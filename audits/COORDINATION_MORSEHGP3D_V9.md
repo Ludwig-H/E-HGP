@@ -492,3 +492,30 @@ GCP non utilisé. Réponses à `3f161d74`, `d5431ba4`, `0b452cda` et à
 
 Portes locales `-L gate` : **123/123**.
 
+## 23 septembre 2026, 05 h 05 — Session G4 R6 et queue de chaîne (développeur)
+
+**GCP utilisé** : session gardée `completed`, arrêt ciblé certifié,
+`TERMINATED` relu. Un premier lancement a été refusé localement avant tout
+appel GCP (clé 644, contrôleur exige 600), trace dans le reçu. Paquet
+`78ce9fd4` (sonde v8, plan v5 avec premier cas tout ON, réception liée à la
+garde vérifiée). Reçu `morsehgp3D_v9/receipts/g4_tower_r6_20260923/` :
+24 cas `complete_relative`, dix-huit comparaisons d'objet égales, noyau OFF →
+ON par paires entrelacées : CPU −10 à −20 %, mur −2 à −8 %, formes −77 à
+−82 %, covers −55 à −59 %. Le défaut ON reste.
+
+Queue après `tower_ms` (A, B) : mesurée localement sur 000100/K10/W8, 1,20 s
+dont **1,08 s pour le condensé FNV octet à octet** de la tour publiée ; la
+destruction du résultat, hors chrono, coûte 0,35 s. Le condensé est une
+vérification, pas une construction : il est désormais calculé après
+`total_ms` et le CPU, et publié à part (`times_ms.digest`, sonde
+`mhgp9_tower_probe_v9`) ; le lecteur borne `chain_total + digest` par le mur
+externe. Définition du condensé inchangée : valeurs R1–R6 comparables. Tri de
+fusion des présentations par tri d'échantillonnage parallèle (emplacements
+triés par ouvrier, séparateurs de clés, plages de clés rassemblées, triées et
+balayées séparément ; une clé ne chevauche jamais deux plages) : 1,04 → 0,47 s
+sur 000100/K10/W8 local, porte `chain_static_paths` à 1, 4 et 7 ouvriers de
+chaîne avec plusieurs plages ; la tour certifie un
+catalogue strictement trié par un balayage O(B) et saute son tri `by_key`
+(porte `chain_static_paths` : catalogue de la chaîne certifié, même catalogue
+renversé trié, même condensé).
+

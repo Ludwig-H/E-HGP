@@ -12,7 +12,9 @@
 //
 // Chronometre du contrat : du nuage prepare en memoire a la tour complete en
 // memoire (ChainTimes, sans la lecture). La lecture et son empreinte sont
-// mesurees a part. Sortie : un objet JSON sur stdout. Code 0 conforme, 2 refus
+// mesurees a part, de meme que le condense de verification de la tour
+// (times_ms.digest, apres chain_total). Sortie : un objet JSON sur stdout.
+// Code 0 conforme, 2 refus
 // d'arguments ou d'entree, 3 statut de chaine non complet.
 #include <sys/resource.h>
 
@@ -163,7 +165,7 @@ int main(int argc, char** argv) {
   const auto r = mhgp9::run_tower_chain(input.points, options);
   const auto& t = r.times;
   const auto& c = r.catalogue;
-  std::printf("{\"schema\":\"mhgp9_tower_probe_v8\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
+  std::printf("{\"schema\":\"mhgp9_tower_probe_v9\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
               r.reason.c_str());
   std::printf("\"input\":{\"format\":\"%s\",\"grid\":\"%s\",\"sites\":%zu,\"hash\":\"%016" PRIx64 "\"},", input.format.c_str(),
               grid.c_str(), input.points.size(), input.hash);
@@ -176,9 +178,10 @@ int main(int argc, char** argv) {
               options.q3_leaf_census ? "true" : "false", options.q34_dead_lanes ? "true" : "false",
               options.q34_witness_cache ? "true" : "false", options.q34_dead_core ? "true" : "false");
   std::printf("\"times_ms\":{\"read\":%.3f,\"prepare\":%.3f,\"gen_index\":%.3f,\"q2\":%.3f,\"q34\":%.3f,\"merge\":%.3f,"
-              "\"tower_index\":%.3f,\"census\":%.3f,\"tower\":%.3f,\"chain_total\":%.3f},\"chain_cpu_s\":%.3f,",
+              "\"tower_index\":%.3f,\"census\":%.3f,\"tower\":%.3f,\"chain_total\":%.3f,\"digest\":%.3f},"
+              "\"chain_cpu_s\":%.3f,",
               read_ms, t.prepare_ms, t.gen_index_ms, t.q2_ms, t.q34_ms, t.merge_ms, t.tower_index_ms, t.census_ms, t.tower_ms,
-              t.total_ms, t.cpu_s);
+              t.total_ms, t.digest_ms, t.cpu_s);
   std::printf("\"generator\":{\"q2_front_rectangles\":%" PRIu64 ",\"q2_candidate_pairs\":%" PRIu64 ",\"q2_accepted_pairs\":%" PRIu64
               ",\"q34_expanded_pairs\":%" PRIu64 ",\"q34_cover_builds\":%" PRIu64 ",\"q3_emitted\":%" PRIu64 ",\"q4_emitted\":%" PRIu64 "},",
               r.q2_front_rectangles, r.q2_candidate_pairs, r.q2_accepted_pairs, r.q34_expanded_pairs, r.q34_cover_builds,

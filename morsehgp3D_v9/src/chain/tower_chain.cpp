@@ -1,6 +1,7 @@
 #include "tower_chain.hpp"
 
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <chrono>
 #include <ctime>
@@ -68,6 +69,86 @@ bool presentation_less(const Presentation& a, const Presentation& b) {
   if (a.key != b.key) return a.key < b.key;
   if (a.arity != b.arity) return a.arity < b.arity;
   return a.support < b.support;
+}
+
+// The presentations of every worker slot, one representative per key (its
+// smallest arity, then support) in increasing key order, after the checks of
+// a sorted scan: equal depth and shell within a key, no presentation twice.
+// Parallel sample sort, no serial merge: each slot is sorted, key splitters
+// cut every slot into the same key ranges, and each range is gathered,
+// sorted and scanned on its own. A key never straddles two ranges, so the
+// result is the unique sorted order whatever the number of threads.
+struct GatheredPresentations {
+  std::vector<std::vector<Presentation>> ranges;  // owns the presentations
+  std::vector<const Presentation*> representatives;
+  std::uint64_t by_arity[5] = {};
+};
+
+GatheredPresentations gather_presentations(std::vector<std::vector<Presentation>>& slots, std::size_t workers) {
+  const int threads = static_cast<int>(std::max<std::size_t>(1, workers));
+  const std::size_t S = slots.size();
+  tower::parallel_items(S, threads, [&](std::size_t s, std::size_t) {
+    std::sort(slots[s].begin(), slots[s].end(), presentation_less);
+  });
+  std::size_t total = 0;
+  for (const auto& slot : slots) total += slot.size();
+  const std::size_t wanted = total < 4096 ? 1 : 4 * std::max<std::size_t>(1, workers);
+  std::vector<Key5> sample;
+  for (const auto& slot : slots)
+    for (std::size_t i = 1; i <= 16 * wanted && !slot.empty(); ++i)
+      sample.push_back(slot[(slot.size() * i) / (16 * wanted + 1)].key);
+  std::sort(sample.begin(), sample.end());
+  sample.erase(std::unique(sample.begin(), sample.end()), sample.end());
+  std::vector<Key5> splitters;  // strictly increasing
+  for (std::size_t b = 1; b < wanted && !sample.empty(); ++b) {
+    const auto& key = sample[(sample.size() * b) / wanted];
+    if (splitters.empty() || splitters.back() < key) splitters.push_back(key);
+  }
+  const std::size_t B = splitters.size() + 1;
+  std::vector<std::vector<std::size_t>> cut(S, std::vector<std::size_t>(B + 1, 0));
+  tower::parallel_items(S, threads, [&](std::size_t s, std::size_t) {
+    const auto& slot = slots[s];
+    for (std::size_t b = 1; b < B; ++b)
+      cut[s][b] = static_cast<std::size_t>(std::lower_bound(slot.begin(), slot.end(), splitters[b - 1],
+          [](const Presentation& p, const Key5& key) { return p.key < key; }) - slot.begin());
+    cut[s][B] = slot.size();
+  });
+  GatheredPresentations out;
+  out.ranges.resize(B);
+  std::vector<std::vector<const Presentation*>> firsts(B);
+  std::vector<std::array<std::uint64_t, 5>> counts(B);
+  tower::parallel_items(B, threads, [&](std::size_t b, std::size_t) {
+    auto& range = out.ranges[b];
+    std::size_t size = 0;
+    for (std::size_t s = 0; s < S; ++s) size += cut[s][b + 1] - cut[s][b];
+    range.reserve(size);
+    for (std::size_t s = 0; s < S; ++s)
+      range.insert(range.end(), slots[s].begin() + static_cast<std::ptrdiff_t>(cut[s][b]),
+                   slots[s].begin() + static_cast<std::ptrdiff_t>(cut[s][b + 1]));
+    std::sort(range.begin(), range.end(), presentation_less);
+    auto& count = counts[b];
+    count.fill(0);
+    for (std::size_t i = 0; i < range.size(); ++i) {
+      ++count[std::min<std::size_t>(range[i].arity, 4)];
+      if (i == 0 || range[i].key != range[i - 1].key) {
+        firsts[b].push_back(&range[i]);
+      } else {
+        require(range[i].depth == range[i - 1].depth, "chain_presentations_disagree_on_depth");
+        require(range[i].shell == range[i - 1].shell, "chain_presentations_disagree_on_shell");
+        require(range[i].support != range[i - 1].support || range[i].arity != range[i - 1].arity,
+                "chain_duplicate_presentation");
+      }
+    }
+  });
+  tower::parallel_items(S, threads, [&](std::size_t s, std::size_t) { std::vector<Presentation>().swap(slots[s]); });
+  std::size_t unique = 0;
+  for (const auto& f : firsts) unique += f.size();
+  out.representatives.reserve(unique);
+  for (std::size_t b = 0; b < B; ++b) {
+    out.representatives.insert(out.representatives.end(), firsts[b].begin(), firsts[b].end());
+    for (std::size_t q = 0; q < 5; ++q) out.by_arity[q] += counts[b][q];
+  }
+  return out;
 }
 
 tower::P3 to_p3(const gen::Point3& p) { return tower::P3{p.x, p.y, p.z}; }
@@ -324,33 +405,13 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
 
     // ---- Fusion : une boule par cle (union q2 u q3 u q4).
     t = Clock::now();
-    std::vector<Presentation> all;
-    {
-      std::size_t total = 0;
-      for (const auto& s : slots) total += s.size();
-      all.reserve(total);
-      for (auto& s : slots) {
-        for (const auto& p : s) {
-          if (p.arity == 2) ++result.catalogue.q2_presentations;
-          else if (p.arity == 3) ++result.catalogue.q3_presentations;
-          else ++result.catalogue.q4_presentations;
-        }
-        all.insert(all.end(), s.begin(), s.end());
-        std::vector<Presentation>().swap(s);
-      }
-    }
-    std::sort(all.begin(), all.end(), presentation_less);
-    std::vector<std::size_t> groups;  // debut de chaque groupe de meme cle
-    for (std::size_t i = 0; i < all.size(); ++i) {
-      if (i == 0 || all[i].key != all[i - 1].key) {
-        groups.push_back(i);
-      } else {
-        require(all[i].depth == all[i - 1].depth, "chain_presentations_disagree_on_depth");
-        require(all[i].shell == all[i - 1].shell, "chain_presentations_disagree_on_shell");
-        require(all[i].support != all[i - 1].support || all[i].arity != all[i - 1].arity,
-                "chain_duplicate_presentation");
-      }
-    }
+    auto gathered = gather_presentations(slots, W);
+    result.catalogue.q2_presentations = gathered.by_arity[2];
+    result.catalogue.q3_presentations = gathered.by_arity[3];
+    result.catalogue.q4_presentations = gathered.by_arity[4];
+    require(gathered.by_arity[0] == 0 && gathered.by_arity[1] == 0, "chain_presentation_arity");
+    result.presentation_ranges = gathered.ranges.size();
+    const auto& groups = gathered.representatives;  // one per key, key order
     const std::size_t unique = groups.size();
     result.catalogue.unique_keys = unique;
     result.times.merge_ms = ms_since(t);
@@ -387,7 +448,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     std::vector<WorkerState> states(census_workers);
     parallel_for(unique, census_workers, [&](std::size_t g, std::size_t w) {
       auto& st = states[w];
-      const Presentation& rep = all[groups[g]];  // plus petite arite presentee
+      const Presentation& rep = *groups[g];  // plus petite arite presentee
       tower::BallKey key;
       tower::ExactLevel level;
       key_and_level(points, rep, &key, &level);
@@ -439,8 +500,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       for (std::size_t q = 0; q < 5; ++q) result.catalogue.balls_by_qmin[q] += st.by_q[q];
       for (std::size_t s = 0; s < 17; ++s) result.catalogue.balls_by_shell[s] += st.by_shell[s];
     }
-    std::vector<Presentation>().swap(all);
-    std::vector<std::size_t>().swap(groups);
+    gathered = GatheredPresentations{};  // groups is not read past this point
     result.catalogue.shell_over_cap = over_cap.load();
     if (result.catalogue.shell_over_cap > 0) {
       result.times.census_ms = ms_since(t);
@@ -477,7 +537,6 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         }
         result.orders.push_back(o);
       }
-      result.tower_digest = tower_digest(tw);
       result.tower = std::move(tw);
     }
     result.status = ChainStatus::kComplete;
@@ -499,6 +558,20 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
   result.times.total_ms = ms_since(total_start);
   const double cpu_end = process_cpu_s();
   result.times.cpu_s = (cpu_start < 0 || cpu_end < 0) ? -1.0 : cpu_end - cpu_start;
+  // The digest is a verification of the published tower, not part of its
+  // construction: timed apart (digest_ms), after the chain total and CPU.
+  if (result.status == ChainStatus::kComplete && options.run_tower) {
+    const auto t = Clock::now();
+    try {
+      result.tower_digest = tower_digest(result.tower);
+    } catch (const std::exception& e) {
+      result.status = ChainStatus::kInvariantViolated;
+      result.reason = std::string("chain_digest_failed: ") + e.what();
+      result.tower = {};
+      result.catalogue_balls.clear();
+    }
+    result.times.digest_ms = ms_since(t);
+  }
   return result;
 }
 

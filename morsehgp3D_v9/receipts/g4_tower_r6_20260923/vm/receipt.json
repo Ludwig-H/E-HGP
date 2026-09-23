@@ -1,0 +1,2547 @@
+{
+  "FULL_executed": true,
+  "GPU_executed": false,
+  "available_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47
+  ],
+  "backend": "reference_cpu",
+  "binary_sha256": "1421ff34c33c04e8524e2f26f173f391ff734d57eab452e85266ad43ad41aaba",
+  "binary_stable": true,
+  "case_cap_seconds": 600,
+  "case_outcomes": [
+    {
+      "chain_total_ms": 6000.19,
+      "elapsed_seconds": 6.085983589999998,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 1138028,
+      "index": 0,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "67450c64611075b1"
+    },
+    {
+      "chain_total_ms": 6031.202,
+      "elapsed_seconds": 6.080118146999993,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 1150540,
+      "index": 1,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "67450c64611075b1"
+    },
+    {
+      "chain_total_ms": 5764.731,
+      "elapsed_seconds": 5.828019431000001,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 1138336,
+      "index": 2,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "67450c64611075b1"
+    },
+    {
+      "chain_total_ms": 5995.751,
+      "elapsed_seconds": 6.079629560000001,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 1162488,
+      "index": 3,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "67450c64611075b1"
+    },
+    {
+      "chain_total_ms": 16768.04,
+      "elapsed_seconds": 16.95454050699999,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 4737520,
+      "index": 4,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "ac108f7f71096c3f"
+    },
+    {
+      "chain_total_ms": 17180.453,
+      "elapsed_seconds": 17.36565956000001,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 4731452,
+      "index": 5,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "ac108f7f71096c3f"
+    },
+    {
+      "chain_total_ms": 16666.063,
+      "elapsed_seconds": 16.905810136000014,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 4869760,
+      "index": 6,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "ac108f7f71096c3f"
+    },
+    {
+      "chain_total_ms": 17027.872,
+      "elapsed_seconds": 17.21467323600001,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 4691816,
+      "index": 7,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "ac108f7f71096c3f"
+    },
+    {
+      "chain_total_ms": 4151.442,
+      "elapsed_seconds": 4.226141119000005,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 1073780,
+      "index": 8,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "dbf799c8ed83f53f"
+    },
+    {
+      "chain_total_ms": 4211.675,
+      "elapsed_seconds": 4.274438777,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 1057400,
+      "index": 9,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "dbf799c8ed83f53f"
+    },
+    {
+      "chain_total_ms": 4150.784,
+      "elapsed_seconds": 4.223632089999995,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 1076804,
+      "index": 10,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "dbf799c8ed83f53f"
+    },
+    {
+      "chain_total_ms": 4243.28,
+      "elapsed_seconds": 4.323362632999988,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 1072044,
+      "index": 11,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "dbf799c8ed83f53f"
+    },
+    {
+      "chain_total_ms": 11726.237,
+      "elapsed_seconds": 11.948696143999996,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 3879876,
+      "index": 12,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "9ddbf7430c9086cc"
+    },
+    {
+      "chain_total_ms": 12012.026,
+      "elapsed_seconds": 12.142157689000015,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 3721440,
+      "index": 13,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "9ddbf7430c9086cc"
+    },
+    {
+      "chain_total_ms": 11899.853,
+      "elapsed_seconds": 12.039525666000003,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 3684392,
+      "index": 14,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "9ddbf7430c9086cc"
+    },
+    {
+      "chain_total_ms": 12067.198,
+      "elapsed_seconds": 12.20699500500001,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 3759668,
+      "index": 15,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "9ddbf7430c9086cc"
+    },
+    {
+      "chain_total_ms": 6868.5,
+      "elapsed_seconds": 6.9292496429999915,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 1247356,
+      "index": 16,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "8240af3d4dce3d45"
+    },
+    {
+      "chain_total_ms": 7519.942,
+      "elapsed_seconds": 7.579966062999972,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 1269580,
+      "index": 17,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "8240af3d4dce3d45"
+    },
+    {
+      "chain_total_ms": 6916.572,
+      "elapsed_seconds": 6.97795308100001,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 1249468,
+      "index": 18,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "8240af3d4dce3d45"
+    },
+    {
+      "chain_total_ms": 7418.527,
+      "elapsed_seconds": 7.481027385000004,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 1275136,
+      "index": 19,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "8240af3d4dce3d45"
+    },
+    {
+      "chain_total_ms": 18062.234,
+      "elapsed_seconds": 18.267114994999986,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 4854020,
+      "index": 20,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "ba973af0c8da95bd"
+    },
+    {
+      "chain_total_ms": 19343.384,
+      "elapsed_seconds": 19.615636338,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 4860864,
+      "index": 21,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "ba973af0c8da95bd"
+    },
+    {
+      "chain_total_ms": 18110.143,
+      "elapsed_seconds": 18.318072691999987,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 4911276,
+      "index": 22,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "ba973af0c8da95bd"
+    },
+    {
+      "chain_total_ms": 19823.571,
+      "elapsed_seconds": 20.05223385900001,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 4885316,
+      "index": 23,
+      "outcome": "complete_relative",
+      "probe_status": "complete_relative",
+      "tower_digest": "ba973af0c8da95bd"
+    }
+  ],
+  "cases": [
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 39885,
+      "repeat": 0,
+      "s": 8,
+      "scene": "00",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": false,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 39885,
+      "repeat": 0,
+      "s": 8,
+      "scene": "00",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 39885,
+      "repeat": 1,
+      "s": 8,
+      "scene": "00",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": false,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 39885,
+      "repeat": 1,
+      "s": 8,
+      "scene": "00",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 10,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 39885,
+      "repeat": 0,
+      "s": 8,
+      "scene": "00",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 10,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": false,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 39885,
+      "repeat": 0,
+      "s": 8,
+      "scene": "00",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 10,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 39885,
+      "repeat": 1,
+      "s": 8,
+      "scene": "00",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 10,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": false,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 39885,
+      "repeat": 1,
+      "s": 8,
+      "scene": "00",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_01.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 35551,
+      "repeat": 0,
+      "s": 8,
+      "scene": "01",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_01.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": false,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 35551,
+      "repeat": 0,
+      "s": 8,
+      "scene": "01",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_01.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 35551,
+      "repeat": 1,
+      "s": 8,
+      "scene": "01",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_01.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": false,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 35551,
+      "repeat": 1,
+      "s": 8,
+      "scene": "01",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_01.u32le",
+      "k": 10,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 35551,
+      "repeat": 0,
+      "s": 8,
+      "scene": "01",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_01.u32le",
+      "k": 10,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": false,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 35551,
+      "repeat": 0,
+      "s": 8,
+      "scene": "01",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_01.u32le",
+      "k": 10,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 35551,
+      "repeat": 1,
+      "s": 8,
+      "scene": "01",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_01.u32le",
+      "k": 10,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": false,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 35551,
+      "repeat": 1,
+      "s": 8,
+      "scene": "01",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_02.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 45845,
+      "repeat": 0,
+      "s": 8,
+      "scene": "02",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_02.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": false,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 45845,
+      "repeat": 0,
+      "s": 8,
+      "scene": "02",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_02.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 45845,
+      "repeat": 1,
+      "s": 8,
+      "scene": "02",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_02.u32le",
+      "k": 5,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": false,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 45845,
+      "repeat": 1,
+      "s": 8,
+      "scene": "02",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_02.u32le",
+      "k": 10,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 45845,
+      "repeat": 0,
+      "s": 8,
+      "scene": "02",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_02.u32le",
+      "k": 10,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": false,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 45845,
+      "repeat": 0,
+      "s": 8,
+      "scene": "02",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_02.u32le",
+      "k": 10,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": true,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 45845,
+      "repeat": 1,
+      "s": 8,
+      "scene": "02",
+      "static_threads": 48,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_02.u32le",
+      "k": 10,
+      "levers": {
+        "atlas_saturate_deep": true,
+        "q34_dead_core": false,
+        "q34_dead_lanes": true,
+        "q34_witness_cache": true,
+        "q3_leaf_census": true
+      },
+      "n": 45845,
+      "repeat": 1,
+      "s": 8,
+      "scene": "02",
+      "static_threads": 48,
+      "workers": 48
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "/usr/bin/g++",
+        "--version"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0074437809999921,
+      "ended_utc": "2026-09-23T04:45:00.434192+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 1826,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:45:00.426677+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "9eaf9b7f4b11c2e84e2478c2ceb0e4f48f4ba88565bcfc832b3bce49847dda6d"
+    },
+    {
+      "argv": [
+        "/usr/bin/cmake",
+        "--version"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.06354998899999487,
+      "ended_utc": "2026-09-23T04:45:00.497879+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 1827,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:45:00.434299+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "6c08f840b67782da73a6fe113b64712615441722b15cd2723062dd4cc00a10d8"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "--version"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0019034699999878057,
+      "ended_utc": "2026-09-23T04:45:00.499936+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 1828,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:45:00.497998+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a3b64288a651d40a18a243c43c871f7ae2886baa58b7e3c64a1061bfd651245f"
+    },
+    {
+      "argv": [
+        "lscpu"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.016338523000001715,
+      "ended_utc": "2026-09-23T04:45:00.516429+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 1829,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:45:00.500025+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "2efda043bcd879a936a13bdaddc2667f9e4e6dc97ad64164c1ed5e1a54a6cf71"
+    },
+    {
+      "argv": [
+        "nproc"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0012400800000023082,
+      "ended_utc": "2026-09-23T04:45:00.517792+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 1830,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:45:00.516523+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "654ee9da442fa353f59f11beb688fc7f76c8de62a6c18b2a181fdde2a27cc3ef"
+    },
+    {
+      "argv": [
+        "/usr/bin/cmake",
+        "-S",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/morsehgp3D_v9",
+        "-B",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBOOST_ROOT=/usr",
+        "-DCMAKE_CXX_COMPILER=/usr/bin/g++"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.9148125610000051,
+      "ended_utc": "2026-09-23T04:45:01.432788+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 1831,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:45:00.517951+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "86917a4c803a578f1f76eebbb4cc3211260a253bae96a00d3a696c0212ed944c"
+    },
+    {
+      "argv": [
+        "/usr/bin/cmake",
+        "--build",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build",
+        "--target",
+        "mhgp9_tower_probe",
+        "--parallel",
+        "48"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 11.481977637,
+      "ended_utc": "2026-09-23T04:45:12.915068+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 1889,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:45:01.433035+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "62f0467ca1af9961942df7c30312cf3ae802e5de4f5f945dc2b4710d1f088333"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/preflight.u32le",
+        "5",
+        "2",
+        "--s=8",
+        "--static=2",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=1"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.8649442549999975,
+      "ended_utc": "2026-09-23T04:45:14.172147+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2068,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:45:13.307166+00:00",
+      "stderr_sha256": "bc520edc66e8665c5f46109ff7327ec00552d7be71d0bd11159efabef363e443",
+      "stdout_sha256": "1718544fb45f14a5fa8bcdb465a94b02e5ef674850917e01690a2e0d29107ff5"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0026593999999988682,
+      "ended_utc": "2026-09-23T04:45:14.177303+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2121,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:45:14.174589+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "94932e353541eb7035bbb364003c7ae0d8481ce3f678eb5ca0275e052be9d244"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_00.u32le",
+        "5",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=1"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 6.085983589999998,
+      "ended_utc": "2026-09-23T04:45:20.263436+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2122,
+      "session_work_deadline_epoch": 1790139314.177396,
+      "started_utc": "2026-09-23T04:45:14.177430+00:00",
+      "stderr_sha256": "6e663cefe8ce8966f662058186a742f8cde4f033a08a98df823b0b31ba1315a1",
+      "stdout_sha256": "15186a157e827ec4be5869438a21753c12633bc137d666d1b20026814ebc52b1"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0014465400000034379,
+      "ended_utc": "2026-09-23T04:45:20.266504+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 3697,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:45:20.265001+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "857e98b6dafef1ce0e9a0a626d4066875595b217b75635671d8c1e971ce85abc"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0013441899999975249,
+      "ended_utc": "2026-09-23T04:45:20.267985+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 3698,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:45:20.266609+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "857e98b6dafef1ce0e9a0a626d4066875595b217b75635671d8c1e971ce85abc"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_00.u32le",
+        "5",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=0"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 6.080118146999993,
+      "ended_utc": "2026-09-23T04:45:26.348240+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 3699,
+      "session_work_deadline_epoch": 1790139320.2680683,
+      "started_utc": "2026-09-23T04:45:20.268101+00:00",
+      "stderr_sha256": "f0b37c5a9150e5226ea9771fcd77c3cd33f6db1e84f854c0987126f3a8481039",
+      "stdout_sha256": "5306c76c1c1d726130a62f66716f79738142f3b4f85ad210f07b80529dcf6eb3"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.001467220000023417,
+      "ended_utc": "2026-09-23T04:45:26.351054+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 5274,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:45:26.349547+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a4063e70f0eac502b27efbc7d14dae3a7ce3756f2bb12f6dd6335b2790bc6330"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0012661800000159928,
+      "ended_utc": "2026-09-23T04:45:26.352456+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 5275,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:45:26.351159+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a4063e70f0eac502b27efbc7d14dae3a7ce3756f2bb12f6dd6335b2790bc6330"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_00.u32le",
+        "5",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=1"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 5.828019431000001,
+      "ended_utc": "2026-09-23T04:45:32.180609+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 5276,
+      "session_work_deadline_epoch": 1790139326.3525348,
+      "started_utc": "2026-09-23T04:45:26.352568+00:00",
+      "stderr_sha256": "9d9b28fd749debe0680aa4b7ec1e0d834e94d9b33db7baebfcb995987c8c408f",
+      "stdout_sha256": "3bbb747d4d285c417d7d817ea1ad2d57acaa02bc666929f9d2cab8efa7fb0d7b"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.00144602099999247,
+      "ended_utc": "2026-09-23T04:45:32.183518+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 6851,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:45:32.182019+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "be2375ea3870d11997f1237a4b73d0372222844691ae9a49fabda1805dbfda0f"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0013503800000194133,
+      "ended_utc": "2026-09-23T04:45:32.185002+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 6852,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:45:32.183621+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "be2375ea3870d11997f1237a4b73d0372222844691ae9a49fabda1805dbfda0f"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_00.u32le",
+        "5",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=0"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 6.079629560000001,
+      "ended_utc": "2026-09-23T04:45:38.264766+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 6853,
+      "session_work_deadline_epoch": 1790139332.1850836,
+      "started_utc": "2026-09-23T04:45:32.185115+00:00",
+      "stderr_sha256": "40cbe1b768456f03bc8aaae14005d508c4e4830e423b404b5972f9772de25bb6",
+      "stdout_sha256": "fc43964eb8e7aa19bbcb033369a719e3ad71bef6f9de949fab0906e6771007d7"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.001449470000011388,
+      "ended_utc": "2026-09-23T04:45:38.267573+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 8428,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:45:38.266081+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "45cf2657e0d5db0450d0bad11acc878226d4a14a6e423b10a3b956707dcb0ae7"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.001362350999983164,
+      "ended_utc": "2026-09-23T04:45:38.269071+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 8429,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:45:38.267675+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "45cf2657e0d5db0450d0bad11acc878226d4a14a6e423b10a3b956707dcb0ae7"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_00.u32le",
+        "10",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=1"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 16.95454050699999,
+      "ended_utc": "2026-09-23T04:45:55.223740+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 8430,
+      "session_work_deadline_epoch": 1790139338.269145,
+      "started_utc": "2026-09-23T04:45:38.269176+00:00",
+      "stderr_sha256": "f3051ae78754ab10f157ea5f31c462ccb04083cfe61e1ec85a1e64e20deeeb8c",
+      "stdout_sha256": "35af04435452ac27dec5798d3b92d818b8e96de288321aaf74e0a400bf0fc7e6"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0014315399999986766,
+      "ended_utc": "2026-09-23T04:45:55.226574+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 11450,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:45:55.225101+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "10fd40ab133c9edb2926784ef894b82c7fffb1a7d42f323e1b317ff328939d64"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0013608100000226386,
+      "ended_utc": "2026-09-23T04:45:55.228074+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 11451,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:45:55.226680+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "10fd40ab133c9edb2926784ef894b82c7fffb1a7d42f323e1b317ff328939d64"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_00.u32le",
+        "10",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=0"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 17.36565956000001,
+      "ended_utc": "2026-09-23T04:46:12.593867+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 11452,
+      "session_work_deadline_epoch": 1790139355.2281508,
+      "started_utc": "2026-09-23T04:45:55.228183+00:00",
+      "stderr_sha256": "8bdb067d887c84b3f6c95184de7fef2f4d28ce9eb26581802b066509e74e1e70",
+      "stdout_sha256": "e709487439ecd02fe6d2296739880e855c56264e6a0aaefce800e7c83a011304"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0014783899999883943,
+      "ended_utc": "2026-09-23T04:46:12.596849+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 14472,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:46:12.595329+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "8c1e88ee499138bcb85533c7cf16c27f00b0aa4b22c69f628a6c1efcd4d311ec"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0013527499999952397,
+      "ended_utc": "2026-09-23T04:46:12.598345+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 14473,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:46:12.596954+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "8c1e88ee499138bcb85533c7cf16c27f00b0aa4b22c69f628a6c1efcd4d311ec"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_00.u32le",
+        "10",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=1"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 16.905810136000014,
+      "ended_utc": "2026-09-23T04:46:29.504289+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 14474,
+      "session_work_deadline_epoch": 1790139372.5984228,
+      "started_utc": "2026-09-23T04:46:12.598455+00:00",
+      "stderr_sha256": "a5f2e67818ec1684c9c7b1d55c327b78d98ee6b1a78b84aed05007763baaae2c",
+      "stdout_sha256": "46e0f092380b16f921b6a40750f5d2186696803736b136d88962fd97a82a5005"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0014384800000186715,
+      "ended_utc": "2026-09-23T04:46:29.507081+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 17494,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:46:29.505603+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "cc7bb2e48055462f931626a2c3801079feeb3a5115c10f8ab4b246de8b012939"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0013741600000116705,
+      "ended_utc": "2026-09-23T04:46:29.508612+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 17495,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:46:29.507203+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "cc7bb2e48055462f931626a2c3801079feeb3a5115c10f8ab4b246de8b012939"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_00.u32le",
+        "10",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=0"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 17.21467323600001,
+      "ended_utc": "2026-09-23T04:46:46.723422+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 17496,
+      "session_work_deadline_epoch": 1790139389.5086937,
+      "started_utc": "2026-09-23T04:46:29.508726+00:00",
+      "stderr_sha256": "460eb9208bc8f67dd95378ef08ca414078cf1d1665fb7e6f6a5e87d1139fe8a9",
+      "stdout_sha256": "30366cf6cc5c49d74f186329186685161d2de7dc231d7cd3a2665d3f6094aa58"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0014742699999885645,
+      "ended_utc": "2026-09-23T04:46:46.726248+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 20516,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:46:46.724734+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "950b523f903efcaca188c3b4a1b2931a1b677120a156445fe4c109a667e77660"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0013510699999983444,
+      "ended_utc": "2026-09-23T04:46:46.727741+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 20517,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:46:46.726356+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "950b523f903efcaca188c3b4a1b2931a1b677120a156445fe4c109a667e77660"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_01.u32le",
+        "5",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=1"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 4.226141119000005,
+      "ended_utc": "2026-09-23T04:46:50.954009+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 20518,
+      "session_work_deadline_epoch": 1790139406.727816,
+      "started_utc": "2026-09-23T04:46:46.727848+00:00",
+      "stderr_sha256": "5a8227601e81cb32ab8be7f33980c960d1aabffaa34d464a2d6604db1ed2ac8e",
+      "stdout_sha256": "0cdd4ef97b873b18f747e3ce94d1514e172b249fe9ce748d30a2dd6ac74b6200"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0014762600000040038,
+      "ended_utc": "2026-09-23T04:46:50.956967+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 22079,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:46:50.955450+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "34cd2a9458d11add4f27b959da270b4fe4584b4b132ef86b67d0ab8ec0718704"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0013822700000218902,
+      "ended_utc": "2026-09-23T04:46:50.958528+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 22080,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:46:50.957109+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "34cd2a9458d11add4f27b959da270b4fe4584b4b132ef86b67d0ab8ec0718704"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_01.u32le",
+        "5",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=0"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 4.274438777,
+      "ended_utc": "2026-09-23T04:46:55.233107+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 22081,
+      "session_work_deadline_epoch": 1790139410.9586158,
+      "started_utc": "2026-09-23T04:46:50.958649+00:00",
+      "stderr_sha256": "b7f1fe27ff3aef5e99bb4e23f2f6d82ad7ac8f2082df001f2c94050e235967f7",
+      "stdout_sha256": "6be41492af34fc4af041ba4a3bc8a58f830bef6a5139b37f1b354828e8c57045"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0014261099999828275,
+      "ended_utc": "2026-09-23T04:46:55.235893+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 23642,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:46:55.234423+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "fa3957c563f109e2722460fb8c100a6e4c8ca278b9490ee1d57e8c7284b600b1"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0012591800000052444,
+      "ended_utc": "2026-09-23T04:46:55.237294+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 23643,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:46:55.236000+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "fa3957c563f109e2722460fb8c100a6e4c8ca278b9490ee1d57e8c7284b600b1"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_01.u32le",
+        "5",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=1"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 4.223632089999995,
+      "ended_utc": "2026-09-23T04:46:59.461060+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 23644,
+      "session_work_deadline_epoch": 1790139415.237375,
+      "started_utc": "2026-09-23T04:46:55.237407+00:00",
+      "stderr_sha256": "9d7e7a664cb17cf81a522c5ab2f034fa3d5213d66e5ab7f426d47ebd72e448c6",
+      "stdout_sha256": "ad06365e2f2447265d77fefcd435ba10f41b618166d97f397123b52b740d28c9"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0014590500000224438,
+      "ended_utc": "2026-09-23T04:46:59.463882+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 25205,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:46:59.462382+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "14ca4c3808e8ceeab92b9b0cf5d14c19dc2b57cdb207c337c4e6c4d8fe068946"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0013479400000164787,
+      "ended_utc": "2026-09-23T04:46:59.465419+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 25206,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:46:59.464025+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "14ca4c3808e8ceeab92b9b0cf5d14c19dc2b57cdb207c337c4e6c4d8fe068946"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_01.u32le",
+        "5",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=0"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 4.323362632999988,
+      "ended_utc": "2026-09-23T04:47:03.788916+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 25207,
+      "session_work_deadline_epoch": 1790139419.4655006,
+      "started_utc": "2026-09-23T04:46:59.465533+00:00",
+      "stderr_sha256": "f74b6c1dd7fbb94647273c96b244484b6a1df3095297fab5c8aafb3ed5a92161",
+      "stdout_sha256": "26fd90b65ff347d9b23677b204cdd28f8df1b77a0bfc223563404f76c7e6410d"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0014348899999845344,
+      "ended_utc": "2026-09-23T04:47:03.791829+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 26768,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:47:03.790256+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "6bcf0579866b84cc5402dcae19186b23ff9f4c4da152f65f6fc095fe5a92643c"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0013728700000115168,
+      "ended_utc": "2026-09-23T04:47:03.793342+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 26769,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:47:03.791936+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "6bcf0579866b84cc5402dcae19186b23ff9f4c4da152f65f6fc095fe5a92643c"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_01.u32le",
+        "10",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=1"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 11.948696143999996,
+      "ended_utc": "2026-09-23T04:47:15.742167+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 26770,
+      "session_work_deadline_epoch": 1790139423.7934203,
+      "started_utc": "2026-09-23T04:47:03.793452+00:00",
+      "stderr_sha256": "91338c8967ef2174adb1ac633dc1f69a182e644e1b363922c99b36ca8e0e4496",
+      "stdout_sha256": "3a123f851488ca1855d67f72bfb789269c47458e7c88f224aaaadf49e379cef1"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0014325799999994615,
+      "ended_utc": "2026-09-23T04:47:15.744997+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 29776,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:47:15.743524+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "01b071f2245ba3e093f3d194994db39ad52cf0bc093dd0db041d02e9ef279e69"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0013747890000104235,
+      "ended_utc": "2026-09-23T04:47:15.746518+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 29777,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:47:15.745109+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "01b071f2245ba3e093f3d194994db39ad52cf0bc093dd0db041d02e9ef279e69"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_01.u32le",
+        "10",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=0"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 12.142157689000015,
+      "ended_utc": "2026-09-23T04:47:27.888803+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 29778,
+      "session_work_deadline_epoch": 1790139435.746593,
+      "started_utc": "2026-09-23T04:47:15.746625+00:00",
+      "stderr_sha256": "5e7343fbbd24e2ad9310a638157c4beb95c080ce9be2f2a64fb893dd606e3abb",
+      "stdout_sha256": "02f17906abc5d80571e44ae82657883eedef740246a4928a72edc483eee6c3db"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0014099599999894963,
+      "ended_utc": "2026-09-23T04:47:27.891603+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 32784,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:47:27.890151+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e4b0c9845af156f0f4621440e92b5ecaa4240aef0598a45a1986f573224dfa11"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0013301399999932073,
+      "ended_utc": "2026-09-23T04:47:27.893074+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 32785,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:47:27.891709+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e4b0c9845af156f0f4621440e92b5ecaa4240aef0598a45a1986f573224dfa11"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_01.u32le",
+        "10",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=1"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 12.039525666000003,
+      "ended_utc": "2026-09-23T04:47:39.932729+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 32786,
+      "session_work_deadline_epoch": 1790139447.893151,
+      "started_utc": "2026-09-23T04:47:27.893182+00:00",
+      "stderr_sha256": "039a59313aa08f25eb53c8efe73f7e514c0ab877dc48d3465571170c182d2f31",
+      "stdout_sha256": "f7d6aa94589a6d6a062da0145cc57c97497556a15aa0d38f740cccb71d4667ae"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0014533099999880505,
+      "ended_utc": "2026-09-23T04:47:39.935679+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 35792,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:47:39.934090+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "9e70d524dbe6113853d8a2b33a618fba9ff8dc3de9a0d4a8513dc2e61e7543d7"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0012469700000110606,
+      "ended_utc": "2026-09-23T04:47:39.937073+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 35793,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:47:39.935791+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "9e70d524dbe6113853d8a2b33a618fba9ff8dc3de9a0d4a8513dc2e61e7543d7"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_01.u32le",
+        "10",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=0"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 12.20699500500001,
+      "ended_utc": "2026-09-23T04:47:52.144202+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 35794,
+      "session_work_deadline_epoch": 1790139459.9371521,
+      "started_utc": "2026-09-23T04:47:39.937185+00:00",
+      "stderr_sha256": "15d67ac99fb2260c3e1354358588712bf47c79f43f8c6741c33945a0ba8dbc8c",
+      "stdout_sha256": "04135a015c50675f471175af12e3f9b1ed56ec811a72988d9904aff00aab436a"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0015030499999966196,
+      "ended_utc": "2026-09-23T04:47:52.147074+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 38800,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:47:52.145530+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a2eada870d7399060f562cd39d2ced8386ccfb99cc714960c36c3194a320e77a"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0012682500000096297,
+      "ended_utc": "2026-09-23T04:47:52.148503+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 38801,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:47:52.147198+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a2eada870d7399060f562cd39d2ced8386ccfb99cc714960c36c3194a320e77a"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_02.u32le",
+        "5",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=1"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 6.9292496429999915,
+      "ended_utc": "2026-09-23T04:47:59.077881+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 38802,
+      "session_work_deadline_epoch": 1790139472.1485786,
+      "started_utc": "2026-09-23T04:47:52.148610+00:00",
+      "stderr_sha256": "1507212e079a696cfcdea07d899eeae19df6bc3f2996e0b5dad0400b9508e339",
+      "stdout_sha256": "54f6354edf4f32c65655080582b849069cdf09468097bf85d893776c77868984"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.001457430000016302,
+      "ended_utc": "2026-09-23T04:47:59.080714+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 40396,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:47:59.079215+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "210bedec7aedaebcbe98df4c32f2d57194ff756a1b43fe8c20ac6f7e87c4dd89"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.001333259000034559,
+      "ended_utc": "2026-09-23T04:47:59.082186+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 40397,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:47:59.080819+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "210bedec7aedaebcbe98df4c32f2d57194ff756a1b43fe8c20ac6f7e87c4dd89"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_02.u32le",
+        "5",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=0"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 7.579966062999972,
+      "ended_utc": "2026-09-23T04:48:06.662277+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 40398,
+      "session_work_deadline_epoch": 1790139479.0822616,
+      "started_utc": "2026-09-23T04:47:59.082293+00:00",
+      "stderr_sha256": "03ce5a3b1a1631e61f12f35c1ff88d7e31287e56d3c6b7644912e5ac48a1b6d6",
+      "stdout_sha256": "994f2f7f3f4ff628f3cb919d9d4e8c1bef8ecf9a0a7c443324e579b510d68700"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.001553870000009283,
+      "ended_utc": "2026-09-23T04:48:06.665218+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 41992,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:48:06.663621+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "f56c5949d024c0a46c8b65e78632b45a0c73b51f7b15dc48cc1436540036bf32"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0013553000000001703,
+      "ended_utc": "2026-09-23T04:48:06.666717+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 41993,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:48:06.665328+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "f56c5949d024c0a46c8b65e78632b45a0c73b51f7b15dc48cc1436540036bf32"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_02.u32le",
+        "5",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=1"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 6.97795308100001,
+      "ended_utc": "2026-09-23T04:48:13.644814+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 41994,
+      "session_work_deadline_epoch": 1790139486.666798,
+      "started_utc": "2026-09-23T04:48:06.666830+00:00",
+      "stderr_sha256": "31a7d0fcf3639f2af550ec8d9a2e2a5701d1a5e0c8d5d0fe8043234e09ac3c28",
+      "stdout_sha256": "256febba6a04c4f4fbec45b38cd073f009aaa4c024b1b69154b6fae5b4647d3b"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0014276399999744172,
+      "ended_utc": "2026-09-23T04:48:13.647636+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 43588,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:48:13.646166+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "0cc0b4a433662785b8ee9011339b0b82d669ada27ffba7f9c9b72e70e8c64184"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0014117700000042532,
+      "ended_utc": "2026-09-23T04:48:13.649190+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 43589,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:48:13.647742+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "0cc0b4a433662785b8ee9011339b0b82d669ada27ffba7f9c9b72e70e8c64184"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_02.u32le",
+        "5",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=0"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 7.481027385000004,
+      "ended_utc": "2026-09-23T04:48:21.130350+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 43590,
+      "session_work_deadline_epoch": 1790139493.649271,
+      "started_utc": "2026-09-23T04:48:13.649303+00:00",
+      "stderr_sha256": "4ae7ff777088d24020e4f62421a0207d9652514f650f3a1ae69109afd70c97d0",
+      "stdout_sha256": "763aa418bc4c66598675b3597c01317c8599524ff4c2b7ac744593d0eeaf4d3f"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0014275100000418206,
+      "ended_utc": "2026-09-23T04:48:21.133158+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 45186,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:48:21.131688+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "407638d25d13e33a6e04fdd5cc7303030b1a5bafe3d118e856414bc15da71e21"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.001367720000018835,
+      "ended_utc": "2026-09-23T04:48:21.134666+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 45187,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:48:21.133264+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "407638d25d13e33a6e04fdd5cc7303030b1a5bafe3d118e856414bc15da71e21"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_02.u32le",
+        "10",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=1"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 18.267114994999986,
+      "ended_utc": "2026-09-23T04:48:39.401909+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 45188,
+      "session_work_deadline_epoch": 1790139501.1347413,
+      "started_utc": "2026-09-23T04:48:21.134773+00:00",
+      "stderr_sha256": "bbe514fa9ec9dc0b49952ba9c04b5cfa54a209ea2345c201bb978dd464cf8475",
+      "stdout_sha256": "c6fb0bec46deb45a24aa9947cbcf4a97b57174fc80e4e535b110afcf006ad3c0"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0014558699999724922,
+      "ended_utc": "2026-09-23T04:48:39.404737+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 48228,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:48:39.403241+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "59c17081f88378e6e51f91fdfef840dc5ae65423033318452f34982a2d008ecd"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0013747009999747206,
+      "ended_utc": "2026-09-23T04:48:39.406350+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 48229,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:48:39.404940+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "59c17081f88378e6e51f91fdfef840dc5ae65423033318452f34982a2d008ecd"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_02.u32le",
+        "10",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=0"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 19.615636338,
+      "ended_utc": "2026-09-23T04:48:59.022123+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 48230,
+      "session_work_deadline_epoch": 1790139519.406431,
+      "started_utc": "2026-09-23T04:48:39.406463+00:00",
+      "stderr_sha256": "b6ef2a18d0ef2612c2069cbdcf32f4c11dd1d3ea241b4daffcbf1d8ad0bdbad7",
+      "stdout_sha256": "ccc700a3e25e01d428266f69bf7ba798e937461932f568c8d6826a48de1d5d73"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.00148233900000605,
+      "ended_utc": "2026-09-23T04:48:59.024965+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 51272,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:48:59.023441+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "8e01141518074ace237ab6224e911467404b3f09e839561eb4f1c3564146cf0c"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0013667700000041805,
+      "ended_utc": "2026-09-23T04:48:59.026507+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 51273,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:48:59.025100+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "8e01141518074ace237ab6224e911467404b3f09e839561eb4f1c3564146cf0c"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_02.u32le",
+        "10",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=1"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 18.318072691999987,
+      "ended_utc": "2026-09-23T04:49:17.344709+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 51274,
+      "session_work_deadline_epoch": 1790139539.0265853,
+      "started_utc": "2026-09-23T04:48:59.026617+00:00",
+      "stderr_sha256": "f7f98d80d2c78e7f13b1224bb29cc93e3648478d6b080b3b86f7d7dea118ed12",
+      "stdout_sha256": "a435986fd91c40f053131fc6080fc4cbb07960a09a14af8a1cead4510a572dc7"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0014399799999864626,
+      "ended_utc": "2026-09-23T04:49:17.347564+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 54313,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:49:17.346081+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "7a02cbf67640dca14192512ccbbe469876868c61bb59f3f2a5003a05743d31a8"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0013713000000166176,
+      "ended_utc": "2026-09-23T04:49:17.349077+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 54314,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:49:17.347672+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "7a02cbf67640dca14192512ccbbe469876868c61bb59f3f2a5003a05743d31a8"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output/build/mhgp9_tower_probe",
+        "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source/data/scene_02.u32le",
+        "10",
+        "48",
+        "--s=8",
+        "--static=48",
+        "--grid=1mm",
+        "--lever=atlas_saturate_deep=1",
+        "--lever=q3_leaf_census=1",
+        "--lever=q34_dead_lanes=1",
+        "--lever=q34_witness_cache=1",
+        "--lever=q34_dead_core=0"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 20.05223385900001,
+      "ended_utc": "2026-09-23T04:49:37.401446+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 54315,
+      "session_work_deadline_epoch": 1790139557.3491595,
+      "started_utc": "2026-09-23T04:49:17.349190+00:00",
+      "stderr_sha256": "17359adb872f6ff2571c3d700c772aea9a2966b74618d1235471f7621b5654f8",
+      "stdout_sha256": "b75e8119203faf49c7a58f78ed86259f826f3cd5530b692d2f72da1d900db240"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+      "elapsed_seconds": 0.0014707700000258228,
+      "ended_utc": "2026-09-23T04:49:37.404295+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 57354,
+      "session_work_deadline_epoch": 1790140200.2085779,
+      "started_utc": "2026-09-23T04:49:37.402782+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "55b871c0c1a7b3850ff374713d446cdf793e3b1011934c19767459f9a6ab99db"
+    }
+  ],
+  "compiled_dependencies_stable": true,
+  "compiled_dependency_manifest_sha256": "7c88743d8f6bdf25df96fb9397d6774315d5ed8e2cef0465212cd2c474c6621e",
+  "completed_case_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23
+  ],
+  "contract_certified": false,
+  "cross_worker_comparisons": [
+    {
+      "equal": true,
+      "other": 1,
+      "reference": 0
+    },
+    {
+      "equal": true,
+      "other": 2,
+      "reference": 0
+    },
+    {
+      "equal": true,
+      "other": 3,
+      "reference": 0
+    },
+    {
+      "equal": true,
+      "other": 5,
+      "reference": 4
+    },
+    {
+      "equal": true,
+      "other": 6,
+      "reference": 4
+    },
+    {
+      "equal": true,
+      "other": 7,
+      "reference": 4
+    },
+    {
+      "equal": true,
+      "other": 9,
+      "reference": 8
+    },
+    {
+      "equal": true,
+      "other": 10,
+      "reference": 8
+    },
+    {
+      "equal": true,
+      "other": 11,
+      "reference": 8
+    },
+    {
+      "equal": true,
+      "other": 13,
+      "reference": 12
+    },
+    {
+      "equal": true,
+      "other": 14,
+      "reference": 12
+    },
+    {
+      "equal": true,
+      "other": 15,
+      "reference": 12
+    },
+    {
+      "equal": true,
+      "other": 17,
+      "reference": 16
+    },
+    {
+      "equal": true,
+      "other": 18,
+      "reference": 16
+    },
+    {
+      "equal": true,
+      "other": 19,
+      "reference": 16
+    },
+    {
+      "equal": true,
+      "other": 21,
+      "reference": 20
+    },
+    {
+      "equal": true,
+      "other": 22,
+      "reference": 20
+    },
+    {
+      "equal": true,
+      "other": 23,
+      "reference": 20
+    }
+  ],
+  "elapsed_before_closure_seconds": 277.1962380409241,
+  "generation": "2026-09-22T21:43:10.709-07:00",
+  "guards": {
+    "closing_margin_seconds": 300,
+    "guest_deadline_epoch": 1790141038.713585,
+    "safe_gce_deadline_epoch": 1790141890.709,
+    "work_deadline_epoch": 1790140738
+  },
+  "plan_schema": "mhgp9_tower_plan_v5",
+  "preflight": {
+    "sites": 1500,
+    "tower_digest": "73490cf88c02af30"
+  },
+  "provenance": {
+    "commit": "78ce9fd4d3240f2c9118ce12357cd3a2b1cea6f0",
+    "helper": {
+      "path": "gcp-migration/full_probe_worker_v7.py",
+      "sha256": "da967163bdb7247bc6aad4df0c294cda1071076a0127cd5bd9f59bc0e4788439"
+    },
+    "inputs": {
+      "data/scene_00.u32le": {
+        "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le",
+        "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf"
+      },
+      "data/scene_01.u32le": {
+        "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/full.u32le",
+        "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f"
+      },
+      "data/scene_02.u32le": {
+        "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/full.u32le",
+        "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af"
+      }
+    },
+    "protocol_source": "commit",
+    "schema": "mhgp9_tower_provenance_v1",
+    "tree": "fb3f7b2db94d91b84ce88cae76b36c3041c91338"
+  },
+  "public_status": "not_claimed",
+  "scope": "FULL_tower_chain_relative_to_cross_checked_catalogue",
+  "source_manifest_sha256": "d8506da8ded4d612688cb71e8633ae8371889eb7bbcc04ad1918e46e14c1f429",
+  "sources_stable": true,
+  "status": "completed",
+  "target": {
+    "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-b"
+  },
+  "targeted_GCP_stop_required_by_ROOT": true,
+  "tool_paths": {
+    "boost_header": "/usr/include/boost/multiprecision/cpp_int.hpp",
+    "cmake": "/usr/bin/cmake",
+    "g++": "/usr/bin/g++",
+    "time": "/usr/bin/time"
+  },
+  "tool_sha256": {
+    "cmake": "fd22547781b64bb2db04370970b93db1f3fada1e41e60873b015ee0747009fc0",
+    "g++": "2360901d864cf10bfd6296e261cb2c14053552a80377761ab07146ec9ec9a2c0"
+  },
+  "useful_budget_seconds": 1500,
+  "useful_deadline_epoch": 1790140200.2085779,
+  "worker_argv": [
+    "worker.py",
+    "--source-root",
+    "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source",
+    "--source-manifest",
+    "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/source_manifest.json",
+    "--source-manifest-sha256",
+    "d8506da8ded4d612688cb71e8633ae8371889eb7bbcc04ad1918e46e14c1f429",
+    "--guard-mark",
+    "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/double_guard_verified",
+    "--guard-mark-sha256",
+    "edae9e4a48c6036aafb1e339d67ca8ef3ffaf50fbadd464ca66667930c5c3728",
+    "--generation",
+    "2026-09-22T21:43:10.709-07:00",
+    "--session-deadline-epoch",
+    "1790141038",
+    "--closing-margin-seconds",
+    "300",
+    "--output",
+    "/tmp/ehgp-tower-v9-a494332c4aa1001d.x99lD2tvUz/output",
+    "--project",
+    "devpod-gpu-exploration",
+    "--zone",
+    "us-central1-b",
+    "--instance",
+    "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "--execute",
+    "--useful-budget-seconds",
+    "1500",
+    "--case-cap-seconds",
+    "600"
+  ],
+  "worker_sha256": "0b7bf6a29efb36f4c88a4d6e30200a7a3d94e7a0efada7378b3678f892de989f"
+}

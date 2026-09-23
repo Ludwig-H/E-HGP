@@ -71,6 +71,9 @@ struct ChainOptions {
 struct ChainTimes {
   double prepare_ms = 0, gen_index_ms = 0, q2_ms = 0, q34_ms = 0;
   double merge_ms = 0, tower_index_ms = 0, census_ms = 0, tower_ms = 0, total_ms = 0;
+  // Verification digest of the published tower, measured after total_ms
+  // (not part of the chain's construction time).
+  double digest_ms = 0;
   double cpu_s = 0;
 };
 
@@ -129,6 +132,8 @@ struct ChainResult {
   tower::FullBallTowerResult tower;
   // Catalogue recoupe (indices geometriques de l'index de la tour), si demande.
   std::vector<tower::BallData> catalogue_balls;
+  // Key ranges of the parallel presentation sort (1 below 4 096 presentations).
+  std::size_t presentation_ranges = 0;
 };
 
 // points[i] a l'identite i (PointId = rang d'entree). Sites distincts requis.

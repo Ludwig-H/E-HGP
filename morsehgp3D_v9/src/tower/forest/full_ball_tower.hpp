@@ -54,6 +54,7 @@ struct FullBallStats {
   u64 static_peak_seed_bytes = 0, static_peak_group_bytes = 0, static_peak_worker_bytes = 0;
   u64 static_batch_calls = 0, static_peak_batch_bytes = 0;
   u64 parallel_orders = 0;  // orders built by the concurrent static path
+  u64 presorted_catalogues = 0;  // key order certified by one scan, no sort
   // False after a backend failure whose paid work could not be recovered.
   bool static_batch_work_known = true;
   AnchorMebWork validation_work, resolve_work;
@@ -837,11 +838,19 @@ class Builder {
     for (const auto& row : identity) domain.push_back(row.first);
     require(std::adjacent_find(domain.begin(), domain.end()) == domain.end(), "full_ball_duplicate_id", invalid);
     by_key.resize(balls.size()); std::iota(by_key.begin(), by_key.end(), BallId{0});
-    // Keys are pairwise distinct (checked below): a strict total order, so
-    // the parallel sort is the unique sorted permutation.
-    parallel_sort(by_key, geometry_threads, [&](BallId a, BallId b) { return balls[a].key < balls[b].key; });
-    for (size_t j = 1; j < by_key.size(); ++j)
-      require(!(balls[by_key[j]].key == balls[by_key[j - 1]].key), "full_ball_duplicate_key", invalid);
+    // A catalogue already in STRICTLY increasing key order (the chain's) is
+    // certified by this one scan: the identity is then the unique sorted
+    // permutation and keys are distinct. Otherwise keys are sorted and must
+    // be pairwise distinct: a strict total order, so the parallel sort is
+    // the unique sorted permutation.
+    bool presorted = true;
+    for (size_t j = 1; j < balls.size() && presorted; ++j) presorted = balls[j - 1].key < balls[j].key;
+    if (presorted) add(st.presorted_catalogues);
+    else {
+      parallel_sort(by_key, geometry_threads, [&](BallId a, BallId b) { return balls[a].key < balls[b].key; });
+      for (size_t j = 1; j < by_key.size(); ++j)
+        require(!(balls[by_key[j]].key == balls[by_key[j - 1]].key), "full_ball_duplicate_key", invalid);
+    }
     std::vector<u8> qmins(balls.size());
     std::vector<size_t> counts(kmax + 1, 0);
     // Pass 1, parallel on the static path: the per-ball exact checks that

@@ -48,7 +48,7 @@ PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
 PLAN_SCHEMA = 'mhgp9_tower_plan_v5'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v8'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v9'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -102,7 +102,7 @@ TOP_KEYS = frozenset({'schema', 'status', 'reason', 'input', 'options', 'times_m
 INPUT_KEYS = frozenset({'format', 'grid', 'sites', 'hash'})
 OPTION_KEYS = frozenset({'K', 'K_effective', 's', 'workers', 'tower_static_threads', 'run_tower', 'levers'})
 TIME_KEYS = frozenset({'read', 'prepare', 'gen_index', 'q2', 'q34', 'merge', 'tower_index', 'census', 'tower',
-                       'chain_total'})
+                       'chain_total', 'digest'})
 ORDER_KEYS = frozenset({'K', 'nodes', 'births', 'merges', 'parents', 'contributions'})
 # tower_work : compteurs entiers, sauf ces deux champs types du noyau MEB
 # (libelle de comptabilite epingle, histogramme des tailles de supports).
@@ -533,10 +533,12 @@ def validate_probe(value, case, exit_code, inputs=None):
 
 
 def validate_external_wall(value, elapsed_seconds):
-    """Le chrono interne de chaine est borne par le mur externe du cas."""
+    """Le chrono interne de chaine, plus le condense de verification mesure
+    apres lui (times_ms.digest), est borne par le mur externe du cas."""
     need(_number(elapsed_seconds) and
-         value['times_ms']['chain_total'] / 1000.0 <= elapsed_seconds + EXTERNAL_WALL_TOLERANCE_SECONDS,
-         'chain total exceeds the external wall time of the case')
+         (value['times_ms']['chain_total'] + value['times_ms']['digest']) / 1000.0 <=
+         elapsed_seconds + EXTERNAL_WALL_TOLERANCE_SECONDS,
+         'chain total and digest exceed the external wall time of the case')
 
 
 def validate_gnu_time(text, exit_code):

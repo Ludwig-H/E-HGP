@@ -53,7 +53,7 @@ import pathlib
 import sys
 import time
 
-TIMES = ('read', 'prepare', 'gen_index', 'q2', 'q34', 'merge', 'tower_index', 'census', 'tower', 'chain_total')
+TIMES = ('read', 'prepare', 'gen_index', 'q2', 'q34', 'merge', 'tower_index', 'census', 'tower', 'chain_total', 'digest')
 
 
 def fnv_u32le(raw):
@@ -98,7 +98,7 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                       core_cover_point_tests=1, dead_core_cells=3)
     else:
         ledger.update({name: 0 for name in schema['ledger'] if name.startswith(('core_', 'dead_core_'))})
-    return dict(schema='mhgp9_tower_probe_v8', status=status,
+    return dict(schema='mhgp9_tower_probe_v9', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
@@ -793,6 +793,8 @@ class Protocol(unittest.TestCase):
                      ('orders', lambda v: v['orders'].pop()), ('order_key', lambda v: v['orders'][0].update(extra=1)),
                      ('time', lambda v: v['times_ms'].update(q34=-1.0)),
                      ('time_key', lambda v: v['times_ms'].pop('q34')),
+                     ('digest_time_absent', lambda v: v['times_ms'].pop('digest')),
+                     ('digest_time_negative', lambda v: v['times_ms'].update(digest=-1.0)),
                      ('counter_bool', lambda v: v['generator'].update(q3_emitted=True)),
                      ('counter_negative', lambda v: v['catalogue'].update(balls=-1)),
                      ('shell_list', lambda v: v['catalogue'].update(by_shell=[1, -2])),

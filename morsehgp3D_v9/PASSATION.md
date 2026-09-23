@@ -119,10 +119,22 @@ voies restées ouvertes. Harnais local W8 sur 08/000000 : CPU q3/q4 −18 % à K
 v7 (sonde) / v5 (plan) : cinq leviers, douze compteurs du noyau et leurs
 identités exactes.
 
-Suite : session G4 R6 (ablation du noyau) ; coût q3/q4 (atlas et énumération
-q3/q4 : 53 % des cycles à K10, filtres de paires et de rectangles) ; résidu
-hors q3/q4 et tour (fusion sérielle, double tri des clés, ~1 s non attribué à
-K10) ; seuil K−2 des arêtes q4 seules ; équilibrage de la tour K10.
+Session G4 R6 ([`g4_tower_r6_20260923`](receipts/g4_tower_r6_20260923/README.md),
+paquet `78ce9fd4`, **`completed`**, `TERMINATED` certifié) : ablation
+appariée du noyau, 24 cas, objets égaux ON/OFF ; CPU −10 à −20 %, mur −2 à
+−8 %, formes chargées −77 à −82 % ; meilleurs totaux **4,15 / 5,76 / 6,87 s à
+K5** et **11,73 / 16,67 / 18,06 s à K10**. Défaut ON gardé.
+
+Queue de chaîne : le condensé FNV de vérification (≈1,1 s local à K10) est
+sorti du chrono de chaîne et publié à part (`times_ms.digest`, sonde v9) ; la
+fusion des présentations est un tri d'échantillonnage parallèle par plages de
+clés (1,04 → 0,47 s en W8 local à K10) ; la tour certifie par un balayage
+un catalogue déjà strictement trié (`presorted_catalogues`) et ne le retrie
+pas.
+
+Suite : coût q3/q4 (ventilation K10 W8 locale en Gcycles : atlas 229, q4 235,
+paires 187, rectangles 123, noyau 120, q3 120, preuve sur cover 86) ; seuil
+K−2 des arêtes q4 seules ; équilibrage de la tour K10 ; voie GPU (V9-4).
 
 ## État du dépôt au moment de l'ouverture (historique)
 

@@ -174,7 +174,16 @@ def main(argv):
             check(False, 'mutant accepted: external wall shorter than the chain total')
         except ValueError:
             killed += 1
-        print('probe_worker_contract mutants_killed=' + str(killed) + '/' + str(len(mutants) + 1))
+        # The verification digest is timed after the chain total: the external
+        # wall must cover both (a digest slower than the whole case is refused).
+        slow = copy.deepcopy(good)
+        slow['times_ms']['digest'] = 1000.0 * 3600.0
+        try:
+            worker.validate_external_wall(slow, 60.0)
+            check(False, 'mutant accepted: digest time beyond the external wall')
+        except ValueError:
+            killed += 1
+        print('probe_worker_contract mutants_killed=' + str(killed) + '/' + str(len(mutants) + 2))
     for failure in failures:
         print('FAIL ' + failure)
     print(json.dumps(dict(gate='probe_worker_contract', failures=len(failures),

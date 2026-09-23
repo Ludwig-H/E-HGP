@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/build/v9-open-worktree/gcp-migration/tower_session_v9.py", line 546, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspaces/E-HGP/build/v9-open-worktree/gcp-migration/tower_session_v9.py", line 542, in main
+    return run_session(args)
+           ^^^^^^^^^^^^^^^^^
+  File "/workspaces/E-HGP/build/v9-open-worktree/gcp-migration/tower_session_v9.py", line 288, in run_session
+    need(key.is_file() and not key.is_symlink() and key.stat().st_mode & 0o777 == 0o600 and
+  File "/workspaces/E-HGP/build/v9-open-worktree/gcp-migration/full_probe_session_v7.py", line 31, in need
+    raise ValueError(reason)
+ValueError: existing private/public key files

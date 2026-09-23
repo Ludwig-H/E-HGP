@@ -1,0 +1,28 @@
+{
+  "case": {
+    "file": "data/scene_01.u32le",
+    "k": 10,
+    "levers": {
+      "atlas_saturate_deep": true,
+      "q34_dead_core": true,
+      "q34_dead_lanes": true,
+      "q34_witness_cache": true,
+      "q3_leaf_census": true
+    },
+    "n": 35551,
+    "repeat": 0,
+    "s": 8,
+    "scene": "01",
+    "static_threads": 48,
+    "workers": 48
+  },
+  "chain_total_ms": 11726.237,
+  "elapsed_seconds": 11.948696143999996,
+  "exit_code": 0,
+  "gnu_time_max_rss_kb": 3879876,
+  "index": 12,
+  "input_file_sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f",
+  "outcome": "complete_relative",
+  "probe_status": "complete_relative",
+  "tower_digest": "9ddbf7430c9086cc"
+}
