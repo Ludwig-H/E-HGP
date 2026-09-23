@@ -471,12 +471,21 @@ def validate_tower_phases(value, case):
         # lots_by_k est borne par la fenetre phase 0 + reste.
         overlap = case['levers'].get('tower_overlap_static', False)
         lots_window = phases['lots'] + (phases['static'] if overlap else 0.0)
-        need(not any(phases['order_by_k']) and
+        need(not any(phases['order_by_k']) and phases['static_by_k'][0] == 0 and
              abs(phases['static'] - sum(phases['static_by_k'])) <= PHASE_TOLERANCE_MS * case['k'] and
              all(x <= lots_window + PHASE_TOLERANCE_MS for x in phases['lots_by_k']) and
              all(x <= phases[step] + PHASE_TOLERANCE_MS
                  for step, key in (('images', 'images_by_k'), ('encode', 'encode_by_k'))
                  for x in phases[key]), 'tower static path phases')
+        if overlap:
+            # Dependance par ordre (contrelecture B) : la phase A de K suit la
+            # phase 0 de K et, par K decroissant, celles des ordres superieurs ;
+            # populations, images, banque et encodage suivent tous les lots.
+            after = sum(phases[key] for key in ('populations', 'images', 'bank', 'encode'))
+            for k in range(1, case['k'] + 1):
+                chain = phases['validate'] + sum(phases['static_by_k'][k - 1:]) + phases['lots_by_k'][k - 1] + after
+                need(chain <= value['times_ms']['tower'] + PHASE_TOLERANCE_MS * (case['k'] + 7),
+                     'tower phase A of order %d before its phase 0' % k)
     else:
         need(not any(phases[key] for key in STATIC_PATH_PHASES) and
              not any(any(phases[key]) for key in ('static_by_k', 'lots_by_k', 'images_by_k')),

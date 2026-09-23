@@ -237,6 +237,9 @@ def main(argv):
             ('overlap lever flipped', lambda v: v['options']['levers'].update(tower_overlap_static=False)),
             ('order lots beyond the overlap window', lambda v: v['tower_phases_ms']['lots_by_k'].__setitem__(
                 0, v['tower_phases_ms']['static'] + v['tower_phases_ms']['lots'] + 5.0)),
+            ('order K5 lots before its phase 0', lambda v: v['tower_phases_ms']['lots_by_k'].__setitem__(
+                4, v['tower_phases_ms']['static'] + v['tower_phases_ms']['lots'])),
+            ('phase 0 time moved to order 1', lambda v: v['tower_phases_ms']['static_by_k'].__setitem__(0, 1.0)),
             ('longest job beyond worker wall', lambda v: v['q34_occupancy'].update(
                 max_job_ms=v['q34_occupancy']['wall_max_ms'] + 5.0)),
             ('job time beyond threads x wall', lambda v: v['q34_occupancy'].update(

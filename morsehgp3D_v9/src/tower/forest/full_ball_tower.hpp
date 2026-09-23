@@ -572,7 +572,7 @@ class Builder {
   // otherwise lots and images as in run_orders_parallel. Counters of every
   // order are merged exactly once on every exit. Times: static_by_k as
   // before; lots_by_k is each order's own phase A (it may overlap phase 0);
-  // lots_ms is the part of phase A left AFTER phase 0.
+  // lots_ms is the launch-to-join window minus phase 0.
   std::vector<FullBallOrder> run_orders_overlapped(std::vector<OrderState>& orders) {
     std::vector<std::optional<Failure>> failures(kmax);
     bool merged = false;
@@ -593,6 +593,9 @@ class Builder {
       std::vector<std::thread> runners;
       runners.reserve(kmax);
       parallel_detail::JoinThreads joined{runners};
+      // One window from the first runner launch to the last join: phase 0
+      // and every order's phase A lie inside it (lots_ms = window - static).
+      const auto window_start = PhaseClock::now();
       const auto cancel = [&] {
         { std::lock_guard<std::mutex> lock(mu); cancelled = true; }
         wake.notify_all();
@@ -629,10 +632,9 @@ class Builder {
           }
         }
       } catch (...) { cancel(); throw; }
-      const auto after_static = PhaseClock::now();
       if (static_failure) cancel();
       for (auto& runner : runners) runner.join();
-      times->lots_ms = ms_since(after_static);
+      times->lots_ms = std::max(0.0, ms_since(window_start) - times->static_ms);
       if (static_failure) throw *static_failure;
       for (const auto& error : errors) if (error) std::rethrow_exception(error);
       size_t lots_done = 0;
