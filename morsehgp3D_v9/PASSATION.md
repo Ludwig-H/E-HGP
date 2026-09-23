@@ -222,6 +222,27 @@ filtre GPU, survivants au CPU), puis porter le cœur et le certificat de voie
 morte. La tentative 1 a échoué à la configuration (CMake 3.22.1 sur la VM,
 [reçu](receipts/g4_gpu_s1_attempt1_20260923/README.md)).
 
+Voie GPU S2 (23 septembre, fin d'après-midi) : filtre témoin q3/q4 par lots
+dans la chaîne (`run_wspd_q34_batched`, leviers `q34_batch_filter` et
+`q34_gpu_filter`, sonde v17, protocole de la tour v17 avec build CUDA).
+Frontière de confiance à trois couches :
+- contrôle structurel des survivants ;
+- différentiel moteur/lots (porte `chain_batch_filter`, jumeau moteur du
+  préflight et des cas GPU) ;
+- juges indépendants de C.
+
+Session G4 R12 ([reçu](receipts/g4_tower_r12_20260923/README.md), paquet
+`2059189d`, **`completed`**, `TERMINATED` certifié), toutes les tours
+égales à leur jumeau moteur :
+- **K5 2,01 / 2,47 / 2,69 s** et **K10 6,63 / 8,32 / 8,70 s**, soit −15 à
+  −25 % contre le chemin moteur ;
+- appel du filtre 0,2–0,3 s, dont 47–119 ms de passe GPU, le reste côté
+  hôte (contexte, copies) ;
+- survivants 0,8–1,2 s à K5, tour 0,6–0,8 s.
+
+Suites : contexte GPU et index préparés pendant q2 ; cœur et certificat sur
+GPU ; tour D5.
+
 Suite : tour maigre (D5 de l'auditeur C :
 index des selles, saut au centre, images de naissance directes), puis
 réfutation des ancres longues avant expansion (66–70 % du CPU q3/q4 selon C).

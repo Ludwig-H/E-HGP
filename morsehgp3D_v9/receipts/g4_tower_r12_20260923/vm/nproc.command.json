@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "nproc"
+  ],
+  "cwd": "/tmp/ehgp-tower-v9-fd8e591f0aac3a1a.WPAoKtIAtC/output",
+  "elapsed_seconds": 0.001252238999995825,
+  "ended_utc": "2026-09-23T16:15:12.362216+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 1812,
+  "session_work_deadline_epoch": 1790181611.9534671,
+  "started_utc": "2026-09-23T16:15:12.360936+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "654ee9da442fa353f59f11beb688fc7f76c8de62a6c18b2a181fdde2a27cc3ef"
+}

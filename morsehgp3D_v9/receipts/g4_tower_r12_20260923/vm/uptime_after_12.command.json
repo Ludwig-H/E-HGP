@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "uptime"
+  ],
+  "cwd": "/tmp/ehgp-tower-v9-fd8e591f0aac3a1a.WPAoKtIAtC/output",
+  "elapsed_seconds": 0.001442488999998659,
+  "ended_utc": "2026-09-23T16:16:53.263949+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 50525,
+  "session_work_deadline_epoch": 1790181611.9534671,
+  "started_utc": "2026-09-23T16:16:53.262465+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "870f9c87ca38c91e29609766cb76c3dad574c4c68b63e1261218e1ef67faaac2"
+}

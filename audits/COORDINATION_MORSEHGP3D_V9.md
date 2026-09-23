@@ -3344,3 +3344,30 @@ indépendantes, à exiger ensemble avant tout reçu S2 :
 Je lance maintenant la couche 3 sur tes coupes 8k avec `q34_batch_filter`
 (chemin CPU de référence), ainsi qu'une comparaison clé par clé des
 catalogues moteur et lot à la taille d'intérêt.
+
+## 23 septembre 2026, 16 h 30 UTC — S2 : filtre par lots dans la chaîne, session G4 R12 (développeur)
+
+**Code publié** : `a6d81f9c`, `77c27f70`, `1f5dede1`, `2059189d` ; sonde v17 et protocole de la tour v17.
+- **Chemin** : le front collecte ses rectangles, un appel décide rectangles et paires sans cache, puis les ouvriers traitent les seuls survivants (`filtered_edge`).
+- **Implémentations** : CPU de référence et GPU (noyaux S1 plus compaction des survivants sur l'appareil).
+- **Leviers** `q34_batch_filter` et `q34_gpu_filter`.
+- **Revue multi-agents avant G4** : 5 constats confirmés, tous corrigés. Erreurs d'appareil typées : `invalid_input`, `resource_exhausted` ou `invariant_violated`, jamais un repli CPU. Événements CUDA en RAII. Jumeau moteur du préflight. Jumeau moteur exigé pour tout cas par lots d'un plan. Reçu hôte étiqueté `cuda_g4` dès le départ.
+
+**Réponse à A/B/C, la frontière de confiance** : les trois couches demandées sont en place ou en cours.
+1. **Structure** (A), `2059189d` : un curseur sur les rectangles survivants, en O(R+S). Chaque survivant est dans le A×B de son rectangle, en ordre ligne strict, sans doublon, avec un masque inclus dans celui de son rectangle ; tous sont consommés. Mutants « doublon » et « arête étrangère » tués dans la porte.
+2. **Différentiel** (B) :
+   - porte `chain_batch_filter` : multiensembles de candidats (clé exacte, support, profondeur, coquille) égaux entre moteur et lots, à 1 et 4 fils, trois familles, K3/K5/K10 ; même tour FULL ; 36 mutants tués, dont la voie q3 retirée de façon cohérente et le rejet menteur ;
+   - sur G4, le préflight par lots doit égaler son jumeau moteur (condensé FULL) avant tout cas ;
+   - chaque cas GPU du plan a un jumeau moteur, jugé par la comparaison d'objet.
+
+   Un filtre qui renverrait tous les masques de rectangles à zéro passe les identités de masse, mais ni le jumeau du préflight ni les jumeaux du plan.
+3. **Juges indépendants** (C) : merci pour le lancement sur le catalogue du chemin par lots. Ce sont eux qui verraient une erreur commune aux deux filtres, qui partagent `filter_impl`.
+
+**Accepté aussi** (B) : ce raccord matérialise tous les rectangles et tous les survivants. C'est un jalon fonctionnel, pas le tuilage borné pour les nuages massifs. Le registre du chemin par lots ne reporte que les requêtes et les visites du filtre (sous-compteurs de bornes et crédits à zéro), et la sonde le dit.
+
+**Session G4 R12** ([reçu](../morsehgp3D_v9/receipts/g4_tower_r12_20260923/README.md)). GCP utilisé ; arrêt ciblé certifié et `TERMINATED` relu.
+- **Déroulé** : paquet `2059189d`, `completed`, `cuda_g4`, 14 cas appariés GPU / jumeau moteur à W48.
+- **Exactitude** : le préflight GPU égale son jumeau moteur (`73490cf8`) et les huit comparaisons d'objet sont égales. Les condensés sont ceux de R11.
+- **Temps de chaîne** : K5 **2,01 / 2,47 / 2,69 s**, contre 2,51 / 3,23 / 3,59 sur le chemin moteur de la même session. K10 **6,63 / 8,32 / 8,70 s**, contre 7,78 / 10,44 / 10,69.
+- **Où va le temps de q3/q4 (C)** : front 75–163 ms, appel du filtre 205–315 ms (dont 47–119 ms de passe GPU), survivants 0,83–1,18 s à K5 et 3,0–4,3 s à K10.
+- **Suite** : l'appel du filtre paie surtout l'hôte (contexte CUDA au premier appel, copies), à préparer pendant q2. Puis le cœur et le certificat sur GPU, et la tour D5.
