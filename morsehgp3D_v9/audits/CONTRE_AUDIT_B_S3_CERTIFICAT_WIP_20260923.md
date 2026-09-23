@@ -205,3 +205,61 @@ laisserait 1,177–1,513 s sur les trois lignes K5 si les autres phases
 ne changent pas. R13 doit donc être présenté comme une mesure du port
 S3 et de sa sûreté, **pas** comme une qualification anticipée du contrat
 brut, multi-séquence ou sous la seconde.
+À K10, le même calcul fictif laisse 3,583–4,380 s ; la tour seule prend
+déjà 2,283–2,965 s. Même à K5, ses 0,592–0,775 s sont 5,9–7,8 fois
+la cible ultérieure de 100 ms. Ces résidus sont des projections sur
+l'architecture R12 figée, **pas** des bornes d'impossibilité pour une
+nouvelle architecture.
+
+## Réception du correctif publié `942494362` (19 h 52 UTC)
+
+Ce commit contient les trois corrections de source demandées : retour du
+lot vide avant toute plage de pointeurs, feuilles unitaires, masques limités
+aux voies disponibles à K. Les deux dernières ont des fixtures causales
+dans `gpu_certificate_port` : arbre préordre valide dont seule la feuille
+fusionnée est refusée, puis q4 à K2 et q3 à K1. La barrière `group.sync()`
+avant l'accès à chaque frontière ferme aussi le risque statique de
+réemploi inter-lanes relevé précédemment. **Aucun de ces faits ne remplace
+un essai CUDA de ce commit** : le build `build/v9-exp` que j'ai relu avait
+`MHGP9_ENABLE_CUDA=OFF` et son journal contient 149 tests sélectionnés
+réussis, zéro échec, sans reçu épinglé par commit. Je ne trouve pas de
+porte qui appelle directement `run_certificate_batch` avec zéro arête et
+des tableaux nuls : la correction du lot vide est établie par lecture du
+code, pas par un test causal sur appareil.
+
+Le nouveau `judge_certificate_filter` recalcule **chaque masque décidé**
+et tous les compteurs de certificat agrégés sur CPU. R13 l'active dans
+ses deux préflights GPU sur le nuage synthétique de 1 500 sites, dont la
+variante à ardoise 64 doit imposer des reports, **pas** sur les trames LiDAR
+chronométrées. Le chemin d'attente reprend bien l'arête entière dans le
+moteur. Le compteur `rebuilt_covers` est incrémenté après chaque
+`certified_edge` à masque non nul, mais les tests et le lecteur n'en
+vérifient que la borne `<= cover_builds`, pas sa valeur attendue ni sa
+non-vacuité. Les identifiants des deux coquilles et le travail logique
+complet sont désormais comparés dans la porte de chaîne.
+
+L'assertion publique `GPU_executed` a encore une faille **conditionnelle
+de classement** : `gpu_completed_cases` ne lit que les leviers des cas
+achevés. L'appel pur avec un cas « filtre CPU, certificats GPU, zéro
+survivant, zéro warp et zéro ms device » renvoie `[0]`, donc pourrait
+marquer une tour GPU malgré l'absence de noyau ; ce cas n'est pas le plan
+R13 ordinaire, qui active aussi le filtre GPU. Corriger le classement par
+les mesures observées et lui ajouter ce mutant est souhaitable, sans
+confondre cela avec un défaut démontré du calcul géométrique.
+
+Les [six condensés absolus de C](c_catalogue_digest_20260923/README.md)
+et sa porte causale restent non intégrés : R13 vérifie les trois entrées
+et l'égalité relative GPU/jumeau moteur, mais pas ces épingles externes.
+Son plan reste 18 cas sur trois trames **sans sol d'une seule séquence**,
+grille 1 mm, s8 ; aucune ligne brute avec sol, multi-séquence, s10/s12,
+float32, ni mesure de croissance 8k/16k/32k n'est ajoutée par ce commit.
+Le juge ajoute un second parcours CPU aux préflights, hors `chain_total`
+mais dans le budget utile de session de 1 500 s. L'appel S3 alloue au
+défaut 52 octets par site et par warp, soit 3,25 Mio pour chaque ardoise
+de 65 536 sites ; index et arêtes sont encore transférés, puis chaque
+arête décidée restant ouverte reconstruit son cover côté CPU. Une mesure
+du gain net R13 doit donc inclure ces charges et l'atlas/émission/FULL
+restés sur CPU ; la ventilation en ticks TSC 35 %/28 % n'en est pas une
+borne de vitesse.
+Le statut reste **S3 source corrigée, exactitude CUDA et temps G4 non
+qualifiés**.

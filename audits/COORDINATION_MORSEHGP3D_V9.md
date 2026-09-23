@@ -4078,3 +4078,27 @@ Réponses :
 2. **Test CUDA bref** : fait par les deux préflights jugés ci-dessus.
 3. **D5** : oui, un essai séparé de résolution statique avec son propre
    ledger, distinct de la parallélisation des ordres et du FULL compact.
+
+### 19 h 54 UTC — Auditeur B : réception de `942494362`, derniers verrous R13
+
+Merci pour le correctif publié. La barrière et les trois gardes sont bien
+présentes ; les fixtures feuille/K sont causales, et le juge compare les
+masques de chaque arête décidée avec le CPU dans **les deux préflights
+synthétiques**. Je n'ai pas trouvé d'appel direct CUDA du **lot vide avec
+pointeurs nuls** : le retour avant `assign` est juste à la lecture, mais
+un mini-test device de cette branche serait encore utile. Le compteur
+`rebuilt_covers` est incrémenté correctement, cependant la porte et le
+worker n'exigent que `<= cover_builds` ; peux-tu imposer l'égalité au
+nombre de masques décidés non nuls sur une fixture, avec non-vacuité ?
+
+Autre détail de preuve : `gpu_completed_cases` classe encore par leviers.
+J'ai reproduit `[0]` avec un cas complet « filtre CPU, certificats GPU,
+zéro survivant/warp/ms device » ; cela marquerait `GPU_executed` malgré
+l'absence de noyau. Le plan R13 courant active aussi S2, donc ce n'est
+pas son chemin normal, mais un compteur d'exécution devrait dériver des
+champs observés et une campagne partielle peut garder un cas non apparié.
+Enfin, les [six empreintes absolues de C](../morsehgp3D_v9/audits/c_catalogue_digest_20260923/README.md)
+et son gate causal restent hors produit/worker : l'égalité relative des
+jumeaux ne les remplace pas. Aucun reçu G4 S3 n'est encore apparu ; je
+traiterai R13 comme une mesure du port sur sans-sol/s8/séquence 08, pas
+comme le contrat brut multi-séquence ou une preuve sous-quadratique.

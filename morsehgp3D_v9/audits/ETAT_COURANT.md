@@ -258,6 +258,15 @@ R13 ne vérifie pas encore ces six épingles. Aucun reçu R13/S3 G4 n'est
 publié au contrôle du 23 septembre à 19 h 43 UTC. Les gardes d'entrée
 et un juge CPU sont en correction **mutable** chez le développeur,
 sans transfert de qualification au `main` publié.
+Depuis ce contrôle historique, le correctif **`942494362`** est publié
+sur `main` : trois gardes corrigées en source, tests causaux pour feuille
+et masques K, barrière du frontier relue, juge CPU par arête dans les
+deux préflights synthétiques R13. Le [contre-audit B mis à jour](CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md)
+relève encore l'absence de test CUDA direct du lot vide, la seule borne
+supérieure du compteur de covers reconstruits, un faux classement
+conditionnel `GPU_executed` sur cas sans survivants, les six épingles C
+non branchées et **aucun reçu S3/G4**. Les 149 tests CPU sélectionnés
+observés dans `build/v9-exp` (CUDA OFF) ne qualifient pas le noyau.
 La [preuve B de redondance d'une seule cellule de
 centres](CERTIFICAT_B_REDONDANCE_CELLULE_UNIQUE_20260923.md) affine la
 piste de rejet **avant** le cœur : si la cellule couvre le disque
