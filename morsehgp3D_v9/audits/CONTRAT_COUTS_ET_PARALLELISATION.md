@@ -51,9 +51,10 @@ Pour la répétition au total minimal de chaque scène, le résidu
 | 000000 | 1,038 | 3,387 | 2,02 |
 | 000200 | 1,098 | 3,435 | 2,06 |
 
-Le résidu comprend préparation et index, résumé des ordres et digest ;
-la lecture du fichier, l'impression JSON et les destructeurs des gros
-locaux après l'affectation de `chain_total` sont hors de cette mesure.
+Le résidu comprend préparation et index, résumé des ordres, digest et
+destruction des temporaires déclarés dans le `try` de la chaîne. La
+lecture du fichier, l'impression JSON et la destruction ultérieure du
+résultat retourné sont hors de cette mesure.
 Ainsi, **dans cette architecture séquentielle**,
 rendre q3/q4 et la tour instantanés ne suffit pas pour K10 <1 s ; même
 les trois seules phases nommées de la dernière colonne dépassent 1 s.
@@ -62,24 +63,23 @@ digest et autres postes réellement compris avant de décider de la
 frontière du contrat, puis
 réduire aussi q2, fusion et recensus sur l'appel complet.
 
-La fusion trie en série **4,38–5,51 millions** de présentations à K10
+Dans R5, la fusion triait en série **4,38–5,51 millions** de présentations à K10
 pour ne trouver que **2–13 doublons de BallKey** sur ces trois trames ;
-elle prend 0,61–0,78 s. Après ce tri, `balls` est déjà en ordre strict de
-clé, mais FULL trie une seconde fois les BallIds par cette même clé
-avant de valider l'unicité. Son `parallel_sort(by_key)` trie des tranches,
-alloue un tampon de `B` IDs puis les fusionne, même quand `by_key` est
-déjà l'identité triée ; à 5,51 M boules, le tampon représente environ
+elle prenait 0,61–0,78 s. Après ce tri, `balls` était déjà en ordre strict de
+clé, mais FULL triait une seconde fois les BallIds par cette même clé
+avant de valider l'unicité. Son `parallel_sort(by_key)` triait des tranches,
+allouait un tampon de `B` IDs puis les fusionnait, même quand `by_key` était
+déjà l'identité triée ; à 5,51 M boules, le tampon représentait environ
 22 Mo décimaux temporaires. Les comparateurs `Key5` et `BallKey`
 sont tous deux lexicographiques sur les mêmes cinq `i128` signés, et
 le recensus vérifie l'égalité de chaque clé reconstruite avec sa
 présentation : l'ordre de `balls` est conservé sur le chemin chaîne.
-Un chemin interne « catalogue trié/unique »
-peut transmettre l'ordre certifié à FULL et vérifier les voisins en
-`O(B)`, tout en gardant l'API publique indépendante pour les catalogues
-arbitraires. Mesurer le gain et les octets de cette suppression d'un tri
-redondant ; le tri exact distinct par niveau `by_level` reste nécessaire.
-Le tri/fusion initial des présentations reste à paralléliser
-ou remplacer par des runs exacts à coût total compté. La quasi-absence de
+Depuis `50690c12`, le sample-sort distribue les présentations par plages
+de clés et FULL certifie cet ordre strict en `O(B)` avant de sauter son
+tri `by_key` ; les catalogues publics non ordonnés suivent encore le tri
+général. Le tri exact distinct par niveau `by_level` reste nécessaire.
+Mesurer sur G4 le gain net, les déséquilibres de plages et la résidence
+simultanée des slots et des plages. La quasi-absence de
 doublons ici ne se transfère pas aux passages LiDAR superposés.
 
 Enfin, R5 compte **120–138 boules par site** à K10, avec

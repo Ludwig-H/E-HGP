@@ -1,6 +1,6 @@
 # État courant des audits v9
 
-23 septembre 2026. Produit publié courant : **`50690c12`**. Le
+23 septembre 2026. Produit publié courant : **`6200bb5a`**. Le
 [reçu G4 R6](../receipts/g4_tower_r6_20260923/README.md) exécute le
 snapshot **`78ce9fd4`** ; ses temps ne qualifient pas encore le
 sample-sort, le raccourci FULL ni la nouvelle frontière temporelle
@@ -130,11 +130,12 @@ Le cœur ferme **54,9–58,9 %**
 des arêtes qui arrivent au cover et réduit les formes chargées de
 **72,85–81,87 %**, mais augmente les visites d'index core+cover de
 **21,0–45,6 %**. Meilleurs cas ON : **4,151 s à K5** et **11,726 s à
-K10**, toujours hors contrat. Le README R6 publié doit être corrigé :
-« générateur identique » est trop large car `q34_cover_builds` change
-par construction (000000/K5 : 900 377 ON, 2 043 612 OFF) ; seules
-ses émissions et masses de candidats restent identiques. Ses plages
-arrondies de gain omettent aussi les bornes 0,51 %, 8,66 % et 72,85 %.
+K10**, toujours hors contrat. L'[erratum
+R6](../receipts/g4_tower_r6_20260923/ERRATUM.md) corrige « générateur
+identique » : `q34_cover_builds` change par construction
+(000000/K5 : 900 377 ON, 2 043 612 OFF), tandis que les émissions et
+masses de candidats restent identiques. Il ne corrige pas encore les
+plages arrondies du README, qui omettent 0,51 %, 8,66 % et 72,85 %.
 Les trois compteurs du cache témoin varient légèrement entre
 répétitions, sans changer l'objet.
 
@@ -286,8 +287,8 @@ R5/K10 laisserait encore **2,50 / 3,39 / 3,44 s** de chaîne sur
 **1,43 / 2,02 / 2,06 s**. La queue après `tower_ms` comprend le résumé et
 le digest sur les snapshots R5/R6. `50690c12` isole désormais le digest
 dans `times_ms.digest` ; il reste **synchrone** dans l'appel public.
-Les destructeurs des gros locaux en fin de fonction interviennent après
-l'affectation de `chain_total`.
+La destruction des temporaires déclarés dans le `try` est comprise
+dans `chain_total` ; celle du résultat retourné intervient après l'appel.
 Les présentations ont seulement 2–13 doublons pour 4,38–5,51 M clés
 sur ces trames ; ce ratio ne se transfère pas à des passages LiDAR
 superposés. Le catalogue arrive déjà strictement trié par `BallKey`
@@ -334,12 +335,24 @@ rejuge strictement toutes les clés. Les portes locales passent, sans
 reçu G4 ni ablation FULL de ces changements. Le [contre-audit du chantier](CONTRE_AUDIT_B_TRI_FUSION_WIP_20260923.md)
 doit être relu à la lumière du **sample-sort commité** ; son calcul
 de tampon à 112 octets par présentation décrit une variante abandonnée.
+Le prélèvement de splitters prend jusqu'à `16×4W` clés **par slot non
+vide**, sans pondérer par sa taille : une répartition très inégale des
+présentations peut laisser une plage beaucoup plus grosse que la
+moyenne malgré `presentation_ranges>1`. Publier au moins le maximum et
+la distribution des tailles de plages sur LiDAR ; comparer, si ce
+déséquilibre apparaît, un échantillon pondéré ou une partition en deux
+passes suivie d'un seul tri par plage. L'ordre exact ne dépend pas de
+la qualité des splitters, seul le coût en dépend.
 Pour comparer un futur reçu à R6, ajouter `times_ms.digest` à
 `chain_total` sur le périmètre mural ancien. Le nouveau `chain_cpu_s`
 exclut également le condensé, mais aucun `digest_cpu_s` n'est publié :
-une comparaison CPU·s R6/R7 brute serait trompeuse. Le lecteur v9 doit
-aussi borner `read + chain_total + digest` par le mur externe, puisque
-son contrôle actuel omet `read` ([mutation causale](CONTRE_AUDIT_B_TRI_FUSION_WIP_20260923.md)).
+une comparaison CPU·s R6/R7 brute serait trompeuse. `6200bb5a` borne
+désormais `read + chain_total + digest` par le mur externe et tue la
+[mutation d'une heure de lecture](CONTRE_AUDIT_B_TRI_FUSION_WIP_20260923.md).
+Il classe `std::length_error` et `std::system_error` comme manque de
+ressources, chronomètre fusion et recensus même en cas d'échec et vide
+les résumés d'ordres sur refus ; la porte de chaîne exerce une panne de
+lancement après q3/q4. Ce correctif n'a pas de reçu G4.
 
 Prochaines mesures : mêmes octets et masque figé, trames **entières** de
 plusieurs séquences sans sol puis brutes, s8/10/12, K5 et K10, W1/W24/W48,
