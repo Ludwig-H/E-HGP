@@ -1,0 +1,250 @@
+{
+  "cases": {
+    "postF_panel_leaf64": {
+      "group": {
+        "Fclosed": 160795484,
+        "cand": 101,
+        "closed": 25832,
+        "collision_skips": 13364,
+        "covered3": 1256026,
+        "covered4": 579362,
+        "failF": 207209411,
+        "lane3_closed": 15096,
+        "lane4_closed": 25443,
+        "leaves": 2048,
+        "match_calls": 4107,
+        "match_iterations": 301712,
+        "nodes": 4095,
+        "partial": 21429,
+        "tests": 381203,
+        "tile3": 14703,
+        "tile4": 8010,
+        "validated_pairs": 2858552
+      },
+      "masks": {
+        "F": [
+          5879580,
+          185934461,
+          176190854
+        ],
+        "Fclosed": [
+          2198764,
+          120622575,
+          37974145
+        ],
+        "closed": [
+          403,
+          18887,
+          6542
+        ],
+        "counts": [
+          1225,
+          31329,
+          35273
+        ]
+      },
+      "pointwise": {
+        "fallback_Fclosed": 79840486,
+        "fallback_closed": 14063,
+        "fallback_tests": 4223769,
+        "group_only": 0,
+        "point3": 25097,
+        "point4": 39111,
+        "point_Fclosed": 240635970,
+        "point_closed": 39895,
+        "point_tests": 6827128
+      },
+      "seed": null
+    },
+    "precore_16_leaf16": {
+      "group": {
+        "Fclosed": 183784954,
+        "cand": 51,
+        "closed": 29610,
+        "collision_skips": 13135,
+        "covered3": 986694,
+        "covered4": 529629,
+        "failF": 184219941,
+        "lane3_closed": 17184,
+        "lane4_closed": 29113,
+        "leaves": 6387,
+        "match_calls": 10892,
+        "match_iterations": 399884,
+        "nodes": 12773,
+        "partial": 19631,
+        "tests": 571162,
+        "tile3": 25328,
+        "tile4": 15958,
+        "validated_pairs": 2587862
+      },
+      "masks": {
+        "F": [
+          5879580,
+          185934461,
+          176190854
+        ],
+        "Fclosed": [
+          2757534,
+          129192481,
+          51834939
+        ],
+        "closed": [
+          497,
+          20202,
+          8911
+        ],
+        "counts": [
+          1225,
+          31329,
+          35273
+        ]
+      },
+      "pointwise": {
+        "fallback_Fclosed": 49693226,
+        "fallback_closed": 8802,
+        "fallback_tests": 1938631,
+        "group_only": 0,
+        "point3": 23285,
+        "point4": 37670,
+        "point_Fclosed": 233478180,
+        "point_closed": 38412,
+        "point_tests": 3445238
+      },
+      "seed": {
+        "cloud_scans": 1974224,
+        "inside_sites": 86678,
+        "pair_tests_seed": 28948,
+        "seed_count": 16,
+        "top_sites": 967
+      }
+    },
+    "precore_16_leaf256": {
+      "group": {
+        "Fclosed": 109836328,
+        "cand": 51,
+        "closed": 17313,
+        "collision_skips": 3359,
+        "covered3": 493612,
+        "covered4": 225885,
+        "failF": 258168567,
+        "lane3_closed": 7814,
+        "lane4_closed": 17125,
+        "leaves": 512,
+        "match_calls": 1213,
+        "match_iterations": 51732,
+        "nodes": 1023,
+        "partial": 22867,
+        "tests": 47514,
+        "tile3": 1973,
+        "tile4": 1057,
+        "validated_pairs": 882955
+      },
+      "masks": {
+        "F": [
+          5879580,
+          185934461,
+          176190854
+        ],
+        "Fclosed": [
+          1044828,
+          93677897,
+          15113603
+        ],
+        "closed": [
+          188,
+          14555,
+          2570
+        ],
+        "counts": [
+          1225,
+          31329,
+          35273
+        ]
+      },
+      "pointwise": {
+        "fallback_Fclosed": 123641852,
+        "fallback_closed": 21099,
+        "fallback_tests": 2564006,
+        "group_only": 0,
+        "point3": 23285,
+        "point4": 37670,
+        "point_Fclosed": 233478180,
+        "point_closed": 38412,
+        "point_tests": 3445238
+      },
+      "seed": {
+        "cloud_scans": 1974224,
+        "inside_sites": 86678,
+        "pair_tests_seed": 28948,
+        "seed_count": 16,
+        "top_sites": 967
+      }
+    },
+    "precore_16_leaf64": {
+      "group": {
+        "Fclosed": 153837726,
+        "cand": 51,
+        "closed": 24537,
+        "collision_skips": 6943,
+        "covered3": 779051,
+        "covered4": 394735,
+        "failF": 214167169,
+        "lane3_closed": 13275,
+        "lane4_closed": 24180,
+        "leaves": 2048,
+        "match_calls": 4107,
+        "match_iterations": 162622,
+        "nodes": 4095,
+        "partial": 20935,
+        "tests": 187790,
+        "tile3": 8453,
+        "tile4": 4883,
+        "validated_pairs": 1761439
+      },
+      "masks": {
+        "F": [
+          5879580,
+          185934461,
+          176190854
+        ],
+        "Fclosed": [
+          1964409,
+          118135449,
+          33737868
+        ],
+        "closed": [
+          357,
+          18421,
+          5759
+        ],
+        "counts": [
+          1225,
+          31329,
+          35273
+        ]
+      },
+      "pointwise": {
+        "fallback_Fclosed": 79640454,
+        "fallback_closed": 13875,
+        "fallback_tests": 2196475,
+        "group_only": 0,
+        "point3": 23285,
+        "point4": 37670,
+        "point_Fclosed": 233478180,
+        "point_closed": 38412,
+        "point_tests": 3445238
+      },
+      "seed": {
+        "cloud_scans": 1974224,
+        "inside_sites": 86678,
+        "pair_tests_seed": 28948,
+        "seed_count": 16,
+        "top_sites": 967
+      }
+    }
+  },
+  "group_F": 368004895,
+  "group_edges": 67827,
+  "schema": "mhgp9_audit_paired_group_bvh_summary_v1",
+  "scope": "one raw SemanticKITTI 08/000000 S2 group; audit only; F diagnostic post-core"
+}

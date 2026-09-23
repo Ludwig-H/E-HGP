@@ -17,6 +17,14 @@ distincte ; aucune campagne R14 n'est inférée de ce préflight.
 Le plan par défaut reste trois sous-nuages entiers sans sol de la
 seule séquence 08, s8/K5/K10, non les trames brutes et s10/s12 du
 contrat final.
+La [contrelecture S4](AUDIT_S4_RESIDENCE_ORDINALS_20260923.md) précise le
+raccord du jalon hybride : si q3 s'exécute sur GPU et q4 sur CPU,
+la résidence S2/S3 exige encore l'export des arêtes q4 ouvertes avec
+leurs ordinaux et masques, plus copie/synchronisation comptées dans le mur.
+Pour un éventuel filtre de groupe avant S3, garder l'ordinal S2 immuable,
+des masques de voies monotones et un repli CPU sur le dernier masque
+certifié. Le plan doit aussi pondérer le second passage q4 par les tailles
+de cover et préciser ce que prouve l'empreinte des IDs de coquille.
 
 23 septembre 2026. Ports v13 publiés : sonde **`c768e06a`**, porte Euler
 8k **`a08378da`**, lecteur LiDAR **`50646eef`** puis **`1f048aae`**,
@@ -519,6 +527,18 @@ précéder les tests corrélés de B. Cellule/axe n'est pas un certificat :
 subdiviser les couples d'extrémités, prouver la disjonction des sites,
 facturer le groupage et les replis. Ce seul plein brut ne prédit pas
 la sélectivité des demi-scènes, quarts ou densités.
+Le [BVH de couples d'arêtes](paired_guard_group_bvh_20260923/README.md)
+teste exactement cette subdivision sur le **plus grand groupe en nombre
+d'arêtes**, critère disponible après S2 mais avant le cœur : 67 827
+arêtes contre 9 548 dans le second groupe. Seize représentants choisis
+par extrémités proposent 51 paires avec **1,974 M visites de sites** ;
+à feuilles de 64, 187 790 tests uniformes et 4 107 matchings ferment
+intégralement **24 537 arêtes**, dont `F=153,838 M` formes qui auraient
+pu être évitées avant `load`. Les 43 290 autres arêtes gardent le chemin
+exact ; les preuves positives sont recoupées point par point en Release
+et sous ASan/UBSan. Le groupe n'est qu'un cas favorable d'une trame
+brute/K5/s8, avec coût de dispatch, BVH, sélection, replis et aval non
+apparié au moteur. Ce n'est ni un gain net ni une borne sous-quadratique.
 Les [demi-scènes et quarts aux trois densités](lidar_raw_physical_scaling_20260923/README.md)
 ont été mesurés avec v12, puis appariés au batch S2 CPU K5 par les
 deux reçus ci-dessus. La somme de leurs tours ne reconstruit pas le

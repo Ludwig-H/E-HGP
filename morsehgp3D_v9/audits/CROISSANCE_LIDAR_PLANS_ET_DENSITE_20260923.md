@@ -226,6 +226,11 @@ avec leur graine commune, puis inverser la table
 [`scene_00_grid/raw_to_original.u32le`](../../morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/raw_to_original.u32le)
 pour ramener les IDs originaux du sans-sol aux IDs de retours bruts ;
 les intersections ci-dessus portent sur ces derniers, pas sur des rangs de sites.
+Pour une comparaison **appariée** du retrait du sol, tirer à chaque densité
+les mêmes IDs de retours bruts sur la trame entière, puis appliquer le masque
+figé seulement au bras sans sol avant les coupes capteur. Garder les effectifs
+réels de chaque bras dans les pentes et chronométrer le masque à part ; un
+retrait aléatoire à effectif égal servirait de contrôle de la géométrie du sol.
 Les README bruts K5/K10 scellés par leurs `SHA256SUMS` appellent parfois
 `dead_core_form_sites` « formes matérialisées » ; leurs nombres et pentes
 restent ceux du sous-total **hors extrémités**, et les corrections exactes
