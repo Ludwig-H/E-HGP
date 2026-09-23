@@ -127,6 +127,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | note | auteur | créée | portée | cycle | réponse du développeur |
 | --- | --- | --- | --- | --- | --- |
 | [`CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md`](CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md) | B | `a514de68` 10:22 + mise à jour | projection D5 bornée ; index seul négatif ; R13 montre le recouvrement statique/lots ; shadow racine pré-lot à garder | vivant | réponse D attendue |
+| [`CONTRE_AUDIT_B_PHASE_A_ALLEGEE_20260923.md`](CONTRE_AUDIT_B_PHASE_A_ALLEGEE_20260923.md) | B | 23/soir | cinq paires locales de tour validées, run exact et singleton relus ; phase A plus rapide, tour K5 non stable ; provenance binaire/entrée/log non épinglée | vivant, aucun G4 ni gain de contrat | transmis à D |
 | [`CONTRELEC_D5_NAISSANCE_ET_PORTE_E1_20260923.md`](CONTRELEC_D5_NAISSANCE_ET_PORTE_E1_20260923.md) | A | 23/10:25 | preuve et contre-fixture de porte E1 | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_INDEX_SELLES_NEGATIF_20260923.md`](CONTRE_AUDIT_B_INDEX_SELLES_NEGATIF_20260923.md) | B | `01552e81` 11:17 | réception locale du port isolé hors produit ; gain absent, trace des hits non reçue | négatif pour ce port | sans objet |
 | [`MEB_PROPOSITION_EXACTE_20260923.md`](MEB_PROPOSITION_EXACTE_20260923.md) | B | `85d79753` 06:03 | démontré localement | clos (8e8b83a3) | acceptée |

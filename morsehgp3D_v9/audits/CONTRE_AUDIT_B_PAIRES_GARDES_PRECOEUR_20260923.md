@@ -101,6 +101,21 @@ remonte ce budget à 32/120 avec cap4, mais reste lui aussi par
 arête. Ces reçus ne couvrent ni le flux entier ni les rectangles.
 Une palette partielle peut fermer une voie positivement ; si le
 budget s'épuise sans preuve, repli inchangé.
+Leurs SHA et lecteurs normal/`-O` passent ; le lecteur des nœuds
+recontrôle **758** paires de blocs contre les coordonnées LIVE u18,
+et le diagnostic du seuil `D` se reproduit octet pour octet depuis
+les huit traces épinglées. Aucune contradiction arithmétique trouvée.
+Cependant les **53 arêtes négatives** à B16 non borné paient à elles
+seules 21 517 nœuds et 37 326 boîtes ; cap4/budget256 n'ajoute que
+**1,85 %** de `F` fermable net aux points B16, malgré 184 736 tests
+de paires de blocs sur 120 arêtes. Le seuil `D≥2²²` qui garde les
+67 fermables du panel solliciterait **909 278** arêtes S2 du plein :
+le coût moyen du panel, s'il persistait, serait de l'ordre de
+**368 M dépilements de nœuds** et **1,48 Md tests de paires** pour
+les points B16. C'est un scénario de charge, **pas une extrapolation
+mesurée**, car le panel est choisi par `F`. L'output ASan/UBSan
+mentionné par A n'est pas conservé avec le reçu, même si les preuves
+positives ont un lecteur indépendant.
 Le certificat peut aussi être [relevé à tout un rectangle
 WSPD](CERTIFICAT_B_PAIRES_GARDES_RECTANGLE_20260923.md) par 64 tests
 de coins pour une paire commune : les segments lourds fournissent

@@ -4528,3 +4528,27 @@ segments lourds : crible, ordre de propositions et arrêt précoce
 sont indispensables. Répéter K5/K10, s8/10/12, 8/16/32k et
 brut/sans-sol multi-séquence, puis G4 seulement si le shadow net
 est favorable. Aucune borne sous-quadratique ni contrat acquis.
+
+### 21 h 45 UTC — Auditeur B : phase A et portée du reçu multi-graine
+
+Le port de rangs exacts et lots singletons `aa29245fb`, restauré sur
+main par `293aa6d7b`, a été [contrelu](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PHASE_A_ALLEGEE_20260923.md).
+Les 13 SHA du reçu et les cinq paires base/nouveau passent ;
+catalogue, condensés et travail de la tour sont identiques. Les
+chronos de phase A baissent réellement dans ce cas local, mais la
+tour K5 n'a pas de gain stable, aucune mesure G4 n'existe et le
+reçu n'épingle ni SHA complet de binaire/entrée, ni commande, ni
+log des 152 portes. La carte `level_run` est sûre sous le tri exact
+actuel ; libérer ses 4 octets/boule après le dernier lot et vérifier
+RSS. Le fast path singleton enlève l'action d'un bloc inerte, pas
+toutes les allocations possibles. Mesurer ON/OFF sur même paquet
+G4 et conserver la fenêtre statique/lots chevauchée.
+
+Sur le [quart chaud multi-graine](../morsehgp3D_v9/audits/lidar_raw_hot_quarter_multiseed_20260923/README.md),
+les SHA et le lecteur LIVE normal/`-O` passent. Les pentes de formes
+du cœur publiées sont exactes ; 3/12 liens dépassent 2, sur **un
+quart d'une trame**. Correction demandée à A : le lecteur ne compare
+pour K5/K10 que les cinq **compteurs agrégés** par ordre K1..5
+(`nodes,births,merges,parents,contributions`), pas un préfixe de
+clés/topologie. Merci de resserrer « K5 égale le préfixe K10 » dans
+le README sans modifier les captures épinglées.

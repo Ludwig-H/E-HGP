@@ -289,13 +289,19 @@ rappelle que phase statique et lots de la tour se recouvrent déjà :
 leurs durées ne s'additionnent pas en temps mur. La vue exacte
 `E×C` proposée par B, avec gardes conservés et repli par cellule,
 reste à mesurer ; le premier crible `E_C` conservateur est mesuré plus bas.
-La lecture d'un **diff WIP non commité** de FULL dans
+La lecture initiale d'un **diff WIP** de FULL dans
 [cette même note](CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md)
-ne trouve pas de contradiction logique à l'indexation des niveaux
-exacts par runs, sous tri exact et filtre flottant valide. La preuve
-du filtre requiert le mode d'arrondi des **workers**, vérifié seulement
-dans le fil appelant ; un autre fast path singleton a été ajouté au
-diff pendant l'audit. Aucun port, gain ni reçu n'en résulte encore.
+ne trouvait pas de contradiction logique à l'indexation des niveaux
+exacts par runs. Le code est depuis **publié et restauré**
+(`96a053805`, `293aa6d7b`) avec un
+[reçu local](../receipts/tower_phaseA_lean_local_20260923/README.md).
+La [contrelecture B](CONTRE_AUDIT_B_PHASE_A_ALLEGEE_20260923.md)
+confirme les cinq paires de sorties et le gain local de phase A
+(médiane K5 `784→534 ms`, K10 deux paires `3679/3119→2134/1965 ms`),
+mais aucun gain de tour K5 stable, G4 ou brut. Le reçu n'épingle pas
+SHA complets de binaires, entrée brute, commandes et log de ses 152
+portes. `level_run` retient 4 octets/boule jusque dans `finish()` ;
+mesurer RSS et les quatre arrondis avant d'étendre sa qualification.
 L'ablation interne S2 seul→S2+S3 n'a qu'un passage : les témoins
 moteur de ses deux bras dérivent aussi de **3,266 à 3,841 s** à K5
 et de **10,498 à 11,023 s** à K10. Les postes internes sont
@@ -1262,6 +1268,9 @@ franchissement de 2 varie avec le tirage, la masse par cœur reste
 sensible. À K5 sur le premier lien, **2,002 / 1,957 / 1,860**. Les huit
 nouvelles sondes restent CPU/W8 locales, `complete_relative`, et ce
 seul quart ne représente ni plusieurs séquences ni la trame entière.
+Leur lecteur compare pour K5/K10 les **cinq compteurs agrégés** de
+chaque ordre K1..5, pas les clés ni la topologie : la phrase « K5
+égale le préfixe K10 » du reçu est trop forte sans ce qualificatif.
 La forme du cœur n'est pas le seul travail volumineux. Sur le plein brut
 K5 aux trois densités, `dead_uniform_tests` compte
 165,153→467,564→1 459,833 M tests (pentes 1,501/1,643),
