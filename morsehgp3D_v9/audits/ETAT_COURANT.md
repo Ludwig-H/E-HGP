@@ -117,16 +117,17 @@ masques géométriques.
 Le garde structurel publié dans `2059189d` ferme ce contre-exemple local :
 un [rejeu indépendant](q34_batch_duplicate_gate_20260923/README.md) à trois
 sites/K3 refuse le doublon à cardinalité et comptes inchangés, puis la
-paire hors rectangle, par les motifs propres au nouveau contrôle. Son test
-intégré « duplicate » modifie toutefois `expanded_pairs` ; l'ancien garde
-de masse le refuse avant le nouveau parcours. Le remplacer par une
-mutation à comptes constants et vérifier le motif du refus.
+paire hors rectangle, par les motifs propres au nouveau contrôle.
+**`c265a5da` ferme aussi la porte de test** : le mutant intégré remplace
+un survivant sans changer cardinalité ni comptes et exige le motif du
+parcours structurel ; la paire étrangère exige son motif propre.
 La [porte de réception partielle](s2_partial_twin_20260923/README.md)
-rejoue le protocole `1f5dede11` sur faux G4 : cas GPU LiDAR 00/K5 terminé,
-jumeau moteur coupé par le budget, `cross_worker_comparisons=[]` ; le
-lecteur accepte néanmoins `partial`, `GPU_executed=true`. Ce statut ne
-qualifie aucun contrat, mais toute mesure GPU présentée comme vérifiée
-doit porter son jumeau LiDAR achevé et égal, ou être marquée `unpaired`.
+avait produit sur faux G4 un cas GPU achevé, son jumeau coupé au budget
+et un reçu `partial` sans comparaison. **`c265a5da` publie maintenant
+`unpaired_batch_cases`** : worker et lecteur recalculent la liste des cas
+par lots achevés sans jumeau moteur achevé de même fichier/K/s ; un reçu
+qui la masque est refusé. Ces mesures restent brutes et non appariées.
+R12, entièrement achevé, n'est pas touché.
 Le [shadow des rectangles](Q34_BLOCS_LIDAR_SHADOW_20260923.md) donne un
 critère d'ordonnancement S2a concret sur 08/000000/s8 : à K5, **1 081 123
 des 1 128 166** rectangles ouverts ont moins de 16 paires, mais ne portent
@@ -162,6 +163,14 @@ entièrement l'appel du filtre laisserait **1,786 s** de chaîne.
 Priorités : différentiel catalogue GPU, ablation à trois bras, puis
 réduction/accélération exacte des survivants et de la tour ; reprendre
 les coupes physiques et densités sur S2 pour étudier la croissance.
+La [décomposition par arête](ATTRIBUTION_COEUR_ARETES_COUPES_LIDAR_20260923.md)
+précise ce prochain diagnostic : sur 08/000000 brut/v12, les formes par
+charge du cœur passent de 45,16 (Σ quarts) à 140,39 (plein) à K5, et de
+63,96 à 160,56 à K10, mais les arêtes traitées changent. Apparier les
+IDs originaux des **mêmes** arêtes dans plein/quarts permet d'attribuer
+exactement leur écart aux sites extérieurs du cœur, puis de séparer
+les arêtes nouvelles et traversantes. Cela oriente entre certificat par
+blocs du cœur et filtrage avant cœur, sans faire des coupes une tour.
 Les deux meilleures lignes R11 (08/000100) bornent aussi le gain du
 seul réordonnancement q3/q4 : les **48 workers logiques** consomment
 78,151 CPU·s en 1,661 s de mur maximal à K5 et 211,744 CPU·s en

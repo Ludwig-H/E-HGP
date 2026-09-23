@@ -37,6 +37,13 @@ Le test intégré « duplicate » reste non causal malgré ce bon résultat du
 nouveau contrôle : corriger sa mutation et exiger le motif avant de compter
 ce test comme porte structurelle.
 
+**Statut courant (`c265a5da`, 23 septembre 2026).** Le test intégré remplace
+désormais un survivant par un autre à cardinalité et compteurs constants.
+Il exige le motif `duplicate, unordered or widened` ; le mutant « foreign »
+exige `outside its surviving rectangles`. Cette porte causale est donc
+fermée. Le paragraphe précédent décrit l'état historique à `2059189d`.
+La comparaison exhaustive des masques géométriques GPU reste séparée.
+
 La fixture a trois points u18 distincts : `(0,0,0)`, `(100,0,0)`, `(30,60,0)`. Le triangle est strictement aigu : son plus grand côté est l'arête `(0,1)` de carré 10 000, inférieur à la somme des deux autres carrés 4 500 + 8 500. À `K=3`, sa boule q3 a profondeur zéro et doit paraître dans le flux. Le sidecar `check.cpp` compare d'abord **tout le flux** du moteur parallèle et du batch CPU honnête (arité, coefficients de clé, support, profondeur, coquille), puis remplace un couple survivant par un autre de même masque. Le callback malveillant ne change ni la taille de la sortie, ni les masques de rectangles, ni les masses, ni les comptes de rejets, ni les visites déclarées.
 
 Le cas trouvé remplace le survivant d'indice 1, issu du rectangle 1 et des rangs `(0,2)`, par une copie du survivant d'indice 0, issu du rectangle 0 et des rangs `(0,1)`. Les deux chemins honnêtes émettent la même unique présentation q3 ; le chemin altéré n'en émet aucune. Le retour normal de `run_wspd_q34_batched` prouve que `validate_completion` accepte ce lot. Les objets de compteurs `witness` sont égaux champ par champ entre lots honnête et altéré, de même que `expanded_pairs=3` et `q3_edges=3`. Le [reçu](receipt.json) contient les empreintes et la sortie du gate.

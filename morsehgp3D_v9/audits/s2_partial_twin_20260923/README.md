@@ -8,6 +8,14 @@ Cause : `validate_plan` lignes 290–294 exige seulement la présence du jumeau 
 
 **Correction proposée :** pour chaque résultat GPU/batch LiDAR `complete_relative` présenté comme validé, exiger un résultat moteur `complete_relative` du même fichier/K/s et une comparaison d'objet égale. Si le jumeau manque dans un reçu partiel, conserver les mesures brutes comme `unpaired` et empêcher toute lecture de ce cas comme équivalence LiDAR vérifiée. Un test adversarial peut reprendre ce script en exigeant le refus ou le statut explicite `unpaired`.
 
+**Statut courant (`c265a5da`, 23 septembre 2026).** Le worker publie
+`unpaired_batch_cases` pour les cas par lots achevés sans jumeau moteur
+achevé du même fichier/K/s ; le lecteur recalcule la liste et refuse un
+reçu qui la masque. Le nouveau selftest tue les jumeaux moteur de
+00/K5 au plafond, attend `[0,12]`, puis falsifie la liste : refus obtenu.
+Le reçu reste `partial` et ses mesures GPU demeurent non appariées.
+Le contre-exemple ci-dessus décrit uniquement le protocole `1f5dede11`.
+
 Rejouer depuis la racine avec un checkout détaché du commit épinglé :
 
 ```sh
