@@ -134,9 +134,15 @@ actif par défaut dans la chaîne. Une feuille profonde sans fragment complet
 reste un simple minorant et retombe sur le census global. Le petit juge
 `wspd_q34` du build développeur a été rejoué directement : PASS, 60 appels
 en mode feuille, 6 088 census feuille, 1 846 rejets et 44 300 tests
-ponctuels ; `q4_local` passe aussi. Ce sont des portes ciblées, pas une
-qualification indépendante des 102 CTests inscrits ni une mesure LiDAR
-appariée. La [contrelecture B](CONTRE_AUDIT_B_Q3_FEUILLE_WIP_20260923.md)
+ponctuels ; `q4_local` passe aussi. Le rejeu de **tout CTest** sur ce
+build donne **101/101 PASS**, une mutation héritée explicitement
+`Disabled`, en 15,29 s avec quatre jobs. Les binaires du build développeur
+ont été réutilisés : ce n'est ni une compilation indépendante sous
+sanitizers ni une mesure LiDAR appariée. En complément, une **compilation
+neuve Clang 18 ASan/UBSan** du seul juge `wspd_q34` et de ses dépendances
+dans `/tmp` passe 19 903 vérifications, dont la branche feuille ; elle
+ne rejoue pas les 101 autres portes sous sanitizers. La
+[contrelecture B](CONTRE_AUDIT_B_Q3_FEUILLE_WIP_20260923.md)
 donne la fixture K3 avec un intérieur et quatre contacts : l'invariant
 géométrique est cohérent, mais son diagnostic LiDAR non versionné expose
 610,29 M nouveaux tests ponctuels q3 sur feuille. Les gains globaux restent
@@ -177,6 +183,9 @@ appariée.
    `validate_external_wall` est encore **1 seconde absolue** : elle accepte
    1 050 ms de chaîne pour 100 ms de mur externe. Resserrer cette cohérence
    avant de juger la cible 100 ms, et publier le mur externe lui-même.
+   Le [scénario B](CONTRE_AUDIT_B_PROTOCOLE_V4_WIP_20260923.md) reproduit
+   aussi `partial` avec **zéro cas complet** et code hôte 0 ; un tel reçu
+   ne peut être lu comme succès de tour.
    Le [contre-test de provenance](CONTRE_AUDIT_B_G4_R1_ET_SCHEMA_V2_20260922.md)
    montre qu'un paquet muté peut annoncer un commit inexistant et être
    accepté par le contrôleur, et qu'une provenance différente dans le
@@ -215,17 +224,16 @@ appariée.
    profondeurs 3..7, couvrant localement le seuil K10 ; aucun constructeur
    de niveaux ni moteur q4 n'est jugé par ces scripts.
    Ni le port symbolique, ni son coût réel, ni le census ne sont acquis.
-   Plus grave pour
-   la trame : le reçu 1 mm compte **2,779 milliards d'incidences
-   site–cover cumulées sur les arêtes**, déjà davantage que `n²` pour
-   `n=39 885`. Un parcours complet de chaque cover serait donc déjà plus
-   coûteux que `n²` sur ce cas ; il faut partager ou élider ces covers, sans
-   confondre cette masse avec `Σh` des droites q4. Le compteur
-   `cover_sites` est une **population logique** additionnée sur des nœuds
-   certifiés, pas autant de lectures de sites dans le moteur actuel ; le
-   premier cover, sa décomposition et les IDs copiés ont leurs propres
-   compteurs : **440,194 M** visites pour le construire, puis **315,737 M**
-   pour le redécomposer dans l'atlas q4, sur la ligne 1 mm. Census global et test
+   Le reçu 1 mm compte **2,779 milliards d'incidences site–cover logiques**
+   cumulées sur les arêtes pour `n=39 885`, déjà davantage que `n²`.
+   Le brut R2 à K10 monte à **7,805 milliards** ; les seules arêtes q4
+   représentent au moins **5,758 milliards**, soit plus de `3,6n²`
+   ([calcul B](CONTRE_AUDIT_B_Q4_SHALLOW_20260922.md)). Construire les
+   niveaux en lisant chaque cover entier déplacerait donc le verrou ; ces
+   populations additionnées sur des nœuds certifiés ne sont ni `Σh` des
+   droites q4 ni des visites physiques du moteur actuel. Sur la ligne 1 mm,
+   la construction du cover et sa redécomposition dans l'atlas q4 comptent
+   respectivement **440,194 M** et **315,737 M** visites. Census global et test
    `centre∈conv(coquille)` restent obligatoires ; le catalogue ne remplace
    pas automatiquement les présentations positives. La ligne v8 1 mm
    compte **171 444 arêtes q3 seules et 16,12 M census** que la réutilisation
@@ -248,7 +256,14 @@ appariée.
    Le [petit oracle](check_q3_atlas_rational_location_20260923.py) passe
    192 352 centres, frontières et extrêmes inclus ; les 466,02 M
    consultations du reçu brut R2 rendent l'ablation LiDAR pertinente,
-   sans gain de temps encore mesuré. Le relais produit reste à
+   sans gain de temps encore mesuré. Pour les fragments exacts, une
+   palette privée de ≤`K−1−inside_count` sites actifs peut réordonner les
+   tests q3 et rejeter tôt sans crédit entre graines : l'[oracle
+   rationnel](check_q3_leaf_palette_20260923.py) sépare 47 tests dans
+   l'ordre spatial d'un rejet en un test après apprentissage sur une
+   seconde graine. C'est une fixture `Disk`, pas un gain LiDAR ; mesurer
+   d'abord l'occupation `Leaf`/`Deep` et les rejets tardifs. Le relais
+   produit reste à
    qualifier. Le [contre-audit
    B](CONTRE_AUDIT_B_PREATLAS_ET_Q3_20260922.md) rappelle que la suppression
    d'une cellule q4 peut aussi enlever un certificat de rejet q3. Sa
@@ -285,8 +300,17 @@ appariée.
    seuil `K−1` utile aux rejets q3 des arêtes mixtes. Une fixture u18 K5
    sépare exactement les seuils ; le reçu 1 mm contient 326 970 arêtes
    q4 seules, mais pas leur coût distinct. Mesurer les compteurs par masque
-   et l'identité FULL avant de prioriser le port. Ni gain LiDAR ni borne
-   globale acquis.
+   et l'identité FULL avant de prioriser le port. Un certificat de **voie
+   morte q3/q4** est en préparation, sans commit ni mesure appariée à cette
+   date : la [note de coût et de preuve](DOMINATION_Q4_PARESSEUSE_PAR_BLOCS_20260923.md#certifier-une-voie-morte-sans-balayer-chaque-cover)
+   montre qu'en charger les formes depuis chaque cover ferait de ses
+   7,805 milliards d'incidences logiques R2/K10 presque autant de lectures
+   physiques. Une petite palette de vrais gardes **adaptée par cellule**
+   peut tenter le certificat avant le cover, avec repli exact et budget
+   d'effort ; les gardes universels sont déjà traités par le filtre citron.
+   La fixture K5 distingue les deux preuves. Mesurer les succès par arête
+   et les coûts réellement évités avant d'activer cette option. Ni gain
+   LiDAR ni borne globale acquis.
 4. **Aval FULL, grandes coquilles et échelle** : les 12,0 M appels MEB
    de 000000/K10 font 1,065 milliard de tests de puissance ; un test
    exact de la paire la plus éloignée peut éliminer toutes les autres
@@ -298,6 +322,17 @@ appariée.
    contrat comptable et la cause exacte de mutation sont corrigés à
    `5ab4326c`. Le gain local annoncé 130→109 s n'a pas encore de reçu
    apparié versionné ; l'amélioration G4 du MEB n'est pas mesurée.
+   Sur le brut G4 R2 08/000000/K10, **supprimer idéalement q3/q4 et FULL
+   laisserait encore 3,145 s** dans la chaîne actuelle : q2 0,794 s,
+   fusion 0,789 s, recensus 0,494 s et 1,046 s de queue hors sous-temps
+   publiés, plus préparation/index ([analyse B](CONTRE_AUDIT_B_FULL_COUTS_ET_INTERFACES_20260922.md)).
+   La queue inclut résumé et digest après la tour : mesurer ces postes et
+   fixer explicitement s'ils appartiennent au produit chronométré avant
+   de juger la cible. FULL fait aussi **11,309 M** recherches `BallKey`
+   dans **5,513 M** boules sur ce cas ; un index immuable clé→ID avec
+   égalité exacte aux collisions mérite une ablation appariée, coût et
+   octets inclus. Ces chiffres R2 restent des diagnostics bruts d'une
+   session refusée, pas une qualification G4 acceptée.
    La [découpe FULL par K](PREFETCH_GEOMETRIE_FULL_PAR_K_20260923.md)
    rend les BallIds géométriques pré-calculables sous fenêtre d'octets,
    tandis que la fermeture des lots reste chronologique. Les 34,14 s de

@@ -186,6 +186,61 @@ Les tâches par cellules et nœuds se batchent sur CPU/GPU, avec comparaisons
 entières exactes ou repli certifié et buffers bornés. Aucun chrono G4
 n'est disponible pour cette proposition.
 
+## Certifier une voie morte sans balayer chaque cover
+
+Un essai de `Q34DeadLaneProver` est en cours dans le worktree du constructeur
+le 23 septembre ; il n'est pas encore un résultat publié. Son idée est
+exacte : recouvrir le disque des centres possibles de `ab` par des cellules
+fermées, chacune extérieure au disque ou portant `T₃=K−1` / `T₄=K−2`
+sites distincts uniformément intérieurs. Une voie ainsi certifiée ne peut
+émettre aucune présentation. **Le coût de préparation doit faire partie de
+la décision** : l'essai charge les formes de chaque site du cover, après
+sa construction. Sur le brut R2 08/000000/K10, `cover_sites` totalise
+7 805 426 490 sur 4 507 278 covers. Appliquer ce chargement aux mêmes
+arêtes lirait environ **7,796 milliards de sites** hors endpoints, avant
+le premier test de cellule. Cette masse deviendrait du travail physique,
+alors que `cover_sites` n'est qu'une population logique dans le reçu R2.
+
+La preuve positive ne demande pourtant **aucun cover**. Choisir avant sa
+construction un ensemble borné `G` de vrais IDs distincts du même nuage,
+hors `a,b` ; les sélectionner via l'index, avec un budget d'effort. Le
+filtre citron par paire traverse déjà cet index avant le cover : il peut
+retourner à son worker quelques feuilles candidates proches du milieu et
+les petits nœuds crédités dont le seuil n'a pas été atteint, sans changer
+sa décision ni transmettre son compte à l'atlas. Sur chaque cellule du
+disque, utiliser seulement leurs formes exactes : si au moins `T` gardes
+y ont `max L_g<0`, la voie correspondante est morte. Un garde n'a pas
+besoin d'être pré-filtré par le cover : s'il est intérieur à une boule
+admissible, le lemme de cover garantit déjà qu'il y appartient.
+Les gardes peuvent varier d'une cellule à l'autre. Si une cellule reste
+indécise ou si le budget expire, conserver intégralement la voie courante ;
+une petite palette n'est **jamais** une preuve de survie. Le test ponctuel
+de réfutation du prototype demande la population entière et ne se
+transfère pas à cette palette. Si les deux voies d'une arête mixte sont
+prouvées, même le cover peut être évité ; si une seule l'est, garder le
+cover et tous les témoins nécessaires à l'autre. Compter visites d'index,
+formes, cellules et coût du repli, par masque d'arête et par classe de
+taille, puis comparer émissions, coquilles, profondeurs et digest FULL.
+
+Ce gain de logique **n'est pas** le citron déjà appliqué par le filtre de
+paires : celui-ci compte les témoins intérieurs sur *tout* le disque. Par
+exemple `a=(5,10,10), b=(15,10,10)`, `g₊=(10,13,10)` et
+`g₋=(10,7,10)` donnent `D=100` et, pour `c_y=10+t`, les puissances
+`P₊=−16−6t`, `P₋=−16+6t`. Aucun garde n'est universel sur les disques
+q3/q4 (`H=16`, `Ξ=900`, donc `3H²=768<900` et `2H²=512<900`), mais
+`g₊` est strictement intérieur dans toute la demi-cellule fermée `t≥0`
+et `g₋` dans `t≤0`. Une division dyadique prouve donc la voie morte à
+K2/q3 ou K3/q4 avec ces **deux** gardes ; à K5/K10, il faut autant d'IDs
+distincts que le seuil. À K5, les huit gardes
+`(x,13,10),(x,7,10)` pour `x∈{8,9,10,11}` donnent quatre intérieurs
+uniformes sur chaque demi-cellule : `P≤−12`, alors que chaque citron
+singleton échoue encore (`H∈{12,15,16}`, `Ξ=900`). Ce cas sépare la
+nouvelle certification locale du filtre universel, sans prédire sa
+fréquence LiDAR. Les nombreuses arêtes sans émission dans R2 ne
+garantissent pas non plus que leur disque
+*entier* soit certifiable ; mesurer les succès réels avant un port par
+défaut.
+
 ## Lentille de complétion : bonne spécialisation, pas un remplacement général
 
 Les deux complétions d'un tétraèdre q4 de propriétaire `ab` vérifient

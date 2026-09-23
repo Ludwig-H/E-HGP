@@ -165,6 +165,57 @@ sur les **mêmes** trames LiDAR les profondeurs de consultation, temps
 q3/q4, travail d'atlas et sortie FULL. Cette économie de localisation ne
 remplace pas la réduction des milliards de tests et copies de l'atlas.
 
+### Rejeter tôt dans un fragment exact partagé
+
+Le diagnostic LiDAR local de la [contrelecture B](CONTRE_AUDIT_B_Q3_FEUILLE_WIP_20260923.md)
+compte 10,70 M census sur fragment, dont **94,83 % rejetés**, avec
+57,04 tests ponctuels en moyenne. Ce n'est qu'un essai non apparié ;
+les vraies `Leaf` et les `Deep` à fragment retenu sont mélangées dans
+ces compteurs. Avant de construire des sous-cellules ou des bornes de
+blocs, une **palette adaptative** de quelques sites actifs peut tenter
+un rejet plus tôt, sans nouveau prédicat ni crédit transmis.
+
+Pour un fragment exact fixé, `cover=I ⊎ O ⊎ F`, avec `I` uniformément
+intérieur et `F` frontière complète. Poser `h=K−1−|I|>0`. Garder au plus
+`h` **rangs** de sites de `F` dans un petit cache privé du worker et de
+l'arête, indexé par l'identité du fragment et vidé à la fin de l'arête.
+Chaque nouvelle graine
+**reteste** ces sites avec sa propre boule q3. Si `h` signes sont
+strictement négatifs, elle est rejetée ; sinon, elle parcourt une fois
+le reste de `F` en sautant exactement les rangs déjà testés. Une graine
+admise voit ainsi tous les contacts et garde la même profondeur/coquille ;
+un rejet peut s'arrêter tôt. Figer la palette pendant la requête, puis
+apprendre des intérieurs effectivement testés pour la suivante. Un
+petit tableau de rangs triés permet le saut linéaire sans recopier `F`.
+La palette contient au plus neuf rangs à K10 ; son cache doit être borné,
+et une mauvaise palette peut **retarder** le rejet par rapport à l'ordre
+spatial, même si elle n'ajoute pas de test ponctuel à un census complet.
+
+Trois tests sont structurellement inutiles dans cette branche : les
+endpoints `a,b` et la graine `x` ont une puissance nulle par définition de
+la boule q3. Comme `Inside`/`Outside` exigent un signe strict sur toute la
+cellule fermée, ces trois IDs appartiennent au fragment actif contenant
+son centre. Le census peut sauter leurs évaluations de puissance et, pour
+une graine survivante seulement, les ajouter à la coquille avant le tri.
+Cela économise au plus trois tests par census, sans modifier le compte ni
+les rejets ; vérifier en porte native une coquille cosphérique plus large
+et un centre sur coupure de cellule. Cette économie reste secondaire face
+aux rejets tardifs et ne dispense pas de mesurer les scans réels.
+
+L'[oracle Fraction](check_q3_leaf_palette_20260923.py) construit 52
+sites u18, une arête `ab` propriétaire de deux graines aiguës, et un
+fragment racine `Deep` **exact** à K5 avec trois intérieurs uniformes et
+49 actifs. Quarante-quatre leurres extérieurs aux deux boules précèdent
+le témoin actif `w` dans l'ordre spatial ; chaque graine est rejetée au
+47e test, alors que le témoin appris sur la première rejette la seconde
+en **un** test. PASS normal et `python -O`. La fixture emploie le domaine
+local `Disk` et ne juge ni le moteur natif ni le profil `Positive` par
+défaut. Avant tout port, exporter l'occupation des fragments `Leaf` et
+`Deep` retenus, les tests jusqu'au rejet et les requêtes par fragment
+(1, 2–3, 4–7, 8+), puis les scans complets des survivants ;
+mesurer ensuite en ablation appariée sur trames LiDAR entières les tests,
+coût de cache, temps q3/q4, RSS et sortie FULL identique.
+
 ## Lemme exact : une profondeur de miniballe est un rang de site
 
 Soit un triangle strictement aigu de sites distincts `a,b,x`. Sa boule q3 est la **miniballe des trois sommets** : son centre `c` est le circumcentre dans leur plan, situé dans l'intérieur du triangle. Sa profondeur stricte est le nombre de sites `z` tels que
