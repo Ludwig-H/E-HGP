@@ -37,6 +37,18 @@ par sous-échantillonnage global des retours avant le moteur, passent
 | 1/2 | 61 694 | 33 039 / 1 684 675 (1,961 %) | 2 987 989 / 128 852 821 (2,319 %) |
 | entière | 123 389 | 57 677 / 3 986 433 (1,447 %) | 8 363 262 / 559 661 741 (1,494 %) |
 
+Pour éviter **tout le cœur** d'une arête par cette seule preuve, il faut
+plus strictement que les disques de **toutes** ses voies encore ouvertes
+sortent de la boîte. Le même script trouve alors, aux densités
+1/4→1/2→entière, **14 717 / 25 747 / 46 340 arêtes** et
+**898 975 / 2 641 182 / 7 528 704 incidences cœur**, soit seulement
+**2,429 % / 2,050 % / 1,345 %** des masses respectives. Le
+[criblage indépendant de A](../precore_cell_screen_20260923/README.md)
+sur une autre capture par arête retrouve exactement ces six comptes,
+ainsi que les comptes q3/q4 séparés au plein. Une fermeture partielle
+de voie peut encore être utile, mais ne dispense pas nécessairement
+du cœur partagé. Aucun de ces nombres n'est une fermeture obtenue.
+
 La fraction baisse dans ce **panel fini et mono-scène** ; ni une loi
 asymptotique ni une propriété de tous les LiDAR n'en découle. Les
 moitiés/quarts sont des densités emboîtées de la scène entière, **pas**
@@ -57,7 +69,9 @@ Ainsi, sur **ce seul régime**, 1,494 % est un majorant de masse cœur
 concernable, **pas** un nombre de rejets, de formes réellement évitées,
 ni un gain de temps. Le poids du cover par arête n'est pas dans cette
 trace et ne peut pas être extrapolé ; une voie fermée seule peut encore
-laisser l'autre voie consommer le cœur ou le cover. Les segments de
+laisser l'autre voie consommer le cœur ou le cover. Pour la suppression
+de tout le cœur, le majorant plus pertinent est **1,345 %** ci-dessus.
+Les segments de
 rectangle entiers ne peuvent pas améliorer ce plafond par simple
 regroupement d'arêtes avec la même cellule.
 
@@ -83,7 +97,7 @@ Chaque record `<IIIIIIII` donne les IDs bruts des extrémités, la taille
 du cœur et le masque avant/après sa preuve. Les fichiers d'entrée
 `<III` et d'IDs `<I` sont joints par rang, avec IDs uniques.
 
-Le script vérifie tous les SHA, `3 986 433` records, la somme
+Le script vérifie tous les SHA, `3 986 433` records au plein, la somme
 `Σcore_sites=559 661 741` et
 `Σ(core_sites−2)=551 688 875=dead_core_form_sites`. Pour chaque
 arête active `ab`, il pose `D=|b−a|²`,
@@ -91,7 +105,8 @@ arête active `ab`, il pose `D=|b−a|²`,
 si un axe vérifie `3qᵢ²<D−(bᵢ−aᵢ)²`, ou q4 avec `2qᵢ²` à gauche.
 Cette comparaison entière est équivalente à la projection maximale
 du disque sur chaque axe ; elle n'utilise aucun arrondi. Le poids
-`core_sites` est additionné une seule fois pour l'union des voies.
+`core_sites` est additionné une seule fois pour l'union des voies ;
+`whole_core_possible` exige que **chaque** voie active déborde.
 
 Rejeu tant que les archives temporaires sont disponibles :
 

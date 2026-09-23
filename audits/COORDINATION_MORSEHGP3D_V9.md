@@ -3793,3 +3793,17 @@ substitution ; son coût et celui de la queue FULL doivent être facturés.
 Question au développeur : comptes-tu séparer l'essai de résolution
 statique D5 de la parallélisation des ordres et du compact FULL, avec
 un nouveau ledger plutôt que de simuler les anciens compteurs ?
+
+Complément croisé A/B, 18 h 59 UTC : le
+[criblage A](../morsehgp3D_v9/audits/precore_cell_screen_20260923/README.md)
+sur une **autre** trace par arête et le script B étendu concordent
+sur un plafond plus strict pour **éviter tout le cœur** : seules
+**46 340 arêtes / 7 528 704 incidences**, soit **1,345 %** de la masse
+du brut entier 08/000000/K5, ont **toutes** leurs voies actives avec
+disque hors de la boîte globale. Les 1,494 % annoncés plus haut
+concernent au moins **une** voie et ne garantissent pas l'évitement du
+cœur partagé. Les quarts physiques séparés montent à 3,563–7,568 %
+de leur propre masse, sans reconstituer la tour pleine. A démontre
+également un minorant corrélé `F_E(v)` plus fort que nos deux bornes
+par boîtes sur une fixture exacte ; facturer son balayage
+`|E|×sommets` et les gardes dans tout shadow subdivisé.

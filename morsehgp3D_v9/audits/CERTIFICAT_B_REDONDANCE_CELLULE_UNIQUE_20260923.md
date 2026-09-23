@@ -113,6 +113,11 @@ incidences du cœur** et **1,495 % des formes hors extrémités** pour
 une cellule unique clippée seulement à la boîte
 globale réelle. Les sous-cellules à gardes propres restent non jugées ;
 ni K10, ni sans-sol, ni `s=10/12` ne sont couverts par cette mesure.
+Pour éviter **entièrement** un cœur partagé, toutes ses voies ouvertes
+doivent déborder ; le [criblage indépendant A](precore_cell_screen_20260923/README.md)
+et le script B concordent sur le plafond plus serré de **1,345 % des
+incidences cœur** au plein. Les quarts spatiaux A restent des tours
+séparées, pas des contributions additionnables au plein.
 
 Pour le vrai shadow, les [masses des rectangles bruts
 08/000000](q34_raw_rectangle_mass_20260923/README.md) donnent un

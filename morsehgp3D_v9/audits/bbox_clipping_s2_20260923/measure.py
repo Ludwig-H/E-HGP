@@ -68,6 +68,7 @@ def main() -> None:
     stats = {name: {"open_edges": 0, "open_core_sites": 0, "outside_edges": 0,
                     "outside_core_sites": 0, "tangent_edges": 0, "tangent_core_sites": 0}
              for name in (*modes, "union")}
+    whole_core_possible = {"edges": 0, "core_sites": 0}
     total_edges = 0
     total_core_sites = 0
     for name, expected in sorted(run["trace_part_sha256"].items()):
@@ -88,6 +89,7 @@ def main() -> None:
                         raise ValueError(f"invalid active lane mask: {mask}")
                     a, b = by_id[raw_a], by_id[raw_b]
                     outside_any = False
+                    outside_all = True
                     tangent_any = False
                     for lane, bit in modes.items():
                         if not mask & bit:
@@ -104,6 +106,8 @@ def main() -> None:
                             row["tangent_edges"] += 1
                             row["tangent_core_sites"] += core_sites
                             tangent_any = True
+                        if relation != "outside":
+                            outside_all = False
                     union = stats["union"]
                     union["open_edges"] += 1
                     union["open_core_sites"] += core_sites
@@ -113,6 +117,9 @@ def main() -> None:
                     elif tangent_any:
                         union["tangent_edges"] += 1
                         union["tangent_core_sites"] += core_sites
+                    if outside_all:
+                        whole_core_possible["edges"] += 1
+                        whole_core_possible["core_sites"] += core_sites
         if digest.hexdigest() != expected:
             raise ValueError(f"SHA-256 mismatch: {path}")
     ledger = run["ledger"]
@@ -120,10 +127,11 @@ def main() -> None:
         raise ValueError("trace/ledger mismatch")
     if total_core_sites - 2 * total_edges != ledger["dead_core_form_sites"]:
         raise ValueError("trace physical-form ledger mismatch")
-    result = {"schema": "mhgp9_s2_bbox_clipping_v1", "source_commit": run["source_commit"],
+    result = {"schema": "mhgp9_s2_bbox_clipping_v2", "source_commit": run["source_commit"],
               "source_run": str(args.run_json), "sites": len(points), "bbox_lo": lo,
               "bbox_hi": hi, "edges": total_edges, "core_sites": total_core_sites,
-              "stats": stats, "input_sha256": run["file_sha256"]["input"],
+              "stats": stats, "whole_core_possible": whole_core_possible,
+              "input_sha256": run["file_sha256"]["input"],
               "ids_sha256": run["file_sha256"]["ids"],
               "trace_part_sha256": run["trace_part_sha256"]}
     print(json.dumps(result, indent=2, sort_keys=True))

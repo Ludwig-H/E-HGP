@@ -79,6 +79,11 @@ clippée globalement n'est donc pas prioritaire sur ce cas. Le shadow
 utile doit vraiment subdiviser les centres, puis mesurer ses gardes
 distincts, coût et formes économisées ; rien n'est encore connu à K10,
 sans sol ou `s=10/12`.
+Si l'objectif est d'éviter **tout le cœur** d'une arête, le crible est
+encore plus sévère : toutes les voies actives doivent déborder, soit
+**1,345 % des incidences** au plein, résultat que le script B et le
+[reçu A sur une autre trace](precore_cell_screen_20260923/README.md)
+retrouvent indépendamment.
 Aux densités emboîtées 1/4→1/2→entière de cette même trame/K5, le
 plafond d'incidences cœur baisse **2,823 %→2,319 %→1,494 %**. Cette
 tendance finie n'est pas une loi sous-quadratique ni une mesure des
@@ -220,6 +225,16 @@ comparés après multiplication entière commune, sans `float` ni
 arrondi vers le mauvais côté. Le calcul des trois boîtes et de `Dmin`
 reste `O(S)` ; l'intérêt et les visites de recherche de gardes restent
 à mesurer sur les vrais segments S2.
+
+L'[audit A sur les mêmes traces](precore_cell_screen_20260923/README.md)
+ajoute un minorant **corrélé** plus fort à chaque sommet :
+`F_E(v)=min_(a,b)∈E (|a−v|²+|b−v|²)/2`. Il domine `L₁` et `L₂`
+sans rompre la preuve affine ; ses `min` sont réductibles en parallèle.
+Une fixture exacte de A fait réussir quatre gardes là où les deux
+bornes par boîtes échouent. Mais chaque cellule exige désormais
+`|E|×nombre de sommets` évaluations, en plus de la recherche des gardes :
+facturer ces opérations sur les vrais segments lourds et ne pas les
+confondre avec la préparation de boîtes en un seul passage.
 
 Forme d'implémentation exacte, vérifiée indépendamment : à chaque
 sommet `v`, poser `w=2v`, `G₂=2g`, et doubler les coordonnées de toutes
