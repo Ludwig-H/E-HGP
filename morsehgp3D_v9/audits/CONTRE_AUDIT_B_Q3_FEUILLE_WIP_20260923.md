@@ -81,3 +81,48 @@ Enfin, l'en-tête `WspdQ34Options` dit que `q3_leaf_census` exige
 `true/false` : l'option devient alors silencieusement inerte. C'est un
 défaut de contrat et de provenance, pas un contre-exemple géométrique.
 Refuser la combinaison ou annoncer explicitement cette inertie.
+
+## Mise à jour après publication `e54f727c`
+
+Les deux défauts de provenance du WIP ci-dessus sont **corrigés dans le
+code publié** : la sonde accepte `--q3-leaf`/`--no-q3-leaf` et publie le
+choix dans `options`, et `WspdQ34Options` refuse la feuille si la
+consultation de l'atlas n'est pas active sous `Local28`. Le constat WIP
+reste conservé pour dater précisément ce qui a été inspecté ; il ne doit
+pas être lu comme un défaut encore ouvert. Les portes natives portées et
+les deux mutants q3 propres à cette branche sont déclarés dans le
+commit ; aucune exécution G4 postérieure au commit ni qualification de
+tour sous une seconde n'en découle.
+
+L'analyse du même fichier exploratoire `s01_k5_leaf2.json` affine la
+priorité : `10 146 767` des `10 699 704` census de fragment, soit
+`94,83 %`, se terminent en rejet ; les `610 289 100` tests représentent
+`57,04` tests par census en moyenne. Le travail à supprimer en premier
+est donc le rejet tardif des graines, sans perdre la recollecte de la
+coquille pour les `552 937` census non rejetés. Ce sont des compteurs
+d'un seul essai local non apparié, pas une courbe de croissance.
+
+Verrou structurel vérifié dans la construction de l'atlas : une vraie
+cellule terminale `State::Leaf` a une frontière active **de singletons**.
+Quand un budget laisse des nœuds internes, la construction les raffine
+avant publication ; les `ExactLeaf` issues d'une cellule `State::Deep`
+retenue peuvent, elles, conserver des blocs internes. Poser seulement
+une borne spatiale sur chaque nœud actif ne peut donc réduire aucun test
+ponctuel des vraies `Leaf`. Avant d'implémenter un nouveau parcours par
+blocs, exporter les histogrammes du nombre de graines par cellule, de
+la taille des frontières et des parts `Leaf`/`Deep` ; mesurer un hybride
+singleton→prédicat ponctuel, puis le partage de préfixe **entre graines
+d'une même cellule**. Un groupe traversant deux cellules ne peut pas
+hériter d'un compte intérieur commun.
+
+Pour un raccord exact de la voie `Deep`, l'invariant est
+`cover = I ⊎ O ⊎ F` : démarrer du compte certifié de `I`, parcourir
+uniquement les racines disjointes de `F` pour le compte, puis **toutes**
+ces racines pour la coquille si la graine est acceptée. Ne jamais partir
+de la racine globale avec ce compte, au risque de compter `I` deux
+fois. Le ticket doit lier propriétaire, index, boule positive, cellule
+et fragment ; un couple public libre `(compte, fragment)` serait
+forgeable. Si la règle de compte saute un bloc à `min≥0`, une graine
+cosphérique peut parvenir à EOF tout en restant valide : reprendre de
+v8 l'assertion « EOF impossible » serait incorrect. Il faut une fixture
+cosphérique et une comparaison de la coquille complète contre l'oracle.

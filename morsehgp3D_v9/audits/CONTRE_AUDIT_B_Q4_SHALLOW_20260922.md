@@ -86,6 +86,35 @@ Le test convexe reste indispensable même après le filtre du disque.
 La fixture de la note A prouve aussi « shallow ≠ miniballe », mais son
 centre est déjà **hors** du disque `D/8`.
 
+## Frontière de propriété : le cover d'une graine q3 ne suffit pas à q4
+
+Contre-fixture entière, vérifiée par arithmétique exacte le 23 septembre :
+`c=(30,30,30)`, `a=(39,10,42)`, `b=(50,42,21)`,
+`x=(21,18,10)`, `y=(30,45,50)`, `z=(6,36,29)`.
+Les quatre contacts sont à distance carrée `625` de `c`, tandis que
+`|z−c|²=613<625`. Le centre est **strictement** intérieur au tétraèdre :
+ses poids barycentriques sur `(a,b,x,y)` sont
+`(4575,4680,14975,14336)/38566`, tous positifs. Les six arêtes ont
+les carrés `ab=1586`, `ax=1412`, `bx=1538`, `ay=1370`, `by=1250`,
+`xy=2410`. Ainsi `ab` est l'arête strictement la plus longue des deux
+faces aiguës `abx` et `aby`, mais **pas** celle du tétraèdre : son
+propriétaire q4 est `xy`.
+
+Pourtant, avec `m_ab=(89/2,26,63/2)`, on obtient
+`|z−m_ab|²=3177/2>1586=|ab|²` : le site strictement intérieur `z`
+est absent du cover de `ab`. Un census q4 de cette sphère à partir du
+cover de la graine q3 annoncerait `p=0` au lieu de `p=1`, alors que la
+coquille a quatre contacts et que la configuration est admissible dès
+`K=4`, donc aussi pour `K=5`. La propriété de l'arête q3 dans deux faces
+ne certifie **jamais** le cover q4 ; il faut établir le propriétaire de
+du tétraèdre avant de substituer un cover au census global.
+
+Ce n'est **pas un défaut produit observé** : le moteur v9 publié à
+`e54f727c` vérifie l'arête propriétaire du support q4 avant d'en
+déclarer la profondeur globale. Cette fixture est une porte à conserver
+si le développement réutilise une ligne de graine ou accélère le census
+à partir d'un cover local.
+
 ## Sélection, coût caché et piste non acquise
 
 Sur une droite de graine `λ`, chaque site du cover donne une restriction
@@ -157,7 +186,8 @@ python3 morsehgp3D_v9/audits/check_q4_false_vertex_inside_disc_20260922.py
 python3 -O morsehgp3D_v9/audits/check_q4_false_vertex_inside_disc_20260922.py
 ```
 
-Le script vérifie la fixture entière, puis les bornes `m(d+1)` et
+Le script vérifie les deux fixtures entières, dont la non-propriété du
+cover q3 pour q4, puis les bornes `m(d+1)` et
 `s(2d+2)` pour `d=0..3` sur trois familles dégénérées explicites et
 400 familles aléatoires reproductibles de droites entières. Il compare
 la sélection top/bottom à **toutes** les intersections exactes sur les

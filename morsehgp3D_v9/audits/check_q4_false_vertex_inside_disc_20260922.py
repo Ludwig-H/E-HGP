@@ -72,6 +72,45 @@ def check_false_vertex() -> dict[str, int]:
             "tetra_volume6": volume6}
 
 
+def check_nonowner_cover() -> dict[str, int]:
+    """An owned q3 seed's edge cover cannot certify an unowned q4 center."""
+    c = (30, 30, 30)
+    a, b = (39, 10, 42), (50, 42, 21)
+    x, y = (21, 18, 10), (30, 45, 50)
+    z = (6, 36, 29)
+    contacts = (a, b, x, y)
+    require(all(dist2(p, c) == 625 for p in contacts),
+            "nonowner contacts must be cospherical")
+    require(dist2(z, c) == 613 < 625,
+            "nonowner witness must be strictly interior")
+    weights = (4575, 4680, 14975, 14336)
+    denominator = sum(weights)
+    require(denominator == 38566 and min(weights) > 0 and
+            all(sum(weights[j] * contacts[j][axis] for j in range(4)) ==
+                denominator * c[axis] for axis in range(3)),
+            "nonowner center lacks strict positive barycentrics")
+    lengths = [dist2(contacts[i], contacts[j])
+               for i, j in combinations(range(4), 2)]
+    require(lengths == [1586, 1412, 1370, 1538, 1250, 2410],
+            "nonowner edge lengths changed")
+    require(all(dist2(a, b) > dist2(a, seed) and
+                dist2(a, b) > dist2(b, seed) and
+                dist2(a, b) < dist2(a, seed) + dist2(b, seed)
+                for seed in (x, y)),
+            "ab must own both acute q3 seed faces")
+    require(dist2(x, y) == max(lengths),
+            "xy must own the q4 support")
+    doubled_z = tuple(2 * coordinate for coordinate in z)
+    doubled_midpoint = tuple(a[i] + b[i] for i in range(3))
+    require(dist2(doubled_z, doubled_midpoint) == 6354 >
+            4 * dist2(a, b) == 6344,
+            "strict interior witness must lie outside ab cover")
+    return {"nonowner_cover_ab_diameter2": dist2(a, b),
+            "nonowner_cover_z_midpoint_distance2_times4": 6354,
+            "nonowner_cover_interior_count_global": 1,
+            "nonowner_cover_interior_count_local": 0}
+
+
 Form = tuple[int, int, int]  # c + x*u + y*v
 Center = tuple[Fraction, Fraction]
 
@@ -198,6 +237,7 @@ def check_arrangements() -> dict[str, int]:
 def main() -> None:
     receipt = {"status": "PASS", "scope": "local exact audit, not v9 gate"}
     receipt.update(check_false_vertex())
+    receipt.update(check_nonowner_cover())
     receipt.update(check_arrangements())
     print(json.dumps(receipt, sort_keys=True))
 
