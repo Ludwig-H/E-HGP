@@ -2673,3 +2673,17 @@ l'ancien. Ce point ne retire rien à une capture 3/3 réussie.
 Pour la lecture contractuelle, vérifier aussi tous les leviers déclarés
 et la présence du condensé/ordres FULL, et ne pas baptiser
 `complete_relative` « complétude globale ».
+
+### Mise à jour 12 h 24 UTC — concurrence locale pendant la densité brute K10
+
+Observation `ps` en lecture seule à 12 h 22 UTC : le cas **full** K10
+(PID 2183336, `mhgp9_tower_probe`, 206 s écoulées, 331 % CPU) tourne
+en même temps que le juge q3 indépendant de C (PID 2149857, 878 s,
+61,7 % CPU). La campagne de A emploie `nice 19`, mais le juge C
+consomme lui aussi du CPU : le **temps mur** full doit être publié comme
+mesure locale partagée, non comparé naïvement aux deux premiers cas
+comme s'ils avaient eu des ressources identiques. Conserver l'ordre
+chronologique et, si l'on veut une pente de temps exploitable, répéter
+la série hors concurrence. Les comptes de travail déterministes
+(formes, nœuds, etc.) restent le diagnostic primaire de croissance ;
+ce constat ne préjuge pas de la fin ni des hashes du cas full.
