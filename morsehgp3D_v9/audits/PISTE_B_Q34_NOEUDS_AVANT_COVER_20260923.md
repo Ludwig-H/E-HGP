@@ -59,6 +59,12 @@ plus le cover ; en cas d'échec, construire le cover et lancer la voie
 exacte inchangée. Si les deux voies sont prouvées, l'arête n'a aucun
 cover à construire. Cette disposition se prête ensuite à des lots
 multi-CPU/GPU, mais son coût de traversée doit d'abord être mesuré.
+Cette première variante reste **par arête après expansion WSPD** : elle
+ne réduit pas à elle seule le nombre d'arêtes résiduelles, potentiellement
+quadratique. Si les comptes sont favorables, partager les certificats sur
+des blocs d'arêtes `E×C` serait l'étape architecturale suivante, avec
+propriété et frontières certifiées ; ne pas transférer d'emblée un gain
+par arête à une borne globale.
 
 ## Ne pas dupliquer le filtre déjà présent
 
