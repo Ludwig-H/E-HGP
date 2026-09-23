@@ -110,3 +110,24 @@ pour ces seuls tableaux, hors surallocation et autres covers (jusqu'à
 environ 69 Go décimaux à 30 M points et 48 workers). C'est un plafond,
 **pas un RSS observé sur LiDAR** : publier les pics co-résidents par
 worker et du processus avant de conclure sur le régime massif.
+
+### Porte propriétaire publiée `84c74a5e`
+
+La nouvelle porte `mhgp9_gen_q34_dead_lanes_owner` compare un prouveur
+réutilisé à un neuf sur deux nuages et 372 arêtes, force un `bad_alloc`
+pendant un second `load()` puis vérifie que `prove()` refuse l'ancien
+état. Elle couvre un couple de nuages où une preuve périmée changerait
+le masque. Le mutant `dead_load_keeps_loaded` est tué par réponse
+d'état incorrecte. Reconstruction Release indépendante et CTests
+ciblés : **2/2 PASS** ; exécution directe affiche
+`aba_same_address=1`, `stale_mask=2`, `fresh_mask=0`,
+`interrupted_loads=1` sur l'allocateur local. Le produit actuel ne
+garde toujours aucune adresse nue d'index dans le prouveur.
+
+La porte **n'exige pas** `same_address=1` pour passer : si l'allocateur
+ne réutilise pas cette adresse, l'essai ABA particulier devient
+conditionnel (l'alternance et l'échec de chargement restent exercés).
+Pour une preuve reproductible indépendante de l'allocateur, forcer la
+réutilisation d'adresse via placement ou injection dédiée, ou exiger
+ce plancher dans un environnement qualifié. Les deux CTests ciblés ne
+mesurent pas le RSS ni le coût de la copie `12·n` de l'index.

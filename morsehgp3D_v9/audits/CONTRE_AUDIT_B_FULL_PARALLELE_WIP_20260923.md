@@ -238,3 +238,41 @@ boucle K séquentielle. Par ailleurs, la phase C lit l'histoire et les
 ancres du K inférieur **figées après A**, mais écrit son propre brouillon
 `o.draft.lower_nodes` : aucun accès concurrent à ce tableau inférieur
 n'est identifié dans ce passage.
+
+### Port `84c74a5e` : priorité interphases A/C et bilan sur échec
+
+Le produit résout maintenant la divergence **entre A et C** : après
+les lots de tous les K, il repère le premier K en échec A, calcule
+encore les images C de tous les K inférieurs réussis, puis choisit le
+premier `Failure` en ordre K. Les compteurs privés de ces ordres sont
+fusionnés une fois avant une sortie normale ou exceptionnelle. Une
+porte `MHGP9_TESTING` injecte deux pannes par K ; deux mutants compilés
+restaurent l'ancienne priorité par phase et la perte de bilan. Sur
+reconstruction Release indépendante au commit `84c74a5e`, les trois
+CTests ciblés passent **3/3** (52,40 s cumulés de tests de chaîne).
+Cela corrige le contre-exemple A/K5 contre C/K2. Les sorties qui
+réussissent gardent le chemin séquentiel de numérotation de banque.
+
+La promesse « comme la boucle séquentielle » du commentaire source et
+de la coordination reste **plus large que la porte** : la phase 0
+prépare les cibles statiques de tous les K avant A, et la phase B
+numérote/construit les populations avant C ; leurs exceptions peuvent
+encore masquer celle d'un K inférieur. Les exceptions non-`Failure`
+concurrentes sont choisies par arrivée et non par ordre K. La porte
+couvre K≤5, uniquement les failpoints de fin A/C, et vérifie seulement
+un minimum de naissances/contributions payées ; elle n'injecte ni échec
+de lancement, ni défaut phase 0/B, ni bilan exact de chaque ordre.
+`parallel_orders += Kmax` compte des ordres **nominaux** même si tous
+ne terminent pas après une panne ; ce champ ne démontre pas la
+concurrence effective. Ces réserves concernent la sémantique d'échec
+et la preuve du travail payé, pas une divergence observée des tours
+réussies R5.
+
+La fusion du bilan pose `merged=true` **avant** ses additions ; si un
+compteur `u64` déborde pendant `merge_order_stats`, le `Failure`
+retourné peut porter un préfixe de statistiques sans marque globale
+« bilan incomplet ». Le choix évite justement de refusionner deux fois,
+mais le contrat de compteurs payés doit alors soit rendre cette fusion
+transactionnelle, soit publier explicitement l'incomplétude. Ce cas
+extrême n'est pas exercé par les deux mutants ni par R5 ; aucune
+corruption de tour réussie n'en est déduite.

@@ -150,3 +150,56 @@ une fois à sa production éviterait cette revalidation répétée tout en
 gardant l'API fail-closed. Le correctif de réception v6 séparé est
 [contrelu ici](CONTRE_AUDIT_B_G4_RECEPTION_V5_20260923.md) ; il ne ferme
 pas encore la réception de tous les champs de garde archivés.
+
+## Coût caché quantifié sur le reçu G4 R5
+
+Sur les six premières répétitions du
+[reçu R5](../receipts/g4_tower_r5_20260923/README.md), le cache est
+interrogé **123,228 millions** de fois, pour **554,501 millions** de
+`node_tests` géométriques. La double boucle de validation précède ces
+derniers. Pour une trace interne de taille `m≤2K−3` (7 à K5, 17 à K10),
+elle exécute `m(m−1)/2` tests de recouvrement de **masques** à chaque
+appel, puis compare les plages seulement si les voies se chevauchent.
+Ne pas appeler la borne suivante « comparaisons de plages » : leur
+nombre est conditionnel au partage de voie. Comme `node_tests_i≤m_i`,
+le total des **tours de
+boucle** a pour minorant entier
+`Q·C(floor(T/Q),2)+(T mod Q)·floor(T/Q)`, où `Q=queries` et
+`T=node_tests` ; son majorant interne est `Q·C(2K−3,2)`.
+
+| R5, première répétition | Requêtes Q | Tests géométriques T | Tours de validation : minorant–majorant |
+| --- | ---: | ---: | ---: |
+| 000000/K5 | 21,609 M | 61,564 M | 58,300–453,793 M |
+| 000100/K5 | 10,373 M | 30,473 M | 29,828–217,825 M |
+| 000200/K5 | 20,411 M | 62,839 M | 66,050–428,636 M |
+| 000000/K10 | 27,214 M | 148,659 M | 335,086 M–3,701 Md |
+| 000100/K10 | 14,694 M | 81,159 M | 185,385 M–1,998 Md |
+| 000200/K10 | 28,927 M | 169,806 M | 415,130 M–3,934 Md |
+
+Les six cas agrégés impliquent **au moins 1,090 milliard** de tours
+de validation, possiblement jusqu'à 10,734 milliards, **non comptés**
+dans `node_tests`. En outre, chaque entrée géométriquement testée porte
+au moins une des deux voies ; parmi `t` telles entrées, au moins
+`C(ceil(t/2),2)+C(floor(t/2),2)` couples partagent une voie. La même
+minimisation entière sur `T/Q` donne ainsi **au moins 424,330 millions**
+de comparaisons d'intervalles sur les six cas (majorant interne
+**5,005 milliards**, avec au plus 4/3 nœuds par voie à K5 et 9/8 à
+K10). Ce sont des bornes combinatoires, **pas** un temps mesuré : les
+conditions de
+masque, la hiérarchie des plages, les caches CPU et le compilateur
+peuvent rendre un tour peu coûteux. Instrumenter séparément
+`validation_pair_iterations`, `interval_compares`, histogramme de
+longueurs, constructions de traces, puis ablater au même
+trame/K/s/W avec RSS et sortie FULL.
+
+La voie publique acceptant un span arbitraire doit continuer de
+vérifier les doublons, ancêtres et indices hors domaine **avant tout
+crédit**. Une voie interne pourrait recevoir un ticket opaque immuable,
+fabriqué uniquement par une recherche tracée réussie (ou une factory
+validant l'antichaîne une fois), lié par propriété à l'index utilisé :
+elle retesterait la géométrie sur chaque paire sans refaire le carré
+de validation. Prouver impossibilité de forger/modifier/croiser l'index
+et comparer ticket/public/oracle sur mêmes et autres paires. Cela reste
+une réduction de contrôle, **pas** des 12–33 millions de paires
+développées ni des milliards de formes ; le certificat de groupe avant
+expansion garde la priorité architecturale.

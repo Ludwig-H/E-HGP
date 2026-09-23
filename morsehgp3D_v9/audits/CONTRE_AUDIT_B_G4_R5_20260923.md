@@ -67,6 +67,16 @@ machine expose 24 cœurs/48 fils matériels. Ces résultats demandent de
 mesurer le travail q3/q4 et les pics co-résidents, pas seulement le
 nombre de workers.
 
+Le verrou massif est aussi matériel : à K10, ces seules trames de
+35–46 k sites produisent **4,38–5,51 millions de boules** et le
+catalogue annonce **0,982–1,235 Go décimaux**, tandis que le RSS du
+processus monte à 3,76–4,72 Gio. Une simple extrapolation au même
+rapport boules/site vers 30 M points impliquerait des milliards de
+boules et une résidence hors de portée ; ce n'est **pas** une borne
+sur le LiDAR à cette taille, mais elle interdit de prétendre au contrat
+massif sans sorties/runs/catalogue et tour adressables par fenêtres,
+avec coûts d'export mesurés.
+
 ## Verdict et suite d'audit
 
 Le meilleur temps R5 est **4,263 s** pour K1..5 et **12,067 s** pour
@@ -81,8 +91,41 @@ de voies mortes, avec compteurs et repli résiduel complet. Le
 un gain net. Qualifier ensuite sur coupes spatiales 8k/16k/32k appariées
 et plusieurs séquences, avec et sans sol, s8/s10/s12, sorties et RSS.
 
-Une réserve indépendante subsiste dans FULL : le correctif
+Il existe aussi un **plancher mesuré hors q3/q4 et hors tour** : sur la
+meilleure répétition K10 de chaque scène, retrancher intégralement ces
+deux postes laisse encore **2,50 / 3,39 / 3,44 s** (000100 / 000000 /
+000200). q2+fusion+recensus en représente déjà **1,43 / 2,02 /
+2,06 s**. Il faudra donc réduire la préparation/fusion/catalogue et
+les autres frais de chaîne en même temps que q3/q4 ; cette soustraction
+est un diagnostic de postes, pas une prédiction de nouvel algorithme.
+
+Prochaine mesure de croissance à coût contrôlé : les **sept fichiers
+1 mm sans sol déjà figés** dans
+`morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/`
+(`full`, `half_x_neg`, `half_x_nonneg`, puis les quatre `quarter_*`, tous
+en `.u32le`). Ils contiennent respectivement 39 885, 24 591, 15 294,
+11 536, 13 055, 8 225 et 7 069 sites ; l'origine de grille, le masque
+et les coupes capteur ont été figés avant cette v9. Le SHA-256 du
+`full.u32le` est exactement celui du fichier d'entrée R5/000000
+(`0baa4de1…`). Exécuter **chaque
+morceau comme nuage autonome** sur un même snapshot FULL/K5/s8/W et
+répéter la trame entière dans la même campagne. Publier les six
+relations parent→enfant pré-déclarées, même défavorables, pour les
+relations parent→enfant pré-déclarées, même défavorables, pour les
+sorties, les compteurs dominants et les temps, avec les vrais rapports
+de tailles `r=N_parent/N_enfant` ; pour un travail positif,
+`p=ln(W_parent/W_enfant)/ln(r)`. Les cas nuls/égaux ne donnent pas
+d'exposant. Étendre ensuite K10, s10/s12, scans bruts et autres
+séquences. Les essais nominaux 8k/16k/32k complètent ces coupes mais
+ne remplacent pas leur géométrie. Le reçu v8 spatial à 2 cm/q3-q4
+seul n'est **pas** un exposant v9 à 1 mm/FULL.
+
+Sur le snapshot R5, une réserve indépendante subsiste dans FULL : le correctif
 `133c8653` rend le statut de banque publique sûr, mais la priorité du
 plus petit K en échec n'est garantie que **par phase** ; voir
 [l'audit des ordres](PREFETCH_GEOMETRIE_FULL_PAR_K_20260923.md) et la
 [contrelecture B](CONTRE_AUDIT_B_FULL_PARALLELE_WIP_20260923.md).
+Le commit produit ultérieur `84c74a5e` corrige ce point pour les
+`Failure` des phases lots/images et ses trois tests ciblés passent,
+mais il **n'appartient pas** au snapshot G4 R5 et ne qualifie pas encore
+la priorité globale des erreurs de préparation/banque.

@@ -187,3 +187,18 @@ sous-quadratique si la masse résiduelle reste quadratique ; le but est
 de rejeter assez de blocs pour réduire cette masse et le travail aval.
 Ne jamais fusionner deux traces de paires sans dédoublonnage et preuve
 d'antichaîne par voie.
+
+### Retour du prototype de ligne du développeur (03 h 45)
+
+La [coordination produit](../../audits/COORDINATION_MORSEHGP3D_V9.md)
+rapporte une ablation **hors dépôt, non archivée comme reçu** sur
+08/000000/K5/W8 : le DFS `a×B` rejette 15–17 M des 23,7 M paires
+résiduelles et réduit le filtre par paire de 114 à 57 Gcycles, mais
+consomme lui-même 49–87 Gcycles ; le CPU total passe de 156 à
+164–171 s sur hôte partagé. Le flux/condensé reste égal. Ce résultat
+écarte **le DFS neuf par ligne tel quel** : réduire le nombre de paires
+ne suffit pas si l'on déplace leur coût dans une recherche par ligne.
+La variante à ticket borné ci-dessus est différente — elle ne relance
+pas ce DFS global — mais demeure une hypothèse sans ablation ni preuve
+de gain sous-quadratique. Prioriser l'instrumentation du coût total et
+une porte shadow avant toute activation.
