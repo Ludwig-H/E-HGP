@@ -254,3 +254,32 @@ un propriétaire unique (par exemple une convention demi-ouverte),
 sans perdre les contacts. Cette preuve de largeur ne s'étend ni au
 float32 exact, ni aux coins rationnels/dyadiques mis à l'échelle, ni
 aux autres prédicats résiduels q3/q4.
+
+#### Contrelecture indépendante : conditions pour tuer un produit entier
+
+La preuve précédente est **valide mais locale à une cellule**. Pour un
+produit de nœuds `A×B`, une réalisation sûre doit partir d'une couverture
+fermée de **tous** les centres q3/q4 possibles, puis traiter chaque
+cellule pour chaque voie : soit l'exclure parce qu'aucun centre de boule
+par `a∈A,b∈B` n'y peut être équidistant à `a,b`, soit obtenir ses
+`K−1`/`K−2` témoins strictement intérieurs ; sinon conserver cette zone
+et faire le chemin exact. Aux huit coins d'une cellule, la condition
+`min_{a∈box(A)}|a−c|² > max_{b∈box(B)}|b−c|²` (ou son symétrique)
+exclut sûrement l'équidistance dans toute la cellule : pour chaque
+`a,b` fixé, la différence des distances carrées est affine en `c`.
+L'égalité à un coin ne permet pas d'exclure. Ce test est conservateur
+sur les boîtes, mais peut réduire fortement le domaine de centres à
+certifier sans déplacer la recherche vers chaque paire.
+
+Les témoins Z crédités doivent être des **sites distincts par ID**,
+représentés par des nœuds en antichaîne de l'index ; leurs populations,
+pas seulement leurs boîtes géométriques, sont disjointes. Les garder
+disjoints de A et B simplifie la preuve que ni extrémité n'est créditée.
+Les seuils ne valent que pour q3 à K≥2 et q4 à K≥3 ; les autres voies
+restent ouvertes. Si une cellule frontière n'est pas certifiée, aucun
+crédit des cellules voisines ne la sauve. La partition de produit doit
+attribuer chaque paire A×B à un seul enfant/worker, et non réémettre
+par cellule de centre. Q2 et toute voie q3/q4 non prouvée restent
+inchangées. Cette contrelecture ne donne **aucun** majorant du nombre
+de cellules, de nœuds Z inspectés ou de la masse résiduelle ; tester
+ces trois grandeurs est la condition d'une revendication sous-quadratique.
