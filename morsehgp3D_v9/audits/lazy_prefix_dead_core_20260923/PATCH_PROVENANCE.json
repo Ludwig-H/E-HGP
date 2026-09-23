@@ -1,0 +1,20 @@
+{
+  "files": {
+    "src/gen/lanes/q34_dead_lanes.cpp": {
+      "injected_sha256": "4a8f804147bf47b1a9eee0237b1aa20dfec167dd06a010e19269a3b75a1efebd",
+      "source_sha256": "0ab2489816be606182ca55da8b679125edec181bdc8132159d20f9daa9fd5074"
+    },
+    "src/gen/lanes/q34_dead_lanes.hpp": {
+      "injected_sha256": "bd35c50440bd9ddd032b7dd79637b732029a10d5c92ab5f91fedadc90fd5922a",
+      "source_sha256": "90abb5adba45769b61e038f64ca64b896c36aaaaee407dac2f77356f1c1e2312"
+    },
+    "src/gen/pipeline/wspd_q34.cpp": {
+      "injected_sha256": "0b8bee43755c2f00f3fe27fb6c350536e8a1705929a21daca4dc5f6d81ffd4f6",
+      "source_sha256": "911edce89839e84197de73694d2289b1a2672e231dccaca3a2a28759f7724885"
+    }
+  },
+  "git_archive_sha256": "bb891d731c5bf7582f905d889ddd0a0c518cfd98c3823bf9f11eaaeed95ed4d3",
+  "schema": "mhgp9_lazy_prefix_shadow_patch_v1",
+  "source_commit": "c265a5dae4dd92059fc78acc0a1d7f52de9c1435",
+  "trace_header_sha256": "5160868ff4b4a83beed46aecae1d5c8ee0606b4badf3be01bdeff578e2c9ab90"
+}

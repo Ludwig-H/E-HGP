@@ -1,0 +1,400 @@
+{
+  "cases": {
+    "full": {
+      "binary_sha256": "b989a2e920d8f71783b1f9d839b2815fa15c84d95b6b88aaf917d0e9ed520901",
+      "checks": {
+        "all_counter_invariants": true,
+        "edge_join_exact": true,
+        "independent_post_core_receipt_equal": true,
+        "ledgers_equal": true,
+        "post_core_closure_count_equal": true,
+        "quadrants_partition_full_scene": true
+      },
+      "groups": {
+        "all": {
+          "depth2_descended_cells": 3701528,
+          "depth2_full_scans": 3943158,
+          "depth2_scanned_cells": 11535314,
+          "forms": 559661741,
+          "loads": 3986433,
+          "loads_full_prefix": 2931570,
+          "post_closed_forms": 526672944,
+          "post_closed_loads": 1806897,
+          "post_closed_potential_unmaterialized_forms": 242981833,
+          "potential_fraction_forms": 0.4341583767470716,
+          "potential_unmaterialized_forms": 242981833,
+          "visited_prefix_forms": 316679908
+        },
+        "cross_x": {
+          "depth2_descended_cells": 41134,
+          "depth2_full_scans": 44086,
+          "depth2_scanned_cells": 482235,
+          "forms": 383619073,
+          "loads": 124423,
+          "loads_full_prefix": 36167,
+          "post_closed_forms": 380106252,
+          "post_closed_loads": 107853,
+          "post_closed_potential_unmaterialized_forms": 196982817,
+          "potential_fraction_forms": 0.5134854621787797,
+          "potential_unmaterialized_forms": 196982817,
+          "visited_prefix_forms": 186636256
+        },
+        "cross_x_long4m": {
+          "depth2_descended_cells": 11785,
+          "depth2_full_scans": 12794,
+          "depth2_scanned_cells": 310378,
+          "forms": 371690803,
+          "loads": 78063,
+          "loads_full_prefix": 10919,
+          "post_closed_forms": 369764492,
+          "post_closed_loads": 75247,
+          "post_closed_potential_unmaterialized_forms": 193500995,
+          "potential_fraction_forms": 0.5205966718525451,
+          "potential_unmaterialized_forms": 193500995,
+          "visited_prefix_forms": 178189808
+        },
+        "cross_y_only": {
+          "depth2_descended_cells": 22107,
+          "depth2_full_scans": 23212,
+          "depth2_scanned_cells": 111929,
+          "forms": 2898707,
+          "loads": 32589,
+          "loads_full_prefix": 18167,
+          "post_closed_forms": 2299397,
+          "post_closed_loads": 21300,
+          "post_closed_potential_unmaterialized_forms": 611626,
+          "potential_fraction_forms": 0.2109995939568918,
+          "potential_unmaterialized_forms": 611626,
+          "visited_prefix_forms": 2287081
+        },
+        "intra": {
+          "depth2_descended_cells": 3638287,
+          "depth2_full_scans": 3875860,
+          "depth2_scanned_cells": 10941150,
+          "forms": 173143961,
+          "loads": 3829421,
+          "loads_full_prefix": 2877236,
+          "post_closed_forms": 144267295,
+          "post_closed_loads": 1677744,
+          "post_closed_potential_unmaterialized_forms": 45387390,
+          "potential_fraction_forms": 0.2621367198593776,
+          "potential_unmaterialized_forms": 45387390,
+          "visited_prefix_forms": 127756571
+        },
+        "long4m": {
+          "forms": 450005733,
+          "loads": 339428,
+          "potential_fraction_forms": 0.48824778416767417,
+          "potential_unmaterialized_forms": 219714302,
+          "visited_prefix_forms": 230291431
+        }
+      },
+      "input_sha256": "233cc4ea8cac6e0b1155ea845af57b32e5236764bf2e119557aeab5bac76c172",
+      "ledger": {
+        "core_closed_edges": 1806897,
+        "core_sites": 559661741,
+        "dead_core_form_sites": 551688875,
+        "dead_core_loads": 3986433,
+        "dead_core_uniform_tests": 785997344
+      },
+      "matched_original_edges": 3986433,
+      "pre_post_masks": {
+        "2->0": 197175,
+        "2->2": 123547,
+        "4->0": 441766,
+        "4->4": 42487,
+        "6->0": 1167956,
+        "6->2": 237549,
+        "6->4": 20440,
+        "6->6": 1755513
+      },
+      "raw_ids_sha256": "796e9814dd2dff7778ad8d1bb55f5113ab54206ff8b246e6432200f9a6833f7f",
+      "sites": 123389,
+      "stdout_sha256": "e09842c1e2923adf1c81f3ea2710ee2f49e8e1ff1e9b2f7d39056edc99afd98a",
+      "tower_digest": "cfb1634832c0384a",
+      "trace_part_sha256": {
+        "part_0.bin": "f711867e2a216e328b3f5d9a62275dec38d98214eb49cd2c0fb7c9e67af88259",
+        "part_1.bin": "a7a33dccf6e0616c2427950c9f259c8a34839c4da2e420bdc4d41bc5d0d21e07",
+        "part_2.bin": "d8a20f92f507a7cc01dfbb547699c46935e24a6c76dd1bd9ee90ed8e47860ec9",
+        "part_3.bin": "aecf06eb70f39a90bb3b56aa3f9b7bb03333894c34dfe840d5d6d33ef5f01d98",
+        "part_4.bin": "f02021ad6dc6af187aa5eda235377e7af0897ffecd16053c560d42cd14ed7f78",
+        "part_5.bin": "9ddd660c5953ab6451b53f401487d60e3c1cabe7f43f8ab369a1083894e1f701",
+        "part_6.bin": "032e185aecfe5b58ff160e68b87a837a122c772f373ee4ca387d49a2be36e9d5",
+        "part_7.bin": "64c213414f0a5248df605710c789816e86f2fc68ccb2fd933023c80245e4e9ee"
+      }
+    },
+    "half": {
+      "binary_sha256": "b989a2e920d8f71783b1f9d839b2815fa15c84d95b6b88aaf917d0e9ed520901",
+      "checks": {
+        "all_counter_invariants": true,
+        "edge_join_exact": true,
+        "ledgers_equal": true,
+        "post_core_closure_count_equal": true,
+        "quadrants_partition_full_scene": true
+      },
+      "groups": {
+        "all": {
+          "depth2_descended_cells": 1712048,
+          "depth2_full_scans": 1815398,
+          "depth2_scanned_cells": 4556262,
+          "forms": 128852821,
+          "loads": 1684675,
+          "loads_full_prefix": 1361906,
+          "post_closed_forms": 116576589,
+          "post_closed_loads": 638811,
+          "post_closed_potential_unmaterialized_forms": 51004500,
+          "potential_fraction_forms": 0.39583533836639867,
+          "potential_unmaterialized_forms": 51004500,
+          "visited_prefix_forms": 77848321
+        },
+        "cross_x": {
+          "depth2_descended_cells": 22332,
+          "depth2_full_scans": 23723,
+          "depth2_scanned_cells": 199588,
+          "forms": 77549239,
+          "loads": 52963,
+          "loads_full_prefix": 19406,
+          "post_closed_forms": 76506080,
+          "post_closed_loads": 42828,
+          "post_closed_potential_unmaterialized_forms": 41303883,
+          "potential_fraction_forms": 0.5326149364276804,
+          "potential_unmaterialized_forms": 41303883,
+          "visited_prefix_forms": 36245356
+        },
+        "cross_x_long4m": {
+          "depth2_descended_cells": 7504,
+          "depth2_full_scans": 7906,
+          "depth2_scanned_cells": 128973,
+          "forms": 74954251,
+          "loads": 32863,
+          "loads_full_prefix": 6833,
+          "post_closed_forms": 74387032,
+          "post_closed_loads": 30755,
+          "post_closed_potential_unmaterialized_forms": 40714625,
+          "potential_fraction_forms": 0.5431930071584599,
+          "potential_unmaterialized_forms": 40714625,
+          "visited_prefix_forms": 34239626
+        },
+        "cross_y_only": {
+          "depth2_descended_cells": 14722,
+          "depth2_full_scans": 15550,
+          "depth2_scanned_cells": 57153,
+          "forms": 3195480,
+          "loads": 17466,
+          "loads_full_prefix": 11956,
+          "post_closed_forms": 2908419,
+          "post_closed_loads": 10271,
+          "post_closed_potential_unmaterialized_forms": 205583,
+          "potential_fraction_forms": 0.06433556148059133,
+          "potential_unmaterialized_forms": 205583,
+          "visited_prefix_forms": 2989897
+        },
+        "intra": {
+          "depth2_descended_cells": 1674994,
+          "depth2_full_scans": 1776125,
+          "depth2_scanned_cells": 4299521,
+          "forms": 48108102,
+          "loads": 1614246,
+          "loads_full_prefix": 1330544,
+          "post_closed_forms": 37162090,
+          "post_closed_loads": 585712,
+          "post_closed_potential_unmaterialized_forms": 9495034,
+          "potential_fraction_forms": 0.19736870932883613,
+          "potential_unmaterialized_forms": 9495034,
+          "visited_prefix_forms": 38613068
+        },
+        "long4m": {
+          "forms": 99689039,
+          "loads": 177559,
+          "potential_fraction_forms": 0.4700780092784323,
+          "potential_unmaterialized_forms": 46861625,
+          "visited_prefix_forms": 52827414
+        }
+      },
+      "input_sha256": "9b745ea012a418076c9e570a5f57fd1f36fc1fbcaa467ec1335202cd5bf4adb1",
+      "ledger": {
+        "core_closed_edges": 638811,
+        "core_sites": 128852821,
+        "dead_core_form_sites": 125483471,
+        "dead_core_loads": 1684675,
+        "dead_core_uniform_tests": 233181850
+      },
+      "matched_original_edges": 1684675,
+      "pre_post_masks": {
+        "2->0": 93961,
+        "2->2": 64891,
+        "4->0": 159753,
+        "4->4": 18459,
+        "6->0": 385097,
+        "6->2": 105878,
+        "6->4": 9050,
+        "6->6": 847586
+      },
+      "raw_ids_sha256": "23b62b6176d14e9dff93ef508ed171521631e40607191819b9503c6103f9bba6",
+      "sites": 61694,
+      "stdout_sha256": "dfb2db3e965511994704955f08f09b7aa9f20856b757c5a80d4f20e7e6360dac",
+      "tower_digest": "993a8fdc51737fc8",
+      "trace_part_sha256": {
+        "part_0.bin": "2e9559d57f270c59e4079208c4893d58a567700be8ac8fe6fac9d72316e20770",
+        "part_1.bin": "2a868e73dcca2032ce2a9faa6328086b37edede882499bc7916e36a8cb1bb9c9",
+        "part_2.bin": "c4991a2630d71fad432fc1cd12c74dfeb9f06edfc29a78eb8475ce046b6fbca4",
+        "part_3.bin": "f8c5a97bf86a61d6388e76132f8770a18c25219180eb3f0206d6521094b64e5f",
+        "part_4.bin": "26f1a9db46f520790c1b5a03f1e71c4d2a33a0cae6d8be9b09d310c3462cb87b",
+        "part_5.bin": "cddac8cbaea4f58dfa8876e5839eb8c1ccfb673d510d36fbad9cba7f7b3eb3e8",
+        "part_6.bin": "5fe2b36c0b620f19899bd01c3822cf313246ee82ad36e80fe392a075575d12ff",
+        "part_7.bin": "f8c454ce860f7b4b806c7d64942558b50bbb9d1497ab40281da2d5d6c2825b6b"
+      }
+    },
+    "quarter": {
+      "binary_sha256": "b989a2e920d8f71783b1f9d839b2815fa15c84d95b6b88aaf917d0e9ed520901",
+      "checks": {
+        "all_counter_invariants": true,
+        "edge_join_exact": true,
+        "ledgers_equal": true,
+        "post_core_closure_count_equal": true,
+        "quadrants_partition_full_scene": true
+      },
+      "groups": {
+        "all": {
+          "depth2_descended_cells": 824317,
+          "depth2_full_scans": 874698,
+          "depth2_scanned_cells": 2025603,
+          "forms": 37009904,
+          "loads": 774494,
+          "loads_full_prefix": 653982,
+          "post_closed_forms": 32120162,
+          "post_closed_loads": 267968,
+          "post_closed_potential_unmaterialized_forms": 13014900,
+          "potential_fraction_forms": 0.351659923246491,
+          "potential_unmaterialized_forms": 13014900,
+          "visited_prefix_forms": 23995004
+        },
+        "cross_x": {
+          "depth2_descended_cells": 14302,
+          "depth2_full_scans": 15155,
+          "depth2_scanned_cells": 99716,
+          "forms": 18696969,
+          "loads": 27184,
+          "loads_full_prefix": 12451,
+          "post_closed_forms": 18286094,
+          "post_closed_loads": 20622,
+          "post_closed_potential_unmaterialized_forms": 10152463,
+          "potential_fraction_forms": 0.5430004724295152,
+          "potential_unmaterialized_forms": 10152463,
+          "visited_prefix_forms": 8544506
+        },
+        "cross_x_long4m": {
+          "depth2_descended_cells": 5357,
+          "depth2_full_scans": 5608,
+          "depth2_scanned_cells": 65244,
+          "forms": 18065639,
+          "loads": 16822,
+          "loads_full_prefix": 4995,
+          "post_closed_forms": 17805574,
+          "post_closed_loads": 15270,
+          "post_closed_potential_unmaterialized_forms": 10038001,
+          "potential_fraction_forms": 0.5556405173379143,
+          "potential_unmaterialized_forms": 10038001,
+          "visited_prefix_forms": 8027638
+        },
+        "cross_y_only": {
+          "depth2_descended_cells": 10578,
+          "depth2_full_scans": 11062,
+          "depth2_scanned_cells": 36872,
+          "forms": 3873331,
+          "loads": 11548,
+          "loads_full_prefix": 8847,
+          "post_closed_forms": 3760538,
+          "post_closed_loads": 6838,
+          "post_closed_potential_unmaterialized_forms": 869036,
+          "potential_fraction_forms": 0.2243639905807172,
+          "potential_unmaterialized_forms": 869036,
+          "visited_prefix_forms": 3004295
+        },
+        "intra": {
+          "depth2_descended_cells": 799437,
+          "depth2_full_scans": 848481,
+          "depth2_scanned_cells": 1889015,
+          "forms": 14439604,
+          "loads": 735762,
+          "loads_full_prefix": 632684,
+          "post_closed_forms": 10073530,
+          "post_closed_loads": 240508,
+          "post_closed_potential_unmaterialized_forms": 1993401,
+          "potential_fraction_forms": 0.1380509465495037,
+          "potential_unmaterialized_forms": 1993401,
+          "visited_prefix_forms": 12446203
+        },
+        "long4m": {
+          "forms": 27526693,
+          "loads": 99887,
+          "potential_fraction_forms": 0.4348608094695574,
+          "potential_unmaterialized_forms": 11970280,
+          "visited_prefix_forms": 15556413
+        }
+      },
+      "input_sha256": "0bd6bf8482717249e3375936ce78e5641f9aa7f5f980497a2f9c2bee4e293bd7",
+      "ledger": {
+        "core_closed_edges": 267968,
+        "core_sites": 37009904,
+        "dead_core_form_sites": 35460916,
+        "dead_core_loads": 774494,
+        "dead_core_uniform_tests": 76736439
+      },
+      "matched_original_edges": 774494,
+      "pre_post_masks": {
+        "2->0": 53998,
+        "2->2": 34491,
+        "4->0": 64260,
+        "4->4": 7917,
+        "6->0": 149710,
+        "6->2": 49282,
+        "6->4": 4224,
+        "6->6": 410612
+      },
+      "raw_ids_sha256": "003706e4f890eaffec82f6399afe5a12f9486bf659699636d2ab7f894eb35195",
+      "sites": 30847,
+      "stdout_sha256": "1bf41235784ef75925a2b3d226b8bdb615ba1f72e14836fe12b63e34c37401bd",
+      "tower_digest": "1157fb7a56cceabc",
+      "trace_part_sha256": {
+        "part_0.bin": "9399a8de88bd97e5fea74c2eb71bb703f4fbb7d0afa45a21440f9fe05f388282",
+        "part_1.bin": "c40edcd23ea7fcc19337caa10a96b9f6762cb0501cc41f672bdcd1d1a68b8c81",
+        "part_2.bin": "ca58fb1344bf45f6295087a392517722d302a925f4562db19529af6723a0fc13",
+        "part_3.bin": "7b4587026a551d392e0c60d1ce6171b45fae057aace97642bd79e8c153568f1e",
+        "part_4.bin": "7964dcdfaf579d8c7f15bbf8fefb6f176b8663bf58b0111e87d73ef509833baf",
+        "part_5.bin": "595b65e037a248d2906b2a35ae18319664dbf58999d31e97ea45b7479ddc1675",
+        "part_6.bin": "9e46151d481b78f3abe4d84df7baaada01d97565c4b28e870577321c765eda88",
+        "part_7.bin": "b81910c1fefff983368745c70d5a9cd871282405718d0f1567f8010c38c82df8"
+      }
+    }
+  },
+  "finite_density_slopes": {
+    "half_to_full": {
+      "all_eager_forms": 2.118806,
+      "all_visited_prefix_forms": 2.024264,
+      "cross_x_eager_forms": 2.306463,
+      "cross_x_visited_prefix_forms": 2.364334
+    },
+    "quarter_to_half": {
+      "all_eager_forms": 1.799741,
+      "all_visited_prefix_forms": 1.697932,
+      "cross_x_eager_forms": 2.052308,
+      "cross_x_visited_prefix_forms": 2.084727
+    }
+  },
+  "input_manifest_sha256": "6e64125abddbfcd589ba61cf747e493e455adec4beeaea81c2739ce98fe16095",
+  "parameters": {
+    "K": 5,
+    "backend": "cpu_reference",
+    "grid": "1mm",
+    "q34_batch_filter": 1,
+    "q34_gpu_filter": 0,
+    "s": 8,
+    "scene": "SemanticKITTI 08/000000 full raw return cloud, three globally nested densities",
+    "static_threads": 8,
+    "workers": 8
+  },
+  "patch_provenance_sha256": "6150068b9406064672f0b2655a7cb219a5aa8abfed0eecab6cc7de458ca8efa7",
+  "schema": "mhgp9_lazy_prefix_shadow_k5_v1",
+  "source_commit": "c265a5dae4dd92059fc78acc0a1d7f52de9c1435"
+}

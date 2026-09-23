@@ -187,8 +187,19 @@ plein et quarts. Les traversantes de `x=0` concentrent 383,619 M formes,
 dont **380,106 M** sur des arêtes ensuite fermées au cœur. Le seuil
 intrinsèque exploratoire `|ab|≥4 m` couvre 80,4 % des formes avec 8,5 %
 des charges, mais n'est pas un certificat. Essayer un rejet exact avant
-matérialisation, avec repli et coût total apparié ; mesurer aussi le préfixe
-de formes réellement consulté avant de porter une variante paresseuse.
+matérialisation, avec repli et coût total apparié.
+Le [shadow du préfixe](lazy_prefix_dead_core_20260923/README.md) mesure
+maintenant les formes réellement consultées aux trois densités du plein brut
+K5 : dans l'ordre actuel, `Σ(n−h)` vaut 13,015/51,005/**242,982 M**
+formes non consultées, soit 35,17/39,58/**43,42 %** des formes du cœur.
+Au plein, 196,983 M de ce suffixe sont sur les arêtes traversant `x=0`,
+sans que cet axe soit une hypothèse produit. Les trois sorties discrètes
+coïncident avec le batch antérieur ; chaque arête recoupe la trace S2.
+Le cover reste intact.
+La pente finie de `Σh` au dernier doublement est encore **2,024** : ce
+shadow borne un potentiel de fabrication évitable, sans mesurer un gain
+CPU, sans conclure à une chaîne sous-quadratique et sans remplacer le
+certificat exact avant cœur.
 Les [demi-scènes et quarts aux trois densités](lidar_raw_physical_scaling_20260923/README.md)
 restent dans le reçu v12 ; la somme de leurs tours ne reconstruit pas le
 plein. Une scène/K5/CPU ne prouve ni sous-quadraticité, ni contrat G4.

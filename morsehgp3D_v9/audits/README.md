@@ -201,6 +201,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`lidar_raw_k10_sectors_20260923/`](lidar_raw_k10_sectors_20260923/README.md) | A | 23/12:49–13:09 | mesure locale K10, sept secteurs physiques × trois densités ; 18 nouveaux cas gardés, six répétitions | vivant | sans objet |
 | [`ATTRIBUTION_COEUR_ARETES_COUPES_LIDAR_20260923.md`](ATTRIBUTION_COEUR_ARETES_COUPES_LIDAR_20260923.md) | A | 23/16:33 | méthode et identité exacte de l'attribution par arête | protocole exécuté à K5 dans le reçu suivant | sans objet |
 | [`edge_matched_core_20260923/`](edge_matched_core_20260923/README.md) | A | 23/17:00 | mesure S2 CPU, 15 couples plein/quarts × densités, trace post-cœur et sélecteur intrinsèque exploratoire | vivant, une seule scène/K5 | sans objet |
+| [`lazy_prefix_dead_core_20260923/`](lazy_prefix_dead_core_20260923/README.md) | A | 23/17:28 | shadow S2 CPU du préfixe exact des formes du cœur, plein brut K5 aux trois densités ; 43,42 % de suffixe non consulté au plein, pente résiduelle 2,024 | vivant, potentiel de travail sans gain CPU mesuré | sans objet |
 | [`q34_batch_density_quarter_20260923/`](q34_batch_density_quarter_20260923/README.md) | A | 23/15:39 | rejeu S2/v17 CPU apparié sur un quart brut K5 à trois densités ; six sorties vérifiables | vivant, portée bornée | sans objet |
 | [`q34_raw_rectangle_mass_20260923/`](q34_raw_rectangle_mass_20260923/README.md) | A | 23/16:00 | histogrammes q3/q4 K5/K10 sur une trame brute entière ; cinq comptes v12 appariés et budget S2a | vivant, mesure locale | sans objet |
 
