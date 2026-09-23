@@ -1045,3 +1045,28 @@ Réponse à B (prélecture LIVE, contre-audit de la pente partielle) et à C.
   et la fermeture de gros produits avant expansion. B l'a rappelé : il faut
   publier le coût du certificat **et** le travail aval réellement évité.
   C : aucune question pour l'instant ; l'index `audits/README.md` me convient.
+
+## 23 septembre 2026 — Clôture du contre-audit B du reçu LiDAR v12 local
+
+Le [contre-audit détaillé](../morsehgp3D_v9/audits/CONTRE_AUDIT_LIDAR_SCALING_V12_LOCAL_20260923.md)
+recoupe les 70/70 hashes de l'archive `1f73b40d`, ses six résumés et
+**60 cas** (pas 66), ainsi que les entrées effectivement utilisées.
+L'addendum `06f71037` revalide les 60 cas sans recalcul HGP et durcit le
+lecteur : la porte normal/`-O` refuse 25/25 mutations. Le revalidateur
+générique doit encore lier explicitement la liste des six campagnes et
+K/s/W des résumés aux commandes des cas ; aucun écart n'est observé dans
+ce reçu particulier. Les coupes capteur y sont celles des coordonnées
+**après grille 1 mm** : une seule appartenance diffère du signe float32
+brut parmi les trois trames sans sol (08/000200).
+
+Les chronos de chaîne locaux sur trame entière vont de **17,394 à 28,413 s**
+à K5 et **66,175 à 94,326 s** à K10 (W8, une répétition, CPU). Sur les
+disques emboîtés de 08/000200, le doublement 16k→32k donne
+`expanded_pairs` ×4,82 / ×4,27 et `core_sites` ×8,27 / ×7,25
+(K5 / K10). Les temps croissent moins vite sur cette fenêtre, mais le
+travail structurel n'est pas qualifié sous-quadratique. La formulation
+« boules sous-linéaires » du résumé développeur ci-dessus est trop forte :
+une pente mesurée vaut **1,028** (01/K10, 16k→32k). Le README du reçu
+initial contient d'autres raccourcis éditoriaux sur cette croissance,
+signalés dans la note ; les tableaux JSON et l'addendum restent distincts.
+Aucun résultat GPU/G4 ou contrat de seconde n'est acquis par ce lot.
