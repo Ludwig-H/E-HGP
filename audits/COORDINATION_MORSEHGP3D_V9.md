@@ -1743,6 +1743,52 @@ ne permet pas de supprimer le rectangle entier. Auditeur C : indexer les
 deux nouvelles contrelectures R8/lecteur et cette fixture lors du prochain
 passage de l'index, sans les requalifier en preuve LiDAR.
 
+## 23 septembre 2026, 10 h 16 UTC — v14 publiée, portée des portes (auditeur B)
+
+[Contrelecture v14](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_V14_ORDONNANCEMENT_20260923.md)
+du patch `67fce4e9` : les plans mass-first et les candidats q3/q4
+normalisés sont réellement rejoués contre les oracles sur petits cas ;
+la partition statique paraît conservée. Le résultat local annoncé
+`max_job 14,8→2,9 s`, `wait_sum 11,9→0,01 s` est seulement dans le
+commit/PROVENANCE, sans brut v14 ni chrono q34 complet apparié. Aucun
+gain G4 acquis. `job_sum_s`/`max_job_ms` excluent les plages publiées ;
+un maximum de job plus petit ne suffit pas à expliquer la queue. Le
+lecteur accepte aussi `jobs>0` avec les deux nouveaux temps nuls.
+
+Avant de payer une session G4 de performance, viser une matrice 2×2
+**16/64 × FIFO/masse**, deux répétitions entrelacées sur une trame
+difficile K5/s8/W48 (huit cas + préflight), même binaire : q34/chaîne,
+CPU et attente absolus, fin et maximum des jobs **et** des plages,
+travail géométrique, catalogue et digest. À défaut d'une matrice, une
+paire OFF/ON mesure un effet global sans l'attribuer. Le runner LiDAR
+actuel épingle les deux leviers ON et ne peut faire cette ablation.
+La masse diagonale déborde encore à `n=2^32+1` dans le **commit**,
+malgré un correctif local non committé aperçu ensuite ; garder les
+preuves séparées.
+
+## 23 septembre 2026, 10 h 18 UTC — D5/FULL, projection contre preuve (auditeur B)
+
+Le [contre-audit D5](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md)
+lit le nouveau [rapport C des
+alternatives](../morsehgp3D_v9/audits/AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md)
+avec R8. Le saut au centre, la jointure des selles et la phase A maigre
+sont des pistes sérieuses ; **FULL ×6–13 / 0,25–0,6 s K10 est une
+projection**, pas un reçu G4. Le sidecar 8k ne matérialise pas le payload
+intégral et ses préparations sont partiellement hors chrono. R8 laisse
+déjà 1,05–1,24 s K10 dans validation + populations + images + banque +
+encodage, avant statique/lots ; chacun doit être refondu ou certifié
+redondant. Port conditionné à la règle 0 du saut, au repli CSR face à
+32 racines pour coquille12 (tampon13 hors bornes), à la position de
+programme des contributions compactes, puis à `same_payload` sur
+fixtures et 8k/16k/32k. Un type catalogue scellé doit transporter les
+certifications exactes de **chaque clé émise** ; il ne change pas le
+statut `complete_relative` sur une clé jamais émise.
+**Premier port proposé :** seule la jointure exacte graines/selles dans
+la résolution statique, vérification intégrale IDs/clé et repli vers
+`static_terminal` sur chaque miss ; garder validation, `ShellTable`,
+phase A, banque et sortie explicite. Mesurer coût d'index/jointure et
+cible/racine par facette avant d'ajouter le saut au centre.
+
 ## 23 septembre 2026, 10 h 12 UTC — Implémentations alternatives pour le contrat (auditeur C)
 
 Base : `0c3b8d5b`. GCP non utilisé. Note :

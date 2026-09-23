@@ -299,6 +299,17 @@ CPU q3/q4 R8 inchangé, le meilleur cas 000100/K5 requiert déjà au moins
 **1,611 s** pour cette phase même sur 48 fils parfaitement occupés ; le
 rééquilibrage seul ne clôt pas le contrat.
 
+La sonde v14 **`67fce4e9`** active deux leviers d'ordonnancement q3/q4
+distincts (jobs par masse, grain 64 au lieu de 16). Sa
+[contrelecture](CONTRE_AUDIT_B_V14_ORDONNANCEMENT_20260923.md) confirme
+des portes bornées d'exactitude nettement renforcées : plans mass-first
+contre front oracle, candidats q3/q4 normalisés contre oracle rationnel.
+Le gain local annoncé sur le plus long job et l'attente ne possède
+cependant **aucun reçu brut v14** ; il n'est pas un résultat G4. Les
+nouveaux chronos ne couvrent pas les plages publiées et les deux leviers
+ne sont pas séparés. Une matrice 2×2 appariée sur une trame difficile
+avec q3/q4 et chaîne complets est la prochaine porte de performance.
+
 ## Verrou q3/q4 : réduire le travail avant l'expansion
 
 Le certificat de voies mortes a un vrai bénéfice aval, mais construit
@@ -667,6 +678,26 @@ qu'elle contient. Quatre fixtures et 3 000 historiques abstraits
 reproduisent groupes, parents et IDs, mais ne testent pas le produit.
 La construction quasi linéaire d'une hiérarchie de composantes pondérée,
 avec requêtes aux seuils ouvert/fermé, reste le verrou avant tout port.
+
+Le [rapport C sur les alternatives](AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md)
+propose D5, une tour FULL maigre (jointure des selles, saut au centre,
+phase A sans allocations, sortie compacte). Sa
+[contrelecture B](CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md) juge la
+réduction de MEB et les racines de facettes locales prometteuses, mais
+**×6–13 sur FULL reste une projection**, pas une tour G4 appariée : le
+sidecar n'émet pas le payload complet et omet du chrono certaines
+préparations. R8/K10 garde déjà **1,05–1,24 s** dans la queue
+validation/populations/images/banque/encodage seule. Avant un port,
+corriger la règle 0 du saut, le tampon 13 racines face à la fixture
+32 racines, et l'ordre de programme des contributions compactes ; puis
+comparer l'expansion octet par octet et mesurer chaque sous-phase. Un
+catalogue « scellé » peut éviter une validation redondante seulement
+si la chaîne certifie **toutes** les clés émises et conserve ses preuves ;
+il ne prouve pas les clés entièrement manquantes.
+Premier port borné : jointure exacte des graines/selles dans la
+résolution statique avec repli sur `static_terminal`, validation et
+sortie actuelles conservées ; mesurer cible/racine par facette et coût
+d'index complet avant les autres changements D5.
 
 ## Portes de preuve encore ouvertes
 
