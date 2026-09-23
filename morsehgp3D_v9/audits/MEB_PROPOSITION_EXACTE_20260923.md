@@ -38,3 +38,34 @@ Le lecteur de reçus `8e8b83a3` exige désormais, pour un calcul complet,
 deux issues certifiées ci-dessus ; les refus partiels gardent leurs
 propres compteurs de travail payé. La correction n'ajoute aucun
 résultat G4.
+
+`8fa03046` change uniquement la proposition flottante en Welzl à
+déplacement en tête, avec les deux extrêmes en début de liste. À chaque
+récursion, le point courant reste hors du préfixe muté ; le déplacer
+ensuite en tête conserve exactement l'ensemble des points déjà
+traités. L'`attempt` entier et son repli restent inchangés. La
+[contre-épreuve FENV](check_meb_proposed_fenv_20260923.cpp) a été
+recompilée `-O2 -frounding-math -fno-fast-math` contre le header publié
+(SHA-256 `4c5f13c12a20f790…`) : **42 544** cas, quatre modes
+d'arrondi × FTZ/DAZ éteints/allumés, zéro divergence de résultat,
+**22 840** propositions vérifiées et **320** canonisations. Elle ne
+prouve pas un gain temporel G4. La coordination rapporte localement
+**43,1 → 15,8 Gcycles** pour la proposition seule ; le paquet G4 R7b
+exécuté sur `8e8b83a3` est antérieur à ce port. Son
+[ablation appariée](../receipts/g4_tower_r7b_20260923/README.md)
+trouve un gain de tour K10 de 5 à 8,4 %, aucun gain K5 établi ;
+aucun de ces temps n'est celui du move-to-front.
+
+Rejeu indépendant du gate source `8fa03046` : Release et Clang
+ASan/UBSan passent **34 957** ensembles ; la variante à proposition
+corrompue passe avec **6 410** replis, et le mutant sans canonisation
+échoue causalement (`cause=proposed.differs`). Le même gate compilé
+sur le snapshot `8e8b83a3` donne les mêmes **19 349** propositions
+vérifiées et **857** canonisations, ainsi que les mêmes résultats ;
+les binaires temporaires sont dans `/tmp/mhgp9_anchor_meb_mtf_audit_*`
+et `/tmp/mhgp9-meb-baseline.na1lNa/`, non épinglés comme reçus.
+Le commentaire de code « expected linear work » n'a pas de preuve
+pour l'ordre déterministe employé (`n≤10`). La marque de comptabilité
+`...double_welzl...v3` garde la même signification des issues mais ne
+nomme pas le nouveau proposer : comparer les coûts avec le **pin
+source**, jamais avec cette marque seule.

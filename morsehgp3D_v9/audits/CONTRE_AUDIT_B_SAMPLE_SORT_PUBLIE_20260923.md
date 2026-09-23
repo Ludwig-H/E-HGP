@@ -103,3 +103,37 @@ de départs et initialisation des cibles restent sériels : le port ne
 supprime pas tout le plancher hôte. La mesure locale W8 est dans le
 bruit et W48 local est sursouscrit ; aucun reçu apparié G4 n'établit le
 gain de chaîne de `75f27eee`.
+
+**Contre-épreuve LiDAR locale exploratoire, hors dépôt et non archivée
+comme reçu, sur les séparateurs périodiques avant `ec6d1b74`.** Une
+copie isolée du paquet `8e8b83a3`, avec seul
+`pool.hpp` instrumenté, a traité la trame entière sans sol 08/000000
+à 1 mm, K10/s8, générateur W8 puis FULL statique W8 ou W48. Les deux
+objets `complete_relative` ont les mêmes `input`, `generator`,
+`catalogue`, `orders` et digest `ac108f7f71096c3f`. Les neuf tris
+de requêtes ont **32/32 seaux non vides** à W8, maximum/moyenne
+**1,268–1,566**, et **192/192** à W48, maximum/moyenne
+**1,442–1,696**. Les graines suivent des distributions comparables.
+Le déséquilibre adverse de 96,94 % n'apparaît donc pas sur cette trame ;
+ce diagnostic mono-scène, instrumenté sur hôte partagé, ne mesure pas
+un gain G4. `ec6d1b74` remplace ensuite la grille de prélèvement par
+des positions pseudo-aléatoires déterministes, sans publier encore la
+distribution des seaux réels ni supprimer le pire cas théorique.
+Une reproduction indépendante de la sélection `splitmix64` publiée
+sur le **même** témoin de 200 003 clés/W48 donne cette fois **192/192**
+seaux non vides, maximum **1 798** clés pour une moyenne de
+**1 041,68** (rapport **1,73**). Le désalignement voulu fonctionne
+donc sur cette fixture précise ; il ne transforme pas un prélèvement
+déterministe en garantie universelle d'équilibrage.
+En effet, pour les **positions SplitMix elles-mêmes** à
+`n=200003`/W48, les 6144 tirages couvrent 6043 indices distincts :
+y placer les 6043 plus petites clés distinctes laisse
+**193 992/200 003 (96,995 %)** dans le dernier seau. Cette entrée
+adversariale reste correctement triée, mais un seul worker porte
+presque tout le tri. Le nouveau gate `adversarial_grid` valide la
+permutation, pas une répartition minimale ; la version périodique
+ancienne le passait également.
+Le gate du source `ec6d1b74` a été recompilé indépendamment en Clang
+ASan/UBSan : **403/403** cas passent (160 multi-workers, 52 cas au
+compteur historique `odd_runs`) ; cela ne mesure ni occupation des
+seaux ni performance G4.
