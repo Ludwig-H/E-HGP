@@ -2616,3 +2616,41 @@ masse réellement retirée avant `A×B`, covers/formes évités et coût
 total. Les enfants ne sont pas publiés comme tâches de workers : un
 gros sous-arbre de raffinement reste sur un seul worker, même si les
 expansions terminales peuvent être dispersées.
+
+### Mise à jour 12 h 12 UTC — ébauche retirée du worktree
+
+Le développeur a retiré `rect_refine_min` de la source mutable avant
+publication : l'accès `nodes[absent]` ci-dessus concerne **l'ébauche
+inspectée**, pas `main` ni le produit actuel. Son gate en cours avait
+aussi `WORDS(WspdQ34Work,477)` tout en gardant
+`bit_cast<std::array<u64,476>>` et deux retours `array<476>` : la
+reconstruction du gate aurait échoué à la compilation. Si la piste
+revient, corriger ces tailles, faire passer les gates ciblés
+et surtout fixer un **budget de travail de certificat** avec repli exact :
+jusqu'à `2m−2` filtres enfants pour un produit de masse `m`, chacun
+pouvant parcourir O(n) nœuds, déplacerait le verrou vers O(mn).
+
+### Mise à jour 12 h 13 UTC — au juge indépendant q3 de C
+
+Lecture B du `q3_sample_judge.cpp` encore WIP : le prédicat feuille
+`Sphere::s` est entier exact, mais `census` élague les boîtes avec
+centre/rayon `double` et `margin=1e-6*(r2+1)+4`, **sans borne d'erreur
+démontrée**. Je n'ai trouvé aucun contre-exemple ; la marge paraît
+ample sous u18, mais `--compare` oppose l'élagage Tukey au mode sans
+Tukey en réutilisant le **même** census flottant. Il ne certifie donc
+pas ce raccourci numérique. La preuve Tukey/demi-boule elle-même paraît
+saine ; les produits `Sphere::s` tiennent sous 2^117 en i128 signé.
+
+Une alternative exacte et simple pour les boîtes **d'entiers** :
+`s(x)=Σ_i f_i(x_i)`, `f_i(t)=D(t−a_i)^2−2P_i(t−a_i)`, `D>0`.
+Sur `[lo_i,hi_i]∩Z`, `max f_i` est à `lo_i` ou `hi_i` ; `min f_i`
+est à l'un des deux entiers voisins de `a_i+P_i/D`, chacun clampé
+dans l'intervalle. Somme des trois minima/maxima : `min_s>0`
+exclut tout intérieur **et contact** ; `max_s<0` crédite tout le
+nœud strictement intérieur ; l'égalité force descente. Division
+signée avec vrai floor/ceil, pas troncature C++ ; tous les intermédiaires
+u18 restent sous 2^117. Pré-calculer les quotients une fois par
+sphère. Ainsi le juge pourra revendiquer un census exact **sans**
+marge heuristique, avant de publier des absences de clés q3.
+Les coquilles `>12` restent volontairement hors du juge et les
+ancres/longueurs échantillonnées ne prouvent pas la complétude globale.
