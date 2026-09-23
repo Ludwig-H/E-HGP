@@ -61,7 +61,10 @@ Le cover moyen d'une arête **morte** est
 vivante, `13 497 418 / 312 064 = 43,25`. La moyenne **globale** est
 `2 963 451 407 / 2 043 612 = 1 450,10`. Les « 1 453 sites des
 arêtes mortes » du README et « 568 » de `docs/PROVENANCE.md` ne sont
-donc pas les moyennes de la classe morte de ce brut. Corriger les
+donc pas les moyennes de **toute** la classe morte de ce brut. Le chiffre
+1 453 se reconstruit pour la sous-classe `both_dead` seulement
+(`1 799 656 642 / 1 238 649 ≈ 1 452,9`) ; 568 reste sans définition
+dans ce reçu. Corriger les
 libellés/chiffres avant de les reprendre dans une décision de défaut.
 Cette rectification ne retire pas le constat qualitatif : les arêtes
 sans sortie concentrent énormément de travail aval.
@@ -82,6 +85,10 @@ Le reçu n'a ni coupes capteur appariées 8k/16k/32k, ni plusieurs
 séquences, ni s10/s12, ni brut avec sol, ni GPU. Mesurer maintenant
 temps **et** formes/frontières/cellules/covers/aval sur ces régimes ; une
 simple baisse de `q34_ms` ne clôt pas le P0 sous-quadratique.
+Une [piste distincte](PISTE_B_Q34_NOEUDS_AVANT_COVER_20260923.md)
+consisterait à créditer des nœuds spatiaux entiers pour des cellules de
+centres **avant** de construire le cover ; elle reste à implémenter et à
+mesurer sans dupliquer le filtre universel déjà présent.
 
 La sonde de tour locale avec certificat reste très loin du jalon
 temporel sur 08/000000 : `chain_total=57,064 s` à K5 et `156,321 s`

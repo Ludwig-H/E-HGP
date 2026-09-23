@@ -9,6 +9,12 @@ relus sont `tower_worker_v9.py` SHA-256 `255aeeed…`,
 mais la réception n'est pas encore *fail-closed* ; corriger avant de payer
 une nouvelle campagne G4 R3.
 
+Une campagne v5 sur `b4e480fc` avait déjà démarré lorsque ce verdict a
+été publié. Ses chronos éventuels peuvent rester des diagnostics, mais
+son statut `completed`/`partial` ne doit pas être promu sans contrelecture
+indépendante de la fermeture et des identités du reçu ; ne pas répéter une
+campagne payante avant correction.
+
 ## Quatre contre-exemples acceptés
 
 1. `validate_received` accepte comme `partial` un cas censuré
