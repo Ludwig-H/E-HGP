@@ -27,10 +27,11 @@
 //   q3_sample_judge family <uniform|terrain|clusters> <n> <Kmax> <sites> <workers> [options]
 //   q3_sample_judge file <cut.u32le> <Kmax> <sites> <workers> [options]
 //   q3_sample_judge fixture-eq [options]         (fixture d'egalite gravee, Kmax = 5, tous les sites)
-// options : --compare | --no-prune ; --seed=<u64> ; --min-top=<n> ; --inject=overprune | --inject=level
+// options : --compare | --no-prune ; --seed=<u64> ; --sites=<i,j,...> ; --min-top=<n> ;
+//           --inject=overprune | --inject=level | --inject=shell-dup
 //
 // Code 0 conforme ; 1 manquante, EXTRA, desaccord d'elagage ou recoupement faux ; 2 argument/chaine ;
-// 3 vacuite (plancher --min-top de cles p = Kmax-2 non atteint, ou mutant cible non tue).
+// 3 vacuite (plancher --min-top de cles q3 regulieres p = Kmax-2, arite 3, non atteint ; mutant cible non tue).
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -71,6 +72,8 @@ struct Options {
   std::uint64_t min_top = 1;
   bool overprune = false;
   bool corrupt_level = false;  // mutant : tous les niveaux du catalogue faux (den + 1)
+  bool shell_dup = false;      // mutant : dernier site de coquille remplace par le premier (doublon)
+  std::vector<std::size_t> sites;  // --sites= : sites imposes (indices de l'index), a la place du tirage
 };
 
 std::vector<Point3> read_u32le(const std::string& path) {
@@ -345,6 +348,9 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
   }
   std::vector<BallData> cat = r.catalogue_balls;
   if (opt.corrupt_level) for (auto& ball : cat) ball.level.den += 1;
+  if (opt.shell_dup)
+    for (auto& ball : cat)
+      if (ball.n_shell >= 3) ball.shell_ids[ball.n_shell - 1] = ball.shell_ids[0];
   std::vector<std::vector<std::uint32_t>> by_site(n);
   for (std::size_t i = 0; i < cat.size(); ++i)
     for (const auto s : cat[i].shell()) by_site[static_cast<std::size_t>(s)].push_back(static_cast<std::uint32_t>(i));
@@ -437,19 +443,18 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
                         sp.D * (px.y + py.y - 2 * pos[a].y) == 2 * sp.P[1] &&
                         sp.D * (px.z + py.z - 2 * pos[a].z) == 2 * sp.P[2];
           }
+        std::vector<std::int32_t> shell_sorted(shell.begin(), shell.end());
+        std::sort(shell_sorted.begin(), shell_sorted.end());
         std::int64_t hit = -1;
         bool cross_ok = false;
         for (const auto bi : by_site[a]) {
           if (static_cast<std::int64_t>(bi) == exclude) continue;
           const auto& ball = cat[bi];
           if (ball.n_shell != shell.size()) continue;
-          bool on = true, has_b = false, has_c = false;
-          for (const auto s : ball.shell()) {
-            if (sp.s(pos[static_cast<std::size_t>(s)]) != 0) { on = false; break; }
-            has_b = has_b || static_cast<std::uint32_t>(s) == b;
-            has_c = has_c || static_cast<std::uint32_t>(s) == c;
-          }
-          if (!on || !has_b || !has_c || !same_level(ball, sp)) continue;
+          // Ensemble exact des sites de coquille (listes triees egales : ni doublon, ni site substitue).
+          std::vector<std::int32_t> theirs(ball.shell().begin(), ball.shell().end());
+          std::sort(theirs.begin(), theirs.end());
+          if (theirs != shell_sorted || !same_level(ball, sp)) continue;
           hit = bi;
           // Recoupement : memes interieurs (ids distincts, strictement interieurs), arite coherente.
           std::vector<std::int32_t> ids(ball.interior().begin(), ball.interior().end());
@@ -496,7 +501,11 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
     }
   };
 
-  const auto sampled = sample_sites(n, sites, opt.seed);
+  std::vector<std::size_t> sampled = sample_sites(n, sites, opt.seed);
+  if (!opt.sites.empty()) {
+    for (const auto a : opt.sites) if (a >= n) { std::fprintf(stderr, "site %zu out of range\n", a); return 2; }
+    sampled = opt.sites;
+  }
   Totals t;
   std::unordered_set<std::uint32_t> keys;
   std::vector<std::string> lines;
@@ -504,6 +513,7 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
   std::uint64_t kept_pruned = 0;
   for (const auto a : sampled) {
     bool dummy = false;
+    const std::uint64_t long_before = t.by_len[2];
     if (opt.mode == 2) {
       Totals t1;
       std::set<Tri> e1, e2;
@@ -519,16 +529,21 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
     } else {
       judge_site(a, opt.mode == 0, -1, t, nullptr, keys, lines, dummy);
     }
+    if (t.by_len[2] > long_before)  // sites porteurs d'incidences longues (>= 1600 unites) : cibles de --compare
+      std::printf("%s LONG_SITE a=%zu incidences=%llu\n", label.c_str(), a,
+                  (unsigned long long)(t.by_len[2] - long_before));
   }
   if (opt.mode == 2) t.kept = kept_pruned;
   for (const auto& l : lines) std::printf("%s %s\n", label.c_str(), l.c_str());
   std::uint64_t top_keys = 0, top_population = 0;
-  for (const auto k : keys) if (cat[k].n_interior == pmax) ++top_keys;
+  const auto top = [&](std::uint32_t k) { return cat[k].n_interior == pmax && cat[k].arity == 3 && cat[k].n_shell == 3; };
+  std::uint64_t q2_keys = 0;
+  for (const auto k : keys) { if (top(k)) ++top_keys; if (cat[k].arity == 2) ++q2_keys; }
   for (const auto& ball : cat) if (ball.n_shell == 3 && ball.arity == 3 && ball.n_interior == pmax) ++top_population;
   // Mutant cible : une cle trouvee de rang p = pmax, retiree de la table, rejugee depuis un site tire de sa
   // coquille ; un triangle manquant doit porter deux autres sites de sa coquille.
   std::uint32_t target = UINT32_MAX;
-  for (const auto k : keys) if (cat[k].n_interior == pmax && (target == UINT32_MAX || k < target)) target = k;
+  for (const auto k : keys) if (top(k) && (target == UINT32_MAX || k < target)) target = k;
   bool mutant_killed = false;
   if (target != UINT32_MAX) {
     for (const auto a : sampled) {
@@ -541,16 +556,17 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
   }
   std::printf("%s n=%zu kmax=%u balls=%zu input_fnv=%016llx seed=%016llx mode=%s%s sampled_sites=%zu partners=%llu "
               "kept=%llu triangles=%llu acute=%llu incidences=%llu found=%llu missing=%llu cross_fail=%llu extra=%llu "
-              "unique_keys=%zu top_keys=%llu top_population=%llu extended=%llu shell_over_12=%llu mutant_killed=%d "
+              "unique_keys=%zu q2_keys=%llu top_keys=%llu top_population=%llu extended=%llu shell_over_12=%llu mutant_killed=%d "
               "len_lt500=%llu len_500_1600=%llu len_ge1600=%llu top_lt500=%llu top_500_1600=%llu top_ge1600=%llu "
               "prune_disagreements=%d",
               label.c_str(), n, kmax, cat.size(), (unsigned long long)fnv_points(points), (unsigned long long)opt.seed,
               opt.mode == 0 ? "prune" : opt.mode == 1 ? "no-prune" : "compare",
-              opt.overprune ? "+overprune" : opt.corrupt_level ? "+level" : "",
+              opt.overprune ? "+overprune" : opt.corrupt_level ? "+level" : opt.shell_dup ? "+shell-dup" : "",
               sampled.size(), (unsigned long long)t.partners, (unsigned long long)t.kept,
               (unsigned long long)t.triangles, (unsigned long long)t.acute, (unsigned long long)t.incidences,
               (unsigned long long)t.found, (unsigned long long)t.missing, (unsigned long long)t.cross_fail,
-              (unsigned long long)t.extra, keys.size(), (unsigned long long)top_keys, (unsigned long long)top_population,
+              (unsigned long long)t.extra, keys.size(), (unsigned long long)q2_keys, (unsigned long long)top_keys,
+              (unsigned long long)top_population,
               (unsigned long long)t.extended, (unsigned long long)t.over_shell, mutant_killed ? 1 : 0,
               (unsigned long long)t.by_len[0], (unsigned long long)t.by_len[1], (unsigned long long)t.by_len[2],
               (unsigned long long)t.by_len_top[0], (unsigned long long)t.by_len_top[1],
@@ -574,6 +590,17 @@ int main(int argc, char** argv) {
       else if (a == "--no-prune") opt.mode = 1;
       else if (a == "--inject=overprune") opt.overprune = true;
       else if (a == "--inject=level") opt.corrupt_level = true;
+      else if (a == "--inject=shell-dup") opt.shell_dup = true;
+      else if (a.rfind("--sites=", 0) == 0) {
+        std::string list = a.substr(8);
+        std::size_t pos = 0;
+        while (pos <= list.size()) {
+          const std::size_t comma = list.find(',', pos);
+          opt.sites.push_back(std::stoul(list.substr(pos, comma == std::string::npos ? std::string::npos : comma - pos)));
+          if (comma == std::string::npos) break;
+          pos = comma + 1;
+        }
+      }
       else if (a.rfind("--seed=", 0) == 0) opt.seed = std::stoull(a.substr(7), nullptr, 0);
       else if (a.rfind("--min-top=", 0) == 0) opt.min_top = std::stoull(a.substr(10));
       else if (a.rfind("--", 0) == 0) { std::fprintf(stderr, "unknown option %s\n", a.c_str()); return 2; }

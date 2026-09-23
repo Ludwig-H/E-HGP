@@ -20,7 +20,8 @@
 //   q2_sample_judge family <uniform|terrain|clusters> <n> <Kmax> <sites> <workers>
 //   q2_sample_judge file <cut.u32le> <Kmax> <sites> <workers>
 //
-// Options : --seed=S, --min-top=N, --inject=level (mutant : niveaux faux, doit rendre 1).
+// Options : --seed=S, --min-top=N (cles regulieres p = Kmax-1, arite 2), --inject=level | --inject=shell-dup
+// (mutants : niveaux faux, coquille a doublon ; doivent rendre 1).
 // Code 0 conforme ; 1 manquante, EXTRA ou recoupement faux ; 2 argument/chaine ; 3 vacuite.
 #include <algorithm>
 #include <cstdint>
@@ -122,7 +123,7 @@ struct Totals {
 };
 
 int run(const std::string& label, const std::vector<Point3>& points, unsigned kmax, std::size_t sites,
-        std::size_t workers, std::uint64_t seed, std::uint64_t min_top, bool corrupt_level) {
+        std::size_t workers, std::uint64_t seed, std::uint64_t min_top, bool corrupt_level, bool shell_dup) {
   if (kmax < 2 || kmax > 10) { std::fprintf(stderr, "Kmax must be in 2..10\n"); return 2; }
   mhgp9::ChainOptions o;
   o.kmax = kmax;
@@ -154,6 +155,9 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
   }
   std::vector<BallData> cat = r.catalogue_balls;
   if (corrupt_level) for (auto& ball : cat) ball.level.den += 1;  // mutant : niveaux faux
+  if (shell_dup)  // mutant : dernier site de coquille remplace par le premier (doublon)
+    for (auto& ball : cat)
+      if (ball.n_shell >= 2) ball.shell_ids[ball.n_shell - 1] = ball.shell_ids[0];
   std::vector<std::vector<std::uint32_t>> by_site(n);
   for (std::size_t i = 0; i < cat.size(); ++i)
     for (const auto s : cat[i].shell()) by_site[static_cast<std::size_t>(s)].push_back(static_cast<std::uint32_t>(i));
@@ -189,18 +193,18 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
         continue;
       }
       if (shell.size() > 2) ++t.extended;
+      std::vector<std::int32_t> shell_sorted(shell.begin(), shell.end());
+      std::sort(shell_sorted.begin(), shell_sorted.end());
       std::int64_t hit = -1;
       bool cross_ok = false;
       for (const auto bi : by_site[a]) {
         if (static_cast<std::int64_t>(bi) == exclude) continue;
         const auto& ball = cat[bi];
         if (ball.n_shell != shell.size()) continue;
-        bool on = true, has_b = false;
-        for (const auto s : ball.shell()) {
-          if (power(pos[static_cast<std::size_t>(s)], pos[a], pos[b]) != 0) { on = false; break; }
-          if (static_cast<std::size_t>(s) == b) has_b = true;
-        }
-        if (!on || !has_b || !same_level(ball, pos[a], pos[b])) continue;
+        // Ensemble exact des sites de coquille (listes triees egales : ni doublon, ni site substitue).
+        std::vector<std::int32_t> theirs(ball.shell().begin(), ball.shell().end());
+        std::sort(theirs.begin(), theirs.end());
+        if (theirs != shell_sorted || !same_level(ball, pos[a], pos[b])) continue;
         hit = bi;
         // Recoupement : memes interieurs (ids distincts), arite 2 (la paire a, b est antipodale).
         std::vector<std::int32_t> ids(ball.interior().begin(), ball.interior().end());
@@ -249,12 +253,13 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
   for (const auto a : sampled) judge_site(a, -1, t, keys, lines, dummy);
   for (const auto& l : lines) std::printf("%s %s\n", label.c_str(), l.c_str());
   std::uint64_t top_keys = 0, top_population = 0;
-  for (const auto k : keys) if (cat[k].n_interior == pmax) ++top_keys;
+  const auto top = [&](std::uint32_t k) { return cat[k].n_interior == pmax && cat[k].arity == 2 && cat[k].n_shell == 2; };
+  for (const auto k : keys) if (top(k)) ++top_keys;
   for (const auto& ball : cat) if (ball.n_shell == 2 && ball.arity == 2 && ball.n_interior == pmax) ++top_population;
   // Mutant cible : une cle trouvee de rang p = Kmax-1, retiree, rejugee depuis un site tire de sa coquille ; un
   // manquant doit porter l'autre site de sa coquille.
   std::uint32_t target = UINT32_MAX;
-  for (const auto k : keys) if (cat[k].n_interior == pmax && (target == UINT32_MAX || k < target)) target = k;
+  for (const auto k : keys) if (top(k) && (target == UINT32_MAX || k < target)) target = k;
   bool mutant_killed = false;
   if (target != UINT32_MAX) {
     for (const auto a : sampled) {
@@ -285,11 +290,12 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
 int main(int argc, char** argv) {
   try {
     std::uint64_t seed = 0xc3a5c85c97cb3127ull, min_top = 1;
-    bool corrupt_level = false;
+    bool corrupt_level = false, shell_dup = false;
     std::vector<std::string> args;
     for (int i = 1; i < argc; ++i) {
       const std::string a = argv[i];
       if (a == "--inject=level") corrupt_level = true;
+      else if (a == "--inject=shell-dup") shell_dup = true;
       else if (a.rfind("--seed=", 0) == 0) seed = std::stoull(a.substr(7), nullptr, 0);
       else if (a.rfind("--min-top=", 0) == 0) min_top = std::stoull(a.substr(10));
       else if (a.rfind("--", 0) == 0) { std::fprintf(stderr, "unknown option %s\n", a.c_str()); return 2; }
@@ -298,12 +304,12 @@ int main(int argc, char** argv) {
     if (args.size() == 6 && args[0] == "family") {
       const auto fx = mhgp9::gen::bench::make_front_fixture(std::stoul(args[2]), args[1], 3);
       return run(args[1] + "_" + args[2], fx.points, std::stoul(args[3]), std::stoul(args[4]), std::stoul(args[5]),
-                 seed, min_top, corrupt_level);
+                 seed, min_top, corrupt_level, shell_dup);
     }
     if (args.size() == 5 && args[0] == "file") {
       const auto slash = args[1].find_last_of('/');
       return run(args[1].substr(slash == std::string::npos ? 0 : slash + 1), read_u32le(args[1]), std::stoul(args[2]),
-                 std::stoul(args[3]), std::stoul(args[4]), seed, min_top, corrupt_level);
+                 std::stoul(args[3]), std::stoul(args[4]), seed, min_top, corrupt_level, shell_dup);
     }
   } catch (const std::exception& e) {
     std::fprintf(stderr, "error: %s\n", e.what());
