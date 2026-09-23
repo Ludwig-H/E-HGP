@@ -1,9 +1,10 @@
 # État courant des audits v9
 
 23 septembre 2026. Code produit courant sur `origin/main` :
-**`6345a985`** (selftest du protocole v6), après `7f64a279` (cache des
-nœuds témoins, preuve q3/q4 conjointe et leviers publiés) et `e0ae05a7`
-(préparation/tri FULL statiques parallèles). Le reçu G4 R3 exécute
+**`a1d7a9bc`** (réception G4 v6 et validation des compteurs), après
+`6345a985` (selftest v6), `7f64a279` (cache des nœuds témoins, preuve
+q3/q4 conjointe et leviers publiés) et `e0ae05a7` (préparation/tri FULL
+statiques parallèles). Le reçu G4 R3 exécute
 **`b4e480fc`**, pas ces ports plus récents. Le certificat de voies mortes
 et le protocole v5 venaient de `099ca784`. Le census q3 sur feuille et la sonde
 v4 venaient de `e54f727c` ; le reçu G4 R2 reste épinglé au code
@@ -397,9 +398,15 @@ appariée.
    18,7 % de tests uniformes en moins mais aucun gain LiDAR établi ; ses
    compteurs de cellules ne se comparent plus directement à R3. Le cache
    des nœuds témoins passe ses comparaisons sur de vraies traces, mais son
-   API publique permet de compter deux fois une feuille : voir la
+   API publique permettait de compter deux fois une feuille : voir la
    [contrelecture B et sa reproduction](CONTRE_AUDIT_B_CACHE_TEMOINS_WIP_20260923.md).
-   Le chemin interne garde les nœuds disjoints. Les portes cache et ses trois
+   `a1d7a9bc` refuse désormais les recouvrements de plages par voie ; une
+   compilation indépendante refuse aussi doublon et ancêtre/feuille, tout
+   en acceptant leur usage sur deux voies distinctes. Le chemin interne
+   garde les nœuds disjoints. La validation est répétée par paire en
+   `O(m²)` pour `m≤17` dans une trace interne ; mesurer son coût LiDAR
+   avant de préférer un type de trace certifié une fois. Les portes cache
+   et ses trois
    mutants, le raccord chaîne et la sonde/worker v6 ciblée passent dans un
    build isolé. `6345a985` corrige aussi le faux producteur v5 du selftest
    v6 ; son test de snapshot ciblé passe. Aucun gain G4 du cache ni de la
@@ -415,6 +422,16 @@ appariée.
    port FULL, sans cas v6 cache=off apparié. Leurs résultats logiques
    concordent avec les anciens essais locaux, mais ils ne quantifient
    pas le gain causal du cache.
+   `a1d7a9bc` ferme plusieurs trous v5 de réception (groupe tué fermé,
+   génération/provenance, préflight non vacant, rapport GNU time), mais sa
+   [relecture de `guard_evidence.json`](CONTRE_AUDIT_B_G4_RECEPTION_V5_20260923.md)
+   accepte encore un calendrier vide et des champs de garde falsifiés dans
+   un faux cycle complet. Son validateur
+   de compteurs accepte aussi `witness_cache_queries=0` malgré 16,5 M
+   rejets cache, ou `both_edges>q3_edges` sur le JSON local cité ci-dessus.
+   Exiger la preuve complète de garde **relative au contexte hôte conservé**,
+   puis les bornes `cache_rejected_pairs≤cache_queries≤expanded_pairs` et
+   `both_edges≤min(q3_edges,q4_edges)` avant un nouveau reçu G4.
 4. **Aval FULL, grandes coquilles et échelle** : les 12,0 M appels MEB
    de 000000/K10 font 1,065 milliard de tests de puissance ; un test
    exact de la paire la plus éloignée peut éliminer toutes les autres
