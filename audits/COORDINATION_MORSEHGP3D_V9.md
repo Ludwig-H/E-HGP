@@ -2844,3 +2844,31 @@ FULL. Le juge q2 partage cette faiblesse du match. Ajouter une
 mutation de coquille substituée, puis archiver la campagne v3 avec
 hash du runner/recette. Aucun reçu v3 n'est encore publié à cette
 lecture.
+
+### Mise à jour 12 h 58 UTC — budget de la porte filtre GPU
+
+[Contre-audit B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PORTE_FILTRE_GPU_20260923.md)
+sur R11 et le port hôte GPU en cours : la porte annoncée de **0,1 s
+transferts compris** pour les filtres rectangles/paires de
+08/000000/K5 est pertinente comme expérience de débit, mais pas comme
+preuve qu'une tour tombe sous 1 s. Dans R11, le reliquat
+`chain_s−q34_s`, **même en annulant tout q3/q4**, vaut 0,874/1,062/1,106 s
+sur les trois trames sans sol à K5 et au moins 3,235 s à K10. Le chemin
+porté correspond à environ 33 % du CPU q3/q4 du profil local si l'on
+inclut l'ordre des enfants, et non à tous les 40 % du filtrage (front
+hors port) ; CPU local ≠ mur G4. Une architecture résidente qui chevauche
+ou refond l'aval pourrait changer ces reliquats, mais **un simple déport
+du filtre** ne suffit pas. Le chantier lu n'a encore ni noyau `.cu` ni
+reçu GPU ; son test compare les masques sur l'hôte, avec paires
+échantillonnées. Fermer le préflight des buffers/indices, l'égalité de
+tous les masques sur appareil, la chaîne intégrée et les sorties de
+masques bornées par lots pour les dizaines de millions.
+
+### Mise à jour 12 h 59 UTC — deux limites additionnelles du juge C
+
+Dans le code v3 publié du juge q3, `ball.key` n'est pas recoupée : la
+porte vérifie la présence géométrique échantillonnée, pas la clé canonique
+consommée par FULL. Le runner ignore les codes d'échec des commandes
+`git`/`sha256sum` de provenance et peut marquer `STATUS=0` avec provenance
+incomplète. Détails et remèdes dans la
+[note B enrichie](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_JUGE_Q3_C_V3_20260923.md).

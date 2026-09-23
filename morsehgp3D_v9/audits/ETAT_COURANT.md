@@ -46,6 +46,16 @@ annonce à tort 3,3–4,5× ; les répétitions individuelles donnent
 la tour a aussi évolué ; l'ablation interne R11 est la preuve du gain.
 Toujours **CPU G4**, s8, sans sol et seule séquence 08 : ni GPU ni
 contrat brut multi-séquence ou sous-quadraticité nouvelle.
+Le [budget B de la porte filtre GPU](CONTRE_AUDIT_B_PORTE_FILTRE_GPU_20260923.md)
+montre que, dans R11, `chain_s−q34_s` vaut encore 0,874/1,062/1,106 s
+sur les trois trames K5 et au moins 3,235 s à K10 : déporter **seulement**
+les filtres ne peut qualifier la seconde si les autres phases restent
+inchangées et séquentielles. La porte de débit 0,1 s pour tous les masques
+sans cache demeure utile, mais le port hôte en chantier n'a encore aucun
+noyau CUDA ni résultat G4. Le profil local attribue environ 33 % du CPU
+q3/q4 aux deux DFS ciblés avec leur ordre d'enfants ; 40 % comprend
+aussi le front non porté. Un chemin GPU intégré doit inclure les coûts
+de création/consommation des requêtes et une sortie bornée par lots.
 Les deux meilleures lignes R11 (08/000100) bornent aussi le gain du
 seul réordonnancement q3/q4 : les **48 workers logiques** consomment
 78,151 CPU·s en 1,661 s de mur maximal à K5 et 211,744 CPU·s en

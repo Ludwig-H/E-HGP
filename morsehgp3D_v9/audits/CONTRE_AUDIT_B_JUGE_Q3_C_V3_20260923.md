@@ -55,10 +55,21 @@ pour qualifier l'absence de clés q3 jamais émises dans le périmètre
 
 Le juge fixe `run_tower=false` : code 0 juge le **catalogue**, son
 census/Euler et les ancres tirées, jamais les parents de la tour FULL.
+Le match géométrique n'inspecte pas `ball.key` : une clé canonique
+erronée, avec niveau/coquille/intérieurs/arité préservés, peut passer.
+Ce n'est pas une objection à la recherche d'omissions géométriques,
+mais ce juge ne certifie pas l'identité de catalogue que FULL consomme.
+Pour revendiquer cette identité, comparer la clé canonique reconstruite
+indépendamment et tuer un mutant de clé seule.
 Le mode `--compare` de la campagne v3 confronte l'élagage à
 l'énumération complète sur la fixture d'égalité et trois ancres
 LiDAR, pas sur tous les sites. Le runner épingle les SHA des sources
 des deux juges, de leurs binaires et des entrées ; il ne hache pas
 encore son propre script ni les flags de compilation. Le hash du
 binaire protège le résultat exécuté, mais la reproductibilité de la
-recette reste à fermer avant un reçu autonome.
+recette reste à fermer avant un reçu autonome. De plus,
+`run_judges_v3.sh` utilise `set -u -o pipefail` mais pas `set -e` ni
+un test du code de `git rev-parse`, `git status` et `sha256sum` dans le
+bloc de provenance. Une provenance absente/incomplète peut donc
+coexister avec `STATUS=0` si les cas passent. Faire de la réussite de
+chaque commande de provenance une précondition bloquante.
