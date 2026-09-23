@@ -91,6 +91,15 @@ et les masques **propres à chaque arête** : les voies q3 et q4 actives
 peuvent différer à l'intérieur du même segment. Compter séparément les
 rectangles ouverts devenus vides, y compris en fin de liste : le
 curseur actuel de validation s'arrête au dernier survivant.
+La [mesure indépendante A des segments S2](s2_segment_mass_20260923/README.md)
+donne un premier sélecteur **observable avant le cœur** sur le brut
+08/000000/K5/s8 : les 11 174 segments avec au moins 16 survivantes
+(0,44 % des 2 548 453 rectangles ouverts) portent 478 635 662 des
+559 661 741 formes de cœur, soit 85,52 %. Leurs 396 481 arêtes
+représentent 10 704 987 termes paire-sommet pour une grille de
+27 sommets. Ce sont des **coûts et une masse ciblable**, aucun rejet
+ni gain de temps acquis ; le seuil doit être requalifié aux autres
+trames, K et séparations.
 Le calcul de `Q_E(v)` coûte `|E|` évaluations
 par sommet **distinct** : une grille de 2×2×2 cellules AABB n'a qu'au
 plus **27 sommets distincts**, et non 8×8, si les valeurs sont

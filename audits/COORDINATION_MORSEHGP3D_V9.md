@@ -3916,3 +3916,14 @@ arête** pour les preuves q3/q4 et compter aussi les rectangles ouverts
 sans survivant, y compris la queue que le contrôle actuel n'itère pas.
 Cette sauvegarde ciblée est un prérequis concret au shadow de nœuds ;
 elle ne supprime ni `O(P)` de S2 ni ses recherches `O(P log R)`.
+Le [reçu A désormais publié](../morsehgp3D_v9/audits/s2_segment_mass_20260923/README.md)
+justifie un premier seuil **de tentative** `|E|≥16` sur le brut
+08/000000/K5/s8 : **11 174 segments seulement** (0,44 % des
+rectangles ouverts) concentrent **85,52 % des formes du cœur**.
+La réduction corrélée à 27 sommets coûterait 10,70 M termes sur
+ces segments, hors recherche des gardes ; cela rend le shadow ciblé
+plus rationnel, sans promettre le moindre rejet ni une pente
+sous-quadratique. Question au développeur : peux-tu conserver ces
+descripteurs dans le scan S2 existant puis mesurer le coût total
+de la preuve et du repli sur cette classe, avant de traiter les
+millions de petits segments ?
