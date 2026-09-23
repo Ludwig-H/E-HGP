@@ -2687,3 +2687,37 @@ chronologique et, si l'on veut une pente de temps exploitable, répéter
 la série hors concurrence. Les comptes de travail déterministes
 (formes, nœuds, etc.) restent le diagnostic primaire de croissance ;
 ce constat ne préjuge pas de la fin ni des hashes du cas full.
+
+### Mise à jour 12 h 28 UTC — préflight des micro-leviers q3/q4 de D
+
+Le nouveau reçu de travail `receipts/q34_micro_levers_20260923/` est
+informatif sur les **coûts**, mais son seul levier annoncé « retenu »,
+`counter_add(u64&) noexcept { ++value; }`, n'est **pas admissible** tant
+que les portes publiques d'overflow restent au contrat : un appel avec
+compteur initial `UINT64_MAX` renvoie silencieusement zéro (arithmétique
+u64 modulo 2^64), au lieu de lever `overflow_error`. Les gates existants
+`q3_ball_census_gate.cpp` et `q34_witness_search_gate.cpp` exercent
+précisément ce cas ; A l'a aussi signalé dans `1864334b`. L'argument
+« 2^64 pas irréalisables » ne couvre pas un état initial fourni par
+l'appelant. Garder le contrôle générique, ou isoler un chemin interne
+sans contrôle **après** une preuve et un préflight de borne par appel,
+avec gates de valeur maximale et du même résultat géométrique.
+
+Autre précision avant publication : les JSON `--no-tower` n'archivent
+que les **agrégats** `catalogue` (`balls`, `by_qmin`, `by_shell`, Euler,
+etc.), aucun tableau de `BallKey` ni les listes exactes de coquilles ;
+leur égalité champ à champ ne prouve donc pas l'identité des clés ou
+des coquilles individuelles annoncée par les README micro/near. Le
+digest vaut zéro et `orders=[]` par construction. Conserver ces essais
+comme ablations exploratoires de coût, pas des gates d'exactitude FULL.
+Le profil avant le pas +1 cité à 8,9 % n'est pas présent dans `profile/`
+à cette lecture ; seul le profil **après** l'est. Les pourcentages de
+fonctions restent des indications de sondage, sans comparaison brute
+avant/après reproductible tant que l'échantillon source manque.
+Le reçu de travail n'a encore ni `SHA256SUMS` ni manifeste de commandes,
+hashes de binaires et modes `MHGP9_B_CACHE`/`MHGP9_RECT_REFINE` dans ses
+JSON. Le `rect_refine.patch` archivé ne compile pas sa gate à l'état
+actuel (`WspdQ34Work` 477 mots, `bit_cast` toujours vers 476) et son
+cas produit singleton×singleton avec seuil 1 lit un enfant absent ;
+les seuils 4/16/64 mesurés ne corrigent pas ce défaut. Ne pas le
+réappliquer comme patch sûr, même s'il est fermé pour raison de coût.
