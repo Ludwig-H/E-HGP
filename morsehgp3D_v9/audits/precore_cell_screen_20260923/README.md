@@ -107,6 +107,36 @@ réellement évitées, les replis, les clés émises et la tour mesurés.
 Une réduction parallèle ne transforme pas à elle seule une masse
 quadratique en algorithme sous-quadratique.
 
+**Première passe avant ce shadow.** Les traces par arête actuelles ne
+portent pas l'identité du rectangle S2. Dans la validation structurelle
+des survivants du port `c265a5dae` (`wspd_q34.cpp`, juste avant la
+libération de `rectangles`), le curseur parcourt déjà chaque rectangle
+ouvert et ses survivants contigus. Enregistrer pour chaque segment non
+vide `(rect_id, begin, end, |A|·|B|, masque_rectangle)` ajoute un passage
+`O(R+S)` sans reconstruire `A×B`. Le worker connaît l'ordinal `j` de
+chaque survivant : une case préallouée `core_sites_by_j[j]` peut recevoir
+la différence du compteur avant/après `surviving_edge`, et de même pour
+`cover_sites`, sans verrou ni ordre de worker supposé. Exiger
+`Δcore_builds=1` par arête avec `dead_core=true`, une case écrite par
+ordinal, puis les sommes exactes des ledgers et l'égalité du jumeau
+moteur/lot. Ce premier reçu classe la masse des **formes cœur** selon
+`end−begin` et `|A|·|B|` ; il ne calcule encore aucun garde.
+
+Cette mesure est un préalable au choix des segments à traiter. Les
+42 020 rectangles ouverts de produit ≥64 à K5 portent 62,46 % des
+**paires développables** du [shadow des rectangles](../q34_raw_rectangle_mass_20260923/README.md),
+mais leur part des 559,662 M formes cœur est inconnue. Si les formes
+sont surtout dans des segments singleton, le minimum `F_E` n'apporte
+aucun partage entre arêtes. Pour huit sous-cellules partageant les 27
+sommets d'une grille `3³`, une tentative sur tous les survivants paie
+déjà jusqu'à `27S` termes corrélés, soit 107,634 M à K5 ou 210,919 M à
+K10 sur le plein brut 08/000000, **avant** gardes, repli exact, transport
+et cover. Séparer `E_q3` et `E_q4` d'après le masque de chaque arête ;
+une voie n'est fermée que si **toutes** ses sous-cellules sont certifiées.
+Ne créditer une forme cœur comme évitée que lorsque toutes les voies
+ouvertes de son arête sont fermées **avant** `load`. Garder S3 désactivé
+pour ce premier appariement, car il déplace le cœur hors des workers S2.
+
 La [fixture entière](verify_correlated_fixture.py), exécutable aussi
 sous `python3 -O`, comporte 12 sites u18 après une translation commune.
 Ses quatre arêtes `A×B` ont **zéro** témoin singleton S2 q3/q4 ; une

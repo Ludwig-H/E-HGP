@@ -271,6 +271,14 @@ sur une fixture q4 positive pour les **sous-cellules**, mais son coût
 Le shadow doit limiter ses recherches et se replier sur le moteur,
 publier visites, tests et formes effectivement évitées sur brut et
 sans sol, sans annoncer de gain avant mesure.
+La [première passe instrumentable](precore_cell_screen_20260923/README.md)
+doit joindre en `O(R+S)` chaque segment de survivants S2 à ses formes
+cœur **par ordinal**, puis publier leur distribution par taille de
+segment et de rectangle avant de choisir les groupes à certifier :
+les rectangles de produit ≥64 portent 62,46 % des paires développables
+K5, mais leur part des formes cœur est encore inconnue. Huit
+sous-cellules à 27 sommets demanderaient déjà jusqu'à 107,634 M
+évaluations corrélées K5 sur ce plein, hors gardes et repli.
 Les [demi-scènes et quarts aux trois densités](lidar_raw_physical_scaling_20260923/README.md)
 restent dans le reçu v12 ; la somme de leurs tours ne reconstruit pas le
 plein. Une scène/K5/CPU ne prouve ni sous-quadraticité, ni contrat G4.
