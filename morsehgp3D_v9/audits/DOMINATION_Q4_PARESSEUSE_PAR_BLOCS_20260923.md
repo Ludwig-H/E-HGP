@@ -361,6 +361,18 @@ sur mêmes arêtes, puis mesurer seulement les covers et formes **vraiment**
 réfute une preuve sur tout le disque sans rien conclure sur la survie
 géométrique de la voie.
 
+Le [reçu G4 R3](../receipts/g4_tower_r3_20260923/README.md) donne une
+cible concrète pour cette mesure conjointe. Après le prouveur actuel,
+`cover_builds−q3_edges−q4_edges+both_edges` arêtes n'ont **plus aucune**
+voie active : 65,3 / 64,7 / 66,5 % des covers à K5 et
+67,5 / 65,7 / 68,4 % à K10 pour les trames 000000 / 000100 / 000200.
+À K10, les arêtes à **une seule** voie encore active ne représentent que
+2,9–3,1 % des covers. Si un certificat pré-cover retrouve ces succès,
+beaucoup de covers entiers deviennent évitables ; le reçu ne dit pas
+quelle fraction de leur **masse de sites** ils portent. Publier
+`cover_sites` par masque final et les deux masques prouvés pré-cover
+avant d'estimer les formes ou les octets réellement économisés.
+
 ## Lentille de complétion : bonne spécialisation, pas un remplacement général
 
 Les deux complétions d'un tétraèdre q4 de propriétaire `ab` vérifient
