@@ -396,7 +396,25 @@ appariée.
    snapshot `a1d7a9bc` et 13 cas appariés cache ON/OFF bien préparés,
    mais SSH a expiré avant le worker et toute sonde ; l'arrêt ciblé
    `TERMINATED` est certifié. Elle ne fournit **aucun chrono ni résultat
-   de tour** et ne qualifie pas le cache.
+   de tour** et ne qualifie pas le cache. La [reprise R4b
+   publiée](../receipts/g4_tower_r4b_20260923/README.md) exécute le **même
+   paquet `a1d7a9bc`** sur G4 CPU : treize sondes `complete_relative`, six
+   paires cache ON/OFF sur les trois trames sans sol de la séquence 08 à
+   K5/K10, et une répétition ON. Les 245 fichiers du manifeste SHA concordent,
+   les sept comparaisons d'objet sont égales, le préflight est non vacant,
+   et l'arrêt ciblé est certifié `TERMINATED`. Dans les six paires, le seul
+   levier variant est `q34_witness_cache` ; `expanded_pairs`, covers et
+   digest sont inchangés. Le mur q3/q4 passe, par scène 00/01/02,
+   **4,22→3,96 / 2,89→2,76 / 5,61→5,48 s à K5** et
+   **9,16→8,71 / 5,91→5,72 / 12,72→11,76 s à K10** ; la chaîne gagne
+   0,12 à 0,89 s selon la paire. Une seule exécution par configuration
+   empêche d'en faire une borne robuste ou un contrat. Le ratio de rejets
+   cache porte sur les paires résiduelles développées : **53,36–69,76 %**
+   sur ces six cas. La plage « 61 à 70 % » du README R4b omet
+   **08/000100 K10 = 9 331 351 / 17 488 839 = 53,36 %** ; la corriger
+   dans le reçu, sans toucher aux sorties brutes. Les lacunes connues du
+   validateur v6 de garde et de certaines identités restent ouvertes ;
+   elles ne changent pas les égalités et les temps lus dans ce reçu.
    Le port `7f64a279` réunit maintenant le cache de témoins, la preuve
    conjointe et la sonde v6. Le DFS conjoint q3/q4 rend les mêmes bits de
    preuve que les deux DFS séparés sur **30 000** appels synthétiques, avec
@@ -414,9 +432,9 @@ appariée.
    et ses trois
    mutants, le raccord chaîne et la sonde/worker v6 ciblée passent dans un
    build isolé. `6345a985` corrige aussi le faux producteur v5 du selftest
-   v6 ; son test de snapshot ciblé passe. Aucun gain G4 du cache ni de la
-   preuve conjointe, aucun reçu v6 apparié et aucune borne de croissance
-   ne sont acquis.
+   v6 ; son test de snapshot ciblé passe. Le reçu R4b mesure désormais le
+   cache en ablation appariée, mais n'isole pas la preuve conjointe et
+   n'établit aucune borne de croissance.
    Les trois JSON locaux `build/v9-runs/dead_20260923/cache_s{00,01,02}_k5.json`
    donnent **69,763 / 61,155 / 66,851 %** pour
    `witness_cache_rejected_pairs / expanded_pairs` : il s'agit des paires
