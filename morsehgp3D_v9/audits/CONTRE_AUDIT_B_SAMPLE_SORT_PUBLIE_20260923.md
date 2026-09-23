@@ -61,3 +61,45 @@ mesure 0,15–0,77 s de fusion/tri contre 2,61–9,83 s de q3/q4 selon le
 cas cœur ON. Le nouveau coût et sa courbe 8k/16k/32k doivent être
 mesurés, mais supprimer entièrement ce poste ne suffirait pas au
 contrat d'une seconde sur les trames R6.
+
+## Extension au tri des requêtes FULL (`75f27eee`)
+
+Ce second tri est **distinct** de `gather_presentations`. Le commit
+`75f27eee` remplace la fusion sérielle de `tower::parallel_sort` par
+échantillonnage, classification, scatter et tri parallèle des seaux ;
+la collecte des requêtes/graines et la détection des départs de groupes
+sont également distribuées. Les ordinaux sont attribués par préfixes
+dans l'ordre de collecte initial ; chaque chunk et chaque seau possède
+des plages disjointes, jointes avant l'étape suivante. La comparaison
+`(clé,ordinal)` garde l'unique permutation triée, et je n'ai pas trouvé
+de perte ni de race dans ce port. Les exceptions des workers sont
+relayées après jointure. Recompilation indépendante du source dans
+`/tmp/mhgp9-sort-audit.BJSf2I` : la porte produit passe **400/400** cas
+(160 multi-workers) ; le mutant « seau non trié » échoue causalement à
+`n=8192`, `range=1`, W2. La porte produit passe aussi sous Clang
+ASan/UBSan dans `/tmp/mhgp9-sort-san-audit.P88Yzq`. Ces chemins
+temporaires ne sont pas un reçu archivé ; aucune mesure G4 de ce commit.
+
+Le choix **périodique fixe** des échantillons ne garantit pas des seaux
+équilibrés. Témoin strictement ordonné : pour `n=200003`, W48,
+`samples=6144`, placer les 6144 plus petites clés distinctes exactement
+aux indices `⌊i·n/6144⌋`, et toutes les autres clés au-dessus. Les
+séparateurs ne voient que les petites : le dernier seau reçoit
+**193 891 éléments (96,94 %)** et est trié par **un seul worker**.
+L'objet final reste exact et le coût reste O(n log n), mais ce code
+n'assure pas un gain de parallélisme dans ce régime. La porte actuelle
+n'exerce que des clés mélangées aléatoirement ; `workers_created` ne
+mesure pas l'occupation des seaux. Ajouter ce témoin et publier
+`nonempty_buckets`, `max_bucket`, distribution et temps par seau sur
+les vraies requêtes LiDAR avant d'attribuer un gain W48/G4.
+
+Le suivi mémoire `static_peak_request_bytes` n'inclut que deux fois la
+capacité des requêtes. Le nouveau tri garde en plus `bucket_of` (4n
+octets), échantillon/séparateurs, comptes/décalages et tampon scatter ;
+la détection de groupes alloue encore ses listes de départs. Le RSS
+global reste mesurable, mais le compteur analytique n'est plus une
+borne de ce pic. `resize` des requêtes/graines, concaténation des listes
+de départs et initialisation des cibles restent sériels : le port ne
+supprime pas tout le plancher hôte. La mesure locale W8 est dans le
+bruit et W48 local est sursouscrit ; aucun reçu apparié G4 n'établit le
+gain de chaîne de `75f27eee`.
