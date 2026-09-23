@@ -1,6 +1,14 @@
 # V9 — contrat mesurable, coût complet et parallélisme intérieur
 
-22 septembre 2026. Moteur v8 lu à `a74e90f2`, ouverture v9 `3595725a`. Audit de transition, sans qualification v9 ni exécution GCP. Cette note porte sur le système et l'ordonnancement ; les propositions géométriques q3/q4 exigent leurs propres preuves. Le [premier jalon de temps v9](https://github.com/Ludwig-H/E-HGP/blob/3595725a/morsehgp3D_v9/docs/AUDIT_V8_SYNTHESE.md) est la trame LiDAR entière sans sol, moteur entier u18/grille 1 mm. Le float32 original reste le défaut d'entrée fixé en v8, avec développement temporel v9 suspendu ; le contrat principal antérieur sur trame brute entière demeure, sa portée temporelle v9 étant à confirmer. Les trois trames disponibles proviennent toutes de la séquence SemanticKITTI 08.
+Ouverte le 22 septembre 2026 sur le moteur v8 `a74e90f2` et l'ouverture v9
+`3595725a`, mise à jour avec le reçu G4 R5 du 23 septembre. Cette note
+porte sur le système et l'ordonnancement ; les propositions géométriques
+q3/q4 exigent leurs propres preuves. Le [premier jalon de temps v9](https://github.com/Ludwig-H/E-HGP/blob/3595725a/morsehgp3D_v9/docs/AUDIT_V8_SYNTHESE.md)
+est la trame LiDAR entière sans sol, moteur entier u18/grille 1 mm. Le
+float32 original reste le défaut d'entrée fixé en v8, avec développement
+temporel v9 suspendu ; le contrat principal antérieur sur trame brute
+entière demeure. Les trois trames disponibles proviennent toutes de la
+séquence SemanticKITTI 08.
 
 ## Écart réel avec la cible
 
@@ -21,6 +29,59 @@ Le [premier reçu sans sol entier à 1 mm, inventorié à l'ouverture](https://g
 Le flux 1 mm émet 849 780 callbacks et totalise 2 707 836 IDs de supports ainsi que 2 707 842 IDs de coquille. La sonde n'en conserve qu'un digest : une sortie complète, ses clés et son catalogue restent à mesurer. Pour situer l'échelle seulement, matérialiser ces deux listes en IDs de 64 bits exige déjà au moins 43,3 Mo d'écriture, avant clés, offsets et parents. Atteindre 100 ms exige également au moins 8,5 millions d'émissions/s sur cette scène si la même quantité de supports subsiste ; cela ne prouve pas que la bande passante mémoire serait le verrou principal. Les sorties FULL peuvent différer fortement de ce flux.
 
 La [tour v7 G4](../../morsehgp3D_v7/docs/RESULTATS_TOUR_CACHE_G4_20260910.md) donne une autre alerte : sur un uniforme u16 à 50k, le census CUDA a coûté 189,346 ms de kernels à K10, tandis que FULL CPU prenait 390,481 s et la tour 418,921 s ; K5 restait à 33,569 s, dont 26,983 s FULL. Cette voie et ses données ne qualifient pas le LiDAR v9. Elles montrent pourquoi accélérer uniquement un noyau géométrique ne suffit pas au contrat de tour.
+
+### R5 : le reste de la chaîne dépasse aussi une seconde à K10
+
+Le [reçu G4 R5](../receipts/g4_tower_r5_20260923/README.md) exécute la
+tour CPU FULL sur les trois trames sans sol entières, K5/K10, 48 fils et
+deux répétitions, avec les mêmes objets que R4b et 245/245 fichiers du
+manifeste intègres ; voir la [contrelecture B](CONTRE_AUDIT_B_G4_R5_20260923.md).
+La phase tour observée baisse de **57–67 %** face à R4b sur la même
+cible, après le port des ordres K concurrents ; plusieurs changements
+et les sessions diffèrent, donc ce signal n'est pas une ablation causale.
+Le meilleur total reste **4,263 s à K5** et **12,067 s à K10**.
+
+Dans le code mesuré, q3/q4, tour et les autres phases se succèdent.
+Pour la répétition au total minimal de chaque scène, le résidu
+`chain_total−q34−tower` et la somme `q2+merge+census` valent :
+
+| Trame 08 | Résidu K5 (s) | Résidu K10 (s) | q2 + fusion + recensus K10 (s) |
+| --- | ---: | ---: | ---: |
+| 000100 | 0,699 | 2,497 | 1,43 |
+| 000000 | 1,038 | 3,387 | 2,02 |
+| 000200 | 1,098 | 3,435 | 2,06 |
+
+Le résidu comprend préparation et index, résumé des ordres, digest et
+destructions des temporaires ; la lecture du fichier et l'impression JSON
+sont hors `chain_total`. Ainsi, **dans cette architecture séquentielle**,
+rendre q3/q4 et la tour instantanés ne suffit pas pour K10 <1 s ; même
+les trois seules phases nommées de la dernière colonne dépassent 1 s.
+Ventiler le temps non attribué (environ 1,0–1,35 s à K10) entre résumé,
+digest et libérations avant de décider de la frontière du contrat, puis
+réduire aussi q2, fusion et recensus sur l'appel complet.
+
+La fusion trie en série **4,38–5,51 millions** de présentations à K10
+pour ne trouver que **2–13 doublons de BallKey** sur ces trois trames ;
+elle prend 0,61–0,78 s. Après ce tri, `balls` est déjà en ordre strict de
+clé, mais FULL trie une seconde fois les BallIds par cette même clé
+avant de valider l'unicité. Un chemin interne « catalogue trié/unique »
+peut transmettre l'ordre certifié à FULL et vérifier les voisins en
+`O(B)`, tout en gardant l'API publique indépendante pour les catalogues
+arbitraires. Mesurer le gain et les octets de cette suppression d'un tri
+redondant ; le tri/fusion initial des présentations reste à paralléliser
+ou remplacer par des runs exacts à coût total compté. La quasi-absence de
+doublons ici ne se transfère pas aux passages LiDAR superposés.
+
+Enfin, R5 compte **120–138 boules par site** à K10, avec
+`sizeof(BallData)=224` octets sur son ABI. À titre de **scénario de capacité seulement**,
+si ce ratio restait identique à 30 M sites, le catalogue seul porterait
+3,59–4,15 milliards de boules et demanderait 0,80–0,93 To décimal,
+avant index, programmes et forêts ; la borne BallId `u32` serait atteinte
+vers 31–36 M sites selon ces ratios. Ce n'est ni une prédiction de
+croissance ni une preuve de sortie quadratique, mais l'API massive doit
+prévoir des IDs et une représentation de catalogue/tour au-delà des
+vecteurs actuels avant de promettre 1 s sur plusieurs dizaines de
+millions de sites.
 
 ## Grand-livre de travail à fermer sur chaque trame
 

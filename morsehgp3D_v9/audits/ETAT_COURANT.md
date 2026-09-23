@@ -1,15 +1,15 @@
 # État courant des audits v9
 
-23 septembre 2026. Code produit courant sur `origin/main` :
-**`aae9da0e`** (coordonnées q3/q4 ordonnées possédées par l'index), après
+23 septembre 2026. Code produit courant publié : **`aae9da0e`**
+(coordonnées q3/q4 ordonnées possédées par l'index), qui inclut
 `133c8653` (statut public de la banque FULL et priorité d'échec par phase),
 `47f8a5da` (chargement des formes des voies mortes) et
-`684d8fc7` (ordres FULL concurrents et banque déplacée), après
-`a1d7a9bc` (réception G4 v6 et validation des compteurs),
+`684d8fc7` (ordres FULL concurrents et banque déplacée). Le dernier
+reçu publié, **R5 à `19de1b7f`**, exécute `aae9da0e` ; R4b exécute
+`a1d7a9bc` et R3 `b4e480fc`. Avant cette série venaient
 `6345a985` (selftest v6), `7f64a279` (cache des nœuds témoins, preuve
 q3/q4 conjointe et leviers publiés) et `e0ae05a7` (préparation/tri FULL
-statiques parallèles). Le reçu G4 R4b exécute **`a1d7a9bc`** et R3
-**`b4e480fc`**, pas le port FULL plus récent. Le certificat de voies mortes
+statiques parallèles). Le certificat de voies mortes
 et le protocole v5 venaient de `099ca784`. Le census q3 sur feuille et la sonde
 v4 venaient de `e54f727c` ; le reçu G4 R2 reste épinglé au code
 antérieur `0b29b6c3` et le reçu G4 R1 au paquet `e28296bb`. Noyau MEB à
@@ -421,6 +421,21 @@ appariée.
    elles ne changent pas les égalités et les temps lus dans ce reçu.
    La [contrelecture B de R4b](CONTRE_AUDIT_B_G4_R4B_CACHE_20260923.md)
    recoupe en outre sources, fermeture des commandes, ledger et arrêt.
+   Le [reçu G4 R5](../receipts/g4_tower_r5_20260923/README.md) sur
+   `aae9da0e` ajoute deux répétitions des six cas FULL CPU W48 et un
+   K10/W24 : **13/13** `complete_relative`, 245/245 hashes, sept
+   comparaisons d'objet égales et arrêt ciblé relu `TERMINATED`.
+   Face à R4b, sur la même cible mais dans une autre session et avec
+   plusieurs changements de code, la phase tour K10 passe de
+   **14,89/11,42/14,58 s à 5,37/4,15/4,85 s** (scènes 00/01/02) ; le
+   meilleur total est **12,067 s K10** et **4,263 s K5**. Le RSS K10
+   baisse aussi, mais demeure **3,8–4,8 Gio**. Ce signal positif ne
+   sépare pas causalement banque déplacée, parallélisme K et chargement
+   q3/q4 ; la [contrelecture B R5](CONTRE_AUDIT_B_G4_R5_20260923.md)
+   en ferme la réception. Un prototype local de filtre par ligne
+   rejette 15–17 M des 23,7 M paires résiduelles de 000000/K5, mais son
+   CPU total régresse 156→164–171 s ; ses chiffres ne sont pas un reçu
+   brut R5 et confortent le choix de ne pas porter la variante indépendante.
    Le port `7f64a279` réunit maintenant le cache de témoins, la preuve
    conjointe et la sonde v6. Le DFS conjoint q3/q4 rend les mêmes bits de
    preuve que les deux DFS séparés sur **30 000** appels synthétiques, avec
@@ -581,8 +596,19 @@ appariée.
    masquer une panne C/K2, contrairement à la priorité globale de la
    boucle séquentielle annoncée par son commentaire. Soit documenter
    la priorité par phase, soit résoudre les images C des K inférieurs
-   avant de retourner l'échec A. Aucun chrono G4/RSS ne porte encore
-   sur le port FULL concurrent.
+   avant de retourner l'échec A. R5 mesure maintenant mur et RSS sur
+   ce port ; aucune ablation appariée des seuls ordres K parallèles
+   n'existe encore.
+   Sur la meilleure répétition R5, même supprimer entièrement les temps
+   q3/q4 **et** tour laisserait **2,50/3,39/3,44 s** à K10 pour les scènes
+   01/00/02 de la chaîne actuelle. `q2+fusion+recensus` compte déjà
+   **1,43/2,02/2,06 s**. La [ventilation et piste du double tri exact
+   de BallKeys](CONTRAT_COUTS_ET_PARALLELISATION.md) montrent qu'accélérer
+   seulement q3/q4 et FULL ne peut atteindre 1 s sur ce chemin ; le
+   temps de résumé/digest/libération après `tower_ms` doit aussi être
+   publié séparément. À K10, les présentations ne contiennent que
+   **2–13 doublons** pour 4,38–5,51 M clés selon la trame, sans transférer
+   ce ratio à des captations superposées.
    Une [piste exacte pour les intrus](INTRUS_FULL_PREFIXE_EXACT_20260923.md)
    réutilise, par BallKey, un préfixe complet d'intérieurs Morton ; son
    [oracle combinatoire](check_full_intruder_prefix_20260923.py) passe
