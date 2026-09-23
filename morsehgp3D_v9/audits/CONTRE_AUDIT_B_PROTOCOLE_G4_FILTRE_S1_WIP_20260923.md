@@ -86,3 +86,32 @@ les champs de comparaison restent fournis par la même sonde, sans
 oracle externe. Ces réserves ne changent pas le statut exploratoire.
 Les quatre scripts de session sont encore non committés à cette
 lecture ; le garde de snapshot doit donc refuser `--execute`.
+
+## Couture source/protocole encore bloquante avant G4
+
+La mutation causale `--inject=pair_mask` a été ajoutée **dans le bench
+mutable** après le commit CUDA `0d5ad2e89`. Le protocole mutable lance
+désormais un préflight GPU normal puis le mutant et exige exactement
+une paire divergente ; c'est un bon test du comparateur **si le binaire
+construit contient réellement cette option**. Or le snapshot prend les
+sources C++ dans le commit demandé et les quatre scripts GPU du
+worktree seulement avec `allow_uncommitted_protocol`. `validate_sources`
+contrôle schéma et `--cpu-only`, pas la présence du mutant. Le selftest
+hors ligne remplace le vrai bench par une fausse sonde qui possède déjà
+l'option : ses 8/8 ne détectent pas ce décalage. Si seuls les scripts
+étaient committés, la session SPOT construirait l'ancien bench, puis
+échouerait au `preflight_mutant` (code 2) **après** démarrage G4.
+Reproduction locale sans GCP : `collect("0d5ad2e89",
+allow_uncommitted_protocol=True)` rend
+`protocol_source=worktree_uncommitted`, le blob du bench ne contient pas
+`--inject=pair_mask`, **et `validate_files` l'accepte**. Un faux probe
+cohérent avec `pairs=400` mais `rectangle_survivors=0` est de même
+accepté `complete` par `validate_probe` : ce lecteur n'est pas un
+oracle structurel autonome des masses.
+
+Porte préalable : committer **ensemble** bench muté et protocole,
+reconstruire le snapshot du HEAD final, vérifier que le vrai bench
+compilé contient bien l'option, puis garder le préflight
+GPU réel comme juge ultime. La comparaison causale est meilleure que
+la seule lecture des compteurs auto-déclarés, mais ne certifie pas
+encore FULL ni une géométrie indépendante.

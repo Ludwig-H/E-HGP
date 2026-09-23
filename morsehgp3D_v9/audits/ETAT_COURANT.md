@@ -67,7 +67,11 @@ de paires paie `O(P log R)` pour ses recherches d'offset ; ni mémoire
 massive ni vitesse GPU ne sont acquises. Le [préflight B du protocole
 G4](CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md) a
 8/8 selftests normaux et 8/8 sous `-O` **avec faux GPU**, pas de CUDA
-réel. La [proposition S2](PROPOSITION_B_GPU_STREAMING_S2_20260923.md)
+réel. Avant SPOT, le bench mutable avec `--inject=pair_mask` doit être
+commité **avec** les scripts : à cette lecture, le snapshot du commit
+GPU seul construirait un ancien bench et échouerait au préflight mutant
+après démarrage G4.
+La [proposition S2](PROPOSITION_B_GPU_STREAMING_S2_20260923.md)
 sépare le tuilage borné sans nouveau rejet (S2a) du certificat
 bloc/ligne avant expansion (S2b), avec tests causaux et arrêt de la
 **piste expérimentale**, jamais de l'exécution exacte. Le profil local
@@ -222,6 +226,14 @@ une provenance bloquante. **Aucun reçu v5 publié à ce stade** : ces
 portes nouvelles restent à exécuter et à lire. Le juge échantillonne des
 ancres et fixe `run_tower=false` : même un code 0 contrôlerait le
 catalogue sur cet échantillon, pas la tour FULL ni la complétude globale.
+Le commit **`c6042af2b`** publie le code des juges **v5** : clé de boule
+reconstruite indépendamment et mutant de clé seule, provenance devenue
+bloquante, sites longs choisis depuis les coordonnées. La
+[contrelecture B](CONTRE_AUDIT_B_JUGES_C_V4_20260923.md) constate
+qu'aucun **reçu v5** n'est encore publié et que le mutant de
+sur-élagage sur ces sites reste seulement observé, sans incidence
+longue minimale ni code 1 exigé. Ne pas transférer les anciens codes 0
+au nouveau SHA ; les limites d'échantillonnage et de tour subsistent.
 
 La porte de **clés jamais émises** publiée par `683fa46e` change utilement
 le sens du contrôle : elle recense des MEB de supports q2–q4 voisins

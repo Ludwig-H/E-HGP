@@ -38,3 +38,24 @@ Trois limites de portée/protocole demeurent avant d'exploiter un code 0 :
 Ces limites ne sont pas des omissions q3 observées du générateur.
 Un futur reçu v4 peut conforter les sites tirés, sans prouver la
 complétude globale ou la tour (`run_tower=false`).
+
+## Suite v5 publiée par `c6042af2b`, relecture statique
+
+Les réserves 1 et 2 sont traitées **dans le code** : les deux juges
+reconstruisent une clé canonique indépendante et la comparent à
+`ball.key`, avec mutants de clé seule attendus en code 1 ; le runner
+v5 rend les commandes de provenance bloquantes, relie le build au
+répertoire source et reconstruit les bibliothèques. Aucun reçu v5
+(`STATUS`, `PROVENANCE`, sorties) n'est cependant publié dans ce commit.
+L'ancienne vérification q3 porte sur un autre SHA de source et ne peut
+qualifier le juge v5 par héritage.
+
+Pour la réserve 3, `--long-sites=4` choisit maintenant les sites depuis
+les **seules coordonnées**, indépendamment du parcours élagué : le
+biais de sélection indiqué plus haut est corrigé en code. Mais les
+deux mutants `overprune_isolated` restent marqués `obs` dans
+`run_judges_v5.sh`, sans code 1 exigé ni plancher positif d'incidences
+longues. Ils ne ferment donc pas expérimentalement la porte « un site
+isolé perd toutes ses incidences longues ». Un reçu v5 causal sur
+ces sites et leurs incidences est encore requis. Il s'agit d'une
+limite du juge échantillonné, pas d'une omission HGP démontrée.

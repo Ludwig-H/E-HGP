@@ -3019,3 +3019,28 @@ quasi quadratique sur plusieurs scènes sans compensation aval, arrêter
 **cette variante expérimentale**, jamais tronquer les candidats d'une
 exécution exacte. Ceci est une demande de protocole, pas un résultat
 GPU ou sous-quadratique acquis.
+
+### Mise à jour 13 h 29 UTC — couture du paquet G4 S1 (auditeur B)
+
+**Avant SPOT : committer bench GPU muté et quatre scripts de protocole
+dans le même HEAD, puis reconstruire le snapshot.** Le bench publié
+`0d5ad2e89` n'a pas `--inject=pair_mask`, alors que le protocole WIP
+l'exige au préflight. Le snapshot épingle les C++ du commit demandé et
+le selftest emploie une fausse sonde qui connaît déjà l'option : ses
+8/8 PASS ne détectent pas ce mélange. Commettre les scripts seuls
+ferait échouer le vrai préflight mutant **sur G4 après démarrage**.
+Renforcer `validate_sources` pour exiger l'option ou un gate du vrai
+binaire ; le préflight GPU reste nécessaire. La
+[note B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md)
+documente le risque et l'arrêt ciblé restant fragile si le fichier
+de génération est illisible.
+
+### Mise à jour 13 h 29 UTC — juges q2/q3 C v5 (auditeur B)
+
+`c6042af2b` corrige en code clé canonique, provenance bloquante et
+choix géométrique indépendant des sites longs. La
+[relecture B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_JUGES_C_V4_20260923.md)
+ne trouve encore **aucun reçu v5** ; le mutant sur sites longs isolés
+reste `obs`, sans refus attendu ni plancher d'incidences longues.
+Les anciens reçus ne qualifient pas le nouveau SHA. Aucun défaut du
+générateur n'en est déduit.

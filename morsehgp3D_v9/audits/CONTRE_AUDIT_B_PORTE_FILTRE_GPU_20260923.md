@@ -188,3 +188,8 @@ travail hôte sont des portes du prochain port.
 Conclusion inchangée : **port CUDA publié, mais ni compilation/exécution
 positive G4 ni temps de tour GPU qualifiés**. Le protocole G4 est encore
 hors commit à cette lecture et son garde doit refuser une session réelle.
+Une reconstruction indépendante locale du code publié, CUDA désactivé,
+a passé le CTest `mhgp9_gpu_witness_filter_port` à 2 000 sites en
+**15,04 s** (1/1). Cette observation non archivée comme reçu contrôle
+la fidélité **hôte** du filtre sur la fixture du gate, pas le lanceur
+device ni la chaîne.
