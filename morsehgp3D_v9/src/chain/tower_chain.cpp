@@ -414,6 +414,16 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       l.core_cover_node_visits = w.core_cover.node_visits; l.core_cover_bound_tests = w.core_cover.bound_tests;
       l.core_cover_point_tests = w.core_cover.point_tests; l.dead_core_outside_cells = w.dead_core.outside_cells;
       l.dead_core_deep_cells = w.dead_core.deep_cells; l.dead_core_failed_cells = w.dead_core.failed_cells;
+      l.q34_input_rectangles = w.input_rectangles;
+      l.witness_rect_queries = w.witness.rectangles.queries; l.witness_rect_node_visits = w.witness.rectangles.node_visits;
+      l.witness_pair_queries = w.witness.pairs.queries; l.witness_pair_node_visits = w.witness.pairs.node_visits;
+      l.q3_edge_queries = w.q3.edge_queries; l.q3_seed_node_visits = w.q3.seed_node_visits;
+      l.q3_seed_point_tests = w.q3.seed_point_tests; l.q3_seed_bound_tests = w.q3.seed_bound_tests;
+      l.q4_geometry_preparations = w.local.geometry.preparations;
+      l.q4_domain_node_visits = w.local.geometry.domain.node_visits;
+      l.q4_cover_decomposition_node_visits = w.local.geometry.cover_node_visits;
+      l.q4_seed_node_visits = w.local.node_visits; l.q4_seed_cell_queries = w.q4_seed_cells.queries;
+      l.q4_sweep_active_sites = w.local.sweep.active_sites;
     }
     result.times.q34_ms = ms_since(t);
 

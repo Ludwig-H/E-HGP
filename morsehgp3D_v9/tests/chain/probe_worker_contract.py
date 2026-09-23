@@ -126,7 +126,11 @@ def main(argv):
         # sortes prouvees par lui, et rien quand son levier est coupe.
         check(ledger['core_closed_edges'] > 0 and ledger['dead_core_q3_proved'] > 0 and
               ledger['dead_core_q4_proved'] > 0 and off['ledger']['core_builds'] == 0 and
-              on['tower_work']['meb_verified_proposals'] > 0 and off['tower_work']['meb_proposals'] == 0,
+              on['tower_work']['meb_verified_proposals'] > 0 and off['tower_work']['meb_proposals'] == 0 and
+              all(ledger[name] > 0 for name in ('witness_rect_node_visits', 'witness_pair_node_visits',
+                                                'q3_seed_node_visits', 'q4_domain_node_visits',
+                                                'q4_cover_decomposition_node_visits', 'q4_seed_node_visits',
+                                                'q4_sweep_active_sites')),
               'diametral core not exercised: ' + json.dumps({key: ledger[key] for key in (
                   'core_builds', 'core_closed_edges', 'dead_core_q3_proved', 'dead_core_q4_proved')}, sort_keys=True))
         check(len(on['orders']) == 5 and on['catalogue']['balls'] >= 1000,
@@ -151,6 +155,9 @@ def main(argv):
                 meb_verified_proposals=v['tower_work']['meb_proposals'] + 1)),
             ('MEB proposal unaccounted', lambda v: v['tower_work'].update(
                 meb_proposals=v['tower_work']['meb_proposals'] + 1)),
+            ('q3 seed visits split', lambda v: v['ledger'].update(
+                q3_seed_node_visits=v['ledger']['q3_seed_node_visits'] + 1)),
+            ('witness rectangle queries hidden', lambda v: v['ledger'].update(witness_rect_queries=0)),
             ('core closure uncounted', lambda v: v['ledger'].update(core_closed_edges=0)),
             ('core cover visits hidden', lambda v: v['ledger'].update(core_cover_node_visits=0)),
             ('cache rejections without queries', lambda v: v['ledger'].update(witness_cache_queries=0)),

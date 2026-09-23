@@ -106,6 +106,14 @@ struct GeneratorLedger {
       dead_core_q4_open;
   std::uint64_t core_cover_node_visits, core_cover_bound_tests, core_cover_point_tests, dead_core_outside_cells,
       dead_core_deep_cells, dead_core_failed_cells;
+  // Global-index DFS already counted by the generator (audit B, ledger of
+  // hidden q3/q4 visits): witness searches of rectangles and pairs, q3 seed
+  // search per open q3 edge, q4 positive domain, cover decomposition and
+  // LiveOnly seed traversal, plus the repeated active-site sweeps of q4.
+  std::uint64_t q34_input_rectangles, witness_rect_queries, witness_rect_node_visits, witness_pair_queries,
+      witness_pair_node_visits, q3_edge_queries, q3_seed_node_visits, q3_seed_point_tests, q3_seed_bound_tests,
+      q4_geometry_preparations, q4_domain_node_visits, q4_cover_decomposition_node_visits, q4_seed_node_visits,
+      q4_seed_cell_queries, q4_sweep_active_sites;
 };
 
 struct OrderSummary {

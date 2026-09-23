@@ -48,7 +48,7 @@ PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
 PLAN_SCHEMA = 'mhgp9_tower_plan_v6'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v11'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v12'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -129,7 +129,10 @@ LEDGER_KEYS = frozenset((
     'witness_cache_rejected_pairs core_builds core_sites core_closed_edges dead_core_loads dead_core_form_sites '
     'dead_core_cells dead_core_uniform_tests dead_core_point_tests dead_core_q3_proved dead_core_q3_open '
     'dead_core_q4_proved dead_core_q4_open core_cover_node_visits core_cover_bound_tests core_cover_point_tests '
-    'dead_core_outside_cells dead_core_deep_cells dead_core_failed_cells').split())
+    'dead_core_outside_cells dead_core_deep_cells dead_core_failed_cells q34_input_rectangles witness_rect_queries '
+    'witness_rect_node_visits witness_pair_queries witness_pair_node_visits q3_edge_queries q3_seed_node_visits '
+    'q3_seed_point_tests q3_seed_bound_tests q4_geometry_preparations q4_domain_node_visits '
+    'q4_cover_decomposition_node_visits q4_seed_node_visits q4_seed_cell_queries q4_sweep_active_sites').split())
 CATALOGUE_LISTS = dict(by_qmin=3, by_shell=17)
 CATALOGUE_KEYS = frozenset(('q2_presentations q3_presentations q4_presentations unique_keys balls '
                             'extra_shell_balls shell_over_12 max_shell max_interior census_nodes census_leaf_tests '
@@ -400,6 +403,22 @@ def validate_ledger_identities(value, levers):
     # La chaine refuse toute coquille de plus de 12 sites avant complete_relative.
     need(catalogue['shell_over_12'] == 0 and catalogue['max_shell'] <= 12 and
          all(count == 0 for count in catalogue['by_shell'][13:]), 'complete catalogue with a shell above 12')
+    # Parcours de l'index global deja comptes par le generateur (arbre plein
+    # de 2n-1 noeuds : au plus 2n-1 visites par appel) et leurs identites.
+    nodes = 2 * value['input']['sites'] - 1
+    need(ledger['witness_rect_queries'] == ledger['q34_input_rectangles'] and
+         ledger['witness_pair_queries'] + ledger['witness_cache_rejected_pairs'] == ledger['expanded_pairs'] and
+         ledger['q3_seed_node_visits'] == ledger['q3_seed_point_tests'] + ledger['q3_seed_bound_tests'] and
+         ledger['q3_edge_queries'] <= ledger['q3_edges'] and
+         ledger['q4_geometry_preparations'] <= ledger['q4_edges'] and
+         ledger['q4_seed_cell_queries'] <= ledger['q4_edges'] and
+         ledger['witness_rect_node_visits'] <= nodes * ledger['witness_rect_queries'] and
+         ledger['witness_pair_node_visits'] <= nodes * ledger['witness_pair_queries'] and
+         ledger['q3_seed_node_visits'] <= nodes * ledger['q3_edge_queries'] and
+         all(ledger[name] <= nodes * ledger['q4_geometry_preparations']
+             for name in ('q4_domain_node_visits', 'q4_cover_decomposition_node_visits')) and
+         ledger['q4_seed_node_visits'] <= nodes * ledger['q4_seed_cell_queries'],
+         'hidden q3/q4 index traversals identity/bounds')
     # Une arete aux deux voies est dans q3, dans q4 et a un cover.
     need(ledger['both_edges'] <= min(ledger['q3_edges'], ledger['q4_edges']) and
          ledger['q3_edges'] + ledger['q4_edges'] - ledger['both_edges'] <= ledger['cover_builds'],

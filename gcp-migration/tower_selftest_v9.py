@@ -98,7 +98,14 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                       core_cover_point_tests=1, dead_core_cells=3)
     else:
         ledger.update({name: 0 for name in schema['ledger'] if name.startswith(('core_', 'dead_core_'))})
-    return dict(schema='mhgp9_tower_probe_v11', status=status,
+    # Hidden index traversals: consistent identities and 2n-1 bounds.
+    ledger.update(q34_input_rectangles=7, witness_rect_queries=7, witness_rect_node_visits=20,
+                  witness_pair_queries=ledger['expanded_pairs'] - ledger['witness_cache_rejected_pairs'],
+                  witness_pair_node_visits=9, q3_edge_queries=1, q3_seed_node_visits=5, q3_seed_point_tests=3,
+                  q3_seed_bound_tests=2, q4_geometry_preparations=1, q4_domain_node_visits=4,
+                  q4_cover_decomposition_node_visits=4, q4_seed_node_visits=3, q4_seed_cell_queries=1,
+                  q4_sweep_active_sites=6)
+    return dict(schema='mhgp9_tower_probe_v12', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
@@ -742,6 +749,7 @@ class Protocol(unittest.TestCase):
                      5.0), 'chain total bounded by the external wall')
         mutations = [('schema', lambda v: v.update(schema='mhgp9_tower_probe_v0')),
                      ('schema_v10', lambda v: v.update(schema='mhgp9_tower_probe_v10')),
+                     ('schema_v11', lambda v: v.update(schema='mhgp9_tower_probe_v11')),
                      ('status', lambda v: v.update(status='complete')),
                      ('hash', lambda v: v['input'].update(hash='0' * 16)),
                      ('sites', lambda v: v['input'].update(sites=data['n'] - 1)),
@@ -790,6 +798,10 @@ class Protocol(unittest.TestCase):
                      ('q3_presentations_zero', lambda v: v['catalogue'].update(q3_presentations=0)),
                      ('dead_q3_open_shifted', lambda v: v['ledger'].update(dead_q3_open=2)),
                      ('core_closed_shifted', lambda v: v['ledger'].update(core_closed_edges=2)),
+                     ('rect_queries_shifted', lambda v: v['ledger'].update(witness_rect_queries=8)),
+                     ('q3_seed_visits_split', lambda v: v['ledger'].update(q3_seed_node_visits=6)),
+                     ('q4_domain_beyond_bound', lambda v: v['ledger'].update(q4_domain_node_visits=10 ** 9)),
+                     ('pair_queries_unaccounted', lambda v: v['ledger'].update(witness_pair_queries=0)),
                      ('core_loads_shifted', lambda v: v['ledger'].update(dead_core_loads=4)),
                      ('cache_queries_zero', lambda v: v['ledger'].update(witness_cache_queries=0)),
                      ('cache_node_tests_zero', lambda v: v['ledger'].update(witness_cache_node_tests=0)),

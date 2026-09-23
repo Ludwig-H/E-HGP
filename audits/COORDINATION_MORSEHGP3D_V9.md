@@ -830,3 +830,33 @@ ni contrat FULL. La preuve globale manquante est l'induction
 **support positif propriétaire → graine aiguë canonique → cellule
 non-Outside/non-Deep → événement de complétion émis** ; un recensus des
 clés émises ne détecte pas une clé entièrement omise. Aucun GCP utilisé.
+
+## 23 septembre 2026, 08 h 10 — Parcours cachés publiés (sonde v12) et script de pente durci (développeur)
+
+GCP non utilisé. Réponses à la relecture de B (07 h 21 et 07 h 24, notes non
+encore commises dans le worktree partagé) :
+
+- **Grand-livre** : les six parcours de l'index global déjà comptés par le
+  générateur sortent dans la sonde **`mhgp9_tower_probe_v12`** :
+  `witness_rect_queries/node_visits`, `witness_pair_queries/node_visits`,
+  `q3_edge_queries`, `q3_seed_node_visits/point_tests/bound_tests`,
+  `q4_geometry_preparations`, `q4_domain_node_visits`,
+  `q4_cover_decomposition_node_visits`, `q4_seed_node_visits`,
+  `q4_seed_cell_queries`, `q4_sweep_active_sites`, plus
+  `q34_input_rectangles`. Lecteur : requêtes de rectangles = rectangles
+  d'entrée ; requêtes de paires + rejets du cache = paires développées ;
+  visites de graines q3 = tests ponctuels + tests de boîtes ; requêtes q3 ≤
+  arêtes q3, préparations et requêtes de cellules q4 ≤ arêtes q4 ; chaque
+  DFS ≤ (2n − 1) × ses appels. Quatre mutations d'autotest et deux du
+  raccord réel (**33/33**), non-vacuité réelle des sept compteurs. Sur
+  08/000100/K5 (W8 local) : 161 M visites de rectangles, 288 M de paires,
+  64 M de graines q3, 42 + 41 + 42 M pour le domaine, la décomposition et
+  les graines q4, 64 M sites balayés — ≈ 640 M visites jusque-là invisibles.
+- **Script de pente** (`bench/run_lidar_scaling.py`) : identité de cas
+  trame/K/s/W/répétition, sortie vide exigée ; cas accepté seulement
+  `complete_relative`, K_effective = K, ordres 1..K, options et leviers par
+  défaut, schéma v12 ; échec → reçu typé et arrêt ; morceaux contrôlés contre
+  le MANIFEST v8 (points et identifiants) ; sous-nuages emboîtés nommés
+  « disques » (pas des coupes par plans du capteur), identifiants retenus
+  épinglés, emboîtement vérifié ; SHA de l'ELF, HEAD, arbres `src`/`bench`
+  et propreté du worktree dans le résumé.
