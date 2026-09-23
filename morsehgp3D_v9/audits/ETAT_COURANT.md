@@ -459,6 +459,13 @@ appellerait **909 278/3 986 433** survivantes S2 sur la trame brute :
 aucun gain produit, FULL ou G4 n'est démontré. Chercher un routage moins
 cher et une mutualisation par groupe, puis mesurer succès **et replis**
 sur tout le flux avant tout port.
+La [contrelecture du coût physique](CONTRE_AUDIT_B_COUT_NOEUDS_PAIRES_20260923.md)
+montre que le shadow par nœuds recalcule les bornes après chaque
+extraction de la file sans les compter dans `boxes` : cap4/budget64
+paye **88 108** calculs contre 57 794 affichés (Top-B : 58 444),
+et cap4/budget256 **129 753** contre 82 160 affichés (Top-B :
+83 768). Les 758 preuves positives demeurent exactes ; la comparaison
+de coût des « boîtes » doit être corrigée avant de juger un port.
 Le [certificat B de rectangle entier](CERTIFICAT_B_PAIRES_GARDES_RECTANGLE_20260923.md)
 relève la paire ponctuelle : les **64 couples de coins** de `box(A)×box(B)`
 certifient la même paire de gardes pour tous les sites du rectangle,

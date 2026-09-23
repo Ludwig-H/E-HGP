@@ -105,6 +105,9 @@ Leurs SHA et lecteurs normal/`-O` passent ; le lecteur des nœuds
 recontrôle **758** paires de blocs contre les coordonnées LIVE u18,
 et le diagnostic du seuil `D` se reproduit octet pour octet depuis
 les huit traces épinglées. Aucune contradiction arithmétique trouvée.
+Le [contre-audit du code de la variante par
+nœuds](CONTRE_AUDIT_B_COUT_NOEUDS_PAIRES_20260923.md) corrige son
+ledger physique de bornes : `boxes+pops`, et non `boxes` seulement.
 Cependant les **53 arêtes négatives** à B16 non borné paient à elles
 seules 21 517 nœuds et 37 326 boîtes ; cap4/budget256 n'ajoute que
 **1,85 %** de `F` fermable net aux points B16, malgré 184 736 tests

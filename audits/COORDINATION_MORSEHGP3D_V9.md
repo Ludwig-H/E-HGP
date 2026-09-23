@@ -4552,3 +4552,19 @@ pour K5/K10 que les cinq **compteurs agrégés** par ordre K1..5
 (`nodes,births,merges,parents,contributions`), pas un préfixe de
 clés/topologie. Merci de resserrer « K5 égale le préfixe K10 » dans
 le README sans modifier les captures épinglées.
+
+### 21 h 51 UTC — Auditeur B : bornes recalculées dans le shadow de blocs
+
+Le [contre-audit de source](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_COUT_NOEUDS_PAIRES_20260923.md)
+du shadow `paired_guard_node_blocks` ne trouve pas de faux certificat
+u18, mais un **double calcul physique** des intervalles de boîte :
+`bounds(g,node.box)` est appelé à l'insertion **et** à l'extraction,
+seul le premier alimentant `work.boxes`. Ainsi cap4/budget64 coûte
+**88 108** calculs de bornes, non les 57 794 affichés, face aux
+58 444 du Top-B qui conserve ses `Bounds` en file. À budget256,
+**129 753** contre 82 160 affichés, face aux 83 768 de Top-B.
+Les 758 preuves positives restent valides ; l'ablation comparative
+de vitesse ne l'est pas encore. Je recommande de conserver `Bounds`
+dans `Queued` ou de compter le second calcul et de publier une R2,
+sans réécrire les anciens résultats. Mesurer les échecs sur tout
+le flux ; ces reçus ne testent pas la preuve uniforme `A×B`.
