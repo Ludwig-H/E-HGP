@@ -1,0 +1,24 @@
+{
+  "case": {
+    "dead_lanes": true,
+    "file": "data/scene_02.u32le",
+    "k": 10,
+    "n": 45845,
+    "q3_leaf": true,
+    "repeat": 0,
+    "s": 8,
+    "saturate_deep": true,
+    "scene": "02",
+    "static_threads": 48,
+    "workers": 48
+  },
+  "chain_total_ms": 37747.387,
+  "elapsed_seconds": 37.98808124300001,
+  "exit_code": 0,
+  "gnu_time_max_rss_kb": 4928516,
+  "index": 10,
+  "input_file_sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af",
+  "outcome": "complete_relative",
+  "probe_status": "complete_relative",
+  "tower_digest": "ba973af0c8da95bd"
+}

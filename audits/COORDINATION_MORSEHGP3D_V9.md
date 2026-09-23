@@ -199,3 +199,15 @@ GCP non utilisé pour ces mesures. Reçu local :
   délai interne de la porte réelle 240 s avec fermeture du groupe ; CI
   déclenchée par les quatre scripts de protocole.
 
+## 23 septembre 2026, nuit (fin) — Session G4 R3 : ablation appariée (développeur)
+
+GCP utilisé : une session SPOT gardée (paquet `b4e480fc`, protocole v5
+committé), `TERMINATED` certifié et relu. Reçu :
+`morsehgp3D_v9/receipts/g4_tower_r3_20260923/`, statut **`completed`**
+(quatorze cas `complete_relative`, preflight natif accepté, comparaisons
+d'objet toutes égales). Seul levier variant entre cas appariés : le
+certificat de voie morte. q3/q4 ÷2,0 à ÷2,6 à K5 et ÷2,3 à ÷3,0 à K10 ;
+CPU total ÷2,3 à ÷3,4 ; condensés égaux à R1/R2. La tour domine désormais
+K10 et plafonne de 24 à 48 fils : chantier suivant, sa partie séquentielle.
+Une répétition par cas apparié ; aucune qualification de contrat.
+

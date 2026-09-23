@@ -70,9 +70,16 @@ Protocole v5 durci : schémas exacts de la sonde, preflight natif sur la vraie
 sonde avant tout cas, résumés recalculés à la réception, campagne sans tour
 complète refusée, paquet recertifié contre les objets Git de son commit.
 
-Suite : session G4 R3 appariée (certificat allumé/éteint) ; coût du
-certificat lui-même (29 % à K5) et du filtre de témoins de paire (34 %) ;
-parallélisme de la tour au-delà de 24 fils ; seuil K−2 des arêtes q4 seules.
+Session G4 R3 ([`g4_tower_r3_20260923`](receipts/g4_tower_r3_20260923/README.md),
+paquet `b4e480fc`, **`completed`**, `TERMINATED` certifié) : ablation appariée
+du certificat, quatorze cas complets, preflight natif accepté. q3/q4 ÷2,0 à
+÷3,0 ; chaîne complète à 48 fils **6,2 / 8,9 / 10,9 s à K5** et
+**26,0 / 35,6 / 37,8 s à K10** (000100 / 000000 / 000200), condensés
+inchangés. À K10 la tour domine (17,5 à 22,8 s) et plafonne dès 24 fils.
+
+Suite : partie séquentielle de la tour (validation du catalogue, collecte et
+tri des requêtes statiques, lots, banque, forêts) ; coût du certificat
+lui-même et du filtre de témoins de paire ; seuil K−2 des arêtes q4 seules.
 
 ## État du dépôt au moment de l'ouverture (historique)
 
