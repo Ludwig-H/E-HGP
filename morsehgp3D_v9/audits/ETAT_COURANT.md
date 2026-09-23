@@ -252,6 +252,16 @@ ce cas ; ce n'est ni un gain mesuré ni une conclusion pour K10/sans-sol.
 Sur les sous-échantillons emboîtés 1/4 et 1/2 de cette même trame/K5,
 ce plafond d'incidences est 2,823 % et 2,319 % : baisse finie, sans
 borne de croissance ni transfert aux coupes spatiales.
+Le [complément apparié par arête](precore_cell_screen_20260923/README.md)
+retrouve les comptes q3/q4 de B sur une autre trace et resserre le
+plafond du **chargement entier** : toutes les voies ouvertes doivent
+déborder, soit **46 340 arêtes / 7 528 704 formes (1,345 %)** au plein.
+Cette part vaut 2,429 % puis 2,050 % aux densités 1/4 et 1/2 ; dans
+les quatre quarts spatiaux à densité entière, elle varie de 3,563 % à
+7,568 % de leurs calculs séparés. Une borne exacte qui garde la
+corrélation des deux extrémités des arêtes survivantes est démontrée
+sur une fixture q4 positive pour les **sous-cellules**, mais son coût
+`|E|×sommets` et son rendement LiDAR restent à mesurer.
 Le shadow doit limiter ses recherches et se replier sur le moteur,
 publier visites, tests et formes effectivement évitées sur brut et
 sans sol, sans annoncer de gain avant mesure.

@@ -1,0 +1,274 @@
+{
+  "cases": [
+    {
+      "binary_sha256": "ec915b5ec84d4ac6ef90ee1ed4dfd39e1e449e096b7c45ba7457921f5487905b",
+      "box_hi": [
+        158607,
+        158284,
+        30595
+      ],
+      "box_lo": [
+        0,
+        0,
+        0
+      ],
+      "density": "full",
+      "forms": 559661741,
+      "mask_after_core": {
+        "0": 1806897,
+        "2": 361096,
+        "4": 62927,
+        "6": 1755513
+      },
+      "mask_before_core": {
+        "2": 320722,
+        "4": 484253,
+        "6": 3181458
+      },
+      "records": 3986433,
+      "scores": {
+        "after_core": {
+          "edge_union": {
+            "clipped_edges": 12107,
+            "clipped_forms": 1120809,
+            "clipped_x_edges": 206,
+            "clipped_x_forms": 56990,
+            "clipped_y_edges": 174,
+            "clipped_y_forms": 2264,
+            "clipped_z_edges": 11918,
+            "clipped_z_forms": 1116875,
+            "contained_edges": 2167429,
+            "contained_forms": 31867988,
+            "edges": 2179536,
+            "forms": 32988797
+          },
+          "q3": {
+            "clipped_edges": 10546,
+            "clipped_forms": 699667,
+            "clipped_x_edges": 125,
+            "clipped_x_forms": 7499,
+            "clipped_y_edges": 162,
+            "clipped_y_forms": 1900,
+            "clipped_z_edges": 10336,
+            "clipped_z_forms": 695719,
+            "contained_edges": 2106063,
+            "contained_forms": 23919038,
+            "edges": 2116609,
+            "forms": 24618705
+          },
+          "q4": {
+            "clipped_edges": 12869,
+            "clipped_forms": 1076517,
+            "clipped_x_edges": 258,
+            "clipped_x_forms": 60588,
+            "clipped_y_edges": 192,
+            "clipped_y_forms": 2195,
+            "clipped_z_edges": 12571,
+            "clipped_z_forms": 1068431,
+            "contained_edges": 1805571,
+            "contained_forms": 26963214,
+            "edges": 1818440,
+            "forms": 28039731
+          }
+        },
+        "before_core": {
+          "edge_union": {
+            "clipped_edges": 46340,
+            "clipped_forms": 7528704,
+            "clipped_x_edges": 325,
+            "clipped_x_forms": 78475,
+            "clipped_y_edges": 244,
+            "clipped_y_forms": 4678,
+            "clipped_z_edges": 46074,
+            "clipped_z_forms": 7521403,
+            "contained_edges": 3940093,
+            "contained_forms": 552133037,
+            "edges": 3986433,
+            "forms": 559661741
+          },
+          "q3": {
+            "clipped_edges": 27868,
+            "clipped_forms": 2636115,
+            "clipped_x_edges": 203,
+            "clipped_x_forms": 9618,
+            "clipped_y_edges": 220,
+            "clipped_y_forms": 3844,
+            "clipped_z_edges": 27580,
+            "clipped_z_forms": 2629779,
+            "contained_edges": 3474312,
+            "contained_forms": 274842608,
+            "edges": 3502180,
+            "forms": 277478723
+          },
+          "q4": {
+            "clipped_edges": 54431,
+            "clipped_forms": 8042106,
+            "clipped_x_edges": 485,
+            "clipped_x_forms": 90448,
+            "clipped_y_edges": 272,
+            "clipped_y_forms": 4435,
+            "clipped_z_edges": 53921,
+            "clipped_z_forms": 8022091,
+            "contained_edges": 3611280,
+            "contained_forms": 538179886,
+            "edges": 3665711,
+            "forms": 546221992
+          }
+        }
+      },
+      "sector": "full",
+      "sites": 123389,
+      "trace_role": "after_trace",
+      "trace_summary_sha256": "10ec8d981d54302ae45edbc23b24462070097e3175a61500acc46d5bee2eb4e8"
+    },
+    {
+      "binary_sha256": "b6e0dae39d915727d097aeafda212856047aad337f9722c770fe68882c213d97",
+      "box_hi": [
+        158607,
+        158284,
+        30595
+      ],
+      "box_lo": [
+        0,
+        0,
+        0
+      ],
+      "density": "half",
+      "forms": 128852821,
+      "mask_before_core": {
+        "2": 158852,
+        "4": 178212,
+        "6": 1347611
+      },
+      "records": 1684675,
+      "scores": {
+        "before_core": {
+          "edge_union": {
+            "clipped_edges": 25747,
+            "clipped_forms": 2641182,
+            "clipped_x_edges": 143,
+            "clipped_x_forms": 13413,
+            "clipped_y_edges": 126,
+            "clipped_y_forms": 1927,
+            "clipped_z_edges": 25617,
+            "clipped_z_forms": 2638867,
+            "contained_edges": 1658928,
+            "contained_forms": 126211639,
+            "edges": 1684675,
+            "forms": 128852821
+          },
+          "q3": {
+            "clipped_edges": 15923,
+            "clipped_forms": 944301,
+            "clipped_x_edges": 98,
+            "clipped_x_forms": 2458,
+            "clipped_y_edges": 100,
+            "clipped_y_forms": 1238,
+            "clipped_z_edges": 15789,
+            "clipped_z_forms": 942244,
+            "contained_edges": 1490540,
+            "contained_forms": 71173538,
+            "edges": 1506463,
+            "forms": 72117839
+          },
+          "q4": {
+            "clipped_edges": 31232,
+            "clipped_forms": 2882768,
+            "clipped_x_edges": 218,
+            "clipped_x_forms": 16711,
+            "clipped_y_edges": 150,
+            "clipped_y_forms": 2030,
+            "clipped_z_edges": 30976,
+            "clipped_z_forms": 2876636,
+            "contained_edges": 1494591,
+            "contained_forms": 117635717,
+            "edges": 1525823,
+            "forms": 120518485
+          }
+        }
+      },
+      "sector": "full",
+      "sites": 61694,
+      "trace_role": "before_trace",
+      "trace_summary_sha256": "5e2e1872e5713f8d5875ff48024edd400f53742d96b2efd14c9f629ead0d88a8"
+    },
+    {
+      "binary_sha256": "b6e0dae39d915727d097aeafda212856047aad337f9722c770fe68882c213d97",
+      "box_hi": [
+        157672,
+        158284,
+        30521
+      ],
+      "box_lo": [
+        903,
+        2179,
+        0
+      ],
+      "density": "quarter",
+      "forms": 37009904,
+      "mask_before_core": {
+        "2": 88489,
+        "4": 72177,
+        "6": 613828
+      },
+      "records": 774494,
+      "scores": {
+        "before_core": {
+          "edge_union": {
+            "clipped_edges": 14717,
+            "clipped_forms": 898975,
+            "clipped_x_edges": 105,
+            "clipped_x_forms": 5241,
+            "clipped_y_edges": 112,
+            "clipped_y_forms": 1158,
+            "clipped_z_edges": 14630,
+            "clipped_z_forms": 897881,
+            "contained_edges": 759777,
+            "contained_forms": 36110929,
+            "edges": 774494,
+            "forms": 37009904
+          },
+          "q3": {
+            "clipped_edges": 9850,
+            "clipped_forms": 350219,
+            "clipped_x_edges": 86,
+            "clipped_x_forms": 702,
+            "clipped_y_edges": 80,
+            "clipped_y_forms": 753,
+            "clipped_z_edges": 9752,
+            "clipped_z_forms": 349364,
+            "contained_edges": 692467,
+            "contained_forms": 21615582,
+            "edges": 702317,
+            "forms": 21965801
+          },
+          "q4": {
+            "clipped_edges": 17954,
+            "clipped_forms": 1003157,
+            "clipped_x_edges": 139,
+            "clipped_x_forms": 6537,
+            "clipped_y_edges": 109,
+            "clipped_y_forms": 1043,
+            "clipped_z_edges": 17809,
+            "clipped_z_forms": 1000558,
+            "contained_edges": 668051,
+            "contained_forms": 33069767,
+            "edges": 686005,
+            "forms": 34072924
+          }
+        }
+      },
+      "sector": "full",
+      "sites": 30847,
+      "trace_role": "before_trace",
+      "trace_summary_sha256": "eac3ea31a9902d3a7943d19c4d9fe3466dcec6d9aa68bea8eb65b85cf19de44b"
+    }
+  ],
+  "criterion": "For each axis i, q=min(a_i+b_i-2lo_i,2hi_i-a_i-b_i); q3 contained iff 3q^2>=D-d_i^2 on all axes; q4 contained iff 2q^2>=D-d_i^2 on all axes.",
+  "input_manifest_sha256": "6e64125abddbfcd589ba61cf747e493e455adec4beeaea81c2739ce98fe16095",
+  "interpretation": "For q3/q4, clipped means that the nominal disk extends outside the actual input box; tangency to the box is contained. For edge_union, clipped means all still-open lane disks extend outside the box; contained means at least one still-open lane disk is fully contained. A fully contained nominal disk makes a one-cell universal guard redundant with S2; clipping is necessary but not sufficient for a new proof. Core forms are a reference weight already paid in the trace, not proved savings.",
+  "schema": "mhgp9_single_box_nominal_disk_screen_v1",
+  "source_commit": "c265a5dae4dd92059fc78acc0a1d7f52de9c1435",
+  "versioned_post_core_sha256": "5541052ca5b1b18fdacb6aefb175353b93b3e4a005cec86417b60439ba55fd89",
+  "versioned_results_sha256": "d8c82a569cf62efc89f34581151fa6b3760d20b7c1470b1762baf23d3b5fdf31"
+}
