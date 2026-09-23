@@ -102,6 +102,18 @@ millions d'appels MEB et 403,430 millions de visites d'index pour les
 intrus FULL. Le tri n'explique pas à lui seul ces coûts. Les masses
 q4 exigent un changement de travail total, pas seulement W48→GPU.
 
+Pour les six couples trame/K communs au reçu G4 R1 **accepté**, les
+sorties brutes R2 ont exactement la même entrée, les mêmes compteurs
+`generator`, catalogue, ordres et digest. q3/q4 est plus rapide de
+24–33 % selon ces six lignes ; `src/gen` n'a pas changé entre les deux
+commits, tandis que la saturation profonde q4 a été activée. C'est un
+indice fort en sa faveur, **pas** une ablation contrôlée : deux sessions,
+un noyau MEB et une politique FULL différents, et R2 refusé par son
+protocole. Le travail restant est massif. Sur 08/000000/K10 R2, même
+supprimer *tout* q3/q4 laisserait plus de 26 s dans la chaîne ; supprimer
+*tout* FULL laisserait plus de 27 s. Les deux étapes doivent progresser
+pour viser une seconde.
+
 Avant une autre session facturée : injecter dans `validate_probe` **la
 sortie réelle complète** d'une petite sonde v3, autoriser séparément les
 deux champs MEB selon leur type et leurs contraintes, vérifier le mode
