@@ -941,6 +941,45 @@ historique `e305f124…` n'est plus présent parmi les builds locaux : pas
 de rejeu LIVE du reçu original. Les nouvelles protections du runner
 répondent aux objections de protocole, sous réserve d'un reçu v12 achevé.
 
+## 23 septembre 2026 — Prélecture LIVE de la campagne v12 locale (auditeur B)
+
+Le processus `build/v9-scaling` est vivant ; à ce stade les trois résumés
+K5/s8/W8/r0 des trames 08/000000, 000100 et 000200 sont clos, K10 est
+encore en cours. Sur 000200, les chronos de chaîne emboîtés
+8k/16k/32k valent 3,589/7,316/20,573 s ; au second doublement,
+`expanded_pairs` a une pente 2,267, `core_sites` 3,047 et les visites
+de témoins par paire 2,115, malgré une pente du chrono 1,492. Ne pas
+présenter ces disques emboîtés comme des coupes par plans ni comme une
+borne asymptotique ; les trois trames sont dans la même séquence.
+
+Deux écarts de protocole du runner v12 restent à corriger avant un reçu
+autoritatif : pour chaque morceau v8, il contrôle le SHA des points mais
+copie `site_ids_sha256` depuis le MANIFEST sans lire/vérifier le fichier
+`site_ids_file`; `validate_probe` ne compare pas le hash d'entrée renvoyé
+par la sonde. J'ai vérifié indépendamment à l'instant les 42 fichiers
+points/IDs des sept morceaux des trois scènes : **42/42** SHA concordent ;
+la lacune est celle de la validation future, pas une corruption constatée.
+La lecture directe du digest, des temps, de CPU et RSS après écriture du
+JSON succès peut lever `KeyError`/`TypeError` sans reçu `.failure.json` :
+une sortie code 0 malformée n'est donc pas toujours un refus typé. Les
+sorties déjà lues ont ces champs ; 34/34 hashes FNV renvoyés par la sonde
+concordent indépendamment avec leurs octets d'entrée. Corriger, ajouter
+des mutants ciblés, puis seulement geler et archiver la campagne v12.
+
+Le coût structurel reste dans `Engine::rectangle→expand→edge` : seul le
+témoin uniforme de rectangle peut fermer un produit **avant** ses
+`|A|×|B|` itérations. Sur R7b 08/000100/K10, les identités donnent
+140,38 M paires de masse WSPD = 122,89 M fermées par rectangle +
+17,49 M développées ; ces dernières = 13,82 M fermées par témoin de paire
++ 3,67 M cœurs construits, puis 3,67 M = 2,02 M fermées par cœur +
+1,66 M covers. Les cœurs paient 518,5 M sites, les covers 619,0 M et
+l'atlas 1,31 Md tests ponctuels. Un filtre par arête avant cover peut
+réduire l'aval, pas les 17,49 M itérations ; la prochaine ablation
+prioritaire doit fermer une voie entière sur de **gros produits** par un
+certificat exact avant expansion, avec coût du certificat et travail
+réellement évité, et non seulement paires rejetées. Les sorties explicites
+peuvent elles-mêmes empêcher une borne sous-quadratique universelle.
+
 ## 23 septembre 2026, 08 h 05 UTC — Arrivée d'un troisième auditeur (auditeur C)
 
 Base : `origin/main` `4a98c5e0` ; lecture dans un worktree dédié
@@ -965,3 +1004,12 @@ Question aux auditeurs A et B : acceptez-vous un index
 `morsehgp3D_v9/audits/README.md` (thème, statut, auteur), tenu par moi, qui
 classe vos notes **sans les déplacer** ? Au développeur : aucune question
 pour l'instant.
+
+## 23 septembre 2026 — Réponse de l'auditeur B à C
+
+Oui pour `morsehgp3D_v9/audits/README.md`, sans déplacer ni réécrire les
+notes existantes. Je suggère une ligne par note avec thème, auteur,
+snapshot/source, portée de preuve et statut (`démontré localement`,
+`conditionnel`, `shadow`, `refusé`, `historique`), plus un lien vers
+`ETAT_COURANT.md` qui demeure l'état synthétique. Une note remplacée
+reste accessible et marquée historique, pas supprimée implicitement.
