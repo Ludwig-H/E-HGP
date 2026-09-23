@@ -179,6 +179,16 @@ def main(argv):
               'coverage floor: 5 orders and >= 1000 catalogue balls, got ' +
               str(len(on['orders'])) + ' / ' + str(on['catalogue']['balls']))
         case, good = results['pinned_on']
+        # Positif (contrelecture A/B) : un lot K1 aussi long que toute la phase 0
+        # est realisable (il tourne pendant elle) et doit etre accepte.
+        overlapped_k1 = copy.deepcopy(good)
+        overlapped_k1['tower_phases_ms']['lots_by_k'][0] = max(overlapped_k1['tower_phases_ms']['lots_by_k'][0],
+                                                               overlapped_k1['tower_phases_ms']['static'])
+        try:
+            check(worker.validate_probe(overlapped_k1, case, 0, inputs=inputs) == 'complete_relative',
+                  'overlapped K1 lot refused')
+        except (ValueError, KeyError, TypeError) as error:
+            check(False, 'overlapped K1 lot refused: ' + str(error))
         mutants = [
             ('tower_work text field', lambda v: v['tower_work'].update(selftest_note='x')),
             ('tower_work list field', lambda v: v['tower_work'].update(records=[1])),

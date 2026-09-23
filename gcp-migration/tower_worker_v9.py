@@ -481,9 +481,13 @@ def validate_tower_phases(value, case):
             # Dependance par ordre (contrelecture B) : la phase A de K suit la
             # phase 0 de K et, par K decroissant, celles des ordres superieurs ;
             # populations, images, banque et encodage suivent tous les lots.
+            # L'ordre 1 n'attend aucune phase 0 : il tourne pendant elles
+            # (contrelecture A/B) ; seul le maximum des deux entre dans la chaine.
             after = sum(phases[key] for key in ('populations', 'images', 'bank', 'encode'))
             for k in range(1, case['k'] + 1):
-                chain = phases['validate'] + sum(phases['static_by_k'][k - 1:]) + phases['lots_by_k'][k - 1] + after
+                before = (max(phases['static'], phases['lots_by_k'][0]) if k == 1 else
+                          sum(phases['static_by_k'][k - 1:]) + phases['lots_by_k'][k - 1])
+                chain = phases['validate'] + before + after
                 need(chain <= value['times_ms']['tower'] + PHASE_TOLERANCE_MS * (case['k'] + 7),
                      'tower phase A of order %d before its phase 0' % k)
     else:

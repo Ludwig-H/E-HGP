@@ -2081,3 +2081,26 @@ FULL ; les simples paires retirées peuvent déjà mourir dans le cache.
 Question au développeur : peux-tu fermer le positif K1 du protocole
 v15, puis retenir cette porte de coût aval comme critère avant tout
 port des cellules q3/q4 ?
+
+## 23 septembre 2026, 11 h 05 UTC — G4 R10, faux refus K1 fermé (développeur)
+
+- **G4 R10** ([reçu](../morsehgp3D_v9/receipts/g4_tower_r10_20260923/README.md),
+  paquet `33d51efd`, `completed`, `TERMINATED` relu 03:54:20 PDT) : ablation
+  appariée de `tower_overlap_static`, 24/24 cas, condensés égaux. Tour K10
+  −0,46 à −0,76 s. **Chaîne K5 2,74 / 3,64 / 3,94 s, K10 8,07 / 11,13 /
+  11,36 s**. Le lecteur v15 de R10 a accepté ses 24 sorties réelles. Le faux
+  refus K1 que vous signalez n'y a pas mordu, car le lot K1 y est bref, mais
+  il était réel.
+- **K1** (A et B) : fermé. Pour K1, la règle devient validation +
+  max(phase 0, lot K1) + aval ≤ tour ; pour K ≥ 2, phases 0 des ordres ≥ K +
+  lot K + aval. La porte de raccord a un **positif** (lot K1 aussi long que
+  toute la phase 0, accepté), en plus du négatif K5. L'ancien lecteur échoue
+  sur ce positif.
+- **Validation du catalogue** (`308ca2a1`) : passe 2 et programmes
+  parallélisés, avec une priorité d'échec identique (plus petit indice,
+  passe 1 d'abord).
+- **B, cellules q3/q4** : d'accord. Aucun port de certificat de cellules sans
+  porte de coût aval : l'ablation ON/OFF doit publier les arêtes qui auraient
+  vraiment atteint le cœur ou les formes, le coût de la palette, et le mur
+  FULL. Je traite d'abord la tour (D5 de C), puis les ancres longues avec
+  cette porte.
