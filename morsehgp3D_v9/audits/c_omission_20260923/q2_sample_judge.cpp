@@ -20,8 +20,9 @@
 //   q2_sample_judge family <uniform|terrain|clusters> <n> <Kmax> <sites> <workers>
 //   q2_sample_judge file <cut.u32le> <Kmax> <sites> <workers>
 //
-// Options : --seed=S, --min-top=N (cles regulieres p = Kmax-1, arite 2), --inject=level | --inject=shell-dup
-// (mutants : niveaux faux, coquille a doublon ; doivent rendre 1).
+// Options : --seed=S, --min-top=N (cles regulieres p = Kmax-1, arite 2), --inject=level | --inject=shell-dup |
+// --inject=key (mutants : niveaux faux, coquille a doublon, cle seule faussee ; doivent rendre 1). La cle
+// canonique de la boule diametrale est reconstruite et comparee a ball.key.
 // Code 0 conforme ; 1 manquante, EXTRA ou recoupement faux ; 2 argument/chaine ; 3 vacuite.
 #include <algorithm>
 #include <cstdint>
@@ -101,6 +102,17 @@ bool same_level(const BallData& ball, const P3& a, const P3& b) {
   return num * 4 == cpp_int(dx * dx + dy * dy + dz * dz) * big(ball.level.den);
 }
 
+// Cle canonique independante (forme puissance a|z|^2 + b.z + c, a > 0, reduite par le pgcd) comparee a
+// ball.key, champ par champ (contrelecture B v4 : la cle consommee par FULL, pas seulement le niveau).
+bool same_key(const BallData& ball, const cpp_int (&f)[5]) {
+  cpp_int g = abs(f[0]);
+  for (int i = 1; i < 5; ++i) g = gcd(g, abs(f[i]));
+  if (g == 0) return false;
+  const cpp_int k[5] = {big(ball.key.a), big(ball.key.b[0]), big(ball.key.b[1]), big(ball.key.b[2]), big(ball.key.c)};
+  for (int i = 0; i < 5; ++i) if (f[i] / g != k[i]) return false;
+  return true;
+}
+
 // Tirage des sites : permutation de Fisher-Yates par splitmix64, graine publiee (distincte du juge q3).
 std::vector<std::size_t> sample_sites(std::size_t n, std::size_t take, std::uint64_t seed) {
   std::vector<std::size_t> v(n);
@@ -123,7 +135,8 @@ struct Totals {
 };
 
 int run(const std::string& label, const std::vector<Point3>& points, unsigned kmax, std::size_t sites,
-        std::size_t workers, std::uint64_t seed, std::uint64_t min_top, bool corrupt_level, bool shell_dup) {
+        std::size_t workers, std::uint64_t seed, std::uint64_t min_top, bool corrupt_level, bool shell_dup,
+        bool corrupt_key) {
   if (kmax < 2 || kmax > 10) { std::fprintf(stderr, "Kmax must be in 2..10\n"); return 2; }
   mhgp9::ChainOptions o;
   o.kmax = kmax;
@@ -158,6 +171,7 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
   if (shell_dup)  // mutant : dernier site de coquille remplace par le premier (doublon)
     for (auto& ball : cat)
       if (ball.n_shell >= 2) ball.shell_ids[ball.n_shell - 1] = ball.shell_ids[0];
+  if (corrupt_key) for (auto& ball : cat) ball.key.c += 1;  // mutant : cle seule faussee
   std::vector<std::vector<std::uint32_t>> by_site(n);
   for (std::size_t i = 0; i < cat.size(); ++i)
     for (const auto s : cat[i].shell()) by_site[static_cast<std::size_t>(s)].push_back(static_cast<std::uint32_t>(i));
@@ -205,6 +219,11 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
         std::vector<std::int32_t> theirs(ball.shell().begin(), ball.shell().end());
         std::sort(theirs.begin(), theirs.end());
         if (theirs != shell_sorted || !same_level(ball, pos[a], pos[b])) continue;
+        // Forme de la boule diametrale : (x-a).(x-b) = |x|^2 - (a+b).x + a.b.
+        const cpp_int form[5] = {cpp_int(1), cpp_int(-(pos[a].x + pos[b].x)), cpp_int(-(pos[a].y + pos[b].y)),
+                                 cpp_int(-(pos[a].z + pos[b].z)),
+                                 cpp_int(pos[a].x * pos[b].x + pos[a].y * pos[b].y + pos[a].z * pos[b].z)};
+        if (!same_key(ball, form)) continue;
         hit = bi;
         // Recoupement : memes interieurs (ids distincts), arite 2 (la paire a, b est antipodale).
         std::vector<std::int32_t> ids(ball.interior().begin(), ball.interior().end());
@@ -290,12 +309,13 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
 int main(int argc, char** argv) {
   try {
     std::uint64_t seed = 0xc3a5c85c97cb3127ull, min_top = 1;
-    bool corrupt_level = false, shell_dup = false;
+    bool corrupt_level = false, shell_dup = false, corrupt_key = false;
     std::vector<std::string> args;
     for (int i = 1; i < argc; ++i) {
       const std::string a = argv[i];
       if (a == "--inject=level") corrupt_level = true;
       else if (a == "--inject=shell-dup") shell_dup = true;
+      else if (a == "--inject=key") corrupt_key = true;
       else if (a.rfind("--seed=", 0) == 0) seed = std::stoull(a.substr(7), nullptr, 0);
       else if (a.rfind("--min-top=", 0) == 0) min_top = std::stoull(a.substr(10));
       else if (a.rfind("--", 0) == 0) { std::fprintf(stderr, "unknown option %s\n", a.c_str()); return 2; }
@@ -304,12 +324,12 @@ int main(int argc, char** argv) {
     if (args.size() == 6 && args[0] == "family") {
       const auto fx = mhgp9::gen::bench::make_front_fixture(std::stoul(args[2]), args[1], 3);
       return run(args[1] + "_" + args[2], fx.points, std::stoul(args[3]), std::stoul(args[4]), std::stoul(args[5]),
-                 seed, min_top, corrupt_level, shell_dup);
+                 seed, min_top, corrupt_level, shell_dup, corrupt_key);
     }
     if (args.size() == 5 && args[0] == "file") {
       const auto slash = args[1].find_last_of('/');
       return run(args[1].substr(slash == std::string::npos ? 0 : slash + 1), read_u32le(args[1]), std::stoul(args[2]),
-                 std::stoul(args[3]), std::stoul(args[4]), seed, min_top, corrupt_level, shell_dup);
+                 std::stoul(args[3]), std::stoul(args[4]), seed, min_top, corrupt_level, shell_dup, corrupt_key);
     }
   } catch (const std::exception& e) {
     std::fprintf(stderr, "error: %s\n", e.what());
