@@ -25,7 +25,7 @@ Une arête totalement close saute S3 et S4 ; une fermeture de seule voie laisse 
 
 Un BVH pré-cœur **CPU** intercalé entre deux étages résidents imposerait S2 GPU→CPU puis des masques CPU→S3 GPU, avec une synchronisation sur le chemin critique. Le shadow CPU est utile pour mesurer sélectivité et coût ; un port GPU de la preuve de groupe, ou un export compact recouvert et mesuré, serait nécessaire avant d'en déduire un gain de chaîne. La même discipline de mesure s'applique aux demi-scènes, quarts de scène et densités 1/2 et 1/4, brut et sans sol : ces coupes changent conjointement le nombre d'arêtes, de graines et de sites par cover.
 
-Enfin, l'arène de plages S4.0 (§3 du plan) doit préciser l'unité de `(offset, compte)` : sa borne annoncée de 5,6 Go à K10 dépasse un décalage **en octets** sur u32, alors qu'un décalage **en plages de 8 octets** reste sous 2³² pour cette borne. Calculer et vérifier les sommes en u64, consulter la mémoire libre avant allocation et traiter explicitement la capacité insuffisante par repli exact ; aucune durée ni faisabilité G4 n'en est déduite ici.
+Enfin, l'arène de plages S4.0 (§3 du plan) doit préciser l'unité de `(offset, compte)` : son estimation de 5,6 Go à K10 dépasse déjà un décalage **en octets** sur u32, alors qu'un décalage **en plages de 8 octets** reste sous 2³² pour cette estimation. Celle-ci n'est pas une borne de capacité, comme le précise la [contrelecture B](CONTRE_AUDIT_B_PLAN_S4_LEDGER_ET_BUDGET_20260923.md) : publier la somme réelle des plages retenues et ses maxima. Calculer et vérifier les sommes en u64, consulter la mémoire libre avant allocation et traiter explicitement la capacité insuffisante par repli exact ; aucune durée ni faisabilité G4 n'en est déduite ici.
 
 ## Porte de coût S4b et croissance réelle
 
@@ -36,3 +36,14 @@ Le budget nominal q3 des balayages complets est \(\sum_e \lceil g_e/32\rceil c_e
 ## Ce que le juge peut prouver avec son payload
 
 Le [plan S4](../docs/s4_conception_20260923/PLAN_S4.md), §2, distingue correctement la porte d'objet **CPU** (IDs de coquille exacts) des enregistrements GPU, qui ne portent que taille et empreinte somme/xor de mélanges 64 bits ; il annonce aussi un préflight `--lanes-judge` comparant le multiensemble des arêtes décidées. Avec ce payload GPU, le préflight peut comparer **exactement les champs consommés par la tour** — clé, support, arité, profondeur et taille de coquille —, tandis que l'empreinte des IDs de coquille n'est qu'un contrôle à collisions possibles. Si la porte de port doit certifier « même objet q3/q4 » avec la **liste exacte** des IDs de coquille, prévoir une sortie d'IDs réservée au mode juge, ou un oracle hôte exhaustif relié aux IDs produits sur l'appareil. Il suffit sinon de nommer explicitement la portée plus étroite du juge GPU ; le recalcul du census de catalogue en aval ne transforme pas l'empreinte en preuve d'identité de la coquille.
+
+La phrase du plan S4 §2, « Seul le jumeau attrape une boule manquante »,
+est trop forte. Le jumeau CPU/GPU attrape une **divergence** de leurs
+sorties ; il accepte une omission commune due aux mêmes arêtes amont,
+au même propriétaire ou à une primitive partagée. Garder en parallèle
+un juge qui construit des [clés admissibles indépendamment du
+générateur](CONTRE_AUDIT_B_JUGE_CLES_ABSENTES_20260923.md), avec les
+planchers par famille et strate critique déjà demandés, puis comparer
+ses clés au catalogue des deux bras. Une absence trouvée est une preuve
+unilatérale de défaut ; l'absence de défaut dans cet échantillon ne
+devient toujours pas une preuve de complétude globale.

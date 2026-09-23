@@ -1,0 +1,62 @@
+{
+  "points": {
+    "path": "/tmp/mhgp9-s2-scaling-20260923-inputs/s00_full_full.u32le",
+    "bytes": 1480668,
+    "sha256": "233cc4ea8cac6e0b1155ea845af57b32e5236764bf2e119557aeab5bac76c172"
+  },
+  "raw_return_ids": {
+    "path": "/tmp/mhgp9-s2-scaling-20260923-inputs/s00_full_full.raw_return_ids.u32le",
+    "bytes": 493556,
+    "sha256": "796e9814dd2dff7778ad8d1bb55f5113ab54206ff8b246e6432200f9a6833f7f"
+  },
+  "generator_library": {
+    "path": "build/v9-open-worktree/build/v9-dev/libmhgp9_gen.a",
+    "bytes": 2118610,
+    "sha256": "208aabb30a764bad25ab1c99d74885bd405e84a13dcb8375622d66aa6203f70a"
+  },
+  "local_binary": {
+    "path": "/tmp/mhgp9-triple-probe",
+    "bytes": 498192,
+    "sha256": "a5488cdaa999c2047645c4d33852a79756d21745409dcc8e3cfc13be0aba021a"
+  },
+  "trace_part_0": {
+    "path": "/tmp/mhgp9-edge-core-audit-20260923/full/trace/part_0.bin",
+    "bytes": 7813120,
+    "sha256": "aff29cd4cc91b074f32a70696f628d1ae4b3f02ba76521710ba07e888d12cdc6"
+  },
+  "trace_part_1": {
+    "path": "/tmp/mhgp9-edge-core-audit-20260923/full/trace/part_1.bin",
+    "bytes": 7944192,
+    "sha256": "d5d36f42a19a6a8e3672d015f2be3b4b611aad056c163db3efcb182aeb905eaa"
+  },
+  "trace_part_2": {
+    "path": "/tmp/mhgp9-edge-core-audit-20260923/full/trace/part_2.bin",
+    "bytes": 8174592,
+    "sha256": "cf19e31682a3a90350838db9e8cdcf3a4cd1e041e9e859768a624ee718f64a4a"
+  },
+  "trace_part_3": {
+    "path": "/tmp/mhgp9-edge-core-audit-20260923/full/trace/part_3.bin",
+    "bytes": 8055808,
+    "sha256": "41f4a8d92cbc642f67daa2d0f9d7c20d75bc380e7dd70cc273ce3832473121a6"
+  },
+  "trace_part_4": {
+    "path": "/tmp/mhgp9-edge-core-audit-20260923/full/trace/part_4.bin",
+    "bytes": 7918592,
+    "sha256": "edaf2633f7f21bf7d6ff7fb7cb9243e2d544b05253a813dd23f6801e85d4b708"
+  },
+  "trace_part_5": {
+    "path": "/tmp/mhgp9-edge-core-audit-20260923/full/trace/part_5.bin",
+    "bytes": 7873536,
+    "sha256": "cbc8c4af910854fca9dbc6c250678551345fe67736a0d2fbc742ad6c3be53d62"
+  },
+  "trace_part_6": {
+    "path": "/tmp/mhgp9-edge-core-audit-20260923/full/trace/part_6.bin",
+    "bytes": 7968768,
+    "sha256": "51b1f047fc6127aec2a6b8b2314f08f4043abf58dbff24d30b9e16563e370a73"
+  },
+  "trace_part_7": {
+    "path": "/tmp/mhgp9-edge-core-audit-20260923/full/trace/part_7.bin",
+    "bytes": 8034320,
+    "sha256": "4cb6b3f45a8577aac541b4d183c91d42e4d421ab813e76b7a27bbb9e738ad334"
+  }
+}

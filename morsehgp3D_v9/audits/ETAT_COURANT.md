@@ -37,6 +37,10 @@ Le ledger doit distinguer graines, groupes et enregistrements avant port
 GPU. Les champs projetés occupent au moins **129 octets** avant alignement,
 non les 112 annoncés ; les budgets d'arène de plages sont des estimations,
 pas des bornes. Ni ces corrections ni S4 n'ont de reçu G4.
+Le jumeau CPU/GPU compare deux chemins issus des mêmes survivants : il
+détecte une divergence, pas une clé omise par les deux. Conserver le juge
+échantillonné de clés admissibles indépendantes en parallèle de la porte
+différentielle S4, avec sa portée limitée déclarée.
 
 23 septembre 2026. Ports v13 publiés : sonde **`c768e06a`**, porte Euler
 8k **`a08378da`**, lecteur LiDAR **`50646eef`** puis **`1f048aae`**,
@@ -531,11 +535,16 @@ des groupes disjoints donnent autant de sites intérieurs. Une fixture
 u18 K5 a **quatre triples** qui ferment q3 et trois q4, tandis que
 **les 66 paires** de gardes échouent toutes. Une seconde fixture teste
 64 coins distincts et 120 paires : le [contrôle entier](check_group_guards.py)
-passe. Cette piste n'a **aucune** sélectivité LiDAR mesurée : énumérer
-les 4 960 triples d'une palette32 sur chaque rectangle serait
-prohibitif. Première porte : propositions bornées, gardes/IDs
-conservés, repli exact, comparaison sur segments positifs puis coût
-sur tous les rectangles.
+passe. Le [premier shadow LiDAR des triples](rect_guard_triples_b_20260923/README.md)
+mesure une proposition bornée sur ces **1 747** grands rectangles : après
+la preuve par paires, un mix glouton de triples ferme seulement **deux
+rectangles positifs supplémentaires**, 44 arêtes et **53 523 formes**,
+soit **0,00956 %** du cœur global. Sur les 696 rectangles restants, la
+sélection des triples paie encore **2,547 M énumérations**, 2,712 M
+coins et environ **356,5 ms CPU locaux** ; ni gain de chaîne ni GPU
+n'en découlent. Le certificat garde son pouvoir mathématique, mais cette
+palette uniforme/top64 ne justifie pas un port ; tester des tuiles ou
+groupes adaptatifs avec gardes/IDs archivés et repli exact.
 Le [diagnostic de routage pré-cœur](paired_guard_dispatch_grid_20260923/README.md)
 lit les **3 986 433** survivantes S2 du plein brut 08/000000/K5.
 `D≥2²³` et une cellule du milieu de 4,096 m occupée par au moins

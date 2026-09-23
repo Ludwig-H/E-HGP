@@ -1,0 +1,76 @@
+{
+  "case": "08/000000 raw entire grid1mm u18 K5 s8; large rectangles product>=1024",
+  "global_s2_edges": 3986433,
+  "global_F": 559661741,
+  "rectangles_big": 1747,
+  "positive_big": 299,
+  "pair_max": {
+    "all_closed": 1051,
+    "positive_closed": 72,
+    "positive_edges": 2175,
+    "positive_F": 5059809
+  },
+  "triple_only": {
+    "all_closed": 206,
+    "positive_closed": 1
+  },
+  "mixed_greedy": {
+    "all_closed": 1055,
+    "positive_closed": 71,
+    "positive_edges": 2066,
+    "positive_F": 4194061
+  },
+  "pair_or_mixed_potential": {
+    "all_closed": 1067,
+    "positive_closed": 74,
+    "positive_edges": 2219,
+    "positive_F": 5113332,
+    "new_positive_ordinals": [
+      {
+        "ordinal": 1790368,
+        "edges": 36,
+        "F": 44046
+      },
+      {
+        "ordinal": 2938279,
+        "edges": 8,
+        "F": 9477
+      }
+    ]
+  },
+  "work_all_sampled": {
+    "enumerated": 7233957,
+    "point3": 6393097,
+    "point4": 5825755,
+    "tested": 151972,
+    "corners": 8394057,
+    "box3": 108836,
+    "box4": 64398,
+    "select_ns": 939570092,
+    "class_ns": 208727250,
+    "pair_select_ns": 80687544,
+    "pair_class_ns": 670418882
+  },
+  "work_big": {
+    "enumerated": 7150671,
+    "point3": 6324988,
+    "point4": 5767618,
+    "tested": 149897,
+    "corners": 8271994,
+    "box3": 107097,
+    "box4": 63026,
+    "select_ns": 930108307,
+    "class_ns": 205856962,
+    "pair_select_ns": 79442874,
+    "pair_class_ns": 662509179
+  },
+  "work_only_after_pair_max_failure": {
+    "rectangles": 696,
+    "positive": 227,
+    "enumerated": 2546513,
+    "tested": 61477,
+    "corners": 2712129,
+    "select_ns": 290451838,
+    "class_ns": 66064620
+  }
+}
