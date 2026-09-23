@@ -282,3 +282,19 @@ Le gain du cache est modeste (CPU −5 à −19 %, mur q3/q4 −2 à −8 %) ; l
 K10 passe de 17,5–22,8 s (R3) à 11,4–14,9 s (préparation parallèle), comparaison
 entre sessions.
 
+## 23 septembre 2026, 03 h 10 — Tour : ordres K en parallèle (développeur)
+
+GCP non utilisé. Sur la voie statique à plusieurs fils, les K ordres sont
+construits concurremment : cibles statiques de chaque ordre (phase 0,
+parallèle dans l'ordre), lots de chaque ordre (phase A, un ordre par tâche),
+identifiants de populations dans l'ordre exact de la construction séquentielle
+(phase B, puis lignes en parallèle), images verticales de l'ordre K depuis
+l'histoire et les ancres achevées de K−1 dans l'ordre des nœuds (phase C,
+coupes monotones comme en série). Même brouillon, même banque, mêmes forêts :
+la voie statique à un fil garde la boucle séquentielle et la porte
+`mhgp9_chain_static_paths` compare temporelle / statique 1 / 4 / 8 fils
+(même condensé). Banque : lignes déplacées (plus de copie de deux vecteurs
+par ligne), validation parallèle, premier défaut au plus petit indice.
+Condensés inchangés à K10 sur les trois trames ; tour W8 locale 26 → 18 s
+(000100), RSS 3,48 → 3,38 Go.
+

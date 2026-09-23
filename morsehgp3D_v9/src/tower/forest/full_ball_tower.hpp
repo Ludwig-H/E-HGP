@@ -302,6 +302,9 @@ class Builder {
     require(!batch_resolver.resolve || geometry_threads > 0,
         "full_ball_batch_requires_static", FullBallStatus::kInvalidInput);
     if (kmax > 1 && !geometry_threads) resolver_cache.configure(ix.upos.size());
+    // Static path on several threads: the K orders are built concurrently
+    // (run_orders_parallel), with the same objects as this sequential loop.
+    if (geometry_threads > 1 && kmax > 1 && !batch_resolver.resolve) return run_orders_parallel();
     std::vector<Draft> drafts;
     History lower_history;
     std::vector<u64> lower_anchors;
@@ -330,10 +333,11 @@ class Builder {
         const auto& level = balls[program[begin]].level;
         while (end < program.size() && same_exact_level(level, balls[program[end]].level)) ++end;
         // No anchor of this lot is installed until EVERY representative resolves.
-        std::vector<Block> blocks;
-        blocks.reserve(end - begin);
+        // Block slots are reused from lot to lot (no allocation per lot).
+        if (lot_blocks.size() < end - begin) lot_blocks.resize(end - begin);
+        const std::span<Block> blocks(lot_blocks.data(), end - begin);
         const u64 prior_count = current.levels.size();
-        for (size_t j = begin; j < end; ++j) blocks.push_back(prepare_block(program[j], level, prior_count));
+        for (size_t j = begin; j < end; ++j) prepare_block(blocks[j - begin], program[j], level, prior_count);
         close_lot(blocks, level, draft, lower_cursor, lower_anchors);
         begin = end;
       }
@@ -350,9 +354,13 @@ class Builder {
     }
     // Construction indices and histories are dead after the last order; no
     // published object borrows them. Release before copying the immutable bank.
-    resolver_cache.release();
     lower_history = {};
     decltype(lower_anchors)().swap(lower_anchors);
+    return finish(drafts);
+  }
+
+  std::vector<FullBallOrder> finish(std::vector<Draft>& drafts) {
+    resolver_cache.release();
     decltype(identity)().swap(identity);
     decltype(by_key)().swap(by_key);
     decltype(programs)().swap(programs);
@@ -362,7 +370,8 @@ class Builder {
     decltype(compressed)().swap(compressed);
     current = {};
     decltype(stack)().swap(stack);
-    auto bank = build_full_coverage_populations(domain, populations);
+    // Rows are moved into the bank (validated on the static threads).
+    auto bank = build_full_coverage_populations(domain, std::move(populations), geometry_threads);
     require(bank.status == FullCertificateStatus::kOk, "full_ball_population_bank",
         bank.status == FullCertificateStatus::kResourceExhausted ? FullBallStatus::kResourceExhausted
                                                                : FullBallStatus::kInvariantViolated);
@@ -390,6 +399,282 @@ class Builder {
     return result;
   }
 
+  // ---- Static path, K orders built concurrently (geometry_threads > 1).
+  //
+  // Phase 0 (sequential over K, parallel inside): the static targets of every
+  // order. Phase A (parallel over K): each order's lots, anchors, history and
+  // draft, with contributions naming BALLS and without vertical images.
+  // Phase B (sequential): population IDs assigned in the order of the
+  // sequential construction (domain singletons, then K = 1..Kmax, batches,
+  // actions, contributions), hence the same bank. Phase C (parallel over K):
+  // vertical images of order K from the completed history and anchors of
+  // order K-1, queried in node order (monotone cuts, as sequentially). The
+  // drafts, the bank and the forests are those of the sequential loop.
+  static constexpr u64 kBallTag = u64{1} << 63;
+  struct OrderState {
+    unsigned k = 0;
+    FullBallStats st;
+    std::vector<u32> anchors;          // node per ball of this order (kAbsent32)
+    History current;
+    std::vector<u64> compressed;
+    std::vector<BallId> static_targets;
+    size_t static_cursor = 0;
+    std::vector<Block> lot_blocks;
+    Draft draft;
+    std::vector<u32> birth_ball;       // per node: ball of a birth, or kAbsent32
+  };
+  static constexpr u32 kAbsent32 = std::numeric_limits<u32>::max();
+
+  std::vector<FullBallOrder> run_orders_parallel() {
+    std::vector<OrderState> orders(kmax);
+    for (unsigned k = 1; k <= kmax; ++k) {
+      auto& o = orders[k - 1];
+      o.k = k;
+      if (k > 1) {
+        current_k = k;
+        prepare_static_order();  // parallel inside, writes static_targets
+        o.static_targets.swap(static_targets);
+      }
+    }
+    parallel_items(kmax, geometry_threads, [&](size_t i, size_t) { order_lots(orders[i]); });
+    assign_populations(orders);
+    parallel_items(kmax, geometry_threads, [&](size_t i, size_t) {
+      order_images(orders[i], i ? &orders[i - 1] : nullptr);
+    });
+    std::vector<Draft> drafts;
+    for (auto& o : orders) {
+      merge_order_stats(o.st);
+      drafts.push_back(std::move(o.draft));
+    }
+    decltype(orders)().swap(orders);
+    return finish(drafts);
+  }
+
+  void merge_order_stats(const FullBallStats& o) {
+    // Only the counters phases A and C write; everything else stays zero.
+    for (auto [into, from] : {std::pair{&st.anchor_blocks, o.anchor_blocks}, {&st.regular_blocks, o.regular_blocks},
+                              {&st.extra_blocks, o.extra_blocks}, {&st.representatives, o.representatives},
+                              {&st.births, o.births}, {&st.merges, o.merges}, {&st.contributions, o.contributions},
+                              {&st.inert_blocks, o.inert_blocks}, {&st.singleton_lots, o.singleton_lots},
+                              {&st.grouped_lots, o.grouped_lots}, {&st.lot_dsu_slots, o.lot_dsu_slots},
+                              {&st.lower_edges_indexed, o.lower_edges_indexed},
+                              {&st.lower_nodes_activated, o.lower_nodes_activated},
+                              {&st.lower_edges_activated, o.lower_edges_activated},
+                              {&st.lower_queries, o.lower_queries}, {&st.lower_find_steps, o.lower_find_steps},
+                              {&st.lower_path_writes, o.lower_path_writes}})
+      add(*into, from);
+  }
+
+  u64 order_root(OrderState& o, u64 token, u64 prior_count) {
+    require(token < prior_count, "full_ball_anchor_not_prior");
+    u64 r = token;
+    while (o.compressed[r] != r) r = o.compressed[r];
+    while (o.compressed[token] != token) {
+      const auto next = o.compressed[token]; o.compressed[token] = r; token = next;
+    }
+    require(r < prior_count && o.current.next[r] == absent, "full_ball_root_not_prior");
+    return r;
+  }
+
+  u64 order_new_node(OrderState& o, const ExactLevel& level, const std::vector<u64>& parents, u32 birth) {
+    const u64 id = o.current.levels.size();
+    require(id < kAbsent32, "full_ball_node_representation", FullBallStatus::kResourceExhausted);
+    o.current.levels.push_back(level); o.current.next.push_back(absent); o.compressed.push_back(id);
+    for (u64 parent : parents) { o.current.next[parent] = id; o.compressed[parent] = id; }
+    o.birth_ball.push_back(birth);
+    if (parents.empty()) add(o.st.births); else add(o.st.merges);
+    return id;
+  }
+
+  void order_block(OrderState& o, Block& block, BallId id, const ExactLevel& level, u64 prior_count) {
+    block.ball = id; block.roots.clear(); block.contribution = 0; block.interior = false;
+    add(o.st.anchor_blocks);
+    if (balls[id].n_shell == balls[id].arity) add(o.st.regular_blocks); else add(o.st.extra_blocks);
+    u16 contribution = 0; bool interior = false;
+    visit_block_at(o.k, id, contribution, interior, [&](std::span<const i32> facet) {
+      if (o.k == 1) {
+        add(o.st.representatives);
+        require(facet.size() == 1, "full_ball_representative_cardinality");
+        const PointId point = ix.point_id(facet.front());
+        block.roots.push_back(order_root(o, std::lower_bound(domain.begin(), domain.end(), point) - domain.begin(),
+                                         prior_count));
+        return;
+      }
+      add(o.st.representatives);
+      require(o.static_cursor < o.static_targets.size(), "full_ball_static_target_missing");
+      const BallId target = o.static_targets[o.static_cursor++];
+      require(target < balls.size() && compare_exact_level(balls[target].level, level) < 0,
+              "full_ball_static_target_not_strict");
+      require(o.anchors[target] != kAbsent32, "full_ball_static_closed_anchor_missing");
+      block.roots.push_back(order_root(o, o.anchors[target], prior_count));
+    });
+    block.contribution = contribution; block.interior = interior;
+    std::sort(block.roots.begin(), block.roots.end());
+    block.roots.erase(std::unique(block.roots.begin(), block.roots.end()), block.roots.end());
+  }
+
+  void order_lot(OrderState& o, std::span<Block> blocks, const ExactLevel& level) {
+    const auto birth_of = [&](const std::vector<u64>& parents, BallId ball) {
+      return parents.empty() ? static_cast<u32>(ball) : kAbsent32;
+    };
+    if (blocks.size() == 1) {
+      add(o.st.singleton_lots);
+      auto& block = blocks.front();
+      FullCoverageAction action;
+      action.parents.swap(block.roots);
+      if (block.contribution || block.interior) {
+        action.contributions.push_back({kBallTag | block.ball, block.contribution, block.interior});
+        add(o.st.contributions);
+      }
+      u64 target;
+      if (action.parents.size() == 1) target = action.parents.front();
+      else {
+        if (action.parents.empty()) require(action.contributions.size() == 1, "full_ball_distinct_births");
+        target = order_new_node(o, level, action.parents, birth_of(action.parents, block.ball));
+      }
+      if (action.parents.size() != 1 || !action.contributions.empty()) {
+        FullCoverageBatch batch{level, {}};
+        batch.actions.push_back(std::move(action));
+        o.draft.batches.push_back(std::move(batch));
+      } else add(o.st.inert_blocks);
+      require(o.anchors[block.ball] == kAbsent32 && target != absent, "full_ball_anchor_duplicate");
+      o.anchors[block.ball] = static_cast<u32>(target);
+      return;
+    }
+    add(o.st.grouped_lots);
+    add(o.st.lot_dsu_slots, blocks.size());
+    std::vector<size_t> dsu(blocks.size()); std::iota(dsu.begin(), dsu.end(), size_t{0});
+    const auto find = [&](size_t a) { while (dsu[a] != a) { dsu[a] = dsu[dsu[a]]; a = dsu[a]; } return a; };
+    std::vector<std::pair<u64,size_t>> owners;
+    for (size_t b = 0; b < blocks.size(); ++b) for (u64 p : blocks[b].roots) owners.emplace_back(p,b);
+    std::sort(owners.begin(), owners.end());
+    for (size_t j = 1; j < owners.size(); ++j) if (owners[j - 1].first == owners[j].first) {
+      const auto a = find(owners[j - 1].second), b = find(owners[j].second);
+      dsu[std::max(a,b)] = std::min(a,b);
+    }
+    std::vector<std::vector<size_t>> groups(blocks.size());
+    for (size_t b = 0; b < blocks.size(); ++b) groups[find(b)].push_back(b);
+    FullCoverageBatch batch{level, {}};
+    std::vector<u64> targets(blocks.size(), absent);
+    for (const auto& group : groups) {
+      if (group.empty()) continue;
+      FullCoverageAction action;
+      for (size_t b : group) {
+        const auto& block = blocks[b];
+        action.parents.insert(action.parents.end(), block.roots.begin(), block.roots.end());
+        if (block.contribution || block.interior) {
+          action.contributions.push_back({kBallTag | block.ball, block.contribution, block.interior});
+          add(o.st.contributions);
+        }
+      }
+      std::sort(action.parents.begin(), action.parents.end());
+      action.parents.erase(std::unique(action.parents.begin(), action.parents.end()), action.parents.end());
+      u64 target;
+      if (action.parents.size() == 1) target = action.parents.front();
+      else {
+        if (action.parents.empty())
+          require(group.size() == 1 && action.contributions.size() == 1, "full_ball_distinct_births");
+        target = order_new_node(o, level, action.parents, birth_of(action.parents, blocks[group.front()].ball));
+      }
+      for (size_t b : group) targets[b] = target;
+      if (action.parents.size() != 1 || !action.contributions.empty()) batch.actions.push_back(std::move(action));
+      else add(o.st.inert_blocks, group.size());
+    }
+    if (!batch.actions.empty()) o.draft.batches.push_back(std::move(batch));
+    for (size_t b = 0; b < blocks.size(); ++b) {
+      require(o.anchors[blocks[b].ball] == kAbsent32 && targets[b] != absent, "full_ball_anchor_duplicate");
+      o.anchors[blocks[b].ball] = static_cast<u32>(targets[b]);
+    }
+  }
+
+  void order_lots(OrderState& o) {
+    o.anchors.assign(balls.size(), kAbsent32);
+    if (o.k == 1) {
+      FullCoverageBatch initial;
+      for (size_t j = 0; j < domain.size(); ++j) {
+        initial.actions.push_back({{}, {{j, 1, false}}});  // domain singleton j (population j)
+        add(o.st.contributions);
+        order_new_node(o, initial.level, {}, kAbsent32);
+      }
+      o.draft.batches.push_back(std::move(initial));
+    }
+    const auto& program = programs[o.k];
+    for (size_t begin = 0; begin < program.size();) {
+      size_t end = begin + 1;
+      const auto& level = balls[program[begin]].level;
+      while (end < program.size() && same_exact_level(level, balls[program[end]].level)) ++end;
+      if (o.lot_blocks.size() < end - begin) o.lot_blocks.resize(end - begin);
+      const std::span<Block> blocks(o.lot_blocks.data(), end - begin);
+      const u64 prior_count = o.current.levels.size();
+      for (size_t j = begin; j < end; ++j) order_block(o, blocks[j - begin], program[j], level, prior_count);
+      order_lot(o, blocks, level);
+      begin = end;
+    }
+    if (o.k > 1) require(o.static_cursor == o.static_targets.size(), "full_ball_static_unconsumed_targets");
+    std::vector<BallId>().swap(o.static_targets);
+    decltype(o.lot_blocks)().swap(o.lot_blocks);
+    decltype(o.compressed)().swap(o.compressed);
+    u64 live = 0;
+    for (u64 next : o.current.next) if (next == absent) ++live;
+    require(live == 1, "full_ball_final_component_count");
+  }
+
+  void assign_populations(std::vector<OrderState>& orders) {
+    // IDs in the order of the sequential construction (domain singletons,
+    // then first encounter over K, batches, actions, contributions); the
+    // rows themselves are then built in parallel, each at its own ID.
+    std::vector<BallId> first_seen;
+    u64 next = domain.size();
+    for (auto& o : orders)
+      for (auto& batch : o.draft.batches)
+        for (auto& action : batch.actions)
+          for (auto& ref : action.contributions) {
+            if ((ref.population & kBallTag) == 0) continue;
+            const auto ball = static_cast<BallId>(ref.population & ~kBallTag);
+            if (population_ids[ball] == absent) { population_ids[ball] = next++; first_seen.push_back(ball); }
+            ref.population = population_ids[ball];
+          }
+    populations.resize(next);
+    for (size_t j = 0; j < domain.size(); ++j) populations[j] = {{}, {domain[j]}};
+    parallel_ranges(first_seen.size(), geometry_threads, [&](size_t begin, size_t end, size_t) {
+      for (size_t j = begin; j < end; ++j) {
+        const BallId id = first_seen[j];
+        auto& row = populations[domain.size() + j];
+        for (i32 site : balls[id].interior()) row.interior.push_back(ix.point_id(site));
+        for (i32 site : balls[id].shell()) row.shell.push_back(ix.point_id(site));
+        std::sort(row.interior.begin(), row.interior.end()); std::sort(row.shell.begin(), row.shell.end());
+      }
+    });
+  }
+
+  void order_images(OrderState& o, const OrderState* lower) {
+    static const History empty_history;
+    MonotoneHistory cursor(lower ? lower->current : empty_history, o.st);
+    o.draft.lower_nodes.reserve(o.current.levels.size());
+    u64 node = 0;
+    for (const auto& batch : o.draft.batches)
+      for (const auto& action : batch.actions) {
+        if (action.parents.size() == 1) continue;  // continuation: no node
+        require(node < o.current.levels.size(), "full_ball_image_node_count");
+        u64 image = absent;
+        if (o.k > 1) {
+          const auto& level = o.current.levels[node];
+          if (action.parents.empty()) {
+            const u32 ball = o.birth_ball[node];
+            require(ball != kAbsent32 && lower->anchors[ball] != kAbsent32, "full_ball_vertical_birth_anchor");
+            image = cursor.root_at(lower->anchors[ball], level, true);
+          } else {
+            image = cursor.root_at(o.draft.lower_nodes[action.parents.front()], level, true);
+            for (u64 p : action.parents)
+              require(cursor.root_at(o.draft.lower_nodes[p], level, true) == image, "full_ball_vertical_naturality");
+          }
+        }
+        o.draft.lower_nodes.push_back(image);
+        ++node;
+      }
+    require(node == o.current.levels.size(), "full_ball_image_node_count");
+  }
+
  private:
   const CloudIndex& ix;
   std::span<const BallData> balls;
@@ -410,6 +695,7 @@ class Builder {
   std::vector<u64> population_ids, anchors, compressed;
   History current;
   std::vector<NodeRef> stack;
+  std::vector<Block> lot_blocks;  // reused slots of the current lot
 
   AnchorMebResult meb(std::span<const i32> sites, AnchorMebWork& work) const {
     std::array<P3, kFacetMaxK> positions{};
@@ -1032,14 +1318,19 @@ class Builder {
 
   template<class Emit>
   void visit_block(BallId id, u16& contribution, bool& interior, Emit&& emit) const {
+    visit_block_at(current_k, id, contribution, interior, std::forward<Emit>(emit));
+  }
+  // Same as visit_block for an explicit order k (parallel orders).
+  template<class Emit>
+  void visit_block_at(unsigned k, BallId id, u16& contribution, bool& interior, Emit&& emit) const {
     const auto& b = balls[id];
     if (b.n_shell == b.arity) {
-      if (current_k == b.n_interior + b.n_shell) {
+      if (k == b.n_interior + b.n_shell) {
         contribution = static_cast<u16>((1u << b.n_shell) - 1);
         interior = b.n_interior != 0;
       } else {
-        require(current_k + 1 == b.n_interior + b.n_shell, "full_ball_regular_rank");
-        // Representative facets are built in a fixed buffer (current_k <=
+        require(k + 1 == b.n_interior + b.n_shell, "full_ball_regular_rank");
+        // Representative facets are built in a fixed buffer (k <=
         // kFacetMaxK sites): no allocation per representative.
         std::array<i32, kFacetMaxK> sites{};
         for (size_t omit = 0; omit < b.n_shell; ++omit) {
@@ -1054,7 +1345,7 @@ class Builder {
       }
     } else {
       const auto& table = extra.at(id);
-      const auto rank = table.rank(current_k);
+      const auto rank = table.rank(k);
       require(rank.present, "full_ball_absent_scheduled_block");
       contribution = rank.contribution_shell; interior = rank.contribution_interior;
       std::array<i32, kFacetMaxK> sites{};
@@ -1073,8 +1364,8 @@ class Builder {
       }
     }
   }
-  Block prepare_block(BallId id, const ExactLevel& level, u64 prior_count) {
-    Block block{id, {}, 0, false};
+  void prepare_block(Block& block, BallId id, const ExactLevel& level, u64 prior_count) {
+    block.ball = id; block.roots.clear(); block.contribution = 0; block.interior = false;
     add(st.anchor_blocks);
     if (balls[id].n_shell == balls[id].arity) add(st.regular_blocks); else add(st.extra_blocks);
     visit_block(id, block.contribution, block.interior, [&](std::span<const i32> facet) {
@@ -1085,7 +1376,6 @@ class Builder {
     });
     std::sort(block.roots.begin(), block.roots.end());
     block.roots.erase(std::unique(block.roots.begin(), block.roots.end()), block.roots.end());
-    return block;
   }
   u64 population(BallId id) {
     if (population_ids[id] != absent) return population_ids[id];
@@ -1112,13 +1402,13 @@ class Builder {
     if (parents.empty()) add(st.births); else add(st.merges);
     return id;
   }
-  void close_lot(const std::vector<Block>& blocks, const ExactLevel& level, Draft& draft,
+  void close_lot(std::span<Block> blocks, const ExactLevel& level, Draft& draft,
       MonotoneHistory& lower, const std::vector<u64>& lower_anchors) {
     if (blocks.size() == 1) {
       add(st.singleton_lots);
-      const auto& block = blocks.front();
+      auto& block = blocks.front();
       FullCoverageAction action;
-      action.parents = block.roots;  // Already sorted and unique in prepare_block.
+      action.parents.swap(block.roots);  // Already sorted and unique in prepare_block.
       if (block.contribution || block.interior) {
         action.contributions.push_back({population(block.ball), block.contribution, block.interior});
         add(st.contributions);

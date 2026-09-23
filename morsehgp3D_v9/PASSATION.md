@@ -90,9 +90,14 @@ reprise R4b ([`g4_tower_r4b_20260923`](receipts/g4_tower_r4b_20260923/README.md)
 complète **5,4 / 7,4 / 9,2 s à K5** et **19,4 / 26,7 / 29,5 s à K10** à 48 fils,
 condensés inchangés.
 
-Suite : tour à ordres K construits en parallèle (lots séquentiels par ordre,
-images verticales ensuite) ; coût du certificat ; seuil K−2 des arêtes q4
-seules.
+Tour à ordres K construits en parallèle (voie statique à plusieurs fils) :
+lots de chaque ordre en parallèle, identifiants de populations attribués dans
+l'ordre séquentiel puis lignes construites en parallèle, images verticales de
+l'ordre K depuis l'histoire achevée de K−1, banque par déplacement et
+validation parallèle. Lots 12 → 2,1 s en W8 local sur 000100 K10 ; tour
+26 → 18 s ; condensés inchangés sur 000000, 000100, 000200 à K10.
+
+Suite : session G4 R5 ; coût du certificat ; seuil K−2 des arêtes q4 seules.
 
 ## État du dépôt au moment de l'ouverture (historique)
 

@@ -2,9 +2,11 @@
 // regular minima certificate v1, a geometric producer, or a completeness proof.
 #pragma once
 
+#include <atomic>
 #include <memory>
 
 #include "full_certificate.hpp"
+#include "../parallel/pool.hpp"
 
 namespace mhgp9::tower {
 
@@ -25,6 +27,11 @@ struct FullCoveragePopulationResult {
 };
 FullCoveragePopulationResult build_full_coverage_populations(
     std::span<const PointId>, std::span<const FullCoveragePopulation>);
+// Same bank; the rows are MOVED in (no copy of their two vectors) and are
+// validated on up to `threads` threads. The first invalid row in index order
+// decides, exactly as the copying overload.
+FullCoveragePopulationResult build_full_coverage_populations(
+    std::span<const PointId>, std::vector<FullCoveragePopulation>&&, int threads);
 
 class FullCoveragePopulations {
  public:
@@ -38,31 +45,64 @@ class FullCoveragePopulations {
  private:
   friend FullCoveragePopulationResult build_full_coverage_populations(
       std::span<const PointId>, std::span<const FullCoveragePopulation>);
+  friend FullCoveragePopulationResult build_full_coverage_populations(
+      std::span<const PointId>, std::vector<FullCoveragePopulation>&&, int);
   std::vector<PointId> domain_;
   std::vector<FullCoveragePopulation> rows_;
 };
+
+namespace full_coverage_detail {
+template <typename Points>
+inline bool strictly_ordered(const Points& points) {
+  for (size_t i = 1; i < points.size(); ++i)
+    if (points[i - 1] >= points[i]) return false;
+  return true;
+}
+inline bool valid_population_row(std::span<const PointId> domain, const FullCoveragePopulation& row) {
+  // A representation bound of the mask, NOT a cloud/work/time ceiling.
+  if (row.shell.size() > std::numeric_limits<u16>::digits ||
+      (row.interior.empty() && row.shell.empty()) ||
+      !strictly_ordered(row.interior) || !strictly_ordered(row.shell)) return false;
+  for (const auto* points : {&row.interior, &row.shell})
+    for (PointId p : *points)
+      if (!std::binary_search(domain.begin(), domain.end(), p)) return false;
+  for (PointId p : row.shell)
+    if (std::binary_search(row.interior.begin(), row.interior.end(), p)) return false;
+  return true;
+}
+}  // namespace full_coverage_detail
+
+inline FullCoveragePopulationResult build_full_coverage_populations(
+    std::span<const PointId> domain, std::vector<FullCoveragePopulation>&& rows, int threads) {
+  FullCoveragePopulationResult result;
+  if (domain.empty() || rows.empty() || !full_coverage_detail::strictly_ordered(domain)) return result;
+  std::atomic<bool> valid{true};
+  parallel_ranges(rows.size(), threads, [&](size_t begin, size_t end, size_t) {
+    for (size_t i = begin; i < end && valid.load(std::memory_order_relaxed); ++i)
+      if (!full_coverage_detail::valid_population_row(domain, rows[i])) valid.store(false);
+  });
+  if (!valid.load()) return result;
+  try {
+    auto bank = std::make_shared<FullCoveragePopulations>();
+    bank->domain_.assign(domain.begin(), domain.end());
+    bank->rows_ = std::move(rows);
+    result.value = std::move(bank);
+    result.status = FullCertificateStatus::kOk;
+    result.reason = "structural_only";
+  } catch (const std::bad_alloc&) {
+    result.status = FullCertificateStatus::kResourceExhausted;
+    result.reason = "coverage_allocation_failed";
+  }
+  return result;
+}
 
 inline FullCoveragePopulationResult build_full_coverage_populations(
     std::span<const PointId> domain, std::span<const FullCoveragePopulation> rows) {
   FullCoveragePopulationResult result;
   if (domain.empty() || rows.empty()) return result;
-  const auto ordered = [](const auto& points) {
-    for (size_t i = 1; i < points.size(); ++i)
-      if (points[i - 1] >= points[i]) return false;
-    return true;
-  };
-  if (!ordered(domain)) return result;
-  for (const auto& row : rows) {
-    // A representation bound of the mask, NOT a cloud/work/time ceiling.
-    if (row.shell.size() > std::numeric_limits<u16>::digits ||
-        (row.interior.empty() && row.shell.empty()) ||
-        !ordered(row.interior) || !ordered(row.shell)) return result;
-    for (const auto* points : {&row.interior, &row.shell})
-      for (PointId p : *points)
-        if (!std::binary_search(domain.begin(), domain.end(), p)) return result;
-    for (PointId p : row.shell)
-      if (std::binary_search(row.interior.begin(), row.interior.end(), p)) return result;
-  }
+  if (!full_coverage_detail::strictly_ordered(domain)) return result;
+  for (const auto& row : rows)
+    if (!full_coverage_detail::valid_population_row(domain, row)) return result;
   try {
     auto bank = std::make_shared<FullCoveragePopulations>();
     bank->domain_.assign(domain.begin(), domain.end());
