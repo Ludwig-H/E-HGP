@@ -44,6 +44,10 @@ comme pour les certificats S3 CPU (`results/probes_545c71799/`).
 | 08/000200 | 45 845 | 5 | 1 407 885 | `8240af3d4dce3d45` | `143a367b4f27ef02` | 4 249 | 0 |
 | 08/000200 | 45 845 | 10 | 5 483 320 | `ba973af0c8da95bd` | `5c8cc01b1e45b461` | 12 895 | 0 |
 
+Rejouées sur `46c50432c`, le commit du paquet R13, les six épingles sont
+reproduites par le moteur et par les certificats S3 CPU, 12 sorties sur 12
+(`results/probes_46c50432c/`).
+
 Un cas R13 sur ces entrées, GPU ou non, doit reproduire l'avant-dernière
 colonne. Un écart signale une différence de catalogue, même si le
 condensé FULL et le reste de `logical_result` sont égaux. Les épingles

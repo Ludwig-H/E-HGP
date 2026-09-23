@@ -4163,3 +4163,53 @@ paquet `46c50432` ; `TERMINATED` certifié (20 h 15 UTC).
 - **Portée** : sans sol, séquence 08, s = 8. Aucun contrat, aucune pente.
   Le lot vide sur l'appareil reste un résidu.
 
+
+### 20 h 25 UTC — C : contrelecture de R13, épingles tenues, espace disque
+
+Base : `3dfedcae1`.
+
+**Objet.** Avant la publication, j'ai lu la capture R13 en lecture seule
+(`dc9ca396…`) : ses 18 sorties de sonde sont identiques octet pour octet à
+celles du [reçu](../morsehgp3D_v9/receipts/g4_tower_r13_20260923/README.md),
+dont les `SHA256SUMS` passent. Recalculé indépendamment du lecteur : les
+**18 cas** reproduisent les six épingles de tour et de catalogue. Neuf
+cas utilisent le filtre et les certificats S3 sur l'appareil ; aucun n'a
+mis d'arête en attente. En local, sur `46c50432c` (commit du paquet), le
+moteur et les certificats S3 CPU redonnent aussi les six épingles, 12
+sorties sur 12. Une erreur commune au GPU et à son jumeau moteur aurait
+donc été vue sur ces entrées.
+
+**Temps.** Les chiffres du reçu sont exacts :
+
+- filtre par lots CPU : 1,58 s à K5 et 2,79 s à K10 ;
+- préchauffage : filtre GPU de 205–315 ms (R12) à 81–154 ms (R13) ;
+- S3 dans la session : −5,9 % à K5 (2,34 → 2,20 s) et −6,9 % à K10
+  (8,41 → 7,83 s).
+
+Ce sont des mesures uniques. En R12, la paire GPU répétée 000000/K5
+variait de 3,9 % (2,47 / 2,57 s). La décomposition par phases corrobore le
+gain S3 : 351 ms retirés aux survivants, 211 ms de certificats, et un
+écart de chaîne de 138 ms. Pour une attribution ferme, prévoir en R14 des
+paires S2 GPU / S3 GPU répétées et entrelacées (R-27). Les comparaisons à
+R12 (−6 à −13 %) mêlent préchauffage et S3, entre deux sessions. Le cas
+`probe_17` (65,7 s) est le moteur W1 du plan, pas une anomalie : le moteur
+W48 va vingt fois plus vite à K5.
+
+**Espace disque.** À 20 h 15, `/workspaces` était plein à 100 % (318 Mo
+libres) pendant que R13 rapatriait sa capture (162 Ko). Sur demande de
+l'utilisateur, j'ai supprimé 201 arbres CMake des chantiers v4 à v8, soit
+12 Go. Critères : `CMakeCache.txt` présent, pas de `.git`, aucun fichier
+modifié depuis 24 h, aucune citation dans v9, `gcp-migration`, ce canal,
+AGENTS ou CLAUDE. J'ai aussi retiré mon ancien worktree d'instantané. Il
+reste 14 Go libres.
+
+Gardés : tout `v9*`, `cuda-12.9-local`, `v7_boost_gate` (le `BOOST_ROOT`
+de tous), les worktrees, les dix arbres qui contiennent des sorties
+(`v8_u18_resume_*`, `v8-dev-tests`, `v8_lidar_global_20260921`, etc.) et
+les entrées non CMake. Proposition R-27 : un préflight local d'espace
+libre dans le lanceur de session.
+
+Registre : R-23 à R-27 ajoutés (préflight S3, `GPU_executed` observé,
+plafond S2/S3, shadow subdivisé, espace et paires répétées).
+
+GCP non utilisé par C.
