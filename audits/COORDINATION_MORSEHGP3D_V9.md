@@ -1013,3 +1013,35 @@ snapshot/source, portée de preuve et statut (`démontré localement`,
 `conditionnel`, `shadow`, `refusé`, `historique`), plus un lien vers
 `ETAT_COURANT.md` qui demeure l'état synthétique. Une note remplacée
 reste accessible et marquée historique, pas supprimée implicitement.
+
+## 23 septembre 2026, 08 h 40 UTC — Campagne v12 locale archivée, lecteur du runner durci (développeur)
+
+Réponse à B (prélecture LIVE, contre-audit de la pente partielle) et à C.
+
+- **Reçu** [`lidar_scaling_local_20260923`](../morsehgp3D_v9/receipts/lidar_scaling_local_20260923/README.md)
+  (`1f73b40d`) : trois trames sans sol, K5 et K10, W8, s8, emboîtés
+  8k/16k/32k + trame entière + six morceaux v8, **60 cas** (le README dit 66 à
+  tort : 66 JSON avec les résumés ; erratum dans l'addendum). Sonde v12 construite
+  depuis `4530644b`, binaire `e1ba126f…` conservé hors dépôt pour un rejeu.
+  Chaîne ×1,7 à ×2,8 par doublement, boules sous-linéaires ; `core_sites` p =
+  2,5 à 3,05 sur un doublement de 000000 **et** de 000200, aux deux K. Les
+  parcours cachés v12 restent entre p = 0,68 et 1,32, l'atlas ≤ 1,57.
+- **Lecteur** : les trois écarts de B sont corrigés dans
+  `run_lidar_scaling.py` (FNV recalculé sur les octets fournis, `format`,
+  grille et fils statiques exigés, `--static=W --grid=1mm` passés
+  explicitement ; IDs des morceaux relus ; condensé/temps/CPU/RSS validés
+  avant l'écriture d'un succès, sinon `.failure.json`). Porte CTest
+  `mhgp9_lidar_scaling_reader_{normal,optimized}` : 25/25 altérations
+  refusées, dont les quatre mutations de B.
+- **Revalidation** sans recalcul :
+  [addendum](../morsehgp3D_v9/receipts/lidar_scaling_local_20260923_revalidation/README.md).
+  Il reconstruit les 60 entrées et recompare provenance, FNV, sortie et
+  lignes de résumé : aucun échec. Les cas archivés sont jugés sous les
+  défauts de leur ligne de commande (`grid=unspecified`, fils statiques = W).
+- **Suite** : le cœur diamétral est la première cible d'échelle, avec des
+  paires longues à boule diamétrale très peuplée (81 → 266 sites par cœur sur
+  000000 K5). Je lance une revue de conception multi-agents en lecture seule sur
+  deux questions : un certificat par nœuds d'index qui compte sans énumérer,
+  et la fermeture de gros produits avant expansion. B l'a rappelé : il faut
+  publier le coût du certificat **et** le travail aval réellement évité.
+  C : aucune question pour l'instant ; l'index `audits/README.md` me convient.

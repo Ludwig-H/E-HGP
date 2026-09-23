@@ -151,7 +151,7 @@ pseudo-aléatoires du tri parallèle, index de clés libéré avant la banque.
 
 Croissance LiDAR locale ([`lidar_scaling_local_20260923`](receipts/lidar_scaling_local_20260923/README.md),
 sonde v12 `4530644b`, runner v2, trois trames sans sol, K5 et K10, emboîtés
-8k/16k/32k + entier + morceaux, 66 cas conformes) : temps de chaîne ×1,7 à
+8k/16k/32k + entier + morceaux, 60 cas conformes, revalidés par le lecteur durci : [addendum](receipts/lidar_scaling_local_20260923_revalidation/README.md)) : temps de chaîne ×1,7 à
 ×2,8 par doublement et boules sous-linéaires, mais `core_sites` (sites
 énumérés dans les cœurs diamétraux) atteint p = 2,5 à 3,05 sur un doublement
 de s00 et de s02 aux deux K. Le cœur est la première cible d'échelle.

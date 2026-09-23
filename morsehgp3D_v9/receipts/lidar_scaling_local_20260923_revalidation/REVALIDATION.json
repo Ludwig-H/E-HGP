@@ -1,0 +1,37 @@
+{
+ "campaigns": [
+  {
+   "cases": 10,
+   "summary_sha256": "65f638a282415ad010119539c4a56928baa5ec4b6bd240b92ad95f6e246109db",
+   "tag": "s00_k10_s8_w8_r0"
+  },
+  {
+   "cases": 10,
+   "summary_sha256": "30771b8303ae6b552b3398b3ebc8ca8d3914e6a41d0f322912faa4ce89172d6a",
+   "tag": "s00_k5_s8_w8_r0"
+  },
+  {
+   "cases": 10,
+   "summary_sha256": "064267073a59c96cbbe778c1ea7e1d0b85d9443ede4b37e880f9f01babf87419",
+   "tag": "s01_k10_s8_w8_r0"
+  },
+  {
+   "cases": 10,
+   "summary_sha256": "b5ef2cd040ee54d566712742befc390d171ac9f4ad2046b18858d917496b8efd",
+   "tag": "s01_k5_s8_w8_r0"
+  },
+  {
+   "cases": 10,
+   "summary_sha256": "b98dd58c8251a6ff23cbd77852b001cae6561decb270902fbcb812822bd96feb",
+   "tag": "s02_k10_s8_w8_r0"
+  },
+  {
+   "cases": 10,
+   "summary_sha256": "710783185e0b1a15240714b349da0a9515288e40254bc183620625d8d8da6db1",
+   "tag": "s02_k5_s8_w8_r0"
+  }
+ ],
+ "cases": 60,
+ "failures": [],
+ "schema": "mhgp9_lidar_scaling_revalidation_v1"
+}
