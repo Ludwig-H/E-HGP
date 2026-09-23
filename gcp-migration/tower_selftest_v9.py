@@ -68,7 +68,8 @@ def fnv_u32le(raw):
     return '%016x' % h
 
 
-def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt='', levers=None, schema=None):
+def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt='', levers=None, schema=None,
+                capacity=0):
     effective = min(k, n)
     complete = status == 'complete_relative'
     orders = [dict(K=q, nodes=2 * n * q, births=n * q, merges=n * q - 1, parents=2 * n * q - 1, contributions=n * q)
@@ -140,12 +141,13 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
         if levers.get('q34_batch_certificates'):
             gpu_certificates = levers.get('q34_gpu_certificates')
             batch.update(certificate_backend=device if gpu_certificates else 'cpu', certificate_ms=0.03,
-                         certificate_device_ms=0.02 if gpu_certificates else 0.0)
+                         certificate_device_ms=0.02 if gpu_certificates else 0.0,
+                         deferred=1 if gpu_certificates and capacity else 0)
     return dict(schema='mhgp9_tower_probe_v18', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
-                             run_tower=True,
+                             run_tower=True, certificate_capacity=capacity,
                              levers=levers),
                 times_ms=dict({key: 0.125 for key in TIMES}, chain_total=1.5), chain_cpu_s=0.25,
                 generator=dict(q2_front_rectangles=3, q2_candidate_pairs=2, q2_accepted_pairs=1,
@@ -188,6 +190,7 @@ def main():
             options[key] = value
         else:
             options[argument] = None
+    capacity = int(options.pop('certificate-capacity', 0))
     if (set(options) != {'s', 'static', 'grid', '--catalogue-digest'} or options['grid'] != '1mm' or
             sorted(levers) != sorted(config['schema']['levers'])):
         print('argument refusal: selftest', file=sys.stderr)
@@ -196,7 +199,9 @@ def main():
     if pathlib.Path(path).name == 'preflight.u32le':
         salt = 'batch' if config.get('preflight_batch_differs') and levers.get('q34_batch_filter') else ''
         value = probe_value(len(raw) // 12, fnv_u32le(raw), k, int(options['s']), workers, int(options['static']),
-                            'complete_relative', salt, levers, config['schema'])
+                            'complete_relative', salt, levers, config['schema'], capacity)
+        if config.get('deferral_differs') and capacity:
+            value['catalogue_digest'] = '0' * 15 + '1'
         if config.get('fail_preflight'):
             value['tower_work']['selftest_unknown'] = 1
         if config.get('vacuous_preflight'):
@@ -742,11 +747,16 @@ class Protocol(unittest.TestCase):
         # OFF first is refused since the preflight would skip the ON path.
         off = dict(plan['cases'][0], levers=dict(plan['cases'][0]['levers'], q34_dead_core=False), repeat=7)
         twin = plan['cases'][1]  # the engine-path twin of the first (GPU) case
-        worker.validate_plan(dict(plan, cases=[plan['cases'][0], off, twin]), manifest)
-        need(refused(worker.validate_plan, dict(plan, cases=[off, plan['cases'][0], twin]), manifest),
+        off_twin = dict(twin, levers=dict(twin['levers'], q34_dead_core=False), repeat=7)
+        worker.validate_plan(dict(plan, cases=[plan['cases'][0], off, twin, off_twin]), manifest)
+        need(refused(worker.validate_plan, dict(plan, cases=[off, plan['cases'][0], twin, off_twin]), manifest),
              'OFF-first plan would preflight without every lever')
         need(refused(worker.validate_plan, dict(plan, cases=[plan['cases'][0], off]), manifest),
              'batch/GPU cases without an engine-path twin')
+        # v18: a twin with other certificate levers leaves the certificate
+        # work of the batch case uncompared: refused.
+        need(refused(worker.validate_plan, dict(plan, cases=[plan['cases'][0], off, twin]), manifest),
+             'batch case whose only twin has other certificate levers')
         for bad in (dict(plan, schema='mhgp8_q34_spatial_plan_v1'), dict(plan, schema='mhgp9_tower_plan_v5'),
                     dict(plan, cases=[]),
                     dict(plan, cases=[dict(plan['cases'][0], repeat=i) for i in range(65)]), dict(plan, extra=1)):
@@ -821,7 +831,15 @@ class Protocol(unittest.TestCase):
                               ('gpu batch unused', lambda v: v['q34_batch'].update(used=False)),
                               ('gpu cache used', lambda v: v['ledger'].update(witness_cache_queries=1)),
                               ('gpu pair queries short', lambda v: v['ledger'].update(witness_pair_queries=1)),
-                              ('gpu without batch', lambda v: v['options']['levers'].update(q34_batch_filter=False))):
+                              ('gpu without batch', lambda v: v['options']['levers'].update(q34_batch_filter=False)),
+                              # v18: the device certificate rules (review of 23 September).
+                              ('gpu certificates on the cpu', lambda v: v['q34_batch'].update(certificate_backend='cpu')),
+                              ('gpu certificate device time zero', lambda v: v['q34_batch'].update(
+                                  certificate_device_ms=0.0)),
+                              ('gpu certificates deferred below the slab', lambda v: v['q34_batch'].update(deferred=1)),
+                              ('gpu certificate capacity unannounced', lambda v: v['options'].update(
+                                  certificate_capacity=64)),
+                              ('gpu catalogue digest absent', lambda v: v.update(catalogue_digest=None))):
             bad = deepcopy(gpu_good)
             mutate(bad)
             need(refused(worker.validate_probe, bad, gpu_case, 0), 'batch/GPU probe mutation ' + label)
@@ -977,6 +995,9 @@ class Protocol(unittest.TestCase):
             value = worker.strict_json((output / 'receipt.json').read_bytes())
             # v17 default plan: GPU case then its engine twin per (frame, K),
             # then 00/K5 at 24 (GPU) and 1 (engine) workers.
+            need(value['preflight']['deferred'] == 1 and (output / 'preflight_deferral.command.json').is_file() and
+                 value['preflight']['engine_tower_digest'] == value['preflight']['tower_digest'],
+                 'deferral preflight run and recorded')
             need(value['GPU_preflight_executed'] is True and value['GPU_completed_cases'] == list(range(0, 17, 2)) and
                  receipt['GPU_completed_cases'] == value['GPU_completed_cases'], 'GPU labels from complete LiDAR towers')
             # v18 plan: GPU/engine pairs per (frame, K), then the 00 attribution
@@ -1168,6 +1189,19 @@ class Protocol(unittest.TestCase):
             need('differs from the engine path' in value.get('error', '') and value['GPU_attempted'] is True and
                  value['GPU_executed'] is False and not (output / 'probe_0.command.json').exists(),
                  'no LiDAR case after a differing batch preflight')
+
+    def test_deferral_preflight_must_equal_default(self):
+        # v18: the reduced-slab device preflight must give the same object as
+        # the default one, or no LiDAR case runs.
+        with tempfile.TemporaryDirectory() as temporary:
+            code, receipt, fake, host = run_scenario(Path(temporary), tools=dict(deferral_differs=True))
+            need(code == 1 and receipt['status'] == 'worker_failed' and receipt['worker_status'] == 'preflight_failed'
+                 and receipt['GPU_executed'] is False, 'deferral preflight differing: ' + json.dumps(receipt)[:600])
+            expect_certified_stop(receipt, fake)
+            output = host / 'received/output'
+            value = worker.strict_json((output / 'receipt.json').read_bytes())
+            need('reduced-slab preflight differs' in value.get('error', '') and
+                 not (output / 'probe_0.command.json').exists(), 'no LiDAR case after a differing deferral preflight')
 
     def test_protocol_defect_stops_the_campaign(self):
         with tempfile.TemporaryDirectory() as temporary:

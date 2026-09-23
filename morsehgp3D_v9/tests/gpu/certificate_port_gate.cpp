@@ -8,7 +8,8 @@
 // memes compteurs, champ par champ (cover du coeur et du cover, prouveur du
 // coeur et du cover, constructions, sites, fermetures, maximum).
 //   - aretes : les survivants reels du chemin par lots (filtre CPU de
-//     reference), trois familles, K3/K5/K10 ;
+//     reference), trois familles, K2 (q3 seul), K3, K5, K10 ; avec le coeur
+//     diametral, et sans lui (une arete sur quatre, cover seul) ;
 //   - capacite reduite : une arete est mise en attente (deferred, sans aucun
 //     compteur) exactement quand son coeur ou son cover depasse la capacite ;
 //     les autres gardent la meme decision ;
@@ -16,9 +17,13 @@
 //     prouvees et ouvertes, plages fusionnees, fermetures par le coeur et par
 //     le cover, mises en attente, tous non nuls ;
 //   - mutants du comparateur : un masque, un test uniforme, une plage
-//     fusionnee ou un maximum de cover faux d'une unite sont detectes.
+//     fusionnee ou un maximum de cover faux d'une unite sont detectes ;
+//   - garde d'entree du GPU (validate_certificate_input, seule garantie de
+//     terminaison et de bornes du noyau) : l'entree reelle est acceptee,
+//     chaque champ forge un a un est refuse (liens d'echappement cycliques ou
+//     incoherents, rangs, masques, capacite).
 //
-//   mhgp9_gpu_certificate_port_gate [--n=2000] [--k=3,5,10]
+//   mhgp9_gpu_certificate_port_gate [--n=2000] [--k=2,3,5,10]
 //
 // Code 0 conforme, 1 desaccord ou mutant survivant (`cause=`), 2 argument,
 // 3 plancher.
@@ -34,6 +39,7 @@
 #include "../../src/gen/lanes/q34_dead_lanes.hpp"
 #include "../../src/gen/pipeline/wspd_q34.hpp"
 #include "../../src/gpu/certificate.hpp"
+#include "../../src/gpu/filter_runner.hpp"
 #include "../../src/gpu/flat_index.hpp"
 #include "../gen/front_fixtures.hpp"
 
@@ -106,9 +112,22 @@ struct Reference {
 };
 
 Reference product(const gen::Q2CensusIndexPtr& index, gen::Q34DeadLaneProver& prover, std::size_t a,
-                  std::size_t b, std::uint8_t mask, unsigned kmax) {
+                  std::size_t b, std::uint8_t mask, unsigned kmax, bool with_core = true) {
   Reference r;
   auto& w = r.work;
+  if (!with_core) {
+    const auto cover = gen::Q34EdgeCover::make(index, {a, b});
+    gen::Q34DeadLaneWork dead{};
+    prover.load(*cover, dead);
+    r.mask = static_cast<std::uint8_t>(mask & ~prover.prove(kmax, mask, dead));
+    w.cover_builds = 1;
+    w.cover_sites = cover->site_count();
+    w.max_cover_sites = cover->site_count();
+    w.cover = cover_of(cover->work());
+    w.dead = dead_of(dead);
+    r.cover_sites = cover->site_count();
+    return r;
+  }
   const auto core = gen::Q34EdgeCover::make_diametral(index, {a, b});
   gen::Q34DeadLaneWork dead_core{};
   prover.load(*core, dead_core);
@@ -166,7 +185,7 @@ std::vector<unsigned> parse_list(std::string_view text) {
 
 int main(int argc, char** argv) {
   std::size_t n = 2000;
-  std::vector<unsigned> ks{3, 5, 10};
+  std::vector<unsigned> ks{2, 3, 5, 10};
   for (int i = 1; i < argc; ++i) {
     const std::string_view arg(argv[i]);
     if (arg.starts_with("--n=")) {
@@ -181,10 +200,11 @@ int main(int argc, char** argv) {
     }
   }
   if (n < 64 || n > 65536 || std::any_of(ks.begin(), ks.end(), [](unsigned k) { return k < 2 || k > 10; })) {
-    std::fprintf(stderr, "usage: mhgp9_gpu_certificate_port_gate [--n=2000] [--k=3,5,10]\n");
+    std::fprintf(stderr, "usage: mhgp9_gpu_certificate_port_gate [--n=2000] [--k=2,3,5,10]\n");
     return 2;
   }
-  unsigned long long edges = 0, deferred = 0, core_closed = 0, cover_closed = 0, open = 0, mutants = 0;
+  unsigned long long edges = 0, deferred = 0, core_closed = 0, cover_closed = 0, open = 0, mutants = 0,
+                     coverless = 0, guards = 0;
   gpu::CertificateWork total{};
   for (const std::string_view family : {"uniform", "terrain", "clusters"}) {
     const auto fixture = gen::bench::make_front_fixture(n, family, 3);
@@ -201,6 +221,7 @@ int main(int argc, char** argv) {
     const gpu::CertificateIndex view{nodes.data(), escapes.data(), static_cast<gpu::u32>(nodes.size()),
                                      rank_points.data()};
     const auto order = index->spatial_order();
+    bool guarded = false;
     for (const unsigned kmax : ks) {
       const std::string where = std::string(family) + "/K" + std::to_string(kmax);
       // The real survivors of the witness filter (CPU reference batch).
@@ -214,6 +235,92 @@ int main(int argc, char** argv) {
       static_cast<void>(gen::run_wspd_q34_batched(index, kmax, 8, q34_options(), 4,
                                                   [](std::size_t, const gen::Q34SeedCandidate&) {}, 16, capture,
                                                   nullptr));
+      // Input guard of the device call: the real input is accepted, each
+      // forged field is refused (never a device call here).
+      if (!guarded && survivors.size() >= 2) {
+        guarded = true;
+        std::vector<gpu::u32> ea, eb;
+        std::vector<gpu::u8> em;
+        for (std::size_t i = 0; i < 2; ++i) {
+          ea.push_back(survivors[i].a_rank);
+          eb.push_back(survivors[i].b_rank);
+          em.push_back(survivors[i].mask);
+        }
+        auto forged_nodes = nodes;
+        auto forged_escapes = escapes;
+        const auto input = [&](const std::vector<gpu::FlatNode>& ns, const std::vector<gpu::u32>& es) {
+          gpu::CertificateInput in;
+          in.index.nodes = ns.data();
+          in.index.node_count = ns.size();
+          in.index.rank_points = rank_points.data();
+          in.index.rank_count = rank_points.size() / 3;
+          in.index.kmax = kmax;
+          in.escapes = es.data();
+          in.edge_a = ea.data();
+          in.edge_b = eb.data();
+          in.edge_mask = em.data();
+          in.edge_count = ea.size();
+          in.dead_core = true;
+          return in;
+        };
+        if (!gpu::validate_certificate_input(input(nodes, escapes)).empty()) return fail("guard.real_refused " + where);
+        std::size_t internal = 0, leaf = 0;
+        while (internal < nodes.size() && nodes[internal].left == gpu::absent32) ++internal;
+        while (leaf < nodes.size() && nodes[leaf].left != gpu::absent32) ++leaf;
+        if (internal >= nodes.size() || leaf >= nodes.size()) return fail("guard.tree_shape " + where);
+        const auto refused = [&](const gpu::CertificateInput& in) {
+          return !gpu::validate_certificate_input(in).empty();
+        };
+        std::vector<std::pair<const char*, bool>> cases;
+        {
+          auto in = input(nodes, escapes);
+          in.escapes = nullptr;
+          cases.emplace_back("null escapes", refused(in));
+        }
+        const auto with_escape = [&](std::size_t at, gpu::u32 value) {
+          forged_escapes = escapes;
+          forged_escapes[at] = value;
+          return refused(input(nodes, forged_escapes));
+        };
+        cases.emplace_back("root escape", with_escape(0, static_cast<gpu::u32>(nodes.size() - 1)));
+        cases.emplace_back("cyclic escape", with_escape(internal, static_cast<gpu::u32>(internal)));
+        cases.emplace_back("backward escape", with_escape(leaf, 0));
+        cases.emplace_back("leaf escape skips", with_escape(leaf, std::min<gpu::u32>(
+                                                                    static_cast<gpu::u32>(leaf + 2),
+                                                                    static_cast<gpu::u32>(nodes.size()))));
+        cases.emplace_back("left child escape", with_escape(nodes[internal].left, nodes[internal].right + 1));
+        cases.emplace_back("right child escape", with_escape(nodes[internal].right, escapes[internal] - 1));
+        {
+          forged_nodes = nodes;
+          std::swap(forged_nodes[internal].left, forged_nodes[internal].right);
+          cases.emplace_back("left child not next", refused(input(forged_nodes, escapes)));
+        }
+        const auto with_edge = [&](int field, gpu::u32 value) {
+          auto a2 = ea, b2 = eb;
+          auto m2 = em;
+          if (field == 0) a2[1] = value;
+          else if (field == 1) b2[1] = value;
+          else m2[1] = static_cast<gpu::u8>(value);
+          auto in = input(nodes, escapes);
+          in.edge_a = a2.data();
+          in.edge_b = b2.data();
+          in.edge_mask = m2.data();
+          return refused(in);
+        };
+        cases.emplace_back("rank outside", with_edge(0, static_cast<gpu::u32>(rank_points.size() / 3)));
+        cases.emplace_back("same endpoints", with_edge(1, ea[1]));
+        cases.emplace_back("mask zero", with_edge(2, 0));
+        cases.emplace_back("mask bit 0", with_edge(2, 3));
+        {
+          auto in = input(nodes, escapes);
+          in.capacity = 1;
+          cases.emplace_back("capacity one", refused(in));
+        }
+        for (const auto& [label, ok] : cases) {
+          if (!ok) return fail(std::string("guard.accepted ") + label + " " + where);
+          ++guards;
+        }
+      }
       gen::Q34DeadLaneProver prover;
       Slab full(static_cast<gpu::u32>(n)), small(64);
       for (const auto& edge : survivors) {
@@ -245,6 +352,17 @@ int main(int argc, char** argv) {
                    !same_work(reduced, expected.work)) {
           return fail("port.reduced " + at);
         }
+        // Without the diametral core (cover only), one edge in four.
+        if (edges % 4 == 0) {
+          const auto bare = product(index, prover, a, b, edge.mask, kmax, false);
+          gpu::CertificateWork plain{};
+          const auto alone = gpu::certify_edge(gpu::HostGroup{}, view, edge.a_rank, edge.b_rank, edge.mask, kmax,
+                                               false, full.view, plain);
+          if (alone.status != gpu::CertificateStatus::decided || alone.mask != bare.mask ||
+              !same_work(plain, bare.work))
+            return fail("port.coverless " + at);
+          ++coverless;
+        }
         // Comparator mutants on the first edges of each case.
         if (edges % 997 == 1) {
           auto m = expected;
@@ -266,7 +384,7 @@ int main(int argc, char** argv) {
   }
   std::printf("gpu_certificate_port_gate n=%zu edges=%llu core_closed=%llu cover_closed=%llu open=%llu "
               "deferred=%llu cells=%llu outside=%llu deep=%llu failed=%llu uniform_tests=%llu point_tests=%llu "
-              "merged_ranges=%llu q3_proved=%llu q4_proved=%llu mutants=%llu\n",
+              "merged_ranges=%llu q3_proved=%llu q4_proved=%llu mutants=%llu coverless=%llu guards=%llu\n",
               n, edges, core_closed, cover_closed, open, deferred, total.dead_core.cells + total.dead.cells,
               total.dead_core.outside_cells + total.dead.outside_cells,
               total.dead_core.deep_cells + total.dead.deep_cells,
@@ -275,7 +393,7 @@ int main(int argc, char** argv) {
               total.dead_core.point_tests + total.dead.point_tests,
               total.core_cover.merged_ranges + total.cover.merged_ranges,
               total.dead_core.q3_proved + total.dead.q3_proved, total.dead_core.q4_proved + total.dead.q4_proved,
-              mutants);
+              mutants, coverless, guards);
   const bool floors = edges > 0 && core_closed > 0 && cover_closed > 0 && open > 0 && deferred > 0 &&
                       total.dead_core.outside_cells > 0 && total.dead.outside_cells > 0 &&
                       total.dead_core.deep_cells > 0 && total.dead.deep_cells > 0 &&
@@ -283,7 +401,7 @@ int main(int argc, char** argv) {
                       total.dead_core.point_tests > 0 && total.dead.point_tests > 0 &&
                       total.core_cover.merged_ranges > 0 && total.cover.merged_ranges > 0 &&
                       total.dead.q3_proved > 0 && total.dead.q4_proved > 0 && total.dead.q3_open > 0 &&
-                      total.dead.q4_open > 0 && mutants >= 12;
+                      total.dead.q4_open > 0 && mutants >= 12 && coverless >= 1000 && guards >= 3 * 13;
   if (!floors) {
     std::printf("cause=floor\n");
     return 3;

@@ -318,7 +318,32 @@ Localement, sur la trame entière 08/000000/K5 (W8) : moteur et lots CPU
 avec certificats donnent le condensé FULL `67450c64611075b1`, le condensé
 de catalogue `5ad1fe09354411ba` et un travail des certificats identique.
 
+**Revue multi-agents avant session** (cinq relecteurs, cinq vérificateurs ;
+aucun défaut bloquant, un constat réfuté, le reste corrigé) :
+- **Frontière** : `__syncwarp` au début de chaque cellule balayée. Les votes
+  n'ordonnent pas la mémoire sur l'appareil ; la frontière d'une profondeur
+  est réécrite d'une cellule à l'autre.
+- **Occupation** : nombre de warps par la requête d'occupation (250
+  registres : 8 warps résidents par SM, non 16).
+- **Porte du port** : branche sans cœur, K2, garde d'entrée du GPU (13
+  champs forgés refusés par famille).
+- **Chaîne** : option `q34_certificate_capacity` et sonde
+  `--certificate-capacity=N`. Le catalogue est libéré dans la chaîne comme
+  sans condensé ; le mur et le CPU du condensé sont retirés du total. Un
+  échec de condensé remet les condensés à zéro et classe l'allocation en
+  ressource épuisée.
+- **Porte de chaîne** : tout le travail des certificats comparé ; passage
+  GPU à ardoise de 64 sites, qui doit mettre en attente.
+
 **Protocole G4 de la tour v18** :
+- préflight de mise en attente : le préflight GPU est rejoué avec une ardoise
+  de 64 sites (localement, 3 404 arêtes en attente sur 55 523). Il doit
+  donner la même tour, le même catalogue et le même travail des certificats,
+  avec au moins une arête en attente et pas toutes ;
+- `deferred == 0` exigé sur toute trame plus petite que l'ardoise par
+  défaut ;
+- travail des certificats comparé dès le préflight moteur ;
+- jumeau de même trame, K, s **et** mêmes leviers de certificat ;
 - le worker passe `--catalogue-digest` à chaque sonde ;
 - la comparaison entre cas du même (trame, K, s) exige le même condensé de
   catalogue, soit le différentiel clé par clé de C sur chaque paire GPU /

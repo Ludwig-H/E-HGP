@@ -49,9 +49,14 @@ struct ChainOptions {
   bool run_tower = true;       // false : s'arreter au catalogue (mesure de l'amont)
   bool keep_catalogue = false; // publier le catalogue recoupe (portes, juges)
   // Condense canonique du catalogue complet (cle par cle, vue de l'auditeur C :
-  // cle, niveau, arite, interieurs et coquille tries), calcule apres la chaine,
-  // hors chronometre (times.catalogue_digest_ms). Differentiel GPU/moteur.
+  // cle, niveau, arite, interieurs et coquille tries), calcule apres la tour
+  // pendant que le catalogue vit encore ; son mur et son CPU sont retires du
+  // total de la chaine (times.catalogue_digest_ms), le catalogue est libere
+  // dans la chaine comme sans l'option. Differentiel GPU/moteur. v18 :
+  // q34_certificate_capacity fixe l'ardoise des warps du GPU (0 : defaut) ;
+  // une petite valeur force la mise en attente (porte et preflight G4).
   bool catalogue_digest = false;
+  std::uint32_t q34_certificate_capacity = 0;
   // Atlas q4 saturant (option v8 de la reprise u18, desactivee par defaut en
   // v8) : arret d'une cellule des que son compte certifie atteint K-1,
   // certificat terminal sans fragment. Contrat v9 : ACTIVE par defaut dans la

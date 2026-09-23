@@ -365,8 +365,14 @@ MHGP9_HD CellEntry enter_cell(const Group& group, const Prover& p, const Certifi
       ++work.deep_cells;
       return CellEntry{true, lanes, {}};
     }
-    const u32* frontier = frontier_level == 0 ? nullptr : slab.frontiers + (frontier_level - 1) * slab.capacity;
-    u32* next = slab.frontiers + (depth - prover_min_depth) * slab.capacity;
+    // Every earlier read or write of this depth's frontier (a sibling or an
+    // earlier cell at this depth, by any lane, possibly left by an early
+    // return) is ordered before this cell's writes (review of 23 September:
+    // ballots alone give no memory ordering on the device).
+    group.sync();
+    const u32* frontier =
+        frontier_level == 0 ? nullptr : slab.frontiers + static_cast<std::size_t>(frontier_level - 1) * slab.capacity;
+    u32* next = slab.frontiers + static_cast<std::size_t>(depth - prover_min_depth) * slab.capacity;
     u32 next_size = 0;
     const auto id_at = [&](u32 i) { return frontier == nullptr ? i : frontier[i]; };
     for (u32 base = 0; base < frontier_size; base += 32) {

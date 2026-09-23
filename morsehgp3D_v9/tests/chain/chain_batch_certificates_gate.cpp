@@ -100,6 +100,30 @@ bool same_work(const gen::WspdQ34Work& a, const gen::WspdQ34Work& b) {
          a.q3_atlas == b.q3_atlas && a.input_rectangles == b.input_rectangles;
 }
 
+// Every certificate, cover and lane counter of the chain ledger.
+bool same_certificate_ledger(const GeneratorLedger& a, const GeneratorLedger& b) {
+  return a.expanded_pairs == b.expanded_pairs && a.witness_rejected_pairs == b.witness_rejected_pairs &&
+         a.cover_builds == b.cover_builds && a.cover_sites == b.cover_sites &&
+         a.cover_node_visits == b.cover_node_visits && a.q3_edges == b.q3_edges && a.q4_edges == b.q4_edges &&
+         a.both_edges == b.both_edges && a.dead_loads == b.dead_loads && a.dead_form_sites == b.dead_form_sites &&
+         a.dead_cells == b.dead_cells && a.dead_outside_cells == b.dead_outside_cells &&
+         a.dead_deep_cells == b.dead_deep_cells && a.dead_failed_cells == b.dead_failed_cells &&
+         a.dead_uniform_tests == b.dead_uniform_tests && a.dead_point_tests == b.dead_point_tests &&
+         a.dead_q3_proved == b.dead_q3_proved && a.dead_q3_open == b.dead_q3_open &&
+         a.dead_q4_proved == b.dead_q4_proved && a.dead_q4_open == b.dead_q4_open &&
+         a.core_builds == b.core_builds && a.core_sites == b.core_sites &&
+         a.core_closed_edges == b.core_closed_edges && a.dead_core_loads == b.dead_core_loads &&
+         a.dead_core_form_sites == b.dead_core_form_sites && a.dead_core_cells == b.dead_core_cells &&
+         a.dead_core_uniform_tests == b.dead_core_uniform_tests && a.dead_core_point_tests == b.dead_core_point_tests &&
+         a.dead_core_q3_proved == b.dead_core_q3_proved && a.dead_core_q3_open == b.dead_core_q3_open &&
+         a.dead_core_q4_proved == b.dead_core_q4_proved && a.dead_core_q4_open == b.dead_core_q4_open &&
+         a.core_cover_node_visits == b.core_cover_node_visits &&
+         a.core_cover_bound_tests == b.core_cover_bound_tests &&
+         a.core_cover_point_tests == b.core_cover_point_tests &&
+         a.dead_core_outside_cells == b.dead_core_outside_cells && a.dead_core_deep_cells == b.dead_core_deep_cells &&
+         a.dead_core_failed_cells == b.dead_core_failed_cells;
+}
+
 // The CPU reference on the survivors not deferred; every third survivor is
 // handed back to the workers (whole engine edge).
 gen::Q34CertificateBatch deferring(const gen::Q2CensusIndexPtr& index, unsigned kmax, bool dead_core,
@@ -300,33 +324,30 @@ int main(int argc, char** argv) {
             return fail("mutant.catalogue_digest_blind " + where);
           mutants += 2;
         }
-        if (la.expanded_pairs != lb.expanded_pairs || la.cover_builds != lb.cover_builds ||
-            la.cover_sites != lb.cover_sites || la.core_builds != lb.core_builds ||
-            la.core_sites != lb.core_sites || la.core_closed_edges != lb.core_closed_edges ||
-            la.q3_edges != lb.q3_edges || la.q4_edges != lb.q4_edges ||
-            la.dead_uniform_tests != lb.dead_uniform_tests || la.dead_core_uniform_tests != lb.dead_core_uniform_tests ||
-            la.dead_cells != lb.dead_cells || la.dead_core_cells != lb.dead_core_cells ||
-            la.dead_q3_proved != lb.dead_q3_proved || la.dead_core_q4_proved != lb.dead_core_q4_proved ||
-            la.core_cover_node_visits != lb.core_cover_node_visits || la.cover_node_visits != lb.cover_node_visits)
-          return fail("chain.ledger " + where);
+        if (!same_certificate_ledger(la, lb)) return fail("chain.ledger " + where);
         if (!b.q34_batch.used || b.q34_batch.certificate_backend != "cpu" || b.q34_batch.deferred != 0)
           return fail("chain.batch_fields " + where);
         ++chains;
-        // The GPU lever: an explicit refusal without a device, the same tower with one.
-        auto gpu = batched;
-        gpu.q34_gpu_certificates = true;
-        const auto g = run_tower_chain(fixture.points, gpu);
-        if (g.status == ChainStatus::kComplete) {
-          if (g.tower_digest != a.tower_digest || g.catalogue_digest != a.catalogue_digest ||
-              g.q34_batch.certificate_backend == "cpu" ||
-              g.ledger.dead_uniform_tests != la.dead_uniform_tests || g.ledger.core_sites != la.core_sites)
-            return fail("chain.gpu_object " + where);
-          ++gpu_runs;
-        } else if (kmax >= 2 && g.status == ChainStatus::kInvalidInput &&
-                   g.reason.starts_with("chain_q34_gpu_unavailable")) {
-          ++gpu_refusals;
-        } else {
-          return fail("chain.gpu_status " + where + " reason=" + g.reason);
+        // The GPU levers: an explicit refusal without a device; with one, the
+        // same tower, catalogue and certificate work, at the default slab and
+        // at a 64-site slab that must defer edges to the engine path.
+        for (const std::uint32_t capacity : {std::uint32_t{0}, std::uint32_t{64}}) {
+          auto gpu = batched;
+          gpu.q34_gpu_certificates = true;
+          gpu.q34_certificate_capacity = capacity;
+          const auto g = run_tower_chain(fixture.points, gpu);
+          if (g.status == ChainStatus::kComplete) {
+            if (g.tower_digest != a.tower_digest || g.catalogue_digest != a.catalogue_digest ||
+                g.q34_batch.certificate_backend == "cpu" || !same_certificate_ledger(g.ledger, la) ||
+                (capacity != 0 && (g.q34_batch.deferred == 0 || g.q34_batch.deferred >= g.q34_batch.survivors)) ||
+                (capacity == 0 && g.q34_batch.deferred != 0))
+              return fail("chain.gpu_object " + where + " capacity=" + std::to_string(capacity));
+            ++gpu_runs;
+          } else if (g.status == ChainStatus::kInvalidInput && g.reason.starts_with("chain_q34_gpu_unavailable")) {
+            ++gpu_refusals;
+          } else {
+            return fail("chain.gpu_status " + where + " reason=" + g.reason);
+          }
         }
         // Incoherent levers, refused with their reason before any work.
         auto lone = batched;
@@ -337,14 +358,19 @@ int main(int argc, char** argv) {
         auto no_dead = batched;
         no_dead.q34_dead_lanes = false;
         no_dead.q34_dead_core = false;
+        auto cpu_capacity = batched;
+        cpu_capacity.q34_certificate_capacity = 64;
         const auto l = run_tower_chain(fixture.points, lone);
         const auto m = run_tower_chain(fixture.points, no_batch);
         const auto d = run_tower_chain(fixture.points, no_dead);
+        const auto c = run_tower_chain(fixture.points, cpu_capacity);
         if (l.status != ChainStatus::kInvalidInput || l.reason != "chain_q34_gpu_certificates_require_batch_certificates" ||
             m.status != ChainStatus::kInvalidInput ||
             m.reason != "chain_q34_batch_certificates_require_batch_filter_and_dead_lanes" ||
             d.status != ChainStatus::kInvalidInput ||
-            d.reason != "chain_q34_batch_certificates_require_batch_filter_and_dead_lanes")
+            d.reason != "chain_q34_batch_certificates_require_batch_filter_and_dead_lanes" ||
+            c.status != ChainStatus::kInvalidInput ||
+            c.reason != "chain_q34_certificate_capacity_requires_gpu_certificates_and_two_sites")
           return fail("chain.lever_refusals " + where);
       }
     }
@@ -353,7 +379,7 @@ int main(int argc, char** argv) {
               "chains=%llu mutants=%llu gpu_refusals=%llu gpu_runs=%llu\n",
               n, streams, candidates, closed, deferred_runs, chains, mutants, gpu_refusals, gpu_runs);
   if (streams < 24 || candidates < 10000 || closed < 1000 || deferred_runs < 12 || chains < 24 || mutants < 70 ||
-      gpu_refusals + gpu_runs < 24) {
+      gpu_refusals + gpu_runs < 48) {
     std::printf("cause=floor.batch_certificates\n");
     return 3;
   }

@@ -123,7 +123,13 @@ TOP_KEYS = frozenset({'schema', 'status', 'reason', 'input', 'options', 'times_m
                       'ledger', 'catalogue', 'q34_occupancy', 'q34_batch', 'tower_phases_ms', 'tower_work', 'orders',
                       'tower_digest', 'catalogue_digest', 'peak_rss_kb'})
 INPUT_KEYS = frozenset({'format', 'grid', 'sites', 'hash'})
-OPTION_KEYS = frozenset({'K', 'K_effective', 's', 'workers', 'tower_static_threads', 'run_tower', 'levers'})
+OPTION_KEYS = frozenset({'K', 'K_effective', 's', 'workers', 'tower_static_threads', 'run_tower', 'certificate_capacity',
+                         'levers'})
+# v18 : ardoise par warp des certificats GPU (defaut de gpu/filter_runner.hpp).
+# Une trame plus petite ne peut rien mettre en attente ; le preflight de mise
+# en attente rejoue le preflight GPU avec une ardoise de 64 sites.
+DEFAULT_CERTIFICATE_CAPACITY = 1 << 16
+DEFERRAL_CAPACITY = 64
 TIME_KEYS = frozenset({'read', 'prepare', 'gen_index', 'q2', 'q34', 'merge', 'tower_index', 'census', 'tower',
                        'chain_total', 'digest', 'catalogue_digest'})
 ORDER_KEYS = frozenset({'K', 'nodes', 'births', 'merges', 'parents', 'contributions'})
@@ -312,9 +318,12 @@ def validate_plan(plan, manifest):
          'the first case sets the preflight levers and must pin every lever ON')
     # v17: every (frame, K, s) run on the batch path has an engine-path twin,
     # so that the cross-case object comparison judges the batch/GPU tower.
-    engine = {(c['scene'], c['k'], c['s']) for c in plan['cases'] if not c['levers']['q34_batch_filter']}
-    need(all((c['scene'], c['k'], c['s']) in engine for c in plan['cases'] if c['levers']['q34_batch_filter']),
-         'a batch/GPU case without an engine-path twin on the same frame, K and s')
+    # v18: with the same certificate levers, so that its certificate work is
+    # compared too.
+    twin = lambda c: (c['scene'], c['k'], c['s'], c['levers']['q34_dead_lanes'], c['levers']['q34_dead_core'])
+    engine = {twin(c) for c in plan['cases'] if not c['levers']['q34_batch_filter']}
+    need(all(twin(c) in engine for c in plan['cases'] if c['levers']['q34_batch_filter']),
+         'a batch/GPU case without an engine-path twin on the same frame, K, s and certificate levers')
     return plan['cases']
 
 
@@ -400,9 +409,10 @@ def probe_command(build, root, case):
             '--catalogue-digest', *lever_arguments(case)]
 
 
-def expected_probe_tail(case):
+def expected_probe_tail(case, capacity=0):
     return [str(case['k']), str(case['workers']), '--s=' + str(case['s']),
-            '--static=' + str(case['static_threads']), '--grid=1mm', '--catalogue-digest', *lever_arguments(case)]
+            '--static=' + str(case['static_threads']), '--grid=1mm', '--catalogue-digest',
+            *(['--certificate-capacity=' + str(capacity)] if capacity else []), *lever_arguments(case)]
 
 
 def _count(value):
@@ -476,7 +486,7 @@ def validate_euler(value, case):
         need(euler['checkable_max_k'] in (0, checkable), 'euler bound of an early refusal')
 
 
-def validate_batch(value, case):
+def validate_batch(value, case, capacity=0):
     """Section q34_batch (v18) : phases du chemin par lots, a zero sur le chemin moteur."""
     batch, levers = value['q34_batch'], case['levers']
     times = ('front_ms', 'filter_ms', 'edges_ms', 'device_ms', 'certificate_ms', 'certificate_device_ms')
@@ -499,6 +509,13 @@ def validate_batch(value, case):
              batch['certificate_device_ms'] <= batch['certificate_ms'] + 0.05 and
              batch['deferred'] <= batch['survivors'] and (gpu_certificates or batch['deferred'] == 0),
              'q34_batch certificate backend/device time/deferred')
+        # A correct device defers only an edge whose core or cover exceeds its
+        # slab: never on a frame smaller than the default slab; always some,
+        # never all, on the reduced-slab preflight (review of 23 September).
+        if gpu_certificates and capacity:
+            need(0 < batch['deferred'] < batch['survivors'], 'reduced-slab certificates deferred none or all edges')
+        elif gpu_certificates and case['n'] < DEFAULT_CERTIFICATE_CAPACITY:
+            need(batch['deferred'] == 0, 'device certificates deferred edges of a frame below the slab')
     else:
         need(batch['certificate_backend'] == '' and batch['certificate_ms'] == 0 and
              batch['certificate_device_ms'] == 0 and batch['deferred'] == 0, 'q34_batch certificates without the lever')
@@ -720,7 +737,7 @@ def preflight_inputs(raw):
     return {'preflight': dict(n=len(raw) // 12, fnv=input_fnv(raw))}
 
 
-def validate_probe(value, case, exit_code, inputs=None):
+def validate_probe(value, case, exit_code, inputs=None, capacity=0):
     """Lit la sortie de la sonde ; rend complete_relative ou explicit_refusal.
 
     Un statut non complet n'est accepte que s'il est explicite (code 3) ; une
@@ -739,6 +756,7 @@ def validate_probe(value, case, exit_code, inputs=None):
     need(type(options) is dict and set(options) == OPTION_KEYS and options['K'] == case['k'] and
          options['s'] == case['s'] and options['workers'] == case['workers'] and
          options['tower_static_threads'] == case['static_threads'] and options['run_tower'] is True and
+         options['certificate_capacity'] == capacity and
          _levers(options['levers']) and options['levers'] == case['levers'] and
          type(options['K_effective']) is int, 'probe options')
     times = value['times_ms']
@@ -753,7 +771,7 @@ def validate_probe(value, case, exit_code, inputs=None):
     need(_catalogue(value['catalogue']), 'probe catalogue')
     validate_euler(value, case)
     validate_occupancy(value, case)
-    validate_batch(value, case)
+    validate_batch(value, case, capacity)
     validate_tower_phases(value, case)
     orders = value['orders']
     need(type(orders) is list and all(type(order) is dict and set(order) == ORDER_KEYS and
@@ -1001,11 +1019,30 @@ def execute(args):
                      'complete_relative', 'engine preflight not complete')
                 validate_gnu_time((output / 'preflight_engine.stderr').read_text(errors='replace'), 0)
                 need(engine_value['tower_digest'] == pre_value['tower_digest'] and
-                     logical_result(engine_value) == logical_result(pre_value),
-                     'batch/GPU preflight tower differs from the engine path')
+                     logical_result(engine_value) == logical_result(pre_value) and
+                     certificate_work(engine_value) == certificate_work(pre_value),
+                     'batch/GPU preflight tower or certificate work differs from the engine path')
             except (ValueError, KeyError, TypeError, UnicodeError) as error:
                 raise PreflightFailed(type(error).__name__ + ': ' + str(error)) from error
             result['preflight']['engine_tower_digest'] = engine_value['tower_digest']
+        if pre_case['levers']['q34_gpu_certificates']:
+            # v18: the device deferral path on real hardware, before any LiDAR
+            # case: a 64-site slab must defer some edges to the engine path and
+            # still give the engine tower, catalogue and certificate work.
+            deferral_row = worker.command('preflight_deferral', [TIME, '-v', str(binary), str(output / PREFLIGHT_FILE),
+                                                                 *expected_probe_tail(pre_case, DEFERRAL_CAPACITY)])
+            try:
+                need(deferral_row['exit_code'] == 0, 'deferral preflight exit code')
+                deferral_value = strict_json((output / 'preflight_deferral.stdout').read_bytes())
+                need(validate_probe(deferral_value, pre_case, 0, inputs=preflight_inputs(pre_raw),
+                                    capacity=DEFERRAL_CAPACITY) == 'complete_relative', 'deferral preflight not complete')
+                validate_gnu_time((output / 'preflight_deferral.stderr').read_text(errors='replace'), 0)
+                need(logical_result(deferral_value) == logical_result(pre_value) and
+                     certificate_work(deferral_value) == certificate_work(pre_value),
+                     'reduced-slab preflight differs from the default-slab preflight')
+            except (ValueError, KeyError, TypeError, UnicodeError) as error:
+                raise PreflightFailed(type(error).__name__ + ': ' + str(error)) from error
+            result['preflight']['deferred'] = deferral_value['q34_batch']['deferred']
         if uses_device(pre_case['levers']):
             # Validated device pass on the synthetic preflight only (auditor B):
             # GPU_executed waits for a complete LiDAR tower on the device.

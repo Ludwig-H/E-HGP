@@ -578,9 +578,17 @@ CertificateOutput run_certificate_batch(const CertificateInput& input) {
     MHGP9_CUDA(cudaDeviceGetAttribute(&sms, cudaDevAttrMultiProcessorCount, 0));
     std::size_t free_bytes = 0, total_bytes = 0;
     MHGP9_CUDA(cudaMemGetInfo(&free_bytes, &total_bytes));
-    // At most 16 warps per SM, at most a quarter of the free memory in slabs.
+    // The warps that can be resident at once (the kernel's register budget
+    // decides, measured by the occupancy query): a slab for a warp that could
+    // only start after every edge is claimed would be wasted memory. At most
+    // a quarter of the free memory goes to slabs.
+    const int threads = 128;
+    int blocks_per_sm = 0;
+    MHGP9_CUDA(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocks_per_sm, certificate_kernel, threads, 0));
+    if (blocks_per_sm <= 0) throw CudaFailure{"certificate kernel cannot be resident on this device", true};
     const std::size_t by_memory = free_bytes / 4 / slab_bytes;
-    const std::size_t wanted = std::min<std::size_t>(static_cast<std::size_t>(sms) * 16, edges);
+    const std::size_t wanted = std::min<std::size_t>(
+        static_cast<std::size_t>(sms) * static_cast<std::size_t>(blocks_per_sm) * (threads / 32), edges);
     const std::size_t warps = std::min(wanted, by_memory);
     if (warps == 0) throw CudaFailure{"no certificate slab fits in a quarter of the free device memory", true};
     out.capacity = capacity;
@@ -625,7 +633,6 @@ CertificateOutput run_certificate_batch(const CertificateInput& input) {
     MHGP9_CUDA(cudaEventRecord(e[1]));
     const CertificateIndex index{nodes.get(), escapes.get(), static_cast<u32>(input.index.node_count),
                                  rank_points.get()};
-    const int threads = 128;
     const int blocks = static_cast<int>((warps * 32 + threads - 1) / threads);
     certificate_kernel<<<blocks, threads>>>(index, edge_a.get(), edge_b.get(), edge_mask.get(),
         static_cast<u32>(edges), input.index.kmax, input.dead_core, capacity, ranges.get(), form_constant.get(),

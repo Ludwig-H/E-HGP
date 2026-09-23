@@ -2,7 +2,7 @@
 //
 //   mhgp9_tower_probe <fichier .u32le|.u16le> K workers [--s=8] [--static=T]
 //                     [--no-tower] [--n=prefixe] [--grid=libelle]
-//                     [--catalogue-digest]
+//                     [--catalogue-digest] [--certificate-capacity=N]
 //                     [--lever=NOM=0|1 ...]
 //
 // Leviers (meme objet, travail different) : atlas_saturate_deep,
@@ -136,6 +136,11 @@ int main(int argc, char** argv) {
       }
       else if (arg == "--no-tower") options.run_tower = false;
       else if (arg == "--catalogue-digest") options.catalogue_digest = true;
+      else if (arg.starts_with("--certificate-capacity=")) {
+        const auto capacity = parse_u(arg.substr(23));
+        if (capacity < 2 || capacity > 0xffffffffULL) throw std::invalid_argument("certificate capacity outside 2..2^32-1");
+        options.q34_certificate_capacity = static_cast<std::uint32_t>(capacity);
+      }
       else if (arg.starts_with("--lever=")) {
         const auto spec = arg.substr(8);
         const auto eq = spec.find('=');
@@ -191,6 +196,7 @@ int main(int argc, char** argv) {
   std::printf("\"input\":{\"format\":\"%s\",\"grid\":\"%s\",\"sites\":%zu,\"hash\":\"%016" PRIx64 "\"},", input.format.c_str(),
               grid.c_str(), input.points.size(), input.hash);
   std::printf("\"options\":{\"K\":%u,\"K_effective\":%u,\"s\":%u,\"workers\":%zu,\"tower_static_threads\":%d,\"run_tower\":%s,"
+              "\"certificate_capacity\":%u,"
               "\"levers\":{\"atlas_saturate_deep\":%s,\"q3_leaf_census\":%s,\"q34_dead_lanes\":%s,"
               "\"q34_witness_cache\":%s,\"q34_dead_core\":%s,\"tower_meb_proposal\":%s,"
               "\"q34_jobs_by_mass\":%s,\"q34_fine_jobs\":%s,\"tower_overlap_static\":%s,\"q2_jobs_by_mass\":%s,"
@@ -198,7 +204,8 @@ int main(int argc, char** argv) {
               "\"q34_gpu_certificates\":%s}},",
               options.kmax, r.kmax_effective, options.separation_s, options.workers,
               options.tower_static_threads >= 0 ? options.tower_static_threads : r.tower_static_threads,
-              options.run_tower ? "true" : "false", options.atlas_saturate_deep ? "true" : "false",
+              options.run_tower ? "true" : "false", options.q34_certificate_capacity,
+              options.atlas_saturate_deep ? "true" : "false",
               options.q3_leaf_census ? "true" : "false", options.q34_dead_lanes ? "true" : "false",
               options.q34_witness_cache ? "true" : "false", options.q34_dead_core ? "true" : "false",
               options.tower_meb_proposal ? "true" : "false", options.q34_jobs_by_mass ? "true" : "false",

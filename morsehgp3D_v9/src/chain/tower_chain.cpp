@@ -204,7 +204,7 @@ gen::Q34FilterBatch gpu_filter_batch(const GpuIndex& prepared, std::span<const g
 // or cover without its endpoints) is an invariant violation of the port.
 gen::Q34CertificateBatch gpu_certificate_batch(const GpuIndex& prepared, unsigned kmax, bool dead_core,
                                                std::span<const gen::Q34SurvivingEdge> survivors,
-                                               double& device_ms) {
+                                               std::uint32_t capacity, double& device_ms) {
   std::vector<gpu::u32> a(survivors.size()), b(survivors.size());
   std::vector<gpu::u8> lanes(survivors.size());
   for (std::size_t i = 0; i < survivors.size(); ++i) {
@@ -224,6 +224,7 @@ gen::Q34CertificateBatch gpu_certificate_batch(const GpuIndex& prepared, unsigne
   in.edge_mask = lanes.data();
   in.edge_count = survivors.size();
   in.dead_core = dead_core;
+  in.capacity = capacity;
   auto out = gpu::run_certificate_batch(in);
   switch (out.error_kind) {
     case gpu::BatchError::none:
@@ -527,8 +528,9 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
   ChainResult result;
   const auto total_start = Clock::now();
   const double cpu_start = process_cpu_s();
-  // The catalogue kept for its digest, moved out of the chain (no copy).
-  std::vector<tower::BallData> digest_balls;
+  // Catalogue digest (verification, not construction): computed while the
+  // catalogue is alive, then its wall and CPU are taken out of the chain's.
+  double catalogue_ms = 0, catalogue_cpu = 0;
   try {
     if (options.kmax < 1 || options.kmax > 10) fail(ChainStatus::kInvalidInput, "chain_kmax_outside_1_10");
     if (options.separation_s < 8) fail(ChainStatus::kInvalidInput, "chain_separation_below_8");
@@ -539,6 +541,8 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       fail(ChainStatus::kInvalidInput, "chain_q34_batch_certificates_require_batch_filter_and_dead_lanes");
     if (options.q34_gpu_certificates && !options.q34_batch_certificates)
       fail(ChainStatus::kInvalidInput, "chain_q34_gpu_certificates_require_batch_certificates");
+    if (options.q34_certificate_capacity != 0 && (!options.q34_gpu_certificates || options.q34_certificate_capacity < 2))
+      fail(ChainStatus::kInvalidInput, "chain_q34_certificate_capacity_requires_gpu_certificates_and_two_sites");
     if (points.size() < 2) fail(ChainStatus::kInvalidInput, "chain_requires_two_sites");
     if (points.size() > static_cast<std::size_t>(std::numeric_limits<std::int32_t>::max()))
       fail(ChainStatus::kInvalidInput, "chain_too_many_sites");
@@ -644,10 +648,11 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         double certificate_device_ms = 0;
         gen::Q34CertificateFilter certificates;
         if (options.q34_gpu_certificates) {
-          certificates = [&certificate_device_ms, &gpu_preparation](
+          const std::uint32_t capacity = options.q34_certificate_capacity;
+          certificates = [&certificate_device_ms, &gpu_preparation, capacity](
                              const gen::Q2CensusIndexPtr& ix, unsigned k, bool core,
                              std::span<const gen::Q34SurvivingEdge> edges) {
-            return gpu_certificate_batch(gpu_preparation.get(*ix), k, core, edges, certificate_device_ms);
+            return gpu_certificate_batch(gpu_preparation.get(*ix), k, core, edges, capacity, certificate_device_ms);
           };
         } else if (options.q34_batch_certificates) {
           certificates = [W](const gen::Q2CensusIndexPtr& ix, unsigned k, bool core,
@@ -929,7 +934,14 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       }
       result.tower = std::move(tw);
     }
-    if (options.catalogue_digest) digest_balls = std::move(balls);
+    if (options.catalogue_digest) {
+      const auto digest_start = Clock::now();
+      const double digest_cpu = process_cpu_s();
+      result.catalogue_digest = catalogue_digest(balls);
+      catalogue_ms = ms_since(digest_start);
+      const double digest_cpu_end = process_cpu_s();
+      if (digest_cpu >= 0 && digest_cpu_end >= 0) catalogue_cpu = digest_cpu_end - digest_cpu;
+    }
     result.status = ChainStatus::kComplete;
     result.reason = "complete_relative_to_cross_checked_catalogue";
   } catch (const Failure& f) {
@@ -957,37 +969,33 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     result.tower = {};
     result.catalogue_balls.clear();
     result.orders.clear();
+    result.catalogue_digest = 0;
   }
-  result.times.total_ms = ms_since(total_start);
+  result.times.total_ms = ms_since(total_start) - catalogue_ms;
+  result.times.catalogue_digest_ms = catalogue_ms;
   const double cpu_end = process_cpu_s();
-  result.times.cpu_s = (cpu_start < 0 || cpu_end < 0) ? -1.0 : cpu_end - cpu_start;
+  result.times.cpu_s = (cpu_start < 0 || cpu_end < 0) ? -1.0 : cpu_end - cpu_start - catalogue_cpu;
   // The digest is a verification of the published tower, not part of its
   // construction: timed apart (digest_ms), after the chain total and CPU.
   if (result.status == ChainStatus::kComplete && options.run_tower) {
     const auto t = Clock::now();
+    const auto refuse = [&](ChainStatus status, const std::string& reason) {
+      result.status = status;
+      result.reason = reason;
+      result.tower = {};
+      result.catalogue_balls.clear();
+      result.orders.clear();
+      result.tower_digest = 0;
+      result.catalogue_digest = 0;
+    };
     try {
       result.tower_digest = tower_digest(result.tower);
+    } catch (const std::bad_alloc&) {
+      refuse(ChainStatus::kResourceExhausted, "chain_digest_allocation_failed");
     } catch (const std::exception& e) {
-      result.status = ChainStatus::kInvariantViolated;
-      result.reason = std::string("chain_digest_failed: ") + e.what();
-      result.tower = {};
-      result.catalogue_balls.clear();
-      result.orders.clear();
+      refuse(ChainStatus::kInvariantViolated, std::string("chain_digest_failed: ") + e.what());
     }
     result.times.digest_ms = ms_since(t);
-  }
-  if (result.status == ChainStatus::kComplete && options.catalogue_digest) {
-    const auto t = Clock::now();
-    try {
-      result.catalogue_digest = catalogue_digest(digest_balls);
-    } catch (const std::exception& e) {
-      result.status = ChainStatus::kInvariantViolated;
-      result.reason = std::string("chain_catalogue_digest_failed: ") + e.what();
-      result.tower = {};
-      result.catalogue_balls.clear();
-      result.orders.clear();
-    }
-    result.times.catalogue_digest_ms = ms_since(t);
   }
   return result;
 }

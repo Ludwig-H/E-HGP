@@ -417,6 +417,7 @@ def selftest(case_path):
                             certificate_device_ms=0.0, deferred=0)
     v13['catalogue_digest'] = '0123456789abcdef'
     v13['times_ms']['catalogue_digest'] = 0.0
+    v13['options']['certificate_capacity'] = 0
     static_path = expected['static_threads'] > 1
     v13['tower_phases_ms'] = dict(validate=1.0, static=0.0, lots=1.0 if static_path else 0.0, populations=0.0,
                                   images=0.0, bank=1.0, encode=1.0, static_by_k=[0.0] * k,

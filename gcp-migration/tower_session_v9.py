@@ -194,7 +194,10 @@ def validate_received(output, manifest, worker_pin, expected_cases, generation, 
          'worker command list/raw receipts mismatch')
     # v17: the engine twin of a batch preflight is a fixed command too.
     batch_plan = expected_cases[0]['levers']['q34_batch_filter']
-    fixed = FIXED_COMMANDS + (('preflight_engine',) if batch_plan else ())
+    # v18: and the reduced-slab (deferral) preflight of device certificates.
+    deferral_plan = expected_cases[0]['levers']['q34_gpu_certificates']
+    fixed = (FIXED_COMMANDS + (('preflight_engine',) if batch_plan else ()) +
+             (('preflight_deferral',) if deferral_plan else ()))
     need(set(fixed) <= set(rows), 'environment/build commands absent')
     for stem, row in rows.items():
         match = CASE_COMMAND.fullmatch(stem)
@@ -235,10 +238,24 @@ def validate_received(output, manifest, worker_pin, expected_cases, generation, 
         engine_value = payload.strict_json((output / 'preflight_engine.stdout').read_bytes())
         need(payload.validate_probe(engine_value, engine_case, 0, inputs=payload.preflight_inputs(pre_raw)) ==
              'complete_relative' and engine_value['tower_digest'] == pre_value['tower_digest'] and
-             payload.logical_result(engine_value) == payload.logical_result(pre_value),
-             'engine preflight recomputation / batch tower differs from the engine path')
+             payload.logical_result(engine_value) == payload.logical_result(pre_value) and
+             payload.certificate_work(engine_value) == payload.certificate_work(pre_value),
+             'engine preflight recomputation / batch tower or certificate work differs from the engine path')
         payload.validate_gnu_time((output / 'preflight_engine.stderr').read_text(errors='replace'), 0)
         expected_preflight['engine_tower_digest'] = engine_value['tower_digest']
+    if deferral_plan:
+        deferral_argv = rows['preflight_deferral']['argv']
+        need(deferral_argv[:4] == pre_argv[:4] and
+             deferral_argv[4:] == payload.expected_probe_tail(pre_case, payload.DEFERRAL_CAPACITY),
+             'exact deferral preflight invocation')
+        deferral_value = payload.strict_json((output / 'preflight_deferral.stdout').read_bytes())
+        need(payload.validate_probe(deferral_value, pre_case, 0, inputs=payload.preflight_inputs(pre_raw),
+                                    capacity=payload.DEFERRAL_CAPACITY) == 'complete_relative' and
+             payload.logical_result(deferral_value) == payload.logical_result(pre_value) and
+             payload.certificate_work(deferral_value) == payload.certificate_work(pre_value),
+             'deferral preflight recomputation / reduced-slab tower differs')
+        payload.validate_gnu_time((output / 'preflight_deferral.stderr').read_text(errors='replace'), 0)
+        expected_preflight['deferred'] = deferral_value['q34_batch']['deferred']
     need(payload.validate_probe(pre_value, pre_case, 0, inputs=payload.preflight_inputs(pre_raw)) == 'complete_relative'
          and value.get('preflight') == expected_preflight, 'preflight recomputation')
     payload.validate_external_wall(pre_value, rows['preflight'].get('elapsed_seconds'))

@@ -3866,3 +3866,16 @@ Code prêt pour la session G4 R13 ; GCP non utilisé. Détail dans
 - **R13** (18 cas) : GPU complet et jumeau moteur par (trame, K). Bras
   d'attribution à 00, K5 et K10 : filtre GPU seul, et lots CPU (demande
   de B). Puis W24 et W1.
+- **Revue multi-agents avant session** (cinq dimensions, vérification
+  adverse) ; corrigé :
+  - `__syncwarp` des frontières ;
+  - warps par occupation mesurée ;
+  - garde d'entrée testée ;
+  - branche sans cœur et K2 au port ;
+  - travail complet des certificats dans la porte de chaîne ;
+  - libération du catalogue dans le chrono.
+
+  Nouveau préflight G4 de **mise en attente sur l'appareil** (ardoise de 64
+  sites, même objet exigé). `deferred == 0` exigé sur les trames plus
+  petites que l'ardoise. Travail des certificats comparé dès le préflight.
+  Le jumeau doit avoir les mêmes leviers de certificat.
