@@ -86,9 +86,10 @@ Python. Déplacer la fonction hors de `FAKE_PROBE`, tuer les mutations
 exactes date future/calendrier plausible, puis repasser normal **et**
 `python3 -O` sur le même commit figé avant R6.
 
-## Relecture de `f599aed7` : preuve liée, mais porte nominale encore rouge
+## Relecture de `f599aed7` (`cc4664e5` sur main) : preuve liée, porte alors rouge
 
 `d49c99f7` a déplacé `rewrite_guard` au niveau module. `f599aed7`
+(`cc4664e5` après réconciliation sur main)
 transmet désormais à `validate_received` la marque et le calendrier
 **exactement** lus et vérifiés par l'hôte, puis exige leur égalité avec
 `guard_evidence.json`. Dans une session factice hors-ligne sur ce commit,
@@ -107,3 +108,64 @@ au lieu du `ValueError` qu'attend `refused()`. Ajouter `bound[2]` à ces
 deux appels, puis faire passer la suite complète normale et `-O` sur
 un snapshot stable avant R6. Les nouvelles mutations de garde ne sont
 pas encore jugées par cette porte interrompue.
+
+**Porte corrigée ensuite :** `e9000f9c` (rejoué sur main sous
+`a5872918`) ajoute l'argument `verified_guard` aux deux anciennes
+mutations. Sur le commit figé `e9000f9c`, le selftest complet passe
+**21/21** en Python normal (58,640 s) et **21/21** sous `-O`
+(44,619 s). Le second passage a utilisé un worktree temporaire détaché
+sur ce commit, nettoyé ensuite : une tentative antérieure avait croisé
+le déplacement concurrent de HEAD et échoué sur l'identité du paquet,
+sans signaler de régression `-O`. La porte nominale exerce maintenant
+17 altérations de sortie capturée, dont les deux substitutions de garde.
+Les fichiers de protocole commités sont identiques entre `e9000f9c`
+et `a5872918`. Ce verdict ne transfère pas la qualification aux
+modifications de protocole ultérieures non commitées, ni à GCP.
+
+## Deux cas de réception R6 à fermer avant une ablation G4
+
+Contre-épreuves hors-ligne sur `f599aed7` (mêmes sources dans `cc4664e5`), sans VM :
+
+- `preflight_case(cases, raw)` reprend uniquement les leviers du **premier**
+  cas. Un plan validé avec les cinq leviers OFF au premier cas et ON au
+  second produit un préflight tout OFF. Le lecteur recalcule ce même cas,
+  donc accepte l'absence d'exercice du cœur et des autres voies ON avant
+  leur mesure. Pour une ablation, placer ON en premier est un contournement
+  de plan ; la correction robuste est de préflighter chaque vecteur de
+  leviers distinct (ou un vecteur OR en prouvant qu'il couvre les chemins
+  requis), puis de vérifier exactement ces préflights à la réception.
+- Les scénarios factices `killed_case_cap` et `killed_budget` donnent
+  correctement `partial`. Le worker écrit un `probe_i.summary.json`
+  pour chacun ; pourtant supprimer respectivement `probe_7.summary.json`
+  ou `probe_1.summary.json` laisse `validate_received` retourner
+  `partial`. Le `continue` de la branche killed précède la vérification
+  du résumé. Vérifier `summary == dict(case=case,
+  input_file_sha256=manifest[case['file']], **entry)` pour **tout cas
+  lancé**, avant cette branche, avec tests de suppression et mutation.
+
+Le plan R6 par défaut a tous les leviers ON, mais **aucun cas OFF** : il
+ne constitue donc pas l'ablation appariée annoncée. Un plan personnalisé
+ON/OFF doit régler le préflight avant lancement. Ces défauts ne retirent
+pas les reçus R5 ; ils empêchent de qualifier proprement un nouveau R6
+avec ces modalités.
+
+**Résolution ciblée dans `78ce9fd4` :** le validateur refuse tout plan
+dont le premier cas n'a pas les cinq leviers ON. Un plan OFF→ON est donc
+refusé, ON→OFF accepté ; le préflight du premier cas couvre toutes les
+voies que le plan peut activer. Un plan uniquement OFF est également
+refusé : restriction de protocole assumée pour R6, non nécessité
+mathématique de la tour. Le lecteur vérifie maintenant les champs et le
+fichier résumé avant de quitter les branches `killed_case_cap` et
+`killed_budget`. En scénarios factices ciblés, les deux bases rendent
+`partial`, mais la suppression de `probe_7.summary.json` ou
+`probe_1.summary.json` rend `ValueError`. La modification du résumé cap
+est aussi mutée dans le selftest produit ; la voie budget partage le
+lecteur et a été contre-testée indépendamment. Aucun GCP utilisé.
+La suite entière du **commit figé `78ce9fd4`** passe ensuite **21/21**
+en Python normal (44,980 s) et **21/21** sous `-O` (44,860 s) dans un
+worktree temporaire détaché, supprimé après lecture. Les nouveaux tests
+exercent ON→OFF accepté, OFF→ON refusé et le résumé d'un cas tué par
+plafond supprimé ou modifié ; le cas budget a été contre-testé
+indépendamment. Les quatre fichiers de protocole ont été relus identiques
+au commit. Cette clôture locale autorise l'étape de qualification R6,
+mais n'est ni un reçu GCP ni une ablation de performance.

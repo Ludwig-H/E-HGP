@@ -1,7 +1,8 @@
 # Contre-audit B — noyau diamétral q3/q4 (chantier du 23 septembre)
 
 Statut : **code publié dans `a78664d4`, gardes complétés dans
-`f599aed7`, performance non qualifiée, hors registre**. Lecture
+`f599aed7` (`cc4664e5` sur main), performance non qualifiée,
+hors registre**. Lecture
 d'abord du diff au-dessus de `84c74a5e`, puis des commits produit.
 Cette note ne transforme ni R5 ni le harnais local en reçu du nouveau
 levier. La réception v8 est auditée séparément.
@@ -153,7 +154,8 @@ Cela n'émet aucune q4 incorrecte, puisque la voie est inactive ; déplacer
 surcharges et tester K1/2 dans la porte de cover. Les huit refus de la
 porte actuelle ne portent que sur K5.
 
-**Résolution dans `f599aed7` :** les deux surcharges appellent maintenant
+**Résolution dans `f599aed7` (`cc4664e5` sur main) :** les deux
+surcharges appellent maintenant
 `require_complete_q34_cover` avant tout retour à K1/2. Une contrelecture
 des chemins publics n'a pas trouvé d'autre consommateur non gardé. Le
 binaire fraîchement reconstruit `mhgp9_gen_q34_cover_gate --selftest`
