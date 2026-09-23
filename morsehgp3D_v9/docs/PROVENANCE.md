@@ -389,6 +389,24 @@ aucun défaut bloquant, un constat réfuté, le reste corrigé) :
     CPU ;
   - 00/K5 à 24 fils (GPU) et à 1 fil (moteur).
 
+### Tour allégée et sonde v19 (23 septembre 2026, soir)
+
+- **Rangs de plateau** (`aa29245f`) : après le tri exact `by_level`, chaque
+  boule reçoit l'indice de son plateau de niveau exact. La phase 0 et la
+  phase A comparent ces indices au lieu de produits U320 par facette. Un lot
+  singleton ne construit son action que si elle est publiée.
+- **Brouillon plat** (`f93dc165`) : `FullCoverageFlatDraft` (niveaux par lot,
+  plages CSR de parents et de contributions par action) sur le chemin
+  statique. Le constructeur du certificat a un corps générique pour les deux
+  formes ; l'API `span<const FullCoverageBatch>` est un adaptateur. Le chemin
+  séquentiel garde la forme vectorielle et sert de témoin (même charge
+  utile).
+- **Sonde et protocole v19** : `filter_kernel_ms`, `filter_transfer_ms`,
+  `certificate_kernel_ms`, `certificate_transfer_ms`. Le lecteur G4 borne
+  noyau + transferts par le temps d'appareil et exige des zéros sur CPU. Le
+  plan R14 comprend les six jumeaux et des paires S2 / S2 + S3 répétées et
+  entrelacées.
+
 ## Voie GPU S1 : `src/gpu/` (espace `mhgp9::gpu`, code neuf)
 
 23 septembre 2026. Première brique GPU de la v9, pour une expérience de

@@ -301,9 +301,27 @@ Phase A allégée (`aa29245f`,
 - lots singletons sans allocation pour les blocs inertes.
 
 Localement, la phase A de l'ordre le plus élevé baisse d'environ 30 % à K5
-et de 35 à 40 % à K10 (tour K10 −10 à −16 %). Prochaine étape de la tour :
-un brouillon plat (sans allocation par action publiée), puis la validation,
-les images et l'encodage à K10.
+et de 35 à 40 % à K10 (tour K10 −10 à −16 %).
+
+Brouillon plat (`f93dc165`,
+[reçu](receipts/tower_flat_draft_local_20260923/README.md)) : le chemin
+statique range ses lots dans des tableaux plats, lus par les populations,
+les images et l'encodage (constructeur générique). En local :
+- phase A de l'ordre K5 encore −10 à −13 % (environ 790 → 455 ms depuis la
+  base) ;
+- tour K10 −15 à −23 % ;
+- RSS −5 à −11 %.
+
+Sonde et protocole G4 v19 : noyau et transferts d'appareil publiés
+séparément (B). Plan R14 : les jumeaux GPU/moteur de R13, puis des paires S2
+seul / S2 + S3 répétées et entrelacées (C, R-27). R14 mesure sur G4 la tour
+allégée et le noyau S3 à 16 warps par SM.
+
+**S4** ([conception](docs/s4_conception_20260923/README.md)) : S4.0 (session
+d'appareil résidente), puis S4a (voie q3 sans atlas sur le cover, une voie
+par graine, après quatre restructurations CPU munies de portes), puis S4b (q4
+par la fenêtre exacte, derrière une porte de coût). Projection : K5 vers
+1,55–1,65 s à 08/000000.
 
 Suite : tour maigre (D5 de l'auditeur C :
 index des selles, saut au centre, images de naissance directes), puis
