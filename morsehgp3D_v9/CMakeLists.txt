@@ -175,6 +175,57 @@ mhgp9_product_executable(mhgp9_chain_static_paths_gate tests/chain/chain_static_
 target_link_libraries(mhgp9_chain_static_paths_gate PRIVATE mhgp9_chain)
 mhgp9_gate(mhgp9_chain_static_paths 0 mhgp9_chain_static_paths_gate
            ARGS --selftest LABELS "gate;chain" TIMEOUT 300)
+# Porte d'echelle de l'auditeur C : invariant d'Euler par ordre K sur le
+# catalogue reel de la chaine (NOTE_C_INVARIANT_EULER_20260923, preuve sans
+# position generale CONTRELEC_EULER_PAR_NERF_20260923). Trois familles v8
+# epinglees a n = 8 000, chaine complete K5 (Euler K <= 3), puis K7 sur
+# `uniform` (Euler K <= 5 et restriction p+q_min <= 6 egale cle par cle au
+# catalogue K5). Condition NECESSAIRE de completude, jamais une preuve.
+# Label scale8000, hors de la CI rapide `gate`.
+mhgp9_product_executable(mhgp9_chain_euler_scale_gate tests/chain/euler_scale_gate.cpp)
+target_link_libraries(mhgp9_chain_euler_scale_gate PRIVATE mhgp9_chain)
+mhgp9_gate(mhgp9_chain_euler_scale8000 0 mhgp9_chain_euler_scale_gate
+           ARGS --selftest EXPECT_PREFIX "euler_scale ok n=8000" LABELS "scale8000;chain;euler" TIMEOUT 1800)
+mhgp9_gate(mhgp9_chain_euler_scale_bad_argument 2 mhgp9_chain_euler_scale_gate
+           ARGS --unknown LABELS "gate;chain" TIMEOUT 60)
+# Mutant d'omission du generateur que les recoupements de la chaine ne voient
+# pas et que l'invariant doit tuer (depuis v13 par le refus Euler de la chaine) (disque q3 du certificat de voie morte trop
+# petit, mutant v8 de tests/gen/mutants.json) : copie mutee de l'unite liee
+# AVANT libmhgp9_gen, code 1 et cause euler exacte.
+function(mhgp9_euler_scale_mutant mutant expect)
+  string(JSON count LENGTH "${mhgp9_gen_mutant_text}" mutants)
+  math(EXPR last "${count} - 1")
+  foreach(i RANGE ${last})
+    string(JSON name GET "${mhgp9_gen_mutant_text}" mutants ${i} name)
+    if(name STREQUAL mutant)
+      string(JSON unit GET "${mhgp9_gen_mutant_text}" mutants ${i} source)
+      file(READ "${CMAKE_CURRENT_SOURCE_DIR}/src/gen/${unit}" text)
+      string(JSON rcount LENGTH "${mhgp9_gen_mutant_text}" mutants ${i} replacements)
+      math(EXPR rlast "${rcount} - 1")
+      foreach(r RANGE ${rlast})
+        string(JSON before GET "${mhgp9_gen_mutant_text}" mutants ${i} replacements ${r} 0)
+        string(JSON after GET "${mhgp9_gen_mutant_text}" mutants ${i} replacements ${r} 1)
+        string(FIND "${text}" "${before}" first)
+        string(FIND "${text}" "${before}" final REVERSE)
+        if(first EQUAL -1 OR NOT first EQUAL final)
+          message(FATAL_ERROR "mhgp9: site du mutant ${mutant} absent ou non unique")
+        endif()
+        string(REPLACE "${before}" "${after}" text "${text}")
+      endforeach()
+      get_filename_component(unit_dir "${unit}" DIRECTORY)
+      get_filename_component(unit_name "${unit}" NAME)
+      set(mutated "${CMAKE_CURRENT_BINARY_DIR}/euler_scale_mutants/${mutant}/${unit_name}")
+      file(WRITE "${mutated}.staged" "${text}")
+      configure_file("${mutated}.staged" "${mutated}" COPYONLY)
+      mhgp9_product_executable(mhgp9_chain_euler_scale_mutant_${mutant}_gate tests/chain/euler_scale_gate.cpp "${mutated}")
+      target_include_directories(mhgp9_chain_euler_scale_mutant_${mutant}_gate PRIVATE
+                                 "${CMAKE_CURRENT_SOURCE_DIR}/src/gen" "${CMAKE_CURRENT_SOURCE_DIR}/src/gen/${unit_dir}")
+      target_link_libraries(mhgp9_chain_euler_scale_mutant_${mutant}_gate PRIVATE mhgp9_chain)
+      mhgp9_gate(mhgp9_chain_euler_scale_mutant_${mutant} 1 mhgp9_chain_euler_scale_mutant_${mutant}_gate
+                 ARGS --selftest EXPECT_PREFIX "${expect}" LABELS "scale8000;chain;euler;mutant" TIMEOUT 1800)
+    endif()
+  endforeach()
+endfunction()
 mhgp9_gate(mhgp9_chain_census_tower_bad_argument 2 mhgp9_chain_census_tower_gate
            ARGS --unknown LABELS "gate;chain" TIMEOUT 60)
 mhgp9_gate(mhgp9_chain_census_tower_mutant_assignment 1 mhgp9_chain_census_tower_gate
@@ -380,3 +431,10 @@ foreach(index RANGE ${mhgp9_gen_mutant_last})
     message(STATUS "mhgp9: ${test_name} DISABLED (${disabled})")
   endif()
 endforeach()
+
+# Mutant d'omission tue par la porte d'echelle d'Euler (auditeur C) ; appele
+# apres la lecture de tests/gen/mutants.json.
+# Depuis la sonde v13, la chaine refuse elle-meme un catalogue qui viole Euler :
+# le mutant est tue par ce refus, avant le calcul independant de la porte.
+mhgp9_euler_scale_mutant(dead_q3_disk_too_small
+                         "cause=chain.status family=uniform kmax=5 reason=chain_catalogue_euler_violated")
