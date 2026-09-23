@@ -502,6 +502,38 @@
    "expected_stderr": "q34 dead-lane owner gate: prove() used the forms of an earlier cover after a failed load\n",
    "judgment": "state",
    "provenance": "v9 (audit A, reproduction ABA du 23 septembre 2026)"
+  },
+  {
+   "family": "wspd_q34",
+   "name": "dead_core_closes_on_any_lane",
+   "gate": "wspd_q34",
+   "source": "pipeline/wspd_q34.cpp",
+   "replacements": [
+    [
+     "      mask = static_cast<std::uint8_t>(mask & ~dead_.prove(k_, mask, work.dead_core));\n",
+     "      mask = static_cast<std::uint8_t>(dead_.prove(k_, mask, work.dead_core) != 0 ? 0 : mask);\n"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "wspd q34 gate: mhgp9 gen global q34 completed ledger mismatch\n",
+   "judgment": "ledger",
+   "provenance": "v9 (noyau diametral du certificat de voie morte, 23 septembre 2026)"
+  },
+  {
+   "family": "wspd_q34",
+   "name": "dead_core_closed_edge_uncounted",
+   "gate": "wspd_q34",
+   "source": "pipeline/wspd_q34.cpp",
+   "replacements": [
+    [
+     "      if (mask == 0) { counter_add(work.core_closed_edges); return; }\n",
+     "      if (mask == 0) { return; }\n"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "wspd q34 gate: mhgp9 gen global q34 completed ledger mismatch\n",
+   "judgment": "ledger",
+   "provenance": "v9 (noyau diametral du certificat de voie morte, 23 septembre 2026)"
   }
  ]
 }

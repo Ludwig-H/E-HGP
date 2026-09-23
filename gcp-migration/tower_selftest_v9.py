@@ -86,7 +86,14 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
         ledger.update({name: 0 for name in schema['ledger'] if name.startswith('witness_cache_')})
     if not levers['q3_leaf_census']:
         ledger.update(q3_leaf_censuses=0, q3_leaf_point_tests=0)
-    return dict(schema='mhgp9_tower_probe_v6', status=status,
+    if levers['q34_dead_core']:
+        # One edge closed by the diametral core, one sent on to the cover.
+        ledger.update(expanded_pairs=5, core_closed_edges=1, core_builds=2, dead_core_loads=2, core_sites=10,
+                      dead_core_form_sites=6, dead_core_q3_open=ledger['dead_q3_proved'] + ledger['dead_q3_open'],
+                      dead_core_q4_open=ledger['dead_q4_proved'] + ledger['dead_q4_open'])
+    else:
+        ledger.update({name: 0 for name in schema['ledger'] if name.startswith(('core_', 'dead_core_'))})
+    return dict(schema='mhgp9_tower_probe_v7', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
@@ -94,7 +101,8 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                              levers=levers),
                 times_ms=dict({key: 0.125 for key in TIMES}, chain_total=1.5), chain_cpu_s=0.25,
                 generator=dict(q2_front_rectangles=3, q2_candidate_pairs=2, q2_accepted_pairs=1,
-                               q34_expanded_pairs=4, q34_cover_builds=1, q3_emitted=2, q4_emitted=1),
+                               q34_expanded_pairs=ledger['expanded_pairs'], q34_cover_builds=1, q3_emitted=2,
+                               q4_emitted=1),
                 ledger=ledger,
                 catalogue=dict(q2_presentations=1, q3_presentations=2, q4_presentations=1, unique_keys=4, balls=4,
                                extra_shell_balls=0, shell_over_12=0, max_shell=4, max_interior=3, census_nodes=9,
@@ -624,6 +632,7 @@ class Protocol(unittest.TestCase):
                            ('levers', {}), ('levers', None),
                            ('levers', dict({name: True for name in worker.LEVER_NAMES}, extra=True)),
                            ('levers', dict({name: True for name in worker.LEVER_NAMES}, q34_dead_lanes=1)),
+                           ('levers', dict({name: True for name in worker.LEVER_NAMES}, q34_dead_lanes=False)),
                            ('scene', '../00'), ('file', 'data/scene_01.u32le'), ('extra', 1)]:
             bad = deepcopy(plan)
             bad['cases'][0][key] = value
@@ -718,6 +727,7 @@ class Protocol(unittest.TestCase):
                      ('leaf_mode_absent', lambda v: v['options']['levers'].pop('q3_leaf_census')),
                      ('dead_mode', lambda v: v['options']['levers'].update(q34_dead_lanes=False)),
                      ('cache_mode', lambda v: v['options']['levers'].update(q34_witness_cache=False)),
+                     ('core_mode', lambda v: v['options']['levers'].update(q34_dead_core=False)),
                      ('lever_unknown', lambda v: v['options']['levers'].update(extra=True)),
                      ('meb_accounting', lambda v: v['tower_work'].update(meb_accounting='other')),
                      ('meb_accounting_absent', lambda v: v['tower_work'].pop('meb_accounting')),
@@ -744,6 +754,10 @@ class Protocol(unittest.TestCase):
                      ('expanded_pairs_zero', lambda v: v['generator'].update(q34_expanded_pairs=0)),
                      ('q3_presentations_zero', lambda v: v['catalogue'].update(q3_presentations=0)),
                      ('dead_q3_open_shifted', lambda v: v['ledger'].update(dead_q3_open=2)),
+                     ('core_closed_shifted', lambda v: v['ledger'].update(core_closed_edges=2)),
+                     ('core_loads_shifted', lambda v: v['ledger'].update(dead_core_loads=3)),
+                     ('core_form_sites_shifted', lambda v: v['ledger'].update(dead_core_form_sites=8)),
+                     ('core_q4_open_shifted', lambda v: v['ledger'].update(dead_core_q4_open=1)),
                      ('cache_rejections_excess', lambda v: v['ledger'].update(witness_cache_rejected_pairs=4)),
                      ('run_tower', lambda v: v['options'].update(run_tower=False)),
                      ('K_effective', lambda v: v['options'].update(K_effective=4)),

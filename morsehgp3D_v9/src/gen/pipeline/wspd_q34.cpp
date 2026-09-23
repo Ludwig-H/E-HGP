@@ -274,8 +274,8 @@ void merge(Q34WitnessCacheWork& a, const Q34WitnessCacheWork& b) {
 }
 
 void merge(WspdQ34Work& a, const WspdQ34Work& b) {
-  static_assert(sizeof(WspdQ34Work) == 13 * sizeof(u64) + sizeof(Q34EdgeCoverWork) +
-      sizeof(WspdQ3Work) + sizeof(Q4LocalEdgeWork) + sizeof(Q4WindowEdgeWork) + sizeof(WspdQ34WitnessWork) + sizeof(Q3BallCensusWork) + sizeof(Q4SeedCellWork) + sizeof(WspdQ3AtlasWork) + sizeof(Q34DeadLaneWork) + sizeof(Q34WitnessCacheWork));
+  static_assert(sizeof(WspdQ34Work) == 16 * sizeof(u64) + 2 * sizeof(Q34EdgeCoverWork) +
+      sizeof(WspdQ3Work) + sizeof(Q4LocalEdgeWork) + sizeof(Q4WindowEdgeWork) + sizeof(WspdQ34WitnessWork) + sizeof(Q3BallCensusWork) + sizeof(Q4SeedCellWork) + sizeof(WspdQ3AtlasWork) + 2 * sizeof(Q34DeadLaneWork) + sizeof(Q34WitnessCacheWork));
   MHGP9G_ADD(input_rectangles); MHGP9G_ADD(expanded_pairs); MHGP9G_ADD(q3_edges);
   MHGP9G_ADD(q4_edges); MHGP9G_ADD(both_edges); MHGP9G_ADD(cover_builds);
   MHGP9G_ADD(cover_sites); MHGP9G_MAX(max_cover_sites); MHGP9G_MAX(peak_cover_bytes);
@@ -289,6 +289,9 @@ void merge(WspdQ34Work& a, const WspdQ34Work& b) {
   merge(a.q3_atlas, b.q3_atlas);
   merge(a.dead, b.dead);
   merge(a.witness_cache, b.witness_cache);
+  MHGP9G_ADD(core_builds); MHGP9G_ADD(core_sites); MHGP9G_ADD(core_closed_edges);
+  merge(a.core_cover, b.core_cover);
+  merge(a.dead_core, b.dead_core);
 }
 
 #undef MHGP9G_ADD
@@ -345,6 +348,8 @@ void validate(Q2CensusIndexPtr index, unsigned k, unsigned s,
       (options.q4_backend == WspdQ4Backend::Window30 &&
        options.q4_seed_cells.mode != Q4SeedCellMode::Individual))
     throw std::invalid_argument("mhgp9 gen invalid or incompatible q4 seed-cell options");
+  if (options.dead_core && !options.dead_lanes)
+    throw std::invalid_argument("mhgp9 gen dead-lane core requires the dead-lane certificate");
   // The traced cache is the exact singleton Affine search only.
   if (options.pair_witness_cache &&
       (options.witness_mode == WspdQ34WitnessMode::Disabled ||
@@ -374,6 +379,8 @@ void validate_completion(const WspdQ34Result& result, const WspdQ34Options& opti
   counter_add(q3, witness.rectangle_q3_pairs); counter_add(q3, witness.pair_q3_pairs);
   counter_add(q4, witness.rectangle_q4_pairs); counter_add(q4, witness.pair_q4_pairs);
   counter_add(q3, result.work.dead.q3_proved); counter_add(q4, result.work.dead.q4_proved);
+  counter_add(q3, result.work.dead_core.q3_proved); counter_add(q4, result.work.dead_core.q4_proved);
+  counter_add(covered, result.work.core_closed_edges);
   counter_add(expanded, witness.rectangle_pair_mass);
   counter_add(covered, witness.rejected_pairs);
   if (q3 != result.front.work.residual_pair_mass[1] ||
@@ -538,6 +545,18 @@ class Engine {
       if ((mask & 4U) != 0 && (filtered & 4U) == 0) counter_add(work.witness.pair_q4_pairs);
       mask = filtered;
       if (mask == 0) { counter_add(work.witness.rejected_pairs); return; }
+    }
+    if (options_.dead_core) {
+      // Diametral core first: every credit it gives, the cover gives too.
+      // A lane it leaves open is rerun below on the full cover.
+      const auto core = Q34EdgeCover::make_diametral(index_, {a, b});
+      counter_add(work.core_builds);
+      counter_add(work.core_sites, static_cast<u64>(core->site_count()));
+      merge(work.core_cover, core->work());
+      dead_.load(*core, work.dead_core);
+      mask = static_cast<std::uint8_t>(mask & ~dead_.prove(k_, mask, work.dead_core));
+      observe(core, static_cast<u64>(dead_.retained_bytes()));
+      if (mask == 0) { counter_add(work.core_closed_edges); return; }
     }
     const auto cover = Q34EdgeCover::make(index_, {a, b});
     counter_add(work.cover_builds);

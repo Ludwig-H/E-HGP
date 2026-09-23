@@ -264,6 +264,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       o.q3_leaf_census = options.q3_leaf_census;
       o.dead_lanes = options.q34_dead_lanes;
       o.pair_witness_cache = options.q34_witness_cache;
+      o.dead_core = options.q34_dead_core;
       const auto r34 = gen::run_wspd_q34_parallel(
           index, kmax, options.separation_s, o, W,
           [&slots](std::size_t slot, const gen::Q34SeedCandidate& c) {
@@ -309,6 +310,12 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       l.dead_q4_proved = w.dead.q4_proved; l.dead_q4_open = w.dead.q4_open;
       l.witness_cache_queries = w.witness_cache.queries; l.witness_cache_node_tests = w.witness_cache.node_tests;
       l.witness_cache_rejected_pairs = w.witness.cache_rejected_pairs;
+      l.core_builds = w.core_builds; l.core_sites = w.core_sites; l.core_closed_edges = w.core_closed_edges;
+      l.dead_core_loads = w.dead_core.loads; l.dead_core_form_sites = w.dead_core.form_sites;
+      l.dead_core_cells = w.dead_core.cells; l.dead_core_uniform_tests = w.dead_core.uniform_tests;
+      l.dead_core_point_tests = w.dead_core.point_tests;
+      l.dead_core_q3_proved = w.dead_core.q3_proved; l.dead_core_q3_open = w.dead_core.q3_open;
+      l.dead_core_q4_proved = w.dead_core.q4_proved; l.dead_core_q4_open = w.dead_core.q4_open;
     }
     result.times.q34_ms = ms_since(t);
 

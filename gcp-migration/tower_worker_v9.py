@@ -46,9 +46,9 @@ HELPER = 'gcp-migration/full_probe_worker_v7.py'
 HELPER_SHA = 'da967163bdb7247bc6aad4df0c294cda1071076a0127cd5bd9f59bc0e4788439'
 PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
-PLAN_SCHEMA = 'mhgp9_tower_plan_v4'
+PLAN_SCHEMA = 'mhgp9_tower_plan_v5'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v6'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v7'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -96,7 +96,7 @@ PROBE_STATUSES = ('complete_relative', 'unsupported_degeneracy', 'invalid_input'
 OUTCOMES = ('complete_relative', 'explicit_refusal', 'killed_case_cap', 'killed_budget',
             'skipped_budget', 'probe_failed', 'skipped_protocol_defect')
 CASE_KEYS = frozenset({'scene', 'file', 'n', 'k', 's', 'workers', 'static_threads', 'levers', 'repeat'})
-LEVER_NAMES = ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_witness_cache')
+LEVER_NAMES = ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_witness_cache', 'q34_dead_core')
 TOP_KEYS = frozenset({'schema', 'status', 'reason', 'input', 'options', 'times_ms', 'chain_cpu_s', 'generator',
                       'ledger', 'catalogue', 'tower_work', 'orders', 'tower_digest', 'peak_rss_kb'})
 INPUT_KEYS = frozenset({'format', 'grid', 'sites', 'hash'})
@@ -122,7 +122,9 @@ LEDGER_KEYS = frozenset((
     'q3_leaf_rejections q3_lower_bound_fallbacks dead_loads dead_form_sites dead_cells dead_outside_cells '
     'dead_deep_cells dead_failed_cells dead_uniform_tests dead_point_tests dead_q3_proved dead_q3_open '
     'dead_q4_proved dead_q4_open witness_cache_queries witness_cache_node_tests '
-    'witness_cache_rejected_pairs').split())
+    'witness_cache_rejected_pairs core_builds core_sites core_closed_edges dead_core_loads dead_core_form_sites '
+    'dead_core_cells dead_core_uniform_tests dead_core_point_tests dead_core_q3_proved dead_core_q3_open '
+    'dead_core_q4_proved dead_core_q4_open').split())
 CATALOGUE_LISTS = dict(by_qmin=3, by_shell=17)
 CATALOGUE_KEYS = frozenset(('q2_presentations q3_presentations q4_presentations unique_keys balls '
                             'extra_shell_balls shell_over_12 max_shell max_interior census_nodes census_leaf_tests '
@@ -216,7 +218,10 @@ def _integer(value, low, high):
 
 
 def _levers(value):
-    return type(value) is dict and set(value) == set(LEVER_NAMES) and all(type(item) is bool for item in value.values())
+    # Le noyau diametral n'existe que sous le certificat de voie morte.
+    return (type(value) is dict and set(value) == set(LEVER_NAMES) and
+            all(type(item) is bool for item in value.values()) and
+            (value['q34_dead_lanes'] or not value['q34_dead_core']))
 
 
 def lever_arguments(case):
@@ -372,7 +377,8 @@ def _catalogue(value):
 def validate_ledger_identities(value, levers):
     """Identites exactes d'une tour complete entre generateur, registre et catalogue."""
     ledger, generator, catalogue = value['ledger'], value['generator'], value['catalogue']
-    need(ledger['expanded_pairs'] == ledger['cover_builds'] + ledger['witness_rejected_pairs'] and
+    need(ledger['expanded_pairs'] == ledger['cover_builds'] + ledger['core_closed_edges'] +
+         ledger['witness_rejected_pairs'] and
          generator['q34_expanded_pairs'] == ledger['expanded_pairs'] and
          generator['q34_cover_builds'] == ledger['cover_builds'], 'ledger pair/cover identity')
     need(generator['q2_accepted_pairs'] == catalogue['q2_presentations'] and
@@ -390,6 +396,18 @@ def validate_ledger_identities(value, levers):
              'dead-lane ledger identity')
     else:
         need(all(ledger[name] == 0 for name in dead), 'dead-lane counters while the lever is off')
+    core = ('core_builds', 'core_sites', 'core_closed_edges', 'dead_core_loads', 'dead_core_form_sites',
+            'dead_core_cells', 'dead_core_uniform_tests', 'dead_core_point_tests', 'dead_core_q3_proved',
+            'dead_core_q3_open', 'dead_core_q4_proved', 'dead_core_q4_open')
+    if levers['q34_dead_core']:
+        need(ledger['core_builds'] == ledger['cover_builds'] + ledger['core_closed_edges'] and
+             ledger['dead_core_loads'] == ledger['core_builds'] and
+             ledger['dead_core_form_sites'] == ledger['core_sites'] - 2 * ledger['core_builds'] and
+             ledger['dead_core_q3_open'] == ledger['dead_q3_proved'] + ledger['dead_q3_open'] and
+             ledger['dead_core_q4_open'] == ledger['dead_q4_proved'] + ledger['dead_q4_open'],
+             'dead-lane core ledger identity')
+    else:
+        need(all(ledger[name] == 0 for name in core), 'dead-lane core counters while the lever is off')
     cache = ('witness_cache_queries', 'witness_cache_node_tests', 'witness_cache_rejected_pairs')
     if levers['q34_witness_cache']:
         need(ledger['witness_cache_rejected_pairs'] <= ledger['witness_rejected_pairs'], 'witness cache identity')
@@ -407,7 +425,8 @@ def validate_preflight_work(value, levers):
     need((not levers['q3_leaf_census'] or ledger['q3_leaf_censuses'] > 0) and
          (not levers['atlas_saturate_deep'] or ledger['atlas_deep_cells'] > 0) and
          (not levers['q34_dead_lanes'] or ledger['dead_q3_proved'] + ledger['dead_q4_proved'] > 0) and
-         (not levers['q34_witness_cache'] or ledger['witness_cache_rejected_pairs'] > 0),
+         (not levers['q34_witness_cache'] or ledger['witness_cache_rejected_pairs'] > 0) and
+         (not levers['q34_dead_core'] or ledger['core_closed_edges'] > 0),
          'preflight did not exercise an active lever')
 
 

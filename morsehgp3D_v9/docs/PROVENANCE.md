@@ -141,6 +141,23 @@ paire, inclusion dans la recherche d'une autre paire) et trois mutants
 causaux (crédit toutes voies, borne basse de Ξ, seuil q4 à K−3) ; variante de
 la porte `wspd_q34` contre l'oracle rationnel.
 
+Code neuf v9 (23 septembre 2026) : le **noyau diamétral** du certificat de voie
+morte (`Q34EdgeCover::make_diametral`, option `WspdQ34Options::dead_core`,
+levier `q34_dead_core`, défaut de la chaîne). Le certificat ne crédite que des
+sites distincts strictement intérieurs à toutes les boules d'une cellule :
+n'importe quel sous-ensemble du cover donne donc une preuve valide, avec
+moins de crédits. Il est d'abord tenté sur la boule diamétrale fermée
+$|2z-a-b|^2 \le |b-a|^2$ (a et b sur son bord) ; le cover n'est construit, et
+le certificat rejoué, que pour les voies restées ouvertes. Sur 08/000000 à
+K5, 1,14 M des 2,04 M arêtes sont closes par le noyau et les formes chargées
+tombent de 2,96 G à 0,61 G ; CPU q3/q4 du harnais −18 % à K5 et −16,5 % à
+K10, flux émis identique. Identités : expansées = covers + arêtes closes par
+le noyau + paires rejetées ; noyaux = covers + arêtes closes ; voies ouvertes
+après le noyau = voies prouvées + ouvertes sur le cover. Portes : variante
+`wspd_q34` contre l'oracle rationnel (voies prouvées par le noyau et voies
+prouvées seulement sur le cover après lui), appartenance exacte du noyau et
+inclusion dans le cover (`q34_cover`), deux mutants tués par le ledger.
+
 ## Chaîne : `src/chain/` (espace `mhgp9`, code neuf)
 
 `run_tower_chain` enchaîne le générateur (configuration mesurée des reçus v8 :

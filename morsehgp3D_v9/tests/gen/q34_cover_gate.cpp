@@ -41,6 +41,7 @@ struct Gate {
   u64 oracle_completions{}, oracle_sites{}, candidates{}, q3{}, q4{}, max_shell{};
   u64 cover_boundary{}, cover_excluded{}, cover_admitted_nodes{}, cover_rejected_nodes{};
   u64 cover_split_nodes{}, reused_covers{}, q4_without_q3{}, invalid_root_depth_changed{};
+  u64 diametral_cores{}, diametral_members{}, diametral_cover_only{};
   u64 exhaustive_edges{}, permutations{}, invalid_inputs{}, callback_failures{};
   u64 parallel_calls{}, judge_mutants{};
   u64 edge_seed_count{}, edge_pruned_sites{}, covered_site_reads{};
@@ -209,6 +210,38 @@ std::vector<std::size_t> check_cover(Gate& gate, const Points& points,
   return actual;
 }
 
+// v9 diametral core: the closed ball |2z-a-b|^2 <= |b-a|^2, judged against
+// the same exhaustive rational membership, and a subset of the edge cover.
+void check_diametral(Gate& gate, const Points& points, const mhgp9::gen::Q2CensusIndexPtr& index, Edge edge,
+                     const std::vector<std::size_t>& cover_members) {
+  const auto core = mhgp9::gen::Q34EdgeCover::make_diametral(index, edge);
+  std::sort(edge.begin(), edge.end());
+  gate.require(core->edge_ids() == edge && core->index().get() == index.get(), "diametral core lost its edge or index");
+  std::vector<std::size_t> wanted, actual;
+  const auto d = oracle::difference(points[edge[1]], points[edge[0]]);
+  for (std::size_t id = 0; id != points.size(); ++id) {
+    Big power = -oracle::dot(d, d);
+    for (std::size_t axis = 0; axis != 3; ++axis) {
+      const Big distance = 2 * Big(points[id][axis]) - points[edge[0]][axis] - points[edge[1]][axis];
+      power += distance * distance;
+    }
+    if (power <= 0) wanted.push_back(id);
+    gate.require(core->contains_id(id) == (power <= 0), "diametral membership disagrees with closed rational ball");
+  }
+  const auto order = index->spatial_order();
+  for (const auto range : core->ranges())
+    for (std::size_t rank = range.first; rank != range.last; ++rank) actual.push_back(order[rank]);
+  std::sort(actual.begin(), actual.end());
+  gate.require(actual == wanted && core->site_count() == actual.size(), "diametral ranges differ from exhaustive membership");
+  gate.require(std::binary_search(actual.begin(), actual.end(), edge[0]) &&
+               std::binary_search(actual.begin(), actual.end(), edge[1]) &&
+               std::includes(cover_members.begin(), cover_members.end(), actual.begin(), actual.end()),
+               "diametral core lost an endpoint or left the edge cover");
+  ++gate.diametral_cores;
+  gate.diametral_members += actual.size();
+  gate.diametral_cover_only += cover_members.size() - actual.size();
+}
+
 Output covered_seed(const mhgp9::gen::Q34EdgeCoverPtr& cover, std::size_t x, std::size_t kmax,
                     mhgp9::gen::Q34CoverSeedWork* work = nullptr) {
   Output result;
@@ -237,7 +270,7 @@ Output check_edge(Gate& gate, const Points& points, Edge edge, std::size_t kmax,
   const auto cover = mhgp9::gen::Q34EdgeCover::make(index, edge);
   gate.require(cover->index().get() == index.get(), "cover rebuilt or copied the shared spatial index");
   const auto members = check_cover(gate, points, cover, edge);
-  static_cast<void>(members);
+  check_diametral(gate, points, index, edge, members);
   edge = cover->edge_ids();
   const auto before_ranges = std::vector<mhgp9::gen::Range>(cover->ranges().begin(), cover->ranges().end());
   const auto before_bytes = cover->retained_bytes();
@@ -554,6 +587,8 @@ void run(Gate& gate) {
   gate.require(gate.covers >= 150 && gate.edge_calls >= 150 && gate.seed_calls >= 100 &&
                gate.reference_calls == gate.seed_calls && gate.oracle_sites >= 1000 && gate.q3 >= 30 && gate.q4 >= 10,
                "cover correctness nonvacuity floor");
+  gate.require(gate.diametral_cores > 0 && gate.diametral_cover_only > 0 && gate.diametral_members > 2 * gate.diametral_cores,
+               "diametral core never exercised (cores, cover-only sites, interior members)");
   gate.require(gate.cover_boundary >= 2 && gate.cover_excluded > 0 && gate.cover_admitted_nodes > 0 &&
                gate.cover_rejected_nodes > 0 && gate.cover_split_nodes > 0 && gate.reused_covers > 0 &&
                gate.max_shell >= 30 && gate.q4_without_q3 >= 2 && gate.invalid_root_depth_changed == 1 &&
@@ -581,6 +616,8 @@ int main(int argc, char** argv) {
               << ",\"oracle_completions\":" << gate.oracle_completions << ",\"oracle_sites\":" << gate.oracle_sites
               << ",\"candidates\":" << gate.candidates << ",\"q3\":" << gate.q3 << ",\"q4\":" << gate.q4
               << ",\"max_shell\":" << gate.max_shell << ",\"cover_boundary\":" << gate.cover_boundary
+              << ",\"diametral_cores\":" << gate.diametral_cores << ",\"diametral_members\":" << gate.diametral_members
+              << ",\"diametral_cover_only\":" << gate.diametral_cover_only
               << ",\"cover_excluded\":" << gate.cover_excluded << ",\"cover_admitted_nodes\":" << gate.cover_admitted_nodes
               << ",\"cover_rejected_nodes\":" << gate.cover_rejected_nodes << ",\"cover_split_nodes\":" << gate.cover_split_nodes
               << ",\"reused_covers\":" << gate.reused_covers << ",\"q4_without_q3\":" << gate.q4_without_q3

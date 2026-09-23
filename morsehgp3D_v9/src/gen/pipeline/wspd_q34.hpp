@@ -45,6 +45,12 @@ struct WspdQ34Options {
   // (T=K-1 for q3, K-2 for q4). Such a lane emits nothing on the exact path
   // either: same stream. Off keeps the v8 path and every historical counter.
   bool dead_lanes{false};
+  // v9 option (requires dead_lanes): the certificate is first attempted on
+  // the closed DIAMETRAL ball of the edge (Q34EdgeCover::make_diametral), a
+  // subset of the cover; the cover is built, and the certificate rerun on
+  // it, only for the lanes this core leaves open. A subset can only remove
+  // credits, never add one: same proved lanes are sound, same stream.
+  bool dead_core{false};
   // v9 option (Affine bounds only): the pair filter first re-tests, for the
   // same endpoint a, the witness nodes admitted by the previous full search
   // (lanes/q34_witness_search.hpp): lanes they prove rejected skip the
@@ -117,6 +123,12 @@ struct WspdQ34Work {
   // q3_edges/q4_edges (lane mass identities include q3_proved/q4_proved).
   Q34DeadLaneWork dead;
   Q34WitnessCacheWork witness_cache;
+  // v9 diametral core of the certificate (dead_core): its own cover work and
+  // prover work. An edge closed by the core builds no cover:
+  // expanded = cover_builds + core_closed_edges + rejected pairs.
+  u64 core_builds{}, core_sites{}, core_closed_edges{};
+  Q34EdgeCoverWork core_cover;
+  Q34DeadLaneWork dead_core;
 };
 
 struct WspdQ34Result {

@@ -9,6 +9,16 @@ namespace mhgp9::gen {
 
 Q34EdgeCoverPtr Q34EdgeCover::make(
     Q2CensusIndexPtr index, std::array<std::size_t, 2> edge_ids) {
+  return make_ball(std::move(index), edge_ids, false);
+}
+
+Q34EdgeCoverPtr Q34EdgeCover::make_diametral(
+    Q2CensusIndexPtr index, std::array<std::size_t, 2> edge_ids) {
+  return make_ball(std::move(index), edge_ids, true);
+}
+
+Q34EdgeCoverPtr Q34EdgeCover::make_ball(
+    Q2CensusIndexPtr index, std::array<std::size_t, 2> edge_ids, bool diametral) {
   if (!index) throw std::invalid_argument("mhgp9 gen edge cover requires an immutable index");
   const auto size = index->cloud().points().size();
   if (edge_ids[0] >= size || edge_ids[1] >= size)
@@ -16,17 +26,17 @@ Q34EdgeCoverPtr Q34EdgeCover::make(
   if (edge_ids[0] == edge_ids[1])
     throw std::invalid_argument("mhgp9 gen edge cover requires distinct edge IDs");
   if (edge_ids[1] < edge_ids[0]) std::swap(edge_ids[0], edge_ids[1]);
-  return Q34EdgeCoverPtr(new Q34EdgeCover(std::move(index), edge_ids));
+  return Q34EdgeCoverPtr(new Q34EdgeCover(std::move(index), edge_ids, diametral));
 }
 
-Q34EdgeCover::Q34EdgeCover(Q2CensusIndexPtr index, std::array<std::size_t, 2> edge_ids)
+Q34EdgeCover::Q34EdgeCover(Q2CensusIndexPtr index, std::array<std::size_t, 2> edge_ids, bool diametral)
     : index_(std::move(index)), edge_ids_(edge_ids) {
   const auto points = index_->cloud().points();
   const auto a = points[edge_ids_[0]], b = points[edge_ids_[1]];
   for (std::size_t axis = 0; axis != 3; ++axis) {
     center_twice_[axis] = static_cast<i64>(a[axis]) + b[axis];
     const i64 delta = static_cast<i64>(b[axis]) - a[axis];
-    radius_fourfold_ += 4 * delta * delta;
+    radius_fourfold_ += (diametral ? 1 : 4) * delta * delta;
   }
   // For 18-bit coordinates, M=262143: each doubled displacement is in
   // [-2M,2M], so both its squared 3-norm and 4*|b-a|^2 are <=12M^2<2^40.

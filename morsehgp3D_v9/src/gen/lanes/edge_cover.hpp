@@ -42,6 +42,12 @@ class Q34EdgeCover final {
   // Allocation/counter failures propagate without publishing a partial cover.
   [[nodiscard]] static Q34EdgeCoverPtr make(
       Q2CensusIndexPtr index, std::array<std::size_t, 2> edge_ids);
+  // The closed DIAMETRAL ball |2*z-a-b|^2 <= |b-a|^2 of the same edge (a and
+  // b on its boundary), with the same ranges contract: a subset of make().
+  // Only a consumer for which any subset is sound may use it (v9 dead-lane
+  // core, pipeline/wspd_q34.hpp); it never replaces the cover of a census.
+  [[nodiscard]] static Q34EdgeCoverPtr make_diametral(
+      Q2CensusIndexPtr index, std::array<std::size_t, 2> edge_ids);
 
   Q34EdgeCover(const Q34EdgeCover&) = delete;
   Q34EdgeCover& operator=(const Q34EdgeCover&) = delete;
@@ -62,7 +68,9 @@ class Q34EdgeCover final {
   [[nodiscard]] bool contains_id(std::size_t id) const;
 
  private:
-  explicit Q34EdgeCover(Q2CensusIndexPtr index, std::array<std::size_t, 2> edge_ids);
+  explicit Q34EdgeCover(Q2CensusIndexPtr index, std::array<std::size_t, 2> edge_ids, bool diametral);
+  [[nodiscard]] static Q34EdgeCoverPtr make_ball(
+      Q2CensusIndexPtr index, std::array<std::size_t, 2> edge_ids, bool diametral);
   [[nodiscard]] bool contains_point(Point3 point) const noexcept;
   void admit(Range range);
   void reject(Range range);

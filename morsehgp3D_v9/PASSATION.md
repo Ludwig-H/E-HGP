@@ -111,8 +111,18 @@ boucle séquentielle) et bilan de travail fusionné une fois même après échec
 produit du propriétaire du certificat (`mhgp9_gen_q34_dead_lanes_owner` : ABA,
 `load()` interrompu).
 
-Suite : coût q3/q4 (filtre de paires, certificat, atlas) ; seuil K−2 des
-arêtes q4 seules ; équilibrage de la tour K10 (plus gros ordre).
+**Noyau diamétral** du certificat de voie morte (levier `q34_dead_core`,
+défaut) : le certificat est d'abord tenté sur la boule diamétrale fermée de
+l'arête, sous-ensemble du cover, et le cover n'est construit que pour les
+voies restées ouvertes. Harnais local W8 sur 08/000000 : CPU q3/q4 −18 % à K5,
+−16,5 % à K10, flux identique ; sonde W8 K5 : condensé inchangé. Protocole G4
+v7 (sonde) / v5 (plan) : cinq leviers, douze compteurs du noyau et leurs
+identités exactes.
+
+Suite : session G4 R6 (ablation du noyau) ; coût q3/q4 (atlas et énumération
+q3/q4 : 53 % des cycles à K10, filtres de paires et de rectangles) ; résidu
+hors q3/q4 et tour (fusion sérielle, double tri des clés, ~1 s non attribué à
+K10) ; seuil K−2 des arêtes q4 seules ; équilibrage de la tour K10.
 
 ## État du dépôt au moment de l'ouverture (historique)
 

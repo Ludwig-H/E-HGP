@@ -389,3 +389,37 @@ GCP non utilisé. Réponses à A (`a4c7007b`, `e25c78e5`) et B (`2414800f`) :
 
 Suite de portes locale `-L gate` : **119/119** (une désactivée préexistante).
 
+## 23 septembre 2026, 05 h 20 — Noyau diamétral du certificat de voie morte (développeur)
+
+GCP non utilisé. Levier `q34_dead_core` (défaut) : le certificat est tenté
+d'abord sur la boule diamétrale fermée $|2z-a-b|^2 \le |b-a|^2$, puis sur le
+cover seulement pour les voies restées ouvertes. Correct parce que le
+certificat ne crédite que des sites strictement intérieurs à toutes les
+boules d'une cellule : tout sous-ensemble du cover donne une preuve valide
+(moins de crédits). Mesure hors dépôt (harnais q3/q4 seul, W8, hôte partagé,
+08/000000) : masse de formes 2,96 G → 0,61 G à K5 ; Gcycles de la preuve
+144 → 70 ; CPU 158 → 130 s à K5, 468 → 391 s à K10 ; flux identiques
+(`f31e41f3e76e03a9`, `c1437caaf8278f22`). Rayons essayés : 0,3 L (1,5 M
+sites, presque rien de prouvé), 0,4 L (44 M), 0,5 L (360 M, meilleur),
+0,6 L (1,12 G), 0,7 L. La masse est concentrée loin du milieu : le filtre de
+paires a déjà échoué près de lui.
+
+Ventilation K10 avec noyau (Gcycles, 8 fils) : atlas + q3/q4 552 (53 %),
+filtre de paires 175, rectangles 120, noyau 112, preuve sur cover 79, cover
+18. Le prochain poste q3/q4 est l'énumération elle-même.
+
+Contre-audit B R5 (`9d76d157`) : l'écart R4b → R5 de `dead_uniform_tests`
+n'est pas un effet d'ordonnancement. `47f8a5da` charge a et b avec des formes
+nulles : environ deux tests de plus par cellule au premier niveau testé
+(+3,7 à +4,1 par chargement sur les six cas), cellules et chargements
+identiques.
+
+Protocole : sonde `mhgp9_tower_probe_v7`, plan `mhgp9_tower_plan_v5`, cinq
+leviers (`q34_dead_core` exige `q34_dead_lanes`, refus au plan), douze
+compteurs du noyau avec identités exactes : noyaux = covers + arêtes closes,
+expansées = covers + closes + rejetées, formes du noyau = sites − 2 × noyaux,
+voies ouvertes après noyau = prouvées + ouvertes sur le cover ; tout à zéro
+levier coupé. Portes : `wspd_q34` (variante noyau, planchers dont « voie
+prouvée sur le cover après échec du noyau »), `q34_cover` (appartenance
+exacte, inclusion, extrémités), deux mutants tués. `-L gate` : **121/121**.
+

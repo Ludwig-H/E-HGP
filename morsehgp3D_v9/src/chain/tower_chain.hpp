@@ -62,6 +62,9 @@ struct ChainOptions {
   // Cache des noeuds temoins du filtre de paires (meme extremite a), meme
   // objet. Contrat v9 : active par defaut, publie et epingle.
   bool q34_witness_cache = true;
+  // Noyau diametral du certificat de voie morte (exige q34_dead_lanes), meme
+  // objet. Contrat v9 : active par defaut, publie et epingle.
+  bool q34_dead_core = true;
 };
 
 // Temps de mur en millisecondes, CPU du processus en secondes.
@@ -92,6 +95,9 @@ struct GeneratorLedger {
   std::uint64_t dead_loads, dead_form_sites, dead_cells, dead_outside_cells, dead_deep_cells, dead_failed_cells,
       dead_uniform_tests, dead_point_tests, dead_q3_proved, dead_q3_open, dead_q4_proved, dead_q4_open;
   std::uint64_t witness_cache_queries, witness_cache_node_tests, witness_cache_rejected_pairs;
+  std::uint64_t core_builds, core_sites, core_closed_edges, dead_core_loads, dead_core_form_sites, dead_core_cells,
+      dead_core_uniform_tests, dead_core_point_tests, dead_core_q3_proved, dead_core_q3_open, dead_core_q4_proved,
+      dead_core_q4_open;
 };
 
 struct OrderSummary {
