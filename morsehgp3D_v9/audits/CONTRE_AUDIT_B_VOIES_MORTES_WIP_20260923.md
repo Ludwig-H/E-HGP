@@ -77,14 +77,18 @@ ablation appariée on/off (mêmes trames entières, K/s/W/FULL, catalogue,
 ordres et digest), avec temps CPU/mur et RSS. Garder la nouvelle voie
 optionnelle jusqu'à preuve qu'elle économise **plus** que son chargement.
 
-La factory réutilisable conserve `loaded_=true` depuis un ancien appel
-jusqu'à la fin d'un `load` suivant. Si une allocation interrompt ce
-dernier, l'appelant normal propage l'exception et n'utilise pas le
-prover ; il n'y a pas de faux rejet sur ce chemin. Il faut néanmoins
-définir explicitement l'état après échec avant toute réutilisation par
-un appelant qui récupère l'exception : remettre `loaded_` à faux au
-début ou construire puis publier un nouvel état complet. La porte de
-faute doit vérifier cette règle, pas seulement le résultat nominal.
+L'objet public réutilisable conserve `loaded_=true` depuis un ancien
+appel jusqu'à la fin d'un `load` suivant. Cas causal : après un premier
+chargement réussi, appeler `load` avec `work.loads=UINT64_MAX` fait lever
+`counter_add` **après** `forms_.clear()` mais avant le nouvel `all_` ;
+`loaded_` reste vrai et `all_` garde les anciens rangs. Un appelant qui
+récupère l'exception et appelle `prove_*` peut alors indexer le vecteur
+vide `forms_` par ces rangs. Le pipeline courant propage l'exception et
+détruit son moteur : **aucun faux résultat produit n'est établi sur ce
+chemin**, mais la garantie de l'objet après refus est insuffisante.
+Invalider `loaded_` dès l'entrée et le republier seulement en fin, ou
+construire un état temporaire puis l'échanger ; une porte de faute doit
+vérifier la réutilisation après échec, pas seulement le résultat nominal.
 
 Enfin, le changement de schéma `probe_v5` ajoute le booléen de voie morte
 mais ne durcit pas les sept autres champs/histogrammes malformés encore

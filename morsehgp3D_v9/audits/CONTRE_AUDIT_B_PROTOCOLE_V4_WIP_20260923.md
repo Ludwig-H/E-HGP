@@ -127,3 +127,36 @@ Le workflow CI v9 ne surveille, parmi les fichiers de protocole, que
 ce workflow. Il exécute les CTests CPU, pas la suite Python de cycle de
 vie factice. Ajouter ces chemins et ce test avant d'utiliser le statut
 CI comme porte protocolaire complète.
+
+## Nouvelle lecture du protocole v5 non commité
+
+Le worktree développeur `build/v9-open-worktree`, base `bb2c40dc`, ajoute
+un certificat de voies mortes et passe à `plan_v3`/`probe_v5`. La chaîne
+plan → commande → CLI → option moteur → `options.q34_dead_lanes` de la
+réponse est bien raccordée. Lecture du worker SHA-256 `4b08d1f6…` et
+de la porte réelle `4bd185a0…` ; ce sont des **octets WIP**, pas un
+nouveau reçu G4. Le journal local de CTest affiche bien les deux portes
+normale/`-O` vertes et `mutants_killed=12/12`. Le nouveau mutant inverse
+le drapeau de voie morte, mais les sept mutations de schéma ci-dessus
+ne figurent toujours pas dans la porte.
+
+Contre-épreuve sur le JSON de la **vraie sonde native v5** du petit nuage
+de cette porte : la base et chacune des sept mutations restent acceptées
+`complete_relative`, y compris `meb_supports_by_size=[0]`, un compteur
+`tower_work` inconnu, l'absence de `tower_work.records` ou de compteurs
+`generator`/`ledger`, et les deux histogrammes catalogue vides. Supprimer
+**tous les nouveaux champs `ledger.dead_*`** est également accepté.
+Ce défaut de réception n'est donc pas seulement celui de la fausse
+fixture du selftest, qui garde elle-même quatre champs `ledger`.
+Le nuage de la porte active réellement les nouvelles branches (des
+cellules et des voies mortes non nulles), mais elle ne fixe pas un seuil
+de couverture et son on/off change aussi W1/statique0 en W2/statique2 :
+une égalité d'objet n'est pas une ablation temporelle de ce seul levier.
+
+Le préflight natif reste non obligatoire avant le départ G4, et le
+timeout enfant de 600 s reste supérieur au CTest 300 s. Aucun de ces
+constats n'annule les douze refus effectivement vérifiés ; ils montrent
+simplement que `12/12` n'est pas encore une porte complète pour les
+compteurs de coût ou pour la prochaine session G4. Exiger le schéma
+exact sur **sortie native réelle**, un reçu préflight du snapshot
+commité, puis seulement des cas G4 payants.
