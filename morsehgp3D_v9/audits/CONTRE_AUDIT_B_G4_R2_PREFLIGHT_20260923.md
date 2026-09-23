@@ -61,6 +61,14 @@ mais **treize `probe_failed`**, tous et seulement avec la raison annoncée
 `ValueError: probe counters tower_work`. Le reçu hôte garde
 `FULL_executed=false` parce qu'aucun résultat n'a été accepté par son
 lecteur : ne pas en conclure que la sonde invitée n'a pas calculé.
+Une contrelecture indépendante a recoupé les **111 membres** de l'archive
+au manifeste SHA, les **106 membres non-données** aux blobs Git de
+`0b29b6c3`, les trois fichiers d'entrée aux octets u32 commis, puis les
+hashes stdout/stderr des **46 commandes invitées** et **14 commandes
+hôte** ; tous concordent. `lifecycle.txt` reste à l'état historique
+`targeted_running`, mais le reçu final et `guarded_stop` certifient l'arrêt
+de cette génération précise. Ne pas utiliser ce fichier mutable seul
+comme autorité de coût.
 
 Les sorties brutes de la sonde annoncent toutes `complete_relative`.
 Un diagnostic en mémoire qui remplace **seulement** les deux valeurs MEB
