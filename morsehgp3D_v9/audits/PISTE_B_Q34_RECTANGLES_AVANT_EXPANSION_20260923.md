@@ -240,6 +240,14 @@ la première paire et les palettes `H_a` peuvent être essayés
 séparément ; **ne pas additionner** leurs crédits sans dédoublonnage
 d'IDs/nœuds et preuve d'antichaîne.
 
+Cette unité de travail est aussi adaptée au GPU : tableaux compacts de
+`(a,b_node,masque)`, palette courte par ancre, tests de coins indépendants
+par ligne, puis compactage par somme de préfixes des lignes/voies encore
+ouvertes. La grille de tâches est disjointe et déterministe ; le
+certificat entier et les contacts doivent rester identiques au CPU.
+Ce schéma est une proposition de parallélisation, **aucun kernel ni
+gain G4 ne sont encore qualifiés**.
+
 Une seconde palette gratuite en recherche globale provient des **frères
 exclus** quand un vrai nœud A ou B est scindé : pour le sous-produit
 enfant×autre facteur, le frère est disjoint des deux facteurs et peut
