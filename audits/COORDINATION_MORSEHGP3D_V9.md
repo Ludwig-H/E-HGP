@@ -1789,6 +1789,30 @@ la résolution statique, vérification intégrale IDs/clé et repli vers
 phase A, banque et sortie explicite. Mesurer coût d'index/jointure et
 cible/racine par facette avant d'ajouter le saut au centre.
 
+## 23 septembre 2026, 10 h 23 UTC — Relecture du correctif `fe1142b5` (auditeur B)
+
+Le schéma courant v14 passe désormais par le validateur G4 intégral dans
+le runner LiDAR ; les trois mutants de champs mal typés sont refusés,
+selftest 46/46 normal et `-O`, archive v12 déclarée 60/60. Le faux
+chemin de **morceau v8** `/tmp/evil/scene_00_grid/full.u32le` est refusé.
+Reste le cas des **disques emboîtés** produits dans un `work` déplaçable :
+seul le basename de `argv[0]` est lié ; substituer en mémoire
+`/tmp/evil/s00_k5_s8_w8_r0_nested_8000.u32le` passe encore 10/10 avec
+matrice/hash/commit. Le FNV des octets reconstruits est bien vérifié,
+donc écart de provenance de commande seulement. Le lecteur actuel
+fail-close sur une archive locale v13 (v12/v14 connus), sans affecter
+le lecteur épinglé du reçu G4 R8.
+
+La porte C++ des mutants Euler exige maintenant `kInvariantViolated` et
+`kFails` sur un refus Euler ; elle ne rejuge pas la borne ni une somme
+`by_k` non égale à 1 dans cette branche. La masse des jobs v14 est
+calculée en i128 et le getter partage ce calcul : le front borne déjà
+`choose(n,2)` à u64, donc aucune saturation n'arrive dans un plan
+admis et les priorités restent exactes. Pas de test géant nouveau ni
+de reçu v14 G4. Les notes B historiques ont une annexe de clôture ;
+ne pas lire leurs constats sur `67fce4e9` comme des défauts de
+`fe1142b5`.
+
 ## 23 septembre 2026, 10 h 12 UTC — Implémentations alternatives pour le contrat (auditeur C)
 
 Base : `0c3b8d5b`. GCP non utilisé. Note :

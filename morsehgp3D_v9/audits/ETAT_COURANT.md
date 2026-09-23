@@ -3,6 +3,8 @@
 23 septembre 2026. Ports v13 publiés : sonde **`c768e06a`**, porte Euler
 8k **`a08378da`**, lecteur LiDAR **`50646eef`** puis **`1f048aae`**,
 lecteur G4 **`515b3666`** puis **`1f048aae`**.
+La sonde v14 **`67fce4e9`** et le correctif de réception/masse
+**`fe1142b5`** sont publiés depuis ; aucun reçu G4 v14 n'est acquis.
 Les mesures de densité restent celles du binaire v12 **`4530644b`** ;
 aucune nouvelle série LiDAR v13 n'en découle. Le dernier
 [reçu G4 R8](../receipts/g4_tower_r8_20260923/README.md) exécute
@@ -96,12 +98,17 @@ en Python normal et sous `-O` (rejeu local). Le lecteur G4 `515b3666`
 reconnaissait déjà un refus réel antérieur au calcul d'Euler
 (`chain_shell_above_12`, borne Euler 0) comme refus explicite. Aucune
 nouvelle pente LiDAR v13 n'est publiée par ce seul correctif.
-La [contrelecture](CONTRE_AUDIT_B_LECTEURS_1F048_20260923.md) trouve
-encore deux écarts : `--revalidate` ne confine ni ne lie réellement
-`argv[0]` au chemin attendu (un chemin `/tmp/evil/...` de même suffixe
-passe 60/60), et trois champs de compte/temps invalides sont acceptés
-localement alors que G4 refuse la sonde v13 complète. Ce sont des trous
-de réception/provenance, non une clé omise démontrée.
+La [contrelecture et sa
+suite](CONTRE_AUDIT_B_LECTEURS_1F048_20260923.md) confirment que
+**`fe1142b5`** fait juger le schéma courant v14 par le validateur G4
+**complet** (trois mutants anciennement survivants refusés ; 46/46
+selftest normal/`-O`) et confine désormais l'argument des morceaux v8.
+Le chemin archivé d'un **disque emboîté** reste lié par son seul nom :
+un faux `/tmp/evil/<même nom>.u32le` passe avec matrice/hash/commit,
+sans lire ce fichier ; les octets reconstruits et leur FNV restent
+vérifiés. C'est une limite de fidélité de commande, non une clé omise.
+Le lecteur courant n'a plus de compatibilité locale v13 ; le reçu G4
+R8 reste lu par son lecteur épinglé.
 
 Le calcul Euler reste inclus dans `census_ms` (`tower_chain.cpp:486,539–601`)
 et un `E_K` faux refuse **avant** FULL (`:602–612`), alors que la décision
@@ -113,9 +120,10 @@ impose aux deux mutants de chaîne la raison
 Euler `fails` dans les deux sens. La porte d'échelle de **`96bd6190`**
 échantillonne une boule sur 64 pour son recensus brut : contrôle utile mais
 déterministe et non exhaustif, sans couverture garantie de chaque famille
-de coquilles. La porte C++ des mutants ne vérifie toutefois pas elle-même
-`kInvariantViolated` ni le statut `kFails` après refus ; la source produit
-les pose correctement. Pour `run_tower=false`, expliciter la positivité des
+de coquilles. **`fe1142b5`** fait maintenant vérifier
+`kInvariantViolated` et `kFails` par la porte C++ des mutants ; elle
+ne recalcule pas encore sa borne ni une somme `by_k` fausse dans cette
+branche. Pour `run_tower=false`, expliciter la positivité des
 supports réguliers, que les fabriques exactes q2/q3/q4 imposent déjà.
 
 Les certificats exacts actuellement raccordés comprennent la saturation
@@ -309,6 +317,9 @@ cependant **aucun reçu brut v14** ; il n'est pas un résultat G4. Les
 nouveaux chronos ne couvrent pas les plages publiées et les deux leviers
 ne sont pas séparés. Une matrice 2×2 appariée sur une trame difficile
 avec q3/q4 et chaîne complets est la prochaine porte de performance.
+Le débordement de masse diagonale de la version initiale v14 est
+**fermé en source** par `fe1142b5` (calcul i128 exact sur le domaine
+des plans admis), sans nouveau reçu de performance.
 
 ## Verrou q3/q4 : réduire le travail avant l'expansion
 

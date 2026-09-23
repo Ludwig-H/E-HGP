@@ -51,3 +51,27 @@ le juger, puis réutiliser le validateur G4 complet pour v13 ou prouver
 et tester une équivalence champ par champ. Ajouter ces trois mutants au
 selftest local et un test `--revalidate` avec `argv[0]` hors dépôt. Ne pas
 confondre ce raccord documentaire avec une qualification FULL/GPU.
+
+## Suite publiée : `fe1142b5`
+
+La relecture du commit exact confirme la fermeture de **la partie pièces
+v8** : le faux chemin `/tmp/evil/scene_00_grid/full.u32le` est refusé
+(`input_argument`, code 1). Le lecteur local du schéma **courant v14**
+appelle désormais le `validate_probe` G4 complet : les trois champs
+texte mutants ci-dessus sont refusés, et le selftest passe **46/46**
+normal et `-O`. La revalidation déclarée des six campagnes v12 passe
+**60/60**. La porte C++ Euler vérifie maintenant sur le refus
+`kInvariantViolated` et `kFails` ; elle ne rejuge pas encore elle-même
+la borne ni une entrée de `by_k` réellement différente de 1.
+
+Reste une limite de **fidélité de commande**, sans lecture d'un fichier
+extérieur : pour les disques emboîtés reconstruits dans un `work`
+déplaçable, `--revalidate` compare toujours seulement le nom du fichier.
+La substitution en mémoire par
+`/tmp/evil/s00_k5_s8_w8_r0_nested_8000.u32le` passe encore avec
+matrice, hash de sonde et commit attendus (10 cas, zéro échec). Les octets
+reconstruits et leur FNV restent jugés ; l'écart concerne l'argument
+archivé, dont la politique de portabilité doit être explicitée. Le
+lecteur courant connaît v12 et v14, **pas v13** : une éventuelle archive
+locale v13 n'est pas revalidable avec ce commit, même si le reçu G4 R8
+reste lisible avec son lecteur v13 épinglé.

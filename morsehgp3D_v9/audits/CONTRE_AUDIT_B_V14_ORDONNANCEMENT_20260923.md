@@ -67,6 +67,13 @@ dizaines de millions de sites, mais la fabrique ne pose pas de plafond
 2^32. Un correctif non committé était en cours lors de la relecture :
 ne pas l'attribuer à `67fce4e9`.
 
+**Suite `fe1142b5` :** ce point est fermé en source. La préparation et
+le getter utilisent le même calcul `i128` avec saturation `u64` ; le
+front refuse d'abord tout nuage dont `n(n−1)/2` ne tient pas dans
+`u64`, si bien que chaque masse d'un plan admis reste exacte et que
+la saturation n'est jamais atteinte. C'est une preuve statique de
+domaine, sans test géant `n>2^32` ni nouveau reçu de performance.
+
 ## Porte G4 proportionnée
 
 Même binaire, même trame difficile 08/000000 **ou** 000200 sans sol,
