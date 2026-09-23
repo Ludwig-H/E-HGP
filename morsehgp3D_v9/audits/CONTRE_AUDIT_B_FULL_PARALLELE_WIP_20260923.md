@@ -82,3 +82,40 @@ de sortie sur cette fixture, ou leur sérialisation canonique complète,
 serait une porte d'identité plus forte. `workers_created=16` est une
 **somme** de voies de résolution, non 16 fils simultanés ni un compteur
 du tri. Aucun TSan n'est encore dans cette porte ou le workflow CI.
+
+## Relecture du commit publié `e0ae05a7`
+
+Cette section remplace le statut « WIP » des deux sources précédentes :
+`full_ball_tower.hpp` SHA-256 `fb8b2c630f29…` et `parallel/pool.hpp`
+`aa0b780b4918…` sont effectivement dans le commit. Rejeu local de la
+sélection CTest `gate` sur le build développeur existant : **109 PASS,
+1 DISABLED** (110 tests dénombrés), sans reconstruction indépendante de ce
+build ni sanitizer de cette sélection. Les trois portes ciblées ont aussi
+passé ; le mutant de fusion `COPY_PAIRS` est tué par une permutation fausse
+à 8 192 éléments. Les 400 cas de tri couvrent les budgets de fils
+`0,1,2,3,4,5,7,8,16,48` : ils ne couvrent **pas** chaque entier de 1 à 48.
+
+La lecture indépendante n'a révélé ni inversion de l'ordre total des
+requêtes, ni course évidente sur les plages de fusion et cases de forêt,
+ni changement de priorité du premier refus logique : les validations
+par blocs conservent une réduction ordonnée des échecs. Le filtre de
+niveaux flottant ne sert que sous `FE_TONEAREST`, avec repli exact et
+départage par rang. Sur entrée malformée, des compteurs peuvent inclure du
+travail lancé dans des blocs ultérieurs avant le premier refus ; ne pas
+leur donner une sémantique de « préfixe validé ». Une porte FULL dédiée
+aux autres modes FENV et à deux défauts situés dans des blocs distincts
+renforcerait cette preuve.
+
+Le double buffer des requêtes est maintenant compté dans
+`static_peak_request_bytes`, mais **pas** tous les tableaux coexistants :
+collecte par blocs et requêtes concaténées, tri des graines et forêts K
+simultanées ne composent pas un pic global. Un diagnostic local de
+l'auditeur A observe 11 245 584 octets pour le double buffer contre
+7 584 268 dans `static_peak_retained_bytes` échantillonné après tri ; ce
+dernier ne doit pas être lu comme un RSS. Une allocation du buffer de
+fusion peut aussi échouer alors qu'un tri en place réussirait : qualifier
+un repli exact ou un plafond mémoire propre au régime 30 M, sans tronquer
+la tour. Le gate de chaîne assure une égalité de condensé FNV-64 et du
+nombre d'ordres sur 1 500 sites/K5/s8, non l'égalité sérialisée de toutes
+les sorties, ni une trame complète/G4. Aucun chrono apparié, RSS G4,
+TSan ou contrat de 1 s n'est acquis par ce commit.
