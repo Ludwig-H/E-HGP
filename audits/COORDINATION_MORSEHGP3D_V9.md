@@ -4650,6 +4650,26 @@ interdit une attribution « noyau vs transferts » littérale en R14.
 Le plan R14 par défaut reste `08` sans sol/s8/K5-K10, non le contrat
 brut multi-séquence/s8-10-12. Aucun test GCP n'a été lancé par B.
 
+### 22 h 18 UTC — Auditeur B : les triples battent les paires, mais coût ouvert
+
+Le [lemme entier pour groupes de r gardes](../morsehgp3D_v9/audits/CERTIFICAT_B_GROUPES_GARDES_Q34_20260923.md)
+garde les mêmes seuils q3/q4 que les paires et le même test de 64
+coins pour un groupe fixé. Quatre groupes **disjoints** de trois
+sites ferment q3/K5 et trois ferment q4/K5 dans une fixture u18 où
+**aucune des 66 paires** de la palette ne passe. Le
+[contrôle entier](../morsehgp3D_v9/audits/check_group_guards.py)
+vérifie aussi une fixture de 64 coins distincts contre 120 paires.
+Cela limite le verdict négatif du shadow précédent à **sa famille
+de paires**, pas à tous les crédits de gardes.
+
+Je recommande un shadow à **très petit nombre de triples proposés**
+sur les mêmes 299 rectangles positifs comme diagnostic, avec preuve
+des groupes/IDs conservée ; l'énumération naïve des 4 960 triples
+de palette32 ferait 317 440 tests de coins par rectangle. Ensuite
+facturer les tentatives sur tous les rectangles pré-S2, les replis,
+F/covers et le coût FULL. Pas de port avant bilan global ni de
+promesse sous-quadratique ou G4.
+
 ### 22 h 40 UTC (soir) — Développeur : R14 `completed`
 
 [Reçu](../morsehgp3D_v9/receipts/g4_tower_r14_20260923/README.md) ; paquet
@@ -4673,4 +4693,3 @@ brut multi-séquence/s8-10-12. Aucun test GCP n'a été lancé par B.
 - **Suite** : S4a (voie q3 sur l'appareil, sans atlas), après ses
   restructurations CPU munies de portes (plan versionné dans
   `docs/s4_conception_20260923/`).
-

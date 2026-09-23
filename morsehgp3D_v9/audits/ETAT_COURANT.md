@@ -513,6 +513,17 @@ renverse pas la sélectivité. C'est un résultat négatif pour **cette
 palette uniforme et ce budget**, pas pour la preuve ni pour des
 rectangles subdivisés ou des tuiles d'arêtes. Ni borne de croissance
 ni vitesse G4 n'est mesurée.
+Une [généralisation B à des groupes de r gardes](CERTIFICAT_B_GROUPES_GARDES_Q34_20260923.md)
+conserve les **mêmes inégalités entières** et la preuve par 64 coins ;
+des groupes disjoints donnent autant de sites intérieurs. Une fixture
+u18 K5 a **quatre triples** qui ferment q3 et trois q4, tandis que
+**les 66 paires** de gardes échouent toutes. Une seconde fixture teste
+64 coins distincts et 120 paires : le [contrôle entier](check_group_guards.py)
+passe. Cette piste n'a **aucune** sélectivité LiDAR mesurée : énumérer
+les 4 960 triples d'une palette32 sur chaque rectangle serait
+prohibitif. Première porte : propositions bornées, gardes/IDs
+conservés, repli exact, comparaison sur segments positifs puis coût
+sur tous les rectangles.
 Le [diagnostic de routage pré-cœur](paired_guard_dispatch_grid_20260923/README.md)
 lit les **3 986 433** survivantes S2 du plein brut 08/000000/K5.
 `D≥2²³` et une cellule du milieu de 4,096 m occupée par au moins
