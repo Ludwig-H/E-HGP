@@ -129,7 +129,11 @@ préflight du WIP, non une qualification publiée.
   **chacune** des 23,69 M paires de R11/000000/K5, soit environ
   0,5 milliard d'itérations de recherche avant les DFS. Un découpage
   par tuiles de rectangles/paires éviterait ce terme `P log R` et
-  bornerait les buffers sans changer les masques.
+  bornerait les buffers sans changer les masques : pour une taille de
+  tuile `B`, construire `ceil(|A_i||B_i|/B)` descripteurs `(rectangle,
+  début, longueur)` puis faire la recherche d'offset **une fois par
+  tuile** ou la supprimer par ce descripteur ; le rang local demeure
+  `p/|B_i|, p%|B_i|`. Cette création doit elle-même être comptée.
 - Les événements couvrent bien les copies H2D/D2H **de chaque passe**,
   le scan et les noyaux, mais `total_ms` conserve la meilleure passe
   chaude après création du contexte et allocations initiales ;
@@ -140,4 +144,8 @@ préflight du WIP, non une qualification publiée.
 - Des événements CUDA créés avant une erreur ne sont détruits qu'au
   succès ; corriger cette fuite de ressource. Le coût et la compilation
   du `__int128` device restent à constater sur G4, sans conclusion
-  avant le build et un test positif.
+  avant le build et un test positif. Le [guide CUDA C++ 12.9 de
+  NVIDIA](https://docs.nvidia.com/cuda/archive/12.9.0/pdf/CUDA_C_Programming_Guide.pdf)
+  autorise explicitement `__int128` en code device avec un compilateur
+  hôte qui le prend en charge : il n'y a pas de blocage de langage
+  démontré, seulement une porte de compilation et de débit à passer.
