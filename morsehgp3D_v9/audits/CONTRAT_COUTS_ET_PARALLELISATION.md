@@ -87,18 +87,23 @@ clairsemées distinguent rejet/admission de l'ambiguïté A×B. Cela n'est
 les décisions `E×Z`, les replis exacts, les handles, la production finale
 de ranges **par arête** et le coût aval d'atlas dans le même chrono ;
 garder un grain explicite pour les tuiles même si le front laisse un grand
-`|B|` dans un seul job. Aucun compte de profondeur n'est transféré par
+`|B|` dans un seul job. Réduire les arêtes en flux par tuile évite de
+matérialiser d'un coup les 23,7 millions de paires du reçu, mais les
+identités de chaque arête doivent survivre jusqu'à la matérialisation
+certifiée des ranges. Aucun compte de profondeur n'est transféré par
 ce certificat de cover.
 La même tuile pourrait borner la lentille du domaine positif q4, mais
 son `completion_box` exclut **les deux endpoints propres à chaque arête** :
 une admission `E×Z` ne fournit pas cette boîte tant que Z peut contenir
 un endpoint de E. Certifier cette disjonction ou raffiner avant agrégation.
 
-L'[oracle entier autonome](check_cover_batch_u18_20260922.py) passe en
-Python normal et `-O` : 45 871 triplets de points bornés, 1 001
-familles subdivisées sans trou/doublon et trois contacts exacts. Il
-vérifie des ensembles de rangs, **pas** la fusion des ranges du produit
-v9, les rectangles WSPD réels ou le coût d'une file GPU. Pour une
+Le même oracle subdivise désormais les **1 000 familles de survivantes**
+avec les bornes `E×Z` ci-dessus : les tuiles terminales sont disjointes,
+couvrent chaque couple arête–site et rendent le cover ponctuel exact
+(16 928 visites de tuiles dans ces petits cas synthétiques). Trois
+contacts exacts sont testés. Ce résultat ne vérifie **pas** la fusion des
+ranges du produit v9, les rectangles WSPD réels ou le coût d'une file GPU.
+Pour une
 ablation pertinente, former les blocs après le masque de rectangle et
 le filtre de paire **s'il est actif**, en conservant le masque q3/q4
 de chaque arête ; ne mutualiser que lorsque plusieurs arêtes survivantes

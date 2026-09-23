@@ -84,7 +84,7 @@ def surviving_edge_bounds(edges: list[tuple[Point, Point]], z: Box) -> tuple[int
 
 
 def verify_grouped(edges: list[tuple[Point, Point]],
-                   witnesses: list[Point]) -> int:
+                   witnesses: list[Point], *, surviving: bool = False) -> int:
     """Split edge×Z cells; all terminal tiles are disjoint and exact."""
     covered = [set() for _ in edges]
     assigned = [set() for _ in edges]
@@ -93,10 +93,13 @@ def verify_grouped(edges: list[tuple[Point, Point]],
     def visit(edge_ids: list[int], first: int, last: int) -> None:
         nonlocal visits
         visits += 1
-        ba = box([edges[i][0] for i in edge_ids])
-        bb = box([edges[i][1] for i in edge_ids])
         bz = box(witnesses[first:last])
-        lower, upper = cover_bounds(ba, bb, bz)
+        if surviving:
+            lower, upper = surviving_edge_bounds([edges[i] for i in edge_ids], bz)
+        else:
+            ba = box([edges[i][0] for i in edge_ids])
+            bb = box([edges[i][1] for i in edge_ids])
+            lower, upper = cover_bounds(ba, bb, bz)
         if upper <= 0 or lower > 0:
             for i in edge_ids:
                 for j in range(first, last):
@@ -162,7 +165,7 @@ def main() -> None:
     rng = random.Random(20260922)
     box_cases = 0
     grouped_cases = 0
-    grouped_visits = 0
+    grouped_visits = surviving_grouped_visits = 0
     sparse_families = 0
     sharper_lower = sharper_upper = 0
     for case in range(1001):
@@ -200,11 +203,13 @@ def main() -> None:
             sharper_lower += edge_lower > lower
             sharper_upper += edge_upper < upper
             grouped_visits += verify_grouped(edges, zz)
+            surviving_grouped_visits += verify_grouped(survivors, zz, surviving=True)
             grouped_cases += 1
     print(json.dumps({"status": "PASS", "box_triplets": box_cases,
                       "grouped_families": grouped_cases,
                       "grouped_visits": grouped_visits,
                       "surviving_families": sparse_families,
+                      "surviving_grouped_visits": surviving_grouped_visits,
                       "sharper_lower": sharper_lower,
                       "sharper_upper": sharper_upper,
                       "sparse_discriminants": 2,
