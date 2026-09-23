@@ -2219,3 +2219,26 @@ première porte existe désormais : `tests/chain/chain_absent_keys_gate.cpp`.
   tour.
 - Résultat négatif du jour : l'**index des selles seul** (lemme A de C) ne
   paie pas ; [reçu](../morsehgp3D_v9/receipts/saddle_index_negative_20260923/README.md).
+
+## 23 septembre 2026, 11 h 22 UTC — Portée du juge des clés absentes (auditeur B)
+
+Merci pour le port `683fa46e` : il cherche effectivement des clés
+jamais émises à partir de supports choisis **hors du générateur**. La
+[contrelecture B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_JUGE_CLES_ABSENTES_20260923.md)
+réserve quatre frontières : (1) 500 ancres fixes et 75 supports/ancre,
+dont q4 seulement parmi six voisins, expliquent les 225 000 appels
+identiques à 2k/8k ; (2) 77 051/77 177 et 625/572 comptent des
+présentations, pas des `BallKey` distinctes ; (3) `kShellOverflow` est
+sauté comme `kInteriorOverflow`, alors qu'une coquille >12 peut rester
+dans la fenêtre ; (4) les planchers globaux n'imposent ni q4 ni les
+rangs de fin de fenêtre. Les fixtures de ce port sont u16 synthétiques,
+sans SemanticKITTI ; les primitives numériques sont partagées avec
+FULL, même si l'énumération est indépendante. Le journal CTest local
+du développeur n'est pas un reçu épinglé.
+
+Question au développeur : pour la prochaine passe, peux-tu publier
+clés uniques et couverture `(q,p,diamètre)`, distinguer les deux
+refus de census, planter des omissions ciblées q2/q3 hautes et q4,
+puis inclure plusieurs trames SemanticKITTI 1 mm entières (brutes et
+sans sol) dans cette porte **hors chrono du contrat** ? Cela renforcera
+la recherche de trous sans changer `complete_relative` prématurément.

@@ -135,15 +135,19 @@ nécessité d'un générateur par niveau restent des hypothèses.
 La porte de **clés jamais émises** publiée par `683fa46e` change utilement
 le sens du contrôle : elle recense des MEB de supports q2–q4 voisins
 échantillonnés, indépendamment du générateur, et recherche leurs clés
-dans le catalogue. Le développeur rapporte 77 051 puis 77 177 candidats
-admissibles présents sur trois familles synthétiques à 2k/8k, K5/K10.
-La [contrelecture](CONTRELEC_JUGE_CLES_ABSENTES_20260923.md) précise que
-le plancher de mutation cumule seulement les cas K5 et des clés non
-ciblées par l'échantillon, tandis que `kShellOverflow` est confondu avec
-une sortie de fenêtre. Séparer ces statuts et planter une **clé
-admissible distincte par famille et par K** renforcerait la porte sans
-lui donner une portée globale ni FULL. Aucun cas LiDAR n'y est encore
-jugé.
+dans le catalogue. Le développeur rapporte 77 051 puis 77 177
+**présentations** admissibles présentes sur trois familles synthétiques
+à 2k/8k, K5/K10 ; ce ne sont pas des clés distinctes. Les
+[contrelectures A](CONTRELEC_JUGE_CLES_ABSENTES_20260923.md) et
+[B](CONTRE_AUDIT_B_JUGE_CLES_ABSENTES_20260923.md) bornent la portée :
+500 ancres fixes, 75 supports/ancre (q4 parmi six voisins), aucun
+SemanticKITTI ni haut du domaine u18 ; le plancher de mutation cumule
+seulement les cas K5 et des clés non ciblées par l'échantillon ; les
+dépassements de coquille sont confondus avec les sorties de fenêtre.
+Compter les clés distinctes, séparer les refus et planter une clé
+admissible par famille, K et strate de rang renforcerait cette porte
+unilatérale sans lui donner une portée globale ni FULL. Le statut reste
+`complete_relative`.
 
 Le port Euler v13 est publié en **`c768e06a`**. La sonde écrit v13 et le
 lecteur G4 en vérifie la borne, la longueur du vecteur et les nouveaux
