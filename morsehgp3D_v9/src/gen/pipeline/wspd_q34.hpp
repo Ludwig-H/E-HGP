@@ -68,7 +68,8 @@ struct WspdQ34Options {
   // Parallel entry only: the front job plan splits the pending product of
   // largest pair mass first (make_wspd_front_jobs mass_first) and jobs are
   // claimed by decreasing mass. Scheduling only: same rectangles, same
-  // stream; the prefix/job split of the front counters may differ.
+  // normalized stream and geometric work; the serial preparation, the
+  // job/worker split and the witness-cache hits per worker differ.
   bool jobs_by_mass{false};
 };
 

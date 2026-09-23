@@ -198,15 +198,17 @@ def validate_probe(value, expected):
              number(times.get('chain_total')), number(times.get('digest')), number(value.get('chain_cpu_s')),
              type(value.get('peak_rss_kb')) is int and value['peak_rss_kb'] > 0]
     if schema != 'mhgp9_tower_probe_v12' and all(need):
-        # v13 : champs de premier niveau exacts, puis Euler, occupation q3/q4 et
-        # phases de la tour juges par le lecteur G4 lui-meme.
+        # Schema courant : le lecteur G4 INTEGRAL (validate_probe du worker,
+        # memes regles des deux cotes : types et cles exactes de chaque
+        # section, identites du grand-livre, Euler, occupation, phases), sur
+        # l'entree annoncee.
         reader = g4_reader()
-        case = dict(k=expected['k'], n=sites, workers=expected['workers'], static_threads=expected['static_threads'])
+        case = dict(scene='lidar', file='lidar.u32le', n=sites, k=expected['k'], s=expected['s'],
+                    workers=expected['workers'], static_threads=expected['static_threads'],
+                    levers=dict(DEFAULT_LEVERS), repeat=0)
         try:
-            need.append(set(value) == reader.TOP_KEYS and reader._catalogue(value['catalogue']))
-            reader.validate_euler(value, case)
-            reader.validate_occupancy(value, case)
-            reader.validate_tower_phases(value, case)
+            need.append(reader.validate_probe(value, case, 0, inputs={'lidar': dict(n=sites, fnv=expected['fnv'])})
+                        == 'complete_relative')
         except (ValueError, KeyError, TypeError):
             need.append(False)
     return all(need)
@@ -409,7 +411,10 @@ def selftest(case_path):
                                   images=0.0, bank=1.0, encode=1.0, static_by_k=[0.0] * k,
                                   lots_by_k=[1.0 if static_path else 0.0] * k, images_by_k=[0.0] * k,
                                   encode_by_k=[1.0] * k, order_by_k=[0.0 if static_path else 1.0] * k)
-    expected13 = dict(expected, schema=campaign_probe_schema(dict(schema=SUMMARY_SCHEMA, probe_schema=PROBE_SCHEMA)))
+    v13['input']['grid'] = GRID
+    v13['options']['tower_static_threads'] = expected['static_threads']
+    expected13 = dict(expected, grid=GRID,
+                      schema=campaign_probe_schema(dict(schema=SUMMARY_SCHEMA, probe_schema=PROBE_SCHEMA)))
     if not validate_probe(v13, expected13):
         print('lidar_scaling_selftest cause=v13_baseline_refused')
         return 1
@@ -426,6 +431,9 @@ def selftest(case_path):
         ('v13_occupancy_wall', lambda v: v['q34_occupancy'].update(wall_max_ms=v['times_ms']['q34'] + 5.0)),
         ('v13_phases_beyond_tower', lambda v: v['tower_phases_ms'].update(bank=v['times_ms']['tower'] + 5.0)),
         ('v13_top_extra', lambda v: v.update(extra=1)),
+        ('v13_time_text', lambda v: v['times_ms'].update(prepare='bad')),
+        ('v13_meb_accounting_text', lambda v: v['tower_work'].update(meb_accounting='bad')),
+        ('v13_generator_text', lambda v: v['generator'].update(q34_expanded_pairs='bad')),
     ]
     for name, apply in table13:
         mutated = json.loads(json.dumps(v13))
@@ -446,7 +454,7 @@ def selftest(case_path):
     # Entree alteree d'un octet : le FNV recalcule ne correspond plus.
     changed = bytearray(raw)
     changed[0] ^= 1
-    total = len(table) + 5 + 12 + 2 + 1
+    total = len(table) + 5 + 15 + 2 + 1
     if not validate_probe(value, dict(expected, fnv=input_fnv(bytes(changed)))):
         killed += 1
     else:
@@ -531,8 +539,12 @@ def revalidate(out_dir, work, expect):
             expected_input = (name + '.u32le') if provenance['kind'] == 'nested_disc' else None
             if expected_input is not None and argument.name != expected_input:
                 reasons.append('input_argument')
-            if expected_input is None and (argument.parts[-2:] != _path.parts[-2:]):
-                reasons.append('input_argument')
+            if expected_input is None:
+                try:
+                    if resolve_input(record['argv'][0]) != _path.resolve():
+                        reasons.append('input_argument')
+                except Refusal:
+                    reasons.append('input_argument')
             if (expected['k'], expected['s'], expected['workers']) != (summary['k'], summary['s'], summary['workers']):
                 reasons.append('command_parameters')
             if not validate_probe(record.get('probe'), expected):

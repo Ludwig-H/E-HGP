@@ -467,10 +467,14 @@ struct WspdFrontJobs::Impl {
     prefix = preparation.result();
   }
 
+  // Unordered pair mass in i128, saturated to u64 (never wrapped): exact for
+  // every product of up to 2^32 sites per side, a scheduling estimate only.
   u64 mass(const Task& task) const {
     const auto nodes = index->spatial_nodes();
-    const auto a = static_cast<u64>(nodes[task.a].range.size()), b = static_cast<u64>(nodes[task.b].range.size());
-    return task.a == task.b ? a * (a - 1) / 2 : a * b;
+    const auto a = static_cast<i128>(nodes[task.a].range.size()), b = static_cast<i128>(nodes[task.b].range.size());
+    const i128 value = task.a == task.b ? a * (a - 1) / 2 : a * b;
+    return value > static_cast<i128>(std::numeric_limits<u64>::max()) ? std::numeric_limits<u64>::max()
+                                                                      : static_cast<u64>(value);
   }
 
   // Largest pending product first (a max-heap on mass, then discovery order),
@@ -531,11 +535,7 @@ WspdFrontResult WspdFrontJobs::run_job(std::size_t id, const WspdRectangleConsum
 u64 WspdFrontJobs::job_pair_mass(std::size_t id) const {
   const auto& plan = *implementation_;
   if (id >= plan.jobs.size()) throw std::invalid_argument("mhgp9 gen WSPD requires an existing job");
-  const auto nodes = plan.index->spatial_nodes();
-  const auto a = static_cast<u64>(nodes[plan.jobs[id].a].range.size());
-  const auto b = static_cast<u64>(nodes[plan.jobs[id].b].range.size());
-  // n < 2^32 sites: both products stay below 2^64.
-  return plan.jobs[id].a == plan.jobs[id].b ? a * (a - 1) / 2 : a * b;
+  return plan.mass(plan.jobs[id]);
 }
 
 std::unique_ptr<WspdFrontJobs> make_wspd_front_jobs(

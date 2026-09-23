@@ -57,8 +57,14 @@ bool judge(const std::vector<Point>& points, unsigned kmax, unsigned s, std::siz
       kmax >= 3 ? static_cast<unsigned>(std::min<std::size_t>(kmax - 2, points.size())) : 0;
   const std::string where = std::string(name) + " K" + std::to_string(kmax) + " s" + std::to_string(s) + " W" +
                             std::to_string(workers);
-  if (chain.status != mhgp9::ChainStatus::kComplete)
+  if (chain.status != mhgp9::ChainStatus::kComplete) {
+    // A refusal is an Euler refusal only with its status, reason and failed
+    // sums together (contre-audit B): any other refusal is its own cause.
+    if (chain.reason == "chain_catalogue_euler_violated" &&
+        (chain.status != mhgp9::ChainStatus::kInvariantViolated || c.euler_status != mhgp9::EulerStatus::kFails))
+      return fail("euler.refusal_inconsistent " + where);
     return fail("euler.chain_refused " + where + " reason=" + chain.reason);
+  }
   if (c.euler_checkable_max_k != expected_checkable) return fail("euler.checkable_bound " + where);
   if (expected_checkable == 0) {
     if (c.euler_status != mhgp9::EulerStatus::kNotCheckable) return fail("euler.vacuous_status " + where);
