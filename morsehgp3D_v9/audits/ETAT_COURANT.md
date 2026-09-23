@@ -316,7 +316,15 @@ sous-quadratique n'en découlent : les incidences site–cover dépassent déjà
 Les contacts, le propriétaire et `centre∈conv(coquille)` restent
 obligatoires. Une q4 peut survivre quand toutes ses faces q3 sont
 rejetées : ne pas limiter ses graines aux q3 finalement émises
-([fixture B](CONTRE_AUDIT_B_PREATLAS_ET_Q3_20260922.md)).
+([fixture B](CONTRE_AUDIT_B_PREATLAS_ET_Q3_20260922.md)). La
+[revue d'induction de l'atlas](Q4_INDUCTION_ATLAS_EVENEMENTS_20260923.md)
+explicite, pour une arête propriétaire q4 déjà transmise avec cover complet,
+pourquoi le centre positif échappe aux refus `Outside`/`Deep` et atteint un
+groupe émis, même si les faces q3 sont rejetées. Le
+[gate de flux entier à douze sites](q4_global_12sites_20260923/README.md)
+compare **108 sorties complètes** à l'oracle rationnel sur deux permutations,
+`s=8/10/12`, `Local28`/`Window30` et mono/W1/W4. Il ferme cette fixture
+précise, pas la preuve des filtres WSPD ni la complétude globale d'une trame.
 Le [cover commun par blocs](CONTRE_AUDIT_B_COVER_BATCH_20260923.md)
 et la [saturation K−2 des seules arêtes q4](SEUIL_SATURATION_ATLAS_PAR_VOIE_20260923.md)
 restent des pistes secondaires à mesurer avec le coût aval complet.
@@ -452,10 +460,12 @@ composantes, parents et IDs des lots par coupes de niveau, si les égalités
 sont fermées ensemble. Elle ouvre une voie de composantes parallèles dans
 un ordre K, sans coût ni gain prouvé. La sonde locale 08/000000/K10
 compte seulement **1,72 %** des blocs dans les lots groupés : le seul
-parallélisme *au sein d'un lot* aurait peu de portée sur cette trame.
-Une variante à têtes physiques borne les réétiquetages tout en gardant les
-ancres historiques ; les **3,10 sauts de racine par requête** mesurés
-justifient son ablation, pas encore son adoption.
+parallélisme *au sein d'un lot* toucherait donc peu de blocs sur cette
+trame, sans que cette fraction mesure sa part des cycles. Une variante
+à têtes physiques garde les ancres historiques, mais son ablation
+appariée sur le même catalogue rend la même tour octet par octet sans
+gain stable et avec **54–159 Mio** de RSS supplémentaire : ne pas la
+porter sur ce seul régime.
 
 ## Portes de preuve encore ouvertes
 

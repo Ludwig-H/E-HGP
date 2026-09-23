@@ -1,0 +1,15 @@
+{
+  "binary_sha256": "1b1b378d57b3dea76e9f128c691dcbc342d5a2534e398354fec128e8d5013afe",
+  "compiler": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "exit_code": 0,
+  "gen_worktree_status": "",
+  "library_sha256": "208aabb30a764bad25ab1c99d74885bd405e84a13dcb8375622d66aa6203f70a",
+  "product_gate_sha256": "26e0cd143dfdb017884571a2ed16145e5a57cf0b1a97004382f28d7980f7e107",
+  "runner_sha256": "bf4f2646066e707656ea06c7dde0621f5b420ac16abe206dfd2838797d6e2c26",
+  "sidecar_sha256": "b750bd837df9e3d88c0f0bf8adbb0ec6b38f2dbb6545d46d19d30ef2ab5fcfad",
+  "source_commit": "ba9980fd554a7c8ae5716f0e06078225a32b8ccf",
+  "status": "PASS",
+  "stderr": "",
+  "stdout": "{\"status\":\"PASS\",\"sites\":12,\"permutations\":2,\"logical_configs\":36,\"complete_streams\":108,\"checks\":3580,\"oracle_tetrahedra\":990,\"oracle_balls\":338}",
+  "test_worktree_status": ""
+}
