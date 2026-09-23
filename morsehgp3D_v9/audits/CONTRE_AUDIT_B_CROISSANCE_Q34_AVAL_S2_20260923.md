@@ -75,6 +75,17 @@ ensuite l'enveloppe des centres issue du produit entier avec celle de
 permettre `K−1` gardes q3 ou `K−2` gardes q4 là où les extrêmes de
 `A×B` empêchent tout certificat.
 
+Le [reçu S2 CPU par arête](edge_matched_core_20260923/README.md) précise
+où cibler cette tentative sur le **brut** 08/000000/K5 : à pleine
+densité, 157 012 arêtes traversant les quarts physiques ne sont que
+3,94 % des charges du cœur mais portent 386,518 M de ses 559,662 M
+formes ; 382,406 M de ces formes sont calculées sur des arêtes ensuite
+fermées par le cœur. Un seuil descriptif de longueur `|ab|≥4 m` cible
+80,41 % des formes avec 8,51 % des arêtes, mais n'est **pas** un
+certificat et ne doit jamais devenir un rejet. Cibler les *tentatives*
+de preuve sur ces charges lourdes, indépendamment de l'axe du capteur,
+permet d'évaluer si l'objet `E` sauve vraiment le poste dominant.
+
 La porte est **économique avant d'être chronométrique** : sur les
 rectangles lourds choisis par un budget de *tentatives* (jamais un quota
 de candidats), publier `R,P,S`, tailles et masques des segments,
