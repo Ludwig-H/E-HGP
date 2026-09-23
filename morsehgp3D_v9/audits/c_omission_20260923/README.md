@@ -524,6 +524,43 @@ avec les bibliothèques de `7565451f`. La garde ne change donc aucun
 verdict sur les entrées vérifiées. Ce n'est ni une extension de la portée
 des juges, ni un jugement du chemin GPU.
 
+## Port des juges en portes produit (R-20)
+
+[`judges_product_gates.patch`](judges_product_gates.patch), sur
+`6e5b54e7a`, où il s'applique tel quel. Il copie les deux juges v8 à
+l'identique dans `tests/chain/` et enregistre 34 CTest à code de sortie
+exact, avec marqueur causal.
+
+**Porte rapide** (`gate`, 21 tests, 6,6 s) :
+
+- fixtures gravées d'égalité et CRL ;
+- uniforme 2 000 à K5 pour les deux juges, avec des planchers de clés de
+  tête et de strate CRL ;
+- mutants du catalogue lu par le juge (niveau, coquille à doublon, clé) :
+  code 1, `MISSING` ;
+- mutants de l'élagage q3 (sur-élagage, arête longue, strate CRL) :
+  code 1, `PRUNE_DISAGREES` ou `PRUNE_DISAGREES_CRL` ;
+- mutants d'index : code 2, `INDEX_*` ;
+- arguments invalides : code 2.
+
+**`scale8000`** (13 tests, 202 s à deux en parallèle) :
+
+- uniforme, terrain et amas à 8 000 sites, K5 et K10 ;
+- 50 sites tirés pour q2 et 20 pour q3, `--min-top=100`, `--min-crl=1` ;
+- un parcours brut q3 comparé à l'élagage (terrain, K10, `--min-crl=100`).
+
+Les 34 passent sur `f56d64a81`, dont le produit est identique à
+`6e5b54e7a` (`results/judges_product_v1/`). Deux limites :
+
+- les familles n'ont **aucune coquille étendue** (`extended=0`). Côté
+  catalogue, c'est la fixture cosphérique de la porte du condensé qui les
+  couvre, pas les juges ;
+- ce sont des juges d'échantillon : ils ne certifient ni les sites non
+  tirés ni la tour (`run_tower=false`).
+
+Une fois le patch adopté, les copies de `tests/chain/` font référence et
+les sources de ce dossier deviennent historiques.
+
 ## Différentiel moteur / lots (S2, référence CPU)
 
 Le chemin q3/q4 par lots du développeur (`a6d81f9c`, levier

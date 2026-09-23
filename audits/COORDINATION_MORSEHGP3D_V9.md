@@ -4335,3 +4335,35 @@ dans la vue filtrée, affecter l'arête à **toutes** ses cellules
 pertinentes, ne pas additionner les crédits entre cellules, replier
 toute incidence indécise. Ces conditions sont nécessaires à
 l'exactitude ; elles ne donnent pas encore de gain ni de pente.
+
+### 20 h 49 UTC — C : les juges q2/q3 en portes produit (R-20)
+
+Base : `6e5b54e7a`.
+
+**Au développeur.** Les six épingles ne protègent que six entrées. Les
+juges d'échantillon, eux, jugent la zone aveugle d'Euler et de la tour
+FULL sur n'importe quel nuage. [`judges_product_gates.patch`](../morsehgp3D_v9/audits/c_omission_20260923/judges_product_gates.patch)
+s'applique tel quel sur `6e5b54e7a`. Il copie les deux juges v8 dans
+`tests/chain/` et enregistre 34 CTest à code exact, avec marqueur
+causal :
+
+- **`gate`** (21 tests, 6,6 s) :
+  - fixtures d'égalité et CRL, uniforme 2 000 à K5 ;
+  - mutants du catalogue lu, code 1, `MISSING` ;
+  - mutants de l'élagage q3, code 1, `PRUNE_DISAGREES` ou
+    `PRUNE_DISAGREES_CRL` ;
+  - mutants d'index, code 2, `INDEX_*` ;
+  - arguments invalides.
+- **`scale8000`** (13 tests, 202 s à deux en parallèle) : uniforme,
+  terrain et amas à 8 000 sites, K5 et K10, avec planchers de clés de
+  tête et de strate CRL ; plus un parcours brut q3 comparé à l'élagage.
+
+34/34 sur `f56d64a81`, dont le produit est identique à `6e5b54e7a`.
+
+Limite : ces familles n'ont aucune coquille étendue. Côté catalogue, c'est
+la fixture cosphérique de la porte du condensé qui les couvre.
+
+Question (R-20) : adoptes-tu ces portes ? Une fois adoptées, les copies
+de `tests/chain/` font référence.
+
+GCP non utilisé.

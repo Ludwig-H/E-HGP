@@ -1,0 +1,15 @@
+ 1/13 Test #56: mhgp9_q2_judge_uniform_8000_k5 ............   Passed    9.68 sec
+ 2/13 Test #57: mhgp9_q3_judge_uniform_8000_k5 ............   Passed   13.20 sec
+ 3/13 Test #58: mhgp9_q2_judge_uniform_8000_k10 ...........   Passed   32.86 sec
+ 4/13 Test #60: mhgp9_q2_judge_terrain_8000_k5 ............   Passed    3.25 sec
+ 5/13 Test #59: mhgp9_q3_judge_uniform_8000_k10 ...........   Passed   37.04 sec
+ 6/13 Test #61: mhgp9_q3_judge_terrain_8000_k5 ............   Passed    6.30 sec
+ 7/13 Test #62: mhgp9_q2_judge_terrain_8000_k10 ...........   Passed    6.06 sec
+ 8/13 Test #63: mhgp9_q3_judge_terrain_8000_k10 ...........   Passed   12.76 sec
+ 9/13 Test #64: mhgp9_q2_judge_clusters_8000_k5 ...........   Passed   12.38 sec
+10/13 Test #65: mhgp9_q3_judge_clusters_8000_k5 ...........   Passed   18.58 sec
+11/13 Test #66: mhgp9_q2_judge_clusters_8000_k10 ..........   Passed   59.00 sec
+12/13 Test #67: mhgp9_q3_judge_clusters_8000_k10 ..........   Passed   62.93 sec
+13/13 Test #68: mhgp9_q3_judge_terrain_8000_k10_compare ...   Passed   74.33 sec
+100% tests passed, 0 tests failed out of 13
+Total Test time (real) = 202.02 sec

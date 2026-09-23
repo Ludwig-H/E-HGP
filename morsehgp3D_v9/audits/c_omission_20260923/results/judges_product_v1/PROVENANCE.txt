@@ -1,0 +1,6 @@
+base_testee=f56d64a81619d1edfdbca76adafb4a27aaad4264 (produit identique a 6e5b54e7a, ou le patch s'applique aussi)
+build=Release CPU local, BOOST_ROOT=build/v7_boost_gate/extracted/usr, g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+patch_sha256=40fe6e4ad84c2564b8e1564228a820382a1cab372f8f8bc940c4aeafda4fab3e
+q2_source_sha256=869f9026f252419e322081c9eee535f20a3a5fda37d840ce5e5d319486216075 (copie identique dans tests/chain/)
+q3_source_sha256=09219267ab21ca5c125faa380d0991d61dab6470920269d55b165e62563dc42d (copie identique dans tests/chain/)
+ctest -R '_judge_|sample_judge' -L gate -j4 ; ctest -R '_judge_' -L scale8000 -j2
