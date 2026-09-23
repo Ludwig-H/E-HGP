@@ -43,11 +43,15 @@ intérieurs à toute miniballe positive possédée par `e`.
 Dans [`front.cpp:106–169`](../src/gen/wspd/front.cpp), le produit diagonal
 `X×X` est remplacé par `L×L`, `L×R`, `R×R`, qui partitionnent les paires
 non ordonnées. Un produit disjoint est soit émis, soit partagé selon un
-facteur en deux produits disjoints. L’index certifié porte des sites
-géométriquement distincts ; deux feuilles distinctes ont donc des
-boîtes ponctuelles séparées et finissent émises. Par induction, chaque
-paire non ordonnée a un unique rectangle terminal **avant ses rejets de
-lane**. La file de tâches partage ensuite les rangs `A` en intervalles
+facteur en deux produits disjoints, **ou rejeté** si toutes ses voies
+sont certifiées mortes. L’index certifié porte des sites géométriquement
+distincts ; deux feuilles distinctes ont donc des boîtes ponctuelles
+séparées si leur voie subsiste. Par induction, chaque paire non ordonnée
+suit un chemin unique de produits disjoints : il finit soit par un rejet
+de voie certifié, soit dans un unique rectangle émis. Pour la voie d’une
+boule admissible, le lemme des témoins interdit son rejet à chaque
+étape ; son arête atteint donc un unique rectangle terminal. La file de
+tâches partage ensuite les rangs `A` en intervalles
 disjoints ; un intervalle refusé par la file est développé sur place
 ([`wspd_q34.cpp:457–506`](../src/gen/pipeline/wspd_q34.cpp)). Sur un
 appel réussi, aucune arête résiduelle n’est perdue par le parallélisme.
