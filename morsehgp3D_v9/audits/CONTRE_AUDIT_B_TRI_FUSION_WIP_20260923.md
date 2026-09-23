@@ -29,6 +29,9 @@ de la tour en 1 s sur ces cas. Le nouveau `chain_total`/`chain_cpu_s`
 `times_ms.digest` à la nouvelle mesure ou annoncer clairement la
 frontière différente. Le lecteur v9 contrôle la somme contre le mur
 externe ; il ne transforme pas pour autant les chronos v8 historiques.
+Le digest reste synchrone dans `run_tower_chain` : la latence de cet appel
+est donc au moins `chain_total + digest`, même si la construction de la
+tour en mémoire s'achève avant le digest.
 
 ## Résidence mémoire et échecs
 
