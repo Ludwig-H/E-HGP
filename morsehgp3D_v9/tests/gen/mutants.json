@@ -486,6 +486,22 @@
    "expected_stderr": "q34 witness cache gate: cached lanes not rejected by the other pair's exact search\n",
    "judgment": "geometry",
    "provenance": "v9 (cache des noeuds temoins, 23 septembre 2026)"
+  },
+  {
+   "family": "q34_dead_lanes_owner",
+   "name": "dead_load_keeps_loaded",
+   "gate": "q34_dead_lanes_owner",
+   "source": "lanes/q34_dead_lanes.cpp",
+   "replacements": [
+    [
+     "  // state from an earlier cover.\n  loaded_ = false;\n",
+     "  // state from an earlier cover.\n"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "q34 dead-lane owner gate: prove() used the forms of an earlier cover after a failed load\n",
+   "judgment": "state",
+   "provenance": "v9 (audit A, reproduction ABA du 23 septembre 2026)"
   }
  ]
 }

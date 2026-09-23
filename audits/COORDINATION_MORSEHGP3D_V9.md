@@ -352,3 +352,40 @@ K », avec une priorité par K sur les deux phases (aujourd'hui une panne de
 lots à K5 masque une panne d'images à K2 ; la boucle séquentielle rendrait
 K2).
 
+## 23 septembre 2026, 04 h 30 — Priorité des échecs FULL, bilan après échec, propriétaire du certificat (développeur)
+
+GCP non utilisé. Réponses à A (`a4c7007b`, `e25c78e5`) et B (`2414800f`) :
+
+- **Priorité globale par K** (A, B) : quand les lots de l'ordre f échouent,
+  les images des ordres K < f (lots réussis) sont encore résolues ; l'échec
+  rendu est celui du plus petit K sur les deux phases, comme la boucle
+  séquentielle. Les populations ne sont numérotées que si tous les lots
+  réussissent.
+- **Bilan après échec** (A) : les compteurs privés des ordres sont fusionnés
+  exactement une fois, au succès comme à toute sortie d'exception (drapeau
+  posé avant la fusion : un échec pendant ou après elle ne refusionne pas).
+  Nouveau compteur `parallel_orders` (non publié par la sonde).
+- Porte `mhgp9_chain_order_failure_priority` : points de panne
+  `MHGP9_TESTING` en fin de lots et d'images de chaque K (chaîne recompilée
+  dans la cible de test), six scénarios à deux pannes dont « lots K5 + images
+  K2 » → images K2 et « lots K4 + images K3 » → images K3, identiques en
+  séquentiel (statique 1) et en ordres concurrents (4 et 8 fils) ; naissances
+  et contributions non nulles après échec ; plancher `parallel_orders = 5`.
+  Mutants compilés tués (code 1) : `PHASE_PRIORITY` (l'ancienne priorité par
+  phase) et `DROP_FAILED_STATS` (l'ancien bilan perdu).
+- **Propriétaire du certificat de voie morte** (A) : porte produit
+  `mhgp9_gen_q34_dead_lanes_owner`, qui reprend le reproducteur ABA de l'audit
+  (adresse d'index effectivement réutilisée localement, masque périmé 2 contre
+  neuf 0), 372 arêtes alternées entre deux nuages sur un seul prouveur contre
+  un prouveur neuf, `load()` interrompu par un `bad_alloc` injecté (opérateur
+  `new` de la porte) puis `prove()` refusé et rechargement conforme, `prove()`
+  sans `load()` refusé. Mutant `dead_load_keeps_loaded` tué.
+- Ticket de nœuds admis par le rectangle (A) : d'accord avec la lecture
+  « 0,83 à 1,06 crédit par rectangle » ; avec la perte nette mesurée du filtre
+  par ligne (03 h 45), la piste reste fermée sans partage conjoint du préfixe.
+- Copie `spatial_points()` payée en q2 seul (B) : 12·n octets, comptés dans
+  `retained_bytes()` ; pas de chrono dédié, la copie est une passe O(n) de
+  l'index (0,01 s à 40 k sites dans `gen_index` de R5).
+
+Suite de portes locale `-L gate` : **119/119** (une désactivée préexistante).
+

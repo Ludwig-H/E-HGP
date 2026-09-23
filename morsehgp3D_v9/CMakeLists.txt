@@ -133,6 +133,26 @@ foreach(kind IN ITEMS historical line12 shell14 spatial12 rejects)
 endforeach()
 # Voies de resolution de la tour sur un nuage de 1 500 sites : temporelle et
 # statique 1/4/8 fils, meme tour ; le tri parallele des requetes y est exerce.
+# Priorite des echecs de la tour (plus petit K sur les phases A et C) et
+# travail paye compte apres echec : points de panne MHGP9_TESTING, chaine
+# recompilee dans la cible de test (le generateur ne voit pas la tour).
+mhgp9_test_executable(mhgp9_chain_order_failure_priority_gate
+                      tests/chain/order_failure_priority_gate.cpp src/chain/tower_chain.cpp)
+target_link_libraries(mhgp9_chain_order_failure_priority_gate PRIVATE mhgp9_gen)
+mhgp9_gate(mhgp9_chain_order_failure_priority 0 mhgp9_chain_order_failure_priority_gate
+           ARGS --selftest LABELS "gate;chain;tower" TIMEOUT 300)
+foreach(mutant IN ITEMS PHASE_PRIORITY DROP_FAILED_STATS)
+  string(TOLOWER ${mutant} lower)
+  mhgp9_test_executable(mhgp9_chain_order_failure_${lower}_mutant_gate
+                        tests/chain/order_failure_priority_gate.cpp src/chain/tower_chain.cpp)
+  target_link_libraries(mhgp9_chain_order_failure_${lower}_mutant_gate PRIVATE mhgp9_gen)
+  target_compile_definitions(mhgp9_chain_order_failure_${lower}_mutant_gate
+                             PRIVATE MHGP9_FULL_ORDERS_MUTANT_${mutant}=1)
+endforeach()
+mhgp9_gate(mhgp9_chain_order_failure_mutant_phase_priority 1 mhgp9_chain_order_failure_phase_priority_mutant_gate
+           ARGS --selftest EXPECT_PREFIX "cause=priority" LABELS "gate;chain;tower;mutant" TIMEOUT 300)
+mhgp9_gate(mhgp9_chain_order_failure_mutant_drop_failed_stats 1 mhgp9_chain_order_failure_drop_failed_stats_mutant_gate
+           ARGS --selftest EXPECT_PREFIX "cause=ledger.paid_work_lost" LABELS "gate;chain;tower;mutant" TIMEOUT 300)
 mhgp9_product_executable(mhgp9_chain_static_paths_gate tests/chain/chain_static_paths_gate.cpp)
 target_link_libraries(mhgp9_chain_static_paths_gate PRIVATE mhgp9_chain)
 mhgp9_gate(mhgp9_chain_static_paths 0 mhgp9_chain_static_paths_gate
@@ -209,7 +229,8 @@ function(mhgp9_gen_gate gate labels)
 endfunction()
 foreach(gate IN ITEMS wspd_q34 q4_local q4_seed_cells q4_saturating_atlas q3_ball_census
     exact_ball q34_witness_search q34_pair_bounds q34_cover q2_census wspd_front
-    q2_prepared_bounds q2_joint_bounds q4_family q34_seed wspd_front_jobs q34_witness_cache)
+    q2_prepared_bounds q2_joint_bounds q4_family q34_seed wspd_front_jobs q34_witness_cache
+    q34_dead_lanes_owner)
   mhgp9_gen_gate(${gate} "gate;gen;oracle")
 endforeach()
 foreach(gate IN ITEMS wspd_q2_census u18_numeric_domain q2_node_pool q2_terminal_pool

@@ -53,6 +53,7 @@ struct FullBallStats {
   u64 static_lanes_used = 0, static_peak_retained_bytes = 0;
   u64 static_peak_seed_bytes = 0, static_peak_group_bytes = 0, static_peak_worker_bytes = 0;
   u64 static_batch_calls = 0, static_peak_batch_bytes = 0;
+  u64 parallel_orders = 0;  // orders built by the concurrent static path
   // False after a backend failure whose paid work could not be recovered.
   bool static_batch_work_known = true;
   AnchorMebWork validation_work, resolve_work;
@@ -115,6 +116,27 @@ struct Failure { FullBallStatus status; const char* reason; };
 inline void require(bool ok, const char* reason, FullBallStatus status = FullBallStatus::kInvariantViolated) {
   if (!ok) throw Failure{status, reason};
 }
+#if defined(MHGP9_TESTING)
+// Test failpoints, never compiled in a product target: bit K-1 makes order K
+// fail at the end of its lots (A) or of its vertical images (C). The
+// sequential path checks both at the end of order K, lots first.
+inline std::atomic<u32> failpoint_lots{0}, failpoint_images{0};
+inline void failpoint(const std::atomic<u32>& mask, bool lots, unsigned k) {
+  static constexpr const char* kLots[] = {"failpoint_lots_k1", "failpoint_lots_k2", "failpoint_lots_k3",
+      "failpoint_lots_k4", "failpoint_lots_k5", "failpoint_lots_k6", "failpoint_lots_k7", "failpoint_lots_k8",
+      "failpoint_lots_k9", "failpoint_lots_k10"};
+  static constexpr const char* kImages[] = {"failpoint_images_k1", "failpoint_images_k2", "failpoint_images_k3",
+      "failpoint_images_k4", "failpoint_images_k5", "failpoint_images_k6", "failpoint_images_k7",
+      "failpoint_images_k8", "failpoint_images_k9", "failpoint_images_k10"};
+  if (k >= 1 && k <= 10 && ((mask.load() >> (k - 1)) & 1U)) throw Failure{FullBallStatus::kInvariantViolated,
+                                                                          lots ? kLots[k - 1] : kImages[k - 1]};
+}
+inline void failpoint_after_lots(unsigned k) { failpoint(failpoint_lots, true, k); }
+inline void failpoint_after_images(unsigned k) { failpoint(failpoint_images, false, k); }
+#else
+inline void failpoint_after_lots(unsigned) {}
+inline void failpoint_after_images(unsigned) {}
+#endif
 inline void add(u64& count, u64 amount = 1) {
   require(amount <= std::numeric_limits<u64>::max() - count, "full_ball_counter_overflow",
           FullBallStatus::kResourceExhausted);
@@ -349,6 +371,8 @@ class Builder {
       u64 live = 0;
       for (u64 next : current.next) if (next == absent) ++live;
       require(live == 1, "full_ball_final_component_count");
+      failpoint_after_lots(k);
+      failpoint_after_images(k);
       drafts.push_back(std::move(draft));
       lower_history = std::move(current);
       lower_anchors = std::move(anchors);
@@ -440,26 +464,42 @@ class Builder {
         o.static_targets.swap(static_targets);
       }
     }
-    // A Failure in some order is reported for the SMALLEST K, as the
-    // sequential loop would (other exceptions propagate as before).
+    // A Failure is reported for the SMALLEST K over both phases, as the
+    // sequential loop would: when the lots of order f fail, the images of
+    // the orders below f (whose lots all succeeded) are still resolved.
+    // Other exceptions propagate as before. The private counters of every
+    // order are merged exactly once, on success and on every exit.
     std::vector<std::optional<Failure>> failures(kmax);
-    const auto rethrow_first = [&] {
-      for (auto& failure : failures) if (failure) throw *failure;
+    bool merged = false;
+    const auto merge_once = [&] {
+      if (merged) return;
+      merged = true;
+      for (auto& o : orders) merge_order_stats(o.st);
+      add(st.parallel_orders, kmax);
     };
-    parallel_items(kmax, geometry_threads, [&](size_t i, size_t) {
-      try { order_lots(orders[i]); } catch (const Failure& f) { failures[i] = f; }
-    });
-    rethrow_first();
-    assign_populations(orders);
-    parallel_items(kmax, geometry_threads, [&](size_t i, size_t) {
-      try { order_images(orders[i], i ? &orders[i - 1] : nullptr); } catch (const Failure& f) { failures[i] = f; }
-    });
-    rethrow_first();
-    std::vector<Draft> drafts;
-    for (auto& o : orders) {
-      merge_order_stats(o.st);
-      drafts.push_back(std::move(o.draft));
+    try {
+      parallel_items(kmax, geometry_threads, [&](size_t i, size_t) {
+        try { order_lots(orders[i]); } catch (const Failure& f) { failures[i] = f; }
+      });
+      size_t lots_done = 0;
+      while (lots_done < kmax && !failures[lots_done]) ++lots_done;
+#if defined(MHGP9_FULL_ORDERS_MUTANT_PHASE_PRIORITY)
+      if (lots_done != kmax) lots_done = 0;  // mutant: a lot failure masks lower images
+#endif
+      if (lots_done == kmax) assign_populations(orders);
+      parallel_items(lots_done, geometry_threads, [&](size_t i, size_t) {
+        try { order_images(orders[i], i ? &orders[i - 1] : nullptr); } catch (const Failure& f) { failures[i] = f; }
+      });
+      for (auto& failure : failures) if (failure) throw *failure;
+      merge_once();
+    } catch (...) {
+#if !defined(MHGP9_FULL_ORDERS_MUTANT_DROP_FAILED_STATS)
+      merge_once();
+#endif
+      throw;
     }
+    std::vector<Draft> drafts;
+    for (auto& o : orders) drafts.push_back(std::move(o.draft));
     decltype(orders)().swap(orders);
     return finish(drafts);
   }
@@ -631,6 +671,7 @@ class Builder {
     u64 live = 0;
     for (u64 next : o.current.next) if (next == absent) ++live;
     require(live == 1, "full_ball_final_component_count");
+    failpoint_after_lots(o.k);
   }
 
   void assign_populations(std::vector<OrderState>& orders) {
@@ -687,6 +728,7 @@ class Builder {
         ++node;
       }
     require(node == o.current.levels.size(), "full_ball_image_node_count");
+    failpoint_after_images(o.k);
   }
 
  private:

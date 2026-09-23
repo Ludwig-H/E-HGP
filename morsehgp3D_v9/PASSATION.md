@@ -105,6 +105,12 @@ redevient le premier poste (65 à 70 % à K5). Filtre par ligne a × B
 (proposition B) prototypé : perte nette, écarté (coordination, 23 septembre
 03 h 45).
 
+Échecs de la tour : priorité au plus petit K sur les phases A et C (comme la
+boucle séquentielle) et bilan de travail fusionné une fois même après échec
+(porte `mhgp9_chain_order_failure_priority`, deux mutants compilés). Porte
+produit du propriétaire du certificat (`mhgp9_gen_q34_dead_lanes_owner` : ABA,
+`load()` interrompu).
+
 Suite : coût q3/q4 (filtre de paires, certificat, atlas) ; seuil K−2 des
 arêtes q4 seules ; équilibrage de la tour K10 (plus gros ordre).
 
