@@ -3673,8 +3673,27 @@ dans `work.cover.*` ; le temps phase3 le contient, mais le ledger est
 logique et le pic GPU séparé. Mesurer reports, reconstructions, RSS/HBM
 et vrais chronos G4, et ne pas prétendre que S3 seul ferme 1 s.
 
-Enfin, la sonde produit WIP annonce `mhgp9_tower_probe_v18`, tandis
-que `gcp-migration/tower_worker_v9.py` et le runner LiDAR exigent
-toujours **v17**. Toute nouvelle session G4 lancée avant mise à jour
-des lecteurs/contrats serait rejetée ou non qualifiante. R12 publié
-reste inchangé ; ce signal concerne seulement le diff mutable S3.
+Le développeur a maintenant porté la sonde, le worker G4, son selftest
+et le runner LiDAR en **v18 dans son diff non publié**. Cela clôt le
+simple décalage de numéro, pas la réception S3. Contre-fixture B du
+worker courant : `survivors=deferred=3`, `certificate_device_ms=0,02`,
+`validate_probe=complete_relative`, puis `gpu_completed_cases=[0]`.
+Toutes les arêtes peuvent donc être reprises sur CPU alors que le cas
+est classé `GPU_executed`. Il faut distinguer S2 GPU, S3 GPU **décidé**
+et tour GPU, avec compteur positif de décisions S3. Le gate chaîne
+compare les tailles, non les IDs des coquilles ; le condensé v18 du
+catalogue améliore le contrôle final mais ne remplace pas le
+différentiel littéral sur petites portes. Avant G4, réparer aussi le
+lot CUDA vide et la feuille multi-site, puis juger réellement le noyau
+CUDA sur u18/LiDAR. R12 publié reste inchangé.
+
+**Ordre économique :** S3 déplace sur GPU une masse déjà énorme : R12
+sans sol 08/000000/K10 porte environ 1,394 Md visites cœur+cover et
+5,232 Md tests uniformes ; le noyau garde une DFS par arête/warp.
+Évaluer un certificat exact partagé **avant** les cœurs pour réduire
+ces masses, tuiler S2→S3 avec index GPU résident et budget mémoire,
+puis accélérer aussi atlas, q3/q4 et FULL. L'actuel S2 refuse
+`P>2³¹−1` et matérialise rectangles, paires et survivants ; ce plafond
+de représentation empêche l'échelle de plusieurs dizaines de millions
+sans tuilage. Réduire les recherches binaires/validations répétées est
+utile mais ne change pas à soi seul la pente du travail.

@@ -225,11 +225,14 @@ signale avant G4 le lot CUDA vide avec pointeur nul, une feuille
 multi-site acceptée par la garde brute malgré le contrat du cover,
 les slabs de 3,25 Mio par warp au défaut, et le cover CPU reconstruit
 sur les arêtes encore ouvertes sans compteur physique séparé. La
-sonde du diff émet v18 alors que les lecteurs G4/LiDAR attendent v17 :
-aucune session S3 ne doit être présentée comme qualifiée avant raccord
-et nouveaux tests. Le backend GPU d'un lot vide n'attesterait que le
-préflight, pas une exécution S3 ; séparer les deux marqueurs comme en
-S2. R12 publié n'est pas touché.
+sonde, le worker G4, son selftest et le lecteur LiDAR passent en v18
+dans le **diff mutable**, pas encore dans un reçu qualifié. Le worker
+WIP accepte cependant un cas où les trois survivants sont tous
+`deferred` vers le CPU et le marque `GPU_executed` : temps device et
+préflight ne prouvent pas une décision GPU utile. Exiger le nombre
+d'arêtes réellement décidées et un différentiel CUDA par arête. La
+porte de chaîne compare encore les tailles, pas les IDs des coquilles,
+et seulement une partie du travail logique. R12 publié n'est pas touché.
 Les [demi-scènes et quarts aux trois densités](lidar_raw_physical_scaling_20260923/README.md)
 restent dans le reçu v12 ; la somme de leurs tours ne reconstruit pas le
 plein. Une scène/K5/CPU ne prouve ni sous-quadraticité, ni contrat G4.

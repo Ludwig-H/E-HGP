@@ -13,6 +13,8 @@ Le port hôte `gpu/certificate.hpp` suit à la lecture l'ordre des plages, les b
 
 Le slab S3 vaut exactement `52×capacity` octets **par warp** : `2u32` de plages, trois `i64` de formes et cinq `u32` de frontières par site. Le défaut `capacity=65536` donne **3,25 Mio par warp** ; le lanceur peut demander jusqu'à 16 warps par SM et un quart de la mémoire GPU libre en slabs. Il faut publier histogrammes `max(core_sites,cover_sites)`, fraction et coût des reports CPU, nombre réel de warps et pic HBM sur brut/sans-sol, K5/K10. Le contrat de dizaines de millions exige en plus des sorties par lots : le S3 provisoire téléverse toujours les tableaux de toutes les arêtes, et l'appel répète la garde `3Σ|plage(v)|` et la copie de l'index après S2. Réutiliser l'index certifié/chargé est une optimisation de chaîne, pas une modification de la preuve.
 
+Le noyau donne une arête par warp persistant. La construction du cœur/cover et la descente des cellules restent des parcours **uniformes dans les 32 voies** ; seuls les chargements de formes et les scans des frontières répartissent effectivement les sites. Le scheduling masque des arêtes courtes, mais ne réduit pas la masse de la **classe** des arêtes lourdes : sur le brut K5, les 1 % plus gros cœurs des arêtes traversantes ne portent que 3,0 % de leur masse et les 10 % en portent 27,7 % ([reçu apparié](edge_matched_core_20260923/README.md)). Le [reçu brut K10](lidar_raw_k10_density_20260923/full.stdout) compte sur 08/000000 **1 242 755 011** visites de nœuds pour le cœur, **720 414 128** pour le cover, puis **2 383 439 336** et **4 376 234 522** tests uniformes respectifs. Dans le [reçu G4 R12](../receipts/g4_tower_r12_20260923/README.md), le sans-sol 08/000000 représente encore environ **540,6 M** visites cœur+cover et **1,458 Md** tests uniformes à K5 ; **1,394 Md** visites et **5,232 Md** tests à K10. Ce sont des **comptes logiques du moteur antérieur**, ni des mesures S3 GPU ni des durées. Profiler registres/spills `ptxas`, occupation, histogrammes p50/p95/p99/max des sites/visites/cellules par arête, et temps de la queue ; déplacer ce travail sur G4 ne le rend pas sous-quadratique. Le filtre S2 paie encore deux recherches binaires de rectangle par paire (filtrage et dispersion, `O(P log R)`) et refuse `P>2³¹−1` au lieu de tuiler : blocage architectural pour les dizaines de millions, pas plafond mathématique.
+
 Le raccord `Engine::certified_edge` reconstruit sur CPU le cover des arêtes dont au moins une voie reste ouverte après S3, nécessaire à l'atlas et à la génération. Sur le sans-sol 08/000000 du reçu de phases, cela concernerait **708 686** arêtes K5 et **1 463 362** K10, et non tous les 900 377/1 934 399 covers initialement construits. `edges_ns` paie cette reconstruction, mais `work.cover.*` garde les **comptes logiques** du certificat GPU et ne la recompte pas ; les pics `peak_edge_buffer_bytes` excluent les slabs HBM et les cœurs GPU fermés ne passent plus par `observe`. Séparer travail physique CPU/GPU, pics RSS/HBM et ledger logique avant de comparer les coûts. Les identités agrégées de masques/compteurs du nouveau `check_certificate_batch` ne certifient pas chaque décision : exiger par arête le différentiel CPU/GPU et catalogue/tour clé par clé. Un `CertificateOutput.available=true` peut coexister avec une erreur d'allocation ou device capturée ; le bridge doit refuser **`error` non vide et `faults>0`**, pas seulement tester `available`.
 
 Le gate de chaîne WIP conserve dans son flux comparé les coefficients de
@@ -39,4 +41,21 @@ la séparation déjà introduite pour S2 entre préflight et nombre de
 cas/arêtes S3 effectivement achevés ; imposer un mutant « zéro arête,
 préflight GPU vrai, exécution S3 fausse » au lecteur G4 futur.
 
-Enfin, la sonde `bench/tower_probe.cpp` du diff annonce déjà `mhgp9_tower_probe_v18`, tandis que `gcp-migration/tower_worker_v9.py` et `bench/run_lidar_scaling.py` exigent encore **v17**. Sans adaptation du worker, du lecteur hôte, des selftests et des recettes, une session G4 S3 serait rejetée ou non qualifiante. Ne pas lancer de VM sur ce paquet mutable ; fermer d'abord cette porte locale. Le nouveau certificat S3 ne règle de toute façon pas seul le budget : R12 K5 laisse encore 1,177/1,388/1,513 s de chaîne si l'on retire fictivement **tous** les survivants et que les autres phases restent inchangées.
+Le worker v18 **WIP** corrige à présent la version et les leviers du
+protocole G4, mais son marqueur `GPU_executed` reste lié au levier, pas au
+nombre de certificats réellement **décidés** sur GPU. Contre-exemple
+local du lecteur : `survivors=deferred=3`, backend GPU et temps device
+positif satisfont `validate_probe`, puis `gpu_completed_cases` marque
+le cas GPU ; toutes les arêtes peuvent pourtant être reprises par le CPU.
+Reproduction sans appareil ni donnée LiDAR : construire le premier cas
+de `tower_snapshot_v9.default_plan()` avec
+`tower_selftest_v9.FAKE_PROBE`, poser
+`q34_batch.deferred=q34_batch.survivors`, puis appeler dans cet ordre
+`tower_worker_v9.validate_probe(value,case,0)` et
+`gpu_completed_cases([case],[{"outcome":"complete_relative"}])`.
+Lecture B sur le diff courant : `3 0.02 complete_relative [0]` pour
+`survivors`, `certificate_device_ms`, validation et liste GPU.
+Publier `certificate_decided_edges`/lancements réels et distinguer
+« filtre GPU », « certificat GPU utile » et « tour complète GPU ».
+
+Enfin, la sonde `bench/tower_probe.cpp` du diff annonce `mhgp9_tower_probe_v18`. Le worker, son selftest et le lecteur LiDAR ont été adaptés **dans le diff mutable** pendant cette contrelecture ; ce raccord n'est pas encore un commit ni un reçu, et la porte chaîne reste insuffisante sur les IDs des coquilles et le travail complet. Ne pas lancer de VM sur ce paquet mutable ; fermer d'abord les portes locales et les deux défauts d'entrée. Le nouveau certificat S3 ne règle de toute façon pas seul le budget : R12 K5 laisse encore 1,177/1,388/1,513 s de chaîne si l'on retire fictivement **tous** les survivants et que les autres phases restent inchangées.
