@@ -1,7 +1,9 @@
 # Certificat B — paires de gardes pour tout un rectangle WSPD q3/q4
 
-23 septembre 2026. Proposition **mathématiquement exacte mais non portée ni
-mesurée**. Elle relève le [certificat ponctuel de A](paired_guards_precore_20260923/README.md)
+23 septembre 2026. Proposition **mathématiquement exacte mais non portée**.
+Un [shadow local ultérieur](rect_pair_shadow_b_20260923/README.md) en a
+mesuré la première palette bornée, sans gain intégré de chaîne.
+Elle relève le [certificat ponctuel de A](paired_guards_precore_20260923/README.md)
 du niveau d'une arête `ab` à **toutes les arêtes réelles d'un rectangle**
 `A×B`. L'objectif est de décider avant le cœur, et si possible avant
 l'expansion du produit, sans histogrammes quadratiques par facteur.
@@ -205,3 +207,14 @@ augmenter. Un budget constant par segment ne démontre pas une borne
 sous-quadratique si le nombre de segments, l'expansion restante ou
 l'aval croissent trop vite. Aucun contrat 1 s/100 ms ni dizaines de
 millions de points n'est acquis par cette preuve seule.
+
+**Mise à jour du shadow :** sur tous les 1 747 rectangles ouverts
+`|A||B|≥1 024` de la trame brute 08/000000/K5/s8, cette palette
+commune ferme complètement 72 des 299 rectangles ayant des
+survivantes S2, soit 5 059 809 des 559 661 741 formes du cœur
+(0,904 %). Un appariement maximum n'ajoute que trois fermetures
+positives au glouton. Les 979 rectangles supplémentaires fermés
+avaient déjà un segment S2 vide : ils pourraient réduire le coût S2,
+pas le cœur. Le shadow paie 26,845 millions de couples de coins et
+ne mesure aucun gain moteur/G4. Le résultat borne **cette palette et
+ce budget**, non le théorème ou les variantes adaptatives.

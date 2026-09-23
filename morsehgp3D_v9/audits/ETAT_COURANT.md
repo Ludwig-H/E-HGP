@@ -479,8 +479,21 @@ un essai au front demande un déclencheur pré-S2 différent. À palette
 64, l'essai exhaustif de paires et coins pourrait coûter **1,442 Md**
 de tests sur ces segments : sélection bornée, crible et arrêt précoce
 sont des conditions de viabilité, non des optimisations facultatives.
-Aucune sélectivité sur rectangles, borne de croissance ou vitesse G4
-n'est encore mesurée.
+Le [shadow B sur les rectangles réels](rect_pair_shadow_b_20260923/README.md)
+mesure maintenant **tous les 1 747** rectangles ouverts de produit
+`|A||B|≥1 024` de cette trame brute K5/s8 : seuls 299 ont des
+survivantes S2. Avec 32 gardes proposés au maximum et appariement
+exact, **72** de ces 299 segments ferment complètement, soit
+**2 175 arêtes et 5,060 M / 559,662 M formes du cœur global
+(0,904 %)** potentiellement évitables. Les **979** autres fermetures
+portent des segments déjà vides après S2 : elles pourraient réduire
+S2 mais non le cœur. Le crible paie **26,845 M** couples de coins
+sur hôte CPU partagé, sans gain de chaîne mesuré. Le glouton manque
+trois fermetures positives ; l'amélioration de matching seule ne
+renverse pas la sélectivité. C'est un résultat négatif pour **cette
+palette uniforme et ce budget**, pas pour la preuve ni pour des
+rectangles subdivisés ou des tuiles d'arêtes. Ni borne de croissance
+ni vitesse G4 n'est mesurée.
 Le [diagnostic de routage pré-cœur](paired_guard_dispatch_grid_20260923/README.md)
 lit les **3 986 433** survivantes S2 du plein brut 08/000000/K5.
 `D≥2²³` et une cellule du milieu de 4,096 m occupée par au moins
@@ -1567,6 +1580,16 @@ vectoriel/plat, forme invalide, RSS/allocation ou chrono G4 n'est jointe
 au port. Les lots groupés allouent encore une action temporaire.
 Le point est **source seulement**, non un échec exécuté ni une erreur
 géométrique démontrée sur la sortie interne valide.
+Le [reçu plat local](CONTRE_AUDIT_B_RECU_BROUILLON_PLAT_LOCAL_20260923.md)
+du commit développeur `5f36d5536` passe 11/11 SHA pour cinq couples
+sur la seule trame sans sol 08/000000, W8/s8. À digest FULL, comptes
+d'ordres et travail FULL égaux, la tour K5 gagne 1,7–4,3 % ; une
+seule paire K10 exploitable passe de 14,705 à 11,327 s. Les résultats
+sont `complete_relative`, sans catalogue clé par clé ni payload FULL
+archivé. L'affirmation 152/152 portes n'est pas accompagnée du log,
+les binaires n'ont que des préfixes SHA et aucune commande n'est
+épinglée. Le défaut de forme CSR subsiste dans ce paquet ; aucun
+résultat G4 du chemin plat n'est publié.
 
 La [réduction de la phase A en graphe
 temporel](PHASE_A_GRAPHE_TEMPOREL_20260923.md) retrouve exactement

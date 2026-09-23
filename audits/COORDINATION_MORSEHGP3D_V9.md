@@ -4584,3 +4584,46 @@ flat/vector et entrées CSR mal formées sous sanitizers. La factory
 interne valide ne ferme pas à elle seule l'API publique. Les lots
 groupés gardent une action temporaire ; mesurer leur part et RSS.
 Source-only, pas de crash revendiqué, pas de qualification G4.
+
+### 22 h 09 UTC — Auditeur B : shadow complet des paires de gardes par rectangle
+
+Le [code, lecteur et résultat borné](../morsehgp3D_v9/audits/rect_pair_shadow_b_20260923/README.md)
+portent sur **tous** les 1 747 rectangles WSPD ouverts
+`|A||B|≥1 024` de la trame **brute entière** 08/000000/K5/s8
+1 mm. Seuls 299 ont des survivantes S2. La palette commune à
+32 sites, cherchée par index sous quatre budgets de 128 pops, puis
+testée par 64 coins exacts et matching maximum, ferme **72** de ces
+299 rectangles : **2 175 arêtes** et **5,060 M/559,662 M** formes
+du cœur de la trame (0,904 %) *potentiellement* évitables. Les 979
+autres rectangles fermés sont déjà vides après S2 : leur produit
+4,034 M peut intéresser S2, pas le cœur. Le shadow paie 26,845 M
+coins et 0,690 s d'essais mono sur hôte partagé, **sans** front ni
+gain de chaîne. Le matching optimal n'ajoute que trois fermetures
+positives au glouton ; la même palette singleton n'en ferme aucune.
+
+Je déconseille donc le port de **cette configuration uniforme** comme
+solution au cœur. Le test des 64 coins est déjà exact sur les boîtes
+continues pour une paire fixe ; un calcul plus rapide ne changera pas
+la sélectivité. Comparer ensuite, sur les **mêmes 299 segments positifs**
+comme diagnostic oracle, subdivisions A/B adaptatives avec palette
+héritée et tests ponctuels par arête pour isoler la perte due aux
+boîtes, puis payer la sélection sur **tous** les rectangles tentés dans
+une politique pré-S2 réelle. Les groupes de 3 gardes ou les domaines
+de centres par cellules sont des hypothèses mathématiques distinctes
+à tester sous budget strict, jamais des gains acquis. Repli exact et
+masques q3/q4 séparés obligatoires ; aucun résultat sous-quadratique/G4.
+
+### 22 h 10 UTC — Auditeur B : contrelecture du reçu FULL plat local
+
+Le [reçu](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_RECU_BROUILLON_PLAT_LOCAL_20260923.md)
+du commit développeur local `5f36d5536` passe ses 11/11 SHA et
+contient cinq couples sur **une seule trame sans sol** W8/s8, pas
+une campagne G4. K5 FULL gagne 1,7–4,3 % ; la seule paire K10
+exploitable fait 14,705→11,327 s, avec phase A 2,706→1,464 s.
+La seconde base K10 est aberrante sous contention. Les bras ont
+digest FULL, comptes et travail FULL égaux, mais le payload et les
+clés ne sont pas archivés ; les binaires n'ont que des préfixes SHA,
+les commandes et logs des « 152/152 » portes manquent. Le verrou
+CSR public signalé ci-dessus demeure au commit du reçu. Merci de
+garder la mesure comme signal local, de fermer cette frontière et de
+faire une ablation G4 propre avant d'en déduire un gain contractuel.
