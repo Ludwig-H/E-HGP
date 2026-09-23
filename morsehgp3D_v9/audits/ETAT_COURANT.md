@@ -37,8 +37,8 @@ FULL](CONTRE_AUDIT_B_FULL_COUTS_ET_INTERFACES_20260922.md).
 `inside≥K−1` et filtre le tri des niveaux FULL en arrondi au plus proche,
 avec repli exact pour les niveaux proches. La [contrelecture
 B](CONTRE_AUDIT_B_PORT_V3_SATURATION_TRI_20260923.md) ne trouve pas de
-défaut d'exactitude dans ces deux chemins ; le commentaire de
-`ChainOptions` qui dit encore « désactivée par défaut » est périmé.
+défaut d'exactitude dans ces deux chemins ; `ChainOptions` décrit désormais
+correctement le défaut v9 actif.
 L'auteur annonce sur 08/000100 K5/W8 un temps q3/q4 97,7→72,1 s et
 des digests K5/K10 inchangés, sans reçu local apparié versionné.
 Le ledger v9 contient le travail physique total de partition, préfixes
@@ -47,13 +47,12 @@ saturés inclus **une fois**, mais n'exporte pas les compteurs spécifiques
 `unvisited_site_mass` et `discarded_frontier_ids` : publier ces nombres
 pour expliquer le gain, en gardant `saturation_work.prefixes` comme
 **sous-ensemble** de `work.partition`, jamais comme terme additionnel.
-`0b29b6c3` choisit par défaut le résolveur FULL statique avec W fils si
-W>1 ; le test de chaîne compare déjà les payloads exacts W1/W4 sur de
-petits nuages. La [contrelecture B](CONTRE_AUDIT_B_PORT_V3_SATURATION_TRI_20260923.md)
-montre que le plan G4 passe `--static` explicitement et ne mesure donc pas
-ce nouveau défaut. Vérifier en porte le nombre **effectif** publié, le
-défaut contre `--static=0`, et refuser toute valeur négative autre que
-la sentinelle `-1` ; aucun nouveau chrono G4 n'est acquis.
+`0b29b6c3` a choisi par défaut le résolveur FULL statique avec W fils si
+W>1 ; le test de chaîne comparait les payloads exacts W1/W4 sur de
+petits nuages. Le [plan G4](CONTRE_AUDIT_B_PORT_V3_SATURATION_TRI_20260923.md)
+épingle `--static` explicitement : les reçus R1–R5 ne qualifient pas
+séparément le chemin de défaut. Les portes d'API et les refus de valeurs
+négatives restent à lire sur le code courant, sans requalifier ces reçus.
 
 Un rejeu indépendant local de `d2700314` passe **20/20 CTests** sans saut ;
 B retrouve ces 20 portes en Release et sous Clang ASan/UBSan. Le commit
@@ -620,6 +619,11 @@ appariée.
    publié séparément. À K10, les présentations ne contiennent que
    **2–13 doublons** pour 4,38–5,51 M clés selon la trame, sans transférer
    ce ratio à des captations superposées.
+   La [borne structurelle R5/K10](CONTRAT_COUTS_ET_PARALLELISATION.md)
+   donne déjà **770–968 Mio** pour cinq tableaux de sortie FULL sur ces
+   seules trames de 35–46 k sites, hors banque et catalogue ; prévoir une
+   représentation/export par fenêtres pour le régime massif, avec coût
+   et identité comptés.
    Une [piste exacte pour les intrus](INTRUS_FULL_PREFIXE_EXACT_20260923.md)
    réutilise, par BallKey, un préfixe complet d'intérieurs Morton ; son
    [oracle combinatoire](check_full_intruder_prefix_20260923.py) passe

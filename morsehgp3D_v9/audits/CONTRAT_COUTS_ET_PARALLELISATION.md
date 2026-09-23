@@ -91,6 +91,24 @@ prévoir des IDs et une représentation de catalogue/tour au-delà des
 vecteurs actuels avant de qualifier le régime de plusieurs dizaines de
 millions de sites.
 
+La **sortie FULL elle-même** est déjà volumineuse, indépendamment du
+catalogue. Les JSON R5/K10 comptent, selon les scènes 000000/000100/000200,
+7,426/5,954/7,468 M nœuds et 4,414/3,548/4,467 M contributions. Sur
+l'ABI du reçu, les cinq tableaux retenus `nodes`, `parents`,
+`successors`, `contributions`, `lower_nodes` occupent au minimum
+**960,0 / 770,4 / 967,6 Mio** : la formule est
+`80·nodes + 8·parents + 80·contributions` octets (`FullNode=64`,
+`FullNodeId=8`, `FullDatedContribution=80`). Elle exclut la banque de
+populations et ses IDs, les capacités supplémentaires et les buffers de
+construction. Sur 000000/K10, le catalogue publié ajoute déjà
+**1 234 838 080 octets** logiques de `BallData` ; ces deux volumes sont
+co-résidents lors de la construction de FULL. Maintenir le même ratio
+octets/site jusqu'à 30 M points donnerait **environ 618–705 Gio pour ces
+cinq tableaux seuls** selon la scène, un scénario de capacité, **pas** une
+borne de croissance. La tour exacte doit donc offrir une représentation
+adressable/fenêtrée ou un plan d'export contrôlé pour le régime massif ;
+compter sa construction et sa publication dans le temps du contrat.
+
 ## Grand-livre de travail à fermer sur chaque trame
 
 L'entrée v8 `run_wspd_q34_parallel` partage l'index et les jobs du front. Une arête résiduelle construit son cover, puis éventuellement un atlas Local28 commun aux voies q3/q4. La file actuelle divise les rectangles en plages de rangs A **avant** l'expansion des arêtes ; `Engine::edge`, le census q3 de chaque graine, la construction et le balayage de l'atlas q4 restent synchrones dans un worker. Les callbacks sont privés par slot, mais leurs vues sont empruntées pendant l'appel. Les tâches publiées refusées sont traitées localement, ce qui préserve la complétude. L'annulation joint tous les workers. Ces invariants, présents dans [wspd_q34.cpp](../../morsehgp3D_v8/src/pipeline/wspd_q34.cpp), sont à conserver lors du découpage intérieur.
