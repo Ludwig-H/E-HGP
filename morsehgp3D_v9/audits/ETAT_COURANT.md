@@ -263,7 +263,12 @@ masques, comptes logiques et IDs de coquilles renforcés. Une relecture
 indépendante ne trouve pas de divergence causale dans le **plan R13 par
 défaut** ; deux tests ciblés du validateur/préflight passent en Python
 normal, dont un aussi sous `-O`. Aucun reçu device R13 ne qualifie
-encore S3. Le worker compare le condensé FNV-64 du catalogue et une
+encore S3. Le [contre-audit B sur le correctif publié](CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md)
+relève 149 tests CPU sélectionnés réussis sous **CUDA OFF** (journal
+local non épinglé), mais aucune porte CUDA directe du lot vide à
+pointeurs nuls ; `rebuilt_covers` n'est contrôlé que par une borne
+supérieure, sans valeur attendue. Le worker compare le condensé
+FNV-64 du catalogue et une
 **projection publiée** du travail de couverture : les expressions
 « clé par clé GPU/moteur » dans la passation et « même travail de la
 couverture » dans la provenance sont plus fortes que cette comparaison
