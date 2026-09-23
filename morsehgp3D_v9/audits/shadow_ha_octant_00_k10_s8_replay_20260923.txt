@@ -1,0 +1,17 @@
+time index wall_s 0.0193754 cpu_s 0.019328
+time prepare_both wall_s 0.214213 cpu_s 0.214196
+time front wall_s 6.9303 cpu_s 6.93004
+time rectangle_filter wall_s 26.0762 cpu_s 26.0738
+meta sites 39885 k 10 s 8 candidate_distances 3189160 rectangles 2034440 residual_mass 30777213
+time near_only wall_s 0.407622 cpu_s 0.407594
+count near_only rows 632560 mass 25345687 full 3499305 q3 2747214 q4 3764127 proposals 12323754 skip_b 667 duplicate 0 queries 19876621 corners 36896355
+time direction_only wall_s 0.227161 cpu_s 0.22717
+count direction_only rows 632560 mass 25345687 full 5177835 q3 3917483 q4 5263872 proposals 4374547 skip_b 11867 duplicate 0 queries 6264098 corners 21166392
+time near_then_direction wall_s 0.535274 cpu_s 0.535221
+count near_then_direction rows 632560 mass 25345687 full 7960608 q3 6130418 q4 8050035 proposals 14415170 skip_b 11183 duplicate 1190275 queries 23056366 corners 44847546
+time baseline_replay wall_s 41.2187 cpu_s 40.2437
+replay baseline skipped_rows 0 skipped_pairs 0 pairs 30777213 searches 11799271 cache_full 18977942 cache_tests 149617337 pair_visits 959838242 covers 4507278
+time direction wall_s 37.762 cpu_s 35.9575
+replay direction skipped_rows 117933 skipped_pairs 5177835 pairs 25599378 searches 10639581 cache_full 14959797 cache_tests 124246574 pair_visits 902275135 covers 4507278
+time union wall_s 50.7362 cpu_s 41.3372
+replay union skipped_rows 184066 skipped_pairs 7960608 pairs 22816605 searches 10001115 cache_full 12815490 cache_tests 110030642 pair_visits 868349026 covers 4507278

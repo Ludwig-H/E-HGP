@@ -1,51 +1,25 @@
 # État courant des audits v9
 
-23 septembre 2026. Produit publié courant : **`8e8b83a3`**. Le
-[reçu G4 R6](../receipts/g4_tower_r6_20260923/README.md) exécute le
-snapshot **`78ce9fd4`** ; ses temps ne qualifient pas encore le
-sample-sort, le raccourci FULL ni la nouvelle frontière temporelle
-de la sonde v9. Cadre :
+23 septembre 2026. Produit publié courant : **`ec6d1b74`**. Le dernier
+[reçu G4 R7b](../receipts/g4_tower_r7b_20260923/README.md) exécute
+le paquet **`8e8b83a3`**, antérieur au Welzl move-to-front, aux
+séparateurs pseudo-aléatoires du tri FULL et à la libération précoce de
+l'index de clés. Le [reçu R6](../receipts/g4_tower_r6_20260923/README.md)
+exécute `78ce9fd4` ; comparer ses temps avec R7b exige d'ajouter le
+digest séparé au périmètre mural ancien. Cadre :
 `exploration_v9_hors_registre`, `reference_cpu`,
-`quantized_u18_input_only`, **`not_claimed`**. Ce fichier porte le verdict
-mutable. Les notes datées conservent preuves, contre-exemples et reçus.
+`quantized_u18_input_only`, **`not_claimed`**. Ce fichier porte le
+verdict mutable ; les notes et reçus gardent les preuves.
 
-**Session G4 interrompue le 23 septembre, 05 h 35 UTC.** L'utilisateur a
-choisi l'arrêt de la session SPOT envisagée : le premier diff de la sonde
-MEB v3 annonçait un schéma que le validateur v2 aurait rejeté. Relecture
-GCP ciblée à ce moment : l'instance de campagne
-`ehgp-v7-4fa0e0789a7d5bb06b787d35` est déjà `TERMINATED` (dernier
-arrêt 04 h 50 min 54 s UTC) et aucune des autres instances SPOT du projet
-n'est en cours ; **aucun stop supplémentaire n'a été lancé**. Le commit
-`458fb0ed` aligne les littéraux sonde/worker/selftest en v10 et MEB v3 ;
-`78e94b04` publie le levier ON/OFF et ses quatre compteurs dans le JSON
-jugé, sans mesure G4. Sa
-[rupture de schéma v10/v5](PROTOCOLE_TOUR_V10_V5_RUPTURE_20260923.md)
-est fermée au pin `f55ea40c` : sonde v11, plan v6 et mutations des
-anciens libellés dans le selftest. Sur ce pin stable, **21/21 selftests**
-passent en Python normal et sous `-O` en contrelecture locale. Un nouveau
-plan épinglé et ses portes restent nécessaires avant une campagne de calcul.
-Le WIP v6 C6/tri observé en parallèle
-est [contrelu séparément](CONTRE_AUDIT_B_WIP_V6_C6_TRI_20260923.md) :
-il n'est pas raccordé à v9 ni qualifié sur u18/G4.
-
-La [tentative G4 R7](../receipts/g4_tower_r7_stockout_20260923/README.md)
-du 23 septembre à 05 h 46 UTC, sur le pin `78e94b04`, a reçu un refus
-GCE `resource_availability/STOCKOUT` avant tout démarrage du worker.
-Le manifeste et ses douze sommes SHA sont cohérents ; la lecture seule
-retrouve la VM `TERMINATED` avec `lastStartTimestamp` inchangé depuis R6.
-Le paquet `PACKAGE.json` décrit la préparation (`GCP_used=false`), le
-reçu hôte la demande réellement envoyée ; **aucun chrono, aucune
-ablation MEB ni résultat FULL/GPU** ne vient de R7.
-
-La [contrelecture du MEB
-proposé](MEB_PROPOSITION_EXACTE_20260923.md) a trouvé une proposition
-non comptée que le lecteur v11 acceptait encore ; `8e8b83a3` ferme
-cette lacune avec l'identité exacte
-`proposals=verified_proposals+proposal_fallbacks` et une mutation
-causale. Aucun reçu G4 n'en découle.
-Sur le pin figé, les **21/21 selftests** passent en Python normal et
-sous `-O` ; les deux portes `probe_worker_contract` tuent chacune
-**31/31** mutations, y compris la proposition non comptée.
+La [première tentative R7](../receipts/g4_tower_r7_stockout_20260923/README.md)
+a subi un `STOCKOUT` avant démarrage, sans chrono. La rupture de schéma
+de la sonde v10/plan v5 est [close](PROTOCOLE_TOUR_V10_V5_RUPTURE_20260923.md)
+depuis `f55ea40c`. Le lecteur `8e8b83a3` impose l'identité MEB exacte
+`proposals=verified_proposals+proposal_fallbacks` trouvée par la
+[contrelecture](MEB_PROPOSITION_EXACTE_20260923.md) : **21/21** selftests
+normal et `-O`, et **31/31** mutants tués dans chacune des deux portes
+réelles. Le WIP v6 C6/tri est [contrelu à part](CONTRE_AUDIT_B_WIP_V6_C6_TRI_20260923.md)
+et ne qualifie pas v9.
 
 ## Contrat et objet effectivement construit
 
@@ -121,6 +95,12 @@ conjointe ni coût de croissance ne sont isolés par cette ablation.
 La [contrelecture R4b](CONTRE_AUDIT_B_G4_R4B_CACHE_20260923.md) recoupe
 le reçu. La première tentative R4, [préemptée avant le
 worker](CONTRE_AUDIT_B_G4_R4_PREVOL_20260923.md), ne donne aucun chrono.
+Le [contrôle d'antichaîne du cache](CACHE_TEMOINS_COUT_VALIDATION_20260923.md)
+paie aussi du travail non inclus dans `node_tests` : les six cas R5
+impliquent au moins **1,090 milliard** de tours de validation et
+**424,330 millions** de comparaisons d'intervalles. Ce sont des
+minorants de comptage, pas des durées ; un ticket interne possédé
+pourrait réutiliser l'antichaîne certifiée sans assouplir l'API publique.
 
 R5 exécute **13/13 cas FULL CPU `complete_relative`** : deux répétitions
 W48 des trois trames sans sol à K5/K10, plus 000000/K10/W24. Les 245
@@ -194,6 +174,30 @@ du cover ON à K5 et **72,6 %** à K10 pour atteindre seulement le niveau
 OFF. Cette borne ne condamne pas la reprise : elle peut réduire CPU et
 mur en conservant la baisse des formes chargées, mais impose de mesurer
 son coût mémoire et de viser ensuite un certificat **avant** l'expansion.
+
+Le [reçu R7b](../receipts/g4_tower_r7b_20260923/README.md) reprend sur
+G4 le paquet `8e8b83a3` : **24/24 cas FULL CPU
+`complete_relative`**, deux répétitions entrelacées ON/OFF du seul
+MEB proposé pour trois trames 08, K5/K10, s8/W48, dix-huit comparaisons
+de **projection d'objet** égales, arrêt ciblé certifié et **388/388**
+empreintes du paquet vérifiées par la
+[contrelecture indépendante](CONTRE_AUDIT_B_G4_R7B_20260923.md)
+en Python normal et sous `-O`. Le reçu ne publie pas les flux
+intégraux de clés/supports/coquilles/parents. Les trois compteurs du cache témoin
+`witness_cache_queries/node_tests/rejected_pairs` varient légèrement
+entre les paires malgré l'identité de l'objet ; la phrase du README
+« travail hors MEB identique » doit être lue comme **travail de tour
+hors MEB**, pas comme égalité intégrale du ledger générateur.
+Toutes les propositions MEB sont
+vérifiées. À K10, le MEB ON réduit la tour de **5 à 8,4 %** et la chaîne
+de **2 à 4 %** ; à K5, le gain de tour reste dans le bruit et la chaîne
+est parfois plus lente. Meilleurs cas ON : **3,67 s à K5** et **9,58 s
+à K10** pour `chain_total`, plus respectivement **0,16 s** et
+**0,80 s** de digest synchrone. Ce sont encore des secondes, sur CPU
+seul et une seule séquence. R7b inclut d'autres changements depuis R6 :
+leur effet ne se déduit pas de cette ablation. Il n'exécute ni Welzl
+move-to-front, ni le nouvel échantillonnage FULL, ni la libération
+précoce de `key_slots`, et ne prouve pas la complétude des clés omises.
 
 ## Verrou q3/q4 : réduire le travail avant l'expansion
 
@@ -272,6 +276,19 @@ rejette déjà la plupart de ces paires à faible coût ; ne porter la palette
 qu'après une ablation de chaîne ON/OFF, identités complètes et coût par
 worker inclus. Une palette des seuls proches peut manquer les témoins
 dans la direction de B, comme le montre la contre-fixture B.
+
+Le [shadow orienté par octant](SHADOW_HA_OCTANT_Q34_LIDAR_20260923.md)
+emploie les mêmes voisins proposés et le prédicat entier exact sur
+l'octant pointant vers B. Sur 08/000000 sans sol K10/s8, il ferme
+**5 177 835** paires avant filtre, contre **3 499 305** pour les
+proches ; les **30 777 213 masques** et **4 507 278 covers** restent
+identiques. Le replay mono gagne environ **3,85 CPU·s locaux nets**
+après préparation et lignes, sur hôte partagé ; 08/000000 K5 gagne
+**1,82 CPU·s**, mais 08/000100 K5 seulement **0,19 CPU·s** et régresse
+en mur. Les passes K10/s10 et 08/000100 K10 ne jugent que les lignes,
+pas le replay. Conserver l'octant en SHADOW jusqu'à une ablation de
+chaîne entière, mémoire comprise, sur plusieurs séquences et sol brut ;
+aucun cover ni travail aval n'est supprimé ici.
 
 Pour q3, seuls les fragments d'atlas **complets** fournissent un compte
 réutilisable ; un certificat profond incomplet n'est qu'un minorant.
@@ -367,9 +384,15 @@ publie maintenant les compteurs `proposals/verified/canonical/fallbacks`
 dans le JSON et un levier `tower_meb_proposal` ON/OFF. Le nouveau
 préflight exige une proposition vérifiée quand ce levier est actif ;
 l'ablation G4 complète reste à faire. L'ordre Welzl inverse actuellement
-`power_order` alors
-que la récursion insère dans l'ordre du tableau ; mesurer les deux ordres
-sur les mêmes facettes avant de le choisir pour le coût.
+`power_order` dans le paquet `8e8b83a3`, alors que la récursion insère
+dans l'ordre du tableau. `8fa03046` passe à une proposition
+move-to-front avec les extrêmes en tête : la coordination rapporte
+**43,1 → 15,8 Gcycles** locaux pour Welzl seul, sans reçu G4 sur ce
+nouveau code. La [contre-épreuve FENV
+actualisée](MEB_PROPOSITION_EXACTE_20260923.md) compare **42 544** cas
+au header publié sous quatre arrondis et FTZ/DAZ, zéro divergence ;
+aucune borne de coût générale ni garantie « espérée linéaire » ne suit
+d'un ordre déterministe sur les facettes.
 
 `02d55856` remplace les recherches binaires de clé FULL par une table
 exacte à adressage ouvert, construite en parallèle puis lue après jonction.
@@ -384,29 +407,38 @@ causalement. Une seconde archive complète du pin `02d55856` inscrit
 **128** tests `gate` et passe les portes FULL séquentielle et statique
 même avec hachage forcé constant ; le mutant échoue. Le **127/127**
 annoncé dans la coordination n'est pas le décompte de cette archive
-complète. `key_slots` reste alloué dans `Builder::finish()` après sa
-dernière recherche : le vider au début de cette méthode, après jonction
-des ordres, retirerait **64 Mio** de stockage vivant pendant la banque
-et l'encodage à 5,51 M boules ; mesurer l'effet RSS réel. Ni G4 ni gain
-de chaîne complète n'en découlent. Publier construction, sondes réussies et
+complète. `ec6d1b74` vide désormais `key_slots` au début de
+`Builder::finish()`, après la dernière recherche et les jonctions :
+**64 Mio** de stockage logique sont libérés à 5,51 M boules avant banque
+et encodage ; l'effet RSS réel reste à mesurer. R7b exécute le paquet
+antérieur et ne mesure pas ce changement. Publier construction, sondes réussies et
 absentes, longueurs de chaînes, RSS de pointe et ablations W1/W48 :
 à plusieurs dizaines de millions de points, le coût total et la
 résidence décident de la pertinence de cette table.
 
 `75f27eee` remplace dans FULL la fusion série du tri des requêtes par
 des seaux répartis et triés en parallèle, et parallélise concaténation
-et détection des groupes. L'ordre total `(clé, ordinal)` et les plages
-disjointes rendent le résultat indépendant de l'ordonnancement des
-workers ; les portes locales et digests annoncés restent à distinguer
-d'un reçu G4. Le prélèvement à positions fixes ne garantit cependant
-pas un partage utile : une entrée stricte construite de 131 072 clés,
-avec les positions échantillonnées toutes petites et les autres grandes,
-donne 32 seaux non vides mais **130 080 clés (99,24 %) dans le dernier**.
-Le compteur de workers créés inclut la répartition et ne borne donc
-pas le temps du plus gros tri. Publier tailles non vides/maximales des
-seaux et CPU/mur par étape sur les requêtes FULL LiDAR, W1/W8/W48, avec
-RSS réel : le second tampon, `bucket_of` et les offsets coexistent,
-au-delà du seul `2×capacity×sizeof(Request)` annoncé pour la crête.
+et détection des groupes. La [contrelecture du tri
+FULL](CONTRE_AUDIT_B_SAMPLE_SORT_PUBLIE_20260923.md) confirme l'ordre
+total, **400/400** cas en Release et la porte Clang ASan/UBSan, avec
+mutant tué ; aucun reçu G4 ne mesure ce port. Le prélèvement à
+positions fixes ne garantit pas un partage utile : un témoin W48
+strict de 200 003 clés met **96,94 %** des éléments dans un seul seau.
+Le nombre de workers créés ne borne donc pas le temps du plus gros
+tri. `ec6d1b74` remplace les positions périodiques par un tirage
+pseudo-aléatoire déterministe et ajoute ce témoin à la porte d'identité ;
+il ne publie pas encore l'occupation des seaux ni un gain G4 apparié.
+Le risque de déséquilibre en pire cas subsiste sans borne de taille
+des seaux. Publier tailles non vides/maximales des seaux et CPU/mur par étape
+sur les requêtes FULL LiDAR, W1/W8/W48, avec RSS réel : le second
+tampon, `bucket_of` et les offsets coexistent au-delà du seul
+`2×capacity×sizeof(Request)` annoncé pour les requêtes.
+Une contre-épreuve isolée du paquet périodique `8e8b83a3` sur
+08/000000 entier sans sol K10/s8 ne voit **aucun** déséquilibre massif :
+les neuf tris de requêtes ont 32/32 seaux utiles à W8 et 192/192 à
+W48, maxima **1,27–1,70×** la moyenne ; les objets et digests sont
+égaux. Cette mesure locale n'est ni un reçu G4 ni une mesure des
+séparateurs pseudo-aléatoires de `ec6d1b74`.
 
 ## Portes de preuve encore ouvertes
 
@@ -442,7 +474,7 @@ et les échecs de ressources sur le chemin de chaîne. Le fast-path FULL
 rejuge strictement toutes les clés. Les portes locales passent, sans
 reçu G4 ni ablation FULL de ces changements. Le [contre-audit du
 sample-sort publié](CONTRE_AUDIT_B_SAMPLE_SORT_PUBLIE_20260923.md)
-sépare ce chemin du [tri WIP abandonné](CONTRE_AUDIT_B_TRI_FUSION_WIP_20260923.md).
+sépare ce chemin du tri global WIP abandonné avant publication.
 Le prélèvement de splitters prend jusqu'à `16×4W` clés **par slot non
 vide**, sans pondérer par sa taille : une répartition très inégale des
 présentations peut laisser une plage beaucoup plus grosse que la
@@ -470,7 +502,7 @@ Pour comparer un futur reçu à R6, ajouter `times_ms.digest` à
 exclut également le condensé, mais aucun `digest_cpu_s` n'est publié :
 une comparaison CPU·s R6/R7 brute serait trompeuse. `6200bb5a` borne
 désormais `read + chain_total + digest` par le mur externe et tue la
-[mutation d'une heure de lecture](CONTRE_AUDIT_B_TRI_FUSION_WIP_20260923.md).
+mutation qui plaçait `read=3 600 000 ms` sous un mur externe de 60 s.
 Il classe `std::length_error` et `std::system_error` comme manque de
 ressources, chronomètre fusion et recensus même en cas d'échec et vide
 les résumés d'ordres sur refus ; la porte de chaîne exerce une panne de

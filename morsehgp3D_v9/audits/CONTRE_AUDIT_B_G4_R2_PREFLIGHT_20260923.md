@@ -153,8 +153,12 @@ déterministe de protocole plutôt que répéter les mêmes cas.
 **Mise à jour de protocole** : `e54f727c` a publié la sonde v4, le
 validateur typé et une porte réelle qui corrigent la cause immédiate
 du refus R2 ; ce paquet nouveau n'a **pas** été exécuté sur G4.
-Le [contre-audit v4](CONTRE_AUDIT_B_PROTOCOLE_V4_WIP_20260923.md)
-reproduit encore sept mutations de schéma acceptées et l'absence d'une
-porte native obligatoire avant `guarded_start`. Le besoin actuel avant
-une nouvelle session est donc ce contrôle v4 complet, **pas** un rejeu
-des treize calculs du vieux paquet v3 en espérant changer son statut.
+La première révision v4 acceptait encore **sept** mutations du schéma
+de travail : tableau MEB tronqué, clé ajoutée et compteur `records`
+absent dans `tower_work`, champs `generator.q34_expanded_pairs` ou
+`ledger.q3_seeds` absents, histogrammes `by_qmin` ou `by_shell`
+vides. Le schéma exact et un préflight natif invité ont été publiés
+ensuite dans `099ca784` ; les lecteurs et portes ont encore évolué
+jusqu'à v11. Ces sept défauts sont historiques, **pas** un motif pour
+réinterpréter R2 : son paquet v3 reste définitivement refusé et ses
+treize calculs ne deviennent pas un reçu de contrat.
