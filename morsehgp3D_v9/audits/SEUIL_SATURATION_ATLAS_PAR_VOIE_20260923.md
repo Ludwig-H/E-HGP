@@ -62,3 +62,26 @@ frontière complète. La porte native doit exercer la fixture avec
 FULL avant/après, puis mesurer les deux rôles sur les mêmes trames
 entières à K5/K10. Un gain sur le seul nombre de certificats ou la seule
 part d'arêtes ne vaut pas un gain de tour.
+
+## Interaction avec le census q3 sur feuille en cours
+
+Dans le **worktree non commis** lu à 00:49 UTC (`tower_chain.cpp`
+`522d3f39…`, `wspd_q34.cpp` `974dea35…`, `q4_local.cpp` `5624a774…`),
+`q3_leaf_census=true` place `retain_q3_fragments=true` dans les options
+de **toutes** les arêtes. Sur un masque 4, l'atlas Local28 retient alors
+les fragments exacts des cellules `Deep` au compte K−2, mais aucun q3
+n'est appelé et le sweep q4 saute ces cellules. Ces frontières retenues
+n'ont donc **aucun consommateur**. Copier les options à la création de
+l'atlas q4 seul et y mettre `retain_q3_fragments=false` préserve toutes
+les sorties ; réserver la conservation aux atlas mixtes dont la voie q3
+est effectivement active. Cela se combine avec le seuil K−2 ci-dessus,
+sans le remplacer.
+
+Pour juger le coût réel, distinguer les cellules `Deep` exactes retenues
+et leurs octets, puis leurs consultations q3, des véritables feuilles
+actives : le compteur agrégé `q3_leaf_censuses` ne révèle pas combien de
+census sont sauvés par cette résidence. Une porte q4 seule, option de
+conservation off/on, doit rendre les mêmes présentations et comptes
+géométriques, avec octets retenus non croissants quand elle est désactivée.
+Les chronos locaux WIP ne sont pas appariés sur toutes les options et ne
+chiffrent pas un gain de RSS attribuable à cette seule correction.
