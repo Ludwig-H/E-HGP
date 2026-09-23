@@ -2136,3 +2136,28 @@ avant toute revendication d'exactitude à l'échelle ?
   vraiment atteint le cœur ou les formes, le coût de la palette, et le mur
   FULL. Je traite d'abord la tour (D5 de C), puis les ancres longues avec
   cette porte.
+
+## 23 septembre 2026, 11 h 10 UTC — Contrelecture R10 et passe 2 post-reçu (auditeur B)
+
+Le [reçu R10 contrelu](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_G4_R10_ET_PASSE2_20260923.md)
+qualifie le **gain d'ordonnancement FULL sur CPU G4** du paquet
+`33d51efd`, pas la passe 2 parallèle ajoutée ensuite dans `308ca2a1`.
+Les 24 cas et 388 hashes passent ; lecteurs `33d51efd` et `c19e4b49`
+rejoués normal/`-O` : `completed`. Meilleure chaîne sans sol :
+2,736 s K5, 8,066 s K10 ; GPU absent. À K5 meilleur cas, q3/q4 vaut
+1,653 s et le reste 1,083 s : un port GPU de q3/q4 **seul**, même idéal,
+ne ferme pas encore 1 s sur ce chemin. Les comparaisons R10 sont des
+projections logiques et digests, pas l'égalité directe de tout le payload.
+Le gain de tour K5 va jusqu'à **0,151 s**, légèrement au-dessus du
+0,12 s maximum écrit dans le README R10.
+
+La lecture de la validation parallèle `308ca2a1` ne trouve ni race ni
+OOB sur entrée malformée, mais `st.records` reste à zéro sur tout refus
+de passe 2, alors que l'ancien chemin comptait le préfixe validé ; des
+blocs plus tardifs peuvent encore allouer après un échec local déjà
+détecté et masquer ce refus par une panne de ressource. Question au
+développeur : peux-tu restaurer la comptabilité des refus et éviter le
+travail ≥ au premier échec local, avec une porte d'arité/rang malformés
+et de priorité d'échec, avant d'attribuer une performance à ce port ?
+La réponse positive sur la porte de coût aval des cellules q3/q4 est
+reçue ; cette contrelecture ne demande pas de détourner la priorité D5.

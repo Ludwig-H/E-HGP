@@ -7,21 +7,24 @@ La sonde v14 **`67fce4e9`** et le correctif de réception/masse
 **`fe1142b5`** sont publiés. Le [reçu G4 R9](../receipts/g4_tower_r9_20260923/README.md),
 exécuté avec `fe1142b5`, est désormais versionné par **`76436d44`** ;
 les deux empreintes relevées par la [contrelecture B](CONTRE_AUDIT_B_G4_R9_ORDONNANCEMENT_20260923.md)
-avant publication sont inchangées. Le même commit publie la sonde v15,
-sans reçu G4 v15. Le [contre-audit B du recouvrement FULL](CONTRE_AUDIT_B_WIP_TOUR_V15_RECOUVREMENT_20260923.md)
+avant publication sont inchangées. Le même commit publie la sonde v15.
+Le [contre-audit B du recouvrement FULL](CONTRE_AUDIT_B_WIP_TOUR_V15_RECOUVREMENT_20260923.md)
 et la [contrelecture par ordre](CONTRELEC_V15_CHRONO_ORDRE_20260923.md)
-ont trouvé respectivement un faux refus K1 et un faux accord K5 du
-lecteur initial. Le correctif **`33d51efd`** mesure la fenêtre commune
-lancement→jointure et ajoute la dépendance par ordre K≥2 : ces deux
-écarts initiaux sont traités dans ce port. Le faux refus K1 restant est
-**fermé par `c19e4b49`**, qui utilise `max(static, lots_by_k[0])` et
-ajoute un cas positif : le nouveau lecteur accepte en rejeu les 24
-sorties du [reçu G4 R10](RECEPTION_G4_R10_20260923.md). R10 exécute
-cependant **`33d51efd`**, avant ce correctif ; son ablation mesure le
-recouvrement FULL, pas le lecteur ultérieur ni la validation parallèle
-ajoutée en `308ca2a1`. Une porte de priorité des pannes et un digest
-ON/OFF identique sur 16k/K10 sont publiés ; l'égalité exhaustive du
-payload et un stress TSan propre au recouvrement restent ouverts.
+ont trouvé un faux refus K1 et un faux accord K5 dans les lecteurs
+successifs. **`33d51efd`** corrige la fenêtre lancement→jointure et la
+dépendance K≥2 ; **`c19e4b49`** corrige finalement K1 avec
+`max(static, lots_K1)` et un test positif. Le
+[reçu G4 R10](../receipts/g4_tower_r10_20260923/README.md) exécute le
+paquet `33d51efd` sur **CPU G4** : recouvrement FULL ON/OFF, 24/24 cas
+`complete_relative`, meilleure chaîne **2,736 s à K5** et **8,066 s à
+K10**, sans sol/grille 1 mm/s8/une seule séquence. Son ancien lecteur
+accepte les sorties réelles ; le lecteur corrigé les accepte aussi
+([réception A](RECEPTION_G4_R10_20260923.md)). La
+[contrelecture B de R10](CONTRE_AUDIT_B_G4_R10_ET_PASSE2_20260923.md)
+sépare ce gain des modifications du moteur publiées **après** la capture
+par `308ca2a1`. L'égalité exhaustive du payload ON/OFF, un stress TSan
+du recouvrement et une nouvelle porte de refus/ledger restent ouverts.
+R8/R9 ne mesurent pas le recouvrement ; R10 ne mesure aucun GPU.
 Les mesures de densité restent celles du binaire v12 **`4530644b`** ;
 aucune nouvelle série LiDAR v13 n'en découle. Le reçu G4
 [R8](../receipts/g4_tower_r8_20260923/README.md) exécute
