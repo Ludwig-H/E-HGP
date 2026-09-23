@@ -79,8 +79,8 @@ __global__ void rectangle_kernel(const FlatNode* nodes, const u32* rect_a, const
 __global__ void pair_kernel(const FlatNode* nodes, const std::int32_t* rank_points, const u32* rect_a,
                             const u32* rect_b, const u8* filtered, const unsigned long long* offsets,
                             std::size_t rect_count, unsigned long long pairs, unsigned kmax, u8* out_mask,
-                            unsigned long long* visits, int* failure) {
-  unsigned long long local = 0;
+                            unsigned long long* visits, unsigned long long* lane_rejections, int* failure) {
+  unsigned long long local = 0, q3 = 0, q4 = 0;
   const unsigned long long stride = static_cast<unsigned long long>(gridDim.x) * blockDim.x;
   const unsigned long long rounded = (pairs + stride - 1) / stride * stride;
   for (unsigned long long p = static_cast<unsigned long long>(blockIdx.x) * blockDim.x + threadIdx.x; p < rounded;
@@ -105,15 +105,54 @@ __global__ void pair_kernel(const FlatNode* nodes, const std::int32_t* rank_poin
       pb.low[axis] = pb.high[axis] = rank_points[3 * static_cast<std::size_t>(bi) + axis];
     }
     std::uint64_t v = 0;
-    u8 mask = filter<true>(nodes, pa, pb, kmax, filtered[low], v);
+    const u8 lanes = filtered[low];
+    u8 mask = filter<true>(nodes, pa, pb, kmax, lanes, v);
     local += v;
     if (mask == stack_failure) {
       atomicExch(failure, 1);
       mask = 0;
     }
+    q3 += (lanes & 2U) != 0 && (mask & 2U) == 0;
+    q4 += (lanes & 4U) != 0 && (mask & 4U) == 0;
     out_mask[p] = mask;
   }
   add_visits(visits, local);
+  add_visits(lane_rejections, q3);
+  add_visits(lane_rejections + 1, q4);
+}
+
+__global__ void flag_kernel(const u8* masks, unsigned long long pairs, u32* flags) {
+  const unsigned long long stride = static_cast<unsigned long long>(gridDim.x) * blockDim.x;
+  for (unsigned long long p = static_cast<unsigned long long>(blockIdx.x) * blockDim.x + threadIdx.x; p < pairs;
+       p += stride)
+    flags[p] = masks[p] != 0 ? 1U : 0U;
+}
+
+// Surviving pair p goes to slot positions[p] (exclusive scan of the flags):
+// rectangle order, row-major inside each rectangle, like the engine.
+__global__ void scatter_kernel(const FlatNode* nodes, const u32* rect_a, const u32* rect_b,
+                               const unsigned long long* offsets, std::size_t rect_count, const u8* masks,
+                               unsigned long long pairs, const u32* positions, u32* out_a, u32* out_b, u8* out_mask) {
+  const unsigned long long stride = static_cast<unsigned long long>(gridDim.x) * blockDim.x;
+  for (unsigned long long p = static_cast<unsigned long long>(blockIdx.x) * blockDim.x + threadIdx.x; p < pairs;
+       p += stride) {
+    const u8 mask = masks[p];
+    if (mask == 0) continue;
+    std::size_t low = 0, high = rect_count;
+    while (high - low > 1) {
+      const std::size_t middle = low + (high - low) / 2;
+      if (offsets[middle] <= p) low = middle;
+      else high = middle;
+    }
+    const FlatNode& a = nodes[rect_a[low]];
+    const FlatNode& b = nodes[rect_b[low]];
+    const unsigned long long local_index = p - offsets[low];
+    const unsigned long long columns = b.last - b.first;
+    const u32 j = positions[p];
+    out_a[j] = a.first + static_cast<u32>(local_index / columns);
+    out_b[j] = b.first + static_cast<u32>(local_index % columns);
+    out_mask[j] = mask;
+  }
 }
 
 float elapsed(cudaEvent_t start, cudaEvent_t stop) {
@@ -156,7 +195,7 @@ FilterOutput run_filters(const FilterInput& input) {
     filtered.allocate(input.rect_count);
     mass.allocate(input.rect_count);
     offsets.allocate(input.rect_count);
-    counters.allocate(2);
+    counters.allocate(4);
     failure.allocate(1);
     std::size_t scan_bytes = 0;
     MHGP9_CUDA(cub::DeviceScan::ExclusiveSum(nullptr, scan_bytes, mass.get(), offsets.get(),
@@ -177,7 +216,7 @@ FilterOutput run_filters(const FilterInput& input) {
       MHGP9_CUDA(cudaMemcpy(rect_a.get(), input.rect_a, input.rect_count * sizeof(u32), cudaMemcpyHostToDevice));
       MHGP9_CUDA(cudaMemcpy(rect_b.get(), input.rect_b, input.rect_count * sizeof(u32), cudaMemcpyHostToDevice));
       MHGP9_CUDA(cudaMemcpy(rect_mask.get(), input.rect_mask, input.rect_count, cudaMemcpyHostToDevice));
-      MHGP9_CUDA(cudaMemset(counters.get(), 0, 2 * sizeof(unsigned long long)));
+      MHGP9_CUDA(cudaMemset(counters.get(), 0, 4 * sizeof(unsigned long long)));
       MHGP9_CUDA(cudaMemset(failure.get(), 0, sizeof(int)));
       MHGP9_CUDA(cudaEventRecord(e[1]));
       const int rect_blocks = static_cast<int>(std::min<std::size_t>((input.rect_count + threads - 1) / threads,
@@ -209,7 +248,7 @@ FilterOutput run_filters(const FilterInput& input) {
                                                                              static_cast<unsigned long long>(sms) * 64));
         pair_kernel<<<std::max(pair_blocks, 1), threads>>>(nodes.get(), rank_points.get(), rect_a.get(),
             rect_b.get(), filtered.get(), offsets.get(), input.rect_count, pairs, input.kmax, pair_mask.get(),
-            counters.get() + 1, failure.get());
+            counters.get() + 1, counters.get() + 2, failure.get());
         MHGP9_CUDA(cudaGetLastError());
       }
       MHGP9_CUDA(cudaEventRecord(e[4]));
@@ -244,6 +283,159 @@ FilterOutput run_filters(const FilterInput& input) {
   } catch (const CudaFailure& failure) {
     out.error = failure.what;
   } catch (const std::exception& failure) {  // host side of the pass (e.g. bad_alloc of the mask copies)
+    out.error = std::string("host: ") + failure.what();
+  }
+  return out;
+}
+
+BatchOutput run_filter_batch(const FilterInput& input) {
+  BatchOutput out;
+  out.error = validate_filter_input(input);
+  if (!out.error.empty()) return out;
+  try {
+    int devices = 0;
+    if (cudaGetDeviceCount(&devices) != cudaSuccess || devices == 0) {
+      out.error = "no CUDA device";
+      return out;
+    }
+    MHGP9_CUDA(cudaSetDevice(0));
+    cudaDeviceProp properties{};
+    MHGP9_CUDA(cudaGetDeviceProperties(&properties, 0));
+    out.device = properties.name;
+    out.available = true;
+    MHGP9_CUDA(cudaFree(nullptr));
+    int sms = 0;
+    MHGP9_CUDA(cudaDeviceGetAttribute(&sms, cudaDevAttrMultiProcessorCount, 0));
+    const int threads = 128;
+    const auto blocks_for = [&](unsigned long long items) {
+      return static_cast<int>(std::max<unsigned long long>(1, std::min<unsigned long long>(
+          (items + threads - 1) / threads, static_cast<unsigned long long>(sms) * 64)));
+    };
+    cudaEvent_t e[7];
+    for (auto& event : e) MHGP9_CUDA(cudaEventCreate(&event));
+    DeviceBuffer<FlatNode> nodes;
+    DeviceBuffer<std::int32_t> rank_points;
+    DeviceBuffer<u32> rect_a, rect_b, flags, positions, out_a, out_b;
+    DeviceBuffer<u8> rect_mask, filtered, pair_mask, out_mask;
+    DeviceBuffer<unsigned long long> mass, offsets, counters;
+    DeviceBuffer<int> failure;
+    DeviceBuffer<unsigned char> scan_storage, flag_storage;
+    MHGP9_CUDA(cudaEventRecord(e[0]));
+    nodes.allocate(input.node_count);
+    rank_points.allocate(3 * input.rank_count);
+    rect_a.allocate(input.rect_count);
+    rect_b.allocate(input.rect_count);
+    rect_mask.allocate(input.rect_count);
+    filtered.allocate(input.rect_count);
+    mass.allocate(input.rect_count);
+    offsets.allocate(input.rect_count);
+    counters.allocate(4);
+    failure.allocate(1);
+    MHGP9_CUDA(cudaMemcpy(nodes.get(), input.nodes, input.node_count * sizeof(FlatNode), cudaMemcpyHostToDevice));
+    MHGP9_CUDA(cudaMemcpy(rank_points.get(), input.rank_points, 3 * input.rank_count * sizeof(std::int32_t),
+                          cudaMemcpyHostToDevice));
+    if (input.rect_count != 0) {
+      MHGP9_CUDA(cudaMemcpy(rect_a.get(), input.rect_a, input.rect_count * sizeof(u32), cudaMemcpyHostToDevice));
+      MHGP9_CUDA(cudaMemcpy(rect_b.get(), input.rect_b, input.rect_count * sizeof(u32), cudaMemcpyHostToDevice));
+      MHGP9_CUDA(cudaMemcpy(rect_mask.get(), input.rect_mask, input.rect_count, cudaMemcpyHostToDevice));
+    }
+    MHGP9_CUDA(cudaMemset(counters.get(), 0, 4 * sizeof(unsigned long long)));
+    MHGP9_CUDA(cudaMemset(failure.get(), 0, sizeof(int)));
+    MHGP9_CUDA(cudaEventRecord(e[1]));
+    if (input.rect_count != 0) {
+      rectangle_kernel<<<blocks_for(input.rect_count), threads>>>(nodes.get(), rect_a.get(), rect_b.get(),
+          rect_mask.get(), input.rect_count, input.kmax, filtered.get(), mass.get(), counters.get(), failure.get());
+      MHGP9_CUDA(cudaGetLastError());
+    }
+    MHGP9_CUDA(cudaEventRecord(e[2]));
+    unsigned long long pairs = 0;
+    if (input.rect_count != 0) {
+      std::size_t scan_bytes = 0;
+      MHGP9_CUDA(cub::DeviceScan::ExclusiveSum(nullptr, scan_bytes, mass.get(), offsets.get(),
+                                               static_cast<int>(input.rect_count)));
+      scan_storage.allocate(std::max<std::size_t>(scan_bytes, 1));
+      MHGP9_CUDA(cub::DeviceScan::ExclusiveSum(scan_storage.get(), scan_bytes, mass.get(), offsets.get(),
+                                               static_cast<int>(input.rect_count)));
+      unsigned long long tail[2] = {0, 0};
+      MHGP9_CUDA(cudaMemcpy(&tail[0], offsets.get() + input.rect_count - 1, sizeof(unsigned long long),
+                            cudaMemcpyDeviceToHost));
+      MHGP9_CUDA(cudaMemcpy(&tail[1], mass.get() + input.rect_count - 1, sizeof(unsigned long long),
+                            cudaMemcpyDeviceToHost));
+      pairs = tail[0] + tail[1];
+    }
+    if (pairs > static_cast<unsigned long long>(0x7fffffff)) throw CudaFailure{"expanded pairs exceed the CUB int range"};
+    std::size_t free_bytes = 0, total_bytes = 0;
+    MHGP9_CUDA(cudaMemGetInfo(&free_bytes, &total_bytes));
+    if (pairs * 10 > free_bytes / 2) throw CudaFailure{"pair buffers exceed half of the free device memory"};
+    MHGP9_CUDA(cudaEventRecord(e[3]));
+    unsigned long long survivors = 0;
+    if (pairs != 0) {
+      pair_mask.allocate(pairs);
+      pair_kernel<<<blocks_for(pairs), threads>>>(nodes.get(), rank_points.get(), rect_a.get(), rect_b.get(),
+          filtered.get(), offsets.get(), input.rect_count, pairs, input.kmax, pair_mask.get(), counters.get() + 1,
+          counters.get() + 2, failure.get());
+      MHGP9_CUDA(cudaGetLastError());
+    }
+    MHGP9_CUDA(cudaEventRecord(e[4]));
+    if (pairs != 0) {
+      flags.allocate(pairs);
+      positions.allocate(pairs);
+      flag_kernel<<<blocks_for(pairs), threads>>>(pair_mask.get(), pairs, flags.get());
+      MHGP9_CUDA(cudaGetLastError());
+      std::size_t flag_bytes = 0;
+      MHGP9_CUDA(cub::DeviceScan::ExclusiveSum(nullptr, flag_bytes, flags.get(), positions.get(),
+                                               static_cast<int>(pairs)));
+      flag_storage.allocate(std::max<std::size_t>(flag_bytes, 1));
+      MHGP9_CUDA(cub::DeviceScan::ExclusiveSum(flag_storage.get(), flag_bytes, flags.get(), positions.get(),
+                                               static_cast<int>(pairs)));
+      u32 tail[2] = {0, 0};
+      MHGP9_CUDA(cudaMemcpy(&tail[0], positions.get() + pairs - 1, sizeof(u32), cudaMemcpyDeviceToHost));
+      MHGP9_CUDA(cudaMemcpy(&tail[1], flags.get() + pairs - 1, sizeof(u32), cudaMemcpyDeviceToHost));
+      survivors = static_cast<unsigned long long>(tail[0]) + tail[1];
+      out_a.allocate(survivors);
+      out_b.allocate(survivors);
+      out_mask.allocate(survivors);
+      if (survivors != 0) {
+        scatter_kernel<<<blocks_for(pairs), threads>>>(nodes.get(), rect_a.get(), rect_b.get(), offsets.get(),
+            input.rect_count, pair_mask.get(), pairs, positions.get(), out_a.get(), out_b.get(), out_mask.get());
+        MHGP9_CUDA(cudaGetLastError());
+      }
+    }
+    MHGP9_CUDA(cudaEventRecord(e[5]));
+    out.rect_masks.resize(input.rect_count);
+    out.survivor_a.resize(survivors);
+    out.survivor_b.resize(survivors);
+    out.survivor_mask.resize(survivors);
+    if (input.rect_count != 0)
+      MHGP9_CUDA(cudaMemcpy(out.rect_masks.data(), filtered.get(), input.rect_count, cudaMemcpyDeviceToHost));
+    if (survivors != 0) {
+      MHGP9_CUDA(cudaMemcpy(out.survivor_a.data(), out_a.get(), survivors * sizeof(u32), cudaMemcpyDeviceToHost));
+      MHGP9_CUDA(cudaMemcpy(out.survivor_b.data(), out_b.get(), survivors * sizeof(u32), cudaMemcpyDeviceToHost));
+      MHGP9_CUDA(cudaMemcpy(out.survivor_mask.data(), out_mask.get(), survivors, cudaMemcpyDeviceToHost));
+    }
+    unsigned long long counts[4] = {0, 0, 0, 0};
+    int failed = 0;
+    MHGP9_CUDA(cudaMemcpy(counts, counters.get(), sizeof(counts), cudaMemcpyDeviceToHost));
+    MHGP9_CUDA(cudaMemcpy(&failed, failure.get(), sizeof(int), cudaMemcpyDeviceToHost));
+    MHGP9_CUDA(cudaEventRecord(e[6]));
+    MHGP9_CUDA(cudaEventSynchronize(e[6]));
+    out.upload_ms = elapsed(e[0], e[1]);
+    out.rect_ms = elapsed(e[1], e[2]);
+    out.scan_ms = elapsed(e[2], e[3]);
+    out.pair_ms = elapsed(e[3], e[4]);
+    out.select_ms = elapsed(e[4], e[5]);
+    out.download_ms = elapsed(e[5], e[6]);
+    out.total_ms = elapsed(e[0], e[6]);
+    out.pairs = pairs;
+    out.rect_visits = counts[0];
+    out.pair_visits = counts[1];
+    out.pair_q3_rejected = counts[2];
+    out.pair_q4_rejected = counts[3];
+    out.stack_failure = failed != 0;
+    for (auto& event : e) cudaEventDestroy(event);
+  } catch (const CudaFailure& failure) {
+    out.error = failure.what;
+  } catch (const std::exception& failure) {
     out.error = std::string("host: ") + failure.what();
   }
   return out;

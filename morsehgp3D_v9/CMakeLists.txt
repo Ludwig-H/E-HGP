@@ -122,7 +122,9 @@ target_link_libraries(mhgp9_gen PUBLIC Threads::Threads)
 # ---- Chaine de bout en bout : generateur -> catalogue recoupe -> tour FULL.
 add_library(mhgp9_chain STATIC src/chain/tower_chain.cpp)
 target_include_directories(mhgp9_chain PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/gen")
-target_link_libraries(mhgp9_chain PUBLIC mhgp9_gen Threads::Threads)
+# mhgp9_gpu (defini plus bas : lanceur CUDA ou stub) porte l'appel par lots
+# du levier q34_gpu_filter ; sans MHGP9_ENABLE_CUDA la chaine le refuse.
+target_link_libraries(mhgp9_chain PUBLIC mhgp9_gen mhgp9_gpu Threads::Threads)
 
 mhgp9_product_executable(mhgp9_tower_probe bench/tower_probe.cpp)
 target_link_libraries(mhgp9_tower_probe PRIVATE mhgp9_chain)
@@ -143,14 +145,14 @@ endforeach()
 # recompilee dans la cible de test (le generateur ne voit pas la tour).
 mhgp9_test_executable(mhgp9_chain_order_failure_priority_gate
                       tests/chain/order_failure_priority_gate.cpp src/chain/tower_chain.cpp)
-target_link_libraries(mhgp9_chain_order_failure_priority_gate PRIVATE mhgp9_gen)
+target_link_libraries(mhgp9_chain_order_failure_priority_gate PRIVATE mhgp9_gen mhgp9_gpu)
 mhgp9_gate(mhgp9_chain_order_failure_priority 0 mhgp9_chain_order_failure_priority_gate
            ARGS --selftest LABELS "gate;chain;tower" TIMEOUT 300)
 foreach(mutant IN ITEMS PHASE_PRIORITY DROP_FAILED_STATS)
   string(TOLOWER ${mutant} lower)
   mhgp9_test_executable(mhgp9_chain_order_failure_${lower}_mutant_gate
                         tests/chain/order_failure_priority_gate.cpp src/chain/tower_chain.cpp)
-  target_link_libraries(mhgp9_chain_order_failure_${lower}_mutant_gate PRIVATE mhgp9_gen)
+  target_link_libraries(mhgp9_chain_order_failure_${lower}_mutant_gate PRIVATE mhgp9_gen mhgp9_gpu)
   target_compile_definitions(mhgp9_chain_order_failure_${lower}_mutant_gate
                              PRIVATE MHGP9_FULL_ORDERS_MUTANT_${mutant}=1)
 endforeach()
@@ -167,11 +169,21 @@ mhgp9_product_executable(mhgp9_chain_euler_gate tests/chain/chain_euler_gate.cpp
 target_link_libraries(mhgp9_chain_euler_gate PRIVATE mhgp9_chain)
 mhgp9_gate(mhgp9_chain_euler 0 mhgp9_chain_euler_gate ARGS --selftest LABELS "gate;chain;oracle" TIMEOUT 300)
 mhgp9_gate(mhgp9_chain_euler_bad_argument 2 mhgp9_chain_euler_gate ARGS --unknown LABELS "gate;chain" TIMEOUT 60)
+# S2 : chemin q3/q4 par lots (filtre CPU de reference) contre chemin moteur :
+# memes candidats, meme tour FULL ; levier GPU refuse sans appareil ; mutants
+# causaux du filtre par lots tues.
+mhgp9_product_executable(mhgp9_chain_batch_filter_gate tests/chain/chain_batch_filter_gate.cpp)
+target_link_libraries(mhgp9_chain_batch_filter_gate PRIVATE mhgp9_chain)
+target_include_directories(mhgp9_chain_batch_filter_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+mhgp9_gate(mhgp9_chain_batch_filter 0 mhgp9_chain_batch_filter_gate ARGS --n=1000
+           EXPECT_PREFIX "chain_batch_filter_gate n=1000" LABELS "gate;chain;oracle" TIMEOUT 900)
+mhgp9_gate(mhgp9_chain_batch_filter_bad_argument 2 mhgp9_chain_batch_filter_gate ARGS --n=abc
+           LABELS "gate;chain" TIMEOUT 60)
 foreach(mutant IN ITEMS REGULAR_SHELLS_ONLY NO_SITE_TERM)
   string(TOLOWER ${mutant} lower)
   mhgp9_product_executable(mhgp9_chain_euler_${lower}_mutant_gate tests/chain/chain_euler_gate.cpp src/chain/tower_chain.cpp)
   target_include_directories(mhgp9_chain_euler_${lower}_mutant_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/gen")
-  target_link_libraries(mhgp9_chain_euler_${lower}_mutant_gate PRIVATE mhgp9_gen)
+  target_link_libraries(mhgp9_chain_euler_${lower}_mutant_gate PRIVATE mhgp9_gen mhgp9_gpu)
   target_compile_definitions(mhgp9_chain_euler_${lower}_mutant_gate PRIVATE MHGP9_EULER_MUTANT_${mutant}=1)
   mhgp9_gate(mhgp9_chain_euler_mutant_${lower} 1 mhgp9_chain_euler_${lower}_mutant_gate
              ARGS --selftest

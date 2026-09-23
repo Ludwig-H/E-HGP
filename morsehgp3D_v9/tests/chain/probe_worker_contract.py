@@ -92,10 +92,15 @@ def main(argv):
         value = worker.strict_json(stdout)
         return value, process.returncode, elapsed
 
+    # v17: 'pinned_on' keeps every engine lever on (the cache exists only on
+    # the engine path); 'batch_on' adds the batch filter on the CPU; the GPU
+    # lever is judged apart (explicit refusal without a device).
+    engine_levers = dict({name: True for name in worker.LEVER_NAMES}, q34_batch_filter=False, q34_gpu_filter=False)
     base = dict(scene='gate', file=data_file.name, n=inputs['gate']['n'], k=5, s=8, workers=2, static_threads=2,
-                levers={name: True for name in worker.LEVER_NAMES}, repeat=0)
+                levers=engine_levers, repeat=0)
     results = {}
     for label, case in (('pinned_on', base),
+                        ('batch_on', dict(base, levers=dict(engine_levers, q34_batch_filter=True))),
                         ('pinned_off', dict(base, levers={name: False for name in worker.LEVER_NAMES}, workers=1,
                                             static_threads=0))):
         try:
@@ -109,6 +114,19 @@ def main(argv):
         check(outcome == 'complete_relative', label + ': outcome ' + outcome)
         check(value['options']['levers'] == case['levers'], label + ': published levers')
         results[label] = (case, value)
+    # The GPU lever: without a device, an explicit refusal naming it (never a
+    # silent CPU run); with one, the same object as the engine path.
+    gpu_case = dict(base, levers={name: True for name in worker.LEVER_NAMES})
+    try:
+        value, code, _ = run(gpu_case)
+        outcome = worker.validate_probe(value, gpu_case, code, inputs=inputs)
+        if outcome == 'explicit_refusal':
+            check(value['status'] == 'invalid_input' and value['reason'].startswith('chain_q34_gpu_unavailable'),
+                  'GPU lever refusal reason: ' + str(value['reason']))
+        else:
+            results['gpu_on'] = (gpu_case, value)
+    except (ValueError, KeyError, TypeError, UnicodeError, subprocess.TimeoutExpired) as error:
+        check(False, 'GPU lever output refused by the worker validator: ' + type(error).__name__ + ': ' + str(error))
     # Refus explicite REEL avant l'etape Euler du recensement (revue v13 : le
     # lecteur l'avait pris pour un defaut de protocole) : les 30 points entiers
     # de x^2+y^2+z^2 = 25 forment une coquille de plus de 12 sites.
@@ -145,9 +163,54 @@ def main(argv):
             check(accepted, 'validate_euler accepted: ' + label)
         except ValueError:
             check(not accepted, 'validate_euler refused: ' + label)
-    if len(results) == 2:
-        on, off = results['pinned_on'][1], results['pinned_off'][1]
-        check(worker.logical_result(on) == worker.logical_result(off), 'modes on/off change the object')
+    if {'pinned_on', 'batch_on', 'pinned_off'} <= set(results):
+        on, off, batched = results['pinned_on'][1], results['pinned_off'][1], results['batch_on'][1]
+        check(worker.logical_result(on) == worker.logical_result(off) == worker.logical_result(batched) and
+              ('gpu_on' not in results or worker.logical_result(results['gpu_on'][1]) == worker.logical_result(on)),
+              'modes on/off/batch/gpu change the object')
+        # v17: the batch path ran (CPU backend), searched each expanded pair
+        # once without the cache, and its survivors reached the cores.
+        b = batched['q34_batch']
+        check(b['used'] and b['backend'] == 'cpu' and b['survivors'] == batched['ledger']['core_builds'] > 0 and
+              b['rectangles'] == batched['ledger']['q34_input_rectangles'] > 0 and
+              batched['ledger']['witness_cache_queries'] == 0 and not on['q34_batch']['used'] and
+              on['ledger']['expanded_pairs'] == batched['ledger']['expanded_pairs'] and
+              on['ledger']['cover_builds'] == batched['ledger']['cover_builds'],
+              'batch path not exercised or its ledger differs: ' + json.dumps(b, sort_keys=True))
+        batch_case = results['batch_on'][0]
+        batch_mutants = [
+            ('batch survivors shifted', lambda v: v['q34_batch'].update(survivors=v['q34_batch']['survivors'] + 1)),
+            ('batch rectangles shifted', lambda v: v['q34_batch'].update(rectangles=v['q34_batch']['rectangles'] - 1)),
+            ('batch backend relabelled', lambda v: v['q34_batch'].update(
+                backend='NVIDIA RTX PRO 6000 Blackwell Server Edition')),
+            ('batch device time on the CPU', lambda v: v['q34_batch'].update(device_ms=1.0)),
+            ('batch used flipped', lambda v: v['q34_batch'].update(used=False)),
+            ('batch phases beyond q34', lambda v: v['q34_batch'].update(
+                edges_ms=v['times_ms']['q34'] + 5.0)),
+            ('batch cache used', lambda v: v['ledger'].update(witness_cache_queries=1)),
+            ('batch lever flipped', lambda v: v['options']['levers'].update(q34_batch_filter=False)),
+            ('batch section absent', lambda v: v.pop('q34_batch')),
+            ('gpu lever without batch', lambda v: v['options']['levers'].update(q34_batch_filter=False,
+                                                                                 q34_gpu_filter=True)),
+        ]
+        batch_killed = 0
+        for label, mutate in batch_mutants:
+            bad = copy.deepcopy(batched)
+            mutate(bad)
+            try:
+                worker.validate_probe(bad, batch_case, 0, inputs=inputs)
+            except (ValueError, KeyError, TypeError):
+                batch_killed += 1
+                continue
+            check(False, 'batch mutant accepted: ' + label)
+        print('probe_worker_contract batch_mutants_killed=' + str(batch_killed) + '/' + str(len(batch_mutants)))
+        engine_filled = copy.deepcopy(on)
+        engine_filled['q34_batch'].update(used=True)
+        try:
+            worker.validate_probe(engine_filled, results['pinned_on'][0], 0, inputs=inputs)
+            check(False, 'batch mutant accepted: q34_batch filled on the engine path')
+        except (ValueError, KeyError, TypeError):
+            pass
         # Non-vacuite : les trois voies epinglees sont reellement exercees.
         ledger = on['ledger']
         check(ledger['q3_leaf_censuses'] > 0 and ledger['atlas_deep_cells'] > 0 and ledger['dead_q3_proved'] > 0 and

@@ -9,6 +9,8 @@
 #include "wspd/front.hpp"
 
 #include <functional>
+#include <span>
+#include <string>
 #include <vector>
 
 namespace mhgp9::gen {
@@ -276,5 +278,62 @@ struct WspdQ34ParallelResult {
     Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s,
     WspdQ34Options options, std::size_t worker_count,
     const WspdQ34ParallelConsumer& consumer, std::size_t jobs_per_worker = 16);
+
+// ---- v9 S2 (23 septembre 2026) : filtre témoin par lots.
+//
+// The front runs first and only collects its residual rectangles. One batch
+// call then decides every rectangle (Affine bounds, as filter_q34_witnesses)
+// and every pair of every surviving rectangle (point overload, NO cache).
+// The workers finally run the rest of the edge (core, cover, certificate,
+// q3/q4) on the surviving pairs only. Same decisions as the engine path (the
+// engine's row cache never changes a final mask), hence the same candidate
+// set; its order and the per-worker split differ.
+
+// A surviving pair: spatial ranks of its endpoints (row-major order of its
+// rectangle) and its surviving lanes (subset of 6, nonzero).
+struct Q34SurvivingEdge {
+  std::uint32_t a_rank{}, b_rank{};
+  std::uint8_t mask{};
+  bool operator==(const Q34SurvivingEdge&) const = default;
+};
+
+// Output of one batch call, in rectangle order.
+struct Q34FilterBatch {
+  std::vector<std::uint8_t> rectangle_masks;   // surviving lanes of each input rectangle
+  std::vector<Q34SurvivingEdge> survivors;     // pairs with at least one lane left
+  u64 expanded_pairs{};                        // sum of |A||B| over surviving rectangles
+  u64 pair_q3_rejected{}, pair_q4_rejected{};  // lanes rejected among the expanded pairs
+  u64 rectangle_visits{}, pair_visits{};       // node visits of the two witness DFS families
+  std::string backend;                         // "cpu" or the device name
+};
+
+// Implementations: run_q34_filter_batch_cpu below (reference), a device one
+// supplied by the caller. Must return exactly the decisions of the reference
+// or throw; the result is cross-checked for shape before use.
+using Q34BatchFilter = std::function<Q34FilterBatch(const Q2CensusIndex& index, unsigned kmax,
+                                                    std::span<const WspdRectangle> rectangles)>;
+
+// CPU reference of the batch call, `workers` threads, dynamic blocks.
+[[nodiscard]] Q34FilterBatch run_q34_filter_batch_cpu(const Q2CensusIndex& index, unsigned kmax,
+                                                      std::span<const WspdRectangle> rectangles,
+                                                      std::size_t workers);
+
+// Measured phases of the batch path (nanoseconds, never compared).
+struct WspdQ34BatchTiming {
+  u64 front_ns{}, filter_ns{}, edges_ns{};
+  u64 rectangles{}, survivors{};
+  std::string backend;
+};
+
+// Requires witness_mode=RectanglePair and witness_bounds_mode=Affine (the
+// only filter the batch call implements); the pair cache is not used.
+// Ledger identities of validate_completion hold as on the engine path:
+// witness.rectangles.queries=input_rectangles, witness.pairs.queries=
+// expanded_pairs, cache counters zero. `timing` may be null.
+[[nodiscard]] WspdQ34ParallelResult run_wspd_q34_batched(
+    Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s,
+    WspdQ34Options options, std::size_t worker_count,
+    const WspdQ34ParallelConsumer& consumer, std::size_t jobs_per_worker,
+    const Q34BatchFilter& filter, WspdQ34BatchTiming* timing);
 
 }  // namespace mhgp9::gen

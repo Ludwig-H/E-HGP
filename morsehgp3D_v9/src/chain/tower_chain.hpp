@@ -81,6 +81,15 @@ struct ChainOptions {
   // Ordonnancement q2 (meme objet) : plan de jobs du front prepare par masse
   // decroissante et 64 jobs par fil (le plus long job faisait tout q2).
   bool q2_jobs_by_mass = true;
+  // v9 S2 : filtre temoin q3/q4 par lots (gen::run_wspd_q34_batched). Le
+  // front ne fait que collecter ses rectangles, un appel decide tous les
+  // rectangles puis toutes les paires sans cache, les ouvriers traitent les
+  // seules paires survivantes. Meme objet (memes decisions que le moteur).
+  // q34_gpu_filter execute cet appel sur le GPU (build MHGP9_ENABLE_CUDA) et
+  // exige q34_batch_filter ; sans GPU la chaine refuse explicitement.
+  // Desactives par defaut.
+  bool q34_batch_filter = false;
+  bool q34_gpu_filter = false;
 };
 
 // Temps de mur en millisecondes, CPU du processus en secondes.
@@ -152,6 +161,15 @@ struct Q34Occupancy {
   double job_sum_s = 0, max_job_ms = 0;  // mur dans les jobs du front : somme, plus long job
 };
 
+// Phases mesurees du chemin q3/q4 par lots (ms, jamais comparees).
+struct Q34BatchTimes {
+  bool used = false;
+  std::string backend;  // "cpu" ou le nom de l'appareil
+  double front_ms = 0, filter_ms = 0, edges_ms = 0;
+  double device_ms = 0;  // passe GPU mesuree par evenements (0 sur CPU)
+  std::uint64_t rectangles = 0, survivors = 0;
+};
+
 struct OrderSummary {
   unsigned k = 0;
   std::uint64_t nodes = 0, births = 0, merges = 0, contributions = 0, parents = 0;
@@ -172,6 +190,7 @@ struct ChainResult {
   tower::FullBallStats tower_stats;
   tower::FullBallTimes tower_times;  // chronos par phase de la tour (mesures)
   Q34Occupancy q34_occupancy;
+  Q34BatchTimes q34_batch;
   std::vector<OrderSummary> orders;
   // Condense FNV-1a 64 d'un encodage canonique de toute la tour (tous ordres,
   // noeuds, parents, contributions, populations en PointId, verticales).

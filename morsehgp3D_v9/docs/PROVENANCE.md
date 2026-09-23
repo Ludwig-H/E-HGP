@@ -185,6 +185,50 @@ condensé inchangé ; libellé de comptabilité
 `anchor_meb_first_maximal_pair_then_double_welzl_proposal_exact_boundary_canonical_v3`
 (sonde v10).
 
+### Filtre témoin q3/q4 par lots (S2, sonde v17)
+
+23 septembre 2026, après la session S1. `gen::run_wspd_q34_batched` s'exécute
+en trois phases.
+- **Front** : ses jobs ne font que collecter leurs rectangles.
+- **Filtre** : un appel décide tous les rectangles (bornes affines), puis
+  toutes les paires des rectangles survivants, sans cache.
+- **Survivants** : les ouvriers ne traitent que les paires survivantes, par
+  la seconde moitié d'`Engine::edge` (`filtered_edge` : cœur, couverture,
+  certificat, q3/q4).
+
+**Mêmes décisions que le moteur** (son cache ne change jamais un masque
+final), donc mêmes candidats. Les identités de `validate_completion`
+tiennent : recherches de rectangle = rectangles, recherches de paire =
+paires développées, cache nul.
+
+**Deux implémentations de l'appel** :
+- `run_q34_filter_batch_cpu`, la référence ;
+- le passage GPU `gpu::run_filter_batch`. Ce sont les noyaux de S1, suivis
+  d'une compaction des survivants sur l'appareil (drapeaux, balayage
+  exclusif, dispersion, dans l'ordre du moteur) et des rejets par voie.
+
+**Chaîne** : leviers `q34_batch_filter` et `q34_gpu_filter` (le second
+exige le premier ; sans GPU, refus `chain_q34_gpu_unavailable`, jamais un
+repli CPU). `mhgp9_chain` lie `mhgp9_gpu` (stub hors CUDA).
+
+**Sonde v17** : les deux leviers, et une section `q34_batch` (backend,
+front, filtre, survivants, passe GPU, rectangles, survivants).
+
+**Portes** :
+- `chain_batch_filter` : candidats triés égaux entre moteur et lots, à 1 et
+  4 fils, trois familles, K3/K5/K10 ; même tour FULL et même registre. Le
+  levier GPU est refusé sans appareil. Deux mutants causaux sont tués :
+  retrait cohérent de la voie q3, qui change les candidats ; rejet q3
+  menteur, que les identités de masse refusent.
+- Contrat sonde/worker : cas par lots et cas GPU, 10 mutants de la section
+  `q34_batch`.
+
+Localement, sur 08/000100/K5 : condensé FULL `dbf799c8ed83f53f` identique
+entre moteur et lots CPU.
+
+**Protocole G4 de la tour** : build CUDA (nvcc et nvidia-smi existants),
+`backend=cuda_g4` et `GPU_executed` selon le plan.
+
 ## Voie GPU S1 : `src/gpu/` (espace `mhgp9::gpu`, code neuf)
 
 23 septembre 2026. Première brique GPU de la v9, pour une expérience de

@@ -85,7 +85,7 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                       dead_q4_proved=1, dead_cells=3)
     else:
         ledger.update({name: 0 for name in schema['ledger'] if name.startswith('dead_')})
-    if not levers['q34_witness_cache']:
+    if not levers['q34_witness_cache'] or levers.get('q34_batch_filter'):
         ledger.update({name: 0 for name in schema['ledger'] if name.startswith('witness_cache_')})
     if not levers['q3_leaf_census']:
         ledger.update(q3_leaf_censuses=0, q3_leaf_point_tests=0)
@@ -125,7 +125,17 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                   static_by_k=[0.0] * k, lots_by_k=[0.01 if static_path else 0.0] * k,
                   images_by_k=[0.01 if static_path else 0.0] * k, encode_by_k=[0.01] * k,
                   order_by_k=[0.0 if static_path else 0.005] * k)
-    return dict(schema='mhgp9_tower_probe_v16', status=status,
+    # v17: the batch path's phases (zero on the engine path); survivors are
+    # the expanded pairs minus the rejected ones.
+    batch = dict(used=False, backend='', front_ms=0.0, filter_ms=0.0, edges_ms=0.0, device_ms=0.0, rectangles=0,
+                 survivors=0)
+    if complete and levers.get('q34_batch_filter'):
+        gpu = levers.get('q34_gpu_filter')
+        batch = dict(used=True, backend='NVIDIA RTX PRO 6000 Blackwell Server Edition' if gpu else 'cpu',
+                     front_ms=0.03, filter_ms=0.03, edges_ms=0.03, device_ms=0.02 if gpu else 0.0,
+                     rectangles=ledger['q34_input_rectangles'],
+                     survivors=ledger['expanded_pairs'] - ledger['witness_rejected_pairs'])
+    return dict(schema='mhgp9_tower_probe_v17', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
@@ -141,7 +151,7 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                                extra_shell_balls=0, shell_over_12=0, max_shell=4, max_interior=3, census_nodes=9,
                                census_leaf_tests=5, bytes=64, by_qmin=[1, 2, 1],
                                by_shell=[0, 0, 1, 2, 1] + [0] * 12, euler=euler),
-                q34_occupancy=occupancy, tower_phases_ms=phases,
+                q34_occupancy=occupancy, q34_batch=batch, tower_phases_ms=phases,
                 tower_work=dict(records=4, extra_records=0, representatives=5, anchor_hits=1, key_lookups=4,
                                 intruder_queries=2, intruder_nodes=7, meb_calls=4, meb_power_tests=9, births=3,
                                 merges=2, contributions=3, grouped_lots=1, resolver_cache_hits=2,
@@ -225,10 +235,11 @@ def main():
     if args == ['--version']:
         print('cmake version 3.22.1 (selftest fake; never a real build)')
         return 0
-    if len(args) == 7 and args[0] == '-S' and args[2] == '-B':
+    if len(args) == 9 and args[0] == '-S' and args[2] == '-B':
         source, build = pathlib.Path(args[1]), pathlib.Path(args[3])
         if (args[4:6] != ['-DCMAKE_BUILD_TYPE=Release', '-DBOOST_ROOT=/usr'] or
-                not args[6].startswith('-DCMAKE_CXX_COMPILER=') or any('Wno-error' in item for item in args)):
+                not args[6].startswith('-DCMAKE_CXX_COMPILER=') or args[7] != '-DMHGP9_ENABLE_CUDA=ON' or
+                not args[8].startswith('-DCMAKE_CUDA_COMPILER=') or any('Wno-error' in item for item in args)):
             return 64
         if not (source / 'CMakeLists.txt').is_file() or config.get('fail_configure'):
             print('CMake Error: selftest configure failure', file=sys.stderr)
@@ -267,6 +278,20 @@ import sys
 if sys.argv[1:] != ['--version']:
     raise SystemExit(64)
 print('g++ (selftest fake) 11.4.0')
+'''
+
+FAKE_NVCC = r'''
+import sys
+if sys.argv[1:] != ['--version']:
+    raise SystemExit(64)
+print('Cuda compilation tools, release 12.9, V12.9.41 (selftest fake)')
+'''
+
+FAKE_SMI = r'''
+import sys
+if sys.argv[1:] != ['--query-gpu=name,driver_version,memory.total,compute_cap', '--format=csv,noheader']:
+    raise SystemExit(64)
+print('NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.173.02, 97887 MiB, 12.0')
 '''
 
 
@@ -387,7 +412,8 @@ def fake_tools(directory, **config):
     (directory / 'boost_cpp_int.hpp').write_text('// selftest stand-in for boost/multiprecision/cpp_int.hpp\n')
     shebang = '#!' + sys.executable + ' -B\n'
     probe = 'CONFIG = ' + repr(str(fakebin / 'config.json')) + '\n' + FAKE_PROBE
-    for name, text in (('cmake', FAKE_CMAKE), ('g++', FAKE_GXX), ('fake_probe.py', probe)):
+    for name, text in (('cmake', FAKE_CMAKE), ('g++', FAKE_GXX), ('nvcc', FAKE_NVCC), ('nvidia-smi', FAKE_SMI),
+                       ('fake_probe.py', probe)):
         (fakebin / name).write_text(shebang + text)
         (fakebin / name).chmod(0o755)
     return fakebin
@@ -408,6 +434,7 @@ def guest(fakebin, generation, schedule_text):
         stack.enter_context(patch.object(worker, 'load_helper', load))
         stack.enter_context(patch.object(worker, 'BOOST_HEADER', str(fakebin.parent / 'boost_cpp_int.hpp')))
         stack.enter_context(patch.object(worker, 'available_cpus', lambda: list(range(48))))
+        stack.enter_context(patch.object(worker, 'CUDA_PATHS', (str(fakebin / 'nvcc'),)))
         stack.enter_context(patch.object(worker, 'boot_epoch', lambda: session.epoch(generation)))
         yield
 
@@ -521,6 +548,8 @@ def run_scenario(directory, cloud=None, tools=None, patches=()):
     args = session_args(directory)
     with ExitStack() as stack:
         stack.enter_context(patch.object(session, 'Commands', fake.commands_class()))
+        # The host reception checks the recorded nvcc against CUDA_PATHS too.
+        stack.enter_context(patch.object(worker, 'CUDA_PATHS', (str(fakebin / 'nvcc'),)))
         for owner, name, value in patches:
             stack.enter_context(patch.object(owner, name, value))
         stack.enter_context(redirect_stdout(io.StringIO()))

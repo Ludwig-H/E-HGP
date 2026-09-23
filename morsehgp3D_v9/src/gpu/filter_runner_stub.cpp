@@ -10,4 +10,11 @@ FilterOutput run_filters(const FilterInput& input) {
   return out;
 }
 
+BatchOutput run_filter_batch(const FilterInput& input) {
+  BatchOutput out;
+  out.error = validate_filter_input(input);
+  if (out.error.empty()) out.error = "built without MHGP9_ENABLE_CUDA";
+  return out;
+}
+
 }  // namespace mhgp9::gpu

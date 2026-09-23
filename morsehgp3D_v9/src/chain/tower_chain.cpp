@@ -19,6 +19,8 @@
 #include "pipeline/q2_census.hpp"
 #include "pipeline/wspd_q2_parallel.hpp"
 #include "pipeline/wspd_q34.hpp"
+#include "../gpu/filter_runner.hpp"
+#include "../gpu/flat_index.hpp"
 
 namespace mhgp9 {
 
@@ -64,6 +66,69 @@ struct Failure {
 [[noreturn]] void fail(ChainStatus status, std::string reason) { throw Failure{status, std::move(reason)}; }
 void require(bool ok, const char* reason) {
   if (!ok) fail(ChainStatus::kInvariantViolated, reason);
+}
+
+// Device absent or CUDA error: an explicit refusal of the q34_gpu_filter
+// lever, never a silent CPU fallback.
+struct GpuUnavailable : std::runtime_error {
+  using std::runtime_error::runtime_error;
+};
+
+// The batch call of gen::run_wspd_q34_batched on the device: flat copy of the
+// immutable index (the device guard rechecks u18 boxes and partitions), one
+// pass, compacted survivors in rectangle order. A device stack-bound
+// violation is an invariant violation of the port, never an answer.
+gen::Q34FilterBatch gpu_filter_batch(const gen::Q2CensusIndex& index, unsigned kmax,
+                                     std::span<const gen::WspdRectangle> rectangles, double& device_ms) {
+  const auto flat = gpu::flatten_nodes(index);
+  const auto order = index.spatial_order();
+  const auto points = index.cloud().points();
+  std::vector<std::int32_t> rank_points(3 * order.size());
+  for (std::size_t r = 0; r < order.size(); ++r) {
+    const auto& q = points[order[r]];
+    rank_points[3 * r] = q.x;
+    rank_points[3 * r + 1] = q.y;
+    rank_points[3 * r + 2] = q.z;
+  }
+  std::vector<gpu::u32> a(rectangles.size()), b(rectangles.size());
+  std::vector<gpu::u8> lanes(rectangles.size());
+  for (std::size_t i = 0; i < rectangles.size(); ++i) {
+    if (rectangles[i].a_node >= flat.size() || rectangles[i].b_node >= flat.size())
+      throw std::logic_error("chain_q34_gpu_rectangle_outside_index");
+    a[i] = static_cast<gpu::u32>(rectangles[i].a_node);
+    b[i] = static_cast<gpu::u32>(rectangles[i].b_node);
+    lanes[i] = rectangles[i].lane_mask;
+  }
+  gpu::FilterInput in;
+  in.nodes = flat.data();
+  in.node_count = flat.size();
+  in.rank_points = rank_points.data();
+  in.rank_count = order.size();
+  in.rect_a = a.data();
+  in.rect_b = b.data();
+  in.rect_mask = lanes.data();
+  in.rect_count = rectangles.size();
+  in.kmax = kmax;
+  auto out = gpu::run_filter_batch(in);
+  if (!out.available || !out.error.empty())
+    throw GpuUnavailable(out.error.empty() ? std::string("no CUDA device") : out.error);
+  if (out.stack_failure) throw std::logic_error("chain_q34_gpu_stack_bound_violated");
+  const std::size_t survivors = out.survivor_mask.size();
+  if (out.survivor_a.size() != survivors || out.survivor_b.size() != survivors)
+    throw std::logic_error("chain_q34_gpu_survivor_arrays_differ");
+  gen::Q34FilterBatch batch;
+  batch.backend = out.device;
+  batch.rectangle_masks = std::move(out.rect_masks);
+  batch.survivors.resize(survivors);
+  for (std::size_t j = 0; j < survivors; ++j)
+    batch.survivors[j] = {out.survivor_a[j], out.survivor_b[j], out.survivor_mask[j]};
+  batch.expanded_pairs = out.pairs;
+  batch.pair_q3_rejected = out.pair_q3_rejected;
+  batch.pair_q4_rejected = out.pair_q4_rejected;
+  batch.rectangle_visits = out.rect_visits;
+  batch.pair_visits = out.pair_visits;
+  device_ms = out.total_ms;
+  return batch;
 }
 
 // Une presentation emise par le generateur : cle, arite presentee (pas q_min),
@@ -300,6 +365,8 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     if (options.kmax < 1 || options.kmax > 10) fail(ChainStatus::kInvalidInput, "chain_kmax_outside_1_10");
     if (options.separation_s < 8) fail(ChainStatus::kInvalidInput, "chain_separation_below_8");
     if (options.workers < 1) fail(ChainStatus::kInvalidInput, "chain_workers_zero");
+    if (options.q34_gpu_filter && !options.q34_batch_filter)
+      fail(ChainStatus::kInvalidInput, "chain_q34_gpu_filter_requires_batch_filter");
     if (points.size() < 2) fail(ChainStatus::kInvalidInput, "chain_requires_two_sites");
     if (points.size() > static_cast<std::size_t>(std::numeric_limits<std::int32_t>::max()))
       fail(ChainStatus::kInvalidInput, "chain_too_many_sites");
@@ -372,18 +439,48 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       o.pair_witness_cache = options.q34_witness_cache;
       o.dead_core = options.q34_dead_core;
       o.jobs_by_mass = options.q34_jobs_by_mass;
-      const auto r34 = gen::run_wspd_q34_parallel(
-          index, kmax, options.separation_s, o, W,
-          [&slots](std::size_t slot, const gen::Q34SeedCandidate& c) {
-            Presentation p;
-            p.arity = static_cast<std::uint8_t>(c.arity);
-            for (unsigned j = 0; j < c.arity; ++j) p.support[j] = static_cast<std::uint32_t>(c.support_ids[j]);
-            p.key = c.ball.coefficients();
-            p.depth = static_cast<std::uint32_t>(c.depth);
-            p.shell = static_cast<std::uint32_t>(c.shell_first.size() + c.shell_second.size());
-            slots[slot].push_back(p);
-          },
-          options.q34_fine_jobs ? 64 : 16);
+      const gen::WspdQ34ParallelConsumer consumer = [&slots](std::size_t slot, const gen::Q34SeedCandidate& c) {
+        Presentation p;
+        p.arity = static_cast<std::uint8_t>(c.arity);
+        for (unsigned j = 0; j < c.arity; ++j) p.support[j] = static_cast<std::uint32_t>(c.support_ids[j]);
+        p.key = c.ball.coefficients();
+        p.depth = static_cast<std::uint32_t>(c.depth);
+        p.shell = static_cast<std::uint32_t>(c.shell_first.size() + c.shell_second.size());
+        slots[slot].push_back(p);
+      };
+      const std::size_t jobs_per_worker = options.q34_fine_jobs ? 64 : 16;
+      gen::WspdQ34ParallelResult r34;
+      if (!options.q34_batch_filter) {
+        r34 = gen::run_wspd_q34_parallel(index, kmax, options.separation_s, o, W, consumer, jobs_per_worker);
+      } else {
+        double device_ms = 0;
+        gen::Q34BatchFilter filter;
+        if (options.q34_gpu_filter) {
+          filter = [&device_ms](const gen::Q2CensusIndex& ix, unsigned k, std::span<const gen::WspdRectangle> rects) {
+            return gpu_filter_batch(ix, k, rects, device_ms);
+          };
+        } else {
+          filter = [W](const gen::Q2CensusIndex& ix, unsigned k, std::span<const gen::WspdRectangle> rects) {
+            return gen::run_q34_filter_batch_cpu(ix, k, rects, W);
+          };
+        }
+        gen::WspdQ34BatchTiming timing;
+        try {
+          r34 = gen::run_wspd_q34_batched(index, kmax, options.separation_s, o, W, consumer, jobs_per_worker,
+                                          filter, &timing);
+        } catch (const GpuUnavailable& e) {
+          fail(ChainStatus::kInvalidInput, std::string("chain_q34_gpu_unavailable: ") + e.what());
+        }
+        auto& b = result.q34_batch;
+        b.used = true;
+        b.backend = timing.backend;
+        b.front_ms = static_cast<double>(timing.front_ns) / 1e6;
+        b.filter_ms = static_cast<double>(timing.filter_ns) / 1e6;
+        b.edges_ms = static_cast<double>(timing.edges_ns) / 1e6;
+        b.device_ms = device_ms;
+        b.rectangles = timing.rectangles;
+        b.survivors = timing.survivors;
+      }
       result.q34_expanded_pairs = r34.pipeline.work.expanded_pairs;
       result.q34_cover_builds = r34.pipeline.work.cover_builds;
       result.q3_emitted = r34.pipeline.work.q3_emitted;

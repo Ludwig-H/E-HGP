@@ -482,6 +482,10 @@ class Engine {
     expand(task.a_first, task.a_last, b.first, b.last, task.mask);
   }
 
+  // Batch path: an edge whose witness filter was decided by the batch call
+  // (original IDs). Only the core/cover/certificate/q3/q4 work is paid here.
+  void surviving_edge(std::size_t a, std::size_t b, std::uint8_t mask) { filtered_edge(a, b, mask); }
+
   WspdQ34Work work{};
   u64 split_rectangles{};  // Not a geometric counter: orchestration only.
 
@@ -546,6 +550,15 @@ class Engine {
       mask = filtered;
       if (mask == 0) { counter_add(work.witness.rejected_pairs); return; }
     }
+    filtered_edge(a, b, mask);
+  }
+
+  // The rest of an edge once its witness filter is decided (engine or batch
+  // path): core, cover, certificate, then the q3/q4 lanes. `mask` holds the
+  // surviving lanes; expanded_pairs and the witness ledger are not touched.
+  void filtered_edge(std::size_t a, std::size_t b, std::uint8_t mask) {
+    if (mask == 0 || (mask & ~6U) != 0)
+      throw std::logic_error("mhgp9 gen global q34 received an inactive filtered edge");
     if (options_.dead_core) {
       // Diametral core first: every credit it gives, the cover gives too.
       // A lane it leaves open is rerun below on the full cover.
@@ -983,6 +996,264 @@ WspdQ34ParallelResult run_wspd_q34_parallel(Q2CensusIndexPtr index, unsigned kma
   if (result.tasks.published != result.tasks.consumed || !queue.pending.empty())
     throw std::logic_error("mhgp9 gen parallel q34 lost a published rectangle range");
   validate_completion(result.pipeline, options);
+  return result;
+}
+
+Q34FilterBatch run_q34_filter_batch_cpu(const Q2CensusIndex& index, unsigned kmax,
+                                        std::span<const WspdRectangle> rectangles, std::size_t workers) {
+  if (workers == 0) throw std::invalid_argument("mhgp9 gen q34 batch filter requires a positive worker count");
+  if (kmax == 0 || kmax > 10) throw std::invalid_argument("mhgp9 gen q34 batch filter requires K1..10");
+  const auto nodes = index.spatial_nodes();
+  const auto order = index.spatial_order();
+  const auto points = index.cloud().points();
+  if (order.size() > std::numeric_limits<std::uint32_t>::max())
+    throw std::overflow_error("mhgp9 gen q34 batch filter ranks exceed u32");
+  Q34FilterBatch out;
+  out.backend = "cpu";
+  out.rectangle_masks.assign(rectangles.size(), 0);
+  // Contiguous blocks, concatenated in block order: rectangle order, and
+  // row-major pairs inside each rectangle, whatever the thread count.
+  constexpr std::size_t grain = 256;
+  const std::size_t blocks = (rectangles.size() + grain - 1) / grain;
+  struct Part {
+    std::vector<Q34SurvivingEdge> survivors;
+    u64 expanded{}, q3{}, q4{}, rectangle_visits{}, pair_visits{};
+  };
+  std::vector<Part> parts(blocks);
+  std::atomic<std::size_t> next{0};
+  const auto k = static_cast<std::uint8_t>(kmax);
+  parallel_detail::run_joined_workers(std::min(workers, std::max<std::size_t>(blocks, 1)),
+      [&](std::size_t, const std::atomic<bool>& cancel) {
+        for (;;) {
+          if (cancel.load(std::memory_order_relaxed)) return;
+          const std::size_t block = next.fetch_add(1);
+          if (block >= blocks) return;
+          auto& part = parts[block];
+          Q34WitnessSearchWork rectangle_work, pair_work;
+          Q34WitnessBoundsWork rectangle_bounds, pair_bounds;
+          for (std::size_t i = block * grain; i < std::min(rectangles.size(), (block + 1) * grain); ++i) {
+            const auto& r = rectangles[i];
+            if (r.a_node >= nodes.size() || r.b_node >= nodes.size() || r.lane_mask == 0 || (r.lane_mask & ~6U) != 0)
+              throw std::invalid_argument("mhgp9 gen q34 batch filter received a rectangle outside the index/lanes");
+            const auto mask = filter_q34_witnesses(index, nodes[r.a_node].box, nodes[r.b_node].box, k, r.lane_mask,
+                                                   rectangle_work, Q34WitnessBoundsMode::Affine, rectangle_bounds);
+            out.rectangle_masks[i] = mask;
+            if (mask == 0) continue;
+            const auto a = nodes[r.a_node].range, b = nodes[r.b_node].range;
+            counter_add(part.expanded, static_cast<u64>(a.size()) * b.size());
+            for (auto ai = a.first; ai < a.last; ++ai)
+              for (auto bi = b.first; bi < b.last; ++bi) {
+                const auto pair = filter_q34_witnesses(index, singleton_box(points[order[ai]]),
+                    singleton_box(points[order[bi]]), k, mask, pair_work, Q34WitnessBoundsMode::Affine,
+                    pair_bounds);
+                if ((mask & 2U) != 0 && (pair & 2U) == 0) counter_add(part.q3);
+                if ((mask & 4U) != 0 && (pair & 4U) == 0) counter_add(part.q4);
+                if (pair != 0)
+                  part.survivors.push_back({static_cast<std::uint32_t>(ai), static_cast<std::uint32_t>(bi), pair});
+              }
+          }
+          part.rectangle_visits = rectangle_work.node_visits;
+          part.pair_visits = pair_work.node_visits;
+        }
+      });
+  std::size_t total = 0;
+  for (const auto& part : parts) total += part.survivors.size();
+  out.survivors.reserve(total);
+  for (auto& part : parts) {
+    out.survivors.insert(out.survivors.end(), part.survivors.begin(), part.survivors.end());
+    counter_add(out.expanded_pairs, part.expanded);
+    counter_add(out.pair_q3_rejected, part.q3);
+    counter_add(out.pair_q4_rejected, part.q4);
+    counter_add(out.rectangle_visits, part.rectangle_visits);
+    counter_add(out.pair_visits, part.pair_visits);
+  }
+  return out;
+}
+
+WspdQ34ParallelResult run_wspd_q34_batched(Q2CensusIndexPtr index, unsigned kmax,
+    unsigned separation_s, WspdQ34Options options, std::size_t worker_count,
+    const WspdQ34ParallelConsumer& consumer, std::size_t jobs_per_worker,
+    const Q34BatchFilter& filter, WspdQ34BatchTiming* timing) {
+  validate(index, kmax, separation_s, options, static_cast<bool>(consumer));
+  if (!filter) throw std::invalid_argument("mhgp9 gen batched q34 requires a batch filter");
+  if (options.witness_mode != WspdQ34WitnessMode::RectanglePair ||
+      options.witness_bounds_mode != Q34WitnessBoundsMode::Affine)
+    throw std::invalid_argument("mhgp9 gen batched q34 implements RectanglePair witnesses with Affine bounds only");
+  if (worker_count == 0 || jobs_per_worker == 0)
+    throw std::invalid_argument("mhgp9 gen batched q34 requires positive workers/job granularity");
+  if (worker_count > std::numeric_limits<std::size_t>::max() / jobs_per_worker)
+    throw std::overflow_error("mhgp9 gen batched q34 target job count overflow");
+  const auto target_jobs = worker_count * jobs_per_worker;
+  WspdQ34ParallelResult result{};
+  result.pipeline = empty_result(index, kmax, options);
+  auto& orchestration = result.parallel;
+  orchestration.requested_workers = static_cast<u64>(worker_count);
+  orchestration.target_jobs = static_cast<u64>(target_jobs);
+  WspdQ34BatchTiming local_timing;
+  if (result.pipeline.front.active_lane_mask == 0) {
+    if (timing != nullptr) *timing = local_timing;
+    return result;
+  }
+  const auto wall_ns = [] {
+    return static_cast<u64>(std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count());
+  };
+  const auto thread_cpu_ns = [] {
+    timespec now{};
+    if (clock_gettime(CLOCK_THREAD_CPUTIME_ID, &now) != 0) return u64{0};
+    return static_cast<u64>(static_cast<u64>(now.tv_sec) * u64{1000000000} + static_cast<u64>(now.tv_nsec));
+  };
+
+  // ---- Phase 1: the front jobs only collect their residual rectangles.
+  auto phase = wall_ns();
+  const auto plan = make_wspd_front_jobs(index, kmax, separation_s, options.front_mode,
+                                       target_jobs, options.requested_lane_mask, {}, options.jobs_by_mass);
+  result.pipeline.front = plan->prefix_result();
+  orchestration.prefix_product_visits = result.pipeline.front.work.product_visits;
+  orchestration.jobs = static_cast<u64>(plan->job_count());
+  orchestration.terminal_jobs = static_cast<u64>(plan->terminal_job_count());
+  orchestration.job_storage_bytes = static_cast<u64>(plan->retained_bytes());
+  const auto started = std::min(worker_count, plan->job_count());
+  orchestration.started_workers = static_cast<u64>(started);
+  const std::vector<WspdQ34ParallelConsumer> callbacks(started, consumer);
+  orchestration.callback_storage_bytes = storage_bytes(callbacks.capacity(), sizeof(WspdQ34ParallelConsumer));
+  struct alignas(64) WorkerState {
+    WspdFrontWork front{};
+    WspdQ34Work work{};
+    WspdQ34WorkerWork stats{};
+    WspdQ34WorkerTiming timing{};
+  };
+  std::vector<WorkerState> states(started);
+  orchestration.worker_state_bytes = storage_bytes(states.capacity(), sizeof(WorkerState));
+  std::vector<std::vector<WspdRectangle>> by_job(plan->job_count());
+  {
+    std::atomic<std::size_t> next{0};
+    parallel_detail::run_joined_workers(started, [&](std::size_t slot, const std::atomic<bool>& cancel) {
+      auto& state = states[slot];
+      const auto wall_start = wall_ns(), cpu_start = thread_cpu_ns();
+      for (;;) {
+        if (cancel.load(std::memory_order_relaxed)) break;
+        const std::size_t job = next.fetch_add(1);
+        if (job >= by_job.size()) break;
+        auto& sink = by_job[job];
+        const auto job_start = wall_ns();
+        const auto part = plan->run_job(job, [&](const WspdRectangle& rectangle) { sink.push_back(rectangle); });
+        const auto elapsed = wall_ns() - job_start;
+        counter_add(state.timing.job_ns, elapsed);
+        state.timing.max_job_ns = std::max(state.timing.max_job_ns, elapsed);
+        parallel_detail::merge_work(state.front, part.work);
+        counter_add(state.stats.jobs);
+      }
+      counter_add(state.timing.wall_ns, wall_ns() - wall_start);
+      counter_add(state.timing.cpu_ns, thread_cpu_ns() - cpu_start);
+    });
+  }
+  std::vector<WspdRectangle> rectangles;
+  {
+    std::size_t total = 0;
+    for (const auto& job : by_job) total += job.size();
+    rectangles.reserve(total);
+    for (auto& job : by_job) {
+      rectangles.insert(rectangles.end(), job.begin(), job.end());
+      std::vector<WspdRectangle>().swap(job);
+    }
+  }
+  local_timing.front_ns = wall_ns() - phase;
+  local_timing.rectangles = rectangles.size();
+
+  // ---- Phase 2: one batch call decides every rectangle and every pair.
+  phase = wall_ns();
+  auto batch = filter(*index, kmax, rectangles);
+  local_timing.filter_ns = wall_ns() - phase;
+  local_timing.backend = batch.backend;
+  const auto nodes = index->spatial_nodes();
+  const auto order = index->spatial_order();
+  if (batch.rectangle_masks.size() != rectangles.size())
+    throw std::logic_error("mhgp9 gen batched q34 filter returned a mask count different from its rectangles");
+  WspdQ34Work filter_work{};
+  auto& witness = filter_work.witness;
+  u64 expanded = 0;
+  for (std::size_t i = 0; i < rectangles.size(); ++i) {
+    const auto& r = rectangles[i];
+    const auto mask = batch.rectangle_masks[i];
+    if ((mask & ~r.lane_mask) != 0)
+      throw std::logic_error("mhgp9 gen batched q34 filter opened a lane its rectangle did not carry");
+    const i128 product = static_cast<i128>(nodes[r.a_node].range.size()) * nodes[r.b_node].range.size();
+    if (product > std::numeric_limits<u64>::max())
+      throw std::overflow_error("mhgp9 gen batched q34 rectangle mass exceeds u64");
+    const auto mass = static_cast<u64>(product);
+    counter_add(filter_work.input_rectangles);
+    counter_add(witness.input_pair_mass, mass);
+    if ((r.lane_mask & 2U) != 0 && (mask & 2U) == 0) counter_add(witness.rectangle_q3_pairs, mass);
+    if ((r.lane_mask & 4U) != 0 && (mask & 4U) == 0) counter_add(witness.rectangle_q4_pairs, mass);
+    if (mask == 0) {
+      counter_add(witness.rejected_rectangles);
+      counter_add(witness.rectangle_pair_mass, mass);
+    } else {
+      counter_add(expanded, mass);
+    }
+  }
+  if (batch.expanded_pairs != expanded || batch.survivors.size() > expanded)
+    throw std::logic_error("mhgp9 gen batched q34 filter pair count differs from its surviving rectangles");
+  for (const auto& edge : batch.survivors)
+    if (edge.mask == 0 || (edge.mask & ~6U) != 0 || edge.a_rank >= order.size() || edge.b_rank >= order.size())
+      throw std::logic_error("mhgp9 gen batched q34 filter returned a malformed surviving pair");
+  filter_work.expanded_pairs = expanded;
+  witness.rejected_pairs = expanded - batch.survivors.size();
+  witness.pair_q3_pairs = batch.pair_q3_rejected;
+  witness.pair_q4_pairs = batch.pair_q4_rejected;
+  witness.rectangles.queries = static_cast<u64>(rectangles.size());
+  witness.rectangles.node_visits = batch.rectangle_visits;
+  witness.pairs.queries = expanded;
+  witness.pairs.node_visits = batch.pair_visits;
+  local_timing.survivors = batch.survivors.size();
+  std::vector<WspdRectangle>().swap(rectangles);
+
+  // ---- Phase 3: the workers run the rest of every surviving edge.
+  phase = wall_ns();
+  {
+    std::atomic<std::size_t> next{0};
+    constexpr std::size_t grain = 64;
+    const auto& survivors = batch.survivors;
+    parallel_detail::run_joined_workers(started, [&](std::size_t slot, const std::atomic<bool>& cancel) {
+      auto& state = states[slot];
+      const auto wall_start = wall_ns(), cpu_start = thread_cpu_ns();
+      const Q34SeedConsumer output = [&](const Q34SeedCandidate& candidate) { callbacks[slot](slot, candidate); };
+      {
+        Engine engine(index, kmax, options, output);
+        for (;;) {
+          if (cancel.load(std::memory_order_relaxed)) break;
+          const std::size_t begin = next.fetch_add(grain);
+          if (begin >= survivors.size()) break;
+          for (std::size_t j = begin; j < std::min(survivors.size(), begin + grain); ++j)
+            engine.surviving_edge(order[survivors[j].a_rank], order[survivors[j].b_rank], survivors[j].mask);
+        }
+        state.work = engine.work;
+      }
+      counter_add(state.timing.wall_ns, wall_ns() - wall_start);
+      counter_add(state.timing.cpu_ns, thread_cpu_ns() - cpu_start);
+    });
+  }
+  local_timing.edges_ns = wall_ns() - phase;
+  merge(result.pipeline.work, filter_work);
+  result.workers.reserve(states.size());
+  result.worker_tasks.assign(states.size(), 0);
+  for (auto& state : states) {
+    parallel_detail::merge_work(result.pipeline.front.work, state.front);
+    merge(result.pipeline.work, state.work);
+    counter_add(orchestration.completed_jobs, state.stats.jobs);
+    counter_add(orchestration.edge_buffer_bytes_sum, state.work.peak_edge_buffer_bytes);
+    state.stats.front_products = state.front.product_visits;
+    state.stats.q3_emitted = state.work.q3_emitted;
+    state.stats.q4_emitted = state.work.q4_emitted;
+    state.stats.peak_edge_buffer_bytes = state.work.peak_edge_buffer_bytes;
+    result.workers.push_back(state.stats);
+    result.worker_timings.push_back(state.timing);
+  }
+  if (orchestration.completed_jobs != orchestration.jobs)
+    throw std::logic_error("mhgp9 gen batched q34 lost its front job partition");
+  validate_completion(result.pipeline, options);
+  if (timing != nullptr) *timing = std::move(local_timing);
   return result;
 }
 

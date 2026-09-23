@@ -46,14 +46,14 @@ struct FilterOutput {
 // arithmetic is proved only for u18 coordinates, and a box credits or
 // excludes every site of its rank range: a forged box that misses one of
 // its points makes a false rejection (A's fixture: q4 mask 4 -> 0). Checked:
-// K in 3..10; coordinates and box bounds in 0..262143 with low <= high;
+// K in 1..10 (the filter derives the available lanes); coordinates and box bounds in 0..262143 with low <= high;
 // children partition their parent's rank range exactly; every box contains
 // the points of its range (O(n * depth)); rectangle ids, lane masks subset
 // of 6, and CUB's int item count. Tight hulls are not required: a larger
 // box only weakens both certificates.
 inline std::string validate_filter_input(const FilterInput& input) {
   constexpr std::int32_t limit = 262143;
-  if (input.kmax < 3 || input.kmax > 10) return "kmax outside 3..10";
+  if (input.kmax < 1 || input.kmax > 10) return "kmax outside 1..10";
   if (input.nodes == nullptr || input.node_count == 0 || input.node_count >= absent32) return "empty or huge node array";
   if (input.rank_points == nullptr || input.rank_count == 0 || input.rank_count >= absent32) return "empty rank array";
   if (input.rect_count > static_cast<std::size_t>(0x7fffffff)) return "rectangle count exceeds the CUB int range";
@@ -95,5 +95,26 @@ inline std::string validate_filter_input(const FilterInput& input) {
 // returns available=false. Refuses (error) any input validate_filter_input
 // refuses, before touching the device.
 FilterOutput run_filters(const FilterInput& input);
+
+// S2 (chain): one device pass, then only the surviving pairs come back,
+// compacted on the device in rectangle order (row-major inside each
+// rectangle), with their spatial ranks and lanes; plus the rectangle masks
+// and the lane rejections among the expanded pairs. Same validation and
+// kernels as run_filters; `repeats` is ignored (one pass).
+struct BatchOutput {
+  bool available = false;
+  std::string device;
+  std::string error;  // non-empty: nothing below is valid
+  bool stack_failure = false;
+  std::vector<u8> rect_masks;
+  std::vector<u32> survivor_a, survivor_b;  // spatial ranks
+  std::vector<u8> survivor_mask;
+  std::uint64_t pairs = 0, pair_q3_rejected = 0, pair_q4_rejected = 0;
+  std::uint64_t rect_visits = 0, pair_visits = 0;
+  // cudaEvent timings of the pass (ms): upload, rectangle kernel, mass scan,
+  // pair kernel, survivor compaction, download of masks and survivors.
+  double upload_ms = 0, rect_ms = 0, scan_ms = 0, pair_ms = 0, select_ms = 0, download_ms = 0, total_ms = 0;
+};
+BatchOutput run_filter_batch(const FilterInput& input);
 
 }  // namespace mhgp9::gpu

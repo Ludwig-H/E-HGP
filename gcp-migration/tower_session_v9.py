@@ -52,7 +52,8 @@ need, sha, save, unique, fields, epoch, target = (
     legacy.need, legacy.sha, legacy.save, legacy.unique, legacy.fields, legacy.epoch, legacy.target)
 generation_from_records, closure_generation = legacy.generation_from_records, legacy.closure_generation
 Commands, extract_capture = legacy.Commands, legacy.extract_capture
-FIXED_COMMANDS = ('compiler', 'cmake_version', 'time_version', 'lscpu', 'nproc', 'configure', 'build', 'preflight')
+FIXED_COMMANDS = ('compiler', 'cmake_version', 'nvcc_version', 'gpu_inventory', 'time_version', 'lscpu', 'nproc',
+                  'configure', 'build', 'preflight')
 CASE_COMMAND = re.compile(r'(uptime_before|probe|uptime_after)_(0|[1-9][0-9]*)')
 
 
@@ -163,9 +164,13 @@ def validate_received(output, manifest, worker_pin, expected_cases, generation, 
     need(type(value) is dict and value.get('status') in ('completed', 'partial') and
          value.get('sources_stable') is True and value.get('compiled_dependencies_stable') is True and
          value.get('binary_stable') is True and value.get('worker_sha256') == worker_pin and
-         value.get('backend') == 'reference_cpu' and value.get('GPU_executed') is False and
          value.get('FULL_executed') is True and value.get('contract_certified') is False and
-         value.get('public_status') == 'not_claimed', 'worker completion/scope')
+         value.get('public_status') == 'not_claimed' and value.get('CUDA_installation_attempted') is False,
+         'worker completion/scope')
+    # v17: the backend label and the device pass follow the transported plan.
+    gpu = payload.plan_uses_gpu(expected_cases)
+    need(value.get('backend') == ('cuda_g4' if gpu else 'reference_cpu') and value.get('GPU_attempted') is gpu and
+         value.get('GPU_executed') is gpu, 'worker backend/GPU labels differ from the plan')
     need(value.get('useful_budget_seconds') == payload.USEFUL_BUDGET_SECONDS and
          value.get('case_cap_seconds') == payload.CASE_CAP_SECONDS, 'worker budgets')
     dependencies_path = output / 'compiled_dependencies.json'
@@ -196,12 +201,16 @@ def validate_received(output, manifest, worker_pin, expected_cases, generation, 
             need(row.get('exit_code') == 0 and row.get('group_closed') is True and
                  not row.get('residual_or_interrupted_group_killed'), 'worker command closure: ' + stem)
     configure, build = rows['configure']['argv'], rows['build']['argv']
-    need(configure[0] == build[0] == rows['cmake_version']['argv'][0] and configure[1] == '-S' and
-         configure[2].endswith('/' + payload.SOURCE_ROOT) and configure[3] == '-B' and
-         configure[5:] == ['-DCMAKE_BUILD_TYPE=Release', '-DBOOST_ROOT=' + payload.BOOST_ROOT,
-                           '-DCMAKE_CXX_COMPILER=' + rows['compiler']['argv'][0]] and
-         build[1:] == ['--build', configure[4], '--target', payload.PROBE_TARGET, '--parallel', payload.BUILD_PARALLEL],
-         'strict CMake configure/build invocation (no -Wno-error)')
+    tools = {'cmake': rows['cmake_version']['argv'][0], 'g++': rows['compiler']['argv'][0],
+             'nvcc': rows['nvcc_version']['argv'][0]}
+    need(len(configure) == 10 and configure[1] == '-S' and configure[2].endswith('/' + payload.SOURCE_ROOT) and
+         configure[3] == '-B' and tools['nvcc'] in payload.CUDA_PATHS and
+         configure == payload.configure_command(tools, Path(configure[2][:-len('/' + payload.SOURCE_ROOT)]),
+                                                Path(configure[4])) and
+         build == [tools['cmake'], '--build', configure[4], '--target', payload.PROBE_TARGET, '--parallel',
+                   payload.BUILD_PARALLEL],
+         'strict CMake configure/build invocation (CUDA on, no -Wno-error)')
+    need(payload.DEVICE_NAME in (output / 'gpu_inventory.stdout').read_text(), 'G4 GPU inventory')
     cases = payload.validate_plan(dict(schema=value.get('plan_schema'), cases=value.get('cases')), manifest)
     need(cases == expected_cases, 'worker case plan differs from transported plan')
     # Preflight natif rejuge a la reception : memes octets de nuage, meme
@@ -458,6 +467,8 @@ def run_session(args):
                         state['status'] = validate_received(host / 'received/output', manifest, args.worker_sha256,
                                                             expected_cases, generation, provenance, verified_guard)
                         state['FULL_executed'] = True
+                        state['GPU_executed'] = payload.plan_uses_gpu(expected_cases)
+                        state['backend'] = 'cuda_g4' if state['GPU_executed'] else 'reference_cpu'
                 except BaseException as error:
                     state.update(status='capture_failed', capture_error=type(error).__name__ + ': ' + str(error))
         finally:

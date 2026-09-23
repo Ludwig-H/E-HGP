@@ -48,7 +48,7 @@ PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
 PLAN_SCHEMA = 'mhgp9_tower_plan_v6'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v16'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v17'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -98,9 +98,14 @@ OUTCOMES = ('complete_relative', 'explicit_refusal', 'killed_case_cap', 'killed_
 CASE_KEYS = frozenset({'scene', 'file', 'n', 'k', 's', 'workers', 'static_threads', 'levers', 'repeat'})
 LEVER_NAMES = ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_witness_cache', 'q34_dead_core',
                'tower_meb_proposal', 'q34_jobs_by_mass', 'q34_fine_jobs', 'tower_overlap_static',
-               'q2_jobs_by_mass')
+               'q2_jobs_by_mass', 'q34_batch_filter', 'q34_gpu_filter')
+# v17 (S2) : filtre q3/q4 par lots, puis sur GPU. Le build G4 active CUDA
+# (nvcc et nvidia-smi existants, aucune installation) ; l'appareil attendu :
+DEVICE_NAME = 'NVIDIA RTX PRO 6000 Blackwell Server Edition'
+CUDA_PATHS = ('/usr/local/cuda/bin/nvcc', '/usr/local/cuda-12.9/bin/nvcc')
+BATCH_KEYS = frozenset({'used', 'backend', 'front_ms', 'filter_ms', 'edges_ms', 'device_ms', 'rectangles', 'survivors'})
 TOP_KEYS = frozenset({'schema', 'status', 'reason', 'input', 'options', 'times_ms', 'chain_cpu_s', 'generator',
-                      'ledger', 'catalogue', 'q34_occupancy', 'tower_phases_ms', 'tower_work', 'orders',
+                      'ledger', 'catalogue', 'q34_occupancy', 'q34_batch', 'tower_phases_ms', 'tower_work', 'orders',
                       'tower_digest', 'peak_rss_kb'})
 INPUT_KEYS = frozenset({'format', 'grid', 'sites', 'hash'})
 OPTION_KEYS = frozenset({'K', 'K_effective', 's', 'workers', 'tower_static_threads', 'run_tower', 'levers'})
@@ -240,10 +245,16 @@ def _integer(value, low, high):
 
 
 def _levers(value):
-    # Le noyau diametral n'existe que sous le certificat de voie morte.
+    # Le noyau diametral n'existe que sous le certificat de voie morte ; le
+    # filtre GPU n'existe que sur le chemin par lots.
     return (type(value) is dict and set(value) == set(LEVER_NAMES) and
             all(type(item) is bool for item in value.values()) and
-            (value['q34_dead_lanes'] or not value['q34_dead_core']))
+            (value['q34_dead_lanes'] or not value['q34_dead_core']) and
+            (value['q34_batch_filter'] or not value['q34_gpu_filter']))
+
+
+def plan_uses_gpu(cases):
+    return any(case['levers']['q34_gpu_filter'] for case in cases)
 
 
 def lever_arguments(case):
@@ -432,6 +443,29 @@ def validate_euler(value, case):
         need(euler['checkable_max_k'] in (0, checkable), 'euler bound of an early refusal')
 
 
+def validate_batch(value, case):
+    """Section q34_batch (v17) : phases du chemin par lots, a zero sur le chemin moteur."""
+    batch, levers = value['q34_batch'], case['levers']
+    times = ('front_ms', 'filter_ms', 'edges_ms', 'device_ms')
+    need(type(batch) is dict and set(batch) == BATCH_KEYS and type(batch['used']) is bool and
+         type(batch['backend']) is str and all(_number(batch[key]) for key in times) and
+         _count(batch['rectangles']) and _count(batch['survivors']), 'probe q34_batch fields')
+    if value['status'] != 'complete_relative':
+        return
+    ledger = value['ledger']
+    if not levers['q34_batch_filter']:
+        need(batch['used'] is False and batch['backend'] == '' and all(batch[key] == 0 for key in times) and
+             batch['rectangles'] == 0 and batch['survivors'] == 0, 'q34_batch filled on the engine path')
+        return
+    gpu = levers['q34_gpu_filter']
+    need(batch['used'] is True and batch['backend'] == (DEVICE_NAME if gpu else 'cpu') and
+         (batch['device_ms'] > 0) == gpu, 'q34_batch backend/device time')
+    need(batch['rectangles'] == ledger['q34_input_rectangles'] and
+         batch['survivors'] == ledger['expanded_pairs'] - ledger['witness_rejected_pairs'] and
+         batch['front_ms'] + batch['filter_ms'] + batch['edges_ms'] <= value['times_ms']['q34'] + 0.05 and
+         batch['device_ms'] <= batch['filter_ms'] + 0.05, 'q34_batch rectangles/survivors/phase times')
+
+
 def validate_occupancy(value, case):
     """Occupation q3/q4 mesuree : murs des ouvriers dans celui de l'etape q34,
     CPU et attente bornes par fils x mur, taches consommees = publiees."""
@@ -572,7 +606,11 @@ def validate_ledger_identities(value, levers):
     else:
         need(all(ledger[name] == 0 for name in core), 'dead-lane core counters while the lever is off')
     cache = ('witness_cache_queries', 'witness_cache_node_tests', 'witness_cache_rejected_pairs')
-    if levers['q34_witness_cache']:
+    if levers['q34_batch_filter']:
+        # The batch path searches every expanded pair once, without the cache.
+        need(all(ledger[name] == 0 for name in cache) and ledger['witness_pair_queries'] == ledger['expanded_pairs'],
+             'batch path: no cache, one search per expanded pair')
+    elif levers['q34_witness_cache']:
         # Un rejet par le cache suppose une requete et au moins un noeud teste.
         need(ledger['witness_cache_rejected_pairs'] <= ledger['witness_rejected_pairs'] and
              ledger['witness_cache_rejected_pairs'] <= ledger['witness_cache_queries'] <= ledger['expanded_pairs'] and
@@ -603,7 +641,9 @@ def validate_preflight_work(value, levers):
     need((not levers['q3_leaf_census'] or ledger['q3_leaf_censuses'] > 0) and
          (not levers['atlas_saturate_deep'] or ledger['atlas_deep_cells'] > 0) and
          (not levers['q34_dead_lanes'] or ledger['dead_q3_proved'] + ledger['dead_q4_proved'] > 0) and
-         (not levers['q34_witness_cache'] or ledger['witness_cache_rejected_pairs'] > 0) and
+         (not levers['q34_witness_cache'] or levers['q34_batch_filter'] or
+          ledger['witness_cache_rejected_pairs'] > 0) and
+         (not levers['q34_batch_filter'] or value['q34_batch']['survivors'] > 0) and
          (not levers['q34_dead_core'] or ledger['core_closed_edges'] > 0) and
          (not levers['tower_meb_proposal'] or (value['tower_work']['meb_proposals'] > 0 and
                                                value['tower_work']['meb_verified_proposals'] > 0)),
@@ -666,6 +706,7 @@ def validate_probe(value, case, exit_code, inputs=None):
     need(_catalogue(value['catalogue']), 'probe catalogue')
     validate_euler(value, case)
     validate_occupancy(value, case)
+    validate_batch(value, case)
     validate_tower_phases(value, case)
     orders = value['orders']
     need(type(orders) is list and all(type(order) is dict and set(order) == ORDER_KEYS and
@@ -725,6 +766,13 @@ def compare_cases(cases, outcomes, values):
     return out
 
 
+def configure_command(tools, root, build):
+    """Strict configure (no -Wno-error), CUDA on with the existing nvcc."""
+    return [tools['cmake'], '-S', str(root / SOURCE_ROOT), '-B', str(build), '-DCMAKE_BUILD_TYPE=Release',
+            '-DBOOST_ROOT=' + BOOST_ROOT, '-DCMAKE_CXX_COMPILER=' + tools['g++'], '-DMHGP9_ENABLE_CUDA=ON',
+            '-DCMAKE_CUDA_COMPILER=' + tools['nvcc']]
+
+
 def compiled_dependencies(build, root, before):
     consumed, relative_seen = {}, set()
     depfiles = sorted(build.glob('CMakeFiles/*.dir/**/*.o.d'))
@@ -760,7 +808,7 @@ def execute(args):
     need(not output.exists() and not output.is_symlink() and not output.resolve().is_relative_to(root), 'fresh output')
     output.mkdir(mode=0o700)
     result = dict(status='failed', backend='reference_cpu', scope=SCOPE, public_status='not_claimed',
-                  GPU_executed=False, FULL_executed=False, contract_certified=False,
+                  GPU_attempted=False, GPU_executed=False, FULL_executed=False, contract_certified=False,
                   targeted_GCP_stop_required_by_ROOT=True, worker_argv=list(args.argv), worker_sha256=sha(__file__),
                   useful_budget_seconds=args.useful_budget_seconds, case_cap_seconds=args.case_cap_seconds)
     worker, manifest, before, consumed = None, None, None, {}
@@ -803,12 +851,22 @@ def execute(args):
         result['provenance'] = validate_provenance(strict_json(read(PROVENANCE)), manifest)
         result.update(plan_schema=PLAN_SCHEMA, cases=cases, case_outcomes=[], completed_case_indices=[],
                       cross_worker_comparisons=[])
-        tools = {'g++': shutil.which('g++'), 'cmake': shutil.which('cmake')}
-        need(tools['g++'] and tools['cmake'] and Path(TIME).is_file() and Path(BOOST_HEADER).is_file(),
-             'g++, cmake, GNU time and system Boost required; no automatic installation')
+        # v17: the G4 build always enables CUDA (the plan's GPU cases need
+        # it; CPU cases are unchanged). Existing tools only.
+        result['backend'] = 'cuda_g4' if plan_uses_gpu(cases) else 'reference_cpu'
+        nvcc = next((p for p in CUDA_PATHS if Path(p).is_file() and os.access(p, os.X_OK)), None)
+        tools = {'g++': shutil.which('g++'), 'cmake': shutil.which('cmake'), 'nvcc': nvcc,
+                 'nvidia-smi': shutil.which('nvidia-smi')}
+        need(all(tools.values()) and Path(TIME).is_file() and Path(BOOST_HEADER).is_file(),
+             'g++, cmake, nvcc, nvidia-smi, GNU time and system Boost required; no automatic installation')
+        result['CUDA_installation_attempted'] = False
         result['tool_paths'] = dict(tools, time=TIME, boost_header=BOOST_HEADER)
         result['tool_sha256'] = {name: sha(path) for name, path in tools.items()}
         for name, command in [('compiler', [tools['g++'], '--version']), ('cmake_version', [tools['cmake'], '--version']),
+                              ('nvcc_version', [tools['nvcc'], '--version']),
+                              ('gpu_inventory', [tools['nvidia-smi'],
+                                                 '--query-gpu=name,driver_version,memory.total,compute_cap',
+                                                 '--format=csv,noheader']),
                               ('time_version', [TIME, '--version']), ('lscpu', ['lscpu']), ('nproc', ['nproc'])]:
             need(worker.command(name, command)['exit_code'] == 0, name)
         for filename in ('/etc/os-release', '/proc/meminfo'):
@@ -819,9 +877,8 @@ def execute(args):
         # AVANT le -Werror de add_compile_options (CMAKE_CXX_FLAGS precede les
         # options de compilation), donc sans effet ; le CMake ne le permet
         # pas et le worker ne le passe pas. Un echec est consigne, sans relance.
-        configure = worker.command('configure', [tools['cmake'], '-S', str(root / SOURCE_ROOT), '-B', str(build),
-                                                 '-DCMAKE_BUILD_TYPE=Release', '-DBOOST_ROOT=' + BOOST_ROOT,
-                                                 '-DCMAKE_CXX_COMPILER=' + tools['g++']])
+        need(DEVICE_NAME in (output / 'gpu_inventory.stdout').read_text(), 'G4 GPU inventory')
+        configure = worker.command('configure', configure_command(tools, root, build))
         if configure['exit_code'] != 0:
             raise BuildFailed('cmake configure failed; logs in configure.stdout/stderr')
         compiled = worker.command('build', [tools['cmake'], '--build', str(build), '--target', PROBE_TARGET,
@@ -841,6 +898,8 @@ def execute(args):
         with (output / PREFLIGHT_FILE).open('xb') as stream:
             stream.write(pre_raw)
         pre_case = preflight_case(cases, pre_raw)
+        if pre_case['levers']['q34_gpu_filter']:
+            result['GPU_attempted'] = True
         pre_row = worker.command('preflight', [TIME, '-v', str(binary), str(output / PREFLIGHT_FILE),
                                                *expected_probe_tail(pre_case)])
         try:
@@ -854,6 +913,8 @@ def execute(args):
         except (ValueError, KeyError, TypeError, UnicodeError) as error:
             raise PreflightFailed(type(error).__name__ + ': ' + str(error)) from error
         result['preflight'] = dict(sites=pre_case['n'], tower_digest=pre_value['tower_digest'])
+        if pre_case['levers']['q34_gpu_filter']:
+            result['GPU_executed'] = True  # validated device pass (backend and survivors judged)
 
         def left():
             try:
@@ -876,6 +937,8 @@ def execute(args):
             case_worker = helper.Worker(output, min(started + args.case_cap_seconds, useful_deadline), schedule)
             name = 'probe_' + suffix
             result['FULL_executed'] = True
+            if case['levers']['q34_gpu_filter']:
+                result['GPU_attempted'] = True
             killed, row = False, None
             try:
                 row = case_worker.command(name, [TIME, '-v', *probe_command(build, root, case)])

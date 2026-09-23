@@ -10,7 +10,11 @@
 // tour propose puis verifie exactement), q34_jobs_by_mass et q34_fine_jobs
 // (ordonnancement des jobs du front q3/q4 : ordre par masse, grain fin),
 // tower_overlap_static (phase A de la tour recouvrant la phase 0),
-// q2_jobs_by_mass (plan de jobs q2 par masse, 64 jobs par fil). Tous sont publies dans
+// q2_jobs_by_mass (plan de jobs q2 par masse, 64 jobs par fil),
+// q34_batch_filter (filtre temoin q3/q4 par lots : front, puis un appel pour
+// tous les rectangles et paires sans cache, puis les survivants) et
+// q34_gpu_filter (cet appel sur le GPU, exige q34_batch_filter ; sans GPU la
+// chaine refuse). Tous sont publies dans
 // options.levers ; un plan G4 les epingle explicitement, un nom inconnu est
 // refuse (code 2).
 //
@@ -145,6 +149,8 @@ int main(int argc, char** argv) {
         else if (name == "q34_fine_jobs") options.q34_fine_jobs = on;
         else if (name == "tower_overlap_static") options.tower_overlap_static = on;
         else if (name == "q2_jobs_by_mass") options.q2_jobs_by_mass = on;
+        else if (name == "q34_batch_filter") options.q34_batch_filter = on;
+        else if (name == "q34_gpu_filter") options.q34_gpu_filter = on;
         else throw std::invalid_argument("unknown lever");
       }
       else if (arg.starts_with("--n=")) prefix = static_cast<std::size_t>(parse_u(arg.substr(4)));
@@ -174,14 +180,15 @@ int main(int argc, char** argv) {
   const auto r = mhgp9::run_tower_chain(input.points, options);
   const auto& t = r.times;
   const auto& c = r.catalogue;
-  std::printf("{\"schema\":\"mhgp9_tower_probe_v16\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
+  std::printf("{\"schema\":\"mhgp9_tower_probe_v17\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
               r.reason.c_str());
   std::printf("\"input\":{\"format\":\"%s\",\"grid\":\"%s\",\"sites\":%zu,\"hash\":\"%016" PRIx64 "\"},", input.format.c_str(),
               grid.c_str(), input.points.size(), input.hash);
   std::printf("\"options\":{\"K\":%u,\"K_effective\":%u,\"s\":%u,\"workers\":%zu,\"tower_static_threads\":%d,\"run_tower\":%s,"
               "\"levers\":{\"atlas_saturate_deep\":%s,\"q3_leaf_census\":%s,\"q34_dead_lanes\":%s,"
               "\"q34_witness_cache\":%s,\"q34_dead_core\":%s,\"tower_meb_proposal\":%s,"
-              "\"q34_jobs_by_mass\":%s,\"q34_fine_jobs\":%s,\"tower_overlap_static\":%s,\"q2_jobs_by_mass\":%s}},",
+              "\"q34_jobs_by_mass\":%s,\"q34_fine_jobs\":%s,\"tower_overlap_static\":%s,\"q2_jobs_by_mass\":%s,"
+              "\"q34_batch_filter\":%s,\"q34_gpu_filter\":%s}},",
               options.kmax, r.kmax_effective, options.separation_s, options.workers,
               options.tower_static_threads >= 0 ? options.tower_static_threads : r.tower_static_threads,
               options.run_tower ? "true" : "false", options.atlas_saturate_deep ? "true" : "false",
@@ -189,7 +196,8 @@ int main(int argc, char** argv) {
               options.q34_witness_cache ? "true" : "false", options.q34_dead_core ? "true" : "false",
               options.tower_meb_proposal ? "true" : "false", options.q34_jobs_by_mass ? "true" : "false",
               options.q34_fine_jobs ? "true" : "false", options.tower_overlap_static ? "true" : "false",
-              options.q2_jobs_by_mass ? "true" : "false");
+              options.q2_jobs_by_mass ? "true" : "false", options.q34_batch_filter ? "true" : "false",
+              options.q34_gpu_filter ? "true" : "false");
   std::printf("\"times_ms\":{\"read\":%.3f,\"prepare\":%.3f,\"gen_index\":%.3f,\"q2\":%.3f,\"q34\":%.3f,\"merge\":%.3f,"
               "\"tower_index\":%.3f,\"census\":%.3f,\"tower\":%.3f,\"chain_total\":%.3f,\"digest\":%.3f},"
               "\"chain_cpu_s\":%.3f,",
@@ -222,6 +230,17 @@ int main(int argc, char** argv) {
                 ",\"cpu_sum_s\":%.3f,\"wait_sum_s\":%.3f,\"job_sum_s\":%.3f,\"max_job_ms\":%.3f},",
                 o.started_workers, o.jobs, o.tasks_published, o.tasks_consumed, o.task_waits, o.wall_max_ms,
                 o.wall_min_ms, o.cpu_sum_s, o.wait_sum_s, o.job_sum_s, o.max_job_ms);
+    // v17 : phases du chemin q3/q4 par lots (used=false sur le chemin moteur,
+    // tous les champs a zero). Le backend est "cpu" ou le nom de l'appareil
+    // (alphabet d'un nom de GPU ; guillemets et controles remplaces).
+    const auto& b = r.q34_batch;
+    std::string backend = b.backend;
+    for (auto& ch : backend)
+      if (ch == '"' || ch == '\\' || static_cast<unsigned char>(ch) < 0x20) ch = '\'';
+    std::printf("\"q34_batch\":{\"used\":%s,\"backend\":\"%s\",\"front_ms\":%.3f,\"filter_ms\":%.3f,\"edges_ms\":%.3f"
+                ",\"device_ms\":%.3f,\"rectangles\":%" PRIu64 ",\"survivors\":%" PRIu64 "},",
+                b.used ? "true" : "false", backend.c_str(), b.front_ms, b.filter_ms, b.edges_ms, b.device_ms,
+                b.rectangles, b.survivors);
     const auto& tt = r.tower_times;
     std::printf("\"tower_phases_ms\":{\"validate\":%.3f,\"static\":%.3f,\"lots\":%.3f,\"populations\":%.3f,"
                 "\"images\":%.3f,\"bank\":%.3f,\"encode\":%.3f",
