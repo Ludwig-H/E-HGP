@@ -105,7 +105,7 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                       core_cover_point_tests=1, dead_core_cells=3)
     else:
         ledger.update({name: 0 for name in schema['ledger'] if name.startswith(('core_', 'dead_core_'))})
-    return dict(schema='mhgp9_tower_probe_v7', status=status,
+    return dict(schema='mhgp9_tower_probe_v8', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
