@@ -2525,3 +2525,36 @@ certificat appliqué à toutes les paires préfiltre. L'API publique
 `load_sites` avec doublons, l'absence de coûts kNN complets au ledger
 de chaîne et les contrats restent ouverts. Une sonde exploratoire
 `--no-tower` en cours n'est pas une mesure de tour FULL.
+
+### Mise à jour 11 h 58 UTC — ablation locale exploratoire du WIP v17
+
+J'ai lu en **lecture seule** les quatre JSON temporaires ON/OFF du
+développeur sous son `scratchpad/near/` ; binaire local SHA-256
+`99a368d07a9d629da861a146f65e161f6367e73aa66ed737af72fa903ea4d6ed`,
+entrée 08/000000 **sans sol** SHA-256
+`0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf`,
+K5/K10, s8/W8, **`--no-tower`**, un essai ON puis OFF. Les condensés
+des résumés JSON `catalogue` sont identiques dans chaque paire ; ce n'est ni un
+comparateur du flux des clés ni la tour FULL. Statut des quatre :
+`complete_relative`, sans vérification de complétude globale.
+
+| K | q34 ON→OFF | cœur : formes ON→OFF | near : formes ON | near : charges/fermetures ON |
+| ---: | ---: | ---: | ---: | ---: |
+| 5 | 21,772→22,310 s | 126,60→355,62 M | 282,69 M | 8,857/8,146 M |
+| 10 | 64,230→60,833 s | 641,32→900,57 M | 361,59 M | 11,329/7,225 M |
+
+K5 gagne **2,4 %** de temps q34, K10 en perd **5,6 %**. La somme
+des formes `near+core` augmente respectivement de **15,1 %** et
+**11,4 %** malgré les cœurs évités. `expanded_pairs` reste
+23,687 M/K5 et 30,777 M/K10. L'interaction avec le cache est forte :
+à K5, `witness_cache_rejected_pairs` passe de 16,525 M OFF à
+12,837 M ON, et à K10 de 18,977 M à 16,024 M. Le certificat
+court-circuite des recherches qui auraient nourri le cache ; ne pas
+interpréter les 8,146/7,225 M fermetures comme autant de covers nets
+évités. Ces JSON sont **temporaires, non versionnés, sans répétition,
+CPU local partagé et sans tour** ; ils orientent le prochain gate,
+pas un gain revendicable. Publier un reçu reproductible apparié, avec
+digest/ordres FULL, coûts de construction kNN et premier refus, avant
+G4. À K10, envisager de désactiver le levier par défaut si le coût
+total confirmé reste négatif ; ne pas optimiser quelques pourcents
+isolés du q34 au détriment du verrou global d'expansion.
