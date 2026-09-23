@@ -1,0 +1,7 @@
+frozen/morsehgp3D_v9/src/gpu/certificate.hpp: OK
+frozen/morsehgp3D_v9/src/gpu/witness_filter.hpp: OK
+mutable/morsehgp3D_v9/src/gpu/certificate.hpp: OK
+mutable/morsehgp3D_v9/src/gpu/witness_filter.hpp: OK
+mutant/morsehgp3D_v9/src/gpu/certificate.hpp: OK
+mutant/morsehgp3D_v9/src/gpu/witness_filter.hpp: OK
+s3_frontier_barrier_gate: PASS (frozen unsafe, mutable safe, barrier mutant unsafe)

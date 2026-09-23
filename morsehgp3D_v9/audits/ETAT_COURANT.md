@@ -233,9 +233,13 @@ lecture statique du premier noyau `50dabc0fa` trouvait un **retour
 anticipé sans `__syncwarp` après écritures partielles du frontier** :
 `__ballot_sync` n'ordonne pas la mémoire entre lanes. Le correctif
 local `6596b13a2`, publié sur `main` sous `545c71799`, ajoute une
-barrière avant le réemploi ; le
-risque WAW paraît fermé en source, mais **aucune porte device** ne l'a
-encore éprouvé. La sonde, le worker G4, son selftest et le lecteur LiDAR
+barrière avant le réemploi ; le risque WAW paraît fermé en source. Un
+[gate hôte ciblé](s3_frontier_barrier_gate_20260923/README.md), épinglé
+aux headers publiés, trouve dans l'ancien ordre et dans un mutant sans
+cette barrière un réemploi WAW **et WAR** du frontier, contre zéro pour
+le correctif. Il n'émule pas les délais mémoire CUDA : **aucune porte
+device** n'a encore éprouvé ce chemin. La sonde, le worker G4, son
+selftest et le lecteur LiDAR
 passent en v18 ; le correctif exige désormais dans le préflight réduit
 au moins une décision GPU et au moins un report, puis zéro report sur
 les trames normales plus petites que l'ardoise. C'est un protocole,
@@ -285,14 +289,23 @@ exact mais pas encore un gain LiDAR ou une solution à `S` développé.
 Le shadow doit limiter ses recherches et se replier sur le moteur,
 publier visites, tests et formes effectivement évitées sur brut et
 sans sol, sans annoncer de gain avant mesure.
-La [première passe instrumentable](precore_cell_screen_20260923/README.md)
-doit joindre en `O(R+S)` chaque segment de survivants S2 à ses
-incidences de cœur **par ordinal**, puis publier leur distribution
-par taille de segment et de rectangle avant de choisir les groupes à certifier :
-les rectangles de produit ≥64 portent 62,46 % des paires développables
-K5, mais leur part des incidences de cœur est encore inconnue. Huit
-sous-cellules à 27 sommets demanderaient déjà jusqu'à 107,634 M
-évaluations corrélées K5 sur ce plein, hors gardes et repli.
+La [jointure S2 par segment](s2_segment_mass_20260923/README.md) a
+maintenant mesuré cette distribution sur la trame brute entière
+08/000000/K5 : **11 174 segments d'au moins 16 survivantes**, soit
+0,44 % des 2 548 453 rectangles ouverts, portent **478 635 662 / 559 661 741
+formes (85,52 %)** avec seulement 396 481 / 3 986 433 arêtes S2.
+La longueur du segment est connue **après le filtre S2 mais avant le cœur** ;
+elle offre un sélecteur déterministe de shadow et sans axe LiDAR. Le produit de
+rectangle ≥1 024 cible encore 71,00 % des formes, mais laisse 22 grands
+rectangles ≥32 768 sans aucune survivante : le produit seul ne suffit pas.
+Pour les segments ≥16, huit sous-cellules à 27 sommets demanderaient
+`27×396 481 = 10 704 987` termes corrélés, soit 2,24 % de leurs formes
+actuelles **avant** séparation q3/q4, gardes, repli et couverture. Ce rapport
+arithmétique n'est ni un rejet ni un gain mesuré. La jointure recrée le
+front et le filtre avec une archive distincte du binaire tracé ; elle
+retrouve exactement chaque arête, son masque et les cinq comptes du front.
+Essayer ce sélecteur sur brut et sans sol, facturer aussi la recherche des
+gardes, le coût de couverture et les formes réellement évitées.
 Les [demi-scènes et quarts aux trois densités](lidar_raw_physical_scaling_20260923/README.md)
 ont été mesurés avec v12, puis appariés au batch S2 CPU K5 par les
 deux reçus ci-dessus. La somme de leurs tours ne reconstruit pas le

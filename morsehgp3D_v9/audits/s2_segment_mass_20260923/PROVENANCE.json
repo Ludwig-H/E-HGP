@@ -1,0 +1,16 @@
+{
+  "case": "SemanticKITTI 08/000000 raw full, common 1 mm grid, K5/s8, q3+q4, CPU",
+  "compiler": "g++ -std=c++20 -O2 -Wall -Wextra -Werror",
+  "hashes": {
+    "compiled_binary_sha256": "dee11fe4d538bc5cfca62413150fed32ae93f7e15ca3bfa24032159612b8f6fc",
+    "edge_trace_receipt_sha256": "d8c82a569cf62efc89f34581151fa6b3760d20b7c1470b1762baf23d3b5fdf31",
+    "input_manifest_sha256": "6e64125abddbfcd589ba61cf747e493e455adec4beeaea81c2739ce98fe16095",
+    "input_points_sha256": "233cc4ea8cac6e0b1155ea845af57b32e5236764bf2e119557aeab5bac76c172",
+    "input_raw_ids_sha256": "796e9814dd2dff7778ad8d1bb55f5113ab54206ff8b246e6432200f9a6833f7f",
+    "linked_archive_sha256": "208aabb30a764bad25ab1c99d74885bd405e84a13dcb8375622d66aa6203f70a",
+    "measure_cpp_sha256": "2be71f41e01b21ed26409e47f552c14946b9d2e2448c4213e7ab6e48f7a17f7f",
+    "measure_stdout_sha256": "5ab80ba4855979ffa1459ce7f7fdd44a30577f623bea1bcc54a50719222e8f1d",
+    "rectangle_histogram_receipt_sha256": "dfa0d26f6c4ec3afde77ec7e9087c7f1e89a62419b6c8fde523d8dc941e708d6"
+  },
+  "trace_source_commit": "c265a5dae4dd92059fc78acc0a1d7f52de9c1435"
+}

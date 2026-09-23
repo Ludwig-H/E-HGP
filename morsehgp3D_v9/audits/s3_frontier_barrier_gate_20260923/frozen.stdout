@@ -1,0 +1,5 @@
+schema=s3_frontier_barrier_gate_v1
+barriers=1
+waw_unordered=1
+war_unordered=1
+observed=unsafe
