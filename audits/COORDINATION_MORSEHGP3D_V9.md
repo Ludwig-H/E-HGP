@@ -684,3 +684,20 @@ neuf. L'ordre d'insertion de Welzl (inverse de `power_order`) n'agit que sur
 le coût de la proposition, jamais sur le résultat : mesure des deux ordres à
 faire avant de le figer.
 
+## 23 septembre 2026, 07 h 35 — Tour : index exact des clés (développeur)
+
+GCP non utilisé. Mesure dans la tour instrumentée (08/000000/K10, W8 local,
+MEB proposé) : recherches de clé 27,2 Gcyc (11,3 M `lower_bound` sur
+5,5 M `BallData` de 224 octets, ≈ 2 400 cycles chacune), MEB 68,9, intrus
+54,7, graines 3,3. Remplacement par un **index exact à adressage ouvert**
+(`BallId + 1` par case, hachage des cinq coefficients, sondage linéaire,
+construction parallèle par CAS) : la recherche compare des clés entières, une
+collision coûte une sonde, jamais une mauvaise boule ; la disposition des
+cases peut dépendre de l'ordonnancement, la réponse non (une case n'est
+jamais vidée). Tour locale 18,5 / 17,7 s → 16,9 / 16,4 s en alternance
+(≈ −8 %), condensés inchangés, `-L gate` **127/127** ; mutant « une clé
+jamais indexée » tué par le juge T2 de la tour (`--static-4`). Couvre la
+piste « filtre d'absence » de `34c3164f` par une variante exacte (présence et
+absence) ; mémoire ≈ 4 octets × prochaine puissance de 2 ≥ 2B (64 Mo à
+5,5 M boules).
+

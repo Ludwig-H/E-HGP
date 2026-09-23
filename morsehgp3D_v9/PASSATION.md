@@ -136,7 +136,9 @@ Tour à K10 (catalogue 08/000000, W8 local) : la phase de cibles statiques
 prend 70 % de la tour, dont la résolution des facettes (MEB exact puis
 recherche d'intrus). **MEB proposé** (Welzl en double vérifié exactement,
 canonisé au bord, repli exact) : même résultat que l'énumération, cycles MEB
-÷2,2, tour −24 % local, condensé inchangé (sonde v10).
+÷2,2, tour −24 % local, condensé inchangé (sonde v10, levier
+`tower_meb_proposal`). Index exact par hachage des clés du catalogue à la
+place des recherches dichotomiques : tour −8 % local.
 
 Suite : coût q3/q4 (ventilation K10 W8 locale en Gcycles : atlas 229, q4 235,
 paires 187, rectangles 123, noyau 120, q3 120, preuve sur cover 86) ; seuil

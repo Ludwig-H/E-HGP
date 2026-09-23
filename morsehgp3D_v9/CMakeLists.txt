@@ -215,6 +215,13 @@ mhgp9_product_executable(mhgp9_tower_anchor_meb_proposed_mutant_gate tests/tower
 target_compile_definitions(mhgp9_tower_anchor_meb_proposed_mutant_gate PRIVATE MHGP9_MEB_PROPOSED_MUTANT_NO_CANONICAL=1)
 mhgp9_gate(mhgp9_tower_anchor_meb_proposed_mutant_no_canonical 1 mhgp9_tower_anchor_meb_proposed_mutant_gate
            ARGS --selftest EXPECT_PREFIX "cause=proposed.differs" LABELS "gate;tower;mutant" TIMEOUT 300)
+# Index exact des cles de la tour : une cle jamais indexee est detectee par
+# le juge T2 (tour Gamma bornee), voie statique a quatre fils.
+mhgp9_product_executable(mhgp9_tower_key_index_mutant_gate tests/tower/full_ball_tower_gate.cpp)
+target_compile_definitions(mhgp9_tower_key_index_mutant_gate PRIVATE MHGP9_KEY_INDEX_MUTANT_DROP_FIRST=1)
+target_include_directories(mhgp9_tower_key_index_mutant_gate SYSTEM PRIVATE ${MHGP9_BOOST_INCLUDE_DIR})
+mhgp9_gate(mhgp9_tower_key_index_mutant_drop_first 1 mhgp9_tower_key_index_mutant_gate
+           ARGS --static-4 LABELS "gate;tower;mutant" TIMEOUT 300)
 mhgp9_product_executable(mhgp9_tower_anchor_meb_mutant_gate tests/tower/anchor_meb_gate.cpp)
 target_compile_definitions(mhgp9_tower_anchor_meb_mutant_gate PRIVATE MHGP9_MEB_MUTANT_LAST_MAXIMUM=1)
 mhgp9_gate(mhgp9_tower_anchor_meb_mutant_last_maximum 1 mhgp9_tower_anchor_meb_mutant_gate

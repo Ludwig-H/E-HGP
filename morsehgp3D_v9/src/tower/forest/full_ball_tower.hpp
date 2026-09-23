@@ -747,6 +747,54 @@ class Builder {
   std::vector<PointId> domain;
   std::vector<std::pair<PointId,i32>> identity;
   std::vector<BallId> by_key;
+  // Exact open-addressing index of the (pairwise distinct) catalogue keys:
+  // slot = BallId + 1, 0 empty, linear probing from the key's hash. A lookup
+  // compares whole keys: a collision costs a probe, never a wrong ball.
+  // Built in parallel by compare-and-swap; the slot layout may depend on the
+  // schedule, the answer of every lookup does not.
+  std::vector<u32> key_slots;
+  u64 key_mask = 0;
+  static u64 key_hash(const BallKey& key) {
+    u64 h = 0x9e3779b97f4a7c15ull;
+    const auto mix = [&](i128 value) {
+      for (const u64 word : {static_cast<u64>(static_cast<u128>(value)), static_cast<u64>(static_cast<u128>(value) >> 64)}) {
+        h ^= word + 0x9e3779b97f4a7c15ull + (h << 6) + (h >> 2);
+        h ^= h >> 31; h *= 0xbf58476d1ce4e5b9ull; h ^= h >> 29;
+      }
+    };
+    mix(key.a); mix(key.b[0]); mix(key.b[1]); mix(key.b[2]); mix(key.c);
+    return h;
+  }
+  void build_key_index() {
+    u64 capacity = 16;
+    while (capacity < 2 * static_cast<u64>(balls.size())) capacity *= 2;
+    key_slots.assign(capacity, 0);
+    key_mask = capacity - 1;
+    parallel_ranges(balls.size(), geometry_threads, [&](size_t begin, size_t end, size_t) {
+      for (size_t id = begin; id < end; ++id) {
+#if defined(MHGP9_KEY_INDEX_MUTANT_DROP_FIRST)
+        if (id == 0) continue;  // mutant: one catalogue key never indexed
+#endif
+        u64 at = key_hash(balls[id].key) & key_mask;
+        for (;;) {
+          std::atomic_ref<u32> slot(key_slots[at]);
+          u32 expected = 0;
+          if (slot.load(std::memory_order_relaxed) == 0 &&
+              slot.compare_exchange_strong(expected, static_cast<u32>(id + 1), std::memory_order_relaxed))
+            break;
+          at = (at + 1) & key_mask;
+        }
+      }
+    });
+  }
+  // The BallId of `key` in the catalogue, or kAbsent32.
+  u32 find_key(const BallKey& key) const {
+    for (u64 at = key_hash(key) & key_mask;; at = (at + 1) & key_mask) {
+      const u32 slot = key_slots[at];
+      if (slot == 0) return std::numeric_limits<u32>::max();
+      if (balls[slot - 1].key == key) return slot - 1;
+    }
+  }
   std::vector<std::vector<BallId>> programs;
   std::unordered_map<BallId, local_plateau::ShellTable> extra;
   std::vector<FullCoveragePopulation> populations;
@@ -854,6 +902,7 @@ class Builder {
       for (size_t j = 1; j < by_key.size(); ++j)
         require(!(balls[by_key[j]].key == balls[by_key[j - 1]].key), "full_ball_duplicate_key", invalid);
     }
+    build_key_index();  // keys are distinct from here on
     std::vector<u8> qmins(balls.size());
     std::vector<size_t> counts(kmax + 1, 0);
     // Pass 1, parallel on the static path: the per-ball exact checks that
@@ -1005,15 +1054,14 @@ class Builder {
     for (;;) {
       require(compare_exact_level(local.level, before) < 0, "full_ball_static_not_strict");
       add(work.key_lookups);
-      const auto found = std::lower_bound(by_key.begin(), by_key.end(), local.key,
-          [&](BallId id, const BallKey& value) { return balls[id].key < value; });
-      if (found != by_key.end() && balls[*found].key == local.key) {
-        const auto& b = balls[*found];
+      const u32 found = find_key(local.key);
+      if (found != kAbsent32) {
+        const auto& b = balls[found];
         require(same_exact_level(b.level, local.level), "full_ball_static_anchor_level");
         const unsigned lo = b.n_interior + b.arity - 1;
         if (current_k >= lo && current_k <= b.n_interior + b.n_shell) {
           add(work.anchor_hits); work.max_chain_steps = std::max(work.max_chain_steps, length);
-          return *found;
+          return found;
         }
       }
       const i32 z = intruder_work(local.key, sites, work, scratch);
@@ -1341,17 +1389,16 @@ class Builder {
     for (;;) {
       require(compare_exact_level(local.level, before) < 0, "full_ball_representative_not_strict");
       add(st.key_lookups);
-      const auto found = std::lower_bound(by_key.begin(), by_key.end(), local.key,
-          [&](BallId id, const BallKey& key) { return balls[id].key < key; });
-      if (found != by_key.end() && balls[*found].key == local.key) {
-        require(same_exact_level(balls[*found].level, local.level), "full_ball_anchor_level");
-        if (anchors[*found] != absent) {
+      const u32 found = find_key(local.key);
+      if (found != kAbsent32) {
+        require(same_exact_level(balls[found].level, local.level), "full_ball_anchor_level");
+        if (anchors[found] != absent) {
           add(st.anchor_hits); st.max_chain_steps = std::max(st.max_chain_steps, length);
-          const u64 resolved = root(anchors[*found], prior_count);
+          const u64 resolved = root(anchors[found], prior_count);
           resolver_cache.store(initial_key, resolved);
           return resolved;  // hit BEFORE spatial query
         }
-        const auto& ball = balls[*found];
+        const auto& ball = balls[found];
         const unsigned lo = ball.n_interior + ball.arity - 1;
         require(current_k < lo || current_k > ball.n_interior + ball.n_shell,
                 "full_ball_missing_closed_anchor");
