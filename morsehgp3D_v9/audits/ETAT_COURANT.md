@@ -159,8 +159,12 @@ seul vecteur de 24 octets. S2a a besoin de deux plafonds indépendants
 sur les rectangles et les paires, puis de regrouper les petits produits
 et de scinder les rares gros sans perdre les ordinals ni les masques.
 Cette sonde CPU ne mesure ni le port S2 courant, ni GPU/G4, ni une
-croissance sous-quadratique ; la matrice spatiale/densité reste à rejouer
-avec le raccord exact.
+croissance sous-quadratique. À sa date, la matrice spatiale/densité
+restait à rejouer avec le raccord exact ; les reçus S2 CPU K5
+[quarts](edge_matched_core_20260923/README.md) et
+[demis](s2_half_density_k5_20260923/README.md) couvrent depuis les
+21 entrées distinctes, avec deux builds épinglés et trois entrées
+« plein » communes ; ce n'est pas un reçu unique à binaire commun.
 Le [reçu G4 R12](../receipts/g4_tower_r12_20260923/README.md) publie
 maintenant le raccord S2 : 14/14 cas achevés, sept filtres GPU réels,
 chaînes **2,01–2,69 s à K5** et **6,63–8,70 s à K10** sur trois trames
@@ -280,7 +284,8 @@ K5, mais leur part des incidences de cœur est encore inconnue. Huit
 sous-cellules à 27 sommets demanderaient déjà jusqu'à 107,634 M
 évaluations corrélées K5 sur ce plein, hors gardes et repli.
 Les [demi-scènes et quarts aux trois densités](lidar_raw_physical_scaling_20260923/README.md)
-restent dans le reçu v12 ; la somme de leurs tours ne reconstruit pas le
+ont été mesurés avec v12, puis appariés au batch S2 CPU K5 par les
+deux reçus ci-dessus. La somme de leurs tours ne reconstruit pas le
 plein. Une scène/K5/CPU ne prouve ni sous-quadraticité, ni contrat G4.
 
 Les deux meilleures lignes R11 (08/000100) bornent aussi le gain du
@@ -293,15 +298,18 @@ sur la portion workers dans chaque cas. Cette borne conditionnelle
 n'inclut pas une réduction du travail ni un changement de coût par
 opération ; elle oriente la suite vers moins de paires, formes et
 sorties intermédiaires, avec coût aval complet.
-La **matrice complète** de densité reste celle du binaire v12
-**`4530644b`**. Un [rejeu S2/v17 apparié](q34_batch_density_quarter_20260923/README.md)
+La première **matrice complète** de densité vient du binaire v12
+**`4530644b`** ; ses 21 entrées K5 ont depuis un appariement S2 CPU
+dans les reçus des quarts et des demis ci-dessus. Un
+[rejeu S2/v17 apparié](q34_batch_density_quarter_20260923/README.md)
 sur le quart brut `x≥0,y<0` de 08/000000 à K5 et aux mêmes trois densités
 trouve des tours/catalogues identiques moteur–batch CPU. Les formes cœur
 restent 3,549→14,655→52,302 M (`p=2,002/1,823`) ; au plein du quart,
 le batch sans cache passe de 97,76 à 162,48 M visites de paires témoins,
-de 44,225 à 46,253 CPU·s et de 585 328 à 597 424 KiB RSS. Une
-répétition locale et un quart ne qualifient ni la croissance globale de
-S2 ni CUDA/G4. Le runner LiDAR v17 constructeur force les leviers batch/GPU
+de 44,225 à 46,253 CPU·s et de 585 328 à 597 424 KiB RSS. Ce reçu
+isolé ne qualifiait pas la croissance globale de S2 et ne qualifie
+toujours pas CUDA/G4. Le runner LiDAR v17 constructeur force les leviers
+batch/GPU
 à `false` et n'échantillonne que des disques 8k/16k/32k ; il ne rejoue
 pas cette matrice. Le reçu G4
 [R8](../receipts/g4_tower_r8_20260923/README.md) exécute
