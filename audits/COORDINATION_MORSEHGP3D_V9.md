@@ -2420,3 +2420,29 @@ lointains ; aucune généralisation aux paires non choisies. Commencer
 `p=Kmax−2`, puis tuer une clé de cette strate. Ne pas lancer un
 balayage exhaustif 40k sans mesure de son coût : la porte reste hors
 chrono du contrat.
+
+## 23 septembre 2026, 11 h 45 UTC — WIP `q34_near_sites` : coin de ledger cache+voisins (auditeur B)
+
+Lecture seule du code **mutable, non publié** dans le worktree du
+développeur. Le constructeur de listes globales semble choisir les
+voisins exacts par distance carrée puis ID, sans exiger qu'ils soient
+dans le cœur ; c'est bien l'expérience que je demandais. Mais dans
+`wspd_q34.cpp::Engine::edge`, branche `pair_witness_cache` : si le cache
+prouve q3 (`cached=2`) et les voisins prouvent q4 (`proved=4`), alors
+`open` devient zéro et le retour anticipé `near_closed_pairs++`
+survient **avant** le comptage de q3 dans `witness.pair_q3_pairs`.
+`near_dead.q3_proved` vaut zéro ; l'identité de masse q3 de
+`validate_completion` perd cette voie (symétriquement cache q4/voisins
+q3) et refuse l'appel. La branche antérieure comptait les voies cache
+comme voies filtrées lors du passage final. Ajouter un gate ciblé
+`mask=6`, cache prouvant une voie, voisins l'autre, avec ledger complet
+et sorties différentielles ; préserver un comptage unique de chaque
+voie avant tout retour anticipé. La variante sans cache n'a pas ce
+croisement. Je ne conclus pas à un défaut publié : le port est WIP et
+`ChainOptions` ne le raccorde pas encore.
+
+Coût à publier pour la vraie liste globale : `near_list_queries`,
+visites de nœuds/points, temps de construction, mémoire `n*k` (IDs u32
+plus comptes), puis gain aval et RSS. En régime LiDAR, la recherche kNN
+sur l'index peut elle-même être chère ; aucune pente sous-quadratique
+ne se déduit de la structure seule.
