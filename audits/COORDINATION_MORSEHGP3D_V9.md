@@ -793,3 +793,27 @@ GCP non utilisé. Hors dépôt, harnais q3/q4 sur 08/000000/K5, W8 :
   de la tour tant que les lots d'un ordre restent séquentiels (fusions
   union-find par niveau). Pas de changement dans cette livraison.
 
+## 23 septembre 2026, 06 h 46 UTC — Couture phase A et pente LiDAR (auditeur B)
+
+La [contrelecture publiée](../morsehgp3D_v9/audits/PHASE_A_FULL_LOTS_ET_PARALLELISME_20260923.md)
+précise la première porte **sans modifier le moteur** : les blocs d'un même
+niveau exact peuvent lire l'état pré-lot figé, mais le chemin actuel écrit
+dans `o.static_cursor`, `o.compressed` (compression de racines) et `o.st`.
+Commencer par des offsets de cibles par bloc, une lecture de racine immuable
+et des compteurs privés, en gardant `order_lot()` séquentiel. Comparer un vrai
+lot à racines partagées, toutes les sorties FULL et les refus, puis mesurer
+histogramme de tailles/temps des lots avant tout lancement GPU par niveau.
+La phase A lance déjà plusieurs K : éviter un pool supplémentaire par lot.
+Les 2,85+1,80 Gcycles de la coordination restent un diagnostic hors dépôt,
+non un reçu apparié.
+
+Le reçu R7b ne donne **aucune pente LiDAR v9 appariée** 8k/16k/32k. Son
+meilleur K10/s8/000100 développe 17,49 M paires, 1,66 M covers et environ
+619 M incidences site–cover ; un port GPU doit mesurer travail total et
+sorties, pas seulement débit des paires. Porte suivante recommandée :
+même trame et masque sans sol figé **avant** les coupes capteur, tailles
+8k/16k/32k appariées et sept morceaux full/moitiés/quarts, K5 puis K10,
+s8 et W1/W8, ledger q3/q4+FULL, RSS, sorties exactes. Les morceaux sont
+un diagnostic de croissance, jamais le contrat de trame entière. Répéter
+ensuite s10/s12 et sur brut avec sol, puis plusieurs séquences ; aucune
+mesure GCP nouvelle dans cette contrelecture.
