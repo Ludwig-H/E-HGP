@@ -1,4 +1,13 @@
-# Audit — ce qui sépare encore la tour FULL de 1 s sur GPU G4
+# Archive R7b — obstacles avant les mesures GPU intégrées
+
+**Statut historique.** Cette note décrit le paquet CPU R7b au matin du
+23 septembre. Les campagnes v12 de croissance et les reçus GPU
+[R12](../receipts/g4_tower_r12_20260923/README.md) puis
+[R13](../receipts/g4_tower_r13_20260923/README.md) ont depuis mesuré la
+chaîne hybride. Lire l'[état courant](ETAT_COURANT.md) et la
+[contrelecture R13](CONTRE_AUDIT_B_G4_R13_S3_20260923.md) pour les
+coûts actuels ; les propositions ci-dessous restent des pistes, non
+le bilan courant de la v9.
 
 23 septembre 2026. Reçu de référence :
 [`g4_tower_r7b_20260923`](../receipts/g4_tower_r7b_20260923/README.md),

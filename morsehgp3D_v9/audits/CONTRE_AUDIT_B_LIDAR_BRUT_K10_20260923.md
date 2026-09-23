@@ -1,5 +1,15 @@
 # Contrelecture B — tour K10 sur la trame LiDAR brute 08/000000
 
+**Erratum de lecture ajouté par A, 23 septembre.** La colonne « Formes cœur »
+ci-dessous est `dead_core_form_sites` **hors les deux extrémités
+pourtant calculées par charge**. Le total payé est
+`core_sites = dead_core_form_sites + 2×dead_core_loads` :
+**106,597→330,915→1 254,254 M** formes, de pentes **1,634/1,922**.
+Les pentes **1,650/1,936** du texte restent celles du sous-total.
+Le total cœur + cover payé est **298,608→693,370→2 328,973 M**,
+au lieu de 293,0→681,7→2 304,2 M hors extrémités.
+Voir la [synthèse corrigée](CROISSANCE_LIDAR_PLANS_ET_DENSITE_20260923.md).
+
 23 septembre 2026. Reçu source :
 [`lidar_raw_k10_density_20260923`](lidar_raw_k10_density_20260923/README.md),
 publié par `d7fd32a1`. Cette lecture est **indépendante de la mesure** ;
@@ -30,30 +40,34 @@ Ces contrôles établissent la cohérence de l'archive et des sorties
 
 ## Ce que disent les trois tailles
 
-| Sites | CPU chaîne (CPU·s) | Formes cœur | Charges cœur | Paires q3/q4 développées | Catalogue | RSS pic |
+| Sites | CPU chaîne (CPU·s) | Formes cœur hors extrémités | Charges cœur | Paires q3/q4 développées | Catalogue | RSS pic |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | 30 847 | 173,008 | 103 153 147 | 1 721 708 | 5 402 246 | 2 760 701 | 2,131 GiB |
 | 61 694 | 383,704 | 323 686 030 | 3 614 332 | 12 861 574 | 5 669 283 | 4,189 GiB |
 | 123 389 | 905,514 | 1 238 630 455 | 7 811 827 | 37 868 819 | 11 387 391 | 8,219 GiB |
 
 Avec les effectifs réels, les pentes finies 1/4→1/2 puis 1/2→plein
-sont **1,650 puis 1,936** pour les formes cœur, **1,251 puis 1,558**
-pour les paires développées et **1,149 puis 1,239** pour le CPU total.
-Le dernier lien des formes s'approche du carré, tandis que K5 sur les
+sont **1,650 puis 1,936** pour le sous-total cœur hors extrémités,
+**1,251 puis 1,558** pour les paires développées et **1,149 puis
+1,239** pour le CPU total.
+Le dernier lien du sous-total s'approche du carré, tandis que K5 sur les
 **mêmes entrées** l'avait dépassé (2,136) : aucune propriété globale
 sous-quadratique n'en découle. K10 plein examine **2,245×** les formes
-et émet **4,035×** les boules de K5 plein. La mémoire devient également
+hors extrémités (ou **2,241×** toutes les formes) et émet **4,035×**
+les boules de K5 plein. La mémoire devient également
 un poste industriel, distinct de la seule ordonnance des workers.
 
-La décomposition des formes explique le verrou. Les charges du cœur
+La décomposition du sous-total explique le verrou. Les charges du cœur
 croissent presque linéairement (pentes **1,070/1,112**), mais leur
-taille moyenne monte de **59,9 à 89,6 puis 158,6 sites** ; la pente
+charge moyenne hors extrémités monte de **59,9 à 89,6 puis 158,6
+formes** ; la pente
 de cette moyenne atteint **0,824** sur le dernier doublement. Les
 charges de couvertures complètes croissent elles aussi presque
 linéairement (**1,100→2,217→4,560 M**), avec une taille moyenne de
-**172,6→161,5→233,7**. Après ajout des formes de couverture
-complète (`dead_core_form_sites + dead_form_sites`), le travail
-matérialisé atteint **293,0→681,7→2 304,2 M**
+**172,6→161,5→233,7 formes hors extrémités par charge**. Après ajout
+du sous-total de couverture
+complète (`dead_core_form_sites + dead_form_sites`), la quantité hors
+extrémités atteint **293,0→681,7→2 304,2 M**
 formes, de pente finie **1,218 puis 1,757**. La poussée vient donc
 surtout du **nombre de sites traités par cœur/couverture**, pas d'une
 explosion du nombre de charges. Un certificat de groupes avant

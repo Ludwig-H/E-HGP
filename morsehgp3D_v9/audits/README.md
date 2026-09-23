@@ -13,7 +13,8 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 2. [`AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md`](AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md) :
    à quoi sert l'algorithme et comment la tour est reconstruite, pas à pas.
 3. [`CONTRAT_COUTS_ET_PARALLELISATION.md`](CONTRAT_COUTS_ET_PARALLELISATION.md) et
-   [`OBSTACLES_GPU_SOUS_SECONDE_20260923.md`](OBSTACLES_GPU_SOUS_SECONDE_20260923.md) : le contrat et ce qui en sépare.
+   [la contrelecture R13](CONTRE_AUDIT_B_G4_R13_S3_20260923.md) : le contrat et
+   les coûts récents de la chaîne GPU hybride.
 4. [`NOTE_C_INVARIANT_EULER_20260923.md`](NOTE_C_INVARIANT_EULER_20260923.md) et
    [`CONTRELEC_EULER_PAR_NERF_20260923.md`](CONTRELEC_EULER_PAR_NERF_20260923.md) : juge global de complétude.
 5. [`AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md`](AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md) :
@@ -31,8 +32,9 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 - **Cycle** : vivant, clos (le commit qui l'a traité), historique, négatif,
   remplacé par une autre note.
 - **Réponse du développeur** dans le canal : acceptée, acceptée en partie,
-  refusée, différée (le préambule du canal exige une échéance), sans réponse,
-  sans objet.
+  refusée, différée, sans réponse, sans objet. Le préambule du canal exige
+  une échéance pour tout report ; « différée sans échéance » signale une
+  réponse incomplète, pas une date que l'index inventerait.
 
 ## Cadre, objet et verdict
 
@@ -197,10 +199,10 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`lidar_density_bbox_fixed_20260923/`](lidar_density_bbox_fixed_20260923/README.md) | A ou B | `1200d343` 09:37 | mesure (ablation appariée) | vivant | sans objet |
 | [`lidar_scene02_physical_cut_20260923/`](lidar_scene02_physical_cut_20260923/README.md) | A | 23/soir | 08/000200 sans sol K10 : un retour change de quart entre signe quantifié et float32 ; le quart chaud garde p=2,035350 | vivant, une relation vérifiée | sans objet |
 | [`lidar_raw_physical_scaling_20260923/`](lidar_raw_physical_scaling_20260923/README.md) | A | 23/11:30–11:52 | mesure locale 21 cas, trame brute entière K5, sept secteurs physiques × trois densités ; reçu reproductible | vivant | sans objet |
-| [`CONTRE_AUDIT_B_LIDAR_BRUT_PHYSIQUE_20260923.md`](CONTRE_AUDIT_B_LIDAR_BRUT_PHYSIQUE_20260923.md) | B | `53a2e5d29` 11:50 | contrelecture indépendante de la matrice brute K5 ; proposition voisins depuis retirée | vivant pour les mesures | sans objet |
+| [`CONTRE_AUDIT_B_LIDAR_BRUT_PHYSIQUE_20260923.md`](CONTRE_AUDIT_B_LIDAR_BRUT_PHYSIQUE_20260923.md) | B | `53a2e5d29` 11:50 + erratum | contrelecture de la matrice brute K5 ; champ hors extrémités distingué du total effectivement calculé | vivant pour les mesures corrigées | sans objet |
 | [`lidar_raw_k10_density_20260923/`](lidar_raw_k10_density_20260923/README.md) | A | 23/12:18–12:23 | mesure locale 3 cas, même trame brute et mêmes densités, tour K10 ; reçu reproductible | vivant | sans objet |
-| [`CONTRE_AUDIT_B_LIDAR_BRUT_K10_20260923.md`](CONTRE_AUDIT_B_LIDAR_BRUT_K10_20260923.md) | B | `82efba156` 12:32 | contrelecture indépendante du plein brut K10 | vivant | sans objet |
-| [`lidar_raw_k10_sectors_20260923/`](lidar_raw_k10_sectors_20260923/README.md) | A | 23/12:49–13:09 | mesure locale K10, sept secteurs physiques × trois densités ; 18 nouveaux cas gardés, six répétitions | vivant | sans objet |
+| [`CONTRE_AUDIT_B_LIDAR_BRUT_K10_20260923.md`](CONTRE_AUDIT_B_LIDAR_BRUT_K10_20260923.md) | B | `82efba156` 12:32 + erratum | contrelecture du plein brut K10 ; sous-total hors extrémités et total payé séparés | vivant pour les mesures corrigées | sans objet |
+| [`lidar_raw_k10_sectors_20260923/`](lidar_raw_k10_sectors_20260923/README.md) | A | 23/12:49–13:09 | matrice K10, sept secteurs × trois densités ; ses « formes » sont hors extrémités, [total corrigé](CROISSANCE_LIDAR_PLANS_ET_DENSITE_20260923.md) | vivant, reçu scellé inchangé | sans objet |
 | [`s2_half_density_k5_20260923/`](s2_half_density_k5_20260923/README.md) | A | 23/18:20 | S2 CPU K5, plein et deux demi-scènes × trois densités, neuf paires moteur/lot ; six compteurs égaux au v12 | vivant, une scène | sans objet |
 | [`ATTRIBUTION_COEUR_ARETES_COUPES_LIDAR_20260923.md`](ATTRIBUTION_COEUR_ARETES_COUPES_LIDAR_20260923.md) | A | 23/16:33 | méthode et identité exacte de l'attribution par arête | protocole exécuté à K5 dans le reçu suivant | sans objet |
 | [`edge_matched_core_20260923/`](edge_matched_core_20260923/README.md) | A | 23/17:00 | mesure S2 CPU, 15 couples plein/quarts × densités, trace post-cœur et sélecteur intrinsèque exploratoire | vivant, une seule scène/K5 | sans objet |
@@ -211,16 +213,17 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`s2_segment_panel_20260923/`](s2_segment_panel_20260923/README.md) | A | 23/soir | 15 jointures S2 plein/quarts × densités 1/4,1/2,1 ; F des segments ≥16 augmente sur le plein, mais coût indicatif très variable selon le quart | vivant, seuil non universel | réponse D attendue |
 | [`s2_precore_node_shadow_20260923/`](s2_precore_node_shadow_20260923/README.md) | A | 23/soir | certificat exact à huit cellules sur segments S2 lourds : 0,0818–0,1345 % de F du plein fermable pour 4,6–15,3 M visites ; 39 divergences post-cœur jugées sans q3/q4 | vivant, schéma grossier non rentable ; pistes de cellules locales | réponse D attendue |
 | [`s2_precell_incidence_20260923/`](s2_precell_incidence_20260923/README.md) | A | 23/soir | crible entier d'incidence par cellule sur les mêmes arêtes S2 : +0,0254 % de F total fermable sur le plein, zéro sur le quart | vivant, simple `E_C` trop lâche ; pas de port produit | réponse D attendue |
+| [`paired_guards_precore_20260923/`](paired_guards_precore_20260923/README.md) | A | 23/soir | certificat exact par paires disjointes ; fixture S2 ouverte, puis 27/60 et 40/60 fermetures sur deux échantillons LiDAR lourds | shadow oracle à scan complet, gain de chaîne inconnu | réponse D attendue |
 
 ## GPU et parallélisme
 
 | note | auteur | créée | portée | cycle | réponse du développeur |
 | --- | --- | --- | --- | --- | --- |
-| [`OBSTACLES_GPU_SOUS_SECONDE_20260923.md`](OBSTACLES_GPU_SOUS_SECONDE_20260923.md) | B ? | `c717a1f2` 05:56 | mesure | vivant | sans réponse |
+| [`OBSTACLES_GPU_SOUS_SECONDE_20260923.md`](OBSTACLES_GPU_SOUS_SECONDE_20260923.md) | B ? | `c717a1f2` 05:56 | diagnostic R7b CPU antérieur aux reçus v12/R12/R13 | historique, remplacé pour l'état courant | sans objet |
 | [`CONTRE_AUDIT_B_WIP_V6_C6_TRI_20260923.md`](CONTRE_AUDIT_B_WIP_V6_C6_TRI_20260923.md) | B | `73d1d0a6` 05:31 | démontré localement | vivant (hors v9) | sans réponse (question canal l. 35) |
 | [`CONTRE_AUDIT_B_PORTE_FILTRE_GPU_20260923.md`](CONTRE_AUDIT_B_PORTE_FILTRE_GPU_20260923.md) | B | `7a7987ad3` 12:58 | budget R11 et préflight du port CUDA S1 ; première lecture historique | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_G4_S1_PUBLIE_20260923.md`](CONTRE_AUDIT_B_G4_S1_PUBLIE_20260923.md) | B | 23/13:51 | préflight historique du paquet S1 publié | clos par les deux reçus G4 | réponse D |
-| [`CONTRE_AUDIT_B_G4_GPU_S1_SESSIONS_20260923.md`](CONTRE_AUDIT_B_G4_GPU_S1_SESSIONS_20260923.md) | B | 23/15:12 | deux sessions G4, six cas de filtre exact, portée et budget restant | historique S1 ; S2 mesuré en R12, catalogue GPU et chaîne restent ouverts | réponse D |
+| [`CONTRE_AUDIT_B_G4_GPU_S1_SESSIONS_20260923.md`](CONTRE_AUDIT_B_G4_GPU_S1_SESSIONS_20260923.md) | B | 23/15:12 | deux sessions G4, six cas de filtre exact, portée et budget restant | historique S1 ; chaîne hybride mesurée en R12/R13, égalité littérale du catalogue et contrat ouverts | réponse D |
 | [`CONTRELECTURE_G4_R12_S2_20260923.md`](CONTRELECTURE_G4_R12_S2_20260923.md) | A | 23/16:25 | reçu G4 S2 : six paires distinctes, attribution lots/CUDA, plancher survivants + tour et diagnostic de croissance | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_RACCORD_Q34_BATCH_WIP_20260923.md`](CONTRE_AUDIT_B_RACCORD_Q34_BATCH_WIP_20260923.md) | B | 23/15:10 | préflight du raccord q3/q4 batch : confiance, mémoire, ledger ; sources publiées à `a6d81f9ce` | vivant, qualifications ouvertes | réponse D attendue |
 | [`q34_batch_duplicate_gate_20260923/`](q34_batch_duplicate_gate_20260923/README.md) | A | 23/15:20, rejeu 16:14 | doublon à comptes constants refusé par `2059189d` ; mutant intégré rendu causal par `c265a5da` | clos pour le contre-exemple et sa porte | corrigée |

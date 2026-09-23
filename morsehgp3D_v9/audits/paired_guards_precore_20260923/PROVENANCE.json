@@ -1,0 +1,28 @@
+{
+  "archive_sha256": "208aabb30a764bad25ab1c99d74885bd405e84a13dcb8375622d66aa6203f70a",
+  "audit_status": "not_claimed; CPU shadow, oracle selection",
+  "fixture_binary_sha256": "0dc6d29a1dd39609209dc7129ecc8bcf4ac2aea59926e25c638d36050e6a2d70",
+  "format": "little-endian u32 points/IDs and 16-byte a,b,F,mask S2 records; eight trace parts in lexical order",
+  "input_sha256": {
+    "points": "233cc4ea8cac6e0b1155ea845af57b32e5236764bf2e119557aeab5bac76c172",
+    "raw_ids": "796e9814dd2dff7778ad8d1bb55f5113ab54206ff8b246e6432200f9a6833f7f",
+    "trace_parts": [
+      "aff29cd4cc91b074f32a70696f628d1ae4b3f02ba76521710ba07e888d12cdc6",
+      "d5d36f42a19a6a8e3672d015f2be3b4b611aad056c163db3efcb182aeb905eaa",
+      "cf19e31682a3a90350838db9e8cdcf3a4cd1e041e9e859768a624ee718f64a4a",
+      "41f4a8d92cbc642f67daa2d0f9d7c20d75bc380e7dd70cc273ce3832473121a6",
+      "edaf2633f7f21bf7d6ff7fb7cb9243e2d544b05253a813dd23f6801e85d4b708",
+      "cbc8c4af910854fca9dbc6c250678551345fe67736a0d2fbc742ad6c3be53d62",
+      "51b1f047fc6127aec2a6b8b2314f08f4043abf58dbff24d30b9e16563e370a73",
+      "4cb6b3f45a8577aac541b4d183c91d42e4d421ab813e76b7a27bbb9e738ad334"
+    ]
+  },
+  "schema": "mhgp9_audit_paired_guard_provenance_v1",
+  "sector_raw_ids_sha256": {
+    "quarter_x_neg_y_neg": "dc43f4b5d490828bfdecc09ca59c6e9c0519d8a7e3c14c0f80d9db8282e97dc5",
+    "quarter_x_neg_y_nonneg": "fd69b4d0e913829d47597e982cca9462e63c4a09d961cb340790d925f0d902b8",
+    "quarter_x_nonneg_y_neg": "0ead7ce73bfdeaf4fdcb21179f08fa7da2f1370820bfa873ec6b9169c478668c",
+    "quarter_x_nonneg_y_nonneg": "2f4208aa2d4d499ee6c350d089db16751c0f42877ef53fb2445f306c7a982404"
+  },
+  "source_trace_commit": "c265a5dae4dd92059fc78acc0a1d7f52de9c1435"
+}

@@ -1,5 +1,14 @@
 # Contrelecture B — première trame brute et découpes physiques
 
+**Erratum de lecture ajouté par A, 23 septembre.** Les valeurs appelées ci-dessous
+« formes » sont le champ `dead_core_form_sites`, qui **exclut les deux
+extrémités calculées à chaque charge**. Le total de formes réellement
+calculées est `core_sites = dead_core_form_sites + 2×dead_core_loads` :
+**37,010→128,853→559,662 M** sur les trois densités, avec pentes
+**1,800/2,119**. Les tableaux historiques ci-dessous et leurs pentes
+**1,823/2,136** restent exacts pour le seul sous-total hors extrémités ;
+voir la [synthèse corrigée](CROISSANCE_LIDAR_PLANS_ET_DENSITE_20260923.md).
+
 23 septembre 2026. Relecture indépendante du
 [reçu A](lidar_raw_physical_scaling_20260923/README.md) publié en
 `aa2528d2`. Aucun calcul HGP supplémentaire ni GCP par B. Cadre :
@@ -29,20 +38,21 @@ et des entrées n'est pas une preuve indépendante de complétude HGP.
 
 ## Ce que montrent réellement les coûts
 
-| sites de la trame brute | chaîne locale W8 | CPU·s | q3/q4 | formes du cœur effectivement chargées |
+| sites de la trame brute | chaîne locale W8 | CPU·s | q3/q4 | formes du cœur hors extrémités |
 | ---: | ---: | ---: | ---: | ---: |
 | 30 847 | 9,318 s | 49,920 | 7,005 s | 35,46 M |
 | 61 694 | 20,486 s | 116,088 | 15,686 s | 125,48 M |
 | 123 389 | 48,357 s | 285,329 | 38,942 s | 551,69 M |
 
-Les pentes effectives des formes sont **1,823 puis 2,136** aux deux
+Les pentes effectives de ce sous-total sont **1,823 puis 2,136** aux deux
 doublements ; celles du CPU sont **1,218 puis 1,297**, du temps de
 chaîne **1,137 puis 1,239**. Le deuxième doublement dépasse donc n²
 pour une **opération réellement payée**, pas pour le temps total
 mesuré. Le source v12 appelle `dead_.load` à chaque cœur et calcule
-une forme par site du cœur hors les deux extrémités. Sur la trame
-entière : **3,986 M cœurs**, **551,69 M formes**, soit **138,39
-formes par cœur** en moyenne. La somme des deux moitiés physiques
+une forme par site du cœur, **extrémités comprises**. Sur la trame
+entière : **3,986 M cœurs**, **551,69 M formes hors extrémités**
+(138,39 par cœur), soit **559,66 M formes réellement calculées**
+(140,39 par cœur). La somme des deux moitiés physiques
 garde 97,0 % des constructions de cœur du plein mais seulement
 30,6 % des formes : le coût par cœur croît fortement avec l'étendue
 de la scène. Le plein prend 49,174 s de mur externe et 1,93 GiB RSS.
@@ -82,7 +92,8 @@ et leurs payloads u18. Avec les 21 sorties archivées, le manifeste,
 fichier n'a été modifié pendant cette contrelecture. Le lecteur refuse
 logiquement le manifeste temporaire limité aux neuf premiers cas.
 
-Les chiffres de l'extension sont cohérents : **2/14** pentes de formes
+Les chiffres de l'extension sont cohérents pour le sous-total
+hors extrémités : **2/14** pentes
 au moins quadratiques entre densités d'un même secteur — plein
 1/2→1 : **2,136333** ; quart `x≥0,y<0` 1/4→1/2 : **2,059549**.
 Les quatorze pentes CPU sont **1,1995–1,3283**, les paires développées

@@ -90,7 +90,8 @@ montre `3Σ|plage(v)|` vérifications de rangs **hors** événements GPU ;
 l'API brute ne contrôle pas l'unicité XYZ déjà certifiée par le
 producteur. Le scan/probe gardent des buffers `O(R+P)` et le noyau
 de paires paie `O(P log R)` ; la vitesse S1 est mesurée, mais la mémoire
-massive et le gain de la chaîne ne le sont pas. Une certification linéaire
+massive n'est pas qualifiée ; le gain de la chaîne a été mesuré depuis
+en R12/R13, avec les limites exposées plus bas. Une certification linéaire
 réutilisable de l'index et le tuilage S2 sont les prochaines étapes ;
 mesurer ensuite les temps de création et de consommation des requêtes
 dans la chaîne. Aucun contrat de tour G4 n'en découle.
@@ -233,76 +234,26 @@ de sites et temps de deux runs : c'est une projection, pas une borne ni
 un gain G4. Même retirer idéalement **toute** la phase
 des arêtes survivantes des trois lignes K5 de R12 laisserait 1,177 à
 1,513 s de chaîne, à autres phases inchangées : S3 seul ne suffit pas.
-Un [préflight B du port S3 local non publié](CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md)
-signale avant G4 le lot CUDA vide avec pointeur nul, une feuille
-multi-site acceptée par la garde brute malgré le contrat du cover,
-les slabs de 3,25 Mio par warp au défaut, et le cover CPU reconstruit
-sur les arêtes encore ouvertes sans compteur physique séparé. La
-lecture statique du premier noyau `50dabc0fa` trouvait un **retour
-anticipé sans `__syncwarp` après écritures partielles du frontier** :
-`__ballot_sync` n'ordonne pas la mémoire entre lanes. Le correctif
-local `6596b13a2`, publié sur `main` sous `545c71799`, ajoute une
-barrière avant le réemploi ; le risque WAW paraît fermé en source. Un
-[gate hôte ciblé](s3_frontier_barrier_gate_20260923/README.md), épinglé
-aux headers publiés, trouve dans l'ancien ordre et dans un mutant sans
-cette barrière un réemploi WAW **et WAR** du frontier, contre zéro pour
-le correctif. Il n'émule pas les délais mémoire CUDA : **avant R13,
-aucune porte device** n'avait encore éprouvé ce chemin. La sonde, le worker G4, son
-selftest et le lecteur LiDAR
-passent en v18 ; le correctif exige désormais dans le préflight réduit
-au moins une décision GPU et au moins un report, puis zéro report sur
-les trames normales plus petites que l'ardoise. C'est un protocole,
-pas un reçu G4. Dans ce commit `545c71799`, les trois gardes bruts
-(lot vide nul, feuille multi-site, q4 à K2) restent ouverts ; ils sont
-fermés ensuite par `942494362`. Le digest catalogue inclut les IDs des
-coquilles, sans être une comparaison littérale indépendante ; la porte
-de flux ne compare encore que leurs tailles. Le journal local CUDA OFF
-du correctif a 23 tests ciblés réussis, pas 154/154 ni un test device.
-Exiger un différentiel CUDA par arête et le nombre de décisions GPU
-réelles. R12 publié n'est pas touché.
-L'[audit C du condensé du catalogue](c_catalogue_digest_20260923/README.md)
-épingle maintenant six valeurs CPU (trois trames sans sol 08, K5/K10)
-égales entre moteur, lot CPU et S3 CPU. À cette étape, son gate causal de coquilles
-étendues restait un **patch d'audit**, pas un CTest produit ; le lecteur
-R13 ne vérifiait pas encore ces six épingles à cette étape. Aucun reçu
-R13/S3 G4 n'était publié au contrôle du 23 septembre à 19 h 43 UTC. Depuis,
-**`942494362` est publié sur `main`** : il ferme les trois gardes
-d'entrée et ajoute un juge CPU par arête aux deux préflights G4, avec
-masques, comptes logiques et IDs de coquilles renforcés. Une relecture
-indépendante ne trouve pas de divergence causale dans le **plan R13 par
-défaut** ; deux tests ciblés du validateur/préflight passent en Python
-normal, dont un aussi sous `-O`. À ce stade, aucun reçu device R13 ne
-qualifiait encore S3. Le [contre-audit B sur le correctif publié](CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md)
-relève 149 tests CPU sélectionnés réussis sous **CUDA OFF** (journal
-local non épinglé), mais aucune porte CUDA directe du lot vide à
-pointeurs nuls. À `942494362`, `rebuilt_covers` n'était contrôlé que
-par une borne supérieure ; **`46c50432c`** ajoute son égalité exacte
-sur les fixtures CPU de la porte chaîne. Le worker compare le condensé
-FNV-64 du catalogue et une
-**projection publiée** du travail de couverture : les expressions
-« clé par clé GPU/moteur » dans la passation et « même travail de la
-couverture » dans la provenance sont plus fortes que cette comparaison
-de session. Le gate C++ local compare davantage de champs ; le patch
-C de coquilles étendues et ses six valeurs épinglées sont ensuite portés
-par **`18d7c69c7`** (quatre tests ciblés locaux, aucun CUDA ni reçu
-R13). Un [contrôle B ultérieur](CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md)
-voit 26/26 auto-tests Python du protocole à `8ce818ff9` et reproduit
-localement l'épingle 08/000000/K5 avec le moteur W48 ; ces sorties ne
-sont pas un reçu G4 épinglé. **`46c50432c`** ferme aussi le faux
-`GPU_executed` d'un plan personnalisé S3 sans survivant : le worker
-et le lecteur exigent maintenant des temps/warps observés pour classer
-la phase device. Le test Python ciblé passe ; la session R13 juge depuis
-S3 sur G4, mais n'exerce toujours pas le lot vide. Les libellés de passation et
-provenance doivent toujours dire « même condensé canonique et mêmes
-compteurs publiés », et les décisions GPU réelles restent à compter.
+Le [préflight B de S3](CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md)
+et le [gate causal de frontière](s3_frontier_barrier_gate_20260923/README.md)
+ont trouvé un réemploi WAW/WAR du frontier dans l'ancien noyau. Les
+correctifs publiés `545c71799` (barrière), `942494362` (gardes d'entrée
+et juge CPU par arête dans les deux préflights G4), `46c50432c`
+(compte exact des covers reconstruits et classement GPU observé) et
+`18d7c69c7` (six épingles de condensé de catalogue et mutants de
+coquille) ferment ces défauts et préparent R13. Le lot CUDA **vide à
+pointeurs nuls** reste sans essai device ciblé ; la porte hôte ne
+simule pas les délais mémoire CUDA. Les preuves CPU et le reçu R13
+ci-dessous comparent le condensé FNV-64 et des comptes publiés, sans
+égalité littérale indépendante des catalogues GPU/CPU. Les commandes,
+refus et portées intermédiaires restent dans la contrelecture liée.
 L'[addendum de flux S2/S3](PROPOSITION_B_GPU_STREAMING_S2_20260923.md)
 épingle les six populations R/P/S de R12 et les plafonds `2^31−1` du
 port à appel entier. Sans tuilage exact, cette représentation n'a pas
 de voie vers plusieurs dizaines de millions de sites, indépendamment
 de la question mathématique de croissance globale.
 Le [reçu R13 S3 sur G4](../receipts/g4_tower_r13_20260923/README.md)
-est **maintenant publié** ; les phrases précédentes « aucun reçu R13 »
-décrivent les contrôles antérieurs au lancement, pas l'état courant.
+est publié après ces préflights.
 La [contrelecture B](CONTRE_AUDIT_B_G4_R13_S3_20260923.md) vérifie les
 326 empreintes et rejoue le lecteur normal/`-O` : 18/18 cas achevés,
 six épingles CPU tour/catalogue et 12 comparaisons égales. Le préflight
@@ -454,6 +405,21 @@ Les 21,9 M termes `Q` du sidecar naïf sont mémoïsables, mais la faible
 fermeture interdit d'en faire le prochain port produit. Tester plutôt
 des domaines 2D ou adaptatifs et le seuil q4 seul `K−2`, avec budget,
 repli exact et coût de chaîne mesuré.
+Un [certificat complémentaire sans cellule](paired_guards_precore_20260923/README.md)
+apparie des **sites distincts** : si la somme de leurs deux marges
+d'intériorité est strictement positive sur tout le disque de centres
+q3 ou q4, au moins un site de chaque paire est intérieur. Les tests
+entiers sont `H>0`, `3H²>4X` (q3) ou `H²>2X` (q4), avec quatre/trois
+paires disjointes à K5. Une fixture native laisse S2 ouvert sur les deux
+voies, puis ferme exactement ces voies par quatre paires. Sur deux
+échantillons stratifiés de **60 arêtes S2 lourdes** d'une même trame
+brute, une palette de 16 sites au plus par quadrant ferme **27/60 puis
+40/60** arêtes et couvre **111 883/260 032 puis 168 845/260 599**
+formes de cœur échantillonnées. La palette oracle balaie toutefois
+**7,403 M sites par échantillon** ; ces rapports ne décrivent ni le flux
+complet ni un gain de temps. Prochaine épreuve : recherche bornée par
+index, visites et coût de chaîne sur plein/moitiés/quarts à densités
+appariées, avec repli exact pour tout échec.
 Les [demi-scènes et quarts aux trois densités](lidar_raw_physical_scaling_20260923/README.md)
 ont été mesurés avec v12, puis appariés au batch S2 CPU K5 par les
 deux reçus ci-dessus. La somme de leurs tours ne reconstruit pas le
@@ -642,9 +608,10 @@ LiDAR 8k/K10, aucun désaccord sain, `drop-crl` et `drop-long` tués dans
 cette strate. Une clé retirée du catalogue est détectée par coupe.
 L'échantillon ne couvre qu'environ 0,061/0,188/0,016 % des populations
 q3 de tête publiées, populations elles-mêmes issues du produit ; ni
-complétude générale ni transfert au GPU. À cette version, la garde
-d'index des juges devait encore vérifier la bijection et les bornes
-des IDs avant tout accès.
+complétude générale ni transfert au GPU. À l'étape v7, la garde d'index
+des juges devait encore vérifier la bijection et les bornes des IDs
+avant tout accès ; le patch R-20 ci-dessous ajoute cette garde, sans être
+encore intégré au produit.
 
 La [proposition R-20 de C](c_omission_20260923/judges_product_gates.patch)
 porte 21 `gate` et 13 `scale8000` en patch, **34/34** réussis
