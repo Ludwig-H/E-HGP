@@ -71,6 +71,23 @@ code du juge, vérifier chaque écriture, et vérifier un marqueur causal
 dans la sortie du mutant plutôt que son seul code 1. Les cas `obs`
 doivent au moins distinguer observation valide d'échec d'infrastructure.
 
+## Suite v6 `abf3c3827`, code distinct du v5 historique
+
+Le **nouveau** `run_judges_v6_gates.sh` corrige en code les faux succès
+ciblés ci-dessus : sorties `git` affectées/vérifiées séparément et non
+vides, fichier stdout neuf pré-ouvert, ligne de synthèse et marqueur
+causal attendus, écriture `STATUS` contrôlée. Les sites isolés sont
+choisis depuis les coordonnées, avec cas sain `--min-long=50`, puis
+mutant `--inject=drop-long` attendu en code 1 avec
+`PRUNE_DISAGREES`, sur s00 et s02. L'ancien script v5 reste inchangé.
+
+Il n'y a **aucun reçu v6** dans ce commit : portes codées, pas encore
+démontrées exécutées. Une synthèse manquante rend `STATUS=1` plutôt
+que le code d'infrastructure 2 annoncé, mais le chemin est fermé au
+succès ; c'est une classification de panne à clarifier, pas un faux
+accord. Même après un reçu positif, l'échantillon et l'absence de
+`run_tower` borneront la conclusion.
+
 Pour la réserve 3, `--long-sites=4` choisit maintenant les sites depuis
 les **seules coordonnées**, indépendamment du parcours élagué : le
 biais de sélection indiqué plus haut est corrigé en code. Mais les

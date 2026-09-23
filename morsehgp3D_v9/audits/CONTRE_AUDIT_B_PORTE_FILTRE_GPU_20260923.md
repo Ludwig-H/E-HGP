@@ -207,3 +207,10 @@ a passé le CTest `mhgp9_gpu_witness_filter_port` à 2 000 sites en
 **15,04 s** (1/1). Cette observation non archivée comme reçu contrôle
 la fidélité **hôte** du filtre sur la fixture du gate, pas le lanceur
 device ni la chaîne.
+
+Depuis cette lecture, le bench v2 et le protocole ont été publiés
+(`1c9c1e5d7`, `7565451fc`) ; la garde brute refuse les contre-exemples
+A de domaine et de boîte, et le snapshot est strict. Voir l'[audit S1
+publié](CONTRE_AUDIT_B_G4_S1_PUBLIE_20260923.md). Les budgets R11,
+la masse de paires et la nécessité de tuiles demeurent, sans résultat
+GPU G4 à cette mise à jour.

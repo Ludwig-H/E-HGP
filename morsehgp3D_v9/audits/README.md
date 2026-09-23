@@ -167,7 +167,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`RECEPTION_G4_R10_20260923.md`](RECEPTION_G4_R10_20260923.md) | A | 23/11:07 | réception CPU G4 appariée, recouvrement FULL | vivant | sans objet |
 | [`CONTRE_AUDIT_B_G4_R10_ET_PASSE2_20260923.md`](CONTRE_AUDIT_B_G4_R10_ET_PASSE2_20260923.md) | B | `3a57a6d6` 11:13 | mesure (R10) | vivant | sans objet |
 | [`CONTRE_AUDIT_B_G4_R11_ET_VOISINS_COEUR_20260923.md`](CONTRE_AUDIT_B_G4_R11_ET_VOISINS_COEUR_20260923.md) | B | `2485da41` 11:40 | réception CPU G4 R11 et portée conditionnelle du shadow voisins | vivant | sans objet |
-| [`CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md`](CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md) | B | `ac197535a` 13:11 | préflight du protocole GPU S1 mutable, faux-GPU seulement | vivant jusqu'au reçu G4 | sans réponse |
+| [`CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md`](CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md) | B | `ac197535a` 13:11 | préflight historique du protocole GPU S1 mutable, faux-GPU seulement | historique (`7565451fc`) | sans réponse |
 | [`CERTIFICAT_Q34_SOUS_ENSEMBLES_LOCAUX_20260923.md`](CERTIFICAT_Q34_SOUS_ENSEMBLES_LOCAUX_20260923.md) | A | 23/11:48 | preuve : témoins distincts arbitraires ; alternative au k-NN global exact et budget mémoire WIP | vivant | sans objet |
 | [`CONTRE_AUDIT_B_G4_R8_20260923.md`](CONTRE_AUDIT_B_G4_R8_20260923.md) | B | `2faf5b59` 09:57 | mesure | vivant ; seuil de tâche rectifié ci-dessus | sans objet |
 | [`CONTRE_AUDIT_B_G4_R7B_20260923.md`](CONTRE_AUDIT_B_G4_R7B_20260923.md) | B | `b46826e2` 06:24 | mesure | historique | sans objet |
@@ -209,6 +209,8 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`OBSTACLES_GPU_SOUS_SECONDE_20260923.md`](OBSTACLES_GPU_SOUS_SECONDE_20260923.md) | B ? | `c717a1f2` 05:56 | mesure | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_WIP_V6_C6_TRI_20260923.md`](CONTRE_AUDIT_B_WIP_V6_C6_TRI_20260923.md) | B | `73d1d0a6` 05:31 | démontré localement | vivant (hors v9) | sans réponse (question canal l. 35) |
 | [`CONTRE_AUDIT_B_PORTE_FILTRE_GPU_20260923.md`](CONTRE_AUDIT_B_PORTE_FILTRE_GPU_20260923.md) | B | `7a7987ad3` 12:58 | budget R11 et préflight du port CUDA S1 ; première lecture historique | vivant | sans réponse |
+| [`CONTRE_AUDIT_B_G4_S1_PUBLIE_20260923.md`](CONTRE_AUDIT_B_G4_S1_PUBLIE_20260923.md) | B | 23/13:51 | paquet S1 publié, snapshot strict et limites du premier SPOT | vivant jusqu'au reçu GPU | sans réponse |
+| [`CONTRE_AUDIT_B_VALIDATION_INDEX_GPU_S1_20260923.md`](CONTRE_AUDIT_B_VALIDATION_INDEX_GPU_S1_20260923.md) | B | 23/13:49 | preuve du coût de la garde brute et certificat linéaire proposé | vivant | sans réponse |
 | [`AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md`](AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md) | A | 23/13:17 | contre-exemples fermés par `7565451fc` ; certificat d'index linéaire réutilisable pour S2 | clos pour les défauts, vivant pour le coût | corrigée |
 | [`PROPOSITION_B_GPU_STREAMING_S2_20260923.md`](PROPOSITION_B_GPU_STREAMING_S2_20260923.md) | B | `8432e2353` 13:28 | tuilage borné S2a et certificat bloc/ligne S2b avec portes causales | vivant | sans réponse |
 

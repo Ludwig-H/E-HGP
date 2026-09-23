@@ -3081,6 +3081,38 @@ servir **≥253 615 450 visites en 0,1 s**, soit >2,53 Md/s, **en plus**
 des transferts ; le vrai nombre de visites des paires sans cache reste
 à mesurer. Ce n'est pas une preuve d'impossibilité GPU, mais un débit
 minimal de cette porte concrète.
+
+### Mise à jour 13 h 48 UTC — paquet S1 publié, première G4 possible (auditeur B)
+
+`1c9c1e5d7` publie le bench v2 et `7565451fc` les quatre scripts G4 et
+la garde d'entrée. Le snapshot strict
+`collect("7565451fc")/validate_files` passe avec
+`protocol_source=commit`, six cas ; 10/10 selftests normal et 10/10
+`-O` passent **avec faux GPU**. La
+[contrelecture B du paquet](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_G4_S1_PUBLIE_20260923.md)
+ne voit pas de faux accord sur l'entrée produite ni de bloqueur
+évident du **premier** SPOT S1 ~40k ; le vrai CUDA sm120 et son débit
+restent inconnus. Pour minimiser le coût, commencer si souhaité par
+un plan à **un cas** 08/000000/K5. `complete` signifie masques égaux,
+non `≤100 ms` ni tour FULL. Le défaut de boîte forgée de l'audit A
+est maintenant refusé ; l'API brute n'impose toujours pas unicité XYZ.
+Surtout, sa garde rescane `3Σ_v|plage(v)|` rangs **hors** chrono GPU,
+soit jusqu'à 54n dans l'index produit et Θ(n²) pour un peigne brut.
+La [preuve de certification linéaire](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_VALIDATION_INDEX_GPU_S1_20260923.md)
+propose feuilles scannées une fois + hulls remontés en O(n+N) et un
+jeton immuable réutilisable entre lots. Cette optimisation est pour
+l'industrialisation, pas un prétexte pour retarder la sonde 40k.
+
+### Mise à jour 13 h 48 UTC — runner C v6 avant reçu (auditeur B)
+
+Le nouveau `run_judges_v6_gates.sh` de `abf3c3827` ferme en code les
+faux succès de `git`, redirection/code1 et `STATUS`, et impose un
+mutant `drop-long` causal sur sites isolés avec au moins 50 incidences
+longues ; l'ancien v5 reste historique. La
+[contrelecture B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_JUGES_C_V4_20260923.md)
+ne trouve toujours **aucun reçu v6 publié** : attendre un STATUS,
+une provenance et les sorties effectivement produits avant toute
+conclusion de complétude échantillonnée.
 ## 23 septembre 2026, 14 h 00 UTC — Réponse du développeur : voie GPU S1 (code, protocole, revue avant session)
 
 GCP non utilisé à la date de cette entrée.

@@ -128,3 +128,9 @@ le mutant causal exécuté sur G4.
 Le selftest WIP étendu passe désormais **10/10** en Python normal et
 **10/10** sous `-O` lors de la reprise locale ; il reste un test de
 protocole à fausse sonde, non une compilation CUDA positive.
+
+**Clôture de cette note WIP :** bench v2 et protocole ont depuis été
+publiés dans `1c9c1e5d7` et `7565451fc`. Lire l'[audit du paquet
+immuable](CONTRE_AUDIT_B_G4_S1_PUBLIE_20260923.md) pour le statut
+courant ; les défauts ci-dessus datent des lectures successives du
+worktree et ne doivent pas être réattribués au snapshot publié.

@@ -54,26 +54,27 @@ inchangées et séquentielles. La porte de débit 0,1 s pour tous les masques
 sans cache demeure utile : la population R11/000000/K5 implique déjà
 au moins **253,6 M visites de nœuds** (rectangles plus une racine par
 paire), donc **>2,53 Md/s** pour la seule porte S1, transferts inclus ;
-le nombre réel de visites de paires sans cache est inconnu. Le lanceur
-CUDA S1 (`0d5ad2e89`), la sonde v2 (`1c9c1e5d7`) et la garde brute avec
-protocole SPOT (`7565451fc`) sont publiés. La nouvelle garde refuse le
-débordement hors u18 et la boîte racine forgée qui donnait un faux rejet
-q4 ; la [fixture et la correction](AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md)
-sont documentées. Le snapshot strict du commit contient bien bench v2,
-garde et scripts ; ses **10/10 selftests** passent normalement et sous
-`-O`, avec fausse sonde. Aucun test positif CUDA/G4 ni temps de tour GPU
-n'en découle. La [tentative G4 1](../receipts/g4_gpu_s1_attempt1_20260923/README.md)
-a échoué à la configuration avant compilation (`CUDA_STANDARD 20` inconnu de CMake
-3.22.1) ; `6e0e43a0d` passe l'unité CUDA à C++17 et rapporte un build
-local avec cet outillage. Aucun masque n'a été calculé sur G4 dans ce reçu.
-La garde paie une lecture des points de chaque nœud, hors
-événements CUDA ; une certification linéaire réutilisable de l'index est
-préférable avant le tuilage S2.
-Le scan et le probe gardent des buffers `O(R+P)`, tandis que le noyau
-de paires paie `O(P log R)` pour ses recherches d'offset ; ni mémoire
-massive ni vitesse GPU ne sont acquises. Le
-[préflight B](CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md)
-avait trouvé un mélange bench/protocole ; le paquet publié le refuse.
+le nombre réel de visites de paires sans cache est inconnu. Le port
+CUDA `0d5ad2e89`, le bench v2 `1c9c1e5d7` et le protocole G4 avec
+garde brute `7565451fc` sont publiés. La
+[contrelecture B du paquet](CONTRE_AUDIT_B_G4_S1_PUBLIE_20260923.md)
+valide un snapshot strict commité de six cas ; les **10/10 selftests**
+normaux et **10/10** sous `-O` passent sur faux GPU. La garde ferme
+les contre-exemples A de débordement u18 et de boîte racine forgée.
+La [tentative G4 1](../receipts/g4_gpu_s1_attempt1_20260923/README.md)
+a échoué à la configuration avant compilation (`CUDA_STANDARD 20`
+inconnu de CMake 3.22.1), sans calculer de masque GPU. Le correctif
+`6e0e43a0d` passe l'unité CUDA à C++17 et rapporte un build local
+avec cet outillage ; un passage positif G4 manque toujours.
+L'[audit B du coût de garde](CONTRE_AUDIT_B_VALIDATION_INDEX_GPU_S1_20260923.md)
+montre `3Σ|plage(v)|` vérifications de rangs **hors** événements GPU ;
+l'API brute ne contrôle pas l'unicité XYZ déjà certifiée par le
+producteur. Le scan/probe gardent des buffers `O(R+P)` et le noyau
+de paires paie `O(P log R)` ; ni mémoire massive ni vitesse GPU ne
+sont acquises. Une certification linéaire réutilisable de l'index
+serait préférable avant le tuilage S2. Un prochain plan à **un seul
+cas** 08/000000/K5 limiterait la dépense SPOT ; le plan par défaut
+continue après ce cas s'il est exact mais plus lent que 100 ms.
 La [proposition S2](PROPOSITION_B_GPU_STREAMING_S2_20260923.md)
 sépare le tuilage borné sans nouveau rejet (S2a) du certificat
 bloc/ligne avant expansion (S2b), avec tests causaux et arrêt de la
@@ -224,21 +225,20 @@ corrompue est prévu. Le [certificat de B](CERTIFICAT_B_MARGE_JUGE_Q3_U18_202609
 pour ces triangles aigus u18. La source et la
 [recette v5](c_omission_20260923/run_judges_v5.sh) de `c6042af2b`
 ajoutent la comparaison indépendante des clés canoniques q2/q3, un
-mutant de clé seule, des sites isolés choisis depuis les coordonnées et
-une provenance **partiellement** bloquante. La
-[contrelecture B](CONTRE_AUDIT_B_JUGES_C_V4_20260923.md) a trouvé deux
-substitutions `git` dont l'échec pouvait être masqué et un code 1 de
-mutant imitable par échec de redirection. La
-[recette v6](c_omission_20260923/run_judges_v6_gates.sh) publiée par
-`abf3c3827` contrôle maintenant ces écritures, exige des marqueurs
-causaux et tente un mutant `drop-long`. L'[audit A des portes v6](AUDIT_A_JUGE_Q3_V6_LONGUES_INCIDENCES_20260923.md)
-relève deux limites encore ouvertes : le plancher long peut être atteint hors du
-rang q3 critique `p=Kmax−2`, et une observation `obs` peut accepter un
-refus du juge de code 2. **Aucun reçu v6 n'est publié** ; ne pas
-transférer les anciens codes 0 aux nouveaux SHA. Le juge échantillonne
-des ancres et fixe `run_tower=false` : même un code 0 ne contrôlerait
-que le catalogue échantillonné, sans certifier la tour FULL ni la
-complétude globale.
+mutant de clé seule et des sites isolés choisis depuis les coordonnées.
+La [contrelecture B](CONTRE_AUDIT_B_JUGES_C_V4_20260923.md) a trouvé
+dans ce **runner v5** des faux succès de provenance et de code 1 par
+redirection, ainsi qu'un mutant des sites longs seulement observé.
+Le **nouveau** [runner v6](c_omission_20260923/run_judges_v6_gates.sh)
+de `abf3c3827` vérifie substitutions et sorties, et exige un mutant
+`drop-long` apparié avec au moins 50 incidences longues. Mais
+l'[audit A des portes v6](AUDIT_A_JUGE_Q3_V6_LONGUES_INCIDENCES_20260923.md)
+relève que ce plancher peut être atteint hors du rang q3 critique
+`p=Kmax−2`, et qu'une observation `obs` peut accepter un refus du
+juge de code 2. **Aucun reçu v6 n'est publié** ; ne pas hériter des
+anciens codes 0. Le juge échantillonne des ancres et fixe
+`run_tower=false` : même un code 0 ne contrôlerait que le catalogue
+échantillonné, sans certifier la tour FULL ni la complétude globale.
 
 La porte de **clés jamais émises** publiée par `683fa46e` change utilement
 le sens du contrôle : elle recense des MEB de supports q2–q4 voisins
