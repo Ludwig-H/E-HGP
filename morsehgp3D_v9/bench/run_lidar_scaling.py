@@ -45,7 +45,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[2]
 V8 = ROOT / 'morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v19'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v20'
 # Schemas relus lors d'une revalidation d'archive (v12 : reçu du 23 septembre).
 KNOWN_SCHEMAS = ('mhgp9_tower_probe_v12', PROBE_SCHEMA)
 # Le schema de sonde d'une campagne est fixe par son RESUME, jamais par le JSON
@@ -63,9 +63,9 @@ FNV_MASK = (1 << 64) - 1
 DEFAULT_LEVERS = dict(atlas_saturate_deep=True, q3_leaf_census=True, q34_dead_lanes=True, q34_witness_cache=True,
                       q34_dead_core=True, tower_meb_proposal=True, q34_jobs_by_mass=True, q34_fine_jobs=True,
                       tower_overlap_static=True, q2_jobs_by_mass=True,
-                      # v17/v18: the local campaign keeps the engine path (no GPU here).
+                      # v17/v18/v20: the local campaign keeps the engine path (no GPU here).
                       q34_batch_filter=False, q34_gpu_filter=False, q34_batch_certificates=False,
-                      q34_gpu_certificates=False)
+                      q34_gpu_certificates=False, q34_batch_q3=False, q34_gpu_q3=False)
 # Leviers publies par schema de sonde (les archives v12 en ont six).
 LEVERS_V12 = {name: True for name in ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_witness_cache',
                                       'q34_dead_core', 'tower_meb_proposal')}
@@ -416,11 +416,22 @@ def selftest(case_path):
                             rectangles=0, survivors=0, certificate_backend='', certificate_ms=0.0,
                             certificate_device_ms=0.0, deferred=0, judged_edges=0, rebuilt_covers=0,
                             certificate_warps=0, filter_kernel_ms=0.0, filter_transfer_ms=0.0,
-                            certificate_kernel_ms=0.0, certificate_transfer_ms=0.0)
+                            certificate_kernel_ms=0.0, certificate_transfer_ms=0.0, lanes_backend='',
+                            lanes_ms=0.0, lanes_device_ms=0.0, lanes_kernel_ms=0.0, lanes_transfer_ms=0.0,
+                            lanes_wait_ms=0.0, tail_ms=0.0, lanes_asked=0, lanes_decided=0, lanes_deferred=0,
+                            lanes_records=0, lanes_judged=0, lanes_warps=0)
+    # v20: the declared q3 lanes ledger, zero on the engine path.
+    for name in ('lanes_edges', 'lanes_cover_sites', 'lanes_cover_node_visits', 'lanes_seed_tests',
+                 'lanes_acute_sites', 'lanes_owner_rejections', 'lanes_seeds', 'lanes_census_point_tests',
+                 'lanes_census_inside_sites', 'lanes_census_shell_sites', 'lanes_census_outside_sites',
+                 'lanes_depth_rejections', 'lanes_emitted', 'lanes_shell_ids'):
+        v13['ledger'].setdefault(name, 0)
     v13['catalogue_digest'] = '0123456789abcdef'
     v13['times_ms']['catalogue_digest'] = 0.0
     v13['options']['certificate_capacity'] = 0
     v13['options']['certificate_judge'] = False
+    v13['options']['lanes_capacity'] = 0
+    v13['options']['lanes_judge'] = False
     static_path = expected['static_threads'] > 1
     v13['tower_phases_ms'] = dict(validate=1.0, static=0.0, lots=1.0 if static_path else 0.0, populations=0.0,
                                   images=0.0, bank=1.0, encode=1.0, static_by_k=[0.0] * k,

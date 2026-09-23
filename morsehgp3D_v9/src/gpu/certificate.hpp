@@ -192,6 +192,16 @@ struct HostGroup {
   void for_each(u32 count, F f) const {
     for (u32 i = 0; i < count; ++i) f(i);
   }
+  // Adds the wrapping sum and the xor of h(lane) over the set lanes of mask.
+  template <class H>
+  void fingerprint(u32 mask, H h, u64& sum, u64& x) const {
+    for (u32 lane = 0; lane < size; ++lane)
+      if (((mask >> lane) & 1U) != 0) {
+        const u64 v = h(lane);
+        sum += v;
+        x ^= v;
+      }
+  }
   [[nodiscard]] bool leader() const { return true; }
   void sync() const {}
 };

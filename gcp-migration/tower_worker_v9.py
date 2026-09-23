@@ -48,7 +48,7 @@ PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
 PLAN_SCHEMA = 'mhgp9_tower_plan_v6'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v19'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v20'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -99,7 +99,7 @@ CASE_KEYS = frozenset({'scene', 'file', 'n', 'k', 's', 'workers', 'static_thread
 LEVER_NAMES = ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_witness_cache', 'q34_dead_core',
                'tower_meb_proposal', 'q34_jobs_by_mass', 'q34_fine_jobs', 'tower_overlap_static',
                'q2_jobs_by_mass', 'q34_batch_filter', 'q34_gpu_filter', 'q34_batch_certificates',
-               'q34_gpu_certificates')
+               'q34_gpu_certificates', 'q34_batch_q3', 'q34_gpu_q3')
 # v17 (S2) : filtre q3/q4 par lots, puis sur GPU. Le build G4 active CUDA
 # (nvcc et nvidia-smi existants, aucune installation) ; l'appareil attendu :
 DEVICE_NAME = 'NVIDIA RTX PRO 6000 Blackwell Server Edition'
@@ -107,7 +107,18 @@ CUDA_PATHS = ('/usr/local/cuda/bin/nvcc', '/usr/local/cuda-12.9/bin/nvcc')
 BATCH_KEYS = frozenset({'used', 'backend', 'front_ms', 'filter_ms', 'edges_ms', 'device_ms', 'rectangles', 'survivors',
                         'certificate_backend', 'certificate_ms', 'certificate_device_ms', 'deferred', 'judged_edges',
                         'rebuilt_covers', 'certificate_warps', 'filter_kernel_ms', 'filter_transfer_ms',
-                        'certificate_kernel_ms', 'certificate_transfer_ms'})
+                        'certificate_kernel_ms', 'certificate_transfer_ms', 'lanes_backend', 'lanes_ms',
+                        'lanes_device_ms', 'lanes_kernel_ms', 'lanes_transfer_ms', 'lanes_wait_ms', 'tail_ms',
+                        'lanes_asked', 'lanes_decided', 'lanes_deferred', 'lanes_records', 'lanes_judged',
+                        'lanes_warps'})
+# v20 (S4a) : voie q3 des survivants certifies par lots, sans atlas (CPU ou
+# GPU). Chronos et comptes de l'appel, registre declare lanes_* du mode.
+LANES_TIMES = ('lanes_ms', 'lanes_device_ms', 'lanes_kernel_ms', 'lanes_transfer_ms', 'lanes_wait_ms', 'tail_ms')
+LANES_COUNTS = ('lanes_asked', 'lanes_decided', 'lanes_deferred', 'lanes_records', 'lanes_judged', 'lanes_warps')
+LANES_LEDGER = ('lanes_edges', 'lanes_cover_sites', 'lanes_cover_node_visits', 'lanes_seed_tests',
+                'lanes_acute_sites', 'lanes_owner_rejections', 'lanes_seeds', 'lanes_census_point_tests',
+                'lanes_census_inside_sites', 'lanes_census_shell_sites', 'lanes_census_outside_sites',
+                'lanes_depth_rejections', 'lanes_emitted', 'lanes_shell_ids')
 # v18 (S3) : certificats de voie morte par lots (CPU ou GPU). Leur travail ne
 # depend que des leviers q34_dead_lanes/q34_dead_core : deux cas du meme
 # (fichier, K, s) avec ces leviers egaux doivent avoir ces compteurs egaux.
@@ -126,12 +137,17 @@ TOP_KEYS = frozenset({'schema', 'status', 'reason', 'input', 'options', 'times_m
                       'tower_digest', 'catalogue_digest', 'peak_rss_kb'})
 INPUT_KEYS = frozenset({'format', 'grid', 'sites', 'hash'})
 OPTION_KEYS = frozenset({'K', 'K_effective', 's', 'workers', 'tower_static_threads', 'run_tower', 'certificate_capacity',
-                         'certificate_judge', 'levers'})
+                         'certificate_judge', 'lanes_capacity', 'lanes_judge', 'levers'})
 # v18 : ardoise par warp des certificats GPU (defaut de gpu/filter_runner.hpp).
 # Une trame plus petite ne peut rien mettre en attente ; le preflight de mise
 # en attente rejoue le preflight GPU avec une ardoise de 64 sites.
 DEFAULT_CERTIFICATE_CAPACITY = 1 << 16
 DEFERRAL_CAPACITY = 64
+# v20 : ardoise (sites) des voies q3 GPU, defaut de gpu/filter_runner.hpp ; le
+# preflight de mise en attente la reduit a 24 sites (moins que l'ardoise des
+# certificats, sinon toute arete decidee par S3 tiendrait dans celle des voies).
+DEFAULT_LANES_CAPACITY = 1 << 16
+LANES_DEFERRAL_CAPACITY = 24
 # v18 (auditeur C, audits/c_catalogue_digest_20260923) : condenses FULL (egaux
 # a R12) et du catalogue des trois trames a s = 8, identiques sur le moteur,
 # le lot CPU et les certificats S3 CPU. Tout cas de ces (scene, K, s), GPU ou
@@ -172,7 +188,11 @@ LEDGER_KEYS = frozenset((
     'dead_core_outside_cells dead_core_deep_cells dead_core_failed_cells q34_input_rectangles witness_rect_queries '
     'witness_rect_node_visits witness_pair_queries witness_pair_node_visits q3_edge_queries q3_seed_node_visits '
     'q3_seed_point_tests q3_seed_bound_tests q4_geometry_preparations q4_domain_node_visits '
-    'q4_cover_decomposition_node_visits q4_seed_node_visits q4_seed_cell_queries q4_sweep_active_sites').split())
+    'q4_cover_decomposition_node_visits q4_seed_node_visits q4_seed_cell_queries q4_sweep_active_sites '
+    'lanes_edges lanes_cover_sites lanes_cover_node_visits lanes_seed_tests lanes_acute_sites '
+    'lanes_owner_rejections lanes_seeds lanes_census_point_tests lanes_census_inside_sites '
+    'lanes_census_shell_sites lanes_census_outside_sites lanes_depth_rejections lanes_emitted '
+    'lanes_shell_ids').split())
 CATALOGUE_LISTS = dict(by_qmin=3, by_shell=17)
 CATALOGUE_KEYS = frozenset(('q2_presentations q3_presentations q4_presentations unique_keys balls '
                             'extra_shell_balls shell_over_12 max_shell max_interior census_nodes census_leaf_tests '
@@ -286,11 +306,13 @@ def _levers(value):
             (value['q34_dead_lanes'] or not value['q34_dead_core']) and
             (value['q34_batch_filter'] or not value['q34_gpu_filter']) and
             ((value['q34_batch_filter'] and value['q34_dead_lanes']) or not value['q34_batch_certificates']) and
-            (value['q34_batch_certificates'] or not value['q34_gpu_certificates']))
+            (value['q34_batch_certificates'] or not value['q34_gpu_certificates']) and
+            (value['q34_batch_certificates'] or not value['q34_batch_q3']) and
+            (value['q34_batch_q3'] or not value['q34_gpu_q3']))
 
 
 def uses_device(levers):
-    return levers['q34_gpu_filter'] or levers['q34_gpu_certificates']
+    return levers['q34_gpu_filter'] or levers['q34_gpu_certificates'] or levers['q34_gpu_q3']
 
 
 def plan_uses_gpu(cases):
@@ -300,7 +322,7 @@ def plan_uses_gpu(cases):
 def engine_levers(levers):
     """The same levers on the engine path (no batch call, no device)."""
     return dict(levers, q34_batch_filter=False, q34_gpu_filter=False, q34_batch_certificates=False,
-                q34_gpu_certificates=False)
+                q34_gpu_certificates=False, q34_batch_q3=False, q34_gpu_q3=False)
 
 
 def lever_arguments(case):
@@ -421,15 +443,27 @@ def probe_command(build, root, case):
             '--catalogue-digest', *lever_arguments(case)]
 
 
-def expected_probe_tail(case, capacity=0, judge=False):
+def expected_probe_tail(case, capacity=0, judge=False, lanes_capacity=0):
+    # v20: `judge` judges every batch call of the case (certificates, and the
+    # q3 lanes when that lever is on).
     return [str(case['k']), str(case['workers']), '--s=' + str(case['s']),
             '--static=' + str(case['static_threads']), '--grid=1mm', '--catalogue-digest',
             *(['--certificate-capacity=' + str(capacity)] if capacity else []),
-            *(['--certificate-judge'] if judge else []), *lever_arguments(case)]
+            *(['--certificate-judge'] if judge else []),
+            *(['--lanes-capacity=' + str(lanes_capacity)] if lanes_capacity else []),
+            *(['--lanes-judge'] if judge and case['levers']['q34_batch_q3'] else []), *lever_arguments(case)]
+
+
+def deferral_capacities(levers):
+    """v20: reduced slabs of the deferral preflight (0 = not reduced): the
+    device certificates and the device q3 lanes, each when its lever is on."""
+    return (DEFERRAL_CAPACITY if levers['q34_gpu_certificates'] else 0,
+            LANES_DEFERRAL_CAPACITY if levers['q34_gpu_q3'] else 0)
 
 
 def judged_preflight(levers):
-    """v18: the preflights judge the certificate call edge by edge (CPU reference)."""
+    """v18: the preflights judge the certificate call edge by edge (CPU
+    reference); v20: and the q3 lanes call (the engine's q3 lane)."""
     return levers['q34_batch_certificates']
 
 
@@ -504,19 +538,22 @@ def validate_euler(value, case):
         need(euler['checkable_max_k'] in (0, checkable), 'euler bound of an early refusal')
 
 
-def validate_batch(value, case, capacity=0, judge=False):
+def validate_batch(value, case, capacity=0, judge=False, lanes_capacity=0):
     """Section q34_batch (v18) : phases du chemin par lots, a zero sur le chemin moteur."""
     batch, levers = value['q34_batch'], case['levers']
     times = ('front_ms', 'filter_ms', 'edges_ms', 'device_ms', 'certificate_ms', 'certificate_device_ms',
              'filter_kernel_ms', 'filter_transfer_ms', 'certificate_kernel_ms', 'certificate_transfer_ms')
     need(type(batch) is dict and set(batch) == BATCH_KEYS and type(batch['used']) is bool and
          type(batch['backend']) is str and type(batch['certificate_backend']) is str and
-         all(_number(batch[key]) for key in times) and _count(batch['rectangles']) and
+         type(batch['lanes_backend']) is str and
+         all(_number(batch[key]) for key in times + LANES_TIMES) and _count(batch['rectangles']) and
          _count(batch['survivors']) and _count(batch['deferred']) and _count(batch['judged_edges']) and
-         _count(batch['rebuilt_covers']) and _count(batch['certificate_warps']), 'probe q34_batch fields')
+         _count(batch['rebuilt_covers']) and _count(batch['certificate_warps']) and
+         all(_count(batch[key]) for key in LANES_COUNTS), 'probe q34_batch fields')
     if value['status'] != 'complete_relative':
         return
     ledger = value['ledger']
+    validate_lanes(value, case, lanes_capacity, judge)
     if not levers['q34_batch_filter']:
         need(batch['used'] is False and batch['backend'] == '' and batch['certificate_backend'] == '' and
              all(batch[key] == 0 for key in times) and batch['rectangles'] == 0 and batch['survivors'] == 0 and
@@ -561,11 +598,52 @@ def validate_batch(value, case, capacity=0, judge=False):
     need(((batch['filter_kernel_ms'] > 0 and batch['filter_kernel_ms'] + batch['filter_transfer_ms'] <=
            batch['device_ms'] + 0.05) if gpu else
           batch['filter_kernel_ms'] == 0 and batch['filter_transfer_ms'] == 0), 'q34_batch filter kernel/transfer split')
+    # v20: the lanes call runs before the workers on the CPU, beside them on
+    # the device; the wait for it and the tail follow the workers.
+    serial = batch['front_ms'] + batch['filter_ms'] + batch['certificate_ms'] + batch['edges_ms'] + \
+        batch['lanes_wait_ms'] + batch['tail_ms'] + (0 if levers['q34_gpu_q3'] else batch['lanes_ms'])
     need(batch['rectangles'] == ledger['q34_input_rectangles'] and
          batch['survivors'] == ledger['expanded_pairs'] - ledger['witness_rejected_pairs'] and
-         batch['front_ms'] + batch['filter_ms'] + batch['certificate_ms'] + batch['edges_ms'] <=
-         value['times_ms']['q34'] + 0.05 and
+         serial <= value['times_ms']['q34'] + 0.05 and
          batch['device_ms'] <= batch['filter_ms'] + 0.05, 'q34_batch rectangles/survivors/phase times')
+
+
+def validate_lanes(value, case, lanes_capacity=0, judge=False):
+    """v20 (S4a) : appel des voies q3 et registre declare lanes_* du mode."""
+    batch, levers, ledger = value['q34_batch'], case['levers'], value['ledger']
+    if not levers['q34_batch_q3']:
+        need(batch['lanes_backend'] == '' and all(batch[key] == 0 for key in LANES_TIMES + LANES_COUNTS) and
+             all(ledger[key] == 0 for key in LANES_LEDGER), 'q3 lanes filled without the lever')
+        return
+    gpu = levers['q34_gpu_q3']
+    ran = gpu and batch['lanes_asked'] > 0
+    need(batch['lanes_backend'] == (DEVICE_NAME if gpu else 'cpu') and
+         batch['lanes_decided'] + batch['lanes_deferred'] == batch['lanes_asked'] and
+         batch['lanes_asked'] <= ledger['q3_edges'] and batch['lanes_decided'] == ledger['lanes_edges'] and
+         batch['lanes_records'] == ledger['lanes_emitted'] and
+         batch['lanes_judged'] == (batch['lanes_decided'] if judge else 0) and
+         (batch['lanes_device_ms'] > 0) == ran and (batch['lanes_warps'] > 0) == ran and
+         (not ran or batch['lanes_decided'] > 0) and
+         ((batch['lanes_kernel_ms'] > 0 and batch['lanes_kernel_ms'] + batch['lanes_transfer_ms'] <=
+           batch['lanes_device_ms'] + 0.05 and batch['lanes_device_ms'] <= batch['lanes_ms'] + 0.05) if ran else
+          batch['lanes_kernel_ms'] == 0 and batch['lanes_transfer_ms'] == 0 and batch['lanes_device_ms'] == 0),
+         'q3 lanes backend/counts/device time/judge')
+    # A correct call defers only an edge beyond its slab: some but never all
+    # on the reduced-slab preflight, none on a frame below the default slab.
+    if lanes_capacity:
+        need(0 < batch['lanes_deferred'] < batch['lanes_asked'], 'reduced-slab q3 lanes deferred none or all edges')
+    elif case['n'] < DEFAULT_LANES_CAPACITY:
+        need(batch['lanes_deferred'] == 0, 'q3 lanes deferred edges of a frame below the slab')
+    need(ledger['lanes_seeds'] == ledger['lanes_depth_rejections'] + ledger['lanes_emitted'] and
+         ledger['lanes_acute_sites'] == ledger['lanes_owner_rejections'] + ledger['lanes_seeds'] and
+         ledger['lanes_seed_tests'] == ledger['lanes_cover_sites'] and
+         ledger['lanes_cover_sites'] >= 2 * ledger['lanes_edges'] and
+         ledger['lanes_cover_node_visits'] >= ledger['lanes_edges'] and
+         ledger['lanes_census_point_tests'] == ledger['lanes_census_inside_sites'] +
+         ledger['lanes_census_shell_sites'] + ledger['lanes_census_outside_sites'] and
+         ledger['lanes_shell_ids'] <= ledger['lanes_census_shell_sites'] and
+         3 * ledger['lanes_emitted'] <= ledger['lanes_shell_ids'] and
+         ledger['lanes_emitted'] <= value['generator']['q3_emitted'], 'q3 lanes ledger identity')
 
 
 def validate_occupancy(value, case):
@@ -747,6 +825,8 @@ def validate_preflight_work(value, levers):
           ledger['witness_cache_rejected_pairs'] > 0) and
          (not levers['q34_batch_filter'] or value['q34_batch']['survivors'] > 0) and
          (not levers['q34_batch_certificates'] or value['q34_batch']['certificate_ms'] > 0) and
+         (not levers['q34_batch_q3'] or (value['q34_batch']['lanes_decided'] > 0 and
+                                         value['q34_batch']['lanes_records'] > 0)) and
          (not levers['q34_dead_core'] or ledger['core_closed_edges'] > 0) and
          (not levers['tower_meb_proposal'] or (value['tower_work']['meb_proposals'] > 0 and
                                                value['tower_work']['meb_verified_proposals'] > 0)),
@@ -776,7 +856,7 @@ def preflight_inputs(raw):
     return {'preflight': dict(n=len(raw) // 12, fnv=input_fnv(raw))}
 
 
-def validate_probe(value, case, exit_code, inputs=None, capacity=0, judge=False):
+def validate_probe(value, case, exit_code, inputs=None, capacity=0, judge=False, lanes_capacity=0):
     """Lit la sortie de la sonde ; rend complete_relative ou explicit_refusal.
 
     Un statut non complet n'est accepte que s'il est explicite (code 3) ; une
@@ -796,6 +876,8 @@ def validate_probe(value, case, exit_code, inputs=None, capacity=0, judge=False)
          options['s'] == case['s'] and options['workers'] == case['workers'] and
          options['tower_static_threads'] == case['static_threads'] and options['run_tower'] is True and
          options['certificate_capacity'] == capacity and options['certificate_judge'] is judge and
+         options['lanes_capacity'] == lanes_capacity and
+         options['lanes_judge'] is (judge and case['levers']['q34_batch_q3']) and
          _levers(options['levers']) and options['levers'] == case['levers'] and
          type(options['K_effective']) is int, 'probe options')
     times = value['times_ms']
@@ -810,7 +892,7 @@ def validate_probe(value, case, exit_code, inputs=None, capacity=0, judge=False)
     need(_catalogue(value['catalogue']), 'probe catalogue')
     validate_euler(value, case)
     validate_occupancy(value, case)
-    validate_batch(value, case, capacity, judge)
+    validate_batch(value, case, capacity, judge, lanes_capacity)
     validate_tower_phases(value, case)
     orders = value['orders']
     need(type(orders) is list and all(type(order) is dict and set(order) == ORDER_KEYS and
@@ -907,7 +989,8 @@ def device_ran(case, value):
     batch = value['q34_batch']
     return ((case['levers']['q34_gpu_filter'] and batch['device_ms'] > 0) or
             (case['levers']['q34_gpu_certificates'] and batch['certificate_device_ms'] > 0 and
-             batch['certificate_warps'] > 0))
+             batch['certificate_warps'] > 0) or
+            (case['levers']['q34_gpu_q3'] and batch['lanes_device_ms'] > 0 and batch['lanes_warps'] > 0))
 
 
 def gpu_completed_cases(cases, outcomes, values):
@@ -1078,19 +1161,21 @@ def execute(args):
             except (ValueError, KeyError, TypeError, UnicodeError) as error:
                 raise PreflightFailed(type(error).__name__ + ': ' + str(error)) from error
             result['preflight']['engine_tower_digest'] = engine_value['tower_digest']
-        if pre_case['levers']['q34_gpu_certificates']:
+        if pre_case['levers']['q34_gpu_certificates'] or pre_case['levers']['q34_gpu_q3']:
             # v18: the device deferral path on real hardware, before any LiDAR
             # case: a 64-site slab must defer some edges to the engine path and
             # still give the engine tower, catalogue and certificate work.
+            # v20: and a 24-site q3 lanes slab some q3 lanes to the CPU tail.
+            capacity, lanes_capacity = deferral_capacities(pre_case['levers'])
             deferral_row = worker.command('preflight_deferral', [TIME, '-v', str(binary), str(output / PREFLIGHT_FILE),
-                                                                 *expected_probe_tail(pre_case, DEFERRAL_CAPACITY,
-                                                                                      judge=True)])
+                                                                 *expected_probe_tail(pre_case, capacity, judge=True,
+                                                                                      lanes_capacity=lanes_capacity)])
             try:
                 need(deferral_row['exit_code'] == 0, 'deferral preflight exit code')
                 deferral_value = strict_json((output / 'preflight_deferral.stdout').read_bytes())
                 need(validate_probe(deferral_value, pre_case, 0, inputs=preflight_inputs(pre_raw),
-                                    capacity=DEFERRAL_CAPACITY, judge=True) == 'complete_relative',
-                     'deferral preflight not complete')
+                                    capacity=capacity, judge=True, lanes_capacity=lanes_capacity) ==
+                     'complete_relative', 'deferral preflight not complete')
                 validate_gnu_time((output / 'preflight_deferral.stderr').read_text(errors='replace'), 0)
                 need(logical_result(deferral_value) == logical_result(pre_value) and
                      certificate_work(deferral_value) == certificate_work(pre_value),
@@ -1098,6 +1183,7 @@ def execute(args):
             except (ValueError, KeyError, TypeError, UnicodeError) as error:
                 raise PreflightFailed(type(error).__name__ + ': ' + str(error)) from error
             result['preflight']['deferred'] = deferral_value['q34_batch']['deferred']
+            result['preflight']['lanes_deferred'] = deferral_value['q34_batch']['lanes_deferred']
         if uses_device(pre_case['levers']):
             # Validated device pass on the synthetic preflight only (auditor B):
             # GPU_executed waits for a complete LiDAR tower on the device.

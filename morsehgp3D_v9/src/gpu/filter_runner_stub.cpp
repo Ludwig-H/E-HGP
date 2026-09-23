@@ -32,6 +32,17 @@ CertificateOutput run_certificate_batch(const CertificateInput& input) {
   return out;
 }
 
+LanesOutput run_lanes_batch(const LanesInput& input) {
+  LanesOutput out;
+  out.error = validate_lanes_input(input);
+  out.error_kind = BatchError::input_guard;
+  if (out.error.empty()) {
+    out.error = "built without MHGP9_ENABLE_CUDA";
+    out.error_kind = BatchError::no_device;
+  }
+  return out;
+}
+
 std::string warm_up() { return "built without MHGP9_ENABLE_CUDA"; }
 
 }  // namespace mhgp9::gpu

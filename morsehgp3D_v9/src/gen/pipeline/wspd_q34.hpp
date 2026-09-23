@@ -8,6 +8,8 @@
 #include "lanes/q34_dead_lanes.hpp"
 #include "wspd/front.hpp"
 
+#include <array>
+#include <cstdint>
 #include <functional>
 #include <span>
 #include <string>
@@ -109,6 +111,19 @@ struct WspdQ3Work {
   bool operator==(const WspdQ3Work&) const = default;
 };
 
+// v9 S4a: declared ledger of the q3 lanes of a batch call (gpu/lanes.hpp,
+// gpu::Q3Work field by field), never compared with the engine's q3 ledger:
+// the rebuilt cover, the seed scan of the cover sites, and the ScalarCover
+// censuses (site-parallel, exact stopping site).
+struct Q34LanesWork {
+  u64 edges{}, cover_sites{}, max_cover_sites{};
+  Q34EdgeCoverWork cover;
+  u64 seed_tests{}, acute_sites{}, owner_rejections{}, seeds{};
+  u64 census_point_tests{}, census_inside_sites{}, census_shell_sites{}, census_outside_sites{};
+  u64 depth_rejections{}, emitted{}, shell_ids{};
+  bool operator==(const Q34LanesWork&) const = default;
+};
+
 struct WspdQ34Work {
   u64 input_rectangles{}, expanded_pairs{}, q3_edges{}, q4_edges{}, both_edges{};
   u64 cover_builds{}, cover_sites{}, max_cover_sites{}, peak_cover_bytes{};
@@ -137,6 +152,10 @@ struct WspdQ34Work {
   u64 core_builds{}, core_sites{}, core_closed_edges{};
   Q34EdgeCoverWork core_cover;
   Q34DeadLaneWork dead_core;
+  // v9 S4a: the q3 lanes decided by a batch call (run_wspd_q34_batched),
+  // their own declared ledger; q3_edges, both_edges, q3_emitted and
+  // payload_shell_ids include them, the engine's q3 ledger does not.
+  Q34LanesWork lanes;
 };
 
 struct WspdQ34Result {
@@ -364,12 +383,96 @@ struct Q34CertificateJudgeWork {
 [[nodiscard]] Q34CertificateFilter judge_certificate_filter(Q34CertificateFilter inner, std::size_t workers,
                                                             Q34CertificateJudgeWork* work);
 
+// ---- v9 S4a (23 septembre 2026) : voie q3 des survivants certifiés, par lots.
+//
+// After the certificates (S3), one call generates the q3 lane of every
+// certified survivor whose q3 lane is left open (`asked`), without atlas:
+// the seeds are drawn from the cover and every census is the exact
+// ScalarCover census (gpu/lanes.hpp). The workers run the other lanes (q4)
+// meanwhile, then the q3 lanes the call did not decide (deferred: a memory
+// decision only). The emitted balls come back as records, without shell IDs.
+
+// One emitted q3 ball (gpu::LaneRecord): primitive key {A, Bx, By, Bz, C},
+// sorted support IDs (support[3] = UINT32_MAX), strict interior count, shell
+// size and fingerprint (wrapping sum and xor of q34_shell_hash of its IDs).
+struct Q34LaneRecord {
+  std::array<i128, 5> key{};
+  std::array<std::uint32_t, 4> support{};
+  std::uint32_t edge{};  // survivor ordinal
+  std::uint32_t depth{}, shell{};
+  std::uint8_t arity{};
+  u64 shell_sum{}, shell_xor{};
+  bool operator==(const Q34LaneRecord&) const = default;
+};
+
+// SplitMix64 finalizer (gpu::mix64): the shell fingerprint of one input ID.
+[[nodiscard]] inline u64 q34_shell_hash(u64 x) noexcept {
+  x += 0x9e3779b97f4a7c15ULL;
+  x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ULL;
+  x = (x ^ (x >> 27)) * 0x94d049bb133111ebULL;
+  return x ^ (x >> 31);
+}
+
+struct Q34LanesBatch {
+  std::vector<std::uint8_t> decided;        // per survivor: lanes decided by the call (subset of asked)
+  std::vector<std::uint32_t> record_begin;  // per survivor: first record of its slice
+  std::vector<std::uint32_t> record_count;  // per survivor: its records (0 unless decided)
+  std::vector<Q34LaneRecord> records;       // the slices, in any order of the edges
+  Q34LanesWork work;                        // decided edges only
+  std::string backend;                      // "cpu" or the device name
+};
+
+// Implementations are supplied by the caller (host emulation or device of
+// gpu/lanes.hpp). Must return exactly the q3 lane of every edge it decides,
+// or throw; check_lanes_batch runs before any record is used.
+using Q34LanesFilter = std::function<Q34LanesBatch(const Q2CensusIndexPtr& index, unsigned kmax,
+    std::span<const Q34SurvivingEdge> survivors, std::span<const std::uint8_t> asked)>;
+// Receives checked records, one chunk per call; concurrent calls come from
+// distinct worker slots.
+using Q34RecordSink = std::function<void(std::size_t slot, std::span<const Q34LaneRecord> records)>;
+
+struct Q34LanesStage {
+  Q34LanesFilter filter;
+  Q34RecordSink sink;
+  bool concurrent = false;  // the call runs on its own thread while the workers run the q4 lanes
+};
+
+// Trust boundary of a lanes call: shapes, decided lanes inside `asked`, an
+// exact partition of the records into the decided edges' slices, records
+// well formed (arity 3, sorted support holding the edge, A > 0, depth below
+// K-1, shell >= 3), and the ledger identities binding the work to them.
+void check_lanes_batch(const Q34LanesBatch& batch, const Q2CensusIndex& index, unsigned kmax,
+                       std::span<const Q34SurvivingEdge> survivors, std::span<const std::uint8_t> asked);
+
+// The engine's own q3 lane of one edge (original IDs), as records: the
+// Engine of the batch path with the q3 lane only (no atlas is built for a
+// q3-only lane, so the product options give the GlobalBoxes census). `q3`
+// (may be null) receives the engine's q3 ledger of this edge.
+[[nodiscard]] std::vector<Q34LaneRecord> engine_q3_records(const Q2CensusIndexPtr& index, unsigned kmax,
+                                                           const WspdQ34Options& options, std::size_t a,
+                                                           std::size_t b, WspdQ3Work* q3 = nullptr);
+
+// Judge of a lanes call (before any device qualification): every edge the
+// call DECIDED is recomputed by engine_q3_records; per edge, the multisets
+// of (arity, support, key, depth, shell size, shell fingerprint) must be
+// equal, and the summed seeds and emissions; else std::logic_error.
+struct Q34LanesJudgeWork {
+  u64 judged{}, deferred{}, records{};
+};
+[[nodiscard]] Q34LanesFilter judge_lanes_filter(Q34LanesFilter inner, WspdQ34Options options, std::size_t workers,
+                                                Q34LanesJudgeWork* work);
+
 // Measured phases of the batch path (nanoseconds, never compared).
 struct WspdQ34BatchTiming {
   u64 front_ns{}, filter_ns{}, certificate_ns{}, edges_ns{};
   u64 rectangles{}, survivors{}, deferred{};
   u64 rebuilt_covers{};  // covers rebuilt by the workers for certified edges (uncounted in the ledger)
   std::string backend, certificate_backend;
+  // S4a: wall time of the lanes call, of the workers' wait for it after
+  // their own lanes, and of the tail (deferred q3 lanes and record sink).
+  u64 lanes_ns{}, lanes_wait_ns{}, tail_ns{};
+  u64 lanes_asked{}, lanes_decided{}, lanes_deferred{}, lanes_records{};
+  std::string lanes_backend;
 };
 
 // Requires witness_mode=RectanglePair and witness_bounds_mode=Affine (the
@@ -378,12 +481,14 @@ struct WspdQ34BatchTiming {
 // witness.rectangles.queries=input_rectangles, witness.pairs.queries=
 // expanded_pairs, cache counters zero. `timing` may be null. A nonnull
 // `certificates` (S3, requires dead_lanes) decides the certificates of the
-// survivors in one call before the workers.
+// survivors in one call before the workers. A nonnull `lanes` (S4a,
+// requires `certificates`) generates the q3 lane of the certified survivors
+// by one call; its records go to lanes->sink, never to `consumer`.
 [[nodiscard]] WspdQ34ParallelResult run_wspd_q34_batched(
     Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s,
     WspdQ34Options options, std::size_t worker_count,
     const WspdQ34ParallelConsumer& consumer, std::size_t jobs_per_worker,
     const Q34BatchFilter& filter, WspdQ34BatchTiming* timing,
-    const Q34CertificateFilter* certificates = nullptr);
+    const Q34CertificateFilter* certificates = nullptr, const Q34LanesStage* lanes = nullptr);
 
 }  // namespace mhgp9::gen

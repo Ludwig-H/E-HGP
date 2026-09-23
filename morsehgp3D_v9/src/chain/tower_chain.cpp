@@ -22,6 +22,7 @@
 #include "pipeline/wspd_q34.hpp"
 #include "../gpu/filter_runner.hpp"
 #include "../gpu/flat_index.hpp"
+#include "../gpu/lanes_host.hpp"
 
 namespace mhgp9 {
 
@@ -88,6 +89,7 @@ struct GpuIndex {
   std::vector<gpu::FlatNode> nodes;
   std::vector<gpu::u32> escapes;
   std::vector<std::int32_t> rank_points;
+  std::vector<gpu::u32> rank_ids;  // original input ID of every spatial rank (S4a)
 };
 
 GpuIndex prepare_gpu_index(const gen::Q2CensusIndex& index) {
@@ -97,11 +99,14 @@ GpuIndex prepare_gpu_index(const gen::Q2CensusIndex& index) {
   const auto order = index.spatial_order();
   const auto points = index.cloud().points();
   out.rank_points.resize(3 * order.size());
+  out.rank_ids.resize(order.size());
   for (std::size_t r = 0; r < order.size(); ++r) {
     const auto& q = points[order[r]];
     out.rank_points[3 * r] = q.x;
     out.rank_points[3 * r + 1] = q.y;
     out.rank_points[3 * r + 2] = q.z;
+    if (order[r] > std::numeric_limits<gpu::u32>::max()) throw std::logic_error("chain_gpu_index_id_exceeds_u32");
+    out.rank_ids[r] = static_cast<gpu::u32>(order[r]);
   }
   return out;
 }
@@ -276,6 +281,108 @@ gen::Q34CertificateBatch gpu_certificate_batch(const GpuIndex& prepared, unsigne
   warps = out.warps;
   kernel_ms = out.kernel_ms;
   transfer_ms = out.upload_ms + out.download_ms;
+  return batch;
+}
+
+// S4a: the q3 lanes call of gen::run_wspd_q34_batched, on the device or by
+// the host emulation of the same header (gpu/lanes_host.hpp). Only the asked
+// survivors are sent; the answer is mapped back to survivor ordinals. Same
+// error classes as the other device calls; a faulted edge is an invariant
+// violation of the port.
+gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::span<const gen::Q34SurvivingEdge> survivors,
+                               std::span<const std::uint8_t> asked, bool device, std::uint32_t capacity,
+                               std::size_t workers, double& device_ms, double& kernel_ms, double& transfer_ms,
+                               std::uint32_t& warps) {
+  std::vector<std::size_t> where;
+  std::vector<gpu::u32> a, b;
+  for (std::size_t j = 0; j < survivors.size(); ++j)
+    if (asked[j] != 0) {
+      where.push_back(j);
+      a.push_back(survivors[j].a_rank);
+      b.push_back(survivors[j].b_rank);
+    }
+  gpu::LanesInput in;
+  in.index.nodes = prepared.nodes.data();
+  in.index.node_count = prepared.nodes.size();
+  in.index.rank_points = prepared.rank_points.data();
+  in.index.rank_count = prepared.rank_points.size() / 3;
+  in.index.kmax = kmax;
+  in.escapes = prepared.escapes.data();
+  in.rank_ids = prepared.rank_ids.data();
+  in.edge_a = a.data();
+  in.edge_b = b.data();
+  in.edge_count = where.size();
+  in.capacity = capacity;
+  auto out = device ? gpu::run_lanes_batch(in) : gpu::run_lanes_batch_host(in, workers);
+  switch (out.error_kind) {
+    case gpu::BatchError::none:
+      break;
+    case gpu::BatchError::input_guard:
+    case gpu::BatchError::no_device:
+      throw GpuRefusal(ChainStatus::kInvalidInput, "chain_q34_gpu_unavailable: " + out.error);
+    case gpu::BatchError::capacity:
+      throw GpuRefusal(ChainStatus::kResourceExhausted, "chain_q34_gpu_capacity: " + out.error);
+    case gpu::BatchError::device_fault:
+      throw GpuRefusal(ChainStatus::kInvariantViolated, "chain_q34_gpu_fault: " + out.error);
+  }
+  if (!out.available || !out.error.empty())
+    throw GpuRefusal(ChainStatus::kInvariantViolated, "chain_q34_gpu_fault: unclassified: " + out.error);
+  if (out.faults != 0) throw std::logic_error("chain_q34_lanes_edge_fault");
+  const std::size_t n = where.size();
+  if ((n != 0 && (out.status.size() != n || out.record_begin.size() != n || out.record_count.size() != n)))
+    throw std::logic_error("chain_q34_lanes_arrays_differ");
+  gen::Q34LanesBatch batch;
+  batch.backend = out.device;
+  batch.decided.assign(survivors.size(), 0);
+  batch.record_begin.assign(survivors.size(), 0);
+  batch.record_count.assign(survivors.size(), 0);
+  for (std::size_t i = 0; i < n; ++i) {
+    if (out.status[i] != static_cast<gpu::u8>(gpu::CertificateStatus::decided)) continue;
+    batch.decided[where[i]] = 2;
+    batch.record_begin[where[i]] = out.record_begin[i];
+    batch.record_count[where[i]] = out.record_count[i];
+  }
+  batch.records.resize(out.records.size());
+  tower::parallel_ranges(out.records.size(), static_cast<int>(std::max<std::size_t>(1, workers)),
+                         [&](std::size_t first, std::size_t last, std::size_t) {
+    for (std::size_t r = first; r < last; ++r) {
+      const auto& from = out.records[r];
+      auto& to = batch.records[r];
+      for (int c = 0; c < 5; ++c) to.key[c] = from.key[c];
+      for (int c = 0; c < 4; ++c) to.support[c] = from.support[c];
+      if (from.edge >= n) throw std::logic_error("chain_q34_lanes_record_edge_outside_call");
+      to.edge = static_cast<std::uint32_t>(where[from.edge]);
+      to.depth = from.depth;
+      to.shell = from.shell;
+      to.arity = static_cast<std::uint8_t>(from.arity == 3 ? 3 : 0);
+      to.shell_sum = from.shell_sum;
+      to.shell_xor = from.shell_xor;
+    }
+  });
+  const auto& w = out.work;
+  auto& t = batch.work;
+  t.edges = w.edges;
+  t.cover_sites = w.cover_sites;
+  t.max_cover_sites = w.max_cover_sites;
+  t.cover = gen::Q34EdgeCoverWork{w.cover.node_visits,    w.cover.bound_tests,    w.cover.point_tests,
+                                  w.cover.admitted_nodes, w.cover.rejected_nodes, w.cover.split_nodes,
+                                  w.cover.admitted_sites, w.cover.rejected_sites, w.cover.retained_ranges,
+                                  w.cover.merged_ranges};
+  t.seed_tests = w.seed_tests;
+  t.acute_sites = w.acute_sites;
+  t.owner_rejections = w.owner_rejections;
+  t.seeds = w.seeds;
+  t.census_point_tests = w.census_point_tests;
+  t.census_inside_sites = w.census_inside_sites;
+  t.census_shell_sites = w.census_shell_sites;
+  t.census_outside_sites = w.census_outside_sites;
+  t.depth_rejections = w.depth_rejections;
+  t.emitted = w.emitted;
+  t.shell_ids = w.shell_ids;
+  device_ms = out.total_ms;
+  kernel_ms = out.kernel_ms;
+  transfer_ms = out.upload_ms + out.download_ms;
+  warps = out.warps;
   return batch;
 }
 
@@ -558,6 +665,14 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       fail(ChainStatus::kInvalidInput, "chain_q34_certificate_capacity_requires_gpu_certificates_and_two_sites");
     if (options.q34_certificate_judge && !options.q34_batch_certificates)
       fail(ChainStatus::kInvalidInput, "chain_q34_certificate_judge_requires_batch_certificates");
+    if (options.q34_batch_q3 && !options.q34_batch_certificates)
+      fail(ChainStatus::kInvalidInput, "chain_q34_batch_q3_requires_batch_certificates");
+    if (options.q34_gpu_q3 && !options.q34_batch_q3)
+      fail(ChainStatus::kInvalidInput, "chain_q34_gpu_q3_requires_batch_q3");
+    if (options.q34_lanes_judge && !options.q34_batch_q3)
+      fail(ChainStatus::kInvalidInput, "chain_q34_lanes_judge_requires_batch_q3");
+    if (options.q34_lanes_capacity != 0 && (!options.q34_batch_q3 || options.q34_lanes_capacity < 2))
+      fail(ChainStatus::kInvalidInput, "chain_q34_lanes_capacity_requires_batch_q3_and_two_sites");
     if (points.size() < 2) fail(ChainStatus::kInvalidInput, "chain_requires_two_sites");
     if (points.size() > static_cast<std::size_t>(std::numeric_limits<std::int32_t>::max()))
       fail(ChainStatus::kInvalidInput, "chain_too_many_sites");
@@ -580,7 +695,8 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     result.times.gen_index_ms = ms_since(t);
     // S2: CUDA context and flat index prepared during q2 (joined before q34).
     GpuPreparation gpu_preparation;
-    if (options.q34_batch_filter && (options.q34_gpu_filter || options.q34_gpu_certificates) && kmax >= 2)
+    if (options.q34_batch_filter && (options.q34_gpu_filter || options.q34_gpu_certificates || options.q34_gpu_q3) &&
+        kmax >= 2)
       gpu_preparation.start(*index);
 
     std::vector<std::vector<Presentation>> slots(W);
@@ -680,10 +796,42 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         }
         if (certificates && options.q34_certificate_judge)
           certificates = gen::judge_certificate_filter(std::move(certificates), W, &judge);
+        // S4a: the q3 lanes of the certified survivors, their records turned
+        // into presentations of the worker slot that receives them.
+        double lanes_device_ms = 0, lanes_kernel_ms = 0, lanes_transfer_ms = 0;
+        std::uint32_t lanes_warps = 0;
+        gen::Q34LanesJudgeWork lanes_judge;
+        gen::Q34LanesStage lanes;
+        if (options.q34_batch_q3 && kmax >= 2) {
+          const bool device = options.q34_gpu_q3;
+          const std::uint32_t capacity = options.q34_lanes_capacity;
+          lanes.filter = [&gpu_preparation, &lanes_device_ms, &lanes_kernel_ms, &lanes_transfer_ms, &lanes_warps,
+                          device, capacity, W](const gen::Q2CensusIndexPtr& ix, unsigned k,
+                                               std::span<const gen::Q34SurvivingEdge> edges,
+                                               std::span<const std::uint8_t> asked) {
+            return lanes_batch(gpu_preparation.get(*ix), k, edges, asked, device, capacity, W, lanes_device_ms,
+                               lanes_kernel_ms, lanes_transfer_ms, lanes_warps);
+          };
+          if (options.q34_lanes_judge) lanes.filter = gen::judge_lanes_filter(std::move(lanes.filter), o, W, &lanes_judge);
+          lanes.sink = [&slots](std::size_t slot, std::span<const gen::Q34LaneRecord> records) {
+            auto& out = slots[slot];
+            for (const auto& r : records) {
+              Presentation p;
+              p.arity = r.arity;
+              p.support = {r.support[0], r.support[1], r.support[2], 0};
+              p.key = r.key;
+              p.depth = r.depth;
+              p.shell = r.shell;
+              out.push_back(p);
+            }
+          };
+          lanes.concurrent = device;
+        }
         gen::WspdQ34BatchTiming timing;
         try {
           r34 = gen::run_wspd_q34_batched(index, kmax, options.separation_s, o, W, consumer, jobs_per_worker,
-                                          filter, &timing, certificates ? &certificates : nullptr);
+                                          filter, &timing, certificates ? &certificates : nullptr,
+                                          lanes.filter ? &lanes : nullptr);
         } catch (const GpuRefusal& e) {
           fail(e.status, e.what());
         }
@@ -707,6 +855,19 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         b.filter_transfer_ms = filter_transfer_ms;
         b.certificate_kernel_ms = certificate_kernel_ms;
         b.certificate_transfer_ms = certificate_transfer_ms;
+        b.lanes_backend = timing.lanes_backend;
+        b.lanes_ms = static_cast<double>(timing.lanes_ns) / 1e6;
+        b.lanes_device_ms = options.q34_gpu_q3 ? lanes_device_ms : 0.0;
+        b.lanes_kernel_ms = options.q34_gpu_q3 ? lanes_kernel_ms : 0.0;
+        b.lanes_transfer_ms = options.q34_gpu_q3 ? lanes_transfer_ms : 0.0;
+        b.lanes_wait_ms = static_cast<double>(timing.lanes_wait_ns) / 1e6;
+        b.tail_ms = static_cast<double>(timing.tail_ns) / 1e6;
+        b.lanes_asked = timing.lanes_asked;
+        b.lanes_decided = timing.lanes_decided;
+        b.lanes_deferred = timing.lanes_deferred;
+        b.lanes_records = timing.lanes_records;
+        b.lanes_judged = lanes_judge.judged;
+        b.lanes_warps = lanes_warps;
       }
       result.q34_expanded_pairs = r34.pipeline.work.expanded_pairs;
       result.q34_cover_builds = r34.pipeline.work.cover_builds;
@@ -779,6 +940,15 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       l.q4_cover_decomposition_node_visits = w.local.geometry.cover_node_visits;
       l.q4_seed_node_visits = w.local.node_visits; l.q4_seed_cell_queries = w.q4_seed_cells.queries;
       l.q4_sweep_active_sites = w.local.sweep.active_sites;
+      l.lanes_edges = w.lanes.edges; l.lanes_cover_sites = w.lanes.cover_sites;
+      l.lanes_cover_node_visits = w.lanes.cover.node_visits; l.lanes_seed_tests = w.lanes.seed_tests;
+      l.lanes_acute_sites = w.lanes.acute_sites; l.lanes_owner_rejections = w.lanes.owner_rejections;
+      l.lanes_seeds = w.lanes.seeds; l.lanes_census_point_tests = w.lanes.census_point_tests;
+      l.lanes_census_inside_sites = w.lanes.census_inside_sites;
+      l.lanes_census_shell_sites = w.lanes.census_shell_sites;
+      l.lanes_census_outside_sites = w.lanes.census_outside_sites;
+      l.lanes_depth_rejections = w.lanes.depth_rejections; l.lanes_emitted = w.lanes.emitted;
+      l.lanes_shell_ids = w.lanes.shell_ids;
     }
     result.times.q34_ms = ms_since(t);
 

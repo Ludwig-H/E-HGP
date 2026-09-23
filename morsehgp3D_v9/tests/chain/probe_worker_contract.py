@@ -104,6 +104,10 @@ def main(argv):
                         ('batch_on', dict(base, levers=dict(engine_levers, q34_batch_filter=True))),
                         ('cert_on', dict(base, levers=dict(engine_levers, q34_batch_filter=True,
                                                            q34_batch_certificates=True))),
+                        # v20: the q3 lanes of the certified survivors by one
+                        # call (host emulation of gpu/lanes.hpp).
+                        ('q3_on', dict(base, levers=dict(engine_levers, q34_batch_filter=True,
+                                                         q34_batch_certificates=True, q34_batch_q3=True))),
                         ('pinned_off', dict(base, levers={name: False for name in worker.LEVER_NAMES}, workers=1,
                                             static_threads=0))):
         try:
@@ -122,7 +126,10 @@ def main(argv):
     gpu_cases = (('gpu_on', dict(base, levers={name: True for name in worker.LEVER_NAMES})),
                  ('gpu_certificates_on', dict(base, levers=dict(engine_levers, q34_batch_filter=True,
                                                                   q34_batch_certificates=True,
-                                                                  q34_gpu_certificates=True))))
+                                                                  q34_gpu_certificates=True))),
+                 ('gpu_q3_on', dict(base, levers=dict(engine_levers, q34_batch_filter=True,
+                                                        q34_batch_certificates=True, q34_batch_q3=True,
+                                                        q34_gpu_q3=True))))
     for label, gpu_case in gpu_cases:
         try:
             value, code, _ = run(gpu_case)
@@ -175,7 +182,7 @@ def main(argv):
         on, off, batched = results['pinned_on'][1], results['pinned_off'][1], results['batch_on'][1]
         check(worker.logical_result(on) == worker.logical_result(off) == worker.logical_result(batched) and
               all(label not in results or worker.logical_result(results[label][1]) == worker.logical_result(on)
-                  for label in ('gpu_on', 'gpu_certificates_on', 'cert_on')),
+                  for label in ('gpu_on', 'gpu_certificates_on', 'gpu_q3_on', 'cert_on', 'q3_on')),
               'modes on/off/batch/certificates/gpu change the object')
         # v17: the batch path ran (CPU backend), searched each expanded pair
         # once without the cache, and its survivors reached the cores.
@@ -281,6 +288,70 @@ def main(argv):
                       'cross-case comparison blind to the ' + label)
         else:
             check(False, 'certificate case absent')
+        # v20: the q3 lanes call (CPU host emulation) ran on every asked edge,
+        # gives the engine's object and certificate work; judged, every
+        # decided edge recomputed by the engine's q3 lane; and its mutants.
+        q3_judge_case = dict(base, levers=dict(engine_levers, q34_batch_filter=True, q34_batch_certificates=True,
+                                               q34_batch_q3=True))
+        try:
+            q3_judged, code, _ = run(q3_judge_case, judge=True)
+            check(worker.validate_probe(q3_judged, q3_judge_case, code, inputs=inputs, judge=True) ==
+                  'complete_relative' and worker.logical_result(q3_judged) == worker.logical_result(on) and
+                  q3_judged['q34_batch']['lanes_judged'] == q3_judged['q34_batch']['lanes_decided'] > 0,
+                  'judged q3 lanes case')
+        except (ValueError, KeyError, TypeError, UnicodeError, subprocess.TimeoutExpired) as error:
+            check(False, 'judged q3 lanes case refused: ' + type(error).__name__ + ': ' + str(error))
+        if 'q3_on' in results:
+            q3_case, lanes = results['q3_on']
+            b = lanes['q34_batch']
+            check(b['lanes_backend'] == 'cpu' and b['lanes_ms'] > 0 and b['lanes_device_ms'] == 0 and
+                  b['lanes_deferred'] == 0 and b['lanes_decided'] == b['lanes_asked'] > 0 and b['lanes_records'] > 0 and
+                  worker.logical_result(lanes) == worker.logical_result(on) and
+                  worker.certificate_work(lanes) == worker.certificate_work(on),
+                  'q3 lanes path not exercised or its object differs: ' + json.dumps(b, sort_keys=True))
+            q3_mutants = [
+                ('lanes backend relabelled', lambda v: v['q34_batch'].update(
+                    lanes_backend='NVIDIA RTX PRO 6000 Blackwell Server Edition')),
+                ('lanes device time on the CPU', lambda v: v['q34_batch'].update(lanes_device_ms=0.5)),
+                ('lanes kernel time on the CPU', lambda v: v['q34_batch'].update(lanes_kernel_ms=0.5)),
+                ('lanes warps on the CPU', lambda v: v['q34_batch'].update(lanes_warps=1)),
+                ('lanes deferral below the slab', lambda v: v['q34_batch'].update(
+                    lanes_deferred=1, lanes_decided=v['q34_batch']['lanes_decided'] - 1)),
+                ('lanes judged without the judge', lambda v: v['q34_batch'].update(lanes_judged=1)),
+                ('lanes judge announced', lambda v: v['options'].update(lanes_judge=True)),
+                ('lanes capacity unannounced', lambda v: v['options'].update(lanes_capacity=24)),
+                ('lanes records shifted', lambda v: v['q34_batch'].update(
+                    lanes_records=v['q34_batch']['lanes_records'] + 1)),
+                ('lanes seeds shifted', lambda v: v['ledger'].update(lanes_seeds=v['ledger']['lanes_seeds'] + 1)),
+                ('lanes census split', lambda v: v['ledger'].update(
+                    lanes_census_point_tests=v['ledger']['lanes_census_point_tests'] + 1)),
+                ('lanes lever flipped', lambda v: v['options']['levers'].update(q34_batch_q3=False)),
+                ('gpu lanes without batch lanes', lambda v: v['options']['levers'].update(
+                    q34_batch_q3=False, q34_gpu_q3=True)),
+                ('lanes without certificates', lambda v: v['options']['levers'].update(
+                    q34_batch_certificates=False)),
+                ('lanes phase beyond q34', lambda v: v['q34_batch'].update(lanes_ms=v['times_ms']['q34'] + 5.0)),
+            ]
+            q3_killed = 0
+            for label, mutate in q3_mutants:
+                bad = copy.deepcopy(lanes)
+                mutate(bad)
+                try:
+                    worker.validate_probe(bad, q3_case, 0, inputs=inputs)
+                except (ValueError, KeyError, TypeError):
+                    q3_killed += 1
+                    continue
+                check(False, 'q3 lanes mutant accepted: ' + label)
+            print('probe_worker_contract q3_mutants_killed=' + str(q3_killed) + '/' + str(len(q3_mutants)))
+        else:
+            check(False, 'q3 lanes case absent')
+        engine_filled = copy.deepcopy(on)
+        engine_filled['q34_batch'].update(lanes_backend='cpu')
+        try:
+            worker.validate_probe(engine_filled, results['pinned_on'][0], 0, inputs=inputs)
+            check(False, 'q3 lanes mutant accepted: lanes backend on the engine path')
+        except (ValueError, KeyError, TypeError):
+            pass
         engine_filled = copy.deepcopy(on)
         engine_filled['q34_batch'].update(certificate_backend='cpu')
         try:

@@ -111,6 +111,20 @@ struct ChainOptions {
   // rendue au CPU, chemin moteur complet). Meme objet. Desactives par defaut.
   bool q34_batch_certificates = false;
   bool q34_gpu_certificates = false;
+  // v20 S4a : voie q3 des survivants certifies par lots, SANS atlas
+  // (gpu/lanes.hpp) : graines tirees du cover, recensement ScalarCover exact
+  // par graine, cle primitive ; les enregistrements deviennent directement des
+  // presentations. q34_batch_q3 execute l'appel sur le CPU (emulation hote du
+  // meme en-tete) avant les ouvriers ; q34_gpu_q3 sur le GPU pendant que les
+  // ouvriers font les voies q4. Exigent q34_batch_certificates (q34_gpu_q3
+  // exige q34_batch_q3). q34_lanes_capacity fixe l'ardoise des sites (0 :
+  // defaut ; petite valeur : mise en attente) ; q34_lanes_judge rejuge chaque
+  // arete decidee par la voie q3 du moteur (preflights). Meme objet ;
+  // desactives par defaut.
+  bool q34_batch_q3 = false;
+  bool q34_gpu_q3 = false;
+  bool q34_lanes_judge = false;
+  std::uint32_t q34_lanes_capacity = 0;
 };
 
 // Temps de mur en millisecondes, CPU du processus en secondes.
@@ -172,6 +186,11 @@ struct GeneratorLedger {
       witness_pair_node_visits, q3_edge_queries, q3_seed_node_visits, q3_seed_point_tests, q3_seed_bound_tests,
       q4_geometry_preparations, q4_domain_node_visits, q4_cover_decomposition_node_visits, q4_seed_node_visits,
       q4_seed_cell_queries, q4_sweep_active_sites;
+  // v20 S4a: declared ledger of the q3 lanes decided by the batch call
+  // (gen::Q34LanesWork), zero without the lever.
+  std::uint64_t lanes_edges, lanes_cover_sites, lanes_cover_node_visits, lanes_seed_tests, lanes_acute_sites,
+      lanes_owner_rejections, lanes_seeds, lanes_census_point_tests, lanes_census_inside_sites,
+      lanes_census_shell_sites, lanes_census_outside_sites, lanes_depth_rejections, lanes_emitted, lanes_shell_ids;
 };
 
 // Occupation mesuree des ouvriers q3/q4 (jamais comparee entre executions) :
@@ -201,6 +220,14 @@ struct Q34BatchTimes {
   // (upload + download), par evenements CUDA ; zero sur CPU.
   double filter_kernel_ms = 0, filter_transfer_ms = 0;
   double certificate_kernel_ms = 0, certificate_transfer_ms = 0;
+  // v20 S4a : appel des voies q3 (vide et nul si le levier est coupe) : mur
+  // de l'appel, passe d'appareil (noyau, transferts), attente des ouvriers
+  // apres leurs voies, traine (voies q3 en attente et puits d'enregistrements).
+  std::string lanes_backend;
+  double lanes_ms = 0, lanes_device_ms = 0, lanes_kernel_ms = 0, lanes_transfer_ms = 0;
+  double lanes_wait_ms = 0, tail_ms = 0;
+  std::uint64_t lanes_asked = 0, lanes_decided = 0, lanes_deferred = 0, lanes_records = 0, lanes_judged = 0;
+  std::uint32_t lanes_warps = 0;
 };
 
 struct OrderSummary {

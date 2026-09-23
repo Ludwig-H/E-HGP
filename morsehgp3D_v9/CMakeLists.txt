@@ -211,6 +211,14 @@ mhgp9_gate(mhgp9_chain_batch_certificates 0 mhgp9_chain_batch_certificates_gate 
            EXPECT_PREFIX "chain_batch_certificates_gate n=1000" LABELS "gate;chain;oracle" TIMEOUT 1200)
 mhgp9_gate(mhgp9_chain_batch_certificates_bad_argument 2 mhgp9_chain_batch_certificates_gate ARGS --n=abc
            LABELS "gate;chain" TIMEOUT 60)
+# S4a : voie q3 par lots (levier q34_batch_q3) dans la chaine, memes condenses.
+mhgp9_product_executable(mhgp9_chain_batch_q3_gate tests/chain/chain_batch_q3_gate.cpp)
+target_link_libraries(mhgp9_chain_batch_q3_gate PRIVATE mhgp9_chain)
+target_include_directories(mhgp9_chain_batch_q3_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+mhgp9_gate(mhgp9_chain_batch_q3 0 mhgp9_chain_batch_q3_gate ARGS --n=1000
+           EXPECT_PREFIX "chain_batch_q3_gate n=1000" LABELS "gate;chain;oracle" TIMEOUT 1200)
+mhgp9_gate(mhgp9_chain_batch_q3_bad_argument 2 mhgp9_chain_batch_q3_gate ARGS --n=abc
+           LABELS "gate;chain" TIMEOUT 60)
 foreach(mutant IN ITEMS REGULAR_SHELLS_ONLY NO_SITE_TERM)
   string(TOLOWER ${mutant} lower)
   mhgp9_product_executable(mhgp9_chain_euler_${lower}_mutant_gate tests/chain/chain_euler_gate.cpp src/chain/tower_chain.cpp)
@@ -253,6 +261,18 @@ mhgp9_gate(mhgp9_gpu_certificate_port 0 mhgp9_gpu_certificate_port_gate ARGS --n
 mhgp9_gate(mhgp9_gpu_certificate_port_scale8000 0 mhgp9_gpu_certificate_port_gate ARGS --n=8000 --k=5
            EXPECT_PREFIX "gpu_certificate_port_gate n=8000" LABELS "scale8000;gpu;oracle" TIMEOUT 2400)
 mhgp9_gate(mhgp9_gpu_certificate_port_bad_argument 2 mhgp9_gpu_certificate_port_gate ARGS --k=11
+           LABELS "gate;gpu" TIMEOUT 60)
+# S4a : port portable de la voie q3 sans atlas (gpu/lanes.hpp, emulation
+# hote), juge arete par arete contre la voie q3 du moteur, executeur par lots,
+# capacites reduites, mutants de sortie et garde d'entree.
+mhgp9_product_executable(mhgp9_gpu_lanes_port_gate tests/gpu/lanes_port_gate.cpp)
+target_link_libraries(mhgp9_gpu_lanes_port_gate PRIVATE mhgp9_gen)
+target_include_directories(mhgp9_gpu_lanes_port_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+mhgp9_gate(mhgp9_gpu_lanes_port 0 mhgp9_gpu_lanes_port_gate ARGS --n=2000
+           EXPECT_PREFIX "lanes_port_gate n=2000" LABELS "gate;gpu;oracle" TIMEOUT 900)
+mhgp9_gate(mhgp9_gpu_lanes_port_scale8000 0 mhgp9_gpu_lanes_port_gate ARGS --n=8000 --k=5
+           EXPECT_PREFIX "lanes_port_gate n=8000" LABELS "scale8000;gpu;oracle" TIMEOUT 2400)
+mhgp9_gate(mhgp9_gpu_lanes_port_bad_argument 2 mhgp9_gpu_lanes_port_gate ARGS --k=11
            LABELS "gate;gpu" TIMEOUT 60)
 
 # Sonde S1 : meme population que la chaine (front, rectangles, paires), CPU

@@ -8,6 +8,7 @@
 // the CUDA translation unit.
 
 #include "certificate.hpp"
+#include "lanes.hpp"
 #include "witness_filter.hpp"
 
 #include <cstdint>
@@ -199,6 +200,71 @@ struct CertificateOutput {
   double upload_ms = 0, kernel_ms = 0, download_ms = 0, total_ms = 0;
 };
 CertificateOutput run_certificate_batch(const CertificateInput& input);
+
+// ---- S4a (chain): q3 lanes of certified edges ---------------------------
+//
+// One warp per edge (gpu/lanes.hpp): the cover rebuilt, the seeds drawn from
+// it, one exact ScalarCover census per seed, the key of every accepted ball.
+// Each warp owns a slab of `capacity` sites and `record_capacity` records;
+// the records of a decided edge are copied into one arena of
+// `arena_capacity` records (one atomic reservation per edge, never a
+// prefix). An edge whose cover, records or arena share exceed them comes
+// back DEFERRED (status 1) with no counter: the CPU runs its q3 lane.
+struct LanesInput {
+  FilterInput index;              // nodes, rank points and kmax >= 2 (rectangle fields unused)
+  const u32* escapes = nullptr;   // preorder escape links
+  const u32* rank_ids = nullptr;  // original input ID of every spatial rank
+  const u32* edge_a = nullptr;    // spatial ranks
+  const u32* edge_b = nullptr;
+  std::size_t edge_count = 0;
+  u32 capacity = 0;                // sites per slab; 0 selects the default
+  u32 record_capacity = 0;         // records per slab; 0 selects the default
+  std::size_t arena_capacity = 0;  // records of the call; 0 selects the default
+};
+
+inline constexpr u32 default_lanes_capacity = 1U << 16;
+inline constexpr u32 default_record_capacity = 1U << 12;
+// Default arena: four records per edge plus one slab (R14: about one q3 ball
+// per edge at K5, two at K10).
+inline std::size_t default_arena_capacity(std::size_t edges) { return 4 * edges + default_record_capacity; }
+
+// Host-side refusal before any device call; empty when accepted: the index
+// and escape links of validate_certificate_input, the rank IDs, K >= 2, edge
+// ranks inside the index and distinct, capacities 0 or >= 2 sites and >= 1
+// record.
+inline std::string validate_lanes_input(const LanesInput& input) {
+  CertificateInput shape;
+  shape.index = input.index;
+  shape.escapes = input.escapes;
+  if (auto error = validate_certificate_input(shape); !error.empty()) return error;
+  if (input.index.kmax < 2) return "q3 lanes require K >= 2";
+  if (input.rank_ids == nullptr) return "null rank IDs";
+  if (input.edge_count > static_cast<std::size_t>(0x7fffffff)) return "edge count exceeds 2^31-1";
+  if (input.edge_count != 0 && (input.edge_a == nullptr || input.edge_b == nullptr)) return "null edge arrays";
+  for (std::size_t i = 0; i < input.edge_count; ++i)
+    if (input.edge_a[i] >= input.index.rank_count || input.edge_b[i] >= input.index.rank_count ||
+        input.edge_a[i] == input.edge_b[i])
+      return "edge rank outside the index";
+  if (input.capacity == 1) return "slab capacity below two sites";
+  if (input.arena_capacity > static_cast<std::size_t>(0xffffffffU)) return "record arena exceeds 2^32-1";
+  return {};
+}
+
+struct LanesOutput {
+  bool available = false;
+  std::string device;
+  std::string error;  // non-empty: nothing below is valid
+  BatchError error_kind = BatchError::none;
+  std::vector<u8> status;                       // per edge: CertificateStatus
+  std::vector<u32> record_begin, record_count;  // per edge (decided): its slice of records
+  std::vector<LaneRecord> records;              // slices in reservation order; edge = input edge index
+  Q3Work work{};                                // decided edges only
+  std::uint64_t deferred = 0, faults = 0;
+  std::uint32_t capacity = 0, record_capacity = 0, warps = 0;
+  // cudaEvent timings (ms): upload, kernel, download, whole pass.
+  double upload_ms = 0, kernel_ms = 0, download_ms = 0, total_ms = 0;
+};
+LanesOutput run_lanes_batch(const LanesInput& input);
 
 // Opens the device's primary context (process-wide), so that the first
 // batch call does not pay it; empty string on success. Any error is left to

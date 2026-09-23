@@ -11,6 +11,8 @@
 #include <chrono>
 #include <ctime>
 #include <condition_variable>
+#include <exception>
+#include <thread>
 #include <mutex>
 #include <limits>
 #include <stdexcept>
@@ -273,9 +275,18 @@ void merge(Q34WitnessCacheWork& a, const Q34WitnessCacheWork& b) {
   MHGP9G_ADD(full_rejections);
 }
 
+void merge(Q34LanesWork& a, const Q34LanesWork& b) {
+  static_assert(sizeof(Q34LanesWork) == 14 * sizeof(u64) + sizeof(Q34EdgeCoverWork));
+  MHGP9G_ADD(edges); MHGP9G_ADD(cover_sites); MHGP9G_MAX(max_cover_sites);
+  merge(a.cover, b.cover);
+  MHGP9G_ADD(seed_tests); MHGP9G_ADD(acute_sites); MHGP9G_ADD(owner_rejections); MHGP9G_ADD(seeds);
+  MHGP9G_ADD(census_point_tests); MHGP9G_ADD(census_inside_sites); MHGP9G_ADD(census_shell_sites);
+  MHGP9G_ADD(census_outside_sites); MHGP9G_ADD(depth_rejections); MHGP9G_ADD(emitted); MHGP9G_ADD(shell_ids);
+}
+
 void merge(WspdQ34Work& a, const WspdQ34Work& b) {
   static_assert(sizeof(WspdQ34Work) == 16 * sizeof(u64) + 2 * sizeof(Q34EdgeCoverWork) +
-      sizeof(WspdQ3Work) + sizeof(Q4LocalEdgeWork) + sizeof(Q4WindowEdgeWork) + sizeof(WspdQ34WitnessWork) + sizeof(Q3BallCensusWork) + sizeof(Q4SeedCellWork) + sizeof(WspdQ3AtlasWork) + 2 * sizeof(Q34DeadLaneWork) + sizeof(Q34WitnessCacheWork));
+      sizeof(WspdQ3Work) + sizeof(Q4LocalEdgeWork) + sizeof(Q4WindowEdgeWork) + sizeof(WspdQ34WitnessWork) + sizeof(Q3BallCensusWork) + sizeof(Q4SeedCellWork) + sizeof(WspdQ3AtlasWork) + 2 * sizeof(Q34DeadLaneWork) + sizeof(Q34WitnessCacheWork) + sizeof(Q34LanesWork));
   MHGP9G_ADD(input_rectangles); MHGP9G_ADD(expanded_pairs); MHGP9G_ADD(q3_edges);
   MHGP9G_ADD(q4_edges); MHGP9G_ADD(both_edges); MHGP9G_ADD(cover_builds);
   MHGP9G_ADD(cover_sites); MHGP9G_MAX(max_cover_sites); MHGP9G_MAX(peak_cover_bytes);
@@ -292,6 +303,7 @@ void merge(WspdQ34Work& a, const WspdQ34Work& b) {
   MHGP9G_ADD(core_builds); MHGP9G_ADD(core_sites); MHGP9G_ADD(core_closed_edges);
   merge(a.core_cover, b.core_cover);
   merge(a.dead_core, b.dead_core);
+  merge(a.lanes, b.lanes);
 }
 
 #undef MHGP9G_ADD
@@ -387,7 +399,8 @@ void validate_completion(const WspdQ34Result& result, const WspdQ34Options& opti
       q4 != result.front.work.residual_pair_mass[2] ||
       covered != result.work.expanded_pairs || expanded != witness.input_pair_mass ||
       result.work.input_rectangles != result.front.work.emitted_rectangles ||
-      result.work.q3_emitted != result.work.q3.emitted ||
+      result.work.q3_emitted < result.work.lanes.emitted ||
+      result.work.q3_emitted - result.work.lanes.emitted != result.work.q3.emitted ||
       result.work.q4_emitted != (options.q4_backend == WspdQ4Backend::Local28
           ? result.work.local.sweep.emitted : result.work.window.sweep.sweep.emitted))
     throw std::logic_error("mhgp9 gen global q34 completed ledger mismatch");
@@ -1168,6 +1181,163 @@ Q34CertificateFilter judge_certificate_filter(Q34CertificateFilter inner, std::s
   };
 }
 
+namespace {
+
+Q34LaneRecord lane_record(const Q34SeedCandidate& c) {
+  Q34LaneRecord r;
+  r.key = c.ball.coefficients();
+  for (std::size_t j = 0; j < 4; ++j)
+    r.support[j] = j < c.arity ? static_cast<std::uint32_t>(c.support_ids[j]) : std::numeric_limits<std::uint32_t>::max();
+  r.edge = std::numeric_limits<std::uint32_t>::max();
+  r.depth = static_cast<std::uint32_t>(c.depth);
+  r.shell = static_cast<std::uint32_t>(c.shell_first.size() + c.shell_second.size());
+  r.arity = static_cast<std::uint8_t>(c.arity);
+  for (const auto part : {c.shell_first, c.shell_second})
+    for (const auto id : part) {
+      const auto h = q34_shell_hash(static_cast<u64>(id));
+      r.shell_sum += h;
+      r.shell_xor ^= h;
+    }
+  return r;
+}
+
+// Record order of the judge: everything but the edge ordinal.
+bool record_less(const Q34LaneRecord& a, const Q34LaneRecord& b) {
+  if (a.key != b.key) return a.key < b.key;
+  if (a.support != b.support) return a.support < b.support;
+  if (a.depth != b.depth) return a.depth < b.depth;
+  if (a.shell != b.shell) return a.shell < b.shell;
+  if (a.shell_sum != b.shell_sum) return a.shell_sum < b.shell_sum;
+  return a.shell_xor < b.shell_xor;
+}
+
+bool same_record(const Q34LaneRecord& a, const Q34LaneRecord& b) {
+  return a.key == b.key && a.support == b.support && a.depth == b.depth && a.shell == b.shell &&
+         a.arity == b.arity && a.shell_sum == b.shell_sum && a.shell_xor == b.shell_xor;
+}
+
+}  // namespace
+
+std::vector<Q34LaneRecord> engine_q3_records(const Q2CensusIndexPtr& index, unsigned kmax,
+                                             const WspdQ34Options& options, std::size_t a, std::size_t b,
+                                             WspdQ3Work* q3) {
+  if (!index || kmax < 2 || kmax > 10)
+    throw std::invalid_argument("mhgp9 gen engine q3 records require an index and K2..10");
+  std::vector<Q34LaneRecord> out;
+  const Q34SeedConsumer capture = [&out](const Q34SeedCandidate& c) {
+    if (c.arity != 3) throw std::logic_error("mhgp9 gen engine q3 lane emitted another arity");
+    out.push_back(lane_record(c));
+  };
+  Engine engine(index, kmax, options, capture);
+  engine.certified_edge(a, b, 2);
+  if (q3 != nullptr) *q3 = engine.work.q3;
+  return out;
+}
+
+void check_lanes_batch(const Q34LanesBatch& batch, const Q2CensusIndex& index, unsigned kmax,
+                       std::span<const Q34SurvivingEdge> survivors, std::span<const std::uint8_t> asked) {
+  const std::size_t n = survivors.size();
+  if (asked.size() != n || batch.decided.size() != n || batch.record_begin.size() != n ||
+      batch.record_count.size() != n)
+    throw std::logic_error("mhgp9 gen batched q34 lanes call returned a count different from its survivors");
+  const auto order = index.spatial_order();
+  const auto& w = batch.work;
+  u64 decided = 0, records = 0, shells = 0;
+  constexpr auto none = std::numeric_limits<std::uint32_t>::max();
+  for (std::size_t j = 0; j < n; ++j) {
+    const auto lanes = batch.decided[j];
+    if ((lanes & ~asked[j]) != 0 || (asked[j] & ~2U) != 0 || (lanes == 0 && batch.record_count[j] != 0))
+      throw std::logic_error("mhgp9 gen batched q34 lanes call decided a lane it was not asked");
+    if (lanes == 0) continue;
+    ++decided;
+    const u64 begin = batch.record_begin[j], count = batch.record_count[j];
+    if (begin > batch.records.size() || count > batch.records.size() - begin)
+      throw std::logic_error("mhgp9 gen batched q34 lanes call returned a slice outside its records");
+    const auto ida = static_cast<std::uint32_t>(order[survivors[j].a_rank]);
+    const auto idb = static_cast<std::uint32_t>(order[survivors[j].b_rank]);
+    for (u64 r = begin; r < begin + count; ++r) {
+      const auto& record = batch.records[r];
+      const auto& s = record.support;
+      const bool holds = (s[0] == ida || s[1] == ida || s[2] == ida) && (s[0] == idb || s[1] == idb || s[2] == idb);
+      if (record.edge != j || record.arity != 3 || s[3] != none || !(s[0] < s[1] && s[1] < s[2]) || !holds ||
+          record.key[0] <= 0 || record.depth >= kmax - 1 || record.shell < 3)
+        throw std::logic_error("mhgp9 gen batched q34 lanes call returned a malformed or misplaced record");
+      counter_add(shells, static_cast<u64>(record.shell));
+    }
+    counter_add(records, count);
+  }
+  // Every record lies in the slice of its own edge (edge field), and the
+  // slices sum to the records: they partition the records exactly.
+  const bool ok = records == batch.records.size() && w.edges == decided && w.emitted == records &&
+      w.shell_ids == shells && w.seeds == w.depth_rejections + w.emitted &&
+      w.acute_sites == w.owner_rejections + w.seeds && w.seed_tests == w.cover_sites &&
+      w.cover.admitted_sites == w.cover_sites && w.cover_sites >= 2 * w.edges &&
+      w.census_point_tests == w.census_inside_sites + w.census_shell_sites + w.census_outside_sites &&
+      w.census_shell_sites >= w.shell_ids && w.max_cover_sites <= w.cover_sites &&
+      (w.edges == 0) == (w.max_cover_sites == 0);
+  if (!ok) throw std::logic_error("mhgp9 gen batched q34 lanes call broke a record or work identity");
+}
+
+Q34LanesFilter judge_lanes_filter(Q34LanesFilter inner, WspdQ34Options options, std::size_t workers,
+                                  Q34LanesJudgeWork* work) {
+  if (!inner || workers == 0)
+    throw std::invalid_argument("mhgp9 gen lanes judge requires a call and a positive worker count");
+  return [inner = std::move(inner), options, workers, work](const Q2CensusIndexPtr& index, unsigned kmax,
+                                                            std::span<const Q34SurvivingEdge> survivors,
+                                                            std::span<const std::uint8_t> asked) {
+    auto answer = inner(index, kmax, survivors, asked);
+    check_lanes_batch(answer, *index, kmax, survivors, asked);
+    const auto order = index->spatial_order();
+    std::vector<std::size_t> decided;
+    for (std::size_t j = 0; j < survivors.size(); ++j)
+      if (answer.decided[j] != 0) decided.push_back(j);
+    struct alignas(64) Part {
+      u64 seeds{}, emitted{};
+    };
+    std::vector<Part> parts(std::min(workers, std::max<std::size_t>(decided.size(), 1)));
+    std::atomic<std::size_t> next{0};
+    constexpr std::size_t grain = 64;
+    parallel_detail::run_joined_workers(parts.size(), [&](std::size_t slot, const std::atomic<bool>& cancel) {
+      std::vector<Q34LaneRecord> mine;
+      for (;;) {
+        if (cancel.load(std::memory_order_relaxed)) return;
+        const std::size_t begin = next.fetch_add(grain);
+        if (begin >= decided.size()) return;
+        for (std::size_t i = begin; i < std::min(decided.size(), begin + grain); ++i) {
+          const auto j = decided[i];
+          WspdQ3Work q3{};
+          auto reference = engine_q3_records(index, kmax, options, order[survivors[j].a_rank],
+                                             order[survivors[j].b_rank], &q3);
+          counter_add(parts[slot].seeds, q3.seeds);
+          counter_add(parts[slot].emitted, q3.emitted);
+          mine.assign(answer.records.begin() + answer.record_begin[j],
+                      answer.records.begin() + answer.record_begin[j] + answer.record_count[j]);
+          std::sort(mine.begin(), mine.end(), record_less);
+          std::sort(reference.begin(), reference.end(), record_less);
+          if (mine.size() != reference.size() ||
+              !std::equal(mine.begin(), mine.end(), reference.begin(), same_record))
+            throw std::logic_error("mhgp9 gen lanes judge: a decided edge's q3 balls differ from the engine");
+        }
+      }
+    });
+    u64 seeds = 0, emitted = 0;
+    for (const auto& part : parts) {
+      counter_add(seeds, part.seeds);
+      counter_add(emitted, part.emitted);
+    }
+    if (seeds != answer.work.seeds || emitted != answer.work.emitted)
+      throw std::logic_error("mhgp9 gen lanes judge: the decided seeds or emissions differ from the engine");
+    if (work != nullptr) {
+      counter_add(work->judged, static_cast<u64>(decided.size()));
+      u64 asked_count = 0;
+      for (const auto lane : asked) asked_count += lane != 0 ? 1U : 0U;
+      counter_add(work->deferred, asked_count - static_cast<u64>(decided.size()));
+      counter_add(work->records, static_cast<u64>(answer.records.size()));
+    }
+    return answer;
+  };
+}
+
 Q34FilterBatch run_q34_filter_batch_cpu(const Q2CensusIndex& index, unsigned kmax,
                                         std::span<const WspdRectangle> rectangles, std::size_t workers) {
   if (workers == 0) throw std::invalid_argument("mhgp9 gen q34 batch filter requires a positive worker count");
@@ -1242,12 +1412,16 @@ Q34FilterBatch run_q34_filter_batch_cpu(const Q2CensusIndex& index, unsigned kma
 WspdQ34ParallelResult run_wspd_q34_batched(Q2CensusIndexPtr index, unsigned kmax,
     unsigned separation_s, WspdQ34Options options, std::size_t worker_count,
     const WspdQ34ParallelConsumer& consumer, std::size_t jobs_per_worker,
-    const Q34BatchFilter& filter, WspdQ34BatchTiming* timing, const Q34CertificateFilter* certificates) {
+    const Q34BatchFilter& filter, WspdQ34BatchTiming* timing, const Q34CertificateFilter* certificates,
+    const Q34LanesStage* lanes) {
   validate(index, kmax, separation_s, options, static_cast<bool>(consumer));
   if (!filter) throw std::invalid_argument("mhgp9 gen batched q34 requires a batch filter");
   const bool certify = certificates != nullptr && static_cast<bool>(*certificates);
   if (certify && !options.dead_lanes)
     throw std::invalid_argument("mhgp9 gen batched q34 certificates require the dead-lane certificate");
+  const bool staged = lanes != nullptr && static_cast<bool>(lanes->filter);
+  if (staged && (!certify || !lanes->sink))
+    throw std::invalid_argument("mhgp9 gen batched q34 lanes require the certificate call and a record sink");
   if (options.witness_mode != WspdQ34WitnessMode::RectanglePair ||
       options.witness_bounds_mode != Q34WitnessBoundsMode::Affine)
     throw std::invalid_argument("mhgp9 gen batched q34 implements RectanglePair witnesses with Affine bounds only");
@@ -1429,13 +1603,49 @@ WspdQ34ParallelResult run_wspd_q34_batched(Q2CensusIndexPtr index, unsigned kmax
     merge(filter_work, w);
   }
 
-  // ---- Phase 3: the workers run the rest of every surviving edge.
+  // ---- Phase 2c (S4a): one call generates the q3 lane of the certified
+  // survivors (`asked`), on its own thread when concurrent: the workers run
+  // the other lanes meanwhile. The thread is joined on every path.
+  const auto& survivors = batch.survivors;
+  std::vector<std::uint8_t> asked;
+  Q34LanesBatch lanes_batch;
+  std::exception_ptr lanes_failure;
+  u64 lanes_ns = 0;
+  std::thread lanes_thread;
+  struct Joiner {
+    std::thread& thread;
+    ~Joiner() {
+      if (thread.joinable()) thread.join();
+    }
+  } joiner{lanes_thread};
+  if (staged) {
+    asked.assign(survivors.size(), 0);
+    for (std::size_t j = 0; j < survivors.size(); ++j)
+      if (certified.deferred[j] == 0) asked[j] = static_cast<std::uint8_t>(certified.masks[j] & 2U);
+    const auto call = [&] {
+      const auto start = wall_ns();
+      try {
+        lanes_batch = lanes->filter(index, kmax, survivors, asked);
+      } catch (...) {
+        lanes_failure = std::current_exception();
+      }
+      lanes_ns = wall_ns() - start;
+    };
+    if (lanes->concurrent) {
+      lanes_thread = std::thread(call);
+    } else {
+      call();
+      if (lanes_failure) std::rethrow_exception(lanes_failure);
+    }
+  }
+
+  // ---- Phase 3: the workers run the rest of every surviving edge (without
+  // the asked q3 lanes).
   phase = wall_ns();
   std::atomic<u64> rebuilt{0};
   {
     std::atomic<std::size_t> next{0};
     constexpr std::size_t grain = 64;
-    const auto& survivors = batch.survivors;
     parallel_detail::run_joined_workers(started, [&](std::size_t slot, const std::atomic<bool>& cancel) {
       auto& state = states[slot];
       const auto wall_start = wall_ns(), cpu_start = thread_cpu_ns();
@@ -1449,9 +1659,13 @@ WspdQ34ParallelResult run_wspd_q34_batched(Q2CensusIndexPtr index, unsigned kmax
           if (begin >= survivors.size()) break;
           for (std::size_t j = begin; j < std::min(survivors.size(), begin + grain); ++j) {
             const auto a = order[survivors[j].a_rank], b = order[survivors[j].b_rank];
-            if (!certify || certified.deferred[j] != 0) engine.surviving_edge(a, b, survivors[j].mask);
-            else if (certified.masks[j] != 0) {
-              engine.certified_edge(a, b, certified.masks[j]);
+            if (!certify || certified.deferred[j] != 0) {
+              engine.surviving_edge(a, b, survivors[j].mask);
+              continue;
+            }
+            const auto open = static_cast<std::uint8_t>(certified.masks[j] & ~(staged ? asked[j] : 0U));
+            if (open != 0) {
+              engine.certified_edge(a, b, open);
               ++rebuilt_here;
             }
           }
@@ -1464,6 +1678,74 @@ WspdQ34ParallelResult run_wspd_q34_batched(Q2CensusIndexPtr index, unsigned kmax
     });
   }
   local_timing.edges_ns = wall_ns() - phase;
+
+  // ---- Phase 3b (S4a): join the call, check it, then the workers run the
+  // q3 lanes it did not decide and hand its records to the sink.
+  if (staged) {
+    phase = wall_ns();
+    if (lanes_thread.joinable()) lanes_thread.join();
+    local_timing.lanes_wait_ns = wall_ns() - phase;
+    if (lanes_failure) std::rethrow_exception(lanes_failure);
+    check_lanes_batch(lanes_batch, *index, kmax, survivors, asked);
+    local_timing.lanes_ns = lanes_ns;
+    local_timing.lanes_backend = lanes_batch.backend;
+    std::vector<std::size_t> tail;
+    WspdQ34Work lanes_work{};
+    for (std::size_t j = 0; j < survivors.size(); ++j) {
+      if (asked[j] == 0) continue;
+      ++local_timing.lanes_asked;
+      // The q4 lane of an asked edge ran apart (phase 3): the edge is counted
+      // in both_edges here, whether its q3 lane is decided or in the tail.
+      if ((certified.masks[j] & 4U) != 0) counter_add(lanes_work.both_edges);
+      if (lanes_batch.decided[j] == 0) {
+        tail.push_back(j);
+        continue;
+      }
+      ++local_timing.lanes_decided;
+      counter_add(lanes_work.q3_edges);
+    }
+    local_timing.lanes_deferred = tail.size();
+    local_timing.lanes_records = lanes_batch.records.size();
+    lanes_work.lanes = lanes_batch.work;
+    lanes_work.q3_emitted = lanes_batch.work.emitted;
+    lanes_work.payload_shell_ids = lanes_batch.work.shell_ids;
+    merge(filter_work, lanes_work);
+    phase = wall_ns();
+    std::atomic<std::size_t> next_edge{0}, next_chunk{0};
+    constexpr std::size_t grain = 16, chunk = 4096;
+    const std::size_t chunks = (lanes_batch.records.size() + chunk - 1) / chunk;
+    const std::span<const Q34LaneRecord> records(lanes_batch.records);
+    parallel_detail::run_joined_workers(started, [&](std::size_t slot, const std::atomic<bool>& cancel) {
+      auto& state = states[slot];
+      const auto wall_start = wall_ns(), cpu_start = thread_cpu_ns();
+      const Q34SeedConsumer output = [&](const Q34SeedCandidate& candidate) { callbacks[slot](slot, candidate); };
+      u64 rebuilt_here = 0;
+      {
+        Engine engine(index, kmax, options, output);
+        for (;;) {
+          if (cancel.load(std::memory_order_relaxed)) break;
+          const std::size_t begin = next_edge.fetch_add(grain);
+          if (begin >= tail.size()) break;
+          for (std::size_t i = begin; i < std::min(tail.size(), begin + grain); ++i) {
+            const auto j = tail[i];
+            engine.certified_edge(order[survivors[j].a_rank], order[survivors[j].b_rank], asked[j]);
+            ++rebuilt_here;
+          }
+        }
+        merge(state.work, engine.work);
+      }
+      for (;;) {
+        if (cancel.load(std::memory_order_relaxed)) break;
+        const std::size_t c = next_chunk.fetch_add(1);
+        if (c >= chunks) break;
+        lanes->sink(slot, records.subspan(c * chunk, std::min(chunk, records.size() - c * chunk)));
+      }
+      rebuilt.fetch_add(rebuilt_here, std::memory_order_relaxed);
+      counter_add(state.timing.wall_ns, wall_ns() - wall_start);
+      counter_add(state.timing.cpu_ns, thread_cpu_ns() - cpu_start);
+    });
+    local_timing.tail_ns = wall_ns() - phase;
+  }
   local_timing.rebuilt_covers = rebuilt.load();
   merge(result.pipeline.work, filter_work);
   result.workers.reserve(states.size());
