@@ -1,0 +1,130 @@
+{
+  "datasets": {
+    "half": {
+      "full": {
+        "original_site_ids_sha256": "a6a4fd5a7a858ff4b823c6b4bd0b81b3587340b2710e657073f4acc734dffad0",
+        "points_file": "s02_half_full.u32le",
+        "points_sha256": "e961c4715463c350b16c77beb79da884ddf33a0d0b99bf29d05e6c5a60022ee6",
+        "site_ids_sha256": "8a32f35ca734a10ca49fd8b7774b64fcc3b97565f93c7b6da595bf8c2a9a084d",
+        "sites": 22922
+      },
+      "half_x_neg": {
+        "original_site_ids_sha256": "e8588e4bebe66b32c9263fea444dc11bd34cfcc61fc7f63f8d5d368ae7cb3a84",
+        "points_file": "s02_half_half_x_neg.u32le",
+        "points_sha256": "7b8bc6f6181ad421b7a2df21afdb64d960e8f6955319bc7b8dd86b8bb609a25c",
+        "site_ids_sha256": "c0558e29d065476c4c9353a5b33b9766c3bd2732d4e21e8e867d4181b15caf0a",
+        "sites": 12893
+      },
+      "half_x_nonneg": {
+        "original_site_ids_sha256": "a4d60dade2701ca48fb110c9ad03d607c4c7e543fa4f664ff596b26a26ad4bd3",
+        "points_file": "s02_half_half_x_nonneg.u32le",
+        "points_sha256": "d1681ae8e1559e66566f1b543d933c0a3bddc8e4c3beb69b560b704faee4e6a5",
+        "site_ids_sha256": "676646d16ce67f6b258176f119a73555a9b272293b329bf4a2f7ccc278ba2a0a",
+        "sites": 10029
+      },
+      "quarter_x_neg_y_neg": {
+        "original_site_ids_sha256": "4305e663e599d1dca4677ea9a94c2a561fec9864c3da02eae7dce55f128b35c6",
+        "points_file": "s02_half_quarter_x_neg_y_neg.u32le",
+        "points_sha256": "d0a546cef3ce1c5e4f1094bd488def4dd007a361e9ecb8a88ee2396cfed3f9bb",
+        "site_ids_sha256": "d502abb4fe7ef6c0de6ac5189799e4ad9826b525cbaa765a1f62375b2179e228",
+        "sites": 8220
+      },
+      "quarter_x_neg_y_nonneg": {
+        "original_site_ids_sha256": "d9b00da830fe0d94c8aeba3f660c0af6201651a38e0c0551d2ccdb8576d690eb",
+        "points_file": "s02_half_quarter_x_neg_y_nonneg.u32le",
+        "points_sha256": "569a14b0d6b8cebad348e8284990a8bc436d65f64ba2fdd555066dd5147c2b0c",
+        "site_ids_sha256": "f8e1dc9ce8826b0aa99c17f030e3f1e19b07e7351e0e77a6725cc899e43a215b",
+        "sites": 4673
+      },
+      "quarter_x_nonneg_y_neg": {
+        "original_site_ids_sha256": "12aee1d0baa59a9664496d9f73925aa296d7542c3648fcb41128b9564554b532",
+        "points_file": "s02_half_quarter_x_nonneg_y_neg.u32le",
+        "points_sha256": "6ed1e22a2a448fce055a8701e9aa94905edad3710d3cde60e7ac4f246ad23b1a",
+        "site_ids_sha256": "a221e215d5149a2b5e01fa7459142ca439d8854cb68dbf19392ca04ede9b6d72",
+        "sites": 7339
+      },
+      "quarter_x_nonneg_y_nonneg": {
+        "original_site_ids_sha256": "d2818403df24547af24061b8aa3979f7a9a45c46bc951035a187e8d70b0d2aab",
+        "points_file": "s02_half_quarter_x_nonneg_y_nonneg.u32le",
+        "points_sha256": "ac5218f6fdbfe4f8436a330012089876df47433df7e97750c9604e900a0ef584",
+        "site_ids_sha256": "798feae9ad39bbe8a37414ad1b993de485e89cb690eda5d51c9d9b81128e07ca",
+        "sites": 2690
+      }
+    },
+    "quarter": {
+      "full": {
+        "original_site_ids_sha256": "29345ed41c703c3f44ca1b6f6ded92aba188e4fde5f6a063b48f462da8776e2c",
+        "points_file": "s02_quarter_full.u32le",
+        "points_sha256": "55ce2683b6f4af2d0d638434b311e9925c7bf542d3861ee150f24ca709cdf470",
+        "site_ids_sha256": "a1c1252b4ecea0c32d442d30ca8f1316aced4b17ebe8c10cba1c78e25aa2f53e",
+        "sites": 11461
+      },
+      "half_x_neg": {
+        "original_site_ids_sha256": "886df72cfeca80dde1c212d1ad4fd91deeb600f212fc3ad25c8c22ee223f65ed",
+        "points_file": "s02_quarter_half_x_neg.u32le",
+        "points_sha256": "aecb3c391ef2435b7c08dcb143cb1035412cfafc6450ffd187d73a4bf0bd9cec",
+        "site_ids_sha256": "f80404b2b9be248d89cf182d9d60bf3f8906318c21536849f0c99e66ad706408",
+        "sites": 6506
+      },
+      "half_x_nonneg": {
+        "original_site_ids_sha256": "f68276d6605ef2e9e9ce62c1ccb7b8d405e8aeb3ae0709d34f1a725380e5e85a",
+        "points_file": "s02_quarter_half_x_nonneg.u32le",
+        "points_sha256": "0501a8c82c2a7ce54f7d9bb1282cc9671b894fd8f676d67b50f2ef64ea15cf0f",
+        "site_ids_sha256": "63d1b2db1df87e294104b07f79967ed313df3bfc7d5f36a253295215d5549fae",
+        "sites": 4955
+      },
+      "quarter_x_neg_y_neg": {
+        "original_site_ids_sha256": "ad24c19d573c21e5142040c46a7fd6828726783bcca93430cfd18e3a6a341499",
+        "points_file": "s02_quarter_quarter_x_neg_y_neg.u32le",
+        "points_sha256": "ba5d76e1674a7c83d4f8406049ceb6a8652fd3f723cdff9abf107125fdb5ba92",
+        "site_ids_sha256": "b5b8caad7fb37d0eeda511dea9814e9eda33589bbf09c56c8e1c4a7f4631d366",
+        "sites": 4146
+      },
+      "quarter_x_neg_y_nonneg": {
+        "original_site_ids_sha256": "ba2de855a11f6b921d75ede84bf89e6698b90b365712f9a0c22725d73fd2ab4f",
+        "points_file": "s02_quarter_quarter_x_neg_y_nonneg.u32le",
+        "points_sha256": "f0db581800be4095e268b71ae1baefea364b04648efa3b0b20a6fbef4e602a78",
+        "site_ids_sha256": "2ca4111ae1a17b626490074e153fc53c7b8a84e3b56aa0a77adb53f146dd587c",
+        "sites": 2360
+      },
+      "quarter_x_nonneg_y_neg": {
+        "original_site_ids_sha256": "7e1e1a23ed0ddd3942f4c11e962a82da1148a18497b6ae3565a68b57bcbdd384",
+        "points_file": "s02_quarter_quarter_x_nonneg_y_neg.u32le",
+        "points_sha256": "40e1c5ec8306515f08278eea49f89bde2fc4d02748935114974111d82fbaeb4e",
+        "site_ids_sha256": "fb3ed648fdd079dfca7a3f70201337737e3d16e424cd700419c84b27a00c4cba",
+        "sites": 3630
+      },
+      "quarter_x_nonneg_y_nonneg": {
+        "original_site_ids_sha256": "53df30926b28237c77b51a11b03eae8923cb597889e1f2384c4c875a5b7f5d60",
+        "points_file": "s02_quarter_quarter_x_nonneg_y_nonneg.u32le",
+        "points_sha256": "e58610e2693448bb6b778037db024d1a2a3e59acf0cdfa5fdc82abb6c8376407",
+        "site_ids_sha256": "c6722ef901dc4c7a212d564cf53f702ba747f9ee9093f2aa267a725ab8668156",
+        "sites": 1325
+      }
+    }
+  },
+  "encoded_sensor_origin": [
+    80271,
+    22224,
+    13694
+  ],
+  "schema": "ephemeral_mhgp9_lidar_density_v1",
+  "selection": {
+    "counts": {
+      "full": 45845,
+      "half": 22922,
+      "quarter": 11461
+    },
+    "output_order": "original_full_order",
+    "ranked_global_retained_sites": 45845,
+    "score": "splitmix64(original_site_id XOR seed)",
+    "sector_policy": "intersect global density set with encoded x/y sensor planes; boundary nonnegative",
+    "seed_hex": "d1da73a520260923",
+    "tie_breaker": "original_site_id"
+  },
+  "source_full_original_site_ids_sha256": "20b0444acfe22f020d422ffb4a75ec0721a9891262a1a6234d43420d699661c8",
+  "source_full_points_sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af",
+  "source_full_site_ids_sha256": "b9700358a5dfb6269a5d50a2862cb05aa9e3fe8e0c77278e5bb3e023ac19c73e",
+  "source_manifest": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/MANIFEST.json",
+  "source_manifest_sha256": "a37d4e46b529885b9fc370a25e361a302762b95109f00928b2b2e96fcac799da"
+}

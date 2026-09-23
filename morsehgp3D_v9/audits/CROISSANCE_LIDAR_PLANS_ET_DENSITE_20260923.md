@@ -19,7 +19,11 @@ Une valeur `R<B` signale plus de travail que ce repère lors du passage
 des morceaux à la scène ; `R>B` signale moins. Le repère n'est **pas** un
 test asymptotique : la géométrie, les frontières, les certificats et les
 sorties changent avec la coupe. `CPU` est `chain_cpu_s`, `paires` est
-`expanded_pairs`, `cœur` est `core_sites`.
+`expanded_pairs`, `cœur` est `core_sites`, la population **logique** des
+disques diamétraux. Elle est proche, dans ce moteur, du nombre de formes
+effectivement chargées `dead_core_form_sites` mais n'est pas elle-même un
+compteur d'accès mémoire ; voir la [contrelecture du certificat par
+nœuds](CERTIFICAT_NOEUDS_CORE_LIDAR_20260923.md).
 
 | 08/K | `B_H/B_Q` | `R_H` CPU / paires / cœur | `R_Q` CPU / paires / cœur | liens cœur avec `p>2` | max `p_CPU` |
 | --- | --- | --- | --- | ---: | ---: |
@@ -33,7 +37,7 @@ sorties changent avec la coupe. `CPU` est `chain_cpu_s`, `paires` est
 Les six liens par ligne sont `full→2 moitiés` et `chaque moitié→ses 2
 quarts`. Leur pente finie est
 `p=log(W_parent/W_enfant)/log(n_parent/n_enfant)` : 0/36 pentes CPU,
-8/36 pentes de paires développées et **13/36 pentes de sites de cœur**
+8/36 pentes de paires développées et **13/36 pentes de population de cœur**
 dépasse 2. Le maximum du cœur vaut **3,940** sur
 `000100/K5`, `half_x_neg→quarter_x_neg_y_nonneg`. Sur 000000/K5,
 la somme des cœurs des moitiés est 45,4 % du plein, sous son repère
@@ -48,22 +52,78 @@ serait mauvaise ici. Les trois disques emboîtés du même reçu donnent,
 sur 000200 de 16k à 32k, `p_core=3,05` à K5 et `2,86` à K10 : ces
 deux diagnostics changent la géométrie et ne se réfutent pas mutuellement.
 
-## Isoler la densité à emprise fixée
+## Densité à emprise fixe : première mesure sur 08/000200
 
-Pour tester le changement de densité demandé, il faut garder **chacun
-des sept secteurs capteur fixe** et sélectionner globalement, par hash
-stable des IDs d'origine, des sites emboîtés `1/4⊂1/2⊂1` ; l'intersection
-de cette sélection avec chaque secteur conserve le même découpage et les
-mêmes coordonnées. Publier le seed, les IDs/hashes, les cardinalités
-réelles et vérifier que les moitiés/quarts reconstruisent le plein à
-chaque densité. Comparer dans **chaque secteur** les deux pentes
-`1/4→1/2` et `1/2→1`, avec K/s/W, grille, masque sans sol et moteur
-identiques. Répéter avec plusieurs seeds et d'autres scènes ; une seule
-réalisation ne peut qualifier un exposant. Mesurer aussi sortie, catalogue,
-paires, témoins, sites/tests du cœur, atlas, q3/q4, CPU, mur et mémoire.
+Le [reçu d'audit exploratoire](lidar_density_scene02_20260923/README.md)
+garde **chacun des sept secteurs capteur fixe**. Il classe globalement les
+IDs d'origine par `splitmix64(ID XOR d1da73a520260923)`, sélectionne
+11 461⊂22 922⊂45 845 sites, puis intersecte chaque sélection avec les
+secteurs. Chaque série reste emboîtée et conserve ses coordonnées ; les
+moitiés et les quarts reconstruisent le plein à chaque densité. Le même
+binaire Release de `4530644b`, K5/K10, s8/W8 et la grille 1 mm sont
+utilisés. Il y a **28 nouvelles sondes** aux densités 1/4 et 1/2, plus
+les 14 cas à densité entière du reçu v12 et un témoin plein rejoué.
+Les SHA des entrées, le FNV, les options, le statut, les ordres et les
+pentes recalculées à partir des effectifs réels ont été contrôlés ; les
+sorties brutes et la méthode sont conservées dans le sous-dossier.
 
-Les trames brutes entières et d'autres séquences restent à chronométrer
-séparément ; les six préparations float32 par plans déjà vérifiées ne sont
-pas des exécutions de tour v9. Ni les ratios spatiaux ni les pentes de
-densité finies ne démontrent à eux seuls une borne sous-quadratique globale
-ou le contrat G4.
+`p` ci-dessous utilise `log(W_b/W_a)/log(n_b/n_a)` et non un facteur 2
+imposé aux secteurs. Les deux valeurs de chaque cellule sont `1/4→1/2`,
+puis `1/2→1` pour la **population logique du cœur** :
+
+| Secteur | Sites 1/4 / 1/2 / 1 | K5 : `p_core` | K10 : `p_core` |
+| --- | ---: | ---: | ---: |
+| Scène entière | 11 461 / 22 922 / 45 845 | 1,741 / 1,852 | 1,513 / 1,847 |
+| `x<0` | 6 506 / 12 893 / 25 730 | 1,681 / 1,873 | 1,307 / 1,672 |
+| `x≥0` | 4 955 / 10 029 / 20 115 | 1,827 / 1,798 | **1,999 / 2,006** |
+| `x<0,y<0` | 4 146 / 8 220 / 16 262 | 1,690 / 1,879 | 1,719 / 1,629 |
+| `x<0,y≥0` | 2 360 / 4 673 / 9 468 | 1,375 / 1,576 | 1,526 / 1,569 |
+| `x≥0,y<0` | 3 630 / 7 339 / 14 829 | 1,905 / 1,816 | **2,046 / 2,035** |
+| `x≥0,y≥0` | 1 325 / 2 690 / 5 286 | 1,400 / 1,439 | 1,430 / 1,468 |
+
+Sur les **28 relations adjacentes** secteur×K×densité, les paires
+développées ont `p=1,256–1,876`, les CPU·s `p=1,274–1,427`, et les
+boules distinctes du catalogue `p=1,091–1,265`. En revanche,
+`core_sites` atteint ou dépasse 2 sur **3/28** relations, toutes à K10 :
+une dans le demi `x≥0` et les deux dans le quart `x≥0,y<0`. Le compteur
+physique voisin `dead_core_form_sites` le fait sur **4/28** relations :
+`2,011/2,014` dans ce demi et `2,058/2,043` dans ce quart. Pour le quart
+`x≥0,y<0`, `core_sites/n²` augmente de **2,503→2,586→2,651** lorsque
+la densité augmente. La pente favorable de la scène entière ne décrit donc
+pas tous ses secteurs. Les visites et bornes des nœuds de construction du
+cœur restent, sur ces 28 relations, sous 2 ; la matérialisation des formes
+est ici le signal plus net.
+
+Une [extension sur les trames entières](lidar_density_full_3scenes_20260923/README.md)
+applique la même graine et la même méthode à 08/000000 et 08/000100,
+à K5/K10, avec huit nouvelles sondes. Sur les trois trames entières,
+les pentes `dead_core_form_sites` sont :
+
+| 08/K | Sites 1/4 / 1/2 / 1 | `p_formes` 1/4→1/2 / 1/2→1 |
+| --- | ---: | ---: |
+| 000000/K5 | 9 971 / 19 942 / 39 885 | 1,940 / **2,008** |
+| 000000/K10 | 9 971 / 19 942 / 39 885 | 1,885 / 1,985 |
+| 000100/K5 | 8 887 / 17 775 / 35 551 | 1,872 / 1,953 |
+| 000100/K10 | 8 887 / 17 775 / 35 551 | 1,818 / 1,903 |
+| 000200/K5 | 11 461 / 22 922 / 45 845 | 1,757 / 1,864 |
+| 000200/K10 | 11 461 / 22 922 / 45 845 | 1,520 / 1,855 |
+
+À trame entière, **une des douze** relations adjacentes de formes dépasse
+donc légèrement 2, sur 000000/K5. Les paires développées y restent entre
+`p=1,466` et `1,753` sur ces douze relations. Ce complément teste la
+variation entre trois scènes, mais **pas** les demi-scènes et quarts des
+scènes 000000/000100 à densité variable.
+
+Le diagnostic détaillé par secteur reste à une graine sur une scène sans
+sol de la séquence 08 ; l'extension pleine emprise garde cette unique
+graine et cette unique séquence.
+Le thinning par hash réduit des sites dans le même support spatial
+approximatif ; il ne reproduit ni les faisceaux d'un autre capteur, ni des
+passages superposés. Les temps proviennent d'un hôte CPU partagé et les
+cas à densité entière portent le libellé de sonde historique
+`grid=unspecified`, même si leur entrée 1 mm est attestée par le manifeste.
+Répéter sur d'autres scènes, plusieurs graines et le sol brut, en gardant
+K/s/W, segmentation et préparation séparés ; publier sortie, catalogue,
+paires, témoins, populations logiques et formes du cœur, atlas, q3/q4,
+CPU, mur et mémoire. Ni ces pentes finies ni les ratios spatiaux ne
+démontrent une borne sous-quadratique globale ou le contrat G4.

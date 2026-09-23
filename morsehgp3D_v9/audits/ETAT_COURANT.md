@@ -328,16 +328,25 @@ ci-dessous publie leur croissance sur trois trames LiDAR appariées.
 Le [reçu local v12](../receipts/lidar_scaling_local_20260923/README.md)
 archive trois trames sans sol à K5/K10 : **60 cas de sonde et six résumés**,
 soit 66 JSON ; la formule « 66 cas » du README compte aussi les résumés.
-Sur 08/000200/K10, de 16k à 32k, les paires développées font ×4,27 et les
-sites énumérés dans les cœurs ×7,25, alors que le catalogue de boules fait
+Sur 08/000200/K10, de 16k à 32k, les paires développées font ×4,27 et la
+population logique des cœurs ×7,25, alors que le catalogue de boules fait
 ×1,86. C'est un signal local de coût caché à attaquer avant le cœur,
 pas une borne asymptotique. Les temps viennent d'un hôte CPU partagé ; le
 reçu n'est ni G4 ni une preuve de contrat ou de complétude absolue.
 La [lecture des demi-scènes et quarts](CROISSANCE_LIDAR_PLANS_ET_DENSITE_20260923.md)
 compare les 42 cas spatiaux du reçu : 0/36 pentes CPU parent→morceau
-dépassent 2, mais **13/36** pentes du nombre de sites énumérés dans le
-cœur le dépassent. Les coupes changent la géométrie ; la densité 1/2 et
-1/4 doit être mesurée à emprise fixe dans chaque secteur, séparément.
+dépassent 2, mais **13/36** pentes de population logique du cœur le
+dépassent. Les coupes changent la géométrie. Le
+[premier reçu de densité](lidar_density_scene02_20260923/README.md)
+garde chaque secteur de 08/000200 fixe et ajoute **28** sondes à 1/4 et
+1/2 des sites ; au K10, `dead_core_form_sites` a une pente d'au moins 2
+sur **4/28** relations adjacentes, concentrées dans `x≥0` et
+`x≥0,y<0`, malgré des pentes de paires et CPU sous 2. Une scène, une
+graine et un hôte CPU partagé ne prouvent aucune borne générale. La
+[même décimation sur les trames entières 000000/000100](lidar_density_full_3scenes_20260923/README.md)
+ajoute huit sondes : le nombre de formes du cœur atteint `p=2,008`
+sur 000000/K5 de demi à pleine densité. Les trois trames restent d'une
+seule séquence, sans sol ; aucune extrapolation asymptotique.
 
 Le [reçu local de pente LiDAR v11](CONTRE_AUDIT_PENTE_LIDAR_LOCALE_PARTIELLE_20260923.md)
 est intègre (15/15 SHA et entrées vérifiées) mais partiel : une seule

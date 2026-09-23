@@ -1,0 +1,58 @@
+{
+  "scenes": {
+    "00": {
+      "datasets": {
+        "half": {
+          "original_site_ids_sha256": "2b9bca35789da94df5eaf915497013853d604868219d70459e1dbd0ef4e7ec69",
+          "points_file": "s00_half_full.u32le",
+          "points_sha256": "4e7b9b40999e915e2737059699273ac51633732a044a15b637b41f15bb0fc471",
+          "site_ids_sha256": "a4e1685577b5a9a4eaa9858910e6919061d452faabbaf009e456985a367de786",
+          "sites": 19942
+        },
+        "quarter": {
+          "original_site_ids_sha256": "d79117a26b3655af47a50140e2a3021686ea942ca9d2048e04b7b178a3766e3d",
+          "points_file": "s00_quarter_full.u32le",
+          "points_sha256": "779d905079f604656ffa058b2342274b29b4eeff4bef7de0a1eadceae072750e",
+          "site_ids_sha256": "93da93ed351ddae6d466b35e1c21977729485eba898869f588e916400feb1359",
+          "sites": 9971
+        }
+      },
+      "source_manifest_sha256": "835ad83073e5af19072541e46fee5829af60917fab370e72558da90c1587caf4",
+      "source_original_site_ids_sha256": "9023c2bb108b6b7566288dd3d48a109afd53622a1be880748727723d0d604992",
+      "source_points_sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf",
+      "source_site_ids_sha256": "2f6952ac5f77156c92008d117be19dc421b4c4f217c53b00f468c067caae6c3c",
+      "source_sites": 39885
+    },
+    "01": {
+      "datasets": {
+        "half": {
+          "original_site_ids_sha256": "c31032e009ea4623bbc6c761cd87bec7a9be4456c083c063e00d3612254f575e",
+          "points_file": "s01_half_full.u32le",
+          "points_sha256": "57e1cdd2e5d8182f8666abdf4e8a052a6db48cccaa46e82106c3cef8e360c3cc",
+          "site_ids_sha256": "3880b00dfbaae534fbac7d14e558962eddf02d3eb822c1e5b2bf4e3b1e829b59",
+          "sites": 17775
+        },
+        "quarter": {
+          "original_site_ids_sha256": "7d013022a91db6bbf629f0880f07e2168a2663cacbd2d32a59e82429b210c4d6",
+          "points_file": "s01_quarter_full.u32le",
+          "points_sha256": "46dc7bcfc697fdebd4860e336b9c605e0a916170c2f8af7ff497605e4e66864e",
+          "site_ids_sha256": "5aca66bcc152ff749dc5f0b327c50cc94a7c6a77fcf506dbbf83036dfc18f0e5",
+          "sites": 8887
+        }
+      },
+      "source_manifest_sha256": "6c8cb4b949bb5cb0d0e5bbfa94c949191e4b9d734e8d579929741682a9f89f4c",
+      "source_original_site_ids_sha256": "8e3e913b5167403b9de89759a5e25ac082bea8f66b2e8b005f9ccbc5b81fe171",
+      "source_points_sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f",
+      "source_site_ids_sha256": "9576a2fb75f30e8a41e08462a6dbde8959a55892102af32e5e4983352584de6c",
+      "source_sites": 35551
+    }
+  },
+  "schema": "ephemeral_mhgp9_lidar_crossscene_inputs_v1",
+  "selection": {
+    "global_rank_over": "retained_sites_after_full_frame_ground_mask",
+    "output_order": "original_full_order",
+    "score": "splitmix64(original_site_id XOR seed)",
+    "seed_hex": "d1da73a520260923",
+    "subset_sizes": "floor(n/4), floor(n/2)"
+  }
+}
