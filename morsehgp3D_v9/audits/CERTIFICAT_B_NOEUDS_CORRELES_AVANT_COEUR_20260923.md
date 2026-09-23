@@ -73,9 +73,25 @@ plus forte que le disque.
 
 ## Travail borné, puis repli exact
 
-Le flux S2 sait déjà énumérer les segments `E` en `O(R+S)`, où `R`
-est le nombre de rectangles ouverts et `S` les arêtes survivantes ;
-ne jamais reformer `A×B`. Le calcul de `Q_E(v)` coûte `|E|` évaluations
+Le flux S2 émet les `S` arêtes survivantes **en ordre de rectangle**, et
+son contrôle de forme les parcourt déjà avec un curseur sur les `R`
+rectangles ouverts. Il peut donc **enregistrer à cet endroit** les
+offsets `[begin,end)` **avec les deux IDs de nœuds `A,B` et leur masque**
+en `O(R+S)` temps et `O(R)` mémoire au pire. Les IDs gardent les plages originales à
+exclure du crédit.
+Ces offsets ne sont **pas conservés aujourd'hui** : le flux S3 reçoit
+une liste plate et les rectangles sont ensuite libérés ; ne pas
+reconstituer `E` par recherche binaire par arête ou reformer `A×B`.
+Pour limiter la mémoire à `O(H)`, avec `H` segments ciblés, ne garder
+que leurs descripteurs s'ils sont assez lourds pour amortir une tentative ;
+les petits continuent sur
+le chemin exact inchangé. C'est un seuil **d'effort de preuve**, non
+un plafond de candidats. Garder l'ordinal du rectangle pour l'audit,
+et les masques **propres à chaque arête** : les voies q3 et q4 actives
+peuvent différer à l'intérieur du même segment. Compter séparément les
+rectangles ouverts devenus vides, y compris en fin de liste : le
+curseur actuel de validation s'arrête au dernier survivant.
+Le calcul de `Q_E(v)` coûte `|E|` évaluations
 par sommet **distinct** : une grille de 2×2×2 cellules AABB n'a qu'au
 plus **27 sommets distincts**, et non 8×8, si les valeurs sont
 mutualisées. Avec un nombre **fixé** de cellules et sommets, cela reste

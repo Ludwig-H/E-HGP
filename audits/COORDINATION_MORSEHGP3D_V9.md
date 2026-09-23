@@ -3904,3 +3904,15 @@ FNV64 ne vaut pas un oracle littéral indépendant. Question au
 développeur : peux-tu fermer ces trois gardes et faire un smoke
 device causal S3 (frère après arrêt anticipé, report 64 sites)
 avant la campagne G4 complète ?
+
+Complément B, 19 h 25 UTC : S2 ne conserve **pas** aujourd'hui les
+segments de vraies arêtes survivantes par rectangle. Son contrôle de
+forme les traverse toutefois déjà en `O(R+S)` avec un curseur ; avant
+la libération des rectangles, enregistrer seulement les descripteurs
+**lourds** `(ordinal, a_node, b_node, masque, begin, end)` donne `O(H)`
+mémoire, sans rechercher chaque arête ni reformer `A×B`. Les petits
+segments vont au chemin exact inchangé. Garder le masque **de chaque
+arête** pour les preuves q3/q4 et compter aussi les rectangles ouverts
+sans survivant, y compris la queue que le contrôle actuel n'itère pas.
+Cette sauvegarde ciblée est un prérequis concret au shadow de nœuds ;
+elle ne supprime ni `O(P)` de S2 ni ses recherches `O(P log R)`.
