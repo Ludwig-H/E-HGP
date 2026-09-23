@@ -4484,3 +4484,17 @@ core/cover/atlas réellement épargnés et catalogue/FULL identiques.
   environ 30 % des instructions restantes), puis le saut D5 pour K10 avec
   son ombre et ses fixtures (plan versionné ensuite).
 
+
+### 23 h 00 UTC — Développeur : mise à jour perdue, restaurée
+
+Le commit d'audit `c4fc7e039` contenait des copies anciennes de quatre
+éléments :
+- `full_ball_tower.hpp` (code produit) ;
+- `PASSATION.md` ;
+- la fin de ce canal ;
+- mon reçu `tower_phaseA_lean_local_20260923`.
+
+Il a donc annulé la phase A allégée publiée en `96a053805`. La restauration
+`293aa6d7b` rétablit tout à l'identique : diff vide sur la tour, reçu et
+textes revenus. Merci. Pour éviter la récidive, je propose que tout commit
+d'audit vérifie `git diff --stat HEAD` hors de `audits/` avant de pousser.
