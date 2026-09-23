@@ -1067,7 +1067,6 @@ class Builder {
         require(!(balls[by_key[j]].key == balls[by_key[j - 1]].key), "full_ball_duplicate_key", invalid);
     }
     build_key_index();  // keys are distinct from here on
-    std::vector<u8> qmins(balls.size());
     std::vector<size_t> counts(kmax + 1, 0);
     // Pass 1, parallel on the static path: the per-ball exact checks that
     // touch no shared state (shape, sites, key domain, census powers, and the
@@ -1100,35 +1099,62 @@ class Builder {
         }
       }
     }
-    for (size_t j = 0; j < balls.size(); ++j) {
-      if (j == first_local_failure) throw local_failure;
-      const auto& ball = balls[j];
-      std::array<i32,4> support{};
-      unsigned q = ball.arity;
-      if (ball.n_shell != ball.arity) {
-        local_plateau::LocalCensus local{ball.key, {}, {}};
-        for (i32 site : ball.interior()) local.interior.push_back({ix.point_id(site), ix.upos[site]});
-        for (i32 site : ball.shell()) local.shell.push_back({ix.point_id(site), ix.upos[site]});
-        auto table = local_plateau::ShellTable::prepare(std::move(local));
-        q = table.q_min();
-        require(q == ball.arity, "full_ball_minimum_arity", invalid);
-        const auto mask = table.minimal_supports().front();
-        unsigned at = 0;
-        for (size_t bit = 0; bit < table.census().shell.size(); ++bit)
-          if (mask & (u16{1} << bit)) support[at++] = geometry_id(table.census().shell[bit].id);
-        require(at == q, "full_ball_minimum_support");
-        extra.emplace(static_cast<BallId>(j), std::move(table)); add(st.extra_records);
-        const auto witness = meb(std::span<const i32>(support.data(), q), st.validation_work);
-        require(witness.support_size == q && witness.key == ball.key &&
-            same_exact_level(witness.level, ball.level), "full_ball_census_geometry", invalid);
-      }
-      require(ball.n_interior + q <= std::min<u64>(kmax + 1, ix.input_count),
-              "full_ball_outside_rank_window", invalid);
-      qmins[j] = static_cast<u8>(q);
-      const unsigned lo = ball.n_interior + q - 1;
-      const unsigned hi = std::min<unsigned>(kmax, ball.n_interior + ball.n_shell);
-      for (unsigned k = lo; k <= hi; ++k) ++counts[k];
-      add(st.records);
+    // Pass 2. Regular balls in parallel (rank window, per-order counts; their
+    // q_min is their arity), extended shells serially in index order (plateau
+    // table, minimal support, MEB witness). The failure reported is the one
+    // of the smallest index, a pass-1 failure first at equal index: exactly
+    // the serial loop's.
+    {
+      constexpr size_t block = 4096;
+      const size_t blocks = std::max<size_t>(1, (balls.size() + block - 1) / block);
+      std::vector<size_t> rank_failed(blocks, absent_index);
+      std::vector<std::vector<size_t>> block_counts(blocks, std::vector<size_t>(kmax + 1, 0));
+      std::vector<std::vector<size_t>> block_extended(blocks);
+      parallel_items(blocks, geometry_threads, [&](size_t chunk, size_t) {
+        auto& local = block_counts[chunk];
+        for (size_t j = chunk * block; j < std::min(balls.size(), (chunk + 1) * block); ++j) {
+          const auto& ball = balls[j];
+          if (ball.n_shell != ball.arity) block_extended[chunk].push_back(j);
+          if (ball.n_interior + ball.arity > std::min<u64>(kmax + 1, ix.input_count)) {
+            if (rank_failed[chunk] == absent_index) rank_failed[chunk] = j;
+            continue;
+          }
+          const unsigned lo = ball.n_interior + ball.arity - 1;
+          const unsigned hi = std::min<unsigned>(kmax, ball.n_interior + ball.n_shell);
+          for (unsigned k = lo; k <= hi; ++k) ++local[k];
+        }
+      });
+      size_t first_rank_failure = absent_index;
+      for (const auto failed : rank_failed) first_rank_failure = std::min(first_rank_failure, failed);
+      const size_t first_other = std::min(first_local_failure, first_rank_failure);
+      for (const auto& part : block_extended)
+        for (const size_t j : part) {
+          if (j > first_other) break;
+          if (j == first_local_failure) throw local_failure;
+          const auto& ball = balls[j];
+          std::array<i32,4> support{};
+          local_plateau::LocalCensus local{ball.key, {}, {}};
+          for (i32 site : ball.interior()) local.interior.push_back({ix.point_id(site), ix.upos[site]});
+          for (i32 site : ball.shell()) local.shell.push_back({ix.point_id(site), ix.upos[site]});
+          auto table = local_plateau::ShellTable::prepare(std::move(local));
+          const unsigned q = table.q_min();
+          require(q == ball.arity, "full_ball_minimum_arity", invalid);
+          const auto mask = table.minimal_supports().front();
+          unsigned at = 0;
+          for (size_t bit = 0; bit < table.census().shell.size(); ++bit)
+            if (mask & (u16{1} << bit)) support[at++] = geometry_id(table.census().shell[bit].id);
+          require(at == q, "full_ball_minimum_support");
+          extra.emplace(static_cast<BallId>(j), std::move(table)); add(st.extra_records);
+          const auto witness = meb(std::span<const i32>(support.data(), q), st.validation_work);
+          require(witness.support_size == q && witness.key == ball.key &&
+              same_exact_level(witness.level, ball.level), "full_ball_census_geometry", invalid);
+          require(j != first_rank_failure, "full_ball_outside_rank_window", invalid);
+        }
+      if (first_local_failure != absent_index && first_local_failure <= first_rank_failure) throw local_failure;
+      require(first_rank_failure == absent_index, "full_ball_outside_rank_window", invalid);
+      for (const auto& local : block_counts)
+        for (unsigned k = 1; k <= kmax; ++k) counts[k] += local[k];
+      add(st.records, balls.size());
     }
     // Same order as a stable sort of by_key under compare_exact_level: the
     // certified double filter decides clear gaps, the exact U320 comparison
@@ -1154,12 +1180,39 @@ class Builder {
         return compare_exact_level(balls[a].level, balls[b].level) < 0;
       });
     }
+    // Programs in by_level order, filled in parallel at per-chunk offsets
+    // (counts, prefix, scatter): the same vectors as the serial append.
     programs.resize(kmax + 1);
-    for (unsigned k = 1; k <= kmax; ++k) programs[k].reserve(counts[k]);
-    for (BallId b : by_level) {
-      const unsigned lo = balls[b].n_interior + qmins[b] - 1;
-      const unsigned hi = std::min<unsigned>(kmax, balls[b].n_interior + balls[b].n_shell);
-      for (unsigned k = lo; k <= hi; ++k) programs[k].push_back(b);
+    {
+      const size_t chunks = std::max<size_t>(1, std::min<size_t>(by_level.size() / 65536 + 1, 256));
+      std::vector<std::vector<size_t>> at(chunks, std::vector<size_t>(kmax + 1, 0));
+      const auto range = [&](size_t c) {
+        return std::pair<size_t, size_t>{by_level.size() * c / chunks, by_level.size() * (c + 1) / chunks};
+      };
+      parallel_items(chunks, geometry_threads, [&](size_t c, size_t) {
+        const auto [begin, end] = range(c);
+        for (size_t j = begin; j < end; ++j) {
+          const auto& ball = balls[by_level[j]];
+          const unsigned hi = std::min<unsigned>(kmax, ball.n_interior + ball.n_shell);
+          for (unsigned k = ball.n_interior + ball.arity - 1; k <= hi; ++k) ++at[c][k];
+        }
+      });
+      for (unsigned k = 1; k <= kmax; ++k) {
+        size_t running = 0;
+        for (size_t c = 0; c < chunks; ++c) { const size_t n = at[c][k]; at[c][k] = running; running += n; }
+        require(running == counts[k], "full_ball_program_count");
+        programs[k].resize(running);
+      }
+      parallel_items(chunks, geometry_threads, [&](size_t c, size_t) {
+        const auto [begin, end] = range(c);
+        auto& position = at[c];
+        for (size_t j = begin; j < end; ++j) {
+          const BallId b = by_level[j];
+          const auto& ball = balls[b];
+          const unsigned hi = std::min<unsigned>(kmax, ball.n_interior + ball.n_shell);
+          for (unsigned k = ball.n_interior + ball.arity - 1; k <= hi; ++k) programs[k][position[k]++] = b;
+        }
+      });
     }
     population_ids.assign(balls.size(), absent);
   }

@@ -1,0 +1,32 @@
+{
+  "case": {
+    "file": "data/scene_00.u32le",
+    "k": 5,
+    "levers": {
+      "atlas_saturate_deep": true,
+      "q34_dead_core": true,
+      "q34_dead_lanes": true,
+      "q34_fine_jobs": true,
+      "q34_jobs_by_mass": true,
+      "q34_witness_cache": true,
+      "q3_leaf_census": true,
+      "tower_meb_proposal": true,
+      "tower_overlap_static": false
+    },
+    "n": 39885,
+    "repeat": 0,
+    "s": 8,
+    "scene": "00",
+    "static_threads": 48,
+    "workers": 48
+  },
+  "chain_total_ms": 3725.763,
+  "elapsed_seconds": 3.973852518000001,
+  "exit_code": 0,
+  "gnu_time_max_rss_kb": 1244124,
+  "index": 1,
+  "input_file_sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf",
+  "outcome": "complete_relative",
+  "probe_status": "complete_relative",
+  "tower_digest": "67450c64611075b1"
+}

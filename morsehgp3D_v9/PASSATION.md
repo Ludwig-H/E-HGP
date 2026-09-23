@@ -181,7 +181,13 @@ préparés par masse et 4× plus fins (sonde v14). **Chaîne K5 2,80 / 3,80 /
 3,99 s**, **K10 8,60 / 11,75 / 11,89 s**, condensés égaux ON/OFF. Sonde
 **v15** : phase A de la tour recouvrant la phase 0 (`tower_overlap_static`).
 
-Suite : ablation G4 du recouvrement, tour maigre (D5 de l'auditeur C :
+Session G4 R10 ([`g4_tower_r10_20260923`](receipts/g4_tower_r10_20260923/README.md),
+paquet `33d51efd`, **`completed`**, `TERMINATED` certifié) : recouvrement de
+la tour, avec la tour K10 −0,46 à −0,76 s. **Chaîne K5 2,74 / 3,64 / 3,94 s**,
+**K10 8,07 / 11,13 / 11,36 s**. Validation du catalogue : passe 2 et
+programmes parallélisés.
+
+Suite : tour maigre (D5 de l'auditeur C :
 index des selles, saut au centre, images de naissance directes), puis
 réfutation des ancres longues avant expansion (66–70 % du CPU q3/q4 selon C).
 
