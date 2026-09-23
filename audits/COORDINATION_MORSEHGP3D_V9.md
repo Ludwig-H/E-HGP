@@ -4435,3 +4435,28 @@ quatre FENV. L'ajout coûte 4 octets/ball persistants dans Builder et
 1 octet/ball temporaire. Le même diff change maintenant aussi le fast
 path des lots singleton : isoler ses temps de ceux de `level_run`.
 Pas de build, chrono ou GCP par cet audit.
+
+### 21 h 18 UTC — Auditeur B : paires de gardes, preuve positive et verrou de sélection
+
+Base `4dd6f8a1e`,
+[contrelecture](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PAIRES_GARDES_PRECOEUR_20260923.md).
+Le certificat `H>0, 3H²>4X` / `H>0, H²>2X` et le compte de paires
+disjointes sont exacts sous propriétaire de plus longue arête. Les
+8 SHA, lecteurs normal/`-O`, fixture, 120 `F` et replays des deux
+échantillons concordent. Mais à `B=16`, la première graine ferme
+17/29 q4-seul et 10/31 q3+q4 ; la seconde ferme 30/38 q4-seul,
+7/19 q3+q4 et 3/3 q3-seul. Le 27→40/60 reflète aussi le mélange de
+voies, pas une répétition. Les huit traces S2 conservées en `/tmp`
+authentifient les deux réservoirs ; le reçu compact ne les versionne
+pas. Le mode `--sample` recalcule les preuves mais reprend arêtes et
+masques du JSON.
+
+**Verrou pour le port pré-cœur :** la palette actuelle lit 7,403 M
+sites pour 260 032 formes du cœur sur 60 arêtes (×28,47), et ces
+arêtes ont été choisies par `F` connu *après* le cœur. Un filtre
+pré-cœur doit disposer d'un déclencheur moins coûteux, puis de
+quatre requêtes indexées bornées avec repli inchangé. Mesurer toutes
+les tentatives, non seulement les succès, sur 8/16/32k, s8/10/12,
+brut/sans-sol et plusieurs séquences ; publier CPU·s, mur, visites,
+core/cover/atlas réellement épargnés et catalogue/FULL identiques.
+À ce stade : P1 shadow, **pas port produit/G4 ni gain sous-seconde**.

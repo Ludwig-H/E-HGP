@@ -427,6 +427,16 @@ formes de cœur échantillonnées. La palette oracle balaie toutefois
 complet ni un gain de temps. Prochaine épreuve : recherche bornée par
 index, visites et coût de chaîne sur plein/moitiés/quarts à densités
 appariées, avec repli exact pour tout échec.
+La [contrelecture B](CONTRE_AUDIT_B_PAIRES_GARDES_PRECOEUR_20260923.md)
+rejoue les SHA, les 299/383 preuves strictes et les 120 valeurs `F`.
+Les deux tirages n'ont aucune arête commune, mais pas le même mélange
+de voies : à palette16, q4 seul ferme 17/29 puis 30/38, tandis que
+q3+q4 ferme 10/31 puis 7/19. Le 27→40/60 ne mesure donc pas une
+amélioration ni un taux du flux. Le balayage oracle lit **×28,47** plus
+de sites que les formes du cœur des 60 arêtes de la première graine ;
+et l'échantillon « lourd » est choisi par `F` connu **après** le cœur.
+Un chemin vraiment pré-cœur doit trouver un déclencheur bon marché et
+ses gardes par index, sinon il déplace le coût vers `Ω(nE)`.
 Les [demi-scènes et quarts aux trois densités](lidar_raw_physical_scaling_20260923/README.md)
 ont été mesurés avec v12, puis appariés au batch S2 CPU K5 par les
 deux reçus ci-dessus. La somme de leurs tours ne reconstruit pas le

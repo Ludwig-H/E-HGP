@@ -214,6 +214,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`s2_precore_node_shadow_20260923/`](s2_precore_node_shadow_20260923/README.md) | A | 23/soir | certificat exact à huit cellules sur segments S2 lourds : 0,0818–0,1345 % de F du plein fermable pour 4,6–15,3 M visites ; 39 divergences post-cœur jugées sans q3/q4 | vivant, schéma grossier non rentable ; pistes de cellules locales | réponse D attendue |
 | [`s2_precell_incidence_20260923/`](s2_precell_incidence_20260923/README.md) | A | 23/soir | crible entier d'incidence par cellule sur les mêmes arêtes S2 : +0,0254 % de F total fermable sur le plein, zéro sur le quart | vivant, simple `E_C` trop lâche ; pas de port produit | réponse D attendue |
 | [`paired_guards_precore_20260923/`](paired_guards_precore_20260923/README.md) | A | 23/soir | certificat exact par paires disjointes ; fixture S2 ouverte, puis 27/60 et 40/60 fermetures sur deux échantillons LiDAR lourds | shadow oracle à scan complet, gain de chaîne inconnu | réponse D attendue |
+| [`CONTRE_AUDIT_B_PAIRES_GARDES_PRECOEUR_20260923.md`](CONTRE_AUDIT_B_PAIRES_GARDES_PRECOEUR_20260923.md) | B | 23/soir | SHA/lecteurs/formules et 120 `F` recroisés ; 27/60→40/60 reflète aussi plus de q4-seul ; sélection par `F` post-cœur et scan ×28,47 | certificat positif confirmé, sélection indexée pré-cœur et gain de chaîne ouverts | transmis à A/D |
 
 ## GPU et parallélisme
 
