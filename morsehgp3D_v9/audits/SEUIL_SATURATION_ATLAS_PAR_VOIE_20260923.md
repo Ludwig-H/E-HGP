@@ -10,7 +10,8 @@ Après une partition *complète*, le même code jette déjà la cellule si son
 compte strict est **≥K−2**. Le sweep q4 rejette aussi les événements à
 `inside≥K−2` ; `q4_shallow` suit le même seuil. Le raccord
 `Engine::edge` n'appelle `q3_edge` que si le bit 2 survit, et construit un
-atlas q4 seul pour le masque 4. Voir `src/gen/lanes/q4_local.cpp`,
+atlas q4 seul pour le masque 4 **avec le backend Local28**. Le backend
+Window30 ne construit pas cet atlas. Voir `src/gen/lanes/q4_local.cpp`,
 `q4_shallow.cpp` et `src/gen/pipeline/wspd_q34.cpp` au commit ci-dessus.
 
 Pour un masque 4, un `Q4LocalPartitionResult` saturé à **K−2** sur une

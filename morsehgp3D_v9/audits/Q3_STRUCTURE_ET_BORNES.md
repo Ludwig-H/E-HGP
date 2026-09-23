@@ -25,11 +25,20 @@ Le [census float32 partagé](../../morsehgp3D_v8/docs/CENSUS_Q3_FLOAT32_PARTAGE_
 
 Sur le profil mesuré `GlobalBoxes`, `wspd_q34.cpp` construit encore un
 `Q34EdgeCover` pour les 171 444 arêtes q3 seules ; leur voie n'en lit
-que `edge_ids()`, car le census prend l'index global. Une entrée typée
+que `edge_ids()`, car `q3_edge` énumère déjà ses graines dans **l'index
+global** et `q3_seed` y fait le census et la coquille. Une entrée typée
 `(index, arête propriétaire)` pourrait éviter ces covers, en les gardant
 pour q4, les arêtes communes et `ScalarCover`. Le contrôle causal est
 l'identité des supports/coquilles avec `cover_builds` réduit d'autant ;
-ce retrait ne supprime à lui seul aucun census.
+ce retrait ne supprime à lui seul aucun census. Préserver aussi l'identité
+du registre : `validate_completion` impose actuellement
+`cover_builds + witness.rejected_pairs = expanded_pairs`. En mode
+`GlobalBoxes`, la nouvelle identité serait
+`cover_builds = q4_edges` et
+`cover_builds + (q3_edges−both_edges) + witness.rejected_pairs = expanded_pairs` ;
+le terme sauté est **déjà dérivable** du ledger, sans nouveau champ public.
+`ScalarCover` garde l'ancienne identité. Conserver le pic du buffer de
+coquille même sans cover.
 
 Le port entier u18 du `SharedPrefix` est le candidat suivant pour ces
 16,1 millions de census. Pour l'arête fixe `ab`, poser `D=|b−a|²`,
