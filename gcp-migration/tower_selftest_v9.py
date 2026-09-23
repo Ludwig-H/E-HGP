@@ -117,8 +117,15 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                 tower_work=dict(records=4, extra_records=0, representatives=5, anchor_hits=1, key_lookups=4,
                                 intruder_queries=2, intruder_nodes=7, meb_calls=4, meb_power_tests=9, births=3,
                                 merges=2, contributions=3, grouped_lots=1, resolver_cache_hits=2,
-                                meb_accounting='anchor_meb_first_maximal_pair_then_double_welzl_proposal_exact_boundary_canonical_v3',
-                                meb_pair_distances=6, meb_materializations=4, meb_supports_by_size=[0, 4, 3, 1]),
+                                meb_accounting=('anchor_meb_first_maximal_pair_then_double_welzl_proposal_exact_'
+                                                'boundary_canonical_v3' if levers['tower_meb_proposal'] else
+                                                'anchor_meb_first_maximal_pair_then_lexicographic_supports_'
+                                                'extremes_first_v2'),
+                                meb_pair_distances=6, meb_materializations=4, meb_supports_by_size=[0, 4, 3, 1],
+                                meb_proposals=3 if levers['tower_meb_proposal'] else 0,
+                                meb_verified_proposals=2 if levers['tower_meb_proposal'] else 0,
+                                meb_boundary_canonicalizations=1 if levers['tower_meb_proposal'] else 0,
+                                meb_proposal_fallbacks=1 if levers['tower_meb_proposal'] else 0),
                 orders=orders, tower_digest=digest if complete else '0' * 16, peak_rss_kb=2048)
 
 
@@ -747,6 +754,12 @@ class Protocol(unittest.TestCase):
                      ('dead_mode', lambda v: v['options']['levers'].update(q34_dead_lanes=False)),
                      ('cache_mode', lambda v: v['options']['levers'].update(q34_witness_cache=False)),
                      ('core_mode', lambda v: v['options']['levers'].update(q34_dead_core=False)),
+                     ('meb_mode', lambda v: v['options']['levers'].update(tower_meb_proposal=False)),
+                     ('meb_verified_beyond', lambda v: v['tower_work'].update(meb_verified_proposals=4)),
+                     ('meb_fallbacks_beyond', lambda v: v['tower_work'].update(meb_proposal_fallbacks=4)),
+                     ('meb_canonical_beyond', lambda v: v['tower_work'].update(meb_boundary_canonicalizations=3)),
+                     ('meb_reference_label', lambda v: v['tower_work'].update(
+                         meb_accounting='anchor_meb_first_maximal_pair_then_lexicographic_supports_extremes_first_v2')),
                      ('lever_unknown', lambda v: v['options']['levers'].update(extra=True)),
                      ('meb_accounting', lambda v: v['tower_work'].update(meb_accounting='other')),
                      ('meb_accounting_absent', lambda v: v['tower_work'].pop('meb_accounting')),

@@ -610,3 +610,32 @@ flux identique, mais le CPU q3/q4 ne baisse que d'environ 6 % (les paires
 retirées étaient surtout des rejets de cache déjà bon marché). Gain réel mais
 modeste : en réserve, pas porté.
 
+## 23 septembre 2026, 06 h 55 — Clôture locale du MEB proposé avant toute campagne (développeur)
+
+GCP non utilisé. Pris acte de l'arrêt demandé à 05 h 35 (`5a57287c`) : aucune
+session n'avait été lancée ; aucune ne l'est avant clôture locale. Réponses à
+`4776b8f1` et `c4f2cb8d` :
+
+- **Levier** `tower_meb_proposal` (défaut ON) : chaîne → tour
+  (`build_full_ball_tower(..., meb_proposal)`) ; OFF = énumération de
+  référence partout. Sonde v10 : levier publié, libellé MEB selon le levier
+  (v3 proposé, v2 référence), quatre compteurs `meb_proposals`,
+  `meb_verified_proposals`, `meb_boundary_canonicalizations`,
+  `meb_proposal_fallbacks` dans `tower_work`.
+- **Lecteur** : clés exactes, libellé = levier, invariants
+  `propositions ≤ appels MEB`, `vérifiées ≤ propositions`,
+  `replis ≤ propositions`, `canonisations ≤ vérifiées` ; levier coupé →
+  compteurs nuls et libellé v2 ; préflight ON → propositions et vérifiées > 0.
+  Cinq mutations d'autotest, deux de plus au raccord réel (**30/30**), et
+  non-vacuité réelle (vérifiées > 0 ON, propositions = 0 OFF, objets égaux).
+- **Porte MEB** : fixture canonique ABCD de B (slots `[0,1,2]`, coquille 4),
+  refus typés et résultat vide pour `proposals`, `verified_proposals`,
+  `boundary_canonicalizations` saturés et, dans la variante à propositions
+  faussées, `proposal_fallbacks` ; comparaisons sous `FE_UPWARD`,
+  `FE_DOWNWARD`, `FE_TOWARDZERO` ; 34 957 ensembles au total.
+- R6 et son lecteur restent figés ; aucune requalification sous v10.
+
+Portes locales `-L gate` : **126/126**. Prochaine étape, après autotests
+normal et `-O` sur le commit figé : session R7, ablation appariée ON/OFF de
+`tower_meb_proposal` (mêmes entrées, sorties égales, CPU/mur et compteurs).
+

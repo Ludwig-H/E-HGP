@@ -316,9 +316,9 @@ class ResolverCache {
 class Builder {
  public:
   Builder(const CloudIndex& index, std::span<const BallData> census, unsigned max_k, FullBallStats& stats,
-      int static_threads = 0, FullBallBatchResolver batch = {})
+      int static_threads = 0, FullBallBatchResolver batch = {}, bool meb_proposal = true)
       : ix(index), balls(census), requested(max_k), st(stats), resolver_cache(stats),
-        geometry_threads(static_threads), batch_resolver(batch) {}
+        geometry_threads(static_threads), batch_resolver(batch), propose_meb(meb_proposal) {}
 
   std::vector<FullBallOrder> run() {
     validate_catalogue();
@@ -740,6 +740,7 @@ class Builder {
   ResolverCache resolver_cache;
   int geometry_threads = 0;
   FullBallBatchResolver batch_resolver;
+  bool propose_meb = true;  // anchor_meb_proposed, else the reference enumeration
   using StaticSeed = FullBallBatchSeed;
   std::vector<BallId> static_targets;
   size_t static_cursor = 0;
@@ -759,7 +760,8 @@ class Builder {
     require(!sites.empty() && sites.size() <= positions.size(), "full_ball_meb_cardinality");
     for (size_t j = 0; j < sites.size(); ++j) positions[j] = ix.upos[sites[j]];
     // Same result as the reference enumeration (anchor_meb.hpp), less work.
-    auto result = anchor_meb_proposed(std::span<const P3>(positions.data(), sites.size()), work);
+    const std::span<const P3> points(positions.data(), sites.size());
+    auto result = propose_meb ? anchor_meb_proposed(points, work) : anchor_meb(points, work);
     require(result.status == AnchorMebStatus::kOk, "full_ball_meb_failure",
         result.status == AnchorMebStatus::kCounterOverflow ? FullBallStatus::kResourceExhausted
                                                          : FullBallStatus::kInvariantViolated);
@@ -1567,11 +1569,14 @@ class Builder {
 };
 }  // namespace full_ball_detail
 
+// meb_proposal selects anchor_meb_proposed (default) or the reference
+// enumeration for every local MEB: same objects, different work.
 inline FullBallTowerResult build_full_ball_tower(const CloudIndex& ix, std::span<const BallData> balls,
-    unsigned kmax, int static_threads = 0, FullBallBatchResolver batch = {}) {
+    unsigned kmax, int static_threads = 0, FullBallBatchResolver batch = {}, bool meb_proposal = true) {
   FullBallTowerResult result;
   try {
-    result.orders = full_ball_detail::Builder(ix, balls, kmax, result.stats, static_threads, batch).run();
+    result.orders =
+        full_ball_detail::Builder(ix, balls, kmax, result.stats, static_threads, batch, meb_proposal).run();
     result.status = FullBallStatus::kCompleteRelative; result.reason = kFullBallAuthority;
   } catch (const full_ball_detail::Failure& error) {
     result.status = error.status; result.reason = error.reason;

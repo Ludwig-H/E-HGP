@@ -96,7 +96,8 @@ PROBE_STATUSES = ('complete_relative', 'unsupported_degeneracy', 'invalid_input'
 OUTCOMES = ('complete_relative', 'explicit_refusal', 'killed_case_cap', 'killed_budget',
             'skipped_budget', 'probe_failed', 'skipped_protocol_defect')
 CASE_KEYS = frozenset({'scene', 'file', 'n', 'k', 's', 'workers', 'static_threads', 'levers', 'repeat'})
-LEVER_NAMES = ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_witness_cache', 'q34_dead_core')
+LEVER_NAMES = ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_witness_cache', 'q34_dead_core',
+               'tower_meb_proposal')
 TOP_KEYS = frozenset({'schema', 'status', 'reason', 'input', 'options', 'times_ms', 'chain_cpu_s', 'generator',
                       'ledger', 'catalogue', 'tower_work', 'orders', 'tower_digest', 'peak_rss_kb'})
 INPUT_KEYS = frozenset({'format', 'grid', 'sites', 'hash'})
@@ -107,6 +108,9 @@ ORDER_KEYS = frozenset({'K', 'nodes', 'births', 'merges', 'parents', 'contributi
 # tower_work : compteurs entiers, sauf ces deux champs types du noyau MEB
 # (libelle de comptabilite epingle, histogramme des tailles de supports).
 MEB_ACCOUNTING = 'anchor_meb_first_maximal_pair_then_double_welzl_proposal_exact_boundary_canonical_v3'
+MEB_REFERENCE_ACCOUNTING = 'anchor_meb_first_maximal_pair_then_lexicographic_supports_extremes_first_v2'
+MEB_PROPOSAL_KEYS = ('meb_proposals', 'meb_verified_proposals', 'meb_boundary_canonicalizations',
+                     'meb_proposal_fallbacks')
 TOWER_WORK_TYPED = frozenset({'meb_accounting', 'meb_supports_by_size'})
 # Schema v5 EXACT des sections de travail (contre-audit B du protocole v4) :
 # champ manquant, inconnu ou histogramme de mauvaise longueur = refus.
@@ -133,7 +137,8 @@ CATALOGUE_KEYS = frozenset(('q2_presentations q3_presentations q4_presentations 
 TOWER_WORK_KEYS = frozenset(('records extra_records representatives anchor_hits key_lookups intruder_queries '
                              'intruder_nodes meb_calls meb_power_tests births merges contributions grouped_lots '
                              'resolver_cache_hits meb_accounting meb_pair_distances meb_materializations '
-                             'meb_supports_by_size').split())
+                             'meb_supports_by_size meb_proposals meb_verified_proposals '
+                             'meb_boundary_canonicalizations meb_proposal_fallbacks').split())
 MEB_SIZES_LENGTH = 4
 # Tolerance du rapprochement chrono interne / mur externe du cas (horloges
 # monotones de la meme machine ; granularite, pas une marge de contrat).
@@ -353,7 +358,7 @@ def _tower_work(value):
         return False
     for name, item in value.items():
         if name == 'meb_accounting':
-            if item != MEB_ACCOUNTING:
+            if item not in (MEB_ACCOUNTING, MEB_REFERENCE_ACCOUNTING):
                 return False
         elif name == 'meb_supports_by_size':
             if type(item) is not list or len(item) != MEB_SIZES_LENGTH or not all(_count(x) for x in item):
@@ -448,6 +453,18 @@ def validate_ledger_identities(value, levers):
         need(all(ledger[name] == 0 for name in cache), 'witness cache counters while the lever is off')
     if not levers['q3_leaf_census']:
         need(ledger['q3_leaf_censuses'] == 0 and ledger['q3_leaf_point_tests'] == 0, 'leaf census while the lever is off')
+    tower = value['tower_work']
+    if levers['tower_meb_proposal']:
+        # Every proposal is verified, canonicalized from a verified one, or
+        # falls back to the reference enumeration; one proposal per MEB at most.
+        need(tower['meb_accounting'] == MEB_ACCOUNTING and tower['meb_proposals'] <= tower['meb_calls'] and
+             tower['meb_verified_proposals'] <= tower['meb_proposals'] and
+             tower['meb_proposal_fallbacks'] <= tower['meb_proposals'] and
+             tower['meb_boundary_canonicalizations'] <= tower['meb_verified_proposals'],
+             'tower MEB proposal identity')
+    else:
+        need(tower['meb_accounting'] == MEB_REFERENCE_ACCOUNTING and
+             all(tower[name] == 0 for name in MEB_PROPOSAL_KEYS), 'tower MEB proposal counters while the lever is off')
 
 
 def validate_preflight_work(value, levers):
@@ -459,7 +476,9 @@ def validate_preflight_work(value, levers):
          (not levers['atlas_saturate_deep'] or ledger['atlas_deep_cells'] > 0) and
          (not levers['q34_dead_lanes'] or ledger['dead_q3_proved'] + ledger['dead_q4_proved'] > 0) and
          (not levers['q34_witness_cache'] or ledger['witness_cache_rejected_pairs'] > 0) and
-         (not levers['q34_dead_core'] or ledger['core_closed_edges'] > 0),
+         (not levers['q34_dead_core'] or ledger['core_closed_edges'] > 0) and
+         (not levers['tower_meb_proposal'] or (value['tower_work']['meb_proposals'] > 0 and
+                                               value['tower_work']['meb_verified_proposals'] > 0)),
          'preflight did not exercise an active lever')
 
 

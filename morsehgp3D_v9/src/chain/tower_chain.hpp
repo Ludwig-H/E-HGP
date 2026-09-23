@@ -65,6 +65,9 @@ struct ChainOptions {
   // Noyau diametral du certificat de voie morte (exige q34_dead_lanes), meme
   // objet. Contrat v9 : active par defaut, publie et epingle.
   bool q34_dead_core = true;
+  // MEB propose par Welzl en double et verifie exactement dans la tour
+  // (anchor_meb_proposed), meme objet. Contrat v9 : active par defaut.
+  bool tower_meb_proposal = true;
 };
 
 // Temps de mur en millisecondes, CPU du processus en secondes.

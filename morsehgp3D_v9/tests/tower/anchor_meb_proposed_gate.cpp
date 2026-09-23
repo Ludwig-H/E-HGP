@@ -6,7 +6,12 @@
 // statut, cle, niveau, taille et emplacements du support, coquille
 // selectionnee. Ensembles : aleatoires sur grilles u18, 2^16 et minuscules
 // (tres degeneres), points entiers cospheriques (x^2+y^2+z^2 = r^2, sommets de
-// cube et d'octaedre) avec ou sans sites interieurs, permutations.
+// cube et d'octaedre) avec ou sans sites interieurs, permutations, aussi sous
+// les trois autres modes d'arrondi (les doubles ne decident rien). Fixture
+// canonique (contre-audit B) : quatre sites cocycliques sans paire
+// diametrale, dont le premier support positif est ABC, slots [0,1,2], bord a
+// quatre sites. Chacun des quatre compteurs de la voie proposee, sature,
+// donne un refus type de resultat vide.
 // Planchers : propositions verifiees, canonisations sur un bord plus grand que
 // le support, et moins de supports essayes que la reference. Compilee avec
 // MHGP9_MEB_PROPOSED_TEST_CORRUPT, une proposition sur trois est faussee : les
@@ -18,7 +23,9 @@
 // Compile avec MHGP9_MEB_PROPOSED_MUTANT_NO_CANONICAL, la voie proposee rend
 // le support verifie meme quand le bord est plus grand : code 1 attendu.
 #include <algorithm>
+#include <cfenv>
 #include <cstdio>
+#include <limits>
 #include <random>
 #include <string_view>
 #include <vector>
@@ -110,6 +117,69 @@ int main(int argc, char** argv) {
         if ((mask & (u32{1} << i)) != 0) sites.push_back(solid[i]);
       if (!check(sites, reference, proposed)) return 1;
     }
+  // Canonical fixture: A, B, C, D on the circle of centre (10,10,0), radius^2
+  // 25, no diametral pair; ABC is the first positive support, shell 4.
+  {
+    const std::vector<P3> circle{{15, 10, 0}, {6, 13, 0}, {7, 6, 0}, {10, 15, 0}};
+    AnchorMebWork local;
+    const auto result = anchor_meb_proposed(circle, local);
+    if (!check(circle, reference, proposed) || result.status != AnchorMebStatus::kOk || result.support_size != 3 ||
+        result.support_slots != std::array<u8, 4>{0, 1, 2, 0} || result.selected_shell_count != 4) {
+      std::printf("cause=proposed.canonical_fixture\n");
+      return 1;
+    }
+  }
+  // Saturated proposal counters: typed refusal, empty result.
+  {
+    const std::vector<P3> circle{{15, 10, 0}, {6, 13, 0}, {7, 6, 0}, {10, 15, 0}};
+    const u64 maximum = std::numeric_limits<u64>::max();
+    for (int counter = 0; counter < 3; ++counter) {
+      AnchorMebWork saturated;
+      (counter == 0 ? saturated.proposals : counter == 1 ? saturated.verified_proposals
+                                                          : saturated.boundary_canonicalizations) = maximum;
+      const auto refused = anchor_meb_proposed(circle, saturated);
+      if (refused.status != AnchorMebStatus::kCounterOverflow || refused.key != BallKey{} ||
+          refused.support_size != 0 || refused.selected_shell_count != 0) {
+        std::printf("cause=proposed.counter_overflow counter=%d\n", counter);
+        return 1;
+      }
+    }
+#if defined(MHGP9_MEB_PROPOSED_TEST_CORRUPT)
+    // Only a corrupted proposal reaches the fallback counter.
+    bool fallback_refused = false;
+    for (unsigned attempt = 0; attempt < 3 && !fallback_refused; ++attempt) {
+      AnchorMebWork saturated;
+      saturated.proposals = attempt;  // the corruption fires when proposals % 3 == 0 after the charge
+      saturated.proposal_fallbacks = maximum;
+      const auto refused = anchor_meb_proposed(circle, saturated);
+      fallback_refused = refused.status == AnchorMebStatus::kCounterOverflow && refused.key == BallKey{};
+    }
+    if (!fallback_refused) {
+      std::printf("cause=proposed.fallback_counter_overflow\n");
+      return 1;
+    }
+#endif
+  }
+  // The other rounding modes change the doubles only, never the result.
+  for (const int mode : {FE_UPWARD, FE_DOWNWARD, FE_TOWARDZERO}) {
+    std::mt19937_64 rounding(77 + static_cast<unsigned>(mode));
+    if (std::fesetround(mode) != 0) continue;
+    bool agree = true;
+    for (unsigned repetition = 0; repetition < 2000 && agree; ++repetition) {
+      const u64 bound = repetition % 2 == 0 ? 262144 : 8;
+      const unsigned n = 3 + static_cast<unsigned>(rounding() % 8);
+      std::vector<P3> sites;
+      unsigned guard = 0;
+      while (sites.size() != n && guard++ < 1000) {
+        const P3 point{static_cast<i64>(rounding() % bound), static_cast<i64>(rounding() % bound),
+                       static_cast<i64>(rounding() % bound)};
+        if (std::find(sites.begin(), sites.end(), point) == sites.end()) sites.push_back(point);
+      }
+      if (sites.size() == n) agree = check(sites, reference, proposed);
+    }
+    std::fesetround(FE_TONEAREST);
+    if (!agree) return 1;
+  }
   u64 reference_supports = 0, proposed_supports = 0;
   for (const auto count : reference.supports_by_size) reference_supports += count;
   for (const auto count : proposed.supports_by_size) proposed_supports += count;

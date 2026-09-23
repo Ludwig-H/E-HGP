@@ -125,7 +125,8 @@ def main(argv):
         # Noyau diametral : des aretes closes par lui, des voies des deux
         # sortes prouvees par lui, et rien quand son levier est coupe.
         check(ledger['core_closed_edges'] > 0 and ledger['dead_core_q3_proved'] > 0 and
-              ledger['dead_core_q4_proved'] > 0 and off['ledger']['core_builds'] == 0,
+              ledger['dead_core_q4_proved'] > 0 and off['ledger']['core_builds'] == 0 and
+              on['tower_work']['meb_verified_proposals'] > 0 and off['tower_work']['meb_proposals'] == 0,
               'diametral core not exercised: ' + json.dumps({key: ledger[key] for key in (
                   'core_builds', 'core_closed_edges', 'dead_core_q3_proved', 'dead_core_q4_proved')}, sort_keys=True))
         check(len(on['orders']) == 5 and on['catalogue']['balls'] >= 1000,
@@ -145,6 +146,9 @@ def main(argv):
             ('dead-lane lever flipped', lambda v: v['options']['levers'].update(q34_dead_lanes=False)),
             ('witness-cache lever flipped', lambda v: v['options']['levers'].update(q34_witness_cache=False)),
             ('core lever flipped', lambda v: v['options']['levers'].update(q34_dead_core=False)),
+            ('MEB proposal lever flipped', lambda v: v['options']['levers'].update(tower_meb_proposal=False)),
+            ('MEB verified beyond proposals', lambda v: v['tower_work'].update(
+                meb_verified_proposals=v['tower_work']['meb_proposals'] + 1)),
             ('core closure uncounted', lambda v: v['ledger'].update(core_closed_edges=0)),
             ('core cover visits hidden', lambda v: v['ledger'].update(core_cover_node_visits=0)),
             ('cache rejections without queries', lambda v: v['ledger'].update(witness_cache_queries=0)),

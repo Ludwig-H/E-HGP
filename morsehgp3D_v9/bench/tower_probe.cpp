@@ -6,7 +6,8 @@
 //
 // Leviers (meme objet, travail different) : atlas_saturate_deep,
 // q3_leaf_census, q34_dead_lanes, q34_witness_cache, q34_dead_core (ce dernier
-// exige q34_dead_lanes, sinon la chaine refuse). Tous sont publies dans
+// exige q34_dead_lanes, sinon la chaine refuse), tower_meb_proposal (MEB de la
+// tour propose puis verifie exactement). Tous sont publies dans
 // options.levers ; un plan G4 les epingle explicitement, un nom inconnu est
 // refuse (code 2).
 //
@@ -136,6 +137,7 @@ int main(int argc, char** argv) {
         else if (name == "q34_dead_lanes") options.q34_dead_lanes = on;
         else if (name == "q34_witness_cache") options.q34_witness_cache = on;
         else if (name == "q34_dead_core") options.q34_dead_core = on;
+        else if (name == "tower_meb_proposal") options.tower_meb_proposal = on;
         else throw std::invalid_argument("unknown lever");
       }
       else if (arg.starts_with("--n=")) prefix = static_cast<std::size_t>(parse_u(arg.substr(4)));
@@ -171,12 +173,13 @@ int main(int argc, char** argv) {
               grid.c_str(), input.points.size(), input.hash);
   std::printf("\"options\":{\"K\":%u,\"K_effective\":%u,\"s\":%u,\"workers\":%zu,\"tower_static_threads\":%d,\"run_tower\":%s,"
               "\"levers\":{\"atlas_saturate_deep\":%s,\"q3_leaf_census\":%s,\"q34_dead_lanes\":%s,"
-              "\"q34_witness_cache\":%s,\"q34_dead_core\":%s}},",
+              "\"q34_witness_cache\":%s,\"q34_dead_core\":%s,\"tower_meb_proposal\":%s}},",
               options.kmax, r.kmax_effective, options.separation_s, options.workers,
               options.tower_static_threads >= 0 ? options.tower_static_threads : r.tower_static_threads,
               options.run_tower ? "true" : "false", options.atlas_saturate_deep ? "true" : "false",
               options.q3_leaf_census ? "true" : "false", options.q34_dead_lanes ? "true" : "false",
-              options.q34_witness_cache ? "true" : "false", options.q34_dead_core ? "true" : "false");
+              options.q34_witness_cache ? "true" : "false", options.q34_dead_core ? "true" : "false",
+              options.tower_meb_proposal ? "true" : "false");
   std::printf("\"times_ms\":{\"read\":%.3f,\"prepare\":%.3f,\"gen_index\":%.3f,\"q2\":%.3f,\"q34\":%.3f,\"merge\":%.3f,"
               "\"tower_index\":%.3f,\"census\":%.3f,\"tower\":%.3f,\"chain_total\":%.3f,\"digest\":%.3f},"
               "\"chain_cpu_s\":%.3f,",
@@ -212,12 +215,18 @@ int main(int argc, char** argv) {
               ",\"meb_calls\":%" PRIu64 ",\"meb_power_tests\":%" PRIu64 ",\"births\":%" PRIu64 ",\"merges\":%" PRIu64
               ",\"contributions\":%" PRIu64 ",\"grouped_lots\":%" PRIu64 ",\"resolver_cache_hits\":%" PRIu64
               ",\"meb_accounting\":\"%s\",\"meb_pair_distances\":%" PRIu64 ",\"meb_materializations\":%" PRIu64
-              ",\"meb_supports_by_size\":[%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%" PRIu64 "]},",
+              ",\"meb_supports_by_size\":[%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%" PRIu64 "]"
+              ",\"meb_proposals\":%" PRIu64 ",\"meb_verified_proposals\":%" PRIu64
+              ",\"meb_boundary_canonicalizations\":%" PRIu64 ",\"meb_proposal_fallbacks\":%" PRIu64 "},",
               ts.records, ts.extra_records, ts.representatives, ts.anchor_hits, ts.key_lookups, ts.intruder_queries,
               ts.intruder_nodes, ts.resolve_work.calls, ts.resolve_work.power_tests, ts.births, ts.merges, ts.contributions,
-              ts.grouped_lots, ts.resolver_cache_hits, mhgp9::tower::kAnchorMebProposedWorkAccounting,
+              ts.grouped_lots, ts.resolver_cache_hits,
+              options.tower_meb_proposal ? mhgp9::tower::kAnchorMebProposedWorkAccounting
+                                         : mhgp9::tower::kAnchorMebWorkAccounting,
               ts.resolve_work.pair_distances, ts.resolve_work.materializations, ts.resolve_work.supports_by_size[1],
-              ts.resolve_work.supports_by_size[2], ts.resolve_work.supports_by_size[3], ts.resolve_work.supports_by_size[4]);
+              ts.resolve_work.supports_by_size[2], ts.resolve_work.supports_by_size[3], ts.resolve_work.supports_by_size[4],
+              ts.resolve_work.proposals, ts.resolve_work.verified_proposals, ts.resolve_work.boundary_canonicalizations,
+              ts.resolve_work.proposal_fallbacks);
   std::printf("\"orders\":[");
   for (std::size_t i = 0; i < r.orders.size(); ++i) {
     const auto& o = r.orders[i];
