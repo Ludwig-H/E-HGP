@@ -1,0 +1,12 @@
+scene_00_full.u32le LONG_SITE a=5700 incidences=2
+scene_00_full.u32le LONG_SITE a=9987 incidences=100
+scene_00_full.u32le LONG_SITE a=12706 incidences=15
+scene_00_full.u32le LONG_SITE a=12361 incidences=3
+scene_00_full.u32le LONG_SITE a=29676 incidences=3
+scene_00_full.u32le LONG_SITE a=3585 incidences=17
+scene_00_full.u32le LONG_SITE a=34761 incidences=15
+scene_00_full.u32le LONG_SITE a=39504 incidences=64
+scene_00_full.u32le LONG_SITE a=37863 incidences=124
+scene_00_full.u32le LONG_SITE a=7056 incidences=76
+scene_00_full.u32le n=39885 kmax=10 balls=5512670 input_fnv=84f5ce1703704d2c seed=9e3779b97f4a7c15 mode=prune sampled_sites=30 partners=1196520 kept=9930 triangles=1991605 acute=426275 incidences=6374 found=6374 missing=0 cross_fail=0 extra=0 unique_keys=6374 q2_keys=0 top_keys=1265 top_population=555223 extended=0 shell_over_12=0 mutant_killed=1 len_lt500=4180 len_500_1600=1775 len_ge1600=419 top_lt500=645 top_500_1600=476 top_ge1600=144 prune_disagreements=0 p0=177 p1=352 p2=442 p3=594 p4=743 p5=809 p6=927 p7=1065 p8=1265
+exit=0 expected=0

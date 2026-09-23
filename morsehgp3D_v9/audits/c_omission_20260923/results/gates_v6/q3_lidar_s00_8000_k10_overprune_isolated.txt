@@ -1,0 +1,4 @@
+s00_k5_s8_w8_r0_nested_8000.u32le LONG_SITE a=1108 incidences=248
+s00_k5_s8_w8_r0_nested_8000.u32le LONG_SITE a=5516 incidences=60
+s00_k5_s8_w8_r0_nested_8000.u32le n=8000 kmax=10 balls=1567942 input_fnv=5b72c71f0728bd0c seed=9e3779b97f4a7c15 mode=compare+overprune sampled_sites=4 partners=31996 kept=2838 triangles=127952004 acute=35687593 incidences=1513 found=1513 missing=0 cross_fail=0 extra=0 unique_keys=1500 q2_keys=0 top_keys=303 top_population=152067 extended=0 shell_over_12=0 mutant_killed=1 len_lt500=0 len_500_1600=1205 len_ge1600=308 top_lt500=0 top_500_1600=241 top_ge1600=64 prune_disagreements=0 p0=34 p1=60 p2=107 p3=143 p4=164 p5=192 p6=237 p7=271 p8=305
+exit=0 expected=obs

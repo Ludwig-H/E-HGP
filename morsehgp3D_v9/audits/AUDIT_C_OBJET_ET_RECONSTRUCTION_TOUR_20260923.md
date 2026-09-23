@@ -436,7 +436,12 @@ et elle ne se transporte pas à K10 : K11 est hors domaine
 (`kBallInteriorMax = 9`). Pour la famille q2, un juge d'échantillon
 indépendant du générateur existe désormais (même dossier) : 204 683 boules
 q2 attendues autour de sites tirés, toutes présentes, dont 16 506 à $p=9$ à
-K10. La famille q3 à $p=K_{\max}-2$ reste sans juge. Deux omissions
+K10. Pour la famille q3 à $p=K_{\max}-2$, un juge d'échantillon
+indépendant (élagage exact par la demi-boule diamétrale, clé canonique,
+niveau, coquille, intérieurs et arité recoupés) trouve présentes les
+286 706 incidences q3 admissibles de sa campagne v5, dont 55 297 clés
+régulières de cette famille ; ses portes v6 tuent tous leurs mutants
+avec marqueur causal. Ce sont des échantillons, pas une certification. Deux omissions
 conjointes (une naissance et la seule fusion qui la référence) restent
 hors de portée de ces contrôles, comme d'Euler.
 
@@ -600,7 +605,7 @@ constats) : [`c_audit_20260923/verifications/`](c_audit_20260923/verifications/R
 | 14 | basse | bénéfice net de la preuve de voie morte sur cover complet jamais mesuré, aucun levier ne l'isole ; elle prouve 19–27 % des voies atteintes et ferme 21–24 % des covers | V\* | levier séparé, puis ablation appariée |
 | 15 | basse | `run_tower=false` publie `complete_relative` sans positivité vérifiée des coquilles régulières | V | positivité dans le recensement ou statut distinct |
 | 16 | basse | meilleurs K5 publiés mêlant MEB OFF et ON (biais optimiste 2–6 %) | V | publier moyenne et configuration par défaut |
-| 17 | haute | zone de détection potentiellement aveugle pour Euler et la tour : boules de fusion seule à l'ordre Kmax (q2 à p=Kmax−1, q3 à p=Kmax−2), 26 à 29 % (K5), 17 à 18 % (K7) et 10 à 11 % (K10) du catalogue à 8k ; la partie q2 est couverte par un juge d'échantillon indépendant, pas la partie q3 | C | K5 : contrôle Kmax+1 avec tour et restriction clé par clé ; K10 : domaine d'audit K11 ou juge d'échantillon dédié (R-20) |
+| 17 | haute | zone de détection potentiellement aveugle pour Euler et la tour : boules de fusion seule à l'ordre Kmax (q2 à p=Kmax−1, q3 à p=Kmax−2), 26 à 29 % (K5), 17 à 18 % (K7) et 10 à 11 % (K10) du catalogue à 8k ; parties q2 et q3 jugées par échantillon indépendant (v5 et portes v6, tout présent) | C | K5 : contrôle Kmax+1 avec tour et restriction clé par clé ; K10 : domaine d'audit K11 ou juge d'échantillon dédié (R-20) |
 
 ## 7. Recommandations au développeur, par ordre
 

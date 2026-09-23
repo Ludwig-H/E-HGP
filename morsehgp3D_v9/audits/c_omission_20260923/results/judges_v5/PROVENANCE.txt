@@ -1,0 +1,16 @@
+commit=c6042af2bc4acf37efcfee74fc2c7693dc90d53f
+src_commit=0d5ad2e8960e1708ba5a120eaf7fecd9d90db66f
+sources_juges_non_commitees:
+recette=g++ -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -I/workspaces/E-HGP/build/v9-audit-c-publish/morsehgp3D_v9 -I/workspaces/E-HGP/build/v9-audit-c-publish/morsehgp3D_v9/src/gen -isystem /workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include <source> /workspaces/E-HGP/build/v9-audit-c-scale/libmhgp9_chain.a /workspaces/E-HGP/build/v9-audit-c-scale/libmhgp9_gen.a -lpthread
+compilateur=g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+6fe2ef5172ff1547ac4d4cc7f3a3c21caa86018034afbb3530207b7e0fcfe2fb  /workspaces/E-HGP/build/v9-audit-c-publish/morsehgp3D_v9/audits/c_omission_20260923/run_judges_v5.sh
+7e8c79820a3a3e4a4dc8d07f56199605ec50af6cdeb5dc08ae657ebd4a4c0fd9  /workspaces/E-HGP/build/v9-audit-c-publish/morsehgp3D_v9/audits/c_omission_20260923/q2_sample_judge.cpp
+71dd3012cc6f212d6400b36c8703bdb3e2c3dae2c3c967a36f9cbdc7fb88890a  /workspaces/E-HGP/build/v9-audit-c-publish/morsehgp3D_v9/audits/c_omission_20260923/q3_sample_judge.cpp
+d7fac3c3f9a24f879a7f27a789d2cfcae7204a015101f1dd8592d337664d536f  /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/judges_v5/q2_sample_judge
+ab04c06c39644cd92580a72383f72151124cd6336617c28b7e44bc9ab071e982  /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/judges_v5/q3_sample_judge
+1b1b7cfcb71faa570e003d8b153665fb032058413f631a4e15f622aed5549726  /workspaces/E-HGP/build/v9-audit-c-scale/libmhgp9_chain.a
+530f949a613c50d1fcae7d5c14f6153f4aceb025bd72defc68bb9de4f802bc6e  /workspaces/E-HGP/build/v9-audit-c-scale/libmhgp9_gen.a
+cf84866390ede2e53a20b4166e8dc1a14cb5791eb78b6efba147941b7cd61c54  /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/data/s00_k5_s8_w8_r0_nested_8000.u32le
+d141e843dcdd3c56d3b396431c9699d94b45b586bc318de70f7aeb77049a6d2a  /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/data/s01_k5_s8_w8_r0_nested_8000.u32le
+255f6433034a6d9e1531dce11cb880725c3bf3e46b6b66078596341dbd7f8d5e  /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/data/s02_k5_s8_w8_r0_nested_8000.u32le
+0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf  /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/data/scene_00_full.u32le

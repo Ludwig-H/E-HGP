@@ -1,0 +1,2 @@
+scene_00_full.u32le n=39885 kmax=10 balls=5512670 input_fnv=84f5ce1703704d2c seed=c3a5c85c97cb3127 sampled_sites=200 pairs=7976800 incidences=8587 found=8587 missing=0 cross_fail=0 extra=0 unique_keys=8565 top_keys=810 top_population=83241 extended=5 shell_over_12=0 mutant_killed=1 p0=983 p1=881 p2=862 p3=836 p4=903 p5=812 p6=844 p7=770 p8=886 p9=810
+exit=0 expected=0

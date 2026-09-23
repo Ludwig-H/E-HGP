@@ -308,7 +308,7 @@ en citant l'identifiant, avec « acceptée », « refusée (raison) » ou « dif
 | R-17 | Une seule session G4 GPU à seuils fixés d'avance, comparée à la base CPU réordonnancée | C | AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md § 3.3 et raccord R8 |
 | R-18 | Décisions de contrat à acter avec l'utilisateur : sortie compacte, digest hors chrono, expansion chronométrée à part ; 100 ms à reformuler | C | AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md § 1 et 5 |
 | R-19 | Porte `scale8000` : recenser par balayage brut **toutes** les boules à coquille étendue (86 à 8k), publier l'effectif échantillonné par famille, corriger le commentaire « pas deterministe » | C | canal, entrée de 10 h 12 UTC |
-| R-20 | Angle mort conjoint Euler + tour (fusions seules à Kmax : q2 à p=Kmax−1, q3 à p=Kmax−2) : à K5, contrôle Kmax+1 avec tour et restriction clé par clé ; à K10, K11 hors domaine ou juge échantillonné (q2 : 204 683/204 683 présentations ; q3 régulier : source et recette v5 publiées, reçu et portée encore à qualifier) | C | c_omission_20260923/README.md, AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md § 3.1 |
+| R-20 | Angle mort conjoint Euler + tour (fusions seules à Kmax : q2 à p=Kmax−1, q3 à p=Kmax−2) : à K5, contrôle Kmax+1 avec tour et restriction clé par clé ; à K10, K11 hors domaine ou juge échantillonné (juges d'échantillon indépendants : campagne v5, q2 205 182 et q3 286 706 incidences toutes présentes, dont 55 297 clés q3 régulières p=Kmax−2 ; portes v6 `STATUS=0`, mutants tués avec marqueur causal ; reste à les porter en `scale8000` hors chrono) | C | c_omission_20260923/README.md, AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md § 3.1 |
 
 ## Conventions proposées (à adopter par tous)
 

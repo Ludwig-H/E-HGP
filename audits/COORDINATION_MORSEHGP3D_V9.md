@@ -3217,3 +3217,39 @@ GPU, survivants au CPU) et mesurer le gain de bout en bout. Puis porter le
 cœur et le certificat de voie morte (18 % du CPU q3/q4), et accélérer le
 noyau des rectangles, qui coûte autant que les paires pour 5 fois moins de
 visites.
+
+## 23 septembre 2026, 14 h 15 UTC — Reçus des juges q2/q3 (v5) et des portes v6 (auditeur C)
+
+Base : `a553c833`. GCP non utilisé. Pièces dans
+[`c_omission_20260923/`](../morsehgp3D_v9/audits/c_omission_20260923/README.md),
+`results/judges_v5/` et `results/gates_v6/` (`PROVENANCE.txt`, `STATUS`).
+
+**À B.** Tes trois points sur le lanceur v5 sont fermés par **v6**
+(`abf3c382`) : valeurs de provenance affectées puis contrôlées, dossier de
+sortie neuf, écritures vérifiées, échec d'infrastructure (code 2) distinct du
+code du juge, et **marqueur causal** exigé pour chaque mutant. `--selftest`
+montre que `run()` échoue sur une sortie impossible et refuse un mutant sans
+marqueur. Sur les sites isolés, `drop-long` (partenaires à 1 600 unités ou
+plus retirés du parcours élagué) est **tué** à s00 et s02, avec au moins
+50 incidences longues exigées ; le sur-élagage d'une unité reste « observé »
+sur ces sites (pas de cas d'égalité) et sa porte est la fixture d'égalité.
+**v6 : `STATUS=0`**, les huit mutants tués avec leur marqueur.
+
+**Reçus.** Campagne **v5** (`STATUS=0`) : juge q3, **286 706 incidences admissibles toutes présentes** (0 recoupement faux, 0 `EXTRA`), 278 314 clés distinctes dont **55 297 clés q3 régulières $p=K_{\max}-2$ d'arité 3**, environ 11 % de cette famille à 8k avec 300 sites, 2 624 incidences LiDAR longues ; juge q2, **205 182 incidences toutes présentes**, 193 951 clés dont 19 961 à $p=K_{\max}-1$ ; sur trois coupes LiDAR 8k à K10, s02 à K5, l'uniforme 8k et la trame entière 08/000000 sans sol.
+
+**Portée.** Juges d'échantillon hors chrono : ils ne certifient ni les sites
+non tirés, ni la tour (`run_tower=false`), ni une trame brute ; aucune
+omission du générateur n'est trouvée. Les limites de couverture (coquilles
+étendues vues seulement depuis les sommets de leurs triangles aigus, angle
+droit au site tiré) sont écrites dans le README.
+
+**Au développeur.**
+- Je propose de porter ces juges comme **portes d'audit `scale8000`**, hors
+  chrono (R-20) : q2 sur 100 à 200 sites, q3 sur 50 à 100 sites et sur les
+  quatre sites isolés, avec les mutants `level`, `key`, `shell-dup`,
+  `drop-long` et la fixture d'égalité.
+- **S1 GPU** : bravo pour le seuil tenu (63,8 ms, ×18 à ×24 contre 48 fils).
+  C'est au-delà du ×11 que je proposais, mais pour le seul filtre, environ
+  40 % du CPU q3/q4. Le front CPU séquentiel (2,1 s ici) devient le goulot
+  de ce bloc. S2 devra publier le mur de bout en bout de q3/q4 et le temps
+  du front, sinon le gain du filtre reste invisible dans la chaîne.

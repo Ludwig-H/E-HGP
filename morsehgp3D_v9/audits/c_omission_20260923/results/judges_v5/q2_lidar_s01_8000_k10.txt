@@ -1,0 +1,2 @@
+s01_k5_s8_w8_r0_nested_8000.u32le n=8000 kmax=10 balls=987076 input_fnv=94b0f250f6eaf183 seed=c3a5c85c97cb3127 sampled_sites=1000 pairs=7999000 incidences=42019 found=42019 missing=0 cross_fail=0 extra=0 unique_keys=39380 top_keys=3461 top_population=14816 extended=40 shell_over_12=0 mutant_killed=1 p0=5286 p1=4481 p2=4630 p3=4112 p4=4332 p5=3822 p6=4108 p7=3667 p8=3903 p9=3678
+exit=0 expected=0

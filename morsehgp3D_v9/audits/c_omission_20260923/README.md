@@ -1,4 +1,4 @@
-# Omissions de catalogue que la tour FULL refuse, et la zone que rien ne juge encore
+# Omissions de catalogue que la tour FULL refuse, et la zone jugée par échantillon
 
 Auditeur C, 23 septembre 2026. Cadre : `exploration_v9_hors_registre`,
 `reference_cpu`, `quantized_u18_input_only`, `public_status=not_claimed`.
@@ -67,8 +67,12 @@ Pour une coquille régulière ($u=q$) :
   `b13` pour le nuage de 13 sites de
   [B](../CONTRE_EXEMPLE_EULER_KPLUS2_20260923.md).
 - `run_campaign.sh` : la campagne exécutée ; `aggregate.py` : les tableaux.
-- `q2_sample_judge.cpp`, `run_q2_judge.sh` : juge d'échantillon q2 indépendant du
-  générateur (section finale).
+- `q2_sample_judge.cpp`, `q3_sample_judge.cpp` : juges d'échantillon q2 et q3
+  indépendants du générateur ; `run_q2_judge.sh` (première campagne q2),
+  `run_judges_v5.sh` (campagne v5), `run_judges_v6_gates.sh` (portes v6,
+  `--selftest`), `tables_judges.py` (tableaux) ; `results/judges_v5/`,
+  `results/gates_v6/` (sorties, `PROVENANCE.txt`, `STATUS`) ;
+  `verification_juge_q3.json` (vérification adverse du juge q3).
 - `run_digest_campaign.sh`, `results/digest/` : condensés des tours acceptées.
 - `results/` : sorties brutes et `TABLEAUX.md`. Les coupes LiDAR 8k
   (`s00`, `s01`, `s02`, disques emboîtés du runner v12) ne sont pas
@@ -206,43 +210,211 @@ condensé égal ne certifie pas l'égalité du payload.
 | 10 | oui | régulière | 3 | 480 522 | 8 | 8 | 0 | 0 | full_ball_static_missing_weak_terminal |
 | 10 | oui | régulière | 4 | 234 918 | 8 | 8 | 0 | 0 | full_ball_static_missing_weak_terminal |
 
-**Lecture.** Dans la zone potentiellement aveugle, **10 des 68** retraits q2 acceptés et **26 des 67** retraits q3 acceptés changent le condensé de la tour (uniforme et deux coupes LiDAR à K5, une coupe LiDAR à K10) : ce sont des **tours fausses publiées avec le statut `complete_relative`**, qu'Euler ne voit pas non plus. Les autres gardent un condensé égal : la boule retirée n'y portait vraisemblablement qu'une fusion redondante (non démontré, un condensé égal ne certifie pas le payload). Les q4 d'ordre haut > Kmax changent le condensé 48 fois sur 62 acceptés, mais Euler les voit. Dans les strates d'ordre haut ≤ Kmax, tous les retraits sont refusés. Le risque résiduel concret, sans juge aujourd'hui, est donc la famille **q3 à $p=K_{\max}-2$**.
+**Lecture.** Dans la zone potentiellement aveugle, **10 des 68** retraits q2 acceptés et **26 des 67** retraits q3 acceptés changent le condensé de la tour (uniforme et deux coupes LiDAR à K5, une coupe LiDAR à K10) : ce sont des **tours fausses publiées avec le statut `complete_relative`**, qu'Euler ne voit pas non plus. Les autres gardent un condensé égal : la boule retirée n'y portait vraisemblablement qu'une fusion redondante (non démontré, un condensé égal ne certifie pas le payload). Les q4 d'ordre haut > Kmax changent le condensé 48 fois sur 62 acceptés, mais Euler les voit. Dans les strates d'ordre haut ≤ Kmax, tous les retraits sont refusés. Le risque résiduel concret est donc la famille **q3 à $p=K_{\max}-2$**, que seul le juge q3 ci-dessous juge, par échantillon.
 
 ## Juge d'échantillon q2 indépendant du générateur
 
-`q2_sample_judge.cpp` couvre la partie q2 de l'angle mort, pour tout $p$.
-Pour un site $a$ tiré à pas régulier et **tout** autre site $b$, la boule
-diamétrale de $\lbrace a,b\rbrace$ est recensée par balayage brut de tous
-les sites en entiers exacts ($x$ intérieur strict si et seulement si
+`q2_sample_judge.cpp` couvre la partie q2 de la zone potentiellement
+aveugle, pour tout $p$. Pour un site $a$ tiré et **tout** autre site $b$,
+la boule diamétrale de $\lbrace a,b\rbrace$ est recensée par balayage brut
+de tous les sites en entiers exacts ($x$ intérieur strict si et seulement si
 $(x-a)\cdot(x-b)<0$, sur la sphère si $=0$). Si elle a au plus
-$K_{\max}-1$ intérieurs, elle est admise et le catalogue doit contenir une
-boule de même $p$, portée par la même sphère, dont la coquille contient
-$a$ et $b$ et a le même nombre de sites. Ni WSPD, ni témoins, ni Pool :
-seul le catalogue de la chaîne est lu. Coût : $O(n)$ candidats par site
-tiré, chacun un balayage arrêté dès que $p$ dépasse $K_{\max}-1$, donc
-jamais $O(n^{3})$. Anti-vacuité : la première boule trouvée est retirée de
-la table, et le juge doit alors la déclarer manquante (`mutant_killed=1`).
-Campagne `run_q2_judge.sh`, sorties dans `results/q2_judge/` :
+$K_{\max}-1$ intérieurs, elle est admise : le catalogue doit contenir une
+boule de même clé canonique ($\vert x\vert^{2}-(a+b)\cdot x+a\cdot b$,
+comparée à `ball.key`), de même niveau exact, de même liste triée de sites
+de coquille, de mêmes intérieurs, d'arité 2. En sens inverse, toute boule
+régulière à deux sites, d'arité 2 et $p\leq K_{\max}-1$, passant par un site
+tiré, doit être retrouvée. Ni WSPD, ni témoins, ni Pool. Coût : $O(n)$
+candidats par site tiré, chacun un balayage arrêté dès que $p$ dépasse
+$K_{\max}-1$, donc jamais $O(n^{3})$.
 
-| cas | Kmax | sites tirés | boules q2 attendues | trouvées | dont $p=K_{\max}-1$ | coquilles étendues | anti-vacuité |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| LiDAR s00 8k | 10 | 1 000 | 50 739 | 50 739 | 4 880 | 24 | tué |
-| LiDAR s01 8k | 10 | 1 000 | 41 755 | 41 755 | 3 664 | 43 | tué |
-| LiDAR s02 8k | 10 | 1 000 | 44 301 | 44 301 | 3 731 | 62 | tué |
-| LiDAR s02 8k | 5 | 1 000 | 23 883 | 23 883 | 4 479 | 34 | tué |
-| uniforme 8k | 10 | 500 | 35 280 | 35 280 | 3 373 | 0 | tué |
-| trame entière 08/000000 sans sol (39 885 sites) | 10 | 200 | 8 725 | 8 725 | 858 | 6 | tué |
+Première campagne (v1, `b05fbf36`, recoupement par coquille et $p$
+seulement) : 204 683 **incidences** (site tiré, partenaire) admissibles,
+toutes présentes, dont 16 506 à $p=9$ à K10 ; ses sorties restent dans
+`results/q2_judge/`. La version v5 ci-dessous ajoute clé, niveau, coquille
+exacte, intérieurs, arité, sens inverse, tirage à graine et mutants
+(contrelectures de B et vérification adverse).
 
-**204 683 boules q2 attendues, 204 683 trouvées**, dont 16 506 à $p=9$ à
-K10, la famille q2 de l'angle mort. Ce juge est un échantillon : il ne
-certifie pas les sites non tirés. Il reste à couvrir la famille **q3 à
-$p=K_{\max}-2$**, la plus nombreuse de l'angle mort (104 131 à 277 105 à
-K10 sur 8k) : pour elle, je n'ai pas de balayage indépendant de coût
-$O(n^{2})$ par site, car une boule circonscrite peu peuplée peut avoir un
-très grand rayon (les ancres longues du LiDAR).
+## Juge d'échantillon q3 indépendant du générateur
+
+`q3_sample_judge.cpp` vise la famille que ni Euler ni la tour ne jugent,
+**q3 à $p=K_{\max}-2$**, et plus largement toute boule q3 admissible
+($p\leq K_{\max}-2$) dont un triangle aigu passe par un site tiré, supports
+longs compris. Pour un site $a$ tiré et un triangle **strictement aigu**
+$(a,b,c)$, la boule circonscrite (centre dans l'intérieur relatif du
+triangle, donc support positif et $q_{\min}\leq3$) est admise dès qu'elle a
+au plus $K_{\max}-2$ intérieurs stricts. Le catalogue doit alors contenir
+une boule de **même clé canonique** (forme puissance reconstruite
+indépendamment, réduite par le pgcd, comparée champ par champ à
+`ball.key`), de **même niveau exact**, dont la liste triée des sites de
+coquille est exactement celle du recensement, avec les **mêmes intérieurs**
+et une arité cohérente (2 si la coquille a une paire antipodale, 3 sinon). En sens
+inverse, toute boule régulière à trois sites, d'arité 3 et $p\leq K_{\max}-2$,
+dont la coquille contient un site tiré doit être retrouvée (sinon `EXTRA` :
+boule non critique ou mal recensée). Une coquille de plus de 12 sites trouvée
+sur une chaîne complète est une omission, puisque la chaîne refuse ce
+domaine.
+
+**Arithmétique exacte.** Avec $u=b-a$, $v=c-a$, $w=u\times v$, le centre
+est $O=a+P/D$, où $P=\vert u\vert^{2}(v\times w)+\vert v\vert^{2}(w\times u)$
+et $D=2\vert w\vert^{2}$ ; un site $x$ est strictement intérieur si et
+seulement si $s(x)=D\vert x-a\vert^{2}-2(x-a)\cdot P<0$, sur la sphère si
+$s(x)=0$. Sur la grille u18, $\vert s\vert<2^{116}$ : entiers de 128 bits.
+Le niveau $R^{2}=\vert P\vert^{2}/D^{2}$ est comparé à celui du catalogue en
+entiers multiprécision (Boost `cpp_int`, produits d'au plus $2^{346}$).
+Le recensement passe par un arbre k-d propre au juge : boîtes exactes pour
+les boules diamétrales, filtre flottant conservateur (marge d'au moins 4
+unités de grille au carré, environ 15 bits au-dessus des erreurs mesurées)
+pour les boules circonscrites, tests exacts aux feuilles.
+
+**Lemme de la demi-boule diamétrale (élagage exact).** Soit $B$ une sphère
+passant par $a$ et $b$, de centre $O$ et rayon $R$, et $m$ le milieu de
+$ab$. Tout site $y$ strictement intérieur à la boule diamétrale $D_{ab}$ et
+tel que $(y-m)\cdot(O-m)\geq0$ est strictement intérieur à $B$.
+
+*Preuve.* $O-m$ est orthogonal à $ab$, donc
+$R^{2}=\vert a-m\vert^{2}+\vert O-m\vert^{2}$. Alors
+$\vert y-O\vert^{2}=\vert y-m\vert^{2}-2(y-m)\cdot(O-m)+\vert O-m\vert^{2}<\vert a-m\vert^{2}+\vert O-m\vert^{2}=R^{2}$. $\square$
+
+Le lemme ne demande pas l'acuité, et le cas $O=m$ ne pose pas de problème.
+La combinaison « intérieur **strict** de $D_{ab}$ et demi-plan **fermé** »
+est exactement la bonne : avec $D_{ab}$ fermé, le lemme devient faux
+($a=(0,0,0)$, $b=(8,0,0)$, $c=(4,8,0)$ et $y=(4,0,4)$, qui est sur la
+coquille de $B$).
+
+*Conséquence.* Si $B$ a au plus $K_{\max}-2$ intérieurs stricts, le
+demi-plan fermé de direction $O-m$, dans le plan orthogonal à $ab$, contient
+au plus $K_{\max}-2$ projections des intérieurs stricts de $D_{ab}$ : la
+profondeur de Tukey de l'origine parmi ces projections est au plus
+$K_{\max}-2$. Le juge ne garde que les partenaires $b$ qui vérifient cette
+condition, et il énumère les triangles dont les deux partenaires la
+vérifient ($ac$ est aussi une arête de $B$). La profondeur d'un
+sous-ensemble minore la vraie profondeur : l'élagage reste sûr.
+
+**Portes du juge** (`run_judges_v5.sh`, codes attendus) :
+- `--compare` rejuge chaque site sans élagage et exige le même ensemble de
+  triangles attendus ;
+- une **fixture d'égalité** gravée (trois sites sur le segment $ab$, un site
+  opposé dans $D_{ab}$ hors de $B$ : profondeur $=p=K_{\max}-2$) passe sans
+  mutant et tue `--inject=overprune`, l'élagage dès la profondeur
+  $K_{\max}-2$, que les familles aléatoires ne tuent pas ;
+- `--inject=level`, `--inject=key` et `--inject=shell-dup` faussent
+  respectivement tous les niveaux, toutes les clés seules, ou remplacent un
+  site de coquille par un doublon : chaque recoupement doit échouer
+  (code 1), pour les deux juges ;
+- `--compare` est aussi exécuté sur les quatre sites **les plus isolés**
+  (plus grande distance au $K_{\max}$-ième voisin), choisis depuis les
+  seules coordonnées d'entrée : ce sont eux qui portent les ancres longues,
+  qu'aucun tirage aléatoire n'atteignait ; le mutant de sur-élagage y est
+  observé ;
+- mutant ciblé : une clé régulière trouvée de rang $p=K_{\max}-2$ et
+  d'arité 3 est retirée de la table et son site rejugé ; le manquant doit
+  porter deux autres sites de sa coquille ; plancher `--min-top` de clés
+  distinctes de cette famille.
+
+Le lanceur `run_judges_v5.sh` reconstruit les bibliothèques v9 depuis ce
+dépôt (dossier de build et `src/` propre vérifiés), compile les deux juges
+avec une recette fixe et hache, de façon bloquante, son script, la recette,
+les sources, les binaires, les bibliothèques et les entrées
+(`PROVENANCE.txt`). Le filtre flottant des boîtes est certifié sûr par
+[B](../CERTIFICAT_B_MARGE_JUGE_Q3_U18_20260923.md) sous IEEE binary64
+conforme, sans fast-math.
+
+**Résultats**
+
+Campagne **v5** (`run_judges_v5.sh`, juges épinglés à `c6042af2`, produit reconstruit depuis `0d5ad2e8`, `STATUS=0`, sorties dans `results/judges_v5/`). **Juge q3 : 286 706 incidences admissibles, toutes présentes**, 0 recoupement faux (clé, niveau, coquille, intérieurs, arité), 0 `EXTRA` ; 278 314 clés distinctes, dont **55 297 clés régulières de la famille $p=K_{\max}-2$ d'arité 3**, soit environ 11 % de cette famille à 8k avec 300 sites tirés ; 2 624 incidences LiDAR à 1 600 unités de grille ou plus (sur la famille uniforme u16, l'étiquette de longueur n'a pas de sens). **Juge q2 : 205 182 incidences, toutes présentes**, 193 951 clés distinctes, dont 19 961 de la famille $p=K_{\max}-1$. Sur les quatre sites les plus isolés de s00 et s02, `--compare` retrouve exactement les mêmes triangles avec et sans élagage (1 513 et 430 incidences, dont 308 et 59 longues). Les limites du lanceur v5 relevées par B (substitutions `git` non contrôlées, redirection prise pour un mutant tué) ne changent pas ces sorties, dont les codes et marqueurs sont lisibles ; elles sont fermées pour les portes par v6.
+
+#### Portes v5 (`run_judges_v5.sh`)
+
+| cas | code | attendu |
+| --- | ---: | ---: |
+| `q3_fixture_eq_compare` (désaccords d'élagage : 0, incidences : 369, dont ≥ 1 600 unités : 0) | 0 | 0 |
+| `q3_fixture_eq_overprune` (désaccords d'élagage : 2, incidences : 369, dont ≥ 1 600 unités : 0) | 1 | 1 |
+| `q3_fixture_eq_level` | 1 | 1 |
+| `q3_fixture_eq_shell_dup` | 1 | 1 |
+| `q3_fixture_eq_key` | 1 | 1 |
+| `q2_lidar_s02_8000_k5_level` | 1 | 1 |
+| `q2_lidar_s02_8000_k5_shell_dup` | 1 | 1 |
+| `q2_lidar_s02_8000_k5_key` | 1 | 1 |
+| `q3_lidar_s00_8000_k10_compare_isolated` (désaccords d'élagage : 0, incidences : 1513, dont ≥ 1 600 unités : 308) | 0 | 0 |
+| `q3_lidar_s00_8000_k10_overprune_isolated` (désaccords d'élagage : 0, incidences : 1513, dont ≥ 1 600 unités : 308) | 0 | obs |
+| `q3_lidar_s02_8000_k10_compare_isolated` (désaccords d'élagage : 0, incidences : 430, dont ≥ 1 600 unités : 59) | 0 | 0 |
+| `q3_lidar_s02_8000_k10_overprune_isolated` (désaccords d'élagage : 0, incidences : 430, dont ≥ 1 600 unités : 59) | 0 | obs |
+
+#### Juge q3, campagne v5
+
+| cas | Kmax | sites | incidences | trouvées | manquantes | recoupements faux | EXTRA | clés distinctes | clés q2 | clés p=Kmax−2 (arité 3) / population | ≥ 1 600 unités (dont p=Kmax−2) | code |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| q3_lidar_s00_8000_k10 | 10 | 300 | 89 577 | 89 577 | 0 | 0 | 0 | 86 425 | 0 | 16 733 / 152 067 | 131 (34) | 0 |
+| q3_lidar_s01_8000_k10 | 10 | 300 | 60 568 | 60 568 | 0 | 0 | 0 | 58 321 | 0 | 10 533 / 95 032 | 1 690 (474) | 0 |
+| q3_lidar_s02_8000_k10 | 10 | 300 | 62 873 | 62 873 | 0 | 0 | 0 | 60 932 | 0 | 10 911 / 104 131 | 338 (78) | 0 |
+| q3_lidar_s02_8000_k5 | 5 | 300 | 16 010 | 16 010 | 0 | 0 | 0 | 15 499 | 0 | 5 898 / 56 747 | 46 (19) | 0 |
+| q3_lidar_scene00_full_k10 | 10 | 30 | 6 374 | 6 374 | 0 | 0 | 0 | 6 374 | 0 | 1 265 / 555 223 | 419 (144) | 0 |
+| q3_uniform_8000_k10 | 10 | 100 | 51 304 | 51 304 | 0 | 0 | 0 | 50 763 | 0 | 9 957 / 277 105 | 51 300 (10 077) | 0 |
+
+#### Juge q2, campagne v5
+
+| cas | Kmax | sites | incidences | trouvées | manquantes | recoupements faux | EXTRA | clés distinctes | clés p=Kmax−1 (arité 2) / population | code |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| q2_lidar_s00_8000_k10 | 10 | 1000 | 50 774 | 50 774 | 0 | 0 | 0 | 47 652 | 4 615 / 19 695 | 0 |
+| q2_lidar_s01_8000_k10 | 10 | 1000 | 42 019 | 42 019 | 0 | 0 | 0 | 39 380 | 3 461 / 14 816 | 0 |
+| q2_lidar_s02_8000_k10 | 10 | 1000 | 44 378 | 44 378 | 0 | 0 | 0 | 41 580 | 3 526 / 14 958 | 0 |
+| q2_lidar_s02_8000_k5 | 5 | 1000 | 24 126 | 24 126 | 0 | 0 | 0 | 22 609 | 4 335 / 18 253 | 0 |
+| q2_lidar_scene00_full_k10 | 10 | 200 | 8 587 | 8 587 | 0 | 0 | 0 | 8 565 | 810 / 83 241 | 0 |
+| q2_uniform_8000_k10 | 10 | 500 | 35 298 | 35 298 | 0 | 0 | 0 | 34 165 | 3 214 / 26 860 | 0 |
+
+Portes **v6** (`run_judges_v6_gates.sh`, épinglé à `abf3c382`, `STATUS=0`, sorties dans `results/gates_v6/`) : provenance contrôlée, dossier neuf, chaque mutant tué **avec son marqueur causal** ; `drop-long` tué sur les sites isolés de s00 et s02, au moins 50 incidences longues exigées.
+
+#### Portes v6 (`run_judges_v6_gates.sh`)
+
+| cas | code | attendu |
+| --- | ---: | ---: |
+| `q3_fixture_eq_compare` (désaccords d'élagage : 0, incidences : 369, dont ≥ 1 600 unités : 0) | 0 | 0 |
+| `q3_fixture_eq_overprune` (désaccords d'élagage : 2, incidences : 369, dont ≥ 1 600 unités : 0) | 1 | 1 |
+| `q3_fixture_eq_level` | 1 | 1 |
+| `q3_fixture_eq_shell_dup` | 1 | 1 |
+| `q3_fixture_eq_key` | 1 | 1 |
+| `q2_lidar_s02_8000_k5_level` | 1 | 1 |
+| `q2_lidar_s02_8000_k5_shell_dup` | 1 | 1 |
+| `q2_lidar_s02_8000_k5_key` | 1 | 1 |
+| `q3_lidar_s00_8000_k10_compare_isolated` (désaccords d'élagage : 0, incidences : 1513, dont ≥ 1 600 unités : 308) | 0 | 0 |
+| `q3_lidar_s00_8000_k10_overprune_isolated` (désaccords d'élagage : 0, incidences : 1513, dont ≥ 1 600 unités : 308) | 0 | obs |
+| `q3_lidar_s02_8000_k10_compare_isolated` (désaccords d'élagage : 0, incidences : 430, dont ≥ 1 600 unités : 59) | 0 | 0 |
+| `q3_lidar_s02_8000_k10_overprune_isolated` (désaccords d'élagage : 0, incidences : 430, dont ≥ 1 600 unités : 59) | 0 | obs |
+
+**Portée et réserves** (vérification adverse archivée dans
+`verification_juge_q3.json`, sur une source antérieure : trois
+vérificateurs, lemme et arithmétique confirmés ; défauts corrigés, puis
+contrelectures statiques de B sur les versions v3 et v4, également
+corrigées) :
+- C'est un juge d'échantillon : il ne certifie ni les sites non tirés, ni
+  la tour (`run_tower=false`), et ne change aucun statut public.
+- Les comptes sont des **incidences** (site tiré, triangle aigu) ; les clés
+  distinctes et la fraction de la famille $p=K_{\max}-2$ couverte sont
+  publiées à part (`top_keys` sur `top_population`).
+- Une boule à coquille étendue n'est visible que depuis les sommets de ses
+  triangles aigus de grand cercle : contre-exemple exact de centre
+  $(1000,1000,1000)$, $R^{2}=25$, coquille $a=(1000,1003,1004)$,
+  $b=(1005,1000,1000)$, $c=(997,1004,1000)$, $d=(997,996,1000)$, invisible
+  depuis $a$. De même, une boule diamétrale de $(b,c)$ passant par $a$
+  (angle droit en $a$) n'est jugée depuis $a$ ni par le juge q2 ni par le
+  juge q3.
+- Le juge partage avec le produit l'index des positions uniques (vérifié
+  contre les points d'entrée), la structure `BallData`, le catalogue et
+  `run_tower_chain` ; en mode `family`, le générateur d'entrées. Il ne
+  partage ni WSPD, ni témoins, ni cœur, ni cover, ni atlas.
+- Le catalogue jugé est produit à deux fils, pas à la configuration des
+  reçus G4 (W48).
+- Les strates de longueur sont des étiquettes en unités de grille ; elles
+  ne valent des millimètres qu'en mode `file`.
+- Les sites sont tirés par une permutation à graine publiée, distincte de
+  celle du juge q2.
 
 Bibliothèques : la sonde d'omission a été compilée contre les sources de
-`67fce4e9` (v14), le juge q2 contre celles de `243373f6` (v15) ; le
-générateur est le même dans les deux. Le mode `b13` de la sonde publiée
-identifie D et T par leurs coordonnées ; la campagne à 8k a tourné avec la
-version précédente de ce seul mode (le mode d'échelle est inchangé).
+`67fce4e9` (v14) ; la première campagne du juge q2 contre celles de
+`243373f6` (v15) ; la campagne v5 des deux juges et les portes v6 contre les
+sources du produit de `0d5ad2e8`, reconstruites par leurs lanceurs
+(`PROVENANCE.txt` de chaque dossier). Le générateur est le même dans toutes.
+Le mode `b13` de la sonde publiée identifie D et T par leurs coordonnées ; la
+campagne d'omission à 8k a tourné avec la version précédente de ce seul mode
+(le mode d'échelle est inchangé).
