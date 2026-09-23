@@ -148,6 +148,20 @@ et de scinder les rares gros sans perdre les ordinals ni les masques.
 Cette sonde CPU ne mesure ni le port S2 courant, ni GPU/G4, ni une
 croissance sous-quadratique ; la matrice spatiale/densité reste à rejouer
 avec le raccord exact.
+Le [reçu G4 R12](../receipts/g4_tower_r12_20260923/README.md) publie
+maintenant le raccord S2 : 14/14 cas achevés, sept filtres GPU réels,
+chaînes **2,01–2,69 s à K5** et **6,63–8,70 s à K10** sur trois trames
+sans sol de la seule séquence 08. La [contrelecture A](CONTRELECTURE_G4_R12_S2_20260923.md)
+vérifie le reçu et précise que ses huit accords comprennent six couples
+GPU–moteur distincts, mais comparent des résumés, pas les catalogues clé
+par clé. La campagne C compare ceux du lot **CPU** sur 08/000000/K5/K10,
+pas ceux du GPU. R12 change simultanément architecture batch et CUDA :
+le bras batch CPU `1/0` manque pour attribuer le gain de 15–25 %.
+Sur le meilleur K5, survivants et tour coûtent déjà **1,426 s** ; supprimer
+entièrement l'appel du filtre laisserait **1,786 s** de chaîne.
+Priorités : différentiel catalogue GPU, ablation à trois bras, puis
+réduction/accélération exacte des survivants et de la tour ; reprendre
+les coupes physiques et densités sur S2 pour étudier la croissance.
 Les deux meilleures lignes R11 (08/000100) bornent aussi le gain du
 seul réordonnancement q3/q4 : les **48 workers logiques** consomment
 78,151 CPU·s en 1,661 s de mur maximal à K5 et 211,744 CPU·s en
