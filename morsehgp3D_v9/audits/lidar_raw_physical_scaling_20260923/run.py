@@ -20,10 +20,10 @@ if not __debug__:
 FNV_PRIME = 1099511628211
 FNV_MASK = (1 << 64) - 1
 DEFAULT_PROBE = Path('/workspaces/E-HGP/build/v9-open-worktree/build/v9-dev/mhgp9_tower_probe')
-SECTORS = ('quarter_x_neg_y_neg', 'quarter_x_neg_y_nonneg',
-           'quarter_x_nonneg_y_neg', 'quarter_x_nonneg_y_nonneg',
-           'half_x_neg', 'half_x_nonneg')
-CASES = [('full', s) for s in SECTORS] + [('quarter', 'full'), ('half', 'full'), ('full', 'full')]
+SECTORS = ('full', 'half_x_neg', 'half_x_nonneg',
+           'quarter_x_neg_y_neg', 'quarter_x_neg_y_nonneg',
+           'quarter_x_nonneg_y_neg', 'quarter_x_nonneg_y_nonneg')
+CASES = [(density, sector) for density in ('quarter', 'half', 'full') for sector in SECTORS]
 
 
 def sha(blob):

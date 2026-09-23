@@ -6,7 +6,7 @@ Une seule trame SemanticKITTI 08/000000 **avec sol**, 123 389 retours distincts,
 sans fusion sur la grille 1 mm. Les prédicats géométriques utilisent les
 coordonnées entières u18 déclarées, pas les float32 d'origine. K5, s8,
 8 workers CPU et 8 fils
-statiques, `nice 19`, tous les leviers v12 actifs, aucun GPU ou GCP. Les neuf
+statiques, `nice 19`, tous les leviers v12 actifs, aucun GPU ou GCP. Les **21**
 sondes retournent `complete_relative` : le catalogue émis est recoupé, sa
 complétude envers les clés jamais émises n'est pas établie. Une exécution par
 cas sur hôte CPU partagé ; les temps sont descriptifs.
@@ -84,8 +84,48 @@ murs chaîne 0,971 et 1,042. Ces rapports spatiaux changent la géométrie
 et les frontières : ni eux ni les pentes de densité ne démontrent une loi
 asymptotique, et la somme des tours des morceaux n'est pas la tour globale.
 
+Les **12 sondes complémentaires** croisent maintenant les deux densités
+réduites avec les six secteurs. Les 21 cas forment la matrice complète
+7 secteurs × 3 densités, tous issus des mêmes sélections globales emboîtées.
+Chaque pente compare des effectifs **réels** dans un secteur fixe :
+
+| secteur physique | sites 1/4 / 1/2 / entière | p formes 1/4→1/2 / 1/2→entière | p CPU·s 1/4→1/2 / 1/2→entière |
+| --- | ---: | ---: | ---: |
+| trame entière | 30 847 / 61 694 / 123 389 | 1,823 / **2,136** | 1,218 / 1,297 |
+| demi `x<0` | 15 437 / 30 644 / 61 045 | 1,670 / 1,873 | 1,247 / 1,236 |
+| demi `x≥0` | 15 410 / 31 050 / 62 344 | 1,258 / 1,473 | 1,209 / 1,298 |
+| quart `x<0,y<0` | 7 649 / 15 217 / 30 265 | 1,658 / 1,864 | 1,245 / 1,292 |
+| quart `x<0,y≥0` | 7 788 / 15 427 / 30 780 | 1,688 / 1,898 | 1,200 / 1,244 |
+| quart `x≥0,y<0` | 7 692 / 15 619 / 31 391 | **2,060** / 1,844 | 1,209 / 1,328 |
+| quart `x≥0,y≥0` | 7 718 / 15 431 / 30 953 | 1,731 / 1,981 | 1,314 / 1,307 |
+
+**2/14** liens de densité franchissent `p_formes=2`. Les 14 pentes CPU
+restent entre **1,200 et 1,328**, les charges de cœur entre 1,119 et
+1,296 et les paires développées entre 1,287 et 1,769. À population
+fixée par densité, `R=Σ formes(morceau)/formes(plein)` évolue ainsi :
+
+| densité | repère quadratique moitiés / quarts | `R_formes` moitiés / quarts | `R_charges` moitiés / quarts | `R_CPU` moitiés / quarts |
+| --- | ---: | ---: | ---: | ---: |
+| 1/4 | 0,500 / 0,250 | 0,549 / 0,365 | 0,968 / 0,951 | 0,917 / 0,872 |
+| 1/2 | 0,500 / 0,250 | 0,421 / 0,357 | 0,970 / 0,959 | 0,924 / 0,882 |
+| entière | 0,500 / 0,250 | 0,306 / 0,300 | 0,969 / 0,961 | 0,900 / 0,874 |
+
+La part des formes qui disparaît sous la coupe en deux croît avec la
+densité : le verrou n'est pas seulement le nombre de cœurs chargés.
+Sur les 18 liens spatiaux parent→enfant (six à chaque densité), **7**
+ont `p_formes≥2` ; la pente maximale est 2,880 entre la trame entière
+et le demi `x≥0` à densité pleine. Le maximum CPU sur ces liens est
+1,466. Ces coupes changent les arêtes et les frontières ; elles ne
+constituent pas une preuve de complexité du générateur global.
+
+Les 12 nouvelles exécutions ont subi une forte contention de l'hôte
+partagé : le demi `x<0` à densité 1/2 a pris 54,95 s mur pour seulement
+64,82 CPU·s, alors que ce demi entier prend 28,05 s mur pour 151,96
+CPU·s. Les pentes murales entre ces deux cas seraient trompeuses ; les
+compteurs déterministes sont le signal de croissance de ce reçu.
+
 `generate.py` produit 21 entrées réversibles sous `/tmp` depuis les sources
-v8 versionnées. `run.py` exécute neuf cas, garde stdout/stderr et le reçu
+v8 versionnées. `run.py` exécute les 21 cas, garde stdout/stderr et le reçu
 `CASES.jsonl` ; `summarize.py` vérifie SHA, binaire/commande, options,
 entrée FNV, jointure
 par IDs, emboîtement strict, reconstruction spatiale et les sorties, puis
@@ -94,17 +134,20 @@ mesure la chaîne en mémoire et diffère du mur externe Python ; `chain_cpu_s`
 est le CPU cumulé de la sonde. Le plein prend 49,174 s de mur externe et
 1,93 GiB RSS. Les 21 payloads binaires peuvent être régénérés avec
 `python3 generate.py --repo /workspaces/E-HGP --out <répertoire>`. Copier
-ensuite `CASES.jsonl` et les neuf `*.stdout`/`*.stderr` archivés dans ce
+ensuite `CASES.jsonl` et les 21 `*.stdout`/`*.stderr` archivés dans ce
 répertoire. La commande
 `python3 summarize.py --repo /workspaces/E-HGP --out <répertoire>` relit le
 reçu sans relancer HGP. Ces scripts utilisent des assertions de contrôle :
 ils refusent explicitement le mode Python `-O` au lieu de déclarer une
 relecture réussie sans ces contrôles. Un rejeu depuis les sources v8
-versionnées a reconstruit les entrées, validé les neuf sorties et reproduit
+versionnées a reconstruit les entrées, validé les 21 sorties et reproduit
 `SUMMARY.json` octet pour octet ; une corruption du hash du binaire et
 `-O` ont bien refusé. Ces deux gardes du lecteur et le refus de `-O`
 dans les scripts ont été ajoutés **après la capture** ; la génération
-normale et les neuf commandes HGP restent celles inscrites au reçu.
+normale et les 21 commandes HGP restent celles inscrites au reçu. La
+première capture comptait neuf cas ; les douze secteurs décimés ont été
+ajoutés ensuite sous le même binaire épinglé, sans modifier les neuf
+premières lignes ni leurs sorties.
 
 Le catalogue non émis, K10, plusieurs scènes ou séquences, G4 et le
 profil float32 natif restent hors de ce reçu.

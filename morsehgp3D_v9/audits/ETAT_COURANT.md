@@ -644,10 +644,10 @@ sur ce quart échange seulement trois puis deux IDs aux densités 1/4 et 1/2 ;
 la pente K10 des formes reste **2,058215 puis 2,042880**, pratiquement
 inchangée. Ce signal ne vient donc pas seulement de l'étendue de la boîte.
 Le [premier reçu brut avec sol](lidar_raw_physical_scaling_20260923/README.md),
-[contrelu indépendamment par B](CONTRE_AUDIT_B_LIDAR_BRUT_PHYSIQUE_20260923.md)
-ajoute **neuf cas K5** sur une trame entière 08/000000 à 1 mm : sept
-secteurs par plans **float32 physiques** et trois densités emboîtées de
-la trame entière. La sélection garde les 123 389 retours sans fusion ;
+dont les [neuf premiers cas ont été contre-lus indépendamment par B](CONTRE_AUDIT_B_LIDAR_BRUT_PHYSIQUE_20260923.md),
+compte désormais **21 cas K5** sur une trame entière 08/000000 à 1 mm :
+sept secteurs par plans **float32 physiques**, chacun aux trois densités
+emboîtées. La sélection garde les 123 389 retours sans fusion ;
 trois changeraient de secteur si le signe était pris après grille.
 Sur 30 847→61 694→123 389 sites, les formes réellement chargées par
 le cœur passent de 35,46→125,48→551,69 M, soit des pentes finies
@@ -655,6 +655,13 @@ le cœur passent de 35,46→125,48→551,69 M, soit des pentes finies
 moitiés cumulent 97,0 % des charges de cœur du plein, mais seulement
 30,6 % de ses formes : 43,68 contre 138,39 formes par charge.
 C'est un verrou de **masse par cœur**, pas seulement de nombre de cœurs.
+Dans les 14 comparaisons de densité à secteur fixe, **2** pentes des
+formes dépassent 2 : la trame entière 1/2→entière (2,136) et le quart
+`x≥0,y<0` 1/4→1/2 (2,060). Les pentes CPU sont 1,200–1,328.
+La part des formes retrouvée en sommant les moitiés tombe de **0,549**
+à densité 1/4 à **0,306** à densité entière ; la part des charges de
+cœur reste autour de 0,97. Les chronos muraux des nouvelles coupes sont
+fortement perturbés par la contention de l'hôte partagé.
 Le plein prend 48,36 s de chaîne locale W8 et 1,93 GiB RSS ; ni borne
 asymptotique ni contrat G4 ne sont acquis.
 Le [crédit exact par nœuds du certificat de cœur](../receipts/dead_node_credit_negative_20260923/README.md)

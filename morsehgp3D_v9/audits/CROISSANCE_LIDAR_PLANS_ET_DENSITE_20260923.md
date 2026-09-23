@@ -180,10 +180,18 @@ passages superposés. Les temps proviennent d'un hôte CPU partagé et les
 cas à densité entière portent le libellé de sonde historique
 `grid=unspecified`, même si leur entrée 1 mm est attestée par le manifeste.
 Un [premier reçu brut](lidar_raw_physical_scaling_20260923/README.md)
-couvre désormais 08/000000/K5 avec les plans **float32 physiques** et
-trois densités de la trame entière : il retrouve `p_formes=2,136` au
-dernier doublement, avec CPU `p=1,297`. Ce seul cas ne remplace pas la
-matrice sans sol K5/K10 ci-dessus. Répéter sur d'autres séquences,
+couvre désormais les **21** croisements des sept secteurs 08/000000/K5
+définis par plans **float32 physiques** et des trois densités emboîtées.
+Ses 14 pentes de densité à secteur fixe donnent deux franchissements des
+formes payées par le cœur : **2,136** sur la trame entière 1/2→entière
+et **2,060** sur le quart `x≥0,y<0` 1/4→1/2. Les pentes CPU restent
+entre **1,200 et 1,328**. À densité 1/4, 1/2, entière, les moitiés
+réunies portent **0,549 / 0,421 / 0,306** des formes du plein alors que
+leurs charges de cœur restent à environ **0,97**. Le signal de masse
+par cœur se renforce donc avec la densité sur cette trame, mais ce seul
+cas ne remplace pas la matrice sans sol K5/K10 ci-dessus. Les murs des
+12 nouvelles coupes ont subi de fortes interférences sur l'hôte partagé ;
+privilégier les compteurs dans ce reçu. Répéter sur d'autres séquences,
 plusieurs graines et K10, puis comparer une sélection stratifiée par
 azimut/rayon en gardant K/s/W, segmentation et préparation séparés ;
 publier sortie, catalogue,

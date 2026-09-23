@@ -13,7 +13,15 @@ if not __debug__:
 SECTORS = ('full', 'half_x_neg', 'half_x_nonneg',
            'quarter_x_neg_y_neg', 'quarter_x_neg_y_nonneg',
            'quarter_x_nonneg_y_neg', 'quarter_x_nonneg_y_nonneg')
-CASE_NAMES = {f'full_{s}' for s in SECTORS} | {'quarter_full', 'half_full'}
+DENSITIES = ('quarter', 'half', 'full')
+CASE_NAMES = {f'{density}_{sector}' for density in DENSITIES for sector in SECTORS}
+SLOPE_KEYS = ('external_wall_s', 'chain_wall_s', 'chain_cpu_s', 'q34_wall_s',
+              'catalogue_balls', 'expanded_pairs', 'dead_core_loads',
+              'dead_core_form_sites', 'dead_core_forms_per_load',
+              'dead_core_uniform_tests', 'core_sites')
+SUM_KEYS = ('external_wall_s', 'chain_wall_s', 'chain_cpu_s', 'q34_wall_s',
+            'catalogue_balls', 'expanded_pairs', 'dead_core_loads',
+            'dead_core_form_sites', 'dead_core_uniform_tests', 'core_sites')
 LEVER_NAMES = ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes',
                'q34_witness_cache', 'q34_dead_core', 'tower_meb_proposal')
 EXPECTED_BINARY_SHA256 = 'e1ba126fbcea8ad483ebff2265f446c18e90eaefe04bf20021e76cd0df09af80'
@@ -131,38 +139,55 @@ def main():
         assert cat['shell_over_12'] == 0
         assert probe['times_ms']['chain_total'] > 0 and probe['chain_cpu_s'] > 0
         by_name[name] = metrics(line)
-    density = []
-    for pa, ch in (('quarter_full', 'half_full'), ('half_full', 'full_full')):
-        a0, b0 = by_name[pa], by_name[ch]
-        density.append({'from': pa, 'to': ch, 'n_ratio': b0['sites'] / a0['sites'],
-                        'p': {key: slope(a0, b0, key) for key in (
-                            'external_wall_s', 'chain_wall_s', 'chain_cpu_s',
-                            'q34_wall_s', 'catalogue_balls', 'expanded_pairs',
-                            'dead_core_loads', 'dead_core_form_sites',
-                            'dead_core_forms_per_load', 'dead_core_uniform_tests',
-                            'core_sites')}})
-    full = by_name['full_full']
+    density = {}
+    for sector in SECTORS:
+        density[sector] = []
+        for before, after in zip(DENSITIES, DENSITIES[1:]):
+            a0, b0 = by_name[f'{before}_{sector}'], by_name[f'{after}_{sector}']
+            density[sector].append({
+                'from': before, 'to': after, 'n_ratio': b0['sites'] / a0['sites'],
+                'p': {key: slope(a0, b0, key) for key in SLOPE_KEYS},
+            })
     spatial = {}
-    for part, names in (
-        ('halves', ('full_half_x_neg', 'full_half_x_nonneg')),
-        ('quarters', tuple('full_' + s for s in SECTORS[3:])),
-    ):
-        spatial[part] = {
-            'quadratic_reference': sum((by_name[name]['sites'] / full['sites']) ** 2 for name in names),
-            'sum_piece_over_full': {
-                key: sum(by_name[name][key] for name in names) / full[key]
-                for key in ('external_wall_s', 'chain_wall_s', 'chain_cpu_s',
-                            'q34_wall_s', 'catalogue_balls', 'expanded_pairs',
-                            'dead_core_loads', 'dead_core_form_sites',
-                            'dead_core_uniform_tests', 'core_sites')},
-        }
-    result = {'schema': 'mhgp9_raw_physical_sector_density_summary_v1',
+    for level in DENSITIES:
+        full = by_name[f'{level}_full']
+        spatial[level] = {}
+        for part, sectors in (
+            ('halves', SECTORS[1:3]), ('quarters', SECTORS[3:]),
+        ):
+            pieces = [by_name[f'{level}_{sector}'] for sector in sectors]
+            assert sum(piece['sites'] for piece in pieces) == full['sites']
+            spatial[level][part] = {
+                'quadratic_reference': sum((piece['sites'] / full['sites']) ** 2 for piece in pieces),
+                'sum_piece_over_full': {
+                    key: sum(piece[key] for piece in pieces) / full[key]
+                    for key in SUM_KEYS},
+            }
+    links = (('full', 'half_x_neg'), ('full', 'half_x_nonneg'),
+             ('half_x_neg', 'quarter_x_neg_y_neg'),
+             ('half_x_neg', 'quarter_x_neg_y_nonneg'),
+             ('half_x_nonneg', 'quarter_x_nonneg_y_neg'),
+             ('half_x_nonneg', 'quarter_x_nonneg_y_nonneg'))
+    parent_child = {}
+    for level in DENSITIES:
+        parent_child[level] = []
+        for parent, child in links:
+            older, smaller = by_name[f'{level}_{parent}'], by_name[f'{level}_{child}']
+            parent_child[level].append({
+                'parent': parent, 'child': child,
+                'n_ratio_parent_over_child': older['sites'] / smaller['sites'],
+                'p_parent_over_child': {key: slope(smaller, older, key) for key in SLOPE_KEYS},
+            })
+    result = {'schema': 'mhgp9_raw_physical_sector_density_summary_v2',
               'binary_sha256': lines[0]['binary_sha256'],
               'n_valid_cases': len(lines), 'metrics': by_name,
-              'density_slopes': density, 'spatial_sums': spatial}
+              'density_slopes_by_sector': density,
+              'spatial_sums_by_density': spatial,
+              'spatial_parent_child_slopes_by_density': parent_child}
     (a.out / 'SUMMARY.json').write_text(json.dumps(result, indent=2, sort_keys=True) + '\n')
-    print(json.dumps({'n_valid_cases': len(lines), 'density_slopes': density,
-                      'spatial_sums': spatial}, indent=2, sort_keys=True))
+    print(json.dumps({'n_valid_cases': len(lines),
+                      'density_slopes_by_sector': density,
+                      'spatial_sums_by_density': spatial}, indent=2, sort_keys=True))
 
 
 if __name__ == '__main__':
