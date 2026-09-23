@@ -88,6 +88,21 @@ certificat et ne doit jamais devenir un rejet. Cibler les *tentatives*
 de preuve sur ces charges lourdes, indépendamment de l'axe du capteur,
 permet d'évaluer si l'objet `E` sauve vraiment le poste dominant.
 
+**Ne pas confondre avec une nouvelle boule centrale universelle.** Si
+`D=|b−a|²`, `m=(a+b)/2` et un témoin réel satisfait
+`|g−m|²≤D/16`, alors, pour la paire ponctuelle `a,b`, le filtre
+actuel a `4H=D−4|g−m|²≥3D/4` et
+`Xi=|(b−a)×(g−m)|²≤D²/16`. Sa condition stricte q4 est donc
+`2(4H)²≥18D²/16>16Xi` ; q3 est encore plus facile. De tels
+témoins sont **déjà** crédités par la recherche ponctuelle jusqu'aux
+feuilles dans la configuration `RectanglePair`/Affine de R12 (ou la
+voie est déjà rejetée lorsque son seuil est atteint). Si la voie
+q4 survit, il n'y en a pas `K−2` ; si q3 survit, pas `K−1`. Le fait que
+94 % des formes du cœur soient ensuite calculées sur des voies fermées
+ne justifie donc pas de simplement recompter cette boule centrale :
+il faut des gardes dépendant d'une **cellule de centres plus petite**
+ou une autre preuve conditionnelle, avec travail mesuré.
+
 La porte est **économique avant d'être chronométrique** : sur les
 rectangles lourds choisis par un budget de *tentatives* (jamais un quota
 de candidats), publier `R,P,S`, tailles et masques des segments,

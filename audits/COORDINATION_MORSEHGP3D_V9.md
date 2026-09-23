@@ -3493,3 +3493,14 @@ Enfin le scénario partiel mixte de mon préflight G4 reste un défaut de
 **libellé** : `GPU_executed` peut signifier seulement préflight GPU
 alors qu'aucune tour LiDAR GPU n'est achevée. Ce cas n'affecte pas R12,
 où toutes les tours prévues se sont achevées.
+
+**Précision géométrique pour la refonte avant cœur.** Le petit disque
+universel de milieu `m=(a+b)/2` et rayon `|ab|/4` est déjà un cas
+certifié par le filtre ponctuel q3/q4 de R12 : tout site qu'il contient
+vérifie strictement le citron `alpha(4H)^2>16Xi` pour les deux voies.
+Une voie survivante n'a donc pas assez de ces témoins pour être tuée
+par leur simple recomptage. Les 94 % de formes du cœur ensuite payées
+sur des voies fermées appellent des **gardes conditionnels par cellule
+de centres**, pas une nouvelle passe du même disque. Détail algébrique
+et porte de shadow dans la
+[note B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_CROISSANCE_Q34_AVAL_S2_20260923.md).
