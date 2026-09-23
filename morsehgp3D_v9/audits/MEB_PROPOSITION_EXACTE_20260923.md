@@ -31,3 +31,24 @@ G4 R7 a subi un `STOCKOUT` avant démarrage : il reste à comparer la chaîne
 complète et le coût CPU/mur appariés, même entrée et même objet. Les
 résultats locaux et la contre-épreuve FENV sont récapitulés dans
 [ETAT_COURANT.md](ETAT_COURANT.md).
+
+## Porte de réception encore incomplète
+
+Sur le produit `02d55856`, le lecteur v11 accepte une sortie
+`complete_relative` du faux producteur avec `meb_calls=4`,
+`meb_proposals=4`, `meb_verified_proposals=2` et
+`meb_proposal_fallbacks=1`. Un seul compteur (`proposals`) a été
+augmenté ; le calcul est pourtant déclaré complet. Pour un appel MEB
+terminé, les deux issues sont exhaustives : une proposition vérifiée
+retourne, directement ou après canonisation sur son bord exact, et
+toute autre proposition atteint le repli. Le support déjà vérifié est
+présent sur ce bord, donc la canonisation ne peut échouer sans refus
+explicite. L'identité attendue est
+`proposals = verified_proposals + proposal_fallbacks`.
+`tower_worker_v9.py:459-464` ne vérifie que des inégalités séparées ;
+une mutation causale du faux producteur reste acceptée, y compris
+sous Python `-O`. Cela n'implique **aucune erreur géométrique** observée
+dans le moteur ; c'est une lacune du validateur de reçus. Exiger
+l'égalité pour `complete_relative`, avec un mutant dédié, avant de
+tenir ces compteurs pour une preuve G4. Les refus partiels doivent
+garder leur propre règle de comptage.

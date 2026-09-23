@@ -37,6 +37,16 @@ Le paquet `PACKAGE.json` décrit la préparation (`GCP_used=false`), le
 reçu hôte la demande réellement envoyée ; **aucun chrono, aucune
 ablation MEB ni résultat FULL/GPU** ne vient de R7.
 
+La [contrelecture du MEB
+proposé](MEB_PROPOSITION_EXACTE_20260923.md) reproduit sous le
+lecteur v11 une sortie `complete_relative` acceptée malgré
+`meb_proposals=4`, `meb_verified_proposals=2` et
+`meb_proposal_fallbacks=1` : une proposition manque au bilan. Pour
+un calcul terminé du moteur courant, les issues sont exhaustives ;
+ajouter l'égalité et un mutant dédié avant d'utiliser ce ledger
+comme preuve de réception G4. Cela ne démontre pas une erreur
+géométrique du moteur.
+
 ## Contrat et objet effectivement construit
 
 Le jalon v9 vise toute la tour HGP **K=1..10 en moins de 1 s sur GCP G4**,
@@ -367,7 +377,10 @@ Les collisions sont départagées par la clé entière ; aucune case occupée
 n'est effacée. À 5,51 M boules, la capacité de 16 777 216 identifiants
 `u32` ajoute **64 Mio** à `by_key`, toujours conservé. L'essai local
 alterné 08/000000/K10/W8 passe de **18,5/17,7 s à 16,9/16,4 s** pour la
-tour, avec digest égal ; le développeur rapporte **127/127** portes locales,
+tour, avec digest égal ; la
+[contrelecture indépendante](CONTRE_AUDIT_B_INDEX_CLES_FULL_20260923.md)
+rejoue quatre portes ciblées, dont le mutant « clé absente » tué
+causalement. Le développeur rapporte **127/127** portes locales,
 mais le registre CTest du snapshot énumère **128** tests `gate` et le log
 mutable ne fige pas leur clôture. Ni G4 ni gain de chaîne complète n'en
 découlent. Publier construction, sondes réussies et
