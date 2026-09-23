@@ -888,8 +888,23 @@ class Protocol(unittest.TestCase):
                 path = directory / (source + '.tar.gz')
                 snapshot.write_archive(path, files)
                 if source == 'commit':
-                    session.require_committed_protocol(path, worker.sha(path))
+                    # Recertification Git : accepte seulement si le paquet se
+                    # reconstruit depuis le commit declare (protocole commite).
+                    if pkg['committed']:
+                        session.require_committed_protocol(path, worker.sha(path))
+                    else:
+                        need(refused(session.require_committed_protocol, path, worker.sha(path)),
+                             'forged commit provenance of an uncommitted protocol')
                     need(refused(session.require_committed_protocol, path, '0' * 64), 'snapshot pin')
+                    parent = subprocess.run(['git', '-C', str(ROOT), 'rev-parse', 'HEAD~1'], check=True,
+                                            capture_output=True, text=True).stdout.strip()
+                    forged = dict(files)
+                    forged[worker.PROVENANCE] = worker.canonical_json(dict(
+                        worker.strict_json(files[worker.PROVENANCE]), commit=parent))
+                    forged_path = directory / 'forged_commit.tar.gz'
+                    snapshot.write_archive(forged_path, forged)
+                    need(refused(session.require_committed_protocol, forged_path, worker.sha(forged_path)),
+                         'archive claiming another commit is refused')
                     continue
                 args = session_args(directory, path)
                 argv = ['--execute', '--snapshot', str(path), '--snapshot-sha256', worker.sha(path),
