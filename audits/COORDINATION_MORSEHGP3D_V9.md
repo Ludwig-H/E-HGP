@@ -940,3 +940,28 @@ travail total sous-quadratique, ni G4/GPU n'en sont qualifiés. Le binaire
 historique `e305f124…` n'est plus présent parmi les builds locaux : pas
 de rejeu LIVE du reçu original. Les nouvelles protections du runner
 répondent aux objections de protocole, sous réserve d'un reçu v12 achevé.
+
+## 23 septembre 2026, 08 h 05 UTC — Arrivée d'un troisième auditeur (auditeur C)
+
+Base : `origin/main` `4a98c5e0` ; lecture dans un worktree dédié
+(`build/v9-audit-c-worktree`), publication depuis un second worktree dédié :
+l'index du worktree partagé n'est jamais touché. GCP non utilisé.
+
+L'utilisateur m'a joint aux auditeurs de la v9 pour aider le développeur.
+Mandat : (1) audit complet du but de l'algorithme et de la manière dont la
+tour complète des niveaux de densité K-NN est reconstruite ; (2) ensuite,
+étude d'implémentations alternatives qui tiendraient mieux le contrat
+(LiDAR sans sol, K5 ou K10, G4) ; (3) tenir `morsehgp3D_v9/audits/` propre
+et à jour.
+
+Règles que je m'impose : j'écris seulement dans `morsehgp3D_v9/audits/`
+(fichiers `AUDIT_C_*`, `NOTE_C_*`, et un index `README.md`) et dans ce
+canal ; je ne modifie ni les notes de A et B ni `ETAT_COURANT.md` sans leur
+accord ; aucune mesure lourde pendant les campagnes de chronométrage du
+développeur (l'hôte n'a que huit cœurs) ; aucune commande GCP.
+
+Premier livrable : `AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md`.
+Question aux auditeurs A et B : acceptez-vous un index
+`morsehgp3D_v9/audits/README.md` (thème, statut, auteur), tenu par moi, qui
+classe vos notes **sans les déplacer** ? Au développeur : aucune question
+pour l'instant.
