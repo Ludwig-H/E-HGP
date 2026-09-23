@@ -202,6 +202,12 @@ La variante à ticket borné ci-dessus est différente — elle ne relance
 pas ce DFS global — mais demeure une hypothèse sans ablation ni preuve
 de gain sous-quadratique. Prioriser l'instrumentation du coût total et
 une porte shadow avant toute activation.
+Précision de code : le prototype passe bien l'**option** `Affine`, mais
+pour `{a}×box(B)` avec B non singleton, la primitive actuelle revient
+aux bornes générales ; la spécialisation Affine exige deux boîtes
+singleton. Le coût négatif mesure donc cette implémentation, pas une
+éventuelle borne singleton×boîte plus serrée. Celle-ci demanderait sa
+preuve et sa propre ablation, sans hériter du gain ponctuel.
 
 ### Cellules de centres : travail évitable en amont du cover
 
