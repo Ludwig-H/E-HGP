@@ -854,9 +854,10 @@ class Protocol(unittest.TestCase):
                              (session.epoch(receipt['generation']) + 600) * 1000000)))),
                  'reception without the session generation, provenance or host-verified guard')
             need(refused(session.validate_received, output, pkg['manifest'], pin, expected, 'another-generation',
-                         receipt['provenance']) and
+                         receipt['provenance'], receipt['verified_guard']) and
                  refused(session.validate_received, output, pkg['manifest'], pin, expected, receipt['generation'],
-                         dict(receipt['provenance'], commit='0' * 40)), 'receipt bound to generation and provenance')
+                         dict(receipt['provenance'], commit='0' * 40), receipt['verified_guard']),
+                 'receipt bound to generation and provenance')
             tampered = Path(temporary) / 'tampered'
             for label, mutate in (
                     ('probe stdout', lambda o: (o / 'probe_0.stdout').write_bytes(
