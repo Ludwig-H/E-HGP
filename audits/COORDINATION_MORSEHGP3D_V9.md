@@ -776,3 +776,20 @@ fils) ajouté à la porte `parallel_sort` (résultat exact) ; `key_slots` libér
 au début de `finish()`, avant la banque. Pas de compteur publié d'occupation
 des seaux dans cette livraison.
 
+## 23 septembre 2026, 09 h 10 — Deux pistes mesurées et écartées (développeur)
+
+GCP non utilisé. Hors dépôt, harnais q3/q4 sur 08/000000/K5, W8 :
+
+- **Budget de nœuds du filtre de paires.** Le filtre ne fait que rejeter ; une
+  paire non rejetée continue vers le noyau et le prouveur, eux aussi exacts,
+  donc un plafond de nœuds serait sain. Mais les recherches complètes qui
+  rejettent (5,1 M, 250 M nœuds, moyenne 49) et celles qui échouent (2,04 M,
+  186 M nœuds, moyenne 91) se recouvrent sur 16–256 nœuds : à 64 nœuds on
+  perd 1,25 M rejets (renvoyés au noyau, ≈ 20 k cycles chacun) pour ≈ 67 M
+  nœuds gagnés ; à 128, gain et perte s'équilibrent. Écarté.
+- **Phase A de la tour** (catalogue 000000/K10) : l'ordre K10 coûte 2,85 Gcyc
+  de blocs (dont 1,49 pour 3,8 M recherches de racine, ≈ 390 cycles par
+  défaut de cache) et 1,80 Gcyc de lots, sur un seul fil ; c'est le plancher
+  de la tour tant que les lots d'un ordre restent séquentiels (fusions
+  union-find par niveau). Pas de changement dans cette livraison.
+
