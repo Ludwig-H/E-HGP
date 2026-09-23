@@ -149,6 +149,13 @@ hors condensé (publié à part) : **3,67 / 5,31 / 6,40 s à K5** et
 Depuis : Welzl à déplacement en tête (proposition ÷2,7), séparateurs
 pseudo-aléatoires du tri parallèle, index de clés libéré avant la banque.
 
+Croissance LiDAR locale ([`lidar_scaling_local_20260923`](receipts/lidar_scaling_local_20260923/README.md),
+sonde v12 `4530644b`, runner v2, trois trames sans sol, K5 et K10, emboîtés
+8k/16k/32k + entier + morceaux, 66 cas conformes) : temps de chaîne ×1,7 à
+×2,8 par doublement et boules sous-linéaires, mais `core_sites` (sites
+énumérés dans les cœurs diamétraux) atteint p = 2,5 à 3,05 sur un doublement
+de s00 et de s02 aux deux K. Le cœur est la première cible d'échelle.
+
 Suite : coût q3/q4 (ventilation K10 W8 locale en Gcycles : atlas 229, q4 235,
 paires 187, rectangles 123, noyau 120, q3 120, preuve sur cover 86) ; seuil
 K−2 des arêtes q4 seules ; équilibrage de la tour K10 ; voie GPU (V9-4).
