@@ -1,10 +1,11 @@
 # État courant des audits v9
 
-23 septembre 2026. Produit publié courant : **`d49c99f7`**. Le dernier
+23 septembre 2026. Produit publié courant : **`78ce9fd4`**. Le dernier
 [reçu G4 R5](../receipts/g4_tower_r5_20260923/README.md) exécute le snapshot
 antérieur **`aae9da0e`** ; ses temps ne qualifient donc pas le correctif
-`84c74a5e`, le cœur diamétral de `a78664d4` ni la sonde v8 publiée dans
-`e5688680`. Aucun reçu R6 n'est encore publié. Cadre :
+`84c74a5e`, le cœur diamétral de `a78664d4`, la sonde v8 de
+`e5688680` ni les gardes de réception de `cc4664e5`/`78ce9fd4`. Aucun reçu R6
+n'est encore publié. Cadre :
 `exploration_v9_hors_registre`, `reference_cpu`,
 `quantized_u18_input_only`, **`not_claimed`**. Ce fichier porte le verdict
 mutable. Les notes datées conservent preuves, contre-exemples et reçus.
@@ -13,10 +14,11 @@ mutable. Les notes datées conservent preuves, contre-exemples et reçus.
 
 Le jalon v9 vise toute la tour HGP **K=1..10 en moins de 1 s sur GCP G4**,
 avec repli K=1..5, puis 100 ms. Le sans-sol LiDAR u18/grille 1 mm est le
-premier régime de travail. Il ne remplace ni le contrat principal sur
-**trames brutes entières**, ni les coordonnées float32 originales par
-défaut ; aucune hypothèse d'alignement entre passages LiDAR n'est admise.
-Une grille isotrope de 1 mm reste une option d'entrée distincte. Les trois
+premier régime de travail. Décision utilisateur ultérieure : **la grille
+1 mm est le profil de qualification prioritaire de v9 ; le float32 exact
+est secondaire**. Ce choix de précision ne remplace pas le contrat
+principal sur **trames brutes entières** par le sous-nuage sans sol ;
+aucune hypothèse d'alignement entre passages LiDAR n'est admise. Les trois
 trames 08/000000, 000100 et 000200 sont d'une seule séquence, pas une
 qualification multi-séquence. Les coupes capteur servent au diagnostic de
 croissance, jamais à remplacer une trame entière.
@@ -52,9 +54,9 @@ ouverte repasse par celui-ci. Le sous-ensemble ne peut ajouter un faux
 témoin intérieur. Les portes locales comparent les candidats aux petits
 oracles et exercent fermeture puis repli, mais le levier est déjà **ON par
 défaut** sans reçu G4 ni ablation FULL qui l'isole. `e5688680` protège
-aussi les consommateurs complets contre un cœur passé par erreur ; deux
-wrappers q4 à K1/2 rendent encore vide avant ce garde, écart d'API sans
-sortie fausse. La porte FULL actuelle
+aussi les consommateurs complets contre un cœur passé par erreur ;
+`cc4664e5` place le même refus avant les retours q4 à K1/2. La porte
+FULL actuelle
 compare les cinq leviers ensemble, donc couvre le raccord sans attribuer
 une égalité au seul cœur. Corriger aussi le commentaire de profondeur
 « exacte » dans `q34_dead_lanes.cpp` : sur le cœur, le compte ponctuel est
@@ -146,6 +148,20 @@ diagnostiquer le chemin critique.
 Le plan G4 v5 par défaut met les cinq leviers ON dans ses huit cas : une
 ablation causale du cœur exige des cas supplémentaires appariés, avec un
 préflight ON. L'expansion `A×B` demeure entière.
+
+Une [ablation locale complémentaire sur deux coupes **sans
+sol**](CORE_LIDAR_LOCAL_20260923.md), K5/K10/s8/W8 et sans FULL,
+compare aussi le **flux entier** des présentations q3/q4 : OFF et ON
+coïncident sur 117 196, 565 007 puis 2 032 711 lignes, avec clé,
+support, profondeur et coquille exacts. Le coût reste dépendant du
+régime : à K10, les visites core+cover montent de 83,1 % sur 8 225
+sites mais baissent de 10,1 % sur 13 055 sites. Le CPU de chaîne
+diminue dans les deux cas ; le mur q3/q4 régresse sur la petite coupe
+et gagne sur la grande, une répétition sur hôte partagé. Construire
+le cover complet puis filtrer le cœur exigerait de scanner jusqu'à
+1,63 milliard d'incidences sur la grande coupe, contre 115 millions
+pour le cœur actuel : cette variante ne mérite pas de port sans
+prototype favorable. Aucune paire développée n'est supprimée.
 
 La priorité constructive est de prouver un masque q3/q4 **avant**
 l'expansion de produits résiduels `A×B`, puis avant le cover pour les
@@ -244,60 +260,28 @@ mesure des répétitions par clé et worker.
 
 ## Portes de preuve encore ouvertes
 
-Le protocole v6 a produit les reçus R4b/R5 complets, mais son lecteur
-acceptait des incohérences de `guard_evidence.json` et des compteurs
-impossibles. `e5688680` renforce les identités des voies, du cache, des
-coquilles et du cœur ; `d49c99f7` corrige la portée de la fixture de
-garde. Les [contre-fixtures v5](CONTRE_AUDIT_B_G4_RECEPTION_V5_20260923.md)
-et les [identités v6](RECEPTION_V6_IDENTITES_MANQUANTES_20260923.md)
-restent l'historique des refus manquants. La
-contrelecture indépendante des **sorties effectivement reçues** R5
-reste positive ; un simple statut `completed` ne vaut pas réception
-fail-closed de toute campagne future. R2 demeure refusé, sans
-promotion rétrospective de ses chronos bruts.
+Le lecteur des reçus a progressé : `e5688680` impose les identités
+physiques des voies, du cache, des coquilles et du cœur ; `cc4664e5`
+lie la marque et le calendrier archivés aux **valeurs exactes** déjà
+vérifiées par l'hôte. `a5872918` répare les appels du selftest à cette
+nouvelle interface. Sur contenu figé, les **21/21 selftests** passent en
+Python normal puis sous `-O`, avec les mutations de date future et de
+calendrier plausible refusées. Ces portes hors GCP ne certifient pas
+encore un reçu R6 ; la contrelecture des sorties brutes R5 reste
+positive et R2 demeure refusé. Les [contre-fixtures
+v5](CONTRE_AUDIT_B_G4_RECEPTION_V5_20260923.md), les [identités
+v6](RECEPTION_V6_IDENTITES_MANQUANTES_20260923.md) et la
+[relecture v8](CONTRE_AUDIT_B_RECEPTION_V8_GARDES_WIP_20260923.md)
+gardent l'historique sans être des défauts du lecteur publié courant.
 
-Le lecteur du plan v5 acceptait aussi un registre **physiquement
-impossible** du cœur : ajouter un million à `dead_core_q3_proved` sur
-un vrai JSON local passait malgré un total de voies supérieur aux
-`core_builds`. `e5688680` impose maintenant les bornes `proved+open <=
-builds` par voie et des gardes de conservation ; la fixture factice est
-rendue physiquement cohérente. Vérifier ces mutations sur le snapshot
-figé avant R6, sans reporter ce défaut historique au lecteur v8.
-
-Dans le lecteur de session **publié** sous `e5688680`, la marque et le
-calendrier archivés ne sont toujours pas liés aux
-**valeurs exactes vérifiées par l'hôte**. Sur une fixture hors-ligne,
-remplacer seulement `guard_evidence.mark.date_utc` par le lendemain laisse
-`validate_received` rendre `completed` ; l'autre auditeur a aussi fait
-accepter un `schedule.USEC` différent mais plausible. Une simple fenêtre
-temporelle est donc insuffisante : transmettre la marque et le calendrier
-vérifiés (ou leurs empreintes) au lecteur, exiger leur égalité avec
-l'archive, puis tuer les deux mutations avant le prochain reçu G4. Voir la
-[contrelecture de la réception v8](CONTRE_AUDIT_B_RECEPTION_V8_GARDES_WIP_20260923.md).
-
-Le correctif local développeur `f599aed7` lie bien la garde archivée à
-la paire marque/calendrier déjà vérifiée par l'hôte et déplace la garde
-de cover q3/q4 avant les retours K1/2 ; il n'est pas encore publié sur
-`main`. Sa porte protocolaire est rouge : dans
-`Protocol.test_nominal_session_completed`, deux appels historiques à
-`validate_received` omettent le nouvel argument `verified_guard`
-(lignes 856–859 du selftest). Le test ciblé rend code 1 avec `TypeError`,
-avant d'exercer les refus de génération et provenance. Passer aussi la
-garde vérifiée à ces deux appels, puis relancer **tous** les selftests
-normal/`-O` en conservant le code de sortie Python (une sortie passée à
-`tail` sans `pipefail` peut masquer un échec).
-
-Deux détails de protocole restent à fermer pour une ablation R6 propre.
-`preflight_case` prend seulement les leviers du premier cas ; un plan
-valide OFF→ON pour le cœur ne préflight donc jamais la configuration ON
-avant sa trame LiDAR. Placer un cas ON d'abord ou préflighter chaque
-vecteur de leviers distinct. En réception `partial`, le résumé
-`probe_i.summary.json` d'un cas `killed_case_cap`/`killed_budget` est
-écrit par le worker, mais le lecteur saute sa vérification : sa
-suppression laisse encore accepter `partial` sur une fixture hors GCP.
-Vérifier le résumé attendu de chaque cas lancé avant le `continue` des
-cas tués. Aucun de ces constats ne retire la concordance brute des
-reçus R5 déjà contre-lus.
+`78ce9fd4` ferme les deux derniers écarts protocolaires suivis : le
+premier cas doit activer les cinq leviers que le préflight exercera,
+et le lecteur contrôle aussi le résumé exact de chaque cas tué dans
+une réception `partial`. Un fichier absent rend un refus typé. Sur
+ce commit figé, **21/21 selftests normal et 21/21 sous `-O`** passent,
+dont les mutations ON/OFF de plan et suppression/altération du résumé.
+La prochaine preuve attendue est un reçu G4 R6 complet ou partiel
+rejugeable, pas une nouvelle inférence depuis les seuls selftests.
 
 Prochaines mesures : mêmes octets et masque figé, trames **entières** de
 plusieurs séquences sans sol puis brutes, s8/10/12, K5 et K10, W1/W24/W48,
