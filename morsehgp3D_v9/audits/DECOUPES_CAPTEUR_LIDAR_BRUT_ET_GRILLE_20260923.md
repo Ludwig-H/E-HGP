@@ -9,7 +9,8 @@ second à `x`. Les sous-nuages emboîtés
 ils ne remplacent pas ces découpes par plans, encore moins la trame entière.
 Le masque sans sol est produit sur la trame entière avant les coupes. Faire
 les mêmes diagnostics de découpe sur la trame brute entière et sur le
-sous-nuage sans sol ; les reçus examinés ici ne contiennent que ce dernier.
+sous-nuage sans sol. Les chronos de tour v9 examinés ici ne portent que
+sur ce dernier.
 
 ## Ce qui est vérifié dans les trois reçus disponibles
 
@@ -28,6 +29,26 @@ encodée appartient au côté non négatif. Les effectifs sont :
 | 000000 | 39 885 | 24 591 / 15 294 | 11 536 / 13 055 / 8 225 / 7 069 |
 | 000100 | 35 551 | 19 019 / 16 532 | 8 074 / 10 945 / 9 221 / 7 311 |
 | 000200 | 45 845 | 25 730 / 20 115 | 16 262 / 9 468 / 14 829 / 5 286 |
+
+Les préparations float32 de la [trame brute entière](../../morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/MANIFEST.json)
+et du [sous-nuage sans sol](../../morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_float32/MANIFEST.json)
+contiennent déjà les coupes selon le **signe original** du repère capteur.
+Une contrelecture indépendante a vérifié les sept payloads de chacun des
+six manifestes : SHA-256 des points et IDs, cardinalités, IDs strictement
+croissants, coordonnées conservées par ID, signes des côtés et
+reconstruction disjointe et exhaustive. Pour la trame brute entière :
+
+| 08/ | Full | `x<0` / `x≥0` | quarts `x−y−` / `x−y+` / `x+y−` / `x+y+` |
+| --- | ---: | ---: | ---: |
+| 000000 | 123 389 | 61 045 / 62 344 | 30 265 / 30 780 / 31 391 / 30 953 |
+| 000100 | 124 479 | 60 958 / 63 521 | 30 085 / 30 873 / 32 127 / 31 394 |
+| 000200 | 125 526 | 61 943 / 63 583 | 30 083 / 31 860 / 32 040 / 31 543 |
+
+Cette vérification qualifie la **préparation des entrées**, pas les temps
+ni la complétude d'une tour HGP v9 sur les trames brutes. Le sans-sol
+float32 donne les effectifs de la table 1 pour 000000 et 000100 ; pour
+000200, ses moitiés valent 25 731 / 20 114 et ses quarts 16 263 / 9 468 /
+14 828 / 5 286.
 
 Le [préparateur v8](../../morsehgp3D_v8/bench/prepare_lidar_precision.py) partitionne
 les **sites représentés** suivant leur signe sur la grille, avant la

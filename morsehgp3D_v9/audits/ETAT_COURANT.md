@@ -1,8 +1,9 @@
 # État courant des audits v9
 
-23 septembre 2026. Produit publié courant : **`4530644b`**. La sonde v12
-publie les parcours q3/q4 jusque-là cachés et le runner local v2 durcit la
-capture des pentes ; aucun nouveau reçu G4 n'en découle. Le dernier
+23 septembre 2026. Produit publié courant : **`06f71037`** pour le lecteur
+de pente ; le moteur et la sonde v12 mesurés restent **`4530644b`**.
+La sonde publie les parcours q3/q4 jusque-là cachés et le runner local v2
+durcit la capture des pentes ; aucun nouveau reçu G4 n'en découle. Le dernier
 [reçu G4 R7b](../receipts/g4_tower_r7b_20260923/README.md) exécute
 le paquet **`8e8b83a3`**, antérieur au Welzl move-to-front, aux
 séparateurs pseudo-aléatoires du tri FULL et à la libération précoce de
@@ -41,12 +42,15 @@ capteur `x=0` et les **quatre quarts** par `x=0` et `y=0` : deux plans
 verticaux contenant le capteur, sans sous-échantillonnage ; les points sur
 un plan vont au côté non négatif. Il faut publier ces découpes pour la
 trame brute entière aussi bien que pour le régime sans sol.
-Les sept fichiers actuels découpent la **géométrie sur grille 1 mm** : leurs
+Les sept fichiers chronométrés v9 découpent la **géométrie sur grille 1 mm** : leurs
 IDs sont disjoints et reforment exactement chaque trame sans sol. Une
 coordonnée float32 brute de 08/000200, négative à 0,09 mm du plan, devient
 `x=0` sur grille et change de moitié ; la
 [contrelecture des découpes](DECOUPES_CAPTEUR_LIDAR_BRUT_ET_GRILLE_20260923.md)
-sépare donc explicitement coupe brute et coupe quantifiée. Les disques
+sépare donc explicitement coupe brute et coupe quantifiée. Les six
+préparations float32 v8 des trames brutes et sans sol contiennent déjà des
+coupes par les signes originaux, vérifiées par IDs, coordonnées et hashes ;
+elles ne sont pas des chronos de tour v9. Les disques
 emboîtés 8k/16k/32k du runner de pente sont un **autre** diagnostic ; ils
 ne remplacent ni ces découpes par plans ni la trame entière.
 
@@ -329,6 +333,11 @@ sites énumérés dans les cœurs ×7,25, alors que le catalogue de boules fait
 ×1,86. C'est un signal local de coût caché à attaquer avant le cœur,
 pas une borne asymptotique. Les temps viennent d'un hôte CPU partagé ; le
 reçu n'est ni G4 ni une preuve de contrat ou de complétude absolue.
+La [lecture des demi-scènes et quarts](CROISSANCE_LIDAR_PLANS_ET_DENSITE_20260923.md)
+compare les 42 cas spatiaux du reçu : 0/36 pentes CPU parent→morceau
+dépassent 2, mais **13/36** pentes du nombre de sites énumérés dans le
+cœur le dépassent. Les coupes changent la géométrie ; la densité 1/2 et
+1/4 doit être mesurée à emprise fixe dans chaque secteur, séparément.
 
 Le [reçu local de pente LiDAR v11](CONTRE_AUDIT_PENTE_LIDAR_LOCALE_PARTIELLE_20260923.md)
 est intègre (15/15 SHA et entrées vérifiées) mais partiel : une seule
@@ -336,11 +345,16 @@ trame sans sol, K5 aux tailles 8k/16k/32k et K10 seulement à 8k/16k.
 Les chronos internes K5 croissent d'environ ×2 à chaque doublement,
 mais `core_sites` croît ×7,66 au premier ; à K10, ×5,69 de 8k à 16k.
 Ce signal ne qualifie ni le travail total sous-quadratique, ni G4/GPU.
-Le runner v2 de `4530644b` durcit les prochains reçus ; il ne complète pas
-rétroactivement les cas absents de cette capture.
-Sa porte locale doit encore apparier `input.hash` aux octets fournis et
-vérifier format, grille 1 mm et threads effectifs : quatre mutations de ces
-champs passent aujourd'hui son `validate_probe`.
+Le lecteur de `06f71037` corrige les quatre omissions du runner v2 : FNV
+recalculé sur les octets fournis, format, grille 1 mm et threads statiques
+vérifiés ; 25/25 mutations sont refusées sous Python normal et `-O`.
+L'[addendum de revalidation](../receipts/lidar_scaling_local_20260923_revalidation/README.md)
+retrouve les 60 cas archivés, sans nouveau calcul HGP. Les anciens JSON
+gardent `grid=unspecified` dans la sonde ; la grille 1 mm est attestée par
+les manifestes. `--revalidate` ne recoupe pas encore `record.case`, le
+chemin d'entrée dans `argv[0]` ni les empreintes/commit du résumé, et un
+sous-ensemble non vide de groupes peut retourner code 0. Ne pas employer
+ce seul code de sortie comme preuve de couverture de la campagne entière.
 
 Le [shadow de scission des rectangles q3/q4](Q34_BLOCS_LIDAR_SHADOW_20260923.md)
 sur 08/000000 sans sol ferme 3,68 M paires à K5 et 4,12 M à K10 avant

@@ -63,25 +63,34 @@ hashes d'IDs des entrées emboîtées et ajoute la pente du temps interne de
 chaîne et les compteurs cachés. Il vérifie aussi les morceaux contre le
 manifeste v8. Ces
 corrections de code **ne complètent pas rétroactivement** le K10 32k, les
-répétitions ou les autres scènes absentes de ce reçu. Leur qualification sur
-une campagne v2 reste à examiner séparément ; la priorité de mesure reste
-la croissance des compteurs lourds et le coût total sur LiDAR réel.
+répétitions ou les autres scènes absentes de ce reçu. La campagne v12 et son
+addendum sont [lus séparément](ETAT_COURANT.md) ; la priorité reste la
+croissance des compteurs lourds et le coût total sur LiDAR réel.
 
-**Contrat d'entrée encore ouvert dans v2.** `validate_probe` contrôle le
+**Contrat d'entrée ouvert dans le v2 initial, fermé depuis.** `validate_probe` contrôlait le
 nombre de sites, mais ni `input.hash`, ni `input.format`, ni `input.grid`, ni
 `options.tower_static_threads`. Une mutation locale du JSON 8k archivé,
-adapté au schéma/champs v12, reste acceptée après substitution indépendante
+adapté au schéma/champs v12, était acceptée après substitution indépendante
 de `input.hash=0000000000000000`, `input.format=u16le`,
 `input.grid=other` ou `tower_static_threads=0` (quatre `True` de
 `validate_probe`). Le test juge **le lecteur Python**, pas une sortie
 réelle de la sonde v12 ; le binaire normal lit bien le chemin demandé.
-Le worker G4 possède déjà `input_fnv(raw)` et compare l'identité complète.
-Pour rendre le prochain reçu local autoritatif, calculer ce FNV sur les
-octets effectivement fournis, exiger sa correspondance dans le JSON ainsi
-que `u32le` et le nombre de threads effectif attendu ; passer explicitement
-`--grid=1mm` à la sonde et vérifier ce libellé. Ajouter ces quatre mutations
-à une porte du runner. Le SHA-256 du fichier dans la provenance reste utile,
+Le worker G4 possédait déjà `input_fnv(raw)` et comparait l'identité complète.
+La correction demandée était de calculer ce FNV sur les octets effectivement
+fournis, d'exiger sa correspondance dans le JSON ainsi que `u32le` et le
+nombre de threads attendu, de passer `--grid=1mm` à la sonde et de vérifier
+ce libellé. Les quatre mutations devaient rejoindre une porte du runner.
+Le SHA-256 du fichier dans la provenance reste utile,
 mais ne remplace pas le lien avec l'entrée annoncée par la sonde.
+
+**Mise à jour `06f71037` :** le lecteur recalcule maintenant le FNV sur
+les octets fournis, exige `u32le`, la grille et les threads statiques,
+et transmet `--grid=1mm --static=W` aux nouvelles sondes. Les quatre
+mutations ci-dessus sont incluses dans une porte de 25/25 refus sous
+Python normal et `-O`. L'[addendum](../receipts/lidar_scaling_local_20260923_revalidation/README.md)
+rejuge 60/60 cas de la campagne v12 sans échec, sans rejeu HGP. Les JSON
+historiques restent étiquetés `grid=unspecified` par la sonde ; leur
+géométrie 1 mm est prouvée séparément par les manifestes v8.
 
 **Verdict :** reçu partiel et intègre, premier signal utile mais pas preuve
 de sous-quadraticité dans les régimes LiDAR, ni qualification FULL exacte
