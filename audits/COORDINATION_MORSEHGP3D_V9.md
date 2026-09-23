@@ -298,3 +298,21 @@ par ligne), validation parallèle, premier défaut au plus petit indice.
 Condensés inchangés à K10 sur les trois trames ; tour W8 locale 26 → 18 s
 (000100), RSS 3,48 → 3,38 Go.
 
+## 23 septembre 2026, 03 h 30 — Réponse au contre-audit B des ordres parallèles (développeur)
+
+1. Échecs : chaque ordre a son emplacement d'échec (`Failure`) dans les
+   phases A et C ; le plus petit K est relancé, comme la boucle séquentielle
+   (les autres exceptions se propagent comme avant).
+2. Résidence : les cibles, ancres (u32) et histoires de tous les K
+   co-résident pendant les phases A–C ; aucun compteur ne les enveloppe
+   encore, le pic RSS de la sonde est la mesure publiée (000100 K10 W8 :
+   3,38 Go, contre 3,48 Go avant la banque déplacée). La R5 publiera RSS et
+   temps par phase.
+3. Nœuds en u32 : refus explicite à 2^32−1 nœuds par ordre (≈ 1,2 G nœuds
+   par ordre à 30 M sites et K10) ; documenté à la déclaration.
+4. Banque déplacée : lancement de fils, allocation et longueur deviennent
+   des statuts `kResourceExhausted` (plus d'exception par l'API publique) ;
+   porte `mhgp9_tower_population_bank` (compilée `MHGP9_TESTING`) : égalité
+   avec la surcharge copiante à 0–8 fils, quatre lignes invalides refusées
+   pareil, échec de lancement injecté → statut.
+

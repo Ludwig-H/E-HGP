@@ -4,6 +4,7 @@
 
 #include <atomic>
 #include <memory>
+#include <system_error>
 
 #include "full_certificate.hpp"
 #include "../parallel/pool.hpp"
@@ -76,13 +77,15 @@ inline FullCoveragePopulationResult build_full_coverage_populations(
     std::span<const PointId> domain, std::vector<FullCoveragePopulation>&& rows, int threads) {
   FullCoveragePopulationResult result;
   if (domain.empty() || rows.empty() || !full_coverage_detail::strictly_ordered(domain)) return result;
-  std::atomic<bool> valid{true};
-  parallel_ranges(rows.size(), threads, [&](size_t begin, size_t end, size_t) {
-    for (size_t i = begin; i < end && valid.load(std::memory_order_relaxed); ++i)
-      if (!full_coverage_detail::valid_population_row(domain, rows[i])) valid.store(false);
-  });
-  if (!valid.load()) return result;
   try {
+    // Thread launch or allocation failures are statuses, as in the copying
+    // overload, never an exception escaping this public entry point.
+    std::atomic<bool> valid{true};
+    parallel_ranges(rows.size(), threads, [&](size_t begin, size_t end, size_t) {
+      for (size_t i = begin; i < end && valid.load(std::memory_order_relaxed); ++i)
+        if (!full_coverage_detail::valid_population_row(domain, rows[i])) valid.store(false);
+    });
+    if (!valid.load()) return result;
     auto bank = std::make_shared<FullCoveragePopulations>();
     bank->domain_.assign(domain.begin(), domain.end());
     bank->rows_ = std::move(rows);
@@ -92,6 +95,12 @@ inline FullCoveragePopulationResult build_full_coverage_populations(
   } catch (const std::bad_alloc&) {
     result.status = FullCertificateStatus::kResourceExhausted;
     result.reason = "coverage_allocation_failed";
+  } catch (const std::length_error&) {
+    result.status = FullCertificateStatus::kResourceExhausted;
+    result.reason = "coverage_size_overflow";
+  } catch (const std::system_error&) {
+    result.status = FullCertificateStatus::kResourceExhausted;
+    result.reason = "coverage_thread_launch_failed";
   }
   return result;
 }

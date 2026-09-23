@@ -75,6 +75,11 @@ foreach(gate IN ITEMS full_certificate full_coverage_certificate anchor_meb loca
   mhgp9_gate(mhgp9_tower_${gate}_bad_argument 2 mhgp9_tower_${gate}_gate
              ARGS --unknown LABELS "gate;tower" TIMEOUT 60)
 endforeach()
+# Banque de populations deplacee : meme banque que la surcharge copiante a
+# 0..8 fils, memes refus, echec de lancement de fil = statut (MHGP9_TESTING).
+mhgp9_test_executable(mhgp9_tower_population_bank_gate tests/tower/population_bank_gate.cpp)
+mhgp9_gate(mhgp9_tower_population_bank 0 mhgp9_tower_population_bank_gate
+           ARGS --selftest LABELS "gate;tower" TIMEOUT 120)
 # Tri parallele de la tour : permutation egale a std::sort pour tout nombre de
 # fils, et son mutant compile (fusions remplacees par des copies) tue.
 mhgp9_product_executable(mhgp9_tower_parallel_sort_gate tests/tower/parallel_sort_gate.cpp)

@@ -12,6 +12,7 @@
 #include "ball_data.hpp"
 #include "../pipeline/census.hpp"
 #include "../parallel/pool.hpp"
+#include <optional>
 
 namespace mhgp9::tower {
 
@@ -423,6 +424,9 @@ class Builder {
     Draft draft;
     std::vector<u32> birth_ball;       // per node: ball of a birth, or kAbsent32
   };
+  // Node IDs of one order in u32: an order with 2^32-1 nodes or more is an
+  // explicit resource refusal on this path (never a truncation). At 30 M
+  // sites and K10 an order holds about 1.2 G nodes.
   static constexpr u32 kAbsent32 = std::numeric_limits<u32>::max();
 
   std::vector<FullBallOrder> run_orders_parallel() {
@@ -436,11 +440,21 @@ class Builder {
         o.static_targets.swap(static_targets);
       }
     }
-    parallel_items(kmax, geometry_threads, [&](size_t i, size_t) { order_lots(orders[i]); });
+    // A Failure in some order is reported for the SMALLEST K, as the
+    // sequential loop would (other exceptions propagate as before).
+    std::vector<std::optional<Failure>> failures(kmax);
+    const auto rethrow_first = [&] {
+      for (auto& failure : failures) if (failure) throw *failure;
+    };
+    parallel_items(kmax, geometry_threads, [&](size_t i, size_t) {
+      try { order_lots(orders[i]); } catch (const Failure& f) { failures[i] = f; }
+    });
+    rethrow_first();
     assign_populations(orders);
     parallel_items(kmax, geometry_threads, [&](size_t i, size_t) {
-      order_images(orders[i], i ? &orders[i - 1] : nullptr);
+      try { order_images(orders[i], i ? &orders[i - 1] : nullptr); } catch (const Failure& f) { failures[i] = f; }
     });
+    rethrow_first();
     std::vector<Draft> drafts;
     for (auto& o : orders) {
       merge_order_stats(o.st);
