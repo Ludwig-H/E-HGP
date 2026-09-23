@@ -324,3 +324,36 @@ donc en `i64`. Les frontières fractionnaires du véritable centre ne
 sont pas arrondies vers l'intérieur. Ce domaine local est un **surensemble**
 certifié, pas un certificat de voie morte : il reste à mesurer combien
 de cellules et de nœuds témoins il économise sur les coupes LiDAR.
+
+#### Palette de témoins réutilisée par cellule mondiale
+
+Une variante potentiellement plus parallèle évite de refaire un DFS de
+témoins pour **chaque** produit. Associer à une cellule mondiale fermée
+`C` une petite palette `P_C` d'**IDs de sites distincts**, réemployée
+pour tous les rectangles qui visitent cette cellule. Elle peut être
+choisie par une recherche de voisins *approximative* d'un représentant
+de C : cette recherche propose seulement des témoins à essayer, elle
+ne décide jamais un rejet.
+
+Pour chaque `z∈P_C`, tester aux huit coins `v` de C les **deux** signes
+stricts `|z−v|² < min_{a∈box(A)}|a−v|²` et
+`|z−v|² < min_{b∈box(B)}|b−v|²`. Pour chaque `z,a` ou `z,b`
+fixé, la différence de distances carrées est affine en `v` ; les coins
+certifient donc le signe dans toute C. Un `z` admis est intérieur à
+toute boule candidate de centre dans C et ne peut appartenir à aucun
+facteur A/B : le choisir comme extrémité rendrait son signe égal à
+zéro. Si la palette certifie `K−1` IDs en q3 ou `K−2` en q4 **dans
+chaque cellule possible**, la voie du produit meurt ; sinon la zone
+indécise suit exactement le chemin actuel. Les comptes des cellules
+ne s'additionnent jamais. Aux coins entiers u18, les distances carrées
+et leur différence tiennent en `i64` (`3·262143²<2^38`).
+
+Cette règle est exacte même si `P_C` est médiocre ou approximative :
+une palette ratée ne produit qu'un repli. Sa pertinence industrielle
+dépend de la réutilisation réelle des cellules entre produits, du coût
+de construction/stockage des palettes, des exclusions A/B et du nombre
+de cellules indécises. Une porte shadow doit mesurer ces postes et la
+masse `A×B` évitée **avant** de l'activer ; aucun gain LiDAR ni majorant
+sous-quadratique n'en découle aujourd'hui. Le domaine local `Dmax` de
+la section précédente réduit le nombre de cellules à visiter sans
+affaiblir ce repli.
