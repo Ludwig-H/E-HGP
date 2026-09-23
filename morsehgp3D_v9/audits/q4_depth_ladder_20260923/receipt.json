@@ -1,0 +1,64 @@
+{
+  "binary_sha256": "cd2f120a55bbc267c3395b3e1061ae81db7477aabb985bf06a824b4f995826fe",
+  "build_command": [
+    "cmake",
+    "--build",
+    "/tmp/mhgp9-q4-depth-build",
+    "--target",
+    "mhgp9_gen",
+    "-j4"
+  ],
+  "build_stderr": "",
+  "build_stdout": "[100%] Built target mhgp9_gen",
+  "cmake_build_type": "Release",
+  "cmake_cache_sha256": "7a060aa7e2108926bbd102cf614754849ef47ec748707145f7a38bed7f7b66aa",
+  "cmake_home_directory": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v9",
+  "cmake_sanitize": "OFF",
+  "compiler": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "exit_code": 0,
+  "fraction_gate": {
+    "10": {
+      "q3_face_depths": [
+        9,
+        9,
+        9,
+        9
+      ],
+      "q4_depth": 7,
+      "sites": 19
+    },
+    "4": {
+      "q3_face_depths": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "q4_depth": 1,
+      "sites": 13
+    },
+    "5": {
+      "q3_face_depths": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "q4_depth": 2,
+      "sites": 14
+    }
+  },
+  "gen_worktree_status_after": "",
+  "gen_worktree_status_before": "",
+  "library_sha256_after": "530f949a613c50d1fcae7d5c14f6153f4aceb025bd72defc68bb9de4f802bc6e",
+  "library_sha256_before": "530f949a613c50d1fcae7d5c14f6153f4aceb025bd72defc68bb9de4f802bc6e",
+  "product_gate_sha256": "539164dde137bbaad33b50393256f5a1f2bf533ebbf9d4a69294944255fb1005",
+  "runner_sha256": "82dc70a2ed5fe8124b4474c072d025c7b2e724c048db49f27afea1e1e9b3f37c",
+  "sidecar_sha256": "15344f3d3396961efd476bec1e19bfe242b2e9a76d1d6bffe8add16c55f367ad",
+  "source_commit": "5011653d0fcc817b38c815477cbd42171de9913e",
+  "status": "PASS",
+  "stderr": "",
+  "stdout": "{\"status\":\"PASS\",\"clouds\":6,\"depths\":[1,2,7],\"k\":[4,5,10],\"complete_streams\":76,\"checks\":8628,\"oracle_tetrahedra\":11184,\"oracle_balls\":1798}",
+  "test_worktree_status_after": "",
+  "test_worktree_status_before": ""
+}

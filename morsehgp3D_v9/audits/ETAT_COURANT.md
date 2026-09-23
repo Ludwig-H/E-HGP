@@ -902,6 +902,14 @@ Un rejeu indépendant sans réécrire le reçu, sur les mêmes SHA de
 bibliothèque et de gate produit, reproduit les **108/108** flux et
 **3 580** contrôles ; le HEAD local a avancé à `28f0c284` sans modifier
 ces dépendances.
+La [porte q4 à profondeur non nulle](q4_depth_ladder_20260923/README.md)
+étend la fixture aux seuils K4/K5/K10 : la q4 cible a 1/2/7 sites
+intérieurs alors que chacune de ses quatre faces q3 atteint exactement
+le seuil de rejet 3/4/9. Sur six nuages adversariaux de 13/14/19 sites,
+**76 flux complets** mono et parallèles égalent un oracle rationnel,
+avec clés, supports, profondeurs et coquilles. Cette porte teste le
+cas « q4 admise sans face q3 admise » à plusieurs profondeurs ; elle ne
+prouve ni l'induction générale ni la complétude des scènes LiDAR.
 Le [cover commun par blocs](CONTRE_AUDIT_B_COVER_BATCH_20260923.md)
 et la [saturation K−2 des seules arêtes q4](SEUIL_SATURATION_ATLAS_PAR_VOIE_20260923.md)
 restent des pistes secondaires à mesurer avec le coût aval complet.

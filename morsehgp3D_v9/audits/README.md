@@ -67,6 +67,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`Q34_PROPRIETAIRE_PASSAGE_AMONT_20260923.md`](Q34_PROPRIETAIRE_PASSAGE_AMONT_20260923.md) | B ? | `4291c538` 07:56 | démontré localement | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_PORTE_PUBLIQUE_T2_20260922.md`](CONTRE_AUDIT_B_PORTE_PUBLIQUE_T2_20260922.md) | B | `174fb8db` 22/23:18 | testé borné | historique | sans réponse |
 | [`q4_global_12sites_20260923/`](q4_global_12sites_20260923/README.md) | B ? | `28f0c284` 07:15 | testé borné | vivant | sans objet |
+| [`q4_depth_ladder_20260923/`](q4_depth_ladder_20260923/README.md) | A | 23/14:53 | oracle rationnel ; 76 flux complets K4/K5/K10 avec q4 profonde et faces q3 rejetées | vivant | sans objet |
 
 ## Arithmétique 18 bits
 
