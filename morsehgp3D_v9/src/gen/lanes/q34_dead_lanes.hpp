@@ -70,7 +70,8 @@ class Q34DeadLaneProver final {
   explicit Q34DeadLaneProver(unsigned max_depth = default_max_depth,
                              unsigned min_depth = default_min_depth);
 
-  // Forms of every cover site except a and b, in cover rank order.
+  // Forms of every cover site in cover rank order; a and b get identically
+  // zero forms (never credited). form_sites counts the other sites.
   void load(const Q34EdgeCover& cover, Q34DeadLaneWork& work);
   // Requires load(). K is the tower's Kmax (1..10), `lanes` a subset of
   // 2 (q3) | 4 (q4). Returns the subset proved dead, both lanes in ONE pass
@@ -94,7 +95,9 @@ class Q34DeadLaneProver final {
   std::size_t threshold3_{}, threshold4_{};
   bool loaded_{false};
   std::vector<Form> forms_;
-  std::vector<std::uint32_t> all_;                   // 0..forms-1
+  std::vector<std::uint32_t> all_;                   // identity prefix 0..n-1
+  const Q2CensusIndex* ordered_owner_ = nullptr;      // index of ordered_
+  std::vector<Point3> ordered_;                      // coordinates by spatial rank
   std::vector<std::vector<std::uint32_t>> levels_;  // frontier by depth
 };
 

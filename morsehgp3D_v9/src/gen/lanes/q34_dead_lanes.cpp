@@ -25,10 +25,19 @@ Q34DeadLaneProver::Q34DeadLaneProver(unsigned max_depth, unsigned min_depth)
 
 void Q34DeadLaneProver::load(const Q34EdgeCover& cover, Q34DeadLaneWork& work) {
   const auto& index = *cover.index();
-  const auto points = index.cloud().points();
   const auto order = index.spatial_order();
+  if (ordered_owner_ != &index) {
+    // Coordinates in spatial rank order, once per index and prover: the
+    // cover ranges are then read sequentially (no ID indirection).
+    const auto points = index.cloud().points();
+    ordered_.resize(order.size());
+    for (std::size_t rank = 0; rank < order.size(); ++rank) ordered_[rank] = points[order[rank]];
+    ordered_owner_ = &index;
+  }
   const auto ids = cover.edge_ids();
+  const auto points = index.cloud().points();
   const auto a = points[ids[0]], b = points[ids[1]];
+  static_cast<void>(order);
   Vec v{}, midpoint_twice{};
   std::size_t main_axis = 0;
   for (std::size_t i = 0; i < 3; ++i) {
@@ -45,28 +54,41 @@ void Q34DeadLaneProver::load(const Q34EdgeCover& cover, Q34DeadLaneWork& work) {
   diameter_squared_ = dot(v, v);
   // Invalid until this load completes: a failed load leaves no usable state.
   loaded_ = false;
-  forms_.clear();
   counter_add(work.loads);
+  forms_.resize(cover.site_count());
+  std::size_t n = 0;
+  // Each basis vector has two nonzero coordinates: two products each.
+  const i64 am = a_basis_[main_axis], ai = a_basis_[axis_i], bm = b_basis_[main_axis], bj = b_basis_[axis_j];
+  // a and b are loaded too: w = -+v gives k = 0 and x = y = 0 (A, B are
+  // orthogonal to v), an identically zero form that is never negative, so
+  // they are never credited nor kept in a frontier. No branch in the loop.
   for (const auto range : cover.ranges())
     for (auto rank = range.first; rank < range.last; ++rank) {
-      const auto id = order[rank];
-      if (id == ids[0] || id == ids[1]) continue;
+      const auto& z = ordered_[rank];
       Vec w{};
-      for (std::size_t i = 0; i < 3; ++i) w[i] = 2 * static_cast<i64>(points[id][i]) - midpoint_twice[i];
+      for (std::size_t i = 0; i < 3; ++i) w[i] = 2 * static_cast<i64>(z[i]) - midpoint_twice[i];
       // M=262143: |w_i| <= 2M, |dot(w,w)-|v|^2| <= 15M^2 < 2^40 (scaled < 2^60),
       // |x|,|y| <= 8M^2 < 2^39 (Q4LocalGeometry::form).
-      forms_.push_back({scale * (dot(w, w) - diameter_squared_), -2 * dot(w, a_basis_), -2 * dot(w, b_basis_)});
+      forms_[n++] = {scale * (dot(w, w) - diameter_squared_), -2 * (w[main_axis] * am + w[axis_i] * ai),
+                     -2 * (w[main_axis] * bm + w[axis_j] * bj)};
     }
+  forms_.resize(n);
   if (forms_.size() > std::numeric_limits<std::uint32_t>::max())
     throw std::overflow_error("mhgp9 gen dead-lane prover cover exceeds u32 frontier IDs");
-  all_.resize(forms_.size());
-  for (std::size_t i = 0; i < all_.size(); ++i) all_[i] = static_cast<std::uint32_t>(i);
-  counter_add(work.form_sites, static_cast<u64>(forms_.size()));
+  // Identity frontier 0..n-1, extended only when a larger cover appears.
+  const auto old = all_.size();
+  if (old < n) {
+    all_.resize(n);
+    for (std::size_t i = old; i < n; ++i) all_[i] = static_cast<std::uint32_t>(i);
+  }
+  if (n < 2) throw std::logic_error("mhgp9 gen dead-lane prover cover lost its endpoints");
+  counter_add(work.form_sites, static_cast<u64>(n - 2));  // sites other than a and b
   loaded_ = true;
 }
 
 std::size_t Q34DeadLaneProver::retained_bytes() const {
-  std::size_t bytes = forms_.capacity() * sizeof(Form) + all_.capacity() * sizeof(std::uint32_t);
+  std::size_t bytes = forms_.capacity() * sizeof(Form) + all_.capacity() * sizeof(std::uint32_t) +
+                      ordered_.capacity() * sizeof(Point3);
   for (const auto& level : levels_) bytes += level.capacity() * sizeof(std::uint32_t);
   return bytes;
 }
@@ -82,7 +104,9 @@ std::uint8_t Q34DeadLaneProver::prove(unsigned kmax, std::uint8_t lanes, Q34Dead
   threshold3_ = kmax >= 2 ? kmax - 1 : 0;
   threshold4_ = kmax >= 3 ? kmax - 2 : 0;
   std::uint8_t proved = 0;
-  if (tried != 0) proved = cell({-2 * scale, 2 * scale, -2 * scale, 2 * scale}, 0, all_, 0, tried, work);
+  if (tried != 0)
+    proved = cell({-2 * scale, 2 * scale, -2 * scale, 2 * scale}, 0,
+                  std::span<const std::uint32_t>(all_.data(), forms_.size()), 0, tried, work);
   if ((lanes & 2U) != 0) counter_add((proved & 2U) != 0 ? work.q3_proved : work.q3_open);
   if ((lanes & 4U) != 0) counter_add((proved & 4U) != 0 ? work.q4_proved : work.q4_open);
   return proved;
