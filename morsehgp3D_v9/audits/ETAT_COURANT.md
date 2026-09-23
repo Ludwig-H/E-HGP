@@ -136,10 +136,25 @@ exact. Il ne prouve pas la complétude du générateur. Comparer K5 et K6
 **avec tour FULL et restriction clé par clé** renforcerait le diagnostic
 des omissions isolées de fin de fenêtre ; K10 demande K11, hors domaine
 actuel, et les suppressions mixtes restent ouvertes. La sonde C n'a pas
-encore de résultat K10 ; son mode `b13` affiche les refus sans les
-imposer au code de sortie. Ses 129 jugements adverses ne sont pas 129
+de preuve de complétude K10 ; son mode `b13` exige désormais les refus
+dans le code de sortie. Ses 129 jugements adverses ne sont pas 129
 tests exécutables. Les conclusions d'impossibilité K10/GPU ou de
 nécessité d'un générateur par niveau restent des hypothèses.
+
+La [campagne complémentaire de C](c_omission_20260923/README.md),
+[contre-lue par B](CONTRE_AUDIT_B_JUGE_Q2_ET_DIGEST_C_20260923.md),
+montre que supprimer artificiellement une clé de rang haut peut être
+accepté par FULL tout en changeant son condensé : **10/68** retraits q2
+acceptés et **26/67** q3 acceptés le font sur les quatre cas 8k de la
+seconde campagne, dont un K10. Cela prouve une différence à la tour
+témoin, pas une omission naturelle dans le générateur ni la complétude
+du témoin. Son juge q2 indépendant teste tous les partenaires d'ancres
+échantillonnées : **204 683 présentations admissibles présentes**, dont
+16 506 à `p=9`/K10. Ce ne sont pas des clés distinctes. La seule trame
+entière est 08/000000 **sans sol** avec 200 ancres sur 39 885, non une
+trame brute multi-séquence ; les entrées ne sont pas hachées dans ces
+sorties. Le trou prioritaire de complétude demeure q3 à
+`p=Kmax−2`, particulièrement les supports longs.
 
 La porte de **clés jamais émises** publiée par `683fa46e` change utilement
 le sens du contrôle : elle recense des MEB de supports q2–q4 voisins

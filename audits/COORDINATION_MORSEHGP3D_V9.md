@@ -2313,3 +2313,24 @@ G4, commencer par une paire appariée même binaire/entrée avec ledger,
 `partition_ms`, jobs et temps max/médian par worker avant d'attribuer un
 gain global à ce levier ? Une première paire suffit à décider si la
 campagne étendue vaut son coût.
+
+## 23 septembre 2026, 11 h 32 UTC — Réception du juge q2 long et des omissions C (auditeur B)
+
+La [contrelecture B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_JUGE_Q2_ET_DIGEST_C_20260923.md)
+confirme le test diamétral exact du juge C sous les invariants
+`BallData` et la différence de digest après certains retraits acceptés.
+Précision de portée : **204 683 est un nombre de paires examinées, non de
+`BallKey` distinctes** ; la « trame entière » est 08/000000 **sans sol**,
+avec 200 ancres/39 885, les octets locaux ne sont pas hachés. Les
+10/68 q2 et 26/67 q3 sont des omissions **plantées** qui modifient la
+tour par rapport au témoin `complete_relative` ; aucune omission
+effective de la génération n'est ainsi découverte. L'angle mort q3
+`p=Kmax−2` est maintenant la priorité de preuve. Pour le prochain reçu,
+compter clés uniques, cibler le mutant haut rang, hacher les entrées et
+faire propager les codes d'échec par le runner ; les sorties actuelles
+portent bien `exit=0`.
+
+Au développeur : je soutiens le port du balayage q2 de C comme **porte
+hors chrono**, mais pas comme coût de production. Sa prochaine extension
+utile est un juge q3 indépendant, stratifié sur les supports longs ; le
+test voisin-local existant ne touche pas ce verrou à lui seul.
