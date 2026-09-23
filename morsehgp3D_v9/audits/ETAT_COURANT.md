@@ -1,6 +1,6 @@
 # État courant des audits v9
 
-23 septembre 2026. Produit publié courant : **`02d55856`**. Le
+23 septembre 2026. Produit publié courant : **`8e8b83a3`**. Le
 [reçu G4 R6](../receipts/g4_tower_r6_20260923/README.md) exécute le
 snapshot **`78ce9fd4`** ; ses temps ne qualifient pas encore le
 sample-sort, le raccourci FULL ni la nouvelle frontière temporelle
@@ -38,14 +38,14 @@ reçu hôte la demande réellement envoyée ; **aucun chrono, aucune
 ablation MEB ni résultat FULL/GPU** ne vient de R7.
 
 La [contrelecture du MEB
-proposé](MEB_PROPOSITION_EXACTE_20260923.md) reproduit sous le
-lecteur v11 une sortie `complete_relative` acceptée malgré
-`meb_proposals=4`, `meb_verified_proposals=2` et
-`meb_proposal_fallbacks=1` : une proposition manque au bilan. Pour
-un calcul terminé du moteur courant, les issues sont exhaustives ;
-ajouter l'égalité et un mutant dédié avant d'utiliser ce ledger
-comme preuve de réception G4. Cela ne démontre pas une erreur
-géométrique du moteur.
+proposé](MEB_PROPOSITION_EXACTE_20260923.md) a trouvé une proposition
+non comptée que le lecteur v11 acceptait encore ; `8e8b83a3` ferme
+cette lacune avec l'identité exacte
+`proposals=verified_proposals+proposal_fallbacks` et une mutation
+causale. Aucun reçu G4 n'en découle.
+Sur le pin figé, les **21/21 selftests** passent en Python normal et
+sous `-O` ; les deux portes `probe_worker_contract` tuent chacune
+**31/31** mutations, y compris la proposition non comptée.
 
 ## Contrat et objet effectivement construit
 
@@ -380,13 +380,33 @@ alterné 08/000000/K10/W8 passe de **18,5/17,7 s à 16,9/16,4 s** pour la
 tour, avec digest égal ; la
 [contrelecture indépendante](CONTRE_AUDIT_B_INDEX_CLES_FULL_20260923.md)
 rejoue quatre portes ciblées, dont le mutant « clé absente » tué
-causalement. Le développeur rapporte **127/127** portes locales,
-mais le registre CTest du snapshot énumère **128** tests `gate` et le log
-mutable ne fige pas leur clôture. Ni G4 ni gain de chaîne complète n'en
-découlent. Publier construction, sondes réussies et
+causalement. Une seconde archive complète du pin `02d55856` inscrit
+**128** tests `gate` et passe les portes FULL séquentielle et statique
+même avec hachage forcé constant ; le mutant échoue. Le **127/127**
+annoncé dans la coordination n'est pas le décompte de cette archive
+complète. `key_slots` reste alloué dans `Builder::finish()` après sa
+dernière recherche : le vider au début de cette méthode, après jonction
+des ordres, retirerait **64 Mio** de stockage vivant pendant la banque
+et l'encodage à 5,51 M boules ; mesurer l'effet RSS réel. Ni G4 ni gain
+de chaîne complète n'en découlent. Publier construction, sondes réussies et
 absentes, longueurs de chaînes, RSS de pointe et ablations W1/W48 :
 à plusieurs dizaines de millions de points, le coût total et la
 résidence décident de la pertinence de cette table.
+
+`75f27eee` remplace dans FULL la fusion série du tri des requêtes par
+des seaux répartis et triés en parallèle, et parallélise concaténation
+et détection des groupes. L'ordre total `(clé, ordinal)` et les plages
+disjointes rendent le résultat indépendant de l'ordonnancement des
+workers ; les portes locales et digests annoncés restent à distinguer
+d'un reçu G4. Le prélèvement à positions fixes ne garantit cependant
+pas un partage utile : une entrée stricte construite de 131 072 clés,
+avec les positions échantillonnées toutes petites et les autres grandes,
+donne 32 seaux non vides mais **130 080 clés (99,24 %) dans le dernier**.
+Le compteur de workers créés inclut la répartition et ne borne donc
+pas le temps du plus gros tri. Publier tailles non vides/maximales des
+seaux et CPU/mur par étape sur les requêtes FULL LiDAR, W1/W8/W48, avec
+RSS réel : le second tampon, `bucket_of` et les offsets coexistent,
+au-delà du seul `2×capacity×sizeof(Request)` annoncé pour la crête.
 
 ## Portes de preuve encore ouvertes
 

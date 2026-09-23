@@ -68,6 +68,20 @@ Une division A/B partitionne le produit initial en sous-produits
 disjoints, sans perte ni doublon de paire ; ne pas émettre une même
 arête une fois par cellule de centres.
 
+**Limite all-or-nothing du certificat de cellules :** une cellule de
+centres certifiée ne désigne pas, à elle seule, quelles paires de
+`A×B` possèdent un centre dans cette cellule. Si une seule cellule
+possible reste indécise, le rectangle entier doit revenir **une seule
+fois** au chemin exact actuel, sauf si l'on possède un classificateur
+exact des centres/paires ou si l'on divise réellement A ou B en
+sous-produits disjoints. Relancer la génération de `A×B` pour chaque
+cellule crée doublons et coût sans garantie. Le gain pré-expansion
+demande donc de certifier **toutes** les cellules possibles d'un bloc,
+ou de rendre leur région impossible ; l'arrêt à la première cellule
+indécise est une manière sûre de limiter le surcoût. Le travail des
+cellules, témoins et replis doit être ajouté au grand-livre : il n'a
+aucune borne sous-quadratique acquise.
+
 Les points u18 permettent des bornes entières étroites aux coins
 entiers. Une grille dyadique de centres exige cependant de **prouver la
 largeur selon la profondeur choisie** avant toute arithmétique i128 ou
@@ -159,6 +173,20 @@ Ce test de coins est plus serré que séparer `Hmin` et `Xi_max`, dont les
 extrêmes peuvent provenir de coins incompatibles. Il coûte toutefois
 jusqu'à 64 ou 512 prédicats par nœud : réserver d'abord le repli aux
 nœuds **ambigus à forte masse**, en observation, sans annoncer de gain.
+Un relevé shadow exploratoire **hors dépôt, non archivé comme preuve**
+sur 08/000000 sans sol (39 885 sites, s8), en échantillonnant un
+rectangle éligible sur 128, suggère la faible sélectivité de
+ce repli général. Avec nœuds témoins d'au moins huit sites, il ferme
+en plus **4/256** rectangles encore ouverts à K5 et **6/358** à K10,
+soit **1 238/120 263** et **1 912/140 615** paires de cet échantillon,
+pour **159 891** et **256 027** triplets de coins supplémentaires.
+Sur les lignes, le surcoût est **252 744/448 161** triplets pour
+**722/1 016** paires évitées. À seuil 16, aucun rectangle n'est
+entièrement fermé ; à 32, aucun gain. Les paires ainsi fermées auraient
+été rejetées par le filtre ponctuel actuel : ni cover ni forme ne sont
+épargnés. Ce signal déconseille le port d'un repli par coins sur tout
+le DFS ; il ne juge ni un ciblage nouveau de rares blocs lourds, ni
+la chaîne complète ou d'autres trames.
 Une voie possiblement moins chère que le DFS de ligne neuf consiste à
 conserver les au plus `2K−3` nœuds de témoins admis pour `K≥3`
 (un pour K2, aucun pour K1) par le filtre/cache
@@ -185,6 +213,10 @@ de taille O(K), le coût supplémentaire de classification est au pire
 plafond de candidats. Cette borne ne prouve évidemment pas le
 sous-quadratique si la masse résiduelle reste quadratique ; le but est
 de rejeter assez de blocs pour réduire cette masse et le travail aval.
+Cette borne suppose que l'appartenance et la disjonction des nœuds du
+ticket se vérifient en O(1) par nœud et qu'aucune recherche Z récursive
+n'est cachée dans la classification ; sinon il faut publier le terme
+supplémentaire réel.
 Ne jamais fusionner deux traces de paires sans dédoublonnage et preuve
 d'antichaîne par voie.
 
@@ -339,6 +371,23 @@ retirée avant expansion, résidu, CPU/mur q3/q4 et identité du flux
 canonique/coquilles ; comparer K5/K10, s8/10/12 et les coupes capteur
 8k/16k/32k. Si les facteurs B sont souvent minuscules ou si les
 palettes échouent, aucun gain n'est présumé.
+
+**Retour du prototype hors dépôt communiqué ensuite par le développeur
+(`458fb0ed`, coordination 06 h 30) :** sur 08/000000/K5, des palettes de
+16–128 voisins proposés par ancre retirent **8,8–15,4 M** des
+**23,7 M** paires résiduelles avant expansion et paient 1–7 Gcycles,
+avec flux annoncé identique ; le CPU q3/q4 ne baisse
+cependant que d'environ **6 %**. Ces paires étaient souvent déjà
+rejetées à bas coût par le cache ponctuel. L'ablation n'est pas un reçu
+archivé, ne porte qu'une scène/K et ne mesure pas FULL/G4 : garder la
+palette en réserve, sans lui attribuer une pente sous-quadratique.
+Le poste prioritaire doit désormais montrer combien de **covers, formes,
+visites d'atlas et recensus** il évite *avant* de les payer, par cellule
+ou bloc certifié. R6 développe 11,96–32,79 M paires, mais construit
+encore jusqu'à plusieurs millions de covers ; éliminer des paires
+destinées au filtre ne suffit pas au contrat. Aucun run v9 FULL sur
+les coupes capteur appariées 8k/16k/32k n'est publié, donc aucune pente
+globale sous-quadratique n'est acquise.
 
 ### Cellules de centres : travail évitable en amont du cover
 
