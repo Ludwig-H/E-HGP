@@ -293,6 +293,16 @@ pas le replay. Conserver l'octant en SHADOW jusqu'à une ablation de
 chaîne entière, mémoire comprise, sur plusieurs séquences et sol brut ;
 aucun cover ni travail aval n'est supprimé ici.
 
+Le [contre-audit du grand-livre q3/q4](LEDGER_VISITES_CACHEES_Q34_20260923.md)
+montre que six parcours d'index déjà comptés par le générateur et les
+sites balayés par le sweep q4 ne sont pas projetés dans la sonde FULL.
+Ils incluent les témoins par rectangle/paire, l'accès aux graines q3
+par arête et trois parcours q4 par arête. Sur un index à `2n−1` nœuds,
+leurs bornes par appel restent linéaires en `n` ; les comptes R7b publiés
+ne permettent donc pas d'écarter un coût caché
+`(rectangles + paires recherchées + arêtes q3/q4)×n`. Publier ces
+comptes sur les coupes LiDAR appariées avant de conclure sur la pente.
+
 Pour q3, seuls les fragments d'atlas **complets** fournissent un compte
 réutilisable ; un certificat profond incomplet n'est qu'un minorant.
 Partager les graines d'une cellule exige un ticket possédé
@@ -325,6 +335,10 @@ groupe émis, même si les faces q3 sont rejetées. Le
 compare **108 sorties complètes** à l'oracle rationnel sur deux permutations,
 `s=8/10/12`, `Local28`/`Window30` et mono/W1/W4. Il ferme cette fixture
 précise, pas la preuve des filtres WSPD ni la complétude globale d'une trame.
+Un rejeu indépendant sans réécrire le reçu, sur les mêmes SHA de
+bibliothèque et de gate produit, reproduit les **108/108** flux et
+**3 580** contrôles ; le HEAD local a avancé à `28f0c284` sans modifier
+ces dépendances.
 Le [cover commun par blocs](CONTRE_AUDIT_B_COVER_BATCH_20260923.md)
 et la [saturation K−2 des seules arêtes q4](SEUIL_SATURATION_ATLAS_PAR_VOIE_20260923.md)
 restent des pistes secondaires à mesurer avec le coût aval complet.
@@ -466,6 +480,14 @@ trame, sans que cette fraction mesure sa part des cycles. Une variante
 appariée sur le même catalogue rend la même tour octet par octet sans
 gain stable et avec **54–159 Mio** de RSS supplémentaire : ne pas la
 porter sur ce seul régime.
+
+Le [lemme du maximum d'ID](PHASE_A_MAX_ID_COMPOSANTE_20260923.md) donne
+une reconstruction hors des barrières de niveau : dans une composante
+au seuil ouvert, la racine canonique est le plus grand ID de création
+qu'elle contient. Quatre fixtures et 3 000 historiques abstraits
+reproduisent groupes, parents et IDs, mais ne testent pas le produit.
+La construction quasi linéaire d'une hiérarchie de composantes pondérée,
+avec requêtes aux seuils ouvert/fermé, reste le verrou avant tout port.
 
 ## Portes de preuve encore ouvertes
 
