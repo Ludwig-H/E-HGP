@@ -1,22 +1,25 @@
 # État courant des audits v9
 
-Le [reçu G4 R13](../receipts/g4_tower_r13_20260923/README.md) est
-publié et [contrelu par B](CONTRE_AUDIT_B_G4_R13_S3_20260923.md) : S2+S3 GPU termine
-18/18 cas sur trois trames sans sol de la seule séquence 08, avec les six
-couples de condensés épinglés, sans qualifier le contrat. À W48, les
-chaînes valent 1,738–2,347 s à K5 et 5,914–7,967 s à K10 ; sur deux
-trames K5, le temps mesuré **hors q34** dépasse déjà une seconde.
-Le [préflight du plan R14/v19](CONTRE_AUDIT_B_PREFLIGHT_G4_R14_V19_20260923.md)
-signale deux réserves avant de lire les nouveaux chronos : la garde
-locale de **2 Gio libres** annoncée en R-27 n'est pas dans le chemin
-publié du lanceur, et les champs « kernel/transfert » incluent encore
-des copies/allocations dans les intervalles dits noyau ou transfert.
-Le lecteur n'exige qu'une somme ≤ temps device, laissant accepter un
-résidu arbitraire. Le **temps total de chaîne** reste une mesure
-distincte ; aucune campagne R14 n'est inférée de ce préflight.
-Le plan par défaut reste trois sous-nuages entiers sans sol de la
-seule séquence 08, s8/K5/K10, non les trames brutes et s10/s12 du
-contrat final.
+Le [reçu G4 R14](../receipts/g4_tower_r14_20260923/README.md),
+[contrelu indépendamment](CONTRELECTURE_G4_R14_RECU_20260923.md), ferme
+18/18 cas `complete_relative` sur trois trames **sans sol** de la seule
+séquence 08, grille 1 mm, s8/W48. Les 326 empreintes et le lecteur épinglé
+passent. Les meilleures chaînes S2+S3 valent **1,563 s à K5** et
+**5,488 s à K10** ; aucune tour sous la seconde ni trame brute du contrat
+principal n'est acquise. Sur 08/000000, les paires entrelacées attribuent
+à S3 **0,221/0,230 s** de gain K5 et **0,794/0,785 s** K10. La
+[lecture du budget restant](LECTURE_R14_G4_PLANCHER_CONDITIONNEL_20260923.md)
+montre qu'un remplacement gratuit de la seule phase des survivants
+laisserait **1,024–1,305 s** à K5 si les autres phases restaient fixes :
+S4 et la tour doivent être mesurés ensemble. Le [reçu R13](../receipts/g4_tower_r13_20260923/README.md)
+reste historique, pas une ablation des changements simultanés R13→R14.
+Le [préflight B](CONTRE_AUDIT_B_PREFLIGHT_G4_R14_V19_20260923.md) et la
+contrelecture du reçu confirment que la garde locale annoncée de
+**2 Gio libres** n'est pas dans le chemin R14 publié. Les ventilations
+GPU réelles ferment à l'arrondi près, mais le lecteur accepte des sommes
+artificiellement sous-déclarées ; « kernel/transfert » désigne en outre
+des intervalles mêlant calcul, copies et allocations. Le temps total de
+chaîne reste exploitable sans cette attribution matérielle fine.
 La [contrelecture S4](AUDIT_S4_RESIDENCE_ORDINALS_20260923.md) précise le
 raccord du jalon hybride : si q3 s'exécute sur GPU et q4 sur CPU,
 la résidence S2/S3 exige encore l'export des arêtes q4 ouvertes avec
@@ -1612,7 +1615,7 @@ W48, maxima **1,27–1,70×** la moyenne ; les objets et digests sont
 séparateurs pseudo-aléatoires de `ec6d1b74`.
 
 Le [préflight B du brouillon plat FULL](CONTRE_AUDIT_B_BROUILLON_PLAT_FULL_WIP_20260923.md)
-sur le commit **local non encore publié** `f93dc1659` trouve une frontière
+sur le commit local historique `f93dc1659` trouve une frontière
 publique à fermer : les offsets CSR du nouveau `FullCoverageFlatDraft`
 sont lus avant toute validation de forme. Un `level` non vide avec
 `batch_begin` trop court suffit à sortir du contrat de refus typé ;
@@ -1620,8 +1623,10 @@ offsets décroissants ou hors plage posent le même problème. Le producteur
 statique paraît préserver l'ordre, mais aucune nouvelle porte directe
 vectoriel/plat, forme invalide, RSS/allocation ou chrono G4 n'est jointe
 au port. Les lots groupés allouent encore une action temporaire.
-Le point est **source seulement**, non un échec exécuté ni une erreur
-géométrique démontrée sur la sortie interne valide.
+Le port est publié depuis **`092b1d86a`** ; la même surcharge publique
+est encore lisible sans contrôle préalable des offsets à la date de cette
+revue. Le point est **source seulement**, non un échec exécuté ni une
+erreur géométrique démontrée sur la sortie interne valide.
 Le [reçu plat local](CONTRE_AUDIT_B_RECU_BROUILLON_PLAT_LOCAL_20260923.md)
 du commit développeur `5f36d5536` passe 11/11 SHA pour cinq couples
 sur la seule trame sans sol 08/000000, W8/s8. À digest FULL, comptes
