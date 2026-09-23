@@ -75,8 +75,9 @@ réelle, clôturée et **CPU seulement** : huit cas complets du paquet
 par cas. À W48, la tour K1..5 prend **18,81 / 15,05 / 29,25 s** et K1..10
 **111,68 / 82,31 / 125,44 s** ; 000000/K10 descend à **70,00 s** en FULL
 statique W48. Les six cas communs ont `generator`, `catalogue`,
-`tower_work` et `orders` exactement égaux aux reçus locaux, pas seulement
-le condensé. Sous l'hypothèse du FULL non statique en un fil, le reste de
+`tower_work` et `orders` **statistiques** exactement égaux aux reçus locaux,
+pas seulement le condensé ; les clés individuelles ne sont pas exposées.
+Sous l'hypothèse du FULL non statique en un fil, le reste de
 la chaîne consomme en moyenne **42,6–44,6 des 48 CPU logiques** : son
 coût tient davantage au travail payé qu'à un manque évident de threads.
 La voie FULL statique modifie aussi les compteurs MEB/cache : son gain

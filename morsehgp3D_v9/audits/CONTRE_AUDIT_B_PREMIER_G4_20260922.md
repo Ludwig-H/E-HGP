@@ -51,6 +51,9 @@ ambiguë en « Go ».
 
 Les condensés de tour des cas 0/6 et 3/7 concordent entre options de fils ;
 les six cas de base concordent avec les condensés locaux des mêmes entrées.
+Le recoupement champ par champ des six JSON donne aussi les mêmes **résumés
+statistiques** `generator`, `catalogue`, `tower_work` et `orders` ; il ne
+compare pas l'inventaire individuel des BallKeys, absent de la sonde.
 Le README annonce ×11,6 pour q3/q4 sur 000000 K5 :
 `128,48 s / 11,12 s = 11,56`, **arithmétiquement juste**. Ce n'est
 **pas** une efficacité de parallélisation W8→W48 : l'hôte local était un

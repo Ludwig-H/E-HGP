@@ -98,7 +98,9 @@ comparaisons entre configurations (0/6 et 3/7) sont égales selon la
 projection du protocole. Les **six comparaisons G4/local correspondantes**
 ont aussi été recoupées champ par champ : `generator`, `catalogue`,
 `tower_work`, `orders` et `tower_digest` sont identiques, au-delà du seul
-condensé. Cette égalité concerne ces cas, pas tous les nuages possibles.
+condensé. Il s'agit des **résumés JSON**, non d'une comparaison BallKey par
+BallKey (la sonde ne publie pas cet inventaire). Cette égalité concerne ces
+cas, pas tous les nuages possibles.
 
 Les valeurs du `SUMMARY.json` concordent avec les bruts : temps de chaîne
 et de phases arrondis, RSS et cardinalités ; `cpu_s` est la somme
