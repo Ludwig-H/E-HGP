@@ -85,3 +85,25 @@ garde. Le `-L gate` CTest C++ annoncé vert ne remplace pas ce selftest
 Python. Déplacer la fonction hors de `FAKE_PROBE`, tuer les mutations
 exactes date future/calendrier plausible, puis repasser normal **et**
 `python3 -O` sur le même commit figé avant R6.
+
+## Relecture de `f599aed7` : preuve liée, mais porte nominale encore rouge
+
+`d49c99f7` a déplacé `rewrite_guard` au niveau module. `f599aed7`
+transmet désormais à `validate_received` la marque et le calendrier
+**exactement** lus et vérifiés par l'hôte, puis exige leur égalité avec
+`guard_evidence.json`. Dans une session factice hors-ligne sur ce commit,
+le cas nominal rend `completed` ; modifier seulement la date archivée en
+2099 ou le calendrier archivé en `generation+600 s` lève maintenant
+`ValueError`. Les deux substitutions admises par `028067a3` sont donc
+refusées. Aucun reçu GCP n'est impliqué.
+
+La porte `test_nominal_session_completed` échoue néanmoins encore sur
+le **commit figé** : `python3 -B gcp-migration/tower_selftest_v9.py
+Protocol.test_nominal_session_completed` donne **1 erreur sur 1 test**
+en 3,07 s. Les deux anciennes mutations « autre génération » et
+« autre provenance » aux lignes 856–858 appellent la nouvelle fonction
+sans son argument obligatoire `verified_guard` ; elles lèvent `TypeError`
+au lieu du `ValueError` qu'attend `refused()`. Ajouter `bound[2]` à ces
+deux appels, puis faire passer la suite complète normale et `-O` sur
+un snapshot stable avant R6. Les nouvelles mutations de garde ne sont
+pas encore jugées par cette porte interrompue.

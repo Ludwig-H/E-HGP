@@ -1,7 +1,7 @@
 # Contre-audit B — noyau diamétral q3/q4 (chantier du 23 septembre)
 
-Statut : **code publié dans `a78664d4`, correctifs `028067a3` en cours
-d'intégration, performance non qualifiée, hors registre**. Lecture
+Statut : **code publié dans `a78664d4`, gardes complétés dans
+`f599aed7`, performance non qualifiée, hors registre**. Lecture
 d'abord du diff au-dessus de `84c74a5e`, puis des commits produit.
 Cette note ne transforme ni R5 ni le harnais local en reçu du nouveau
 levier. La réception v8 est auditée séparément.
@@ -26,8 +26,8 @@ du prouveur. Elle ne qualifie pas le float32 ni une nouvelle largeur de
 coordonnées. Le type public `Q34EdgeCoverPtr` est commun au sous-cover et au
 cover complet : un futur branchement du sous-cover vers le census/atlas
 serait incorrect. `028067a3` ajoute un marqueur `complete()` et un refus
-à l'entrée des principaux consommateurs ; voir toutefois le cas K1/2
-ci-dessous. **Aucune divergence de sortie n'a été observée**
+à l'entrée des principaux consommateurs ; `f599aed7` ferme le cas K1/2
+décrit ci-dessous. **Aucune divergence de sortie n'a été observée**
 sur les petits oracles à ce stade.
 
 ## Coût : le verrou principal n'est pas touché
@@ -141,7 +141,7 @@ spécifiquement à K1/2 ou avec filtre témoin désactivé dans la grande
 porte indexée ; ces cas restent utiles pour tuer des mutations de
 contrôle de voie et de contact.
 
-Le garde de consommateur ajouté dans `028067a3` a encore un trou de
+Le garde de consommateur ajouté dans `028067a3` avait un trou de
 **contrat d'API** : les deux surcharges directes
 `run_q4_local_edge_candidates(Q34EdgeCoverPtr, K, ...)` de
 `q4_local.cpp` rendent un travail vide à `K<3` **avant** d'appeler
@@ -152,6 +152,17 @@ Cela n'émet aucune q4 incorrecte, puisque la voie est inactive ; déplacer
 `require_complete_q34_cover` avant le retour précoce dans les deux
 surcharges et tester K1/2 dans la porte de cover. Les huit refus de la
 porte actuelle ne portent que sur K5.
+
+**Résolution dans `f599aed7` :** les deux surcharges appellent maintenant
+`require_complete_q34_cover` avant tout retour à K1/2. Une contrelecture
+des chemins publics n'a pas trouvé d'autre consommateur non gardé. Le
+binaire fraîchement reconstruit `mhgp9_gen_q34_cover_gate --selftest`
+passe avec **18 029 assertions**, 248 cœurs et 18 refus de consommateur ;
+le nouveau gate exerce K1/2 pour les appels directs et seed-cell. Le
+mutant compilé qui retire la garde directe est tué causalement. Le gate
+n'isole pas par mutation la seconde surcharge en mode `Joined`, mais
+elle possède la même garde avant branchement. Cela ferme cet écart
+d'API, non la qualification FULL/G4 du levier.
 
 Avant de qualifier le défaut ON ou de lancer une campagne G4 coûteuse,
 demander des paires
