@@ -63,3 +63,26 @@ le reçu historique R1, lié indépendamment à ses sources ; tous empêchent
 de promouvoir la nouvelle voie v3 en preuve de contrat. La prochaine
 porte est une **vraie petite sortie v3** jugée par le worker, puis des
 mutants de schéma/mode/provenance/fermeture/temps, avant G4.
+
+## Suite `0b29b6c3` : défaut FULL statique, mais pas dans le plan G4
+
+Le commit suivant donne à l'API `ChainOptions::tower_static_threads=-1`
+le sens « utiliser W fils statiques si W>1 », puis publie dans la sonde
+le nombre **effectif**. C'est une politique locale plausible, distincte
+de la preuve de gain sur G4. Le worker G4 conserve
+`expected_probe_tail(case) = ... --static=<case.static_threads>` et ses
+cas standards portent `static_threads=0`. Cette option explicite
+**désactive le nouveau défaut** : relancer le plan inchangé mesurerait
+encore la voie temporelle, sauf le cas additionnel statique prévu à 48.
+Pour mesurer le nouveau défaut sur les cas contractuels, épingler dans
+chaque cas la voie statique voulue (ou omettre explicitement l'argument
+et vérifier le nombre effectif), puis comparer même catalogue et digest
+par ordre. Une ligne locale non versionnée `scene00/K5/W8` sous les
+nouveaux défauts annonce bien `tower_static_threads=8` et le digest
+historique `67450c64611075b1`, mais elle ne constitue ni reçu apparié,
+ni G4, ni preuve générale d'identité.
+
+Le cast `static_cast<int>(W)` dans ce chemin auto demande une garde
+représentationnelle `W≤INT_MAX` avant conversion pour l'API C++ directe ;
+la CLI borne déjà W à 4096. Il ne s'agit pas de réintroduire un quota de
+recherche ou de points.
