@@ -200,6 +200,13 @@ sa construction. Sur le brut R2 08/000000/K10, `cover_sites` totalise
 arêtes lirait environ **7,796 milliards de sites** hors endpoints, avant
 le premier test de cellule. Cette masse deviendrait du travail physique,
 alors que `cover_sites` n'est qu'une population logique dans le reçu R2.
+Dans cette version **à chargement intégral**, la partition des ranges et
+la présence unique des deux endpoints imposent les identités auditables
+`dead.loads=cover_builds` et
+`dead.form_sites=cover_sites−2·cover_builds`. Le WIP compte ces postes
+en interne mais sa sonde v5 ne les publie pas ; elle expose les tests des
+cellules sans la préparation qui les précède. Une variante pré-cover
+aurait naturellement un autre bilan, à publier séparément.
 
 La preuve positive ne demande pourtant **aucun cover**. Choisir avant sa
 construction un ensemble borné `G` de vrais IDs distincts du même nuage,

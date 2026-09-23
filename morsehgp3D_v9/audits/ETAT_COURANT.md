@@ -186,6 +186,19 @@ appariée.
    Le [scénario B](CONTRE_AUDIT_B_PROTOCOLE_V4_WIP_20260923.md) reproduit
    aussi `partial` avec **zéro cas complet** et code hôte 0 ; un tel reçu
    ne peut être lu comme succès de tour.
+   Le protocole **v5 encore en WIP** ajoute le mode `q34_dead_lanes`, mais
+   son validateur accepte `complete_relative` avec ce booléen vrai et
+   **aucun** des sept compteurs `dead_*` : la fausse sonde nominale de son
+   propre selftest n'en émet aucun. Rejeu direct du `validate_probe` sur
+   cette sonde : quatre variantes (`base`, compteurs absents, compteurs
+   nuls, `generator.q3_emitted` absent) rendent toutes
+   `complete_relative`. Le contrôle actuel exige seulement un ledger non
+   vide d'entiers non négatifs. Avant un reçu G4 v5, rendre obligatoires les
+   clés et identités du travail réel, notamment `dead_loads` et
+   `dead_form_sites` que la sonde n'exporte pas encore, puis **exiger dans
+   le préflight** une fixture native où une voie est effectivement prouvée
+   morte ; le petit gate actuel l'exerce mais ne l'asserte pas. Ce
+   constat vise le WIP lu le 23 septembre, pas le paquet R1/R2 épinglé.
    Le [contre-test de provenance](CONTRE_AUDIT_B_G4_R1_ET_SCHEMA_V2_20260922.md)
    montre qu'un paquet muté peut annoncer un commit inexistant et être
    accepté par le contrôleur, et qu'une provenance différente dans le
@@ -308,8 +321,16 @@ appariée.
    physiques. Une petite palette de vrais gardes **adaptée par cellule**
    peut tenter le certificat avant le cover, avec repli exact et budget
    d'effort ; les gardes universels sont déjà traités par le filtre citron.
-   La fixture K5 distingue les deux preuves. Mesurer les succès par arête
-   et les coûts réellement évités avant d'activer cette option. Ni gain
+   La fixture K5 distingue les deux preuves. Le WIP met déjà cette option
+   **par défaut dans la chaîne** sans mesure LiDAR appariée ; la garder
+   expérimentale jusqu'à publication des formes chargées, succès par arête
+   et coûts réellement évités. Sa `docs/PROVENANCE.md` en cours annonce
+   **91 % du temps q3/q4** sur des arêtes sans émission et des covers moyens
+   de 568 contre 43 sites, sans reçu ni méthode de profil par arête
+   identifiables dans le dossier à cette date. Le brut R2 démontre une
+   **proportion d'arêtes q4 muettes** supérieure à 91 %, pas une fraction
+   de temps ; demander entrée, code/options, définition des classes et
+   chronos avant de fonder le défaut sur cette attribution. Ni gain
    LiDAR ni borne globale acquis.
 4. **Aval FULL, grandes coquilles et échelle** : les 12,0 M appels MEB
    de 000000/K10 font 1,065 milliard de tests de puissance ; un test
