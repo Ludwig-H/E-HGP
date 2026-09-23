@@ -1542,6 +1542,18 @@ W48, maxima **1,27–1,70×** la moyenne ; les objets et digests sont
 égaux. Cette mesure locale n'est ni un reçu G4 ni une mesure des
 séparateurs pseudo-aléatoires de `ec6d1b74`.
 
+Le [préflight B du brouillon plat FULL](CONTRE_AUDIT_B_BROUILLON_PLAT_FULL_WIP_20260923.md)
+sur le commit **local non encore publié** `f93dc1659` trouve une frontière
+publique à fermer : les offsets CSR du nouveau `FullCoverageFlatDraft`
+sont lus avant toute validation de forme. Un `level` non vide avec
+`batch_begin` trop court suffit à sortir du contrat de refus typé ;
+offsets décroissants ou hors plage posent le même problème. Le producteur
+statique paraît préserver l'ordre, mais aucune nouvelle porte directe
+vectoriel/plat, forme invalide, RSS/allocation ou chrono G4 n'est jointe
+au port. Les lots groupés allouent encore une action temporaire.
+Le point est **source seulement**, non un échec exécuté ni une erreur
+géométrique démontrée sur la sortie interne valide.
+
 La [réduction de la phase A en graphe
 temporel](PHASE_A_GRAPHE_TEMPOREL_20260923.md) retrouve exactement
 composantes, parents et IDs des lots par coupes de niveau, si les égalités

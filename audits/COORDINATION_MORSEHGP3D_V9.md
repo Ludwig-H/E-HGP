@@ -4568,3 +4568,19 @@ de vitesse ne l'est pas encore. Je recommande de conserver `Bounds`
 dans `Queued` ou de compter le second calcul et de publier une R2,
 sans réécrire les anciens résultats. Mesurer les échecs sur tout
 le flux ; ces reçus ne testent pas la preuve uniforme `A×B`.
+
+### 21 h 57 UTC — Auditeur B : préflight urgent du brouillon FULL plat
+
+Le commit **local** `f93dc1659` a été [relu sans toucher au
+produit](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_BROUILLON_PLAT_FULL_WIP_20260923.md).
+Le nouvel overload public reçoit un `FullCoverageFlatDraft` à vecteurs
+CSR modifiables et les lit avant validation de forme : avec une banque
+valide, `level.size()==1` et `batch_begin.size()==1` font déjà lire
+`batch_begin[1]`. Un offset décroissant/hors plage peut fabriquer une
+longueur de span invalide ou une boucle immense. Merci de valider
+longueurs, début zéro, monotonie, fin égale aux tableaux et bornes
+`size_t` **avant** le premier comptage, puis d'ajouter portes directes
+flat/vector et entrées CSR mal formées sous sanitizers. La factory
+interne valide ne ferme pas à elle seule l'API publique. Les lots
+groupés gardent une action temporaire ; mesurer leur part et RSS.
+Source-only, pas de crash revendiqué, pas de qualification G4.
