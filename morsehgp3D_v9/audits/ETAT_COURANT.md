@@ -636,7 +636,8 @@ Une [ablation à boîte exactement fixe](lidar_density_bbox_fixed_20260923/READM
 sur ce quart échange seulement trois puis deux IDs aux densités 1/4 et 1/2 ;
 la pente K10 des formes reste **2,058215 puis 2,042880**, pratiquement
 inchangée. Ce signal ne vient donc pas seulement de l'étendue de la boîte.
-Le [premier reçu brut avec sol](lidar_raw_physical_scaling_20260923/README.md)
+Le [premier reçu brut avec sol](lidar_raw_physical_scaling_20260923/README.md),
+[contrelu indépendamment par B](CONTRE_AUDIT_B_LIDAR_BRUT_PHYSIQUE_20260923.md)
 ajoute **neuf cas K5** sur une trame entière 08/000000 à 1 mm : sept
 secteurs par plans **float32 physiques** et trois densités emboîtées de
 la trame entière. La sélection garde les 123 389 retours sans fusion ;

@@ -2447,7 +2447,7 @@ plus comptes), puis gain aval et RSS. En régime LiDAR, la recherche kNN
 sur l'index peut elle-même être chère ; aucune pente sous-quadratique
 ne se déduit de la structure seule.
 
-### Mise à jour 11 h 48 UTC — le WIP vient d'activer la voie dans la chaîne
+### Mise à jour 11 h 46 UTC — le WIP vient d'activer la voie dans la chaîne
 
 Le worktree mutable raccorde maintenant `near_sites=16` **ON par défaut**
 dans `ChainOptions`/`tower_chain.cpp`, avec sonde v17 : mon énoncé
@@ -2478,3 +2478,18 @@ comparer les listes globales aux listes du cœur. À 16 voisins par
 extrémité, la seule préparation des formes peut peser lourd. Mesurer
 le nombre réel d'appels et les formes/tests **sur cette population**,
 et les rejets que le filtre préexistant aurait obtenus à moindre coût.
+
+### Mise à jour 11 h 50 UTC — audit indépendant de la trame brute physique
+
+Le [reçu brut de A](../morsehgp3D_v9/audits/lidar_raw_physical_scaling_20260923/README.md)
+est [contrelu par B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_LIDAR_BRUT_PHYSIQUE_20260923.md) :
+26/26 SHA, 63 payloads d'entrée et résumé des neuf sorties reconstruits
+à l'identique. Sur 08/000000 **avec sol**, grille 1 mm/K5/CPU local,
+les 30 847→61 694→123 389 sites donnent 35,46→125,48→551,69 M
+formes de cœur ; pente finie 1,823 puis **2,136**. Le temps de chaîne
+reste sous la pente 2, mais cette masse est un coût réellement payé,
+pas une preuve de sous-quadraticité. Une trame/un run/une séquence :
+ne pas assimiler aux 8k/16k/32k sans sol ni aux contrats G4. Pour v17,
+publier formes *évitées* avec coût intégral des voisins globaux et les
+sorties exactes sur cette même trame brute, sans confondre les deux
+populations de paires.
