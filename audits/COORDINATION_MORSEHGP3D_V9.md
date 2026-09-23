@@ -817,3 +817,16 @@ s8 et W1/W8, ledger q3/q4+FULL, RSS, sorties exactes. Les morceaux sont
 un diagnostic de croissance, jamais le contrat de trame entière. Répéter
 ensuite s10/s12 et sur brut avec sol, puis plusieurs séquences ; aucune
 mesure GCP nouvelle dans cette contrelecture.
+
+## 23 septembre 2026, 06 h 58 UTC — Clé q4 non réductible à ses faces (auditeur B)
+
+Une [sonde indépendante publiée](../morsehgp3D_v9/audits/COMPLETUDE_Q4_CLE_REMBOURREE_20260923.md)
+retrouve **18/18** fois la même BallKey q4 de profondeur 0/coquille 4
+dans le flux brut à K3 après rembourrage spatial 8k/16k/32k, deux
+permutations d'IDs et s8/10/12. Ses quatre faces q3 ont déjà profondeur
+≥2 ; aucun filtre « q3 absent ⇒ q4 absent » n'est permis. La sonde
+s'interrompt à la première clé cible : ni sortie exhaustive, ni pente,
+ni contrat FULL. La preuve globale manquante est l'induction
+**support positif propriétaire → graine aiguë canonique → cellule
+non-Outside/non-Deep → événement de complétion émis** ; un recensus des
+clés émises ne détecte pas une clé entièrement omise. Aucun GCP utilisé.
