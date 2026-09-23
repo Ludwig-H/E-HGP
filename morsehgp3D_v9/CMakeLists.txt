@@ -8,12 +8,17 @@ project(morsehgp3d_v9 CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+# C++ only: the optional CUDA unit (MHGP9_ENABLE_CUDA) has its own flags.
+add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Wpedantic;-Werror>")
 
 option(MHGP9_SANITIZE "Construire sous ASan et UBSan" OFF)
 option(MHGP9_TSAN "Construire sous ThreadSanitizer" OFF)
+option(MHGP9_ENABLE_CUDA "Construire le filtre temoin sur GPU (sm_120, sonde S1)" OFF)
 if(MHGP9_SANITIZE AND MHGP9_TSAN)
   message(FATAL_ERROR "MHGP9_SANITIZE et MHGP9_TSAN sont exclusifs")
+endif()
+if(MHGP9_ENABLE_CUDA AND (MHGP9_SANITIZE OR MHGP9_TSAN))
+  message(FATAL_ERROR "MHGP9_ENABLE_CUDA est incompatible avec les sanitizers")
 endif()
 if(MHGP9_SANITIZE)
   add_compile_options(-fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer)
@@ -185,6 +190,35 @@ mhgp9_gate(mhgp9_chain_absent_keys 0 mhgp9_chain_absent_keys_gate ARGS --selftes
 mhgp9_gate(mhgp9_chain_absent_keys_scale8000 0 mhgp9_chain_absent_keys_gate ARGS --selftest --n=8000
            EXPECT_PREFIX "chain_absent_keys_gate n=8000" LABELS "scale8000;chain;oracle" TIMEOUT 1800)
 mhgp9_gate(mhgp9_chain_absent_keys_bad_argument 2 mhgp9_chain_absent_keys_gate ARGS --n=abc LABELS "gate;chain" TIMEOUT 60)
+
+# ---- Voie GPU (23 septembre 2026) : port portable (hote/device) du filtre
+# temoin exact q3/q4, juge ici requete par requete contre le produit.
+mhgp9_product_executable(mhgp9_gpu_witness_filter_port_gate tests/gpu/witness_filter_port_gate.cpp)
+target_link_libraries(mhgp9_gpu_witness_filter_port_gate PRIVATE mhgp9_gen)
+mhgp9_gate(mhgp9_gpu_witness_filter_port 0 mhgp9_gpu_witness_filter_port_gate ARGS --n=2000 --pair-stride=5
+           EXPECT_PREFIX "witness_filter_port_gate n=2000" LABELS "gate;gpu;oracle" TIMEOUT 600)
+mhgp9_gate(mhgp9_gpu_witness_filter_port_scale8000 0 mhgp9_gpu_witness_filter_port_gate ARGS --n=8000
+           EXPECT_PREFIX "witness_filter_port_gate n=8000" LABELS "scale8000;gpu;oracle" TIMEOUT 1800)
+mhgp9_gate(mhgp9_gpu_witness_filter_port_bad_argument 2 mhgp9_gpu_witness_filter_port_gate ARGS --n=abc
+           LABELS "gate;gpu" TIMEOUT 60)
+
+# Sonde S1 : meme population que la chaine (front, rectangles, paires), CPU
+# puis GPU, masques compares requete par requete. Sans MHGP9_ENABLE_CUDA le
+# passage GPU est un stub (`--cpu-only` seul utile).
+if(MHGP9_ENABLE_CUDA)
+  enable_language(CUDA)
+  find_package(CUDAToolkit REQUIRED)
+  add_library(mhgp9_gpu STATIC src/gpu/filter_runner.cu)
+  set_target_properties(mhgp9_gpu PROPERTIES CUDA_ARCHITECTURES 120 CUDA_STANDARD 20 CUDA_STANDARD_REQUIRED ON)
+  target_compile_options(mhgp9_gpu PRIVATE "$<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-Wall,-Wextra>")
+  target_link_libraries(mhgp9_gpu PUBLIC CUDA::cudart_static)
+else()
+  add_library(mhgp9_gpu STATIC src/gpu/filter_runner_stub.cpp)
+endif()
+mhgp9_product_executable(mhgp9_gpu_filter_probe bench/gpu_filter_probe.cpp)
+target_link_libraries(mhgp9_gpu_filter_probe PRIVATE mhgp9_gen mhgp9_gpu)
+mhgp9_gate(mhgp9_gpu_filter_probe_bad_argument 2 mhgp9_gpu_filter_probe ARGS missing.u32le 5 1
+           LABELS "gate;gpu" TIMEOUT 60)
 mhgp9_product_executable(mhgp9_chain_static_paths_gate tests/chain/chain_static_paths_gate.cpp)
 target_link_libraries(mhgp9_chain_static_paths_gate PRIVATE mhgp9_chain)
 mhgp9_gate(mhgp9_chain_static_paths 0 mhgp9_chain_static_paths_gate

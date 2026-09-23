@@ -185,6 +185,36 @@ condensé inchangé ; libellé de comptabilité
 `anchor_meb_first_maximal_pair_then_double_welzl_proposal_exact_boundary_canonical_v3`
 (sonde v10).
 
+## Voie GPU S1 : `src/gpu/` (espace `mhgp9::gpu`, code neuf)
+
+23 septembre 2026. Première brique GPU de la v9, pour une expérience de
+débit bornée : le filtre témoin exact q3/q4.
+
+- **Port** : `witness_filter.hpp` porte `filter_impl` avec bornes
+  d'exclusion de `lanes/q34_witness_search.cpp`, en version hôte et device.
+  Il couvre la spécialisation affine des paires et la générale des boîtes.
+  Arithmétique entière identique (i64, i128), même ordre de DFS, mêmes
+  crédits, pile bornée à 55 cadres (borne prouvée de l'index).
+  `flat_index.hpp` en fait une copie plate de l'index.
+- **Exécution** : `filter_runner.cu` fait un fil par rectangle, un balayage
+  exclusif CUB des masses survivantes, puis un fil par paire développée
+  (ordre du moteur, sans cache). `filter_runner_stub.cpp` le remplace sans
+  CUDA. L'option CMake `MHGP9_ENABLE_CUDA` est désactivée par défaut
+  (sm_120) ; les unités C++ gardent `-Wall -Wextra -Wpedantic -Werror`.
+- **Porte `gpu_witness_filter_port`** : le port compilé pour l'hôte est
+  comparé à `filter_q34_witnesses`, requête par requête. Elle couvre les
+  rectangles réels du front et un échantillon des paires développées, trois
+  familles, K3, K5 et K10, et exige des totaux de nœuds visités égaux. À
+  2 000 sites : 1,71 M rectangles et 1,20 M paires identiques ; témoin de
+  sensibilité (K−1) à 211 k divergences ; variante `scale8000`.
+- **Sonde `mhgp9_gpu_filter_probe`** (schéma `mhgp9_gpu_filter_probe_v1`) :
+  elle reproduit la population de la chaîne (front, rectangles, paires).
+  Trois références CPU : rectangles, paires sans cache, paires avec le cache
+  de ligne du moteur ; ce dernier doit donner les mêmes masques. Elle refait
+  ensuite le passage sur GPU et exige des masques et des totaux de visites
+  égaux. Sur 08/000100/K5 en local (W8) : 2,35 M rectangles, 12,0 M paires ;
+  filtre CPU 2,4 s (rectangles) plus 2,8 s (paires avec cache).
+
 ## Chaîne : `src/chain/` (espace `mhgp9`, code neuf)
 
 `run_tower_chain` enchaîne le générateur (configuration mesurée des reçus v8 :
