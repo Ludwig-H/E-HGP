@@ -175,8 +175,15 @@ paquet `515b3666`, **`completed`**, `TERMINATED` certifié) :
 - Tour K10 : phase 0 1,1–1,5 s, lots séquentiels 0,8–1,2 s.
 - s = 8 reste le meilleur choix, devant s = 10 et 12.
 
-Suite immédiate : ordonnancement de q34 (ordre des jobs par masse, grain
-plus fin), puis squelette des lots de la tour et phase 0.
+Session G4 R9 ([`g4_tower_r9_20260923`](receipts/g4_tower_r9_20260923/README.md),
+paquet `fe1142b5`, **`completed`**, `TERMINATED` certifié) : jobs du front
+préparés par masse et 4× plus fins (sonde v14). **Chaîne K5 2,80 / 3,80 /
+3,99 s**, **K10 8,60 / 11,75 / 11,89 s**, condensés égaux ON/OFF. Sonde
+**v15** : phase A de la tour recouvrant la phase 0 (`tower_overlap_static`).
+
+Suite : ablation G4 du recouvrement, tour maigre (D5 de l'auditeur C :
+index des selles, saut au centre, images de naissance directes), puis
+réfutation des ancres longues avant expansion (66–70 % du CPU q3/q4 selon C).
 
 Suite : coût q3/q4 (ventilation K10 W8 locale en Gcycles : atlas 229, q4 235,
 paires 187, rectangles 123, noyau 120, q3 120, preuve sur cover 86) ; seuil

@@ -1934,3 +1934,41 @@ ni s10/s12, ni complétude absolue acquis.
 Question au développeur : peux-tu figer le dossier R9 sur `main` avec
 les empreintes annoncées (ou signaler toute correction du reçu), puis
 garder ses cas ON comme base CPU de comparaison du futur GPU ?
+
+## 23 septembre 2026, 10 h 45 UTC — Ordonnancement q34 mesuré sur G4 (R9), v15 (développeur)
+
+- **B, rectificatif R8** : bien noté, tout rectangle survivant propose une
+  plage ; le diagnostic juste est celui du **plus long job**, que R9 mesure
+  désormais. Sans les leviers, ce job dure 2,5 à 6,8 s, presque tout le mur
+  q34. Tes points sur `1f048aae` sont corrigés dans `fe1142b5` :
+  - `validate_probe` G4 intégral dans le lecteur local, avec des mutants de
+    champs texte ;
+  - `argv[0]` des morceaux résolu dans le sous-arbre v8 ;
+  - masse calculée sur 128 bits et saturée ;
+  - refus Euler exigé avec `kInvariantViolated` et `kFails` dans la porte
+    C++.
+
+  Le commentaire du levier ne promet plus des compteurs égaux : il dit
+  « même flux normalisé et même travail géométrique ; préparation, partage
+  et hits de cache par ouvrier différents ».
+- **G4 R9**
+  ([reçu](../morsehgp3D_v9/receipts/g4_tower_r9_20260923/README.md), paquet
+  `fe1142b5`, `TERMINATED` relu 03:25:51 PDT) : ablation appariée des deux
+  leviers d'ordonnancement, 24/24 cas, condensés égaux ON/OFF. **K5 : 2,80 /
+  3,80 / 3,99 s** (contre 3,69 / 5,24 / 6,30), **K10 : 8,60 / 11,75 /
+  11,89 s**. L'attente passe de 35–49 % à environ 1 %, et le plus long job
+  tombe à 0,23–0,31 s.
+- **v15** (`tower_overlap_static`) : la phase A de chaque ordre démarre dès
+  sa phase 0, calculée par K décroissant. C'est l'étape 1 de l'ordonnancement
+  proposée par la revue, avec un gain local de −0,3 à −0,7 s sur la tour
+  K10 16k. La porte de priorité couvre les deux voies et un nouveau point de
+  panne de phase 0.
+- **C, alternatives** : je prends D5 (tour maigre) comme prochain chantier de
+  la tour, en commençant par ce qui est prouvé et mesuré chez toi :
+  - index des selles (lemme A) ;
+  - saut au centre avec règle 0 (lemme B) ;
+  - images de naissance directes (lemme C) ;
+  - fixtures `fx_cz`, `lat5_*`, `fx_ico12` comme portes.
+
+  La réfutation des ancres longues avant expansion reste la cible q34
+  principale.
