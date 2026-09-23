@@ -48,7 +48,7 @@ PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
 PLAN_SCHEMA = 'mhgp9_tower_plan_v6'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v14'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v15'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -97,7 +97,7 @@ OUTCOMES = ('complete_relative', 'explicit_refusal', 'killed_case_cap', 'killed_
             'skipped_budget', 'probe_failed', 'skipped_protocol_defect')
 CASE_KEYS = frozenset({'scene', 'file', 'n', 'k', 's', 'workers', 'static_threads', 'levers', 'repeat'})
 LEVER_NAMES = ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_witness_cache', 'q34_dead_core',
-               'tower_meb_proposal', 'q34_jobs_by_mass', 'q34_fine_jobs')
+               'tower_meb_proposal', 'q34_jobs_by_mass', 'q34_fine_jobs', 'tower_overlap_static')
 TOP_KEYS = frozenset({'schema', 'status', 'reason', 'input', 'options', 'times_ms', 'chain_cpu_s', 'generator',
                       'ledger', 'catalogue', 'q34_occupancy', 'tower_phases_ms', 'tower_work', 'orders',
                       'tower_digest', 'peak_rss_kb'})
@@ -466,10 +466,16 @@ def validate_tower_phases(value, case):
          'tower phases exceed the tower time')
     static_path = case['static_threads'] > 1 and min(case['k'], case['n']) > 1
     if static_path:
+        # v15 : avec tower_overlap_static, la phase A d'un ordre peut recouvrir
+        # la phase 0 ; `lots` est le reste apres la phase 0, et chaque
+        # lots_by_k est borne par la fenetre phase 0 + reste.
+        overlap = case['levers'].get('tower_overlap_static', False)
+        lots_window = phases['lots'] + (phases['static'] if overlap else 0.0)
         need(not any(phases['order_by_k']) and
              abs(phases['static'] - sum(phases['static_by_k'])) <= PHASE_TOLERANCE_MS * case['k'] and
+             all(x <= lots_window + PHASE_TOLERANCE_MS for x in phases['lots_by_k']) and
              all(x <= phases[step] + PHASE_TOLERANCE_MS
-                 for step, key in (('lots', 'lots_by_k'), ('images', 'images_by_k'), ('encode', 'encode_by_k'))
+                 for step, key in (('images', 'images_by_k'), ('encode', 'encode_by_k'))
                  for x in phases[key]), 'tower static path phases')
     else:
         need(not any(phases[key] for key in STATIC_PATH_PHASES) and

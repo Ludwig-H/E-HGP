@@ -234,6 +234,9 @@ def main(argv):
             ('tower phases absent', lambda v: v.pop('tower_phases_ms')),
             ('jobs-by-mass lever flipped', lambda v: v['options']['levers'].update(q34_jobs_by_mass=False)),
             ('fine-jobs lever flipped', lambda v: v['options']['levers'].update(q34_fine_jobs=False)),
+            ('overlap lever flipped', lambda v: v['options']['levers'].update(tower_overlap_static=False)),
+            ('order lots beyond the overlap window', lambda v: v['tower_phases_ms']['lots_by_k'].__setitem__(
+                0, v['tower_phases_ms']['static'] + v['tower_phases_ms']['lots'] + 5.0)),
             ('longest job beyond worker wall', lambda v: v['q34_occupancy'].update(
                 max_job_ms=v['q34_occupancy']['wall_max_ms'] + 5.0)),
             ('job time beyond threads x wall', lambda v: v['q34_occupancy'].update(

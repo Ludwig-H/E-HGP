@@ -74,6 +74,10 @@ struct ChainOptions {
   // defaut, publies et epingles (reçu G4 R8 : fils q34 affames a W48).
   bool q34_jobs_by_mass = true;
   bool q34_fine_jobs = true;
+  // Tour statique : phase A de chaque ordre lancee des que sa phase 0 est
+  // faite (phase 0 par K decroissant), meme objet. Contrat v9 : actif par
+  // defaut, publie et epingle.
+  bool tower_overlap_static = true;
 };
 
 // Temps de mur en millisecondes, CPU du processus en secondes.

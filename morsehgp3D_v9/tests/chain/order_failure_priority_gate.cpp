@@ -16,6 +16,7 @@
 //   mhgp9_chain_order_failure_priority_gate --selftest
 //
 // Code 0 conforme, 1 desaccord (ligne `cause=`), 2 argument, 3 plancher.
+#include <tuple>
 #include <cstdint>
 #include <cstdio>
 #include <string>
@@ -63,16 +64,42 @@ int main(int argc, char** argv) {
       {bit(4), bit(3), "tower: failpoint_images_k3"},
       {bit(1), bit(5), "tower: failpoint_lots_k1"},
   };
-  std::uint64_t checks = 0, concurrent = 0;
+  std::uint64_t checks = 0, concurrent = 0, overlapped = 0, static_checks = 0;
+  bool overlap = true;
   const auto run = [&](int statics) {
     mhgp9::ChainOptions options;
     options.kmax = 5;
     options.workers = 4;
     options.tower_static_threads = statics;
+    options.tower_overlap_static = overlap;
     return mhgp9::run_tower_chain(points, options);
   };
+  // Phase-0 failures (static path): the SMALLEST failing K is reported, on
+  // the overlapped path (phase 0 by decreasing K) as on the classic one,
+  // before any lot or image failure.
+  for (const bool mode : {true, false}) {
+    overlap = mode;
+    for (const auto& [statics_mask, lots_mask, expected] :
+         {std::tuple{bit(3) | bit(5), 0U, "tower: failpoint_static_k3"},
+          std::tuple{bit(4), bit(2), "tower: failpoint_static_k4"},
+          std::tuple{bit(2) | bit(3) | bit(4) | bit(5), bit(1), "tower: failpoint_static_k2"}}) {
+      detail::failpoint_static = statics_mask;
+      detail::failpoint_lots = lots_mask;
+      const auto r = run(4);
+      detail::failpoint_static = 0;
+      detail::failpoint_lots = 0;
+      ++checks; ++static_checks;
+      if (r.status != mhgp9::ChainStatus::kInvariantViolated || r.reason != expected) {
+        std::printf("cause=priority.static overlap=%d expected=%s reason=%s\n", mode ? 1 : 0, expected,
+                    r.reason.c_str());
+        return 1;
+      }
+    }
+  }
+  for (const bool mode : {true, false})
   for (const auto& scenario : scenarios)
     for (const int statics : {1, 4, 8}) {
+      overlap = mode;
       detail::failpoint_lots = scenario.lots;
       detail::failpoint_images = scenario.images;
       const auto r = run(statics);
@@ -88,7 +115,9 @@ int main(int argc, char** argv) {
         return 1;
       }
       if (statics > 1 && r.tower_stats.parallel_orders == 5) ++concurrent;
+      if (statics > 1 && r.tower_stats.overlapped_orders == (mode ? 5U : 0U)) ++overlapped;
     }
+  overlap = true;
   {
     mhgp9::tower::parallel_detail::launch_fail_after = 1;
     const auto launch = run(4);
@@ -108,10 +137,12 @@ int main(int argc, char** argv) {
     std::printf("cause=complete.status reason=%s\n", complete.reason.c_str());
     return 1;
   }
-  std::printf("order_failure_priority_gate checks=%llu concurrent_failures=%llu digest=%016llx\n",
+  std::printf("order_failure_priority_gate checks=%llu concurrent_failures=%llu overlapped=%llu digest=%016llx\n",
               static_cast<unsigned long long>(checks), static_cast<unsigned long long>(concurrent),
+              static_cast<unsigned long long>(overlapped),
               static_cast<unsigned long long>(complete.tower_digest));
-  if (concurrent != 2 * std::size(scenarios) || complete.tower_stats.parallel_orders != 5) {
+  if (concurrent != 4 * std::size(scenarios) || overlapped != 4 * std::size(scenarios) || static_checks != 6 ||
+      complete.tower_stats.parallel_orders != 5 || complete.tower_stats.overlapped_orders != 5) {
     std::printf("cause=floor.concurrent_orders\n");
     return 3;
   }

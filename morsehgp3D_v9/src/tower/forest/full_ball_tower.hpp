@@ -5,6 +5,9 @@
 #include <array>
 #include <cfenv>
 #include <chrono>
+#include <condition_variable>
+#include <mutex>
+#include <thread>
 #include <numeric>
 #include <unordered_map>
 
@@ -56,6 +59,7 @@ struct FullBallStats {
   u64 static_peak_seed_bytes = 0, static_peak_group_bytes = 0, static_peak_worker_bytes = 0;
   u64 static_batch_calls = 0, static_peak_batch_bytes = 0;
   u64 parallel_orders = 0;  // orders built by the concurrent static path
+  u64 overlapped_orders = 0;  // of which with phase A overlapping phase 0 (overlap_static)
   u64 presorted_catalogues = 0;  // key order certified by one scan, no sort
   // False after a backend failure whose paid work could not be recovered.
   bool static_batch_work_known = true;
@@ -139,7 +143,7 @@ inline void require(bool ok, const char* reason, FullBallStatus status = FullBal
 // Test failpoints, never compiled in a product target: bit K-1 makes order K
 // fail at the end of its lots (A) or of its vertical images (C). The
 // sequential path checks both at the end of order K, lots first.
-inline std::atomic<u32> failpoint_lots{0}, failpoint_images{0};
+inline std::atomic<u32> failpoint_lots{0}, failpoint_images{0}, failpoint_static{0};
 inline void failpoint(const std::atomic<u32>& mask, bool lots, unsigned k) {
   static constexpr const char* kLots[] = {"failpoint_lots_k1", "failpoint_lots_k2", "failpoint_lots_k3",
       "failpoint_lots_k4", "failpoint_lots_k5", "failpoint_lots_k6", "failpoint_lots_k7", "failpoint_lots_k8",
@@ -152,9 +156,18 @@ inline void failpoint(const std::atomic<u32>& mask, bool lots, unsigned k) {
 }
 inline void failpoint_after_lots(unsigned k) { failpoint(failpoint_lots, true, k); }
 inline void failpoint_after_images(unsigned k) { failpoint(failpoint_images, false, k); }
+// Phase 0 (static targets) of order K, static path only.
+inline void failpoint_after_static(unsigned k) {
+  static constexpr const char* kStatic[] = {"failpoint_static_k1", "failpoint_static_k2", "failpoint_static_k3",
+      "failpoint_static_k4", "failpoint_static_k5", "failpoint_static_k6", "failpoint_static_k7",
+      "failpoint_static_k8", "failpoint_static_k9", "failpoint_static_k10"};
+  if (k >= 1 && k <= 10 && ((failpoint_static.load() >> (k - 1)) & 1U))
+    throw Failure{FullBallStatus::kInvariantViolated, kStatic[k - 1]};
+}
 #else
 inline void failpoint_after_lots(unsigned) {}
 inline void failpoint_after_images(unsigned) {}
+inline void failpoint_after_static(unsigned) {}
 #endif
 inline void add(u64& count, u64 amount = 1) {
   require(amount <= std::numeric_limits<u64>::max() - count, "full_ball_counter_overflow",
@@ -335,10 +348,10 @@ class Builder {
  public:
   Builder(const CloudIndex& index, std::span<const BallData> census, unsigned max_k, FullBallStats& stats,
       int static_threads = 0, FullBallBatchResolver batch = {}, bool meb_proposal = true,
-      FullBallTimes* phase_times = nullptr)
+      FullBallTimes* phase_times = nullptr, bool overlap_static = false)
       : ix(index), balls(census), requested(max_k), st(stats), resolver_cache(stats),
         geometry_threads(static_threads), batch_resolver(batch), propose_meb(meb_proposal),
-        times(phase_times ? phase_times : &unused_times) {}
+        times(phase_times ? phase_times : &unused_times), overlap_static_lots(overlap_static) {}
 
   std::vector<FullBallOrder> run() {
     const auto validate_start = PhaseClock::now();
@@ -487,17 +500,16 @@ class Builder {
 
   std::vector<FullBallOrder> run_orders_parallel() {
     std::vector<OrderState> orders(kmax);
-    for (unsigned k = 1; k <= kmax; ++k) {
+    for (unsigned k = 1; k <= kmax; ++k) orders[k - 1].k = k;
+    if (overlap_static_lots) return run_orders_overlapped(orders);
+    for (unsigned k = 2; k <= kmax; ++k) {
       auto& o = orders[k - 1];
-      o.k = k;
-      if (k > 1) {
-        const auto start = PhaseClock::now();
-        current_k = k;
-        prepare_static_order();  // parallel inside, writes static_targets
-        o.static_targets.swap(static_targets);
-        times->static_by_k[k] = ms_since(start);
-        times->static_ms += times->static_by_k[k];
-      }
+      const auto start = PhaseClock::now();
+      current_k = k;
+      prepare_static_order();  // parallel inside, writes static_targets
+      o.static_targets.swap(static_targets);
+      times->static_by_k[k] = ms_since(start);
+      times->static_ms += times->static_by_k[k];
     }
     // A Failure is reported for the SMALLEST K over both phases, as the
     // sequential loop would: when the lots of order f fail, the images of
@@ -546,6 +558,109 @@ class Builder {
     std::vector<Draft> drafts;
     for (auto& o : orders) drafts.push_back(std::move(o.draft));
     decltype(orders)().swap(orders);
+    return finish(drafts);
+  }
+
+  // Overlapped static path (same objects): phase 0 runs by DECREASING K on
+  // the geometry threads while one runner per order waits for its own static
+  // targets and then runs its phase A; order 1 has none and starts at once.
+  // Phase A of order K reads only its OrderState and the immutable
+  // catalogue, programs and index; phase 0 writes only the builder's own
+  // static members, one order at a time. Failures keep the sequential
+  // priority: a phase-0 failure is reported for the SMALLEST failing K (the
+  // descending loop keeps the last one), before any lot or image failure;
+  // otherwise lots and images as in run_orders_parallel. Counters of every
+  // order are merged exactly once on every exit. Times: static_by_k as
+  // before; lots_by_k is each order's own phase A (it may overlap phase 0);
+  // lots_ms is the part of phase A left AFTER phase 0.
+  std::vector<FullBallOrder> run_orders_overlapped(std::vector<OrderState>& orders) {
+    std::vector<std::optional<Failure>> failures(kmax);
+    bool merged = false;
+    const auto merge_once = [&] {
+      if (merged) return;
+      merged = true;
+      for (auto& o : orders) merge_order_stats(o.st);
+      add(st.parallel_orders, kmax);
+      add(st.overlapped_orders, kmax);
+    };
+    try {
+      std::mutex mu;
+      std::condition_variable wake;
+      std::vector<char> ready(kmax, 0);
+      bool cancelled = false;
+      ready[0] = 1;
+      std::vector<std::exception_ptr> errors(kmax);
+      std::vector<std::thread> runners;
+      runners.reserve(kmax);
+      parallel_detail::JoinThreads joined{runners};
+      const auto cancel = [&] {
+        { std::lock_guard<std::mutex> lock(mu); cancelled = true; }
+        wake.notify_all();
+      };
+      try {
+        for (size_t i = 0; i < kmax; ++i)
+          runners.emplace_back([&, i] {
+            {
+              std::unique_lock<std::mutex> lock(mu);
+              wake.wait(lock, [&] { return ready[i] != 0 || cancelled; });
+              if (!ready[i]) return;
+            }
+            const auto start = PhaseClock::now();
+            try { order_lots(orders[i]); } catch (const Failure& f) { failures[i] = f; }
+            catch (...) { errors[i] = std::current_exception(); }
+            times->lots_by_k[i + 1] = ms_since(start);
+          });
+      } catch (...) { cancel(); throw; }
+      std::optional<Failure> static_failure;
+      try {
+        for (unsigned k = kmax; k >= 2; --k) {
+          const auto start = PhaseClock::now();
+          current_k = k;
+          bool built = true;
+          try {
+            prepare_static_order();  // parallel inside, writes static_targets
+            orders[k - 1].static_targets.swap(static_targets);
+          } catch (const Failure& f) { static_failure = f; built = false; }
+          times->static_by_k[k] = ms_since(start);
+          times->static_ms += times->static_by_k[k];
+          if (built) {
+            { std::lock_guard<std::mutex> lock(mu); ready[k - 1] = 1; }
+            wake.notify_all();
+          }
+        }
+      } catch (...) { cancel(); throw; }
+      const auto after_static = PhaseClock::now();
+      if (static_failure) cancel();
+      for (auto& runner : runners) runner.join();
+      times->lots_ms = ms_since(after_static);
+      if (static_failure) throw *static_failure;
+      for (const auto& error : errors) if (error) std::rethrow_exception(error);
+      size_t lots_done = 0;
+      while (lots_done < kmax && !failures[lots_done]) ++lots_done;
+#if defined(MHGP9_FULL_ORDERS_MUTANT_PHASE_PRIORITY)
+      if (lots_done != kmax) lots_done = 0;  // mutant: a lot failure masks lower images
+#endif
+      const auto populations_start = PhaseClock::now();
+      if (lots_done == kmax) assign_populations(orders);
+      times->populations_ms = ms_since(populations_start);
+      const auto images_start = PhaseClock::now();
+      parallel_items(lots_done, geometry_threads, [&](size_t i, size_t) {
+        const auto start = PhaseClock::now();
+        try { order_images(orders[i], i ? &orders[i - 1] : nullptr); } catch (const Failure& f) { failures[i] = f; }
+        times->images_by_k[i + 1] = ms_since(start);
+      });
+      times->images_ms = ms_since(images_start);
+      for (auto& failure : failures) if (failure) throw *failure;
+      merge_once();
+    } catch (...) {
+#if !defined(MHGP9_FULL_ORDERS_MUTANT_DROP_FAILED_STATS)
+      merge_once();
+#endif
+      throw;
+    }
+    std::vector<Draft> drafts;
+    for (auto& o : orders) drafts.push_back(std::move(o.draft));
+    std::vector<OrderState>().swap(orders);
     return finish(drafts);
   }
 
@@ -787,6 +902,7 @@ class Builder {
   bool propose_meb = true;  // anchor_meb_proposed, else the reference enumeration
   FullBallTimes unused_times;
   FullBallTimes* times;  // phase wall times (the caller's, or unused_times)
+  bool overlap_static_lots = false;  // phase A of order K starts once phase 0 of K is done
   using StaticSeed = FullBallBatchSeed;
   std::vector<BallId> static_targets;
   size_t static_cursor = 0;
@@ -1280,6 +1396,7 @@ class Builder {
   }
 
   void prepare_static_order() {
+    failpoint_after_static(current_k);
     using Request = FullBallBatchRequest;
     std::vector<Request> requests;
     std::vector<StaticSeed> seeds;
@@ -1682,12 +1799,15 @@ class Builder {
 
 // meb_proposal selects anchor_meb_proposed (default) or the reference
 // enumeration for every local MEB: same objects, different work.
+// overlap_static: on the static path, phase A of each order starts as soon as
+// its phase 0 is done (phase 0 by decreasing K): same objects and statuses.
 inline FullBallTowerResult build_full_ball_tower(const CloudIndex& ix, std::span<const BallData> balls,
-    unsigned kmax, int static_threads = 0, FullBallBatchResolver batch = {}, bool meb_proposal = true) {
+    unsigned kmax, int static_threads = 0, FullBallBatchResolver batch = {}, bool meb_proposal = true,
+    bool overlap_static = false) {
   FullBallTowerResult result;
   try {
     result.orders = full_ball_detail::Builder(ix, balls, kmax, result.stats, static_threads, batch, meb_proposal,
-                                              &result.times).run();
+                                              &result.times, overlap_static).run();
     result.status = FullBallStatus::kCompleteRelative; result.reason = kFullBallAuthority;
   } catch (const full_ball_detail::Failure& error) {
     result.status = error.status; result.reason = error.reason;

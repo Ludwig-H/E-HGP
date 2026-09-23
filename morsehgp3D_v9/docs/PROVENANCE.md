@@ -278,3 +278,32 @@ Portes :
 - `wspd_q34` : chaque cas parallèle est rejoué par masse, soit 425 cas
   identiques à l'oracle rationnel et aux compteurs mono.
 - Porte de raccord : 53 mutants tués.
+
+La session G4 R9 ([reçu](../receipts/g4_tower_r9_20260923/README.md)) mesure
+l'effet de ces deux leviers en ablation appariée, avec des condensés égaux
+ON/OFF. À K5, la chaîne passe de 3,69 / 5,24 / 6,30 s à 2,80 / 3,80 / 3,99 s.
+À K10, elle passe de 9,51 / 13,60 / 14,95 s à 8,60 / 11,75 / 11,89 s.
+L'attente de file tombe de 35–49 % à environ 1 %, et le plus long job de
+2,5–3,7 s à 0,23–0,31 s.
+
+### Tour statique : phase A recouvrant la phase 0 (sonde v15)
+
+Levier `tower_overlap_static`, actif par défaut et épinglé. La phase 0 (cibles
+statiques) est calculée par K décroissant sur les fils géométriques, pendant
+qu'un fil par ordre attend ses cibles puis lance sa phase A ; l'ordre 1 démarre
+aussitôt. Même objet :
+- la phase A d'un ordre ne lit que son propre état, le catalogue, les
+  programmes et l'index, qui sont immuables ;
+- la phase 0 n'écrit que les membres statiques du constructeur, un ordre à la
+  fois.
+
+Échecs : un échec de phase 0 est rapporté pour le plus petit K, avant tout
+échec de lot ou d'image, comme sur la voie classique. Chronos : `lots` devient
+le reste de la phase A après la phase 0, et chaque `lots_by_k` est borné par
+la fenêtre phase 0 + reste.
+
+Porte `order_failure_priority` : elle couvre les deux voies, avec un nouveau
+point de panne de phase 0 (échec de plus petit K sur trois scénarios par
+voie) et les deux mutants de priorité et de compteurs, placés aussi dans la
+voie recouverte. En local (W8, 16k K10), la tour passe de 4,5–4,96 s à
+4,26–4,28 s, avec un condensé identique.

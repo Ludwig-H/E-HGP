@@ -125,7 +125,7 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                   static_by_k=[0.0] * k, lots_by_k=[0.01 if static_path else 0.0] * k,
                   images_by_k=[0.01 if static_path else 0.0] * k, encode_by_k=[0.01] * k,
                   order_by_k=[0.0 if static_path else 0.005] * k)
-    return dict(schema='mhgp9_tower_probe_v14', status=status,
+    return dict(schema='mhgp9_tower_probe_v15', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
@@ -773,6 +773,8 @@ class Protocol(unittest.TestCase):
                      ('schema_v11', lambda v: v.update(schema='mhgp9_tower_probe_v11')),
                      ('schema_v12', lambda v: v.update(schema='mhgp9_tower_probe_v12')),
                      ('schema_v13', lambda v: v.update(schema='mhgp9_tower_probe_v13')),
+                     ('schema_v14', lambda v: v.update(schema='mhgp9_tower_probe_v14')),
+                     ('overlap_mode', lambda v: v['options']['levers'].update(tower_overlap_static=False)),
                      ('jobs_mass_mode', lambda v: v['options']['levers'].update(q34_jobs_by_mass=False)),
                      ('fine_jobs_mode', lambda v: v['options']['levers'].update(q34_fine_jobs=False)),
                      ('max_job_beyond_wall', lambda v: v['q34_occupancy'].update(max_job_ms=5.0)),
