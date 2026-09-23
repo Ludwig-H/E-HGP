@@ -160,3 +160,70 @@ simplement que `12/12` n'est pas encore une porte complète pour les
 compteurs de coût ou pour la prochaine session G4. Exiger le schéma
 exact sur **sortie native réelle**, un reçu préflight du snapshot
 commité, puis seulement des cas G4 payants.
+
+## Actualisation WIP stricte à 01:42 UTC
+
+Le constructeur a modifié le protocole **après** les octets ci-dessus.
+Worker SHA-256 `255aeeed…`, session `8fb0e14b…`, selftest `8168577e…`,
+sonde source `b800a092…` ; toujours **non commités** à cette lecture.
+Le worker impose maintenant exactement sept clés `generator`, 48 clés
+`ledger` (dont les 12 masses `dead_*`), 14 clés de catalogue avec
+histogrammes de tailles 3/17, et 18 clés `tower_work` dont histogramme
+MEB de taille 4 ; les entiers sont bornés à u64. La fixture factice a
+été synchronisée. Sur le binaire natif **reconstruit** à 01:42,
+`validate_probe` accepte la base et **refuse les sept mutants historiques**
+ainsi que la suppression de tous les nouveaux `dead_*`. L'ancien refus
+obtenu avec le binaire de 01:25 était un décalage source/binaire, pas un
+défaut du schéma courant. Ces objections v4/v5 initiales sont donc
+**corrigées dans la révision WIP**, sous réserve d'un snapshot commité
+et d'un reçu de porte fermé.
+
+Un préflight de 1 500 sites u18 est maintenant **obligatoire chez l'invité
+après le build et avant `probe_0`**. L'hôte recalcule ses octets, commande,
+sortie, durée et digest avant de recevoir la session ; c'est une bonne
+protection contre la répétition des treize calculs R2 refusés. Elle a
+lieu **après** `guarded_start` G4, donc n'évite pas le coût VM/build, et
+sa commande n'a pas encore de plafond propre court : un blocage de cette
+petite sonde peut consommer l'essentiel du budget invité avant échec.
+La tolérance du rapprochement chaîne/mur externe passe de `1 s` à
+`0,05 s` ; publier les deux temps reste nécessaire pour le jalon 100 ms.
+
+Le CTest actuel affiche **106 tests exécutés PASS, un Disabled** : ne
+pas écrire « 107 PASS ». Les deux portes de protocole normal/`-O` sont
+parmi les tests exécutés. La porte a ensuite été renforcée (script
+SHA-256 `14025f0f…`) et rejouée ciblée normal/`-O` à 01:43 :
+**19/19 mutants tués** sur la vraie sonde reconstruite, dont les sept
+historiques, et non-vacuité exigée des branches q3 feuille/atlas/voies
+mortes. Ce ciblage est postérieur à la suite complète de 106 ; il ne la
+remplace pas. Le statut de la suite Python de cycle de
+vie entière et de l'exécution G4 sur ce snapshot restent séparés.
+Rejeu direct de la suite Python actuelle : **20 tests lancés, 14 erreurs
+en 4,111 s**, toutes à `snapshot.build('HEAD')` lors de la validation
+du token `probe_v5` contre le `HEAD` produit encore v4 du worktree
+détaché `bb2c40dc`. Le mode de selftest n'inclut pas la source produit
+WIP dans son archive : c'est un refus attendu du paquet non commité,
+pas un défaut géométrique ni un `20/20` réussi. Relancer sur un commit
+produit cohérent avant tout départ G4.
+La lecture des octets courants de `tower_session_v9.py` trouve aussi
+deux corrections indépendantes : `validate_received` refuse maintenant
+une campagne avec **zéro tour complète** et recalcule chaque résumé de
+cas à partir de la sonde, de GNU time et de la ligne de commande ;
+`require_committed_protocol` reconstruit le paquet depuis les objets Git
+du commit déclaré avant `guarded_start`. Elles sont présentes dans le
+WIP, mais leur suite de cycle de vie n'est pas encore jugeable sur un
+snapshot cohérent. Un statut `partial` avec **au moins une** tour complète
+reste possible et rend code 0 ; les tableaux de contrat doivent le
+distinguer explicitement de `completed`.
+
+Deux petites portes restent faibles dans ces octets : le mutant de mur
+externe de `probe_worker_contract.py` soustrait **5 s** au temps chaîne
+de sa toute petite sonde, fournissant une durée négative déjà refusée
+par `_number`. Son succès ne tuerait pas un retour accidentel de la
+tolérance à `+1 s` ; utiliser un cas synthétique à durée positive, par
+exemple chaîne `1,5 s`, mur `1,4 s`, qui sépare `+0,05` et `+1`.
+À la réception, l'hôte relit la sortie et le mur du préflight, mais pas
+son stderr GNU time/RSS, pourtant jugé par le worker avant LiDAR.
+Enfin, le workflow CI v9 ne surveille toujours pas `tower_session_v9.py`,
+`tower_snapshot_v9.py` et `tower_selftest_v9.py` et n'exécute pas la
+suite de cycle de vie. Ces écarts ne rouvrent pas les sept défauts de
+schéma corrigés ; ils bornent la portée de la preuve protocolaire.
