@@ -266,8 +266,9 @@ normal, dont un aussi sous `-O`. Aucun reçu device R13 ne qualifie
 encore S3. Le [contre-audit B sur le correctif publié](CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md)
 relève 149 tests CPU sélectionnés réussis sous **CUDA OFF** (journal
 local non épinglé), mais aucune porte CUDA directe du lot vide à
-pointeurs nuls ; `rebuilt_covers` n'est contrôlé que par une borne
-supérieure, sans valeur attendue. Le worker compare le condensé
+pointeurs nuls. À `942494362`, `rebuilt_covers` n'était contrôlé que
+par une borne supérieure ; **`46c50432c`** ajoute son égalité exacte
+sur les fixtures CPU de la porte chaîne. Le worker compare le condensé
 FNV-64 du catalogue et une
 **projection publiée** du travail de couverture : les expressions
 « clé par clé GPU/moteur » dans la passation et « même travail de la
@@ -278,12 +279,13 @@ par **`18d7c69c7`** (quatre tests ciblés locaux, aucun CUDA ni reçu
 R13). Un [contrôle B ultérieur](CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md)
 voit 26/26 auto-tests Python du protocole à `8ce818ff9` et reproduit
 localement l'épingle 08/000000/K5 avec le moteur W48 ; ces sorties ne
-sont pas un reçu G4 épinglé. Un plan personnalisé S3 GPU seul, sans survivant,
-peut encore étiqueter `GPU_executed` à partir du levier sans kernel S3 ;
-le plan R13 par défaut active aussi le filtre S2 GPU et n'est pas touché
-par ce contre-exemple. Recommander des libellés « même condensé
-canonique et mêmes compteurs publiés » et compter les décisions GPU
-réelles dans chaque cas.
+sont pas un reçu G4 épinglé. **`46c50432c`** ferme aussi le faux
+`GPU_executed` d'un plan personnalisé S3 sans survivant : le worker
+et le lecteur exigent maintenant des temps/warps observés pour classer
+la phase device. Le test Python ciblé passe ; aucun lot vide ni certificat
+S3 de ce commit n'est encore jugé sur G4. Les libellés de passation et
+provenance doivent toujours dire « même condensé canonique et mêmes
+compteurs publiés », et les décisions GPU réelles restent à compter.
 L'[addendum de flux S2/S3](PROPOSITION_B_GPU_STREAMING_S2_20260923.md)
 épingle les six populations R/P/S de R12 et les plafonds `2^31−1` du
 port à appel entier. Sans tuilage exact, cette représentation n'a pas
@@ -317,7 +319,7 @@ les quatre quarts spatiaux à densité entière, elle varie de 3,563 % à
 7,568 % de leurs calculs séparés. Une borne exacte qui garde la
 corrélation des deux extrémités des arêtes survivantes est démontrée
 sur une fixture q4 positive pour les **sous-cellules**, mais son coût
-`|E|×sommets` et son rendement LiDAR restent à mesurer.
+`|E|×sommets` et son rendement LiDAR demandent la mesure ci-dessous.
 La [proposition B de crédit par nœuds](CERTIFICAT_B_NOEUDS_CORRELES_AVANT_COEUR_20260923.md)
 étend cette borne : si le **plus lointain point** d'une boîte d'index
 satisfait l'inégalité stricte aux sommets d'une sous-cellule, toute
@@ -325,9 +327,8 @@ sa population distincte peut servir de gardes, sans énumérer ses sites.
 Huit cellules AABB partagent au plus 27 sommets ; le budget de visites
 porte sur la **preuve**, jamais sur les candidats. C'est un lemme
 exact mais pas encore un gain LiDAR ou une solution à `S` développé.
-Le shadow doit limiter ses recherches et se replier sur le moteur,
-publier visites, tests et formes effectivement évitées sur brut et
-sans sol, sans annoncer de gain avant mesure.
+Le premier shadow limite ses recherches et conserve le repli moteur ;
+les autres régimes restent à mesurer.
 La [jointure S2 par segment](s2_segment_mass_20260923/README.md) a
 maintenant mesuré cette distribution sur la trame brute entière
 08/000000/K5 : **11 174 segments d'au moins 16 survivantes**, soit
@@ -343,8 +344,8 @@ actuelles **avant** séparation q3/q4, gardes, repli et couverture. Ce rapport
 arithmétique n'est ni un rejet ni un gain mesuré. La jointure recrée le
 front et le filtre avec une archive distincte du binaire tracé ; elle
 retrouve exactement chaque arête, son masque et les cinq comptes du front.
-Essayer ce sélecteur sur brut et sans sol, facturer aussi la recherche des
-gardes, le coût de couverture et les formes réellement évitées.
+Le sélecteur est essayé ci-dessous sur le plein brut dense et un quart
+clairsemé ; restent le sans-sol, le coût de couverture et la chaîne.
 Le [panel de segments S2 sur les quatre quarts et trois densités](s2_segment_panel_20260923/README.md)
 recoupe **15/15** cas avec les traces et les cinq comptes front/filtre.
 Sur le plein brut, la part de F portée par les segments ≥16 monte de
@@ -357,6 +358,23 @@ Sur le plein dense, les voies séparées q3/q4 relèvent le budget de
 un réglage universel ; mesurer un déclencheur adaptatif et toujours
 laisser un repli exact. Les moitiés ont leur panel S2 de formes, pas
 encore de distribution des segments.
+Le [shadow exact par nœuds avant cœur](s2_precore_node_shadow_20260923/README.md)
+teste alors huit cellules 3D fermées sur les segments S2 d'au moins
+16 arêtes, avec `Q_E` entier et **64 ou 256 visites d'index par cellule**.
+Sur le plein brut 08/000000/K5, ces tentatives ferment 36 puis
+103 segments, correspondant à **458 001 (0,0818 %) puis 753 058
+(0,1345 %) des 559 661 741 formes** du cœur potentiellement évitables,
+pour 10,705 M termes corrélés et **4,595 puis 15,309 M visites**.
+Le quart `x≥0,y≥0` à densité 1/4 ne ferme rien à budget64 ; même à
+4 096 visites, une seule fermeture épargne 848 formes. Les
+**39 arêtes** que le prouveur du cœur laisse ouvertes malgré la preuve
+shadow ont huit cellules × quatre gardes chacune vérifiées par entiers ;
+la voie exacte n'émet aucun candidat q3/q4 sur elles. Le reçu est
+reproductible et les 17 sommes SHA passent, mais ces formes ne sont
+**pas** un gain CPU/G4 ni un résultat FULL. Cette grille commune ne
+justifie pas un port tel quel : tester ensuite `E_C` des seules arêtes
+dont le disque peut rencontrer une cellule, les domaines 2D locaux
+et le seuil q4 seul `K−2`, avec budget et repli exacts.
 Les [demi-scènes et quarts aux trois densités](lidar_raw_physical_scaling_20260923/README.md)
 ont été mesurés avec v12, puis appariés au batch S2 CPU K5 par les
 deux reçus ci-dessus. La somme de leurs tours ne reconstruit pas le
