@@ -8,7 +8,10 @@
 // fils) ; le cas croise « lots K5 + images K2 » rend images K2. Le travail
 // paye reste compte apres l'echec (naissances et contributions non nulles).
 // Planchers : ordres concurrents mesures (parallel_orders) sur chaque cas
-// multi-fils, et une tour complete sans panne.
+// multi-fils, et une tour complete sans panne. Enfin un fil qui ne peut etre
+// lance dans le tri parallele des presentations de la chaine donne un refus
+// de ressource (jamais un invariant), avec le temps de fusion paye publie et
+// aucun resume d'ordre.
 //
 //   mhgp9_chain_order_failure_priority_gate --selftest
 //
@@ -86,6 +89,19 @@ int main(int argc, char** argv) {
       }
       if (statics > 1 && r.tower_stats.parallel_orders == 5) ++concurrent;
     }
+  {
+    mhgp9::tower::parallel_detail::launch_fail_after = 1;
+    const auto launch = run(4);
+    mhgp9::tower::parallel_detail::launch_fail_after = static_cast<std::size_t>(-1);
+    ++checks;
+    if (launch.status != mhgp9::ChainStatus::kResourceExhausted ||
+        launch.reason.rfind("chain_thread_launch_failed", 0) != 0 || !(launch.times.merge_ms > 0) ||
+        !launch.orders.empty() || launch.times.q34_ms <= 0) {
+      std::printf("cause=launch_failure status=%d reason=%s merge_ms=%.3f\n", static_cast<int>(launch.status),
+                  launch.reason.c_str(), launch.times.merge_ms);
+      return 1;
+    }
+  }
   const auto complete = run(4);
   ++checks;
   if (complete.status != mhgp9::ChainStatus::kComplete) {

@@ -10,6 +10,7 @@
 #include <mutex>
 #include <new>
 #include <stdexcept>
+#include <system_error>
 #include <thread>
 #include <utility>
 
@@ -150,6 +151,19 @@ GatheredPresentations gather_presentations(std::vector<std::vector<Presentation>
   }
   return out;
 }
+
+// Records a phase's elapsed time on every exit, success or exception: work
+// paid before a failure is still published.
+struct PhaseClock {
+  double& out;
+  Clock::time_point start = Clock::now();
+  bool running = true;
+  void stop() {
+    if (running) out = ms_since(start);
+    running = false;
+  }
+  ~PhaseClock() { stop(); }
+};
 
 tower::P3 to_p3(const gen::Point3& p) { return tower::P3{p.x, p.y, p.z}; }
 
@@ -404,7 +418,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     result.times.q34_ms = ms_since(t);
 
     // ---- Fusion : une boule par cle (union q2 u q3 u q4).
-    t = Clock::now();
+    PhaseClock merge_clock{result.times.merge_ms};
     auto gathered = gather_presentations(slots, W);
     result.catalogue.q2_presentations = gathered.by_arity[2];
     result.catalogue.q3_presentations = gathered.by_arity[3];
@@ -414,7 +428,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     const auto& groups = gathered.representatives;  // one per key, key order
     const std::size_t unique = groups.size();
     result.catalogue.unique_keys = unique;
-    result.times.merge_ms = ms_since(t);
+    merge_clock.stop();
 
     // ---- Index de la tour (PointId = rang d'entree).
     t = Clock::now();
@@ -432,7 +446,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     result.times.tower_index_ms = ms_since(t);
 
     // ---- Census exact de chaque cle distincte sur l'index de la tour.
-    t = Clock::now();
+    PhaseClock census_clock{result.times.census_ms};
     std::vector<tower::BallData> balls(unique);
     std::vector<std::uint8_t> keep(unique, 0);
     std::atomic<std::uint64_t> over_cap{0};
@@ -503,12 +517,12 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     gathered = GatheredPresentations{};  // groups is not read past this point
     result.catalogue.shell_over_cap = over_cap.load();
     if (result.catalogue.shell_over_cap > 0) {
-      result.times.census_ms = ms_since(t);
+      census_clock.stop();
       fail(ChainStatus::kUnsupportedDegeneracy, "chain_shell_above_12");
     }
     result.catalogue.balls = unique;
     result.catalogue.bytes = balls.capacity() * sizeof(tower::BallData);
-    result.times.census_ms = ms_since(t);
+    census_clock.stop();
 
     // ---- Tour FULL.
     if (options.keep_catalogue) result.catalogue_balls = balls;
@@ -550,11 +564,23 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
   } catch (const std::invalid_argument& e) {
     result.status = ChainStatus::kInvalidInput;
     result.reason = std::string("chain_invalid_argument: ") + e.what();
+  } catch (const std::length_error& e) {
+    // As in FULL: a size beyond a container's range, or a thread that cannot
+    // be launched, is a resource refusal, not an invariant violation.
+    result.status = ChainStatus::kResourceExhausted;
+    result.reason = std::string("chain_size_overflow: ") + e.what();
+  } catch (const std::system_error& e) {
+    result.status = ChainStatus::kResourceExhausted;
+    result.reason = std::string("chain_thread_launch_failed: ") + e.what();
   } catch (const std::exception& e) {
     result.status = ChainStatus::kInvariantViolated;
     result.reason = std::string("chain_exception: ") + e.what();
   }
-  if (result.status != ChainStatus::kComplete) { result.tower = {}; result.catalogue_balls.clear(); }
+  if (result.status != ChainStatus::kComplete) {
+    result.tower = {};
+    result.catalogue_balls.clear();
+    result.orders.clear();
+  }
   result.times.total_ms = ms_since(total_start);
   const double cpu_end = process_cpu_s();
   result.times.cpu_s = (cpu_start < 0 || cpu_end < 0) ? -1.0 : cpu_end - cpu_start;
@@ -569,6 +595,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       result.reason = std::string("chain_digest_failed: ") + e.what();
       result.tower = {};
       result.catalogue_balls.clear();
+      result.orders.clear();
     }
     result.times.digest_ms = ms_since(t);
   }

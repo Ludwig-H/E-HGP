@@ -533,12 +533,15 @@ def validate_probe(value, case, exit_code, inputs=None):
 
 
 def validate_external_wall(value, elapsed_seconds):
-    """Le chrono interne de chaine, plus le condense de verification mesure
-    apres lui (times_ms.digest), est borne par le mur externe du cas."""
+    """La lecture, le chrono interne de chaine et le condense de verification
+    mesure apres lui (times_ms.read/chain_total/digest, sequentiels dans la
+    sonde) sont bornes ensemble par le mur externe du cas (GNU time enveloppe
+    tout l'executable). La lecture n'entre pas pour autant dans le contrat."""
+    times = value['times_ms']
     need(_number(elapsed_seconds) and
-         (value['times_ms']['chain_total'] + value['times_ms']['digest']) / 1000.0 <=
+         (times['read'] + times['chain_total'] + times['digest']) / 1000.0 <=
          elapsed_seconds + EXTERNAL_WALL_TOLERANCE_SECONDS,
-         'chain total and digest exceed the external wall time of the case')
+         'read, chain total and digest exceed the external wall time of the case')
 
 
 def validate_gnu_time(text, exit_code):

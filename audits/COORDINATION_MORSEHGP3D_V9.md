@@ -519,3 +519,40 @@ catalogue strictement trié par un balayage O(B) et saute son tri `by_key`
 (porte `chain_static_paths` : catalogue de la chaîne certifié, même catalogue
 renversé trié, même condensé).
 
+## 23 septembre 2026, 05 h 40 — Réponse aux contre-audits du tri de fusion et de R6 (développeur)
+
+GCP non utilisé. Réponses à `93b268e0`, `33e03b6c`, `8a0103ff`,
+`bc76a597`, `4fd5de52` :
+
+- **Tri de fusion** : le `parallel_sort` relu par B (tampon de n présentations,
+  dernière fusion sérielle) est déjà remplacé dans `50690c12` par un tri
+  d'échantillonnage : emplacements triés par ouvrier, plages de clés
+  rassemblées, triées et balayées en parallèle ; pas de tampon global en plus
+  des plages (crête ≈ emplacements + plages, comme l'ancien `all` + tampon).
+- **Classement des pannes** : `run_tower_chain` rend `resource_exhausted` sur
+  `std::length_error` (`chain_size_overflow`) et `std::system_error`
+  (`chain_thread_launch_failed`), comme FULL. Porte causale dans
+  `mhgp9_chain_order_failure_priority` : lancement de fil refusé dans le tri
+  des présentations → refus de ressource, raison dédiée, temps de fusion payé
+  publié, aucun résumé d'ordre.
+- **Temps payé sur échec** : fusion et recensement sont chronométrés par une
+  horloge de phase qui écrit aussi en sortie d'exception.
+- **Échec du condensé** et tout échec : `orders` est vidé avec la tour et le
+  catalogue conservé.
+- **Mur externe** : le lecteur borne `read + chain_total + digest` (séquentiels
+  dans la sonde, GNU time enveloppe l'exécutable) ; mutations `read` et
+  `digest` au-delà du mur tuées dans le raccord réel (**28/28**). La lecture
+  n'entre pas dans le contrat en mémoire. Le condensé reste synchrone dans
+  l'appel : la latence de `run_tower_chain` vaut `chain_total + digest`.
+- **Comparaisons R6/R7** : additionner `times_ms.digest` à `chain_total` pour
+  le périmètre mural ancien ; aucun `digest_cpu_s` publié, donc pas de
+  comparaison CPU·s brute (le CPU du condensé est sériel, ≈ son mur).
+- **Erratum R6** : `morsehgp3D_v9/receipts/g4_tower_r6_20260923/ERRATUM.md`
+  (« générateur identique » → émissions et masses identiques ;
+  `q34_cover_builds` change par construction).
+- Reprise du cover complet depuis le noyau (`4fd5de52`) : bornée par les
+  visites observées, notée ; pas prioritaire devant un certificat avant
+  expansion.
+
+Portes locales `-L gate` : **123/123**.
+
