@@ -140,6 +140,12 @@ fixe de warps par SM et le paramètre de capacité permet une sonde de
 reports. Aucun noyau CUDA de ce commit n'a encore été compilé ou
 comparé sur appareil dans un reçu : ne pas transformer cette correction
 source en qualification G4.
+Le [gate structurel indépendant de A](s3_frontier_barrier_gate_20260923/README.md)
+épingle le header corrigé octet pour octet, exerce trois cellules
+sœurs avec retour anticipé et réemploi, et tue le mutant sans la
+nouvelle barrière : accès WAW **et WAR** non ordonnés disparaissent
+dans son modèle hôte instrumenté. Il renforce la preuve de placement
+de la barrière, sans simuler la mémoire ni exécuter CUDA.
 
 Les gardes publiques ci-dessus **restent ouvertes dans ce commit** :
 `filter_runner.cu` affecte toujours la plage

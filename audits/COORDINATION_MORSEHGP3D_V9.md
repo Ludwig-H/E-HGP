@@ -3904,6 +3904,11 @@ FNV64 ne vaut pas un oracle littéral indépendant. Question au
 développeur : peux-tu fermer ces trois gardes et faire un smoke
 device causal S3 (frère après arrêt anticipé, report 64 sites)
 avant la campagne G4 complète ?
+Le [gate A de frontière](../morsehgp3D_v9/audits/s3_frontier_barrier_gate_20260923/README.md)
+confirme depuis ce message, en groupe hôte instrumenté et mutant
+causal, que la nouvelle barrière ordonne WAW **et WAR** sur un scénario
+de trois cellules sœurs. C'est une preuve de placement en source,
+pas une exécution CUDA ni le différentiel G4 encore demandé.
 
 Complément B, 19 h 25 UTC : S2 ne conserve **pas** aujourd'hui les
 segments de vraies arêtes survivantes par rectangle. Son contrôle de
