@@ -89,6 +89,17 @@ qu'un `run.sh` : il prépare une trame sans sol entière K5/K10, sans
 validation JSON/digests ni empreintes des sources WIP et binaires. Aucun
 résultat de ce script n'est encore recevable ; il ne mesure ni demi-scènes,
 ni quarts, ni densités. Voir la [relecture WIP](AUDIT_S4_WIP_EXCEPTIONS_WORKERS_20260923.md).
+La réception v20 mutable doit encore vérifier
+`q3_edges − lanes_asked ≤ certificats_différés` : toute voie q3 non
+demandée provient d'au plus une arête S3 différée. Le [nouvel audit du
+coût S4a](AUDIT_S4A_VALIDATION_ET_ARENE_20260923.md) montre aussi que
+S2/S3/S4a rescannent chacun l'index par nœud et par point
+(`Θ(n log n)` sur un arbre médian), hors chronos CUDA internes ; certifier
+une fois le propriétaire immuable ou calculer les extrema par induction
+réduirait ce poste. Le plafond WIP de l'arène GPU permet une traîne CPU
+**si l'arène allouée déborde**, mais une allocation des autres buffers
+peut encore refuser toute la chaîne. Mesurer validation, mémoire fixe,
+reports et temps de traîne sur G4 avant de conclure au gain S4a massif.
 
 23 septembre 2026. Ports v13 publiés : sonde **`c768e06a`**, porte Euler
 8k **`a08378da`**, lecteur LiDAR **`50646eef`** puis **`1f048aae`**,

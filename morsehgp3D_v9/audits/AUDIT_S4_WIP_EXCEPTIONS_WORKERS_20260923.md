@@ -97,3 +97,18 @@ ensuite mesurer le même port sur la matrice plein/moitiés/quarts ×
 densités déjà archivée. Les statistiques `--file` ne sont pas une porte
 LiDAR d'exactitude, et la borne `warp_steps_lower_bound` reste un minorant
 par arête des ballots par graine (voir l'audit de couplage S4a).
+
+**Réception v20, WIP `gcp-migration/tower_worker_v9.py` SHA-256
+`89983e24…`.** Le validateur accepte maintenant à juste titre une traîne
+q3 à ardoise réduite et l'absence de census q3 de feuille quand S4a le
+remplace. Il garde toutefois une porte trop lâche dans `validate_lanes`
+(`:623–628`) : dès que `batch.deferred>0`, un nombre arbitraire de voies
+q3 peut manquer dans `lanes_asked`. Dans le générateur, `asked[j]` est
+exactement la voie q3 ouverte d'un certificat S3 **décidé** ; toute voie
+q3 non demandée vient donc d'un certificat S3 différé, à raison d'au
+plus une par arête. L'invariant gratuit est
+`0 ≤ ledger.q3_edges − batch.lanes_asked ≤ batch.deferred`.
+La borne gauche existe déjà ; ajouter la borne droite et un mutant avec
+une seule arête S3 différée mais deux voies q3 manquantes. Cela renforce
+la réception des comptes ; les digests du reçu restent une porte séparée
+pour l'objet. Voir aussi la [validation répétée et le budget d'arène](AUDIT_S4A_VALIDATION_ET_ARENE_20260923.md).
