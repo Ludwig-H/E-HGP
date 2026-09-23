@@ -1,0 +1,27 @@
+{
+  "build": "g++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Werror -I build/v9-open-worktree/morsehgp3D_v9/src/gen morsehgp3D_v9/audits/paired_guard_node_blocks_20260923/node_blocks.cpp build/v9-open-worktree/build/v9-dev/libmhgp9_gen.a -pthread -o <binary>",
+  "date": "2026-09-23",
+  "input_points_sha256": "233cc4ea8cac6e0b1155ea845af57b32e5236764bf2e119557aeab5bac76c172",
+  "input_raw_ids_sha256": "796e9814dd2dff7778ad8d1bb55f5113ab54206ff8b246e6432200f9a6833f7f",
+  "positive_block_pair_proofs": 758,
+  "release_compiler": "g++ 13.3.0 -std=c++20 -O2 -Wall -Wextra -Wpedantic -Werror",
+  "release_geometry_rows": 1920,
+  "run": "<binary> <points.u32le> <raw_return_ids.u32le> morsehgp3D_v9/audits/paired_guard_index_shadow_20260923/SAMPLES.tsv > RESULT.stdout",
+  "sanitizer": "exit 0; 2679 output lines equal to Release after omitting META and ROW timings; transient sanitizer binary/output removed",
+  "sanitizer_compiler": "clang++ 18.1.3 -std=c++20 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer -Wall -Wextra -Wpedantic -Werror",
+  "schema": "mhgp9_audit_node_blocks_manifest_v1",
+  "scope": "120 S2 survivors stratified by post-core F; SemanticKITTI 08/000000 raw 1mm/u18 K5/s8",
+  "sha256": {
+    "../paired_guard_index_shadow_20260923/SAMPLES.tsv": "8a7e6f4ff53338fb26e34235e44138a1aa0578cfce48c5cc7a174e79a09c7dbb",
+    "../paired_guards_precore_20260923/RESULT.json": "5f45fd3277ae9882ab821ac60eed0c9c0257e8d643aa4e0fbc0f33043bac90f6",
+    "../paired_guards_precore_20260923/RESULT_SEED2.json": "3280a01881cea4f23b67c6a8d135cffb5d67003bf6a4e5c58df231c146bf6547",
+    "README.md": "7409f0e1008bd34d754ab3d6302d32535b74507350b8c9a5f244763278dafb31",
+    "RESULT.stdout": "3bff37aef75d9561a6ea0a728f359f49d614f87eb4eb55f45781dcba2c661c27",
+    "SUMMARY.json": "53867b96759c025924addee9204b0c791fc2491cf8d22523c85b24950aa6954a",
+    "node_blocks.cpp": "9e9e8badeb4ba040f630fb848642bce02edadaee5d2c1498879d123e07c6fb45",
+    "summarize.py": "b0a60ec17f3f1688fbd621a6181582a8080fc014b284fa0420107d5e228e5944",
+    "verify.py": "5c15119bc440f088ae6b2d99f1573790f00ca947e584b75568f9fe5ecde9cd5f"
+  },
+  "source_archive_sha256": "208aabb30a764bad25ab1c99d74885bd405e84a13dcb8375622d66aa6203f70a",
+  "status": "CPU audit-only shadow; no product/GPU/FULL claim"
+}

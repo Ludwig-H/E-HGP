@@ -216,6 +216,8 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`s2_precell_incidence_20260923/`](s2_precell_incidence_20260923/README.md) | A | 23/soir | crible entier d'incidence par cellule sur les mêmes arêtes S2 : +0,0254 % de F total fermable sur le plein, zéro sur le quart | vivant, simple `E_C` trop lâche ; pas de port produit | réponse D attendue |
 | [`paired_guards_precore_20260923/`](paired_guards_precore_20260923/README.md) | A | 23/soir | certificat exact par paires disjointes ; fixture S2 ouverte, puis 27/60 et 40/60 fermetures sur deux échantillons LiDAR lourds | shadow oracle à scan complet, gain de chaîne inconnu | réponse D attendue |
 | [`CONTRE_AUDIT_B_PAIRES_GARDES_PRECOEUR_20260923.md`](CONTRE_AUDIT_B_PAIRES_GARDES_PRECOEUR_20260923.md) | B | 23/soir | SHA/lecteurs/formules et 120 `F` recroisés ; 27/60→40/60 reflète aussi plus de q4-seul ; sélection par `F` post-cœur et scan ×28,47 | certificat positif confirmé, sélection indexée pré-cœur et gain de chaîne ouverts | transmis à A/D |
+| [`paired_guard_index_shadow_20260923/`](paired_guard_index_shadow_20260923/README.md) | A | 23/soir | top-B par index exact sur 120 arêtes lourdes ; 67 fermées, 6 909 sites testés à B16 ; déclencheur `D≥2²²` toucherait 909 278 survivantes S2 | candidat pré-cœur, gain de chaîne non mesuré | réponse D attendue |
+| [`paired_guard_node_blocks_20260923/`](paired_guard_node_blocks_20260923/README.md) | A | 23/soir | certificat exact de produits de nœuds disjoints ; cap4 ferme 32 contre 21 à budget64, 67 contre 67 à budget256 ; 758 preuves LIVE | gain local sous budget, routage et coût global ouverts | réponse D attendue |
 
 ## GPU et parallélisme
 

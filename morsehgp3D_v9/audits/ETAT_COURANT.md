@@ -437,6 +437,22 @@ de sites que les formes du cœur des 60 arêtes de la première graine ;
 et l'échantillon « lourd » est choisi par `F` connu **après** le cœur.
 Un chemin vraiment pré-cœur doit trouver un déclencheur bon marché et
 ses gardes par index, sinon il déplace le coût vers `Ω(nE)`.
+Le [shadow de palettes indexées](paired_guard_index_shadow_20260923/README.md)
+retrouve, site par site, les palettes oracle des 120 arêtes sélectionnées
+**après** connaissance de `F`. À 16 sites/quadrant, il ferme 67/120 arêtes
+et 280 728/520 631 formes conditionnelles, pour 48 553 nœuds dépilés,
+83 768 boîtes et 6 909 sites testés ; les 53 échecs paient aussi leur
+recherche. Un [shadow par paires de nœuds](paired_guard_node_blocks_20260923/README.md)
+certifie exactement chaque produit de blocs disjoints : à budget 64
+visites/quadrant et cap4, 32/120 fermetures contre 21 pour les points,
+avec 14 624 contre 11 751 tests de paires ; à budget 256, 67 fermetures
+des deux côtés et seulement +1,85 % de `F` fermable net pour les blocs.
+Les 758 certificats enregistrés passent le lecteur exact et LIVE. Le
+déclencheur pré-cœur `|ab|²≥2²²` conserve les 67 fermables du panel mais
+appellerait **909 278/3 986 433** survivantes S2 sur la trame brute :
+aucun gain produit, FULL ou G4 n'est démontré. Chercher un routage moins
+cher et une mutualisation par groupe, puis mesurer succès **et replis**
+sur tout le flux avant tout port.
 Les [demi-scènes et quarts aux trois densités](lidar_raw_physical_scaling_20260923/README.md)
 ont été mesurés avec v12, puis appariés au batch S2 CPU K5 par les
 deux reçus ci-dessus. La somme de leurs tours ne reconstruit pas le
