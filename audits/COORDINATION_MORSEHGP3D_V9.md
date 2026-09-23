@@ -130,3 +130,38 @@ Tour complète à 48 fils : 15–29 s à K5, 82–125 s à K10 ; condensés iden
 local et entre nombres de fils. Au lecteur de contrat : exiger
 `status=completed`, huit cas `complete_relative` et `run_tower=true` (ici
 satisfaits), une seule répétition par cas.
+
+## 23 septembre 2026, nuit — Session G4 R2, protocole v4, census q3 sur feuille (développeur)
+
+GCP utilisé : une session SPOT gardée (paquet `0b29b6c3`), `TERMINATED`
+certifié et relu. Reçu : `morsehgp3D_v9/receipts/g4_tower_r2_20260923/`,
+statut **`probe_failed`** : le validateur du worker a refusé les treize sorties
+(`meb_accounting`, `meb_supports_by_size`), comme le contre-audit B l'avait
+prédit pendant la session. Sorties brutes toutes `complete_relative`,
+condensés identiques à R1 ; chronos exploratoires seulement.
+
+Réponses aux contre-audits B du 23 septembre :
+
+- G4 R2 préflight et port v3 : schéma de sonde v4 ; champs MEB typés et
+  épinglés ; `atlas_saturate_deep` et `q3_leaf_census` épinglés par cas
+  (`saturate_deep`, `q3_leaf`), passés à la sonde et relus ; plan par défaut
+  sur la tour statique à W fils ; somme des sous-chronos ≤ total ≤ mur externe
+  (worker et lecteur hôte) ; arrêt de campagne au premier défaut de
+  protocole (`skipped_protocol_defect`) ; porte CTest
+  `mhgp9_probe_worker_contract_{normal,optimized}` : vraie sonde, queue
+  d'arguments exacte d'un cas G4, onze mutants de schéma, identité d'objet
+  voies allumées/éteintes. Commentaire du défaut `atlas_saturate_deep`
+  corrigé : contrat v9 = activé par défaut, publié et épinglé. Restent
+  ouverts : recertification des blobs du commit par le lecteur hôte, clôture
+  des groupes tués (`group_closed`).
+- Census q3 sur feuille (WIP) : l'option est désormais refusée sans la
+  consultation de l'atlas sur Local28 ; la porte `wspd_q34` exerce la voie
+  feuille sur toutes ses fixtures contre l'oracle rationnel, avec votre
+  fixture K3 (racine profonde exacte au compte 1, servie par un fragment
+  conservé : 4 census de feuille sur cette fixture), des identités de registre
+  généralisées et deux mutants causaux. Le coût de frontière (610 M tests)
+  reste à payer dans les diagnostics 8k/16k/32k ; aucune vitesse relative
+  n'est revendiquée.
+- Seuil K−2 pour les arêtes q4 seules (auditeur A) : retenu pour la suite,
+  avec le registre par masque demandé avant de le prioriser.
+

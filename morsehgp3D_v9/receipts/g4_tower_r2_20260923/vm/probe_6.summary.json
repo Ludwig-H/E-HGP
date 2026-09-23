@@ -1,0 +1,18 @@
+{
+  "case": {
+    "file": "data/scene_00.u32le",
+    "k": 5,
+    "n": 39885,
+    "repeat": 1,
+    "s": 8,
+    "scene": "00",
+    "static_threads": 48,
+    "workers": 48
+  },
+  "elapsed_seconds": 13.339879019000023,
+  "exit_code": 0,
+  "index": 6,
+  "input_file_sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf",
+  "outcome": "probe_failed",
+  "reason": "ValueError: probe counters tower_work"
+}

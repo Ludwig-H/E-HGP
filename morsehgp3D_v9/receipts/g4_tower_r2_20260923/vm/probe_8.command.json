@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "/usr/bin/time",
+    "-v",
+    "/tmp/ehgp-tower-v9-3c2de26e1c7b1388.mXfrv8a6JH/output/build/mhgp9_tower_probe",
+    "/tmp/ehgp-tower-v9-3c2de26e1c7b1388.mXfrv8a6JH/source/data/scene_02.u32le",
+    "5",
+    "48",
+    "--s=8",
+    "--static=48",
+    "--grid=1mm"
+  ],
+  "cwd": "/tmp/ehgp-tower-v9-3c2de26e1c7b1388.mXfrv8a6JH/output",
+  "elapsed_seconds": 20.250318714000002,
+  "ended_utc": "2026-09-23T00:37:06.068963+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 5484,
+  "session_work_deadline_epoch": 1790124405.8185973,
+  "started_utc": "2026-09-23T00:36:45.818625+00:00",
+  "stderr_sha256": "e27eb5713a8675a7f28bd96a9a9cbf34d322e767b4285fc813c16d46786f4a2a",
+  "stdout_sha256": "0a08aed9b4c7402358c92b8ce1651da948516431b26f78a1fbe6dd9aae9359d0"
+}

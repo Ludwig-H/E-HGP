@@ -44,9 +44,26 @@ condensés identiques, tests de puissance −56 % à K5 et −64 % à K10, tour 
 locale 130 → 109 s. La sonde publie maintenant le registre du générateur
 (`ledger`).
 
-Suite : parallélisme de la tour (voie statique par défaut, puis calendrier et
-tenue de livres), comptabilité hors géométrie de la tour (allocations par
-représentant, tri des niveaux) ; V9-2 sur l'atlas q4 et le census q3.
+Deuxième session G4 ([`g4_tower_r2_20260923`](receipts/g4_tower_r2_20260923/README.md),
+paquet `0b29b6c3`, `TERMINATED` certifié) : **refusée** par le validateur du
+worker (`probe_failed`, champs MEB non entiers), donc sans qualification. Les
+sorties brutes, toutes `complete_relative`, donnent 10,5–20,2 s à K5 et
+37,1–64,4 s à K10 (48 fils, tour statique), condensés identiques à R1 ; la
+tour K10 plafonne à 23 s de 24 à 48 fils. Correctif : schéma de sonde v4,
+voies géométriques épinglées par cas, arrêt au premier défaut de protocole,
+porte `mhgp9_probe_worker_contract` qui fait juger la vraie sonde.
+
+Census q3 sur feuille exacte de l'atlas (levier de l'auditeur A, défaut de la
+chaîne) et portes du générateur portées de la v8 (27 portes, mutants compilés) :
+voir la [provenance](docs/PROVENANCE.md). Condensé identique sur 000100 K5 en
+local ; bornes de census q3 −54 % mais 610 M tests ponctuels de frontière
+(contre-audit B) : gain net non qualifié, parcours de frontière par boîtes à
+faire.
+
+Suite : parallélisme de la tour au-delà de 24 fils (calendrier, tenue de
+livres), frontière de feuille par boîtes, seuil K−2 de l'atlas pour les arêtes
+q4 seules (proposition de l'auditeur A), registre par masque ; session G4 R3
+appariée voies allumées/éteintes.
 
 ## État du dépôt au moment de l'ouverture (historique)
 

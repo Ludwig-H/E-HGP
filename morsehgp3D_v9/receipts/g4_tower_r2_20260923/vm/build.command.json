@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "/usr/bin/cmake",
+    "--build",
+    "/tmp/ehgp-tower-v9-3c2de26e1c7b1388.mXfrv8a6JH/output/build",
+    "--target",
+    "mhgp9_tower_probe",
+    "--parallel",
+    "48"
+  ],
+  "cwd": "/tmp/ehgp-tower-v9-3c2de26e1c7b1388.mXfrv8a6JH/output",
+  "elapsed_seconds": 9.928152374999996,
+  "ended_utc": "2026-09-23T00:33:05.017933+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 1874,
+  "session_work_deadline_epoch": 1790125074.2507658,
+  "started_utc": "2026-09-23T00:32:55.089747+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "d360d012935b6e45a068d16ba832f69fab36245cc6f245f68295f24fcba451d2"
+}
