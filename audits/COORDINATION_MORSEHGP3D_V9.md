@@ -831,6 +831,63 @@ ni contrat FULL. La preuve globale manquante est l'induction
 non-Outside/non-Deep → événement de complétion émis** ; un recensus des
 clés émises ne détecte pas une clé entièrement omise. Aucun GCP utilisé.
 
+## 23 septembre 2026, 07 h 21 UTC — Visites cachées q3/q4 et phase A (auditeur B)
+
+Le [contre-audit du grand-livre](../morsehgp3D_v9/audits/LEDGER_VISITES_CACHEES_Q34_20260923.md)
+trouve six DFS globaux déjà agrégés dans `WspdQ34Work` mais absents du
+`GeneratorLedger`/JSON FULL : témoins des rectangles/paires, graines q3,
+domaine positif, décomposition de cover et graines q4. Les balayages répétés
+`local.sweep.active_sites` manquent également ; `q4_sweep_events` n'est que
+`kept_events`. Chaque DFS peut visiter au plus `2n−1` nœuds par appel,
+mais la somme peut suivre `(R+P+E3+E4)n` : le ledger R7b ne permet donc pas
+d'écarter ce terme dans le régime LiDAR. Projeter ces compteurs dans la
+prochaine sonde et les mesurer sur les coupes appariées 8k/16k/32k,
+W1/W8, K5/K10, s8 puis s10/s12, avec sorties complètes comparées.
+Une réduction q3/q4 exacte à ablater ensuite : toute graine aiguë
+possédée par `ab` appartient au cover complet déjà construit
+(`|x−m|²≤3|ab|²/4`). Les deux voies emploient les mêmes prédicats de
+graine, mais peuvent être ouvertes ou court-circuitées séparément ; scanner
+le cover ou partager leur
+sélection peut coûter plus que l'élagage actuel.
+
+Le [lemme des racines de phase A](../morsehgp3D_v9/audits/PHASE_A_MAX_ID_COMPOSANTE_20260923.md)
+montre que l'ID canonique vivant est le maximum des IDs de création de
+sa composante au seuil **ouvert**. Une forêt minimale pondérée, les labels
+aux seuils ouvert/fermé et un préfixe des groupes créateurs permettraient
+de reconstruire les mêmes parents et IDs sans barrière par niveau.
+Quatre fixtures et 3 000 historiques abstraits passent ; le produit,
+la hiérarchie de requêtes quasi linéaire et le GPU ne sont pas testés.
+La variante de têtes physiques a une ablation négative locale : ne pas
+la porter sur la seule intuition des sauts de racine.
+
+## 23 septembre 2026, 07 h 24 UTC — Prélecture du runner de pente LiDAR WIP (auditeur B)
+
+Lecture seule de `morsehgp3D_v9/bench/run_lidar_scaling.py` **non suivi**
+dans le worktree développeur : ne pas publier ses futurs chronos comme
+reçu tant que ces points ne sont pas clos. Les entrées v8 sans sol 1 mm
+existent et les sept morceaux capteur sont conservés ; le 8k/16k/32k
+supplémentaire est une sélection emboîtée par distance au centre médian
+horizontal, **pas** une coupe par plans du capteur. Le distinguer des
+moitiés/quarts et du contrat de trame entière.
+
+- Les noms des JSON et du `SUMMARY` ne contiennent ni `s` ni `workers` :
+  réutiliser `--out` pour s8/10/12 ou W1/W8 écrase silencieusement les
+  résultats. Inclure tous les paramètres dans l'identité de cas ou refuser
+  un dossier de sortie non vierge, puis garder les répétitions distinctes.
+- `run_case` accepte code 0 et JSON sans exiger `status=complete_relative`,
+  `K_effective`/ordres complets ni correspondance des options ; un refus
+  pourrait entrer dans les pentes. Conserver aussi un reçu typé sur échec,
+  avec commande, stdout/stderr, code, mur et raison, avant de quitter.
+- Le hash du nuage est enregistré mais non comparé aux SHA du MANIFEST v8 ;
+  publier le pin du masque/profil, le SHA de l'ELF et des sources/sonde,
+  la correspondance des IDs retenus puis des sous-ensembles emboîtés.
+  Les fichiers provisoires `work`/`out` doivent être des répertoires dédiés.
+- Le ledger de cette sonde n'inclut pas encore les six DFS q3/q4 et les
+  balayages actifs signalés ci-dessus ; des pentes des seuls champs
+  `WORK_KEYS` ne peuvent qualifier le travail total sous-quadratique.
+
+Aucun script modifié, aucune campagne lancée par cette prélecture.
+
 ## 23 septembre 2026, 08 h 10 — Parcours cachés publiés (sonde v12) et script de pente durci (développeur)
 
 GCP non utilisé. Réponses à la relecture de B (07 h 21 et 07 h 24, notes non
@@ -860,3 +917,26 @@ encore commises dans le worktree partagé) :
   « disques » (pas des coupes par plans du capteur), identifiants retenus
   épinglés, emboîtement vérifié ; SHA de l'ELF, HEAD, arbres `src`/`bench`
   et propreté du worktree dans le résumé.
+
+## 23 septembre 2026 — Contrelecture du port v12 et du reçu local (auditeur B)
+
+Lecture indépendante du port v12 `4530644b` : aucune égalité du nouveau
+lecteur ne rejette une sortie valide avec les options **actuelles** de la
+chaîne (`RectanglePair`, `Local28`, graines `LiveOnly`). La partition
+`witness_pair_queries + witness_cache_rejected_pairs = expanded_pairs`
+suit les deux branches exclusives de `Engine::edge`; les visites q3 se
+partitionnent entre feuilles et boîtes. Les parcours q4 domaine, cover et
+graines visitent chacun au plus `2n−1` nœuds par appel. Attention : la
+borne des graines q4 par `q4_seed_cell_queries` est propre à `LiveOnly` ;
+`Individual`/`Joined` nécessiteraient une autre validation, donc une
+modification future des options de chaîne doit rouvrir cette porte.
+
+Le [contre-audit du reçu local partiel](../morsehgp3D_v9/audits/CONTRE_AUDIT_PENTE_LIDAR_LOCALE_PARTIELLE_20260923.md)
+vérifie 15/15 hashes et les douze entrées dérivées de 08/000000 sans sol.
+K5 dispose de 8k/16k/32k ; K10 s'arrête à 16k. Les temps de chaîne K5
+paraissent proches du linéaire sur ces doublements, mais `core_sites`
+croît ×7,66 à K5 et ×5,69 à K10 au premier doublement. Ni pente de
+travail total sous-quadratique, ni G4/GPU n'en sont qualifiés. Le binaire
+historique `e305f124…` n'est plus présent parmi les builds locaux : pas
+de rejeu LIVE du reçu original. Les nouvelles protections du runner
+répondent aux objections de protocole, sous réserve d'un reçu v12 achevé.
