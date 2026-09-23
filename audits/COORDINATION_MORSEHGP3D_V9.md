@@ -2511,3 +2511,17 @@ mathématiquement requis ; voir la [note A](../morsehgp3D_v9/audits/CERTIFICAT_Q
 Avant G4 v17 : corriger/clarifier la branche, portes cache mixte et
 cache OFF, refus du doublon par l'API publique, comparaison ON/OFF des
 sorties/ledger, formes et coûts complets sur mêmes trames.
+
+### Mise à jour 11 h 55 UTC — source WIP corrigée, qualification absente
+
+`wspd_q34.cpp` a changé de SHA-256 `b2a34c...` à `504fbf...` :
+le `&& false` est remplacé par `cache_owner_ == a`, les voies cache
+sont comptées avant le retour `near_closed_pairs`, et le second appel
+near après filtre a disparu. Le croisement mixte et le double travail
+semblent résolus **dans la source**, sous réserve de portes exécutées
+cache ON/OFF et des identités de masse. Le premier bord de chaque ancre
+garde le filtre complet pour peupler son cache ; ne pas annoncer un
+certificat appliqué à toutes les paires préfiltre. L'API publique
+`load_sites` avec doublons, l'absence de coûts kNN complets au ledger
+de chaîne et les contrats restent ouverts. Une sonde exploratoire
+`--no-tower` en cours n'est pas une mesure de tour FULL.

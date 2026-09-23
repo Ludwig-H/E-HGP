@@ -79,3 +79,16 @@ sorties FULL identiques, validation de toutes les identités de masse,
 coûts de construction/proof/cœur/aval et RSS. Puis trames LiDAR entières
 brutes et sans sol, plusieurs séquences, K5/K10 et s8/10/12. Aucun
 contrat 1 s/GPU/sous-quadratique n'est qualifié par ce WIP.
+
+## Mise à jour du WIP à 11 h 55 UTC
+
+Le développeur a déjà remplacé la source épinglée ci-dessus : SHA-256
+actuel de `wspd_q34.cpp` :
+`504fbf40747b12054e5d13d92099a4693c07c8ec1040460ee4b01`.
+La prépreuve est rétablie **seulement si le cache appartient déjà à a** ;
+le retour anticipé compte désormais les voies fermées par cache dans
+`witness.pair_q3_pairs`/`pair_q4_pairs`, et le second appel après filtre
+est retiré. Le cas de ledger mixte paraît donc réconcilié en lecture
+statique ; les points 1–2 décrivent **l'état antérieur**, pas le code
+de 11 h 55. Aucune porte `near_sites>0` ciblée ou reçu v17 n'est
+encore publié ; l'API `load_sites` et le coût total restent ouverts.
