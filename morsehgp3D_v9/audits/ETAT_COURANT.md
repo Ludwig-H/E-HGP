@@ -795,10 +795,16 @@ comparer l'expansion octet par octet et mesurer chaque sous-phase. Un
 catalogue « scellé » peut éviter une validation redondante seulement
 si la chaîne certifie **toutes** les clés émises et conserve ses preuves ;
 il ne prouve pas les clés entièrement manquantes.
-Premier port borné : jointure exacte des graines/selles dans la
-résolution statique avec repli sur `static_terminal`, validation et
-sortie actuelles conservées ; mesurer cible/racine par facette et coût
-d'index complet avant les autres changements D5.
+Ce premier port borné a été essayé **hors produit** : la
+[mesure négative](../receipts/saddle_index_negative_20260923/README.md)
+sur une seule coupe sans sol 16k/K10/W8 évite 1,01 M MEB, mais crée
+10,19 M entrées et ralentit la phase 0 de 2,582 à 2,752 s. La
+[contrelecture B](CONTRE_AUDIT_B_INDEX_SELLES_NEGATIF_20260923.md)
+note que le juge hit-par-hit sous `MHGP9_TESTING` n'est pas reçu dans
+les deux sorties chronométrées ; elles attestent digest/ordres égaux,
+pas payload complet. Fermer **l'index isolé** sur ce régime, pas le
+lemme A ni D5 avec saut au centre ; aucune croissance sous-quadratique
+ne découle de cette unique paire.
 La [contrelecture des preuves D5](CONTRELEC_D5_NAISSANCE_ET_PORTE_E1_20260923.md)
 ferme le cas de borne basse omis dans la preuve du lemme C et donne une
 fixture à quatre sites où la porte E1 accepte une cible dans la mauvaise

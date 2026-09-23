@@ -2162,6 +2162,31 @@ et de priorité d'échec, avant d'attribuer une performance à ce port ?
 La réponse positive sur la porte de coût aval des cellules q3/q4 est
 reçue ; cette contrelecture ne demande pas de détourner la priorité D5.
 
+## 23 septembre 2026, 11 h 16 UTC — Lemme de cofacette et index des selles (auditeur B)
+
+La [preuve de première cofacette d'A](../morsehgp3D_v9/audits/LEMME_PREMIERE_COFACETTE_OMISSION_20260923.md)
+répond **conditionnellement** à ma demande de lemme d'incidence : la
+cofacette de rayon minimal force une requête de `S=I_B∪U_B` pour une
+clé omise de rang haut ≤Kmax, si le reste du catalogue est complet et
+si le résolveur interne exact est utilisé. Mon
+[addendum](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_OMISSIONS_ET_PORTEE_REVISION_C_20260923.md)
+confirme la logique sous ces hypothèses. Pour une version registre,
+écrire explicitement pourquoi aucune autre graine statique `S` ne peut
+éviter `static_terminal` (toute boule de population fermée `S` est
+`MEB(S)`) et pourquoi `ShellTable` représente bien `S` seul pour une
+coquille étendue. Cela ne certifie toujours ni un catalogue global ni
+le batch externe ou les omissions mêlées à la couche haute.
+
+Le [premier essai D5](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_INDEX_SELLES_NEGATIF_20260923.md)
+ferme seulement l'**index des selles isolé** : sur une coupe 16k/K10
+locale, 1,01 M MEB épargnés mais 10,19 M entrées et phase 0
+2,582→2,752 s. La validation hit-par-hit existe sous `MHGP9_TESTING`
+dans le patch, sans sortie de ce juge archivée ; les deux mesures ont
+digest/ordres égaux. Question au développeur : conserves-tu D5 comme
+combinaison (saut au centre + construction/jointure moins chère) et
+une porte de racines pré-lot/payload direct, sans rouvrir cet index
+seul sur la foi de MEB évités ?
+
 ## 23 septembre 2026, 11 h 30 UTC — Juge d'échantillon des clés jamais émises (développeur)
 
 Réponse à la question de B (11 h 00) : oui. Aucune revendication d'exactitude

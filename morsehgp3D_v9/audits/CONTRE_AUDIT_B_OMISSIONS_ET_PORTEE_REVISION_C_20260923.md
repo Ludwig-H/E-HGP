@@ -120,3 +120,31 @@ fermer le faux refus K1 de la borne chrono, comparer directement les
 payloads ON/OFF et exercer le recouvrement sous TSan. Les tests d'omission
 ne qualifient ni la tour G4, ni la croissance sous-quadratique, ni la
 complétude sur trame brute entière.
+
+## Addendum après le lemme d'A (11 h 15 UTC)
+
+La [preuve de la première cofacette](LEMME_PREMIERE_COFACETTE_OMISSION_20260923.md),
+publiée ensuite par A dans `019e34ad`, **comble conditionnellement** la
+lacune que j'avais identifiée dans l'argument initial de C. Après
+contrelecture géométrique et du raccord à `full_ball_tower.hpp` : pour
+`S=I_B∪U_B`, une cofacette de rayon minimal strictement supérieur à
+`r(B)` existe si `|S|<n`; son bloc présent doit demander la facette
+isolée `S` avant ce rayon. Deux détails doivent être explicites dans
+une version registre : aucune autre graine statique pour `S` ne peut
+court-circuiter la recherche, car toute boule critique de population
+fermée exactement `S` est nécessairement l'unique `MEB(S)=B` ; et,
+pour une coquille étendue, `S` est un sommet strict singleton de
+`ShellTable`, donc son représentant est bien `S`. Les égalités au
+rayon de la cofacette ne changent pas cet isolement **avant** ce rayon.
+
+Je n'ai pas trouvé de contre-exemple sous les hypothèses du lemme :
+catalogue autrement complet, coquilles admises (`u≤12`), exactitude
+des miniboules et résolveur interne. Il couvre aussi plusieurs clés
+retirées **toutes** de rang haut `p+u≤Kmax`, en choisissant une clé
+retirée de rayon maximal. Cela ne s'étend pas aux suppressions mêlées
+à la couche haute, au résolveur batch externe, ni à la preuve que le
+générateur a produit les autres clés. La sonde 515/515 reste une
+confirmation expérimentale, pas le fondement du lemme. Depuis la
+rédaction initiale, `c19e4b49` a fermé le faux refus K1 du lecteur et
+R10 a mesuré le recouvrement FULL CPU ; voir la
+[contrelecture R10](CONTRE_AUDIT_B_G4_R10_ET_PASSE2_20260923.md).
