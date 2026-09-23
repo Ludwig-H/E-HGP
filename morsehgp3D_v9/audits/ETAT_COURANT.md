@@ -472,6 +472,15 @@ voisins **globaux** pré-calculable avant le cœur ; les deux peuvent
 Le patch de mesure paie encore construction/parcours/tri du cœur puis
 la preuve complète : aucune baisse CPU/mur/RSS ni effet aval n'est
 mesuré. Tester la vraie liste globale et le repli avant port produit.
+Une [contrelecture mathématique du WIP q3/q4](CERTIFICAT_Q34_SOUS_ENSEMBLES_LOCAUX_20260923.md)
+montre que `prove` n'exige **aucun k-NN global exact** : tout sous-ensemble
+de sites **distincts** suffit à une fermeture sûre, avec repli si la
+preuve échoue. Une sélection locale/approchée à budget borné est donc
+permise, sous réserve de mesurer sa force et son coût total. La table
+actuelle à 16 voisins réserve au moins **65 octets/site** (2,42 Gio à
+40 millions de sites) ; les visites de points du pré-calcul manquent
+encore au ledger de chaîne. Le WIP a aussi besoin du gate mixte
+cache q3/voisins q4 signalé par B avant capture.
 
 ## Verrou q3/q4 : réduire le travail avant l'expansion
 
