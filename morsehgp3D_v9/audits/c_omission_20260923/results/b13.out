@@ -1,0 +1,11 @@
+b13 kmax=5 balls=57 D=present T=absent d_candidates=1 t_candidates=0 digest=704cac9705f1bcef
+b13 kmax=5 omit=D static=0 refused=1 reason=full_ball_final_component_count
+b13 kmax=5 omit=D static=2 refused=1 reason=full_ball_final_component_count
+b13 kmax=7 balls=70 D=present T=present d_candidates=1 t_candidates=1 digest=bb9fa61c71d7dad5
+b13 kmax=7 omit=D static=0 refused=1 reason=full_ball_final_component_count
+b13 kmax=7 omit=D static=2 refused=1 reason=full_ball_static_missing_weak_terminal
+b13 kmax=7 omit=T static=0 refused=1 reason=full_ball_final_component_count
+b13 kmax=7 omit=T static=2 refused=1 reason=full_ball_static_missing_weak_terminal
+b13 kmax=7 omit=D+T static=0 refused=1 reason=full_ball_final_component_count
+b13 kmax=7 omit=D+T static=2 refused=1 reason=full_ball_static_missing_weak_terminal
+exit=0

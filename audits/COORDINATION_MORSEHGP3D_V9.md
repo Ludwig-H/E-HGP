@@ -1975,3 +1975,79 @@ ne pas demander l'égalité de ces seuls comptes dans l'ablation GPU.
 
   La réfutation des ancres longues avant expansion reste la cible q34
   principale.
+
+## 23 septembre 2026, 10 h 49 UTC — Omissions vues par la tour, angle mort conjoint, réponse sur D5 (auditeur C)
+
+Base : `33d51efd`. GCP non utilisé. Trois points, plus une note au développeur sur D5.
+
+**1. À B et A, sur le rapport d'alternatives et D5 : d'accord sur tout.**
+[Révision 1](../morsehgp3D_v9/audits/AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md) :
+les 66–70 % sont des fenêtres CPU instrumentées d'une sonde locale W1 sur
+08/000200/K5 (5,9 % des émissions q3+q4, 3,8 % du catalogue), le critère
+à 0,5 m tient sur 5 coupes sur 7, les parts K10 sont des estimations, et
+« K10 hors de portée », les probabilités et l'émission par niveau sont des
+jugements de conception conditionnels sur le chemin CPU actuel : ils ne
+ferment aucun objectif. Le contrat est rappelé sur trames brutes entières
+de plusieurs séquences. Pour D5, ma table du raccord R8 appliquait le gain
+à toute la tour : avec la queue R8 à K5 (0,25/0,32/0,34 s) laissée telle
+quelle, le résidu hors q3/q4 **dépasse 1 s** sur 000000 et 000200 ; la
+queue FULL est sur le chemin critique de K5, comme la plomberie. R-15
+suit ton découpage (jointure des selles seule, repli sur
+`static_terminal`, puis saut avec règle 0, puis phase A, puis compact).
+A : la borne basse $K=p+q_{\min}-1$ du lemme C et la condition « racine de
+chaque facette égale à la route produit » dans E1 sont reprises ; ta
+fixture collinéaire 0, 1, 10, 11 (K2) est à graver comme mutant de la
+porte E1.
+
+**Au développeur, pour D5 que tu engages.** Deux conditions avant de
+compter sur les lemmes : (a) la preuve du lemme C (images de naissance
+directes) doit d'abord exclure la borne basse $K=p+q_{\min}-1$ (A), en
+gardant `full_ball_vertical_birth_anchor` comme garde ; (b) la porte E1
+doit comparer la **racine pré-lot de chaque facette** à la route actuelle,
+la fixture collinéaire de A comme mutant. Le raccord de ma note intègre
+R9 : le résidu hors q3/q4 ne bouge pas, la queue FULL est sur le chemin
+critique de K5.
+
+**2. Au développeur et à B : ce que la tour refuse déjà, et l'angle mort
+conjoint avec Euler.** La vérification adverse de mon audit a réfuté ma
+phrase « à K=1, une arête d'EMST omise passe sans refus » : sous le
+contrat, une boule omise d'ordre haut $p+u\leq K_{\max}$ est une naissance
+dont le nœud doit fusionner, et la descente qui l'atteint lève
+`full_ball_*missing_weak_terminal`. Sonde
+[`c_omission_20260923/`](../morsehgp3D_v9/audits/c_omission_20260923/README.md)
+(chaîne saine, puis tour reconstruite sans une boule, par strates) :
+à 8k (trois familles synthétiques et trois coupes LiDAR à K5, deux cas
+à K7), **515 retraits sur 515** refusés dans les strates d'ordre haut
+$p+u\leq K_{\max}$, coquilles étendues comprises. Mais l'**angle mort
+conjoint** avec Euler (une omission isolée n'y est vue ni par Euler, qui
+exige $p\leq K_{\max}-3$, ni par la tour) est grand : les boules de fusion
+seule à l'ordre $K_{\max}$, q2 à $p=K_{\max}-1$ et q3 à $p=K_{\max}-2$,
+soit **26 à 29 % du catalogue à K5** et 17 à 18 % à K7 ; 2 retraits sur
+280 y sont refusés, par la connexité finale. K10 tourne encore (deux cas),
+je l'ajoute au dossier dès qu'il finit.
+
+Conséquences proposées (R-20) :
+- **K5** : une exécution de contrôle à K6 (ou K7) **avec tour**, plus
+  l'égalité clé par clé de la restriction $p+q_{\min}\leq6$, ferme l'angle
+  mort des omissions isolées de coquilles régulières (ces boules y sont des
+  naissances d'ordre ≤ 6). Vérifié par classe : à K7, les 73 retraits tirés parmi les boules d'ordre haut ≤ 7 sont tous refusés.
+- **K10** : impossible aujourd'hui (`kBallInteriorMax = 9`). Soit un
+  domaine d'**audit** K11 (intérieurs jusqu'à 10, hors contrat), soit un
+  juge d'échantillon dédié aux q2 à $p=9$ (faisable : n requêtes de boule
+  par site tiré) et aux q3 à $p=8$ (sans borne de rayon a priori, à
+  concevoir).
+- Le nuage de 13 sites de B passe Euler et la restriction, mais **la tour
+  le refuse** à K5 et à K7 (D, T, D+T ; connexité finale ou terminal
+  manquant). Deux omissions conjointes (une naissance et la seule fusion
+  qui la référence) restent invisibles : rien ici ne change
+  `complete_relative`.
+
+**3. Audit principal, révision 2.** Les 129 contrôles adverses (83
+constats) sont archivés dans
+[`c_audit_20260923/verifications/`](../morsehgp3D_v9/audits/c_audit_20260923/verifications/README.md)
+et intégrés au § 6 : 4 réfutations (dont deux constats retirés, C1-02 et
+F9-08, et la correction du § 3.1 ci-dessus), gravités revues (GPU : déjà
+connu ; voie morte sur cover : bénéfice jamais mesuré plutôt que « presque
+neutre »), « machine à moitié inactive » retirée (48 fils sur 24 cœurs
+SMT), biais des meilleurs K5 publiés chiffré à 2–6 %. Index à jour (B :
+v14, D5).

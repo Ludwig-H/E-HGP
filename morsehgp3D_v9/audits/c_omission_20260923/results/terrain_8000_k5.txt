@@ -1,0 +1,12 @@
+terrain_8000 n=8000 kmax=5 balls=160174 regular=160173 extended=1 top_within=112470 euler_visible_regular=97506 joint_blind_regular=47146 extended_top_over=0 digest=66e1ca43b5915b01
+terrain_8000 joint_blind p=3 q=3 count=31478
+terrain_8000 joint_blind p=4 q=2 count=15668
+terrain_8000 stratum top_within=0 regular=1 q=2 population=15668 sampled=20 refused=0 complete_relative=20
+terrain_8000 stratum top_within=0 regular=1 q=3 population=31478 sampled=20 refused=0 complete_relative=20
+terrain_8000 stratum top_within=0 regular=1 q=4 population=558 sampled=20 refused=3 complete_relative=17 full_ball_final_component_count=3
+terrain_8000 stratum top_within=1 regular=0 q=2 population=1 sampled=1 refused=1 full_ball_static_missing_weak_terminal=1
+terrain_8000 stratum top_within=1 regular=1 q=2 population=63270 sampled=20 refused=20 full_ball_static_missing_weak_terminal=20
+terrain_8000 stratum top_within=1 regular=1 q=3 population=48616 sampled=20 refused=20 full_ball_static_missing_weak_terminal=20
+terrain_8000 stratum top_within=1 regular=1 q=4 population=583 sampled=20 refused=20 full_ball_static_missing_weak_terminal=20
+terrain_8000 claim_top_within_refused=holds_on_sample
+exit=0

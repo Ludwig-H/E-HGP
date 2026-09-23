@@ -26,8 +26,15 @@ Neuf lectures indépendantes, menées en parallèle sur `origin/main` `0125dc18`
 Chaque `*_constats.json` donne les constats bruts de la lecture (gravité,
 preuves fichier:ligne, action). **Ce sont des constats avant vérification** :
 le document principal ne retient que les constats revérifiés par l'auditeur C
-ou confirmés par la vérification adverse, et signale les autres comme en
-cours. La lecture L8 alimente l'index [`../README.md`](../README.md).
+ou confirmés par la vérification adverse. La lecture L8 alimente l'index
+[`../README.md`](../README.md).
+
+## `verifications/`
+
+Verdicts de la vérification adverse (129 contrôles sur 83 constats), résumé et
+tableau dans [`verifications/README.md`](verifications/README.md), texte
+intégral dans `verifications/verdicts.json`. Intégrés au § 6 de l'audit
+principal en révision 2.
 
 ## `scripts/`
 

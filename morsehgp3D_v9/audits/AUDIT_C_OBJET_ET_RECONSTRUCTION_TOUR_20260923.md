@@ -20,9 +20,18 @@ l'[erratum de B](ERRATUM_B_AUDIT_C_OBJET_ET_EULER_20260923.md) (règle génériq
 limitée à la position générale, Euler présenté comme condition nécessaire,
 statut exact des portes, mutants comparés clé par clé).
 
+**Révision 2 (10 h 48 UTC)** : verdicts de la vérification adverse (129
+contrôles sur 83 constats,
+[`c_audit_20260923/verifications/`](c_audit_20260923/verifications/README.md))
+intégrés au § 6 ; § 3.1 corrigé (la tour refuse, sous le contrat, toute
+omission isolée d'ordre haut $p+u\leq K_{\max}$ ; angle mort conjoint avec
+Euler mesuré à 8k) ; « machine à moitié inactive » retirée du § 5 ;
+comptes de mutants et biais des chiffres K5 précisés.
+
 Ce document répond à la première demande de l'utilisateur : **à quoi sert
 l'algorithme, et comment la v9 reconstruit la tour complète**. L'étude des
-implémentations alternatives pour le contrat fera l'objet d'une note séparée.
+implémentations alternatives pour le contrat est dans
+[`AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md`](AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md).
 
 ## Verdict en dix lignes
 
@@ -368,12 +377,40 @@ $2^{-51,39}$ sur 200 000 cas exacts, sous la borne annoncée de $2^{-49}$.
 
 ## 3. La complétude à l'échelle
 
-### 3.1 Ce que la tour détecte déjà
+### 3.1 Ce que la tour détecte déjà (corrigé en révision 2)
 
 La descente d'un représentant qui atteint une boule sans intrus absente du
-catalogue lève un refus. Une boule omise qui n'est **terminal d'aucune
-descente** reste invisible, et à $K=1$ il n'y a aucune descente : une
-arête d'arbre couvrant minimal omise fausse les niveaux sans refus.
+catalogue lève un refus (`full_ball_*missing_weak_terminal`). La révision 1
+en tirait qu'à $K=1$ une arête d'arbre couvrant minimal omise fausse les
+niveaux sans refus : c'est **faux sous le contrat** (réfutation du constat
+L4-02 par la vérification adverse). Une boule de fenêtre
+$[p+q_{\min}-1,\,p+u]$ est une **naissance** à son ordre haut $p+u$ ; son
+nœud $I\cup U$ doit fusionner avant la fin de l'ordre (racine unique), et
+sa première référence ne peut venir que d'une descente qui atteint sa clé.
+Une arête de Gabriel ($p=0$, fenêtre $[1,2]$) omise est donc refusée à
+l'ordre 2 dès que $K_{\max}\geq2$.
+
+Énoncé, argumenté mais **non inscrit au registre** : *une omission isolée
+d'une boule d'ordre haut $p+u\leq K_{\max}$ est refusée par la tour.*
+Oracle borné du vérificateur : 3 382 retraits sur 3 382 refusés (6 à 8
+sites). Sonde d'omission de C à 8k (trois familles synthétiques et trois coupes LiDAR à K5, deux cas à K7 ; K10 en cours) : 515 retraits sur 515 refusés dans les strates d'ordre haut $p+u\leq K_{\max}$. Détail :
+[`c_omission_20260923/`](c_omission_20260923/README.md).
+
+**Angle mort conjoint de la tour et d'Euler.** Pour une coquille régulière,
+Euler voit une omission isolée si et seulement si $p\leq K_{\max}-3$, la
+tour si et seulement si $p+q\leq K_{\max}$. Restent les boules de
+**fusion seule à l'ordre $K_{\max}$** de type q2 à $p=K_{\max}-1$ et q3 à
+$p=K_{\max}-2$ : leur omission ne fausse que des fusions de l'ordre
+$K_{\max}$, et aucune porte actuelle ne la voit. À K5, une exécution de
+contrôle à $K_{\max}+1$ ou $K_{\max}+2$ **avec tour**, plus l'égalité
+clé par clé de la restriction $p+q_{\min}\leq K_{\max}+1$, ferme cet
+angle mort pour les omissions isolées de coquilles régulières : ces boules
+y deviennent des naissances d'ordre au plus $K_{\max}+1$. À K10, c'est
+impossible aujourd'hui (`kBallInteriorMax = 9` borne le domaine à K10) ;
+il faudrait un domaine d'audit K11 (intérieurs jusqu'à 10) ou un juge
+d'échantillon dédié à ces deux familles. Deux omissions conjointes (une
+naissance et la seule fusion qui la référence) restent invisibles, comme
+pour Euler.
 
 ### 3.2 Invariant d'Euler
 
@@ -444,9 +481,11 @@ workflow entier était déjà rouge à cause du selftest (point suivant).
 - **Mutants absents** : aucun mutant produit sur le cœur FULL (lots de même
   niveau, coupes ouvertes et fermées, verticales), sur les recoupements de la
   chaîne (clé, profondeur, coquille, $q_{\min}$, doublon, fenêtre, coquille
-  de plus de 12) ni sur la voie q2 ; les 18 sites `MHGP9_MUTANT` du chemin
-  produit ne sont activables par aucun test, et le registre `kMutants`
-  compte 132 noms pour 18 sites. Le mutant
+  de plus de 12) ni sur la voie q2. Le registre `kMutants` déclare 132
+  noms, dont 18 seulement ont un site (19 lignes `MHGP9_MUTANT`) ; aucun
+  n'est activable (`mutants_enable` sans appelant, pas de `--inject=`) ;
+  12 sont sur le chemin produit, 6 dans du code sans appelant (mutants
+  équivalents : supprimer ce code plutôt que le muter). Le mutant
   `admitted_lane_recounted_in_children` est désactivé alors qu'un site
   unique à deux lignes existe.
 - **Concurrence** : ni ASan/UBSan ni TSan en CI ; bit-identité testée
@@ -472,7 +511,10 @@ Recalcul sur les 109 exécutions G4 brutes (R1 à R7b), périmètre constant :
   CPU de R7b demande 1,81–2,60 s à K5 et 5,58–7,75 s à K10. Il faut le
   diviser par 1,8–2,6 (K5) et 5,6–7,7 (K10) pour 1 s, par 18–77 pour
   100 ms. **Aucun réglage d'ordonnancement ne ferme cet écart.**
-- **Machine à moitié inactive** : 19 à 28 fils occupés sur 48 ; 10 à 13 %
+- **Occupation et temps système** : 19 à 28 fils occupés en moyenne sur
+  48 fils logiques, soit 24 cœurs physiques en SMT 2 (ce n'est pas une
+  machine à moitié inactive : de 24 à 48 fils, le mur ne baisse que de 9 à
+  14 %) ; 10 à 13 %
   de CPU système à K5, apparu avec le certificat de voies mortes (ablation
   R3 : 6,74 contre 1,68 s de temps système) ; 0,44 à 1,97 M commutations
   volontaires par exécution ; file q3/q4 unique sous mutex ; environ
@@ -488,7 +530,8 @@ Recalcul sur les 109 exécutions G4 brutes (R1 à R7b), périmètre constant :
 - **Précisions sur les chiffres publiés** : les meilleurs K5 de 000000 et
   000200 (5,31 et 6,40 s) sont des minima sur quatre essais pris en
   configuration **MEB OFF** ; la configuration par défaut donne 5,63 et
-  6,51 s en moyenne. Les reçus G4 n'ont qu'une ou deux répétitions, sans
+  6,51 s en moyenne, soit un biais optimiste de 2 à 6 % (les chiffres K10
+  sont bien des minima MEB ON). Les reçus G4 n'ont qu'une ou deux répétitions, sans
   échauffement ni p95, et ne publient ni la grille ni le masque sans sol.
 - **Représentativité** : trois trames d'une seule séquence, 35,6 k à
   45,8 k sites ; rien entre 46 k et 60 k. Dans la campagne locale emboîtée,
@@ -506,27 +549,30 @@ Recalcul sur les 109 exécutions G4 brutes (R1 à R7b), périmètre constant :
 
 Constats consolidés des neuf lectures, dédoublonnés et recoupés avec les
 notes de A et B. Colonne « vérif. » : **C** = revérifié directement par
-l'auditeur C ; **V** = confirmé par la vérification adverse ; **…** =
-vérification adverse en cours (ce tableau sera mis à jour).
+l'auditeur C ; **V** = confirmé par la vérification adverse ; **V\*** =
+confirmé avec correction (le texte ci-dessous est corrigé) ; **D** = déjà
+signalé par A, B ou le développeur. Verdicts bruts (129 contrôles sur 83
+constats) : [`c_audit_20260923/verifications/`](c_audit_20260923/verifications/README.md).
 
 | # | gravité | constat | vérif. | action proposée |
 | --- | --- | --- | --- | --- |
 | 1 | haute | CI v9 rouge depuis 01 h 49 (selftest `HEAD~1`, puis chemin absolu dans la porte de pente) | C | corriger les deux causes ; mutation « chemin étranger » |
 | 2 | haute | aucun juge de complétude du catalogue aux tailles d'intérêt | C | invariant d'Euler dans la sonde, le lecteur G4 et une porte `scale8000` ; protocole Kmax+2 |
 | 3 | haute | travail CPU ×1,8–2,6 (K5) et ×5,6–7,7 (K10) trop grand pour 1 s même à 48 fils parfaits | C | réduire le nombre d'opérations avant de paralléliser ; étude d'alternatives |
-| 4 | haute | la tour FULL ne passe pas au-delà de 24 fils (phase A séquentielle par ordre, phase 0 séquentielle entre ordres) | … | phase A maigre, pipeline Kmax d'abord, phase C parallèle, lemme max-ID |
-| 5 | haute | aucune préparation GPU du poste dominant (générateur sans annotation device) | … | flux plat par feuille d'atlas, filtres certifiés, porter q2 en binary64 exact |
+| 4 | haute | la tour FULL ne passe pas au-delà de 24 fils (phase A : un fil par ordre ; phase 0 séquentielle entre ordres) ; R8 : lots de K10 0,80–1,19 s sur un seul fil | D, V | préparer K=Kmax d'abord et lancer A(Kmax) aussitôt (A(K) ne dépend que de sa phase 0) ; phase A maigre ; phase C parallèle ; lemme max-ID |
+| 5 | basse | aucune préparation GPU du poste dominant (déjà connu) ; les 27 annotations `MHGP9_HD` sont toutes dans `tower/` et incohérentes (aides non annotées, points de mutant hôtes) | D, V\* | flux plat par feuille d'atlas, filtres certifiés, porter q2 en binary64 exact |
 | 6 | moyenne | T2 de chaîne limitée à $K_{\max}=10$ : élagage presque vide, K5 jamais jugé | C, V | paramétrer K ∈ {1,2,3,5,10}, planchers de rejets, mutant de seuil tué |
 | 7 | moyenne | les refus de recoupement de la chaîne n'ont aucune porte causale | V | mutants compilés de présentation, fixture u13 de A |
-| 8 | moyenne | aucun mutant produit sur le cœur FULL, la recoupe et q2 ; 18 sites `MHGP9_MUTANT` inertes | … | convertir en mutants compilés, purger `kMutants` |
+| 8 | moyenne | aucun mutant produit sur le cœur FULL, la recoupe et q2 ; `kMutants` : 132 noms, 18 avec site, aucun activable, 6 dans du code mort | V | convertir les 12 sites du chemin produit en mutants compilés, supprimer le code mort, purger `kMutants` |
 | 9 | moyenne | extension non régulière, complétude q2 et q3/q4 absentes du registre ; README « prouvée » trop fort | C | entrées au registre (B1–B8, inductions q3/q4, Euler) ; corriger README l. 23 |
 | 10 | moyenne | plomberie 0,70–1,00 s à K10, dont 0,18–0,43 s non attribués | V (chiffres) | publier `release_ms`, arènes, index unique, recensement fusionné |
-| 11 | moyenne | 10–13 % de CPU système à K5, fils recréés par région, file q3/q4 sous mutex | … | pool persistant, files par ouvrier, `getrusage` par phase |
-| 12 | moyenne | q2 et recensement figés depuis R1 ; grand-livre q2 non publié | … | ablations `{4,all,true}`, charge utile réduite, publier le grand-livre |
-| 13 | moyenne | protocole de mesure du plan non tenu (répétitions, p95, grille et masque, trames 46–60 k) | … | session G4 W1..W48, boucle à chaud, trames déclarées à l'avance |
-| 14 | moyenne | preuve de voie morte sur cover complet presque neutre (échoue sur 73–81 % des voies traitées) | … | ablation ; restructuration q3/q4 par feuille d'atlas |
+| 11 | moyenne | 10–13 % de CPU système à K5, lié au certificat de voies mortes (ablation R3) ; environ 100 équipes de fils créées par chaîne K10 ; file q3/q4 sous mutex unique, commentaires faux (attente 35–49 % à K5 en R8) | V\*, D | pool persistant, files par ouvrier, `getrusage` par phase |
+| 12 | moyenne | q2 et recensement figés depuis R1 (0,78–1,29 s à eux deux à K10, R7b et R8) ; grand-livre q2 non publié (3 compteurs sur plusieurs dizaines) | D, V | ablations `{4,all,true}`, charge utile réduite, publier le grand-livre |
+| 13 | basse | protocole de mesure du plan non tenu (répétitions, seuil de charge, p95, octets de tour) ; aucune trame entre 45,8 k et 60 k | V\*, D | session G4 W1..W48, boucle à chaud, trames déclarées à l'avance |
+| 14 | basse | bénéfice net de la preuve de voie morte sur cover complet jamais mesuré, aucun levier ne l'isole ; elle prouve 19–27 % des voies atteintes et ferme 21–24 % des covers | V\* | levier séparé, puis ablation appariée |
 | 15 | basse | `run_tower=false` publie `complete_relative` sans positivité vérifiée des coquilles régulières | V | positivité dans le recensement ou statut distinct |
-| 16 | basse | meilleurs K5 publiés pris en configuration MEB OFF | … | publier moyenne et configuration par défaut |
+| 16 | basse | meilleurs K5 publiés mêlant MEB OFF et ON (biais optimiste 2–6 %) | V | publier moyenne et configuration par défaut |
+| 17 | haute | omissions isolées invisibles à la fois à Euler et à la tour : boules de fusion seule à l'ordre Kmax (q2 à p=Kmax−1, q3 à p=Kmax−2), 26 à 29 % (K5) et 17 à 18 % (K7) du catalogue à 8k | C | K5 : contrôle Kmax+1 avec tour et restriction clé par clé ; K10 : domaine d'audit K11 ou juge d'échantillon dédié (R-20) |
 
 ## 7. Recommandations au développeur, par ordre
 

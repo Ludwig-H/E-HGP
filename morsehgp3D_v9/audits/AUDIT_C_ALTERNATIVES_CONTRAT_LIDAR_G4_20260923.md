@@ -14,6 +14,14 @@ Aucun temps de ce document ne promeut un statut. Les chiffres locaux viennent d'
 
 Sources : six propositions (D1 à D6), trois jurys (rigueur, performance G4, risque et doctrine) et six vérifications adverses (théorème et projection de D5, D1 et D3). Quand une vérification adverse a réfuté un chiffre, ce document retient le chiffre corrigé et le signale.
 
+**Révision 1 (10 h 49 UTC).** Corrections demandées par les contrelectures de B ([alternatives](CONTRE_AUDIT_B_ALTERNATIVES_C_20260923.md), [D5](CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md)) et de A ([D5, naissance et porte E1](CONTRELEC_D5_NAISSANCE_ET_PORTE_E1_20260923.md)) :
+- la part 66–70 % des ancres longues est celle des **fenêtres CPU instrumentées** (arête et filtre de rectangle) d'**une** sonde locale, 08/000200/K5/W1, après correction d'horloge modélisée ; ce n'est pas une attribution du q3/q4 G4 ; les 5,9 % sont des émissions q3+q4 (3,8 % des boules du catalogue) ;
+- le critère « plus de 50 % à 0,5 m » tient sur 5 coupes sur 7 après correction d'horloge, pas 7 sur 7 ; les parts K10 de trame entière (48,6 et 56,3 %) sont des **estimations** du modèle, pas des minorants ;
+- le gain D5 est une **projection conditionnelle** : la queue FULL (validation, populations, images, banque, encodage) vaut déjà 1,05–1,24 s à K10 en R8 et doit être refondue poste par poste ; premier port réduit à la jointure des selles (raccord R8) ;
+- la preuve du lemme C doit d'abord exclure la borne basse $K=p+q_{\min}-1$ (A) ; la porte E1 par facette doit comparer la **racine** de chaque facette à la route produit, sinon une cible de bon niveau dans une autre composante passe (contre-fixture de A : sites collinéaires 0, 1, 10, 11, ordre K2) ;
+- les résidus R8 (1,15–1,64 s à K10 quand q3/q4 et FULL sont soustraits) bornent le **chemin CPU actuel**, pas un autre générateur ni un GPU résident ; « K10 hors de portée », les probabilités des jurys et le prérequis d'émission par niveau pour 100 ms sont des **jugements de conception conditionnels** : ils ne ferment ni ne renégocient aucun objectif ;
+- le contrat porte sur des **trames brutes entières de plusieurs séquences** ; le sans-sol de la séquence 08 est le premier régime de travail.
+
 ## Lecture de l'auditeur C
 
 Méthode : six concepteurs indépendants ont chacun défendu une famille
@@ -27,10 +35,11 @@ archivées dans [`c_alternatives_20260923/`](c_alternatives_20260923/README.md).
 
 Ce que j'en retiens, en six points :
 
-1. **Le verrou est le travail, pas seulement son ordonnancement.** Sur la trame entière
-   08/000200 à K5, les arêtes propriétaires de plus de 1,6 m portent 66 à 70 %
-   du CPU q3/q4 pour 5,9 % des boules émises ; c'est là que vit la croissance
-   superlinéaire. Aucun découpage local (D3, D4, tuiles GPU de D6) ne
+1. **Le verrou est le travail, pas seulement son ordonnancement.** Dans une
+   sonde locale (08/000200, K5, un fil), les arêtes propriétaires de plus de
+   1,6 m portent 66 à 70 % des fenêtres CPU q3/q4 instrumentées pour 5,9 % des
+   émissions q3+q4 ; c'est là que vit la croissance superlinéaire, à
+   confirmer sur les trois trames par l'étape 3. Aucun découpage local (D3, D4, tuiles GPU de D6) ne
    l'atteint : il faut **réfuter les ancres longues avant l'expansion**,
    exactement la cible des certificats de bloc en cours chez le développeur et
    B. Critère de réussite chiffré : ramener cette part sous 25 %.
@@ -38,10 +47,13 @@ Ce que j'en retiens, en six points :
    au centre (lemme B, avec la « règle 0 » ajoutée par la réfutation), phase A
    sans allocation, images de naissance directes, sortie compacte. Racines
    identiques au produit sur 5,04 M facettes LiDAR et 221 556 facettes de
-   nuages dégénérés ; gain réaliste ×6–13 sur FULL (K10 : 3,2 s → 0,25–0,6 s ;
-   K5 : 0,73 s → 0,06–0,12 s). Nécessaire à toute cible, non suffisant.
-3. **1 s à K10 est hors de portée de toutes les familles étudiées**
-   (probabilité subjective < 0,1) : même avec q3/q4 et FULL gratuits, q2,
+   nuages dégénérés ; gain projeté ×6–13 sur FULL (K10 : 3,2 s → 0,25–0,6 s ;
+   K5 : 0,73 s → 0,06–0,12 s) **à condition de refondre aussi la queue**
+   (1,05–1,24 s à K10 en R8, voir le raccord). Nécessaire à toute cible, non
+   suffisant.
+3. **1 s à K10 est hors de portée de toutes les familles étudiées**, jugement
+   de conception conditionnel (probabilité subjective < 0,1) : sur le chemin
+   CPU actuel, même avec q3/q4 et FULL gratuits, q2,
    fusion, recensement et plomberie dépassent déjà 1 s à K10 sur 000200.
 4. **1 s à K5 reste possible** avec D5, la plomberie compacte **et** un port
    GPU de q3/q4 qui emporte aussi la réfutation des ancres longues — sous
@@ -65,7 +77,8 @@ Deux faits nouveaux précisent la feuille de route.
 
 **Le budget q3/q4 de 1 s à K5 dépend fortement de la trame.** Avec le
 résidu hors q3/q4 publié par le [contre-audit R8 de B](CONTRE_AUDIT_B_G4_R8_20260923.md)
-et la tour FULL ramenée par D5 (×6 à ×13) :
+et la tour FULL **entière** ramenée par D5 (×6 à ×13, projection : queue
+comprise, voir la correction qui suit) :
 
 | Trame 08/ | Chaîne − q3/q4 (R8) | dont tour | Résidu avec D5 | Budget q3/q4 pour 1 s | q3/q4 W48 (R8) | Facteur exigé |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -73,12 +86,37 @@ et la tour FULL ramenée par D5 (×6 à ×13) :
 | 000000 | 1,507 s | 0,866 s | 0,71–0,79 s | 0,21–0,29 s | 3,953 s | ×14–18 |
 | 000200 | 1,685 s | 0,921 s | 0,83–0,92 s | 0,08–0,17 s | 4,710 s | ×29–57 |
 
+**Correction après le [contre-audit B de D5](CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md)
+(révision du même jour).** Le ×6–13 est une projection du sidecar 8k, pas
+un reçu : ce sidecar ne matérialise ni populations, ni banque, ni images,
+ni encodage. Les phases publiées par R8 (sonde v13, W48, s8) chiffrent
+cette queue : validation + populations + images + banque + encodage
+valent 0,25/0,32/0,34 s à K5 et 1,05/1,24 s à K10 (000100/000000), pour
+une phase statique + lots de 0,45/0,58/0,60 s à K5. Si D5 ne réduit que
+la résolution et la phase A et que la queue reste telle quelle :
+
+| Trame 08/ | Queue FULL (R8) | Résidu hors q3/q4 | Budget q3/q4 pour 1 s |
+| --- | ---: | ---: | ---: |
+| 000100 | 0,250 s | 0,73–0,77 s | 0,23–0,27 s (×9–11) |
+| 000000 | 0,316 s | 1,00–1,05 s | aucun |
+| 000200 | 0,335 s | 1,15–1,20 s | aucun |
+
+La queue FULL fait donc partie du chemin critique de 1 s à K5, au même
+titre que la plomberie : chaque élément doit être refondu ou certifié
+redondant, poste par poste, avant d'espérer le tableau précédent. Je
+retiens aussi le découpage de B pour le premier port : **seule la
+jointure exacte des graines et des selles dans la résolution statique**,
+vérification intégrale des IDs et de la clé, repli sur `static_terminal`
+à chaque échec, le reste de FULL inchangé ; puis le saut au centre avec
+la règle 0 ; puis la phase A maigre ; puis la sortie compacte et le
+catalogue scellé, chacun avec sa porte `same_payload`.
+
 La probabilité 0,25–0,35 du § 1 vaut pour la trame légère. Sur la trame la
 plus lourde, 1 s à K5 exige **en plus** de retirer 0,3 à 0,5 s des
 0,76 s hors q3/q4 et hors tour (q2, fusion, recensement, plomberie) : c'est
 l'étape 2 (pool persistant, arènes, temps système), qui n'est plus
-optionnelle. Sans elle, je ramène la probabilité « trois trames sous 1 s à
-K5 » à 0,1–0,2.
+optionnelle, **et** la refonte de la queue FULL. Sans elles, je ramène la
+probabilité « trois trames sous 1 s à K5 » à 0,1–0,2.
 
 **L'ordonnancement de q3/q4 est un levier réel, à prendre avant le GPU.**
 À W48, les fils q3/q4 attendent la file 35 à 49 % du temps à K5, et le CPU
@@ -94,12 +132,23 @@ arête que B mesure à boîte fixe (moyenne 96→165→290 formes non-supports
 par cœur) converge avec le poids des ancres longues : dans les deux cas,
 le levier est un certificat **avant** `A×B`.
 
+**R9, reçu pendant la révision 1.** Le [reçu R9](../receipts/g4_tower_r9_20260923/README.md)
+(paquet `fe1142b5`, ablation appariée des deux leviers d'ordonnancement,
+condensés égaux) le confirme : K5 passe à 2,80 / 3,80 / 3,99 s et K10 à
+8,60 / 11,75 / 11,89 s. À K5, q3/q4 tombe à 1,66–1,68 / 2,16–2,21 /
+2,36–2,39 s et son mur vaut 1,02–1,03 fois `cpu_sum/48` : il ne reste plus
+de marge d'ordonnancement. Le résidu hors q3/q4 ne bouge pas
+(1,14 / 1,59–1,65 / 1,63–1,69 s), donc les deux tableaux ci-dessus restent
+valables ; avec D5 complet (projection), le facteur exigé sur q3/q4 devient
+×3–4 sur 000100, ×7–10 sur 000000 et ×14–30 sur 000200. Les cas R9 ON sont
+la base CPU contre laquelle mesurer le seuil ×11 de l'expérience GPU.
+
 **Rappel de l'objet.**
 - On part d'un nuage $P$ de $n$ sites distincts sur la grille 1 mm (18 bits), et on pose $L_{K}(r)=\lbrace x : \vert P\cap \bar{B}(x,r)\vert \geq K\rbrace$.
 - La tour FULL est, pour chaque $K\leq K_{\max}$, l'arbre de fusion de $L_{K}(r)$ quand $r$ croît, plus les applications verticales $L_{K}\subseteq L_{K-1}$.
 - Elle se déduit du catalogue des boules minimales critiques. Une telle boule a un support $q\in\lbrace 2,3,4\rbrace$ et son centre dans l'intérieur relatif de l'enveloppe du support. Le catalogue retient celles qui vérifient $p+q_{\min}\leq K_{\max}+1$.
 
-**Le contrat.** Trames LiDAR sans sol de 30 à 60 k sites, K5 puis K10, objectif 1 s puis 100 ms. Machine : `g4-standard-48`, soit 24 cœurs physiques Zen 5 en SMT 2 et une RTX PRO 6000 sm_120.
+**Le contrat.** Trames LiDAR brutes entières de plusieurs séquences, K5 puis K10, objectif 1 s puis 100 ms ; premier régime de travail, et seul régime mesuré ici : trames sans sol de 30 à 60 k sites de la séquence 08. Machine : `g4-standard-48`, soit 24 cœurs physiques Zen 5 en SMT 2 et une RTX PRO 6000 sm_120.
 
 ## 1. Résumé exécutif
 
@@ -115,7 +164,7 @@ Ce port doit encore être justifié par une expérience de débit. Les cinq port
 **Ce que les mesures ont établi, au-delà des propositions.**
 
 1. **Les ancres longues dominent q3/q4.**
-   - Sur la trame entière 08/000200 à K5, les arêtes propriétaires de plus de 1,6 m portent environ 66 à 70 % du CPU q3/q4, pour 5,9 % des émissions.
+   - Sur la trame entière 08/000200 à K5 (sonde locale à un fil), les arêtes propriétaires de plus de 1,6 m portent environ 66 à 70 % des fenêtres CPU q3/q4 instrumentées, pour 5,9 % des émissions q3+q4.
    - La part qu'un traitement local ne peut pas prendre vaut 79,0 / 70,1 / 56,9 % pour h = 0,5 / 1 / 2 m. Les coupes 8k la sous-estiment de 25 à 34 points.
    - C'est là que se trouve la croissance superlinéaire, et aucune des six familles ne l'attaque directement.
 2. **FULL est le second verrou, et il est séquentiel.**
@@ -201,7 +250,7 @@ Le classement agrégé récompense la rigueur et le faible risque. Il ne dit pas
   - **Correction obligatoire** (vérification adverse, fixture `fx_cz`) : la règle de descente telle qu'écrite refuse là où le produit réussit.
   - Il faut une *règle 0*, appliquée à chaque état, y compris après un saut : si la clé de $D$ est au catalogue et que $p_{D}+q_{\min}-1\leq K\leq p_{D}+u_{D}$, la cible est $D$.
   - Avec cette règle, on démontre que le repli par échange d'intrus n'est jamais atteint sur un catalogue complet. La terminaison devient une descente stricte de niveau, et le repli devient un refus d'invariant, donc un détecteur d'omission.
-- **Lemme C** (image d'une naissance) : prouvé et confronté au code (`order_images`).
+- **Lemme C** (image d'une naissance) : confronté au code (`order_images`) ; la preuve doit d'abord exclure la borne basse $K=p+q_{\min}-1$, où une naissance est impossible (contrelecture A), avant tout statut `proved_here`.
 - **Propositions D** (image d'une fusion par une feuille) **et E** (tranches figées) : esquisses.
 - **Proposition F** (bijection du format compact) : **fausse telle qu'écrite**.
   - Dans un lot, une continuation contributive prend le rang du premier bloc de son groupe, et ce bloc peut être muet.
@@ -237,7 +286,7 @@ Le classement agrégé récompense la rigueur et le faible risque. Il ne dit pas
 **Expérience de falsification (E1, locale, sans GCP).** Champ : les neuf coupes emboîtées (s00, s01, s02 × 8k, 16k, 32k), à K5 et K10, plus les douze nuages dégénérés et les fixtures `fx_cz`, `lat5_3`, `lat5_1`, `fx_ico12`. Trois exigences :
 
 - égalité octet par octet de l'expansion avec la tour produit (`same_payload`, `tower_digest`), statuts compris ;
-- une porte par facette qui ne s'appuie pas sur la composante : le niveau de $\mathrm{MEB}(F)$ est inférieur à $\lambda$, la boule terminale figure au catalogue avec la fenêtre $K$ admise, le niveau de la cible est inférieur à $\lambda$, la racine est prise à $\lambda^{-}$. Les deux mutants v7 de clé partielle de semis doivent être tués ;
+- une porte par facette : le niveau de $\mathrm{MEB}(F)$ est inférieur à $\lambda$, la boule terminale figure au catalogue avec la fenêtre $K$ admise, le niveau de la cible est inférieur à $\lambda$, la racine est prise à $\lambda^{-}$, **et la racine pré-lot de chaque facette égale celle de la route produit** (ou chaque saut est certifié par le centre commun du lemme B) ; sans cette dernière condition, une cible de bon niveau dans une autre composante passe (contre-fixture de A, sites collinéaires 0, 1, 10, 11, ordre K2, à graver comme mutant). Les deux mutants v7 de clé partielle de semis doivent être tués ;
 - des relevés par $K$, **y compris l'ordre $K_{\max}$**, où aucun census n'est lu dans le catalogue (les nœuds n'y sont divisés que par 2,06). Index et énumération des facettes chronométrés ; phases FULL ventilées par la sonde v13 (`tower_phases_ms`, `c768e06a`).
 
 **Critères d'arrêt.**
@@ -375,7 +424,7 @@ La fixture « ancre de carré exactement $8h^{2}/3$ avec $r=h$ » est irréalisa
 - Chronométrer chaque arête avec `CLOCK_THREAD_CPUTIME_ID` coûte environ 1 µs d'appel système par fenêtre. Le coût réel d'une arête longue est de 1,8 à 4,3 µs.
 - Chaîne D3 idéale (partie locale gratuite et recouverte) : K5 2,8 à 5,5 s, K10 7,5 à 12,2 s, soit un gain de ×1,2 à ×1,5.
 
-**Falsification.** Elle est faite, et elle écarte D3 comme levier principal. Critère fixé d'avance : part globale supérieure à 50 % à h = 0,5 m sur au moins deux scènes. Résultat : dépassé sur 7 coupes sur 7 et sur la trame entière.
+**Falsification.** Elle est faite, et elle écarte D3 comme levier principal. Critère fixé d'avance : part globale supérieure à 50 % à h = 0,5 m sur au moins deux scènes. Résultat : dépassé sur 5 coupes sur 7 après correction d'horloge (les deux coupes 8k de 08/000200 valent 49,9 % à K5 et 48,4 % à K10) et sur la trame entière ; le critère « au moins deux scènes » reste satisfait.
 
 D3 ne se rouvre que si un certificat de bloc ramène la part des ancres de plus de 1,6 m sous 25 % du CPU q3/q4 sur les trois trames entières.
 
@@ -394,7 +443,7 @@ Ce qui survit :
   - la seule présentation centrée est $\lbrace x,y,z\rbrace$ ;
   - si $a$ porte l'identifiant minimal, personne n'émet la boule, et Euler ne la voit pas si $p=K_{\max}-2$.
 - **Coût.** Pas de gain CPU : 0,66 à 3,6 fois la v9 sur q3/q4, arêtes de face et filtres compris. Le débit GPU supposé est 4 à 15 fois au-dessus de ce que le dépôt a calibré.
-- **E0 déjà tranché par les données de D3.** Le travail des ancres de plus de 1,633 m pèse au moins 48,6 et 56,3 % à K10 sur deux trames entières (minorants du modèle ; 70,1 % mesurés à K5 sur 000200). C'est au-delà du seuil d'abandon de 35 %. La mesure directe de l'étape 3 de la feuille de route doit le confirmer.
+- **E0 déjà tranché par les données de D3.** Le travail des ancres de plus de 1,633 m pèse au moins 48,6 et 56,3 % à K10 sur deux trames entières (estimations du modèle `fullframe_model.py`, pas des minorants ; 70,1 % mesurés à K5 sur 000200 par une sonde locale). C'est au-delà du seuil d'abandon de 35 %. La mesure directe de l'étape 3 de la feuille de route doit le confirmer.
 - **Rôle retenu** : juge d'échantillon par site, exact, hors produit. Éventuellement, noyau à court rayon si les ancres longues sont un jour résolues ailleurs.
 
 **D2 (délétion locale, pavage rhomboïdal).**

@@ -1,0 +1,13 @@
+clusters_8000 n=8000 kmax=5 balls=510758 regular=510675 extended=83 top_within=318535 euler_visible_regular=351725 joint_blind_regular=133810 extended_top_over=39 digest=1cfeae024e44dc80
+clusters_8000 joint_blind p=3 q=3 count=109466
+clusters_8000 joint_blind p=4 q=2 count=24344
+clusters_8000 stratum top_within=0 regular=0 q=2 population=39 sampled=20 refused=7 complete_relative=13 full_ball_static_missing_weak_terminal=7
+clusters_8000 stratum top_within=0 regular=1 q=2 population=24344 sampled=20 refused=0 complete_relative=20
+clusters_8000 stratum top_within=0 regular=1 q=3 population=109466 sampled=20 refused=0 complete_relative=20
+clusters_8000 stratum top_within=0 regular=1 q=4 population=58374 sampled=20 refused=0 complete_relative=20
+clusters_8000 stratum top_within=1 regular=0 q=2 population=44 sampled=20 refused=20 full_ball_static_missing_weak_terminal=20
+clusters_8000 stratum top_within=1 regular=1 q=2 population=105099 sampled=20 refused=20 full_ball_static_missing_weak_terminal=20
+clusters_8000 stratum top_within=1 regular=1 q=3 population=172557 sampled=20 refused=20 full_ball_static_missing_weak_terminal=20
+clusters_8000 stratum top_within=1 regular=1 q=4 population=40835 sampled=20 refused=20 full_ball_static_missing_weak_terminal=20
+clusters_8000 claim_top_within_refused=holds_on_sample
+exit=0

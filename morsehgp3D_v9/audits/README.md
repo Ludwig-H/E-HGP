@@ -194,6 +194,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`c_audit_20260923/`](c_audit_20260923/README.md) | C | `f4480c02` 08:44 | pièces de l'audit C | vivant | sans objet |
 | [`c_euler_20260923/`](c_euler_20260923/README.md) | C | `cab281d8` 08:25 | testé, sondes | vivant | sans objet |
 | [`c_alternatives_20260923/`](c_alternatives_20260923/README.md) | C | 23/10:12 | propositions, jurys, réfutations, expériences | vivant | sans objet |
+| [`c_omission_20260923/`](c_omission_20260923/README.md) | C | 23/10:49 | shadow, échantillon 8k | vivant | sans objet |
 
 ## Sondes et sorties à la racine du dossier
 
@@ -275,11 +276,12 @@ en citant l'identifiant, avec « acceptée », « refusée (raison) » ou « dif
 | R-12 | Collisions, sondes et RSS de l'index de clés ; RSS par phase et par K promis pour R5 | B | CONTRE_AUDIT_B_INDEX_CLES_FULL, CONTRE_AUDIT_B_RESIDENCE_CHAINE |
 | R-13 | Erratum des plages R6 ; commentaire « Exact depth » de `q34_dead_lanes.cpp` | B | ETAT_COURANT.md |
 | R-14 | Seuil K−2 des arêtes q4 seules | A | SEUIL_SATURATION_ATLAS_PAR_VOIE_20260923.md |
-| R-15 | Tour FULL maigre D5 palier 1 avec ses trois corrections (règle 0, position du premier bloc de groupe dans les exceptions, racines CSR au-delà d'un petit tampon) ; porte E1 | C | AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md § 3.1 et 5 |
+| R-15 | Tour FULL maigre D5 par tranches (découpage de B) : d'abord la seule jointure graines/selles dans la résolution statique avec repli, puis saut au centre avec règle 0, phase A maigre, sortie compacte ; racines CSR, position du premier bloc de groupe ; queue FULL refondue poste par poste ; porte E1 | C | AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md § 3.1 et 5 |
 | R-16 | Sonde d'attribution du CPU q3/q4 par longueur d'ancre sur les trois trames, par lot | C | AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md § 5, étape 3 |
 | R-17 | Une seule session G4 GPU à seuils fixés d'avance, comparée à la base CPU réordonnancée | C | AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md § 3.3 et raccord R8 |
 | R-18 | Décisions de contrat à acter avec l'utilisateur : sortie compacte, digest hors chrono, expansion chronométrée à part ; 100 ms à reformuler | C | AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md § 1 et 5 |
 | R-19 | Porte `scale8000` : recenser par balayage brut **toutes** les boules à coquille étendue (86 à 8k), publier l'effectif échantillonné par famille, corriger le commentaire « pas deterministe » | C | canal, entrée de 10 h 12 UTC |
+| R-20 | Angle mort conjoint Euler + tour (fusions seules à Kmax : q2 à p=Kmax−1, q3 à p=Kmax−2) : à K5, exécution de contrôle Kmax+1 avec tour et restriction clé par clé ; à K10, domaine d'audit K11 ou juge d'échantillon dédié | C | c_omission_20260923/README.md, AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md § 3.1 |
 
 ## Conventions proposées (à adopter par tous)
 

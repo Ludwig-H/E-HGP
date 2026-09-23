@@ -1,0 +1,16 @@
+s02_k5_s8_w8_r0_nested_8000.u32le n=8000 kmax=7 balls=532339 regular=532176 extended=163 top_within=393988 euler_visible_regular=421191 joint_blind_regular=94927 extended_top_over=52 digest=a97088668bb96231
+s02_k5_s8_w8_r0_nested_8000.u32le joint_blind p=5 q=3 count=77298
+s02_k5_s8_w8_r0_nested_8000.u32le joint_blind p=6 q=2 count=17629
+s02_k5_s8_w8_r0_nested_8000.u32le stratum top_within=0 regular=0 q=2 population=51 sampled=10 refused=3 complete_relative=7 full_ball_static_missing_weak_terminal=3
+s02_k5_s8_w8_r0_nested_8000.u32le stratum top_within=0 regular=0 q=4 population=1 sampled=1 refused=1 full_ball_static_missing_weak_terminal=1
+s02_k5_s8_w8_r0_nested_8000.u32le stratum top_within=0 regular=1 q=2 population=17629 sampled=10 refused=0 complete_relative=10
+s02_k5_s8_w8_r0_nested_8000.u32le stratum top_within=0 regular=1 q=3 population=77298 sampled=10 refused=0 complete_relative=10
+s02_k5_s8_w8_r0_nested_8000.u32le stratum top_within=0 regular=1 q=4 population=43372 sampled=10 refused=0 complete_relative=10
+s02_k5_s8_w8_r0_nested_8000.u32le stratum top_within=1 regular=0 q=2 population=109 sampled=10 refused=10 full_ball_static_missing_weak_terminal=10
+s02_k5_s8_w8_r0_nested_8000.u32le stratum top_within=1 regular=0 q=3 population=1 sampled=1 refused=1 full_ball_static_missing_weak_terminal=1
+s02_k5_s8_w8_r0_nested_8000.u32le stratum top_within=1 regular=0 q=4 population=1 sampled=1 refused=1 full_ball_static_missing_weak_terminal=1
+s02_k5_s8_w8_r0_nested_8000.u32le stratum top_within=1 regular=1 q=2 population=111706 sampled=10 refused=10 full_ball_static_missing_weak_terminal=10
+s02_k5_s8_w8_r0_nested_8000.u32le stratum top_within=1 regular=1 q=3 population=218782 sampled=10 refused=10 full_ball_static_missing_weak_terminal=10
+s02_k5_s8_w8_r0_nested_8000.u32le stratum top_within=1 regular=1 q=4 population=63389 sampled=10 refused=10 full_ball_static_missing_weak_terminal=10
+s02_k5_s8_w8_r0_nested_8000.u32le claim_top_within_refused=holds_on_sample
+exit=0

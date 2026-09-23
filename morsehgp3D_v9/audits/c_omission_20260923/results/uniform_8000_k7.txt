@@ -1,0 +1,12 @@
+uniform_8000 n=8000 kmax=7 balls=1293712 regular=1293711 extended=1 top_within=900652 euler_visible_regular=1047986 joint_blind_regular=217989 extended_top_over=0 digest=9543c4dee2e07fbc
+uniform_8000 joint_blind p=5 q=3 count=190586
+uniform_8000 joint_blind p=6 q=2 count=27403
+uniform_8000 stratum top_within=0 regular=1 q=2 population=27403 sampled=10 refused=0 complete_relative=10
+uniform_8000 stratum top_within=0 regular=1 q=3 population=190586 sampled=10 refused=0 complete_relative=10
+uniform_8000 stratum top_within=0 regular=1 q=4 population=175071 sampled=10 refused=1 complete_relative=9 full_ball_final_component_count=1
+uniform_8000 stratum top_within=1 regular=0 q=2 population=1 sampled=1 refused=1 full_ball_static_missing_weak_terminal=1
+uniform_8000 stratum top_within=1 regular=1 q=2 population=171179 sampled=10 refused=10 full_ball_static_missing_weak_terminal=10
+uniform_8000 stratum top_within=1 regular=1 q=3 population=490346 sampled=10 refused=10 full_ball_static_missing_weak_terminal=10
+uniform_8000 stratum top_within=1 regular=1 q=4 population=239126 sampled=10 refused=10 full_ball_static_missing_weak_terminal=10
+uniform_8000 claim_top_within_refused=holds_on_sample
+exit=0
