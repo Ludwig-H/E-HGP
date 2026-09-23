@@ -65,16 +65,26 @@ La [tentative G4 1](../receipts/g4_gpu_s1_attempt1_20260923/README.md)
 a échoué à la configuration avant compilation (`CUDA_STANDARD 20`
 inconnu de CMake 3.22.1), sans calculer de masque GPU. Le correctif
 `6e0e43a0d` passe l'unité CUDA à C++17 et rapporte un build local
-avec cet outillage ; un passage positif G4 manque toujours.
+avec cet outillage. Le [reçu G4 S1](../receipts/g4_gpu_s1_20260923/README.md)
+publie ensuite **six passages CUDA exacts** sur les trois trames **sans sol**
+de la seule séquence 08, K5/K10 : masques égaux au CPU, visites égales,
+préflight positif et mutant causal détecté. Ses 166 fichiers et ses
+résumés ont été contre-vérifiés. Le seuil S1 fixé pour 08/000000/K5 est
+franchi : **63,8 ms**, transferts aller/retour compris, soit **18,5×** plus
+vite que le filtre CPU à 48 fils avec cache. Les autres K5 prennent
+43,4/64,2 ms ; les K10 prennent 103,0/70,3/106,8 ms, dont deux au-dessus
+de 100 ms. Ce sont les meilleurs temps de trois passes après contexte
+et allocations, et excluent garde, index/front, cœur/certificat,
+catalogue et FULL.
 L'[audit B du coût de garde](CONTRE_AUDIT_B_VALIDATION_INDEX_GPU_S1_20260923.md)
 montre `3Σ|plage(v)|` vérifications de rangs **hors** événements GPU ;
 l'API brute ne contrôle pas l'unicité XYZ déjà certifiée par le
 producteur. Le scan/probe gardent des buffers `O(R+P)` et le noyau
-de paires paie `O(P log R)` ; ni mémoire massive ni vitesse GPU ne
-sont acquises. Une certification linéaire réutilisable de l'index
-serait préférable avant le tuilage S2. Un prochain plan à **un seul
-cas** 08/000000/K5 limiterait la dépense SPOT ; le plan par défaut
-continue après ce cas s'il est exact mais plus lent que 100 ms.
+de paires paie `O(P log R)` ; la vitesse S1 est mesurée, mais la mémoire
+massive et le gain de la chaîne ne le sont pas. Une certification linéaire
+réutilisable de l'index et le tuilage S2 sont les prochaines étapes ;
+mesurer ensuite les temps de création et de consommation des requêtes
+dans la chaîne. Aucun contrat de tour G4 n'en découle.
 La [proposition S2](PROPOSITION_B_GPU_STREAMING_S2_20260923.md)
 sépare le tuilage borné sans nouveau rejet (S2a) du certificat
 bloc/ligne avant expansion (S2b), avec tests causaux et arrêt de la
