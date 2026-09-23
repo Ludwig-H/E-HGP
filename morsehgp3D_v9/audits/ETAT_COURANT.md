@@ -362,16 +362,32 @@ appariée.
    sont `--no-tower` avec digest zéro ; ils ne qualifient pas FULL. Ces
    signaux sont utiles, mais l'archive ne ferme pas encore
    les commandes, environnement et SHA des binaires du prototype : son
-   patch imprime une ligne `refine:` absente de la sortie publiée. Aucun
-   de ces chiffres n'est une ablation G4 de la tour FULL.
+   patch imprime une ligne `refine:` absente de la sortie publiée. Ces
+   chiffres restent distincts du nouveau reçu G4 apparié ci-dessous.
    Le brut R2 démontre une **proportion d'arêtes q4 muettes** supérieure à
-   91 %, pas une fraction de temps. Aucun gain de **tour LiDAR G4** ni
-   borne globale acquis.
-   Une session G4 v5 sur le snapshot publié `b4e480fc` a commencé : son
-   plan apparie `dead_lanes` on/off à K5/K10 sur les trois trames sans sol,
-   puis prévoit une répétition et W24. Elle ne devient un reçu qu'après
-   retour, fermeture ciblée et contrelecture des identités de masse, des
-   sorties FULL et du mur externe ; c'est toujours un backend CPU.
+   91 %, pas une fraction de temps. Le [reçu G4 R3
+   publié](../receipts/g4_tower_r3_20260923/README.md), snapshot
+   `b4e480fc`, apporte enfin six paires **FULL CPU** on/off sur les trois
+   trames sans sol de la séquence 08, K5/K10, W48. La
+   [contrelecture B des sorties brutes](CONTRE_AUDIT_B_G4_R3_20260923.md)
+   recoupe les 14 cas achevés, les masses, hashes, ordres, catalogue et
+   arrêt ciblé. Sans/avec certificat, la chaîne passe de
+   **12,93→8,89 / 10,12→6,19 / 19,71→10,93 s** à K5 et de
+   **48,33→35,56 / 36,29→25,96 / 62,99→37,75 s** à K10. Catalogues,
+   ordres et digests publiés sont égaux dans chaque paire ; c'est un gain
+   réel pour cet algorithme, pas une complétude exhaustive sur grande
+   trame. À K10 la tour aval prend désormais 59–67 % du mur, tandis que
+   le prouveur charge encore 4,15–9,28 milliards de formes selon la trame. Ces deux postes
+   appellent un port architecturé ; sur 000000/K10 les graines q3 passent
+   de 472,06 à 33,35 M et les tests ponctuels d'atlas de 17,947 à
+   1,468 G : la réduction aval est mesurée. L'unique comparaison W24/W48
+   montre peu de gain mural et plus de CPU/RSS à W48, sans isoler une
+   partie intrinsèquement séquentielle : contention, taille des lots et
+   déséquilibre restent des explications concurrentes. Aucune borne
+   sous-quadratique, ni le contrat de 1 s, ni le GPU ne sont acquis. Le reçu
+   reste `complete_relative` ; les lacunes v5 de réception demeurent pour un
+   futur reçu arbitraire et `host/lifecycle.txt` reste à `targeted_running`
+   malgré la preuve séparée d'arrêt `TERMINATED`.
 4. **Aval FULL, grandes coquilles et échelle** : les 12,0 M appels MEB
    de 000000/K10 font 1,065 milliard de tests de puissance ; un test
    exact de la paire la plus éloignée peut éliminer toutes les autres

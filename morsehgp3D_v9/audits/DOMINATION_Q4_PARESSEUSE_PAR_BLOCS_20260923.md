@@ -320,6 +320,47 @@ jamais un quota de recherche qui supprimerait un candidat exact. Séparer
 dans le ledger les tentatives pré-cover, leurs succès, les covers évités,
 les formes chargées et les replis de la voie actuelle.
 
+La [variante B par nœuds](PISTE_B_Q34_NOEUDS_AVANT_COVER_20260923.md)
+peut recycler les crédits du **filtre singleton** déjà payé. Une voie qui
+survit à `filter_q34_witnesses` possède moins de `T` sites universels
+crédités ; dans le code actuel, chaque nœud admis contribue jusqu'au
+seuil et la voie disparaît dès que ce seuil est atteint. Pour une voie
+survivante, tous ses nœuds admis contiennent donc au total au plus
+`T−1≤8` rangs de sites. L'interface pourrait retourner ces vrais rangs
+par voie, en plus du masque, sans grande frontière. Ils sont intérieurs
+à **chaque** centre du disque de cette voie et deviennent un compte initial
+pour toutes les cellules. Lorsqu'un nœud `Z` est crédité ensuite, retirer
+de `|Z|` les rangs déjà transférés qu'il contient : le compte est alors
+une union disjointe, même si les nœuds du filtre et de la seconde DFS se
+recouvrent. Ne pas transporter les crédits du filtre de rectangles comme
+s'il s'agissait d'une arête singleton ; capturer les rangs seulement lors
+du filtre de paire. Une voie désactivée n'a aucun crédit à transmettre.
+Cet amendement exige des compteurs de crédit initial par voie et un test
+qui tue le double compte ; il ne supprime pas à lui seul la seconde DFS.
+
+Le test de nœud de B peut aussi éviter l'énumération des 32 couples
+coin de boîte × coin de cellule. À un coin de cellule `(α,β)` en unités
+`Q=2^20`, poser `D_i=αA_i+βB_i`,
+`w_i^-=2Z_i^-−a_i−b_i` et `w_i^+=2Z_i^+−a_i−b_i`. Le maximum **exact**
+sur la boîte du polynôme du certificat est
+`−Q|b−a|² + Σ_i max(Q(w_i^-)²−2w_i^-D_i,
+Q(w_i^+)²−2w_i^+D_i)` : chaque terme est convexe en sa coordonnée et
+atteint son maximum à une borne. Quatre coins de cellule demandent ainsi
+24 évaluations axiales et quatre sommes, sans fabriquer huit sommets
+spatiaux. Promouvoir avant produits, et comparer strictement à zéro.
+Une feuille ponctuelle peut garder la forme affine à trois coefficients.
+
+Pour juger la version pré-cover, rapporter aussi le **masque conjoint**
+prouvé par arête. Sur une arête mixte, un seul succès laisse le cover
+nécessaire ; si le prouveur actuel est ensuite appelé pour la voie
+inconnue, il charge encore toutes les formes, tandis que le sauter peut
+perdre des rejets aval. Comparer ces deux replis et le chemin désactivé
+sur mêmes arêtes, puis mesurer seulement les covers et formes **vraiment**
+évités. Le filtre universel présent ne rend pas redondant le test
+**négatif** au milieu exact : une profondeur insuffisante à ce centre
+réfute une preuve sur tout le disque sans rien conclure sur la survie
+géométrique de la voie.
+
 ## Lentille de complétion : bonne spécialisation, pas un remplacement général
 
 Les deux complétions d'un tétraèdre q4 de propriétaire `ab` vérifient
