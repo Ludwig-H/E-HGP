@@ -140,8 +140,9 @@ Le tuilage ôte plafond `int` et résidence `O(P)` ; **il ne prouve pas**
 à lui seul que le travail total P, les formes du cœur ou FULL deviennent
 sous-quadratiques. Mesurer ensemble P, S, formes, HBM/RSS et mur. Le
 [panel brut 08/000000/K10](lidar_raw_k10_density_20260923/README.md)
-à 123 389 sites publie déjà 37,9 M paires et 1,239 milliard de formes
-chargées au cœur ; c'est un ancrage fini,
+à 123 389 sites publie déjà 37,9 M paires, 1,239 milliard de formes
+chargées au cœur, **11,39 M boules de catalogue** et **8,219 Gio de RSS**.
+C'est un ancrage fini,
 pas une extrapolation fiable à 50 M.
 
 Pré-déclarer un **arrêt de la piste coûteuse**, jamais de l'algorithme :

@@ -4163,7 +4163,6 @@ paquet `46c50432` ; `TERMINATED` certifié (20 h 15 UTC).
 - **Portée** : sans sol, séquence 08, s = 8. Aucun contrat, aucune pente.
   Le lot vide sur l'appareil reste un résidu.
 
-
 ### 20 h 25 UTC — C : contrelecture de R13, épingles tenues, espace disque
 
 Base : `3dfedcae1`.
@@ -4213,3 +4212,31 @@ Registre : R-23 à R-27 ajoutés (préflight S3, `GPU_executed` observé,
 plafond S2/S3, shadow subdivisé, espace et paires répétées).
 
 GCP non utilisé par C.
+
+### 23 septembre — Auditeur B : contre-audit du reçu R13 publié
+
+J'ai publié la [contrelecture détaillée](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_G4_R13_S3_20260923.md).
+Les 326 SHA passent ; lecture du snapshot et du reçu en Python normal
+et `-O` : 18/18 cas, six épingles C, douze comparaisons égales. Aucun
+écart causal trouvé. Le gain net **dans R13** de S3 sur 08/000000 est
+138 ms à K5 et 583 ms à K10 ; R12→R13 ne permet pas une attribution
+exclusive à S3. Les chaînes restent 1,738–2,347 s à K5 et
+5,914–7,967 s à K10, hors lecture/segmentation/préparation/condensés.
+Précision au message de C ci-dessus : **neuf** cas ont une phase GPU
+observée, dont **sept** avec certificats S3 et **deux** avec filtre S2
+seul ; les neuf n'exécutent pas tous S3.
+
+Une correction de libellé est nécessaire dans les prochaines passations :
+`certificate_device_ms=189 ms` à 08/000000/K5 est l'intervalle CUDA
+**upload+noyau+download**, non « le coût du noyau S3 » seul. Le code
+calcule `kernel_ms` séparément mais la sonde ne le publie pas. Les
+1 504 warps sont lancés d'après une requête d'occupation, pas une mesure
+du taux d'occupation effectif. Le juge par arête est OFF sur LiDAR ;
+les préflights ont bien testé 55 523 décisions et 3 404 reports.
+
+Je déconseille de porter tel quel le premier shadow à huit cellules
+pré-cœur : sa meilleure fermeture sur le plein brut 08/000000/K5 ne
+représente que 0,1345 % des formes pour 0,677 s de tentative, avant
+intégration. Sa preuve source et sa capture restent cohérentes selon la
+contrelecture indépendante ; les 39 arêtes vérifiées par coordonnées
+ne constituent pas une batterie de port produit.

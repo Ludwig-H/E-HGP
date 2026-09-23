@@ -227,6 +227,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`CONTRE_AUDIT_B_VENTILATION_SURVIVANTS_20260923.md`](CONTRE_AUDIT_B_VENTILATION_SURVIVANTS_20260923.md) | B | 23/soir | sonde CPU sans-sol : phases atlas/voies dominantes, 1,3 % non borné ; même zéro survivant ne suffit pas seul en R12 | diagnostic, pas G4 S3 | réponse D attendue |
 | [`CONTRELECTURE_CYCLES_SURVIVANTS_Q34_20260923.md`](CONTRELECTURE_CYCLES_SURVIVANTS_Q34_20260923.md) | A | 23/soir | `rest_cyc` recouvre le cœur ouvert ; TSC ventilé mesure le temps écoulé sous contention, pas les cycles CPU actifs | correction du diagnostic | réponse D attendue |
 | [`CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md`](CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md) | B | 23/soir | préflight S3 ; gardes d'entrée closes par 942, épingles de catalogue par 18d, classement GPU et compte de covers par 46c | pas de reçu G4 S3 ni porte CUDA du lot vide | réponse D |
+| [`CONTRE_AUDIT_B_G4_R13_S3_20260923.md`](CONTRE_AUDIT_B_G4_R13_S3_20260923.md) | B | 23/soir | reçu G4 S3 : 18 cas, six épingles, ablation interne et coût résiduel de tour ; temps device ≠ noyau seul | vivant, contrat non acquis | réponse D attendue |
 | [`s3_frontier_barrier_gate_20260923/`](s3_frontier_barrier_gate_20260923/README.md) | A | 23/soir | gate hôte causal du réemploi du frontier : ordre ancien/mutant WAW+WAR, correctif 545c à zéro ; headers épinglés | porte structurelle, pas preuve device | réponse D attendue |
 | [`CERTIFICAT_B_REDONDANCE_CELLULE_UNIQUE_20260923.md`](CERTIFICAT_B_REDONDANCE_CELLULE_UNIQUE_20260923.md) | B | 23/soir | preuve : boîte de centres entière redondante avec le citron S2 ; clipping réel ou gardes distincts par sous-cellule, shadow O(R+S) borné | math établi | réponse D attendue |
 | [`CERTIFICAT_B_NOEUDS_CORRELES_AVANT_COEUR_20260923.md`](CERTIFICAT_B_NOEUDS_CORRELES_AVANT_COEUR_20260923.md) | B | 23/soir | proposition prouvée : minorant corrélé par segment + majorant de boîte d'index, crédit de populations entières par sous-cellule ; recherche bornée, repli exact | rendement non mesuré | réponse D attendue |
@@ -245,7 +246,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`c_euler_20260923/`](c_euler_20260923/README.md) | C | `cab281d8` 08:25 | testé, sondes | vivant | sans objet |
 | [`c_alternatives_20260923/`](c_alternatives_20260923/README.md) | C | 23/10:12 | propositions, jurys, réfutations, expériences | vivant | sans objet |
 | [`c_omission_20260923/`](c_omission_20260923/README.md) | C | 23/10:49 | shadow, échantillons 8k et juge q2 sur trame sans sol entière | vivant | sans objet |
-| [`c_catalogue_digest_20260923/`](c_catalogue_digest_20260923/README.md) | C | 23/19:35 | condensé v18 du catalogue : contrôle sur les trames R12, six épingles R13, porte portée par 18d | vivant, aucun reçu G4 R13 | reprise D |
+| [`c_catalogue_digest_20260923/`](c_catalogue_digest_20260923/README.md) | C | 23/19:35 | condensé v18 du catalogue : contrôle sur les trames R12, six épingles R13, porte portée par 18d | vivant, six épingles retrouvées dans R13 | reprise D |
 
 ## Sondes et sorties à la racine du dossier
 

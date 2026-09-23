@@ -291,6 +291,24 @@ L'[addendum de flux S2/S3](PROPOSITION_B_GPU_STREAMING_S2_20260923.md)
 port à appel entier. Sans tuilage exact, cette représentation n'a pas
 de voie vers plusieurs dizaines de millions de sites, indépendamment
 de la question mathématique de croissance globale.
+Le [reçu R13 S3 sur G4](../receipts/g4_tower_r13_20260923/README.md)
+est **maintenant publié** ; les phrases précédentes « aucun reçu R13 »
+décrivent les contrôles antérieurs au lancement, pas l'état courant.
+La [contrelecture B](CONTRE_AUDIT_B_G4_R13_S3_20260923.md) vérifie les
+326 empreintes et rejoue le lecteur normal/`-O` : 18/18 cas achevés,
+six épingles CPU tour/catalogue et 12 comparaisons égales. Le préflight
+à 1 500 sites juge 55 523 décisions GPU, dont 3 404 reportées dans
+la variante à ardoise 64 ; le juge par arête est désactivé sur LiDAR.
+Sur trois trames **sans sol de la seule séquence 08**, s8/W48, la chaîne
+S2+S3 GPU est à **1,738–2,347 s à K5** et **5,914–7,967 s à K10**.
+L'ablation interne R13 de 08/000000 donne un gain net S3 de 138 ms à
+K5 et 583 ms à K10, mais 611–750 k covers sont encore reconstruits
+côté CPU à K5, 1,258–1,555 M à K10, puis la tour prend 0,584–0,784 s
+et 2,260–3,039 s respectivement. Le `certificate_device_ms` publié
+inclut transferts et noyau, contrairement au libellé « coût du noyau »
+du reçu ; le temps du noyau seul n'est pas publié. Une seule mesure par
+cas, aucun p95 ; aucun contrat brut multi-séquence ni sous-quadraticité
+globale ne sont qualifiés. Le G4 SPOT a été arrêté et relu `TERMINATED`.
 La [preuve B de redondance d'une seule cellule de
 centres](CERTIFICAT_B_REDONDANCE_CELLULE_UNIQUE_20260923.md) affine la
 piste de rejet **avant** le cœur : si la cellule couvre le disque
