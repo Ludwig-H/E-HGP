@@ -1,10 +1,10 @@
 # Contre-audit B — noyau diamétral q3/q4 (chantier du 23 septembre)
 
-Statut : **code publié dans `a78664d4`, performance non qualifiée, hors
-registre**. Lecture d'abord du diff au-dessus de `84c74a5e`, puis du
-commit produit qui l'a intégré sur `main`. Cette note ne transforme ni R5
-ni le harnais local en reçu du nouveau levier. Le protocole de réception
-v8 en cours après ce commit est un chantier distinct.
+Statut : **code publié dans `a78664d4`, correctifs `028067a3` en cours
+d'intégration, performance non qualifiée, hors registre**. Lecture
+d'abord du diff au-dessus de `84c74a5e`, puis des commits produit.
+Cette note ne transforme ni R5 ni le harnais local en reçu du nouveau
+levier. La réception v8 est auditée séparément.
 
 ## Ce qui est mathématiquement sûr
 
@@ -25,8 +25,9 @@ Cette preuve suppose le contrat actuel u18/1 mm et les bornes numériques
 du prouveur. Elle ne qualifie pas le float32 ni une nouvelle largeur de
 coordonnées. Le type public `Q34EdgeCoverPtr` est commun au sous-cover et au
 cover complet : un futur branchement du sous-cover vers le census/atlas
-serait incorrect. Un type restreint ou un garde de consommateur rendrait
-l'invariant moins fragile. **Aucune divergence de sortie n'a été observée**
+serait incorrect. `028067a3` ajoute un marqueur `complete()` et un refus
+à l'entrée des principaux consommateurs ; voir toutefois le cas K1/2
+ci-dessous. **Aucune divergence de sortie n'a été observée**
 sur les petits oracles à ce stade.
 
 ## Coût : le verrou principal n'est pas touché
@@ -52,6 +53,13 @@ déplacer des visites dans `core_cover` non visible. Publier au minimum
 CPU/mur/RSS de la chaîne complète. La durée q34 englobe bien les deux
 chemins ; un ledger incomplet n'est pas une erreur de temps, mais empêche
 d'expliquer et d'extrapoler ce temps.
+
+`028067a3` raccorde ensuite ces **six** compteurs à la sonde v8
+(`core_cover_node_visits/bound_tests/point_tests` et
+`dead_core_outside/deep/failed_cells`) avec des identités de réception.
+La lacune décrite au paragraphe précédent concerne donc la **sonde v7**,
+pas le nouveau schéma. Les nouveaux comptes doivent encore être reçus
+sur LiDAR entier et comparés au coût du cover évité.
 
 Le `PROVENANCE.md` produit en cours mentionne un harnais local sur
 08/000000 : 1,14 M/2,04 M arêtes fermées, CPU q34 −18 % (K5) et −16,5 %
@@ -132,6 +140,18 @@ résultat de performance. Le cœur n'est pas exercé
 spécifiquement à K1/2 ou avec filtre témoin désactivé dans la grande
 porte indexée ; ces cas restent utiles pour tuer des mutations de
 contrôle de voie et de contact.
+
+Le garde de consommateur ajouté dans `028067a3` a encore un trou de
+**contrat d'API** : les deux surcharges directes
+`run_q4_local_edge_candidates(Q34EdgeCoverPtr, K, ...)` de
+`q4_local.cpp` rendent un travail vide à `K<3` **avant** d'appeler
+`Q4LocalAtlas::make`, seul endroit qui refuse le cœur. Un cœur diamétral
+passé directement à K1 ou K2 est donc accepté sans exception, alors que
+la documentation annonce que *tout* consommateur hors prouveur le refuse.
+Cela n'émet aucune q4 incorrecte, puisque la voie est inactive ; déplacer
+`require_complete_q34_cover` avant le retour précoce dans les deux
+surcharges et tester K1/2 dans la porte de cover. Les huit refus de la
+porte actuelle ne portent que sur K5.
 
 Avant de qualifier le défaut ON ou de lancer une campagne G4 coûteuse,
 demander des paires

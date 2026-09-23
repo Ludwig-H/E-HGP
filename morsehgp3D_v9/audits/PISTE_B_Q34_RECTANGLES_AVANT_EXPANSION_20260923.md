@@ -283,3 +283,15 @@ par cellule de centre. Q2 et toute voie q3/q4 non prouvée restent
 inchangées. Cette contrelecture ne donne **aucun** majorant du nombre
 de cellules, de nœuds Z inspectés ou de la masse résiduelle ; tester
 ces trois grandeurs est la condition d'une revendication sous-quadratique.
+
+Contre-fixture simple à l'addition **entre** cellules (dans un plan du
+cube u18, puis translation entière si besoin) : `a=(0,0,0)`,
+`b=(8,0,0)`, `x±=(4,±5,0)` et `z±=(4,±4,0)`. Les triangles `abx±`
+sont strictement aigus, `ab` leur plus longue arête ; leurs centres
+sont `(4,±0,9,0)`. La boule `abx+` contient strictement `z+` mais pas
+`z−` ni `x−`, et la boule `abx−` contient strictement `z−` mais pas
+`z+` ni `x+`. Chacune a donc profondeur 1. À K3, additionner le témoin
+de la cellule des centres positifs à celui de la cellule négative
+inventerait 2 intérieurs et supprimerait à tort **les deux** supports.
+L'écriture avec coordonnées négatives sert la lecture ; ajouter 5 à
+toutes les ordonnées donne une fixture entière non négative u18.

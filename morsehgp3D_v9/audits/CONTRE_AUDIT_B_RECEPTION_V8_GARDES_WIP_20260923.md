@@ -1,7 +1,8 @@
 # Contre-audit B — réception v8, preuve de garde archivée
 
-23 septembre 2026. **Chantier non commité** au-dessus du produit
-`a78664d4` lors de cette lecture ; aucun appel GCP. Le worker/probe
+23 septembre 2026. D'abord **chantier non commité** au-dessus du produit
+`a78664d4`, puis publié sous `028067a3` dans le worktree du développeur ;
+aucun appel GCP. Le worker/probe
 préparent le schéma v8 pour publier le travail du noyau diamétral et
 resserrer les identités de catalogue, de voies et de cache demandées dans
 [l'audit v6](RECEPTION_V6_IDENTITES_MANQUANTES_20260923.md). Les selftests
@@ -60,3 +61,27 @@ Ajouter les deux mutations isolées aux selftests normal/`-O` sur un
 **commit atomique** protocole+sonde, puis relire le snapshot avant tout
 nouveau reçu G4. Les nouvelles identités de travail q3/q4 doivent être
 jugées séparément ; cette note n'en tire pas un défaut géométrique.
+
+## Contrôle du commit `028067a3` : porte protocolaire rouge
+
+Le commit publie des compteurs supplémentaires du cœur, des identités
+plus fortes et se présente comme une réception de garde « fail-closed ».
+Il ne transmet toujours **pas** la marque et le calendrier exacts de
+l'hôte à `validate_received` : la reproduction ci-dessus reste applicable.
+Un second rejeu **du code commité** sur la session factice nominale
+retourne `completed` en baseline et après mutation isolée de la date
+archivée en `2099-01-01T00:00:00Z`, puis après remplacement isolé du
+calendrier archivé par `generation+600 s` (calendrier hôte observé
+environ `generation+2430 s`). Il s'agit d'un écart effectif du lecteur,
+pas seulement d'une lacune stylistique de tests.
+En outre, le selftest complet du commit ne passe pas : exécution
+indépendante `python3 -B gcp-migration/tower_selftest_v9.py`, **20 tests
+passés, 1 erreur** en 46,656 s. `test_nominal_session_completed` appelle
+`rewrite_guard` à sa ligne 868, mais cette fonction a été définie à la
+ligne 70 **à l'intérieur de la chaîne brute `FAKE_PROBE`** (ouverte ligne
+49), et n'existe donc pas dans l'espace de noms du module de tests.
+L'appel lève `NameError` avant de juger les huit nouvelles mutations de
+garde. Le `-L gate` CTest C++ annoncé vert ne remplace pas ce selftest
+Python. Déplacer la fonction hors de `FAKE_PROBE`, tuer les mutations
+exactes date future/calendrier plausible, puis repasser normal **et**
+`python3 -O` sur le même commit figé avant R6.
