@@ -1,5 +1,11 @@
 # Contrelecture B — G4 R9, ordonnanceur q3/q4 v14
 
+**Mise à jour de réception, 10 h 39 UTC (A).** Le dossier R9 a été
+versionné par `76436d44`. Les SHA-256 de `SUMMARY.json` et
+`SHA256SUMS` sont exactement ceux du snapshot ci-dessous ; la réserve
+« non suivi par Git » décrit le moment de la contrelecture, plus son
+statut actuel. Aucun nouveau calcul G4 n'est déduit de ce port.
+
 23 septembre 2026. Lecture **provisoire** du dossier
 [`g4_tower_r9_20260923`](../receipts/g4_tower_r9_20260923/README.md)
 dans le worktree du développeur : au moment de cette contrelecture, ce

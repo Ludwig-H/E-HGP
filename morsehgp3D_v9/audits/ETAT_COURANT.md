@@ -4,15 +4,18 @@
 8k **`a08378da`**, lecteur LiDAR **`50646eef`** puis **`1f048aae`**,
 lecteur G4 **`515b3666`** puis **`1f048aae`**.
 La sonde v14 **`67fce4e9`** et le correctif de réception/masse
-**`fe1142b5`** sont publiés depuis. Le reçu G4 R9 v14 est **relu
-provisoirement**, mais son dossier est encore non suivi par Git à la
-lecture B ; voir la [note R9](CONTRE_AUDIT_B_G4_R9_ORDONNANCEMENT_20260923.md).
-Un [contre-audit B du WIP v15 de recouvrement FULL](CONTRE_AUDIT_B_WIP_TOUR_V15_RECOUVREMENT_20260923.md)
+**`fe1142b5`** sont publiés. Le [reçu G4 R9](../receipts/g4_tower_r9_20260923/README.md),
+exécuté avec `fe1142b5`, est désormais versionné par **`76436d44`** ;
+les deux empreintes relevées par la [contrelecture B](CONTRE_AUDIT_B_G4_R9_ORDONNANCEMENT_20260923.md)
+avant publication sont inchangées. Le même commit publie la sonde v15,
+sans reçu G4 v15. Un [contre-audit B du WIP v15 de recouvrement FULL](CONTRE_AUDIT_B_WIP_TOUR_V15_RECOUVREMENT_20260923.md)
 relève une borne de durée du lecteur qui peut rejeter une sortie valide :
 K1 démarre avant l'horloge statique, alors que `lots_by_k` est borné
-par `static+lots`. La propriété de données paraît plausible en lecture
-statique, mais égalité ON/OFF, pannes et TSan de cette voie manquent.
-Ce WIP postérieur à `fe1142b5` ne qualifie aucun reçu R8/R9.
+par `static+lots`. Le port **`76436d44`** ajoute une porte de priorité
+des pannes sur les deux voies et un digest ON/OFF identique sur
+16k/K10 local ; l'égalité exhaustive du payload, un stress TSan propre
+au recouvrement et un reçu G4 v15 restent ouverts. Le défaut de durée
+du WIP reste dans ce port ; aucun reçu R8/R9 ne mesure son recouvrement.
 La [contrelecture complémentaire](CONTRELEC_V15_CHRONO_ORDRE_20260923.md)
 reproduit sur une sortie v15 locale le défaut inverse : en gonflant un
 seul `lots_by_k` à K5, le lecteur accepte **65,379 ms** de phases
@@ -20,8 +23,8 @@ nécessairement disjointes pour **60,718 ms** de mur FULL. Une borne par
 ordre doit accompagner l'horloge commune proposée par B avant tout
 reçu G4 v15.
 Les mesures de densité restent celles du binaire v12 **`4530644b`** ;
-aucune nouvelle série LiDAR v13 n'en découle. Le dernier reçu G4
-**publié** [R8](../receipts/g4_tower_r8_20260923/README.md) exécute
+aucune nouvelle série LiDAR v13 n'en découle. Le reçu G4
+[R8](../receipts/g4_tower_r8_20260923/README.md) exécute
 `515b3666` sur CPU G4 et a sa
 [contrelecture indépendante](CONTRE_AUDIT_B_G4_R8_20260923.md). Le
 [reçu G4 R7b](../receipts/g4_tower_r7b_20260923/README.md) exécute
@@ -329,8 +332,8 @@ des portes bornées d'exactitude nettement renforcées : plans mass-first
 contre front oracle, candidats q3/q4 normalisés contre oracle rationnel.
 Au moment de cette première contrelecture, le gain local annoncé sur
 le plus long job et l'attente ne possédait **aucun reçu brut v14**.
-La [contrelecture provisoire R9](CONTRE_AUDIT_B_G4_R9_ORDONNANCEMENT_20260923.md)
-apporte maintenant un reçu G4 CPU apparié, non encore figé dans Git :
+La [contrelecture R9](CONTRE_AUDIT_B_G4_R9_ORDONNANCEMENT_20260923.md)
+porte maintenant sur un reçu G4 CPU apparié figé dans Git :
 24/24 `complete_relative`, 18 comparaisons égales, validateur épinglé
 normal/`-O` positif. Avec les **deux** leviers ON, K5 passe de
 3,69–6,30 s à **2,80–4,07 s** selon la trame/répétition ; K10 de
@@ -338,6 +341,13 @@ normal/`-O` positif. Avec les **deux** leviers ON, K5 passe de
 35–49 % à moins de 1 %, mais la phase reste 1,66–2,39 s. À travail
 CPU inchangé, son mur n'est plus que 1,02–1,03 fois `cpu_sum/48` à K5 :
 réduire le **travail** ou changer de backend devient la priorité.
+Le README du reçu devrait encore préciser que ces trois entrées sont
+**sans sol, à 1 mm, toutes de la séquence 08**, et que « chaîne » exclut
+le digest (meilleur cas 2,799 s de chaîne, **3,021 s de mur externe**).
+Ses q3/q4, attente et plus long job tabulés sont ceux de la répétition
+0, tandis que les colonnes chaîne portent 0/1. `q2+fusion+recensement`
+vaut **0,884–1,410 s à K10 ON**, au-delà de la borne « 0,4–0,8 s » du
+README ; Euler `holds` ne contrôle que K1..3 à K5 et K1..8 à K10.
 Les nouveaux chronos ne couvrent pas les plages publiées et les deux leviers
 ne sont pas séparés. Une matrice 2×2 appariée sur une trame difficile
 avec q3/q4 et chaîne complets est la prochaine porte d'attribution.
