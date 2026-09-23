@@ -1,0 +1,2 @@
+duplicate_replacement=refused survivors=3->3 drop_rect=1 copy_rect=0 reason=mhgp9 gen batched q34 filter returned a duplicate, unordered or widened pair
+foreign_pair=refused survivors=3 expanded=3->3 b_rank=2->1 reason=mhgp9 gen batched q34 filter returned a pair outside its surviving rectangles

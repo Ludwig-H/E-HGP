@@ -114,6 +114,19 @@ Release porte sur le batch CPU du snapshot avant publication, avec mutation
 injectée ; aucune erreur spontanée CUDA ni tour FULL n'en est déduite.
 Il faut contrôler l'ordinal des paires et qualifier séparément leurs
 masques géométriques.
+Le garde structurel publié dans `2059189d` ferme ce contre-exemple local :
+un [rejeu indépendant](q34_batch_duplicate_gate_20260923/README.md) à trois
+sites/K3 refuse le doublon à cardinalité et comptes inchangés, puis la
+paire hors rectangle, par les motifs propres au nouveau contrôle. Son test
+intégré « duplicate » modifie toutefois `expanded_pairs` ; l'ancien garde
+de masse le refuse avant le nouveau parcours. Le remplacer par une
+mutation à comptes constants et vérifier le motif du refus.
+La [porte de réception partielle](s2_partial_twin_20260923/README.md)
+rejoue le protocole `1f5dede11` sur faux G4 : cas GPU LiDAR 00/K5 terminé,
+jumeau moteur coupé par le budget, `cross_worker_comparisons=[]` ; le
+lecteur accepte néanmoins `partial`, `GPU_executed=true`. Ce statut ne
+qualifie aucun contrat, mais toute mesure GPU présentée comme vérifiée
+doit porter son jumeau LiDAR achevé et égal, ou être marquée `unpaired`.
 Le [shadow des rectangles](Q34_BLOCS_LIDAR_SHADOW_20260923.md) donne un
 critère d'ordonnancement S2a concret sur 08/000000/s8 : à K5, **1 081 123
 des 1 128 166** rectangles ouverts ont moins de 16 paires, mais ne portent

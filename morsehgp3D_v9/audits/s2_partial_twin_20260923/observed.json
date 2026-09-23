@@ -1,0 +1,31 @@
+{
+  "FULL_executed": true,
+  "GPU_executed": true,
+  "backend": "cuda_g4",
+  "case_outcomes": [
+    "complete_relative",
+    "killed_budget",
+    "skipped_budget",
+    "skipped_budget",
+    "skipped_budget",
+    "skipped_budget",
+    "skipped_budget",
+    "skipped_budget",
+    "skipped_budget",
+    "skipped_budget",
+    "skipped_budget",
+    "skipped_budget",
+    "skipped_budget",
+    "skipped_budget"
+  ],
+  "completed_case_indices": [
+    0
+  ],
+  "cross_worker_comparisons": [],
+  "fake_g4_only": true,
+  "host_exit_code": 0,
+  "host_status": "partial",
+  "source_commit": "1f5dede11d841e2d726f643ea2b8fbe55fbba9aa",
+  "targeted_shutdown_certified": true,
+  "worker_status": "partial"
+}
