@@ -48,7 +48,7 @@ PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
 PLAN_SCHEMA = 'mhgp9_tower_plan_v6'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v17'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v18'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -98,19 +98,34 @@ OUTCOMES = ('complete_relative', 'explicit_refusal', 'killed_case_cap', 'killed_
 CASE_KEYS = frozenset({'scene', 'file', 'n', 'k', 's', 'workers', 'static_threads', 'levers', 'repeat'})
 LEVER_NAMES = ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_witness_cache', 'q34_dead_core',
                'tower_meb_proposal', 'q34_jobs_by_mass', 'q34_fine_jobs', 'tower_overlap_static',
-               'q2_jobs_by_mass', 'q34_batch_filter', 'q34_gpu_filter')
+               'q2_jobs_by_mass', 'q34_batch_filter', 'q34_gpu_filter', 'q34_batch_certificates',
+               'q34_gpu_certificates')
 # v17 (S2) : filtre q3/q4 par lots, puis sur GPU. Le build G4 active CUDA
 # (nvcc et nvidia-smi existants, aucune installation) ; l'appareil attendu :
 DEVICE_NAME = 'NVIDIA RTX PRO 6000 Blackwell Server Edition'
 CUDA_PATHS = ('/usr/local/cuda/bin/nvcc', '/usr/local/cuda-12.9/bin/nvcc')
-BATCH_KEYS = frozenset({'used', 'backend', 'front_ms', 'filter_ms', 'edges_ms', 'device_ms', 'rectangles', 'survivors'})
+BATCH_KEYS = frozenset({'used', 'backend', 'front_ms', 'filter_ms', 'edges_ms', 'device_ms', 'rectangles', 'survivors',
+                        'certificate_backend', 'certificate_ms', 'certificate_device_ms', 'deferred'})
+# v18 (S3) : certificats de voie morte par lots (CPU ou GPU). Leur travail ne
+# depend que des leviers q34_dead_lanes/q34_dead_core : deux cas du meme
+# (fichier, K, s) avec ces leviers egaux doivent avoir ces compteurs egaux.
+CERTIFICATE_WORK_KEYS = ('expanded_pairs', 'witness_rejected_pairs', 'cover_builds', 'cover_sites',
+                         'cover_node_visits', 'q3_edges', 'q4_edges', 'both_edges', 'dead_loads', 'dead_form_sites',
+                         'dead_cells', 'dead_outside_cells', 'dead_deep_cells', 'dead_failed_cells',
+                         'dead_uniform_tests', 'dead_point_tests', 'dead_q3_proved', 'dead_q3_open',
+                         'dead_q4_proved', 'dead_q4_open', 'core_builds', 'core_sites', 'core_closed_edges',
+                         'dead_core_loads', 'dead_core_form_sites', 'dead_core_cells', 'dead_core_uniform_tests',
+                         'dead_core_point_tests', 'dead_core_q3_proved', 'dead_core_q3_open', 'dead_core_q4_proved',
+                         'dead_core_q4_open', 'core_cover_node_visits', 'core_cover_bound_tests',
+                         'core_cover_point_tests', 'dead_core_outside_cells', 'dead_core_deep_cells',
+                         'dead_core_failed_cells')
 TOP_KEYS = frozenset({'schema', 'status', 'reason', 'input', 'options', 'times_ms', 'chain_cpu_s', 'generator',
                       'ledger', 'catalogue', 'q34_occupancy', 'q34_batch', 'tower_phases_ms', 'tower_work', 'orders',
-                      'tower_digest', 'peak_rss_kb'})
+                      'tower_digest', 'catalogue_digest', 'peak_rss_kb'})
 INPUT_KEYS = frozenset({'format', 'grid', 'sites', 'hash'})
 OPTION_KEYS = frozenset({'K', 'K_effective', 's', 'workers', 'tower_static_threads', 'run_tower', 'levers'})
 TIME_KEYS = frozenset({'read', 'prepare', 'gen_index', 'q2', 'q34', 'merge', 'tower_index', 'census', 'tower',
-                       'chain_total', 'digest'})
+                       'chain_total', 'digest', 'catalogue_digest'})
 ORDER_KEYS = frozenset({'K', 'nodes', 'births', 'merges', 'parents', 'contributions'})
 # tower_work : compteurs entiers, sauf ces deux champs types du noyau MEB
 # (libelle de comptabilite epingle, histogramme des tailles de supports).
@@ -235,7 +250,7 @@ def validate_sources(read_bytes):
     probe = read_bytes(PROBE_SOURCE)
     need(b'mhgp9_product_executable(' + PROBE_TARGET.encode() + b' bench/tower_probe.cpp)' in cmake,
          'CMake target mhgp9_tower_probe absent')
-    need(all(token in probe for token in (PROBE_SCHEMA.encode(), b'"--s="', b'"--static="', b'"--grid="',
+    need(all(token in probe for token in (PROBE_SCHEMA.encode(), b'"--s="', b'"--static="', b'"--grid="', b'"--catalogue-digest"',
                                           b'"--lever="', *(b'"' + name.encode() + b'"' for name in LEVER_NAMES))),
          'tower probe schema/CLI differs from the v9 protocol')
 
@@ -246,20 +261,28 @@ def _integer(value, low, high):
 
 def _levers(value):
     # Le noyau diametral n'existe que sous le certificat de voie morte ; le
-    # filtre GPU n'existe que sur le chemin par lots.
+    # filtre GPU n'existe que sur le chemin par lots ; les certificats par lots
+    # exigent le chemin par lots et le certificat, leur GPU les exige.
     return (type(value) is dict and set(value) == set(LEVER_NAMES) and
             all(type(item) is bool for item in value.values()) and
             (value['q34_dead_lanes'] or not value['q34_dead_core']) and
-            (value['q34_batch_filter'] or not value['q34_gpu_filter']))
+            (value['q34_batch_filter'] or not value['q34_gpu_filter']) and
+            ((value['q34_batch_filter'] and value['q34_dead_lanes']) or not value['q34_batch_certificates']) and
+            (value['q34_batch_certificates'] or not value['q34_gpu_certificates']))
+
+
+def uses_device(levers):
+    return levers['q34_gpu_filter'] or levers['q34_gpu_certificates']
 
 
 def plan_uses_gpu(cases):
-    return any(case['levers']['q34_gpu_filter'] for case in cases)
+    return any(uses_device(case['levers']) for case in cases)
 
 
 def engine_levers(levers):
-    """The same levers on the engine path (no batch filter, no device)."""
-    return dict(levers, q34_batch_filter=False, q34_gpu_filter=False)
+    """The same levers on the engine path (no batch call, no device)."""
+    return dict(levers, q34_batch_filter=False, q34_gpu_filter=False, q34_batch_certificates=False,
+                q34_gpu_certificates=False)
 
 
 def lever_arguments(case):
@@ -374,12 +397,12 @@ def boot_epoch():
 def probe_command(build, root, case):
     return [str(build / PROBE_TARGET), str(root / case['file']), str(case['k']), str(case['workers']),
             '--s=' + str(case['s']), '--static=' + str(case['static_threads']), '--grid=1mm',
-            *lever_arguments(case)]
+            '--catalogue-digest', *lever_arguments(case)]
 
 
 def expected_probe_tail(case):
     return [str(case['k']), str(case['workers']), '--s=' + str(case['s']),
-            '--static=' + str(case['static_threads']), '--grid=1mm', *lever_arguments(case)]
+            '--static=' + str(case['static_threads']), '--grid=1mm', '--catalogue-digest', *lever_arguments(case)]
 
 
 def _count(value):
@@ -454,25 +477,38 @@ def validate_euler(value, case):
 
 
 def validate_batch(value, case):
-    """Section q34_batch (v17) : phases du chemin par lots, a zero sur le chemin moteur."""
+    """Section q34_batch (v18) : phases du chemin par lots, a zero sur le chemin moteur."""
     batch, levers = value['q34_batch'], case['levers']
-    times = ('front_ms', 'filter_ms', 'edges_ms', 'device_ms')
+    times = ('front_ms', 'filter_ms', 'edges_ms', 'device_ms', 'certificate_ms', 'certificate_device_ms')
     need(type(batch) is dict and set(batch) == BATCH_KEYS and type(batch['used']) is bool and
-         type(batch['backend']) is str and all(_number(batch[key]) for key in times) and
-         _count(batch['rectangles']) and _count(batch['survivors']), 'probe q34_batch fields')
+         type(batch['backend']) is str and type(batch['certificate_backend']) is str and
+         all(_number(batch[key]) for key in times) and _count(batch['rectangles']) and
+         _count(batch['survivors']) and _count(batch['deferred']), 'probe q34_batch fields')
     if value['status'] != 'complete_relative':
         return
     ledger = value['ledger']
     if not levers['q34_batch_filter']:
-        need(batch['used'] is False and batch['backend'] == '' and all(batch[key] == 0 for key in times) and
-             batch['rectangles'] == 0 and batch['survivors'] == 0, 'q34_batch filled on the engine path')
+        need(batch['used'] is False and batch['backend'] == '' and batch['certificate_backend'] == '' and
+             all(batch[key] == 0 for key in times) and batch['rectangles'] == 0 and batch['survivors'] == 0 and
+             batch['deferred'] == 0, 'q34_batch filled on the engine path')
         return
+    certificates, gpu_certificates = levers['q34_batch_certificates'], levers['q34_gpu_certificates']
+    if certificates:
+        need(batch['certificate_backend'] == (DEVICE_NAME if gpu_certificates else 'cpu') and
+             (batch['certificate_device_ms'] > 0) == gpu_certificates and
+             batch['certificate_device_ms'] <= batch['certificate_ms'] + 0.05 and
+             batch['deferred'] <= batch['survivors'] and (gpu_certificates or batch['deferred'] == 0),
+             'q34_batch certificate backend/device time/deferred')
+    else:
+        need(batch['certificate_backend'] == '' and batch['certificate_ms'] == 0 and
+             batch['certificate_device_ms'] == 0 and batch['deferred'] == 0, 'q34_batch certificates without the lever')
     gpu = levers['q34_gpu_filter']
     need(batch['used'] is True and batch['backend'] == (DEVICE_NAME if gpu else 'cpu') and
          (batch['device_ms'] > 0) == gpu, 'q34_batch backend/device time')
     need(batch['rectangles'] == ledger['q34_input_rectangles'] and
          batch['survivors'] == ledger['expanded_pairs'] - ledger['witness_rejected_pairs'] and
-         batch['front_ms'] + batch['filter_ms'] + batch['edges_ms'] <= value['times_ms']['q34'] + 0.05 and
+         batch['front_ms'] + batch['filter_ms'] + batch['certificate_ms'] + batch['edges_ms'] <=
+         value['times_ms']['q34'] + 0.05 and
          batch['device_ms'] <= batch['filter_ms'] + 0.05, 'q34_batch rectangles/survivors/phase times')
 
 
@@ -654,6 +690,7 @@ def validate_preflight_work(value, levers):
          (not levers['q34_witness_cache'] or levers['q34_batch_filter'] or
           ledger['witness_cache_rejected_pairs'] > 0) and
          (not levers['q34_batch_filter'] or value['q34_batch']['survivors'] > 0) and
+         (not levers['q34_batch_certificates'] or value['q34_batch']['certificate_ms'] > 0) and
          (not levers['q34_dead_core'] or ledger['core_closed_edges'] > 0) and
          (not levers['tower_meb_proposal'] or (value['tower_work']['meb_proposals'] > 0 and
                                                value['tower_work']['meb_verified_proposals'] > 0)),
@@ -722,6 +759,7 @@ def validate_probe(value, case, exit_code, inputs=None):
     need(type(orders) is list and all(type(order) is dict and set(order) == ORDER_KEYS and
                                       all(_count(item) for item in order.values()) for order in orders), 'probe orders')
     need(type(value['tower_digest']) is str and re.fullmatch('[0-9a-f]{16}', value['tower_digest']) and
+         type(value['catalogue_digest']) is str and re.fullmatch('[0-9a-f]{16}', value['catalogue_digest']) and
          type(value['peak_rss_kb']) is int and value['peak_rss_kb'] >= -1, 'probe digest/RSS')
     effective = min(case['k'], case['n'])
     if value['status'] == 'complete_relative':
@@ -740,7 +778,7 @@ def validate_external_wall(value, elapsed_seconds):
     tout l'executable). La lecture n'entre pas pour autant dans le contrat."""
     times = value['times_ms']
     need(_number(elapsed_seconds) and
-         (times['read'] + times['chain_total'] + times['digest']) / 1000.0 <=
+         (times['read'] + times['chain_total'] + times['digest'] + times['catalogue_digest']) / 1000.0 <=
          elapsed_seconds + EXTERNAL_WALL_TOLERANCE_SECONDS,
          'read, chain total and digest exceed the external wall time of the case')
 
@@ -758,7 +796,13 @@ def logical_result(value):
     return dict(hash=value['input']['hash'], sites=value['input']['sites'],
                 K_effective=value['options']['K_effective'], unique_keys=value['catalogue']['unique_keys'],
                 balls=value['catalogue']['balls'], euler=value['catalogue']['euler'], orders=value['orders'],
-                tower_digest=value['tower_digest'])
+                tower_digest=value['tower_digest'], catalogue_digest=value['catalogue_digest'])
+
+
+def certificate_work(value):
+    """v18 : travail des certificats et du cover, egal entre deux cas aux memes
+    leviers q34_dead_lanes/q34_dead_core (moteur, lots CPU, GPU, tout W)."""
+    return {name: value['ledger'][name] for name in CERTIFICATE_WORK_KEYS}
 
 
 def compare_cases(cases, outcomes, values):
@@ -769,8 +813,11 @@ def compare_cases(cases, outcomes, values):
         key = (case['file'], case['k'], case['s'])
         if key in groups:
             reference = groups[key]
-            out.append(dict(reference=reference, other=index,
-                            equal=logical_result(values[reference]) == logical_result(values[index])))
+            same = logical_result(values[reference]) == logical_result(values[index])
+            levers = [cases[i]['levers'] for i in (reference, index)]
+            if all(levers[0][name] == levers[1][name] for name in ('q34_dead_lanes', 'q34_dead_core')):
+                same = same and certificate_work(values[reference]) == certificate_work(values[index])
+            out.append(dict(reference=reference, other=index, equal=same))
         else:
             groups[key] = index
     return out
@@ -797,7 +844,7 @@ def gpu_completed_cases(cases, outcomes):
     """Complete LiDAR towers whose q3/q4 filter ran on the device: the only
     ground for GPU_executed (a device preflight alone is not, auditor B)."""
     return [index for index, (case, entry) in enumerate(zip(cases, outcomes))
-            if entry.get('outcome') == 'complete_relative' and case['levers']['q34_gpu_filter']]
+            if entry.get('outcome') == 'complete_relative' and uses_device(case['levers'])]
 
 
 def compiled_dependencies(build, root, before):
@@ -926,7 +973,7 @@ def execute(args):
         with (output / PREFLIGHT_FILE).open('xb') as stream:
             stream.write(pre_raw)
         pre_case = preflight_case(cases, pre_raw)
-        if pre_case['levers']['q34_gpu_filter']:
+        if uses_device(pre_case['levers']):
             result['GPU_attempted'] = True
         pre_row = worker.command('preflight', [TIME, '-v', str(binary), str(output / PREFLIGHT_FILE),
                                                *expected_probe_tail(pre_case)])
@@ -959,7 +1006,7 @@ def execute(args):
             except (ValueError, KeyError, TypeError, UnicodeError) as error:
                 raise PreflightFailed(type(error).__name__ + ': ' + str(error)) from error
             result['preflight']['engine_tower_digest'] = engine_value['tower_digest']
-        if pre_case['levers']['q34_gpu_filter']:
+        if uses_device(pre_case['levers']):
             # Validated device pass on the synthetic preflight only (auditor B):
             # GPU_executed waits for a complete LiDAR tower on the device.
             result['GPU_preflight_executed'] = True
@@ -985,7 +1032,7 @@ def execute(args):
             case_worker = helper.Worker(output, min(started + args.case_cap_seconds, useful_deadline), schedule)
             name = 'probe_' + suffix
             result['FULL_executed'] = True
-            if case['levers']['q34_gpu_filter']:
+            if uses_device(case['levers']):
                 result['GPU_attempted'] = True
             killed, row = False, None
             try:

@@ -479,6 +479,195 @@ BatchOutput run_filter_batch(const FilterInput& input) {
   return out;
 }
 
+namespace {
+
+// A CUDA warp as the 32-lane group of gpu/certificate.hpp. Every lane runs
+// the same uniform control flow; the host versions are never called.
+struct WarpGroup {
+  u32 lane;
+  template <class Code>
+  __host__ __device__ void ballot2(u32 base, u32 count, Code code, u32& first, u32& second) const {
+#if defined(__CUDA_ARCH__)
+    const u32 i = base + lane;
+    const u32 c = i < count ? code(i) : 0U;
+    first = __ballot_sync(0xffffffffU, (c & 1U) != 0);
+    second = __ballot_sync(0xffffffffU, (c & 2U) != 0);
+#else
+    (void)base; (void)count; (void)code;
+    first = second = 0;
+#endif
+  }
+  template <class F>
+  __host__ __device__ void for_set(u32 mask, F f) const {
+    if (((mask >> lane) & 1U) != 0) f(lane, popcount32(mask & ((1U << lane) - 1U)));
+  }
+  template <class F>
+  __host__ __device__ void for_each(u32 count, F f) const {
+    for (u32 i = lane; i < count; i += 32) f(i);
+  }
+  __host__ __device__ bool leader() const { return lane == 0; }
+  __host__ __device__ void sync() const {
+#if defined(__CUDA_ARCH__)
+    __syncwarp();
+#endif
+  }
+};
+
+// Persistent warps: each takes the next edge from a global counter, runs it
+// in its own slab, and keeps its work; lane 0 writes the per-edge answer and,
+// at the end, the warp's work (summed on the host, in integers).
+__global__ void certificate_kernel(CertificateIndex index, const u32* edge_a, const u32* edge_b,
+                                   const u8* edge_mask, u32 edges, unsigned kmax, bool dead_core, u32 capacity,
+                                   u32* ranges, i64* form_constant, i64* form_x, i64* form_y, u32* frontiers,
+                                   unsigned long long* next_edge, u8* out_mask, u8* out_status,
+                                   CertificateWork* warp_work, u32 warps) {
+  const u32 warp = (blockIdx.x * blockDim.x + threadIdx.x) / 32;
+  if (warp >= warps) return;  // whole warps only: blockDim is a multiple of 32
+  const WarpGroup group{threadIdx.x & 31U};
+  const std::size_t c = capacity;
+  const CertificateSlab slab{ranges + 2 * c * warp, form_constant + c * warp, form_x + c * warp,
+                             form_y + c * warp, frontiers + prover_levels * c * warp, capacity};
+  CertificateWork work{};
+  for (;;) {
+    unsigned long long edge = 0;
+    if (group.leader()) edge = atomicAdd(next_edge, 1ULL);
+    edge = __shfl_sync(0xffffffffU, edge, 0);
+    if (edge >= edges) break;
+    const auto result = certify_edge(group, index, edge_a[edge], edge_b[edge], edge_mask[edge], kmax, dead_core,
+                                     slab, work);
+    if (group.leader()) {
+      out_mask[edge] = result.mask;
+      out_status[edge] = static_cast<u8>(result.status);
+    }
+    group.sync();
+  }
+  if (group.leader()) warp_work[warp] = work;
+}
+
+}  // namespace
+
+CertificateOutput run_certificate_batch(const CertificateInput& input) {
+  CertificateOutput out;
+  out.error = validate_certificate_input(input);
+  if (!out.error.empty()) {
+    out.error_kind = BatchError::input_guard;
+    return out;
+  }
+  try {
+    int devices = 0;
+    if (cudaGetDeviceCount(&devices) != cudaSuccess || devices == 0) {
+      out.error = "no CUDA device";
+      out.error_kind = BatchError::no_device;
+      return out;
+    }
+    MHGP9_CUDA(cudaSetDevice(0));
+    cudaDeviceProp properties{};
+    MHGP9_CUDA(cudaGetDeviceProperties(&properties, 0));
+    out.device = properties.name;
+    out.available = true;
+    MHGP9_CUDA(cudaFree(nullptr));
+    const std::size_t edges = input.edge_count;
+    out.masks.assign(input.edge_mask, input.edge_mask + edges);
+    out.status.assign(edges, 0);
+    if (edges == 0) return out;
+    const u32 capacity = input.capacity == 0 ? default_certificate_capacity : input.capacity;
+    // Slab bytes per warp: ranges, three forms, the frontiers of each scanned depth.
+    const std::size_t slab_bytes = static_cast<std::size_t>(capacity) *
+        (2 * sizeof(u32) + 3 * sizeof(i64) + prover_levels * sizeof(u32));
+    int sms = 0;
+    MHGP9_CUDA(cudaDeviceGetAttribute(&sms, cudaDevAttrMultiProcessorCount, 0));
+    std::size_t free_bytes = 0, total_bytes = 0;
+    MHGP9_CUDA(cudaMemGetInfo(&free_bytes, &total_bytes));
+    // At most 16 warps per SM, at most a quarter of the free memory in slabs.
+    const std::size_t by_memory = free_bytes / 4 / slab_bytes;
+    const std::size_t wanted = std::min<std::size_t>(static_cast<std::size_t>(sms) * 16, edges);
+    const std::size_t warps = std::min(wanted, by_memory);
+    if (warps == 0) throw CudaFailure{"no certificate slab fits in a quarter of the free device memory", true};
+    out.capacity = capacity;
+    out.warps = static_cast<u32>(warps);
+    const std::size_t cap = capacity;
+    EventSet<4> e;
+    e.create();
+    DeviceBuffer<FlatNode> nodes;
+    DeviceBuffer<u32> escapes, edge_a, edge_b, ranges, frontiers;
+    DeviceBuffer<std::int32_t> rank_points;
+    DeviceBuffer<u8> edge_mask, out_mask, out_status;
+    DeviceBuffer<i64> form_constant, form_x, form_y;
+    DeviceBuffer<unsigned long long> next_edge;
+    DeviceBuffer<CertificateWork> warp_work;
+    MHGP9_CUDA(cudaEventRecord(e[0]));
+    nodes.allocate(input.index.node_count);
+    escapes.allocate(input.index.node_count);
+    rank_points.allocate(3 * input.index.rank_count);
+    edge_a.allocate(edges);
+    edge_b.allocate(edges);
+    edge_mask.allocate(edges);
+    out_mask.allocate(edges);
+    out_status.allocate(edges);
+    ranges.allocate(2 * cap * warps);
+    form_constant.allocate(cap * warps);
+    form_x.allocate(cap * warps);
+    form_y.allocate(cap * warps);
+    frontiers.allocate(prover_levels * cap * warps);
+    next_edge.allocate(1);
+    warp_work.allocate(warps);
+    MHGP9_CUDA(cudaMemcpy(nodes.get(), input.index.nodes, input.index.node_count * sizeof(FlatNode),
+                          cudaMemcpyHostToDevice));
+    MHGP9_CUDA(cudaMemcpy(escapes.get(), input.escapes, input.index.node_count * sizeof(u32),
+                          cudaMemcpyHostToDevice));
+    MHGP9_CUDA(cudaMemcpy(rank_points.get(), input.index.rank_points,
+                          3 * input.index.rank_count * sizeof(std::int32_t), cudaMemcpyHostToDevice));
+    MHGP9_CUDA(cudaMemcpy(edge_a.get(), input.edge_a, edges * sizeof(u32), cudaMemcpyHostToDevice));
+    MHGP9_CUDA(cudaMemcpy(edge_b.get(), input.edge_b, edges * sizeof(u32), cudaMemcpyHostToDevice));
+    MHGP9_CUDA(cudaMemcpy(edge_mask.get(), input.edge_mask, edges, cudaMemcpyHostToDevice));
+    MHGP9_CUDA(cudaMemset(next_edge.get(), 0, sizeof(unsigned long long)));
+    MHGP9_CUDA(cudaMemset(warp_work.get(), 0, warps * sizeof(CertificateWork)));
+    MHGP9_CUDA(cudaEventRecord(e[1]));
+    const CertificateIndex index{nodes.get(), escapes.get(), static_cast<u32>(input.index.node_count),
+                                 rank_points.get()};
+    const int threads = 128;
+    const int blocks = static_cast<int>((warps * 32 + threads - 1) / threads);
+    certificate_kernel<<<blocks, threads>>>(index, edge_a.get(), edge_b.get(), edge_mask.get(),
+        static_cast<u32>(edges), input.index.kmax, input.dead_core, capacity, ranges.get(), form_constant.get(),
+        form_x.get(), form_y.get(), frontiers.get(), next_edge.get(), out_mask.get(), out_status.get(),
+        warp_work.get(), static_cast<u32>(warps));
+    MHGP9_CUDA(cudaGetLastError());
+    MHGP9_CUDA(cudaEventRecord(e[2]));
+    std::vector<CertificateWork> works(warps);
+    MHGP9_CUDA(cudaMemcpy(out.masks.data(), out_mask.get(), edges, cudaMemcpyDeviceToHost));
+    MHGP9_CUDA(cudaMemcpy(out.status.data(), out_status.get(), edges, cudaMemcpyDeviceToHost));
+    MHGP9_CUDA(cudaMemcpy(works.data(), warp_work.get(), warps * sizeof(CertificateWork), cudaMemcpyDeviceToHost));
+    MHGP9_CUDA(cudaEventRecord(e[3]));
+    MHGP9_CUDA(cudaEventSynchronize(e[3]));
+    for (const auto& w : works) add_certificate(out.work, w);
+    for (std::size_t i = 0; i < edges; ++i) {
+      if (out.status[i] == static_cast<u8>(CertificateStatus::deferred)) {
+        ++out.deferred;
+        out.masks[i] = input.edge_mask[i];
+      } else if (out.status[i] != static_cast<u8>(CertificateStatus::decided)) {
+        ++out.faults;
+      }
+    }
+    out.upload_ms = elapsed(e[0], e[1]);
+    out.kernel_ms = elapsed(e[1], e[2]);
+    out.download_ms = elapsed(e[2], e[3]);
+    out.total_ms = elapsed(e[0], e[3]);
+  } catch (const CudaFailure& failure) {
+    out.error = failure.what;
+    out.error_kind = failure.capacity ? BatchError::capacity : BatchError::device_fault;
+  } catch (const std::bad_alloc& failure) {
+    out.error = std::string("host: ") + failure.what();
+    out.error_kind = BatchError::capacity;
+  } catch (const std::length_error& failure) {
+    out.error = std::string("host: ") + failure.what();
+    out.error_kind = BatchError::capacity;
+  } catch (const std::exception& failure) {
+    out.error = std::string("host: ") + failure.what();
+    out.error_kind = BatchError::device_fault;
+  }
+  return out;
+}
+
 std::string warm_up() {
   int devices = 0;
   if (cudaGetDeviceCount(&devices) != cudaSuccess || devices == 0) return "no CUDA device";

@@ -485,6 +485,16 @@ class Engine {
   // Batch path: an edge whose witness filter was decided by the batch call
   // (original IDs). Only the core/cover/certificate/q3/q4 work is paid here.
   void surviving_edge(std::size_t a, std::size_t b, std::uint8_t mask) { filtered_edge(a, b, mask); }
+  // S3: the lanes a batch certificate call left open. That call already
+  // counted the core, the cover and both certificates of this edge; the
+  // cover is rebuilt here for the generation only, uncounted.
+  void certified_edge(std::size_t a, std::size_t b, std::uint8_t mask) {
+    if (mask == 0 || (mask & ~6U) != 0)
+      throw std::logic_error("mhgp9 gen global q34 received an inactive certified edge");
+    const auto cover = Q34EdgeCover::make(index_, {a, b});
+    observe(cover);
+    generate_lanes(cover, mask);
+  }
 
   WspdQ34Work work{};
   u64 split_rectangles{};  // Not a geometric counter: orchestration only.
@@ -585,6 +595,11 @@ class Engine {
       observe(cover, static_cast<u64>(dead_.retained_bytes()));
       if (mask == 0) return;
     }
+    generate_lanes(cover, mask);
+  }
+
+  // The q3/q4 generation of the lanes left open on this edge's cover.
+  void generate_lanes(const Q34EdgeCoverPtr& cover, std::uint8_t mask) {
     const bool q3 = (mask & 2U) != 0, q4 = (mask & 4U) != 0;
     if (q3) counter_add(work.q3_edges);
     if (q4) counter_add(work.q4_edges);
@@ -999,6 +1014,126 @@ WspdQ34ParallelResult run_wspd_q34_parallel(Q2CensusIndexPtr index, unsigned kma
   return result;
 }
 
+namespace {
+
+// Certificate part of Engine::filtered_edge (same order, same counters),
+// without the capacity observations: the S3 CPU reference.
+std::uint8_t certify_edge_cpu(const Q2CensusIndexPtr& index, Q34DeadLaneProver& prover, unsigned kmax,
+                              bool dead_core, std::size_t a, std::size_t b, std::uint8_t mask, WspdQ34Work& work) {
+  if (dead_core) {
+    const auto core = Q34EdgeCover::make_diametral(index, {a, b});
+    counter_add(work.core_builds);
+    counter_add(work.core_sites, static_cast<u64>(core->site_count()));
+    merge(work.core_cover, core->work());
+    prover.load(*core, work.dead_core);
+    mask = static_cast<std::uint8_t>(mask & ~prover.prove(kmax, mask, work.dead_core));
+    if (mask == 0) {
+      counter_add(work.core_closed_edges);
+      return 0;
+    }
+  }
+  const auto cover = Q34EdgeCover::make(index, {a, b});
+  counter_add(work.cover_builds);
+  counter_add(work.cover_sites, static_cast<u64>(cover->site_count()));
+  work.max_cover_sites = std::max(work.max_cover_sites, static_cast<u64>(cover->site_count()));
+  merge(work.cover, cover->work());
+  prover.load(*cover, work.dead);
+  return static_cast<std::uint8_t>(mask & ~prover.prove(kmax, mask, work.dead));
+}
+
+// Trust boundary of a certificate call: shapes, masks inside the survivors'
+// lanes, and the lane/work identities that bind the reported counters to the
+// returned masks. A consistent lie on a single decision is left to the
+// engine/batch differentials and the independent judges.
+void check_certificate_batch(const Q34CertificateBatch& c, std::span<const Q34SurvivingEdge> survivors,
+                             bool dead_core) {
+  if (c.masks.size() != survivors.size() || c.deferred.size() != survivors.size())
+    throw std::logic_error("mhgp9 gen batched q34 certificate call returned a count different from its survivors");
+  u64 decided = 0, q3_in = 0, q4_in = 0, q3_out = 0, q4_out = 0;
+  for (std::size_t j = 0; j < survivors.size(); ++j) {
+    const auto mask = survivors[j].mask, left = c.masks[j];
+    if (c.deferred[j] > 1 || (c.deferred[j] == 1 && left != mask) || (left & ~mask) != 0)
+      throw std::logic_error("mhgp9 gen batched q34 certificate call returned a widened or malformed mask");
+    if (c.deferred[j] == 1) continue;
+    ++decided;
+    q3_in += (mask >> 1) & 1U;
+    q4_in += (mask >> 2) & 1U;
+    q3_out += (left >> 1) & 1U;
+    q4_out += (left >> 2) & 1U;
+  }
+  const auto& core = c.dead_core;
+  const auto& cover = c.dead;
+  bool ok;
+  if (dead_core) {
+    ok = c.core_builds == decided && core.loads == decided && c.core_sites >= 2 * decided &&
+         core.form_sites == c.core_sites - 2 * decided && c.core_cover.admitted_sites == c.core_sites &&
+         core.q3_proved + core.q3_open == q3_in && core.q4_proved + core.q4_open == q4_in &&
+         c.core_closed_edges <= decided && c.cover_builds == decided - c.core_closed_edges &&
+         cover.q3_proved + cover.q3_open == core.q3_open && cover.q4_proved + cover.q4_open == core.q4_open;
+  } else {
+    ok = c.core_builds == 0 && c.core_sites == 0 && c.core_closed_edges == 0 &&
+         c.core_cover == Q34EdgeCoverWork{} && core == Q34DeadLaneWork{} && c.cover_builds == decided &&
+         cover.q3_proved + cover.q3_open == q3_in && cover.q4_proved + cover.q4_open == q4_in;
+  }
+  ok = ok && cover.loads == c.cover_builds && c.cover.admitted_sites == c.cover_sites &&
+       c.cover_sites >= 2 * c.cover_builds && cover.form_sites == c.cover_sites - 2 * c.cover_builds &&
+       cover.q3_open == q3_out && cover.q4_open == q4_out && c.max_cover_sites <= c.cover_sites &&
+       (c.cover_builds == 0) == (c.max_cover_sites == 0);
+  if (!ok) throw std::logic_error("mhgp9 gen batched q34 certificate call broke a lane or work identity");
+}
+
+}  // namespace
+
+Q34CertificateBatch run_q34_certificate_batch_cpu(const Q2CensusIndexPtr& index, unsigned kmax, bool dead_core,
+                                                  std::span<const Q34SurvivingEdge> survivors,
+                                                  std::size_t workers) {
+  if (!index) throw std::invalid_argument("mhgp9 gen q34 certificate batch requires an immutable index");
+  if (workers == 0) throw std::invalid_argument("mhgp9 gen q34 certificate batch requires a positive worker count");
+  if (kmax == 0 || kmax > 10) throw std::invalid_argument("mhgp9 gen q34 certificate batch requires K1..10");
+  const auto order = index->spatial_order();
+  Q34CertificateBatch out;
+  out.backend = "cpu";
+  out.masks.assign(survivors.size(), 0);
+  out.deferred.assign(survivors.size(), 0);
+  constexpr std::size_t grain = 256;
+  const std::size_t blocks = (survivors.size() + grain - 1) / grain;
+  struct alignas(64) Part {
+    WspdQ34Work work{};
+  };
+  std::vector<Part> parts(std::min(workers, std::max<std::size_t>(blocks, 1)));
+  std::atomic<std::size_t> next{0};
+  parallel_detail::run_joined_workers(parts.size(), [&](std::size_t slot, const std::atomic<bool>& cancel) {
+    auto& work = parts[slot].work;
+    Q34DeadLaneProver prover;
+    for (;;) {
+      if (cancel.load(std::memory_order_relaxed)) return;
+      const std::size_t block = next.fetch_add(1);
+      if (block >= blocks) return;
+      for (std::size_t i = block * grain; i < std::min(survivors.size(), (block + 1) * grain); ++i) {
+        const auto& edge = survivors[i];
+        if (edge.a_rank >= order.size() || edge.b_rank >= order.size() || edge.a_rank == edge.b_rank ||
+            edge.mask == 0 || (edge.mask & ~6U) != 0)
+          throw std::invalid_argument("mhgp9 gen q34 certificate batch received an edge outside the index/lanes");
+        out.masks[i] = certify_edge_cpu(index, prover, kmax, dead_core, order[edge.a_rank], order[edge.b_rank],
+                                        edge.mask, work);
+      }
+    }
+  });
+  WspdQ34Work total{};
+  for (const auto& part : parts) merge(total, part.work);
+  out.core_builds = total.core_builds;
+  out.core_sites = total.core_sites;
+  out.core_closed_edges = total.core_closed_edges;
+  out.core_cover = total.core_cover;
+  out.dead_core = total.dead_core;
+  out.cover_builds = total.cover_builds;
+  out.cover_sites = total.cover_sites;
+  out.max_cover_sites = total.max_cover_sites;
+  out.cover = total.cover;
+  out.dead = total.dead;
+  return out;
+}
+
 Q34FilterBatch run_q34_filter_batch_cpu(const Q2CensusIndex& index, unsigned kmax,
                                         std::span<const WspdRectangle> rectangles, std::size_t workers) {
   if (workers == 0) throw std::invalid_argument("mhgp9 gen q34 batch filter requires a positive worker count");
@@ -1073,9 +1208,12 @@ Q34FilterBatch run_q34_filter_batch_cpu(const Q2CensusIndex& index, unsigned kma
 WspdQ34ParallelResult run_wspd_q34_batched(Q2CensusIndexPtr index, unsigned kmax,
     unsigned separation_s, WspdQ34Options options, std::size_t worker_count,
     const WspdQ34ParallelConsumer& consumer, std::size_t jobs_per_worker,
-    const Q34BatchFilter& filter, WspdQ34BatchTiming* timing) {
+    const Q34BatchFilter& filter, WspdQ34BatchTiming* timing, const Q34CertificateFilter* certificates) {
   validate(index, kmax, separation_s, options, static_cast<bool>(consumer));
   if (!filter) throw std::invalid_argument("mhgp9 gen batched q34 requires a batch filter");
+  const bool certify = certificates != nullptr && static_cast<bool>(*certificates);
+  if (certify && !options.dead_lanes)
+    throw std::invalid_argument("mhgp9 gen batched q34 certificates require the dead-lane certificate");
   if (options.witness_mode != WspdQ34WitnessMode::RectanglePair ||
       options.witness_bounds_mode != Q34WitnessBoundsMode::Affine)
     throw std::invalid_argument("mhgp9 gen batched q34 implements RectanglePair witnesses with Affine bounds only");
@@ -1234,6 +1372,29 @@ WspdQ34ParallelResult run_wspd_q34_batched(Q2CensusIndexPtr index, unsigned kmax
   local_timing.survivors = batch.survivors.size();
   std::vector<WspdRectangle>().swap(rectangles);
 
+  // ---- Phase 2b (S3): one call decides the certificates of the survivors.
+  Q34CertificateBatch certified;
+  if (certify) {
+    phase = wall_ns();
+    certified = (*certificates)(index, kmax, options.dead_core, batch.survivors);
+    local_timing.certificate_ns = wall_ns() - phase;
+    local_timing.certificate_backend = certified.backend;
+    check_certificate_batch(certified, batch.survivors, options.dead_core);
+    for (const auto flag : certified.deferred) local_timing.deferred += flag;
+    WspdQ34Work w{};
+    w.core_builds = certified.core_builds;
+    w.core_sites = certified.core_sites;
+    w.core_closed_edges = certified.core_closed_edges;
+    w.core_cover = certified.core_cover;
+    w.dead_core = certified.dead_core;
+    w.cover_builds = certified.cover_builds;
+    w.cover_sites = certified.cover_sites;
+    w.max_cover_sites = certified.max_cover_sites;
+    w.cover = certified.cover;
+    w.dead = certified.dead;
+    merge(filter_work, w);
+  }
+
   // ---- Phase 3: the workers run the rest of every surviving edge.
   phase = wall_ns();
   {
@@ -1250,8 +1411,11 @@ WspdQ34ParallelResult run_wspd_q34_batched(Q2CensusIndexPtr index, unsigned kmax
           if (cancel.load(std::memory_order_relaxed)) break;
           const std::size_t begin = next.fetch_add(grain);
           if (begin >= survivors.size()) break;
-          for (std::size_t j = begin; j < std::min(survivors.size(), begin + grain); ++j)
-            engine.surviving_edge(order[survivors[j].a_rank], order[survivors[j].b_rank], survivors[j].mask);
+          for (std::size_t j = begin; j < std::min(survivors.size(), begin + grain); ++j) {
+            const auto a = order[survivors[j].a_rank], b = order[survivors[j].b_rank];
+            if (!certify || certified.deferred[j] != 0) engine.surviving_edge(a, b, survivors[j].mask);
+            else if (certified.masks[j] != 0) engine.certified_edge(a, b, certified.masks[j]);
+          }
         }
         state.work = engine.work;
       }

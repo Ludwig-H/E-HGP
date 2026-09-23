@@ -318,22 +318,60 @@ using Q34BatchFilter = std::function<Q34FilterBatch(const Q2CensusIndex& index, 
                                                       std::span<const WspdRectangle> rectangles,
                                                       std::size_t workers);
 
+// ---- v9 S3 (23 septembre 2026) : certificats de voie morte par lots.
+//
+// After the batch filter, one call decides the dead-lane certificate of
+// every survivor, exactly as Engine::filtered_edge: the diametral core and
+// its certificate (dead_core), then the cover and its certificate for the
+// lanes it leaves open. The workers then run only the q3/q4 generation of
+// the lanes left open (the cover is rebuilt for it, uncounted). A DEFERRED
+// survivor (not decided by the call, e.g. a device memory limit) runs the
+// whole engine edge on the workers instead: same decisions, same counters.
+struct Q34CertificateBatch {
+  std::vector<std::uint8_t> masks;     // per survivor: lanes left open (its own mask when deferred)
+  std::vector<std::uint8_t> deferred;  // per survivor: 1 when not decided by the call
+  // Certificate work of the decided survivors, the WspdQ34Work fields.
+  u64 core_builds{}, core_sites{}, core_closed_edges{};
+  Q34EdgeCoverWork core_cover;
+  Q34DeadLaneWork dead_core;
+  u64 cover_builds{}, cover_sites{}, max_cover_sites{};
+  Q34EdgeCoverWork cover;
+  Q34DeadLaneWork dead;
+  std::string backend;  // "cpu" or the device name
+};
+
+// Implementations: run_q34_certificate_batch_cpu below (reference), a device
+// one supplied by the caller. Must return exactly the reference decisions and
+// work for its decided survivors, or throw; the batch path checks shape and
+// the lane/work identities before use.
+using Q34CertificateFilter = std::function<Q34CertificateBatch(
+    const Q2CensusIndexPtr& index, unsigned kmax, bool dead_core, std::span<const Q34SurvivingEdge> survivors)>;
+
+// CPU reference: product core/cover/prover per survivor, `workers` threads.
+[[nodiscard]] Q34CertificateBatch run_q34_certificate_batch_cpu(const Q2CensusIndexPtr& index, unsigned kmax,
+                                                                bool dead_core,
+                                                                std::span<const Q34SurvivingEdge> survivors,
+                                                                std::size_t workers);
+
 // Measured phases of the batch path (nanoseconds, never compared).
 struct WspdQ34BatchTiming {
-  u64 front_ns{}, filter_ns{}, edges_ns{};
-  u64 rectangles{}, survivors{};
-  std::string backend;
+  u64 front_ns{}, filter_ns{}, certificate_ns{}, edges_ns{};
+  u64 rectangles{}, survivors{}, deferred{};
+  std::string backend, certificate_backend;
 };
 
 // Requires witness_mode=RectanglePair and witness_bounds_mode=Affine (the
 // only filter the batch call implements); the pair cache is not used.
 // Ledger identities of validate_completion hold as on the engine path:
 // witness.rectangles.queries=input_rectangles, witness.pairs.queries=
-// expanded_pairs, cache counters zero. `timing` may be null.
+// expanded_pairs, cache counters zero. `timing` may be null. A nonnull
+// `certificates` (S3, requires dead_lanes) decides the certificates of the
+// survivors in one call before the workers.
 [[nodiscard]] WspdQ34ParallelResult run_wspd_q34_batched(
     Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s,
     WspdQ34Options options, std::size_t worker_count,
     const WspdQ34ParallelConsumer& consumer, std::size_t jobs_per_worker,
-    const Q34BatchFilter& filter, WspdQ34BatchTiming* timing);
+    const Q34BatchFilter& filter, WspdQ34BatchTiming* timing,
+    const Q34CertificateFilter* certificates = nullptr);
 
 }  // namespace mhgp9::gen

@@ -37,4 +37,28 @@ inline std::vector<FlatNode> flatten_nodes(const gen::Q2CensusIndex& index) {
   return flat;
 }
 
+// Escape links of the index (preorder), node_count for the end. Recomputed
+// from the children and required equal to the index's own links, so that a
+// walk that follows `left` or `escape` strictly increases and ends.
+inline std::vector<u32> flatten_escapes(const gen::Q2CensusIndex& index) {
+  const auto nodes = index.spatial_nodes();
+  if (nodes.size() >= absent32) throw std::overflow_error("mhgp9 gpu flat index exceeds u32 node numbers");
+  const auto count = static_cast<u32>(nodes.size());
+  std::vector<u32> escapes(nodes.size(), absent32);
+  if (nodes.empty()) return escapes;
+  escapes[0] = count;
+  for (std::size_t i = 0; i < nodes.size(); ++i) {
+    const auto& node = nodes[i];
+    const std::size_t own = node.escape == gen::Q2SpatialNode::absent ? count : node.escape;
+    if (escapes[i] == absent32 || own != escapes[i])
+      throw std::logic_error("mhgp9 gpu flat index escape link differs from the preorder structure");
+    if (node.left == gen::Q2SpatialNode::absent) continue;
+    if (node.left != i + 1 || node.right <= node.left || node.right >= own)
+      throw std::logic_error("mhgp9 gpu flat index is not in preorder");
+    escapes[node.left] = static_cast<u32>(node.right);
+    escapes[node.right] = static_cast<u32>(own);
+  }
+  return escapes;
+}
+
 }  // namespace mhgp9::gpu

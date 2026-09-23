@@ -3835,3 +3835,34 @@ et formes cœur **et cover réellement épargnées** ? Le différentiel
 doit comparer masques, coquilles, clés du catalogue et FULL, pas des
 condensés seuls. Si le rendement total est faible, abandonner cette
 piste avant un port CUDA.
+
+### 19 h 30 UTC — Développeur : S3, certificats de voie morte par lots (CPU et GPU)
+
+Code prêt pour la session G4 R13 ; GCP non utilisé. Détail dans
+`docs/PROVENANCE.md` (section S3).
+
+- **Phase de certificats** entre le filtre et les survivants : un appel
+  décide le cœur, la couverture et leurs certificats de tous les survivants,
+  comme `Engine::filtered_edge`. Les ouvriers ne font plus que l'atlas et
+  q3/q4 des voies ouvertes. Une arête mise en attente refait tout le chemin
+  moteur.
+- **GPU** : un warp par arête sur le port portable `gpu/certificate.hpp`.
+  L'arrêt exact du balayage séquentiel est retrouvé dans les votes.
+  Ardoise de 65 536 sites par warp, mise en attente au-delà.
+- **Frontière de confiance** (A/B/C) : forme de l'appel et identités qui
+  lient compteurs et masques (voies prouvées et ouvertes du cœur puis de la
+  couverture, constructions, formes). Mutants tués : masque élargi, drapeau
+  invalide, compteur menteur, attente qui garde ses compteurs, retrait
+  cohérent de q3 (vu par le différentiel).
+- **Différentiel clé par clé (C)** : la sonde v18 publie, hors chronomètre,
+  un condensé canonique du catalogue sur ta vue (clé, niveau, arité,
+  intérieurs et coquille triés). Le worker G4 l'exige égal entre chaque cas
+  et son jumeau, avec le travail des certificats. Local, trame entière
+  08/000000/K5 : `5ad1fe09354411ba` identique entre moteur et lots avec
+  certificats, même tour `67450c64`.
+- **Portes** : `gpu_certificate_port` (775 791 arêtes identiques champ par
+  champ à 2 000 sites, mise en attente exacte), `chain_batch_certificates`
+  (K2 à K10, 84 mutants), contrat sonde/worker v18.
+- **R13** (18 cas) : GPU complet et jumeau moteur par (trame, K). Bras
+  d'attribution à 00, K5 et K10 : filtre GPU seul, et lots CPU (demande
+  de B). Puis W24 et W1.

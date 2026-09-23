@@ -179,6 +179,13 @@ mhgp9_gate(mhgp9_chain_batch_filter 0 mhgp9_chain_batch_filter_gate ARGS --n=100
            EXPECT_PREFIX "chain_batch_filter_gate n=1000" LABELS "gate;chain;oracle" TIMEOUT 900)
 mhgp9_gate(mhgp9_chain_batch_filter_bad_argument 2 mhgp9_chain_batch_filter_gate ARGS --n=abc
            LABELS "gate;chain" TIMEOUT 60)
+mhgp9_product_executable(mhgp9_chain_batch_certificates_gate tests/chain/chain_batch_certificates_gate.cpp)
+target_link_libraries(mhgp9_chain_batch_certificates_gate PRIVATE mhgp9_chain)
+target_include_directories(mhgp9_chain_batch_certificates_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+mhgp9_gate(mhgp9_chain_batch_certificates 0 mhgp9_chain_batch_certificates_gate ARGS --n=1000
+           EXPECT_PREFIX "chain_batch_certificates_gate n=1000" LABELS "gate;chain;oracle" TIMEOUT 1200)
+mhgp9_gate(mhgp9_chain_batch_certificates_bad_argument 2 mhgp9_chain_batch_certificates_gate ARGS --n=abc
+           LABELS "gate;chain" TIMEOUT 60)
 foreach(mutant IN ITEMS REGULAR_SHELLS_ONLY NO_SITE_TERM)
   string(TOLOWER ${mutant} lower)
   mhgp9_product_executable(mhgp9_chain_euler_${lower}_mutant_gate tests/chain/chain_euler_gate.cpp src/chain/tower_chain.cpp)
@@ -212,6 +219,15 @@ mhgp9_gate(mhgp9_gpu_witness_filter_port 0 mhgp9_gpu_witness_filter_port_gate AR
 mhgp9_gate(mhgp9_gpu_witness_filter_port_scale8000 0 mhgp9_gpu_witness_filter_port_gate ARGS --n=8000
            EXPECT_PREFIX "witness_filter_port_gate n=8000" LABELS "scale8000;gpu;oracle" TIMEOUT 1800)
 mhgp9_gate(mhgp9_gpu_witness_filter_port_bad_argument 2 mhgp9_gpu_witness_filter_port_gate ARGS --n=abc
+           LABELS "gate;gpu" TIMEOUT 60)
+mhgp9_product_executable(mhgp9_gpu_certificate_port_gate tests/gpu/certificate_port_gate.cpp)
+target_link_libraries(mhgp9_gpu_certificate_port_gate PRIVATE mhgp9_gen)
+target_include_directories(mhgp9_gpu_certificate_port_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+mhgp9_gate(mhgp9_gpu_certificate_port 0 mhgp9_gpu_certificate_port_gate ARGS --n=2000
+           EXPECT_PREFIX "gpu_certificate_port_gate n=2000" LABELS "gate;gpu;oracle" TIMEOUT 900)
+mhgp9_gate(mhgp9_gpu_certificate_port_scale8000 0 mhgp9_gpu_certificate_port_gate ARGS --n=8000 --k=5
+           EXPECT_PREFIX "gpu_certificate_port_gate n=8000" LABELS "scale8000;gpu;oracle" TIMEOUT 2400)
+mhgp9_gate(mhgp9_gpu_certificate_port_bad_argument 2 mhgp9_gpu_certificate_port_gate ARGS --k=11
            LABELS "gate;gpu" TIMEOUT 60)
 
 # Sonde S1 : meme population que la chaine (front, rectangles, paires), CPU
@@ -331,7 +347,7 @@ if(Python3_Interpreter_FOUND AND EXISTS ${MHGP9_TOWER_WORKER})
     add_test(NAME mhgp9_probe_worker_contract_${mode}
              COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=${Python3_EXECUTABLE}
                      "-DARGS=${py_flags} ${CMAKE_CURRENT_SOURCE_DIR}/tests/chain/probe_worker_contract.py $<TARGET_FILE:mhgp9_tower_probe> ${MHGP9_TOWER_WORKER} ${CMAKE_CURRENT_BINARY_DIR}/probe_worker_contract_${mode}"
-                     "-DEXPECT_PREFIX=probe_worker_contract mutants_killed=58/58"
+                     "-DEXPECT_PREFIX=probe_worker_contract mutants_killed=61/61"
                      -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
     set_tests_properties(mhgp9_probe_worker_contract_${mode} PROPERTIES LABELS "gate;probe;protocol" TIMEOUT 300)
   endforeach()

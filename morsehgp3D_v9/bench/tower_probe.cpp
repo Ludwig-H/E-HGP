@@ -2,6 +2,7 @@
 //
 //   mhgp9_tower_probe <fichier .u32le|.u16le> K workers [--s=8] [--static=T]
 //                     [--no-tower] [--n=prefixe] [--grid=libelle]
+//                     [--catalogue-digest]
 //                     [--lever=NOM=0|1 ...]
 //
 // Leviers (meme objet, travail different) : atlas_saturate_deep,
@@ -14,7 +15,9 @@
 // q34_batch_filter (filtre temoin q3/q4 par lots : front, puis un appel pour
 // tous les rectangles et paires sans cache, puis les survivants) et
 // q34_gpu_filter (cet appel sur le GPU, exige q34_batch_filter ; sans GPU la
-// chaine refuse). Tous sont publies dans
+// chaine refuse), q34_batch_certificates (certificats de voie morte de tous
+// les survivants en un appel, exige q34_batch_filter et q34_dead_lanes) et
+// q34_gpu_certificates (cet appel sur le GPU). Tous sont publies dans
 // options.levers ; un plan G4 les epingle explicitement, un nom inconnu est
 // refuse (code 2).
 //
@@ -132,6 +135,7 @@ int main(int argc, char** argv) {
         options.tower_static_threads = static_cast<int>(t);
       }
       else if (arg == "--no-tower") options.run_tower = false;
+      else if (arg == "--catalogue-digest") options.catalogue_digest = true;
       else if (arg.starts_with("--lever=")) {
         const auto spec = arg.substr(8);
         const auto eq = spec.find('=');
@@ -151,6 +155,8 @@ int main(int argc, char** argv) {
         else if (name == "q2_jobs_by_mass") options.q2_jobs_by_mass = on;
         else if (name == "q34_batch_filter") options.q34_batch_filter = on;
         else if (name == "q34_gpu_filter") options.q34_gpu_filter = on;
+        else if (name == "q34_batch_certificates") options.q34_batch_certificates = on;
+        else if (name == "q34_gpu_certificates") options.q34_gpu_certificates = on;
         else throw std::invalid_argument("unknown lever");
       }
       else if (arg.starts_with("--n=")) prefix = static_cast<std::size_t>(parse_u(arg.substr(4)));
@@ -180,7 +186,7 @@ int main(int argc, char** argv) {
   const auto r = mhgp9::run_tower_chain(input.points, options);
   const auto& t = r.times;
   const auto& c = r.catalogue;
-  std::printf("{\"schema\":\"mhgp9_tower_probe_v17\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
+  std::printf("{\"schema\":\"mhgp9_tower_probe_v18\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
               r.reason.c_str());
   std::printf("\"input\":{\"format\":\"%s\",\"grid\":\"%s\",\"sites\":%zu,\"hash\":\"%016" PRIx64 "\"},", input.format.c_str(),
               grid.c_str(), input.points.size(), input.hash);
@@ -188,7 +194,8 @@ int main(int argc, char** argv) {
               "\"levers\":{\"atlas_saturate_deep\":%s,\"q3_leaf_census\":%s,\"q34_dead_lanes\":%s,"
               "\"q34_witness_cache\":%s,\"q34_dead_core\":%s,\"tower_meb_proposal\":%s,"
               "\"q34_jobs_by_mass\":%s,\"q34_fine_jobs\":%s,\"tower_overlap_static\":%s,\"q2_jobs_by_mass\":%s,"
-              "\"q34_batch_filter\":%s,\"q34_gpu_filter\":%s}},",
+              "\"q34_batch_filter\":%s,\"q34_gpu_filter\":%s,\"q34_batch_certificates\":%s,"
+              "\"q34_gpu_certificates\":%s}},",
               options.kmax, r.kmax_effective, options.separation_s, options.workers,
               options.tower_static_threads >= 0 ? options.tower_static_threads : r.tower_static_threads,
               options.run_tower ? "true" : "false", options.atlas_saturate_deep ? "true" : "false",
@@ -197,12 +204,14 @@ int main(int argc, char** argv) {
               options.tower_meb_proposal ? "true" : "false", options.q34_jobs_by_mass ? "true" : "false",
               options.q34_fine_jobs ? "true" : "false", options.tower_overlap_static ? "true" : "false",
               options.q2_jobs_by_mass ? "true" : "false", options.q34_batch_filter ? "true" : "false",
-              options.q34_gpu_filter ? "true" : "false");
+              options.q34_gpu_filter ? "true" : "false", options.q34_batch_certificates ? "true" : "false",
+              options.q34_gpu_certificates ? "true" : "false");
   std::printf("\"times_ms\":{\"read\":%.3f,\"prepare\":%.3f,\"gen_index\":%.3f,\"q2\":%.3f,\"q34\":%.3f,\"merge\":%.3f,"
-              "\"tower_index\":%.3f,\"census\":%.3f,\"tower\":%.3f,\"chain_total\":%.3f,\"digest\":%.3f},"
+              "\"tower_index\":%.3f,\"census\":%.3f,\"tower\":%.3f,\"chain_total\":%.3f,\"digest\":%.3f,"
+              "\"catalogue_digest\":%.3f},"
               "\"chain_cpu_s\":%.3f,",
               read_ms, t.prepare_ms, t.gen_index_ms, t.q2_ms, t.q34_ms, t.merge_ms, t.tower_index_ms, t.census_ms, t.tower_ms,
-              t.total_ms, t.digest_ms, t.cpu_s);
+              t.total_ms, t.digest_ms, t.catalogue_digest_ms, t.cpu_s);
   std::printf("\"generator\":{\"q2_front_rectangles\":%" PRIu64 ",\"q2_candidate_pairs\":%" PRIu64 ",\"q2_accepted_pairs\":%" PRIu64
               ",\"q34_expanded_pairs\":%" PRIu64 ",\"q34_cover_builds\":%" PRIu64 ",\"q3_emitted\":%" PRIu64 ",\"q4_emitted\":%" PRIu64 "},",
               r.q2_front_rectangles, r.q2_candidate_pairs, r.q2_accepted_pairs, r.q34_expanded_pairs, r.q34_cover_builds,
@@ -234,13 +243,20 @@ int main(int argc, char** argv) {
     // tous les champs a zero). Le backend est "cpu" ou le nom de l'appareil
     // (alphabet d'un nom de GPU ; guillemets et controles remplaces).
     const auto& b = r.q34_batch;
-    std::string backend = b.backend;
-    for (auto& ch : backend)
-      if (ch == '"' || ch == '\\' || static_cast<unsigned char>(ch) < 0x20) ch = '\'';
+    // v18 : appel des certificats (S3), backend vide et zeros sans le levier.
+    const auto clean = [](std::string name) {
+      for (auto& ch : name)
+        if (ch == '"' || ch == '\\' || static_cast<unsigned char>(ch) < 0x20) ch = '\'';
+      return name;
+    };
+    const std::string backend = clean(b.backend), certificate_backend = clean(b.certificate_backend);
     std::printf("\"q34_batch\":{\"used\":%s,\"backend\":\"%s\",\"front_ms\":%.3f,\"filter_ms\":%.3f,\"edges_ms\":%.3f"
-                ",\"device_ms\":%.3f,\"rectangles\":%" PRIu64 ",\"survivors\":%" PRIu64 "},",
+                ",\"device_ms\":%.3f,\"rectangles\":%" PRIu64 ",\"survivors\":%" PRIu64
+                ",\"certificate_backend\":\"%s\",\"certificate_ms\":%.3f,\"certificate_device_ms\":%.3f"
+                ",\"deferred\":%" PRIu64 "},",
                 b.used ? "true" : "false", backend.c_str(), b.front_ms, b.filter_ms, b.edges_ms, b.device_ms,
-                b.rectangles, b.survivors);
+                b.rectangles, b.survivors, certificate_backend.c_str(), b.certificate_ms, b.certificate_device_ms,
+                b.deferred);
     const auto& tt = r.tower_times;
     std::printf("\"tower_phases_ms\":{\"validate\":%.3f,\"static\":%.3f,\"lots\":%.3f,\"populations\":%.3f,"
                 "\"images\":%.3f,\"bank\":%.3f,\"encode\":%.3f",
@@ -291,6 +307,10 @@ int main(int argc, char** argv) {
                 ",\"contributions\":%" PRIu64 "}",
                 i ? "," : "", o.k, o.nodes, o.births, o.merges, o.parents, o.contributions);
   }
-  std::printf("],\"tower_digest\":\"%016" PRIx64 "\",\"peak_rss_kb\":%ld}\n", r.tower_digest, peak_rss_kb());
+  // v18 : condense canonique du catalogue complet (--catalogue-digest), null sinon.
+  char catalogue[24] = "null";
+  if (options.catalogue_digest) std::snprintf(catalogue, sizeof catalogue, "\"%016" PRIx64 "\"", r.catalogue_digest);
+  std::printf("],\"tower_digest\":\"%016" PRIx64 "\",\"catalogue_digest\":%s,\"peak_rss_kb\":%ld}\n", r.tower_digest,
+              catalogue, peak_rss_kb());
   return r.status == mhgp9::ChainStatus::kComplete ? 0 : 3;
 }

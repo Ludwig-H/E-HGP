@@ -86,12 +86,14 @@ struct GpuRefusal : std::runtime_error {
 // rank), prepared once per chain.
 struct GpuIndex {
   std::vector<gpu::FlatNode> nodes;
+  std::vector<gpu::u32> escapes;
   std::vector<std::int32_t> rank_points;
 };
 
 GpuIndex prepare_gpu_index(const gen::Q2CensusIndex& index) {
   GpuIndex out;
   out.nodes = gpu::flatten_nodes(index);
+  out.escapes = gpu::flatten_escapes(index);
   const auto order = index.spatial_order();
   const auto points = index.cloud().points();
   out.rank_points.resize(3 * order.size());
@@ -193,6 +195,79 @@ gen::Q34FilterBatch gpu_filter_batch(const GpuIndex& prepared, std::span<const g
   batch.pair_q4_rejected = out.pair_q4_rejected;
   batch.rectangle_visits = out.rect_visits;
   batch.pair_visits = out.pair_visits;
+  device_ms = out.total_ms;
+  return batch;
+}
+
+// S3: the certificate call of gen::run_wspd_q34_batched on the device. Same
+// error classes as the filter; an edge the device marks as a fault (a core
+// or cover without its endpoints) is an invariant violation of the port.
+gen::Q34CertificateBatch gpu_certificate_batch(const GpuIndex& prepared, unsigned kmax, bool dead_core,
+                                               std::span<const gen::Q34SurvivingEdge> survivors,
+                                               double& device_ms) {
+  std::vector<gpu::u32> a(survivors.size()), b(survivors.size());
+  std::vector<gpu::u8> lanes(survivors.size());
+  for (std::size_t i = 0; i < survivors.size(); ++i) {
+    a[i] = survivors[i].a_rank;
+    b[i] = survivors[i].b_rank;
+    lanes[i] = survivors[i].mask;
+  }
+  gpu::CertificateInput in;
+  in.index.nodes = prepared.nodes.data();
+  in.index.node_count = prepared.nodes.size();
+  in.index.rank_points = prepared.rank_points.data();
+  in.index.rank_count = prepared.rank_points.size() / 3;
+  in.index.kmax = kmax;
+  in.escapes = prepared.escapes.data();
+  in.edge_a = a.data();
+  in.edge_b = b.data();
+  in.edge_mask = lanes.data();
+  in.edge_count = survivors.size();
+  in.dead_core = dead_core;
+  auto out = gpu::run_certificate_batch(in);
+  switch (out.error_kind) {
+    case gpu::BatchError::none:
+      break;
+    case gpu::BatchError::input_guard:
+    case gpu::BatchError::no_device:
+      throw GpuRefusal(ChainStatus::kInvalidInput, "chain_q34_gpu_unavailable: " + out.error);
+    case gpu::BatchError::capacity:
+      throw GpuRefusal(ChainStatus::kResourceExhausted, "chain_q34_gpu_capacity: " + out.error);
+    case gpu::BatchError::device_fault:
+      throw GpuRefusal(ChainStatus::kInvariantViolated, "chain_q34_gpu_fault: " + out.error);
+  }
+  if (!out.available || !out.error.empty())
+    throw GpuRefusal(ChainStatus::kInvariantViolated, "chain_q34_gpu_fault: unclassified: " + out.error);
+  if (out.faults != 0) throw std::logic_error("chain_q34_gpu_certificate_edge_fault");
+  if (out.masks.size() != survivors.size() || out.status.size() != survivors.size())
+    throw std::logic_error("chain_q34_gpu_certificate_arrays_differ");
+  gen::Q34CertificateBatch batch;
+  batch.backend = out.device;
+  batch.masks = std::move(out.masks);
+  batch.deferred.resize(survivors.size());
+  for (std::size_t i = 0; i < survivors.size(); ++i)
+    batch.deferred[i] = out.status[i] == static_cast<gpu::u8>(gpu::CertificateStatus::deferred) ? 1 : 0;
+  const auto cover = [](const gpu::CoverWork& w) {
+    return gen::Q34EdgeCoverWork{w.node_visits,    w.bound_tests,    w.point_tests,     w.admitted_nodes,
+                                 w.rejected_nodes, w.split_nodes,    w.admitted_sites,  w.rejected_sites,
+                                 w.retained_ranges, w.merged_ranges};
+  };
+  const auto dead = [](const gpu::DeadWork& w) {
+    return gen::Q34DeadLaneWork{w.loads,        w.form_sites,  w.cells,     w.outside_cells, w.deep_cells,
+                                w.failed_cells, w.uniform_tests, w.point_tests, w.q3_proved, w.q3_open,
+                                w.q4_proved,    w.q4_open};
+  };
+  const auto& w = out.work;
+  batch.core_builds = w.core_builds;
+  batch.core_sites = w.core_sites;
+  batch.core_closed_edges = w.core_closed_edges;
+  batch.core_cover = cover(w.core_cover);
+  batch.dead_core = dead(w.dead_core);
+  batch.cover_builds = w.cover_builds;
+  batch.cover_sites = w.cover_sites;
+  batch.max_cover_sites = w.max_cover_sites;
+  batch.cover = cover(w.cover);
+  batch.dead = dead(w.dead);
   device_ms = out.total_ms;
   return batch;
 }
@@ -423,16 +498,47 @@ std::uint64_t tower_digest(const tower::FullBallTowerResult& result) {
   return h;
 }
 
+std::uint64_t catalogue_digest(const std::vector<tower::BallData>& balls) {
+  std::vector<std::size_t> order(balls.size());
+  for (std::size_t i = 0; i < order.size(); ++i) order[i] = i;
+  std::sort(order.begin(), order.end(), [&](std::size_t x, std::size_t y) { return balls[x].key < balls[y].key; });
+  std::uint64_t h = 14695981039346656037ull;
+  fnv(h, balls.size());
+  std::vector<std::int32_t> ids;
+  for (const auto i : order) {
+    const auto& b = balls[i];
+    for (const tower::i128 v : {b.key.a, b.key.b[0], b.key.b[1], b.key.b[2], b.key.c}) {
+      fnv(h, static_cast<std::uint64_t>(v));
+      fnv(h, static_cast<std::uint64_t>(v >> 64));
+    }
+    fnv_level(h, b.level);
+    fnv(h, b.arity);
+    for (const auto part : {b.interior(), b.shell()}) {
+      ids.assign(part.begin(), part.end());
+      std::sort(ids.begin(), ids.end());
+      fnv(h, ids.size());
+      for (const auto id : ids) fnv(h, static_cast<std::uint64_t>(static_cast<std::uint32_t>(id)));
+    }
+  }
+  return h;
+}
+
 ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOptions& options) {
   ChainResult result;
   const auto total_start = Clock::now();
   const double cpu_start = process_cpu_s();
+  // The catalogue kept for its digest, moved out of the chain (no copy).
+  std::vector<tower::BallData> digest_balls;
   try {
     if (options.kmax < 1 || options.kmax > 10) fail(ChainStatus::kInvalidInput, "chain_kmax_outside_1_10");
     if (options.separation_s < 8) fail(ChainStatus::kInvalidInput, "chain_separation_below_8");
     if (options.workers < 1) fail(ChainStatus::kInvalidInput, "chain_workers_zero");
     if (options.q34_gpu_filter && !options.q34_batch_filter)
       fail(ChainStatus::kInvalidInput, "chain_q34_gpu_filter_requires_batch_filter");
+    if (options.q34_batch_certificates && (!options.q34_batch_filter || !options.q34_dead_lanes))
+      fail(ChainStatus::kInvalidInput, "chain_q34_batch_certificates_require_batch_filter_and_dead_lanes");
+    if (options.q34_gpu_certificates && !options.q34_batch_certificates)
+      fail(ChainStatus::kInvalidInput, "chain_q34_gpu_certificates_require_batch_certificates");
     if (points.size() < 2) fail(ChainStatus::kInvalidInput, "chain_requires_two_sites");
     if (points.size() > static_cast<std::size_t>(std::numeric_limits<std::int32_t>::max()))
       fail(ChainStatus::kInvalidInput, "chain_too_many_sites");
@@ -455,7 +561,8 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     result.times.gen_index_ms = ms_since(t);
     // S2: CUDA context and flat index prepared during q2 (joined before q34).
     GpuPreparation gpu_preparation;
-    if (options.q34_batch_filter && options.q34_gpu_filter && kmax >= 2) gpu_preparation.start(*index);
+    if (options.q34_batch_filter && (options.q34_gpu_filter || options.q34_gpu_certificates) && kmax >= 2)
+      gpu_preparation.start(*index);
 
     std::vector<std::vector<Presentation>> slots(W);
     t = Clock::now();
@@ -534,10 +641,24 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
             return gen::run_q34_filter_batch_cpu(ix, k, rects, W);
           };
         }
+        double certificate_device_ms = 0;
+        gen::Q34CertificateFilter certificates;
+        if (options.q34_gpu_certificates) {
+          certificates = [&certificate_device_ms, &gpu_preparation](
+                             const gen::Q2CensusIndexPtr& ix, unsigned k, bool core,
+                             std::span<const gen::Q34SurvivingEdge> edges) {
+            return gpu_certificate_batch(gpu_preparation.get(*ix), k, core, edges, certificate_device_ms);
+          };
+        } else if (options.q34_batch_certificates) {
+          certificates = [W](const gen::Q2CensusIndexPtr& ix, unsigned k, bool core,
+                             std::span<const gen::Q34SurvivingEdge> edges) {
+            return gen::run_q34_certificate_batch_cpu(ix, k, core, edges, W);
+          };
+        }
         gen::WspdQ34BatchTiming timing;
         try {
           r34 = gen::run_wspd_q34_batched(index, kmax, options.separation_s, o, W, consumer, jobs_per_worker,
-                                          filter, &timing);
+                                          filter, &timing, certificates ? &certificates : nullptr);
         } catch (const GpuRefusal& e) {
           fail(e.status, e.what());
         }
@@ -550,6 +671,10 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         b.device_ms = device_ms;
         b.rectangles = timing.rectangles;
         b.survivors = timing.survivors;
+        b.certificate_backend = timing.certificate_backend;
+        b.certificate_ms = static_cast<double>(timing.certificate_ns) / 1e6;
+        b.certificate_device_ms = certificate_device_ms;
+        b.deferred = timing.deferred;
       }
       result.q34_expanded_pairs = r34.pipeline.work.expanded_pairs;
       result.q34_cover_builds = r34.pipeline.work.cover_builds;
@@ -804,6 +929,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       }
       result.tower = std::move(tw);
     }
+    if (options.catalogue_digest) digest_balls = std::move(balls);
     result.status = ChainStatus::kComplete;
     result.reason = "complete_relative_to_cross_checked_catalogue";
   } catch (const Failure& f) {
@@ -849,6 +975,19 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       result.orders.clear();
     }
     result.times.digest_ms = ms_since(t);
+  }
+  if (result.status == ChainStatus::kComplete && options.catalogue_digest) {
+    const auto t = Clock::now();
+    try {
+      result.catalogue_digest = catalogue_digest(digest_balls);
+    } catch (const std::exception& e) {
+      result.status = ChainStatus::kInvariantViolated;
+      result.reason = std::string("chain_catalogue_digest_failed: ") + e.what();
+      result.tower = {};
+      result.catalogue_balls.clear();
+      result.orders.clear();
+    }
+    result.times.catalogue_digest_ms = ms_since(t);
   }
   return result;
 }

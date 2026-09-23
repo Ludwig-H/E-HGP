@@ -229,6 +229,108 @@ entre moteur et lots CPU.
 **Protocole G4 de la tour** : build CUDA (nvcc et nvidia-smi existants),
 `backend=cuda_g4` et `GPU_executed` selon le plan.
 
+### Certificats de voie morte par lots (S3, sonde v18)
+
+23 septembre 2026, soir. Une phase s'insère entre le filtre et les
+survivants de `gen::run_wspd_q34_batched` : un appel décide le certificat
+de voie morte de **tous** les survivants, exactement comme
+`Engine::filtered_edge`. D'abord le cœur diamétral et son certificat, puis,
+pour les voies qu'il laisse ouvertes, la couverture et son certificat.
+
+- **Les ouvriers** ne font plus que la génération q3/q4 des voies restées
+  ouvertes (`Engine::certified_edge`). La couverture y est reconstruite
+  pour la génération seule, sans être recomptée.
+- **Un survivant mis en attente** (`deferred`, par exemple faute de mémoire
+  sur l'appareil) exécute l'arête moteur complète : mêmes décisions, mêmes
+  compteurs.
+
+**Frontière de confiance.** Le chemin par lots contrôle la forme de
+l'appel : tailles, masque inclus dans celui du survivant, drapeau d'attente
+0 ou 1. Il contrôle aussi les identités qui lient les compteurs aux masques
+rendus :
+- constructions du cœur = survivants décidés ;
+- formes = sites − 2 × chargements ;
+- voies prouvées + ouvertes du cœur = voies des survivants ;
+- voies ouvertes du cœur = voies prouvées + ouvertes de la couverture ;
+- voies ouvertes de la couverture = voies des masques rendus.
+
+Un mensonge cohérent sur une décision reste l'affaire des différentiels.
+
+**Deux implémentations** :
+- `run_q34_certificate_batch_cpu`, la référence : le prouveur produit par
+  survivant ;
+- `gpu::run_certificate_batch`. Des warps persistants, **un warp par
+  arête**, exécutent le port portable `gpu/certificate.hpp`. Le parcours
+  d'arbre sans pile et la récursion des cellules sont uniformes. Les
+  balayages de frontière sont répartis sur les 32 voies par votes : la
+  position d'arrêt exacte du balayage séquentiel est retrouvée dans les
+  masques de vote, et les sites partiels sont compactés dans l'ordre.
+  Chaque warp dispose d'une ardoise fixe de 65 536 sites (plages, formes,
+  une frontière par profondeur balayée). Une arête plus grosse est mise en
+  attente. Les liens d'échappement de l'index plat sont recalculés depuis la
+  structure préordre et vérifiés : tout parcours avance et termine.
+
+**Chaîne** : leviers `q34_batch_certificates` (exige `q34_batch_filter` et
+`q34_dead_lanes`) et `q34_gpu_certificates` (exige le premier). Sans GPU,
+refus `chain_q34_gpu_unavailable`. Le contexte CUDA et l'index plat
+(échappements compris) sont préparés pendant q2 dès qu'un levier GPU est
+actif.
+
+**Condensé du catalogue.** `ChainOptions::catalogue_digest` calcule, après
+la chaîne et hors chronomètre, un condensé canonique du catalogue complet,
+sur la vue de l'auditeur C : boules triées par clé, puis clé, niveau exact,
+arité, intérieurs triés et coquille triée.
+
+**Sonde v18** :
+- les deux leviers ;
+- `--catalogue-digest` ;
+- la section `q34_batch` complétée : backend et temps de l'appel des
+  certificats, passe GPU, survivants mis en attente ;
+- `catalogue_digest` et `times_ms.catalogue_digest`.
+
+**Portes** :
+- `gpu_certificate_port` : le port compilé pour l'hôte (groupe de 32 voies
+  émulé) contre le prouveur produit, arête par arête et champ par champ, sur
+  les survivants réels du filtre, trois familles, K3, K5 et K10.
+  - À 2 000 sites : 775 791 arêtes identiques, dont 154 839 mises en attente
+    exactement quand un cœur ou une couverture dépasse une capacité réduite
+    à 64.
+  - Planchers sur chaque classe de cellule et de voie ; 3 116 mutants du
+    comparateur tués ; variante `scale8000`.
+- `chain_batch_certificates` :
+  - candidats triés égaux au moteur, trois familles, K2 (q3 seul), K3, K5,
+    K10, à 1 et 4 fils ;
+  - travail des certificats, de la couverture, des voies et des émissions
+    égal au chemin par lots sans certificats ;
+  - chemin de mise en attente (un survivant sur trois) égal ;
+  - mutants tués : masque élargi, drapeau invalide, compteur menteur, attente
+    qui garde ses compteurs, retrait cohérent de la voie q3 ;
+  - chaîne : même tour FULL, même registre et même condensé de catalogue que
+    le moteur ; le condensé égale celui du catalogue publié et voit une
+    boule retirée ou une coquille modifiée ;
+  - refus explicite du levier GPU sans appareil ; leviers incohérents
+    refusés avec leur raison.
+- Contrat sonde/worker : cas `cert_on`, 8 mutants des certificats,
+  3 mutants du condensé, comparaison entre cas sensible au condensé et au
+  travail des certificats.
+
+Localement, sur la trame entière 08/000000/K5 (W8) : moteur et lots CPU
+avec certificats donnent le condensé FULL `67450c64611075b1`, le condensé
+de catalogue `5ad1fe09354411ba` et un travail des certificats identique.
+
+**Protocole G4 de la tour v18** :
+- le worker passe `--catalogue-digest` à chaque sonde ;
+- la comparaison entre cas du même (trame, K, s) exige le même condensé de
+  catalogue, soit le différentiel clé par clé de C sur chaque paire GPU /
+  jumeau moteur. Elle exige aussi le même travail des certificats et de la
+  couverture quand les leviers `q34_dead_lanes` et `q34_dead_core` sont
+  égaux ;
+- le plan par défaut R13 (18 cas) :
+  - chaque (trame, K) sur le chemin GPU complet puis sur son jumeau moteur ;
+  - deux bras d'attribution à 08/000000, K5 et K10 : filtre GPU seul, lots
+    CPU ;
+  - 00/K5 à 24 fils (GPU) et à 1 fil (moteur).
+
 ## Voie GPU S1 : `src/gpu/` (espace `mhgp9::gpu`, code neuf)
 
 23 septembre 2026. Première brique GPU de la v9, pour une expérience de

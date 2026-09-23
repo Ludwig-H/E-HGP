@@ -94,18 +94,25 @@ def read_blobs(oids):
 
 def default_plan():
     # Voies epinglees : defauts v9 de la chaine (tour statique sur W fils),
-    # passees explicitement a la sonde. v17 : chaque (scene, K) tourne sur le
-    # chemin GPU (tous les leviers) puis sur son jumeau moteur (sans lots ni
-    # GPU), que la comparaison d'objet juge ; puis la scene 00 a K5 avec
-    # 24 fils (GPU) et 1 fil (moteur, le plus susceptible d'etre coupe).
-    def case(scene, k, workers, gpu):
+    # passees explicitement a la sonde. v18 : chaque (scene, K) tourne sur le
+    # chemin GPU complet (filtre et certificats sur l'appareil) puis sur son
+    # jumeau moteur (sans lots ni GPU), que la comparaison d'objet juge
+    # (condenses de tour et de catalogue, travail des certificats) ; a 00, K5
+    # et K10, deux bras d'attribution : filtre GPU seul (S2) et lots CPU sans
+    # GPU (B) ; puis 00 a K5 avec 24 fils (GPU) et 1 fil (moteur).
+    def case(scene, k, workers, arm):
         levers = {name: True for name in worker.LEVER_NAMES}
-        if not gpu:
+        if arm == 'engine':
             levers = worker.engine_levers(levers)
+        elif arm == 'gpu_filter':
+            levers.update(q34_batch_certificates=False, q34_gpu_certificates=False)
+        elif arm == 'batch_cpu':
+            levers.update(q34_gpu_filter=False, q34_batch_certificates=False, q34_gpu_certificates=False)
         return dict(scene=scene, file=worker.INPUTS[scene]['file'], n=worker.INPUTS[scene]['n'], k=k, s=8,
                     workers=workers, static_threads=workers if workers > 1 else 0, levers=levers, repeat=0)
-    cases = [case(scene, k, 48, gpu) for scene in ('00', '01', '02') for k in (5, 10) for gpu in (True, False)]
-    cases += [case('00', 5, 24, True), case('00', 5, 1, False)]
+    cases = [case(scene, k, 48, arm) for scene in ('00', '01', '02') for k in (5, 10) for arm in ('gpu', 'engine')]
+    cases += [case('00', k, 48, arm) for k in (5, 10) for arm in ('gpu_filter', 'batch_cpu')]
+    cases += [case('00', 5, 24, 'gpu'), case('00', 5, 1, 'engine')]
     return dict(schema=worker.PLAN_SCHEMA, cases=cases)
 
 

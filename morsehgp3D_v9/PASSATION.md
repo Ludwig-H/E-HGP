@@ -243,6 +243,34 @@ Session G4 R12 ([reçu](receipts/g4_tower_r12_20260923/README.md), paquet
 Suites : contexte GPU et index préparés pendant q2 ; cœur et certificat sur
 GPU ; tour D5.
 
+Voie GPU S3 (23 septembre, soir) : certificats de voie morte par lots. Le
+[reçu de ventilation](receipts/q34_survivor_phases_20260923/README.md)
+situe la phase des survivants à 08/000000 :
+- cœur et couverture, avec leurs certificats : 35 % à K5, 28 % à K10 ;
+- atlas, q3 et q4 des arêtes restées vivantes : 65 % et 72 %.
+
+Calculer les formes du cœur à la première consultation rapporterait au plus
+1,3 % ; piste fermée.
+
+Livré (sans GCP) :
+- préchauffage du contexte CUDA et de l'index plat pendant q2 ;
+- libellé GPU honnête (`GPU_executed` exige une tour LiDAR achevée sur
+  l'appareil) ;
+- phase de certificats par lots (leviers `q34_batch_certificates`,
+  `q34_gpu_certificates`), avec son port portable exact, un warp par arête,
+  et la mise en attente sur le CPU d'une arête trop grosse ;
+- condensé canonique du catalogue, hors chronomètre ;
+- sonde et protocole G4 v18, plan R13 à 18 cas (voir `docs/PROVENANCE.md`).
+
+Local : même tour, même catalogue et même travail des certificats que le
+moteur sur la trame entière 08/000000/K5.
+
+Prochaine étape : session G4 R13. Elle mesure le gain de S3 et du
+préchauffage, et fait le différentiel clé par clé GPU/moteur sur les trois
+trames. Ensuite :
+- atlas et voies q3/q4 des arêtes vivantes, le poste dominant ;
+- tour D5.
+
 Suite : tour maigre (D5 de l'auditeur C :
 index des selles, saut au centre, images de naissance directes), puis
 réfutation des ancres longues avant expansion (66–70 % du CPU q3/q4 selon C).

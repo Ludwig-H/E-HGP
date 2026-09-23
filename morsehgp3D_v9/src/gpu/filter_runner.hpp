@@ -7,6 +7,7 @@
 // Plain host types only: this header is shared by the C++20 host probe and
 // the CUDA translation unit.
 
+#include "certificate.hpp"
 #include "witness_filter.hpp"
 
 #include <cstdint>
@@ -122,6 +123,77 @@ struct BatchOutput {
   double upload_ms = 0, rect_ms = 0, scan_ms = 0, pair_ms = 0, select_ms = 0, download_ms = 0, total_ms = 0;
 };
 BatchOutput run_filter_batch(const FilterInput& input);
+
+// ---- S3 (chain): dead-lane certificates of surviving edges ------------
+//
+// One warp per edge (gpu/certificate.hpp): the diametral core and its
+// certificate, then the cover and its certificate for the lanes left open,
+// exactly as Engine::filtered_edge. Each warp owns a slab of `capacity`
+// sites; an edge whose core or cover exceeds it comes back DEFERRED (status
+// 1) with no counter, and the CPU runs its whole engine edge.
+struct CertificateInput {
+  FilterInput index;       // nodes, rank points and kmax (rectangle fields unused)
+  const u32* escapes = nullptr;  // preorder escape links, node_count at the end
+  const u32* edge_a = nullptr;   // spatial ranks
+  const u32* edge_b = nullptr;
+  const u8* edge_mask = nullptr;  // surviving lanes (nonzero subset of 6)
+  std::size_t edge_count = 0;
+  bool dead_core = false;
+  u32 capacity = 0;  // sites per warp slab; 0 selects the default
+};
+
+inline constexpr u32 default_certificate_capacity = 1U << 16;
+
+// Host-side refusal before any device call; empty when accepted. The index
+// part is validate_filter_input; the escape links must be exactly those of
+// the preorder tree (root: node_count; a leaf: the next node; children: the
+// right sibling, then the parent's escape), so every walk strictly advances
+// and ends. Edges: ranks inside the index, distinct, lanes a nonzero subset
+// of 6; at most 2^31-1 edges; capacity 0 or >= 2.
+inline std::string validate_certificate_input(const CertificateInput& input) {
+  FilterInput index = input.index;
+  index.rect_count = 0;
+  if (auto error = validate_filter_input(index); !error.empty()) return error;
+  if (input.escapes == nullptr) return "null escape links";
+  const std::size_t n = index.node_count;
+  if (input.escapes[0] != n) return "root escape is not the end of the index";
+  for (std::size_t i = 0; i < n; ++i) {
+    const FlatNode& node = index.nodes[i];
+    if (input.escapes[i] <= i || input.escapes[i] > n) return "escape link does not advance inside the index";
+    if (node.left == absent32) {
+      // A leaf's subtree is itself: its escape is the next preorder node.
+      if (input.escapes[i] != i + 1) return "leaf escape is not the next preorder node";
+      continue;
+    }
+    if (node.left != i + 1) return "left child does not follow its parent in preorder";
+    if (input.escapes[node.left] != node.right || input.escapes[node.right] != input.escapes[i])
+      return "child escape links differ from the preorder structure";
+  }
+  if (input.edge_count > static_cast<std::size_t>(0x7fffffff)) return "edge count exceeds 2^31-1";
+  if (input.edge_count != 0 && (input.edge_a == nullptr || input.edge_b == nullptr || input.edge_mask == nullptr))
+    return "null edge arrays";
+  for (std::size_t i = 0; i < input.edge_count; ++i)
+    if (input.edge_a[i] >= index.rank_count || input.edge_b[i] >= index.rank_count ||
+        input.edge_a[i] == input.edge_b[i] || input.edge_mask[i] == 0 || (input.edge_mask[i] & ~6U) != 0)
+      return "edge rank or lane mask outside the domain";
+  if (input.capacity == 1) return "slab capacity below two sites";
+  return {};
+}
+
+struct CertificateOutput {
+  bool available = false;
+  std::string device;
+  std::string error;  // non-empty: nothing below is valid
+  BatchError error_kind = BatchError::none;
+  std::vector<u8> masks;   // per edge: lanes left open (decided), the input mask otherwise
+  std::vector<u8> status;  // per edge: CertificateStatus (0 decided, 1 deferred, 2 fault)
+  CertificateWork work{};  // decided edges only
+  std::uint64_t deferred = 0, faults = 0;
+  std::uint32_t capacity = 0, warps = 0;
+  // cudaEvent timings (ms): upload, kernel, download, whole pass.
+  double upload_ms = 0, kernel_ms = 0, download_ms = 0, total_ms = 0;
+};
+CertificateOutput run_certificate_batch(const CertificateInput& input);
 
 // Opens the device's primary context (process-wide), so that the first
 // batch call does not pay it; empty string on success. Any error is left to

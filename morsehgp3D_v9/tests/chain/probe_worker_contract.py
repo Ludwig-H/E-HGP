@@ -93,14 +93,17 @@ def main(argv):
         return value, process.returncode, elapsed
 
     # v17: 'pinned_on' keeps every engine lever on (the cache exists only on
-    # the engine path); 'batch_on' adds the batch filter on the CPU; the GPU
-    # lever is judged apart (explicit refusal without a device).
-    engine_levers = dict({name: True for name in worker.LEVER_NAMES}, q34_batch_filter=False, q34_gpu_filter=False)
+    # the engine path); 'batch_on' adds the batch filter on the CPU; v18:
+    # 'cert_on' adds the batch certificates on the CPU; the GPU levers are
+    # judged apart (explicit refusal without a device).
+    engine_levers = worker.engine_levers({name: True for name in worker.LEVER_NAMES})
     base = dict(scene='gate', file=data_file.name, n=inputs['gate']['n'], k=5, s=8, workers=2, static_threads=2,
                 levers=engine_levers, repeat=0)
     results = {}
     for label, case in (('pinned_on', base),
                         ('batch_on', dict(base, levers=dict(engine_levers, q34_batch_filter=True))),
+                        ('cert_on', dict(base, levers=dict(engine_levers, q34_batch_filter=True,
+                                                           q34_batch_certificates=True))),
                         ('pinned_off', dict(base, levers={name: False for name in worker.LEVER_NAMES}, workers=1,
                                             static_threads=0))):
         try:
@@ -116,17 +119,22 @@ def main(argv):
         results[label] = (case, value)
     # The GPU lever: without a device, an explicit refusal naming it (never a
     # silent CPU run); with one, the same object as the engine path.
-    gpu_case = dict(base, levers={name: True for name in worker.LEVER_NAMES})
-    try:
-        value, code, _ = run(gpu_case)
-        outcome = worker.validate_probe(value, gpu_case, code, inputs=inputs)
-        if outcome == 'explicit_refusal':
-            check(value['status'] == 'invalid_input' and value['reason'].startswith('chain_q34_gpu_unavailable'),
-                  'GPU lever refusal reason: ' + str(value['reason']))
-        else:
-            results['gpu_on'] = (gpu_case, value)
-    except (ValueError, KeyError, TypeError, UnicodeError, subprocess.TimeoutExpired) as error:
-        check(False, 'GPU lever output refused by the worker validator: ' + type(error).__name__ + ': ' + str(error))
+    gpu_cases = (('gpu_on', dict(base, levers={name: True for name in worker.LEVER_NAMES})),
+                 ('gpu_certificates_on', dict(base, levers=dict(engine_levers, q34_batch_filter=True,
+                                                                  q34_batch_certificates=True,
+                                                                  q34_gpu_certificates=True))))
+    for label, gpu_case in gpu_cases:
+        try:
+            value, code, _ = run(gpu_case)
+            outcome = worker.validate_probe(value, gpu_case, code, inputs=inputs)
+            if outcome == 'explicit_refusal':
+                check(value['status'] == 'invalid_input' and value['reason'].startswith('chain_q34_gpu_unavailable'),
+                      label + ' refusal reason: ' + str(value['reason']))
+            else:
+                results[label] = (gpu_case, value)
+        except (ValueError, KeyError, TypeError, UnicodeError, subprocess.TimeoutExpired) as error:
+            check(False, label + ' output refused by the worker validator: ' + type(error).__name__ + ': ' +
+                  str(error))
     # Refus explicite REEL avant l'etape Euler du recensement (revue v13 : le
     # lecteur l'avait pris pour un defaut de protocole) : les 30 points entiers
     # de x^2+y^2+z^2 = 25 forment une coquille de plus de 12 sites.
@@ -166,8 +174,9 @@ def main(argv):
     if {'pinned_on', 'batch_on', 'pinned_off'} <= set(results):
         on, off, batched = results['pinned_on'][1], results['pinned_off'][1], results['batch_on'][1]
         check(worker.logical_result(on) == worker.logical_result(off) == worker.logical_result(batched) and
-              ('gpu_on' not in results or worker.logical_result(results['gpu_on'][1]) == worker.logical_result(on)),
-              'modes on/off/batch/gpu change the object')
+              all(label not in results or worker.logical_result(results[label][1]) == worker.logical_result(on)
+                  for label in ('gpu_on', 'gpu_certificates_on', 'cert_on')),
+              'modes on/off/batch/certificates/gpu change the object')
         # v17: the batch path ran (CPU backend), searched each expanded pair
         # once without the cache, and its survivors reached the cores.
         b = batched['q34_batch']
@@ -204,6 +213,63 @@ def main(argv):
                 continue
             check(False, 'batch mutant accepted: ' + label)
         print('probe_worker_contract batch_mutants_killed=' + str(batch_killed) + '/' + str(len(batch_mutants)))
+        # v18: the batch certificates (CPU) ran, with the engine's certificate
+        # work; their mutants, and the cross-case comparison of the catalogue
+        # digest and of the certificate work.
+        if 'cert_on' in results:
+            cert_case, certified = results['cert_on']
+            c = certified['q34_batch']
+            check(c['used'] and c['certificate_backend'] == 'cpu' and c['certificate_ms'] > 0 and
+                  c['certificate_device_ms'] == 0 and c['deferred'] == 0 and
+                  worker.certificate_work(certified) == worker.certificate_work(on) ==
+                  worker.certificate_work(batched) and certified['ledger']['core_builds'] > 0,
+                  'certificate path not exercised or its work differs: ' + json.dumps(c, sort_keys=True))
+            certificate_mutants = [
+                ('certificate backend relabelled', lambda v: v['q34_batch'].update(
+                    certificate_backend='NVIDIA RTX PRO 6000 Blackwell Server Edition')),
+                ('certificate device time on the CPU', lambda v: v['q34_batch'].update(certificate_device_ms=1.0)),
+                ('certificate deferral on the CPU', lambda v: v['q34_batch'].update(deferred=1)),
+                ('certificate phase beyond q34', lambda v: v['q34_batch'].update(
+                    certificate_ms=v['times_ms']['q34'] + 5.0)),
+                ('certificate lever flipped', lambda v: v['options']['levers'].update(q34_batch_certificates=False)),
+                ('gpu certificates without batch certificates', lambda v: v['options']['levers'].update(
+                    q34_batch_certificates=False, q34_gpu_certificates=True)),
+                ('certificates without the batch path', lambda v: v['options']['levers'].update(
+                    q34_batch_filter=False)),
+                ('certificate section field absent', lambda v: v['q34_batch'].pop('deferred')),
+            ]
+            certificate_killed = 0
+            for label, mutate in certificate_mutants:
+                bad = copy.deepcopy(certified)
+                mutate(bad)
+                try:
+                    worker.validate_probe(bad, cert_case, 0, inputs=inputs)
+                except (ValueError, KeyError, TypeError):
+                    certificate_killed += 1
+                    continue
+                check(False, 'certificate mutant accepted: ' + label)
+            print('probe_worker_contract certificate_mutants_killed=' + str(certificate_killed) + '/' +
+                  str(len(certificate_mutants)))
+            pair = [results['pinned_on'][0], cert_case]
+            complete = [dict(outcome='complete_relative')] * 2
+            check(worker.compare_cases(pair, complete, {0: on, 1: certified}) ==
+                  [dict(reference=0, other=1, equal=True)], 'engine/certificate pair judged unequal')
+            for label, mutate in (('catalogue digest', lambda v: v.update(catalogue_digest='0' * 16)),
+                                  ('certificate work', lambda v: v['ledger'].update(
+                                      dead_uniform_tests=v['ledger']['dead_uniform_tests'] + 1))):
+                bad = copy.deepcopy(certified)
+                mutate(bad)
+                check(worker.compare_cases(pair, complete, {0: on, 1: bad})[0]['equal'] is False,
+                      'cross-case comparison blind to the ' + label)
+        else:
+            check(False, 'certificate case absent')
+        engine_filled = copy.deepcopy(on)
+        engine_filled['q34_batch'].update(certificate_backend='cpu')
+        try:
+            worker.validate_probe(engine_filled, results['pinned_on'][0], 0, inputs=inputs)
+            check(False, 'certificate mutant accepted: certificate backend on the engine path')
+        except (ValueError, KeyError, TypeError):
+            pass
         engine_filled = copy.deepcopy(on)
         engine_filled['q34_batch'].update(used=True)
         try:
@@ -318,6 +384,9 @@ def main(argv):
                 max_job_ms=v['q34_occupancy']['wall_max_ms'] + 5.0)),
             ('job time beyond threads x wall', lambda v: v['q34_occupancy'].update(
                 job_sum_s=v['q34_occupancy']['job_sum_s'] + 1000.0)),
+            ('catalogue digest null', lambda v: v.update(catalogue_digest=None)),
+            ('catalogue digest short', lambda v: v.update(catalogue_digest='0' * 15)),
+            ('catalogue digest time absent', lambda v: v['times_ms'].pop('catalogue_digest')),
         ]
         killed = 0
         for label, mutate in mutants:

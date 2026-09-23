@@ -48,6 +48,10 @@ struct ChainOptions {
   int tower_static_threads = -1;
   bool run_tower = true;       // false : s'arreter au catalogue (mesure de l'amont)
   bool keep_catalogue = false; // publier le catalogue recoupe (portes, juges)
+  // Condense canonique du catalogue complet (cle par cle, vue de l'auditeur C :
+  // cle, niveau, arite, interieurs et coquille tries), calcule apres la chaine,
+  // hors chronometre (times.catalogue_digest_ms). Differentiel GPU/moteur.
+  bool catalogue_digest = false;
   // Atlas q4 saturant (option v8 de la reprise u18, desactivee par defaut en
   // v8) : arret d'une cellule des que son compte certifie atteint K-1,
   // certificat terminal sans fragment. Contrat v9 : ACTIVE par defaut dans la
@@ -90,6 +94,14 @@ struct ChainOptions {
   // Desactives par defaut.
   bool q34_batch_filter = false;
   bool q34_gpu_filter = false;
+  // v9 S3 : certificats de voie morte (coeur diametral puis cover) de tous
+  // les survivants en un appel, avant les ouvriers, qui ne font plus que la
+  // generation q3/q4 des voies restees ouvertes. Exige q34_batch_filter et
+  // q34_dead_lanes ; q34_gpu_certificates execute l'appel sur le GPU (une
+  // arete par warp ; une arete trop grosse pour la memoire du warp est
+  // rendue au CPU, chemin moteur complet). Meme objet. Desactives par defaut.
+  bool q34_batch_certificates = false;
+  bool q34_gpu_certificates = false;
 };
 
 // Temps de mur en millisecondes, CPU du processus en secondes.
@@ -99,6 +111,7 @@ struct ChainTimes {
   // Verification digest of the published tower, measured after total_ms
   // (not part of the chain's construction time).
   double digest_ms = 0;
+  double catalogue_digest_ms = 0;  // idem, condense du catalogue (si demande)
   double cpu_s = 0;
 };
 
@@ -168,6 +181,10 @@ struct Q34BatchTimes {
   double front_ms = 0, filter_ms = 0, edges_ms = 0;
   double device_ms = 0;  // passe GPU mesuree par evenements (0 sur CPU)
   std::uint64_t rectangles = 0, survivors = 0;
+  // S3 : appel des certificats (vide et nul si le levier est coupe).
+  std::string certificate_backend;
+  double certificate_ms = 0, certificate_device_ms = 0;
+  std::uint64_t deferred = 0;  // survivants rendus au chemin moteur complet
 };
 
 struct OrderSummary {
@@ -195,6 +212,8 @@ struct ChainResult {
   // Condense FNV-1a 64 d'un encodage canonique de toute la tour (tous ordres,
   // noeuds, parents, contributions, populations en PointId, verticales).
   std::uint64_t tower_digest = 0;
+  // Condense canonique du catalogue (0 si non demande).
+  std::uint64_t catalogue_digest = 0;
   // Tour complete si status == kComplete et run_tower : proprietaire du
   // resultat (le catalogue et l'index sont liberes avant publication).
   tower::FullBallTowerResult tower;
@@ -209,5 +228,9 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
 
 // Condense canonique d'une tour publiee (independant de l'ordre du catalogue).
 std::uint64_t tower_digest(const tower::FullBallTowerResult& tower);
+
+// Condense canonique d'un catalogue : boules triees par cle, puis cle,
+// niveau exact, arite, interieurs tries et coquille triee (FNV-1a 64).
+std::uint64_t catalogue_digest(const std::vector<tower::BallData>& balls);
 
 }  // namespace mhgp9
