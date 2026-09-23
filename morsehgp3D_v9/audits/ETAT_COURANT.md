@@ -1,9 +1,9 @@
 # État courant des audits v9
 
-23 septembre 2026. Dernier port publié de la sonde et du lecteur v13 :
-**`c768e06a`**, puis porte Euler 8k **`a08378da`**. Les mesures de densité
-restent celles du binaire v12 **`4530644b`** ; aucun nouveau reçu G4 ni
-nouvelle série LiDAR v13 n'en découle. Le dernier
+23 septembre 2026. Ports v13 publiés : sonde **`c768e06a`**, porte Euler
+8k **`a08378da`**, lecteur LiDAR **`50646eef`**, lecteur G4 **`515b3666`**.
+Les mesures de densité restent celles du binaire v12 **`4530644b`** ;
+aucun nouveau reçu G4 ni nouvelle série LiDAR v13 n'en découle. Le dernier
 [reçu G4 R7b](../receipts/g4_tower_r7b_20260923/README.md) exécute
 le paquet **`8e8b83a3`**, antérieur au Welzl move-to-front, aux
 séparateurs pseudo-aléatoires du tri FULL et à la libération précoce de
@@ -83,14 +83,15 @@ domaine produit). Elle ne signale aucune omission observée du générateur.
 
 Le port Euler v13 est publié en **`c768e06a`**. La sonde écrit v13 et le
 lecteur G4 en vérifie la borne, la longueur du vecteur et les nouveaux
-champs `q34_occupancy`/`tower_phases_ms`. Dans ce commit, le lecteur local
-LiDAR acceptait trois mutations d'une vraie réponse de 360 sites, K5/s8/W2 :
-*vecteur `euler.by_k` raccourci de 5 à 3*, *`q34_occupancy` absent* et
-*`tower_phases_ms` absent* ; le lecteur G4 les refusait. Le port local
-**`7d6a8d13`** fixe déjà la longueur/type du vecteur et lie le schéma au
-résumé de campagne, mais ne vérifie toujours pas les deux champs de charge
-et de phases ; son selftest v13 synthétique ne les mute pas. Aligner ces
-deux champs sur le lecteur G4 avant de qualifier une nouvelle pente LiDAR.
+champs `q34_occupancy`/`tower_phases_ms`. Le lecteur LiDAR `50646eef`
+rejette désormais le vecteur Euler tronqué et une rétrogradation v13→v12 ;
+son schéma attendu vient du résumé de campagne. Un écart subsiste sur une
+vraie réponse de 360 sites, K5/s8/W2 : ôter `q34_occupancy` **ou**
+`tower_phases_ms` laisse le lecteur local répondre vrai, tandis que G4
+rejette les deux sorties ; le selftest LiDAR v13 ne mute pas ces champs.
+Le lecteur G4 `515b3666` reconnaît correctement un refus réel antérieur au
+calcul d'Euler (`chain_shell_above_12`, borne Euler 0) comme refus explicite.
+Aligner les deux champs restants avant une nouvelle pente LiDAR v13.
 
 Le calcul Euler reste inclus dans `census_ms` (`tower_chain.cpp:486,539–601`)
 et un `E_K` faux refuse **avant** FULL (`:602–612`), alors que la décision
