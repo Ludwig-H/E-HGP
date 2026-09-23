@@ -68,3 +68,32 @@ qualifier le `both_edges` corrigé : le gate de chaîne du commit ne compare
 ni `both_edges` ni le ledger des voies, et son plancher de traîne peut être
 satisfait par une arête q3 seule. Ne pas assimiler ce préflight à un
 résultat S4a/G4 : aucun reçu R15 n'est présent ici.
+
+**Suivi du WIP à 23 h 22 UTC.** Le gate de chaîne mutable
+`tests/chain/chain_batch_q3_gate.cpp` (SHA-256 `8cf7e0e3…`) compare désormais
+sept champs du ledger entre S3 seul, S3+S4a jugé et S3+S4a à ardoise réduite,
+dont `both_edges`, `cover_builds`, `cover_sites` et les deux voies mortes.
+La lacune « aucun contrôle de `both_edges` » ci-dessus est donc **corrigée
+dans ce WIP**. Le plancher `tails>0` et le plancher `both>0` portent encore
+sur des sommes séparées : ils ne forcent pas la même arête à avoir q3
+**différée** et q4 **ouverte**. Une fixture S3 de masque `6` avec report q3
+sur cette arête, ou un compteur explicite de l'intersection, puis un mutant
+qui omet son crédit `both_edges`, fermeraient la porte ciblée. Comparer aussi
+`q4_emitted` à l'ardoise réduite : le gate compare actuellement cette masse
+entre S3 et S4a normal, mais pas avec le bras reporté.
+
+Le nouveau `receipts/s4a_q3_lanes_local_20260923/run.sh` (SHA-256
+`f34fa558…`) est pour l'instant **un plan de capture**, seul fichier du
+dossier à cette lecture. Il projette 08/000000 sans sol, grille 1 mm,
+K5/K10/W8, trois modes de chaîne CPU et la comparaison huit anneaux/un
+anneau. Il ne rejoue pas les moitiés, quarts ou densités. Il écrit `HEAD`
+alors que les sources S4a et les portes sont encore modifiées hors commit,
+et ne lie ni empreintes des sources effectives, du binaire et de l'entrée,
+ni contrôle des statuts, des digests de catalogue/tour et des ledgers des
+JSON produits. Les futurs `SHA256SUMS` des seuls fichiers de sortie ne
+remplacent pas ces vérifications. Pour un reçu exploitable, figer ce paquet,
+archiver ses identités, comparer les trois sorties et publier les reports ;
+ensuite mesurer le même port sur la matrice plein/moitiés/quarts ×
+densités déjà archivée. Les statistiques `--file` ne sont pas une porte
+LiDAR d'exactitude, et la borne `warp_steps_lower_bound` reste un minorant
+par arête des ballots par graine (voir l'audit de couplage S4a).

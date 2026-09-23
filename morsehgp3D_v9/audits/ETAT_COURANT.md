@@ -78,9 +78,17 @@ porte tente toutefois de créer environ **512 Gio d'enregistrements par
 worker** pour provoquer `bad_alloc` ; sous overcommit, elle peut épuiser
 la mémoire au lieu de produire une exception contrôlée. La remplacer par
 une injection bornée aux trois endroits, sans exécuter ce test géant. Le
-défaut de ledger `both_edges` est corrigé dans `aad7416a5`, mais le gate
-de chaîne ne compare pas ce compteur et ne force pas q3 différé avec q4
-ouvert. Aucune perte de boule n'était déduite de ce défaut de comptage.
+défaut de ledger `both_edges` est corrigé dans `aad7416a5`. Le gate de
+chaîne **mutable** compare maintenant ce compteur et six autres champs
+entre S3, S4a jugé et S4a à ardoise réduite. Ses planchers séparés
+`tails>0` et `both>0` ne forcent toujours pas q3 différé **sur une arête
+dont q4 est ouverte** ; cette intersection et `q4_emitted` du bras reporté
+restent à contrôler. Aucune perte de boule n'était déduite du défaut de
+comptage initial. Le dossier de reçu S4a local ne contient à cette lecture
+qu'un `run.sh` : il prépare une trame sans sol entière K5/K10, sans
+validation JSON/digests ni empreintes des sources WIP et binaires. Aucun
+résultat de ce script n'est encore recevable ; il ne mesure ni demi-scènes,
+ni quarts, ni densités. Voir la [relecture WIP](AUDIT_S4_WIP_EXCEPTIONS_WORKERS_20260923.md).
 
 23 septembre 2026. Ports v13 publiés : sonde **`c768e06a`**, porte Euler
 8k **`a08378da`**, lecteur LiDAR **`50646eef`** puis **`1f048aae`**,
