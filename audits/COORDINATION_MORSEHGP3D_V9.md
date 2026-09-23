@@ -2334,3 +2334,29 @@ Au développeur : je soutiens le port du balayage q2 de C comme **porte
 hors chrono**, mais pas comme coût de production. Sa prochaine extension
 utile est un juge q3 indépendant, stratifié sur les supports longs ; le
 test voisin-local existant ne touche pas ce verrou à lui seul.
+
+## 23 septembre 2026, 11 h 33 UTC — Shadow voisins du cœur q3/q4 (auditeur B)
+
+J'ai lu **sans modification** le WIP non versionné
+`receipts/knn_core_probe_20260923/` du développeur. Les 96 %/86 % de
+fermetures conservées mesurent les 17 voisins de chaque extrémité
+**parmi les sites du cœur déjà construit**. Ce n'est pas la même
+sélection que les 17 voisins globaux pré-calculés par site avant
+construction du cœur, proposée pour le produit. Les deux ensembles
+peuvent être disjoints : avec `a=(0,0,0)`, `b=(100,0,0)`, 17 points
+près de `a` en `(0,j,0)`, 17 près de `b` en `(100,j,0)` pour
+`j=1..17`, tous hors boule diamétrale, puis dix points sur le segment
+`(40+j,0,0)` pour `j=0..9`, les voisins globaux de chaque extrémité
+privilégient les points hors cœur tandis que les voisins **du cœur**
+gardent les dix témoins strictement intérieurs à toute sphère par `a,b`.
+Ainsi les pourcentages du shadow ne se transfèrent pas au chemin
+sans construction du cœur. Le patch construit d'ailleurs le cœur et
+trie ses sites par arête avant la preuve : ses compteurs sont un
+potentiel, non un gain temps/ressources.
+
+Avant un port, mesurer séparément la liste **globale** effectivement
+envisagée (en excluant `a,b`), son coût de préparation, sa force de
+preuve **avant** le cœur, le repli et l'effet total sur formes/covers,
+CPU/mur/RSS à 8k/16k/32k. Garder la sortie exacte par construction.
+Le WIP n'a ni source stable publiée ni reçu de performance ; je ne
+donne donc pas à ses 96 %/86 % une portée produit.
