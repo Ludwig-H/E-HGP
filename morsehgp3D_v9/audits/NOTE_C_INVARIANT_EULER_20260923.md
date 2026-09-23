@@ -138,28 +138,39 @@ sont pas dans le catalogue).
 
 ## Ce que l'invariant détecte : mutants du générateur
 
-**Mise à jour (08 h 44 UTC).** Chacun des 35 mutants compilés de
-`tests/gen/mutants.json` a été lié à la chaîne
-([`run_euler_mutants.py`](c_euler_20260923/run_euler_mutants.py)), sur 08/000000
-8k à K5 ; verdicts dans
-[`results/mutants_k5.json`](c_euler_20260923/results/mutants_k5.json) :
+**Mise à jour (09 h 13 UTC), après l'[erratum de B](ERRATUM_B_AUDIT_C_OBJET_ET_EULER_20260923.md).**
+Les 35 mutants compilés de `tests/gen/mutants.json` ont été liés à la chaîne sur
+08/000000 8k, puis jugés de trois façons : invariant simple à K5 (K = 1..3),
+protocole « Kmax+2 » (chaîne mutée à K5 **et** à K7, Euler jusqu'à K5 sur le
+catalogue K7, comparaison du catalogue K5 à la restriction du catalogue K7), et
+**comparaison clé par clé** du catalogue K5 avec le catalogue sain
+([`run_key_compare.py`](c_euler_20260923/run_key_compare.py),
+[`compare_dumps.py`](c_euler_20260923/compare_dumps.py)). Le mutant désactivé
+`admitted_lane_recounted_in_children` a d'abord été appliqué, à tort, sur la
+première occurrence de sa cible (le site d'exclusion) : il a été recompilé sur
+son **site exact à deux lignes** (l'admission). Résultats :
+[protocole](c_euler_20260923/results/mutants_protocol_k5_k7.json),
+[clés](c_euler_20260923/results/mutants_key_compare_k5.json).
 
-| verdict | nombre | mutants |
+| verdict | nombre | détail |
 | --- | ---: | --- |
-| tué par l'invariant ($E_K\neq1$ pour un $K\leq3$) | 9 | `q4_gated_by_q3_acceptance`, `local_exclusion_removes_global_lane`, `single_live_leaf_discarded`, `dead_q4_threshold_k_minus_3`, `dead_contact_counted_inside`, `dead_uniform_at_one_corner`, `dead_q3_disk_too_small`, `witness_cache_all_lanes`, `witness_cache_q4_threshold_k_minus_3` |
-| refusé par la chaîne (recensement, registre de masse) | 10 | contacts comptés intérieurs, arrondis de census, feuilles q3, registres |
-| catalogue changé, invariant muet (omissions aux deux ordres supérieurs) | 3 | `q3_atlas_rejects_at_k_minus_2`, `new_admission_wrong_xi_scale`, `dead_q3_threshold_k_minus_2` |
-| catalogue de même taille, sans alarme | 13 | fautes de contact, d'égalité, de travail ou de contrat qui ne s'expriment pas sur cette coupe |
+| tué par l'invariant simple ($E_K\neq1$, $K\leq3$) | 9 | `q4_gated_by_q3_acceptance`, `local_exclusion_removes_global_lane`, `single_live_leaf_discarded`, `dead_q4_threshold_k_minus_3`, `dead_contact_counted_inside`, `dead_uniform_at_one_corner`, `dead_q3_disk_too_small`, `witness_cache_all_lanes`, `witness_cache_q4_threshold_k_minus_3` |
+| tué par le protocole Kmax+2 seulement | 3 | `new_admission_wrong_xi_scale` (Euler faux à K7 pour un ordre au plus 5) ; `q3_atlas_rejects_at_k_minus_2`, `dead_q3_threshold_k_minus_2` (restriction différente) |
+| refusé par la chaîne | 11 | recensement, registre de masse ; et le mutant `admitted_lane_recounted_in_children` au site exact (garde « witness cache nodes overlap on a lane ») |
+| catalogue **identique clé par clé** au catalogue sain | 12 | fautes de contact, d'égalité, de travail physique ou de contrat, non exprimées sur cette coupe |
 
-Aucun des neuf mutants tués par l'invariant n'est vu par les contrôles de la
-chaîne : c'est la preuve qu'il comble un vrai trou. Les trois survivants à
-catalogue changé tombent exactement dans l'angle mort annoncé (seuils décalés
-de 1, donc boules de profondeur $K_{\max}-2$ ou plus). Le protocole
-« $K_{\max}+2$ » les vise : sur la chaîne saine, la même coupe à K7 donne
-$E_K=1$ pour $K=1..5$, et la restriction $p+q_{\min}\leq6$ de son catalogue
-égale le catalogue K5 (342 181 boules, condensés commutatifs égaux). La
-campagne de ce protocole sur les 35 mutants est en cours ; ses verdicts seront
-ajoutés ici.
+Clé par clé, les trois mutants que l'invariant simple laisse passer n'omettent,
+**à K5 sur cette coupe**, que des boules q3 de profondeur 3
+(2 502, 8 et 6 762 boules, toutes $(p,q,u)=(3,3,3)$) : elles ne comptent qu'aux
+ordres 4 et 5, invisibles par construction à $K\leq3$. Ce constat est propre à
+cette exécution : à K7, `new_admission_wrong_xi_scale` omet aussi des boules qui
+comptent à un ordre au plus 5, ce que l'invariant voit. Aucun des neuf mutants
+tués par l'invariant simple n'est vu par les contrôles de la chaîne. Sur cette
+coupe, **toute mutation qui change le catalogue est détectée** par la réunion
+des trois contrôles ; cela reste un résultat de campagne, pas une preuve de
+complétude, et les omissions communes à deux exécutions ne sont pas vues par la
+comparaison de restriction, qui porte sur un compte et une somme commutative de
+hachés 64 bits, non sur les clés.
 
 ## Limites
 
@@ -170,8 +181,10 @@ ajoutés ici.
   à K5 (33 %) et 191 398 des 1 567 942 à K10 (12 %).
 - Pour couvrir **tous** les ordres du contrat, exécuter le générateur à
   $K_{\max}+2$ (K7 pour le contrat K5), vérifier $E_K$ jusqu'à $K_{\max}$,
-  puis exiger l'égalité du catalogue $K_{\max}$ avec la restriction
-  $p+q_{\min}\leq K_{\max}+1$ du catalogue $K_{\max}+2$. Le contrat K10
+  puis comparer le catalogue $K_{\max}$ à la restriction
+  $p+q_{\min}\leq K_{\max}+1$ du catalogue $K_{\max}+2$ (aujourd'hui compte et
+  somme commutative de hachés ; une comparaison clé par clé est plus sûre, et
+  une omission commune aux deux exécutions reste invisible). Le contrat K10
   demanderait un générateur à K12, hors du domaine actuel ($K\leq10$).
 - L'invariant juge le **catalogue**, pas la tour FULL. Il ne remplace ni T2
   ni un juge de tour d'échantillon.

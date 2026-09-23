@@ -1,0 +1,454 @@
+[
+ {
+  "mutant": "q3_shell_counted_inside",
+  "status": "complete",
+  "compare": {
+   "reference": 342181,
+   "candidate": 342181,
+   "missing": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "added": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "changed_fields": 0,
+   "identical": true
+  },
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  }
+ },
+ {
+  "mutant": "q4_gated_by_q3_front_mask",
+  "status": "complete",
+  "compare": {
+   "reference": 342181,
+   "candidate": 342181,
+   "missing": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "added": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "changed_fields": 0,
+   "identical": true
+  },
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  }
+ },
+ {
+  "mutant": "q3_atlas_rejects_at_k_minus_2",
+  "status": "complete",
+  "compare": {
+   "reference": 342181,
+   "candidate": 339679,
+   "missing": {
+    "count": 2502,
+    "by_p_q_u": {
+     "3,3,3": 2502
+    },
+    "first_euler_order": {
+     "4": 2502
+    },
+    "only_top_two_orders": true
+   },
+   "added": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "changed_fields": 0,
+   "identical": false
+  },
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 47081,
+   "5": -159142
+  }
+ },
+ {
+  "mutant": "xi_upper_used_to_exclude",
+  "status": "complete",
+  "compare": {
+   "reference": 342181,
+   "candidate": 342181,
+   "missing": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "added": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "changed_fields": 0,
+   "identical": true
+  },
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  }
+ },
+ {
+  "mutant": "new_admission_wrong_xi_scale",
+  "status": "complete",
+  "compare": {
+   "reference": 342181,
+   "candidate": 342173,
+   "missing": {
+    "count": 8,
+    "by_p_q_u": {
+     "3,3,3": 8
+    },
+    "first_euler_order": {
+     "4": 8
+    },
+    "only_top_two_orders": true
+   },
+   "added": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "changed_fields": 0,
+   "identical": false
+  },
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49575,
+   "5": -164130
+  }
+ },
+ {
+  "mutant": "positive_contact_lost",
+  "status": "complete",
+  "compare": {
+   "reference": 342181,
+   "candidate": 342181,
+   "missing": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "added": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "changed_fields": 0,
+   "identical": true
+  },
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  }
+ },
+ {
+  "mutant": "fourth_cell_incidence_lost",
+  "status": "complete",
+  "compare": {
+   "reference": 342181,
+   "candidate": 342181,
+   "missing": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "added": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "changed_fields": 0,
+   "identical": true
+  },
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  }
+ },
+ {
+  "mutant": "prefix_work_omitted",
+  "status": "complete",
+  "compare": {
+   "reference": 342181,
+   "candidate": 342181,
+   "missing": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "added": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "changed_fields": 0,
+   "identical": true
+  },
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  }
+ },
+ {
+  "mutant": "q4_wrong_alpha",
+  "status": "complete",
+  "compare": {
+   "reference": 342181,
+   "candidate": 342181,
+   "missing": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "added": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "changed_fields": 0,
+   "identical": true
+  },
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  }
+ },
+ {
+  "mutant": "lemon_contact_counted_inside",
+  "status": "complete",
+  "compare": {
+   "reference": 342181,
+   "candidate": 342181,
+   "missing": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "added": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "changed_fields": 0,
+   "identical": true
+  },
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  }
+ },
+ {
+  "mutant": "admitted_lane_recounted_in_children",
+  "status": "invalid_input",
+  "reason": "chain_invalid_argument: mhgp9 gen q34 witness cache nodes overlap on a lane"
+ },
+ {
+  "mutant": "dead_q3_threshold_k_minus_2",
+  "status": "complete",
+  "compare": {
+   "reference": 342181,
+   "candidate": 335419,
+   "missing": {
+    "count": 6762,
+    "by_p_q_u": {
+     "3,3,3": 6762
+    },
+    "first_euler_order": {
+     "4": 6762
+    },
+    "only_top_two_orders": true
+   },
+   "added": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "changed_fields": 0,
+   "identical": false
+  },
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 42821,
+   "5": -150622
+  }
+ },
+ {
+  "mutant": "witness_cache_xi_lower_bound",
+  "status": "complete",
+  "compare": {
+   "reference": 342181,
+   "candidate": 342181,
+   "missing": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "added": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "changed_fields": 0,
+   "identical": true
+  },
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  }
+ },
+ {
+  "mutant": "dead_load_keeps_loaded",
+  "status": "complete",
+  "compare": {
+   "reference": 342181,
+   "candidate": 342181,
+   "missing": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "added": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "changed_fields": 0,
+   "identical": true
+  },
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  }
+ },
+ {
+  "mutant": "diametral_core_accepted_by_consumers",
+  "status": "complete",
+  "compare": {
+   "reference": 342181,
+   "candidate": 342181,
+   "missing": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "added": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "changed_fields": 0,
+   "identical": true
+  },
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  }
+ },
+ {
+  "mutant": "diametral_core_accepted_by_inactive_local_q4",
+  "status": "complete",
+  "compare": {
+   "reference": 342181,
+   "candidate": 342181,
+   "missing": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "added": {
+    "count": 0,
+    "by_p_q_u": {},
+    "first_euler_order": {},
+    "only_top_two_orders": true
+   },
+   "changed_fields": 0,
+   "identical": true
+  },
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  }
+ }
+]

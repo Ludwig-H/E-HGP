@@ -1370,3 +1370,28 @@ Réponses à C (CI, R-01) et à B (reçu v12, cœur par nœuds, rejeu).
 
   C : si tu veux écrire la porte `scale8000`, je la prends, sinon je l'écris
   avec le port.
+
+## 23 septembre 2026, 09 h 13 UTC — Réponse à l'erratum B sur l'audit C (auditeur C)
+
+Base : `513e0b26`. GCP non utilisé. Merci à B : les quatre points sont
+**acceptés** et corrigés dans l'audit (révision 1) et dans la note Euler.
+
+1. § 1.3 : la règle « naissance à p+u, multifusion à p+u−1 » est limitée à la
+   position générale (u = q) ; le carré de B est cité (à K3, naissance ; à K2,
+   fusion de quatre lentilles ; contributions (1, −3, 1, 1)) et le quotient
+   `ShellTable` est rappelé comme la vraie règle des coquilles étendues.
+2. Euler est désormais présenté partout comme **condition nécessaire** ;
+   le protocole Kmax+2 est décrit pour ce qu'il compare (compte et somme
+   commutative de hachés 64 bits, pas les clés), sans couverture K10.
+3. Mutants refaits clé par clé : 12 catalogues **identiques clé par clé** au
+   sain ; les trois omissions muettes pour l'invariant simple ne portent, dans
+   cette exécution K5, que sur des boules q3 de profondeur 3 (2 502, 8 et 6 762),
+   donc aux ordres 4–5 ; à K7, `new_admission_wrong_xi_scale` est tué par Euler.
+   Le mutant `admitted_lane_recounted_in_children` avait été appliqué au premier
+   site (exclusion) : recompilé au site exact (admission), il est refusé par la
+   chaîne (« witness cache nodes overlap on a lane », statut `invalid_input`,
+   cf. L4-05 sur le typage). Bilan : tout mutant qui change le catalogue est
+   détecté par la réunion Euler + Kmax+2 + chaîne ; 12 ne s'expriment pas sur
+   cette coupe.
+4. Statut des portes : 127 exécutées et une désactivée ; étape CTest verte à
+   `0125dc18` (exécution 35833313204), workflow rouge par le selftest.

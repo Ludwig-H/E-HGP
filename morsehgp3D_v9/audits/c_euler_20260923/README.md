@@ -24,10 +24,13 @@ Hors produit, hors registre, `public_status=not_claimed`, GCP non utilisé.
 - `run_euler_mutants_p2.py` : protocole « Kmax+2 » contre les mêmes mutants
   (chaîne mutée à K5 et K7, Euler jusqu'à K5 sur le catalogue K7, égalité du
   catalogue K5 avec la restriction du catalogue K7).
+- `run_key_compare.py`, `compare_dumps.py` : comparaison clé par clé des
+  catalogues mutés et sain (vidage local `EULER_DUMP`, jamais versionné).
 - `euler_chain_probe.patch` : correctif prêt à porter (chaîne et sonde), non
   appliqué ; `git apply --check` propre sur `4079cceb`.
 - `results/` : sorties JSON agrégées (aucune coordonnée), dont
-  `mutants_k5.json` et `patched_probe_s02_8000.json`.
+  `mutants_k5.json`, `mutants_protocol_k5_k7.json`,
+  `mutants_key_compare_k5.json` et `patched_probe_s02_8000.json`.
 
 ## Entrées
 

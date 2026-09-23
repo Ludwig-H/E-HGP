@@ -15,6 +15,11 @@ angle portée et doublon avec A et B). Les petits contrôles exécutés l'ont é
 sous `nice -n 19`, hors des campagnes de chronométrage du développeur. Aucun
 chrono de cet audit n'est revendiqué.
 
+**Révision 1 (09 h 13 UTC)** : corrections demandées par
+l'[erratum de B](ERRATUM_B_AUDIT_C_OBJET_ET_EULER_20260923.md) (règle générique
+limitée à la position générale, Euler présenté comme condition nécessaire,
+statut exact des portes, mutants comparés clé par clé).
+
 Ce document répond à la première demande de l'utilisateur : **à quoi sert
 l'algorithme, et comment la v9 reconstruit la tour complète**. L'étude des
 implémentations alternatives pour le contrat fera l'objet d'une note séparée.
@@ -34,9 +39,13 @@ implémentations alternatives pour le contrat fera l'objet d'une note séparée.
    catalogue est prouvée arête par arête (notes v8, induction q4 de A,
    induction q3 écrite ici), testée sur de petits nuages seulement.
 4. **Nouveau juge global** : l'invariant d'Euler par ordre K
-   ([note](NOTE_C_INVARIANT_EULER_20260923.md)) vérifie la complétude du
-   catalogue à l'échelle ; il passe sur les 18 coupes LiDAR 8k/16k/32k, et un
-   protocole « Kmax+2 » couvre aussi les deux ordres supérieurs.
+   ([note](NOTE_C_INVARIANT_EULER_20260923.md)) est une **condition nécessaire**
+   de complétude, calculable à l'échelle : il détecte une partie des omissions
+   du catalogue (des omissions de contributions opposées peuvent se compenser)
+   et ne prouve donc pas la complétude. Il passe sur les 18 coupes LiDAR
+   8k/16k/32k ; un protocole « Kmax+2 » ajoute une cohérence entre deux
+   exécutions pour les deux ordres supérieurs (contrat K5 seulement : le
+   domaine actuel s'arrête à K10).
 5. Les preuves invoquées par la v9 (extension non régulière, voies q3/q4) **ne
    sont pas inscrites au registre**, et le README surévalue leur statut.
 6. La CI v9 est rouge depuis 01 h 49 (deux causes hors moteur), la porte T2
@@ -84,15 +93,27 @@ Une boule $B$ est décrite par son centre $c$, ses $p$ sites strictement
 intérieurs $I$, sa coquille $U$ de $u$ sites et la taille $q_{\min}$ de son
 plus petit **support positif** ($S\subseteq U$, centre dans l'intérieur
 relatif de l'enveloppe de $S$, donc $2\leq q_{\min}\leq4$).
+**En position générale** (coquille réduite au support minimal, $u=q$),
 Reani–Bobrowski, inscrits au registre : $c$ est critique pour $d_K$ si et
-seulement si $p<K\leq p+u$ ; l'indice vaut $\mu=p+u-K$ et la multiplicité
-locale $\binom{u-1}{\mu}$. Seuls $\mu=0$ et $\mu=1$ changent $H_0$ :
+seulement si $p<K\leq p+q$ ; l'indice vaut $\mu=p+q-K$ et la multiplicité
+locale $\binom{q-1}{\mu}$. Seuls $\mu=0$ et $\mu=1$ changent $H_0$ :
 
 | rôle pour $H_0$ | ordre | effet |
 | --- | --- | --- |
-| naissance | $K=p+u$ | une nouvelle composante, qui couvre $I\cup U$ |
-| multifusion | $K=p+u-1$ | les $u$ bras $(I\cup U)\setminus\lbrace s\rbrace$ se rejoignent : jusqu'à $u-1$ fusions en une fois |
-| inerte pour $H_0$ | $K\leq p+u-2$ | cycles et cavités seulement |
+| naissance | $K=p+q$ | une nouvelle composante, qui couvre $I\cup U$ |
+| multifusion | $K=p+q-1$ | les $q$ bras $(I\cup U)\setminus\lbrace s\rbrace$ se rejoignent : jusqu'à $q-1$ fusions en une fois |
+| inerte pour $H_0$ | $K\leq p+q-2$ | cycles et cavités seulement |
+
+**Coquille étendue** ($u>q_{\min}$) : ces règles ne s'appliquent plus telles
+quelles (erratum de B,
+[contrelecture](ERRATUM_B_AUDIT_C_OBJET_ET_EULER_20260923.md)). Contre-exemple :
+les quatre sommets d'un carré de côté 2 ($p=0$, $u=4$, $q_{\min}=2$). À $K=3$,
+aucune boule plus petite ne couvre trois sommets : le centre est une
+**naissance**, pas une fusion de quatre composantes ; à $K=2$, en revanche, les
+quatre lentilles des côtés fusionnent en une. Les contributions d'Euler de ce
+bloc valent $(1,-3,1,1)$ pour $K=1..4$. Le produit ne s'appuie pas sur la règle
+générique pour ces blocs : il emploie le quotient local `ShellTable`
+(`src/tower/forest/local_plateau.hpp`).
 
 Un triangle aigu à $K=p+2$ fusionne ainsi **trois** régions d'un coup ; un
 tétraèdre à $K=p+3$ en fusionne quatre. Sur LiDAR, les multifusions ont en
@@ -358,23 +379,27 @@ arête d'arbre couvrant minimal omise fausse les niveaux sans refus.
 
 Pour tout $K\leq K_{\max}-2$, toute boule qui contribue au bilan d'Euler de
 $d_K$ est admissible dans le catalogue ; la somme des contributions vaut 1
-(plus $n$ à $K=1$). Détails, preuve, oracle et résultats dans la
+(plus $n$ à $K=1$). C'est une **condition nécessaire** : elle détecte les
+omissions dont les contributions ne se compensent pas, elle ne certifie pas
+chaque clé. Détails, preuve, oracle et résultats dans la
 [note dédiée](NOTE_C_INVARIANT_EULER_20260923.md). Sur les 18 coupes
 LiDAR emboîtées (trois trames, 8k/16k/32k, K5 et K10), toutes les sommes
 vérifiables valent 1. Le protocole « Kmax+2 » (exécuter à $K_{\max}+2$,
-vérifier Euler jusqu'à $K_{\max}$, puis exiger l'égalité du catalogue
-$K_{\max}$ avec la restriction $p+q_{\min}\leq K_{\max}+1$) passe sur
-08/000000 8k à K5 : 342 181 boules, condensés commutatifs égaux.
+vérifier Euler jusqu'à $K_{\max}$, puis comparer le catalogue $K_{\max}$ à la
+restriction $p+q_{\min}\leq K_{\max}+1$ du catalogue $K_{\max}+2$) passe sur
+08/000000 8k à K5 : 342 181 boules de part et d'autre, **même nombre et même
+somme commutative de hachés 64 bits** (ce n'est pas une comparaison clé par
+clé ; une omission commune aux deux exécutions passerait). Il ne couvre pas
+le contrat K10, qui demanderait un générateur à K12.
 
 Les 35 mutants compilés du générateur (`tests/gen/mutants.json`) ont été liés
-à la chaîne sur 08/000000 8k à K5 : **9 sont tués par l'invariant**, 10 par
-les recoupements de la chaîne (recensement, registre de masse), 3 changent le
-catalogue sans alarme parce qu'ils n'omettent que des boules des deux ordres
-supérieurs (seuils décalés de 1 : c'est exactement l'angle mort annoncé, que
-le protocole « Kmax+2 » couvre ; campagne en cours), et 13 laissent le
-catalogue inchangé sur cette coupe (fautes de contact, d'égalité ou de
-travail physique, qui ne s'expriment pas sur ces données). Aucun des neuf
-tués par l'invariant n'est vu par un contrôle de la chaîne.
+à la chaîne sur 08/000000 8k (détail et fichiers dans la
+[note Euler](NOTE_C_INVARIANT_EULER_20260923.md)) : **9 sont tués par
+l'invariant simple** (aucun n'est vu par les contrôles de la chaîne), 3 par le
+protocole Kmax+2 seulement, 11 sont refusés par la chaîne, et 12 laissent le
+catalogue **identique clé par clé** sur cette coupe. Les trois mutants que
+l'invariant simple laisse passer n'omettent, dans cette exécution K5, que des
+boules de profondeur 3, qui ne comptent qu'aux ordres 4 et 5.
 
 ### 3.3 Autres juges disponibles
 
@@ -393,8 +418,10 @@ tués par l'invariant n'est vu par un contrôle de la chaîne.
 **Ce qui est solide.** Les juges T2 calculent en rationnels Boost, une
 arithmétique distincte de celle du produit (i128, U192, U320). Le modèle Γ
 suit mot pour mot la définition 21 du manuscrit. Les 35 mutants compilés du
-générateur sont exigeants (code **et** stderr exacts). CTest compte
-128 portes, toutes vertes en local et en CI.
+générateur sont exigeants (code **et** stderr exacts). CTest inscrit
+128 portes : 127 exécutées et une désactivée. L'étape CTest de la CI passait
+(capture de la lecture L6 à `0125dc18`, exécution `35833313204`) alors que le
+workflow entier était déjà rouge à cause du selftest (point suivant).
 
 **Ce qui manque** (vérifié par cet audit) :
 
@@ -519,9 +546,10 @@ vérification adverse en cours (ce tableau sera mis à jour).
    la preuve sur cover, restructuration par feuille d'atlas, certificat avant
    expansion en cours chez le développeur).
 4. **Au-delà** : l'étude d'implémentations alternatives de l'auditeur C
-   (note séparée, en cours) et le GPU. L'invariant d'Euler rend désormais
-   testable à l'échelle n'importe quel générateur alternatif : c'est ce qui
-   permet d'oser changer d'algorithme sans perdre la complétude.
+   (note séparée, en cours) et le GPU. L'invariant d'Euler fournit un juge
+   **nécessaire**, peu coûteux et applicable à l'échelle, pour tout générateur
+   alternatif ; il ne remplace ni les oracles bornés, ni une comparaison clé
+   par clé avec le générateur actuel sur les coupes 8k–32k.
 
 ## Annexe — preuves et reproduction
 

@@ -1,0 +1,722 @@
+[
+ {
+  "mutant": "q3_shell_counted_inside",
+  "family": "wspd_q34",
+  "judgment": "geometry",
+  "balls5": 342181,
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "euler7": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 1,
+   "5": 1,
+   "6": 101004,
+   "7": -291218
+  },
+  "restriction_equal": true,
+  "verdict": "survived_identical"
+ },
+ {
+  "mutant": "q4_gated_by_q3_acceptance",
+  "family": "wspd_q34",
+  "judgment": "geometry",
+  "balls5": 342008,
+  "euler5": {
+   "1": 4,
+   "2": -1,
+   "3": 152,
+   "4": 49112,
+   "5": -163664
+  },
+  "euler7": {
+   "1": 2,
+   "2": 0,
+   "3": 7,
+   "4": 52,
+   "5": 345,
+   "6": 99600,
+   "7": -289677
+  },
+  "restriction_equal": false,
+  "verdict": "killed_euler5"
+ },
+ {
+  "mutant": "q4_gated_by_q3_front_mask",
+  "family": "wspd_q34",
+  "judgment": "geometry",
+  "balls5": 342181,
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "euler7": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 1,
+   "5": 1,
+   "6": 101004,
+   "7": -291218
+  },
+  "restriction_equal": true,
+  "verdict": "survived_identical"
+ },
+ {
+  "mutant": "q3_atlas_rejects_at_k_minus_2",
+  "family": "wspd_q34",
+  "judgment": "geometry",
+  "balls5": 339679,
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 47081,
+   "5": -159142
+  },
+  "euler7": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 1,
+   "5": 1,
+   "6": 98331,
+   "7": -285872
+  },
+  "restriction_equal": false,
+  "verdict": "killed_restriction"
+ },
+ {
+  "mutant": "parallel_refused_range_dropped",
+  "family": "wspd_q34",
+  "judgment": "completion_ledger",
+  "verdict": "killed_chain",
+  "chain": {
+   "k5": "invariant_violated",
+   "k7": "invariant_violated",
+   "reason5": "chain_exception: mhgp9 gen global q34 completed ledger mismatch",
+   "reason7": "chain_exception: mhgp9 gen global q34 completed ledger mismatch"
+  }
+ },
+ {
+  "mutant": "xi_upper_used_to_exclude",
+  "family": "q34_affine",
+  "judgment": "geometry",
+  "balls5": 342181,
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "euler7": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 1,
+   "5": 1,
+   "6": 101004,
+   "7": -291218
+  },
+  "restriction_equal": true,
+  "verdict": "survived_identical"
+ },
+ {
+  "mutant": "new_admission_wrong_xi_scale",
+  "family": "q34_affine",
+  "judgment": "geometry",
+  "balls5": 342173,
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49575,
+   "5": -164130
+  },
+  "euler7": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 1,
+   "5": 0,
+   "6": 100998,
+   "7": -291203
+  },
+  "restriction_equal": false,
+  "verdict": "killed_euler7"
+ },
+ {
+  "mutant": "local_exclusion_removes_global_lane",
+  "family": "q34_affine",
+  "judgment": "geometry",
+  "balls5": 119059,
+  "euler5": {
+   "1": -8846,
+   "2": -6406,
+   "3": 892,
+   "4": 1183,
+   "5": -156
+  },
+  "euler7": {
+   "1": -8846,
+   "2": -6406,
+   "3": 892,
+   "4": 997,
+   "5": 700,
+   "6": 438,
+   "7": -251
+  },
+  "restriction_equal": true,
+  "verdict": "killed_euler5"
+ },
+ {
+  "mutant": "positive_contact_lost",
+  "family": "q4_seed_cells",
+  "judgment": "geometry",
+  "balls5": 342181,
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "euler7": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 1,
+   "5": 1,
+   "6": 101004,
+   "7": -291218
+  },
+  "restriction_equal": true,
+  "verdict": "survived_identical"
+ },
+ {
+  "mutant": "single_live_leaf_discarded",
+  "family": "q4_seed_cells",
+  "judgment": "geometry",
+  "balls5": 311597,
+  "euler5": {
+   "1": 4253,
+   "2": -2485,
+   "3": -1991,
+   "4": 27955,
+   "5": -126230
+  },
+  "euler7": {
+   "1": 4253,
+   "2": -2486,
+   "3": -2019,
+   "4": -1478,
+   "5": -51,
+   "6": 78247,
+   "7": -244374
+  },
+  "restriction_equal": false,
+  "verdict": "killed_euler5"
+ },
+ {
+  "mutant": "fourth_cell_incidence_lost",
+  "family": "q4_seed_cells",
+  "judgment": "geometry",
+  "balls5": 342181,
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "euler7": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 1,
+   "5": 1,
+   "6": 101004,
+   "7": -291218
+  },
+  "restriction_equal": true,
+  "verdict": "survived_identical"
+ },
+ {
+  "mutant": "threshold_one_early",
+  "family": "q4_saturating",
+  "judgment": "geometry",
+  "verdict": "killed_chain",
+  "chain": {
+   "k5": "invariant_violated",
+   "k7": "invariant_violated",
+   "reason5": "chain_exception: mhgp9 gen atlas received an invalid terminal depth certificate",
+   "reason7": "chain_exception: mhgp9 gen atlas received an invalid terminal depth certificate"
+  }
+ },
+ {
+  "mutant": "contact_credited_inside",
+  "family": "q4_saturating",
+  "judgment": "geometry",
+  "verdict": "killed_chain",
+  "chain": {
+   "k5": "invariant_violated",
+   "k7": "invariant_violated",
+   "reason5": "chain_census_depth_mismatch",
+   "reason7": "chain_census_depth_mismatch"
+  }
+ },
+ {
+  "mutant": "prefix_work_omitted",
+  "family": "q4_saturating",
+  "judgment": "physical_work",
+  "balls5": 342181,
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "euler7": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 1,
+   "5": 1,
+   "6": 101004,
+   "7": -291218
+  },
+  "restriction_equal": true,
+  "verdict": "survived_identical"
+ },
+ {
+  "mutant": "q4_wrong_alpha",
+  "family": "q34_indexed_witness",
+  "judgment": "geometry",
+  "balls5": 342181,
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "euler7": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 1,
+   "5": 1,
+   "6": 101004,
+   "7": -291218
+  },
+  "restriction_equal": true,
+  "verdict": "survived_identical"
+ },
+ {
+  "mutant": "lemon_contact_counted_inside",
+  "family": "q34_indexed_witness",
+  "judgment": "geometry",
+  "balls5": 342181,
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "euler7": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 1,
+   "5": 1,
+   "6": 101004,
+   "7": -291218
+  },
+  "restriction_equal": true,
+  "verdict": "survived_identical"
+ },
+ {
+  "mutant": "admitted_lane_recounted_in_children",
+  "family": "q34_indexed_witness",
+  "judgment": "geometry",
+  "balls5": 342181,
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "euler7": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 1,
+   "5": 1,
+   "6": 101004,
+   "7": -291218
+  },
+  "restriction_equal": true,
+  "verdict": "survived_identical"
+ },
+ {
+  "mutant": "integer_minimum_wrong_rounding",
+  "family": "q34_indexed_census",
+  "judgment": "geometry",
+  "verdict": "killed_chain",
+  "chain": {
+   "k5": "invariant_violated",
+   "k7": "invariant_violated",
+   "reason5": "chain_census_shell_mismatch",
+   "reason7": "chain_census_shell_mismatch"
+  }
+ },
+ {
+  "mutant": "whole_contact_counted_inside",
+  "family": "q34_indexed_census",
+  "judgment": "geometry",
+  "verdict": "killed_chain",
+  "chain": {
+   "k5": "invariant_violated",
+   "k7": "invariant_violated",
+   "reason5": "chain_census_depth_mismatch",
+   "reason7": "chain_census_depth_mismatch"
+  }
+ },
+ {
+  "mutant": "shell_contact_excluded",
+  "family": "q34_indexed_census",
+  "judgment": "geometry",
+  "verdict": "killed_chain",
+  "chain": {
+   "k5": "invariant_violated",
+   "k7": "invariant_violated",
+   "reason5": "chain_census_shell_mismatch",
+   "reason7": "chain_census_shell_mismatch"
+  }
+ },
+ {
+  "mutant": "q3_leaf_shell_counted_inside",
+  "family": "wspd_q34",
+  "judgment": "geometry",
+  "verdict": "killed_chain",
+  "chain": {
+   "k5": "invariant_violated",
+   "k7": "invariant_violated",
+   "reason5": "chain_census_depth_mismatch",
+   "reason7": "chain_census_depth_mismatch"
+  }
+ },
+ {
+  "mutant": "q3_leaf_census_drops_certified_count",
+  "family": "wspd_q34",
+  "judgment": "geometry",
+  "verdict": "killed_chain",
+  "chain": {
+   "k5": "invariant_violated",
+   "k7": "invariant_violated",
+   "reason5": "chain_census_interior_overflow",
+   "reason7": "chain_census_interior_overflow"
+  }
+ },
+ {
+  "mutant": "dead_q3_threshold_k_minus_2",
+  "family": "wspd_q34",
+  "judgment": "geometry",
+  "balls5": 335419,
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 42821,
+   "5": -150622
+  },
+  "euler7": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 1,
+   "5": 1,
+   "6": 97312,
+   "7": -283834
+  },
+  "restriction_equal": false,
+  "verdict": "killed_restriction"
+ },
+ {
+  "mutant": "dead_q4_threshold_k_minus_3",
+  "family": "wspd_q34",
+  "judgment": "geometry",
+  "balls5": 335829,
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 6353,
+   "4": 30527,
+   "5": -145090
+  },
+  "euler7": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 1,
+   "5": 5334,
+   "6": 85005,
+   "7": -275219
+  },
+  "restriction_equal": false,
+  "verdict": "killed_euler5"
+ },
+ {
+  "mutant": "dead_contact_counted_inside",
+  "family": "wspd_q34",
+  "judgment": "geometry",
+  "balls5": 274824,
+  "euler5": {
+   "1": 1,
+   "2": 6351,
+   "3": -8415,
+   "4": -4059,
+   "5": -57014
+  },
+  "euler7": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 5962,
+   "5": 395,
+   "6": 37573,
+   "7": -189382
+  },
+  "restriction_equal": false,
+  "verdict": "killed_euler5"
+ },
+ {
+  "mutant": "dead_uniform_at_one_corner",
+  "family": "wspd_q34",
+  "judgment": "geometry",
+  "balls5": 315297,
+  "euler5": {
+   "1": 117,
+   "2": 868,
+   "3": 3623,
+   "4": 17061,
+   "5": -114016
+  },
+  "euler7": {
+   "1": 24,
+   "2": 69,
+   "3": 548,
+   "4": 1874,
+   "5": 4229,
+   "6": 44484,
+   "7": -201658
+  },
+  "restriction_equal": false,
+  "verdict": "killed_euler5"
+ },
+ {
+  "mutant": "dead_q3_disk_too_small",
+  "family": "wspd_q34",
+  "judgment": "geometry",
+  "balls5": 342063,
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": -8,
+   "4": 49492,
+   "5": -163937
+  },
+  "euler7": {
+   "1": 1,
+   "2": 1,
+   "3": 0,
+   "4": 0,
+   "5": -9,
+   "6": 100909,
+   "7": -290989
+  },
+  "restriction_equal": false,
+  "verdict": "killed_euler5"
+ },
+ {
+  "mutant": "witness_cache_all_lanes",
+  "family": "q34_witness_cache",
+  "judgment": "geometry",
+  "balls5": 342128,
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": -4,
+   "4": 49548,
+   "5": -164061
+  },
+  "euler7": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 2,
+   "5": 2,
+   "6": 100960,
+   "7": -291137
+  },
+  "restriction_equal": false,
+  "verdict": "killed_euler5"
+ },
+ {
+  "mutant": "witness_cache_xi_lower_bound",
+  "family": "q34_witness_cache",
+  "judgment": "geometry",
+  "balls5": 342181,
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "euler7": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 1,
+   "5": 1,
+   "6": 101004,
+   "7": -291218
+  },
+  "restriction_equal": true,
+  "verdict": "survived_identical"
+ },
+ {
+  "mutant": "witness_cache_q4_threshold_k_minus_3",
+  "family": "q34_witness_cache",
+  "judgment": "geometry",
+  "balls5": 342130,
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 52,
+   "4": 49430,
+   "5": -163993
+  },
+  "euler7": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 1,
+   "5": 6,
+   "6": 100989,
+   "7": -291203
+  },
+  "restriction_equal": false,
+  "verdict": "killed_euler5"
+ },
+ {
+  "mutant": "dead_load_keeps_loaded",
+  "family": "q34_dead_lanes_owner",
+  "judgment": "state",
+  "balls5": 342181,
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "euler7": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 1,
+   "5": 1,
+   "6": 101004,
+   "7": -291218
+  },
+  "restriction_equal": true,
+  "verdict": "survived_identical"
+ },
+ {
+  "mutant": "dead_core_closes_on_any_lane",
+  "family": "wspd_q34",
+  "judgment": "ledger",
+  "verdict": "killed_chain",
+  "chain": {
+   "k5": "invariant_violated",
+   "k7": "invariant_violated",
+   "reason5": "chain_exception: mhgp9 gen global q34 completed ledger mismatch",
+   "reason7": "chain_exception: mhgp9 gen global q34 completed ledger mismatch"
+  }
+ },
+ {
+  "mutant": "dead_core_closed_edge_uncounted",
+  "family": "wspd_q34",
+  "judgment": "ledger",
+  "verdict": "killed_chain",
+  "chain": {
+   "k5": "invariant_violated",
+   "k7": "invariant_violated",
+   "reason5": "chain_exception: mhgp9 gen global q34 completed ledger mismatch",
+   "reason7": "chain_exception: mhgp9 gen global q34 completed ledger mismatch"
+  }
+ },
+ {
+  "mutant": "diametral_core_accepted_by_consumers",
+  "family": "q34_cover",
+  "judgment": "contract",
+  "balls5": 342181,
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "euler7": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 1,
+   "5": 1,
+   "6": 101004,
+   "7": -291218
+  },
+  "restriction_equal": true,
+  "verdict": "survived_identical"
+ },
+ {
+  "mutant": "diametral_core_accepted_by_inactive_local_q4",
+  "family": "q34_cover",
+  "judgment": "contract",
+  "balls5": 342181,
+  "euler5": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "euler7": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 1,
+   "5": 1,
+   "6": 101004,
+   "7": -291218
+  },
+  "restriction_equal": true,
+  "verdict": "survived_identical"
+ }
+]

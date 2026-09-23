@@ -13,6 +13,7 @@
 // Usage : euler_check <fichier.u32le> Kmax workers <sortie_degenerees.jsonl>
 #include <chrono>
 #include <cstdint>
+#include <cstdlib>
 #include <cstdio>
 #include <fstream>
 #include <iterator>
@@ -130,6 +131,26 @@ int main(int argc, char** argv) {
                  inside, shell.c_str());
   }
   std::fclose(deg);
+  // Vidage optionnel des cles (catalogue deja strictement trie par BallKey) pour une
+  // comparaison cle par cle entre executions : EULER_DUMP=<fichier>. Enregistrement de
+  // 83 octets : a, b0, b1, b2, c (5 x 16 octets LE), puis p, q_min, u. Fichier local,
+  // jamais versionne (les cles decrivent des spheres passant par des sites LiDAR).
+  if (const char* dump = std::getenv("EULER_DUMP")) {
+    std::FILE* f = std::fopen(dump, "wb");
+    if (!f) throw std::runtime_error("cannot open dump");
+    for (const auto& b : res.catalogue_balls) {
+      const i128 parts[5] = {b.key.a, b.key.b[0], b.key.b[1], b.key.b[2], b.key.c};
+      unsigned char rec[83];
+      for (int t = 0; t < 5; ++t) {
+        __extension__ typedef unsigned __int128 u128;
+        const u128 w = (u128)parts[t];
+        for (int byte = 0; byte < 16; ++byte) rec[16 * t + byte] = (unsigned char)((w >> (8 * byte)) & 0xffu);
+      }
+      rec[80] = b.n_interior; rec[81] = b.arity; rec[82] = b.n_shell;
+      std::fwrite(rec, 1, sizeof(rec), f);
+    }
+    std::fclose(f);
+  }
   std::printf("{\"status\":\"complete\",\"file\":\"%s\",\"n\":%zu,\"kmax\":%u,\"wall_s\":%.3f,\"balls\":%zu,\"degenerate\":%llu,\"recount_mismatch\":%llu,\"generic_sum\":[",
               argv[1], pts.size(), kmax, wall, res.catalogue_balls.size(), (unsigned long long)degenerate,
               (unsigned long long)recount_mismatch);
