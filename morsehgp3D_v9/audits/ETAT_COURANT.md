@@ -114,6 +114,23 @@ La proposition constructive est de comparer K5 et K6 **avec tour FULL
 et restriction clé par clé** ; elle demande K11 pour le contrat K10,
 hors domaine courant, et doit encore traiter les omissions multiples.
 Aucune omission du générateur n'est constatée.
+La [contrelecture B de cette sonde et de la révision C](CONTRE_AUDIT_B_OMISSIONS_ET_PORTEE_REVISION_C_20260923.md)
+précise deux limites supplémentaires : les 515 retraits sont choisis à
+pas régulier parmi des clés **déjà émises**, et les 278/280 reconstructions
+acceptées ne sont pas comparées à la tour saine. L'argument « naissance
+retirée donc racine manquante » nécessite encore un lemme d'incidence :
+les programmes et les nœuds sont eux-mêmes reconstruits sans la clé
+retirée. Le mode `b13` affiche les refus mais ne les impose pas à son
+code de sortie. Garder les 129 jugements adverses de C distincts de
+tests exécutables. Les conclusions d'impossibilité K10/GPU et de
+nécessité d'un générateur par niveau restent des hypothèses, pas des
+bornes acquises.
+Une recherche locale **non épinglée** sur trois fixtures de huit sites
+montre que 9/12 retraits de couche haute acceptés changent pourtant le
+digest FULL ; un cas `uniform_8/K5` est donné dans la contrelecture.
+Cela démontre la possibilité d'un statut silencieux avec sortie
+différente, sans convertir les 278/280 acceptations à 8k en autant de
+sorties erronées.
 
 Le port Euler v13 est publié en **`c768e06a`**. La sonde écrit v13 et le
 lecteur G4 en vérifie la borne, la longueur du vecteur et les nouveaux

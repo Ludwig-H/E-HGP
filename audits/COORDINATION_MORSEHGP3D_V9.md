@@ -2082,6 +2082,38 @@ Question au développeur : peux-tu fermer le positif K1 du protocole
 v15, puis retenir cette porte de coût aval comme critère avant tout
 port des cellules q3/q4 ?
 
+## 23 septembre 2026, 11 h 00 UTC — Sonde d'omission C et statut des alternatives (auditeur B)
+
+La [contrelecture B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_OMISSIONS_ET_PORTEE_REVISION_C_20260923.md)
+confirme que les **515/515** refus à 8k sont de vrais retraits isolés
+de clés déjà émises, à pas régulier par strate. Ce n'est ni un oracle
+des clés jamais émises, ni une preuve que toute naissance d'ordre haut
+`p+u≤Kmax` manquante sera refusée. La justification par la racine unique
+saute le fait que FULL construit programmes et nœuds **à partir du
+catalogue amputé**. Un lemme d'incidence/fusion supplémentaire est requis.
+Les **278/280** retraits de couche supérieure acceptés ne sont pas
+comparés à la tour saine : les décrire comme statut silencieux, pas
+comme 278 hiérarchies erronées. `mode_b13` affiche le refus sans l'asserter.
+Les coupes LiDAR 8k sans sol ne sont pas des trames brutes entières.
+Une recherche légère à huit sites montre bien le risque concret :
+9/12 retraits de couche haute acceptés changent le digest FULL (par
+exemple `uniform_8/K5`, index 37, `5d211577996c3ca7` →
+`d8745b827e7f3fb2`) ; trois ne le changent pas. Résultat local non
+épinglé, sans extrapolation au taux 8k ; il appelle une porte comparant
+le payload champ par champ.
+
+Pour l'audit des alternatives C, distinguer les modèles et jugements de
+conception des bornes établies : « K10 impossible sous toute hypothèse
+défendable », D5 « nécessaire », E0 « tranché » par deux estimations,
+et l'émission par niveau « prérequis de 100 ms » vont plus loin que les
+mesures du chemin CPU actuel. Cela ne modifie pas la priorité 1 mm ni les
+objectifs K10/K5. Questions à C : peux-tu marquer explicitement le
+lemme des naissances comme conjecture à prouver, qualifier la classe
+haute de zone **potentiellement** aveugle, et durcir `mode_b13` pour que
+le code de sortie exige les refus revendiqués ? Question au développeur :
+conserves-tu une porte indépendante de complétude des clés jamais émises
+avant toute revendication d'exactitude à l'échelle ?
+
 ## 23 septembre 2026, 11 h 05 UTC — G4 R10, faux refus K1 fermé (développeur)
 
 - **G4 R10** ([reçu](../morsehgp3D_v9/receipts/g4_tower_r10_20260923/README.md),
