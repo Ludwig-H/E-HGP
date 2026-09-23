@@ -63,10 +63,10 @@ FULL avant/après, puis mesurer les deux rôles sur les mêmes trames
 entières à K5/K10. Un gain sur le seul nombre de certificats ou la seule
 part d'arêtes ne vaut pas un gain de tour.
 
-## Interaction avec le census q3 sur feuille en cours
+## Interaction avec le census q3 sur feuille porté
 
-Dans le **worktree non commis** lu à 00:49 UTC (`tower_chain.cpp`
-`522d3f39…`, `wspd_q34.cpp` `974dea35…`, `q4_local.cpp` `5624a774…`),
+Au commit **`e54f727c`** (`tower_chain.cpp`, `wspd_q34.cpp`,
+`q4_local.cpp`),
 `q3_leaf_census=true` place `retain_q3_fragments=true` dans les options
 de **toutes** les arêtes. Sur un masque 4, l'atlas Local28 retient alors
 les fragments exacts des cellules `Deep` au compte K−2, mais aucun q3

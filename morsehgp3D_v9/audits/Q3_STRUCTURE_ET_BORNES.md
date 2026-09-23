@@ -1,6 +1,6 @@
 # Audit v8 → v9 : q3 par cellules locales de miniballes et frontières certifiées
 
-22 septembre 2026. Moteur v8 lu à `a74e90f2`, ouverture v9 `3595725a` ; **architecture proposée, non implémentée ni qualifiée en v9**. La [décision v9 documentée](https://github.com/Ludwig-H/E-HGP/blob/3595725a/morsehgp3D_v9/docs/AUDIT_V8_SYNTHESE.md) poursuit d'abord le jalon de temps sur trame LiDAR entière **sans sol en u18/1 mm**, K5 puis K10 sur G4, puis 100 ms. Le float32 original reste le défaut d'entrée contractuel antérieur, dont le développement temporel v9 est suspendu. La trame brute entière reste une obligation distincte ; sa portée temporelle v9 doit être fixée. Aucun alignement des points, des anneaux ou des passages LiDAR n'est supposé.
+22–23 septembre 2026. Moteur v8 lu à `a74e90f2`, ouverture v9 `3595725a` ; **l'amorce du census q3 sur feuille exacte est portée à `e54f727c`**, le partage entre graines/arêtes et la génération directe depuis les frontières restent des propositions. La [décision v9 documentée](https://github.com/Ludwig-H/E-HGP/blob/3595725a/morsehgp3D_v9/docs/AUDIT_V8_SYNTHESE.md) poursuit d'abord le jalon de temps sur trame LiDAR entière **sans sol en u18/1 mm**, K5 puis K10 sur G4, puis 100 ms. Le float32 original reste le défaut d'entrée contractuel antérieur, dont le développement temporel v9 est suspendu. La trame brute entière reste une obligation distincte ; sa portée temporelle v9 doit être fixée. Aucun alignement des points, des anneaux ou des passages LiDAR n'est supposé.
 
 ## Diagnostic qui commande le choix
 
@@ -129,8 +129,41 @@ découpage.
 
 Avant un nouvel atlas par ancre, une optimisation à risque limité peut réutiliser **les feuilles exactes** de l'atlas q4 déjà payé pour une arête `ab`. [L'objet `Q4LocalFragment`](../../morsehgp3D_v8/src/lanes/q4_local_partition.hpp) garantit, sur sa cellule fermée, le **compte exact des nœuds déjà certifiés intérieurs** pour le même cover et une frontière disjointe complète de nœuds encore ambigus ; les autres nœuds sont strictement dehors. Sa forme locale a le même signe que `4Q` fois la puissance de la sphère de centre `c` passant par `a,b`, avec `Q>0` ([identité](../../morsehgp3D_v8/docs/Q3_CERTIFICAT_ATLAS_20260921.md)). Si le circumcentre q3 de `abx` est dans cette feuille, la positivité et la propriété de `ab` assurent que sa boule fermée entière est dans le cover de `ab` : en posant `D=|ab|²`, on a `R²≤D/3` et `|c−(a+b)/2|²=R²−D/4≤D/12`, donc `R+|c−(a+b)/2|≤√(3D)/2<√D`, le rayon du cover. Les sites strictement intérieurs **et tous les contacts de coquille** y sont. Le census q3 peut donc démarrer avec ce compte exact, tester seulement les sites de la frontière, saturer à K−1 ou conserver sa profondeur exacte, et construire la coquille complète dans cette même frontière. Les endpoints `a,b,x` ont signe zéro et doivent rester disponibles. Le fragment ne livre toutefois que le **compte** des intérieurs uniformes, pas leurs IDs : le catalogue FULL exige des handles vers ces nœuds ou une recollecte d'intérieurs une fois par boule canonique distincte, coût inclus. Ce port exige le **même nuage/index, la même arête, le même cover et la même cellule** ; une simple valeur numérique de compte détachée de son propriétaire n'est pas une preuve.
 
-La distinction des états de [l'atlas](../../morsehgp3D_v8/src/lanes/q4_local.cpp) est décisive. `Leaf` a un fragment exact utilisable. `Deep` ne conserve plus son fragment : s'il certifie au moins K−1 sites, il rejette q3 immédiatement ; s'il ne garantit que K−2, seuil suffisant pour q4, il **ne décide pas q3**. Le nouveau certificat `saturate_deep` atteint K−1 mais n'a volontairement aucune frontière complète : il rejette q3, sans pouvoir amorcer un census accepté. Dans les cas `Deep` insuffisants, il faut raffiner un état complet encore possédé ou reprendre un census global à zéro. `Outside`, notamment sous le domaine `Positive` q4, ne dit rien sur q3 : un circumcentre q3 peut être hors du domaine q4 même si sa graine est valide ; repli global obligatoire. Cette discipline conserve aussi la coquille des préfixes et des frontières, que le seul `certified_inside_count` public ne peut pas fournir. Mesurer séparément feuilles q3 accessibles, profondes à K−2 seulement, profondes à K−1, dehors, masse de frontière et rescans de repli. Le [certificat d'atlas q3 v8](../../morsehgp3D_v8/docs/Q3_CERTIFICAT_ATLAS_20260921.md) ne faisait que rejeter : il n'est pas déjà ce raccord de census.
-Une API typée de consultation de feuille, liée à l'atlas possédé, est donc à porter ; l'actuelle API publique ne livre que le compte certifié et ne permet pas de réutiliser la frontière. La cellule/propriété de la réponse doit rester figée pendant tout le census et la collecte.
+La distinction des états de [l'atlas](../../morsehgp3D_v8/src/lanes/q4_local.cpp) est décisive. `Leaf` a un fragment exact utilisable. En v9 à `e54f727c`, `Deep` **peut aussi conserver** son fragment exact au compte K−2 si `retain_q3_fragments=true` ; sinon il ne donne qu'un minorant. S'il certifie au moins K−1 sites, il rejette q3 immédiatement ; s'il ne garantit que K−2 sans fragment, seuil suffisant pour q4, il **ne décide pas q3**. Le certificat `saturate_deep` atteint K−1 mais n'a volontairement aucune frontière complète : il rejette q3, sans pouvoir amorcer un census accepté. Dans les cas `Deep` insuffisants sans fragment, il faut reprendre un census global à zéro. `Outside`, notamment sous le domaine `Positive` q4, ne dit rien sur q3 : un circumcentre q3 peut être hors du domaine q4 même si sa graine est valide ; repli global obligatoire. Mesurer séparément feuilles q3 accessibles, profondes à K−2 conservées ou non, profondes à K−1, dehors, masse de frontière et rescans de repli. Le [certificat d'atlas q3 v8](../../morsehgp3D_v8/docs/Q3_CERTIFICAT_ATLAS_20260921.md) ne faisait que rejeter ; la réponse typée `certified_cell` et son fragment possédé sont maintenant portés en v9, mais le coût réel reste ouvert.
+
+### Localiser les centres rationnels sans conversion complète
+
+Au commit `e54f727c`, chaque `Q4LocalAtlas::certified_cell` valide le centre
+`(x/den,y/den)` puis exécute `scaled_floor` sur **20 bits par axe avant de
+lire la racine**. La chaîne a `max_depth=7` par défaut. Le reçu G4 R2
+antérieur compte 466 022 395 localisations q3 sur 08/000000/K10 ; parmi
+elles, 20 845 seulement sont classées hors domaine, donc les appels
+retournant une cellule paient à eux seuls au moins **18 640 062 000**
+itérations de doublement quotient/reste (40 chacun). Ce nombre est un
+compte de boucle déduit du code et du registre, **pas** un chrono attribué.
+
+Une descente exacte évite cette conversion. Après les gardes de domaine
+public actuelles et `−2den≤x,y≤2den`, une racine terminale rend directement
+son certificat. À un nœud de profondeur `d`, la coupure d'un axe est
+`j/2^(d−1)` pour `d≥1` (zéro à `d=0`). Comparer
+`x·2^(d−1)` à `j·den` et l'analogue de `y`; l'égalité choisit **gauche/bas**,
+comme le premier enfant contenant le point dans l'actuelle traversée de
+cellules fermées. Pour `d≤10`, `|x|,den<2^117` et `|j|≤2^d−1` bornent le
+premier produit sous `2^126` et le second sous `2^127` : les deux tiennent
+en i128 signé. Si l'option publique permet `max_depth>10`, basculer **une
+fois** sur la division longue existante à la profondeur 11 ; le produit
+`j·den` n'est plus prouvé i128 au-delà. Les états `Outside`, `Deep` et
+`ExactLeaf`, les fragments et tous les comptes restent identiques.
+
+L'[oracle différentiel](check_q3_atlas_rational_location_20260923.py)
+compare les chemins complets et chaque préfixe sur 192 352 centres, les
+frontières dyadiques de `−2` à `2` et leurs voisins, les dénominateurs
+près de `2^117` et les extrêmes signés : PASS normal et `python -O`.
+Il n'exécute pas le moteur natif. Une porte native doit comparer les
+certificats typés et les présentations q3 aux frontières, puis ablater
+sur les **mêmes** trames LiDAR les profondeurs de consultation, temps
+q3/q4, travail d'atlas et sortie FULL. Cette économie de localisation ne
+remplace pas la réduction des milliards de tests et copies de l'atlas.
 
 ## Lemme exact : une profondeur de miniballe est un rang de site
 
@@ -179,7 +212,7 @@ Une tâche v9 peut posséder `(nuage/index immuable, ancre, cellule ou produit, 
 
 Sur G4, les tests nombreux et indépendants `(cellule, nœud Z)` et les paires de petites frontières se prêtent à une compaction en lots GPU avec index résident. Pour u18, un filtre numérique à erreur dirigée doit précéder un repli entier exact ; pour float32 original, le repli exact des [prédicats natifs](../../morsehgp3D_v8/docs/BOULES_FLOAT32_Q3_Q4_20260921.md) reste indispensable. Une indécision GPU devient une tâche exacte CPU ou un chemin exact device qualifié, jamais un signe deviné. Saturation de file, débordement de buffer ou manque de mémoire conserve toutes les tâches restantes ; les transferts et la compaction entrent dans le chrono. Il serait prématuré de porter les 1,1 milliard de bornes q3 v8 telles quelles sur GPU : la priorité est d'en **supprimer** une grande part.
 
-Après la base bout-à-bout V9-1 du [plan ouvert](https://github.com/Ludwig-H/E-HGP/blob/3595725a/morsehgp3D_v9/docs/PLAN_V9.md), premier port d'optimisation conseillé, par ordre de preuve : (i) le raccord d'une feuille q4 exacte au q3, avec les replis ci-dessus ; (ii) un fragment q3 local complet/terminal sur cellule fermée, oracle rationnel et contacts ; (iii) génération des paires depuis la frontière, centre exact et propriétaire unique ; (iv) comparaison au flux v8 complet sur petits nuages, sorties et profondeurs, puis mêmes entrées sans-sol 1 mm ; (v) partage de cellules entre arêtes et équipe CPU ; (vi) lots GPU. Ces expériences peuvent démarrer indépendamment sans remplacer la porte FULL. Le profil float32 ne revient qu'après réouverture explicite de cette voie. Chaque étape enregistre les masses de produits résiduels, cellules, `B,F,P,R,V`, supports/coquilles, cache utile, RSS/pics, appels exacts et temps CPU/mur par worker. Tester d'abord 08/000000, 000100, 000200 entières puis plusieurs **séquences** ; pour la croissance, utiliser scène entière, moitiés et quarts du protocole, avec masque sans-sol fixé avant les coupes, puis le brut. Ce sont des diagnostics : seul un lanceur FULL sur trames entières peut revendiquer 1 s ou 100 ms.
+Après la base bout-à-bout V9-1 du [plan ouvert](https://github.com/Ludwig-H/E-HGP/blob/3595725a/morsehgp3D_v9/docs/PLAN_V9.md), le raccord d'une feuille q4 exacte au q3 a été porté à `e54f727c` avec ses replis et une petite porte rationnelle. La suite utile est : (i) ablation LiDAR appariée, y compris tests ponctuels répétés, coquille et résidence des fragments ; (ii) fragment q3 local complet/terminal sur cellule fermée, oracle rationnel et contacts ; (iii) génération des paires depuis la frontière, centre exact et propriétaire unique ; (iv) comparaison au flux v8 complet sur petits nuages, sorties et profondeurs, puis mêmes entrées sans-sol 1 mm ; (v) partage de cellules entre arêtes et équipe CPU ; (vi) lots GPU. Ces expériences peuvent démarrer indépendamment sans remplacer la porte FULL. Le profil float32 ne revient qu'après réouverture explicite de cette voie. Chaque étape enregistre les masses de produits résiduels, cellules, `B,F,P,R,V`, supports/coquilles, cache utile, RSS/pics, appels exacts et temps CPU/mur par worker. Tester d'abord 08/000000, 000100, 000200 entières puis plusieurs **séquences** ; pour la croissance, utiliser scène entière, moitiés et quarts du protocole, avec masque sans-sol fixé avant les coupes, puis le brut. Ce sont des diagnostics : seul un lanceur FULL sur trames entières peut revendiquer 1 s ou 100 ms.
 
 ### Références de source gelées pendant cette lecture
 

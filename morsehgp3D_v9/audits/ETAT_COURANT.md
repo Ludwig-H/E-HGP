@@ -1,8 +1,10 @@
 # État courant des audits v9
 
-23 septembre 2026. Code jugé : **`0b29b6c3`** (session G4 sur le paquet
-`e28296bb`, noyau MEB à `ad2d0ebb`, sonde v3 et atlas saturant à
-`e6405952`, défaut FULL statique à `0b29b6c3`). Cadre :
+23 septembre 2026. Code courant lu : **`e54f727c`** (census q3 sur feuille,
+portes du générateur portées et sonde v4) ; reçu G4 R2 épinglé au code
+antérieur `0b29b6c3` et reçu G4 R1 au paquet `e28296bb`. Noyau MEB à
+`ad2d0ebb`, atlas saturant et sonde v3 à `e6405952`, défaut FULL statique
+à `0b29b6c3`. Cadre :
 `exploration_v9_hors_registre`,
 `reference_cpu`, `quantized_u18_input_only`, `not_claimed`. Ce fichier est le
 verdict mutable du dossier ; les notes datées conservent les démonstrations et
@@ -127,6 +129,19 @@ entrée, compteurs générateur publiés, catalogue, ordres et digest ; q3/q4 y 
 profonde, avec sessions et options aval différentes, sans ablation
 contrôlée ni promotion du reçu R2 refusé.
 
+`e54f727c` ajoute le census q3 sur fragment exact de l'atlas q4 et le rend
+actif par défaut dans la chaîne. Une feuille profonde sans fragment complet
+reste un simple minorant et retombe sur le census global. Le petit juge
+`wspd_q34` du build développeur a été rejoué directement : PASS, 60 appels
+en mode feuille, 6 088 census feuille, 1 846 rejets et 44 300 tests
+ponctuels ; `q4_local` passe aussi. Ce sont des portes ciblées, pas une
+qualification indépendante des 102 CTests inscrits ni une mesure LiDAR
+appariée. La [contrelecture B](CONTRE_AUDIT_B_Q3_FEUILLE_WIP_20260923.md)
+donne la fixture K3 avec un intérieur et quatre contacts : l'invariant
+géométrique est cohérent, mais son diagnostic LiDAR non versionné expose
+610,29 M nouveaux tests ponctuels q3 sur feuille. Les gains globaux restent
+à mesurer avec le coût de coquille et les octets de fragments retenus.
+
 Le chiffre v8 de 104,63 s portait sur le seul flux q3/q4 en mode digest :
 aucune régression ni accélération v9 ne se déduit de cette comparaison non
 appariée.
@@ -143,17 +158,25 @@ appariée.
    FULL. Ne pas confondre les sommes de temps worker avec le temps mur.
    Le reçu G4 R1 satisfait cette porte pour son paquet **ancien**
    `e28296bb` : huit cas achevés, sources et entrées recoupées, arrêt ciblé
-   certifié. Il ne qualifie pas les nouveaux défauts. **Bloquant pour le
-   prochain G4** : à `0b29b6c3`, le worker accepte l'étiquette v3 et
-   l'option de saturation, mais exige encore des entiers pour toutes les
-   valeurs de `tower_work`. La vraie sonde ajoute `meb_accounting` (chaîne) et
-   `meb_supports_by_size` (tableau) ; `validate_probe` refuse
-   `probe counters tower_work` après calcul. Les faux producteurs des
-   selftests v2/v3 omettent ces champs. Juger une **vraie petite
-   sortie** de la sonde, complète et refusée, avant une autre session
-   facturée. Le protocole v3 ne lie pas non plus la valeur du booléen
-   `atlas_saturate_deep` au plan. Le lecteur de reçu doit aussi refuser toute commande tuée
-   dont le groupe de processus n'est pas fermé, même en campagne `partial`.
+   certifié. Il ne qualifie pas les nouveaux défauts. À `0b29b6c3`, le
+   worker v3 refusait les valeurs `meb_accounting` (chaîne) et
+   `meb_supports_by_size` (tableau) du vrai `tower_work` : c'est la cause
+   précise du refus de R2. `e54f727c` introduit un worker v4 typé, épingle
+   les modes de saturation/feuille et inscrit à CTest une vraie sonde native
+   jugée par ce worker, avec onze mutations. Les 18 selftests du protocole
+   et ses deux portes natives normal/`-O` passent en rejeu local ; aucun
+   nouveau cas G4 n'en découle. La [contrelecture B du
+   v4](CONTRE_AUDIT_B_PROTOCOLE_V4_WIP_20260923.md) relève encore trois
+   lacunes de schéma FULL (histogramme MEB de longueur libre, clé inconnue,
+   absence de `records`) et l'absence de porte native **obligatoire** avant
+   une session G4 payante. Fermer ce contrôle sur le snapshot commité, puis
+   ablater séparément feuille, saturation et politique FULL ; ne pas
+   convertir les sorties brutes refusées de R2 en reçu accepté. Le lecteur
+   de reçu doit aussi refuser toute commande tuée dont le groupe de
+   processus n'est pas fermé, même en campagne `partial`. Sa tolérance
+   `validate_external_wall` est encore **1 seconde absolue** : elle accepte
+   1 050 ms de chaîne pour 100 ms de mur externe. Resserrer cette cohérence
+   avant de juger la cible 100 ms, et publier le mur externe lui-même.
    Le [contre-test de provenance](CONTRE_AUDIT_B_G4_R1_ET_SCHEMA_V2_20260922.md)
    montre qu'un paquet muté peut annoncer un commit inexistant et être
    accepté par le contrôleur, et qu'une provenance différente dans le
@@ -219,7 +242,13 @@ appariée.
    le futur port u18 doit exercer ce relais avec `relay_sites=2`. La
    [note q3](Q3_STRUCTURE_ET_BORNES.md) décrit le ticket possédé
    `(X,compte,curseur Z)` : une réponse GPU hors ordre ne valide pas un
-   préfixe DFS continu. Le relais produit reste à
+   préfixe DFS continu. Elle donne aussi une économie immédiate pour le
+   port q3 feuille : descendre l'atlas par comparaisons rationnelles aux
+   coupures dyadiques plutôt que faire 40 étapes de conversion par centre.
+   Le [petit oracle](check_q3_atlas_rational_location_20260923.py) passe
+   192 352 centres, frontières et extrêmes inclus ; les 466,02 M
+   consultations du reçu brut R2 rendent l'ablation LiDAR pertinente,
+   sans gain de temps encore mesuré. Le relais produit reste à
    qualifier. Le [contre-audit
    B](CONTRE_AUDIT_B_PREATLAS_ET_Q3_20260922.md) rappelle que la suppression
    d'une cellule q4 peut aussi enlever un certificat de rejet q3. Sa
@@ -243,10 +272,15 @@ appariée.
    formes q4 avant l'atlas pour plusieurs arêtes via des gardes plus proches
    sur toute une cellule de centres ; l'[oracle
    entier](check_q4_block_dominance_20260923.py) passe 1 200 boîtes.
-   À K10, huit gardes préservent le flux q4 courant, dix sont nécessaires
-   à une garantie autonome pour tout `q_min≥2`. **Le seuil q4 ne doit pas
-   élaguer l'atlas partagé q3** : une fixture K5 perdrait alors le quatrième
-   intérieur qui rejette une boule q3. Une [ablation plus locale](SEUIL_SATURATION_ATLAS_PAR_VOIE_20260923.md)
+   À K10, huit gardes préservent le flux q4 courant, neuf préservent
+   **ensemble q3 et q4** si la cellule contient leurs deux familles de
+   centres, et dix sont nécessaires à une garantie autonome pour tout
+   `q_min≥2`. La borne d'arête positive `|c−m|²≤D/8` contient aussi les
+   centres q3 (`≤D/12`) : la note établit maintenant ce cas commun et
+   demande une vue filtrée typée avant d'élaguer le cover partagé. **Le
+   seuil q4 de huit gardes ne suffit pas pour q3** : une fixture K5
+   perdrait l'intérieur qui rejette une boule q3. Une
+   [ablation plus locale](SEUIL_SATURATION_ATLAS_PAR_VOIE_20260923.md)
    peut saturer à `K−2` l'atlas des arêtes **q4 seules**, sans changer le
    seuil `K−1` utile aux rejets q3 des arêtes mixtes. Une fixture u18 K5
    sépare exactement les seuils ; le reçu 1 mm contient 326 970 arêtes

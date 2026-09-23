@@ -144,15 +144,32 @@ inclut l'identité de l'index/masque, les `T` IDs de gardes et les bornes
 exactes de `C`, jamais seulement un ID local d'arête. Le petit tableau
 possédé de gardes et les maxima `M_G(v)` pré-calculés évitent tout
 décompte d'antichaîne dans la voie recommandée.
-**Ne pas appliquer cette suppression au cover ou à l'atlas partagé q3.**
-À `K=5`, le centre `c=(0,0,0)` est strictement dans le triangle q3 aigu
+**Le seuil q4 seul `K−2` ne protège pas l'atlas partagé q3.** À `K=5`,
+le centre `c=(0,0,0)` est strictement dans le triangle q3 aigu
 `(5,0,0),(-3,4,0),(-3,-4,0)` de rayon 5. Les trois gardes
 `(0,0,0),(1,0,0),(0,1,0)` dominent `Z={(2,0,0)}` à `C={c}` ; pourtant
 les quatre sont intérieurs à la boule. q3 doit rejeter `p=4`, mais perdrait
-ce certificat et verrait `p=3` si l'on supprimait `Z` avec le seuil q4
-`T₄=K−2`. Garder le cover/certificat q3 intact ou effectuer son census
-exact ; même un seuil q3 adapté exige une cellule couvrant **ses** centres,
-ce que l'enveloppe `C_E` ci-dessus ne garantit que pour q4.
+ce témoin et verrait `p=3` si l'on supprimait `Z` avec le seuil q4.
+
+**Variante sûre commune à q3 et q4 (relecture du 23 septembre).** La même
+enveloppe d'arête `C_E` contient aussi les centres q3 aigus possédés par
+leur plus longue arête `ab` : avec trois poids barycentriques positifs,
+`R₃²≤D/3`, donc `|c₃−m|²=R₃²−D/4≤D/12≤D/8`. Tester `(⋆)` sur `C_E`
+avec **`Kmax−1` gardes distincts** disjoints de `Z`. Le raisonnement ne
+vise que les supports dont `ab` est **réellement l'arête maximale
+propriétaire** de la voie considérée ; la propriété de deux faces q3
+ne suffit pas à établir celle d'un tétraèdre q4. Si un site de `Z`
+était intérieur ou contact d'une telle présentation q3 ou q4 admise, les
+`Kmax−1` gardes seraient strictement intérieurs : contradiction avec
+`p₃≤Kmax−2` et `p₄≤Kmax−3`. Un `Z` ainsi certifié peut donc être omis
+d'une **vue filtrée typée pour les deux voies**, y compris la coquille et
+les supports ; conserver le contrat du `Q34EdgeCover` général tant que
+cette vue et son certificat ne sont pas portés. Les comparaisons égales
+restent indécises. Ce résultat ouvre le partage du rejet avant l'atlas
+mixte, sans autoriser le seuil q4 plus faible ni annoncer un gain de temps.
+Mesurer d'abord, en mode shadow sur les vraies arêtes résiduelles, les
+gardes trouvées, nœuds déjà visités écartés, visites supplémentaires,
+copies de frontière et sorties q3/q4/FULL.
 
 Le nombre de cellules `E×C` et leur réutilisation sont une **obligation
 de mesure**. Un `C_E` grossier peut ne rejeter aucun Z ; une division

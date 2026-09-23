@@ -124,6 +124,17 @@ def main():
     require(all(squared(c, p) == 25 for p in triangle), "q3 radius fixture")
     require(all(sum(w * p[i] for w, p in zip((6, 5, 5), triangle)) == 0
                 for i in range(3)), "q3 positive barycentric fixture")
+    owner = (triangle[0], triangle[1])
+    diameter = squared(*owner)
+    require(diameter == max(squared(p, q) for p, q in
+                            ((triangle[0], triangle[1]),
+                             (triangle[0], triangle[2]),
+                             (triangle[1], triangle[2]))),
+            "q3 edge must be maximal")
+    four_offset = sum((2 * c[i] - owner[0][i] - owner[1][i]) ** 2
+                      for i in range(3))
+    require(3 * four_offset <= diameter and 2 * four_offset <= diameter,
+            "q3 center must lie in the shared q4-sized edge envelope")
     require(box_guard_certificate(((0, 0),) * 3, box_of(guards), box_of((witness,))),
             "q3 counterexample needs a valid q4 guard certificate")
     require(all(squared(c, p) < 25 for p in (*guards, witness)) and
@@ -131,7 +142,8 @@ def main():
             "q3 depth must cross the K5 rejection threshold")
     print({"status": "PASS", "random_boxes": tested,
            "certified_random_boxes": accepted, "comparison_fixtures": 2,
-           "contact_depth_fixtures": 1, "q3_shared_cover_counterexamples": 1})
+           "contact_depth_fixtures": 1, "q3_shared_cover_counterexamples": 1,
+           "q3_shared_envelope_fixtures": 1})
 
 
 if __name__ == "__main__":
