@@ -52,7 +52,7 @@ serait mauvaise ici. Les trois disques emboîtés du même reçu donnent,
 sur 000200 de 16k à 32k, `p_core=3,05` à K5 et `2,86` à K10 : ces
 deux diagnostics changent la géométrie et ne se réfutent pas mutuellement.
 
-## Densité à emprise fixe : première mesure sur 08/000200
+## Densité dans des secteurs fixes : première mesure sur 08/000200
 
 Le [reçu d'audit exploratoire](lidar_density_scene02_20260923/README.md)
 garde **chacun des sept secteurs capteur fixe**. Il classe globalement les
@@ -140,6 +140,17 @@ dix exceptions de formes y sont isolées dans le reçu. Les ratios spatiaux
 parent→morceau demeurent un autre diagnostic : même à densité 1/4 ou
 1/2, la somme des tours des morceaux ne reconstruit pas la tour globale.
 
+Le **secteur** reste fixe, mais l'étendue des sites retenus ne l'est pas.
+Dans le quart `x≥0,y<0` de 000200, un seul ID original `122516`, présent
+seulement à densité pleine, abaisse le minimum `z` encodé de 8 573 à 0
+unités de 1 mm. Une [ablation appariée de cet
+ID](lidar_density_scene02_20260923/README.md#contre-épreuve-dun-extrême-géométrique)
+ramène ce minimum à 8 573 sans faire disparaître le franchissement K10 :
+`dead_core_form_sites` passe de 579 000 541 à 578 914 981 et la pente
+1/2→pleine de 2,042542 à 2,042528. Cet extrême ne cause donc pas à lui
+seul le signal observé ; les frontières réelles des autres échantillons,
+l'index et les certificats changent néanmoins avec la sélection.
+
 Le diagnostic détaillé porte encore sur une seule graine et trois scènes
 sans sol d'une **seule séquence 08**.
 Le thinning par hash réduit des sites dans le même support spatial
@@ -147,7 +158,8 @@ approximatif ; il ne reproduit ni les faisceaux d'un autre capteur, ni des
 passages superposés. Les temps proviennent d'un hôte CPU partagé et les
 cas à densité entière portent le libellé de sonde historique
 `grid=unspecified`, même si leur entrée 1 mm est attestée par le manifeste.
-Répéter sur d'autres scènes, plusieurs graines et le sol brut, en gardant
+Répéter sur d'autres séquences et plusieurs graines, puis comparer une
+sélection stratifiée par azimut/rayon et le sol brut, en gardant
 K/s/W, segmentation et préparation séparés ; publier sortie, catalogue,
 paires, témoins, populations logiques et formes du cœur, atlas, q3/q4,
 CPU, mur et mémoire. Ni ces pentes finies ni les ratios spatiaux ne

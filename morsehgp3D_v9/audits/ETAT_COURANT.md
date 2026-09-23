@@ -350,7 +350,10 @@ relations de densité adjacentes atteignent `p_formes≥2` ; le quart
 `x≥0,y<0` le fait dans chacune des trois trames à K5 ou K10. Paires,
 visites/bornes des nœuds et CPU restent sous 2 dans ces essais, sans
 preuve asymptotique. Les trois trames appartiennent à une seule séquence,
-sans sol et sans mesure G4.
+sans sol et sans mesure G4. Une ablation appariée du seul site qui étend
+fortement `z` dans le quart chaud de 000200 laisse la pente K10 des formes
+à **2,042528** : cet extrême ne porte pas à lui seul le signal. Le secteur
+est fixe, mais l'étendue des sites sélectionnés varie avec la densité.
 
 Le [reçu local de pente LiDAR v11](CONTRE_AUDIT_PENTE_LIDAR_LOCALE_PARTIELLE_20260923.md)
 est intègre (15/15 SHA et entrées vérifiées) mais partiel : une seule
