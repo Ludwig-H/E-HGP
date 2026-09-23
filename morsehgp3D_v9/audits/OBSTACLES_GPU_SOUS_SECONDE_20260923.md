@@ -49,6 +49,27 @@ prend 0,093 s dans ce cas : le tri/fusion seul n'est plus le verrou.
 Les autres trames R7b montent à 32,79 M paires développées et
 5,51 M boules à K10 ; ne pas prendre le meilleur cas pour la garantie.
 
+Les trois premières répétitions ON de R7b/K10 montrent pourquoi le seul
+compteur de paires masque le coût répété en aval (bruts
+`vm/probe_4.stdout`, `probe_12.stdout`, `probe_20.stdout`) :
+
+| 08/ | Sites | Paires développées / n² | Sites parcourus cœur + cover / n² | Tests ponctuels atlas / n² |
+| --- | ---: | ---: | ---: | ---: |
+| 000000 | 39 885 | 0,0194 | 1,121 | 0,923 |
+| 000100 | 35 551 | 0,0138 | 0,900 | 1,039 |
+| 000200 | 45 845 | 0,0156 | 0,972 | 0,830 |
+
+Ces incidences répétées sont déjà de l'ordre de n² à ces tailles, malgré
+un nombre de paires développées bien plus faible. **Trois scènes distinctes
+ne donnent pas une pente** : seules des coupes appariées 8k/16k/32k de la
+même scène peuvent juger la croissance. Une palette qui rejette des paires
+mais ne retire aucun cover ne ferme pas ce poste ; le prochain filtre doit
+publier aussi cœur, cover, atlas et coût de son propre certificat.
+Le [grand-livre actuel](LEDGER_VISITES_CACHEES_Q34_20260923.md) omet en
+outre six parcours d'index déjà comptés en interne et les sites balayés
+par les sweeps q4 : la pente du travail total ne peut pas être jugée à
+partir des seuls champs R7b publiés.
+
 ## Verrous techniques à lever
 
 1. **Éliminer avant l'expansion.** Les certificats cœur/cover réduisent

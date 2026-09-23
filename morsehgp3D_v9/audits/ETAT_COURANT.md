@@ -303,6 +303,14 @@ ne permettent donc pas d'écarter un coût caché
 `(rectangles + paires recherchées + arêtes q3/q4)×n`. Publier ces
 comptes sur les coupes LiDAR appariées avant de conclure sur la pente.
 
+Le [shadow de scission des rectangles q3/q4](Q34_BLOCS_LIDAR_SHADOW_20260923.md)
+sur 08/000000 sans sol ferme 3,68 M paires à K5 et 4,12 M à K10 avant
+leur filtre individuel, mais paie 40,9 M et 62,5 M visites supplémentaires
+de nœuds témoins. Ces paires auraient déjà été rejetées par le filtre
+individuel : aucun cover aval n'est économisé. Ne pas porter cette scission
+naïve sans bilan apparié du travail complet ; le cache de témoins par boîte
+reste une hypothèse distincte.
+
 Pour q3, seuls les fragments d'atlas **complets** fournissent un compte
 réutilisable ; un certificat profond incomplet n'est qu'un minorant.
 Partager les graines d'une cellule exige un ticket possédé
