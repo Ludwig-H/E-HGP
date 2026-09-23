@@ -156,7 +156,11 @@ appariée.
    `centre∈conv(coquille)` restent obligatoires ; le catalogue ne remplace
    pas automatiquement les présentations positives. La ligne v8 1 mm
    compte **171 444 arêtes q3 seules et 16,12 M census** que la réutilisation
-   d'atlas q4 ne touche pas. L'[oracle q3 partagé](check_q3_shared_u18_20260922.py)
+   d'atlas q4 ne touche pas. Dans le raccord v9 actuel, `GlobalBoxes`
+   recense ces q3 dans l'index global : la construction du cover sur les
+   arêtes q3 seules n'est pas utilisée pour ce census et mérite une
+   ablation exacte avant toute optimisation plus lourde du cover. L'[oracle
+   q3 partagé](check_q3_shared_u18_20260922.py)
    vérifie la boîte rationnelle u18, un débordement i128 évité par
    annulation algébrique et une fixture où avancer le curseur Z à travers
    une feuille ambiguë perd un intérieur. La [note q3](Q3_STRUCTURE_ET_BORNES.md)
@@ -170,9 +174,12 @@ appariée.
    peuvent pas être limitées aux q3 finalement émises. Un [certificat de
    cover par bloc d'arêtes survivantes](CONTRAT_COUTS_ET_PARALLELISATION.md)
    partage le prédicat exact sur `E×Z`. Réduire les **vrais** extrema des
-   arêtes survivantes resserre toujours les bornes A×B ; l'[oracle
+   arêtes survivantes ne relâche jamais les bornes A×B, mais peut donner
+   **exactement les mêmes** bornes ; l'[oracle
    entier](check_cover_batch_u18_20260922.py) passe 1 000 familles et
-   deux cas discriminants. C'est une piste secondaire pour les
+   deux cas discriminants. Le [contre-audit B](CONTRE_AUDIT_B_COVER_BATCH_20260923.md)
+   note que l'oracle ne teste pas encore la subdivision `E×Z` ni le coût
+   de matérialisation/réemploi des extrema E. C'est une piste secondaire pour les
    440 millions de visites de cover, à
    mesurer après le filtre de paire, sans lui attribuer le coût dominant
    de l'atlas.
@@ -190,7 +197,10 @@ appariée.
    La [découpe FULL par K](PREFETCH_GEOMETRIE_FULL_PAR_K_20260923.md)
    rend les BallIds géométriques pré-calculables sous fenêtre d'octets,
    tandis que la fermeture des lots reste chronologique. Les 34,14 s de
-   tour statique G4 ne sont pas assez ventilées pour prédire un gain.
+   tour statique G4 ne sont pas assez ventilées pour prédire un gain. La
+   [contrelecture B](CONTRE_AUDIT_B_PREFETCH_FULL_20260923.md) exige un
+   contexte possédé par K, l'annulation/jointure des jobs et distingue le
+   scénario naïf de mémoire `60R` du plancher `4R` des cibles seules.
    Instrumenter les tailles de supports et le temps avant de promettre un
    gain. La [note B](PLATEAUX_GRANDES_COQUILLES_B_20260922.md)
    propose un quotient local compact, [contrelu par B sur sept petites

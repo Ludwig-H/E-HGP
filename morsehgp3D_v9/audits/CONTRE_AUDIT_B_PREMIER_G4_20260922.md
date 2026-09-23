@@ -96,6 +96,10 @@ Même sur ce profil favorable sans sol/grille, la tour entière prend
 statique K10 mesurée prend 70 s. Le repli 1 s et la cible 1 s K10, puis
 100 ms, restent ouverts. K5 est d'abord limité par q3/q4 ; à K10 q3/q4
 **et** FULL comptent, alors que q2 et recensus sont bien plus courts.
+Sur 000000/K10, la phase publiée `merge` (fusion/tri/dédoublonnage du
+catalogue) prend **0,786 s** pour 5,513 M clés, contre 32,725 s q3/q4 et
+75,898 s FULL. Ce chiffre ne ventile **pas** les tris internes du FULL,
+mais la fusion globale mesurée n'explique pas l'écart au contrat.
 Priorité : réduire le travail total cover/atlas/graine-cellule, puis borner
 catalogue/résidence et paralléliser la résolution FULL à lots de niveaux
 atomiques, en mesurant le nouveau ledger et le MEB avec un reçu apparié.

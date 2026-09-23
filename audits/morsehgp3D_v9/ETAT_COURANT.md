@@ -70,6 +70,12 @@ passent un contrôle combinatoire de 2 004 cas A et 1 250 cas indépendants
 jusqu'à la profondeur du K10, mais restent une piste **locale** : pas de
 constructeur, ni de port moteur, ni de réduction globale de la population
 logique `Σ_e cover_sites(e)=2,779` milliards sur la ligne 1 mm publiée.
+Le [cover commun par arêtes survivantes](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_COVER_BATCH_20260923.md)
+est sûr mais pas strictement meilleur sur tous les blocs ; ses extrema
+nécessitent une matérialisation/réutilisation E dont le coût n'est pas
+mesuré. Le [préfetch géométrique FULL](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PREFETCH_FULL_20260923.md)
+est exact sous catalogue figé, mais exige un contexte possédé par K et
+des fenêtres mémoire bornées. Aucun de ces deux ports n'est acquis.
 
 ## Lecture prioritaire
 
