@@ -3074,3 +3074,10 @@ maintenant avec `GPU probe schema/CLI differs from the S1 protocol`
 sous `-O` (fausse sonde). Reste à publier bench+quatre scripts dans
 un même snapshot immuable et à passer le préflight CUDA réel ; ne pas
 transférer le succès du faux GPU au contrat.
+Pour interpréter la porte `≤100 ms`, R11/08/000000/K5 a déjà
+229 928 699 visites **rectangles** ; les 23 686 751 paires sans cache
+requièrent au moins une racine chacune. Le port S1 courant doit donc
+servir **≥253 615 450 visites en 0,1 s**, soit >2,53 Md/s, **en plus**
+des transferts ; le vrai nombre de visites des paires sans cache reste
+à mesurer. Ce n'est pas une preuve d'impossibilité GPU, mais un débit
+minimal de cette porte concrète.

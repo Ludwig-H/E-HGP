@@ -51,7 +51,11 @@ montre que, dans R11, `chain_s−q34_s` vaut encore 0,874/1,062/1,106 s
 sur les trois trames K5 et au moins 3,235 s à K10 : déporter **seulement**
 les filtres ne peut qualifier la seconde si les autres phases restent
 inchangées et séquentielles. La porte de débit 0,1 s pour tous les masques
-sans cache demeure utile. Le lanceur CUDA S1 et sa sonde sont publiés
+sans cache demeure utile : la population R11/000000/K5 implique déjà
+au moins **253,6 M visites de nœuds** (rectangles plus une racine par
+paire), donc **>2,53 Md/s** pour la seule porte S1, transferts inclus ;
+le nombre réel de visites de paires sans cache est inconnu. Le lanceur
+CUDA S1 et sa sonde sont publiés
 par `0d5ad2e89`, sans test positif sur appareil ni résultat G4 ; le
 protocole SPOT reste mutable et non commité. La garde hôte vérifie les
 IDs, plages et masques, mais l'[audit A du domaine u18](AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md)

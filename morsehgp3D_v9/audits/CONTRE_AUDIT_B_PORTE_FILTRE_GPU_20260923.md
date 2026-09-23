@@ -60,6 +60,15 @@ résultat ne se convertit pas directement en accélération face au CPU
 [`vm/probe_0.stdout`](../receipts/g4_tower_r11_20260923/vm/probe_0.stdout)
 (`ledger.witness_rect_queries`, `expanded_pairs`,
 `witness_pair_queries`, `witness_cache_rejected_pairs`).
+Sur cette même ligne R11, les rectangles coûtent déjà
+**229 928 699 visites de nœuds**. Si S1 reproduit la population et
+le DFS du moteur, ses 23 686 751 paires développées exigent chacune
+au moins la visite de la racine : **au moins 253 615 450 visites** au
+total, soit **plus de 2,53 milliards de visites/s** pour la porte
+0,1 s, avant même de réserver du temps aux transferts. Le vrai nombre
+de visites des paires **sans cache** n'est pas archivé dans R11 et peut
+être bien supérieur ; ne pas le déduire du CPU cache ON. Ce débit est
+une exigence de la porte S1 actuelle, pas une impossibilité GPU prouvée.
 
 ## Première lecture historique du port, avant publication
 
