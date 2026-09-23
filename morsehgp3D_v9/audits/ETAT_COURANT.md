@@ -243,8 +243,9 @@ selftest et le lecteur LiDAR
 passent en v18 ; le correctif exige désormais dans le préflight réduit
 au moins une décision GPU et au moins un report, puis zéro report sur
 les trames normales plus petites que l'ardoise. C'est un protocole,
-pas un reçu G4. Les trois gardes bruts (lot vide nul, feuille multi-site,
-q4 à K2) restent ouverts. Le digest catalogue inclut les IDs des
+pas un reçu G4. Dans ce commit `545c71799`, les trois gardes bruts
+(lot vide nul, feuille multi-site, q4 à K2) restent ouverts ; ils sont
+fermés ensuite par `942494362`. Le digest catalogue inclut les IDs des
 coquilles, sans être une comparaison littérale indépendante ; la porte
 de flux ne compare encore que leurs tailles. Le journal local CUDA OFF
 du correctif a 23 tests ciblés réussis, pas 154/154 ni un test device.
@@ -255,18 +256,25 @@ L'[audit C du condensé du catalogue](c_catalogue_digest_20260923/README.md)
 égales entre moteur, lot CPU et S3 CPU. Son gate causal de coquilles
 étendues reste un **patch d'audit**, pas un CTest produit ; le lecteur
 R13 ne vérifie pas encore ces six épingles. Aucun reçu R13/S3 G4 n'est
-publié au contrôle du 23 septembre à 19 h 43 UTC. Les gardes d'entrée
-et un juge CPU sont en correction **mutable** chez le développeur,
-sans transfert de qualification au `main` publié.
-Depuis ce contrôle historique, le correctif **`942494362`** est publié
-sur `main` : trois gardes corrigées en source, tests causaux pour feuille
-et masques K, barrière du frontier relue, juge CPU par arête dans les
-deux préflights synthétiques R13. Le [contre-audit B mis à jour](CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md)
-relève encore l'absence de test CUDA direct du lot vide, la seule borne
-supérieure du compteur de covers reconstruits, un faux classement
-conditionnel `GPU_executed` sur cas sans survivants, les six épingles C
-non branchées et **aucun reçu S3/G4**. Les 149 tests CPU sélectionnés
-observés dans `build/v9-exp` (CUDA OFF) ne qualifient pas le noyau.
+publié au contrôle du 23 septembre à 19 h 43 UTC. Depuis,
+**`942494362` est publié sur `main`** : il ferme les trois gardes
+d'entrée et ajoute un juge CPU par arête aux deux préflights G4, avec
+masques, comptes logiques et IDs de coquilles renforcés. Une relecture
+indépendante ne trouve pas de divergence causale dans le **plan R13 par
+défaut** ; deux tests ciblés du validateur/préflight passent en Python
+normal, dont un aussi sous `-O`. Aucun reçu device R13 ne qualifie
+encore S3. Le worker compare le condensé FNV-64 du catalogue et une
+**projection publiée** du travail de couverture : les expressions
+« clé par clé GPU/moteur » dans la passation et « même travail de la
+couverture » dans la provenance sont plus fortes que cette comparaison
+de session. Le gate C++ local compare davantage de champs ; le patch
+C de coquilles étendues et ses six valeurs épinglées restent à porter
+dans la réception R13. Un plan personnalisé S3 GPU seul, sans survivant,
+peut encore étiqueter `GPU_executed` à partir du levier sans kernel S3 ;
+le plan R13 par défaut active aussi le filtre S2 GPU et n'est pas touché
+par ce contre-exemple. Recommander des libellés « même condensé
+canonique et mêmes compteurs publiés » et compter les décisions GPU
+réelles dans chaque cas.
 La [preuve B de redondance d'une seule cellule de
 centres](CERTIFICAT_B_REDONDANCE_CELLULE_UNIQUE_20260923.md) affine la
 piste de rejet **avant** le cœur : si la cellule couvre le disque
@@ -1087,6 +1095,16 @@ franchissent une pente de 2 ; sur les 18 liens spatiaux parent→enfant,
 homogène `Σ(n_demi/n)²≈0,500` ; pour les quarts, **0,309/0,381** sont
 au-dessus de `Σ(n_quart/n)²≈0,250`. Le diagnostic varie donc avec la
 façon de doubler les points ; aucun exposant unique ne résume ces coupes.
+En suivant **la densité globale** dans chaque famille de tours recalculées,
+les pentes finies de `ΣF` pour les deux moitiés sont **1,420/1,653**
+à K5 et **1,667/1,434** à K10 ; celles des quatre quarts sont
+**1,737/1,848** à K5 et **1,582/1,766** à K10. Les pentes du plein
+sont respectivement **1,800/2,119** et **1,634/1,922**. Les effectifs
+globaux sont les mêmes `30 847→61 694→123 389` à chaque comparaison ;
+`F` inclut les deux extrémités par charge. Ces sommes mesurent des
+calculs **séparés** et omettent les incidences entre secteurs : elles
+montrent où étudier la croissance, sans fournir un algorithme exact
+pour la trame entière ni une borne asymptotique.
 La contre-vérification B du complément retrouve **52/52 SHA**, les 18
 cas K10 gardés sur 24 essais et les 21 lignes de la matrice ; les cinq
 premiers ordres K10 égalent les **comptes** K5 sur chaque entrée, pas

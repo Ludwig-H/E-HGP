@@ -3,8 +3,8 @@
 23 septembre 2026. Reçu exploratoire **clos à trois tailles de la scène
 entière**, complément de la [matrice K5 à sept secteurs physiques et trois
 densités](../lidar_raw_physical_scaling_20260923/README.md). Aucun demi ni
-quart K10 n'est mesuré ici : pour cet axe spatial, utiliser la matrice K5
-existante. Le nuage brut conserve le sol, les 123 389 retours originaux et
+quart K10 n'est mesuré **dans ce reçu** ; la [matrice K10 par secteurs](../lidar_raw_k10_sectors_20260923/README.md)
+les mesure ensuite sur les mêmes entrées. Le nuage brut conserve le sol, les 123 389 retours originaux et
 les coordonnées de la grille entière isotrope 1 mm (u18) ; aucune pose ou
 hypothèse d'alignement de passages n'entre dans la sélection.
 

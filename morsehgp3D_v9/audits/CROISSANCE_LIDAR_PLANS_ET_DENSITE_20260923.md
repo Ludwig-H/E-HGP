@@ -286,6 +286,5 @@ déterministes, dont formes du cœur et paires développées, coïncident
 **9/9** avec v12. Le rapport formes des moitiés sur le plein y tombe
 de **0,567→0,435→0,315** pendant que celui des charges reste vers
 **0,97** : le raccord S2 n'a pas réduit cette masse sur ce panel.
-K10 S2, les autres quarts sous un même binaire S2, plusieurs scènes,
-graines et séquences restent à mesurer. Les matrices v12 et ce panel
+K10 S2, plusieurs scènes, graines et séquences restent à mesurer. Les matrices v12 et ce panel
 CPU ne prouvent aucune borne globale ni un temps G4.
