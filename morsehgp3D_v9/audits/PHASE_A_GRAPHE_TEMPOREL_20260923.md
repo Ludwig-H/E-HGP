@@ -129,9 +129,11 @@ de SHA-256 `0baa4de1…`, correspondant au reçu R7b, observe pour K10
 **2 081 320 lots singletons** dominent ; les **16 336 lots groupés**
 contiennent seulement **36 355 blocs, soit 1,72 %** des blocs, et leur
 taille maximale est huit. Paralléliser seulement les blocs *d'un même
-lot* ne viserait donc qu'une petite fraction de ce K10 LiDAR. Les
-recherches actuelles traversent **11 865 867** liens de `compressed`
-(3,10 par requête) et écrivent **9 029 520** raccourcis. La variante à
+lot* ne viserait donc qu'une petite fraction des blocs de ce K10 LiDAR.
+Le premier parcours des recherches de racine traverse **11 865 867** liens
+de `compressed` (3,10 par requête). Le second parcours de compression
+repasse ces chemins et écrit **9 029 520** raccourcis : le premier compteur
+n'est donc pas le total des lectures physiques de liens. La variante à
 têtes physiques, simulée en observation sur ces mêmes événements,
 réétiquetterait **3 940 560** nœuds, au plus dix fois un même nœud.
 Ses **3 831 431** réponses de racine concordent en ligne avec le code
@@ -150,8 +152,10 @@ Le même comptage montre le rétrécissement des plateaux aux ordres élevés :
 | K5 | 789 886 | 64 286 | 8,14 % | 2,74 |
 | K10 | 2 117 675 | 36 355 | 1,72 % | 3,10 |
 
-Ces fractions portent sur un seul nuage et une seule séquence ; elles ne
-prouvent aucune loi de croissance. Elles rendent néanmoins la porte de
+Ces fractions portent sur les **blocs**, non sur les cycles ou les facettes,
+et sur un seul nuage d'une seule séquence ; elles ne prouvent aucune loi
+de croissance. Les lots groupés peuvent coûter davantage par bloc.
+Elles rendent néanmoins la porte de
 parallélisme au sein d'un plateau peu prometteuse **pour ce K10**, tandis
 que les sauts de racines augmentent avec K.
 
@@ -166,8 +170,9 @@ SHA-256 `ea3c642bbcfe22ec28b8b7ce0474f85b3296eb19574612b05f91622fb7a0e31a`.
 Une ablation locale appariée sur le **même catalogue figé** construit la
 tour K10 avec le header de référence A et la variante minimale à têtes
 physiques B, en ordre A/B, B/A, A/B. Les six constructions rendent
-`complete_relative` et les mêmes compteurs ; chaque B est **identique
-octet par octet** à A sur une sérialisation de **1 056 931 646 octets**
+`complete_relative` et les mêmes comptes de représentants, naissances
+et fusions ; chaque B est **identique octet par octet** à A sur une
+sérialisation de **1 056 931 646 octets**
 comprenant domaine et lignes de la banque, tous les nœuds, niveaux,
 parents, successeurs, contributions et images verticales des dix ordres.
 Les temps du seul `build_full_ball_tower` mesurés par ce harnais local sont

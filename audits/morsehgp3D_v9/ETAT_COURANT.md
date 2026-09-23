@@ -46,7 +46,7 @@ indexé par facettes, non directement par BallKey.
 
 La [synthèse produit à jour](../../morsehgp3D_v9/audits/ETAT_COURANT.md)
 porte désormais les développements postérieurs à `e28296bb`. Le [premier
-reçu G4](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PREMIER_G4_20260922.md)
+reçu G4](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_G4_R1_ET_SCHEMA_V2_20260922.md)
 est réel et clos : huit tours CPU sur trames sans sol de la séquence 08,
 grille 1 mm, s8, **K1..5 en 15–29 s** et **K1..10 en 82–125 s** à W48
 (70 s pour 000000/K10 avec FULL statique W48). Il utilise le paquet
@@ -200,14 +200,13 @@ développeur ne sont pas une preuve de ce commit.
   format/capacité LP64, pas des mesures de RSS ni des temps extrapolés
   sur G4 ; le cache est libéré avant la publication finale, donc ne
   s'additionne pas mécaniquement à ses 6,48 Go.
-- Le [contre-audit du protocole G4 SPOT](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_GCP_SESSION_20260922.md)
-  constate des garde-fous de cible/arrêt et un snapshot lié au commit par
-  son constructeur. Les scripts publiés mesurent **CPU seulement**
-  sur trois trames sans sol de la seule séquence 08 ; un reçu `partial`
-  peut retourner code 0 sans aucune tour achevée. Le plafond du plan
-  personnalisé est corrigé de 1 024 à 48 fils par `e28296bb` ; 17
-  selftests passent en Python normal/−O et un paquet exact de ce commit
-  est `prepared_not_executed`, sans appel GCP.
+- Le [contre-audit du reçu G4 R1 et de son protocole](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_G4_R1_ET_SCHEMA_V2_20260922.md)
+  vérifie les garde-fous de cible/arrêt et le lien du paquet aux sources
+  du commit. Cette campagne mesure **CPU seulement** sur trois trames
+  sans sol de la seule séquence 08 ; un reçu `partial` peut retourner
+  code 0 sans aucune tour achevée. Le paquet préparé porte
+  `prepared_not_executed` : ce statut de préparation ne décrit pas
+  la session G4 R1, exécutée et clôturée séparément.
 - Le banc publié à l'ouverture v9 juge **v8** : 129 CTests exécutés et
   verts sur 132 enregistrés, trois désactivés. Son `SHA256SUMS` référence
   quatre journaux `logs/*.log` absents du commit `3595725a` ; un clone

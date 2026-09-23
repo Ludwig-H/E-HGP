@@ -75,8 +75,13 @@ Les autres trames R7b montent à 32,79 M paires développées et
    ancres ; `order_root` comprime actuellement les chemins par écriture,
    donc son emploi concurrent direct est incorrect. Il faut mesurer la
    distribution des tailles de lots avant de planifier un kernel par
-   niveau. Le MEB proposé donne un gain de tour K10 de 5–8,4 % dans
-   l'ablation R7b ; son successeur move-to-front n'y est pas mesuré.
+   niveau. Une [sonde locale postérieure à R7b](PHASE_A_GRAPHE_TEMPOREL_20260923.md)
+   ne trouve que 1,72 % des blocs K10 dans des lots de plusieurs blocs
+   sur 08/000000 : c'est une part de blocs, pas une part de cycles. Un
+   graphe temporel pourrait exposer du parallélisme entre niveaux, mais
+   il n'est ni porté ni mesuré sur GPU. Le MEB proposé donne un gain de
+   tour K10 de 5–8,4 % dans l'ablation R7b ; son successeur move-to-front
+   n'y est pas mesuré.
 4. **Conserver l'exactitude de bout en bout.** Les comparaisons de
    niveau utilisent notamment des entiers fixes 192/320 bits ; les
    décisions au contact, les supports canoniques et les replis ne
