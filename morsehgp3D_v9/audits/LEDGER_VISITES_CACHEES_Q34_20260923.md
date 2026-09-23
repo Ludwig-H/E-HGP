@@ -5,6 +5,15 @@ de `main` (mêmes fichiers moteur que le worktree développeur `ba9980fd`).
 Audit statique indépendant : **aucun moteur modifié, aucun nouveau test G4**.
 Ce constat porte sur l'observabilité du coût, non sur une erreur de résultat.
 
+**Suivi 4530644b :** la sonde v12 projette désormais ces six parcours et
+`local.sweep.active_sites`, avec des identités bornées dans le lecteur.
+La lacune ci-dessous concerne le reçu R7b/v11 ; une nouvelle campagne
+appariée v12 doit encore mesurer la croissance de ces champs. La
+contrelecture statique du port ne trouve pas de rejet d'une sortie valide
+avec les options de chaîne actuelles (`RectanglePair`, `Local28`,
+`LiveOnly`). La borne des graines q4 devra être revue si `Individual` ou
+`Joined` remplace `LiveOnly`.
+
 ## Parcours déjà comptés, puis perdus par la chaîne
 
 | Compteur du générateur | Travail réellement compté |

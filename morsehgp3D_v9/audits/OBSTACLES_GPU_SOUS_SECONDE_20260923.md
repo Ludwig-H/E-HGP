@@ -65,10 +65,11 @@ ne donnent pas une pente** : seules des coupes appariées 8k/16k/32k de la
 même scène peuvent juger la croissance. Une palette qui rejette des paires
 mais ne retire aucun cover ne ferme pas ce poste ; le prochain filtre doit
 publier aussi cœur, cover, atlas et coût de son propre certificat.
-Le [grand-livre actuel](LEDGER_VISITES_CACHEES_Q34_20260923.md) omet en
+Le [grand-livre R7b/v11](LEDGER_VISITES_CACHEES_Q34_20260923.md) omet en
 outre six parcours d'index déjà comptés en interne et les sites balayés
 par les sweeps q4 : la pente du travail total ne peut pas être jugée à
-partir des seuls champs R7b publiés.
+partir des seuls champs R7b publiés. La sonde v12 `4530644b` les expose,
+mais attend encore des mesures appariées de croissance.
 
 ## Verrous techniques à lever
 
@@ -120,8 +121,10 @@ partir des seuls champs R7b publiés.
    trames brutes avec sol ; `complete_relative` ne prouve pas l'absence
    de clés entièrement omises dans le grand nuage.
    Le profil de référence est la tour complète, non un noyau ni un
-   préfixe ; la croissance 8k/16k/32k et les ablations `s=8/10/12`
-   restent à produire sur les régimes pertinents.
+   préfixe ; un [premier reçu local de croissance](CONTRE_AUDIT_PENTE_LIDAR_LOCALE_PARTIELLE_20260923.md)
+   n'a qu'un 8k/16k K10 et révèle des compteurs superquadratiques sur le
+   premier doublement. La campagne appariée complète, les ablations
+   `s=8/10/12` et les mesures GPU restent à produire.
 
 Le meilleur R7b exige déjà un gain total **×3,67** à K5 ou **×9,58**
 à K10 sur `chain_total` hors digest ; les premiers essais des trois
