@@ -644,7 +644,7 @@ sur ce quart échange seulement trois puis deux IDs aux densités 1/4 et 1/2 ;
 la pente K10 des formes reste **2,058215 puis 2,042880**, pratiquement
 inchangée. Ce signal ne vient donc pas seulement de l'étendue de la boîte.
 Le [premier reçu brut avec sol](lidar_raw_physical_scaling_20260923/README.md),
-dont les [neuf premiers cas ont été contre-lus indépendamment par B](CONTRE_AUDIT_B_LIDAR_BRUT_PHYSIQUE_20260923.md),
+[dont les 21 cas ont été contre-lus indépendamment par B](CONTRE_AUDIT_B_LIDAR_BRUT_PHYSIQUE_20260923.md),
 compte désormais **21 cas K5** sur une trame entière 08/000000 à 1 mm :
 sept secteurs par plans **float32 physiques**, chacun aux trois densités
 emboîtées. La sélection garde les 123 389 retours sans fusion ;

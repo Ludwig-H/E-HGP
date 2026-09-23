@@ -67,3 +67,31 @@ visites, cellules/test, formes, covers, CPU/mur/RSS et premier échec.
 Reprendre ensuite les densités 8k/16k/32k et plusieurs trames brutes
 et sans sol ; aucune extrapolation vers des dizaines de millions de
 points n'est encore recevable.
+
+## Extension du reçu : 21 cas, contrelecture B du 23 septembre
+
+Le commit `0421a2a0` ajoute les douze combinaisons manquantes : sept
+secteurs physiques × trois densités globales emboîtées, toujours une
+seule trame **avec sol**, K5/s8/W8 local. Les neuf cas originaux et
+leurs sorties restent inchangés. J'ai contrôlé **50/50 SHA** ; un
+rejeu indépendant des deux correspondances raw→full, des signes x/y
+float32 et du rang global `splitmix64` retrouve les 21 ensembles d'IDs
+et leurs payloads u18. Avec les 21 sorties archivées, le manifeste,
+`SUMMARY.json` (37 157 octets) et `summarize.stdout` sont reconstruits
+**octet pour octet** en interceptant les écritures du lecteur ; aucun
+fichier n'a été modifié pendant cette contrelecture. Le lecteur refuse
+logiquement le manifeste temporaire limité aux neuf premiers cas.
+
+Les chiffres de l'extension sont cohérents : **2/14** pentes de formes
+au moins quadratiques entre densités d'un même secteur — plein
+1/2→1 : **2,136333** ; quart `x≥0,y<0` 1/4→1/2 : **2,059549**.
+Les quatorze pentes CPU sont **1,1995–1,3283**, les paires développées
+**1,2869–1,7691**. Parmi les dix-huit liens spatiaux, **7** pentes de
+formes atteignent 2, maximum **2,879826** ; elles changent cependant
+la géométrie et les frontières. Les ratios moitiés/plein des formes
+aux densités 1/4, 1/2, entière sont **0,549 / 0,421 / 0,306**.
+
+Verdict inchangé : le reçu prouve un signal de masse de travail local,
+pas une complexité asymptotique ni un contrat de tour. Une scène,
+une séquence, une répétition, CPU partagé et `complete_relative`
+seulement ; la contention rend les nouveaux murs peu comparables.

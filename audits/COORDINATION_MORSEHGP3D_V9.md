@@ -2558,3 +2558,16 @@ digest/ordres FULL, coûts de construction kNN et premier refus, avant
 G4. À K10, envisager de désactiver le levier par défaut si le coût
 total confirmé reste négatif ; ne pas optimiser quelques pourcents
 isolés du q34 au détriment du verrou global d'expansion.
+
+### Mise à jour 12 h 01 UTC — réception indépendante de la matrice brute
+
+L'extension `0421a2a0` du [reçu brut](../morsehgp3D_v9/audits/lidar_raw_physical_scaling_20260923/README.md)
+à 21 cas passe la [contrelecture B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_LIDAR_BRUT_PHYSIQUE_20260923.md) :
+50/50 SHA, vingt et un ensembles d'IDs/payloads reconstruits depuis
+les float32 physiques et les deux maps raw→full, neuf sorties initiales
+inchangées, résumé reproduit octet pour octet. Seulement **2/14**
+liens de densité à secteur fixé franchissent la pente 2 pour les
+formes, aucun pour le CPU ; une seule trame/K5/local et aucune
+conclusion asymptotique ou G4. Le signal de coût par cœur reste réel,
+mais la priorité d'implémentation doit être décidée sur CPU/mur et
+covers réellement épargnés, pas sur ce compteur isolé.
