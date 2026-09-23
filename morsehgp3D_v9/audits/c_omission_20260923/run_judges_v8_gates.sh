@@ -100,27 +100,34 @@ python3 "$HERE/regen_inputs.py" --check "$D" > "$O/inputs_check.txt" 2>&1 || die
 provenance "$SRC" "$O/PROVENANCE.txt" || die "provenance git"
 # Depuis S2 (a6d81f9c), mhgp9_chain depend de mhgp9_gpu (lanceur CUDA ou stub sans CUDA).
 GPU_LIB=""
+GPU_LIBS=()
 if grep -q 'mhgp9_gpu' "$SRC/morsehgp3D_v9/CMakeLists.txt"; then
   nice -n 19 cmake --build "$BUILD" --parallel 3 --target mhgp9_chain mhgp9_gen mhgp9_gpu > "$O/build_libs.log" 2>&1 || die "build bibliotheques"
   GPU_LIB="$BUILD/libmhgp9_gpu.a"
+  GPU_LIBS=("$GPU_LIB")
 else
   nice -n 19 cmake --build "$BUILD" --parallel 3 --target mhgp9_chain mhgp9_gen > "$O/build_libs.log" 2>&1 || die "build bibliotheques"
 fi
 RECIPE="g++ -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -I$SRC/morsehgp3D_v9 -I$SRC/morsehgp3D_v9/src/gen -isystem $BOOST_INC"
 Q2="$O/q2_sample_judge"; Q3="$O/q3_sample_judge"
-$RECIPE "$HERE/q2_sample_judge.cpp" "$BUILD/libmhgp9_chain.a" "$BUILD/libmhgp9_gen.a" $GPU_LIB -lpthread -o "$Q2" \
+$RECIPE "$HERE/q2_sample_judge.cpp" "$BUILD/libmhgp9_chain.a" "$BUILD/libmhgp9_gen.a" "${GPU_LIBS[@]}" -lpthread -o "$Q2" \
   > "$O/compile_q2.log" 2>&1 || die "compilation q2"
-$RECIPE "$HERE/q3_sample_judge.cpp" "$BUILD/libmhgp9_chain.a" "$BUILD/libmhgp9_gen.a" $GPU_LIB -lpthread -o "$Q3" \
+$RECIPE "$HERE/q3_sample_judge.cpp" "$BUILD/libmhgp9_chain.a" "$BUILD/libmhgp9_gen.a" "${GPU_LIBS[@]}" -lpthread -o "$Q3" \
   > "$O/compile_q3.log" 2>&1 || die "compilation q3"
 provenance "$SRC" "$O/PROVENANCE.after_build.txt" || die "provenance git apres construction"
 cmp -s "$O/PROVENANCE.txt" "$O/PROVENANCE.after_build.txt" || die "depot modifie pendant la construction"
 st=$(git -C "$HERE" status --porcelain -- q2_sample_judge.cpp q3_sample_judge.cpp run_judges_v8_gates.sh regen_inputs.py) || die "git status juges"
 cc=$(g++ --version | head -1) || die "g++ --version"
-printf 'sources_juges_non_commitees=%s\nrecette=%s <source> %s %s -lpthread\ncompilateur=%s\nbuild_type=Release\nentrees=conformes_a_regen_inputs.EXPECTED\n' \
-  "${st:-aucune}" "$RECIPE" "$BUILD/libmhgp9_chain.a" "$BUILD/libmhgp9_gen.a" "$cc" >> "$O/PROVENANCE.txt" || die "ecriture provenance"
+GPU_RECIPE=""
+if [ -n "$GPU_LIB" ]; then printf -v GPU_RECIPE ' %q' "$GPU_LIB"; fi
+printf 'sources_juges_non_commitees=%s\nrecette=%s <source> %s %s%s -lpthread\ngpu_archive=%s\ncompilateur=%s\nbuild_type=Release\nentrees=conformes_a_regen_inputs.EXPECTED\n' \
+  "${st:-aucune}" "$RECIPE" "$BUILD/libmhgp9_chain.a" "$BUILD/libmhgp9_gen.a" "$GPU_RECIPE" "${GPU_LIB:-none}" "$cc" >> "$O/PROVENANCE.txt" || die "ecriture provenance"
 sha256sum "$HERE/run_judges_v8_gates.sh" "$HERE/regen_inputs.py" "$HERE/q2_sample_judge.cpp" "$HERE/q3_sample_judge.cpp" "$Q2" "$Q3" \
   "$BUILD/libmhgp9_chain.a" "$BUILD/libmhgp9_gen.a" "$D"/s00_k5_s8_w8_r0_nested_8000.u32le \
   "$D"/s01_k5_s8_w8_r0_nested_8000.u32le "$D"/s02_k5_s8_w8_r0_nested_8000.u32le >> "$O/PROVENANCE.txt" || die "empreintes"
+if [ -n "$GPU_LIB" ]; then
+  sha256sum "$GPU_LIB" >> "$O/PROVENANCE.txt" || die "empreinte archive gpu"
+fi
 L() { echo "$D/$1_k5_s8_w8_r0_nested_8000.u32le"; }
 # Garde d'index (contrelecture B du juge v7) : trois mutants par juge, refus 2 avant l'echantillonnage.
 for m in out-of-range:INDEX_ID_OUT_OF_RANGE duplicate:INDEX_ID_DUPLICATE missing:INDEX_ID_MISSING; do
