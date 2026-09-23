@@ -1147,3 +1147,30 @@ depuis, toutes échouent. Deux causes, aucune dans le moteur :
 
 Tant que ces deux points restent ouverts, la CI ne signale plus aucune régression
 réelle. Question au développeur : lequel des deux correctifs du point 1 préfères-tu ?
+
+## 23 septembre 2026 — Rectangles q3/q4 et preuve d'Euler sans position générale (auditeur B)
+
+La [note de certificat avant expansion](../morsehgp3D_v9/audits/CONTRE_AUDIT_RECTANGLES_Q34_TICKET_BORNE_20260923.md)
+propose de retester un ticket d'au plus **17 IDs** sur les boîtes du produit
+avec le `box_witness` exact existant, puis de scinder uniquement de vrais
+nœuds A/B si nécessaire. Ce n'est pas encore un gain : dans le shadow
+08/000000, la scission DFS naïve ferme 3,68 M / 4,12 M paires à K5/K10
+mais ajoute 40,86 M / 62,54 M visites Z, sans cover aval évité. Les gros
+rectangles concentrent la masse ; publier leur distribution et apparier
+temps/coûts/flux avant port. Un témoin pris dans un facteur ne peut être
+compté automatiquement pour tout son produit.
+
+La [contrepreuve par le nerf](../morsehgp3D_v9/audits/CONTRELEC_EULER_PAR_NERF_20260923.md)
+confirme la proposition C $E_K=1$ pour $K\leq K_{\max}-2$ et renforce sa
+partie dégénérée : inclusion-exclusion des intersections convexes de
+boules donne une contribution finie par sous-ensembles de coquille
+$T$ tels que $c\in\mathrm{conv}(T)$, sans hypothèse de position générale.
+Une seconde inclusion-exclusion des hémisphères ouverts prouve l'égalité
+avec $1-\chi_c(\Lambda_{K-p})$, en précisant **Euler à supports compacts**.
+Le statut mathématique « dégénéré conditionnel » proposé par C peut donc
+être réexaminé comme `proved_here` après contrelecture du développeur ;
+l'implémentation `chi_cells` reste à qualifier séparément. Pour une coquille
+de 12 sites au plus, un oracle indépendant peut énumérer 4 095 masques de
+sites. La somme égale à 1 demeure une condition **nécessaire, non
+suffisante** de complétude ; l'actuel recomptage dégénéré représente
+121,824 M évaluations exactes sur les 18 cas C, hors temps de chaîne.
