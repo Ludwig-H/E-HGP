@@ -41,6 +41,13 @@ Le jumeau CPU/GPU compare deux chemins issus des mêmes survivants : il
 détecte une divergence, pas une clé omise par les deux. Conserver le juge
 échantillonné de clés admissibles indépendantes en parallèle de la porte
 différentielle S4, avec sa portée limitée déclarée.
+Le [préflight du WIP S4a](AUDIT_S4_WIP_EXCEPTIONS_WORKERS_20260923.md)
+repère trois allocations/insertions **hors capture d'exception** dans
+`run_lanes_batch_host` : un `bad_alloc` d'un worker peut terminer le
+processus au lieu du repli `kResourceExhausted`. Le snapshot mutable est
+haché ; aucune panne n'a été injectée. Entourer le worker entier, joindre
+tous les fils avant retour, puis tester les trois points de panne avant
+la publication du port.
 
 23 septembre 2026. Ports v13 publiés : sonde **`c768e06a`**, porte Euler
 8k **`a08378da`**, lecteur LiDAR **`50646eef`** puis **`1f048aae`**,

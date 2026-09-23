@@ -1,0 +1,17 @@
+# S4a WIP : rendre les pannes mémoire des workers hôte récupérables
+
+23 septembre 2026 — préflight de source en lecture seule, `exploration_v9_hors_registre`, `public_status=not_claimed`. Snapshot **mutable, non publié** du worktree développeur `build/v9-open-worktree`, HEAD `3605cef99`, `src/gpu/lanes_host.hpp` SHA-256 `d1292fb6a3f51b21b7e902b4dd996bb57dc0ace9ac2abb8a40259f8f45b797b3`. Ce point n'est ni un résultat CUDA/G4 ni une reproduction dynamique de panne.
+
+`run_lanes_batch_host` dispose déjà d'un relais utile `failure`/`failed`/`turn` et joint les threads en cas d'échec **pendant** le calcul d'un bloc (`lanes_host.hpp:73–90`). Sa fenêtre de capture est cependant trop courte :
+
+- les allocations des slabs par worker (`:55–64`) et les `assign` de début de bloc (`:69–72`) précèdent le `try` ;
+- le commit ordonné fait `out.records.insert(...)` sous mutex **après** le `try` (`:92–119`) ; l'insertion peut réallouer ;
+- le `worker()` du fil appelant (`:134`) n'est lui-même couvert par aucun garde qui joigne `pool` pendant le déroulement de pile après exception.
+
+Avec plusieurs blocs et `workers>1`, une exception d'allocation dans un thread créé qui traverse son point d'entrée appelle `std::terminate`. Si elle vient du fil appelant avant les `join`, le destructeur de `pool` rencontre des `std::thread` encore joignables et appelle aussi `std::terminate`. Une panne pendant `insert` est particulièrement mal placée : elle arrive avec le mutex pris et avant l'incrément de `committed`, donc les autres workers peuvent attendre ce commit. Le `catch(std::bad_alloc)` de la chaîne (`tower_chain.cpp`, fin de `run_tower_chain`) ne peut pas convertir une terminaison de thread en `kResourceExhausted`. Je n'en déduis aucun défaut d'exactitude géométrique des sorties réussies.
+
+Le cas zéro arête révèle aussi un coût inutile : `blocks=0` mais `threads=1`, donc les slabs complets sont alloués avant que le worker constate `block>=blocks`; la voie CUDA retourne, elle, avant toute allocation de slabs (`filter_runner.cu`, `run_lanes_batch`). Un retour hôte vide après validation supprimerait ce coût et sa fenêtre de panne.
+
+**Correction courte proposée.** Englober toute la fonction worker, allocations, `assign`, calcul, attente et commit compris, dans un `try/catch (...)` qui publie la première exception sous mutex, pose `failed`, réveille `turn`, puis sort. Encadrer aussi l'appel du worker sur le fil appelant par un garde de jointure, et ne relancer `failure` qu'après avoir joint tous les threads. Le commit partiellement modifié n'est jamais publié au-dessus si l'appel échoue : le résultat local est abandonné ; sur succès, conserver la réservation et les tranches déterministes actuelles. Ajouter un retour immédiat pour `edges==0` après la garde d'entrée.
+
+**Porte ciblée avant publication.** Injecter une panne d'allocation à trois points distincts : (1) construction de slab dans un worker créé, (2) `assign` d'un bloc après le premier, (3) croissance de `out.records` au commit. Exiger une fin sans terminaison ni worker bloqué, la jointure, et un échec typé `kResourceExhausted` au niveau chaîne. Faire tourner au moins deux blocs/plusieurs workers et une version un seul worker ; vérifier ensuite que les sorties et le ledger du chemin sans panne sont inchangés. Cette porte serait complémentaire du gate géométrique `lanes_port_gate.cpp`, qui teste les reports de capacité mais pas ces exceptions.
