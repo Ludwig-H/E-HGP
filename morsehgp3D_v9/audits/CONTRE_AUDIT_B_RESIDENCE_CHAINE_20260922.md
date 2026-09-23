@@ -192,3 +192,34 @@ postes d'ordre de grandeur à traiter **avant** un port GPU qui garderait
 ces tableaux hôte. Le temps reste dominé par q3/q4 sur la première
 trame exploratoire ; ce constat de résidence ne remplace pas la
 réduction des tests géométriques ni la qualification FULL/G4.
+
+## Mise à jour après la banque déplacée et le reçu G4 R5
+
+Le paragraphe historique ci-dessus « **trois** petites allocations par
+site K1 » décrit le premier chemin copiant. Depuis `133c8653`,
+`finish()` déplace `populations` vers la banque validée : la copie
+`rows_.assign` n'est **plus** exécutée sur le chemin de la chaîne.
+Restent au moins **deux** petites allocations indépendantes par site
+K1, pour la coquille singleton de la population et le vecteur singleton
+des contributions de l'action, tant sur la voie séquentielle que sur
+les ordres K parallèles. Le plancher correspondant à 30 M sites est
+donc **60 millions**, non 90 millions, hors autres allocations aval.
+Les octets de la tour explicite `216n` à K1 et le besoin d'une
+représentation adressable/fenêtrée restent, eux, inchangés.
+Le cache `48·nextpow2(16n)` cité pour l'ancien résolveur n'est pas
+configuré sur le chemin statique W>1 du reçu R5 ; il reste une réserve
+pour le chemin séquentiel, pas une attribution du RSS G4 mesuré.
+
+Au reçu R5/K10, `Presentation` occupe 112 octets sur l'ABI qualifiée :
+5,51 M présentations représenteraient environ 617 Mo décimaux **dans
+chacun** des tableaux `slots` et `all` s'ils atteignent simultanément
+leur capacité logique, avant leurs surcapacités. `groups` ajoute environ
+44 Mo et `balls` environ 1,235 Go ; les fenêtres de coexistence réelles
+et le high-water par phase ne sont toujours pas publiés. Après la
+fusion initiale, le catalogue est déjà strictement trié/unique par la
+clé exacte ; FULL effectue encore un second tri de `by_key`, avec un
+tampon temporaire d'environ 22 Mo à cette taille. Une voie interne
+validant l'ordre adjacent peut supprimer ce tri sans changer l'API
+publique, mais ni `by_level`, ni les présentations, ni les boules et
+leurs populations ne disparaissent. Voir aussi le
+[plancher R5](CONTRE_AUDIT_B_G4_R5_20260923.md).

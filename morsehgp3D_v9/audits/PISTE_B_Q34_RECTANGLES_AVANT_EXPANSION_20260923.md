@@ -202,3 +202,49 @@ La variante à ticket borné ci-dessus est différente — elle ne relance
 pas ce DFS global — mais demeure une hypothèse sans ablation ni preuve
 de gain sous-quadratique. Prioriser l'instrumentation du coût total et
 une porte shadow avant toute activation.
+
+### Cellules de centres : travail évitable en amont du cover
+
+Pour une cellule convexe `C` de **centres mondiaux** et des boîtes
+`A,B,Z`, comparer aux huit sommets `c` de C les extrema de distance
+sur les boîtes. Si
+`max_{z∈box(Z)}|z−c|² < min_{a∈box(A)}|a−c|²` à chaque sommet, tout
+Z est strictement intérieur à chaque boule admissible du bloc ; pour
+chaque `z,a` fixe, la différence des distances carrées est affine en
+`c`, ce qui étend le signe à toute C. Les nœuds Z en antichaîne peuvent
+atteindre K−1/K−2 et tuer la voie **dans cette cellule** avant de
+construire un cover ; tuer le produit entier exige le certificat sur
+**toutes** les cellules où un centre candidat peut se trouver. La
+condition opposée
+`min_{z∈box(Z)}|z−c|² > max_{a∈box(A)}|a−c|²` aux huit sommets
+certifie un nœud strictement extérieur aux boules de cette cellule,
+sans possibilité de contact/coquille. Les extrema sur boîtes sont
+conservateurs ; égalité et boîtes trop larges restent indécises.
+
+Sur les six premiers cas R5, l'identité de ledger
+`covers_vide = cover_builds−q3_edges−q4_edges+both_edges` donne
+**64,7–68,4 %** de covers dont aucune voie ne survit, **après** avoir
+payé leur construction et les formes. C'est une masse à viser en
+amont, pas un pourcentage que le certificat de cellule saurait déjà
+éliminer. Une cellule scindée garde ses crédits propres : ne jamais
+additionner ceux de deux cellules ni éliminer un Z de la coquille
+globale d'une autre. Il faut posséder/partitionner les centres, conserver
+un fallback exact pour les zones ambiguës et comparer temps, formes,
+sorties et RSS sur le même appel FULL ; tuiler seulement la matrice
+arête×témoin sur GPU laisserait Θ(Σ|cover_e|) travail et ne ferme pas
+le problème de complexité.
+
+Pour la **grille u18/1 mm seulement**, les centres q3 aigus et q4
+strictement positifs restent dans l'enveloppe convexe de leurs supports,
+donc dans le cube global entier `[0,262143]^3`. Une partition de ce
+cube par cellules mondiales à coins entiers évite les coins dyadiques
+fractionnaires de la construction précédente : aux coins, chaque
+distance carrée coin↔boîte appartient à `[0,3·262143²]`, et la
+différence signée tient sous `2^38`, donc en `i64`. Les centres réels
+entre coins sont couverts par l'affinité du signe. À largeur 1,
+terminer par le fallback exact ; si les cellules de **preuve** sont
+fermées et se chevauchent au bord, leurs **émissions** doivent avoir
+un propriétaire unique (par exemple une convention demi-ouverte),
+sans perdre les contacts. Cette preuve de largeur ne s'étend ni au
+float32 exact, ni aux coins rationnels/dyadiques mis à l'échelle, ni
+aux autres prédicats résiduels q3/q4.

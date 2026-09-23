@@ -131,3 +131,31 @@ Pour une preuve reproductible indépendante de l'allocateur, forcer la
 réutilisation d'adresse via placement ou injection dédiée, ou exiger
 ce plancher dans un environnement qualifié. Les deux CTests ciblés ne
 mesurent pas le RSS ni le coût de la copie `12·n` de l'index.
+
+### Travail géométrique non visible dans `dead_uniform_tests`
+
+Dans `Q34DeadLaneProver::cell`, chaque `uniform_tests` compte une
+évaluation du **maximum** de forme sur la cellule. Si ce maximum n'est
+pas strictement négatif, le code évalue aussi le **minimum** de forme,
+sans compteur propre. Une cellule peut créditer au plus `K−1` maxima
+strictement négatifs avant de retourner ; ainsi le nombre de minima
+évalués est au moins
+`dead_uniform_tests − (K−1)·dead_cells`. Sur les six premières
+répétitions G4 R5, ce minorant vaut **3,92–7,44 milliards** à K5 et
+**9,62–20,41 milliards** à K10. Pour 08/000200/K10, les
+21 728 323 453 maxima publiés impliquent **au moins 20 405 518 285
+minima supplémentaires**, soit au moins 42,13 milliards
+d'évaluations affines dans cette seule preuve, avant les 65,8 M tests
+ponctuels. Ce sont des comptes de travail, **pas** une attribution du
+temps mur q3/q4. Instrumenter `minimum_tests`, `frontier_ids_copied`
+et `forms_computed` (y compris les deux extrémités) pour juger une
+architecture par blocs et son coût réel.
+
+La largeur du noyau de forme actuel a été contre-vérifiée pour u18 :
+avec `M=262143`, `Q=2^20`, les coefficients vérifient
+`|constant|≤12QM²`, `|x|,|y|≤8M²` et les coordonnées cellulaires
+`|α|,|β|≤2Q`. Une évaluation affine et ses sommes intermédiaires sont
+donc bornées par `44QM²≈3,17·10^18<2^62`, dans `i64` signé. Cette
+preuve dépend de la grille u18 et des cellules actuelles ; elle ne
+qualifie ni une nouvelle mise à l'échelle dyadique ni le profil
+float32 exact.

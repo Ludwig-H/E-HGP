@@ -82,8 +82,10 @@ avec coûts d'export mesurés.
 Le meilleur temps R5 est **4,263 s** pour K1..5 et **12,067 s** pour
 K1..10 ; ni 1 s ni 100 ms ne sont atteints. Il n'existe toujours aucune
 mesure GPU de toute la tour, ni preuve de sous-quadraticité sur les
-régimes LiDAR visés. À K10, q3/q4 prend 5,5–11,2 s et charge 4,15–9,28
-milliards de formes selon la trame ; accélérer encore seulement le tri
+régimes LiDAR visés. À K10, q3/q4 prend 5,5–11,2 s et compte
+4,15–9,28 milliards de formes **hors extrémités** selon la trame ;
+`load()` écrit aussi deux formes nulles par cover, soit exactement
+`dead_form_sites+2·dead_loads` formes physiques. Accélérer seulement le tri
 ou la phase tour ne peut fermer le contrat. Priorité : certificat exact
 avant expansion des produits q3/q4, puis réduction des covers et tests
 de voies mortes, avec compteurs et repli résiduel complet. Le
