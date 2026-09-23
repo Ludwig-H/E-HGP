@@ -4367,3 +4367,28 @@ Question (R-20) : adoptes-tu ces portes ? Une fois adoptées, les copies
 de `tests/chain/` font référence.
 
 GCP non utilisé.
+
+### 20 h 57 UTC — Auditeur B : coût physique masqué des covers S3 R13
+
+Base `3288985bc` ; aucun nouveau moteur ni reçu G4 depuis R13. La
+[contrelecture R13 étendue](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_G4_R13_S3_20260923.md)
+montre un doublon physique : le GPU construit le cover complet dans son
+slab, renvoie `mask/status` sans plages, puis le CPU rappelle
+`Q34EdgeCover::make` pour **0,611–1,555 million** d'arêtes encore
+ouvertes par cas. Le registre q3/q4 conserve le travail logique S3
+mais n'ajoute pas les visites/tests de ce deuxième parcours. Sur les
+six cas, le payload deux `u32` par plage ouverte n'est borné que de
+4,89 à 675,15 Mo selon le cas ; sa taille réelle est inconnue.
+
+**Demande courte R-28, sans lancer G4 maintenant** : publier
+`Σranges`, `Σsites` et quantiles p50/p95/p99/max des seuls covers
+`decided && mask!=0`, ainsi que durée/visites/tests du seul rebuild
+CPU W1/W48, octets exportables et pic mémoire. `edges_ms` comprend
+atlas, graines, voies et callbacks : aucun gain de chaîne n'en découle
+sans ablation. Même sa suppression imaginaire laisserait 1,196–1,599 s
+à K5 R13. Si favorable, tester un export borné par ordinal, des plages
+exactes et maximales en rangs du même index, avec fallback CPU si
+capacité insuffisante, portes de plages puis catalogue/FULL et coûts
+compaction/D2H/inflation séparés. Une seconde passe GPU peut être
+exacte mais doit facturer son nouveau parcours. Le cœur diamétral
+ne remplace pas le cover complet. Aucun GCP utilisé par cet audit.

@@ -319,6 +319,19 @@ au libellé « coût du noyau » du reçu ; le noyau seul n'est pas chronométr�
 Une seule mesure par cas, aucun p95 ; aucun contrat brut multi-séquence
 ni sous-quadraticité globale ne sont qualifiés. Le G4 SPOT a été arrêté
 et relu `TERMINATED`.
+La [contrelecture physique de B](CONTRE_AUDIT_B_G4_R13_S3_20260923.md)
+précise que le GPU a déjà construit le cover complet des arêtes
+`decided && mask!=0`, mais n'en livre pas les plages : le CPU le
+reparcourt 0,611–1,555 M fois selon le cas. Ces visites et tests du
+**second parcours** sont absents du ledger logique, dont l'égalité
+CPU/GPU ne vaut donc pas égalité du travail physique. Le coût isolé du
+rebuild et la distribution des plages ouvertes ne sont pas publiés ;
+`edges_ms` englobe aussi tout l'aval q3/q4. La borne structurelle du
+payload compact est large (4,89–675,15 Mo selon le cas) : mesurer
+temps/visites du rebuild et plages ouvertes avant tout port de leur
+export GPU→CPU. Même effacer fictivement tout `edges_ms` laisse
+1,196–1,599 s à K5 dans R13 : cette optimisation seule ne ferme pas
+le contrat sur la chaîne inchangée.
 Le [correctif d'interprétation](../receipts/g4_tower_r13_20260923/ADDENDUM_20260923.md)
 du développeur suit R13. La [mise à jour D5](CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md)
 rappelle que phase statique et lots de la tour se recouvrent déjà :
