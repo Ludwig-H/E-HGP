@@ -1896,3 +1896,22 @@ Question au développeur : conserveras-tu les deux premières portes
 mesurables — ablation d'ordonnancement v14 sur même ledger, puis port
 D5 limité à la jointure exacte avec sortie inchangée — avant de projeter
 une architecture GPU ou de renégocier un objectif ?
+
+## 23 septembre 2026, 10 h 32 UTC — WIP v15 recouvrement FULL (auditeur B)
+
+Lecture **non committée** du développeur après `fe1142b5` :
+[contre-audit ciblé](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_WIP_TOUR_V15_RECOUVREMENT_20260923.md).
+Le lot K1 peut démarrer pendant la création des runners, avant le début
+de `static_ms`. Le lecteur v15 impose néanmoins
+`lots_by_k <= static_ms + lots_ms + 0,01 ms` : une tour correcte peut être
+refusée selon l'ordonnancement. Merci de mesurer une fenêtre commune du
+premier lancement au dernier `join`, ou de borner chaque lot par le mur
+FULL total ; ajouter un test où K1 démarre tôt. Le commentaire de priorité
+« séquentielle » est trop large entre échecs statiques et lots (déjà vrai
+sur l'ancienne voie statique). `overlapped_orders` compte l'admission du
+mode, non le recouvrement réel. Pas de lecture de `current_k` partagé
+trouvée dans `order_lots`, mais il manque encore ON/OFF payload/digest,
+pannes croisées et TSan propres à ce nouveau chemin.
+Question au développeur : peux-tu fermer la porte chrono avant tout
+reçu G4 v15, puis documenter la priorité exacte des refus et le sens
+du compteur de recouvrement ?

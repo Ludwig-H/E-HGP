@@ -5,6 +5,12 @@
 lecteur G4 **`515b3666`** puis **`1f048aae`**.
 La sonde v14 **`67fce4e9`** et le correctif de réception/masse
 **`fe1142b5`** sont publiés depuis ; aucun reçu G4 v14 n'est acquis.
+Un [contre-audit B du WIP v15 de recouvrement FULL](CONTRE_AUDIT_B_WIP_TOUR_V15_RECOUVREMENT_20260923.md)
+relève une borne de durée du lecteur qui peut rejeter une sortie valide :
+K1 démarre avant l'horloge statique, alors que `lots_by_k` est borné
+par `static+lots`. La propriété de données paraît plausible en lecture
+statique, mais égalité ON/OFF, pannes et TSan de cette voie manquent.
+Ce WIP postérieur à `fe1142b5` ne qualifie aucun reçu R8/R9.
 Les mesures de densité restent celles du binaire v12 **`4530644b`** ;
 aucune nouvelle série LiDAR v13 n'en découle. Le dernier
 [reçu G4 R8](../receipts/g4_tower_r8_20260923/README.md) exécute
