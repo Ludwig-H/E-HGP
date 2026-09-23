@@ -1,8 +1,9 @@
 # q3/q4 : le certificat n'exige pas un k-NN global exact
 
-23 septembre 2026. Lecture **du WIP mutable**, avant tout reçu v17. Cette
-note porte sur le choix des témoins du certificat de voies mortes, pas sur
-la complétude du générateur ni sur un gain déjà mesuré.
+23 septembre 2026. Preuve formulée pendant l'essai des voisins proches.
+Ce [port a été retiré après mesure négative](../receipts/near_sites_negative_20260923/README.md) ;
+le lemme ci-dessous reste valable pour toute future sélection de vrais sites
+distincts. Il ne démontre ni la complétude du générateur ni un gain de coût.
 
 Pour chaque cellule du domaine des centres admissibles, `prove` ferme q3
 avec au moins `K−1` sites distincts strictement intérieurs et q4 avec au
@@ -13,9 +14,9 @@ sites du nuage ; l'absence d'autres sites dans `S` ne peut qu'empêcher une
 fermeture. Le classement exact des k plus proches voisins globaux n'entre
 pas dans cet argument. L'ordre de parcours des IDs influe seulement sur
 le coût et les arrêts précoces. L'unicité, elle, est impérative : deux
-occurrences du même site ne sont pas deux témoins. `load_sites` l'exige
-encore par contrat plutôt que par contrôle ; la voie d'appel WIP trie et
-dédoublonne ses IDs.
+occurrences du même site ne sont pas deux témoins. Dans le port retiré,
+`load_sites` l'exigeait par contrat ; sa voie d'appel triait et
+dédoublonnait les IDs. Toute nouvelle API doit vérifier cette précondition.
 
 Cela autorise une **recherche bornée** sur l'index immuable : récupérer
 quelques sites locaux pour l'arête, même sans garantir qu'ils soient ses
@@ -39,22 +40,19 @@ petite liste réutilisable par site, une récupération locale seulement
 après les filtres bon marché, et un cache borné par worker ; garder le
 repli exact dans chaque variante.
 
-Le port WIP fixe `near_sites=16` et réserve `n×16` IDs `u32` plus `n`
-compteurs `u8` dans `Q34NearSites::build` (`q34_near_sites.cpp:93–97`) :
-**au moins 65 octets/site, soit 2,42 Gio à 40 millions de sites**, avant
-index, catalogue, FULL et buffers des workers. La recherche exacte sur
-boîtes peut elle-même parcourir beaucoup de nœuds et points ; sa
-construction précède les jobs q3/q4, même si la durée murale de q3/q4
-l'englobe. Une liste paresseuse ou bornée est donc une piste de mémoire
-et de latence, non un gain acquis.
+La variante retirée fixait `near_sites=16` : sa table de `n×16` IDs `u32`
+et `n` compteurs `u8` réservait **au moins 65 octets/site**, soit
+2,42 Gio à 40 millions de sites, avant index, catalogue, FULL et buffers
+des workers. Elle construisait les listes exactes avant les jobs q3/q4 ;
+le [reçu négatif](../receipts/near_sites_negative_20260923/README.md)
+mesure seulement −2 % de CPU q3/q4 à K5 et une régression de +3,7 % à
+K10. Une liste paresseuse ou bornée reste une hypothèse, pas un gain acquis.
 
-Porte utile avant capture G4 : sur les mêmes entrées, mesurer séparément
-construction et mémoire des listes, requêtes, visites de nœuds **et de
-points** (`near_list_point_tests` existe dans le moteur mais n'est pas
-encore exporté par la chaîne), taux de fermeture, replis, formes/cover
-évités, sorties et FULL identiques, CPU, mur et RSS. Faire les ablations
-sur les trames entières puis sur les sept secteurs physiques à densités
-1/4, 1/2 et entière. Ajouter un test direct de `load_sites` avec doublon
-refusé, et le gate mixte cache q3/voisins q4 (et inverse) déjà signalé
-par B avant tout reçu v17. Aucune pente sous-quadratique ne découle du
-seul caractère local de la sélection.
+Pour une future variante, mesurer séparément préparation, nœuds **et
+points** visités, fermetures, replis, formes et covers évités, sorties
+et FULL identiques, CPU, mur et RSS. Comparer les trames entières puis
+les sept secteurs physiques aux densités 1/4, 1/2 et entière. Une API
+publique qui accepte une liste de témoins doit refuser les IDs répétés ;
+les voies mixtes cache q3/proof q4 et inverse demandent une porte causale.
+Aucune pente sous-quadratique ne découle du seul caractère local de la
+sélection.

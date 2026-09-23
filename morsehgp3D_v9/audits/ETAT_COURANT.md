@@ -123,6 +123,18 @@ petites tuiles risquent de sous-remplir les blocs. Comparer un empaquetage
 stable de plusieurs petits rectangles par bloc/warp et le tuilage séparé
 des 47 043/72 329 grands rectangles, en conservant chaque ordinal et en
 facturant le coût d'empaquetage ; aucun gain S2 n'est encore mesuré.
+La [mesure complémentaire sur la trame **brute entière**](q34_raw_rectangle_mass_20260923/README.md)
+08/000000/1 mm/s8 retrouve exactement cinq comptes du grand-livre v12
+pour K5 et K10. Au K10, **198 169 des 4 308 768** rectangles ouverts
+portent **74,62 %** des 37,87 M paires développables ; seulement
+**2 337** rectangles (0,054 %) en portent **37,05 %**. Le port batch
+matérialise avant filtrage **9,88 M** rectangles, soit 226 MiB pour un
+seul vecteur de 24 octets. S2a a besoin de deux plafonds indépendants
+sur les rectangles et les paires, puis de regrouper les petits produits
+et de scinder les rares gros sans perdre les ordinals ni les masques.
+Cette sonde CPU ne mesure ni le port S2 courant, ni GPU/G4, ni une
+croissance sous-quadratique ; la matrice spatiale/densité reste à rejouer
+avec le raccord exact.
 Les deux meilleures lignes R11 (08/000100) bornent aussi le gain du
 seul réordonnancement q3/q4 : les **48 workers logiques** consomment
 78,151 CPU·s en 1,661 s de mur maximal à K5 et 211,744 CPU·s en

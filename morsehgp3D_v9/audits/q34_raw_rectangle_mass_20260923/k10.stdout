@@ -1,0 +1,19 @@
+sites 123389 K 10 front_rect 9875830 front_mass 417480120 open_rect 4308768 open_mass 37868819 closed_rect 5567062 closed_mass 379611301 rect_visits 884464262 max_rect_mass 187824 time_s 75.7 front_reported 9875830
+bucket 2^0 front_rect 3026591 front_mass 3026591 open_rect 2224126 open_mass 2224126 open_q3 2152625 open_q4 2182643
+bucket 2^1 front_rect 2452546 front_mass 5435285 open_rect 1042237 open_mass 2218656 open_q3 937485 open_q4 1012874
+bucket 2^2 front_rect 1894676 front_mass 9197457 open_rect 626513 open_mass 2932242 open_q3 539351 open_q4 615206
+bucket 2^3 front_rect 1145299 front_mass 12020098 open_rect 217723 open_mass 2237102 open_q3 167509 open_q4 216270
+bucket 2^4 front_rect 627755 front_mass 13619591 open_rect 94218 open_mass 2034973 open_q3 66710 open_q4 93950
+bucket 2^5 front_rect 329176 front_mass 14571081 open_rect 49129 open_mass 2169080 open_q3 31800 open_q4 49040
+bucket 2^6 front_rect 184680 front_mass 16416715 open_rect 27078 open_mass 2403787 open_q3 16362 open_q4 27057
+bucket 2^7 front_rect 104004 front_mass 18492022 open_rect 14589 open_mass 2585484 open_q3 7823 open_q4 14573
+bucket 2^8 front_rect 54033 front_mass 19287536 open_rect 7391 open_mass 2634168 open_q3 3676 open_q4 7391
+bucket 2^9 front_rect 27144 front_mass 19206034 open_rect 3427 open_mass 2398212 open_q3 1647 open_q4 3424
+bucket 2^10 front_rect 12640 front_mass 17827725 open_rect 1378 open_mass 1932360 open_q3 658 open_q4 1371
+bucket 2^11 front_rect 5505 front_mass 15499068 open_rect 495 open_mass 1367275 open_q3 231 open_q4 490
+bucket 2^12 front_rect 2654 front_mass 15401946 open_rect 147 open_mass 840588 open_q3 78 open_q4 145
+bucket 2^13 front_rect 2824 front_mass 34097674 open_rect 92 open_mass 1080165 open_q3 51 open_q4 77
+bucket 2^14 front_rect 4129 front_mass 98250177 open_rect 106 open_mass 2507949 open_q3 50 open_q4 89
+bucket 2^15 front_rect 1904 front_mass 81558370 open_rect 93 open_mass 4152852 open_q3 56 open_q4 64
+bucket 2^16 front_rect 254 front_mass 21109447 open_rect 26 open_mass 2149800 open_q3 14 open_q4 18
+bucket 2^17 front_rect 16 front_mass 2463303 open_rect 0 open_mass 0 open_q3 0 open_q4 0

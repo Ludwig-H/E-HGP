@@ -83,7 +83,6 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`Q3_STRUCTURE_ET_BORNES.md`](Q3_STRUCTURE_ET_BORNES.md) | A | `0674dc02` 22/21:44 | démontré localement | vivant | acceptée en partie |
 | [`CONTRE_AUDIT_B_PREATLAS_ET_Q3_20260922.md`](CONTRE_AUDIT_B_PREATLAS_ET_Q3_20260922.md) | B | `2c6d806e` 22/22:21 | démontré localement | vivant | différée sans échéance |
 | [`CONTRE_AUDIT_B_Q3_FEUILLE_WIP_20260923.md`](CONTRE_AUDIT_B_Q3_FEUILLE_WIP_20260923.md) | B | `bb3c696e` 00:42 | démontré localement | clos (code publié) | acceptée |
-| [`CONTRE_AUDIT_B_JUGE_Q3_C_V3_20260923.md`](CONTRE_AUDIT_B_JUGE_Q3_C_V3_20260923.md) | B | `5b448b2ca` 12:49 | deux portes du juge q3 v3 corrigées par v4 | historique | acceptée |
 | [`CONTRE_AUDIT_B_JUGES_C_V4_20260923.md`](CONTRE_AUDIT_B_JUGES_C_V4_20260923.md) | B | `931d37cd1` 13:07 | clés canoniques, ancres isolées et provenance ; reçu v5/v6 publié ensuite | historique pour la recette v4/v5 | sans réponse |
 | [`AUDIT_A_JUGE_Q3_V6_LONGUES_INCIDENCES_20260923.md`](AUDIT_A_JUGE_Q3_V6_LONGUES_INCIDENCES_20260923.md) | A | 23/13:48 | reçu v6 positif pour l'échantillon ; causalité longue au rang critique et refus de code 2 encore ouverts | vivant | sans réponse |
 
@@ -112,7 +111,6 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`CACHE_TEMOINS_COUT_VALIDATION_20260923.md`](CACHE_TEMOINS_COUT_VALIDATION_20260923.md) | B ? | `128fb231` 06:26 | mesure | vivant | sans réponse |
 | [`LEDGER_VISITES_CACHEES_Q34_20260923.md`](LEDGER_VISITES_CACHEES_Q34_20260923.md) | B | `5270f3df` 07:43 | mesure | clos (4530644b) | acceptée |
 | [`CORE_LIDAR_LOCAL_20260923.md`](CORE_LIDAR_LOCAL_20260923.md) | A ou B | `3a18c863` 04:43 | shadow | vivant | sans objet |
-| [`CONTRE_AUDIT_B_WIP_V17_VOISINS_20260923.md`](CONTRE_AUDIT_B_WIP_V17_VOISINS_20260923.md) | B | `8f42c9702` 11:53 | préflight de 16 voisins ; port retiré après reçu négatif | historique | sans objet |
 | [`SHADOW_HA_Q34_LIDAR_20260923.md`](SHADOW_HA_Q34_LIDAR_20260923.md) | B ? | `34c3164f` 05:44 | shadow | vivant | différée sans échéance |
 | [`SHADOW_HA_OCTANT_Q34_LIDAR_20260923.md`](SHADOW_HA_OCTANT_Q34_LIDAR_20260923.md) | B ? | `128fb231` 06:26 | shadow | vivant | sans réponse |
 | [`Q34_BLOCS_LIDAR_SHADOW_20260923.md`](Q34_BLOCS_LIDAR_SHADOW_20260923.md) | A ? | `867e68b3` 07:25 | shadow | négatif | sans objet |
@@ -202,6 +200,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`CONTRE_AUDIT_B_LIDAR_BRUT_K10_20260923.md`](CONTRE_AUDIT_B_LIDAR_BRUT_K10_20260923.md) | B | `82efba156` 12:32 | contrelecture indépendante du plein brut K10 | vivant | sans objet |
 | [`lidar_raw_k10_sectors_20260923/`](lidar_raw_k10_sectors_20260923/README.md) | A | 23/12:49–13:09 | mesure locale K10, sept secteurs physiques × trois densités ; 18 nouveaux cas gardés, six répétitions | vivant | sans objet |
 | [`q34_batch_density_quarter_20260923/`](q34_batch_density_quarter_20260923/README.md) | A | 23/15:39 | rejeu S2/v17 CPU apparié sur un quart brut K5 à trois densités ; six sorties vérifiables | vivant, portée bornée | sans objet |
+| [`q34_raw_rectangle_mass_20260923/`](q34_raw_rectangle_mass_20260923/README.md) | A | 23/16:00 | histogrammes q3/q4 K5/K10 sur une trame brute entière ; cinq comptes v12 appariés et budget S2a | vivant, mesure locale | sans objet |
 
 ## GPU et parallélisme
 
