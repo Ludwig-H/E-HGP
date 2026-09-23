@@ -193,11 +193,13 @@ mhgp9_gate(mhgp9_chain_euler_scale_bad_argument 2 mhgp9_chain_euler_scale_gate
 # petit, mutant v8 de tests/gen/mutants.json) : copie mutee de l'unite liee
 # AVANT libmhgp9_gen, code 1 et cause euler exacte.
 function(mhgp9_euler_scale_mutant mutant expect)
+  set(found FALSE)
   string(JSON count LENGTH "${mhgp9_gen_mutant_text}" mutants)
   math(EXPR last "${count} - 1")
   foreach(i RANGE ${last})
     string(JSON name GET "${mhgp9_gen_mutant_text}" mutants ${i} name)
     if(name STREQUAL mutant)
+      set(found TRUE)
       string(JSON unit GET "${mhgp9_gen_mutant_text}" mutants ${i} source)
       file(READ "${CMAKE_CURRENT_SOURCE_DIR}/src/gen/${unit}" text)
       string(JSON rcount LENGTH "${mhgp9_gen_mutant_text}" mutants ${i} replacements)
@@ -225,6 +227,9 @@ function(mhgp9_euler_scale_mutant mutant expect)
                  ARGS --selftest EXPECT_PREFIX "${expect}" LABELS "scale8000;chain;euler;mutant" TIMEOUT 1800)
     endif()
   endforeach()
+  if(NOT found)
+    message(FATAL_ERROR "mhgp9: mutant ${mutant} absent de tests/gen/mutants.json (porte Euler d'echelle)")
+  endif()
 endfunction()
 mhgp9_gate(mhgp9_chain_census_tower_bad_argument 2 mhgp9_chain_census_tower_gate
            ARGS --unknown LABELS "gate;chain" TIMEOUT 60)

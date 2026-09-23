@@ -10,9 +10,13 @@
 // compensent). La contribution d'une boule (p interieurs, coquille U, centre c)
 // est le coefficient de t^{K-1} dans t^p * somme_{T sous U, c dans conv(T)} (t-1)^{|T|-1}.
 // Pour chaque boule, les T sont lus dans ShellTable::contains_center(), apres
-// recensement independant de la ligne sur un index reconstruit (puissance
-// exacte nulle sur chaque site de coquille, negative sur chaque interieur) et
-// verification de q_min, qui certifie la minimalite du support sans tour FULL.
+// VALIDATION DES LISTES FOURNIES par la chaine sur un index reconstruit
+// (puissance exacte nulle sur chaque site de coquille, negative sur chaque
+// interieur) et verification de q_min, qui certifie la minimalite du support
+// sans tour FULL. Ce n'est pas un recensement independant (contrelecture B) :
+// un juge d'echantillon le complete, une boule sur 64 recensee par balayage
+// brut de TOUS les sites (puissance exacte), ensembles d'interieurs et de
+// coquille egaux a ceux de la chaine.
 // La chaine tourne SANS tour : une omission du generateur est jugee par
 // l'invariant, non par la detection partielle de la tour.
 //
@@ -29,6 +33,7 @@
 #include <algorithm>
 #include <array>
 #include <bit>
+#include <charconv>
 #include <cstdint>
 #include <cstdio>
 #include <string>
@@ -46,8 +51,9 @@ namespace {
 using mhgp9::tower::BallData;
 
 struct Totals {
-  std::uint64_t balls = 0, degenerate = 0, checked_orders = 0;
+  std::uint64_t balls = 0, degenerate = 0, checked_orders = 0, sampled = 0;
 };
+constexpr std::uint64_t kSampleStride = 64;
 
 // Coefficient de t^{K-1} dans t^p (t-1)^{j-1}, accumule par ordre K = 1..kmax.
 void add_polynomial(std::array<std::int64_t, 11>& e, unsigned p, unsigned j, std::int64_t count, unsigned kmax) {
@@ -69,11 +75,28 @@ bool euler_of(const std::vector<mhgp9::gen::Point3>& points, const std::vector<B
                                         mhgp9::tower::P3{points[i].x, points[i].y, points[i].z}};
   const auto ix = mhgp9::tower::build_cloud_index(input);
   std::array<std::int64_t, 11> e{};
+  std::vector<std::int32_t> inside, shell, listed;
   for (const auto& b : balls) {
+    // Juge d'echantillon (pas deterministe) : recensement brut sur tous les sites.
+    if (totals->balls % kSampleStride == 0) {
+      inside.clear(); shell.clear();
+      for (std::int32_t u = 0; u < ix.unique_count(); ++u) {
+        const auto power = b.key.power(ix.upos[static_cast<std::size_t>(u)]);
+        if (power < 0) inside.push_back(u);
+        else if (power == 0) shell.push_back(u);
+      }
+      listed.assign(b.interior().begin(), b.interior().end());
+      std::sort(listed.begin(), listed.end());
+      if (listed != inside) { *cause = "sample.interior_set_differs"; return false; }
+      listed.assign(b.shell().begin(), b.shell().end());
+      std::sort(listed.begin(), listed.end());
+      if (listed != shell) { *cause = "sample.shell_set_differs"; return false; }
+      ++totals->sampled;
+    }
     ++totals->balls;
     const unsigned p = b.n_interior, q = b.arity, u = b.n_shell;
     if (u != q) ++totals->degenerate;
-    // Recensement independant de la ligne : puissance exacte negative sur chaque
+    // Validation des listes fournies : puissance exacte negative sur chaque
     // interieur, nulle sur chaque site de coquille ; puis q_min recalcule par le
     // quotient local, qui certifie aussi la minimalite du support d'une coquille
     // reguliere (la chaine ne la verifie pas sans tour FULL).
@@ -134,7 +157,14 @@ int main(int argc, char** argv) {
   for (int i = 1; i < argc; ++i) {
     const std::string_view arg(argv[i]);
     if (arg == "--selftest") selftest = true;
-    else if (arg.starts_with("--n=")) n = std::stoul(std::string(arg.substr(4)));
+    else if (arg.starts_with("--n=")) {
+      const auto digits = arg.substr(4);
+      const auto [end, error] = std::from_chars(digits.data(), digits.data() + digits.size(), n);
+      if (digits.empty() || error != std::errc{} || end != digits.data() + digits.size()) {
+        std::fprintf(stderr, "usage: mhgp9_chain_euler_scale_gate --selftest [--n=8000]\n");
+        return 2;
+      }
+    }
     else { std::fprintf(stderr, "usage: mhgp9_chain_euler_scale_gate --selftest [--n=8000]\n"); return 2; }
   }
   if (!selftest || n < 64 || n > 65536) {
@@ -210,12 +240,14 @@ int main(int argc, char** argv) {
     return 1;
   }
   // Planchers contre la vacuite : grandes populations et coquilles etendues exercees.
-  if (totals.balls < 50 * n || totals.degenerate == 0 || totals.checked_orders != 14) {
+  if (totals.balls < 50 * n || totals.degenerate == 0 || totals.checked_orders != 14 ||
+      totals.sampled * kSampleStride < totals.balls) {
     std::printf("cause=floor balls=%llu degenerate=%llu orders=%llu\n", static_cast<unsigned long long>(totals.balls),
                 static_cast<unsigned long long>(totals.degenerate), static_cast<unsigned long long>(totals.checked_orders));
     return 3;
   }
-  std::printf("euler_scale ok n=%zu families=3 balls=%llu degenerate=%llu restricted_rows=%zu\n", n,
-              static_cast<unsigned long long>(totals.balls), static_cast<unsigned long long>(totals.degenerate), a.size());
+  std::printf("euler_scale ok n=%zu families=3 balls=%llu degenerate=%llu restricted_rows=%zu sampled=%llu\n", n,
+              static_cast<unsigned long long>(totals.balls), static_cast<unsigned long long>(totals.degenerate), a.size(),
+              static_cast<unsigned long long>(totals.sampled));
   return 0;
 }
