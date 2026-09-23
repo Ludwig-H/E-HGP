@@ -119,3 +119,23 @@ la tour. Le gate de chaîne assure une égalité de condensé FNV-64 et du
 nombre d'ordres sur 1 500 sites/K5/s8, non l'égalité sérialisée de toutes
 les sorties, ni une trame complète/G4. Aucun chrono apparié, RSS G4,
 TSan ou contrat de 1 s n'est acquis par ce commit.
+
+## Nouveau WIP après `e0ae05a7` : tampons des lots
+
+Dans le worktree développeur, `full_ball_tower.hpp` remplace le vecteur
+local de `Block` par `lot_blocks` conservé entre lots et donne directement
+le vecteur des racines d'un singleton à son action via `swap`. Lecture
+indépendante : tous les champs du bloc sont réinitialisés avant usage, le
+`span` reste synchrone et les racines ne sont plus lues après le transfert ;
+aucun défaut d'exactitude ou de durée de vie identifié dans ce diff.
+
+L'affirmation « no allocation per lot » du commentaire est toutefois trop
+forte : après le `swap` d'un lot singleton, le slot n'a plus de capacité
+de racines ; le prochain singleton peut la réallouer. Le changement
+économise surtout l'enveloppe `vector<Block>` et réutilise les tampons des
+lots groupés, sans changer la complexité asymptotique. `lot_blocks`
+conserve aussi jusqu'à la fin de la construction la capacité atteinte par
+le plus grand plateau ; la comparer au RSS maximal, surtout sur 30 M
+d'objets. Aucun nouveau test n'accompagnait ce diff au moment de la
+lecture : refaire la porte FULL et le différentiel statique 0/1/4/8 sur
+un build cohérent avant d'attribuer un gain.

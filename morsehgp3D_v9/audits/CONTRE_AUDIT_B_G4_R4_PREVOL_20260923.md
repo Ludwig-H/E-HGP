@@ -59,3 +59,19 @@ aucun temps de tour et aucun test du contrat. Le snapshot et le plan
 préparatoires restent contrôlés ; ne pas transformer cet échec de
 connexion en régression ou en succès de l'algorithme. Aucune relance
 GCP par l'auditeur.
+
+### Contrelecture du reçu d'échec en préparation
+
+Le dossier produit `receipts/g4_tower_r4_preempted_20260923/`, encore non
+commité à la lecture, passe `sha256sum -c SHA256SUMS` sur ses 33 objets.
+Son README attribue l'interruption à l'événement GCE
+`compute.instances.preempted` du 23 septembre à 02:45:36 UTC. Ce
+diagnostic est plausible et plus précis que les traces hôte ci-dessus,
+mais **l'événement GCE lui-même n'est pas dans le reçu** : la chaîne de
+preuve archivée ne permet pas encore de le rejuger indépendamment. Une
+capture expurgée de l'entrée d'audit GCE, liée à l'instance et à sa
+génération, lèverait cette réserve. Les traces hôte suffisent déjà à
+conclure à l'absence de résultat et à l'arrêt ciblé. Le `PACKAGE.json`
+conserve logiquement l'état *préparatoire* `GCP_used=false` et
+`prepared_not_executed` ; ne pas le lire comme l'état final de la
+session, qui figure dans `host/receipt.json` et le README.
