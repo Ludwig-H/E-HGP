@@ -4315,8 +4315,9 @@ ptxas 128 registres et le gain ne sont pas encore archivés/jugés sur
 carte. Les sommes u64 par warp/appel ne sont pas bornées pour toute
 l'API : `2×5461×min(n,capacity)×edges` peut dépasser `2^64` si la
 capacité demandée approche u32 max. R13 est sûr pour ce terme
-(<`2,47×10^15`). Garde/refus typé ou accumulation vérifiée pour le
-massif ; R14 doit archiver ptxas/attributs, sous-temps, pic HBM et juge
+(<`2,47×10^15`). Pour le massif, tuiler et agréger exactement en u128
+ou équivalent ; un simple refus protégerait la vérité mais manquerait
+le contrat. R14 doit archiver ptxas/attributs, sous-temps, pic HBM et juge
 device par arête, incluant reports et lot vide.
 
 D5 : la phase statique et les lots K se **recouvrent déjà**. À lots

@@ -181,7 +181,8 @@ mesurées**, et non une borne sous-quadratique acquise.
    chevauchantes sont licites pour la preuve ; les émissions gardent
    néanmoins un propriétaire canonique unique.
 2. Pour un bloc `Z` de sites et des **IDs réels distincts** `G` disjoints
-   de `Z`, si à tous les sommets `v` de `C`,
+   de `Z` et, conservativement, tous hors `A∪B` (raffiner tout nœud
+   chevauchant les facteurs), si à tous les sommets `v` de `C`,
    `max_(g∈G)|g−v|² < min_(z∈box(Z))|z−v|²`, alors tout `g` reste
    strictement plus proche que tout `z` dans toute la cellule : chaque
    différence de distances carrées est affine en centre. On peut

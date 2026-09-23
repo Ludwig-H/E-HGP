@@ -114,7 +114,9 @@ mais pas avec une capacité utilisateur proche de `2^32`. Les six
 populations R13 sont loin du seuil : cette borne donne moins de
 `2,47×10^15` tests pour le pire cas. C'est un verrou de domaine
 massif, pas une divergence observée. Un refus typé ou une accumulation
-vérifiée est requis avant d'élargir le domaine déclaré. Une future
+vérifiée est requis pour ne pas produire de compte faux ; pour **servir**
+le contrat massif, privilégier des lots bornés avec accumulation hôte
+u128 (ou un équivalent exact), le refus seul ne suffisant pas. Une future
 réception devrait archiver `ptxas -v`, les attributs CUDA et
 l'occupation calculée, puis les sous-temps et les masques/compteurs
 par arête contre CPU, avec ardoise réduite, lot vide et contacts.
