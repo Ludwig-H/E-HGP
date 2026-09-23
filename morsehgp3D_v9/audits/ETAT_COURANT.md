@@ -225,6 +225,12 @@ signale avant G4 le lot CUDA vide avec pointeur nul, une feuille
 multi-site acceptée par la garde brute malgré le contrat du cover,
 les slabs de 3,25 Mio par warp au défaut, et le cover CPU reconstruit
 sur les arêtes encore ouvertes sans compteur physique séparé. La
+lecture statique du noyau trouve en outre un **retour anticipé sans
+`__syncwarp` après écritures partielles du frontier** : une cellule
+sœur réutilise ce tableau ; `__ballot_sync` n'ordonne pas la mémoire
+entre lanes selon la documentation CUDA. Ce risque WAW n'est pas une
+divergence G4 observée, mais exige une barrière et une porte device
+ciblée avant qualification S3. La
 sonde, le worker G4, son selftest et le lecteur LiDAR passent en v18
 dans le commit détaché `50dabc0fa`, pas encore dans un reçu qualifié. Le worker
 local accepte cependant un cas où les trois survivants sont tous
@@ -1269,6 +1275,14 @@ comparer l'expansion octet par octet et mesurer chaque sous-phase. Un
 catalogue « scellé » peut éviter une validation redondante seulement
 si la chaîne certifie **toutes** les clés émises et conserve ses preuves ;
 il ne prouve pas les clés entièrement manquantes.
+Le futur callback D5 a trois verrous concrets
+([lecture B du code](CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md)) :
+sa garde actuelle ne lie pas facette et **composante** cible, elle exige
+les compteurs de l'ancien résolveur d'intrus, et sa présence désactive
+le parallélisme entre ordres K. Le produit actuel ne branche **aucun**
+callback externe et applique déjà la règle 0 : ce ne sont pas des bugs
+de la tour publiée. Un shadow par facette comparant la racine au seuil
+ouvert pré-lot, sans remplacer la cible, doit précéder le port.
 Le [premier port borné D5](../receipts/saddle_index_negative_20260923/README.md)
 est **clos négativement** et retiré du produit : sur 08/000200 sans sol
 16k/K10/W8, la jointure exacte des selles évite 1,012 M MEB, mais construit

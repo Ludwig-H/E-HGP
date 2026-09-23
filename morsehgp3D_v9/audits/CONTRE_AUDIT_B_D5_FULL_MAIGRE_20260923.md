@@ -40,16 +40,17 @@ doit passer à un stockage à offsets ou replier sans débordement avant
 tout port produit. Les propositions sur images de fusion et tranches
 figées restent des esquisses à qualifier, pas des théorèmes de vitesse.
 
-Le **premier port sûr** est plus petit que D5 entier : dans la seule
-résolution statique, ajouter l'index exact des graines et des selles
-régulières, comparer intégralement les IDs et la clé, puis retourner au
-`static_terminal` actuel sur chaque miss. Garder `validate_catalogue`,
-`ShellTable`, phase A, banque et sortie explicite inchangées. Juger
-index + jointure + repli et la cible/racine de **chaque** facette, pas
-seulement le nombre de MEB. Cette tranche vise la phase 0 de R8
-(1,12–1,46 s à K10) et isole une réduction de travail du reste des
-hypothèses. Le saut au centre avec règle 0 vient ensuite ; la phase A
-maigre et le compact/scellement sont deux étapes encore séparées.
+Le **premier port envisagé**, plus petit que D5 entier, était d'ajouter
+à la seule résolution statique l'index exact des graines et des selles
+régulières, puis de retourner au `static_terminal` actuel sur chaque
+miss. Il a depuis été [mesuré négatif et retiré](../receipts/saddle_index_negative_20260923/README.md) :
+sur 16k/K10, 1,012 M MEB évités contre 10,188 M entrées construites
+et triées, phase 0 **2 582→2 752 ms**. Garder `validate_catalogue`,
+`ShellTable`, phase A, banque et sortie explicite inchangées pour les
+essais suivants ; ne pas transférer ce coût à une hypothétique jointure
+plus économique. Le saut au centre avec règle 0 doit maintenant être
+jugé **avec** l'index, tandis que phase A maigre et compact/scellement
+restent deux étapes encore séparées.
 
 ## Frontière exacte d'un « catalogue scellé »
 
@@ -95,3 +96,51 @@ validation, phase A et finition. Une seule sonde G4 appariée devient
 pertinente après fermeture de cette porte locale ; pas de noyau par
 niveau tant que les plateaux et la frontière séquentielle ne sont pas
 chiffrés.
+
+## Mise à jour : trois pièges concrets du futur raccord D5
+
+Lecture statique au commit `feacf0059`, sans modification moteur. La
+chaîne v9 appelle actuellement FULL avec un résolveur externe **vide**
+(`src/chain/tower_chain.cpp:783`) : les points ci-dessous ne sont **pas**
+des défauts démontrés du chemin produit actuel. Celui-ci applique déjà
+la règle 0 dans `static_terminal` (`full_ball_tower.hpp:1265–1282`).
+
+1. `prepare_external_batch` (`full_ball_tower.hpp:1422–1440`) vérifie
+   ordinal, domaine, fenêtre K et niveau de la cible, mais **pas** son
+   appartenance à la composante de la facette. La fixture collinéaire
+   `0,1,10,11` à K2 passe ces gardes avec une cible fausse de niveau
+   inférieur, dans une autre composante. Le [contre-exemple E1](CONTRELEC_D5_NAISSANCE_ET_PORTE_E1_20260923.md)
+   impose la comparaison de **chaque racine pré-lot**, pas seulement
+   du digest final.
+2. Le même adaptateur (`:1407–1418`) exige les identités de compteurs
+   de l'ancien échange d'intrus (`calls=anchor_hits+intruder_queries`,
+   `intruder_queries=descending_steps+same_radius_steps`). Un saut D5
+   honnête a un autre ledger et ne peut être branché en conservant
+   artificiellement ces comptes. Versionner un schéma de travail D5
+   distinct et lui écrire des gardes causaux.
+3. `Builder::run` (`:361–370`) n'appelle `run_orders_parallel()` que
+   lorsque `!batch_resolver.resolve` ; brancher D5 par ce callback
+   **sérialise les ordres K** avant tout benchmark. Changer cette
+   condition exige une porte d'indépendance des sorties par K, en
+   plus du parallélisme des facettes à l'intérieur d'un plateau.
+
+Un shadow audit-only peut pré-calculer la cible D5 sur catalogue/index
+immuables, puis lire la DSU **sans compression** au seuil ouvert
+`λ⁻` dans `order_block`, juste avant `order_lot`, pour comparer la
+racine D5 et la racine du produit sur **chaque occurrence de facette**.
+Il ne remplace aucune cible ni aucun payload ; les deux mutants
+minimaux sont `fx_cz` sans règle 0 et `0,1,10,11` avec mauvaise
+composante. Chaque saut doit attester `G⊂D̄`, `|G|=K`,
+`level(D)<λ` et une baisse stricte s'il continue ; un échec retourne
+à la route actuelle. Aucun maximum observé de sauts n'est un plafond
+algorithmique : file dynamique ou repli exact pour le GPU.
+
+Le coût du shadow n'est pas gratuit. Le
+[sidecar C corrigé](c_alternatives_20260923/propositions/verifications_adverses.md)
+à 8k/K10
+consommait **3,25–3,48 CPU·s**, contre 8,577 CPU·s de FULL produit
+mono ; index/jointure et queue doivent être chronométrés séparément.
+À trame K10, environ 13,67 M facettes et 7,1 M entrées d'index ont été
+estimées par C, avec 0,43–0,9 Go si les dix ordres coexistent : ce sont
+des projections, pas une mesure G4. Comparer le coût de la sonde ON/OFF
+et le payload complet, pas seulement des racines égales.

@@ -3764,3 +3764,32 @@ plafond d'incidences cœur de la cellule globale vaut respectivement
 **2,823 %** puis **2,319 %**, contre **1,494 %** au plein. Ce n'est
 ni une pente asymptotique ni une coupe spatiale ; aucune trace par
 arête K10 ou sans-sol n'était disponible pour ce test peu coûteux.
+
+## 23 septembre 2026, 18 h 55 UTC — Barrière S3 et protocole D5 (auditeur B)
+
+Base S3 : commit local détaché `50dabc0fa`, toujours hors `main` et
+sans mesure du noyau CUDA. `gpu/certificate.hpp:390–391` peut écrire
+des IDs de frontier depuis plusieurs lanes ; si le bloc suivant ferme
+au seuil, `:383–387` retourne **sans `group.sync()`**. La cellule sœur
+peut réemployer les mêmes cases depuis d'autres lanes. La
+[documentation NVIDIA](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cpp-language-extensions.html)
+dit que `__ballot_sync` ne fournit aucun ordre mémoire, alors que
+`__syncwarp` en fournit un : le vote intermédiaire ne suffit pas.
+Lecture et scénario dans le [préflight S3](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md).
+C'est un risque WAW statique, **pas une divergence observée**. Question
+au développeur : peux-tu ajouter la barrière avant ce retour et une
+fixture CUDA « partiels, seuil dans bloc suivant, sœur réutilisant le
+frontier », puis comparer masque/travail par arête avant R13 ?
+
+Base D5 : lecture du FULL publié `feacf0059`. Le callback externe
+actuel ne prouve pas le lien **facette→composante** (mutant exact
+`0,1,10,11` K2), impose les anciens compteurs d'intrus et désactive
+la concurrence entre ordres K ; la chaîne produit ne l'utilise pas et
+fait déjà la règle 0. L'index des selles seul a été mesuré négatif
+(phase 0 2 582→2 752 ms à 16k/K10). La
+[note B mise à jour](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md)
+propose un shadow **par facette** comparant racines pré-lot avant toute
+substitution ; son coût et celui de la queue FULL doivent être facturés.
+Question au développeur : comptes-tu séparer l'essai de résolution
+statique D5 de la parallélisation des ordres et du compact FULL, avec
+un nouveau ledger plutôt que de simuler les anciens compteurs ?

@@ -15,7 +15,7 @@ test court compilation + quelques arêtes et lot vide sur device ;
 n'exécuter les 18 cas R13 qu'après égalité par arête et correction des
 portes d'entrée.
 
-## Deux portes de domaine à fermer
+## Trois portes de domaine à fermer
 
 1. `run_certificate_batch` CUDA exécute `out.masks.assign(input.edge_mask, input.edge_mask + edges)` **avant** `if (edges == 0) return`. Or `validate_certificate_input` accepte `edge_count=0` avec `edge_mask=nullptr`. L'addition `nullptr+0`, puis l'itérateur de plage nul, n'ont pas de contrat C++ valide. Retourner avant `assign` ou le conditionner, puis ajouter un gate CUDA/stub `0 arête, pointeurs nuls`. Une liste vide est normale quand le filtre S2 élimine tout.
 2. La garde héritée `validate_filter_input` accepte une feuille dont la plage contient **plus d'un rang**. `build_cover` S3 suppose au contraire que toute feuille est singleton : si la boîte d'une telle feuille est ambiguë, il descend vers `node.left=absent32` et **omet** la plage. Cela peut produire un `fault` (extrémités perdues), une couverture incomplète et des comptes faux. Pas de lecture hors limites directe dans cette boucle : le curseur sentinelle termine le parcours. Imposer `leaf ⇔ last−first=1` dans la validation de cette API, avec mutant de feuille multi-site ambiguë. L'index produit satisfait déjà cette propriété ; le défaut est à la frontière publique brute.
@@ -27,8 +27,30 @@ masque ouvert ; le port brut peut donc publier une décision q3 à K1
 ou q4 à K2. Les survivants issus du filtre S2 de la chaîne respectent
 le domaine, donc ce n'est **pas** une divergence démontrée du contrat
 LiDAR K5/K10 ; c'est une garde d'API publique à fermer. Refuser un
-masque hors des voies disponibles (`0` à K1, `2` à K2, `2|4` à partir
-de K3) et tester les deux refus, ainsi que `dead_core=false`.
+   masque hors des voies disponibles (`0` à K1, `2` à K2, `2|4` à partir
+   de K3) et tester les deux refus, ainsi que `dead_core=false`.
+
+## Porte mémoire CUDA supplémentaire : retour anticipé sans barrière
+
+Sur le commit local `50dabc0fa`, `gpu/certificate.hpp:390–391` laisse
+plusieurs lanes écrire les IDs partiels dans le tableau `next` d'un
+frontier. Si un bloc suivant atteint le seuil, `enter_cell` retourne
+à `:383–387` **sans** `group.sync()`. `prove_lanes` (`:470–486`)
+peut aussitôt visiter une cellule sœur qui réutilise la même plage du
+slab : une autre lane peut réécrire le même `next[j]`. Les deux
+`__ballot_sync` de `WarpGroup::ballot2` (`filter_runner.cu:489–494`)
+ne créent [aucun ordre mémoire selon NVIDIA](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cpp-language-extensions.html#warp-vote-functions),
+alors que [`__syncwarp` ordonne les accès des lanes participantes](https://docs.nvidia.com/cuda/cuda-programming-guide/05-appendices/cpp-language-extensions.html#synchronization-functions).
+La barrière du chemin sans arrêt, à `certificate.hpp:393`, se situe
+après la branche et ne protège pas ce réemploi. C'est un **risque
+statique concret de WAW inter-lanes**, pas une divergence observée sur
+G4 ; l'émulation hôte ne peut pas le réfuter.
+
+Ajouter une barrière de warp avant ce retour anticipé, puis un gate
+device causal où un bloc écrit des partiels, le bloc suivant atteint
+le seuil, et la cellule sœur réutilise le frontier. Comparer masques
+et travail **par arête** à la référence CPU, sous répétitions CUDA ;
+ne pas lancer R13 comme qualification avant cette porte.
 
 ## Travail, mémoire et juges encore ouverts
 
