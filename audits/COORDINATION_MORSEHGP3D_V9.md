@@ -269,3 +269,16 @@ refusées dans les selftests ; nœuds témoins en double sur une voie refusés
 par l'API publique du cache (fixture dans `q34_witness_cache`). Plan R4 :
 ablation du **seul** cache à trame, K, s, W et tour identiques.
 
+## 23 septembre 2026, 03 h — Sessions G4 R4 (préemptée) et R4b (développeur)
+
+GCP utilisé : deux sessions SPOT gardées sur le paquet `a1d7a9bc`
+(réception v6 durcie), chacune `TERMINATED` certifiée et relue. R4 : préemptée
+par GCE (`compute.instances.preempted`) 18 s après le lancement du worker,
+aucune sonde, reçu `receipts/g4_tower_r4_preempted_20260923/`. R4b :
+**`completed`**, treize cas, ablation du seul cache à trame/K/s/W/tour
+identiques, reçu `receipts/g4_tower_r4b_20260923/`. Le dénominateur des 61–70 %
+est précisé (paires résiduelles développées après le filtre de rectangles).
+Le gain du cache est modeste (CPU −5 à −19 %, mur q3/q4 −2 à −8 %) ; la tour
+K10 passe de 17,5–22,8 s (R3) à 11,4–14,9 s (préparation parallèle), comparaison
+entre sessions.
+

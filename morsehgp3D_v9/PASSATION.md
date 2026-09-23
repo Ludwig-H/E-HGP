@@ -84,8 +84,15 @@ paires (70 % des paires rejetées sans recherche à K5 sur 08/000000).
 Protocole v6 : tous les leviers de la chaîne sont épinglés par cas
 (`levers`, `--lever=NOM=0|1`).
 
-Suite : session G4 R4 (leviers, ablation du cache) ; lots et banque de la
-tour ; coût du certificat ; seuil K−2 des arêtes q4 seules.
+Session G4 R4 préemptée par GCE (aucune mesure, [reçu](receipts/g4_tower_r4_preempted_20260923/README.md)) ;
+reprise R4b ([`g4_tower_r4b_20260923`](receipts/g4_tower_r4b_20260923/README.md), paquet `a1d7a9bc`,
+**`completed`**) : cache −5 à −19 % de CPU, tour K10 −35 % contre R3 ; chaîne
+complète **5,4 / 7,4 / 9,2 s à K5** et **19,4 / 26,7 / 29,5 s à K10** à 48 fils,
+condensés inchangés.
+
+Suite : tour à ordres K construits en parallèle (lots séquentiels par ordre,
+images verticales ensuite) ; coût du certificat ; seuil K−2 des arêtes q4
+seules.
 
 ## État du dépôt au moment de l'ouverture (historique)
 

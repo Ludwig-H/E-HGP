@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/workspaces/.ehgp-sessions/v9tower.20260923T024703Z/tower_v9_host/start_and_verify.sh",
+    "--yes",
+    "--guest-shutdown-minutes",
+    "40",
+    "--handoff-file",
+    "/workspaces/.ehgp-sessions/v9tower.20260923T024703Z/tower_v9_host/handoff.json",
+    "--lifecycle-state-file",
+    "/workspaces/.ehgp-sessions/v9tower.20260923T024703Z/tower_v9_host/lifecycle.txt",
+    "--guard-mark-dir",
+    "/workspaces/.ehgp-sessions/v9tower.20260923T024703Z/tower_v9_host/guardmarks"
+  ],
+  "ended_epoch": 1790131707.4576619,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "guarded_start",
+  "pid": 1385776,
+  "started_epoch": 1790131633.4124966,
+  "stderr_sha256": "5483771a0b7589dbf5dd75541c54a0229a411decc15c1bde3721dd4e34880cd6",
+  "stdout_sha256": "74f7f09dc772c393124d24461f478dd8529e139a157e51557086dfe1297a7a73",
+  "timeout_seconds": null
+}

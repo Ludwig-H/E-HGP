@@ -1,0 +1,12 @@
+ssh: connect to host 136.65.193.15 port 22: Connection timed out
+
+Recommendation: To check for possible causes of SSH connectivity issues and get
+recommendations, rerun the ssh command with the --troubleshoot option.
+
+gcloud compute ssh ehgp-v7-4fa0e0789a7d5bb06b787d35 --project=devpod-gpu-exploration --zone=us-central1-b --ssh-key-file=/workspaces/.ehgp-sessions/v9tower.20260923T024248Z/key --troubleshoot
+
+Or, to investigate an IAP tunneling issue:
+
+gcloud compute ssh ehgp-v7-4fa0e0789a7d5bb06b787d35 --project=devpod-gpu-exploration --zone=us-central1-b --ssh-key-file=/workspaces/.ehgp-sessions/v9tower.20260923T024248Z/key --troubleshoot --tunnel-through-iap
+
+ERROR: (gcloud.compute.ssh) [/usr/bin/ssh] exited with return code [255].
