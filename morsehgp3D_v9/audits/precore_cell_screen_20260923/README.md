@@ -119,14 +119,15 @@ la différence du compteur avant/après `surviving_edge`, et de même pour
 `cover_sites`, sans verrou ni ordre de worker supposé. Exiger
 `Δcore_builds=1` par arête avec `dead_core=true`, une case écrite par
 ordinal, puis les sommes exactes des ledgers et l'égalité du jumeau
-moteur/lot. Ce premier reçu classe la masse des **formes cœur** selon
-`end−begin` et `|A|·|B|` ; il ne calcule encore aucun garde.
+moteur/lot. Ce premier reçu classe `F=ΣΔcore_sites` (extrémités
+incluses) et les formes `Σ(Δcore_sites−2)` selon `end−begin` et
+`|A|·|B|` ; il ne calcule encore aucun garde.
 
 Cette mesure est un préalable au choix des segments à traiter. Les
 42 020 rectangles ouverts de produit ≥64 à K5 portent 62,46 % des
 **paires développables** du [shadow des rectangles](../q34_raw_rectangle_mass_20260923/README.md),
-mais leur part des 559,662 M formes cœur est inconnue. Si les formes
-sont surtout dans des segments singleton, le minimum `F_E` n'apporte
+mais leur part des 559,662 M incidences `F` du cœur est inconnue. Si
+elles sont surtout dans des segments singleton, le minimum `F_E` n'apporte
 aucun partage entre arêtes. Pour huit sous-cellules partageant les 27
 sommets d'une grille `3³`, une tentative sur tous les survivants paie
 déjà jusqu'à `27S` termes corrélés, soit 107,634 M à K5 ou 210,919 M à
