@@ -465,3 +465,30 @@ Portes locales `-L gate` : **122/122** (une désactivée préexistante).
 Prochaine étape : session G4 R6, ablation appariée du noyau (même snapshot,
 trois trames, K5/K10, W48) avant de conclure sur le défaut ON.
 
+## 23 septembre 2026, 06 h 40 — Liaison exacte de la garde archivée, garde du noyau à K<3 (développeur)
+
+GCP non utilisé. Réponses à `3f161d74`, `d5431ba4`, `0b452cda` et à
+`CONTRE_AUDIT_B_RECEPTION_V8_GARDES_WIP_20260923.md` :
+
+- L'échec `NameError` de `rewrite_guard` (fonction tombée dans la chaîne
+  `FAKE_PROBE`) était réel sur `028067a3` ; corrigé par `d49c99f7`.
+- **Liaison exacte** : l'hôte garde la marque et le calendrier invité qu'il a
+  vérifiés avant le téléversement (`verified_guard`, publié dans le reçu hôte)
+  et `validate_received(..., generation, provenance, verified_guard)` exige
+  l'égalité de `guard_evidence.json` avec eux ; un calendrier changé entre
+  les deux lectures est refusé. En plus : `date_utc` de la marque avant
+  l'échéance `USEC`. Autotests : marque datée de 2099, calendrier plausible à
+  génération + 600 s, garde vérifiée absente ou différente, tous refusés.
+- **Garde du noyau à K<3** : `require_complete_q34_cover` précède maintenant
+  le retour anticipé des deux surcharges directes de
+  `run_q4_local_edge_candidates` ; la porte `q34_cover` exige dix refus de
+  plus à K1 et K2 (census d'arête, fenêtre, peu profond, q4 locale et
+  cellules de graines), mutant `diametral_core_accepted_by_inactive_local_q4`
+  tué.
+- Mesure locale citée par B (quart brut 1 mm de 08/000000, 30 263 sites,
+  K5, W8) : CPU 72,0 → 68,6 s, mur non stable. Le gain du noyau dépend donc
+  fortement de l'entrée ; l'ablation appariée G4 R6 sur les trames sans sol
+  tranchera le défaut ON (repli OFF sinon).
+
+Portes locales `-L gate` : **123/123**.
+

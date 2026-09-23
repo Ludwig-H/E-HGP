@@ -123,14 +123,15 @@ def validate_protocol_runtime(manifest):
          'transported protocol differs from executing controller/worker')
 
 
-def validate_received(output, manifest, worker_pin, expected_cases, generation, provenance):
+def validate_received(output, manifest, worker_pin, expected_cases, generation, provenance, verified_guard):
     """Relit le recu du worker et ses fichiers bruts ; rend completed ou partial.
 
     `generation` et `provenance` (obligatoires) lient le recu au contexte hote
     de la session (cible fixe, generation demarree, provenance du paquet
     valide) ; la preuve de garde archivee est rejugee champ par champ."""
-    need(type(generation) is str and generation and type(provenance) is dict and provenance,
-         'reception needs the session generation and provenance')
+    need(type(generation) is str and generation and type(provenance) is dict and provenance and
+         type(verified_guard) is dict and set(verified_guard) == {'mark', 'schedule'},
+         'reception needs the session generation, provenance and host-verified guard')
     value = payload.strict_json((output / 'receipt.json').read_bytes())
     need(type(value) is dict and value.get('target') == payload.TARGET and
          value.get('generation') == generation and
@@ -152,7 +153,13 @@ def validate_received(output, manifest, worker_pin, expected_cases, generation, 
     need(type(schedule) is dict and schedule.get('MODE') == 'poweroff' and
          type(schedule.get('USEC')) is str and re.fullmatch('[0-9]{1,18}', schedule['USEC']) and
          epoch(generation) < int(schedule['USEC']) // 1000000 <=
-         epoch(generation) + int(payload.MAX_RUN_SECONDS) - 300, 'guest shutdown schedule')
+         epoch(generation) + int(payload.MAX_RUN_SECONDS) - 300 and
+         epoch(mark['date_utc']) < int(schedule['USEC']) // 1000000, 'guest shutdown schedule')
+    # Exact binding: the archived mark and schedule are the ones the host
+    # verified before upload; a schedule changed between the two reads is
+    # refused rather than rewritten.
+    need(mark == verified_guard['mark'] and schedule == verified_guard['schedule'],
+         'archived guard evidence differs from the host-verified guard')
     need(type(value) is dict and value.get('status') in ('completed', 'partial') and
          value.get('sources_stable') is True and value.get('compiled_dependencies_stable') is True and
          value.get('binary_stable') is True and value.get('worker_sha256') == worker_pin and
@@ -366,9 +373,14 @@ def run_session(args):
         recertify('before_upload')
         rc, schedule_raw, _ = ssh('guest_schedule', 'sudo -n cat /run/systemd/shutdown/scheduled')
         need(rc == 0, 'guest schedule unreadable')
-        deadline = guard_deadline(mark, fields(schedule_raw), generation, time.time())
+        schedule = fields(schedule_raw)
+        deadline = guard_deadline(mark, schedule, generation, time.time())
         monotonic_deadline = time.monotonic() + deadline-time.time()
-        state.update(generation=generation, session_deadline_epoch=deadline, ssh_expiration=expiration[0])
+        # The exact mark and guest schedule verified here: the archived guard
+        # evidence must equal them at reception (never a merely plausible one).
+        verified_guard = dict(mark=mark, schedule=schedule)
+        state.update(generation=generation, session_deadline_epoch=deadline, ssh_expiration=expiration[0],
+                     verified_guard=verified_guard)
         nonce = secrets.token_hex(8)
         prefix = '/tmp/ehgp-tower-v9-' + nonce + '.'
         rc, raw, _ = ssh('remote_mkdir', 'umask 077; mktemp -d ' + shlex.quote(prefix + 'XXXXXXXXXX'))
@@ -437,7 +449,7 @@ def run_session(args):
                         state['status'] = 'capture_incomplete'
                     elif state['status'] == 'worker_returned':
                         state['status'] = validate_received(host / 'received/output', manifest, args.worker_sha256,
-                                                            expected_cases, generation, provenance)
+                                                            expected_cases, generation, provenance, verified_guard)
                         state['FULL_executed'] = True
                 except BaseException as error:
                     state.update(status='capture_failed', capture_error=type(error).__name__ + ': ' + str(error))

@@ -843,12 +843,16 @@ class Protocol(unittest.TestCase):
             pkg = package()
             expected = session.validate_snapshot(pkg['archive'], pkg['manifest'])[0]
             pin = worker.sha(worker.__file__)
-            bound = (receipt['generation'], receipt['provenance'])
+            bound = (receipt['generation'], receipt['provenance'], receipt['verified_guard'])
             need(session.validate_received(output, pkg['manifest'], pin, expected, *bound) == 'completed',
                  'revalidation bound to the session')
-            need(refused(session.validate_received, output, pkg['manifest'], pin, expected, '', receipt['provenance']) and
-                 refused(session.validate_received, output, pkg['manifest'], pin, expected, receipt['generation'], {}),
-                 'reception without the session generation or provenance')
+            need(refused(session.validate_received, output, pkg['manifest'], pin, expected, '', *bound[1:]) and
+                 refused(session.validate_received, output, pkg['manifest'], pin, expected, bound[0], {}, bound[2]) and
+                 refused(session.validate_received, output, pkg['manifest'], pin, expected, *bound[:2], {}) and
+                 refused(session.validate_received, output, pkg['manifest'], pin, expected, *bound[:2],
+                         dict(bound[2], schedule=dict(bound[2]['schedule'], USEC=str(
+                             (session.epoch(receipt['generation']) + 600) * 1000000)))),
+                 'reception without the session generation, provenance or host-verified guard')
             need(refused(session.validate_received, output, pkg['manifest'], pin, expected, 'another-generation',
                          receipt['provenance']) and
                  refused(session.validate_received, output, pkg['manifest'], pin, expected, receipt['generation'],
@@ -874,7 +878,10 @@ class Protocol(unittest.TestCase):
                     ('guest schedule too late', lambda o: rewrite_guard(o, 'schedule', USEC=str(
                         (session.epoch(receipt['generation']) + 4000) * 1000000))),
                     ('guest schedule before start', lambda o: rewrite_guard(o, 'schedule', USEC=str(
-                        (session.epoch(receipt['generation']) - 10) * 1000000)))):
+                        (session.epoch(receipt['generation']) - 10) * 1000000))),
+                    ('guard mark in the future', lambda o: rewrite_guard(o, 'mark', date_utc='2099-01-01T00:00:00Z')),
+                    ('guest schedule plausible but not verified', lambda o: rewrite_guard(o, 'schedule', USEC=str(
+                        (session.epoch(receipt['generation']) + 600) * 1000000)))):
                 shutil.copytree(output, tampered)
                 mutate(tampered)
                 need(refused(session.validate_received, tampered, pkg['manifest'], pin, expected, *bound),

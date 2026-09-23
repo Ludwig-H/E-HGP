@@ -500,6 +500,7 @@ Q4LocalEdgeWork run_q4_local_edge_candidates(Q34EdgeCoverPtr cover,std::size_t k
                                            const Q34SeedConsumer& consumer) {
   validate(o);
   if(!cover || !consumer || k==0) throw std::invalid_argument("mhgp9 gen local edge requires cover, callback and K>0");
+  require_complete_q34_cover(cover);  // before the inactive-lane return too
   Q4LocalEdgeWork work{};
   if(k<3) return work;
   return run_q4_local_edge_candidates(Q4LocalAtlas::make(std::move(cover),k,o),consumer);
@@ -843,6 +844,7 @@ Q4LocalEdgeWork run_q4_local_edge_candidates(Q34EdgeCoverPtr cover,std::size_t k
   validate(local_options);
   if(!cover || !consumer || k==0)
     throw std::invalid_argument("mhgp9 gen seed/cell traversal requires cover, callback and K>0");
+  require_complete_q34_cover(cover);
   if(seed_options.mode==Q4SeedCellMode::Individual)
     return run_q4_local_edge_candidates(std::move(cover),k,local_options,consumer);
   Q4LocalEdgeWork result{};

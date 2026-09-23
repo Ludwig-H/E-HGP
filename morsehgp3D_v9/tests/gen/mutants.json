@@ -550,6 +550,22 @@
    "expected_stderr": "q34 cover gate: edge census accepted a diametral core\n",
    "judgment": "contract",
    "provenance": "v9 (garde du noyau diametral, contre-audit B du 23 septembre 2026)"
+  },
+  {
+   "family": "q34_cover",
+   "name": "diametral_core_accepted_by_inactive_local_q4",
+   "gate": "q34_cover",
+   "source": "lanes/q4_local.cpp",
+   "replacements": [
+    [
+     "  require_complete_q34_cover(cover);  // before the inactive-lane return too\n",
+     ""
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "q34 cover gate: local q4 accepted a diametral core at K<3\n",
+   "judgment": "contract",
+   "provenance": "v9 (garde du noyau diametral a K<3, contre-audit B du 23 septembre 2026)"
   }
  ]
 }

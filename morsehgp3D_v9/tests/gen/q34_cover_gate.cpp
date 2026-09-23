@@ -20,6 +20,7 @@
 #include "lanes/q34_seed.hpp"
 #include "lanes/q34_pruning.hpp"
 #include "lanes/q4_local.hpp"
+#include "lanes/q4_seed_cells.hpp"
 #include "lanes/q4_local_partition.hpp"
 #include "lanes/q4_positive_domain.hpp"
 #include "lanes/q4_shallow.hpp"
@@ -268,6 +269,23 @@ void check_diametral(Gate& gate, const Points& points, const mhgp9::gen::Q2Censu
                  "q4 shallow accepted a diametral core");
     refuses([&] { static_cast<void>(mhgp9::gen::Q4LocalGeometry::make(core, mhgp9::gen::Q4CenterDomainMode::Disk)); },
                  "local geometry accepted a diametral core");
+    // Also where the lane is inactive (K1/K2): the refusal precedes every early return.
+    for (const std::size_t low_k : {std::size_t{1}, std::size_t{2}}) {
+      refuses([&] { static_cast<void>(mhgp9::gen::run_q34_edge_candidates(core, low_k, noop)); },
+              "edge census accepted a diametral core at K<3");
+      refuses([&] { static_cast<void>(mhgp9::gen::run_q4_window_edge_candidates(core, low_k, noop)); },
+              "q4 window accepted a diametral core at K<3");
+      refuses([&] { static_cast<void>(mhgp9::gen::run_q4_shallow_edge_candidates(core, low_k, noop)); },
+              "q4 shallow accepted a diametral core at K<3");
+      refuses([&] { static_cast<void>(mhgp9::gen::run_q4_local_edge_candidates(core, low_k,
+                                                                         mhgp9::gen::Q4LocalOptions{}, noop)); },
+              "local q4 accepted a diametral core at K<3");
+      mhgp9::gen::Q4SeedCellWork cells{};
+      refuses([&] { static_cast<void>(mhgp9::gen::run_q4_local_edge_candidates(core, low_k,
+                    mhgp9::gen::Q4LocalOptions{}, noop,
+                    mhgp9::gen::Q4SeedCellOptions{mhgp9::gen::Q4SeedCellMode::LiveOnly, 64}, cells)); },
+              "local q4 seed cells accepted a diametral core at K<3");
+    }
   }
   ++gate.diametral_cores;
   gate.diametral_members += actual.size();
@@ -619,7 +637,7 @@ void run(Gate& gate) {
   gate.require(gate.covers >= 150 && gate.edge_calls >= 150 && gate.seed_calls >= 100 &&
                gate.reference_calls == gate.seed_calls && gate.oracle_sites >= 1000 && gate.q3 >= 30 && gate.q4 >= 10,
                "cover correctness nonvacuity floor");
-  gate.require(gate.diametral_cores > 0 && gate.diametral_refusals == 8 && gate.diametral_cover_only > 0 && gate.diametral_members > 2 * gate.diametral_cores,
+  gate.require(gate.diametral_cores > 0 && gate.diametral_refusals == 18 && gate.diametral_cover_only > 0 && gate.diametral_members > 2 * gate.diametral_cores,
                "diametral core never exercised (cores, cover-only sites, interior members)");
   gate.require(gate.cover_boundary >= 2 && gate.cover_excluded > 0 && gate.cover_admitted_nodes > 0 &&
                gate.cover_rejected_nodes > 0 && gate.cover_split_nodes > 0 && gate.reused_covers > 0 &&
