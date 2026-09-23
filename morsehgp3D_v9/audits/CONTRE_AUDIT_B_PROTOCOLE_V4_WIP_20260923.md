@@ -227,3 +227,19 @@ Enfin, le workflow CI v9 ne surveille toujours pas `tower_session_v9.py`,
 `tower_snapshot_v9.py` et `tower_selftest_v9.py` et n'exécute pas la
 suite de cycle de vie. Ces écarts ne rouvrent pas les sept défauts de
 schéma corrigés ; ils bornent la portée de la preuve protocolaire.
+
+## Après publication de v5
+
+Les octets ci-dessus ont finalement été publiés dans `099ca784`, puis le
+selftest de provenance forgée dans `b4e480fc`. Le workflow **surveille
+maintenant** les quatre scripts de protocole et lance le selftest Python
+normal/`-O` ; la réserve CI du paragraphe précédent est donc historique.
+Rejeu indépendant de la suite de cycle de vie sur `b4e480fc` : **20/20
+normal et 20/20 `-O`**, en 53,609 et 51,089 s sur hôte local partagé.
+Ses 14 erreurs de paquet WIP sur l'ancien HEAD ne sont plus un verdict
+actuel ; ces succès ne tuent pas les contre-fixtures non inscrites.
+Le [contre-audit de réception v5](CONTRE_AUDIT_B_G4_RECEPTION_V5_20260923.md)
+documente quatre contre-exemples encore acceptés sur les octets commités,
+dont une censure `group_closed=false`. **Pas de nouvelle session G4 R3**
+sur la seule foi des portes précédentes : corriger et rejouer ces cas en
+mémoire d'abord.

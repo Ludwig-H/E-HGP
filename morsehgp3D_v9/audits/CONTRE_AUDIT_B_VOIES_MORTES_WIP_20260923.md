@@ -151,3 +151,20 @@ dont les cinq mutants de voie morte réellement lancés ; ne pas écrire
 « 107 PASS » à partir de la ligne « Test Passed » du test désactivé.
 Cette porte locale ne constitue ni un reçu LiDAR apparié ni une
 qualification du coût de la tour G4.
+
+## Après publication du reçu et du code
+
+Le certificat et le reçu ont été publiés dans `099ca784` ; le selftest
+protocolaire de provenance suit dans `b4e480fc`. Le
+[contre-audit du reçu](CONTRE_AUDIT_B_RECU_VOIES_MORTES_20260923.md)
+vérifie les fichiers et les comptes bruts. Il trouve un vrai gain exploratoire
+du **prototype linéaire** sur une trame pour le générateur seul, mais non
+une ablation FULL/G4 de la version finale. Surtout, les nombres « 91 % »,
+« 1 453 sites des arêtes mortes » et « 568 » cités dans les notes de
+développement ne suivent pas des classes et dénominateurs bruts annoncés :
+les arêtes mortes portent 96,69 % des cycles classés par arête à K5, ou
+85,68 % en comptant le filtre de paires ; leur cover moyen est 1 703,65
+sites. Les `dead_form_sites` restent massifs (1,79 milliard à K5 et
+4,15 milliards à K10 sur 08/000100). Ces corrections ne récusent pas le
+certificat géométrique ; elles interdisent d'appeler le gain local une
+preuve de sous-quadraticité ou du contrat G4.
