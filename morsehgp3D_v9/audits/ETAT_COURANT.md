@@ -96,6 +96,12 @@ en Python normal et sous `-O` (rejeu local). Le lecteur G4 `515b3666`
 reconnaissait déjà un refus réel antérieur au calcul d'Euler
 (`chain_shell_above_12`, borne Euler 0) comme refus explicite. Aucune
 nouvelle pente LiDAR v13 n'est publiée par ce seul correctif.
+La [contrelecture](CONTRE_AUDIT_B_LECTEURS_1F048_20260923.md) trouve
+encore deux écarts : `--revalidate` ne confine ni ne lie réellement
+`argv[0]` au chemin attendu (un chemin `/tmp/evil/...` de même suffixe
+passe 60/60), et trois champs de compte/temps invalides sont acceptés
+localement alors que G4 refuse la sonde v13 complète. Ce sont des trous
+de réception/provenance, non une clé omise démontrée.
 
 Le calcul Euler reste inclus dans `census_ms` (`tower_chain.cpp:486,539–601`)
 et un `E_K` faux refuse **avant** FULL (`:602–612`), alors que la décision
@@ -107,7 +113,9 @@ impose aux deux mutants de chaîne la raison
 Euler `fails` dans les deux sens. La porte d'échelle de **`96bd6190`**
 échantillonne une boule sur 64 pour son recensus brut : contrôle utile mais
 déterministe et non exhaustif, sans couverture garantie de chaque famille
-de coquilles. Pour `run_tower=false`, expliciter dans la preuve la positivité des
+de coquilles. La porte C++ des mutants ne vérifie toutefois pas elle-même
+`kInvariantViolated` ni le statut `kFails` après refus ; la source produit
+les pose correctement. Pour `run_tower=false`, expliciter la positivité des
 supports réguliers, que les fabriques exactes q2/q3/q4 imposent déjà.
 
 Les certificats exacts actuellement raccordés comprennent la saturation

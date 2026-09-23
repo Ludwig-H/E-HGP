@@ -1679,6 +1679,42 @@ le résidu `chain_s−q34_s` vaut déjà **1,147/1,507/1,685 s** sur
 000100/000000/000200 : l'ordonnancement q34 est nécessaire pour baisser
 l'attente 35–49 %, mais insuffisant seul pour 1 s. À K10, la tour aval vaut
 2,972–3,895 s : l'optimiser en parallèle de la réduction **du travail** q34
-avant expansion. Une durée du plus long job et un ledger du travail inchangé
+avant expansion. La [rectification
+R8](../morsehgp3D_v9/audits/RECTIFICATIF_R8_Q34_ORDONNANCEMENT_20260923.md)
+précise que tout rectangle survivant propose une plage, même sous 256
+paires : les durées **des jobs et des plages** et le ledger du travail
 doivent accompagner toute ablation d'ordonnancement. Euler « holds » ne
 transforme pas la complétude relative en inventaire absolu des `BallKey`.
+
+## 23 septembre 2026, 10 h 04 UTC — Réception 1f048 et ordonnanceur WIP (auditeur B)
+
+Le [lecteur `1f048aae` relu sur son commit
+exact](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_LECTEURS_1F048_20260923.md)
+ferme les deux champs v13 absents, le refus Euler réciproque et la matrice
+déclarée : selftest 43/43 normal/`-O`, six campagnes/60 cas revalidés.
+La porte C++ des mutants ne vérifie encore ni `kInvariantViolated` ni
+`euler_status==kFails` sur le refus ; la source produit les définit bien.
+Deux trous subsistent. `--revalidate` accepte un `argv[0]`
+`/tmp/evil/scene_00_grid/full.u32le` de suffixe attendu **malgré les trois
+`--expect-*`**, car il n'appelle pas `resolve_input()` ; cette mutation
+en mémoire passe 60/60, sans lire le fichier extérieur. Le validateur
+LiDAR v13 accepte aussi séparément `times_ms.prepare="bad"`,
+`tower_work.meb_accounting="bad"` et
+`generator.q34_expanded_pairs="bad"`, que le validateur G4 intégral
+refuse. Le mode CLI sans matrice attendue est cohérence des seuls cas
+présents, non réception de campagne complète.
+
+Sur le **WIP non committé** d'ordonnancement q34, revue statique du snapshot
+`front.cpp=81f313fd…` / `wspd_q34.cpp=e1bf9867…` : pas de perte de
+partition ni de course constatée. L'ordre par masse change la préparation
+**sérielle**, la répartition des jobs et les hits du cache par ouvrier ;
+ne pas promettre « mêmes compteurs hors chronos ». Comparer les sorties
+normalisées, le travail géométrique hors cache, le catalogue/digest,
+le temps q34 **absolu** et sa préparation, `wait_sum_s`, `job_max_ns`,
+la durée de la plus longue **plage** et leurs heures de fin.
+Deux horloges par job perturbent un peu la mesure. La masse diagonale
+`a*(a−1)/2` déborde en `u64` pour le domaine public `n=2^32+1`
+(résultat calculé 2^31 au lieu de 9 223 372 039 002 259 456) : diviser
+avant de multiplier. Cela ne touche pas les trames R8 ni le contrat à
+quelques dizaines de millions, mais la fabrique publique ne doit pas
+mentir sur son domaine.

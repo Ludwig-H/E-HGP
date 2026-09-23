@@ -41,17 +41,32 @@ qu'une répétition. Sur 000100/K5, q3/q4 passe de 42,501 s à W1 à 3,570 s
 à W24 puis 2,518 s à W48 : accélération W1→W48 **×16,9**, mais son CPU
 cumulé augmente de 42,5 à 77,3 CPU·s. À W48, environ 35–49 % du temps des
 fils q3/q4 est passé à attendre la file pour K5. Les 768/769 jobs initiaux
-de front et les ~0,94–2,16 millions de tâches publiées par cas montrent que
+de front et les ~0,94–2,16 millions de plages publiées par cas montrent que
 le problème n'est pas l'absence totale de tâches : la distribution de la
-durée du travail dans les jobs/rectangles reste à mesurer. Le seuil courant
-ne publie en tâche qu'un rectangle de plus de 256 paires ; les autres
-restent dans le job parent.
+durée des **jobs de front et des plages** reste à mesurer. [Rectification
+du code](RECTIFICATIF_R8_Q34_ORDONNANCEMENT_20260923.md) : tout rectangle
+survivant **propose** sa première plage à la file, même sous 256 paires ;
+256 règle le grain du découpage de A, pas l'admission de la tâche. Une
+file pleine peut refuser l'offre et provoquer le développement en ligne.
+
+Le coût n'est pas qu'un temps d'attente : sur 000100/K5, le grand-livre
+compte **11,96 M** de paires développées, **193,15 M** de formes de sites
+préparées par le cœur, **795,94 M** de tests uniformes, **161,45 M** de
+visites de nœuds du filtre rectangle, **287,57 M** du filtre par paire et
+**330,74 M** de la couverture du cœur. Ces catégories se recouvrent ou
+décrivent des étapes différentes : ne pas les additionner comme des
+opérations homogènes. À K10, les trois catalogues contiennent déjà
+**4,38–5,51 M** de boules et les pics RSS **3,84–4,78 Gio** pour seulement
+35–46 k sites. Le contrat à plusieurs dizaines de millions de points
+exige donc un plan explicite de mémoire/résidence et de flux de sortie ;
+une extrapolation linéaire de ces chiffres n'est pas une prévision fiable.
 
 ## Ce que ces chiffres imposent au développement
 
 1. **Ordonnancement q3/q4 : nécessaire, non suffisant.** Réclamer les jobs
-   lourds tôt, fractionner les longues descentes et publier la durée du
-   plus long job sont des essais justifiés. Mais même si q3/q4 devenait
+   lourds tôt, fractionner les longues descentes et publier les durées
+   maximales **des jobs et des plages**, ainsi que leurs fins respectives,
+   sont des essais justifiés. Mais même si q3/q4 devenait
    instantané *sans changer les autres phases*, le chemin mesuré resterait
    à **1,147–1,685 s à K5** ; le contrat de 1 s ne peut venir du seul
    rééquilibrage q3/q4. Cette soustraction est un contrefactuel du chemin
