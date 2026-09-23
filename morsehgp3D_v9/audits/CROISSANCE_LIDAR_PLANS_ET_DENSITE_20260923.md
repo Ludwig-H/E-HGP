@@ -89,8 +89,11 @@ une dans le demi `x≥0` et les deux dans le quart `x≥0,y<0`. Le compteur
 physique voisin `dead_core_form_sites` le fait sur **4/28** relations :
 `2,011/2,014` dans ce demi et `2,058/2,043` dans ce quart. Pour le quart
 `x≥0,y<0`, `core_sites/n²` augmente de **2,503→2,586→2,651** lorsque
-la densité augmente. La pente favorable de la scène entière ne décrit donc
-pas tous ses secteurs. Les visites et bornes des nœuds de construction du
+la densité augmente. Pour les **formes réellement chargées** à K10,
+`dead_core_form_sites/n²` descend de **0,777→0,557→0,504** sur la scène
+entière mais monte de **2,452→2,555→2,633** sur ce quart. La pente
+favorable de la scène entière ne décrit donc pas tous ses secteurs.
+Les visites et bornes des nœuds de construction du
 cœur restent, sur ces 28 relations, sous 2 ; la matérialisation des formes
 est ici le signal plus net.
 

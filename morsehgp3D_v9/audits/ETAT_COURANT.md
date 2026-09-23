@@ -325,7 +325,8 @@ ne permettent donc pas d'écarter un coût caché
 `(rectangles + paires recherchées + arêtes q3/q4)×n`. Le reçu v12
 ci-dessous publie leur croissance sur trois trames LiDAR appariées.
 
-Le [reçu local v12](../receipts/lidar_scaling_local_20260923/README.md)
+Le [reçu local v12](../receipts/lidar_scaling_local_20260923/README.md),
+[contrelu indépendamment](CONTRE_AUDIT_LIDAR_SCALING_V12_LOCAL_20260923.md),
 archive trois trames sans sol à K5/K10 : **60 cas de sonde et six résumés**,
 soit 66 JSON ; la formule « 66 cas » du README compte aussi les résumés.
 Sur 08/000200/K10, de 16k à 32k, les paires développées font ×4,27 et la
@@ -636,10 +637,14 @@ lancement après q3/q4. Ce correctif n'a pas de reçu G4.
 Prochaines mesures : mêmes octets et masque figé, trames **entières** de
 plusieurs séquences sans sol puis brutes, s8/10/12, K5 et K10, W1/W24/W48,
 profil float32 et grille fine **séparés**. Les sept morceaux spatiaux
-1 mm déjà figés dans le [reçu v8
-LiDAR](../../morsehgp3D_v8/receipts/lidar_ground_20260921/README.md)
-permettent un diagnostic de croissance pré-déclaré, jamais une validation
-de trame entière. Publier travail amont, formes et atlas, candidats
+1 mm du [reçu v8 LiDAR](../../morsehgp3D_v8/receipts/lidar_ground_20260921/README.md)
+ont maintenant des chronos v12 locaux sur les trois scènes sans sol de
+la séquence 08 ; reproduire sur les trames brutes et d'autres séquences.
+La décimation emboîtée 1/4–1/2–1 est mesurée sur ces trois trames entières
+et les secteurs de 000200 avec une seule graine ; répéter les secteurs
+des autres scènes, les graines et les régimes avec sol. Ni morceaux ni
+décimations ne valident le contrat de trame entière. Publier travail amont,
+formes et atlas, candidats
 résiduels, coquilles, catalogue, sorties FULL, CPU/mur et RSS par phase,
 y compris les échecs et les replis exacts. Une exécution GPU de toute
 la tour, avec transferts, buffers résidents et retours CPU exacts, reste
