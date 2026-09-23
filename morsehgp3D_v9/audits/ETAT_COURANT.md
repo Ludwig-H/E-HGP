@@ -209,11 +209,15 @@ les grosses traces nécessaires à la jointure autonome.
 Le [reçu local du développeur](../receipts/q34_survivor_phases_20260923/README.md),
 [contrelu par B](CONTRE_AUDIT_B_VENTILATION_SURVIVANTS_20260923.md),
 ventile les survivants sur une trame **sans sol** 08/000000 : cœur et
-cover occupent environ 35 % des cycles à K5, 28 % à K10, contre
-65/72 % pour atlas et voies. Son « 1,3 % maximal » pour les formes
-paresseuses mélange fraction de sites et cycles de deux runs ; c'est
-une estimation fragile, pas une borne. Les `rdtsc` sur hôte chargé ne
-transfèrent aucun gain G4. Même retirer idéalement **toute** la phase
+cover occupent environ 35 % des **ticks TSC écoulés** à K5, 28 % à K10,
+contre 65/72 % pour atlas et voies. La
+[contrelecture A des compteurs](CONTRELECTURE_CYCLES_SURVIVANTS_Q34_20260923.md)
+montre que `rest_cyc` recouvre le cœur des arêtes ouvertes ; les neuf
+postes de l'autre patch ne se recouvrent pas dans l'instrumentation mais
+suivent surtout le temps écoulé des fils désordonnancés, pas leur CPU
+actif. Son « 1,3 % maximal » pour les formes paresseuses mélange fraction
+de sites et temps de deux runs : c'est une projection, pas une borne ni
+un gain G4. Même retirer idéalement **toute** la phase
 des arêtes survivantes des trois lignes K5 de R12 laisserait 1,177 à
 1,513 s de chaîne, à autres phases inchangées : S3 seul ne suffit pas.
 Les [demi-scènes et quarts aux trois densités](lidar_raw_physical_scaling_20260923/README.md)

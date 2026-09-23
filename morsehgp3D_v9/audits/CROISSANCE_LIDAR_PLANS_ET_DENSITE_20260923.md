@@ -267,3 +267,19 @@ contention. Ainsi, le besoin d'éviter des formes **par cœur** persiste
 secteurs et sous-échantillons ne reconstituent pas la tour du plein et
 ne prouvent aucune borne asymptotique. Plusieurs séquences, graines et
 une mesure appariée du coût total sur G4 restent à produire.
+
+Le [rejeu S2/v17 sur le quart brut chaud](q34_batch_density_quarter_20260923/README.md)
+garde les mêmes trois entrées et compare moteur et filtre par lots CPU,
+K5/s8/W8. Leurs formes de cœur sont identiques :
+**3,549→14,655→52,302 M**, de pentes **2,002/1,823**. À pleine densité,
+le lot CPU ajoute 66,2 % de visites de témoins et 4,6 % de CPU de chaîne
+dans cet essai ; le transfert sur G4 n'est pas mesuré. Le
+[reçu S2 des arêtes appariées](edge_matched_core_20260923/README.md)
+étend K5 aux **quatre quarts et à la trame entière**, aux trois densités :
+les arêtes traversant les quarts portent, à densité pleine, **69,06 %**
+des formes pour **3,94 %** des charges. Ce résultat localise le coût de
+réunification de la scène sans supposer qu'un axe de coupe est toujours
+défavorable. Le port S2 ne réduit pas, à lui seul, cette masse. Il reste
+à mesurer les **deux moitiés S2** et K10 sur toute la matrice 7×3,
+puis plusieurs scènes, graines et séquences. Les matrices v12 restent
+des diagnostics CPU de leur propre binaire.
