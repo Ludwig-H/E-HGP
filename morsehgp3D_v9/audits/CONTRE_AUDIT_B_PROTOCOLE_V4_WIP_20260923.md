@@ -112,6 +112,9 @@ de test n'est pas une réfutation du protocole, mais elle impose de
 publier les reçus avec un commit stable plutôt qu'un résultat global
 « 18/18 » déduit d'un rejeu favorable. Les trois mutants acceptés et
 l'absence de préflight obligatoire demeurent dans les octets commis.
+Un rejeu ultérieur complet dans le worktree détaché à `bb2c40dc`, HEAD
+stable, a cette fois passé **18/18** tests en 50,706 s ; il ne tue pas les
+sept mutants de schéma acceptés ci-dessus, absents de cette suite.
 
 Le workflow CI v9 ne surveille, parmi les fichiers de protocole, que
 `tower_worker_v9.py` : une modification de `tower_session_v9.py`,
