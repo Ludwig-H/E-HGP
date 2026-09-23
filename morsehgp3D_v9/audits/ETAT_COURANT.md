@@ -493,8 +493,11 @@ appariée.
    La porte produit dédiée publiée à `84c74a5e` (SHA `1f673c66…`)
    passe sur une réutilisation
    réelle d'adresse (`aba_same_address=1`), 372 alternances et un
-   `bad_alloc` injecté après un chargement réussi. Son **plancher ABA
-   doit encore exiger `same_address`** (ou rendre code 3 si aucun essai ne
+   `bad_alloc` injecté après un chargement réussi. La porte est causale
+   ici : recompilée contre le snapshot `47f8a5da` à cache
+   d'adresse nue, le même gate sort code 1 (« prouveur réutilisé différent
+   du neuf »), tandis qu'elle sort code 0 sur `84c74a5e`. Le **plancher
+   ABA doit encore exiger `same_address`** (ou rendre code 3 si aucun essai ne
    le réalise) : aujourd'hui, après 128 échecs de réemploi, elle compare
    le dernier index à adresse différente et peut rendre code 0 sans
    exercer l'ancien défaut à pointeur nu. Le mutant présent couvre

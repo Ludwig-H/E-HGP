@@ -64,11 +64,19 @@ La fusion trie en série **4,38–5,51 millions** de présentations à K10
 pour ne trouver que **2–13 doublons de BallKey** sur ces trois trames ;
 elle prend 0,61–0,78 s. Après ce tri, `balls` est déjà en ordre strict de
 clé, mais FULL trie une seconde fois les BallIds par cette même clé
-avant de valider l'unicité. Un chemin interne « catalogue trié/unique »
+avant de valider l'unicité. Son `parallel_sort(by_key)` trie des tranches,
+alloue un tampon de `B` IDs puis les fusionne, même quand `by_key` est
+déjà l'identité triée ; à 5,51 M boules, le tampon représente environ
+22 Mo décimaux temporaires. Les comparateurs `Key5` et `BallKey`
+sont tous deux lexicographiques sur les mêmes cinq `i128` signés, et
+le recensus vérifie l'égalité de chaque clé reconstruite avec sa
+présentation : l'ordre de `balls` est conservé sur le chemin chaîne.
+Un chemin interne « catalogue trié/unique »
 peut transmettre l'ordre certifié à FULL et vérifier les voisins en
 `O(B)`, tout en gardant l'API publique indépendante pour les catalogues
 arbitraires. Mesurer le gain et les octets de cette suppression d'un tri
-redondant ; le tri/fusion initial des présentations reste à paralléliser
+redondant ; le tri exact distinct par niveau `by_level` reste nécessaire.
+Le tri/fusion initial des présentations reste à paralléliser
 ou remplacer par des runs exacts à coût total compté. La quasi-absence de
 doublons ici ne se transfère pas aux passages LiDAR superposés.
 
@@ -80,7 +88,7 @@ avant index, programmes et forêts ; la borne BallId `u32` serait atteinte
 vers 31–36 M sites selon ces ratios. Ce n'est ni une prédiction de
 croissance ni une preuve de sortie quadratique, mais l'API massive doit
 prévoir des IDs et une représentation de catalogue/tour au-delà des
-vecteurs actuels avant de promettre 1 s sur plusieurs dizaines de
+vecteurs actuels avant de qualifier le régime de plusieurs dizaines de
 millions de sites.
 
 ## Grand-livre de travail à fermer sur chaque trame
