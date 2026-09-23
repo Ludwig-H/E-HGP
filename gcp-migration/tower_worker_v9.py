@@ -13,7 +13,12 @@ Ce qui change pour la v9 :
 - les entrees sont les trois trames LiDAR sans sol a 1 mm, fichiers entiers
   epingles (sha256, taille, empreinte FNV-1a de la sonde) ;
 - chaque cas du plan a un plafond propre ; un cas qui l'atteint est tue et
-  consigne, les suivants sont sautes quand le budget utile est epuise.
+  consigne, les suivants sont sautes quand le budget utile est epuise ;
+- chaque cas epingle les deux voies geometriques (saturation de l'atlas,
+  census q3 sur feuille), passees explicitement a la sonde et relues ;
+- une sortie de sonde refusee par le validateur est un defaut deterministe
+  de protocole : les cas suivants sont sautes au lieu de repeter le calcul
+  (session G4 R2 du 23 septembre 2026, treize cas refuses pour un champ).
 
 Aucune installation de paquet, aucun reboot, aucune mutation cloud, aucun
 CUDA, aucun ELF local transporte. public_status reste not_claimed : une
@@ -40,9 +45,9 @@ HELPER = 'gcp-migration/full_probe_worker_v7.py'
 HELPER_SHA = 'da967163bdb7247bc6aad4df0c294cda1071076a0127cd5bd9f59bc0e4788439'
 PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
-PLAN_SCHEMA = 'mhgp9_tower_plan_v1'
+PLAN_SCHEMA = 'mhgp9_tower_plan_v2'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v3'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v4'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -88,15 +93,22 @@ MIN_CASE_START_SECONDS = 15    # aucun cas n'est lance avec moins de temps utile
 PROBE_STATUSES = ('complete_relative', 'unsupported_degeneracy', 'invalid_input',
                   'resource_exhausted', 'invariant_violated')
 OUTCOMES = ('complete_relative', 'explicit_refusal', 'killed_case_cap', 'killed_budget',
-            'skipped_budget', 'probe_failed')
-CASE_KEYS = frozenset({'scene', 'file', 'n', 'k', 's', 'workers', 'static_threads', 'repeat'})
+            'skipped_budget', 'probe_failed', 'skipped_protocol_defect')
+CASE_KEYS = frozenset({'scene', 'file', 'n', 'k', 's', 'workers', 'static_threads', 'saturate_deep', 'q3_leaf',
+                       'repeat'})
 TOP_KEYS = frozenset({'schema', 'status', 'reason', 'input', 'options', 'times_ms', 'chain_cpu_s', 'generator',
                       'ledger', 'catalogue', 'tower_work', 'orders', 'tower_digest', 'peak_rss_kb'})
 INPUT_KEYS = frozenset({'format', 'grid', 'sites', 'hash'})
-OPTION_KEYS = frozenset({'K', 'K_effective', 's', 'workers', 'tower_static_threads', 'run_tower', 'atlas_saturate_deep'})
+OPTION_KEYS = frozenset({'K', 'K_effective', 's', 'workers', 'tower_static_threads', 'run_tower', 'atlas_saturate_deep',
+                         'q3_leaf_census'})
 TIME_KEYS = frozenset({'read', 'prepare', 'gen_index', 'q2', 'q34', 'merge', 'tower_index', 'census', 'tower',
                        'chain_total'})
 ORDER_KEYS = frozenset({'K', 'nodes', 'births', 'merges', 'parents', 'contributions'})
+# tower_work : compteurs entiers, sauf ces deux champs types du noyau MEB
+# (libelle de comptabilite epingle, histogramme des tailles de supports).
+MEB_ACCOUNTING = 'anchor_meb_first_maximal_pair_then_lexicographic_supports_extremes_first_v2'
+TOWER_WORK_TYPED = frozenset({'meb_accounting', 'meb_supports_by_size'})
+STAGE_TIME_KEYS = ('prepare', 'gen_index', 'q2', 'q34', 'merge', 'tower_index', 'census', 'tower')
 SCOPE = 'FULL_tower_chain_relative_to_cross_checked_catalogue'
 
 
@@ -163,7 +175,9 @@ def validate_sources(read_bytes):
     probe = read_bytes(PROBE_SOURCE)
     need(b'mhgp9_product_executable(' + PROBE_TARGET.encode() + b' bench/tower_probe.cpp)' in cmake,
          'CMake target mhgp9_tower_probe absent')
-    need(all(token in probe for token in (PROBE_SCHEMA.encode(), b'"--s="', b'"--static="', b'"--grid="')),
+    need(all(token in probe for token in (PROBE_SCHEMA.encode(), b'"--s="', b'"--static="', b'"--grid="',
+                                          b'"--saturate-deep"', b'"--no-saturate-deep"', b'"--q3-leaf"',
+                                          b'"--no-q3-leaf"', b'q3_leaf_census')),
          'tower probe schema/CLI differs from the v9 protocol')
 
 
@@ -182,8 +196,10 @@ def validate_plan(plan, manifest):
         need(case['n'] == INPUTS[case['scene']]['n'] and type(case['n']) is int, 'whole-frame size; prefixes forbidden')
         need(type(case['k']) is int and case['k'] in (5, 10) and type(case['s']) is int and case['s'] in (8, 10, 12) and
              _integer(case['workers'], 1, 48) and _integer(case['static_threads'], 0, 48) and
+             type(case['saturate_deep']) is bool and type(case['q3_leaf']) is bool and
              _integer(case['repeat'], 0, (1 << 32) - 1), 'tower case domain')
-        identity = tuple(case[key] for key in ('scene', 'k', 's', 'workers', 'static_threads', 'repeat'))
+        identity = tuple(case[key] for key in ('scene', 'k', 's', 'workers', 'static_threads', 'saturate_deep',
+                                               'q3_leaf', 'repeat'))
         need(identity not in seen, 'duplicate case needs an explicit distinct repetition')
         seen.add(identity)
     return plan['cases']
@@ -267,12 +283,16 @@ def boot_epoch():
 
 def probe_command(build, root, case):
     return [str(build / PROBE_TARGET), str(root / case['file']), str(case['k']), str(case['workers']),
-            '--s=' + str(case['s']), '--static=' + str(case['static_threads']), '--grid=1mm']
+            '--s=' + str(case['s']), '--static=' + str(case['static_threads']), '--grid=1mm',
+            '--saturate-deep' if case['saturate_deep'] else '--no-saturate-deep',
+            '--q3-leaf' if case['q3_leaf'] else '--no-q3-leaf']
 
 
 def expected_probe_tail(case):
     return [str(case['k']), str(case['workers']), '--s=' + str(case['s']),
-            '--static=' + str(case['static_threads']), '--grid=1mm']
+            '--static=' + str(case['static_threads']), '--grid=1mm',
+            '--saturate-deep' if case['saturate_deep'] else '--no-saturate-deep',
+            '--q3-leaf' if case['q3_leaf'] else '--no-q3-leaf']
 
 
 def _count(value):
@@ -283,17 +303,35 @@ def _number(value):
     return type(value) in (int, float) and math.isfinite(value) and value >= 0
 
 
-def validate_probe(value, case, exit_code):
+def _tower_work(value):
+    if type(value) is not dict or not value or not TOWER_WORK_TYPED <= set(value):
+        return False
+    for name, item in value.items():
+        if type(name) is not str:
+            return False
+        if name == 'meb_accounting':
+            if item != MEB_ACCOUNTING:
+                return False
+        elif name == 'meb_supports_by_size':
+            if type(item) is not list or not 1 <= len(item) <= 8 or not all(_count(x) for x in item):
+                return False
+        elif not _count(item):
+            return False
+    return True
+
+
+def validate_probe(value, case, exit_code, inputs=None):
     """Lit la sortie de la sonde ; rend complete_relative ou explicit_refusal.
 
     Un statut non complet n'est accepte que s'il est explicite (code 3) ; une
-    sortie partielle, un code inattendu ou un domaine different est refuse."""
+    sortie partielle, un code inattendu ou un domaine different est refuse.
+    `inputs` remplace INPUTS pour la porte locale sonde reelle / validateur."""
     need(type(value) is dict and set(value) == TOP_KEYS, 'probe JSON fields')
     need(value['schema'] == PROBE_SCHEMA and value['status'] in PROBE_STATUSES and type(value['reason']) is str,
          'probe schema/status')
     need(type(value['ledger']) is dict and value['ledger'] and
          all(type(k) is str and type(v) is int and v >= 0 for k, v in value['ledger'].items()), 'probe ledger')
-    data = INPUTS[case['scene']]
+    data = (INPUTS if inputs is None else inputs)[case['scene']]
     source = value['input']
     need(type(source) is dict and set(source) == INPUT_KEYS and source['format'] == 'u32le' and
          source['grid'] == '1mm' and source['sites'] == case['n'] == data['n'] and source['hash'] == data['fnv'],
@@ -302,13 +340,18 @@ def validate_probe(value, case, exit_code):
     need(type(options) is dict and set(options) == OPTION_KEYS and options['K'] == case['k'] and
          options['s'] == case['s'] and options['workers'] == case['workers'] and
          options['tower_static_threads'] == case['static_threads'] and options['run_tower'] is True and
-         type(options['atlas_saturate_deep']) is bool and type(options['K_effective']) is int, 'probe options')
+         options['atlas_saturate_deep'] is case['saturate_deep'] and options['q3_leaf_census'] is case['q3_leaf'] and
+         type(options['K_effective']) is int, 'probe options')
     times = value['times_ms']
     need(type(times) is dict and set(times) == TIME_KEYS and all(_number(item) for item in times.values()) and
          _number(value['chain_cpu_s']), 'probe times')
-    for key in ('generator', 'tower_work'):
-        need(type(value[key]) is dict and value[key] and
-             all(type(name) is str and _count(item) for name, item in value[key].items()), 'probe counters ' + key)
+    # Les etapes sont des sous-chronos du total de chaine (la lecture est
+    # mesuree a part) : leur somme ne peut pas le depasser, a l'arrondi pres.
+    need(sum(times[key] for key in STAGE_TIME_KEYS) <= times['chain_total'] + 0.01 * len(STAGE_TIME_KEYS),
+         'probe stage times exceed the chain total')
+    need(type(value['generator']) is dict and value['generator'] and
+         all(type(name) is str and _count(item) for name, item in value['generator'].items()), 'probe counters generator')
+    need(_tower_work(value['tower_work']), 'probe counters tower_work')
     catalogue = value['catalogue']
     need(type(catalogue) is dict and {'unique_keys', 'balls', 'by_qmin', 'by_shell'} <= set(catalogue) and
          all(all(_count(x) for x in item) if type(item) is list else _count(item) for item in catalogue.values()),
@@ -325,6 +368,12 @@ def validate_probe(value, case, exit_code):
         return 'complete_relative'
     need(exit_code == 3 and options['K_effective'] in (0, effective), 'explicit refusal must exit with code 3')
     return 'explicit_refusal'
+
+
+def validate_external_wall(value, elapsed_seconds):
+    """Le chrono interne de chaine est borne par le mur externe du cas."""
+    need(_number(elapsed_seconds) and value['times_ms']['chain_total'] / 1000.0 <= elapsed_seconds + 1.0,
+         'chain total exceeds the external wall time of the case')
 
 
 def validate_gnu_time(text, exit_code):
@@ -469,9 +518,12 @@ def execute(args):
                 return worker.remaining()
             except helper.SessionDeadline:
                 return 0.0
-        outcomes, values, exhausted = result['case_outcomes'], {}, False
+        outcomes, values, exhausted, defect = result['case_outcomes'], {}, False, False
         for index, case in enumerate(cases):
             suffix = str(index)
+            if defect:
+                outcomes.append(dict(index=index, outcome='skipped_protocol_defect'))
+                continue
             if exhausted or left() < MIN_CASE_START_SECONDS:
                 exhausted = True
                 outcomes.append(dict(index=index, outcome='skipped_budget'))
@@ -504,12 +556,14 @@ def execute(args):
                     need(row['exit_code'] in (0, 3), 'probe exit code outside {0, 3}')
                     value = strict_json((output / (name + '.stdout')).read_bytes())
                     outcome = validate_probe(value, case, row['exit_code'])
+                    validate_external_wall(value, row['elapsed_seconds'])
                     rss = validate_gnu_time((output / (name + '.stderr')).read_text(errors='replace'), row['exit_code'])
                     values[index] = value
                     entry.update(outcome=outcome, probe_status=value['status'], tower_digest=value['tower_digest'],
                                  gnu_time_max_rss_kb=rss, chain_total_ms=value['times_ms']['chain_total'])
                 except (ValueError, KeyError, TypeError, UnicodeError) as error:
                     entry.update(outcome='probe_failed', reason=type(error).__name__ + ': ' + str(error))
+                    defect = True
                 outcomes.append(entry)
                 need(sha(binary) == binary_sha, 'binary changed')
             save(output / (name + '.summary.json'), dict(case=case, input_file_sha256=manifest[case['file']],

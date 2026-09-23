@@ -216,7 +216,9 @@ struct Q4LocalAtlas::Impl {
     nodes[id].inside_count=fragment->inside_count();
     observe();
     if(fragment->inside_count()>=k-2) {
-      nodes[id].state=State::Deep;counter_add(work.deep_cells);release(id);return;
+      nodes[id].state=State::Deep;counter_add(work.deep_cells);
+      if(!(options.retain_q3_fragments && fragment->inside_count()<k-1)) release(id);
+      return;
     }
     bool stop=false;
     if(fragment->active_sites()<=options.leaf_sites) {counter_add(work.small_stops);stop=true;}
@@ -248,7 +250,9 @@ struct Q4LocalAtlas::Impl {
         nodes[id].inside_count=fragment->inside_count();
         if(fragment->inside_count()>=k-2) {
           nodes[id].state=State::Deep;counter_add(work.deep_cells);
-          counter_add(work.terminal_deep_cells);release(id);return;
+          counter_add(work.terminal_deep_cells);
+          if(!(options.retain_q3_fragments && fragment->inside_count()<k-1)) release(id);
+          return;
         }
       }
       counter_add(work.leaf_cells);
@@ -296,6 +300,44 @@ std::optional<std::size_t> Q4LocalAtlas::certified_inside_count(const Q4LocalCen
     const auto& node=nodes[id];
     if(node.state==Impl::State::Outside) return std::nullopt;
     if(node.state!=Impl::State::Branch) return node.inside_count;
+    std::size_t next=absent;
+    for(unsigned q=0;q<4 && next==absent;++q)
+      if(contains(nodes[node.children+q].cell,p)) next=node.children+q;
+    if(next==absent) throw std::logic_error("mhgp9 gen atlas children do not cover their parent cell");
+    id=next;
+  }
+}
+Q4LocalCellCertificate Q4LocalAtlas::certified_cell(const Q4LocalCenter& center) const {
+  constexpr i128 limit=i128{1}<<117;
+  if(center.den<=0 || center.den>=limit || center.x<=-limit || center.x>=limit ||
+     center.y<=-limit || center.y>=limit)
+    throw std::invalid_argument("mhgp9 gen atlas center exceeds its certified arithmetic domain");
+  Q4LocalCellCertificate out;
+  const auto twice_den=2*center.den;
+  if(center.x < -twice_den || center.x > twice_den ||
+     center.y < -twice_den || center.y > twice_den) return out;
+  const auto p=scaled(Center{center.x,center.y,center.den});
+  const auto& nodes=impl_->nodes;
+  std::size_t id=0;
+  if(!contains(nodes[id].cell,p)) return out;
+  while(true) {
+    const auto& node=nodes[id];
+    if(node.state==Impl::State::Outside) return out;
+    if(node.state==Impl::State::Deep) {
+      out.inside_count=node.inside_count;
+      if(node.fragment) {  // retained exact fragment (count < K-1), see Q4LocalOptions
+        if(node.fragment->inside_count()!=node.inside_count)
+          throw std::logic_error("mhgp9 gen atlas retained fragment count mismatch");
+        out.kind=Q4LocalCellCertificate::Kind::ExactLeaf;out.fragment=node.fragment;
+      } else out.kind=Q4LocalCellCertificate::Kind::LowerBound;
+      return out;
+    }
+    if(node.state==Impl::State::Leaf) {
+      if(!node.fragment || node.fragment->inside_count()!=node.inside_count)
+        throw std::logic_error("mhgp9 gen atlas leaf lost its exact fragment");
+      out.kind=Q4LocalCellCertificate::Kind::ExactLeaf;out.inside_count=node.inside_count;
+      out.fragment=node.fragment;return out;
+    }
     std::size_t next=absent;
     for(unsigned q=0;q<4 && next==absent;++q)
       if(contains(nodes[node.children+q].cell,p)) next=node.children+q;

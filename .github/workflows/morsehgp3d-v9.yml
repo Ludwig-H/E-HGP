@@ -5,11 +5,13 @@ on:
     branches: [main]
     paths:
       - 'morsehgp3D_v9/**'
+      - 'gcp-migration/tower_worker_v9.py'
       - 'tools/check_docs.py'
       - '.github/workflows/morsehgp3d-v9.yml'
   pull_request:
     paths:
       - 'morsehgp3D_v9/**'
+      - 'gcp-migration/tower_worker_v9.py'
       - 'tools/check_docs.py'
       - '.github/workflows/morsehgp3d-v9.yml'
 

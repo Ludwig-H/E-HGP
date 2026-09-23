@@ -255,11 +255,13 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       o.q4_backend = gen::WspdQ4Backend::Local28;
       o.local = gen::Q4LocalOptions{};
       o.local.saturate_deep = options.atlas_saturate_deep;
+      o.local.retain_q3_fragments = options.q3_leaf_census;
       o.witness_mode = gen::WspdQ34WitnessMode::RectanglePair;
       o.q3_census_mode = gen::WspdQ3CensusMode::GlobalBoxes;
       o.witness_bounds_mode = gen::Q34WitnessBoundsMode::Affine;
       o.q4_seed_cells = gen::Q4SeedCellOptions{gen::Q4SeedCellMode::LiveOnly, 64};
       o.q3_atlas_consultation = true;
+      o.q3_leaf_census = options.q3_leaf_census;
       const auto r34 = gen::run_wspd_q34_parallel(
           index, kmax, options.separation_s, o, W,
           [&slots](std::size_t slot, const gen::Q34SeedCandidate& c) {
@@ -295,6 +297,8 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       l.q4_seeds = w.local.seeds; l.q4_live_leaves = w.q4_seed_cells.live_leaves;
       l.q4_whole_atlas_skips = w.q4_seed_cells.whole_atlas_skips;
       l.q4_sweep_events = w.local.sweep.kept_events;
+      l.q3_leaf_censuses = w.q3_atlas.leaf_censuses; l.q3_leaf_point_tests = w.q3_atlas.leaf_point_tests;
+      l.q3_leaf_rejections = w.q3_atlas.leaf_rejections; l.q3_lower_bound_fallbacks = w.q3_atlas.lower_bound_fallbacks;
     }
     result.times.q34_ms = ms_since(t);
 

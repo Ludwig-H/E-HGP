@@ -138,6 +138,26 @@ mhgp9_gate(mhgp9_tower_probe_rejects_separation_below_8 2 mhgp9_tower_probe
            ARGS absent.u32le 5 1 --s=7 LABELS "gate;probe" TIMEOUT 30)
 mhgp9_gate(mhgp9_tower_probe_rejects_grid_label 2 mhgp9_tower_probe
            ARGS absent.u32le 5 1 --grid=a/b LABELS "gate;probe" TIMEOUT 30)
+# Raccord sonde REELLE / validateur du worker G4, avec la queue d'arguments
+# exacte d'un cas G4 et des mutants de schema (session R2 du 23 septembre
+# 2026 : treize sorties refusees faute d'une telle porte). Sous python3 -O aussi.
+find_package(Python3 COMPONENTS Interpreter)
+set(MHGP9_TOWER_WORKER ${CMAKE_CURRENT_SOURCE_DIR}/../gcp-migration/tower_worker_v9.py)
+if(Python3_Interpreter_FOUND AND EXISTS ${MHGP9_TOWER_WORKER})
+  foreach(mode IN ITEMS normal optimized)
+    if(mode STREQUAL "optimized")
+      set(py_flags "-B -O")
+    else()
+      set(py_flags "-B")
+    endif()
+    add_test(NAME mhgp9_probe_worker_contract_${mode}
+             COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=${Python3_EXECUTABLE}
+                     "-DARGS=${py_flags} ${CMAKE_CURRENT_SOURCE_DIR}/tests/chain/probe_worker_contract.py $<TARGET_FILE:mhgp9_tower_probe> ${MHGP9_TOWER_WORKER} ${CMAKE_CURRENT_BINARY_DIR}/probe_worker_contract_${mode}"
+                     "-DEXPECT_PREFIX=probe_worker_contract mutants_killed=11/11"
+                     -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
+    set_tests_properties(mhgp9_probe_worker_contract_${mode} PROPERTIES LABELS "gate;probe;protocol" TIMEOUT 300)
+  endforeach()
+endif()
 
 # Mutant de compilation du noyau MEB (derniere paire maximale au lieu de la
 # premiere) : la porte doit le refuser (code 1, support canonique faux).
@@ -145,3 +165,116 @@ mhgp9_product_executable(mhgp9_tower_anchor_meb_mutant_gate tests/tower/anchor_m
 target_compile_definitions(mhgp9_tower_anchor_meb_mutant_gate PRIVATE MHGP9_MEB_MUTANT_LAST_MAXIMUM=1)
 mhgp9_gate(mhgp9_tower_anchor_meb_mutant_last_maximum 1 mhgp9_tower_anchor_meb_mutant_gate
            ARGS --selftest EXPECT_LINE "cause=support.first_positive_containing" LABELS "gate;tower;mutant" TIMEOUT 120)
+
+# ---- Portes du generateur (port de morsehgp3D_v8/tests, 3f0d188f).
+# Port mecanique des portes C++ v8 du chemin mesure, memes renommages que
+# src/gen (mhgp8 -> mhgp9::gen, MHGP8_ -> MHGP9G_) ; fixtures, planchers et
+# mutants compiles inchanges. Juges exacts Boost : tests/gen/exact_ball_oracle.hpp
+# et tests/gen/oracle/{p0,q2_census}_oracle.hpp. En v8 chaque porte etait
+# enregistree par add_test(<porte> --selftest), code attendu 0 ; les codes
+# d'erreur v8 (1 sur toute exception, y compris d'usage pour la plupart) ne
+# suivent pas encore la table 0/1/2/3/4 : seule la voie --selftest est jugee.
+# tests/gen/q34_family_pruning_gate.cpp et q34_cover_gate.cpp servent aussi
+# d'aides incluses par #define main (wspd_q34, q4_local, q4_seed_cells).
+# Chaque porte est compilee une fois en bibliotheque OBJECT, partagee par
+# l'executable produit et par ses mutants compiles.
+function(mhgp9_gen_gate gate labels)
+  add_library(mhgp9_gen_${gate}_gate_objects OBJECT tests/gen/${gate}_gate.cpp)
+  target_link_libraries(mhgp9_gen_${gate}_gate_objects PRIVATE mhgp9_gen)
+  target_include_directories(mhgp9_gen_${gate}_gate_objects SYSTEM PRIVATE ${MHGP9_BOOST_INCLUDE_DIR})
+  mhgp9_product_executable(mhgp9_gen_${gate}_gate $<TARGET_OBJECTS:mhgp9_gen_${gate}_gate_objects>)
+  target_link_libraries(mhgp9_gen_${gate}_gate PRIVATE mhgp9_gen)
+  mhgp9_gate(mhgp9_gen_${gate} 0 mhgp9_gen_${gate}_gate
+             ARGS --selftest LABELS "${labels}" TIMEOUT 600)
+endfunction()
+foreach(gate IN ITEMS wspd_q34 q4_local q4_seed_cells q4_saturating_atlas q3_ball_census
+    exact_ball q34_witness_search q34_pair_bounds q34_cover q2_census wspd_front
+    q2_prepared_bounds q2_joint_bounds q4_family q34_seed wspd_front_jobs)
+  mhgp9_gen_gate(${gate} "gate;gen;oracle")
+endforeach()
+foreach(gate IN ITEMS wspd_q2_census u18_numeric_domain q2_node_pool q2_terminal_pool
+    wspd_q2_parallel q2_sibling q2_witness_order q2_joint wspd_q2_proposals
+    wspd_front_inheritance cloud_owner)
+  mhgp9_gen_gate(${gate} "gate;gen")
+endforeach()
+# Refus d'argument (code 2) : seulement les portes v8 qui rendaient deja 2 sur
+# une erreur d'usage. wspd_q34, q4_local, q4_seed_cells, q4_saturating_atlas,
+# q3_ball_census, q34_witness_search, q34_pair_bounds et u18_numeric_domain
+# rendent 1 (exception d'usage, comme en v8) : non enregistrees, a aligner.
+foreach(gate IN ITEMS exact_ball q34_cover q2_census wspd_front q2_prepared_bounds
+    q2_joint_bounds q4_family q34_seed wspd_front_jobs wspd_q2_census q2_node_pool
+    q2_terminal_pool wspd_q2_parallel q2_sibling q2_witness_order q2_joint
+    wspd_q2_proposals wspd_front_inheritance cloud_owner)
+  mhgp9_gate(mhgp9_gen_${gate}_bad_argument 2 mhgp9_gen_${gate}_gate
+             ARGS --unknown LABELS "gate;gen" TIMEOUT 60)
+endforeach()
+# Diagnostic d'echelle de l'atlas saturant (mode --scale de la porte v8, non
+# enregistre en v8) : une arete fournie, racine certifiee profonde, aucun
+# support q4 emis ; invariants verifies, temps non juges.
+foreach(n IN ITEMS 8000 16000 32000)
+  mhgp9_gate(mhgp9_gen_q4_saturating_atlas_scale${n} 0 mhgp9_gen_q4_saturating_atlas_gate
+             ARGS --scale ${n} LABELS "gate;gen;scale${n}" TIMEOUT 120)
+endforeach()
+
+# ---- Mutants compiles du generateur (port des scripts v8 wspd_q34_mutations,
+# q34_affine_mutations, q4_seed_cells_mutations, q4_saturating_mutations,
+# q34_indexed_mutations). tests/gen/mutants.json donne, par mutant, l'unite de
+# src/gen visee, les remplacements (sites exacts, uniques, appliques dans
+# l'ordre) et le stderr causal exact. La copie mutee est ecrite au configure
+# dans le build (src/gen n'est jamais modifie), compilee avec les memes options
+# que mhgp9_gen et liee AVANT libmhgp9_gen.a, comme les scripts v8 liaient
+# l'objet mute avant libmhgp8_p0.a. Un site absent ou non unique ne casse pas
+# le build : le test correspondant echoue en le disant.
+set(mhgp9_gen_mutant_spec "${CMAKE_CURRENT_SOURCE_DIR}/tests/gen/mutants.json")
+file(READ "${mhgp9_gen_mutant_spec}" mhgp9_gen_mutant_text)
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${mhgp9_gen_mutant_spec}")
+string(JSON mhgp9_gen_mutant_count LENGTH "${mhgp9_gen_mutant_text}" mutants)
+math(EXPR mhgp9_gen_mutant_last "${mhgp9_gen_mutant_count} - 1")
+foreach(index RANGE ${mhgp9_gen_mutant_last})
+  string(JSON family GET "${mhgp9_gen_mutant_text}" mutants ${index} family)
+  string(JSON mutant GET "${mhgp9_gen_mutant_text}" mutants ${index} name)
+  string(JSON gate GET "${mhgp9_gen_mutant_text}" mutants ${index} gate)
+  string(JSON unit GET "${mhgp9_gen_mutant_text}" mutants ${index} source)
+  string(JSON disabled ERROR_VARIABLE no_disabled GET "${mhgp9_gen_mutant_text}" mutants ${index} disabled)
+  set(test_name mhgp9_gen_mutant_${family}_${mutant})
+  set(original "${CMAKE_CURRENT_SOURCE_DIR}/src/gen/${unit}")
+  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${original}")
+  file(READ "${original}" mutated_text)
+  set(refusal "")
+  string(JSON replacement_count LENGTH "${mhgp9_gen_mutant_text}" mutants ${index} replacements)
+  math(EXPR replacement_last "${replacement_count} - 1")
+  foreach(r RANGE ${replacement_last})
+    string(JSON before GET "${mhgp9_gen_mutant_text}" mutants ${index} replacements ${r} 0)
+    string(JSON after GET "${mhgp9_gen_mutant_text}" mutants ${index} replacements ${r} 1)
+    string(FIND "${mutated_text}" "${before}" first)
+    string(FIND "${mutated_text}" "${before}" last REVERSE)
+    if(first EQUAL -1 OR NOT first EQUAL last)
+      set(refusal "site de mutation absent ou non unique dans src/gen/${unit} (remplacement ${r})")
+      break()
+    endif()
+    string(REPLACE "${before}" "${after}" mutated_text "${mutated_text}")
+  endforeach()
+  if(NOT refusal STREQUAL "")
+    add_test(NAME ${test_name} COMMAND ${CMAKE_COMMAND} "-DREFUSE=${test_name}: ${refusal}"
+             -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/gen/run_mutant.cmake)
+  else()
+    get_filename_component(unit_dir "${unit}" DIRECTORY)
+    get_filename_component(unit_name "${unit}" NAME)
+    set(mutated "${CMAKE_CURRENT_BINARY_DIR}/gen_mutants/${family}_${mutant}/${unit_name}")
+    file(WRITE "${mutated}.staged" "${mutated_text}")
+    configure_file("${mutated}.staged" "${mutated}" COPYONLY)
+    mhgp9_product_executable(${test_name}_gate $<TARGET_OBJECTS:mhgp9_gen_${gate}_gate_objects> "${mutated}")
+    target_include_directories(${test_name}_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/gen"
+                               "${CMAKE_CURRENT_SOURCE_DIR}/src/gen/${unit_dir}")
+    target_link_libraries(${test_name}_gate PRIVATE mhgp9_gen)
+    add_test(NAME ${test_name}
+             COMMAND ${CMAKE_COMMAND} -DCMD=$<TARGET_FILE:${test_name}_gate>
+                     -DSPEC=${mhgp9_gen_mutant_spec} -DINDEX=${index}
+                     -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/gen/run_mutant.cmake)
+  endif()
+  set_tests_properties(${test_name} PROPERTIES LABELS "gate;gen;mutant" TIMEOUT 300)
+  if(no_disabled STREQUAL "NOTFOUND")
+    set_tests_properties(${test_name} PROPERTIES DISABLED TRUE)
+    message(STATUS "mhgp9: ${test_name} DISABLED (${disabled})")
+  endif()
+endforeach()

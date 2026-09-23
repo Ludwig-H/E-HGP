@@ -1,0 +1,363 @@
+{
+ "schema": "mhgp9_gen_compiled_mutants_v1",
+ "note": "Mutants compiles du generateur, portes des scripts Python v8 (3f0d188f) : chaque mutant remplace une unite de mhgp9_gen par une copie mutee (sites exacts et uniques), lie avant libmhgp9_gen.a, et la porte native doit echouer avec le code et le stderr EXACTS ci-dessous.",
+ "mutants": [
+  {
+   "family": "wspd_q34",
+   "name": "q3_shell_counted_inside",
+   "gate": "wspd_q34",
+   "source": "pipeline/wspd_q34.cpp",
+   "replacements": [
+    [
+     "        if (power < 0) {\n          counter_add(q3.census_inside_sites);",
+     "        if (power <= 0) {\n          counter_add(q3.census_inside_sites);"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "wspd q34 gate: global q34 stream differs from independent rational support/depth/shell oracle\n",
+   "judgment": "geometry",
+   "provenance": "morsehgp3D_v8/tests/wspd_q34_mutations.py"
+  },
+  {
+   "family": "wspd_q34",
+   "name": "q4_gated_by_q3_acceptance",
+   "gate": "wspd_q34",
+   "source": "pipeline/wspd_q34.cpp",
+   "replacements": [
+    [
+     "    if (q3) {\n      const auto root = atlas",
+     "    const auto q3_before = work.q3.emitted;\n    if (q3) {\n      const auto root = atlas"
+    ],
+    [
+     "    if (q4) {",
+     "    if (q4 && (!q3 || work.q3.emitted > q3_before)) {"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "wspd q34 gate: global q34 stream differs from independent rational support/depth/shell oracle\n",
+   "judgment": "geometry",
+   "provenance": "morsehgp3D_v8/tests/wspd_q34_mutations.py"
+  },
+  {
+   "family": "wspd_q34",
+   "name": "q4_gated_by_q3_front_mask",
+   "gate": "wspd_q34",
+   "source": "pipeline/wspd_q34.cpp",
+   "replacements": [
+    [
+     "    if (q4) {",
+     "    if (q4 && (options_.requested_lane_mask != 6 || q3)) {"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "wspd q34 gate: global q34 stream differs from independent rational support/depth/shell oracle\n",
+   "judgment": "geometry",
+   "provenance": "morsehgp3D_v8/tests/wspd_q34_mutations.py"
+  },
+  {
+   "family": "wspd_q34",
+   "name": "q3_atlas_rejects_at_k_minus_2",
+   "gate": "wspd_q34",
+   "source": "pipeline/wspd_q34.cpp",
+   "replacements": [
+    [
+     "      else if (cell.inside_count >= k_ - 1) {",
+     "      else if (cell.inside_count >= k_ - 2) {"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "wspd q34 gate: indexed filter lost support/depth/key/complete shell\n",
+   "judgment": "geometry",
+   "provenance": "morsehgp3D_v8/tests/wspd_q34_mutations.py"
+  },
+  {
+   "family": "wspd_q34",
+   "name": "parallel_refused_range_dropped",
+   "gate": "wspd_q34",
+   "source": "pipeline/wspd_q34.cpp",
+   "replacements": [
+    [
+     "        if (!splitter_(RectangleTask{rectangle.a_node, rectangle.b_node, start, stop, mask}))\n          expand(start, stop, b.first, b.last, mask);",
+     "        static_cast<void>(splitter_(RectangleTask{rectangle.a_node, rectangle.b_node, start, stop, mask}));"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "wspd q34 gate: mhgp9 gen global q34 completed ledger mismatch\n",
+   "judgment": "completion_ledger",
+   "provenance": "morsehgp3D_v8/tests/wspd_q34_mutations.py"
+  },
+  {
+   "family": "q34_affine",
+   "name": "xi_upper_used_to_exclude",
+   "gate": "q34_witness_search",
+   "source": "lanes/q34_witness_search.cpp",
+   "replacements": [
+    [
+     "static_cast<i128>(16) * xi.low)",
+     "static_cast<i128>(16) * xi.high)"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "q34 witness search gate: singleton witness decision differs from independent oracle\n",
+   "judgment": "geometry",
+   "provenance": "morsehgp3D_v8/tests/q34_affine_mutations.py"
+  },
+  {
+   "family": "q34_affine",
+   "name": "new_admission_wrong_xi_scale",
+   "gate": "q34_witness_search",
+   "source": "lanes/q34_witness_search.cpp",
+   "replacements": [
+    [
+     "const i128 xi16 = static_cast<i128>(16) * xi.high;",
+     "const i128 xi16 = static_cast<i128>(Exclusion ? 4 : 16) * xi.high;"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "q34 witness search gate: singleton witness decision differs from independent oracle\n",
+   "judgment": "geometry",
+   "provenance": "morsehgp3D_v8/tests/q34_affine_mutations.py"
+  },
+  {
+   "family": "q34_affine",
+   "name": "local_exclusion_removes_global_lane",
+   "gate": "q34_witness_search",
+   "source": "lanes/q34_witness_search.cpp",
+   "replacements": [
+    [
+     "            frame.mask &= static_cast<std::uint8_t>(~bit);\n            continue;",
+     "            frame.mask &= static_cast<std::uint8_t>(~bit);\n            remaining &= static_cast<std::uint8_t>(~bit);\n            continue;"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "q34 witness search gate: singleton witness decision differs from independent oracle\n",
+   "judgment": "geometry",
+   "provenance": "morsehgp3D_v8/tests/q34_affine_mutations.py"
+  },
+  {
+   "family": "q4_seed_cells",
+   "name": "positive_contact_lost",
+   "gate": "q4_seed_cells",
+   "source": "lanes/q4_local.cpp",
+   "replacements": [
+    [
+     "if(bound.minimum>0) {counter_add(extra.positive_products);continue;}",
+     "if(bound.minimum>=0) {counter_add(extra.positive_products);continue;}"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "q4 seed cells gate: seed-cell stream differs from independent rational support/depth/shell oracle\n",
+   "judgment": "geometry",
+   "provenance": "morsehgp3D_v8/tests/q4_seed_cells_mutations.py"
+  },
+  {
+   "family": "q4_seed_cells",
+   "name": "single_live_leaf_discarded",
+   "gate": "q4_seed_cells",
+   "source": "lanes/q4_local.cpp",
+   "replacements": [
+    [
+     "if(result.atlas.leaf_cells==0)",
+     "if(result.atlas.leaf_cells<=1)"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "q4 seed cells gate: seed-cell stream differs from independent rational support/depth/shell oracle\n",
+   "judgment": "geometry",
+   "provenance": "morsehgp3D_v8/tests/q4_seed_cells_mutations.py"
+  },
+  {
+   "family": "q4_seed_cells",
+   "name": "fourth_cell_incidence_lost",
+   "gate": "q4_seed_cells",
+   "source": "lanes/q4_local.cpp",
+   "replacements": [
+    [
+     "for(std::size_t quadrant=4;quadrant!=0;--quadrant)",
+     "for(std::size_t quadrant=3;quadrant!=0;--quadrant)"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "q4 seed cells gate: seed-cell stream differs from independent rational support/depth/shell oracle\n",
+   "judgment": "geometry",
+   "provenance": "morsehgp3D_v8/tests/q4_seed_cells_mutations.py"
+  },
+  {
+   "family": "q4_saturating",
+   "name": "threshold_one_early",
+   "gate": "q4_saturating_atlas",
+   "source": "lanes/q4_local_partition.cpp",
+   "replacements": [
+    [
+     "if(stop_after!=0 && inside_count_>=stop_after)",
+     "if(stop_after!=0 && inside_count_>=stop_after-1)"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "q4 saturating atlas gate: partial frontier escaped or threshold changed\n",
+   "judgment": "geometry",
+   "provenance": "morsehgp3D_v8/tests/q4_saturating_mutations.py"
+  },
+  {
+   "family": "q4_saturating",
+   "name": "contact_credited_inside",
+   "gate": "q4_saturating_atlas",
+   "source": "lanes/q4_local_partition.cpp",
+   "replacements": [
+    [
+     "if (bound.maximum<0)",
+     "if (bound.maximum<=0)"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "q4 saturating atlas gate: terminal certificate fails independent closed-cell oracle\n",
+   "judgment": "geometry",
+   "provenance": "morsehgp3D_v8/tests/q4_saturating_mutations.py"
+  },
+  {
+   "family": "q4_saturating",
+   "name": "prefix_work_omitted",
+   "gate": "q4_saturating_atlas",
+   "source": "lanes/q4_local.cpp",
+   "replacements": [
+    [
+     "    merge(work.partition,result.work());",
+     "    // MUTANT: interrupted prefix work omitted from physical total."
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "q4 saturating atlas gate: prefix is not a subset of total work\n",
+   "judgment": "physical_work",
+   "provenance": "morsehgp3D_v8/tests/q4_saturating_mutations.py"
+  },
+  {
+   "family": "q34_indexed_witness",
+   "name": "q4_wrong_alpha",
+   "gate": "q34_witness_search",
+   "source": "lanes/q34_witness_search.cpp",
+   "replacements": [
+    [
+     "lane == 0 ? 3 : 2",
+     "lane == 0 ? 3 : 3"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "q34 witness search gate: singleton witness decision differs from independent oracle\n",
+   "judgment": "geometry",
+   "provenance": "morsehgp3D_v8/tests/q34_indexed_mutations.py"
+  },
+  {
+   "family": "q34_indexed_witness",
+   "name": "lemon_contact_counted_inside",
+   "gate": "q34_witness_search",
+   "source": "lanes/q34_witness_search.cpp",
+   "replacements": [
+    [
+     "alpha * h4_squared <= xi16",
+     "alpha * h4_squared < xi16"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "q34 witness search gate: singleton witness decision differs from independent oracle\n",
+   "judgment": "geometry",
+   "provenance": "morsehgp3D_v8/tests/q34_indexed_mutations.py"
+  },
+  {
+   "family": "q34_indexed_witness",
+   "name": "admitted_lane_recounted_in_children",
+   "gate": "q34_witness_search",
+   "source": "lanes/q34_witness_search.cpp",
+   "replacements": [
+    [
+     "        frame.mask &= static_cast<std::uint8_t>(~bit);",
+     "        /* mutant: leave admitted lane in children */"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "q34 witness search gate: singleton witness decision differs from independent oracle\n",
+   "judgment": "geometry",
+   "provenance": "morsehgp3D_v8/tests/q34_indexed_mutations.py",
+   "disabled": "site de mutation non unique dans lanes/q34_witness_search.cpp depuis 2629a536 (bornes affines) ; DISABLED en v8 (CMakeLists v8, mhgp8_q34_indexed_witness_mutations)"
+  },
+  {
+   "family": "q34_indexed_census",
+   "name": "integer_minimum_wrong_rounding",
+   "gate": "q3_ball_census",
+   "source": "lanes/q3_ball_census.cpp",
+   "replacements": [
+    [
+     "std::min(at_floor, at_ceil)",
+     "std::max(at_floor, at_ceil)"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "q3 ball census gate: global census differs from independent rational depth and shell oracle\n",
+   "judgment": "geometry",
+   "provenance": "morsehgp3D_v8/tests/q34_indexed_mutations.py"
+  },
+  {
+   "family": "q34_indexed_census",
+   "name": "whole_contact_counted_inside",
+   "gate": "q3_ball_census",
+   "source": "lanes/q3_ball_census.cpp",
+   "replacements": [
+    [
+     "if (frame.bounds.maximum < 0) {",
+     "if (frame.bounds.maximum <= 0) {"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "q3 ball census gate: global census differs from independent rational depth and shell oracle\n",
+   "judgment": "geometry",
+   "provenance": "morsehgp3D_v8/tests/q34_indexed_mutations.py"
+  },
+  {
+   "family": "q34_indexed_census",
+   "name": "shell_contact_excluded",
+   "gate": "q3_ball_census",
+   "source": "lanes/q3_ball_census.cpp",
+   "replacements": [
+    [
+     "frame.bounds.minimum > 0 || frame.bounds.maximum < 0",
+     "frame.bounds.minimum >= 0 || frame.bounds.maximum < 0"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "q3 ball census gate: global census differs from independent rational depth and shell oracle\n",
+   "judgment": "geometry",
+   "provenance": "morsehgp3D_v8/tests/q34_indexed_mutations.py"
+  },
+  {
+   "family": "wspd_q34",
+   "name": "q3_leaf_shell_counted_inside",
+   "gate": "wspd_q34",
+   "source": "pipeline/wspd_q34.cpp",
+   "replacements": [
+    [
+     "          if (power < 0) {\n            if (++depth >= k_ - 1) {",
+     "          if (power <= 0) {\n            if (++depth >= k_ - 1) {"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "wspd q34 gate: indexed filter lost support/depth/key/complete shell\n",
+   "judgment": "geometry",
+   "provenance": "v9 (census q3 sur feuille, 23 septembre 2026)"
+  },
+  {
+   "family": "wspd_q34",
+   "name": "q3_leaf_census_drops_certified_count",
+   "gate": "wspd_q34",
+   "source": "pipeline/wspd_q34.cpp",
+   "replacements": [
+    [
+     "      depth = cell.inside_count;\n",
+     "      depth = 0;\n"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "wspd q34 gate: indexed filter lost support/depth/key/complete shell\n",
+   "judgment": "geometry",
+   "provenance": "v9 (census q3 sur feuille, 23 septembre 2026)"
+  }
+ ]
+}

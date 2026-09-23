@@ -27,9 +27,11 @@ namespace {
 #define MHGP9G_MAX(field) a.field = std::max(a.field, b.field)
 
 void merge(WspdQ3AtlasWork& a, const WspdQ3AtlasWork& b) {
-  static_assert(sizeof(WspdQ3AtlasWork) == 5 * sizeof(u64));
+  static_assert(sizeof(WspdQ3AtlasWork) == 9 * sizeof(u64));
   MHGP9G_ADD(edges_with_atlas); MHGP9G_ADD(root_lane_skips); MHGP9G_ADD(locations);
   MHGP9G_ADD(outside_domain); MHGP9G_ADD(rejections);
+  MHGP9G_ADD(leaf_censuses); MHGP9G_ADD(leaf_point_tests); MHGP9G_ADD(leaf_rejections);
+  MHGP9G_ADD(lower_bound_fallbacks);
 }
 
 void merge(Q34EdgeCoverWork& a, const Q34EdgeCoverWork& b) {
@@ -327,6 +329,11 @@ void validate(Q2CensusIndexPtr index, unsigned k, unsigned s,
       (options.q4_backend == WspdQ4Backend::Window30 &&
        options.q4_seed_cells.mode != Q4SeedCellMode::Individual))
     throw std::invalid_argument("mhgp9 gen invalid or incompatible q4 seed-cell options");
+  // The leaf census reads the atlas that only the consultation builds, and
+  // only Local28 has one: refuse an option that would be silently inert.
+  if (options.q3_leaf_census &&
+      (!options.q3_atlas_consultation || options.q4_backend != WspdQ4Backend::Local28))
+    throw std::invalid_argument("mhgp9 gen q3 leaf census requires q3 atlas consultation on Local28");
 }
 
 WspdQ34Result empty_result(const Q2CensusIndexPtr& index, unsigned kmax,
@@ -536,17 +543,20 @@ class Engine {
     auto& q3 = work.q3;
     const auto points = index_->cloud().points();
     const auto order = index_->spatial_order();
+    Q4LocalCellCertificate cell;
     if (atlas) {
       // The certified count is a lower bound of the strict interior of the
       // seed ball (a, b, x): reaching K-1 rejects it exactly, before any
       // ball construction or census. No credit is transferred otherwise.
       counter_add(work.q3_atlas.locations);
-      const auto certified = atlas->certified_inside_count(atlas->geometry()->q3_center(ids[2]));
-      if (!certified) counter_add(work.q3_atlas.outside_domain);
-      else if (*certified >= k_ - 1) {
+      cell = atlas->certified_cell(atlas->geometry()->q3_center(ids[2]));
+      if (cell.kind == Q4LocalCellCertificate::Kind::None) counter_add(work.q3_atlas.outside_domain);
+      else if (cell.inside_count >= k_ - 1) {
         counter_add(work.q3_atlas.rejections);
         counter_add(q3.depth_rejections);
         return;
+      } else if (cell.kind == Q4LocalCellCertificate::Kind::LowerBound) {
+        counter_add(work.q3_atlas.lower_bound_fallbacks);
       }
     }
     counter_add(q3.ball_builds);
@@ -554,7 +564,30 @@ class Engine {
     if (!ball) throw std::logic_error("mhgp9 gen q3 owned acute seed lacks its exact ball");
     shell_.clear();
     std::size_t depth = 0, visited = 0;
-    if (options_.q3_census_mode == WspdQ3CensusMode::GlobalBoxes) {
+    if (options_.q3_leaf_census && cell.kind == Q4LocalCellCertificate::Kind::ExactLeaf) {
+      // The positive owned q3 ball lies inside the edge cover (R + |c-m| <=
+      // sqrt(3)|ab|/2 < |ab|) and its centre lies in this closed leaf cell:
+      // depth = certified count + frontier sites of negative power, and the
+      // whole shell is the frontier sites of zero power (a, b, x included).
+      counter_add(work.q3_atlas.leaf_censuses);
+      depth = cell.inside_count;
+      const auto nodes = index_->spatial_nodes();
+      for (const auto node_id : cell.fragment->active_nodes()) {
+        const auto range = nodes[node_id].range;
+        for (auto rank = range.first; rank < range.last; ++rank) {
+          const auto id = order[rank];
+          counter_add(work.q3_atlas.leaf_point_tests);
+          const auto power = ball->power(points[id]);
+          if (power < 0) {
+            if (++depth >= k_ - 1) {
+              counter_add(work.q3_atlas.leaf_rejections);
+              counter_add(q3.depth_rejections);
+              return;
+            }
+          } else if (power == 0) shell_.push_back(id);
+        }
+      }
+    } else if (options_.q3_census_mode == WspdQ3CensusMode::GlobalBoxes) {
       const auto census = census_q3_ball(*index_, *ball, k_ - 1, shell_, work.q3_blocks);
       if (!census.accepted) { counter_add(q3.depth_rejections); return; }
       depth = census.depth;

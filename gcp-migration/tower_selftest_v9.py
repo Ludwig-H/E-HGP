@@ -56,18 +56,18 @@ import time
 TIMES = ('read', 'prepare', 'gen_index', 'q2', 'q34', 'merge', 'tower_index', 'census', 'tower', 'chain_total')
 
 
-def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=''):
+def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt='', saturate=True, leaf=True):
     effective = min(k, n)
     complete = status == 'complete_relative'
     orders = [dict(K=q, nodes=2 * n * q, births=n * q, merges=n * q - 1, parents=2 * n * q - 1, contributions=n * q)
               for q in range(1, effective + 1)] if complete else []
     digest = hashlib.sha256((fnv + ':' + str(k) + ':' + str(s) + ':' + salt).encode()).hexdigest()[:16]
-    return dict(schema='mhgp9_tower_probe_v3', status=status,
+    return dict(schema='mhgp9_tower_probe_v4', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
-                             run_tower=True, atlas_saturate_deep=True),
-                times_ms={key: 1.5 for key in TIMES}, chain_cpu_s=0.25,
+                             run_tower=True, atlas_saturate_deep=saturate, q3_leaf_census=leaf),
+                times_ms=dict({key: 0.125 for key in TIMES}, chain_total=1.5), chain_cpu_s=0.25,
                 generator=dict(q2_front_rectangles=3, q2_candidate_pairs=2, q2_accepted_pairs=1,
                                q34_expanded_pairs=4, q34_cover_builds=1, q3_emitted=2, q4_emitted=1),
                 ledger=dict(expanded_pairs=4, cover_builds=1, q3_seeds=3, atlas_cells=5),
@@ -76,15 +76,19 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                                census_leaf_tests=5, bytes=64, by_qmin=[1, 2, 1], by_shell=[0, 0, 1, 2, 1]),
                 tower_work=dict(records=4, extra_records=0, representatives=5, anchor_hits=1, key_lookups=4,
                                 intruder_queries=2, intruder_nodes=7, meb_calls=4, meb_power_tests=9, births=3,
-                                merges=2, contributions=3, grouped_lots=1, resolver_cache_hits=2),
+                                merges=2, contributions=3, grouped_lots=1, resolver_cache_hits=2,
+                                meb_accounting='anchor_meb_first_maximal_pair_then_lexicographic_supports_extremes_first_v2',
+                                meb_pair_distances=6, meb_materializations=4, meb_supports_by_size=[0, 4, 3, 1]),
                 orders=orders, tower_digest=digest if complete else '0' * 16, peak_rss_kb=2048)
 
 
 def main():
     config = json.loads(pathlib.Path(CONFIG).read_text())
     path, k, workers = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
-    options = dict(argument[2:].split('=', 1) for argument in sys.argv[4:])
-    if set(options) != {'s', 'static', 'grid'} or options['grid'] != '1mm':
+    flags = [argument for argument in sys.argv[4:] if '=' not in argument]
+    options = dict(argument[2:].split('=', 1) for argument in sys.argv[4:] if '=' in argument)
+    if (set(options) != {'s', 'static', 'grid'} or options['grid'] != '1mm' or len(flags) != 2 or
+            flags[0] not in ('--saturate-deep', '--no-saturate-deep') or flags[1] not in ('--q3-leaf', '--no-q3-leaf')):
         print('argument refusal: selftest', file=sys.stderr)
         return 2
     raw = pathlib.Path(path).read_bytes()
@@ -101,7 +105,10 @@ def main():
             status = 'unsupported_degeneracy'
     salt = str(workers) if config.get('salt_by_workers') else ''
     value = probe_value(len(raw) // 12, config['fnv'][scene], k, int(options['s']), workers, int(options['static']),
-                        status, salt)
+                        status, salt, flags[0] == '--saturate-deep', flags[1] == '--q3-leaf')
+    for rule in config.get('malform', []):
+        if rule['scene'] == scene and rule['k'] == k:
+            value['tower_work']['meb_accounting'] = 'selftest_unpinned_accounting'
     print(json.dumps(value, separators=(',', ':')))
     return 0 if status == 'complete_relative' else 3
 
@@ -507,8 +514,10 @@ class Protocol(unittest.TestCase):
         cases, provenance = session.validate_snapshot(pkg['archive'], manifest)
         need(provenance['commit'] == head and [(c['scene'], c['k'], c['workers']) for c in cases] == [
             ('00', 5, 48), ('00', 10, 48), ('01', 5, 48), ('01', 10, 48), ('02', 5, 48), ('02', 10, 48),
-            ('00', 5, 24), ('00', 5, 1)] and all(c['s'] == 8 and c['static_threads'] == 0 and c['repeat'] == 0
-                                                  for c in cases), 'default plan order and parameters')
+            ('00', 5, 24), ('00', 5, 1)] and all(
+                c['s'] == 8 and c['static_threads'] == (c['workers'] if c['workers'] > 1 else 0) and
+                c['saturate_deep'] is True and c['q3_leaf'] is True and c['repeat'] == 0 for c in cases),
+               'default plan order and parameters')
         # Temoin independant : git archive du meme commit, jamais le worktree.
         exported = subprocess.run(['git', '-C', str(ROOT), 'archive', '--format=tar', 'HEAD', worker.SOURCE_ROOT],
                                   check=True, capture_output=True).stdout
@@ -541,6 +550,7 @@ class Protocol(unittest.TestCase):
         worker.validate_plan(plan, manifest)
         for key, value in [('k', 7), ('k', True), ('s', 9), ('s', 6), ('workers', 0), ('workers', 1025),
                            ('static_threads', -1), ('repeat', -1), ('n', 39884), ('n', True), ('scene', '03'),
+                           ('saturate_deep', 1), ('saturate_deep', None), ('q3_leaf', 0), ('q3_leaf', 'yes'),
                            ('scene', '../00'), ('file', 'data/scene_01.u32le'), ('extra', 1)]:
             bad = deepcopy(plan)
             bad['cases'][0][key] = value
@@ -611,8 +621,12 @@ class Protocol(unittest.TestCase):
     def test_probe_and_time_validation(self):
         plan_case = snapshot.default_plan()['cases'][0]
         data = worker.INPUTS['00']
-        good = probe_value(data['n'], data['fnv'], 5, 8, 48, 0)
+        good = probe_value(data['n'], data['fnv'], 5, 8, 48, 48)
         need(worker.validate_probe(worker.strict_json(json.dumps(good)), plan_case, 0) == 'complete_relative', 'valid')
+        worker.validate_external_wall(good, 0.5)
+        need(refused(worker.validate_external_wall, good, -1.0) and
+             refused(worker.validate_external_wall, dict(good, times_ms=dict(good['times_ms'], chain_total=9000.0)),
+                     5.0), 'chain total bounded by the external wall')
         mutations = [('schema', lambda v: v.update(schema='mhgp9_tower_probe_v0')),
                      ('status', lambda v: v.update(status='complete')),
                      ('hash', lambda v: v['input'].update(hash='0' * 16)),
@@ -621,6 +635,20 @@ class Protocol(unittest.TestCase):
                      ('grid', lambda v: v['input'].update(grid='unspecified')),
                      ('K', lambda v: v['options'].update(K=10)), ('workers', lambda v: v['options'].update(workers=24)),
                      ('static', lambda v: v['options'].update(tower_static_threads=1)),
+                     ('saturate_mode', lambda v: v['options'].update(atlas_saturate_deep=False)),
+                     ('leaf_mode', lambda v: v['options'].update(q3_leaf_census=False)),
+                     ('leaf_mode_type', lambda v: v['options'].update(q3_leaf_census=1)),
+                     ('leaf_mode_absent', lambda v: v['options'].pop('q3_leaf_census')),
+                     ('meb_accounting', lambda v: v['tower_work'].update(meb_accounting='other')),
+                     ('meb_accounting_absent', lambda v: v['tower_work'].pop('meb_accounting')),
+                     ('meb_sizes_type', lambda v: v['tower_work'].update(meb_supports_by_size='4,3')),
+                     ('meb_sizes_negative', lambda v: v['tower_work'].update(meb_supports_by_size=[0, -1])),
+                     ('meb_sizes_empty', lambda v: v['tower_work'].update(meb_supports_by_size=[])),
+                     ('meb_sizes_long', lambda v: v['tower_work'].update(meb_supports_by_size=[0] * 9)),
+                     ('meb_sizes_bool', lambda v: v['tower_work'].update(meb_supports_by_size=[True])),
+                     ('tower_work_text', lambda v: v['tower_work'].update(records='4')),
+                     ('tower_work_list', lambda v: v['tower_work'].update(births=[3])),
+                     ('stage_sum', lambda v: v['times_ms'].update(q34=5.0)),
                      ('run_tower', lambda v: v['options'].update(run_tower=False)),
                      ('K_effective', lambda v: v['options'].update(K_effective=4)),
                      ('orders', lambda v: v['orders'].pop()), ('order_key', lambda v: v['orders'][0].update(extra=1)),
@@ -637,7 +665,7 @@ class Protocol(unittest.TestCase):
             need(refused(worker.validate_probe, bad, plan_case, 0), 'probe mutation ' + label)
         need(refused(worker.validate_probe, good, plan_case, 3), 'complete status with code 3')
         need(refused(worker.strict_json, '{"a": NaN}') and refused(worker.strict_json, '{"a": 1, "a": 2}'), 'strict JSON')
-        refusal = probe_value(data['n'], data['fnv'], 5, 8, 48, 0, status='unsupported_degeneracy')
+        refusal = probe_value(data['n'], data['fnv'], 5, 8, 48, 48, status='unsupported_degeneracy')
         need(worker.validate_probe(refusal, plan_case, 3) == 'explicit_refusal', 'explicit refusal')
         need(refused(worker.validate_probe, refusal, plan_case, 0), 'refusal with code 0')
         report = ('\tCommand being timed: "probe"\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:01.00\n'
@@ -726,6 +754,21 @@ class Protocol(unittest.TestCase):
                  'budget exhaustion: ' + repr(outcomes))
             need(not any((output / ('probe_' + str(i) + '.command.json')).exists() for i in range(2, 8)),
                  'skipped cases never launched')
+
+    def test_protocol_defect_stops_the_campaign(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            code, receipt, fake, host = run_scenario(Path(temporary), tools=dict(malform=[dict(scene='00', k=10)]))
+            need(code == 1 and receipt['status'] == 'worker_failed' and receipt['worker_status'] == 'probe_failed',
+                 'protocol defect host receipt: ' + json.dumps(receipt)[:600])
+            expect_certified_stop(receipt, fake)
+            output = host / 'received/output'
+            value = worker.strict_json((output / 'receipt.json').read_bytes())
+            outcomes = [entry['outcome'] for entry in value['case_outcomes']]
+            need(outcomes == ['complete_relative', 'probe_failed'] + ['skipped_protocol_defect'] * 6,
+                 'protocol defect skips the following cases: ' + repr(outcomes))
+            need('probe counters tower_work' in value['case_outcomes'][1]['reason'] and
+                 not any((output / ('probe_' + str(i) + '.command.json')).exists() for i in range(2, 8)),
+                 'skipped cases never launched after a protocol defect')
 
     def test_worker_build_failure_still_stops(self):
         with tempfile.TemporaryDirectory() as temporary:

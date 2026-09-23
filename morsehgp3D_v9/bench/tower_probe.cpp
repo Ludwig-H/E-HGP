@@ -2,6 +2,10 @@
 //
 //   mhgp9_tower_probe <fichier .u32le|.u16le> K workers [--s=8] [--static=T]
 //                     [--no-tower] [--n=prefixe] [--grid=libelle]
+//                     [--saturate-deep|--no-saturate-deep] [--q3-leaf|--no-q3-leaf]
+//
+// Les deux voies geometriques (saturation de l'atlas, census q3 sur feuille)
+// sont publiees dans options ; un plan G4 les epingle explicitement.
 //
 // Chronometre du contrat : du nuage prepare en memoire a la tour complete en
 // memoire (ChainTimes, sans la lecture). La lecture et son empreinte sont
@@ -117,6 +121,8 @@ int main(int argc, char** argv) {
       else if (arg == "--no-tower") options.run_tower = false;
       else if (arg == "--saturate-deep") options.atlas_saturate_deep = true;
       else if (arg == "--no-saturate-deep") options.atlas_saturate_deep = false;
+      else if (arg == "--q3-leaf") options.q3_leaf_census = true;
+      else if (arg == "--no-q3-leaf") options.q3_leaf_census = false;
       else if (arg.starts_with("--n=")) prefix = static_cast<std::size_t>(parse_u(arg.substr(4)));
       else if (arg.starts_with("--grid=")) {
         grid = std::string(arg.substr(7));
@@ -144,15 +150,16 @@ int main(int argc, char** argv) {
   const auto r = mhgp9::run_tower_chain(input.points, options);
   const auto& t = r.times;
   const auto& c = r.catalogue;
-  std::printf("{\"schema\":\"mhgp9_tower_probe_v3\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
+  std::printf("{\"schema\":\"mhgp9_tower_probe_v4\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
               r.reason.c_str());
   std::printf("\"input\":{\"format\":\"%s\",\"grid\":\"%s\",\"sites\":%zu,\"hash\":\"%016" PRIx64 "\"},", input.format.c_str(),
               grid.c_str(), input.points.size(), input.hash);
   std::printf("\"options\":{\"K\":%u,\"K_effective\":%u,\"s\":%u,\"workers\":%zu,\"tower_static_threads\":%d,\"run_tower\":%s,"
-              "\"atlas_saturate_deep\":%s},",
+              "\"atlas_saturate_deep\":%s,\"q3_leaf_census\":%s},",
               options.kmax, r.kmax_effective, options.separation_s, options.workers,
               options.tower_static_threads >= 0 ? options.tower_static_threads : r.tower_static_threads,
-              options.run_tower ? "true" : "false", options.atlas_saturate_deep ? "true" : "false");
+              options.run_tower ? "true" : "false", options.atlas_saturate_deep ? "true" : "false",
+              options.q3_leaf_census ? "true" : "false");
   std::printf("\"times_ms\":{\"read\":%.3f,\"prepare\":%.3f,\"gen_index\":%.3f,\"q2\":%.3f,\"q34\":%.3f,\"merge\":%.3f,"
               "\"tower_index\":%.3f,\"census\":%.3f,\"tower\":%.3f,\"chain_total\":%.3f},\"chain_cpu_s\":%.3f,",
               read_ms, t.prepare_ms, t.gen_index_ms, t.q2_ms, t.q34_ms, t.merge_ms, t.tower_index_ms, t.census_ms, t.tower_ms,
@@ -172,7 +179,7 @@ int main(int argc, char** argv) {
   std::printf("]},");
   {
     const auto& l = r.ledger;
-    const std::pair<const char*, std::uint64_t> rows[] = {{"expanded_pairs",l.expanded_pairs},{"cover_builds",l.cover_builds},{"cover_sites",l.cover_sites},{"cover_node_visits",l.cover_node_visits},{"q3_edges",l.q3_edges},{"q4_edges",l.q4_edges},{"both_edges",l.both_edges},{"witness_input_pair_mass",l.witness_input_pair_mass},{"witness_rejected_rectangles",l.witness_rejected_rectangles},{"witness_rejected_pairs",l.witness_rejected_pairs},{"q3_seeds",l.q3_seeds},{"q3_ball_builds",l.q3_ball_builds},{"q3_depth_rejections",l.q3_depth_rejections},{"q3_census_bounds",l.q3_census_bounds},{"q3_census_point_tests",l.q3_census_point_tests},{"q3_atlas_edges",l.q3_atlas_edges},{"q3_atlas_locations",l.q3_atlas_locations},{"q3_atlas_rejections",l.q3_atlas_rejections},{"q3_atlas_outside_domain",l.q3_atlas_outside_domain},{"atlas_cells",l.atlas_cells},{"atlas_leaf_cells",l.atlas_leaf_cells},{"atlas_deep_cells",l.atlas_deep_cells},{"atlas_outside_cells",l.atlas_outside_cells},{"atlas_splits",l.atlas_splits},{"atlas_node_visits",l.atlas_node_visits},{"atlas_block_bounds",l.atlas_block_bounds},{"atlas_point_tests",l.atlas_point_tests},{"atlas_ids_copied",l.atlas_ids_copied},{"q4_seeds",l.q4_seeds},{"q4_live_leaves",l.q4_live_leaves},{"q4_whole_atlas_skips",l.q4_whole_atlas_skips},{"q4_sweep_events",l.q4_sweep_events}};
+    const std::pair<const char*, std::uint64_t> rows[] = {{"expanded_pairs",l.expanded_pairs},{"cover_builds",l.cover_builds},{"cover_sites",l.cover_sites},{"cover_node_visits",l.cover_node_visits},{"q3_edges",l.q3_edges},{"q4_edges",l.q4_edges},{"both_edges",l.both_edges},{"witness_input_pair_mass",l.witness_input_pair_mass},{"witness_rejected_rectangles",l.witness_rejected_rectangles},{"witness_rejected_pairs",l.witness_rejected_pairs},{"q3_seeds",l.q3_seeds},{"q3_ball_builds",l.q3_ball_builds},{"q3_depth_rejections",l.q3_depth_rejections},{"q3_census_bounds",l.q3_census_bounds},{"q3_census_point_tests",l.q3_census_point_tests},{"q3_atlas_edges",l.q3_atlas_edges},{"q3_atlas_locations",l.q3_atlas_locations},{"q3_atlas_rejections",l.q3_atlas_rejections},{"q3_atlas_outside_domain",l.q3_atlas_outside_domain},{"atlas_cells",l.atlas_cells},{"atlas_leaf_cells",l.atlas_leaf_cells},{"atlas_deep_cells",l.atlas_deep_cells},{"atlas_outside_cells",l.atlas_outside_cells},{"atlas_splits",l.atlas_splits},{"atlas_node_visits",l.atlas_node_visits},{"atlas_block_bounds",l.atlas_block_bounds},{"atlas_point_tests",l.atlas_point_tests},{"atlas_ids_copied",l.atlas_ids_copied},{"q4_seeds",l.q4_seeds},{"q4_live_leaves",l.q4_live_leaves},{"q4_whole_atlas_skips",l.q4_whole_atlas_skips},{"q4_sweep_events",l.q4_sweep_events},{"q3_leaf_censuses",l.q3_leaf_censuses},{"q3_leaf_point_tests",l.q3_leaf_point_tests},{"q3_leaf_rejections",l.q3_leaf_rejections},{"q3_lower_bound_fallbacks",l.q3_lower_bound_fallbacks}};
     std::printf("\"ledger\":{");
     bool first = true;
     for (const auto& [name, value] : rows) {

@@ -76,6 +76,33 @@ abandonnés (arbre de plages du nuage, dispatcher `Donate`, T1, T24–T29) suit 
 [carte des sources](audit_v8/16_carte_du_code_v8.md) et viendra avec les
 portes du générateur portées.
 
+Portes du générateur (`tests/gen/`, 23 septembre 2026) : les 27 portes natives
+de `morsehgp3D_v8/tests` au même commit `3f0d188f`, leurs oracles Boost
+(`exact_ball_oracle.hpp`, `oracle/`) et les fixtures de front, avec les mêmes
+changements mécaniques d'espace et de macros ; chaque porte est jugée sur sa
+voie `--selftest` (code 0). Les scripts Python de mutation de la v8
+(`wspd_q34_mutations.py` et voisins) deviennent `tests/gen/mutants.json` : une
+copie mutée de l'unité est compilée et liée avant `libmhgp9_gen.a`, et la porte
+doit rendre le code 1 et le stderr causal exact (`tests/gen/run_mutant.cmake`).
+Un site non unique est refusé à la configuration ; le seul mutant désactivé
+l'était déjà en v8.
+
+Écart assumé à la source v8 : le census q3 sur feuille exacte de l'atlas
+(`Q4LocalCellCertificate`, `Q4LocalOptions::retain_q3_fragments`,
+`WspdQ34Options::q3_leaf_census`), levier proposé par l'auditeur A. Une q3
+possédée par l'arête ab a son centre dans une cellule fermée de l'atlas de ab
+et sa boule dans le cover (rayon au plus $|ab|/\sqrt{3}$, décalage du centre
+au plus $|ab|/(2\sqrt{3})$) : profondeur = compte certifié de la feuille +
+sites de frontière de puissance négative, coquille = sites de frontière de
+puissance nulle. Une cellule profonde sans fragment reste un minorant et
+retombe sur le census global. L'option est refusée sans la consultation de
+l'atlas sur Local28. Porte `wspd_q34` : variante feuille sur toutes les
+fixtures (oracle rationnel identique), identités de registre généralisées,
+fixture du contre-audit B (`a=(14,20,20)`, `b=(26,20,20)`, `x=(20,29,20)`,
+`y=(20,16,20)`, `m=(20,20,20)`, K3 : racine profonde exacte au compte 1,
+servie par un fragment conservé) et planchers ; deux mutants causaux
+(coquille comptée intérieure sur la feuille, compte certifié oublié).
+
 ## Chaîne : `src/chain/` (espace `mhgp9`, code neuf)
 
 `run_tower_chain` enchaîne le générateur (configuration mesurée des reçus v8 :

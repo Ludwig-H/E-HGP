@@ -18,6 +18,10 @@ struct Q4LocalOptions {
   // Optional early terminal certificate at K-1 (safe for BOTH q3 and q4).
   // Default keeps the historical complete-partition path and its counters.
   bool saturate_deep{false};
+  // v9: keep the EXACT fragment of a Deep cell whose count is below K-1 (Deep
+  // for q4 at K-2, not conclusive for q3), so that a q3 census can start from
+  // it (certified_cell then returns ExactLeaf). Memory only; same object.
+  bool retain_q3_fragments{false};
 };
 
 struct Q4LocalSaturationWork {
@@ -44,6 +48,21 @@ struct Q4LocalAtlasWork {
 
 class Q4LocalAtlas;
 using Q4LocalAtlasPtr = std::shared_ptr<const Q4LocalAtlas>;
+
+// Typed consultation of the closed cell containing a point (port v9, lever of
+// auditor A, Q3_STRUCTURE_ET_BORNES.md). None: outside the root or in an
+// Outside cell, no certificate. LowerBound: a Deep cell, certified lower bound
+// of depth_cover only (its fragment is released or was never exact).
+// ExactLeaf: the complete fragment of a Leaf cell, owned by this atlas; for
+// every center t of that closed cell, depth_cover(t) = inside_count() +
+// #{active sites z with L_z(t) < 0} and the entire shell is made of active
+// sites with L_z(t) == 0. Same cloud/index/edge/cover as the atlas.
+struct Q4LocalCellCertificate {
+  enum class Kind { None, LowerBound, ExactLeaf };
+  Kind kind{Kind::None};
+  std::size_t inside_count{};
+  std::shared_ptr<const class Q4LocalFragment> fragment;  // ExactLeaf only
+};
 
 // Immutable after factory success. One edge/index owner, exact leaf fragments,
 // no compressed lower bound reused as an exact count. Construction budgets
@@ -78,6 +97,8 @@ class Q4LocalAtlas final {
   [[nodiscard]] std::optional<std::size_t> certified_inside_count(const Q4LocalCenter& center) const;
   // Same certificate for the whole root cell (every center of the domain).
   [[nodiscard]] std::optional<std::size_t> root_certified_inside_count() const noexcept;
+  // Same descent and domain checks as certified_inside_count, typed result.
+  [[nodiscard]] Q4LocalCellCertificate certified_cell(const Q4LocalCenter& center) const;
  private:
   struct Impl;
   explicit Q4LocalAtlas(std::unique_ptr<Impl> impl);

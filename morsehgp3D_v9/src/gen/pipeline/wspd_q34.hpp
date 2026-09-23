@@ -33,6 +33,11 @@ struct WspdQ34Options {
   // on closed cells); the q4 sweep then reuses the same atlas. Off keeps the
   // historical order and every counter bit-identical.
   bool q3_atlas_consultation{false};
+  // v9 option (requires q3_atlas_consultation): a q3 seed whose centre lies in
+  // an EXACT atlas leaf is censused from that leaf (certified count + frontier
+  // sites) instead of the global index. Same depth and shell; off keeps the
+  // v8 path and every historical counter.
+  bool q3_leaf_census{false};
   // Parallel entry only: every surviving residual rectangle is published to
   // the team's bounded task queue, by ranges of a-ranks when its pair mass
   // exceeds this grain, so that any idle worker expands it; the discovering
@@ -46,6 +51,9 @@ struct WspdQ34Options {
 
 struct WspdQ3AtlasWork {
   u64 edges_with_atlas{}, root_lane_skips{}, locations{}, outside_domain{}, rejections{};
+  // v9: q3 census started from the exact atlas leaf containing the centre
+  // (certified count + the leaf frontier only) instead of the global index.
+  u64 leaf_censuses{}, leaf_point_tests{}, leaf_rejections{}, lower_bound_fallbacks{};
   bool operator==(const WspdQ3AtlasWork&) const = default;
 };
 

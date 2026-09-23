@@ -48,10 +48,14 @@ struct ChainOptions {
   int tower_static_threads = -1;
   bool run_tower = true;       // false : s'arreter au catalogue (mesure de l'amont)
   bool keep_catalogue = false; // publier le catalogue recoupe (portes, juges)
-  // Atlas q4 saturant (option v8 de la reprise u18, desactivee par defaut) :
-  // arret d'une cellule des que son compte certifie atteint K-1, certificat
-  // terminal sans fragment. Meme objet attendu ; a juger par condenses.
+  // Atlas q4 saturant (option v8 de la reprise u18, desactivee par defaut en
+  // v8) : arret d'une cellule des que son compte certifie atteint K-1,
+  // certificat terminal sans fragment. Contrat v9 : ACTIVE par defaut dans la
+  // chaine ; la sonde publie la valeur et le plan G4 l'epingle.
   bool atlas_saturate_deep = true;
+  // Census q3 depuis la feuille exacte de l'atlas (levier de l'auditeur A,
+  // meme objet). Contrat v9 : active par defaut, publie et epingle de meme.
+  bool q3_leaf_census = true;
 };
 
 // Temps de mur en millisecondes, CPU du processus en secondes.
@@ -78,6 +82,7 @@ struct GeneratorLedger {
   std::uint64_t q3_seeds, q3_ball_builds, q3_depth_rejections, q3_census_bounds, q3_census_point_tests, q3_atlas_edges, q3_atlas_locations, q3_atlas_rejections, q3_atlas_outside_domain;
   std::uint64_t atlas_cells, atlas_leaf_cells, atlas_deep_cells, atlas_outside_cells, atlas_splits, atlas_node_visits, atlas_block_bounds, atlas_point_tests, atlas_ids_copied;
   std::uint64_t q4_seeds, q4_live_leaves, q4_whole_atlas_skips, q4_sweep_events;
+  std::uint64_t q3_leaf_censuses, q3_leaf_point_tests, q3_leaf_rejections, q3_lower_bound_fallbacks;
 };
 
 struct OrderSummary {

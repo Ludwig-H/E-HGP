@@ -185,7 +185,7 @@ def validate_received(output, manifest, worker_pin, expected_cases):
         need(name in rows and 'uptime_before_' + str(index) in rows, 'launched case commands')
         row = rows[name]
         argv = row['argv']
-        need(argv[:2] == [payload.TIME, '-v'] and len(argv) == 9 and
+        need(argv[:2] == [payload.TIME, '-v'] and len(argv) == 4 + len(payload.expected_probe_tail(case)) and
              argv[2] == configure[4] + '/' + payload.PROBE_TARGET and argv[3].endswith('/' + case['file']) and
              argv[4:] == payload.expected_probe_tail(case), 'exact GNU time / probe invocation')
         need(entry.get('exit_code') == row.get('exit_code'), 'case exit code record')
@@ -202,6 +202,7 @@ def validate_received(output, manifest, worker_pin, expected_cases):
              not row.get('session_deadline_reached'), 'probe closure')
         probe = payload.strict_json((output / (name + '.stdout')).read_bytes())
         need(payload.validate_probe(probe, case, row['exit_code']) == outcome, 'probe outcome recomputation')
+        payload.validate_external_wall(probe, row.get('elapsed_seconds'))
         payload.validate_gnu_time((output / (name + '.stderr')).read_text(errors='replace'), row['exit_code'])
         need(entry.get('probe_status') == probe['status'] and entry.get('tower_digest') == probe['tower_digest'],
              'case summary differs from raw probe output')
