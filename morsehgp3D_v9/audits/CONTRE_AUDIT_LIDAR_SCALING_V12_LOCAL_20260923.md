@@ -140,6 +140,12 @@ calcul HGP : `REVALIDATION.json` rapporte **60 cas / 6 campagnes / 0 échec**
 et ses 2/2 SHA passent. J'ai réexécuté la porte du lecteur en Python normal
 et `-O` : **25/25 mutations refusées dans les deux modes**. Ce correctif ne
 réétiquette pas rétroactivement les JSON historiques `grid=unspecified`.
+Portabilité à distinguer de cette lecture locale : l'auditeur C a montré
+dans `af483513` que le selftest CTest ouvre `record['argv'][0]`, chemin
+**absolu du worktree de capture** contenu dans le JSON archivé. La porte
+réussit ici où ce chemin existe, mais échoue dans un autre clone/CI tant que
+le chemin n'est pas ré-ancré sur l'entrée v8 versionnée. Ce n'est pas une
+divergence géométrique du moteur.
 
 Le revalidateur parcourt les résumés qu'il trouve et réussit dès qu'au moins
 un cas est accepté sans échec. Il ne fixe pas lui-même les six campagnes
