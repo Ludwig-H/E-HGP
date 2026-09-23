@@ -1,0 +1,139 @@
+{
+  "dominant_group_cell_19_18_6_axis_x": {
+    "23": {
+      "D_max": 25207726,
+      "D_min": 9170885,
+      "edges": 67827,
+      "heavy_core_sites": 367510224,
+      "heavy_edges": 66869,
+      "left_high": [
+        79129,
+        78771,
+        28160
+      ],
+      "left_low": [
+        75894,
+        74020,
+        25996
+      ],
+      "right_high": [
+        82418,
+        78957,
+        27945
+      ],
+      "right_low": [
+        80351,
+        74681,
+        26012
+      ]
+    },
+    "24": {
+      "D_max": 25207726,
+      "D_min": 16830770,
+      "edges": 66779,
+      "heavy_core_sites": 367396217,
+      "heavy_edges": 66779,
+      "left_high": [
+        78059,
+        76651,
+        28160
+      ],
+      "left_low": [
+        75894,
+        74020,
+        25996
+      ],
+      "right_high": [
+        81213,
+        78957,
+        27945
+      ],
+      "right_low": [
+        80351,
+        74681,
+        26746
+      ]
+    }
+  },
+  "grid_cells_and_max_population": {
+    "10": [
+      6923,
+      708
+    ],
+    "11": [
+      2698,
+      2386
+    ],
+    "12": [
+      969,
+      6016
+    ],
+    "13": [
+      273,
+      14091
+    ],
+    "14": [
+      73,
+      26888
+    ]
+  },
+  "group_counts": {
+    "23": {
+      "cell_axis_groups": 52,
+      "midpoint_cells": 22
+    },
+    "24": {
+      "cell_axis_groups": 26,
+      "midpoint_cells": 17
+    }
+  },
+  "schema": "mhgp9_audit_precore_grid_dispatch_summary_v1",
+  "selected_thresholds": {
+    "D2^22_cell2^12_count1": {
+      "edges": 838565,
+      "heavy_core_sites": 428994946,
+      "heavy_edges": 90855,
+      "panel_closable": 67,
+      "panel_closable_core_sites": 280728,
+      "panel_edges": 120
+    },
+    "D2^23_cell2^12_count1": {
+      "edges": 502157,
+      "heavy_core_sites": 425630327,
+      "heavy_edges": 87917,
+      "panel_closable": 63,
+      "panel_closable_core_sites": 276434,
+      "panel_edges": 114
+    },
+    "D2^23_cell2^12_count1024": {
+      "edges": 147406,
+      "heavy_core_sites": 421519574,
+      "heavy_edges": 85023,
+      "panel_closable": 61,
+      "panel_closable_core_sites": 273077,
+      "panel_edges": 109
+    },
+    "D2^23_cell2^12_count256": {
+      "edges": 247738,
+      "heavy_core_sites": 424616622,
+      "heavy_edges": 87175,
+      "panel_closable": 62,
+      "panel_closable_core_sites": 274540,
+      "panel_edges": 113
+    },
+    "D2^24_cell2^12_count1024": {
+      "edges": 89822,
+      "heavy_core_sites": 417549864,
+      "heavy_edges": 81863,
+      "panel_closable": 55,
+      "panel_closable_core_sites": 265793,
+      "panel_edges": 103
+    }
+  },
+  "total": {
+    "S2_survivors": 3986433,
+    "all_F_sum": 559661741,
+    "heavy_F_ge_1000": 91267,
+    "heavy_F_sum": 429563593
+  }
+}

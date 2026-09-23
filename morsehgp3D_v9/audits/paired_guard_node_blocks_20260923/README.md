@@ -34,7 +34,7 @@ Deux nœuds disjoints apportent `min(|G|,|H|)` paires de sites distincts.
 Les produits sont promus avant multiplication en `i128` signé : sous u18,
 `|Hmin|<2^41`, `Xmax<2^80`, `3Hmin²<2^83`, `4Xmax<2^82`.
 
-| Méthode / budget | Fermées / 120 | F fermable / 520 631 | Nœuds dépilés | Boîtes | Tests de paires |
+| Méthode / budget | Fermées / 120 | F fermable / 520 631 | Nœuds dépilés | Boîtes à l'enfilement | Tests de paires |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Top-B points B16, 64 | 21 | 64 429 | 30 334 | 58 444 | 11 751 |
 | Nœuds cap4, 64 | **32** | **110 327** | 30 314 | 57 794 | 14 624 |
@@ -43,25 +43,38 @@ Les produits sont promus avant multiplication en `i128` signé : sous u18,
 | Nœuds cap4, 256 | 67 | 285 918 | 47 593 | 82 160 | 184 736 |
 | Nœuds cap8, 256 | 65 | 273 822 | 46 624 | 80 268 | 183 266 |
 
+**Erratum du ledger de bornes.** Dans ce sidecar, chaque nœud dépilé
+recalcule sa borne après celle de l'enfilement, sans incrémenter la colonne
+« Boîtes à l'enfilement ». Les **calculs effectifs de bornes** valent donc
+`boîtes + nœuds dépilés` : pour cap4, **88 108** à budget64 et
+**129 753** à budget256, contre **58 444** et **83 768** pour Top-B,
+qui transporte sa borne dans la file. La
+[contrelecture indépendante](../CONTRE_AUDIT_B_COUT_NOEUDS_PAIRES_20260923.md)
+donne le contrôle de source. Les preuves géométriques et les fermetures
+ne changent pas.
+
 Les lignes Top-B proviennent du
 [shadow indexé voisin](../paired_guard_index_shadow_20260923/SUMMARY.json) ;
 notre cap1 reproduit ses fermetures et `F` aux deux budgets. À budget64,
 cap4 prouve 11 arêtes supplémentaires et 45 898 sites de cœur cumulés par rapport
-aux points seuls, au prix de 2 873 tests de paires supplémentaires. Les
+aux points seuls, au prix de 2 873 tests de paires et **29 664 calculs de
+bornes effectifs** supplémentaires. Les
 quatre quadrants ne sont complets pour aucune des 120 arêtes Top-B à ce
 budget (450/480 interruptions) ; ce gain est donc un **gain de preuve
 positive sous budget**, pas une différence de vérité géométrique. Pour
 cap4 à budget64, 88 arêtes restent ouvertes après **22 274 visites,
-42 974 boîtes et 6 050 tests de paires**. À budget256, les 53 ouvertes
-consomment encore **21 037 visites, 36 514 boîtes et 75 332 tests de
+42 974 boîtes à l'enfilement, donc 65 248 bornes effectives, et
+6 050 tests de paires**. À budget256, les 53 ouvertes
+consomment encore **21 037 visites, 36 514 boîtes à l'enfilement,
+donc 57 551 bornes effectives, et 75 332 tests de
 paires**. Le dernier budget ferme autant d'arêtes que Top-B : cap4 en
 gagne deux et en perd deux, soit seulement +5 190 `F` nets (+1,85 % des
 `F` fermables par Top-B). Cap8 perd deux fermetures nettes. Tous les
 budgets 256/1024/4096 produisent les mêmes comptes ; 256 suffit ici à
 remplir les 16 nœuds par quadrant. Le temps mesuré du sidecar varie avec
 la charge de l'hôte et exclut la lecture, le contrôle indépendant de `F`,
-la construction de l'index, le cœur, le cover et le catalogue ; les visites
-et tests ci-dessus sont les coûts comparables. La préparation/index du
+la construction de l'index, le cœur, le cover et le catalogue ; comparer
+les bornes effectives, les visites **et** les tests de paires. La préparation/index du
 rejeu local vaut 54,3 ms et conserve 19,2 Mo pour l'index, partagés par
 les 120 arêtes.
 

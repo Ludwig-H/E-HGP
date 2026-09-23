@@ -1,0 +1,58 @@
+{
+  "schema": "mhgp9_d5_knn_aabb_counterexample_v2",
+  "u18_valid": true,
+  "k": 5,
+  "p": 5,
+  "q_min": 2,
+  "window_lower_k": 6,
+  "cases": [
+    {
+      "points": 15,
+      "closed_sites": 7,
+      "exterior_sites": 8,
+      "threshold_power": -64086,
+      "internal_nodes": 14,
+      "internal_surviving": 14,
+      "visited_nodes": 29,
+      "total_nodes": 29,
+      "visited_leaves": 5,
+      "pruned_leaves": 10
+    },
+    {
+      "points": 23,
+      "closed_sites": 7,
+      "exterior_sites": 16,
+      "threshold_power": -64086,
+      "internal_nodes": 22,
+      "internal_surviving": 22,
+      "visited_nodes": 45,
+      "total_nodes": 45,
+      "visited_leaves": 5,
+      "pruned_leaves": 18
+    },
+    {
+      "points": 39,
+      "closed_sites": 7,
+      "exterior_sites": 32,
+      "threshold_power": -64086,
+      "internal_nodes": 38,
+      "internal_surviving": 38,
+      "visited_nodes": 77,
+      "total_nodes": 77,
+      "visited_leaves": 5,
+      "pruned_leaves": 34
+    },
+    {
+      "points": 71,
+      "closed_sites": 7,
+      "exterior_sites": 64,
+      "threshold_power": -64086,
+      "internal_nodes": 70,
+      "internal_surviving": 70,
+      "visited_nodes": 141,
+      "total_nodes": 141,
+      "visited_leaves": 5,
+      "pruned_leaves": 66
+    }
+  ]
+}

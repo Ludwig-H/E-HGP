@@ -481,6 +481,20 @@ de tests sur ces segments : sélection bornée, crible et arrêt précoce
 sont des conditions de viabilité, non des optimisations facultatives.
 Aucune sélectivité sur rectangles, borne de croissance ou vitesse G4
 n'est encore mesurée.
+Le [diagnostic de routage pré-cœur](paired_guard_dispatch_grid_20260923/README.md)
+lit les **3 986 433** survivantes S2 du plein brut 08/000000/K5.
+`D≥2²³` et une cellule du milieu de 4,096 m occupée par au moins
+1 024 sites routent **147 406** arêtes (3,70 %) ; parmi les gros cœurs
+`F≥1 000`, ce sont 85 023/91 267 arêtes et **421,520/429,564 M**
+formes, connues seulement après le cœur. Un groupe cellule/axe contient
+67 827 arêtes, dont 66 869 grosses portant **367,510 M** formes ;
+ses boîtes d'extrémités larges motivent une subdivision à mesurer.
+Le préfiltre exact sur boîtes par **16 coins/axe pour Hmin** et **64
+coins/composante pour Xmax** est vérifié sur 30 fixtures ; il peut
+précéder les tests corrélés de B. Cellule/axe n'est pas un certificat :
+subdiviser les couples d'extrémités, prouver la disjonction des sites,
+facturer le groupage et les replis. Ce seul plein brut ne prédit pas
+la sélectivité des demi-scènes, quarts ou densités.
 Les [demi-scènes et quarts aux trois densités](lidar_raw_physical_scaling_20260923/README.md)
 ont été mesurés avec v12, puis appariés au batch S2 CPU K5 par les
 deux reçus ci-dessus. La somme de leurs tours ne reconstruit pas le
@@ -1589,6 +1603,16 @@ ferme le cas de borne basse omis dans la preuve du lemme C et donne une
 fixture à quatre sites où la porte E1 accepte une cible dans la mauvaise
 composante. Comparer la racine pré-lot **par facette** au produit, ou
 certifier le saut par le témoin central, avant de compacter la sortie.
+La [contre-épreuve du k-NN de D5](d5_knn_aabb_counterexample_20260923/README.md)
+rectifie la borne de coût du plan de saut : sur une entrée u18/K5
+géométriquement non terminale avec **sept sites dans la boule fermée**,
+les préfixes ajoutant 8/16/32/64 sites extérieurs font visiter
+**29/45/77/141 nœuds sur autant**, car leurs boîtes AABB croisent la
+zone du seuil final. La famille géométrique donne un pire cas Ω(n)
+pour cette recherche, indépendamment des sites fermés ; aucune facette
+effectivement émise par FULL n'est démontrée par la sonde. Remplacer
+la projection `O(|D̄∩P|)` par le compte de nœuds admissibles, puis
+mesurer `tree_nodes` et les feuilles sur les coupes/densités LiDAR.
 La [contrelecture des chiffres et verdicts
 C](CONTRE_AUDIT_B_ALTERNATIVES_C_20260923.md) précise que les 66–70 %
 d'ancres longues proviennent des fenêtres arête/rectangle d'une **seule
