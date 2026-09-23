@@ -556,6 +556,23 @@ coins et environ **356,5 ms CPU locaux** ; ni gain de chaîne ni GPU
 n'en découlent. Le certificat garde son pouvoir mathématique, mais cette
 palette uniforme/top64 ne justifie pas un port ; tester des tuiles ou
 groupes adaptatifs avec gardes/IDs archivés et repli exact.
+Le [shadow des paires pondérées](weighted_guard_pairs_20260923/README.md)
+donne un autre levier exact : pour une paire fixée, des poids rationnels
+positifs `λ:μ` conservent le certificat par 64 coins si **le même
+rapport** vaut sur tout le rectangle. Une fixture ferme q3/q4 au rapport
+2:3, mais échoue à 1:1 ; la fixture des quatre triples reste impossible
+à fermer par **toute** paire pondérée, même avec poids libres. Sur la
+même trame brute K5 et la palette B, quatre rapports bornés ajoutent
+**15 rectangles S2-positifs**, soit 1 712 arêtes et **5,634 M formes**
+potentiellement évitables (1,007 % du cœur global). Les 15 preuves
+archivées passent 6 720 tests entiers de coins, avec gardes disjoints
+par voie. Mais tous les 1 747 grands rectangles paient déjà 2,243 M
+rapports au représentant et 58,086 M coins supplémentaires ; même un
+déclenchement après échec 1:1 laisserait 1,089 M rapports et 23,060 M
+coins sur 696 replis. Aucun gain de chaîne n'est mesuré. L'étape utile
+est une sélection de rapport dans l'intersection exacte des intervalles
+des 64 coins, puis une porte conditionnelle dont le coût complet est
+comparé aux formes et à l'aval réellement épargnés.
 Le [diagnostic de routage pré-cœur](paired_guard_dispatch_grid_20260923/README.md)
 lit les **3 986 433** survivantes S2 du plein brut 08/000000/K5.
 `D≥2²³` et une cellule du milieu de 4,096 m occupée par au moins

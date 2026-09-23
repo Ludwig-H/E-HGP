@@ -1,0 +1,154 @@
+{
+  "all_sampled": {
+    "additional_corner_tests": 58639030,
+    "extra_pair_q3": 46811,
+    "extra_pair_q4": 37904,
+    "gained": 100,
+    "gained_F": 5633688,
+    "gained_s2_edges": 1712,
+    "old_closed": 1068,
+    "old_closed_F": 5060730,
+    "old_closed_s2_edges": 2184,
+    "positive_representative_tests": 1681109,
+    "ratio_tests_at_representative": 2268037,
+    "rectangles": 1771,
+    "weighted_closed": 1168,
+    "weighted_closed_F": 10694418,
+    "weighted_closed_s2_edges": 3896,
+    "weighted_phase_ns": 1490551046
+  },
+  "big": {
+    "additional_corner_tests": 58085846,
+    "extra_pair_q3": 45877,
+    "extra_pair_q4": 37186,
+    "gained": 100,
+    "gained_F": 5633688,
+    "gained_s2_edges": 1712,
+    "old_closed": 1051,
+    "old_closed_F": 5059809,
+    "old_closed_s2_edges": 2175,
+    "positive_representative_tests": 1666803,
+    "ratio_tests_at_representative": 2242967,
+    "rectangles": 1747,
+    "weighted_closed": 1151,
+    "weighted_closed_F": 10693497,
+    "weighted_closed_s2_edges": 3887,
+    "weighted_phase_ns": 1476330764
+  },
+  "conditional_after_equal_pair_failure": {
+    "additional_corner_tests": 23060495,
+    "extra_pair_q3": 15227,
+    "extra_pair_q4": 5810,
+    "gained": 100,
+    "gained_F": 5633688,
+    "gained_s2_edges": 1712,
+    "old_closed": 0,
+    "old_closed_F": 0,
+    "old_closed_s2_edges": 0,
+    "positive_representative_tests": 764184,
+    "ratio_tests_at_representative": 1088739,
+    "rectangles": 696,
+    "weighted_closed": 100,
+    "weighted_closed_F": 5633688,
+    "weighted_closed_s2_edges": 1712,
+    "weighted_phase_ns": 583336490
+  },
+  "global_F": 559661741,
+  "global_s2_edges": 3986433,
+  "positive_big": {
+    "additional_corner_tests": 8017686,
+    "extra_pair_q3": 4122,
+    "extra_pair_q4": 3148,
+    "gained": 15,
+    "gained_F": 5633688,
+    "gained_positive_ordinals": [
+      {
+        "F": 205880,
+        "ordinal": 1078227,
+        "s2_edges": 180
+      },
+      {
+        "F": 147832,
+        "ordinal": 1078244,
+        "s2_edges": 120
+      },
+      {
+        "F": 5068,
+        "ordinal": 1275183,
+        "s2_edges": 4
+      },
+      {
+        "F": 5605,
+        "ordinal": 1275191,
+        "s2_edges": 5
+      },
+      {
+        "F": 44046,
+        "ordinal": 1790368,
+        "s2_edges": 36
+      },
+      {
+        "F": 7219,
+        "ordinal": 1790384,
+        "s2_edges": 5
+      },
+      {
+        "F": 225051,
+        "ordinal": 2938045,
+        "s2_edges": 147
+      },
+      {
+        "F": 62518,
+        "ordinal": 2938047,
+        "s2_edges": 37
+      },
+      {
+        "F": 182669,
+        "ordinal": 2938173,
+        "s2_edges": 96
+      },
+      {
+        "F": 343416,
+        "ordinal": 2938237,
+        "s2_edges": 235
+      },
+      {
+        "F": 278548,
+        "ordinal": 2938239,
+        "s2_edges": 224
+      },
+      {
+        "F": 3194,
+        "ordinal": 2938916,
+        "s2_edges": 2
+      },
+      {
+        "F": 1313001,
+        "ordinal": 3803742,
+        "s2_edges": 227
+      },
+      {
+        "F": 1467739,
+        "ordinal": 3808557,
+        "s2_edges": 208
+      },
+      {
+        "F": 1341902,
+        "ordinal": 3808650,
+        "s2_edges": 186
+      }
+    ],
+    "gained_s2_edges": 1712,
+    "old_closed": 72,
+    "old_closed_F": 5059809,
+    "old_closed_s2_edges": 2175,
+    "positive_representative_tests": 299678,
+    "ratio_tests_at_representative": 464745,
+    "rectangles": 299,
+    "weighted_closed": 87,
+    "weighted_closed_F": 10693497,
+    "weighted_closed_s2_edges": 3887,
+    "weighted_phase_ns": 205715811
+  },
+  "scope": "08/000000 raw whole frame, 1mm/u18, K5/s8, B palette"
+}

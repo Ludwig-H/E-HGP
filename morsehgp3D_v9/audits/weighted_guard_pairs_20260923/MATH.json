@@ -1,0 +1,67 @@
+{
+  "case": "B fixed-edge 12 guards, 66 unordered pairs",
+  "q3": {
+    "H_nonnegative_pairs": 65,
+    "best_t": "5051/10382",
+    "largest_F": "-89220768/5191",
+    "pair_indices": [
+      0,
+      2
+    ],
+    "strict_successes": 0
+  },
+  "q4": {
+    "H_nonnegative_pairs": 65,
+    "best_t": "2533/5192",
+    "largest_F": "-6598732/649",
+    "pair_indices": [
+      0,
+      2
+    ],
+    "strict_successes": 0
+  },
+  "rectangle_fixture": {
+    "a_box": [
+      [
+        3,
+        10,
+        10
+      ],
+      [
+        4,
+        10,
+        10
+      ]
+    ],
+    "b_box": [
+      [
+        17,
+        10,
+        10
+      ],
+      [
+        18,
+        10,
+        10
+      ]
+    ],
+    "corner_pairs": 64,
+    "distinct_corner_pairs": 4,
+    "equal_fail_F4_corners": 16,
+    "guards": [
+      [
+        10,
+        5,
+        13
+      ],
+      [
+        15,
+        14,
+        8
+      ]
+    ],
+    "ratio": "2:3",
+    "weighted_min_F4": 2336,
+    "weighted_min_H": 88
+  }
+}

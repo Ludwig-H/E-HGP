@@ -1,0 +1,178 @@
+--- rect_pair_shadow_b/probe.cpp
++++ weighted_guard_pairs/probe.cpp
+@@ -128,7 +128,7 @@
+   if(selected.size()>8) selected.resize(8);
+   return selected;
+ }
+-struct PairBits {std::size_t i{},j{};bool q3{},q4{};};
++struct PairBits {std::size_t i{},j{};bool q3{},q4{};int l3{1},m3{1},l4{1},m4{1};};
+ static std::pair<i64,i128> point_formula(Point3 a,Point3 b,Point3 g,Point3 h) {
+   const V d=sub(vec(b),vec(a)); const i64 D=dot(d,d);
+   const V wg{2*i64(g.x)-a.x-b.x,2*i64(g.y)-a.y-b.y,2*i64(g.z)-a.z-b.z};
+@@ -152,6 +152,30 @@
+     }
+   return out;
+ }
++static std::pair<i64,i128> weighted_formula(Point3 a,Point3 b,Point3 g,Point3 h,int l,int m) {
++  const V d=sub(vec(b),vec(a)); const i64 D=dot(d,d);
++  const V wg{2*i64(g.x)-a.x-b.x,2*i64(g.y)-a.y-b.y,2*i64(g.z)-a.z-b.z};
++  const V wh{2*i64(h.x)-a.x-b.x,2*i64(h.y)-a.y-b.y,2*i64(h.z)-a.z-b.z};
++  const i64 H=(l+m)*D-l*dot(wg,wg)-m*dot(wh,wh);
++  const V w{l*wg[0]+m*wh[0],l*wg[1]+m*wh[1],l*wg[2]+m*wh[2]};
++  const V c{d[1]*w[2]-d[2]*w[1],d[2]*w[0]-d[0]*w[2],d[0]*w[1]-d[1]*w[0]};
++  const i128 X=i128(c[0])*c[0]+i128(c[1])*c[1]+i128(c[2])*c[2];
++  return {H,X};
++}
++static PairBits classify_weighted(Box3 a,Box3 b,Point3 g,Point3 h,
++    std::size_t i,std::size_t j,int l,int m,std::uint64_t& corners) {
++  PairBits out{i,j,true,true};
++  for(unsigned ai=0;ai<8 && (out.q3||out.q4);++ai)
++    for(unsigned bi=0;bi<8 && (out.q3||out.q4);++bi) {
++      ++corners;
++      const auto [H,X]=weighted_formula(box_corner(a,ai),box_corner(b,bi),g,h,l,m);
++      const i128 H2=i128(H)*H;
++      if(H<=0) {out.q3=false;out.q4=false;break;}
++      if(3*H2<=4*X)out.q3=false;
++      if(H2<=2*X)out.q4=false;
++    }
++  return out;
++}
+ static unsigned greedy(std::vector<PairBits> pairs,std::size_t n,int lane) {
+   std::vector<bool> used(n);unsigned credit=0;
+   for(auto p:pairs) {
+@@ -161,7 +185,8 @@
+   return credit;
+ }
+ // Edmonds blossom: exact maximum cardinality matching on at most 32 sites.
+-static unsigned maximum_matching(const std::vector<PairBits>& pairs,std::size_t n,int lane) {
++static unsigned maximum_matching(const std::vector<PairBits>& pairs,std::size_t n,int lane,
++    std::vector<PairBits>* chosen=nullptr) {
+   std::vector<std::vector<int>> graph(n);
+   for(const auto& e:pairs) if(lane==3?e.q3:e.q4) {
+     graph[e.i].push_back(int(e.j));graph[e.j].push_back(int(e.i));
+@@ -220,6 +245,12 @@
+     }
+   }
+   unsigned count=0;for(int x:match)if(x!=-1)++count;
++  if(chosen)for(std::size_t i=0;i<n;++i)if(match[i]>int(i)) {
++    const auto it=std::find_if(pairs.begin(),pairs.end(),[&](const PairBits& p) {
++      return p.i==i && p.j==std::size_t(match[i]) && (lane==3?p.q3:p.q4);
++    });
++    ck(it!=pairs.end(),"matched pair absent");chosen->push_back(*it);
++  }
+   return count/2;
+ }
+ struct Result {
+@@ -228,6 +259,8 @@
+       pair_tests{},corners{},rect_positive3{},rect_positive4{},
+       singleton_corner_tests{},singleton_positive3{},singleton_positive4{};
+   unsigned pair3{},pair4{},max3{},max4{},single3{},single4{};
++  std::uint64_t weighted_ns{},weighted_attempts{},weighted_rep_positive{},weighted_corners{},weighted_extra_pairs3{},weighted_extra_pairs4{};
++  unsigned wpair3{},wpair4{},wmax3{},wmax4{};
+ };
+ static Result measure(const Q2CensusIndex& idx,const Rect& r) {
+   Result out;
+@@ -247,6 +280,7 @@
+   out.proposed=palette.size();out.select_ns=ns(start,Clock::now());
+   auto pstart=Clock::now();
+   std::vector<PairBits> positives;positives.reserve(palette.size()*palette.size()/2);
++  std::vector<PairBits> base_bits;base_bits.reserve(palette.size()*palette.size()/2);
+   for(std::size_t i=0;i<palette.size();++i)
+     for(std::size_t j=i+1;j<palette.size();++j) {
+       ++out.pair_tests;const auto pa=points[palette[i].site],pb=points[palette[j].site];
+@@ -254,10 +288,13 @@
+       const i128 H2=i128(H)*H;
+       const bool first3=H>0 && 3*H2>4*X,first4=H>0 && H2>2*X;
+       out.first_positive3+=first3;out.first_positive4+=first4;
+-      if(!first3 && !first4)continue;
+-      auto cert=classify(na.box,nb.box,pa,pb,i,j,out.corners);
+-      out.rect_positive3+=cert.q3;out.rect_positive4+=cert.q4;
+-      if(cert.q3||cert.q4) positives.push_back(cert);
++      PairBits cert{i,j,false,false};
++      if(first3||first4) {
++        cert=classify(na.box,nb.box,pa,pb,i,j,out.corners);
++        out.rect_positive3+=cert.q3;out.rect_positive4+=cert.q4;
++        if(cert.q3||cert.q4) positives.push_back(cert);
++      }
++      base_bits.push_back(cert);
+     }
+   out.pair3=greedy(positives,palette.size(),3);
+   out.pair4=greedy(positives,palette.size(),4);
+@@ -265,6 +302,64 @@
+   out.max4=maximum_matching(positives,palette.size(),4);
+   ck(out.max3>=out.pair3 && out.max4>=out.pair4,"matching dominance");
+   out.pair_ns=ns(pstart,Clock::now());
++  auto wstart=Clock::now();
++  std::vector<PairBits> weighted;weighted.reserve(base_bits.size());
++  const std::array<std::pair<int,int>,4> ratios{{{1,2},{2,1},{2,3},{3,2}}};
++  std::size_t pos=0;
++  for(std::size_t i=0;i<palette.size();++i)
++    for(std::size_t j=i+1;j<palette.size();++j) {
++      auto cert=base_bits[pos++];
++      const auto pa=points[palette[i].site],pb=points[palette[j].site];
++      if(!(cert.q3&&cert.q4))for(const auto& [l,m]:ratios) {
++        ++out.weighted_attempts;
++        const auto [H,X]=weighted_formula(points[order[na.range.first]],
++            points[order[nb.range.first]],pa,pb,l,m);
++        const i128 H2=i128(H)*H;
++        const bool rep3=H>0 && 3*H2>4*X,rep4=H>0 && H2>2*X;
++        if((!cert.q3&&rep3)||(!cert.q4&&rep4)) {
++          ++out.weighted_rep_positive;
++          const auto add=classify_weighted(na.box,nb.box,pa,pb,i,j,l,m,out.weighted_corners);
++          if(add.q3&&!cert.q3) {cert.q3=true;cert.l3=l;cert.m3=m;}
++          if(add.q4&&!cert.q4) {cert.q4=true;cert.l4=l;cert.m4=m;}
++        }
++        if(cert.q3&&cert.q4)break;
++      }
++      if(cert.q3&&!base_bits[pos-1].q3)++out.weighted_extra_pairs3;
++      if(cert.q4&&!base_bits[pos-1].q4)++out.weighted_extra_pairs4;
++      if(cert.q3||cert.q4)weighted.push_back(cert);
++    }
++  out.wpair3=greedy(weighted,palette.size(),3);
++  out.wpair4=greedy(weighted,palette.size(),4);
++  out.wmax3=maximum_matching(weighted,palette.size(),3);
++  out.wmax4=maximum_matching(weighted,palette.size(),4);
++  ck(out.wmax3>=out.max3 && out.wmax4>=out.max4,"weighted dominance");
++  out.weighted_ns=ns(wstart,Clock::now());
++  const bool old3=!(r.mask&2)||out.max3>=4,old4=!(r.mask&4)||out.max4>=3;
++  const bool new3=!(r.mask&2)||out.wmax3>=4,new4=!(r.mask&4)||out.wmax4>=3;
++  if(r.segment>0 && !(old3&&old4) && new3&&new4) {
++    std::cout<<"CERTBOX "<<r.ordinal<<' '<<unsigned(r.mask);
++    for(int k=0;k<3;++k)std::cout<<' '<<na.box.low[k];
++    for(int k=0;k<3;++k)std::cout<<' '<<na.box.high[k];
++    for(int k=0;k<3;++k)std::cout<<' '<<nb.box.low[k];
++    for(int k=0;k<3;++k)std::cout<<' '<<nb.box.high[k];
++    std::cout<<'\n';
++    for(int lane:{3,4})if(r.mask&(lane==3?2:4)) {
++      std::vector<PairBits> chosen;
++      const auto size=maximum_matching(weighted,palette.size(),lane,&chosen);
++      const unsigned need=lane==3?4U:3U;
++      ck(size>=need && chosen.size()>=need,"witness matching");
++      for(unsigned k=0;k<need;++k) {
++        const auto& p=chosen[k];
++        const auto gi=palette[p.i].site,hi=palette[p.j].site;
++        const auto gp=points[gi],hp=points[hi];
++        std::cout<<"CERTPAIR "<<r.ordinal<<' '<<lane<<' '
++          <<gi<<' '<<gp.x<<' '<<gp.y<<' '<<gp.z<<' '
++          <<hi<<' '<<hp.x<<' '<<hp.y<<' '<<hp.z<<' '
++          <<(lane==3?p.l3:p.l4)<<' '<<(lane==3?p.m3:p.m4)<<'\n';
++      }
++    }
++    std::cout<<"CERTEND "<<r.ordinal<<'\n';
++  }
+   auto sstart=Clock::now();
+   for(auto c:palette) {
+     const auto p=points[c.site];
+@@ -381,5 +476,12 @@
+       <<singleclose3<<' '<<singleclose4<<' '
+       <<x.select_ns<<' '<<x.pair_ns<<' '<<x.singleton_ns<<' '
+       <<x.max3<<' '<<x.max4<<'\n';
++    const bool wclose3=!(r.mask&2)||x.wmax3>=4,wclose4=!(r.mask&4)||x.wmax4>=3;
++    std::cout<<"WROW "<<r.ordinal<<' '<<r.segment<<' '<<r.forms<<' '
++      <<close3<<' '<<close4<<' '<<wclose3<<' '<<wclose4<<' '
++      <<x.max3<<' '<<x.max4<<' '<<x.wmax3<<' '<<x.wmax4<<' '
++      <<x.weighted_attempts<<' '<<x.weighted_rep_positive<<' '
++      <<x.weighted_corners<<' '<<x.weighted_extra_pairs3<<' '
++      <<x.weighted_extra_pairs4<<' '<<x.weighted_ns<<'\n';
+   }
+ } catch(const std::exception& e) {std::cerr<<"probe: "<<e.what()<<'\n';return 1;}
