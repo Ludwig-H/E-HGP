@@ -164,6 +164,13 @@ certificats typés et les présentations q3 aux frontières, puis ablater
 sur les **mêmes** trames LiDAR les profondeurs de consultation, temps
 q3/q4, travail d'atlas et sortie FULL. Cette économie de localisation ne
 remplace pas la réduction des milliards de tests et copies de l'atlas.
+Un essai natif temporaire sur la trame entière 08/000000 à 1 mm
+(`39 885` sites, K5/s8/W4, saturation et feuille actives, **sans tour**)
+donne trois sorties code 0 dont tous les champs hors temps/RSS sont
+identiques entre l'ancien localisateur et la descente rationnelle :
+catalogue de 1 306 696 boules et 168 343 794 consultations q3 inclus.
+Le batch LiDAR concurrent du constructeur biaise les chronos de cet
+essai non versionné ; aucun gain de temps ni preuve FULL n'en découle.
 
 ### Rejeter tôt dans un fragment exact partagé
 

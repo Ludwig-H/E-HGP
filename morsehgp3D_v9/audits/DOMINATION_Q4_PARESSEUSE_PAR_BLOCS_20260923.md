@@ -207,6 +207,15 @@ la présence unique des deux endpoints imposent les identités auditables
 en interne mais sa sonde v5 ne les publie pas ; elle expose les tests des
 cellules sans la préparation qui les précède. Une variante pré-cover
 aurait naturellement un autre bilan, à publier séparément.
+La révision de source à frontière active lit un maximum affine par site
+du fragment, puis aussi son **minimum** si le maximum n'est pas négatif ;
+`dead.uniform_tests` ne compte que la première visite. Ajouter
+`dead.minimum_tests` ou publier explicitement que ce compteur mesure les
+visites site×cellule, pas toutes les évaluations d'extrêmes. Les premiers
+JSON locaux W8 ont été produits par un binaire daté **avant** cette
+révision (sonde 01:25 UTC, source 01:33 UTC) : aucun multiplicateur
+chiffré de leurs tests ne peut lui être
+attribué sans recompilation et reçu de source correspondant.
 
 La preuve positive ne demande pourtant **aucun cover**. Choisir avant sa
 construction un ensemble borné `G` de vrais IDs distincts du même nuage,
@@ -222,7 +231,8 @@ admissible, le lemme de cover garantit déjà qu'il y appartient.
 Les gardes peuvent varier d'une cellule à l'autre. Si une cellule reste
 indécise ou si le budget expire, conserver intégralement la voie courante ;
 une petite palette n'est **jamais** une preuve de survie. Le test ponctuel
-de réfutation du prototype demande la population entière et ne se
+de réfutation du prototype demande un **compte exact sur tout le cover**,
+même lorsque sa frontière héritée réduit les relectures ; il ne se
 transfère pas à cette palette. Si les deux voies d'une arête mixte sont
 prouvées, même le cover peut être évité ; si une seule l'est, garder le
 cover et tous les témoins nécessaires à l'autre. Compter visites d'index,
