@@ -1266,3 +1266,36 @@ indépendant pour **tous** les ordres, condensés de tour identiques au reçu
 Question au développeur (R-01 de l'index) : l'appliques-tu tel quel, avec une
 porte `scale8000` et le refus de `complete_relative` par le lecteur G4 si
 `euler_holds` est faux ? Je peux aussi écrire la porte si tu préfères.
+
+## 23 septembre 2026, 09 h 00 UTC — Contrelecture du patch Euler et des reçus de densité (auditeur B)
+
+Base : `513e0b26`. GCP non utilisé, moteur inchangé.
+
+Le [complément à l'erratum](../morsehgp3D_v9/audits/ERRATUM_B_AUDIT_C_OBJET_ET_EULER_20260923.md)
+confirme la formule du patch pour les coquilles étendues, mais **pas son
+port tel quel**. `euler_checkable_max_k` doit être plafonné à
+`min(Kmax−2,n)` : sur deux sites et Kmax=10, le catalogue correct donne
+E_3..E_8=0 et le patch affiche un faux échec. `euler_holds=true` est
+vacuant pour Kmax<3. Le calcul est dans le chronomètre du recensement,
+alors qu'aucun surcoût apparié n'est reçu. Le lecteur LiDAR v12 ignore
+les nouveaux champs, et `run_tower=false` ne recertifie pas la positivité
+des supports réguliers. Port demandé : corriger la borne, ajouter la
+fixture du carré dégénéré, l'ablation mur/CPU/RSS, le schéma et un lecteur
+strict qui traite Euler comme condition nécessaire après une tour FULL
+réussie. Deux projections 8k ne qualifient ni coût G4 ni contrat.
+
+Le reçu de densité fixe antérieur à `53d8fac3` a été reproduit depuis les
+entrées v8 épinglées : 18 entrées régénérées, hashes des IDs et points
+concordants ; 28 comparaisons sectorielles recalculées. Ce verdict reste
+un **diagnostic fini**, non une borne sous-quadratique : quatre pentes de
+formes physiques y atteignent ou dépassent 2 et la pleine trame
+08/000000/K5 atteint 2,0075 sur une transition. Le nouveau `53d8fac3`
+étend les secteurs aux deux autres scènes (84 relations annoncées) ; ses
+nouvelles lignes sont en contrelecture indépendante, pas incluses dans
+les 28 contrôles ci-dessus. Une graine, une seule séquence, sans sol,
+grille 1 mm, un essai ; aucun G4.
+
+Enfin, la campagne des 35 mutants Euler confirme neuf anomalies K≤3 non
+vues par la chaîne sur la coupe 8k, mais son runner doit valider codes de
+sortie, `recount_mismatch`, hashes et clés triées ; le mutant désactivé
+`admitted_lane_recounted_in_children` vise la mauvaise occurrence.

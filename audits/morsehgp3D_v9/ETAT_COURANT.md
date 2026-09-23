@@ -1,4 +1,8 @@
-# État courant — audit Morse HGP 3D v9
+# Photographie historique — audit d'ouverture Morse HGP 3D v9
+
+État figé au commit `74aa8172` ; ne pas l'utiliser comme verdict courant.
+La [synthèse v9 vivante](../../morsehgp3D_v9/audits/ETAT_COURANT.md)
+fait autorité pour les changements et les reçus ultérieurs.
 
 23 septembre 2026. Rôle : **audit et conseil**, pas développement du moteur.
 Le dossier produit `morsehgp3D_v9/` n'existait pas à l'ouverture ; il a

@@ -74,3 +74,43 @@ Suite recommandée : corriger §1.3, les paragraphes Euler/mutants et le
 tableau de statut dans le rapport C ; comparer les clés des mutants
 survivants, garder l'invariant en porte nécessaire et un oracle de
 complétude indépendant pour les tailles où il est praticable.
+
+## 5. Contrelecture du correctif Euler prêt à porter (`513e0b26`)
+
+La formule du [patch proposé](c_euler_20260923/euler_chain_probe.patch) est
+correcte pour les coquilles étendues : `ShellTable::contains_center()`
+marque les sous-coquilles pertinentes. Sur le carré du §1, deux diagonales,
+quatre triples et le carré entier donnent le polynôme local
+`2(t−1)+4(t−1)^2+(t−1)^3 = 1−3t+t²+t³`, donc les contributions
+`(e_1,e_2,e_3,e_4)=(1,−3,1,1)`. Cette fixture manque encore à la porte
+d'intégration du patch.
+
+Le patch n'est **pas prêt tel quel** pour le lecteur de contrat :
+
+- `euler_checkable_max_k=kmax−2` doit être plafonné par le nombre de sites
+  (`min(kmax−2,n)`). La chaîne autorise Kmax>n ; avec deux sites et Kmax=10,
+  E_1=E_2=1 mais E_3..E_8=0, et le patch marque à tort le catalogue valide
+  comme échoué. Pour Kmax=1 ou 2, `euler_holds=true` est vacuant : publier
+  « non applicable » ou exiger explicitement `euler_checkable_max_k>0`.
+- Le calcul ajouté est **dans** `census_ms`, `chain_total` et `chain_cpu_s`.
+  Il n'est pas « hors chrono ». Mesurer l'ablation appariée mur/CPU/RSS,
+  même si la géométrie des coquilles étendues est déjà préparée.
+- La branche régulière suppose le support positif minimal. FULL le vérifie,
+  mais `run_tower=false` ne le fait pas. La porte doit exiger une tour FULL
+  complète (ou recertifier la positivité). Sur refus ultérieur, le statut
+  d'échec prime toujours sur les champs Euler déjà calculés.
+- La sonde garde le schéma `mhgp9_tower_probe_v12` ; le lecteur local
+  `bench/run_lidar_scaling.py` ignore `euler_by_k`, `euler_checkable_max_k`
+  et `euler_holds`. Ajouter un schéma/lecteur cohérents, des mutations de
+  champs absents/faux/mal typés et l'exigence de chaque E_K=1 vérifiable.
+  Un `euler_holds` vrai reste une condition nécessaire, jamais un statut
+  de complétude démontrée.
+
+Le reçu proposé ne contient que deux projections K5/K10 de 08/000200 8k.
+Boules et condensés concordent avec l'ancienne sonde, mais les sorties
+brutes, identité du binaire, temps et ablation appariée manquent : aucun
+coût G4 ni identité intégrale des tours ne s'en déduit. Dans la campagne
+mutante, les neuf détections Euler sur K≤3 restent numériquement valides
+sur la coupe testée ; renforcer néanmoins les codes de sortie, le
+recomptage, les hashes et les comparaisons de clés avant d'en faire une
+porte reproductible.

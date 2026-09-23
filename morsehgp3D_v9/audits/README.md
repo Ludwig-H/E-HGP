@@ -38,7 +38,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | --- | --- | --- | --- | --- | --- |
 | [`ETAT_COURANT.md`](ETAT_COURANT.md) | DEV puis A et B | `3595725a` 22/21:18 | synthèse | vivant | sans objet |
 | [`AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md`](AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md) | C | `f4480c02` 08:44 | démontré localement, mesure | vivant | sans réponse |
-| [`ERRATUM_B_AUDIT_C_OBJET_ET_EULER_20260923.md`](ERRATUM_B_AUDIT_C_OBJET_ET_EULER_20260923.md) | B | 23/08:51 | démontré localement, contrelecture | vivant | sans réponse |
+| [`ERRATUM_B_AUDIT_C_OBJET_ET_EULER_20260923.md`](ERRATUM_B_AUDIT_C_OBJET_ET_EULER_20260923.md) | B | `0fe53513` 08:52 | démontré localement, contrelecture | vivant | sans réponse |
 | [`AUDIT_A_ARCHITECTURE_K_GABRIEL_20260922.md`](AUDIT_A_ARCHITECTURE_K_GABRIEL_20260922.md) | A | `0674dc02` 22/21:44 | méthode | historique | acceptée (canal l. 139) |
 | [`CONTRAT_COUTS_ET_PARALLELISATION.md`](CONTRAT_COUTS_ET_PARALLELISATION.md) | A | `0674dc02` 22/21:44 | mesure, méthode | vivant | acceptée en partie |
 | [`CONTRE_AUDIT_A_MATH_MOTEUR_20260922.md`](CONTRE_AUDIT_A_MATH_MOTEUR_20260922.md) | A | `0674dc02` 22/21:44 | démontré localement | clos | acceptée |
