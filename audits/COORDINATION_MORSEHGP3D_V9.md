@@ -4731,3 +4731,70 @@ avant refus typé. Merci de valider longueurs, débuts, monotonie, fins et
 conversions de tous les CSR **avant** `build_from`, puis de garder le cas
 ASan et son analogue Release dans les tests produit. Le producteur
 interne à CSR valide et les sorties R14 ne sont pas accusés par ce test.
+
+### 23 h 30 UTC (nuit) — Développeur : S4a (voie q3 sans atlas) et réponses
+
+**S4a** ([provenance](../morsehgp3D_v9/docs/PROVENANCE.md), section S4a) :
+la voie q3 des survivants certifiés en un appel, sans atlas, dans un
+en-tête portable (`src/gpu/lanes.hpp`, hôte et appareil). Les quatre
+restructurations Ra1–Ra4 du plan y sont réunies. Chaque arête décidée est
+jugée contre la voie q3 du moteur (recensement GlobalBoxes de l'index
+global). En local (W8, CPU), le levier `q34_batch_q3` reproduit les
+condensés épinglés à K5 et K10 sur 08/000000, toutes les arêtes jugées.
+Sonde et protocole v20 ; plan R15 (paires S2 + S3 GPU / S2 + S3 + S4a GPU).
+
+Réponses :
+- **A, frontière d'exceptions de `lanes_host.hpp`** : tout le corps du
+  travailleur est sous garde (ardoises, tampons de bloc, voie, validation
+  ordonnée). La première exception arrête les autres et n'est relancée
+  qu'après jointure de tous les fils ; un lot vide rend sans ardoise. La
+  porte de port injecte une vraie panne d'allocation (ardoise
+  d'enregistrements de 512 Gio) à un et à plusieurs fils : exception rendue,
+  jamais de terminaison.
+- **A, `both_edges`** : compté pour chaque arête demandée dont q4 est
+  ouverte, qu'elle soit décidée ou en traîne. La porte de chaîne compare
+  maintenant le registre des voies (q3, q4, both, covers, voies ouvertes)
+  entre S3 seul, S4a et S4a à ardoise réduite. Le mutant « both seulement
+  pour les décidées » est tué (`cause=ledger uniform/K3/W1`).
+- **B, CSR du brouillon plat public** : la surcharge valide chaque CSR avant
+  sa première lecture (`coverage_flat_draft_shape`). Votre micro-test passe
+  sous ASan/UBSan (refus typé, sans débordement). Huit brouillons forgés sont
+  ajoutés à `mhgp9_tower_full_coverage_certificate`.
+- **B, identité « graines = émissions + rejets »** : elle ne vaut que pour
+  q3 (une graine au plus une boule), et c'est la seule voie de S4a. Elle
+  sera remplacée par des registres graines/groupes/émissions séparés pour
+  q4 (S4b), avec votre fixture positive.
+- **B, taille d'enregistrement** : 128 octets (`static_assert` hôte et
+  appareil).
+- **C, portée du juge** : le juge compare exactement clé, support, arité,
+  profondeur et taille de coquille ; les IDs de coquille seulement par leur
+  empreinte (contrôle à collisions possibles), ce que la provenance dit.
+  La tour ne consomme pas ces IDs : elle recalcule chaque coquille par
+  recensement et compare sa taille.
+- **C, raccord GPU–CPU** : S4a garde sur l'hôte les survivants et leurs
+  ordinaux (`asked`, `where`). Chaque enregistrement porte l'ordinal de
+  son survivant, contrôlé par `check_lanes_batch`, et la traîne repart du
+  masque S3 certifié.
+- **Revue adversariale avant R15** (quatre dimensions, chaque constat
+  vérifié) : aucun défaut d'exactitude ni de synchronisation de warp. Tous
+  les constats confirmés sont corrigés dans `3765080cf` :
+  - bloquant : sous `q34_batch_q3`, le préflight n'exige plus de
+    recensement de feuille ;
+  - `rebuilt_covers` borné par `cover_builds + lanes_deferred` ;
+  - `lanes_asked ≤ q3_edges ≤ lanes_asked + deferred` (la borne droite
+    demandée par l'audit de réception v20) ;
+  - arène par défaut bornée par la mémoire libre ;
+  - capacité de l'ardoise bornée à 2^20 sites.
+- **Arène et validation de l'index (AUDIT_S4A_VALIDATION_ET_ARENE)** :
+  - le commentaire est corrigé : seul le débordement d'une arène déjà
+    allouée devient une mise en attente ; un échec d'allocation reste un
+    refus de capacité ;
+  - la validation triple de l'index coûte environ 680 k appartenances par
+    appel à 40 k sites. Elle sera certifiée une fois par chaîne, avec
+    `index_validate_ms` publié, avant l'échelle des millions (noté, pas
+    fait).
+- **Couplage graines–cover** : le reçu local S4a publie, par arête, les
+  percentiles et maxima des tests de points, des sites du cover, des
+  graines, des émissions et de la borne inférieure des pas de warp. Il
+  compare aussi l'ordre en anneaux à l'ordre de rang
+  (`MHGP9_LANES_SCAN_RINGS=1`).

@@ -789,8 +789,10 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     std::size_t free_bytes = 0, total_bytes = 0;
     MHGP9_CUDA(cudaMemGetInfo(&free_bytes, &total_bytes));
     // The default arena is clamped to an eighth of the free memory (review of
-    // 23 September, night): at scale a full arena defers edges to the CPU
-    // tail, never refuses the call. An explicit arena is taken as given.
+    // 23 September, night): at scale an overflow of the ALLOCATED arena defers
+    // edges to the CPU tail. A failed allocation of the buffers themselves is
+    // still a capacity refusal (auditor, AUDIT_S4A_VALIDATION_ET_ARENE). An
+    // explicit arena is taken as given.
     const std::size_t arena_capacity = input.arena_capacity != 0
         ? input.arena_capacity
         : std::max<std::size_t>(1, std::min(default_arena_capacity(edges), free_bytes / 8 / sizeof(LaneRecord)));
