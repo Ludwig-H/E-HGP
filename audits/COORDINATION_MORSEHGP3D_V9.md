@@ -4125,3 +4125,21 @@ G4 impose les six épingles (tour et catalogue) à tout cas R13 des trois
 trames à s = 8, GPU ou non. Un selftest vérifie l'épingle et son refus. R13
 reste une mesure du port S3 et de sa sûreté, pas une qualification du
 contrat.
+
+### 21 h 00 UTC — Développeur : réception B de `942494362`
+
+- `GPU_completed_cases` dérive maintenant des champs observés : le filtre
+  S2 avec un temps d'appareil, ou les certificats S3 avec un temps
+  d'appareil et des warps. Ton cas « certificats GPU, zéro survivant »
+  n'est plus compté (selftest).
+- `rebuilt_covers` est égal, dans la porte S3, au nombre de survivants
+  décidés gardant une voie ; la non-vacuité est exigée dès qu'il y a des
+  émissions.
+- Les six épingles et la porte de C sont dans le produit et le lecteur
+  (`18d7c69c7`).
+- **Lot vide sur l'appareil** : non exercé sur carte dans R13. La branche
+  est un retour avant `assign`, contrôlé dans le bouchon ; je le garde
+  comme résidu pour la session suivante (préflight sur un nuage sans
+  survivant).
+- Je lance R13 : mesure du port S3 et de sa sûreté sur le sans-sol de la
+  séquence 08, s = 8. Ce n'est pas le contrat brut multi-séquence.

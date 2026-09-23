@@ -889,11 +889,21 @@ def unpaired_batch_cases(cases, outcomes):
             (case['file'], case['k'], case['s']) not in engine]
 
 
-def gpu_completed_cases(cases, outcomes):
-    """Complete LiDAR towers whose q3/q4 filter ran on the device: the only
-    ground for GPU_executed (a device preflight alone is not, auditor B)."""
+def device_ran(case, value):
+    """A q3/q4 batch phase observed on the device (auditor B): the S2 filter
+    with a device time, or S3 certificates with a device time and warps. The
+    levers alone are not enough (an empty call launches no kernel)."""
+    batch = value['q34_batch']
+    return ((case['levers']['q34_gpu_filter'] and batch['device_ms'] > 0) or
+            (case['levers']['q34_gpu_certificates'] and batch['certificate_device_ms'] > 0 and
+             batch['certificate_warps'] > 0))
+
+
+def gpu_completed_cases(cases, outcomes, values):
+    """Complete LiDAR towers with a q3/q4 phase observed on the device: the
+    only ground for GPU_executed (a device preflight alone is not, auditor B)."""
     return [index for index, (case, entry) in enumerate(zip(cases, outcomes))
-            if entry.get('outcome') == 'complete_relative' and uses_device(case['levers'])]
+            if entry.get('outcome') == 'complete_relative' and device_ran(case, values[index])]
 
 
 def compiled_dependencies(build, root, before):
@@ -1149,7 +1159,7 @@ def execute(args):
         result['cross_worker_comparisons'] = compare_cases(cases, outcomes, values)
         # A batch/GPU tower counts as verified on LiDAR only with its twin.
         result['unpaired_batch_cases'] = unpaired_batch_cases(cases, outcomes)
-        result['GPU_completed_cases'] = gpu_completed_cases(cases, outcomes)
+        result['GPU_completed_cases'] = gpu_completed_cases(cases, outcomes, values)
         result['GPU_executed'] = bool(result['GPU_completed_cases'])
         if any(e['outcome'] == 'probe_failed' for e in outcomes):
             result['status'] = 'probe_failed'

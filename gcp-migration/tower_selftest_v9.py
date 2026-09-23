@@ -595,6 +595,19 @@ class Protocol(unittest.TestCase):
         # are judged apart (test_pinned_digests).
         self.enterContext(patch.object(worker, 'PINNED_DIGESTS', {}))
 
+    def test_gpu_execution_is_observed(self):
+        # Auditor B: a GPU-certificate case without survivors launches no
+        # kernel and is no GPU execution, whatever its levers.
+        data = worker.INPUTS['00']
+        levers = dict({name: True for name in worker.LEVER_NAMES}, q34_gpu_filter=False)
+        case = dict(snapshot.default_plan()['cases'][0], levers=levers)
+        value = probe_value(data['n'], data['fnv'], 5, 8, 48, 48, levers=levers)
+        complete = [dict(outcome='complete_relative')]
+        need(worker.gpu_completed_cases([case], complete, {0: value}) == [0], 'device certificates observed')
+        idle = deepcopy(value)
+        idle['q34_batch'].update(certificate_device_ms=0.0, certificate_warps=0, survivors=0)
+        need(worker.gpu_completed_cases([case], complete, {0: idle}) == [], 'no kernel, no GPU execution')
+
     def test_pinned_digests(self):
         data = worker.INPUTS['00']
         gpu_case = snapshot.default_plan()['cases'][0]

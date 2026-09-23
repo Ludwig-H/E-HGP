@@ -321,7 +321,7 @@ def validate_received(output, manifest, worker_pin, expected_cases, generation, 
          'unpaired batch/GPU cases recomputation')
     # GPU_executed: at least one complete LiDAR tower on the device, never
     # the preflight alone (auditor B, mixed plan).
-    gpu_completed = payload.gpu_completed_cases(cases, outcomes)
+    gpu_completed = payload.gpu_completed_cases(cases, outcomes, values)
     need(value.get('GPU_completed_cases') == gpu_completed and value.get('GPU_executed') is bool(gpu_completed),
          'GPU completed cases recomputation')
     need(any(entry['outcome'] != 'skipped_budget' for entry in outcomes), 'no executed case')

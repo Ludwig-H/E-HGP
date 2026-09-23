@@ -212,16 +212,23 @@ int main(int argc, char** argv) {
       // ---- Certificates by batch (CPU reference), W1 and W4.
       for (const std::size_t workers : {std::size_t{1}, std::size_t{4}}) {
         Stream certified;
-        const gen::Q34CertificateFilter cpu = [workers](const gen::Q2CensusIndexPtr& ix, unsigned k, bool core,
-                                                        std::span<const gen::Q34SurvivingEdge> edges) {
-          return gen::run_q34_certificate_batch_cpu(ix, k, core, edges, workers);
+        std::uint64_t open_after = 0;  // decided survivors left with a lane: the covers the workers rebuild
+        const gen::Q34CertificateFilter cpu = [workers, &open_after](const gen::Q2CensusIndexPtr& ix, unsigned k,
+                                                                     bool core,
+                                                                     std::span<const gen::Q34SurvivingEdge> edges) {
+          auto answer = gen::run_q34_certificate_batch_cpu(ix, k, core, edges, workers);
+          open_after = 0;
+          for (std::size_t i = 0; i < edges.size(); ++i) open_after += answer.deferred[i] == 0 && answer.masks[i] != 0;
+          return answer;
         };
         gen::WspdQ34BatchTiming timing;
         const auto r = gen::run_wspd_q34_batched(index, kmax, 8, o, workers, certified.consumer(), 16, cpu_filter,
                                                  &timing, &cpu);
         if (certified.sorted() != reference) return fail("certificates.stream " + where);
         if (!same_work(r.pipeline.work, base.pipeline.work)) return fail("certificates.work " + where);
-        if (timing.certificate_backend != "cpu" || timing.deferred != 0) return fail("certificates.timing " + where);
+        if (timing.certificate_backend != "cpu" || timing.deferred != 0 || timing.rebuilt_covers != open_after ||
+            (base.pipeline.work.q3_emitted + base.pipeline.work.q4_emitted != 0 && open_after == 0))
+          return fail("certificates.timing " + where);
         ++streams;
         candidates += reference.size();
         closed += r.pipeline.work.core_closed_edges;
