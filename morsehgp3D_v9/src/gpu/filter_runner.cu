@@ -567,9 +567,9 @@ CertificateOutput run_certificate_batch(const CertificateInput& input) {
     out.available = true;
     MHGP9_CUDA(cudaFree(nullptr));
     const std::size_t edges = input.edge_count;
+    if (edges == 0) return out;  // no kernel: warps stays 0 (the edge arrays may be null)
     out.masks.assign(input.edge_mask, input.edge_mask + edges);
     out.status.assign(edges, 0);
-    if (edges == 0) return out;
     const u32 capacity = input.capacity == 0 ? default_certificate_capacity : input.capacity;
     // Slab bytes per warp: ranges, three forms, the frontiers of each scanned depth.
     const std::size_t slab_bytes = static_cast<std::size_t>(capacity) *

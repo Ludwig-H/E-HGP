@@ -245,12 +245,16 @@ GPU ; tour D5.
 
 Voie GPU S3 (23 septembre, soir) : certificats de voie morte par lots. Le
 [reçu de ventilation](receipts/q34_survivor_phases_20260923/README.md)
-situe la phase des survivants à 08/000000 :
-- cœur et couverture, avec leurs certificats : 35 % à K5, 28 % à K10 ;
-- atlas, q3 et q4 des arêtes restées vivantes : 65 % et 72 %.
+situe la phase des survivants à 08/000000, en ticks TSC écoulés sur hôte
+chargé (parts indicatives, pas des cycles CPU ;
+[addendum](receipts/q34_survivor_phases_20260923/ADDENDUM_20260923.md)) :
+- cœur et couverture, avec leurs certificats : environ 35 % à K5, 28 % à K10 ;
+- atlas, q3 et q4 des arêtes restées vivantes : environ 65 % et 72 %.
 
-Calculer les formes du cœur à la première consultation rapporterait au plus
-1,3 % ; piste fermée.
+Calculer les formes du cœur à la première consultation rapporterait de
+l'ordre de 1 % (projection, non bornée) ; seule cette variante est
+écartée, et sur CPU. Même en supprimant idéalement tous les survivants,
+R12 garderait 1,18 à 1,51 s à K5 : S3 n'est pas le dernier levier.
 
 Livré (sans GCP) :
 - préchauffage du contexte CUDA et de l'index plat pendant q2 ;
@@ -259,7 +263,10 @@ Livré (sans GCP) :
 - phase de certificats par lots (leviers `q34_batch_certificates`,
   `q34_gpu_certificates`), avec son port portable exact, un warp par arête,
   et la mise en attente sur le CPU d'une arête trop grosse ;
-- condensé canonique du catalogue, hors chronomètre ;
+- juge de l'appel des certificats, arête par arête contre la référence CPU,
+  exécuté par les deux préflights G4 ;
+- condensé canonique (FNV-64) du catalogue, hors chronomètre ; ce n'est
+  pas une égalité littérale du catalogue ;
 - sonde et protocole G4 v18, plan R13 à 18 cas (voir `docs/PROVENANCE.md`).
 
 Local : même tour, même catalogue et même travail des certificats que le

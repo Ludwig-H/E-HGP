@@ -204,7 +204,7 @@ gen::Q34FilterBatch gpu_filter_batch(const GpuIndex& prepared, std::span<const g
 // or cover without its endpoints) is an invariant violation of the port.
 gen::Q34CertificateBatch gpu_certificate_batch(const GpuIndex& prepared, unsigned kmax, bool dead_core,
                                                std::span<const gen::Q34SurvivingEdge> survivors,
-                                               std::uint32_t capacity, double& device_ms) {
+                                               std::uint32_t capacity, double& device_ms, std::uint32_t& warps) {
   std::vector<gpu::u32> a(survivors.size()), b(survivors.size());
   std::vector<gpu::u8> lanes(survivors.size());
   for (std::size_t i = 0; i < survivors.size(); ++i) {
@@ -270,6 +270,7 @@ gen::Q34CertificateBatch gpu_certificate_batch(const GpuIndex& prepared, unsigne
   batch.cover = cover(w.cover);
   batch.dead = dead(w.dead);
   device_ms = out.total_ms;
+  warps = out.warps;
   return batch;
 }
 
@@ -543,6 +544,8 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       fail(ChainStatus::kInvalidInput, "chain_q34_gpu_certificates_require_batch_certificates");
     if (options.q34_certificate_capacity != 0 && (!options.q34_gpu_certificates || options.q34_certificate_capacity < 2))
       fail(ChainStatus::kInvalidInput, "chain_q34_certificate_capacity_requires_gpu_certificates_and_two_sites");
+    if (options.q34_certificate_judge && !options.q34_batch_certificates)
+      fail(ChainStatus::kInvalidInput, "chain_q34_certificate_judge_requires_batch_certificates");
     if (points.size() < 2) fail(ChainStatus::kInvalidInput, "chain_requires_two_sites");
     if (points.size() > static_cast<std::size_t>(std::numeric_limits<std::int32_t>::max()))
       fail(ChainStatus::kInvalidInput, "chain_too_many_sites");
@@ -646,13 +649,16 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
           };
         }
         double certificate_device_ms = 0;
+        std::uint32_t certificate_warps = 0;
+        gen::Q34CertificateJudgeWork judge;
         gen::Q34CertificateFilter certificates;
         if (options.q34_gpu_certificates) {
           const std::uint32_t capacity = options.q34_certificate_capacity;
-          certificates = [&certificate_device_ms, &gpu_preparation, capacity](
+          certificates = [&certificate_device_ms, &certificate_warps, &gpu_preparation, capacity](
                              const gen::Q2CensusIndexPtr& ix, unsigned k, bool core,
                              std::span<const gen::Q34SurvivingEdge> edges) {
-            return gpu_certificate_batch(gpu_preparation.get(*ix), k, core, edges, capacity, certificate_device_ms);
+            return gpu_certificate_batch(gpu_preparation.get(*ix), k, core, edges, capacity, certificate_device_ms,
+                                         certificate_warps);
           };
         } else if (options.q34_batch_certificates) {
           certificates = [W](const gen::Q2CensusIndexPtr& ix, unsigned k, bool core,
@@ -660,6 +666,8 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
             return gen::run_q34_certificate_batch_cpu(ix, k, core, edges, W);
           };
         }
+        if (certificates && options.q34_certificate_judge)
+          certificates = gen::judge_certificate_filter(std::move(certificates), W, &judge);
         gen::WspdQ34BatchTiming timing;
         try {
           r34 = gen::run_wspd_q34_batched(index, kmax, options.separation_s, o, W, consumer, jobs_per_worker,
@@ -680,6 +688,9 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         b.certificate_ms = static_cast<double>(timing.certificate_ns) / 1e6;
         b.certificate_device_ms = certificate_device_ms;
         b.deferred = timing.deferred;
+        b.judged_edges = judge.judged;
+        b.rebuilt_covers = timing.rebuilt_covers;
+        b.certificate_warps = certificate_warps;
       }
       result.q34_expanded_pairs = r34.pipeline.work.expanded_pairs;
       result.q34_cover_builds = r34.pipeline.work.cover_builds;

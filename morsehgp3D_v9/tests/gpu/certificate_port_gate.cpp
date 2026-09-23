@@ -316,6 +316,52 @@ int main(int argc, char** argv) {
           in.capacity = 1;
           cases.emplace_back("capacity one", refused(in));
         }
+        {
+          // A multi-rank leaf (auditor B) in an otherwise valid preorder tree
+          // of three points: only the singleton-leaf rule can refuse it; the
+          // same tree with that leaf split in two is accepted.
+          const std::vector<std::int32_t> tiny{0, 0, 0, 10, 0, 0, 20, 0, 0};
+          const auto box = [](std::int32_t lo, std::int32_t hi) { return gpu::FlatBox{{lo, 0, 0}, {hi, 0, 0}}; };
+          const std::vector<gpu::FlatNode> merged{{box(0, 20), 1, 2, 0, 3}, {box(0, 0), gpu::absent32, gpu::absent32, 0, 1},
+                                                  {box(10, 20), gpu::absent32, gpu::absent32, 1, 3}};
+          const std::vector<gpu::u32> merged_escapes{3, 2, 3};
+          const std::vector<gpu::FlatNode> split{{box(0, 20), 1, 2, 0, 3}, {box(0, 0), gpu::absent32, gpu::absent32, 0, 1},
+                                                 {box(10, 20), 3, 4, 1, 3}, {box(10, 10), gpu::absent32, gpu::absent32, 1, 2},
+                                                 {box(20, 20), gpu::absent32, gpu::absent32, 2, 3}};
+          const std::vector<gpu::u32> split_escapes{5, 2, 5, 4, 5};
+          const std::vector<gpu::u32> ta{0}, tb{1};
+          const std::vector<gpu::u8> tm{2};
+          const auto tiny_input = [&](const std::vector<gpu::FlatNode>& ns, const std::vector<gpu::u32>& es) {
+            gpu::CertificateInput in;
+            in.index.nodes = ns.data();
+            in.index.node_count = ns.size();
+            in.index.rank_points = tiny.data();
+            in.index.rank_count = 3;
+            in.index.kmax = 3;
+            in.escapes = es.data();
+            in.edge_a = ta.data();
+            in.edge_b = tb.data();
+            in.edge_mask = tm.data();
+            in.edge_count = 1;
+            return in;
+          };
+          if (!gpu::validate_certificate_input(tiny_input(split, split_escapes)).empty())
+            return fail("guard.tiny_split_refused " + where);
+          cases.emplace_back("multi-rank leaf", gpu::validate_certificate_input(tiny_input(merged, merged_escapes)) ==
+                                                    "leaf with more than one rank");
+        }
+        {
+          // Lanes outside K (auditor B): q4 at K2, anything at K1.
+          auto in = input(nodes, escapes);
+          auto m2 = em;
+          m2[1] = 4;
+          in.edge_mask = m2.data();
+          in.index.kmax = 2;
+          cases.emplace_back("q4 lane at K2", refused(in));
+          m2[1] = 2;
+          in.index.kmax = 1;
+          cases.emplace_back("q3 lane at K1", refused(in));
+        }
         for (const auto& [label, ok] : cases) {
           if (!ok) return fail(std::string("guard.accepted ") + label + " " + where);
           ++guards;
@@ -401,7 +447,7 @@ int main(int argc, char** argv) {
                       total.dead_core.point_tests > 0 && total.dead.point_tests > 0 &&
                       total.core_cover.merged_ranges > 0 && total.cover.merged_ranges > 0 &&
                       total.dead.q3_proved > 0 && total.dead.q4_proved > 0 && total.dead.q3_open > 0 &&
-                      total.dead.q4_open > 0 && mutants >= 12 && coverless >= 1000 && guards >= 3 * 13;
+                      total.dead.q4_open > 0 && mutants >= 12 && coverless >= 1000 && guards >= 3 * 16;
   if (!floors) {
     std::printf("cause=floor\n");
     return 3;

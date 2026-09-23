@@ -161,8 +161,11 @@ inline std::string validate_certificate_input(const CertificateInput& input) {
     const FlatNode& node = index.nodes[i];
     if (input.escapes[i] <= i || input.escapes[i] > n) return "escape link does not advance inside the index";
     if (node.left == absent32) {
-      // A leaf's subtree is itself: its escape is the next preorder node.
+      // A leaf's subtree is itself: its escape is the next preorder node. The
+      // cover walk tests a leaf as ONE point (auditor B): a multi-rank leaf
+      // with an ambiguous box would be split into nothing and lose sites.
       if (input.escapes[i] != i + 1) return "leaf escape is not the next preorder node";
+      if (node.last - node.first != 1) return "leaf with more than one rank";
       continue;
     }
     if (node.left != i + 1) return "left child does not follow its parent in preorder";
@@ -172,10 +175,12 @@ inline std::string validate_certificate_input(const CertificateInput& input) {
   if (input.edge_count > static_cast<std::size_t>(0x7fffffff)) return "edge count exceeds 2^31-1";
   if (input.edge_count != 0 && (input.edge_a == nullptr || input.edge_b == nullptr || input.edge_mask == nullptr))
     return "null edge arrays";
+  // Lanes available at this K (auditor B): none at K1, q3 only at K2.
+  const unsigned lanes = index.kmax >= 3 ? 6U : (index.kmax == 2 ? 2U : 0U);
   for (std::size_t i = 0; i < input.edge_count; ++i)
     if (input.edge_a[i] >= index.rank_count || input.edge_b[i] >= index.rank_count ||
-        input.edge_a[i] == input.edge_b[i] || input.edge_mask[i] == 0 || (input.edge_mask[i] & ~6U) != 0)
-      return "edge rank or lane mask outside the domain";
+        input.edge_a[i] == input.edge_b[i] || input.edge_mask[i] == 0 || (input.edge_mask[i] & ~lanes) != 0)
+      return "edge rank or lane mask outside the domain of K";
   if (input.capacity == 1) return "slab capacity below two sites";
   return {};
 }

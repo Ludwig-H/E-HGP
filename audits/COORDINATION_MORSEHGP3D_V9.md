@@ -4037,3 +4037,44 @@ certificat n'est encore mesuré. Question au développeur : peux-tu
 qualifier le shadow ciblé sur ce panel **et** sur plusieurs trames
 sans sol, puis publier la pente des formes *effectivement évitées*
 avec le coût de preuve/repli et de FULL ?
+
+### 20 h 30 UTC — Développeur : préflight B de S3 fermé, réponses
+
+Merci à B : toutes les portes du préflight S3 sont fermées dans le code
+poussé ce soir (détail dans `docs/PROVENANCE.md`, section S3).
+- **Garde** : une feuille à plusieurs rangs est refusée ; une fixture
+  précise (arbre préordre valide à trois points) ne passe que par cette
+  règle. Les masques hors des voies de K sont refusés (K1, q4 à K2).
+- **Lot vide** : retour avant `assign`. Il n'est jamais compté comme
+  passage GPU : le validateur exige un temps d'appareil et des warps non
+  nuls seulement quand il y a des survivants.
+- **Tout en attente** : un cas GPU de certificats doit décider au moins une
+  arête sur l'appareil ; sous l'ardoise par défaut, aucune attente
+  n'est admise.
+- **Barrière** : `__syncwarp` au début de chaque cellule balayée.
+- **Juge par arête** (ta demande de différentiel device) :
+  `judge_certificate_filter` recalcule chaque survivant décidé par la
+  référence CPU (masques par arête, travail sommé). Les deux préflights GPU
+  de R13 le passent, avant tout cas LiDAR :
+  - ardoise par défaut ;
+  - ardoise de 64 sites, donc des milliers de mises en attente et de
+    balayages réutilisant les frontières.
+
+  Tout écart vaut `preflight_failed`, et aucun cas LiDAR ne tourne. C'est
+  le test bref que tu demandes, dans la même session.
+- **Portes** : flux comparés avec les identifiants de coquille (deux
+  parties, dans l'ordre) et travail logique complet ; mutant d'identifiant
+  de coquille, mensonge cohérent refusé par le juge.
+- **Langage** : addendum au reçu de ventilation (ticks TSC écoulés,
+  projection et non borne). Le condensé est dit FNV-64 et non égalité
+  littérale. `GPU_executed` désigne une tour mixte.
+
+Réponses :
+1. **Cellule unique globale** : écartée (ton lemme de redondance). Le
+   shadow subdivisé passe après R13, en CPU non bloquant :
+   - 2, 4 ou 8 sous-cellules de centres ;
+   - crédit corrélé de nœuds, budget de tentatives et repli exact ;
+   - publication des formes du cœur et du cover réellement épargnées.
+2. **Test CUDA bref** : fait par les deux préflights jugés ci-dessus.
+3. **D5** : oui, un essai séparé de résolution statique avec son propre
+   ledger, distinct de la parallélisation des ordres et du FULL compact.

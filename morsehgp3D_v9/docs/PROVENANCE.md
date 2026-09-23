@@ -335,7 +335,29 @@ aucun défaut bloquant, un constat réfuté, le reste corrigé) :
 - **Porte de chaîne** : tout le travail des certificats comparé ; passage
   GPU à ardoise de 64 sites, qui doit mettre en attente.
 
+**Préflight B avant session** (portes de domaine et juge) :
+- **Garde** : toute feuille doit avoir exactement un rang (une feuille à
+  plusieurs rangs serait « scindée » en rien par le parcours du cover) ;
+  masque hors des voies de K refusé (rien à K1, q3 seul à K2).
+- **Lot vide** : retour avant toute lecture des tableaux, aucun noyau ; il
+  n'est pas compté comme passage GPU.
+- **Juge** (`judge_certificate_filter`, levier de chaîne
+  `q34_certificate_judge`, sonde `--certificate-judge`) : chaque survivant
+  décidé par l'appel est recalculé par la référence CPU ; masques par arête
+  et travail sommé doivent être égaux.
+- **Nouveaux champs** de `q34_batch` : arêtes jugées, covers reconstruits
+  par les ouvriers (hors registre), warps du noyau.
+- **Portes** :
+  - flux comparés avec les identifiants de coquille (première et seconde
+    partie, dans l'ordre) ;
+  - travail logique complet comparé (q3, q4 local et fenêtre, blocs,
+    cellules, payload ; seules les capacités de tampons réutilisés sont
+    exclues) ;
+  - mensonge cohérent refusé par le juge.
+
 **Protocole G4 de la tour v18** :
+- les deux préflights GPU passent le juge (`--certificate-judge`) : arêtes
+  jugées = survivants − attentes ;
 - préflight de mise en attente : le préflight GPU est rejoué avec une ardoise
   de 64 sites (localement, 3 404 arêtes en attente sur 55 523). Il doit
   donner la même tour, le même catalogue et le même travail des certificats,
@@ -346,10 +368,14 @@ aucun défaut bloquant, un constat réfuté, le reste corrigé) :
 - jumeau de même trame, K, s **et** mêmes leviers de certificat ;
 - le worker passe `--catalogue-digest` à chaque sonde ;
 - la comparaison entre cas du même (trame, K, s) exige le même condensé de
-  catalogue, soit le différentiel clé par clé de C sur chaque paire GPU /
-  jumeau moteur. Elle exige aussi le même travail des certificats et de la
-  couverture quand les leviers `q34_dead_lanes` et `q34_dead_core` sont
-  égaux ;
+  catalogue sur chaque paire GPU / jumeau moteur. C'est un condensé
+  FNV-64 de la vue canonique de C, pas une égalité littérale du catalogue.
+  Elle exige aussi le même travail des certificats et de la couverture
+  quand les leviers `q34_dead_lanes` et `q34_dead_core` sont égaux ;
+- `GPU_executed` signifie qu'au moins une tour LiDAR achevée a eu une phase
+  q3/q4 sur l'appareil (filtre S2, ou certificats S3 avec au moins une
+  arête décidée sur l'appareil). Ce n'est pas une tour calculée entièrement
+  sur GPU ;
 - le plan par défaut R13 (18 cas) :
   - chaque (trame, K) sur le chemin GPU complet puis sur son jumeau moteur ;
   - deux bras d'attribution à 08/000000, K5 et K10 : filtre GPU seul, lots

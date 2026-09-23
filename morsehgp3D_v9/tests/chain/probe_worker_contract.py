@@ -78,8 +78,8 @@ def main(argv):
             failures.append(label)
         return ok
 
-    def run(case, path=data_file):
-        argv_probe = [str(probe), str(path)] + worker.expected_probe_tail(case)
+    def run(case, path=data_file, judge=False):
+        argv_probe = [str(probe), str(path)] + worker.expected_probe_tail(case, judge=judge)
         started = time.monotonic()
         process = subprocess.Popen(argv_probe, stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
         try:
@@ -216,6 +216,17 @@ def main(argv):
         # v18: the batch certificates (CPU) ran, with the engine's certificate
         # work; their mutants, and the cross-case comparison of the catalogue
         # digest and of the certificate work.
+        # v18: the judged certificate call (every decided edge recomputed by
+        # the CPU reference) gives the same object and reports its count.
+        judge_case = dict(base, levers=dict(engine_levers, q34_batch_filter=True, q34_batch_certificates=True))
+        try:
+            judged_value, code, _ = run(judge_case, judge=True)
+            check(worker.validate_probe(judged_value, judge_case, code, inputs=inputs, judge=True) ==
+                  'complete_relative' and worker.logical_result(judged_value) == worker.logical_result(on) and
+                  judged_value['q34_batch']['judged_edges'] == judged_value['q34_batch']['survivors'] > 0,
+                  'judged certificate case')
+        except (ValueError, KeyError, TypeError, UnicodeError, subprocess.TimeoutExpired) as error:
+            check(False, 'judged certificate case refused: ' + type(error).__name__ + ': ' + str(error))
         if 'cert_on' in results:
             cert_case, certified = results['cert_on']
             c = certified['q34_batch']
@@ -237,6 +248,11 @@ def main(argv):
                 ('certificates without the batch path', lambda v: v['options']['levers'].update(
                     q34_batch_filter=False)),
                 ('certificate section field absent', lambda v: v['q34_batch'].pop('deferred')),
+                ('judged edges without the judge', lambda v: v['q34_batch'].update(judged_edges=1)),
+                ('rebuilt covers beyond the covers', lambda v: v['q34_batch'].update(
+                    rebuilt_covers=v['ledger']['cover_builds'] + 1)),
+                ('certificate warps on the CPU', lambda v: v['q34_batch'].update(certificate_warps=1)),
+                ('judge announced but not run', lambda v: v['options'].update(certificate_judge=True)),
             ]
             certificate_killed = 0
             for label, mutate in certificate_mutants:

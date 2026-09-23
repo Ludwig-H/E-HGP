@@ -1134,6 +1134,40 @@ Q34CertificateBatch run_q34_certificate_batch_cpu(const Q2CensusIndexPtr& index,
   return out;
 }
 
+Q34CertificateFilter judge_certificate_filter(Q34CertificateFilter inner, std::size_t workers,
+                                              Q34CertificateJudgeWork* work) {
+  if (!inner || workers == 0)
+    throw std::invalid_argument("mhgp9 gen certificate judge requires a call and a positive worker count");
+  return [inner = std::move(inner), workers, work](const Q2CensusIndexPtr& index, unsigned kmax, bool dead_core,
+                                                   std::span<const Q34SurvivingEdge> survivors) {
+    auto answer = inner(index, kmax, dead_core, survivors);
+    if (answer.masks.size() != survivors.size() || answer.deferred.size() != survivors.size())
+      throw std::logic_error("mhgp9 gen certificate judge: the call returned a count different from its survivors");
+    std::vector<Q34SurvivingEdge> decided;
+    std::vector<std::size_t> where;
+    for (std::size_t i = 0; i < survivors.size(); ++i)
+      if (answer.deferred[i] == 0) {
+        decided.push_back(survivors[i]);
+        where.push_back(i);
+      }
+    const auto reference = run_q34_certificate_batch_cpu(index, kmax, dead_core, decided, workers);
+    for (std::size_t j = 0; j < where.size(); ++j)
+      if (answer.masks[where[j]] != reference.masks[j])
+        throw std::logic_error("mhgp9 gen certificate judge: a decided mask differs from the CPU reference");
+    if (answer.core_builds != reference.core_builds || answer.core_sites != reference.core_sites ||
+        answer.core_closed_edges != reference.core_closed_edges || answer.core_cover != reference.core_cover ||
+        answer.dead_core != reference.dead_core || answer.cover_builds != reference.cover_builds ||
+        answer.cover_sites != reference.cover_sites || answer.max_cover_sites != reference.max_cover_sites ||
+        answer.cover != reference.cover || answer.dead != reference.dead)
+      throw std::logic_error("mhgp9 gen certificate judge: the decided work differs from the CPU reference");
+    if (work != nullptr) {
+      counter_add(work->judged, static_cast<u64>(decided.size()));
+      counter_add(work->deferred, static_cast<u64>(survivors.size() - decided.size()));
+    }
+    return answer;
+  };
+}
+
 Q34FilterBatch run_q34_filter_batch_cpu(const Q2CensusIndex& index, unsigned kmax,
                                         std::span<const WspdRectangle> rectangles, std::size_t workers) {
   if (workers == 0) throw std::invalid_argument("mhgp9 gen q34 batch filter requires a positive worker count");
@@ -1397,6 +1431,7 @@ WspdQ34ParallelResult run_wspd_q34_batched(Q2CensusIndexPtr index, unsigned kmax
 
   // ---- Phase 3: the workers run the rest of every surviving edge.
   phase = wall_ns();
+  std::atomic<u64> rebuilt{0};
   {
     std::atomic<std::size_t> next{0};
     constexpr std::size_t grain = 64;
@@ -1405,6 +1440,7 @@ WspdQ34ParallelResult run_wspd_q34_batched(Q2CensusIndexPtr index, unsigned kmax
       auto& state = states[slot];
       const auto wall_start = wall_ns(), cpu_start = thread_cpu_ns();
       const Q34SeedConsumer output = [&](const Q34SeedCandidate& candidate) { callbacks[slot](slot, candidate); };
+      u64 rebuilt_here = 0;
       {
         Engine engine(index, kmax, options, output);
         for (;;) {
@@ -1414,16 +1450,21 @@ WspdQ34ParallelResult run_wspd_q34_batched(Q2CensusIndexPtr index, unsigned kmax
           for (std::size_t j = begin; j < std::min(survivors.size(), begin + grain); ++j) {
             const auto a = order[survivors[j].a_rank], b = order[survivors[j].b_rank];
             if (!certify || certified.deferred[j] != 0) engine.surviving_edge(a, b, survivors[j].mask);
-            else if (certified.masks[j] != 0) engine.certified_edge(a, b, certified.masks[j]);
+            else if (certified.masks[j] != 0) {
+              engine.certified_edge(a, b, certified.masks[j]);
+              ++rebuilt_here;
+            }
           }
         }
         state.work = engine.work;
       }
+      rebuilt.fetch_add(rebuilt_here, std::memory_order_relaxed);
       counter_add(state.timing.wall_ns, wall_ns() - wall_start);
       counter_add(state.timing.cpu_ns, thread_cpu_ns() - cpu_start);
     });
   }
   local_timing.edges_ns = wall_ns() - phase;
+  local_timing.rebuilt_covers = rebuilt.load();
   merge(result.pipeline.work, filter_work);
   result.workers.reserve(states.size());
   result.worker_tasks.assign(states.size(), 0);

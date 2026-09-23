@@ -353,10 +353,22 @@ using Q34CertificateFilter = std::function<Q34CertificateBatch(
                                                                 std::span<const Q34SurvivingEdge> survivors,
                                                                 std::size_t workers);
 
+// Judge of a certificate call (auditor B, before any device qualification):
+// every survivor the call DECIDED is recomputed by the CPU reference; each
+// decided mask and the summed work of the decided survivors must be equal,
+// else std::logic_error (no answer is used). Deferred survivors are left to
+// the workers' engine edges. `work` (may be null) receives the counts.
+struct Q34CertificateJudgeWork {
+  u64 judged{}, deferred{};
+};
+[[nodiscard]] Q34CertificateFilter judge_certificate_filter(Q34CertificateFilter inner, std::size_t workers,
+                                                            Q34CertificateJudgeWork* work);
+
 // Measured phases of the batch path (nanoseconds, never compared).
 struct WspdQ34BatchTiming {
   u64 front_ns{}, filter_ns{}, certificate_ns{}, edges_ns{};
   u64 rectangles{}, survivors{}, deferred{};
+  u64 rebuilt_covers{};  // covers rebuilt by the workers for certified edges (uncounted in the ledger)
   std::string backend, certificate_backend;
 };
 

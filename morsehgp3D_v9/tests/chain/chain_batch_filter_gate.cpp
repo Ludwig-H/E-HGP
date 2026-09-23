@@ -41,9 +41,10 @@
 
 namespace {
 
-// arity, exact key, support IDs, depth, shell size
+// arity, exact key, support IDs, depth, shell IDs (first then second part, in
+// stream order: their split and order are part of the candidate).
 using Candidate = std::tuple<unsigned, std::array<mhgp9::gen::i128, 5>, std::array<std::size_t, 4>, std::size_t,
-                             std::size_t>;
+                             std::vector<std::size_t>, std::vector<std::size_t>>;
 
 int fail(const std::string& cause) {
   std::printf("cause=%s\n", cause.c_str());
@@ -79,7 +80,8 @@ struct Stream {
     return [this](std::size_t, const mhgp9::gen::Q34SeedCandidate& c) {
       const std::lock_guard<std::mutex> lock(mutex);
       candidates.emplace_back(c.arity, c.ball.coefficients(), c.support_ids, c.depth,
-                              c.shell_first.size() + c.shell_second.size());
+                              std::vector<std::size_t>(c.shell_first.begin(), c.shell_first.end()),
+                              std::vector<std::size_t>(c.shell_second.begin(), c.shell_second.end()));
     };
   }
   std::vector<Candidate> sorted() {

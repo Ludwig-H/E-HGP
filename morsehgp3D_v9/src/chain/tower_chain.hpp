@@ -57,6 +57,10 @@ struct ChainOptions {
   // une petite valeur force la mise en attente (porte et preflight G4).
   bool catalogue_digest = false;
   std::uint32_t q34_certificate_capacity = 0;
+  // v18 : juge de l'appel des certificats (exige q34_batch_certificates) :
+  // chaque survivant decide est recalcule par la reference CPU, masque par
+  // masque et travail somme ; un ecart refuse la chaine (preflights G4).
+  bool q34_certificate_judge = false;
   // Atlas q4 saturant (option v8 de la reprise u18, desactivee par defaut en
   // v8) : arret d'une cellule des que son compte certifie atteint K-1,
   // certificat terminal sans fragment. Contrat v9 : ACTIVE par defaut dans la
@@ -190,6 +194,9 @@ struct Q34BatchTimes {
   std::string certificate_backend;
   double certificate_ms = 0, certificate_device_ms = 0;
   std::uint64_t deferred = 0;  // survivants rendus au chemin moteur complet
+  std::uint64_t judged_edges = 0;    // survivants decides rejuges par la reference CPU (juge)
+  std::uint64_t rebuilt_covers = 0;  // covers reconstruits par les ouvriers (hors registre)
+  std::uint32_t certificate_warps = 0;  // warps du noyau (0 sur CPU ou sans survivant)
 };
 
 struct OrderSummary {

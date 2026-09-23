@@ -69,7 +69,7 @@ def fnv_u32le(raw):
 
 
 def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt='', levers=None, schema=None,
-                capacity=0):
+                capacity=0, judge=False):
     effective = min(k, n)
     complete = status == 'complete_relative'
     orders = [dict(K=q, nodes=2 * n * q, births=n * q, merges=n * q - 1, parents=2 * n * q - 1, contributions=n * q)
@@ -130,7 +130,8 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
     # v17: the batch path's phases (zero on the engine path); survivors are
     # the expanded pairs minus the rejected ones.
     batch = dict(used=False, backend='', front_ms=0.0, filter_ms=0.0, edges_ms=0.0, device_ms=0.0, rectangles=0,
-                 survivors=0, certificate_backend='', certificate_ms=0.0, certificate_device_ms=0.0, deferred=0)
+                 survivors=0, certificate_backend='', certificate_ms=0.0, certificate_device_ms=0.0, deferred=0,
+                 judged_edges=0, rebuilt_covers=0, certificate_warps=0)
     device = 'NVIDIA RTX PRO 6000 Blackwell Server Edition'
     if complete and levers.get('q34_batch_filter'):
         gpu = levers.get('q34_gpu_filter')
@@ -140,14 +141,16 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                      survivors=ledger['expanded_pairs'] - ledger['witness_rejected_pairs'])
         if levers.get('q34_batch_certificates'):
             gpu_certificates = levers.get('q34_gpu_certificates')
+            deferred = 1 if gpu_certificates and capacity else 0
             batch.update(certificate_backend=device if gpu_certificates else 'cpu', certificate_ms=0.03,
-                         certificate_device_ms=0.02 if gpu_certificates else 0.0,
-                         deferred=1 if gpu_certificates and capacity else 0)
+                         certificate_device_ms=0.02 if gpu_certificates else 0.0, deferred=deferred,
+                         judged_edges=batch['survivors'] - deferred if judge else 0, rebuilt_covers=1,
+                         certificate_warps=4 if gpu_certificates else 0)
     return dict(schema='mhgp9_tower_probe_v18', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
-                             run_tower=True, certificate_capacity=capacity,
+                             run_tower=True, certificate_capacity=capacity, certificate_judge=judge,
                              levers=levers),
                 times_ms=dict({key: 0.125 for key in TIMES}, chain_total=1.5), chain_cpu_s=0.25,
                 generator=dict(q2_front_rectangles=3, q2_candidate_pairs=2, q2_accepted_pairs=1,
@@ -191,6 +194,8 @@ def main():
         else:
             options[argument] = None
     capacity = int(options.pop('certificate-capacity', 0))
+    judge = '--certificate-judge' in options
+    options.pop('--certificate-judge', None)
     if (set(options) != {'s', 'static', 'grid', '--catalogue-digest'} or options['grid'] != '1mm' or
             sorted(levers) != sorted(config['schema']['levers'])):
         print('argument refusal: selftest', file=sys.stderr)
@@ -199,7 +204,7 @@ def main():
     if pathlib.Path(path).name == 'preflight.u32le':
         salt = 'batch' if config.get('preflight_batch_differs') and levers.get('q34_batch_filter') else ''
         value = probe_value(len(raw) // 12, fnv_u32le(raw), k, int(options['s']), workers, int(options['static']),
-                            'complete_relative', salt, levers, config['schema'], capacity)
+                            'complete_relative', salt, levers, config['schema'], capacity, judge)
         if config.get('deferral_differs') and capacity:
             value['catalogue_digest'] = '0' * 15 + '1'
         if config.get('fail_preflight'):
@@ -839,10 +844,25 @@ class Protocol(unittest.TestCase):
                               ('gpu certificates deferred below the slab', lambda v: v['q34_batch'].update(deferred=1)),
                               ('gpu certificate capacity unannounced', lambda v: v['options'].update(
                                   certificate_capacity=64)),
-                              ('gpu catalogue digest absent', lambda v: v.update(catalogue_digest=None))):
+                              ('gpu catalogue digest absent', lambda v: v.update(catalogue_digest=None)),
+                              ('gpu judged edges without the judge', lambda v: v['q34_batch'].update(judged_edges=1)),
+                              ('gpu certificate warps zero', lambda v: v['q34_batch'].update(certificate_warps=0)),
+                              ('gpu rebuilt covers beyond the covers', lambda v: v['q34_batch'].update(
+                                  rebuilt_covers=v['ledger']['cover_builds'] + 1)),
+                              ('gpu judge announced but not run', lambda v: v['options'].update(certificate_judge=True))):
             bad = deepcopy(gpu_good)
             mutate(bad)
             need(refused(worker.validate_probe, bad, gpu_case, 0), 'batch/GPU probe mutation ' + label)
+        # v18: a judged probe must report every decided edge as judged.
+        judged = probe_value(data['n'], data['fnv'], 5, 8, 48, 48, judge=True)
+        need(worker.validate_probe(worker.strict_json(json.dumps(judged)), gpu_case, 0, judge=True) ==
+             'complete_relative', 'valid judged GPU probe')
+        for label, mutate in (('judge short', lambda v: v['q34_batch'].update(
+                                  judged_edges=v['q34_batch']['judged_edges'] - 1)),
+                              ('judge flag dropped', lambda v: v['options'].update(certificate_judge=False))):
+            bad = deepcopy(judged)
+            mutate(bad)
+            need(refused(worker.validate_probe, bad, gpu_case, 0, None, 0, True), 'judged probe mutation ' + label)
         need(worker.validate_probe(worker.strict_json(json.dumps(good)), plan_case, 0) == 'complete_relative', 'valid')
         worker.validate_external_wall(good, 0.0015)
         need(refused(worker.validate_external_wall, good, 0.0015 - worker.EXTERNAL_WALL_TOLERANCE_SECONDS - 0.001),

@@ -10,6 +10,9 @@
 //     voies et des emissions egal au chemin par lots sans certificats ;
 //   - mise en attente : un appel qui rend un survivant sur trois au CPU
 //     (chemin moteur complet) donne les memes candidats et le meme travail ;
+//   - juge (judge_certificate_filter) : sur la reference CPU tout est juge ;
+//     sur l'appel qui met en attente, juges + attentes = survivants ; le
+//     mensonge coherent sur la voie q3 est refuse par le juge ;
 //   - mutants causaux tues : masque elargi, drapeau d'attente invalide,
 //     compteur menteur, attente qui garde ses compteurs (refuses par les
 //     identites du chemin par lots) ; voie q3 retiree de chaque survivant avec
@@ -30,6 +33,8 @@
 #include <charconv>
 #include <cstdint>
 #include <cstdio>
+#include <cstring>
+#include <type_traits>
 #include <mutex>
 #include <string>
 #include <string_view>
@@ -43,8 +48,10 @@
 namespace {
 
 using namespace mhgp9;
+// arity, exact key, support IDs, depth, shell IDs (first then second part, in
+// stream order: their split and order are part of the candidate).
 using Candidate = std::tuple<unsigned, std::array<gen::i128, 5>, std::array<std::size_t, 4>, std::size_t,
-                             std::size_t>;
+                             std::vector<std::size_t>, std::vector<std::size_t>>;
 
 int fail(const std::string& cause) {
   std::printf("cause=%s\n", cause.c_str());
@@ -79,7 +86,8 @@ struct Stream {
     return [this](std::size_t, const gen::Q34SeedCandidate& c) {
       const std::lock_guard<std::mutex> lock(mutex);
       candidates.emplace_back(c.arity, c.ball.coefficients(), c.support_ids, c.depth,
-                              c.shell_first.size() + c.shell_second.size());
+                              std::vector<std::size_t>(c.shell_first.begin(), c.shell_first.end()),
+                              std::vector<std::size_t>(c.shell_second.begin(), c.shell_second.end()));
     };
   }
   std::vector<Candidate> sorted() {
@@ -88,16 +96,37 @@ struct Stream {
   }
 };
 
-// Logical work that the certificate call must leave unchanged (capacity
-// peaks excluded: they depend on which object held which buffer).
-bool same_work(const gen::WspdQ34Work& a, const gen::WspdQ34Work& b) {
+// Logical work that the certificate call must leave unchanged: every field,
+// q3/q4 sections included, except the capacities of buffers reused across
+// edges (shell, cover, edge buffer), which depend on which worker held which
+// edge (header of WspdQ34Work).
+// Plain u64 aggregates without operator== (q4 local/window work): compared
+// byte for byte, which requires no padding.
+template <class T>
+bool same_bytes(const T& a, const T& b) {
+  static_assert(std::has_unique_object_representations_v<T>, "padding would make a byte comparison meaningless");
+  return std::memcmp(&a, &b, sizeof(T)) == 0;
+}
+
+gen::WspdQ34Work logical(gen::WspdQ34Work w) {
+  w.peak_cover_bytes = 0;
+  w.peak_edge_buffer_bytes = 0;
+  w.q3.peak_shell_bytes = 0;
+  return w;
+}
+
+bool same_work(const gen::WspdQ34Work& x, const gen::WspdQ34Work& y) {
+  const auto a = logical(x), b = logical(y);
   return a.expanded_pairs == b.expanded_pairs && a.q3_edges == b.q3_edges && a.q4_edges == b.q4_edges &&
          a.both_edges == b.both_edges && a.cover_builds == b.cover_builds && a.cover_sites == b.cover_sites &&
          a.max_cover_sites == b.max_cover_sites && a.cover == b.cover && a.core_builds == b.core_builds &&
          a.core_sites == b.core_sites && a.core_closed_edges == b.core_closed_edges &&
          a.core_cover == b.core_cover && a.dead == b.dead && a.dead_core == b.dead_core &&
          a.q3_emitted == b.q3_emitted && a.q4_emitted == b.q4_emitted && a.witness == b.witness &&
-         a.q3_atlas == b.q3_atlas && a.input_rectangles == b.input_rectangles;
+         a.q3_atlas == b.q3_atlas && a.input_rectangles == b.input_rectangles && a.q3 == b.q3 &&
+         same_bytes(a.local, b.local) && same_bytes(a.window, b.window) && a.q3_blocks == b.q3_blocks &&
+         a.q4_seed_cells == b.q4_seed_cells && a.payload_shell_ids == b.payload_shell_ids &&
+         a.witness_cache == b.witness_cache;
 }
 
 // Every certificate, cover and lane counter of the chain ledger.
@@ -284,6 +313,35 @@ int main(int argc, char** argv) {
         if (!refused && stripped.sorted() == reference && base.pipeline.work.q3_emitted != 0)
           return fail("mutant.strip_q3_survived " + where);
         ++mutants;
+        // The judge: everything judged on the reference, deferred edges left
+        // to the engine path, and the consistent lie refused by it.
+        gen::Q34CertificateJudgeWork judged_work, deferred_work;
+        const auto judged = gen::judge_certificate_filter(reference_call, 2, &judged_work);
+        const auto judged_deferral = gen::judge_certificate_filter(deferring, 2, &deferred_work);
+        Stream judged_stream, deferred_stream;
+        gen::WspdQ34BatchTiming judged_timing;
+        static_cast<void>(gen::run_wspd_q34_batched(index, kmax, 8, o, 2, judged_stream.consumer(), 16, cpu_filter,
+                                                    &judged_timing, &judged));
+        static_cast<void>(gen::run_wspd_q34_batched(index, kmax, 8, o, 2, deferred_stream.consumer(), 16, cpu_filter,
+                                                    nullptr, &judged_deferral));
+        if (judged_stream.sorted() != reference || deferred_stream.sorted() != reference ||
+            judged_work.judged != judged_timing.survivors || judged_work.deferred != 0 ||
+            deferred_work.judged + deferred_work.deferred != judged_timing.survivors ||
+            (judged_timing.survivors >= 3 && deferred_work.deferred == 0))
+          return fail("judge.counts " + where);
+        const auto judged_lie = gen::judge_certificate_filter(strip, 2, nullptr);
+        if (!refused_by(judged_lie, "decided mask differs") && base.pipeline.work.q3_emitted != 0)
+          return fail("mutant.judge_blind_to_lie " + where);
+        ++mutants;
+        // Comparator: one shell ID replaced at constant size is seen.
+        auto moved = reference;
+        for (auto& candidate : moved)
+          if (!std::get<4>(candidate).empty()) {
+            ++std::get<4>(candidate)[0];
+            break;
+          }
+        if (moved == reference && base.pipeline.work.q3_emitted != 0) return fail("mutant.shell_id_blind " + where);
+        ++mutants;
       }
       // ---- Whole chain: same FULL tower, catalogue and ledger as the engine.
       for (const std::size_t workers : {std::size_t{1}, std::size_t{4}}) {
@@ -297,6 +355,7 @@ int main(int argc, char** argv) {
         batched.keep_catalogue = false;
         batched.q34_batch_filter = true;
         batched.q34_batch_certificates = true;
+        batched.q34_certificate_judge = workers == 1;
         const auto a = run_tower_chain(fixture.points, engine_options);
         const auto b = run_tower_chain(fixture.points, batched);
         if (a.status != ChainStatus::kComplete || b.status != ChainStatus::kComplete)
@@ -325,7 +384,9 @@ int main(int argc, char** argv) {
           mutants += 2;
         }
         if (!same_certificate_ledger(la, lb)) return fail("chain.ledger " + where);
-        if (!b.q34_batch.used || b.q34_batch.certificate_backend != "cpu" || b.q34_batch.deferred != 0)
+        if (!b.q34_batch.used || b.q34_batch.certificate_backend != "cpu" || b.q34_batch.deferred != 0 ||
+            b.q34_batch.judged_edges != (workers == 1 ? b.q34_batch.survivors : 0) ||
+            b.q34_batch.rebuilt_covers > lb.cover_builds || b.q34_batch.certificate_warps != 0)
           return fail("chain.batch_fields " + where);
         ++chains;
         // The GPU levers: an explicit refusal without a device; with one, the
@@ -360,17 +421,22 @@ int main(int argc, char** argv) {
         no_dead.q34_dead_core = false;
         auto cpu_capacity = batched;
         cpu_capacity.q34_certificate_capacity = 64;
+        auto lone_judge = engine_options;
+        lone_judge.q34_batch_filter = true;
+        lone_judge.q34_certificate_judge = true;
         const auto l = run_tower_chain(fixture.points, lone);
         const auto m = run_tower_chain(fixture.points, no_batch);
         const auto d = run_tower_chain(fixture.points, no_dead);
         const auto c = run_tower_chain(fixture.points, cpu_capacity);
+        const auto j = run_tower_chain(fixture.points, lone_judge);
         if (l.status != ChainStatus::kInvalidInput || l.reason != "chain_q34_gpu_certificates_require_batch_certificates" ||
             m.status != ChainStatus::kInvalidInput ||
             m.reason != "chain_q34_batch_certificates_require_batch_filter_and_dead_lanes" ||
             d.status != ChainStatus::kInvalidInput ||
             d.reason != "chain_q34_batch_certificates_require_batch_filter_and_dead_lanes" ||
             c.status != ChainStatus::kInvalidInput ||
-            c.reason != "chain_q34_certificate_capacity_requires_gpu_certificates_and_two_sites")
+            c.reason != "chain_q34_certificate_capacity_requires_gpu_certificates_and_two_sites" ||
+            j.status != ChainStatus::kInvalidInput || j.reason != "chain_q34_certificate_judge_requires_batch_certificates")
           return fail("chain.lever_refusals " + where);
       }
     }
@@ -378,7 +444,7 @@ int main(int argc, char** argv) {
   std::printf("chain_batch_certificates_gate n=%zu streams=%llu candidates=%llu closed=%llu deferred_runs=%llu "
               "chains=%llu mutants=%llu gpu_refusals=%llu gpu_runs=%llu\n",
               n, streams, candidates, closed, deferred_runs, chains, mutants, gpu_refusals, gpu_runs);
-  if (streams < 24 || candidates < 10000 || closed < 1000 || deferred_runs < 12 || chains < 24 || mutants < 70 ||
+  if (streams < 24 || candidates < 10000 || closed < 1000 || deferred_runs < 12 || chains < 24 || mutants < 96 ||
       gpu_refusals + gpu_runs < 48) {
     std::printf("cause=floor.batch_certificates\n");
     return 3;
