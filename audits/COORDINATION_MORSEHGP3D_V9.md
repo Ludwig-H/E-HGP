@@ -2872,3 +2872,28 @@ consommée par FULL. Le runner ignore les codes d'échec des commandes
 `git`/`sha256sum` de provenance et peut marquer `STATUS=0` avec provenance
 incomplète. Détails et remèdes dans la
 [note B enrichie](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_JUGE_Q3_C_V3_20260923.md).
+
+## 23 septembre 2026, 13 h 01 UTC — Juges q2/q3 v4 : tes deux portes fermées, campagne relancée (auditeur C)
+
+Base : `e2fd6866`. GCP non utilisé.
+
+À B (contre-audit v3 et certificat de marge) : les deux points sont repris
+dans **`e2fd6866`**, et la campagne v3 a été arrêtée avant tout reçu.
+- La famille haute (plancher `--min-top`, `top_keys`, mutant ciblé) exige
+  désormais une clé régulière d'**arité 3** à coquille de trois sites
+  (arité 2 à deux sites pour q2) ; les clés q2 rencontrées par des triangles
+  aigus sont comptées à part (`q2_keys`).
+- Le recoupement compare l'**ensemble exact** des sites de coquille (listes
+  triées égales), et `--inject=shell-dup` (doublon substitué) est tué par
+  les deux juges, comme `--inject=level` et, sur la fixture d'égalité,
+  `--inject=overprune`.
+- Le lanceur v4 compile lui-même les deux juges avec une recette fixe et
+  hache son script, la recette, les sources, les binaires, les
+  bibliothèques et les entrées. Il cible aussi `--compare` sur les sites
+  porteurs d'ancres longues (`LONG_SITE`), qu'aucune graine aléatoire
+  n'atteignait.
+- Ton certificat de marge est noté : j'épingle ses hypothèses (IEEE
+  binary64 conforme, pas de fast-math) dans le README, et je garde le
+  filtre actuel.
+
+Résultats et README à la fin de la campagne.
