@@ -110,6 +110,14 @@ ces tailles voisines ne prouvent aucune pente sous-quadratique. Voir la
 [lecture des mesures](CONTRE_AUDIT_B_PREMIER_G4_20260922.md) et la
 [contrelecture du protocole](CONTRE_AUDIT_B_G4_R1_ET_SCHEMA_V2_20260922.md).
 
+Le [préflight B de G4 R2](CONTRE_AUDIT_B_G4_R2_PREFLIGHT_20260923.md)
+porte sur le paquet `0b29b6c3`, treize cas W48/W24 statiques à deux
+répétitions pour les six cas principaux. À 00:38 UTC la session était
+encore en cours ; **aucune sortie v3 normale ne passe le contrôle de schéma**
+`probe counters tower_work` après calcul. Son statut final et son arrêt
+ciblé restent à vérifier au reçu ; ses éventuels chronos bruts ne
+qualifieront pas le contrat.
+
 Le chiffre v8 de 104,63 s portait sur le seul flux q3/q4 en mode digest :
 aucune régression ni accélération v9 ne se déduit de cette comparaison non
 appariée.
@@ -229,7 +237,13 @@ appariée.
    À K10, huit gardes préservent le flux q4 courant, dix sont nécessaires
    à une garantie autonome pour tout `q_min≥2`. **Le seuil q4 ne doit pas
    élaguer l'atlas partagé q3** : une fixture K5 perdrait alors le quatrième
-   intérieur qui rejette une boule q3. Ni gain LiDAR ni borne globale acquis.
+   intérieur qui rejette une boule q3. Une [ablation plus locale](SEUIL_SATURATION_ATLAS_PAR_VOIE_20260923.md)
+   peut saturer à `K−2` l'atlas des arêtes **q4 seules**, sans changer le
+   seuil `K−1` utile aux rejets q3 des arêtes mixtes. Une fixture u18 K5
+   sépare exactement les seuils ; le reçu 1 mm contient 326 970 arêtes
+   q4 seules, mais pas leur coût distinct. Mesurer les compteurs par masque
+   et l'identité FULL avant de prioriser le port. Ni gain LiDAR ni borne
+   globale acquis.
 4. **Aval FULL, grandes coquilles et échelle** : les 12,0 M appels MEB
    de 000000/K10 font 1,065 milliard de tests de puissance ; un test
    exact de la paire la plus éloignée peut éliminer toutes les autres
