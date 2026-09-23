@@ -1,0 +1,4 @@
+fixture_eq PRUNE_DISAGREES a=5 pruned=3 full=4
+fixture_eq PRUNE_DISAGREES a=1 pruned=2 full=3
+fixture_eq n=34 kmax=5 balls=324 input_fnv=2498b0f402183350 seed=9e3779b97f4a7c15 mode=compare+overprune sampled_sites=34 partners=1122 kept=876 triangles=17952 acute=3075 incidences=369 found=369 missing=0 cross_fail=0 extra=0 unique_keys=123 q2_keys=0 top_keys=52 top_population=52 extended=0 shell_over_12=0 mutant_killed=1 len_lt500=369 len_500_1600=0 len_ge1600=0 top_lt500=156 top_500_1600=0 top_ge1600=0 prune_disagreements=2 crl=0 crl_unique=0 crl_disagreements=0 crl_lost=0 crl_target_killed=0 p0=0 p1=198 p2=15 p3=156
+exit=1 expected=1

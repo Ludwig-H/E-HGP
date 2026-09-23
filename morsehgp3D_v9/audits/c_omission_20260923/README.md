@@ -69,14 +69,19 @@ Pour une coquille régulière ($u=q$) :
 - `run_campaign.sh` : la campagne exécutée ; `aggregate.py` : les tableaux.
 - `q2_sample_judge.cpp`, `q3_sample_judge.cpp` : juges d'échantillon q2 et q3
   indépendants du générateur ; `run_q2_judge.sh` (première campagne q2),
-  `run_judges_v5.sh` (campagne v5), `run_judges_v6_gates.sh` (portes v6,
-  `--selftest`), `tables_judges.py` (tableaux) ; `results/judges_v5/`,
-  `results/gates_v6/` (sorties, `PROVENANCE.txt`, `STATUS`) ;
+  `run_judges_v5.sh` (campagne v5), `run_judges_v6_gates.sh` (portes v6),
+  `run_judges_v7_gates.sh` (portes v7, `--selftest`), `regen_inputs.py`
+  (entrées), `tables_judges.py` (tableaux, `--gates`) ; `results/judges_v5/`,
+  `results/gates_v6/`, `results/gates_v7/` (sorties, `PROVENANCE.txt`,
+  `STATUS`) ;
   `verification_juge_q3.json` (vérification adverse du juge q3).
 - `run_digest_campaign.sh`, `results/digest/` : condensés des tours acceptées.
 - `results/` : sorties brutes et `TABLEAUX.md`. Les coupes LiDAR 8k
-  (`s00`, `s01`, `s02`, disques emboîtés du runner v12) ne sont pas
-  versionnées : seuls les comptes le sont.
+  (`s00`, `s01`, `s02`, disques emboîtés du runner v12) et la trame entière
+  08/000000 ne sont pas copiées ici : `regen_inputs.py` les régénère bit à
+  bit depuis les trames sans sol versionnées du reçu v8, dans un dossier neuf
+  hors dépôt, et contrôle leurs empreintes (`--check` pour un dossier
+  existant).
 
 Compilation (depuis ce dossier, `B` = build v9 Release avec Boost) :
 
@@ -381,6 +386,68 @@ Portes **v6** (`run_judges_v6_gates.sh`, épinglé à `abf3c382`, `STATUS=0`, so
 | `q3_lidar_s00_8000_k10_overprune_isolated` (désaccords d'élagage : 0, incidences : 1513, dont ≥ 1 600 unités : 308) | 0 | obs |
 | `q3_lidar_s02_8000_k10_compare_isolated` (désaccords d'élagage : 0, incidences : 430, dont ≥ 1 600 unités : 59) | 0 | 0 |
 | `q3_lidar_s02_8000_k10_overprune_isolated` (désaccords d'élagage : 0, incidences : 430, dont ≥ 1 600 unités : 59) | 0 | obs |
+
+#### Portes v7 (`run_judges_v7_gates.sh`, après l'audit A du juge v6)
+
+L'[audit A](../AUDIT_A_JUGE_Q3_V6_LONGUES_INCIDENCES_20260923.md) a montré
+que le plancher « long » v6 comptait des incidences de tous rangs (s02 :
+59 longues, dont 13 seulement au rang critique), que `drop-long` retirait
+des *partenaires* longs alors que l'étiquette porte sur l'arête maximale du
+triangle, et qu'une observation `obs` pouvait absorber un code 2. La v7
+(`9ffb871e`) répond ainsi, après une seconde vérification adverse à deux
+lentilles dont tous les défauts ont été corrigés avant exécution :
+
+- **strate CRL** : $p=K_{\max}-2$, coquille de trois sites, $q_{\min}=3$
+  (sans paire antipodale, ce que l'acuité stricte garantit déjà), arête
+  maximale d'au moins 1 600 unités de grille. C'est exactement la famille
+  que ni Euler ni la tour ne voient, prise dans sa partie longue ;
+- `--min-crl` porte sur les **triangles CRL distincts du parcours brut**, et
+  exige qu'une **clé CRL retirée du catalogue** soit déclarée manquante
+  (chemin `MISSING`, pas seulement la comparaison d'énumération) ;
+- `--compare` publie les désaccords restreints à la strate
+  (`PRUNE_DISAGREES_CRL`) ; `--inject=drop-crl` retire la strate du parcours
+  élagué et doit être tué avec ce marqueur ; `drop-long` porte désormais sur
+  l'arête maximale, et les deux mutants sont refusés hors `--compare` et
+  rendent 3 sur une strate vide ;
+- **fixture CRL gravée** (le triangle de l'audit A, $a$, $a+(1500,0,0)$,
+  $a+(100,1500,0)$, trois intérieurs stricts, $K=5$) : depuis la seule ancre
+  $a$, l'ancien `drop-long` par partenaires survivait, le nouveau est tué
+  dans la strate ;
+- lanceur : tout code ≥ 2 échoue, même pour une observation ; la ligne de
+  synthèse ` n=… kmax=` est exigée ; le `--selftest` donne à chaque cas une
+  vraie ligne de synthèse, si bien que la suppression de chacun des quatre
+  contrôles de `run()` est détectée par son propre cas (mutation du lanceur
+  vérifiée) ; les entrées sont contrôlées contre `regen_inputs.EXPECTED` ;
+  la provenance couvre `src/`, `tests/gen/` et `CMakeLists.txt`, exige un
+  build Release et est relue après la construction.
+
+| cas | code | attendu | désaccords (dont CRL) | incidences CRL / triangles CRL distincts | clé CRL retirée déclarée manquante | marqueur |
+| --- | ---: | ---: | ---: | ---: | --- | --- |
+| `q2_lidar_s02_8000_k5_key` | 1 | 1 | — (—) | — / — | — | MISSING |
+| `q2_lidar_s02_8000_k5_level` | 1 | 1 | — (—) | — / — | — | MISSING |
+| `q2_lidar_s02_8000_k5_shell_dup` | 1 | 1 | — (—) | — / — | — | MISSING |
+| `q3_fixture_crl_compare` | 0 | 0 | 0 (0) | 1 / 1 | oui | — |
+| `q3_fixture_crl_drop_crl` | 1 | 1 | 1 (1) | 1 / 1 | oui | PRUNE_DISAGREES_CRL |
+| `q3_fixture_crl_drop_long` | 1 | 1 | 1 (1) | 1 / 1 | oui | PRUNE_DISAGREES_CRL |
+| `q3_fixture_eq_compare` | 0 | 0 | 0 (0) | 0 / 0 | non | — |
+| `q3_fixture_eq_key` | 1 | 1 | 0 (0) | 0 / 0 | non | MISSING |
+| `q3_fixture_eq_level` | 1 | 1 | 0 (0) | 0 / 0 | non | MISSING |
+| `q3_fixture_eq_overprune` | 1 | 1 | 2 (0) | 0 / 0 | non | PRUNE_DISAGREES |
+| `q3_fixture_eq_shell_dup` | 1 | 1 | 0 (0) | 0 / 0 | non | MISSING |
+| `q3_lidar_s00_8000_k10_compare_isolated` | 0 | 0 | 0 (0) | 92 / 92 | oui | — |
+| `q3_lidar_s00_8000_k10_drop_crl_isolated` | 1 | 1 | 5 (5) | 92 / 92 | oui | PRUNE_DISAGREES_CRL |
+| `q3_lidar_s00_8000_k10_drop_long_isolated` | 1 | 1 | 5 (5) | 92 / 92 | oui | PRUNE_DISAGREES_CRL |
+| `q3_lidar_s00_8000_k10_overprune_isolated` | 0 | obs | 0 (0) | 92 / 92 | oui | — |
+| `q3_lidar_s01_8000_k10_compare_isolated` | 0 | 0 | 0 (0) | 188 / 179 | oui | — |
+| `q3_lidar_s01_8000_k10_drop_crl_isolated` | 1 | 1 | 8 (8) | 188 / 179 | oui | PRUNE_DISAGREES_CRL |
+| `q3_lidar_s01_8000_k10_drop_long_isolated` | 1 | 1 | 8 (8) | 188 / 179 | oui | PRUNE_DISAGREES_CRL |
+| `q3_lidar_s01_8000_k10_overprune_isolated` | 0 | obs | 0 (0) | 188 / 179 | oui | — |
+| `q3_lidar_s02_8000_k10_compare_isolated` | 0 | 0 | 0 (0) | 18 / 17 | oui | — |
+| `q3_lidar_s02_8000_k10_drop_crl_isolated` | 1 | 1 | 3 (3) | 18 / 17 | oui | PRUNE_DISAGREES_CRL |
+| `q3_lidar_s02_8000_k10_drop_long_isolated` | 1 | 1 | 3 (3) | 18 / 17 | oui | PRUNE_DISAGREES_CRL |
+| `q3_lidar_s02_8000_k10_overprune_isolated` | 0 | obs | 0 (0) | 18 / 17 | oui | — |
+
+**Lecture.** `STATUS=0` (sorties, `PROVENANCE.txt`, contrôle des entrées dans `results/gates_v7/`). Sur les huit sites les plus isolés, la strate CRL compte **92, 179 et 17 triangles distincts** à s00, s01, s02 (planchers 80, 150, 15) ; dans chaque cas, la clé CRL retirée du catalogue est déclarée manquante ; `drop-crl` et `drop-long` sont tués **dans la strate** (désaccords CRL sur 5, 8 et 3 sites) ; l'élagage réel ne diffère jamais de la force brute. Le mutant réaliste d'élagage (`overprune`) reste une observation sans désaccord sur ces sites, faute de cas d'égalité : sa porte est la fixture d'égalité. Échantillon toujours, `run_tower=false`.
 
 **Portée et réserves** (vérification adverse archivée dans
 `verification_juge_q3.json`, sur une source antérieure : trois

@@ -441,7 +441,11 @@ indépendant (élagage exact par la demi-boule diamétrale, clé canonique,
 niveau, coquille, intérieurs et arité recoupés) trouve présentes les
 286 706 incidences q3 admissibles de sa campagne v5, dont 55 297 clés
 régulières de cette famille ; ses portes v6 tuent tous leurs mutants
-avec marqueur causal. Ce sont des échantillons, pas une certification. Deux omissions
+avec marqueur causal. Après l'audit A du juge v6, les portes v7
+(`results/gates_v7/`) visent la seule strate longue régulière au rang
+critique : 92, 179 et 17 triangles distincts sur les sites isolés de s00,
+s01, s02, clé retirée déclarée manquante, mutants tués dans la strate. Ce
+sont des échantillons, pas une certification. Deux omissions
 conjointes (une naissance et la seule fusion qui la référence) restent
 hors de portée de ces contrôles, comme d'Euler.
 

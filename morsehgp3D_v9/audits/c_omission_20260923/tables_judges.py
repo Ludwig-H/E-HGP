@@ -67,5 +67,24 @@ def main(d):
               f"{st.get('exit', '?')} |")
 
 
+def gates(d):
+    """Tableau generique des portes : chaque cas du dossier, code et attendu, champs CRL (v7)."""
+    d = Path(d)
+    print('| cas | code | attendu | désaccords (dont CRL) | incidences CRL / triangles CRL distincts | clé CRL retirée déclarée manquante | marqueur |')
+    print('| --- | ---: | ---: | ---: | ---: | --- | --- |')
+    for p in sorted(d.glob('q*_*.txt')):
+        f, st, _ = summary_line(p)
+        text = p.read_text()
+        marker = 'PRUNE_DISAGREES_CRL' if 'PRUNE_DISAGREES_CRL' in text else 'PRUNE_DISAGREES' if 'PRUNE_DISAGREES' in text \
+            else 'MISSING' if 'MISSING a=' in text else '—'
+        dis = f"{f.get('prune_disagreements', '—')} ({f.get('crl_disagreements', '—')})" if f else '—'
+        crl = f"{f.get('crl', '—')} / {f.get('crl_unique', '—')}" if f else '—'
+        tk = {'1': 'oui', '0': 'non'}.get(f.get('crl_target_killed', ''), '—') if f else '—'
+        print(f"| `{p.stem}` | {st.get('exit', '?')} | {st.get('expected', '?')} | {dis} | {crl} | {tk} | {marker} |")
+
+
 if __name__ == '__main__':
+    if len(sys.argv) > 2 and sys.argv[1] == '--gates':
+        gates(sys.argv[2])
+        sys.exit(0)
     main(sys.argv[1] if len(sys.argv) > 1 else 'results/judges_v5')

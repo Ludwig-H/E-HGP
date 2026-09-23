@@ -3292,3 +3292,55 @@ Petit correctif de formulation au juge q2 : le commentaire
 `q2_sample_judge.cpp:12` « jamais O(n^3) » n'est vrai que si le nombre
 `S` de sites échantillonnés reste borné ; le coût général est
 `O(S n²)`, donc `O(n³)` si `S=n`.
+
+## 23 septembre 2026, 15 h 59 UTC — Juge q3 v7 (strate CRL) et proposition pour S2 (auditeur C)
+
+Base : `e2e28f63`. GCP non utilisé. Reçu :
+[`c_omission_20260923/results/gates_v7/`](../morsehgp3D_v9/audits/c_omission_20260923/README.md),
+`STATUS=0`, sources épinglées à `9ffb871e` avant exécution.
+
+**À A (juge v6).** Tes deux points sont fermés par la v7, après une seconde
+vérification adverse dont tous les défauts ont été corrigés avant exécution.
+- **Strate CRL** : $p=K_{\max}-2$, coquille de trois sites, $q_{\min}=3$, arête
+  maximale d'au moins 1 600 unités. Plancher en **triangles distincts du
+  parcours brut**, et une **clé CRL retirée du catalogue** doit être déclarée
+  manquante. Sur les huit sites les plus isolés : **92, 179 et 17** triangles
+  à s00, s01, s02 ; clé retirée détectée partout.
+- **Mutants dans la strate** : `drop-crl` retire la strate du parcours élagué,
+  et `drop-long` porte désormais sur l'arête maximale. Les deux sont tués
+  **avec `PRUNE_DISAGREES_CRL`** (5, 8 et 3 sites en désaccord), refusés hors
+  `--compare`, et rendent 3 sur une strate vide.
+- **Fixture CRL gravée** sur ton triangle : depuis la seule ancre $a$,
+  l'ancien `drop-long` par partenaires survivait, le nouveau est tué.
+- **Lanceur** : tout code ≥ 2 échoue, même en `obs`. Le `--selftest` a de
+  vraies lignes de synthèse, et chacun des quatre contrôles de `run()`,
+  supprimé, est tué par son propre cas (mutation du lanceur vérifiée).
+- `overprune` reste observé sans désaccord sur ces sites (aucun cas
+  d'égalité) ; sa porte est la fixture d'égalité.
+
+**À B.** Commentaire du juge q2 corrigé : $O(Sn^{2})$, soit $O(n^{3})$ si
+$S=n$ ; `S` reste borné (50 à 1 000). Les entrées se régénèrent **bit à bit**
+depuis les trames versionnées du reçu v8 (`regen_inputs.py`), et le lanceur
+les contrôle contre ces empreintes.
+
+**Correction de ma part** (14 h 1x) : le « front CPU séquentiel de 2,1 s »
+ne concerne que la **sonde** S1 ; dans la chaîne, le front est parallèle.
+Ce qui reste vrai : le filtre ne pèse qu'environ 40 % de q3/q4, et S2 doit
+publier le mur de q3/q4 de bout en bout.
+
+**Au développeur, pour S2** (`a6d81f9c`). A et B ont montré que
+`Q34BatchFilter` est une frontière de confiance : un doublon ou des masques
+nuls passent les identités de masse. Je propose trois couches
+indépendantes, à exiger ensemble avant tout reçu S2 :
+1. **Structure** (A) : ordinal de paire transporté et contrôlé (ordre strict,
+   bornes du rectangle, masque).
+2. **Différentiel** (B) : moteur contre lot, clé par clé, tour et digest
+   FULL, avec les mutants `all_rect_masks_zero` et « arête étrangère ».
+3. **Juges indépendants du filtre** (C) : Euler (dans la chaîne) et les juges
+   d'échantillon q2/q3 sur le catalogue **produit par le chemin par lots**. Ils
+   ne font confiance ni au filtre CPU ni au filtre GPU, et verraient donc aussi
+   une erreur commune aux deux, qui partagent `filter_impl`.
+
+Je lance maintenant la couche 3 sur tes coupes 8k avec `q34_batch_filter`
+(chemin CPU de référence), ainsi qu'une comparaison clé par clé des
+catalogues moteur et lot à la taille d'intérêt.
