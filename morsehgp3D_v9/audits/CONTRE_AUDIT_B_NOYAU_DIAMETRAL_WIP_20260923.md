@@ -1,9 +1,10 @@
 # Contre-audit B — noyau diamétral q3/q4 (chantier du 23 septembre)
 
-Statut : **WIP, non qualifié en performance, hors registre**. Lecture du diff
-produit au-dessus de `84c74a5e` vers 04 h UTC ; les sources et les tests du
-développeur évoluent encore. Cette note ne transforme ni R5 ni le harnais
-local en reçu du nouveau levier.
+Statut : **code publié dans `a78664d4`, performance non qualifiée, hors
+registre**. Lecture d'abord du diff au-dessus de `84c74a5e`, puis du
+commit produit qui l'a intégré sur `main`. Cette note ne transforme ni R5
+ni le harnais local en reçu du nouveau levier. Le protocole de réception
+v8 en cours après ce commit est un chantier distinct.
 
 ## Ce qui est mathématiquement sûr
 
@@ -62,6 +63,14 @@ contre `dead.form_sites` OFF : 0,61 G semble désigner seulement les
 formes du cover complet restantes. Ces chiffres sont des indications de
 développement, ni un gain FULL/G4 rejugeable ni une égalité du flux entier.
 
+Un autre auditeur a depuis publié dans [l'état courant](ETAT_COURANT.md)
+deux paires FULL **locales** sur un quart spatial brut 1 mm de
+08/000000, 30 263 sites/K5/s8/W8 : sortie et digest égaux, CPU de chaîne
+environ 72,0→68,6–68,7 s, mais mur OFF 14,81/17,04 s contre ON
+16,08/24,06 s sur hôte partagé. Le diagnostic montre une économie CPU
+modeste sur ce morceau et **aucun** gain mural stable ; il ne mesure ni
+une trame entière sans sol, ni le G4, ni la croissance 8k/16k/32k.
+
 Contrairement à une alerte intermédiaire rétractée, les **deux** objets
 cover ne vivent pas simultanément : le `core` est détruit à la fin du
 bloc `if` avant la construction du cover complet. La mesure de pic ne
@@ -69,7 +78,7 @@ sous-compte pas leur somme pour cette raison.
 
 ## Portes et mesures à fermer avant activation par défaut
 
-Le diff met `ChainOptions::q34_dead_core=true` par défaut et fait évoluer
+Le commit met `ChainOptions::q34_dead_core=true` par défaut et fait évoluer
 la sonde v6→v7, le plan worker v4→v5. Une porte indépendante Release sur
 un build séparé a passé `mhgp9_gen_wspd_q34` (18,01 s), puis les portes
 `mhgp9_probe_worker_contract_{normal,optimized}` (0,76/0,89 s). Un échec
@@ -100,13 +109,17 @@ réel. Ajouter au raccord réel une non-vacuité du cœur et un mutant causal
 de son effet, tout en permettant qu'un cœur très efficace laisse zéro
 preuve au cover complet sur un autre fixture.
 
-Le selftest **complet** `tower_selftest_v9.py` lancé pendant ce diff
+Le selftest **complet** `tower_selftest_v9.py` lancé pendant le diff
 non commité a 15 erreurs sur 21 tests : le worker WIP attend le schéma
 de sonde v7 tandis que `snapshot.build('HEAD', ...)` empaquette encore la
 sonde v6 de `84c74a5e`, puis refuse l'incohérence. Ce n'est ni un reçu G4
-ni un défaut géométrique attribuable au nouveau moteur ; rejouer normal
-et `-O` après un commit atomique moteur+protocole. Les deux CTests de
-raccord réel ont, eux, passé sur le build local du diff.
+ni un défaut géométrique attribuable au nouveau moteur. Après le commit
+atomique `a78664d4`, le même selftest normal passe **21/21** en 44,09 s.
+Le rejeu `-O` a de nouveau croisé une modification *ultérieure* des
+fichiers du contrôleur/worker (nouveau schéma v8) pendant son exécution ;
+ses erreurs de hash ne sont pas un verdict sur `a78664d4`. Le rejeu `-O`
+sur un prochain commit figé reste requis. Les deux CTests de raccord réel
+avaient, eux, passé sur le build local du diff.
 
 L'oracle indexé exercé à cette lecture couvre le cœur à K3/5/10 avec
 les filtres témoins `Pair` et `RectanglePair`. Une porte directe
@@ -120,7 +133,8 @@ spécifiquement à K1/2 ou avec filtre témoin désactivé dans la grande
 porte indexée ; ces cas restent utiles pour tuer des mutations de
 contrôle de voie et de contact.
 
-Avant de livrer le défaut ON ou de lancer G4, demander des paires
+Avant de qualifier le défaut ON ou de lancer une campagne G4 coûteuse,
+demander des paires
 ON/OFF **même entrée, même snapshot** sur les trois trames sans sol,
 K5/K10, W48, avec sorties FULL/catalogue/tour/digest identiques, travail
 q34 séparé, CPU/mur/RSS et `core_builds/core_closed_edges/core_sites`.
