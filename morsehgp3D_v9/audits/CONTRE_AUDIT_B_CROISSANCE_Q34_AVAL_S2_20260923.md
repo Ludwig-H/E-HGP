@@ -73,7 +73,9 @@ les offsets des segments non vides et leurs extrema associatifs
 ensuite l'enveloppe des centres issue du produit entier avec celle de
 `E`, en gardant propriétaire, masque et IDs exacts. Une boîte serrée peut
 permettre `K−1` gardes q3 ou `K−2` gardes q4 là où les extrêmes de
-`A×B` empêchent tout certificat.
+`A×B` empêchent tout certificat. Le seuil q4 `K−2` ne protège **pas**
+l'atlas partagé q3 ; pour une vue commune, exiger `K−1` gardes ou
+conserver séparément la voie q3 entière.
 
 Le [reçu S2 CPU par arête](edge_matched_core_20260923/README.md) précise
 où cibler cette tentative sur le **brut** 08/000000/K5 : à pleine

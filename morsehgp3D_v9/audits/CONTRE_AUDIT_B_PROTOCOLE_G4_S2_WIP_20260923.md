@@ -22,6 +22,9 @@ pas « tour LiDAR GPU achevée ». Ce défaut de **libellé** ne retire rien
 aux sept cas GPU complets de R12. Le différentiel catalogue GPU–moteur
 clé par clé reste à faire ; les six paires distinctes de R12 comparent
 une projection logique, pas les catalogues entiers.
+Dans R12, `catalogue.euler.status=holds` ne porte que sur les degrés
+jusqu'à `checkable_max_k=3` de la dimension simpliciale ; ce n'est pas
+une vérification indépendante des dix niveaux de la tour.
 
 ## Faux statut positif possible dans une réception partielle
 
