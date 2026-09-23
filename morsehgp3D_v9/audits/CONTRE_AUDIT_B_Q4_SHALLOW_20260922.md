@@ -297,6 +297,16 @@ La fixture `c=0`, `a=(−5,0,0)`, `b=(3,−4,0)`, `x=(0,0,−5)`,
 la positivité est stricte et les quatre autres arêtes sont au plus
 `|ab|²=80`, mais `|xy|²=90`.
 
+Un [mini-oracle Fraction indépendant](check_q4_owner_dominance_20260923.py)
+vérifie la réduction de décision (pas l'arbre de plages ni le convexe
+3D) contre un solveur barycentrique et toutes les arêtes. Rejoué en
+Python normal et `-O`, il passe cinq fixtures causales, 315 coquilles
+aléatoires entières (3 992 paires de côtés opposés dont 635 positives,
+1 281 égalités de coordonnées projectives) et 320 centres u18 pour les
+bornes homogènes ; SHA-256 `be054948d39ef2b4e3434e46afa5b3a73290f872086db39ad3d91a701bb925a8`.
+Il ne certifie ni le coût ni les cas de convexes dégénérés d'une future
+structure native.
+
 ## Mini-reçu reproductible
 
 Depuis la racine du dépôt, sans écrire de fichier :
@@ -304,6 +314,8 @@ Depuis la racine du dépôt, sans écrire de fichier :
 ```sh
 python3 morsehgp3D_v9/audits/check_q4_false_vertex_inside_disc_20260922.py
 python3 -O morsehgp3D_v9/audits/check_q4_false_vertex_inside_disc_20260922.py
+python3 morsehgp3D_v9/audits/check_q4_owner_dominance_20260923.py
+python3 -O morsehgp3D_v9/audits/check_q4_owner_dominance_20260923.py
 ```
 
 Le script vérifie les deux fixtures entières, dont la non-propriété du
