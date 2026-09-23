@@ -1,9 +1,9 @@
 # État courant des audits v9
 
-23 septembre 2026. Produit publié courant : **`84c74a5e`**. Le dernier
+23 septembre 2026. Produit publié courant : **`a78664d4`**. Le dernier
 [reçu G4 R5](../receipts/g4_tower_r5_20260923/README.md) exécute le snapshot
 antérieur **`aae9da0e`** ; ses temps ne qualifient donc pas le correctif
-`84c74a5e`. Cadre :
+`84c74a5e` ni le nouveau cœur diamétral de `a78664d4`. Cadre :
 `exploration_v9_hors_registre`, `reference_cpu`,
 `quantized_u18_input_only`, **`not_claimed`**. Ce fichier porte le verdict
 mutable. Les notes datées conservent preuves, contre-exemples et reçus.
@@ -44,6 +44,18 @@ après 128 essais infructueux, il peut aujourd'hui réussir sans l'avoir
 exercé. Voir la [contrelecture du chargement des
 formes](CONTRE_AUDIT_B_CHARGEMENT_FORMES_Q34_WIP_20260923.md) et la
 [preuve conjointe](CONTRE_AUDIT_B_Q34_PREUVE_CONJOINTE_WIP_20260923.md).
+
+`a78664d4` tente le certificat de voies mortes d'abord sur les sites de la
+boule diamétrale de l'arête, sous-ensemble du cover complet ; toute voie
+ouverte repasse par celui-ci. Le sous-ensemble ne peut ajouter un faux
+témoin intérieur. Les portes locales comparent les candidats aux petits
+oracles et exercent fermeture puis repli, mais le levier est déjà **ON par
+défaut** sans reçu G4 ni ablation FULL qui l'isole. La porte FULL actuelle
+compare les cinq leviers ensemble, donc couvre le raccord sans attribuer
+une égalité au seul cœur. Corriger aussi le commentaire de profondeur
+« exacte » dans `q34_dead_lanes.cpp` : sur le cœur, le compte ponctuel est
+un minorant et ne sert qu'à abandonner une preuve. Voir la
+[contrelecture du cœur](CONTRE_AUDIT_B_NOYAU_DIAMETRAL_WIP_20260923.md).
 
 ## Ce que mesurent les reçus G4
 
@@ -109,6 +121,26 @@ Le [reçu exploratoire par
 arête](CONTRE_AUDIT_B_RECU_VOIES_MORTES_20260923.md) a corrigé les
 pourcentages et covers moyens mal définis dans la provenance initiale ;
 ses prototypes sans FULL ne sont pas une mesure R5.
+
+Diagnostic local du commit `a78664d4` sur **un quart spatial seulement de
+la trame brute** 08/000000 à 1 mm (sol conservé)
+([entrée u32le](../../morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_grid/quarter_x_neg_y_neg.u32le),
+30 263 sites, K5/s8/W8, tour statique W8, quatre autres leviers ON) : deux paires
+OFF/ON du cœur gardent catalogue, ordres, travail FULL et digest égaux.
+Le cœur ferme 443 495 des 990 559 arêtes qui survivent au filtre ; les
+incidences site–cover payées passent de 454,08 M à 120,56 M en additionnant
+**cœur et cover complet**. Le CPU de chaîne baisse de 72,05/71,88 à
+68,72/68,56 CPU·s, tandis que le mur de chaîne vaut 14,81/17,04 s OFF
+et 16,08/24,06 s ON. Sur cet hôte partagé, aucune amélioration murale
+stable n'est établie ; les sorties JSON et le binaire local ne constituent
+pas un reçu G4. Entrée SHA256 `2632c86e…6c516e`, binaire
+`267dbed7…b7734` ; les sept sources principales ont les mêmes empreintes
+que le commit publié. Les mesures G4 doivent inclure les visites et tests
+du **core_cover**, aujourd'hui absents du registre de la sonde, ainsi que
+les temps et masses par worker pour diagnostiquer le chemin critique.
+Le plan G4 v5 par défaut met les cinq leviers ON dans ses huit cas : une
+ablation causale du cœur exige des cas supplémentaires appariés, avec un
+préflight ON. L'expansion `A×B` demeure entière.
 
 La priorité constructive est de prouver un masque q3/q4 **avant**
 l'expansion de produits résiduels `A×B`, puis avant le cover pour les
@@ -218,6 +250,18 @@ contrelecture indépendante des **sorties effectivement reçues** R5
 reste positive ; un simple statut `completed` ne vaut pas réception
 fail-closed de toute campagne future. R2 demeure refusé, sans
 promotion rétrospective de ses chronos bruts.
+
+Le lecteur du plan v5 accepte aussi un registre **physiquement impossible**
+du cœur : sur un vrai JSON local, ajouter un million à
+`dead_core_q3_proved` laisse passer `validate_ledger_identities`, bien que
+`dead_core_q3_proved + dead_core_q3_open` dépasse `core_builds`.
+Pour chaque voie q3/q4, imposer `proved + open <= core_builds` au cœur et
+`proved + open <= cover_builds` au cover complet ; quand le levier tourne,
+la somme des deux voies est entre le nombre de builds et son double,
+même avec un masque partiel. Le faux reçu positif du selftest viole déjà
+les deux bornes par voie. Ajouter ces mutants au validateur avant de
+promouvoir les compteurs du prochain reçu G4 ; le moteur conserve sa
+propre identité de masse, ce constat vise le lecteur externe.
 
 Prochaines mesures : mêmes octets et masque figé, trames **entières** de
 plusieurs séquences sans sol puis brutes, s8/10/12, K5 et K10, W1/W24/W48,
