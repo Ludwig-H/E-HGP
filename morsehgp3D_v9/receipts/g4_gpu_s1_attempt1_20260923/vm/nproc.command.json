@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "nproc"
+  ],
+  "cwd": "/tmp/ehgp-gpu-v9-650474f90e06c464.08wnrpiR6s/output",
+  "elapsed_seconds": 0.00123959900000159,
+  "ended_utc": "2026-09-23T13:45:03.527323+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 1827,
+  "session_work_deadline_epoch": 1790172603.1272476,
+  "started_utc": "2026-09-23T13:45:03.526055+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "654ee9da442fa353f59f11beb688fc7f76c8de62a6c18b2a181fdde2a27cc3ef"
+}

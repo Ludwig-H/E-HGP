@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "/usr/bin/cmake",
+    "-S",
+    "/tmp/ehgp-gpu-v9-650474f90e06c464.08wnrpiR6s/source/morsehgp3D_v9",
+    "-B",
+    "/tmp/ehgp-gpu-v9-650474f90e06c464.08wnrpiR6s/output/build",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DBOOST_ROOT=/usr",
+    "-DCMAKE_CXX_COMPILER=/usr/bin/g++",
+    "-DMHGP9_ENABLE_CUDA=ON",
+    "-DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc"
+  ],
+  "cwd": "/tmp/ehgp-gpu-v9-650474f90e06c464.08wnrpiR6s/output",
+  "elapsed_seconds": 2.2668143369999996,
+  "ended_utc": "2026-09-23T13:45:05.794354+00:00",
+  "exit_code": 1,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 1828,
+  "session_work_deadline_epoch": 1790172603.1272476,
+  "started_utc": "2026-09-23T13:45:03.527517+00:00",
+  "stderr_sha256": "3f8fed52e5a6875d5accb1063deb22ab4c3fa00667bc48873eaa0bd38c9d4054",
+  "stdout_sha256": "437d8c060bbc9b63f5a40986e527d50951e898d9fdb6a2e7b468c9e9ef1bc1ad"
+}

@@ -1,0 +1,6 @@
+CMake Error in CMakeLists.txt:
+  Target "mhgp9_gpu" requires the language dialect "CUDA20" , but CMake does
+  not know the compile flags to use to enable it.
+
+
+CMake Generate step failed.  Build files cannot be regenerated correctly.
