@@ -177,8 +177,8 @@ entière est 08/000000 **sans sol** avec 200 ancres sur 39 885, non une
 trame brute multi-séquence ; les entrées ne sont pas hachées dans ces
 sorties. Le trou prioritaire de complétude demeure q3 à
 `p=Kmax−2`, particulièrement les supports longs.
-Dans le **juge q3 indépendant encore WIP** de C (`q3_sample_judge.cpp`,
-SHA-256 `9b2d7df3…86066b33` à 12 h 35), le plancher `top_keys` et la clé
+Dans le **juge q3 indépendant publié** par C (`85a4d4ab`,
+`q3_sample_judge.cpp` SHA-256 `c34da9da…86fda78`), le plancher `top_keys` et la clé
 retirée pour le mutant filtrent seulement `p=Kmax−2`. Une présentation
 par triangle strictement aigu peut pourtant avoir `q_min=2` si sa
 coquille contient aussi une paire antipodale. Fixture entière K5 : centre
@@ -190,8 +190,8 @@ premier et quatrième sont antipodaux : `q_min=2`, `p=3=K5−2`. Le plancher
 et le mutant dits « q3 haut rang » peuvent ainsi être portés par une clé
 q2. Exiger `ball.arity==3` dans leur sélection, et comptabiliser à part
 les incidences aiguës de clés q2. C'est une correction de **portée du
-juge**, pas un défaut démontré du générateur ; aucun reçu du juge q3
-n'est encore publié.
+juge**, pas un défaut démontré du générateur ; aucun reçu de la campagne
+durcie n'est encore publié.
 La [contrelecture B du filtre flottant](CERTIFICAT_B_MARGE_JUGE_Q3_U18_20260923.md)
 prouve, **sous IEEE binary64 sans fast-math et triangles aigus u18**,
 que son erreur de boîte est <0,004 pour une marge ≥4 : les coupes
@@ -501,55 +501,26 @@ Sur 08/000000 sans sol K5, un binaire local postérieur au port rend le
 même digest R10 avec 1 306 696 boules, franchissant les seuils des deux
 voies parallèles. Cela soutient l'identité des sorties sur ce cas, sans
 remplacer une porte de payload complet ni une qualification G4 du port.
-Le [shadow voisins du cœur](../receipts/knn_core_probe_20260923/README.md)
-publié avec R11 conserve 96 %/86 % de ses fermetures K5/K10 en
-choisissant 17 voisins de chaque extrémité **parmi les sites du cœur
-déjà construit**, sur une seule coupe 16k. Ce n'est pas la liste des
-voisins **globaux** pré-calculable avant le cœur ; les deux peuvent
-être disjointes ([contre-exemple](CONTRE_AUDIT_B_G4_R11_ET_VOISINS_COEUR_20260923.md)).
-Le patch de mesure paie encore construction/parcours/tri du cœur puis
-la preuve complète : aucune baisse CPU/mur/RSS ni effet aval n'est
-mesuré. Tester la vraie liste globale et le repli avant port produit.
-Une [contrelecture mathématique du WIP q3/q4](CERTIFICAT_Q34_SOUS_ENSEMBLES_LOCAUX_20260923.md)
-montre que `prove` n'exige **aucun k-NN global exact** : tout sous-ensemble
-de sites **distincts** suffit à une fermeture sûre, avec repli si la
-preuve échoue. Une sélection locale/approchée à budget borné est donc
-permise, sous réserve de mesurer sa force et son coût total. La table
-**essayée** à 16 voisins réserve au moins **65 octets/site** (2,42 Gio à
-40 millions de sites) ; les visites de points du pré-calcul manquent
-au ledger de chaîne de cet essai. Le gate mixte cache q3/voisins q4
-était requis avant toute promotion.
-La [contrelecture B du raccord mutable v17](CONTRE_AUDIT_B_WIP_V17_VOISINS_20260923.md)
-fige l'ébauche qui désactivait provisoirement la preuve avant filtre
-par `&& false` et pouvait doubler le calcul cache OFF. À 11 h 55, le
-WIP rétablit la prépreuve si un cache valide existe pour l'ancre,
-compte la voie déjà fermée par cache au retour anticipé, et retire
-le deuxième essai. Cette correction du ledger est plausible en lecture
-statique, **pas encore qualifiée** : aucun gate ciblé ni reçu v17.
-Le développeur a depuis **retiré** ce port du code produit et prépare
-une archive négative, encore non publiée : sur 08/000000 sans sol,
-`--no-tower`, l'essai précoce donne un petit gain K5 mais une
-régression q3/q4 K10 de 60,833 à 64,230 s en mur local. L'égalité
-des seuls résumés `catalogue` ne vérifie pas les clés ni la tour FULL.
+Le [shadow des voisins du cœur](../receipts/knn_core_probe_20260923/README.md)
+mesurait 96 %/86 % de fermetures K5/K10 sur une coupe 16k, mais choisissait
+des sites du cœur **déjà construit**. Le [reçu négatif publié](../receipts/near_sites_negative_20260923/README.md)
+teste désormais les 16 voisins **globaux** : à 08/000000 sans sol, il enlève
+62 % des recherches de paire K5 pour seulement −2 % de CPU q3/q4 et régresse
+de +3,7 % à K10. Le port a été retiré. La preuve mathématique reste utile :
+[tout sous-ensemble de sites distincts](CERTIFICAT_Q34_SOUS_ENSEMBLES_LOCAUX_20260923.md)
+donne une fermeture sûre, mais sa sélection et son coût complet doivent
+être payés. Ce reçu `--no-tower` ne compare pas les clés une à une.
 
-Le WIP mutable de micro-levier (`types.hpp` SHA-256 `596b5cd8…761b292`
-à 12 h 30) remplace l'incrément unitaire vérifié par `++value`, puis
-ajoute un précontrôle de marge dans census q3 et filtres/cache q3/q4.
-Cela peut réparer les **deux gates publiques** d'overflow signalées dans
-la première lecture, mais le contrôle n'est pas général. L'API publique
-`point_witness` accepte un `PredicateWork&` fourni par l'appelant et
-incrémente `point_tests` sans garde : avec `UINT64_MAX`, la fixture
-`Q2, a=(0,0,0), b=(2,0,0), z=(1,0,0)` compilée sur ce WIP renvoie
-`true, point_tests=0` au lieu de lever `overflow_error`. `run_q4_local_edge_candidates`
-et le prouveur de voies mortes exposent la même classe de ledger.
-Le nouveau précontrôle refuse en outre tout mot `≥2^63`, même si cet
-appel n'incrémenterait pas ce mot ; il change donc le domaine accepté sans
-débordement réel. Conserver l'incrément vérifié à la frontière publique et
-réserver l'incrément sans contrôle aux ledgers **privés** avec borne par
-appel démontrée ; ajouter une porte `PredicateWork` au maximum et rejouer
-les portes existantes. Le précontrôle scanne 25 puis parfois 12 mots par
-requête q3/q4 ; son coût doit être remesuré sur le binaire final avant
-de reprendre le gain CPU d'un reçu micro antérieur. Ce WIP n'est pas publié.
+Le [reçu micro q3/q4 publié](../receipts/q34_micro_levers_20260923/README.md)
+mesure environ −4 % de CPU pour l'incrément `+1` non vérifié avec garde sur
+trois entrées, digest FULL identique sur deux paires. Le changement global
+brisait pourtant le contrat de dépassement d'autres API publiques
+(`point_witness` rebouclait de `UINT64_MAX` à zéro dans notre fixture) :
+**levier retiré du produit**. La variante sûre à compteurs DFS locaux ne
+gagne que 0,9 %. Le profil attribue environ 40 % du CPU q3/q4 au filtrage,
+sans poste unique supérieur à 16 % ; les raffinements de rectangles et le
+second cache `b` régressent dans ce reçu. Ces résultats locaux K5 ne
+qualifient ni K10, ni G4, ni une borne de croissance.
 
 ## Verrou q3/q4 : réduire le travail avant l'expansion
 
@@ -563,6 +534,18 @@ Le [reçu exploratoire par
 arête](CONTRE_AUDIT_B_RECU_VOIES_MORTES_20260923.md) a corrigé les
 pourcentages et covers moyens mal définis dans la provenance initiale ;
 ses prototypes sans FULL ne sont pas une mesure R5.
+
+Une optimisation exacte de **constante** mérite une ablation ciblée : pour
+une même arête et un même index, le cœur diamétral est inclus dans le cover
+complet ; la forme affine de `Q34DeadLaneProver::load` dépend seulement de
+l'arête et du site. Si une voie survit au cœur, les deux flux de rangs sont
+triés : en gardant les plages du cœur jusqu'au cover, une fusion **à rebours**
+peut déplacer ses formes dans le buffer complet et calculer seulement les
+nouveaux sites, sans nouveau tableau de formes. Vérifier identité de l'index
+et de l'arête, invalider le prover avant l'extension, puis mesurer
+`full_forms_reused`, `full_forms_new`, CPU et
+RSS. Les agrégats actuels n'isolent pas le cœur des seules arêtes ouvertes ;
+la fusion parcourt encore tout le cover et ne change pas la borne globale.
 
 Diagnostic local du commit `a78664d4` sur **un quart spatial seulement de
 la trame brute** 08/000000 à 1 mm (sol conservé)
