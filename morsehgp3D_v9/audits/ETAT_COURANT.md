@@ -99,7 +99,18 @@ signale trois portes avant de qualifier S2 : adapter de filtre fiable
 et porte différentielle causale (les ledgers acceptent même un retour
 tout zéro), tuilage borné au lieu de matérialiser tous rectangles et
 survivants, et conservation des compteurs de travail du filtre.
+Dans ce WIP, `q34_occupancy.cpu_sum_s` n'inclut pas la phase batch de
+filtrage ; comparer cette occupation à celle du moteur sous-estimerait
+le travail q3/q4 intégré. Le temps CPU du processus garde un périmètre
+plus large.
 Cette lecture porte sur un diff mutable, non sur le GPU S1 publié.
+La [porte causale A](q34_batch_duplicate_gate_20260923/README.md) exerce
+le même point de confiance : à trois sites/K3, remplacer un survivant par
+un doublon de même masque conserve cardinalité, masses et compteurs,
+`validate_completion` réussit, mais l'unique clé q3 disparaît. Le reçu
+Release porte sur le batch CPU du WIP, avec mutation injectée ; aucune
+erreur spontanée CUDA ni tour FULL n'en est déduite. Il faut contrôler
+l'ordinal des paires et qualifier séparément leurs masques géométriques.
 Le [shadow des rectangles](Q34_BLOCS_LIDAR_SHADOW_20260923.md) donne un
 critère d'ordonnancement S2a concret sur 08/000000/s8 : à K5, **1 081 123
 des 1 128 166** rectangles ouverts ont moins de 16 paires, mais ne portent

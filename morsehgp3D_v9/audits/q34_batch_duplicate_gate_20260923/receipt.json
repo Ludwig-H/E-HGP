@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "date_utc": "2026-09-23",
+  "scope": "unpublished S2 CPU batch, injected same-mask duplicate/drop from another rectangle at Q34BatchFilter callback",
+  "source_worktree_head": "5577f0f2a",
+  "source_wspd_q34_cpp_sha256": "1e34498e40f5a7a40c0e22ad14bb14bbaf23347494e0313553f51910d50c7892",
+  "source_wspd_q34_hpp_sha256": "3711fc2ab9dcc304c58dcea95de65d35f0cbabe3b118ac0a9a8f2400f20d23be",
+  "source_q34_seed_hpp_sha256": "d16e023786333853764f34ff860872242bbb326ffe6001c80f8edd6761540b37",
+  "gate_cpp_sha256": "9a996f461ed68247420132ddd1afdf369d12684c04d2b9c23766b648ec452797",
+  "build_type": "Release",
+  "cuda_enabled": false,
+  "library_sha256": "d368ae6caae561e317484d2858f43314e6e0b130b94923743de41bc28ca8c8c0",
+  "binary_sha256": "cbe0c7168fa46b13191b7844b9d744c4b902d94497fb887ffcb737cdaa336eda",
+  "exit_code": 0,
+  "stdout": "PASS sites=3 K=3 survivors=3 drop=1 duplicate=0 engine_records=1 honest_records=1 altered_records=0 honest_q3_keys=1 altered_q3_keys=0 missing_q3_keys=1 drop_rectangle=1 duplicate_rectangle=0 dropped_ranks=0,2 copied_ranks=0,1 witness_counters_equal=1 expanded_pairs=3 q3_edges=3 validate_completion=accepted",
+  "configured_cmake_sha256": "f827bd17f859ca3d4ecfbefb91f198cad44b41db152bdbc85e9100db57f3aafc"
+}

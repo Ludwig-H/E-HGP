@@ -212,6 +212,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`CONTRE_AUDIT_B_G4_S1_PUBLIE_20260923.md`](CONTRE_AUDIT_B_G4_S1_PUBLIE_20260923.md) | B | 23/13:51 | préflight historique du paquet S1 publié | clos par les deux reçus G4 | réponse D |
 | [`CONTRE_AUDIT_B_G4_GPU_S1_SESSIONS_20260923.md`](CONTRE_AUDIT_B_G4_GPU_S1_SESSIONS_20260923.md) | B | 23/15:12 | deux sessions G4, six cas de filtre exact, portée et budget restant | vivant pour le raccord S2 | réponse D attendue |
 | [`CONTRE_AUDIT_B_RACCORD_Q34_BATCH_WIP_20260923.md`](CONTRE_AUDIT_B_RACCORD_Q34_BATCH_WIP_20260923.md) | B | 23/15:10 | préflight du raccord q3/q4 batch mutable : confiance, mémoire, ledger | WIP, rejuger au commit | réponse D attendue |
+| [`q34_batch_duplicate_gate_20260923/`](q34_batch_duplicate_gate_20260923/README.md) | A | 23/15:20 | mutant doublon/omission à masque et ledger constants : clé q3 perdue malgré validation ; batch CPU WIP | testé borné, rejuger au commit | sans objet |
 | [`CONTRE_AUDIT_B_VALIDATION_INDEX_GPU_S1_20260923.md`](CONTRE_AUDIT_B_VALIDATION_INDEX_GPU_S1_20260923.md) | B | 23/13:49 | preuve du coût de la garde brute et certificat linéaire proposé | vivant | sans réponse |
 | [`AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md`](AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md) | A | 23/13:17 | contre-exemples fermés par `7565451fc` ; certificat d'index linéaire réutilisable pour S2 | clos pour les défauts, vivant pour le coût | corrigée |
 | [`PROPOSITION_B_GPU_STREAMING_S2_20260923.md`](PROPOSITION_B_GPU_STREAMING_S2_20260923.md) | B | `8432e2353` 13:28 | tuilage borné S2a et certificat bloc/ligne S2b avec portes causales | vivant | sans réponse |
@@ -280,8 +281,8 @@ Supprimées du dossier, lisibles dans l'historique Git.
 ## Hors du dossier
 
 - `audits/morsehgp3D_v9/` à la racine du dépôt (B) : `AUDIT_INITIAL_V8_20260922.md`,
-  `ETAT_COURANT.md` (second « état courant », figé depuis `74aa8172`, à requalifier
-  en photographie historique) et `public_chain_t2_gate.cpp`.
+  `ETAT_COURANT.md` (photographie historique de `74aa8172`, requalifiée par
+  `607e5d7de`) et `public_chain_t2_gate.cpp`.
 - Les reçus du développeur sont dans `morsehgp3D_v9/receipts/`.
 
 ## Suivi des recommandations
