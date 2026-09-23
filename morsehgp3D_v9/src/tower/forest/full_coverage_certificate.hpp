@@ -148,10 +148,65 @@ struct FullDatedContribution {
   FullNodeId segment;
   FullCoverageRef ref;
 };
+// The same batches in flat form: levels per batch and, for every action, a
+// CSR range of parents and one of contributions, in batch then action order.
+// Filled without any allocation per action (amortized appends only).
+struct FullCoverageFlatDraft {
+  std::vector<ExactLevel> level;            // per batch
+  std::vector<u64> batch_begin{0};          // actions of batch b: [batch_begin[b], batch_begin[b + 1])
+  std::vector<u64> parent_begin{0};         // parents of action a: [parent_begin[a], parent_begin[a + 1])
+  std::vector<FullNodeId> parent;
+  std::vector<u64> contribution_begin{0};   // contributions of action a, likewise
+  std::vector<FullCoverageRef> contribution;
+  void open_batch(const ExactLevel& l) { level.push_back(l); batch_begin.push_back(batch_begin.back()); }
+  void add_action(std::span<const FullNodeId> parents, std::span<const FullCoverageRef> contributions) {
+    parent.insert(parent.end(), parents.begin(), parents.end());
+    parent_begin.push_back(parent.size());
+    contribution.insert(contribution.end(), contributions.begin(), contributions.end());
+    contribution_begin.push_back(contribution.size());
+    ++batch_begin.back();
+  }
+  size_t actions() const { return parent_begin.size() - 1; }
+  std::span<const FullNodeId> parents_of(size_t a) const {
+    return {parent.data() + parent_begin[a], parent_begin[a + 1] - parent_begin[a]};
+  }
+  std::span<const FullCoverageRef> contributions_of(size_t a) const {
+    return {contribution.data() + contribution_begin[a], contribution_begin[a + 1] - contribution_begin[a]};
+  }
+};
+
+namespace full_coverage_detail {
+// A draft read as batches of actions: the vector form or the flat form.
+struct BatchVectorSource {
+  std::span<const FullCoverageBatch> v;
+  size_t batches() const { return v.size(); }
+  const ExactLevel& level(size_t b) const { return v[b].level; }
+  size_t actions(size_t b) const { return v[b].actions.size(); }
+  std::span<const FullNodeId> parents(size_t b, size_t a) const { return v[b].actions[a].parents; }
+  std::span<const FullCoverageRef> contributions(size_t b, size_t a) const { return v[b].actions[a].contributions; }
+};
+struct FlatDraftSource {
+  const FullCoverageFlatDraft& d;
+  size_t batches() const { return d.level.size(); }
+  const ExactLevel& level(size_t b) const { return d.level[b]; }
+  size_t actions(size_t b) const { return d.batch_begin[b + 1] - d.batch_begin[b]; }
+  std::span<const FullNodeId> parents(size_t b, size_t a) const { return d.parents_of(d.batch_begin[b] + a); }
+  std::span<const FullCoverageRef> contributions(size_t b, size_t a) const {
+    return d.contributions_of(d.batch_begin[b] + a);
+  }
+};
+}  // namespace full_coverage_detail
+
 class FullCoverageCertificate;
 struct FullCoverageBuildResult;
 FullCoverageBuildResult build_full_coverage_certificate(unsigned,
     std::shared_ptr<const FullCoveragePopulations>, std::span<const FullCoverageBatch>);
+FullCoverageBuildResult build_full_coverage_certificate(unsigned,
+    std::shared_ptr<const FullCoveragePopulations>, const FullCoverageFlatDraft&);
+namespace full_coverage_detail {
+template <class Source>
+FullCoverageBuildResult build_from(unsigned, std::shared_ptr<const FullCoveragePopulations>, const Source&);
+}
 
 class FullCoverageCertificate {
  public:
@@ -170,8 +225,9 @@ class FullCoverageCertificate {
   const auto& successors() const { return successors_; }
   const auto& contributions() const { return contributions_; }
  private:
-  friend FullCoverageBuildResult build_full_coverage_certificate(unsigned,
-      std::shared_ptr<const FullCoveragePopulations>, std::span<const FullCoverageBatch>);
+  template <class Source>
+  friend FullCoverageBuildResult full_coverage_detail::build_from(unsigned,
+      std::shared_ptr<const FullCoveragePopulations>, const Source&);
   void swap(FullCoverageCertificate& other) noexcept {
     std::swap(order_, other.order_);
     populations_.swap(other.populations_);
@@ -203,14 +259,17 @@ inline bool admitted(const ExactLevel& level, const ExactLevel& cut, bool closed
 // Input actions are already grouped across all balls of an exact level by the
 // producer. Distinct empty-parent actions remain distinct births. IDs follow
 // action order, skipping continuations. No root point-set is materialized here.
-inline FullCoverageBuildResult build_full_coverage_certificate(unsigned order,
-    std::shared_ptr<const FullCoveragePopulations> bank,
-    std::span<const FullCoverageBatch> batches) {
+// One body for both draft forms (vector or flat): the same checks, the same
+// certificate.
+namespace full_coverage_detail {
+template <class Source>
+FullCoverageBuildResult build_from(unsigned order, std::shared_ptr<const FullCoveragePopulations> bank,
+                                   const Source& batches) {
   const auto invalid = [](const char* reason) {
     FullCoverageBuildResult result; result.reason = reason; return result;
   };
   if (order < 1 || order > kFacetMaxK || !bank || bank->rows().empty() ||
-      bank->domain().size() < order || batches.empty()) return invalid("coverage_invalid_domain");
+      bank->domain().size() < order || batches.batches() == 0) return invalid("coverage_invalid_domain");
   try {
     FullCoverageBuildResult result;
     auto& out = result.value;
@@ -223,51 +282,55 @@ inline FullCoverageBuildResult build_full_coverage_certificate(unsigned order,
         throw std::length_error("coverage arena size overflow");
       total += amount;
     };
-    for (const auto& batch : batches) for (const auto& action : batch.actions) {
-      if (action.parents.size() != 1) {
-        count(node_count, 1);
-        count(parent_count, action.parents.size());
+    for (size_t b = 0; b < batches.batches(); ++b)
+      for (size_t a = 0; a < batches.actions(b); ++a) {
+        const auto parents = batches.parents(b, a);
+        if (parents.size() != 1) {
+          count(node_count, 1);
+          count(parent_count, parents.size());
+        }
+        count(contribution_count, batches.contributions(b, a).size());
       }
-      count(contribution_count, action.contributions.size());
-    }
     out.nodes_.reserve(node_count);
     out.parents_.reserve(parent_count);
     out.successors_.reserve(node_count);
     out.contributions_.reserve(contribution_count);
     live.reserve(node_count);
-    for (size_t b = 0; b < batches.size(); ++b) {
-      const auto& batch = batches[b];
-      if (batch.level.den <= 0) return invalid("coverage_invalid_level");
-      if (b && compare_exact_level(batches[b - 1].level, batch.level) >= 0)
+    for (size_t b = 0; b < batches.batches(); ++b) {
+      const auto& level = batches.level(b);
+      const size_t action_count = batches.actions(b);
+      if (level.den <= 0) return invalid("coverage_invalid_level");
+      if (b && compare_exact_level(batches.level(b - 1), level) >= 0)
         return invalid("coverage_nonincreasing_batch");
-      if (batch.actions.empty()) return invalid("coverage_empty_batch");
-      if (order > 1 && full_certificate_detail::zero(batch.level))
+      if (action_count == 0) return invalid("coverage_empty_batch");
+      if (order > 1 && full_certificate_detail::zero(level))
         return invalid("coverage_positive_level_required");
-      if (order == 1 && b == 0 && (!full_certificate_detail::zero(batch.level) ||
-          batch.actions.size() != bank->domain().size())) return invalid("coverage_k1_roots");
+      if (order == 1 && b == 0 && (!full_certificate_detail::zero(level) ||
+          action_count != bank->domain().size())) return invalid("coverage_k1_roots");
       const size_t prior_count = out.nodes_.size();
       // Consume/check every prelot root BEFORE creating any postlot root. Also
       // rejects two ungrouped actions that share a parent at the same level.
-      for (size_t a = 0; a < batch.actions.size(); ++a) {
-        const auto& action = batch.actions[a];
-        for (size_t j = 0; j < action.parents.size(); ++j) {
-          const auto parent = action.parents[j];
-          if ((j && action.parents[j - 1] >= parent) || parent >= prior_count || !live[parent])
+      for (size_t a = 0; a < action_count; ++a) {
+        const auto parents = batches.parents(b, a);
+        const auto contributions = batches.contributions(b, a);
+        for (size_t j = 0; j < parents.size(); ++j) {
+          const auto parent = parents[j];
+          if ((j && parents[j - 1] >= parent) || parent >= prior_count || !live[parent])
             return invalid("coverage_parent_not_unique_prebatch_root");
           live[parent] = 0;
         }
-        if (action.parents.size() == 1 && action.contributions.empty())
+        if (parents.size() == 1 && contributions.empty())
           return invalid("coverage_empty_continuation");
-        for (const auto& ref : action.contributions) {
+        for (const auto& ref : contributions) {
           if (ref.population >= bank->rows().size()) return invalid("coverage_population_reference");
           const auto& row = bank->rows()[ref.population];
           if ((ref.shell_mask & ~full_coverage_detail::all_shell(row)) ||
               (ref.include_interior && row.interior.empty()) ||
               (!ref.include_interior && ref.shell_mask == 0)) return invalid("coverage_empty_or_invalid_mask");
         }
-        if (action.parents.empty()) {
-          if (action.contributions.size() != 1) return invalid("coverage_birth_population");
-          const auto& ref = action.contributions.front();
+        if (parents.empty()) {
+          if (contributions.size() != 1) return invalid("coverage_birth_population");
+          const auto& ref = contributions.front();
           const auto& row = bank->rows()[ref.population];
           if (ref.include_interior != !row.interior.empty() ||
               ref.shell_mask != full_coverage_detail::all_shell(row) ||
@@ -280,25 +343,24 @@ inline FullCoverageBuildResult build_full_coverage_certificate(unsigned order,
           }
         }
       }
-      for (const auto& action : batch.actions) {
+      for (size_t a = 0; a < action_count; ++a) {
+        const auto parents = batches.parents(b, a);
         FullNodeId segment;
-        if (action.parents.size() == 1) {
-          segment = action.parents.front();
+        if (parents.size() == 1) {
+          segment = parents.front();
           live[segment] = 1;  // continuation retains component identity
         } else {
           if (out.nodes_.size() == kFullCoverageAbsent)
             throw std::length_error("coverage node identifiers exhausted");
           segment = out.nodes_.size();
-          out.nodes_.push_back({batch.level, static_cast<u64>(out.parents_.size()),
-                                static_cast<u64>(action.parents.size())});
+          out.nodes_.push_back({level, static_cast<u64>(out.parents_.size()), static_cast<u64>(parents.size())});
           out.successors_.push_back(kFullCoverageAbsent); live.push_back(1);
-          for (auto parent : action.parents) {
+          for (auto parent : parents) {
             out.parents_.push_back(parent);
             out.successors_[parent] = segment;
           }
         }
-        for (const auto& ref : action.contributions)
-          out.contributions_.push_back({batch.level, segment, ref});
+        for (const auto& ref : batches.contributions(b, a)) out.contributions_.push_back({level, segment, ref});
       }
     }
     out.order_ = order; out.populations_ = std::move(bank);
@@ -311,6 +373,17 @@ inline FullCoverageBuildResult build_full_coverage_certificate(unsigned order,
     auto result = invalid("coverage_size_overflow");
     result.status = FullCertificateStatus::kResourceExhausted; return result;
   }
+}
+}  // namespace full_coverage_detail
+
+inline FullCoverageBuildResult build_full_coverage_certificate(unsigned order,
+    std::shared_ptr<const FullCoveragePopulations> bank, std::span<const FullCoverageBatch> batches) {
+  return full_coverage_detail::build_from(order, std::move(bank), full_coverage_detail::BatchVectorSource{batches});
+}
+
+inline FullCoverageBuildResult build_full_coverage_certificate(unsigned order,
+    std::shared_ptr<const FullCoveragePopulations> bank, const FullCoverageFlatDraft& draft) {
+  return full_coverage_detail::build_from(order, std::move(bank), full_coverage_detail::FlatDraftSource{draft});
 }
 
 // Immutable successor history. In particular, NOT a path-compressed final root.

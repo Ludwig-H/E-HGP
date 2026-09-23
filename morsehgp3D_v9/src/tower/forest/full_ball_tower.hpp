@@ -263,7 +263,9 @@ class MonotoneHistory {
   }
 };
 struct Draft {
-  std::vector<FullCoverageBatch> batches;
+  std::vector<FullCoverageBatch> batches;  // sequential path
+  FullCoverageFlatDraft flat;              // static path (phase A): no allocation per action
+  bool flat_form = false;
   std::vector<u64> lower_nodes;
 };
 struct Block {
@@ -454,8 +456,11 @@ class Builder {
     const auto encode_start = PhaseClock::now();
     parallel_items(kmax, geometry_threads, [&](size_t i, size_t) {
       const auto start = PhaseClock::now();
-      forests[i] = build_full_coverage_certificate(static_cast<unsigned>(i + 1), bank.value, drafts[i].batches);
+      forests[i] = drafts[i].flat_form
+          ? build_full_coverage_certificate(static_cast<unsigned>(i + 1), bank.value, drafts[i].flat)
+          : build_full_coverage_certificate(static_cast<unsigned>(i + 1), bank.value, drafts[i].batches);
       std::vector<FullCoverageBatch>().swap(drafts[i].batches);  // encoded: release at once
+      drafts[i].flat = {};
       times->encode_by_k[i + 1] = ms_since(start);
     });
     times->encode_ms = ms_since(encode_start);
@@ -748,11 +753,9 @@ class Builder {
         target = order_new_node(o, level, block.roots, birth_of(block.roots, block.ball));
       }
       if (block.roots.size() != 1 || contributes) {
-        auto& batch = o.draft.batches.emplace_back();
-        batch.level = level;
-        auto& action = batch.actions.emplace_back();
-        action.parents.assign(block.roots.begin(), block.roots.end());
-        if (contributes) action.contributions.push_back({kBallTag | block.ball, block.contribution, block.interior});
+        const FullCoverageRef ref{kBallTag | block.ball, block.contribution, block.interior};
+        o.draft.flat.open_batch(level);
+        o.draft.flat.add_action(block.roots, std::span<const FullCoverageRef>(&ref, contributes ? 1 : 0));
       } else add(o.st.inert_blocks);
       require(o.anchors[block.ball] == kAbsent32 && target != absent, "full_ball_anchor_duplicate");
       o.anchors[block.ball] = static_cast<u32>(target);
@@ -771,7 +774,7 @@ class Builder {
     }
     std::vector<std::vector<size_t>> groups(blocks.size());
     for (size_t b = 0; b < blocks.size(); ++b) groups[find(b)].push_back(b);
-    FullCoverageBatch batch{level, {}};
+    bool opened = false;
     std::vector<u64> targets(blocks.size(), absent);
     for (const auto& group : groups) {
       if (group.empty()) continue;
@@ -794,10 +797,14 @@ class Builder {
         target = order_new_node(o, level, action.parents, birth_of(action.parents, blocks[group.front()].ball));
       }
       for (size_t b : group) targets[b] = target;
-      if (action.parents.size() != 1 || !action.contributions.empty()) batch.actions.push_back(std::move(action));
-      else add(o.st.inert_blocks, group.size());
+      if (action.parents.size() != 1 || !action.contributions.empty()) {
+        if (!opened) {
+          o.draft.flat.open_batch(level);
+          opened = true;
+        }
+        o.draft.flat.add_action(action.parents, action.contributions);
+      } else add(o.st.inert_blocks, group.size());
     }
-    if (!batch.actions.empty()) o.draft.batches.push_back(std::move(batch));
     for (size_t b = 0; b < blocks.size(); ++b) {
       require(o.anchors[blocks[b].ball] == kAbsent32 && targets[b] != absent, "full_ball_anchor_duplicate");
       o.anchors[blocks[b].ball] = static_cast<u32>(targets[b]);
@@ -806,14 +813,16 @@ class Builder {
 
   void order_lots(OrderState& o) {
     o.anchors.assign(balls.size(), kAbsent32);
+    o.draft.flat_form = true;
     if (o.k == 1) {
-      FullCoverageBatch initial;
+      const ExactLevel zero{{0, 0, 0}, 1};
+      o.draft.flat.open_batch(zero);
       for (size_t j = 0; j < domain.size(); ++j) {
-        initial.actions.push_back({{}, {{j, 1, false}}});  // domain singleton j (population j)
+        const FullCoverageRef ref{j, 1, false};  // domain singleton j (population j)
+        o.draft.flat.add_action({}, std::span<const FullCoverageRef>(&ref, 1));
         add(o.st.contributions);
-        order_new_node(o, initial.level, {}, kAbsent32);
+        order_new_node(o, zero, {}, kAbsent32);
       }
-      o.draft.batches.push_back(std::move(initial));
     }
     const auto& program = programs[o.k];
     for (size_t begin = 0; begin < program.size();) {
@@ -844,15 +853,16 @@ class Builder {
     // rows themselves are then built in parallel, each at its own ID.
     std::vector<BallId> first_seen;
     u64 next = domain.size();
-    for (auto& o : orders)
-      for (auto& batch : o.draft.batches)
-        for (auto& action : batch.actions)
-          for (auto& ref : action.contributions) {
-            if ((ref.population & kBallTag) == 0) continue;
-            const auto ball = static_cast<BallId>(ref.population & ~kBallTag);
-            if (population_ids[ball] == absent) { population_ids[ball] = next++; first_seen.push_back(ball); }
-            ref.population = population_ids[ball];
-          }
+    // The flat contributions are stored in batch, action, contribution order.
+    for (auto& o : orders) {
+      require(o.draft.flat_form, "full_ball_draft_form");
+      for (auto& ref : o.draft.flat.contribution) {
+        if ((ref.population & kBallTag) == 0) continue;
+        const auto ball = static_cast<BallId>(ref.population & ~kBallTag);
+        if (population_ids[ball] == absent) { population_ids[ball] = next++; first_seen.push_back(ball); }
+        ref.population = population_ids[ball];
+      }
+    }
     populations.resize(next);
     for (size_t j = 0; j < domain.size(); ++j) populations[j] = {{}, {domain[j]}};
     parallel_ranges(first_seen.size(), geometry_threads, [&](size_t begin, size_t end, size_t) {
@@ -871,26 +881,28 @@ class Builder {
     MonotoneHistory cursor(lower ? lower->current : empty_history, o.st);
     o.draft.lower_nodes.reserve(o.current.levels.size());
     u64 node = 0;
-    for (const auto& batch : o.draft.batches)
-      for (const auto& action : batch.actions) {
-        if (action.parents.size() == 1) continue;  // continuation: no node
-        require(node < o.current.levels.size(), "full_ball_image_node_count");
-        u64 image = absent;
-        if (o.k > 1) {
-          const auto& level = o.current.levels[node];
-          if (action.parents.empty()) {
-            const u32 ball = o.birth_ball[node];
-            require(ball != kAbsent32 && lower->anchors[ball] != kAbsent32, "full_ball_vertical_birth_anchor");
-            image = cursor.root_at(lower->anchors[ball], level, true);
-          } else {
-            image = cursor.root_at(o.draft.lower_nodes[action.parents.front()], level, true);
-            for (u64 p : action.parents)
-              require(cursor.root_at(o.draft.lower_nodes[p], level, true) == image, "full_ball_vertical_naturality");
-          }
+    require(o.draft.flat_form, "full_ball_draft_form");
+    const auto& flat = o.draft.flat;
+    for (size_t a = 0; a < flat.actions(); ++a) {
+      const auto parents = flat.parents_of(a);
+      if (parents.size() == 1) continue;  // continuation: no node
+      require(node < o.current.levels.size(), "full_ball_image_node_count");
+      u64 image = absent;
+      if (o.k > 1) {
+        const auto& level = o.current.levels[node];
+        if (parents.empty()) {
+          const u32 ball = o.birth_ball[node];
+          require(ball != kAbsent32 && lower->anchors[ball] != kAbsent32, "full_ball_vertical_birth_anchor");
+          image = cursor.root_at(lower->anchors[ball], level, true);
+        } else {
+          image = cursor.root_at(o.draft.lower_nodes[parents.front()], level, true);
+          for (u64 p : parents)
+            require(cursor.root_at(o.draft.lower_nodes[p], level, true) == image, "full_ball_vertical_naturality");
         }
-        o.draft.lower_nodes.push_back(image);
-        ++node;
       }
+      o.draft.lower_nodes.push_back(image);
+      ++node;
+    }
     require(node == o.current.levels.size(), "full_ball_image_node_count");
     failpoint_after_images(o.k);
   }
