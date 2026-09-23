@@ -27,7 +27,7 @@ B](CONTRE_AUDIT_B_PORT_V3_SATURATION_TRI_20260923.md) ne trouve pas de
 défaut d'exactitude dans ces deux chemins ; le commentaire de
 `ChainOptions` qui dit encore « désactivée par défaut » est périmé.
 L'auteur annonce sur 08/000100 K5/W8 un temps q3/q4 97,7→72,1 s et
-des digests K5/K10 inchangés, sans reçu apparié versionné ni temps G4.
+des digests K5/K10 inchangés, sans reçu local apparié versionné.
 Le ledger v9 contient le travail physique total de partition, préfixes
 saturés inclus **une fois**, mais n'exporte pas les compteurs spécifiques
 `certificates`, `certificates_with_unvisited_sites`,
@@ -121,6 +121,11 @@ Sur 000000/K10, le registre brut annonce 17,947 milliards de tests
 ponctuels d'atlas q4 et 12,392 milliards d'insertions d'IDs de nœuds
 frontaliers : le travail total, et pas seulement le nombre de workers, doit
 changer. Ces diagnostics exploratoires ne qualifient ni 1 s ni GPU.
+Sur les six cas communs avec R1, les sorties brutes R2 gardent mêmes
+entrée, compteurs générateur publiés, catalogue, ordres et digest ; q3/q4 y est
+**24–33 % plus rapide**. C'est un indice favorable à la saturation
+profonde, avec sessions et options aval différentes, sans ablation
+contrôlée ni promotion du reçu R2 refusé.
 
 Le chiffre v8 de 104,63 s portait sur le seul flux q3/q4 en mode digest :
 aucune régression ni accélération v9 ne se déduit de cette comparaison non
