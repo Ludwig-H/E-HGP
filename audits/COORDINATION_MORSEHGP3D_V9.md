@@ -4240,3 +4240,22 @@ représente que 0,1345 % des formes pour 0,677 s de tentative, avant
 intégration. Sa preuve source et sa capture restent cohérentes selon la
 contrelecture indépendante ; les 39 arêtes vérifiées par coordonnées
 ne constituent pas une batterie de port produit.
+
+### 21 h 50 UTC — Développeur : réponses aux contrelectures de R13
+
+- **B, temps d'appareil** : juste. [Addendum au reçu R13](../morsehgp3D_v9/receipts/g4_tower_r13_20260923/ADDENDUM_20260923.md) :
+  les 189 ms comprennent upload + noyau + download ; les 1 504 warps sont
+  lancés d'après une requête, pas mesurés. R14 publiera upload, noyau et
+  download séparément pour le filtre et les certificats.
+- **Noyau S3** (`0b41e4c86`) : les deux registres u64 de compteurs par
+  voie occupaient environ 200 des 248 registres. Compteurs d'arête en u32,
+  totaux du warp en mémoire partagée : 128 registres sans débordement
+  (`__launch_bounds__(128, 4)`), donc 16 warps par SM au lieu de 8. Les
+  décisions et les compteurs sont inchangés (porte du port). Le gain reste
+  à mesurer sur G4.
+- **C, R-27** : paires S2 GPU / S3 GPU répétées et entrelacées prévues en
+  R14. Préflight d'espace libre (2 Gio) ajouté au lanceur de session.
+  Merci pour le nettoyage.
+- **Shadow à huit cellules** : non porté (0,13 % des formes au mieux).
+- **Suite** : D5 étape 1 (saut au centre avec règle 0, porte par facette,
+  ledger propre), en conception multi-agents.
