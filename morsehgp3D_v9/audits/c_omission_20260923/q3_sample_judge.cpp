@@ -35,6 +35,8 @@
 //           --min-crl=<n> (plancher de triangles CRL distincts : p = Kmax-2, coquille de 3 sites, q_min = 3, arete
 //           max >= 1600 ; exige aussi qu'une cle CRL retiree du catalogue soit declaree manquante)
 //
+// Mutants d'index (refus en code 2 avant echantillonnage, marqueurs INDEX_*) : --inject=index-out-of-range |
+// --inject=index-duplicate | --inject=index-missing.
 // Code 0 conforme ; 1 manquante, EXTRA, desaccord d'elagage ou recoupement faux ; 2 argument/chaine ;
 // 3 vacuite (plancher --min-top de cles q3 regulieres p = Kmax-2, arite 3, --min-long d'incidences longues ou
 // --min-crl de la strate CRL non atteint ; mutant cible non tue). En --compare, la strate CRL est comptee dans le
@@ -368,6 +370,53 @@ struct Totals {
   std::uint64_t crl = 0;  // strate CRL : p = pmax, coquille de 3 sites sans paire antipodale (q_min = 3), arete max >= 1600
 };
 
+// Garde d'index (contrelecture B du juge v7, 23 septembre 2026), AVANT tout echantillonnage : l'index ne porte
+// pas de position dupliquee ; chaque rang geometrique u a un PointId < n (verifie avant d'indexer l'entree) ;
+// les PointIds sont deux a deux distincts (bitset de n bits) et couvrent 0..n-1 ; la position du rang u est
+// celle du point d'entree de meme PointId. Le multiensemble (coordonnees, PointId) de l'index egale donc celui
+// de l'entree. Refus en code 2, marqueur INDEX_*, jamais de ligne de synthese. Mutants (--inject=index-*) :
+// l'identifiant du rang 1 hors bornes ou egal a celui du rang 0, ou le dernier rang retire.
+enum class IndexInject { kNone, kOutOfRange, kDuplicate, kMissing };
+IndexInject g_index_inject = IndexInject::kNone;
+
+int check_index(const std::string& label, const std::vector<Point3>& points, const mhgp9::tower::CloudIndex& ix) {
+  const std::size_t n = points.size();
+  if (ix.has_duplicate_positions()) {
+    std::printf("%s INDEX_DUPLICATE_POSITIONS\n", label.c_str());
+    return 2;
+  }
+  std::vector<std::uint64_t> ids(ix.upos.size());
+  std::vector<P3> pos = ix.upos;
+  for (std::size_t u = 0; u < ids.size(); ++u) ids[u] = ix.point_id(static_cast<std::int32_t>(u));
+  if (ids.size() >= 2 && g_index_inject == IndexInject::kOutOfRange) ids[1] = n;
+  if (ids.size() >= 2 && g_index_inject == IndexInject::kDuplicate) ids[1] = ids[0];
+  if (!ids.empty() && g_index_inject == IndexInject::kMissing) { ids.pop_back(); pos.pop_back(); }
+  std::vector<bool> seen(n, false);
+  for (std::size_t u = 0; u < ids.size(); ++u) {
+    if (ids[u] >= n) {
+      std::printf("%s INDEX_ID_OUT_OF_RANGE u=%zu id=%llu n=%zu\n", label.c_str(), u, (unsigned long long)ids[u], n);
+      return 2;
+    }
+    if (seen[ids[u]]) {
+      std::printf("%s INDEX_ID_DUPLICATE u=%zu id=%llu\n", label.c_str(), u, (unsigned long long)ids[u]);
+      return 2;
+    }
+    seen[ids[u]] = true;
+  }
+  if (ids.size() != n) {  // distincts et < n : couverture complete si et seulement si |ids| = n
+    std::printf("%s INDEX_ID_MISSING covered=%zu n=%zu\n", label.c_str(), ids.size(), n);
+    return 2;
+  }
+  for (std::size_t u = 0; u < n; ++u) {
+    const auto& q = points[ids[u]];
+    if (pos[u].x != q.x || pos[u].y != q.y || pos[u].z != q.z) {
+      std::printf("%s INDEX_POSITION_MISMATCH u=%zu\n", label.c_str(), u);
+      return 2;
+    }
+  }
+  return 0;
+}
+
 int run(const std::string& label, const std::vector<Point3>& points, unsigned kmax, std::size_t sites,
         std::size_t workers, const Options& opt) {
   if (kmax < 3 || kmax > 10) { std::fprintf(stderr, "Kmax must be in 3..10\n"); return 2; }
@@ -386,15 +435,9 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
   const auto ix = mhgp9::tower::build_cloud_index(input);
   const std::vector<P3>& pos = ix.upos;
   const std::size_t n = pos.size();
-  // Coherence de l'index lu avec les points d'entree (sites distincts : une position par site).
+  // Coherence de l'index avec les points d'entree : bijection des PointIds puis positions (check_index).
+  if (const int bad = check_index(label, points, ix)) return bad;
   if (n != points.size()) { std::printf("%s index_size_mismatch\n", label.c_str()); return 2; }
-  for (std::size_t u = 0; u < n; ++u) {
-    const auto& q = points[static_cast<std::size_t>(ix.point_id(static_cast<std::int32_t>(u)))];
-    if (pos[u].x != q.x || pos[u].y != q.y || pos[u].z != q.z) {
-      std::printf("%s index_position_mismatch\n", label.c_str());
-      return 2;
-    }
-  }
   std::vector<BallData> cat = r.catalogue_balls;
   if (opt.corrupt_level) for (auto& ball : cat) ball.level.den += 1;
   if (opt.shell_dup)
@@ -705,6 +748,9 @@ int main(int argc, char** argv) {
       else if (a == "--inject=level") opt.corrupt_level = true;
       else if (a == "--inject=shell-dup") opt.shell_dup = true;
       else if (a == "--inject=key") opt.corrupt_key = true;
+      else if (a == "--inject=index-out-of-range") g_index_inject = IndexInject::kOutOfRange;
+      else if (a == "--inject=index-duplicate") g_index_inject = IndexInject::kDuplicate;
+      else if (a == "--inject=index-missing") g_index_inject = IndexInject::kMissing;
       else if (a == "--inject=drop-long") opt.drop_long = true;
       else if (a == "--inject=drop-crl") opt.drop_crl = true;
       else if (a.rfind("--min-long=", 0) == 0) opt.min_long = std::stoull(a.substr(11));
