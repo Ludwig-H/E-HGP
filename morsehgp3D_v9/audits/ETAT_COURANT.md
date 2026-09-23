@@ -93,8 +93,11 @@ représentent **53,36–69,76 % des paires résiduelles développées**, pas
 de toutes les paires du nuage. Les sorties demeurent égales ; ni preuve
 conjointe ni coût de croissance ne sont isolés par cette ablation.
 La [contrelecture R4b](CONTRE_AUDIT_B_G4_R4B_CACHE_20260923.md) recoupe
-le reçu. La première tentative R4, [préemptée avant le
-worker](CONTRE_AUDIT_B_G4_R4_PREVOL_20260923.md), ne donne aucun chrono.
+le reçu. La première tentative R4, [arrêtée avant le
+worker](../receipts/g4_tower_r4_preempted_20260923/README.md), ne donne
+aucun chrono. Son README annonce `compute.instances.preempted`, mais ne
+joint pas la trace GCE brute de cet événement ; les traces hôte suffisent
+à prouver l'absence de sonde et l'arrêt ciblé, pas la cause exacte.
 Le [contrôle d'antichaîne du cache](CACHE_TEMOINS_COUT_VALIDATION_20260923.md)
 paie aussi du travail non inclus dans `node_tests` : les six cas R5
 impliquent au moins **1,090 milliard** de tours de validation et
@@ -324,7 +327,8 @@ restent des pistes secondaires à mesurer avec le coût aval complet.
 verticales après leurs lots et déplace les populations vers une banque
 partagée. `84c74a5e` conserve le travail payé en cas d'échec et choisit
 le plus petit K en échec entre les phases A/C ; deux mutants ciblés sont
-tués, sans nouveau reçu G4 sur ce commit. Une phase de préparation/tri
+tués. R5/R6/R7b exécutent ensuite cette voie sur G4, sans l'isoler de
+tous les autres changements. Une phase de préparation/tri
 peut garder deux buffers de requêtes coexistants, et les dix ordres
 gardent simultanément leurs états : demander RSS et capacités **au même
 instant**, par phase et K. Voir l'[audit des ordres
@@ -348,12 +352,12 @@ est requise avant de promettre des dizaines de millions de points.
 La [borne R5 détaillée](CONTRAT_COUTS_ET_PARALLELISATION.md) n'est ni une
 borne asymptotique sur d'autres LiDAR ni un RSS de phase isolé.
 
-Même si q3/q4 **et** la tour devenaient gratuits, la meilleure répétition
-R5/K10 laisserait encore **2,50 / 3,39 / 3,44 s** de chaîne sur
-000100 / 000000 / 000200 ; q2+fusion+recensus représente déjà
-**1,43 / 2,02 / 2,06 s**. La queue après `tower_ms` comprend le résumé et
-le digest sur les snapshots R5/R6. `50690c12` isole désormais le digest
-dans `times_ms.digest` ; il reste **synchrone** dans l'appel public.
+Dans le meilleur cas R7b ON, 08/000100/K10, q3/q4 prend **5,226 s**,
+FULL **3,199 s** et les autres postes de chaîne **1,154 s**. Rendre
+q3/q4 et FULL gratuits sur ce chemin séquentiel mesuré laisserait donc
+encore 1,154 s, sans borner un nouvel algorithme ni un chevauchement GPU.
+`50690c12` isole le digest dans `times_ms.digest` ; il reste
+**synchrone** dans l'appel public.
 La destruction des temporaires déclarés dans le `try` est comprise
 dans `chain_total` ; celle du résultat retourné intervient après l'appel.
 Les présentations ont seulement 2–13 doublons pour 4,38–5,51 M clés
@@ -372,7 +376,8 @@ flottante est vérifiée par les formes et puissances entières, puis le
 support de référence est repris sur le bord exact. Le gate différentiel
 juge **28 956 ensembles** et tue le mutant sans canonisation ; le port
 rapporte localement **154 → 70 Gcycles MEB** et **24,7 → 18,9 s** pour
-la tour 08/000000/K10/W8, sans reçu de calcul G4. Une
+la tour 08/000000/K10/W8 ; R7b mesure ensuite l'ablation de sa version
+`8e8b83a3` sur G4. Une
 [contre-épreuve FENV](check_meb_proposed_fenv_20260923.cpp) indépendante,
 compilée `-O2 -frounding-math -fno-fast-math` contre le header publié
 (SHA-256 `de54655393b09182…`), compare encore **42 544** cas sous
@@ -383,7 +388,8 @@ canonique](MEB_PROPOSITION_EXACTE_20260923.md). `78e94b04`
 publie maintenant les compteurs `proposals/verified/canonical/fallbacks`
 dans le JSON et un levier `tower_meb_proposal` ON/OFF. Le nouveau
 préflight exige une proposition vérifiée quand ce levier est actif ;
-l'ablation G4 complète reste à faire. L'ordre Welzl inverse actuellement
+R7b en donne désormais l'ablation G4, résumée plus haut, sur le paquet
+`8e8b83a3`. L'ordre Welzl inverse
 `power_order` dans le paquet `8e8b83a3`, alors que la récursion insère
 dans l'ordre du tableau. `8fa03046` passe à une proposition
 move-to-front avec les extrêmes en tête : la coordination rapporte
@@ -421,7 +427,7 @@ des seaux répartis et triés en parallèle, et parallélise concaténation
 et détection des groupes. La [contrelecture du tri
 FULL](CONTRE_AUDIT_B_SAMPLE_SORT_PUBLIE_20260923.md) confirme l'ordre
 total, **400/400** cas en Release et la porte Clang ASan/UBSan, avec
-mutant tué ; aucun reçu G4 ne mesure ce port. Le prélèvement à
+mutant tué ; R7b exécute ce port sans ablation du tri. Le prélèvement à
 positions fixes ne garantit pas un partage utile : un témoin W48
 strict de 200 003 clés met **96,94 %** des éléments dans un seul seau.
 Le nombre de workers créés ne borne donc pas le temps du plus gros
@@ -439,6 +445,17 @@ les neuf tris de requêtes ont 32/32 seaux utiles à W8 et 192/192 à
 W48, maxima **1,27–1,70×** la moyenne ; les objets et digests sont
 égaux. Cette mesure locale n'est ni un reçu G4 ni une mesure des
 séparateurs pseudo-aléatoires de `ec6d1b74`.
+
+La [réduction de la phase A en graphe
+temporel](PHASE_A_GRAPHE_TEMPOREL_20260923.md) retrouve exactement
+composantes, parents et IDs des lots par coupes de niveau, si les égalités
+sont fermées ensemble. Elle ouvre une voie de composantes parallèles dans
+un ordre K, sans coût ni gain prouvé. La sonde locale 08/000000/K10
+compte seulement **1,72 %** des blocs dans les lots groupés : le seul
+parallélisme *au sein d'un lot* aurait peu de portée sur cette trame.
+Une variante à têtes physiques borne les réétiquetages tout en gardant les
+ancres historiques ; les **3,10 sauts de racine par requête** mesurés
+justifient son ablation, pas encore son adoption.
 
 ## Portes de preuve encore ouvertes
 

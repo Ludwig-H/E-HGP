@@ -5,7 +5,7 @@ quatre lacunes v5 suivies dans la [contrelecture B](CONTRE_AUDIT_B_G4_RECEPTION_
 Les **21 selftests protocolaires** passent en Python normal et sous `-O`
 sur un `HEAD` stable ; le vrai préflight local de 1 500 sites exerce les
 quatre leviers. Cet audit n'a pas utilisé GCP. La
-[tentative R4](CONTRE_AUDIT_B_G4_R4_PREVOL_20260923.md) s'est arrêtée avant
+[tentative R4](../receipts/g4_tower_r4_preempted_20260923/README.md) s'est arrêtée avant
 le worker et ne donne aucun reçu LIVE de tour v6.
 Les mutations ci-dessous sont acceptées par `validate_probe` avec statut
 `complete_relative` sur le JSON local K5/W8/s8

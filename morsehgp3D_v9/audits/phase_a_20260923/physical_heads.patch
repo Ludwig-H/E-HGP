@@ -1,0 +1,85 @@
+--- a/morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp
++++ b/morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp
+@@ -443,7 +443,9 @@
+     FullBallStats st;
+     std::vector<u32> anchors;          // node per ball of this order (kAbsent32)
+     History current;
+-    std::vector<u64> compressed;
++    // Heads are physical component labels; owner is the canonical dated node.
++    // Historical anchors and successor links remain unchanged.
++    std::vector<u32> head, next_member, component_size, owner;
+     std::vector<BallId> static_targets;
+     size_t static_cursor = 0;
+     std::vector<Block> lot_blocks;
+@@ -523,11 +525,7 @@
+ 
+   u64 order_root(OrderState& o, u64 token, u64 prior_count) {
+     require(token < prior_count, "full_ball_anchor_not_prior");
+-    u64 r = token;
+-    while (o.compressed[r] != r) r = o.compressed[r];
+-    while (o.compressed[token] != token) {
+-      const auto next = o.compressed[token]; o.compressed[token] = r; token = next;
+-    }
++    const u64 r = o.owner[o.head[token]];
+     require(r < prior_count && o.current.next[r] == absent, "full_ball_root_not_prior");
+     return r;
+   }
+@@ -535,8 +533,44 @@
+   u64 order_new_node(OrderState& o, const ExactLevel& level, const std::vector<u64>& parents, u32 birth) {
+     const u64 id = o.current.levels.size();
+     require(id < kAbsent32, "full_ball_node_representation", FullBallStatus::kResourceExhausted);
+-    o.current.levels.push_back(level); o.current.next.push_back(absent); o.compressed.push_back(id);
+-    for (u64 parent : parents) { o.current.next[parent] = id; o.compressed[parent] = id; }
++    o.current.levels.push_back(level); o.current.next.push_back(absent);
++    for (u64 parent : parents) o.current.next[parent] = id;
++    if (parents.empty()) {
++      o.head.push_back(static_cast<u32>(id));
++      o.next_member.push_back(kAbsent32);
++      o.component_size.push_back(1);
++      o.owner.push_back(static_cast<u32>(id));
++    } else {
++      u32 chosen = o.head[parents.front()];
++      for (u64 parent : parents) {
++        const u32 h = o.head[parent];
++        if (o.component_size[h] > o.component_size[chosen] ||
++            (o.component_size[h] == o.component_size[chosen] && h < chosen)) chosen = h;
++      }
++      for (u64 parent : parents) {
++        const u32 h = o.head[parent];
++        if (h == chosen) continue;
++        u32 at = h, tail = h;
++        for (;;) {
++          o.head[at] = chosen;
++          tail = at;
++          if (o.next_member[at] == kAbsent32) break;
++          at = o.next_member[at];
++        }
++        o.next_member[tail] = o.next_member[chosen];
++        o.next_member[chosen] = h;
++        o.component_size[chosen] += o.component_size[h];
++        o.component_size[h] = 0;
++        o.owner[h] = kAbsent32;
++      }
++      o.head.push_back(chosen);
++      o.next_member.push_back(o.next_member[chosen]);
++      o.next_member[chosen] = static_cast<u32>(id);
++      o.component_size.push_back(0);
++      o.owner.push_back(kAbsent32);
++      ++o.component_size[chosen];
++      o.owner[chosen] = static_cast<u32>(id);
++    }
+     o.birth_ball.push_back(birth);
+     if (parents.empty()) add(o.st.births); else add(o.st.merges);
+     return id;
+@@ -669,7 +703,10 @@
+     if (o.k > 1) require(o.static_cursor == o.static_targets.size(), "full_ball_static_unconsumed_targets");
+     std::vector<BallId>().swap(o.static_targets);
+     decltype(o.lot_blocks)().swap(o.lot_blocks);
+-    decltype(o.compressed)().swap(o.compressed);
++    decltype(o.head)().swap(o.head);
++    decltype(o.next_member)().swap(o.next_member);
++    decltype(o.component_size)().swap(o.component_size);
++    decltype(o.owner)().swap(o.owner);
+     u64 live = 0;
+     for (u64 next : o.current.next) if (next == absent) ++live;
+     require(live == 1, "full_ball_final_component_count");

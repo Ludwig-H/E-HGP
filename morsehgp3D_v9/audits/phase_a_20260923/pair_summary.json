@@ -1,0 +1,50 @@
+[
+  {
+    "pair": 1,
+    "mode": "A",
+    "wall_s": 18.01640185299766,
+    "summary": "status=complete_relative orders=10 representatives=17389031 births=4414230 merges=3011985 tower_ms=13074.3 peak_rss_kb=4490856",
+    "size": 1056931646,
+    "exact_cmp": true
+  },
+  {
+    "pair": 1,
+    "mode": "B",
+    "wall_s": 18.03818689599575,
+    "summary": "status=complete_relative orders=10 representatives=17389031 births=4414230 merges=3011985 tower_ms=13194.8 peak_rss_kb=4606216",
+    "size": 1056931646,
+    "exact_cmp": true
+  },
+  {
+    "pair": 2,
+    "mode": "B",
+    "wall_s": 17.962854871999298,
+    "summary": "status=complete_relative orders=10 representatives=17389031 births=4414230 merges=3011985 tower_ms=13079.6 peak_rss_kb=4789444",
+    "size": 1056931646,
+    "exact_cmp": true
+  },
+  {
+    "pair": 2,
+    "mode": "A",
+    "wall_s": 18.08652680600062,
+    "summary": "status=complete_relative orders=10 representatives=17389031 births=4414230 merges=3011985 tower_ms=13158.7 peak_rss_kb=4626192",
+    "size": 1056931646,
+    "exact_cmp": true
+  },
+  {
+    "pair": 3,
+    "mode": "A",
+    "wall_s": 18.462751377999666,
+    "summary": "status=complete_relative orders=10 representatives=17389031 births=4414230 merges=3011985 tower_ms=13542.1 peak_rss_kb=4572116",
+    "size": 1056931646,
+    "exact_cmp": true
+  },
+  {
+    "pair": 3,
+    "mode": "B",
+    "wall_s": 18.612801985997066,
+    "summary": "status=complete_relative orders=10 representatives=17389031 births=4414230 merges=3011985 tower_ms=13816.9 peak_rss_kb=4627084",
+    "size": 1056931646,
+    "exact_cmp": true
+  }
+]

@@ -1,0 +1,22 @@
+--- a/src/tower/forest/full_ball_tower.hpp
++++ b/src/tower/forest/full_ball_tower.hpp
+@@ -5,2 +5,4 @@
+ #include <cfenv>
++#include <cstdio>
++#include <ctime>
+ #include <numeric>
+@@ -646,2 +648,4 @@
+   void order_lots(OrderState& o) {
++    timespec phase_a_begin{}, phase_a_end{};
++    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &phase_a_begin);
+     o.anchors.assign(balls.size(), kAbsent32);
+@@ -675,2 +679,9 @@
+     require(live == 1, "full_ball_final_component_count");
++    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &phase_a_end);
++    const double phase_a_cpu_ms = (phase_a_end.tv_sec - phase_a_begin.tv_sec) * 1000.0 +
++      (phase_a_end.tv_nsec - phase_a_begin.tv_nsec) / 1000000.0;
++    std::fprintf(stderr, "PHASE_A_CPU K=%u cpu_ms=%.3f blocks=%llu reps=%llu singleton=%llu grouped=%llu\n",
++      o.k, phase_a_cpu_ms, (unsigned long long)o.st.anchor_blocks,
++      (unsigned long long)o.st.representatives, (unsigned long long)o.st.singleton_lots,
++      (unsigned long long)o.st.grouped_lots);
+     failpoint_after_lots(o.k);

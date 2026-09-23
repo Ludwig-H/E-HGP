@@ -1,0 +1,48 @@
+--- a/morsehgp3D_v9/src/chain/tower_chain.cpp
++++ b/morsehgp3D_v9/src/chain/tower_chain.cpp
+@@ -5,7 +5,10 @@
+ #include <atomic>
+ #include <chrono>
+ #include <ctime>
++#include <cstdlib>
++#include <cstring>
+ #include <exception>
++#include <fstream>
+ #include <limits>
+ #include <mutex>
+ #include <new>
+@@ -524,6 +527,34 @@
+     result.catalogue.bytes = balls.capacity() * sizeof(tower::BallData);
+     census_clock.stop();
+ 
++    // AUDIT SIDECAR ONLY: exact field stream, no struct padding or source
++    // changes. Native little-endian ABI is pinned to this local replay.
++    if (const char* path = std::getenv("MHGP9_AUDIT_CATALOGUE")) {
++      std::ofstream dump(path, std::ios::binary | std::ios::trunc);
++      require(static_cast<bool>(dump), "audit_catalogue_open");
++      const std::uint64_t count = balls.size();
++      dump.write(reinterpret_cast<const char*>(&count), sizeof(count));
++      for (const auto& b : balls) {
++        std::array<char, 207> row{};
++        std::size_t at = 0;
++        const auto field = [&](const auto& value) {
++          std::memcpy(row.data() + at, &value, sizeof(value));
++          at += sizeof(value);
++        };
++        field(b.key.a);
++        for (auto x : b.key.b) field(x);
++        field(b.key.c);
++        for (auto x : b.level.num) field(x);
++        field(b.level.den);
++        field(b.arity); field(b.n_interior); field(b.n_shell);
++        for (auto x : b.interior_ids) field(x);
++        for (auto x : b.shell_ids) field(x);
++        require(at == row.size(), "audit_catalogue_row_size");
++        dump.write(row.data(), static_cast<std::streamsize>(row.size()));
++      }
++      require(static_cast<bool>(dump), "audit_catalogue_write");
++    }
++
+     // ---- Tour FULL.
+     if (options.keep_catalogue) result.catalogue_balls = balls;
+     if (options.run_tower) {

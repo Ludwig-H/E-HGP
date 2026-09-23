@@ -1,0 +1,142 @@
+--- a/morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp
++++ b/morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp
+@@ -3,6 +3,10 @@
+ #pragma once
+ 
+ #include <cfenv>
++#include <bit>
++#include <cstdio>
++#include <chrono>
++#include <ctime>
+ #include <numeric>
+ #include <unordered_map>
+ 
+@@ -449,6 +453,13 @@
+     std::vector<Block> lot_blocks;
+     Draft draft;
+     std::vector<u32> birth_ball;       // per node: ball of a birth, or kAbsent32
++    // AUDIT SIDECAR ONLY: no product mutation; independently shadow the
++    // current canonical roots with physical heads and intrusive node lists.
++    std::vector<u32> shadow_head, shadow_next, shadow_size, shadow_owner;
++    std::vector<u8> shadow_relocations;
++    u64 root_calls = 0, root_steps = 0, root_path_writes = 0, relabeled = 0;
++    u64 max_lot = 0, max_relabels = 0;
++    std::array<u64, 24> lot_hist{};
+   };
+   // Node IDs of one order in u32: an order with 2^32-1 nodes or more is an
+   // explicit resource refusal on this path (never a truncation). At 30 M
+@@ -522,12 +533,19 @@
+   }
+ 
+   u64 order_root(OrderState& o, u64 token, u64 prior_count) {
++    ++o.root_calls;
+     require(token < prior_count, "full_ball_anchor_not_prior");
++    const u64 original = token;
+     u64 r = token;
+-    while (o.compressed[r] != r) r = o.compressed[r];
++    while (o.compressed[r] != r) { ++o.root_steps; r = o.compressed[r]; }
+     while (o.compressed[token] != token) {
+-      const auto next = o.compressed[token]; o.compressed[token] = r; token = next;
+-    }
++      const auto next = o.compressed[token];
++      if (o.compressed[token] != r) ++o.root_path_writes;
++      o.compressed[token] = r; token = next;
++    }
++    require(original < o.shadow_head.size() &&
++            o.shadow_owner[o.shadow_head[original]] == r,
++            "phase_a_sidecar_shadow_root_mismatch");
+     require(r < prior_count && o.current.next[r] == absent, "full_ball_root_not_prior");
+     return r;
+   }
+@@ -538,6 +556,47 @@
+     o.current.levels.push_back(level); o.current.next.push_back(absent); o.compressed.push_back(id);
+     for (u64 parent : parents) { o.current.next[parent] = id; o.compressed[parent] = id; }
+     o.birth_ball.push_back(birth);
++    if (parents.empty()) {
++      o.shadow_head.push_back(static_cast<u32>(id));
++      o.shadow_next.push_back(kAbsent32);
++      o.shadow_size.push_back(1);
++      o.shadow_owner.push_back(static_cast<u32>(id));
++      o.shadow_relocations.push_back(0);
++    } else {
++      u32 chosen = o.shadow_head[parents.front()];
++      for (u64 parent : parents) {
++        const u32 h = o.shadow_head[parent];
++        if (o.shadow_size[h] > o.shadow_size[chosen] ||
++            (o.shadow_size[h] == o.shadow_size[chosen] && h < chosen)) chosen = h;
++      }
++      for (u64 parent : parents) {
++        const u32 h = o.shadow_head[parent];
++        if (h == chosen) continue;
++        u32 at = h, tail = h;
++        for (;;) {
++          o.shadow_head[at] = chosen;
++          ++o.relabeled;
++          const auto count = ++o.shadow_relocations[at];
++          o.max_relabels = std::max<u64>(o.max_relabels, count);
++          tail = at;
++          if (o.shadow_next[at] == kAbsent32) break;
++          at = o.shadow_next[at];
++        }
++        o.shadow_next[tail] = o.shadow_next[chosen];
++        o.shadow_next[chosen] = h;
++        o.shadow_size[chosen] += o.shadow_size[h];
++        o.shadow_size[h] = 0;
++        o.shadow_owner[h] = kAbsent32;
++      }
++      o.shadow_head.push_back(chosen);
++      o.shadow_next.push_back(o.shadow_next[chosen]);
++      o.shadow_next[chosen] = static_cast<u32>(id);
++      o.shadow_size.push_back(0);
++      o.shadow_owner.push_back(kAbsent32);
++      o.shadow_relocations.push_back(0);
++      ++o.shadow_size[chosen];
++      o.shadow_owner[chosen] = static_cast<u32>(id);
++    }
+     if (parents.empty()) add(o.st.births); else add(o.st.merges);
+     return id;
+   }
+@@ -644,6 +703,9 @@
+   }
+ 
+   void order_lots(OrderState& o) {
++    const auto wall_start = std::chrono::steady_clock::now();
++    timespec cpu_start{}, cpu_end{};
++    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &cpu_start);
+     o.anchors.assign(balls.size(), kAbsent32);
+     if (o.k == 1) {
+       FullCoverageBatch initial;
+@@ -661,6 +723,9 @@
+       while (end < program.size() && same_exact_level(level, balls[program[end]].level)) ++end;
+       if (o.lot_blocks.size() < end - begin) o.lot_blocks.resize(end - begin);
+       const std::span<Block> blocks(o.lot_blocks.data(), end - begin);
++      o.max_lot = std::max<u64>(o.max_lot, blocks.size());
++      const unsigned bucket = std::min<unsigned>(23, std::bit_width(static_cast<u64>(blocks.size())) - 1);
++      ++o.lot_hist[bucket];
+       const u64 prior_count = o.current.levels.size();
+       for (size_t j = begin; j < end; ++j) order_block(o, blocks[j - begin], program[j], level, prior_count);
+       order_lot(o, blocks, level);
+@@ -673,6 +738,23 @@
+     u64 live = 0;
+     for (u64 next : o.current.next) if (next == absent) ++live;
+     require(live == 1, "full_ball_final_component_count");
++    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &cpu_end);
++    const auto wall_end = std::chrono::steady_clock::now();
++    const double cpu_ms = (cpu_end.tv_sec-cpu_start.tv_sec)*1000.0 +
++      (cpu_end.tv_nsec-cpu_start.tv_nsec)/1000000.0;
++    const double wall_ms = std::chrono::duration<double, std::milli>(wall_end-wall_start).count();
++    std::fprintf(stderr,
++      "PHASE_A_SHADOW K=%u nodes=%zu blocks=%llu reps=%llu singleton=%llu grouped=%llu dsu_slots=%llu max_lot=%llu root_calls=%llu root_steps=%llu path_writes=%llu relabels=%llu max_relabels=%llu cpu_ms=%.3f wall_ms=%.3f hist=",
++      o.k, o.current.levels.size(), (unsigned long long)o.st.anchor_blocks,
++      (unsigned long long)o.st.representatives, (unsigned long long)o.st.singleton_lots,
++      (unsigned long long)o.st.grouped_lots, (unsigned long long)o.st.lot_dsu_slots,
++      (unsigned long long)o.max_lot, (unsigned long long)o.root_calls,
++      (unsigned long long)o.root_steps, (unsigned long long)o.root_path_writes,
++      (unsigned long long)o.relabeled, (unsigned long long)o.max_relabels, cpu_ms, wall_ms);
++    for (unsigned b = 0; b < o.lot_hist.size(); ++b)
++      if (o.lot_hist[b]) std::fprintf(stderr, "%s%u:%llu", b ? "," : "", b,
++                                      (unsigned long long)o.lot_hist[b]);
++    std::fprintf(stderr, "\n");
+     failpoint_after_lots(o.k);
+   }
+ 

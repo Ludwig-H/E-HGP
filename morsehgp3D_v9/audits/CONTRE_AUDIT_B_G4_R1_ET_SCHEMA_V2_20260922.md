@@ -109,6 +109,13 @@ La colonne temps total est `chain_total`, distincte de la durée externe
 de commande et de la préparation/segmentation hors ligne. Aucun contrat
 1 s/100 ms, trame brute float32 ou GPU n'est acquis par ces trois trames
 sans sol sur grille 1 mm, une seule répétition par cas.
+Les valeurs RSS exactes restent en **KiB** dans les bruts GNU time : les
+« Go » arrondis du README ne doivent pas être relus comme ces valeurs.
+En soustrayant le FULL mono, les six cas W48 de R1 donnent
+`(chain_cpu_s−tower_s)/(chain_total_s−tower_s)=42,6–44,6` CPU logiques
+occupés en moyenne sur 48, sans ventilation par phase. Le ratio de temps
+local/W8 vers G4/W48 (environ ×11,6)
+mêle machine et parallélisme et ne mesure pas l'efficacité des 48 fils.
 
 `completed` est recalculé seulement lorsque tous les cas sont
 `complete_relative` ; `partial` conserve explicitement refus, cas censurés

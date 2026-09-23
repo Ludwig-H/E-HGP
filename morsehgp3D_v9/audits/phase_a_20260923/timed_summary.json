@@ -1,0 +1,181 @@
+{
+  "product_pin": "ec6d1b74",
+  "input_sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf",
+  "catalogue_sha256": "c9829439ca819b48f5f0dc46cb7f5cdf7b4b4cae876c7881397e4c77fb461563",
+  "canonical_equal_bytewise": true,
+  "canonical_bytes": 1056931646,
+  "base": {
+    "orders": [
+      {
+        "K": 1,
+        "cpu_ms": 113.431,
+        "blocks": 101138,
+        "reps": 202227,
+        "singleton": 39458,
+        "grouped": 18232
+      },
+      {
+        "K": 2,
+        "cpu_ms": 281.092,
+        "blocks": 267355,
+        "reps": 410863,
+        "singleton": 146907,
+        "grouped": 33221
+      },
+      {
+        "K": 3,
+        "cpu_ms": 423.996,
+        "blocks": 415755,
+        "reps": 673257,
+        "singleton": 323021,
+        "grouped": 32601
+      },
+      {
+        "K": 4,
+        "cpu_ms": 676.061,
+        "blocks": 590629,
+        "reps": 985266,
+        "singleton": 513639,
+        "grouped": 29681
+      },
+      {
+        "K": 5,
+        "cpu_ms": 766.728,
+        "blocks": 789886,
+        "reps": 1350172,
+        "singleton": 725600,
+        "grouped": 26301
+      },
+      {
+        "K": 6,
+        "cpu_ms": 1050.913,
+        "blocks": 1013317,
+        "reps": 1760359,
+        "singleton": 957418,
+        "grouped": 23663
+      },
+      {
+        "K": 7,
+        "cpu_ms": 1410.766,
+        "blocks": 1259012,
+        "reps": 2217746,
+        "singleton": 1210456,
+        "grouped": 21095
+      },
+      {
+        "K": 8,
+        "cpu_ms": 1750.721,
+        "blocks": 1523893,
+        "reps": 2709673,
+        "singleton": 1480407,
+        "grouped": 19157
+      },
+      {
+        "K": 9,
+        "cpu_ms": 1859.43,
+        "blocks": 1808770,
+        "reps": 3248037,
+        "singleton": 1769628,
+        "grouped": 17440
+      },
+      {
+        "K": 10,
+        "cpu_ms": 2179.729,
+        "blocks": 2117675,
+        "reps": 3831431,
+        "singleton": 2081320,
+        "grouped": 16336
+      }
+    ],
+    "tower_ms": 13258.3,
+    "peak_rss_kb": 4574552,
+    "status": "complete_relative"
+  },
+  "fast": {
+    "orders": [
+      {
+        "K": 1,
+        "cpu_ms": 110.8,
+        "blocks": 101138,
+        "reps": 202227,
+        "singleton": 39458,
+        "grouped": 18232
+      },
+      {
+        "K": 2,
+        "cpu_ms": 292.725,
+        "blocks": 267355,
+        "reps": 410863,
+        "singleton": 146907,
+        "grouped": 33221
+      },
+      {
+        "K": 3,
+        "cpu_ms": 460.677,
+        "blocks": 415755,
+        "reps": 673257,
+        "singleton": 323021,
+        "grouped": 32601
+      },
+      {
+        "K": 4,
+        "cpu_ms": 690.339,
+        "blocks": 590629,
+        "reps": 985266,
+        "singleton": 513639,
+        "grouped": 29681
+      },
+      {
+        "K": 5,
+        "cpu_ms": 911.725,
+        "blocks": 789886,
+        "reps": 1350172,
+        "singleton": 725600,
+        "grouped": 26301
+      },
+      {
+        "K": 6,
+        "cpu_ms": 1139.858,
+        "blocks": 1013317,
+        "reps": 1760359,
+        "singleton": 957418,
+        "grouped": 23663
+      },
+      {
+        "K": 7,
+        "cpu_ms": 1456.854,
+        "blocks": 1259012,
+        "reps": 2217746,
+        "singleton": 1210456,
+        "grouped": 21095
+      },
+      {
+        "K": 8,
+        "cpu_ms": 1562.917,
+        "blocks": 1523893,
+        "reps": 2709673,
+        "singleton": 1480407,
+        "grouped": 19157
+      },
+      {
+        "K": 9,
+        "cpu_ms": 1861.784,
+        "blocks": 1808770,
+        "reps": 3248037,
+        "singleton": 1769628,
+        "grouped": 17440
+      },
+      {
+        "K": 10,
+        "cpu_ms": 2290.302,
+        "blocks": 2117675,
+        "reps": 3831431,
+        "singleton": 2081320,
+        "grouped": 16336
+      }
+    ],
+    "tower_ms": 13173.6,
+    "peak_rss_kb": 4747196,
+    "status": "complete_relative"
+  }
+}
