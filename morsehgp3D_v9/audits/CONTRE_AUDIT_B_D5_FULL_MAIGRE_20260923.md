@@ -144,3 +144,32 @@ mono ; index/jointure et queue doivent être chronométrés séparément.
 estimées par C, avec 0,43–0,9 Go si les dix ordres coexistent : ce sont
 des projections, pas une mesure G4. Comparer le coût de la sonde ON/OFF
 et le payload complet, pas seulement des racines égales.
+
+## Actualisation R13 : le vrai recouvrement limite l'attribution D5
+
+Les six cas W48 du [reçu R13](../receipts/g4_tower_r13_20260923/README.md)
+ont une tour FULL de **0,584–0,784 s à K5** et **2,260–3,039 s à K10**.
+Dans le code, les préparations statiques descendent K tandis que les
+lots déjà lancés se chevauchent ; `lots_ms` est le **résidu de la fenêtre
+commune** après soustraction des durées statiques, non la somme des
+`lots_by_k`. La fenêtre vaut 0,358–0,493 s à K5 et 1,421–1,904 s à
+K10 ; validation, populations, images, banque et encodage prennent
+encore 0,226–0,290 s et 0,830–1,123 s respectivement. À lots inchangés,
+supprimer fictivement **toute** la préparation statique ne retrancherait
+que 0,097–0,104 s à K5 et 0,423–0,539 s à K10 de cette fenêtre. D5
+pourrait changer aussi les lots ou la contention : ces retraits sont
+des projections conditionnelles, pas des plafonds universels.
+
+Une réutilisation **exacte en principe** des facettes, cibles ordinales
+et contributions immuables collectées par `prepare_static_order()`
+dans `order_block()` éviterait la seconde extraction `visit_block_at`.
+Les **racines**, en revanche, dépendent des ancres/DSU au seuil ouvert
+du niveau et doivent être relues juste avant fermeture du lot ; les
+pré-calculer en phase statique serait faux. Conserver les blocs à zéro
+facette, l'ordre des facettes et la première position canonique du
+groupe ; mesurer mémoire, collecte et second parcours avant tout port.
+Une ablation utile fixerait le même catalogue, comparerait chaque
+racine pré-lot et le payload FULL entier, avec trois répétitions
+W48 puis W24/W1. Les millions de MEB et visites d'intrus de R13
+sont des **comptes sans temps isolé** : ils ne prouvent ni la vitesse
+du saut D5 ni un coût dominant de la phase statique.

@@ -89,3 +89,40 @@ ne ferme que 0,0818–0,1345 % des formes cœur du plein brut testé : ne
 pas la porter telle quelle pour combler l'écart. Le streaming exact
 S2/S3, nécessaire pour les dizaines de millions de sites, est un
 chantier **distinct** de la réduction du travail total.
+
+## Après R13 : portée du port « 128 registres »
+
+Le commit produit `0b41e4c86`, **postérieur au paquet R13**,
+remplace les compteurs d'une arête par des champs u32 et place les
+totaux de warp en mémoire partagée. La lecture statique donne une borne
+pour les champs par arête sous les gardes d'index actuelles : le DFS
+monotone visite au plus `node_count<2^32` nœuds ; les sous-arbres admis
+ou rejetés sont disjoints, donc comptent au plus `n<2^32` sites ; les
+deux preuves par arête ont chacune au plus
+`1+4+…+4^6 = 5 461` cellules. Les tests potentiellement nombreux
+restent u64. La barrière avant réemploi du frontier demeure en source.
+Ce n'est **pas** encore une preuve device du nouveau noyau. Le chiffre
+`128 registres, sans spill, 16 warps/SM` est annoncé depuis une
+compilation locale non archivée ; R13 a exécuté l'ancien binaire.
+
+Les additions u64 des totaux par warp et par appel restent **sans
+contrôle de débordement** sur tout le domaine de l'API. Une borne
+conservatrice du seul terme de tests de cellules est
+`2 × 5 461 × min(n, capacity) × edges` : avec le défaut
+`capacity=65 536` et `edges≤2^31−1`, elle est inférieure à `2^64`,
+mais pas avec une capacité utilisateur proche de `2^32`. Les six
+populations R13 sont loin du seuil : cette borne donne moins de
+`2,47×10^15` tests pour le pire cas. C'est un verrou de domaine
+massif, pas une divergence observée. Un refus typé ou une accumulation
+vérifiée est requis avant d'élargir le domaine déclaré. Une future
+réception devrait archiver `ptxas -v`, les attributs CUDA et
+l'occupation calculée, puis les sous-temps et les masques/compteurs
+par arête contre CPU, avec ardoise réduite, lot vide et contacts.
+
+Précision supplémentaire au [nouvel addendum développeur](../receipts/g4_tower_r13_20260923/ADDENDUM_20260923.md) :
+`cudaEventRecord(e[0])` précède **les allocations**, copies et
+initialisations du lot S3 (`filter_runner.cu:616–643`). L'intervalle
+`certificate_device_ms=e[0]→e[3]` les englobe aussi, ainsi que de
+possibles attentes de soumission hôte. « Upload + noyau + download »
+n'est donc pas un découpage exhaustif, ni un temps d'activité pure du
+noyau.

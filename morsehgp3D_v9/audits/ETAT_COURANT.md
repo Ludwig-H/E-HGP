@@ -309,6 +309,20 @@ inclut transferts et noyau, contrairement au libellé « coût du noyau »
 du reçu ; le temps du noyau seul n'est pas publié. Une seule mesure par
 cas, aucun p95 ; aucun contrat brut multi-séquence ni sous-quadraticité
 globale ne sont qualifiés. Le G4 SPOT a été arrêté et relu `TERMINATED`.
+Le [correctif d'interprétation](../receipts/g4_tower_r13_20260923/ADDENDUM_20260923.md)
+du développeur suit R13. L'audit précise encore que le temps e0→e3
+encadre **allocations et initialisations**, pas seulement copies et
+noyau. Le nouveau port S3 `0b41e4c86` annonce 128 registres et 16
+warps/SM après transfert des totaux en mémoire partagée ; **R13 a
+exécuté l'ancien noyau**, le gain reste non mesuré sur G4. Les champs
+u32 par arête ont des bornes sous les gardes actuelles, mais les
+additions u64 globales doivent être bornées ou contrôlées avant le
+domaine massif complet. La [mise à jour D5](CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md)
+rappelle que phase statique et lots de la tour se recouvrent déjà :
+ne pas additionner leurs durées comme du mur ni promettre un facteur
+depuis les seuls comptes MEB. Un shadow de vues `E×C` reste à tester,
+avec gardes conservés et repli par cellule ; le premier shadow commun
+à huit cellules est négatif.
 La [preuve B de redondance d'une seule cellule de
 centres](CERTIFICAT_B_REDONDANCE_CELLULE_UNIQUE_20260923.md) affine la
 piste de rejet **avant** le cœur : si la cellule couvre le disque

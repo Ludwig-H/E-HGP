@@ -163,3 +163,38 @@ si le coût total est prometteur. Le plafond global à cellule unique
 pour le chargement entier, mesuré à
 [1,345 % de la masse cœur](precore_cell_screen_20260923/README.md)
 sur une trame brute K5 ne prédit pas le rendement des sous-cellules.
+
+## Addendum après le premier shadow négatif : vues par cellule
+
+Le [shadow à huit cellules](s2_precore_node_shadow_20260923/README.md)
+ne ferme que **0,0818–0,1345 %** des formes du plein brut 08/000000/K5,
+pour 0,232–0,677 s de tentative hors produit. Ne pas porter cette grille
+commune telle quelle. Deux raffinements restent des **hypothèses non
+mesurées**, et non une borne sous-quadratique acquise.
+
+1. Construire pour chaque cellule fermée `C` un ensemble `E_C`
+   conservateur des arêtes dont un centre de la voie pourrait appartenir
+   à `C`. Une arête/voie doit être attribuée à **toutes** ses cellules
+   possibles, frontières comprises ; elle ne ferme que si chacune est
+   hors domaine ou prouvée. Une cellule indécise impose le repli.
+   Les crédits de cellules ne s'additionnent jamais. Des cellules
+   chevauchantes sont licites pour la preuve ; les émissions gardent
+   néanmoins un propriétaire canonique unique.
+2. Pour un bloc `Z` de sites et des **IDs réels distincts** `G` disjoints
+   de `Z`, si à tous les sommets `v` de `C`,
+   `max_(g∈G)|g−v|² < min_(z∈box(Z))|z−v|²`, alors tout `g` reste
+   strictement plus proche que tout `z` dans toute la cellule : chaque
+   différence de distances carrées est affine en centre. On peut
+   examiner l'omission de `Z` d'une **vue `E×C`**, même sans fermer
+   l'arête, avec `K−1` gardes pour la vue commune q3/q4 et `K−2`
+   seulement pour q4. Il faut **épingler les gardes `G` dans cette même
+   vue**, ou prouver une chaîne transitive ; sinon le filtrage pourrait
+   masquer précisément la profondeur rejetante. Une arête ayant aussi
+   des centres dans une autre cellule ne peut pas perdre `Z` dans son
+   cover global sans preuve sur ces autres cellules. Égalité → repli.
+
+Le shadow décisif doit facturer les incidences `E×C`, les recherches
+`Z`, les gardes retenus, les copies/replis et les **formes réellement
+évitées** sur les mêmes 8k/16k/32k emboîtés, K5/K10, puis brut et
+sans-sol. Si même un majorant généreux des formes épargnables ne
+rembourse pas ce travail, arrêter la piste et conserver le moteur exact.

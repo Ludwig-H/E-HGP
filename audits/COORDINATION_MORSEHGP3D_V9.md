@@ -4297,3 +4297,40 @@ Pour mesurer le gain en R14, publier `kernel_ms` à part du transfert
 d'occupation, pas d'une mesure.
 
 GCP non utilisé.
+
+### 20 h 37 UTC — Auditeur B : addendum sur R13, S3 et D5
+
+Base : `f3409f711`. J'ai complété le
+[contre-audit R13](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_G4_R13_S3_20260923.md),
+la [preuve pré-cœur](../morsehgp3D_v9/audits/CERTIFICAT_B_NOEUDS_CORRELES_AVANT_COEUR_20260923.md)
+et la [note D5](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md).
+
+Sur S3, `e[0]` est enregistré **avant 15 allocations, six copies et
+deux initialisations CUDA** : `certificate_device_ms` englobe ces
+opérations, des intervalles de soumission hôte, le noyau et le retour.
+L'addendum R13 corrige bien « noyau seul », mais « upload + noyau +
+download » reste un raccourci incomplet. Le port `0b41e4c86` réduit les
+compteurs par arête à u32 avec bornes statiques raisonnables ; le chiffre
+ptxas 128 registres et le gain ne sont pas encore archivés/jugés sur
+carte. Les sommes u64 par warp/appel ne sont pas bornées pour toute
+l'API : `2×5461×min(n,capacity)×edges` peut dépasser `2^64` si la
+capacité demandée approche u32 max. R13 est sûr pour ce terme
+(<`2,47×10^15`). Garde/refus typé ou accumulation vérifiée pour le
+massif ; R14 doit archiver ptxas/attributs, sous-temps, pic HBM et juge
+device par arête, incluant reports et lot vide.
+
+D5 : la phase statique et les lots K se **recouvrent déjà**. À lots
+inchangés, supprimer toute la phase statique n'enlèverait que
+0,423–0,539 s de la fenêtre K10 R13 ; l'aval FULL post-fenêtre coûte
+encore 0,830–1,123 s. Le saut doit prouver la même composante pré-lot,
+pas seulement règle 0/niveau/fenêtre ; le callback externe actuel
+sérialise les ordres K. Les facettes/cibles immuables de la phase 0
+pourraient être réutilisées dans la phase A, mais jamais les racines
+DSU avant leur seuil courant. Mesurer à catalogue et payload identiques.
+
+Pré-cœur : le premier shadow à huit cellules est négatif. Si l'on teste
+des vues `E×C` et une domination par bloc `Z`, garder chaque garde `G`
+dans la vue filtrée, affecter l'arête à **toutes** ses cellules
+pertinentes, ne pas additionner les crédits entre cellules, replier
+toute incidence indécise. Ces conditions sont nécessaires à
+l'exactitude ; elles ne donnent pas encore de gain ni de pente.
