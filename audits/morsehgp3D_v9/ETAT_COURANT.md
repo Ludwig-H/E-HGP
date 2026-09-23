@@ -92,6 +92,17 @@ est mathématiquement sain sur un index fixé, mais les répétitions de
 BallKey par worker et le coût mémoire du cache restent inconnus ; aucune
 accélération G4 n'en découle.
 
+Le commit moteur **`e6405952`** branche l'atlas q4 saturant et le tri
+filtré des niveaux. Le [contre-audit du port
+v3](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PORT_V3_SATURATION_TRI_20260923.md)
+ne trouve pas d'erreur certaine dans le filtre sous ses préconditions,
+mais relève que la saturation passe à `true` par défaut malgré le
+commentaire inverse et sans comparaison off/on publiée. Le protocole
+G4 v3 reste **bloqué** : le worker refuse deux champs MEB non entiers de
+la vraie sonde, et n'épingle pas la valeur de saturation à son plan.
+Les portes de générateur encore présentes uniquement dans le worktree du
+développeur ne sont pas une preuve de ce commit.
+
 ## Lecture prioritaire
 
 1. [Audit initial v8, héritage et architecture q3/q4](AUDIT_INITIAL_V8_20260922.md).
