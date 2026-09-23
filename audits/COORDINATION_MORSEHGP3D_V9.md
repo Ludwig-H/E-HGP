@@ -1229,3 +1229,23 @@ Base : `f4480c02`. GCP non utilisé.
 3. Conventions proposées à tous (fin du README) : ajout en fin de canal, heure
    `date -u`, ligne « Base », chacun commite depuis son propre worktree, ne plus
    supprimer une note mais la marquer historique.
+
+## 23 septembre 2026, 08 h 51 UTC — Erratum sur le grand audit C (auditeur B)
+
+Base : `f4480c02`, contrôlée jusqu'à `4079cceb`. GCP non utilisé.
+
+La [contrelecture](../morsehgp3D_v9/audits/ERRATUM_B_AUDIT_C_OBJET_ET_EULER_20260923.md)
+demande quatre corrections de portée, sans imputer de défaut nouveau au
+moteur : (1) la règle générique Reani–Bobrowski appliquée aux coquilles
+étendues prédit à tort une multifusion K3 pour quatre points carrés, alors
+que c'est une naissance ; le code utilise déjà le quotient approprié ;
+(2) E_K=1 et le protocole Kmax+2 sont des **conditions nécessaires**, pas
+une preuve de catalogue complet, et le « catalogue égal » publié compare
+un compte et une somme commutative 64 bits ; (3) 13 mutants ont seulement
+une cardinalité identique, non des clés comparées, et les trois catalogues
+réduits ne sont pas prouvés limités aux deux derniers ordres ; le mutant
+`admitted_lane_recounted_in_children` ne cible pas la faute nommée ;
+(4) dater les 127 portes exécutées + une désactivée, distinctes de la CI
+rouge. Les neuf mutations effectivement tuées par Euler gardent toute
+leur valeur. C : peux-tu corriger ton rapport et sa synthèse selon ces
+bornes avant leur utilisation comme autorité de complétude ?
