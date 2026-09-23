@@ -1,6 +1,6 @@
 # État courant des audits v9
 
-23 septembre 2026. Produit publié courant : **`f55ea40c`**. Le
+23 septembre 2026. Produit publié courant : **`02d55856`**. Le
 [reçu G4 R6](../receipts/g4_tower_r6_20260923/README.md) exécute le
 snapshot **`78ce9fd4`** ; ses temps ne qualifient pas encore le
 sample-sort, le raccourci FULL ni la nouvelle frontière temporelle
@@ -351,8 +351,8 @@ compilée `-O2 -frounding-math -fno-fast-math` contre le header publié
 (SHA-256 `de54655393b09182…`), compare encore **42 544** cas sous
 quatre arrondis et FTZ/DAZ activés ou non, sans divergence de
 clé, niveau, support, coquille ou statut ; ce sidecar ne remplace pas
-une porte FENV intégrée. Voir la [preuve et ses portes
-ouvertes](CONTRE_AUDIT_B_MEB_PROPOSE_WIP_20260923.md). `78e94b04`
+une porte FENV intégrée. Voir la [preuve du support
+canonique](MEB_PROPOSITION_EXACTE_20260923.md). `78e94b04`
 publie maintenant les compteurs `proposals/verified/canonical/fallbacks`
 dans le JSON et un levier `tower_meb_proposal` ON/OFF. Le nouveau
 préflight exige une proposition vérifiée quand ce levier est actif ;
@@ -361,13 +361,19 @@ l'ablation G4 complète reste à faire. L'ordre Welzl inverse actuellement
 que la récursion insère dans l'ordre du tableau ; mesurer les deux ordres
 sur les mêmes facettes avant de le choisir pour le coût.
 
-Le [filtre négatif de clés](FULL_FILTRE_ABSENCE_CLE_20260923.md) propose
-d'éviter le `lower_bound` de `static_terminal` quand la clé MEB est
-assurément absente du catalogue immuable. Ses collisions ne changent
-jamais le résultat ; construire et sonder le filtre a cependant un coût.
-R6 compte **11,309 M recherches** à K10 sur 08/000000, sans publier le
-nombre de clés absentes ni leur temps : l'histogramme par K et une
-ablation FULL/chaîne décident de l'intérêt réel.
+`02d55856` remplace les recherches binaires de clé FULL par une table
+exacte à adressage ouvert, construite en parallèle puis lue après jonction.
+Les collisions sont départagées par la clé entière ; aucune case occupée
+n'est effacée. À 5,51 M boules, la capacité de 16 777 216 identifiants
+`u32` ajoute **64 Mio** à `by_key`, toujours conservé. L'essai local
+alterné 08/000000/K10/W8 passe de **18,5/17,7 s à 16,9/16,4 s** pour la
+tour, avec digest égal ; le développeur rapporte **127/127** portes locales,
+mais le registre CTest du snapshot énumère **128** tests `gate` et le log
+mutable ne fige pas leur clôture. Ni G4 ni gain de chaîne complète n'en
+découlent. Publier construction, sondes réussies et
+absentes, longueurs de chaînes, RSS de pointe et ablations W1/W48 :
+à plusieurs dizaines de millions de points, le coût total et la
+résidence décident de la pertinence de cette table.
 
 ## Portes de preuve encore ouvertes
 
