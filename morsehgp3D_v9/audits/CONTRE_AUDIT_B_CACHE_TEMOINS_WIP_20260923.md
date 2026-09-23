@@ -71,3 +71,43 @@ Une trace interne fait au plus 17 entrées à K10 ; son empreinte est à
 mesurer pour clôture comptable, mais le verrou de fond reste ailleurs.
 Les portes WIP actuelles utilisent des petits oracles et des mutants de
 bornes ; elles ne sont pas encore cette ablation ni une preuve de gain.
+
+Le mutant WIP `witness_cache_endpoint_admitted` est **équivalent** sur
+entrée valide : remplacer `h.minimum4<=0` par `<0` ne fait entrer que
+`h.minimum4=0`; alors `h4_squared=0`, tandis que `Xi.high≥0` est une
+somme de carrés, si bien que le test suivant
+`alpha*h4_squared<=16*Xi.high` continue toujours sans crédit. Il ne peut
+être tué par une réponse géométrique fausse. Rejeu du binaire mutant
+WIP : code `0`, `status=PASS`, 23 757 checks, alors que
+`mutants.json` attend `1`. Le remplacer par une
+mutation qui force réellement un crédit à `H_min=0`, et archiver une
+fixture causale, avant de compter cette porte parmi les preuves.
+
+## Reprise WIP v6 après cette alerte
+
+Le développeur a ensuite remplacé ce mutant et ajouté une porte dédiée
+`q34_witness_cache_gate.cpp` SHA-256 `b9509ac1cd46…`. Rejeu local :
+24 804 comparaisons avec la même paire, 24 804 avec une autre paire,
+7 556 rejets croisés et 4 787 traces portant séparément les deux voies.
+Les **trois mutants désormais présents** sont tués par réponse
+géométrique erronée. Le survivant équivalent ci-dessus est donc un
+épisode WIP historique, non le verdict sur la nouvelle porte.
+
+La sonde a désormais `--lever=NAME=0|1`, le JSON `options.levers` en
+schéma v6, et trois compteurs cache propagés jusqu'au ledger ; le worker
+et le plan sont passés au schéma v6/v4. Cela résout l'absence de levier
+exposée plus haut, **pas** le besoin d'une ablation cache seule à
+trame/K/s/W identiques : la porte chaîne compare encore tous les leviers
+ON à tous OFF en changeant aussi W2→W1. La voie publique à span forgé
+reste inchangée et la contre-fixture de doublon reste valable.
+
+Le protocole v6 WIP n'est pas encore qualifié : son faux producteur
+`tower_selftest_v9.py:76` émet littéralement
+`mhgp9_tower_probe_v5` tandis que le worker exige `v6`. Le test ciblé
+`Protocol.test_probe_and_time_validation` échoue immédiatement sur
+`probe schema/status` ; le remplacement v5→v6 **en mémoire** le fait
+passer, sans constituer une porte complète. En outre,
+`tower_session_v9.py` n'a pas encore corrigé les quatre défauts de
+réception du [contre-audit v5](CONTRE_AUDIT_B_G4_RECEPTION_V5_20260923.md).
+Pas de nouvelle dépense G4 avant correction, selftests normaux/`-O`,
+relecture du snapshot et ablation cache seule.
