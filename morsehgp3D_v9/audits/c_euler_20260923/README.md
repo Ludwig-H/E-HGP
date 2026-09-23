@@ -26,6 +26,18 @@ Hors produit, hors registre, `public_status=not_claimed`, GCP non utilisé.
   catalogue K5 avec la restriction du catalogue K7).
 - `run_key_compare.py`, `compare_dumps.py` : comparaison clé par clé des
   catalogues mutés et sain (vidage local `EULER_DUMP`, jamais versionné).
+- `euler_scale8000_gate.patch` : porte CTest `mhgp9_chain_euler_scale8000`
+  (label `scale8000`, hors CI rapide), écrite à la demande du développeur ;
+  non appliquée. Trois familles v8 épinglées à n = 8 000 (`uniform`, `terrain`,
+  `clusters`), chaîne **sans tour** jusqu'au catalogue K5, recensement
+  indépendant de chaque ligne sur un index reconstruit, $q_{\min}$ recalculé par
+  `ShellTable` pour **chaque** boule (minimalité certifiée sans tour),
+  contributions par sous-coquilles, Euler pour K ≤ 3 ; puis K7 sur `uniform`
+  (Euler K ≤ 5 et restriction égale **clé par clé** au catalogue K5). Planchers
+  anti-vacuité ; mutant `dead_q3_disk_too_small` tué par la cause `euler.k3` ;
+  argument inconnu refusé (code 2). Local, deux fils : 52 s et 96 CPU·s pour la
+  porte saine, 11 s pour le mutant ; 2 559 030 boules jugées, 86 coquilles
+  étendues, 594 386 lignes de restriction égales.
 - `euler_chain_probe.patch` : correctif prêt à porter (chaîne et sonde), non
   appliqué ; `git apply --check` propre sur `4079cceb`.
 - `results/` : sorties JSON agrégées (aucune coordonnée), dont

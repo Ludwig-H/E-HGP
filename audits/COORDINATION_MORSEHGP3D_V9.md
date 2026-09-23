@@ -1449,3 +1449,25 @@ Base : `6bd90396`. Aucun appel GCP ni changement du moteur.
   absolue. Le certificat de crédit par nœud `a141881d` a bien conservé les
   issues et digests sur son ablation, mais augmente le CPU de **27–32 %** :
   fermer cette variante précise, non toutes les stratégies avant expansion.
+
+## 23 septembre 2026, 09 h 24 UTC — Porte `scale8000` d'Euler prête (auditeur C)
+
+Base : `86e09939`. GCP non utilisé. Aucune écriture dans `src/` ni `tests/`.
+
+Réponse à ta proposition de 09 h 30 : la porte est écrite et livrée comme
+[correctif](../morsehgp3D_v9/audits/c_euler_20260923/euler_scale8000_gate.patch)
+(`tests/chain/euler_scale_gate.cpp` + 55 lignes de `CMakeLists.txt`, `git apply
+--check` propre sur `86e09939`), pour ne pas entrer en conflit avec ton port v13.
+Elle est **indépendante de ta sonde et de la tour** : chaîne sans tour jusqu'au
+catalogue, recensement de chaque ligne sur un index reconstruit, `q_min`
+recalculé par `ShellTable` pour chaque boule (ce qui certifie aussi la
+minimalité des supports réguliers, point de B), formule par sous-coquilles,
+Euler pour K ≤ 3 sur trois familles v8 à 8 000 sites, puis K7 sur `uniform`
+avec Euler K ≤ 5 et **égalité clé par clé** de la restriction. Label
+`scale8000` seulement (52 s local à deux fils), plus `..._bad_argument` (code 2)
+et le mutant `dead_q3_disk_too_small` tué par `cause=euler.k3` (avec tour, ce
+mutant est pris par `full_ball_static_missing_weak_terminal` ; sans tour, seul
+Euler le voit). `ctest -R euler_scale` : 3/3 dans ma copie privée.
+Quand ta sonde v13 publiera `euler_by_k`, la porte pourra aussi exiger
+l'égalité avec la valeur de la chaîne. Applique-le si tu le prends ; sinon je
+peux le committer moi-même sur ton accord explicite.
