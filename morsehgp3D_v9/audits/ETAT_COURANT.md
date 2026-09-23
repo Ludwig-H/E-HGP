@@ -1,7 +1,8 @@
 # État courant des audits v9
 
 23 septembre 2026. Ports v13 publiés : sonde **`c768e06a`**, porte Euler
-8k **`a08378da`**, lecteur LiDAR **`50646eef`**, lecteur G4 **`515b3666`**.
+8k **`a08378da`**, lecteur LiDAR **`50646eef`** puis **`1f048aae`**,
+lecteur G4 **`515b3666`** puis **`1f048aae`**.
 Les mesures de densité restent celles du binaire v12 **`4530644b`** ;
 aucune nouvelle série LiDAR v13 n'en découle. Le dernier
 [reçu G4 R8](../receipts/g4_tower_r8_20260923/README.md) exécute
@@ -87,25 +88,26 @@ domaine produit). Elle ne signale aucune omission observée du générateur.
 Le port Euler v13 est publié en **`c768e06a`**. La sonde écrit v13 et le
 lecteur G4 en vérifie la borne, la longueur du vecteur et les nouveaux
 champs `q34_occupancy`/`tower_phases_ms`. Le lecteur LiDAR `50646eef`
-rejette désormais le vecteur Euler tronqué et une rétrogradation v13→v12 ;
-son schéma attendu vient du résumé de campagne. Un écart subsiste sur une
-vraie réponse de 360 sites, K5/s8/W2 : ôter `q34_occupancy` **ou**
-`tower_phases_ms` laisse le lecteur local répondre vrai, tandis que G4
-rejette les deux sorties ; le selftest LiDAR v13 ne mute pas ces champs.
-Le lecteur G4 `515b3666` reconnaît correctement un refus réel antérieur au
-calcul d'Euler (`chain_shell_above_12`, borne Euler 0) comme refus explicite.
-Aligner les deux champs restants avant une nouvelle pente LiDAR v13.
+rejetait déjà un vecteur Euler tronqué et une rétrogradation v13→v12,
+mais acceptait encore l'absence de ces deux champs. Le correctif
+**`1f048aae`** réutilise les juges v13 G4 et lie la revalidation à une
+matrice de campagnes annoncée ; son selftest refuse **43/43** mutations
+en Python normal et sous `-O` (rejeu local). Le lecteur G4 `515b3666`
+reconnaissait déjà un refus réel antérieur au calcul d'Euler
+(`chain_shell_above_12`, borne Euler 0) comme refus explicite. Aucune
+nouvelle pente LiDAR v13 n'est publiée par ce seul correctif.
 
 Le calcul Euler reste inclus dans `census_ms` (`tower_chain.cpp:486,539–601`)
 et un `E_K` faux refuse **avant** FULL (`:602–612`), alors que la décision
 du constructeur prévoit son coût séparé et un refus après tour FULL réussie.
 Les portes mathématiques passent sur leurs cas locaux, sans contre-exemple
-trouvé à la formule ; la porte 8k est ajoutée en `a08378da`. Le test des
-deux mutants de la chaîne accepte cependant
-`cause=euler.chain_refused` pour **toute** erreur de chaîne
-(`chain_euler_gate.cpp:60–61`, `CMakeLists.txt:171–172`). Exiger la raison
-`chain_catalogue_euler_violated` et le statut Euler `fails` rendra le mutant
-causal. Pour `run_tower=false`, expliciter dans la preuve la positivité des
+trouvé à la formule ; la porte 8k est ajoutée en `a08378da`. **`1f048aae`**
+impose aux deux mutants de chaîne la raison
+`chain_catalogue_euler_violated`, et le lecteur G4 lie ce refus au statut
+Euler `fails` dans les deux sens. La porte d'échelle de **`96bd6190`**
+échantillonne une boule sur 64 pour son recensus brut : contrôle utile mais
+déterministe et non exhaustif, sans couverture garantie de chaque famille
+de coquilles. Pour `run_tower=false`, expliciter dans la preuve la positivité des
 supports réguliers, que les fabriques exactes q2/q3/q4 imposent déjà.
 
 Les certificats exacts actuellement raccordés comprennent la saturation
@@ -277,6 +279,17 @@ supplémentaire : **chaîne hors q3/q4 = 1,147–1,685 s dès K5**, et tour
 aval seule **2,972–3,895 s à K10**. Accélérer le seul q3/q4 ne peut faire
 passer sous 1 s le chemin mesuré actuel. GPU, trames brutes avec sol,
 diversité des séquences et complétude absolue restent ouverts.
+
+Le [rectificatif d'ordonnancement](RECTIFICATIF_R8_Q34_ORDONNANCEMENT_20260923.md)
+relève une erreur commune au reçu et à sa contrelecture : **tous les
+rectangles survivants sont proposés à la file**, même sous 256 paires ;
+256 ne règle que le découpage des plages. Sur 000000/K5, **2,006 M** des
+**3,134 M** rectangles sont rejetés dans les jobs avant publication, puis
+**1,196 M** plages sont publiées. Mesurer séparément la fin des jobs de
+front et des plages est nécessaire avant d'attribuer l'attente. À travail
+CPU q3/q4 R8 inchangé, le meilleur cas 000100/K5 requiert déjà au moins
+**1,611 s** pour cette phase même sur 48 fils parfaitement occupés ; le
+rééquilibrage seul ne clôt pas le contrat.
 
 ## Verrou q3/q4 : réduire le travail avant l'expansion
 
