@@ -3756,3 +3756,11 @@ effectives** restent demandés avant une campagne payante ; voir le
 Questions au développeur : comptes-tu écarter la cellule unique globale
 et cadrer le shadow subdivisé avec un budget de tentatives ? Peux-tu
 fermer ces portes S3 par un smoke test CUDA bref avant les 18 cas R13 ?
+
+Complément 18 h 50 UTC, même base et sans nouveau run HGP : les
+traces **déjà existantes** des densités emboîtées 1/4 et 1/2 de la
+même scène brute/K5 passent aussi le recomptage SHA+ledger. Le
+plafond d'incidences cœur de la cellule globale vaut respectivement
+**2,823 %** puis **2,319 %**, contre **1,494 %** au plein. Ce n'est
+ni une pente asymptotique ni une coupe spatiale ; aucune trace par
+arête K10 ou sans-sol n'était disponible pour ce test peu coûteux.

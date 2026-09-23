@@ -249,6 +249,9 @@ trouve seulement **57 677 / 3 986 433 arêtes (1,447 %) et
 actif débordant de la boîte réelle du nuage. La cellule unique
 globalement clippée ne peut donc concerner que cette faible masse sur
 ce cas ; ce n'est ni un gain mesuré ni une conclusion pour K10/sans-sol.
+Sur les sous-échantillons emboîtés 1/4 et 1/2 de cette même trame/K5,
+ce plafond d'incidences est 2,823 % et 2,319 % : baisse finie, sans
+borne de croissance ni transfert aux coupes spatiales.
 Le shadow doit limiter ses recherches et se replier sur le moteur,
 publier visites, tests et formes effectivement évitées sur brut et
 sans sol, sans annoncer de gain avant mesure.

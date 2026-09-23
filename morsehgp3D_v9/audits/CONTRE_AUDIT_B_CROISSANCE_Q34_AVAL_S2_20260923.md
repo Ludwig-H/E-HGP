@@ -79,6 +79,11 @@ clippée globalement n'est donc pas prioritaire sur ce cas. Le shadow
 utile doit vraiment subdiviser les centres, puis mesurer ses gardes
 distincts, coût et formes économisées ; rien n'est encore connu à K10,
 sans sol ou `s=10/12`.
+Aux densités emboîtées 1/4→1/2→entière de cette même trame/K5, le
+plafond d'incidences cœur baisse **2,823 %→2,319 %→1,494 %**. Cette
+tendance finie n'est pas une loi sous-quadratique ni une mesure des
+coupes spatiales ; elle réduit seulement l'intérêt de la cellule
+globale dans ce panel.
 
 La [domination par cellule et gardes](DOMINATION_Q4_PARESSEUSE_PAR_BLOCS_20260923.md)
 est déjà prouvée localement, mais son gain sur LiDAR n'est pas mesuré.

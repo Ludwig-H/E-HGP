@@ -27,6 +27,22 @@ hors boîte. Aucun disque actif n'est exactement tangent selon le test
 entier. La boîte des sites de cette entrée est
 `[0,158607]×[0,158284]×[0,30595]` en millimètres encodés.
 
+Les deux autres traces **déjà capturées** de cette même scène, obtenues
+par sous-échantillonnage global des retours avant le moteur, passent
+également tous les SHA et les égalités de ledger avec le même script :
+
+| Densité de la même trame | Sites | Arêtes avec voie hors boîte | Incidences cœur correspondantes |
+| --- | ---: | ---: | ---: |
+| 1/4 | 30 847 | 19 125 / 774 494 (2,469 %) | 1 044 793 / 37 009 904 (2,823 %) |
+| 1/2 | 61 694 | 33 039 / 1 684 675 (1,961 %) | 2 987 989 / 128 852 821 (2,319 %) |
+| entière | 123 389 | 57 677 / 3 986 433 (1,447 %) | 8 363 262 / 559 661 741 (1,494 %) |
+
+La fraction baisse dans ce **panel fini et mono-scène** ; ni une loi
+asymptotique ni une propriété de tous les LiDAR n'en découle. Les
+moitiés/quarts sont des densités emboîtées de la scène entière, **pas**
+les coupes spatiales par plans du capteur. Aucun cas tangent non plus
+aux deux densités partielles.
+
 ## Sens exact de ce plafond
 
 Le [lemme de redondance](../CERTIFICAT_B_REDONDANCE_CELLULE_UNIQUE_20260923.md)
@@ -86,7 +102,10 @@ python3 -B morsehgp3D_v9/audits/bbox_clipping_s2_20260923/measure.py \
   /tmp/mhgp9-v17-density-inputs-audit/s00_full_full.raw_return_ids.u32le
 ```
 
-Les trois gros binaires d'entrée et les huit traces demeurent sous
+Pour les autres lignes, remplacer `full` par `half` ou `quarter` dans
+les trois noms de fichiers et chemins du run, et garder `K5`.
+
+Les deux binaires d'entrée et les huit traces demeurent sous
 `/tmp`, non versionnés. Leurs SHA et les scripts de production sont
 conservés dans l'audit parent ; ce reçu compact ne prétend donc pas être
 un artefact LIVE indépendant de ces données.
