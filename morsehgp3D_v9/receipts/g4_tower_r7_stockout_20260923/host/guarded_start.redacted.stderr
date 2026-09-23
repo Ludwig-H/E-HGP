@@ -1,0 +1,33 @@
+Starting instance(s) ehgp-v7-4fa0e0789a7d5bb06b787d35...
+.....................................failed.
+ERROR: (gcloud.compute.instances.start) ---
+code: ZONE_RESOURCE_POOL_EXHAUSTED_WITH_DETAILS
+errorDetails:
+- help:
+    links:
+    - description: Troubleshooting documentation
+      url: https://cloud.google.com/compute/docs/resource-error
+- localizedMessage:
+    locale: en-US
+    message: A g4-standard-48 VM instance with 1 nvidia-rtx-pro-6000 accelerator(s)
+      is currently unavailable in the us-central1-b zone. Consider trying your request
+      in the us-central1-f, us-central1-c zone(s), which currently has capacity to
+      accommodate your request. Alternatively, you can try your request again with
+      a different VM hardware configuration or at a later time. For more information,
+      see the troubleshooting documentation.
+- errorInfo:
+    domain: compute.googleapis.com
+    metadatas:
+      attachment: nvidia-rtx-pro-6000:1
+      vmType: g4-standard-48
+      zone: us-central1-b
+      zonesAvailable: us-central1-f,us-central1-c
+    reason: resource_availability
+message: The zone 'projects/devpod-gpu-exploration/zones/us-central1-b' does not have
+  enough resources available to fulfill the request.  'NULL:0/NULL:0/NULL:0 (state:STOCKOUT,
+  sub-state:STOCKOUT, resource type:compute)'.
+
+[ERREUR] La commande de démarrage GCP a échoué ou dépassé 180 s.
+[URGENCE] Démarrage non certifié de ehgp-v7-4fa0e0789a7d5bb06b787d35 et génération lastStartTimestamp inconnue; aucun arrêt automatique non versionné n’est autorisé.
+[URGENCE] Projet=devpod-gpu-exploration zone=us-central1-b instance=ehgp-v7-4fa0e0789a7d5bb06b787d35; dernier état certifié avant mutation=TERMINATED.
+Commande de contrôle : gcloud compute instances describe ehgp-v7-4fa0e0789a7d5bb06b787d35 --project=devpod-gpu-exploration --zone=us-central1-b --format=value\(status\,lastStartTimestamp\)

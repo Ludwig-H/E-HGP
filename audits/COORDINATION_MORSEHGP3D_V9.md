@@ -35,6 +35,26 @@ de fil. Ces chemins ne sont pas raccordés à v9/u18 : aucun crédit G4.
 Question au développeur : comptes-tu corriger/qualifier ces prototypes
 séparément avant un éventuel port, sans détourner la priorité q3/q4/FULL ?
 
+## 23 septembre 2026, 05 h 48 UTC — Identité manquante du ledger MEB v10 (auditeur B)
+
+Base : `78e94b04`, code et lecteur publiés. Les quatre compteurs du
+MEB proposé sont désormais exportés, et les portes locales ont été
+rejouées indépendamment (3/3 CTests Release ; selftest protocole normal
+21/21, `-O` en cours à l'écriture). Pourtant le lecteur accepte une
+sortie `complete_relative` mutée avec `meb_calls=4`,
+`meb_proposals=4`, `meb_verified_proposals=2`,
+`meb_proposal_fallbacks=1` : une proposition manque dans le ledger.
+Dans un appel **terminé** du code actuel, chaque proposition vérifiée
+retourne via la coquille exacte ; sinon elle tombe sur le repli. La
+canonisation d'un support vérifié ne peut manquer ce même support dans
+son bord exact. Il devrait donc tenir
+`meb_proposals = meb_verified_proposals + meb_proposal_fallbacks` pour
+`complete_relative`, en plus des bornes individuelles actuelles.
+Garder les sorties de refus partielles distinctes ; leur compte peut
+être interrompu. Question au développeur : peux-tu confirmer cet
+invariant, l'ajouter au lecteur et tuer une mutation causale qui
+sous-compte seulement un des deux termes ?
+
 ## 22 septembre 2026 — Ouverture (développeur sortant de la v8)
 
 Base : `origin/main` 12294241. Cadre : `exploration_v9_hors_registre`,
@@ -638,4 +658,17 @@ session n'avait été lancée ; aucune ne l'est avant clôture locale. Réponses
 Portes locales `-L gate` : **126/126**. Prochaine étape, après autotests
 normal et `-O` sur le commit figé : session R7, ablation appariée ON/OFF de
 `tower_meb_proposal` (mêmes entrées, sorties égales, CPU/mur et compteurs).
+
+## 23 septembre 2026, 07 h 10 — Tentative G4 R7 : rupture de stock (développeur)
+
+**GCP utilisé** (une demande de démarrage). Paquet `78e94b04` (sonde v10,
+ablation appariée de `tower_meb_proposal`, 24 cas), autotests normal et `-O`
+verts sur ce commit. GCE a refusé le démarrage : `STOCKOUT` g4-standard-48 +
+RTX PRO 6000 en us-central1-b (cible épinglée, aucune autre zone essayée).
+Le script gardé n'a certifié aucune génération et a refusé tout arrêt non
+versionné (`shutdown_uncertified`, `start_may_have_been_requested`). Relecture
+seule : `TERMINATED`, `lastStartTimestamp` inchangé depuis R6 → aucun
+démarrage, rien à arrêter. Reçu sans mesure :
+`morsehgp3D_v9/receipts/g4_tower_r7_stockout_20260923/`. Reprise à
+l'identique quand la capacité reviendra.
 

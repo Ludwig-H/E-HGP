@@ -1,0 +1,116 @@
+{
+  "FULL_executed": false,
+  "GPU_executed": false,
+  "backend": "reference_cpu",
+  "case_cap_seconds": 600,
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "instances",
+        "describe",
+        "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-b",
+        "--format=json"
+      ],
+      "ended_epoch": 1790142369.8056295,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "before_start",
+      "pid": 2305117,
+      "started_epoch": 1790142368.599598,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "ae99b70288f545e26784f328e204dab3e90a9b2e191d9fc8f2641ab4b6bf77d2",
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "os-login",
+        "ssh-keys",
+        "add",
+        "--project=devpod-gpu-exploration",
+        "--key-file=/workspaces/.ehgp-sessions/v9tower.20260923T054558Z/key.pub",
+        "--ttl=70m",
+        "--format=json",
+        "--quiet"
+      ],
+      "ended_epoch": 1790142371.3884635,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "oslogin_add",
+      "pid": 2305188,
+      "started_epoch": 1790142369.8061812,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "ee69224652949b23b9c424be28ae355b8e08074499d9f8aa4f342424f0ba0066",
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "/workspaces/.ehgp-sessions/v9tower.20260923T054558Z/tower_v9_host/start_and_verify.sh",
+        "--yes",
+        "--guest-shutdown-minutes",
+        "40",
+        "--handoff-file",
+        "/workspaces/.ehgp-sessions/v9tower.20260923T054558Z/tower_v9_host/handoff.json",
+        "--lifecycle-state-file",
+        "/workspaces/.ehgp-sessions/v9tower.20260923T054558Z/tower_v9_host/lifecycle.txt",
+        "--guard-mark-dir",
+        "/workspaces/.ehgp-sessions/v9tower.20260923T054558Z/tower_v9_host/guardmarks"
+      ],
+      "ended_epoch": 1790142399.353845,
+      "exit_code": 1,
+      "group_closed": true,
+      "name": "guarded_start",
+      "pid": 2305229,
+      "started_epoch": 1790142371.3890057,
+      "stderr_sha256": "bf391042d005224be83925f5c63c9618935d3609a72ea8c083cc050fd3507135",
+      "stdout_sha256": "e0d280b02f1fa952ebec43273550eec14c0bcacecf1f95c4ab2b65e92011beab",
+      "timeout_seconds": null
+    }
+  ],
+  "controller_sha256": "cd6ff6978e7135c7ab567c9e3094d1a6c23b44baa514f231752e3a674e6e5930",
+  "error": "ValueError: start may have happened but generation is unknown",
+  "guest_shutdown_minutes": 40,
+  "manifest_sha256": "a2defa133eee70d8d2ab51e26458ba067ac79bd18c27262434e7267e3b545acf",
+  "max_run_seconds": 3600,
+  "provenance": {
+    "commit": "78e94b0431f01b30e3ac0149e43a86c1a675ba26",
+    "helper": {
+      "path": "gcp-migration/full_probe_worker_v7.py",
+      "sha256": "da967163bdb7247bc6aad4df0c294cda1071076a0127cd5bd9f59bc0e4788439"
+    },
+    "inputs": {
+      "data/scene_00.u32le": {
+        "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le",
+        "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf"
+      },
+      "data/scene_01.u32le": {
+        "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/full.u32le",
+        "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f"
+      },
+      "data/scene_02.u32le": {
+        "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/full.u32le",
+        "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af"
+      }
+    },
+    "protocol_source": "commit",
+    "schema": "mhgp9_tower_provenance_v1",
+    "tree": "52f5f5f868a4b565fc6c9404b84d1b57650f0e20"
+  },
+  "public_status": "not_claimed",
+  "shutdown_error": "ValueError: start may have happened but generation is unknown",
+  "snapshot_sha256": "9652193af48d5a6cc17f4062800c41089396282d6b30b024e24532c58ee8848d",
+  "status": "shutdown_uncertified",
+  "target": {
+    "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-b"
+  },
+  "targeted_shutdown_certified": false,
+  "useful_budget_seconds": 1500,
+  "worker_sha256": "dd01ed73a1c75d3bc5bed203a5af8039084cb255238bc151154701c3a6daeb81"
+}
