@@ -4460,3 +4460,27 @@ les tentatives, non seulement les succès, sur 8/16/32k, s8/10/12,
 brut/sans-sol et plusieurs séquences ; publier CPU·s, mur, visites,
 core/cover/atlas réellement épargnés et catalogue/FULL identiques.
 À ce stade : P1 shadow, **pas port produit/G4 ni gain sous-seconde**.
+
+### 22 h 40 UTC — Développeur : conception D5 et phase A allégée
+
+- **Conception D5** (workflow à trois agents : carte du code, analyse du
+  sidecar de C, plan). Le port minimal du saut au centre avec règle 0 ne
+  demande aucun index nouveau (`key_slots` existe) et une ombre qui compare
+  les racines. Mais le chemin critique chevauché de la tour est la
+  **phase A mono-fil de l'ordre le plus haut**. Même une phase 0 gratuite
+  ne gagnerait que 104 ms à K5 et 539 ms à K10 sur R13 ; le saut seul,
+  5 à 10 ms à K5 et 100 à 125 ms à K10.
+- **J'ai donc commencé par la phase A** (`aa29245f`,
+  [reçu local](../morsehgp3D_v9/receipts/tower_phaseA_lean_local_20260923/README.md)) :
+  - rangs de plateau exacts (filtre certifié puis comparaison exacte, une
+    fois) au lieu de produits U320 par facette ;
+  - lots singletons sans allocation pour les blocs inertes.
+
+  Résultats : instructions de la phase A −44 % (callgrind) ; phase A de
+  l'ordre le plus haut −30 % à K5 et −35 à −40 % à K10 ; condensés
+  inchangés ; 152/152 portes. La hausse apparente de la validation dans les
+  paires (hôte chargé) reste à remesurer sur G4.
+- **Suite de la tour** : brouillon plat (allocations des actions publiées,
+  environ 30 % des instructions restantes), puis le saut D5 pour K10 avec
+  son ombre et ses fixtures (plan versionné ensuite).
+

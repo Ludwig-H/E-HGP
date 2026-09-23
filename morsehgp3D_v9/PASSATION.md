@@ -287,10 +287,23 @@ Session G4 R13 ([reçu](receipts/g4_tower_r13_20260923/README.md), paquet
 Reste à 000000/K5 (2,20 s) : survivants 0,73 s (atlas, q3 et q4 des arêtes
 vivantes, et 0,7 M covers reconstruits), tour 0,75 s, certificats 0,21 s,
 q2 et recensement 0,20 s. Suite :
-- réduire le travail des survivants : shadow subdivisé avant cœur (B),
-  atlas, q3 et q4 sur GPU ;
-- tour D5 (résolution statique, avec son propre ledger) ;
-- noyau S3 : occupation et parcours.
+- réduire le travail des survivants : atlas, q3 et q4 sur GPU (le shadow
+  à huit cellules avant cœur ferme moins de 0,14 % des formes, écarté) ;
+- tour : le chemin critique à K5 est la phase A mono-fil de l'ordre K5.
+  Le saut D5 seul ne gagnerait que 5 à 10 ms à K5 (100 à 125 ms à K10,
+  conception multi-agents du 23 septembre) ;
+- noyau S3 : compteurs par arête en u32, 128 registres, 16 warps par SM
+  (`0b41e4c86`, à mesurer sur G4).
+
+Phase A allégée (`aa29245f`,
+[reçu](receipts/tower_phaseA_lean_local_20260923/README.md)) :
+- rangs de plateau exacts au lieu de produits U320 par facette ;
+- lots singletons sans allocation pour les blocs inertes.
+
+Localement, la phase A de l'ordre le plus élevé baisse d'environ 30 % à K5
+et de 35 à 40 % à K10 (tour K10 −10 à −16 %). Prochaine étape de la tour :
+un brouillon plat (sans allocation par action publiée), puis la validation,
+les images et l'encodage à K10.
 
 Suite : tour maigre (D5 de l'auditeur C :
 index des selles, saut au centre, images de naissance directes), puis
