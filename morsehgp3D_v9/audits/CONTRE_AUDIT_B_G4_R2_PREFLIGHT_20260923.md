@@ -149,3 +149,12 @@ deux champs MEB selon leur type et leurs contraintes, vérifier le mode
 `atlas_saturate_deep` contre le plan, puis exercer un faux champ et un
 tableau malformé. Il faut aussi arrêter une campagne après un défaut
 déterministe de protocole plutôt que répéter les mêmes cas.
+
+**Mise à jour de protocole** : `e54f727c` a publié la sonde v4, le
+validateur typé et une porte réelle qui corrigent la cause immédiate
+du refus R2 ; ce paquet nouveau n'a **pas** été exécuté sur G4.
+Le [contre-audit v4](CONTRE_AUDIT_B_PROTOCOLE_V4_WIP_20260923.md)
+reproduit encore sept mutations de schéma acceptées et l'absence d'une
+porte native obligatoire avant `guarded_start`. Le besoin actuel avant
+une nouvelle session est donc ce contrôle v4 complet, **pas** un rejeu
+des treize calculs du vieux paquet v3 en espérant changer son statut.

@@ -126,3 +126,13 @@ forgeable. Si la règle de compte saute un bloc à `min≥0`, une graine
 cosphérique peut parvenir à EOF tout en restant valide : reprendre de
 v8 l'assertion « EOF impossible » serait incorrect. Il faut une fixture
 cosphérique et une comparaison de la coquille complète contre l'oracle.
+
+L'[audit A de la descente rationnelle](Q3_STRUCTURE_ET_BORNES.md)
+repère séparément la conversion complète sur 20 bits par axe avant
+chaque localisation d'atlas : 466,02 M localisations dans le brut R2
+000000/K10 impliquent des milliards d'itérations de quotient/reste.
+Comparer directement les rationnels aux coupures dyadiques est exact
+jusqu'à la profondeur 10 sous les bornes i128 établies, avec repli au-delà ;
+son oracle autonome passe. Il faut une ablation native appariée, et ne
+pas additionner ses éventuels gains aux `610,29 M` tests ponctuels
+répétés de la voie feuille comme s'il s'agissait du même poste.

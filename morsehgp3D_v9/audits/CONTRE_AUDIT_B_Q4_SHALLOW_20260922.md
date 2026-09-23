@@ -194,10 +194,22 @@ contenait les `39 885` sites, les `4 455 934` covers q4 totaliseraient
 encore au moins `5 757 571 050` sites logiques, soit plus de `3,6n²`.
 La conclusion K10 vaut donc aussi pour un constructeur limité aux
 arêtes q4 ; ce minorant ne découle pas de l'agrégat K5 seul.
+La même soustraction conservatrice à K10 donne, sur 08/000100
+(`n=35 551`), au moins `2 493 423 316` sites de covers q4
+(`1,97n²`), et sur 08/000200 (`n=45 845`) au moins
+`6 505 041 335` (`3,10n²`). Les trois scans sont d'une seule
+séquence ; ces ratios n'établissent pas une loi asymptotique, mais
+montrent **dans chacun de ces régimes mesurés** qu'une lecture exhaustive
+par cover q4 paierait déjà plus de `n²` unités élémentaires ; seul un
+protocole de croissance apparié peut établir son exposant.
 La route collective doit donc filtrer/partager les formes avant ce
 regroupement, ou réduire le nombre/couverture d'arêtes, puis publier le
 nombre réel de sites lus. Une bonne borne `O(mK)` *après* matérialisation
-du cover ne clôt pas le P0 sous-quadratique global.
+du cover ne clôt pas le P0 sous-quadratique global. Le
+[certificat de domination par gardes et blocs](DOMINATION_Q4_PARESSEUSE_PAR_BLOCS_20260923.md)
+est une piste exacte **avant** cette matérialisation ; son seuil doit
+rester `K−1` si l'atlas partagé sert aussi q3, et son coût total `E×C×Z`
+reste à mesurer.
 
 Les comparaisons exactes de racines **sur une même droite** se réduisent
 aux produits i128 déjà bornés dans cette note, mais un balayage global

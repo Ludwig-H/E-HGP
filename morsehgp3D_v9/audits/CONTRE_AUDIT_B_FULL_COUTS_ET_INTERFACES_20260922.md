@@ -184,6 +184,12 @@ digest sert au contrôle d'identité ; il faut mesurer séparément
 produit industriel doit calculer ce condensé pendant la construction ou
 seulement dans une passe de vérification hors contrat. Ne pas retirer
 après coup la queue du chrono qui échoue.
+Le digest lit `rows.at(c.ref.population)` **pour chaque contribution** :
+son travail est proportionnel à la somme des tailles de populations
+référencées, pas seulement au nombre de lignes distinctes. Avec les
+plafonds actuels, cette taille est bornée ; après le port nécessaire des
+grandes coquilles, il faudra éviter qu'un condensé de vérification
+réintroduise un coût répété `coquille × contributions`.
 
 Sur le premier cas R2 brut K10/W48, **même l'annulation idéale de q3/q4
 et de FULL laisserait 3,145 s** dans le `chain_total` actuel : q2
