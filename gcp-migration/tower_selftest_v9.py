@@ -105,7 +105,22 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                   q3_seed_bound_tests=2, q4_geometry_preparations=1, q4_domain_node_visits=4,
                   q4_cover_decomposition_node_visits=4, q4_seed_node_visits=3, q4_seed_cell_queries=1,
                   q4_sweep_active_sites=6)
-    return dict(schema='mhgp9_tower_probe_v12', status=status,
+    # v13 : Euler (ordres verifiables min(K-2, n)), occupation q3/q4 bornee par
+    # le mur de l'etape q34, phases de la tour de la voie statique ou
+    # sequentielle, toutes sous le chrono de la tour.
+    checkable = min(k - 2, n) if k >= 3 else 0
+    euler = dict(status='holds' if checkable else 'not_checkable', checkable_max_k=checkable,
+                 by_k=[1] * checkable + [0] * (k - checkable))
+    started = max(1, min(workers, 4))
+    occupancy = dict(started_workers=started, jobs=4, tasks_published=2, tasks_consumed=2, task_waits=0,
+                     wall_max_ms=0.1, wall_min_ms=0.05, cpu_sum_s=0.0001 * started, wait_sum_s=0.0)
+    static_path = static > 1 and effective > 1
+    phases = dict(validate=0.005, static=0.0, lots=0.01 if static_path else 0.0, populations=0.0,
+                  images=0.01 if static_path else 0.0, bank=0.005, encode=0.01,
+                  static_by_k=[0.0] * k, lots_by_k=[0.01 if static_path else 0.0] * k,
+                  images_by_k=[0.01 if static_path else 0.0] * k, encode_by_k=[0.01] * k,
+                  order_by_k=[0.0 if static_path else 0.005] * k)
+    return dict(schema='mhgp9_tower_probe_v13', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
@@ -120,7 +135,8 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                 catalogue=dict(q2_presentations=1, q3_presentations=2, q4_presentations=1, unique_keys=4, balls=4,
                                extra_shell_balls=0, shell_over_12=0, max_shell=4, max_interior=3, census_nodes=9,
                                census_leaf_tests=5, bytes=64, by_qmin=[1, 2, 1],
-                               by_shell=[0, 0, 1, 2, 1] + [0] * 12),
+                               by_shell=[0, 0, 1, 2, 1] + [0] * 12, euler=euler),
+                q34_occupancy=occupancy, tower_phases_ms=phases,
                 tower_work=dict(records=4, extra_records=0, representatives=5, anchor_hits=1, key_lookups=4,
                                 intruder_queries=2, intruder_nodes=7, meb_calls=4, meb_power_tests=9, births=3,
                                 merges=2, contributions=3, grouped_lots=1, resolver_cache_hits=2,
@@ -750,6 +766,13 @@ class Protocol(unittest.TestCase):
         mutations = [('schema', lambda v: v.update(schema='mhgp9_tower_probe_v0')),
                      ('schema_v10', lambda v: v.update(schema='mhgp9_tower_probe_v10')),
                      ('schema_v11', lambda v: v.update(schema='mhgp9_tower_probe_v11')),
+                     ('schema_v12', lambda v: v.update(schema='mhgp9_tower_probe_v12')),
+                     ('euler_fails_complete', lambda v: v['catalogue']['euler'].update(status='fails')),
+                     ('euler_sum', lambda v: v['catalogue']['euler']['by_k'].__setitem__(0, 0)),
+                     ('occupancy_absent', lambda v: v.pop('q34_occupancy')),
+                     ('occupancy_wall', lambda v: v['q34_occupancy'].update(wall_max_ms=50.0)),
+                     ('tower_phases_absent', lambda v: v.pop('tower_phases_ms')),
+                     ('tower_phases_beyond', lambda v: v['tower_phases_ms'].update(bank=50.0)),
                      ('status', lambda v: v.update(status='complete')),
                      ('hash', lambda v: v['input'].update(hash='0' * 16)),
                      ('sites', lambda v: v['input'].update(sites=data['n'] - 1)),

@@ -2,7 +2,9 @@
 // ball censuses. No claim of WSPD completeness, archive authority, or speed.
 #pragma once
 
+#include <array>
 #include <cfenv>
+#include <chrono>
 #include <numeric>
 #include <unordered_map>
 
@@ -103,10 +105,22 @@ struct FullBallOrder {
   // history at their OWN cut. All entries are absent at K1.
   std::vector<FullNodeId> lower_nodes;
 };
+// Wall time of the phases in milliseconds (steady clock), measured, never
+// compared: validation of the catalogue; static path: phase 0 (static
+// targets, per K), phase A (lots, wall of the parallel step and per order on
+// its own thread), phase B (population IDs), phase C (vertical images, same);
+// sequential path: each order whole (order_by_k); both: bank and encoding
+// (wall and per order). Arrays are indexed by K (entry 0 unused).
+struct FullBallTimes {
+  double validate_ms = 0, static_ms = 0, lots_ms = 0, populations_ms = 0, images_ms = 0, bank_ms = 0,
+         encode_ms = 0;
+  std::array<double, 11> static_by_k{}, lots_by_k{}, images_by_k{}, encode_by_k{}, order_by_k{};
+};
 struct FullBallTowerResult {
   FullBallStatus status = FullBallStatus::kInvalidInput;
   const char* reason = "full_ball_uninitialized";
   FullBallStats stats;
+  FullBallTimes times;
   std::vector<FullBallOrder> orders;  // index K-1, no partial orders on failure
 };
 
@@ -114,6 +128,10 @@ namespace full_ball_detail {
 using BallId = u32;
 constexpr u64 absent = kFullCoverageAbsent;
 struct Failure { FullBallStatus status; const char* reason; };
+using PhaseClock = std::chrono::steady_clock;
+inline double ms_since(PhaseClock::time_point start) {
+  return std::chrono::duration<double, std::milli>(PhaseClock::now() - start).count();
+}
 inline void require(bool ok, const char* reason, FullBallStatus status = FullBallStatus::kInvariantViolated) {
   if (!ok) throw Failure{status, reason};
 }
@@ -316,12 +334,16 @@ class ResolverCache {
 class Builder {
  public:
   Builder(const CloudIndex& index, std::span<const BallData> census, unsigned max_k, FullBallStats& stats,
-      int static_threads = 0, FullBallBatchResolver batch = {}, bool meb_proposal = true)
+      int static_threads = 0, FullBallBatchResolver batch = {}, bool meb_proposal = true,
+      FullBallTimes* phase_times = nullptr)
       : ix(index), balls(census), requested(max_k), st(stats), resolver_cache(stats),
-        geometry_threads(static_threads), batch_resolver(batch), propose_meb(meb_proposal) {}
+        geometry_threads(static_threads), batch_resolver(batch), propose_meb(meb_proposal),
+        times(phase_times ? phase_times : &unused_times) {}
 
   std::vector<FullBallOrder> run() {
+    const auto validate_start = PhaseClock::now();
     validate_catalogue();
+    times->validate_ms = ms_since(validate_start);
     require(geometry_threads >= 0, "full_ball_static_threads", FullBallStatus::kInvalidInput);
     require(!batch_resolver.resolve || geometry_threads > 0,
         "full_ball_batch_requires_static", FullBallStatus::kInvalidInput);
@@ -333,6 +355,7 @@ class Builder {
     History lower_history;
     std::vector<u64> lower_anchors;
     for (unsigned k = 1; k <= kmax; ++k) {
+      const auto order_start = PhaseClock::now();
       current_k = k;
       if (k > 1) resolver_cache.reset();
       anchors.assign(balls.size(), absent);
@@ -377,6 +400,7 @@ class Builder {
       drafts.push_back(std::move(draft));
       lower_history = std::move(current);
       lower_anchors = std::move(anchors);
+      times->order_by_k[k] = ms_since(order_start);
     }
     // Construction indices and histories are dead after the last order; no
     // published object borrows them. Release before copying the immutable bank.
@@ -398,7 +422,9 @@ class Builder {
     current = {};
     decltype(stack)().swap(stack);
     // Rows are moved into the bank (validated on the static threads).
+    const auto bank_start = PhaseClock::now();
     auto bank = build_full_coverage_populations(domain, std::move(populations), geometry_threads);
+    times->bank_ms = ms_since(bank_start);
     require(bank.status == FullCertificateStatus::kOk, "full_ball_population_bank",
         bank.status == FullCertificateStatus::kResourceExhausted ? FullBallStatus::kResourceExhausted
                                                                : FullBallStatus::kInvariantViolated);
@@ -411,10 +437,14 @@ class Builder {
     // shared immutable bank: built in parallel on the static path, then
     // validated and published in K order (same objects, same statuses).
     std::vector<FullCoverageBuildResult> forests(kmax);
+    const auto encode_start = PhaseClock::now();
     parallel_items(kmax, geometry_threads, [&](size_t i, size_t) {
+      const auto start = PhaseClock::now();
       forests[i] = build_full_coverage_certificate(static_cast<unsigned>(i + 1), bank.value, drafts[i].batches);
       std::vector<FullCoverageBatch>().swap(drafts[i].batches);  // encoded: release at once
+      times->encode_by_k[i + 1] = ms_since(start);
     });
+    times->encode_ms = ms_since(encode_start);
     for (unsigned k = 1; k <= kmax; ++k) {
       auto& forest = forests[k - 1];
       require(forest.status == FullCertificateStatus::kOk, "full_ball_structural_certificate",
@@ -461,9 +491,12 @@ class Builder {
       auto& o = orders[k - 1];
       o.k = k;
       if (k > 1) {
+        const auto start = PhaseClock::now();
         current_k = k;
         prepare_static_order();  // parallel inside, writes static_targets
         o.static_targets.swap(static_targets);
+        times->static_by_k[k] = ms_since(start);
+        times->static_ms += times->static_by_k[k];
       }
     }
     // A Failure is reported for the SMALLEST K over both phases, as the
@@ -480,18 +513,28 @@ class Builder {
       add(st.parallel_orders, kmax);
     };
     try {
+      const auto lots_start = PhaseClock::now();
       parallel_items(kmax, geometry_threads, [&](size_t i, size_t) {
+        const auto start = PhaseClock::now();
         try { order_lots(orders[i]); } catch (const Failure& f) { failures[i] = f; }
+        times->lots_by_k[i + 1] = ms_since(start);
       });
+      times->lots_ms = ms_since(lots_start);
       size_t lots_done = 0;
       while (lots_done < kmax && !failures[lots_done]) ++lots_done;
 #if defined(MHGP9_FULL_ORDERS_MUTANT_PHASE_PRIORITY)
       if (lots_done != kmax) lots_done = 0;  // mutant: a lot failure masks lower images
 #endif
+      const auto populations_start = PhaseClock::now();
       if (lots_done == kmax) assign_populations(orders);
+      times->populations_ms = ms_since(populations_start);
+      const auto images_start = PhaseClock::now();
       parallel_items(lots_done, geometry_threads, [&](size_t i, size_t) {
+        const auto start = PhaseClock::now();
         try { order_images(orders[i], i ? &orders[i - 1] : nullptr); } catch (const Failure& f) { failures[i] = f; }
+        times->images_by_k[i + 1] = ms_since(start);
       });
+      times->images_ms = ms_since(images_start);
       for (auto& failure : failures) if (failure) throw *failure;
       merge_once();
     } catch (...) {
@@ -742,6 +785,8 @@ class Builder {
   int geometry_threads = 0;
   FullBallBatchResolver batch_resolver;
   bool propose_meb = true;  // anchor_meb_proposed, else the reference enumeration
+  FullBallTimes unused_times;
+  FullBallTimes* times;  // phase wall times (the caller's, or unused_times)
   using StaticSeed = FullBallBatchSeed;
   std::vector<BallId> static_targets;
   size_t static_cursor = 0;
@@ -1641,8 +1686,8 @@ inline FullBallTowerResult build_full_ball_tower(const CloudIndex& ix, std::span
     unsigned kmax, int static_threads = 0, FullBallBatchResolver batch = {}, bool meb_proposal = true) {
   FullBallTowerResult result;
   try {
-    result.orders =
-        full_ball_detail::Builder(ix, balls, kmax, result.stats, static_threads, batch, meb_proposal).run();
+    result.orders = full_ball_detail::Builder(ix, balls, kmax, result.stats, static_threads, batch, meb_proposal,
+                                              &result.times).run();
     result.status = FullBallStatus::kCompleteRelative; result.reason = kFullBallAuthority;
   } catch (const full_ball_detail::Failure& error) {
     result.status = error.status; result.reason = error.reason;

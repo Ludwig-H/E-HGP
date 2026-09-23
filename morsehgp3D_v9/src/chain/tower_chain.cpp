@@ -1,6 +1,7 @@
 #include "tower_chain.hpp"
 
 #include <algorithm>
+#include <bit>
 #include <array>
 #include <atomic>
 #include <chrono>
@@ -20,6 +21,15 @@
 #include "pipeline/wspd_q34.hpp"
 
 namespace mhgp9 {
+
+const char* euler_status_name(EulerStatus status) {
+  switch (status) {
+    case EulerStatus::kNotCheckable: return "not_checkable";
+    case EulerStatus::kHolds: return "holds";
+    case EulerStatus::kFails: return "fails";
+  }
+  return "unknown";
+}
 
 const char* chain_status_name(ChainStatus status) {
   switch (status) {
@@ -376,6 +386,23 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       result.q34_cover_builds = r34.pipeline.work.cover_builds;
       result.q3_emitted = r34.pipeline.work.q3_emitted;
       result.q4_emitted = r34.pipeline.work.q4_emitted;
+      {
+        auto& o = result.q34_occupancy;
+        o.started_workers = r34.parallel.started_workers;
+        o.jobs = r34.parallel.jobs;
+        o.tasks_published = r34.tasks.published;
+        o.tasks_consumed = r34.tasks.consumed;
+        o.task_waits = r34.tasks.waits;
+        bool first = true;
+        for (const auto& timing : r34.worker_timings) {
+          const double wall = static_cast<double>(timing.wall_ns) / 1e6;
+          o.wall_max_ms = first ? wall : std::max(o.wall_max_ms, wall);
+          o.wall_min_ms = first ? wall : std::min(o.wall_min_ms, wall);
+          o.cpu_sum_s += static_cast<double>(timing.cpu_ns) / 1e9;
+          o.wait_sum_s += static_cast<double>(timing.wait_ns) / 1e9;
+          first = false;
+        }
+      }
       const auto& w = r34.pipeline.work;
       auto& l = result.ledger;
       l.expanded_pairs = w.expanded_pairs; l.cover_builds = w.cover_builds; l.cover_sites = w.cover_sites;
@@ -467,6 +494,16 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       std::uint64_t extra = 0, max_shell = 0, max_interior = 0;
       std::array<std::uint64_t, 5> by_q{};
       std::array<std::uint64_t, 17> by_shell{};
+      std::array<std::int64_t, 11> euler{};  // contributions d'Euler par ordre K (indice K)
+    };
+    // Coefficient de t^{K-1} dans t^p (t-1)^{j-1} : (-1)^{j-1-i} C(j-1, i), i = K-1-p.
+    const auto euler_add = [kmax](std::array<std::int64_t, 11>& e, std::size_t p, std::size_t j, std::int64_t count) {
+      static constexpr std::int64_t binom[12][12] = {
+          {1}, {1, 1}, {1, 2, 1}, {1, 3, 3, 1}, {1, 4, 6, 4, 1}, {1, 5, 10, 10, 5, 1}, {1, 6, 15, 20, 15, 6, 1},
+          {1, 7, 21, 35, 35, 21, 7, 1}, {1, 8, 28, 56, 70, 56, 28, 8, 1}, {1, 9, 36, 84, 126, 126, 84, 36, 9, 1},
+          {1, 10, 45, 120, 210, 252, 210, 120, 45, 10, 1}, {1, 11, 55, 165, 330, 462, 462, 330, 165, 55, 11, 1}};
+      for (std::size_t i = 0; i < j && p + i + 1 <= kmax; ++i)
+        e[p + i + 1] += (((j - 1 - i) % 2) ? -1 : 1) * binom[j - 1][i] * count;
     };
     const std::size_t census_workers = std::max<std::size_t>(1, std::min(W, unique / 256 + 1));
     std::vector<WorkerState> states(census_workers);
@@ -499,6 +536,21 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         const auto table = tower::local_plateau::ShellTable::prepare(std::move(local));
         q = table.q_min();
         require(q == rep.arity, "chain_qmin_differs_from_min_presented_arity");
+        // Euler d'une coquille etendue : sous-coquilles T (|T| >= 2) dont
+        // l'enveloppe convexe contient le centre, comptees par taille.
+        std::array<std::int64_t, 13> by_size{};
+        const auto& contains = table.contains_center();
+        for (std::size_t mask = 1; mask < contains.size(); ++mask)
+          if (contains[mask]) ++by_size[static_cast<std::size_t>(std::popcount(static_cast<unsigned>(mask)))];
+#if defined(MHGP9_EULER_MUTANT_REGULAR_SHELLS_ONLY)
+        by_size = {};
+        by_size[st.sh.size()] = 1;  // mutant : coquille etendue traitee comme T = U seule
+#endif
+        for (std::size_t j = 2; j <= st.sh.size(); ++j)
+          if (by_size[j]) euler_add(st.euler, st.in.size(), j, by_size[j]);
+      } else {
+        // Coquille reguliere : T = U seule (centre interieur au support positif).
+        euler_add(st.euler, st.in.size(), q, 1);
       }
       require(st.in.size() + q <= std::min<std::size_t>(kmax + 1, points.size()),
               "chain_ball_outside_rank_window");
@@ -523,6 +575,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       result.catalogue.census_leaf_tests += st.depth.leaf_tests;
       for (std::size_t q = 0; q < 5; ++q) result.catalogue.balls_by_qmin[q] += st.by_q[q];
       for (std::size_t s = 0; s < 17; ++s) result.catalogue.balls_by_shell[s] += st.by_shell[s];
+      for (std::size_t k = 1; k <= 10; ++k) result.catalogue.euler_by_k[k] += st.euler[k];
     }
     gathered = GatheredPresentations{};  // groups is not read past this point
     result.catalogue.shell_over_cap = over_cap.load();
@@ -532,7 +585,22 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     }
     result.catalogue.balls = unique;
     result.catalogue.bytes = balls.capacity() * sizeof(tower::BallData);
+    // Euler : les sites sont les minima de d_1 (terme n a l'ordre 1). Une
+    // somme differente de 1 sur un ordre verifiable prouve une cle manquante
+    // ou fausse : refus explicite, jamais une tour publiee sur ce catalogue.
+#if !defined(MHGP9_EULER_MUTANT_NO_SITE_TERM)
+    result.catalogue.euler_by_k[1] += static_cast<std::int64_t>(points.size());
+#endif
+    result.catalogue.euler_checkable_max_k =
+        kmax >= 3 ? static_cast<unsigned>(std::min<std::size_t>(kmax - 2, points.size())) : 0;
+    if (result.catalogue.euler_checkable_max_k > 0) {
+      result.catalogue.euler_status = EulerStatus::kHolds;
+      for (unsigned k = 1; k <= result.catalogue.euler_checkable_max_k; ++k)
+        if (result.catalogue.euler_by_k[k] != 1) result.catalogue.euler_status = EulerStatus::kFails;
+    }
     census_clock.stop();
+    if (result.catalogue.euler_status == EulerStatus::kFails)
+      fail(ChainStatus::kInvariantViolated, "chain_catalogue_euler_violated");
 
     // ---- Tour FULL.
     if (options.keep_catalogue) result.catalogue_balls = balls;
@@ -544,6 +612,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       auto tw = tower::build_full_ball_tower(ix, balls, kmax, static_threads, {}, options.tower_meb_proposal);
       result.times.tower_ms = ms_since(t);
       result.tower_stats = tw.stats;
+      result.tower_times = tw.times;
       if (tw.status != tower::FullBallStatus::kCompleteRelative) {
         const auto s = tw.status == tower::FullBallStatus::kInvalidInput       ? ChainStatus::kInvalidInput
                        : tw.status == tower::FullBallStatus::kResourceExhausted ? ChainStatus::kResourceExhausted

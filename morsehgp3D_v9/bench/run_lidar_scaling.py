@@ -44,7 +44,9 @@ import time
 
 ROOT = Path(__file__).resolve().parents[2]
 V8 = ROOT / 'morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v12'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v13'
+# Schemas relus lors d'une revalidation d'archive (v12 : reçu du 23 septembre).
+KNOWN_SCHEMAS = ('mhgp9_tower_probe_v12', PROBE_SCHEMA)
 PIECES = ('full', 'half_x_neg', 'half_x_nonneg', 'quarter_x_neg_y_neg', 'quarter_x_neg_y_nonneg',
           'quarter_x_nonneg_y_neg', 'quarter_x_nonneg_y_nonneg')
 NESTED = (8000, 16000, 32000)
@@ -143,7 +145,9 @@ def number(value):
 def validate_probe(value, expected):
     """Vrai si la sortie est une tour complete de la sonde attendue, sur l'entree annoncee.
 
-    `expected` : k, s, workers, static_threads, sites, fnv, grid.
+    `expected` : k, s, workers, static_threads, sites, fnv, grid, et le schema
+    (v13 pour une mesure neuve ; celui de l'archive pour une revalidation). En
+    v13, l'invariant d'Euler doit tenir sur les ordres min(K-2, n).
     """
     if type(value) is not dict:
         return False
@@ -154,7 +158,8 @@ def validate_probe(value, expected):
     times = value.get('times_ms')
     if type(source) is not dict or type(options) is not dict or type(orders) is not list or type(times) is not dict:
         return False
-    need = [value.get('schema') == PROBE_SCHEMA, value.get('status') == 'complete_relative',
+    schema = expected.get('schema', PROBE_SCHEMA)
+    need = [schema in KNOWN_SCHEMAS, value.get('schema') == schema, value.get('status') == 'complete_relative',
             set(source) == INPUT_KEYS, source.get('format') == 'u32le', source.get('grid') == expected['grid'],
             source.get('sites') == sites, source.get('hash') == expected['fnv']]
     need += [options.get('K') == expected['k'], options.get('K_effective') == min(expected['k'], sites),
@@ -167,6 +172,13 @@ def validate_probe(value, expected):
     need += [type(value.get('tower_digest')) is str and len(value['tower_digest']) == 16,
              number(times.get('chain_total')), number(times.get('digest')), number(value.get('chain_cpu_s')),
              type(value.get('peak_rss_kb')) is int and value['peak_rss_kb'] > 0]
+    if schema != 'mhgp9_tower_probe_v12':
+        catalogue = value.get('catalogue')
+        euler = catalogue.get('euler') if type(catalogue) is dict else None
+        checkable = min(expected['k'] - 2, sites) if expected['k'] >= 3 else 0
+        need += [type(euler) is dict and euler.get('checkable_max_k') == checkable and
+                 euler.get('status') == ('holds' if checkable else 'not_checkable') and
+                 type(euler.get('by_k')) is list and euler['by_k'][:checkable] == [1] * checkable]
     return all(need)
 
 
@@ -271,6 +283,16 @@ def expected_from_argv(argv, sites, raw):
                 fnv=input_fnv(raw), grid=flags.get('--grid', 'unspecified'))
 
 
+def archived_expectations(record, sites, raw):
+    """Attentes d'un cas archive : sa commande et le schema qu'il declare (connu)."""
+    expected = expected_from_argv(record['argv'], sites, raw)
+    probe = record.get('probe')
+    schema = probe.get('schema') if type(probe) is dict else None
+    if schema not in KNOWN_SCHEMAS:
+        raise Refusal('archived probe schema unknown: ' + str(schema))
+    return dict(expected, schema=schema)
+
+
 def mutants(value):
     """Sorties alterees qui doivent toutes etre refusees par validate_probe."""
     def edit(path, new):
@@ -292,6 +314,7 @@ def mutants(value):
         ('input_sites_minus_one', edit(('input', 'sites'), value['input']['sites'] - 1)),
         ('status_resource', edit(('status',), 'resource_exhausted')),
         ('schema_v11', edit(('schema',), 'mhgp9_tower_probe_v11')),
+        ('schema_other_known', edit(('schema',), [x for x in KNOWN_SCHEMAS if x != value['schema']][0])),
         ('k_effective_minus_one', edit(('options', 'K_effective'), value['options']['K_effective'] - 1)),
         ('s_ten', edit(('options', 's'), 10)),
         ('workers_one', edit(('options', 'workers'), 1)),
@@ -316,7 +339,7 @@ def selftest(case_path):
     value = record['probe']
     argv = record['argv']
     raw = resolve_input(argv[0]).read_bytes()
-    expected = expected_from_argv(argv, record['input']['sites'], raw)
+    expected = archived_expectations(record, record['input']['sites'], raw)
     if not validate_probe(value, expected):
         print('lidar_scaling_selftest cause=baseline_refused')
         return 1
@@ -389,7 +412,7 @@ def revalidate(out_dir, work):
         checked = 0
         for name, size, _path, raw, provenance in cases:
             record = json.loads((summary_path.parent / (name + '.json')).read_text())
-            expected = expected_from_argv(record['argv'], size, raw)
+            expected = archived_expectations(record, size, raw)
             reasons = []
             if record.get('outcome') != 'complete_relative' or record.get('exit_code') != 0:
                 reasons.append('outcome')

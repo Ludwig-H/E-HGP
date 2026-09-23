@@ -201,3 +201,56 @@ coquille contre la plus petite arité présentée. Une coquille de plus de
 Juge : `tests/chain/chain_census_tower_gate.cpp`, le juge T2 de la v7 appliqué à
 la chaîne réelle (inventaire rationnel exhaustif, modèle Γ, K = 1..10,
 séparations 8/10/12, un et quatre fils de chaîne).
+
+### Invariant d'Euler du catalogue (sonde v13)
+
+Proposition de l'auditeur C (`audits/NOTE_C_INVARIANT_EULER_20260923.md`),
+prouvée sans position générale par le nerf (contrelecture B,
+`audits/CONTRELEC_EULER_PAR_NERF_20260923.md`). Pour
+K ≤ min(Kmax − 2, n), la somme n·[K = 1] + Σ e_K(B) sur les boules du
+catalogue vaut 1 si le catalogue est complet. Définitions :
+- p est le nombre d'intérieurs de B ;
+- e_K(B) est le coefficient de t^{K−1} dans t^p Σ_T (t − 1)^{|T|−1} ;
+- T parcourt les sous-coquilles dont l'enveloppe contient le centre
+  (`ShellTable::contains_center`) pour une coquille étendue, et T = U seule
+  pour une coquille régulière.
+
+C'est une condition **nécessaire** seulement : une somme juste ne certifie pas
+chaque clé. Le calcul se fait pendant le recensement, sur ses ouvriers. Le
+Kmax pris en compte est celui qui est **demandé**, d'où la borne min(Kmax−2, n) :
+deux sites à Kmax = 10 vérifient les ordres 1..2 sans faux échec. Sous Kmax < 3,
+le statut est `not_checkable`, jamais un succès vacant. Une violation fait
+refuser la chaîne (`invariant_violated`, `chain_catalogue_euler_violated`) :
+aucune tour n'est publiée sur ce catalogue.
+
+Portes :
+- `mhgp9_chain_euler` : 90 exécutions, 444 ordres vérifiés dont 306 à K10,
+  1 321 boules à coquille étendue. Cas couverts : carré plan dégénéré (contre-exemple de B à la
+  formule générique, Kmax = 1..10), deux sites, cube, octaèdre et son
+  centre, points entiers d'une sphère, 36 nuages aléatoires sur grilles
+  minuscules et u18.
+- Deux mutants de la chaîne recompilée, tués dès le carré : coquille étendue
+  traitée comme régulière, terme des sites oublié.
+- La porte T2 exige `holds` sur les 6 catalogues qu'elle juge
+  exhaustivement.
+- Sur LiDAR (000200 16k), les condensés sont inchangés, avec `holds` à K5
+  (ordres 1..3) et à K10 (ordres 1..8).
+
+### Mesures publiées par la sonde v13
+
+- `q34_occupancy` : pour les ouvriers q3/q4, fils démarrés, murs extrêmes,
+  sommes de CPU de fil et d'attente sur la file, tâches publiées et
+  consommées (`WspdQ34WorkerTiming`, jusque-là non publié).
+- `tower_phases_ms` : murs des phases de la tour (`FullBallTimes`), à savoir
+  la validation, la phase 0 par K, les lots par K, les populations, les images
+  par K, la banque et l'encodage par K. Sur la voie séquentielle, chaque ordre
+  est mesuré entier.
+
+Ce sont des mesures, jamais comparées entre exécutions. Le lecteur G4 borne :
+- les murs des ouvriers par le mur de q34 ;
+- le CPU des ouvriers par fils × mur ;
+- la somme des phases par le chrono de la tour.
+
+Il exige aussi que les phases relèvent exclusivement de la voie statique ou
+de la voie séquentielle, et que la phase 0 soit égale à la somme de ses
+valeurs par K. Porte `probe_worker_contract` : 49 mutants tués.

@@ -48,7 +48,7 @@ PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
 PLAN_SCHEMA = 'mhgp9_tower_plan_v6'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v12'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v13'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -99,7 +99,8 @@ CASE_KEYS = frozenset({'scene', 'file', 'n', 'k', 's', 'workers', 'static_thread
 LEVER_NAMES = ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_witness_cache', 'q34_dead_core',
                'tower_meb_proposal')
 TOP_KEYS = frozenset({'schema', 'status', 'reason', 'input', 'options', 'times_ms', 'chain_cpu_s', 'generator',
-                      'ledger', 'catalogue', 'tower_work', 'orders', 'tower_digest', 'peak_rss_kb'})
+                      'ledger', 'catalogue', 'q34_occupancy', 'tower_phases_ms', 'tower_work', 'orders',
+                      'tower_digest', 'peak_rss_kb'})
 INPUT_KEYS = frozenset({'format', 'grid', 'sites', 'hash'})
 OPTION_KEYS = frozenset({'K', 'K_effective', 's', 'workers', 'tower_static_threads', 'run_tower', 'levers'})
 TIME_KEYS = frozenset({'read', 'prepare', 'gen_index', 'q2', 'q34', 'merge', 'tower_index', 'census', 'tower',
@@ -136,7 +137,18 @@ LEDGER_KEYS = frozenset((
 CATALOGUE_LISTS = dict(by_qmin=3, by_shell=17)
 CATALOGUE_KEYS = frozenset(('q2_presentations q3_presentations q4_presentations unique_keys balls '
                             'extra_shell_balls shell_over_12 max_shell max_interior census_nodes census_leaf_tests '
-                            'bytes by_qmin by_shell').split())
+                            'bytes by_qmin by_shell euler').split())
+# Invariant d'Euler du catalogue (v13) : condition NECESSAIRE de completude.
+EULER_KEYS = frozenset({'status', 'checkable_max_k', 'by_k'})
+EULER_STATUSES = ('holds', 'fails', 'not_checkable')
+# Occupation mesuree des ouvriers q3/q4 et chronos par phase de la tour (v13).
+OCCUPANCY_COUNTS = ('started_workers', 'jobs', 'tasks_published', 'tasks_consumed', 'task_waits')
+OCCUPANCY_TIMES = ('wall_max_ms', 'wall_min_ms', 'cpu_sum_s', 'wait_sum_s')
+TOWER_PHASES = ('validate', 'static', 'lots', 'populations', 'images', 'bank', 'encode')
+TOWER_PHASES_BY_K = ('static_by_k', 'lots_by_k', 'images_by_k', 'encode_by_k', 'order_by_k')
+STATIC_PATH_PHASES = ('static', 'lots', 'populations', 'images')
+# Arrondi des chronos imprimes a 0,001 ms ; marge relative des sommes CPU.
+PHASE_TOLERANCE_MS = 0.01
 TOWER_WORK_KEYS = frozenset(('records extra_records representatives anchor_hits key_lookups intruder_queries '
                              'intruder_nodes meb_calls meb_power_tests births merges contributions grouped_lots '
                              'resolver_cache_hits meb_accounting meb_pair_distances meb_materializations '
@@ -379,12 +391,72 @@ def _catalogue(value):
     if type(value) is not dict or set(value) != CATALOGUE_KEYS:
         return False
     for name, item in value.items():
-        if name in CATALOGUE_LISTS:
+        if name == 'euler':
+            if (type(item) is not dict or set(item) != EULER_KEYS or item['status'] not in EULER_STATUSES or
+                    not _count(item['checkable_max_k']) or type(item['by_k']) is not list or
+                    not all(type(x) is int for x in item['by_k'])):
+                return False
+        elif name in CATALOGUE_LISTS:
             if type(item) is not list or len(item) != CATALOGUE_LISTS[name] or not all(_count(x) for x in item):
                 return False
         elif not _count(item):
             return False
     return True
+
+
+def validate_euler(value, case):
+    """Euler v13 : ordres verifiables min(K-2, n) (rien sous K3), sommes publiees
+    pour K = 1..K ; une tour complete exige `holds` (toutes egales a 1)."""
+    euler = value['catalogue']['euler']
+    checkable = min(case['k'] - 2, case['n']) if case['k'] >= 3 else 0
+    need(euler['checkable_max_k'] == checkable and len(euler['by_k']) == case['k'], 'euler bound/length')
+    if value['status'] == 'complete_relative':
+        need(euler['status'] == ('holds' if checkable else 'not_checkable') and
+             euler['by_k'][:checkable] == [1] * checkable, 'euler invariant of a complete catalogue')
+    elif euler['status'] == 'fails':
+        need(value['reason'] == 'chain_catalogue_euler_violated', 'euler failure without its refusal')
+
+
+def validate_occupancy(value, case):
+    """Occupation q3/q4 mesuree : murs des ouvriers dans celui de l'etape q34,
+    CPU et attente bornes par fils x mur, taches consommees = publiees."""
+    o = value['q34_occupancy']
+    need(type(o) is dict and set(o) == set(OCCUPANCY_COUNTS + OCCUPANCY_TIMES) and
+         all(_count(o[key]) for key in OCCUPANCY_COUNTS) and all(_number(o[key]) for key in OCCUPANCY_TIMES),
+         'q34 occupancy fields')
+    if value['status'] != 'complete_relative':
+        return
+    started = o['started_workers']
+    need(1 <= started <= case['workers'] and o['tasks_consumed'] == o['tasks_published'] and
+         o['wall_min_ms'] <= o['wall_max_ms'] <= value['times_ms']['q34'] + PHASE_TOLERANCE_MS, 'q34 occupancy walls')
+    budget = started * o['wall_max_ms'] / 1000.0
+    need(o['cpu_sum_s'] <= budget * 1.01 + 0.01 and o['wait_sum_s'] <= budget + 0.01, 'q34 occupancy cpu/wait')
+
+
+def validate_tower_phases(value, case):
+    """Chronos de phase de la tour : sous-chronos du mur de la tour, par K
+    bornes par leur etape parallele, voie statique ou sequentielle exclusive."""
+    phases = value['tower_phases_ms']
+    need(type(phases) is dict and set(phases) == set(TOWER_PHASES + TOWER_PHASES_BY_K) and
+         all(_number(phases[key]) for key in TOWER_PHASES) and
+         all(type(phases[key]) is list and len(phases[key]) == case['k'] and all(_number(x) for x in phases[key])
+             for key in TOWER_PHASES_BY_K), 'tower phase fields')
+    if value['status'] != 'complete_relative':
+        return
+    total = sum(phases[key] for key in TOWER_PHASES) + sum(phases['order_by_k'])
+    need(total <= value['times_ms']['tower'] + PHASE_TOLERANCE_MS * (len(TOWER_PHASES) + case['k']),
+         'tower phases exceed the tower time')
+    static_path = case['static_threads'] > 1 and min(case['k'], case['n']) > 1
+    if static_path:
+        need(not any(phases['order_by_k']) and
+             abs(phases['static'] - sum(phases['static_by_k'])) <= PHASE_TOLERANCE_MS * case['k'] and
+             all(x <= phases[step] + PHASE_TOLERANCE_MS
+                 for step, key in (('lots', 'lots_by_k'), ('images', 'images_by_k'), ('encode', 'encode_by_k'))
+                 for x in phases[key]), 'tower static path phases')
+    else:
+        need(not any(phases[key] for key in STATIC_PATH_PHASES) and
+             not any(any(phases[key]) for key in ('static_by_k', 'lots_by_k', 'images_by_k')),
+             'tower sequential path phases')
 
 
 def validate_ledger_identities(value, levers):
@@ -554,6 +626,9 @@ def validate_probe(value, case, exit_code, inputs=None):
     need(_counters(value['generator'], GENERATOR_KEYS), 'probe counters generator')
     need(_tower_work(value['tower_work']), 'probe counters tower_work')
     need(_catalogue(value['catalogue']), 'probe catalogue')
+    validate_euler(value, case)
+    validate_occupancy(value, case)
+    validate_tower_phases(value, case)
     orders = value['orders']
     need(type(orders) is list and all(type(order) is dict and set(order) == ORDER_KEYS and
                                       all(_count(item) for item in order.values()) for order in orders), 'probe orders')
@@ -593,7 +668,8 @@ def logical_result(value):
     """Projection comparee entre nombres d'ouvriers : l'objet, pas les couts."""
     return dict(hash=value['input']['hash'], sites=value['input']['sites'],
                 K_effective=value['options']['K_effective'], unique_keys=value['catalogue']['unique_keys'],
-                balls=value['catalogue']['balls'], orders=value['orders'], tower_digest=value['tower_digest'])
+                balls=value['catalogue']['balls'], euler=value['catalogue']['euler'], orders=value['orders'],
+                tower_digest=value['tower_digest'])
 
 
 def compare_cases(cases, outcomes, values):

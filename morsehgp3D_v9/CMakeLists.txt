@@ -153,6 +153,24 @@ mhgp9_gate(mhgp9_chain_order_failure_mutant_phase_priority 1 mhgp9_chain_order_f
            ARGS --selftest EXPECT_PREFIX "cause=priority" LABELS "gate;chain;tower;mutant" TIMEOUT 300)
 mhgp9_gate(mhgp9_chain_order_failure_mutant_drop_failed_stats 1 mhgp9_chain_order_failure_drop_failed_stats_mutant_gate
            ARGS --selftest EXPECT_PREFIX "cause=ledger.paid_work_lost" LABELS "gate;chain;tower;mutant" TIMEOUT 300)
+# Invariant d'Euler du catalogue (note C, preuve par le nerf de B) : sommes
+# egales a 1 sur K <= min(Kmax-2, n) pour des fixtures degenerees (carre plan,
+# deux sites, solides cospheriques) et des nuages entiers aleatoires ; statut
+# not_checkable sous Kmax 3. Deux mutants de la chaine recompilee (coquille
+# etendue traitee comme reguliere ; terme des sites oublie) : refus attendu.
+mhgp9_product_executable(mhgp9_chain_euler_gate tests/chain/chain_euler_gate.cpp)
+target_link_libraries(mhgp9_chain_euler_gate PRIVATE mhgp9_chain)
+mhgp9_gate(mhgp9_chain_euler 0 mhgp9_chain_euler_gate ARGS --selftest LABELS "gate;chain;oracle" TIMEOUT 300)
+mhgp9_gate(mhgp9_chain_euler_bad_argument 2 mhgp9_chain_euler_gate ARGS --unknown LABELS "gate;chain" TIMEOUT 60)
+foreach(mutant IN ITEMS REGULAR_SHELLS_ONLY NO_SITE_TERM)
+  string(TOLOWER ${mutant} lower)
+  mhgp9_product_executable(mhgp9_chain_euler_${lower}_mutant_gate tests/chain/chain_euler_gate.cpp src/chain/tower_chain.cpp)
+  target_include_directories(mhgp9_chain_euler_${lower}_mutant_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/gen")
+  target_link_libraries(mhgp9_chain_euler_${lower}_mutant_gate PRIVATE mhgp9_gen)
+  target_compile_definitions(mhgp9_chain_euler_${lower}_mutant_gate PRIVATE MHGP9_EULER_MUTANT_${mutant}=1)
+  mhgp9_gate(mhgp9_chain_euler_mutant_${lower} 1 mhgp9_chain_euler_${lower}_mutant_gate
+             ARGS --selftest EXPECT_PREFIX "cause=euler.chain_refused" LABELS "gate;chain;mutant" TIMEOUT 300)
+endforeach()
 mhgp9_product_executable(mhgp9_chain_static_paths_gate tests/chain/chain_static_paths_gate.cpp)
 target_link_libraries(mhgp9_chain_static_paths_gate PRIVATE mhgp9_chain)
 mhgp9_gate(mhgp9_chain_static_paths 0 mhgp9_chain_static_paths_gate
@@ -193,13 +211,13 @@ if(Python3_Interpreter_FOUND AND EXISTS ${MHGP9_TOWER_WORKER})
     add_test(NAME mhgp9_probe_worker_contract_${mode}
              COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=${Python3_EXECUTABLE}
                      "-DARGS=${py_flags} ${CMAKE_CURRENT_SOURCE_DIR}/tests/chain/probe_worker_contract.py $<TARGET_FILE:mhgp9_tower_probe> ${MHGP9_TOWER_WORKER} ${CMAKE_CURRENT_BINARY_DIR}/probe_worker_contract_${mode}"
-                     "-DEXPECT_PREFIX=probe_worker_contract mutants_killed=33/33"
+                     "-DEXPECT_PREFIX=probe_worker_contract mutants_killed=49/49"
                      -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
     set_tests_properties(mhgp9_probe_worker_contract_${mode} PROPERTIES LABELS "gate;probe;protocol" TIMEOUT 300)
   endforeach()
 endif()
 # Lecteur du runner de pente LiDAR (contre-audit B du 23 septembre 2026) : un
-# cas archive dont l'entree est un morceau v8 versionne est accepte, et 27
+# cas archive dont l'entree est un morceau v8 versionne est accepte, et 28
 # alterations (FNV d'entree, format, grille, fils statiques, champs lus apres
 # validation, IDs du morceau, chemin absolu d'un autre checkout...) sont
 # refusees ou re-ancrees. Sous python3 -O aussi.
@@ -215,7 +233,7 @@ if(Python3_Interpreter_FOUND AND EXISTS ${MHGP9_LIDAR_SCALING_CASE})
     add_test(NAME mhgp9_lidar_scaling_reader_${mode}
              COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=${Python3_EXECUTABLE}
                      "-DARGS=${py_flags} ${CMAKE_CURRENT_SOURCE_DIR}/bench/run_lidar_scaling.py --selftest ${MHGP9_LIDAR_SCALING_CASE}"
-                     "-DEXPECT_PREFIX=lidar_scaling_selftest mutants_killed=27/27"
+                     "-DEXPECT_PREFIX=lidar_scaling_selftest mutants_killed=28/28"
                      -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
     set_tests_properties(mhgp9_lidar_scaling_reader_${mode} PROPERTIES LABELS "gate;protocol" TIMEOUT 120)
   endforeach()

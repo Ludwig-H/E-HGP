@@ -80,6 +80,9 @@ struct ChainTimes {
   double cpu_s = 0;
 };
 
+enum class EulerStatus { kNotCheckable, kHolds, kFails };
+const char* euler_status_name(EulerStatus status);
+
 struct CatalogueStats {
   std::uint64_t q2_presentations = 0, q3_presentations = 0, q4_presentations = 0;
   std::uint64_t unique_keys = 0, balls = 0, extra_shell_balls = 0;
@@ -88,6 +91,17 @@ struct CatalogueStats {
   std::array<std::uint64_t, 5> balls_by_qmin{};
   std::array<std::uint64_t, 17> balls_by_shell{};  // index = taille de coquille (16 = 16 et plus)
   std::uint64_t bytes = 0;  // capacite du catalogue BallData
+  // Invariant d'Euler par ordre (note C, preuve par le nerf de B, sans
+  // position generale) : pour K <= euler_checkable_max_k = min(Kmax-2, n),
+  // n*[K=1] + somme des contributions des boules du catalogue vaut 1 si le
+  // catalogue est complet. Contribution d'une boule : coefficient de t^{K-1}
+  // dans t^p * somme_{T : centre dans conv(T)} (t-1)^{|T|-1}, T parcourant les
+  // sous-coquilles (ShellTable) d'une coquille etendue, T = U seule pour une
+  // coquille reguliere (support positif). Condition NECESSAIRE seulement : une
+  // somme juste ne certifie pas chaque cle. Kmax < 3 : rien de verifiable.
+  std::array<std::int64_t, 11> euler_by_k{};  // indice K = 1..10
+  unsigned euler_checkable_max_k = 0;
+  EulerStatus euler_status = EulerStatus::kNotCheckable;
 };
 
 // Registre du generateur q3/q4 (copie scalaire des compteurs v8, sommes sur
@@ -116,6 +130,14 @@ struct GeneratorLedger {
       q4_seed_cell_queries, q4_sweep_active_sites;
 };
 
+// Occupation mesuree des ouvriers q3/q4 (jamais comparee entre executions) :
+// fils demarres, murs extremes de leurs boucles, CPU de fil et attente sur la
+// file de taches, sommes sur les fils ; taches consommees et attentes.
+struct Q34Occupancy {
+  std::uint64_t started_workers = 0, jobs = 0, tasks_published = 0, tasks_consumed = 0, task_waits = 0;
+  double wall_max_ms = 0, wall_min_ms = 0, cpu_sum_s = 0, wait_sum_s = 0;
+};
+
 struct OrderSummary {
   unsigned k = 0;
   std::uint64_t nodes = 0, births = 0, merges = 0, contributions = 0, parents = 0;
@@ -134,6 +156,8 @@ struct ChainResult {
   std::uint64_t q34_expanded_pairs = 0, q34_cover_builds = 0, q3_emitted = 0, q4_emitted = 0;
   GeneratorLedger ledger{};
   tower::FullBallStats tower_stats;
+  tower::FullBallTimes tower_times;  // chronos par phase de la tour (mesures)
+  Q34Occupancy q34_occupancy;
   std::vector<OrderSummary> orders;
   // Condense FNV-1a 64 d'un encodage canonique de toute la tour (tous ordres,
   // noeuds, parents, contributions, populations en PointId, verticales).

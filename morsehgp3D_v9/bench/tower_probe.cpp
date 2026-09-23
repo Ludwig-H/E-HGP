@@ -167,7 +167,7 @@ int main(int argc, char** argv) {
   const auto r = mhgp9::run_tower_chain(input.points, options);
   const auto& t = r.times;
   const auto& c = r.catalogue;
-  std::printf("{\"schema\":\"mhgp9_tower_probe_v12\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
+  std::printf("{\"schema\":\"mhgp9_tower_probe_v13\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
               r.reason.c_str());
   std::printf("\"input\":{\"format\":\"%s\",\"grid\":\"%s\",\"sites\":%zu,\"hash\":\"%016" PRIx64 "\"},", input.format.c_str(),
               grid.c_str(), input.points.size(), input.hash);
@@ -197,7 +197,35 @@ int main(int argc, char** argv) {
               c.shell_over_cap, c.max_shell, c.max_interior, c.census_nodes, c.census_leaf_tests, c.bytes, c.balls_by_qmin[2],
               c.balls_by_qmin[3], c.balls_by_qmin[4]);
   for (std::size_t s = 0; s < c.balls_by_shell.size(); ++s) std::printf("%s%" PRIu64, s ? "," : "", c.balls_by_shell[s]);
-  std::printf("]},");
+  // Invariant d'Euler (condition necessaire de completude du catalogue) :
+  // sommes par ordre K = 1..Kmax, ordres verifiables 1..checkable_max_k.
+  std::printf("],\"euler\":{\"status\":\"%s\",\"checkable_max_k\":%u,\"by_k\":[",
+              mhgp9::euler_status_name(c.euler_status), c.euler_checkable_max_k);
+  for (unsigned k = 1; k <= options.kmax; ++k) std::printf("%s%" PRId64, k > 1 ? "," : "", c.euler_by_k[k]);
+  std::printf("]}},");
+  {
+    // Occupation mesuree des ouvriers q3/q4 et chronos par phase de la tour
+    // (mesures de mur, jamais comparees entre executions).
+    const auto& o = r.q34_occupancy;
+    std::printf("\"q34_occupancy\":{\"started_workers\":%" PRIu64 ",\"jobs\":%" PRIu64 ",\"tasks_published\":%" PRIu64
+                ",\"tasks_consumed\":%" PRIu64 ",\"task_waits\":%" PRIu64 ",\"wall_max_ms\":%.3f,\"wall_min_ms\":%.3f"
+                ",\"cpu_sum_s\":%.3f,\"wait_sum_s\":%.3f},",
+                o.started_workers, o.jobs, o.tasks_published, o.tasks_consumed, o.task_waits, o.wall_max_ms,
+                o.wall_min_ms, o.cpu_sum_s, o.wait_sum_s);
+    const auto& tt = r.tower_times;
+    std::printf("\"tower_phases_ms\":{\"validate\":%.3f,\"static\":%.3f,\"lots\":%.3f,\"populations\":%.3f,"
+                "\"images\":%.3f,\"bank\":%.3f,\"encode\":%.3f",
+                tt.validate_ms, tt.static_ms, tt.lots_ms, tt.populations_ms, tt.images_ms, tt.bank_ms, tt.encode_ms);
+    const std::pair<const char*, const std::array<double, 11>*> per_k[] = {
+        {"static_by_k", &tt.static_by_k}, {"lots_by_k", &tt.lots_by_k}, {"images_by_k", &tt.images_by_k},
+        {"encode_by_k", &tt.encode_by_k}, {"order_by_k", &tt.order_by_k}};
+    for (const auto& [name, values] : per_k) {
+      std::printf(",\"%s\":[", name);
+      for (unsigned k = 1; k <= options.kmax; ++k) std::printf("%s%.3f", k > 1 ? "," : "", (*values)[k]);
+      std::printf("]");
+    }
+    std::printf("},");
+  }
   {
     const auto& l = r.ledger;
     const std::pair<const char*, std::uint64_t> rows[] = {{"expanded_pairs",l.expanded_pairs},{"cover_builds",l.cover_builds},{"cover_sites",l.cover_sites},{"cover_node_visits",l.cover_node_visits},{"q3_edges",l.q3_edges},{"q4_edges",l.q4_edges},{"both_edges",l.both_edges},{"witness_input_pair_mass",l.witness_input_pair_mass},{"witness_rejected_rectangles",l.witness_rejected_rectangles},{"witness_rejected_pairs",l.witness_rejected_pairs},{"q3_seeds",l.q3_seeds},{"q3_ball_builds",l.q3_ball_builds},{"q3_depth_rejections",l.q3_depth_rejections},{"q3_census_bounds",l.q3_census_bounds},{"q3_census_point_tests",l.q3_census_point_tests},{"q3_atlas_edges",l.q3_atlas_edges},{"q3_atlas_locations",l.q3_atlas_locations},{"q3_atlas_rejections",l.q3_atlas_rejections},{"q3_atlas_outside_domain",l.q3_atlas_outside_domain},{"atlas_cells",l.atlas_cells},{"atlas_leaf_cells",l.atlas_leaf_cells},{"atlas_deep_cells",l.atlas_deep_cells},{"atlas_outside_cells",l.atlas_outside_cells},{"atlas_splits",l.atlas_splits},{"atlas_node_visits",l.atlas_node_visits},{"atlas_block_bounds",l.atlas_block_bounds},{"atlas_point_tests",l.atlas_point_tests},{"atlas_ids_copied",l.atlas_ids_copied},{"q4_seeds",l.q4_seeds},{"q4_live_leaves",l.q4_live_leaves},{"q4_whole_atlas_skips",l.q4_whole_atlas_skips},{"q4_sweep_events",l.q4_sweep_events},{"q3_leaf_censuses",l.q3_leaf_censuses},{"q3_leaf_point_tests",l.q3_leaf_point_tests},{"q3_leaf_rejections",l.q3_leaf_rejections},{"q3_lower_bound_fallbacks",l.q3_lower_bound_fallbacks},{"dead_loads",l.dead_loads},{"dead_form_sites",l.dead_form_sites},{"dead_cells",l.dead_cells},{"dead_outside_cells",l.dead_outside_cells},{"dead_deep_cells",l.dead_deep_cells},{"dead_failed_cells",l.dead_failed_cells},{"dead_uniform_tests",l.dead_uniform_tests},{"dead_point_tests",l.dead_point_tests},{"dead_q3_proved",l.dead_q3_proved},{"dead_q3_open",l.dead_q3_open},{"dead_q4_proved",l.dead_q4_proved},{"dead_q4_open",l.dead_q4_open},{"witness_cache_queries",l.witness_cache_queries},{"witness_cache_node_tests",l.witness_cache_node_tests},{"witness_cache_rejected_pairs",l.witness_cache_rejected_pairs},{"core_builds",l.core_builds},{"core_sites",l.core_sites},{"core_closed_edges",l.core_closed_edges},{"dead_core_loads",l.dead_core_loads},{"dead_core_form_sites",l.dead_core_form_sites},{"dead_core_cells",l.dead_core_cells},{"dead_core_uniform_tests",l.dead_core_uniform_tests},{"dead_core_point_tests",l.dead_core_point_tests},{"dead_core_q3_proved",l.dead_core_q3_proved},{"dead_core_q3_open",l.dead_core_q3_open},{"dead_core_q4_proved",l.dead_core_q4_proved},{"dead_core_q4_open",l.dead_core_q4_open},{"core_cover_node_visits",l.core_cover_node_visits},{"core_cover_bound_tests",l.core_cover_bound_tests},{"core_cover_point_tests",l.core_cover_point_tests},{"dead_core_outside_cells",l.dead_core_outside_cells},{"dead_core_deep_cells",l.dead_core_deep_cells},{"dead_core_failed_cells",l.dead_core_failed_cells},{"q34_input_rectangles",l.q34_input_rectangles},{"witness_rect_queries",l.witness_rect_queries},{"witness_rect_node_visits",l.witness_rect_node_visits},{"witness_pair_queries",l.witness_pair_queries},{"witness_pair_node_visits",l.witness_pair_node_visits},{"q3_edge_queries",l.q3_edge_queries},{"q3_seed_node_visits",l.q3_seed_node_visits},{"q3_seed_point_tests",l.q3_seed_point_tests},{"q3_seed_bound_tests",l.q3_seed_bound_tests},{"q4_geometry_preparations",l.q4_geometry_preparations},{"q4_domain_node_visits",l.q4_domain_node_visits},{"q4_cover_decomposition_node_visits",l.q4_cover_decomposition_node_visits},{"q4_seed_node_visits",l.q4_seed_node_visits},{"q4_seed_cell_queries",l.q4_seed_cell_queries},{"q4_sweep_active_sites",l.q4_sweep_active_sites}};

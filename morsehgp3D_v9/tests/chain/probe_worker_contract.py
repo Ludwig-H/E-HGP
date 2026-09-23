@@ -133,6 +133,12 @@ def main(argv):
                                                 'q4_sweep_active_sites')),
               'diametral core not exercised: ' + json.dumps({key: ledger[key] for key in (
                   'core_builds', 'core_closed_edges', 'dead_core_q3_proved', 'dead_core_q4_proved')}, sort_keys=True))
+        # v13 : Euler verifie sur les ordres 1..3 a K5, occupation q34 publiee,
+        # chronos de la tour sur la voie statique (on) et sequentielle (off).
+        check(on['catalogue']['euler']['status'] == 'holds' and on['catalogue']['euler']['checkable_max_k'] == 3 and
+              on['q34_occupancy']['started_workers'] == 2 and on['tower_phases_ms']['static'] > 0 and
+              not any(on['tower_phases_ms']['order_by_k']) and all(off['tower_phases_ms']['order_by_k']) and
+              off['tower_phases_ms']['static'] == 0, 'v13 sections not exercised')
         check(len(on['orders']) == 5 and on['catalogue']['balls'] >= 1000,
               'coverage floor: 5 orders and >= 1000 catalogue balls, got ' +
               str(len(on['orders'])) + ' / ' + str(on['catalogue']['balls']))
@@ -171,6 +177,25 @@ def main(argv):
             ('ledger missing field', lambda v: v['ledger'].pop('q3_seeds')),
             ('by_qmin empty', lambda v: v['catalogue'].update(by_qmin=[])),
             ('by_shell empty', lambda v: v['catalogue'].update(by_shell=[])),
+            ('euler sum broken', lambda v: v['catalogue']['euler']['by_k'].__setitem__(0, 2)),
+            ('euler vacuous status', lambda v: v['catalogue']['euler'].update(status='not_checkable')),
+            ('euler bound shifted', lambda v: v['catalogue']['euler'].update(checkable_max_k=4)),
+            ('euler list short', lambda v: v['catalogue']['euler']['by_k'].pop()),
+            ('euler absent', lambda v: v['catalogue'].pop('euler')),
+            ('euler sum text', lambda v: v['catalogue']['euler']['by_k'].__setitem__(4, '7')),
+            ('occupancy wall beyond q34', lambda v: v['q34_occupancy'].update(wall_max_ms=v['times_ms']['q34'] + 5.0)),
+            ('occupancy cpu beyond threads', lambda v: v['q34_occupancy'].update(
+                cpu_sum_s=v['q34_occupancy']['cpu_sum_s'] + 1000.0)),
+            ('occupancy tasks lost', lambda v: v['q34_occupancy'].update(
+                tasks_consumed=v['q34_occupancy']['tasks_published'] + 1)),
+            ('occupancy workers beyond request', lambda v: v['q34_occupancy'].update(started_workers=3)),
+            ('occupancy absent', lambda v: v.pop('q34_occupancy')),
+            ('tower phase beyond tower', lambda v: v['tower_phases_ms'].update(validate=v['times_ms']['tower'] + 5.0)),
+            ('tower phase per-K short', lambda v: v['tower_phases_ms']['lots_by_k'].pop()),
+            ('tower phase mixed paths', lambda v: v['tower_phases_ms']['order_by_k'].__setitem__(0, 1.0)),
+            ('tower static sum split', lambda v: v['tower_phases_ms'].update(
+                static=v['tower_phases_ms']['static'] + 5.0)),
+            ('tower phases absent', lambda v: v.pop('tower_phases_ms')),
         ]
         killed = 0
         for label, mutate in mutants:

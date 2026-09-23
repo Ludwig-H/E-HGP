@@ -11,7 +11,7 @@
 namespace {
 u64 oracle_mebs = 0, oracle_components = 0, catalogue_rows = 0, tower_pairs = 0;
 u64 census_runs = 0, high_order_facets = 0, high_order_verticals = 0, shell12 = 0;
-u64 q3_rows = 0, q4_rows = 0;
+u64 q3_rows = 0, q4_rows = 0, euler_runs = 0;
 oracle::Mutation oracle_mutation = oracle::Mutation::none;
 bool omit_census_ball = false;
 
@@ -104,6 +104,12 @@ std::vector<BallData> actual_census(const CloudIndex& ix, unsigned kmax, int s) 
   if (chain.status != mhgp9::ChainStatus::kComplete)
     std::fprintf(stderr, "chain refusal=%s\n", chain.reason.c_str());
   need(chain.status == mhgp9::ChainStatus::kComplete, "T2.chain.accepted");
+  // Euler, condition necessaire publiee par la chaine, sur un catalogue que
+  // cette porte juge exhaustivement : sommes egales a 1 pour K <= min(Kmax-2, n).
+  need(chain.catalogue.euler_status == mhgp9::EulerStatus::kHolds &&
+       chain.catalogue.euler_checkable_max_k == std::min<unsigned>(kmax - 2, static_cast<unsigned>(points.size())),
+       "T2.chain.euler_invariant");
+  ++euler_runs;
   auto balls = std::move(chain.catalogue_balls);
   std::sort(balls.begin(), balls.end(), [](const auto& a, const auto& b) { return a.key < b.key; });
   if (omit_census_ball && !balls.empty()) balls.pop_back();
@@ -271,7 +277,7 @@ int main(int argc, char** argv) {
         {42,7,24},{62,94,47},{3,29,58},{85,73,15},{29,36,97},{58,65,3}}, 10};
     } else return 2;
     for (unsigned variant = 0; variant < 2; ++variant) large_case(fixture, variant);
-    need(clouds == 2 && orders == 220 && census_runs == 6 && tower_pairs == 18 &&
+    need(clouds == 2 && orders == 220 && census_runs == 6 && euler_runs == 6 && tower_pairs == 18 &&
          high_order_facets > 0 && high_order_verticals > 0, "T2.nonvacuity");
     if (mode == "--shell14") need(shell12 == 6, "T2.nonvacuity.shell12");
     if (mode == "--spatial12") need(q3_rows > 0 && q4_rows > 0, "T2.nonvacuity.three_dimensional_supports");
