@@ -32,6 +32,48 @@ Le [protocole spatial brut](../../morsehgp3D_v8/receipts/q34_spatial_20260921/RE
 
 Le fil directeur v9 est le **certificat local k-Gabriel d'un support canonique et de sa boule minimale**, avec compte de témoins stricts et coquille complète. L'index global donne des blocs de témoins et le front filtre des familles ; il n'est pas un diagramme de Voronoï/Delaunay d'ordre supérieur à construire. Un certificat commun ne devient une tâche qu'en présence de candidats, puis se partage entre supports d'une même arête ou d'un même bloc ; un signe indécis se raffine exactement. C'est cette paresse et le nombre total de certificats réellement visités, plutôt que la seule parallélisation des anciennes boucles, qu'il faut confronter au seuil sous-quadratique dans les deux régimes LiDAR. Les liens d'incidence entre supports cosphériques restent conservés après regroupement des boules.
 
+### Filtrer une ligne `a × B` avant l'expansion q3/q4
+
+Le [reçu G4 R4b](../receipts/g4_tower_r4b_20260923/README.md) établit
+qu'un cache des témoins évite la recherche complète sur 53,36–69,76 %
+des **paires résiduelles développées**, mais ne réduit ni leur
+énumération, ni les covers. Un cran de granularité exact se trouve entre
+le filtre du rectangle `A_box × B_box` et le filtre de chaque paire : pour
+chaque ancre `a` dans A, appeler la primitive existante
+`filter_q34_witnesses(index, singleton_box(a), box(B_node), K, mask, …)`.
+Tout nœud de témoins admis par ses bornes `H`/`Xi` l'est pour **chaque**
+`b∈B_node` ; un seuil de `K−1` témoins stricts éteint q3, et celui de
+`K−2` éteint q4. Le masque rendu ne peut donc que retirer des voies
+pour toute la ligne. Si les deux voies s'éteignent, créditer `|B|`
+paires et passer à l'ancre suivante sans les matérialiser ; sinon
+transmettre le sous-masque à la voie par paire inchangée. La preuve ne
+transfère aucun compte entre lignes et ne suppose ni alignement ni
+modèle de densité LiDAR.
+
+La différence avec le filtre du rectangle est stricte : sur les
+points collinéaires `A={0,3,5,10}`, `B={1000,1001}`, `K=3`, une sonde
+compilée temporaire de la primitive renvoie le masque `6` pour tout
+`A_box × B_box`, puis `0` pour la ligne `a=0` ; chacun des deux filtres
+ponctuels de cette ligne renvoie aussi `0`. Les témoins `3,5` sont
+stricts pour `a=0`, mais pas pour `a=10`. C'est une fixture de sûreté et
+de gain structurel potentiel, **pas** une mesure LiDAR ni un test du
+front WSPD complet. Le splitter actuel de `wspd_q34.cpp` répartit des
+plages disjointes de rangs A et garde B entier ; `expand` parcourt A à
+l'extérieur puis B. Chaque ligne est donc possédée par un seul worker,
+y compris quand la file refuse une tâche, sans nouvel état partagé.
+
+Avant activation, compter en mode shadow `row_queries`, visites de
+nœuds, masse de lignes entièrement rejetées et masses q3/q4 retirées ;
+facturer le DFS de ligne même si aucune paire n'est évitée. La porte
+existante `q34_witness_search_gate` vérifie les boîtes, et
+`wspd_q34_gate` doit comparer W1/W4, petit grain et refus de file.
+Après activation, le grand-livre des paires doit satisfaire
+`input_pair_mass = rectangle_pair_mass + row_full_pair_mass + expanded_pairs`
+sur une exécution complète, sans compter deux fois les rejets par voie.
+Le gain doit être jugé sur mur, CPU, covers, sorties et RSS pour les
+trames LiDAR entières et les scènes denses, pas sur la seule masse
+évitée.
+
 ### Covers communs sur un bloc d'arêtes survivantes : certificat entier secondaire
 
 Le premier moteur v9 `d2700314` construit encore un `Q34EdgeCover` **par

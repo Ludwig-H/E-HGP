@@ -435,6 +435,14 @@ appariée.
    v6 ; son test de snapshot ciblé passe. Le reçu R4b mesure désormais le
    cache en ablation appariée, mais n'isole pas la preuve conjointe et
    n'établit aucune borne de croissance.
+   Une [piste de filtre par ligne
+   `a × B_node`](CONTRAT_COUTS_ET_PARALLELISATION.md)
+   réutilise le prédicat exact de témoins sur une ancre singleton et tout
+   le nœud B avant l'expansion : elle peut créditer `|B|` paires d'un coup
+   quand la boîte A entière reste ouverte. Une sonde compilée temporaire
+   donne rectangle ouvert, ligne fermée sur six points collinéaires.
+   Mesurer d'abord visites et masse évitée en shadow sur R4b : aucun gain
+   LiDAR ni changement de moteur n'en découle encore.
    Les trois JSON locaux `build/v9-runs/dead_20260923/cache_s{00,01,02}_k5.json`
    donnent **69,763 / 61,155 / 66,851 %** pour
    `witness_cache_rejected_pairs / expanded_pairs` : il s'agit des paires
@@ -513,6 +521,17 @@ appariée.
    injection locale sur `vector<int>` le reproduit, sans prouver qu'un FULL
    30 M réussirait. Un repli ciblé sur cette allocation et son compteur
    sont une protection simple à qualifier sous le contrat massif.
+   Un nouveau [port WIP des ordres K
+   concurrents](PREFETCH_GEOMETRIE_FULL_PAR_K_20260923.md)
+   (snapshot `0552ad3e…`, hors reçu R4b) sépare lots horizontaux,
+   numérotation des populations et images verticales. Ses petites portes
+   différentielles, ASan/UBSan/LSan, TSan et la chaîne 1 500 sites passent.
+   Mais les états simultanés ont un plancher logique de **635,2 Mio** sur
+   la scène 08/000000/K10 du reçu R4b, avant brouillons et catalogue, et
+   une exception après un lot fait perdre les compteurs privés de travail
+   déjà payé ; une injection l'a reproduit. Fusionner ces compteurs sur
+   échec après jointure, puis mesurer RSS et mur par phase/K avant
+   d'attribuer un gain massif. Aucune mesure G4 ne porte sur ce WIP.
    Une [piste exacte pour les intrus](INTRUS_FULL_PREFIXE_EXACT_20260923.md)
    réutilise, par BallKey, un préfixe complet d'intérieurs Morton ; son
    [oracle combinatoire](check_full_intruder_prefix_20260923.py) passe
