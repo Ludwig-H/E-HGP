@@ -41,6 +41,19 @@ Le jumeau CPU/GPU compare deux chemins issus des mêmes survivants : il
 détecte une divergence, pas une clé omise par les deux. Conserver le juge
 échantillonné de clés admissibles indépendantes en parallèle de la porte
 différentielle S4, avec sa portée limitée déclarée.
+L'[audit du couplage graines–cover S4a](AUDIT_S4_COUPLAGE_GRAINES_COVER_20260923.md)
+montre que les agrégats R14 et LiDAR brut ne calculent pas le volume projeté
+`Σ_e ceil(g_e/32)c_e` : ils séparent graines et covers, et le total des
+covers mélange les voies. Le WIP donne un warp à chaque arête, traite les
+graines successivement et les sites 32 par 32 : son nominal est
+`Σ_e g_e ceil(c_e/32)`, son travail effectif dépend de l'arrêt **par
+graine**. À `g_e,c_e` identiques, le nominal WIP ne dépasse celui du
+plan que de `G=Σg_e` au plus ; pour R14/K5, `G=9,318 M`, mais les
+`0,2 G` pas du plan restent une projection non mesurée. Le compteur
+`ceil(census_point_tests/32)` par arête est correctement libellé minorant,
+pas un nombre de ballots. Publier les couples par arête, les ballots
+réels, quatre évaluations d'anneau par site, transferts et replis avant
+d'attribuer un coût ou une croissance à S4a.
 Le [préflight du WIP S4a](AUDIT_S4_WIP_EXCEPTIONS_WORKERS_20260923.md)
 repère trois allocations/insertions **hors capture d'exception** dans
 `run_lanes_batch_host` : un `bad_alloc` d'un worker peut terminer le
