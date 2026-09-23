@@ -4,10 +4,31 @@
 
 Le port hôte `gpu/certificate.hpp` suit à la lecture l'ordre des plages, les bornes fermées, les formes u18, les cellules de profondeur 2..6 et les seuils `K−1`/`K−2` du producteur. Le gate provisoire compare masques **et compteurs** sur des survivants synthétiques 2k/8k K3/5/10, ainsi que le report sous petite capacité. Ce n'est ni une comparaison CUDA exécutée ni un gate aux bornes u18, aux trames LiDAR ou à K1/2. Le `WarpGroup` et le noyau persistent viennent seulement d'apparaître dans un diff mutable ; ils doivent encore compiler, subir un différentiel par arête, un test des voies vides/différées et une campagne G4 avant toute déclaration d'exactitude device.
 
+La campagne locale observée après le commit détaché passe **148/148
+tests actifs**, un mutant étant désactivé, dans `build/v9-exp` (log
+`Testing/Temporary/LastTest.log`, 18:18 UTC). Son cache indique
+`MHGP9_ENABLE_CUDA=OFF` : cette réussite juge la référence CPU et
+l'émulation hôte, **pas** la compilation ni les décisions du noyau
+CUDA. Ce log de build non versionné est une observation de préflight,
+pas un reçu archivé. La première dépense G4 devrait donc être un smoke
+test court compilation + quelques arêtes et lot vide sur device ;
+n'exécuter les 18 cas R13 qu'après égalité par arête et correction des
+portes d'entrée.
+
 ## Deux portes de domaine à fermer
 
 1. `run_certificate_batch` CUDA exécute `out.masks.assign(input.edge_mask, input.edge_mask + edges)` **avant** `if (edges == 0) return`. Or `validate_certificate_input` accepte `edge_count=0` avec `edge_mask=nullptr`. L'addition `nullptr+0`, puis l'itérateur de plage nul, n'ont pas de contrat C++ valide. Retourner avant `assign` ou le conditionner, puis ajouter un gate CUDA/stub `0 arête, pointeurs nuls`. Une liste vide est normale quand le filtre S2 élimine tout.
 2. La garde héritée `validate_filter_input` accepte une feuille dont la plage contient **plus d'un rang**. `build_cover` S3 suppose au contraire que toute feuille est singleton : si la boîte d'une telle feuille est ambiguë, il descend vers `node.left=absent32` et **omet** la plage. Cela peut produire un `fault` (extrémités perdues), une couverture incomplète et des comptes faux. Pas de lecture hors limites directe dans cette boucle : le curseur sentinelle termine le parcours. Imposer `leaf ⇔ last−first=1` dans la validation de cette API, avec mutant de feuille multi-site ambiguë. L'index produit satisfait déjà cette propriété ; le défaut est à la frontière publique brute.
+
+3. `validate_certificate_input` admet toute arête de masque non nul
+dans `2|4` même quand `kmax=1` ou quand la voie q4 est indisponible à
+`kmax=2`. `prove_lanes` ne tente alors pas cette voie et renvoie son
+masque ouvert ; le port brut peut donc publier une décision q3 à K1
+ou q4 à K2. Les survivants issus du filtre S2 de la chaîne respectent
+le domaine, donc ce n'est **pas** une divergence démontrée du contrat
+LiDAR K5/K10 ; c'est une garde d'API publique à fermer. Refuser un
+masque hors des voies disponibles (`0` à K1, `2` à K2, `2|4` à partir
+de K3) et tester les deux refus, ainsi que `dead_core=false`.
 
 ## Travail, mémoire et juges encore ouverts
 
