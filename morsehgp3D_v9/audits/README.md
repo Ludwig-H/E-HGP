@@ -197,6 +197,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | --- | --- | --- | --- | --- | --- |
 | [`OBSTACLES_GPU_SOUS_SECONDE_20260923.md`](OBSTACLES_GPU_SOUS_SECONDE_20260923.md) | B ? | `c717a1f2` 05:56 | mesure | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_WIP_V6_C6_TRI_20260923.md`](CONTRE_AUDIT_B_WIP_V6_C6_TRI_20260923.md) | B | `73d1d0a6` 05:31 | démontré localement | vivant (hors v9) | sans réponse (question canal l. 35) |
+| [`AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md`](AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md) | A | 23/13:17 | défaut de garde démontré sur S1 publié ; correction ciblée | vivant | sans réponse |
 
 ## Annexes de l'auditeur C
 

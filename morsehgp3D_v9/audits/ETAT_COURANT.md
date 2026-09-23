@@ -51,9 +51,13 @@ montre que, dans R11, `chain_s−q34_s` vaut encore 0,874/1,062/1,106 s
 sur les trois trames K5 et au moins 3,235 s à K10 : déporter **seulement**
 les filtres ne peut qualifier la seconde si les autres phases restent
 inchangées et séquentielles. La porte de débit 0,1 s pour tous les masques
-sans cache demeure utile. Un lanceur CUDA a depuis été ajouté au **worktree
-mutable** ; il n'a encore ni test positif sur appareil ni résultat G4
-publié. Le profil local attribue environ 33 % du CPU
+sans cache demeure utile. Le lanceur CUDA S1 est maintenant publié par
+`0d5ad2e89`, avec validation hôte des IDs, plages et masques, et une sonde
+de comparaison de tous les masques ; il n'a encore ni test positif sur
+appareil ni résultat G4 publié. L'[audit du domaine u18](AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md)
+montre que sa garde accepte aussi des coordonnées hors u18 qui font
+déborder l'arithmétique signée du filtre : borner points et boîtes avant
+CUDA. Le profil local attribue environ 33 % du CPU
 q3/q4 aux deux DFS ciblés avec leur ordre d'enfants ; 40 % comprend
 aussi le front non porté. Un chemin GPU intégré doit inclure les coûts
 de création/consommation des requêtes et une sortie bornée par lots.
