@@ -150,13 +150,19 @@ moins de crédits. Il est d'abord tenté sur la boule diamétrale fermée
 $|2z-a-b|^2 \le |b-a|^2$ (a et b sur son bord) ; le cover n'est construit, et
 le certificat rejoué, que pour les voies restées ouvertes. Sur 08/000000 à
 K5, 1,14 M des 2,04 M arêtes sont closes par le noyau et les formes chargées
-tombent de 2,96 G à 0,61 G ; CPU q3/q4 du harnais −18 % à K5 et −16,5 % à
-K10, flux émis identique. Identités : expansées = covers + arêtes closes par
+tombent de 2,96 G à 0,61 G (0,36 G de noyaux + 0,25 G de covers restants,
+soit `dead_core.form_sites + dead.form_sites` contre `dead.form_sites`) ;
+CPU q3/q4 du harnais hors dépôt −18 % à K5 et −16,5 % à K10, flux émis
+identique : indications de développement, pas un reçu. Le noyau porte
+`complete() == false` et `require_complete_q34_cover` le refuse à tout autre
+consommateur (census, atlas, graines, fenêtre, domaine positif, réserve de
+témoins). Identités : expansées = covers + arêtes closes par
 le noyau + paires rejetées ; noyaux = covers + arêtes closes ; voies ouvertes
 après le noyau = voies prouvées + ouvertes sur le cover. Portes : variante
 `wspd_q34` contre l'oracle rationnel (voies prouvées par le noyau et voies
 prouvées seulement sur le cover après lui), appartenance exacte du noyau et
-inclusion dans le cover (`q34_cover`), deux mutants tués par le ledger.
+inclusion dans le cover et refus par les huit consommateurs (`q34_cover`),
+trois mutants tués (deux par le ledger, un par la garde).
 
 ## Chaîne : `src/chain/` (espace `mhgp9`, code neuf)
 

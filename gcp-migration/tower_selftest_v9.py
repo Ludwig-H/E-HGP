@@ -67,6 +67,13 @@ def fnv_u32le(raw):
     return '%016x' % h
 
 
+def rewrite_guard(output, section, **fields):
+    path = output / 'guard_evidence.json'
+    value = json.loads(path.read_text())
+    value[section].update(fields)
+    path.write_text(json.dumps(value))
+
+
 def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt='', levers=None, schema=None):
     effective = min(k, n)
     complete = status == 'complete_relative'
@@ -77,9 +84,12 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
     # A ledger consistent with the generator and catalogue below, and with
     # each lever (the reader checks these identities exactly).
     ledger = {name: 1 for name in schema['ledger']}
-    ledger.update(expanded_pairs=4, cover_builds=1, witness_rejected_pairs=3, cover_sites=10, q3_edges=1, q4_edges=1)
+    # Two covers: one keeps both lanes open, the other has both proved dead.
+    ledger.update(expanded_pairs=5, cover_builds=2, witness_rejected_pairs=3, cover_sites=10, q3_edges=1, q4_edges=1,
+                  both_edges=1)
     if levers['q34_dead_lanes']:
-        ledger.update(dead_loads=1, dead_form_sites=8, dead_q3_open=1, dead_q4_open=1)
+        ledger.update(dead_loads=2, dead_form_sites=6, dead_q3_open=1, dead_q4_open=1, dead_q3_proved=1,
+                      dead_q4_proved=1, dead_cells=3)
     else:
         ledger.update({name: 0 for name in schema['ledger'] if name.startswith('dead_')})
     if not levers['q34_witness_cache']:
@@ -87,10 +97,12 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
     if not levers['q3_leaf_census']:
         ledger.update(q3_leaf_censuses=0, q3_leaf_point_tests=0)
     if levers['q34_dead_core']:
-        # One edge closed by the diametral core, one sent on to the cover.
-        ledger.update(expanded_pairs=5, core_closed_edges=1, core_builds=2, dead_core_loads=2, core_sites=10,
+        # One edge closed by the diametral core, two sent on to the covers.
+        ledger.update(expanded_pairs=6, core_closed_edges=1, core_builds=3, dead_core_loads=3, core_sites=12,
                       dead_core_form_sites=6, dead_core_q3_open=ledger['dead_q3_proved'] + ledger['dead_q3_open'],
-                      dead_core_q4_open=ledger['dead_q4_proved'] + ledger['dead_q4_open'])
+                      dead_core_q4_open=ledger['dead_q4_proved'] + ledger['dead_q4_open'], dead_core_q3_proved=1,
+                      dead_core_q4_proved=1, core_cover_node_visits=4, core_cover_bound_tests=3,
+                      core_cover_point_tests=1, dead_core_cells=3)
     else:
         ledger.update({name: 0 for name in schema['ledger'] if name.startswith(('core_', 'dead_core_'))})
     return dict(schema='mhgp9_tower_probe_v7', status=status,
@@ -101,7 +113,8 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                              levers=levers),
                 times_ms=dict({key: 0.125 for key in TIMES}, chain_total=1.5), chain_cpu_s=0.25,
                 generator=dict(q2_front_rectangles=3, q2_candidate_pairs=2, q2_accepted_pairs=1,
-                               q34_expanded_pairs=ledger['expanded_pairs'], q34_cover_builds=1, q3_emitted=2,
+                               q34_expanded_pairs=ledger['expanded_pairs'], q34_cover_builds=ledger['cover_builds'],
+                               q3_emitted=2,
                                q4_emitted=1),
                 ledger=ledger,
                 catalogue=dict(q2_presentations=1, q3_presentations=2, q4_presentations=1, unique_keys=4, balls=4,
@@ -755,7 +768,17 @@ class Protocol(unittest.TestCase):
                      ('q3_presentations_zero', lambda v: v['catalogue'].update(q3_presentations=0)),
                      ('dead_q3_open_shifted', lambda v: v['ledger'].update(dead_q3_open=2)),
                      ('core_closed_shifted', lambda v: v['ledger'].update(core_closed_edges=2)),
-                     ('core_loads_shifted', lambda v: v['ledger'].update(dead_core_loads=3)),
+                     ('core_loads_shifted', lambda v: v['ledger'].update(dead_core_loads=4)),
+                     ('cache_queries_zero', lambda v: v['ledger'].update(witness_cache_queries=0)),
+                     ('cache_node_tests_zero', lambda v: v['ledger'].update(witness_cache_node_tests=0)),
+                     ('both_edges_beyond_q3', lambda v: v['ledger'].update(both_edges=2)),
+                     ('dead_q3_proved_beyond_covers', lambda v: v['ledger'].update(dead_q3_proved=3)),
+                     ('dead_cells_classes', lambda v: v['ledger'].update(dead_cells=2)),
+                     ('core_cover_visits', lambda v: v['ledger'].update(core_cover_node_visits=5)),
+                     ('core_closed_unproved', lambda v: v['ledger'].update(dead_core_q3_proved=0, dead_core_q4_proved=0)),
+                     ('shell_over_12', lambda v: v['catalogue'].update(shell_over_12=1)),
+                     ('max_shell_13', lambda v: v['catalogue'].update(max_shell=13)),
+                     ('by_shell_2_to_16', lambda v: v['catalogue'].update(by_shell=[0, 0, 0, 2, 1] + [0] * 11 + [1])),
                      ('core_form_sites_shifted', lambda v: v['ledger'].update(dead_core_form_sites=8)),
                      ('core_q4_open_shifted', lambda v: v['ledger'].update(dead_core_q4_open=1)),
                      ('cache_rejections_excess', lambda v: v['ledger'].update(witness_cache_rejected_pairs=4)),
@@ -820,9 +843,12 @@ class Protocol(unittest.TestCase):
             pkg = package()
             expected = session.validate_snapshot(pkg['archive'], pkg['manifest'])[0]
             pin = worker.sha(worker.__file__)
-            need(session.validate_received(output, pkg['manifest'], pin, expected) == 'completed', 'revalidation')
-            need(session.validate_received(output, pkg['manifest'], pin, expected, receipt['generation'],
-                                           receipt['provenance']) == 'completed', 'revalidation bound to the session')
+            bound = (receipt['generation'], receipt['provenance'])
+            need(session.validate_received(output, pkg['manifest'], pin, expected, *bound) == 'completed',
+                 'revalidation bound to the session')
+            need(refused(session.validate_received, output, pkg['manifest'], pin, expected, '', receipt['provenance']) and
+                 refused(session.validate_received, output, pkg['manifest'], pin, expected, receipt['generation'], {}),
+                 'reception without the session generation or provenance')
             need(refused(session.validate_received, output, pkg['manifest'], pin, expected, 'another-generation',
                          receipt['provenance']) and
                  refused(session.validate_received, output, pkg['manifest'], pin, expected, receipt['generation'],
@@ -838,12 +864,23 @@ class Protocol(unittest.TestCase):
                     ('guard evidence', lambda o: (o / 'guard_evidence.json').write_text('{}')),
                     ('preflight stderr', rewrite_preflight_stderr),
                     ('receipt target', lambda o: (o / 'receipt.json').write_bytes((o / 'receipt.json').read_bytes().replace(
-                        worker.TARGET['instance'].encode(), b'another-instance')))):
+                        worker.TARGET['instance'].encode(), b'another-instance'))),
+                    ('guard mark instance', lambda o: rewrite_guard(o, 'mark', instance='another-instance')),
+                    ('guard mark zone', lambda o: rewrite_guard(o, 'mark', zone='europe-west4-a')),
+                    ('guard mark schema', lambda o: rewrite_guard(o, 'mark', schema='e-hgp.guard-mark.v0')),
+                    ('guard mark before generation', lambda o: rewrite_guard(o, 'mark', date_utc='2000-01-01T00:00:00Z')),
+                    ('guest schedule mode', lambda o: rewrite_guard(o, 'schedule', MODE='reboot')),
+                    ('guest schedule text', lambda o: rewrite_guard(o, 'schedule', USEC='soon')),
+                    ('guest schedule too late', lambda o: rewrite_guard(o, 'schedule', USEC=str(
+                        (session.epoch(receipt['generation']) + 4000) * 1000000))),
+                    ('guest schedule before start', lambda o: rewrite_guard(o, 'schedule', USEC=str(
+                        (session.epoch(receipt['generation']) - 10) * 1000000)))):
                 shutil.copytree(output, tampered)
                 mutate(tampered)
-                need(refused(session.validate_received, tampered, pkg['manifest'], pin, expected), 'tamper ' + label)
+                need(refused(session.validate_received, tampered, pkg['manifest'], pin, expected, *bound),
+                     'tamper ' + label)
                 shutil.rmtree(tampered)
-            need(refused(session.validate_received, output, pkg['manifest'], '0' * 64, expected), 'worker pin')
+            need(refused(session.validate_received, output, pkg['manifest'], '0' * 64, expected, *bound), 'worker pin')
 
     def test_partial_session_case_cap_and_refusal(self):
         with tempfile.TemporaryDirectory() as temporary:

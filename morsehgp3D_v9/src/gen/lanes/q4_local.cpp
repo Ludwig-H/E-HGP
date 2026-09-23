@@ -276,6 +276,7 @@ Q4LocalAtlas::~Q4LocalAtlas()=default;
 Q4LocalAtlasPtr Q4LocalAtlas::make(Q34EdgeCoverPtr cover,std::size_t k,Q4LocalOptions o) {
   validate(o);
   if(!cover || k<3) throw std::invalid_argument("mhgp9 gen local atlas requires cover and K>=3");
+  require_complete_q34_cover(cover);
   return Q4LocalAtlasPtr(new Q4LocalAtlas(std::make_unique<Impl>(std::move(cover),k,o)));
 }
 const Q4LocalGeometryPtr& Q4LocalAtlas::geometry() const noexcept {return impl_->geometry;}

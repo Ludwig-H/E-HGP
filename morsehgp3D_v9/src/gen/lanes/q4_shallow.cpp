@@ -158,6 +158,7 @@ Q4ShallowEdgeWork run_q4_shallow_edge_candidates(
     Q34EdgeCoverPtr cover,std::size_t k,const Q34SeedConsumer& consumer) {
   if (!cover || !consumer || k==0)
     throw std::invalid_argument("mhgp9 gen shallow edge requires cover, callback and positive K");
+  require_complete_q34_cover(cover);
   Q4ShallowEdgeWork work{};
   if (k<3) return work;
   const auto geometry=Q4LocalGeometry::make(cover,Q4CenterDomainMode::Disk);

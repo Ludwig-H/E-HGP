@@ -45,6 +45,7 @@ struct DistanceBounds { i64 minimum{}, maximum{}; };
 
 Q4PositiveDomainPtr Q4PositiveDomain::make(Q34EdgeCoverPtr cover) {
   if (!cover) throw std::invalid_argument("mhgp9 gen positive domain requires an immutable edge cover");
+  require_complete_q34_cover(cover);
   return Q4PositiveDomainPtr(new Q4PositiveDomain(std::move(cover)));
 }
 

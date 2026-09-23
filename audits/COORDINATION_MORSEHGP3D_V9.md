@@ -423,3 +423,45 @@ levier coupé. Portes : `wspd_q34` (variante noyau, planchers dont « voie
 prouvée sur le cover après échec du noyau »), `q34_cover` (appartenance
 exacte, inclusion, extrémités), deux mutants tués. `-L gate` : **121/121**.
 
+## 23 septembre 2026, 06 h 00 — Réponse aux contre-audits B du noyau et de la réception (développeur)
+
+GCP non utilisé. Réponses à `aed84902`, `190e0a7c`, `c10f43b5`, `916549f5`,
+`5a3c8e10` et à `RECEPTION_V6_IDENTITES_MANQUANTES_20260923.md` :
+
+- **Travail caché du noyau publié** (sonde `mhgp9_tower_probe_v8`) :
+  `core_cover_node_visits`, `core_cover_bound_tests`, `core_cover_point_tests`,
+  `dead_core_outside_cells`, `dead_core_deep_cells`, `dead_core_failed_cells`,
+  avec `visites = tests de boîtes + tests ponctuels`, `noyaux ≤ visites` et
+  classes de cellules ≤ cellules. La v7 n'a servi à aucune session.
+- **Formes** : 0,61 G = 0,36 G de noyaux + 0,25 G de covers restants
+  (`dead_core.form_sites + dead.form_sites`), contre 2,96 G ; précisé dans la
+  provenance, toujours une indication de harnais, pas un reçu.
+- **Garde de type** : `Q34EdgeCover::complete()` est faux pour le noyau et
+  `require_complete_q34_cover` le refuse aux huit consommateurs (census
+  d'arête et de graine, atlas, géométrie locale, fenêtre q4, peu profond,
+  domaine positif, réserve de témoins) ; la porte `q34_cover` l'exige, mutant
+  `diametral_core_accepted_by_consumers` tué.
+- **Raccord réel** : non-vacuité du noyau (arêtes closes, voies q3 et q4
+  prouvées par lui, rien levier coupé) et six mutants de plus (levier, clôture
+  non comptée, visites cachées, rejets de cache sans requête, arêtes doubles
+  au-delà de q3, coquille au-delà de 12) : **26/26** tués.
+- **Lecteur fail-closed** (identités manquantes v6) : rejets du cache ≤
+  requêtes ≤ paires développées et rejet ⇒ nœud testé ; arêtes doubles ≤
+  min(q3, q4) et q3 + q4 − doubles ≤ covers ; voies prouvées + ouvertes ≤
+  covers par voie, voies ouvertes + prouvées couvrent chaque cover ; classes
+  de cellules ≤ cellules ; `shell_over_12 = 0`, `max_shell ≤ 12`,
+  `by_shell[13..16] = 0` sous statut complet. Douze nouvelles mutations
+  refusées dans les autotests.
+- **Preuve de garde archivée** : `validate_received` exige génération et
+  provenance (plus d'arguments optionnels), rejuge cible, schéma et
+  chronologie de la marque, `MODE=poweroff` et l'échéance `USEC` dans
+  ]génération, génération + 3 600 − 300]. Huit altérations de
+  `guard_evidence.json` refusées dans les autotests.
+- **ABA** : la réutilisation effective de l'adresse d'index est maintenant un
+  plancher (code 3), sauf sous AddressSanitizer dont la quarantaine
+  l'interdit par construction.
+
+Portes locales `-L gate` : **122/122** (une désactivée préexistante).
+Prochaine étape : session G4 R6, ablation appariée du noyau (même snapshot,
+trois trames, K5/K10, W48) avant de conclure sur le défaut ON.
+

@@ -58,6 +58,9 @@ class Q34EdgeCover final {
   [[nodiscard]] const std::array<std::size_t, 2>& edge_ids() const noexcept { return edge_ids_; }
   [[nodiscard]] std::span<const Range> ranges() const noexcept { return ranges_; }
   [[nodiscard]] std::size_t site_count() const noexcept { return site_count_; }
+  // False for make_diametral(): such a core is readable by the dead-lane
+  // certificate only (require_complete_q34_cover guards every other consumer).
+  [[nodiscard]] bool complete() const noexcept { return complete_; }
   [[nodiscard]] const Q34EdgeCoverWork& work() const noexcept { return work_; }
   // Vector capacity only, excluding this object, shared_ptr metadata and the
   // already-owned index/cloud. No traversal stack or per-seed ID list exists.
@@ -83,6 +86,12 @@ class Q34EdgeCover final {
   std::vector<Range> ranges_;
   std::size_t site_count_{};
   Q34EdgeCoverWork work_{};
+  bool complete_{true};
 };
+
+// Census, atlas, seeds and shells need the COMPLETE closed cover: a diametral
+// core passed to them is refused (invalid_argument). A null cover is left to
+// each consumer's own refusal.
+void require_complete_q34_cover(const Q34EdgeCoverPtr& cover);
 
 }  // namespace mhgp9::gen

@@ -450,11 +450,13 @@ Q34EdgeWork run_edge(Q34EdgeCoverPtr cover, std::size_t kmax,
 
 Q34CoverSeedWork run_q34_cover_seed_candidates(Q34EdgeCoverPtr cover,
     std::size_t x_id, std::size_t kmax, const Q34SeedConsumer& consumer) {
+  require_complete_q34_cover(cover);
   return run_seed(std::move(cover), x_id, kmax, consumer, nullptr, nullptr);
 }
 
 Q34EdgeWork run_q34_edge_candidates(Q34EdgeCoverPtr cover, std::size_t kmax,
                                    const Q34SeedConsumer& consumer) {
+  require_complete_q34_cover(cover);
   return run_edge(cover, kmax, consumer, [&](std::size_t id) {
     return run_seed(cover, id, kmax, consumer, nullptr, nullptr);
   });

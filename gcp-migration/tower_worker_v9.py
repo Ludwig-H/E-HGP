@@ -48,7 +48,7 @@ PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
 PLAN_SCHEMA = 'mhgp9_tower_plan_v5'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v7'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v8'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -124,7 +124,8 @@ LEDGER_KEYS = frozenset((
     'dead_q4_proved dead_q4_open witness_cache_queries witness_cache_node_tests '
     'witness_cache_rejected_pairs core_builds core_sites core_closed_edges dead_core_loads dead_core_form_sites '
     'dead_core_cells dead_core_uniform_tests dead_core_point_tests dead_core_q3_proved dead_core_q3_open '
-    'dead_core_q4_proved dead_core_q4_open').split())
+    'dead_core_q4_proved dead_core_q4_open core_cover_node_visits core_cover_bound_tests core_cover_point_tests '
+    'dead_core_outside_cells dead_core_deep_cells dead_core_failed_cells').split())
 CATALOGUE_LISTS = dict(by_qmin=3, by_shell=17)
 CATALOGUE_KEYS = frozenset(('q2_presentations q3_presentations q4_presentations unique_keys balls '
                             'extra_shell_balls shell_over_12 max_shell max_interior census_nodes census_leaf_tests '
@@ -387,6 +388,13 @@ def validate_ledger_identities(value, levers):
     need(catalogue['balls'] == catalogue['unique_keys'] == sum(catalogue['by_qmin']) == sum(catalogue['by_shell']) and
          catalogue['q2_presentations'] + catalogue['q3_presentations'] + catalogue['q4_presentations'] >=
          catalogue['unique_keys'], 'catalogue identity')
+    # La chaine refuse toute coquille de plus de 12 sites avant complete_relative.
+    need(catalogue['shell_over_12'] == 0 and catalogue['max_shell'] <= 12 and
+         all(count == 0 for count in catalogue['by_shell'][13:]), 'complete catalogue with a shell above 12')
+    # Une arete aux deux voies est dans q3, dans q4 et a un cover.
+    need(ledger['both_edges'] <= min(ledger['q3_edges'], ledger['q4_edges']) and
+         ledger['q3_edges'] + ledger['q4_edges'] - ledger['both_edges'] <= ledger['cover_builds'],
+         'edge lane identity')
     dead = ('dead_loads', 'dead_form_sites', 'dead_cells', 'dead_outside_cells', 'dead_deep_cells', 'dead_failed_cells',
             'dead_uniform_tests', 'dead_point_tests', 'dead_q3_proved', 'dead_q3_open', 'dead_q4_proved', 'dead_q4_open')
     if levers['q34_dead_lanes']:
@@ -394,11 +402,20 @@ def validate_ledger_identities(value, levers):
              ledger['dead_form_sites'] == ledger['cover_sites'] - 2 * ledger['dead_loads'] and
              ledger['dead_q3_open'] == ledger['q3_edges'] and ledger['dead_q4_open'] == ledger['q4_edges'],
              'dead-lane ledger identity')
+        # Une voie est prouvee ou ouverte au plus une fois par cover ; chaque
+        # cover porte au moins une voie ; classes de cellules disjointes.
+        need(all(ledger['dead_q%d_proved' % q] + ledger['dead_q%d_open' % q] <= ledger['cover_builds'] for q in (3, 4)) and
+             ledger['q3_edges'] + ledger['q4_edges'] - ledger['both_edges'] + ledger['dead_q3_proved'] +
+             ledger['dead_q4_proved'] >= ledger['cover_builds'] and
+             ledger['dead_outside_cells'] + ledger['dead_deep_cells'] + ledger['dead_failed_cells'] <=
+             ledger['dead_cells'], 'dead-lane lane/cell bounds')
     else:
         need(all(ledger[name] == 0 for name in dead), 'dead-lane counters while the lever is off')
     core = ('core_builds', 'core_sites', 'core_closed_edges', 'dead_core_loads', 'dead_core_form_sites',
             'dead_core_cells', 'dead_core_uniform_tests', 'dead_core_point_tests', 'dead_core_q3_proved',
-            'dead_core_q3_open', 'dead_core_q4_proved', 'dead_core_q4_open')
+            'dead_core_q3_open', 'dead_core_q4_proved', 'dead_core_q4_open', 'core_cover_node_visits',
+            'core_cover_bound_tests', 'core_cover_point_tests', 'dead_core_outside_cells', 'dead_core_deep_cells',
+            'dead_core_failed_cells')
     if levers['q34_dead_core']:
         need(ledger['core_builds'] == ledger['cover_builds'] + ledger['core_closed_edges'] and
              ledger['dead_core_loads'] == ledger['core_builds'] and
@@ -406,11 +423,23 @@ def validate_ledger_identities(value, levers):
              ledger['dead_core_q3_open'] == ledger['dead_q3_proved'] + ledger['dead_q3_open'] and
              ledger['dead_core_q4_open'] == ledger['dead_q4_proved'] + ledger['dead_q4_open'],
              'dead-lane core ledger identity')
+        need(all(ledger['dead_core_q%d_proved' % q] + ledger['dead_core_q%d_open' % q] <= ledger['core_builds']
+                 for q in (3, 4)) and
+             ledger['core_closed_edges'] <= ledger['dead_core_q3_proved'] + ledger['dead_core_q4_proved'] and
+             ledger['cover_builds'] <= ledger['dead_core_q3_open'] + ledger['dead_core_q4_open'] and
+             ledger['core_cover_node_visits'] == ledger['core_cover_bound_tests'] + ledger['core_cover_point_tests'] and
+             ledger['core_builds'] <= ledger['core_cover_node_visits'] and
+             ledger['dead_core_outside_cells'] + ledger['dead_core_deep_cells'] + ledger['dead_core_failed_cells'] <=
+             ledger['dead_core_cells'], 'dead-lane core lane/cell/cover bounds')
     else:
         need(all(ledger[name] == 0 for name in core), 'dead-lane core counters while the lever is off')
     cache = ('witness_cache_queries', 'witness_cache_node_tests', 'witness_cache_rejected_pairs')
     if levers['q34_witness_cache']:
-        need(ledger['witness_cache_rejected_pairs'] <= ledger['witness_rejected_pairs'], 'witness cache identity')
+        # Un rejet par le cache suppose une requete et au moins un noeud teste.
+        need(ledger['witness_cache_rejected_pairs'] <= ledger['witness_rejected_pairs'] and
+             ledger['witness_cache_rejected_pairs'] <= ledger['witness_cache_queries'] <= ledger['expanded_pairs'] and
+             (ledger['witness_cache_rejected_pairs'] == 0 or ledger['witness_cache_node_tests'] > 0),
+             'witness cache identity')
     else:
         need(all(ledger[name] == 0 for name in cache), 'witness cache counters while the lever is off')
     if not levers['q3_leaf_census']:

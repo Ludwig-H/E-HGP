@@ -98,6 +98,8 @@ struct GeneratorLedger {
   std::uint64_t core_builds, core_sites, core_closed_edges, dead_core_loads, dead_core_form_sites, dead_core_cells,
       dead_core_uniform_tests, dead_core_point_tests, dead_core_q3_proved, dead_core_q3_open, dead_core_q4_proved,
       dead_core_q4_open;
+  std::uint64_t core_cover_node_visits, core_cover_bound_tests, core_cover_point_tests, dead_core_outside_cells,
+      dead_core_deep_cells, dead_core_failed_cells;
 };
 
 struct OrderSummary {

@@ -12,9 +12,10 @@
 //       (logic_error) au lieu d'employer les formes precedentes ; un load()
 //       complet ulterieur rend le masque neuf.
 //   (3) prove() avant tout load() refuse.
-// Planchers : sur la fixture ABA, masque perime != masque neuf ; une
-// allocation interrompue dans load() ; des aretes prouvees et des aretes
-// ouvertes dans la serie alternee.
+// Planchers : sur la fixture ABA, masque perime != masque neuf et adresse
+// d'index EFFECTIVEMENT reemployee (sauf sous AddressSanitizer, dont la
+// quarantaine l'interdit par construction) ; une allocation interrompue dans
+// load() ; des aretes prouvees et des aretes ouvertes dans la serie alternee.
 //
 //   mhgp9_gen_q34_dead_lanes_owner_gate --selftest
 //
@@ -32,6 +33,14 @@
 #include "lanes/q34_dead_lanes.hpp"
 #include "pipeline/prepared_cloud.hpp"
 #include "pipeline/q2_census.hpp"
+
+#if defined(__SANITIZE_ADDRESS__)
+#define MHGP9_OWNER_GATE_ASAN 1
+#elif defined(__has_feature)
+#if __has_feature(address_sanitizer)
+#define MHGP9_OWNER_GATE_ASAN 1
+#endif
+#endif
 
 namespace {
 // Countdown of successful allocations before one bad_alloc; negative = off.
@@ -132,6 +141,12 @@ int main(int argc, char** argv) {
     std::cerr << "q34 dead-lane owner gate: ABA fixture is vacuous (stale and fresh masks agree)\n";
     return 3;
   }
+#if !defined(MHGP9_OWNER_GATE_ASAN)
+  if (!same_address) {
+    std::cerr << "q34 dead-lane owner gate: the allocator never reused the index address (ABA not exercised)\n";
+    return 3;
+  }
+#endif
   // (1b) One prover alternating between two cluster clouds, many edges.
   const auto index_a = mhgp9::gen::make_q2_cloud_index(mhgp9::gen::prepare_cloud(clusters(900, 11, 9000)));
   const auto index_b = mhgp9::gen::make_q2_cloud_index(mhgp9::gen::prepare_cloud(clusters(1100, 17, 5000)));

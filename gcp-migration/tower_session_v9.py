@@ -123,15 +123,18 @@ def validate_protocol_runtime(manifest):
          'transported protocol differs from executing controller/worker')
 
 
-def validate_received(output, manifest, worker_pin, expected_cases, generation=None, provenance=None):
+def validate_received(output, manifest, worker_pin, expected_cases, generation, provenance):
     """Relit le recu du worker et ses fichiers bruts ; rend completed ou partial.
 
-    `generation` et `provenance` lient le recu au contexte hote de la session
-    (cible fixe, generation demarree, provenance du paquet valide)."""
+    `generation` et `provenance` (obligatoires) lient le recu au contexte hote
+    de la session (cible fixe, generation demarree, provenance du paquet
+    valide) ; la preuve de garde archivee est rejugee champ par champ."""
+    need(type(generation) is str and generation and type(provenance) is dict and provenance,
+         'reception needs the session generation and provenance')
     value = payload.strict_json((output / 'receipt.json').read_bytes())
     need(type(value) is dict and value.get('target') == payload.TARGET and
-         (generation is None or value.get('generation') == generation) and
-         (provenance is None or value.get('provenance') == provenance), 'worker receipt identity (target/generation/provenance)')
+         value.get('generation') == generation and
+         value.get('provenance') == provenance, 'worker receipt identity (target/generation/provenance)')
     evidence = payload.strict_json((output / 'guard_evidence.json').read_bytes())
     need(type(evidence) is dict and set(evidence) == {'mark', 'schedule', 'metadata'} and
          type(evidence['metadata']) is dict and
@@ -139,7 +142,17 @@ def validate_received(output, manifest, worker_pin, expected_cases, generation=N
          evidence['metadata'].get('machine') == 'g4-standard-48' and type(evidence['mark']) is dict and
          evidence['mark'].get('max_run_seconds') == payload.MAX_RUN_SECONDS and
          evidence['mark'].get('guest_shutdown_minutes') == payload.GUEST_SHUTDOWN_MINUTES and
-         (generation is None or evidence['mark'].get('generation') == generation), 'guard evidence identity')
+         evidence['mark'].get('generation') == generation, 'guard evidence identity')
+    # Marque : cible, schema et chronologie ; calendrier invite : arret
+    # (poweroff) avant l'echeance sure GCE, comme guard_deadline a l'aller.
+    mark, schedule = evidence['mark'], evidence['schedule']
+    need(all(mark.get(key) == item for key, item in payload.TARGET.items()) and
+         mark.get('schema') == 'e-hgp.guard-mark.v1' and mark.get('mark') == 'double_guard_verified' and
+         type(mark.get('date_utc')) is str and epoch(generation) <= epoch(mark['date_utc']), 'guard mark target/chronology')
+    need(type(schedule) is dict and schedule.get('MODE') == 'poweroff' and
+         type(schedule.get('USEC')) is str and re.fullmatch('[0-9]{1,18}', schedule['USEC']) and
+         epoch(generation) < int(schedule['USEC']) // 1000000 <=
+         epoch(generation) + int(payload.MAX_RUN_SECONDS) - 300, 'guest shutdown schedule')
     need(type(value) is dict and value.get('status') in ('completed', 'partial') and
          value.get('sources_stable') is True and value.get('compiled_dependencies_stable') is True and
          value.get('binary_stable') is True and value.get('worker_sha256') == worker_pin and

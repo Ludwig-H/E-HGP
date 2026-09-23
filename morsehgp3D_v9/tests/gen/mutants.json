@@ -534,6 +534,22 @@
    "expected_stderr": "wspd q34 gate: mhgp9 gen global q34 completed ledger mismatch\n",
    "judgment": "ledger",
    "provenance": "v9 (noyau diametral du certificat de voie morte, 23 septembre 2026)"
+  },
+  {
+   "family": "q34_cover",
+   "name": "diametral_core_accepted_by_consumers",
+   "gate": "q34_cover",
+   "source": "lanes/edge_cover.cpp",
+   "replacements": [
+    [
+     "  if (cover && !cover->complete())\n",
+     "  if (cover && !cover->complete() && false)\n"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "q34 cover gate: edge census accepted a diametral core\n",
+   "judgment": "contract",
+   "provenance": "v9 (garde du noyau diametral, contre-audit B du 23 septembre 2026)"
   }
  ]
 }

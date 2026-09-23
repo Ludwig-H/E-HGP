@@ -122,6 +122,12 @@ def main(argv):
         check(off['ledger']['dead_loads'] == 0 and off['ledger']['q3_leaf_censuses'] == 0 and
               off['ledger']['witness_cache_queries'] == 0 and ledger['witness_cache_rejected_pairs'] > 0,
               'levers off still ran, or the witness cache never rejected a pair')
+        # Noyau diametral : des aretes closes par lui, des voies des deux
+        # sortes prouvees par lui, et rien quand son levier est coupe.
+        check(ledger['core_closed_edges'] > 0 and ledger['dead_core_q3_proved'] > 0 and
+              ledger['dead_core_q4_proved'] > 0 and off['ledger']['core_builds'] == 0,
+              'diametral core not exercised: ' + json.dumps({key: ledger[key] for key in (
+                  'core_builds', 'core_closed_edges', 'dead_core_q3_proved', 'dead_core_q4_proved')}, sort_keys=True))
         check(len(on['orders']) == 5 and on['catalogue']['balls'] >= 1000,
               'coverage floor: 5 orders and >= 1000 catalogue balls, got ' +
               str(len(on['orders'])) + ' / ' + str(on['catalogue']['balls']))
@@ -138,6 +144,12 @@ def main(argv):
             ('leaf lever absent', lambda v: v['options']['levers'].pop('q3_leaf_census')),
             ('dead-lane lever flipped', lambda v: v['options']['levers'].update(q34_dead_lanes=False)),
             ('witness-cache lever flipped', lambda v: v['options']['levers'].update(q34_witness_cache=False)),
+            ('core lever flipped', lambda v: v['options']['levers'].update(q34_dead_core=False)),
+            ('core closure uncounted', lambda v: v['ledger'].update(core_closed_edges=0)),
+            ('core cover visits hidden', lambda v: v['ledger'].update(core_cover_node_visits=0)),
+            ('cache rejections without queries', lambda v: v['ledger'].update(witness_cache_queries=0)),
+            ('both-lane edges beyond q3', lambda v: v['ledger'].update(both_edges=v['ledger']['q3_edges'] + 1)),
+            ('shell above 12 under complete', lambda v: v['catalogue'].update(shell_over_12=1)),
             ('stage times beyond total', lambda v: v['times_ms'].update(q34=v['times_ms']['chain_total'] + 60.0)),
             ('meb histogram short', lambda v: v['tower_work'].update(meb_supports_by_size=[0])),
             ('tower_work unknown integer', lambda v: v['tower_work'].update(extra=1)),

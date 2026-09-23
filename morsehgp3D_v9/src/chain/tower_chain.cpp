@@ -316,6 +316,9 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       l.dead_core_point_tests = w.dead_core.point_tests;
       l.dead_core_q3_proved = w.dead_core.q3_proved; l.dead_core_q3_open = w.dead_core.q3_open;
       l.dead_core_q4_proved = w.dead_core.q4_proved; l.dead_core_q4_open = w.dead_core.q4_open;
+      l.core_cover_node_visits = w.core_cover.node_visits; l.core_cover_bound_tests = w.core_cover.bound_tests;
+      l.core_cover_point_tests = w.core_cover.point_tests; l.dead_core_outside_cells = w.dead_core.outside_cells;
+      l.dead_core_deep_cells = w.dead_core.deep_cells; l.dead_core_failed_cells = w.dead_core.failed_cells;
     }
     result.times.q34_ms = ms_since(t);
 

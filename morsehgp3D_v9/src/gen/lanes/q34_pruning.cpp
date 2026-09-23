@@ -9,6 +9,7 @@ namespace mhgp9::gen {
 
 Q34WitnessPoolPtr Q34WitnessPool::make(Q34EdgeCoverPtr cover, std::size_t budget) {
   if (!cover) throw std::invalid_argument("mhgp9 gen witness pool requires an immutable edge cover");
+  require_complete_q34_cover(cover);
   return Q34WitnessPoolPtr(new Q34WitnessPool(std::move(cover), budget));
 }
 

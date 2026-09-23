@@ -40,6 +40,7 @@ std::size_t id_bytes(std::size_t capacity) {
 Q4LocalGeometryPtr Q4LocalGeometry::make(Q34EdgeCoverPtr cover,Q4CenterDomainMode mode) {
   if (!cover || (mode!=Q4CenterDomainMode::Disk && mode!=Q4CenterDomainMode::Positive))
     throw std::invalid_argument("mhgp9 gen local geometry requires cover and valid domain");
+  require_complete_q34_cover(cover);
   return Q4LocalGeometryPtr(new Q4LocalGeometry(std::move(cover),mode));
 }
 

@@ -17,6 +17,11 @@ Q34EdgeCoverPtr Q34EdgeCover::make_diametral(
   return make_ball(std::move(index), edge_ids, true);
 }
 
+void require_complete_q34_cover(const Q34EdgeCoverPtr& cover) {
+  if (cover && !cover->complete())
+    throw std::invalid_argument("mhgp9 gen consumer requires the complete edge cover, not its diametral core");
+}
+
 Q34EdgeCoverPtr Q34EdgeCover::make_ball(
     Q2CensusIndexPtr index, std::array<std::size_t, 2> edge_ids, bool diametral) {
   if (!index) throw std::invalid_argument("mhgp9 gen edge cover requires an immutable index");
@@ -30,7 +35,7 @@ Q34EdgeCoverPtr Q34EdgeCover::make_ball(
 }
 
 Q34EdgeCover::Q34EdgeCover(Q2CensusIndexPtr index, std::array<std::size_t, 2> edge_ids, bool diametral)
-    : index_(std::move(index)), edge_ids_(edge_ids) {
+    : index_(std::move(index)), edge_ids_(edge_ids), complete_(!diametral) {
   const auto points = index_->cloud().points();
   const auto a = points[edge_ids_[0]], b = points[edge_ids_[1]];
   for (std::size_t axis = 0; axis != 3; ++axis) {

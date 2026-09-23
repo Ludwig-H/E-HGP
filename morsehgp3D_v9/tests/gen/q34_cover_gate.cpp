@@ -18,6 +18,12 @@
 #include "lanes/edge_cover.hpp"
 #include "lanes/q34_cover.hpp"
 #include "lanes/q34_seed.hpp"
+#include "lanes/q34_pruning.hpp"
+#include "lanes/q4_local.hpp"
+#include "lanes/q4_local_partition.hpp"
+#include "lanes/q4_positive_domain.hpp"
+#include "lanes/q4_shallow.hpp"
+#include "lanes/q4_window.hpp"
 
 // Exhaustive only on small clouds. The cover is checked by the unexpanded
 // rational inequality; positive balls and every retained payload are judged
@@ -41,7 +47,7 @@ struct Gate {
   u64 oracle_completions{}, oracle_sites{}, candidates{}, q3{}, q4{}, max_shell{};
   u64 cover_boundary{}, cover_excluded{}, cover_admitted_nodes{}, cover_rejected_nodes{};
   u64 cover_split_nodes{}, reused_covers{}, q4_without_q3{}, invalid_root_depth_changed{};
-  u64 diametral_cores{}, diametral_members{}, diametral_cover_only{};
+  u64 diametral_cores{}, diametral_members{}, diametral_cover_only{}, diametral_refusals{};
   u64 exhaustive_edges{}, permutations{}, invalid_inputs{}, callback_failures{};
   u64 parallel_calls{}, judge_mutants{};
   u64 edge_seed_count{}, edge_pruned_sites{}, covered_site_reads{};
@@ -237,6 +243,32 @@ void check_diametral(Gate& gate, const Points& points, const mhgp9::gen::Q2Censu
                std::binary_search(actual.begin(), actual.end(), edge[1]) &&
                std::includes(cover_members.begin(), cover_members.end(), actual.begin(), actual.end()),
                "diametral core lost an endpoint or left the edge cover");
+  // No consumer below the certificate accepts the core (census, atlas, seeds).
+  if (gate.diametral_cores == 0) {
+    const auto noop = [](const auto&) {};
+    const auto refuses = [&](auto&& call, const char* message) {
+      bool caught = false;
+      try { call(); } catch (const std::invalid_argument&) { caught = true; }
+      gate.require(caught, message);
+      ++gate.diametral_refusals;
+    };
+    refuses([&] { static_cast<void>(mhgp9::gen::run_q34_edge_candidates(core, 5, noop)); },
+                 "edge census accepted a diametral core");
+    refuses([&] { static_cast<void>(mhgp9::gen::run_q34_cover_seed_candidates(core, edge[0] == 0 ? 1 : 0, 5, noop)); },
+                 "seed census accepted a diametral core");
+    refuses([&] { static_cast<void>(mhgp9::gen::Q4LocalAtlas::make(core, 5, mhgp9::gen::Q4LocalOptions{})); },
+                 "local atlas accepted a diametral core");
+    refuses([&] { static_cast<void>(mhgp9::gen::run_q4_window_edge_candidates(core, 5, noop)); },
+                 "q4 window accepted a diametral core");
+    refuses([&] { static_cast<void>(mhgp9::gen::Q4PositiveDomain::make(core)); },
+                 "positive domain accepted a diametral core");
+    refuses([&] { static_cast<void>(mhgp9::gen::Q34WitnessPool::make(core, 8)); },
+                 "witness pool accepted a diametral core");
+    refuses([&] { static_cast<void>(mhgp9::gen::run_q4_shallow_edge_candidates(core, 5, noop)); },
+                 "q4 shallow accepted a diametral core");
+    refuses([&] { static_cast<void>(mhgp9::gen::Q4LocalGeometry::make(core, mhgp9::gen::Q4CenterDomainMode::Disk)); },
+                 "local geometry accepted a diametral core");
+  }
   ++gate.diametral_cores;
   gate.diametral_members += actual.size();
   gate.diametral_cover_only += cover_members.size() - actual.size();
@@ -587,7 +619,7 @@ void run(Gate& gate) {
   gate.require(gate.covers >= 150 && gate.edge_calls >= 150 && gate.seed_calls >= 100 &&
                gate.reference_calls == gate.seed_calls && gate.oracle_sites >= 1000 && gate.q3 >= 30 && gate.q4 >= 10,
                "cover correctness nonvacuity floor");
-  gate.require(gate.diametral_cores > 0 && gate.diametral_cover_only > 0 && gate.diametral_members > 2 * gate.diametral_cores,
+  gate.require(gate.diametral_cores > 0 && gate.diametral_refusals == 8 && gate.diametral_cover_only > 0 && gate.diametral_members > 2 * gate.diametral_cores,
                "diametral core never exercised (cores, cover-only sites, interior members)");
   gate.require(gate.cover_boundary >= 2 && gate.cover_excluded > 0 && gate.cover_admitted_nodes > 0 &&
                gate.cover_rejected_nodes > 0 && gate.cover_split_nodes > 0 && gate.reused_covers > 0 &&
@@ -617,7 +649,7 @@ int main(int argc, char** argv) {
               << ",\"candidates\":" << gate.candidates << ",\"q3\":" << gate.q3 << ",\"q4\":" << gate.q4
               << ",\"max_shell\":" << gate.max_shell << ",\"cover_boundary\":" << gate.cover_boundary
               << ",\"diametral_cores\":" << gate.diametral_cores << ",\"diametral_members\":" << gate.diametral_members
-              << ",\"diametral_cover_only\":" << gate.diametral_cover_only
+              << ",\"diametral_cover_only\":" << gate.diametral_cover_only << ",\"diametral_refusals\":" << gate.diametral_refusals
               << ",\"cover_excluded\":" << gate.cover_excluded << ",\"cover_admitted_nodes\":" << gate.cover_admitted_nodes
               << ",\"cover_rejected_nodes\":" << gate.cover_rejected_nodes << ",\"cover_split_nodes\":" << gate.cover_split_nodes
               << ",\"reused_covers\":" << gate.reused_covers << ",\"q4_without_q3\":" << gate.q4_without_q3
