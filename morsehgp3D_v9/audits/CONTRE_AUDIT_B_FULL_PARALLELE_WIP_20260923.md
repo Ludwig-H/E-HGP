@@ -139,3 +139,63 @@ le plus grand plateau ; la comparer au RSS maximal, surtout sur 30 M
 d'objets. Aucun nouveau test n'accompagnait ce diff au moment de la
 lecture : refaire la porte FULL et le différentiel statique 0/1/4/8 sur
 un build cohérent avant d'attribuer un gain.
+
+## WIP ultérieur : lots simultanés par ordre K
+
+Le développeur a ensuite ouvert `run_orders_parallel` dans
+`full_ball_tower.hpp` : cibles statiques préparées par K, lots/histoires
+privés construits en parallèle, IDs de populations attribués ensuite
+dans l'ordre canonique, images verticales calculées après fermeture des
+histoires, puis forêts encodées. Lecture du diff mouvant du 23 septembre :
+`current_k` ne change que pendant la préparation séquentielle ; les
+workers de lots emploient `o.k` et des états privés, ceux des images
+lisent des histoires inférieures figées. Les cibles sont consommées dans
+l'ordre des facettes, avec contrôle final. Aucun défaut de géométrie ou
+course démontré sur une entrée valide à cette étape **WIP**.
+
+Trois obligations avant qualification :
+
+1. `parallel_items` relance la première exception **arrivée**, pas celle
+   du plus petit K. Deux ordres invalides peuvent donc publier des
+   `reason`/`status` différents d'un lancement à l'autre, alors que la
+   boucle antérieure était ordonnée. Conserver des slots d'erreur par K
+   et publier le premier indice, ou déclarer et tester le nouveau contrat
+   fail-closed ; ne pas appeler cela « mêmes statuts » sans porte causale.
+2. Les `static_targets`, `anchors` et historiques de **tous** les K
+   restent simultanément résidents pendant certaines phases. Le
+   compteur `static_peak_retained_bytes`, pris par préparation, ne les
+   enveloppe pas. Publier pic RSS et octets co-résidents, notamment pour
+   les régimes de dizaines de millions de points. Le parallélisme des
+   lots est plafonné à K tâches (dix au plus à K10) : mesurer les temps
+   par ordre et la fraction réellement occupée des 48 CPU G4.
+3. La nouvelle voie encode ses ancres/nœuds en `u32` et refuse à
+   `UINT32_MAX` nœuds par ordre, alors que la voie séquentielle porte
+   `u64`. C'est un refus explicite, pas une troncature, mais le domaine
+   massif admissible est plus étroit ; tester le seuil ou justifier la
+   borne de sortie requise.
+
+Le nouveau `full_coverage_certificate.hpp` ajoute une banque de
+populations déplacée avec validation parallèle. Les lectures de lignes
+sont disjointes, le domaine est immuable et la banque n'est publiée
+qu'après validation. **Défaut d'API reproduit** : `parallel_ranges` est
+appelé hors du `try` de cette surcharge publique. Avec le hook
+`MHGP9_TESTING` et `launch_fail_after=1`, l'appel à deux lignes lève
+`std::system_error` (`active=0` après jointure), au lieu de retourner
+`kResourceExhausted` comme la surcharge copiante. L'exception est
+capturée si l'appel passe par `build_full_ball_tower`, mais pas par l'API
+publique directe. Un `std::bad_alloc` pendant la préparation des threads
+peut suivre la même voie ; `std::length_error` n'est pas non plus pris
+dans le `try` de la surcharge déplacée. Ajouter un gate de surcharge
+move mono/multi, entrées malformées, échec de lancement et allocation,
+puis rendre les statuts cohérents. Les portes actuelles de banque ne
+couvrent que l'ancienne surcharge.
+
+Ces deux sources sont désormais publiées au commit **`684d8fc7`**
+(`full_ball_tower.hpp` SHA-256 `89f1f96a…`,
+`full_coverage_certificate.hpp` `08033ed0…`) sans nouveau fichier de
+test dans ce commit. Le message annonce des digests K10 inchangés sur
+trois trames et un temps local W8 de tour 26→18 s sur 000100 ; ce sont
+des indications développeur, **pas encore un reçu G4 apparié**, ni une
+réponse au cas causal d'échec de lancement de la surcharge publique.
+La prochaine R5 devra mesurer la tour complète, ses phases par K et le
+pic RSS sur le snapshot exact, avec arrêt G4 certifié.

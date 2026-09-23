@@ -5,6 +5,11 @@ implémentée et non mesurée**. Les deux pistes existantes de [domination
 par blocs](DOMINATION_Q4_PARESSEUSE_PAR_BLOCS_20260923.md) et de
 [témoins avant cover](PISTE_B_Q34_NOEUDS_AVANT_COVER_20260923.md)
 économisent surtout du travail **après** expansion, sur une arête donnée.
+Le [filtre intermédiaire d'une ligne `a×B`](CONTRAT_COUTS_ET_PARALLELISATION.md),
+proposé ensuite par l'auditeur A, est une expérience plus simple à
+qualifier d'abord : il peut déjà éviter la boucle sur B quand son masque
+est vide. La présente piste ne vaut son surcoût en cellules que si cette
+étape laisse encore des produits lourds.
 Ici l'objet est le produit WSPD résiduel `A×B` lui-même : certifier qu'une
 voie q3 ou q4 est vide pour **toutes** ses paires, avec des groupes de
 témoins qui peuvent changer selon la région du centre. Le filtre de
@@ -25,7 +30,9 @@ support. Comme `a,b` sont sur la sphère,
 de tous ces centres pour `a∈A,b∈B` se construit à partir des boîtes A/B
 et d'un majorant entier de D, **sans** parcourir `A×B` ; si elle est
 large, le certificat peut devenir inutile. La partitionner en cellules
-fermées `C` qui couvrent la région possible, avec contacts conservés.
+convexes, par exemple des boîtes axiales fermées `C` égales à l'enveloppe
+de leurs sommets testés, qui couvrent la région possible avec contacts
+conservés.
 
 Pour un nœud témoin `Z` de l'index, dont la population est disjointe des
 deux facteurs, tester à **chaque sommet** `v` de `C` l'inégalité stricte
@@ -44,6 +51,10 @@ distinctes ; **K−1** témoins dans chaque cellule possible tuent la voie
 q3 du produit, **K−2** tuent q4. Les gardes peuvent différer d'une
 cellule à l'autre, mais leurs comptes ne s'additionnent pas entre
 cellules ; on ne crédite ni les extrémités, ni les témoins au contact.
+Exiger des gardes hors A/B est volontairement conservateur : un
+raffinement ultérieur peut exploiter des témoins propres à chaque `a`
+ou `b` (`h_a`,`h_b`), mais doit alors retirer exactement l'extrémité
+choisie et prouver la disjonction de ses crédits pour chaque paire.
 
 Une cellule peut aussi être exclue avant recherche de gardes : si à
 tous ses sommets `min_{x∈box(A)}|x−v|² >
@@ -70,9 +81,9 @@ transféré.
 
 R3 sur 08/000000/K10 laissait environ **153,94 M** de masse de paires
 après le front, puis **30,78 M** paires développées, **4,51 M** covers,
-**7,80 Md** formes chargées et **25,31 Md** tests uniformes. Le
-certificat ne peut éviter ces coûts que s'il tue des produits non
-singleton de masse significative **avant** la double boucle de
+**7,80 Md** formes chargées et **25,31 Md** tests uniformes. Pour réduire
+**structurellement l'énumération**, le certificat doit tuer des produits
+non singleton de masse significative **avant** la double boucle de
 `wspd_q34.cpp`. S'il ne reste que de petits facteurs ou si les cellules
 de centres sont trop larges, il ajoutera simplement du travail. Même la
 suppression idéale de q3/q4 ne résoudrait pas le temps FULL : R3/K10
@@ -89,3 +100,36 @@ avant activation. Répéter sur trames entières et brutes de plusieurs
 séquences, K5/K10, s8/10/12. Ni le coût des cellules ni la masse
 résiduelle ne bénéficient aujourd'hui d'une borne sous-quadratique
 générale ou d'une validation LiDAR.
+
+## Contrelecture B du filtre de ligne proposé par A
+
+La preuve de `filter_q34_witnesses(index, {a}, box(B_node), …)` est sûre :
+la surcharge boîte passe par les bornes générales H/Xi, un nœud admis
+est témoin strict pour **tous** les vrais `b∈B_node`, et son DFS crédite
+des populations disjointes. Le splitter actuel coupe seulement des
+plages A et conserve B entier, donc la ligne `a×B` a un propriétaire
+unique même si la file refuse une tâche. L'identité de masse proposée
+par A tient si retraits complets de rectangle/ligne et expansions sont
+des classes exclusives ; les retraits d'une seule voie restent séparés.
+
+Attention à la couture : `expand` reçoit aujourd'hui les rangs
+`b_first,b_last`, **pas** l'identifiant ni la boîte certifiée du nœud B.
+Transporter `b_node` dans `rectangle` et `rectangle_range` avant la
+requête de ligne, sans reconstruire une boîte approximative à partir
+d'une tranche de permutation. Chaque ligne paie un DFS supplémentaire,
+souvent sans rejet ; comparer cache ON/OFF et stratifier le gain par
+`|B|`. La fixture collinéaire d'A sépare les deux filtres, mais ne
+mesure pas un gain de pipeline LiDAR. Le filtre de ligne est la première
+expérience pertinente ; le certificat par cellules ci-dessus reste une
+option si des produits lourds survivent.
+Publier aussi la distribution des **visites par ligne indécise** :
+`Σ|A|≤Σ|A||B|`, mais une ligne peut visiter O(n) nœuds de l'index
+sans preuve, si bien que le surcoût théorique peut dépasser la double
+boucle actuelle. Un déclenchement conditionnel mesuré (notamment selon
+`|B|`) ou un arrêt de cette seule tentative suivi du chemin exact des
+paires peut limiter une régression ; il ne doit jamais plafonner les
+candidats ni changer leur complétude.
+Pour `|B|=1`, la ligne est la paire : ne pas payer son filtre puis le
+rejouer dans `edge`. Réutiliser exactement ce résultat ou sauter
+l'étape ligne ; mesurer également la redondance à `|B|=2` avec le cache
+R4b actif.
