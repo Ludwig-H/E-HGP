@@ -1,5 +1,10 @@
 # Contre-audit B — parallélisme q3/q4 et FULL du premier moteur v9
 
+**Mise à jour du 23 septembre :** les ordres K sont désormais parallèles
+dans le produit ; la phase A reste séquentielle **à l'intérieur de chaque
+lot**. Voir la [couture actuelle et sa porte minimale](PHASE_A_FULL_LOTS_ET_PARALLELISME_20260923.md).
+Les temps ci-dessous sont historiques et ne remplacent pas le reçu R7b.
+
 22 septembre 2026. Lecture seule du moteur `d2700314` (les sources citées sont
 inchangées dans le worktree examiné). Cadre : `quantized_u18_input_only`,
 `reference_cpu`, `not_claimed`. La [première campagne](../receipts/first_tower_20260922/README.md)
