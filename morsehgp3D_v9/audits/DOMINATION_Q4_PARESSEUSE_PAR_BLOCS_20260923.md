@@ -188,8 +188,7 @@ n'est disponible pour cette proposition.
 
 ## Certifier une voie morte sans balayer chaque cover
 
-Un essai de `Q34DeadLaneProver` est en cours dans le worktree du constructeur
-le 23 septembre ; il n'est pas encore un résultat publié. Son idée est
+`099ca784` publie `Q34DeadLaneProver`, sans qualification G4. Son idée est
 exacte : recouvrir le disque des centres possibles de `ab` par des cellules
 fermées, chacune extérieure au disque ou portant `T₃=K−1` / `T₄=K−2`
 sites distincts uniformément intérieurs. Une voie ainsi certifiée ne peut
@@ -203,9 +202,10 @@ alors que `cover_sites` n'est qu'une population logique dans le reçu R2.
 Dans cette version **à chargement intégral**, la partition des ranges et
 la présence unique des deux endpoints imposent les identités auditables
 `dead.loads=cover_builds` et
-`dead.form_sites=cover_sites−2·cover_builds`. Le WIP compte ces postes
-en interne mais sa sonde v5 ne les publie pas ; elle expose les tests des
-cellules sans la préparation qui les précède. Une variante pré-cover
+`dead.form_sites=cover_sites−2·cover_builds`. La sonde v5 publiée expose
+désormais `dead_loads` et `dead_form_sites`, mais son validateur ne vérifie
+pas encore ces identités : leur présence typée ne garantit pas leur
+cohérence. Une variante pré-cover
 aurait naturellement un autre bilan, à publier séparément.
 La révision de source à frontière active lit un maximum affine par site
 du fragment, puis aussi son **minimum** si le maximum n'est pas négatif ;
@@ -217,17 +217,22 @@ source seulement, si `U=uniform_tests` et `C=cells`, les minima réellement
 ne peut créditer que `K−1` maxima stricts avant de s'arrêter. Les premiers
 JSON locaux W8 ont été produits par un binaire daté **avant** cette
 révision (sonde 01:25 UTC, source 01:38 UTC) : aucun multiplicateur
-chiffré de leurs tests ne peut lui être
-attribué sans recompilation et reçu de source correspondant.
+chiffré de leurs tests ne peut lui être attribué. Le reçu distingue bien
+ces anciens cas des deux sorties `frontier_s01_k*.json` du code publié.
 
-Ces **six anciens JSON locaux**, non versionnés et sans ablation appariée,
+Ces **six anciens JSON** du [reçu publié](../receipts/q34_dead_edges_20260923/README.md),
+sans ablation FULL appariée,
 finissent tous avec code 0 ; leurs masses sont néanmoins un diagnostic de
 taille : à K10, les trois trames entières 00/01/02 ont respectivement
 `7,796/4,151/9,281` milliards de formes à charger et
 `42,105/30,120/52,854` milliards de visites de cellule par site. Ces
 visites décrivent l'**ancien binaire**, pas la frontière active.
 Même si celle-ci réduit les visites, son `load` parcourt encore le cover
-entier avant de commencer à prouver. Ajouter une porte de coût bon marché :
+entier avant de commencer à prouver. Dès que le cover existe, une porte
+`site_count−2<T₄` évite l'essai sur les deux voies ; si
+`site_count−2<T₃`, q3 seul ne peut être prouvé par ces témoins. Cela ne
+dit rien de la survie des voies et laisse leur chemin exact inchangé.
+Ajouter aussi une porte de coût bon marché :
 au milieu exact `m=(a+b)/2`, situé dans les deux disques de centres, compter
 par l'index les sites strictement intérieurs à la boule de diamètre `ab`,
 en saturant à `T₃=K−1` et `T₄=K−2`. Si ce compte est inférieur au seuil
@@ -251,7 +256,7 @@ Sur une surface LiDAR mince, cette restriction pourrait éviter des cellules
 et des échecs conservateurs ; elle laisse entier le coût de chargement des
 formes et demande une ablation propre.
 
-Enfin, le pic `peak_edge_buffer_bytes` de ce WIP additionne la capacité
+Enfin, le pic `peak_edge_buffer_bytes` de cette version additionne la capacité
 retenue du prouveur juste après sa preuve, mais les observations ultérieures
 pendant q3/q4 l'omettent alors que les buffers existent encore. Ajouter
 `dead_.retained_bytes()` à **toutes** ces observations pour mesurer le pic

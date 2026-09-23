@@ -1,9 +1,10 @@
 # État courant des audits v9
 
-23 septembre 2026. Dernier code produit lu sur `origin/main` :
-**`e54f727c`** (census q3 sur feuille,
-portes du générateur portées et sonde v4) ; reçu G4 R2 épinglé au code
-antérieur `0b29b6c3` et reçu G4 R1 au paquet `e28296bb`. Noyau MEB à
+23 septembre 2026. Code produit courant sur `origin/main` :
+**`099ca784`** (certificat de voies mortes q3/q4 et protocole v5), suivi
+du selftest de protocole `b4e480fc`. Le census q3 sur feuille et la sonde
+v4 venaient de `e54f727c` ; le reçu G4 R2 reste épinglé au code
+antérieur `0b29b6c3` et le reçu G4 R1 au paquet `e28296bb`. Noyau MEB à
 `ad2d0ebb`, atlas saturant et sonde v3 à `e6405952`, défaut FULL statique
 à `0b29b6c3`. Cadre :
 `exploration_v9_hors_registre`,
@@ -176,31 +177,45 @@ appariée.
    [contrelecture B](CONTRE_AUDIT_B_PROTOCOLE_V4_WIP_20260923.md)
    concernaient schéma FULL incomplet, préflight facultatif, tolérance de
    mur externe d'une seconde et campagne `partial` sans tour complète.
-   La révision **v5 encore en WIP** impose maintenant les clés et types
+   La révision **v5 publiée à `099ca784`** impose maintenant les clés et types
    exacts, histogrammes de longueur fixe, un préflight natif avant LiDAR,
    une tolérance de 0,05 s et au moins un cas complet à la réception. Elle
    recertifie aussi les blobs depuis le commit annoncé, en réponse au
    [contre-test de provenance](CONTRE_AUDIT_B_G4_R1_ET_SCHEMA_V2_20260922.md).
-   Une compilation indépendante des sources WIP du 23 septembre et le vrai
-   préflight de 1 500 sites/K5/W2 donnent `complete_relative` avec
+   Sur `b4e480fc` figé, la suite Python de cycle de vie v5 passe
+   **20/20 tests** en rejeu indépendant (59,9 s), et la porte native du
+   probe passe ses **19 mutations** ciblées. Ces réussites ne contiennent
+   pas les identités de masse ci-dessous.
+   Une compilation indépendante des sources, recoupées par SHA avec le
+   commit publié, permet de rejouer le vrai préflight de 1 500 sites/K5/W2 :
+   il donne `complete_relative` avec
    **23 848 voies q3 et 26 428 voies q4 prouvées mortes** : les deux branches
    sont exercées. Mais `validate_probe` accepte encore, sur une copie de
    cette sortie réelle, chacune des six mutations isolées qui mettent à
    zéro `dead_loads`, `dead_form_sites`, `dead_q3_open`, `cover_builds`,
    `generator.q34_expanded_pairs` ou `catalogue.q3_presentations`.
-   Les identités testables sont notamment
+   Sur une réponse `complete_relative`, les identités testables sont notamment
    `expanded_pairs=cover_builds+witness_rejected_pairs`,
    `dead_loads=cover_builds`,
    `dead_form_sites=cover_sites−2·dead_loads`,
    `dead_q3_open=q3_edges`, `dead_q4_open=q4_edges` quand l'option
    `dead_lanes` est active,
+   `dead_qi_proved+dead_qi_open≤dead_loads` pour chaque voie,
    et les présentations par arité du catalogue égales aux émissions du
-   générateur. Les imposer dans le validateur et les tuer en selftest avant
-   un reçu G4 v5. Le préflight indépendant repose sur des objets `/tmp`
-   non versionnés et ne qualifie pas encore le paquet final ; ablater
+   générateur. La fausse sonde du selftest publie elle-même
+   `dead_loads=1` avec `dead_q3_proved+dead_q3_open=2` : lui donner un
+   ledger cohérent avant d'imposer ces relations, puis tuer leurs mutants
+   en selftest avant un reçu G4 v5. Le préflight indépendant repose sur des
+   objets `/tmp` non versionnés et ne qualifie pas encore une session G4 ; ablater
    séparément les trois options sur les trames entières. Le lecteur doit
    encore certifier la fermeture du groupe de toute commande tuée, même en
-   campagne partielle. Ne pas convertir les sorties R2 refusées en reçu accepté.
+   campagne partielle. Le nouveau [contre-audit B de la
+   réception](CONTRE_AUDIT_B_G4_RECEPTION_V5_20260923.md) reproduit en
+   outre quatre acceptations de paquet incohérent : groupe censuré non
+   fermé, identité cible/génération/provenance altérée, préflight à travail
+   nul, stderr GNU time de préflight invalide. Les 20 selftests passés ne
+   couvrent pas ces mutations. Ne pas convertir les sorties R2 refusées en
+   reçu accepté.
 2. **Portes causales et entrée** : rejouer les 28 portes de `e28296bb`
    indépendamment ; les portes MEB et FULL ciblées du nouveau noyau passent
    déjà en Release et sous ASan/UBSan, mais pas une campagne appariée LiDAR.
@@ -308,7 +323,7 @@ appariée.
    sépare exactement les seuils ; le reçu 1 mm contient 326 970 arêtes
    q4 seules, mais pas leur coût distinct. Mesurer les compteurs par masque
    et l'identité FULL avant de prioriser le port. Un certificat de **voie
-   morte q3/q4** est en préparation, sans commit ni mesure appariée à cette
+   morte q3/q4** est publié à `099ca784`, sans mesure FULL appariée à cette
    date : la [note de coût et de preuve](DOMINATION_Q4_PARESSEUSE_PAR_BLOCS_20260923.md#certifier-une-voie-morte-sans-balayer-chaque-cover)
    montre qu'en charger les formes depuis chaque cover ferait de ses
    7,805 milliards d'incidences logiques R2/K10 presque autant de lectures
@@ -318,18 +333,22 @@ appariée.
    La fixture K5 distingue les deux preuves. Le hook du filtre de paire
    doit aussi proposer les petits nœuds **écartés par Xi**, pas seulement
    ses feuilles : ils peuvent contenir tous les gardes non universels.
-   Le WIP met déjà cette option
-   **par défaut dans la chaîne** sans mesure LiDAR appariée ; la garder
-   expérimentale jusqu'à publication des formes chargées, succès par arête
-   et coûts réellement évités. Sa `docs/PROVENANCE.md` en cours annonce
+   `099ca784` met cette option **par défaut dans la chaîne** sans mesure
+   FULL LiDAR appariée ; la garder expérimentale jusqu'à une ablation
+   on/off qui mesure aussi les formes chargées, succès par arête et coûts
+   réellement évités. Sa `docs/PROVENANCE.md` annonce
    **91 % du temps q3/q4** sur des arêtes sans émission et des covers moyens
-   de 568 contre 43 sites. Le nouveau reçu local
-   `receipts/q34_dead_edges_20260923/`, encore absent de `origin/main` à
-   cette lecture, apporte le harnais K5 de 08/000000 et les classes de
-   cycles, avec hashes internes cohérents.
-   Il donne **96,69 % des cycles d'arêtes après filtre** aux classes sans
-   émission, ou **85,69 % avec le filtre de paire inclus** : 91 % n'est
-   reconstructible avec aucun de ces dénominateurs. Le cover moyen vaut
+   de 568 contre 43 sites. Le nouveau [reçu de profil par
+   arête](../receipts/q34_dead_edges_20260923/README.md) apporte le harnais
+   K5 de 08/000000 et les classes de cycles, avec hashes internes cohérents.
+   Une compilation indépendante du juge `wspd_q34` sur le commit publié,
+   sous Clang 18 ASan/UBSan/LSan, passe **23 756 contrôles** dont huit appels
+   u18 extrêmes ; ses **cinq mutants compilés** sont rejetés pour la cause
+   géométrique attendue, sans crash. Cette porte cible le générateur, pas
+   FULL ni la performance G4.
+   Le tableau du reçu donne **96,69 % des cycles d'arêtes après filtre**
+   aux classes sans émission, ou **85,69 % avec le filtre de paire inclus** :
+   91 % n'est reconstructible avec aucun de ces dénominateurs. Le cover moyen vaut
    **1 453 contre 43** pour les arêtes *mixtes* mortes/vivantes, et
    **1 704 contre 43** pour toutes les classes mortes/vivantes ; le 568
    de `PROVENANCE` reste sans définition dans cette capture. Indiquer le
@@ -337,13 +356,22 @@ appariée.
    L'essai linéaire du harnais conserve les mêmes émissions et digest et
    annonce q3/q4 **592→205 CPU·s à K5, 1 600→557 à K10** ; la variante à
    frontière baisse ses visites de 9,94→6,75 G à K5 et 30,1→17,7 G à K10
-   sur 000100. Ces signaux sont utiles, mais l'archive ne ferme pas encore
+   sur 000100. À K10, le harnais réduit aussi les tests ponctuels d'atlas
+   de 17,947 à 1,483 G et les graines q3 de 472,06 à 34,03 M : le
+   **rejet aval est réel dans ce prototype**. Les deux JSON de frontière
+   sont `--no-tower` avec digest zéro ; ils ne qualifient pas FULL. Ces
+   signaux sont utiles, mais l'archive ne ferme pas encore
    les commandes, environnement et SHA des binaires du prototype : son
    patch imprime une ligne `refine:` absente de la sortie publiée. Aucun
    de ces chiffres n'est une ablation G4 de la tour FULL.
    Le brut R2 démontre une **proportion d'arêtes q4 muettes** supérieure à
-   91 %, pas une fraction de temps. Ni gain
-   LiDAR ni borne globale acquis.
+   91 %, pas une fraction de temps. Aucun gain de **tour LiDAR G4** ni
+   borne globale acquis.
+   Une session G4 v5 sur le snapshot publié `b4e480fc` a commencé : son
+   plan apparie `dead_lanes` on/off à K5/K10 sur les trois trames sans sol,
+   puis prévoit une répétition et W24. Elle ne devient un reçu qu'après
+   retour, fermeture ciblée et contrelecture des identités de masse, des
+   sorties FULL et du mur externe ; c'est toujours un backend CPU.
 4. **Aval FULL, grandes coquilles et échelle** : les 12,0 M appels MEB
    de 000000/K10 font 1,065 milliard de tests de puissance ; un test
    exact de la paire la plus éloignée peut éliminer toutes les autres
