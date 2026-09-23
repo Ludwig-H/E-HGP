@@ -2721,3 +2721,18 @@ actuel (`WspdQ34Work` 477 mots, `bit_cast` toujours vers 476) et son
 cas produit singleton×singleton avec seuil 1 lit un enfant absent ;
 les seuils 4/16/64 mesurés ne corrigent pas ce défaut. Ne pas le
 réappliquer comme patch sûr, même s'il est fermé pour raison de coût.
+
+### Mise à jour 12 h 32 UTC — reçu brut K10 publié et contrelu
+
+Le reçu A `d7fd32a1` ferme **3/3** densités imbriquées de la trame brute
+08/000000 à K10/s8/W8 en grille 1 mm, tour complète locale CPU.
+[Contrelecture B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_LIDAR_BRUT_K10_20260923.md) :
+10/10 SHA, IDs et coordonnées appariés au K5, dix ordres et digest,
+formes cœur **103,153→323,686→1 238,630 M** (pentes 1,650/1,936),
+CPU chaîne **173,008→383,704→905,514 CPU·s**. Le plein affiche
+254,575 s de mur partagé et 8,219 GiB RSS ; le chevauchement du juge C
+interdit une lecture fine des murs. `complete_relative` n'est pas un
+jugement de clés absentes ni une qualification multi-séquence/G4/GPU.
+Le lecteur final corrige le problème de reprise relevé à 12 h 19 et
+revalide les lignes anciennes sans leur inventer un drapeau
+`validated=true` qui n'y était pas archivé.

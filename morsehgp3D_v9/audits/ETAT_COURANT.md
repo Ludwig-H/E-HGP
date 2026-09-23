@@ -702,6 +702,11 @@ premiers ordres K10 sont égaux à ceux de K5 sur chaque entrée, sans
 identité clé par clé ni preuve des clés jamais émises. Cette coupe K10 ne
 franchit pas la pente 2 des formes, mais la masse absolue et la mémoire
 restent des verrous ; les murs de l'hôte partagé ne qualifient pas G4.
+La [contrelecture B](CONTRE_AUDIT_B_LIDAR_BRUT_K10_20260923.md)
+confirme **10/10 hashes**, les IDs/coordonnées emboîtés, les dix ordres
+et les pentes ; elle précise que les trois lignes historiques n'ont
+pas de champ `validated` archivé et que le cas plein chevauche un autre
+calcul CPU sur l'hôte partagé.
 Le [crédit exact par nœuds du certificat de cœur](../receipts/dead_node_credit_negative_20260923/README.md)
 a été essayé hors produit : mêmes voies et digest, mais CPU de chaîne
 **+27 % à K5 et +32 % à K10** sur la coupe 16k de 000000 ; cette variante
