@@ -165,7 +165,7 @@ int main(int argc, char** argv) {
   const auto r = mhgp9::run_tower_chain(input.points, options);
   const auto& t = r.times;
   const auto& c = r.catalogue;
-  std::printf("{\"schema\":\"mhgp9_tower_probe_v9\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
+  std::printf("{\"schema\":\"mhgp9_tower_probe_v10\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
               r.reason.c_str());
   std::printf("\"input\":{\"format\":\"%s\",\"grid\":\"%s\",\"sites\":%zu,\"hash\":\"%016" PRIx64 "\"},", input.format.c_str(),
               grid.c_str(), input.points.size(), input.hash);
@@ -215,7 +215,7 @@ int main(int argc, char** argv) {
               ",\"meb_supports_by_size\":[%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%" PRIu64 "]},",
               ts.records, ts.extra_records, ts.representatives, ts.anchor_hits, ts.key_lookups, ts.intruder_queries,
               ts.intruder_nodes, ts.resolve_work.calls, ts.resolve_work.power_tests, ts.births, ts.merges, ts.contributions,
-              ts.grouped_lots, ts.resolver_cache_hits, mhgp9::tower::kAnchorMebWorkAccounting,
+              ts.grouped_lots, ts.resolver_cache_hits, mhgp9::tower::kAnchorMebProposedWorkAccounting,
               ts.resolve_work.pair_distances, ts.resolve_work.materializations, ts.resolve_work.supports_by_size[1],
               ts.resolve_work.supports_by_size[2], ts.resolve_work.supports_by_size[3], ts.resolve_work.supports_by_size[4]);
   std::printf("\"orders\":[");

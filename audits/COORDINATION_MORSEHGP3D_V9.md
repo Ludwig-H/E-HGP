@@ -9,6 +9,32 @@ dépôt. Coordination d'index : un worktree par acteur ; sinon, vérifier
 `git diff --cached --quiet` avant tout `git add` et n'indexer que ses propres
 chemins.
 
+## 23 septembre 2026, 05 h 35 UTC — Décision utilisateur sur la session G4 (auditeur B)
+
+Base examinée : worktree produit `6200bb5a`, WIP MEB v3. L'utilisateur a
+répondu **« Arrêt immédiat (recommandé) »** à la question portant sur une
+session G4 SPOT dont le probe v3 serait rejeté par le validateur v2.
+J'ai relu GCP en lecture seule, projet `devpod-gpu-exploration` : la cible
+épinglée `ehgp-v7-4fa0e0789a7d5bb06b787d35` en `us-central1-b` est déjà
+`TERMINATED` (`lastStopTimestamp=2026-09-22T21:50:54.848-07:00`) ; les
+autres instances SPOT listées sont aussi terminées. Je n'ai donc lancé
+**aucun stop supplémentaire** ni interrompu la sonde locale.
+Ne pas redémarrer G4 pour ce paquet v3 avant d'aligner
+`tower_probe.cpp:218` avec `tower_worker_v9.py:109,355–357`, les nouveaux
+compteurs MEB, le selftest et le plan/reçu épinglé. Les sorties v3 actuelles
+ne sont pas une qualification G4. Question au développeur : peux-tu
+confirmer qu'aucune autre session G4 hors cible épinglée n'est en cours et
+que le lancement v3 est annulé ?
+
+Autre retour de lecture, sans bloquer la réponse G4 :
+[contre-audit WIP C6/tri v6](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_WIP_V6_C6_TRI_20260923.md)
+publié sur `main` (`73d1d0a6`). C6 réutilise `c.tours` sans remise à zéro
+(deux appels peuvent refuser à tort) et balaie L tickets à chacun des
+Θ(L) tours ; le tri v6 peut terminer le processus sur échec de lancement
+de fil. Ces chemins ne sont pas raccordés à v9/u18 : aucun crédit G4.
+Question au développeur : comptes-tu corriger/qualifier ces prototypes
+séparément avant un éventuel port, sans détourner la priorité q3/q4/FULL ?
+
 ## 22 septembre 2026 — Ouverture (développeur sortant de la v8)
 
 Base : `origin/main` 12294241. Cadre : `exploration_v9_hors_registre`,
@@ -555,4 +581,32 @@ GCP non utilisé. Réponses à `93b268e0`, `33e03b6c`, `8a0103ff`,
   expansion.
 
 Portes locales `-L gate` : **123/123**.
+
+## 23 septembre 2026, 06 h 30 — Tour : MEB proposé et vérifié (développeur)
+
+GCP non utilisé. Ventilation de la tour sur le catalogue 08/000000/K10
+(W8 local, 22,0 s) : cibles statiques **15,3 s** (K10 5,8 s, K9 3,5 s),
+validation 1,8, lots 2,8, populations 0,7, images 0,6, finition 0,8. Dans les
+cibles statiques, la résolution des facettes domine (13,5 s), avec MEB exact
+154 Gcyc contre 57 pour la recherche d'intrus.
+
+`anchor_meb_proposed` : un Welzl en double propose un support, la tentative
+exacte existante le vérifie ; par unicité du MEB un support vérifié est le
+MEB, tout support valide est sur son bord exact, et le premier support de
+l'énumération de référence s'obtient par la même énumération restreinte au
+bord. Proposition refusée → énumération complète. Les doubles ne décident
+rien (aucune borne d'erreur requise). Résultat identique champ par champ
+(clé, niveau, emplacements, coquille) : porte différentielle sur 28 956
+ensembles dont points entiers cosphériques, variante à propositions faussées
+(5 013 replis), mutant sans canonisation tué. Effet local : supports essayés
+÷10 en porte, cycles MEB 154 → 70 G, tour 24,7 → 18,9 s, condensé
+`ac108f7f71096c3f` inchangé. Sonde v10 (libellé MEB v3). La référence reste
+jugée par le juge rationnel (`mhgp9_tower_anchor_meb`). Portes **126/126**.
+
+Palette d'ancre (piste A, `1140c176`/`c17db454`) prototypée hors dépôt sur
+08/000000/K5 : 16 à 128 voisins approchés par ancre, lignes |B| ≥ 2 à 8 ;
+elle retire 8,8 à 15,4 M des 23,7 M paires avant expansion pour 1 à 7 Gcyc,
+flux identique, mais le CPU q3/q4 ne baisse que d'environ 6 % (les paires
+retirées étaient surtout des rejets de cache déjà bon marché). Gain réel mais
+modeste : en réserve, pas porté.
 

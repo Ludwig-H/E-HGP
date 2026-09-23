@@ -48,7 +48,7 @@ PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
 PLAN_SCHEMA = 'mhgp9_tower_plan_v5'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v9'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v10'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -106,7 +106,7 @@ TIME_KEYS = frozenset({'read', 'prepare', 'gen_index', 'q2', 'q34', 'merge', 'to
 ORDER_KEYS = frozenset({'K', 'nodes', 'births', 'merges', 'parents', 'contributions'})
 # tower_work : compteurs entiers, sauf ces deux champs types du noyau MEB
 # (libelle de comptabilite epingle, histogramme des tailles de supports).
-MEB_ACCOUNTING = 'anchor_meb_first_maximal_pair_then_lexicographic_supports_extremes_first_v2'
+MEB_ACCOUNTING = 'anchor_meb_first_maximal_pair_then_double_welzl_proposal_exact_boundary_canonical_v3'
 TOWER_WORK_TYPED = frozenset({'meb_accounting', 'meb_supports_by_size'})
 # Schema v5 EXACT des sections de travail (contre-audit B du protocole v4) :
 # champ manquant, inconnu ou histogramme de mauvaise longueur = refus.

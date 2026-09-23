@@ -2,10 +2,23 @@
 
 // Exact local MEB for ball-anchor descent, not the regular F resolver.
 // Additional selected boundary sites are valid. No cloud census, catalogue,
-// floating proposal, virtual ordinal, work quota or allocation lives here.
-// Positive supports of at most four sites certify minimality by convexity;
-// the first enclosing one suffices by uniqueness of the Euclidean MEB.
+// virtual ordinal, work quota or allocation lives here. Positive supports of
+// at most four sites certify minimality by convexity; the first enclosing one
+// suffices by uniqueness of the Euclidean MEB.
+//
+// anchor_meb is the reference: first maximal pair, then every triple and
+// quadruple in lexicographic order. anchor_meb_proposed returns the SAME
+// result (key, level, support slots, selected shell) with less work: a
+// double-precision Welzl run only PROPOSES a support, which the same exact
+// attempt verifies (positive support, every site contained). A verified
+// support is the MEB by uniqueness, and every valid support lies on its exact
+// boundary; the reference's first valid support is therefore found by the
+// same lexicographic enumeration restricted to the boundary sites. A
+// proposal that fails verification falls back to the full enumeration. The
+// double values decide nothing.
+#include <algorithm>
 #include <array>
+#include <cmath>
 #include <limits>
 #include <span>
 
@@ -17,6 +30,8 @@ namespace mhgp9::tower {
 
 inline constexpr const char* kAnchorMebWorkAccounting =
     "anchor_meb_first_maximal_pair_then_lexicographic_supports_extremes_first_v2";
+inline constexpr const char* kAnchorMebProposedWorkAccounting =
+    "anchor_meb_first_maximal_pair_then_double_welzl_proposal_exact_boundary_canonical_v3";
 
 enum class AnchorMebStatus { kOk, kInvalidInput, kCounterOverflow, kInvariantViolated };
 
@@ -29,6 +44,10 @@ struct AnchorMebWork {
   // Pair distances paid to find the first maximal pair (port v9 of the
   // qualified v7 anchor_meb_diameter, receipts/meb_diameter_20260911).
   u64 pair_distances = 0;
+  // anchor_meb_proposed only: proposals made, verified by the exact attempt,
+  // canonicalized over a boundary with more sites than the support, and
+  // fallbacks to the full enumeration.
+  u64 proposals = 0, verified_proposals = 0, boundary_canonicalizations = 0, proposal_fallbacks = 0;
 };
 
 struct AnchorMebResult {
@@ -87,7 +106,88 @@ inline bool form(std::span<const P3> sites, std::array<u8, 4> slots, u8 q,
 
 }  // namespace anchor_meb_detail
 
-inline AnchorMebResult anchor_meb(std::span<const P3> sites, AnchorMebWork& work) noexcept {
+namespace anchor_meb_detail {
+
+// Double-precision proposal only (never a decision): the ball of 1..4 sites
+// with every one on its boundary, and Welzl's recursion over n <= 10 sites.
+struct Proposal {
+  double center[3] = {0, 0, 0};
+  double radius2 = -1;  // < 0: degenerate, no proposal
+  std::array<u8, 4> support{};
+  u8 size = 0;
+};
+
+inline Proposal boundary_ball(const double (*p)[3], const u8* r, u8 nr) noexcept {
+  Proposal out;
+  out.size = nr;
+  for (u8 i = 0; i < nr; ++i) out.support[i] = r[i];
+  if (nr == 0) return out;
+  const double* a = p[r[0]];
+  if (nr == 1) {
+    for (int k = 0; k < 3; ++k) out.center[k] = a[k];
+    out.radius2 = 0;
+    return out;
+  }
+  double u[3], v[3], w[3];
+  for (int k = 0; k < 3; ++k) u[k] = p[r[1]][k] - a[k];
+  if (nr == 2) {
+    for (int k = 0; k < 3; ++k) out.center[k] = a[k] + u[k] / 2;
+    out.radius2 = (u[0] * u[0] + u[1] * u[1] + u[2] * u[2]) / 4;
+    return out;
+  }
+  for (int k = 0; k < 3; ++k) v[k] = p[r[2]][k] - a[k];
+  double offset[3];
+  if (nr == 3) {
+    w[0] = u[1] * v[2] - u[2] * v[1]; w[1] = u[2] * v[0] - u[0] * v[2]; w[2] = u[0] * v[1] - u[1] * v[0];
+    const double ww = w[0] * w[0] + w[1] * w[1] + w[2] * w[2];
+    const double uu = u[0] * u[0] + u[1] * u[1] + u[2] * u[2], vv = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+    if (!(ww > 1e-9 * uu * vv)) return out;  // collinear: no proposal
+    // center - a = (|u|^2 (v x w) + |v|^2 (w x u)) / (2 |w|^2)
+    const double vw[3] = {v[1] * w[2] - v[2] * w[1], v[2] * w[0] - v[0] * w[2], v[0] * w[1] - v[1] * w[0]};
+    const double wu[3] = {w[1] * u[2] - w[2] * u[1], w[2] * u[0] - w[0] * u[2], w[0] * u[1] - w[1] * u[0]};
+    for (int k = 0; k < 3; ++k) offset[k] = (uu * vw[k] + vv * wu[k]) / (2 * ww);
+  } else {
+    for (int k = 0; k < 3; ++k) w[k] = p[r[3]][k] - a[k];
+    // 2 M x = rhs with rows u, v, w.
+    const double rhs[3] = {u[0] * u[0] + u[1] * u[1] + u[2] * u[2], v[0] * v[0] + v[1] * v[1] + v[2] * v[2],
+                           w[0] * w[0] + w[1] * w[1] + w[2] * w[2]};
+    const double det = u[0] * (v[1] * w[2] - v[2] * w[1]) - u[1] * (v[0] * w[2] - v[2] * w[0]) +
+                       u[2] * (v[0] * w[1] - v[1] * w[0]);
+    if (!(std::fabs(det) > 1e-12 * std::sqrt(rhs[0] * rhs[1] * rhs[2]))) return out;  // coplanar
+    const double m[3][3] = {{u[0], u[1], u[2]}, {v[0], v[1], v[2]}, {w[0], w[1], w[2]}};
+    for (int k = 0; k < 3; ++k) {
+      double c[3][3];
+      for (int i = 0; i < 3; ++i)
+        for (int j = 0; j < 3; ++j) c[i][j] = j == k ? rhs[i] / 2 : m[i][j];
+      offset[k] = (c[0][0] * (c[1][1] * c[2][2] - c[1][2] * c[2][1]) - c[0][1] * (c[1][0] * c[2][2] - c[1][2] * c[2][0]) +
+                   c[0][2] * (c[1][0] * c[2][1] - c[1][1] * c[2][0])) / det;
+    }
+  }
+  for (int k = 0; k < 3; ++k) out.center[k] = a[k] + offset[k];
+  out.radius2 = offset[0] * offset[0] + offset[1] * offset[1] + offset[2] * offset[2];
+  return out;
+}
+
+inline bool proposal_contains(const Proposal& ball, const double* q) noexcept {
+  if (ball.radius2 < 0) return false;
+  const double d0 = q[0] - ball.center[0], d1 = q[1] - ball.center[1], d2 = q[2] - ball.center[2];
+  const double d = d0 * d0 + d1 * d1 + d2 * d2;
+  return d <= ball.radius2 * (1 + 1e-12) + 1e-6;
+}
+
+// Welzl over the first n entries of order, with r (nr <= 4) on the boundary.
+inline Proposal welzl(const double (*p)[3], const u8* order, u8 n, u8* r, u8 nr) noexcept {
+  if (n == 0 || nr == 4) return boundary_ball(p, r, nr);
+  const u8 last = order[n - 1];
+  Proposal ball = welzl(p, order, static_cast<u8>(n - 1), r, nr);
+  if (proposal_contains(ball, p[last])) return ball;
+  r[nr] = last;
+  return welzl(p, order, static_cast<u8>(n - 1), r, static_cast<u8>(nr + 1));
+}
+
+}  // namespace anchor_meb_detail
+
+inline AnchorMebResult anchor_meb_impl(std::span<const P3> sites, AnchorMebWork& work, bool propose) noexcept {
   const auto failure = [](AnchorMebStatus status, const char* reason) {
     AnchorMebResult result;
     result.status = status;
@@ -142,6 +242,7 @@ inline AnchorMebResult anchor_meb(std::span<const P3> sites, AnchorMebWork& work
   u8 at = 2;
   for (u8 i = 0; i < n; ++i) if (i != extreme_a && i != extreme_b) power_order[at++] = i;
   bool finished = false;
+  std::array<u8, kFacetMaxK> boundary{};  // exact boundary sites of the last contained candidate
   const auto attempt = [&](std::array<u8, 4> slots, u8 q) {
     if (!anchor_meb_detail::charge(work.supports_by_size[q])) {
       result = failure(AnchorMebStatus::kCounterOverflow, "anchor_meb_supports_overflow");
@@ -156,9 +257,9 @@ inline AnchorMebResult anchor_meb(std::span<const P3> sites, AnchorMebWork& work
         result = failure(AnchorMebStatus::kCounterOverflow, "anchor_meb_power_tests_overflow");
         return true;
       }
-      const i128 power = candidate.power(point);
+        const i128 power = candidate.power(point);
       if (power > 0) return false;
-      if (power == 0) ++shell;
+      if (power == 0) { boundary[shell] = power_order[position]; ++shell; }
     }
     if (!anchor_meb_detail::charge(work.materializations)) {
       result = failure(AnchorMebStatus::kCounterOverflow, "anchor_meb_materializations_overflow");
@@ -184,6 +285,64 @@ inline AnchorMebResult anchor_meb(std::span<const P3> sites, AnchorMebWork& work
     return true;
   };
   finished = attempt({extreme_a, extreme_b, 0, 0}, 2);
+  if (!finished && propose) {
+    // Proposal (q2 is settled: only the first maximal pair can be a q2 MEB).
+    if (!anchor_meb_detail::charge(work.proposals)) return failure(AnchorMebStatus::kCounterOverflow, "anchor_meb_proposals_overflow");
+    double coordinates[kFacetMaxK][3];
+    for (u8 i = 0; i < n; ++i) {
+      coordinates[i][0] = static_cast<double>(sites[i].x);
+      coordinates[i][1] = static_cast<double>(sites[i].y);
+      coordinates[i][2] = static_cast<double>(sites[i].z);
+    }
+    std::array<u8, kFacetMaxK> order{};
+    for (u8 i = 0; i < n; ++i) order[i] = power_order[static_cast<u8>(n - 1 - i)];  // extremes enter first
+    u8 boundary_set[4] = {0, 0, 0, 0};
+    auto proposal = anchor_meb_detail::welzl(coordinates, order.data(), n, boundary_set, 0);
+#if defined(MHGP9_MEB_PROPOSED_TEST_CORRUPT)
+    // Test build only: every third proposal names a wrong site, so that the
+    // exact verification refuses it and the fallback is exercised.
+    if (work.proposals % 3 == 0 && proposal.size >= 3)
+      proposal.support[0] = static_cast<u8>((proposal.support[0] + 1) % n);
+#endif
+    if (proposal.radius2 >= 0 && proposal.size >= 3) {
+      std::array<u8, 4> slots{};
+      for (u8 i = 0; i < proposal.size; ++i) slots[i] = proposal.support[i];
+      std::sort(slots.begin(), slots.begin() + proposal.size);
+      const bool verified = attempt(slots, proposal.size);
+      if (verified && result.status != AnchorMebStatus::kOk) return result;  // counter overflow inside
+      if (verified) {
+        if (!anchor_meb_detail::charge(work.verified_proposals))
+          return failure(AnchorMebStatus::kCounterOverflow, "anchor_meb_proposals_overflow");
+#if !defined(MHGP9_MEB_PROPOSED_MUTANT_NO_CANONICAL)
+        if (result.selected_shell_count == result.support_size) return result;
+#else
+        return result;  // mutant: the verified support even on a larger boundary
+#endif
+        // More boundary sites than the support: the reference's first valid
+        // support, triples then quadruples, among the boundary sites only.
+        if (!anchor_meb_detail::charge(work.boundary_canonicalizations))
+          return failure(AnchorMebStatus::kCounterOverflow, "anchor_meb_proposals_overflow");
+        const u8 m = result.selected_shell_count;
+        std::array<u8, kFacetMaxK> on{};
+        for (u8 i = 0; i < m; ++i) on[i] = boundary[i];
+        std::sort(on.begin(), on.begin() + m);
+        finished = false;
+        for (u8 a = 0; a < m && !finished; ++a)
+          for (u8 b = a + 1; b < m && !finished; ++b)
+            for (u8 c = b + 1; c < m && !finished; ++c)
+              finished = attempt({on[a], on[b], on[c], 0}, 3);
+        for (u8 a = 0; a < m && !finished; ++a)
+          for (u8 b = a + 1; b < m && !finished; ++b)
+            for (u8 c = b + 1; c < m && !finished; ++c)
+              for (u8 d = c + 1; d < m && !finished; ++d)
+                finished = attempt({on[a], on[b], on[c], on[d]}, 4);
+        if (finished) return result;
+      }
+    }
+    if (!anchor_meb_detail::charge(work.proposal_fallbacks))
+      return failure(AnchorMebStatus::kCounterOverflow, "anchor_meb_proposals_overflow");
+    finished = false;
+  }
   for (u8 a = 0; a < n && !finished; ++a)
     for (u8 b = a + 1; b < n && !finished; ++b)
       for (u8 c = b + 1; c < n && !finished; ++c)
@@ -196,6 +355,14 @@ inline AnchorMebResult anchor_meb(std::span<const P3> sites, AnchorMebWork& work
   if (!finished)
     return failure(AnchorMebStatus::kInvariantViolated, "anchor_meb_no_containing_positive_support");
   return result;
+}
+
+inline AnchorMebResult anchor_meb(std::span<const P3> sites, AnchorMebWork& work) noexcept {
+  return anchor_meb_impl(sites, work, false);
+}
+
+inline AnchorMebResult anchor_meb_proposed(std::span<const P3> sites, AnchorMebWork& work) noexcept {
+  return anchor_meb_impl(sites, work, true);
 }
 
 }  // namespace mhgp9::tower

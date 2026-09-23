@@ -164,6 +164,27 @@ prouvées seulement sur le cover après lui), appartenance exacte du noyau et
 inclusion dans le cover et refus par les huit consommateurs (`q34_cover`),
 trois mutants tués (deux par le ledger, un par la garde).
 
+Code neuf v9 (23 septembre 2026) : le **MEB proposé** de la descente des
+ancres FULL (`anchor_meb_proposed`, `tower/forest/anchor_meb.hpp`), qui rend
+le même résultat que l'énumération de référence (`anchor_meb` : première paire
+maximale, puis tous les triplets et quadruplets en ordre lexicographique) —
+clé, niveau, emplacements du support, coquille sélectionnée — avec moins de
+travail. Un Welzl en double **propose** seulement un support ; la même
+tentative exacte le vérifie (support positif, tous les sites contenus). Par
+unicité du MEB euclidien, un support vérifié est le MEB, et tout support
+valide est sur son bord exact : le premier support valide de la référence se
+trouve donc par la même énumération restreinte aux sites du bord. Une
+proposition refusée retombe sur l'énumération complète ; les valeurs en double
+ne décident rien. Porte `anchor_meb_proposed` (28 956 ensembles de 1 à 10
+sites : grilles u18, 2^16 et minuscules, points entiers cosphériques, cube et
+octaèdre ; supports essayés 704 665 → 72 029), variante à propositions
+faussées une fois sur trois (5 013 replis, mêmes résultats) et mutant sans
+canonisation tué. Sur 08/000000/K10 (catalogue local, W8) : cycles MEB
+154 → 70 G, phase de cibles statiques 17,0 → 12,3 s, tour 24,7 → 18,9 s,
+condensé inchangé ; libellé de comptabilité
+`anchor_meb_first_maximal_pair_then_double_welzl_proposal_exact_boundary_canonical_v3`
+(sonde v10).
+
 ## Chaîne : `src/chain/` (espace `mhgp9`, code neuf)
 
 `run_tower_chain` enchaîne le générateur (configuration mesurée des reçus v8 :

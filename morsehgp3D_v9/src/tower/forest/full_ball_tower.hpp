@@ -758,7 +758,8 @@ class Builder {
     std::array<P3, kFacetMaxK> positions{};
     require(!sites.empty() && sites.size() <= positions.size(), "full_ball_meb_cardinality");
     for (size_t j = 0; j < sites.size(); ++j) positions[j] = ix.upos[sites[j]];
-    auto result = anchor_meb(std::span<const P3>(positions.data(), sites.size()), work);
+    // Same result as the reference enumeration (anchor_meb.hpp), less work.
+    auto result = anchor_meb_proposed(std::span<const P3>(positions.data(), sites.size()), work);
     require(result.status == AnchorMebStatus::kOk, "full_ball_meb_failure",
         result.status == AnchorMebStatus::kCounterOverflow ? FullBallStatus::kResourceExhausted
                                                          : FullBallStatus::kInvariantViolated);
@@ -1067,6 +1068,10 @@ class Builder {
     add(st.resolve_work.pair_distances, w.resolve_work.pair_distances);
     for (size_t q = 0; q < st.resolve_work.supports_by_size.size(); ++q)
       add(st.resolve_work.supports_by_size[q], w.resolve_work.supports_by_size[q]);
+    add(st.resolve_work.proposals, w.resolve_work.proposals);
+    add(st.resolve_work.verified_proposals, w.resolve_work.verified_proposals);
+    add(st.resolve_work.boundary_canonicalizations, w.resolve_work.boundary_canonicalizations);
+    add(st.resolve_work.proposal_fallbacks, w.resolve_work.proposal_fallbacks);
   }
 
   void prepare_external_batch(const std::vector<FullBallBatchRequest>& requests,

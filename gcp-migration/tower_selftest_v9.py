@@ -98,7 +98,7 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                       core_cover_point_tests=1, dead_core_cells=3)
     else:
         ledger.update({name: 0 for name in schema['ledger'] if name.startswith(('core_', 'dead_core_'))})
-    return dict(schema='mhgp9_tower_probe_v9', status=status,
+    return dict(schema='mhgp9_tower_probe_v10', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
@@ -117,7 +117,7 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                 tower_work=dict(records=4, extra_records=0, representatives=5, anchor_hits=1, key_lookups=4,
                                 intruder_queries=2, intruder_nodes=7, meb_calls=4, meb_power_tests=9, births=3,
                                 merges=2, contributions=3, grouped_lots=1, resolver_cache_hits=2,
-                                meb_accounting='anchor_meb_first_maximal_pair_then_lexicographic_supports_extremes_first_v2',
+                                meb_accounting='anchor_meb_first_maximal_pair_then_double_welzl_proposal_exact_boundary_canonical_v3',
                                 meb_pair_distances=6, meb_materializations=4, meb_supports_by_size=[0, 4, 3, 1]),
                 orders=orders, tower_digest=digest if complete else '0' * 16, peak_rss_kb=2048)
 

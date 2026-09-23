@@ -201,6 +201,20 @@ endif()
 
 # Mutant de compilation du noyau MEB (derniere paire maximale au lieu de la
 # premiere) : la porte doit le refuser (code 1, support canonique faux).
+# MEB propose (Welzl en double, verification exacte, canonisation au bord) :
+# meme resultat que l'enumeration de reference, et son mutant sans
+# canonisation tue.
+mhgp9_product_executable(mhgp9_tower_anchor_meb_proposed_gate tests/tower/anchor_meb_proposed_gate.cpp)
+mhgp9_gate(mhgp9_tower_anchor_meb_proposed 0 mhgp9_tower_anchor_meb_proposed_gate
+           ARGS --selftest LABELS "gate;tower" TIMEOUT 300)
+mhgp9_product_executable(mhgp9_tower_anchor_meb_proposed_fallback_gate tests/tower/anchor_meb_proposed_gate.cpp)
+target_compile_definitions(mhgp9_tower_anchor_meb_proposed_fallback_gate PRIVATE MHGP9_MEB_PROPOSED_TEST_CORRUPT=1)
+mhgp9_gate(mhgp9_tower_anchor_meb_proposed_fallback 0 mhgp9_tower_anchor_meb_proposed_fallback_gate
+           ARGS --selftest LABELS "gate;tower" TIMEOUT 300)
+mhgp9_product_executable(mhgp9_tower_anchor_meb_proposed_mutant_gate tests/tower/anchor_meb_proposed_gate.cpp)
+target_compile_definitions(mhgp9_tower_anchor_meb_proposed_mutant_gate PRIVATE MHGP9_MEB_PROPOSED_MUTANT_NO_CANONICAL=1)
+mhgp9_gate(mhgp9_tower_anchor_meb_proposed_mutant_no_canonical 1 mhgp9_tower_anchor_meb_proposed_mutant_gate
+           ARGS --selftest EXPECT_PREFIX "cause=proposed.differs" LABELS "gate;tower;mutant" TIMEOUT 300)
 mhgp9_product_executable(mhgp9_tower_anchor_meb_mutant_gate tests/tower/anchor_meb_gate.cpp)
 target_compile_definitions(mhgp9_tower_anchor_meb_mutant_gate PRIVATE MHGP9_MEB_MUTANT_LAST_MAXIMUM=1)
 mhgp9_gate(mhgp9_tower_anchor_meb_mutant_last_maximum 1 mhgp9_tower_anchor_meb_mutant_gate
