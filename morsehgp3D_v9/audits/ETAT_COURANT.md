@@ -187,34 +187,19 @@ entière est 08/000000 **sans sol** avec 200 ancres sur 39 885, non une
 trame brute multi-séquence ; les entrées ne sont pas hachées dans ces
 sorties. Le trou prioritaire de complétude demeure q3 à
 `p=Kmax−2`, particulièrement les supports longs.
-Dans le **juge q3 indépendant publié** par C (`85a4d4ab`,
-`q3_sample_judge.cpp` SHA-256 `c34da9da…86fda78`), le plancher `top_keys` et la clé
-retirée pour le mutant filtrent seulement `p=Kmax−2`. Une présentation
-par triangle strictement aigu peut pourtant avoir `q_min=2` si sa
-coquille contient aussi une paire antipodale. Fixture entière K5 : centre
-`(100,100,100)`, coquille `(105,100,100)`, `(97,104,100)`, `(97,96,100)`,
-`(95,100,100)`, puis trois points strictement intérieurs
-`(100,100,100)`, `(101,100,100)`, `(100,101,100)`. Les trois premiers
-sites de coquille sont aigus (produits scalaires 48, 32, 32), mais les
-premier et quatrième sont antipodaux : `q_min=2`, `p=3=K5−2`. Le plancher
-et le mutant dits « q3 haut rang » peuvent ainsi être portés par une clé
-q2. Exiger `ball.arity==3` dans leur sélection, et comptabiliser à part
-les incidences aiguës de clés q2. C'est une correction de **portée du
-juge**, pas un défaut démontré du générateur ; aucun reçu de la campagne
-durcie n'est encore publié.
-La [contrelecture B du filtre flottant](CERTIFICAT_B_MARGE_JUGE_Q3_U18_20260923.md)
-prouve, **sous IEEE binary64 sans fast-math et triangles aigus u18**,
-que son erreur de boîte est <0,004 pour une marge ≥4 : les coupes
-flottantes ne perdent ni intérieur ni contact dans ce cadre. Épingler
-explicitement ces hypothèses dans le juge ; les bornes entières exactes
-restent le repli si elles ne tiennent pas. Cela ne répare ni la sélection
-du top `q_min=3` ni le caractère échantillonné du juge.
-La [contrelecture B de la v3 publiée](CONTRE_AUDIT_B_JUGE_Q3_C_V3_20260923.md)
-ajoute une porte de coquille : le match ne compare pas encore les
-**ensembles** d'IDs, donc une coquille corrompue avec doublon peut
-passer. Le juge fixe `run_tower=false` et son script n'a pas encore
-de reçu v3 ; ses résultats futurs porteront sur le catalogue et les
-ancres tirées, non sur FULL.
+Le [juge q3 indépendant v4 de C](c_omission_20260923/q3_sample_judge.cpp)
+(publié par `e2fd68662`) ferme les deux portes signalées par A et B :
+`top_keys` et le mutant ciblent désormais les clés **régulières q3**
+(`q_min=3`, trois sites de coquille, `p=Kmax−2`) ; les clés q2 rencontrées
+par des triangles aigus sont comptées séparément. Le recoupement compare
+les **ensembles exacts d'IDs de coquille**, et le mutant de coquille
+corrompue est prévu. Le [certificat de B](CERTIFICAT_B_MARGE_JUGE_Q3_U18_20260923.md)
+établit la sûreté du filtre flottant sous IEEE binary64 sans fast-math
+pour ces triangles aigus u18. La [recette v4](c_omission_20260923/run_judges_v4.sh)
+épingle sources, compilation, binaires et entrées ; la campagne est
+relancée, **sans reçu v4 publié à ce stade**. Le juge échantillonne des
+ancres et fixe `run_tower=false` : même un code 0 contrôlerait le
+catalogue sur cet échantillon, pas la tour FULL ni la complétude globale.
 
 La porte de **clés jamais émises** publiée par `683fa46e` change utilement
 le sens du contrôle : elle recense des MEB de supports q2–q4 voisins
