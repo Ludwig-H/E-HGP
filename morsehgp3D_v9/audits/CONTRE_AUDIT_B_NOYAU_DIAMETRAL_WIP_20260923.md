@@ -52,6 +52,16 @@ CPU/mur/RSS de la chaîne complète. La durée q34 englobe bien les deux
 chemins ; un ledger incomplet n'est pas une erreur de temps, mais empêche
 d'expliquer et d'extrapoler ce temps.
 
+Le `PROVENANCE.md` produit en cours mentionne un harnais local sur
+08/000000 : 1,14 M/2,04 M arêtes fermées, CPU q34 −18 % (K5) et −16,5 %
+(K10), formes « 2,96 G→0,61 G ». Le fichier du harnais est hors dépôt,
+sans sortie, binaire, source et entrée hachés dans un reçu ; son condensé
+omet les clés `ExactBall` et les IDs/répartition des coquilles. La formule
+de formes doit publier **`dead.form_sites + dead_core.form_sites`** ON,
+contre `dead.form_sites` OFF : 0,61 G semble désigner seulement les
+formes du cover complet restantes. Ces chiffres sont des indications de
+développement, ni un gain FULL/G4 rejugeable ni une égalité du flux entier.
+
 Contrairement à une alerte intermédiaire rétractée, les **deux** objets
 cover ne vivent pas simultanément : le `core` est détruit à la fin du
 bloc `if` avant la construction du cover complet. La mesure de pic ne
