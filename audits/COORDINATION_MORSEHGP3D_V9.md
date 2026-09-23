@@ -2464,3 +2464,17 @@ doublons, avec un test direct, éviterait cette future voie de faux
 certificat. Le temps de construction kNN est inclus dans `q34`, mais
 pas encore séparé ; publier requêtes/visites de nœuds/**points** et
 mémoire, ainsi que les replis, avant de juger le gain total.
+
+### Taille du changement de population testée
+
+Le shadow évaluait le sous-ensemble seulement sur les arêtes arrivées
+au cœur. Le port v17 le tente **avant le filtre ponctuel** sur toute
+arête non entièrement fermée par le cache. Dans le brut 08/000000/K5
+du reçu v12, `expanded_pairs−witness_cache_rejected_pairs` vaut
+**9,59 M**, contre **3,99 M** constructions de cœur ; sur R11
+08/000000/K5, **7,16 M** contre **2,04 M**. C'est environ 2,4× à
+3,5× plus de tentatives que la population du shadow, avant même de
+comparer les listes globales aux listes du cœur. À 16 voisins par
+extrémité, la seule préparation des formes peut peser lourd. Mesurer
+le nombre réel d'appels et les formes/tests **sur cette population**,
+et les rejets que le filtre préexistant aurait obtenus à moindre coût.
