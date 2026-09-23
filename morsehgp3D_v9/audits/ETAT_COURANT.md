@@ -1,6 +1,6 @@
 # État courant des audits v9
 
-23 septembre 2026. Produit publié courant : **`6200bb5a`**. Le
+23 septembre 2026. Produit publié courant : **`458fb0ed`**. Le
 [reçu G4 R6](../receipts/g4_tower_r6_20260923/README.md) exécute le
 snapshot **`78ce9fd4`** ; ses temps ne qualifient pas encore le
 sample-sort, le raccourci FULL ni la nouvelle frontière temporelle
@@ -9,15 +9,17 @@ de la sonde v9. Cadre :
 `quantized_u18_input_only`, **`not_claimed`**. Ce fichier porte le verdict
 mutable. Les notes datées conservent preuves, contre-exemples et reçus.
 
-**Urgence WIP du 23 septembre, 05 h 35 UTC.** L'utilisateur a choisi
-**l'arrêt immédiat** de la session G4 SPOT envisagée avec la sonde MEB v3 :
-`tower_probe.cpp` annonce v3, tandis que le validateur G4 épingle encore
-v2 ; le reçu serait rejeté. Relecture GCP ciblée : l'instance de campagne
+**Session G4 interrompue le 23 septembre, 05 h 35 UTC.** L'utilisateur a
+choisi l'arrêt de la session SPOT envisagée : le premier diff de la sonde
+MEB v3 annonçait un schéma que le validateur v2 aurait rejeté. Relecture
+GCP ciblée à ce moment : l'instance de campagne
 `ehgp-v7-4fa0e0789a7d5bb06b787d35` est déjà `TERMINATED` (dernier
 arrêt 04 h 50 min 54 s UTC) et aucune des autres instances SPOT du projet
-n'est en cours ; **aucun stop supplémentaire n'a été lancé**. Ne pas
-redémarrer ce paquet avant alignement du schéma, des nouveaux compteurs
-MEB, du selftest et du plan épinglé. Le WIP v6 C6/tri observé en parallèle
+n'est en cours ; **aucun stop supplémentaire n'a été lancé**. Le commit
+`458fb0ed` aligne maintenant les littéraux sonde/worker/selftest en v10 et
+MEB v3, mais n'exporte pas encore les quatre compteurs de proposition dans
+le JSON jugé et n'a aucun reçu G4. Un nouveau plan épinglé et ses portes
+restent nécessaires avant une campagne. Le WIP v6 C6/tri observé en parallèle
 est [contrelu séparément](CONTRE_AUDIT_B_WIP_V6_C6_TRI_20260923.md) :
 il n'est pas raccordé à v9 ni qualifié sur u18/G4.
 
@@ -232,8 +234,20 @@ le DFS ne visite que le complément de ses plages. Voir le
 [certificats par rectangles](PISTE_B_Q34_RECTANGLES_AVANT_EXPANSION_20260923.md),
 [nœuds avant cover](PISTE_B_Q34_NOEUDS_AVANT_COVER_20260923.md) et
 [gardes par blocs](DOMINATION_Q4_PARESSEUSE_PAR_BLOCS_20260923.md).
-Leurs bornes locales sont exactes ; aucun gain net LiDAR ni majorant
-global sous-quadratique n'est démontré.
+Leurs bornes locales sont exactes ; aucun gain net LiDAR de ces
+certificats par blocs ni majorant global sous-quadratique n'est démontré.
+
+Le [shadow LiDAR de la palette par ancre](SHADOW_HA_Q34_LIDAR_20260923.md)
+isole une proposition plus légère qu'un nouveau DFS de ligne. À K10/s8
+sur 08/000000 sans sol, il ferme **3 499 305 / 30 777 213** paires
+résiduelles avant expansion ; les **30 777 213 masques de paire** du
+replay mono restent identiques, comme les **4 507 278 covers potentiels**.
+L'économie CPU locale indicative vaut environ **1,29 s** après préparation
+et tests de palette, sur hôte partagé et sans FULL/G4. Le cache de paire
+rejette déjà la plupart de ces paires à faible coût ; ne porter la palette
+qu'après une ablation de chaîne ON/OFF, identités complètes et coût par
+worker inclus. Une palette des seuls proches peut manquer les témoins
+dans la direction de B, comme le montre la contre-fixture B.
 
 Pour q3, seuls les fragments d'atlas **complets** fournissent un compte
 réutilisable ; un certificat profond incomplet n'est qu'un minorant.
@@ -311,6 +325,33 @@ gain FULL et le pic de résidence simultanée. L'[analyse FULL](CONTRE_AUDIT_B_F
 et la [piste de préfixe d'intrus](INTRUS_FULL_PREFIXE_EXACT_20260923.md)
 documentent les autres postes ; le préfixe ne mérite un cache qu'après
 mesure des répétitions par clé et worker.
+
+`458fb0ed` porte désormais `anchor_meb_proposed` : la proposition Welzl
+flottante est vérifiée par les formes et puissances entières, puis le
+support de référence est repris sur le bord exact. Le gate différentiel
+juge **28 956 ensembles** et tue le mutant sans canonisation ; le port
+rapporte localement **154 → 70 Gcycles MEB** et **24,7 → 18,9 s** pour
+la tour 08/000000/K10/W8, sans reçu G4. Une
+[contre-épreuve FENV](check_meb_proposed_fenv_20260923.cpp) indépendante,
+compilée `-O2 -frounding-math -fno-fast-math` contre le header publié
+(SHA-256 `de54655393b09182…`), compare encore **42 544** cas sous
+quatre arrondis et FTZ/DAZ activés ou non, sans divergence de
+clé, niveau, support, coquille ou statut ; ce sidecar ne remplace pas
+une porte FENV intégrée. Voir la [preuve et ses portes
+ouvertes](CONTRE_AUDIT_B_MEB_PROPOSE_WIP_20260923.md). Les nouveaux
+compteurs `proposals/verified/canonical/fallbacks` sont agrégés dans FULL,
+mais absents du JSON/lecteur v10 : publier leur ventilation avant tout
+reçu d'ablation. L'ordre Welzl inverse actuellement `power_order` alors
+que la récursion insère dans l'ordre du tableau ; mesurer les deux ordres
+sur les mêmes facettes avant de le choisir pour le coût.
+
+Le [filtre négatif de clés](FULL_FILTRE_ABSENCE_CLE_20260923.md) propose
+d'éviter le `lower_bound` de `static_terminal` quand la clé MEB est
+assurément absente du catalogue immuable. Ses collisions ne changent
+jamais le résultat ; construire et sonder le filtre a cependant un coût.
+R6 compte **11,309 M recherches** à K10 sur 08/000000, sans publier le
+nombre de clés absentes ni leur temps : l'histogramme par K et une
+ablation FULL/chaîne décident de l'intérêt réel.
 
 ## Portes de preuve encore ouvertes
 
