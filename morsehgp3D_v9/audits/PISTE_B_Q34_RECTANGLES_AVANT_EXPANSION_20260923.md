@@ -209,6 +209,59 @@ singleton. Le coût négatif mesure donc cette implémentation, pas une
 éventuelle borne singleton×boîte plus serrée. Celle-ci demanderait sa
 preuve et sa propre ablation, sans hériter du gain ponctuel.
 
+### Première porte shadow proposée : petite palette `h_a` par ancre
+
+Le DFS global neuf pour chaque ligne `a×B_node` est coûteux dans le
+prototype ci-dessus. Une expérience distincte prépare **une fois par
+site `a`** une petite palette `H_a` d'IDs proches distincts, par exemple
+`2K` voisins proposés par un index spatial/voxel. Cette sélection peut
+être approximative : elle ne décide jamais un rejet. Pour une ligne
+résiduelle de `|B_node|≥8` ou `16` (seuil à mesurer), chaque `z∈H_a`
+avec `z≠a` est soumis au prédicat exact déjà public
+`universal_witness(lane,a,box(B_node),z,…)`. Il teste les huit coins de
+la boîte B continue, sans DFS ni scan de facteur : un succès prouve que
+`z` est strictement intérieur à **toute** boule positive de cette voie
+pour chaque vrai `b∈B_node`. Si `z` peut être l'extrémité `b`, le test
+universel échoue par contact ; un contrôle d'ID/rang peut le sauter plus
+tôt. Compter les IDs distincts séparément aux seuils q3 `K−1`, q4
+`K−2`, transmettre le masque des voies encore ouvertes à chaque arête
+de la ligne et garder le chemin actuel quand le seuil manque. Aucun
+voisin proposé mais non certifié ne reçoit de crédit.
+
+Le coût de préparation visé est `O(nK)` pour cette **palette
+heuristique**, puis `O(K·Σ_lignes 1)` prédicats de boîte, au lieu d'un
+nouveau DFS potentiellement `O(n)` par ligne. Ce sont des objectifs de
+travail, pas une borne déjà obtenue du voisinage ni du pipeline.
+`RectangleTask` transporte déjà `b_node`, mais `expand` ne reçoit plus
+que sa plage de rangs : conserver le vrai nœud et sa boîte certifiée
+jusqu'à la classification de chaque ligne. Les plages A existantes
+conviennent, car le ticket est propre à l'ancre. Le cache de nœuds de
+la première paire et les palettes `H_a` peuvent être essayés
+séparément ; **ne pas additionner** leurs crédits sans dédoublonnage
+d'IDs/nœuds et preuve d'antichaîne.
+
+Une seconde palette gratuite en recherche globale provient des **frères
+exclus** quand un vrai nœud A ou B est scindé : pour le sous-produit
+enfant×autre facteur, le frère est disjoint des deux facteurs et peut
+servir de bloc `Z`. Le prédicat public
+`classify_witness_block(lane,A_box,B_box,Z_box,…)` est `O(1)` par
+triplet de boîtes, sûr mais conservateur ; seul `Credit` transmet la
+population du frère, saturée au seuil. Les frères successifs sont
+disjoints, mais il faut garder leurs handles et leurs masques en ticket
+et ne jamais créditer deux fois un site. Cette piste exige de scinder
+par **vrais enfants de l'index**, pas par plages A arbitraires. À
+défaut de certification, on revient à l'expansion exacte : le pire cas
+reste `O(K|A||B|)` tests de tickets plus les paires, sans histogramme
+local `O(|A|²+|B|²)` ; il n'est pas sous-quadratique par lui-même.
+
+Commencer par `H_a` en **observation** sur les rectangles résiduels du
+LiDAR sans sol, car son raccord ne change pas l'ordonnanceur. Publier
+temps de préparation, lignes, coins/nœuds testés, masse de paires
+retirée avant expansion, résidu, CPU/mur q3/q4 et identité du flux
+canonique/coquilles ; comparer K5/K10, s8/10/12 et les coupes capteur
+8k/16k/32k. Si les facteurs B sont souvent minuscules ou si les
+palettes échouent, aucun gain n'est présumé.
+
 ### Cellules de centres : travail évitable en amont du cover
 
 Pour une cellule convexe `C` de **centres mondiaux** et des boîtes
@@ -345,10 +398,18 @@ témoins, mais reste fixe pour un témoin dans cette cellule. Pour chaque
 candidat est équidistant de `a` et `b` : être strictement plus proche
 que **l'un** des deux facteurs suffit à rendre `z` intérieur. Tester
 les deux côtés simultanément serait exact mais inutilement fort.
-Un « OU » pouvant changer **à chaque coin** serait en revanche faux :
-dans le plan u18, `A={(0,0)}`, `B={(10,0)}`, `z=(5,6)` et
-`C=[3,7]×{0}` passent côté B au coin gauche et côté A au coin droit,
-alors que `z` est extérieur à la boule centrée en `(5,0)` de rayon 5.
+La garde d'ID `z∉A∪B` est conservatrice : si `z` était l'extrémité
+choisie, ou un autre support q3/q4, son égalité de contact
+`|z−c|²=|a−c|²=|b−c|²` ferait échouer le signe strict dans toute
+cellule contenant ce centre ; retirer cette garde demanderait de
+conserver la disjonction par paire et le repli exact des contacts.
+Un « OU » pouvant changer **à chaque coin** serait en revanche faux,
+même pour une q3 positive : dans le plan u18, `A={(0,0)}`,
+`B={(10,0)}`, `x=(6,6)`, `z=(5,7)` et `C=[3,7]×{1}`.
+La boule q3 de `abx` est aiguë, `ab` est sa plus longue arête, son
+centre est `(5,1)` et son rayon carré vaut 26. Aux deux coins de C,
+`|z−v|²=40<50`, distance carrée au facteur éloigné, mais au centre
+`|z−c|²=36>26` : `z` est extérieur.
 Si la palette certifie `K−1` IDs en q3 ou `K−2` en q4 **dans
 chaque cellule possible**, la voie du produit meurt ; sinon la zone
 indécise suit exactement le chemin actuel. Les comptes des cellules

@@ -1,11 +1,10 @@
 # État courant des audits v9
 
-23 septembre 2026. Produit publié courant : **`78ce9fd4`**. Le dernier
-[reçu G4 R5](../receipts/g4_tower_r5_20260923/README.md) exécute le snapshot
-antérieur **`aae9da0e`** ; ses temps ne qualifient donc pas le correctif
-`84c74a5e`, le cœur diamétral de `a78664d4`, la sonde v8 de
-`e5688680` ni les gardes de réception de `cc4664e5`/`78ce9fd4`. Aucun reçu R6
-n'est encore publié. Cadre :
+23 septembre 2026. Produit publié courant : **`50690c12`**. Le
+[reçu G4 R6](../receipts/g4_tower_r6_20260923/README.md) exécute le
+snapshot **`78ce9fd4`** ; ses temps ne qualifient pas encore le
+sample-sort, le raccourci FULL ni la nouvelle frontière temporelle
+de la sonde v9. Cadre :
 `exploration_v9_hors_registre`, `reference_cpu`,
 `quantized_u18_input_only`, **`not_claimed`**. Ce fichier porte le verdict
 mutable. Les notes datées conservent preuves, contre-exemples et reçus.
@@ -52,8 +51,8 @@ formes](CONTRE_AUDIT_B_CHARGEMENT_FORMES_Q34_WIP_20260923.md) et la
 boule diamétrale de l'arête, sous-ensemble du cover complet ; toute voie
 ouverte repasse par celui-ci. Le sous-ensemble ne peut ajouter un faux
 témoin intérieur. Les portes locales comparent les candidats aux petits
-oracles et exercent fermeture puis repli, mais le levier est déjà **ON par
-défaut** sans reçu G4 ni ablation FULL qui l'isole. `e5688680` protège
+oracles et exercent fermeture puis repli ; R6 isole désormais ce levier
+**ON par défaut** en ablation FULL sur G4. `e5688680` protège
 aussi les consommateurs complets contre un cœur passé par erreur ;
 `cc4664e5` place le même refus avant les retours q4 à K1/2. La porte
 FULL actuelle
@@ -115,24 +114,36 @@ globale n'est acquis. Le [premier reçu local](../receipts/first_tower_20260922/
 [R2 refusé par son validateur](CONTRE_AUDIT_B_G4_R2_PREFLIGHT_20260923.md)
 restent des témoins historiques ; leurs temps ne remplacent pas R5.
 
-**R6 est reçue localement, mais son dossier de reçu n'est pas encore
-publié sur `main` à cette lecture.** Le snapshot `78ce9fd4` a exécuté
+Le [reçu R6](../receipts/g4_tower_r6_20260923/README.md),
+[contrelu indépendamment](CONTRE_AUDIT_B_G4_R6_20260923.md), a exécuté
+le snapshot `78ce9fd4`
 sur G4 24 cas FULL CPU (trois trames entières sans sol, K5/K10,
 W48/s8, deux répétitions ON/OFF du seul cœur), tous
 `complete_relative` ; la relecture indépendante de la capture rend
-`completed`, avec arrêt ciblé certifié. Dans les douze paires,
-émissions q2/q3/q4, catalogue, ordres, travail FULL et digest
-coïncident. Le mur de chaîne gagne **1,8–7,7 %** en moyenne selon la
-scène/K ; le CPU·s gagne **9,9–20,4 %**. Le cœur ferme **54,9–58,9 %**
+`completed`, avec arrêt ciblé certifié et 390/390 empreintes intègres.
+Dans les douze paires, émissions q2/q3/q4, résumés de catalogue,
+ordres, travail FULL et digest coïncident ; R6 ne publie pas le flux
+complet des clés/supports/coquilles. Le mur de chaîne gagne
+**0,51–8,66 %** par paire (**1,8–7,7 %** sur les moyennes des deux
+répétitions par scène/K) ; le CPU·s gagne **8,09–21,18 %** par paire.
+Le cœur ferme **54,9–58,9 %**
 des arêtes qui arrivent au cover et réduit les formes chargées de
-**72,9–81,9 %**, mais augmente les visites d'index core+cover de
+**72,85–81,87 %**, mais augmente les visites d'index core+cover de
 **21,0–45,6 %**. Meilleurs cas ON : **4,151 s à K5** et **11,726 s à
-K10**, toujours hors contrat. Dans le README de reçu encore brouillon,
-« générateur identique » est trop large : `q34_cover_builds` change
+K10**, toujours hors contrat. Le README R6 publié doit être corrigé :
+« générateur identique » est trop large car `q34_cover_builds` change
 par construction (000000/K5 : 900 377 ON, 2 043 612 OFF) ; seules
-ses émissions et masses de candidats restent identiques. Les trois
-compteurs du cache témoin varient légèrement entre répétitions, sans
-changer l'objet.
+ses émissions et masses de candidats restent identiques. Ses plages
+arrondies de gain omettent aussi les bornes 0,51 %, 8,66 % et 72,85 %.
+Les trois compteurs du cache témoin varient légèrement entre
+répétitions, sans changer l'objet.
+
+À travail CPU mesuré inchangé, même une répartition idéale sur les
+**48 fils logiques** du G4 laisserait, pour le meilleur cas R6 ON,
+**1,89 s à K5** et **5,81 s à K10** de CPU·s/48 avant tout coût de
+synchronisation. Ce calcul ne borne ni un nouvel algorithme ni une
+voie GPU ; il montre que le seul ordonnancement CPU de l'existant ne
+peut atteindre 1 s.
 
 La reprise du cover complet à partir des nœuds terminaux du cœur est
 exacte en principe, mais R6 borne son bénéfice en visites : sur
@@ -172,12 +183,11 @@ stable n'est établie ; les sorties JSON et le binaire local ne constituent
 pas un reçu G4. Entrée SHA256 `2632c86e…6c516e`, binaire
 `267dbed7…b7734` ; les sept sources principales ont les mêmes empreintes
 que le commit publié. Les mesures G4 doivent inclure les visites et tests
-du **core_cover**, publiés par la sonde v8 de `e5688680` mais jamais
-encore reçus sur G4, ainsi que les temps et masses par worker pour
-diagnostiquer le chemin critique.
-Le plan G4 v5 par défaut met les cinq leviers ON dans ses huit cas : une
-ablation causale du cœur exige des cas supplémentaires appariés, avec un
-préflight ON. L'expansion `A×B` demeure entière.
+du **core_cover**, publiés par la sonde v8 de `e5688680` et maintenant
+reçus sur G4 dans R6. Les temps et masses par worker restent nécessaires
+pour diagnostiquer le chemin critique. R6 a réalisé l'ablation appariée
+sur trames sans sol entières avec préflight ON ; l'expansion `A×B`
+demeure entière.
 
 Une [ablation locale complémentaire sur deux coupes **sans
 sol**](CORE_LIDAR_LOCAL_20260923.md), K5/K10/s8/W8 et sans FULL,
@@ -274,16 +284,17 @@ Même si q3/q4 **et** la tour devenaient gratuits, la meilleure répétition
 R5/K10 laisserait encore **2,50 / 3,39 / 3,44 s** de chaîne sur
 000100 / 000000 / 000200 ; q2+fusion+recensus représente déjà
 **1,43 / 2,02 / 2,06 s**. La queue après `tower_ms` comprend le résumé et
-le digest ; la mesurer séparément, puis fixer ce que le produit chronométré
-publie. Les destructeurs des gros locaux en fin de fonction interviennent
-après l'affectation de `chain_total`.
+le digest sur les snapshots R5/R6. `50690c12` isole désormais le digest
+dans `times_ms.digest` ; il reste **synchrone** dans l'appel public.
+Les destructeurs des gros locaux en fin de fonction interviennent après
+l'affectation de `chain_total`.
 Les présentations ont seulement 2–13 doublons pour 4,38–5,51 M clés
 sur ces trames ; ce ratio ne se transfère pas à des passages LiDAR
 superposés. Le catalogue arrive déjà strictement trié par `BallKey`
-dans l'appel de chaîne, alors que FULL retrie sa permutation `by_key` :
-une voie interne validée peut éviter ce second tri, en gardant l'API
-générale et le tri `by_level`. Mesurer son coût réel, pas seulement les
-comparaisons. L'[analyse FULL](CONTRE_AUDIT_B_FULL_COUTS_ET_INTERFACES_20260922.md)
+dans l'appel de chaîne. `50690c12` le certifie par balayage et évite
+le tri redondant de `by_key` ; l'API générale trie toujours un catalogue
+non ordonné et le tri distinct `by_level` reste nécessaire. Mesurer le
+gain FULL et le pic de résidence simultanée. L'[analyse FULL](CONTRE_AUDIT_B_FULL_COUTS_ET_INTERFACES_20260922.md)
 et la [piste de préfixe d'intrus](INTRUS_FULL_PREFIXE_EXACT_20260923.md)
 documentent les autres postes ; le préfixe ne mérite un cache qu'après
 mesure des répétitions par clé et worker.
@@ -310,20 +321,25 @@ et le lecteur contrôle aussi le résumé exact de chaque cas tué dans
 une réception `partial`. Un fichier absent rend un refus typé. Sur
 ce commit figé, **21/21 selftests normal et 21/21 sous `-O`** passent,
 dont les mutations ON/OFF de plan et suppression/altération du résumé.
-La prochaine preuve attendue est un reçu G4 R6 complet ou partiel
-rejugeable, pas une nouvelle inférence depuis les seuls selftests.
+R6 apporte maintenant cette preuve de réception pour le snapshot.
 
-Chantier produit suivant R6 : tri parallèle des présentations,
-certification d'un catalogue déjà trié, et déplacement du condensé de
-vérification hors `chain_total` dans la sonde v9. Le fast-path trié
-rejuge strictement toutes les clés ; les portes locales ne montrent
-pas de divergence. Le tri parallèle alloue toutefois un tampon de
-**112 octets par présentation** (environ 491–617 Mo pour les cas R6
-K10) : mesurer son gain et le pic RSS. Pour comparer un futur reçu à
-R6, ajouter `times_ms.digest` à `chain_total` sur le périmètre mural
-ancien. Le futur `chain_cpu_s` exclut également le condensé, mais aucun
-`digest_cpu_s` n'est encore publié : sans lui, une comparaison CPU·s
-R6/R7 brute serait trompeuse.
+`50690c12` remplace la fusion série par un **sample-sort parallèle** :
+tris des slots, splitters de clés, puis tris de plages possédées ; une
+clé de frontière entière va dans la même plage par `lower_bound`.
+Ce n'est **pas** le `parallel_sort(all)` à tampon unique d'un chantier
+mutable précédent. Les slots et plages restent simultanément résidents
+durant la collecte ; mesurer le maximum par plage, la crête RSS, le temps
+et les échecs de ressources sur le chemin de chaîne. Le fast-path FULL
+rejuge strictement toutes les clés. Les portes locales passent, sans
+reçu G4 ni ablation FULL de ces changements. Le [contre-audit du chantier](CONTRE_AUDIT_B_TRI_FUSION_WIP_20260923.md)
+doit être relu à la lumière du **sample-sort commité** ; son calcul
+de tampon à 112 octets par présentation décrit une variante abandonnée.
+Pour comparer un futur reçu à R6, ajouter `times_ms.digest` à
+`chain_total` sur le périmètre mural ancien. Le nouveau `chain_cpu_s`
+exclut également le condensé, mais aucun `digest_cpu_s` n'est publié :
+une comparaison CPU·s R6/R7 brute serait trompeuse. Le lecteur v9 doit
+aussi borner `read + chain_total + digest` par le mur externe, puisque
+son contrôle actuel omet `read` ([mutation causale](CONTRE_AUDIT_B_TRI_FUSION_WIP_20260923.md)).
 
 Prochaines mesures : mêmes octets et masque figé, trames **entières** de
 plusieurs séquences sans sol puis brutes, s8/10/12, K5 et K10, W1/W24/W48,
