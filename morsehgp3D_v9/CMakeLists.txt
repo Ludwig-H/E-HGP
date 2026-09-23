@@ -179,6 +179,31 @@ mhgp9_gate(mhgp9_chain_batch_filter 0 mhgp9_chain_batch_filter_gate ARGS --n=100
            EXPECT_PREFIX "chain_batch_filter_gate n=1000" LABELS "gate;chain;oracle" TIMEOUT 900)
 mhgp9_gate(mhgp9_chain_batch_filter_bad_argument 2 mhgp9_chain_batch_filter_gate ARGS --n=abc
            LABELS "gate;chain" TIMEOUT 60)
+# Condense canonique du catalogue (auditeur C, 23 septembre 2026) : fixture
+# gravee de coquilles etendues (arites 2, 3 et 4), recalcul local, egalite
+# moteur 1/4 fils, lots CPU et certificats S3 CPU, option coupee neutre pour
+# la tour, sensibilite a six alterations, et des boules redondantes de la zone
+# aveugle (q2 et q3) que le condense FULL ne voit pas (plancher par arite).
+# Deux mutants de la chaine recompilee (derniere boule omise ; coquille etendue
+# tronquee a l'arite) refuses.
+mhgp9_product_executable(mhgp9_catalogue_digest_gate tests/chain/catalogue_digest_gate.cpp)
+target_link_libraries(mhgp9_catalogue_digest_gate PRIVATE mhgp9_chain)
+target_include_directories(mhgp9_catalogue_digest_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+mhgp9_gate(mhgp9_catalogue_digest 0 mhgp9_catalogue_digest_gate ARGS --n=1500
+           EXPECT_PREFIX "catalogue_digest_gate n=1500" LABELS "gate;chain;oracle" TIMEOUT 900)
+mhgp9_gate(mhgp9_catalogue_digest_bad_argument 2 mhgp9_catalogue_digest_gate ARGS --n=abc
+           LABELS "gate;chain" TIMEOUT 60)
+foreach(mutant IN ITEMS SKIP_LAST SHELL_ARITY_ONLY)
+  string(TOLOWER ${mutant} lower)
+  mhgp9_product_executable(mhgp9_catalogue_digest_${lower}_mutant_gate tests/chain/catalogue_digest_gate.cpp
+                           src/chain/tower_chain.cpp)
+  target_include_directories(mhgp9_catalogue_digest_${lower}_mutant_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/gen"
+                             "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+  target_link_libraries(mhgp9_catalogue_digest_${lower}_mutant_gate PRIVATE mhgp9_gen mhgp9_gpu)
+  target_compile_definitions(mhgp9_catalogue_digest_${lower}_mutant_gate PRIVATE MHGP9_CATALOGUE_DIGEST_MUTANT_${mutant}=1)
+  mhgp9_gate(mhgp9_catalogue_digest_mutant_${lower} 1 mhgp9_catalogue_digest_${lower}_mutant_gate ARGS --n=1500
+             EXPECT_LINE "cause=catalogue_digest.recompute cospheric K5" LABELS "gate;chain;mutant" TIMEOUT 900)
+endforeach()
 mhgp9_product_executable(mhgp9_chain_batch_certificates_gate tests/chain/chain_batch_certificates_gate.cpp)
 target_link_libraries(mhgp9_chain_batch_certificates_gate PRIVATE mhgp9_chain)
 target_include_directories(mhgp9_chain_batch_certificates_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")

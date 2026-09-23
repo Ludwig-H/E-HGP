@@ -507,6 +507,9 @@ std::uint64_t catalogue_digest(const std::vector<tower::BallData>& balls) {
   std::uint64_t h = 14695981039346656037ull;
   fnv(h, balls.size());
   std::vector<std::int32_t> ids;
+#if defined(MHGP9_CATALOGUE_DIGEST_MUTANT_SKIP_LAST)
+  if (!order.empty()) order.pop_back();  // mutant : derniere boule omise (la porte doit le voir)
+#endif
   for (const auto i : order) {
     const auto& b = balls[i];
     for (const tower::i128 v : {b.key.a, b.key.b[0], b.key.b[1], b.key.b[2], b.key.c}) {
@@ -517,6 +520,10 @@ std::uint64_t catalogue_digest(const std::vector<tower::BallData>& balls) {
     fnv(h, b.arity);
     for (const auto part : {b.interior(), b.shell()}) {
       ids.assign(part.begin(), part.end());
+#if defined(MHGP9_CATALOGUE_DIGEST_MUTANT_SHELL_ARITY_ONLY)
+      // Mutant : coquille etendue hachee sur ses seuls `arite` premiers sites (la porte doit le voir).
+      if (part.data() == b.shell().data() && ids.size() > b.arity) ids.resize(b.arity);
+#endif
       std::sort(ids.begin(), ids.end());
       fnv(h, ids.size());
       for (const auto id : ids) fnv(h, static_cast<std::uint64_t>(static_cast<std::uint32_t>(id)));

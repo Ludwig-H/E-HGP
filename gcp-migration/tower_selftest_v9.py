@@ -39,6 +39,7 @@ import unittest
 from unittest.mock import patch
 import tower_session_v9 as session
 import tower_worker_v9 as worker
+PINNED_REAL = dict(worker.PINNED_DIGESTS)  # the real pins, before any test patches them away
 import tower_snapshot_v9 as snapshot
 
 HERE = Path(__file__).resolve().parent
@@ -589,6 +590,27 @@ def expect_certified_stop(receipt, fake):
 
 
 class Protocol(unittest.TestCase):
+    def setUp(self):
+        # The fake probe's digests are not the pinned LiDAR values: the pins
+        # are judged apart (test_pinned_digests).
+        self.enterContext(patch.object(worker, 'PINNED_DIGESTS', {}))
+
+    def test_pinned_digests(self):
+        data = worker.INPUTS['00']
+        gpu_case = snapshot.default_plan()['cases'][0]
+        value = probe_value(data['n'], data['fnv'], 5, 8, 48, 48)
+        pin = (value['tower_digest'], value['catalogue_digest'])
+        with patch.object(worker, 'PINNED_DIGESTS', {('00', 5, 8): pin}):
+            need(worker.validate_probe(worker.strict_json(json.dumps(value)), gpu_case, 0) == 'complete_relative',
+                 'pinned digests reproduced')
+            for field in ('tower_digest', 'catalogue_digest'):
+                bad = dict(value, **{field: '0' * 16})
+                need(refused(worker.validate_probe, bad, gpu_case, 0), 'pinned ' + field + ' differs')
+        need(worker.PINNED_DIGESTS == {} and len(PINNED_REAL) == 6 and
+             {(scene, k, 8) for scene in ('00', '01', '02') for k in (5, 10)} == set(PINNED_REAL) and
+             all(re.fullmatch('[0-9a-f]{16}', d) for pair in PINNED_REAL.values() for d in pair),
+             'six pinned LiDAR values')
+
     def test_pins_and_guard_arithmetic(self):
         for name, pin in session.GUARDS.items():
             need(worker.sha(HERE / name) == pin, 'guard pin ' + name)

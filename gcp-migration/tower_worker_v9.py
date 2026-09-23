@@ -131,6 +131,16 @@ OPTION_KEYS = frozenset({'K', 'K_effective', 's', 'workers', 'tower_static_threa
 # en attente rejoue le preflight GPU avec une ardoise de 64 sites.
 DEFAULT_CERTIFICATE_CAPACITY = 1 << 16
 DEFERRAL_CAPACITY = 64
+# v18 (auditeur C, audits/c_catalogue_digest_20260923) : condenses FULL (egaux
+# a R12) et du catalogue des trois trames a s = 8, identiques sur le moteur,
+# le lot CPU et les certificats S3 CPU. Tout cas de ces (scene, K, s), GPU ou
+# non, doit les reproduire : une erreur commune aux deux jumeaux se voit.
+PINNED_DIGESTS = {('00', 5, 8): ('67450c64611075b1', '5ad1fe09354411ba'),
+                  ('00', 10, 8): ('ac108f7f71096c3f', 'a6e959d227f3dafa'),
+                  ('01', 5, 8): ('dbf799c8ed83f53f', 'a4a5149c15b4122e'),
+                  ('01', 10, 8): ('9ddbf7430c9086cc', 'c5cddc5b0baefcf1'),
+                  ('02', 5, 8): ('8240af3d4dce3d45', '143a367b4f27ef02'),
+                  ('02', 10, 8): ('ba973af0c8da95bd', '5c8cc01b1e45b461')}
 TIME_KEYS = frozenset({'read', 'prepare', 'gen_index', 'q2', 'q34', 'merge', 'tower_index', 'census', 'tower',
                        'chain_total', 'digest', 'catalogue_digest'})
 ORDER_KEYS = frozenset({'K', 'nodes', 'births', 'merges', 'parents', 'contributions'})
@@ -802,6 +812,9 @@ def validate_probe(value, case, exit_code, inputs=None, capacity=0, judge=False)
         need(exit_code == 0 and options['K_effective'] == effective and
              [order['K'] for order in orders] == list(range(1, effective + 1)), 'complete tower: code 0, orders 1..K')
         validate_ledger_identities(value, case['levers'])
+        pin = PINNED_DIGESTS.get((case['scene'], case['k'], case['s'])) if inputs is None else None
+        need(pin is None or (value['tower_digest'], value['catalogue_digest']) == pin,
+             'tower or catalogue digest differs from the pinned CPU value')
         return 'complete_relative'
     need(exit_code == 3 and options['K_effective'] in (0, effective), 'explicit refusal must exit with code 3')
     return 'explicit_refusal'

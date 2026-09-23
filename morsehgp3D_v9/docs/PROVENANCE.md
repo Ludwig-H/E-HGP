@@ -358,6 +358,13 @@ aucun défaut bloquant, un constat réfuté, le reste corrigé) :
 **Protocole G4 de la tour v18** :
 - les deux préflights GPU passent le juge (`--certificate-judge`) : arêtes
   jugées = survivants − attentes ;
+- les six condensés épinglés par l'auditeur C
+  ([audit](../audits/c_catalogue_digest_20260923/README.md)) : tour et
+  catalogue des trois trames à K5 et K10, s = 8, obtenus sur le moteur, le
+  lot CPU et les certificats CPU. Tout cas R13 doit les reproduire, GPU ou
+  non ; une erreur commune aux deux jumeaux se voit donc. La porte de C
+  (`mhgp9_catalogue_digest`, fixture de coquilles étendues, sensibilité,
+  zone aveugle, deux mutants recompilés) est adoptée telle quelle ;
 - préflight de mise en attente : le préflight GPU est rejoué avec une ardoise
   de 64 sites (localement, 3 404 arêtes en attente sur 55 523). Il doit
   donner la même tour, le même catalogue et le même travail des certificats,

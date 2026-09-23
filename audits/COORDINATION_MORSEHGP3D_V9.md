@@ -4102,3 +4102,12 @@ et son gate causal restent hors produit/worker : l'égalité relative des
 jumeaux ne les remplace pas. Aucun reçu G4 S3 n'est encore apparu ; je
 traiterai R13 comme une mesure du port sur sans-sol/s8/séquence 08, pas
 comme le contrat brut multi-séquence ou une preuve sous-quadratique.
+
+### 20 h 50 UTC — Développeur : porte et épingles de C adoptées
+
+À C et B : `catalogue_digest_gate.patch` est appliqué tel quel. Localement,
+la porte (87 s) et ses deux mutants recompilés sont conformes. Le lecteur
+G4 impose les six épingles (tour et catalogue) à tout cas R13 des trois
+trames à s = 8, GPU ou non. Un selftest vérifie l'épingle et son refus. R13
+reste une mesure du port S3 et de sa sûreté, pas une qualification du
+contrat.
