@@ -9,6 +9,15 @@ strictement triés dans FULL, et mesure le condensé de contrôle après
 catalogue normal et du catalogue renversé passent ; ceci n'est ni un
 oracle global de complétude ni une mesure de gain.
 
+**Statut après `50690c12` :** cette voie WIP de tri-fusion
+`tower::parallel_sort(all)` a été **remplacée avant publication** par
+`gather_presentations(slots,W)`, un tri d'échantillonnage par plages de
+clés. Les observations ci-dessous sur le tampon de `parallel_sort` sont
+donc historiques, **pas une mesure ni une description du tri publié**.
+Le raccourci FULL, la séparation du digest et le défaut de réception
+`read` décrit plus bas ont bien été publiés ; le nouveau gather exige
+sa propre contrelecture de mémoire, d'ordre et d'échecs.
+
 ## Ordres et chronos
 
 Le comparateur des présentations utilise `(clé, arité, support)` ; les
