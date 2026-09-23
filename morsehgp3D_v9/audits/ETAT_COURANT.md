@@ -273,13 +273,19 @@ FNV-64 du catalogue et une
 « clé par clé GPU/moteur » dans la passation et « même travail de la
 couverture » dans la provenance sont plus fortes que cette comparaison
 de session. Le gate C++ local compare davantage de champs ; le patch
-C de coquilles étendues et ses six valeurs épinglées restent à porter
-dans la réception R13. Un plan personnalisé S3 GPU seul, sans survivant,
+C de coquilles étendues et ses six valeurs épinglées sont ensuite portés
+par **`18d7c69c7`** (quatre tests ciblés locaux, aucun CUDA ni reçu
+R13). Un plan personnalisé S3 GPU seul, sans survivant,
 peut encore étiqueter `GPU_executed` à partir du levier sans kernel S3 ;
 le plan R13 par défaut active aussi le filtre S2 GPU et n'est pas touché
 par ce contre-exemple. Recommander des libellés « même condensé
 canonique et mêmes compteurs publiés » et compter les décisions GPU
 réelles dans chaque cas.
+L'[addendum de flux S2/S3](PROPOSITION_B_GPU_STREAMING_S2_20260923.md)
+épingle les six populations R/P/S de R12 et les plafonds `2^31−1` du
+port à appel entier. Sans tuilage exact, cette représentation n'a pas
+de voie vers plusieurs dizaines de millions de sites, indépendamment
+de la question mathématique de croissance globale.
 La [preuve B de redondance d'une seule cellule de
 centres](CERTIFICAT_B_REDONDANCE_CELLULE_UNIQUE_20260923.md) affine la
 piste de rejet **avant** le cœur : si la cellule couvre le disque

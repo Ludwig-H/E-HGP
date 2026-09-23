@@ -263,3 +263,18 @@ restés sur CPU ; la ventilation en ticks TSC 35 %/28 % n'en est pas une
 borne de vitesse.
 Le statut reste **S3 source corrigée, exactitude CUDA et temps G4 non
 qualifiés**.
+
+## Adoption de la porte C publiée ensuite (`18d7c69c7`)
+
+Le développeur a depuis porté **exactement** le patch de C dans le produit
+et branché les six couples de condensés CPU absolus au lecteur G4 R13,
+pour chaque scène/K à s8. Le port a été contrelu par application inverse
+du patch ; les quatre tests ciblés locaux passent (porte normale, argument
+invalide, deux mutants recompilés), les mutants tombant sur leur ligne
+causale attendue. Cela ferme le manque d'épingles signalé ci-dessus
+pour le **protocole à venir**. Ces quatre tests ne sont pas une nouvelle
+suite complète, et aucun reçu S3/G4 n'existe encore à cette réception.
+Le condensé FNV64 reste un témoin canonique à collision près, non une
+comparaison littérale indépendante ni une preuve de complétude commune
+aux deux bras. Les gardes CUDA et le classement `GPU_executed` gardent
+les réserves distinctes décrites plus haut.

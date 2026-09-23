@@ -92,6 +92,58 @@ certificats, paires arrivant au cœur, covers, formes, sorties FULL,
 octets H2D/D2H, queue maximale, RSS/HBM, CPU·s et mur bout-en-bout.
 Le premier passage froid et les passages chauds sont distincts.
 
+## Addendum après S2/S3 : plafond mesuré de la représentation actuelle
+
+Le [reçu G4 R12](../receipts/g4_tower_r12_20260923/README.md) mesure
+maintenant S2 sur trois trames sans sol de la seule séquence 08, s8,
+grille 1 mm. `R` compte les rectangles émis, `P` les paires **après**
+rejet des rectangles mais avant le filtre de paire, `S` les survivants
+envoyés au cœur. Le reçu contient les six sorties de sonde ; la
+répétition 08/000000/K5 n'est montrée qu'une fois ici.
+
+| Trame | n | K | R | P | S |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 08/000000 | 39 885 | 5 | 3 133 819 | 23 686 751 | 2 043 612 |
+| 08/000000 | 39 885 | 10 | 4 782 714 | 30 777 213 | 4 507 278 |
+| 08/000100 | 35 551 | 5 | 2 348 056 | 11 960 420 | 1 732 176 |
+| 08/000100 | 35 551 | 10 | 3 549 478 | 17 488 839 | 3 673 260 |
+| 08/000200 | 45 845 | 5 | 2 964 033 | 22 722 345 | 2 237 912 |
+| 08/000200 | 45 845 | 10 | 4 695 935 | 32 789 701 | 4 927 304 |
+
+Le port S2 actuel matérialise tous les rectangles, puis environ
+`26R + 9P + 9S` octets de tableaux GPU simultanés, hors index et
+scratch ; les tableaux hôtes de rectangles/survivants s'y ajoutent.
+Ses scans actuels convertissent R et P en `int` et refusent chacun
+au-delà de `2^31−1`. C'est une **limite de cette implémentation**, pas
+une limite fondamentale de CUB ni de l'algorithme exact. À **P/n
+simplement constant** avec chacune de ces six lignes, le plafond P
+surviendrait déjà vers 2,8–6,4 millions de sites : une projection
+conditionnelle, non une courbe mesurée ni une preuve de croissance.
+À 50 millions de sites, `2^31−1` représente seulement 42,95 éléments
+par site ; les six lignes finies ont déjà R/n = 66–120, P/n = 336–772
+et S/n = 49–113. Ces rapports peuvent changer fortement avec la scène
+et l'échelle ; ils justifient le chantier de flux, pas une prédiction
+chiffrée à 50 millions.
+S3 ajoute un plafond `2^31−1` sur ses arêtes et alloue au défaut
+`52 × 65 536 = 3,25 Mio` par warp, avec transfert de toutes les arêtes.
+
+S2 et S3 revalident séparément les boîtes de l'index par
+`3Σ_v |range(v)|` contrôles de coordonnées, puis allouent et transfèrent
+chacun leurs propres nœuds et coordonnées ; S3 ajoute les liens escape.
+Cette validation `O(n·profondeur)` et ces copies restent exactes mais
+sont des frais répétés lourds au régime massif. Priorité architecturale :
+un index immuable **certifié une fois** (avec garde bottom-up des boîtes),
+résident sur GPU entre S2 et S3 ; des tuiles de rectangles/paires bornées
+avec ordinals globaux conservés ; et une consommation des survivants
+en flux borné vers S3 ou l'aval CPU, sans perdre les reports exacts.
+Le tuilage ôte plafond `int` et résidence `O(P)` ; **il ne prouve pas**
+à lui seul que le travail total P, les formes du cœur ou FULL deviennent
+sous-quadratiques. Mesurer ensemble P, S, formes, HBM/RSS et mur. Le
+[panel brut 08/000000/K10](lidar_raw_k10_density_20260923/README.md)
+à 123 389 sites publie déjà 37,9 M paires et 1,239 milliard de formes
+chargées au cœur ; c'est un ancrage fini,
+pas une extrapolation fiable à 50 M.
+
 Pré-déclarer un **arrêt de la piste coûteuse**, jamais de l'algorithme :
 si, sur plusieurs scènes d'intérêt, deux doublements 8k→16k→32k
 donnent chacun un ratio proche de 4 (par exemple `≥3,8`) pour la masse

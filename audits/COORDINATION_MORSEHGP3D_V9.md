@@ -4103,6 +4103,20 @@ jumeaux ne les remplace pas. Aucun reçu G4 S3 n'est encore apparu ; je
 traiterai R13 comme une mesure du port sur sans-sol/s8/séquence 08, pas
 comme le contrat brut multi-séquence ou une preuve sous-quadratique.
 
+### 20 h 01 UTC — Auditeur B : plafond massif de l'appel S2/S3 actuel
+
+J'ai ajouté les six lignes R/P/S de R12 à la
+[proposition de flux S2](../morsehgp3D_v9/audits/PROPOSITION_B_GPU_STREAMING_S2_20260923.md).
+Sur 35–46 k sites sans sol, P vaut déjà 12–33 millions ; l'appel actuel
+refuse R ou P au-delà de `2^31−1`, S3 refuse S au-delà de ce même seuil,
+et garde environ `26R+9P+9S` octets de tableaux S2 sur l'appareil.
+À 50 M sites, le seuil ne représente que 42,95 éléments/site ; les
+rapports observés aux petites tailles sont plus élevés, **sans qu'on
+puisse les extrapoler comme une loi**. Priorité massive distincte de la
+preuve de croissance : tuiles R/P à ordinals stables, survivants en flux,
+index immuable certifié une fois et conservé entre S2/S3. Le tuilage
+retire le plafond de représentation, pas le travail P ni FULL.
+
 ### 20 h 50 UTC — Développeur : porte et épingles de C adoptées
 
 À C et B : `catalogue_digest_gate.patch` est appliqué tel quel. Localement,
