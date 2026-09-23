@@ -1933,7 +1933,10 @@ reste ; l'ordonnancement seul ne donne pas 1 s. Ni GPU, ni trames brutes,
 ni s10/s12, ni complétude absolue acquis.
 Question au développeur : peux-tu figer le dossier R9 sur `main` avec
 les empreintes annoncées (ou signaler toute correction du reçu), puis
-garder ses cas ON comme base CPU de comparaison du futur GPU ?
+garder ses cas ON comme base CPU de comparaison du futur GPU ? Les
+sorties et masses structurelles ON/OFF coïncident, mais quelques
+compteurs du cache privé changent légèrement avec la répartition :
+ne pas demander l'égalité de ces seuls comptes dans l'ablation GPU.
 
 ## 23 septembre 2026, 10 h 45 UTC — Ordonnancement q34 mesuré sur G4 (R9), v15 (développeur)
 

@@ -6,14 +6,14 @@ versionné par `76436d44`. Les SHA-256 de `SUMMARY.json` et
 « non suivi par Git » décrit le moment de la contrelecture, plus son
 statut actuel. Aucun nouveau calcul G4 n'est déduit de ce port.
 
-23 septembre 2026. Lecture **provisoire** du dossier
+23 septembre 2026. Lecture du dossier
 [`g4_tower_r9_20260923`](../receipts/g4_tower_r9_20260923/README.md)
-dans le worktree du développeur : au moment de cette contrelecture, ce
-dossier est encore **non suivi par Git**. Repères de ce snapshot :
+dans le worktree du développeur. Au premier passage il était non suivi ;
+il est désormais **publié sur `main` par `76436d44`**, avec les mêmes
+empreintes relues :
 `SUMMARY.json` SHA-256 `29fbfac0e3ab1bcfef338478b9691169e1f4e117809331f287da24c38f329867`,
 `SHA256SUMS` SHA-256 `9270c097115cc9275722be654e4930541dd37018a878c901f1e2c43a40eca36a`.
-Ne pas promouvoir la ligne en preuve publiée avant de figer le dossier
-et de relire ces empreintes. Aucun GCP lancé par B.
+Aucun GCP lancé par B.
 
 ## Ce qui a été relu
 
@@ -48,8 +48,16 @@ l'exécution est attestée par les reçus hôte/VM, pas par ce champ.
 
 L'attente des workers q3/q4 passe de **35–49 % à 0,4–0,9 %** à K5.
 Le plus long job du front passe de **2,5–3,7 s à 0,23–0,31 s**.
-Ce gain de calendrier est crédible car, à travail et objet égaux,
-les deux répétitions le reproduisent. La partie `job_sum_s` ne couvre
+Ce gain de calendrier est crédible car les deux répétitions le
+reproduisent avec les **mêmes sorties et les mêmes masses structurelles**.
+Dans les douze paires ON/OFF, la comparaison triée des objets
+`ledger/generator/catalogue/orders/tower_work/digest` ne montre que
+cinq champs de travail de cache différents ; toutes les autres valeurs
+de ces objets coïncident. Le travail de cache n'est donc **pas identique** : par exemple,
+sur 000000/K5/r0, `witness_cache_node_tests` vaut 61 547 355 ON
+contre 61 561 444 OFF, et `witness_pair_node_visits` 436 106 295
+contre 436 096 758. Changer l'ordonnancement redistribue les caches
+privés et leurs petits comptes. La partie `job_sum_s` ne couvre
 cependant que les jobs du front, pas chaque plage publiée ; elle ne
 permet pas seule une attribution détaillée de la queue des plages.
 
@@ -81,4 +89,5 @@ atteignaient réellement le cœur ; ne pas compter seulement des rejets
 déjà obtenus par les voies mortes ou le cache. Garder en parallèle le
 premier port FULL exact, limité et apparié, ainsi que les coûts q2,
 catalogue et sortie. Les chronos ON de R9 sont maintenant la base CPU
-appropriée pour un futur port GPU à ledger identique.
+appropriée pour un futur port GPU avec **même objet et ledger structurel** ;
+publier séparément les compteurs dépendants de l'ordonnancement des caches.

@@ -63,3 +63,17 @@ OFF/ON, sur plateau, coquille étendue, pannes phase 0/A/C et LiDAR 8k ;
 comparaison exhaustive des actions, parents, images, populations et
 digest ; horloge commune et TSan activé sur cette voie. L'ablation G4
 n'a de sens qu'après fermeture de ces points locaux.
+
+### Suite après publication de la source v15
+
+`76436d44` publie cette source et ajoute des injections de panne
+phase 0/lots sur les deux modes, avec priorité « phase 0 avant lots »
+documentée ; le constat « porte de panne croisée absente » du snapshot
+ci-dessus est **clos** sur ces cas. Un digest ON identique est indiqué
+sur 16k/K10 local, pas une comparaison exhaustive de tout le payload
+ON/OFF. Les deux défauts de porte de durée restent ouverts : le faux
+refus décrit ici et le [faux accord par
+ordre](CONTRELEC_V15_CHRONO_ORDRE_20260923.md) démontré séparément.
+Le compteur `overlapped_orders` conserve le sens « mode admis », non
+chevauchement chronométré. Aucun reçu G4 v15 ni gate TSan dédiée à ce
+nouveau chemin n'est encore joint à cette publication.
