@@ -219,6 +219,10 @@ mhgp9_product_executable(mhgp9_gpu_filter_probe bench/gpu_filter_probe.cpp)
 target_link_libraries(mhgp9_gpu_filter_probe PRIVATE mhgp9_gen mhgp9_gpu)
 mhgp9_gate(mhgp9_gpu_filter_probe_bad_argument 2 mhgp9_gpu_filter_probe ARGS missing.u32le 5 1
            LABELS "gate;gpu" TIMEOUT 60)
+# Empty cloud: a documented input refusal (code 2), never an abort.
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/gpu_probe_empty.u32le "")
+mhgp9_gate(mhgp9_gpu_filter_probe_empty_input 2 mhgp9_gpu_filter_probe
+           ARGS ${CMAKE_CURRENT_BINARY_DIR}/gpu_probe_empty.u32le 5 1 --cpu-only LABELS "gate;gpu" TIMEOUT 60)
 mhgp9_product_executable(mhgp9_chain_static_paths_gate tests/chain/chain_static_paths_gate.cpp)
 target_link_libraries(mhgp9_chain_static_paths_gate PRIVATE mhgp9_chain)
 mhgp9_gate(mhgp9_chain_static_paths 0 mhgp9_chain_static_paths_gate

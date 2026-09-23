@@ -214,6 +214,15 @@ débit bornée : le filtre témoin exact q3/q4.
   ensuite le passage sur GPU et exige des masques et des totaux de visites
   égaux. Sur 08/000100/K5 en local (W8) : 2,35 M rectangles, 12,0 M paires ;
   filtre CPU 2,4 s (rectangles) plus 2,8 s (paires avec cache).
+- **Sonde v2, après la revue multi-agents et les notes de B** :
+  - clé `options.inject` ; mutant causal `--inject=pair_mask`, qui inverse le
+    masque GPU d'une paire et doit être détecté exactement une fois ;
+  - une violation de pile sur le GPU est un désaccord (code 1), car le CPU a
+    passé les mêmes requêtes ;
+  - code 3 réservé au GPU absent ou à une erreur CUDA ou hôte ;
+  - nuage vide ou sites dupliqués : refus d'entrée en code 2, avec une porte
+    `gpu_filter_probe_empty_input` ;
+  - toute exception de la sonde donne le code 3, jamais un abandon.
 
 ## Chaîne : `src/chain/` (espace `mhgp9`, code neuf)
 

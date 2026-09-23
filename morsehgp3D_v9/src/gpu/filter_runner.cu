@@ -266,6 +266,8 @@ FilterOutput run_filters(const FilterInput& input) {
     for (auto& event : e) cudaEventDestroy(event);
   } catch (const CudaFailure& failure) {
     out.error = failure.what;
+  } catch (const std::exception& failure) {  // host side of the pass (e.g. bad_alloc of the mask copies)
+    out.error = std::string("host: ") + failure.what();
   }
   return out;
 }
