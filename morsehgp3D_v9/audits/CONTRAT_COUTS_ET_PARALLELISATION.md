@@ -51,13 +51,15 @@ Pour la répétition au total minimal de chaque scène, le résidu
 | 000000 | 1,038 | 3,387 | 2,02 |
 | 000200 | 1,098 | 3,435 | 2,06 |
 
-Le résidu comprend préparation et index, résumé des ordres, digest et
-destructions des temporaires ; la lecture du fichier et l'impression JSON
-sont hors `chain_total`. Ainsi, **dans cette architecture séquentielle**,
+Le résidu comprend préparation et index, résumé des ordres et digest ;
+la lecture du fichier, l'impression JSON et les destructeurs des gros
+locaux après l'affectation de `chain_total` sont hors de cette mesure.
+Ainsi, **dans cette architecture séquentielle**,
 rendre q3/q4 et la tour instantanés ne suffit pas pour K10 <1 s ; même
 les trois seules phases nommées de la dernière colonne dépassent 1 s.
 Ventiler le temps non attribué (environ 1,0–1,35 s à K10) entre résumé,
-digest et libérations avant de décider de la frontière du contrat, puis
+digest et autres postes réellement compris avant de décider de la
+frontière du contrat, puis
 réduire aussi q2, fusion et recensus sur l'appel complet.
 
 La fusion trie en série **4,38–5,51 millions** de présentations à K10
