@@ -256,6 +256,26 @@ son centre est `(5,11/12,11/12)`, ses barycentriques sont
 `−25`, donc la profondeur vaut encore **1** ; quatre retours fusionnés
 en `z` ne valent pas les `K−2=3` témoins requis à K5. Cette vérification
 doit utiliser les IDs canoniques du nuage préparé, pas les IDs de retours.
+Choisir seulement les `2K` plus proches de `a` peut néanmoins manquer tous
+les témoins utiles. À K10, prendre `a=(100,100,100)`, la boîte de huit
+sites `b_j=(200+j,100,100)`, vingt leurres `(100−i,100,100)` pour
+`1≤i≤20`, et neuf sites `(130+i,100,100)` pour `0≤i≤8`.
+Les vingt leurres sont les plus proches de `a`, mais ont `H<0` pour
+toute la boîte B ; les neuf sites plus loin ont `H>0`, `Xi=0` et
+certifient tous la ligne aux seuils q3/q4. Les supports
+`x=(150,160,100)` et `y=(150,100,160)` donnent aussi des boules
+positives q3/q4 à arête propriétaire `ab`, donc l'exemple n'est pas
+seulement collinéaire. Comparer une palette proche **et** une palette
+directionnelle par cônes/octants vers B ; cette sélection reste
+heuristique, son coût et sa mémoire doivent être mesurés, et seul le
+prédicat exact accorde un crédit.
+En effet, `H=(z−a)·(b−a)−|z−a|²` et `αH²>Xi` imposent, comme condition
+nécessaire, un angle entre `z−a` et `b−a` strictement inférieur à
+`60°` en q3, `arctan(√2)≈54,74°` en q4. Ce n'est **pas** un certificat
+de rejet par secteur : il sert seulement à proposer de meilleurs IDs.
+Préconstruire `O(nombre_de_secteurs·K·n)` sites en mémoire serait
+prohibitif aux dizaines de millions de points ; une sélection paresseuse
+réutilisable et son coût total sont à tester.
 
 Le coût de préparation visé est `O(nK)` pour cette **palette
 heuristique**, puis `O(K·Σ_lignes 1)` prédicats de boîte, au lieu d'un
