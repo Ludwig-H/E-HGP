@@ -139,7 +139,89 @@ def cases():
         yield f"aleatoire_{case}", raw, random.randrange(0, 3)
 
 
+def check_cell_owner_after_snap():
+    # A q_min=4 sphere on a dyadic corner. Filtering epsilon vertices by
+    # the owning cell before snapping them loses its genuine q4 centre.
+    points = ((0, 6, 3), (16, 6, 3), (2, 0, 7), (7, 12, 12), (2, 5, 0))
+    a, b, x, y, z = points
+    center = (8, 6, 6)
+
+    def subtract(left, right):
+        return tuple(p - q for p, q in zip(left, right))
+
+    def dot(left, right):
+        return sum(p * q for p, q in zip(left, right))
+
+    def distance_squared(left, right):
+        delta = subtract(left, right)
+        return dot(delta, delta)
+
+    def determinant(left, middle, right):
+        cross = (middle[1] * right[2] - middle[2] * right[1],
+                 middle[2] * right[0] - middle[0] * right[2],
+                 middle[0] * right[1] - middle[1] * right[0])
+        return dot(left, cross)
+
+    require(all(distance_squared(site, center) == 73 for site in points),
+            "cell_owner: all five sites must contact the sphere")
+    weights = (Fraction(35, 208), Fraction(77, 208),
+               Fraction(3, 13), Fraction(3, 13))
+    require(all(weight > 0 for weight in weights) and sum(weights) == 1 and
+            all(sum(weights[j] * points[j][i] for j in range(4)) == center[i]
+                for i in range(3)), "cell_owner: positive q4 support")
+    require(all(distance_squared(left, right) < 256
+                for left, right in combinations((a, b, x, y), 2)
+                if (left, right) != (a, b)), "cell_owner: ab is longest")
+    vectors = [subtract(site, center) for site in points]
+    require(all(determinant(vectors[i], vectors[j], vectors[k]) != 0
+                for i, j, k in combinations(range(5), 3)),
+            "cell_owner: no support of arity at most three")
+
+    midpoint_twice = tuple(a[i] + b[i] for i in range(3))
+    basis_a, basis_b = (0, 16, 0), (0, 0, 16)
+
+    def site_form(site):
+        w = tuple(2 * site[i] - midpoint_twice[i] for i in range(3))
+        raw = (dot(w, w) - 256, -2 * dot(w, basis_a),
+               -2 * dot(w, basis_b))
+        divisor = gcd(*raw)
+        return tuple(coefficient // divisor for coefficient in raw)
+
+    forms = tuple(site_form(site) for site in (x, y, z))
+    require(forms == ((3, 12, -8), (9, -16, -24), (-9, 8, 24)),
+            "cell_owner: primitive oriented forms")
+    original = (Fraction(0), Fraction(3, 8))
+    require(all(constant + slope_u * original[0] + slope_v * original[1] == 0
+                for constant, slope_u, slope_v in forms),
+            "cell_owner: original intersections coincide")
+
+    normals = [form[1:] for form in forms]
+    drifts = []
+    for first, second in combinations(range(3), 2):
+        slope_u, slope_v = normals[first]
+        other_u, other_v = normals[second]
+        determinant2 = slope_u * other_v - slope_v * other_u
+        require(determinant2 != 0, "cell_owner: independent lines")
+        drift = (Fraction(slope_v - other_v, determinant2),
+                 Fraction(other_u - slope_u, determinant2))
+        drifts.append(drift)
+        require(all(1 + u * drift[0] + v * drift[1] > 0
+                    for index, (u, v) in enumerate(normals)
+                    if index not in (first, second)),
+                "cell_owner: outward vertex must be shallow")
+    require(drifts == [(Fraction(-1, 26), Fraction(7, 104)),
+                       (Fraction(-1, 11), Fraction(-1, 88)),
+                       (Fraction(1, 4), Fraction(-1, 8))],
+            "cell_owner: first-order symbolic drifts")
+    require(all(u < 0 or v < 0 for u, v in drifts),
+            "cell_owner: pre-snap clipping must lose all three vertices")
+    require(Fraction(0) <= original[0] <= Fraction(1, 32) and
+            Fraction(3, 8) <= original[1] <= Fraction(13, 32),
+            "cell_owner: snapped centre belongs to right/up dyadic cell")
+
+
 def main():
+    check_cell_owner_after_snap()
     total_centers = total_perturbed = max_groups = 0
     count = 0
     for label, raw, limit in cases():
@@ -151,7 +233,7 @@ def main():
         total_perturbed += perturbed
         max_groups = max(max_groups, groups)
         count += 1
-    print(dumps({"status": "PASS", "cases": count,
+    print(dumps({"status": "PASS", "cases": count, "cell_owner_fixture": 1,
                  "exact_shallow_centers": total_centers,
                  "perturbed_shallow_vertices": total_perturbed,
                  "max_oriented_groups": max_groups}, sort_keys=True))

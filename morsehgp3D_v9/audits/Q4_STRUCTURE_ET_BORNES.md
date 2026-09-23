@@ -352,6 +352,25 @@ parallèles, concurrences, orientations opposées et multiplicités. Les
 exécutions normales et `-O` donnent le même PASS. Cela contrôle le lemme
 local, sans tester le constructeur de niveaux ni le moteur v9.
 
+**Ordre de possession des cellules.** La fixture u18 ajoutée à cet
+[oracle](check_q4_outward_levels_20260922.py) donne cinq contacts
+`a=(0,6,3)`, `b=(16,6,3)`, `x=(2,0,7)`, `y=(7,12,12)`, `z=(2,5,0)`
+sur la sphère de centre `(8,6,6)`, de rayon carré 73. `ab` est strictement
+maximale dans le tétraèdre positif `abxy` ; la coquille a cinq sites et
+`q_min=4`. Dans le plan local de `ab`, le centre original est
+`(α,β)=(0,3/8)`, coin de la cellule dyadique droite/haute
+`[0,1/32]×[3/8,13/32]`. Les trois formes primitives des autres contacts
+sont `(3,12,−8)`, `(9,−16,−24)`, `(−9,8,24)`. Sous la perturbation
+sortante, les trois sommets ont pour dérives de premier ordre
+`(−1/26,7/104)`, `(−1/11,−1/88)`, `(1/4,−1/8)` fois `ε` : chacun
+sort de la cellule propriétaire, bien que les trois soient de profondeur
+zéro et se rabattent sur son coin. Un port qui filtre les **sommets
+perturbés** par la cellule avant de calculer l'intersection originale
+perd cette vraie clé q4. Calculer d'abord le centre rationnel original,
+dédoublonner, puis appliquer la possession de cellule et les tests exacts.
+L'oracle normal et `-O` passe 2 004 cas plus cette fixture ; il ne qualifie
+pas encore un constructeur de niveaux.
+
 Le dédoublonnage **précède** les tests coûteux : chaque sommet perturbé
 donne une paire de droites originales indépendantes. On normalise
 exactement leur intersection
