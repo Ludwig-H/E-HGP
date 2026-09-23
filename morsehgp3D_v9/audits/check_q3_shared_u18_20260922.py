@@ -107,6 +107,42 @@ def power_box_bounds(a: Point, cbox, zs: list[Point]):
     return Fraction(lower, den), Fraction(upper, den)
 
 
+def check_eof_contact_fixture() -> None:
+    # A packet can finish the shared count at EOF if nonnegative power, rather
+    # than strictly positive power, skips contact leaves. The fixed endpoints
+    # are structural contacts and must be skipped separately, as in the v8
+    # SharedPrefix engine; its strict Outside rule does not exercise this case.
+    # Four owned seeds keep the shared packet larger than relay_sites=2.
+    a, b = (2, 2, 2), (4, 4, 2)
+    xs = [(4, 2, 4), (2, 4, 0), (2, 4, 4), (4, 2, 0)]
+    sites = [a, b, *xs]
+    require(len(xs) > 2, "EOF fixture must reach the shared stage")
+    xlow = tuple(min(p[i] for p in sites) for i in range(3))
+    xhigh = tuple(max(p[i] for p in sites) for i in range(3))
+    corners = itertools.product(*[(xlow[i], xhigh[i]) for i in range(3)])
+    cbox = center_box(a, b, [h_for_x(a, b, x) for x in corners])
+    den, low, high = cbox
+    require(tuple(Fraction(v, den) for v in low) ==
+            (Fraction(8, 3), Fraction(8, 3), Fraction(4, 3)) and
+            tuple(Fraction(v, den) for v in high) ==
+            (Fraction(10, 3), Fraction(10, 3), Fraction(8, 3)),
+            "EOF fixture center packet box")
+    centers = [seed(a, b, x) for x in xs]
+    require(all(result is not None for result in centers),
+            "EOF fixture owned acute seeds")
+    require(power_box_bounds(a, cbox, [b])[0] < 0,
+            "EOF fixture must skip fixed endpoint structurally")
+    for z in xs:
+        require(power_box_bounds(a, cbox, [z])[0] == 0,
+                "EOF fixture contact leaf not nonnegative")
+    for x, result in zip(xs, centers):
+        c = result[1]
+        require(all(power(a, z, c) >= 0 for z in sites),
+                "EOF fixture depth is not zero")
+        require({z for z in sites if power(a, z, c) == 0} == {a, b, x},
+                "EOF fixture global shell differs")
+
+
 def main() -> None:
     rng = random.Random(20260922)
     groups = seeds = checks = 0
@@ -171,11 +207,13 @@ def main() -> None:
     require(power(a, z, c1[1]) < 0 and power(a, z, c2[1]) < 0 and
             power(a, x1, c1[1]) == 0 and power(a, x1, c2[1]) < 0,
             "cursor fixture contact/interior mismatch")
+    check_eof_contact_fixture()
     require(groups > 100 and seeds > 500, "insufficient seed coverage")
     print(json.dumps({"status": "PASS", "index_box_groups": groups,
                       "groups": groups, "seeds": seeds,
                       "power_checks": checks, "contact_fixtures": 1,
-                      "overflow_fixtures": 1, "cursor_fixtures": 1},
+                      "overflow_fixtures": 1, "cursor_fixtures": 1,
+                      "eof_contact_fixtures": 1},
                      sort_keys=True))
 
 

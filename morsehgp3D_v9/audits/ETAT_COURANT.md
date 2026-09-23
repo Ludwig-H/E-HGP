@@ -1,7 +1,8 @@
 # État courant des audits v9
 
-23 septembre 2026. Code jugé : **`5ab4326c`** (session G4 sur le paquet
-`e28296bb`, noyau MEB à `ad2d0ebb`, sonde v2 à `5ab4326c`). Cadre :
+23 septembre 2026. Code jugé : **`0b29b6c3`** (session G4 sur le paquet
+`e28296bb`, noyau MEB à `ad2d0ebb`, sonde v3 et atlas saturant à
+`e6405952`, défaut FULL statique à `0b29b6c3`). Cadre :
 `exploration_v9_hors_registre`,
 `reference_cpu`, `quantized_u18_input_only`, `not_claimed`. Ce fichier est le
 verdict mutable du dossier ; les notes datées conservent les démonstrations et
@@ -18,6 +19,28 @@ indépendante de l'orientation du support. La contrelecture n'a pas trouvé de
 défaut concret sur ces chemins ; voir le [contre-audit A du
 moteur](CONTRE_AUDIT_A_MATH_MOTEUR_20260922.md) et la [lecture B de
 FULL](CONTRE_AUDIT_B_FULL_COUTS_ET_INTERFACES_20260922.md).
+
+`e6405952` active par défaut dans la chaîne le certificat terminal q4
+`inside≥K−1` et filtre le tri des niveaux FULL en arrondi au plus proche,
+avec repli exact pour les niveaux proches. La [contrelecture
+B](CONTRE_AUDIT_B_PORT_V3_SATURATION_TRI_20260923.md) ne trouve pas de
+défaut d'exactitude dans ces deux chemins ; le commentaire de
+`ChainOptions` qui dit encore « désactivée par défaut » est périmé.
+L'auteur annonce sur 08/000100 K5/W8 un temps q3/q4 97,7→72,1 s et
+des digests K5/K10 inchangés, sans reçu apparié versionné ni temps G4.
+Le ledger v9 contient le travail physique total de partition, préfixes
+saturés inclus **une fois**, mais n'exporte pas les compteurs spécifiques
+`certificates`, `certificates_with_unvisited_sites`,
+`unvisited_site_mass` et `discarded_frontier_ids` : publier ces nombres
+pour expliquer le gain, en gardant `saturation_work.prefixes` comme
+**sous-ensemble** de `work.partition`, jamais comme terme additionnel.
+`0b29b6c3` choisit par défaut le résolveur FULL statique avec W fils si
+W>1 ; le test de chaîne compare déjà les payloads exacts W1/W4 sur de
+petits nuages. La [contrelecture B](CONTRE_AUDIT_B_PORT_V3_SATURATION_TRI_20260923.md)
+montre que le plan G4 passe `--static` explicitement et ne mesure donc pas
+ce nouveau défaut. Vérifier en porte le nombre **effectif** publié, le
+défaut contre `--static=0`, et refuser toute valeur négative autre que
+la sentinelle `-1` ; aucun nouveau chrono G4 n'est acquis.
 
 Un rejeu indépendant local de `d2700314` passe **20/20 CTests** sans saut ;
 B retrouve ces 20 portes en Release et sous Clang ASan/UBSan. Le commit
@@ -103,15 +126,16 @@ appariée.
    FULL. Ne pas confondre les sommes de temps worker avec le temps mur.
    Le reçu G4 R1 satisfait cette porte pour son paquet **ancien**
    `e28296bb` : huit cas achevés, sources et entrées recoupées, arrêt ciblé
-   certifié. Il ne qualifie pas le nouveau noyau MEB. **Bloquant pour le
-   prochain G4** : à `5ab4326c`, le worker accepte `ledger` et l'étiquette
-   v2, mais exige encore des entiers pour toutes les valeurs de
-   `tower_work`. La vraie sonde v2 ajoute `meb_accounting` (chaîne) et
+   certifié. Il ne qualifie pas les nouveaux défauts. **Bloquant pour le
+   prochain G4** : à `0b29b6c3`, le worker accepte l'étiquette v3 et
+   l'option de saturation, mais exige encore des entiers pour toutes les
+   valeurs de `tower_work`. La vraie sonde ajoute `meb_accounting` (chaîne) et
    `meb_supports_by_size` (tableau) ; `validate_probe` refuse
-   `probe counters tower_work` après calcul. Les 17 selftests Python sont
-   verts car leur fausse sonde omet ces champs. Juger une **vraie petite
+   `probe counters tower_work` après calcul. Les faux producteurs des
+   selftests v2/v3 omettent ces champs. Juger une **vraie petite
    sortie** de la sonde, complète et refusée, avant une autre session
-   facturée. Le lecteur de reçu doit aussi refuser toute commande tuée
+   facturée. Le protocole v3 ne lie pas non plus la valeur du booléen
+   `atlas_saturate_deep` au plan. Le lecteur de reçu doit aussi refuser toute commande tuée
    dont le groupe de processus n'est pas fermé, même en campagne `partial`.
    Le [contre-test de provenance](CONTRE_AUDIT_B_G4_R1_ET_SCHEMA_V2_20260922.md)
    montre qu'un paquet muté peut annoncer un commit inexistant et être
@@ -172,9 +196,13 @@ appariée.
    q3 partagé](check_q3_shared_u18_20260922.py)
    vérifie la boîte rationnelle u18, un débordement i128 évité par
    annulation algébrique et une fixture où avancer le curseur Z à travers
-   une feuille ambiguë perd un intérieur. La [note q3](Q3_STRUCTURE_ET_BORNES.md)
-   décrit le ticket possédé `(X,compte,curseur Z)` : une réponse GPU hors
-   ordre ne valide pas un préfixe DFS continu. Le relais produit reste à
+   une feuille ambiguë perd un intérieur. La nouvelle fixture exacte à
+   quatre graines atteint réellement EOF avec `lower≥0`, quatre supports
+   valides et coquilles complètes après saut structurel des endpoints ;
+   le futur port u18 doit exercer ce relais avec `relay_sites=2`. La
+   [note q3](Q3_STRUCTURE_ET_BORNES.md) décrit le ticket possédé
+   `(X,compte,curseur Z)` : une réponse GPU hors ordre ne valide pas un
+   préfixe DFS continu. Le relais produit reste à
    qualifier. Le [contre-audit
    B](CONTRE_AUDIT_B_PREATLAS_ET_Q3_20260922.md) rappelle que la suppression
    d'une cellule q4 peut aussi enlever un certificat de rejet q3. Sa

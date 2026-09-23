@@ -94,10 +94,16 @@ consommation ambiguë de x₁ donne faussement profondeur 1 à x₂ au lieu
 de 2 et peut publier une q3 à rejeter. Même danger si des réponses GPU
 sur Z arrivent hors ordre : le `cursor` ne peut avancer qu'après un
 préfixe DFS **continu** validé, sinon il faut payer une forêt explicite
-des trous. Un `lower≥0` autorise désormais un EOF admis (trois seuls
-sites a,b,x avec contacts et zéro intérieur en donnent le cas simple) ;
-ne pas hériter de la preuve float32 d'EOF inaccessible avec l'ancien
-test `Outside>0`.
+des trous. `lower≥0` permet EOF, à la différence de `Outside>0` en float32.
+Prendre `a=(2,2,2)`, `b=(4,4,2)` et les quatre graines équilatérales
+propriétaires `(4,2,4),(2,4,0),(2,4,4),(4,2,0)` avec `relay_sites=2` :
+leur boîte de centres est `[8/3,10/3]²×[4/3,8/3]`, et chaque feuille a
+`lower=0`. Après saut structurel de `a,b`, le ticket atteint EOF avec
+quatre supports valides de profondeur zéro ; les coquilles restent globales.
+Sous l'enveloppe actuelle `ξ∈[0,1/3]`, `ξ<1/3` force plutôt `lower<0`
+sur sa propre feuille : avec `m=(a+b)/2` et `h=H/D`, on a
+`Δ(x;m+h/3)=−2(1/3−ξ)G/D`. Une boîte `ξ` plus
+serrée demande une preuve neuve.
 
 Plan CPU/GPU : distribuer d'abord les arêtes q3 seules, puis donner des
 enfants X d'une arête lourde avec contexte d'arête paresseux. Un batch
