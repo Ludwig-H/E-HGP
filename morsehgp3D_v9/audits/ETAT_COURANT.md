@@ -1,6 +1,6 @@
 # État courant des audits v9
 
-23 septembre 2026. Produit publié courant : **`78e94b04`**. Le
+23 septembre 2026. Produit publié courant : **`f55ea40c`**. Le
 [reçu G4 R6](../receipts/g4_tower_r6_20260923/README.md) exécute le
 snapshot **`78ce9fd4`** ; ses temps ne qualifient pas encore le
 sample-sort, le raccourci FULL ni la nouvelle frontière temporelle
@@ -18,15 +18,24 @@ arrêt 04 h 50 min 54 s UTC) et aucune des autres instances SPOT du projet
 n'est en cours ; **aucun stop supplémentaire n'a été lancé**. Le commit
 `458fb0ed` aligne les littéraux sonde/worker/selftest en v10 et MEB v3 ;
 `78e94b04` publie le levier ON/OFF et ses quatre compteurs dans le JSON
-jugé, sans reçu G4. Ce dernier commit garde pourtant les étiquettes
-`mhgp9_tower_probe_v10` et `mhgp9_tower_plan_v5` alors que les champs
-obligatoires et l'ensemble des leviers ont changé. La
-[rupture bidirectionnelle](PROTOCOLE_TOUR_V10_V5_RUPTURE_20260923.md)
-mérite des étiquettes v11/v6 et des mutations d'anciennes formes ; un
-nouveau plan épinglé reste nécessaire avant une campagne.
+jugé, sans mesure G4. Sa
+[rupture de schéma v10/v5](PROTOCOLE_TOUR_V10_V5_RUPTURE_20260923.md)
+est fermée au pin `f55ea40c` : sonde v11, plan v6 et mutations des
+anciens libellés dans le selftest. Sur ce pin stable, **21/21 selftests**
+passent en Python normal et sous `-O` en contrelecture locale. Un nouveau
+plan épinglé et ses portes restent nécessaires avant une campagne de calcul.
 Le WIP v6 C6/tri observé en parallèle
 est [contrelu séparément](CONTRE_AUDIT_B_WIP_V6_C6_TRI_20260923.md) :
 il n'est pas raccordé à v9 ni qualifié sur u18/G4.
+
+La [tentative G4 R7](../receipts/g4_tower_r7_stockout_20260923/README.md)
+du 23 septembre à 05 h 46 UTC, sur le pin `78e94b04`, a reçu un refus
+GCE `resource_availability/STOCKOUT` avant tout démarrage du worker.
+Le manifeste et ses douze sommes SHA sont cohérents ; la lecture seule
+retrouve la VM `TERMINATED` avec `lastStartTimestamp` inchangé depuis R6.
+Le paquet `PACKAGE.json` décrit la préparation (`GCP_used=false`), le
+reçu hôte la demande réellement envoyée ; **aucun chrono, aucune
+ablation MEB ni résultat FULL/GPU** ne vient de R7.
 
 ## Contrat et objet effectivement construit
 
@@ -336,7 +345,7 @@ flottante est vérifiée par les formes et puissances entières, puis le
 support de référence est repris sur le bord exact. Le gate différentiel
 juge **28 956 ensembles** et tue le mutant sans canonisation ; le port
 rapporte localement **154 → 70 Gcycles MEB** et **24,7 → 18,9 s** pour
-la tour 08/000000/K10/W8, sans reçu G4. Une
+la tour 08/000000/K10/W8, sans reçu de calcul G4. Une
 [contre-épreuve FENV](check_meb_proposed_fenv_20260923.cpp) indépendante,
 compilée `-O2 -frounding-math -fno-fast-math` contre le header publié
 (SHA-256 `de54655393b09182…`), compare encore **42 544** cas sous

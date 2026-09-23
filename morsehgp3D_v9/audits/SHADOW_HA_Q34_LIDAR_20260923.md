@@ -41,6 +41,18 @@ Deux observations K5/s8 antérieures, avec la même géométrie `H_a` mais une v
 
 La contre-fixture de B dans [la piste](PISTE_B_Q34_RECTANGLES_AVANT_EXPANSION_20260923.md) place les `2K` voisins les plus proches de `a` dans la mauvaise direction alors que des témoins plus loin ferment la ligne. Notre palette de rangs spatiaux a la même limite de sélection ; un échec n'est jamais une preuve de survie. Le gain local K10 est réel dans ce replay, mais faible à l'échelle de la chaîne et ne réduit aucun cover. Garder `H_a` en SHADOW. La prochaine porte utile est une ablation **chaîne ON/OFF** avec préparation incluse, caches laissés évoluer par worker, identités exactes des supports/coquilles/catalogue/FULL, compteurs de paire/cover/formes et RSS, sur K5/K10, s8/10/12 et plusieurs séquences. Ne pas annoncer de gain G4 ni activer le rejet par défaut sur cette seule sonde.
 
+Pour un futur noyau CPU/GPU fusionné, une identité entière évite aussi le
+produit vectoriel du prédicat **ponctuel**. Avec `u=z−a`, `w=b−z`,
+`H=u·w`, `U=|u|²`, `V=|w|²`, l'identité de Lagrange donne exactement
+`Xi=|u×w|²=UV−H²`. Après la garde indispensable `H>0`, la voie q3
+teste `4H²>UV` et q4 `3H²>UV`, **strictement** ; q4 implique q3.
+Sur l'entrée u18 `[0,M]³`, `M=262143`, `|H|,U,V≤3M²<2³⁸` et
+`4H²<2⁷⁸` : accumuler en 64 bits puis promouvoir **avant** les
+produits suffit en signé 128 bits. Les contacts (`=`) ne créditent rien.
+Cette réécriture ne change pas le certificat par huit coins, et le
+shadow fusionné ci-dessus n'est pas un benchmark de cette nouvelle
+forme ; mesurer son coût CPU et GPU exact avant port.
+
 ## Provenance hachée
 
 `sha256` : sidecar source archivé `f42d570bb31d95c2996b7fd958f1c32b62bfa50405438da0adbeb817e353b119` ; binaire local `/tmp/mhgp9_ha_shadow_20260923` `3759482d93f0a71ea1ac99dd55473e2d79545c2e6978fe895658d013b9da50b9` ; bibliothèque construite `/tmp/mhgp9-ha-build-20260923/libmhgp9_gen.a` `208aabb30a764bad25ab1c99d74885bd405e84a13dcb8375622d66aa6203f70a` ; entrée 08/000000 `0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf` ; [sortie K10](shadow_ha_scene00_k10_s8_replay_20260923.txt) `7e7945f44bb90dab34d9de9b0b1fcc47644ba1267df2a1fe00b7b0b14980a56e` ; [temps K10](shadow_ha_scene00_k10_s8_replay_20260923.time.txt) `0ca187a80084e09918cca6571031c26f76eb13c9e7fc38bc797ff81809a112e7`. Binaire/build et entrée v8 sont des dépendances locales LIVE, pas une archive autonome. Les deux sorties K5 ont pour hashes `82017bf31217353d7137274e2132abb5ed91697054bb44366e7ae9d3fa42f948` et `9640fd70750cd02f0564335b05329b7801b071eda4f4350dbd52fccd596e54ce` ; leur sidecar antérieur avait les hashes source/binaire `645556e7b4d23ac80f3f2ddcf51524b95bb245be82da78c6931fc5a2370ee468` / `ed0f7728ed355ad9b57e78678b1b4287053e83f8fbc06fbf917f51304b709023`. Entrée 08/000100 : `ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f`.

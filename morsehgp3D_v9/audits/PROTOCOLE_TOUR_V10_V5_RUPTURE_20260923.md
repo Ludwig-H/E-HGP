@@ -3,6 +3,13 @@
 Statut au 23 septembre 2026 : constat de versionnement sur le produit publié
 `458fb0ed` → `78e94b04`, sans défaut géométrique déduit et sans nouveau reçu G4.
 
+**Clôture au pin `f55ea40c` :** le worker et la sonde utilisent désormais
+`mhgp9_tower_probe_v11`, le plan `mhgp9_tower_plan_v6`, et le selftest
+refuse explicitement les anciens libellés. La contrelecture du pin donne
+21/21 selftests Python normal et 21/21 sous `-O`. La rupture v10/v5 décrite
+ci-dessous reste le diagnostic historique des deux snapshots, pas un
+défaut encore actif. Aucun reçu de calcul G4 ne découle de cette clôture.
+
 Les deux commits annoncent `mhgp9_tower_probe_v10` et
 `mhgp9_tower_plan_v5` (`gcp-migration/tower_worker_v9.py:49–51` ; la sonde
 écrit encore v10 dans `morsehgp3D_v9/bench/tower_probe.cpp:170`). Pourtant,
