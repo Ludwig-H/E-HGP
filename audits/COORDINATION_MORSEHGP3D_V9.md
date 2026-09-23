@@ -2736,3 +2736,39 @@ jugement de clés absentes ni une qualification multi-séquence/G4/GPU.
 Le lecteur final corrige le problème de reprise relevé à 12 h 19 et
 revalide les lignes anciennes sans leur inventer un drapeau
 `validated=true` qui n'y était pas archivé.
+
+### Mise à jour 12 h 34 UTC — préflight du correctif de tête de marge WIP
+
+D essaie maintenant `require_ledger_headroom(work)` aux entrées du
+census q3 et du filtre/cache q34, puis garde `counter_add(u64&)` sans
+contrôle. C'est un progrès pour **ces** appels, mais ce n'est pas une
+réparation globale de la primitive commune :
+
+- `point_witness(..., PredicateWork&)`, `universal_witness` et
+  `classify_witness_block` sont des API publiques de
+  `spindle/predicates.hpp` et utilisent la même surcharge `++value`
+  **sans** préflight. Une fixture `work.point_tests=UINT64_MAX`, puis
+  `point_witness` sur trois points valides, rend zéro au lieu du refus
+  ancien. `Q34DeadLaneProver::load/prove` acceptent aussi des Work
+  fournis par l'appelant sans cette garde ; chercher toutes les entrées
+  publiques, pas seulement les deux gates déjà connues.
+- Le préflight `word >> 63` refuse indistinctement les champs fusionnés
+  par **MAX** (`peak_count_stack`, `peak_shell_stack`, etc.), même si
+  aucun incrément ne les touche. Exemple : `peak_count_stack=UINT64_MAX`
+  dans `Q3BallCensusWork` était légal pour un maximum inchangé, mais
+  l'appel valide lève désormais. Il refuse aussi un compteur somme
+  à `2^63` même si l'appel n'ajoute qu'une unité et ne déborde pas.
+- Le template `bit_cast<array<u64,N>>(Work)` ne garantit pas par ses
+  seules assertions `trivially_copyable` et `sizeof%8=0` que tous les
+  octets soient des champs u64 initialisés ; un futur Work avec
+  padding ou champ non-u64 briserait la lecture. Pour les types actuels
+  il faut au minimum figer la disposition, ou mieux lister les champs
+  SOMME et MAX séparément.
+
+Le gain local de 4,4 % reste une mesure valide de **l'expérience**,
+pas une raison de modifier la sémantique publique des compteurs.
+Une option sûre est de conserver `counter_add` vérifié aux frontières
+publiques et de n'utiliser un incrément interne sans contrôle qu'avec
+une borne supérieure démontrée par appel pour **chaque** somme, y
+compris les états fournis par l'appelant ; tester les valeurs hautes
+encore admissibles et le débordement exact.
