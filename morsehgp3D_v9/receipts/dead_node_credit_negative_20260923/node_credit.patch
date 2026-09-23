@@ -1,0 +1,715 @@
+diff --git a/morsehgp3D_v9/bench/tower_probe.cpp b/morsehgp3D_v9/bench/tower_probe.cpp
+index ab7fb632..5b66ece1 100644
+--- a/morsehgp3D_v9/bench/tower_probe.cpp
++++ b/morsehgp3D_v9/bench/tower_probe.cpp
+@@ -137,6 +137,7 @@ int main(int argc, char** argv) {
+         else if (name == "q34_dead_lanes") options.q34_dead_lanes = on;
+         else if (name == "q34_witness_cache") options.q34_witness_cache = on;
+         else if (name == "q34_dead_core") options.q34_dead_core = on;
++        else if (name == "q34_dead_node_credit") options.q34_dead_node_credit = on;
+         else if (name == "tower_meb_proposal") options.tower_meb_proposal = on;
+         else throw std::invalid_argument("unknown lever");
+       }
+@@ -173,13 +174,13 @@ int main(int argc, char** argv) {
+               grid.c_str(), input.points.size(), input.hash);
+   std::printf("\"options\":{\"K\":%u,\"K_effective\":%u,\"s\":%u,\"workers\":%zu,\"tower_static_threads\":%d,\"run_tower\":%s,"
+               "\"levers\":{\"atlas_saturate_deep\":%s,\"q3_leaf_census\":%s,\"q34_dead_lanes\":%s,"
+-              "\"q34_witness_cache\":%s,\"q34_dead_core\":%s,\"tower_meb_proposal\":%s}},",
++              "\"q34_witness_cache\":%s,\"q34_dead_core\":%s,\"q34_dead_node_credit\":%s,\"tower_meb_proposal\":%s}},",
+               options.kmax, r.kmax_effective, options.separation_s, options.workers,
+               options.tower_static_threads >= 0 ? options.tower_static_threads : r.tower_static_threads,
+               options.run_tower ? "true" : "false", options.atlas_saturate_deep ? "true" : "false",
+               options.q3_leaf_census ? "true" : "false", options.q34_dead_lanes ? "true" : "false",
+               options.q34_witness_cache ? "true" : "false", options.q34_dead_core ? "true" : "false",
+-              options.tower_meb_proposal ? "true" : "false");
++              options.q34_dead_node_credit ? "true" : "false", options.tower_meb_proposal ? "true" : "false");
+   std::printf("\"times_ms\":{\"read\":%.3f,\"prepare\":%.3f,\"gen_index\":%.3f,\"q2\":%.3f,\"q34\":%.3f,\"merge\":%.3f,"
+               "\"tower_index\":%.3f,\"census\":%.3f,\"tower\":%.3f,\"chain_total\":%.3f,\"digest\":%.3f},"
+               "\"chain_cpu_s\":%.3f,",
+@@ -200,7 +201,7 @@ int main(int argc, char** argv) {
+   std::printf("]},");
+   {
+     const auto& l = r.ledger;
+-    const std::pair<const char*, std::uint64_t> rows[] = {{"expanded_pairs",l.expanded_pairs},{"cover_builds",l.cover_builds},{"cover_sites",l.cover_sites},{"cover_node_visits",l.cover_node_visits},{"q3_edges",l.q3_edges},{"q4_edges",l.q4_edges},{"both_edges",l.both_edges},{"witness_input_pair_mass",l.witness_input_pair_mass},{"witness_rejected_rectangles",l.witness_rejected_rectangles},{"witness_rejected_pairs",l.witness_rejected_pairs},{"q3_seeds",l.q3_seeds},{"q3_ball_builds",l.q3_ball_builds},{"q3_depth_rejections",l.q3_depth_rejections},{"q3_census_bounds",l.q3_census_bounds},{"q3_census_point_tests",l.q3_census_point_tests},{"q3_atlas_edges",l.q3_atlas_edges},{"q3_atlas_locations",l.q3_atlas_locations},{"q3_atlas_rejections",l.q3_atlas_rejections},{"q3_atlas_outside_domain",l.q3_atlas_outside_domain},{"atlas_cells",l.atlas_cells},{"atlas_leaf_cells",l.atlas_leaf_cells},{"atlas_deep_cells",l.atlas_deep_cells},{"atlas_outside_cells",l.atlas_outside_cells},{"atlas_splits",l.atlas_splits},{"atlas_node_visits",l.atlas_node_visits},{"atlas_block_bounds",l.atlas_block_bounds},{"atlas_point_tests",l.atlas_point_tests},{"atlas_ids_copied",l.atlas_ids_copied},{"q4_seeds",l.q4_seeds},{"q4_live_leaves",l.q4_live_leaves},{"q4_whole_atlas_skips",l.q4_whole_atlas_skips},{"q4_sweep_events",l.q4_sweep_events},{"q3_leaf_censuses",l.q3_leaf_censuses},{"q3_leaf_point_tests",l.q3_leaf_point_tests},{"q3_leaf_rejections",l.q3_leaf_rejections},{"q3_lower_bound_fallbacks",l.q3_lower_bound_fallbacks},{"dead_loads",l.dead_loads},{"dead_form_sites",l.dead_form_sites},{"dead_cells",l.dead_cells},{"dead_outside_cells",l.dead_outside_cells},{"dead_deep_cells",l.dead_deep_cells},{"dead_failed_cells",l.dead_failed_cells},{"dead_uniform_tests",l.dead_uniform_tests},{"dead_point_tests",l.dead_point_tests},{"dead_q3_proved",l.dead_q3_proved},{"dead_q3_open",l.dead_q3_open},{"dead_q4_proved",l.dead_q4_proved},{"dead_q4_open",l.dead_q4_open},{"witness_cache_queries",l.witness_cache_queries},{"witness_cache_node_tests",l.witness_cache_node_tests},{"witness_cache_rejected_pairs",l.witness_cache_rejected_pairs},{"core_builds",l.core_builds},{"core_sites",l.core_sites},{"core_closed_edges",l.core_closed_edges},{"dead_core_loads",l.dead_core_loads},{"dead_core_form_sites",l.dead_core_form_sites},{"dead_core_cells",l.dead_core_cells},{"dead_core_uniform_tests",l.dead_core_uniform_tests},{"dead_core_point_tests",l.dead_core_point_tests},{"dead_core_q3_proved",l.dead_core_q3_proved},{"dead_core_q3_open",l.dead_core_q3_open},{"dead_core_q4_proved",l.dead_core_q4_proved},{"dead_core_q4_open",l.dead_core_q4_open},{"core_cover_node_visits",l.core_cover_node_visits},{"core_cover_bound_tests",l.core_cover_bound_tests},{"core_cover_point_tests",l.core_cover_point_tests},{"dead_core_outside_cells",l.dead_core_outside_cells},{"dead_core_deep_cells",l.dead_core_deep_cells},{"dead_core_failed_cells",l.dead_core_failed_cells},{"q34_input_rectangles",l.q34_input_rectangles},{"witness_rect_queries",l.witness_rect_queries},{"witness_rect_node_visits",l.witness_rect_node_visits},{"witness_pair_queries",l.witness_pair_queries},{"witness_pair_node_visits",l.witness_pair_node_visits},{"q3_edge_queries",l.q3_edge_queries},{"q3_seed_node_visits",l.q3_seed_node_visits},{"q3_seed_point_tests",l.q3_seed_point_tests},{"q3_seed_bound_tests",l.q3_seed_bound_tests},{"q4_geometry_preparations",l.q4_geometry_preparations},{"q4_domain_node_visits",l.q4_domain_node_visits},{"q4_cover_decomposition_node_visits",l.q4_cover_decomposition_node_visits},{"q4_seed_node_visits",l.q4_seed_node_visits},{"q4_seed_cell_queries",l.q4_seed_cell_queries},{"q4_sweep_active_sites",l.q4_sweep_active_sites}};
++    const std::pair<const char*, std::uint64_t> rows[] = {{"expanded_pairs",l.expanded_pairs},{"cover_builds",l.cover_builds},{"cover_sites",l.cover_sites},{"cover_node_visits",l.cover_node_visits},{"q3_edges",l.q3_edges},{"q4_edges",l.q4_edges},{"both_edges",l.both_edges},{"witness_input_pair_mass",l.witness_input_pair_mass},{"witness_rejected_rectangles",l.witness_rejected_rectangles},{"witness_rejected_pairs",l.witness_rejected_pairs},{"q3_seeds",l.q3_seeds},{"q3_ball_builds",l.q3_ball_builds},{"q3_depth_rejections",l.q3_depth_rejections},{"q3_census_bounds",l.q3_census_bounds},{"q3_census_point_tests",l.q3_census_point_tests},{"q3_atlas_edges",l.q3_atlas_edges},{"q3_atlas_locations",l.q3_atlas_locations},{"q3_atlas_rejections",l.q3_atlas_rejections},{"q3_atlas_outside_domain",l.q3_atlas_outside_domain},{"atlas_cells",l.atlas_cells},{"atlas_leaf_cells",l.atlas_leaf_cells},{"atlas_deep_cells",l.atlas_deep_cells},{"atlas_outside_cells",l.atlas_outside_cells},{"atlas_splits",l.atlas_splits},{"atlas_node_visits",l.atlas_node_visits},{"atlas_block_bounds",l.atlas_block_bounds},{"atlas_point_tests",l.atlas_point_tests},{"atlas_ids_copied",l.atlas_ids_copied},{"q4_seeds",l.q4_seeds},{"q4_live_leaves",l.q4_live_leaves},{"q4_whole_atlas_skips",l.q4_whole_atlas_skips},{"q4_sweep_events",l.q4_sweep_events},{"q3_leaf_censuses",l.q3_leaf_censuses},{"q3_leaf_point_tests",l.q3_leaf_point_tests},{"q3_leaf_rejections",l.q3_leaf_rejections},{"q3_lower_bound_fallbacks",l.q3_lower_bound_fallbacks},{"dead_loads",l.dead_loads},{"dead_form_sites",l.dead_form_sites},{"dead_cells",l.dead_cells},{"dead_outside_cells",l.dead_outside_cells},{"dead_deep_cells",l.dead_deep_cells},{"dead_failed_cells",l.dead_failed_cells},{"dead_uniform_tests",l.dead_uniform_tests},{"dead_point_tests",l.dead_point_tests},{"dead_q3_proved",l.dead_q3_proved},{"dead_q3_open",l.dead_q3_open},{"dead_q4_proved",l.dead_q4_proved},{"dead_q4_open",l.dead_q4_open},{"witness_cache_queries",l.witness_cache_queries},{"witness_cache_node_tests",l.witness_cache_node_tests},{"witness_cache_rejected_pairs",l.witness_cache_rejected_pairs},{"core_builds",l.core_builds},{"core_sites",l.core_sites},{"core_closed_edges",l.core_closed_edges},{"dead_core_loads",l.dead_core_loads},{"dead_core_form_sites",l.dead_core_form_sites},{"dead_core_cells",l.dead_core_cells},{"dead_core_uniform_tests",l.dead_core_uniform_tests},{"dead_core_point_tests",l.dead_core_point_tests},{"dead_core_q3_proved",l.dead_core_q3_proved},{"dead_core_q3_open",l.dead_core_q3_open},{"dead_core_q4_proved",l.dead_core_q4_proved},{"dead_core_q4_open",l.dead_core_q4_open},{"core_cover_node_visits",l.core_cover_node_visits},{"core_cover_bound_tests",l.core_cover_bound_tests},{"core_cover_point_tests",l.core_cover_point_tests},{"dead_core_outside_cells",l.dead_core_outside_cells},{"dead_core_deep_cells",l.dead_core_deep_cells},{"dead_core_failed_cells",l.dead_core_failed_cells},{"q34_input_rectangles",l.q34_input_rectangles},{"witness_rect_queries",l.witness_rect_queries},{"witness_rect_node_visits",l.witness_rect_node_visits},{"witness_pair_queries",l.witness_pair_queries},{"witness_pair_node_visits",l.witness_pair_node_visits},{"q3_edge_queries",l.q3_edge_queries},{"q3_seed_node_visits",l.q3_seed_node_visits},{"q3_seed_point_tests",l.q3_seed_point_tests},{"q3_seed_bound_tests",l.q3_seed_bound_tests},{"q4_geometry_preparations",l.q4_geometry_preparations},{"q4_domain_node_visits",l.q4_domain_node_visits},{"q4_cover_decomposition_node_visits",l.q4_cover_decomposition_node_visits},{"q4_seed_node_visits",l.q4_seed_node_visits},{"q4_seed_cell_queries",l.q4_seed_cell_queries},{"q4_sweep_active_sites",l.q4_sweep_active_sites},{"dead_node_tests",l.dead_node_tests},{"dead_node_point_tests",l.dead_node_point_tests},{"dead_node_splits",l.dead_node_splits},{"dead_core_node_tests",l.dead_core_node_tests},{"dead_core_node_point_tests",l.dead_core_node_point_tests},{"dead_core_node_splits",l.dead_core_node_splits}};
+     std::printf("\"ledger\":{");
+     bool first = true;
+     for (const auto& [name, value] : rows) {
+diff --git a/morsehgp3D_v9/src/chain/tower_chain.cpp b/morsehgp3D_v9/src/chain/tower_chain.cpp
+index 23d147fb..8763483d 100644
+--- a/morsehgp3D_v9/src/chain/tower_chain.cpp
++++ b/morsehgp3D_v9/src/chain/tower_chain.cpp
+@@ -360,6 +360,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
+       o.dead_lanes = options.q34_dead_lanes;
+       o.pair_witness_cache = options.q34_witness_cache;
+       o.dead_core = options.q34_dead_core;
++      o.dead_node_credit = options.q34_dead_node_credit;
+       const auto r34 = gen::run_wspd_q34_parallel(
+           index, kmax, options.separation_s, o, W,
+           [&slots](std::size_t slot, const gen::Q34SeedCandidate& c) {
+@@ -414,6 +415,9 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
+       l.core_cover_node_visits = w.core_cover.node_visits; l.core_cover_bound_tests = w.core_cover.bound_tests;
+       l.core_cover_point_tests = w.core_cover.point_tests; l.dead_core_outside_cells = w.dead_core.outside_cells;
+       l.dead_core_deep_cells = w.dead_core.deep_cells; l.dead_core_failed_cells = w.dead_core.failed_cells;
++      l.dead_node_tests = w.dead.node_tests; l.dead_node_point_tests = w.dead.node_point_tests;
++      l.dead_node_splits = w.dead.node_splits; l.dead_core_node_tests = w.dead_core.node_tests;
++      l.dead_core_node_point_tests = w.dead_core.node_point_tests; l.dead_core_node_splits = w.dead_core.node_splits;
+       l.q34_input_rectangles = w.input_rectangles;
+       l.witness_rect_queries = w.witness.rectangles.queries; l.witness_rect_node_visits = w.witness.rectangles.node_visits;
+       l.witness_pair_queries = w.witness.pairs.queries; l.witness_pair_node_visits = w.witness.pairs.node_visits;
+diff --git a/morsehgp3D_v9/src/chain/tower_chain.hpp b/morsehgp3D_v9/src/chain/tower_chain.hpp
+index 1945cb09..f9a220d4 100644
+--- a/morsehgp3D_v9/src/chain/tower_chain.hpp
++++ b/morsehgp3D_v9/src/chain/tower_chain.hpp
+@@ -65,6 +65,9 @@ struct ChainOptions {
+   // Noyau diametral du certificat de voie morte (exige q34_dead_lanes), meme
+   // objet. Contrat v9 : active par defaut, publie et epingle.
+   bool q34_dead_core = true;
++  // Credit par noeuds d'index du certificat de voie morte (exige
++  // q34_dead_lanes) : memes cellules, memes voies prouvees, travail different.
++  bool q34_dead_node_credit = false;
+   // MEB propose par Welzl en double et verifie exactement dans la tour
+   // (anchor_meb_proposed), meme objet. Contrat v9 : active par defaut.
+   bool tower_meb_proposal = true;
+@@ -106,6 +109,9 @@ struct GeneratorLedger {
+       dead_core_q4_open;
+   std::uint64_t core_cover_node_visits, core_cover_bound_tests, core_cover_point_tests, dead_core_outside_cells,
+       dead_core_deep_cells, dead_core_failed_cells;
++  // Node credit of the certificate (zero without it), cover then core.
++  std::uint64_t dead_node_tests, dead_node_point_tests, dead_node_splits, dead_core_node_tests,
++      dead_core_node_point_tests, dead_core_node_splits;
+   // Global-index DFS already counted by the generator (audit B, ledger of
+   // hidden q3/q4 visits): witness searches of rectangles and pairs, q3 seed
+   // search per open q3 edge, q4 positive domain, cover decomposition and
+diff --git a/morsehgp3D_v9/src/gen/lanes/edge_cover.cpp b/morsehgp3D_v9/src/gen/lanes/edge_cover.cpp
+index 1a93b6e8..4b562271 100644
+--- a/morsehgp3D_v9/src/gen/lanes/edge_cover.cpp
++++ b/morsehgp3D_v9/src/gen/lanes/edge_cover.cpp
+@@ -65,8 +65,11 @@ bool Q34EdgeCover::contains_id(std::size_t id) const {
+   return contains_point(points[id]);
+ }
+ 
+-void Q34EdgeCover::admit(Range range) {
++void Q34EdgeCover::admit(std::size_t node, Range range) {
+   counter_add(work_.admitted_nodes);
++  if (node > std::numeric_limits<std::uint32_t>::max())
++    throw std::overflow_error("mhgp9 gen edge cover node ID exceeds u32");
++  nodes_.push_back(static_cast<std::uint32_t>(node));
+   counter_add(work_.admitted_sites, static_cast<u64>(range.size()));
+   // Consumed node populations are disjoint portions of this cloud, so the
+   // sum is <= points().size() and cannot overflow size_t.
+@@ -95,7 +98,7 @@ void Q34EdgeCover::build() {
+     counter_add(work_.node_visits);
+     if (node.range.size() == 1) {
+       counter_add(work_.point_tests);
+-      if (contains_point(points[order[node.range.first]])) admit(node.range);
++      if (contains_point(points[order[node.range.first]])) admit(cursor, node.range);
+       else reject(node.range);
+       cursor = node.escape;
+       continue;
+@@ -116,7 +119,7 @@ void Q34EdgeCover::build() {
+       reject(node.range);
+       cursor = node.escape;
+     } else if (maximum <= radius_fourfold_) {
+-      admit(node.range);
++      admit(cursor, node.range);
+       cursor = node.escape;
+     } else {
+       counter_add(work_.split_nodes);
+@@ -133,7 +136,10 @@ void Q34EdgeCover::build() {
+ std::size_t Q34EdgeCover::retained_bytes() const {
+   if (ranges_.capacity() > std::numeric_limits<std::size_t>::max() / sizeof(Range))
+     throw std::overflow_error("mhgp9 gen edge cover storage exceeds size_t");
+-  return ranges_.capacity() * sizeof(Range);
++  if (nodes_.capacity() > (std::numeric_limits<std::size_t>::max() - ranges_.capacity() * sizeof(Range)) /
++                             sizeof(std::uint32_t))
++    throw std::overflow_error("mhgp9 gen edge cover storage exceeds size_t");
++  return ranges_.capacity() * sizeof(Range) + nodes_.capacity() * sizeof(std::uint32_t);
+ }
+ 
+ }  // namespace mhgp9::gen
+diff --git a/morsehgp3D_v9/src/gen/lanes/edge_cover.hpp b/morsehgp3D_v9/src/gen/lanes/edge_cover.hpp
+index c608d6cb..7d8afd05 100644
+--- a/morsehgp3D_v9/src/gen/lanes/edge_cover.hpp
++++ b/morsehgp3D_v9/src/gen/lanes/edge_cover.hpp
+@@ -2,6 +2,7 @@
+ 
+ #include <array>
+ #include <cstddef>
++#include <cstdint>
+ #include <memory>
+ #include <span>
+ #include <vector>
+@@ -57,6 +58,11 @@ class Q34EdgeCover final {
+   [[nodiscard]] const Q2CensusIndexPtr& index() const noexcept { return index_; }
+   [[nodiscard]] const std::array<std::size_t, 2>& edge_ids() const noexcept { return edge_ids_; }
+   [[nodiscard]] std::span<const Range> ranges() const noexcept { return ranges_; }
++  // v9: the admitted index nodes themselves (whole nodes and singletons), in
++  // admission (increasing rank) order: a disjoint antichain whose ranges are
++  // exactly ranges() before joining. Read by the node-credit dead-lane
++  // certificate, which credits whole populations without per-site forms.
++  [[nodiscard]] std::span<const std::uint32_t> admitted_nodes() const noexcept { return nodes_; }
+   [[nodiscard]] std::size_t site_count() const noexcept { return site_count_; }
+   // False for make_diametral(): such a core is readable by the dead-lane
+   // certificate only (require_complete_q34_cover guards every other consumer).
+@@ -75,7 +81,7 @@ class Q34EdgeCover final {
+   [[nodiscard]] static Q34EdgeCoverPtr make_ball(
+       Q2CensusIndexPtr index, std::array<std::size_t, 2> edge_ids, bool diametral);
+   [[nodiscard]] bool contains_point(Point3 point) const noexcept;
+-  void admit(Range range);
++  void admit(std::size_t node, Range range);
+   void reject(Range range);
+   void build();
+ 
+@@ -84,6 +90,7 @@ class Q34EdgeCover final {
+   std::array<i64, 3> center_twice_{};
+   i64 radius_fourfold_{};
+   std::vector<Range> ranges_;
++  std::vector<std::uint32_t> nodes_;
+   std::size_t site_count_{};
+   Q34EdgeCoverWork work_{};
+   bool complete_{true};
+diff --git a/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.cpp b/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.cpp
+index abfcdafc..78cee45f 100644
+--- a/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.cpp
++++ b/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.cpp
+@@ -1,5 +1,6 @@
+ #include "lanes/q34_dead_lanes.hpp"
+ 
++#include <algorithm>
+ #include <cstdlib>
+ #include <limits>
+ #include <stdexcept>
+@@ -15,57 +16,78 @@ constexpr i64 q4_disk_factor = 2;
+ i64 dot(const Vec& a, const Vec& b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]; }
+ }  // namespace
+ 
+-Q34DeadLaneProver::Q34DeadLaneProver(unsigned max_depth, unsigned min_depth)
+-    : max_depth_(max_depth), min_depth_(min_depth) {
++Q34DeadLaneProver::Q34DeadLaneProver(unsigned max_depth, unsigned min_depth, bool node_credit)
++    : max_depth_(max_depth), min_depth_(min_depth), node_credit_(node_credit) {
+   // Depth d halves the 2^22-wide root d times: integer corners up to 2^20.
+   if (max_depth > 20 || min_depth > max_depth)
+     throw std::invalid_argument("mhgp9 gen dead-lane prover requires min<=max<=20 depths");
+   levels_.resize(max_depth + 1);
+ }
+ 
+-void Q34DeadLaneProver::load(const Q34EdgeCover& cover, Q34DeadLaneWork& work) {
+-  // Invalid until this load completes: no failure below leaves a usable
+-  // state from an earlier cover.
+-  loaded_ = false;
+-  const auto& index = *cover.index();
+-  // Coordinates in spatial rank order, owned by the index itself: the cover
+-  // ranges are read sequentially, with no per-prover copy.
+-  const auto ordered = index.spatial_points();
++void Q34DeadLaneProver::set_edge(const Q34EdgeCover& cover) {
+   const auto ids = cover.edge_ids();
+-  const auto points = index.cloud().points();
++  const auto points = cover.index()->cloud().points();
+   const auto a = points[ids[0]], b = points[ids[1]];
+-  Vec v{}, midpoint_twice{};
++  Vec v{};
+   std::size_t main_axis = 0;
+   for (std::size_t i = 0; i < 3; ++i) {
+     v[i] = static_cast<i64>(b[i]) - a[i];
+-    midpoint_twice[i] = static_cast<i64>(a[i]) + b[i];
++    midpoint_twice_[i] = static_cast<i64>(a[i]) + b[i];
+     if (std::llabs(v[i]) > std::llabs(v[main_axis])) main_axis = i;
+   }
+   // Same integer basis as Q4LocalGeometry (proofs there): |basis| <= M.
+-  const std::size_t axis_i = (main_axis + 1) % 3, axis_j = (main_axis + 2) % 3;
++  main_axis_ = main_axis;
++  axis_i_ = (main_axis + 1) % 3;
++  axis_j_ = (main_axis + 2) % 3;
+   const i64 h = std::llabs(v[main_axis]), sign = v[main_axis] > 0 ? 1 : -1;
+   a_basis_ = {0, 0, 0}; b_basis_ = {0, 0, 0};
+-  a_basis_[axis_i] = h; a_basis_[main_axis] = -sign * v[axis_i];
+-  b_basis_[axis_j] = h; b_basis_[main_axis] = -sign * v[axis_j];
++  a_basis_[axis_i_] = h; a_basis_[main_axis] = -sign * v[axis_i_];
++  b_basis_[axis_j_] = h; b_basis_[main_axis] = -sign * v[axis_j_];
+   diameter_squared_ = dot(v, v);
++}
++
++Q34DeadLaneProver::Form Q34DeadLaneProver::form_of(const Point3& z) const {
++  // Each basis vector has two nonzero coordinates: two products each.
++  const i64 am = a_basis_[main_axis_], ai = a_basis_[axis_i_], bm = b_basis_[main_axis_], bj = b_basis_[axis_j_];
++  Vec w{};
++  for (std::size_t i = 0; i < 3; ++i) w[i] = 2 * static_cast<i64>(z[i]) - midpoint_twice_[i];
++  // M=262143: |w_i| <= 2M, |dot(w,w)-|v|^2| <= 15M^2 < 2^40 (scaled < 2^60),
++  // |x|,|y| <= 8M^2 < 2^39 (Q4LocalGeometry::form).
++  return {scale * (dot(w, w) - diameter_squared_), -2 * (w[main_axis_] * am + w[axis_i_] * ai),
++          -2 * (w[main_axis_] * bm + w[axis_j_] * bj)};
++}
++
++void Q34DeadLaneProver::load(const Q34EdgeCover& cover, Q34DeadLaneWork& work) {
++  // Invalid until this load completes: no failure below leaves a usable
++  // state from an earlier cover.
++  loaded_ = false;
++  index_.reset();
++  set_edge(cover);
+   counter_add(work.loads);
++  nodes_loaded_ = node_credit_ && (std::getenv("MHGP9_NC_CORE_ONLY") == nullptr || !cover.complete());
++  if (nodes_loaded_) {
++    const auto nodes = cover.admitted_nodes();
++    // Node and form IDs share one u32 element: node IDs must stay below 2^31.
++    if (cover.index()->spatial_nodes().size() >= form_bit)
++      throw std::overflow_error("mhgp9 gen dead-lane prover index exceeds 2^31 nodes");
++    elements_.assign(nodes.begin(), nodes.end());
++    if (cover.site_count() < 2) throw std::logic_error("mhgp9 gen dead-lane prover cover lost its endpoints");
++    forms_.clear();
++    index_ = cover.index();
++    loaded_ = true;
++    return;
++  }
++  const auto& index = *cover.index();
++  // Coordinates in spatial rank order, owned by the index itself: the cover
++  // ranges are read sequentially, with no per-prover copy.
++  const auto ordered = index.spatial_points();
+   forms_.resize(cover.site_count());
+   std::size_t n = 0;
+-  // Each basis vector has two nonzero coordinates: two products each.
+-  const i64 am = a_basis_[main_axis], ai = a_basis_[axis_i], bm = b_basis_[main_axis], bj = b_basis_[axis_j];
+   // a and b are loaded too: w = -+v gives k = 0 and x = y = 0 (A, B are
+   // orthogonal to v), an identically zero form that is never negative, so
+   // they are never credited nor kept in a frontier. No branch in the loop.
+   for (const auto range : cover.ranges())
+-    for (auto rank = range.first; rank < range.last; ++rank) {
+-      const auto& z = ordered[rank];
+-      Vec w{};
+-      for (std::size_t i = 0; i < 3; ++i) w[i] = 2 * static_cast<i64>(z[i]) - midpoint_twice[i];
+-      // M=262143: |w_i| <= 2M, |dot(w,w)-|v|^2| <= 15M^2 < 2^40 (scaled < 2^60),
+-      // |x|,|y| <= 8M^2 < 2^39 (Q4LocalGeometry::form).
+-      forms_[n++] = {scale * (dot(w, w) - diameter_squared_), -2 * (w[main_axis] * am + w[axis_i] * ai),
+-                     -2 * (w[main_axis] * bm + w[axis_j] * bj)};
+-    }
++    for (auto rank = range.first; rank < range.last; ++rank) forms_[n++] = form_of(ordered[rank]);
+   forms_.resize(n);
+   if (forms_.size() > std::numeric_limits<std::uint32_t>::max())
+     throw std::overflow_error("mhgp9 gen dead-lane prover cover exceeds u32 frontier IDs");
+@@ -81,7 +103,9 @@ void Q34DeadLaneProver::load(const Q34EdgeCover& cover, Q34DeadLaneWork& work) {
+ }
+ 
+ std::size_t Q34DeadLaneProver::retained_bytes() const {
+-  std::size_t bytes = forms_.capacity() * sizeof(Form) + all_.capacity() * sizeof(std::uint32_t);
++  std::size_t bytes = forms_.capacity() * sizeof(Form) +
++                      (all_.capacity() + elements_.capacity() + pending_.capacity() + stack_.capacity()) *
++                          sizeof(std::uint32_t);
+   for (const auto& level : levels_) bytes += level.capacity() * sizeof(std::uint32_t);
+   return bytes;
+ }
+@@ -97,9 +121,11 @@ std::uint8_t Q34DeadLaneProver::prove(unsigned kmax, std::uint8_t lanes, Q34Dead
+   threshold3_ = kmax >= 2 ? kmax - 1 : 0;
+   threshold4_ = kmax >= 3 ? kmax - 2 : 0;
+   std::uint8_t proved = 0;
+-  if (tried != 0)
+-    proved = cell({-2 * scale, 2 * scale, -2 * scale, 2 * scale}, 0,
+-                  std::span<const std::uint32_t>(all_.data(), forms_.size()), 0, tried, work);
++  if (tried != 0) {
++    const Cell root{-2 * scale, 2 * scale, -2 * scale, 2 * scale};
++    proved = nodes_loaded_ ? cell_nodes(root, 0, elements_, 0, tried, work)
++                          : cell(root, 0, std::span<const std::uint32_t>(all_.data(), forms_.size()), 0, tried, work);
++  }
+   if ((lanes & 2U) != 0) counter_add((proved & 2U) != 0 ? work.q3_proved : work.q3_open);
+   if ((lanes & 4U) != 0) counter_add((proved & 4U) != 0 ? work.q4_proved : work.q4_open);
+   return proved;
+@@ -210,4 +236,208 @@ std::uint8_t Q34DeadLaneProver::cell(const Cell& c, unsigned depth, std::span<co
+   return lanes;
+ }
+ 
++Q34DeadLaneProver::Bounds Q34DeadLaneProver::node_bounds(const Box3& box, i64 alpha, i64 beta) const {
++  // Q4LocalGeometry::node_bounds_unchecked at ONE center (alpha, beta), with
++  // this prover's basis, midpoint and 2^20 scale. i64 domain (M=262143):
++  // |w|<=2M<2^19, |alpha|,|beta|<=2^21 and |basis|<=M give |T|<=4MQ<2^40;
++  // Q*w^2<2^58 and 2|w||T|<2^60, the three-axis sum with Q*D (<3*2^56) stays
++  // <2^62. Only T^2 (<2^80) needs i128; Q is a power of two, so floor(T^2/Q)
++  // is a shift and the remainder a mask. For fixed center L is separable and
++  // convex in w: interval endpoints give the exact maximum, the clamped
++  // vertex T/Q the minimum, rounded DOWN (a certified lower bound). On a
++  // point box both equal the exact form value (T=Q*w leaves no remainder).
++  i64 minimum = -scale * diameter_squared_, maximum = minimum;
++  for (std::size_t axis = 0; axis < 3; ++axis) {
++    const i64 low = 2 * static_cast<i64>(box.low[axis]) - midpoint_twice_[axis];
++    const i64 high = 2 * static_cast<i64>(box.high[axis]) - midpoint_twice_[axis];
++    const i64 target = a_basis_[axis] * alpha + b_basis_[axis] * beta;
++    const i64 at_low = scale * low * low - 2 * low * target, at_high = scale * high * high - 2 * high * target;
++    maximum += std::max(at_low, at_high);
++    if (target < scale * low) minimum += at_low;
++    else if (target > scale * high) minimum += at_high;
++    else {
++      const i128 square = static_cast<i128>(target) * target;
++      minimum -= static_cast<i64>(square >> scale_bits) + ((square & (scale - 1)) != 0 ? 1 : 0);
++    }
++  }
++  return {minimum, maximum};
++}
++
++Q34DeadLaneProver::Class Q34DeadLaneProver::classify(std::uint32_t& element, const Cell& c, std::size_t& size,
++                                                     Tally& tally) {
++  const auto nodes = index_->spatial_nodes();
++  if ((element & form_bit) == 0) {
++    const auto& node = nodes[element];
++    size = node.range.size();
++    if (size != 1) {
++      // L is affine in the center: box x cell extrema are those of the four
++      // corners; the maximum is exact, the minimum a certified lower bound.
++      ++tally.node;
++      Bounds all = node_bounds(node.box, c.left, c.bottom);
++      for (unsigned corner = 1; corner < 4; ++corner) {
++        const auto b = node_bounds(node.box, (corner & 1U) ? c.right : c.left, (corner & 2U) ? c.top : c.bottom);
++        all.minimum = std::min(all.minimum, b.minimum);
++        all.maximum = std::max(all.maximum, b.maximum);
++      }
++      if (all.maximum < 0) return Class::inside;
++      return all.minimum >= 0 ? Class::dropped : Class::uncertain;
++    }
++    // A singleton becomes its exact form once; the element now names it.
++    if (forms_.size() >= form_bit) throw std::overflow_error("mhgp9 gen dead-lane prover form IDs exceed 2^31");
++    forms_.push_back(form_of(index_->spatial_points()[node.range.first]));
++    ++tally.forms;
++    element = form_bit | static_cast<std::uint32_t>(forms_.size() - 1);
++  }
++  size = 1;
++  ++tally.uniform;
++  const auto& f = forms_[element & ~form_bit];
++  const i64 maximum = f.constant + f.x * (f.x < 0 ? c.left : c.right) + f.y * (f.y < 0 ? c.bottom : c.top);
++  if (maximum < 0) return Class::inside;
++  const i64 minimum = f.constant + f.x * (f.x < 0 ? c.right : c.left) + f.y * (f.y < 0 ? c.top : c.bottom);
++  return minimum < 0 ? Class::partial : Class::dropped;
++}
++
++std::size_t Q34DeadLaneProver::corner_count(std::span<const std::uint32_t> elements, i64 alpha, i64 beta,
++                                            std::size_t needed, Tally& tally) {
++  // Sites strictly inside the ball of center (alpha, beta), up to `needed`.
++  // Forms: exact value. Nodes (never singletons here): exact maximum and
++  // certified minimum at that center; undecided nodes are opened on a local
++  // stack, down to singletons whose point bounds are the exact value.
++  const auto nodes = index_->spatial_nodes();
++  std::size_t count = 0;
++  for (const auto element : elements) {
++    if (count >= needed) break;
++    if ((element & form_bit) != 0) {
++      ++tally.point;
++      const auto& f = forms_[element & ~form_bit];
++      if (f.constant + f.x * alpha + f.y * beta < 0) ++count;
++      continue;
++    }
++    stack_.clear();
++    stack_.push_back(element);
++    while (!stack_.empty() && count < needed) {
++      const auto& node = nodes[stack_.back()];
++      stack_.pop_back();
++      ++tally.node_point;
++      const auto b = node_bounds(node.box, alpha, beta);
++      if (b.maximum < 0) count += node.range.size();
++      else if (b.minimum < 0) {
++        // Not a singleton: on a point box the bounds are equal.
++        stack_.push_back(static_cast<std::uint32_t>(node.right));
++        stack_.push_back(static_cast<std::uint32_t>(node.left));
++      }
++    }
++  }
++  return count;
++}
++
++void Q34DeadLaneProver::flush(const Tally& tally, Q34DeadLaneWork& work) {
++  counter_add(work.uniform_tests, tally.uniform);
++  counter_add(work.point_tests, tally.point);
++  counter_add(work.node_tests, tally.node);
++  counter_add(work.node_point_tests, tally.node_point);
++  counter_add(work.node_splits, tally.splits);
++  counter_add(work.form_sites, tally.forms);
++}
++
++std::uint8_t Q34DeadLaneProver::cell_nodes(const Cell& c, unsigned depth, std::span<std::uint32_t> frontier,
++                                           std::size_t inherited, std::uint8_t lanes, Q34DeadLaneWork& work) {
++  // Same decisions as cell() on the same cover (class comment): only the
++  // elements differ. `inside` counts CREDITED sites; the exact count of the
++  // cell lies in [inside, inside + pending_sites] and each threshold is
++  // settled by splitting pending nodes until that interval excludes it.
++  counter_add(work.cells);
++  std::uint8_t need = 0;
++  if ((lanes & 2U) != 0 && !outside(c, q3_disk_factor)) need = static_cast<std::uint8_t>(need | 2U);
++  if ((lanes & 4U) != 0 && !outside(c, q4_disk_factor)) need = static_cast<std::uint8_t>(need | 4U);
++  if (need == 0) { counter_add(work.outside_cells); return lanes; }
++  std::size_t inside = inherited;
++  if (depth >= min_depth_) {
++    const std::size_t target = (need & 2U) != 0 ? threshold3_ : threshold4_;
++    if (inside >= target) { counter_add(work.deep_cells); return lanes; }
++    auto& next = levels_[depth];
++    next.clear();
++    pending_.clear();
++    std::size_t pending_sites = 0;
++    Tally tally{};
++    // True once the credited count reaches the cell target (cell proved).
++    // A singleton element is rewritten in place to its form (computed once).
++    const auto take = [&](std::uint32_t& element) {
++      std::size_t size = 0;
++      switch (classify(element, c, size, tally)) {
++        case Class::inside: inside += size; return inside >= target;
++        case Class::dropped: return false;
++        case Class::partial: next.push_back(element); return false;
++        case Class::uncertain: pending_.push_back(element); pending_sites += size; return false;
++      }
++      return false;
++    };
++    const auto settle = [&](std::size_t threshold) {
++      while (inside < threshold && inside + pending_sites >= threshold && !pending_.empty()) {
++        const auto& node = index_->spatial_nodes()[pending_.back()];
++        pending_.pop_back();
++        pending_sites -= node.range.size();
++        ++tally.splits;
++        std::uint32_t left = static_cast<std::uint32_t>(node.left), right = static_cast<std::uint32_t>(node.right);
++        if (take(left) || take(right)) return true;
++      }
++      return false;
++    };
++    bool proved = false;
++    for (auto& element : frontier)
++      if (take(element)) { proved = true; break; }
++    if (!proved) proved = settle(target);
++    // q4 may already hold here (T4 <= exact count < T3): only q3 is refined.
++    if (!proved && (need & 6U) == 6U) {
++      proved = settle(threshold4_);  // never reaches T3: inside + pending_sites < T3 already
++      if (inside >= threshold4_) need = static_cast<std::uint8_t>(need & ~4U);
++    }
++    if (proved) {
++      flush(tally, work);
++      counter_add(work.deep_cells);
++      return lanes;
++    }
++    // Exact depth at a lane center of the cell (its corner), capped at T3:
++    // credited sites are negative there, the partial singletons and the
++    // pending nodes hold every other candidate.
++    std::size_t count = inside;
++    bool counted = false, refuted = false;
++    for (const std::uint8_t lane : {std::uint8_t{2}, std::uint8_t{4}}) {
++      if ((need & lane) == 0) continue;
++      const std::size_t lane_target = lane == 2U ? threshold3_ : threshold4_;
++      if (!center_inside(c.left, c.bottom, lane == 2U ? q3_disk_factor : q4_disk_factor)) continue;
++      if (!counted) {
++        const std::size_t needed = threshold3_ - inside;
++        count += corner_count(next, c.left, c.bottom, needed, tally);
++        if (count < threshold3_) count += corner_count(pending_, c.left, c.bottom, threshold3_ - count, tally);
++        counted = true;
++      }
++      if (count < lane_target) {
++        need = static_cast<std::uint8_t>(need & ~lane);
++        lanes = static_cast<std::uint8_t>(lanes & ~lane);
++        refuted = true;
++      }
++    }
++    flush(tally, work);
++    if (refuted) counter_add(work.failed_cells);
++    if (need == 0) return lanes;
++    next.insert(next.end(), pending_.begin(), pending_.end());
++    frontier = next;
++  }
++  if (depth == max_depth_) {
++    counter_add(work.failed_cells);
++    return static_cast<std::uint8_t>(lanes & ~need);
++  }
++  const i64 x = c.left + (c.right - c.left) / 2, y = c.bottom + (c.top - c.bottom) / 2;
++  const Cell children[4] = {{c.left, x, c.bottom, y}, {x, c.right, c.bottom, y},
++                            {c.left, x, y, c.top}, {x, c.right, y, c.top}};
++  for (const auto& child : children) {
++    const std::uint8_t kept = cell_nodes(child, depth + 1, frontier, inside, need, work);
++    lanes = static_cast<std::uint8_t>(lanes & ~(need & ~kept));  // lanes refuted in the child
++    need = static_cast<std::uint8_t>(need & kept);
++    if (need == 0) break;
++  }
++  return lanes;
++}
++
+ }  // namespace mhgp9::gen
+diff --git a/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.hpp b/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.hpp
+index 44ffe40c..68d4660b 100644
+--- a/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.hpp
++++ b/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.hpp
+@@ -16,6 +16,10 @@ namespace mhgp9::gen {
+ struct Q34DeadLaneWork {
+   u64 loads{}, form_sites{}, cells{}, outside_cells{}, deep_cells{}, failed_cells{};
+   u64 uniform_tests{}, point_tests{}, q3_proved{}, q3_open{}, q4_proved{}, q4_open{};
++  // Node credit only (zero otherwise): box bounds of a non-singleton node on
++  // a cell (node_tests) or at one lane center (node_point_tests), and nodes
++  // split because a threshold decision was still open.
++  u64 node_tests{}, node_point_tests{}, node_splits{};
+   bool operator==(const Q34DeadLaneWork&) const = default;
+ };
+ 
+@@ -59,6 +63,23 @@ struct Q34DeadLaneWork {
+ // frontier sites negative there): below T no certificate can exist and the
+ // proof stops at once (cost decision only).
+ //
++// Node credit (v9, option). The frontier holds index NODES of the cover's
++// admitted antichain instead of one form per site. On a closed cell, a node
++// whose exact box x cell maximum of L is negative credits its whole
++// population (distinct sites, a and b never: L=0 there); one whose certified
++// minimum is >=0 is dropped (every site would be); a singleton is its exact
++// affine form (computed once, when first classified). Any other node is
++// split into its two index children only while a threshold decision of the
++// cell (T of its lanes, T4 when both lanes need it, the depth at a lane
++// center capped at T3) is not settled by [credited, credited + sites of the
++// unsplit nodes]; unsplit nodes pass to the sub-cells with the partial
++// singletons. Every decision equals the per-site one on the same cover, so
++// the cells visited, their outcome and the proved lanes are IDENTICAL; only
++// the work (forms, tests) differs. The box bound is the exact separable
++// convex bound of Q4LocalGeometry::node_bounds_unchecked (same basis, same
++// 2^20 scale): exact maximum, minimum rounded down; on a point box both are
++// the exact form value.
++//
+ // A failed proof states nothing: the caller runs the exact lane unchanged.
+ // A successful proof removes exactly an empty lane: same emitted stream.
+ // Not thread-safe: one prover per worker, reused across edges (it keeps
+@@ -68,10 +89,13 @@ class Q34DeadLaneProver final {
+   static constexpr unsigned default_max_depth = 6;
+   static constexpr unsigned default_min_depth = 2;
+   explicit Q34DeadLaneProver(unsigned max_depth = default_max_depth,
+-                             unsigned min_depth = default_min_depth);
++                             unsigned min_depth = default_min_depth, bool node_credit = false);
++  [[nodiscard]] bool node_credit() const noexcept { return node_credit_; }
+ 
+   // Forms of every cover site in cover rank order; a and b get identically
+-  // zero forms (never credited). form_sites counts the other sites.
++  // zero forms (never credited). form_sites counts the other sites. With node
++  // credit: the cover's admitted nodes (it keeps the shared index alive);
++  // form_sites then counts the singleton forms computed by prove().
+   void load(const Q34EdgeCover& cover, Q34DeadLaneWork& work);
+   // Requires load(). K is the tower's Kmax (1..10), `lanes` a subset of
+   // 2 (q3) | 4 (q4). Returns the subset proved dead, both lanes in ONE pass
+@@ -84,19 +108,40 @@ class Q34DeadLaneProver final {
+  private:
+   struct Cell { i64 left, right, bottom, top; };
+   struct Form { i64 constant, x, y; };  // 2^20*k, x, y of L_z
++  struct Bounds { i64 minimum, maximum; };
++  struct Tally { u64 uniform{}, point{}, node{}, node_point{}, splits{}, forms{}; };
++  enum class Class { inside, dropped, partial, uncertain };
++  static constexpr std::uint32_t form_bit = std::uint32_t{1} << 31;  // element = form index | form_bit
+   std::uint8_t cell(const Cell& c, unsigned depth, std::span<const std::uint32_t> frontier, std::size_t inherited,
+                     std::uint8_t lanes, Q34DeadLaneWork& work);
++  std::uint8_t cell_nodes(const Cell& c, unsigned depth, std::span<std::uint32_t> frontier,
++                          std::size_t inherited, std::uint8_t lanes, Q34DeadLaneWork& work);
++  void set_edge(const Q34EdgeCover& cover);
++  [[nodiscard]] Form form_of(const Point3& z) const;
++  [[nodiscard]] Bounds node_bounds(const Box3& box, i64 alpha, i64 beta) const;
++  Class classify(std::uint32_t& element, const Cell& c, std::size_t& size, Tally& tally);
++  std::size_t corner_count(std::span<const std::uint32_t> forms, i64 alpha, i64 beta, std::size_t needed,
++                           Tally& tally);
++  static void flush(const Tally& tally, Q34DeadLaneWork& work);
+   [[nodiscard]] bool outside(const Cell& c, i64 disk_factor) const;
+   [[nodiscard]] bool center_inside(i64 alpha, i64 beta, i64 disk_factor) const;
+ 
+   unsigned max_depth_, min_depth_;
+-  std::array<i64, 3> a_basis_{}, b_basis_{};
++  bool node_credit_;
++  bool nodes_loaded_{false};
++  std::array<i64, 3> a_basis_{}, b_basis_{}, midpoint_twice_{};
++  std::size_t main_axis_{}, axis_i_{}, axis_j_{};
+   i64 diameter_squared_{};
+   std::size_t threshold3_{}, threshold4_{};
+   bool loaded_{false};
+   std::vector<Form> forms_;
+   std::vector<std::uint32_t> all_;                   // identity prefix 0..n-1
+   std::vector<std::vector<std::uint32_t>> levels_;  // frontier by depth
++  // Node credit: the loaded cover's index (kept alive), its admitted nodes
++  // (root frontier), the unsplit uncertain nodes of the current cell and the
++  // traversal stack of a lane-center count (scratch, never across cells).
++  Q2CensusIndexPtr index_;
++  std::vector<std::uint32_t> elements_, pending_, stack_;
+ };
+ 
+ }  // namespace mhgp9::gen
+diff --git a/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp b/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp
+index e912dfbf..3afa8c98 100644
+--- a/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp
++++ b/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp
+@@ -261,10 +261,11 @@ void merge(Q4SeedCellWork& a, const Q4SeedCellWork& b) {
+ }
+ 
+ void merge(Q34DeadLaneWork& a, const Q34DeadLaneWork& b) {
+-  static_assert(sizeof(Q34DeadLaneWork) == 12 * sizeof(u64));
++  static_assert(sizeof(Q34DeadLaneWork) == 15 * sizeof(u64));
+   MHGP9G_ADD(loads); MHGP9G_ADD(form_sites); MHGP9G_ADD(cells); MHGP9G_ADD(outside_cells);
+   MHGP9G_ADD(deep_cells); MHGP9G_ADD(failed_cells); MHGP9G_ADD(uniform_tests); MHGP9G_ADD(point_tests);
+   MHGP9G_ADD(q3_proved); MHGP9G_ADD(q3_open); MHGP9G_ADD(q4_proved); MHGP9G_ADD(q4_open);
++  MHGP9G_ADD(node_tests); MHGP9G_ADD(node_point_tests); MHGP9G_ADD(node_splits);
+ }
+ 
+ void merge(Q34WitnessCacheWork& a, const Q34WitnessCacheWork& b) {
+@@ -350,6 +351,8 @@ void validate(Q2CensusIndexPtr index, unsigned k, unsigned s,
+     throw std::invalid_argument("mhgp9 gen invalid or incompatible q4 seed-cell options");
+   if (options.dead_core && !options.dead_lanes)
+     throw std::invalid_argument("mhgp9 gen dead-lane core requires the dead-lane certificate");
++  if (options.dead_node_credit && !options.dead_lanes)
++    throw std::invalid_argument("mhgp9 gen dead-lane node credit requires the dead-lane certificate");
+   // The traced cache is the exact singleton Affine search only.
+   if (options.pair_witness_cache &&
+       (options.witness_mode == WspdQ34WitnessMode::Disabled ||
+@@ -422,7 +425,9 @@ class Engine {
+          const Q34SeedConsumer& consumer, RectangleSplitter splitter = {})
+       : index_(std::move(index)), k_(k), options_(options), consumer_(consumer),
+         sink_([this](const Q34SeedCandidate& candidate) { emit(candidate); }),
+-        splitter_(std::move(splitter)) {}
++        splitter_(std::move(splitter)),
++        dead_(Q34DeadLaneProver::default_max_depth, Q34DeadLaneProver::default_min_depth,
++              options.dead_node_credit) {}
+   Engine(const Engine&) = delete;
+   Engine& operator=(const Engine&) = delete;
+   Engine(Engine&&) = delete;
+diff --git a/morsehgp3D_v9/src/gen/pipeline/wspd_q34.hpp b/morsehgp3D_v9/src/gen/pipeline/wspd_q34.hpp
+index 5b6c990e..d16cf5a2 100644
+--- a/morsehgp3D_v9/src/gen/pipeline/wspd_q34.hpp
++++ b/morsehgp3D_v9/src/gen/pipeline/wspd_q34.hpp
+@@ -51,6 +51,11 @@ struct WspdQ34Options {
+   // it, only for the lanes this core leaves open. A subset can only remove
+   // credits, never add one: same proved lanes are sound, same stream.
+   bool dead_core{false};
++  // v9 option (requires dead_lanes): the certificate credits whole index
++  // nodes of the core/cover antichain instead of one form per site
++  // (lanes/q34_dead_lanes.hpp, node credit). Same cells, same outcomes, same
++  // proved lanes on each cover: only the prover work counters differ.
++  bool dead_node_credit{false};
+   // v9 option (Affine bounds only): the pair filter first re-tests, for the
+   // same endpoint a, the witness nodes admitted by the previous full search
+   // (lanes/q34_witness_search.hpp): lanes they prove rejected skip the
+diff --git a/morsehgp3D_v9/tests/gen/wspd_q34_gate.cpp b/morsehgp3D_v9/tests/gen/wspd_q34_gate.cpp
+index a1f80da9..b2551aee 100644
+--- a/morsehgp3D_v9/tests/gen/wspd_q34_gate.cpp
++++ b/morsehgp3D_v9/tests/gen/wspd_q34_gate.cpp
+@@ -93,15 +93,15 @@ WORDS(Q4LocalAtlasWork,38);WORDS(Q4LocalSweepWork,41);WORDS(Q4LocalEdgeWork,117)
+ WORDS(Q4ShallowSetWork,25);WORDS(Q4FamilyWork,13);WORDS(Q4ShallowSweepWork,32);
+ WORDS(Q4WindowSelectionWork,25);WORDS(Q4WindowSweepWork,57);WORDS(Q4WindowEdgeWork,116);
+ WORDS(Q34WitnessSearchWork,25);WORDS(Q34WitnessBoundsWork,12);WORDS(WspdQ34WitnessWork,83);
+-WORDS(Q3BallCensusWork,26);WORDS(Q4SeedCellWork,37);WORDS(WspdQ3AtlasWork,9);WORDS(Q34DeadLaneWork,12);
+-WORDS(Q34WitnessCacheWork,5);WORDS(WspdQ34Work,476);
++WORDS(Q3BallCensusWork,26);WORDS(Q4SeedCellWork,37);WORDS(WspdQ3AtlasWork,9);WORDS(Q34DeadLaneWork,15);
++WORDS(Q34WitnessCacheWork,5);WORDS(WspdQ34Work,482);
+ #undef WORDS
+-std::array<u64,476> logical_work(mhgp9::gen::WspdQ34Work work) {
++std::array<u64,482> logical_work(mhgp9::gen::WspdQ34Work work) {
+   // These two capacity peaks depend on the private buffer's previous jobs;
+   // they are paid separately, not erased from the published result.
+   work.q3.peak_shell_bytes=0;
+   work.peak_edge_buffer_bytes=0;
+-  return std::bit_cast<std::array<u64,476>>(work);
++  return std::bit_cast<std::array<u64,482>>(work);
+ }
+ 
+ // Enumerate every small-cloud support once. An independent Gaussian rational
+@@ -828,7 +828,7 @@ void indexed_fixtures(GlobalGate& gate) {
+     "indexed global modes have no exercised rejection");
+ }
+ 
+-std::array<u64,476> without_filter_geometry(mhgp9::gen::WspdQ34Work work) {
++std::array<u64,482> without_filter_geometry(mhgp9::gen::WspdQ34Work work) {
+   // Keep ALL rejection masses and all work downstream of filtering. Only the
+   // four explicitly changed search/bounds ledgers are normalized away.
+   work.witness.rectangles={};work.witness.pairs={};
+@@ -946,7 +946,7 @@ void bounds_mode_global_fixtures(GlobalGate& gate) {
+   normalize(out);gate.require(out==expected && !index && !cloud,"bounds callback owner reset lost payload");
+ }
+ 
+-std::array<u64,476> without_local_q4(mhgp9::gen::WspdQ34Work work) {
++std::array<u64,482> without_local_q4(mhgp9::gen::WspdQ34Work work) {
+   // Only the selected q4 traversal is replaced. All q3, filtering, covers,
+   // lane masses and output counters remain subject to exact comparison.
+   work.local={};work.q4_seed_cells={};
