@@ -91,3 +91,15 @@ rejets prouvés ; apparier W1/W8 sur les coupes capteur 8k/16k/32k de la
 ci-dessus, les tests de nœuds/cellules, les sorties exactes et les temps
 CPU/mur/RSS. Ce certificat reste par arête après expansion : il ne
 promet pas à lui seul une borne sous-quadratique globale.
+
+## Publication du port
+
+Le parcours conjoint est publié sur `main` sous `7f64a279`. La lecture
+mathématique ci-dessus ne change pas de verdict. Un différentiel natif
+indépendant de l'auditeur A sur **30 000 appels synthétiques** trouve les
+mêmes bits de preuve que les deux parcours séparés et 18,7 % de tests
+uniformes en moins ; voir
+[son analyse](DOMINATION_Q4_PARESSEUSE_PAR_BLOCS_20260923.md).
+Ce pourcentage porte sur les tests de cellules de ces fixtures, ni sur
+la chaîne LiDAR entière ni sur `dead_.load`; aucun exposant
+sous-quadratique ni contrat G4 n'en découle.

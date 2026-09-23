@@ -111,3 +111,20 @@ passer, sans constituer une porte complète. En outre,
 réception du [contre-audit v5](CONTRE_AUDIT_B_G4_RECEPTION_V5_20260923.md).
 Pas de nouvelle dépense G4 avant correction, selftests normaux/`-O`,
 relecture du snapshot et ablation cache seule.
+
+## État après publication sur `main`
+
+Le produit est publié sous `7f64a279`, puis le faux producteur a été
+corrigé sous `6345a985`. Rejeu indépendant du test ciblé sur ce dernier
+commit : **1/1 PASS** en 0,026 s ; l'échec de schéma ci-dessus est donc
+historique. Il ne vaut ni les 20 mutants du selftest complet ni une
+réception G4. La nouvelle source de cache SHA-256 `87655330ec4d…`
+réécrit algébriquement son inégalité stricte, sans vérification de
+l'antichaîne : la contre-fixture du span dupliqué reste applicable.
+
+Le statut courant reste **non qualifié pour une nouvelle dépense G4** :
+les défauts de réception hôte v5 sont inchangés, aucune ablation isolée
+cache on/off à mêmes trame/K/s/W n'est archivée, et les gains locaux
+70/61/67 % de recherches évitées annoncés par le développeur n'ont pas
+encore de reçu apparié versionné. Le cache est une optimisation du
+filtre de paire, pas une réduction démontrée des covers ou formes.
