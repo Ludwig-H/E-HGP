@@ -41,14 +41,35 @@ complétude globale ou la tour (`run_tower=false`).
 
 ## Suite v5 publiée par `c6042af2b`, relecture statique
 
-Les réserves 1 et 2 sont traitées **dans le code** : les deux juges
+La réserve 1 est traitée **dans le code** : les deux juges
 reconstruisent une clé canonique indépendante et la comparent à
-`ball.key`, avec mutants de clé seule attendus en code 1 ; le runner
-v5 rend les commandes de provenance bloquantes, relie le build au
-répertoire source et reconstruit les bibliothèques. Aucun reçu v5
+`ball.key`, avec mutants de clé seule attendus en code 1. Le runner
+v5 relie le build au répertoire source, reconstruit les bibliothèques
+et rend **certaines** commandes de provenance bloquantes. Le bloc
+`sha256sum ... || exit 1` est correct, mais `echo
+"commit=$(git ... )" || exit 1` ne vérifie que le succès de `echo` :
+un échec de `git` dans la substitution écrit `commit=` et passe. De
+même, `[ -z "$(git ... status --porcelain ...)" ] || die` accepte
+un échec de `git` à sortie vide comme un arbre propre. La réserve 2
+n'est donc que **partiellement** fermée ; affecter séparément la sortie
+et vérifier le code de retour avant de l'écrire ou de tester sa
+vacuité. Reproduction minimale : `bash -c 'echo "commit=$(false)" ||
+exit 7; echo status=$?'` affiche `commit=` puis `status=0`.
+Aucun reçu v5
 (`STATUS`, `PROVENANCE`, sorties) n'est cependant publié dans ce commit.
 L'ancienne vérification q3 porte sur un autre SHA de source et ne peut
 qualifier le juge v5 par héritage.
+
+Autre faiblesse de la recette : dans `run()`, l'échec d'ouverture de
+`$O/$name.txt` produit `c=1` **avant** le lancement du juge. Pour un
+mutant `expected=1`, ce code est accepté comme mutant tué ; l'append
+`exit=...` et l'écriture finale de `STATUS` ne sont pas contrôlés.
+Une fixture Bash reproduisant cette fonction avec une redirection
+impossible finit en code 0 sans sortie ni `STATUS`. Le runner devrait
+exiger un dossier de sortie neuf, distinguer échec de redirection et
+code du juge, vérifier chaque écriture, et vérifier un marqueur causal
+dans la sortie du mutant plutôt que son seul code 1. Les cas `obs`
+doivent au moins distinguer observation valide d'échec d'infrastructure.
 
 Pour la réserve 3, `--long-sites=4` choisit maintenant les sites depuis
 les **seules coordonnées**, indépendamment du parcours élagué : le

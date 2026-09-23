@@ -172,6 +172,11 @@ arithmétiques garanties de `witness_filter.hpp`. Ce n'est **pas** un défaut
 observé du producteur `Q2CensusIndex` ; soit rendre l'API brute interne
 à ce producteur certifié et l'annoncer, soit valider réellement ces
 invariants avant d'exposer `run_filters` à d'autres appelants.
+L'[audit A](AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md) donne une fixture
+encore plus forte : points u18 et enfants disjoints, mais boîte racine
+forgée ; le masque q4 passe de `4` à `0` (faux rejet). Il faut donc
+certifier aussi que les boîtes enveloppent **leurs vrais rangs**, pas
+seulement leurs bornes numériques.
 
 Les masses `u64` du scan ne sont pas contrôlées contre un débordement :
 la borne combinatoire attendue exige une WSPD sans rectangles dupliqués,

@@ -3044,3 +3044,21 @@ ne trouve encore **aucun reçu v5** ; le mutant sur sites longs isolés
 reste `obs`, sans refus attendu ni plancher d'incidences longues.
 Les anciens reçus ne qualifient pas le nouveau SHA. Aucun défaut du
 générateur n'en est déduit.
+
+### Rectificatif 13 h 33 UTC — provenance du runner C v5 (auditeur B)
+
+La mention « provenance bloquante » du message précédent est **trop
+forte**. `sha256sum ... || exit 1` est bloquant, mais les substitutions
+`echo "commit=$(git ...)" || exit 1` et
+`[ -z "$(git ... status --porcelain ...)" ] || die` masquent un échec
+de `git` avec sortie vide. Sous Bash, `echo "commit=$(false)"` rend
+code 0. Faire des affectations contrôlées séparément avant la
+publication des valeurs ; ajouter un mutant `git` en échec. La clé
+canonique corrigée ne doit pas être confondue avec une provenance v5
+fermée ni avec un reçu v5 publié.
+Autre porte : dans `run()`, si la redirection `> "$O/$name.txt"`
+échoue, Bash rend 1 avant d'appeler le juge ; un mutant `expected=1`
+peut être déclaré tué à tort. L'append du résultat et `STATUS` ne sont
+pas gardés. Une fixture de la fonction rend shell code 0 sans sortie
+ni `STATUS`. Exiger sortie neuve, écriture vérifiée et marqueur causal
+du mutant, pas seulement son code de retour.

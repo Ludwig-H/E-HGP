@@ -227,13 +227,16 @@ portes nouvelles restent à exécuter et à lire. Le juge échantillonne des
 ancres et fixe `run_tower=false` : même un code 0 contrôlerait le
 catalogue sur cet échantillon, pas la tour FULL ni la complétude globale.
 Le commit **`c6042af2b`** publie le code des juges **v5** : clé de boule
-reconstruite indépendamment et mutant de clé seule, provenance devenue
-bloquante, sites longs choisis depuis les coordonnées. La
+reconstruite indépendamment et mutant de clé seule, provenance
+**partiellement** bloquante, sites longs choisis depuis les coordonnées. La
 [contrelecture B](CONTRE_AUDIT_B_JUGES_C_V4_20260923.md) constate
 qu'aucun **reçu v5** n'est encore publié et que le mutant de
 sur-élagage sur ces sites reste seulement observé, sans incidence
 longue minimale ni code 1 exigé. Ne pas transférer les anciens codes 0
-au nouveau SHA ; les limites d'échantillonnage et de tour subsistent.
+au nouveau SHA. Deux substitutions `git` peuvent encore échouer sans
+faire échouer le runner ; un échec de redirection peut aussi imiter le
+code 1 attendu d'un mutant, et `STATUS` n'est pas vérifié. Les limites
+d'échantillonnage et de tour subsistent.
 
 La porte de **clés jamais émises** publiée par `683fa46e` change utilement
 le sens du contrôle : elle recense des MEB de supports q2–q4 voisins
