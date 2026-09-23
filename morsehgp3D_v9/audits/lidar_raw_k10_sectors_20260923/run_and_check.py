@@ -27,9 +27,10 @@ DENSITIES = ("quarter", "half", "full")
 HALVES = ("half_x_neg", "half_x_nonneg")
 QUARTERS = ("quarter_x_neg_y_neg", "quarter_x_neg_y_nonneg",
             "quarter_x_nonneg_y_neg", "quarter_x_nonneg_y_nonneg")
+QUARTER_PRIORITY = (QUARTERS[2], QUARTERS[0], QUARTERS[1], QUARTERS[3])
 SECTORS = ("full",) + HALVES + QUARTERS
 ORDER = tuple((d, s) for s in HALVES for d in DENSITIES) + tuple(
-    (d, s) for s in QUARTERS for d in DENSITIES)
+    (d, s) for s in QUARTER_PRIORITY for d in DENSITIES)
 LEVERS = ("atlas_saturate_deep", "q3_leaf_census", "q34_dead_lanes",
           "q34_witness_cache", "q34_dead_core", "tower_meb_proposal")
 METRICS = ("chain_cpu_s", "chain_wall_s", "q34_wall_s", "dead_core_loads",
@@ -167,7 +168,7 @@ def run(m, timeout, stage):
         if validate_row(row, m) and "binary_sha256_before" in row:
             assert row["name"] not in done
             done.add(row["name"])
-    selected = ORDER[:6] if stage == "halves" else ORDER
+    selected = ORDER[:6] if stage == "halves" else ORDER[:9] if stage == "hot_quarter" else ORDER
     for d, s in selected:
         name = f"{d}_{s}"
         if name in done:
@@ -255,7 +256,8 @@ def verify(m, stage):
         if validate_row(row, m) and "binary_sha256_before" in row:
             assert row["name"] not in good
             good[row["name"]] = row
-    wanted = {f"{d}_{s}" for d, s in (ORDER[:6] if stage == "halves" else ORDER)}
+    selected = ORDER[:6] if stage == "halves" else ORDER[:9] if stage == "hot_quarter" else ORDER
+    wanted = {f"{d}_{s}" for d, s in selected}
     assert set(good) == wanted
     replay = {}
     initial = {row["name"]: row for row in rows if "binary_sha256_before" not in row}
@@ -346,7 +348,7 @@ def verify(m, stage):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("mode", choices=("run", "verify"))
-    parser.add_argument("--stage", choices=("halves", "all"), default="all")
+    parser.add_argument("--stage", choices=("halves", "hot_quarter", "all"), default="all")
     parser.add_argument("--timeout", type=int, default=600)
     args = parser.parse_args()
     m = manifest()
