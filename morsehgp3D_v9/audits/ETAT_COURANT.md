@@ -811,9 +811,12 @@ il ne prouve pas les clés entièrement manquantes.
 Le [premier port borné D5](../receipts/saddle_index_negative_20260923/README.md)
 est **clos négativement** et retiré du produit : sur 08/000200 sans sol
 16k/K10/W8, la jointure exacte des selles évite 1,012 M MEB, mais construit
-et trie 10,188 M entrées. À cible et digest égaux, la phase 0 passe de
+et trie 10,188 M entrées. À digest et ordres égaux, la phase 0 passe de
 2 582 à 2 752 ms et la tour de 3 990 à 4 029 ms (CPU local partagé,
-un cas). Le prochain essai D5 doit réduire le coût de l'index ou coupler
+un cas). La [contrelecture B](CONTRE_AUDIT_B_INDEX_SELLES_NEGATIF_20260923.md)
+précise que le juge de cibles hit par hit n'est pas capturé dans les deux
+sorties chronométrées : celles-ci ne prouvent pas l'égalité du payload
+complet. Le prochain essai D5 doit réduire le coût de l'index ou coupler
 la jointure au **saut au centre avec règle 0**, et mesurer les recherches
 d'intrus ainsi que la racine pré-lot par facette. Aucun gain de cette
 tranche n'est transférable à une trame entière G4.

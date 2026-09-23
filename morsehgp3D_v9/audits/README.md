@@ -118,6 +118,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | --- | --- | --- | --- | --- | --- |
 | [`CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md`](CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md) | B | `a514de68` 10:22 | mesure et méthode, projection D5 bornée | vivant | sans réponse |
 | [`CONTRELEC_D5_NAISSANCE_ET_PORTE_E1_20260923.md`](CONTRELEC_D5_NAISSANCE_ET_PORTE_E1_20260923.md) | A | 23/10:25 | preuve et contre-fixture de porte E1 | vivant | sans réponse |
+| [`CONTRE_AUDIT_B_INDEX_SELLES_NEGATIF_20260923.md`](CONTRE_AUDIT_B_INDEX_SELLES_NEGATIF_20260923.md) | B | `01552e81` 11:17 | réception locale du port isolé hors produit ; gain absent, trace des hits non reçue | négatif pour ce port | sans objet |
 | [`MEB_PROPOSITION_EXACTE_20260923.md`](MEB_PROPOSITION_EXACTE_20260923.md) | B | `85d79753` 06:03 | démontré localement | clos (8e8b83a3) | acceptée |
 | [`CONTRE_AUDIT_B_ANCHOR_MEB_DIAMETRE_20260922.md`](CONTRE_AUDIT_B_ANCHOR_MEB_DIAMETRE_20260922.md) | B | `ae88ff1f` 22/23:36 | démontré localement | historique | sans réponse |
 | [`CONTRE_AUDIT_B_INDEX_CLES_FULL_20260923.md`](CONTRE_AUDIT_B_INDEX_CLES_FULL_20260923.md) | B | `95e073a5` 06:05 | démontré localement | vivant | acceptée en partie (mesures en attente) |
