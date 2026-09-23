@@ -1257,7 +1257,7 @@ WspdQ2ParallelResult run_wspd_q2_census_parallel(
     const auto partition_started = Clock::now();
     const auto plan = make_wspd_front_jobs(index, kmax, separation_s, front_mode,
                                          static_cast<std::size_t>(result.target_jobs), 1,
-                                         front_proposals);
+                                         front_proposals, schedule.mass_first);
     result.partition_ms = milliseconds(partition_started, Clock::now());
     result.front = plan->prefix_result();
     result.prefix_product_visits = result.front.work.product_visits;

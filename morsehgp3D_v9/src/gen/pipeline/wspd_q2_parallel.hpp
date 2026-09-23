@@ -13,6 +13,10 @@ struct WspdQ2Schedule {
   WspdQ2ScheduleMode mode = WspdQ2ScheduleMode::Coarse;
   std::size_t queue_capacity = 64;
   std::size_t donation_interval = 64;
+  // v9: the front job plan expands the pending product of largest pair mass
+  // first (make_wspd_front_jobs mass_first), jobs stored by decreasing mass.
+  // Scheduling only: same rectangles and supports.
+  bool mass_first = false;
 };
 
 struct Q2ParallelWorkerStats {

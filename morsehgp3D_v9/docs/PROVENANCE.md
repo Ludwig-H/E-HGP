@@ -307,3 +307,14 @@ point de panne de phase 0 (échec de plus petit K sur trois scénarios par
 voie) et les deux mutants de priorité et de compteurs, placés aussi dans la
 voie recouverte. En local (W8, 16k K10), la tour passe de 4,5–4,96 s à
 4,26–4,28 s, avec un condensé identique.
+
+### Ordonnancement des jobs du front q2 (sonde v16)
+
+Le recensement q2 découpait lui aussi son front en largeur (16 jobs par fil,
+compteur atomique). En local (000000 K5, W8), un seul job durait 1,64 s sur
+1,72 s de q2. Levier `q2_jobs_by_mass`, actif par défaut et épinglé : le plan
+est préparé par masse décroissante (`WspdQ2Schedule::mass_first`), avec
+64 jobs par fil. En local, q2 passe de 1 711 à 1 048 ms, avec les mêmes paires
+acceptées et le même catalogue. Porte `wspd_q2_parallel` : chaque exécution
+parallèle est rejouée avec le plan par masse, ce qui donne la même sortie et le
+même travail mono (au moins 400 exécutions).

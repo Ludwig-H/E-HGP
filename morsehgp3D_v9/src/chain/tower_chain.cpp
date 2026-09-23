@@ -343,9 +343,10 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       }
       const auto r2 = gen::run_wspd_q2_census_parallel(
           index, kmax, options.separation_s, gen::WspdFrontMode::MidpointSamples,
-          gen::Q2CensusMode::SharedBlocks, consumers, 16, gen::Q2SiblingMode::Saturating,
-          gen::Q2WitnessOrder::ComplementFirst, gen::Q2AnchorMode::Individual, 64,
-          gen::WspdQ2Schedule{}, gen::WspdFrontProposals{2, 16, true});
+          gen::Q2CensusMode::SharedBlocks, consumers, options.q2_jobs_by_mass ? 64 : 16,
+          gen::Q2SiblingMode::Saturating, gen::Q2WitnessOrder::ComplementFirst, gen::Q2AnchorMode::Individual, 64,
+          [&] { gen::WspdQ2Schedule schedule; schedule.mass_first = options.q2_jobs_by_mass; return schedule; }(),
+          gen::WspdFrontProposals{2, 16, true});
       result.q2_front_rectangles = r2.input_rectangles;
       result.q2_candidate_pairs = r2.candidate_pairs;
       result.q2_accepted_pairs = r2.accepted_pairs;

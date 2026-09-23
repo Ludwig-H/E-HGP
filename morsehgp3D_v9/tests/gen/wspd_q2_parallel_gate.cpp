@@ -51,7 +51,7 @@ struct Options {
 };
 
 struct Gate {
-  u64 checks{}, clouds{}, oracle_pairs{}, oracle_sites{}, mono_runs{}, parallel_runs{};
+  u64 checks{}, clouds{}, oracle_pairs{}, oracle_sites{}, mono_runs{}, parallel_runs{}, mass_first_runs{};
   u64 supports{}, max_shell{}, empty_job_runs{}, excess_worker_runs{}, multi_worker_runs{};
   u64 pool_selected{}, pool_filtered{}, pool_passthrough{}, selected64{}, filtered64{};
   u64 joint_runs{}, pairwise_runs{}, sibling_tests{}, structural_steps{}, callback_failures{};
@@ -201,6 +201,26 @@ Parallel parallel(Gate& gate, const mhgp9::gen::Q2CensusIndexPtr& index, const O
   check_output(gate, capture.output, admitted(all, options.k), index->cloud().points().size(), options.k);
   gate.require(capture.output == reference.output && same_work(result, reference.result),
                "parallel scheduling changed exact output or a mono work field/max/bin");
+  {
+    // v9 mass-first job plan (scheduling only): same output, same mono work.
+    std::vector<Output> massed_slots(workers);
+    std::vector<Q2CensusConsumer> massed_consumers;
+    for (std::size_t i = 0; i < workers; ++i)
+      massed_consumers.emplace_back([&, i](const mhgp9::gen::Q2Support& item) {
+        massed_slots[i].push_back(copy_support(item));
+      });
+    mhgp9::gen::WspdQ2Schedule massed;
+    massed.mass_first = true;
+    const auto massed_result = mhgp9::gen::run_wspd_q2_census_parallel(index, options.k, options.s, options.front,
+        options.census, massed_consumers, granularity, options.sibling, options.order, options.anchor, options.pool,
+        massed);
+    Output massed_output;
+    for (const auto& slot : massed_slots) massed_output.insert(massed_output.end(), slot.begin(), slot.end());
+    sort_output(massed_output);
+    gate.require(massed_output == capture.output && same_work(massed_result, reference.result),
+                 "mass-first job plan changed exact output or a mono work field/max/bin");
+    ++gate.mass_first_runs;
+  }
   gate.require(result.requested_workers == workers && result.target_jobs == workers * granularity &&
                    result.started_workers == std::min<u64>(workers, result.jobs) &&
                    result.workers.size() == result.started_workers && result.completed_jobs == result.jobs &&
@@ -642,6 +662,7 @@ int main(int argc, char** argv) {
     callbacks_and_ownership(gate);
     joined_workers(gate);
     invalid_and_mutants(gate);
+    gate.require(gate.mass_first_runs >= 400, "mass-first job plan not exercised on every parallel run");
     gate.require(gate.clouds == 8 && gate.oracle_sites > 1000000 && gate.mono_runs >= 140 &&
                      gate.parallel_runs >= 400 && gate.parallel_runs < 500 && gate.supports > 1000 &&
                      gate.max_shell == 30 && gate.empty_job_runs > 0 && gate.excess_worker_runs > 0 &&

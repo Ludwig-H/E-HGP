@@ -78,6 +78,9 @@ struct ChainOptions {
   // faite (phase 0 par K decroissant), meme objet. Contrat v9 : actif par
   // defaut, publie et epingle.
   bool tower_overlap_static = true;
+  // Ordonnancement q2 (meme objet) : plan de jobs du front prepare par masse
+  // decroissante et 64 jobs par fil (le plus long job faisait tout q2).
+  bool q2_jobs_by_mass = true;
 };
 
 // Temps de mur en millisecondes, CPU du processus en secondes.

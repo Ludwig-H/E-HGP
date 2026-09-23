@@ -48,7 +48,7 @@ PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
 PLAN_SCHEMA = 'mhgp9_tower_plan_v6'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v15'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v16'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -97,7 +97,8 @@ OUTCOMES = ('complete_relative', 'explicit_refusal', 'killed_case_cap', 'killed_
             'skipped_budget', 'probe_failed', 'skipped_protocol_defect')
 CASE_KEYS = frozenset({'scene', 'file', 'n', 'k', 's', 'workers', 'static_threads', 'levers', 'repeat'})
 LEVER_NAMES = ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_witness_cache', 'q34_dead_core',
-               'tower_meb_proposal', 'q34_jobs_by_mass', 'q34_fine_jobs', 'tower_overlap_static')
+               'tower_meb_proposal', 'q34_jobs_by_mass', 'q34_fine_jobs', 'tower_overlap_static',
+               'q2_jobs_by_mass')
 TOP_KEYS = frozenset({'schema', 'status', 'reason', 'input', 'options', 'times_ms', 'chain_cpu_s', 'generator',
                       'ledger', 'catalogue', 'q34_occupancy', 'tower_phases_ms', 'tower_work', 'orders',
                       'tower_digest', 'peak_rss_kb'})
