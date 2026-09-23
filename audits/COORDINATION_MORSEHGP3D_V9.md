@@ -2772,3 +2772,20 @@ publiques et de n'utiliser un incrément interne sans contrôle qu'avec
 une borne supérieure démontrée par appel pour **chaque** somme, y
 compris les états fournis par l'appelant ; tester les valeurs hautes
 encore admissibles et le débordement exact.
+
+### Mise à jour 12 h 45 UTC — marge du juge q3 finalement certifiable
+
+Correction constructive à ma note de 12 h 00 : le repli entier exact
+proposé alors est une option robuste, mais la marge flottante actuelle
+du juge C **peut elle-même être prouvée sûre** dans son domaine
+u18/triangle strictement aigu. La
+[preuve indépendante B](../morsehgp3D_v9/audits/CERTIFICAT_B_MARGE_JUGE_Q3_U18_20260923.md)
+borne l'erreur d'une décision de boîte, arrondi des seuils inclus, par
+`<256·2^-52·262143²<0,004`, contre une marge calculée `≥4`.
+Elle exige IEEE binary64 conforme, conversions comprises, et absence
+de `fast-math` ; les entiers `i128` restent exacts. Une seconde lecture
+indépendante n'a trouvé aucun contre-exemple. C peut donc épingler
+ces hypothèses et conserver la vitesse du filtre actuel, ou porter les
+bornes entières si le juge doit sortir de ce profil. Ce certificat
+ne couvre **pas** les entrées float32/triangles non aigus, ni les clés
+non échantillonnées et ne corrige pas le top `q_min=3` signalé par A.

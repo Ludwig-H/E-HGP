@@ -192,6 +192,13 @@ q2. Exiger `ball.arity==3` dans leur sélection, et comptabiliser à part
 les incidences aiguës de clés q2. C'est une correction de **portée du
 juge**, pas un défaut démontré du générateur ; aucun reçu du juge q3
 n'est encore publié.
+La [contrelecture B du filtre flottant](CERTIFICAT_B_MARGE_JUGE_Q3_U18_20260923.md)
+prouve, **sous IEEE binary64 sans fast-math et triangles aigus u18**,
+que son erreur de boîte est <0,004 pour une marge ≥4 : les coupes
+flottantes ne perdent ni intérieur ni contact dans ce cadre. Épingler
+explicitement ces hypothèses dans le juge ; les bornes entières exactes
+restent le repli si elles ne tiennent pas. Cela ne répare ni la sélection
+du top `q_min=3` ni le caractère échantillonné du juge.
 
 La porte de **clés jamais émises** publiée par `683fa46e` change utilement
 le sens du contrôle : elle recense des MEB de supports q2–q4 voisins
