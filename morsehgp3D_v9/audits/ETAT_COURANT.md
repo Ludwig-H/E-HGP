@@ -115,6 +115,25 @@ globale n'est acquis. Le [premier reçu local](../receipts/first_tower_20260922/
 [R2 refusé par son validateur](CONTRE_AUDIT_B_G4_R2_PREFLIGHT_20260923.md)
 restent des témoins historiques ; leurs temps ne remplacent pas R5.
 
+**R6 est reçue localement, mais son dossier de reçu n'est pas encore
+publié sur `main` à cette lecture.** Le snapshot `78ce9fd4` a exécuté
+sur G4 24 cas FULL CPU (trois trames entières sans sol, K5/K10,
+W48/s8, deux répétitions ON/OFF du seul cœur), tous
+`complete_relative` ; la relecture indépendante de la capture rend
+`completed`, avec arrêt ciblé certifié. Dans les douze paires,
+émissions q2/q3/q4, catalogue, ordres, travail FULL et digest
+coïncident. Le mur de chaîne gagne **1,8–7,7 %** en moyenne selon la
+scène/K ; le CPU·s gagne **9,9–20,4 %**. Le cœur ferme **54,9–58,9 %**
+des arêtes qui arrivent au cover et réduit les formes chargées de
+**72,9–81,9 %**, mais augmente les visites d'index core+cover de
+**21,0–45,6 %**. Meilleurs cas ON : **4,151 s à K5** et **11,726 s à
+K10**, toujours hors contrat. Dans le README de reçu encore brouillon,
+« générateur identique » est trop large : `q34_cover_builds` change
+par construction (000000/K5 : 900 377 ON, 2 043 612 OFF) ; seules
+ses émissions et masses de candidats restent identiques. Les trois
+compteurs du cache témoin varient légèrement entre répétitions, sans
+changer l'objet.
+
 ## Verrou q3/q4 : réduire le travail avant l'expansion
 
 Le certificat de voies mortes a un vrai bénéfice aval, mais construit
@@ -282,6 +301,18 @@ ce commit figé, **21/21 selftests normal et 21/21 sous `-O`** passent,
 dont les mutations ON/OFF de plan et suppression/altération du résumé.
 La prochaine preuve attendue est un reçu G4 R6 complet ou partiel
 rejugeable, pas une nouvelle inférence depuis les seuls selftests.
+
+Chantier produit suivant R6 : tri parallèle des présentations,
+certification d'un catalogue déjà trié, et déplacement du condensé de
+vérification hors `chain_total` dans la sonde v9. Le fast-path trié
+rejuge strictement toutes les clés ; les portes locales ne montrent
+pas de divergence. Le tri parallèle alloue toutefois un tampon de
+**112 octets par présentation** (environ 491–617 Mo pour les cas R6
+K10) : mesurer son gain et le pic RSS. Pour comparer un futur reçu à
+R6, ajouter `times_ms.digest` à `chain_total` sur le périmètre mural
+ancien. Le futur `chain_cpu_s` exclut également le condensé, mais aucun
+`digest_cpu_s` n'est encore publié : sans lui, une comparaison CPU·s
+R6/R7 brute serait trompeuse.
 
 Prochaines mesures : mêmes octets et masque figé, trames **entières** de
 plusieurs séquences sans sol puis brutes, s8/10/12, K5 et K10, W1/W24/W48,
