@@ -1,7 +1,7 @@
 # État courant des audits v9
 
-23 septembre 2026. Produit publié courant : **`06f71037`** pour le lecteur
-de pente ; le moteur et la sonde v12 mesurés restent **`4530644b`**.
+23 septembre 2026. Dernier port publié du lecteur LiDAR et de la CI :
+**`4b6e3aa6`** ; le moteur et la sonde v12 mesurés restent **`4530644b`**.
 La sonde publie les parcours q3/q4 jusque-là cachés et le runner local v2
 durcit la capture des pentes ; aucun nouveau reçu G4 n'en découle. Le dernier
 [reçu G4 R7b](../receipts/g4_tower_r7b_20260923/README.md) exécute
@@ -354,6 +354,10 @@ sans sol et sans mesure G4. Une ablation appariée du seul site qui étend
 fortement `z` dans le quart chaud de 000200 laisse la pente K10 des formes
 à **2,042528** : cet extrême ne porte pas à lui seul le signal. Le secteur
 est fixe, mais l'étendue des sites sélectionnés varie avec la densité.
+Le [crédit exact par nœuds du certificat de cœur](../receipts/dead_node_credit_negative_20260923/README.md)
+a été essayé hors produit : mêmes voies et digest, mais CPU de chaîne
+**+27 % à K5 et +32 % à K10** sur la coupe 16k de 000000 ; cette variante
+est fermée. La réduction des paires longues avant le cœur reste ouverte.
 
 Le [reçu local de pente LiDAR v11](CONTRE_AUDIT_PENTE_LIDAR_LOCALE_PARTIELLE_20260923.md)
 est intègre (15/15 SHA et entrées vérifiées) mais partiel : une seule
@@ -367,9 +371,12 @@ vérifiés ; 25/25 mutations sont refusées sous Python normal et `-O`.
 L'[addendum de revalidation](../receipts/lidar_scaling_local_20260923_revalidation/README.md)
 retrouve les 60 cas archivés, sans nouveau calcul HGP. Les anciens JSON
 gardent `grid=unspecified` dans la sonde ; la grille 1 mm est attestée par
-les manifestes. `--revalidate` ne recoupe pas encore `record.case`, le
-chemin d'entrée dans `argv[0]` ni les empreintes/commit du résumé, et un
-sous-ensemble non vide de groupes peut retourner code 0. Ne pas employer
+les manifestes. `4b6e3aa6` lie désormais le nom du résumé à scène/K/s/W/
+répétition et K/s/W de chaque commande au résumé ; il réancre les chemins
+historiques du selftest (27/27), sans nouvelle sonde HGP. `--revalidate` ne
+recoupe pas encore `record.case`, le chemin d'entrée dans `argv[0]` ni les
+empreintes/commit du résumé, et un sous-ensemble non vide de groupes peut
+retourner code 0. Ne pas employer
 ce seul code de sortie comme preuve de couverture de la campagne entière.
 
 Le [shadow de scission des rectangles q3/q4](Q34_BLOCS_LIDAR_SHADOW_20260923.md)
