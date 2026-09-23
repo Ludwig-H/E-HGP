@@ -13,14 +13,15 @@ et la [contrelecture par ordre](CONTRELEC_V15_CHRONO_ORDRE_20260923.md)
 ont trouvé respectivement un faux refus K1 et un faux accord K5 du
 lecteur initial. Le correctif **`33d51efd`** mesure la fenêtre commune
 lancement→jointure et ajoute la dépendance par ordre K≥2 : ces deux
-écarts initiaux sont traités dans ce port. Il reste un **faux refus K1**
-dans la nouvelle borne, qui additionne toutes les phases statiques à son
-lot alors que K1 peut les recouvrir ; une sortie 360 sites valide mutée
-dans le seul chrono K1 est rejetée. Pour K1, la borne nécessaire utilise
-`max(static, lots_by_k[0])`, puis les phases aval. La porte de priorité
-des pannes et un digest ON/OFF identique sur 16k/K10 sont publiés ;
-l'égalité exhaustive du payload, un stress TSan propre au recouvrement
-et un reçu G4 v15 restent ouverts. R8/R9 ne mesurent pas ce recouvrement.
+écarts initiaux sont traités dans ce port. Le faux refus K1 restant est
+**fermé par `c19e4b49`**, qui utilise `max(static, lots_by_k[0])` et
+ajoute un cas positif : le nouveau lecteur accepte en rejeu les 24
+sorties du [reçu G4 R10](RECEPTION_G4_R10_20260923.md). R10 exécute
+cependant **`33d51efd`**, avant ce correctif ; son ablation mesure le
+recouvrement FULL, pas le lecteur ultérieur ni la validation parallèle
+ajoutée en `308ca2a1`. Une porte de priorité des pannes et un digest
+ON/OFF identique sur 16k/K10 sont publiés ; l'égalité exhaustive du
+payload et un stress TSan propre au recouvrement restent ouverts.
 Les mesures de densité restent celles du binaire v12 **`4530644b`** ;
 aucune nouvelle série LiDAR v13 n'en découle. Le reçu G4
 [R8](../receipts/g4_tower_r8_20260923/README.md) exécute
@@ -98,39 +99,35 @@ certifie pas les clés une à une : à K5 elle ne juge que K1..3, et le
 contrat K10 exigerait un générateur K12 pour juger ses dix ordres. Le
 protocole Kmax+2 ajoute des témoins, mais **Euler et la restriction des
 clés seuls** peuvent manquer une omission commune aux deux exécutions :
-un [contre-exemple exact à 13
-sites](CONTRE_EXEMPLE_EULER_KPLUS2_20260923.md) construit deux clés omises
-qui laissent à la fois `E_K=1` et la restriction K7→K5 inchangées. Son
-extension à 23 sites fait de même pour K12→K10 (K12 n'est pas encore un
-domaine produit). La [sonde d'omission de C](c_omission_20260923/README.md)
-montre que la **tour FULL refuse ces omissions de la fixture 13 sites**.
-Sur huit cas 8k (synthétiques et disques LiDAR de la seule séquence 08),
-elle refuse aussi **515/515 retraits isolés** de clés dont `p+u≤Kmax`,
-mais seulement **2/280** retraits échantillonnés dans la classe régulière
-de fin de fenêtre q2/q3 sont refusés, par connexité finale. C'est une
-observation d'échantillon et un argument de portée, pas encore une
-preuve générale de détection ni une preuve de complétude du générateur.
-La proposition constructive est de comparer K5 et K6 **avec tour FULL
-et restriction clé par clé** ; elle demande K11 pour le contrat K10,
-hors domaine courant, et doit encore traiter les omissions multiples.
-Aucune omission du générateur n'est constatée.
-La [contrelecture B de cette sonde et de la révision C](CONTRE_AUDIT_B_OMISSIONS_ET_PORTEE_REVISION_C_20260923.md)
-précise deux limites supplémentaires : les 515 retraits sont choisis à
-pas régulier parmi des clés **déjà émises**, et les 278/280 reconstructions
-acceptées ne sont pas comparées à la tour saine. L'argument « naissance
-retirée donc racine manquante » nécessite encore un lemme d'incidence :
-les programmes et les nœuds sont eux-mêmes reconstruits sans la clé
-retirée. Le mode `b13` affiche les refus mais ne les impose pas à son
-code de sortie. Garder les 129 jugements adverses de C distincts de
-tests exécutables. Les conclusions d'impossibilité K10/GPU et de
-nécessité d'un générateur par niveau restent des hypothèses, pas des
-bornes acquises.
-Une recherche locale **non épinglée** sur trois fixtures de huit sites
-montre que 9/12 retraits de couche haute acceptés changent pourtant le
-digest FULL ; un cas `uniform_8/K5` est donné dans la contrelecture.
-Cela démontre la possibilité d'un statut silencieux avec sortie
-différente, sans convertir les 278/280 acceptations à 8k en autant de
-sorties erronées.
+le [contre-exemple exact de B](CONTRE_EXEMPLE_EULER_KPLUS2_20260923.md)
+construit deux clés omises à 13 sites qui laissent `E_K=1` et la
+restriction K7→K5 inchangées ; son extension à 23 sites fait de même
+pour K12→K10. La [sonde de C](c_omission_20260923/README.md) montre
+que **FULL refuse les omissions de la fixture 13 sites**. À 8k/K5–K7,
+elle refuse 515/515 retraits isolés de clés avec `p+u≤Kmax`, mais
+seulement 2/280 retraits de la classe régulière q2/q3 de fin de fenêtre
+le sont par connexité finale. Ces clés étaient **déjà émises** et le
+tirage est déterministe ; la campagne ne cherche aucune clé jamais
+produite. Le seuil n'est pas un « si et seulement si » de détection.
+
+La [contrelecture B](CONTRE_AUDIT_B_OMISSIONS_ET_PORTEE_REVISION_C_20260923.md)
+montre que 9/12 retraits de couche haute acceptés sur de petites
+fixtures changent pourtant le digest FULL (recherche locale non
+épinglée), sans prouver que les 278 acceptations à 8k changent la tour.
+Elle relève aussi la lacune de l'argument par racine finale : les nœuds
+sont reconstruits sans la naissance retirée. Le
+[lemme de la première cofacette](LEMME_PREMIERE_COFACETTE_OMISSION_20260923.md)
+comble **conditionnellement** cette lacune, même pour plusieurs clés
+retirées si elles sont toutes de rang haut au plus Kmax : il suppose un
+catalogue autrement complet, accepté par FULL et un résolveur interne
+exact. Il ne prouve pas la complétude du générateur. Comparer K5 et K6
+**avec tour FULL et restriction clé par clé** renforcerait le diagnostic
+des omissions isolées de fin de fenêtre ; K10 demande K11, hors domaine
+actuel, et les suppressions mixtes restent ouvertes. La sonde C n'a pas
+encore de résultat K10 ; son mode `b13` affiche les refus sans les
+imposer au code de sortie. Ses 129 jugements adverses ne sont pas 129
+tests exécutables. Les conclusions d'impossibilité K10/GPU ou de
+nécessité d'un générateur par niveau restent des hypothèses.
 
 Le port Euler v13 est publié en **`c768e06a`**. La sonde écrit v13 et le
 lecteur G4 en vérifie la borne, la longueur du vecteur et les nouveaux
@@ -387,6 +384,19 @@ d'utiliser les nouveaux chronos pour expliquer le gain.
 Le débordement de masse diagonale de la version initiale v14 est
 **fermé en source** par `fe1142b5` (calcul i128 exact sur le domaine
 des plans admis), sans nouveau reçu de performance.
+
+Le [reçu R10 contrelu](RECEPTION_G4_R10_20260923.md) isole ensuite le
+recouvrement phase 0/phase A de FULL sur **12 paires G4 CPU** : 24/24
+cas `complete_relative`, 388/388 SHA conformes, objets logiques ON/OFF
+et par rapport à R9 ON identiques. La tour gagne **0,049–0,151 s à K5**
+et **0,461–0,761 s à K10** ; meilleur `chain_s` ON **2,74 s à K5**
+et **8,07 s à K10**, encore hors contrat. Le README du reçu réduit
+à tort le gain K5 maximal à 0,12 s et le ralentissement maximal de la
+phase 0 à 8 % : les maxima lus sont **0,151 s** et **9,94 %**.
+Le paquet exécuté `33d51efd` précède la validation parallèle du
+catalogue et le remplissage parallèle des programmes de `308ca2a1`,
+ainsi que le lecteur K1 corrigé en `c19e4b49` ; ne pas leur attribuer
+ces chronos. La phase q3/q4 du meilleur K5 reste **1,65–1,69 s**.
 
 ## Verrou q3/q4 : réduire le travail avant l'expansion
 

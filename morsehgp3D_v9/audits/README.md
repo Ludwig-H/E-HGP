@@ -57,6 +57,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`NOTE_C_INVARIANT_EULER_20260923.md`](NOTE_C_INVARIANT_EULER_20260923.md) | C | `cab281d8` 08:25 | démontré localement, testé | vivant | acceptée en partie (sonde/portes v13 publiées ; [limites ouvertes](ETAT_COURANT.md)) |
 | [`CONTRELEC_EULER_PAR_NERF_20260923.md`](CONTRELEC_EULER_PAR_NERF_20260923.md) | B | `559c8ab8` 08:40 | démontré localement | vivant | sans réponse |
 | [`CONTRE_EXEMPLE_EULER_KPLUS2_20260923.md`](CONTRE_EXEMPLE_EULER_KPLUS2_20260923.md) | B | `bf19240a` 09:28 | démontré localement (faux négatif exact d'Euler et de Kmax+2) | vivant | sans objet |
+| [`LEMME_PREMIERE_COFACETTE_OMISSION_20260923.md`](LEMME_PREMIERE_COFACETTE_OMISSION_20260923.md) | A | 23/11:07 | preuve conditionnelle de refus FULL, résolveur interne | vivant | sans réponse |
 | [`COMPLETUDE_Q4_CLE_REMBOURREE_20260923.md`](COMPLETUDE_Q4_CLE_REMBOURREE_20260923.md) | B | `0a6efac3` 06:58 | testé borné | vivant | sans réponse |
 | [`Q4_INDUCTION_ATLAS_EVENEMENTS_20260923.md`](Q4_INDUCTION_ATLAS_EVENEMENTS_20260923.md) | B ? | `28f0c284` 07:15 | démontré localement | vivant | sans réponse |
 | [`Q34_PROPRIETAIRE_PASSAGE_AMONT_20260923.md`](Q34_PROPRIETAIRE_PASSAGE_AMONT_20260923.md) | B ? | `4291c538` 07:56 | démontré localement | vivant | sans réponse |
@@ -149,9 +150,10 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`CONTRE_AUDIT_B_V14_ORDONNANCEMENT_20260923.md`](CONTRE_AUDIT_B_V14_ORDONNANCEMENT_20260923.md) | B | `a514de68` 10:22 | portes et protocole v14 | vivant | sans réponse |
 | [`RECEPTION_V14_CHRONOS_Q34_20260923.md`](RECEPTION_V14_CHRONOS_Q34_20260923.md) | A | 23/10:20 | méthode (deux mutations acceptées à `fe1142b5`) | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_WIP_TOUR_V15_RECOUVREMENT_20260923.md`](CONTRE_AUDIT_B_WIP_TOUR_V15_RECOUVREMENT_20260923.md) | B | `f5ef37f7` 10:32 | contrelecture WIP, faux refus de durée possible | vivant | sans réponse |
-| [`CONTRELEC_V15_CHRONO_ORDRE_20260923.md`](CONTRELEC_V15_CHRONO_ORDRE_20260923.md) | A | 23/10:34 | mutation réelle, faux accord de durée K5 | vivant | sans réponse |
+| [`CONTRELEC_V15_CHRONO_ORDRE_20260923.md`](CONTRELEC_V15_CHRONO_ORDRE_20260923.md) | A | 23/10:34 | mutations K5/K1 et réception du correctif | clos (`c19e4b49`) | corrigée |
 | [`CONTRE_AUDIT_B_LECTEURS_1F048_20260923.md`](CONTRE_AUDIT_B_LECTEURS_1F048_20260923.md) | B | `758236b4` 10:07 | méthode (rejeu du lecteur) | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_G4_R9_ORDONNANCEMENT_20260923.md`](CONTRE_AUDIT_B_G4_R9_ORDONNANCEMENT_20260923.md) | B, réception A | `bf42ccde` 10:37 | mesure CPU G4 appariée, dossier publié `76436d44` | vivant | sans objet |
+| [`RECEPTION_G4_R10_20260923.md`](RECEPTION_G4_R10_20260923.md) | A | 23/11:07 | réception CPU G4 appariée, recouvrement FULL | vivant | sans objet |
 | [`CONTRE_AUDIT_B_G4_R8_20260923.md`](CONTRE_AUDIT_B_G4_R8_20260923.md) | B | `2faf5b59` 09:57 | mesure | vivant ; seuil de tâche rectifié ci-dessus | sans objet |
 | [`CONTRE_AUDIT_B_G4_R7B_20260923.md`](CONTRE_AUDIT_B_G4_R7B_20260923.md) | B | `b46826e2` 06:24 | mesure | historique | sans objet |
 | [`CONTRE_AUDIT_B_G4_R6_20260923.md`](CONTRE_AUDIT_B_G4_R6_20260923.md) | B | `c17db454` 05:11 | mesure | historique | acceptée en partie (erratum incomplet) |

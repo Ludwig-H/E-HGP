@@ -97,6 +97,17 @@ Les visites et bornes des nœuds de construction du
 cœur restent, sur ces 28 relations, sous 2 ; la matérialisation des formes
 est ici le signal plus net.
 
+Il s'agit d'un **travail payé par la v12**, pas d'une population seulement
+logique : au commit `4530644b`, `wspd_q34.cpp:549–557` appelle `dead_.load`
+pour chaque cœur, puis `q34_dead_lanes.cpp:52–79` parcourt ses plages et
+calcule/stocke une forme par site. `dead_core_form_sites` écarte du compte
+les deux extrémités de chaque arête, bien qu'elles soient aussi parcourues.
+Le code v12 fait donc au moins un traitement par forme comptée :
+sur ce quart K10, **32,314 M→137,636 M→579,001 M** formes hors extrémités
+aux trois densités. Le ratio `formes/n²` croissant signale un coût
+réel du port v12 à ces tailles, sans établir une borne asymptotique pour
+le LiDAR ni pour un futur certificat par blocs.
+
 Une [extension sur les trames entières](lidar_density_full_3scenes_20260923/README.md)
 applique la même graine et la même méthode à 08/000000 et 08/000100,
 à K5/K10, avec huit nouvelles sondes. Sur les trois trames entières,

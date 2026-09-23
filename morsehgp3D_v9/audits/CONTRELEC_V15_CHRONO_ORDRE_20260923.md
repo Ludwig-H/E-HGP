@@ -1,4 +1,10 @@
-# WIP v15 : un chrono impossible par ordre reste accepté
+# v15 : contre-épreuves des chronos par ordre, désormais corrigées
+
+**État courant : clos par `33d51efd` pour le faux accord K5, puis par
+`c19e4b49` pour le faux refus K1.** Le reçu G4 R10 exécute le premier
+de ces deux ports ; ses sorties acceptées n'exhibent pas ce faux refus.
+Les sections ci-dessous gardent les contre-exemples qui ont motivé les
+portes, sans attribuer R10 au lecteur corrigé après sa capture.
 
 23 septembre 2026, lecture du worktree **non committé** après
 `fe1142b5` et du binaire local `build/v9-exp`. Complément au
@@ -65,5 +71,22 @@ avec `tower phase A of order 1 before its phase 0`. La nouvelle porte
 qui exige `static_by_k[0]=0` est utile, mais son test actuel modifie cette
 case sans préserver `static=sum(static_by_k)` : il échoue aussi à une
 ancienne garde. Transférer une durée de K2 à K1, somme inchangée,
-isolerait ce nouveau contrôle. Aucun reçu G4 v15 ne découle de ces
+isolerait ce nouveau contrôle. Aucun reçu G4 v15 ne découlait de ces
 contre-épreuves locales.
+
+Le port `c19e4b49` applique désormais
+`validate + max(static, lots_by_k[0]) + aval` à K1, et garde la somme
+des phases 0 pertinentes pour K≥2. Il ajoute un cas **positif** où le lot
+K1 dure toute la phase statique ; le mutant négatif K5 reste en place.
+Ce correctif ferme le défaut de réception décrit ici. En rejeu local,
+le lecteur corrigé accepte **24/24** sorties brutes R10 ; la mutation
+positive K1 passe **12/12** sorties avec recouvrement, contre **1/12**
+avec le lecteur `33d51efd`, et le mutant impossible K5 reste refusé
+**12/12**. Ce rejeu n'est pas une nouvelle session G4 : le reçu R10,
+réalisé avec `33d51efd`, précède cette correction du lecteur. Le mutant
+`static_by_k[0]=1` ne distingue toujours pas sa garde de l'identité
+`static=sum(static_by_k)` ; un transfert K2→K1 à somme constante
+compléterait la porte. Sur un échec de lancement de runner ou une
+exception statique non typée `Failure`, la jointure se fait mais
+`lots_ms` peut rester nul, car son affectation est sautée ; ce point
+n'affecte pas les sorties réussies de R10.
