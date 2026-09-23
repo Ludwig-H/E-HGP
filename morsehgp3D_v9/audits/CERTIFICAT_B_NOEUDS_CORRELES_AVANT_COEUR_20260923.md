@@ -58,7 +58,8 @@ préparé, et exclure conservativement toutes les plages originales
 `A∪B` des gardes ; si un nœud les chevauche, le raffiner ou le refuser.
 Il ne doit additionner ni les crédits S2, ni les crédits de cellules
 différentes. Dans chaque cellule pertinente, `K−1` gardes distincts
-ferment la voie q3 et aussi q4 ; `K−2` ferment q4 seule. Les domaines
+ferment la voie q3 active (`K≥2`) et aussi q4 si elle est active ;
+`K−2` ferment q4 seule (`K≥3`). Les domaines
 q3 et q4 peuvent partager une partition, mais seules leurs cellules
 respectivement intersectées doivent être prouvées.
 
@@ -102,7 +103,10 @@ sont promus avant soustraction/carré. La forme algébrique réarrangée
 `2|v|²+min_e(h_e−2s_e·v)` peut avoir des **intermédiaires** plus
 grands : l'évaluer en i128 vérifié ou rester aux distances directes.
 Hors du domaine u18/dyadique, utiliser `i128` vérifié ou replier ;
-aucun `double` ne tranche `<`.
+aucun `double` ne tranche `<`. Cette largeur `p≤12` qualifie **seulement**
+la grille entière u18/1 mm : la preuve géométrique s'applique aussi
+aux coordonnées float32 décodées exactement, mais leurs bornes
+numériques doivent être établies séparément.
 Les nœuds admis se prêtent à
 une réduction parallèle des populations, et `Q_E(v)` à une réduction
 par arêtes, mais la découverte des nœuds et les petites tâches doivent
