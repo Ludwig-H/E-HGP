@@ -1,10 +1,11 @@
 # État courant des audits v9
 
 23 septembre 2026. Code produit courant sur `origin/main` :
-**`e0ae05a7`** (préparation/tri FULL statiques parallèles et erratum du
-reçu q3/q4), après le certificat de voies mortes et protocole v5
-`099ca784` puis le selftest `b4e480fc`. Le reçu G4 R3 exécute **ce dernier
-snapshot**, pas le nouveau port FULL. Le census q3 sur feuille et la sonde
+**`6345a985`** (selftest du protocole v6), après `7f64a279` (cache des
+nœuds témoins, preuve q3/q4 conjointe et leviers publiés) et `e0ae05a7`
+(préparation/tri FULL statiques parallèles). Le reçu G4 R3 exécute
+**`b4e480fc`**, pas ces ports plus récents. Le certificat de voies mortes
+et le protocole v5 venaient de `099ca784`. Le census q3 sur feuille et la sonde
 v4 venaient de `e54f727c` ; le reçu G4 R2 reste épinglé au code
 antérieur `0b29b6c3` et le reçu G4 R1 au paquet `e28296bb`. Noyau MEB à
 `ad2d0ebb`, atlas saturant et sonde v3 à `e6405952`, défaut FULL statique
@@ -390,15 +391,30 @@ appariée.
    reste `complete_relative` ; les lacunes v5 de réception demeurent pour un
    futur reçu arbitraire et `host/lifecycle.txt` reste à `targeted_running`
    malgré la preuve séparée d'arrêt `TERMINATED`.
-   Sur le chantier WIP suivant, le DFS conjoint q3/q4 rend les mêmes bits de
+   Le port `7f64a279` réunit maintenant le cache de témoins, la preuve
+   conjointe et la sonde v6. Le DFS conjoint q3/q4 rend les mêmes bits de
    preuve que les deux DFS séparés sur **30 000** appels synthétiques, avec
    18,7 % de tests uniformes en moins mais aucun gain LiDAR établi ; ses
    compteurs de cellules ne se comparent plus directement à R3. Le cache
    des nœuds témoins passe ses comparaisons sur de vraies traces, mais son
    API publique permet de compter deux fois une feuille : voir la
    [contrelecture B et sa reproduction](CONTRE_AUDIT_B_CACHE_TEMOINS_WIP_20260923.md).
-   Le chemin interne garde les nœuds disjoints ; le nouveau schéma de sonde
-   v6 et les portes de raccord sont en cours, sans nouveau reçu G4.
+   Le chemin interne garde les nœuds disjoints. Les portes cache et ses trois
+   mutants, le raccord chaîne et la sonde/worker v6 ciblée passent dans un
+   build isolé. `6345a985` corrige aussi le faux producteur v5 du selftest
+   v6 ; son test de snapshot ciblé passe. Aucun gain G4 du cache ni de la
+   preuve conjointe, aucun reçu v6 apparié et aucune borne de croissance
+   ne sont acquis.
+   Les trois JSON locaux `build/v9-runs/dead_20260923/cache_s{00,01,02}_k5.json`
+   donnent **69,763 / 61,155 / 66,851 %** pour
+   `witness_cache_rejected_pairs / expanded_pairs` : il s'agit des paires
+   **résiduelles développées après le filtre de rectangles**, pas de toutes
+   les paires du nuage. La documentation du port doit préciser ce
+   dénominateur. Ces sorties W8/K5 sont ignorées par Git et sans commande
+   ni binaire épinglé ; leurs chronos v5→v6 mêlent cache, DFS conjoint et
+   port FULL, sans cas v6 cache=off apparié. Leurs résultats logiques
+   concordent avec les anciens essais locaux, mais ils ne quantifient
+   pas le gain causal du cache.
 4. **Aval FULL, grandes coquilles et échelle** : les 12,0 M appels MEB
    de 000000/K10 font 1,065 milliard de tests de puissance ; un test
    exact de la paire la plus éloignée peut éliminer toutes les autres
