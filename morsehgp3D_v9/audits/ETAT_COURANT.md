@@ -275,6 +275,30 @@ vérifiés (ou leurs empreintes) au lecteur, exiger leur égalité avec
 l'archive, puis tuer les deux mutations avant le prochain reçu G4. Voir la
 [contrelecture de la réception v8](CONTRE_AUDIT_B_RECEPTION_V8_GARDES_WIP_20260923.md).
 
+Le correctif local développeur `f599aed7` lie bien la garde archivée à
+la paire marque/calendrier déjà vérifiée par l'hôte et déplace la garde
+de cover q3/q4 avant les retours K1/2 ; il n'est pas encore publié sur
+`main`. Sa porte protocolaire est rouge : dans
+`Protocol.test_nominal_session_completed`, deux appels historiques à
+`validate_received` omettent le nouvel argument `verified_guard`
+(lignes 856–859 du selftest). Le test ciblé rend code 1 avec `TypeError`,
+avant d'exercer les refus de génération et provenance. Passer aussi la
+garde vérifiée à ces deux appels, puis relancer **tous** les selftests
+normal/`-O` en conservant le code de sortie Python (une sortie passée à
+`tail` sans `pipefail` peut masquer un échec).
+
+Deux détails de protocole restent à fermer pour une ablation R6 propre.
+`preflight_case` prend seulement les leviers du premier cas ; un plan
+valide OFF→ON pour le cœur ne préflight donc jamais la configuration ON
+avant sa trame LiDAR. Placer un cas ON d'abord ou préflighter chaque
+vecteur de leviers distinct. En réception `partial`, le résumé
+`probe_i.summary.json` d'un cas `killed_case_cap`/`killed_budget` est
+écrit par le worker, mais le lecteur saute sa vérification : sa
+suppression laisse encore accepter `partial` sur une fixture hors GCP.
+Vérifier le résumé attendu de chaque cas lancé avant le `continue` des
+cas tués. Aucun de ces constats ne retire la concordance brute des
+reçus R5 déjà contre-lus.
+
 Prochaines mesures : mêmes octets et masque figé, trames **entières** de
 plusieurs séquences sans sol puis brutes, s8/10/12, K5 et K10, W1/W24/W48,
 profil float32 et grille fine **séparés**. Les sept morceaux spatiaux
