@@ -46,6 +46,16 @@ annonce à tort 3,3–4,5× ; les répétitions individuelles donnent
 la tour a aussi évolué ; l'ablation interne R11 est la preuve du gain.
 Toujours **CPU G4**, s8, sans sol et seule séquence 08 : ni GPU ni
 contrat brut multi-séquence ou sous-quadraticité nouvelle.
+Les deux meilleures lignes R11 (08/000100) bornent aussi le gain du
+seul réordonnancement q3/q4 : les **48 workers logiques** consomment
+78,151 CPU·s en 1,661 s de mur maximal à K5 et 211,744 CPU·s en
+4,444 s à K10. À travail CPU inchangé et occupation idéale des 48 CPU
+logiques (24 cœurs physiques avec SMT), les planchers sont
+**1,628 s et 4,411 s** : environ **33 ms** de marge de scheduling
+sur la portion workers dans chaque cas. Cette borne conditionnelle
+n'inclut pas une réduction du travail ni un changement de coût par
+opération ; elle oriente la suite vers moins de paires, formes et
+sorties intermédiaires, avec coût aval complet.
 Les mesures de densité restent celles du binaire v12 **`4530644b`** ;
 aucune nouvelle série LiDAR v13 n'en découle. Le reçu G4
 [R8](../receipts/g4_tower_r8_20260923/README.md) exécute
@@ -477,10 +487,10 @@ montre que `prove` n'exige **aucun k-NN global exact** : tout sous-ensemble
 de sites **distincts** suffit à une fermeture sûre, avec repli si la
 preuve échoue. Une sélection locale/approchée à budget borné est donc
 permise, sous réserve de mesurer sa force et son coût total. La table
-actuelle à 16 voisins réserve au moins **65 octets/site** (2,42 Gio à
+**essayée** à 16 voisins réserve au moins **65 octets/site** (2,42 Gio à
 40 millions de sites) ; les visites de points du pré-calcul manquent
-encore au ledger de chaîne. Le WIP a aussi besoin du gate mixte
-cache q3/voisins q4 signalé par B avant capture.
+au ledger de chaîne de cet essai. Le gate mixte cache q3/voisins q4
+était requis avant toute promotion.
 La [contrelecture B du raccord mutable v17](CONTRE_AUDIT_B_WIP_V17_VOISINS_20260923.md)
 fige l'ébauche qui désactivait provisoirement la preuve avant filtre
 par `&& false` et pouvait doubler le calcul cache OFF. À 11 h 55, le
@@ -488,6 +498,23 @@ WIP rétablit la prépreuve si un cache valide existe pour l'ancre,
 compte la voie déjà fermée par cache au retour anticipé, et retire
 le deuxième essai. Cette correction du ledger est plausible en lecture
 statique, **pas encore qualifiée** : aucun gate ciblé ni reçu v17.
+Le développeur a depuis **retiré** ce port du code produit et prépare
+une archive négative, encore non publiée : sur 08/000000 sans sol,
+`--no-tower`, l'essai précoce donne un petit gain K5 mais une
+régression q3/q4 K10 de 60,833 à 64,230 s en mur local. L'égalité
+des seuls résumés `catalogue` ne vérifie pas les clés ni la tour FULL.
+
+Un autre WIP, `types.hpp` SHA-256 `75ab2b5e…3b29303b`, remplace le
+contrôle d'overflow des incréments unitaires de ledger par `++value`.
+Sur les chemins privés de FULL partis de zéro, l'argument de coût est
+plausible ; les **API publiques à ledger fourni par l'appelant** ont
+en revanche un contrat vérifié différent. Les portes CTest
+`q3_ball_census` (`queries=UINT64_MAX`) et `q34_witness_search`
+(`queries` et `BoundsWork.queries` au maximum) exigent
+`overflow_error` ; leurs appels à `counter_add` boucleraient maintenant
+à zéro et feraient échouer ces deux gates. Lecture statique, sans
+rebuild : conserver un incrément contrôlé sur ces API ou isoler le
+chemin local non contrôlé, puis rejouer les portes avant publication.
 
 ## Verrou q3/q4 : réduire le travail avant l'expansion
 
