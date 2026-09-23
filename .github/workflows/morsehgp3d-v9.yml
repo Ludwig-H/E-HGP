@@ -34,6 +34,10 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
+        with:
+          # The G4 protocol selftest forges a provenance naming the parent
+          # commit: a shallow clone of depth 1 has no HEAD~1.
+          fetch-depth: 2
 
       - name: Set up Python
         uses: actions/setup-python@v6

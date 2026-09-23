@@ -1072,8 +1072,11 @@ class Protocol(unittest.TestCase):
                         need(refused(session.require_committed_protocol, path, worker.sha(path)),
                              'forged commit provenance of an uncommitted protocol')
                     need(refused(session.require_committed_protocol, path, '0' * 64), 'snapshot pin')
-                    parent = subprocess.run(['git', '-C', str(ROOT), 'rev-parse', 'HEAD~1'], check=True,
-                                            capture_output=True, text=True).stdout.strip()
+                    found = subprocess.run(['git', '-C', str(ROOT), 'rev-parse', '--verify', '--quiet', 'HEAD~1^{commit}'],
+                                           capture_output=True, text=True)
+                    need(found.returncode == 0, 'the forged-commit case needs the parent commit: clone with '
+                         'fetch-depth >= 2 (a depth-1 shallow clone has no HEAD~1)')
+                    parent = found.stdout.strip()
                     forged = dict(files)
                     forged[worker.PROVENANCE] = worker.canonical_json(dict(
                         worker.strict_json(files[worker.PROVENANCE]), commit=parent))

@@ -105,6 +105,29 @@ def input_fnv(raw):
     return '%016x' % h
 
 
+def portable(argument):
+    """Chemin archive relatif a la racine du depot quand il y est (jamais le worktree de l'auteur)."""
+    path = Path(argument)
+    if path.is_absolute():
+        try:
+            return str(path.relative_to(ROOT))
+        except ValueError:
+            return argument
+    return argument
+
+
+def resolve_input(argument):
+    """Entree d'un cas archive, re-ancree sur ce depot : un chemin absolu d'un autre checkout est
+    relu a partir de son segment morsehgp3D_v8/ ; sinon il est refuse."""
+    path = Path(argument)
+    if not path.is_absolute():
+        return ROOT / path
+    parts = path.parts
+    if 'morsehgp3D_v8' not in parts:
+        raise Refusal('archived input path outside this repository: ' + argument)
+    return ROOT.joinpath(*parts[parts.index('morsehgp3D_v8'):])
+
+
 def nested_indices(points, size):
     xs = sorted(p[0] for p in points)
     ys = sorted(p[1] for p in points)
@@ -167,7 +190,8 @@ def run_case(args, name, path, provenance, out_dir, sites):
     elapsed = time.monotonic() - started
     text = completed.stdout
     begin, end = text.find('{'), text.rfind('}')
-    record = dict(case=name, argv=argv[1:], exit_code=completed.returncode, external_wall_s=round(elapsed, 3),
+    record = dict(case=name, argv=[portable(a) for a in argv[1:]], exit_code=completed.returncode,
+                  external_wall_s=round(elapsed, 3),
                   input=provenance)
     try:
         if completed.returncode != 0 or begin < 0:
@@ -291,7 +315,7 @@ def selftest(case_path):
     record = json.loads(case_path.read_text())
     value = record['probe']
     argv = record['argv']
-    raw = (ROOT / argv[0]).read_bytes()
+    raw = resolve_input(argv[0]).read_bytes()
     expected = expected_from_argv(argv, record['input']['sites'], raw)
     if not validate_probe(value, expected):
         print('lidar_scaling_selftest cause=baseline_refused')
@@ -308,13 +332,26 @@ def selftest(case_path):
     # Entree alteree d'un octet : le FNV recalcule ne correspond plus.
     changed = bytearray(raw)
     changed[0] ^= 1
-    total = len(table) + 3
+    total = len(table) + 5
     if not validate_probe(value, dict(expected, fnv=input_fnv(bytes(changed)))):
         killed += 1
     else:
         print('lidar_scaling_selftest survivor=input_byte_flipped')
+    # Chemin archive depuis un autre checkout : re-ancre sur ce depot (memes
+    # octets) ; hors d'un segment morsehgp3D_v8/, refuse.
+    tail = Path(argv[0]).parts
+    tail = tail[tail.index('morsehgp3D_v8'):] if 'morsehgp3D_v8' in tail else tail
+    if resolve_input(str(Path('/elsewhere/checkout').joinpath(*tail))).read_bytes() == raw:
+        killed += 1
+    else:
+        print('lidar_scaling_selftest survivor=foreign_absolute_path')
+    try:
+        resolve_input('/elsewhere/checkout/other/' + Path(argv[0]).name)
+        print('lidar_scaling_selftest survivor=path_outside_repository')
+    except Refusal:
+        killed += 1
     # Morceau v8 dont l'empreinte des IDs est fausse : refuse avant calcul.
-    grid = (ROOT / argv[0]).parent
+    grid = resolve_input(argv[0]).parent
     manifest = json.loads((grid / 'MANIFEST.json').read_text())
     piece = record['input']['piece']
     data = dict(manifest['datasets'][piece])
@@ -343,6 +380,10 @@ def revalidate(out_dir, work):
     for summary_path in sorted(out_dir.rglob('SUMMARY_*.json')):
         summary = json.loads(summary_path.read_text())
         tag = summary_path.stem[len('SUMMARY_'):]
+        bound = 's%s_k%d_s%d_w%d_r%d' % (summary['scene'], summary['k'], summary['s'], summary['workers'],
+                                         summary['repeat'])
+        if tag != bound:
+            report['failures'].append(dict(case=tag, reasons=['summary_parameters_' + bound]))
         _, _, cases = scene_cases(summary['scene'], tag, work)
         rows = {row['case']: row for row in summary['rows']}
         checked = 0
@@ -354,6 +395,8 @@ def revalidate(out_dir, work):
                 reasons.append('outcome')
             if record.get('input') != provenance:
                 reasons.append('provenance')
+            if (expected['k'], expected['s'], expected['workers']) != (summary['k'], summary['s'], summary['workers']):
+                reasons.append('command_parameters')
             if not validate_probe(record.get('probe'), expected):
                 reasons.append('probe_output')
             elif row_of(name, size, record['probe']) != rows.get(name):

@@ -199,9 +199,10 @@ if(Python3_Interpreter_FOUND AND EXISTS ${MHGP9_TOWER_WORKER})
   endforeach()
 endif()
 # Lecteur du runner de pente LiDAR (contre-audit B du 23 septembre 2026) : un
-# cas archive dont l'entree est un morceau v8 versionne est accepte, et 25
+# cas archive dont l'entree est un morceau v8 versionne est accepte, et 27
 # alterations (FNV d'entree, format, grille, fils statiques, champs lus apres
-# validation, IDs du morceau...) sont refusees. Sous python3 -O aussi.
+# validation, IDs du morceau, chemin absolu d'un autre checkout...) sont
+# refusees ou re-ancrees. Sous python3 -O aussi.
 set(MHGP9_LIDAR_SCALING_CASE
     ${CMAKE_CURRENT_SOURCE_DIR}/receipts/lidar_scaling_local_20260923/out/s01_k5_w8_r0/s01_k5_s8_w8_r0_piece_quarter_x_nonneg_y_nonneg.json)
 if(Python3_Interpreter_FOUND AND EXISTS ${MHGP9_LIDAR_SCALING_CASE})
@@ -214,7 +215,7 @@ if(Python3_Interpreter_FOUND AND EXISTS ${MHGP9_LIDAR_SCALING_CASE})
     add_test(NAME mhgp9_lidar_scaling_reader_${mode}
              COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=${Python3_EXECUTABLE}
                      "-DARGS=${py_flags} ${CMAKE_CURRENT_SOURCE_DIR}/bench/run_lidar_scaling.py --selftest ${MHGP9_LIDAR_SCALING_CASE}"
-                     "-DEXPECT_PREFIX=lidar_scaling_selftest mutants_killed=25/25"
+                     "-DEXPECT_PREFIX=lidar_scaling_selftest mutants_killed=27/27"
                      -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
     set_tests_properties(mhgp9_lidar_scaling_reader_${mode} PROPERTIES LABELS "gate;protocol" TIMEOUT 120)
   endforeach()
