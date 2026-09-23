@@ -57,6 +57,18 @@ ni les oracles exhaustifs sur petits nuages, ni les invariants de FULL qui
 pourraient éventuellement refuser un tel catalogue. Elle ne dit pas que le
 moteur actuel omet D ou T.
 
+Le phénomène n'est pas propre à K5. Avec `p=Kmax−1` intérieurs dans
+**chacune** des deux mêmes boules, la somme devient
+`−t^(p+1)+t^(p+2)` : tous les coefficients Euler jusqu'à l'ordre
+`Kmax=p+1` sont nuls. Pour K10, ajouter à D les cinq sites
+`(7,1,1),(13,1,1),(10,1,1),(10,2,1),(10,3,1)` et à T
+`(108,5,1),(109,4,1),(110,5,1),(111,4,1),(112,4,1)` donne
+un nuage de **23 points**, tous les nouveaux sites strictement intérieurs
+à leur boule. La même omission passe Euler jusqu'à K10 et une restriction
+K12→K10 clé par clé. Le moteur actuel ne prend pas K12 en charge : ceci
+est une limite mathématique d'un éventuel protocole étendu, pas un test
+produit déjà exécutable.
+
 ## Fixture recommandée
 
 Sur le nuage ci-dessus, exécuter la chaîne saine avec `keep_catalogue=true`
