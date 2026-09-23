@@ -213,9 +213,25 @@ preuve et sa propre ablation, sans hériter du gain ponctuel.
 
 Le DFS global neuf pour chaque ligne `a×B_node` est coûteux dans le
 prototype ci-dessus. Une expérience distincte prépare **une fois par
-site `a`** une petite palette `H_a` d'IDs proches distincts, par exemple
-`2K` voisins proposés par un index spatial/voxel. Cette sélection peut
-être approximative : elle ne décide jamais un rejet. Pour une ligne
+site `a`** une petite palette `H_a` d'IDs de **sites préparés** proches
+distincts, par exemple `2K` voisins proposés par un index spatial/voxel.
+Après fusion éventuelle de retours par la grille 1 mm, plusieurs IDs de
+retours bruts ne valent qu'**un** témoin ; la correspondance des retours
+reste conservée séparément. Cette sélection peut
+être approximative : elle ne décide jamais un rejet.
+Le reçu G4 R6 développe **11,96–32,79 M** de paires par cas sans sol,
+dont **79–91 %** sont ensuite rejetées par le filtre ponctuel : c'est
+la masse potentielle, pas une économie déjà acquise par `H_a`.
+Dans les six cas ON de première répétition, le cache de nœuds de la
+paire précédente avec la même ancre explique **7,31–20,07 M** de ces
+rejets, soit environ **67–76 %** des rejets ponctuels. Cela motive la
+recherche d'un ticket amorti par ancre, sans prédire que la palette
+heuristique `H_a` retrouvera les mêmes certificats.
+Même une palette parfaite sur ces **paires déjà rejetées** n'enlèverait
+pas les covers, atlas et sorties des paires réellement survivantes, ni
+le catalogue et FULL : la première porte vise surtout le coût et la
+croissance de l'expansion/filtre, pas à elle seule le contrat 1 s.
+Pour une ligne
 résiduelle de `|B_node|≥8` ou `16` (seuil à mesurer), chaque `z∈H_a`
 avec `z≠a` est soumis au prédicat exact déjà public
 `universal_witness(lane,a,box(B_node),z,…)`. Il teste les huit coins de
@@ -227,6 +243,19 @@ tôt. Compter les IDs distincts séparément aux seuils q3 `K−1`, q4
 `K−2`, transmettre le masque des voies encore ouvertes à chaque arête
 de la ligne et garder le chemin actuel quand le seuil manque. Aucun
 voisin proposé mais non certifié ne reçoit de crédit.
+La distinction retour/site est testable : en coordonnées entières du
+plan, `a=(0,0)`, `b=(10,0)`, `x=(5,6)`, `z=(5,0)` donnent une q3 aiguë
+propriétaire `ab`, centre `(5,11/12)`, profondeur **1** due à `z`.
+À K5 elle survit ; quatre retours bruts fusionnés en **ce seul site**
+`z` ne doivent pas être comptés comme quatre témoins (`K−1=4`), sous
+peine de la rejeter faussement.
+La même fixture teste q4 en ajoutant `y=(5,0,6)` : le tétraèdre
+`abxy` est strictement positif, `ab` reste sa plus longue arête,
+son centre est `(5,11/12,11/12)`, ses barycentriques sont
+`(25,25,11,11)/72`, et `R²=1921/72`. Le site `z` a une puissance
+`−25`, donc la profondeur vaut encore **1** ; quatre retours fusionnés
+en `z` ne valent pas les `K−2=3` témoins requis à K5. Cette vérification
+doit utiliser les IDs canoniques du nuage préparé, pas les IDs de retours.
 
 Le coût de préparation visé est `O(nK)` pour cette **palette
 heuristique**, puis `O(K·Σ_lignes 1)` prédicats de boîte, au lieu d'un
@@ -239,12 +268,33 @@ conviennent, car le ticket est propre à l'ancre. Le cache de nœuds de
 la première paire et les palettes `H_a` peuvent être essayés
 séparément ; **ne pas additionner** leurs crédits sans dédoublonnage
 d'IDs/nœuds et preuve d'antichaîne.
+Un premier shadow moins cher peut retester sur `a×B_node` les nœuds
+admis par le cache de la première paire, sans rechercher un seul nouveau
+site. Comparer **baseline / ticket seul / palette `H_a` seule** avant
+toute combinaison : le ticket du filtre rectangle n'offrait qu'environ
+0,83–1,06 crédit par rectangle échantillonné, tandis que la richesse
+du cache de la première paire sur une ligne n'est pas encore mesurée.
+Un test de ligne ne fournit jamais une profondeur initiale au census et
+ne retire aucun site de la coquille globale ; il ferme seulement un bit
+de voie avant la boucle de paires. K1 n'a aucune de ces voies, K2 n'a
+que q3, et K≥3 peut tester q3/q4 avec leurs seuils séparés.
+Les comptes sont remis à zéro pour chaque `(a,B_node,voie)` et le ledger
+doit isoler les masses supprimées **par rectangle**, **par ligne** et
+**par paire** : `masse_initiale = masse_rectangle + masse_ligne +
+masse_expansée` pour les paires, avec colonnes q3/q4 distinctes pour
+les bits partiels. Les masses des deux voies se chevauchent et ne sont
+pas la cardinalité de leur union. Tester l'admission exacte contre tous
+les `b` d'une petite boîte, notamment `z=a`, `z=b` non situé à un coin,
+contact `αH²=Xi`, K2/K3/K5 et palette avec plusieurs retours d'un
+même site.
 
 Cette unité de travail est aussi adaptée au GPU : tableaux compacts de
 `(a,b_node,masque)`, palette courte par ancre, tests de coins indépendants
 par ligne, puis compactage par somme de préfixes des lignes/voies encore
-ouvertes. La grille de tâches est disjointe et déterministe ; le
-certificat entier et les contacts doivent rester identiques au CPU.
+ouvertes. La grille de tâches est disjointe et déterministe ; palettes
+et boîtes sont immuables, sorties et compteurs sont privés par tâche
+avant réduction. Le certificat entier et les contacts doivent rester
+identiques au CPU, y compris ses produits intermédiaires >64 bits.
 Ce schéma est une proposition de parallélisation, **aucun kernel ni
 gain G4 ne sont encore qualifiés**.
 
