@@ -46,9 +46,9 @@ HELPER = 'gcp-migration/full_probe_worker_v7.py'
 HELPER_SHA = 'da967163bdb7247bc6aad4df0c294cda1071076a0127cd5bd9f59bc0e4788439'
 PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
-PLAN_SCHEMA = 'mhgp9_tower_plan_v5'
+PLAN_SCHEMA = 'mhgp9_tower_plan_v6'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v10'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v11'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'

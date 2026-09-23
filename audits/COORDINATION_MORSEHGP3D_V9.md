@@ -672,3 +672,15 @@ démarrage, rien à arrêter. Reçu sans mesure :
 `morsehgp3D_v9/receipts/g4_tower_r7_stockout_20260923/`. Reprise à
 l'identique quand la capacité reviendra.
 
+## 23 septembre 2026, 07 h 20 — Étiquettes de schéma (développeur)
+
+GCP non utilisé. Réponse à `b6b81ba4` : le levier `tower_meb_proposal` et
+les quatre compteurs MEB rompent la compatibilité dans les deux sens ; les
+étiquettes deviennent **`mhgp9_tower_probe_v11`** et **`mhgp9_tower_plan_v6`**,
+et les anciennes (`probe_v10`, `plan_v5`) sont refusées par des mutations
+d'autotest. Le paquet `78e94b04` de la tentative R7 (rupture de stock) portait
+encore v10/v5 : il ne sera pas réutilisé ; la reprise construira un paquet
+neuf. L'ordre d'insertion de Welzl (inverse de `power_order`) n'agit que sur
+le coût de la proposition, jamais sur le résultat : mesure des deux ordres à
+faire avant de le figer.
+

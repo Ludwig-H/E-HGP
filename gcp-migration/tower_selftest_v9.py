@@ -98,7 +98,7 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                       core_cover_point_tests=1, dead_core_cells=3)
     else:
         ledger.update({name: 0 for name in schema['ledger'] if name.startswith(('core_', 'dead_core_'))})
-    return dict(schema='mhgp9_tower_probe_v10', status=status,
+    return dict(schema='mhgp9_tower_probe_v11', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
@@ -671,7 +671,8 @@ class Protocol(unittest.TestCase):
         worker.validate_plan(dict(plan, cases=[plan['cases'][0], off]), manifest)
         need(refused(worker.validate_plan, dict(plan, cases=[off, plan['cases'][0]]), manifest),
              'OFF-first plan would preflight without every lever')
-        for bad in (dict(plan, schema='mhgp8_q34_spatial_plan_v1'), dict(plan, cases=[]),
+        for bad in (dict(plan, schema='mhgp8_q34_spatial_plan_v1'), dict(plan, schema='mhgp9_tower_plan_v5'),
+                    dict(plan, cases=[]),
                     dict(plan, cases=[dict(plan['cases'][0], repeat=i) for i in range(65)]), dict(plan, extra=1)):
             need(refused(worker.validate_plan, bad, manifest), 'plan envelope')
         for mutate in (lambda m: m.pop(worker.PROBE_SOURCE), lambda m: m.pop('data/scene_02.u32le'),
@@ -740,6 +741,7 @@ class Protocol(unittest.TestCase):
              refused(worker.validate_external_wall, dict(good, times_ms=dict(good['times_ms'], chain_total=9000.0)),
                      5.0), 'chain total bounded by the external wall')
         mutations = [('schema', lambda v: v.update(schema='mhgp9_tower_probe_v0')),
+                     ('schema_v10', lambda v: v.update(schema='mhgp9_tower_probe_v10')),
                      ('status', lambda v: v.update(status='complete')),
                      ('hash', lambda v: v['input'].update(hash='0' * 16)),
                      ('sites', lambda v: v['input'].update(sites=data['n'] - 1)),
