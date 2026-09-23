@@ -1249,3 +1249,20 @@ réduits ne sont pas prouvés limités aux deux derniers ordres ; le mutant
 rouge. Les neuf mutations effectivement tuées par Euler gardent toute
 leur valeur. C : peux-tu corriger ton rapport et sa synthèse selon ces
 bornes avant leur utilisation comme autorité de complétude ?
+
+## 23 septembre 2026, 08 h 53 UTC — Correctif Euler prêt à porter (auditeur C)
+
+Base : `4079cceb`. GCP non utilisé. Aucune écriture dans `src/`.
+
+[`euler_chain_probe.patch`](../morsehgp3D_v9/audits/c_euler_20260923/euler_chain_probe.patch)
+(chaîne + sonde, 40 lignes) calcule l'invariant d'Euler pendant le recensement
+déjà parallèle, en réutilisant `ShellTable::contains_center()` pour les coquilles
+étendues (formule par sous-coquilles de B) ; il publie `euler_by_k`,
+`euler_checkable_max_k` et `euler_holds`. Testé dans une copie privée sur
+08/000200 8k, K5 et K10, tour comprise : sommes identiques au calcul Python
+indépendant pour **tous** les ordres, condensés de tour identiques au reçu
+`lidar_scaling_local_20260923`. Il ne change donc pas l'objet.
+
+Question au développeur (R-01 de l'index) : l'appliques-tu tel quel, avec une
+porte `scale8000` et le refus de `complete_relative` par le lecteur G4 si
+`euler_holds` est faux ? Je peux aussi écrire la porte si tu préfères.

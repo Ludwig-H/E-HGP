@@ -1,0 +1,94 @@
+diff --git a/morsehgp3D_v9/bench/tower_probe.cpp b/morsehgp3D_v9/bench/tower_probe.cpp
+index ab7fb63..dd56109 100644
+--- a/morsehgp3D_v9/bench/tower_probe.cpp
++++ b/morsehgp3D_v9/bench/tower_probe.cpp
+@@ -197,6 +197,9 @@ int main(int argc, char** argv) {
+               c.shell_over_cap, c.max_shell, c.max_interior, c.census_nodes, c.census_leaf_tests, c.bytes, c.balls_by_qmin[2],
+               c.balls_by_qmin[3], c.balls_by_qmin[4]);
+   for (std::size_t s = 0; s < c.balls_by_shell.size(); ++s) std::printf("%s%" PRIu64, s ? "," : "", c.balls_by_shell[s]);
++  std::printf("],\"euler_checkable_max_k\":%u,\"euler_holds\":%s,\"euler_by_k\":[", c.euler_checkable_max_k,
++              c.euler_holds ? "true" : "false");
++  for (std::size_t k = 1; k < c.euler_by_k.size(); ++k) std::printf("%s%" PRId64, k > 1 ? "," : "", c.euler_by_k[k]);
+   std::printf("]},");
+   {
+     const auto& l = r.ledger;
+diff --git a/morsehgp3D_v9/src/chain/tower_chain.cpp b/morsehgp3D_v9/src/chain/tower_chain.cpp
+index 23d147f..24d6fb8 100644
+--- a/morsehgp3D_v9/src/chain/tower_chain.cpp
++++ b/morsehgp3D_v9/src/chain/tower_chain.cpp
+@@ -1,5 +1,7 @@
+ #include "tower_chain.hpp"
+ 
++#include <bit>
++
+ #include <algorithm>
+ #include <array>
+ #include <atomic>
+@@ -467,6 +469,16 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
+       std::uint64_t extra = 0, max_shell = 0, max_interior = 0;
+       std::array<std::uint64_t, 5> by_q{};
+       std::array<std::uint64_t, 17> by_shell{};
++      std::array<std::int64_t, 11> euler{};  // contributions par ordre K (index K)
++    };
++    // Coefficient de t^{K-1} dans t^p (t-1)^{j-1} : (-1)^{j-1-i} C(j-1, i), i = K-1-p.
++    const auto euler_add = [kmax](std::array<std::int64_t, 11>& e, unsigned p, unsigned j, std::int64_t count) {
++      static constexpr std::int64_t binom[12][12] = {
++          {1}, {1, 1}, {1, 2, 1}, {1, 3, 3, 1}, {1, 4, 6, 4, 1}, {1, 5, 10, 10, 5, 1}, {1, 6, 15, 20, 15, 6, 1},
++          {1, 7, 21, 35, 35, 21, 7, 1}, {1, 8, 28, 56, 70, 56, 28, 8, 1}, {1, 9, 36, 84, 126, 126, 84, 36, 9, 1},
++          {1, 10, 45, 120, 210, 252, 210, 120, 45, 10, 1}, {1, 11, 55, 165, 330, 462, 462, 330, 165, 55, 11, 1}};
++      for (unsigned i = 0; i < j && p + i + 1 <= kmax; ++i)
++        e[p + i + 1] += (((j - 1 - i) % 2) ? -1 : 1) * binom[j - 1][i] * count;
+     };
+     const std::size_t census_workers = std::max<std::size_t>(1, std::min(W, unique / 256 + 1));
+     std::vector<WorkerState> states(census_workers);
+@@ -499,6 +511,16 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
+         const auto table = tower::local_plateau::ShellTable::prepare(std::move(local));
+         q = table.q_min();
+         require(q == rep.arity, "chain_qmin_differs_from_min_presented_arity");
++        // Euler, coquille etendue : sous-coquilles T dont l'enveloppe contient le centre.
++        std::array<std::int64_t, 13> by_size{};
++        const auto& contains = table.contains_center();
++        for (std::size_t mask = 1; mask < contains.size(); ++mask)
++          if (contains[mask]) ++by_size[(std::size_t)std::popcount((unsigned)mask)];
++        for (unsigned j = 2; j <= st.sh.size(); ++j)
++          if (by_size[j]) euler_add(st.euler, (unsigned)st.in.size(), j, by_size[j]);
++      } else {
++        // Coquille reguliere : T = U seule (positivite du support prouvee par la tour).
++        euler_add(st.euler, (unsigned)st.in.size(), q, 1);
+       }
+       require(st.in.size() + q <= std::min<std::size_t>(kmax + 1, points.size()),
+               "chain_ball_outside_rank_window");
+@@ -523,7 +545,13 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
+       result.catalogue.census_leaf_tests += st.depth.leaf_tests;
+       for (std::size_t q = 0; q < 5; ++q) result.catalogue.balls_by_qmin[q] += st.by_q[q];
+       for (std::size_t s = 0; s < 17; ++s) result.catalogue.balls_by_shell[s] += st.by_shell[s];
++      for (std::size_t k = 1; k <= 10; ++k) result.catalogue.euler_by_k[k] += st.euler[k];
+     }
++    result.catalogue.euler_by_k[1] += static_cast<std::int64_t>(points.size());  // minima de d_1 : les sites
++    result.catalogue.euler_checkable_max_k = kmax >= 3 ? kmax - 2 : 0;
++    result.catalogue.euler_holds = true;
++    for (unsigned k = 1; k <= result.catalogue.euler_checkable_max_k; ++k)
++      result.catalogue.euler_holds = result.catalogue.euler_holds && result.catalogue.euler_by_k[k] == 1;
+     gathered = GatheredPresentations{};  // groups is not read past this point
+     result.catalogue.shell_over_cap = over_cap.load();
+     if (result.catalogue.shell_over_cap > 0) {
+diff --git a/morsehgp3D_v9/src/chain/tower_chain.hpp b/morsehgp3D_v9/src/chain/tower_chain.hpp
+index 1945cb0..d2bf24f 100644
+--- a/morsehgp3D_v9/src/chain/tower_chain.hpp
++++ b/morsehgp3D_v9/src/chain/tower_chain.hpp
+@@ -88,6 +88,15 @@ struct CatalogueStats {
+   std::array<std::uint64_t, 5> balls_by_qmin{};
+   std::array<std::uint64_t, 17> balls_by_shell{};  // index = taille de coquille (16 = 16 et plus)
+   std::uint64_t bytes = 0;  // capacite du catalogue BallData
++  // Invariant d'Euler par ordre (note C, contrepreuve B par le nerf) : pour
++  // K <= euler_checkable_max_k = Kmax-2, n*[K=1] + somme des contributions des
++  // boules du catalogue vaut 1 si le catalogue est complet (condition
++  // necessaire). Contribution : t^p * somme_{T : centre dans conv(T)} (t-1)^{|T|-1},
++  // coefficient de t^{K-1} ; T parcourt les sous-coquilles de ShellTable pour une
++  // coquille etendue, T = U seule pour une coquille reguliere (support minimal).
++  std::array<std::int64_t, 11> euler_by_k{};  // indice K = 1..10
++  unsigned euler_checkable_max_k = 0;
++  bool euler_holds = false;  // toutes les sommes verifiables valent 1
+ };
+ 
+ // Registre du generateur q3/q4 (copie scalaire des compteurs v8, sommes sur

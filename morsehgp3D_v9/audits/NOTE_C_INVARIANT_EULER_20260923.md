@@ -179,6 +179,25 @@ ajoutés ici.
   calcul du lien inférieur n'a pas de plafond propre (arrangement exact de
   $u$ grands cercles, coût $O(u^3)$ en entiers).
 
+## Correctif prêt à porter
+
+[`euler_chain_probe.patch`](c_euler_20260923/euler_chain_probe.patch) (40 lignes
+ajoutées, s'applique proprement au HEAD `4079cceb`, **non appliqué** au dépôt) :
+la chaîne accumule les contributions pendant le recensement déjà parallèle,
+sans travail géométrique nouveau. Pour une coquille étendue, elle réutilise la
+table `ShellTable::contains_center()` que la chaîne calcule déjà pour vérifier
+$q_{\min}$ : c'est exactement l'ensemble des sous-coquilles $T$ dont l'enveloppe
+contient le centre, donc la formule par sous-ensembles de B,
+$t^p\sum_{T}(t-1)^{\lvert T\rvert-1}$. Pour une coquille régulière, un seul
+terme. La sonde publie `euler_by_k`, `euler_checkable_max_k` et `euler_holds`.
+Contrôle (08/000200 8k, sonde complète avec tour, deux fils) : K5 et K10
+`complete_relative`, **mêmes sommes que le calcul Python indépendant par
+grands cercles pour tous les ordres**, y compris les ordres non vérifiables
+(111 et 230 boules dégénérées), et **condensés de tour identiques** à ceux du
+reçu `lidar_scaling_local_20260923` (`9ef07ff0d2f60c17`, `05e1a8fd626d7938`) :
+le correctif ne change pas l'objet
+([résultats](c_euler_20260923/results/patched_probe_s02_8000.json)).
+
 ## Proposition au développeur (priorité haute, coût faible)
 
 1. Calculer $E_K$ dans la chaîne après la fusion du catalogue, **hors chrono**,

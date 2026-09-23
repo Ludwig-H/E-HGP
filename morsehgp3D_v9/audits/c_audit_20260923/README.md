@@ -20,14 +20,14 @@ Neuf lectures indépendantes, menées en parallèle sur `origin/main` `0125dc18`
 | `L5_rapport.md` | reconstruction de la tour FULL |
 | `L6_rapport.md` | portes, oracles, mutants, CI |
 | `L7_rapport.md` | mesures G4 R1 → R7b, écart au contrat, chronomètre |
+| `L8_rapport.md` | état et hygiène du dossier d'audits et du canal (inventaire complet) |
 | `L9_rapport.md` | pistes fermées, invariants, parallélisme et GPU |
 
 Chaque `*_constats.json` donne les constats bruts de la lecture (gravité,
 preuves fichier:ligne, action). **Ce sont des constats avant vérification** :
 le document principal ne retient que les constats revérifiés par l'auditeur C
 ou confirmés par la vérification adverse, et signale les autres comme en
-cours. La lecture L8 (hygiène du dossier) alimente l'index
-`morsehgp3D_v9/audits/README.md`, publié séparément.
+cours. La lecture L8 alimente l'index [`../README.md`](../README.md).
 
 ## `scripts/`
 
@@ -46,5 +46,6 @@ chemins du poste de l'auditeur ; ils se relancent en adaptant ces chemins.
 | `lentille5/` | `check_level_filter.py` (filtre flottant des niveaux), `sizes.cpp` |
 | `lentille6/` | `diam_depth.py` (vacuité de l'élagage à K = 10 sur T2), liste des tests CI |
 | `lentille7/` | `table_g4.py`, `analyse.py`, `scaling_laws.py` et leurs sorties (109 exécutions G4) |
+| `lentille8/` | `links.py`, `attrib.py`, `hashes.py`, `resp.py`, `lint_audits.py` (liens, attributions, commits cités, réponses) |
 | `lentille9/` | `spawn.cpp` (coût de création d'un fil) |
 | `verif_*`, `l4-*`, `L4-*` | contrôles des vérificateurs adverses (sondes d'omission, mesures d'allocation, fixture u13 de A) |

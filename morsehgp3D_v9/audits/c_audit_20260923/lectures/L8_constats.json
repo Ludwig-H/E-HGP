@@ -1,0 +1,225 @@
+{
+ "findings": [
+  {
+   "id": "C8-01",
+   "titre": "Entrées d'auditeur commitées par le développeur et brouillons d'auditeur dans son worktree",
+   "gravite": "moyenne",
+   "categorie": "hygiene",
+   "constat": "Trois entrées de B dans le canal sont entrées dans main par des commits du développeur, qui portent sa ligne Claude-Session : 05 h 35 UTC par 458fb0ed, 05 h 48 UTC par 6420ff90, 06 h 08 UTC par 8e8b83a3. Au moment de l'audit, le worktree du développeur (build/v9-open-worktree, HEAD 06f71037) contient encore du matériel d'auditeur non commis. Le canal y est modifié et ajoute deux entrées B déjà publiées par 87ccf5fc et 7f218872. CERTIFICAT_NOEUDS_CORE_LIDAR_20260923.md y est identique à 7f218872. CONTRE_AUDIT_RECTANGLES_Q34_TICKET_BORNE_20260923.md (mtime 08:32) n'est pas publié. Enfin, le worktree partagé (HEAD a74e90f2) porte une copie non suivie de tout morsehgp3D_v9/audits/ (108 entrées).",
+   "preuves": [
+    "git blame bbc41a9c -- audits/COORDINATION_MORSEHGP3D_V9.md : lignes 12, 38 et 704 attribuées à 458fb0ed, 6420ff90 et 8e8b83a3",
+    "git log -1 --format=%B 458fb0ed / 6420ff90 / 8e8b83a3 : ligne Claude-Session du développeur",
+    "audits/COORDINATION_MORSEHGP3D_V9.md:8-10 (règle : un worktree par acteur)",
+    "git -C build/v9-open-worktree status : M audits/COORDINATION_MORSEHGP3D_V9.md, ?? CERTIFICAT_NOEUDS_CORE_LIDAR_20260923.md, ?? CONTRE_AUDIT_RECTANGLES_Q34_TICKET_BORNE_20260923.md",
+    "git -C /workspaces/E-HGP status : ?? morsehgp3D_v9/audits/"
+   ],
+   "consequence": "La paternité Git des entrées B est perdue, et elles se retrouvent en tête du canal, hors chronologie. Le prochain commit ou rebase du canal par le développeur entrera en conflit ou dupliquera deux entrées B. Un brouillon d'auditeur non relu peut être publié sous un commit du développeur. Un git add -A dans le worktree partagé indexerait tout le dossier.",
+   "action_proposee": "B écrit et commite seulement depuis son propre worktree, et y publie D8. Le développeur remet le canal de son worktree à HEAD avant son prochain pull (décision qui lui revient) et vérifie git diff --cached --quiet avant tout git add du canal. Le README d'index recense les brouillons hors worktree dédié.",
+   "recoupe_audit_existant": "Règle du canal (lignes 8-10), mémoire « Index Git partagé » ; aucune note A ou B ne signale ces cas"
+  },
+  {
+   "id": "C8-02",
+   "titre": "Recommandations restées sans réponse écrite, différées sans échéance, ou engagement non tenu",
+   "gravite": "moyenne",
+   "categorie": "protocole",
+   "constat": "Le préambule du canal exige pour chaque recommandation une réponse acceptée, refusée avec raison, ou différée avec échéance. Aucune réponse écrite n'existe pour : la question de B sur C6/tri v6, l'obligation d'induction globale q4, la couture et le lemme de la phase A, OBSTACLES_GPU_SOUS_SECONDE, le ticket possédé du cache, le tri unique par histogramme/scatter, la mesure des répétitions de BallKey, les collisions et le RSS de l'index, les plages arrondies du README R6, le commentaire « Exact depth ». Plusieurs reports n'ont pas d'échéance : pré-atlas et grandes coquilles « retenues pour V9-2 », seuil K−2 « retenu pour la suite », palette « en réserve », occupation des seaux « pas dans cette livraison ». Engagement non tenu : « La R5 publiera RSS et temps par phase ». R5, R6 et R7b ne publient qu'un rss_kb de pointe par cas.",
+   "preuves": [
+    "audits/COORDINATION_MORSEHGP3D_V9.md:3-7 (règle de réponse)",
+    "audits/COORDINATION_MORSEHGP3D_V9.md:35-36 (question C6 sans suite)",
+    "audits/COORDINATION_MORSEHGP3D_V9.md:796-832 (phase A, induction : pas de réponse du développeur ensuite)",
+    "audits/COORDINATION_MORSEHGP3D_V9.md:158-162, 211-212, 626-631, 776-777 (reports sans échéance)",
+    "audits/COORDINATION_MORSEHGP3D_V9.md:355-356 (engagement RSS par phase)",
+    "morsehgp3D_v9/receipts/g4_tower_r5_20260923/SUMMARY.json (clés : rss_kb seul)",
+    "morsehgp3D_v9/bench/tower_probe.cpp:95,237 à bbc41a9c (peak_rss_kb)",
+    "morsehgp3D_v9/audits/ETAT_COURANT.md:362-364 à 0125dc18 (RSS par phase redemandé)",
+    "morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.cpp:168 à bbc41a9c (commentaire inchangé)"
+   ],
+   "consequence": "Le canal ne sert pas de registre des décisions : des pistes utiles au contrat, comme la résidence par phase, le GPU ou la phase A, peuvent être oubliées ou re-proposées. Le mur de résidence connu n'est pas instrumenté par phase.",
+   "action_proposee": "Tenir un registre des recommandations ouvertes dans morsehgp3D_v9/audits/README.md (identifiant, source, propriétaire, échéance). Le développeur y répond dans le canal par identifiant, avec une échéance pour chaque report. Priorités : RSS par phase et par K, induction q4, phase A, OBSTACLES_GPU.",
+   "recoupe_audit_existant": "ETAT_COURANT.md:72-73, 158-159, 362-364 et canal lignes 35-36, 796-832 posent déjà ces demandes. Apport ici : leur recensement transversal et le constat d'absence de réponse."
+  },
+  {
+   "id": "C8-03",
+   "titre": "Deux « états courants » v9, dont un obsolète hors couverture",
+   "gravite": "moyenne",
+   "categorie": "documentation",
+   "constat": "audits/morsehgp3D_v9/ETAT_COURANT.md (B, 312 lignes, dernier contenu de fond 74aa8172 à 00:27) coexiste avec morsehgp3D_v9/audits/ETAT_COURANT.md. Il écrit encore que le protocole G4 v3 « reste bloqué » et décrit l'état R1/e6405952. Son titre reste « État courant — audit Morse HGP 3D v9 ». Il n'est pas couvert par check_docs. À 1bbb38e6, sa ligne 203 pointait vers une note supprimée ; le lien a été réparé à la main 8 minutes plus tard (be699a69).",
+   "preuves": [
+    "audits/morsehgp3D_v9/ETAT_COURANT.md:1-8, 47-49, 95-101 à bbc41a9c",
+    "git log bbc41a9c -- audits/morsehgp3D_v9/ETAT_COURANT.md (dernier contenu de fond 74aa8172)",
+    "links_root.py sur 1bbb38e6 : lien mort vers CONTRE_AUDIT_B_GCP_SESSION_20260922.md (ligne 203)",
+    "tools/check_docs.py:30-114 (aucun chemin sous audits/)"
+   ],
+   "consequence": "Un lecteur, ou un agent, qui ouvre le mauvais fichier lit un verdict dépassé de plusieurs sessions G4. Les liens cassés n'y sont détectés par personne.",
+   "action_proposee": "B requalifie le titre en « Photographie historique au 74aa8172 » et renvoie en tête vers morsehgp3D_v9/audits/ETAT_COURANT.md. Le README d'index le range dans « Hors dossier ». Les liens de ce fichier entrent dans le contrôle (voir C8-06).",
+   "recoupe_audit_existant": "Aucun"
+  },
+  {
+   "id": "C8-04",
+   "titre": "Attribution non traçable et libellés d'auteur erronés",
+   "gravite": "moyenne",
+   "categorie": "hygiene",
+   "constat": "Tous les commits du dossier sont signés Ludwig-H, sans ligne d'attribution. Environ 20 notes et sondes sans préfixe n'indiquent pas leur auteur ; leur attribution reste probable. Le canal et la passation se trompent d'auteur. Le filtre de ligne a×B, proposé par A (CONTRAT_COUTS § « Filtrer une ligne a × B », confirmé par PISTE_B…:8-9), est appelé « la proposition B » (canal:377 ; PASSATION.md:105). La palette par ancre, issue de PISTE_B…:244 (commit B 1140c176), est appelée « piste A » (canal:626). A n'a aucune entrée dans le canal.",
+   "preuves": [
+    "git log --format=%B -- morsehgp3D_v9/audits : 0 ligne Claude-Session ou Audit-Role",
+    "morsehgp3D_v9/audits/PISTE_B_Q34_RECTANGLES_AVANT_EXPANSION_20260923.md:8-9, 118, 244",
+    "morsehgp3D_v9/audits/CONTRAT_COUTS_ET_PARALLELISATION.md § « Filtrer une ligne a × B » (ligne 124)",
+    "audits/COORDINATION_MORSEHGP3D_V9.md:377, 626",
+    "morsehgp3D_v9/PASSATION.md:105 à bbc41a9c",
+    "liste des en-têtes du canal : 33 entrées DEV, 12 B, 2 C, 0 A"
+   ],
+   "consequence": "Les réponses vont au mauvais auditeur, et les crédits comme les responsabilités de correction sont brouillés. Sans auteur déclaré, le README d'index ne peut pas classer sûrement 20 entrées.",
+   "action_proposee": "Chaque nouvelle note porte « Auteur : auditeur X » en en-tête, et chaque commit d'audit une ligne Audit-Role: A|B|C. A et B confirment ou corrigent les attributions probables du README. Le développeur rectifie « proposition B » et « piste A » dans sa prochaine entrée.",
+   "recoupe_audit_existant": "Aucun"
+  },
+  {
+   "id": "C8-05",
+   "titre": "Chronologie du canal non fiable : ordre, fuseaux, en-têtes datés dans le futur, base manquante",
+   "gravite": "basse",
+   "categorie": "hygiene",
+   "constat": "Les entrées ne sont pas dans l'ordre : B 05 h 35 et 05 h 48 UTC en tête, développeur « 06 h 00 » et « 06 h 40 » avant « 05 h 05 ». Les heures du développeur ne suivent aucun fuseau cohérent (« 05 h 20 » commitée à 04:08 UTC, « 05 h 05 » à 05:07, « 08 h 40 » à 06:20). Certains en-têtes sont datés dans le futur : « 08 h 40 UTC » commitée à 08:16 (06f71037) alors que l'horloge hôte indiquait 08:19. C a le même défaut : « 08 h 05 UTC » commitée à 07:55, « 08 h 45 UTC » à 08:25. Seules 7 entrées sur 47 déclarent un commit de base, et 5 se terminent par une question, contrairement au préambule.",
+   "preuves": [
+    "git blame bbc41a9c -- audits/COORDINATION_MORSEHGP3D_V9.md (lignes 12, 38, 438, 472, 514, 541, 762, 983, 1017, 1097)",
+    "date -u pendant l'audit : Wed Sep 23 08:19:31 UTC 2026",
+    "audits/COORDINATION_MORSEHGP3D_V9.md:3-7 (format exigé)"
+   ],
+   "consequence": "On ne peut pas reconstituer « qui a répondu à quoi, et quand » depuis le canal seul. Il faut passer par git blame. Cela affaiblit le canal comme registre de réponses.",
+   "action_proposee": "Ajouter les entrées seulement en fin de fichier, dans l'ordre des commits. Prendre l'heure avec date -u au moment du commit. Mettre une ligne « Base : <hash> » obligatoire et numéroter les questions. C corrige ses propres en-têtes dans sa prochaine entrée, sans réécrire celles des autres.",
+   "recoupe_audit_existant": "Aucun"
+  },
+  {
+   "id": "C8-06",
+   "titre": "check_docs ne couvre que ETAT_COURANT.md dans le périmètre des audits v9",
+   "gravite": "basse",
+   "categorie": "documentation",
+   "constat": "tools/check_docs.py ne nomme que morsehgp3D_v9/audits/ETAT_COURANT.md. Ni les 66 à 73 autres notes, ni q4_global_12sites_20260923/README.md, ni phase_a_20260923/MANIFEST.md, ni audits/COORDINATION_MORSEHGP3D_V9.md, ni audits/morsehgp3D_v9/*.md ne sont contrôlés. Appliquées à l'ensemble, les règles de validate() donnent 0 erreur (70 fichiers à 0125dc18, 75 à bbc41a9c). Le seul lien cassé observé (1bbb38e6) se trouvait dans un fichier non couvert.",
+   "preuves": [
+    "tools/check_docs.py:107-113",
+    "lint_audits.py (scratchpad) : files 70 errors 0 à 0125dc18 ; files 75 non-link errors 0 à bbc41a9c",
+    "links.py : 385 liens, 0 mort à 0125dc18 ; 423 liens, 0 mort à bbc41a9c",
+    ".github/workflows/ci.yml:62 (check_docs en CI)"
+   ],
+   "consequence": "Un retrait ou un renommage de note peut casser des liens du canal ou du verdict B sans que la CI le voie.",
+   "action_proposee": "Proposition au développeur, propriétaire de tools/ : nommer morsehgp3D_v9/audits/README.md, et ajouter un contrôle des liens seuls pour morsehgp3D_v9/audits/**/*.md, audits/COORDINATION_MORSEHGP3D_V9.md et audits/morsehgp3D_v9/*.md. Cela respecte la politique v4-v8 de ne pas reformater les mots des auditeurs (check_docs.py:43-49).",
+   "recoupe_audit_existant": "Aucun"
+  },
+  {
+   "id": "C8-07",
+   "titre": "Politique de retrait incohérente : 9 notes supprimées, 6 notes au nom WIP périmé",
+   "gravite": "basse",
+   "categorie": "hygiene",
+   "constat": "85d79753, 128fb231 et 1bbb38e6 ont supprimé 9 notes (8 de B, plus FULL_FILTRE_ABSENCE_CLE), leur substance étant reportée dans les notes restantes. Aucune référence textuelle n'y renvoie plus. Six notes gardent _WIP dans leur nom alors que le code est publié (CHARGEMENT_FORMES, FULL_PARALLELE, NOYAU_DIAMETRAL, Q34_PREUVE_CONJOINTE, Q3_FEUILLE, RECEPTION_V8_GARDES). La règle proposée ensuite par B dit : « Une note remplacée reste accessible et marquée historique, pas supprimée implicitement ».",
+   "preuves": [
+    "git log --diff-filter=D origin/main -- morsehgp3D_v9/audits (3 commits, 9 fichiers)",
+    "git grep <nom> origin/main : 0 occurrence pour les 9 noms",
+    "audits/COORDINATION_MORSEHGP3D_V9.md:1008-1015 à bbc41a9c",
+    "morsehgp3D_v9/audits/CONTRE_AUDIT_B_NOYAU_DIAMETRAL_WIP_20260923.md:3-5 (« code publié dans a78664d4 »)"
+   ],
+   "consequence": "Des preuves datées ne sont plus trouvables sans git log, et des notes closes paraissent encore en chantier.",
+   "action_proposee": "Ne plus supprimer. Le README liste les 9 notes retirées avec le commit où elles restent lisibles : b0afa8c9, 4d91329f, 02d55856. Chaque propriétaire met « Statut : clos par <hash> » en tête de ses notes _WIP, sans les renommer.",
+   "recoupe_audit_existant": "Règle de B (canal:1008-1015 à bbc41a9c) ; apport : l'inventaire des retraits et des WIP périmés"
+  },
+  {
+   "id": "C8-08",
+   "titre": "Note GPU et note de mesures sans lien entrant, sonde ABA orpheline",
+   "gravite": "basse",
+   "categorie": "documentation",
+   "constat": "OBSTACLES_GPU_SOUS_SECONDE_20260923.md n'est citée par aucun document : ETAT, notes, canal, README et PASSATION, à 0125dc18 comme à bbc41a9c. C'est pourtant l'analyse des obstacles au contrat de 1 s sur GPU G4. CONTRE_AUDIT_A_MESURES_PLAN_20260922.md n'est pas citée non plus. check_q34_dead_owner_aba_20260923.cpp n'est nommée par aucune note ; elle a été portée comme porte produit.",
+   "preuves": [
+    "git grep -l OBSTACLES_GPU_SOUS_SECONDE_20260923.md bbc41a9c -- morsehgp3D_v9 audits : seule la note elle-même",
+    "git grep -l check_q34_dead_owner_aba_20260923.cpp : aucun .md",
+    "audits/COORDINATION_MORSEHGP3D_V9.md:422-428 (porte mhgp9_gen_q34_dead_lanes_owner)"
+   ],
+   "consequence": "La lecture du contrat GPU passe inaperçue depuis les points d'entrée, et la provenance de la porte produit ABA est invisible.",
+   "action_proposee": "Indexer ces trois entrées dans le README. Proposer aux propriétaires de l'ETAT un lien vers OBSTACLES_GPU dans le paragraphe « Ce que mesurent les reçus G4 » ou « FULL ».",
+   "recoupe_audit_existant": "Aucun"
+  },
+  {
+   "id": "C8-09",
+   "titre": "Phrase « float32 reste le défaut d'entrée » contraire au profil v9 accepté",
+   "gravite": "basse",
+   "categorie": "documentation",
+   "constat": "CONTRAT_COUTS_ET_PARALLELISATION.md:7-9, réécrit par 8175c752 le 23 à 03:37, écrit « Le float32 original reste le défaut d'entrée fixé en v8, avec développement temporel v9 suspendu ». Q3_STRUCTURE_ET_BORNES.md:3 et Q4_STRUCTURE_ET_BORNES.md:11 disent la même chose avec « antérieur ». Le développeur avait pourtant précisé, dès le 22 au soir : profil v9 = quantized_u18_input_only, float32 hors contrat de temps et dormant. README et ETAT vont dans ce sens.",
+   "preuves": [
+    "morsehgp3D_v9/audits/CONTRAT_COUTS_ET_PARALLELISATION.md:7-9",
+    "morsehgp3D_v9/audits/Q3_STRUCTURE_ET_BORNES.md:3",
+    "morsehgp3D_v9/audits/Q4_STRUCTURE_ET_BORNES.md:11",
+    "audits/COORDINATION_MORSEHGP3D_V9.md:142",
+    "morsehgp3D_v9/README.md:8",
+    "morsehgp3D_v9/audits/ETAT_COURANT.md:28-30 à 0125dc18"
+   ],
+   "consequence": "Une ambiguïté sur le profil d'entrée du contrat, lue en premier dans la note-cadre des coûts.",
+   "action_proposee": "A reformule ces trois lignes en : « profil v9 = u18/1 mm ; le float32 sans perte reste un profil qualifié, hors contrat de temps ».",
+   "recoupe_audit_existant": "Contre-audit A d'ouverture (canal:142, « précisé ») ; apport : la phrase subsiste dans trois notes A"
+  },
+  {
+   "id": "C8-10",
+   "titre": "Plages R6 : README non corrigé et liste de l'ETAT incomplète",
+   "gravite": "basse",
+   "categorie": "mesure",
+   "constat": "ETAT_COURANT.md:158-159 signale que le README R6 omet 0,51 %, 8,66 % et 72,85 %. Mais « CPU −10 à −20 % » (README R6:43) exclut aussi les extrêmes 8,09 % et 21,18 % que l'ETAT publie lui-même (ligne 149). Mon recalcul exact par paires, sur SUMMARY.json dont les champs sont arrondis, donne : chaîne 0,50–8,64 %, CPU 8,17–21,20 %, formes 72,85–81,87 %. ERRATUM.md ne traite que « générateur ».",
+   "preuves": [
+    "morsehgp3D_v9/receipts/g4_tower_r6_20260923/README.md:43-45",
+    "morsehgp3D_v9/receipts/g4_tower_r6_20260923/ERRATUM.md",
+    "morsehgp3D_v9/audits/ETAT_COURANT.md:147-159 à 0125dc18",
+    "recalcul Fraction sur SUMMARY.json (24 lignes, 12 paires)"
+   ],
+   "consequence": "Un lecteur du reçu surestime le gain minimal de la chaîne et le gain CPU minimal, et sous-estime le maximum.",
+   "action_proposee": "Le développeur ajoute un addendum ERRATUM R6 avec les plages par paire. L'ETAT complète sa liste avec les deux extrêmes CPU.",
+   "recoupe_audit_existant": "ETAT_COURANT.md:158-159 ; apport : les extrêmes CPU manquants et le recalcul indépendant"
+  },
+  {
+   "id": "C8-11",
+   "titre": "Désaccord non arbitré sur le ticket borné de nœuds témoins",
+   "gravite": "basse",
+   "categorie": "protocole",
+   "constat": "L'ETAT recommande de « tester d'abord un ticket borné de nœuds témoins réemployés, un seuil de déclenchement et le repli exact ». Le développeur répond : « la piste reste fermée sans partage conjoint du préfixe ». B prépare une note sur le même sujet (brouillon D8, non publié). Personne ne dit si le ticket de l'ETAT, avec masque, antichaîne, compte et curseur, remplit la condition posée par le développeur.",
+   "preuves": [
+    "morsehgp3D_v9/audits/ETAT_COURANT.md:280-283 à bbc41a9c (260-263 à 0125dc18)",
+    "audits/COORDINATION_MORSEHGP3D_V9.md:429-431",
+    "build/v9-open-worktree/morsehgp3D_v9/audits/CONTRE_AUDIT_RECTANGLES_Q34_TICKET_BORNE_20260923.md (non suivi)"
+   ],
+   "consequence": "Le verdict et la décision du développeur divergent sur la priorité q3/q4 avant expansion, qui est le premier poste du contrat.",
+   "action_proposee": "Une entrée d'arbitrage dans le canal, après publication de D8 par B : acceptée avec expérience appariée, ou refusée avec raison.",
+   "recoupe_audit_existant": "ETAT_COURANT.md ; canal:429-431"
+  },
+  {
+   "id": "C8-12",
+   "titre": "Liens et commits cités : sains, à 4 hashes pré-rebase près",
+   "gravite": "info",
+   "categorie": "documentation",
+   "constat": "Liens relatifs : 0 mort et 0 ancre morte, sur 385 liens à 0125dc18 et 423 à bbc41a9c, y compris aux trois commits de retrait. Quatre hashes cités ne sont atteignables depuis aucune référence : 23074987, 028067a3, f599aed7, e9000f9c. Les notes B donnent l'équivalent sur main, sauf le canal:520 (028067a3, équivalent e5688680).",
+   "preuves": [
+    "links.py 0125dc18 / bbc41a9c / 85d79753 / 128fb231 / 1bbb38e6",
+    "hashes.py origin/main",
+    "audits/COORDINATION_MORSEHGP3D_V9.md:520"
+   ],
+   "consequence": "Faible : ces objets disparaîtront au prochain gc local et ne se trouvent pas sur GitHub.",
+   "action_proposee": "Toujours citer le hash sur main, et le hash de chantier seulement entre parenthèses.",
+   "recoupe_audit_existant": "Pratique déjà suivie par B dans CONTRE_AUDIT_B_NOYAU_DIAMETRAL_WIP et RECEPTION_V8"
+  },
+  {
+   "id": "C8-13",
+   "titre": "ETAT_COURANT grossit comme un journal plutôt que comme un verdict",
+   "gravite": "info",
+   "categorie": "documentation",
+   "constat": "ETAT_COURANT.md compte 578 lignes à 0125dc18 et 637 à bbc41a9c, après 68 commits en environ 10 h. Il réécrit reçu par reçu (R3, R4b, R5, R6, R7b) des récits déjà présents dans les contrelectures.",
+   "preuves": [
+    "wc -l morsehgp3D_v9/audits/ETAT_COURANT.md (0125dc18 : 578 ; bbc41a9c : 637)",
+    "morsehgp3D_v9/audits/ETAT_COURANT.md:77-203 à 0125dc18"
+   ],
+   "consequence": "Les chiffres sont en double, avec un risque de dérive (voir C8-10), et le verdict prend plus de temps à lire.",
+   "action_proposee": "Proposition aux propriétaires A et B : garder dans l'ETAT le verdict et les priorités, et renvoyer l'historique par reçu vers les lignes du README d'index.",
+   "recoupe_audit_existant": "Aucun"
+  }
+ ],
+ "questions": [
+  "Auditeur A : acceptez-vous l'index morsehgp3D_v9/audits/README.md tenu par C, sans déplacer ni réécrire vos notes ? Pouvez-vous confirmer ou corriger les attributions probables A? : AUDIT_DISTRIBUTION_SAMPLE_SORT, Q34_BLOCS_LIDAR_SHADOW, q34_block_shadow, CORE_LIDAR_LOCAL, DECOUPES_CAPTEUR, CROISSANCE_LIDAR ?",
+  "Auditeur B : pouvez-vous confirmer vos notes sans préfixe (CACHE_TEMOINS_COUT_VALIDATION, OBSTACLES_GPU_SOUS_SECONDE, PHASE_A_GRAPHE_TEMPOREL, PROTOCOLE_TOUR_V10_V5_RUPTURE, Q4_INDUCTION_ATLAS_EVENEMENTS, Q34_PROPRIETAIRE_PASSAGE_AMONT, SHADOW_HA_* et leurs sorties, phase_a_20260923/, q4_global_12sites_20260923/, FULL_FILTRE_ABSENCE_CLE retirée) ? Acceptez-vous de requalifier audits/morsehgp3D_v9/ETAT_COURANT.md en photographie historique, et de publier CONTRE_AUDIT_RECTANGLES_Q34_TICKET_BORNE depuis votre propre worktree ?",
+  "Développeur : quelles réponses, avec échéance, donnez-vous aux recommandations sans réponse (C6/tri v6, induction q4, phase A, OBSTACLES_GPU, ticket possédé du cache, tri unique, répétitions de BallKey, collisions et RSS de l'index, erratum des plages R6, commentaire « Exact depth ») ? Quand le RSS par phase et par K promis à la ligne 355-356 sera-t-il publié ?",
+  "Développeur : acceptez-vous d'étendre tools/check_docs.py au README d'index nommé, et à un contrôle des liens seuls pour morsehgp3D_v9/audits/**, audits/COORDINATION_MORSEHGP3D_V9.md et audits/morsehgp3D_v9/*.md (0 erreur aujourd'hui) ?",
+  "Développeur : pouvez-vous rectifier les libellés « proposition B » (canal:377, PASSATION.md:105) et « piste A » (canal:626), et remettre le canal de votre worktree à HEAD avant le prochain pull, pour éviter de dupliquer deux entrées B déjà publiées ?",
+  "Tous : adoptez-vous la convention du canal (ajout en fin de fichier seulement, heure date -u au commit, ligne « Base : <hash> », rôle obligatoire, questions numérotées) et la règle « ne plus supprimer, marquer historique » ?",
+  "Le ticket de l'ETAT (masque, antichaîne, compte, curseur) remplit-il la condition « partage conjoint du préfixe » posée par le développeur ? Sinon, quelle expérience appariée trancherait ?"
+ ]
+}

@@ -1,0 +1,46 @@
+{
+ "s02_8000_k5": {
+  "status": "complete_relative",
+  "catalogue": {
+   "balls": 278809,
+   "extra_shell_balls": 111,
+   "euler_by_k": [
+    1,
+    1,
+    1,
+    30377,
+    -116500,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "euler_holds": true,
+   "euler_checkable_max_k": 3
+  },
+  "tower_digest": "9ef07ff0d2f60c17"
+ },
+ "s02_8000_k10": {
+  "status": "complete_relative",
+  "catalogue": {
+   "balls": 1083173,
+   "extra_shell_balls": 230,
+   "euler_by_k": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    101137,
+    -299078
+   ],
+   "euler_holds": true,
+   "euler_checkable_max_k": 8
+  },
+  "tower_digest": "05e1a8fd626d7938"
+ }
+}
