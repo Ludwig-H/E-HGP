@@ -27,13 +27,18 @@
 //   q3_sample_judge family <uniform|terrain|clusters> <n> <Kmax> <sites> <workers> [options]
 //   q3_sample_judge file <cut.u32le> <Kmax> <sites> <workers> [options]
 //   q3_sample_judge fixture-eq [options]         (fixture d'egalite gravee, Kmax = 5, tous les sites)
+//   q3_sample_judge fixture-crl [options]        (fixture CRL minimale gravee, Kmax = 5)
 // options : --compare | --no-prune ; --seed=<u64> ; --sites=<i,j,...> ; --long-sites=<N> ; --min-top=<n> ;
 //           --min-long=<n> ; --inject=overprune | --inject=level | --inject=shell-dup | --inject=key |
-//           --inject=drop-long (partenaires >= 1600 unites retires du parcours elague : --compare doit le voir)
+//           --inject=drop-long (triangles d'arete max >= 1600 unites retires du parcours elague) |
+//           --inject=drop-crl (strate CRL retiree du parcours elague : --compare doit la voir, PRUNE_DISAGREES_CRL) ;
+//           --min-crl=<n> (plancher de triangles CRL distincts : p = Kmax-2, coquille de 3 sites, q_min = 3, arete
+//           max >= 1600 ; exige aussi qu'une cle CRL retiree du catalogue soit declaree manquante)
 //
 // Code 0 conforme ; 1 manquante, EXTRA, desaccord d'elagage ou recoupement faux ; 2 argument/chaine ;
-// 3 vacuite (plancher --min-top de cles q3 regulieres p = Kmax-2, arite 3, ou --min-long d'incidences longues
-// non atteint ; mutant cible non tue).
+// 3 vacuite (plancher --min-top de cles q3 regulieres p = Kmax-2, arite 3, --min-long d'incidences longues ou
+// --min-crl de la strate CRL non atteint ; mutant cible non tue). En --compare, la strate CRL est comptee dans le
+// parcours sans elagage.
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -77,8 +82,10 @@ struct Options {
   bool shell_dup = false;      // mutant : dernier site de coquille remplace par le premier (doublon)
   bool corrupt_key = false;    // mutant : cle seule faussee (c + 1), niveau et coquille intacts
   std::size_t long_sites = 0;  // --long-sites=N : N sites les plus isoles (distance au Kmax-ieme voisin)
-  bool drop_long = false;      // mutant : partenaires b a >= 1600 unites retires du parcours elague
+  bool drop_long = false;      // mutant : triangles d'arete max >= 1600 unites retires du parcours elague
+  bool drop_crl = false;       // mutant : strate CRL (critique, reguliere, longue) retiree du parcours elague
   std::uint64_t min_long = 0;  // --min-long=N : plancher d'incidences >= 1600 unites (sinon code 3)
+  std::uint64_t min_crl = 0;   // --min-crl=N : plancher d'incidences de la strate CRL (sinon code 3)
   std::vector<std::size_t> sites;  // --sites= : sites imposes (indices de l'index), a la place du tirage
 };
 
@@ -109,6 +116,19 @@ std::vector<Point3> fixture_eq() {
                            {1030, 1000, 1000}, {1020, 1030, 1000}, {1020, 985, 1000}};
   for (int i = 0; i < 27; ++i)
     p.push_back({1100 + 20 * (i % 3), 1100 + 20 * ((i / 3) % 3), 1000 + 20 * (i / 9)});
+  return p;
+}
+
+// Fixture CRL minimale (verification adverse v7, triangle de l'audit A) : a, b = a + (1500,0,0),
+// c = a + (100,1500,0) forment un triangle strictement aigu dont seule l'arete bc depasse 1600 unites ; trois
+// interieurs stricts (p = 3 = Kmax-2 a K5), puis une grille 3x3x3 de pas 20 eloignee. Depuis l'ancre a
+// (--sites=0), l'ancien drop-long (partenaires) ne retirait ni b ni c ; le nouveau (arete max) retire le triangle.
+std::vector<Point3> fixture_crl() {
+  const mhgp9::gen::Coordinate o = 20000;
+  std::vector<Point3> p = {{o, o, o}, {o + 1500, o, o}, {o + 100, o + 1500, o},
+                           {o + 700, o + 700, o + 1}, {o + 690, o + 720, o - 2}, {o + 710, o + 680, o + 3}};
+  for (int i = 0; i < 27; ++i)
+    p.push_back({60000 + 20 * (i % 3), 60000 + 20 * ((i / 3) % 3), 60000 + 20 * (i / 9)});
   return p;
 }
 
@@ -345,6 +365,7 @@ struct Totals {
   std::uint64_t partners = 0, kept = 0, triangles = 0, acute = 0, incidences = 0, found = 0, missing = 0;
   std::uint64_t extended = 0, over_shell = 0, extra = 0, cross_fail = 0, by_p[10] = {}, by_len[3] = {};
   std::uint64_t by_len_top[3] = {};
+  std::uint64_t crl = 0;  // strate CRL : p = pmax, coquille de 3 sites sans paire antipodale (q_min = 3), arete max >= 1600
 };
 
 int run(const std::string& label, const std::vector<Point3>& points, unsigned kmax, std::size_t sites,
@@ -389,16 +410,12 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
 
   const auto judge_site = [&](std::size_t a, bool prune, std::int64_t exclude, Totals& t, std::set<Tri>* expected,
                               std::unordered_set<std::uint32_t>& keys, std::vector<std::string>& lines,
-                              bool& target_missed) {
+                              bool& target_missed, std::set<Tri>* expected_crl = nullptr) {
     std::vector<std::uint32_t> keep, inner, inside, shell;
     std::vector<V> q;
     for (std::size_t b = 0; b < n; ++b) {
       if (b == a) continue;
       ++t.partners;
-      if (prune && opt.drop_long) {  // mutant : le parcours elague perd les ancres longues
-        const V e = sub(pos[b], pos[a]);
-        if (dot(e, e) >= 1600ll * 1600) continue;
-      }
       if (prune) {
         inner.clear();
         diametral_interior(tree, pos[a], pos[b], inner);
@@ -435,6 +452,9 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
         if (dot(u, v) <= 0 || dot(sub(pos[a], pos[b]), sub(pos[c], pos[b])) <= 0 ||
             dot(sub(pos[a], pos[c]), sub(pos[b], pos[c])) <= 0) continue;
         ++t.acute;
+        const i64 l2 = std::max({dot(u, u), dot(v, v), dot(sub(pos[c], pos[b]), sub(pos[c], pos[b]))});
+        const bool is_long = l2 >= 1600ll * 1600;
+        if (prune && opt.drop_long && is_long) continue;  // mutant : meme notion de longueur que l'etiquette
         const V w = cross(u, v);
         const i128 uu = dot(u, u), vv = dot(v, v);
         const V vw = cross(v, w), wu = cross(w, u);
@@ -448,16 +468,28 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
         sp.r2 = ox * ox + oy * oy + oz * oz;
         if (!census(tree, sp, pmax, inside, shell)) continue;
         const unsigned p = static_cast<unsigned>(inside.size());
+        // Paire antipodale dans la coquille (2O = x + y) : q_min = 2, sinon 3.
+        bool antipodal = false;
+        if (shell.size() <= 12)
+          for (std::size_t x = 0; x < shell.size() && !antipodal; ++x)
+            for (std::size_t y = x + 1; y < shell.size() && !antipodal; ++y) {
+              const P3& px = pos[shell[x]]; const P3& py = pos[shell[y]];
+              antipodal = sp.D * (px.x + py.x - 2 * pos[a].x) == 2 * sp.P[0] &&
+                          sp.D * (px.y + py.y - 2 * pos[a].y) == 2 * sp.P[1] &&
+                          sp.D * (px.z + py.z - 2 * pos[a].z) == 2 * sp.P[2];
+            }
+        // Strate CRL : la famille visee (angle mort FULL), reguliere q_min = 3, au rang critique, longue.
+        const bool crl = p == pmax && shell.size() == 3 && !antipodal && is_long;
+        if (prune && opt.drop_crl && crl) continue;  // mutant : le parcours elague perd exactement la strate CRL
         ++t.incidences; ++t.by_p[p];
-        const i64 l2 = std::max({dot(u, u), dot(v, v), dot(sub(pos[c], pos[b]), sub(pos[c], pos[b]))});
-        const int len = l2 < 500ll * 500 ? 0 : l2 < 1600ll * 1600 ? 1 : 2;  // unites de grille
+        const int len = l2 < 500ll * 500 ? 0 : is_long ? 2 : 1;  // unites de grille
         ++t.by_len[len];
         if (p == pmax) ++t.by_len_top[len];
-        if (expected) {
-          std::array<std::uint32_t, 3> k{static_cast<std::uint32_t>(a), b, c};
-          std::sort(k.begin(), k.end());
-          expected->insert(Tri{k[0], k[1], k[2]});
-        }
+        if (crl) ++t.crl;
+        std::array<std::uint32_t, 3> k{static_cast<std::uint32_t>(a), b, c};
+        std::sort(k.begin(), k.end());
+        if (expected) expected->insert(Tri{k[0], k[1], k[2]});
+        if (expected_crl && crl) expected_crl->insert(Tri{k[0], k[1], k[2]});
         char buf[200];
         if (shell.size() > 12) {  // la chaine refuse toute coquille > 12 : sur une chaine complete, omission
           ++t.over_shell; ++t.missing;
@@ -467,15 +499,6 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
           continue;
         }
         if (shell.size() > 3) ++t.extended;
-        // Paire antipodale dans la coquille (2O = x + y) : q_min = 2, sinon 3.
-        bool antipodal = false;
-        for (std::size_t x = 0; x < shell.size() && !antipodal; ++x)
-          for (std::size_t y = x + 1; y < shell.size() && !antipodal; ++y) {
-            const P3& px = pos[shell[x]]; const P3& py = pos[shell[y]];
-            antipodal = sp.D * (px.x + py.x - 2 * pos[a].x) == 2 * sp.P[0] &&
-                        sp.D * (px.y + py.y - 2 * pos[a].y) == 2 * sp.P[1] &&
-                        sp.D * (px.z + py.z - 2 * pos[a].z) == 2 * sp.P[2];
-          }
         std::vector<std::int32_t> shell_sorted(shell.begin(), shell.end());
         std::sort(shell_sorted.begin(), shell_sorted.end());
         std::int64_t hit = -1;
@@ -559,25 +582,35 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
   Totals t;
   std::unordered_set<std::uint32_t> keys;
   std::vector<std::string> lines;
-  int disagreements = 0;
-  std::uint64_t kept_pruned = 0;
+  int disagreements = 0, crl_disagreements = 0;
+  std::uint64_t kept_pruned = 0, crl_lost = 0;
+  std::set<Tri> crl_all;  // triangles CRL distincts du parcours brut (ou du parcours juge hors --compare)
   for (const auto a : sampled) {
     bool dummy = false;
     const std::uint64_t long_before = t.by_len[2];
     if (opt.mode == 2) {
       Totals t1;
-      std::set<Tri> e1, e2;
+      std::set<Tri> e1, e2, c1, c2;
       std::unordered_set<std::uint32_t> k1;
       std::vector<std::string> l1;
-      judge_site(a, true, -1, t1, &e1, k1, l1, dummy);
-      judge_site(a, false, -1, t, &e2, keys, lines, dummy);
+      judge_site(a, true, -1, t1, &e1, k1, l1, dummy, &c1);
+      judge_site(a, false, -1, t, &e2, keys, lines, dummy, &c2);
       kept_pruned += t1.kept;
       if (!(e1 == e2)) {
         ++disagreements;
         std::printf("%s PRUNE_DISAGREES a=%zu pruned=%zu full=%zu\n", label.c_str(), a, e1.size(), e2.size());
       }
+      crl_all.insert(c2.begin(), c2.end());
+      if (!(c1 == c2)) {  // desaccord restreint a la strate CRL
+        ++crl_disagreements;
+        std::size_t lost = 0;
+        for (const auto& tri : c2) lost += c1.count(tri) == 0;
+        crl_lost += lost;
+        std::printf("%s PRUNE_DISAGREES_CRL a=%zu pruned=%zu full=%zu lost=%zu\n", label.c_str(), a, c1.size(),
+                    c2.size(), lost);
+      }
     } else {
-      judge_site(a, opt.mode == 0, -1, t, nullptr, keys, lines, dummy);
+      judge_site(a, opt.mode == 0, -1, t, nullptr, keys, lines, dummy, &crl_all);
     }
     if (t.by_len[2] > long_before)  // sites porteurs d'incidences longues (>= 1600 unites) : cibles de --compare
       std::printf("%s LONG_SITE a=%zu incidences=%llu\n", label.c_str(), a,
@@ -594,13 +627,36 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
   // coquille ; un triangle manquant doit porter deux autres sites de sa coquille.
   std::uint32_t target = UINT32_MAX;
   for (const auto k : keys) if (top(k) && (target == UINT32_MAX || k < target)) target = k;
+  // Seconde cible, dans la strate CRL : plus petite cle top dont une arete de coquille atteint 1600 unites.
+  const auto crl_key = [&](std::uint32_t k) {
+    if (!top(k)) return false;
+    const auto sh = cat[k].shell();
+    for (std::size_t x = 0; x < sh.size(); ++x)
+      for (std::size_t y = x + 1; y < sh.size(); ++y) {
+        const V e = sub(pos[static_cast<std::size_t>(sh[x])], pos[static_cast<std::size_t>(sh[y])]);
+        if (dot(e, e) >= 1600ll * 1600) return true;
+      }
+    return false;
+  };
+  std::uint32_t crl_target = UINT32_MAX;
+  for (const auto k : keys) if (crl_key(k) && (crl_target == UINT32_MAX || k < crl_target)) crl_target = k;
+  bool crl_target_killed = false;
+  if (crl_target != UINT32_MAX) {
+    for (const auto a : sampled) {
+      const auto sh = cat[crl_target].shell();
+      if (std::find(sh.begin(), sh.end(), static_cast<std::int32_t>(a)) == sh.end()) continue;
+      Totals tm; std::unordered_set<std::uint32_t> km; std::vector<std::string> lm;
+      judge_site(a, opt.mode == 0, crl_target, tm, nullptr, km, lm, crl_target_killed);  // brut en --compare
+      if (crl_target_killed) break;
+    }
+  }
   bool mutant_killed = false;
   if (target != UINT32_MAX) {
     for (const auto a : sampled) {
       const auto sh = cat[target].shell();
       if (std::find(sh.begin(), sh.end(), static_cast<std::int32_t>(a)) == sh.end()) continue;
       Totals tm; std::unordered_set<std::uint32_t> km; std::vector<std::string> lm;
-      judge_site(a, opt.mode != 1, target, tm, nullptr, km, lm, mutant_killed);
+      judge_site(a, opt.mode == 0, target, tm, nullptr, km, lm, mutant_killed);  // brut en --compare
       if (mutant_killed) break;
     }
   }
@@ -608,11 +664,11 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
               "kept=%llu triangles=%llu acute=%llu incidences=%llu found=%llu missing=%llu cross_fail=%llu extra=%llu "
               "unique_keys=%zu q2_keys=%llu top_keys=%llu top_population=%llu extended=%llu shell_over_12=%llu mutant_killed=%d "
               "len_lt500=%llu len_500_1600=%llu len_ge1600=%llu top_lt500=%llu top_500_1600=%llu top_ge1600=%llu "
-              "prune_disagreements=%d",
+              "prune_disagreements=%d crl=%llu crl_unique=%zu crl_disagreements=%d crl_lost=%llu crl_target_killed=%d",
               label.c_str(), n, kmax, cat.size(), (unsigned long long)fnv_points(points), (unsigned long long)opt.seed,
               opt.mode == 0 ? "prune" : opt.mode == 1 ? "no-prune" : "compare",
               opt.overprune ? "+overprune" : opt.corrupt_level ? "+level" : opt.shell_dup ? "+shell-dup" : opt.corrupt_key ? "+key"
-              : opt.drop_long ? "+drop-long" : "",
+              : opt.drop_long ? "+drop-long" : opt.drop_crl ? "+drop-crl" : "",
               sampled.size(), (unsigned long long)t.partners, (unsigned long long)t.kept,
               (unsigned long long)t.triangles, (unsigned long long)t.acute, (unsigned long long)t.incidences,
               (unsigned long long)t.found, (unsigned long long)t.missing, (unsigned long long)t.cross_fail,
@@ -621,11 +677,17 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
               (unsigned long long)t.extended, (unsigned long long)t.over_shell, mutant_killed ? 1 : 0,
               (unsigned long long)t.by_len[0], (unsigned long long)t.by_len[1], (unsigned long long)t.by_len[2],
               (unsigned long long)t.by_len_top[0], (unsigned long long)t.by_len_top[1],
-              (unsigned long long)t.by_len_top[2], disagreements);
+              (unsigned long long)t.by_len_top[2], disagreements, (unsigned long long)t.crl, crl_all.size(),
+              crl_disagreements, (unsigned long long)crl_lost, crl_target_killed ? 1 : 0);
   for (unsigned p = 0; p <= pmax; ++p) std::printf(" p%u=%llu", p, (unsigned long long)t.by_p[p]);
   std::printf("\n");
+  const bool vacuous_crl = crl_all.size() < opt.min_crl || (opt.min_crl > 0 && !crl_target_killed);
+  if (opt.drop_crl || opt.drop_long) {  // mutant d'enumeration : tue seulement par un desaccord, sur une strate non vide
+    if (vacuous_crl || disagreements == 0) return 3;
+    return 1;
+  }
   if (t.missing || t.cross_fail || t.extra || disagreements) return 1;
-  if (!mutant_killed || top_keys < opt.min_top || t.by_len[2] < opt.min_long) return 3;
+  if (!mutant_killed || top_keys < opt.min_top || t.by_len[2] < opt.min_long || vacuous_crl) return 3;
   return 0;
 }
 
@@ -644,7 +706,9 @@ int main(int argc, char** argv) {
       else if (a == "--inject=shell-dup") opt.shell_dup = true;
       else if (a == "--inject=key") opt.corrupt_key = true;
       else if (a == "--inject=drop-long") opt.drop_long = true;
+      else if (a == "--inject=drop-crl") opt.drop_crl = true;
       else if (a.rfind("--min-long=", 0) == 0) opt.min_long = std::stoull(a.substr(11));
+      else if (a.rfind("--min-crl=", 0) == 0) opt.min_crl = std::stoull(a.substr(10));
       else if (a.rfind("--long-sites=", 0) == 0) opt.long_sites = std::stoul(a.substr(13));
       else if (a.rfind("--sites=", 0) == 0) {
         std::string list = a.substr(8);
@@ -661,7 +725,12 @@ int main(int argc, char** argv) {
       else if (a.rfind("--", 0) == 0) { std::fprintf(stderr, "unknown option %s\n", a.c_str()); return 2; }
       else args.push_back(a);
     }
+    if ((opt.drop_crl || opt.drop_long) && opt.mode != 2) {
+      std::fprintf(stderr, "--inject=drop-crl|drop-long exige --compare\n");
+      return 2;
+    }
     if (args.size() == 1 && args[0] == "fixture-eq") return run("fixture_eq", fixture_eq(), 5, 1000, 1, opt);
+    if (args.size() == 1 && args[0] == "fixture-crl") return run("fixture_crl", fixture_crl(), 5, 1000, 1, opt);
     if (args.size() == 6 && args[0] == "family") {
       const auto fx = mhgp9::gen::bench::make_front_fixture(std::stoul(args[2]), args[1], 3);
       return run(args[1] + "_" + args[2], fx.points, std::stoul(args[3]), std::stoul(args[4]), std::stoul(args[5]), opt);

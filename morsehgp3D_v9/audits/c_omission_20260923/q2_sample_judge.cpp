@@ -9,7 +9,8 @@
 // coquille contient a et b et est portee par cette meme sphere, avec autant de
 // sites de coquille que le balayage en trouve. Aucune structure du generateur
 // (WSPD, temoins, Pool) n'est utilisee. Cout par site tire : O(n) candidats b,
-// chacun un balayage O(n) arrete des que p depasse Kmax-1 : jamais O(n^3).
+// chacun un balayage O(n) arrete des que p depasse Kmax-1, soit O(S n^2) pour S sites
+// tires (O(n^3) si S = n : on garde S borne, 50 a 1 000 dans les campagnes).
 // Recoupement (contrelecture adverse de C) : niveau exact egal (Boost cpp_int), memes interieurs, arite 2 ;
 // sens inverse (EXTRA) : toute boule reguliere a 2 sites, d'arite 2, p <= Kmax-1, passant par un site tire,
 // doit etre retrouvee. Une coquille de plus de 12 sites trouvee sur une chaine complete est une omission.
