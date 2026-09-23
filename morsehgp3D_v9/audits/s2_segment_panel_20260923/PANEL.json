@@ -1,0 +1,3155 @@
+{
+  "cases": [
+    {
+      "batch_ledger": {
+        "core_sites": 37009904,
+        "dead_core_loads": 774494,
+        "expanded_pairs": 2852117,
+        "q34_input_rectangles": 1419334,
+        "witness_input_pair_mass": 20499367,
+        "witness_rect_node_visits": 88849834,
+        "witness_rejected_rectangles": 858668
+      },
+      "batch_stdout_sha256": "d0d24885e86c10e4d2707a597d0b601cfd82198209901d5b3980dabce744935c",
+      "density": "quarter",
+      "head": {
+        "core_forms": 37009904,
+        "empty_open_rectangles": 63274,
+        "front_pair_mass": 20499367,
+        "front_rectangles": 1419334,
+        "large_product_edges": 5916,
+        "large_product_forms": 6826748,
+        "large_product_q3": 3147,
+        "large_product_q4": 4787,
+        "open_pair_mass": 2852117,
+        "open_rectangles": 560666,
+        "positive_segments": 497392,
+        "q3_survivors": 702317,
+        "q4_survivors": 686005,
+        "rectangle_node_visits": 88849834,
+        "segment16_q3": 24905,
+        "segment16_q4": 34577,
+        "singleton_forms": 2109777,
+        "singleton_rectangles": 315765,
+        "singleton_survivors": 315765,
+        "sites": 30847,
+        "survivor_edges": 774494
+      },
+      "histograms": {
+        "product": {
+          "0": {
+            "core_forms": 2109777,
+            "product_pairs": 315765,
+            "rectangles": 315765,
+            "survivor_edges": 315765
+          },
+          "1": {
+            "core_forms": 2849635,
+            "product_pairs": 321753,
+            "rectangles": 150098,
+            "survivor_edges": 236104
+          },
+          "10": {
+            "core_forms": 2125208,
+            "product_pairs": 206579,
+            "rectangles": 133,
+            "survivor_edges": 1711
+          },
+          "11": {
+            "core_forms": 3879930,
+            "product_pairs": 497548,
+            "rectangles": 169,
+            "survivor_edges": 3394
+          },
+          "12": {
+            "core_forms": 821610,
+            "product_pairs": 164639,
+            "rectangles": 34,
+            "survivor_edges": 811
+          },
+          "2": {
+            "core_forms": 2441094,
+            "product_pairs": 263984,
+            "rectangles": 55987,
+            "survivor_edges": 118478
+          },
+          "3": {
+            "core_forms": 2145124,
+            "product_pairs": 229686,
+            "rectangles": 22225,
+            "survivor_edges": 49785
+          },
+          "4": {
+            "core_forms": 1313780,
+            "product_pairs": 191129,
+            "rectangles": 8850,
+            "survivor_edges": 17756
+          },
+          "5": {
+            "core_forms": 1209699,
+            "product_pairs": 186139,
+            "rectangles": 4262,
+            "survivor_edges": 7938
+          },
+          "6": {
+            "core_forms": 2370396,
+            "product_pairs": 173336,
+            "rectangles": 1984,
+            "survivor_edges": 7592
+          },
+          "7": {
+            "core_forms": 1719587,
+            "product_pairs": 142430,
+            "rectangles": 814,
+            "survivor_edges": 4684
+          },
+          "8": {
+            "core_forms": 4965203,
+            "product_pairs": 82287,
+            "rectangles": 242,
+            "survivor_edges": 4162
+          },
+          "9": {
+            "core_forms": 9058861,
+            "product_pairs": 76842,
+            "rectangles": 103,
+            "survivor_edges": 6314
+          }
+        },
+        "segment": {
+          "0": {
+            "core_forms": 3023395,
+            "product_pairs": 462902,
+            "rectangles": 358200,
+            "survivor_edges": 358200
+          },
+          "1": {
+            "core_forms": 3628944,
+            "product_pairs": 325602,
+            "rectangles": 112140,
+            "survivor_edges": 239106
+          },
+          "2": {
+            "core_forms": 2966406,
+            "product_pairs": 174694,
+            "rectangles": 22472,
+            "survivor_edges": 103493
+          },
+          "3": {
+            "core_forms": 2356896,
+            "product_pairs": 78965,
+            "rectangles": 3707,
+            "survivor_edges": 36637
+          },
+          "4": {
+            "core_forms": 1853499,
+            "product_pairs": 54544,
+            "rectangles": 591,
+            "survivor_edges": 11966
+          },
+          "5": {
+            "core_forms": 2604681,
+            "product_pairs": 59997,
+            "rectangles": 177,
+            "survivor_edges": 7672
+          },
+          "6": {
+            "core_forms": 2976355,
+            "product_pairs": 64071,
+            "rectangles": 49,
+            "survivor_edges": 4041
+          },
+          "7": {
+            "core_forms": 8609748,
+            "product_pairs": 47274,
+            "rectangles": 37,
+            "survivor_edges": 6882
+          },
+          "8": {
+            "core_forms": 8989980,
+            "product_pairs": 16041,
+            "rectangles": 19,
+            "survivor_edges": 6497
+          }
+        }
+      },
+      "input_sha256": "0bd6bf8482717249e3375936ce78e5641f9aa7f5f980497a2f9c2bee4e293bd7",
+      "raw_ids_sha256": "003706e4f890eaffec82f6399afe5a12f9486bf659699636d2ab7f894eb35195",
+      "sector": "full",
+      "sidecar_elapsed_s": 8.137,
+      "sidecar_stdout_sha256": "4187648ba1667b155ba5a71dd9a2bbab0ada202a68ab84ec1507e8ab0c371cf4",
+      "top": [
+        {
+          "core_forms": 25470694,
+          "denominator": 1000,
+          "numerator": 1,
+          "product_pairs": 279262,
+          "segments": 498,
+          "survivor_edges": 26575
+        },
+        {
+          "core_forms": 28750830,
+          "denominator": 100,
+          "numerator": 1,
+          "product_pairs": 404464,
+          "segments": 4974,
+          "survivor_edges": 64943
+        },
+        {
+          "core_forms": 31584356,
+          "denominator": 100,
+          "numerator": 5,
+          "product_pairs": 545149,
+          "segments": 24870,
+          "survivor_edges": 143223
+        },
+        {
+          "core_forms": 32852300,
+          "denominator": 100,
+          "numerator": 10,
+          "product_pairs": 639381,
+          "segments": 49740,
+          "survivor_edges": 208735
+        }
+      ]
+    },
+    {
+      "batch_ledger": {
+        "core_sites": 4310796,
+        "dead_core_loads": 196223,
+        "expanded_pairs": 573226,
+        "q34_input_rectangles": 343969,
+        "witness_input_pair_mass": 2442363,
+        "witness_rect_node_visits": 20877827,
+        "witness_rejected_rectangles": 201490
+      },
+      "batch_stdout_sha256": "005d0f342f035338d796e092777ab23b7ac7eee4b353a2061075fbbbcf936f23",
+      "density": "quarter",
+      "head": {
+        "core_forms": 4310796,
+        "empty_open_rectangles": 17872,
+        "front_pair_mass": 2442363,
+        "front_rectangles": 343969,
+        "large_product_edges": 0,
+        "large_product_forms": 0,
+        "large_product_q3": 0,
+        "large_product_q4": 0,
+        "open_pair_mass": 573226,
+        "open_rectangles": 142479,
+        "positive_segments": 124607,
+        "q3_survivors": 177506,
+        "q4_survivors": 174821,
+        "rectangle_node_visits": 20877827,
+        "segment16_q3": 6547,
+        "segment16_q4": 8299,
+        "singleton_forms": 531500,
+        "singleton_rectangles": 78449,
+        "singleton_survivors": 78449,
+        "sites": 7649,
+        "survivor_edges": 196223
+      },
+      "histograms": {
+        "product": {
+          "0": {
+            "core_forms": 531500,
+            "product_pairs": 78449,
+            "rectangles": 78449,
+            "survivor_edges": 78449
+          },
+          "1": {
+            "core_forms": 742699,
+            "product_pairs": 80426,
+            "rectangles": 37307,
+            "survivor_edges": 58923
+          },
+          "10": {
+            "core_forms": 0,
+            "product_pairs": 2948,
+            "rectangles": 2,
+            "survivor_edges": 0
+          },
+          "2": {
+            "core_forms": 656609,
+            "product_pairs": 70414,
+            "rectangles": 14836,
+            "survivor_edges": 30942
+          },
+          "3": {
+            "core_forms": 535208,
+            "product_pairs": 64979,
+            "rectangles": 6324,
+            "survivor_edges": 13467
+          },
+          "4": {
+            "core_forms": 400408,
+            "product_pairs": 61863,
+            "rectangles": 2861,
+            "survivor_edges": 6102
+          },
+          "5": {
+            "core_forms": 415264,
+            "product_pairs": 66511,
+            "rectangles": 1526,
+            "survivor_edges": 3380
+          },
+          "6": {
+            "core_forms": 600887,
+            "product_pairs": 66380,
+            "rectangles": 772,
+            "survivor_edges": 3122
+          },
+          "7": {
+            "core_forms": 395334,
+            "product_pairs": 56871,
+            "rectangles": 335,
+            "survivor_edges": 1752
+          },
+          "8": {
+            "core_forms": 18416,
+            "product_pairs": 20375,
+            "rectangles": 61,
+            "survivor_edges": 55
+          },
+          "9": {
+            "core_forms": 14471,
+            "product_pairs": 4010,
+            "rectangles": 6,
+            "survivor_edges": 31
+          }
+        },
+        "segment": {
+          "0": {
+            "core_forms": 778527,
+            "product_pairs": 113883,
+            "rectangles": 88984,
+            "survivor_edges": 88984
+          },
+          "1": {
+            "core_forms": 969083,
+            "product_pairs": 80901,
+            "rectangles": 28319,
+            "survivor_edges": 60572
+          },
+          "2": {
+            "core_forms": 754377,
+            "product_pairs": 39990,
+            "rectangles": 5975,
+            "survivor_edges": 27779
+          },
+          "3": {
+            "core_forms": 551170,
+            "product_pairs": 17927,
+            "rectangles": 1024,
+            "survivor_edges": 10162
+          },
+          "4": {
+            "core_forms": 549327,
+            "product_pairs": 11571,
+            "rectangles": 220,
+            "survivor_edges": 4574
+          },
+          "5": {
+            "core_forms": 536289,
+            "product_pairs": 6862,
+            "rectangles": 71,
+            "survivor_edges": 3070
+          },
+          "6": {
+            "core_forms": 172023,
+            "product_pairs": 2009,
+            "rectangles": 14,
+            "survivor_edges": 1082
+          }
+        }
+      },
+      "input_sha256": "85713bf52d73e618741eb1f55cebe3339ff957270bab0bb469baf5f5ba3235df",
+      "raw_ids_sha256": "d7b1b2fcbd60355d1bc0a8638310d1a939e6cb0fff13efc22fb312c1126cbf2f",
+      "sector": "quarter_x_neg_y_neg",
+      "sidecar_elapsed_s": 1.855,
+      "sidecar_stdout_sha256": "1a40852b0ca40b91ad97567508f82cff3a2b7d16b4e85b1a220bb7184fa65599",
+      "top": [
+        {
+          "core_forms": 1124726,
+          "denominator": 1000,
+          "numerator": 1,
+          "product_pairs": 13805,
+          "segments": 125,
+          "survivor_edges": 4134
+        },
+        {
+          "core_forms": 2056151,
+          "denominator": 100,
+          "numerator": 1,
+          "product_pairs": 43050,
+          "segments": 1247,
+          "survivor_edges": 15086
+        },
+        {
+          "core_forms": 2843789,
+          "denominator": 100,
+          "numerator": 5,
+          "product_pairs": 82307,
+          "segments": 6231,
+          "survivor_edges": 35918
+        },
+        {
+          "core_forms": 3210256,
+          "denominator": 100,
+          "numerator": 10,
+          "product_pairs": 108089,
+          "segments": 12461,
+          "survivor_edges": 52891
+        }
+      ]
+    },
+    {
+      "batch_ledger": {
+        "core_sites": 4325933,
+        "dead_core_loads": 221761,
+        "expanded_pairs": 494114,
+        "q34_input_rectangles": 475470,
+        "witness_input_pair_mass": 3041017,
+        "witness_rect_node_visits": 27876449,
+        "witness_rejected_rectangles": 302010
+      },
+      "batch_stdout_sha256": "ef3ec79feefe5ab0e8453b0e1228745d474ce7f33bd429526fdd8152b65c6633",
+      "density": "quarter",
+      "head": {
+        "core_forms": 4325933,
+        "empty_open_rectangles": 18471,
+        "front_pair_mass": 3041017,
+        "front_rectangles": 475470,
+        "large_product_edges": 0,
+        "large_product_forms": 0,
+        "large_product_q3": 0,
+        "large_product_q4": 0,
+        "open_pair_mass": 494114,
+        "open_rectangles": 173460,
+        "positive_segments": 154989,
+        "q3_survivors": 201799,
+        "q4_survivors": 198078,
+        "rectangle_node_visits": 27876449,
+        "segment16_q3": 2192,
+        "segment16_q4": 3522,
+        "singleton_forms": 798836,
+        "singleton_rectangles": 102738,
+        "singleton_survivors": 102738,
+        "sites": 7788,
+        "survivor_edges": 221761
+      },
+      "histograms": {
+        "product": {
+          "0": {
+            "core_forms": 798836,
+            "product_pairs": 102738,
+            "rectangles": 102738,
+            "survivor_edges": 102738
+          },
+          "1": {
+            "core_forms": 969439,
+            "product_pairs": 97958,
+            "rectangles": 45927,
+            "survivor_edges": 69441
+          },
+          "2": {
+            "core_forms": 731874,
+            "product_pairs": 73964,
+            "rectangles": 15779,
+            "survivor_edges": 30530
+          },
+          "3": {
+            "core_forms": 603856,
+            "product_pairs": 60320,
+            "rectangles": 5842,
+            "survivor_edges": 11911
+          },
+          "4": {
+            "core_forms": 244162,
+            "product_pairs": 41044,
+            "rectangles": 1926,
+            "survivor_edges": 3382
+          },
+          "5": {
+            "core_forms": 154163,
+            "product_pairs": 29666,
+            "rectangles": 687,
+            "survivor_edges": 1137
+          },
+          "6": {
+            "core_forms": 240419,
+            "product_pairs": 27111,
+            "rectangles": 305,
+            "survivor_edges": 1063
+          },
+          "7": {
+            "core_forms": 509084,
+            "product_pairs": 32170,
+            "rectangles": 181,
+            "survivor_edges": 1341
+          },
+          "8": {
+            "core_forms": 43210,
+            "product_pairs": 20217,
+            "rectangles": 62,
+            "survivor_edges": 122
+          },
+          "9": {
+            "core_forms": 30890,
+            "product_pairs": 8926,
+            "rectangles": 13,
+            "survivor_edges": 96
+          }
+        },
+        "segment": {
+          "0": {
+            "core_forms": 1114179,
+            "product_pairs": 142537,
+            "rectangles": 116186,
+            "survivor_edges": 116186
+          },
+          "1": {
+            "core_forms": 1137730,
+            "product_pairs": 86002,
+            "rectangles": 32283,
+            "survivor_edges": 68428
+          },
+          "2": {
+            "core_forms": 771815,
+            "product_pairs": 35817,
+            "rectangles": 5536,
+            "survivor_edges": 25195
+          },
+          "3": {
+            "core_forms": 474312,
+            "product_pairs": 13709,
+            "rectangles": 848,
+            "survivor_edges": 8252
+          },
+          "4": {
+            "core_forms": 309903,
+            "product_pairs": 6765,
+            "rectangles": 105,
+            "survivor_edges": 2151
+          },
+          "5": {
+            "core_forms": 375321,
+            "product_pairs": 4803,
+            "rectangles": 26,
+            "survivor_edges": 1112
+          },
+          "6": {
+            "core_forms": 142673,
+            "product_pairs": 828,
+            "rectangles": 5,
+            "survivor_edges": 437
+          }
+        }
+      },
+      "input_sha256": "faa25e0164345e8e2fad4f3d13cdc3eb0fcdc7f0c0266ac497e98da4d48bbdc4",
+      "raw_ids_sha256": "793e6072ad171ababc1ff1cc44c038bc5e3eab7946ba273d9c0d0768be5d0525",
+      "sector": "quarter_x_neg_y_nonneg",
+      "sidecar_elapsed_s": 3.447,
+      "sidecar_stdout_sha256": "b45442bfb096a2d4c9f7c556fb2746833a6b5c16faa92f118dccdd036afd822f",
+      "top": [
+        {
+          "core_forms": 971205,
+          "denominator": 1000,
+          "numerator": 1,
+          "product_pairs": 16013,
+          "segments": 155,
+          "survivor_edges": 3205
+        },
+        {
+          "core_forms": 1720352,
+          "denominator": 100,
+          "numerator": 1,
+          "product_pairs": 37513,
+          "segments": 1550,
+          "survivor_edges": 12918
+        },
+        {
+          "core_forms": 2540324,
+          "denominator": 100,
+          "numerator": 5,
+          "product_pairs": 74177,
+          "segments": 7750,
+          "survivor_edges": 33619
+        },
+        {
+          "core_forms": 2929872,
+          "denominator": 100,
+          "numerator": 10,
+          "product_pairs": 99306,
+          "segments": 15499,
+          "survivor_edges": 51475
+        }
+      ]
+    },
+    {
+      "batch_ledger": {
+        "core_sites": 3548514,
+        "dead_core_loads": 148423,
+        "expanded_pairs": 325836,
+        "q34_input_rectangles": 243190,
+        "witness_input_pair_mass": 1418588,
+        "witness_rect_node_visits": 12147294,
+        "witness_rejected_rectangles": 134496
+      },
+      "batch_stdout_sha256": "51e1542148c9a93c99ee2f6deecae21b8b3bd9a113ab11090a8516234657ecef",
+      "density": "quarter",
+      "head": {
+        "core_forms": 3548514,
+        "empty_open_rectangles": 9921,
+        "front_pair_mass": 1418588,
+        "front_rectangles": 243190,
+        "large_product_edges": 388,
+        "large_product_forms": 639530,
+        "large_product_q3": 64,
+        "large_product_q4": 382,
+        "open_pair_mass": 325836,
+        "open_rectangles": 108694,
+        "positive_segments": 98773,
+        "q3_survivors": 137881,
+        "q4_survivors": 129352,
+        "rectangle_node_visits": 12147294,
+        "segment16_q3": 1808,
+        "segment16_q4": 3120,
+        "singleton_forms": 347018,
+        "singleton_rectangles": 63566,
+        "singleton_survivors": 63566,
+        "sites": 7692,
+        "survivor_edges": 148423
+      },
+      "histograms": {
+        "product": {
+          "0": {
+            "core_forms": 347018,
+            "product_pairs": 63566,
+            "rectangles": 63566,
+            "survivor_edges": 63566
+          },
+          "1": {
+            "core_forms": 445560,
+            "product_pairs": 61470,
+            "rectangles": 28786,
+            "survivor_edges": 47011
+          },
+          "10": {
+            "core_forms": 639530,
+            "product_pairs": 5968,
+            "rectangles": 4,
+            "survivor_edges": 388
+          },
+          "2": {
+            "core_forms": 362351,
+            "product_pairs": 47587,
+            "rectangles": 10166,
+            "survivor_edges": 23384
+          },
+          "3": {
+            "core_forms": 308648,
+            "product_pairs": 35020,
+            "rectangles": 3377,
+            "survivor_edges": 8595
+          },
+          "4": {
+            "core_forms": 194598,
+            "product_pairs": 34535,
+            "rectangles": 1594,
+            "survivor_edges": 3149
+          },
+          "5": {
+            "core_forms": 68790,
+            "product_pairs": 34595,
+            "rectangles": 816,
+            "survivor_edges": 854
+          },
+          "6": {
+            "core_forms": 27597,
+            "product_pairs": 26730,
+            "rectangles": 315,
+            "survivor_edges": 287
+          },
+          "7": {
+            "core_forms": 8623,
+            "product_pairs": 9640,
+            "rectangles": 56,
+            "survivor_edges": 115
+          },
+          "8": {
+            "core_forms": 36056,
+            "product_pairs": 3215,
+            "rectangles": 9,
+            "survivor_edges": 400
+          },
+          "9": {
+            "core_forms": 1109743,
+            "product_pairs": 3510,
+            "rectangles": 5,
+            "survivor_edges": 674
+          }
+        },
+        "segment": {
+          "0": {
+            "core_forms": 473761,
+            "product_pairs": 89294,
+            "rectangles": 71327,
+            "survivor_edges": 71327
+          },
+          "1": {
+            "core_forms": 553020,
+            "product_pairs": 58996,
+            "rectangles": 22310,
+            "survivor_edges": 47450
+          },
+          "2": {
+            "core_forms": 397404,
+            "product_pairs": 26218,
+            "rectangles": 4406,
+            "survivor_edges": 20087
+          },
+          "3": {
+            "core_forms": 284007,
+            "product_pairs": 10874,
+            "rectangles": 644,
+            "survivor_edges": 6301
+          },
+          "4": {
+            "core_forms": 103724,
+            "product_pairs": 3742,
+            "rectangles": 69,
+            "survivor_edges": 1401
+          },
+          "5": {
+            "core_forms": 95133,
+            "product_pairs": 1554,
+            "rectangles": 12,
+            "survivor_edges": 519
+          },
+          "6": {
+            "core_forms": 12481,
+            "product_pairs": 448,
+            "rectangles": 1,
+            "survivor_edges": 90
+          },
+          "7": {
+            "core_forms": 424642,
+            "product_pairs": 780,
+            "rectangles": 1,
+            "survivor_edges": 244
+          },
+          "8": {
+            "core_forms": 1204342,
+            "product_pairs": 2248,
+            "rectangles": 3,
+            "survivor_edges": 1004
+          }
+        }
+      },
+      "input_sha256": "869fe8c51b89c64934ba55863fa17c321b1dfde1717abe2d7e053c415873272b",
+      "raw_ids_sha256": "255a984bd799823cfc69fd92e7f908560dd5007bc219b0934f909e4b57409fa3",
+      "sector": "quarter_x_nonneg_y_neg",
+      "sidecar_elapsed_s": 1.07,
+      "sidecar_stdout_sha256": "ad1bd26ea10be866c929c066acfe7c79a3a60d94f79230c3a38e8cdc5ba7de61",
+      "top": [
+        {
+          "core_forms": 1945474,
+          "denominator": 1000,
+          "numerator": 1,
+          "product_pairs": 13881,
+          "segments": 99,
+          "survivor_edges": 2894
+        },
+        {
+          "core_forms": 2318911,
+          "denominator": 100,
+          "numerator": 1,
+          "product_pairs": 26643,
+          "segments": 988,
+          "survivor_edges": 9219
+        },
+        {
+          "core_forms": 2701044,
+          "denominator": 100,
+          "numerator": 5,
+          "product_pairs": 51808,
+          "segments": 4939,
+          "survivor_edges": 24420
+        },
+        {
+          "core_forms": 2875810,
+          "denominator": 100,
+          "numerator": 10,
+          "product_pairs": 69634,
+          "segments": 9878,
+          "survivor_edges": 37792
+        }
+      ]
+    },
+    {
+      "batch_ledger": {
+        "core_sites": 2229643,
+        "dead_core_loads": 169900,
+        "expanded_pairs": 287095,
+        "q34_input_rectangles": 290309,
+        "witness_input_pair_mass": 1365422,
+        "witness_rect_node_visits": 13770152,
+        "witness_rejected_rectangles": 169051
+      },
+      "batch_stdout_sha256": "4535422309bb85909531be534b9cafd66f4eb17d60c69a96cc13ad82e03d60ab",
+      "density": "quarter",
+      "head": {
+        "core_forms": 2229643,
+        "empty_open_rectangles": 11016,
+        "front_pair_mass": 1365422,
+        "front_rectangles": 290309,
+        "large_product_edges": 0,
+        "large_product_forms": 0,
+        "large_product_q3": 0,
+        "large_product_q4": 0,
+        "open_pair_mass": 287095,
+        "open_rectangles": 121258,
+        "positive_segments": 110242,
+        "q3_survivors": 157378,
+        "q4_survivors": 149400,
+        "rectangle_node_visits": 13770152,
+        "segment16_q3": 1775,
+        "segment16_q4": 2289,
+        "singleton_forms": 405863,
+        "singleton_rectangles": 67066,
+        "singleton_survivors": 67066,
+        "sites": 7718,
+        "survivor_edges": 169900
+      },
+      "histograms": {
+        "product": {
+          "0": {
+            "core_forms": 405863,
+            "product_pairs": 67066,
+            "rectangles": 67066,
+            "survivor_edges": 67066
+          },
+          "1": {
+            "core_forms": 636351,
+            "product_pairs": 76353,
+            "rectangles": 35543,
+            "survivor_edges": 57475
+          },
+          "2": {
+            "core_forms": 513499,
+            "product_pairs": 62405,
+            "rectangles": 13262,
+            "survivor_edges": 29740
+          },
+          "3": {
+            "core_forms": 390118,
+            "product_pairs": 40981,
+            "rectangles": 4049,
+            "survivor_edges": 11301
+          },
+          "4": {
+            "core_forms": 146018,
+            "product_pairs": 20544,
+            "rectangles": 977,
+            "survivor_edges": 2919
+          },
+          "5": {
+            "core_forms": 84401,
+            "product_pairs": 12216,
+            "rectangles": 288,
+            "survivor_edges": 1116
+          },
+          "6": {
+            "core_forms": 16923,
+            "product_pairs": 5126,
+            "rectangles": 61,
+            "survivor_edges": 122
+          },
+          "7": {
+            "core_forms": 35382,
+            "product_pairs": 1604,
+            "rectangles": 9,
+            "survivor_edges": 158
+          },
+          "8": {
+            "core_forms": 1088,
+            "product_pairs": 800,
+            "rectangles": 3,
+            "survivor_edges": 3
+          }
+        },
+        "segment": {
+          "0": {
+            "core_forms": 569897,
+            "product_pairs": 94911,
+            "rectangles": 76686,
+            "survivor_edges": 76686
+          },
+          "1": {
+            "core_forms": 728186,
+            "product_pairs": 70305,
+            "rectangles": 27187,
+            "survivor_edges": 58064
+          },
+          "2": {
+            "core_forms": 483649,
+            "product_pairs": 30139,
+            "rectangles": 5470,
+            "survivor_edges": 24987
+          },
+          "3": {
+            "core_forms": 287401,
+            "product_pairs": 10060,
+            "rectangles": 798,
+            "survivor_edges": 7820
+          },
+          "4": {
+            "core_forms": 104761,
+            "product_pairs": 2516,
+            "rectangles": 89,
+            "survivor_edges": 1837
+          },
+          "5": {
+            "core_forms": 37520,
+            "product_pairs": 589,
+            "rectangles": 11,
+            "survivor_edges": 411
+          },
+          "6": {
+            "core_forms": 18229,
+            "product_pairs": 200,
+            "rectangles": 1,
+            "survivor_edges": 95
+          }
+        }
+      },
+      "input_sha256": "2f269285bf18738e1994d0d647c21e64cd3c13f783825864bdfc6ecf7655daa0",
+      "raw_ids_sha256": "c14eb01f6548765ce16bb73cbd569065798650cf4a0f9d912221b1691d414059",
+      "sector": "quarter_x_nonneg_y_nonneg",
+      "sidecar_elapsed_s": 1.267,
+      "sidecar_stdout_sha256": "986325e91753242c05e0bf6c5b91adae2a94b15b3fbcd6e001ec20874c1f7901",
+      "top": [
+        {
+          "core_forms": 224925,
+          "denominator": 1000,
+          "numerator": 1,
+          "product_pairs": 3695,
+          "segments": 111,
+          "survivor_edges": 1991
+        },
+        {
+          "core_forms": 603515,
+          "denominator": 100,
+          "numerator": 1,
+          "product_pairs": 15183,
+          "segments": 1103,
+          "survivor_edges": 9491
+        },
+        {
+          "core_forms": 1092128,
+          "denominator": 100,
+          "numerator": 5,
+          "product_pairs": 40789,
+          "segments": 5513,
+          "survivor_edges": 26577
+        },
+        {
+          "core_forms": 1350425,
+          "denominator": 100,
+          "numerator": 10,
+          "product_pairs": 61742,
+          "segments": 11025,
+          "survivor_edges": 41436
+        }
+      ]
+    },
+    {
+      "batch_ledger": {
+        "core_sites": 128852821,
+        "dead_core_loads": 1684675,
+        "expanded_pairs": 7815451,
+        "q34_input_rectangles": 2913849,
+        "witness_input_pair_mass": 75933316,
+        "witness_rect_node_visits": 210235657,
+        "witness_rejected_rectangles": 1739490
+      },
+      "batch_stdout_sha256": "00a5f5f749e40f3875e75c47ec12de418004c9a93cdf1b693477017e791ac6e4",
+      "density": "half",
+      "head": {
+        "core_forms": 128852821,
+        "empty_open_rectangles": 149143,
+        "front_pair_mass": 75933316,
+        "front_rectangles": 2913849,
+        "large_product_edges": 25074,
+        "large_product_forms": 70875027,
+        "large_product_q3": 13911,
+        "large_product_q4": 22983,
+        "open_pair_mass": 7815451,
+        "open_rectangles": 1174359,
+        "positive_segments": 1025216,
+        "q3_survivors": 1506463,
+        "q4_survivors": 1525823,
+        "rectangle_node_visits": 210235657,
+        "segment16_q3": 75082,
+        "segment16_q4": 102385,
+        "singleton_forms": 4427900,
+        "singleton_rectangles": 654358,
+        "singleton_survivors": 654358,
+        "sites": 61694,
+        "survivor_edges": 1684675
+      },
+      "histograms": {
+        "product": {
+          "0": {
+            "core_forms": 4427900,
+            "product_pairs": 654358,
+            "rectangles": 654358,
+            "survivor_edges": 654358
+          },
+          "1": {
+            "core_forms": 5813168,
+            "product_pairs": 613098,
+            "rectangles": 286801,
+            "survivor_edges": 446557
+          },
+          "10": {
+            "core_forms": 46442184,
+            "product_pairs": 209511,
+            "rectangles": 146,
+            "survivor_edges": 16851
+          },
+          "11": {
+            "core_forms": 21179888,
+            "product_pairs": 260200,
+            "rectangles": 88,
+            "survivor_edges": 6867
+          },
+          "12": {
+            "core_forms": 971884,
+            "product_pairs": 429081,
+            "rectangles": 71,
+            "survivor_edges": 406
+          },
+          "13": {
+            "core_forms": 2255935,
+            "product_pairs": 934169,
+            "rectangles": 77,
+            "survivor_edges": 940
+          },
+          "14": {
+            "core_forms": 25136,
+            "product_pairs": 363138,
+            "rectangles": 19,
+            "survivor_edges": 10
+          },
+          "2": {
+            "core_forms": 5958835,
+            "product_pairs": 615696,
+            "rectangles": 130912,
+            "survivor_edges": 292207
+          },
+          "3": {
+            "core_forms": 6306764,
+            "product_pairs": 535464,
+            "rectangles": 51363,
+            "survivor_edges": 127954
+          },
+          "4": {
+            "core_forms": 5389450,
+            "product_pairs": 540406,
+            "rectangles": 24746,
+            "survivor_edges": 66015
+          },
+          "5": {
+            "core_forms": 3911002,
+            "product_pairs": 588261,
+            "rectangles": 13349,
+            "survivor_edges": 28000
+          },
+          "6": {
+            "core_forms": 3359996,
+            "product_pairs": 611800,
+            "rectangles": 6914,
+            "survivor_edges": 15355
+          },
+          "7": {
+            "core_forms": 5006776,
+            "product_pairs": 634955,
+            "rectangles": 3603,
+            "survivor_edges": 13745
+          },
+          "8": {
+            "core_forms": 4272836,
+            "product_pairs": 487685,
+            "rectangles": 1413,
+            "survivor_edges": 7959
+          },
+          "9": {
+            "core_forms": 13531067,
+            "product_pairs": 337629,
+            "rectangles": 499,
+            "survivor_edges": 7451
+          }
+        },
+        "segment": {
+          "0": {
+            "core_forms": 6465913,
+            "product_pairs": 961606,
+            "rectangles": 736361,
+            "survivor_edges": 736361
+          },
+          "1": {
+            "core_forms": 8026772,
+            "product_pairs": 708826,
+            "rectangles": 216966,
+            "survivor_edges": 463907
+          },
+          "2": {
+            "core_forms": 8009495,
+            "product_pairs": 486754,
+            "rectangles": 58204,
+            "survivor_edges": 267889
+          },
+          "3": {
+            "core_forms": 7753191,
+            "product_pairs": 274975,
+            "rectangles": 10824,
+            "survivor_edges": 108474
+          },
+          "4": {
+            "core_forms": 5974092,
+            "product_pairs": 165644,
+            "rectangles": 2179,
+            "survivor_edges": 44694
+          },
+          "5": {
+            "core_forms": 5457192,
+            "product_pairs": 73764,
+            "rectangles": 473,
+            "survivor_edges": 19946
+          },
+          "6": {
+            "core_forms": 6778411,
+            "product_pairs": 79134,
+            "rectangles": 123,
+            "survivor_edges": 10752
+          },
+          "7": {
+            "core_forms": 9699000,
+            "product_pairs": 63276,
+            "rectangles": 38,
+            "survivor_edges": 6633
+          },
+          "8": {
+            "core_forms": 29837782,
+            "product_pairs": 37174,
+            "rectangles": 27,
+            "survivor_edges": 10982
+          },
+          "9": {
+            "core_forms": 40850973,
+            "product_pairs": 37546,
+            "rectangles": 21,
+            "survivor_edges": 15037
+          }
+        }
+      },
+      "input_sha256": "9b745ea012a418076c9e570a5f57fd1f36fc1fbcaa467ec1335202cd5bf4adb1",
+      "raw_ids_sha256": "23b62b6176d14e9dff93ef508ed171521631e40607191819b9503c6103f9bba6",
+      "sector": "full",
+      "sidecar_elapsed_s": 17.488,
+      "sidecar_stdout_sha256": "1ab4d0daf8475bb7d5e5057c5e4b62ae99f30b6d1b78d57169ab9cfdc6ae973d",
+      "top": [
+        {
+          "core_forms": 97744812,
+          "denominator": 1000,
+          "numerator": 1,
+          "product_pairs": 617364,
+          "segments": 1026,
+          "survivor_edges": 62617
+        },
+        {
+          "core_forms": 108471203,
+          "denominator": 100,
+          "numerator": 1,
+          "product_pairs": 935720,
+          "segments": 10253,
+          "survivor_edges": 162496
+        },
+        {
+          "core_forms": 116520041,
+          "denominator": 100,
+          "numerator": 5,
+          "product_pairs": 1311910,
+          "segments": 51261,
+          "survivor_edges": 349374
+        },
+        {
+          "core_forms": 119588300,
+          "denominator": 100,
+          "numerator": 10,
+          "product_pairs": 1537526,
+          "segments": 102522,
+          "survivor_edges": 500526
+        }
+      ]
+    },
+    {
+      "batch_ledger": {
+        "core_sites": 13106100,
+        "dead_core_loads": 423789,
+        "expanded_pairs": 1801672,
+        "q34_input_rectangles": 720693,
+        "witness_input_pair_mass": 7973708,
+        "witness_rect_node_visits": 52484527,
+        "witness_rejected_rectangles": 422322
+      },
+      "batch_stdout_sha256": "6f381bba937247294d42833748cddabf40ce5ecb0ae1a16b64520492bea6c3ed",
+      "density": "half",
+      "head": {
+        "core_forms": 13106100,
+        "empty_open_rectangles": 41019,
+        "front_pair_mass": 7973708,
+        "front_rectangles": 720693,
+        "large_product_edges": 107,
+        "large_product_forms": 82132,
+        "large_product_q3": 0,
+        "large_product_q4": 107,
+        "open_pair_mass": 1801672,
+        "open_rectangles": 298371,
+        "positive_segments": 257352,
+        "q3_survivors": 378240,
+        "q4_survivors": 384299,
+        "rectangle_node_visits": 52484527,
+        "segment16_q3": 18244,
+        "segment16_q4": 22654,
+        "singleton_forms": 1135666,
+        "singleton_rectangles": 164902,
+        "singleton_survivors": 164902,
+        "sites": 15217,
+        "survivor_edges": 423789
+      },
+      "histograms": {
+        "product": {
+          "0": {
+            "core_forms": 1135666,
+            "product_pairs": 164902,
+            "rectangles": 164902,
+            "survivor_edges": 164902
+          },
+          "1": {
+            "core_forms": 1512753,
+            "product_pairs": 149971,
+            "rectangles": 70010,
+            "survivor_edges": 108570
+          },
+          "10": {
+            "core_forms": 81106,
+            "product_pairs": 42062,
+            "rectangles": 32,
+            "survivor_edges": 106
+          },
+          "11": {
+            "core_forms": 1026,
+            "product_pairs": 9162,
+            "rectangles": 3,
+            "survivor_edges": 1
+          },
+          "2": {
+            "core_forms": 1595299,
+            "product_pairs": 154397,
+            "rectangles": 32824,
+            "survivor_edges": 72909
+          },
+          "3": {
+            "core_forms": 1657475,
+            "product_pairs": 153707,
+            "rectangles": 14667,
+            "survivor_edges": 36443
+          },
+          "4": {
+            "core_forms": 1399636,
+            "product_pairs": 160496,
+            "rectangles": 7406,
+            "survivor_edges": 17441
+          },
+          "5": {
+            "core_forms": 1032645,
+            "product_pairs": 179415,
+            "rectangles": 4058,
+            "survivor_edges": 8318
+          },
+          "6": {
+            "core_forms": 924079,
+            "product_pairs": 206393,
+            "rectangles": 2332,
+            "survivor_edges": 5238
+          },
+          "7": {
+            "core_forms": 1918708,
+            "product_pairs": 232267,
+            "rectangles": 1323,
+            "survivor_edges": 5985
+          },
+          "8": {
+            "core_forms": 1437083,
+            "product_pairs": 222888,
+            "rectangles": 628,
+            "survivor_edges": 3091
+          },
+          "9": {
+            "core_forms": 410624,
+            "product_pairs": 126012,
+            "rectangles": 186,
+            "survivor_edges": 785
+          }
+        },
+        "segment": {
+          "0": {
+            "core_forms": 1689630,
+            "product_pairs": 242969,
+            "rectangles": 185141,
+            "survivor_edges": 185141
+          },
+          "1": {
+            "core_forms": 2161048,
+            "product_pairs": 167560,
+            "rectangles": 53513,
+            "survivor_edges": 114856
+          },
+          "2": {
+            "core_forms": 2205373,
+            "product_pairs": 112954,
+            "rectangles": 14782,
+            "survivor_edges": 68516
+          },
+          "3": {
+            "core_forms": 2034098,
+            "product_pairs": 64881,
+            "rectangles": 3114,
+            "survivor_edges": 31202
+          },
+          "4": {
+            "core_forms": 1713429,
+            "product_pairs": 37866,
+            "rectangles": 607,
+            "survivor_edges": 12394
+          },
+          "5": {
+            "core_forms": 1584629,
+            "product_pairs": 18618,
+            "rectangles": 144,
+            "survivor_edges": 6231
+          },
+          "6": {
+            "core_forms": 948829,
+            "product_pairs": 8387,
+            "rectangles": 36,
+            "survivor_edges": 3155
+          },
+          "7": {
+            "core_forms": 769064,
+            "product_pairs": 5233,
+            "rectangles": 15,
+            "survivor_edges": 2294
+          }
+        }
+      },
+      "input_sha256": "fe2cbf5be5f7ce4e4b42562829e5cbbf960423988c6c39c31e0ab9d371e428e6",
+      "raw_ids_sha256": "23ee85d409517e766e7182465b1b984c0e8c9d8d05c884c69e3ab332cb7a1e03",
+      "sector": "quarter_x_neg_y_neg",
+      "sidecar_elapsed_s": 4.252,
+      "sidecar_stdout_sha256": "85366774d5c4c36dbab8605d637ebde66923ef037ad9d70eb7999e8e60185ca1",
+      "top": [
+        {
+          "core_forms": 4621975,
+          "denominator": 1000,
+          "numerator": 1,
+          "product_pairs": 54086,
+          "segments": 258,
+          "survivor_edges": 10279
+        },
+        {
+          "core_forms": 7457346,
+          "denominator": 100,
+          "numerator": 1,
+          "product_pairs": 149178,
+          "segments": 2574,
+          "survivor_edges": 36813
+        },
+        {
+          "core_forms": 9795849,
+          "denominator": 100,
+          "numerator": 5,
+          "product_pairs": 252228,
+          "segments": 12868,
+          "survivor_edges": 86271
+        },
+        {
+          "core_forms": 10698626,
+          "denominator": 100,
+          "numerator": 10,
+          "product_pairs": 315154,
+          "segments": 25736,
+          "survivor_edges": 125396
+        }
+      ]
+    },
+    {
+      "batch_ledger": {
+        "core_sites": 13260212,
+        "dead_core_loads": 477789,
+        "expanded_pairs": 1403555,
+        "q34_input_rectangles": 1022088,
+        "witness_input_pair_mass": 9484982,
+        "witness_rect_node_visits": 67436270,
+        "witness_rejected_rectangles": 660773
+      },
+      "batch_stdout_sha256": "9520123d4f3f2daec6cd49c913ed9eb9a2bc9bf0b2fcbc0525246c3966afad63",
+      "density": "half",
+      "head": {
+        "core_forms": 13260212,
+        "empty_open_rectangles": 44252,
+        "front_pair_mass": 9484982,
+        "front_rectangles": 1022088,
+        "large_product_edges": 212,
+        "large_product_forms": 176866,
+        "large_product_q3": 34,
+        "large_product_q4": 209,
+        "open_pair_mass": 1403555,
+        "open_rectangles": 361315,
+        "positive_segments": 317063,
+        "q3_survivors": 428125,
+        "q4_survivors": 432452,
+        "rectangle_node_visits": 67436270,
+        "segment16_q3": 10741,
+        "segment16_q4": 15419,
+        "singleton_forms": 1636480,
+        "singleton_rectangles": 209588,
+        "singleton_survivors": 209588,
+        "sites": 15427,
+        "survivor_edges": 477789
+      },
+      "histograms": {
+        "product": {
+          "0": {
+            "core_forms": 1636480,
+            "product_pairs": 209588,
+            "rectangles": 209588,
+            "survivor_edges": 209588
+          },
+          "1": {
+            "core_forms": 1964251,
+            "product_pairs": 193072,
+            "rectangles": 90191,
+            "survivor_edges": 134437
+          },
+          "10": {
+            "core_forms": 156982,
+            "product_pairs": 42491,
+            "rectangles": 32,
+            "survivor_edges": 196
+          },
+          "11": {
+            "core_forms": 19884,
+            "product_pairs": 8550,
+            "rectangles": 3,
+            "survivor_edges": 16
+          },
+          "12": {
+            "core_forms": 0,
+            "product_pairs": 4400,
+            "rectangles": 1,
+            "survivor_edges": 0
+          },
+          "2": {
+            "core_forms": 1734352,
+            "product_pairs": 170061,
+            "rectangles": 36169,
+            "survivor_edges": 72194
+          },
+          "3": {
+            "core_forms": 1873065,
+            "product_pairs": 145117,
+            "rectangles": 13887,
+            "survivor_edges": 31678
+          },
+          "4": {
+            "core_forms": 1500924,
+            "product_pairs": 142273,
+            "rectangles": 6499,
+            "survivor_edges": 16381
+          },
+          "5": {
+            "core_forms": 750804,
+            "product_pairs": 125022,
+            "rectangles": 2908,
+            "survivor_edges": 5406
+          },
+          "6": {
+            "core_forms": 546550,
+            "product_pairs": 98299,
+            "rectangles": 1137,
+            "survivor_edges": 2571
+          },
+          "7": {
+            "core_forms": 717829,
+            "product_pairs": 90047,
+            "rectangles": 511,
+            "survivor_edges": 2178
+          },
+          "8": {
+            "core_forms": 1355646,
+            "product_pairs": 95612,
+            "rectangles": 270,
+            "survivor_edges": 1887
+          },
+          "9": {
+            "core_forms": 1003445,
+            "product_pairs": 79023,
+            "rectangles": 119,
+            "survivor_edges": 1257
+          }
+        },
+        "segment": {
+          "0": {
+            "core_forms": 2351052,
+            "product_pairs": 300057,
+            "rectangles": 236330,
+            "survivor_edges": 236330
+          },
+          "1": {
+            "core_forms": 2499034,
+            "product_pairs": 182817,
+            "rectangles": 63610,
+            "survivor_edges": 135340
+          },
+          "2": {
+            "core_forms": 2188711,
+            "product_pairs": 98101,
+            "rectangles": 13904,
+            "survivor_edges": 63871
+          },
+          "3": {
+            "core_forms": 2085501,
+            "product_pairs": 53616,
+            "rectangles": 2598,
+            "survivor_edges": 26167
+          },
+          "4": {
+            "core_forms": 1539481,
+            "product_pairs": 33654,
+            "rectangles": 531,
+            "survivor_edges": 10747
+          },
+          "5": {
+            "core_forms": 836013,
+            "product_pairs": 12329,
+            "rectangles": 62,
+            "survivor_edges": 2526
+          },
+          "6": {
+            "core_forms": 1039300,
+            "product_pairs": 8315,
+            "rectangles": 22,
+            "survivor_edges": 1913
+          },
+          "7": {
+            "core_forms": 721120,
+            "product_pairs": 2876,
+            "rectangles": 6,
+            "survivor_edges": 895
+          }
+        }
+      },
+      "input_sha256": "eb1d2e6b8e9da5306dea12898b51c60f325da84f29288fca2d8b6a2bd148dd21",
+      "raw_ids_sha256": "74cb96b354cc149dcc9a68ea4d1eb7fa836fc4c76f1a0966a4428f68904dbf53",
+      "sector": "quarter_x_neg_y_nonneg",
+      "sidecar_elapsed_s": 5.906,
+      "sidecar_stdout_sha256": "f18bd7c5259b4e2fbc76d7c1dabed7d9b0380316da2f21ba6279a43c197b7e60",
+      "top": [
+        {
+          "core_forms": 4112923,
+          "denominator": 1000,
+          "numerator": 1,
+          "product_pairs": 59003,
+          "segments": 318,
+          "survivor_edges": 8678
+        },
+        {
+          "core_forms": 7064784,
+          "denominator": 100,
+          "numerator": 1,
+          "product_pairs": 133683,
+          "segments": 3171,
+          "survivor_edges": 35113
+        },
+        {
+          "core_forms": 9324997,
+          "denominator": 100,
+          "numerator": 5,
+          "product_pairs": 235662,
+          "segments": 15854,
+          "survivor_edges": 85051
+        },
+        {
+          "core_forms": 10220926,
+          "denominator": 100,
+          "numerator": 10,
+          "product_pairs": 293512,
+          "segments": 31707,
+          "survivor_edges": 125662
+        }
+      ]
+    },
+    {
+      "batch_ledger": {
+        "core_sites": 14655072,
+        "dead_core_loads": 335203,
+        "expanded_pairs": 979390,
+        "q34_input_rectangles": 493909,
+        "witness_input_pair_mass": 4489971,
+        "witness_rect_node_visits": 29006618,
+        "witness_rejected_rectangles": 259224
+      },
+      "batch_stdout_sha256": "3a9b5b8896c2f72faad59803984f5058b6cad3b40da50be99b3fe79f62536bc0",
+      "density": "half",
+      "head": {
+        "core_forms": 14655072,
+        "empty_open_rectangles": 24458,
+        "front_pair_mass": 4489971,
+        "front_rectangles": 493909,
+        "large_product_edges": 2884,
+        "large_product_forms": 9231710,
+        "large_product_q3": 503,
+        "large_product_q4": 2844,
+        "open_pair_mass": 979390,
+        "open_rectangles": 234685,
+        "positive_segments": 210227,
+        "q3_survivors": 306912,
+        "q4_survivors": 302264,
+        "rectangle_node_visits": 29006618,
+        "segment16_q3": 9207,
+        "segment16_q4": 13909,
+        "singleton_forms": 766609,
+        "singleton_rectangles": 136720,
+        "singleton_survivors": 136720,
+        "sites": 15619,
+        "survivor_edges": 335203
+      },
+      "histograms": {
+        "product": {
+          "0": {
+            "core_forms": 766609,
+            "product_pairs": 136720,
+            "rectangles": 136720,
+            "survivor_edges": 136720
+          },
+          "1": {
+            "core_forms": 939206,
+            "product_pairs": 117745,
+            "rectangles": 55491,
+            "survivor_edges": 90125
+          },
+          "10": {
+            "core_forms": 748089,
+            "product_pairs": 11546,
+            "rectangles": 7,
+            "survivor_edges": 375
+          },
+          "11": {
+            "core_forms": 8483621,
+            "product_pairs": 18506,
+            "rectangles": 7,
+            "survivor_edges": 2509
+          },
+          "12": {
+            "core_forms": 0,
+            "product_pairs": 8680,
+            "rectangles": 2,
+            "survivor_edges": 0
+          },
+          "2": {
+            "core_forms": 992163,
+            "product_pairs": 122175,
+            "rectangles": 26031,
+            "survivor_edges": 64618
+          },
+          "3": {
+            "core_forms": 801638,
+            "product_pairs": 82812,
+            "rectangles": 7992,
+            "survivor_edges": 20732
+          },
+          "4": {
+            "core_forms": 739980,
+            "product_pairs": 86904,
+            "rectangles": 3956,
+            "survivor_edges": 10541
+          },
+          "5": {
+            "core_forms": 620610,
+            "product_pairs": 104702,
+            "rectangles": 2373,
+            "survivor_edges": 5574
+          },
+          "6": {
+            "core_forms": 194307,
+            "product_pairs": 115969,
+            "rectangles": 1302,
+            "survivor_edges": 1643
+          },
+          "7": {
+            "core_forms": 134120,
+            "product_pairs": 107804,
+            "rectangles": 630,
+            "survivor_edges": 866
+          },
+          "8": {
+            "core_forms": 117699,
+            "product_pairs": 49846,
+            "rectangles": 151,
+            "survivor_edges": 801
+          },
+          "9": {
+            "core_forms": 117030,
+            "product_pairs": 15981,
+            "rectangles": 23,
+            "survivor_edges": 699
+          }
+        },
+        "segment": {
+          "0": {
+            "core_forms": 1046715,
+            "product_pairs": 188783,
+            "rectangles": 151430,
+            "survivor_edges": 151430
+          },
+          "1": {
+            "core_forms": 1236070,
+            "product_pairs": 121761,
+            "rectangles": 43899,
+            "survivor_edges": 93554
+          },
+          "10": {
+            "core_forms": 3549730,
+            "product_pairs": 2760,
+            "rectangles": 1,
+            "survivor_edges": 1087
+          },
+          "2": {
+            "core_forms": 1196173,
+            "product_pairs": 76293,
+            "rectangles": 12678,
+            "survivor_edges": 58120
+          },
+          "3": {
+            "core_forms": 1036207,
+            "product_pairs": 35629,
+            "rectangles": 1795,
+            "survivor_edges": 17655
+          },
+          "4": {
+            "core_forms": 721388,
+            "product_pairs": 14980,
+            "rectangles": 350,
+            "survivor_edges": 7190
+          },
+          "5": {
+            "core_forms": 212192,
+            "product_pairs": 5104,
+            "rectangles": 56,
+            "survivor_edges": 2377
+          },
+          "6": {
+            "core_forms": 83748,
+            "product_pairs": 2466,
+            "rectangles": 11,
+            "survivor_edges": 857
+          },
+          "7": {
+            "core_forms": 665943,
+            "product_pairs": 3384,
+            "rectangles": 3,
+            "survivor_edges": 524
+          },
+          "8": {
+            "core_forms": 48283,
+            "product_pairs": 480,
+            "rectangles": 1,
+            "survivor_edges": 464
+          },
+          "9": {
+            "core_forms": 4858623,
+            "product_pairs": 5720,
+            "rectangles": 3,
+            "survivor_edges": 1945
+          }
+        }
+      },
+      "input_sha256": "fd8756d3f254fef35e56369d1618af9a33a30a038920cb77298cbf43ed60fd51",
+      "raw_ids_sha256": "2f8f4ee3a0ebcd0ccdc5051701e37b5eb4b1aebd90c274334946f3414ece5f5f",
+      "sector": "quarter_x_nonneg_y_neg",
+      "sidecar_elapsed_s": 2.493,
+      "sidecar_stdout_sha256": "63a7c0d1c4ed147e9d1e27eaa15518685394963c3f872f70f7fcdda547262a06",
+      "top": [
+        {
+          "core_forms": 10224820,
+          "denominator": 1000,
+          "numerator": 1,
+          "product_pairs": 40274,
+          "segments": 211,
+          "survivor_edges": 8911
+        },
+        {
+          "core_forms": 11586386,
+          "denominator": 100,
+          "numerator": 1,
+          "product_pairs": 81752,
+          "segments": 2103,
+          "survivor_edges": 26573
+        },
+        {
+          "core_forms": 12617967,
+          "denominator": 100,
+          "numerator": 5,
+          "product_pairs": 146073,
+          "segments": 10512,
+          "survivor_edges": 63352
+        },
+        {
+          "core_forms": 13079872,
+          "denominator": 100,
+          "numerator": 10,
+          "product_pairs": 189187,
+          "segments": 21023,
+          "survivor_edges": 95598
+        }
+      ]
+    },
+    {
+      "batch_ledger": {
+        "core_sites": 7024220,
+        "dead_core_loads": 378099,
+        "expanded_pairs": 781835,
+        "q34_input_rectangles": 582304,
+        "witness_input_pair_mass": 3609945,
+        "witness_rect_node_visits": 32596679,
+        "witness_rejected_rectangles": 326266
+      },
+      "batch_stdout_sha256": "c4ebb23905a715f81e8418ec732547a1f46452cad4db9406f2cb2a24ea54442e",
+      "density": "half",
+      "head": {
+        "core_forms": 7024220,
+        "empty_open_rectangles": 28095,
+        "front_pair_mass": 3609945,
+        "front_rectangles": 582304,
+        "large_product_edges": 0,
+        "large_product_forms": 0,
+        "large_product_q3": 0,
+        "large_product_q4": 0,
+        "open_pair_mass": 781835,
+        "open_rectangles": 256038,
+        "positive_segments": 227943,
+        "q3_survivors": 343635,
+        "q4_survivors": 342537,
+        "rectangle_node_visits": 32596679,
+        "segment16_q3": 9811,
+        "segment16_q4": 12444,
+        "singleton_forms": 873911,
+        "singleton_rectangles": 139485,
+        "singleton_survivors": 139485,
+        "sites": 15431,
+        "survivor_edges": 378099
+      },
+      "histograms": {
+        "product": {
+          "0": {
+            "core_forms": 873911,
+            "product_pairs": 139485,
+            "rectangles": 139485,
+            "survivor_edges": 139485
+          },
+          "1": {
+            "core_forms": 1289485,
+            "product_pairs": 141894,
+            "rectangles": 66163,
+            "survivor_edges": 106099
+          },
+          "2": {
+            "core_forms": 1482040,
+            "product_pairs": 152506,
+            "rectangles": 32524,
+            "survivor_edges": 77244
+          },
+          "3": {
+            "core_forms": 1322560,
+            "product_pairs": 116831,
+            "rectangles": 11335,
+            "survivor_edges": 32297
+          },
+          "4": {
+            "core_forms": 1090431,
+            "product_pairs": 93281,
+            "rectangles": 4380,
+            "survivor_edges": 15815
+          },
+          "5": {
+            "core_forms": 485781,
+            "product_pairs": 64535,
+            "rectangles": 1524,
+            "survivor_edges": 4917
+          },
+          "6": {
+            "core_forms": 305486,
+            "product_pairs": 42172,
+            "rectangles": 495,
+            "survivor_edges": 1775
+          },
+          "7": {
+            "core_forms": 105071,
+            "product_pairs": 16440,
+            "rectangles": 97,
+            "survivor_edges": 304
+          },
+          "8": {
+            "core_forms": 69455,
+            "product_pairs": 9362,
+            "rectangles": 27,
+            "survivor_edges": 163
+          },
+          "9": {
+            "core_forms": 0,
+            "product_pairs": 5329,
+            "rectangles": 8,
+            "survivor_edges": 0
+          }
+        },
+        "segment": {
+          "0": {
+            "core_forms": 1253146,
+            "product_pairs": 197643,
+            "rectangles": 157602,
+            "survivor_edges": 157602
+          },
+          "1": {
+            "core_forms": 1662908,
+            "product_pairs": 143020,
+            "rectangles": 51946,
+            "survivor_edges": 111413
+          },
+          "2": {
+            "core_forms": 1609675,
+            "product_pairs": 87869,
+            "rectangles": 15169,
+            "survivor_edges": 69589
+          },
+          "3": {
+            "core_forms": 1258227,
+            "product_pairs": 36981,
+            "rectangles": 2669,
+            "survivor_edges": 26623
+          },
+          "4": {
+            "core_forms": 764576,
+            "product_pairs": 15115,
+            "rectangles": 480,
+            "survivor_edges": 9712
+          },
+          "5": {
+            "core_forms": 427445,
+            "product_pairs": 5134,
+            "rectangles": 73,
+            "survivor_edges": 2842
+          },
+          "6": {
+            "core_forms": 48243,
+            "product_pairs": 394,
+            "rectangles": 4,
+            "survivor_edges": 318
+          }
+        }
+      },
+      "input_sha256": "8531136d076c983920cbdda750c8080737014b4d615611ab33b0979c6041bbdf",
+      "raw_ids_sha256": "da931d3e3dee7068adca6dbb822bc9cba0cf33dd6d1d68c36896fe8c20c8a9dc",
+      "sector": "quarter_x_nonneg_y_nonneg",
+      "sidecar_elapsed_s": 2.853,
+      "sidecar_stdout_sha256": "ad23bded267654eb1dc3a7cf744d079934287064321313f63ba014b44ea5c04e",
+      "top": [
+        {
+          "core_forms": 1069308,
+          "denominator": 1000,
+          "numerator": 1,
+          "product_pairs": 12302,
+          "segments": 228,
+          "survivor_edges": 5659
+        },
+        {
+          "core_forms": 2670840,
+          "denominator": 100,
+          "numerator": 1,
+          "product_pairs": 49354,
+          "segments": 2280,
+          "survivor_edges": 26182
+        },
+        {
+          "core_forms": 4284280,
+          "denominator": 100,
+          "numerator": 5,
+          "product_pairs": 120756,
+          "segments": 11398,
+          "survivor_edges": 69036
+        },
+        {
+          "core_forms": 4979943,
+          "denominator": 100,
+          "numerator": 10,
+          "product_pairs": 172825,
+          "segments": 22795,
+          "survivor_edges": 104993
+        }
+      ]
+    },
+    {
+      "batch_ledger": {
+        "core_sites": 559661741,
+        "dead_core_loads": 3986433,
+        "expanded_pairs": 22034426,
+        "q34_input_rectangles": 6175011,
+        "witness_input_pair_mass": 238364135,
+        "witness_rect_node_visits": 503488729,
+        "witness_rejected_rectangles": 3626558
+      },
+      "batch_stdout_sha256": "06f216521def627c90348305e0c3c1c8d4b8cf4bfbf2db14ddd5186423f64b45",
+      "density": "full",
+      "head": {
+        "core_forms": 559661741,
+        "empty_open_rectangles": 351867,
+        "front_pair_mass": 238364135,
+        "front_rectangles": 6175011,
+        "large_product_edges": 81089,
+        "large_product_forms": 397354920,
+        "large_product_q3": 41117,
+        "large_product_q4": 79412,
+        "open_pair_mass": 22034426,
+        "open_rectangles": 2548453,
+        "positive_segments": 2196586,
+        "q3_survivors": 3502180,
+        "q4_survivors": 3665711,
+        "rectangle_node_visits": 503488729,
+        "segment16_q3": 271207,
+        "segment16_q4": 382641,
+        "singleton_forms": 9824229,
+        "singleton_rectangles": 1408545,
+        "singleton_survivors": 1408545,
+        "sites": 123389,
+        "survivor_edges": 3986433
+      },
+      "histograms": {
+        "product": {
+          "0": {
+            "core_forms": 9824229,
+            "product_pairs": 1408545,
+            "rectangles": 1408545,
+            "survivor_edges": 1408545
+          },
+          "1": {
+            "core_forms": 11636158,
+            "product_pairs": 1094733,
+            "rectangles": 516639,
+            "survivor_edges": 782530
+          },
+          "10": {
+            "core_forms": 67338911,
+            "product_pairs": 1605428,
+            "rectangles": 1151,
+            "survivor_edges": 20738
+          },
+          "11": {
+            "core_forms": 13127573,
+            "product_pairs": 1008870,
+            "rectangles": 366,
+            "survivor_edges": 3807
+          },
+          "12": {
+            "core_forms": 196091625,
+            "product_pairs": 680378,
+            "rectangles": 120,
+            "survivor_edges": 33505
+          },
+          "13": {
+            "core_forms": 120766559,
+            "product_pairs": 619546,
+            "rectangles": 55,
+            "survivor_edges": 23032
+          },
+          "14": {
+            "core_forms": 30252,
+            "product_pairs": 733704,
+            "rectangles": 33,
+            "survivor_edges": 7
+          },
+          "15": {
+            "core_forms": 0,
+            "product_pairs": 956869,
+            "rectangles": 20,
+            "survivor_edges": 0
+          },
+          "16": {
+            "core_forms": 0,
+            "product_pairs": 210236,
+            "rectangles": 2,
+            "survivor_edges": 0
+          },
+          "2": {
+            "core_forms": 17589321,
+            "product_pairs": 1686550,
+            "rectangles": 361457,
+            "survivor_edges": 868255
+          },
+          "3": {
+            "core_forms": 17161404,
+            "product_pairs": 1310326,
+            "rectangles": 127047,
+            "survivor_edges": 366045
+          },
+          "4": {
+            "core_forms": 18922710,
+            "product_pairs": 1289775,
+            "rectangles": 59361,
+            "survivor_edges": 209005
+          },
+          "5": {
+            "core_forms": 18554218,
+            "product_pairs": 1480732,
+            "rectangles": 33384,
+            "survivor_edges": 126388
+          },
+          "6": {
+            "core_forms": 15969148,
+            "product_pairs": 1785178,
+            "rectangles": 20055,
+            "survivor_edges": 66063
+          },
+          "7": {
+            "core_forms": 13363522,
+            "product_pairs": 2010178,
+            "rectangles": 11319,
+            "survivor_edges": 32389
+          },
+          "8": {
+            "core_forms": 18795196,
+            "product_pairs": 2162624,
+            "rectangles": 6045,
+            "survivor_edges": 23903
+          },
+          "9": {
+            "core_forms": 20490915,
+            "product_pairs": 1990754,
+            "rectangles": 2854,
+            "survivor_edges": 22221
+          }
+        },
+        "segment": {
+          "0": {
+            "core_forms": 14579999,
+            "product_pairs": 2126928,
+            "rectangles": 1569615,
+            "survivor_edges": 1569615
+          },
+          "1": {
+            "core_forms": 17932865,
+            "product_pairs": 1371814,
+            "rectangles": 405895,
+            "survivor_edges": 871678
+          },
+          "10": {
+            "core_forms": 156661331,
+            "product_pairs": 139811,
+            "rectangles": 19,
+            "survivor_edges": 27865
+          },
+          "11": {
+            "core_forms": 110784208,
+            "product_pairs": 83592,
+            "rectangles": 9,
+            "survivor_edges": 21608
+          },
+          "2": {
+            "core_forms": 23691018,
+            "product_pairs": 1261726,
+            "rectangles": 176268,
+            "survivor_edges": 810414
+          },
+          "3": {
+            "core_forms": 24822197,
+            "product_pairs": 722381,
+            "rectangles": 33634,
+            "survivor_edges": 338245
+          },
+          "4": {
+            "core_forms": 25187474,
+            "product_pairs": 476099,
+            "rectangles": 8529,
+            "survivor_edges": 177402
+          },
+          "5": {
+            "core_forms": 21085000,
+            "product_pairs": 245136,
+            "rectangles": 1966,
+            "survivor_edges": 81807
+          },
+          "6": {
+            "core_forms": 24821198,
+            "product_pairs": 181510,
+            "rectangles": 448,
+            "survivor_edges": 38259
+          },
+          "7": {
+            "core_forms": 29917518,
+            "product_pairs": 118869,
+            "rectangles": 150,
+            "survivor_edges": 26033
+          },
+          "8": {
+            "core_forms": 37614107,
+            "product_pairs": 49083,
+            "rectangles": 37,
+            "survivor_edges": 11669
+          },
+          "9": {
+            "core_forms": 72564826,
+            "product_pairs": 80661,
+            "rectangles": 16,
+            "survivor_edges": 11838
+          }
+        }
+      },
+      "input_sha256": "233cc4ea8cac6e0b1155ea845af57b32e5236764bf2e119557aeab5bac76c172",
+      "raw_ids_sha256": "796e9814dd2dff7778ad8d1bb55f5113ab54206ff8b246e6432200f9a6833f7f",
+      "sector": "full",
+      "sidecar_elapsed_s": 42.301,
+      "sidecar_stdout_sha256": "50423599e0c482a9735dac2869e1db88f8ce429bf2cad131f9e723e754a85100",
+      "top": [
+        {
+          "core_forms": 462421824,
+          "denominator": 1000,
+          "numerator": 1,
+          "product_pairs": 1097131,
+          "segments": 2197,
+          "survivor_edges": 177958
+        },
+        {
+          "core_forms": 503528136,
+          "denominator": 100,
+          "numerator": 1,
+          "product_pairs": 2158489,
+          "segments": 21966,
+          "survivor_edges": 464253
+        },
+        {
+          "core_forms": 527704320,
+          "denominator": 100,
+          "numerator": 5,
+          "product_pairs": 3228501,
+          "segments": 109830,
+          "survivor_edges": 967996
+        },
+        {
+          "core_forms": 536300734,
+          "denominator": 100,
+          "numerator": 10,
+          "product_pairs": 3812912,
+          "segments": 219659,
+          "survivor_edges": 1362085
+        }
+      ]
+    },
+    {
+      "batch_ledger": {
+        "core_sites": 46146150,
+        "dead_core_loads": 990609,
+        "expanded_pairs": 6080474,
+        "q34_input_rectangles": 1558321,
+        "witness_input_pair_mass": 29810460,
+        "witness_rect_node_visits": 128087817,
+        "witness_rejected_rectangles": 913417
+      },
+      "batch_stdout_sha256": "595aae6073dc68f21b4d0c19556a7bba58df3c8dc41766e551ed679f1ef51630",
+      "density": "full",
+      "head": {
+        "core_forms": 46146150,
+        "empty_open_rectangles": 90536,
+        "front_pair_mass": 29810460,
+        "front_rectangles": 1558321,
+        "large_product_edges": 4564,
+        "large_product_forms": 3563991,
+        "large_product_q3": 2688,
+        "large_product_q4": 4312,
+        "open_pair_mass": 6080474,
+        "open_rectangles": 644904,
+        "positive_segments": 554368,
+        "q3_survivors": 871635,
+        "q4_survivors": 909638,
+        "rectangle_node_visits": 128087817,
+        "segment16_q3": 69874,
+        "segment16_q4": 89957,
+        "singleton_forms": 2591575,
+        "singleton_rectangles": 363738,
+        "singleton_survivors": 363738,
+        "sites": 30265,
+        "survivor_edges": 990609
+      },
+      "histograms": {
+        "product": {
+          "0": {
+            "core_forms": 2591575,
+            "product_pairs": 363738,
+            "rectangles": 363738,
+            "survivor_edges": 363738
+          },
+          "1": {
+            "core_forms": 3012555,
+            "product_pairs": 268118,
+            "rectangles": 126009,
+            "survivor_edges": 190329
+          },
+          "10": {
+            "core_forms": 2639713,
+            "product_pairs": 729652,
+            "rectangles": 511,
+            "survivor_edges": 3670
+          },
+          "11": {
+            "core_forms": 913671,
+            "product_pairs": 538957,
+            "rectangles": 203,
+            "survivor_edges": 888
+          },
+          "12": {
+            "core_forms": 10607,
+            "product_pairs": 112300,
+            "rectangles": 20,
+            "survivor_edges": 6
+          },
+          "13": {
+            "core_forms": 0,
+            "product_pairs": 21891,
+            "rectangles": 2,
+            "survivor_edges": 0
+          },
+          "2": {
+            "core_forms": 4314674,
+            "product_pairs": 388274,
+            "rectangles": 83006,
+            "survivor_edges": 197041
+          },
+          "3": {
+            "core_forms": 4740567,
+            "product_pairs": 344099,
+            "rectangles": 32726,
+            "survivor_edges": 95340
+          },
+          "4": {
+            "core_forms": 5318364,
+            "product_pairs": 385228,
+            "rectangles": 17689,
+            "survivor_edges": 65763
+          },
+          "5": {
+            "core_forms": 3691913,
+            "product_pairs": 405127,
+            "rectangles": 9136,
+            "survivor_edges": 27576
+          },
+          "6": {
+            "core_forms": 3129394,
+            "product_pairs": 508487,
+            "rectangles": 5687,
+            "survivor_edges": 15675
+          },
+          "7": {
+            "core_forms": 2332260,
+            "product_pairs": 568524,
+            "rectangles": 3171,
+            "survivor_edges": 8576
+          },
+          "8": {
+            "core_forms": 4612477,
+            "product_pairs": 696164,
+            "rectangles": 1944,
+            "survivor_edges": 9123
+          },
+          "9": {
+            "core_forms": 8838380,
+            "product_pairs": 749915,
+            "rectangles": 1062,
+            "survivor_edges": 12884
+          }
+        },
+        "segment": {
+          "0": {
+            "core_forms": 3821318,
+            "product_pairs": 534149,
+            "rectangles": 402754,
+            "survivor_edges": 402754
+          },
+          "1": {
+            "core_forms": 4708504,
+            "product_pairs": 345218,
+            "rectangles": 98567,
+            "survivor_edges": 212383
+          },
+          "2": {
+            "core_forms": 6303181,
+            "product_pairs": 320111,
+            "rectangles": 40948,
+            "survivor_edges": 189250
+          },
+          "3": {
+            "core_forms": 6835551,
+            "product_pairs": 197052,
+            "rectangles": 9048,
+            "survivor_edges": 92253
+          },
+          "4": {
+            "core_forms": 5908954,
+            "product_pairs": 139543,
+            "rectangles": 2424,
+            "survivor_edges": 49871
+          },
+          "5": {
+            "core_forms": 4937667,
+            "product_pairs": 88103,
+            "rectangles": 440,
+            "survivor_edges": 18561
+          },
+          "6": {
+            "core_forms": 5229224,
+            "product_pairs": 65154,
+            "rectangles": 124,
+            "survivor_edges": 10811
+          },
+          "7": {
+            "core_forms": 4248825,
+            "product_pairs": 33601,
+            "rectangles": 42,
+            "survivor_edges": 7359
+          },
+          "8": {
+            "core_forms": 4127337,
+            "product_pairs": 12579,
+            "rectangles": 20,
+            "survivor_edges": 6853
+          },
+          "9": {
+            "core_forms": 25589,
+            "product_pairs": 625,
+            "rectangles": 1,
+            "survivor_edges": 514
+          }
+        }
+      },
+      "input_sha256": "f2f8d39b23efe0f2656996bc4fb8b8796408fc64bbbf79268725282b96cfb7c9",
+      "raw_ids_sha256": "dc43f4b5d490828bfdecc09ca59c6e9c0519d8a7e3c14c0f80d9db8282e97dc5",
+      "sector": "quarter_x_neg_y_neg",
+      "sidecar_elapsed_s": 10.323,
+      "sidecar_stdout_sha256": "4f07f701daa3b716c2f741d1ef509e995cc89c288937c057324aadb0a7f51e18",
+      "top": [
+        {
+          "core_forms": 21126830,
+          "denominator": 1000,
+          "numerator": 1,
+          "product_pairs": 256987,
+          "segments": 555,
+          "survivor_edges": 34035
+        },
+        {
+          "core_forms": 30734766,
+          "denominator": 100,
+          "numerator": 1,
+          "product_pairs": 516092,
+          "segments": 5544,
+          "survivor_edges": 106966
+        },
+        {
+          "core_forms": 37980836,
+          "denominator": 100,
+          "numerator": 5,
+          "product_pairs": 818774,
+          "segments": 27719,
+          "survivor_edges": 239314
+        },
+        {
+          "core_forms": 40320057,
+          "denominator": 100,
+          "numerator": 10,
+          "product_pairs": 978880,
+          "segments": 55437,
+          "survivor_edges": 338001
+        }
+      ]
+    },
+    {
+      "batch_ledger": {
+        "core_sites": 47832906,
+        "dead_core_loads": 1088446,
+        "expanded_pairs": 4426004,
+        "q34_input_rectangles": 2213795,
+        "witness_input_pair_mass": 30258724,
+        "witness_rect_node_visits": 166497225,
+        "witness_rejected_rectangles": 1439988
+      },
+      "batch_stdout_sha256": "138cba6a5d9197893ed82082670a425a01226f02524adb3a70cf9476158136c0",
+      "density": "full",
+      "head": {
+        "core_forms": 47832906,
+        "empty_open_rectangles": 103999,
+        "front_pair_mass": 30258724,
+        "front_rectangles": 2213795,
+        "large_product_edges": 6166,
+        "large_product_forms": 9894381,
+        "large_product_q3": 1444,
+        "large_product_q4": 6017,
+        "open_pair_mass": 4426004,
+        "open_rectangles": 773807,
+        "positive_segments": 669808,
+        "q3_survivors": 961121,
+        "q4_survivors": 996176,
+        "rectangle_node_visits": 166497225,
+        "segment16_q3": 49448,
+        "segment16_q4": 70812,
+        "singleton_forms": 3542683,
+        "singleton_rectangles": 444943,
+        "singleton_survivors": 444943,
+        "sites": 30780,
+        "survivor_edges": 1088446
+      },
+      "histograms": {
+        "product": {
+          "0": {
+            "core_forms": 3542683,
+            "product_pairs": 444943,
+            "rectangles": 444943,
+            "survivor_edges": 444943
+          },
+          "1": {
+            "core_forms": 3949536,
+            "product_pairs": 357714,
+            "rectangles": 168262,
+            "survivor_edges": 243022
+          },
+          "10": {
+            "core_forms": 6491332,
+            "product_pairs": 311067,
+            "rectangles": 221,
+            "survivor_edges": 4020
+          },
+          "11": {
+            "core_forms": 3351110,
+            "product_pairs": 224337,
+            "rectangles": 81,
+            "survivor_edges": 2080
+          },
+          "12": {
+            "core_forms": 44024,
+            "product_pairs": 91502,
+            "rectangles": 17,
+            "survivor_edges": 54
+          },
+          "13": {
+            "core_forms": 7915,
+            "product_pairs": 43798,
+            "rectangles": 4,
+            "survivor_edges": 12
+          },
+          "2": {
+            "core_forms": 4374089,
+            "product_pairs": 435650,
+            "rectangles": 93461,
+            "survivor_edges": 200621
+          },
+          "3": {
+            "core_forms": 4606051,
+            "product_pairs": 345936,
+            "rectangles": 33392,
+            "survivor_edges": 85876
+          },
+          "4": {
+            "core_forms": 5743381,
+            "product_pairs": 340305,
+            "rectangles": 15580,
+            "survivor_edges": 47696
+          },
+          "5": {
+            "core_forms": 6150580,
+            "product_pairs": 421021,
+            "rectangles": 9520,
+            "survivor_edges": 36348
+          },
+          "6": {
+            "core_forms": 3539050,
+            "product_pairs": 425539,
+            "rectangles": 4890,
+            "survivor_edges": 13557
+          },
+          "7": {
+            "core_forms": 1818368,
+            "product_pairs": 365644,
+            "rectangles": 2084,
+            "survivor_edges": 3881
+          },
+          "8": {
+            "core_forms": 1573519,
+            "product_pairs": 323347,
+            "rectangles": 928,
+            "survivor_edges": 3622
+          },
+          "9": {
+            "core_forms": 2641268,
+            "product_pairs": 295201,
+            "rectangles": 424,
+            "survivor_edges": 2714
+          }
+        },
+        "segment": {
+          "0": {
+            "core_forms": 5187142,
+            "product_pairs": 651003,
+            "rectangles": 499593,
+            "survivor_edges": 499593
+          },
+          "1": {
+            "core_forms": 5537876,
+            "product_pairs": 393871,
+            "rectangles": 120205,
+            "survivor_edges": 256185
+          },
+          "2": {
+            "core_forms": 6168219,
+            "product_pairs": 293996,
+            "rectangles": 39627,
+            "survivor_edges": 181375
+          },
+          "3": {
+            "core_forms": 6951485,
+            "product_pairs": 181710,
+            "rectangles": 7764,
+            "survivor_edges": 78524
+          },
+          "4": {
+            "core_forms": 7746714,
+            "product_pairs": 122884,
+            "rectangles": 2053,
+            "survivor_edges": 43693
+          },
+          "5": {
+            "core_forms": 5614867,
+            "product_pairs": 75125,
+            "rectangles": 497,
+            "survivor_edges": 19796
+          },
+          "6": {
+            "core_forms": 2518478,
+            "product_pairs": 24203,
+            "rectangles": 44,
+            "survivor_edges": 3728
+          },
+          "7": {
+            "core_forms": 4109749,
+            "product_pairs": 27226,
+            "rectangles": 18,
+            "survivor_edges": 3136
+          },
+          "8": {
+            "core_forms": 3998376,
+            "product_pairs": 14773,
+            "rectangles": 7,
+            "survivor_edges": 2416
+          }
+        }
+      },
+      "input_sha256": "eb8e6f93ff3f2494849f4bee22214b8d1d70f082e1677c78e0d8616e235b259c",
+      "raw_ids_sha256": "fd69b4d0e913829d47597e982cca9462e63c4a09d961cb340790d925f0d902b8",
+      "sector": "quarter_x_neg_y_nonneg",
+      "sidecar_elapsed_s": 13.738,
+      "sidecar_stdout_sha256": "16155dc85765237a650a98874118205aad1c25fe689df949f8a9adb77163613b",
+      "top": [
+        {
+          "core_forms": 19750706,
+          "denominator": 1000,
+          "numerator": 1,
+          "product_pairs": 220390,
+          "segments": 670,
+          "survivor_edges": 26440
+        },
+        {
+          "core_forms": 32160196,
+          "denominator": 100,
+          "numerator": 1,
+          "product_pairs": 496606,
+          "segments": 6699,
+          "survivor_edges": 103046
+        },
+        {
+          "core_forms": 38368423,
+          "denominator": 100,
+          "numerator": 5,
+          "product_pairs": 771894,
+          "segments": 33491,
+          "survivor_edges": 233414
+        },
+        {
+          "core_forms": 40682143,
+          "denominator": 100,
+          "numerator": 10,
+          "product_pairs": 917332,
+          "segments": 66981,
+          "survivor_edges": 333865
+        }
+      ]
+    },
+    {
+      "batch_ledger": {
+        "core_sites": 52302311,
+        "dead_core_loads": 828338,
+        "expanded_pairs": 3223967,
+        "q34_input_rectangles": 1044433,
+        "witness_input_pair_mass": 15198480,
+        "witness_rect_node_visits": 72439105,
+        "witness_rejected_rectangles": 516534
+      },
+      "batch_stdout_sha256": "c145663069507fa155ab56595e012d103bb9ea19e779e4c5be1c4037186c71e1",
+      "density": "full",
+      "head": {
+        "core_forms": 52302311,
+        "empty_open_rectangles": 62560,
+        "front_pair_mass": 15198480,
+        "front_rectangles": 1044433,
+        "large_product_edges": 5427,
+        "large_product_forms": 33216041,
+        "large_product_q3": 1350,
+        "large_product_q4": 5309,
+        "open_pair_mass": 3223967,
+        "open_rectangles": 527899,
+        "positive_segments": 465339,
+        "q3_survivors": 749335,
+        "q4_survivors": 761397,
+        "rectangle_node_visits": 72439105,
+        "segment16_q3": 33411,
+        "segment16_q4": 45701,
+        "singleton_forms": 1787135,
+        "singleton_rectangles": 301270,
+        "singleton_survivors": 301270,
+        "sites": 31391,
+        "survivor_edges": 828338
+      },
+      "histograms": {
+        "product": {
+          "0": {
+            "core_forms": 1787135,
+            "product_pairs": 301270,
+            "rectangles": 301270,
+            "survivor_edges": 301270
+          },
+          "1": {
+            "core_forms": 1971270,
+            "product_pairs": 208186,
+            "rectangles": 98827,
+            "survivor_edges": 156483
+          },
+          "10": {
+            "core_forms": 58580,
+            "product_pairs": 119566,
+            "rectangles": 91,
+            "survivor_edges": 98
+          },
+          "11": {
+            "core_forms": 78951,
+            "product_pairs": 26375,
+            "rectangles": 10,
+            "survivor_edges": 354
+          },
+          "12": {
+            "core_forms": 8121241,
+            "product_pairs": 80248,
+            "rectangles": 13,
+            "survivor_edges": 1210
+          },
+          "13": {
+            "core_forms": 24720233,
+            "product_pairs": 46374,
+            "rectangles": 4,
+            "survivor_edges": 3730
+          },
+          "14": {
+            "core_forms": 237036,
+            "product_pairs": 35880,
+            "rectangles": 2,
+            "survivor_edges": 35
+          },
+          "2": {
+            "core_forms": 3706081,
+            "product_pairs": 381708,
+            "rectangles": 81900,
+            "survivor_edges": 219053
+          },
+          "3": {
+            "core_forms": 2706347,
+            "product_pairs": 249876,
+            "rectangles": 24717,
+            "survivor_edges": 78069
+          },
+          "4": {
+            "core_forms": 2149012,
+            "product_pairs": 184688,
+            "rectangles": 8626,
+            "survivor_edges": 28206
+          },
+          "5": {
+            "core_forms": 2485416,
+            "product_pairs": 226331,
+            "rectangles": 5027,
+            "survivor_edges": 20689
+          },
+          "6": {
+            "core_forms": 2350150,
+            "product_pairs": 337187,
+            "rectangles": 3718,
+            "survivor_edges": 12346
+          },
+          "7": {
+            "core_forms": 1318900,
+            "product_pairs": 399844,
+            "rectangles": 2292,
+            "survivor_edges": 5144
+          },
+          "8": {
+            "core_forms": 414557,
+            "product_pairs": 354739,
+            "rectangles": 1002,
+            "survivor_edges": 1205
+          },
+          "9": {
+            "core_forms": 197402,
+            "product_pairs": 271695,
+            "rectangles": 400,
+            "survivor_edges": 446
+          }
+        },
+        "segment": {
+          "0": {
+            "core_forms": 2476571,
+            "product_pairs": 411665,
+            "rectangles": 329415,
+            "survivor_edges": 329415
+          },
+          "1": {
+            "core_forms": 3027657,
+            "product_pairs": 262016,
+            "rectangles": 83111,
+            "survivor_edges": 178633
+          },
+          "10": {
+            "core_forms": 30469187,
+            "product_pairs": 29082,
+            "rectangles": 3,
+            "survivor_edges": 4517
+          },
+          "2": {
+            "core_forms": 4469543,
+            "product_pairs": 265196,
+            "rectangles": 44280,
+            "survivor_edges": 203749
+          },
+          "3": {
+            "core_forms": 3415185,
+            "product_pairs": 120671,
+            "rectangles": 6971,
+            "survivor_edges": 68317
+          },
+          "4": {
+            "core_forms": 2844795,
+            "product_pairs": 60801,
+            "rectangles": 1196,
+            "survivor_edges": 24956
+          },
+          "5": {
+            "core_forms": 2631528,
+            "product_pairs": 51724,
+            "rectangles": 305,
+            "survivor_edges": 12499
+          },
+          "6": {
+            "core_forms": 749103,
+            "product_pairs": 12188,
+            "rectangles": 45,
+            "survivor_edges": 3898
+          },
+          "7": {
+            "core_forms": 319878,
+            "product_pairs": 3517,
+            "rectangles": 11,
+            "survivor_edges": 1772
+          },
+          "8": {
+            "core_forms": 1898864,
+            "product_pairs": 10572,
+            "rectangles": 2,
+            "survivor_edges": 582
+          }
+        }
+      },
+      "input_sha256": "7b8649e56fd7dc4380984d59492e1523fe65ca070cbab0f6883c14848d1a83a3",
+      "raw_ids_sha256": "0ead7ce73bfdeaf4fdcb21179f08fa7da2f1370820bfa873ec6b9169c478668c",
+      "sector": "quarter_x_nonneg_y_neg",
+      "sidecar_elapsed_s": 5.86,
+      "sidecar_stdout_sha256": "1f725c295637f7d3a8a4ea5c3f842bf82d5ec35e337d0ea2df810707d7f7432c",
+      "top": [
+        {
+          "core_forms": 37679684,
+          "denominator": 1000,
+          "numerator": 1,
+          "product_pairs": 139101,
+          "segments": 466,
+          "survivor_edges": 21938
+        },
+        {
+          "core_forms": 42970455,
+          "denominator": 100,
+          "numerator": 1,
+          "product_pairs": 288881,
+          "segments": 4654,
+          "survivor_edges": 71266
+        },
+        {
+          "core_forms": 46266916,
+          "denominator": 100,
+          "numerator": 5,
+          "product_pairs": 464422,
+          "segments": 23267,
+          "survivor_edges": 175285
+        },
+        {
+          "core_forms": 47841053,
+          "denominator": 100,
+          "numerator": 10,
+          "product_pairs": 584728,
+          "segments": 46534,
+          "survivor_edges": 264572
+        }
+      ]
+    },
+    {
+      "batch_ledger": {
+        "core_sites": 26739169,
+        "dead_core_loads": 923776,
+        "expanded_pairs": 2435766,
+        "q34_input_rectangles": 1192081,
+        "witness_input_pair_mass": 10866588,
+        "witness_rect_node_visits": 79534473,
+        "witness_rejected_rectangles": 627778
+      },
+      "batch_stdout_sha256": "1a9060a36fd55cd22d492d39f1e8e38c4c26166c8feca4e73f15235e81c22eb2",
+      "density": "full",
+      "head": {
+        "core_forms": 26739169,
+        "empty_open_rectangles": 75193,
+        "front_pair_mass": 10866588,
+        "front_rectangles": 1192081,
+        "large_product_edges": 361,
+        "large_product_forms": 312323,
+        "large_product_q3": 29,
+        "large_product_q4": 358,
+        "open_pair_mass": 2435766,
+        "open_rectangles": 564303,
+        "positive_segments": 489110,
+        "q3_survivors": 820404,
+        "q4_survivors": 850261,
+        "rectangle_node_visits": 79534473,
+        "segment16_q3": 50288,
+        "segment16_q4": 66940,
+        "singleton_forms": 1876457,
+        "singleton_rectangles": 295593,
+        "singleton_survivors": 295593,
+        "sites": 30953,
+        "survivor_edges": 923776
+      },
+      "histograms": {
+        "product": {
+          "0": {
+            "core_forms": 1876457,
+            "product_pairs": 295593,
+            "rectangles": 295593,
+            "survivor_edges": 295593
+          },
+          "1": {
+            "core_forms": 2551464,
+            "product_pairs": 248662,
+            "rectangles": 117265,
+            "survivor_edges": 182814
+          },
+          "10": {
+            "core_forms": 308512,
+            "product_pairs": 28454,
+            "rectangles": 18,
+            "survivor_edges": 358
+          },
+          "11": {
+            "core_forms": 3811,
+            "product_pairs": 13998,
+            "rectangles": 5,
+            "survivor_edges": 3
+          },
+          "2": {
+            "core_forms": 4466622,
+            "product_pairs": 439708,
+            "rectangles": 94640,
+            "survivor_edges": 235496
+          },
+          "3": {
+            "core_forms": 4436002,
+            "product_pairs": 331869,
+            "rectangles": 32222,
+            "survivor_edges": 101397
+          },
+          "4": {
+            "core_forms": 4582356,
+            "product_pairs": 311518,
+            "rectangles": 14391,
+            "survivor_edges": 59724
+          },
+          "5": {
+            "core_forms": 4197491,
+            "product_pairs": 279505,
+            "rectangles": 6445,
+            "survivor_edges": 30685
+          },
+          "6": {
+            "core_forms": 2515407,
+            "product_pairs": 226576,
+            "rectangles": 2580,
+            "survivor_edges": 12833
+          },
+          "7": {
+            "core_forms": 834755,
+            "product_pairs": 149154,
+            "rectangles": 865,
+            "survivor_edges": 3347
+          },
+          "8": {
+            "core_forms": 616037,
+            "product_pairs": 79566,
+            "rectangles": 231,
+            "survivor_edges": 1116
+          },
+          "9": {
+            "core_forms": 350255,
+            "product_pairs": 31163,
+            "rectangles": 48,
+            "survivor_edges": 410
+          }
+        },
+        "segment": {
+          "0": {
+            "core_forms": 2817473,
+            "product_pairs": 429920,
+            "rectangles": 331521,
+            "survivor_edges": 331521
+          },
+          "1": {
+            "core_forms": 3954890,
+            "product_pairs": 308175,
+            "rectangles": 97560,
+            "survivor_edges": 210185
+          },
+          "2": {
+            "core_forms": 5368344,
+            "product_pairs": 286153,
+            "rectangles": 48055,
+            "survivor_edges": 219251
+          },
+          "3": {
+            "core_forms": 5105990,
+            "product_pairs": 141720,
+            "rectangles": 9290,
+            "survivor_edges": 93443
+          },
+          "4": {
+            "core_forms": 4392557,
+            "product_pairs": 71115,
+            "rectangles": 2215,
+            "survivor_edges": 45542
+          },
+          "5": {
+            "core_forms": 2722502,
+            "product_pairs": 32262,
+            "rectangles": 378,
+            "survivor_edges": 15700
+          },
+          "6": {
+            "core_forms": 2034377,
+            "product_pairs": 13772,
+            "rectangles": 84,
+            "survivor_edges": 7058
+          },
+          "7": {
+            "core_forms": 343036,
+            "product_pairs": 2087,
+            "rectangles": 7,
+            "survivor_edges": 1076
+          }
+        }
+      },
+      "input_sha256": "5cdc3832e8b7431214a373729f9a2b8dd047d5f8263a6677042016d3f92e49f6",
+      "raw_ids_sha256": "2f4208aa2d4d499ee6c350d089db16751c0f42877ef53fb2445f306c7a982404",
+      "sector": "quarter_x_nonneg_y_nonneg",
+      "sidecar_elapsed_s": 6.495,
+      "sidecar_stdout_sha256": "6cd1ac27a6b936cd9b846d3dd84325d0569ad983491c442e581d639c0a6876fc",
+      "top": [
+        {
+          "core_forms": 6350576,
+          "denominator": 1000,
+          "numerator": 1,
+          "product_pairs": 53858,
+          "segments": 490,
+          "survivor_edges": 20667
+        },
+        {
+          "core_forms": 13380086,
+          "denominator": 100,
+          "numerator": 1,
+          "product_pairs": 182393,
+          "segments": 4892,
+          "survivor_edges": 83540
+        },
+        {
+          "core_forms": 19135194,
+          "denominator": 100,
+          "numerator": 5,
+          "product_pairs": 409026,
+          "segments": 24456,
+          "survivor_edges": 205177
+        },
+        {
+          "core_forms": 21275348,
+          "denominator": 100,
+          "numerator": 10,
+          "product_pairs": 552256,
+          "segments": 48911,
+          "survivor_edges": 301812
+        }
+      ]
+    }
+  ],
+  "hashes": {
+    "archive": "208aabb30a764bad25ab1c99d74885bd405e84a13dcb8375622d66aa6203f70a",
+    "binary": "9d5b263ea0cfd08c2fcc630e8bb96c7741a5f5e184c0b047f8235bdc82539ea8",
+    "manifest": "6e64125abddbfcd589ba61cf747e493e455adec4beeaea81c2739ce98fe16095",
+    "sidecar_source": "fc5b7dd9cfdbc7ae9fd420d69208a904271f29dfbb9e7e34e5f7a79187694ee1",
+    "trace_receipt": "d8c82a569cf62efc89f34581151fa6b3760d20b7c1470b1762baf23d3b5fdf31"
+  },
+  "schema": "mhgp9_s2_segment_panel_v1",
+  "scope": "raw SemanticKITTI 08/000000, 1 mm, K5/s8, q3+q4, CPU sidecar",
+  "trace_source_commit": "c265a5dae4dd92059fc78acc0a1d7f52de9c1435"
+}

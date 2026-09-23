@@ -160,5 +160,6 @@ populations créditées, reprises, temps et mémoire. Comparer brut et
 sans-sol, tailles 8k/16k/32k puis **trames entières de plusieurs
 séquences**, `K=5/10`, `s=8/10/12`, CPU mono/multi puis G4 seulement
 si le coût total est prometteur. Le plafond global à cellule unique
-mesuré à [1,345 % de la masse cœur](bbox_clipping_s2_20260923/README.md)
+pour le chargement entier, mesuré à
+[1,345 % de la masse cœur](precore_cell_screen_20260923/README.md)
 sur une trame brute K5 ne prédit pas le rendement des sous-cellules.

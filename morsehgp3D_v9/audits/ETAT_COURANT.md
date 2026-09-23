@@ -306,6 +306,18 @@ front et le filtre avec une archive distincte du binaire tracé ; elle
 retrouve exactement chaque arête, son masque et les cinq comptes du front.
 Essayer ce sélecteur sur brut et sans sol, facturer aussi la recherche des
 gardes, le coût de couverture et les formes réellement évitées.
+Le [panel de segments S2 sur les quatre quarts et trois densités](s2_segment_panel_20260923/README.md)
+recoupe **15/15** cas avec les traces et les cinq comptes front/filtre.
+Sur le plein brut, la part de F portée par les segments ≥16 monte de
+**67,64 % à 76,52 %, puis 85,52 %** ; leur masse elle-même croît avec des
+pentes finies **1,978 puis 2,279**. Mais le quart `x≥0,y≥0` ne couvre
+que **7,20→17,66→35,50 %** de F par ce critère, et son budget
+optimiste `27S16/F16` vaut **39,41→28,02→19,73 %**, avant gardes.
+Sur le plein dense, les voies séparées q3/q4 relèvent le budget de
+2,24 % à **3,69 %**. Le seuil 16 est donc une cible d'ablation, pas
+un réglage universel ; mesurer un déclencheur adaptatif et toujours
+laisser un repli exact. Les moitiés ont leur panel S2 de formes, pas
+encore de distribution des segments.
 Les [demi-scènes et quarts aux trois densités](lidar_raw_physical_scaling_20260923/README.md)
 ont été mesurés avec v12, puis appariés au batch S2 CPU K5 par les
 deux reçus ci-dessus. La somme de leurs tours ne reconstruit pas le
@@ -1048,6 +1060,16 @@ gardent formes, charges, paires, catalogue et ordres ; seules quelques
 visites de cache/témoins varient, avec au plus 0,51 % de CPU. Chaque
 morceau reconstruit sa propre tour : ces sommes ne dénombrent pas les
 arêtes traversantes et ne prouvent aucune borne sous-quadratique globale.
+Le repère `F/n²`, avec extrémités incluses, rend visible la différence
+entre les axes : sur le plein K5 il vaut **0,038895→0,033854→0,036760**
+aux densités 1/4→1/2→entière, contre **0,112026→0,086942→0,082382**
+à K10. Sur les 14 liens de densité à secteur fixe, **2 à K5 et 1 à K10**
+franchissent une pente de 2 ; sur les 18 liens spatiaux parent→enfant,
+**7 à K5 et 3 à K10** la franchissent. À densité entière,
+`ΣF(demis)/F(plein)` vaut **0,315/0,425** à K5/K10, sous le repère
+homogène `Σ(n_demi/n)²≈0,500` ; pour les quarts, **0,309/0,381** sont
+au-dessus de `Σ(n_quart/n)²≈0,250`. Le diagnostic varie donc avec la
+façon de doubler les points ; aucun exposant unique ne résume ces coupes.
 La contre-vérification B du complément retrouve **52/52 SHA**, les 18
 cas K10 gardés sur 24 essais et les 21 lignes de la matrice ; les cinq
 premiers ordres K10 égalent les **comptes** K5 sur chaque entrée, pas
@@ -1062,6 +1084,15 @@ La somme des formes des deux demis vaut **0,567→0,435→0,315** de celle
 du plein lorsque la densité passe de 1/4 à 1/2 puis entière, alors que
 la part des charges reste vers **0,97**. Les temps muraux sont bruités ;
 aucune pente K10 S2 ou borne sous-quadratique nouvelle n'est acquise.
+Le plan G4 v18 actuellement codé dans
+`gcp-migration/tower_snapshot_v9.py:default_plan()` comporte 18 cas
+issus des trois trames **sans sol** 00/01/02 de la seule séquence 08,
+aux K5/K10 et à quelques bras d'attribution. Il ne rejoue **aucune**
+trame brute avec sol, demi-scène, quart ni fraction de densité ; un R13
+réussi ne pourrait donc pas confirmer sur G4 les deux axes de croissance
+ci-dessus. Après une porte S3 device par arête, garder ce diagnostic
+spatial/densité comme campagne distincte du contrat de trame entière,
+avec les mêmes IDs emboîtés et les coûts S2+cœur+cover+catalogue.
 Le [crédit exact par nœuds du certificat de cœur](../receipts/dead_node_credit_negative_20260923/README.md)
 a été essayé hors produit : mêmes voies et digest, mais CPU de chaîne
 **+27 % à K5 et +32 % à K10** sur la coupe 16k de 000000 ; cette variante

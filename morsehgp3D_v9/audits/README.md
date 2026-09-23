@@ -206,6 +206,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`q34_batch_density_quarter_20260923/`](q34_batch_density_quarter_20260923/README.md) | A | 23/15:39 | rejeu S2/v17 CPU apparié sur un quart brut K5 à trois densités ; six sorties vérifiables | vivant, portée bornée | sans objet |
 | [`q34_raw_rectangle_mass_20260923/`](q34_raw_rectangle_mass_20260923/README.md) | A | 23/16:00 | histogrammes q3/q4 K5/K10 sur une trame brute entière ; cinq comptes v12 appariés et budget S2a | vivant, mesure locale | sans objet |
 | [`s2_segment_mass_20260923/`](s2_segment_mass_20260923/README.md) | A | 23/soir | jointure S2 brute K5 : 0,44 % des rectangles ouverts ont ≥16 survivantes et portent 85,52 % des formes du cœur ; sélecteur pré-cœur mesurable | vivant, cible de shadow sans gain établi | réponse D attendue |
+| [`s2_segment_panel_20260923/`](s2_segment_panel_20260923/README.md) | A | 23/soir | 15 jointures S2 plein/quarts × densités 1/4,1/2,1 ; F des segments ≥16 augmente sur le plein, mais coût indicatif très variable selon le quart | vivant, seuil non universel | réponse D attendue |
 
 ## GPU et parallélisme
 
