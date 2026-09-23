@@ -165,8 +165,9 @@ inline size_t parallel_items(size_t n, int threads, Fn&& fn) {
 // Tri parallele pour un ordre STRICT et TOTAL `less` (aucun ex aequo) : le
 // resultat est donc l'unique permutation triee, bit-identique au tri
 // sequentiel quel que soit le nombre de fils. Tri par echantillonnage, sans
-// fusion serielle : des separateurs pris a des positions fixes de l'entree
-// coupent l'ordre en seaux [s_{b-1}, s_b) ; chaque tranche de l'entree
+// fusion serielle : des separateurs pris a des positions pseudo-aleatoires
+// (deterministes, jamais une grille periodique qu'une entree structuree
+// pourrait aligner) coupent l'ordre en seaux [s_{b-1}, s_b) ; chaque tranche de l'entree
 // repartit ses elements dans les seaux (en parallele), puis chaque seau est
 // recopie a sa place et trie (en parallele). Retourne le nombre d'ouvriers
 // crees au plus large. Pic : un second tampon de n elements.
@@ -182,7 +183,13 @@ inline size_t parallel_sort(std::vector<T>& values, int threads, Less less) {
   const size_t samples = std::min(n, 32 * wanted);
   std::vector<T> sample;
   sample.reserve(samples);
-  for (size_t i = 0; i < samples; ++i) sample.push_back(values[(i * n) / samples]);
+  u64 state = 0x9e3779b97f4a7c15ull ^ static_cast<u64>(n);
+  for (size_t i = 0; i < samples; ++i) {
+    state += 0x9e3779b97f4a7c15ull;  // splitmix64: deterministic positions
+    u64 z = state;
+    z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9ull; z = (z ^ (z >> 27)) * 0x94d049bb133111ebull; z ^= z >> 31;
+    sample.push_back(values[static_cast<size_t>(z % n)]);
+  }
   std::sort(sample.begin(), sample.end(), less);
   std::vector<T> splitters;  // strictly increasing
   for (size_t b = 1; b < wanted; ++b) {

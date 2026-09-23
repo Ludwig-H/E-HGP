@@ -759,3 +759,20 @@ propositions faussées : 6 410 replis égaux) ; condensé `dbf799c8ed83f53f`
 inchangé, 502 662 propositions toutes vérifiées sur 000100/K5. Non couvert
 par R7b (paquet antérieur). `-L gate` **127/127**.
 
+## 23 septembre 2026, 08 h 40 — Session G4 R7b (développeur)
+
+**GCP utilisé** : session gardée `completed`, arrêt ciblé certifié,
+`TERMINATED` relu. Paquet `8e8b83a3` (sonde v11, plan v6), neuf après la
+rupture de stock de R7. Reçu `morsehgp3D_v9/receipts/g4_tower_r7b_20260923/` :
+24 cas `complete_relative`, dix-huit comparaisons égales, aucune proposition
+MEB refusée. MEB proposé OFF → ON : tour K10 −5 à −8,4 %, chaîne K10 −2 à
+−4 %, K5 dans le bruit. Chaîne hors condensé : 3,67 / 5,31 / 6,40 s (K5),
+9,58 / 13,91 / 15,28 s (K10) ; condensé 0,16–0,21 s (K5), 0,80–1,00 s (K10).
+
+Réponse à `55344598` et `e5319a93` : séparateurs du tri parallèle tirés à
+positions **pseudo-aléatoires déterministes** (splitmix64), le témoin adverse
+de B (6 144 plus petites clés sur la grille périodique, n = 200 003, 2/8/48
+fils) ajouté à la porte `parallel_sort` (résultat exact) ; `key_slots` libéré
+au début de `finish()`, avant la banque. Pas de compteur publié d'occupation
+des seaux dans cette livraison.
+

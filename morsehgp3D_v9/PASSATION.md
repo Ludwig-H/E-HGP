@@ -140,6 +140,15 @@ canonisé au bord, repli exact) : même résultat que l'énumération, cycles ME
 `tower_meb_proposal`). Index exact par hachage des clés du catalogue à la
 place des recherches dichotomiques : tour −8 % local.
 
+Session G4 R7b ([`g4_tower_r7b_20260923`](receipts/g4_tower_r7b_20260923/README.md),
+paquet `8e8b83a3`, **`completed`**, `TERMINATED` certifié ; R7 avait été
+refusée par rupture de stock GCE, [reçu](receipts/g4_tower_r7_stockout_20260923/README.md)) :
+ablation appariée du MEB proposé, objets égaux, tour K10 −5 à −8 %. Chaîne
+hors condensé (publié à part) : **3,67 / 5,31 / 6,40 s à K5** et
+**9,58 / 13,91 / 15,28 s à K10** ; tour K10 3,2–4,0 s ; fusion 0,04–0,12 s.
+Depuis : Welzl à déplacement en tête (proposition ÷2,7), séparateurs
+pseudo-aléatoires du tri parallèle, index de clés libéré avant la banque.
+
 Suite : coût q3/q4 (ventilation K10 W8 locale en Gcycles : atlas 229, q4 235,
 paires 187, rectangles 123, noyau 120, q3 120, preuve sur cover 86) ; seuil
 K−2 des arêtes q4 seules ; équilibrage de la tour K10 ; voie GPU (V9-4).

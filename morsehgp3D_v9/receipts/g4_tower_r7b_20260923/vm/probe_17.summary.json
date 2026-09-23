@@ -1,0 +1,29 @@
+{
+  "case": {
+    "file": "data/scene_02.u32le",
+    "k": 5,
+    "levers": {
+      "atlas_saturate_deep": true,
+      "q34_dead_core": true,
+      "q34_dead_lanes": true,
+      "q34_witness_cache": true,
+      "q3_leaf_census": true,
+      "tower_meb_proposal": false
+    },
+    "n": 45845,
+    "repeat": 0,
+    "s": 8,
+    "scene": "02",
+    "static_threads": 48,
+    "workers": 48
+  },
+  "chain_total_ms": 6439.257,
+  "elapsed_seconds": 6.731059013999982,
+  "exit_code": 0,
+  "gnu_time_max_rss_kb": 1380448,
+  "index": 17,
+  "input_file_sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af",
+  "outcome": "complete_relative",
+  "probe_status": "complete_relative",
+  "tower_digest": "8240af3d4dce3d45"
+}

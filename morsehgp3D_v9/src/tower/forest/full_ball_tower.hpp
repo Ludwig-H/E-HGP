@@ -387,6 +387,7 @@ class Builder {
 
   std::vector<FullBallOrder> finish(std::vector<Draft>& drafts) {
     resolver_cache.release();
+    decltype(key_slots)().swap(key_slots);  // no lookup after the orders
     decltype(identity)().swap(identity);
     decltype(by_key)().swap(by_key);
     decltype(programs)().swap(programs);

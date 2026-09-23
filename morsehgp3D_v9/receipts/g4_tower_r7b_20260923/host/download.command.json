@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/home/codespace/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "scp",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-b",
+    "--quiet",
+    "--ssh-key-file=/workspaces/.ehgp-sessions/v9tower.20260923T060817Z/key",
+    "--ssh-key-expiration=2026-09-23T07:18:28.470091Z",
+    "ehgp-v7-4fa0e0789a7d5bb06b787d35:/tmp/ehgp-tower-v9-1da5038d1809770c.QLX6muOfc2/capture.tar.gz",
+    "/workspaces/.ehgp-sessions/v9tower.20260923T060817Z/tower_v9_host/capture.tar.gz"
+  ],
+  "ended_epoch": 1790144092.3686562,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "download",
+  "pid": 2487708,
+  "started_epoch": 1790144083.8037283,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": 180
+}

@@ -60,6 +60,28 @@ int main(int argc, char** argv) {
         if (created > 1) ++multi;
         if (runs > 1 && runs % 2 == 1) ++odd_runs;
       }
+  // Adversarial witness of the audit: the smallest keys placed exactly on a
+  // periodic sampling grid, all others above. The result must stay exact.
+  {
+    const std::size_t n = 200003;
+    std::vector<Item> input(n);
+    const std::size_t grid = 6144;
+    std::vector<bool> on_grid(n, false);
+    for (std::size_t i = 0; i < grid; ++i) on_grid[(i * n) / grid] = true;
+    std::uint32_t low = 0, high = 1u << 30;
+    for (std::size_t i = 0; i < n; ++i) input[i] = {on_grid[i] ? low++ : high++, i};
+    auto expected = input;
+    std::sort(expected.begin(), expected.end(), less);
+    for (const int threads : {2, 8, 48}) {
+      auto actual = input;
+      static_cast<void>(mhgp9::tower::parallel_sort(actual, threads, less));
+      ++cases;
+      if (!std::equal(actual.begin(), actual.end(), expected.begin(), expected.end(), same)) {
+        std::printf("cause=parallel_sort.permutation n=%zu adversarial_grid threads=%d\n", n, threads);
+        return 1;
+      }
+    }
+  }
   std::printf("parallel_sort_gate cases=%zu multi_worker=%zu odd_runs=%zu\n", cases, multi, odd_runs);
   if (multi == 0 || odd_runs == 0) {
     std::printf("cause=floor.multi_worker_or_odd_runs\n");
