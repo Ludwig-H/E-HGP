@@ -3639,6 +3639,22 @@ repli exact partout ailleurs, et publier le coût des gardes/cellules
 avec les **formes effectivement évitées**. Preuve et réserves dans la
 [note de croissance B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_CROISSANCE_Q34_AVAL_S2_20260923.md).
 
+**Verrou sur la cellule unique (B, preuve indépendante).** Si une
+cellule `C_E` contient le disque entier des centres admissibles d'une
+arête survivante, toute garde qui marche sur `C_E` satisfait exactement
+le test singleton `H₄/Ξ` de S2 pour cette arête. `K−1` ou `K−2` gardes
+auraient déjà fermé la voie. Une boîte unique non clippée ne peut donc
+donner aucun nouveau rejet ; segmenter `E` sans découper les **centres**
+ne change rien. Deux issues exactes : clipper avec la boîte réelle du
+nuage (pas seulement `[0,262143]³`) et/ou couvrir les centres par
+plusieurs cellules avec gardes différents. Le [lemme, la fixture K5 et
+le test entier de disques contenus](../morsehgp3D_v9/audits/CERTIFICAT_B_REDONDANCE_CELLULE_UNIQUE_20260923.md)
+évitent un shadow à rendement mathématiquement nul. Le premier audit
+économique peut cibler les rectangles ouverts de masse ≥64 et plafonner
+strictement les visites de recherche **sans jamais plafonner les
+candidats exacts** : 42 020/54 822 rectangles K5/K10 dans le brut
+08/000000, mais leur nombre réel de survivants reste inconnu.
+
 **Correction de portée sur `rdtsc` (B).** La ventilation publiée mesure
 des ticks TSC **écoulés**, y compris quand un worker est désordonnancé
 sur l'hôte chargé : 466,988 Gticks K5 / (8×24,076 s) = 2,425 GHz et
@@ -3697,3 +3713,16 @@ puis accélérer aussi atlas, q3/q4 et FULL. L'actuel S2 refuse
 de représentation empêche l'échelle de plusieurs dizaines de millions
 sans tuilage. Réduire les recherches binaires/validations répétées est
 utile mais ne change pas à soi seul la pente du travail.
+
+**Libellés S3 à réconcilier dans le paquet local `308110bc3`.** La
+`PASSATION.md` continue à appeler 35/65 % et 28/72 % une ventilation
+de calcul et « au plus 1,3 % » un plafond paresseux : le reçu mesure
+des ticks TSC écoulés sous préemption et 1,3 % est une projection
+non bornante. `docs/PROVENANCE.md` appelle l'égalité des condensés
+FNV64 une comparaison « clé par clé » ; ce n'est pas une égalité
+littérale du catalogue, et la porte de flux ignore encore les IDs
+de coquille. Un `GPU_executed` de tour mixte n'est pas une tour
+entièrement calculée sur GPU. La [contrelecture B
+S3](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md)
+sépare ces portées ; corriger le langage et fermer les gates avant
+de qualifier un reçu G4 S3.

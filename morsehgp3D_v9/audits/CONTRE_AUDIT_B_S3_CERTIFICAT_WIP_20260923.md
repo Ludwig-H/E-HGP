@@ -58,4 +58,29 @@ Lecture B sur le diff courant : `3 0.02 complete_relative [0]` pour
 Publier `certificate_decided_edges`/lancements réels et distinguer
 « filtre GPU », « certificat GPU utile » et « tour complète GPU ».
 
-Enfin, la sonde `bench/tower_probe.cpp` du diff annonce `mhgp9_tower_probe_v18`. Le worker, son selftest et le lecteur LiDAR ont été adaptés **dans le diff mutable** pendant cette contrelecture ; ce raccord n'est pas encore un commit ni un reçu, et la porte chaîne reste insuffisante sur les IDs des coquilles et le travail complet. Ne pas lancer de VM sur ce paquet mutable ; fermer d'abord les portes locales et les deux défauts d'entrée. Le nouveau certificat S3 ne règle de toute façon pas seul le budget : R12 K5 laisse encore 1,177/1,388/1,513 s de chaîne si l'on retire fictivement **tous** les survivants et que les autres phases restent inchangées.
+Enfin, la sonde `bench/tower_probe.cpp` du diff annonce `mhgp9_tower_probe_v18`. Le worker, son selftest et le lecteur LiDAR ont été adaptés **dans le diff mutable** pendant cette contrelecture ; ils ont ensuite été figés dans un commit local sans reçu G4. La porte chaîne reste insuffisante sur les IDs des coquilles et le travail complet. Avant une VM, fermer ces portes et les deux défauts d'entrée. Le nouveau certificat S3 ne règle de toute façon pas seul le budget : R12 K5 laisse encore 1,177/1,388/1,513 s de chaîne si l'on retire fictivement **tous** les survivants et que les autres phases restent inchangées.
+
+## Libellés à corriger avant de présenter le port
+
+Le développeur a depuis figé localement un paquet S3 (`308110bc3`,
+encore hors `main` à cette lecture). Sa `PASSATION.md` reprend « 35/65 % »
+et « 28/72 % » comme si c'étaient des parts de calcul, puis ferme la
+piste des formes paresseuses sur un « au plus 1,3 % ». Le
+[contre-calcul TSC](CONTRELECTURE_CYCLES_SURVIVANTS_Q34_20260923.md)
+établit seulement des parts de **temps écoulé de fils désordonnancés**,
+et 1,3 % est une projection de deux essais, pas une borne ni une
+ablation. Conserver la priorité pratique S3/atlas est raisonnable ;
+ne pas la justifier par un plafond inexistant.
+
+La nouvelle `docs/PROVENANCE.md` appelle l'égalité du `catalogue_digest`
+une comparaison « clé par clé » GPU/moteur. Le code calcule et compare
+un **condensé FNV 64 bits** de toutes les clés/intérieurs/coquilles ;
+c'est un contrôle renforcé, mais pas une égalité littérale du catalogue,
+et le gate de flux omet encore les IDs des coquilles. La ligne locale
+08/000000/K5 annoncée avec digests égaux n'est pas accompagnée ici
+d'un reçu versionné liant binaire, entrée et commande. Enfin, même une
+chaîne achevée avec S2/S3 CUDA laisse atlas, voies q3/q4 et FULL sur CPU :
+la décrire comme une « tour achevée **sur** l'appareil » surinterprète
+le backend. Distinguer appareil disponible, filtre GPU, arêtes S3
+décidées sur GPU et tour mixte achevée ; seul un reçu G4 avec
+différentiel device peut qualifier S3.

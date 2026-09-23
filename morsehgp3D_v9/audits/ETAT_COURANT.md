@@ -233,6 +233,19 @@ préflight ne prouvent pas une décision GPU utile. Exiger le nombre
 d'arêtes réellement décidées et un différentiel CUDA par arête. La
 porte de chaîne compare encore les tailles, pas les IDs des coquilles,
 et seulement une partie du travail logique. R12 publié n'est pas touché.
+La [preuve B de redondance d'une seule cellule de
+centres](CERTIFICAT_B_REDONDANCE_CELLULE_UNIQUE_20260923.md) affine la
+piste de rejet **avant** le cœur : si la cellule couvre le disque
+nominal d'une arête encore ouverte, chaque garde qui la domine aurait
+déjà été crédité par S2. Segmenter les arêtes sans **subdiviser les
+centres** ne crée alors aucun rejet neuf. Une exception exacte vient
+du clipping par la boîte réelle du nuage, bien plus petite que le cube
+u18 en `z` sur 08/000000 ; l'autre solution couvre les centres par
+2/4/8 cellules à gardes distincts. Un test entier O(S) identifie
+d'abord les disques intérieurs qui rendent la cellule unique vaine.
+Le shadow doit limiter ses recherches et se replier sur le moteur,
+publier visites, tests et formes effectivement évitées sur brut et
+sans sol, sans annoncer de gain avant mesure.
 Les [demi-scènes et quarts aux trois densités](lidar_raw_physical_scaling_20260923/README.md)
 restent dans le reçu v12 ; la somme de leurs tours ne reconstruit pas le
 plein. Une scène/K5/CPU ne prouve ni sous-quadraticité, ni contrat G4.

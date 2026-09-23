@@ -60,6 +60,16 @@ universelle.
 
 ## Prochain shadow à coût borné : le résidu réel après le filtre
 
+**Correction mathématique préalable :** un seul jeu de gardes sur la
+boîte entière des centres ne peut fermer une voie S2 survivante si
+elle contient le disque nominal d'une de ses arêtes. Cela reproduirait
+exactement le témoin « citron » déjà crédité par S2. Voir le
+[lemme et sa contre-fixture de frontière](CERTIFICAT_B_REDONDANCE_CELLULE_UNIQUE_20260923.md).
+Le shadow doit d'abord mesurer le clipping par la boîte réelle du
+nuage, puis des **sous-cellules de centres avec gardes distincts** ;
+segmenter seulement les arêtes et garder pour chaque segment son
+disque entier ne sert pas. Aucune efficacité LiDAR n'est acquise.
+
 La [domination par cellule et gardes](DOMINATION_Q4_PARESSEUSE_PAR_BLOCS_20260923.md)
 est déjà prouvée localement, mais son gain sur LiDAR n'est pas mesuré.
 Le batch S2 crée précisément l'objet manquant pour le juger : une liste
@@ -148,7 +158,7 @@ l'analyseur. Le reçu compact hache ses fichiers conservés, mais les
 traces binaires, entrées et analyses détaillées restent sous `/tmp` :
 la jointure par arête n'est pas autonome à partir du seul commit.
 
-## Certificat simple à essayer dans l'ombre **avant** le cœur
+## Certificat exact avant le cœur — domaine des centres à subdiviser
 
 Le parcours de validation S2 connaît déjà, pour chaque rectangle ouvert,
 le segment contigu `E` de ses **arêtes réellement survivantes**, avant de
@@ -195,6 +205,30 @@ comparés après multiplication entière commune, sans `float` ni
 arrondi vers le mauvais côté. Le calcul des trois boîtes et de `Dmin`
 reste `O(S)` ; l'intérêt et les visites de recherche de gardes restent
 à mesurer sur les vrais segments S2.
+
+Forme d'implémentation exacte, vérifiée indépendamment : à chaque
+sommet `v`, poser `w=2v`, `G₂=2g`, et doubler les coordonnées de toutes
+les boîtes. Le test combiné devient, sans division,
+`2‖G₂−w‖² < max(dist²(w,2A_E)+dist²(w,2B_E),
+2dist²(w,2M_E)+2Dmin)`. Les bornes de `2M_E` sont les sommes entières
+`a+b` ; conserver le signe **strict**. Si les cellules sont subdivisées
+avec des sommets en quarts ou plus fins, augmenter l'échelle commune
+et promouvoir les produits **avant** multiplication. Ce certificat ne
+s'applique qu'aux centres des supports q3 aigus/q4 positifs possédés
+par leur arête maximale ; ne pas l'étendre aux autres présentations ni
+au profil float32 sans nouvelle borne. Pour K<3, ne jamais former
+`K−2` dans un entier non signé.
+
+Ce lemme est **sûr mais peut être redondant**. Pour une arête intérieure
+dont le disque de centres nominal est contenu dans `C_E`, tout garde
+strict pour la cellule est déjà un témoin singleton S2. Une voie
+encore ouverte n'a pas le nombre requis de tels gardes. Les vrais
+essais doivent donc exploiter une restriction certifiée des centres
+(au moins l'intersection avec la boîte réelle du nuage) ou une
+couverture en plusieurs cellules, chacune avec ses propres gardes.
+La [preuve de redondance](CERTIFICAT_B_REDONDANCE_CELLULE_UNIQUE_20260923.md)
+donne aussi le test entier O(S) pour chiffrer la portion à laquelle
+une cellule unique pourrait seulement s'appliquer.
 
 Ce test est seulement **suffisant**. Une cellule de centres trop large,
 ou des boîtes d'extrémités trop lâches, peut le faire échouer alors
