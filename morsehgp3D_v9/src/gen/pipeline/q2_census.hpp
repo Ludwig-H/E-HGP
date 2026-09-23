@@ -113,6 +113,9 @@ class Q2CensusIndex final {
   [[nodiscard]] const PreparedCloud& cloud() const noexcept { return *cloud_; }
   [[nodiscard]] const Q2IndexWork& work() const noexcept { return work_; }
   [[nodiscard]] std::span<const std::size_t> spatial_order() const noexcept { return order_; }
+  // v9: coordinates in spatial rank order (points[spatial_order()[r]] at r),
+  // built once with the index: hot loops read cover ranges sequentially.
+  [[nodiscard]] std::span<const Point3> spatial_points() const noexcept { return ordered_points_; }
   [[nodiscard]] std::span<const Q2SpatialNode> spatial_nodes() const noexcept { return nodes_; }
   // Vector capacities only, excluding the shared cloud and object metadata.
   [[nodiscard]] std::size_t retained_bytes() const;
@@ -127,6 +130,7 @@ class Q2CensusIndex final {
   CloudPtr cloud_;
   std::vector<std::size_t> order_;
   std::vector<Node> nodes_;
+  std::vector<Point3> ordered_points_;
   Q2IndexWork work_;
 };
 

@@ -24,20 +24,16 @@ Q34DeadLaneProver::Q34DeadLaneProver(unsigned max_depth, unsigned min_depth)
 }
 
 void Q34DeadLaneProver::load(const Q34EdgeCover& cover, Q34DeadLaneWork& work) {
+  // Invalid until this load completes: no failure below leaves a usable
+  // state from an earlier cover.
+  loaded_ = false;
   const auto& index = *cover.index();
-  const auto order = index.spatial_order();
-  if (ordered_owner_ != &index) {
-    // Coordinates in spatial rank order, once per index and prover: the
-    // cover ranges are then read sequentially (no ID indirection).
-    const auto points = index.cloud().points();
-    ordered_.resize(order.size());
-    for (std::size_t rank = 0; rank < order.size(); ++rank) ordered_[rank] = points[order[rank]];
-    ordered_owner_ = &index;
-  }
+  // Coordinates in spatial rank order, owned by the index itself: the cover
+  // ranges are read sequentially, with no per-prover copy.
+  const auto ordered = index.spatial_points();
   const auto ids = cover.edge_ids();
   const auto points = index.cloud().points();
   const auto a = points[ids[0]], b = points[ids[1]];
-  static_cast<void>(order);
   Vec v{}, midpoint_twice{};
   std::size_t main_axis = 0;
   for (std::size_t i = 0; i < 3; ++i) {
@@ -52,8 +48,6 @@ void Q34DeadLaneProver::load(const Q34EdgeCover& cover, Q34DeadLaneWork& work) {
   a_basis_[axis_i] = h; a_basis_[main_axis] = -sign * v[axis_i];
   b_basis_[axis_j] = h; b_basis_[main_axis] = -sign * v[axis_j];
   diameter_squared_ = dot(v, v);
-  // Invalid until this load completes: a failed load leaves no usable state.
-  loaded_ = false;
   counter_add(work.loads);
   forms_.resize(cover.site_count());
   std::size_t n = 0;
@@ -64,7 +58,7 @@ void Q34DeadLaneProver::load(const Q34EdgeCover& cover, Q34DeadLaneWork& work) {
   // they are never credited nor kept in a frontier. No branch in the loop.
   for (const auto range : cover.ranges())
     for (auto rank = range.first; rank < range.last; ++rank) {
-      const auto& z = ordered_[rank];
+      const auto& z = ordered[rank];
       Vec w{};
       for (std::size_t i = 0; i < 3; ++i) w[i] = 2 * static_cast<i64>(z[i]) - midpoint_twice[i];
       // M=262143: |w_i| <= 2M, |dot(w,w)-|v|^2| <= 15M^2 < 2^40 (scaled < 2^60),
@@ -87,8 +81,7 @@ void Q34DeadLaneProver::load(const Q34EdgeCover& cover, Q34DeadLaneWork& work) {
 }
 
 std::size_t Q34DeadLaneProver::retained_bytes() const {
-  std::size_t bytes = forms_.capacity() * sizeof(Form) + all_.capacity() * sizeof(std::uint32_t) +
-                      ordered_.capacity() * sizeof(Point3);
+  std::size_t bytes = forms_.capacity() * sizeof(Form) + all_.capacity() * sizeof(std::uint32_t);
   for (const auto& level : levels_) bytes += level.capacity() * sizeof(std::uint32_t);
   return bytes;
 }

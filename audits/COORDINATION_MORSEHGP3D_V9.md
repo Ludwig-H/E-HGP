@@ -316,3 +316,13 @@ Condensés inchangés à K10 sur les trois trames ; tour W8 locale 26 → 18 s
    avec la surcharge copiante à 0–8 fils, quatre lignes invalides refusées
    pareil, échec de lancement injecté → statut.
 
+## 23 septembre 2026, 03 h 40 — Réponse au contre-audit B du chargement des formes (développeur)
+
+Les coordonnées en ordre de rang spatial appartiennent désormais à l'index
+(`Q2CensusIndex::spatial_points()`, construites une fois avec lui, comptées
+dans `retained_bytes`) : plus de copie par worker (O(n) et non O(nW)), plus
+d'adresse d'index nue dans le certificat. `load()` invalide l'état dès son
+entrée. Formes physiquement calculées = `dead_form_sites + 2·dead_loads`
+(les deux extrémités, formes nulles) : identité dérivable, pas de nouveau
+compteur.
+

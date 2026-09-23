@@ -104,6 +104,9 @@ Q2CensusIndex::Q2CensusIndex(CloudPtr cloud) : cloud_(std::move(cloud)) {
     throw std::logic_error("mhgp9 gen certified rectangle has no sites");
   }
   static_cast<void>(build({0, order_.size()}, 0));
+  const auto points = cloud_->points();
+  ordered_points_.resize(order_.size());
+  for (std::size_t rank = 0; rank < order_.size(); ++rank) ordered_points_[rank] = points[order_[rank]];
 }
 
 std::size_t Q2CensusIndex::build(Range range, u64 depth) {
@@ -184,12 +187,15 @@ std::size_t Q2CensusIndex::retained_bytes() const {
       nodes_.capacity() > maximum / sizeof(Node)) {
     throw std::overflow_error("mhgp9 gen q2 index capacity byte count overflow");
   }
+  if (ordered_points_.capacity() > maximum / sizeof(Point3))
+    throw std::overflow_error("mhgp9 gen q2 index capacity byte count overflow");
   const auto orders = order_.capacity() * sizeof(std::size_t);
   const auto nodes = nodes_.capacity() * sizeof(Node);
-  if (orders > maximum - nodes) {
+  const auto ordered = ordered_points_.capacity() * sizeof(Point3);
+  if (orders > maximum - nodes || ordered > maximum - orders - nodes) {
     throw std::overflow_error("mhgp9 gen q2 index retained byte count overflow");
   }
-  return orders + nodes;
+  return orders + nodes + ordered;
 }
 
 struct Q2SingletonBatch;

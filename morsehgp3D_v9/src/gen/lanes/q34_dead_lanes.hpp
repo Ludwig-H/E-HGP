@@ -96,8 +96,6 @@ class Q34DeadLaneProver final {
   bool loaded_{false};
   std::vector<Form> forms_;
   std::vector<std::uint32_t> all_;                   // identity prefix 0..n-1
-  const Q2CensusIndex* ordered_owner_ = nullptr;      // index of ordered_
-  std::vector<Point3> ordered_;                      // coordinates by spatial rank
   std::vector<std::vector<std::uint32_t>> levels_;  // frontier by depth
 };
 
