@@ -1,5 +1,10 @@
 # Attribuer le coût du cœur aux arêtes des coupes LiDAR
 
+**Protocole exécuté** sur le port S2 CPU à K5, aux trois densités :
+[reçu par arête et masque après cœur](edge_matched_core_20260923/README.md).
+Cette note conserve la méthode et ses hypothèses ; le reçu lié porte les
+résultats et les limites actuelles.
+
 Auditeur A, 23 septembre 2026. Diagnostic proposé pour le port S2 courant ;
 les chiffres ci-dessous sont les [reçus bruts v12
 K5](lidar_raw_physical_scaling_20260923/README.md) et

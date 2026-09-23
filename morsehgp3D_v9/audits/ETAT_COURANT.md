@@ -174,13 +174,24 @@ Priorités : différentiel catalogue GPU, ablation à trois bras, puis
 réduction/accélération exacte des survivants et de la tour ; reprendre
 les coupes physiques et densités sur S2 pour étudier la croissance.
 La [décomposition par arête](ATTRIBUTION_COEUR_ARETES_COUPES_LIDAR_20260923.md)
-précise ce prochain diagnostic : sur 08/000000 brut/v12, les formes par
-charge du cœur passent de 45,16 (Σ quarts) à 140,39 (plein) à K5, et de
-63,96 à 160,56 à K10, mais les arêtes traitées changent. Apparier les
-IDs originaux des **mêmes** arêtes dans plein/quarts permet d'attribuer
-exactement leur écart aux sites extérieurs du cœur, puis de séparer
-les arêtes nouvelles et traversantes. Cela oriente entre certificat par
-blocs du cœur et filtrage avant cœur, sans faire des coupes une tour.
+a désormais un [reçu S2 CPU apparié](edge_matched_core_20260923/README.md)
+sur la trame **brute** 08/000000/K5, plein et quatre quarts physiques aux
+densités 1/4, 1/2 et entière. Quinze couples moteur/lot ont mêmes sorties,
+charges et formes du cœur ; le second traçage du plein retrouve les mêmes
+3 986 433 arêtes et le masque après preuve. Au dernier doublement de
+densité, les formes du cœur croissent avec `p=2,119` : à pleine densité,
+157 012 arêtes traversant les quarts portent **386,518 M / 559,662 M**
+formes, alors que les arêtes communes ne gagnent que 0,317 M formes entre
+plein et quarts. Les traversantes de `x=0` concentrent 383,619 M formes,
+dont **380,106 M** sur des arêtes ensuite fermées au cœur. Le seuil
+intrinsèque exploratoire `|ab|≥4 m` couvre 80,4 % des formes avec 8,5 %
+des charges, mais n'est pas un certificat. Essayer un rejet exact avant
+matérialisation, avec repli et coût total apparié ; mesurer aussi le préfixe
+de formes réellement consulté avant de porter une variante paresseuse.
+Les [demi-scènes et quarts aux trois densités](lidar_raw_physical_scaling_20260923/README.md)
+restent dans le reçu v12 ; la somme de leurs tours ne reconstruit pas le
+plein. Une scène/K5/CPU ne prouve ni sous-quadraticité, ni contrat G4.
+
 Les deux meilleures lignes R11 (08/000100) bornent aussi le gain du
 seul réordonnancement q3/q4 : les **48 workers logiques** consomment
 78,151 CPU·s en 1,661 s de mur maximal à K5 et 211,744 CPU·s en
