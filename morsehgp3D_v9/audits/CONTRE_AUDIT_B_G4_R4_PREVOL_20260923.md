@@ -38,3 +38,24 @@ catalogue, ordres, digest, masses de `cover_builds`, `cover_sites` et
 CPU/mur/RSS, puis arrêt ciblé `TERMINATED`. Une paire locale sur une
 séquence ne prouve ni une borne sous-quadratique 8k/16k/32k, ni la
 cible de 1 s, ni une exécution GPU, ni le contrat sur trames brutes.
+
+## Issue observée : capture sans mesure
+
+Le reçu hôte local a finalement `status=capture_failed`,
+`FULL_executed=false`, `worker_exit_code=255` et
+`capture_error="ValueError: fixed G4 target/status"`. La commande SSH
+du worker a expiré sur le port 22 **avant tout reçu invité ou toute
+sonde**. Le contrôle hôte suivant a trouvé la VM `STOPPING`, puis
+`guarded_stop` code 0 a certifié `TERMINATED` et aucune autre VM
+`project=e-hgp` active. Le reçu local conserve `lifecycle.txt` à
+`targeted_running` : ce texte n'est pas la preuve d'arrêt, qui est
+séparée. Le descriptif capturé indique `provisioningModel=SPOT`,
+`automaticRestart=false`, action `STOP` ; l'arrêt précoce est
+**compatible** avec une interruption SPOT, mais ces traces ne prouvent
+pas sa cause exacte.
+
+La tentative n'a donc produit **aucun résultat R4** de cache ON/OFF,
+aucun temps de tour et aucun test du contrat. Le snapshot et le plan
+préparatoires restent contrôlés ; ne pas transformer cet échec de
+connexion en régression ou en succès de l'algorithme. Aucune relance
+GCP par l'auditeur.
