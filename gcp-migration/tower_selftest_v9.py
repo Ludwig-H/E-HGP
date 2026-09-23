@@ -964,6 +964,8 @@ class Protocol(unittest.TestCase):
             value = worker.strict_json((output / 'receipt.json').read_bytes())
             # v17 default plan: GPU case then its engine twin per (frame, K),
             # then 00/K5 at 24 (GPU) and 1 (engine) workers.
+            need(value['GPU_preflight_executed'] is True and value['GPU_completed_cases'] == list(range(0, 14, 2)) and
+                 receipt['GPU_completed_cases'] == value['GPU_completed_cases'], 'GPU labels from complete LiDAR towers')
             need(value['completed_case_indices'] == list(range(14)) and value['cross_worker_comparisons'] == [
                 dict(reference=r, other=r + 1, equal=True) for r in range(0, 12, 2)] + [
                 dict(reference=0, other=12, equal=True), dict(reference=0, other=13, equal=True)] and
@@ -1100,6 +1102,40 @@ class Protocol(unittest.TestCase):
                     patch.object(worker, 'CUDA_PATHS', (str(Path(temporary) / 'fakebin/nvcc'),)):
                 need(refused(session.validate_received, tampered, pkg['manifest'], worker.sha(worker.__file__),
                              expected, *bound), 'an unpaired GPU case hidden from the receipt is refused')
+
+    def test_gpu_preflight_alone_is_not_gpu_executed(self):
+        # Auditor B: every LiDAR GPU case killed, every engine twin complete.
+        # The device preflight passed, yet no GPU tower exists: GPU_executed
+        # stays false, and a receipt claiming otherwise is refused.
+        with tempfile.TemporaryDirectory() as temporary:
+            code, receipt, fake, host = run_scenario(
+                Path(temporary), tools=dict(sleep=[dict(workers=48, batch=True, seconds=60),
+                                                   dict(workers=24, batch=True, seconds=60)]),
+                patches=[(worker, 'CASE_CAP_SECONDS', 4)])
+            need(code == 0 and receipt['status'] == 'partial' and receipt['GPU_executed'] is False and
+                 receipt['GPU_completed_cases'] == [] and receipt['GPU_planned'] is True,
+                 'GPU label without a complete GPU tower: ' + json.dumps(receipt)[:600])
+            expect_certified_stop(receipt, fake)
+            value = worker.strict_json((host / 'received/output/receipt.json').read_bytes())
+            need(value['GPU_preflight_executed'] is True and value['GPU_attempted'] is True and
+                 value['GPU_executed'] is False and
+                 [entry['outcome'] for entry in value['case_outcomes']] ==
+                 ['killed_case_cap', 'complete_relative'] * 7, 'worker GPU labels and outcomes')
+            pkg = package()
+            expected = session.validate_snapshot(pkg['archive'], pkg['manifest'])[0]
+            bound = (receipt['generation'], receipt['provenance'], receipt['verified_guard'])
+            with patch.object(worker, 'CASE_CAP_SECONDS', 4), \
+                    patch.object(worker, 'CUDA_PATHS', (str(Path(temporary) / 'fakebin/nvcc'),)):
+                for label, change in (('GPU_executed', dict(GPU_executed=True)),
+                                      ('GPU_completed_cases', dict(GPU_completed_cases=[0], GPU_executed=True)),
+                                      ('GPU_preflight_executed', dict(GPU_preflight_executed=False))):
+                    tampered = Path(temporary) / 'tampered'
+                    shutil.copytree(host / 'received/output', tampered)
+                    forged = dict(worker.strict_json((tampered / 'receipt.json').read_bytes()), **change)
+                    (tampered / 'receipt.json').write_text(json.dumps(forged, indent=1, sort_keys=True))
+                    need(refused(session.validate_received, tampered, pkg['manifest'], worker.sha(worker.__file__),
+                                 expected, *bound), 'forged GPU label refused: ' + label)
+                    shutil.rmtree(tampered)
 
     def test_batch_preflight_must_equal_engine(self):
         with tempfile.TemporaryDirectory() as temporary:

@@ -3504,3 +3504,58 @@ sur des voies fermées appellent des **gardes conditionnels par cellule
 de centres**, pas une nouvelle passe du même disque. Détail algébrique
 et porte de shadow dans la
 [note B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_CROISSANCE_Q34_AVAL_S2_20260923.md).
+
+### 17 h 40 UTC — Développeur : libellé GPU, préchauffage CUDA, suite
+
+**Libellé GPU (B, 15 h 25 et 17 h 00).** Constat juste, corrigé dans
+le protocole de la tour :
+
+- Le worker ne pose plus `GPU_executed` après le préflight. Il pose
+  `GPU_preflight_executed`, puis `GPU_completed_cases` : les cas LiDAR
+  `complete_relative` dont le filtre a tourné sur le GPU.
+- `GPU_executed` vaut vrai seulement si cette liste est non vide.
+- L'hôte recalcule la liste depuis les issues reçues et le plan
+  transporté, et refuse tout écart.
+- Nouveau selftest du plan mixte causal : les sept cas GPU sont tués au
+  plafond, les sept jumeaux moteur sont achevés.
+  - Résultat attendu et obtenu : `partial`, `GPU_executed=false`,
+    liste vide, préflight GPU vrai.
+  - Trois reçus falsifiés sont refusés.
+- Selftests de la tour : 24/24 sous `-B` et `-O`.
+- R12 n'est pas touchée : ses sept cas GPU sont achevés.
+
+**Préchauffage.** Quand le filtre GPU est demandé, un fil séparé tourne
+pendant q2 : il ouvre le contexte CUDA primaire et prépare la copie plate
+de l'index et les points par rang (l'index est immuable). Il est joint
+avant l'appel du filtre, et dans le destructeur sur toute voie d'échec.
+Les erreurs du préchauffage sont ignorées : l'appel du filtre les
+reclasse (`no_device`, etc.). 57/57 portes chaîne/GPU/tour en build CPU ;
+en build CUDA sans carte, le refus attendu est inchangé. Le gain se
+mesurera à la prochaine session G4.
+
+**Prochaine session G4 (R13)**, demandes de B et C reprises :
+
+- le bras lot CPU `1/0` entre le moteur `0/0` et le GPU `1/1` ;
+- le différentiel catalogue clé par clé de C, GPU contre moteur, sur la
+  trame entière 08/000000 à K5 et K10 ;
+- la mesure du préchauffage.
+
+Euler : noté, `holds` ne couvre que les degrés jusqu'à
+`checkable_max_k=3`. Ce n'est pas un juge des dix niveaux.
+
+**Cœur q3/q4 (A, arêtes appariées ; B, ombre avant cœur).** Les deux
+reçus désignent le même poste : 94 % des formes du cœur sont chargées
+sur des arêtes dont les deux voies sont ensuite fermées. Avant tout
+port GPU du cœur, je mesure ce que A demande :
+
+- par charge, le plus grand ordinal consulté par `prove` rapporté à la
+  taille du cœur ;
+- les retests ;
+- le coût d'adressage.
+
+Cette mesure dira si le calcul des formes à la première consultation
+peut rembourser quelque chose. Si le plus haut ordinal consulté est
+presque toujours la taille du cœur, la piste est fermée sans port. On
+passe alors à l'ombre de B : un certificat par blocs avant le cœur, sur
+les segments réels de `E` et les charges lourdes, jugé en formes
+réellement épargnées.

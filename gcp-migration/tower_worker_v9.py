@@ -793,6 +793,13 @@ def unpaired_batch_cases(cases, outcomes):
             (case['file'], case['k'], case['s']) not in engine]
 
 
+def gpu_completed_cases(cases, outcomes):
+    """Complete LiDAR towers whose q3/q4 filter ran on the device: the only
+    ground for GPU_executed (a device preflight alone is not, auditor B)."""
+    return [index for index, (case, entry) in enumerate(zip(cases, outcomes))
+            if entry.get('outcome') == 'complete_relative' and case['levers']['q34_gpu_filter']]
+
+
 def compiled_dependencies(build, root, before):
     consumed, relative_seen = {}, set()
     depfiles = sorted(build.glob('CMakeFiles/*.dir/**/*.o.d'))
@@ -828,7 +835,8 @@ def execute(args):
     need(not output.exists() and not output.is_symlink() and not output.resolve().is_relative_to(root), 'fresh output')
     output.mkdir(mode=0o700)
     result = dict(status='failed', backend='reference_cpu', scope=SCOPE, public_status='not_claimed',
-                  GPU_attempted=False, GPU_executed=False, FULL_executed=False, contract_certified=False,
+                  GPU_attempted=False, GPU_preflight_executed=False, GPU_completed_cases=[], GPU_executed=False,
+                  FULL_executed=False, contract_certified=False,
                   targeted_GCP_stop_required_by_ROOT=True, worker_argv=list(args.argv), worker_sha256=sha(__file__),
                   useful_budget_seconds=args.useful_budget_seconds, case_cap_seconds=args.case_cap_seconds)
     worker, manifest, before, consumed = None, None, None, {}
@@ -952,7 +960,9 @@ def execute(args):
                 raise PreflightFailed(type(error).__name__ + ': ' + str(error)) from error
             result['preflight']['engine_tower_digest'] = engine_value['tower_digest']
         if pre_case['levers']['q34_gpu_filter']:
-            result['GPU_executed'] = True  # validated device pass, equal to the engine tower
+            # Validated device pass on the synthetic preflight only (auditor B):
+            # GPU_executed waits for a complete LiDAR tower on the device.
+            result['GPU_preflight_executed'] = True
 
         def left():
             try:
@@ -1021,6 +1031,8 @@ def execute(args):
         result['cross_worker_comparisons'] = compare_cases(cases, outcomes, values)
         # A batch/GPU tower counts as verified on LiDAR only with its twin.
         result['unpaired_batch_cases'] = unpaired_batch_cases(cases, outcomes)
+        result['GPU_completed_cases'] = gpu_completed_cases(cases, outcomes)
+        result['GPU_executed'] = bool(result['GPU_completed_cases'])
         if any(e['outcome'] == 'probe_failed' for e in outcomes):
             result['status'] = 'probe_failed'
         elif not all(item['equal'] for item in result['cross_worker_comparisons']):

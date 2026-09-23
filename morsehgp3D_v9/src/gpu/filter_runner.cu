@@ -479,4 +479,12 @@ BatchOutput run_filter_batch(const FilterInput& input) {
   return out;
 }
 
+std::string warm_up() {
+  int devices = 0;
+  if (cudaGetDeviceCount(&devices) != cudaSuccess || devices == 0) return "no CUDA device";
+  if (cudaSetDevice(0) != cudaSuccess) return "cudaSetDevice failed";
+  if (cudaFree(nullptr) != cudaSuccess) return "context creation failed";
+  return {};
+}
+
 }  // namespace mhgp9::gpu

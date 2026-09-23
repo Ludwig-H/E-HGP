@@ -170,7 +170,7 @@ def validate_received(output, manifest, worker_pin, expected_cases, generation, 
     # v17: the backend label and the device pass follow the transported plan.
     gpu = payload.plan_uses_gpu(expected_cases)
     need(value.get('backend') == ('cuda_g4' if gpu else 'reference_cpu') and value.get('GPU_attempted') is gpu and
-         value.get('GPU_executed') is gpu, 'worker backend/GPU labels differ from the plan')
+         value.get('GPU_preflight_executed') is gpu, 'worker backend/GPU labels differ from the plan')
     need(value.get('useful_budget_seconds') == payload.USEFUL_BUDGET_SECONDS and
          value.get('case_cap_seconds') == payload.CASE_CAP_SECONDS, 'worker budgets')
     dependencies_path = output / 'compiled_dependencies.json'
@@ -301,6 +301,11 @@ def validate_received(output, manifest, worker_pin, expected_cases, generation, 
          'cross-worker object comparison')
     need(value.get('unpaired_batch_cases') == payload.unpaired_batch_cases(cases, outcomes),
          'unpaired batch/GPU cases recomputation')
+    # GPU_executed: at least one complete LiDAR tower on the device, never
+    # the preflight alone (auditor B, mixed plan).
+    gpu_completed = payload.gpu_completed_cases(cases, outcomes)
+    need(value.get('GPU_completed_cases') == gpu_completed and value.get('GPU_executed') is bool(gpu_completed),
+         'GPU completed cases recomputation')
     need(any(entry['outcome'] != 'skipped_budget' for entry in outcomes), 'no executed case')
     status = 'completed' if len(completed) == len(cases) else 'partial'
     need(value['status'] == status, 'worker status recomputation')
@@ -486,10 +491,12 @@ def run_session(args):
                         state['status'] = validate_received(host / 'received/output', manifest, args.worker_sha256,
                                                             expected_cases, generation, provenance, verified_guard)
                         state['FULL_executed'] = True
-                        state['GPU_executed'] = gpu_plan  # only after a validated reception
+                        # Only after a validated reception, from the recomputed outcomes.
+                        received = payload.strict_json((host / 'received/output/receipt.json').read_bytes())
+                        state['GPU_completed_cases'] = received['GPU_completed_cases']
+                        state['GPU_executed'] = received['GPU_executed']
                         # Batch/GPU towers never compared with a complete LiDAR engine twin.
-                        state['unpaired_batch_cases'] = payload.strict_json(
-                            (host / 'received/output/receipt.json').read_bytes())['unpaired_batch_cases']
+                        state['unpaired_batch_cases'] = received['unpaired_batch_cases']
                 except BaseException as error:
                     state.update(status='capture_failed', capture_error=type(error).__name__ + ': ' + str(error))
         finally:

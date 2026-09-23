@@ -21,4 +21,6 @@ BatchOutput run_filter_batch(const FilterInput& input) {
   return out;
 }
 
+std::string warm_up() { return "built without MHGP9_ENABLE_CUDA"; }
+
 }  // namespace mhgp9::gpu

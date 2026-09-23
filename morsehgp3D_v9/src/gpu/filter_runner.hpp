@@ -123,4 +123,9 @@ struct BatchOutput {
 };
 BatchOutput run_filter_batch(const FilterInput& input);
 
+// Opens the device's primary context (process-wide), so that the first
+// batch call does not pay it; empty string on success. Any error is left to
+// the batch call itself, which classifies it.
+std::string warm_up();
+
 }  // namespace mhgp9::gpu

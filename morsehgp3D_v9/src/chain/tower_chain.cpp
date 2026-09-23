@@ -10,6 +10,7 @@
 #include <limits>
 #include <mutex>
 #include <new>
+#include <optional>
 #include <stdexcept>
 #include <system_error>
 #include <thread>
@@ -81,18 +82,69 @@ struct GpuRefusal : std::runtime_error {
 // immutable index (the device guard rechecks u18 boxes and partitions), one
 // pass, compacted survivors in rectangle order. A device stack-bound
 // violation is an invariant violation of the port, never an answer.
-gen::Q34FilterBatch gpu_filter_batch(const gen::Q2CensusIndex& index, unsigned kmax,
-                                     std::span<const gen::WspdRectangle> rectangles, double& device_ms) {
-  const auto flat = gpu::flatten_nodes(index);
+// The device's view of an immutable index (flat nodes, points by spatial
+// rank), prepared once per chain.
+struct GpuIndex {
+  std::vector<gpu::FlatNode> nodes;
+  std::vector<std::int32_t> rank_points;
+};
+
+GpuIndex prepare_gpu_index(const gen::Q2CensusIndex& index) {
+  GpuIndex out;
+  out.nodes = gpu::flatten_nodes(index);
   const auto order = index.spatial_order();
   const auto points = index.cloud().points();
-  std::vector<std::int32_t> rank_points(3 * order.size());
+  out.rank_points.resize(3 * order.size());
   for (std::size_t r = 0; r < order.size(); ++r) {
     const auto& q = points[order[r]];
-    rank_points[3 * r] = q.x;
-    rank_points[3 * r + 1] = q.y;
-    rank_points[3 * r + 2] = q.z;
+    out.rank_points[3 * r] = q.x;
+    out.rank_points[3 * r + 1] = q.y;
+    out.rank_points[3 * r + 2] = q.z;
   }
+  return out;
+}
+
+// Opens the CUDA context and prepares the flat index on its own thread while
+// q2 runs (the index is immutable: read-only sharing). Joined before the
+// batch call and, through the destructor, on every failure path.
+class GpuPreparation {
+ public:
+  GpuPreparation() = default;
+  GpuPreparation(const GpuPreparation&) = delete;
+  GpuPreparation& operator=(const GpuPreparation&) = delete;
+  ~GpuPreparation() { join(); }
+  void start(const gen::Q2CensusIndex& index) {
+    thread_ = std::thread([this, &index] {
+      try {
+        static_cast<void>(gpu::warm_up());  // errors are classified by the batch call
+        prepared_ = prepare_gpu_index(index);
+      } catch (...) {
+        failure_ = std::current_exception();
+      }
+    });
+  }
+  // The prepared index (rethrows a preparation failure); prepares it here if
+  // the thread was never started.
+  const GpuIndex& get(const gen::Q2CensusIndex& index) {
+    join();
+    if (failure_) std::rethrow_exception(failure_);
+    if (!prepared_) prepared_ = prepare_gpu_index(index);
+    return *prepared_;
+  }
+
+ private:
+  void join() {
+    if (thread_.joinable()) thread_.join();
+  }
+  std::thread thread_;
+  std::optional<GpuIndex> prepared_;
+  std::exception_ptr failure_;
+};
+
+gen::Q34FilterBatch gpu_filter_batch(const GpuIndex& prepared, std::span<const gen::WspdRectangle> rectangles,
+                                     unsigned kmax, double& device_ms) {
+  const auto& flat = prepared.nodes;
+  const auto& rank_points = prepared.rank_points;
   std::vector<gpu::u32> a(rectangles.size()), b(rectangles.size());
   std::vector<gpu::u8> lanes(rectangles.size());
   for (std::size_t i = 0; i < rectangles.size(); ++i) {
@@ -106,7 +158,7 @@ gen::Q34FilterBatch gpu_filter_batch(const gen::Q2CensusIndex& index, unsigned k
   in.nodes = flat.data();
   in.node_count = flat.size();
   in.rank_points = rank_points.data();
-  in.rank_count = order.size();
+  in.rank_count = rank_points.size() / 3;
   in.rect_a = a.data();
   in.rect_b = b.data();
   in.rect_mask = lanes.data();
@@ -401,6 +453,9 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     t = Clock::now();
     const gen::Q2CensusIndexPtr index = gen::make_q2_cloud_index(cloud);
     result.times.gen_index_ms = ms_since(t);
+    // S2: CUDA context and flat index prepared during q2 (joined before q34).
+    GpuPreparation gpu_preparation;
+    if (options.q34_batch_filter && options.q34_gpu_filter && kmax >= 2) gpu_preparation.start(*index);
 
     std::vector<std::vector<Presentation>> slots(W);
     t = Clock::now();
@@ -470,8 +525,9 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         double device_ms = 0;
         gen::Q34BatchFilter filter;
         if (options.q34_gpu_filter) {
-          filter = [&device_ms](const gen::Q2CensusIndex& ix, unsigned k, std::span<const gen::WspdRectangle> rects) {
-            return gpu_filter_batch(ix, k, rects, device_ms);
+          filter = [&device_ms, &gpu_preparation](const gen::Q2CensusIndex& ix, unsigned k,
+                                                 std::span<const gen::WspdRectangle> rects) {
+            return gpu_filter_batch(gpu_preparation.get(ix), rects, k, device_ms);
           };
         } else {
           filter = [W](const gen::Q2CensusIndex& ix, unsigned k, std::span<const gen::WspdRectangle> rects) {
