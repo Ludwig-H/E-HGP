@@ -272,6 +272,13 @@ les quatre quarts spatiaux à densité entière, elle varie de 3,563 % à
 corrélation des deux extrémités des arêtes survivantes est démontrée
 sur une fixture q4 positive pour les **sous-cellules**, mais son coût
 `|E|×sommets` et son rendement LiDAR restent à mesurer.
+La [proposition B de crédit par nœuds](CERTIFICAT_B_NOEUDS_CORRELES_AVANT_COEUR_20260923.md)
+étend cette borne : si le **plus lointain point** d'une boîte d'index
+satisfait l'inégalité stricte aux sommets d'une sous-cellule, toute
+sa population distincte peut servir de gardes, sans énumérer ses sites.
+Huit cellules AABB partagent au plus 27 sommets ; le budget de visites
+porte sur la **preuve**, jamais sur les candidats. C'est un lemme
+exact mais pas encore un gain LiDAR ou une solution à `S` développé.
 Le shadow doit limiter ses recherches et se replier sur le moteur,
 publier visites, tests et formes effectivement évitées sur brut et
 sans sol, sans annoncer de gain avant mesure.

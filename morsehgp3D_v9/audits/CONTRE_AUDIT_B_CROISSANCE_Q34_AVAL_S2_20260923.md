@@ -235,6 +235,13 @@ bornes par boîtes échouent. Mais chaque cellule exige désormais
 `|E|×nombre de sommets` évaluations, en plus de la recherche des gardes :
 facturer ces opérations sur les vrais segments lourds et ne pas les
 confondre avec la préparation de boîtes en un seul passage.
+La [proposition B de crédit par nœuds](CERTIFICAT_B_NOEUDS_CORRELES_AVANT_COEUR_20260923.md)
+combine ce `F_E` avec un majorant de distance de **tous** les sites
+d'une boîte d'index : un seul test strict à chaque sommet crédite une
+population entière de gardes distincts. Huit sous-cellules AABB
+partagent au plus 27 sommets, donc un balayage `O(27S)` avant recherches
+bornées, puis repli exact. C'est une preuve d'admission, **pas** un gain
+LiDAR mesuré ni un remède à la masse `S` déjà développée par S2.
 
 Forme d'implémentation exacte, vérifiée indépendamment : à chaque
 sommet `v`, poser `w=2v`, `G₂=2g`, et doubler les coordonnées de toutes

@@ -3807,3 +3807,31 @@ de leur propre masse, sans reconstituer la tour pleine. A démontre
 également un minorant corrélé `F_E(v)` plus fort que nos deux bornes
 par boîtes sur une fixture exacte ; facturer son balayage
 `|E|×sommets` et les gardes dans tout shadow subdivisé.
+
+## 23 septembre 2026, 19 h 10 UTC — Crédit corrélé de nœuds avant cœur (auditeur B)
+
+La [proposition mathématique B](../morsehgp3D_v9/audits/CERTIFICAT_B_NOEUDS_CORRELES_AVANT_COEUR_20260923.md)
+combine la borne corrélée de A avec les boîtes de l'index **global**.
+Pour un segment `E` de vraies arêtes S2 survivantes et chaque sommet
+`v` d'une sous-cellule convexe de centres, comparer exactement le
+majorant `2U_N(v)` de **tous** les sites d'un nœud `N` au minorant
+`Q_E(v)=min_e(|a-v|²+|b-v|²)`. Si `2U_N(v)<Q_E(v)` aux sommets, toute
+la population de `N`, hors `A∪B`, est strictement intérieure à toutes
+les boules du segment dans cette cellule : la différence est affine
+en leur centre. Des nœuds disjoints peuvent être crédités en bloc ;
+les cellules exigent chacune leur propre seuil `K−1`/`K−2` et doivent
+couvrir tout le domaine de la voie. Un budget de **tentatives de preuve**
+déclenche le repli exact, jamais l'omission d'une arête.
+
+Le balayage corrélé sur une grille de huit cellules 2×2×2 emploie au
+plus 27 sommets distincts, donc `O(27S)` pour `S` arêtes déjà
+survivantes, puis un nombre borné de propositions de nœuds par
+segment. Cela **n'enlève pas** `S`, la matérialisation S2 de `P`, ni le
+plafond `P≤2³¹−1` ; aucun gain LiDAR/G4 n'est mesuré. Question au
+développeur : peux-tu construire un **shadow CPU non bloquant** sur
+les segments lourds, avec 2/4/8 sous-cellules, nœuds disjoints et
+repli exact, puis publier coûts de `Q_E`, visites, populations créditées
+et formes cœur **et cover réellement épargnées** ? Le différentiel
+doit comparer masques, coquilles, clés du catalogue et FULL, pas des
+condensés seuls. Si le rendement total est faible, abandonner cette
+piste avant un port CUDA.
