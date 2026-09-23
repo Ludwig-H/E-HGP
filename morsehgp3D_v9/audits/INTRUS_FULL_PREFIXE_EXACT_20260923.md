@@ -63,7 +63,11 @@ transformer l'entrée en préfixe complet. Avant cette matérialisation,
 directe, privée par worker et par index, peut évincer librement : une
 collision ne crée qu'un défaut de cache. Si elle survit entre ordres, la
 clé doit rester liée au **même** index immuable ; entre nuages, `BallKey`
-seule ne suffit pas. La mise à jour doit être construite localement puis
+seule ne suffit pas. Le stade différé doit **copier** la facette et sa
+longueur K avant la réutilisation du buffer du worker ; le rang zéro est
+valide et ne peut servir de sentinelle. Une collision de hash exige la
+comparaison de la BallKey complète. La mise à jour doit être construite
+localement puis
 publiée en un seul état valide ; sur échec de capacité, poursuivre sans
 cache. Aucun résultat géométrique, ancre ni lot FULL n'est publié par le
 cache.
@@ -71,12 +75,16 @@ cache.
 Le coût du cache est un compromis : pour une clé jamais répétée, copie
 de clé et de facette, hachage et éviction s'ajoutent au parcours ; pour
 une clé récurrente, les hits économisent `AxisBounds` et les visites de
-nœuds. Avec une entrée fixe d'environ 80 octets de clé et au plus 11 IDs
-de 32 bits, plusieurs milliers d'entrées **par worker** sont déjà des
-dizaines de MiB sur 48 workers. Fixer un budget total explicite, puis
+nœuds. La clé (~80 o), la facette différée (jusqu'à 40 o), le préfixe
+(jusqu'à 44 o), K, z, état et alignement donnent plutôt **au moins
+176–192 o par entrée**, hors table. À 4 096 entrées ×48 workers,
+cela représente environ 34,6–37,7 Mo décimaux avant allocateur.
+Fixer un budget total explicite, puis
 mesurer ses collisions et sa résidence réelle. Une table globale
 concurrente pourrait partager plus de clés mais ajoute synchronisation
 et propriété transactionnelle ; elle ne doit pas être le premier port.
+La [contrelecture B](CONTRE_AUDIT_B_PREFIXE_INTRUS_20260923.md) détaille
+les durées de vie et les fixtures différentielles de cette interface.
 
 ## Raccourci plus simple pour une clé déjà cataloguée
 
@@ -122,7 +130,9 @@ contact, préfixe épuisé, évictions et 48 workers), puis digest, BallIds
 terminaux, compteurs de sortie et statuts. Séparer requêtes logiques,
 parcours réellement effectués, hits, nœuds économisés, tests exacts
 ajoutés, octets du cache et temps CPU/mur. Les compteurs historiques de
-travail géométrique doivent payer les tests supplémentaires ; une baisse
+travail géométrique doivent payer les tests supplémentaires ;
+`intruder_queries` reste le nombre de **requêtes logiques** utilisé par
+les invariants du résolveur, même sur un hit. Une baisse
 de `intruder_nodes` seule ne prouve pas une baisse du temps FULL.
 
 Le [préchauffage géométrique par K](PREFETCH_GEOMETRIE_FULL_PAR_K_20260923.md)

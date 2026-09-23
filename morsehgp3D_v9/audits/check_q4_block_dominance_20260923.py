@@ -33,9 +33,14 @@ def nearest_squared(point, box):
                for i, (lo, hi) in enumerate(box))
 
 
-def paired_certificate(cell, guards_box, witnesses_box):
+def box_guard_certificate(cell, guards_box, witnesses_box):
     return all(farthest_squared(c, guards_box) < nearest_squared(c, witnesses_box)
                for c in corners(cell))
+
+
+def site_guard_certificate(cell, guards, witnesses_box):
+    return all(max(squared(c, g) for g in guards) <
+               nearest_squared(c, witnesses_box) for c in corners(cell))
 
 
 def old_radius_certificate(cell, guards, witnesses_box):
@@ -62,9 +67,22 @@ def main():
     require(len(guards) == 8, "fixture needs eight distinct guards")
     require(not old_radius_certificate(cell, guards, box_of(witnesses)),
             "old independent extrema unexpectedly reject fixture")
-    require(paired_certificate(cell, box_of(guards), box_of(witnesses)),
+    require(box_guard_certificate(cell, box_of(guards), box_of(witnesses)),
             "paired certificate missed strict integer fixture")
+    require(site_guard_certificate(cell, guards, box_of(witnesses)),
+            "exact guard certificate missed strict integer fixture")
     require(check_exact(cell, guards, witnesses), "fixture not truly dominated")
+
+    # A bounding box can contain fictitious guard corners. Then the old
+    # gap/U test may conclude while the boxed-guard test cannot; the
+    # exact-site vertex test still concludes.
+    cell = ((0, 0), (0, 0), (0, 0))
+    guards = [(1, 0, 0), (0, 1, 0), (0, 0, 1)]
+    witnesses = [(1, 1, 0)]
+    require(old_radius_certificate(cell, guards, box_of(witnesses)) and
+            not box_guard_certificate(cell, box_of(guards), box_of(witnesses)) and
+            site_guard_certificate(cell, guards, box_of(witnesses)),
+            "fictitious guard-box corner counterexample")
 
     # Exact box predicate is sufficient, not necessary. Exhaustive integer
     # centres verify its implication, including boxes with overlapping axes.
@@ -76,7 +94,13 @@ def main():
         guards = rng.sample(list(product(range(0, 9), repeat=3)), rng.randrange(3, 9))
         available = [p for p in product(range(0, 9), repeat=3) if p not in guards]
         witnesses = rng.sample(available, rng.randrange(1, 4))
-        certified = paired_certificate(cell, box_of(guards), box_of(witnesses))
+        certified = box_guard_certificate(cell, box_of(guards), box_of(witnesses))
+        site_certified = site_guard_certificate(cell, guards, box_of(witnesses))
+        old_certified = old_radius_certificate(cell, guards, box_of(witnesses))
+        require(not certified or site_certified,
+                "site-guard certificate must dominate boxed guards")
+        require(not old_certified or site_certified,
+                "site-guard certificate must dominate old gap/U")
         if certified:
             accepted += 1
             require(check_exact(cell, guards, witnesses),
@@ -100,13 +124,13 @@ def main():
     require(all(squared(c, p) == 25 for p in triangle), "q3 radius fixture")
     require(all(sum(w * p[i] for w, p in zip((6, 5, 5), triangle)) == 0
                 for i in range(3)), "q3 positive barycentric fixture")
-    require(paired_certificate(((0, 0),) * 3, box_of(guards), box_of((witness,))),
+    require(box_guard_certificate(((0, 0),) * 3, box_of(guards), box_of((witness,))),
             "q3 counterexample needs a valid q4 guard certificate")
     require(all(squared(c, p) < 25 for p in (*guards, witness)) and
             len(guards) == 5 - 2 and len((*guards, witness)) == 5 - 1,
             "q3 depth must cross the K5 rejection threshold")
     print({"status": "PASS", "random_boxes": tested,
-           "certified_random_boxes": accepted, "strict_improvement_fixtures": 1,
+           "certified_random_boxes": accepted, "comparison_fixtures": 2,
            "contact_depth_fixtures": 1, "q3_shared_cover_counterexamples": 1})
 
 
