@@ -192,9 +192,24 @@ par cœur se renforce donc avec la densité sur cette trame, mais ce seul
 cas ne remplace pas la matrice sans sol K5/K10 ci-dessus. Les murs des
 12 nouvelles coupes ont subi de fortes interférences sur l'hôte partagé ;
 privilégier les compteurs dans ce reçu. Répéter sur d'autres séquences,
-plusieurs graines et K10, puis comparer une sélection stratifiée par
-azimut/rayon en gardant K/s/W, segmentation et préparation séparés ;
+plusieurs graines et les secteurs bruts à K10, puis comparer une sélection
+stratifiée par azimut/rayon en gardant K/s/W, segmentation et préparation
+séparés ;
 publier sortie, catalogue,
 paires, témoins, populations logiques et formes du cœur, atlas, q3/q4,
 CPU, mur et mémoire. Ni ces pentes finies ni les ratios spatiaux ne
 démontrent une borne sous-quadratique globale ou le contrat G4.
+
+Le [complément brut K10](lidar_raw_k10_density_20260923/README.md) reprend
+exactement les trois entrées **entières** du reçu K5 (30 847⊂61 694⊂123 389
+retours) et mesure toute la tour K1..10. À 1/4→1/2 puis 1/2→entière, ses
+pentes de formes chargées sont **1,650 / 1,936**, contre **1,823 / 2,136**
+à K5 sur les mêmes octets ; ses pentes CPU·s sont **1,149 / 1,239**. Le
+plein K10 paie pourtant **1 238,63 M** formes, **11,387 M** boules de
+catalogue et **8,219 GiB** de RSS. Les comptes des cinq premiers ordres
+coïncident entre K5 et K10 à chaque taille, sans comparaison de leurs clés
+ou de leurs flux complets. Le changement de K modifie donc le signal des
+formes sur ce doublement fini, sans régler le coût absolu ni démontrer une
+croissance sous-quadratique générale. Les demi-scènes et quarts bruts
+restent mesurés à K5 dans la matrice précédente ; K10 brut ne mesure ici
+que les trois densités de la scène entière.

@@ -691,10 +691,25 @@ cœur reste autour de 0,97. Les chronos muraux des nouvelles coupes sont
 fortement perturbés par la contention de l'hôte partagé.
 Le plein prend 48,36 s de chaîne locale W8 et 1,93 GiB RSS ; ni borne
 asymptotique ni contrat G4 ne sont acquis.
+Le [complément brut K10](lidar_raw_k10_density_20260923/README.md) reprend
+**les mêmes trois ensembles d'IDs et les mêmes octets** de la trame entière :
+30 847→61 694→123 389 sites, trois sorties `complete_relative`. Ses formes
+du cœur font 103,15→323,69→1 238,63 M, de pentes finies **1,650 puis
+1,936**, contre 1,823 puis 2,136 à K5. Les CPU·s de chaîne font
+173,008→383,704→905,514 (pentes 1,149 puis 1,239) ; le plein porte
+11,387 M boules de catalogue et **8,219 GiB** de RSS. Les comptes des cinq
+premiers ordres K10 sont égaux à ceux de K5 sur chaque entrée, sans
+identité clé par clé ni preuve des clés jamais émises. Cette coupe K10 ne
+franchit pas la pente 2 des formes, mais la masse absolue et la mémoire
+restent des verrous ; les murs de l'hôte partagé ne qualifient pas G4.
 Le [crédit exact par nœuds du certificat de cœur](../receipts/dead_node_credit_negative_20260923/README.md)
 a été essayé hors produit : mêmes voies et digest, mais CPU de chaîne
 **+27 % à K5 et +32 % à K10** sur la coupe 16k de 000000 ; cette variante
 est fermée. La réduction des paires longues avant le cœur reste ouverte.
+Pour choisir une autre voie sans déplacer le coût, agréger par worker un
+histogramme `taille du cœur × masque q3/q4 avant/après preuve`, avec formes
+chargées, tests de preuve et coût du cover aval. Les totaux actuels ne disent
+pas si une génération paresseuse éviterait réellement des formes.
 
 Le [reçu local de pente LiDAR v11](CONTRE_AUDIT_PENTE_LIDAR_LOCALE_PARTIELLE_20260923.md)
 est intègre (15/15 SHA et entrées vérifiées) mais partiel : une seule
@@ -1032,10 +1047,11 @@ plusieurs séquences sans sol puis brutes, s8/10/12, K5 et K10, W1/W24/W48,
 profil float32 et grille fine **séparés**. Les sept morceaux spatiaux
 1 mm du [reçu v8 LiDAR](../../morsehgp3D_v8/receipts/lidar_ground_20260921/README.md)
 ont maintenant des chronos v12 locaux sur les trois scènes sans sol de
-la séquence 08 ; reproduire sur les trames brutes et d'autres séquences.
-La décimation emboîtée 1/4–1/2–1 est maintenant mesurée sur les sept
-secteurs de chacune des trois scènes, avec une seule graine ; répéter
-sur d'autres graines et séquences, puis sur les trames brutes avec sol.
+la séquence 08 ; la première trame brute a aussi ses sept secteurs à K5.
+La décimation emboîtée 1/4–1/2–1 est mesurée sur les sept secteurs des
+trois scènes sans sol à K5/K10, sur les sept secteurs de la première trame
+brute à K5 et sur cette trame entière brute à K10. Répéter sur d'autres
+graines et séquences, puis compléter les secteurs bruts à K10.
 Ni les morceaux ni les décimations ne valident le contrat de trame entière.
 Publier travail amont,
 formes et atlas, candidats

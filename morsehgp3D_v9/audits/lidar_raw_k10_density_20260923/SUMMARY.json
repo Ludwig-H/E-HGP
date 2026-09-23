@@ -1,0 +1,314 @@
+{
+  "attempts": 3,
+  "binary_sha256": "e1ba126fbcea8ad483ebff2265f446c18e90eaefe04bf20021e76cd0df09af80",
+  "cases": {
+    "full": {
+      "catalogue_balls": 11387391,
+      "chain_cpu_s": 905.514,
+      "chain_wall_s": 254.57518900000002,
+      "dead_core_form_sites": 1238630455,
+      "dead_core_loads": 7811827,
+      "expanded_pairs": 37868819,
+      "first_five_orders_identical_to_published_K5": true,
+      "orders": [
+        {
+          "K": 1,
+          "births": 123389,
+          "contributions": 123389,
+          "merges": 122299,
+          "nodes": 245688,
+          "parents": 245687
+        },
+        {
+          "K": 2,
+          "births": 235254,
+          "contributions": 235254,
+          "merges": 192968,
+          "nodes": 428222,
+          "parents": 428221
+        },
+        {
+          "K": 3,
+          "births": 367087,
+          "contributions": 367087,
+          "merges": 285648,
+          "nodes": 652735,
+          "parents": 652734
+        },
+        {
+          "K": 4,
+          "births": 535972,
+          "contributions": 535972,
+          "merges": 401443,
+          "nodes": 937415,
+          "parents": 937414
+        },
+        {
+          "K": 5,
+          "births": 730427,
+          "contributions": 730427,
+          "merges": 537548,
+          "nodes": 1267975,
+          "parents": 1267974
+        },
+        {
+          "K": 6,
+          "births": 952999,
+          "contributions": 952999,
+          "merges": 684356,
+          "nodes": 1637355,
+          "parents": 1637354
+        },
+        {
+          "K": 7,
+          "births": 1187486,
+          "contributions": 1187486,
+          "merges": 840976,
+          "nodes": 2028462,
+          "parents": 2028461
+        },
+        {
+          "K": 8,
+          "births": 1440707,
+          "contributions": 1440707,
+          "merges": 1009917,
+          "nodes": 2450624,
+          "parents": 2450623
+        },
+        {
+          "K": 9,
+          "births": 1699780,
+          "contributions": 1699780,
+          "merges": 1186015,
+          "nodes": 2885795,
+          "parents": 2885794
+        },
+        {
+          "K": 10,
+          "births": 1975746,
+          "contributions": 1975746,
+          "merges": 1377813,
+          "nodes": 3353559,
+          "parents": 3353558
+        }
+      ],
+      "peak_rss_kb": 8618708,
+      "q34_wall_s": 205.098949,
+      "sites": 123389,
+      "tower_digest": "dd90bda1e6569b79"
+    },
+    "half": {
+      "catalogue_balls": 5669283,
+      "chain_cpu_s": 383.704,
+      "chain_wall_s": 108.30291,
+      "dead_core_form_sites": 323686030,
+      "dead_core_loads": 3614332,
+      "expanded_pairs": 12861574,
+      "first_five_orders_identical_to_published_K5": true,
+      "orders": [
+        {
+          "K": 1,
+          "births": 61694,
+          "contributions": 61694,
+          "merges": 61599,
+          "nodes": 123293,
+          "parents": 123292
+        },
+        {
+          "K": 2,
+          "births": 120976,
+          "contributions": 120976,
+          "merges": 101336,
+          "nodes": 222312,
+          "parents": 222311
+        },
+        {
+          "K": 3,
+          "births": 197493,
+          "contributions": 197493,
+          "merges": 154346,
+          "nodes": 351839,
+          "parents": 351838
+        },
+        {
+          "K": 4,
+          "births": 287068,
+          "contributions": 287068,
+          "merges": 214377,
+          "nodes": 501445,
+          "parents": 501444
+        },
+        {
+          "K": 5,
+          "births": 383915,
+          "contributions": 383915,
+          "merges": 279097,
+          "nodes": 663012,
+          "parents": 663011
+        },
+        {
+          "K": 6,
+          "births": 487258,
+          "contributions": 487258,
+          "merges": 348538,
+          "nodes": 835796,
+          "parents": 835795
+        },
+        {
+          "K": 7,
+          "births": 596330,
+          "contributions": 596330,
+          "merges": 422914,
+          "nodes": 1019244,
+          "parents": 1019243
+        },
+        {
+          "K": 8,
+          "births": 711037,
+          "contributions": 711037,
+          "merges": 502690,
+          "nodes": 1213727,
+          "parents": 1213726
+        },
+        {
+          "K": 9,
+          "births": 832215,
+          "contributions": 832215,
+          "merges": 588259,
+          "nodes": 1420474,
+          "parents": 1420473
+        },
+        {
+          "K": 10,
+          "births": 959675,
+          "contributions": 959675,
+          "merges": 677894,
+          "nodes": 1637569,
+          "parents": 1637568
+        }
+      ],
+      "peak_rss_kb": 4391992,
+      "q34_wall_s": 85.042665,
+      "sites": 61694,
+      "tower_digest": "f078b2c6cc0d0541"
+    },
+    "quarter": {
+      "catalogue_balls": 2760701,
+      "chain_cpu_s": 173.008,
+      "chain_wall_s": 29.318465,
+      "dead_core_form_sites": 103153147,
+      "dead_core_loads": 1721708,
+      "expanded_pairs": 5402246,
+      "first_five_orders_identical_to_published_K5": true,
+      "orders": [
+        {
+          "K": 1,
+          "births": 30847,
+          "contributions": 30847,
+          "merges": 30823,
+          "nodes": 61670,
+          "parents": 61669
+        },
+        {
+          "K": 2,
+          "births": 63049,
+          "contributions": 63049,
+          "merges": 52551,
+          "nodes": 115600,
+          "parents": 115599
+        },
+        {
+          "K": 3,
+          "births": 101899,
+          "contributions": 101899,
+          "merges": 78244,
+          "nodes": 180143,
+          "parents": 180142
+        },
+        {
+          "K": 4,
+          "births": 143773,
+          "contributions": 143773,
+          "merges": 105840,
+          "nodes": 249613,
+          "parents": 249612
+        },
+        {
+          "K": 5,
+          "births": 188683,
+          "contributions": 188683,
+          "merges": 135446,
+          "nodes": 324129,
+          "parents": 324128
+        },
+        {
+          "K": 6,
+          "births": 236360,
+          "contributions": 236360,
+          "merges": 167700,
+          "nodes": 404060,
+          "parents": 404059
+        },
+        {
+          "K": 7,
+          "births": 287683,
+          "contributions": 287683,
+          "merges": 203016,
+          "nodes": 490699,
+          "parents": 490698
+        },
+        {
+          "K": 8,
+          "births": 342510,
+          "contributions": 342510,
+          "merges": 240831,
+          "nodes": 583341,
+          "parents": 583340
+        },
+        {
+          "K": 9,
+          "births": 401767,
+          "contributions": 401767,
+          "merges": 281804,
+          "nodes": 683571,
+          "parents": 683570
+        },
+        {
+          "K": 10,
+          "births": 464498,
+          "contributions": 464498,
+          "merges": 324857,
+          "nodes": 789355,
+          "parents": 789354
+        }
+      ],
+      "peak_rss_kb": 2234832,
+      "q34_wall_s": 19.532982,
+      "sites": 30847,
+      "tower_digest": "b59e9627c236a2b5"
+    }
+  },
+  "schema": "mhgp9_raw_k10_density_summary_v1",
+  "slopes": {
+    "half_to_full": {
+      "catalogue_balls": 1.0061872872843396,
+      "chain_cpu_s": 1.2387286583443824,
+      "chain_wall_s": 1.2330053964261167,
+      "dead_core_form_sites": 1.9360561805523804,
+      "dead_core_loads": 1.1119179656603138,
+      "expanded_pairs": 1.5579250028834661,
+      "q34_wall_s": 1.2700465364620592
+    },
+    "quarter_to_half": {
+      "catalogue_balls": 1.0381316434820542,
+      "chain_cpu_s": 1.1491550541444513,
+      "chain_wall_s": 1.8851905306617716,
+      "dead_core_form_sites": 1.6498072657719525,
+      "dead_core_loads": 1.0698885494440702,
+      "expanded_pairs": 1.2514359686487688,
+      "q34_wall_s": 2.1222745927396214
+    }
+  },
+  "source_manifest_sha256": "6e64125abddbfcd589ba61cf747e493e455adec4beeaea81c2739ce98fe16095",
+  "successful_cases": 3
+}

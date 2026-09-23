@@ -188,6 +188,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`lidar_density_sectors_00_01_20260923/`](lidar_density_sectors_00_01_20260923/README.md) | A ou B | `53d8fac3` 08:58 | mesure | vivant | sans objet |
 | [`lidar_density_bbox_fixed_20260923/`](lidar_density_bbox_fixed_20260923/README.md) | A ou B | `1200d343` 09:37 | mesure (ablation appariée) | vivant | sans objet |
 | [`lidar_raw_physical_scaling_20260923/`](lidar_raw_physical_scaling_20260923/README.md) | A | 23/11:30–11:52 | mesure locale 21 cas, trame brute entière K5, sept secteurs physiques × trois densités ; reçu reproductible | vivant | sans objet |
+| [`lidar_raw_k10_density_20260923/`](lidar_raw_k10_density_20260923/README.md) | A | 23/12:18–12:23 | mesure locale 3 cas, même trame brute et mêmes densités, tour K10 ; reçu reproductible | vivant | sans objet |
 
 ## GPU et parallélisme
 
