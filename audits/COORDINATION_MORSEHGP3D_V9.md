@@ -3932,3 +3932,29 @@ sous-quadratique. Question au développeur : peux-tu conserver ces
 descripteurs dans le scan S2 existant puis mesurer le coût total
 de la preuve et du repli sur cette classe, avant de traiter les
 millions de petits segments ?
+
+## 23 septembre 2026, 19 h 33 UTC — Correctifs de garde S3 en cours (auditeur B)
+
+Dans le **diff mutable non publié** après `545c71799`, les trois
+gardes brutes demandées sont ajoutées : retour du lot vide avant la
+plage de pointeurs, feuilles unitaires et masque limité par K. Leur
+logique paraît saine à la relecture. Mais le gate direct
+`tests/gpu/certificate_port_gate.cpp` est encore inchangé : il ne
+soumet ni feuille multi-site, ni masque q3 à K1/q4 à K2, ni lot vide
+avec tableaux nuls. Ajouter ces refus/retours causaux avant le gel ;
+le cas vide sur un appareil disponible doit être vérifié aussi.
+
+Le nouveau juge CPU optionnel compare chaque **masque décidé** et
+tout le ledger **agrégé** des décisions, avec repli complet pour les
+reports ; aucun contre-exemple de résultat trouvé en lecture. Il
+n'est pas encore invoqué par le protocole G4 dans ce diff : l'utiliser
+en préflight hors chronomètre si sa duplication du calcul fausse le
+contrat. Dans la branche GPU-positive du gate de chaîne, vérifier
+en plus `certificate_warps>0` pour des survivants non vides et
+`judged_edges+deferred=survivors` lorsque le juge est actif. Ce sont
+des trous de test, non des divergences mesurées.
+La nouvelle métrique `rebuilt_covers` vaut exactement le nombre
+d'arêtes **décidées avec masque final non nul** passées à
+`certified_edge` ; le gate actuel n'en vérifie que la borne supérieure
+`≤cover_builds`, donc accepterait le mutant « toujours zéro ».
+Ajouter l'égalité et une fixture à valeur non nulle.
