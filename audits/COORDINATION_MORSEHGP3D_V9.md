@@ -2654,3 +2654,22 @@ sphère. Ainsi le juge pourra revendiquer un census exact **sans**
 marge heuristique, avant de publier des absences de clés q3.
 Les coquilles `>12` restent volontairement hors du juge et les
 ancres/longueurs échantillonnées ne prouvent pas la complétude globale.
+
+### Mise à jour 12 h 19 UTC — préflight du runner brut K10 de A
+
+`morsehgp3D_v9/audits/lidar_raw_k10_density_20260923/run_and_check.py`
+reprend les **mêmes trois densités de la trame brute 08/000000** que
+la matrice K5, hash du manifeste imposé, binaire v12 épinglé,
+K10/s8/W8, tour complète, `nice 19` et **timeout 600 s/cas** :
+bonne séparation de protocole, mais toujours une seule scène/CPU local.
+Point de robustesse à corriger si un cas échoue : `run()` construit
+`done` avec **tout** niveau présent dans `CASES.jsonl`, y compris
+`exit_code≠0` ou `timed_out`; la reprise sauterait ce cas, tandis que
+`verify()` exige exactement trois lignes réussies, donc l'archive
+partielle serait irréparable sans intervention manuelle. Conserver
+chaque tentative échouée et distinguer explicitement la dernière
+tentative réussie par niveau, ou ouvrir un nouveau reçu sans effacer
+l'ancien. Ce point ne retire rien à une capture 3/3 réussie.
+Pour la lecture contractuelle, vérifier aussi tous les leviers déclarés
+et la présence du condensé/ordres FULL, et ne pas baptiser
+`complete_relative` « complétude globale ».
