@@ -1,9 +1,10 @@
 # Croissance LiDAR : secteurs capteur et densité, deux axes distincts
 
 23 septembre 2026. Le [reçu local v12](../receipts/lidar_scaling_local_20260923/README.md)
-contient trois scènes 08 sans sol à grille 1 mm, K5/K10, s8/W8 : chaque
+contient trois trames sans sol de la séquence 08 à grille 1 mm,
+K5/K10, s8/W8 : chaque
 trame entière, ses deux moitiés `x<0`/`x≥0`, ses quatre quarts selon `y`,
-et trois disques emboîtés. Les plans sont ceux du
+et trois sous-nuages emboîtés. Les plans sont ceux du
 [capteur](DECOUPES_CAPTEUR_LIDAR_BRUT_ET_GRILLE_20260923.md). Je relis ici
 les six résumés, **42 cas de secteurs** au total. Une seule exécution par
 cas, sur hôte CPU partagé ; les compteurs de travail sont le signal
@@ -52,7 +53,7 @@ Le déséquilibre n'est pas aléatoire : pour 000200/K10, le quart
 `x≥0,y<0` contient **14 829/45 845** sites (32,3 %) mais environ
 **583,0/1 069,2 M** `core_sites` (54,5 % du plein, 74,7 % de la somme
 des quatre quarts). Une distribution uniforme des travaux entre quarts
-serait mauvaise ici. Les trois disques emboîtés du même reçu donnent,
+serait mauvaise ici. Les trois sous-nuages emboîtés du même reçu donnent,
 sur 000200 de 16k à 32k, `p_core=3,05` à K5 et `2,86` à K10 : ces
 deux diagnostics changent la géométrie et ne se réfutent pas mutuellement.
 
@@ -187,7 +188,17 @@ le signal de ce quart ; la distribution interne et l'index restent libres.
 Cette ablation porte sur un seul secteur, une seule graine et le même
 binaire v12, sans nouvelle conclusion sur le coût total.
 
-Le diagnostic détaillé porte encore sur une seule graine et trois scènes
+Les quarts sans sol archivés à cette étape sont séparés selon le signe
+**quantifié**. Une [contre-épreuve du signe float32 physique](lidar_scene02_physical_cut_20260923/README.md)
+sur 08/000200/K10 déplace exactement un retour brut entre les deux
+quarts `y<0`, sans changer ses coordonnées u18 ni la grille commune.
+Le site porte l'ID 61939 dans le profil grille mais 61942 dans le profil
+float32 : la jointure se fait par le retour brut 14826. Sur le quart
+`x≥0,y<0`, `core_sites` diminue de **2 980 sur 583 000 415** et la
+pente 1/2→plein reste **2,035350**. Le franchissement de 2 ne provient
+donc pas de cet arrondi ; seule cette relation K10 est contre-éprouvée.
+
+Le diagnostic détaillé porte encore sur une seule graine et trois trames
 sans sol d'une **seule séquence 08**.
 Le thinning par hash réduit des sites dans le même support spatial
 approximatif ; il ne reproduit ni les faisceaux d'un autre capteur, ni des

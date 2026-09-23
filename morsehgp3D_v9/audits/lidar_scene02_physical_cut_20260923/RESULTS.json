@@ -1,0 +1,86 @@
+{
+  "binary_sha256": "e1ba126fbcea8ad483ebff2265f446c18e90eaefe04bf20021e76cd0df09af80",
+  "cases": {
+    "quarter_x_neg_y_neg": {
+      "baseline": {
+        "catalogue_balls": 1865046,
+        "chain_cpu_s": 153.443,
+        "chain_total_ms": 28977.197,
+        "core_sites": 146435388,
+        "dead_core_form_sites": 143694032,
+        "expanded_pairs": 5646194,
+        "input_fnv64": "f21e0487ff46437c",
+        "sites": 16262,
+        "tower_digest": "a00d45262fdaf79d"
+      },
+      "delta": {
+        "catalogue_balls": 105,
+        "core_sites": 664,
+        "dead_core_form_sites": 568,
+        "expanded_pairs": 5941,
+        "sites": 1
+      },
+      "half_density": {
+        "core_sites": 48205008,
+        "sites": 8220
+      },
+      "p_core_sites_baseline": 1.628587239762709,
+      "p_core_sites_physical": 1.6284471163992398,
+      "physical": {
+        "catalogue_balls": 1865151,
+        "chain_cpu_s": 153.216,
+        "chain_total_ms": 41903.399,
+        "core_sites": 146436052,
+        "dead_core_form_sites": 143694600,
+        "dead_core_loads": 1370726,
+        "expanded_pairs": 5652135,
+        "input_fnv64": "329955942247b8e4",
+        "sites": 16263,
+        "tower_digest": "3b8f4387282e4693",
+        "tower_nodes": 2553018
+      }
+    },
+    "quarter_x_nonneg_y_neg": {
+      "baseline": {
+        "catalogue_balls": 1639809,
+        "chain_cpu_s": 194.853,
+        "chain_total_ms": 36166.202,
+        "core_sites": 583000415,
+        "dead_core_form_sites": 579000541,
+        "expanded_pairs": 9801104,
+        "input_fnv64": "40328071a448d6f0",
+        "sites": 14829,
+        "tower_digest": "30f15305e052dace"
+      },
+      "delta": {
+        "catalogue_balls": -167,
+        "core_sites": -2980,
+        "dead_core_form_sites": -2874,
+        "expanded_pairs": -6267,
+        "sites": -1
+      },
+      "half_density": {
+        "core_sites": 139308548,
+        "sites": 7339
+      },
+      "p_core_sites_baseline": 2.0351621052412345,
+      "p_core_sites_physical": 2.0353499801148884,
+      "physical": {
+        "catalogue_balls": 1639642,
+        "chain_cpu_s": 195.177,
+        "chain_total_ms": 189386.683,
+        "core_sites": 582997435,
+        "dead_core_form_sites": 578997667,
+        "dead_core_loads": 1999884,
+        "expanded_pairs": 9794837,
+        "input_fnv64": "d42e56787f9a03a0",
+        "sites": 14828,
+        "tower_digest": "06a78c55c8c65435",
+        "tower_nodes": 2244480
+      }
+    }
+  },
+  "schema": "mhgp9_scene02_physical_boundary_k10_ablation_v1",
+  "source_summary_sha256": "14af25adc2ccf26e46f7a78c6ce5395191f083e9b56d38d4f004c12ff041bde7",
+  "status": "complete_relative"
+}

@@ -68,6 +68,11 @@ les moitiés, et 16 263 / 9 468 / 14 828 / 5 286 pour les quarts. Aucune
 fusion de retours n'a eu lieu dans ces trois préparations ; ce déplacement
 est seulement dû à l'arrondi. Les changements sur **tous** les retours
 bruts avant retrait du sol sont 3, 1 et 4 respectivement.
+Ici `61939` est l'ID de site du **profil grille** ; la
+[contre-épreuve K10 des deux quarts physiques](lidar_scene02_physical_cut_20260923/README.md)
+le joint au retour brut `14826`, dont l'ID de site dans le profil
+float32 est `61942`. Après ce déplacement, la pente des formes du
+quart chaud reste **2,035350** : le franchissement de 2 persiste.
 
 ## Convention à épingler pour les prochaines campagnes
 

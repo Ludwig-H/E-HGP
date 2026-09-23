@@ -1,5 +1,12 @@
 # État courant des audits v9
 
+Le [reçu G4 R13](../receipts/g4_tower_r13_20260923/README.md) est
+publié et [contrelu par B](CONTRE_AUDIT_B_G4_R13_S3_20260923.md) : S2+S3 GPU termine
+18/18 cas sur trois trames sans sol de la seule séquence 08, avec les six
+couples de condensés épinglés, sans qualifier le contrat. À W48, les
+chaînes valent 1,738–2,347 s à K5 et 5,914–7,967 s à K10 ; sur deux
+trames K5, le temps mesuré **hors q34** dépasse déjà une seconde.
+
 23 septembre 2026. Ports v13 publiés : sonde **`c768e06a`**, porte Euler
 8k **`a08378da`**, lecteur LiDAR **`50646eef`** puis **`1f048aae`**,
 lecteur G4 **`515b3666`** puis **`1f048aae`**.
@@ -33,7 +40,8 @@ reçu brut. La [contrelecture B](CONTRE_AUDIT_B_Q2_MASS_FIRST_V16_20260923.md)
 calcule sur le meilleur R10 que supprimer entièrement q2 laisserait
 2,505 s à K5 et 7,651 s à K10 : v16 n'est pas une voie suffisante vers
 1 s. Les archives v15 conservent leur
-lecteur épinglé ; le protocole courant exige la sonde v16 et dix leviers.
+lecteur épinglé ; le protocole **R11 historique** exigeait la sonde v16
+et dix leviers, tandis que R13 emploie v18.
 Le [reçu G4 R11](../receipts/g4_tower_r11_20260923/README.md),
 [contrelu par B](CONTRE_AUDIT_B_G4_R11_ET_VOISINS_COEUR_20260923.md),
 mesure ensuite le levier q2 ON/OFF dans le **même paquet v16** :
@@ -148,7 +156,8 @@ que **8,3 %** des paires ; à K10, **1 962 111 des 2 034 440** en portent
 petites tuiles risquent de sous-remplir les blocs. Comparer un empaquetage
 stable de plusieurs petits rectangles par bloc/warp et le tuilage séparé
 des 47 043/72 329 grands rectangles, en conservant chaque ordinal et en
-facturant le coût d'empaquetage ; aucun gain S2 n'est encore mesuré.
+facturant le coût d'empaquetage ; **ce gain d'empaquetage** n'est pas
+encore mesuré (le port S2 GPU est, lui, mesuré en R12/R13).
 La [mesure complémentaire sur la trame **brute entière**](q34_raw_rectangle_mass_20260923/README.md)
 08/000000/1 mm/s8 retrouve exactement cinq comptes du grand-livre v12
 pour K5 et K10. Au K10, **198 169 des 4 308 768** rectangles ouverts
@@ -237,8 +246,8 @@ barrière avant le réemploi ; le risque WAW paraît fermé en source. Un
 [gate hôte ciblé](s3_frontier_barrier_gate_20260923/README.md), épinglé
 aux headers publiés, trouve dans l'ancien ordre et dans un mutant sans
 cette barrière un réemploi WAW **et WAR** du frontier, contre zéro pour
-le correctif. Il n'émule pas les délais mémoire CUDA : **aucune porte
-device** n'a encore éprouvé ce chemin. La sonde, le worker G4, son
+le correctif. Il n'émule pas les délais mémoire CUDA : **avant R13,
+aucune porte device** n'avait encore éprouvé ce chemin. La sonde, le worker G4, son
 selftest et le lecteur LiDAR
 passent en v18 ; le correctif exige désormais dans le préflight réduit
 au moins une décision GPU et au moins un report, puis zéro report sur
@@ -253,17 +262,17 @@ Exiger un différentiel CUDA par arête et le nombre de décisions GPU
 réelles. R12 publié n'est pas touché.
 L'[audit C du condensé du catalogue](c_catalogue_digest_20260923/README.md)
 épingle maintenant six valeurs CPU (trois trames sans sol 08, K5/K10)
-égales entre moteur, lot CPU et S3 CPU. Son gate causal de coquilles
-étendues reste un **patch d'audit**, pas un CTest produit ; le lecteur
-R13 ne vérifie pas encore ces six épingles. Aucun reçu R13/S3 G4 n'est
-publié au contrôle du 23 septembre à 19 h 43 UTC. Depuis,
+égales entre moteur, lot CPU et S3 CPU. À cette étape, son gate causal de coquilles
+étendues restait un **patch d'audit**, pas un CTest produit ; le lecteur
+R13 ne vérifiait pas encore ces six épingles à cette étape. Aucun reçu
+R13/S3 G4 n'était publié au contrôle du 23 septembre à 19 h 43 UTC. Depuis,
 **`942494362` est publié sur `main`** : il ferme les trois gardes
 d'entrée et ajoute un juge CPU par arête aux deux préflights G4, avec
 masques, comptes logiques et IDs de coquilles renforcés. Une relecture
 indépendante ne trouve pas de divergence causale dans le **plan R13 par
 défaut** ; deux tests ciblés du validateur/préflight passent en Python
-normal, dont un aussi sous `-O`. Aucun reçu device R13 ne qualifie
-encore S3. Le [contre-audit B sur le correctif publié](CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md)
+normal, dont un aussi sous `-O`. À ce stade, aucun reçu device R13 ne
+qualifiait encore S3. Le [contre-audit B sur le correctif publié](CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md)
 relève 149 tests CPU sélectionnés réussis sous **CUDA OFF** (journal
 local non épinglé), mais aucune porte CUDA directe du lot vide à
 pointeurs nuls. À `942494362`, `rebuilt_covers` n'était contrôlé que
@@ -282,8 +291,8 @@ localement l'épingle 08/000000/K5 avec le moteur W48 ; ces sorties ne
 sont pas un reçu G4 épinglé. **`46c50432c`** ferme aussi le faux
 `GPU_executed` d'un plan personnalisé S3 sans survivant : le worker
 et le lecteur exigent maintenant des temps/warps observés pour classer
-la phase device. Le test Python ciblé passe ; aucun lot vide ni certificat
-S3 de ce commit n'est encore jugé sur G4. Les libellés de passation et
+la phase device. Le test Python ciblé passe ; la session R13 juge depuis
+S3 sur G4, mais n'exerce toujours pas le lot vide. Les libellés de passation et
 provenance doivent toujours dire « même condensé canonique et mêmes
 compteurs publiés », et les décisions GPU réelles restent à compter.
 L'[addendum de flux S2/S3](PROPOSITION_B_GPU_STREAMING_S2_20260923.md)
@@ -305,24 +314,41 @@ L'ablation interne R13 de 08/000000 donne un gain net S3 de 138 ms à
 K5 et 583 ms à K10, mais 611–750 k covers sont encore reconstruits
 côté CPU à K5, 1,258–1,555 M à K10, puis la tour prend 0,584–0,784 s
 et 2,260–3,039 s respectivement. Le `certificate_device_ms` publié
-inclut transferts et noyau, contrairement au libellé « coût du noyau »
-du reçu ; le temps du noyau seul n'est pas publié. Une seule mesure par
-cas, aucun p95 ; aucun contrat brut multi-séquence ni sous-quadraticité
-globale ne sont qualifiés. Le G4 SPOT a été arrêté et relu `TERMINATED`.
+encadre allocations, initialisations, transferts et noyau, contrairement
+au libellé « coût du noyau » du reçu ; le noyau seul n'est pas chronométré.
+Une seule mesure par cas, aucun p95 ; aucun contrat brut multi-séquence
+ni sous-quadraticité globale ne sont qualifiés. Le G4 SPOT a été arrêté
+et relu `TERMINATED`.
 Le [correctif d'interprétation](../receipts/g4_tower_r13_20260923/ADDENDUM_20260923.md)
-du développeur suit R13. L'audit précise encore que le temps e0→e3
-encadre **allocations et initialisations**, pas seulement copies et
-noyau. Le nouveau port S3 `0b41e4c86` annonce 128 registres et 16
-warps/SM après transfert des totaux en mémoire partagée ; **R13 a
-exécuté l'ancien noyau**, le gain reste non mesuré sur G4. Les champs
-u32 par arête ont des bornes sous les gardes actuelles, mais les
-additions u64 globales doivent être bornées ou contrôlées avant le
-domaine massif complet. La [mise à jour D5](CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md)
+du développeur suit R13. La [mise à jour D5](CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md)
 rappelle que phase statique et lots de la tour se recouvrent déjà :
-ne pas additionner leurs durées comme du mur ni promettre un facteur
-depuis les seuls comptes MEB. Un shadow de vues `E×C` reste à tester,
-avec gardes conservés et repli par cellule ; le premier shadow commun
-à huit cellules est négatif.
+leurs durées ne s'additionnent pas en temps mur. La vue exacte
+`E×C` proposée par B, avec gardes conservés et repli par cellule,
+reste à mesurer ; le premier crible `E_C` conservateur est mesuré plus bas.
+L'ablation interne S2 seul→S2+S3 n'a qu'un passage : les témoins
+moteur de ses deux bras dérivent aussi de **3,266 à 3,841 s** à K5
+et de **10,498 à 11,023 s** à K10. Les postes internes sont
+mesurés, mais des paires répétées et entrelacées sont nécessaires
+pour attribuer un gain stable de chaîne à S3 seul.
+Le commit produit **`0b41e4c86`**, postérieur à R13, remplace les
+compteurs d'une arête S3 par des `u32` privés et déplace les totaux du
+warp en mémoire partagée, écrits par son leader. Les champs `u32`
+**par arête** ne débordent pas sous les gardes actuelles :
+visites/rangs sont bornés par l'index, formes/sites par l'ardoise,
+cellules par 5 461 et `failed_cells` par 10 922 ; les deux grands
+produits cellules×sites restent `u64`. En revanche, la
+[borne de B](CONTRE_AUDIT_B_G4_R13_S3_20260923.md) montre que les
+**sommes `u64` globales** requièrent un contrôle pour une capacité
+utilisateur proche de `2^32` ; la capacité par défaut de 65 536
+reste dans leur domaine borné si `edges≤2^31−1`. Pour le contrat massif,
+des lots bornés et une accumulation hôte exacte `u128` seraient une
+voie ; un simple refus préserverait l'exactitude sans servir ce contrat.
+La synchronisation du warp avant réemploi est conservée. `ptxas`
+annonce 128 registres et 16 warps résidents par SM, contre 248/8 pour
+R13 ; **aucun chrono G4 du nouveau code** ne valide encore un gain.
+Le prochain essai doit alterner ancien/nouveau sur les mêmes entrées,
+juger masques et compteurs et publier le temps du noyau S3 séparé de
+l'intervalle upload+noyau+download.
 La [preuve B de redondance d'une seule cellule de
 centres](CERTIFICAT_B_REDONDANCE_CELLULE_UNIQUE_20260923.md) affine la
 piste de rejet **avant** le cœur : si la cellule couvre le disque
@@ -404,9 +430,17 @@ shadow ont huit cellules × quatre gardes chacune vérifiées par entiers ;
 la voie exacte n'émet aucun candidat q3/q4 sur elles. Le reçu est
 reproductible et les 17 sommes SHA passent, mais ces formes ne sont
 **pas** un gain CPU/G4 ni un résultat FULL. Cette grille commune ne
-justifie pas un port tel quel : tester ensuite `E_C` des seules arêtes
-dont le disque peut rencontrer une cellule, les domaines 2D locaux
-et le seuil q4 seul `K−2`, avec budget et repli exacts.
+justifie pas un port tel quel. L'[ablation `E_C` par cellule](s2_precell_incidence_20260923/README.md)
+sur les mêmes deux sous-nuages teste le premier raffinement : un crible
+entier boîte/projection/plan, sûr aux contacts, conserve encore
+**86,32 % / 86,26 %** des incidences arête–cellule. À budget64 sur le
+plein, il ferme 1 393 arêtes et rend **600 315 F** fermables
+(0,1073 % du total), contre 974 arêtes/458 001 F pour `E` commun :
+le gain n'est que **0,0254 % de F total** ; le quart reste à zéro.
+Les 21,9 M termes `Q` du sidecar naïf sont mémoïsables, mais la faible
+fermeture interdit d'en faire le prochain port produit. Tester plutôt
+des domaines 2D ou adaptatifs et le seuil q4 seul `K−2`, avec budget,
+repli exact et coût de chaîne mesuré.
 Les [demi-scènes et quarts aux trois densités](lidar_raw_physical_scaling_20260923/README.md)
 ont été mesurés avec v12, puis appariés au batch S2 CPU K5 par les
 deux reçus ci-dessus. La somme de leurs tours ne reconstruit pas le
@@ -1086,6 +1120,16 @@ Une [ablation à boîte exactement fixe](lidar_density_bbox_fixed_20260923/READM
 sur ce quart échange seulement trois puis deux IDs aux densités 1/4 et 1/2 ;
 la pente K10 de ce sous-total reste **2,058215 puis 2,042880**, pratiquement
 inchangée. Ce signal ne vient donc pas seulement de l'étendue de la boîte.
+Une [contre-épreuve de coupe physique](lidar_scene02_physical_cut_20260923/README.md)
+reprend ensuite les deux quarts `y<0` entiers de 08/000200/K10 en
+classant les **retours float32 avant grille**, avec la même grille u18
+globale. Un seul retour brut (14826) change de côté ; il porte l'ID de
+site **61939 en profil grille** et 61942 en profil float32, d'où une
+jointure impérative par correspondance des retours. Le quart chaud
+`x≥0,y<0` perd 2 980 formes sur 583 000 415 et sa pente 1/2→entière
+passe de 2,035162 à **2,035350** : le franchissement 2 persiste.
+Cette contre-épreuve ferme ce biais d'arrondi pour ce lien seulement ;
+elle ne transforme pas toute la matrice sans sol en coupes physiques.
 Le [premier reçu brut avec sol](lidar_raw_physical_scaling_20260923/README.md),
 [dont les 21 cas ont été contre-lus indépendamment par B](CONTRE_AUDIT_B_LIDAR_BRUT_PHYSIQUE_20260923.md),
 compte désormais **21 cas K5** sur une trame entière 08/000000 à 1 mm :
@@ -1169,6 +1213,17 @@ globaux sont les mêmes `30 847→61 694→123 389` à chaque comparaison ;
 calculs **séparés** et omettent les incidences entre secteurs : elles
 montrent où étudier la croissance, sans fournir un algorithme exact
 pour la trame entière ni une borne asymptotique.
+La forme du cœur n'est pas le seul travail volumineux. Sur le plein brut
+K5 aux trois densités, `dead_uniform_tests` compte
+165,153→467,564→1 459,833 M tests (pentes 1,501/1,643),
+`atlas_node_visits` 110,134→298,006→828,142 M visites
+(1,436/1,475) et `atlas_point_tests` 91,532→241,258→654,215 M
+(1,398/1,439), face aux 37,010→128,853→559,662 M formes du cœur.
+Au plein K10, ces trois compteurs atteignent respectivement
+4,376/3,529/2,857 milliards. Ce sont des unités de travail différentes,
+parfois recouvrantes, et non des temps à additionner. Une réduction de
+`core_sites` doit être évaluée avec ces visites, le cover, le catalogue et
+la tour ; un profilage par étape est nécessaire pour classer les gains.
 La contre-vérification B du complément retrouve **52/52 SHA**, les 18
 cas K10 gardés sur 24 essais et les 21 lignes de la matrice ; les cinq
 premiers ordres K10 égalent les **comptes** K5 sur chaque entrée, pas
@@ -1183,23 +1238,23 @@ La somme des formes des deux demis vaut **0,567→0,435→0,315** de celle
 du plein lorsque la densité passe de 1/4 à 1/2 puis entière, alors que
 la part des charges reste vers **0,97**. Les temps muraux sont bruités ;
 aucune pente K10 S2 ou borne sous-quadratique nouvelle n'est acquise.
-Le plan G4 v18 actuellement codé dans
-`gcp-migration/tower_snapshot_v9.py:default_plan()` comporte 18 cas
+Le plan G4 v18 exécuté en [R13](CONTRE_AUDIT_B_G4_R13_S3_20260923.md) comporte 18 cas
 issus des trois trames **sans sol** 00/01/02 de la seule séquence 08,
 aux K5/K10 et à quelques bras d'attribution. Il ne rejoue **aucune**
-trame brute avec sol, demi-scène, quart ni fraction de densité ; un R13
-réussi ne pourrait donc pas confirmer sur G4 les deux axes de croissance
-ci-dessus. Après une porte S3 device par arête, garder ce diagnostic
+trame brute avec sol, demi-scène, quart ni fraction de densité : il ne
+confirme donc pas sur G4 les deux axes de croissance ci-dessus. Les
+préflights S3 device par arête sont passés ; garder ce diagnostic
 spatial/densité comme campagne distincte du contrat de trame entière,
 avec les mêmes IDs emboîtés et les coûts S2+cœur+cover+catalogue.
 Le [crédit exact par nœuds du certificat de cœur](../receipts/dead_node_credit_negative_20260923/README.md)
 a été essayé hors produit : mêmes voies et digest, mais CPU de chaîne
 **+27 % à K5 et +32 % à K10** sur la coupe 16k de 000000 ; cette variante
 est fermée. La réduction des paires longues avant le cœur reste ouverte.
-Pour choisir une autre voie sans déplacer le coût, agréger par worker un
-histogramme `taille du cœur × masque q3/q4 avant/après preuve`, avec formes
-chargées, tests de preuve et coût du cover aval. Les totaux actuels ne disent
-pas si une génération paresseuse éviterait réellement des formes.
+Le [shadow du préfixe paresseux](lazy_prefix_dead_core_20260923/README.md)
+quantifie désormais **43,42 % de suffixe non consulté** au plein brut K5,
+sans gain CPU intégré. Pour choisir une autre voie sans déplacer le coût,
+mesurer par worker taille du cœur, masques q3/q4 avant/après preuve,
+formes réellement chargées, coût des tests et du cover aval.
 
 Le [reçu local de pente LiDAR v11](CONTRE_AUDIT_PENTE_LIDAR_LOCALE_PARTIELLE_20260923.md)
 est intègre (15/15 SHA et entrées vérifiées) mais partiel : une seule
