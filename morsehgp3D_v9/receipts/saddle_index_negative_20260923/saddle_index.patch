@@ -1,0 +1,250 @@
+diff --git a/morsehgp3D_v9/bench/tower_probe.cpp b/morsehgp3D_v9/bench/tower_probe.cpp
+index eb72b00a..276805e5 100644
+--- a/morsehgp3D_v9/bench/tower_probe.cpp
++++ b/morsehgp3D_v9/bench/tower_probe.cpp
+@@ -9,7 +9,8 @@
+ // exige q34_dead_lanes, sinon la chaine refuse), tower_meb_proposal (MEB de la
+ // tour propose puis verifie exactement), q34_jobs_by_mass et q34_fine_jobs
+ // (ordonnancement des jobs du front q3/q4 : ordre par masse, grain fin),
+-// tower_overlap_static (phase A de la tour recouvrant la phase 0). Tous sont publies dans
++// tower_overlap_static (phase A de la tour recouvrant la phase 0),
++// tower_saddle_index (index des selles de la phase 0, lemme A du D5). Tous sont publies dans
+ // options.levers ; un plan G4 les epingle explicitement, un nom inconnu est
+ // refuse (code 2).
+ //
+@@ -143,6 +144,7 @@ int main(int argc, char** argv) {
+         else if (name == "q34_jobs_by_mass") options.q34_jobs_by_mass = on;
+         else if (name == "q34_fine_jobs") options.q34_fine_jobs = on;
+         else if (name == "tower_overlap_static") options.tower_overlap_static = on;
++        else if (name == "tower_saddle_index") options.tower_saddle_index = on;
+         else throw std::invalid_argument("unknown lever");
+       }
+       else if (arg.starts_with("--n=")) prefix = static_cast<std::size_t>(parse_u(arg.substr(4)));
+@@ -172,21 +174,22 @@ int main(int argc, char** argv) {
+   const auto r = mhgp9::run_tower_chain(input.points, options);
+   const auto& t = r.times;
+   const auto& c = r.catalogue;
+-  std::printf("{\"schema\":\"mhgp9_tower_probe_v15\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
++  std::printf("{\"schema\":\"mhgp9_tower_probe_v16\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
+               r.reason.c_str());
+   std::printf("\"input\":{\"format\":\"%s\",\"grid\":\"%s\",\"sites\":%zu,\"hash\":\"%016" PRIx64 "\"},", input.format.c_str(),
+               grid.c_str(), input.points.size(), input.hash);
+   std::printf("\"options\":{\"K\":%u,\"K_effective\":%u,\"s\":%u,\"workers\":%zu,\"tower_static_threads\":%d,\"run_tower\":%s,"
+               "\"levers\":{\"atlas_saturate_deep\":%s,\"q3_leaf_census\":%s,\"q34_dead_lanes\":%s,"
+               "\"q34_witness_cache\":%s,\"q34_dead_core\":%s,\"tower_meb_proposal\":%s,"
+-              "\"q34_jobs_by_mass\":%s,\"q34_fine_jobs\":%s,\"tower_overlap_static\":%s}},",
++              "\"q34_jobs_by_mass\":%s,\"q34_fine_jobs\":%s,\"tower_overlap_static\":%s,\"tower_saddle_index\":%s}},",
+               options.kmax, r.kmax_effective, options.separation_s, options.workers,
+               options.tower_static_threads >= 0 ? options.tower_static_threads : r.tower_static_threads,
+               options.run_tower ? "true" : "false", options.atlas_saturate_deep ? "true" : "false",
+               options.q3_leaf_census ? "true" : "false", options.q34_dead_lanes ? "true" : "false",
+               options.q34_witness_cache ? "true" : "false", options.q34_dead_core ? "true" : "false",
+               options.tower_meb_proposal ? "true" : "false", options.q34_jobs_by_mass ? "true" : "false",
+-              options.q34_fine_jobs ? "true" : "false", options.tower_overlap_static ? "true" : "false");
++              options.q34_fine_jobs ? "true" : "false", options.tower_overlap_static ? "true" : "false",
++              options.tower_saddle_index ? "true" : "false");
+   std::printf("\"times_ms\":{\"read\":%.3f,\"prepare\":%.3f,\"gen_index\":%.3f,\"q2\":%.3f,\"q34\":%.3f,\"merge\":%.3f,"
+               "\"tower_index\":%.3f,\"census\":%.3f,\"tower\":%.3f,\"chain_total\":%.3f,\"digest\":%.3f},"
+               "\"chain_cpu_s\":%.3f,",
+@@ -252,7 +255,8 @@ int main(int argc, char** argv) {
+               ",\"meb_accounting\":\"%s\",\"meb_pair_distances\":%" PRIu64 ",\"meb_materializations\":%" PRIu64
+               ",\"meb_supports_by_size\":[%" PRIu64 ",%" PRIu64 ",%" PRIu64 ",%" PRIu64 "]"
+               ",\"meb_proposals\":%" PRIu64 ",\"meb_verified_proposals\":%" PRIu64
+-              ",\"meb_boundary_canonicalizations\":%" PRIu64 ",\"meb_proposal_fallbacks\":%" PRIu64 "},",
++              ",\"meb_boundary_canonicalizations\":%" PRIu64 ",\"meb_proposal_fallbacks\":%" PRIu64
++              ",\"saddle_entries\":%" PRIu64 ",\"saddle_hits\":%" PRIu64 "},",
+               ts.records, ts.extra_records, ts.representatives, ts.anchor_hits, ts.key_lookups, ts.intruder_queries,
+               ts.intruder_nodes, ts.resolve_work.calls, ts.resolve_work.power_tests, ts.births, ts.merges, ts.contributions,
+               ts.grouped_lots, ts.resolver_cache_hits,
+@@ -261,7 +265,7 @@ int main(int argc, char** argv) {
+               ts.resolve_work.pair_distances, ts.resolve_work.materializations, ts.resolve_work.supports_by_size[1],
+               ts.resolve_work.supports_by_size[2], ts.resolve_work.supports_by_size[3], ts.resolve_work.supports_by_size[4],
+               ts.resolve_work.proposals, ts.resolve_work.verified_proposals, ts.resolve_work.boundary_canonicalizations,
+-              ts.resolve_work.proposal_fallbacks);
++              ts.resolve_work.proposal_fallbacks, ts.saddle_entries, ts.saddle_hits);
+   std::printf("\"orders\":[");
+   for (std::size_t i = 0; i < r.orders.size(); ++i) {
+     const auto& o = r.orders[i];
+diff --git a/morsehgp3D_v9/src/chain/tower_chain.cpp b/morsehgp3D_v9/src/chain/tower_chain.cpp
+index 2d5a663e..008433a6 100644
+--- a/morsehgp3D_v9/src/chain/tower_chain.cpp
++++ b/morsehgp3D_v9/src/chain/tower_chain.cpp
+@@ -613,7 +613,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
+                                  : (W > 1 ? static_cast<int>(W) : 0);
+       result.tower_static_threads = static_threads;
+       auto tw = tower::build_full_ball_tower(ix, balls, kmax, static_threads, {}, options.tower_meb_proposal,
+-                                             options.tower_overlap_static);
++                                             options.tower_overlap_static, options.tower_saddle_index);
+       result.times.tower_ms = ms_since(t);
+       result.tower_stats = tw.stats;
+       result.tower_times = tw.times;
+diff --git a/morsehgp3D_v9/src/chain/tower_chain.hpp b/morsehgp3D_v9/src/chain/tower_chain.hpp
+index 370b1e2b..2dbabc19 100644
+--- a/morsehgp3D_v9/src/chain/tower_chain.hpp
++++ b/morsehgp3D_v9/src/chain/tower_chain.hpp
+@@ -78,6 +78,10 @@ struct ChainOptions {
+   // faite (phase 0 par K decroissant), meme objet. Contrat v9 : actif par
+   // defaut, publie et epingle.
+   bool tower_overlap_static = true;
++  // Index des selles de la phase 0 (lemme A du D5 de l'auditeur C) : une
++  // facette S_C u I_C \ {z} d'une boule reguliere C a pour MEB C, cible
++  // trouvee par consultation exacte au lieu d'un MEB. Meme objet.
++  bool tower_saddle_index = true;
+ };
+ 
+ // Temps de mur en millisecondes, CPU du processus en secondes.
+diff --git a/morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp b/morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp
+index 04bd2c29..a2281e0a 100644
+--- a/morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp
++++ b/morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp
+@@ -61,6 +61,9 @@ struct FullBallStats {
+   u64 parallel_orders = 0;  // orders built by the concurrent static path
+   u64 overlapped_orders = 0;  // of which with phase A overlapping phase 0 (overlap_static)
+   u64 presorted_catalogues = 0;  // key order certified by one scan, no sort
++  // Saddle index (lemma A of auditor C's D5): entries built per order, facets
++  // resolved by an exact lookup instead of a MEB (same terminal ball).
++  u64 saddle_entries = 0, saddle_hits = 0, saddle_verified = 0;
+   // False after a backend failure whose paid work could not be recovered.
+   bool static_batch_work_known = true;
+   AnchorMebWork validation_work, resolve_work;
+@@ -348,10 +351,11 @@ class Builder {
+  public:
+   Builder(const CloudIndex& index, std::span<const BallData> census, unsigned max_k, FullBallStats& stats,
+       int static_threads = 0, FullBallBatchResolver batch = {}, bool meb_proposal = true,
+-      FullBallTimes* phase_times = nullptr, bool overlap_static = false)
++      FullBallTimes* phase_times = nullptr, bool overlap_static = false, bool saddle_index = false)
+       : ix(index), balls(census), requested(max_k), st(stats), resolver_cache(stats),
+         geometry_threads(static_threads), batch_resolver(batch), propose_meb(meb_proposal),
+-        times(phase_times ? phase_times : &unused_times), overlap_static_lots(overlap_static) {}
++        times(phase_times ? phase_times : &unused_times), overlap_static_lots(overlap_static),
++        use_saddle_index(saddle_index) {}
+ 
+   std::vector<FullBallOrder> run() {
+     const auto validate_start = PhaseClock::now();
+@@ -905,6 +909,7 @@ class Builder {
+   FullBallTimes unused_times;
+   FullBallTimes* times;  // phase wall times (the caller's, or unused_times)
+   bool overlap_static_lots = false;  // phase A of order K starts once phase 0 of K is done
++  bool use_saddle_index = false;     // phase 0 facets looked up in the saddle index first
+   using StaticSeed = FullBallBatchSeed;
+   std::vector<BallId> static_targets;
+   size_t static_cursor = 0;
+@@ -1327,7 +1332,8 @@ class Builder {
+     for (const auto field : {&FullBallStats::anchor_hits, &FullBallStats::key_lookups,
+         &FullBallStats::intruder_queries, &FullBallStats::intruder_nodes,
+         &FullBallStats::intruder_power_tests, &FullBallStats::interior_ranges,
+-        &FullBallStats::same_radius_steps, &FullBallStats::descending_steps}) add(st.*field, w.*field);
++        &FullBallStats::same_radius_steps, &FullBallStats::descending_steps,
++        &FullBallStats::saddle_hits, &FullBallStats::saddle_verified}) add(st.*field, w.*field);
+     st.max_chain_steps = std::max(st.max_chain_steps, w.max_chain_steps);
+     add(st.resolve_work.calls, w.resolve_work.calls);
+     add(st.resolve_work.power_tests, w.resolve_work.power_tests);
+@@ -1543,6 +1549,76 @@ class Builder {
+       prepare_external_batch(requests, groups, seeds);
+       return;
+     }
++    // Saddle index of this order (lemma A, D5 of auditor C). For a REGULAR
++    // catalogue ball C (its shell is its unique minimal support S_C, so C is
++    // the MEB of S_C) and z in I_C, the facet F = S_C u I_C \ {z} has
++    // MEB(F) = C: every ball enclosing F encloses S_C hence has radius >=
++    // r_C, C encloses F, and the MEB is unique. With |F| = K = p_C + q_C - 1,
++    // static_terminal would compute exactly C at depth 0 and hit it (its key
++    // is in the catalogue and K is in its window): the lookup returns the
++    // same terminal without the MEB. Entries: XOR fingerprints of the site
++    // sets, sorted; a candidate is accepted only after an exact comparison
++    // of the K sorted sites.
++    struct SaddleEntry { u64 fingerprint; BallId ball; u32 omitted; };
++    std::vector<SaddleEntry> saddles;
++    const auto site_hash = [](i32 site) {
++      u64 x = static_cast<u64>(static_cast<u32>(site)) + 0x9e3779b97f4a7c15ull;
++      x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ull;
++      x = (x ^ (x >> 27)) * 0x94d049bb133111ebull;
++      return x ^ (x >> 31);
++    };
++    if (use_saddle_index) {
++      const auto& order_program = programs[current_k];
++      constexpr size_t block_size = 4096;
++      const size_t chunk_count = (order_program.size() + block_size - 1) / block_size;
++      std::vector<std::vector<SaddleEntry>> parts(chunk_count);
++      parallel_items(chunk_count, geometry_threads, [&](size_t chunk, size_t) {
++        for (size_t j = chunk * block_size; j < std::min(order_program.size(), (chunk + 1) * block_size); ++j) {
++          const BallId id = order_program[j];
++          const auto& b = balls[id];
++          if (b.n_shell != b.arity || b.n_interior == 0 ||
++              static_cast<unsigned>(b.n_interior) + b.arity - 1 != current_k) continue;
++          u64 all = 0;
++          for (i32 site : b.interior()) all ^= site_hash(site);
++          for (i32 site : b.shell()) all ^= site_hash(site);
++          for (u32 slot = 0; slot < b.n_interior; ++slot)
++            parts[chunk].push_back({all ^ site_hash(b.interior()[slot]), id, slot});
++        }
++      });
++      size_t total = 0;
++      for (const auto& part : parts) total += part.size();
++      saddles.reserve(total);
++      for (auto& part : parts) { saddles.insert(saddles.end(), part.begin(), part.end()); std::vector<SaddleEntry>().swap(part); }
++      // (fingerprint, ball, omitted) is a strict total order: unique sorted permutation.
++      parallel_sort(saddles, geometry_threads, [](const SaddleEntry& a, const SaddleEntry& c) {
++        if (a.fingerprint != c.fingerprint) return a.fingerprint < c.fingerprint;
++        return a.ball != c.ball ? a.ball < c.ball : a.omitted < c.omitted;
++      });
++      add(st.saddle_entries, saddles.size());
++    }
++    // Exact saddle lookup: the ball whose S u I \ {z} is exactly this facet.
++    const auto saddle_of = [&](const ResolverCache::Key& key) -> BallId {
++      u64 fingerprint = 0;
++      for (unsigned j = 0; j < current_k; ++j) fingerprint ^= site_hash(key[j]);
++      auto at = std::lower_bound(saddles.begin(), saddles.end(), fingerprint,
++                                 [](const SaddleEntry& a, u64 value) { return a.fingerprint < value; });
++      for (; at != saddles.end() && at->fingerprint == fingerprint; ++at) {
++        const auto& b = balls[at->ball];
++        const size_t size = static_cast<size_t>(b.n_interior) - 1 + b.n_shell;
++        if (size != current_k || size > kFacetMaxK) continue;
++        std::array<i32, kFacetMaxK> facet{};
++        size_t n = 0;
++        for (u32 slot = 0; slot < b.n_interior && n < facet.size(); ++slot)
++          if (slot != at->omitted) facet[n++] = b.interior()[slot];
++        for (i32 site : b.shell())
++          if (n < facet.size()) facet[n++] = site;
++        // Insertion sort of at most kFacetMaxK sites (no heap fallback).
++        for (size_t i = 1; i < n; ++i)
++          for (size_t j = i; j > 0 && facet[j - 1] > facet[j]; --j) std::swap(facet[j - 1], facet[j]);
++        if (std::equal(facet.begin(), facet.begin() + static_cast<std::ptrdiff_t>(n), key.begin())) return at->ball;
++      }
++      return kAbsent32;
++    };
+     struct Worker { FullBallStats work; std::vector<NodeRef> scratch; u64 seeded = 0; };
+     std::vector<Worker> workers(planned_workers(groups.size() - 1, geometry_threads));
+     const auto account = [&] {
+@@ -1575,6 +1651,17 @@ class Builder {
+           target = seed->ball;
+           require(compare_exact_level(balls[target].level, before) < 0, "full_ball_static_seed_not_strict");
+           add(w.seeded);
++        } else if (const BallId saddle = use_saddle_index ? saddle_of(first.key) : kAbsent32; saddle != kAbsent32) {
++          // static_terminal's depth-0 anchor hit, without its MEB (lemma A).
++          target = saddle;
++          require(compare_exact_level(balls[target].level, before) < 0, "full_ball_static_not_strict");
++          add(w.work.saddle_hits);
++#if defined(MHGP9_TESTING)
++          // Test builds judge every lookup against the product's own terminal.
++          require(static_terminal(first.key, before, w.work, w.scratch, seeds) == saddle,
++                  "full_ball_saddle_differs_from_meb_terminal");
++          add(w.work.saddle_verified);
++#endif
+         } else target = static_terminal(first.key, before, w.work, w.scratch, seeds);
+         for (size_t r = groups[group]; r < groups[group + 1]; ++r) {
+           const auto& request = requests[r];
+@@ -1858,11 +1945,11 @@ class Builder {
+ // its phase 0 is done (phase 0 by decreasing K): same objects and statuses.
+ inline FullBallTowerResult build_full_ball_tower(const CloudIndex& ix, std::span<const BallData> balls,
+     unsigned kmax, int static_threads = 0, FullBallBatchResolver batch = {}, bool meb_proposal = true,
+-    bool overlap_static = false) {
++    bool overlap_static = false, bool saddle_index = false) {
+   FullBallTowerResult result;
+   try {
+     result.orders = full_ball_detail::Builder(ix, balls, kmax, result.stats, static_threads, batch, meb_proposal,
+-                                              &result.times, overlap_static).run();
++                                              &result.times, overlap_static, saddle_index).run();
+     result.status = FullBallStatus::kCompleteRelative; result.reason = kFullBallAuthority;
+   } catch (const full_ball_detail::Failure& error) {
+     result.status = error.status; result.reason = error.reason;

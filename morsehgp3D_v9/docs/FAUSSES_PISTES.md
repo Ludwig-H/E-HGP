@@ -87,6 +87,7 @@ parents FULL (liste ciblée dans le [rapport 15](audit_v8/15_entrees_v8_non_lues
 | Récursion relançant l'index par sous-rectangle ; reprise par listes d'IDs | 903 → 1 095 ms ; 450 → 511 ms (archive d'audit, **non épinglé**) |
 | Rejeter q4 seul pour supprimer l'atlas | réserve de méthode, pas une réfutation : l'atlas sert aussi aux graines q3 |
 | Crédit par nœuds d'index du certificat de voie morte, décisions exactes identiques | mêmes cellules et voies prouvées, mais CPU +27 % (K5) et +32 % (K10), +7 % sur le cœur seul : les seuils exacts forcent la résolution jusqu'aux sites ([reçu](../receipts/dead_node_credit_negative_20260923/README.md)) |
+| Index des selles seul dans la phase 0 de la tour (lemme A du D5) | 1,01 M MEB évités à K10 16k, mais 10,2 M entrées à construire et trier : phase 0 inchangée ou plus lente ([reçu](../receipts/saddle_index_negative_20260923/README.md)) |
 | Assimiler une sonde d'une arête ou un quart spatial à une mesure d'échelle | diagnostic « 8k/16k/32k » constant par construction (7 tests pour tout n) |
 | Exposant par relation parent/enfant comme verdict de croissance | un compteur exactement linéaire reçoit 0,78 à 1,27 |
 
