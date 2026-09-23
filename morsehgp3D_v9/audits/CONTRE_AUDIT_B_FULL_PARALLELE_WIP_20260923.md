@@ -223,3 +223,18 @@ restent soumises à la politique de `parallel_items`, sans perte de
 sécurité transactionnelle identifiée. Les réserves de résidence
 simultanée, limite u32 et au plus K tâches de lots demeurent ; aucune
 mesure G4 R5 ni RSS de cette nouvelle voie n'est encore dans ce commit.
+
+Précision après contrelecture A : le « plus petit K » n'est garanti
+qu'**à l'intérieur d'une phase**, pas pour l'ordre séquentiel global.
+`run_orders_parallel` relance tous les échecs de la phase A avant de
+calculer la phase C ; un échec A/K3 peut donc masquer un échec C/K2.
+La préparation statique de tous les K avant A a la même question de
+priorité. [L'audit A](PREFETCH_GEOMETRIE_FULL_PAR_K_20260923.md)
+reproduit le premier cas par injection. C'est une divergence de raison
+d'échec, sans sortie partielle publiée ; les chemins qui réussissent
+restent couverts par les gates et les comparaisons. Ne pas présenter le
+correctif `133c8653` comme une équivalence totale des erreurs à la
+boucle K séquentielle. Par ailleurs, la phase C lit l'histoire et les
+ancres du K inférieur **figées après A**, mais écrit son propre brouillon
+`o.draft.lower_nodes` : aucun accès concurrent à ce tableau inférieur
+n'est identifié dans ce passage.

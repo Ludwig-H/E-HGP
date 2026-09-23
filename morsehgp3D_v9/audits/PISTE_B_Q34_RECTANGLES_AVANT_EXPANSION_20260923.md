@@ -133,3 +133,57 @@ Pour `|B|=1`, la ligne est la paire : ne pas payer son filtre puis le
 rejouer dans `edge`. Réutiliser exactement ce résultat ou sauter
 l'étape ligne ; mesurer également la redondance à `|B|=2` avec le cache
 R4b actif.
+
+### Repli exact par coins et réemploi du cache — piste à tester
+
+Pour q3/q4, écrire `H=(z−a)·(b−z)`,
+`Xi=|(z−a)×(b−z)|²` et `F=√α·H−√Xi`, avec `α=3` pour q3 et
+`α=2` pour q4. Le témoin strict équivaut exactement à `F>0` : en
+arithmétique entière, tester `H>0` **puis** `α·H²>Xi`, sans calculer de
+racine. `F` est **concave séparément** en `a`, `b` et `z` : `H` est
+affine en `a`/`b` et concave en `z`, tandis que le produit vectoriel
+est affine dans chacun de ces trois arguments et sa norme est convexe.
+Par concavité successive, le minimum de `F` sur trois boîtes fermées
+est atteint à un triplet de sommets. Tester les au plus **64** couples
+de coins pour `{a}×box(B)×box(Z)`, ou **512** triplets pour
+`box(A)×box(B)×box(Z)`, est donc un certificat **nécessaire et suffisant
+pour ces boîtes continues**. Pour les ensembles discrets qu'elles
+contiennent, un coin non strict laisse seulement le cas indécis : il
+ne rejette aucune paire. Une admission uniforme stricte interdit
+automatiquement qu'un nœud Z contienne une extrémité choisie ; l'égalité
+reste non créditée. Vérifier les bornes de largeur i128 sur la grille
+u18 avant port et ajouter des oracles entiers/contact sur boîtes
+dégénérées.
+
+Ce test de coins est plus serré que séparer `Hmin` et `Xi_max`, dont les
+extrêmes peuvent provenir de coins incompatibles. Il coûte toutefois
+jusqu'à 64 ou 512 prédicats par nœud : réserver d'abord le repli aux
+nœuds **ambigus à forte masse**, en observation, sans annoncer de gain.
+Une voie possiblement moins chère que le DFS de ligne neuf consiste à
+conserver les au plus `2K−3` nœuds de témoins admis pour `K≥3`
+(un pour K2, aucun pour K1) par le filtre/cache
+du rectangle ou de la première paire, les retester uniformément contre
+`{a}×B_node`, puis ne diviser B ou ne revenir aux paires que si le seuil
+n'est pas atteint. Les antichaînes et masques restent séparés par voie ;
+un nœud non admis n'apporte **aucun** crédit. Mesurer aussi validation
+d'antichaîne, nombre de blocs indécis, coins testés, masses réellement
+épargnées et temps q3/q4 complet. Le sidecar A échantillonné sur LiDAR
+fournit 15,7–29,8 visites DFS par paire évitable : il ne justifie pas
+l'activation du DFS de ligne tel quel. Sa mesure du ticket issu du seul
+filtre rectangle ne trouve qu'environ 0,83–1,06 crédit par rectangle
+échantillonné, en sommant les deux voies ; le réemploi de ce ticket
+seul n'est donc pas non plus un gain présumé. La trace d'une paire
+pourrait être plus riche, mais n'est pas encore mesurée.
+
+Une variante bornée descend `(a,B_node,masque,ticket)` : elle reteste
+le ticket sur la boîte du nœud, saute `|B_node|` paires si les deux
+voies sont certifiées, transmet le sous-masque si une seule l'est,
+sinon scinde B ; à la feuille, le filtre de paire normal peut renouveler
+le ticket. Un arbre binaire B a au plus `2|B|−1` nœuds : pour un ticket
+de taille O(K), le coût supplémentaire de classification est au pire
+`O(K·Σ|A||B|)` sur les rectangles, **sans** DFS `O(n)` par ligne et sans
+plafond de candidats. Cette borne ne prouve évidemment pas le
+sous-quadratique si la masse résiduelle reste quadratique ; le but est
+de rejeter assez de blocs pour réduire cette masse et le travail aval.
+Ne jamais fusionner deux traces de paires sans dédoublonnage et preuve
+d'antichaîne par voie.

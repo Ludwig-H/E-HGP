@@ -98,3 +98,15 @@ de réutilisation d'adresse, de `load()` interrompu, ni la mesure du nouveau
 coût de copie globale. Le contrôle local ne vaut ni reçu de trame ni gate
 GPU/G4. Les deux unités modifiées compilent également en C++20 avec
 `-Wall -Wextra -Wpedantic -fsyntax-only` (contrôle indépendant léger).
+La cible de chaîne `mhgp9_chain_static_paths_gate` a ensuite été
+reconstruite sur le même snapshot et son CTest passe **1/1** (3,42 s).
+
+La disparition de la copie de coordonnées par worker ne retire pas
+les autres états privés. `Q34DeadLaneProver` conserve `forms_` (24 octets
+par site), `all_` et les frontières `levels_` à chaque profondeur ; leurs
+capacités persistent d'une arête à l'autre. Au réglage usuel de profondeur
+maximale 6, une borne structurelle prudente est **48·n octets par worker**
+pour ces seuls tableaux, hors surallocation et autres covers (jusqu'à
+environ 69 Go décimaux à 30 M points et 48 workers). C'est un plafond,
+**pas un RSS observé sur LiDAR** : publier les pics co-résidents par
+worker et du processus avant de conclure sur le régime massif.
