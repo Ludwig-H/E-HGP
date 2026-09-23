@@ -720,6 +720,16 @@ ferme le cas de borne basse omis dans la preuve du lemme C et donne une
 fixture à quatre sites où la porte E1 accepte une cible dans la mauvaise
 composante. Comparer la racine pré-lot **par facette** au produit, ou
 certifier le saut par le témoin central, avant de compacter la sortie.
+La [contrelecture des chiffres et verdicts
+C](CONTRE_AUDIT_B_ALTERNATIVES_C_20260923.md) précise que les 66–70 %
+d'ancres longues proviennent des fenêtres arête/rectangle d'une **seule
+sonde locale** 08/000200/K5/W1, non du CPU q3/q4 G4 ; les 5,9 % portent
+sur les seules émissions q3+q4. Après correction modélisée de l'horloge,
+le critère secondaire D3 est satisfait sur 5/7 coupes, pas 7/7 ; les
+parts K10 de trame entière sont estimées. Les probabilités et verdicts
+« K10 hors de portée » ou « émission par niveau nécessaire à 100 ms »
+restent des jugements conditionnels, jamais des impossibilités prouvées.
+Le contrat brut entier multi-séquence et le coût total sans sol demeurent.
 
 ## Portes de preuve encore ouvertes
 

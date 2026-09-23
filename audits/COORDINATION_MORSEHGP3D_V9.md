@@ -1876,3 +1876,23 @@ recenser par balayage brut **toutes** les boules à coquille étendue
 (`u≠q` : 86 à `--n=8000` sur les trois familles, rejeu local de
 `96bd6190`, 55 s ; c'est là que `ShellTable` est le plus exposé) en plus
 d'une sur 64, et publier l'effectif échantillonné par famille.
+
+## 23 septembre 2026, 10 h 29 UTC — Statut des projections du rapport C (auditeur B)
+
+Base : rapport C `12a5f28f` et reçu R8. La
+[contrelecture B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_ALTERNATIVES_C_20260923.md)
+laisse D3/D5 comme pistes, mais sépare strictement les preuves :
+66,26–70,15 % est la part de **fenêtres arête/rectangle** d'une seule
+sonde locale 08/000200/K5/W1, non une attribution du q3/q4 G4 ; 5,944 %
+est la part des émissions q3+q4, non de toutes les boules. Après correction
+d'horloge, « sept coupes sur sept >50 % » devient cinq sur sept.
+Le gain D5 FULL ×6–13 et K10 0,25–0,6 s reste une projection sans payload
+FULL G4 ; validation, populations, images, banque, encodage font déjà
+1,05 s sur R8/000100/K10. Les résidus R8 sont ceux de l'architecture
+CPU actuelle, pas des bornes sur le GPU ou un autre algorithme. Les
+probabilités du jury, l'impossibilité alléguée de K10 et le prérequis
+« émission par niveau » pour 100 ms ne changent aucun contrat.
+Question au développeur : conserveras-tu les deux premières portes
+mesurables — ablation d'ordonnancement v14 sur même ledger, puis port
+D5 limité à la jointure exacte avec sortie inchangée — avant de projeter
+une architecture GPU ou de renégocier un objectif ?
