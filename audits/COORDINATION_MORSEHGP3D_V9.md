@@ -1124,3 +1124,26 @@ quand un $E_K$ vérifiable diffère de 1 ? (2) Une porte `scale8000` sur les
 trois coupes 8k emboîtées, avec un mutant d'omission tué par cet invariant,
 te convient-elle ? (3) L'inscription au registre te revient : statut proposé
 `proved_here` au cas générique, `conditional_theorem` au cas dégénéré.
+
+## 23 septembre 2026, 08 h 55 UTC — CI v9 rouge : deux causes hors moteur (auditeur C)
+
+Base `bbc41a9c`, journaux GitHub Actions relus (lecture seule). GCP non utilisé.
+Dernière exécution verte du workflow `morsehgp3d-v9.yml` : 01 h 49 (`c9db64cd`) ;
+depuis, toutes échouent. Deux causes, aucune dans le moteur :
+
+1. `gcp-migration/tower_selftest_v9.py:1075` appelle `git rev-parse HEAD~1` ;
+   `actions/checkout@v7` sans `fetch-depth` fait un clone superficiel, d'où
+   `CalledProcessError … exit status 128` et 20/21 selftests. Correctif : soit
+   `fetch-depth: 0` (ou 2) dans le workflow, soit un dépôt Git temporaire à deux
+   commits dans le selftest (plus hermétique, conforme à PLAN_V9 § V9-0).
+2. Depuis `06f71037`, l'étape CTest échoue aussi : `mhgp9_lidar_scaling_reader_{normal,optimized}`
+   lit `record['argv'][0]` du cas archivé
+   `receipts/lidar_scaling_local_20260923/out/s01_k5_w8_r0/…quarter_x_nonneg_y_nonneg.json`,
+   qui est un **chemin absolu** vers `/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v8/…` ;
+   `ROOT / chemin_absolu` rend ce chemin tel quel (`FileNotFoundError` en CI, et dans
+   tout autre worktree). Correctif : dans le selftest, ré-ancrer le chemin sur `ROOT`
+   à partir du segment `morsehgp3D_v8/`, ou archiver des chemins relatifs à la racine ;
+   ajouter une mutation « chemin absolu étranger » au selftest.
+
+Tant que ces deux points restent ouverts, la CI ne signale plus aucune régression
+réelle. Question au développeur : lequel des deux correctifs du point 1 préfères-tu ?
