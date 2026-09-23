@@ -42,7 +42,7 @@ PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
 PLAN_SCHEMA = 'mhgp9_tower_plan_v1'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v2'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v3'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -93,7 +93,7 @@ CASE_KEYS = frozenset({'scene', 'file', 'n', 'k', 's', 'workers', 'static_thread
 TOP_KEYS = frozenset({'schema', 'status', 'reason', 'input', 'options', 'times_ms', 'chain_cpu_s', 'generator',
                       'ledger', 'catalogue', 'tower_work', 'orders', 'tower_digest', 'peak_rss_kb'})
 INPUT_KEYS = frozenset({'format', 'grid', 'sites', 'hash'})
-OPTION_KEYS = frozenset({'K', 'K_effective', 's', 'workers', 'tower_static_threads', 'run_tower'})
+OPTION_KEYS = frozenset({'K', 'K_effective', 's', 'workers', 'tower_static_threads', 'run_tower', 'atlas_saturate_deep'})
 TIME_KEYS = frozenset({'read', 'prepare', 'gen_index', 'q2', 'q34', 'merge', 'tower_index', 'census', 'tower',
                        'chain_total'})
 ORDER_KEYS = frozenset({'K', 'nodes', 'births', 'merges', 'parents', 'contributions'})
@@ -302,7 +302,7 @@ def validate_probe(value, case, exit_code):
     need(type(options) is dict and set(options) == OPTION_KEYS and options['K'] == case['k'] and
          options['s'] == case['s'] and options['workers'] == case['workers'] and
          options['tower_static_threads'] == case['static_threads'] and options['run_tower'] is True and
-         type(options['K_effective']) is int, 'probe options')
+         type(options['atlas_saturate_deep']) is bool and type(options['K_effective']) is int, 'probe options')
     times = value['times_ms']
     need(type(times) is dict and set(times) == TIME_KEYS and all(_number(item) for item in times.values()) and
          _number(value['chain_cpu_s']), 'probe times')

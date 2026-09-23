@@ -2,6 +2,7 @@
 // ball censuses. No claim of WSPD completeness, archive authority, or speed.
 #pragma once
 
+#include <cfenv>
 #include <numeric>
 #include <unordered_map>
 
@@ -515,10 +516,29 @@ class Builder {
       for (unsigned k = lo; k <= hi; ++k) ++counts[k];
       add(st.records);
     }
+    // Same order as a stable sort of by_key under compare_exact_level: the
+    // certified double filter decides clear gaps, the exact U320 comparison
+    // decides the rest, and equal levels keep their by_key rank.
     auto by_level = by_key;
-    std::stable_sort(by_level.begin(), by_level.end(), [&](BallId a, BallId b) {
-      return compare_exact_level(balls[a].level, balls[b].level) < 0;
-    });
+    if (std::fegetround() == FE_TONEAREST) {
+      std::vector<double> approx(balls.size());
+      std::vector<BallId> rank(balls.size());
+      for (size_t j = 0; j < by_key.size(); ++j) {
+        rank[by_key[j]] = static_cast<BallId>(j);
+        approx[by_key[j]] = level_approximation(balls[by_key[j]].level);
+      }
+      std::sort(by_level.begin(), by_level.end(), [&](BallId a, BallId b) {
+        const double x = approx[a], y = approx[b];
+        if (x < y * kLevelFilterMargin) return true;
+        if (y < x * kLevelFilterMargin) return false;
+        const int cmp = compare_exact_level(balls[a].level, balls[b].level);
+        return cmp != 0 ? cmp < 0 : rank[a] < rank[b];
+      });
+    } else {
+      std::stable_sort(by_level.begin(), by_level.end(), [&](BallId a, BallId b) {
+        return compare_exact_level(balls[a].level, balls[b].level) < 0;
+      });
+    }
     programs.resize(kmax + 1);
     for (unsigned k = 1; k <= kmax; ++k) programs[k].reserve(counts[k]);
     for (BallId b : by_level) {

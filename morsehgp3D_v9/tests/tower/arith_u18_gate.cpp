@@ -363,7 +363,7 @@ struct Counters {
   u64 q4_flat_inside = 0;      // 6 vol / L^3 < 2^-10 et centre strictement interieur
   u64 q4_flat_far = 0;         // 6 vol / L^3 < 2^-10 et rayon^2 > 2^60
   u64 q4_inside_checks = 0, q4_inside_true = 0;
-  u64 level_repr_checks = 0, level_pairs = 0, level_rational_pairs = 0;
+  u64 level_repr_checks = 0, level_pairs = 0, level_rational_pairs = 0, level_filter_decided = 0;
   u64 level_close_pairs = 0, level_ties_distinct_repr = 0, level_designated_pairs = 0;
   // 2. puissance
   u64 power_checks = 0, power_shell_zero = 0, power_high = 0, form_power_checks = 0;
@@ -500,6 +500,13 @@ void check_level_repr(const ExactLevel& t, const Rat& truth, const std::string& 
     const int back = compare_exact_level(other, t);
     const bool same = same_exact_level(t, other);
     ++C.level_repr_checks;
+    // Filtre flottant certifie du tri des niveaux : il ne tranche que si
+    // l'ordre exact est le sien.
+    {
+      const double ax = level_approximation(t), ay = level_approximation(other);
+      if ((ax < ay * kLevelFilterMargin && want != -1) || (ay < ax * kLevelFilterMargin && want != 1))
+        disagree(std::string("level.filter_unsound.") + what, ctx + " tower=" + str(t) + " oracle_repr=" + str(other));
+    }
     if (got != want || back != -want || same != (want == 0))
       disagree(std::string("level.compare_exact_level.") + what,
                ctx + " tower=" + str(t) + " oracle_repr=" + str(other) + " got=" + std::to_string(got) +
@@ -1116,6 +1123,12 @@ void compare_pair(size_t i, size_t j, bool is_designated) {
   const int want = lx < ly ? -1 : (lx > ly ? 1 : 0);
   const int got = compare_exact_level(x.level, y.level);
   ++C.level_pairs;
+  {
+    const double ax = level_approximation(x.level), ay = level_approximation(y.level);
+    if ((ax < ay * kLevelFilterMargin && want != -1) || (ay < ax * kLevelFilterMargin && want != 1))
+      disagree("level.filter_unsound.pair", ctx_of(x.family, x.support) + " vs " + ctx_of(y.family, y.support));
+    if (ax < ay * kLevelFilterMargin || ay < ax * kLevelFilterMargin) ++C.level_filter_decided;
+  }
   if (got != want || same_exact_level(x.level, y.level) != (want == 0))
     disagree("level.pair_order", ctx_of(x.family, x.support) + " vs " + ctx_of(y.family, y.support) + " levels " +
                                      str(x.level) + " vs " + str(y.level) + " got=" + std::to_string(got) +
@@ -1541,6 +1554,7 @@ void check_floors() {
   floor_at_least(C.q4_inside_true, 100, "q4_inside_true");
   floor_at_least(C.level_repr_checks, 12000, "level_repr_checks");
   floor_at_least(C.level_pairs, 6000, "level_pairs");
+  floor_at_least(C.level_filter_decided, 3000, "level_filter_decided");
   floor_at_least(C.level_rational_pairs, 2500, "level_rational_pairs");
   floor_at_least(C.level_close_pairs, 200, "level_close_pairs");
   floor_at_least(C.level_ties_distinct_repr, 200, "level_ties_distinct_repr");

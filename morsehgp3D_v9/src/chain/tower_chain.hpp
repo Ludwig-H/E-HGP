@@ -45,6 +45,10 @@ struct ChainOptions {
   int tower_static_threads = 0;  // 0 = resolveur temporel sequentiel (voie par defaut v7)
   bool run_tower = true;       // false : s'arreter au catalogue (mesure de l'amont)
   bool keep_catalogue = false; // publier le catalogue recoupe (portes, juges)
+  // Atlas q4 saturant (option v8 de la reprise u18, desactivee par defaut) :
+  // arret d'une cellule des que son compte certifie atteint K-1, certificat
+  // terminal sans fragment. Meme objet attendu ; a juger par condenses.
+  bool atlas_saturate_deep = true;
 };
 
 // Temps de mur en millisecondes, CPU du processus en secondes.

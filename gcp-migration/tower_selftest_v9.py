@@ -62,11 +62,11 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
     orders = [dict(K=q, nodes=2 * n * q, births=n * q, merges=n * q - 1, parents=2 * n * q - 1, contributions=n * q)
               for q in range(1, effective + 1)] if complete else []
     digest = hashlib.sha256((fnv + ':' + str(k) + ':' + str(s) + ':' + salt).encode()).hexdigest()[:16]
-    return dict(schema='mhgp9_tower_probe_v2', status=status,
+    return dict(schema='mhgp9_tower_probe_v3', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
-                             run_tower=True),
+                             run_tower=True, atlas_saturate_deep=True),
                 times_ms={key: 1.5 for key in TIMES}, chain_cpu_s=0.25,
                 generator=dict(q2_front_rectangles=3, q2_candidate_pairs=2, q2_accepted_pairs=1,
                                q34_expanded_pairs=4, q34_cover_builds=1, q3_emitted=2, q4_emitted=1),

@@ -19,7 +19,7 @@ finally, meme apres echec, interruption ou recuperation impossible.
 Change pour la v9 : paquet construit depuis un commit (tower_snapshot_v9.py),
 arret invite 40 min au lieu de 30 (justification dans tower_worker_v9.py,
 constante GUEST_SHUTDOWN_MINUTES), budget utile 1500 s et plafond par cas,
-reception adaptee au schema mhgp9_tower_probe_v2. GPU jamais execute ;
+reception adaptee au schema mhgp9_tower_probe_v3. GPU jamais execute ;
 public_status=not_claimed.
 """
 import argparse

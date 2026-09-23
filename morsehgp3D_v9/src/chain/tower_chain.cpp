@@ -254,6 +254,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       o.requested_lane_mask = 6;
       o.q4_backend = gen::WspdQ4Backend::Local28;
       o.local = gen::Q4LocalOptions{};
+      o.local.saturate_deep = options.atlas_saturate_deep;
       o.witness_mode = gen::WspdQ34WitnessMode::RectanglePair;
       o.q3_census_mode = gen::WspdQ3CensusMode::GlobalBoxes;
       o.witness_bounds_mode = gen::Q34WitnessBoundsMode::Affine;

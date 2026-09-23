@@ -66,6 +66,26 @@ inline ExactLevel promote_level(const Rational128& l) {
   return r;
 }
 
+// Filtre flottant CERTIFIE de l'ordre des niveaux (port v9). L'approximation
+// double de num/den a une erreur relative < 2^-49 : conversion des trois mots
+// de num (<= 3 arrondis, termes positifs), des deux mots de den (<= 2),
+// sommes (<= 3) et division (1), chacun <= 2^-53, avec termes positifs. Si
+// x < y(1 - 2^-46), alors num_x/den_x < num_y/den_y exactement. Valable
+// seulement en arrondi au plus proche et sans -ffast-math ; sinon l'appelant
+// retombe sur compare_exact_level.
+#if defined(__FAST_MATH__)
+#error "mhgp9 tower level filter requires IEEE semantics (no -ffast-math)"
+#endif
+inline double level_approximation(const ExactLevel& l) {
+  const double two64 = 18446744073709551616.0;
+  const double num = (static_cast<double>(l.num[2]) * two64 + static_cast<double>(l.num[1])) * two64 +
+                     static_cast<double>(l.num[0]);
+  const u128 den = static_cast<u128>(l.den);
+  const double d = static_cast<double>(static_cast<u64>(den >> 64)) * two64 + static_cast<double>(static_cast<u64>(den));
+  return num / d;
+}
+inline constexpr double kLevelFilterMargin = 1.0 - 0x1p-46;
+
 // Plus petite representation (ordre de representation) — le representant
 // canonique d'un niveau au RLE : arite minimale d'abord (par l'appelant),
 // puis cet ordre.
