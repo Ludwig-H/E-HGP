@@ -2589,3 +2589,30 @@ Le reçu négatif peut conclure au manque de gain **sans** ce glissement
 d'exactitude. Garder les deux patchs comme fausses pistes archivées,
 ne pas les réintroduire par défaut sur G4. L'API `load_sites` externe
 ne reçoit pas de qualification de sûreté via ces mesures.
+
+### Mise à jour 12 h 10 UTC — défaut concret dans le WIP `rect_refine_min`
+
+Nouvelle lecture du WIP mutable `wspd_q34.cpp` (SHA-256 à cette lecture
+`499754cece2c9a80673250e3e7dbbd87f0b3c6e1f13e0930d64703b9c1306c67`).
+L'idée de subdiviser un `A×B` résiduel par vrais enfants puis filtrer
+les sous-produits est **exacte en principe** et attaque enfin la masse
+avant expansion. Mais `Engine::rectangle` appelle `refine` lorsque
+`mass>=rect_refine_min` sans vérifier qu'un facteur est splittable.
+Avec `MHGP9_RECT_REFINE=1`, un rectangle singleton×singleton qui
+survit au filtre entre dans `refine` ; `a_leaf=b_leaf=true`,
+`split_a=false`, `children={bn.left,bn.right}={absent,absent}`, puis
+`nodes[absent]` est lu : **UB/crash**. Le test `splittable` des enfants
+vient trop tard. Garde d'entrée dans `refine` : si les deux feuilles,
+`expand_rectangle` une fois avec le masque courant et masse 1, sans
+nouveau filtre. Un nuage à 2 sites avec K5 et une voie q3/q4 active
+donne la fixture minimale, à confirmer par Release+ASan/UBSan,
+W1/W4 et égalité de flux/ledger OFF/ON ; vérifier aussi K2 et seuil 2.
+Ne lancer aucune mesure `RECT_REFINE=1` avant ce gate. L'env
+`strtoull` accepte actuellement les chaînes invalides/partielles sans
+refus ; conserver cette clé comme expérience hors contrat, et valider
+sa valeur explicitement si elle devient publique. Publier
+`refined_rectangles`, recherches/visites du filtre de rectangle,
+masse réellement retirée avant `A×B`, covers/formes évités et coût
+total. Les enfants ne sont pas publiés comme tâches de workers : un
+gros sous-arbre de raffinement reste sur un seul worker, même si les
+expansions terminales peuvent être dispersées.
