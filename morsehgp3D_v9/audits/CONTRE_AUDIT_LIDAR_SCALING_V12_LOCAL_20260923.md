@@ -148,12 +148,15 @@ Notre lecture indépendante a vérifié les six tags 00/01/02 × K5/K10,
 `s=8`, W8, `r0` et les 60 cas du reçu précis ; cette limite porte sur
 l'usage général du revalidateur, pas sur une divergence observée ici.
 
-Le README du reçu initial contient encore cinq erreurs de prose : « 66
+Le README du reçu initial contient encore plusieurs erreurs de prose : « 66
 cas » compte en réalité **60 cas + 6 résumés** ; « onze JSON de sonde » par
 campagne inclut le résumé du runner ; « boules sous-linéaires » est contredit
 par `p=1,028` sur 01/K10, 16k→32k ; « seul signal superquadratique » omet
 les paires développées (`p=2,267`), les visites de témoins sur paires
 (`p=2,115`) et les tests uniformes du cœur (`p=2,406`) sur 02/K5, 16k→32k.
+« Les parcours cachés v12 restent entre p=0,68 et 1,32 » est également
+faux pour le parcours de témoins **par paire** (`p=2,115` dans ce même cas) ;
+la somme non pondérée des six DFS fait 243→728 M visites (`p≈1,58`).
 La fenêtre annoncée s'arrête à 08 h 03, tandis que le dernier résumé et le
 journal LIVE sont datés **08 h 10 min 25 s UTC**. L'addendum corrige le
 nombre de cas ; les sorties chiffrées archivées restent intactes.

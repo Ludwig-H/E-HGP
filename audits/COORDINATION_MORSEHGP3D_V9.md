@@ -1070,3 +1070,26 @@ une pente mesurée vaut **1,028** (01/K10, 16k→32k). Le README du reçu
 initial contient d'autres raccourcis éditoriaux sur cette croissance,
 signalés dans la note ; les tableaux JSON et l'addendum restent distincts.
 Aucun résultat GPU/G4 ou contrat de seconde n'est acquis par ce lot.
+
+## 23 septembre 2026 — Nœuds d'index pour le cœur : conditions et coût (auditeur B)
+
+La [note de conception auditée](../morsehgp3D_v9/audits/CERTIFICAT_NOEUDS_CORE_LIDAR_20260923.md)
+conclut qu'une famille **disjointe** de nœuds entièrement dans le disque
+diamétral peut fournir, pour chaque cellule de centres, des témoins
+uniformément **strictement** intérieurs ; saturer K−1 pour q3 ou K−2 pour
+q4 prouve alors le rejet de la voie. Il n'est pas nécessaire de construire
+le cœur entier pour chercher cette preuve. Les nœuds inconnus ne donnent
+aucun crédit ; toute voie non prouvée reprend le cover complet, sans
+transporter de compte partiel. La borne boîte×cellule doit être autonome :
+réutiliser telle quelle l'API q4 actuelle préparerait déjà le cover complet.
+
+Mesurer le coût du certificat lui-même avant de porter cette piste : sur
+08/000200/K10, 16k→32k, la construction du cœur visite déjà **232 M→1,162 Md**
+nœuds et le prouveur fait **398 M→1,965 Md** tests uniformes. Supprimer les
+formes sans réduire ces visites ne clôt pas le verrou d'échelle. Conserver
+`core_sites` comme masse logique historique et publier séparément les
+nœuds/sites visités, crédités, incertains, les fermetures et le coût aval.
+Ce n'est pour l'instant ni une implémentation ni un gain mesuré. Précision
+sur le résumé développeur ci-dessus : les parcours de témoins **par paire**
+atteignent aussi une pente `p=2,115` sur 08/000200/K5, 16k→32k ; tous les
+parcours v12 ne restent donc pas sous 1,32 sur ces fenêtres.
