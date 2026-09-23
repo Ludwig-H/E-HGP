@@ -2948,3 +2948,18 @@ continuer à représenter tous les sites chargés, avec `reused/new` séparés.
 Mesurer la masse des cœurs des **seules arêtes ouvertes** et le coût de
 fusion : les totaux agrégés actuels ne donnent pas le gain potentiel ;
 ce levier ne change ni covers, ni paires, ni exposant global.
+
+### Mise à jour 13 h 10 UTC — préflight du protocole G4 S1, avant dépense
+
+[Note B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md) :
+la cible SPOT, le paquet commité, le double coupe-circuit et l'arrêt
+ciblé sont correctement repris de la tour. Mais le plan par défaut
+enchaîne six cas sous **1 500 s utiles / 600 s par cas**, alors que le
+seuil `S1_THRESHOLD_MS=100` n'arrête **pas** après le premier
+08/000000/K5 hors seuil ou divergent. Pour réduire la dépense, lancer
+d'abord ce seul cas, ou rendre le go/no-go effectif avec cas sautés
+explicitement archivés. `GPU_executed` reste faux si le GPU a tourné
+pendant un préflight qui échoue : distinguer tentative et validation.
+Le selftest manquant à 13 h 07 a maintenant été ajouté au WIP, mais
+aucune session réelle ne doit précéder son commit, ses gates et la
+validation stricte du snapshot. Aucun GCP lancé par B.
