@@ -58,6 +58,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`CONTRELEC_EULER_PAR_NERF_20260923.md`](CONTRELEC_EULER_PAR_NERF_20260923.md) | B | `559c8ab8` 08:40 | démontré localement | vivant | sans réponse |
 | [`CONTRE_EXEMPLE_EULER_KPLUS2_20260923.md`](CONTRE_EXEMPLE_EULER_KPLUS2_20260923.md) | B | `bf19240a` 09:28 | démontré localement (faux négatif exact d'Euler et de Kmax+2) | vivant | sans objet |
 | [`LEMME_PREMIERE_COFACETTE_OMISSION_20260923.md`](LEMME_PREMIERE_COFACETTE_OMISSION_20260923.md) | A | 23/11:07 | preuve conditionnelle de refus FULL, résolveur interne | vivant | sans réponse |
+| [`CONTRELEC_JUGE_CLES_ABSENTES_20260923.md`](CONTRELEC_JUGE_CLES_ABSENTES_20260923.md) | A | 23/11:30 | lecture de la porte synthétique `683fa46e` ; mutations et débordement de coquille à préciser | vivant | sans réponse |
 | [`COMPLETUDE_Q4_CLE_REMBOURREE_20260923.md`](COMPLETUDE_Q4_CLE_REMBOURREE_20260923.md) | B | `0a6efac3` 06:58 | testé borné | vivant | sans réponse |
 | [`Q4_INDUCTION_ATLAS_EVENEMENTS_20260923.md`](Q4_INDUCTION_ATLAS_EVENEMENTS_20260923.md) | B ? | `28f0c284` 07:15 | démontré localement | vivant | sans réponse |
 | [`Q34_PROPRIETAIRE_PASSAGE_AMONT_20260923.md`](Q34_PROPRIETAIRE_PASSAGE_AMONT_20260923.md) | B ? | `4291c538` 07:56 | démontré localement | vivant | sans réponse |
@@ -149,7 +150,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`RECTIFICATIF_R8_Q34_ORDONNANCEMENT_20260923.md`](RECTIFICATIF_R8_Q34_ORDONNANCEMENT_20260923.md) | A | 23/10:00 | démontré dans le code, mesure R8 | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_V14_ORDONNANCEMENT_20260923.md`](CONTRE_AUDIT_B_V14_ORDONNANCEMENT_20260923.md) | B | `a514de68` 10:22 | portes et protocole v14 | vivant | sans réponse |
 | [`RECEPTION_V14_CHRONOS_Q34_20260923.md`](RECEPTION_V14_CHRONOS_Q34_20260923.md) | A | 23/10:20 | méthode (deux mutations acceptées à `fe1142b5`) | vivant | sans réponse |
-| [`CONTRE_AUDIT_B_WIP_TOUR_V15_RECOUVREMENT_20260923.md`](CONTRE_AUDIT_B_WIP_TOUR_V15_RECOUVREMENT_20260923.md) | B | `f5ef37f7` 10:32 | contrelecture WIP, faux refus de durée possible | vivant | sans réponse |
+| [`CONTRE_AUDIT_B_WIP_TOUR_V15_RECOUVREMENT_20260923.md`](CONTRE_AUDIT_B_WIP_TOUR_V15_RECOUVREMENT_20260923.md) | B | `f5ef37f7` 10:32 | contrelecture WIP, défauts d'horloge K1/K5 clos par `33d51efd` et `c19e4b49` ; égalité complète du payload et TSan encore ouverts | historique pour l'horloge | corrigée pour l'horloge |
 | [`CONTRELEC_V15_CHRONO_ORDRE_20260923.md`](CONTRELEC_V15_CHRONO_ORDRE_20260923.md) | A | 23/10:34 | mutations K5/K1 et réception du correctif | clos (`c19e4b49`) | corrigée |
 | [`CONTRE_AUDIT_B_LECTEURS_1F048_20260923.md`](CONTRE_AUDIT_B_LECTEURS_1F048_20260923.md) | B | `758236b4` 10:07 | méthode (rejeu du lecteur) | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_G4_R9_ORDONNANCEMENT_20260923.md`](CONTRE_AUDIT_B_G4_R9_ORDONNANCEMENT_20260923.md) | B, réception A | `bf42ccde` 10:37 | mesure CPU G4 appariée, dossier publié `76436d44` | vivant | sans objet |
@@ -278,7 +279,7 @@ en citant l'identifiant, avec « acceptée », « refusée (raison) » ou « dif
 | R-12 | Collisions, sondes et RSS de l'index de clés ; RSS par phase et par K promis pour R5 | B | CONTRE_AUDIT_B_INDEX_CLES_FULL, CONTRE_AUDIT_B_RESIDENCE_CHAINE |
 | R-13 | Erratum des plages R6 ; commentaire « Exact depth » de `q34_dead_lanes.cpp` | B | ETAT_COURANT.md |
 | R-14 | Seuil K−2 des arêtes q4 seules | A | SEUIL_SATURATION_ATLAS_PAR_VOIE_20260923.md |
-| R-15 | Tour FULL maigre D5 par tranches (découpage de B) : d'abord la seule jointure graines/selles dans la résolution statique avec repli, puis saut au centre avec règle 0, phase A maigre, sortie compacte ; racines CSR, position du premier bloc de groupe ; queue FULL refondue poste par poste ; porte E1 | C | AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md § 3.1 et 5 |
+| R-15 | Tour FULL maigre D5 : **jointure des selles seule testée puis retirée**, 10,188 M entrées pour 1,012 M MEB évités, phase 0 2 582→2 752 ms sur 16k/K10 ; suite : saut au centre avec règle 0 ou index nettement moins cher, racines par facette, porte E1 corrigée, puis phase A maigre et sortie compacte | C | [reçu négatif](../receipts/saddle_index_negative_20260923/README.md), CONTRELEC_D5_NAISSANCE_ET_PORTE_E1_20260923.md |
 | R-16 | Sonde d'attribution du CPU q3/q4 par longueur d'ancre sur les trois trames, par lot | C | AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md § 5, étape 3 |
 | R-17 | Une seule session G4 GPU à seuils fixés d'avance, comparée à la base CPU réordonnancée | C | AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md § 3.3 et raccord R8 |
 | R-18 | Décisions de contrat à acter avec l'utilisateur : sortie compacte, digest hors chrono, expansion chronométrée à part ; 100 ms à reformuler | C | AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md § 1 et 5 |

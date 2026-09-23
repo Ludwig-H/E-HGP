@@ -132,6 +132,19 @@ imposer au code de sortie. Ses 129 jugements adverses ne sont pas 129
 tests exécutables. Les conclusions d'impossibilité K10/GPU ou de
 nécessité d'un générateur par niveau restent des hypothèses.
 
+La porte de **clés jamais émises** publiée par `683fa46e` change utilement
+le sens du contrôle : elle recense des MEB de supports q2–q4 voisins
+échantillonnés, indépendamment du générateur, et recherche leurs clés
+dans le catalogue. Le développeur rapporte 77 051 puis 77 177 candidats
+admissibles présents sur trois familles synthétiques à 2k/8k, K5/K10.
+La [contrelecture](CONTRELEC_JUGE_CLES_ABSENTES_20260923.md) précise que
+le plancher de mutation cumule seulement les cas K5 et des clés non
+ciblées par l'échantillon, tandis que `kShellOverflow` est confondu avec
+une sortie de fenêtre. Séparer ces statuts et planter une **clé
+admissible distincte par famille et par K** renforcerait la porte sans
+lui donner une portée globale ni FULL. Aucun cas LiDAR n'y est encore
+jugé.
+
 Le port Euler v13 est publié en **`c768e06a`**. La sonde écrit v13 et le
 lecteur G4 en vérifie la borne, la longueur du vecteur et les nouveaux
 champs `q34_occupancy`/`tower_phases_ms`. Le lecteur LiDAR `50646eef`
@@ -795,16 +808,15 @@ comparer l'expansion octet par octet et mesurer chaque sous-phase. Un
 catalogue « scellé » peut éviter une validation redondante seulement
 si la chaîne certifie **toutes** les clés émises et conserve ses preuves ;
 il ne prouve pas les clés entièrement manquantes.
-Ce premier port borné a été essayé **hors produit** : la
-[mesure négative](../receipts/saddle_index_negative_20260923/README.md)
-sur une seule coupe sans sol 16k/K10/W8 évite 1,01 M MEB, mais crée
-10,19 M entrées et ralentit la phase 0 de 2,582 à 2,752 s. La
-[contrelecture B](CONTRE_AUDIT_B_INDEX_SELLES_NEGATIF_20260923.md)
-note que le juge hit-par-hit sous `MHGP9_TESTING` n'est pas reçu dans
-les deux sorties chronométrées ; elles attestent digest/ordres égaux,
-pas payload complet. Fermer **l'index isolé** sur ce régime, pas le
-lemme A ni D5 avec saut au centre ; aucune croissance sous-quadratique
-ne découle de cette unique paire.
+Le [premier port borné D5](../receipts/saddle_index_negative_20260923/README.md)
+est **clos négativement** et retiré du produit : sur 08/000200 sans sol
+16k/K10/W8, la jointure exacte des selles évite 1,012 M MEB, mais construit
+et trie 10,188 M entrées. À cible et digest égaux, la phase 0 passe de
+2 582 à 2 752 ms et la tour de 3 990 à 4 029 ms (CPU local partagé,
+un cas). Le prochain essai D5 doit réduire le coût de l'index ou coupler
+la jointure au **saut au centre avec règle 0**, et mesurer les recherches
+d'intrus ainsi que la racine pré-lot par facette. Aucun gain de cette
+tranche n'est transférable à une trame entière G4.
 La [contrelecture des preuves D5](CONTRELEC_D5_NAISSANCE_ET_PORTE_E1_20260923.md)
 ferme le cas de borne basse omis dans la preuve du lemme C et donne une
 fixture à quatre sites où la porte E1 accepte une cible dans la mauvaise
