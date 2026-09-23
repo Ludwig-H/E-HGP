@@ -342,12 +342,15 @@ dépassent. Les coupes changent la géométrie. Le
 garde chaque secteur de 08/000200 fixe et ajoute **28** sondes à 1/4 et
 1/2 des sites ; au K10, `dead_core_form_sites` a une pente d'au moins 2
 sur **4/28** relations adjacentes, concentrées dans `x≥0` et
-`x≥0,y<0`, malgré des pentes de paires et CPU sous 2. Une scène, une
-graine et un hôte CPU partagé ne prouvent aucune borne générale. La
-[même décimation sur les trames entières 000000/000100](lidar_density_full_3scenes_20260923/README.md)
-ajoute huit sondes : le nombre de formes du cœur atteint `p=2,008`
-sur 000000/K5 de demi à pleine densité. Les trois trames restent d'une
-seule séquence, sans sol ; aucune extrapolation asymptotique.
+`x≥0,y<0`, malgré des pentes de paires et CPU sous 2.
+L'extension aux [trames entières 000000/000100](lidar_density_full_3scenes_20260923/README.md)
+et à [leurs six secteurs](lidar_density_sectors_00_01_20260923/README.md)
+ajoute **56 sondes**. Sur les trois scènes et sept secteurs, **14/84**
+relations de densité adjacentes atteignent `p_formes≥2` ; le quart
+`x≥0,y<0` le fait dans chacune des trois trames à K5 ou K10. Paires,
+visites/bornes des nœuds et CPU restent sous 2 dans ces essais, sans
+preuve asymptotique. Les trois trames appartiennent à une seule séquence,
+sans sol et sans mesure G4.
 
 Le [reçu local de pente LiDAR v11](CONTRE_AUDIT_PENTE_LIDAR_LOCALE_PARTIELLE_20260923.md)
 est intègre (15/15 SHA et entrées vérifiées) mais partiel : une seule
@@ -640,10 +643,11 @@ profil float32 et grille fine **séparés**. Les sept morceaux spatiaux
 1 mm du [reçu v8 LiDAR](../../morsehgp3D_v8/receipts/lidar_ground_20260921/README.md)
 ont maintenant des chronos v12 locaux sur les trois scènes sans sol de
 la séquence 08 ; reproduire sur les trames brutes et d'autres séquences.
-La décimation emboîtée 1/4–1/2–1 est mesurée sur ces trois trames entières
-et les secteurs de 000200 avec une seule graine ; répéter les secteurs
-des autres scènes, les graines et les régimes avec sol. Ni morceaux ni
-décimations ne valident le contrat de trame entière. Publier travail amont,
+La décimation emboîtée 1/4–1/2–1 est maintenant mesurée sur les sept
+secteurs de chacune des trois scènes, avec une seule graine ; répéter
+sur d'autres graines et séquences, puis sur les trames brutes avec sol.
+Ni les morceaux ni les décimations ne valident le contrat de trame entière.
+Publier travail amont,
 formes et atlas, candidats
 résiduels, coquilles, catalogue, sorties FULL, CPU/mur et RSS par phase,
 y compris les échecs et les replis exacts. Une exécution GPU de toute

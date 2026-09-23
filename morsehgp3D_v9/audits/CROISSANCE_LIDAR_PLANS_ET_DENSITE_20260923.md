@@ -113,13 +113,35 @@ les pentes `dead_core_form_sites` sont :
 
 À trame entière, **une des douze** relations adjacentes de formes dépasse
 donc légèrement 2, sur 000000/K5. Les paires développées y restent entre
-`p=1,466` et `1,753` sur ces douze relations. Ce complément teste la
-variation entre trois scènes, mais **pas** les demi-scènes et quarts des
-scènes 000000/000100 à densité variable.
+`p=1,466` et `1,753` sur ces douze relations.
 
-Le diagnostic détaillé par secteur reste à une graine sur une scène sans
-sol de la séquence 08 ; l'extension pleine emprise garde cette unique
-graine et cette unique séquence.
+La [matrice complémentaire des six secteurs de
+000000/000100](lidar_density_sectors_00_01_20260923/README.md) ajoute
+**48 sondes** et réutilise leurs huit trames entières décimées ainsi que
+les 28 secteurs pleins v12. Avec les sept secteurs de 000200, les trois
+scènes donnent **84 relations adjacentes** secteur×K×densité. Nombre de
+relations `p≥2` pour les formes du cœur :
+
+| 08/K | Relations `p_formes≥2` / 14 | Plus forte pente et secteur |
+| --- | ---: | --- |
+| 000000/K5 | 2 | 2,014, quart `x≥0,y<0` |
+| 000000/K10 | 1 | 2,063, quart `x≥0,y<0` |
+| 000100/K5 | 4 | 2,123, demi `x≥0` |
+| 000100/K10 | 3 | 2,039, demi `x≥0` |
+| 000200/K5 | 0 | maximum 1,920, quart `x≥0,y<0` |
+| 000200/K10 | 4 | 2,058, quart `x≥0,y<0` |
+
+Soit **14/84** relations pour les formes effectivement matérialisées.
+Le quart **`x≥0,y<0` est le seul secteur avec au moins un tel
+franchissement dans chacune des trois trames** (à K5 ou K10). Sur les
+56 relations nouvelles de 000000/000100, paires, visites/bornes des
+nœuds du cover, émissions q3/q4, catalogue et CPU·s restent sous 2 ; les
+dix exceptions de formes y sont isolées dans le reçu. Les ratios spatiaux
+parent→morceau demeurent un autre diagnostic : même à densité 1/4 ou
+1/2, la somme des tours des morceaux ne reconstruit pas la tour globale.
+
+Le diagnostic détaillé porte encore sur une seule graine et trois scènes
+sans sol d'une **seule séquence 08**.
 Le thinning par hash réduit des sites dans le même support spatial
 approximatif ; il ne reproduit ni les faisceaux d'un autre capteur, ni des
 passages superposés. Les temps proviennent d'un hôte CPU partagé et les
