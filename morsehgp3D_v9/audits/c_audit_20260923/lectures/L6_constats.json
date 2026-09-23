@@ -1,0 +1,226 @@
+{
+ "findings": [
+  {
+   "id": "C6-01",
+   "titre": "CI v9 rouge depuis 129 exécutions consécutives : le selftest de protocole appelle git rev-parse HEAD~1 sur un clone superficiel",
+   "gravite": "haute",
+   "categorie": "hygiene",
+   "constat": "Le workflow v9 réussit l'étape CTest (127 tests passent, 1 désactivé) puis échoue dans tower_selftest_v9.py, sur test_real_execute_refuses_uncommitted_protocol, qui exécute `git -C ROOT rev-parse HEAD~1`. actions/checkout@v7 sans fetch-depth ne récupère qu'un commit. Dernière réussite : c9db64cd (01:49:19Z). 129 échecs consécutifs depuis b4e480fc, toujours présents à 7312beb7.",
+   "preuves": [
+    "gcp-migration/tower_selftest_v9.py:1063",
+    "gcp-migration/tower_selftest_v9.py:1044-1071",
+    "/.github/workflows/morsehgp3d-v9.yml:35-36 (checkout sans fetch-depth)",
+    ".github/workflows/morsehgp3d-v9.yml:56-63",
+    "gh run 35833313204 (0125dc18) : '100% tests passed, 0 tests failed out of 127' puis 'ERROR: test_real_execute_refuses_uncommitted_protocol … rev-parse HEAD~1 … exit status 128'",
+    "gh run list : même cause sur b4e480fc (35807903416), 78ce9fd4 (35819325282), ec6d1b74 (35826283026)",
+    "docs/PLAN_V9.md:54-56 (portes hermétiques : aucun git rev-parse) et :75 (porte de sortie : suite verte en CI)",
+    "audits/ETAT_COURANT.md:19-20 et :506-507 (21/21 annoncé : résultat local)"
+   ],
+   "consequence": "Le seul garde-fou automatique de la v9 est rouge en permanence. Une vraie régression d'une porte CTest ne changerait plus le statut visible. La porte de sortie V9-0 n'est pas satisfaite, et les audits citent 21/21 alors que la CI rend 20/21. Aucune régression moteur n'est masquée à ce jour : l'étape CTest passe dans toutes les exécutions examinées.",
+   "action_proposee": "Soit `with: fetch-depth: 0` sur actions/checkout, soit rendre le test hermétique : créer dans un dossier temporaire un dépôt Git à deux commits et y forger l'archive. Puis exiger le vert en CI avant toute session G4.",
+   "recoupe_audit_existant": ""
+  },
+  {
+   "id": "C6-02",
+   "titre": "Aucune porte à la taille d'intérêt ne juge la complétude du catalogue ; les labels scale8000/16000/32000 recouvrent un diagnostic à une arête",
+   "gravite": "haute",
+   "categorie": "completude",
+   "constat": "Les seuls tests étiquetés scale8000/16000/32000 lancent q4_saturating_atlas --scale : un cylindre synthétique, une seule arête fournie, une racine certifiée profonde, zéro support émis, 0,01 s en CI. Aucune porte n'appelle la chaîne au-delà de 1 500 sites (K5, différentiel de condensés). À l'échelle, seuls opèrent les recoupes internes (clé, profondeur, coquille et q_min des clés émises), la détection partielle d'ancres manquantes par FULL et les ablations ON/OFF. Aucun ne détecte une clé entièrement omise par tous les chemins.",
+   "preuves": [
+    "CMakeLists.txt:272-279",
+    "tests/gen/q4_saturating_atlas_gate.cpp:225-259 (une arête {0,1}, require collect(a).empty())",
+    "CI 35833313204 : mhgp9_gen_q4_saturating_atlas_scale8000/16000/32000 en 0,01 s",
+    "tests/chain/chain_static_paths_gate.cpp:33-53 (1 500 sites, K5)",
+    "src/chain/tower_chain.cpp:458-486 (recoupe des seules clés émises)",
+    "tests/tower/full_ball_tower_gate.cpp:493-499 (l'autorité relative ne promet pas la détection de tout catalogue incomplet)"
+   ],
+   "consequence": "L'obligation centrale du contrat, une tour exacte sur une trame de 30 à 60 k sites, repose au-delà de 14 sites sur des arguments composant par composant et des différentiels. Un `ctest -L scale8000` donne l'illusion d'une couverture à l'échelle (TEST_PLAN § 3.1 et CLAUDE.md : invariants globaux et juge d'échantillon à 8k/16k/32k).",
+   "action_proposee": "Porte scale* réelle sur familles synthétiques versionnées, avec un juge d'échantillon sain. Tirer des supports S de 2 à 4 sites parmi les K+4 voisins de sites aléatoires. Pour chaque support positif (rationnels), calculer la profondeur stricte d sur tous les sites. Si d+|S| ≤ min(K+1,n) et coquille ≤ 12, exiger key(B) dans le catalogue (keep_catalogue). Validité : q_min ≤ |S| et définition du catalogue, tower_chain.cpp:485-486. Ajouter la projection triée du catalogue (clé, niveau, q_min, profondeur, coquille), comparée sous permutation et entre W1 et W8. Renommer le diagnostic actuel (label diag).",
+   "recoupe_audit_existant": "ETAT_COURANT.md:37-48 ; CONTRE_AUDIT_B_G4_R6_20260923.md:36 ; CONTRE_AUDIT_B_G4_R7B_20260923.md:28 ; COMPLETUDE_Q4_CLE_REMBOURREE_20260923.md (une clé plantée, 18 appels). Apport de C : vacuité des labels scale et conception d'un juge d'échantillon systématique, prouvé sain, à brancher dans CTest."
+  },
+  {
+   "id": "C6-03",
+   "titre": "Le juge Γ de bout en bout ne tourne qu'à K=10 sur 12–14 sites : les leviers d'élagage y sont géométriquement inertes et le repli K5 n'est jamais jugé contre Γ",
+   "gravite": "moyenne",
+   "categorie": "preuve",
+   "constat": "large_case fixe K=10. Les appels de catalogue donnent au générateur les positions dans l'ordre Morton pour les deux variantes, donc la même entrée ; seul le bloc tour publiée à s=8 permute l'ordre. Aucun plancher ne porte sur le ledger du générateur. Condition nécessaire à une voie morte ou rejetée : la boule diamétrale de l'arête contient au moins le seuil de sites (K−1 pour q3, K−2 pour q4, K pour q2), puisque le disque des centres admissibles contient le milieu. Par script exact : spatial12 a une profondeur diamétrale maximale de 6, donc aucun élagage n'est possible à K=10 ; shell14 en permet au plus 3 (q3) et 4 (q4) arêtes ; line12 n'a aucun support q3/q4.",
+   "preuves": [
+    "tests/chain/chain_census_tower_gate.cpp:174-190 (K=10 codé en dur)",
+    "tests/chain/chain_census_tower_gate.cpp:94-99 et src/tower/tree/cloud_index.hpp:158-168 (entrée en ordre Morton)",
+    "tests/chain/chain_census_tower_gate.cpp:274-277 (planchers sans ledger)",
+    "src/gen/lanes/q34_dead_lanes.cpp:97-98 (seuils K−1 et K−2)",
+    "tests/gen/wspd_q34_gate.cpp:688 (disque de centres, borne 1/12)",
+    "script /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/agents/lentille6/diam_depth.py : spatial12 K=10 max_diam_depth=6, 0/0 paires ; K=5 8/15 ; K=3 26/39"
+   ],
+   "consequence": "Les certificats qui retirent l'essentiel du travail à l'échelle (voie morte, cœur, cache et filtres de témoins) ne sont jugés contre le modèle définitionnel que sur quelques arêtes d'une fixture dégénérée. Ils le sont aussi aux composants (wspd_q34 à K 3/5/10, n ≤ 30) et en ON/OFF à 360 sites. Le repli K1..5 et sa fenêtre de rang réduite ne sont jamais passés de bout en bout sous le juge Γ.",
+   "action_proposee": "Paramétrer large_case par K ∈ {1,2,3,5,10} (quelques secondes en CI). Ajouter des planchers dead_q3_proved/dead_q4_proved/core_closed_edges/witness_rejected_pairs > 0 aux petits K. Donner au générateur un ordre d'entrée réellement permuté dans chaque variante. Mesurer le score de mutation : lier les 34 mutants de mutants.json à chain_census_tower et publier les survivants.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_B_PORTE_PUBLIQUE_T2_20260922.md (T2 publique externe K1..3, 12 sites) : C ajoute la vacuité quantifiée à K=10, le K5 non jugé et l'entrée identique en ordre Morton."
+  },
+  {
+   "id": "C6-04",
+   "titre": "Les 18 points d'injection MHGP9_MUTANT du chemin produit ne sont activables par aucun test ; le registre compte 132 noms pour 18 sites",
+   "gravite": "moyenne",
+   "categorie": "preuve",
+   "constat": "MHGP9_MUTANT n'est compilé que sous MHGP9_TESTING et ne s'active que par mutants_enable. Aucun fichier de tests/, bench/ ou src/ n'appelle mutants_enable. kMutants liste 132 noms, dont 114 sans site ; les 18 sites présents (census nonstrict, q3-prune-ge, q4-eq-nonstrict/sign, axis-argmin-*, level-trunc-hi, parallel-*) ne sont jamais exercés. Aucune CLI --inject= n'existe, contrairement à PLAN V9-0.",
+   "preuves": [
+    "src/tower/core/mutants.hpp:35-138 (registre), :153-181 (activation)",
+    "src/tower/pipeline/census.hpp:76-180",
+    "src/tower/lanes/q3.hpp:83,143",
+    "src/tower/lanes/q4.hpp:82-123",
+    "src/tower/core/wide.hpp:39,61",
+    "src/tower/parallel/pool.hpp:28,82",
+    "grep : mutants_enable n'a aucun appelant hors mutants.hpp",
+    "docs/PLAN_V9.md:52-53 (mutants --inject= prévus)"
+   ],
+   "consequence": "La doctrine « chaque défaut historique a un mutant tué » est affichée mais non tenue pour le census, les formes q3/q4 et l'arithmétique large de la tour. Un retour de ces défauts ne serait vu que si les portes T2 ou arith le rencontrent par hasard.",
+   "action_proposee": "Transformer les 18 sites en mutants compilés, comme MHGP9_KEY_INDEX_MUTANT : une cible CMake par nom, code 1 et cause stdout exacte, contre arith_u18, full_ball_tower ou chain_census_tower. Réduire kMutants aux noms réellement injectés, ou supprimer le registre.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_B_PORTE_PUBLIQUE_T2_20260922.md:88-100 et CONTRE_AUDIT_B_U18_ET_SONDE_20260922.md:70-80 (level-trunc-hi seul) : C généralise aux 18 sites et au registre."
+  },
+  {
+   "id": "C6-05",
+   "titre": "Aucun mutant produit sur le cœur FULL, sur la recoupe du catalogue de la chaîne ni sur la voie q2",
+   "gravite": "moyenne",
+   "categorie": "preuve",
+   "constat": "Mutants produit présents côté tour et chaîne : tri parallèle, MEB (deux), index de clés, priorité des échecs et ledger d'échec. Rien ne vise les lots de même niveau, les fusions, la croissance datée, les coupes ouvertes/fermées, les contributions, les images verticales, la fenêtre de rang ni les require de recoupe. Côté générateur, mutants.json ne contient que des familles q3/q4 ; les model_mutants des portes q2 mutent l'attendu, pas le produit.",
+   "preuves": [
+    "CMakeLists.txt:83-89, 140-155, 199-228 (liste exhaustive des mutants tour et chaîne)",
+    "src/tower/forest/full_ball_tower.hpp:488,498,776 (seuls hooks de compilation FULL)",
+    "src/chain/tower_chain.cpp:458-486 (recoupe sans mutant)",
+    "tests/gen/mutants.json (familles wspd_q34, q34_affine, q4_seed_cells, q4_saturating, q34_indexed_*, q34_witness_cache, q34_dead_lanes_owner, q34_cover)",
+    "tests/gen/wspd_q2_census_gate.cpp:470-519 (model_mutants)"
+   ],
+   "consequence": "La sensibilité du juge Γ aux fautes du constructeur FULL n'est démontrée que par des mutants de l'oracle. La voie q2 (q2_census.cpp, 2 858 lignes, à chaque trame) et la recoupe, seul invariant actif à l'échelle, n'ont aucune preuve causale.",
+   "action_proposee": "Ajouter des mutants compilés FULL : coupe ouverte traitée comme fermée, lot de même niveau scindé, image verticale vers un mauvais nœud inférieur, niveau de contribution décalé. Chaîne : fenêtre K au lieu de K+1, contrôle de profondeur retiré. q2 : saturation des frères non stricte, crédit de témoin compté deux fois. Chacun doit être tué avec sa cause par full_ball_tower ou chain_census_tower.",
+   "recoupe_audit_existant": ""
+  },
+  {
+   "id": "C6-06",
+   "titre": "Le refus « coquille > 12 » de la chaîne et ses contrôles internes de recoupe ne sont jamais exercés",
+   "gravite": "moyenne",
+   "categorie": "completude",
+   "constat": "La chaîne rend kUnsupportedDegeneracy/chain_shell_above_12 dès qu'une boule a plus de 12 sites de coquille. Aucun test ne vise ChainStatus::kUnsupportedDegeneracy : seule la frontière à 12 est testée (shell14, plancher shell12==6). Les require chain_key_mismatch_v8_v7, chain_census_depth_mismatch, chain_census_shell_mismatch, chain_qmin_differs… et chain_ball_outside_rank_window ne sont jamais déclenchés. La fixture shell30 (30 sites cosphériques) existe déjà dans les portes du générateur.",
+   "preuves": [
+    "src/chain/tower_chain.cpp:478-481, 518-522",
+    "src/chain/tower_chain.cpp:458-486",
+    "grep tests : aucune occurrence de kUnsupportedDegeneracy ni de chain_shell_above_12",
+    "tests/chain/chain_census_tower_gate.cpp:266-268, 276",
+    "tests/gen/q4_saturating_atlas_gate.cpp:174-183 (shell30)"
+   ],
+   "consequence": "Un refus manquant ou une troncature silencieuse d'un plateau de plus de 12 sites ne serait détecté par aucune porte. Sur les trames brutes avec sol (grilles planes à 1 mm), un seul plateau de ce type refuse toute la trame, et ce comportement n'est pas qualifié.",
+   "action_proposee": "Porte chain_rejects_shell_above_12 : shell30 passé à run_tower_chain avec K ∈ {1,5,10}, code et raison attendus, aucun ordre publié. Ajouter des mutants de recoupe (voir C6-05).",
+   "recoupe_audit_existant": "CONTRE_AUDIT_A_MATH_MOTEUR (refus sans troncature), sans porte de refus."
+  },
+  {
+   "id": "C6-07",
+   "titre": "Concurrence et équivariance : pas de TSan/ASan en CI, au plus 8 fils pour la chaîne et la tour, aucune permutation de la chaîne au-delà de 30 sites",
+   "gravite": "moyenne",
+   "categorie": "concurrence",
+   "constat": "MHGP9_SANITIZE et MHGP9_TSAN existent mais la CI ne construit qu'en Release GCC. Fils testés : 0 à 48 pour parallel_sort seul ; tour 0/1/4/8 ; chaîne 1/4/7 ; générateur 1/2/4. Sur G4, un seul couple W24/W48 est mesuré (R5, 08/000000 K10). Aucune porte ne permute l'entrée de la chaîne au-delà de 30 sites, alors que les égalités sont fréquentes sur une grille de 1 mm et que plusieurs départages se font par identifiant.",
+   "preuves": [
+    "CMakeLists.txt:13-25",
+    ".github/workflows/morsehgp3d-v9.yml:48-58",
+    "tests/tower/parallel_sort_gate.cpp:46,75",
+    "tests/chain/chain_static_paths_gate.cpp:47,71",
+    "tests/chain/order_failure_priority_gate.cpp:75",
+    "receipts/g4_tower_r5_20260923/README.md:31-33",
+    "docs/HERITAGE_V7_V8.md:61 (wspd_q34 jamais passé sous TSan)",
+    "audits/PREFETCH_GEOMETRIE_FULL_PAR_K_20260923.md:41-43, 96-99 (TSan ad hoc sur FULL --static-4)"
+   ],
+   "consequence": "Les courses de données du moteur q3/q4 (files de plages, annulation) et de FULL à 48 fils ne sont couvertes par aucune porte rejouable. Les départages par identifiant sur les données LiDAR ne sont pas jugés.",
+   "action_proposee": "Deux jobs CI Clang : ASan/UBSan sur -L gate, et TSan sur un sous-ensemble parallèle (chain_static_paths, order_failure, wspd_q34, wspd_q2_parallel, population_bank, full_ball_static_cpu4). Étendre chain_static_paths à 16/48 fils et à une entrée permutée, comparée par la projection de catalogue triée et par le condensé après réétiquetage.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_B_FULL_PARALLELE_WIP_20260923.md:84 (« Aucun TSan n'est encore dans cette porte ou le workflow CI ») : C ajoute la carte des fils et l'absence de permutation à l'échelle."
+  },
+  {
+   "id": "C6-08",
+   "titre": "Mutant désactivé admitted_lane_recounted_in_children : réactivable immédiatement par un site à deux lignes unique",
+   "gravite": "basse",
+   "categorie": "preuve",
+   "constat": "Le site d'une ligne `frame.mask &= static_cast<std::uint8_t>(~bit);` apparaît deux fois (l. 168 et 182), d'où DISABLED. La chaîne à deux lignes `admitted_mask |= bit;\\n        frame.mask &= static_cast<std::uint8_t>(~bit);` est unique (vérifié par script) et cible exactement la ligne 182.",
+   "preuves": [
+    "tests/gen/mutants.json (mutant 16, champ disabled)",
+    "src/gen/lanes/q34_witness_search.cpp:168,181-182",
+    "CMakeLists.txt:336-340 (DISABLED TRUE)",
+    "CI 35833313204 : 'Not Run (Disabled)'"
+   ],
+   "consequence": "Le double comptage d'une voie admise dans les enfants, qui peut faire rejeter une voie à tort et donc omettre une clé, n'a aucune porte causale depuis la v8.",
+   "action_proposee": "Remplacer le site par la chaîne à deux lignes dans mutants.json, retirer `disabled`, vérifier code 1 et stderr exact.",
+   "recoupe_audit_existant": ""
+  },
+  {
+   "id": "C6-09",
+   "titre": "Mutant key_index tué sans cause ; run_expect ne voit que stdout ; convention de code 4 vs 1 incohérente",
+   "gravite": "basse",
+   "categorie": "protocole",
+   "constat": "mhgp9_tower_key_index_mutant_drop_first n'attend que le code 1, sans EXPECT_LINE ni EXPECT_PREFIX. Or la porte FULL rend 1 sur n'importe quelle exception ou plancher et écrit ses causes sur stderr, que run_expect.cmake ne capture pas. L'en-tête de mhgp9_gate annonce « 4 mutant tué », mais toutes les portes de mutant attendent 1.",
+   "preuves": [
+    "CMakeLists.txt:219-224",
+    "CMakeLists.txt:49-50",
+    "cmake/run_expect.cmake:13 (seul OUTPUT_VARIABLE)",
+    "tests/tower/full_ball_tower_gate.cpp:552-557 (FAIL sur stderr, code 1)"
+   ],
+   "consequence": "Un mutant « tué » par un échec sans rapport (plancher, exception) resterait vert.",
+   "action_proposee": "Faire imprimer `cause=<why>` sur stdout par full_ball_tower_gate, comme chain_census_tower, et exiger EXPECT_PREFIX \"cause=gamma.\" ou \"cause=producer.\". Harmoniser la documentation des codes.",
+   "recoupe_audit_existant": ""
+  },
+  {
+   "id": "C6-10",
+   "titre": "Bornes non jugées : K > n, chaîne à n ≤ K+1, u18 extrême composé, échec de lancement FULL, OOM",
+   "gravite": "basse",
+   "categorie": "completude",
+   "constat": "La troncature kmax=min(requested,input_count) de FULL n'est jamais exercée : toutes les fixtures FULL ont kmax ≤ n et la chaîne T2 a n ≥ 12 > K+1. Les coordonnées de T2 restent sous 100 : la recoupe clé v8 = v7 n'est pas jugée à 262 143. Le mode --expect-launch-failure de la porte FULL n'est pas enregistré. Toute std::system_error devient thread_launch_failed. Aucun plafond mémoire : un OOM est un signal, pas un refus typé.",
+   "preuves": [
+    "src/tower/forest/full_ball_tower.hpp:884",
+    "tests/tower/full_ball_tower_gate.cpp:119-146, 564-575",
+    "src/tower/forest/full_ball_tower.hpp:1655-1656",
+    "src/chain/tower_chain.cpp:296-298, 570-575",
+    "tests/chain/chain_census_tower_gate.cpp:262-272"
+   ],
+   "consequence": "Des comportements de bord du contrat (petits nuages, coins de grille, pannes de ressources) reposent sur la seule lecture de code.",
+   "action_proposee": "Fixtures T2 chaîne : n=5 à K=10, spatial12 translaté ou dilaté vers les coins u18. Enregistrer une porte de lancement FULL sous MHGP9_TESTING avec launch_fail_after. Classer séparément les system_error.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_B_U18_ET_SONDE_20260922.md (bornes u18 des commentaires) : C ajoute l'absence de composition au niveau chaîne."
+  },
+  {
+   "id": "C6-11",
+   "titre": "Hygiène : porte orpheline non compilable, selftests v8 non portés, labels oracle inexacts, références mortes, PASSATION périmée",
+   "gravite": "basse",
+   "categorie": "hygiene",
+   "constat": "tests/tower/census_tower_gate.cpp n'est pas enregistré et inclut ../src/pipeline/generate.hpp, absent en v9. Le selftest de q34_family_pruning n'est jamais exécuté (fichier inclus comme aide). La porte q34_collective n'est pas portée, alors que q34_collective.cpp, q34_pruning.cpp et family_certificate.cpp restent compilés dans mhgp9_gen hors chemin de chaîne. Le label oracle est posé sur full_certificate, qui n'a pas d'oracle, et manque sur onze portes q2 à oracle brute force. wspd_q34_gate.cpp:69 cite bench/run_q34_indexed_checks.py, absent de la v9. PASSATION annonce 20 CTests et des mutants --inject.",
+   "preuves": [
+    "tests/tower/census_tower_gate.cpp:1-9",
+    "tests/gen/wspd_q34_gate.cpp:1-5, 69",
+    "CMakeLists.txt:71-77, 104-113, 262-268",
+    "tests/tower/full_certificate_gate.cpp:1-3",
+    "PASSATION.md:16, 197"
+   ],
+   "consequence": "Filtrer par label ou lire la passation donne une image fausse de la couverture ; du code mort alourdit la compilation et l'audit.",
+   "action_proposee": "Supprimer la porte orpheline, retirer de mhgp9_gen les unités hors chaîne ou enregistrer leurs selftests, corriger les labels et la PASSATION.",
+   "recoupe_audit_existant": ""
+  },
+  {
+   "id": "C6-12",
+   "titre": "L'oracle Python reference/ n'est pas raccordé ; le modèle Γ à 12–14 sites n'a pas de second juge",
+   "gravite": "info",
+   "categorie": "preuve",
+   "constat": "PLAN_V9 range reference/ parmi les portes, mais aucun test v9 ne l'appelle. census_tower_oracle, seul juge Γ jusqu'à n=14, n'est recoupé par local_plateau_oracle que jusqu'à n=8 (mode --historical).",
+   "preuves": [
+    "docs/PLAN_V9.md:31",
+    "tests/tower/census_tower_oracle.hpp:17-18",
+    "oracle/tower/local_plateau_oracle.hpp:27-34",
+    "tests/chain/chain_census_tower_gate.cpp:17-43",
+    "reference/README.md (oracle exhaustif Python, n ≤ 12–14, refuse les dégénérescences)"
+   ],
+   "consequence": "À 12–14 sites, la vérité T2 repose sur une seule implémentation C++ de la lignée v7. Le risque est faible (le modèle suit la Déf. 21), mais l'indépendance de langage et d'auteur est disponible et inutilisée.",
+   "action_proposee": "Campagne différentielle ponctuelle, puis porte : Γ de census_tower_oracle comparé à reference.run_oracle sur spatial12 et quelques nuages génériques de 10 à 12 points.",
+   "recoupe_audit_existant": ""
+  }
+ ],
+ "questions": [
+  "Développeur : préférez-vous `fetch-depth: 0` dans le workflow ou un selftest hermétique (dépôt Git temporaire à deux commits) pour tower_selftest_v9.py:1063 ? La CI est rouge depuis 129 exécutions.",
+  "Développeur : acceptez-vous de paramétrer chain_census_tower par K ∈ {1,2,3,5,10}, avec planchers sur le ledger (dead_q3_proved, dead_q4_proved, core_closed_edges, witness_rejected_pairs) ? Coût CI estimé : quelques secondes par K (spatial12 prend 2,14 s en CI à K=10).",
+  "Auditeurs A et B : quelqu'un a-t-il déjà mesuré le score de mutation du juge de bout en bout, c'est-à-dire les 34 mutants générateur liés à chain_census_tower ? Sinon, je peux le proposer comme porte ; il faut compiler hors campagne de chronométrage.",
+  "Développeur : pour le juge d'échantillon de complétude à 8k/16k/32k (C6-02), quelles familles synthétiques versionnées retenir (uniform, terrain, clusters, rows de front_fixtures.hpp) et quel budget de temps CTest pour les labels scale* ? Les coupes LiDAR restent dans le runner hors CTest.",
+  "Utilisateur ou développeur : un seul plateau de plus de 12 sites refuse toute la trame (chain_shell_above_12). Est-ce acceptable pour le contrat sur trames brutes avec sol, où les grilles planes à 1 mm rendent de tels plateaux plausibles ?",
+  "Développeur : faut-il restaurer une CLI --inject= (PLAN V9-0) ou convertir les 18 sites MHGP9_MUTANT en mutants compilés et purger kMutants de ses 114 noms sans site ?",
+  "Tous : accepte-t-on d'ajouter l'oracle Python reference/ comme troisième juge Γ sur les fixtures génériques de 10 à 12 points ?"
+ ]
+}

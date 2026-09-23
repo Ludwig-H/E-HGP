@@ -21,7 +21,11 @@ Hors produit, hors registre, `public_status=not_claimed`, GCP non utilisé.
 - `run_euler_mutants.py` : compile chaque mutant de
   `morsehgp3D_v9/tests/gen/mutants.json` contre `euler_check.cpp` et classe
   le verdict (`killed_euler`, `killed_chain`, `survived`, `inert`, `error`).
-- `results/` : sorties JSON agrégées (aucune coordonnée).
+- `run_euler_mutants_p2.py` : protocole « Kmax+2 » contre les mêmes mutants
+  (chaîne mutée à K5 et K7, Euler jusqu'à K5 sur le catalogue K7, égalité du
+  catalogue K5 avec la restriction du catalogue K7).
+- `results/` : sorties JSON agrégées (aucune coordonnée), dont
+  `mutants_k5.json`.
 
 ## Entrées
 

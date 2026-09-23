@@ -1,0 +1,487 @@
+[
+ {
+  "mutant": "q3_shell_counted_inside",
+  "family": "wspd_q34",
+  "judgment": "geometry",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "balls": 342181,
+  "verdict": "survived"
+ },
+ {
+  "mutant": "q4_gated_by_q3_acceptance",
+  "family": "wspd_q34",
+  "judgment": "geometry",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 4,
+   "2": -1,
+   "3": 152,
+   "4": 49112,
+   "5": -163664
+  },
+  "balls": 342008,
+  "verdict": "killed_euler"
+ },
+ {
+  "mutant": "q4_gated_by_q3_front_mask",
+  "family": "wspd_q34",
+  "judgment": "geometry",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "balls": 342181,
+  "verdict": "survived"
+ },
+ {
+  "mutant": "q3_atlas_rejects_at_k_minus_2",
+  "family": "wspd_q34",
+  "judgment": "geometry",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 47081,
+   "5": -159142
+  },
+  "balls": 339679,
+  "verdict": "survived"
+ },
+ {
+  "mutant": "parallel_refused_range_dropped",
+  "family": "wspd_q34",
+  "judgment": "completion_ledger",
+  "kmax": 5,
+  "verdict": "killed_chain",
+  "chain": {
+   "status": "invariant_violated",
+   "reason": "chain_exception: mhgp9 gen global q34 completed ledger mismatch"
+  }
+ },
+ {
+  "mutant": "xi_upper_used_to_exclude",
+  "family": "q34_affine",
+  "judgment": "geometry",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "balls": 342181,
+  "verdict": "survived"
+ },
+ {
+  "mutant": "new_admission_wrong_xi_scale",
+  "family": "q34_affine",
+  "judgment": "geometry",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49575,
+   "5": -164130
+  },
+  "balls": 342173,
+  "verdict": "survived"
+ },
+ {
+  "mutant": "local_exclusion_removes_global_lane",
+  "family": "q34_affine",
+  "judgment": "geometry",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": -8846,
+   "2": -6406,
+   "3": 892,
+   "4": 1183,
+   "5": -156
+  },
+  "balls": 119059,
+  "verdict": "killed_euler"
+ },
+ {
+  "mutant": "positive_contact_lost",
+  "family": "q4_seed_cells",
+  "judgment": "geometry",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "balls": 342181,
+  "verdict": "survived"
+ },
+ {
+  "mutant": "single_live_leaf_discarded",
+  "family": "q4_seed_cells",
+  "judgment": "geometry",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 4253,
+   "2": -2485,
+   "3": -1991,
+   "4": 27955,
+   "5": -126230
+  },
+  "balls": 311597,
+  "verdict": "killed_euler"
+ },
+ {
+  "mutant": "fourth_cell_incidence_lost",
+  "family": "q4_seed_cells",
+  "judgment": "geometry",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "balls": 342181,
+  "verdict": "survived"
+ },
+ {
+  "mutant": "threshold_one_early",
+  "family": "q4_saturating",
+  "judgment": "geometry",
+  "kmax": 5,
+  "verdict": "killed_chain",
+  "chain": {
+   "status": "invariant_violated",
+   "reason": "chain_exception: mhgp9 gen atlas received an invalid terminal depth certificate"
+  }
+ },
+ {
+  "mutant": "contact_credited_inside",
+  "family": "q4_saturating",
+  "judgment": "geometry",
+  "kmax": 5,
+  "verdict": "killed_chain",
+  "chain": {
+   "status": "invariant_violated",
+   "reason": "chain_census_depth_mismatch"
+  }
+ },
+ {
+  "mutant": "prefix_work_omitted",
+  "family": "q4_saturating",
+  "judgment": "physical_work",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "balls": 342181,
+  "verdict": "survived"
+ },
+ {
+  "mutant": "q4_wrong_alpha",
+  "family": "q34_indexed_witness",
+  "judgment": "geometry",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "balls": 342181,
+  "verdict": "survived"
+ },
+ {
+  "mutant": "lemon_contact_counted_inside",
+  "family": "q34_indexed_witness",
+  "judgment": "geometry",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "balls": 342181,
+  "verdict": "survived"
+ },
+ {
+  "mutant": "admitted_lane_recounted_in_children",
+  "family": "q34_indexed_witness",
+  "judgment": "geometry",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "balls": 342181,
+  "verdict": "survived"
+ },
+ {
+  "mutant": "integer_minimum_wrong_rounding",
+  "family": "q34_indexed_census",
+  "judgment": "geometry",
+  "kmax": 5,
+  "verdict": "killed_chain",
+  "chain": {
+   "status": "invariant_violated",
+   "reason": "chain_census_shell_mismatch"
+  }
+ },
+ {
+  "mutant": "whole_contact_counted_inside",
+  "family": "q34_indexed_census",
+  "judgment": "geometry",
+  "kmax": 5,
+  "verdict": "killed_chain",
+  "chain": {
+   "status": "invariant_violated",
+   "reason": "chain_census_depth_mismatch"
+  }
+ },
+ {
+  "mutant": "shell_contact_excluded",
+  "family": "q34_indexed_census",
+  "judgment": "geometry",
+  "kmax": 5,
+  "verdict": "killed_chain",
+  "chain": {
+   "status": "invariant_violated",
+   "reason": "chain_census_shell_mismatch"
+  }
+ },
+ {
+  "mutant": "q3_leaf_shell_counted_inside",
+  "family": "wspd_q34",
+  "judgment": "geometry",
+  "kmax": 5,
+  "verdict": "killed_chain",
+  "chain": {
+   "status": "invariant_violated",
+   "reason": "chain_census_depth_mismatch"
+  }
+ },
+ {
+  "mutant": "q3_leaf_census_drops_certified_count",
+  "family": "wspd_q34",
+  "judgment": "geometry",
+  "kmax": 5,
+  "verdict": "killed_chain",
+  "chain": {
+   "status": "invariant_violated",
+   "reason": "chain_census_interior_overflow"
+  }
+ },
+ {
+  "mutant": "dead_q3_threshold_k_minus_2",
+  "family": "wspd_q34",
+  "judgment": "geometry",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 42821,
+   "5": -150622
+  },
+  "balls": 335419,
+  "verdict": "survived"
+ },
+ {
+  "mutant": "dead_q4_threshold_k_minus_3",
+  "family": "wspd_q34",
+  "judgment": "geometry",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 1,
+   "2": 1,
+   "3": 6353,
+   "4": 30527,
+   "5": -145090
+  },
+  "balls": 335829,
+  "verdict": "killed_euler"
+ },
+ {
+  "mutant": "dead_contact_counted_inside",
+  "family": "wspd_q34",
+  "judgment": "geometry",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 1,
+   "2": 6351,
+   "3": -8415,
+   "4": -4059,
+   "5": -57014
+  },
+  "balls": 274824,
+  "verdict": "killed_euler"
+ },
+ {
+  "mutant": "dead_uniform_at_one_corner",
+  "family": "wspd_q34",
+  "judgment": "geometry",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 117,
+   "2": 868,
+   "3": 3623,
+   "4": 17061,
+   "5": -114016
+  },
+  "balls": 315297,
+  "verdict": "killed_euler"
+ },
+ {
+  "mutant": "dead_q3_disk_too_small",
+  "family": "wspd_q34",
+  "judgment": "geometry",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 1,
+   "2": 1,
+   "3": -8,
+   "4": 49492,
+   "5": -163937
+  },
+  "balls": 342063,
+  "verdict": "killed_euler"
+ },
+ {
+  "mutant": "witness_cache_all_lanes",
+  "family": "q34_witness_cache",
+  "judgment": "geometry",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 1,
+   "2": 1,
+   "3": -4,
+   "4": 49557,
+   "5": -164079
+  },
+  "balls": 342137,
+  "verdict": "killed_euler"
+ },
+ {
+  "mutant": "witness_cache_xi_lower_bound",
+  "family": "q34_witness_cache",
+  "judgment": "geometry",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "balls": 342181,
+  "verdict": "survived"
+ },
+ {
+  "mutant": "witness_cache_q4_threshold_k_minus_3",
+  "family": "q34_witness_cache",
+  "judgment": "geometry",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 1,
+   "2": 1,
+   "3": 62,
+   "4": 49400,
+   "5": -163963
+  },
+  "balls": 342120,
+  "verdict": "killed_euler"
+ },
+ {
+  "mutant": "dead_load_keeps_loaded",
+  "family": "q34_dead_lanes_owner",
+  "judgment": "state",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "balls": 342181,
+  "verdict": "survived"
+ },
+ {
+  "mutant": "dead_core_closes_on_any_lane",
+  "family": "wspd_q34",
+  "judgment": "ledger",
+  "kmax": 5,
+  "verdict": "killed_chain",
+  "chain": {
+   "status": "invariant_violated",
+   "reason": "chain_exception: mhgp9 gen global q34 completed ledger mismatch"
+  }
+ },
+ {
+  "mutant": "dead_core_closed_edge_uncounted",
+  "family": "wspd_q34",
+  "judgment": "ledger",
+  "kmax": 5,
+  "verdict": "killed_chain",
+  "chain": {
+   "status": "invariant_violated",
+   "reason": "chain_exception: mhgp9 gen global q34 completed ledger mismatch"
+  }
+ },
+ {
+  "mutant": "diametral_core_accepted_by_consumers",
+  "family": "q34_cover",
+  "judgment": "contract",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "balls": 342181,
+  "verdict": "survived"
+ },
+ {
+  "mutant": "diametral_core_accepted_by_inactive_local_q4",
+  "family": "q34_cover",
+  "judgment": "contract",
+  "kmax": 5,
+  "euler_by_k": {
+   "1": 1,
+   "2": 1,
+   "3": 1,
+   "4": 49583,
+   "5": -164146
+  },
+  "balls": 342181,
+  "verdict": "survived"
+ }
+]

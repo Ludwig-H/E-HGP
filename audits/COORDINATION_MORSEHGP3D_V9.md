@@ -1174,3 +1174,39 @@ de 12 sites au plus, un oracle indépendant peut énumérer 4 095 masques de
 sites. La somme égale à 1 demeure une condition **nécessaire, non
 suffisante** de complétude ; l'actuel recomptage dégénéré représente
 121,824 M évaluations exactes sur les 18 cas C, hors temps de chaîne.
+
+## 23 septembre 2026, 09 h 10 UTC — Audit C : objet et reconstruction de la tour ; mutants contre Euler (auditeur C)
+
+Base : lecture à `0125dc18`, recoupée jusqu'à `5e68f29e` (sources `src` inchangées).
+GCP non utilisé.
+
+1. **[Audit publié](../morsehgp3D_v9/audits/AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md)**
+   (annexe [`c_audit_20260923/`](../morsehgp3D_v9/audits/c_audit_20260923/README.md) :
+   neuf lectures, scripts). Il explique l'objet (π0 de la multicouverture par
+   ordre K, points critiques de Reani–Bobrowski, admission et calendrier) et
+   la reconstruction pas à pas (q2, q3/q4, catalogue, tour FULL : représentants,
+   MEB vérifiée, intrus et échange, lots, multifusions, verticales). Aucun
+   défaut de correction trouvé. Constats principaux, dont une partie encore
+   en vérification adverse : T2 de chaîne limitée à Kmax = 10 ; refus de
+   recoupement sans porte causale ; mutants absents du cœur FULL, de la
+   recoupe et de q2 ; extension non régulière et complétude q2/q3/q4 hors du
+   registre ; plomberie 0,70–1,00 s à K10 dont 0,18–0,43 s non attribués ;
+   machine à moitié inactive et 10–13 % de CPU système à K5 ; tour plafonnée
+   à 24 fils ; les meilleurs K5 publiés de 000000/000200 sont des essais MEB OFF.
+2. **Mutants contre l'invariant d'Euler** (35 mutants compilés du générateur,
+   08/000000 8k, K5) : **9 tués par l'invariant**, dont aucun n'est vu par la
+   chaîne (par exemple `q4_gated_by_q3_acceptance`, `single_live_leaf_discarded`,
+   `dead_uniform_at_one_corner`, `witness_cache_q4_threshold_k_minus_3`) ;
+   10 refusés par la chaîne ; 3 n'omettent que des boules des deux ordres
+   supérieurs (angle mort annoncé) ; 13 inexprimés sur cette coupe. Protocole
+   « Kmax+2 » validé sur la chaîne saine (K7 → Euler K = 1..5, restriction
+   égale au catalogue K5) ; sa campagne mutants est en cours.
+3. Merci à B pour la [preuve par le nerf](../morsehgp3D_v9/audits/CONTRELEC_EULER_PAR_NERF_20260923.md) :
+   la note Euler est mise à jour (statut `proved_here` proposé, convention
+   $\chi_c$, commentaire d'en-tête corrigé, positivité des supports réguliers
+   certifiée par les exécutions `run_tower=true` du reçu de pente sur les mêmes
+   entrées ; « gratuit » remplacé par « une passe hors chrono »).
+
+Question au développeur : veux-tu que je prépare un correctif prêt à porter
+(sonde : `euler_by_k` et condensés restreints ; porte `scale8000` ; lecteur G4),
+ou préfères-tu l'écrire toi-même ? Je n'écris pas dans `src/` sans ton accord.

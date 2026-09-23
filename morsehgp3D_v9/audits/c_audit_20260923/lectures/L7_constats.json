@@ -1,0 +1,186 @@
+{
+ "findings": [
+  {
+   "id": "C7-01",
+   "titre": "Même avec 48 fils parfaitement occupés, le travail CPU R7b est ×1,8–2,6 (K5) et ×5,6–7,7 (K10) trop grand pour 1 s ; ×18–77 pour 100 ms",
+   "gravite": "haute",
+   "categorie": "mesure",
+   "constat": "Le plancher CPU·s/48 R7b (calculé depuis chain_cpu_s brut, hors digest) vaut 1,82/2,41/2,60 s à K5 et 5,58/7,32/7,75 s à K10 (000100/000000/000200). Le CPU par nœud de sortie est de 67–75 µs à K5 et 45–50 µs à K10. Les budgets sur 48 fils sont de 28,5–36,7 µs (K5) et 6,4–8,1 µs (K10) par nœud pour 1 s, dix fois moins pour 100 ms. Les meilleurs murs sont 3,669 s (K5) et 9,579 s (K10), soit ×3,7–6,4 et ×9,6–15,3 au-dessus de 1 s, ×37–153 au-dessus de 100 ms. La chaîne enchaîne ses étapes séquentiellement (tower_chain.cpp:302-583), donc les phases s'additionnent.",
+   "preuves": [
+    "morsehgp3D_v9/receipts/g4_tower_r7b_20260923/vm/probe_{0..23}.stdout (chain_cpu_s, times_ms, orders)",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:287-288,584-586 (CPU processus, tous fils)",
+    "scratchpad lentille7/analyse.py sections 3 et 4 ; rows.json",
+    "morsehgp3D_v9/audits/ETAT_COURANT.md:183-189 (plancher R6)"
+   ],
+   "consequence": "Aucun réglage d'ordonnancement ni de nombre de fils du code actuel ne peut tenir 1 s à K10, ni 100 ms à K5 ou K10. Le contrat exige de réduire le travail (algorithme sensible à la sortie, élagage avant expansion) ou de déplacer ce travail sur GPU.",
+   "action_proposee": "Tirer du contrat un budget de travail : à 1 s et K10, au plus 48 CPU·s et environ 6,5 µs CPU par nœud de sortie. Exiger que chaque levier publie CPU·s par nœud et par phase, et trier les chantiers par facteur de travail supprimé plutôt que par gain de mur.",
+   "recoupe_audit_existant": "ETAT_COURANT.md:183-189 (plancher R6 1,89/5,81 s) ; OBSTACLES_GPU_SOUS_SECONDE_20260923.md:16-36,126-129. Ajouts : chiffres R7b, facteurs 100 ms, budgets par nœud, K5 et K10 sur les trois trames."
+  },
+  {
+   "id": "C7-02",
+   "titre": "Machine à moitié inactive et 10–13 % de CPU système à K5, sans instrument publié pour l'expliquer",
+   "gravite": "moyenne",
+   "categorie": "performance",
+   "constat": "En R7b, CPU/mur ne vaut que 19–23 fils sur 48 à K5 et 24–28 à K10. GNU time donne 9,4–15,5 s de CPU système à K5 (10–13 % du total) et 4,6–11,2 s à K10, contre 1,1–3,6 s (≤ 0,5 %) en R1/R2. Dans l'ablation appariée R3 (voies mortes ON/OFF), le temps système passe de 1,68 à 6,74 s et les commutations volontaires de 0,12 à 0,69 M sur 000000 K5 (0,09 → 0,90 M à K10). Les défauts mineurs ne bougent pas (0,45 → 0,46 M). La file q3/q4 est protégée par un mutex global unique, pris au retrait, à la publication et après chaque tâche. Les fils sont recréés à chaque région parallèle. Les temps par fil existent (worker_timings) mais ne sont ni recopiés par la chaîne ni publiés.",
+   "preuves": [
+    "morsehgp3D_v9/receipts/g4_tower_r3_20260923/vm/probe_{0,1,2,3}.stderr (System time, Voluntary context switches)",
+    "morsehgp3D_v9/receipts/g4_tower_r7b_20260923/vm/probe_*.stderr",
+    "morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp:846-853,867,884-906,918-919",
+    "morsehgp3D_v9/src/gen/pipeline/wspd_q34.hpp:230-243 (worker_timings, tasks)",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:375-417 (seul r34.pipeline.work est recopié)",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:196-231 et src/tower/parallel/pool.hpp:56-93 (fils créés à chaque appel)"
+   ],
+   "consequence": "Répartir parfaitement le même travail ramènerait K10 000100 de 9,58 à environ 5,6 s (C7-01) : c'est le levier le plus fort à algorithme constant, et il ne peut pas être diagnostiqué avec les reçus actuels. Le lien entre CPU système, contention du mutex ou cycle de vie des fils reste une hypothèse.",
+   "action_proposee": "Publier par phase les écarts getrusage (ru_utime, ru_stime, ru_nvcsw, ru_nivcsw, ru_minflt), plus worker_timings et tasks de q3/q4. Mesurer localement par strace -c -f ou perf trace sur un petit cas K5. Si la contention se confirme, passer à des files par fil avec vol de travail, à des compteurs sans verrou et à un pool persistant.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_A_MESURES_PLAN_20260922.md:162-183 (worker_timings demandé dès d2700314, toujours absent en sonde v12 à c02d45ac) ; CONTRE_AUDIT_B_G4_R3_20260923.md:69-72 (13,9 CPU actifs). Ajouts : temps système, commutations, attribution par ablation R3, code du mutex."
+  },
+  {
+   "id": "C7-03",
+   "titre": "Efficacité parallèle quasi inconnue : quatre paires W24/W48 sur une trame, aucune depuis R5, jamais de W1 sur G4",
+   "gravite": "moyenne",
+   "categorie": "mesure",
+   "constat": "Paires disponibles, toutes sur 000000 : R1 K5 ×1,165 (q3/q4 ×1,248, tour ×1,044, CPU +58 %) ; R2 K10 ×1,128 (session refusée) ; R3 K10 ×1,096 (q3/q4 ×1,275, tour ×1,019, CPU +44 %) ; R5 K10 ×1,256 (q3/q4 ×1,435, tour ×1,108, CPU +42 %). R6 et R7b n'ont aucun cas W24. La machine a 24 cœurs × 2 fils SMT. Le plan prévoit l'identité W1/W2/W4/W8/W24/W48 et W24/W48 sur les trois trames.",
+   "preuves": [
+    "morsehgp3D_v9/receipts/g4_tower_r{1,2,3,5}_*/vm/probe_*.stdout (cas W24)",
+    "morsehgp3D_v9/receipts/g4_tower_r7b_20260923/vm/lscpu.stdout (Thread(s) per core: 2, Core(s) per socket: 24)",
+    "morsehgp3D_v9/docs/PLAN_V9.md:215-219",
+    "scratchpad lentille7/analyse.py section 5"
+   ],
+   "consequence": "On ne peut ni ajuster une fraction séquentielle (Amdahl) par phase, ni juger si W48 avec SMT vaut mieux qu'un fil par cœur physique, ni prédire le gain d'un GPU sur les phases peu parallèles. CPU·s/48 est un plancher optimiste, gonflé par le SMT.",
+   "action_proposee": "Une session G4 à K5 sur 000100 : W1, W6, W12, W24 (avec et sans affinité à un fil par cœur) et W48, trois répétitions, CPU par phase (C7-02). Coût estimé sous le budget utile de 1 500 s (supposé). Ajouter W24/W48 à K10 sur les trois trames avec le code courant.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_B_G4_R5_20260923.md:63-68 ; CONTRE_AUDIT_B_G4_R1_ET_SCHEMA_V2_20260922.md:114-118. Ajouts : table des quatre paires, absence depuis R5, plan de balayage."
+  },
+  {
+   "id": "C7-04",
+   "titre": "Chronomètre honnête dans son périmètre écrit, mais plus étroit que le contrat déclaré : grille et masque absents, sortie non convertie, 0,2 s de fin hors chrono",
+   "gravite": "moyenne",
+   "categorie": "mesure",
+   "constat": "chain_total va de la validation des options à la tour en mémoire. Il inclut la destruction des temporaires du try et les défauts de page à froid. Il exclut : la lecture (1,1 ms, publiée) ; la quantification 1 mm, le dédoublonnage et le masque (hors ligne, jamais dans un reçu G4, alors que la synthèse promet « publiés dans le même reçu ») ; le digest depuis R7b (0,16–0,21 s à K5, 0,80–1,00 s à K10) ; la fin de processus, soit mur − (lecture + chaîne + digest) = 0,06–0,09 s à K5 et 0,21–0,26 s à K10 ; la conversion en CertifiedTowerInput, absente de src. Chaque cas est un processus neuf : 1,74–2,25 M défauts mineurs à K10, soit 6,6–8,6 Gio touchés en pages de 4 Kio pour un RSS de pointe de 3,8–5,0 Gio.",
+   "preuves": [
+    "morsehgp3D_v9/bench/tower_probe.cpp:14-17,158-166",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:287-288,442-443,543-555,584-601",
+    "gcp-migration/tower_worker_v9.py:145,554-563",
+    "morsehgp3D_v9/docs/AUDIT_V8_SYNTHESE.md:311-319",
+    "morsehgp3D_v8/docs/PILOTE_LIDAR_SANS_SOL_20260921.md:107-117 (29,1–31,8 ms lecture → masque, local)",
+    "morsehgp3D_v9/receipts/g4_tower_r7b_20260923/vm/probe_*.summary.json (elapsed_seconds) et probe_*.stderr"
+   ],
+   "consequence": "À 1 s, les exclusions pèsent peu, sauf le digest s'il est requis. À 100 ms, elles sont de l'ordre du budget (masque ≈30 ms, fin de processus 0,2 s à K10). Dans l'autre sens, la mesure à froid surestime peut-être le coût d'une boucle de production.",
+   "action_proposee": "Écrire deux chronomètres : (1) le chronomètre actuel ; (2) une boucle de trames à chaud dans un seul processus, avec grille, dédoublonnage et masque en option, résultat détruit ou réutilisé dans la boucle, et p50/p95 publiés. Publier le temps grille + masque dans chaque reçu, comme la synthèse le prévoit. Décider avec l'utilisateur si le digest et l'export font partie du produit.",
+   "recoupe_audit_existant": "CONTRAT_COUTS_ET_PARALLELISATION.md:15,27,54-57 ; ETAT_COURANT.md:315-318 ; CONTRE_AUDIT_B_G4_R7B (digest). Ajouts : chiffrage de la fin de processus en R7b, défauts de page, écart à AUDIT_V8_SYNTHESE §9.1-9.2, conversion absente."
+  },
+  {
+   "id": "C7-05",
+   "titre": "Règles de mesure du plan non tenues : répétitions, échauffement, p95, hôte calme ; les temps locaux donnent des exposants incohérents",
+   "gravite": "moyenne",
+   "categorie": "protocole",
+   "constat": "PLAN_V9 exige un hôte calme avec refus automatique au-delà d'un seuil et au moins trois répétitions (257-258), puis échauffements et p95 (220). Les sessions G4 ont une répétition (R1, R3, R4b) ou deux (R2, R5, R6, R7b), sans échauffement ni p95. La campagne locale v12 a tourné sous une charge de 9 à 13. Sur la relation 32k → trame entière, ses exposants de temps vont de −1,29 à 4,16, alors que les compteurs déterministes restent entre 0,66 et 1,5. La sonde ne publie pas les octets de sortie que le plan exige (145).",
+   "preuves": [
+    "morsehgp3D_v9/docs/PLAN_V9.md:145,220,257-258",
+    "origin/main:morsehgp3D_v9/receipts/lidar_scaling_local_20260923/README.md:6-8",
+    "scratchpad lentille7/scaling_laws.py (exposants 32k → trame entière)",
+    "morsehgp3D_v9/bench/tower_probe.cpp:189-199 (seul catalogue.bytes est publié)"
+   ],
+   "consequence": "Aucun temps local ne peut servir de pente. Les temps G4 ne donnent ni distribution ni p95. Sur deux essais, un gain de quelques pour cent (MEB à K5, cache) reste indiscernable du bruit.",
+   "action_proposee": "Faire appliquer par le runner et le worker une porte de charge (loadavg) et au moins trois répétitions, calculer médiane et p95, et publier les capacités de sortie (octets par tableau). Garder les compteurs comme seule autorité des exposants locaux.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_B_G4_R6_20260923.md:41-43 (ordre ON puis OFF non randomisé) ; README du reçu v12 (« temps indicatifs »). Ajouts : confrontation au texte du plan, exposants de temps aberrants chiffrés."
+  },
+  {
+   "id": "C7-06",
+   "titre": "Représentativité : trois trames d'une séquence, 35,5k–45,8k sites, rien dans le tiers haut (46k–60k) de la plage du contrat",
+   "gravite": "moyenne",
+   "categorie": "mesure",
+   "constat": "Les trames 08/000000, 000100 et 000200 font 39 885, 35 551 et 45 845 sites, sans sol (masque Patchwork++ approximatif). La dépendance à la scène est forte : à K5, q3/q4 prend 2,52 s sur 000100 et 4,74 s sur 000200 (×1,9 pour ×1,29 sites). Une extrapolation à 60 000 sites avec p = 1 à 1,5 donne 8,5–9,7 s à K5 et 20–23 s à K10 sur le code R7b (supposé).",
+   "preuves": [
+    "morsehgp3D_v9/PASSATION.md:219-224",
+    "morsehgp3D_v9/receipts/g4_tower_r7b_20260923/vm/probe_*.stdout (input.sites, times_ms.q34)",
+    "origin/main:morsehgp3D_v9/receipts/lidar_scaling_local_20260923/out/*/SUMMARY_*.json (mask.producer.classification=approximate_not_semantic_ground_truth)"
+   ],
+   "consequence": "Les meilleurs chiffres ne bornent pas le pire cas du contrat (30k–60k sites, autres séquences, scènes plus denses). Un contrat au p95 sur trames est encore hors de portée de toute mesure.",
+   "action_proposee": "Déclarer à l'avance un échantillon de trames sur plusieurs séquences, en visant les trames sans sol les plus peuplées (≈60 000 sites) et les plus coûteuses, avec trois répétitions et un p95 entre trames. Maintenir une ligne séparée pour les trames brutes.",
+   "recoupe_audit_existant": "Répété par B (R2 à R7b) et A (« une seule séquence ») ; PLAN_V9.md:238-243. Ajouts : trou 46k–60k chiffré, variance entre scènes, extrapolation étiquetée comme supposée."
+  },
+  {
+   "id": "C7-07",
+   "titre": "Lois d'échelle : locales seulement ; la sous-linéarité de la sortie est un artefact de densité des disques emboîtés",
+   "gravite": "moyenne",
+   "categorie": "mesure",
+   "constat": "Les nœuds de sortie par site baissent quand le disque s'agrandit : s00 K10 259,3 / 235,4 / 200,0 / 186,2 ; s02 K10 184,3 / 175,0 / 162,5 / 162,9. Ils restent plats sur s01 (≈167–169). Leur exposant (0,76–1,02) reflète donc l'ajout d'une périphérie moins dense, pas une propriété algorithmique. Il manque : toute croissance sur G4, W1, les répétitions, une densité à emprise fixe, les trames brutes, d'autres séquences, 60k/64k, s = 10/12, et le CPU système et par phase dans le runner. De 8k à 16k, le temps de q2 croît avec p = 1,20–1,84 dans les six cas (temps bruités).",
+   "preuves": [
+    "origin/main:morsehgp3D_v9/receipts/lidar_scaling_local_20260923/out/*/*.json (orders, catalogue)",
+    "scratchpad lentille7/scaling_laws.py (densités et exposants par phase)",
+    "origin/main:morsehgp3D_v9/audits/CROISSANCE_LIDAR_PLANS_ET_DENSITE_20260923.md (densité à emprise fixe)"
+   ],
+   "consequence": "Conclure que la sortie ou le catalogue sont sous-linéaires serait faux. À densité fixe, la sortie est au mieux linéaire en n, et les compteurs lourds (core_sites p ≤ 3,05) restent le signal.",
+   "action_proposee": "Adopter l'échantillonnage à emprise fixe par empreinte d'ID (1/4 ⊂ 1/2 ⊂ 1), publier nœuds et boules par site à chaque taille, et faire tourner une campagne de pente G4 limitée aux compteurs et au CPU, avec W1 sur les petites tailles.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_LIDAR_SCALING_V12_LOCAL_20260923.md ; CROISSANCE_LIDAR_PLANS_ET_DENSITE_20260923.md ; CONTRE_AUDIT_PENTE_LIDAR_LOCALE_PARTIELLE_20260923.md. Ajouts : table des densités de sortie, bruit des temps démontré, exposants de q2."
+  },
+  {
+   "id": "C7-08",
+   "titre": "q2 et le recensus n'ont pas bougé depuis R1 ; à K10 ils dépassent seuls 1 s sur deux trames",
+   "gravite": "moyenne",
+   "categorie": "performance",
+   "constat": "Au meilleur cas de chaque session, q2 vaut 0,23–0,85 s et le census 0,08–0,48 s de R1 à R7b, sans évolution. En R7b à K10, q2 + census = 0,78 / 1,22 / 1,27 s (000100 / 000000 / 000200). Le census recalcule les listes d'IDs intérieurs et de coquille de chaque clé distincte sur l'index de la tour. Le générateur ne transmet que des comptes (Presentation.depth/shell), alors qu'il dispose des coquilles au moment d'émettre.",
+   "preuves": [
+    "scratchpad lentille7/analyse.py section 11 (table par session)",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:321-333,367-373 (Presentation : comptes seulement), 448-513 (census)"
+   ],
+   "consequence": "Même un q3/q4 et une tour gratuits laisseraient K10 au-dessus de 1 s sur deux trames, et tout K au-dessus de 100 ms.",
+   "action_proposee": "Inscrire q2 et le census au plan de réduction du travail. Mesurer le coût d'une émission des IDs par le générateur, qui éviterait un second parcours géométrique, contre la valeur du recoupement v8/v7 ; ce recoupement pourrait passer en porte d'échantillon plutôt que sur chaque clé. Paralléliser et profiler q2 (occupation inconnue).",
+   "recoupe_audit_existant": "CONTRE_AUDIT_B_G4_R3_20260923.md:74-80 ; CONTRE_AUDIT_B_G4_R5_20260923.md:96-102 ; OBSTACLES_GPU (autres postes 1,154 s). Ajouts : stagnation sur sept sessions, valeurs R7b après la baisse de la fusion."
+  },
+  {
+   "id": "C7-09",
+   "titre": "Bornes de sortie pour tout algorithme alternatif : 31–33 boules et 37–39 nœuds par site à K5, 120–138 et 163–186 à K10",
+   "gravite": "info",
+   "categorie": "mesure",
+   "constat": "En R7b : boules par site 30,7–32,8 (K5) et 119,6–138,2 (K10) ; nœuds par site 36,7–38,7 et 162,9–186,2 ; contributions par site 21,4–22,5 et 97,4–110,7 ; ordre K seul 13,3–14,5 et 33,9–41,1 nœuds par site. Sortie à l'ABI actuelle : 168–216 Mio (K5) et 770–968 Mio (K10), plus un catalogue de 0,25–0,32 et 0,98–1,23 Go. Exposants apparents en K : 1,96–2,08 (boules), 2,15–2,27 (nœuds). À 100 ms, K10 exige 60–75 M nœuds/s et 18–22 Go/s d'écriture avec l'ABI actuelle. Amplification de travail : 313–387 tests d'atlas par candidat q3/q4 émis, 14,5–20 candidats q2 par paire acceptée, 16–73 nœuds d'intrus par boule.",
+   "preuves": [
+    "morsehgp3D_v9/receipts/g4_tower_r7b_20260923/vm/probe_{0,4,8,12,16,20}.stdout (catalogue, orders, generator)",
+    "origin/main:morsehgp3D_v9/receipts/lidar_scaling_local_20260923/out/*/*piece_full.json (ledger)",
+    "scratchpad lentille7/analyse.py sections 6 et 7 ; scaling_laws.py"
+   ],
+   "consequence": "La taille de sortie n'interdit pas 100 ms si la représentation est compacte. Le verrou est l'amplification de travail par élément de sortie, qu'un algorithme alternatif doit ramener à une petite constante.",
+   "action_proposee": "Utiliser ces densités comme gabarit de dimensionnement (GPU, ABI compacte, export) et exiger de toute proposition alternative une estimation du travail par nœud de sortie.",
+   "recoupe_audit_existant": "CONTRAT_COUTS_ET_PARALLELISATION.md:85-112 (K10 : octets, boules par site). Ajouts : K5, par site, exposants en K, débits requis, rapports d'amplification."
+  },
+  {
+   "id": "C7-10",
+   "titre": "Les meilleurs chiffres publiés à K5 (5,31 et 6,40 s) sont des minima sur quatre essais, pris sur la configuration MEB OFF",
+   "gravite": "basse",
+   "categorie": "documentation",
+   "constat": "PASSATION et la coordination citent 3,67 / 5,31 / 6,40 s à K5. 5,314 s est probe_3 (MEB OFF) et 6,403 s probe_19 (MEB OFF). La configuration par défaut (MEB ON) donne en moyenne 5,627 et 6,505 s ; les maxima sont 5,697 et 6,569 s.",
+   "preuves": [
+    "morsehgp3D_v9/PASSATION.md:147-148",
+    "audits/COORDINATION_MORSEHGP3D_V9.md:769",
+    "morsehgp3D_v9/receipts/g4_tower_r7b_20260923/vm/probe_3.stdout, probe_19.stdout (options.levers.tower_meb_proposal=false)"
+   ],
+   "consequence": "Biais optimiste de 0,1 à 0,3 s, et mélange de deux configurations dans un chiffre unique présenté comme le résultat du produit.",
+   "action_proposee": "Publier la médiane de la configuration par défaut, à côté du minimum annoncé comme tel.",
+   "recoupe_audit_existant": ""
+  },
+  {
+   "id": "C7-11",
+   "titre": "SUMMARY.json G4 : même schéma v1 mais champs et sens de cpu_s qui changent, sans générateur versionné",
+   "gravite": "basse",
+   "categorie": "hygiene",
+   "constat": "Tous les SUMMARY.json déclarent mhgp9_g4_tower_summary_v1. En R1, cpu_s est la somme utilisateur+système de GNU time (8/8 lignes) ; à partir de R2, c'est chain_cpu_s (13/13 … 24/24). Les champs varient : merge_s absent en R1, R3 et R4b, digest_s seulement en R7b. Aucun script du dépôt ne produit ce schéma. Les autres valeurs concordent avec les bruts.",
+   "preuves": [
+    "morsehgp3D_v9/receipts/g4_tower_r*/SUMMARY.json",
+    "git grep g4_tower_summary (aucun producteur hors des JSON)",
+    "scratchpad lentille7/table_g4.py (recoupement)"
+   ],
+   "consequence": "Un lecteur qui compare des cpu_s entre R1 et les sessions suivantes compare des grandeurs différentes. La dérivation n'est pas rejouable.",
+   "action_proposee": "Versionner gcp-migration/summarize_tower_v9.py, incrémenter la version du schéma à chaque changement de champs, et documenter cpu_s et le périmètre du digest.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_B_G4_R1_ET_SCHEMA_V2_20260922.md:105-108 (cpu_s de R1 = GNU time). Ajout : changement de sens à partir de R2, schéma inchangé, pas de générateur."
+  }
+ ],
+ "questions": [
+  "À l'utilisateur : le budget de 1 s puis 100 ms inclut-il la quantification 1 mm, le dédoublonnage et le masque sans sol (≈30 ms dans le pilote v8 local) ? Faut-il un chronomètre de processus froid, ou une boucle de trames à chaud à 10 Hz ?",
+  "À l'utilisateur : le contrat se juge-t-il sur la médiane ou sur le p95, et sur quel échantillon de trames et de séquences déclaré à l'avance ? Les trames sans sol de 46 000 à 60 000 sites en font-elles partie ?",
+  "Au développeur : le digest FNV (0,80–1,00 s séquentiel à K10) et la conversion en CertifiedTowerInput, absente du code, font-ils partie du produit, donc du chronomètre ?",
+  "Au développeur : d'où viennent les 10–15 s de CPU système à K5 (R5–R7b) et les 0,5 à 2 M de commutations volontaires par exécution : mutex de la file q3/q4, allocateur ou cycle de vie des fils ? Un strace -c -f local sur un cas K5 de 8 000 sites suffirait à trancher.",
+  "Au développeur : la sonde peut-elle publier par phase les écarts getrusage, plus worker_timings et tasks de q3/q4 (demande de A depuis d2700314) avant la prochaine session G4 ?",
+  "Aux auditeurs A et B : faut-il une session G4 dédiée au balayage W1 / W6 / W12 / W24 / W48 à K5 sur une trame, pour mesurer la fraction séquentielle par phase, avant tout autre levier de constante ?",
+  "Sur G4, le réglage SMT (48 fils) est-il préférable à 24 fils avec affinité à un fil par cœur physique pour la tour, qui ne gagne que ×1,02–1,11 de 24 à 48 fils ?"
+ ]
+}

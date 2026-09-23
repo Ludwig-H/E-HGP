@@ -1,9 +1,15 @@
 // Auditeur C (v9) — invariant d'Euler par ordre K sur le catalogue recoupe, hors produit.
 // Pour K <= Kmax-2, tout point critique de d_K (distance au K-ieme voisin) est une boule
-// du catalogue (p <= K-1, q_min <= 4 => p+q_min <= Kmax+1). Morse : la somme des
-// contributions locales vaut chi(R^3) = 1. Boule generique (coquille = support, u = q) :
-// contribution (-1)^(p+q-K) pour p < K <= p+q. Boule degeneree (u > q_min) : contribution
-// 1 - chi(L_m), m = K-p, calculee en Python exact a partir du fichier des degenerees.
+// admissible du catalogue (p <= K-1, q_min <= 4 => p+q_min <= Kmax+1). Morse-Euler : la
+// somme des contributions vaut chi(R^3) = 1 (plus n a K = 1). Boule generique (coquille =
+// support minimal certifie, u = q) : contribution (-1)^(q-m) * C(q-1, m-1), m = K-p, pour
+// p < K <= p+q (indice et multiplicite de Reani-Bobrowski). Boule degeneree (u > q_min) :
+// contribution 1 - chi_c(Lambda_m) (Euler a supports compacts), calculee en Python exact a
+// partir du fichier des degenerees ; preuve sans position generale : note B
+// CONTRELEC_EULER_PAR_NERF_20260923. Avec run_tower=false la positivite des supports
+// reguliers n'est pas verifiee ici : elle l'est par les executions run_tower=true du meme
+// code sur les memes entrees. Sortie : sommes generiques, condenses commutatifs du
+// catalogue restreint a p+q_min <= R (protocole << Kmax+2 >>).
 // Usage : euler_check <fichier.u32le> Kmax workers <sortie_degenerees.jsonl>
 #include <chrono>
 #include <cstdint>
@@ -68,10 +74,30 @@ int main(int argc, char** argv) {
   std::vector<long long> generic_sum(kmax + 1, 0);
   std::vector<long long> degenerate_touch(kmax + 1, 0);
   std::uint64_t degenerate = 0, recount_mismatch = 0;
+  // Condense commutatif du catalogue restreint a p + q_min <= R (R = 2..kmax+1) : permet le
+  // protocole << Kmax+2 >> (le catalogue Kmax doit egaler la restriction du catalogue Kmax+2).
+  std::vector<std::uint64_t> restricted_sum(kmax + 2, 0), restricted_count(kmax + 2, 0);
+  auto mix = [](std::uint64_t h) {
+    h ^= h >> 33; h *= 0xff51afd7ed558ccdull; h ^= h >> 33; h *= 0xc4ceb9fe1a85ec53ull; h ^= h >> 33;
+    return h;
+  };
   std::FILE* deg = std::fopen(argv[4], "w");
   if (!deg) throw std::runtime_error("cannot open degenerate output");
   for (const auto& b : res.catalogue_balls) {
     const int p = b.n_interior, q = b.arity, u = b.n_shell;
+    {
+      std::uint64_t h = 1469598103934665603ull;
+      const i128 parts[5] = {b.key.a, b.key.b[0], b.key.b[1], b.key.b[2], b.key.c};
+      for (const i128 v : parts) {
+        __extension__ typedef unsigned __int128 u128;
+        const u128 w = (u128)v;
+        for (int byte = 0; byte < 16; ++byte) { h ^= (std::uint64_t)((w >> (8 * byte)) & 0xffu); h *= 1099511628211ull; }
+      }
+      h ^= (std::uint64_t)p << 8 | (std::uint64_t)q << 16 | (std::uint64_t)u << 24;
+      h *= 1099511628211ull;
+      const std::uint64_t m = mix(h);
+      for (unsigned r = (unsigned)(p + q); r <= kmax + 1; ++r) { restricted_sum[r] += m; ++restricted_count[r]; }
+    }
     if (u == q) {
       // contribution (-1)^(q-m) C(q-1, m-1), m = k-p : une multifusion q3 a m=2 fusionne trois regions.
       static const int binom[4][4] = {{1, 0, 0, 0}, {1, 1, 0, 0}, {1, 2, 1, 0}, {1, 3, 3, 1}};
@@ -110,6 +136,10 @@ int main(int argc, char** argv) {
   for (unsigned k = 1; k <= kmax; ++k) std::printf("%s%lld", k > 1 ? "," : "", generic_sum[k]);
   std::printf("],\"degenerate_touching_k\":[");
   for (unsigned k = 1; k <= kmax; ++k) std::printf("%s%lld", k > 1 ? "," : "", degenerate_touch[k]);
-  std::printf("]}\n");
+  std::printf("],\"restricted\":{");
+  for (unsigned r = 2; r <= kmax + 1; ++r)
+    std::printf("%s\"%u\":[%llu,\"%016llx\"]", r > 2 ? "," : "", r, (unsigned long long)restricted_count[r],
+                (unsigned long long)restricted_sum[r]);
+  std::printf("}}\n");
   return 0;
 }

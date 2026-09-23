@@ -1,0 +1,178 @@
+{
+ "findings": [
+  {
+   "id": "L3-01",
+   "titre": "Identité exacte de q3_atlas.outside_domain : lemme « un centre q3 n'est jamais Outside sauf si |Z|=1 », indépendant de K et de s",
+   "gravite": "info",
+   "categorie": "preuve",
+   "constat": "Pour une graine aiguë possédée x de l'arête ab, on a 2(c−m)=λx·proj_{v⊥}(2(x−m)) avec 0<λx<1 : le centre q3 appartient au segment [0, proj(2(x−m))], contenu dans la coque {0}∪{coins projetés de la boîte englobante de Z}, et vérifie 2|t|²≤(2/3)D<D. Aucune cellule fermée contenant un centre q3 n'est donc Outside par le disque ou par une facette ; la seule source d'Outside pour q3 est completion_count<2, c'est-à-dire Z={x}. Pour ces arêtes, aucun site n'est strictement intérieur à la boule diamétrale : ni les témoins (H>0 impossible), ni le cœur, ni le cover (la cellule contenant m n'a aucun intérieur en m) ne peuvent les fermer, pour tout K≥3 et tout s. Donc outside_domain = #{arêtes ab : la lentille fermée ne contient qu'un site x, aigu et possédé par ab}, indépendamment de K, de s, des workers et des leviers.",
+   "preuves": [
+    "morsehgp3D_v9/src/gen/lanes/q4_local_partition.cpp:217-240 (tests Outside : disque l.227, completion_count<2 l.228, facettes l.229-239)",
+    "morsehgp3D_v9/src/gen/lanes/q4_local_partition.cpp:159-215 (coque avec le point 0, points[0] par défaut)",
+    "morsehgp3D_v9/src/gen/lanes/q4_positive_domain.cpp:86-143 (Z = sites de la lentille fermée hors extrémités)",
+    "morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp:582-586 et 614-620 (atlas seulement si q3 et q4 vivent ; kind None → outside_domain)",
+    "morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.cpp:133-198 (une cellule profonde exige T sites strictement intérieurs à tous ses centres, y compris m)",
+    "reçu R7b vm/probe_0 et probe_4 : outside_domain = 20845 à K5 et à K10 ; probe_8/12 : 17683 ; probe_16/20 : 21868",
+    "morsehgp3D_v9/docs/audit_v8/03_voies_q3_q4.md:133 et 198 (question ouverte 10 de l'audit v8)",
+    "morsehgp3D_v9/audits/Q3_STRUCTURE_ET_BORNES.md:132 (« repli global obligatoire » sans restriction)"
+   ],
+   "consequence": "Ferme la question ouverte v8 n° 10. Précise Q3_STRUCTURE : avec le domaine Positive actuel, le repli global q3 dû à Outside ne concerne que ~18–22 k arêtes par trame, une graine chacune. Fournit une identité de réception gratuite. Rend complète, sans repli global, la restructuration par feuille (L3-04).",
+   "action_proposee": "Ajouter au lecteur de reçus l'identité outside_domain(K5)=outside_domain(K10) pour une même trame et un même s. Écrire un script indépendant de comptage géométrique des arêtes à lentille d'un seul site aigu et possédé (O(n log n) avec un index). Optionnel : court-circuiter l'atlas quand completion_count<2, avec un census direct de la graine unique ; le gain est négligeable, la simplification réelle.",
+   "recoupe_audit_existant": "03_voies_q3_q4.md question 10 (observation non expliquée) ; Q3_STRUCTURE_ET_BORNES.md:132 (affirmation plus pessimiste) — ce constat apporte la preuve et l'identité exacte"
+  },
+  {
+   "id": "L3-02",
+   "titre": "La preuve de voie morte sur cover complet est au mieux neutre : elle échoue sur 73–81 % des voies qu'elle traite",
+   "gravite": "moyenne",
+   "categorie": "performance",
+   "constat": "Après le cœur diamétral, la preuve sur cover complet ne prouve que 19,3–22,0 % des voies q3 et 23,4–26,9 % des voies q4 qui l'atteignent. Elle ferme entièrement 21–25 % des covers (0,19 M sur 0,90 M à 000000/K5 ; 0,47 M sur 1,93 M à K10). Ses tests uniformes sont la plus grande boucle comptée du générateur : 0,80–4,04 G par trame, 1,8–2,3 fois ceux du cœur et 2,3–3,6 fois les tests ponctuels de l'atlas. Avec la ventilation locale de la PASSATION (preuve sur cover 86 Gcycles ; atlas 229 Gcycles pour 1,33 M atlas, soit ≈172 kcycles par atlas), les 471 037 atlas évités à 000000/K10 valent ≈81 Gcycles. La preuve est donc à peu près neutre, probablement négative, car les arêtes prouvées ont des atlas profonds, donc bon marché. De plus, une q4 prouvée avec q3 restée ouverte transforme l'arête en arête q3 seule, sans atlas (voir L3-03). Aucun levier n'isole aujourd'hui cette preuve : dead_core exige dead_lanes.",
+   "preuves": [
+    "reçu R7b vm/probe_*.stdout ledger : dead_q3_proved/open, dead_q4_proved/open, cover_builds, q3_edges, q4_edges, both_edges, dead_uniform_tests, dead_core_uniform_tests, atlas_point_tests",
+    "morsehgp3D_v9/PASSATION.md:152-154 (Gcycles K10 W8 locaux, non épinglés)",
+    "morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp:561-574 (preuve sur cover après le cœur)",
+    "morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp:351-352 et morsehgp3D_v9/src/chain/tower_chain.hpp:59-67 (leviers : pas d'interrupteur « cœur seul »)"
+   ],
+   "consequence": "Jusqu'à ~8 % du CPU q3/q4 est peut-être payé sans gain net. Le reçu R3 mesurait le certificat entier, avant l'existence du cœur ; son bénéfice ne se transfère pas à l'étape cover après cœur.",
+   "action_proposee": "Ajouter un levier q34_dead_cover (cœur seul si 0) et une ablation appariée ON/OFF sur les trois trames, K5/K10, W48, avec objets égaux. Si le résultat est négatif ou neutre, retirer l'étape ou la fusionner dans l'atlas (formes plates partagées, voir L3-04 et L3-05).",
+   "recoupe_audit_existant": "CONTRE_AUDIT_B_NOYAU_DIAMETRAL_WIP_20260923.md (coût du cœur, pas de l'étape cover après cœur) ; ETAT_COURANT (bornes de reprise du cover)"
+  },
+  {
+   "id": "L3-03",
+   "titre": "Les arêtes q3 seules (7–19 %) portent 99,2–99,6 % des census q3 GlobalBoxes ; un atlas q3 dédié serait à peu près neutre",
+   "gravite": "info",
+   "categorie": "mesure",
+   "constat": "Dans R7b, les census GlobalBoxes valent exactement les graines des arêtes q3 seules plus outside_domain : 2 683 058 + 20 845 = 2 703 903 à 000000/K5, et 4 072 598 + 20 845 = 4 093 443 à K10. Les arêtes q3 seules représentent 18,8 % (K5) et 7,3 % (K10) des arêtes q3, mais 99,2 % et 99,5 % des census globaux (112 M et 196 M bornes). Le même schéma se répète sur 000100 et 000200. Estimation d'un atlas q3 pour ces arêtes : ≈105–139 k atlas à ≈1 300 visites chacun, contre ≈70 % de 2,3–5,0 M census évités à ≈45 bornes chacun. Les deux coûts sont du même ordre : gain net faible, de l'ordre de 1–3 %.",
+   "preuves": [
+    "reçu R7b ledger : q3_seeds, q3_atlas_locations, q3_ball_builds, q3_leaf_censuses, q3_census_bounds, q3_edges, both_edges",
+    "morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp:582-586 (atlas seulement si les deux voies vivent) et 657-660 (GlobalBoxes)"
+   ],
+   "consequence": "Arbitrage des priorités : l'atlas q3 dédié n'est pas un levier majeur. La part des arêtes q3 seules dépend des preuves q4 (L3-02).",
+   "action_proposee": "Ne pas prioriser un atlas q3 dédié. Mesurer de nouveau cette part après l'ablation L3-02.",
+   "recoupe_audit_existant": "03_voies_q3_q4.md:100 et 291 (arêtes q3 seules sans certificat, v8) ; Q3_STRUCTURE_ET_BORNES.md:10-18 (16,1 M census en v8) — ce constat ajoute les chiffres v9 R7b et l'estimation de rentabilité"
+  },
+  {
+   "id": "L3-04",
+   "titre": "Graines traitées par feuille d'atlas : toute graine dont la droite coupe une feuille appartient à sa frontière",
+   "gravite": "moyenne",
+   "categorie": "performance",
+   "constat": "Si la droite L_x=0 coupe une cellule fermée C, alors min_C L_x ≤ 0 ≤ max_C L_x. x ne peut donc être classé ni intérieur (max<0) ni extérieur (min>0) : il appartient à un nœud actif de F_C. Pour q4, les couples (graine, feuille) balayés aujourd'hui sont donc exactement {x ∈ F_C aigu et possédé, L_x coupe C}. Pour q3, le centre d'une graine admissible tombe dans une cellule qui est une feuille, une cellule profonde à fragment retenu (compte K−2), une cellule profonde à K−1 ou plus (rejet certain), ou une cellule Outside (seulement |Z|=1, voir L3-01). Une boucle par feuille (feuilles vivantes et cellules profondes à fragment retenu), qui parcourt les graines de F_C avec un drapeau aigu et possédé mémorisé par arête, qui applique la propriété demi-ouverte des cellules au centre q3 et qui fait le census sur la feuille, produit le même flux. Elle supprime : le DFS global des graines q3 et celui des graines q4 pour chaque arête à atlas ; les localisations des graines centrées en cellules profondes (4,5 M sur 6,6 M à 000000/K5, 21,2 M sur 29,3 M à K10, avec q3_center et division longue) ; les descentes de l'atlas par graine ; le recalcul de form(id) pour chaque couple (graine, site actif).",
+   "preuves": [
+    "morsehgp3D_v9/src/gen/lanes/q4_local_partition.cpp:405-425 (max<0 intérieur, min>0 extérieur, sinon actif)",
+    "morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp:697-761 (DFS global des graines q3) et 609-628 (localisation par graine)",
+    "morsehgp3D_v9/src/gen/lanes/q4_local.cpp:689-711 (DFS global des graines LiveOnly), 672-687 (descente par graine), 391-402 et 439 (geometry.form(id) par site et par groupe)",
+    "morsehgp3D_v9/src/gen/lanes/q4_local_partition.cpp:400 (tests ponctuels de l'atlas : form() recalculée)",
+    "reçu R7b ledger : q3_atlas_locations / q3_atlas_rejections / q3_leaf_censuses ; q4_sweep_events/q4_seeds = 4,8–5,6",
+    "audits/COORDINATION_MORSEHGP3D_V9.md (dans 4530644b, non poussé) : 64 M visites de graines q3 et 42 M de graines q4 à 000100/K5 en W8 locale"
+   ],
+   "consequence": "Levier de constante probablement de quelques pour cent à une dizaine de pour cent sur q3/q4 (à mesurer). Il donne surtout une unité de travail naturelle pour le GPU : une feuille avec |F_C| ≲ 64 sites et des formes précalculées. Il faut retain_q3_fragments=true, sans quoi les cellules à borne inférieure exigent un repli.",
+   "action_proposee": "Prototyper derrière un levier, avec les arêtes q3 seules gardées sur le chemin actuel. Porte : flux entier égal à l'oracle exhaustif de wspd_q34 et au chemin actuel, contacts sur les coupures de cellules, centre q3 exactement sur un coin. Puis ablation appariée LiDAR avec les compteurs v12 (graines q3/q4, balayages) et le temps par sous-phase.",
+   "recoupe_audit_existant": "LEDGER_VISITES_CACHEES_Q34_20260923.md (graines dans le cover, sélection partagée) ; Q3_STRUCTURE_ET_BORNES.md:242 (génération depuis la frontière, cellules 3D par ancre) — ce constat ajoute l'appartenance graine ∈ F_C pour l'atlas existant, l'unification q3/q4 et la suppression du repli par L3-01"
+  },
+  {
+   "id": "L3-05",
+   "titre": "Garde-fou : les frontières du prouveur de voies mortes ne sont pas des fragments exacts (sites min==0 écartés)",
+   "gravite": "basse",
+   "categorie": "correction",
+   "constat": "Le prouveur ne garde dans next que les sites de minimum strictement négatif sur la cellule. Un site de minimum nul (contact possible en un point de la cellule) est jeté, ce qui est correct pour compter des intérieurs stricts. L'atlas exige au contraire que min==0 reste actif, car la coquille q3/q4 est collectée parmi les actifs. Une optimisation naturelle — réutiliser les frontières ou les formes du prouveur comme fragments d'atlas quand la preuve échoue (voir L3-02) — perdrait des contacts de coquille.",
+   "preuves": [
+    "morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.cpp:163 (if (minimum < 0) next.push_back(id))",
+    "morsehgp3D_v9/src/gen/lanes/q4_local_partition.hpp:122-127 (min==0 MUST remain active ; toute la coquille est active)",
+    "morsehgp3D_v9/src/gen/lanes/q4_local_partition.cpp:414-419"
+   ],
+   "consequence": "Aucun défaut aujourd'hui. Risque de coquille incomplète, donc de catalogue refusé ou de tour fausse, si une fusion prouveur/atlas réutilise telle quelle cette frontière.",
+   "action_proposee": "Documenter l'écart dans q34_dead_lanes.hpp. Toute fusion doit garder min≤0 et recevoir une fixture de contact au coin d'une cellule, avec un mutant min<0 contre min≤0 dans la porte de fusion.",
+   "recoupe_audit_existant": ""
+  },
+  {
+   "id": "L3-06",
+   "titre": "Aucune porte d'omission à l'échelle d'une trame pour les certificats v9 (cœur, cover, cache, feuille, saturation)",
+   "gravite": "moyenne",
+   "categorie": "preuve",
+   "constat": "Les oracles exhaustifs (tous les triangles et tétraèdres) ne jugent que des nuages de ≤ ~30 sites. Le flux entier à 12 sites est jugé sur 108 flux. Une seule clé difficile a été retrouvée dans un index rembourré de 8k à 32k sites. Le protocole bilatéral v8 (validité de chaque enregistrement q4 et complétude sur 2 000 paires par morceau) date du moteur T34, avant le cœur, la preuve de voie morte, le cache, le census sur feuille et la saturation. Or les arêtes fermées par ces certificats sont, par construction, invisibles au recensus du catalogue.",
+   "preuves": [
+    "morsehgp3D_v9/tests/gen/wspd_q34_gate.cpp:107-186 (oracle exhaustif, petits nuages)",
+    "morsehgp3D_v9/audits/COMPLETUDE_Q4_CLE_REMBOURREE_20260923.md:73-79",
+    "morsehgp3D_v9/audits/Q4_INDUCTION_ATLAS_EVENEMENTS_20260923.md:122-136 et 149-163",
+    "morsehgp3D_v9/docs/audit_v8/03_voies_q3_q4.md:77 et 150 (bilatéral sur le moteur T34)",
+    "reçu R7b : 1,14–2,90 M arêtes fermées par le cœur, 0,17–0,47 M covers fermés, 7,3–20,1 M paires rejetées par le cache"
+   ],
+   "consequence": "La complétude à l'échelle reste un argument de relecture (sections 3.1 et 3.2), pas une mesure. Un bogue d'échelle (profondeurs 6–7, budgets, grandes frontières) sur un certificat de rejet ne serait vu par aucun contrôle.",
+   "action_proposee": "Porte d'omission échantillonnée en C++ exact. Sur chaque trame et chaque K : tirer 1 000 à 10 000 arêtes fermées par le cœur, par le cover et par le cache, puis énumérer par force brute sur le cover les supports q3/q4 positifs possédés, avec census rationnel ; aucun ne doit être admissible. Tirer aussi autant d'arêtes émettrices et exiger l'égalité de leur flux entier (clé, support, profondeur, coquille). Coût par arête ≈ |lentille|²·|cover|, soit quelques millions d'opérations : quelques secondes pour 1 000 arêtes.",
+   "recoupe_audit_existant": "COMPLETUDE_Q4_CLE_REMBOURREE_20260923.md (appel à une porte ciblant l'induction) ; ETAT_COURANT §q4 — ce constat cible précisément les rejets des nouveaux certificats, à l'échelle"
+  },
+  {
+   "id": "L3-07",
+   "titre": "Trous de couverture par mutants : propriété, canonicité q4, disque q4 du prouveur, élagage des graines, domaine Positive",
+   "gravite": "basse",
+   "categorie": "preuve",
+   "constat": "tests/gen/mutants.json ne mute ni la règle canonique q4 (y<x && acute), ni le départage de propriété (edge_key < dans q3_edge et dans owned), ni l'élagage strict de la lentille (min_a > diameter), ni le facteur du disque q4 du prouveur (seul le disque q3 est muté : 3→12), ni le seuil completion_count<2 ou le signe des facettes du domaine Positive. L'oracle exhaustif, avec la grille 3×3×2 à nombreuses égalités, les tuerait probablement, mais cela n'est pas établi. admitted_lane_recounted_in_children reste DISABLED.",
+   "preuves": [
+    "morsehgp3D_v9/tests/gen/mutants.json (36 mutants ; un seul DISABLED)",
+    "morsehgp3D_v9/src/gen/lanes/q4_local.cpp:454 et 27-37",
+    "morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp:719-731 et 750-755",
+    "morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.cpp:14",
+    "morsehgp3D_v9/src/gen/lanes/q4_local_partition.cpp:228 et 238"
+   ],
+   "consequence": "Une régression de propriété ou de domaine, précisément celle qui fait perdre une clé sans erreur de recensus, n'a pas de preuve causale d'être interceptée.",
+   "action_proposee": "Ajouter cinq mutants compilés, avec la porte wspd_q34 (jugement geometry) : q4_canonical_seed_inverted (y>x), owner_tie_break_inverted (> au lieu de < sur edge_key), q3_seed_prune_ge (>= au lieu de >), dead_q4_disk_too_small (2→8), positive_domain_one_completion (<2 → <3). Si l'un d'eux survit, ajouter la fixture discriminante.",
+   "recoupe_audit_existant": "03_voies_q3_q4.md §3 (mutant α4 DISABLED en v8, réactivé en v9 sauf le recomptage des enfants)"
+  },
+  {
+   "id": "L3-08",
+   "titre": "Bornes 18 bits q3/q4 vérifiées ; commentaires périmés toujours présents ; garde 2^117 sans marge",
+   "gravite": "basse",
+   "categorie": "documentation",
+   "constat": "Le script exact bounds_u18.py passe : 23 majorants, 27 768 triangles aigus et 4 709 tétraèdres positifs aux extrêmes, centre q3 en cellule égal à −B/(2A), lemmes D/12 et D/8, boule ⊂ cover, face aiguë. Tous les prédicats tiennent : puissances < 2^117 en i128, formes du prouveur et bornes de l'atlas < 2^62 en i64, admission < 2^80, compare_roots < 2^97, niveaux q3 < 2^113/2^79 et q4 < 2^160/2^120, produits croisés < 2^192/2^280. Restent faux ou périmés : tower/lanes/q4.hpp:18,20 (2^146, 2^114, 2^74, 2^90, valeurs u16), tower/lanes/level.hpp:31 (2^171), gen wspd_q34.cpp:664 (« u16 i128 proof »), q34_witness_search.hpp:86-89 (« at most49 », « sixteen »), q34_witness_search.cpp:100 (« proven u16 DFS depth »). Le garde de certified_cell à 2^117 est exactement ajusté : 512M⁶ = 2^117·(1−2^−18)^6.",
+   "preuves": [
+    "script scratchpad agents/lentille3/bounds_u18.py : RESULT PASS",
+    "morsehgp3D_v9/src/tower/lanes/q4.hpp:18-20",
+    "morsehgp3D_v9/src/tower/lanes/level.hpp:31",
+    "morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp:664",
+    "morsehgp3D_v9/src/gen/lanes/q34_witness_search.hpp:86-89",
+    "morsehgp3D_v9/src/gen/lanes/q34_witness_search.cpp:100",
+    "morsehgp3D_v9/src/gen/lanes/q4_local.cpp:284-290 et 312-315 ; q4_local_partition.cpp:128-129"
+   ],
+   "consequence": "Aucun débordement. La documentation de preuve est fausse sur trois fichiers. Un futur passage à 19 bits lèverait une exception (échec bruyant) dans la localisation q3.",
+   "action_proposee": "Corriger les commentaires. Signaler la marge nulle du garde dans q4_local.cpp et exiger une nouvelle borne avant tout élargissement de coordonnées.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_B_U18_ET_SONDE_20260922.md:84-95 (q4.hpp, level.hpp) ; 03_voies_q3_q4.md §5 point 15 (commentaires gen) — non corrigés à 0125dc18 ; ce constat ajoute la vérification par script et la marge du garde"
+  },
+  {
+   "id": "L3-09",
+   "titre": "Aucune entrée q3/q4 v8/v9 au registre des preuves",
+   "gravite": "basse",
+   "categorie": "documentation",
+   "constat": "docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md (dernier commit f4c0734c) ne mentionne ni le citron, ni l'inclusion dans le cover, ni la face aiguë q4, ni le certificat de voie morte et son cœur, ni la consultation de l'atlas, ni le census sur feuille, ni le lemme Outside (L3-01).",
+   "preuves": [
+    "grep sans résultat dans docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md",
+    "morsehgp3D_v9/docs/audit_v8/03_voies_q3_q4.md:184 (recommandation v8 non appliquée)"
+   ],
+   "consequence": "Les règles du dépôt exigent ce registre à jour avant tout changement de statut. Ce n'est pas bloquant tant que le statut reste not_claimed, mais c'est une dette de preuve.",
+   "action_proposee": "Inscrire ces lemmes avec leur statut (preuve interne relue et portes associées) dans un commit dédié.",
+   "recoupe_audit_existant": "03_voies_q3_q4.md §5 point 16"
+  },
+  {
+   "id": "L3-10",
+   "titre": "Atlas et balayage q4 lisent les coordonnées par indirection order[rank]→points[id] alors que spatial_points() existe",
+   "gravite": "basse",
+   "categorie": "performance",
+   "constat": "Les tests ponctuels de l'atlas (1,47 G à 000000/K10) et chaque site actif balayé passent par geometry.form(id) ou family.side(points[id]), après order[rank] : c'est un accès aléatoire au tableau dans l'ordre des IDs d'origine. Le prouveur, lui, lit index.spatial_points() séquentiellement. À 40k sites (≈480 Ko), le coût reste celui du cache L2. Aux dizaines de millions de points visées après le contrat, il deviendra un accès DRAM.",
+   "preuves": [
+    "morsehgp3D_v9/src/gen/lanes/q4_local_partition.cpp:108-117 et 400",
+    "morsehgp3D_v9/src/gen/lanes/q4_local.cpp:378, 391-402",
+    "morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.cpp:33-35 et 161-170 (spatial_points)"
+   ],
+   "consequence": "Micro-coût aujourd'hui ; coût réel pour la montée en échelle et pour le GPU (coalescence).",
+   "action_proposee": "Donner à Q4LocalGeometry un form_at_rank(rank) sur spatial_points() et l'utiliser dans le fragment et dans le balayage. À mesurer avec L3-04.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_B_CHARGEMENT_FORMES_Q34_WIP_20260923.md (spatial_points possédé par l'index, pour le prouveur seulement)"
+  }
+ ],
+ "questions": [
+  "Développeur : peux-tu publier dans la sonde le CPU par thread de la phase q3/q4 (somme et maximum des WspdQ34WorkerTiming.cpu_ns, wspd_q34.hpp:232-243) ? Il faut séparer le travail du déséquilibre à W48 sur 24 cœurs SMT ; la chaîne occupe 40–58 % des 48 CPU logiques dans R7b.",
+  "Développeur : sur quelle trame, à quel commit et avec quel outil la ventilation K10 W8 de la PASSATION (atlas 229, q4 235, paires 187, rectangles 123, cœur 120, q3 120, cover 86 Gcycles) a-t-elle été mesurée ? Un reçu rdtsc par sous-phase de q4 (DFS des graines, préparation de famille, descentes, balayage des sites actifs, tri, émission) trancherait la priorité entre L3-04 et L3-10.",
+  "Développeur : accepterais-tu un levier q34_dead_cover (cœur seul) pour une ablation appariée G4, sonde v13 ? Mon estimation (L3-02) donne la preuve sur cover neutre ou légèrement négative.",
+  "Développeur : pour dimensionner des lots GPU, publier max_cover_sites, l'histogramme des tailles de cover et de cœur, la profondeur maximale de l'atlas, sweep.leaf_queries et sweep.sort_comparisons.",
+  "Auditeurs A et B : confirmez-vous le lemme L3-01 (Outside ⇒ |Z|≤1 pour tout centre q3) ? S'il tient, la mention « repli global obligatoire » de Q3_STRUCTURE_ET_BORNES.md:132 peut être restreinte, et la restructuration L3-04 devient complète sans repli.",
+  "Auditeurs : qui écrit la porte d'omission échantillonnée à l'échelle (L3-06), en C++ exact, par arête fermée par le cœur, le cover ou le cache ? Faut-il la brancher dans le protocole G4 ou la garder comme sidecar local sur les trames 1 mm ?",
+  "Utilisateur : l'invariant « pas de mosaïque de Delaunay d'ordre supérieur » exclut toute marche du ≤K-niveau. Je ne recommande pas de le rouvrir, mais c'est la seule famille d'algorithmes sensibles à la sortie qui ne passe pas par l'expansion WSPD des paires. Confirmez-vous qu'elle reste fermée ?"
+ ]
+}

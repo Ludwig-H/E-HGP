@@ -1,0 +1,193 @@
+{
+ "findings": [
+  {
+   "id": "C-L2-01",
+   "titre": "Aucune détection d'omission q2 à l'échelle LiDAR ; trois juges peu coûteux sont disponibles",
+   "gravite": "moyenne",
+   "categorie": "preuve",
+   "constat": "La complétude q2 est prouvée dans les notes v8. Elle n'est testée que sur de petits nuages : au plus 20 sites dans le corpus exhaustif, 320 sites pour l'héritage, 14 sites pour le juge T2. À l'échelle, la chaîne ne vérifie que des invariants nécessaires : la masse du front égale C(n,2), l'absence de présentations en double, et le recensus des clés émises (profondeur, coquille, q_min). Une paire utile omise dont la boule n'a pas d'autre présentation ne déclenche aucun contrôle.",
+   "preuves": [
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:137-140 (doublons seulement)",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:469-492 (recensus des seules clés émises)",
+    "morsehgp3D_v9/src/gen/pipeline/q2_census.cpp:1354-1369 (registre de masse, condition nécessaire)",
+    "morsehgp3D_v9/tests/gen/wspd_q2_census_gate.cpp:346-417 (oracle exhaustif, nuages d'au plus 20 sites)",
+    "morsehgp3D_v9/tests/gen/wspd_front_inheritance_gate.cpp:777-797 (320 sites)",
+    "script check_knn_invariant.py : lemme p(a,b) <= min(rho_a(b), rho_b(a)), 3 312 paires sans violation ; couverture de 25 à 32 % des paires q2 acceptées sur des nuages synthétiques de 110 sites"
+   ],
+   "consequence": "Une régression de partition, de séparation ou de certificat du front sur une trame réelle peut retirer des boules q2 sans aucun signal. Le digest reste alors stable d'une répétition à l'autre, puisqu'il est déterministe.",
+   "action_proposee": "Ajouter en porte scale8000/16000/32000, puis dans la sonde, trois juges. (a) Tout couple (a,b) où b a moins de K sites strictement plus proches de a (ou l'inverse) doit être présenté, avec une profondeur au plus égale à ce rang ; coût O(nK log n) par un index indépendant. (b) L'EMST indépendant doit être inclus dans les présentations de profondeur 0, et ses longueurs divisées par deux doivent égaler les niveaux des fusions K=1, chaque fusion comptant parent_count−1 fois. (c) Juge d'échantillon sur m ancres : p(a,b) saturé à K par tower::ball_census pour tout b, comparé aux présentations de a.",
+   "recoupe_audit_existant": "ETAT_COURANT.md:43-48 constate de façon générale que les petits oracles T2 ne prouvent pas l'absence de clés omises. Ajout : trois juges concrets propres à q2, dont un lemme vérifié."
+  },
+  {
+   "id": "C-L2-02",
+   "titre": "q2 seul prend 0,41 à 0,84 s à K10 sur G4, et doubler les fils (24→48) n'apporte que ×1,07 à ×1,28",
+   "gravite": "moyenne",
+   "categorie": "performance",
+   "constat": "Sur G4 à 48 fils, reçus R5 à R7b, q2 coûte 228 à 517 ms à K5 et 413 à 842 ms à K10. Cela représente 3,5 à 8,6 % de la chaîne. La même trame à 24 fils donne 490,2 contre 456,1 ms à K5 (×1,07) et 962,6 à 971,2 contre 755 à 783 ms à K10 (×1,24 à ×1,28). Le G4 n'a que 24 cœurs physiques, en SMT 2.",
+   "preuves": [
+    "morsehgp3D_v9/receipts/g4_tower_r7b_20260923/vm/probe_*.stdout (times_ms.q2)",
+    "morsehgp3D_v9/receipts/g4_tower_r1_20260922/vm/probe_6.stdout (W24, K5 : 490,176 ms) et probe_0.stdout (W48 : 456,108 ms)",
+    "morsehgp3D_v9/receipts/g4_tower_r3_20260923/vm/probe_13.stdout (W24, K10 : 971,196 ms)",
+    "morsehgp3D_v9/receipts/g4_tower_r5_20260923/vm/probe_12.stdout (W24, K10 : 962,636 ms)",
+    "morsehgp3D_v9/receipts/g4_tower_r5_20260923/vm/lscpu.stdout (24 cœurs, 2 fils par cœur)"
+   ],
+   "consequence": "Avec l'algorithme actuel, q2 seul consomme environ 75 % du budget de 1 s à K10 sur 08/000000. Il dépasse la cible de 100 ms d'un facteur 2,3 à 8,4. Ajouter des fils CPU n'y change rien.",
+   "action_proposee": "Traiter q2 comme un verrou du contrat de 100 ms. Il faut diviser son travail par 5 à 10, ou le porter sur GPU (fp64 exact, voir C-L2-09). À court terme, mesurer les leviers exacts existants (C-L2-04, C-L2-05, C-L2-06) et l'exécution de q2 en parallèle de q3/q4.",
+   "recoupe_audit_existant": "CONTRAT_COUTS_ET_PARALLELISATION.md:44-64 relève que q2, la fusion et le recensus dépassent ensemble 1 s à K10. Ajout : isolement du coût de q2 seul et de son plancher en SMT."
+  },
+  {
+   "id": "C-L2-03",
+   "titre": "Le grand-livre q2 n'est pas publié : trois compteurs sur plusieurs dizaines disponibles",
+   "gravite": "moyenne",
+   "categorie": "mesure",
+   "constat": "La chaîne ne recopie que input_rectangles, candidate_pairs et accepted_pairs. WspdQ2ParallelResult calcule pourtant de nombreux autres compteurs, tous jetés : masses rejetées et résiduelles du front, recherches de témoins, tests H, crédits hérités et élargis, visites et tests du census, travail du Pool et du certificat frère, payload_ms_sum, et temps, jobs et visites par worker (Q2ParallelWorkerStats).",
+   "preuves": [
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:339-341",
+    "morsehgp3D_v9/src/gen/pipeline/wspd_q2_parallel.hpp:18-46",
+    "morsehgp3D_v9/receipts/g4_tower_r7b_20260923/vm/probe_0.stdout (clé generator : 3 champs q2)"
+   ],
+   "consequence": "Sur G4, on ne peut pas attribuer le coût de q2 entre front, census, charge utile et Pool. On ne peut pas non plus distinguer un déséquilibre Coarse d'un plafond SMT. Toute décision de conception q2 se prend donc à l'aveugle.",
+   "action_proposee": "Publier le grand-livre q2 dans la sonde (v12 ou suivante) : travail du front, du census, du Pool et du certificat frère, payload_ms_sum, ainsi que le maximum et la distribution des temps par worker. Ajouter au préflight l'identité : masse rejetée + masse résiduelle = C(n,2).",
+   "recoupe_audit_existant": "LEDGER_VISITES_CACHEES_Q34_20260923.md (q3/q4 seulement). Constat nouveau pour q2."
+  },
+  {
+   "id": "C-L2-04",
+   "titre": "Le levier {4,all,true}, favorable sur LiDAR en v8, n'est pas mesuré en v9",
+   "gravite": "basse",
+   "categorie": "performance",
+   "constat": "La chaîne fige les propositions {2,16,true}. En v8, l'auditeur A a mesuré sur trois scans LiDAR (préfixes de 50k sites, 2 cm, sol conservé, un seul fil) le passage de {2,16,true} à {4,all,true}. Les candidates passent de 4,76 M à 2,62 M. Les visites du census baissent de 38, 33 et 63 %. Le mur passe de 5,307 à 4,774 s (médiane), de 4,883 à 4,708 s et de 6,790 à 4,980 s. Les supports sont identiques. En contrepartie, les tests H du front doublent (50,9 M → 100,4 M).",
+   "preuves": [
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:338",
+    "morsehgp3D_v8/audits/front_options_lidar_20260920/README.md:36-66",
+    "morsehgp3D_v9/src/gen/wspd/front.cpp:268-291 (option déjà codée et qualifiée pour q2 seul)"
+   ],
+   "consequence": "Un gain exact et probable, de l'ordre de −4 à −27 % sur le mur q2, reste non exploité sur le régime du contrat.",
+   "action_proposee": "Exposer les propositions q2 comme levier de ChainOptions, publier sa valeur, puis faire une ablation G4 appariée sur les trois trames, K5 et K10, avec comparaison des digests.",
+   "recoupe_audit_existant": "02_chaine_q2.md § 8 point 2 (recommandation v8 non mise en œuvre)."
+  },
+  {
+   "id": "C-L2-05",
+   "titre": "Ordonnancement q2 figé (Coarse, 16 jobs par worker) ; Donate prévu au retrait sans mesure à W48",
+   "gravite": "basse",
+   "categorie": "performance",
+   "constat": "La chaîne utilise WspdQ2Schedule{} (Coarse) avec jobs_per_worker=16, soit 768 jobs à W48 pour 0,76 à 1,58 M rectangles. En v8, sur LiDAR à 4 fils (K10, 50k), Donate a été observé plus rapide : médianes de 2,868, 2,642 et 3,723 s contre 5,460, 3,057 et 3,904 s en Coarse, avec des plages en partie communes. HERITAGE et PROVENANCE prévoient pourtant de retirer Donate, sans aucune mesure au-delà de 4 fils.",
+   "preuves": [
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:334-338",
+    "morsehgp3D_v9/src/gen/pipeline/wspd_q2_parallel.hpp:12-16",
+    "morsehgp3D_v8/receipts/q2_dynamic_front_20260914/README.md:57-69",
+    "morsehgp3D_v9/docs/HERITAGE_V7_V8.md:41",
+    "morsehgp3D_v9/docs/PROVENANCE.md (Générateur exact : retrait du dispatcher Donate annoncé)"
+   ],
+   "consequence": "On risque de retirer le seul ordonnanceur à grain fin avant d'avoir mesuré s'il réduit le chemin critique q2 sur LiDAR à W24 et W48.",
+   "action_proposee": "Avant tout retrait, faire une ablation G4 de Coarse et Donate, avec jobs_per_worker égal à 16, 64 et 256, à W24 et W48, en publiant les statistiques par worker (C-L2-03).",
+   "recoupe_audit_existant": "02_chaine_q2.md § 5 point 9 (parallélisme q2 non démontré au-delà de 4 fils)."
+  },
+  {
+   "id": "C-L2-06",
+   "titre": "Charge utile q2 calculée puis jetée par la chaîne, puis recalculée par le recensus",
+   "gravite": "basse",
+   "categorie": "performance",
+   "constat": "Pour chaque paire acceptée (0,40 à 0,98 M par trame), accept() relance collect() depuis la racine et remplit les listes d'intérieurs et de coquille. Le consommateur de la chaîne n'en lit que les tailles. Le recensus v7 retraverse ensuite chaque clé pour reconstituer ces mêmes identifiants. Chaque clé q2 subit donc trois parcours : comptage, collecte et recensus.",
+   "preuves": [
+    "morsehgp3D_v9/src/gen/pipeline/q2_census.cpp:364-388",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:329-330",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:470-474"
+   ],
+   "consequence": "La seconde passe et l'écriture des vecteurs sont du travail sans usage dans la chaîne. Leur part reste inconnue, car payload_ms_sum n'est pas publié.",
+   "action_proposee": "Mesurer payload_ms_sum. Selon le rôle du recensus dans le contrat, soit ajouter un mode q2 qui ne produit que les comptes (compte de coquille intégré ou collecte sans stockage), soit transmettre les identifiants au catalogue et réserver le recensus à un mode de vérification ou d'échantillonnage.",
+   "recoupe_audit_existant": ""
+  },
+  {
+   "id": "C-L2-07",
+   "titre": "Code q2 hérité compilé sans usage, nœuds d'index non réservés, arbre de plages construit pour rien",
+   "gravite": "basse",
+   "categorie": "hygiene",
+   "constat": "mhgp9_gen compile local_credits, axis_q2, tube_credits et q2_census_parallel, ainsi qu'environ 1 480 lignes de q2_census.cpp (continuations, équipe, plages, lots) que la chaîne n'appelle jamais. q2_census.hpp inclut encore axis_q2.hpp. prepare_cloud construit un arbre de plages de 2n boîtes, lu seulement par local_credits. Q2CensusIndex::build fait des push_back sur nodes_ sans réserver 2n−1 nœuds, contrairement à la demande de HERITAGE_V7_V8.md:39.",
+   "preuves": [
+    "morsehgp3D_v9/CMakeLists.txt:102-104",
+    "morsehgp3D_v9/src/gen/pipeline/q2_census.hpp:3",
+    "morsehgp3D_v9/src/gen/pipeline/prepared_cloud.cpp:154-169 et local_credits.cpp:307-308",
+    "morsehgp3D_v9/src/gen/pipeline/q2_census.cpp:112-120 (aucun reserve)",
+    "morsehgp3D_v9/docs/HERITAGE_V7_V8.md:39,49"
+   ],
+   "consequence": "Le monolithe reste en place et le code est plus difficile à lire. La mémoire et les réallocations sont inutiles à 10^7 sites : environ 64 octets par nœud, avec jusqu'à 38 % de capacité perdue selon la mesure v8. Coût négligeable à 40k sites.",
+   "action_proposee": "Faire le retrait annoncé dans PROVENANCE, en déplaçant les variantes différentielles dans une cible de test. Découpler l'index de axis_q2. Réserver 2n−1 nœuds. Rendre l'arbre de plages paresseux ou le retirer.",
+   "recoupe_audit_existant": "02_chaine_q2.md § 5 points 6-7 et § 8 point 10 ; PROVENANCE.md (retrait « viendra avec les portes », portes portées le 23/09, retrait non fait)."
+  },
+  {
+   "id": "C-L2-08",
+   "titre": "Preuve de complétude q2 dispersée dans les notes v8 : aucun énoncé consolidé en v9",
+   "gravite": "basse",
+   "categorie": "documentation",
+   "constat": "La partition au plus bas ancêtre commun, le Théorème H, les certificats frère et Pool, la permutation ComplementFirst et l'inclusion des fenêtres sont prouvés dans cinq notes v8 distinctes. La v9 ne les cite qu'en une ligne de tableau (« prouvé + testé »). Le registre racine n'a pas changé depuis f4c0734c.",
+   "preuves": [
+    "morsehgp3D_v9/docs/HERITAGE_V7_V8.md:24",
+    "morsehgp3D_v8/docs/P0_FRONT_REEL.md:40-66",
+    "morsehgp3D_v8/docs/P0_TEMOINS_HERITES_Q2.md:36-66",
+    "morsehgp3D_v8/docs/P0_POOL_TERMINAL_Q2.md:34-64",
+    "docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md (aucune entrée q2 v8/v9)"
+   ],
+   "consequence": "Un lecteur v9 ne peut pas vérifier en un seul endroit la chaîne P1 à P6 ni son domaine (sites distincts, u18, indépendance vis-à-vis de s). Une modification future d'un maillon, comme un port GPU ou un parcours par ancre, n'a pas d'énoncé de référence.",
+   "action_proposee": "Rédiger une note v9 courte « complétude q2 » : P1 à P6 avec références aux fixtures et aux portes, au domaine, aux invariants d'exécution et à ce qui n'est pas couvert à l'échelle. Y ajouter le lemme K-NN de C-L2-01.",
+   "recoupe_audit_existant": "02_chaine_q2.md § 5 point 8."
+  },
+  {
+   "id": "C-L2-09",
+   "titre": "Arithmétique q2 en 18 bits vérifiée ; tous les intermédiaires q2 sont exacts en binary64",
+   "gravite": "info",
+   "categorie": "arithmetique",
+   "constat": "Les formules h_minimum, h_maximum_times_four, Q2PreparedBounds, Q2JointPreparedBounds, pair_bounds et point_power4 donnent les extrema exacts : 7 315 contrôles de force brute sur grille entière et demi-grille, dont les extrêmes u18, sans aucun échec. Pires magnitudes : au plus 2^42 sur les chemins i64 (2^44 pour s²·diag² avec s=8), Ξ < 2^76, 3·h_max4² < 2^81 en i128. La garde de domaine est présente. Hors Ξ (q3/q4), chaque intermédiaire q2 est un entier inférieur à 2^53.",
+   "preuves": [
+    "morsehgp3D_v9/src/gen/spindle/predicates.hpp:27-122",
+    "morsehgp3D_v9/src/gen/spindle/q2_prepared_bounds.hpp:274-342",
+    "morsehgp3D_v9/src/gen/pipeline/q2_joint_bounds.hpp:16-88",
+    "morsehgp3D_v9/src/gen/pipeline/q2_census.cpp:50-93",
+    "morsehgp3D_v9/src/gen/core/types.hpp:64-105",
+    "script check_q2_bounds.py : controles=7315 echecs=0"
+   ],
+   "consequence": "Aucun dépassement n'est possible sur le chemin q2. Un census q2 en binary64 (CPU AVX-512 ou GPU) serait exact sans filtre ni repli, quels que soient l'arrondi, la contraction FMA et la réassociation.",
+   "action_proposee": "Graver ce corollaire dans la note de complétude q2 (C-L2-08) et en tenir compte dans toute conception GPU de q2.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_A_MATH_MOTEUR_20260922.md (bornes des clés) ; 02_chaine_q2.md § 5 points 4-5, désormais corrigés. Ajout : vérification par force brute et exactitude fp64."
+  },
+  {
+   "id": "C-L2-10",
+   "titre": "Deux index spatiaux construits en série : 20 à 27 ms avant toute géométrie",
+   "gravite": "basse",
+   "categorie": "performance",
+   "constat": "La chaîne construit l'index générateur (gen_index : 10,4 à 13,4 ms, construction récursive mono-fil) puis l'index de la tour (tower_index : 9,2 à 14,1 ms, std::sort en série). Les deux indexent le même nuage.",
+   "preuves": [
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:311,440",
+    "morsehgp3D_v9/src/gen/pipeline/q2_census.cpp:112-171",
+    "morsehgp3D_v9/receipts/g4_tower_r7b_20260923/vm/probe_*.stdout (times_ms.gen_index, times_ms.tower_index)"
+   ],
+   "consequence": "Négligeable pour la cible de 1 s, mais 20 à 27 % du budget de 100 ms avant le premier prédicat.",
+   "action_proposee": "Pour la cible de 100 ms : construire les sous-arbres de l'index générateur en parallèle, ou partager un seul index entre générateur et tour, avec une requalification différentielle.",
+   "recoupe_audit_existant": ""
+  },
+  {
+   "id": "C-L2-11",
+   "titre": "La séparation WSPD n'entre dans aucun certificat q2 : la partition est libre pour un port GPU",
+   "gravite": "info",
+   "categorie": "preuve",
+   "constat": "Le front n'emploie s que pour décider entre émettre et diviser. Le rejet (minimum de H sur les boîtes), le Pool (« Separation is a front contract, unnecessary for q2 credit »), le certificat frère et le census sont exacts pour toute partition des paires. L'exactitude de q2 ne dépend donc pas de s. Le seuil s ≥ 8 imposé par la chaîne est un choix de granularité.",
+   "preuves": [
+    "morsehgp3D_v9/src/gen/wspd/front.cpp:145-169",
+    "morsehgp3D_v9/src/gen/pipeline/q2_node_pool.hpp:46",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:291"
+   ],
+   "consequence": "Un producteur q2 GPU ou par ancre peut choisir des tuiles adaptées au matériel sans toucher à l'objet, à condition de conserver P1 (couverture unique) et le registre de masse.",
+   "action_proposee": "Faire trancher par l'utilisateur la portée de la directive s ≥ 8 pour un producteur q2 sans WSPD (voir questions ouvertes).",
+   "recoupe_audit_existant": ""
+  }
+ ],
+ "questions": [
+  "La directive « jamais s < 8 » vaut-elle aussi pour un producteur q2 sans WSPD (parcours par ancre ou tuiles GPU), puisque aucun certificat q2 n'utilise la séparation (front.cpp:145-169, q2_node_pool.hpp:46) ?",
+  "Le recensus v7 de la chaîne (tower_chain.cpp:470-474) fait-il partie du chemin contractuel chronométré, ou seulement d'un mode de vérification ? La réponse décide si la charge utile q2 doit faire autorité (identifiants transmis) ou se limiter aux comptes.",
+  "À W48, le mur q2 (0,23 à 0,84 s) est-il limité par le plus gros job Coarse ou par le SMT (24 cœurs physiques) ? Il faut les temps par worker, déjà calculés dans Q2ParallelWorkerStats mais non publiés.",
+  "Comment le coût q2 se répartit-il entre front, census de comptage, charge utile et Pool sur les trames 1 mm sans sol ? Il faut le grand-livre q2 (C-L2-03).",
+  "Faut-il exécuter q2 et q3/q4 en parallèle dans un même groupe de fils ? Les deux voies sont indépendantes à index fixé ; il faudrait séparer les tranches de sortie (slots).",
+  "Que fait le contrat face aux doublons à 1 mm sur d'autres séquences ou sur des retours multi-écho ? prepare_cloud refuse alors toute la trame (kInvalidInput), alors que les trois trames 08 n'en ont aucun.",
+  "Pour un census q2 GPU exact, faut-il des doubles (exacts ici, mais débit fp64 réduit sur la RTX PRO 6000) ou des entiers i64 émulés ? Question à trancher par un micro-banc sur G4, pas par hypothèse.",
+  "Quelle part des supports q2 LiDAR l'invariant K-NN couvre-t-il réellement ? Ce taux fixe la force du juge C-L2-01(a) par rapport au juge d'échantillon par ancre."
+ ]
+}

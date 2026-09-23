@@ -1,0 +1,146 @@
+{
+ "findings": [
+  {
+   "id": "C1-01",
+   "titre": "L'extension non régulière FULL est utilisée sur 100 % des trames du contrat mais n'a aucune entrée au registre ; le README la dit « prouvée »",
+   "gravite": "moyenne",
+   "categorie": "preuve",
+   "constat": "Toute tour publiée sur les trames du contrat passe par la voie non régulière (u > q_min). R7b mesure 227/135/572 boules à coquille étendue à K5 et 444/280/1301 à K10 (08/000000, 000100, 000200). La position générale de la Déf. 26 du manuscrit n'y tient donc jamais. Or le registre ne couvre que le cas régulier : `conditional_theorem` sous régularité (l. 131–134), inertie Th. 4.2 (l. 120), contraction des plateaux en `proof_obligation` (l. 237). La voie codée n'a aucune entrée : ShellTable, contributions datées, descente lexicographique, ancres aux ordres inertes. Le README écrit « définie et prouvée en v7 ». Je fournis une esquisse de preuve complète (B1–B8 : connexité du bloc fermé, stricte si et seulement si c∉conv, unicité de la boule par niveau, effet de bloc, exclusion par Th. 4.2, représentants réduits I+t, terminaison du résolveur, verticales). Elle est contrôlée par un oracle exact : 33 nuages dégénérés, 1 408 événements, 732 blocs à coquille étendue, zéro divergence, deux mutants tués.",
+   "preuves": [
+    "morsehgp3D_v9/README.md:23 (« définie et prouvée en v7 : ... extension non régulière »)",
+    "morsehgp3D_v9/docs/HERITAGE_V7_V8.md:20 (« prouvé conditionnel + testé »)",
+    "docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md:120, 131-134, 237 (seuls régulier, Th. 4.2 et obligation SCC)",
+    "morsehgp3D_v9/receipts/g4_tower_r7b_20260923/vm/probe_{0,4,8,12,16,20}.stdout : catalogue.extra_shell_balls = 227, 444, 135, 280, 572, 1301 ; max_shell = 4–5",
+    "manuscrit Déf. 26 (texte extrait l. 3053) et Th. 4 (l. 3196) : hypothèse de position générale",
+    "morsehgp3D_v7/docs/PLATEAUX_FULL_ET_ANCRES.md:49-107 (sémantique codée)",
+    "morsehgp3D_v9/src/tower/forest/local_plateau.hpp:100-176 ; full_ball_tower.hpp:945-966",
+    "script exact scratchpad/agents/lentille1/hgp_block_oracle.py (sha256 77a6a992…) : PASS normal et -O ; mutants MUTANT=shell_size et MUTANT=window_minus_one tués"
+   ],
+   "consequence": "L'exactitude de chaque condensé publié (R1–R7b) repose sur un argument qui est testé (T2 à n ≤ 14, oracle local u ≤ 12) mais ni écrit ni enregistré. Un lecteur du README croira à une preuve qui n'existe qu'en v7, sous régularité. Aucune sortie fausse n'est identifiée : l'argument B1–B8 tient et l'oracle concorde.",
+   "action_proposee": "Rédiger B1–B8 dans une note mathématique et l'enregistrer au registre (statut après relecture croisée par A ou B). Y lier l'oracle et les fixtures déjà gravées dans tests/tower/full_ball_tower_gate.cpp:118-150. Corriger README.md:23 en « prouvée sous régularité ; étendue non régulière : testée, preuve B1–B8 ». Aligner HERITAGE:20.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_A_MATH_MOTEUR_20260922.md § 1 (quotient de plateau prouvé exigé comme porte de domaine) ; CONTRE_AUDIT_B_QUOTIENT_COQUILLE_20260922.md (isomorphisme local des composantes) ; docs/audit_v8/11_objet_et_preuves.md § 5, point 3. Apport de cette lentille : la composition GLOBALE (lots, résolveur, terminaison, verticales), la fréquence mesurée sur les trames et l'oracle exact."
+  },
+  {
+   "id": "C1-02",
+   "titre": "Invariants globaux d'objet absents du validateur de réception G4, alors qu'ils sont gratuits et toujours vrais",
+   "gravite": "moyenne",
+   "categorie": "protocole",
+   "constat": "Le validateur vérifie seulement que chaque ordre est un dictionnaire de six compteurs entiers et que les ordres vont de 1 à K. Aucun invariant mathématique de l'objet n'est vérifié. Pourtant, pour n > K, Γ_K à r = ∞ est complet donc connexe. Chaque ordre doit donc avoir une racine finale unique (parents = nodes − 1), births + merges = nodes, births(K=1) = nombre de sites, et une couverture de la racine finale égale à X. J'ai vérifié les 830 enregistrements d'ordre des 109 sondes R1–R7b : zéro violation.",
+   "preuves": [
+    "gcp-migration/tower_worker_v9.py:538-548 (contrôle de type et de liste des K seulement)",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:535-545 (résumé par ordre : nodes, births, merges, parents, contributions)",
+    "aucune vérification de racine unique : grep single_root/root_count vide dans src/tower, src/chain, bench, tests/chain",
+    "contrôle Python sur receipts/g4_tower_r*/vm/probe_*.stdout : 830 ordres, parents == nodes − 1 et births + merges == nodes partout ; 109 sondes, births(K1) == input.sites partout"
+   ],
+   "consequence": "À l'échelle, rien ne détecte une clé totalement absente du catalogue (limite logique relevée par A). Une omission de pont, une plage WSPD perdue ou un fragment parallèle oublié donnerait plusieurs racines à un ordre, ou des sites non couverts, et passerait la réception si le condensé est stable entre nombres de fils.",
+   "action_proposee": "Ajouter au lecteur G4 et à la porte de chaîne, pour chaque ordre : births + merges == nodes, parents == nodes − 1 (si n > K), births(1) == sites. Dans la sonde : l'union des contributions de l'ordre égale X (bitset de n bits par ordre). Graver un mutant qui retire une boule-pont du catalogue et vérifier qu'il est tué avec le code 3.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_A_MATH_MOTEUR_20260922.md § 5 (la complétude du générateur est la limite logique). Apport : un détecteur partiel, gratuit et déjà satisfait par tous les reçus."
+  },
+  {
+   "id": "C1-03",
+   "titre": "Séparation des statuts exact_full_regular / exact_full_quotient_certified / refus : acceptée mais non implémentée",
+   "gravite": "basse",
+   "categorie": "protocole",
+   "constat": "Le plan exige trois statuts distincts ; le développeur l'a accepté dans le canal. Le code n'expose que complete_relative, plus un compteur extra_shell_balls. Or toutes les trames du contrat contiennent des coquilles étendues : un statut « régulier » ne s'y appliquerait jamais.",
+   "preuves": [
+    "morsehgp3D_v9/docs/PLAN_V9.md:109-110",
+    "audits/COORDINATION_MORSEHGP3D_V9.md:131 (« accepté »)",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:26-31, 557 (un seul statut de succès)",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:509 et bench/tower_probe.cpp:193 (compteur extra_shell_balls seulement)"
+   ],
+   "consequence": "L'engagement contractuel du canal n'est pas tenu. Un lecteur de reçu doit déduire le domaine d'un compteur au lieu de lire un statut.",
+   "action_proposee": "Soit publier un champ domain ∈ {regular, quotient_extended} lié à extra_shell_balls > 0, soit retirer la séparation par écrit dans le canal une fois C1-01 enregistré. Dans ce second cas, un seul statut complete_relative suffit.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_A_MATH_MOTEUR_20260922.md § 1, action V9-1 (demande d'origine). Apport : la non-implémentation et le fait que 100 % des trames sont hors régularité."
+  },
+  {
+   "id": "C1-04",
+   "titre": "Admission p + q_min ≤ K+1 et calendrier [p+q_min−1, p+u] : conformes à l'indice de Morse et aux théorèmes",
+   "gravite": "info",
+   "categorie": "correction",
+   "constat": "Pour une boule de coquille U, c est critique pour d_k si et seulement si p < k ≤ p+u, avec un indice μ = p+u−k. π0 ne change qu'à μ = 0 (naissance à k = p+u) et à μ = 1 (u bras). En position générale (u = q), cela revient à K ∈ {p+q−1, p+q}. Côté manuscrit : une coface Gabriel dans B impose I ⊆ σ, donc p + q_min ≤ K+1. Hors position générale, l'exclusion est fondée par le Th. 4.2 avec s = q_min. Le code implémente exactement cette fenêtre. Mon contrôle numérique du lien inférieur donne : vide pour j = u, u composantes pour j = u−1, connexe pour j ≤ u−2 (u = 2, 3, 4).",
+   "preuves": [
+    "docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md:42-47, 66, 120",
+    "docs/SPECIFICATION_MORSEHGP3D.md:128-151",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:492-494",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:962-966, 997-998",
+    "morsehgp3D_v9/src/tower/forest/local_plateau.hpp:108",
+    "scratchpad/agents/lentille1/lower_link_pi0.py (sha256 e328e4a5…) PASS",
+    "hgp_block_oracle.py : aucune naissance sous la fenêtre ; ancre K−1 toujours présente"
+   ],
+   "consequence": "Aucun défaut. L'objet traité par la chaîne coïncide avec les événements H0 de d_K à K ≤ Kmax.",
+   "action_proposee": "Aucune. Citer cette correspondance dans la note de C1-01.",
+   "recoupe_audit_existant": ""
+  },
+  {
+   "id": "C1-05",
+   "titre": "Question Q3 de la lentille 11 (fenêtre d'inertie par le plus grand support) : valide pour l'inertie, sans gain utile",
+   "gravite": "info",
+   "categorie": "performance",
+   "constat": "Le Th. 4.2 vaut pour tout support minimal. Les ordres K ≤ p + s_max − 2 sont donc inertes, alors que le calendrier commence à p + q_min − 1. Mais leurs ancres restent nécessaires : une facette Gabriel de cette boule n'a pas d'intrus pour descendre, donc son résolveur a besoin de l'ancre. Seul le quotient local pourrait être court-circuité. Les boules concernées sont 0,006 à 0,041 % du catalogue sur les trames (R7b).",
+   "preuves": [
+    "morsehgp3D_v9/docs/audit_v8/11_objet_et_preuves.md § 6, question 3",
+    "morsehgp3D_v7/docs/PLATEAUX_FULL_ET_ANCRES.md:104-107 (inertie ≠ ancre inutile)",
+    "morsehgp3D_v9/src/tower/forest/local_plateau.hpp:108",
+    "R7b catalogue.extra_shell_balls / balls : 227/1 306 696 … 1 301/5 483 320"
+   ],
+   "consequence": "Fermer la question sans action.",
+   "action_proposee": "Noter la réponse au canal ; ne rien porter.",
+   "recoupe_audit_existant": "docs/audit_v8/11_objet_et_preuves.md, question 3 (posée, non tranchée)"
+  },
+  {
+   "id": "C1-06",
+   "titre": "Oracle différentiel indépendant à échelle intermédiaire : diagrammes H0 par K via mosaïques d'ordre k ou rhomboïdes",
+   "gravite": "basse",
+   "categorie": "preuve",
+   "constat": "L'objet est π0 de la bifiltration de multicouverture. Les mosaïques de Delaunay d'ordre k munies de leur fonction rayon (Edelsbrunner–Osang, référence déjà au dépôt) ont la même persistance que la k-multicouverture. Le dépôt écarte cette voie comme cœur produit (CATALOGUE_CRITIQUE_3D § 17), à juste titre. En revanche, elle n'a jamais été proposée comme oracle de complétude entre T2 (n ≤ 14) et les trames entières.",
+   "preuves": [
+    "docs/math/DEFINITION_HGP_3D.md:3-20 (multicouvertures normatives)",
+    "docs/math/CATALOGUE_CRITIQUE_3D.md:386-398 (rhomboid tiling écarté comme cœur ; référence Edelsbrunner–Osang)",
+    "docs/references/references.toml:21",
+    "morsehgp3D_v9/audits/ETAT_COURANT.md (T2 ne prouve pas l'absence de clé omise à grande taille)"
+   ],
+   "consequence": "Sans oracle intermédiaire, la complétude du générateur n'est testée qu'à n ≤ 14 (plus les différentiels v8 à 1k–8k sur le flux, pas sur la tour).",
+   "action_proposee": "Prototyper hors chemin produit, à n = 2 000–8 000 extraits des trames, un calcul exact des diagrammes H0 par K à partir des mosaïques d'ordre k. Le comparer aux diagrammes dérivés des forêts v9 (règle de l'aîné, multiensembles de paires naissance–mort). Faisabilité en 3D exacte : supposée, à vérifier avant tout engagement.",
+   "recoupe_audit_existant": "AUDIT_A_ARCHITECTURE_K_GABRIEL_20260922.md:279-283 (mosaïque globale comme comparaison de recherche). Apport : l'usage comme oracle de complétude, pas comme route."
+  },
+  {
+   "id": "C1-07",
+   "titre": "Multiplicités : la spec compte les distances avec multiplicité, la v9 refuse les doublons ; sans effet sur les trois trames",
+   "gravite": "basse",
+   "categorie": "completude",
+   "constat": "La spec § 3 définit D_k avec multiplicité. La tour refuse les positions dupliquées (invalid_input). Sur 08/000000, 000100 et 000200, aucun doublon XYZ n'existe et la grille 1 mm ne fusionne rien : l'objet v9 égale donc l'objet de la spec. Des trames multi-échos ou à passages superposés seraient refusées, ou dédoublonnées par le préparateur, ce qui changerait l'objet.",
+   "preuves": [
+    "docs/SPECIFICATION_MORSEHGP3D.md:67, 91",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:879-880",
+    "morsehgp3D_v8/docs/PRECISION_FLOAT32_ET_GRILLE_20260921.md:108-116 (retours = sites à 1 mm)"
+   ],
+   "consequence": "Écart déclaré et sans effet mesuré sur le contrat actuel, mais bloquant pour une qualification multi-séquences.",
+   "action_proposee": "Écrire la politique dans la passation : refus fail-closed, ou sites pondérés (un site de multiplicité m naît à K ≤ m au niveau 0). Graver une fixture de doublon.",
+   "recoupe_audit_existant": "docs/audit_v8/11_objet_et_preuves.md, point 9 et question 2 ; PASSATION « sites distincts ». Apport : confirmation qu'il n'y a aucun effet sur les trois trames du contrat."
+  },
+  {
+   "id": "C1-08",
+   "titre": "Déf. 22 ensembliste contre composantes identifiées : la v9 suit π0, conforme à la spec",
+   "gravite": "info",
+   "categorie": "documentation",
+   "constat": "θ_K(r) est un ensemble d'ensembles de points : deux composantes de même support s'y confondraient. La v9 et la spec § 3 identifient les composantes par identité (foncteur π0). Je n'ai trouvé aucun cas de composantes distinctes à ensembles égaux sur 1 408 événements de l'oracle ; aucune preuve d'impossibilité n'est connue.",
+   "preuves": [
+    "manuscrit Déf. 21–22 (l. 1893-1920) et Th. 2 (l. 1986)",
+    "docs/SPECIFICATION_MORSEHGP3D.md:99-103",
+    "morsehgp3D_v7/docs/AUDIT_NIVEAUX_GABRIEL_20260905.md:21-23, 126-128",
+    "hgp_block_oracle.py : contrôle equal_point_sets, zéro cas"
+   ],
+   "consequence": "Aucune sur la v9. Ambiguïté normative seulement si un tel cas existe.",
+   "action_proposee": "Garder π0 comme objet de référence ; préciser dans la future note de C1-01 que θ_K est la projection ensembliste de la forêt.",
+   "recoupe_audit_existant": ""
+  }
+ ],
+ "questions": [
+  "Deux composantes distinctes de Γ_K(r) peuvent-elles avoir le même ensemble de points ? Aucun cas sur 1 408 événements exacts ; ni preuve ni contre-exemple. Cela décide si la Déf. 22 ensembliste coïncide avec π0.",
+  "Qui enregistre l'extension non régulière (B1–B8) au registre docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md, et sous quel statut ? proved_here après relecture croisée par A ou B, ou conditional_theorem relatif au catalogue complet ?",
+  "Le développeur veut-il vraiment trois statuts (regular / quotient_certified / refus), ou un seul complete_relative assorti d'un champ de domaine, sachant que 100 % des trames du contrat sont hors régularité ?",
+  "Quelle politique de multiplicité pour les trames multi-échos ou à passages superposés : refus fail-closed, ou sites pondérés conformes à la spec § 3 ?",
+  "Existe-t-il une implémentation exacte en 3D des mosaïques de Delaunay d'ordre k ou des rhomboïdes utilisable comme oracle à 2 000–8 000 points et K ≤ 10 (coût, gestion des dégénérescences de grille) ?",
+  "Le lecteur de réception G4 peut-il recevoir la couverture de la racine finale par ordre (bitset de n bits) sans alourdir la sonde, pour compléter les invariants births + merges = nodes et parents = nodes − 1 ?"
+ ]
+}

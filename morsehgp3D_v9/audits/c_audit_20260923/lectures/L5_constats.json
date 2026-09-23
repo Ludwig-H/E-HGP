@@ -1,0 +1,217 @@
+{
+ "findings": [
+  {
+   "id": "F5-01",
+   "titre": "Phase A séquentielle de K10 : accès dispersés au catalogue de 224 o par bloc et par facette, dont un contrôle d'antériorité redondant",
+   "gravite": "moyenne",
+   "categorie": "performance",
+   "constat": "Sur le fil unique de chaque ordre, order_lots lit balls[program[j]].level pour délimiter les lots, et visit_block_at lit la BallData du bloc (arité, n_I, n_U, ids). Chaque facette relit en plus balls[target].level pour revérifier que la cible est antérieure (FBT:562), alors que la phase 0 l'a déjà imposé à chaque maillon de la chaîne (FBT:1056, 1083) et à chaque consommateur (FBT:1359, 1364). programs[K] est trié par niveau, mais les BallId suivent l'ordre des clés : ces lectures sont dispersées dans un tableau de 1,23 Go (sizeof(BallData)=224, niveau à l'offset 80, ids aux offsets 132-216, soit 2 à 3 lignes de cache par bloc).",
+   "preuves": [
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:657-666 (délimitation des lots via balls[program[..]].level)",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:545-566 (order_block, relecture balls[target].level l.562)",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:1463-1483 (visit_block_at lit la BallData)",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:1056,1083,1359,1364 (antériorité déjà imposée en phase 0)",
+    "sizes.cpp (scratchpad agents/lentille5) : BallData 224 o, level_off 80, interior_off 132, shell_off 168",
+    "morsehgp3D_v9/audits/PHASE_A_GRAPHE_TEMPOREL_20260923.md (sidecar A : K10 2 117 675 blocs, 3 831 431 facettes, phase A 2 179,7 ms CPU local)",
+    "audits/COORDINATION_MORSEHGP3D_V9.md, 09 h 10 (développeur : 1,49 Gcyc pour 3,8 M recherches de racine, environ 390 cycles chacune)"
+   ],
+   "consequence": "Estimé : environ 10 M lectures de lignes de cache dispersées, sans localité, dans l'ordre K10, qui borne le mur de la phase A. C'est probablement une part importante des 2,18 s CPU mesurées localement (supposé ; aucune ventilation par ligne n'est publiée). Cela ne change pas l'objet.",
+   "action_proposee": "En phase 0, qui est parallèle, projeter pour chaque ordre un tableau compact dans l'ordre du programme : rang de niveau u32, n_I, n_U, arité et plage de cibles. Remplacer le contrôle de FBT:562 par une comparaison de rangs u32, ou le réserver au mode qualification. Mesurer en rdtsc la phase A de K10 avant et après sur le même catalogue figé, avec une égalité sérialisée de toutes les sorties.",
+   "recoupe_audit_existant": "PHASE_A_GRAPHE_TEMPOREL_20260923.md et PHASE_A_FULL_LOTS_ET_PARALLELISME_20260923.md (coût des recherches de racine, couture phase A). Ajout : identification des accès dispersés au catalogue et du contrôle d'antériorité redondant sur le chemin séquentiel."
+  },
+  {
+   "id": "F5-02",
+   "titre": "Niveau exact de 48 o recopié dans chaque nœud, historique et contribution, alors qu'un rang u32 exact suffit après le tri global",
+   "gravite": "moyenne",
+   "categorie": "performance",
+   "constat": "Après le tri exact par niveau (FBT:973-993), les lots sont des suites d'égalité exacte. Pourtant, chaque nœud d'historique (History.levels), chaque FullNode (64 o), chaque FullDatedContribution (80 o) et chaque FullCoverageBatch (80 o) stocke un ExactLevel de 48 o. Chaque comparaison coûte deux produits croisés U320 : MonotoneHistory, admitted, order_block, encodage. Un rang dense des niveaux distincts (≤ B+1 valeurs, u32) est un codage exact de l'ordre et de l'égalité, décidés une seule fois par le tri. Une coupe publique se ramène à un rang par dichotomie dans la table des niveaux distincts.",
+   "preuves": [
+    "morsehgp3D_v9/src/tower/lanes/level.hpp:36-58 (ExactLevel, compare_exact_level par U320)",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:146-148, 170-191, 538, 562",
+    "morsehgp3D_v9/src/tower/forest/full_certificate.hpp:37-41 ; full_coverage_certificate.hpp:142-150, 197-200, 241",
+    "sizes.cpp : ExactLevel 48, FullNode 64, FullDatedContribution 80, FullCoverageBatch 80",
+    "receipts/g4_tower_r7b_20260923/vm/probe_4.stdout : N=7 426 215 nœuds, C=4 414 230 contributions (000000/K10)"
+   ],
+   "consequence": "Calcul : 297,0 Mo (FullNode 64→24 o), 211,9 Mo (contributions 80→32 o) et 326,8 Mo transitoires (History 48→4 o) à 000000/K10 sur 40 k sites, soit environ 0,8 Go sur un RSS de 4,81 Gio. S'y ajoutent des comparaisons en O(1) au lieu d'U320 sur le chemin séquentiel. C'est aussi un préalable à des tableaux GPU et au régime de 30 M sites.",
+   "action_proposee": "Introduire un LevelRank u32 et une table distinct_levels (ExactLevel) dans validate_catalogue. Utiliser le rang dans History, les brouillons, les forêts et les contributions. Garder l'API de coupe en ExactLevel par dichotomie. Porte : égalité sérialisée complète contre le format actuel sur les fixtures T2 et un catalogue LiDAR figé, plus un mutant « rang décalé ».",
+   "recoupe_audit_existant": ""
+  },
+  {
+   "id": "F5-03",
+   "titre": "Brouillons en vecteurs imbriqués recopiés en CSR, banque de lignes à deux vecteurs ; sur LiDAR, contributions = naissances dans 60/60 exécutions G4",
+   "gravite": "moyenne",
+   "categorie": "performance",
+   "constat": "La phase A construit Draft.batches sous la forme vector<Batch{vector<Action{vector parents, vector contributions}>}>. finish() recopie ensuite tout dans les tableaux CSR du certificat, puis libère les brouillons. Estimé : environ deux allocations de tas par lot singleton non inerte (actions du batch, plus contributions ou parents récupérés par swap depuis block.roots), soit environ 2×7,4 M allocations sur K1..K10 et environ 3,3 M dans l'ordre K10 séquentiel. La banque crée ensuite deux vecteurs par ligne (4,41 M lignes). Sur toutes les exécutions R5, R6 et R7b, le nombre de contributions égale le nombre de naissances à chaque ordre : aucune continuation contributive ni contribution de fusion. Chaque ligne de naissance duplique donc l'I/U de sa BallId, déjà présent dans le catalogue.",
+   "preuves": [
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:234-237, 572-644 (brouillons), 679-705 (lignes de population), 388-427 (finish)",
+    "morsehgp3D_v9/src/tower/forest/full_coverage_certificate.hpp:206-303 (recopie en CSR)",
+    "receipts/g4_tower_r{5,6,7b}_20260923/vm/probe_*.stdout : contributions == births par ordre, 60/60 cas (script de lecture de cet audit)",
+    "sizes.cpp : FullCoverageAction 48 o, FullCoverageBatch 80 o, FullCoveragePopulation 48 o"
+   ],
+   "consequence": "Double représentation et allocateur sollicités sur le chemin séquentiel par K. La phase B (0,7 s en W8 local, selon le développeur) et une partie de la finition paient une copie du catalogue. Le coût exact n'est pas mesuré.",
+   "action_proposee": "Écrire directement les tableaux CSR en phase A (rang de niveau, décalage et nombre de parents, parents, BallId de naissance) et référencer les populations par BallId. Ne matérialiser la banque qu'à l'export ; garder le journal général pour les contributions non régulières. Mesurer allocations, CPU et RSS par phase ; exiger une égalité sérialisée.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_B_RESIDENCE_CHAINE_20260922.md (allocations par site à K1, arène/CSR) ; CONTRE_AUDIT_B_FULL_PARALLELE_WIP_20260923.md (swap qui vide la capacité). Ajout : extension à tous les ordres, recopie brouillon→forêt, et constat mesuré contributions = naissances sur 60/60 exécutions."
+  },
+  {
+   "id": "F5-04",
+   "titre": "La phase A de K=Kmax, la plus longue section séquentielle, ne démarre qu'après la phase 0 de tous les ordres",
+   "gravite": "moyenne",
+   "categorie": "concurrence",
+   "constat": "run_orders_parallel prépare les cibles statiques de K=2..Kmax dans l'ordre croissant, sans lancer de lots. Ensuite seulement, il lance la phase A de tous les K, soit au plus Kmax tâches sur les 48 fils du G4. Le mur de la phase A est celui de l'ordre K10. Or la phase A d'un ordre K ne dépend que de ses propres cibles et de données immuables. Préparer d'abord K=Kmax, lancer tout de suite sa phase A sur un fil, puis préparer les autres K sur les fils restants recouvrirait la section séquentielle la plus longue. De même, la phase C de K peut démarrer dès que A(K) et A(K−1) sont closes.",
+   "preuves": [
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:458-495",
+    "audits/COORDINATION_MORSEHGP3D_V9.md, 06 h 30 (local W8 : cibles statiques 15,3 s, dont K10 5,8 s et K9 3,5 s ; lots 2,8 s)",
+    "morsehgp3D_v9/audits/PHASE_A_GRAPHE_TEMPOREL_20260923.md (phase A de K10 : 2 179,7 ms CPU, local)"
+   ],
+   "consequence": "Estimé : jusqu'à min(phase 0 de K<Kmax, phase A de Kmax) masquable, peut-être de l'ordre de la seconde au plus sur la tour K10 de 4 s en G4. Supposé : aucune ventilation G4 par phase n'existe.",
+   "action_proposee": "Ordonnanceur en pipeline par K décroissant, avec un budget de fils partagé entre phase 0 et phases A/C. Conserver la priorité d'échec au plus petit K en tamponnant les échecs, y compris ceux de la phase 0. Porte : sorties identiques en 1/4/48 fils et échecs injectés en phase 0, A et C. Mesurer le mur par phase.",
+   "recoupe_audit_existant": "PREFETCH_GEOMETRIE_FULL_PAR_K_20260923.md (A : jobs géométriques calculables pendant la fermeture d'un autre K) ; CONTRE_AUDIT_B_FULL_PARALLELE_WIP_20260923.md (au plus K tâches). Ajout : ordre décroissant concret, pour masquer le plancher K10."
+  },
+  {
+   "id": "F5-05",
+   "titre": "Compteurs FULL calculés mais non publiés, et aucun chrono par phase de la tour",
+   "gravite": "moyenne",
+   "categorie": "mesure",
+   "constat": "FullBallStats calcule déjà de nombreux compteurs que la sonde ne publie pas : requêtes, clés uniques et semis par K, Q/H/T après échange, lots singletons et slots DSU, compteurs lower_*, pas à rayon égal ou descendant, max_chain_steps, interior_ranges et intruder_power_tests. La sonde n'en publie que 23. L'identité v7 MEB = (U−S)+D−H ne peut donc pas être contrôlée sur les reçus. Seule MEB = anchor_hits + intruder_queries l'est ; elle tient sur 24/24 cas R7b. La tour n'est pas non plus ventilée par phase (validation, phase 0 par K, A par K, B, C par K, banque, encodage).",
+   "preuves": [
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:34-61 (champs de FullBallStats)",
+    "morsehgp3D_v9/bench/tower_probe.cpp:213-223 (tower_work publié)",
+    "morsehgp3D_v7/docs/SEMIS_APRES_ECHANGE_20260911.md (identités Q=D, H=T, MEB=U−S+D−H)",
+    "receipts/g4_tower_r7b_20260923/vm/probe_*.stdout (identité MEB = hits + intrus : 24/24)"
+   ],
+   "consequence": "Impossible de savoir où passent les 3,2 à 4,4 s de tour G4, ni de juger le recouvrement (F5-04), la phase A maigre (F5-01) ou le taux de répétition facette/clé qui conditionne un cache ou un GPU.",
+   "action_proposee": "Publier ces compteurs, avec montée de schéma de sonde et de plan, et ajouter tower_phase_ms par phase et par K. Le lecteur vérifie les identités Q=D, H=T≤min(D,U−S) et MEB=U−S+D−H ; un mutant « compteur non fusionné » doit être tué.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_B_FULL_COUTS_ET_INTERFACES_20260922.md et PHASE_A_* (demandes de publication par K). Ajout : les compteurs existent déjà dans le code ; identités précises à imposer."
+  },
+  {
+   "id": "F5-06",
+   "titre": "FULL ne détecte une omission de catalogue que si la boule omise est atteinte comme terminal de descente",
+   "gravite": "moyenne",
+   "categorie": "completude",
+   "constat": "Pendant l'exécution, les seuls détecteurs d'une boule omise sont full_ball_static_missing_weak_terminal, full_ball_missing_weak_terminal et missing_closed_anchor. Ils se déclenchent quand une descente atteint une facette sans intrus dont la clé est absente. Une naissance (K-set) ou un bloc de fusion omis, dont la population n'est jamais l'extrémité d'une chaîne, donne une tour cohérente (live==1, naturalité verticale satisfaite) mais fausse, publiée en complete_relative.",
+   "preuves": [
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:1068-1069, 1420-1426",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:672-675 (seul invariant global : une composante finale)",
+    "morsehgp3D_v9/audits/ETAT_COURANT.md:37-44 (complete_relative ne prouve pas l'absence de clé omise)"
+   ],
+   "consequence": "complete_relative reste strictement relatif au générateur. La porte de chaîne n'exerce le détecteur que sur les facettes choisies par le catalogue lui-même.",
+   "action_proposee": "Ajouter un juge d'échantillon déterministe : lancer des descentes depuis des facettes indépendantes du catalogue (par exemple les K plus proches voisins de sites tirés par hachage) ; chacune doit terminer sur une boule cataloguée. Publier le nombre de sondes et de détections. Cela augmente la probabilité de détection sans prouver la complétude ; garder T2 pour n≤14.",
+   "recoupe_audit_existant": "ETAT_COURANT.md et COMPLETUDE_Q4_CLE_REMBOURREE_20260923.md (clé entièrement omise non détectable). Ajout : caractérisation de ce que FULL détecte réellement, et un juge d'échantillon exécutable dans FULL."
+  },
+  {
+   "id": "F5-07",
+   "titre": "La tour revalide intégralement un catalogue que la chaîne vient de recenser exactement",
+   "gravite": "basse",
+   "categorie": "performance",
+   "constat": "check_ball_locally réévalue toutes les puissances I/U et recalcule clé et niveau de chaque support régulier (formes, pgcd, niveau). La passe 2 reconstruit les ShellTable des coquilles étendues. Or la chaîne vient de classer les mêmes puissances dans ball_census et de construire les mêmes tables, sur le même index et dans le même processus.",
+   "preuves": [
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:822-875, 940-961",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:465-498",
+    "morsehgp3D_v9/src/tower/pipeline/census.hpp:188-201",
+    "audits/COORDINATION_MORSEHGP3D_V9.md, 06 h 30 (validation : 1,8 s sur une tour de 22,0 s, W8 local)"
+   ],
+   "consequence": "Estimé : quelques centaines de ms de CPU sur G4 (la passe 1 est parallèle) et des accès supplémentaires à tout le catalogue.",
+   "action_proposee": "Entrée interne « certifiée par la chaîne » avec juge d'échantillon déterministe (sous-ensemble par hachage, plus toutes les coquilles étendues). Validation complète maintenue dans les portes et en qualification. Mesurer.",
+   "recoupe_audit_existant": ""
+  },
+  {
+   "id": "F5-08",
+   "titre": "La couture GPU de la phase 0 (FullBallBatchResolver) est incompatible avec les ordres K parallèles ; la proposition MEB peut passer en FP32",
+   "gravite": "moyenne",
+   "categorie": "performance",
+   "constat": "La voie run_orders_parallel n'est prise que sans résolveur externe. Avec un résolveur externe, on retombe sur la boucle séquentielle par K. La phase 0 est pourtant la plus parallélisable : travaux indépendants MEB K≤10, clé, intrus. Sa proposition Welzl ne décide rien et peut donc être calculée en FP32 sur un GPU dont le débit FP64 est réduit (supposé pour le GB202 de la RTX PRO 6000, à vérifier par microbenchmark sur G4). La frontière de confiance du batch externe reste celle notée par B.",
+   "preuves": [
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:326-331",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:1128-1228 (prepare_external_batch)",
+    "morsehgp3D_v9/src/tower/forest/anchor_meb.hpp:9-18, 294-352 (proposition sans autorité, vérification entière)",
+    "receipts/g4_tower_r7b_20260923/vm/probe_4.stdout (11,3 M MEB, 7,1 M intrus, 403 M nœuds)"
+   ],
+   "consequence": "Sans refonte, un port GPU de la phase 0 perdrait le parallélisme entre ordres, et une proposition FP64 serait lente.",
+   "action_proposee": "API batch couvrant tous les K en un lancement, avec rendu transactionnel par ordinal. Proposition FP32, vérification entière avec repli CPU exact. Porte différentielle CPU/GPU sur les cibles BallId, cas dégénérés compris. Mesurer transferts et mur.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_B_FULL_COUTS_ET_INTERFACES_20260922.md (frontière de confiance du batch). Ajout : incompatibilité avec les ordres parallèles, et FP32 légitime."
+  },
+  {
+   "id": "F5-09",
+   "titre": "Images verticales séquentielles par ordre : la requête est un ancêtre pondéré, parallélisable",
+   "gravite": "basse",
+   "categorie": "performance",
+   "constat": "La phase C et le chemin séquentiel normalisent les images par MonotoneHistory, un curseur chronologique monothread. Or, le long de next, les niveaux croissent strictement (les parents sont des racines des lots antérieurs ; c'est d'ailleurs imposé en FBT:175). Donc root_at(t, ℓ) est le dernier ancêtre de t de niveau ≤ ℓ : une requête d'ancêtre pondéré, résoluble en parallèle par saut binaire ou par tri hors ligne.",
+   "preuves": [
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:160-205, 531, 539, 707-734",
+    "audits/COORDINATION_MORSEHGP3D_V9.md, 06 h 30 (images : 0,6 s en W8 local)"
+   ],
+   "consequence": "Supprime une section séquentielle par K bornée par K10 (1,64 M nœuds), au prix de O((N+Q) log N) de mémoire ou de travail. Gain à mesurer.",
+   "action_proposee": "Prototype hors produit sur un catalogue figé ; égalité de lower_nodes et de tous les contrôles de naturalité ; mesurer mémoire et mur.",
+   "recoupe_audit_existant": ""
+  },
+  {
+   "id": "F5-10",
+   "titre": "Classification d'exceptions : des invariants internes de ShellTable sont rendus comme kInvalidInput, et std::out_of_range n'est pas capturé par l'API FULL",
+   "gravite": "basse",
+   "categorie": "protocole",
+   "constat": "ShellTable::rank lève std::invalid_argument pour des incohérences internes (local.strict_face_exists, local.hemisphere_identity) ; build_full_ball_tower les traduit en kInvalidInput « full_ball_local_census_invalid ». extra.at(id) lèverait std::out_of_range, que l'API publique ne capture pas ; seule la chaîne capture std::exception. En phase A et C parallèles, une exception qui n'est pas un Failure remonte par ordre d'arrivée, pas par plus petit K.",
+   "preuves": [
+    "morsehgp3D_v9/src/tower/forest/local_plateau.hpp:151,172,188",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:1485, 1643-1657",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:575-578",
+    "morsehgp3D_v9/src/tower/parallel/pool.hpp:95-105"
+   ],
+   "consequence": "Raison ou statut trompeur, ou exception qui s'échappe de l'API publique, sur des cas en principe inatteignables après validation. Aucune sortie partielle n'est publiée.",
+   "action_proposee": "Type d'exception dédié aux invariants locaux, rendu kInvariantViolated ; capture de std::exception dans build_full_ball_tower ; porte par injection.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_B_FULL_PARALLELE_WIP_20260923.md (exceptions non-Failure rendues par ordre d'arrivée). Ajout : les cas ShellTable et out_of_range."
+  },
+  {
+   "id": "F5-11",
+   "titre": "README : « définie et prouvée en v7 » surévalue le statut de preuve de FULL",
+   "gravite": "basse",
+   "categorie": "documentation",
+   "constat": "Le registre classe la Prop. 6 et le Th. 5 du manuscrit false_in_general, et le fold des cofaces Gabriel false. La reconstruction FULL régulière y est conditional_theorem. L'extension aux plateaux repose sur les notes d'audit v7 (BALL_ANCHORS, receipts_plateaux_full) et sur des modèles bornés. La v9 n'a pas de section « chaîne de preuve » reliant son code à ces sources.",
+   "preuves": [
+    "morsehgp3D_v9/README.md:23",
+    "docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md:40-41, 129, 131-134, 142",
+    "morsehgp3D_v7/audits/receipts_plateaux_full_20260906/BALL_ANCHORS.md §1-5"
+   ],
+   "consequence": "Un lecteur peut croire FULL prouvé sans hypothèse, ou fondé sur le Th. 5.",
+   "action_proposee": "Ajouter à PROVENANCE ou au PLAN v9 une chaîne de preuve courte : Th. 2 externe, ancres par boule (conditionnel), descente lexicographique, quotient local, portes T2 bornées, obligation de complétude du générateur.",
+   "recoupe_audit_existant": "AUDIT_A_ARCHITECTURE_K_GABRIEL_20260922.md (E5 et Prop. 6 déjà notés). Ajout : le libellé du README et la chaîne de preuve manquante."
+  },
+  {
+   "id": "F5-12",
+   "titre": "Filtre flottant de l'ordre des niveaux : borne d'erreur vérifiée par script exact",
+   "gravite": "info",
+   "categorie": "preuve",
+   "constat": "level_approximation, avec la marge 1−2^-46, décide x<y seulement si l'ordre exact est x<y, à condition que l'erreur relative reste sous 2^-49. Script exact (Fraction, binary64 Python arrondi au plus proche) : 200 000 cas (formes q2, q3, q4, mots adverses, demi-points) donnent une erreur maximale de 2^-51,39 ; 33 744 décisions en quasi-égalité sont toutes correctes.",
+   "preuves": [
+    "morsehgp3D_v9/src/tower/lanes/level.hpp:67-87",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:973-993",
+    "scratchpad agents/lentille5/check_level_filter.py (sortie : max_rel_err_log2 -51,39, within_2^-49 True, unsound 0)"
+   ],
+   "consequence": "Confirme le tri par niveau sous FE_TONEAREST. Les niveaux valent au moins 1/4, donc aucun sous-normal : FTZ/DAZ sans effet.",
+   "action_proposee": "Aucune. Éventuellement, graver ce contrôle comme porte Python (sans assert) si le filtre évolue.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_B_FULL_PARALLELE_WIP_20260923.md (filtre sous FE_TONEAREST avec repli exact). Ajout : vérification numérique de la borne."
+  },
+  {
+   "id": "F5-13",
+   "titre": "History::root_at est du code mort",
+   "gravite": "info",
+   "categorie": "hygiene",
+   "constat": "La structure History garde une méthode root_at jamais appelée ; seul MonotoneHistory::root_at est utilisé.",
+   "preuves": [
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:146-156",
+    "grep root_at : appels uniquement l.722-726, 1531-1533, 1563, 1617"
+   ],
+   "consequence": "Aucune.",
+   "action_proposee": "Supprimer, ou documenter comme lecteur de secours.",
+   "recoupe_audit_existant": ""
+  }
+ ],
+ "questions": [
+  "Quelle est la ventilation G4 réelle des 3,2 à 4,4 s de tour K10 : validation, phase 0 par K, phase A par K, phase B, phase C par K, banque, encodage ? Sans elle, F5-01, F5-04 et F5-09 ne peuvent pas être hiérarchisés.",
+  "Le contrat « tour complète en mémoire » impose-t-il le format actuel (ExactLevel par nœud, banque de lignes I/U) ? Une représentation exacte équivalente serait-elle acceptée : rangs de niveau u32 et table des niveaux distincts, CSR, populations par BallId avec banque matérialisée à l'export ?",
+  "La revalidation intégrale du catalogue dans FULL doit-elle rester dans le chrono contractuel alors que la chaîne vient de recenser exactement les mêmes boules, ou un juge d'échantillon suffit-il sur ce chemin interne ?",
+  "Le contrôle d'antériorité de chaque facette en phase A (FBT:562), déjà imposé en phase 0, est-il une défense en profondeur exigée sur le chemin produit, ou peut-il passer en mode qualification ?",
+  "Quels sont, par K sur LiDAR, les taux représentants/clés uniques/semis et la longueur des chaînes ? Ces compteurs existent déjà (FBT:48-51) mais ne sont pas publiés ; ils décident de l'intérêt d'un cache ou d'un GPU pour la phase 0.",
+  "Contributions = naissances sur les 60 exécutions G4 à 1 mm sans sol : ce régime tient-il sur trames brutes avec sol et sur d'autres séquences ? C'est la condition pour faire de l'encodage « naissances par BallId » le chemin rapide par défaut.",
+  "Pour la voie GPU de la phase 0 : quel est le débit FP64 effectif de la RTX PRO 6000 Blackwell sur G4, et quel taux de repli exact donne une proposition Welzl en FP32 sur les facettes LiDAR ?"
+ ]
+}

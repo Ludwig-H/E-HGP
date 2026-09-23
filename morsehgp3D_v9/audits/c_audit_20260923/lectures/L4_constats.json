@@ -1,0 +1,211 @@
+{
+ "findings": [
+  {
+   "id": "L4-01",
+   "titre": "La porte T2 de chaîne ne juge que K_max=10 : élagage presque vide sur 12–14 sites, K5 jamais jugé par oracle",
+   "gravite": "moyenne",
+   "categorie": "preuve",
+   "constat": "chain_census_tower_gate code K_max=10 en dur pour l'inventaire, la chaîne et la tour. Sur ses trois nuages, l'oracle exact montre que K10 ne rejette que 1 à 3 boules positives par fixture (65/66, 207/210, 252/253 gardées), contre 21/34/76 rejets à K5. Les certificats dépendant de K, dont une faute causerait une omission, ne sont donc presque pas exercés. K_max=5, repli du contrat, n'est jugé par oracle nulle part au niveau de la chaîne : static_paths et order_failure tournent à K5 mais sont différentielles, et wspd_q34_gate juge K5 surtout à s=12. Contrôle local (testé) : 200 appels K=1..10, s=8/12, W=1/2 sur les trois nuages T2 et deux nuages LiDAR de 14 sites donnent 24 472 lignes égales à l'oracle en fractions, 0 écart.",
+   "preuves": [
+    "morsehgp3D_v9/tests/chain/chain_census_tower_gate.cpp:174",
+    "morsehgp3D_v9/tests/chain/chain_census_tower_gate.cpp:178",
+    "morsehgp3D_v9/tests/chain/chain_census_tower_gate.cpp:181",
+    "morsehgp3D_v9/tests/chain/chain_census_tower_gate.cpp:207",
+    "morsehgp3D_v9/CMakeLists.txt:125-133",
+    "morsehgp3D_v9/tests/gen/wspd_q34_gate.cpp:701",
+    "morsehgp3D_v9/tests/gen/wspd_q34_gate.cpp:734",
+    "morsehgp3D_v9/docs/PLAN_V9.md:134-135",
+    "scratchpad/agents/lentille4/oracle_catalogue.py (sha256 876bfe68…) : line12 66/11/21/30/45/65, shell14 210/39/78/104/176/207, spatial12 253/27/61/99/177/252 (total, puis catalogue à K=1,2,3,5,10)",
+    "scratchpad/agents/lentille4/dump.txt (sha256 b4940898…) + compare.py : runs 200, rows 24472, mismatches 0"
+   ],
+   "consequence": "Une faute d'élagage qui omet des clés à K5 peut passer toute la suite CTest. La porte T2, seule à juger la configuration exacte de la chaîne, reste presque aveugle à ce risque.",
+   "action_proposee": "Paramétrer large_case par K_max ∈ {1,2,3,5,10}, avec check_large_cuts limité à k ≤ K_max. Ajouter les deux nuages LiDAR de 14 sites, la fixture q4 u12 de l'auditeur A (§ 5) et la fixture q4 sans face q3 de B. Planchers : boules positives rejetées > 0 à K5. Ajouter un mutant compilé du générateur (seuil de voie morte ou de saturation décalé de 1) qui doit mourir à K5 avec cause T2.census.exhaustive_ball_inventory.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_A_MATH_MOTEUR_20260922.md § 5 (fixture q4 u12 à greffer, toujours absente) ; CONTRE_AUDIT_B_PORTE_PUBLIQUE_T2_20260922.md (porte hors dépôt, K1..3). Ajout : mesure de la vacuité à K10, absence de K5 au niveau de la chaîne, contrôle K1..10 passé sur 200 appels."
+  },
+  {
+   "id": "L4-02",
+   "titre": "Aucun juge d'omission à l'échelle ; la tour ne détecte qu'une partie des omissions et aucune à K=1",
+   "gravite": "moyenne",
+   "categorie": "completude",
+   "constat": "complete_relative recoupe seulement les clés émises. Par lecture de code, la tour lève full_ball_missing_weak_terminal quand la descente d'une facette atteint une boule sans intrus absente du catalogue : c'est une détection partielle. Une boule omise qui n'est terminal d'aucune descente reste invisible (naissance manquante, fusion rattrapée plus tard). À K=1, resolve rend la racine sans descente : seule la connexité finale live==1 est contrôlée, et une arête d'arbre couvrant minimal omise dont le graphe de Gabriel reste connexe fausse les niveaux sans refus. Aucun juge d'échantillon ni invariant global ne vise la complétude sur les trames LiDAR.",
+   "preuves": [
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:463-507",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:1418-1427",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:1057-1071",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:1398",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:374",
+    "manuscrit § 6.2, remarque après la Déf. 22 : pour K=1 on retrouve exactement le Single-Linkage ; Prop. 6 et Th. 5 (chap. 8)",
+    "grep : aucun juge EMST ni juge d'échantillon dans morsehgp3D_v9/tests, bench ou audits"
+   ],
+   "consequence": "Les reçus G4 (condensés égaux entre répétitions et leviers) ne peuvent pas distinguer une tour complète d'une tour à qui manquent des clés omises de façon systématique et déterministe.",
+   "action_proposee": "(1) Juge K=1 exact et indépendant : un EMST sur distances entières (Borůvka et k-d tree), puis comparaison du multiensemble des niveaux de fusion K1 publiés, chaque nœud comptant parent_count−1 fois, avec {d²/4}. On peut aussi rejouer la partition par union-find. (2) Juge d'échantillon K≥2 : m graines à graine fixe, 24 voisins exacts, supports de 2 à 4 sites contenant la graine, boule positive et recensement exact en arithmétique propre (pas les formules produit). Si |I|+q_min ≤ K+1, la clé doit être au catalogue. Plancher de lignes jugées, et mutant d'omission planté (retirer 0,1 % des clés par hachage) tué à 8k/16k/32k puis sur les trames sans sol. (3) Publier le nombre de boules du catalogue atteintes comme terminal de descente, pour mesurer la couverture de la détection implicite.",
+   "recoupe_audit_existant": "ETAT_COURANT.md (« ne prouvent pas qu'aucune clé entièrement omise ») ; A § 5 ; B COMPLETUDE_Q4_CLE_REMBOURREE_20260923.md (sonde d'une clé plantée). Ajout : caractérisation de la détection implicite de la tour et du cas K=1, plus un juge EMST et un juge d'échantillon concrets."
+  },
+  {
+   "id": "L4-03",
+   "titre": "Les gardes de recoupement de la chaîne n'ont aucune porte causale",
+   "gravite": "moyenne",
+   "categorie": "protocole",
+   "constat": "Les refus qui donnent son sens à complete_relative ne sont déclenchés par aucune fixture ni aucun mutant de la suite CTest : chain_key_mismatch_v8_v7, chain_census_depth_mismatch, chain_census_shell_mismatch, chain_qmin_differs_from_min_presented_arity, chain_duplicate_presentation, chain_presentations_disagree_on_*, chain_ball_outside_rank_window, chain_interior_above_representation et chain_shell_above_12. Leurs chaînes n'apparaissent que dans src/chain. Le seul mutant de la porte T2 retire une boule après l'appel ; probe_worker_contract ne mute que le JSON (shell_over_12=1). Le refus de coquille > 12 a été exercé à la main par A (fixture u13), sans inscription.",
+   "preuves": [
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:137-140",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:469-494",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:519-522",
+    "morsehgp3D_v9/tests/chain/chain_census_tower_gate.cpp:109",
+    "morsehgp3D_v9/tests/chain/probe_worker_contract.py:158",
+    "morsehgp3D_v9/CMakeLists.txt:130-173",
+    "grep -rn des raisons chain_* hors src/chain : aucune occurrence"
+   ],
+   "consequence": "Désactiver ou affaiblir l'un de ces require, par exemple lors d'un refactor de la fusion ou du recensement, ne ferait échouer aucun test. Sur les trames LiDAR, ces gardes sont pourtant la seule protection contre une ligne fausse du générateur.",
+   "action_proposee": "Porte de chaîne à mutants compilés (MHGP9_TESTING) qui corrompent une présentation : profondeur +1, coquille −1, arité 3 pour une clé q2, doublon de support, clé v8 altérée, profondeur hors fenêtre. Chaque mutant doit donner invariant_violated avec la raison exacte ; code 4 par mutant tué. Ajouter la fixture u13 d'A comme porte à code : sonde K10, code 3, unsupported_degeneracy, raison chain_shell_above_12, orders=[].",
+   "recoupe_audit_existant": "A § 5 (refus u13 rejoué hors CTest) ; B porte publique T2 (mutation de harnais seulement). Ajout : inventaire complet des gardes sans porte."
+  },
+  {
+   "id": "L4-04",
+   "titre": "Plomberie de la chaîne à 0,70–1,00 s à K10 (R7b), dont 182–430 ms non attribués et un recensement alourdi par du travail série",
+   "gravite": "moyenne",
+   "categorie": "mesure",
+   "constat": "Recalcul sur les 24 sorties R7b. Le résidu chain_total − Σ(8 phases publiées) vaut 12–98 ms à K5 et 182–430 ms à K10. La plomberie (prepare + gen_index + merge + tower_index + census + résidu) vaut 174–275 ms à K5 et 698–1 002 ms à K10, par exemple 741 ms pour 08/000100/K10, dont census 364 et résidu 263. Par lecture de code, le résidu contient le résumé d'ordres et la destruction en fin de bloc du catalogue (0,25–1,23 Go), de l'index tour, et de l'index et du nuage du générateur. census_ms inclut la construction série du catalogue initialisé (224·B octets, ligne 450) et la libération des plages de présentations (112·P octets, ligne 517). Cette décomposition interne est supposée : rien ne la mesure.",
+   "preuves": [
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:450",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:517",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:543-558",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:584",
+    "morsehgp3D_v9/receipts/g4_tower_r7b_20260923/vm/probe_{0..23}.stdout (probe_12 sha256 c66ddef8…, probe_4 edc8a0ed…) : résidu K5 12,4–97,6 ms, K10 182,4–429,8 ms ; plomberie K5 174–275, K10 698–1002 ms",
+    "R7b census_nodes/unique_keys = 71,4–97,1 visites par clé ; bytes du catalogue 245 487 424 à 1 234 838 080"
+   ],
+   "consequence": "À K10, la plomberie seule consomme le budget d'une seconde, indépendamment de q3/q4 et de la tour ; à 100 ms, même K5 est hors budget. Le poste le plus mal connu (le résidu) n'est publié nulle part.",
+   "action_proposee": "Publier release_ms (fin de bloc), summary_ms et un découpage de census_ms en allocation, recensement parallèle et libération des plages ; publier la politique THP du G4. Puis, en ablation appariée : catalogue non initialisé à premier toucher parallèle ; recensement fusionné au balayage des plages ; arènes réemployées d'une trame à l'autre ou libération asynchrone ; index unique générateur et tour ; libération de l'index et du nuage du générateur dès la fin de q3/q4.",
+   "recoupe_audit_existant": "ETAT_COURANT.md (« 1,154 s hors q3/q4 et FULL » sur 000100/K10 ; destruction des temporaires comprise dans chain_total) ; B résidence (deux index). Ajout : chiffrage du résidu non attribué et de la plomberie hors q2 sur les 24 cas, et identification des étapes série dans census_ms."
+  },
+  {
+   "id": "L4-05",
+   "titre": "Refus typés : des incohérences internes sont publiées invalid_input",
+   "gravite": "basse",
+   "categorie": "protocole",
+   "constat": "Après prepare_cloud, l'entrée de l'appelant est entièrement validée, mais trois conversions restent trompeuses. (1) Tout kInvalidInput de la tour est converti en invalid_input, alors que le catalogue est construit par la chaîne elle-même : positivité refusée, full_ball_census_geometry, key_domain, minimum_arity, outside_rank_window, duplicate_key. (2) Tout std::invalid_argument levé plus tard par le générateur ou la tour devient invalid_input. (3) Plus de 2^32 boules donne invalid_input (full_ball_input_domain) au lieu de resource_exhausted, et std::overflow_error du générateur (capacités, compteurs) tombe en invariant_violated. Une omission partielle sur coquille régulière (N2) sortirait donc en invalid_input.",
+   "preuves": [
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:305-308",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:537-541",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:564-566",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:575-577",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:879-881",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:870-874",
+    "morsehgp3D_v9/src/gen/pipeline/prepared_cloud.cpp:20-33"
+   ],
+   "consequence": "Diagnostic trompeur : un défaut du producteur apparaît comme une faute d'entrée de l'appelant. Aucune acceptation fausse, puisque tous ces statuts sont des refus.",
+   "action_proposee": "Garder invalid_input pour les paramètres et prepare_cloud seulement ; convertir tout refus postérieur de la tour ou du générateur en invariant_violated, raison préfixée, sauf les limites de représentation (> 2^32 boules, overflow_error de capacité) qui deviennent resource_exhausted. Une porte à mutant fixerait la table.",
+   "recoupe_audit_existant": ""
+  },
+  {
+   "id": "L4-06",
+   "titre": "run_tower=false publie complete_relative sans positivité vérifiée des coquilles régulières ; l'en-tête surestime le recoupement q_min",
+   "gravite": "basse",
+   "categorie": "documentation",
+   "constat": "La chaîne ne recalcule q_min que si |U| ≠ arité. Pour |U| = arité, la stricte positivité (q3 aigu, centre q4 intérieur), qui implique q_min = arité, n'est prouvée que par validate_declared_support de la tour. Avec run_tower=false, la tour n'est jamais appelée alors que le statut reste complete_relative. L'en-tête annonce pourtant « q_min recalculé sur la coquille doit égaler la plus petite arité présentée » sans cette restriction.",
+   "preuves": [
+    "morsehgp3D_v9/src/chain/tower_chain.hpp:14-15",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:483-492",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:529",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:556-557",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:844-848",
+    "morsehgp3D_v9/src/tower/forest/anchor_meb.hpp:95-104"
+   ],
+   "consequence": "Un catalogue --no-tower, ou le chemin catalogue de T2 avant sa propre tour, peut porter une arité fausse sous complete_relative si le générateur présente un triangle rectangle ou obtus, ou un tétraèdre non positif.",
+   "action_proposee": "Vérifier la positivité dans le recensement de la chaîne (anchor_meb_detail::form, coût O(1) par boule régulière), ou publier un statut distinct (catalogue_cross_checked) quand run_tower=false. Corriger le commentaire d'en-tête.",
+   "recoupe_audit_existant": "ETAT_COURANT.md (un lecteur de contrat doit exiger run_tower=true). Ajout : le trou de positivité et l'inexactitude de l'en-tête."
+  },
+  {
+   "id": "L4-07",
+   "titre": "Raison d'échec non déterministe quand plusieurs clés échouent dans la fusion ou le recensement",
+   "gravite": "basse",
+   "categorie": "concurrence",
+   "constat": "parallel_for (recensement) et parallel_items (plages de fusion) relaient la première exception capturée dans le temps, ou celle du premier ouvrier. Avec plusieurs clés fautives, la raison publiée (depth, shell, q_min, duplicate…) peut dépendre de W et de l'ordonnancement. La tour, elle, rend explicitement le premier échec dans l'ordre des indices.",
+   "preuves": [
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:202-219",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:232",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:121-143",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:904-938"
+   ],
+   "consequence": "Le statut reste déterministe (invariant_violated), mais la raison n'est pas bit-identique entre W1 et W48 ; cela gêne le diagnostic et les portes à raison exacte.",
+   "action_proposee": "Mémoriser l'échec d'indice minimal (clé g, ou plage b puis position), comme validate_catalogue, et le relancer après jointure.",
+   "recoupe_audit_existant": ""
+  },
+  {
+   "id": "L4-08",
+   "titre": "Temps payés perdus sur exception pour prepare, gen_index, q2, q34 et tower_index",
+   "gravite": "basse",
+   "categorie": "mesure",
+   "constat": "Seules la fusion et le recensement utilisent PhaseClock. Les autres phases n'écrivent leur temps qu'après un retour normal. Une exception dans q2 ou q3/q4 (bad_alloc, lancement de fil, rappel) laisse q2_ms et q34_ms à 0, alors que le travail a été payé.",
+   "preuves": [
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:157-166",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:302-343",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:345-418",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:421",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:449"
+   ],
+   "consequence": "Un reçu de refus sous-estime le travail payé des phases dominantes, contrairement à la règle « travail payé publié même en échec » (6200bb5a).",
+   "action_proposee": "PhaseClock pour toutes les phases, et publication du registre partiel du générateur quand il est disponible.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_B_SAMPLE_SORT_PUBLIE_20260923.md (correctif 6200bb5a limité à la fusion et au recensement)."
+  },
+  {
+   "id": "L4-09",
+   "titre": "geo_of_id et keep toujours déclarés, alimentés et jamais relus",
+   "gravite": "info",
+   "categorie": "hygiene",
+   "constat": "Ces deux tableaux morts, signalés par B à d2700314, sont toujours présents à 0125dc18 : geo_of_id[n] est rempli en O(n) dans tower_index_ms, keep[B] est alloué et écrit dans census_ms. Tout refus de coquille avant la tour les rend de toute façon inutiles.",
+   "preuves": [
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:444-445",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:451",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:506"
+   ],
+   "consequence": "Dette mineure : quelques Mo et un travail série dans le chrono.",
+   "action_proposee": "Les supprimer.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_B_RESIDENCE_CHAINE_20260922.md (lignes 325–326, 332, 387 à d2700314). Rien de neuf, sinon qu'ils sont toujours ouverts."
+  },
+  {
+   "id": "L4-10",
+   "titre": "Domaine d'entrée de la chaîne : sites distincts, PointId = rang, pas d'identités externes ; la sonde rend 3 sur un doublon",
+   "gravite": "info",
+   "categorie": "protocole",
+   "constat": "La chaîne refuse les doublons (invalid_input) et n'accepte pas d'identités externes : la tour publie des rangs, et le condensé dépend de l'ordre du fichier. Les identités clairsemées ne sont exercées que sur la tour dans T2 (variante 1). La sonde n'utilise pas full.site_ids.u32le. Un fichier à doublon passe la lecture puis sort en code 3 (« statut non complet »), alors que l'en-tête réserve 2 aux refus d'entrée. Les manifestes des trois trames sans sol comptent 0 fusion de quantification à 1 mm, donc aucun effet mesuré aujourd'hui.",
+   "preuves": [
+    "morsehgp3D_v9/src/chain/tower_chain.hpp:142",
+    "morsehgp3D_v9/src/gen/pipeline/prepared_cloud.cpp:71-75",
+    "morsehgp3D_v9/bench/tower_probe.cpp:18-19",
+    "morsehgp3D_v9/bench/tower_probe.cpp:238",
+    "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_0{0,1,2}_grid/MANIFEST.json : raw_preparation.counts.distinct_raw_sites_merged_by_quantization = 0",
+    "morsehgp3D_v9/docs/AUDIT_V8_SYNTHESE.md:321-324 (hypothèse des sites distincts)"
+   ],
+   "consequence": "Pour les usages SemanticKITTI, il faudra un remappage externe rang → ID d'origine. Les multiplicités sont perdues si un futur passage fusionne des retours.",
+   "action_proposee": "Documenter le code 3 pour un doublon, ou refuser dans la sonde avant l'appel (code 2). Prévoir une entrée (PointId, position) dans la chaîne, la tour sachant déjà la gérer, et une porte de réétiquetage à l'échelle.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_B_RESIDENCE_CHAINE_20260922.md (le span de l'appelant est relu)."
+  },
+  {
+   "id": "L4-11",
+   "titre": "Travail redondant de la chaîne : tri global pour 1–13 doublons, recensement depuis la racine, revalidation v7 dans la tour",
+   "gravite": "info",
+   "categorie": "performance",
+   "constat": "R7b : P − B = 3, 5, 1, 2, 5, 13 présentations en double sur 1,1–5,5 M. Le double tri et la copie servent surtout à l'ordre des clés. Le recensement descend depuis la racine : 71–97 visites de nœuds par clé. La passe 1 de la tour recalcule clé et niveau v7 des boules régulières avec les mêmes formules que key_and_level de la chaîne : c'est redondant, pas indépendant ; seule la positivité y est nouvelle. La passe 2 est série sur toutes les boules.",
+   "preuves": [
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:88-153",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:173-191",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:851-875",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:939-969",
+    "R7b probe_*.stdout : catalogue.q2+q3+q4_presentations − unique_keys ; census_nodes/unique_keys"
+   ],
+   "consequence": "Une part de la fusion (34–122 ms), du recensement (80–470 ms) et de la validation de la tour est du travail évitable à objet égal.",
+   "action_proposee": "Prototyper, en ablation appariée : dédoublonnage par partition de hachage à l'émission, sans tri global, la tour triant par (niveau, clé) ; recensement fusionné au balayage des plages, départ de la feuille d'un site du support ; jeton interne qui dispense la passe 1 de ses recalculs v7 pour un catalogue issu de la chaîne, en gardant la positivité. Mesurer d'abord le coût de la passe 1.",
+   "recoupe_audit_existant": "AUDIT_DISTRIBUTION_SAMPLE_SORT_20260923.md et CONTRE_AUDIT_B_SAMPLE_SORT_PUBLIE_20260923.md (double tri, histogramme/dispersion). Ajout : rapport doublons/présentations, redondance v7 entre chaîne et tour, coût par clé du recensement."
+  }
+ ],
+ "questions": [
+  "Chronomètre en flux : pour le contrat de 100 ms, l'utilisateur admet-il des arènes réemployées d'une trame à l'autre ? Si oui, allocations et libérations sortent du coût par trame (182–430 ms non attribués à K10 aujourd'hui). Sinon, chaque trame doit-elle payer allocation et libération dans chain_total ?",
+  "Le recensement indépendant de chaque clé (80–470 ms) doit-il rester sur le chemin critique ? Ou peut-on le remplacer, à objet égal, par la vérification du certificat du générateur (I et U émis, plus une requête de vacuité de boule fermée), ou par un recensement échantillonné adossé à des portes ? C'est une décision de doctrine pour l'utilisateur et le développeur.",
+  "Faut-il un statut distinct pour run_tower=false (catalogue recoupé sans tour), afin qu'aucun lecteur ne confonde avec complete_relative ?",
+  "Quelle est la politique THP (transparent hugepages) du G4 ? Elle n'est pas dans les reçus R7b, alors qu'elle pèse sur le premier toucher et la libération des tampons de 0,3 à 1,9 Go.",
+  "Quelle fraction des boules du catalogue la tour atteint-elle comme terminal de descente (détection implicite d'omission) ? Un compteur publié le dirait, par K.",
+  "Le développeur ajoute-t-il K_max ∈ {1,2,3,5} à la porte T2 de chaîne, ainsi que les fixtures q4 u12 (A), q4 sans face q3 (B), les nuages LiDAR de 14 sites et un mutant du générateur tué à K5 ? Le contrôle local de 200 appels montre que cela passe aujourd'hui.",
+  "La chaîne doit-elle accepter des identités externes (site_ids d'origine) et des multiplicités, ou le remappage rang → ID reste-t-il hors contrat ?"
+ ]
+}

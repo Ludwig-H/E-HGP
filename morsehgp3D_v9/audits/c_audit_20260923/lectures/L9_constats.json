@@ -1,0 +1,231 @@
+{
+ "findings": [
+  {
+   "id": "F9-01",
+   "titre": "La tour FULL ne passe pas à l'échelle au-delà de 24 fils : phase A limitée à kmax fils, séquentielle dans un ordre ; phase 0 séquentielle entre les ordres",
+   "gravite": "haute",
+   "categorie": "performance",
+   "constat": "run_orders_parallel prépare les cibles statiques un ordre K après l'autre. Chaque préparation est parallèle en interne. La phase A n'est parallèle qu'entre les ordres, via parallel_items(kmax), donc sur au plus 10 des 48 fils. Dans chaque ordre, order_block puis order_lot s'exécutent séquentiellement, niveau par niveau. Assign_populations parcourt séquentiellement toutes les contributions. Mesures sur G4, même paquet, de W24 à W48 : la tour gagne ×1,02 (R3) et ×1,10–1,12 (R5). Pendant ce temps, q3/q4 gagne ×1,27 à ×1,45 et le recensus ×1,21. Indication de W8 local (v12) à W48 G4 (R7b) : la tour gagne ×3,7–4,7 à K10 contre ×8,6–9,6 pour le recensus et ×7,1–8,7 pour q3/q4.",
+   "preuves": [
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:459-467 (prepare_static_order par K dans une boucle)",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:483-485 (parallel_items(kmax, ...))",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:657-667 (order_block puis order_lot, niveau par niveau)",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:679-691 (parcours séquentiel des contributions)",
+    "receipts g4_tower_r3_20260923 vm/probe_2,12,13 ; g4_tower_r5_20260923 vm/probe_1,7,12 (rapports recalculés par script)",
+    "g4_tower_r7b_20260923 vm/probe_4-23 contre origin/main 87ccf5fc receipts/lidar_scaling_local_20260923 (indication)",
+    "audits/COORDINATION_MORSEHGP3D_V9.md:790-794 (ordre K10 : 2,85 + 1,80 Gcyc sur un fil, hors dépôt)"
+   ],
+   "consequence": "À K10, la tour R7b prend 3,2 à 4,4 s à W48. Aucun fil supplémentaire ne raccourcit le chemin critique de l'ordre le plus lourd. K10 en moins de 1 s est impossible avec cette structure, quel que soit le matériel CPU.",
+   "action_proposee": "Publier les temps mur et CPU par ordre et par phase (0, A, B, C, finish). Porter d'abord le sidecar octet pour octet de PHASE_A_FULL_LOTS (offsets de cibles, racine immuable). Recouvrir ensuite la phase 0 de K+1 avec la phase A de K (PREFETCH). Enfin, étudier la reconstruction Borůvka/max-ID, seule route compatible avec la fermeture v6 F0.",
+   "recoupe_audit_existant": "PHASE_A_FULL_LOTS_ET_PARALLELISME_20260923.md, OBSTACLES_GPU_SOUS_SECONDE_20260923.md § 3 et coordination 09 h 10 signalent déjà la séquentialité. Ajout : quantification W24→W48 sur trois reçus, rapports par phase local/G4, et plafond explicite de la phase A à kmax fils."
+  },
+  {
+   "id": "F9-02",
+   "titre": "Parallélisme non mesuré : ni CPU par phase, ni temps ou tâches par ouvrier, ni ouvriers créés dans la sonde (v11 comme v12)",
+   "gravite": "moyenne",
+   "categorie": "mesure",
+   "constat": "run_wspd_q34_parallel remplit parallel, workers, worker_timings et tasks (published, refused, peak_queue, waits). La chaîne ne lit que pipeline.work. La tour compte static_workers_created, static_lanes_used et parallel_orders, mais tower_probe.cpp ne les publie pas (seule une porte de test les lit). Un seul chain_cpu_s couvre toute la chaîne. Le diff 0125dc18→87ccf5fc (sonde v12) n'ajoute que des lignes de registre. Occupation recalculée sur R7b : 19,2–28,0 CPU sur 48, sans attribution possible.",
+   "preuves": [
+    "morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp:944-966",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:375-416,584-586",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:52-56,480,1372-1373",
+    "morsehgp3D_v9/bench/tower_probe.cpp (aucune occurrence des compteurs d'ouvriers)",
+    "morsehgp3D_v9/src/tower/parallel/pool.hpp:1-7 (« c'est cette valeur, et elle seule, que les compteurs publient »)",
+    "CLAUDE.md:135 (« Le parallélisme est mesuré, jamais déclaré »)"
+   ],
+   "consequence": "Impossible de séparer déséquilibre, contention du mutex, SMT et sections séquentielles. Les leviers de parallélisation ne peuvent être jugés que sur le mur global.",
+   "action_proposee": "Ajouter des deltas de CLOCK_PROCESS_CPUTIME_ID par phase (coût nul). Publier les timings et tâches par ouvrier de q2 et q3/q4 ainsi que les statistiques de file. Publier les ouvriers créés par lancement dans la tour. Planifier une ligne G4 W1 (ou W24) sur une trame pour mesurer la vitesse par fil.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_A_MESURES_PLAN_20260922.md:166-184 (A demandait worker_timings) ; ETAT_COURANT.md:233-234. Ajout : vérifié toujours absent en v12, extension aux compteurs de la tour et au CPU par phase."
+  },
+  {
+   "id": "F9-03",
+   "titre": "« pool.hpp » n'est pas un pool : environ 100 équipes de 48 fils créées et jointes par chaîne K10",
+   "gravite": "moyenne",
+   "categorie": "performance",
+   "constat": "run_threads crée count objets std::thread à chaque appel et n'admet l'équipe qu'après la création de tous. parallel_sort lance trois équipes. prepare_static_order en lance dix par ordre K≥2 (environ 90 pour K=2..10), auxquelles s'ajoutent les lancements de la fusion (4), du recensus (1), de q2 et de q3/q4. Micro-banc local (hôte chargé, nice 19, 2 fils au plus) : 49–69 µs par création et jointure d'un fil ; 76–93 µs pour une équipe de 2. Le commentaire « one lane uses the caller » est faux pour pool.hpp : l'appelant attend sans exécuter de voie.",
+   "preuves": [
+    "morsehgp3D_v9/src/tower/parallel/pool.hpp:56-87 (run_threads, admission après création)",
+    "morsehgp3D_v9/src/tower/parallel/pool.hpp:203,220,224 (trois lancements par parallel_sort)",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:1248,1281,1293,1302,1310,1371",
+    "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp:1373 (commentaire inexact)",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:91,110,121,144,196-233",
+    "morsehgp3D_v9/src/gen/parallel/joined_workers.hpp:48-60",
+    "micro-banc scratchpad agents/lentille9/spawn.cpp (hors dépôt, indicatif)"
+   ],
+   "consequence": "Estimation : 0,1 à 0,3 s par chaîne K10 sur l'hôte local, non mesurée sur G4. Négligeable à 10 s, mais 10 à 30 % d'un budget de 1 s et rédhibitoire à 100 ms.",
+   "action_proposee": "Utiliser un pool persistant au niveau du processus, partagé par q2, q3/q4, la fusion, le recensus et la tour, avec un budget de fils commun (PLAN V9-3). Compter et publier les lancements et le temps d'admission. Corriger le commentaire de la ligne 1373.",
+   "recoupe_audit_existant": "docs/audit_v8/12_parallelisme_gpu_perf.md:194 (« négligeable à 1 s, pas à 100 ms ») ; PLAN_V9.md:207. Ajout : décompte des lancements dans la tour v9 et coût mesuré localement."
+  },
+  {
+   "id": "F9-04",
+   "titre": "Après la sortie du digest, 0,18 à 0,43 s par chaîne K10 échappent encore à toute phase chronométrée (R7b)",
+   "gravite": "moyenne",
+   "categorie": "mesure",
+   "constat": "Sur les 24 cas R7b, chain_total − (prepare+gen_index+q2+q34+merge+tower_index+census+tower) vaut 182–430 ms à K10 et 12–98 ms à K5 (recalcul). Le digest est déjà exclu depuis la sonde v9. Origine supposée : destruction en fin de try de balls (catalogue.bytes 0,98–1,23 Go), de l'index de la tour, de states et keep, plus la boucle de résumé des ordres. La destruction du résultat retourné est en outre hors chrono : 0,35 s en local selon le développeur.",
+   "preuves": [
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:524-556,584",
+    "morsehgp3D_v9/receipts/g4_tower_r7b_20260923/vm/probe_*.stdout (times_ms, catalogue.bytes)",
+    "audits/COORDINATION_MORSEHGP3D_V9.md:552-555",
+    "morsehgp3D_v9/audits/ETAT_COURANT.md:391-392"
+   ],
+   "consequence": "Jusqu'à 18–43 % d'un budget de 1 s à K10 reste non attribué. Allouer puis libérer plusieurs Go par trame est incompatible avec 100 ms.",
+   "action_proposee": "Ajouter une horloge de phase pour la destruction et le résumé. Réutiliser des arènes entre trames. Sortir la libération du chemin critique (thread de destruction ou arène persistante). Publier le RSS au même instant.",
+   "recoupe_audit_existant": "CONTRAT_COUTS_ET_PARALLELISATION.md:44-64 (résidu R5 de 1,0–1,35 s, digest inclus). Ajout : le résidu persiste après la séparation du digest et est chiffré sur R7b."
+  },
+  {
+   "id": "F9-05",
+   "titre": "Le recensus reparcourt chaque clé sur un second index, alors que le générateur a déjà émis les coquilles (et les intérieurs q2)",
+   "gravite": "moyenne",
+   "categorie": "performance",
+   "constat": "Q2Support porte les spans d'IDs intérieurs et de coquille ; Q34SeedCandidate porte la coquille complète. La chaîne ne garde que leurs tailles, puis relance ball_census pour chacune des 4,38–5,51 M clés distinctes à K10 sur l'index de la tour. Mesure R7b à W48 : 0,080–0,106 s à K5, 0,361–0,470 s à K10. Local W8 v12 : 3,1–4,5 s à K10. Une partie est constructive : les IDs intérieurs q3/q4 ne sont pas émis. Le recensus ne détecte pas les clés omises.",
+   "preuves": [
+    "morsehgp3D_v9/src/gen/pipeline/q2_census.hpp:67-73",
+    "morsehgp3D_v9/src/gen/lanes/q34_seed.hpp:20-24",
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:321-331,365-372,461-507",
+    "docs/TEST_PLAN_MORSEHGP3D.md:161-176 ; CLAUDE.md:16",
+    "morsehgp3D_v9/audits/COMPLETUDE_Q4_CLE_REMBOURREE_20260923.md:35"
+   ],
+   "consequence": "36–47 % d'un budget de 1 s à K10 sont consacrés à revérifier exhaustivement, à l'échelle, ce que le générateur a déjà calculé.",
+   "action_proposee": "Transporter les IDs de coquille et les intérieurs q2 dans des arènes par ouvrier. Émettre les IDs intérieurs q3/q4 (au plus K−1) depuis les voies. Ne garder le recensus que comme juge d'échantillon déterministe, en plus de T2. Mesurer la croissance de la fusion.",
+   "recoupe_audit_existant": "CONTRE_AUDIT_B_PARALLELISME_Q34_FULL_20260922.md:23 et CONTRAT_COUTS_ET_PARALLELISATION.md:48-64 chiffrent q2+fusion+recensus. Ajout : redondance d'information démontrée par le code, jamais proposée comme levier."
+  },
+  {
+   "id": "F9-06",
+   "titre": "File q3/q4 v8 portée sans changement : mutex unique, arête atomique, deux commentaires faux",
+   "gravite": "moyenne",
+   "categorie": "concurrence",
+   "constat": "Un mutex unique entraîne quatre acquisitions par tâche (push, pop, task_pairs, busy--). Chaque rectangle survivant est publié, même non scindé (environ 2 M rectangles ouverts à K10 sur 000000). Les arêtes ne sont jamais découpées. Les commentaires des lignes 459-461 et 843-844 affirment que la première plage est développée sur place, alors que la boucle les publie toutes. Mesuré de W24 à W48 : q3/q4 gagne ×1,22–1,45 pour un CPU·s multiplié par ×1,42–1,59. Aucun TSan de cette file n'est au dépôt ni en CI.",
+   "preuves": [
+    "morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp:459-472,842-940",
+    "morsehgp3D_v9/src/gen/pipeline/wspd_q34.hpp:59-67",
+    "morsehgp3D_v9/audits/Q34_BLOCS_LIDAR_SHADOW_20260923.md (2 034 440 rectangles ouverts, K10)",
+    ".github/workflows/morsehgp3d-v9.yml (Release seulement)"
+   ],
+   "consequence": "La contention n'est pas mesurée. L'arête la plus lourde borne le mur. Le SMT ne rapporte que 22–45 %.",
+   "action_proposee": "Passer à des files par ouvrier avec vol de travail, publier seulement au-delà d'un seuil de travail, et scinder les arêtes lourdes (V9-3). Corriger les commentaires. Mesurer le temps de verrou. Ajouter un job TSan (option MHGP9_TSAN existante).",
+   "recoupe_audit_existant": "docs/audit_v8/12_parallelisme_gpu_perf.md:176-181 ; CONTRE_AUDIT_A_MATH_MOTEUR_20260922.md:157 ; CONTRE_AUDIT_B_PARALLELISME_Q34_FULL_20260922.md:20. Ajout : état inchangé en v9, commentaires toujours faux, chiffres W24/W48."
+  },
+  {
+   "id": "F9-07",
+   "titre": "Préparation GPU nulle sur le poste dominant : annotations device limitées à l'arithmétique de la tour, jamais compilées",
+   "gravite": "haute",
+   "categorie": "completude",
+   "constat": "Aucun .cu ni .cuh dans morsehgp3D_v9. project(... CXX), sans option CUDA. GPU_executed=False est écrit en dur dans le worker. MHGP9_HD annote 31 primitives de tower/core et tower/lanes, jamais compilées par nvcc. Le générateur (src/gen) n'en a aucune : std::function par candidat, bornes i128 (< 2^117), arêtes atomiques. Or q3/q4 pèse 55–64 % de la chaîne K10 et 69–74 % de la chaîne K5 dans R7b. L'héritage mesuré (census v6/v7) ne couvre que l'équivalent du recensus. Ses kernels pesaient 2 à 4 % de leur étage (154 sur 7 717 ms ; 189 ms sur 4,540 s), le reste étant du temps hôte. La borne de pile 49 de v7 dépend de clés Morton 48 bits, alors que v9 utilise 54 bits avec une pile dynamique.",
+   "preuves": [
+    "morsehgp3D_v9/CMakeLists.txt:6",
+    "gcp-migration/tower_worker_v9.py:630,843 ; morsehgp3D_v9/receipts/g4_tower_r7b_20260923/PACKAGE.json:4",
+    "morsehgp3D_v9/src/tower/core/device.hpp ; grep MHGP9_HD : tower seulement",
+    "morsehgp3D_v9/src/gen/lanes/q34_seed.hpp:39 ; morsehgp3D_v9/src/gen/lanes/q3_ball_census.cpp:13-23",
+    "morsehgp3D_v6/docs/GPU.md:220 ; morsehgp3D_v7/docs/RESULTATS_TOUR_CACHE_G4_20260910.md:32-34",
+    "morsehgp3D_v7/docs/FAUSSES_PISTES.md:16,21 ; morsehgp3D_v9/src/tower/core/morton.hpp:26 ; morsehgp3D_v9/src/tower/pipeline/census.hpp:174-206"
+   ],
+   "consequence": "Même un CPU·s/48 idéal laisse 5,58 s à K10 (meilleur R7b). Porter les kernels hérités n'attaquerait qu'environ 0,4 s. Le contrat exige une réécriture du générateur en travail plat et résident, pas un port.",
+   "action_proposee": "Avant tout kernel : ajouter un job de compilation nvcc sans GPU, avec -Werror=cross-execution-space-call, sur les en-têtes annotés. Re-dériver la borne de pile à 54 bits. Formuler q3/q4 en étages compactés (arête × bloc de graines, cellules) sur CPU, rejouables identiquement de W1 à W48, puis en lots GPU avec catalogue résident. Appliquer le critère d'arrêt de V9-4.",
+   "recoupe_audit_existant": "OBSTACLES_GPU_SOUS_SECONDE_20260923.md ; ETAT_COURANT.md:576-578 ; docs/audit_v8/12 § 5. Ajout : inventaire de la couverture MHGP9_HD face au poste dominant, écart de pile 48→54 bits, part de q3/q4 par K."
+  },
+  {
+   "id": "F9-08",
+   "titre": "Porter les palettes H_a/octant rouvrirait la fenêtre de propositions q3/q4 fermée en v8, sans le juge alors exigé",
+   "gravite": "moyenne",
+   "categorie": "preuve",
+   "constat": "La v8 a réservé la fenêtre élargie et l'héritage de témoins à la voie q2 : aucun juge ne couvrait q3/q4 et trois mutants survivaient sous le masque 7. Cette garde est active dans front.cpp. Les palettes H_a (2K proches parmi 8K rangs spatiaux) et octant créditent q3/q4 par universal_witness en dehors du front, donc hors de cette garde. Leur exactitude repose sur l'API exacte, l'unicité des IDs et l'absence de double crédit avec le cache de paires. Or la v8 a montré que des troncatures de rang passaient les portes de moins de 128 sites.",
+   "preuves": [
+    "morsehgp3D_v9/src/gen/wspd/front.cpp:406-413",
+    "morsehgp3D_v8/docs/FAUSSES_PISTES.md:396-397 ; morsehgp3D_v9/docs/FAUSSES_PISTES.md:70 ; morsehgp3D_v9/docs/HERITAGE_V7_V8.md:41",
+    "morsehgp3D_v9/audits/SHADOW_HA_Q34_LIDAR_20260923.md ; SHADOW_HA_OCTANT_Q34_LIDAR_20260923.md:8-10",
+    "audits/COORDINATION_MORSEHGP3D_V9.md:626-631"
+   ],
+   "consequence": "Un port fondé sur une seule ablation de chaîne risquerait de réintroduire la classe de fautes v8 : crédit sur toutes les voies, rang tronqué, rang de B non sauté.",
+   "action_proposee": "Exiger, avant le port, une porte q3/q4 à plus de 320 sites avec un plancher sur le plus grand rang proposé, des mutants causaux (witness_cache_all_lanes, rang tronqué, a proposé, rang de B crédité, double crédit palette+cache), puis l'ablation appariée de la chaîne.",
+   "recoupe_audit_existant": "Les notes SHADOW demandent l'ablation de chaîne. Ajout : lien explicite avec la fermeture v8 et son exigence de juge."
+  },
+  {
+   "id": "F9-09",
+   "titre": "docs/FAUSSES_PISTES.md v9 figé depuis le 22 septembre ; fermetures v9 éparses et en partie non épinglées",
+   "gravite": "basse",
+   "categorie": "documentation",
+   "constat": "Le fichier est inchangé depuis c399808e, avant tout le moteur v9. Les fermetures v9 ne sont que dans le canal ou ETAT : filtre de ligne a×B, budget de nœuds du filtre de paires (prototypes hors dépôt), scission de rectangles, variante « têtes physiques » de la phase A, cover complet puis filtre du cœur, borne de reprise du cover, palette en réserve. D'après la règle de force du fichier, les fermetures non épinglées restent des présomptions.",
+   "preuves": [
+    "git log 87ccf5fc -- morsehgp3D_v9/docs/FAUSSES_PISTES.md (dernier commit c399808e)",
+    "audits/COORDINATION_MORSEHGP3D_V9.md:375-385,626-631,783-789",
+    "morsehgp3D_v9/audits/ETAT_COURANT.md:170-179,238-250,306-312,484-490",
+    "morsehgp3D_v9/docs/FAUSSES_PISTES.md:3-17"
+   ],
+   "consequence": "Une étude d'alternatives risque de dupliquer des essais négatifs, ou de tenir pour définitives des fermetures sans reçu.",
+   "action_proposee": "Le développeur ajoute une section v9 avec le niveau de force et l'épinglage. L'auditeur C la reprend dans l'index audits/README.md en attendant.",
+   "recoupe_audit_existant": ""
+  },
+  {
+   "id": "F9-10",
+   "titre": "Binaire G4 compilé sans -march : AVX-512, BMI2 et ADX de l'EPYC 9B45 inutilisés",
+   "gravite": "basse",
+   "categorie": "performance",
+   "constat": "CMake ne fixe aucun drapeau ISA. Le build G4 de R7b est Release avec g++ 11.4, et le lscpu de R7b archive avx512f/dq/bw/vl/ifma/vbmi2/vnni, bmi2 et adx. L'exactitude est préservée a priori. Le code entier ne change pas. Le filtre certifié des niveaux multiplie par 2^64, ce qui est exact : une contraction FMA (fp-contract=fast par défaut en C++ sous GCC) ne peut qu'ôter des arrondis. La proposition MEB est vérifiée exactement : seuls ses compteurs pourraient varier.",
+   "preuves": [
+    "morsehgp3D_v9/CMakeLists.txt:1-11",
+    "morsehgp3D_v9/receipts/g4_tower_r7b_20260923/vm/configure.command.json ; vm/compiler.stdout ; vm/lscpu.stdout",
+    "morsehgp3D_v9/src/tower/lanes/level.hpp:68-89",
+    "morsehgp3D_v9/src/tower/forest/anchor_meb.hpp:12-18"
+   ],
+   "consequence": "Un gain de constante (i128/u128, balayages) reste non exploré. Ce n'est pas un défaut de correction.",
+   "action_proposee": "Faire une ablation G4 appariée -march=x86-64-v4 ON/OFF (supporté par GCC 11), avec égalité d'objets, et rejouer le sidecar FENV sous ces drapeaux.",
+   "recoupe_audit_existant": "docs/audit_v8/12_parallelisme_gpu_perf.md:74 (« jeu d'instructions non archivé ») : désormais archivé dans R7b."
+  },
+  {
+   "id": "F9-11",
+   "titre": "Deux index spatiaux coexistent dans la chaîne, malgré la fermeture « deux arbres spatiaux »",
+   "gravite": "info",
+   "categorie": "hygiene",
+   "constat": "La chaîne construit l'index du générateur (v8, coupes au milieu) puis le CloudIndex de la tour (v6/v7, Karras 54 bits). L'en-tête de ce dernier le présente pourtant comme « L'INDEX SPATIAL UNIQUE ». Coût faible (10,5 + 9,3 ms sur 000100/K10 dans R7b). Les deux index doubleraient toutefois la résidence GPU, et le second ne sert qu'au recensus et à la tour.",
+   "preuves": [
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:311,434-441",
+    "morsehgp3D_v9/src/tower/tree/cloud_index.hpp:1-4",
+    "morsehgp3D_v5/docs/PISTES_FERMEES.md:20-21 ; morsehgp3D_v6/docs/PISTES_FERMEES.md:21"
+   ],
+   "consequence": "Exception non documentée à une règle héritée, et coût de résidence double pour le GPU.",
+   "action_proposee": "Documenter l'exception (recoupe indépendant v8/v7) ou unifier l'index au moment de concevoir la résidence GPU.",
+   "recoupe_audit_existant": ""
+  },
+  {
+   "id": "F9-12",
+   "titre": "Le lemme du maximum d'ID répond à la cause de la fermeture v6 F0 (union-find non portable sur GPU)",
+   "gravite": "info",
+   "categorie": "preuve",
+   "constat": "La fermeture F0 venait de racines union-find dépendantes de l'historique des unions. Sa réouverture exigeait un théorème d'équivalence et une fixture. Le lemme de PHASE_A_MAX_ID (racine canonique = maximum des IDs marqués, plateaux fermés ensemble) rend l'ID indépendant de l'ordre des unions pour la phase A de FULL. Il n'est pas porté : seulement 3 000 historiques abstraits et 4 fixtures. De plus, 2 081 320 lots singletons à K10 excluent une barrière par niveau.",
+   "preuves": [
+    "morsehgp3D_v6/docs/GPU.md:27-38",
+    "morsehgp3D_v9/audits/PHASE_A_MAX_ID_COMPOSANTE_20260923.md:44-65,118"
+   ],
+   "consequence": "La seule route parallèle ou GPU admissible pour la phase A est une construction hors barrières (Borůvka et hiérarchie pondérée), sous la porte octet pour octet décrite.",
+   "action_proposee": "Classer cette route « ouverte sous condition » dans l'index C. Ne pas proposer de CC GPU générique (ECL-CC) sans ce lemme porté.",
+   "recoupe_audit_existant": "PHASE_A_GRAPHE_TEMPOREL / PHASE_A_MAX_ID. Ajout : rattachement explicite à la fermeture v6 F0."
+  },
+  {
+   "id": "F9-13",
+   "titre": "s ≥ 8 garanti seulement à l'entrée publique de la chaîne",
+   "gravite": "info",
+   "categorie": "protocole",
+   "constat": "tower_chain.cpp refuse s < 8. Le front du générateur n'exige que s > 0, et les sidecars d'audit lient directement la bibliothèque gen.",
+   "preuves": [
+    "morsehgp3D_v9/src/chain/tower_chain.cpp:291",
+    "morsehgp3D_v9/src/gen/wspd/front.cpp:395",
+    "morsehgp3D_v9/audits/Q34_BLOCS_LIDAR_SHADOW_20260923.md (commande de compilation contre libmhgp9_gen.a)"
+   ],
+   "consequence": "Une mesure diagnostique à s < 8 pourrait être citée comme représentative du régime. Aucun cas observé.",
+   "action_proposee": "Les sidecars et harnais LiDAR impriment s et refusent s < 8 ; garde optionnelle dans validate_front.",
+   "recoupe_audit_existant": ""
+  }
+ ],
+ "questions": [
+  "Au développeur : quand la sonde publiera-t-elle le CPU par phase, les temps et tâches par ouvrier de q2 et q3/q4 (dont la file : published, refused, peak, waits, temps de verrou) et les ouvriers réellement créés par la tour ? Sans ces mesures, le chemin critique W48 reste inconnu.",
+  "Au développeur : quel est, sur G4, le temps mur de la phase A de l'ordre K10 seul (et de chaque phase 0/A/B/C par K) ? Les 2,85 + 1,80 Gcyc du canal sont un diagnostic hors dépôt.",
+  "Au développeur : un pool persistant de processus est-il prévu avant la prochaine session G4 ? Combien de lancements d'équipes et quel temps d'admission mesure-t-on sur G4 ?",
+  "Au développeur et à B : le recensus complet de chaque clé reste-t-il dans le chemin produit ? Ou bien les IDs de coquille (et les intérieurs q2) émis par le générateur peuvent-ils le remplacer, le recensus devenant un juge d'échantillon ?",
+  "Aux trois : quelle part des 0,18–0,43 s K10 hors phase (R7b) vient de la destruction du catalogue et de l'index ? Faut-il réutiliser des arènes entre trames dès maintenant ?",
+  "Au développeur : une ablation G4 -march=x86-64-v4 ON/OFF (GCC 11.4 le supporte) avec égalité d'objets est-elle acceptable dans une session déjà planifiée ?",
+  "À A et B : acceptez-vous que la fermeture v6 F0 soit citée comme contrainte de toute route GPU de la phase A, avec le lemme max-ID comme seule voie de réouverture ?",
+  "À B : quel juge q3/q4 (fixtures de plus de 320 sites, mutants de rang et de double crédit) exigez-vous avant un éventuel port des palettes H_a/octant, au vu de la fermeture v8 (trois mutants survivants sous masque 7) ?",
+  "Au développeur : le premier étage GPU visé est-il le générateur q3/q4 (dominant, sans annotation device) ou la tour (annotée, mais plafonnée par la phase A séquentielle) ? PLAN V9-4 place l'atlas en premier, alors que le code n'y est pas préparé.",
+  "Au développeur : ajouter à docs/FAUSSES_PISTES.md une section v9 avec niveau de force et épinglage (filtre de ligne, budget de nœuds, scission, têtes physiques, cover puis cœur), ou déléguer ce registre à l'index de l'auditeur C ?"
+ ]
+}

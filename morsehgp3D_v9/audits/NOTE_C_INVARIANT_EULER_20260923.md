@@ -15,8 +15,8 @@ chaque clé émise est recensée exactement, mais une clé que le générateur
 n'émet jamais n'est vue par aucun contrôle à grande taille
 ([état courant](ETAT_COURANT.md), [clé q4 rembourrée](COMPLETUDE_Q4_CLE_REMBOURREE_20260923.md)).
 Les oracles T2 bornés jugent l'inventaire complet jusqu'à n ≤ 14 ; au-delà, il
-n'existait aucun invariant global. En voici un, gratuit, exact et déjà vérifié
-sur les coupes LiDAR 8k, 16k et 32k.
+n'existait aucun invariant global. En voici un, exact, calculable en une passe
+sur le catalogue hors chrono, et déjà vérifié sur les coupes LiDAR 8k, 16k et 32k.
 
 ## Énoncé
 
@@ -69,11 +69,16 @@ admissible dans le catalogue**. D'où l'invariant, nécessaire à la complétude
 
 $E_K=n\cdot[K=1]+\sum_{B\in\mathrm{catalogue}}e_K(B)=1$ pour $K=1,\dots,K_{\max}-2$.
 
-Statut proposé : `proved_here` dans le cas générique (Morse–Euler appliqué
-aux deux entrées Reani–Bobrowski du registre), et `conditional_theorem` pour
-la formule du lien inférieur des coquilles dégénérées (preuve esquissée
-ci-dessus, validée par l'oracle ci-dessous). **Cette note n'écrit pas dans le
-registre** ; l'inscription revient au développeur.
+Statut proposé : `proved_here`. Le cas générique découle des deux entrées
+Reani–Bobrowski du registre. **Mise à jour (08 h 40)** : la
+[contrelecture de B par le nerf](CONTRELEC_EULER_PAR_NERF_20260923.md) donne une
+preuve finie **sans position générale** : $\chi(L_K(r))$ est une somme alternée
+sur les sous-ensembles de rayon de miniboule au plus $r$, la contribution d'une
+boule se lit sur les sous-ensembles $T$ de sa coquille dont l'enveloppe contient
+le centre, et elle égale $1-\chi_c(\Lambda_m)$ avec l'Euler **à supports
+compacts** de l'ouvert $\Lambda_m$, convention que `chi_cells` applique. La
+formule du lien inférieur n'est donc plus conditionnelle. **Cette note
+n'écrit pas dans le registre** ; l'inscription revient au développeur.
 
 ## Validation indépendante
 
@@ -120,18 +125,41 @@ exact. Entrées : les sous-nuages emboîtés du runner v2 du développeur
 | 08/000200 | 32 000 | 10 | 3 813 607 | 1291 | 0 | K=1..8 | toutes = 1 |
 
 Aucun désaccord entre le recomptage par balayage et les champs `n_interior`
-et `n_shell` du catalogue (`recount_mismatch = 0` partout). Les ordres
+et `n_shell` du catalogue (`recount_mismatch = 0` partout). La formule
+générique suppose que le support d'une coquille régulière est minimal, ce que
+la chaîne ne vérifie pas avec `run_tower=false` ; sur ces 18 entrées, la
+positivité est certifiée par les exécutions `run_tower=true` du reçu
+`lidar_scaling_local_20260923` (même arbre `src`, mêmes entrées emboîtées,
+statut `complete_relative`). Une intégration au produit devra exécuter ce
+contrôle après la validation de la tour, ou tester la positivité elle-même. Les ordres
 $K_{\max}-1$ et $K_{\max}$ ne sont pas vérifiables par construction (les
 sommes y valent des centaines de milliers : les boules de rang supérieur ne
 sont pas dans le catalogue).
 
 ## Ce que l'invariant détecte : mutants du générateur
 
-Campagne en cours au moment de la publication : chacun des 35 mutants compilés
-de `tests/gen/mutants.json` est lié à la chaîne (08/000000 8k, K5) et classé
-`killed_euler`, `killed_chain` ou `survived` par
-[`run_euler_mutants.py`](c_euler_20260923/run_euler_mutants.py). Les résultats
-seront ajoutés ici dans une mise à jour datée ; aucun n'est revendiqué avant.
+**Mise à jour (09 h 00).** Chacun des 35 mutants compilés de
+`tests/gen/mutants.json` a été lié à la chaîne
+([`run_euler_mutants.py`](c_euler_20260923/run_euler_mutants.py)), sur 08/000000
+8k à K5 ; verdicts dans
+[`results/mutants_k5.json`](c_euler_20260923/results/mutants_k5.json) :
+
+| verdict | nombre | mutants |
+| --- | ---: | --- |
+| tué par l'invariant ($E_K\neq1$ pour un $K\leq3$) | 9 | `q4_gated_by_q3_acceptance`, `local_exclusion_removes_global_lane`, `single_live_leaf_discarded`, `dead_q4_threshold_k_minus_3`, `dead_contact_counted_inside`, `dead_uniform_at_one_corner`, `dead_q3_disk_too_small`, `witness_cache_all_lanes`, `witness_cache_q4_threshold_k_minus_3` |
+| refusé par la chaîne (recensement, registre de masse) | 10 | contacts comptés intérieurs, arrondis de census, feuilles q3, registres |
+| catalogue changé, invariant muet (omissions aux deux ordres supérieurs) | 3 | `q3_atlas_rejects_at_k_minus_2`, `new_admission_wrong_xi_scale`, `dead_q3_threshold_k_minus_2` |
+| catalogue de même taille, sans alarme | 13 | fautes de contact, d'égalité, de travail ou de contrat qui ne s'expriment pas sur cette coupe |
+
+Aucun des neuf mutants tués par l'invariant n'est vu par les contrôles de la
+chaîne : c'est la preuve qu'il comble un vrai trou. Les trois survivants à
+catalogue changé tombent exactement dans l'angle mort annoncé (seuils décalés
+de 1, donc boules de profondeur $K_{\max}-2$ ou plus). Le protocole
+« $K_{\max}+2$ » les vise : sur la chaîne saine, la même coupe à K7 donne
+$E_K=1$ pour $K=1..5$, et la restriction $p+q_{\min}\leq6$ de son catalogue
+égale le catalogue K5 (342 181 boules, condensés commutatifs égaux). La
+campagne de ce protocole sur les 35 mutants est en cours ; ses verdicts seront
+ajoutés ici.
 
 ## Limites
 

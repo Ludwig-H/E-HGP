@@ -1,0 +1,85 @@
+== 1. Chronologie : meilleur cas W48 configuration par defaut, perimetre ANCIEN (digest inclus)
+   ses   pkg      | 000100 K5 | 000000 K5 | 000200 K5 | 000100 K10 | 000000 K10 | 000200 K10
+   R1    e28296bb |   15.05 |   18.81 |   29.25 |   82.31 |  111.68 |  125.44
+   R2    0b29b6c3 |   10.45 |   13.23 |   19.73 |   37.14 |   49.63 |   64.16
+   R3    b4e480fc |    6.19 |    8.89 |   10.93 |   25.96 |   35.46 |   37.75
+   R4b   a1d7a9bc |    5.44 |    7.39 |    9.18 |   19.40 |   26.69 |   29.50
+   R5    aae9da0e |    4.26 |    5.96 |    7.38 |   12.07 |   17.00 |   19.28
+   R6    78ce9fd4 |    4.15 |    5.76 |    6.87 |   11.73 |   16.67 |   18.06
+   R7b   8e8b83a3 |    3.83 |    5.75 |    6.65 |   10.38 |   14.91 |   16.28
+   facteur R1 -> R7b (perimetre ancien) :
+     000100 K5 : 15.05 -> 3.83  x3.9
+     000000 K5 : 18.81 -> 5.75  x3.3
+     000200 K5 : 29.25 -> 6.65  x4.4
+     000100 K10 : 82.31 -> 10.38  x7.9
+     000000 K10 : 111.68 -> 14.91  x7.5
+     000200 K10 : 125.44 -> 16.28  x7.7
+
+== 2. Ventilation R7b (moyenne des 2 repetitions MEB ON), secondes et parts de chain_total
+   000100 K5  chain 3.741 : q2 0.231 (6.2%) q34 2.595 (69.4%) merge 0.035 (0.9%) census 0.082 (2.2%) tower 0.731 (19.5%) autres 0.068 (1.8%) | digest 0.162 (+4.3%) | mur ext 3.977, hors chronos 0.072 s
+   000000 K5  chain 5.627 : q2 0.453 (8.0%) q34 4.066 (72.3%) merge 0.041 (0.7%) census 0.098 (1.7%) tower 0.906 (16.1%) autres 0.064 (1.1%) | digest 0.191 (+3.4%) | mur ext 5.879, hors chronos 0.060 s
+   000200 K5  chain 6.505 : q2 0.499 (7.7%) q34 4.792 (73.7%) merge 0.043 (0.7%) census 0.105 (1.6%) tower 0.966 (14.9%) autres 0.099 (1.5%) | digest 0.209 (+3.2%) | mur ext 6.806, hors chronos 0.091 s
+   000100 K10 chain 9.582 : q2 0.421 (4.4%) q34 5.266 (55.0%) merge 0.090 (0.9%) census 0.362 (3.8%) tower 3.175 (33.1%) autres 0.267 (2.8%) | digest 0.798 (+8.3%) | mur ext 10.600, hors chronos 0.219 s
+   000000 K10 chain 13.922 : q2 0.755 (5.4%) q34 8.198 (58.9%) merge 0.106 (0.8%) census 0.465 (3.3%) tower 4.016 (28.8%) autres 0.382 (2.7%) | digest 0.998 (+7.2%) | mur ext 15.130, hors chronos 0.210 s
+   000200 K10 chain 15.286 : q2 0.821 (5.4%) q34 9.824 (64.3%) merge 0.118 (0.8%) census 0.447 (2.9%) tower 3.845 (25.2%) autres 0.231 (1.5%) | digest 1.003 (+6.6%) | mur ext 16.553, hors chronos 0.263 s
+
+== 3. Ecart au contrat, R7b (4 essais par trame et K : 2 rep x MEB ON/OFF)
+   000100 K5  chain min 3.669 / moy ON 3.741 / max 3.813 | x3.7 (1 s)  x37 (100 ms) sur min ; CPU ON 87.4 s -> CPU/48 = 1.82 s (x1.8 de 1 s, x18 de 100 ms) ; CPU/mur = 23.4 fils occupes
+   000000 K5  chain min 5.314 / moy ON 5.627 / max 5.697 | x5.3 (1 s)  x53 (100 ms) sur min ; CPU ON 115.8 s -> CPU/48 = 2.41 s (x2.4 de 1 s, x24 de 100 ms) ; CPU/mur = 20.6 fils occupes
+   000200 K5  chain min 6.403 / moy ON 6.505 / max 6.569 | x6.4 (1 s)  x64 (100 ms) sur min ; CPU ON 124.7 s -> CPU/48 = 2.60 s (x2.6 de 1 s, x26 de 100 ms) ; CPU/mur = 19.2 fils occupes
+   000100 K10 chain min 9.579 / moy ON 9.582 / max 10.053 | x9.6 (1 s)  x96 (100 ms) sur min ; CPU ON 268.0 s -> CPU/48 = 5.58 s (x5.6 de 1 s, x56 de 100 ms) ; CPU/mur = 28.0 fils occupes
+   000000 K10 chain min 13.913 / moy ON 13.922 / max 14.295 | x13.9 (1 s)  x139 (100 ms) sur min ; CPU ON 351.2 s -> CPU/48 = 7.32 s (x7.3 de 1 s, x73 de 100 ms) ; CPU/mur = 25.2 fils occupes
+   000200 K10 chain min 15.275 / moy ON 15.286 / max 15.647 | x15.3 (1 s)  x153 (100 ms) sur min ; CPU ON 371.9 s -> CPU/48 = 7.75 s (x7.7 de 1 s, x77 de 100 ms) ; CPU/mur = 24.3 fils occupes
+
+== 4. Plancher CPU/48 par session (meilleur CPU W48 defaut, perimetre de la session)
+   R1     9.15 | 11.36 | 20.00 | 25.78 | 34.65 | 58.08
+   R2     6.81 |  8.63 | 13.70 | 18.86 | 25.43 | 38.70
+   R3     2.42 |  3.44 |  3.96 |  7.28 | 10.36 | 11.34
+   R4b    2.14 |  2.87 |  3.40 |  6.70 |  9.30 | 10.13
+   R5     2.14 |  2.71 |  3.21 |  6.47 |  8.85 |  9.58
+   R6     1.89 |  2.34 |  2.55 |  5.81 |  7.67 |  7.99
+   R7b    1.81 |  2.41 |  2.58 |  5.58 |  7.30 |  7.74
+
+== 5. W24 -> W48 (000000, memes objets)
+   R1 000000 K5 st0/0 n48=1 : chain 21.92 -> 18.81 (x1.165) ; q34 13.88 -> 11.12 (x1.248) ; tower 7.03 -> 6.74 (x1.044) ; q2 x1.07 census x1.18 ; CPU 344 -> 545 (+58%)
+   R2 000000 K10 st24/48 n48=2 : chain 56.47 -> 50.07 (x1.128) ; q34 29.62 -> 23.97 (x1.236) ; tower 23.45 -> 22.98 (x1.020) ; q2 x1.25 census x1.18 ; CPU 792 -> 1239 (+56%)
+   R3 000000 K10 st24/48 n48=2 : chain 38.92 -> 35.51 (x1.096) ; q34 12.39 -> 9.71 (x1.275) ; tower 23.16 -> 22.74 (x1.019) ; q2 x1.28 census x1.21 ; CPU 345 -> 498 (+44%)
+   R5 000000 K10 st24/48 n48=2 : chain 21.59 -> 17.19 (x1.256) ; q34 12.15 -> 8.46 (x1.435) ; tower 5.89 -> 5.32 (x1.108) ; q2 x1.26 census x1.21 ; CPU 300 -> 425 (+42%)
+
+== 6. Tailles (R7b ON rep 0) : catalogue, sortie, par site ; octets de sortie (formule A : 80 noeuds + 8 parents + 80 contrib)
+   000100 K5  n=35551 : boules 1095926 (30.83/site, 0.245 Go cat.) ; presentations 1095927 (doublons 1) ; noeuds 1306721 (36.76/site) ; ordre K seul 478265 (13.45/site) ; contrib 761726 (21.43/site) ; sortie >= 167.8 Mio ; RSS 1.10 Gio ; paires dev. 11960420 (336.4/site)
+   000000 K5  n=39885 : boules 1306696 (32.76/site, 0.293 Go cat.) ; presentations 1306699 (doublons 3) ; noeuds 1541750 (38.65/site) ; ordre K seul 576371 (14.45/site) ; contrib 897776 (22.51/site) ; sortie >= 197.9 Mio ; RSS 1.22 Gio ; paires dev. 23686751 (593.9/site)
+   000200 K5  n=45845 : boules 1407885 (30.71/site, 0.315 Go cat.) ; presentations 1407890 (doublons 5) ; noeuds 1683088 (36.71/site) ; ordre K seul 609376 (13.29/site) ; contrib 982670 (21.43/site) ; sortie >= 216.2 Mio ; RSS 1.31 Gio ; paires dev. 22722345 (495.6/site)
+   000100 K10 n=35551 : boules 4383302 (123.30/site, 0.982 Go cat.) ; presentations 4383304 (doublons 2) ; noeuds 5954045 (167.48/site) ; ordre K seul 1265065 (35.58/site) ; contrib 3548340 (99.81/site) ; sortie >= 770.4 Mio ; RSS 3.80 Gio ; paires dev. 17488839 (491.9/site)
+   000000 K10 n=39885 : boules 5512670 (138.21/site, 1.235 Go cat.) ; presentations 5512675 (doublons 5) ; noeuds 7426215 (186.19/site) ; ordre K seul 1638573 (41.08/site) ; contrib 4414230 (110.67/site) ; sortie >= 960.0 Mio ; RSS 4.81 Gio ; paires dev. 30777213 (771.6/site)
+   000200 K10 n=45845 : boules 5483320 (119.61/site, 1.228 Go cat.) ; presentations 5483333 (doublons 13) ; noeuds 7468379 (162.90/site) ; ordre K seul 1555780 (33.94/site) ; contrib 4466884 (97.43/site) ; sortie >= 967.6 Mio ; RSS 4.88 Gio ; paires dev. 32789701 (715.2/site)
+
+== 7. Debits requis a 1 s et 100 ms (R7b ON rep 0, K10) : sortie et catalogue par seconde
+   000100 : noeuds/s requis 6.0 M (1 s) / 60 M (100 ms) ; octets sortie+catalogue 1.79 Go -> 17.9 Go/s a 100 ms
+   000000 : noeuds/s requis 7.4 M (1 s) / 74 M (100 ms) ; octets sortie+catalogue 2.24 Go -> 22.4 Go/s a 100 ms
+   000200 : noeuds/s requis 7.5 M (1 s) / 75 M (100 ms) ; octets sortie+catalogue 2.24 Go -> 22.4 Go/s a 100 ms
+
+== 8. Defauts de page et temps systeme (R7b)
+   000100 K5  : defauts mineurs [371100, 374548] ; sys 10.09 s / user 77.5 s (11.5%)
+   000000 K5  : defauts mineurs [495654, 483079] ; sys 15.29 s / user 100.7 s (13.2%)
+   000200 K5  : defauts mineurs [516759, 518176] ; sys 13.75 s / user 111.2 s (11.0%)
+   000100 K10 : defauts mineurs [1752746, 1757060] ; sys 5.30 s / user 263.7 s (2.0%)
+   000000 K10 : defauts mineurs [2198221, 2233279] ; sys 9.84 s / user 342.5 s (2.8%)
+   000200 K10 : defauts mineurs [2221084, 2253472] ; sys 10.81 s / user 362.3 s (2.9%)
+
+== 9. Dispersion entre repetitions (config. par defaut, W48) : ecart relatif max-min / moyenne
+   R2    000100 K5 0.2% ; 000000 K5 0.3% ; 000200 K5 2.2% ; 000100 K10 1.0% ; 000000 K10 1.8% ; 000200 K10 0.4%
+   R3    000000 K10 0.3%
+   R4b   000000 K10 0.1%
+   R5    000100 K5 1.6% ; 000000 K5 0.5% ; 000200 K5 0.3% ; 000100 K10 0.2% ; 000000 K10 2.1% ; 000200 K10 1.5%
+   R6    000100 K5 0.0% ; 000000 K5 4.0% ; 000200 K5 0.7% ; 000100 K10 1.5% ; 000000 K10 0.6% ; 000200 K10 0.3%
+   R7b   000100 K5 3.8% ; 000000 K5 2.5% ; 000200 K5 2.0% ; 000100 K10 0.1% ; 000000 K10 0.1% ; 000200 K10 0.1%
+
+== 10. Residu hors phases nommees (chain_total - somme des 8 sous-chronos), config. par defaut W48
+   R1    K5 0.172-0.222 ; K10 0.837-1.048 (digest dedans)
+   R2    K5 0.172-0.222 ; K10 0.838-1.052 (digest dedans)
+   R3    K5 0.172-0.222 ; K10 0.837-1.049 (digest dedans)
+   R4b   K5 0.175-0.225 ; K10 0.840-1.053 (digest dedans)
+   R5    K5 0.174-0.302 ; K10 1.012-1.423 (digest dedans)
+   R6    K5 0.191-0.308 ; K10 0.991-1.377 (digest dedans)
+   R7b   K5 0.012-0.071 ; K10 0.182-0.361 (digest separe)
