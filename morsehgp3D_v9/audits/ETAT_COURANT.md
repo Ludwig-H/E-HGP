@@ -716,21 +716,27 @@ dépassent. Les coupes changent la géométrie. Le
 garde chaque secteur de 08/000200 fixe et ajoute **28** sondes à 1/4 et
 1/2 des sites ; au K10, `dead_core_form_sites` a une pente d'au moins 2
 sur **4/28** relations adjacentes, concentrées dans `x≥0` et
-`x≥0,y<0`, malgré des pentes de paires et CPU sous 2.
+`x≥0,y<0`, malgré des pentes de paires et CPU sous 2. Ce compteur omet
+les deux extrémités par charge, que le code calcule aussi : le total exact
+des formes du cœur est `core_sites = dead_core_form_sites + 2 × dead_core_loads`.
+Il franchit 2 sur **3/28** relations de ce premier reçu.
 L'extension aux [trames entières 000000/000100](lidar_density_full_3scenes_20260923/README.md)
 et à [leurs six secteurs](lidar_density_sectors_00_01_20260923/README.md)
-ajoute **56 sondes**. Sur les trois scènes et sept secteurs, **14/84**
-relations de densité adjacentes atteignent `p_formes≥2` ; le quart
+ajoute **56 sondes**. Sur les trois scènes et sept secteurs, **10/84**
+relations de densité adjacentes atteignent `p_core_sites≥2` pour toutes
+les formes réellement calculées, contre **14/84** pour le sous-total hors
+extrémités ; le quart
 `x≥0,y<0` le fait dans chacune des trois trames à K5 ou K10. Paires,
 visites/bornes des nœuds et CPU restent sous 2 dans ces essais, sans
 preuve asymptotique. Les trois trames appartiennent à une seule séquence,
 sans sol et sans mesure G4. Une ablation appariée du seul site qui étend
-fortement `z` dans le quart chaud de 000200 laisse la pente K10 des formes
+fortement `z` dans le quart chaud de 000200 laisse la pente K10 du
+sous-total de formes hors extrémités
 à **2,042528** : cet extrême ne porte pas à lui seul le signal. Le secteur
 est fixe, mais l'étendue des sites sélectionnés varie avec la densité.
 Une [ablation à boîte exactement fixe](lidar_density_bbox_fixed_20260923/README.md)
 sur ce quart échange seulement trois puis deux IDs aux densités 1/4 et 1/2 ;
-la pente K10 des formes reste **2,058215 puis 2,042880**, pratiquement
+la pente K10 de ce sous-total reste **2,058215 puis 2,042880**, pratiquement
 inchangée. Ce signal ne vient donc pas seulement de l'étendue de la boîte.
 Le [premier reçu brut avec sol](lidar_raw_physical_scaling_20260923/README.md),
 [dont les 21 cas ont été contre-lus indépendamment par B](CONTRE_AUDIT_B_LIDAR_BRUT_PHYSIQUE_20260923.md),
@@ -738,26 +744,30 @@ compte désormais **21 cas K5** sur une trame entière 08/000000 à 1 mm :
 sept secteurs par plans **float32 physiques**, chacun aux trois densités
 emboîtées. La sélection garde les 123 389 retours sans fusion ;
 trois changeraient de secteur si le signe était pris après grille.
-Sur 30 847→61 694→123 389 sites, les formes réellement chargées par
-le cœur passent de 35,46→125,48→551,69 M, soit des pentes finies
-**1,823 puis 2,136**, contre **1,218 puis 1,297** pour CPU·s. Les deux
-moitiés cumulent 97,0 % des charges de cœur du plein, mais seulement
-30,6 % de ses formes : 43,68 contre 138,39 formes par charge.
+Sur 30 847→61 694→123 389 sites, toutes les formes calculées par
+le cœur passent de 37,01→128,85→559,66 M, soit des pentes finies
+**1,800 puis 2,119**, contre **1,218 puis 1,297** pour CPU·s. Le
+sous-total hors extrémités publié initialement vaut 35,46→125,48→551,69 M.
+Les deux moitiés cumulent 97,0 % des charges de cœur du plein, mais seulement
+31,5 % de toutes ses formes : 45,68 contre 140,39 formes par charge.
 C'est un verrou de **masse par cœur**, pas seulement de nombre de cœurs.
-Dans les 14 comparaisons de densité à secteur fixe, **2** pentes des
-formes dépassent 2 : la trame entière 1/2→entière (2,136) et le quart
-`x≥0,y<0` 1/4→1/2 (2,060). Les pentes CPU sont 1,200–1,328.
-La part des formes retrouvée en sommant les moitiés tombe de **0,549**
-à densité 1/4 à **0,306** à densité entière ; la part des charges de
-cœur reste autour de 0,97. Les chronos muraux des nouvelles coupes sont
+Dans les 14 comparaisons de densité à secteur fixe, **2** pentes de
+toutes les formes dépassent 2 : la trame entière 1/2→entière (2,119) et
+le quart `x≥0,y<0` 1/4→1/2 (2,002). Les pentes CPU sont 1,200–1,328.
+La part des formes retrouvée en sommant les moitiés tombe de **0,567**
+à densité 1/4 à **0,315** à densité entière ; la part des charges de
+cœur reste autour de 0,97. Sept des 18 liens spatiaux K5 dépassent aussi
+2 sur le total des formes. Les chronos muraux des nouvelles coupes sont
 fortement perturbés par la contention de l'hôte partagé.
 Le plein prend 48,36 s de chaîne locale W8 et 1,93 GiB RSS ; ni borne
 asymptotique ni contrat G4 ne sont acquis.
 Le [complément brut K10](lidar_raw_k10_density_20260923/README.md) reprend
 **les mêmes trois ensembles d'IDs et les mêmes octets** de la trame entière :
 30 847→61 694→123 389 sites, trois sorties `complete_relative`. Ses formes
-du cœur font 103,15→323,69→1 238,63 M, de pentes finies **1,650 puis
-1,936**, contre 1,823 puis 2,136 à K5. Les CPU·s de chaîne font
+du cœur, extrémités comprises, font 106,60→330,91→1 254,25 M, de pentes
+finies **1,634 puis 1,922**, contre 1,800 puis 2,119 à K5. Les
+chiffres initiaux 103,15→323,69→1 238,63 M comptaient seulement les
+sites hors extrémités. Les CPU·s de chaîne font
 173,008→383,704→905,514 (pentes 1,149 puis 1,239) ; le plein porte
 11,387 M boules de catalogue et **8,219 GiB** de RSS. Les comptes des cinq
 premiers ordres K10 sont égaux à ceux de K5 sur chaque entrée, sans
@@ -769,18 +779,21 @@ confirme **10/10 hashes**, les IDs/coordonnées emboîtés, les dix ordres
 et les pentes ; elle précise que les trois lignes historiques n'ont
 pas de champ `validated` archivé et que le cas plein chevauche un autre
 calcul CPU sur l'hôte partagé. Cœur **plus** couverture complète
-matérialisent **2,304 milliards** de formes au plein K10 ; la croissance
+comptent **au moins 2,304 milliards** de formes hors extrémités au plein
+K10 ; la croissance
 du nombre moyen de sites par charge explique l'essentiel de leur pente.
 Le [complément brut K10 par plans physiques](lidar_raw_k10_sectors_20260923/README.md)
 ferme maintenant la matrice **sept secteurs × trois densités** : dix-huit
 nouvelles sondes K10, six moitiés rejouées, et les trois pleins antérieurs
 sur les **mêmes octets** que K5. Un des 14 liens de densité franchit la
-pente 2 des formes cœur : le quart `x≥0,y<0` à 1/2→entière (**2,057**),
-malgré une pente CPU de 1,251. Quatre des 18 liens spatiaux franchissent
-2 ; à densité entière, plein→deux demi-scènes donne **2,195/2,326**,
-contre 1,936 pour la densité 1/2→entière du plein. Les deux axes ne sont
-pas interchangeables. À densité entière, Σformes/plein vaut 0,418 pour
-les moitiés et 0,374 pour les quarts, tandis que Σcharges cœur/plein
+pente 2 de toutes les formes du cœur : le quart `x≥0,y<0` à 1/2→entière
+(**2,029**, contre 2,057 hors extrémités), malgré une pente CPU de 1,251.
+Trois des 18 liens spatiaux franchissent 2 pour le total des formes,
+contre quatre pour le sous-total ; à densité entière, plein→deux
+demi-scènes donne **2,167/2,306** pour le total, contre 1,922 pour la
+densité 1/2→entière du plein. Les deux axes ne sont pas interchangeables.
+À densité entière, Σformes/plein vaut 0,425 pour les moitiés et 0,381
+pour les quarts, tandis que Σcharges cœur/plein
 vaut 0,969/0,958 et Σboules catalogue/plein 0,996/0,991. Les six rejeux
 gardent formes, charges, paires, catalogue et ordres ; seules quelques
 visites de cache/témoins varient, avec au plus 0,51 % de CPU. Chaque

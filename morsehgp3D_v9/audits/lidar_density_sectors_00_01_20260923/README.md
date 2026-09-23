@@ -24,9 +24,11 @@ Les chemins `/workspaces` et `/tmp` dans les scripts correspondent à cet
 hôte : pour un rejeu ailleurs, reconstruire les entrées par leurs SHA puis
 adapter ces chemins. Les points LiDAR bruts ne sont pas versionnés ici.
 
-Sur les **56 relations adjacentes de densité** des deux scènes, dix
-pentes du nombre de formes de cœur matérialisées atteignent ou dépassent
-2 ; aucune pente des paires, des visites/bornes du cover, des émissions
+Sur les **56 relations adjacentes de densité** des deux scènes, **sept**
+pentes du total des formes de cœur calculées (`core_sites`) atteignent ou
+dépassent 2 ; le sous-total `dead_core_form_sites`, qui écarte deux
+extrémités pourtant calculées à chaque charge, en a **dix**. Aucune pente
+des paires, des visites/bornes du cover, des émissions
 q3/q4, du catalogue ou des CPU·s ne le fait. Le quart `x≥0,y<0` est le
 seul secteur avec un tel franchissement dans chacune des trois scènes
 étudiées. Voir la [lecture des deux axes de

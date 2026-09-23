@@ -56,7 +56,8 @@ Commande après génération de l'entrée :
 nice -n 19 mhgp9_tower_probe.e1ba126f FULL_MINUS_ONE.u32le 10 8 --s=8 --static=8 --grid=1mm
 ```
 
-Les formes matérialisées passent de **579 000 541** à **578 914 981**
+Les formes comptées **hors extrémités** par `dead_core_form_sites` passent
+de **579 000 541** à **578 914 981**
 (`−0,0148 %`), et la pente 1/2→pleine recalculée avec les effectifs réels
 de **2,042542** à **2,042528**. Les paires développées passent de
 9 801 104 à 9 797 635 ; les visites du cover du cœur de 672 387 377

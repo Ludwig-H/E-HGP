@@ -19,10 +19,14 @@ Une valeur `R<B` signale plus de travail que ce repère lors du passage
 des morceaux à la scène ; `R>B` signale moins. Le repère n'est **pas** un
 test asymptotique : la géométrie, les frontières, les certificats et les
 sorties changent avec la coupe. `CPU` est `chain_cpu_s`, `paires` est
-`expanded_pairs`, `cœur` est `core_sites`, la population **logique** des
-disques diamétraux. Elle est proche, dans ce moteur, du nombre de formes
-effectivement chargées `dead_core_form_sites` mais n'est pas elle-même un
-compteur d'accès mémoire ; voir la [contrelecture du certificat par
+`expanded_pairs`, `cœur` est `core_sites`, la somme des tailles des disques
+diamétraux. **Sur les chemins complets de ce binaire v12, c'est aussi le
+nombre exact de formes calculées et écrites par `dead_.load` pour ces
+cœurs**, extrémités `a,b` comprises. `dead_core_form_sites` en retranche
+deux par charge : `core_sites = dead_core_form_sites + 2 × dead_core_loads`.
+Ce sous-total hors extrémités reste utile, mais ne compte pas toutes les
+formes matérialisées. Aucun des deux compteurs ne mesure à lui seul les
+accès mémoire ; voir la [contrelecture du certificat par
 nœuds](CERTIFICAT_NOEUDS_CORE_LIDAR_20260923.md).
 
 | 08/K | `B_H/B_Q` | `R_H` CPU / paires / cœur | `R_Q` CPU / paires / cœur | liens cœur avec `p>2` | max `p_CPU` |
@@ -86,10 +90,11 @@ développées ont `p=1,256–1,876`, les CPU·s `p=1,274–1,427`, et les
 boules distinctes du catalogue `p=1,091–1,265`. En revanche,
 `core_sites` atteint ou dépasse 2 sur **3/28** relations, toutes à K10 :
 une dans le demi `x≥0` et les deux dans le quart `x≥0,y<0`. Le compteur
-physique voisin `dead_core_form_sites` le fait sur **4/28** relations :
+voisin `dead_core_form_sites`, limité aux sites hors extrémités, le fait
+sur **4/28** relations :
 `2,011/2,014` dans ce demi et `2,058/2,043` dans ce quart. Pour le quart
 `x≥0,y<0`, `core_sites/n²` augmente de **2,503→2,586→2,651** lorsque
-la densité augmente. Pour les **formes réellement chargées** à K10,
+la densité augmente. Pour les **formes hors extrémités** à K10,
 `dead_core_form_sites/n²` descend de **0,777→0,557→0,504** sur la scène
 entière mais monte de **2,452→2,555→2,633** sur ce quart. La pente
 favorable de la scène entière ne décrit donc pas tous ses secteurs.
@@ -101,7 +106,8 @@ Il s'agit d'un **travail payé par la v12**, pas d'une population seulement
 logique : au commit `4530644b`, `wspd_q34.cpp:549–557` appelle `dead_.load`
 pour chaque cœur, puis `q34_dead_lanes.cpp:52–79` parcourt ses plages et
 calcule/stocke une forme par site. `dead_core_form_sites` écarte du compte
-les deux extrémités de chaque arête, bien qu'elles soient aussi parcourues.
+les deux extrémités de chaque arête, **bien que leurs formes soient aussi
+calculées et écrites**.
 Le code v12 fait donc au moins un traitement par forme comptée :
 sur ce quart K10, **32,314 M→137,636 M→579,001 M** formes hors extrémités
 aux trois densités. Le ratio `formes/n²` croissant signale un coût
@@ -111,19 +117,21 @@ le LiDAR ni pour un futur certificat par blocs.
 Une [extension sur les trames entières](lidar_density_full_3scenes_20260923/README.md)
 applique la même graine et la même méthode à 08/000000 et 08/000100,
 à K5/K10, avec huit nouvelles sondes. Sur les trois trames entières,
-les pentes `dead_core_form_sites` sont :
+les pentes du sous-total `dead_core_form_sites` et du total réellement
+calculé `core_sites` sont :
 
-| 08/K | Sites 1/4 / 1/2 / 1 | `p_formes` 1/4→1/2 / 1/2→1 |
-| --- | ---: | ---: |
-| 000000/K5 | 9 971 / 19 942 / 39 885 | 1,940 / **2,008** |
-| 000000/K10 | 9 971 / 19 942 / 39 885 | 1,885 / 1,985 |
-| 000100/K5 | 8 887 / 17 775 / 35 551 | 1,872 / 1,953 |
-| 000100/K10 | 8 887 / 17 775 / 35 551 | 1,818 / 1,903 |
-| 000200/K5 | 11 461 / 22 922 / 45 845 | 1,757 / 1,864 |
-| 000200/K10 | 11 461 / 22 922 / 45 845 | 1,520 / 1,855 |
+| 08/K | Sites 1/4 / 1/2 / 1 | `p` hors extrémités 1/4→1/2 / 1/2→1 | `p` toutes formes 1/4→1/2 / 1/2→1 |
+| --- | ---: | ---: | ---: |
+| 000000/K5 | 9 971 / 19 942 / 39 885 | 1,940 / **2,008** | 1,918 / 1,994 |
+| 000000/K10 | 9 971 / 19 942 / 39 885 | 1,885 / 1,985 | 1,870 / 1,974 |
+| 000100/K5 | 8 887 / 17 775 / 35 551 | 1,872 / 1,953 | 1,845 / 1,935 |
+| 000100/K10 | 8 887 / 17 775 / 35 551 | 1,818 / 1,903 | 1,801 / 1,890 |
+| 000200/K5 | 11 461 / 22 922 / 45 845 | 1,757 / 1,864 | 1,741 / 1,852 |
+| 000200/K10 | 11 461 / 22 922 / 45 845 | 1,520 / 1,855 | 1,513 / 1,847 |
 
-À trame entière, **une des douze** relations adjacentes de formes dépasse
-donc légèrement 2, sur 000000/K5. Les paires développées y restent entre
+À trame entière, **aucune des douze** relations de toutes les formes ne
+dépasse 2 : le sous-total seul le dépasse légèrement sur 000000/K5.
+Les paires développées restent entre
 `p=1,466` et `1,753` sur ces douze relations.
 
 La [matrice complémentaire des six secteurs de
@@ -131,23 +139,28 @@ La [matrice complémentaire des six secteurs de
 **48 sondes** et réutilise leurs huit trames entières décimées ainsi que
 les 28 secteurs pleins v12. Avec les sept secteurs de 000200, les trois
 scènes donnent **84 relations adjacentes** secteur×K×densité. Nombre de
-relations `p≥2` pour les formes du cœur :
+relations `p≥2` pour le sous-total hors extrémités et le total des formes
+effectivement calculées :
 
-| 08/K | Relations `p_formes≥2` / 14 | Plus forte pente et secteur |
-| --- | ---: | --- |
-| 000000/K5 | 2 | 2,014, quart `x≥0,y<0` |
-| 000000/K10 | 1 | 2,063, quart `x≥0,y<0` |
-| 000100/K5 | 4 | 2,123, demi `x≥0` |
-| 000100/K10 | 3 | 2,039, demi `x≥0` |
-| 000200/K5 | 0 | maximum 1,920, quart `x≥0,y<0` |
-| 000200/K10 | 4 | 2,058, quart `x≥0,y<0` |
+| 08/K | Hors extrémités `p≥2` / 14 | Toutes formes `p≥2` / 14 | Maximum toutes formes et secteur |
+| --- | ---: | ---: | --- |
+| 000000/K5 | 2 | **0** | 1,994, scène entière |
+| 000000/K10 | 1 | **1** | 2,037, quart `x≥0,y<0` |
+| 000100/K5 | 4 | **3** | 2,082, demi `x≥0` |
+| 000100/K10 | 3 | **3** | 2,015, demi `x≥0` |
+| 000200/K5 | 0 | **0** | 1,905, quart `x≥0,y<0` |
+| 000200/K10 | 4 | **3** | 2,046, quart `x≥0,y<0` |
 
-Soit **14/84** relations pour les formes effectivement matérialisées.
+Soit **10/84** relations pour toutes les formes effectivement matérialisées,
+contre 14/84 pour le seul sous-total hors extrémités. Quatre
+franchissements à peine au-dessus de 2 disparaissent dans le total ;
+les autres restent, dont le quart chaud à K10 sur 000000 et 000200.
 Le quart **`x≥0,y<0` est le seul secteur avec au moins un tel
 franchissement dans chacune des trois trames** (à K5 ou K10). Sur les
 56 relations nouvelles de 000000/000100, paires, visites/bornes des
 nœuds du cover, émissions q3/q4, catalogue et CPU·s restent sous 2 ; les
-dix exceptions de formes y sont isolées dans le reçu. Les ratios spatiaux
+sept franchissements du total des formes se recalculent à partir des
+`core_sites` gardés dans le reçu. Les ratios spatiaux
 parent→morceau demeurent un autre diagnostic : même à densité 1/4 ou
 1/2, la somme des tours des morceaux ne reconstruit pas la tour globale.
 
@@ -165,9 +178,11 @@ l'index et les certificats changent néanmoins avec la sélection.
 Une [contre-épreuve à boîte exactement fixe](lidar_density_bbox_fixed_20260923/README.md)
 impose les six extrema du quart plein aux niveaux 1/4 et 1/2, en gardant
 les mêmes effectifs et l'emboîtement : seulement trois puis deux IDs sont
-échangés. À K10, les pentes des formes `1/4→1/2` et `1/2→plein` restent
+échangés. À K10, les pentes du sous-total hors extrémités `1/4→1/2`
+et `1/2→plein` restent
 **2,058215** et **2,042880**, contre 2,058490 et 2,042542 avec la
-sélection initiale. La variation de boîte n'explique donc pas à elle seule
+sélection initiale ; les pentes de toutes les formes restent **2,046155**
+et **2,035494**. La variation de boîte n'explique donc pas à elle seule
 le signal de ce quart ; la distribution interne et l'index restent libres.
 Cette ablation porte sur un seul secteur, une seule graine et le même
 binaire v12, sans nouvelle conclusion sur le coût total.
@@ -182,12 +197,20 @@ cas à densité entière portent le libellé de sonde historique
 Un [premier reçu brut](lidar_raw_physical_scaling_20260923/README.md)
 couvre désormais les **21** croisements des sept secteurs 08/000000/K5
 définis par plans **float32 physiques** et des trois densités emboîtées.
-Ses 14 pentes de densité à secteur fixe donnent deux franchissements des
-formes payées par le cœur : **2,136** sur la trame entière 1/2→entière
-et **2,060** sur le quart `x≥0,y<0` 1/4→1/2. Les pentes CPU restent
+Les README bruts K5/K10 scellés par leurs `SHA256SUMS` appellent parfois
+`dead_core_form_sites` « formes matérialisées » ; leurs nombres et pentes
+restent ceux du sous-total **hors extrémités**, et les corrections exactes
+ci-dessous utilisent `dead_core_form_sites + 2 × dead_core_loads` sans
+modifier ces reçus.
+Ses 14 pentes de densité à secteur fixe donnent deux franchissements du
+total des formes payées par le cœur : **2,119** sur la trame entière
+1/2→entière et **2,002** sur le quart `x≥0,y<0` 1/4→1/2. Le sous-total
+hors extrémités donnait respectivement 2,136 et 2,060. Les pentes CPU restent
 entre **1,200 et 1,328**. À densité 1/4, 1/2, entière, les moitiés
-réunies portent **0,549 / 0,421 / 0,306** des formes du plein alors que
-leurs charges de cœur restent à environ **0,97**. Le signal de masse
+réunies portent **0,567 / 0,435 / 0,315** de toutes les formes du plein alors que
+leurs charges de cœur restent à environ **0,97**. **Sept des 18** liens
+spatiaux parent→enfant K5 ont une pente de toutes les formes supérieure à
+2 ; ces coupes modifient aussi la géométrie. Le signal de masse
 par cœur se renforce donc avec la densité sur cette trame, mais ce seul
 cas ne remplace pas la matrice sans sol K5/K10 ci-dessus. Les murs des
 12 nouvelles coupes ont subi de fortes interférences sur l'hôte partagé ;
@@ -203,9 +226,11 @@ démontrent une borne sous-quadratique globale ou le contrat G4.
 Le [complément brut K10](lidar_raw_k10_density_20260923/README.md) reprend
 exactement les trois entrées **entières** du reçu K5 (30 847⊂61 694⊂123 389
 retours) et mesure toute la tour K1..10. À 1/4→1/2 puis 1/2→entière, ses
-pentes de formes chargées sont **1,650 / 1,936**, contre **1,823 / 2,136**
-à K5 sur les mêmes octets ; ses pentes CPU·s sont **1,149 / 1,239**. Le
-plein K10 paie pourtant **1 238,63 M** formes, **11,387 M** boules de
+pentes de toutes les formes calculées sont **1,634 / 1,922**, contre
+**1,800 / 2,119** à K5 sur les mêmes octets ; ses pentes CPU·s sont
+**1,149 / 1,239**. Le sous-total hors extrémités publié initialement
+donne 1,650 / 1,936 à K10 et 1,823 / 2,136 à K5. Le plein K10 calcule
+pourtant **1 254,25 M** formes, **11,387 M** boules de
 catalogue et **8,219 GiB** de RSS. Les comptes des cinq premiers ordres
 coïncident entre K5 et K10 à chaque taille, sans comparaison de leurs clés
 ou de leurs flux complets. Le changement de K modifie donc le signal des
@@ -215,11 +240,13 @@ croissance sous-quadratique générale.
 La [matrice brute K10 complète](lidar_raw_k10_sectors_20260923/README.md)
 mesure maintenant les **sept secteurs physiques aux trois densités** sur
 la même trame 08/000000. Sur les 14 liens de densité à secteur fixe, une
-pente des formes dépasse 2 : le quart `x≥0,y<0` entre 1/2 et entière
-atteint **2,057** ; le maximum des pentes CPU·s est **1,262**. Sur les
-18 liens spatiaux parent→enfant, quatre pentes des formes dépassent 2.
-À densité entière, la somme des quatre quarts contient **37,4 %** des
-formes du plein, mais **95,8 %** de ses charges de cœur et **99,1 %** des
+pente de toutes les formes dépasse 2 : le quart `x≥0,y<0` entre 1/2 et
+entière atteint **2,029** (2,057 hors extrémités) ; le maximum des pentes
+CPU·s est **1,262**. Sur les 18 liens spatiaux parent→enfant, **trois**
+pentes du total des formes dépassent 2, contre quatre pour le sous-total.
+À densité entière, la somme des quatre quarts contient **38,1 %** de
+toutes les formes du plein (37,4 % hors extrémités), mais **95,8 %** de
+ses charges de cœur et **99,1 %** des
 boules du catalogue. Les six demi-scènes K10 ont été rejouées avec les
 mêmes compteurs déterministes ; leurs murs restent sensibles à la
 contention. Ainsi, le besoin d'éviter des formes **par cœur** persiste
