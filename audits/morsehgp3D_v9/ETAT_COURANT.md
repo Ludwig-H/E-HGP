@@ -1,6 +1,6 @@
 # État courant — audit Morse HGP 3D v9
 
-22 septembre 2026. Rôle : **audit et conseil**, pas développement du moteur.
+23 septembre 2026. Rôle : **audit et conseil**, pas développement du moteur.
 Le dossier produit `morsehgp3D_v9/` n'existait pas à l'ouverture ; il a
 depuis été créé avec des notes d'un autre auditeur. Ce sous-dossier racine
 conserve donc notre **photographie indépendante de la v8** ; la suite de
@@ -62,7 +62,13 @@ recoupe 175 hashes, les huit cas et l'arrêt ciblé. Il identifie deux
 blocages **pour la prochaine session**, sans invalider R1 : le worker v2
 refuse les champs MEB textuel/tableau de la vraie sonde malgré 17 selftests
 verts, et un cas censuré avec `group_closed=false` peut être accepté comme
-`partial`. Corriger puis tester le raccord réel avant de facturer G4.
+`partial`. La provenance Git du paquet et celle du reçu ne sont pas
+recertifiées à la réception, et les sous-temps peuvent être incohérents
+sans refus. Corriger puis tester le raccord réel avant de facturer G4 ;
+le reçu R1 historique a été lié indépendamment à ses objets Git. Son
+`chain_total` K10 contient ~1,04 s hors sous-phases publiées, après la
+construction FULL et notamment dans la synthèse/digest : le mur contractuel
+l'inclut, mais ce poste doit être chronométré à part.
 La [contrelecture du MEB diamètre](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_ANCHOR_MEB_DIAMETRE_20260922.md)
 est verte localement sur ses petites portes, mais son gain LiDAR n'a pas
 de reçu apparié ; les [niveaux q4 orientés](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_Q4_NIVEAUX_ORIENTES_20260922.md)
@@ -76,6 +82,15 @@ nécessitent une matérialisation/réutilisation E dont le coût n'est pas
 mesuré. Le [préfetch géométrique FULL](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PREFETCH_FULL_20260923.md)
 est exact sous catalogue figé, mais exige un contexte possédé par K et
 des fenêtres mémoire bornées. Aucun de ces deux ports n'est acquis.
+Le [certificat q4 de domination par blocs](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_DOMINATION_Q4_20260923.md)
+est sûr, mais le nouveau test par boîtes et l'ancien test de rayon sont
+**incomparables**, contrairement au libellé « strictement plus fort » de la
+note initiale ; une contre-fixture entière le prouve. Il ne doit pas
+supprimer les témoins de l'atlas q3 partagé. Le [préfixe exact
+d'intrus](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PREFIXE_INTRUS_20260923.md)
+est mathématiquement sain sur un index fixé, mais les répétitions de
+BallKey par worker et le coût mémoire du cache restent inconnus ; aucune
+accélération G4 n'en découle.
 
 ## Lecture prioritaire
 
