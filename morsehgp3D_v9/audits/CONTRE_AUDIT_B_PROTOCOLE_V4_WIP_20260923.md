@@ -12,6 +12,11 @@ explicitement `saturate_deep` et `q3_leaf` ; le worker distingue la chaîne
 MEB et son tableau des compteurs entiers ; il arrête les cas suivants
 après le premier `probe_failed` ; les sous-chronos ne peuvent plus
 dépasser le total, qui est lui-même borné par le mur externe du cas.
+Cette dernière borne comporte toutefois **une marge absolue de 1 s**
+(`validate_external_wall`) : elle ne permet pas de certifier à elle seule
+un contrat de 1 s, encore moins de 100 ms. Le temps hôte et le temps
+interne doivent être rapprochés avec une tolérance de mesure motivée et
+publiés tous les deux, sans soustraire arbitrairement cette marge.
 Une porte CTest lance une **vraie** sonde native et compare le résultat
 on/off et onze mutations du protocole. Ces améliorations sont versionnées,
 mais leurs portes complètes et leur raccord pré-G4 restent à vérifier sur

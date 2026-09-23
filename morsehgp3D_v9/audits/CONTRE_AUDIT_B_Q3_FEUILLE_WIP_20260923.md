@@ -136,3 +136,89 @@ jusqu'à la profondeur 10 sous les bornes i128 établies, avec repli au-delà ;
 son oracle autonome passe. Il faut une ablation native appariée, et ne
 pas additionner ses éventuels gains aux `610,29 M` tests ponctuels
 répétés de la voie feuille comme s'il s'agissait du même poste.
+
+## Piste collective conditionnelle : graines d'une même cellule
+
+Sur une arête `ab` fixée, le centre `c` d'une boule q3 se trouve dans le
+plan médiateur de `ab` et son rayon vérifie `R²=|a−c|²`. Pour chaque site
+`z`, le signe de `|z−c|²−R²` est donc celui de la forme **affine**
+`L_z(c)=|z|²−|a|²−2(z−a)·c` sur ce plan. Une cellule exacte de l'atlas
+fournit déjà son nombre `I` de sites uniformément intérieurs ; seules
+les formes des sites actifs doivent être évaluées. Regrouper les graines
+**par cellule et BallKey**, et non par simple proximité flottante,
+permettrait de partager ces évaluations sans altérer les résultats.
+
+Une première structure exacte possible est un arbre des centres q3
+distincts de la cellule. Pour une forme active, ses extrema sur la boîte
+fermée d'un nœud se calculent aux sommets rationnels : maximum `<0`
+crédite paresseusement tous ses centres vivants ; minimum `≥0` ne
+crédite personne ; le cas mixte descend. Un nœud n'est rejeté pour q3
+que si le **minimum** des comptes de tous ses centres vivants atteint
+`K−1`, jamais sur son seul maximum. Les centres survivants doivent ensuite
+recollecter les contacts `L_z=0` dans **toute** la frontière active ; un
+curseur de compte coupé tôt n'est pas une coquille. Deux supports q3
+positifs peuvent donner la même BallKey : partager leur census reste
+possible, mais toutes leurs présentations distinctes doivent être
+réémises au flux et au catalogue.
+
+Fixture de déduplication proposée : `a=(15,20,20)`, `b=(25,20,20)`,
+`x=(20,28,23)`, `y=(20,28,17)`, éventuellement `m=(20,23,20)`.
+Les deux faces aiguës `abx` et `aby`, possédées par `ab`, donnent le même
+centre `(20,23,20)`, `R²=34` et quatre contacts ; `m` est strictement
+intérieur. À K3, exiger deux présentations et la même profondeur 1 et
+coquille complète pour chacune. Ajouter une fixture où les comptes des
+deux enfants diffèrent et une où un témoin est contact pour un centre
+mais intérieur pour l'autre : un crédit uniforme ou un rejet de nœud
+mal appliqué perdrait respectivement un résultat ou un ID de coquille.
+
+Cette piste ne donne **pas** encore de borne sous-quadratique globale :
+une forme coupant toutes les boîtes de centres force encore le produit
+graines×témoins, et l'aval peut dominer. Avant le port, publier par cellule
+`(#présentations, #BallKeys, #témoins actifs, masse
+#BallKeys×#témoins, part Leaf/Deep)` et les coûts de recollecte ;
+n'allouer la structure groupée qu'aux cellules chaudes. Les
+[palettes de témoins apprises de l'audit A](Q3_STRUCTURE_ET_BORNES.md)
+constituent un premier filtre moins coûteux sur les rejets tardifs ;
+mesurer leur effet avant d'ajouter cet arbre, puis comparer les deux
+à travail total et sortie identique. Les
+[structures de reporting de demi-espaces de Chan–Tsakalidis](https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.SOCG.2015.719)
+montrent qu'une route théorique plus forte existe en position générale,
+mais les contacts et dégénérescences entiers, les cellules nombreuses et
+leur coût de construction interdisent de lui transférer une promesse de
+vitesse LiDAR/GPU sans prototype mesuré.
+
+## Réemploi partiel du balayage q4 au paramètre zéro
+
+Pour une arête et une graine q3 qui tombent dans une **vraie cellule
+Leaf balayée par q4**, la famille du code est `P_z(μ)=P_z(0)−μB_z` :
+`μ=0` redonne exactement la boule q3. Le balayage q4 trie déjà les
+racines d'événements, crédite les constants intérieurs et sépare les
+sorties des entrées. Il pourrait insérer une sentinelle `μ=0` même sans
+groupe de racines à zéro : la profondeur q3 est le compte après les
+racines `<0` et les **sorties** à zéro, avant les entrées à zéro ; la
+coquille réunit tous les contacts à zéro et les constants de coquille.
+Une graine q3 doit être traitée même si le balayage ne produit **aucune**
+présentation q4 : le seuil q3 est `K−1`, celui de q4 `K−2`, et les tests
+de positivité, propriété et canonisation q4 n'autorisent aucun rejet q3.
+
+Cette fusion ne couvre pas les fragments `Deep` exacts retenus à compte
+`K−2` (encore utiles pour q3 mais sautés par le sweep q4), ni les
+arêtes q3 seules, cellules `Outside`, le backend `Window30` ou `K<3`.
+Le census q3 actuel doit rester en repli. Le code exécute aujourd'hui q3
+**avant** q4 ; un simple callback supplémentaire ne réutilise donc pas
+le tri existant : il faut une traversée commune ou un buffer de graines
+possédé, avec ses octets et sa durée comptés.
+
+Une frontière dyadique exige plus de soin que la seule égalité du centre :
+`certified_cell` choisit le premier enfant **fermé** qui le contient,
+tandis que le sweep émet dans une tuile q4 **demi-ouverte**. Ces choix
+peuvent différer sur la coupure. Sélectionner l'unique feuille propriétaire
+q4 de `μ=0`, ou reprendre le q3 indépendant sur la frontière ; ne pas
+émettre q3 depuis deux feuilles adjacentes. Le flux q3 doit toujours
+réunir et trier sa coquille dans `shell_first`, conserver le triple support
+et **une présentation par graine possédée**, même si plusieurs graines
+partagent une BallKey. Ajouter des compteurs d'éligibilité Leaf/Deep,
+graines réellement fusionnées, frontières, événements à zéro, tests
+q3 évités, coûts de fusion/coquille et temps net q3+q4. C'est une ablation
+causale intéressante, pas une économie démontrée sur les 10,7 M feuilles
+de l'essai local : leur ventilation Leaf/Deep n'est pas publiée.

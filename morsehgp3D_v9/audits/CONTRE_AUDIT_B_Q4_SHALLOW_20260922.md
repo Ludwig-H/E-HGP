@@ -237,6 +237,66 @@ former les produits croisés de 160 bits. Les pivots négatifs, pentes
 nulles et racines égales restent des branches distinctes. Ce gain de
 largeur ne change pas le facteur `s·m` du schéma direct.
 
+## Grand shell : recherche d'un support sans carré de paires
+
+Autre verrou, **distinct** de la découverte des centres peu profonds :
+une fois la coquille entière `U` d'une boule q4 connue, trouver **un**
+tétraèdre strictement positif dont `ab` est l'arête propriétaire ne
+requiert pas mathématiquement de tester les `O(|U|²)` paires. Il existe
+une réduction exacte conditionnelle vers dominance 2D et maximum de
+produit scalaire 3D. Elle n'est **ni implémentée ni chronométrée** ; si le
+flux exige toutes les présentations plutôt qu'une preuve d'existence,
+sa taille de sortie peut elle-même être quadratique.
+
+Écrire `A=a−c`, `B=b−c`, `n=A×B`. Si `n=0`, `a,b` sont antipodaux sur
+la sphère, donc `c` appartient déjà au segment `ab` : aucun tétraèdre
+strictement positif de cette boule ne peut avoir `ab` comme arête.
+Sinon, pour chaque contact `Z=z−c`, poser
+`D_Z=det(A,B,Z)`,
+`P_Z=det(Z,B,n)/D_Z` et `Q_Z=det(A,Z,n)/D_Z` lorsque `D_Z≠0`.
+Un support positif doit avoir un contact `X` avec `D_X>0` et un `Y`
+avec `D_Y<0`. La résolution de ses quatre poids barycentriques donne
+exactement
+`c∈int conv(a,b,x,y) ⇔ P_Y>P_X et Q_Y>Q_X` ; les deux égalités sont
+**exclues**. On filtre d'abord chaque contact dont `ax` ou `bx` viole
+la propriété de `ab` (longueur, puis plus petite paire d'IDs en cas
+d'égalité). L'arête finale `xy` vérifie `|xy|²≤|ab|²` si et seulement si
+`(x−c)·(y−c)≥R²−|ab|²/2`. La dominance choisit les `Y` possibles ;
+le maximum de ce produit scalaire parmi eux décide l'inégalité. Une
+égalité de longueur est admise seulement si la paire `xy` vient **après**
+`ab` dans l'ordre des IDs, ce qui se traite par un second index filtré
+sur les IDs de `Y` lorsque `X` satisfait lui aussi cette condition.
+
+Une structure de plages 2D sur `(P_Y,Q_Y)`, avec un convexe des vecteurs
+`Y` dans chaque nœud canonique et une requête d'extrême exacte de type
+[Dobkin–Kirkpatrick](https://dpd.cs.princeton.edu/Papers/DobkinKirkpatrick.pdf),
+donne une **cible théorique** de prétraitement et de recherches
+`O(u log³u)`, espace `O(u log²u)` pour `u=|U|`, au lieu de `u²` tests
+de paires. Les coordonnées égales en dominance restent exclues ; les
+coquilles coplanaires, convexes de dimension inférieure, nombreux centres
+et tables dupliquées exigent des branches exactes et une mesure de
+mémoire. La réduction ne supprime ni la construction de `U`, ni les
+`Σ cover_sites` super-quadratiques observés ci-dessus, ni les coûts de
+catalogue/FULL. Elle est surtout un recours pour les rares grandes
+coquilles, après histogramme des tailles et des sorties.
+
+Sous la grille u18, les comparaisons projectives n'imposent pas
+directement des fractions géantes : choisir quatre contacts affinement
+indépendants donne par Cramer un dénominateur homogène normalisé
+`0<Δ<2^60` et des numérateurs de centre `<2^79`. Les vecteurs entiers
+`Z'=Δz−N` ont alors des composantes de valeur absolue `<2^80`.
+L'identité
+`det(Y,B,X)=D_X r_Y(P_Y−P_X)`, avec
+`r_Y=D_Y/|n|²`, et son analogue pour `Q`, ramène le signe d'une
+différence de clés à un déterminant 3×3 de valeur absolue `<2^243` :
+**256 bits signés suffisent pour ces tris**. Cette borne ne certifie pas
+encore tous les prédicats ni la construction du convexe ; un oracle
+Fraction et des mutants de signes, égalités et propriété restent requis.
+La fixture `c=0`, `a=(−5,0,0)`, `b=(3,−4,0)`, `x=(0,0,−5)`,
+`y=(0,3,4)` montre pourquoi le dernier test `xy` est indispensable :
+la positivité est stricte et les quatre autres arêtes sont au plus
+`|ab|²=80`, mais `|xy|²=90`.
+
 ## Mini-reçu reproductible
 
 Depuis la racine du dépôt, sans écrire de fichier :
