@@ -71,7 +71,15 @@ phase 0/lots sur les deux modes, avec priorité « phase 0 avant lots »
 documentée ; le constat « porte de panne croisée absente » du snapshot
 ci-dessus est **clos** sur ces cas. Un digest ON identique est indiqué
 sur 16k/K10 local, pas une comparaison exhaustive de tout le payload
-ON/OFF. Les deux défauts de porte de durée restent ouverts : le faux
+ON/OFF : `full_ball_tower_gate` compare le payload complet en voie
+`overlap_static=false`, tandis que `chain_static_paths_gate` vérifie
+le digest FNV64 en voie ON. Les pannes `static+images` et le lancement
+des nouveaux `runners.emplace_back` ne sont pas injectés ; le failpoint
+de lancement existant vise une étape antérieure de la chaîne. Aucun
+écart d'objet ni race n'a été démontré par cette lecture. À W48/K10,
+jusqu'à 48 fils de géométrie et 10 runners d'ordres peuvent concourir :
+mesurer aussi ce coût d'oversubscription, sans le présumer bénéfique.
+Les deux défauts de porte de durée restent ouverts : le faux
 refus décrit ici et le [faux accord par
 ordre](CONTRELEC_V15_CHRONO_ORDRE_20260923.md) démontré séparément.
 Le compteur `overlapped_orders` conserve le sens « mode admis », non

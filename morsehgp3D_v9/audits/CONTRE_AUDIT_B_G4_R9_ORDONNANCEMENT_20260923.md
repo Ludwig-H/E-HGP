@@ -46,6 +46,11 @@ l'exécution est attestée par les reçus hôte/VM, pas par ce champ.
 | 000000 | K1..10 | 13,597 / 13,574 | **11,752 / 11,753** | 8,066/8,012 → 6,244/6,243 |
 | 000200 | K1..10 | 14,945 / 15,086 | **11,892 / 11,854** | 9,631/9,608 → 6,613/6,622 |
 
+Ces colonnes sont `chain_s`, **digest exclu**. Sur le meilleur cas
+000100/K5/r0, le digest synchrone coûte 0,163 s et le mur externe
+est **3,021 s**, contre 2,799 s pour `chain_s`. Ces trois frontières
+doivent rester séparées dans le jugement du contrat.
+
 L'attente des workers q3/q4 passe de **35–49 % à 0,4–0,9 %** à K5.
 Le plus long job du front passe de **2,5–3,7 s à 0,23–0,31 s**.
 Ce gain de calendrier est crédible car les deux répétitions le
