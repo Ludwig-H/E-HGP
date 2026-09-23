@@ -392,6 +392,11 @@ appariée.
    reste `complete_relative` ; les lacunes v5 de réception demeurent pour un
    futur reçu arbitraire et `host/lifecycle.txt` reste à `targeted_running`
    malgré la preuve séparée d'arrêt `TERMINATED`.
+   La [tentative G4 R4](CONTRE_AUDIT_B_G4_R4_PREVOL_20260923.md) avait un
+   snapshot `a1d7a9bc` et 13 cas appariés cache ON/OFF bien préparés,
+   mais SSH a expiré avant le worker et toute sonde ; l'arrêt ciblé
+   `TERMINATED` est certifié. Elle ne fournit **aucun chrono ni résultat
+   de tour** et ne qualifie pas le cache.
    Le port `7f64a279` réunit maintenant le cache de témoins, la preuve
    conjointe et la sonde v6. Le DFS conjoint q3/q4 rend les mêmes bits de
    preuve que les deux DFS séparés sur **30 000** appels synthétiques, avec
@@ -426,12 +431,15 @@ appariée.
    génération/provenance, préflight non vacant, rapport GNU time), mais sa
    [relecture de `guard_evidence.json`](CONTRE_AUDIT_B_G4_RECEPTION_V5_20260923.md)
    accepte encore un calendrier vide et des champs de garde falsifiés dans
-   un faux cycle complet. Son validateur
-   de compteurs accepte aussi `witness_cache_queries=0` malgré 16,5 M
-   rejets cache, ou `both_edges>q3_edges` sur le JSON local cité ci-dessus.
+   un faux cycle complet. Ses **21 selftests protocolaires** passent en
+   modes normal et `-O` sur un `HEAD` stable ; le vrai préflight local de
+   1 500 sites exerce les quatre leviers, sans GCP. Le validateur de
+   compteurs accepte encore `witness_cache_queries=0` malgré 16,5 M rejets
+   cache, `both_edges>q3_edges`, ou `shell_over_12=1` avec statut complet
+   sur le JSON local cité ci-dessus : voir les
+   [mutations et invariants proposés](RECEPTION_V6_IDENTITES_MANQUANTES_20260923.md).
    Exiger la preuve complète de garde **relative au contexte hôte conservé**,
-   puis les bornes `cache_rejected_pairs≤cache_queries≤expanded_pairs` et
-   `both_edges≤min(q3_edges,q4_edges)` avant un nouveau reçu G4.
+   puis ces identités avant un nouveau reçu G4.
 4. **Aval FULL, grandes coquilles et échelle** : les 12,0 M appels MEB
    de 000000/K10 font 1,065 milliard de tests de puissance ; un test
    exact de la paire la plus éloignée peut éliminer toutes les autres
