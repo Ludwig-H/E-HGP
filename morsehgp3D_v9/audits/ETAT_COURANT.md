@@ -4,7 +4,9 @@
 8k **`a08378da`**, lecteur LiDAR **`50646eef`** puis **`1f048aae`**,
 lecteur G4 **`515b3666`** puis **`1f048aae`**.
 La sonde v14 **`67fce4e9`** et le correctif de réception/masse
-**`fe1142b5`** sont publiés depuis ; aucun reçu G4 v14 n'est acquis.
+**`fe1142b5`** sont publiés depuis. Le reçu G4 R9 v14 est **relu
+provisoirement**, mais son dossier est encore non suivi par Git à la
+lecture B ; voir la [note R9](CONTRE_AUDIT_B_G4_R9_ORDONNANCEMENT_20260923.md).
 Un [contre-audit B du WIP v15 de recouvrement FULL](CONTRE_AUDIT_B_WIP_TOUR_V15_RECOUVREMENT_20260923.md)
 relève une borne de durée du lecteur qui peut rejeter une sortie valide :
 K1 démarre avant l'horloge statique, alors que `lots_by_k` est borné
@@ -18,8 +20,8 @@ nécessairement disjointes pour **60,718 ms** de mur FULL. Une borne par
 ordre doit accompagner l'horloge commune proposée par B avant tout
 reçu G4 v15.
 Les mesures de densité restent celles du binaire v12 **`4530644b`** ;
-aucune nouvelle série LiDAR v13 n'en découle. Le dernier
-[reçu G4 R8](../receipts/g4_tower_r8_20260923/README.md) exécute
+aucune nouvelle série LiDAR v13 n'en découle. Le dernier reçu G4
+**publié** [R8](../receipts/g4_tower_r8_20260923/README.md) exécute
 `515b3666` sur CPU G4 et a sa
 [contrelecture indépendante](CONTRE_AUDIT_B_G4_R8_20260923.md). Le
 [reçu G4 R7b](../receipts/g4_tower_r7b_20260923/README.md) exécute
@@ -325,11 +327,20 @@ distincts (jobs par masse, grain 64 au lieu de 16). Sa
 [contrelecture](CONTRE_AUDIT_B_V14_ORDONNANCEMENT_20260923.md) confirme
 des portes bornées d'exactitude nettement renforcées : plans mass-first
 contre front oracle, candidats q3/q4 normalisés contre oracle rationnel.
-Le gain local annoncé sur le plus long job et l'attente ne possède
-cependant **aucun reçu brut v14** ; il n'est pas un résultat G4. Les
-nouveaux chronos ne couvrent pas les plages publiées et les deux leviers
+Au moment de cette première contrelecture, le gain local annoncé sur
+le plus long job et l'attente ne possédait **aucun reçu brut v14**.
+La [contrelecture provisoire R9](CONTRE_AUDIT_B_G4_R9_ORDONNANCEMENT_20260923.md)
+apporte maintenant un reçu G4 CPU apparié, non encore figé dans Git :
+24/24 `complete_relative`, 18 comparaisons égales, validateur épinglé
+normal/`-O` positif. Avec les **deux** leviers ON, K5 passe de
+3,69–6,30 s à **2,80–4,07 s** selon la trame/répétition ; K10 de
+9,45–15,09 s à **8,60–11,89 s**. L'attente q3/q4 K5 tombe de
+35–49 % à moins de 1 %, mais la phase reste 1,66–2,39 s. À travail
+CPU inchangé, son mur n'est plus que 1,02–1,03 fois `cpu_sum/48` à K5 :
+réduire le **travail** ou changer de backend devient la priorité.
+Les nouveaux chronos ne couvrent pas les plages publiées et les deux leviers
 ne sont pas séparés. Une matrice 2×2 appariée sur une trame difficile
-avec q3/q4 et chaîne complets est la prochaine porte de performance.
+avec q3/q4 et chaîne complets est la prochaine porte d'attribution.
 La [contrelecture des durées v14](RECEPTION_V14_CHRONOS_Q34_20260923.md)
 montre que le lecteur accepte encore à **`fe1142b5`** un maximum de
 job supérieur à leur somme, et une somme jobs+attente supérieure au

@@ -1915,3 +1915,22 @@ pannes croisées et TSan propres à ce nouveau chemin.
 Question au développeur : peux-tu fermer la porte chrono avant tout
 reçu G4 v15, puis documenter la priorité exacte des refus et le sens
 du compteur de recouvrement ?
+
+## 23 septembre 2026, 10 h 35 UTC — G4 R9 relu, reçu encore non suivi (auditeur B)
+
+Lecture du dossier R9 présent **uniquement en non-suivi Git** dans le
+worktree du développeur ; [contrelecture provisoire](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_G4_R9_ORDONNANCEMENT_20260923.md),
+empreintes du snapshot dans la note. Le validateur de production épinglé
+à `fe1142b5` repasse sur 24/24 sorties brutes en Python normal et `-O`
+(codes 0/0), les SHA-256 passent et les reçus attestent l'arrêt ciblé.
+À s8/W48/CPU G4, deux répétitions OFF/ON **des deux leviers ensemble**
+font passer la meilleure chaîne K5 de 3,69–3,81 à 2,80–2,82 s ; K10
+de 9,45–9,51 à 8,60–8,65 s. Les sorties relatives concordent. À K5,
+l'attente q3/q4 tombe de 35–49 % à moins de 1 % ; son mur ON vaut
+seulement 1,02–1,03 fois `cpu_sum/48`. Il faut donc désormais abaisser
+le travail q3/q4 ou changer de backend, tout en réduisant FULL et le
+reste ; l'ordonnancement seul ne donne pas 1 s. Ni GPU, ni trames brutes,
+ni s10/s12, ni complétude absolue acquis.
+Question au développeur : peux-tu figer le dossier R9 sur `main` avec
+les empreintes annoncées (ou signaler toute correction du reçu), puis
+garder ses cas ON comme base CPU de comparaison du futur GPU ?
