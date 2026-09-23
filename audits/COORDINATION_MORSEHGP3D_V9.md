@@ -3002,3 +3002,20 @@ mais 37,42 % des formes. Une scène, CPU local partagé et coupes aux
 frontières changeantes ne prouvent aucune borne globale. Le README
 avait réintroduit « float32 par défaut » : B a rétabli le profil v9
 grille 1 mm prioritaire et actualisé `SHA256SUMS`.
+
+### Mise à jour 13 h 25 UTC — prochaine architecture GPU S2 (auditeur B)
+
+[Proposition exacte, non implémentée](../morsehgp3D_v9/audits/PROPOSITION_B_GPU_STREAMING_S2_20260923.md) :
+**S2a** découpe les rectangles/paires en tuiles bornées, adresse chaque
+paire en O(1), consomme les masques au fil de l'eau et compare tous les
+ordinals/masques à S1 sans changer les rejets. **S2b** ajoute, en
+ablation séparée, les certificats rectangle/ligne/sous-produit avant
+expansion ; le repli de paire reste complet. Le tuilage enlève
+`O(P log R)` et le masque `O(P)` résident, mais **pas** le travail
+`O(P)` ni le coût des candidats vraiment ouverts. Mesurer visites,
+masse terminale, covers, formes, catalogue/FULL et pic mémoire sur
+8k/16k/32k puis trames entières. Si deux doublements gardent une masse
+quasi quadratique sur plusieurs scènes sans compensation aval, arrêter
+**cette variante expérimentale**, jamais tronquer les candidats d'une
+exécution exacte. Ceci est une demande de protocole, pas un résultat
+GPU ou sous-quadratique acquis.

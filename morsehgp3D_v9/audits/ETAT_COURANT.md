@@ -64,7 +64,11 @@ de paires paie `O(P log R)` pour ses recherches d'offset ; ni mémoire
 massive ni vitesse GPU ne sont acquises. Le [préflight B du protocole
 G4](CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md) a
 8/8 selftests normaux et 8/8 sous `-O` **avec faux GPU**, pas de CUDA
-réel. Le profil local attribue environ 33 % du CPU
+réel. La [proposition S2](PROPOSITION_B_GPU_STREAMING_S2_20260923.md)
+sépare le tuilage borné sans nouveau rejet (S2a) du certificat
+bloc/ligne avant expansion (S2b), avec tests causaux et arrêt de la
+**piste expérimentale**, jamais de l'exécution exacte. Le profil local
+attribue environ 33 % du CPU
 q3/q4 aux deux DFS ciblés avec leur ordre d'enfants ; 40 % comprend
 aussi le front non porté. Un chemin GPU intégré doit inclure les coûts
 de création/consommation des requêtes et une sortie bornée par lots.
