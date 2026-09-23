@@ -134,9 +134,10 @@ ses objections de réception doivent être rejugées sur les sources et
 reçus R12, et non répétées comme défauts actuels. La
 [contrelecture B de la croissance aval](CONTRE_AUDIT_B_CROISSANCE_Q34_AVAL_S2_20260923.md)
 mesure, sur le sans-sol 08/000200 de 16k à 32k, ×4,81 paires développées
-et ×8,27 formes cœur à K5, pour ×1,83 émissions q3+q4. Sur la trame
-brute 08/000000/K10, le CPU local traite 37,87 M paires et 2,329 Md
-formes cœur+cover. Le filtre GPU ne supprime pas cette masse aval ;
+et ×8,27 incidences site–cœur à K5, pour ×1,83 émissions q3+q4. Sur la trame
+brute 08/000000/K10, le CPU local traite 37,87 M paires et compte
+2,329 Md incidences site–cœur+cover, dont 2,304 Md formes chargées hors
+extrémités. Le filtre GPU ne supprime pas cette masse aval ;
 ces mesures ne prouvent ni une borne sous-quadratique ni le budget FULL.
 Le [shadow des rectangles](Q34_BLOCS_LIDAR_SHADOW_20260923.md) donne un
 critère d'ordonnancement S2a concret sur 08/000000/s8 : à K5, **1 081 123

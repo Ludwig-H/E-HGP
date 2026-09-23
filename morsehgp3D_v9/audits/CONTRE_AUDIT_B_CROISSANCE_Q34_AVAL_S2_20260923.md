@@ -21,9 +21,11 @@ sont :
 
 Les [JSON bruts K5](../receipts/lidar_scaling_local_20260923/out/s02_k5_w8_r0/)
 et [K10](../receipts/lidar_scaling_local_20260923/out/s02_k10_w8_r0/)
-donnent les masses ; `core_sites` et `cover_sites` comptent toutes les
-formes chargées, **extrémités comprises**, pas les seules formes
-restantes. À K5, la fraction de la masse de paires résiduelle WSPD
+donnent les masses ; `core_sites` et `cover_sites` additionnent les
+**populations des cœurs/covers construits, extrémités comprises**. Avec
+les leviers actifs de ce reçu, `dead_core_form_sites` et
+`dead_form_sites` comptent séparément les formes réellement chargées
+hors extrémités. À K5, la fraction de la masse de paires résiduelle WSPD
 effectivement développée monte de **15,4 %→17,7 %→28,4 %**. Les
 formes par charge du cœur montent de **54,0→71,7→191,1** et les
 formes par cover de **176,5→230,9→419,4**. À K10, les formes par
@@ -34,14 +36,18 @@ mais ne reflète donc pas le travail du cœur et du cover.
 Sur la [trame brute 08/000000](lidar_raw_k10_density_20260923/README.md),
 le doublement 61 694→123 389 retours donne encore **×4,34 formes cœur
 à K5** et ×3,79 à K10. À pleine taille K10, les comptes bruts sont
-**37 868 819 paires** développées, **1 254 254 109 formes cœur**,
-**1 074 719 197 formes cover**, **11 387 391 boules** de catalogue,
+**37 868 819 paires** développées, **1 254 254 109 incidences site–cœur**,
+**1 074 719 197 incidences site–cover**, **11 387 391 boules** de catalogue,
 **8,219 Gio** de RSS et **905,514 CPU·s** locaux. Ce n'est qu'une
 trame brute d'une seule séquence, sans GPU, mais c'est déjà un coût
 absolu déterminant pour le budget d'une seconde.
+Le même `full.stdout` rapporte **1 238 630 455** formes de cœur et
+**1 065 598 257** formes de cover effectivement chargées hors extrémités,
+soit **2 304 228 712** au total. Ne pas appeler les 2 328 973 306
+incidences (extrémités incluses) autant de lectures de formes.
 
 Le filtre S1 GPU accélère la décision des masques ; le batch S2 actuel
-**ne réduit pas** les formes par cœur/cover des paires survivantes,
+**ne réduit pas** les populations des cœurs/covers des paires survivantes,
 ni leurs sorties et FULL. Une belle pente des émissions ou 43–107 ms
 de filtre ne doivent donc pas être présentés comme une croissance
 sous-quadratique **du calcul complet**. Le prochain reçu intégré doit
@@ -51,3 +57,40 @@ digest FULL, CPU·s, mur et RSS/HBM, puis répéter sur plusieurs scènes
 brutes et sans sol. Les ratios locaux supérieurs à quatre révèlent des
 régimes à traiter ; ils ne prouvent pas non plus une loi quadratique
 universelle.
+
+## Prochain shadow à coût borné : le résidu réel après le filtre
+
+La [domination par cellule et gardes](DOMINATION_Q4_PARESSEUSE_PAR_BLOCS_20260923.md)
+est déjà prouvée localement, mais son gain sur LiDAR n'est pas mesuré.
+Le batch S2 crée précisément l'objet manquant pour le juger : une liste
+ordonnée de **vraies arêtes survivantes** `E⊊A×B`, chacune avec son masque
+q3/q4. La validation structurelle de `wspd_q34.cpp` parcourt déjà
+rectangles et survivants ensemble en `O(R+S)` ; elle détruit ensuite les
+rectangles et distribue les survivants par blocs arbitraires de 64. Un
+shadow peut, dans ce même parcours, calculer sans nouvelle copie de `E`
+les offsets des segments non vides et leurs extrema associatifs
+(`a+b`, longueur² maximale, boîtes des deux côtés **réels**). Comparer
+ensuite l'enveloppe des centres issue du produit entier avec celle de
+`E`, en gardant propriétaire, masque et IDs exacts. Une boîte serrée peut
+permettre `K−1` gardes q3 ou `K−2` gardes q4 là où les extrêmes de
+`A×B` empêchent tout certificat.
+
+La porte est **économique avant d'être chronométrique** : sur les
+rectangles lourds choisis par un budget de *tentatives* (jamais un quota
+de candidats), publier `R,P,S`, tailles et masques des segments,
+tests/gardes/cellules payés, voies certifiées, replis, et surtout les
+`dead_core_form_sites` puis `dead_form_sites` des **arêtes réellement
+épargnées**. Si une voie est éliminée mais l'autre garde le cœur ou le
+cover, compter uniquement la préparation effectivement évitable. Le
+shadow laisse le moteur inchangé et doit inclure brut/sans-sol,
+8k/16k/32k puis trames entières, s8/10/12. Une baisse de paires déjà
+rejetées par le filtre ne rembourse rien dans le cœur. Si le travail
+certifié n'amortit pas la recherche des gardes et le transport des
+segments, fermer la piste sans port GPU. Le crédit exact par nœuds
+essayé **après** construction du cœur/cover a déjà régressé de +27 %
+CPU à K5 et +32 % à K10 sur une coupe 16k ; ce shadow différent teste
+un partage **entre arêtes avant le cœur**, sans refaire cette fausse
+piste. Un résultat favorable demanderait encore une ablation ON/OFF
+avec flux complet de candidats, catalogue clé par clé, tour et digest
+identiques, plus CPU, mur G4 et HBM/RSS. L'étape industrielle suivante
+reste le tuilage borné : la liste globale S2 ne l'est pas.

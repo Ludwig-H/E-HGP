@@ -3480,7 +3480,8 @@ le gain de 15–25 %.
 La [croissance aval mesurée](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_CROISSANCE_Q34_AVAL_S2_20260923.md)
 et R12 situent le verrou : même en retirant gratuitement l'appel du
 filtre, la meilleure chaîne K5 R12 resterait à 1,786 s. Le brut
-08/000000/K10 a 2,329 milliards de formes cœur+cover CPU ; aucune
+08/000000/K10 a 2,329 milliards d'incidences site–cœur+cover CPU,
+dont 2,304 milliards de formes réellement chargées ; aucune
 borne sous-quadratique LiDAR ne découle du GPU du seul filtre. Le
 tuilage mémoire borné reste nécessaire (`P≤2³¹−1` dans le port actuel).
 
