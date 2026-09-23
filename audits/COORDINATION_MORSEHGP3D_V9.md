@@ -1742,3 +1742,67 @@ repli exact, jamais quota de candidats. Une cellule possible indécise
 ne permet pas de supprimer le rectangle entier. Auditeur C : indexer les
 deux nouvelles contrelectures R8/lecteur et cette fixture lors du prochain
 passage de l'index, sans les requalifier en preuve LiDAR.
+
+## 23 septembre 2026, 10 h 12 UTC — Implémentations alternatives pour le contrat (auditeur C)
+
+Base : `0c3b8d5b`. GCP non utilisé. Note :
+[`AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md`](../morsehgp3D_v9/audits/AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md),
+pièces dans [`c_alternatives_20260923/`](../morsehgp3D_v9/audits/c_alternatives_20260923/README.md).
+Six familles défendues chacune par un concepteur, avec expériences locales
+(D1 continuité, D2 délétion de Delaunay, D3 séparation d'échelles, D4
+inversion par site, D5 tour FULL maigre, D6 chaîne GPU résidente), notées
+par trois jurys, puis six réfutations adverses. Chiffrée sur R7b ; R8 ne
+change aucune conclusion (raccord en tête de note).
+
+**Au développeur**, par ordre :
+
+1. **D5 (R-15)** rejoint votre « squelette des lots de la tour ». Même
+   objet, mêmes lots : index des selles (une facette entre selle et
+   intérieur d'une boule régulière a cette boule pour MEB, sans calcul),
+   saut au centre de `MEB(F)` avec une **règle 0** à chaque état (clé de `D`
+   au catalogue et `p_D+q_min−1≤K≤p_D+u_D` ⇒ cible `D` ; sans elle la
+   fixture `fx_cz` refuse là où le produit réussit), phase A sans allocation
+   avec chemin singleton (97–99 % des lots), images de naissance par le
+   lemme C. Racines identiques au produit sur 5,04 M facettes LiDAR et
+   221 556 facettes dégénérées ; FULL ×6–13 (K10 3,2 s → 0,25–0,6 s). Deux
+   défauts trouvés par la réfutation, à ne pas reproduire : un tampon de 13
+   racines déborde (`fx_ico12` : 32 parents, prendre des offsets CSR), et un
+   format compact doit porter la **position du premier bloc de groupe**
+   (`lat5_3`, `lat5_1` : une continuation contributive précède des
+   naissances du même niveau).
+2. **Ordonnancement q3/q4** : utile (attente 35–49 % à K5), mais c'est
+   aussi la base de comparaison de toute expérience GPU. Le seuil ×11 de la
+   session GPU unique (R-17) se mesure contre la chaîne **déjà
+   réordonnancée**, même ledger de travail.
+3. **Plomberie (étape 2)** n'est plus optionnelle : avec D5, le budget
+   q3/q4 pour 1 s à K5 vaut 0,44–0,50 s sur 000100 mais **0,08–0,17 s**
+   sur 000200, où 0,76 s hors q3/q4 et hors tour subsistent (q2, fusion,
+   recensement, temps système).
+4. **Sonde d'ancres longues (R-16)**, 1 à 2 jours : sur 08/000200 K5, les
+   arêtes propriétaires > 1,6 m portent 66–70 % du CPU q3/q4 pour 5,9 % des
+   boules. C'est la même cible que le certificat de rectangle de B et la
+   croissance des formes à boîte fixe. Critère de succès proposé, en CPU et
+   non en paires rejetées (d'accord avec B, 10 h 09) : moins de 25 % du CPU
+   q3/q4 sur les trois trames.
+
+**Verdicts chiffrés** (probabilités subjectives les plus basses des
+jurys) : K5 < 1 s en CPU seul ≈ 0 ; K5 < 1 s avec D5 + plomberie + GPU q3/q4
+0,25–0,35 sur la trame légère, 0,1–0,2 sur les trois trames ; K10 < 1 s
+< 0,1 (même q3/q4 et FULL gratuits laissent 1,15–1,64 s) ; 100 ms < 0,02.
+D2 et D4 sont écartés comme générateurs mais gardés comme juges hors
+produit. Une réfutation a confronté la chaîne actuelle à des oracles exacts
+sur 1 562 nuages adverses (775 566 boules) : zéro écart.
+
+**Décisions de contrat (R-18), pour le développeur et l'utilisateur** :
+sortie compacte (12 octets par nœud plus exceptions, expansion
+chronométrée à part), digest hors chronomètre, et reformulation de 100 ms
+(aucune famille n'y mène sans un générateur qui émette par niveau).
+
+**Porte `scale8000` publiée (`96bd6190`), R-19.** Merci d'avoir porté le
+correctif. Deux remarques après B : le commentaire « pas deterministe »
+est faux (indice `balls % 64`), et le garde `sampled*64 < balls` ne détecte
+qu'un échantillonneur entièrement coupé. Proposition peu coûteuse :
+recenser par balayage brut **toutes** les boules à coquille étendue
+(`u≠q` : 86 à `--n=8000` sur les trois familles, rejeu local de
+`96bd6190`, 55 s ; c'est là que `ShellTable` est le plus exposé) en plus
+d'une sur 64, et publier l'effectif échantillonné par famille.

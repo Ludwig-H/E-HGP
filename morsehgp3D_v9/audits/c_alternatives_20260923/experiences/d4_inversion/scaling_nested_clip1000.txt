@@ -1,0 +1,12 @@
+s00 8000 K 5 start 300 / 300 ms/site 1.352 pencils 292.8 vertsL 472.7 evals/pencil 346.7 q4 25.49 q3 69.11 m 1326 bh 26.6
+s00 8000 K 10 start 120 / 120 ms/site 9.498 pencils 1155.7 vertsL 3821.6 evals/pencil 504.3 q4 294.02 q3 301.73 m 1327 bh 157.2
+s00 16000 K 5 start 300 / 300 ms/site 1.399 pencils 285.0 vertsL 458.2 evals/pencil 312.9 q4 22.53 q3 65.11 m 1049 bh 31.4
+s00 16000 K 10 start 120 / 120 ms/site 8.221 pencils 1098.6 vertsL 3652.5 evals/pencil 475.4 q4 255.77 q3 272.46 m 1065 bh 183.2
+s00 32000 K 5 start 300 / 300 ms/site 1.275 pencils 254.5 vertsL 403.6 evals/pencil 292.6 q4 16.33 q3 52.21 m 677 bh 50.2
+s00 32000 K 10 start 120 / 120 ms/site 6.11 pencils 960.0 vertsL 3115.8 evals/pencil 445.7 q4 178.65 q3 221.55 m 750 bh 242.6
+s02 8000 K 5 start 300 / 300 ms/site 2.366 pencils 278.4 vertsL 444.8 evals/pencil 572.2 q4 16.97 q3 56.62 m 1568 bh 36.5
+s02 8000 K 10 start 120 / 120 ms/site 10.92 pencils 1035.5 vertsL 3372.7 evals/pencil 741.0 q4 147.06 q3 211.93 m 1563 bh 206.3
+s02 16000 K 5 start 299 / 300 ms/site 2.187 pencils 277.3 vertsL 444.5 evals/pencil 562.3 q4 16.28 q3 56.35 m 1574 bh 33.8
+s02 16000 K 10 start 119 / 120 ms/site 11.119 pencils 1071.1 vertsL 3474.6 evals/pencil 819.3 q4 147.26 q3 211.17 m 1654 bh 207.4
+s02 32000 K 5 start 299 / 300 ms/site 2.03 pencils 264.9 vertsL 419.8 evals/pencil 552.6 q4 12.6 q3 49.65 m 1342 bh 48.2
+s02 32000 K 10 start 120 / 120 ms/site 10.419 pencils 1013.5 vertsL 3221.9 evals/pencil 774.3 q4 124.67 q3 196.45 m 1419 bh 288.9

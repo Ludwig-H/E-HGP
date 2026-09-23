@@ -16,7 +16,9 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
    [`OBSTACLES_GPU_SOUS_SECONDE_20260923.md`](OBSTACLES_GPU_SOUS_SECONDE_20260923.md) : le contrat et ce qui en sépare.
 4. [`NOTE_C_INVARIANT_EULER_20260923.md`](NOTE_C_INVARIANT_EULER_20260923.md) et
    [`CONTRELEC_EULER_PAR_NERF_20260923.md`](CONTRELEC_EULER_PAR_NERF_20260923.md) : juge global de complétude.
-5. Par thème, les tableaux ci-dessous.
+5. [`AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md`](AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md) :
+   six familles d'implémentations confrontées au contrat, feuille de route ordonnée.
+6. Par thème, les tableaux ci-dessous.
 
 ## Légende
 
@@ -38,6 +40,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | --- | --- | --- | --- | --- | --- |
 | [`ETAT_COURANT.md`](ETAT_COURANT.md) | DEV puis A et B | `3595725a` 22/21:18 | synthèse | vivant | sans objet |
 | [`AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md`](AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md) | C | `f4480c02` 08:44 | démontré localement, mesure | vivant | sans réponse |
+| [`AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md`](AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md) | C | 23/10:12 | synthèse, shadow, mesure locale | vivant | sans réponse |
 | [`ERRATUM_B_AUDIT_C_OBJET_ET_EULER_20260923.md`](ERRATUM_B_AUDIT_C_OBJET_ET_EULER_20260923.md) | B | `0fe53513` 08:52 | démontré localement, contrelecture | vivant | sans réponse |
 | [`AUDIT_A_ARCHITECTURE_K_GABRIEL_20260922.md`](AUDIT_A_ARCHITECTURE_K_GABRIEL_20260922.md) | A | `0674dc02` 22/21:44 | méthode | historique | acceptée (canal l. 139) |
 | [`CONTRAT_COUTS_ET_PARALLELISATION.md`](CONTRAT_COUTS_ET_PARALLELISATION.md) | A | `0674dc02` 22/21:44 | mesure, méthode | vivant | acceptée en partie |
@@ -90,6 +93,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | note | auteur | créée | portée | cycle | réponse du développeur |
 | --- | --- | --- | --- | --- | --- |
 | [`PISTE_B_Q34_RECTANGLES_AVANT_EXPANSION_20260923.md`](PISTE_B_Q34_RECTANGLES_AVANT_EXPANSION_20260923.md) | B | `de26dd7a` 03:03 | démontré localement | vivant | refusée en partie, différée |
+| [`FIXTURE_CELLULES_CENTRES_Q34_20260923.md`](FIXTURE_CELLULES_CENTRES_Q34_20260923.md) | B | `e3fb7999` 10:12 | démontré localement (fixture exacte), pas une preuve LiDAR | vivant | sans réponse |
 | [`PISTE_B_Q34_NOEUDS_AVANT_COVER_20260923.md`](PISTE_B_Q34_NOEUDS_AVANT_COVER_20260923.md) | B | `f36c140c` 01:59 | démontré localement | vivant | différée |
 | [`CONTRE_AUDIT_RECTANGLES_Q34_TICKET_BORNE_20260923.md`](CONTRE_AUDIT_RECTANGLES_Q34_TICKET_BORNE_20260923.md) | B | `ff121022` 08:34 | démontré localement, shadow | vivant | sans réponse |
 | [`CERTIFICAT_NOEUDS_CORE_LIDAR_20260923.md`](CERTIFICAT_NOEUDS_CORE_LIDAR_20260923.md) | B | `7f218872` 08:24 | démontré localement | vivant | sans réponse |
@@ -139,6 +143,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | note | auteur | créée | portée | cycle | réponse du développeur |
 | --- | --- | --- | --- | --- | --- |
 | [`RECTIFICATIF_R8_Q34_ORDONNANCEMENT_20260923.md`](RECTIFICATIF_R8_Q34_ORDONNANCEMENT_20260923.md) | A | 23/10:00 | démontré dans le code, mesure R8 | vivant | sans réponse |
+| [`CONTRE_AUDIT_B_LECTEURS_1F048_20260923.md`](CONTRE_AUDIT_B_LECTEURS_1F048_20260923.md) | B | `758236b4` 10:07 | méthode (rejeu du lecteur) | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_G4_R8_20260923.md`](CONTRE_AUDIT_B_G4_R8_20260923.md) | B | `2faf5b59` 09:57 | mesure | vivant ; seuil de tâche rectifié ci-dessus | sans objet |
 | [`CONTRE_AUDIT_B_G4_R7B_20260923.md`](CONTRE_AUDIT_B_G4_R7B_20260923.md) | B | `b46826e2` 06:24 | mesure | historique | sans objet |
 | [`CONTRE_AUDIT_B_G4_R6_20260923.md`](CONTRE_AUDIT_B_G4_R6_20260923.md) | B | `c17db454` 05:11 | mesure | historique | acceptée en partie (erratum incomplet) |
@@ -180,6 +185,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | --- | --- | --- | --- | --- | --- |
 | [`c_audit_20260923/`](c_audit_20260923/README.md) | C | `f4480c02` 08:44 | pièces de l'audit C | vivant | sans objet |
 | [`c_euler_20260923/`](c_euler_20260923/README.md) | C | `cab281d8` 08:25 | testé, sondes | vivant | sans objet |
+| [`c_alternatives_20260923/`](c_alternatives_20260923/README.md) | C | 23/10:12 | propositions, jurys, réfutations, expériences | vivant | sans objet |
 
 ## Sondes et sorties à la racine du dossier
 
@@ -247,7 +253,7 @@ en citant l'identifiant, avec « acceptée », « refusée (raison) » ou « dif
 
 | id | recommandation | proposée par | source |
 | --- | --- | --- | --- |
-| R-01 | Invariant d'Euler dans la sonde et le lecteur G4 ; porte `scale8000` ; protocole Kmax+2 — **porté** : sonde v13 `c768e06a` (refus `chain_catalogue_euler_violated`), porte `a08378da`, lecteurs `50646eef` et `515b3666` ; Kmax+2 exercé sur une fixture synthétique 8k K5→K7, sans campagne sur trames entières ; reste : correctif d'hygiène de la porte (C) | C | NOTE_C_INVARIANT_EULER_20260923.md |
+| R-01 | Invariant d'Euler dans la sonde et le lecteur G4 ; porte `scale8000` ; protocole Kmax+2 — **porté** : sonde v13 `c768e06a` (refus `chain_catalogue_euler_violated`), porte `a08378da`, lecteurs `50646eef` et `515b3666` ; Kmax+2 exercé sur une fixture synthétique 8k K5→K7, sans campagne sur trames entières ; hygiène de la porte et juge d'échantillon publiés en `96bd6190` ; reste : R-19 | C | NOTE_C_INVARIANT_EULER_20260923.md |
 | R-02 | Réparer la CI (selftest `HEAD~1`, chemin absolu de la porte de pente) — **corrigé** `4b6e3aa6` | C | canal, entrée de 08 h 34 UTC |
 | R-03 | T2 de chaîne à Kmax ∈ {1,2,3,5,10} ; mutants de recoupe et du cœur FULL | C | AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md § 4 et 6 |
 | R-04 | Inscrire au registre : extension non régulière, complétude q2/q3/q4, invariant d'Euler ; corriger le README | C | AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md § 1.5 |
@@ -261,6 +267,11 @@ en citant l'identifiant, avec « acceptée », « refusée (raison) » ou « dif
 | R-12 | Collisions, sondes et RSS de l'index de clés ; RSS par phase et par K promis pour R5 | B | CONTRE_AUDIT_B_INDEX_CLES_FULL, CONTRE_AUDIT_B_RESIDENCE_CHAINE |
 | R-13 | Erratum des plages R6 ; commentaire « Exact depth » de `q34_dead_lanes.cpp` | B | ETAT_COURANT.md |
 | R-14 | Seuil K−2 des arêtes q4 seules | A | SEUIL_SATURATION_ATLAS_PAR_VOIE_20260923.md |
+| R-15 | Tour FULL maigre D5 palier 1 avec ses trois corrections (règle 0, position du premier bloc de groupe dans les exceptions, racines CSR au-delà d'un petit tampon) ; porte E1 | C | AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md § 3.1 et 5 |
+| R-16 | Sonde d'attribution du CPU q3/q4 par longueur d'ancre sur les trois trames, par lot | C | AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md § 5, étape 3 |
+| R-17 | Une seule session G4 GPU à seuils fixés d'avance, comparée à la base CPU réordonnancée | C | AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md § 3.3 et raccord R8 |
+| R-18 | Décisions de contrat à acter avec l'utilisateur : sortie compacte, digest hors chrono, expansion chronométrée à part ; 100 ms à reformuler | C | AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md § 1 et 5 |
+| R-19 | Porte `scale8000` : recenser par balayage brut **toutes** les boules à coquille étendue (86 à 8k), publier l'effectif échantillonné par famille, corriger le commentaire « pas deterministe » | C | canal, entrée de 10 h 12 UTC |
 
 ## Conventions proposées (à adopter par tous)
 

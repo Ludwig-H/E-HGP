@@ -1,0 +1,6 @@
+K 5 clip 1000 start 40 ms/site 32.74 p90 189.918 max 394.55 pencils 232.8 vertsL 368.9 evals/pencil 225.5 q4 19.2 q3 56.62 q4le1m 19.2 q3le1m 56.62
+K 5 clip 2000 start 40 ms/site 4.338 p90 9.281 max 26.75 pencils 258.8 vertsL 414.6 evals/pencil 341.9 q4 19.93 q3 58.9 q4le1m 19.2 q3le1m 57.25
+K 5 clip 4000 start 40 ms/site 19.909 p90 22.503 max 253.53 pencils 276.4 vertsL 444.1 evals/pencil 481.7 q4 20.2 q3 59.92 q4le1m 19.2 q3le1m 57.25
+K 10 clip 1000 start 40 ms/site 6.252 p90 13.817 max 17.18 pencils 811.0 vertsL 2625.4 evals/pencil 342.4 q4 197.45 q3 229.2 q4le1m 197.45 q3le1m 229.2
+K 10 clip 2000 start 40 ms/site 18.49 p90 33.817 max 275.86 pencils 961.3 vertsL 3175.4 evals/pencil 534.4 q4 213.62 q3 246.65 q4le1m 197.45 q3le1m 231.85
+K 10 clip 4000 start 40 ms/site 40.791 p90 48.183 max 869.92 pencils 1060.4 vertsL 3507.8 evals/pencil 733.6 q4 222.6 q3 255.57 q4le1m 197.45 q3le1m 231.85
