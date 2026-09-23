@@ -286,8 +286,9 @@ Le [reçu R8](../receipts/g4_tower_r8_20260923/README.md) du paquet
 `complete_relative`**, trois trames 08 **sans sol** à 1 mm, toutes les
 empreintes archivées vérifiées, lecteur du commit épinglé positif en
 Python normal et sous `-O`, arrêt ciblé `TERMINATED`. À W48/s8, la chaîne
-vaut **3,665–6,395 s à K5** et **9,403–15,192 s à K10**, digest de contrôle
-exclu. Euler tient sur les ordres jugés mais reste nécessaire seulement.
+vaut **3,657–6,395 s à K5** et **9,403–15,372 s à K10** sur les deux
+répétitions, digest de contrôle exclu. Euler tient sur les ordres jugés
+mais reste nécessaire seulement.
 L'attente de file occupe **35–49 %** du temps des fils q3/q4 à K5, donc
 l'ordonnancement mérite une ablation. La
 [contrelecture R8](CONTRE_AUDIT_B_G4_R8_20260923.md) relève le verrou
@@ -317,6 +318,11 @@ cependant **aucun reçu brut v14** ; il n'est pas un résultat G4. Les
 nouveaux chronos ne couvrent pas les plages publiées et les deux leviers
 ne sont pas séparés. Une matrice 2×2 appariée sur une trame difficile
 avec q3/q4 et chaîne complets est la prochaine porte de performance.
+La [contrelecture des durées v14](RECEPTION_V14_CHRONOS_Q34_20260923.md)
+montre que le lecteur accepte encore à **`fe1142b5`** un maximum de
+job supérieur à leur somme, et une somme jobs+attente supérieure au
+budget mural des fils. Ces identités doivent entrer dans la porte avant
+d'utiliser les nouveaux chronos pour expliquer le gain.
 Le débordement de masse diagonale de la version initiale v14 est
 **fermé en source** par `fe1142b5` (calcul i128 exact sur le domaine
 des plans admis), sans nouveau reçu de performance.
@@ -709,6 +715,11 @@ Premier port borné : jointure exacte des graines/selles dans la
 résolution statique avec repli sur `static_terminal`, validation et
 sortie actuelles conservées ; mesurer cible/racine par facette et coût
 d'index complet avant les autres changements D5.
+La [contrelecture des preuves D5](CONTRELEC_D5_NAISSANCE_ET_PORTE_E1_20260923.md)
+ferme le cas de borne basse omis dans la preuve du lemme C et donne une
+fixture à quatre sites où la porte E1 accepte une cible dans la mauvaise
+composante. Comparer la racine pré-lot **par facette** au produit, ou
+certifier le saut par le témoin central, avant de compacter la sortie.
 
 ## Portes de preuve encore ouvertes
 

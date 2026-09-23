@@ -113,6 +113,8 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 
 | note | auteur | créée | portée | cycle | réponse du développeur |
 | --- | --- | --- | --- | --- | --- |
+| [`CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md`](CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md) | B | `a514de68` 10:22 | mesure et méthode, projection D5 bornée | vivant | sans réponse |
+| [`CONTRELEC_D5_NAISSANCE_ET_PORTE_E1_20260923.md`](CONTRELEC_D5_NAISSANCE_ET_PORTE_E1_20260923.md) | A | 23/10:25 | preuve et contre-fixture de porte E1 | vivant | sans réponse |
 | [`MEB_PROPOSITION_EXACTE_20260923.md`](MEB_PROPOSITION_EXACTE_20260923.md) | B | `85d79753` 06:03 | démontré localement | clos (8e8b83a3) | acceptée |
 | [`CONTRE_AUDIT_B_ANCHOR_MEB_DIAMETRE_20260922.md`](CONTRE_AUDIT_B_ANCHOR_MEB_DIAMETRE_20260922.md) | B | `ae88ff1f` 22/23:36 | démontré localement | historique | sans réponse |
 | [`CONTRE_AUDIT_B_INDEX_CLES_FULL_20260923.md`](CONTRE_AUDIT_B_INDEX_CLES_FULL_20260923.md) | B | `95e073a5` 06:05 | démontré localement | vivant | acceptée en partie (mesures en attente) |
@@ -143,6 +145,8 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | note | auteur | créée | portée | cycle | réponse du développeur |
 | --- | --- | --- | --- | --- | --- |
 | [`RECTIFICATIF_R8_Q34_ORDONNANCEMENT_20260923.md`](RECTIFICATIF_R8_Q34_ORDONNANCEMENT_20260923.md) | A | 23/10:00 | démontré dans le code, mesure R8 | vivant | sans réponse |
+| [`CONTRE_AUDIT_B_V14_ORDONNANCEMENT_20260923.md`](CONTRE_AUDIT_B_V14_ORDONNANCEMENT_20260923.md) | B | `a514de68` 10:22 | portes et protocole v14 | vivant | sans réponse |
+| [`RECEPTION_V14_CHRONOS_Q34_20260923.md`](RECEPTION_V14_CHRONOS_Q34_20260923.md) | A | 23/10:20 | méthode (deux mutations acceptées à `fe1142b5`) | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_LECTEURS_1F048_20260923.md`](CONTRE_AUDIT_B_LECTEURS_1F048_20260923.md) | B | `758236b4` 10:07 | méthode (rejeu du lecteur) | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_G4_R8_20260923.md`](CONTRE_AUDIT_B_G4_R8_20260923.md) | B | `2faf5b59` 09:57 | mesure | vivant ; seuil de tâche rectifié ci-dessus | sans objet |
 | [`CONTRE_AUDIT_B_G4_R7B_20260923.md`](CONTRE_AUDIT_B_G4_R7B_20260923.md) | B | `b46826e2` 06:24 | mesure | historique | sans objet |
