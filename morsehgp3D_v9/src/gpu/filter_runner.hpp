@@ -41,8 +41,59 @@ struct FilterOutput {
   double first_total_ms = 0;  // the first pass, cold
 };
 
+// Host-side refusal of a raw input before any device call (contre-audits B
+// 13 h 05 and A « domaine u18 ») ; empty string when accepted. The device
+// arithmetic is proved only for u18 coordinates, and a box credits or
+// excludes every site of its rank range: a forged box that misses one of
+// its points makes a false rejection (A's fixture: q4 mask 4 -> 0). Checked:
+// K in 3..10; coordinates and box bounds in 0..262143 with low <= high;
+// children partition their parent's rank range exactly; every box contains
+// the points of its range (O(n * depth)); rectangle ids, lane masks subset
+// of 6, and CUB's int item count. Tight hulls are not required: a larger
+// box only weakens both certificates.
+inline std::string validate_filter_input(const FilterInput& input) {
+  constexpr std::int32_t limit = 262143;
+  if (input.kmax < 3 || input.kmax > 10) return "kmax outside 3..10";
+  if (input.nodes == nullptr || input.node_count == 0 || input.node_count >= absent32) return "empty or huge node array";
+  if (input.rank_points == nullptr || input.rank_count == 0 || input.rank_count >= absent32) return "empty rank array";
+  if (input.rect_count > static_cast<std::size_t>(0x7fffffff)) return "rectangle count exceeds the CUB int range";
+  if (input.rect_count != 0 && (input.rect_a == nullptr || input.rect_b == nullptr || input.rect_mask == nullptr))
+    return "null rectangle arrays";
+  for (std::size_t i = 0; i < 3 * input.rank_count; ++i)
+    if (input.rank_points[i] < 0 || input.rank_points[i] > limit) return "point coordinate outside the u18 domain";
+  const FlatNode& root = input.nodes[0];
+  if (root.first != 0 || root.last != input.rank_count) return "root does not cover every rank";
+  for (std::size_t i = 0; i < input.node_count; ++i) {
+    const FlatNode& node = input.nodes[i];
+    if (node.first >= node.last || node.last > input.rank_count) return "node rank range outside the index";
+    for (int axis = 0; axis < 3; ++axis)
+      if (node.box.low[axis] < 0 || node.box.low[axis] > node.box.high[axis] || node.box.high[axis] > limit)
+        return "node box outside the u18 domain or inverted";
+    const bool leaf = node.left == absent32;
+    if (leaf != (node.right == absent32)) return "node with one child";
+    if (!leaf) {
+      if (node.left >= input.node_count || node.right >= input.node_count || node.left <= i || node.right <= i)
+        return "child id outside the index or not after its parent";
+      const FlatNode& left = input.nodes[node.left];
+      const FlatNode& right = input.nodes[node.right];
+      if (left.first != node.first || left.last != right.first || right.last != node.last)
+        return "children do not partition their parent's ranks";
+    }
+    for (u32 r = node.first; r < node.last; ++r)
+      for (int axis = 0; axis < 3; ++axis) {
+        const std::int32_t c = input.rank_points[3 * static_cast<std::size_t>(r) + axis];
+        if (c < node.box.low[axis] || c > node.box.high[axis]) return "node box misses a point of its ranks";
+      }
+  }
+  for (std::size_t i = 0; i < input.rect_count; ++i)
+    if (input.rect_a[i] >= input.node_count || input.rect_b[i] >= input.node_count || (input.rect_mask[i] & ~6U) != 0)
+      return "rectangle node id or lane mask outside the domain";
+  return {};
+}
+
 // Defined in filter_runner.cu when MHGP9_ENABLE_CUDA, else a stub that
-// returns available=false.
+// returns available=false. Refuses (error) any input validate_filter_input
+// refuses, before touching the device.
 FilterOutput run_filters(const FilterInput& input);
 
 }  // namespace mhgp9::gpu

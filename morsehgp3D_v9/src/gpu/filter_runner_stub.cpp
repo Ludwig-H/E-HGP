@@ -3,9 +3,10 @@
 
 namespace mhgp9::gpu {
 
-FilterOutput run_filters(const FilterInput&) {
+FilterOutput run_filters(const FilterInput& input) {
   FilterOutput out;
-  out.error = "built without MHGP9_ENABLE_CUDA";
+  out.error = validate_filter_input(input);
+  if (out.error.empty()) out.error = "built without MHGP9_ENABLE_CUDA";
   return out;
 }
 

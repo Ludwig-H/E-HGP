@@ -13,12 +13,20 @@
 // Non-vacuite : planchers de rectangles, de paires, de voies rejetees et
 // survivantes ; temoin de sensibilite (le port a K-1 doit diverger).
 //
+// Garde d'entree brute (validate_filter_input, audit A « domaine u18 ») :
+// l'index reel de chaque famille est accepte ; l'index minimal de A (a =
+// (0,0,0), b = (2,0,0), deux feuilles) est accepte et garde son masque q4 ;
+// sa racine forgee x = [1,1] est refusee, alors que le filtre y rendrait le
+// faux rejet 4 -> 0 ; coordonnees -1, 262144, INT32_MIN, INT32_MAX et partition
+// cassee refusees, extremes 0 et 262143 acceptes.
+//
 //   mhgp9_gpu_witness_filter_port_gate [--n=8000] [--pair-stride=17]
 //
 // Code 0 conforme, 1 masque different (`cause=`), 2 argument, 3 plancher.
 #include <charconv>
 #include <cstdint>
 #include <cstdio>
+#include <limits>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -26,6 +34,7 @@
 #include "../../src/gen/lanes/q34_witness_search.hpp"
 #include "../../src/gen/pipeline/q2_census.hpp"
 #include "../../src/gen/wspd/front.hpp"
+#include "../../src/gpu/filter_runner.hpp"
 #include "../../src/gpu/flat_index.hpp"
 #include "../gen/front_fixtures.hpp"
 
@@ -44,6 +53,71 @@ struct Totals {
 
 }  // namespace
 
+// A's three-node fixture; `root_x` forges the root box as x = [root_x, root_x]
+// (negative: the certified hull [xa, xb]).
+struct Fixture {
+  std::vector<mhgp9::gpu::FlatNode> nodes;
+  std::vector<std::int32_t> points;
+  std::vector<mhgp9::gpu::u32> a{1}, b{2};
+  std::vector<mhgp9::gpu::u8> mask{4};
+  mhgp9::gpu::FilterInput input() const {
+    mhgp9::gpu::FilterInput in;
+    in.nodes = nodes.data();
+    in.node_count = nodes.size();
+    in.rank_points = points.data();
+    in.rank_count = points.size() / 3;
+    in.rect_a = a.data();
+    in.rect_b = b.data();
+    in.rect_mask = mask.data();
+    in.rect_count = a.size();
+    in.kmax = 3;
+    return in;
+  }
+};
+
+Fixture fixture(std::int32_t xa, std::int32_t xb, std::int32_t root_x = -1) {
+  using mhgp9::gpu::FlatNode;
+  Fixture f;
+  f.points = {xa, 0, 0, xb, 0, 0};
+  const std::int32_t low = root_x < 0 ? xa : root_x, high = root_x < 0 ? xb : root_x;
+  f.nodes = {FlatNode{{{low, 0, 0}, {high, 0, 0}}, 1, 2, 0, 2},
+             FlatNode{{{xa, 0, 0}, {xa, 0, 0}}, mhgp9::gpu::absent32, mhgp9::gpu::absent32, 0, 1},
+             FlatNode{{{xb, 0, 0}, {xb, 0, 0}}, mhgp9::gpu::absent32, mhgp9::gpu::absent32, 1, 2}};
+  return f;
+}
+
+// Code 1 on a wrong acceptance or refusal, 0 when every case holds.
+int input_guard_cases(std::uint64_t& checked) {
+  using namespace mhgp9;
+  const auto accepted = [&](const Fixture& f) { ++checked; return gpu::validate_filter_input(f.input()).empty(); };
+  const auto good = fixture(0, 2);
+  std::uint64_t visits = 0;
+  if (!accepted(good) || gpu::filter_boxes(good.nodes.data(), good.nodes[1].box, good.nodes[2].box, 3, 4, visits) != 4) {
+    std::printf("cause=guard.certified_fixture\n");
+    return 1;
+  }
+  const auto forged = fixture(0, 2, 1);
+  if (accepted(forged) ||
+      gpu::filter_boxes(forged.nodes.data(), forged.nodes[1].box, forged.nodes[2].box, 3, 4, visits) != 0) {
+    std::printf("cause=guard.forged_root_box\n");  // refused, and the refusal matters (false q4 rejection)
+    return 1;
+  }
+  for (const std::int32_t bad : {-1, 262144, std::numeric_limits<std::int32_t>::min(),
+                                 std::numeric_limits<std::int32_t>::max()}) {
+    auto f = fixture(0, 2);
+    f.points[1] = bad;
+    if (accepted(f)) { std::printf("cause=guard.coordinate value=%d\n", bad); return 1; }
+    f = fixture(0, 2);
+    f.nodes[0].box.high[1] = bad;
+    if (bad >= 0 && accepted(f)) { std::printf("cause=guard.box_bound value=%d\n", bad); return 1; }
+  }
+  if (!accepted(fixture(0, 262143))) { std::printf("cause=guard.domain_extremes\n"); return 1; }
+  auto broken = fixture(0, 2);
+  broken.nodes[1].last = 2;  // left child overlaps the right one
+  if (accepted(broken)) { std::printf("cause=guard.partition\n"); return 1; }
+  return 0;
+}
+
 int main(int argc, char** argv) {
   std::size_t n = 8000, stride = 17;
   for (int i = 1; i < argc; ++i) {
@@ -59,6 +133,8 @@ int main(int argc, char** argv) {
     return 2;
   }
   using namespace mhgp9;
+  std::uint64_t guard_checks = 0;
+  if (input_guard_cases(guard_checks) != 0) return 1;
   Totals all;
   for (const std::string_view family : {"uniform", "terrain", "clusters"}) {
     const auto fixture = gen::bench::make_front_fixture(n, family, 3);
@@ -68,6 +144,26 @@ int main(int argc, char** argv) {
     const auto nodes = index->spatial_nodes();
     const auto order = index->spatial_order();
     const auto points = index->cloud().points();
+    {
+      // The engine's certified index passes the raw-input guard.
+      std::vector<std::int32_t> rank_points(3 * order.size());
+      for (std::size_t r = 0; r < order.size(); ++r) {
+        rank_points[3 * r] = points[order[r]].x;
+        rank_points[3 * r + 1] = points[order[r]].y;
+        rank_points[3 * r + 2] = points[order[r]].z;
+      }
+      gpu::FilterInput in;
+      in.nodes = flat.data();
+      in.node_count = flat.size();
+      in.rank_points = rank_points.data();
+      in.rank_count = order.size();
+      in.kmax = 5;
+      ++guard_checks;
+      if (const auto error = gpu::validate_filter_input(in); !error.empty()) {
+        std::printf("cause=guard.real_index family=%s error=%s\n", std::string(family).c_str(), error.c_str());
+        return 1;
+      }
+    }
     for (const unsigned kmax : {3u, 5u, 10u}) {
       std::vector<gen::WspdRectangle> rectangles;
       const auto front = gen::run_wspd_front(*index, kmax, 8, gen::WspdFrontMode::MidpointSamples,
@@ -148,6 +244,7 @@ int main(int argc, char** argv) {
       all.general_rectangles += t.general_rectangles; all.sensitivity += t.sensitivity;
     }
   }
+  std::printf("witness_filter_port_gate guard_checks=%llu\n", static_cast<unsigned long long>(guard_checks));
   std::printf("witness_filter_port_gate n=%zu rectangles=%llu survivors=%llu pairs=%llu lanes_rejected=%llu "
               "lanes_open=%llu affine=%llu general=%llu sensitivity=%llu\n", n,
               static_cast<unsigned long long>(all.rectangles), static_cast<unsigned long long>(all.rectangle_survivors),

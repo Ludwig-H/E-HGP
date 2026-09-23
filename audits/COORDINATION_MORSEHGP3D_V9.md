@@ -3081,3 +3081,78 @@ servir **≥253 615 450 visites en 0,1 s**, soit >2,53 Md/s, **en plus**
 des transferts ; le vrai nombre de visites des paires sans cache reste
 à mesurer. Ce n'est pas une preuve d'impossibilité GPU, mais un débit
 minimal de cette porte concrète.
+## 23 septembre 2026, 14 h 00 UTC — Réponse du développeur : voie GPU S1 (code, protocole, revue avant session)
+
+GCP non utilisé à la date de cette entrée.
+
+**Code publié.** `0d5ad2e8` contient :
+- le port hôte/device du filtre témoin exact (`src/gpu/witness_filter.hpp`) ;
+- le lanceur CUDA optionnel (`MHGP9_ENABLE_CUDA`, sm_120 ; stub sinon) ;
+- la sonde `mhgp9_gpu_filter_probe` (schéma v1) ;
+- la porte hôte `gpu_witness_filter_port`. Elle compare le port au produit
+  requête par requête et exige des totaux de visites égaux : 1,71 M
+  rectangles et 1,20 M paires à 2 000 sites, variante `scale8000` verte.
+
+**Réponses à B.**
+- *13 h 05, lanceur* :
+  - point 1 accepté : `run_filters` valide son entrée avant tout appel
+    CUDA (K, IDs de nœuds et de rangs, enfants, masques ⊆ 6,
+    `rect_count ≤ INT_MAX` pour CUB) ;
+  - point 2 accepté : les masques de paires sont refusés au-delà de la
+    moitié de la mémoire libre ;
+  - point 3 (recherche binaire par paire) : mesuré tel quel, `pair_ms` le
+    dira, avant toute optimisation ;
+  - point 4 : le reçu dira « meilleure passe chaude » et publiera aussi la
+    première passe, le CPU sans et avec cache, et le mur complet de la
+    sonde ; jamais « temps de tour ».
+- *13 h 10, protocole* :
+  - point 1 accepté : le premier cas doit être 08/000000/K5. S'il n'est pas
+    complet, les suivants ne sont pas payés (`skipped_s1_gate`, archivés).
+    Un cas complet au-delà du seuil laisse mesurer les cinq autres : quelques
+    secondes chacun, et K10 et les autres trames disent quel morceau porter
+    ensuite ;
+  - point 2 accepté : `GPU_attempted` est posé dès le préflight,
+    `GPU_executed` seulement après validation ;
+  - point 3 accepté : mutant causal `--inject=pair_mask`, qui inverse un
+    masque GPU après transfert. Le préflight mutant doit sortir en code 1
+    avec exactement une paire différente, sinon aucun cas ne tourne ;
+  - point 5 différé : le cycle de vie est celui de la tour, relu, et je le
+    garde identique dans les deux contrôleurs. La distinction « illisible »
+    / « génération contradictoire » se fera dans les deux à la fois.
+
+- *13 h 29, couture du paquet* : accepté. La sonde mutée (v2) et les quatre
+  scripts sont committés dans le même HEAD. `validate_sources` exige
+  `--inject=pair_mask` et la clé `inject` : un paquet pris sur un commit
+  antérieur est refusé hors ligne, pas sur G4.
+
+**Réponse à A (domaine u18 et boîtes).** Accepté. La garde sort du `.cu`
+et devient `validate_filter_input`, un en-tête hôte testable. Elle exige :
+- coordonnées et bornes dans `0..262143`, avec `low ≤ high` ;
+- la racine couvre tous les rangs, les enfants suivent leur parent et
+  partitionnent exactement sa plage ;
+- chaque boîte contient les points de ses rangs. Une boîte plus large
+  qu'une enveloppe exacte reste sûre : elle affaiblit les deux certificats.
+
+La porte hôte joue les fixtures de A. L'index minimal est accepté et garde
+son masque q4. La racine forgée `x=[1,1]` est refusée, alors que le filtre
+non gardé y rend bien le faux rejet 4 → 0. Les coordonnées −1, 262144 et
+`INT32_MIN/MAX` sont refusées, les extrêmes 0 et 262143 acceptés, et
+l'index réel de chaque famille passe la garde.
+
+**Revue multi-agents** (4 relecteurs, vérification adverse de chaque
+constat) : 12 constats, 6 confirmés, aucun sur l'exactitude du port, tous
+corrigés.
+- une violation de pile sur le GPU est un désaccord (code 1), pas une
+  indisponibilité ;
+- exceptions et entrées invalides de la sonde : codes 2 et 3, jamais un
+  abandon, avec une porte « nuage vide » ;
+- une erreur CUDA sur un appareil présent est `gpu_fault`, reçue comme
+  résultat négatif ;
+- une porte S1 fermée (cas 0 tué ou sans appareil) est reçue en
+  `s1_gate_failed` ; une campagne sans aucune mesure fait échouer le worker
+  (`no_gpu_measurement`) ;
+- schéma de sonde v2, contrôle de source exigeant la CLI mutée.
+
+Statut de campagne unique (`campaign_status`), recalculé à l'identique par
+l'hôte. Selftest GPU 10/10 (`-B`, `-O`), selftest de la tour 21/21,
+142/142 portes v9, porte du port et sonde propres sous ASan/UBSan.

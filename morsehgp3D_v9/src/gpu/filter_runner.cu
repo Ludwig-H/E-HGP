@@ -122,34 +122,11 @@ float elapsed(cudaEvent_t start, cudaEvent_t stop) {
   return ms;
 }
 
-// Host-side validation before any device call (contre-audit B, 13 h 05):
-// K in 3..10, node and rank ids in range, one-or-two-children nodes refused,
-// rectangle masks a subset of 6, CUB's int item count, u32 local indices.
-std::string validate(const FilterInput& input) {
-  if (input.kmax < 3 || input.kmax > 10) return "kmax outside 3..10";
-  if (input.nodes == nullptr || input.node_count == 0 || input.node_count >= absent32) return "empty or huge node array";
-  if (input.rank_points == nullptr || input.rank_count == 0 || input.rank_count >= absent32) return "empty rank array";
-  if (input.rect_count > static_cast<std::size_t>(0x7fffffff)) return "rectangle count exceeds the CUB int range";
-  if (input.rect_count != 0 && (input.rect_a == nullptr || input.rect_b == nullptr || input.rect_mask == nullptr))
-    return "null rectangle arrays";
-  for (std::size_t i = 0; i < input.node_count; ++i) {
-    const FlatNode& node = input.nodes[i];
-    if (node.first >= node.last || node.last > input.rank_count) return "node rank range outside the index";
-    const bool leaf = node.left == absent32;
-    if (leaf != (node.right == absent32)) return "node with one child";
-    if (!leaf && (node.left >= input.node_count || node.right >= input.node_count)) return "child id outside the index";
-  }
-  for (std::size_t i = 0; i < input.rect_count; ++i)
-    if (input.rect_a[i] >= input.node_count || input.rect_b[i] >= input.node_count || (input.rect_mask[i] & ~6U) != 0)
-      return "rectangle node id or lane mask outside the domain";
-  return {};
-}
-
 }  // namespace
 
 FilterOutput run_filters(const FilterInput& input) {
   FilterOutput out;
-  out.error = validate(input);
+  out.error = validate_filter_input(input);
   if (!out.error.empty()) return out;
   try {
     int devices = 0;
