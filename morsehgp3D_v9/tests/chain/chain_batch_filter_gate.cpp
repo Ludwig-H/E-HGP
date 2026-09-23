@@ -16,7 +16,9 @@
 //   - mutants causaux tues : un filtre qui retire la voie q3 de chaque
 //     survivant en tenant un registre coherent change les candidats ; un
 //     filtre qui ment d'une unite sur ses rejets q3 est refuse par les
-//     identites de masse du generateur.
+//     identites de masse du generateur ; un survivant duplique et un
+//     survivant hors de tout rectangle survivant sont refuses par le
+//     controle de structure du chemin par lots.
 //
 //   mhgp9_chain_batch_filter_gate [--n=1500]
 //
@@ -172,6 +174,32 @@ int main(int argc, char** argv) {
         }
         if (!refused) return fail("mutant.ledger_lie_survived " + where);
         ++mutants;
+        // Structural mutants (trust boundary): a duplicated survivor, and a
+        // survivor moved to a pair outside every surviving rectangle.
+        for (const int kind : {0, 1}) {
+          Stream sink;
+          const auto structural = [kind](const gen::Q2CensusIndex& ix, unsigned k,
+                                         std::span<const gen::WspdRectangle> r) {
+            auto batch = gen::run_q34_filter_batch_cpu(ix, k, r, 2);
+            if (batch.survivors.empty()) return batch;
+            if (kind == 0) {
+              batch.survivors.insert(batch.survivors.begin() + 1, batch.survivors.front());
+              ++batch.expanded_pairs;  // keep the pair count consistent: only the structure is wrong
+            } else {
+              auto& edge = batch.survivors.back();
+              edge.b_rank = edge.a_rank;  // a site paired with itself: in no WSPD rectangle
+            }
+            return batch;
+          };
+          refused = false;
+          try {
+            static_cast<void>(gen::run_wspd_q34_batched(index, kmax, 8, o, 2, sink.consumer(), 16, structural, nullptr));
+          } catch (const std::logic_error&) {
+            refused = true;
+          }
+          if (!refused) return fail(std::string("mutant.structure_survived ") + (kind == 0 ? "duplicate " : "foreign ") + where);
+          ++mutants;
+        }
       }
       // ---- Whole chain: same FULL tower, same catalogue and ledger.
       for (const std::size_t workers : {std::size_t{1}, std::size_t{4}}) {
@@ -224,7 +252,7 @@ int main(int argc, char** argv) {
   std::printf("chain_batch_filter_gate n=%zu streams=%llu candidates=%llu survivors=%llu chains=%llu mutants=%llu "
               "gpu_refusals=%llu gpu_runs=%llu\n", n, streams, candidates, survivors, chains, mutants, gpu_refusals,
               gpu_runs);
-  if (streams < 18 || candidates < 10000 || survivors < 1000 || chains < 18 || mutants < 18 ||
+  if (streams < 18 || candidates < 10000 || survivors < 1000 || chains < 18 || mutants < 36 ||
       gpu_refusals + gpu_runs < 18)
   {
     std::printf("cause=floor.batch_filter\n");

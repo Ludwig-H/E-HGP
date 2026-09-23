@@ -1195,9 +1195,34 @@ WspdQ34ParallelResult run_wspd_q34_batched(Q2CensusIndexPtr index, unsigned kmax
   }
   if (batch.expanded_pairs != expanded || batch.survivors.size() > expanded)
     throw std::logic_error("mhgp9 gen batched q34 filter pair count differs from its surviving rectangles");
-  for (const auto& edge : batch.survivors)
-    if (edge.mask == 0 || (edge.mask & ~6U) != 0 || edge.a_rank >= order.size() || edge.b_rank >= order.size())
-      throw std::logic_error("mhgp9 gen batched q34 filter returned a malformed surviving pair");
+  // Structure of the survivors (trust boundary of the batch call, auditors
+  // A/B/C): one cursor over the surviving rectangles in order. Every
+  // survivor lies in exactly the current rectangle's A x B (the WSPD cover is
+  // disjoint), in strictly increasing row-major order (no duplicate), with a
+  // mask inside its rectangle's surviving lanes; all survivors are consumed.
+  // A dropped pair is not visible here: the engine/batch differential and
+  // the independent judges cover that.
+  {
+    std::size_t cursor = 0;
+    for (std::size_t i = 0; i < rectangles.size() && cursor < batch.survivors.size(); ++i) {
+      const auto mask = batch.rectangle_masks[i];
+      if (mask == 0) continue;
+      const auto a = nodes[rectangles[i].a_node].range, b = nodes[rectangles[i].b_node].range;
+      std::size_t previous = std::numeric_limits<std::size_t>::max();
+      while (cursor < batch.survivors.size()) {
+        const auto& edge = batch.survivors[cursor];
+        if (edge.a_rank < a.first || edge.a_rank >= a.last || edge.b_rank < b.first || edge.b_rank >= b.last) break;
+        const std::size_t ordinal = (edge.a_rank - a.first) * b.size() + (edge.b_rank - b.first);
+        if ((previous != std::numeric_limits<std::size_t>::max() && ordinal <= previous) || edge.mask == 0 ||
+            (edge.mask & ~mask) != 0)
+          throw std::logic_error("mhgp9 gen batched q34 filter returned a duplicate, unordered or widened pair");
+        previous = ordinal;
+        ++cursor;
+      }
+    }
+    if (cursor != batch.survivors.size())
+      throw std::logic_error("mhgp9 gen batched q34 filter returned a pair outside its surviving rectangles");
+  }
   filter_work.expanded_pairs = expanded;
   witness.rejected_pairs = expanded - batch.survivors.size();
   witness.pair_q3_pairs = batch.pair_q3_rejected;
