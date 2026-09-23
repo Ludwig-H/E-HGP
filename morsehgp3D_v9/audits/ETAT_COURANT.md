@@ -21,6 +21,19 @@ artificiellement sous-déclarées ; « kernel/transfert » désigne en outre
 des intervalles mêlant calcul, copies et allocations. Le temps total de
 chaîne reste exploitable sans cette attribution matérielle fine.
 
+Le constructeur a ensuite créé **`aad7416a5` localement** : port S4a q3
+sans atlas, nouveau levier de chaîne et protocole R15. Aucun reçu S4a/G4
+R15 n'est encore versionné ; R14 ne mesure que S2+S3. Les portes livrées
+comparent le port hôte à l'ancien moteur sur des fixtures synthétiques ;
+`--file` publie des statistiques, pas un gate LiDAR. Les 146 M tests q3
+annoncés après classement en anneaux sont des **tests logiques de scan** :
+le warp exécute aussi les voies après le site d'arrêt dans son dernier
+ballot. Les nouveaux tampons CUDA retéléversent l'index et reconstruisent
+les covers ; la session résidente S4.0 du plan n'est pas encore intégrée.
+Mesurer d'abord R15 apparié sur la trame entière, puis refaire les coupes
+physiques et densités emboîtées sur **ce** port ; les pentes v12 CPU ne
+qualifient pas S4a.
+
 La [contrelecture S4](AUDIT_S4_RESIDENCE_ORDINALS_20260923.md) précise le
 raccord du jalon hybride : si q3 s'exécute sur GPU et q4 sur CPU,
 la résidence S2/S3 exige encore l'export des arêtes q4 ouvertes avec
@@ -55,17 +68,19 @@ pas un nombre de ballots. Publier les couples par arête, les ballots
 réels, quatre évaluations d'anneau par site, transferts et replis avant
 d'attribuer un coût ou une croissance à S4a.
 Le [préflight du WIP S4a](AUDIT_S4_WIP_EXCEPTIONS_WORKERS_20260923.md)
-repère trois allocations/insertions **hors capture d'exception** dans
-`run_lanes_batch_host` : un `bad_alloc` d'un worker peut terminer le
-processus au lieu du repli `kResourceExhausted`. Le snapshot mutable est
-haché ; aucune panne n'a été injectée. Entourer le worker entier, joindre
-tous les fils avant retour, puis tester les trois points de panne avant
-la publication du port. Le même préflight a trouvé un sous-comptage du
-ledger `both_edges` lorsque S4a diffère q3 d'une survivante q3+q4
-certifiée. Le développeur a déplacé le crédit avant la bifurcation
-décidé/reporté dans le **source mutable** (`wspd_q34.cpp` SHA `5b421436…`),
-sans porte à capacité réduite encore qualifiée ; aucune perte de boule
-n'était déduite du défaut de compteur.
+avait repéré trois allocations/insertions **hors capture d'exception**
+dans `run_lanes_batch_host` du commit local `aad7416a5` : un `bad_alloc`
+d'un worker peut terminer le processus. Le correctif mutable suivant
+(`lanes_host.hpp` SHA `50144a3e…`) englobe désormais tout le worker,
+réveille les attentes, joint avant relance et évite les slabs pour zéro
+arête : les fenêtres sont closes **à la lecture du source**. Sa nouvelle
+porte tente toutefois de créer environ **512 Gio d'enregistrements par
+worker** pour provoquer `bad_alloc` ; sous overcommit, elle peut épuiser
+la mémoire au lieu de produire une exception contrôlée. La remplacer par
+une injection bornée aux trois endroits, sans exécuter ce test géant. Le
+défaut de ledger `both_edges` est corrigé dans `aad7416a5`, mais le gate
+de chaîne ne compare pas ce compteur et ne force pas q3 différé avec q4
+ouvert. Aucune perte de boule n'était déduite de ce défaut de comptage.
 
 23 septembre 2026. Ports v13 publiés : sonde **`c768e06a`**, porte Euler
 8k **`a08378da`**, lecteur LiDAR **`50646eef`** puis **`1f048aae`**,
@@ -1690,6 +1705,15 @@ maintenant un **heap-buffer-overflow exécuté** dans `FlatDraftSource::actions`
 sur une banque valide et un CSR public invalide. Cela n'est pas une erreur
 géométrique démontrée sur la sortie interne valide ; la surcharge publique
 doit refuser la forme avant tout parcours.
+La [relecture du correctif CSR mutable](RELECTURE_CORRECTIF_CSR_PLAT_WIP_20260923.md)
+constate que le constructeur valide désormais les trois tableaux d'offsets
+**avant** ce premier accès. Le micro-test causal de B et la porte modifiée
+passent sous GCC 13.3 ASan/UBSan ; le micro-test revient à
+`kInvalidInput/coverage_flat_draft_shape`. C'est une correction positive
+de la frontière publique **dans le worktree non commis**, pas encore une
+qualification FULL/G4. Le gate compare seulement les **tailles** des
+arènes vectorielle/plate et ne faute pas la surcharge plate : compléter
+l'égalité champ par champ et les pannes d'allocation de cette voie.
 Le [reçu plat local](CONTRE_AUDIT_B_RECU_BROUILLON_PLAT_LOCAL_20260923.md)
 du commit développeur `5f36d5536` passe 11/11 SHA pour cinq couples
 sur la seule trame sans sol 08/000000, W8/s8. À digest FULL, comptes
@@ -1698,7 +1722,8 @@ seule paire K10 exploitable passe de 14,705 à 11,327 s. Les résultats
 sont `complete_relative`, sans catalogue clé par clé ni payload FULL
 archivé. L'affirmation 152/152 portes n'est pas accompagnée du log,
 les binaires n'ont que des préfixes SHA et aucune commande n'est
-épinglée. Le défaut de forme CSR subsiste dans ce paquet ; aucun
+épinglée. Le défaut de forme CSR subsiste dans **ce paquet historique**,
+avec correctif mutable relu ci-dessus ; aucun
 résultat G4 du chemin plat n'est publié.
 
 La [réduction de la phase A en graphe

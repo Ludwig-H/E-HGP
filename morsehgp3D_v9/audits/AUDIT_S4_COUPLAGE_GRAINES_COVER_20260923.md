@@ -131,3 +131,25 @@ d'enregistrements ou d'arène, publier leur nombre, leurs coûts CPU et le
 nominal qu'elles auraient représenté ; un report n'est pas un zéro de
 travail. La porte de décision reste le **mur de chaîne** G4 avec copie,
 recouvrement et traîne, à sorties identiques, une fois ces masses fermées.
+
+
+## Suivi du port S4a local
+
+Le commit développeur local `aad7416a5` introduit le port et annonce une
+réduction 5,29 G → 146 M de `census_point_tests` à K5. Ce compteur compte
+les sites du **scan logique** : dans le dernier ballot d'une graine rejetée,
+le GPU évalue aussi les voies valides situées après le site d'arrêt. Pour
+les arêtes décidées, si `R` est le nombre de recensements rejetés, le
+nombre physique d'évaluations de `q3_power` vérifie
+`T_logique ≤ T_physique ≤ T_logique + 31R`. Les tours de warp restent
+`A=Σ_s ceil(t_s/32)` et ne se déduisent pas de `T_logique` agrégé par
+arête. Cette nuance ne retire pas l'exactitude des sorties ; elle borne
+le sens du facteur 36 annoncé avant une mesure CUDA.
+
+Aucun reçu R15/S4a sur G4 n'accompagne encore le commit. Le port alloue
+ses tampons, téléverse l'index et reconstruit chaque cover au lieu de
+réutiliser la session/plages S4.0 projetées. Le prochain reçu doit
+séparer noyau, copies/allocations, attente de recouvrement et traîne CPU,
+puis mesurer la chaîne complète. Les pentes LiDAR v12 sur coupes physiques
+et densités ne deviennent pas celles de S4a : les rejouer avec le nouveau
+compteur de ballots sur plein, moitiés et quarts est la suite pertinente.

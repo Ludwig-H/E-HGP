@@ -31,3 +31,40 @@ L'ajout à `both_edges` est maintenant placé avant la bifurcation
 mutant restent à exécuter avant de qualifier ce changement. Le fichier
 `lanes_host.hpp` conserve au même moment son SHA-256 `225b127f…` : les
 fenêtres d'exception du premier constat demeurent ouvertes.
+
+
+## Suivi après le commit S4a local
+
+Le développeur a créé le commit local **`aad7416a5`** (non encore sur
+`origin/main` à cette lecture). Il incorpore la correction `both_edges`,
+mais le `lanes_host.hpp` commis garde les fenêtres d'exception du premier
+constat. Le correctif **mutable** suivant, `lanes_host.hpp` SHA-256
+`50144a3ef90a572822af6c5aa9d7b9119fa1ab4f459fe4e8977ea0d6e0835133`,
+englobe maintenant allocations, blocs, attente et commit dans le `try` du
+worker, pose `failed` et réveille les autres sous mutex, joint tous les
+fils avant de relancer la première exception ; `edges==0` revient avant
+les slabs. Cette structure ferme les trois fenêtres **à la lecture du
+source**, sans reçu d'injection aux trois points ni qualification G4.
+
+La nouvelle porte mutable `tests/gpu/lanes_port_gate.cpp` (SHA-256
+`e03cd41c06c3c8ed2ff087be646815198157ca9e4c96f084cda912aaf911addc`)
+cherche une panne en fixant `record_capacity=0xffffffff` pour un appel à
+un et plusieurs workers. `std::vector<LaneRecord>` tente alors environ
+**512 Gio par worker**, puis initialise les enregistrements. Sur un hôte
+Linux avec overcommit, la réservation virtuelle peut réussir et
+l'initialisation provoquer un OOM du processus ou de l'hôte avant qu'un
+`std::bad_alloc` soit livré. Ce test est **non déterministe et coûteux** ;
+je ne l'ai pas lancé. Il ne force par ailleurs ni l'`assign` de bloc ni
+la croissance de `out.records.insert` sous mutex.
+
+Remplacer cette panne géante par un point d'injection déterministe et borné
+aux trois allocations ciblées, y compris après le premier bloc et au
+commit ordonné ; chaque essai doit démontrer jointure, réveil, erreur
+typée et absence de sortie partielle. Pour la seule panne de slab, un
+sous-processus avec limite d'espace d'adressage peut servir de garde
+supplémentaire, sans prétendre tester les deux autres fenêtres. Une porte
+à capacité réduite qui reporte q3 avec q4 ouvert reste nécessaire pour
+qualifier le `both_edges` corrigé : le gate de chaîne du commit ne compare
+ni `both_edges` ni le ledger des voies, et son plancher de traîne peut être
+satisfait par une arête q3 seule. Ne pas assimiler ce préflight à un
+résultat S4a/G4 : aucun reçu R15 n'est présent ici.
