@@ -20,15 +20,20 @@ des autorités implicites.
 
 ## Objectif
 
-Calculer la **tour HGP FULL** (définie et prouvée en v7 : minima Gabriel,
-multifusions, parents, verticales, extension non régulière) d'une trame
-SemanticKITTI **sans sol** de 30 000 à 60 000 sites, grille 1 mm, moteur entier
-exact à 18 bits, en moins de **1 s** puis **100 ms** sur G4, à **K = 5** puis
-**K = 10**, avec parallélisation multi-CPU puis GPU. Les décisions de
-l'utilisateur et les points encore ouverts sont dans la
-[synthèse](docs/AUDIT_V8_SYNTHESE.md) § 2 et § 9.
+Calculer la **tour HGP FULL** (minima Gabriel, multifusions, parents,
+verticales et extension non régulière) d'une **trame SemanticKITTI brute
+entière**, sur plusieurs scènes et séquences, en moins de **1 s** sur G4
+pour toute la tour **K = 1..10** ; le repli est la tour **K = 1..5**, puis
+la cible **100 ms**. La grille entière isotrope de **1 mm** est le profil
+prioritaire choisi par l'utilisateur ; le float32 brut reste un objectif
+secondaire distinct. Les trames **sans sol** sont un régime prioritaire
+à mesurer séparément, mais ne remplacent pas le contrat brut. Les nuages
+de plusieurs dizaines de millions de points restent une cible de passage
+à l'échelle. Aucun de ces contrats de tour n'est acquis. Voir
+la [synthèse](docs/AUDIT_V8_SYNTHESE.md) § 2 et § 9 et
+l'[état courant des audits](audits/ETAT_COURANT.md).
 
-## Verdict de la v8 en quelques lignes
+## Verdict de la v8 au gel du 22 septembre, en quelques lignes
 
 - La v8 livre un **générateur exact de candidats** q2/q3/q4 en entier, parallèle
   sur CPU, élargi à 18 bits, avec des certificats de rejet prouvés et une

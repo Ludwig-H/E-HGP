@@ -1,4 +1,4 @@
-# Avant la première G4 S1 : paquet publié, portée exacte de la mesure
+# Préflight historique du paquet G4 S1, avant les sessions
 
 23 septembre 2026. Relecture B des commits **`1c9c1e5d7`** (sonde v2)
 et **`7565451fc`** (protocole et garde brute), sans session GCP lancée
@@ -61,4 +61,7 @@ la production et consommation des requêtes, le catalogue et FULL.
 Même si la porte de 100 ms est franchie, seule une chaîne complète
 appariée sur **trames entières brutes de plusieurs séquences** pourra
 qualifier la tour K1..5/K1..10 <1 s, puis 100 ms. À cette lecture :
-**aucune mesure G4 GPU ni contrat FULL acquis**.
+**aucune mesure G4 GPU ni contrat FULL acquis à ce préflight**.
+Depuis, le [contre-audit des deux sessions](CONTRE_AUDIT_B_G4_GPU_S1_SESSIONS_20260923.md)
+valide six cas de filtre GPU, dont 08/000000/K5 en 63,801 ms, sans
+qualifier la chaîne ni la tour FULL.

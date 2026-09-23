@@ -12,7 +12,14 @@ séquence SemanticKITTI 08.
 
 ## Écart réel avec la cible
 
-La cible G4 est la **tour FULL entière K=1..10 <1 s**, repli **K=1..5 <1 s**, puis **100 ms** sur le même périmètre sans sol u18/1 mm retenu à l'ouverture. Elle comprend préparation, événements, catalogue, parents, hiérarchies et transferts nécessaires. Lecture disque et démarrage froid/chaud doivent être publiés séparément et leur frontière fixée avant qualification. Une coupe spatiale, un préfixe ou un flux q3/q4 ne constitue pas cette tour.
+Le **premier jalon de temps v9** est la **tour FULL entière K=1..10 <1 s**,
+repli **K=1..5 <1 s**, puis **100 ms**, sur sous-nuage sans sol u18/1 mm.
+Le **contrat principal** garde la trame brute entière, sur plusieurs scènes
+et séquences. La tour comprend préparation, événements, catalogue, parents,
+hiérarchies et transferts nécessaires. Lecture disque et démarrage
+froid/chaud doivent être publiés séparément et leur frontière fixée avant
+qualification. Une coupe spatiale, un préfixe ou un flux q3/q4 ne
+constitue pas cette tour.
 
 Le [reçu G4 du flux q3/q4](../../morsehgp3D_v8/receipts/q34_spatial_20260921/README.md) donne, sur **trames brutes entières u16/2 cm**, K5/s8, 48 workers CPU, une observation chacune :
 

@@ -2951,7 +2951,7 @@ ce levier ne change ni covers, ni paires, ni exposant global.
 
 ### Mise à jour 13 h 10 UTC — préflight du protocole G4 S1, avant dépense
 
-[Note B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md) :
+[Note B WIP historique au commit `113f870a8`](https://github.com/Ludwig-H/E-HGP/blob/113f870a8/morsehgp3D_v9/audits/CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md) :
 la cible SPOT, le paquet commité, le double coupe-circuit et l'arrêt
 ciblé sont correctement repris de la tour. Mais le plan par défaut
 enchaîne six cas sous **1 500 s utiles / 600 s par cas**, alors que le
@@ -2979,7 +2979,7 @@ contre débordement si les rectangles sont dupliqués ; le garde mémoire
 GPU arrive après les allocations CPU par paire du probe. S1 reste une
 sonde `O(R+P)`/`O(P log R)`, non un chemin massif borné.
 
-Le [protocole WIP relu](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md)
+Le [protocole WIP relu au commit `113f870a8`](https://github.com/Ludwig-H/E-HGP/blob/113f870a8/morsehgp3D_v9/audits/CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md)
 marque maintenant `GPU_attempted` dès le préflight et saute les cinq
 cas suivants si le premier est invalide/indisponible. **Il les exécute
 encore si ce premier cas est exact mais >100 ms** ; le seuil n'est donc
@@ -3031,7 +3031,7 @@ le selftest emploie une fausse sonde qui connaît déjà l'option : ses
 ferait échouer le vrai préflight mutant **sur G4 après démarrage**.
 Renforcer `validate_sources` pour exiger l'option ou un gate du vrai
 binaire ; le préflight GPU reste nécessaire. La
-[note B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md)
+[note B WIP historique au commit `113f870a8`](https://github.com/Ludwig-H/E-HGP/blob/113f870a8/morsehgp3D_v9/audits/CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md)
 documente le risque et l'arrêt ciblé restant fragile si le fichier
 de génération est illisible.
 
@@ -3253,3 +3253,42 @@ droit au site tiré) sont écrites dans le README.
   40 % du CPU q3/q4. Le front CPU séquentiel (2,1 s ici) devient le goulot
   de ce bloc. S2 devra publier le mur de bout en bout de q3/q4 et le temps
   du front, sinon le gain du filtre reste invisible dans la chaîne.
+
+### 15 h 10 UTC — B : raccord q3/q4 batch WIP et portée des juges
+
+Les [deux sessions G4 S1 sont contre-auditées](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_G4_GPU_S1_SESSIONS_20260923.md) :
+six cas GPU exacts après un premier échec CMake, mais uniquement des
+sous-nuages sans sol de la séquence 08 et un filtre isolé. La « première
+passe » exclut déjà la création du contexte et les allocations CUDA.
+
+Au développeur : j'ai relu le diff **non commité** de
+`wspd_q34.cpp/.hpp` sur `5577f0f2a`. La
+[note WIP](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_RACCORD_Q34_BATCH_WIP_20260923.md)
+sépare trois portes avant de qualifier S2 :
+
+1. `Q34BatchFilter` est une frontière de confiance : un retour avec
+   tous les masques rectangles à zéro peut satisfaire les ledgers et
+   supprimer tous les candidats. Pas de CPU oracle dans le chrono,
+   mais une porte différentielle hors chrono sur **tous** les masques,
+   survivants, identité/catalogue et digest FULL, avec mutants
+   `all_rect_masks_zero` et substitution d'une arête valide étrangère.
+2. Le raccord matérialise encore tous les rectangles (`by_job`, puis
+   `rectangles`) et tous les survivants. C'est un jalon fonctionnel,
+   **pas encore le tuilage S2a borné** pour les nuages massifs.
+3. Le bilan ne reporte que requêtes/visites du filtre ; les tests de
+   bornes, crédits et travaux par worker sont perdus. Restaurer le
+   ledger comparable, ou marquer explicitement ces champs indisponibles
+   et mesurer `R/P/S`, octets et phases avant tout verdict de croissance.
+
+Au juge C : le reçu v5/v6 est positif pour ses **échantillons** ; la
+[contrelecture A](../morsehgp3D_v9/audits/AUDIT_A_JUGE_Q3_V6_LONGUES_INCIDENCES_20260923.md)
+montre encore que `min-long=50` n'oblige pas des incidences q3
+**régulières longues au rang critique** et que `obs` peut accepter un
+code 2 (non arrivé dans ce reçu). Ne pas convertir ces gates en preuve
+FULL avant une strate top-long-regular causalement mutée.
+La relecture indépendante des reçus confirme 205 182 incidences q2 et
+286 706 q3 échantillonnées toutes retrouvées, sans élargir leur portée.
+Petit correctif de formulation au juge q2 : le commentaire
+`q2_sample_judge.cpp:12` « jamais O(n^3) » n'est vrai que si le nombre
+`S` de sites échantillonnés reste borné ; le coût général est
+`O(S n²)`, donc `O(n³)` si `S=n`.

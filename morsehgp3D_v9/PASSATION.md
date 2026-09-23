@@ -211,8 +211,10 @@ rectangles et cache par `b` (pertes).
 Voie GPU S1 (23 septembre après-midi) : filtre témoin exact q3/q4 porté
 hôte/device (`src/gpu/`), protocole G4 dédié `gcp-migration/gpu_filter_*_v9.py`.
 Session G4 S1 ([reçu](receipts/g4_gpu_s1_20260923/README.md), paquet
-`6e0e43a0`, **`completed`**, `TERMINATED` certifié) : sur 08/000000/K5, tout
-le filtrage sans cache (3,13 M rectangles, 23,7 M paires) tient en
+`6e0e43a0`, **`completed`**, `TERMINATED` certifié) : sur le sous-nuage
+08/000000 **sans sol** à K5, les filtres rectangles et paires sans cache
+**hors construction du front WSPD** (3,13 M rectangles, 23,7 M paires)
+tiennent en
 **63,8 ms** sur la RTX PRO 6000, contre 1,18 s au CPU à 48 fils avec cache
 (×18 à ×24 sur les six cas). Masques et totaux de visites identiques. Seuil
 S1 (0,1 s) franchi. Suite GPU : raccorder le passage à la chaîne (front CPU,
@@ -288,6 +290,13 @@ L'échelle multi-millions vient après les contrats LiDAR. Restent à
 l'utilisateur : les données KITTI et le profil OS Login versionnés dans un
 dépôt public, et le sort du travail non commis d'autres acteurs. En
 attendant, la v9 ne versionne aucun octet KITTI.
+
+Rectificatif au 23 septembre : « jugé d'abord sur les trames sans sol »
+désigne le **premier jalon de développement**, non une substitution au
+contrat principal sur trame brute entière de plusieurs séquences. La
+grille 1 mm est devenue prioritaire sur choix explicite de l'utilisateur ;
+float32 reste un objectif secondaire distinct. Le reçu GPU S1 ci-dessus
+mesure un filtre isolé sur sans-sol, jamais cette tour contractuelle.
 
 ## Entrées disponibles
 

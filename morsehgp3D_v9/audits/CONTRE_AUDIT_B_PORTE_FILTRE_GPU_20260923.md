@@ -213,4 +213,7 @@ Depuis cette lecture, le bench v2 et le protocole ont été publiés
 A de domaine et de boîte, et le snapshot est strict. Voir l'[audit S1
 publié](CONTRE_AUDIT_B_G4_S1_PUBLIE_20260923.md). Les budgets R11,
 la masse de paires et la nécessité de tuiles demeurent, sans résultat
-GPU G4 à cette mise à jour.
+GPU G4 à cette mise à jour historique. Le [reçu positif suivant et sa
+contrelecture](CONTRE_AUDIT_B_G4_GPU_S1_SESSIONS_20260923.md) qualifient
+désormais le débit du **filtre isolé**, toujours pas celui d'une chaîne
+ou tour GPU.

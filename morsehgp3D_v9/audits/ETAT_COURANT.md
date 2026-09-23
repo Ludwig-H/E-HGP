@@ -65,7 +65,8 @@ La [tentative G4 1](../receipts/g4_gpu_s1_attempt1_20260923/README.md)
 a échoué à la configuration avant compilation (`CUDA_STANDARD 20`
 inconnu de CMake 3.22.1), sans calculer de masque GPU. Le correctif
 `6e0e43a0d` passe l'unité CUDA à C++17 et rapporte un build local
-avec cet outillage. Le [reçu G4 S1](../receipts/g4_gpu_s1_20260923/README.md)
+avec cet outillage. Le [reçu G4 S1](../receipts/g4_gpu_s1_20260923/README.md),
+[contre-audité par B](CONTRE_AUDIT_B_G4_GPU_S1_SESSIONS_20260923.md),
 publie ensuite **six passages CUDA exacts** sur les trois trames **sans sol**
 de la seule séquence 08, K5/K10 : masques égaux au CPU, visites égales,
 préflight positif et mutant causal détecté. Ses 166 fichiers et ses
@@ -93,6 +94,12 @@ attribue environ 33 % du CPU
 q3/q4 aux deux DFS ciblés avec leur ordre d'enfants ; 40 % comprend
 aussi le front non porté. Un chemin GPU intégré doit inclure les coûts
 de création/consommation des requêtes et une sortie bornée par lots.
+Le [préflight B du raccord batch WIP](CONTRE_AUDIT_B_RACCORD_Q34_BATCH_WIP_20260923.md)
+signale trois portes avant de qualifier S2 : adapter de filtre fiable
+et porte différentielle causale (les ledgers acceptent même un retour
+tout zéro), tuilage borné au lieu de matérialiser tous rectangles et
+survivants, et conservation des compteurs de travail du filtre.
+Cette lecture porte sur un diff mutable, non sur le GPU S1 publié.
 Le [shadow des rectangles](Q34_BLOCS_LIDAR_SHADOW_20260923.md) donne un
 critère d'ordonnancement S2a concret sur 08/000000/s8 : à K5, **1 081 123
 des 1 128 166** rectangles ouverts ont moins de 16 paires, mais ne portent
