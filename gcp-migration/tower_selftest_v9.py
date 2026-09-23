@@ -785,9 +785,26 @@ class Protocol(unittest.TestCase):
             need(refused(session.validate_snapshot, directory / 'changed.tar.gz', pkg['manifest']), 'changed payload')
 
     def test_probe_and_time_validation(self):
-        plan_case = snapshot.default_plan()['cases'][0]
+        # The cache and ledger mutations below judge the engine path; the
+        # batch/GPU section is judged right after on its own case.
+        engine = dict({name: True for name in worker.LEVER_NAMES}, q34_batch_filter=False, q34_gpu_filter=False)
+        plan_case = dict(snapshot.default_plan()['cases'][0], levers=engine)
         data = worker.INPUTS['00']
-        good = probe_value(data['n'], data['fnv'], 5, 8, 48, 48)
+        good = probe_value(data['n'], data['fnv'], 5, 8, 48, 48, levers=engine)
+        gpu_case = snapshot.default_plan()['cases'][0]
+        gpu_good = probe_value(data['n'], data['fnv'], 5, 8, 48, 48)
+        need(worker.validate_probe(worker.strict_json(json.dumps(gpu_good)), gpu_case, 0) == 'complete_relative',
+             'valid GPU batch probe')
+        for label, mutate in (('gpu backend cpu', lambda v: v['q34_batch'].update(backend='cpu')),
+                              ('gpu device time zero', lambda v: v['q34_batch'].update(device_ms=0.0)),
+                              ('gpu survivors shifted', lambda v: v['q34_batch'].update(survivors=0)),
+                              ('gpu batch unused', lambda v: v['q34_batch'].update(used=False)),
+                              ('gpu cache used', lambda v: v['ledger'].update(witness_cache_queries=1)),
+                              ('gpu pair queries short', lambda v: v['ledger'].update(witness_pair_queries=1)),
+                              ('gpu without batch', lambda v: v['options']['levers'].update(q34_batch_filter=False))):
+            bad = deepcopy(gpu_good)
+            mutate(bad)
+            need(refused(worker.validate_probe, bad, gpu_case, 0), 'batch/GPU probe mutation ' + label)
         need(worker.validate_probe(worker.strict_json(json.dumps(good)), plan_case, 0) == 'complete_relative', 'valid')
         worker.validate_external_wall(good, 0.0015)
         need(refused(worker.validate_external_wall, good, 0.0015 - worker.EXTERNAL_WALL_TOLERANCE_SECONDS - 0.001),
@@ -899,7 +916,7 @@ class Protocol(unittest.TestCase):
             need(refused(worker.validate_probe, bad, plan_case, 0), 'probe mutation ' + label)
         need(refused(worker.validate_probe, good, plan_case, 3), 'complete status with code 3')
         need(refused(worker.strict_json, '{"a": NaN}') and refused(worker.strict_json, '{"a": 1, "a": 2}'), 'strict JSON')
-        refusal = probe_value(data['n'], data['fnv'], 5, 8, 48, 48, status='unsupported_degeneracy')
+        refusal = probe_value(data['n'], data['fnv'], 5, 8, 48, 48, status='unsupported_degeneracy', levers=engine)
         need(worker.validate_probe(refusal, plan_case, 3) == 'explicit_refusal', 'explicit refusal')
         need(refused(worker.validate_probe, refusal, plan_case, 0), 'refusal with code 0')
         report = ('\tCommand being timed: "probe"\n\tElapsed (wall clock) time (h:mm:ss or m:ss): 0:01.00\n'
@@ -922,7 +939,8 @@ class Protocol(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             code, receipt, fake, host = run_scenario(Path(temporary))
             need(code == 0 and receipt['status'] == 'completed' and receipt['worker_status'] == 'completed' and
-                 receipt['FULL_executed'] is True and receipt['GPU_executed'] is False and
+                 receipt['FULL_executed'] is True and receipt['GPU_executed'] is True and
+                 receipt['backend'] == 'cuda_g4' and
                  receipt['public_status'] == 'not_claimed' and receipt['guest_shutdown_minutes'] == 40 and
                  receipt['useful_budget_seconds'] == 1500, 'nominal host receipt: ' + json.dumps(receipt)[:600])
             expect_certified_stop(receipt, fake)
@@ -945,6 +963,7 @@ class Protocol(unittest.TestCase):
             expected = session.validate_snapshot(pkg['archive'], pkg['manifest'])[0]
             pin = worker.sha(worker.__file__)
             bound = (receipt['generation'], receipt['provenance'], receipt['verified_guard'])
+            self.enterContext(patch.object(worker, 'CUDA_PATHS', (str(Path(temporary) / 'fakebin/nvcc'),)))
             need(session.validate_received(output, pkg['manifest'], pin, expected, *bound) == 'completed',
                  'revalidation bound to the session')
             need(refused(session.validate_received, output, pkg['manifest'], pin, expected, '', *bound[1:]) and
@@ -1012,7 +1031,8 @@ class Protocol(unittest.TestCase):
             pin = worker.sha(worker.__file__)
             bound = (receipt['generation'], receipt['provenance'], receipt['verified_guard'])
             output = host / 'received/output'
-            with patch.object(worker, 'CASE_CAP_SECONDS', 4):
+            with patch.object(worker, 'CASE_CAP_SECONDS', 4), \
+                    patch.object(worker, 'CUDA_PATHS', (str(Path(temporary) / 'fakebin/nvcc'),)):
                 need(session.validate_received(output, pkg['manifest'], pin, expected, *bound) == 'partial',
                      'partial revalidation')
                 for label, mutate in (
