@@ -1547,3 +1547,40 @@ l'intégration de la porte, et à B pour la contrelecture et le faux négatif.
    développeur, je ne l'ai pas écrite.
 4. Index : R-01 marqué porté (v13 `c768e06a`, porte `a08378da`, lecteurs
    `50646eef`, `515b3666`), R-02 corrigé (`4b6e3aa6`).
+
+## 23 septembre 2026, 09 h 42 UTC — Boîte fixe et réception v13 (auditeur B)
+
+Base : `11a01c5c`. Aucun nouveau HGP lourd ni GCP de ma part.
+
+La [contre-épreuve LiDAR à boîte
+fixe](../morsehgp3D_v9/audits/lidar_density_bbox_fixed_20260923/README.md)
+de `1200d343` a été reconstruite et ses hashes/reçus recalculés : sur le
+quart chaud 08/000200, les six extrema imposés ne demandent que trois puis
+deux échanges d'IDs, l'emboîtement et les effectifs sont conservés, et la
+boîte x/y/z est identique aux trois densités. Les pentes des **formes**
+restent `2,058215` puis `2,042880` ; celles des paires sont `1,699735`
+puis `1,742289`. Le changement de boîte globale n'est donc pas la seule
+cause du franchissement **dans ce quart précis** ; ni les boîtes internes
+ni la distribution ne sont fixées. Une scène, un secteur, une graine,
+CPU local, `complete_relative` : pas de borne asymptotique ni contrat G4.
+
+Les lecteurs `50646eef`/`515b3666` corrigent bien le downgrade du seul
+cas v13→v12, les vecteurs Euler tronqués, et le faux défaut de protocole
+pour un refus G4 pré-Euler. Restent quatre écarts distincts :
+
+1. En v13 local, enlever entièrement `q34_occupancy` ou `tower_phases_ms`
+   passe encore `validate_probe` ; G4 les exige. Ajouter leur schéma,
+   leurs bornes et des mutations au selftest LiDAR avant nouvelle mesure v13.
+2. `--revalidate` reste une vérification d'un **sous-ensemble non vide** :
+   campagnes manquantes, `record.case`, `argv[0]`, empreinte du binaire et
+   commit annoncé dans le résumé ne sont pas liés à une matrice attendue.
+   Sa réussite ne signifie pas « campagne entière reçue ».
+3. `resolve_input` joint encore des `..` non confinés ; le chemin
+   `morsehgp3D_v8/../../../tmp/escape.u32le` sort du dépôt après
+   normalisation. Rejeter hors du sous-arbre v8 canonique ; la
+   revalidation doit aussi réellement contrôler la commande d'entrée.
+4. Sur un **refus** G4, `reason=chain_catalogue_euler_violated` n'impose pas
+   encore `euler.status=fails` : `not_checkable`/borne 0 peut passer. La
+   porte de mutants de la chaîne accepte toujours une erreur de chaîne
+   quelconque sous `cause=euler.chain_refused`. Exiger le lien dans les
+   deux sens, sans confondre cela avec un faux succès `complete_relative`.
