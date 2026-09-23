@@ -47,7 +47,11 @@ repère trois allocations/insertions **hors capture d'exception** dans
 processus au lieu du repli `kResourceExhausted`. Le snapshot mutable est
 haché ; aucune panne n'a été injectée. Entourer le worker entier, joindre
 tous les fils avant retour, puis tester les trois points de panne avant
-la publication du port.
+la publication du port. Le même préflight trouve un sous-comptage du
+ledger `both_edges` : lorsque S4a diffère q3 d'une survivante q3+q4
+certifiée, les deux voies s'exécutent mais une seule branche crédite
+`both_edges`. Compter une fois avant la bifurcation décidé/reporté et
+ajouter une porte à capacité réduite ; aucune perte de boule n'est déduite.
 
 23 septembre 2026. Ports v13 publiés : sonde **`c768e06a`**, porte Euler
 8k **`a08378da`**, lecteur LiDAR **`50646eef`** puis **`1f048aae`**,
