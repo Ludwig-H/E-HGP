@@ -22,10 +22,10 @@ Ajouter au reçu, pour chaque K, temps mur/CPU d'extraction et quotient, tri/uni
 
 Un raccourci par `BallData::interior()` pour les recherches d'intrus de clé cataloguée est possible seulement aux ordres inférieurs : à `K=Kmax=10`, tout enregistrement du catalogue satisfait `p+q_min-1≤10`, tandis qu'une facette de sa MEB ne peut avoir `K>p+u`. Une clé trouvée est donc déjà admissible ; les recherches d'intrus restantes portent sur des clés **absentes** du catalogue. Ce raccourci ne peut pas expliquer ni éliminer le coût K10 dominant et ne doit pas être vendu comme solution aux 403,4 M visites de nœuds d'intrus cumulées du reçu G4.
 
-## Port WIP des ordres K concurrents, relu le 23 septembre
+## Première révision des ordres K concurrents, relue le 23 septembre
 
-Le worktree du constructeur ajoute à `full_ball_tower.hpp` (SHA-256 du
-snapshot **`0552ad3e5ef6…`**, non publié dans `a1d7a9bc`) un chemin
+Le premier snapshot du constructeur dans `full_ball_tower.hpp` (SHA-256
+**`0552ad3e5ef6…`**, antérieur au port publié) ajoute un chemin
 `run_orders_parallel()` pour `static_threads>1`, sans résolveur externe.
 La séparation A/B/C est mathématiquement saine à ce stade : chaque K
 ferme ses propres lots avec des `BallId` géométriques préparés avant la
@@ -81,3 +81,76 @@ plus `min(K,48)` tâches (5 ou 10 ici), chaque ordre déroulant ses lots en
 série ; publier leur mur, CPU et charge par K pour distinguer gain et
 contention mémoire. Aucun transfert de ces tailles au régime 30 M sans
 mesure de `B` et `N` n'est justifié.
+
+### Port publié `684d8fc7` : banque de populations déplacée
+
+Le port publié (`full_ball_tower.hpp` SHA-256
+`89f1f96af53d…`, `full_coverage_certificate.hpp` SHA-256
+`08033ed0b869…`) conserve la séparation par K et construit les lignes
+de populations par IDs de première rencontre, dans des slots distincts.
+Elle valide ensuite les lignes en parallèle et **déplace** leurs deux
+vecteurs vers la banque immuable, au lieu de recopier toutes les lignes
+à la fermeture. C'est une économie de résidence temporaire pertinente
+pour les gros catalogues ; aucun pic RSS de cette révision n'est encore
+mesuré. Les portes ciblées Release (`full_coverage` : 823 vérifications,
+30 refus, 20 allocations ; FULL `--static-4` : 301 980 vérifications),
+la chaîne de 1 500 sites et un mini-gate move/copy à 0/1/4 fils passent.
+FULL `--static-4` et le mini-gate passent aussi sous Clang
+ASan/UBSan/LSan et TSan, sur copies exactes en `/tmp` ; aucun reçu
+LiDAR/G4 ne porte sur cette révision.
+
+Le nouveau point d'entrée **public**
+`build_full_coverage_populations(domain, vector&&, threads)` n'a pas
+encore la même clôture d'échec que l'overload par copie : son
+`parallel_ranges` est hors `try`, et le `try` ne capte pas
+`std::length_error`. Un lancement de thread échoué par le failpoint
+`MHGP9_TESTING/launch_fail_after=0` fait effectivement remonter
+`std::system_error` à l'appelant direct, au lieu d'un
+`FullCoveragePopulationResult` en `resource_exhausted` ; la chaîne
+`build_full_ball_tower` intercepte cette exception plus haut. Encadrer
+la validation et l'affectation par la même traduction d'exceptions que
+l'overload existant, avec une raison de lancement dédiée et une porte
+directe injectée. La promesse du commentaire « première ligne invalide
+dans l'ordre » n'est pas observable : l'annulation atomique peut arrêter
+avant cette ligne, même si le statut générique reste le bon. Le défaut
+de compteurs privés perdus sur exception en phase A/C est **inchangé**
+sur cette révision.
+
+### Révision `133c8653` : API réparée, bilan d'échec encore incomplet
+
+`133c8653` encadre maintenant la validation et le lancement de l'overload
+public à banque déplacée et traduit `std::system_error`, `bad_alloc` et
+`length_error` en statut. La porte produit de lancement injecté et la
+contre-épreuve directe passent sur les SHA publiés
+`full_ball_tower.hpp` `31184775…` et
+`full_coverage_certificate.hpp` `3a2cda98…` : le défaut d'API décrit
+ci-dessus est **clos**. Aucun reçu G4/RSS apparié ne porte encore sur le
+port FULL concurrent.
+
+Le ledger en cas d'échec reste ouvert : les statistiques privées
+`OrderState::st` ne sont fusionnées qu'après réussite de **toutes** les
+phases A, B et C. L'injection après un lot K1 laisse encore les compteurs
+de travail à zéro. Une fonction de fusion unique, appelée une seule fois
+après la jointure même lors des sorties d'exception, préserverait le
+travail connu sans publier de tour partielle. Une panne d'allocation des
+`drafts` après fusion ne doit pas fusionner une seconde fois.
+
+La révision choisit le plus petit K **à l'intérieur de chaque phase** :
+elle arrête après l'échec de A sans lancer C. Une injection A/K3 et C/K2
+sur une copie temporaire rend A/K3. C'est une politique déterministe,
+mais pas « comme la boucle séquentielle » pour toutes les phases. Si la
+priorité globale K est contractuelle, calculer encore C pour les ordres
+K<f ayant réussi A avant de rendre l'échec A/K=f ; sinon corriger le
+commentaire et la porte pour annoncer une priorité par phase.
+
+La limite `u32` ajoutée à `order_new_node` ne constitue finalement pas
+un nouveau verrou indépendant des entrées admises. Pour K≥2, chaque
+nouveau nœud correspond à un groupe non vide de blocs ; chaque bloc est
+une boule distincte de `program[K]`, qui contient chaque BallId au plus
+une fois. Ainsi `N_K≤|program[K]|≤B≤UINT32_MAX`. Pour K1, les `n`
+singletons initiaux sont les seules naissances, puis tout nouveau nœud
+fusionne au moins deux composantes de ces singletons :
+`N_1≤2n−1≤UINT32_MAX−2` car `n≤INT32_MAX`. La garde reste utile contre
+les débordements et les incohérences ; c'est surtout le nombre de boules
+`B` et la mémoire de leurs programmes, catalogues et forêts qu'il faut
+mesurer au contrat massif.

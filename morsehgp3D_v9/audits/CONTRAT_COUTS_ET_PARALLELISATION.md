@@ -62,6 +62,39 @@ plages disjointes de rangs A et garde B entier ; `expand` parcourt A à
 l'extérieur puis B. Chaque ligne est donc possédée par un seul worker,
 y compris quand la file refuse une tâche, sans nouvel état partagé.
 
+Le [sidecar reproductible](shadow_q34_rows_u18_20260923.cpp) refait le
+front K5/s8 sur les **trois trames sans sol entières à 1 mm** du reçu
+v8, avec le filtre `Affine` du produit et une seule ligne déterministe
+pour environ 1/128 des rectangles survivants ayant `|A|≥2,|B|≥8`.
+Les masses totales du front sont exactement celles de R4b ; la
+bibliothèque locale utilisée portait le SHA-256 `11858d793bc1…` et les
+trois entrées les SHA du reçu R4b. Un second build cohérent de
+`aae9da0e` (bibliothèque SHA-256 `2f3d113b…`) retrouve exactement les
+trois masses de front et toutes les lignes du tableau ci-dessous ; ce
+rejeu vérifie que la centralisation des coordonnées dans l'index ne
+change pas la sonde. Le script n'exécute ni le reste du générateur, ni
+catalogue, ni FULL : c'est une observation géométrique locale, non un
+reçu de chaîne.
+
+| Trame 08 | Masse éligible après filtre rectangle / paires développées R4b | Lignes échantillonnées | Paires entièrement évitables dans l'échantillon | Visites DFS de ligne / paire évitable |
+| --- | ---: | ---: | ---: | ---: |
+| 000000 | 20 747 697 / 23 686 751 (87,6 %) | 191 | 3 207 | 15,7 |
+| 000100 | 9 423 007 / 11 960 420 (78,8 %) | 143 | 1 604 | 21,2 |
+| 000200 | 18 987 124 / 22 722 345 (83,6 %) | 275 | 3 926 | 29,8 |
+
+La masse éligible est grande, mais l'échantillon d'**une ligne par
+rectangle** n'est pas un estimateur du gain global. Le DFS neuf coûte
+ici 15,7–29,8 visites par paire qu'il écarterait entièrement, avant
+comparaison au filtre/cache de paire qu'il remplacerait ; aucune
+économie nette n'est prouvée. Ne pas activer ce port sur ces chiffres.
+Un transfert plus léger peut conserver les **seuls nœuds admis** par
+le filtre rectangle : au plus `(K−1)+(K−2)=2K−3≤17` entrées avec voies
+et comptes, disjointes par voie. Leur admission pour `A×B` reste vraie
+pour `{a}×B`; le DFS de ligne doit sauter exactement leurs sous-arbres
+par voie pour éviter tout double crédit. Ce ticket possédé est borné,
+contrairement à une frontière complète de sous-arbres indécis qui peut
+atteindre `Θ(n)` par rectangle. Mesurer son coût avant d'élargir l'API.
+
 Avant activation, compter en mode shadow `row_queries`, visites de
 nœuds, masse de lignes entièrement rejetées et masses q3/q4 retirées ;
 facturer le DFS de ligne même si aucune paire n'est évitée. La porte

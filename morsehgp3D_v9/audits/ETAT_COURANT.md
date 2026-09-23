@@ -1,11 +1,15 @@
 # État courant des audits v9
 
 23 septembre 2026. Code produit courant sur `origin/main` :
-**`a1d7a9bc`** (réception G4 v6 et validation des compteurs), après
+**`aae9da0e`** (coordonnées q3/q4 ordonnées possédées par l'index), après
+`133c8653` (statut public de la banque FULL et priorité d'échec par phase),
+`47f8a5da` (chargement des formes des voies mortes) et
+`684d8fc7` (ordres FULL concurrents et banque déplacée), après
+`a1d7a9bc` (réception G4 v6 et validation des compteurs),
 `6345a985` (selftest v6), `7f64a279` (cache des nœuds témoins, preuve
 q3/q4 conjointe et leviers publiés) et `e0ae05a7` (préparation/tri FULL
-statiques parallèles). Le reçu G4 R3 exécute
-**`b4e480fc`**, pas ces ports plus récents. Le certificat de voies mortes
+statiques parallèles). Le reçu G4 R4b exécute **`a1d7a9bc`** et R3
+**`b4e480fc`**, pas le port FULL plus récent. Le certificat de voies mortes
 et le protocole v5 venaient de `099ca784`. Le census q3 sur feuille et la sonde
 v4 venaient de `e54f727c` ; le reçu G4 R2 reste épinglé au code
 antérieur `0b29b6c3` et le reçu G4 R1 au paquet `e28296bb`. Noyau MEB à
@@ -415,6 +419,8 @@ appariée.
    dans le reçu, sans toucher aux sorties brutes. Les lacunes connues du
    validateur v6 de garde et de certaines identités restent ouvertes ;
    elles ne changent pas les égalités et les temps lus dans ce reçu.
+   La [contrelecture B de R4b](CONTRE_AUDIT_B_G4_R4B_CACHE_20260923.md)
+   recoupe en outre sources, fermeture des commandes, ledger et arrêt.
    Le port `7f64a279` réunit maintenant le cache de témoins, la preuve
    conjointe et la sonde v6. Le DFS conjoint q3/q4 rend les mêmes bits de
    preuve que les deux DFS séparés sur **30 000** appels synthétiques, avec
@@ -441,8 +447,29 @@ appariée.
    le nœud B avant l'expansion : elle peut créditer `|B|` paires d'un coup
    quand la boîte A entière reste ouverte. Une sonde compilée temporaire
    donne rectangle ouvert, ligne fermée sur six points collinéaires.
-   Mesurer d'abord visites et masse évitée en shadow sur R4b : aucun gain
-   LiDAR ni changement de moteur n'en découle encore.
+   Un [sidecar versionné](shadow_q34_rows_u18_20260923.cpp) retrouve les
+   masses de front R4b K5/s8 : **79–88 %** des paires développées sont
+   dans des rectangles éligibles `|A|≥2,|B|≥8`. Mais son échantillon
+   déterministe d'une ligne par rectangle paie **15,7–29,8 visites DFS
+   par paire entièrement évitable** selon la scène. Il ne mesure pas le
+   temps de chaîne ni le chevauchement avec le cache ; ne pas porter le
+   DFS de ligne neuf sans ablation appariée et seuil de coût. Un ticket
+   borné des seuls nœuds témoins déjà admis par le rectangle pourrait
+   réduire cette répétition, jamais une frontière entière par rectangle.
+   `47f8a5da` a ensuite remplacé le chargement des formes des voies mortes
+   par des coordonnées rangées, mais sa copie privée par worker avait une
+   résidence `12·n·W` et un cache indexé par adresse nue. La
+   [reproduction ABA](check_q34_dead_owner_aba_20260923.cpp) sur le code
+   publié ancien obtenait, à la même adresse d'index, voie q3 faussement
+   morte `2` contre `0` sur un prouveur neuf. `aae9da0e` corrige les
+   **deux** défauts relevés par [B](CONTRE_AUDIT_B_CHARGEMENT_FORMES_Q34_WIP_20260923.md) :
+   coordonnées immuables partagées par l'index (`12·n` octets de plus)
+   et `loaded_=false` dès l'entrée de `load()`. Le même reproducteur
+   compilé contre ce commit rend `reused=0 fresh=0` ; une injection de
+   `bad_alloc` bloque ensuite `prove()`. La porte q3/q4 générale passe,
+   mais aucune porte produit dédiée ABA/échec de chargement n'existe
+   encore. Refaire une ablation de temps **et** RSS sur le même snapshot
+   avant d'attribuer au changement le gain de brouillon 74→46 Gcycles.
    Les trois JSON locaux `build/v9-runs/dead_20260923/cache_s{00,01,02}_k5.json`
    donnent **69,763 / 61,155 / 66,851 %** pour
    `witness_cache_rejected_pairs / expanded_pairs` : il s'agit des paires
@@ -521,17 +548,34 @@ appariée.
    injection locale sur `vector<int>` le reproduit, sans prouver qu'un FULL
    30 M réussirait. Un repli ciblé sur cette allocation et son compteur
    sont une protection simple à qualifier sous le contrat massif.
-   Un nouveau [port WIP des ordres K
-   concurrents](PREFETCH_GEOMETRIE_FULL_PAR_K_20260923.md)
-   (snapshot `0552ad3e…`, hors reçu R4b) sépare lots horizontaux,
-   numérotation des populations et images verticales. Ses petites portes
-   différentielles, ASan/UBSan/LSan, TSan et la chaîne 1 500 sites passent.
-   Mais les états simultanés ont un plancher logique de **635,2 Mio** sur
-   la scène 08/000000/K10 du reçu R4b, avant brouillons et catalogue, et
-   une exception après un lot fait perdre les compteurs privés de travail
-   déjà payé ; une injection l'a reproduit. Fusionner ces compteurs sur
-   échec après jointure, puis mesurer RSS et mur par phase/K avant
-   d'attribuer un gain massif. Aucune mesure G4 ne porte sur ce WIP.
+   Le [port publié `684d8fc7` des ordres K
+   concurrents](PREFETCH_GEOMETRIE_FULL_PAR_K_20260923.md) sépare lots
+   horizontaux, numérotation des populations et images verticales, puis
+   **déplace** les vecteurs des populations dans la banque immuable.
+   Sur copies exactes `89f1f96a…` / `08033ed0…`, les portes FULL,
+   move/copy 0/1/4 fils, Clang ASan/UBSan/LSan et TSan, ainsi que la
+   chaîne locale de 1 500 sites passent. La [contrelecture
+   B](CONTRE_AUDIT_B_FULL_PARALLELE_WIP_20260923.md) signale la
+   déterminisation du premier échec et la borne explicite `u32` des nœuds
+   d'un ordre. La borne d'ID de nœud ne resserre pas, pour une entrée
+   admise, la limite existante des boules `u32` : à K≥2, chaque nouveau
+   nœud correspond à au plus un bloc de `program[K]`, donc au plus une
+   boule ; à K1, il y a au plus `2n−1` nœuds avec
+   `n≤INT32_MAX`. C'est la croissance des boules qui reste à mesurer
+   à 30 M sites. Le plancher logique des états
+   simultanés est **635,2 Mio** sur 08/000000/K10 R4b, avant
+   brouillons/catalogue ; mesurer RSS, mur et occupation par phase/K.
+   Une exception après un lot perd les compteurs privés du travail déjà
+   payé (injection reproduite). `133c8653` corrige le second défaut
+   initial : l'overload public de banque convertit désormais un échec de
+   lancement injecté en statut, et sa porte ciblée passe. Le premier
+   défaut de ledger demeure. Ce commit choisit le plus petit K **dans
+   chaque phase** en cas d'échecs concurrents ; une panne A/K3 peut
+   masquer une panne C/K2, contrairement à la priorité globale de la
+   boucle séquentielle annoncée par son commentaire. Soit documenter
+   la priorité par phase, soit résoudre les images C des K inférieurs
+   avant de retourner l'échec A. Aucun chrono G4/RSS ne porte encore
+   sur le port FULL concurrent.
    Une [piste exacte pour les intrus](INTRUS_FULL_PREFIXE_EXACT_20260923.md)
    réutilise, par BallKey, un préfixe complet d'intérieurs Morton ; son
    [oracle combinatoire](check_full_intruder_prefix_20260923.py) passe
