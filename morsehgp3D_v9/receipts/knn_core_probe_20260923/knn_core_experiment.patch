@@ -1,0 +1,131 @@
+diff --git a/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.cpp b/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.cpp
+index abfcdafc..c8c7bbd5 100644
+--- a/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.cpp
++++ b/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.cpp
+@@ -80,6 +80,36 @@ void Q34DeadLaneProver::load(const Q34EdgeCover& cover, Q34DeadLaneWork& work) {
+   loaded_ = true;
+ }
+ 
++void Q34DeadLaneProver::load_points(Point3 a, Point3 b, std::span<const Point3> sites, Q34DeadLaneWork& work) {
++  loaded_ = false;
++  Vec v{}, midpoint_twice{};
++  std::size_t main_axis = 0;
++  for (std::size_t i = 0; i < 3; ++i) {
++    v[i] = static_cast<i64>(b[i]) - a[i];
++    midpoint_twice[i] = static_cast<i64>(a[i]) + b[i];
++    if (std::llabs(v[i]) > std::llabs(v[main_axis])) main_axis = i;
++  }
++  const std::size_t axis_i = (main_axis + 1) % 3, axis_j = (main_axis + 2) % 3;
++  const i64 h = std::llabs(v[main_axis]), sign = v[main_axis] > 0 ? 1 : -1;
++  a_basis_ = {0, 0, 0}; b_basis_ = {0, 0, 0};
++  a_basis_[axis_i] = h; a_basis_[main_axis] = -sign * v[axis_i];
++  b_basis_[axis_j] = h; b_basis_[main_axis] = -sign * v[axis_j];
++  diameter_squared_ = dot(v, v);
++  counter_add(work.loads);
++  const i64 am = a_basis_[main_axis], ai = a_basis_[axis_i], bm = b_basis_[main_axis], bj = b_basis_[axis_j];
++  forms_.resize(sites.size());
++  std::size_t n = 0;
++  for (const auto& z : sites) {
++    Vec w{};
++    for (std::size_t i = 0; i < 3; ++i) w[i] = 2 * static_cast<i64>(z[i]) - midpoint_twice[i];
++    forms_[n++] = {scale * (dot(w, w) - diameter_squared_), -2 * (w[main_axis] * am + w[axis_i] * ai),
++                   -2 * (w[main_axis] * bm + w[axis_j] * bj)};
++  }
++  const auto old = all_.size();
++  if (old < n) { all_.resize(n); for (std::size_t i = old; i < n; ++i) all_[i] = static_cast<std::uint32_t>(i); }
++  loaded_ = true;
++}
++
+ std::size_t Q34DeadLaneProver::retained_bytes() const {
+   std::size_t bytes = forms_.capacity() * sizeof(Form) + all_.capacity() * sizeof(std::uint32_t);
+   for (const auto& level : levels_) bytes += level.capacity() * sizeof(std::uint32_t);
+diff --git a/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.hpp b/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.hpp
+index 44ffe40c..f2faf0bd 100644
+--- a/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.hpp
++++ b/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.hpp
+@@ -78,6 +78,8 @@ class Q34DeadLaneProver final {
+   // over the cells (the q3 disk lies inside the q4 disk). A lane whose
+   // threshold is zero (K<2 for q3, K<3 for q4) is never proved here.
+   [[nodiscard]] std::uint8_t prove(unsigned kmax, std::uint8_t lanes, Q34DeadLaneWork& work);
++  // EXPERIMENT (local, not committed): forms of an explicit site list for edge ab.
++  void load_points(Point3 a, Point3 b, std::span<const Point3> sites, Q34DeadLaneWork& work);
+   // Capacity of the reused private buffers (forms, IDs, frontiers).
+   [[nodiscard]] std::size_t retained_bytes() const;
+ 
+diff --git a/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp b/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp
+index 143b8b0f..0639c8b2 100644
+--- a/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp
++++ b/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp
+@@ -4,6 +4,7 @@
+ #include "parallel/work_reduction.hpp"
+ 
+ #include <algorithm>
++#include <cstdio>
+ #include <optional>
+ #include <array>
+ #include <functional>
+@@ -416,6 +417,21 @@ struct RectangleTask {
+ // that range inline, so every pair is still expanded exactly once.
+ using RectangleSplitter = std::function<bool(const RectangleTask&)>;
+ 
++struct KnnStats {
++  std::atomic<u64> cores{0}, core_closed{0}, knn_closed{0}, both{0}, knn_sites{0}, core_sites{0}, knn_tests{0};
++  void record(std::uint8_t mask, std::uint8_t knn, std::uint8_t core, std::size_t ks, std::size_t cs, u64 tests) {
++    ++cores; knn_sites += ks; core_sites += cs; knn_tests += tests;
++    const bool c = (mask & ~core) == 0, k = (mask & ~knn) == 0;
++    if (c) ++core_closed;
++    if (k) ++knn_closed;
++    if (c && k) ++both;
++  }
++  ~KnnStats() { std::fprintf(stderr, "KNN cores=%llu core_closed=%llu knn_closed=%llu both=%llu knn_sites=%llu core_sites=%llu knn_tests=%llu\n",
++    (unsigned long long)cores.load(), (unsigned long long)core_closed.load(), (unsigned long long)knn_closed.load(), (unsigned long long)both.load(),
++    (unsigned long long)knn_sites.load(), (unsigned long long)core_sites.load(), (unsigned long long)knn_tests.load()); }
++};
++inline KnnStats& knn_stats() { static KnnStats s; return s; }
++
+ class Engine {
+  public:
+   Engine(Q2CensusIndexPtr index, unsigned k, WspdQ34Options options,
+@@ -553,8 +569,32 @@ class Engine {
+       counter_add(work.core_builds);
+       counter_add(work.core_sites, static_cast<u64>(core->site_count()));
+       merge(work.core_cover, core->work());
+-      dead_.load(*core, work.dead_core);
+-      mask = static_cast<std::uint8_t>(mask & ~dead_.prove(k_, mask, work.dead_core));
++      {
++        // EXPERIMENT: 16 nearest core sites of a and of b only.
++        const auto ordered = index_->spatial_points();
++        const auto cloud_points = index_->cloud().points();
++        const auto pa = cloud_points[a], pb = cloud_points[b];
++        std::vector<std::pair<i64, std::size_t>> da, db;
++        std::vector<Point3> core_points;
++        for (const auto range : core->ranges())
++          for (auto rank = range.first; rank < range.last; ++rank) core_points.push_back(ordered[rank]);
++        const auto d2 = [](const Point3& p, const Point3& q) {
++          i64 s = 0; for (int i = 0; i < 3; ++i) { const i64 d = static_cast<i64>(p[i]) - q[i]; s += d * d; } return s; };
++        for (std::size_t j = 0; j < core_points.size(); ++j) { da.emplace_back(d2(core_points[j], pa), j); db.emplace_back(d2(core_points[j], pb), j); }
++        const std::size_t kk = std::min<std::size_t>(17, da.size());
++        std::partial_sort(da.begin(), da.begin() + kk, da.end()); std::partial_sort(db.begin(), db.begin() + kk, db.end());
++        std::vector<std::size_t> chosen;
++        for (std::size_t j = 0; j < kk; ++j) { chosen.push_back(da[j].second); chosen.push_back(db[j].second); }
++        std::sort(chosen.begin(), chosen.end()); chosen.erase(std::unique(chosen.begin(), chosen.end()), chosen.end());
++        std::vector<Point3> sel; for (auto j : chosen) sel.push_back(core_points[j]);
++        Q34DeadLaneWork scratch_work{};
++        knn_.load_points(pa, pb, sel, scratch_work);
++        const auto knn_proved = knn_.prove(k_, mask, scratch_work);
++        dead_.load(*core, work.dead_core);
++        const auto core_proved = dead_.prove(k_, mask, work.dead_core);
++        knn_stats().record(mask, knn_proved, core_proved, sel.size(), core_points.size(), scratch_work.uniform_tests);
++        mask = static_cast<std::uint8_t>(mask & ~core_proved);
++      }
+       observe(core, static_cast<u64>(dead_.retained_bytes()));
+       if (mask == 0) { counter_add(work.core_closed_edges); return; }
+     }
+@@ -768,6 +808,7 @@ class Engine {
+   RectangleSplitter splitter_;
+   std::vector<std::size_t> shell_;
+   Q34DeadLaneProver dead_;
++  Q34DeadLaneProver knn_;
+   // Witness-node cache of the pair filter, owned by the last searched a.
+   std::size_t cache_owner_ = std::numeric_limits<std::size_t>::max();
+   std::vector<Q34WitnessNode> cache_nodes_, trace_nodes_;

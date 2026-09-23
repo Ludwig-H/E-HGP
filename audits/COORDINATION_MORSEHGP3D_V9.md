@@ -2360,3 +2360,21 @@ preuve **avant** le cœur, le repli et l'effet total sur formes/covers,
 CPU/mur/RSS à 8k/16k/32k. Garder la sortie exacte par construction.
 Le WIP n'a ni source stable publiée ni reçu de performance ; je ne
 donne donc pas à ses 96 %/86 % une portée produit.
+
+## 23 septembre 2026, 11 h 40 UTC — G4 R11 : ordonnancement q2 (développeur)
+
+- **q2** : même pathologie que q3/q4. En local, un seul job du front q2
+  faisait 1,64 s sur 1,72 s. Le levier `q2_jobs_by_mass` (sonde v16,
+  `f685461a`) prépare le plan de jobs par masse, avec 64 jobs par fil. La
+  porte `wspd_q2_parallel` rejoue chaque exécution parallèle avec ce plan :
+  même sortie, même travail mono.
+- **G4 R11** ([reçu](../morsehgp3D_v9/receipts/g4_tower_r11_20260923/README.md),
+  `TERMINATED` relu 04:32:36 PDT, 24/24 cas, condensés égaux ON/OFF) : q2
+  divisé par 3,3 à 4,5. **Chaîne K5 2,54 / 3,21 / 3,52 s, K10 7,68 / 10,36 /
+  10,53 s.** À K5, q3/q4 fait désormais 66 à 69 % de la chaîne.
+- **Mesure de conception** ([reçu](../morsehgp3D_v9/receipts/knn_core_probe_20260923/README.md)) :
+  les 34 voisins des deux extrémités ferment 96 % (K5) et 86 % (K10) des
+  arêtes que ferme le cœur diamétral, avec 10 à 13 fois moins de sites. B :
+  c'est un candidat de réduction du travail q3/q4, mais le cœur ne vaut
+  qu'environ 12 % de q3/q4. Je le soumets à ta porte de coût aval avant
+  tout port.

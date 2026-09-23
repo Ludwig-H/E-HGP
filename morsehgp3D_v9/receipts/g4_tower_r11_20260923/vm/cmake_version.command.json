@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/usr/bin/cmake",
+    "--version"
+  ],
+  "cwd": "/tmp/ehgp-tower-v9-4a329af9172f2066.awNqsS4OMp/output",
+  "elapsed_seconds": 0.11365958399998988,
+  "ended_utc": "2026-09-23T11:28:13.007310+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 1806,
+  "session_work_deadline_epoch": 1790164392.6627002,
+  "started_utc": "2026-09-23T11:28:12.893620+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "6c08f840b67782da73a6fe113b64712615441722b15cd2723062dd4cc00a10d8"
+}

@@ -187,6 +187,16 @@ la tour, avec la tour K10 −0,46 à −0,76 s. **Chaîne K5 2,74 / 3,64 / 3,94 
 **K10 8,07 / 11,13 / 11,36 s**. Validation du catalogue : passe 2 et
 programmes parallélisés.
 
+Session G4 R11 ([`g4_tower_r11_20260923`](receipts/g4_tower_r11_20260923/README.md),
+paquet `f685461a`, **`completed`**, `TERMINATED` certifié) : jobs du front q2
+par masse (sonde v16), q2 divisé par 3 à 4,5. **Chaîne K5 2,54 / 3,21 /
+3,52 s**, **K10 7,68 / 10,36 / 10,53 s**. Juge d'échantillon des clés jamais
+émises (`chain_absent_keys`) : 77 000 boules admissibles, toutes présentes, à 2k et
+8k. Mesures sans suite immédiate :
+- l'index des selles seul ([négatif](receipts/saddle_index_negative_20260923/README.md)) ;
+- le pouvoir de preuve des voisins proches pour le certificat, 96 % des
+  fermetures du cœur à K5 ([mesure](receipts/knn_core_probe_20260923/README.md)).
+
 Suite : tour maigre (D5 de l'auditeur C :
 index des selles, saut au centre, images de naissance directes), puis
 réfutation des ancres longues avant expansion (66–70 % du CPU q3/q4 selon C).
