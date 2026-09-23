@@ -1,0 +1,64 @@
+{
+  "cases": {
+    "s1_half": {
+      "density": "half",
+      "input_fnv64": "9b54bf67cf6c6787",
+      "original_sha256": "215c3fc769946a7a8bd7a75dd4cc919bb55cf6c25cc85a9b92dd6d71f5f433af",
+      "points_sha256": "ed85a028af0a1a1daf3c3a17cbfea7d484f2428e7c5a916a2f3b4b6e3bb104d2",
+      "raw_sha256": "e7848d026b6f84c6c8affaf8eac6a701f6a6c07b8c8c40106a6fbcd4b4d73d30",
+      "seed": "7d1c9a5eb3f24680",
+      "sites": 7387
+    },
+    "s1_quarter": {
+      "density": "quarter",
+      "input_fnv64": "3832d655049a8e97",
+      "original_sha256": "f08a967e6ac62ff40a1a167e18e747aa3decca2967c9bd7179fde89be15e53e2",
+      "points_sha256": "a5cdb880271d3100b618274d762d54b2d621d87c71e7cf76b82b474e9185cf06",
+      "raw_sha256": "723d0e6db5418e989b13bd8ce34639ae5a82f5e92f1bba319b4e29f03ce74ee6",
+      "seed": "7d1c9a5eb3f24680",
+      "sites": 3609
+    },
+    "s2_half": {
+      "density": "half",
+      "input_fnv64": "2c00e7c1c2b5d99e",
+      "original_sha256": "fbee73e3ef766726a79c39c17885643be5f3558a87879b60959e6b8ad1705dbc",
+      "points_sha256": "8228d576fd26b0a48f736050d1501d7886510ce9d0fd97a09a4a0f381ef148b8",
+      "raw_sha256": "3a3f80300901dcbc4c63651a42bbf976107248c23d11568318e7d274e6d8e646",
+      "seed": "2b85d41e0c93a76f",
+      "sites": 7459
+    },
+    "s2_quarter": {
+      "density": "quarter",
+      "input_fnv64": "caa072074cf418d3",
+      "original_sha256": "b26178e7f1dc2bcc33db8b45e2d4e3c2f84817ba42215c988b6d3b6433193eb7",
+      "points_sha256": "41c227d367602213764ead4d9a0ac08e9717263b88a5bd3762f36ad21df65796",
+      "raw_sha256": "52199a9ca1515a78c43c13f35d4435ee3b19f50d4d830425703cb49aa25ab235",
+      "seed": "2b85d41e0c93a76f",
+      "sites": 3717
+    }
+  },
+  "historical_inputs": {
+    "half": {
+      "original_sha256": "12aee1d0baa59a9664496d9f73925aa296d7542c3648fcb41128b9564554b532",
+      "points_sha256": "6ed1e22a2a448fce055a8701e9aa94905edad3710d3cde60e7ac4f246ad23b1a",
+      "raw_sha256": "815ef4e16a618fc536ac5a03fe3028fdae96b428ba1bd96a5a2ad3307b74934f",
+      "sites": 7339
+    },
+    "quarter": {
+      "original_sha256": "7e1e1a23ed0ddd3942f4c11e962a82da1148a18497b6ae3565a68b57bcbdd384",
+      "points_sha256": "40e1c5ec8306515f08278eea49f89bde2fc4d02748935114974111d82fbaeb4e",
+      "raw_sha256": "d3e66f4bc409625f78ea0a07d7623583ea3ae9f22c60744017b9bb6c1908c4c7",
+      "sites": 3630
+    }
+  },
+  "historical_seed_control": "d1da73a520260923",
+  "physical_full_points_sha256": "f4b372962872a91575010af427ff101fb018a62f05dcf2c537bccf07c55e5bb0",
+  "physical_full_sites": 14828,
+  "schema": "mhgp9_ground_physical_hot_quarter_multiseed_inputs_v1",
+  "sector": "quarter_x_nonneg_y_neg",
+  "selection": "global splitmix64(grid-original-site-ID XOR seed) over all 45845 mask-retained sites; first floor(n/4) and floor(n/2), then intersect float32 sensor signs; emit original full-grid u18 coordinates in original order",
+  "source_float32_manifest_sha256": "ce1ffee9de0a43a4aed101d880bb769614b9a5cb1583c3e4af6899835eadd387",
+  "source_grid_manifest_sha256": "a37d4e46b529885b9fc370a25e361a302762b95109f00928b2b2e96fcac799da",
+  "source_kept_return_ids_sha256": "793d80a54991212fd22d298bda39521a345d5fcba1848377b3b57b576ad2380e",
+  "source_mask_sha256": "86b2b46791993f7c3401270b369bfc2954a0a9de1370f7f6fa8637ec5d0b1126"
+}

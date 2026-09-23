@@ -208,6 +208,24 @@ cas à densité entière portent le libellé de sonde historique
 Un [premier reçu brut](lidar_raw_physical_scaling_20260923/README.md)
 couvre désormais les **21** croisements des sept secteurs 08/000000/K5
 définis par plans **float32 physiques** et des trois densités emboîtées.
+Les densités brutes et sans sol ne sont pas une ablation appariée du masque :
+le brut classe les **123 389 retours avant retrait du sol**, tandis que le
+sans-sol classe seulement les sites **retenus après le masque de la trame
+entière** (39 885, 35 551 ou 45 845 selon la scène). La même graine ne
+sélectionne donc pas les mêmes retours aux fractions 1/4 et 1/2 ; de plus,
+leurs effectifs et leurs conventions de coupe historiques diffèrent.
+Comparer leurs pentes décrit deux régimes, sans isoler l'effet causal du sol.
+Sur la scène entière 08/000000, après jointure par `raw_to_original.u32le`,
+les sous-échantillons de densité 1/4 du brut restreint aux retours sans sol
+et du nuage sélectionné *après* masque ont
+respectivement **10 014 et 9 971** retours, dont seulement **2 539** communs ;
+à demi-densité, **19 909 et 19 942**, dont **9 895** communs.
+Reproduction : appliquer les classements des [générateurs brut](lidar_raw_physical_scaling_20260923/generate.py)
+et [sans sol](lidar_density_full_3scenes_20260923/generate_crossscene.py)
+avec leur graine commune, puis inverser la table
+[`scene_00_grid/raw_to_original.u32le`](../../morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/raw_to_original.u32le)
+pour ramener les IDs originaux du sans-sol aux IDs de retours bruts ;
+les intersections ci-dessus portent sur ces derniers, pas sur des rangs de sites.
 Les README bruts K5/K10 scellés par leurs `SHA256SUMS` appellent parfois
 `dead_core_form_sites` « formes matérialisées » ; leurs nombres et pentes
 restent ceux du sous-total **hors extrémités**, et les corrections exactes

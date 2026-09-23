@@ -258,7 +258,7 @@ def gather(manifest, out, base):
     probes = {r["name"]: validate_row(r, manifest["cases"], out) for r in rows}
     for name in manifest["cases"]:
         need(probes[f"{name}_k5"]["orders"] ==
-             probes[f"{name}_k10"]["orders"][:5], "K5/K10 tower prefix")
+             probes[f"{name}_k10"]["orders"][:5], "K5/K10 per-order aggregate counters")
     original_manifest = json.loads((ORIGINAL / "MANIFEST.json").read_text())
     baseline = {5: {}, 10: {}}
     for k, directory in ((5, ORIGINAL), (10, K10)):
@@ -274,7 +274,7 @@ def gather(manifest, out, base):
             baseline[k][density] = probe
     for density in ("quarter", "half", "full"):
         need(baseline[5][density]["orders"] == baseline[10][density]["orders"][:5],
-             f"historical K5/K10 tower prefix: {density}")
+             f"historical K5/K10 per-order aggregate counters: {density}")
     summary = {"schema": "mhgp9_hot_quarter_multiseed_summary_v1",
                "source": "one physical quarter of raw SemanticKITTI 08/000000, original whole-scene 1mm/u18 grid",
                "K": {}}

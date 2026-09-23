@@ -1290,8 +1290,22 @@ sensible. À K5 sur le premier lien, **2,002 / 1,957 / 1,860**. Les huit
 nouvelles sondes restent CPU/W8 locales, `complete_relative`, et ce
 seul quart ne représente ni plusieurs séquences ni la trame entière.
 Leur lecteur compare pour K5/K10 les **cinq compteurs agrégés** de
-chaque ordre K1..5, pas les clés ni la topologie : la phrase « K5
-égale le préfixe K10 » du reçu est trop forte sans ce qualificatif.
+chaque ordre K1..5, pas les clés ni la topologie ; le reçu le précise
+désormais explicitement.
+La [contre-épreuve multi-graine sans sol](lidar_ground_hot_quarter_multiseed_20260923/README.md)
+prend le quart **physique** `x≥0,y<0` de 08/000200 après masque entier
+figé, sur la grille commune de 1 mm. À K10, pour trois décimations
+globales emboîtées, les pentes de **toutes les formes calculées**
+`1/4→1/2` valent **2,046 / 2,077 / 2,025**, puis `1/2→plein`
+**2,035 / 1,916 / 2,048** ; le plein physique a 14 828 sites.
+Les paires développées restent sous 1,75 et les pentes CPU de chaîne
+sous 1,43. Le lecteur LIVE normal/`-O` et les 13 empreintes passent.
+Le tirage sans sol porte sur les seuls sites retenus après masque, alors
+que le tirage brut classe tous les retours avant masque : la même graine
+ne rend pas leurs niveaux réduits appariés. Leurs pentes se comparent
+comme deux régimes, pas comme une ablation causale du sol. Un quart de
+chaque régime et trois graines ne prouvent ni une fréquence LiDAR ni une
+borne asymptotique, et les chronos ne couvrent pas la segmentation.
 La forme du cœur n'est pas le seul travail volumineux. Sur le plein brut
 K5 aux trois densités, `dead_uniform_tests` compte
 165,153→467,564→1 459,833 M tests (pentes 1,501/1,643),

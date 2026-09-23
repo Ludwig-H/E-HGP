@@ -21,8 +21,10 @@ Les huit nouvelles sondes utilisent le même binaire v12 épinglé
 `e1ba126f…ea80`, K5/K10, s8/W8/static8, six leviers ON, `nice 19`
 sur CPU local partagé. Les six sorties historiques du même quart sont
 relues avec leurs SHA, leur FNV d'entrée, statut, options, dix/cinq
-ordres et identité des formes. `K5` égale le préfixe des cinq ordres
-`K10` sur les trois densités de chaque graine. Aucune sortie n'est FULL
+ordres et identité des formes. Pour chaque graine et densité, les cinq
+agrégats publiés par ordre (`nodes`, `births`, `merges`, `parents`,
+`contributions`) coïncident entre K5 et les ordres K1..5 de K10 ; ce
+contrôle ne compare pas leurs clés ni leur topologie. Aucune sortie n'est FULL
 certifiée : statut `complete_relative`.
 
 `p` vaut `log(W_b/W_a)/log(n_b/n_a)` avec **les effectifs réels du quart**.
