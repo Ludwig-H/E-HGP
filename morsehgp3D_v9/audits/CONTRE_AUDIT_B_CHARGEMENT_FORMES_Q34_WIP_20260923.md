@@ -62,3 +62,39 @@ formes/résultats, ASan/UBSan/TSan si pertinent, puis W1/W8/W48 sur les
 trois trames 1 mm avec même sortie complète, temps de chargement,
 `dead_form_sites`, tests, RSS et pics de workers. Ne pas relancer G4
 uniquement pour ce WIP avant correction des deux points de sûreté.
+
+## Correctif produit `aae9da0e`
+
+Le développeur a publié une réponse structurelle aux deux défauts :
+`load()` met maintenant `loaded_=false` **avant** tout accès/allocation,
+et l'index immuable construit puis possède `spatial_points()` une fois.
+Le prover ne garde plus l'adresse nue de l'index ni sa propre copie des
+points. À la lecture, cela supprime le risque d'adresse réutilisée et
+ramène le nouvel octet spatial à **12·n partagé** (360 Mo à 30 M), non
+`12·n·W`. L'index `Q2CensusIndex` paie cette copie O(n) même si la
+certification q3/q4 n'est pas activée ; `retained_bytes()` l'inclut.
+Les deux défauts ci-dessus sont donc **historiques**, pas un verdict sur
+le produit courant. La représentation exacte des formes et des IDs ne
+change pas ; aucune porte ni mesure de trame n'est ajoutée par ce
+commit. Refaire les gates q3/q4 et les chronos/RSS appariés au même
+snapshot avant de transférer le gain de brouillon au pipeline complet.
+
+Attention aux compteurs lors de cette ablation : le remplissage de
+`spatial_points()` ajoute une passe de `n` lectures/écritures à la
+construction de l'index, mais `Q2IndexWork.point_visits` ne les ajoute
+pas. De même, une baisse de `edge_buffer_bytes_sum` peut seulement
+signifier que les `12·n` octets ont migré des workers vers l'index.
+Mesurer `gen_index`, la résidence de l'index et le RSS total, y compris
+sur q2 seul où cette copie est aujourd'hui payée sans utilisation.
+`spatial_points()` reste une vue de mémoire hôte : ce changement ne
+constitue pas une voie GPU ni une qualification des transferts.
+
+Contrôle indépendant sur `aae9da0e` : configuration Release dans
+`build/v9-audit-current/`, reconstruction des cibles
+`mhgp9_gen_wspd_q34_gate` et `mhgp9_gen_q2_census_gate`, puis leurs deux
+CTests : **2/2 PASS** (11,15 s au total). Le gate q3/q4 couvre les modes
+et leurs oracles existants ; il ne contient pas encore une sonde causale
+de réutilisation d'adresse, de `load()` interrompu, ni la mesure du nouveau
+coût de copie globale. Le contrôle local ne vaut ni reçu de trame ni gate
+GPU/G4. Les deux unités modifiées compilent également en C++20 avec
+`-Wall -Wextra -Wpedantic -fsyntax-only` (contrôle indépendant léger).

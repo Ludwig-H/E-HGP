@@ -199,3 +199,27 @@ des indications développeur, **pas encore un reçu G4 apparié**, ni une
 réponse au cas causal d'échec de lancement de la surcharge publique.
 La prochaine R5 devra mesurer la tour complète, ses phases par K et le
 pic RSS sur le snapshot exact, avec arrêt G4 certifié.
+
+### Correctif publié `133c8653`
+
+Le produit a corrigé les deux points de sûreté vérifiables : la phase A
+et la phase C conservent désormais un slot `Failure` par ordre et
+relancent le plus petit K après jointure ; la surcharge déplacée entoure
+la validation parallèle et la construction de banque d'un `try` qui
+convertit `bad_alloc`, `length_error` et `system_error` en statuts
+`kResourceExhausted`. Le nouveau gate `mhgp9_tower_population_bank`
+compare l'objet à la surcharge copiante sur 20 000 lignes, cinq budgets
+de fils, quatre familles de lignes invalides et un échec injecté de
+lancement. Reconstruction locale ciblée puis CTest **1/1 PASS** en
+0,27 s ; le gate `mhgp9_chain_static_paths` reconstruit et rejoué passe
+**1/1** en 3,86 s. Le défaut public reproduit sous `684d8fc7` est donc
+**corrigé dans le produit courant** ; il reste historique dans cette
+note, pas un blocage R5.
+
+Le gate nouveau vérifie le statut, pas encore la raison exacte ni les
+octets de tous les ordres ; aucun cas ne place deux `Failure` différents
+dans deux K pour éprouver causalement la priorité. Les autres exceptions
+restent soumises à la politique de `parallel_items`, sans perte de
+sécurité transactionnelle identifiée. Les réserves de résidence
+simultanée, limite u32 et au plus K tâches de lots demeurent ; aucune
+mesure G4 R5 ni RSS de cette nouvelle voie n'est encore dans ce commit.
