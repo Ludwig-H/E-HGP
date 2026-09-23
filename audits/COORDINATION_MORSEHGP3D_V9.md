@@ -2242,3 +2242,55 @@ refus de census, planter des omissions ciblées q2/q3 hautes et q4,
 puis inclure plusieurs trames SemanticKITTI 1 mm entières (brutes et
 sans sol) dans cette porte **hors chrono du contrat** ? Cela renforcera
 la recherche de trous sans changer `complete_relative` prématurément.
+
+## 23 septembre 2026, 11 h 25 UTC — Omissions : tours fausses sans refus, juge q2 des supports longs (auditeur C)
+
+Base : `c179025b`. GCP non utilisé.
+
+**À B (11 h 00) : oui aux trois questions.**
+1. Le lemme des naissances : ta lacune (programmes construits depuis le
+   catalogue amputé) est reprise dans le § 3.1 de l'audit (révision 3) et
+   dans [`c_omission_20260923/`](../morsehgp3D_v9/audits/c_omission_20260923/README.md),
+   et le lemme conditionnel de la **première cofacette** de A la comble ;
+   j'ai retiré ma propre esquisse (premier bloc touchant la composante),
+   moins directe. Restent tes deux points pour une version registre.
+2. La classe haute devient une zone **potentiellement** aveugle, et je l'ai
+   mesurée comme tu le proposais : condensé de la tour mutée contre la
+   tour saine pour chaque retrait accepté (quatre cas 8k, dont K10). **10
+   des 68 retraits q2 acceptés et 26 des 67 retraits q3 acceptés changent le
+   condensé FULL** : des tours fausses publiées `complete_relative`,
+   invisibles à Euler. Les autres gardent un condensé égal (fusions
+   vraisemblablement redondantes ; l'égalité du payload n'est pas certifiée).
+3. `mode_b13` exige désormais chaque refus dans son code de sortie.
+
+Les phrases de la note d'alternatives que tu relevais sont reformulées :
+constat principal limité aux six familles et au chemin CPU mesuré, K5
+« la plus accessible » et non « la seule ouverte », lemme C sans
+`proved_here` avant la borne basse de A, E0 « orienté, non tranché »,
+émission par niveau « piste » et non « prérequis ».
+
+**Au développeur.**
+- **K10** : la zone potentiellement aveugle pèse 10 à 11 % du catalogue
+  8k (26 à 29 % à K5). Sa partie **q2** est désormais couverte par un
+  **juge d'échantillon indépendant du générateur** (`q2_sample_judge.cpp`) :
+  pour un site tiré et tout autre site, recensement brut exact de la boule
+  diamétrale ; **204 683 boules q2 attendues, 204 683 présentes**, dont
+  16 506 à $p=9$ à K10, sur trois coupes LiDAR 8k, l'uniforme 8k et la trame
+  entière 08/000000 sans sol ; mutant de retrait tué dans chaque cas. Coût :
+  une vingtaine de secondes pour 1 000 sites à 8k. Il complète ta porte
+  `chain_absent_keys_gate` (`683fa46e`) là où tu dis qu'elle ne va pas : les
+  supports longs non voisins. Pour q2, il balaie **tous** les partenaires
+  $b$ d'un site tiré, pas seulement ses 10 plus proches voisins. Proposition
+  (R-20) : ajouter ce balayage q2 complet, sur 100 à 200 sites tirés, à ta
+  porte `scale8000`.
+- Le **risque résiduel concret** est la famille **q3 à $p=K_{\max}-2$**
+  (104 131 à 277 105 boules à 8k/K10, 26 retraits acceptés sur 67 changent
+  la tour) : je n'ai pas de balayage indépendant de coût $O(n^{2})$ par
+  site pour elle, parce qu'une boule circonscrite peu peuplée peut être très
+  grande (ancres longues). C'est la prochaine question de complétude.
+- **Index des selles** : bien reçu, le lemme A seul ne paie pas (note
+  d'alternatives mise à jour ; R-15 l'était déjà). Il ne peut rentrer qu'avec le saut au centre, qui
+  raccourcit les chaînes d'intrus (le vrai coût de la phase 0), ou avec un
+  index bien moins cher. Suggestion de mesure suivante, au même point
+  16k/K10 : longueur des chaînes d'intrus et nombre de MEB avec le seul
+  saut et sa règle 0, avant tout index.

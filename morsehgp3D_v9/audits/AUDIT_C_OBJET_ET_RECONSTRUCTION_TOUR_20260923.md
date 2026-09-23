@@ -28,6 +28,15 @@ omission isolée d'ordre haut $p+u\leq K_{\max}$ ; angle mort conjoint avec
 Euler mesuré à 8k) ; « machine à moitié inactive » retirée du § 5 ;
 comptes de mutants et biais des chiffres K5 précisés.
 
+**Révision 3 (11 h 25 UTC)** : après la
+[contrelecture B des omissions](CONTRE_AUDIT_B_OMISSIONS_ET_PORTEE_REVISION_C_20260923.md),
+la détection par la tour des omissions d'ordre haut $p+u\leq K_{\max}$
+repose sur le lemme conditionnel de A (première cofacette), à qualifier
+avant registre, la classe
+haute une zone **potentiellement** aveugle, mesurée par la comparaison des
+condensés des tours acceptées ; les « 129 contrôles » de la révision 2 sont
+des verdicts argumentés d'agents, pas des tests exécutables.
+
 Ce document répond à la première demande de l'utilisateur : **à quoi sert
 l'algorithme, et comment la v9 reconstruit la tour complète**. L'étude des
 implémentations alternatives pour le contrat est dans
@@ -377,40 +386,59 @@ $2^{-51,39}$ sur 200 000 cas exacts, sous la borne annoncée de $2^{-49}$.
 
 ## 3. La complétude à l'échelle
 
-### 3.1 Ce que la tour détecte déjà (corrigé en révision 2)
+### 3.1 Ce que la tour détecte déjà (corrigé en révisions 2 et 3)
 
 La descente d'un représentant qui atteint une boule sans intrus absente du
 catalogue lève un refus (`full_ball_*missing_weak_terminal`). La révision 1
 en tirait qu'à $K=1$ une arête d'arbre couvrant minimal omise fausse les
-niveaux sans refus : c'est **faux sous le contrat** (réfutation du constat
-L4-02 par la vérification adverse). Une boule de fenêtre
-$[p+q_{\min}-1,\,p+u]$ est une **naissance** à son ordre haut $p+u$ ; son
-nœud $I\cup U$ doit fusionner avant la fin de l'ordre (racine unique), et
-sa première référence ne peut venir que d'une descente qui atteint sa clé.
-Une arête de Gabriel ($p=0$, fenêtre $[1,2]$) omise est donc refusée à
-l'ordre 2 dès que $K_{\max}\geq2$.
+niveaux sans refus ; la vérification adverse (constat L4-02) l'a réfutée
+**sous le contrat** : une boule de fenêtre $[p+q_{\min}-1,\,p+u]$ est une
+naissance à son ordre haut $p+u$, et une arête de Gabriel ($p=0$, fenêtre
+$[1,2]$) est donc aussi en jeu à l'ordre 2 dès que $K_{\max}\geq2$.
 
-Énoncé, argumenté mais **non inscrit au registre** : *une omission isolée
-d'une boule d'ordre haut $p+u\leq K_{\max}$ est refusée par la tour.*
-Oracle borné du vérificateur : 3 382 retraits sur 3 382 refusés (6 à 8
-sites). Sonde d'omission de C à 8k (trois familles synthétiques et trois coupes LiDAR à K5, deux cas à K7 ; K10 en cours) : 515 retraits sur 515 refusés dans les strates d'ordre haut $p+u\leq K_{\max}$. Détail :
+**Lemme conditionnel** (A, [première cofacette](LEMME_PREMIERE_COFACETTE_OMISSION_20260923.md)) :
+*une omission isolée d'une boule d'ordre haut $p+u\leq K_{\max}$, ou
+plusieurs omissions toutes de cette classe, sont refusées par la tour,
+le catalogue étant complet par ailleurs.* Mon premier argument « le nœud
+$I\cup U$ doit fusionner, et sa première référence vient d'une descente qui
+atteint sa clé » a une lacune relevée par
+[B](CONTRE_AUDIT_B_OMISSIONS_ET_PORTEE_REVISION_C_20260923.md) : FULL
+construit programmes et nœuds **depuis le catalogue amputé**, si bien que la
+racine unique ne force pas, à elle seule, une référence à la clé manquante.
+A comble ce trou : la boule $C=\mathrm{MEB}(S\cup\lbrace z\rbrace)$ de plus petit
+rayon, $S=I\cup U$, émet $S$ comme représentant et sa résolution refuse.
+Reste à qualifier avant registre la couture sur coquilles étendues,
+égalités de niveau et voies statique et temporelle. Observations : oracle borné du vérificateur,
+3 382 retraits sur 3 382 refusés (6 à 8 sites) ; sonde d'omission de C à
+8k (trois familles synthétiques et trois coupes LiDAR sans sol à K5, deux
+cas à K7, deux à K10, tirage déterministe à pas régulier par strate) :
+575 retraits sur 575 refusés dans les strates d'ordre haut
+$p+u\leq K_{\max}$. La sonde retire des clés **déjà émises** : elle ne
+cherche aucune clé que le générateur n'aurait jamais émise. Détail :
 [`c_omission_20260923/`](c_omission_20260923/README.md).
 
-**Angle mort conjoint de la tour et d'Euler.** Pour une coquille régulière,
-Euler voit une omission isolée si et seulement si $p\leq K_{\max}-3$, la
-tour si et seulement si $p+q\leq K_{\max}$. Restent les boules de
+**Zone de détection potentiellement aveugle.** Pour une coquille régulière,
+Euler voit une omission isolée si et seulement si $p\leq K_{\max}-3$, et la
+tour la refuse (lemme conditionnel) si $p+q\leq K_{\max}$. Restent les boules de
 **fusion seule à l'ordre $K_{\max}$** de type q2 à $p=K_{\max}-1$ et q3 à
-$p=K_{\max}-2$ : leur omission ne fausse que des fusions de l'ordre
-$K_{\max}$, et aucune porte actuelle ne la voit. À K5, une exécution de
-contrôle à $K_{\max}+1$ ou $K_{\max}+2$ **avec tour**, plus l'égalité
-clé par clé de la restriction $p+q_{\min}\leq K_{\max}+1$, ferme cet
-angle mort pour les omissions isolées de coquilles régulières : ces boules
-y deviennent des naissances d'ordre au plus $K_{\max}+1$. À K10, c'est
-impossible aujourd'hui (`kBallInteriorMax = 9` borne le domaine à K10) ;
-il faudrait un domaine d'audit K11 (intérieurs jusqu'à 10) ou un juge
-d'échantillon dédié à ces deux familles. Deux omissions conjointes (une
-naissance et la seule fusion qui la référence) restent invisibles, comme
-pour Euler.
+$p=K_{\max}-2$ : 26 à 29 % du catalogue à K5, 17 à 18 % à K7, 10 à 11 % à
+K10 sur 8k. Ni Euler ni le statut de la tour n'y sont systématiquement
+sensibles : 2 retraits sur 312 y sont refusés, par la connexité finale.
+Les retraits acceptés ne sont pas pour autant des tours inchangées :
+à 8k, dans cette zone, 10 des 68 retraits q2 acceptés et 26 des 67 retraits q3 acceptés changent le condensé FULL (tours fausses publiées `complete_relative`, invisibles à Euler) ; les autres gardent un condensé égal (fusions vraisemblablement redondantes).
+
+À K5, une exécution de contrôle à $K_{\max}+1$ ou $K_{\max}+2$ **avec
+tour**, plus l'égalité clé par clé de la restriction
+$p+q_{\min}\leq K_{\max}+1$, renforce le diagnostic : ces boules y
+deviennent des naissances d'ordre au plus $K_{\max}+1$. Elle ne remplace
+pas un juge indépendant si une omission est commune aux deux exécutions,
+et elle ne se transporte pas à K10 : K11 est hors domaine
+(`kBallInteriorMax = 9`). Pour la famille q2, un juge d'échantillon
+indépendant du générateur existe désormais (même dossier) : 204 683 boules
+q2 attendues autour de sites tirés, toutes présentes, dont 16 506 à $p=9$ à
+K10. La famille q3 à $p=K_{\max}-2$ reste sans juge. Deux omissions
+conjointes (une naissance et la seule fusion qui la référence) restent
+hors de portée de ces contrôles, comme d'Euler.
 
 ### 3.2 Invariant d'Euler
 
@@ -572,7 +600,7 @@ constats) : [`c_audit_20260923/verifications/`](c_audit_20260923/verifications/R
 | 14 | basse | bénéfice net de la preuve de voie morte sur cover complet jamais mesuré, aucun levier ne l'isole ; elle prouve 19–27 % des voies atteintes et ferme 21–24 % des covers | V\* | levier séparé, puis ablation appariée |
 | 15 | basse | `run_tower=false` publie `complete_relative` sans positivité vérifiée des coquilles régulières | V | positivité dans le recensement ou statut distinct |
 | 16 | basse | meilleurs K5 publiés mêlant MEB OFF et ON (biais optimiste 2–6 %) | V | publier moyenne et configuration par défaut |
-| 17 | haute | omissions isolées invisibles à la fois à Euler et à la tour : boules de fusion seule à l'ordre Kmax (q2 à p=Kmax−1, q3 à p=Kmax−2), 26 à 29 % (K5) et 17 à 18 % (K7) du catalogue à 8k | C | K5 : contrôle Kmax+1 avec tour et restriction clé par clé ; K10 : domaine d'audit K11 ou juge d'échantillon dédié (R-20) |
+| 17 | haute | zone de détection potentiellement aveugle pour Euler et la tour : boules de fusion seule à l'ordre Kmax (q2 à p=Kmax−1, q3 à p=Kmax−2), 26 à 29 % (K5), 17 à 18 % (K7) et 10 à 11 % (K10) du catalogue à 8k ; la partie q2 est couverte par un juge d'échantillon indépendant, pas la partie q3 | C | K5 : contrôle Kmax+1 avec tour et restriction clé par clé ; K10 : domaine d'audit K11 ou juge d'échantillon dédié (R-20) |
 
 ## 7. Recommandations au développeur, par ordre
 

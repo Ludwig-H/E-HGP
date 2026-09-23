@@ -11,7 +11,8 @@ from pathlib import Path
 
 HEAD = re.compile(r'^(\S+) n=(\d+) kmax=(\d+) balls=(\d+) regular=(\d+) extended=(\d+) top_within=(\d+) '
                   r'euler_visible_regular=(\d+) joint_blind_regular=(\d+) extended_top_over=(\d+)')
-STRAT = re.compile(r'^(\S+) stratum top_within=(\d) regular=(\d) q=(\d) population=(\d+) sampled=(\d+) refused=(\d+)(.*)$')
+STRAT = re.compile(r'^(\S+) stratum top_within=(\d) regular=(\d) q=(\d) population=(\d+) sampled=(\d+) refused=(\d+)'
+                   r'(?: accepted_digest_changed=(\d+) accepted_digest_same=(\d+))?(.*)$')
 
 
 def th(x):
@@ -45,12 +46,15 @@ def main(directory):
             m = STRAT.match(l)
             if not m:
                 continue
-            _, within_s, regular, q, population, sampled, refused, reasons = m.groups()
+            _, within_s, regular, q, population, sampled, refused, changed, same, reasons = m.groups()
             key = (int(kmax), within_s == '1', regular == '1', int(q))
-            acc = samp.setdefault(key, [0, 0, 0, set()])
+            acc = samp.setdefault(key, [0, 0, 0, set(), None, None])
             acc[0] += int(population)
             acc[1] += int(sampled)
             acc[2] += int(refused)
+            if changed is not None:
+                acc[4] = (acc[4] or 0) + int(changed)
+                acc[5] = (acc[5] or 0) + int(same)
             for part in reasons.split():
                 acc[3].add(part.split('=')[0])
     print('## Populations du catalogue\n')
@@ -58,13 +62,15 @@ def main(directory):
     print('| --- | ---: | ---: | ---: | ---: | ---: | --- |')
     print('\n'.join(pop_rows))
     print('\n## Retraits isolés, sommés sur les cas\n')
-    print('| Kmax | ordre haut p+u ≤ Kmax | coquille | q | population | retraits | refusés | issues |')
-    print('| ---: | --- | --- | ---: | ---: | ---: | ---: | --- |')
+    print('| Kmax | ordre haut p+u ≤ Kmax | coquille | q | population | retraits | refusés | acceptés, condensé changé | acceptés, condensé égal | issues |')
+    print('| ---: | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |')
     for key in sorted(samp):
         kmax, within, regular, q = key
-        pop, sampled, refused, reasons = samp[key]
+        pop, sampled, refused, reasons, changed, same = samp[key]
+        ch = '—' if changed is None else str(changed)
+        sa = '—' if same is None else str(same)
         print(f"| {kmax} | {'oui' if within else 'non'} | {'régulière' if regular else 'étendue'} | {q} | "
-              f"{th(pop)} | {sampled} | {refused} | {', '.join(sorted(reasons))} |")
+              f"{th(pop)} | {sampled} | {refused} | {ch} | {sa} | {', '.join(sorted(reasons))} |")
 
 
 if __name__ == '__main__':

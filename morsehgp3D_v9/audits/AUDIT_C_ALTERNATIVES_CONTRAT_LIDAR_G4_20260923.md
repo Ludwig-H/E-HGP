@@ -58,10 +58,11 @@ Ce que j'en retiens, en six points :
 4. **1 s à K5 reste possible** avec D5, la plomberie compacte **et** un port
    GPU de q3/q4 qui emporte aussi la réfutation des ancres longues — sous
    réserve d'une expérience G4 unique, à seuils fixés d'avance.
-5. **100 ms** exige un ordre de grandeur de travail en moins, un générateur
-   qui émette par niveau (pour recouvrir génération et FULL) et une sortie
-   compacte hors digest : aucune des six familles ne le fournit. C'est à
-   reformuler avec l'utilisateur plutôt qu'à poursuivre tel quel.
+5. **100 ms** demanderait, dans ces six familles, un ordre de grandeur de
+   travail en moins ; un générateur qui émette par niveau (pour recouvrir
+   génération et FULL) et une sortie compacte hors digest sont des pistes,
+   pas des prérequis démontrés : aucune borne n'exclut une autre
+   organisation. Aucune des six familles ne les fournit.
 6. **Juges avant changement de générateur** : Euler (condition nécessaire),
    Kmax+2 à K5, égalité clé par clé avec la route CPU, et un juge
    d'échantillon par fenêtre autonome pour les ordres K9–K10. Une réfutation a
@@ -152,9 +153,9 @@ la base CPU contre laquelle mesurer le seuil ×11 de l'expérience GPU.
 
 ## 1. Résumé exécutif
 
-**Constat principal.** Aucune des six familles n'atteint 1 s à K10, et aucune n'approche 100 ms, sous quelque hypothèse défendable que ce soit.
+**Constat principal.** Aucune des six familles, telles que chiffrées ici, n'atteint 1 s à K10 ni n'approche 100 ms. C'est un jugement de conception sur ces six familles et sur le chemin CPU mesuré, pas une borne sur toute architecture : un GPU résident ou un autre générateur exact n'est pas exclu.
 
-La seule cible encore ouverte est **1 s à K5**. Elle exige une combinaison de trois choses :
+Parmi ces familles, la cible la plus accessible est **1 s à K5**. Elle demanderait une combinaison de trois choses :
 - la tour FULL maigre (D5) ;
 - une plomberie et une sortie compactes ;
 - **et** un port GPU résident de q3/q4 qui déplace aussi sur le GPU la réfutation des ancres longues.
@@ -260,7 +261,7 @@ Le classement agrégé récompense la rigueur et le faible risque. Il ne dit pas
   - Le chemin des lots singletons range les racines dans un tampon de 13 cases. Or un bloc dont la coquille compte 12 sites peut avoir 32 racines distinctes (fixture `fx_ico12` : fusion à 32 parents dans le produit).
   - Il y a donc écriture hors bornes, et la sonde ne l'a pas détectée.
   - Correction : passer au chemin général à offsets CSR au-delà d'un petit tampon.
-- **Statut** : `proved_here` proposé pour A, B (avec règle 0) et C ; rien n'est inscrit au registre. Comme le produit, D5 reste relatif à un catalogue complet.
+- **Statut** : `proved_here` proposé pour A et B (avec règle 0) ; pour C, seulement après l'ajout de la borne basse (contrelecture A) ; rien n'est inscrit au registre. **Mesure du développeur** ([reçu](../receipts/saddle_index_negative_20260923/README.md), `9b3491ec`) : le lemme A seul, porté dans la phase 0 avec un index par empreinte, évite 1,01 M MEB sur 2,70 M à 16k/K10 à condensé égal, mais construire et trier 10,2 M entrées coûte autant : **pas de gain**, code retiré. Le lemme A ne paie qu'avec un index bien moins cher ou avec le saut au centre du lemme B. Comme le produit, D5 reste relatif à un catalogue complet.
 
 **Vérifications faites.**
 - Racines pré-lot identiques au produit sur 5,04 M facettes LiDAR (08/000100, 8k/K10, 8k/K5, 16k/K5).
@@ -443,7 +444,7 @@ Ce qui survit :
   - la seule présentation centrée est $\lbrace x,y,z\rbrace$ ;
   - si $a$ porte l'identifiant minimal, personne n'émet la boule, et Euler ne la voit pas si $p=K_{\max}-2$.
 - **Coût.** Pas de gain CPU : 0,66 à 3,6 fois la v9 sur q3/q4, arêtes de face et filtres compris. Le débit GPU supposé est 4 à 15 fois au-dessus de ce que le dépôt a calibré.
-- **E0 déjà tranché par les données de D3.** Le travail des ancres de plus de 1,633 m pèse au moins 48,6 et 56,3 % à K10 sur deux trames entières (estimations du modèle `fullframe_model.py`, pas des minorants ; 70,1 % mesurés à K5 sur 000200 par une sonde locale). C'est au-delà du seuil d'abandon de 35 %. La mesure directe de l'étape 3 de la feuille de route doit le confirmer.
+- **E0 orienté, non tranché, par les données de D3.** Le travail des ancres de plus de 1,633 m pèse au moins 48,6 et 56,3 % à K10 sur deux trames entières (estimations du modèle `fullframe_model.py`, pas des minorants ; 70,1 % mesurés à K5 sur 000200 par une sonde locale). Ces estimations dépassent le seuil d'abandon de 35 % ; seule la mesure directe de l'étape 3 de la feuille de route tranchera.
 - **Rôle retenu** : juge d'échantillon par site, exact, hors produit. Éventuellement, noyau à court rayon si les ancres longues sont un jour résolues ailleurs.
 
 **D2 (délétion locale, pavage rhomboïdal).**
@@ -571,7 +572,7 @@ Chaque étape a une porte d'entrée, un livrable et un critère d'arrêt. Les é
 
 **Lecture.**
 - À K10, même avec q3/q4 et FULL gratuits, q2, fusion, recensement et plomberie dépassent déjà 1 s. Atteindre 1 s à K10 exige donc de réduire **chaque** poste, y compris ceux que le SMT n'accélère presque pas.
-- Les étages sont en série : le catalogue doit être complet avant FULL, parce que le générateur émet dans l'ordre spatial et non par niveau. Aucun recouvrement n'est possible sans un générateur qui émette par niveau, et personne n'en a proposé.
+- Les étages sont en série : le catalogue doit être complet avant FULL, parce que le générateur émet dans l'ordre spatial et non par niveau. Dans cette organisation, aucun recouvrement n'est possible sans un générateur qui émette par niveau, et personne n'en a proposé ; une autre organisation n'est pas exclue.
 
 Pour situer l'étape 4 (hypothèse non démontrée) : si un certificat de bloc retirait 80 % du coût des ancres longues, q3/q4 de K5/000100 passerait d'environ 2,52 à 1,2 s. La chaîne CPU avec D5 et L8 resterait alors vers 1,6 à 1,8 s à K5 et vers 4 s à K10. Le CPU seul n'atteint 1 s dans aucun scénario.
 
@@ -616,7 +617,7 @@ Les mesures ne couvrent que trois trames d'une seule séquence (08), de 35,5 à 
 ## 8. Pistes non couvertes par D1 à D6
 
 - **Réfutation des ancres longues sans expansion.** C'est le seul levier de générateur à fort potentiel que les mesures aient identifié. Il relève de la famille B (notes `PISTE_B_Q34_RECTANGLES_AVANT_EXPANSION_20260923.md`, `Q34_BLOCS_LIDAR_SHADOW_20260923.md`, `SHADOW_HA_Q34_LIDAR_20260923.md`) ; c'est l'étape 4 de la feuille de route.
-- **Générateur émettant par niveau**, pour faire se recouvrir génération et FULL. Aucune proposition n'existe ; c'est un prérequis de 100 ms. À n'ouvrir qu'avec un théorème de complétude par niveau.
+- **Générateur émettant par niveau**, pour faire se recouvrir génération et FULL. Aucune proposition n'existe ; c'est une piste pour 100 ms, pas un prérequis démontré. À n'ouvrir qu'avec un théorème de complétude par niveau.
 - **Clé exacte par support, hors coquilles étendues** (L4 de D6, lemme A de D5). Elle supprime le PGCD de fusion et une partie des recherches de clés (27,2 Gcycles avant l'index). La clé canonique resterait réservée aux 135 à 280 boules à coquille étendue.
 
 ## 9. Artefacts

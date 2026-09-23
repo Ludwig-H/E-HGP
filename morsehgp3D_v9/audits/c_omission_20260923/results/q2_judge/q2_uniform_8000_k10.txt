@@ -1,0 +1,2 @@
+uniform_8000 n=8000 kmax=10 balls=3088676 sampled_sites=500 pairs=3999500 expected=35280 found=35280 missing=0 extended=0 mutant_killed=1 p0=3735 p1=3746 p2=3634 p3=3476 p4=3475 p5=3565 p6=3456 p7=3485 p8=3335 p9=3373
+exit=0

@@ -137,6 +137,7 @@ int mode_b13() {
         const bool refused = t.status != mhgp9::tower::FullBallStatus::kCompleteRelative;
         std::printf("b13 kmax=%u omit=%s static=%d refused=%d reason=%s\n", kmax, name.c_str(), threads,
                     refused ? 1 : 0, t.reason);
+        if (!refused) ++failures;  // un retrait accepte contredit la revendication
       }
     }
     if (d_index == cat.size()) ++failures;
@@ -194,16 +195,20 @@ int mode_scale(const std::string& label, const std::vector<Point3>& pts, unsigne
   for (const auto& [s, members] : strata) {
     const std::size_t take = std::min(samples, members.size());
     std::map<std::string, std::uint64_t> reasons;
-    std::uint64_t refused = 0;
+    std::uint64_t refused = 0, silent_changed = 0, silent_same = 0;
     for (std::size_t j = 0; j < take; ++j) {
       const std::size_t idx = members[(j * members.size()) / take];
       const auto t = tower_without(ix, cat, {idx}, kmax, static_cast<int>(workers));
       const bool ref = t.status != mhgp9::tower::FullBallStatus::kCompleteRelative;
       if (ref) ++refused;
+      else if (mhgp9::tower_digest(t) != r.tower_digest) ++silent_changed;  // tour fausse sans refus
+      else ++silent_same;  // condense egal : n'etablit pas l'egalite du payload
       ++reasons[ref ? t.reason : std::string("complete_relative")];
     }
-    std::printf("%s stratum top_within=%d regular=%d q=%u population=%zu sampled=%zu refused=%llu", label.c_str(),
-                s.top_within ? 1 : 0, s.regular ? 1 : 0, s.q, members.size(), take, (unsigned long long)refused);
+    std::printf("%s stratum top_within=%d regular=%d q=%u population=%zu sampled=%zu refused=%llu "
+                "accepted_digest_changed=%llu accepted_digest_same=%llu",
+                label.c_str(), s.top_within ? 1 : 0, s.regular ? 1 : 0, s.q, members.size(), take,
+                (unsigned long long)refused, (unsigned long long)silent_changed, (unsigned long long)silent_same);
     for (const auto& [reason, count] : reasons) std::printf(" %s=%llu", reason.c_str(), (unsigned long long)count);
     std::printf("\n");
     if (s.top_within && refused != take) ++anomalies;  // enonce L4-02 contredit

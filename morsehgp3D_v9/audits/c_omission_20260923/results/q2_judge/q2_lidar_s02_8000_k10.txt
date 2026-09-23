@@ -1,0 +1,2 @@
+s02_k5_s8_w8_r0_nested_8000.u32le n=8000 kmax=10 balls=1083173 sampled_sites=1000 pairs=7999000 expected=44301 found=44301 missing=0 extended=62 mutant_killed=1 p0=5502 p1=4732 p2=4834 p3=4336 p4=4479 p5=4120 p6=4420 p7=3901 p8=4246 p9=3731
+exit=0

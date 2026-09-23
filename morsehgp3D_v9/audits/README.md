@@ -58,6 +58,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`CONTRELEC_EULER_PAR_NERF_20260923.md`](CONTRELEC_EULER_PAR_NERF_20260923.md) | B | `559c8ab8` 08:40 | démontré localement | vivant | sans réponse |
 | [`CONTRE_EXEMPLE_EULER_KPLUS2_20260923.md`](CONTRE_EXEMPLE_EULER_KPLUS2_20260923.md) | B | `bf19240a` 09:28 | démontré localement (faux négatif exact d'Euler et de Kmax+2) | vivant | sans objet |
 | [`LEMME_PREMIERE_COFACETTE_OMISSION_20260923.md`](LEMME_PREMIERE_COFACETTE_OMISSION_20260923.md) | A | 23/11:07 | preuve conditionnelle de refus FULL, résolveur interne | vivant | sans réponse |
+| [`CONTRE_AUDIT_B_OMISSIONS_ET_PORTEE_REVISION_C_20260923.md`](CONTRE_AUDIT_B_OMISSIONS_ET_PORTEE_REVISION_C_20260923.md) | B | `8b62e4fd` 11:02 | contrelecture de la sonde d'omission C, recherche de condensés | vivant | sans objet |
 | [`CONTRELEC_JUGE_CLES_ABSENTES_20260923.md`](CONTRELEC_JUGE_CLES_ABSENTES_20260923.md) | A | 23/11:30 | lecture de la porte synthétique `683fa46e` ; mutations et débordement de coquille à préciser | vivant | sans réponse |
 | [`COMPLETUDE_Q4_CLE_REMBOURREE_20260923.md`](COMPLETUDE_Q4_CLE_REMBOURREE_20260923.md) | B | `0a6efac3` 06:58 | testé borné | vivant | sans réponse |
 | [`Q4_INDUCTION_ATLAS_EVENEMENTS_20260923.md`](Q4_INDUCTION_ATLAS_EVENEMENTS_20260923.md) | B ? | `28f0c284` 07:15 | démontré localement | vivant | sans réponse |
@@ -156,6 +157,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`CONTRE_AUDIT_B_LECTEURS_1F048_20260923.md`](CONTRE_AUDIT_B_LECTEURS_1F048_20260923.md) | B | `758236b4` 10:07 | méthode (rejeu du lecteur) | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_G4_R9_ORDONNANCEMENT_20260923.md`](CONTRE_AUDIT_B_G4_R9_ORDONNANCEMENT_20260923.md) | B, réception A | `bf42ccde` 10:37 | mesure CPU G4 appariée, dossier publié `76436d44` | vivant | sans objet |
 | [`RECEPTION_G4_R10_20260923.md`](RECEPTION_G4_R10_20260923.md) | A | 23/11:07 | réception CPU G4 appariée, recouvrement FULL | vivant | sans objet |
+| [`CONTRE_AUDIT_B_G4_R10_ET_PASSE2_20260923.md`](CONTRE_AUDIT_B_G4_R10_ET_PASSE2_20260923.md) | B | `3a57a6d6` 11:13 | mesure (R10) | vivant | sans objet |
 | [`CONTRE_AUDIT_B_G4_R8_20260923.md`](CONTRE_AUDIT_B_G4_R8_20260923.md) | B | `2faf5b59` 09:57 | mesure | vivant ; seuil de tâche rectifié ci-dessus | sans objet |
 | [`CONTRE_AUDIT_B_G4_R7B_20260923.md`](CONTRE_AUDIT_B_G4_R7B_20260923.md) | B | `b46826e2` 06:24 | mesure | historique | sans objet |
 | [`CONTRE_AUDIT_B_G4_R6_20260923.md`](CONTRE_AUDIT_B_G4_R6_20260923.md) | B | `c17db454` 05:11 | mesure | historique | acceptée en partie (erratum incomplet) |
@@ -285,7 +287,7 @@ en citant l'identifiant, avec « acceptée », « refusée (raison) » ou « dif
 | R-17 | Une seule session G4 GPU à seuils fixés d'avance, comparée à la base CPU réordonnancée | C | AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md § 3.3 et raccord R8 |
 | R-18 | Décisions de contrat à acter avec l'utilisateur : sortie compacte, digest hors chrono, expansion chronométrée à part ; 100 ms à reformuler | C | AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md § 1 et 5 |
 | R-19 | Porte `scale8000` : recenser par balayage brut **toutes** les boules à coquille étendue (86 à 8k), publier l'effectif échantillonné par famille, corriger le commentaire « pas deterministe » | C | canal, entrée de 10 h 12 UTC |
-| R-20 | Angle mort conjoint Euler + tour (fusions seules à Kmax : q2 à p=Kmax−1, q3 à p=Kmax−2) : à K5, exécution de contrôle Kmax+1 avec tour et restriction clé par clé ; à K10, domaine d'audit K11 ou juge d'échantillon dédié | C | c_omission_20260923/README.md, AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md § 3.1 |
+| R-20 | Angle mort conjoint Euler + tour (fusions seules à Kmax : q2 à p=Kmax−1, q3 à p=Kmax−2) : à K5, exécution de contrôle Kmax+1 avec tour et restriction clé par clé ; à K10, domaine d'audit K11 ou juge d'échantillon dédié (q2 : juge indépendant livré, 204 683/204 683 ; q3 à p=Kmax−2 : à concevoir) | C | c_omission_20260923/README.md, AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md § 3.1 |
 
 ## Conventions proposées (à adopter par tous)
 

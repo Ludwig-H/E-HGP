@@ -1,0 +1,2 @@
+scene_00_full.u32le n=39885 kmax=10 balls=5512670 sampled_sites=200 pairs=7976800 expected=8725 found=8725 missing=0 extended=6 mutant_killed=1 p0=1043 p1=868 p2=885 p3=838 p4=821 p5=855 p6=898 p7=843 p8=816 p9=858
+exit=0

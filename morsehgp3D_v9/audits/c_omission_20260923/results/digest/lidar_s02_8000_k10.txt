@@ -1,0 +1,15 @@
+s02_k5_s8_w8_r0_nested_8000.u32le n=8000 kmax=10 balls=1083173 regular=1082943 extended=230 top_within=877218 euler_visible_regular=947029 joint_blind_regular=119089 extended_top_over=41 digest=05e1a8fd626d7938
+s02_k5_s8_w8_r0_nested_8000.u32le joint_blind p=8 q=3 count=104131
+s02_k5_s8_w8_r0_nested_8000.u32le joint_blind p=9 q=2 count=14958
+s02_k5_s8_w8_r0_nested_8000.u32le stratum top_within=0 regular=0 q=2 population=41 sampled=8 refused=6 accepted_digest_changed=0 accepted_digest_same=2 complete_relative=2 full_ball_static_missing_weak_terminal=6
+s02_k5_s8_w8_r0_nested_8000.u32le stratum top_within=0 regular=1 q=2 population=14958 sampled=8 refused=0 accepted_digest_changed=2 accepted_digest_same=6 complete_relative=8
+s02_k5_s8_w8_r0_nested_8000.u32le stratum top_within=0 regular=1 q=3 population=104131 sampled=8 refused=0 accepted_digest_changed=3 accepted_digest_same=5 complete_relative=8
+s02_k5_s8_w8_r0_nested_8000.u32le stratum top_within=0 regular=1 q=4 population=86825 sampled=8 refused=1 accepted_digest_changed=5 accepted_digest_same=2 complete_relative=7 full_ball_final_component_count=1
+s02_k5_s8_w8_r0_nested_8000.u32le stratum top_within=1 regular=0 q=2 population=186 sampled=8 refused=8 accepted_digest_changed=0 accepted_digest_same=0 full_ball_static_missing_weak_terminal=8
+s02_k5_s8_w8_r0_nested_8000.u32le stratum top_within=1 regular=0 q=3 population=1 sampled=1 refused=1 accepted_digest_changed=0 accepted_digest_same=0 full_ball_static_missing_weak_terminal=1
+s02_k5_s8_w8_r0_nested_8000.u32le stratum top_within=1 regular=0 q=4 population=2 sampled=2 refused=2 accepted_digest_changed=0 accepted_digest_same=0 full_ball_static_missing_weak_terminal=2
+s02_k5_s8_w8_r0_nested_8000.u32le stratum top_within=1 regular=1 q=2 population=161589 sampled=8 refused=8 accepted_digest_changed=0 accepted_digest_same=0 full_ball_static_missing_weak_terminal=8
+s02_k5_s8_w8_r0_nested_8000.u32le stratum top_within=1 regular=1 q=3 population=480522 sampled=8 refused=8 accepted_digest_changed=0 accepted_digest_same=0 full_ball_static_missing_weak_terminal=8
+s02_k5_s8_w8_r0_nested_8000.u32le stratum top_within=1 regular=1 q=4 population=234918 sampled=8 refused=8 accepted_digest_changed=0 accepted_digest_same=0 full_ball_static_missing_weak_terminal=8
+s02_k5_s8_w8_r0_nested_8000.u32le claim_top_within_refused=holds_on_sample
+exit=0
