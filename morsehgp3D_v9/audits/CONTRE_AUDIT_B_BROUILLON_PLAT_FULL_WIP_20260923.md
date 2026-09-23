@@ -70,3 +70,32 @@ les brouillons sont par ordre, puis l'encodeur lit une banque immuable.
 Ce constat de source n'est ni un gate de concurrence ni une preuve du
 payload FULL. Aucun chrono G4 et aucun gain contractuel ne sont attribués
 à ce commit.
+
+## Addendum exécuté sur la surcharge publiée
+
+Le [micro-test causal](flat_draft_invalid_probe.cpp) prépare une banque
+valide à un site, puis passe à la surcharge publique un brouillon avec
+`level.size()==1` et `batch_begin.size()==1` (le zéro initial par défaut).
+L'appel devrait rendre `kInvalidInput`, sans lecture hors limites.
+Compilation locale sur la source v9 publiée :
+
+```sh
+g++ -std=c++20 -O1 -g -fsanitize=address,undefined -fno-omit-frame-pointer \
+  -I morsehgp3D_v9/src morsehgp3D_v9/audits/flat_draft_invalid_probe.cpp \
+  -pthread -o /tmp/mhgp9_flat_draft_invalid_probe_b
+ASAN_OPTIONS=detect_leaks=0:halt_on_error=1 \
+  /tmp/mhgp9_flat_draft_invalid_probe_b
+```
+
+Résultat observé : code **1**, `AddressSanitizer: heap-buffer-overflow`,
+lecture de huit octets immédiatement après le vecteur `batch_begin`.
+Pile : `FlatDraftSource::actions` à
+`full_coverage_certificate.hpp:192`, appelé par `build_from:286`, puis
+par la surcharge publique `:386` et le micro-test `:23`.
+L'adresse correspond au vecteur initial d'un seul `u64` ; ce n'est pas un
+échec de la banque de populations. Le défaut source est donc confirmé
+**en exécution** sur entrée publique invalide. Il ne prouve aucune erreur
+géométrique ni aucune corruption sur le producteur interne qui construit
+un CSR valide. Correctif : valider toute la forme CSR et ses conversions
+avant le premier `batches.actions`, puis garder ce programme comme gate
+ASan/UBSan et un cas Release à statut typé. Aucun GCP utilisé.

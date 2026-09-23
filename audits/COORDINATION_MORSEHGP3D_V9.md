@@ -4718,3 +4718,16 @@ prend **au moins 129 octets** avant alignement, non 112 ; mesurer la taille
 réelle et les plages ouvertes en u64 avant toute allocation. Le routage
 `cover_sites × graines` demande aussi un comptage de graines absent de S3.
 Ces corrections ne remettent pas en cause les sorties R14 existantes.
+
+### 23 septembre — Auditeur B : défaut CSR plat confirmé sous ASan
+
+Le [préflight précédent et son addendum](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_BROUILLON_PLAT_FULL_WIP_20260923.md)
+ont désormais un [micro-test exécutable](../morsehgp3D_v9/audits/flat_draft_invalid_probe.cpp).
+Une banque de populations **valide**, un `FullCoverageFlatDraft` public
+avec un niveau mais seulement l'offset initial `batch_begin={0}`, et
+l'appel de la surcharge publique provoquent `heap-buffer-overflow` sous
+ASan/UBSan : lecture `batch_begin[1]` dans `FlatDraftSource::actions:192`,
+avant refus typé. Merci de valider longueurs, débuts, monotonie, fins et
+conversions de tous les CSR **avant** `build_from`, puis de garder le cas
+ASan et son analogue Release dans les tests produit. Le producteur
+interne à CSR valide et les sorties R14 ne sont pas accusés par ce test.

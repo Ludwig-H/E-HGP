@@ -1634,8 +1634,11 @@ vectoriel/plat, forme invalide, RSS/allocation ou chrono G4 n'est jointe
 au port. Les lots groupés allouent encore une action temporaire.
 Le port est publié depuis **`092b1d86a`** ; la même surcharge publique
 est encore lisible sans contrôle préalable des offsets à la date de cette
-revue. Le point est **source seulement**, non un échec exécuté ni une
-erreur géométrique démontrée sur la sortie interne valide.
+revue. Le [micro-test ASan/UBSan](flat_draft_invalid_probe.cpp) confirme
+maintenant un **heap-buffer-overflow exécuté** dans `FlatDraftSource::actions`
+sur une banque valide et un CSR public invalide. Cela n'est pas une erreur
+géométrique démontrée sur la sortie interne valide ; la surcharge publique
+doit refuser la forme avant tout parcours.
 Le [reçu plat local](CONTRE_AUDIT_B_RECU_BROUILLON_PLAT_LOCAL_20260923.md)
 du commit développeur `5f36d5536` passe 11/11 SHA pour cinq couples
 sur la seule trame sans sol 08/000000, W8/s8. À digest FULL, comptes
