@@ -73,16 +73,29 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
     orders = [dict(K=q, nodes=2 * n * q, births=n * q, merges=n * q - 1, parents=2 * n * q - 1, contributions=n * q)
               for q in range(1, effective + 1)] if complete else []
     digest = hashlib.sha256((fnv + ':' + str(k) + ':' + str(s) + ':' + salt).encode()).hexdigest()[:16]
+    levers = dict(levers) if levers is not None else {name: True for name in schema['levers']}
+    # A ledger consistent with the generator and catalogue below, and with
+    # each lever (the reader checks these identities exactly).
+    ledger = {name: 1 for name in schema['ledger']}
+    ledger.update(expanded_pairs=4, cover_builds=1, witness_rejected_pairs=3, cover_sites=10, q3_edges=1, q4_edges=1)
+    if levers['q34_dead_lanes']:
+        ledger.update(dead_loads=1, dead_form_sites=8, dead_q3_open=1, dead_q4_open=1)
+    else:
+        ledger.update({name: 0 for name in schema['ledger'] if name.startswith('dead_')})
+    if not levers['q34_witness_cache']:
+        ledger.update({name: 0 for name in schema['ledger'] if name.startswith('witness_cache_')})
+    if not levers['q3_leaf_census']:
+        ledger.update(q3_leaf_censuses=0, q3_leaf_point_tests=0)
     return dict(schema='mhgp9_tower_probe_v6', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
                              run_tower=True,
-                             levers=dict(levers) if levers is not None else {name: True for name in schema['levers']}),
+                             levers=levers),
                 times_ms=dict({key: 0.125 for key in TIMES}, chain_total=1.5), chain_cpu_s=0.25,
                 generator=dict(q2_front_rectangles=3, q2_candidate_pairs=2, q2_accepted_pairs=1,
                                q34_expanded_pairs=4, q34_cover_builds=1, q3_emitted=2, q4_emitted=1),
-                ledger={name: 1 for name in schema['ledger']},
+                ledger=ledger,
                 catalogue=dict(q2_presentations=1, q3_presentations=2, q4_presentations=1, unique_keys=4, balls=4,
                                extra_shell_balls=0, shell_over_12=0, max_shell=4, max_interior=3, census_nodes=9,
                                census_leaf_tests=5, bytes=64, by_qmin=[1, 2, 1],
@@ -118,6 +131,9 @@ def main():
                             'complete_relative', '', levers, config['schema'])
         if config.get('fail_preflight'):
             value['tower_work']['selftest_unknown'] = 1
+        if config.get('vacuous_preflight'):
+            value['generator'].update(q3_emitted=0, q4_emitted=0)
+            value['catalogue'].update(q3_presentations=0, q4_presentations=0)
         print(json.dumps(value, separators=(',', ':')))
         return 0
     scene = pathlib.Path(path).name[len('scene_'):-len('.u32le')]
@@ -230,6 +246,19 @@ def probe_value(*args, **kwargs):
     exec(compile(FAKE_PROBE, 'mhgp9_fake_probe', 'exec'), namespace)
     kwargs.setdefault('schema', fake_schema())
     return namespace['probe_value'](*args, **kwargs)
+
+
+def rewrite_preflight_stderr(output):
+    """Invalid GNU time report with every hash updated: only its parse refuses it."""
+    (output / 'preflight.stderr').write_text('no GNU time report\n')
+    digest = worker.sha(output / 'preflight.stderr')
+    row = worker.strict_json((output / 'preflight.command.json').read_bytes())
+    old = dict(row)
+    row['stderr_sha256'] = digest
+    (output / 'preflight.command.json').write_text(json.dumps(row, indent=1, sort_keys=True))
+    receipt = worker.strict_json((output / 'receipt.json').read_bytes())
+    receipt['commands'] = [row if item == old else item for item in receipt['commands']]
+    (output / 'receipt.json').write_text(json.dumps(receipt, indent=1, sort_keys=True))
 
 
 def target(status='TERMINATED', generation=None):
@@ -709,6 +738,13 @@ class Protocol(unittest.TestCase):
                      ('by_qmin_empty', lambda v: v['catalogue'].update(by_qmin=[])),
                      ('by_shell_empty', lambda v: v['catalogue'].update(by_shell=[])),
                      ('catalogue_unknown', lambda v: v['catalogue'].update(extra=1)),
+                     ('dead_loads_zero', lambda v: v['ledger'].update(dead_loads=0)),
+                     ('dead_form_sites_zero', lambda v: v['ledger'].update(dead_form_sites=0)),
+                     ('cover_builds_zero', lambda v: v['ledger'].update(cover_builds=0)),
+                     ('expanded_pairs_zero', lambda v: v['generator'].update(q34_expanded_pairs=0)),
+                     ('q3_presentations_zero', lambda v: v['catalogue'].update(q3_presentations=0)),
+                     ('dead_q3_open_shifted', lambda v: v['ledger'].update(dead_q3_open=2)),
+                     ('cache_rejections_excess', lambda v: v['ledger'].update(witness_cache_rejected_pairs=4)),
                      ('run_tower', lambda v: v['options'].update(run_tower=False)),
                      ('K_effective', lambda v: v['options'].update(K_effective=4)),
                      ('orders', lambda v: v['orders'].pop()), ('order_key', lambda v: v['orders'][0].update(extra=1)),
@@ -771,6 +807,12 @@ class Protocol(unittest.TestCase):
             expected = session.validate_snapshot(pkg['archive'], pkg['manifest'])[0]
             pin = worker.sha(worker.__file__)
             need(session.validate_received(output, pkg['manifest'], pin, expected) == 'completed', 'revalidation')
+            need(session.validate_received(output, pkg['manifest'], pin, expected, receipt['generation'],
+                                           receipt['provenance']) == 'completed', 'revalidation bound to the session')
+            need(refused(session.validate_received, output, pkg['manifest'], pin, expected, 'another-generation',
+                         receipt['provenance']) and
+                 refused(session.validate_received, output, pkg['manifest'], pin, expected, receipt['generation'],
+                         dict(receipt['provenance'], commit='0' * 40)), 'receipt bound to generation and provenance')
             tampered = Path(temporary) / 'tampered'
             for label, mutate in (
                     ('probe stdout', lambda o: (o / 'probe_0.stdout').write_bytes(
@@ -778,7 +820,11 @@ class Protocol(unittest.TestCase):
                     ('missing command', lambda o: (o / 'uptime_after_3.command.json').unlink()),
                     ('status', lambda o: (o / 'receipt.json').write_bytes((o / 'receipt.json').read_bytes().replace(
                         b'"status": "completed"', b'"status": "partial"'))),
-                    ('sources', lambda o: (o / 'sources_after.json').write_text('{}'))):
+                    ('sources', lambda o: (o / 'sources_after.json').write_text('{}')),
+                    ('guard evidence', lambda o: (o / 'guard_evidence.json').write_text('{}')),
+                    ('preflight stderr', rewrite_preflight_stderr),
+                    ('receipt target', lambda o: (o / 'receipt.json').write_bytes((o / 'receipt.json').read_bytes().replace(
+                        worker.TARGET['instance'].encode(), b'another-instance')))):
                 shutil.copytree(output, tampered)
                 mutate(tampered)
                 need(refused(session.validate_received, tampered, pkg['manifest'], pin, expected), 'tamper ' + label)
@@ -839,6 +885,14 @@ class Protocol(unittest.TestCase):
             output = host / 'received/output'
             need((output / 'preflight.command.json').is_file() and
                  not (output / 'probe_0.command.json').exists(), 'no LiDAR case after a failed native preflight')
+
+    def test_vacuous_preflight_runs_no_case(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            code, receipt, fake, host = run_scenario(Path(temporary), tools=dict(vacuous_preflight=True))
+            need(code == 1 and receipt['worker_status'] == 'preflight_failed',
+                 'vacuous preflight host receipt: ' + json.dumps(receipt)[:600])
+            expect_certified_stop(receipt, fake)
+            need(not (host / 'received/output/probe_0.command.json').exists(), 'no case after a vacuous preflight')
 
     def test_zero_complete_campaign_is_refused(self):
         with tempfile.TemporaryDirectory() as temporary:

@@ -254,3 +254,18 @@ q3/q4 15 %, filtre de rectangles 11 %.
 - Protocole v6 : `levers` épinglés par cas, sonde `--lever=NOM=0|1`, clés
   exactes ; porte réelle à 20 mutants.
 
+## 23 septembre 2026, 03 h 30 — Réception G4 durcie (développeur)
+
+Réponse au contre-audit B de la réception v5 et du cache (GCP non utilisé) :
+groupe de processus d'un cas tué **certifié fermé** sinon la campagne échoue
+(worker) et la réception refuse (hôte) ; reçu lié à la cible, à la
+génération démarrée et à la provenance du paquet, `guard_evidence.json`
+rejugé ; préflight non vacant (travail géométrique et chaque levier actif
+exercé) et son GNU time rejugé côté hôte ; identités exactes du registre
+pour toute tour complète (paires = covers + rejets, présentations
+générateur = catalogue, histogrammes, formes du certificat, voies ouvertes
+= arêtes, compteurs nuls quand un levier est éteint) avec sept mutations
+refusées dans les selftests ; nœuds témoins en double sur une voie refusés
+par l'API publique du cache (fixture dans `q34_witness_cache`). Plan R4 :
+ablation du **seul** cache à trame, K, s, W et tour identiques.
+

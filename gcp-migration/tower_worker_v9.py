@@ -369,6 +369,48 @@ def _catalogue(value):
     return True
 
 
+def validate_ledger_identities(value, levers):
+    """Identites exactes d'une tour complete entre generateur, registre et catalogue."""
+    ledger, generator, catalogue = value['ledger'], value['generator'], value['catalogue']
+    need(ledger['expanded_pairs'] == ledger['cover_builds'] + ledger['witness_rejected_pairs'] and
+         generator['q34_expanded_pairs'] == ledger['expanded_pairs'] and
+         generator['q34_cover_builds'] == ledger['cover_builds'], 'ledger pair/cover identity')
+    need(generator['q2_accepted_pairs'] == catalogue['q2_presentations'] and
+         generator['q3_emitted'] == catalogue['q3_presentations'] and
+         generator['q4_emitted'] == catalogue['q4_presentations'], 'generator/catalogue presentation identity')
+    need(catalogue['balls'] == catalogue['unique_keys'] == sum(catalogue['by_qmin']) == sum(catalogue['by_shell']) and
+         catalogue['q2_presentations'] + catalogue['q3_presentations'] + catalogue['q4_presentations'] >=
+         catalogue['unique_keys'], 'catalogue identity')
+    dead = ('dead_loads', 'dead_form_sites', 'dead_cells', 'dead_outside_cells', 'dead_deep_cells', 'dead_failed_cells',
+            'dead_uniform_tests', 'dead_point_tests', 'dead_q3_proved', 'dead_q3_open', 'dead_q4_proved', 'dead_q4_open')
+    if levers['q34_dead_lanes']:
+        need(ledger['dead_loads'] == ledger['cover_builds'] and
+             ledger['dead_form_sites'] == ledger['cover_sites'] - 2 * ledger['dead_loads'] and
+             ledger['dead_q3_open'] == ledger['q3_edges'] and ledger['dead_q4_open'] == ledger['q4_edges'],
+             'dead-lane ledger identity')
+    else:
+        need(all(ledger[name] == 0 for name in dead), 'dead-lane counters while the lever is off')
+    cache = ('witness_cache_queries', 'witness_cache_node_tests', 'witness_cache_rejected_pairs')
+    if levers['q34_witness_cache']:
+        need(ledger['witness_cache_rejected_pairs'] <= ledger['witness_rejected_pairs'], 'witness cache identity')
+    else:
+        need(all(ledger[name] == 0 for name in cache), 'witness cache counters while the lever is off')
+    if not levers['q3_leaf_census']:
+        need(ledger['q3_leaf_censuses'] == 0 and ledger['q3_leaf_point_tests'] == 0, 'leaf census while the lever is off')
+
+
+def validate_preflight_work(value, levers):
+    """Le preflight doit exercer chaque levier actif (jamais une sonde vide)."""
+    ledger, generator = value['ledger'], value['generator']
+    need(value['catalogue']['balls'] > 0 and generator['q3_emitted'] > 0 and generator['q4_emitted'] > 0 and
+         ledger['cover_builds'] > 0, 'preflight did no geometric work')
+    need((not levers['q3_leaf_census'] or ledger['q3_leaf_censuses'] > 0) and
+         (not levers['atlas_saturate_deep'] or ledger['atlas_deep_cells'] > 0) and
+         (not levers['q34_dead_lanes'] or ledger['dead_q3_proved'] + ledger['dead_q4_proved'] > 0) and
+         (not levers['q34_witness_cache'] or ledger['witness_cache_rejected_pairs'] > 0),
+         'preflight did not exercise an active lever')
+
+
 def preflight_cloud():
     """Nuage u18 deterministe (LCG 64 bits, trois grappes) du preflight natif."""
     state, out = 3, bytearray()
@@ -432,6 +474,7 @@ def validate_probe(value, case, exit_code, inputs=None):
     if value['status'] == 'complete_relative':
         need(exit_code == 0 and options['K_effective'] == effective and
              [order['K'] for order in orders] == list(range(1, effective + 1)), 'complete tower: code 0, orders 1..K')
+        validate_ledger_identities(value, case['levers'])
         return 'complete_relative'
     need(exit_code == 3 and options['K_effective'] in (0, effective), 'explicit refusal must exit with code 3')
     return 'explicit_refusal'
@@ -598,6 +641,7 @@ def execute(args):
             need(validate_probe(pre_value, pre_case, 0, inputs=preflight_inputs(pre_raw)) == 'complete_relative',
                  'preflight probe not complete')
             validate_external_wall(pre_value, pre_row['elapsed_seconds'])
+            validate_preflight_work(pre_value, pre_case['levers'])
             validate_gnu_time((output / 'preflight.stderr').read_text(errors='replace'), 0)
         except (ValueError, KeyError, TypeError, UnicodeError) as error:
             raise PreflightFailed(type(error).__name__ + ': ' + str(error)) from error
@@ -637,6 +681,9 @@ def execute(args):
                     outcomes.append(dict(index=index, outcome='skipped_budget'))
                     continue
                 row = case_worker.commands[-1]
+                # Fail closed: a killed case whose process group is not
+                # certified closed ends the campaign (nothing may still run).
+                need(row.get('group_closed') is True, 'killed case process group not certified closed')
                 outcomes.append(dict(index=index, outcome='killed_case_cap' if capped else 'killed_budget',
                                      exit_code=row['exit_code'], elapsed_seconds=row['elapsed_seconds']))
                 exhausted = not capped

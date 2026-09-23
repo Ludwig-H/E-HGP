@@ -123,9 +123,23 @@ def validate_protocol_runtime(manifest):
          'transported protocol differs from executing controller/worker')
 
 
-def validate_received(output, manifest, worker_pin, expected_cases):
-    """Relit le recu du worker et ses fichiers bruts ; rend completed ou partial."""
+def validate_received(output, manifest, worker_pin, expected_cases, generation=None, provenance=None):
+    """Relit le recu du worker et ses fichiers bruts ; rend completed ou partial.
+
+    `generation` et `provenance` lient le recu au contexte hote de la session
+    (cible fixe, generation demarree, provenance du paquet valide)."""
     value = payload.strict_json((output / 'receipt.json').read_bytes())
+    need(type(value) is dict and value.get('target') == payload.TARGET and
+         (generation is None or value.get('generation') == generation) and
+         (provenance is None or value.get('provenance') == provenance), 'worker receipt identity (target/generation/provenance)')
+    evidence = payload.strict_json((output / 'guard_evidence.json').read_bytes())
+    need(type(evidence) is dict and set(evidence) == {'mark', 'schedule', 'metadata'} and
+         type(evidence['metadata']) is dict and
+         all(evidence['metadata'].get(key) == item for key, item in payload.TARGET.items()) and
+         evidence['metadata'].get('machine') == 'g4-standard-48' and type(evidence['mark']) is dict and
+         evidence['mark'].get('max_run_seconds') == payload.MAX_RUN_SECONDS and
+         evidence['mark'].get('guest_shutdown_minutes') == payload.GUEST_SHUTDOWN_MINUTES and
+         (generation is None or evidence['mark'].get('generation') == generation), 'guard evidence identity')
     need(type(value) is dict and value.get('status') in ('completed', 'partial') and
          value.get('sources_stable') is True and value.get('compiled_dependencies_stable') is True and
          value.get('binary_stable') is True and value.get('worker_sha256') == worker_pin and
@@ -184,6 +198,8 @@ def validate_received(output, manifest, worker_pin, expected_cases):
          and value.get('preflight') == dict(sites=pre_case['n'], tower_digest=pre_value['tower_digest']),
          'preflight recomputation')
     payload.validate_external_wall(pre_value, rows['preflight'].get('elapsed_seconds'))
+    payload.validate_preflight_work(pre_value, pre_case['levers'])
+    payload.validate_gnu_time((output / 'preflight.stderr').read_text(errors='replace'), 0)
     outcomes = value.get('case_outcomes')
     need(type(outcomes) is list and len(outcomes) == len(cases), 'case outcome list')
     values, exhausted = {}, False
@@ -204,8 +220,8 @@ def validate_received(output, manifest, worker_pin, expected_cases):
              argv[4:] == payload.expected_probe_tail(case), 'exact GNU time / probe invocation')
         need(entry.get('exit_code') == row.get('exit_code'), 'case exit code record')
         if outcome in ('killed_case_cap', 'killed_budget'):
-            need(row.get('session_deadline_reached') is True and row.get('residual_or_interrupted_group_killed') is True,
-                 'killed case record')
+            need(row.get('session_deadline_reached') is True and row.get('residual_or_interrupted_group_killed') is True
+                 and row.get('group_closed') is True, 'killed case record (group certified closed)')
             if outcome == 'killed_case_cap':
                 need(row.get('elapsed_seconds', 0) >= payload.CASE_CAP_SECONDS - 1.0, 'case killed before its cap')
             else:
@@ -408,7 +424,7 @@ def run_session(args):
                         state['status'] = 'capture_incomplete'
                     elif state['status'] == 'worker_returned':
                         state['status'] = validate_received(host / 'received/output', manifest, args.worker_sha256,
-                                                            expected_cases)
+                                                            expected_cases, generation, provenance)
                         state['FULL_executed'] = True
                 except BaseException as error:
                     state.update(status='capture_failed', capture_error=type(error).__name__ + ': ' + str(error))

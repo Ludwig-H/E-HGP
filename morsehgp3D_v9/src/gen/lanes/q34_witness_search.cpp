@@ -235,12 +235,23 @@ std::uint8_t q34_cached_witness_rejections(
   if (lanes == 0 || cached.empty()) return 0;
   const PreparedPairCitronBounds prepared(a, b);  // validates both points
   const auto nodes = index.spatial_nodes();
+  // Per lane, the cached nodes must be pairwise disjoint (one traced call
+  // admits an antichain per lane): a forged or duplicated span is refused,
+  // never double-credited.
+  for (std::size_t i = 0; i < cached.size(); ++i) {
+    if (cached[i].node >= nodes.size() || (cached[i].lanes & ~6U) != 0)
+      throw std::invalid_argument("mhgp9 gen q34 witness cache entry outside the index");
+    for (std::size_t j = 0; j < i; ++j) {
+      if ((cached[i].lanes & cached[j].lanes) == 0) continue;
+      const auto x = nodes[cached[i].node].range, y = nodes[cached[j].node].range;
+      if (x.first < y.last && y.first < x.last)
+        throw std::invalid_argument("mhgp9 gen q34 witness cache nodes overlap on a lane");
+    }
+  }
   const std::array<unsigned, 2> threshold{static_cast<unsigned>(kmax) - 1,
                                           kmax >= 3 ? static_cast<unsigned>(kmax) - 2 : 0};
   std::array<unsigned, 2> count{};
   for (const auto& entry : cached) {
-    if (entry.node >= nodes.size() || (entry.lanes & ~6U) != 0)
-      throw std::invalid_argument("mhgp9 gen q34 witness cache entry outside the index");
     const std::uint8_t open = entry.lanes & lanes;
     if (open == 0) continue;
     const auto& node = nodes[entry.node];

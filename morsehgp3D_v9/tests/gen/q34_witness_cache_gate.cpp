@@ -13,6 +13,7 @@
 //
 // Code 0 conforme, 1 desaccord (stderr causal), 2 argument, 3 plancher.
 #include <cstdint>
+#include <stdexcept>
 #include <iostream>
 #include <string_view>
 #include <vector>
@@ -87,6 +88,35 @@ int main(int argc, char** argv) {
           if (cached != 0) ++cross_rejections;
         }
       }
+    }
+  }
+  // A forged span repeating a node on a lane is refused, never double-credited.
+  {
+    const auto points = clusters(900, 903, 9000);
+    const auto index = mhgp9::gen::make_q2_cloud_index(mhgp9::gen::prepare_cloud(points));
+    const auto order = index->spatial_order();
+    mhgp9::gen::Q34WitnessSearchWork search{};
+    mhgp9::gen::Q34WitnessBoundsWork bounds{};
+    mhgp9::gen::Q34WitnessCacheWork cache{};
+    std::vector<mhgp9::gen::Q34WitnessNode> trace;
+    bool refused = false, tried = false;
+    for (std::size_t i = 0; i + 1 < order.size() && !tried; ++i) {
+      static_cast<void>(mhgp9::gen::filter_q34_witnesses(*index, points[order[i]], points[order[i + 1]], 5, 6,
+                                                         search, bounds, trace));
+      if (trace.empty()) continue;
+      tried = true;
+      auto forged = trace;
+      forged.push_back(trace.front());
+      try {
+        static_cast<void>(mhgp9::gen::q34_cached_witness_rejections(*index, points[order[i]], points[order[i + 1]], 5, 6,
+                                                                    forged, cache));
+      } catch (const std::invalid_argument&) {
+        refused = true;
+      }
+    }
+    if (!tried || !refused) {
+      std::cerr << "q34 witness cache gate: a duplicated cached node was accepted\n";
+      return 1;
     }
   }
   std::cout << "q34_witness_cache_gate same=" << same_checks << " cross=" << cross_checks
