@@ -96,7 +96,7 @@ add_library(mhgp9_gen STATIC
   src/gen/lanes/q4_center_map.cpp src/gen/lanes/q4_local_partition.cpp
   src/gen/lanes/q4_local.cpp src/gen/lanes/q4_shallow_set.cpp src/gen/lanes/q4_shallow.cpp
   src/gen/lanes/q4_window.cpp src/gen/pipeline/wspd_q34.cpp src/gen/lanes/q34_witness_search.cpp
-  src/gen/lanes/q3_ball_census.cpp)
+  src/gen/lanes/q3_ball_census.cpp src/gen/lanes/q34_dead_lanes.cpp)
 target_include_directories(mhgp9_gen PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/gen")
 target_link_libraries(mhgp9_gen PUBLIC Threads::Threads)
 
@@ -153,7 +153,7 @@ if(Python3_Interpreter_FOUND AND EXISTS ${MHGP9_TOWER_WORKER})
     add_test(NAME mhgp9_probe_worker_contract_${mode}
              COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=${Python3_EXECUTABLE}
                      "-DARGS=${py_flags} ${CMAKE_CURRENT_SOURCE_DIR}/tests/chain/probe_worker_contract.py $<TARGET_FILE:mhgp9_tower_probe> ${MHGP9_TOWER_WORKER} ${CMAKE_CURRENT_BINARY_DIR}/probe_worker_contract_${mode}"
-                     "-DEXPECT_PREFIX=probe_worker_contract mutants_killed=11/11"
+                     "-DEXPECT_PREFIX=probe_worker_contract mutants_killed=19/19"
                      -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
     set_tests_properties(mhgp9_probe_worker_contract_${mode} PROPERTIES LABELS "gate;probe;protocol" TIMEOUT 300)
   endforeach()

@@ -259,9 +259,16 @@ void merge(Q4SeedCellWork& a, const Q4SeedCellWork& b) {
   MHGP9G_MAX(peak_auxiliary_bytes); MHGP9G_MAX(peak_total_buffer_bytes);
 }
 
+void merge(Q34DeadLaneWork& a, const Q34DeadLaneWork& b) {
+  static_assert(sizeof(Q34DeadLaneWork) == 12 * sizeof(u64));
+  MHGP9G_ADD(loads); MHGP9G_ADD(form_sites); MHGP9G_ADD(cells); MHGP9G_ADD(outside_cells);
+  MHGP9G_ADD(deep_cells); MHGP9G_ADD(failed_cells); MHGP9G_ADD(uniform_tests); MHGP9G_ADD(point_tests);
+  MHGP9G_ADD(q3_proved); MHGP9G_ADD(q3_open); MHGP9G_ADD(q4_proved); MHGP9G_ADD(q4_open);
+}
+
 void merge(WspdQ34Work& a, const WspdQ34Work& b) {
   static_assert(sizeof(WspdQ34Work) == 13 * sizeof(u64) + sizeof(Q34EdgeCoverWork) +
-      sizeof(WspdQ3Work) + sizeof(Q4LocalEdgeWork) + sizeof(Q4WindowEdgeWork) + sizeof(WspdQ34WitnessWork) + sizeof(Q3BallCensusWork) + sizeof(Q4SeedCellWork) + sizeof(WspdQ3AtlasWork));
+      sizeof(WspdQ3Work) + sizeof(Q4LocalEdgeWork) + sizeof(Q4WindowEdgeWork) + sizeof(WspdQ34WitnessWork) + sizeof(Q3BallCensusWork) + sizeof(Q4SeedCellWork) + sizeof(WspdQ3AtlasWork) + sizeof(Q34DeadLaneWork));
   MHGP9G_ADD(input_rectangles); MHGP9G_ADD(expanded_pairs); MHGP9G_ADD(q3_edges);
   MHGP9G_ADD(q4_edges); MHGP9G_ADD(both_edges); MHGP9G_ADD(cover_builds);
   MHGP9G_ADD(cover_sites); MHGP9G_MAX(max_cover_sites); MHGP9G_MAX(peak_cover_bytes);
@@ -273,6 +280,7 @@ void merge(WspdQ34Work& a, const WspdQ34Work& b) {
   merge(a.q3_blocks, b.q3_blocks);
   merge(a.q4_seed_cells, b.q4_seed_cells);
   merge(a.q3_atlas, b.q3_atlas);
+  merge(a.dead, b.dead);
 }
 
 #undef MHGP9G_ADD
@@ -352,6 +360,7 @@ void validate_completion(const WspdQ34Result& result, const WspdQ34Options& opti
   auto expanded = result.work.expanded_pairs, covered = result.work.cover_builds;
   counter_add(q3, witness.rectangle_q3_pairs); counter_add(q3, witness.pair_q3_pairs);
   counter_add(q4, witness.rectangle_q4_pairs); counter_add(q4, witness.pair_q4_pairs);
+  counter_add(q3, result.work.dead.q3_proved); counter_add(q4, result.work.dead.q4_proved);
   counter_add(expanded, witness.rectangle_pair_mass);
   counter_add(covered, witness.rejected_pairs);
   if (q3 != result.front.work.residual_pair_mass[1] ||
@@ -499,16 +508,25 @@ class Engine {
       mask = filtered;
       if (mask == 0) { counter_add(work.witness.rejected_pairs); return; }
     }
-    const bool q3 = (mask & 2U) != 0, q4 = (mask & 4U) != 0;
-    if (q3) counter_add(work.q3_edges);
-    if (q4) counter_add(work.q4_edges);
-    if (q3 && q4) counter_add(work.both_edges);
     const auto cover = Q34EdgeCover::make(index_, {a, b});
     counter_add(work.cover_builds);
     counter_add(work.cover_sites, static_cast<u64>(cover->site_count()));
     work.max_cover_sites = std::max(work.max_cover_sites, static_cast<u64>(cover->site_count()));
     merge(work.cover, cover->work());
     observe(cover);
+    if (options_.dead_lanes) {
+      // A proved lane is empty on the exact path too (certificate in
+      // lanes/q34_dead_lanes.hpp); an unproved lane runs unchanged.
+      dead_.load(*cover, work.dead);
+      if ((mask & 2U) != 0 && dead_.prove_q3(k_, work.dead)) mask = static_cast<std::uint8_t>(mask & ~2U);
+      if ((mask & 4U) != 0 && dead_.prove_q4(k_, work.dead)) mask = static_cast<std::uint8_t>(mask & ~4U);
+      observe(cover, static_cast<u64>(dead_.retained_bytes()));
+      if (mask == 0) return;
+    }
+    const bool q3 = (mask & 2U) != 0, q4 = (mask & 4U) != 0;
+    if (q3) counter_add(work.q3_edges);
+    if (q4) counter_add(work.q4_edges);
+    if (q3 && q4) counter_add(work.both_edges);
     // Explicit consultation: one atlas built here serves the q3 seed
     // certificates and, unchanged, the q4 sweep of the same edge.
     Q4LocalAtlasPtr atlas;
@@ -700,6 +718,7 @@ class Engine {
   Q34SeedConsumer sink_;
   RectangleSplitter splitter_;
   std::vector<std::size_t> shell_;
+  Q34DeadLaneProver dead_;
 };
 
 }  // namespace

@@ -1,0 +1,142 @@
+--- /tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/base_wspd_q34.cpp	2026-09-23 01:45:08.291764611 +0000
++++ /tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/genB/pipeline/wspd_q34.cpp	2026-09-23 01:34:19.844789701 +0000
+@@ -1,4 +1,10 @@
+ #include "pipeline/wspd_q34.hpp"
++#include "pipeline/dead_edge_prover.hpp"
++#include <cstdlib>
++#include <x86intrin.h>
++#include <atomic>
++#include <cstdio>
++namespace mhgp9::gen { struct EdgeStat { std::atomic<unsigned long long> n[8]{}, cyc[8]{}, sites[8]{}, filt_cyc{}, filt_n{}, rej_n{}, ph[8][4]{}, pv_cells{}, pv_pops{}, pv_q3p{}, pv_q3f{}, pv_q4p{}, pv_q4f{}, pv_cyc{}, pv_fail_cells{}, pv_deep{}, pv_out{}, ref_calls{}, ref_rej{}, ref_rej_mass{}, sat_pt{}, sat_nv{}, all_pt{}, all_nv{}, sat_cert{}, sat_unvisited{}, splits{}, deep{}, root_active{}, root_n{}, root_inside_hist[12]{}; ~EdgeStat(){ const char* nm[8]={"q3only_dead","q3only_live","q4only_dead","q4only_live","both_dead","both_live","?","?"}; std::fprintf(stderr,"filter: n=%llu rejected=%llu cyc=%llu\n",(unsigned long long)filt_n.load(),(unsigned long long)rej_n.load(),(unsigned long long)filt_cyc.load()); std::fprintf(stderr,"refine: calls=%llu rejected=%llu mass=%llu\n",(unsigned long long)ref_calls.load(),(unsigned long long)ref_rej.load(),(unsigned long long)ref_rej_mass.load()); std::fprintf(stderr,"prover: cells=%llu deep=%llu outside=%llu failcells=%llu pops=%llu q3 proved=%llu failed=%llu q4 proved=%llu failed=%llu cyc=%llu\n",(unsigned long long)pv_cells.load(),(unsigned long long)pv_deep.load(),(unsigned long long)pv_out.load(),(unsigned long long)pv_fail_cells.load(),(unsigned long long)pv_pops.load(),(unsigned long long)pv_q3p.load(),(unsigned long long)pv_q3f.load(),(unsigned long long)pv_q4p.load(),(unsigned long long)pv_q4f.load(),(unsigned long long)pv_cyc.load()); std::fprintf(stderr,"atlas(both): point_tests all=%llu saturated=%llu node_visits all=%llu saturated=%llu certificates=%llu unvisited=%llu splits=%llu deep=%llu\n",(unsigned long long)all_pt.load(),(unsigned long long)sat_pt.load(),(unsigned long long)all_nv.load(),(unsigned long long)sat_nv.load(),(unsigned long long)sat_cert.load(),(unsigned long long)sat_unvisited.load(),(unsigned long long)splits.load(),(unsigned long long)deep.load()); for(int i=0;i<6;++i) std::fprintf(stderr,"%s: n=%llu cyc=%llu sites=%llu cover=%llu atlas=%llu q3=%llu q4=%llu\n",nm[i],(unsigned long long)n[i].load(),(unsigned long long)cyc[i].load(),(unsigned long long)sites[i].load(),(unsigned long long)ph[i][0].load(),(unsigned long long)ph[i][1].load(),(unsigned long long)ph[i][2].load(),(unsigned long long)ph[i][3].load()); } }; inline EdgeStat edge_stat; }
+ 
+ #include "parallel/joined_workers.hpp"
+ #include "parallel/work_reduction.hpp"
+@@ -431,6 +437,15 @@
+     // With a splitter, a heavy rectangle is expanded by disjoint a-rank
+     // ranges: the first one here, the others as published tasks; every
+     // pair of the rectangle is still expanded exactly once.
++    static const std::size_t refine_mass = std::getenv("PV_REFINE") ? std::strtoull(std::getenv("PV_REFINE"), nullptr, 10) : 0;
++    if (refine_mass != 0 && mass > refine_mass) {
++      const auto na = nodes[rectangle.a_node], nb = nodes[rectangle.b_node];
++      auto child_pass = [&](std::size_t an, std::size_t bn, std::uint8_t m) { refine(an, bn, m, refine_mass); };
++      if (na.left != Q2SpatialNode::absent && (a.size() >= b.size() || nb.left == Q2SpatialNode::absent)) {
++        child_pass(na.left, rectangle.b_node, mask); child_pass(na.right, rectangle.b_node, mask);
++      } else { child_pass(rectangle.a_node, nb.left, mask); child_pass(rectangle.a_node, nb.right, mask); }
++      return;
++    }
+     const auto grain = options_.parallel_task_pairs;
+     if (splitter_ && grain != 0) {
+       const auto rows = mass > grain ? std::max<std::size_t>(1, grain / b.size()) : a.size();
+@@ -445,6 +460,26 @@
+     expand(a.first, a.last, b.first, b.last, mask);
+   }
+ 
++  void refine(std::size_t an, std::size_t bn, std::uint8_t mask, std::size_t refine_mass) {
++    const auto nodes = index_->spatial_nodes();
++    const auto a = nodes[an].range, b = nodes[bn].range;
++    const auto mass = static_cast<u64>(a.size()) * b.size();
++    edge_stat.ref_calls++;
++    const auto filtered = filter_q34_witnesses(*index_, nodes[an].box, nodes[bn].box, static_cast<std::uint8_t>(k_), mask,
++        work.witness.rectangles, options_.witness_bounds_mode, work.witness.rectangles_bounds);
++    if ((mask & 2U) != 0 && (filtered & 2U) == 0) counter_add(work.witness.rectangle_q3_pairs, mass);
++    if ((mask & 4U) != 0 && (filtered & 4U) == 0) counter_add(work.witness.rectangle_q4_pairs, mass);
++    mask = filtered;
++    if (mask == 0) { edge_stat.ref_rej++; edge_stat.ref_rej_mass += mass; counter_add(work.witness.rectangle_pair_mass, mass); return; }
++    if (mass > refine_mass && (nodes[an].left != Q2SpatialNode::absent || nodes[bn].left != Q2SpatialNode::absent)) {
++      if (nodes[an].left != Q2SpatialNode::absent && (a.size() >= b.size() || nodes[bn].left == Q2SpatialNode::absent)) {
++        refine(nodes[an].left, bn, mask, refine_mass); refine(nodes[an].right, bn, mask, refine_mass);
++      } else { refine(an, nodes[bn].left, mask, refine_mass); refine(an, nodes[bn].right, mask, refine_mass); }
++      return;
++    }
++    expand(a.first, a.last, b.first, b.last, mask);
++  }
++
+   // Published range of an already filtered rectangle: no rectangle-level
+   // counter or witness search is paid again.
+   void rectangle_range(const RectangleTask& task) {
+@@ -489,6 +524,7 @@
+     if (mask == 0 || (mask & ~6U) != 0)
+       throw std::logic_error("mhgp9 gen global q34 received an inactive rectangle");
+     counter_add(work.expanded_pairs);
++    const auto t_f0 = __rdtsc();
+     if (options_.witness_mode != WspdQ34WitnessMode::Disabled) {
+       const auto points = index_->cloud().points();
+       const auto filtered = filter_q34_witnesses(*index_, singleton_box(points[a]),
+@@ -497,13 +533,49 @@
+       if ((mask & 2U) != 0 && (filtered & 2U) == 0) counter_add(work.witness.pair_q3_pairs);
+       if ((mask & 4U) != 0 && (filtered & 4U) == 0) counter_add(work.witness.pair_q4_pairs);
+       mask = filtered;
++      edge_stat.filt_n++; edge_stat.filt_cyc += __rdtsc()-t_f0;
++      if (mask == 0) { edge_stat.rej_n++; counter_add(work.witness.rejected_pairs); return; }
++    }
++    static const bool prover_on = std::getenv("MHGP9_PROVER") != nullptr;
++    static const bool prover_linear = std::getenv("PV_LINEAR") != nullptr;
++    if (prover_on && !prover_linear) {
++      const auto t_p0 = __rdtsc();
++      static thread_local std::unique_ptr<DeadEdgeProver> prover;
++      static thread_local const Q2CensusIndex* prover_index = nullptr;
++      if (!prover || prover_index != index_.get()) { prover = std::make_unique<DeadEdgeProver>(*index_, std::getenv("PV_MAX")?std::atoi(std::getenv("PV_MAX")):8, std::getenv("PV_MIN")?std::atoi(std::getenv("PV_MIN")):2); prover_index = index_.get(); }
++      DeadEdgeProverWork pw;
++      if ((mask & 2U) != 0) { if (prover->prove(a, b, 12, k_ - 1, pw)) { mask &= ~2U; edge_stat.pv_q3p++; counter_add(work.witness.pair_q3_pairs); } else edge_stat.pv_q3f++; }
++      if ((mask & 4U) != 0 && k_ >= 3) { if (prover->prove(a, b, 8, k_ - 2, pw)) { mask &= ~4U; edge_stat.pv_q4p++; counter_add(work.witness.pair_q4_pairs); } else edge_stat.pv_q4f++; }
++      edge_stat.pv_cells += pw.cells; edge_stat.pv_pops += pw.pops; edge_stat.pv_fail_cells += pw.failed_cells; edge_stat.pv_deep += pw.deep_cells; edge_stat.pv_out += pw.outside_cells;
++      edge_stat.pv_cyc += __rdtsc() - t_p0;
+       if (mask == 0) { counter_add(work.witness.rejected_pairs); return; }
+     }
++    const auto t_e0 = __rdtsc();
++    const auto out0 = work.q3_emitted + work.q4_emitted;
++    const auto sites0 = work.cover_sites;
++    const int cls = mask==2?0:(mask==4?2:4);
++    struct Guard { WspdQ34Work& w; u64 out0, sites0; unsigned long long t0; int cls; unsigned long long p[4]{}; ~Guard(){ const int live = (w.q3_emitted+w.q4_emitted)>out0; edge_stat.n[cls+live]++; edge_stat.cyc[cls+live]+= __rdtsc()-t0; edge_stat.sites[cls+live]+= w.cover_sites-sites0; for(int j=0;j<4;++j) edge_stat.ph[cls+live][j]+=p[j]; } } guard{work,out0,sites0,t_e0,cls};
++    auto t_ph = __rdtsc();
++    const auto cover = Q34EdgeCover::make(index_, {a, b});
++    guard.p[0] += __rdtsc()-t_ph; t_ph = __rdtsc();
++    if (prover_on && prover_linear) {
++      const auto t_p0 = __rdtsc();
++      static thread_local std::unique_ptr<DeadEdgeProver> prover;
++      static thread_local const Q2CensusIndex* prover_index = nullptr;
++      if (!prover || prover_index != index_.get()) { prover = std::make_unique<DeadEdgeProver>(*index_, std::getenv("PV_MAX")?std::atoi(std::getenv("PV_MAX")):8, std::getenv("PV_MIN")?std::atoi(std::getenv("PV_MIN")):2); prover_index = index_.get(); }
++      prover->load_linear(a, b, cover->ranges(), index_->spatial_order());
++      DeadEdgeProverWork pw;
++      if ((mask & 2U) != 0) { if (prover->prove_loaded(12, k_ - 1, pw)) { mask &= ~2U; edge_stat.pv_q3p++; counter_add(work.witness.pair_q3_pairs); } else edge_stat.pv_q3f++; }
++      if ((mask & 4U) != 0 && k_ >= 3) { if (prover->prove_loaded(8, k_ - 2, pw)) { mask &= ~4U; edge_stat.pv_q4p++; counter_add(work.witness.pair_q4_pairs); } else edge_stat.pv_q4f++; }
++      edge_stat.pv_cells += pw.cells; edge_stat.pv_pops += pw.pops; edge_stat.pv_fail_cells += pw.failed_cells; edge_stat.pv_deep += pw.deep_cells; edge_stat.pv_out += pw.outside_cells;
++      edge_stat.pv_cyc += __rdtsc() - t_p0;
++      if (mask == 0) { counter_add(work.witness.rejected_pairs); return; }
++      t_ph = __rdtsc();
++    }
+     const bool q3 = (mask & 2U) != 0, q4 = (mask & 4U) != 0;
+     if (q3) counter_add(work.q3_edges);
+     if (q4) counter_add(work.q4_edges);
+     if (q3 && q4) counter_add(work.both_edges);
+-    const auto cover = Q34EdgeCover::make(index_, {a, b});
+     counter_add(work.cover_builds);
+     counter_add(work.cover_sites, static_cast<u64>(cover->site_count()));
+     work.max_cover_sites = std::max(work.max_cover_sites, static_cast<u64>(cover->site_count()));
+@@ -516,13 +588,18 @@
+         options_.q4_backend == WspdQ4Backend::Local28) {
+       atlas = Q4LocalAtlas::make(cover, k_, options_.local);
+       counter_add(work.q3_atlas.edges_with_atlas);
++      { const auto& sw=atlas->saturation_work(); const auto& aw=atlas->work();
++        edge_stat.sat_pt+=sw.prefixes.point_tests; edge_stat.sat_nv+=sw.prefixes.node_visits; edge_stat.all_pt+=aw.partition.point_tests; edge_stat.all_nv+=aw.partition.node_visits;
++        edge_stat.sat_cert+=sw.certificates; edge_stat.sat_unvisited+=sw.unvisited_site_mass; edge_stat.splits+=aw.splits; edge_stat.deep+=aw.deep_cells; }
+     }
++    guard.p[1] += __rdtsc()-t_ph; t_ph = __rdtsc();
+     if (q3) {
+       const auto root = atlas ? atlas->root_certified_inside_count() : std::nullopt;
+       if (root && *root >= k_ - 1) counter_add(work.q3_atlas.root_lane_skips);
+       else q3_edge(cover, atlas.get());
+       observe(cover);
+     }
++    guard.p[2] += __rdtsc()-t_ph; t_ph = __rdtsc();
+     if (q4) {
+       if (options_.q4_backend == WspdQ4Backend::Local28) {
+         const auto local = atlas
+@@ -537,6 +614,7 @@
+         observe(cover, window.peak_live_buffer_bytes);
+       }
+     }
++    guard.p[3] += __rdtsc()-t_ph;
+   }
+ 
+   void q3_seed(const Q34EdgeCoverPtr& cover, std::array<std::size_t, 3> ids, const Q4LocalAtlas* atlas) {

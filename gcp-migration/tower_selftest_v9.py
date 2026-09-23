@@ -56,24 +56,38 @@ import time
 TIMES = ('read', 'prepare', 'gen_index', 'q2', 'q34', 'merge', 'tower_index', 'census', 'tower', 'chain_total')
 
 
-def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt='', saturate=True, leaf=True):
+def fnv_u32le(raw):
+    h = 14695981039346656037
+    prime, mask = 1099511628211, (1 << 64) - 1
+    for byte in (len(raw) // 12).to_bytes(8, 'little'):
+        h = ((h ^ byte) * prime) & mask
+    for index in range(0, len(raw), 4):
+        for byte in raw[index:index + 4] + bytes(4):
+            h = ((h ^ byte) * prime) & mask
+    return '%016x' % h
+
+
+def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt='', saturate=True, leaf=True,
+                dead=True, schema=None):
     effective = min(k, n)
     complete = status == 'complete_relative'
     orders = [dict(K=q, nodes=2 * n * q, births=n * q, merges=n * q - 1, parents=2 * n * q - 1, contributions=n * q)
               for q in range(1, effective + 1)] if complete else []
     digest = hashlib.sha256((fnv + ':' + str(k) + ':' + str(s) + ':' + salt).encode()).hexdigest()[:16]
-    return dict(schema='mhgp9_tower_probe_v4', status=status,
+    return dict(schema='mhgp9_tower_probe_v5', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
-                             run_tower=True, atlas_saturate_deep=saturate, q3_leaf_census=leaf),
+                             run_tower=True, atlas_saturate_deep=saturate, q3_leaf_census=leaf,
+                             q34_dead_lanes=dead),
                 times_ms=dict({key: 0.125 for key in TIMES}, chain_total=1.5), chain_cpu_s=0.25,
                 generator=dict(q2_front_rectangles=3, q2_candidate_pairs=2, q2_accepted_pairs=1,
                                q34_expanded_pairs=4, q34_cover_builds=1, q3_emitted=2, q4_emitted=1),
-                ledger=dict(expanded_pairs=4, cover_builds=1, q3_seeds=3, atlas_cells=5),
+                ledger={name: 1 for name in schema['ledger']},
                 catalogue=dict(q2_presentations=1, q3_presentations=2, q4_presentations=1, unique_keys=4, balls=4,
                                extra_shell_balls=0, shell_over_12=0, max_shell=4, max_interior=3, census_nodes=9,
-                               census_leaf_tests=5, bytes=64, by_qmin=[1, 2, 1], by_shell=[0, 0, 1, 2, 1]),
+                               census_leaf_tests=5, bytes=64, by_qmin=[1, 2, 1],
+                               by_shell=[0, 0, 1, 2, 1] + [0] * 12),
                 tower_work=dict(records=4, extra_records=0, representatives=5, anchor_hits=1, key_lookups=4,
                                 intruder_queries=2, intruder_nodes=7, meb_calls=4, meb_power_tests=9, births=3,
                                 merges=2, contributions=3, grouped_lots=1, resolver_cache_hits=2,
@@ -87,11 +101,20 @@ def main():
     path, k, workers = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
     flags = [argument for argument in sys.argv[4:] if '=' not in argument]
     options = dict(argument[2:].split('=', 1) for argument in sys.argv[4:] if '=' in argument)
-    if (set(options) != {'s', 'static', 'grid'} or options['grid'] != '1mm' or len(flags) != 2 or
-            flags[0] not in ('--saturate-deep', '--no-saturate-deep') or flags[1] not in ('--q3-leaf', '--no-q3-leaf')):
+    if (set(options) != {'s', 'static', 'grid'} or options['grid'] != '1mm' or len(flags) != 3 or
+            flags[0] not in ('--saturate-deep', '--no-saturate-deep') or flags[1] not in ('--q3-leaf', '--no-q3-leaf') or
+            flags[2] not in ('--dead-lanes', '--no-dead-lanes')):
         print('argument refusal: selftest', file=sys.stderr)
         return 2
     raw = pathlib.Path(path).read_bytes()
+    if pathlib.Path(path).name == 'preflight.u32le':
+        value = probe_value(len(raw) // 12, fnv_u32le(raw), k, int(options['s']), workers, int(options['static']),
+                            'complete_relative', '', flags[0] == '--saturate-deep', flags[1] == '--q3-leaf',
+                            flags[2] == '--dead-lanes', config['schema'])
+        if config.get('fail_preflight'):
+            value['tower_work']['selftest_unknown'] = 1
+        print(json.dumps(value, separators=(',', ':')))
+        return 0
     scene = pathlib.Path(path).name[len('scene_'):-len('.u32le')]
     if hashlib.sha256(raw).hexdigest() != config['sha256'][scene]:
         print('input refusal: selftest', file=sys.stderr)
@@ -105,7 +128,8 @@ def main():
             status = 'unsupported_degeneracy'
     salt = str(workers) if config.get('salt_by_workers') else ''
     value = probe_value(len(raw) // 12, config['fnv'][scene], k, int(options['s']), workers, int(options['static']),
-                        status, salt, flags[0] == '--saturate-deep', flags[1] == '--q3-leaf')
+                        status, salt, flags[0] == '--saturate-deep', flags[1] == '--q3-leaf', flags[2] == '--dead-lanes',
+                        config['schema'])
     for rule in config.get('malform', []):
         if rule['scene'] == scene and rule['k'] == k:
             value['tower_work']['meb_accounting'] = 'selftest_unpinned_accounting'
@@ -185,9 +209,22 @@ def refused(function, *args, **kwargs):
     return False
 
 
+def fnv_u32le_host(raw):
+    namespace = {'__name__': 'mhgp9_fake_probe'}
+    exec(compile(FAKE_PROBE, 'mhgp9_fake_probe', 'exec'), namespace)
+    return namespace['fnv_u32le'](raw)
+
+
+def fake_schema():
+    # Formes exigees par le worker ; l'autorite du schema reste la porte CTest
+    # qui juge la VRAIE sonde (probe_worker_contract), pas ce faux producteur.
+    return dict(ledger=sorted(worker.LEDGER_KEYS))
+
+
 def probe_value(*args, **kwargs):
     namespace = {'__name__': 'mhgp9_fake_probe'}
     exec(compile(FAKE_PROBE, 'mhgp9_fake_probe', 'exec'), namespace)
+    kwargs.setdefault('schema', fake_schema())
     return namespace['probe_value'](*args, **kwargs)
 
 
@@ -254,7 +291,7 @@ def fake_tools(directory, **config):
     fakebin = directory / 'fakebin'
     fakebin.mkdir()
     base = dict(sha256={scene: data['sha256'] for scene, data in worker.INPUTS.items()},
-                fnv={scene: data['fnv'] for scene, data in worker.INPUTS.items()})
+                fnv={scene: data['fnv'] for scene, data in worker.INPUTS.items()}, schema=fake_schema())
     base.update(config)
     (fakebin / 'config.json').write_text(json.dumps(base))
     (fakebin / 'system_header.hpp').write_text('// selftest system header outside the snapshot\n')
@@ -516,7 +553,8 @@ class Protocol(unittest.TestCase):
             ('00', 5, 48), ('00', 10, 48), ('01', 5, 48), ('01', 10, 48), ('02', 5, 48), ('02', 10, 48),
             ('00', 5, 24), ('00', 5, 1)] and all(
                 c['s'] == 8 and c['static_threads'] == (c['workers'] if c['workers'] > 1 else 0) and
-                c['saturate_deep'] is True and c['q3_leaf'] is True and c['repeat'] == 0 for c in cases),
+                c['saturate_deep'] is True and c['q3_leaf'] is True and c['dead_lanes'] is True and c['repeat'] == 0
+                for c in cases),
                'default plan order and parameters')
         # Temoin independant : git archive du meme commit, jamais le worktree.
         exported = subprocess.run(['git', '-C', str(ROOT), 'archive', '--format=tar', 'HEAD', worker.SOURCE_ROOT],
@@ -551,6 +589,7 @@ class Protocol(unittest.TestCase):
         for key, value in [('k', 7), ('k', True), ('s', 9), ('s', 6), ('workers', 0), ('workers', 1025),
                            ('static_threads', -1), ('repeat', -1), ('n', 39884), ('n', True), ('scene', '03'),
                            ('saturate_deep', 1), ('saturate_deep', None), ('q3_leaf', 0), ('q3_leaf', 'yes'),
+                           ('dead_lanes', 1), ('dead_lanes', None),
                            ('scene', '../00'), ('file', 'data/scene_01.u32le'), ('extra', 1)]:
             bad = deepcopy(plan)
             bad['cases'][0][key] = value
@@ -623,7 +662,11 @@ class Protocol(unittest.TestCase):
         data = worker.INPUTS['00']
         good = probe_value(data['n'], data['fnv'], 5, 8, 48, 48)
         need(worker.validate_probe(worker.strict_json(json.dumps(good)), plan_case, 0) == 'complete_relative', 'valid')
-        worker.validate_external_wall(good, 0.5)
+        worker.validate_external_wall(good, 0.0015)
+        need(refused(worker.validate_external_wall, good, 0.0015 - worker.EXTERNAL_WALL_TOLERANCE_SECONDS - 0.001),
+             'wall tolerance is not a free second')
+        pre_raw = worker.preflight_cloud()
+        need(fnv_u32le_host(pre_raw) == worker.input_fnv(pre_raw), 'fake FNV matches the worker FNV')
         need(refused(worker.validate_external_wall, good, -1.0) and
              refused(worker.validate_external_wall, dict(good, times_ms=dict(good['times_ms'], chain_total=9000.0)),
                      5.0), 'chain total bounded by the external wall')
@@ -639,6 +682,8 @@ class Protocol(unittest.TestCase):
                      ('leaf_mode', lambda v: v['options'].update(q3_leaf_census=False)),
                      ('leaf_mode_type', lambda v: v['options'].update(q3_leaf_census=1)),
                      ('leaf_mode_absent', lambda v: v['options'].pop('q3_leaf_census')),
+                     ('dead_mode', lambda v: v['options'].update(q34_dead_lanes=False)),
+                     ('dead_mode_absent', lambda v: v['options'].pop('q34_dead_lanes')),
                      ('meb_accounting', lambda v: v['tower_work'].update(meb_accounting='other')),
                      ('meb_accounting_absent', lambda v: v['tower_work'].pop('meb_accounting')),
                      ('meb_sizes_type', lambda v: v['tower_work'].update(meb_supports_by_size='4,3')),
@@ -649,6 +694,15 @@ class Protocol(unittest.TestCase):
                      ('tower_work_text', lambda v: v['tower_work'].update(records='4')),
                      ('tower_work_list', lambda v: v['tower_work'].update(births=[3])),
                      ('stage_sum', lambda v: v['times_ms'].update(q34=5.0)),
+                     ('meb_sizes_short', lambda v: v['tower_work'].update(meb_supports_by_size=[0])),
+                     ('tower_work_unknown', lambda v: v['tower_work'].update(extra=1)),
+                     ('tower_work_missing', lambda v: v['tower_work'].pop('records')),
+                     ('generator_missing', lambda v: v['generator'].pop('q34_expanded_pairs')),
+                     ('ledger_missing', lambda v: v['ledger'].pop('q3_seeds')),
+                     ('ledger_unknown', lambda v: v['ledger'].update(extra=1)),
+                     ('by_qmin_empty', lambda v: v['catalogue'].update(by_qmin=[])),
+                     ('by_shell_empty', lambda v: v['catalogue'].update(by_shell=[])),
+                     ('catalogue_unknown', lambda v: v['catalogue'].update(extra=1)),
                      ('run_tower', lambda v: v['options'].update(run_tower=False)),
                      ('K_effective', lambda v: v['options'].update(K_effective=4)),
                      ('orders', lambda v: v['orders'].pop()), ('order_key', lambda v: v['orders'][0].update(extra=1)),
@@ -769,6 +823,24 @@ class Protocol(unittest.TestCase):
             need('probe counters tower_work' in value['case_outcomes'][1]['reason'] and
                  not any((output / ('probe_' + str(i) + '.command.json')).exists() for i in range(2, 8)),
                  'skipped cases never launched after a protocol defect')
+
+    def test_preflight_failure_runs_no_case(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            code, receipt, fake, host = run_scenario(Path(temporary), tools=dict(fail_preflight=True))
+            need(code == 1 and receipt['status'] == 'worker_failed' and receipt['worker_status'] == 'preflight_failed',
+                 'preflight failure host receipt: ' + json.dumps(receipt)[:600])
+            expect_certified_stop(receipt, fake)
+            output = host / 'received/output'
+            need((output / 'preflight.command.json').is_file() and
+                 not (output / 'probe_0.command.json').exists(), 'no LiDAR case after a failed native preflight')
+
+    def test_zero_complete_campaign_is_refused(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            refuse = [dict(scene=scene, k=k) for scene in ('00', '01', '02') for k in (5, 10)]
+            code, receipt, fake, host = run_scenario(Path(temporary), tools=dict(refuse=refuse))
+            need(code == 1 and receipt['status'] != 'completed' and receipt['status'] != 'partial',
+                 'zero-complete campaign must not be a success: ' + json.dumps(receipt)[:600])
+            expect_certified_stop(receipt, fake)
 
     def test_worker_build_failure_still_stops(self):
         with tempfile.TemporaryDirectory() as temporary:

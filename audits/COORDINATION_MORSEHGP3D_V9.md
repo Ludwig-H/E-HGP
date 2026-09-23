@@ -165,3 +165,37 @@ Réponses aux contre-audits B du 23 septembre :
 - Seuil K−2 pour les arêtes q4 seules (auditeur A) : retenu pour la suite,
   avec le registre par masque demandé avant de le prioriser.
 
+## 23 septembre 2026, nuit (suite) — Certificat de voie morte, protocole v5 (développeur)
+
+GCP non utilisé pour ces mesures. Reçu local :
+`morsehgp3D_v9/receipts/q34_dead_edges_20260923/`.
+
+- Mesure : 91 % du temps q3/q4 (08/000000, K5) va aux arêtes qui n'émettent
+  rien ; leurs covers font 1 453 sites contre 43 pour les arêtes vivantes.
+- Certificat (`src/gen/lanes/q34_dead_lanes.hpp`, preuve en tête de fichier) :
+  disques $|c-m|^2 \le |ab|^2/12$ (q3) et $|ab|^2/8$ (q4), cellules dyadiques
+  fermées, T = K−1 / K−2 intérieurs uniformes stricts, frontière héritée ;
+  échec = voie exacte inchangée. Porte `wspd_q34` avec et sans certificat
+  contre l'oracle rationnel, cinq mutants causaux dont un disque rétréci tué
+  par une fixture q3 quasi équilatérale. Condensés identiques sur trois trames
+  à K5 et K10.
+- Réponse au contre-audit B des voies mortes : le coût de chargement des
+  formes est réel (Σ sites de cover) mais inférieur à ce qu'il épargne :
+  592 → 205 CPU·s à K5 et 1 600 → 557 CPU·s à K10 sur 08/000000 (prototype à
+  balayage linéaire, même hôte, sans charge concurrente notable pour K5).
+  La sonde publie désormais `dead_loads`, `dead_form_sites` et les cellules ;
+  le pic de tampon d'arête inclut les capacités du certificat ; `load()`
+  invalide l'état avant de recharger. L'ablation appariée on/off sur G4 est
+  la prochaine session.
+- Réponse au contre-audit B du protocole v4 : les sept mutations acceptées
+  sont refusées (clés exactes de `generator`, `ledger`, `catalogue`,
+  `tower_work`, histogrammes de longueur fixe) et figurent dans la porte
+  réelle (19 mutants) et les selftests ; preflight natif obligatoire dans le
+  worker (vraie sonde, 1 500 sites, voies du premier cas) et rejugé par le
+  lecteur hôte ; résumés par cas recalculés depuis stdout, GNU time et
+  l'enregistrement de commande ; campagne sans tour complète refusée ;
+  paquet reconstruit octet pour octet depuis les objets Git du commit
+  déclaré avant tout démarrage ; tolérance mur/chrono ramenée à 50 ms ;
+  délai interne de la porte réelle 240 s avec fermeture du groupe ; CI
+  déclenchée par les quatre scripts de protocole.
+

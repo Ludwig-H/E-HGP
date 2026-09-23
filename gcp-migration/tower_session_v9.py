@@ -52,7 +52,7 @@ need, sha, save, unique, fields, epoch, target = (
     legacy.need, legacy.sha, legacy.save, legacy.unique, legacy.fields, legacy.epoch, legacy.target)
 generation_from_records, closure_generation = legacy.generation_from_records, legacy.closure_generation
 Commands, extract_capture = legacy.Commands, legacy.extract_capture
-FIXED_COMMANDS = ('compiler', 'cmake_version', 'time_version', 'lscpu', 'nproc', 'configure', 'build')
+FIXED_COMMANDS = ('compiler', 'cmake_version', 'time_version', 'lscpu', 'nproc', 'configure', 'build', 'preflight')
 CASE_COMMAND = re.compile(r'(uptime_before|probe|uptime_after)_(0|[1-9][0-9]*)')
 
 
@@ -170,6 +170,20 @@ def validate_received(output, manifest, worker_pin, expected_cases):
          'strict CMake configure/build invocation (no -Wno-error)')
     cases = payload.validate_plan(dict(schema=value.get('plan_schema'), cases=value.get('cases')), manifest)
     need(cases == expected_cases, 'worker case plan differs from transported plan')
+    # Preflight natif rejuge a la reception : memes octets de nuage, meme
+    # invocation, sortie complete sous le meme validateur que les cas.
+    pre_raw = (output / payload.PREFLIGHT_FILE).read_bytes()
+    need(pre_raw == payload.preflight_cloud(), 'preflight cloud bytes')
+    pre_case = payload.preflight_case(cases, pre_raw)
+    pre_argv = rows['preflight']['argv']
+    need(pre_argv[:2] == [payload.TIME, '-v'] and pre_argv[2] == configure[4] + '/' + payload.PROBE_TARGET and
+         pre_argv[3].endswith('/' + payload.PREFLIGHT_FILE) and pre_argv[4:] == payload.expected_probe_tail(pre_case),
+         'exact preflight invocation')
+    pre_value = payload.strict_json((output / 'preflight.stdout').read_bytes())
+    need(payload.validate_probe(pre_value, pre_case, 0, inputs=payload.preflight_inputs(pre_raw)) == 'complete_relative'
+         and value.get('preflight') == dict(sites=pre_case['n'], tower_digest=pre_value['tower_digest']),
+         'preflight recomputation')
+    payload.validate_external_wall(pre_value, rows['preflight'].get('elapsed_seconds'))
     outcomes = value.get('case_outcomes')
     need(type(outcomes) is list and len(outcomes) == len(cases), 'case outcome list')
     values, exhausted = {}, False
@@ -203,12 +217,18 @@ def validate_received(output, manifest, worker_pin, expected_cases):
         probe = payload.strict_json((output / (name + '.stdout')).read_bytes())
         need(payload.validate_probe(probe, case, row['exit_code']) == outcome, 'probe outcome recomputation')
         payload.validate_external_wall(probe, row.get('elapsed_seconds'))
-        payload.validate_gnu_time((output / (name + '.stderr')).read_text(errors='replace'), row['exit_code'])
-        need(entry.get('probe_status') == probe['status'] and entry.get('tower_digest') == probe['tower_digest'],
-             'case summary differs from raw probe output')
+        rss = payload.validate_gnu_time((output / (name + '.stderr')).read_text(errors='replace'), row['exit_code'])
+        need(entry.get('probe_status') == probe['status'] and entry.get('tower_digest') == probe['tower_digest'] and
+             entry.get('elapsed_seconds') == row.get('elapsed_seconds') and
+             entry.get('chain_total_ms') == probe['times_ms']['chain_total'] and entry.get('gnu_time_max_rss_kb') == rss,
+             'case summary differs from raw probe output / GNU time / command record')
+        summary = payload.strict_json((output / (name + '.summary.json')).read_bytes())
+        need(summary == dict(case=case, input_file_sha256=manifest[case['file']], **entry), 'case summary file')
         values[index] = probe
     completed = [i for i, entry in enumerate(outcomes) if entry['outcome'] == 'complete_relative']
     need(value.get('completed_case_indices') == completed, 'completed case indices')
+    # Un plan sans aucune tour achevee n'est jamais un succes de reception.
+    need(completed, 'no complete tower in the campaign')
     comparisons = payload.compare_cases(cases, outcomes, values)
     need(value.get('cross_worker_comparisons') == comparisons and all(item['equal'] for item in comparisons),
          'cross-worker object comparison')
@@ -429,11 +449,22 @@ def require_committed_protocol(snapshot, snapshot_sha256):
          sha(snapshot) == snapshot_sha256, 'snapshot pin')
     try:
         with tarfile.open(snapshot, 'r:*') as archive:
-            provenance = payload.strict_json(archive.extractfile(payload.PROVENANCE).read())
+            files = {member.name: archive.extractfile(member).read() for member in archive.getmembers()
+                     if member.isfile()}
+        provenance = payload.strict_json(files[payload.PROVENANCE])
     except (KeyError, tarfile.TarError, OSError) as error:
         raise ValueError('snapshot provenance unreadable: ' + type(error).__name__) from error
     need(type(provenance) is dict and provenance.get('protocol_source') == 'commit',
          'real session refused: v9 protocol files are not committed at the snapshot commit')
+    # Recertification Git a la reception (contre-audit B) : le paquet doit se
+    # reconstruire octet pour octet depuis les objets du commit qu'il declare,
+    # plan transporte compris ; une archive qui s'attribue un commit echoue.
+    import tower_snapshot_v9 as snapshot_builder
+    rebuilt, rebuilt_provenance = snapshot_builder.collect(provenance.get('commit', ''), plan_raw=files[payload.PLAN])
+    need(rebuilt_provenance == provenance and
+         {name: hashlib.sha256(raw).hexdigest() for name, raw in rebuilt.items()} ==
+         {name: hashlib.sha256(raw).hexdigest() for name, raw in files.items()},
+         'snapshot is not reproducible from the Git objects of its declared commit')
 
 
 def main(argv=None):

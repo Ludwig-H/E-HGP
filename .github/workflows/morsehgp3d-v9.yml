@@ -6,12 +6,18 @@ on:
     paths:
       - 'morsehgp3D_v9/**'
       - 'gcp-migration/tower_worker_v9.py'
+      - 'gcp-migration/tower_session_v9.py'
+      - 'gcp-migration/tower_snapshot_v9.py'
+      - 'gcp-migration/tower_selftest_v9.py'
       - 'tools/check_docs.py'
       - '.github/workflows/morsehgp3d-v9.yml'
   pull_request:
     paths:
       - 'morsehgp3D_v9/**'
       - 'gcp-migration/tower_worker_v9.py'
+      - 'gcp-migration/tower_session_v9.py'
+      - 'gcp-migration/tower_snapshot_v9.py'
+      - 'gcp-migration/tower_selftest_v9.py'
       - 'tools/check_docs.py'
       - '.github/workflows/morsehgp3d-v9.yml'
 
@@ -50,6 +56,11 @@ jobs:
       - name: Run bounded gates, oracles and causal mutants
         run: |
           ctest --test-dir build/v9 --output-on-failure --no-tests=error -L '^gate$' --parallel 2 --output-junit gates.xml
+
+      - name: Run the offline G4 protocol selftests (fake cloud, never GCP)
+        run: |
+          python3 -B gcp-migration/tower_selftest_v9.py
+          python3 -B -O gcp-migration/tower_selftest_v9.py
 
       - name: State the qualification boundary
         run: |

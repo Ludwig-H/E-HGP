@@ -103,6 +103,24 @@ fixture du contre-audit B (`a=(14,20,20)`, `b=(26,20,20)`, `x=(20,29,20)`,
 servie par un fragment conservé) et planchers ; deux mutants causaux
 (coquille comptée intérieure sur la feuille, compte certifié oublié).
 
+Code neuf v9 (23 septembre 2026) : le **certificat de voie morte**
+(`lanes/q34_dead_lanes.{hpp,cpp}`, option `WspdQ34Options::dead_lanes`,
+défaut de la chaîne). Mesure qui le motive : sur 08/000000 sans sol à K5, les
+arêtes qui n'émettent **rien** prennent 91 % du temps q3/q4 (atlas 38 %, voie
+q3 27 %), avec des covers de 568 sites contre 43 pour les arêtes vivantes.
+Énoncé : les centres des boules possédées par ab vérifient
+$|c-m|^2 \le |ab|^2/12$ (q3 aiguë) et $|c-m|^2 \le |ab|^2/8$ (q4 positive),
+par l'identité barycentrique du rayon ; une voie est vide si des cellules
+dyadiques fermées recouvrent son disque, chacune disjointe du disque ou
+portant au moins $T$ sites distincts du cover strictement intérieurs pour
+tous ses centres ($T=K-1$ en q3, $K-2$ en q4). Formes affines des sites du
+cover calculées une fois par arête, maximum exact aux coins en i64 ; un échec
+ne dit rien et la voie exacte tourne inchangée. Porte `wspd_q34` : variantes
+avec et sans certificat sur toutes les fixtures contre l'oracle rationnel,
+identités de masse étendues aux voies prouvées, fixture d'une q3 presque
+équilatérale au bord du disque, cinq mutants causaux (seuils K−2 en q3 et
+K−3 en q4, contact compté intérieur, un seul coin, disque rétréci).
+
 ## Chaîne : `src/chain/` (espace `mhgp9`, code neuf)
 
 `run_tower_chain` enchaîne le générateur (configuration mesurée des reçus v8 :

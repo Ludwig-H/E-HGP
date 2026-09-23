@@ -5,6 +5,7 @@
 #include "lanes/q4_window.hpp"
 #include "lanes/q34_witness_search.hpp"
 #include "lanes/q3_ball_census.hpp"
+#include "lanes/q34_dead_lanes.hpp"
 #include "wspd/front.hpp"
 
 #include <functional>
@@ -38,6 +39,12 @@ struct WspdQ34Options {
   // sites) instead of the global index. Same depth and shell; off keeps the
   // v8 path and every historical counter.
   bool q3_leaf_census{false};
+  // v9 option: after the witness filter and the cover build, an exact
+  // dead-lane certificate (lanes/q34_dead_lanes.hpp) removes a lane whose
+  // whole center disk is covered by cells with >=T uniform strict interiors
+  // (T=K-1 for q3, K-2 for q4). Such a lane emits nothing on the exact path
+  // either: same stream. Off keeps the v8 path and every historical counter.
+  bool dead_lanes{false};
   // Parallel entry only: every surviving residual rectangle is published to
   // the team's bounded task queue, by ranges of a-ranks when its pair mass
   // exceeds this grain, so that any idle worker expands it; the discovering
@@ -98,6 +105,9 @@ struct WspdQ34Work {
   Q3BallCensusWork q3_blocks;
   Q4SeedCellWork q4_seed_cells;
   WspdQ3AtlasWork q3_atlas;
+  // v9 dead-lane certificate; a proved lane is counted here, not in
+  // q3_edges/q4_edges (lane mass identities include q3_proved/q4_proved).
+  Q34DeadLaneWork dead;
 };
 
 struct WspdQ34Result {

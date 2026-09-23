@@ -14,8 +14,9 @@ Ce qui change pour la v9 :
   epingles (sha256, taille, empreinte FNV-1a de la sonde) ;
 - chaque cas du plan a un plafond propre ; un cas qui l'atteint est tue et
   consigne, les suivants sont sautes quand le budget utile est epuise ;
-- chaque cas epingle les deux voies geometriques (saturation de l'atlas,
-  census q3 sur feuille), passees explicitement a la sonde et relues ;
+- chaque cas epingle les trois voies geometriques (saturation de l'atlas,
+  census q3 sur feuille, certificat de voie morte), passees explicitement a
+  la sonde et relues ;
 - une sortie de sonde refusee par le validateur est un defaut deterministe
   de protocole : les cas suivants sont sautes au lieu de repeter le calcul
   (session G4 R2 du 23 septembre 2026, treize cas refuses pour un champ).
@@ -45,9 +46,9 @@ HELPER = 'gcp-migration/full_probe_worker_v7.py'
 HELPER_SHA = 'da967163bdb7247bc6aad4df0c294cda1071076a0127cd5bd9f59bc0e4788439'
 PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
-PLAN_SCHEMA = 'mhgp9_tower_plan_v2'
+PLAN_SCHEMA = 'mhgp9_tower_plan_v3'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v4'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v5'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -95,12 +96,12 @@ PROBE_STATUSES = ('complete_relative', 'unsupported_degeneracy', 'invalid_input'
 OUTCOMES = ('complete_relative', 'explicit_refusal', 'killed_case_cap', 'killed_budget',
             'skipped_budget', 'probe_failed', 'skipped_protocol_defect')
 CASE_KEYS = frozenset({'scene', 'file', 'n', 'k', 's', 'workers', 'static_threads', 'saturate_deep', 'q3_leaf',
-                       'repeat'})
+                       'dead_lanes', 'repeat'})
 TOP_KEYS = frozenset({'schema', 'status', 'reason', 'input', 'options', 'times_ms', 'chain_cpu_s', 'generator',
                       'ledger', 'catalogue', 'tower_work', 'orders', 'tower_digest', 'peak_rss_kb'})
 INPUT_KEYS = frozenset({'format', 'grid', 'sites', 'hash'})
 OPTION_KEYS = frozenset({'K', 'K_effective', 's', 'workers', 'tower_static_threads', 'run_tower', 'atlas_saturate_deep',
-                         'q3_leaf_census'})
+                         'q3_leaf_census', 'q34_dead_lanes'})
 TIME_KEYS = frozenset({'read', 'prepare', 'gen_index', 'q2', 'q34', 'merge', 'tower_index', 'census', 'tower',
                        'chain_total'})
 ORDER_KEYS = frozenset({'K', 'nodes', 'births', 'merges', 'parents', 'contributions'})
@@ -108,6 +109,36 @@ ORDER_KEYS = frozenset({'K', 'nodes', 'births', 'merges', 'parents', 'contributi
 # (libelle de comptabilite epingle, histogramme des tailles de supports).
 MEB_ACCOUNTING = 'anchor_meb_first_maximal_pair_then_lexicographic_supports_extremes_first_v2'
 TOWER_WORK_TYPED = frozenset({'meb_accounting', 'meb_supports_by_size'})
+# Schema v5 EXACT des sections de travail (contre-audit B du protocole v4) :
+# champ manquant, inconnu ou histogramme de mauvaise longueur = refus.
+GENERATOR_KEYS = frozenset(('q2_front_rectangles q2_candidate_pairs q2_accepted_pairs q34_expanded_pairs '
+                            'q34_cover_builds q3_emitted q4_emitted').split())
+LEDGER_KEYS = frozenset((
+    'expanded_pairs cover_builds cover_sites cover_node_visits q3_edges q4_edges both_edges '
+    'witness_input_pair_mass witness_rejected_rectangles witness_rejected_pairs q3_seeds q3_ball_builds '
+    'q3_depth_rejections q3_census_bounds q3_census_point_tests q3_atlas_edges q3_atlas_locations '
+    'q3_atlas_rejections q3_atlas_outside_domain atlas_cells atlas_leaf_cells atlas_deep_cells '
+    'atlas_outside_cells atlas_splits atlas_node_visits atlas_block_bounds atlas_point_tests atlas_ids_copied '
+    'q4_seeds q4_live_leaves q4_whole_atlas_skips q4_sweep_events q3_leaf_censuses q3_leaf_point_tests '
+    'q3_leaf_rejections q3_lower_bound_fallbacks dead_loads dead_form_sites dead_cells dead_outside_cells '
+    'dead_deep_cells dead_failed_cells dead_uniform_tests dead_point_tests dead_q3_proved dead_q3_open '
+    'dead_q4_proved dead_q4_open').split())
+CATALOGUE_LISTS = dict(by_qmin=3, by_shell=17)
+CATALOGUE_KEYS = frozenset(('q2_presentations q3_presentations q4_presentations unique_keys balls '
+                            'extra_shell_balls shell_over_12 max_shell max_interior census_nodes census_leaf_tests '
+                            'bytes by_qmin by_shell').split())
+TOWER_WORK_KEYS = frozenset(('records extra_records representatives anchor_hits key_lookups intruder_queries '
+                             'intruder_nodes meb_calls meb_power_tests births merges contributions grouped_lots '
+                             'resolver_cache_hits meb_accounting meb_pair_distances meb_materializations '
+                             'meb_supports_by_size').split())
+MEB_SIZES_LENGTH = 4
+# Tolerance du rapprochement chrono interne / mur externe du cas (horloges
+# monotones de la meme machine ; granularite, pas une marge de contrat).
+EXTERNAL_WALL_TOLERANCE_SECONDS = 0.05
+# Preflight natif (lecon de R2) : la vraie sonde sur un petit nuage
+# deterministe, jugee par validate_probe, avant tout cas LiDAR.
+PREFLIGHT_FILE = 'preflight.u32le'
+PREFLIGHT_SITES = 1500
 STAGE_TIME_KEYS = ('prepare', 'gen_index', 'q2', 'q34', 'merge', 'tower_index', 'census', 'tower')
 SCOPE = 'FULL_tower_chain_relative_to_cross_checked_catalogue'
 
@@ -177,7 +208,8 @@ def validate_sources(read_bytes):
          'CMake target mhgp9_tower_probe absent')
     need(all(token in probe for token in (PROBE_SCHEMA.encode(), b'"--s="', b'"--static="', b'"--grid="',
                                           b'"--saturate-deep"', b'"--no-saturate-deep"', b'"--q3-leaf"',
-                                          b'"--no-q3-leaf"', b'q3_leaf_census')),
+                                          b'"--no-q3-leaf"', b'q3_leaf_census', b'"--dead-lanes"',
+                                          b'"--no-dead-lanes"', b'q34_dead_lanes')),
          'tower probe schema/CLI differs from the v9 protocol')
 
 
@@ -197,9 +229,10 @@ def validate_plan(plan, manifest):
         need(type(case['k']) is int and case['k'] in (5, 10) and type(case['s']) is int and case['s'] in (8, 10, 12) and
              _integer(case['workers'], 1, 48) and _integer(case['static_threads'], 0, 48) and
              type(case['saturate_deep']) is bool and type(case['q3_leaf']) is bool and
+             type(case['dead_lanes']) is bool and
              _integer(case['repeat'], 0, (1 << 32) - 1), 'tower case domain')
         identity = tuple(case[key] for key in ('scene', 'k', 's', 'workers', 'static_threads', 'saturate_deep',
-                                               'q3_leaf', 'repeat'))
+                                               'q3_leaf', 'dead_lanes', 'repeat'))
         need(identity not in seen, 'duplicate case needs an explicit distinct repetition')
         seen.add(identity)
     return plan['cases']
@@ -285,14 +318,16 @@ def probe_command(build, root, case):
     return [str(build / PROBE_TARGET), str(root / case['file']), str(case['k']), str(case['workers']),
             '--s=' + str(case['s']), '--static=' + str(case['static_threads']), '--grid=1mm',
             '--saturate-deep' if case['saturate_deep'] else '--no-saturate-deep',
-            '--q3-leaf' if case['q3_leaf'] else '--no-q3-leaf']
+            '--q3-leaf' if case['q3_leaf'] else '--no-q3-leaf',
+            '--dead-lanes' if case['dead_lanes'] else '--no-dead-lanes']
 
 
 def expected_probe_tail(case):
     return [str(case['k']), str(case['workers']), '--s=' + str(case['s']),
             '--static=' + str(case['static_threads']), '--grid=1mm',
             '--saturate-deep' if case['saturate_deep'] else '--no-saturate-deep',
-            '--q3-leaf' if case['q3_leaf'] else '--no-q3-leaf']
+            '--q3-leaf' if case['q3_leaf'] else '--no-q3-leaf',
+            '--dead-lanes' if case['dead_lanes'] else '--no-dead-lanes']
 
 
 def _count(value):
@@ -304,20 +339,57 @@ def _number(value):
 
 
 def _tower_work(value):
-    if type(value) is not dict or not value or not TOWER_WORK_TYPED <= set(value):
+    if type(value) is not dict or set(value) != TOWER_WORK_KEYS:
         return False
     for name, item in value.items():
-        if type(name) is not str:
-            return False
         if name == 'meb_accounting':
             if item != MEB_ACCOUNTING:
                 return False
         elif name == 'meb_supports_by_size':
-            if type(item) is not list or not 1 <= len(item) <= 8 or not all(_count(x) for x in item):
+            if type(item) is not list or len(item) != MEB_SIZES_LENGTH or not all(_count(x) for x in item):
                 return False
         elif not _count(item):
             return False
     return True
+
+
+def _counters(value, keys):
+    return type(value) is dict and set(value) == keys and all(_count(item) for item in value.values())
+
+
+def _catalogue(value):
+    if type(value) is not dict or set(value) != CATALOGUE_KEYS:
+        return False
+    for name, item in value.items():
+        if name in CATALOGUE_LISTS:
+            if type(item) is not list or len(item) != CATALOGUE_LISTS[name] or not all(_count(x) for x in item):
+                return False
+        elif not _count(item):
+            return False
+    return True
+
+
+def preflight_cloud():
+    """Nuage u18 deterministe (LCG 64 bits, trois grappes) du preflight natif."""
+    state, out = 3, bytearray()
+    for i in range(PREFLIGHT_SITES):
+        centre = (i % 3) * 40000 + 20000
+        coords = []
+        for _ in range(3):
+            state = (state * 6364136223846793005 + 1442695040888963407) % (1 << 64)
+            coords.append(centre + (state >> 40) % 9000)
+        out += struct.pack('<3I', *coords)
+    return bytes(out)
+
+
+def preflight_case(cases, raw):
+    """Cas du preflight : les voies du premier cas du plan, K5, deux fils."""
+    return dict(cases[0], scene='preflight', file=PREFLIGHT_FILE, n=len(raw) // 12, k=5, workers=2, static_threads=2,
+                repeat=0)
+
+
+def preflight_inputs(raw):
+    return {'preflight': dict(n=len(raw) // 12, fnv=input_fnv(raw))}
 
 
 def validate_probe(value, case, exit_code, inputs=None):
@@ -329,8 +401,7 @@ def validate_probe(value, case, exit_code, inputs=None):
     need(type(value) is dict and set(value) == TOP_KEYS, 'probe JSON fields')
     need(value['schema'] == PROBE_SCHEMA and value['status'] in PROBE_STATUSES and type(value['reason']) is str,
          'probe schema/status')
-    need(type(value['ledger']) is dict and value['ledger'] and
-         all(type(k) is str and type(v) is int and v >= 0 for k, v in value['ledger'].items()), 'probe ledger')
+    need(_counters(value['ledger'], LEDGER_KEYS), 'probe ledger')
     data = (INPUTS if inputs is None else inputs)[case['scene']]
     source = value['input']
     need(type(source) is dict and set(source) == INPUT_KEYS and source['format'] == 'u32le' and
@@ -341,6 +412,7 @@ def validate_probe(value, case, exit_code, inputs=None):
          options['s'] == case['s'] and options['workers'] == case['workers'] and
          options['tower_static_threads'] == case['static_threads'] and options['run_tower'] is True and
          options['atlas_saturate_deep'] is case['saturate_deep'] and options['q3_leaf_census'] is case['q3_leaf'] and
+         options['q34_dead_lanes'] is case['dead_lanes'] and
          type(options['K_effective']) is int, 'probe options')
     times = value['times_ms']
     need(type(times) is dict and set(times) == TIME_KEYS and all(_number(item) for item in times.values()) and
@@ -349,13 +421,9 @@ def validate_probe(value, case, exit_code, inputs=None):
     # mesuree a part) : leur somme ne peut pas le depasser, a l'arrondi pres.
     need(sum(times[key] for key in STAGE_TIME_KEYS) <= times['chain_total'] + 0.01 * len(STAGE_TIME_KEYS),
          'probe stage times exceed the chain total')
-    need(type(value['generator']) is dict and value['generator'] and
-         all(type(name) is str and _count(item) for name, item in value['generator'].items()), 'probe counters generator')
+    need(_counters(value['generator'], GENERATOR_KEYS), 'probe counters generator')
     need(_tower_work(value['tower_work']), 'probe counters tower_work')
-    catalogue = value['catalogue']
-    need(type(catalogue) is dict and {'unique_keys', 'balls', 'by_qmin', 'by_shell'} <= set(catalogue) and
-         all(all(_count(x) for x in item) if type(item) is list else _count(item) for item in catalogue.values()),
-         'probe catalogue')
+    need(_catalogue(value['catalogue']), 'probe catalogue')
     orders = value['orders']
     need(type(orders) is list and all(type(order) is dict and set(order) == ORDER_KEYS and
                                       all(_count(item) for item in order.values()) for order in orders), 'probe orders')
@@ -372,7 +440,8 @@ def validate_probe(value, case, exit_code, inputs=None):
 
 def validate_external_wall(value, elapsed_seconds):
     """Le chrono interne de chaine est borne par le mur externe du cas."""
-    need(_number(elapsed_seconds) and value['times_ms']['chain_total'] / 1000.0 <= elapsed_seconds + 1.0,
+    need(_number(elapsed_seconds) and
+         value['times_ms']['chain_total'] / 1000.0 <= elapsed_seconds + EXTERNAL_WALL_TOLERANCE_SECONDS,
          'chain total exceeds the external wall time of the case')
 
 
@@ -426,6 +495,10 @@ def compiled_dependencies(build, root, before):
 
 
 class BuildFailed(Exception):
+    pass
+
+
+class PreflightFailed(Exception):
     pass
 
 
@@ -512,6 +585,24 @@ def execute(args):
         save(output / 'compiled_dependencies.json', consumed)
         result.update(binary_sha256=binary_sha,
                       compiled_dependency_manifest_sha256=sha(output / 'compiled_dependencies.json'))
+        # Preflight natif avant tout cas LiDAR : la sonde reelle, les voies du
+        # premier cas, jugee par le meme validate_probe. Echec = aucun cas.
+        pre_raw = preflight_cloud()
+        with (output / PREFLIGHT_FILE).open('xb') as stream:
+            stream.write(pre_raw)
+        pre_case = preflight_case(cases, pre_raw)
+        pre_row = worker.command('preflight', [TIME, '-v', str(binary), str(output / PREFLIGHT_FILE),
+                                               *expected_probe_tail(pre_case)])
+        try:
+            need(pre_row['exit_code'] == 0, 'preflight probe exit code')
+            pre_value = strict_json((output / 'preflight.stdout').read_bytes())
+            need(validate_probe(pre_value, pre_case, 0, inputs=preflight_inputs(pre_raw)) == 'complete_relative',
+                 'preflight probe not complete')
+            validate_external_wall(pre_value, pre_row['elapsed_seconds'])
+            validate_gnu_time((output / 'preflight.stderr').read_text(errors='replace'), 0)
+        except (ValueError, KeyError, TypeError, UnicodeError) as error:
+            raise PreflightFailed(type(error).__name__ + ': ' + str(error)) from error
+        result['preflight'] = dict(sites=pre_case['n'], tower_digest=pre_value['tower_digest'])
 
         def left():
             try:
@@ -583,6 +674,8 @@ def execute(args):
             result['status'] = 'partial'
     except BuildFailed as error:
         result.update(status='build_failed', error=str(error))
+    except PreflightFailed as error:
+        result.update(status='preflight_failed', error=str(error))
     except BaseException as error:
         result.update(status='failed', error=type(error).__name__ + ': ' + str(error))
     finally:

@@ -56,6 +56,9 @@ struct ChainOptions {
   // Census q3 depuis la feuille exacte de l'atlas (levier de l'auditeur A,
   // meme objet). Contrat v9 : active par defaut, publie et epingle de meme.
   bool q3_leaf_census = true;
+  // Certificat de voie morte q3/q4 par arete (lanes/q34_dead_lanes.hpp), meme
+  // objet. Contrat v9 : active par defaut, publie et epingle.
+  bool q34_dead_lanes = true;
 };
 
 // Temps de mur en millisecondes, CPU du processus en secondes.
@@ -83,6 +86,8 @@ struct GeneratorLedger {
   std::uint64_t atlas_cells, atlas_leaf_cells, atlas_deep_cells, atlas_outside_cells, atlas_splits, atlas_node_visits, atlas_block_bounds, atlas_point_tests, atlas_ids_copied;
   std::uint64_t q4_seeds, q4_live_leaves, q4_whole_atlas_skips, q4_sweep_events;
   std::uint64_t q3_leaf_censuses, q3_leaf_point_tests, q3_leaf_rejections, q3_lower_bound_fallbacks;
+  std::uint64_t dead_loads, dead_form_sites, dead_cells, dead_outside_cells, dead_deep_cells, dead_failed_cells,
+      dead_uniform_tests, dead_point_tests, dead_q3_proved, dead_q3_open, dead_q4_proved, dead_q4_open;
 };
 
 struct OrderSummary {

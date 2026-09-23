@@ -358,6 +358,86 @@
    "expected_stderr": "wspd q34 gate: indexed filter lost support/depth/key/complete shell\n",
    "judgment": "geometry",
    "provenance": "v9 (census q3 sur feuille, 23 septembre 2026)"
+  },
+  {
+   "family": "wspd_q34",
+   "name": "dead_q3_threshold_k_minus_2",
+   "gate": "wspd_q34",
+   "source": "lanes/q34_dead_lanes.cpp",
+   "replacements": [
+    [
+     "prove(3, kmax - 1, work)",
+     "prove(3, kmax - 2, work)"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "wspd q34 gate: indexed filter lost support/depth/key/complete shell\n",
+   "judgment": "geometry",
+   "provenance": "v9 (certificat de voie morte, 23 septembre 2026)"
+  },
+  {
+   "family": "wspd_q34",
+   "name": "dead_q4_threshold_k_minus_3",
+   "gate": "wspd_q34",
+   "source": "lanes/q34_dead_lanes.cpp",
+   "replacements": [
+    [
+     "prove(2, kmax - 2, work)",
+     "prove(2, kmax - 3, work)"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "wspd q34 gate: indexed filter lost support/depth/key/complete shell\n",
+   "judgment": "geometry",
+   "provenance": "v9 (certificat de voie morte, 23 septembre 2026)"
+  },
+  {
+   "family": "wspd_q34",
+   "name": "dead_contact_counted_inside",
+   "gate": "wspd_q34",
+   "source": "lanes/q34_dead_lanes.cpp",
+   "replacements": [
+    [
+     "      if (maximum < 0) {\n",
+     "      if (maximum <= 0) {\n"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "wspd q34 gate: indexed filter lost support/depth/key/complete shell\n",
+   "judgment": "geometry",
+   "provenance": "v9 (certificat de voie morte, 23 septembre 2026)"
+  },
+  {
+   "family": "wspd_q34",
+   "name": "dead_uniform_at_one_corner",
+   "gate": "wspd_q34",
+   "source": "lanes/q34_dead_lanes.cpp",
+   "replacements": [
+    [
+     "const i64 maximum = f.constant + f.x * (f.x < 0 ? c.left : c.right) + f.y * (f.y < 0 ? c.bottom : c.top);",
+     "const i64 maximum = f.constant + f.x * c.left + f.y * c.bottom;"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "wspd q34 gate: indexed filter lost support/depth/key/complete shell\n",
+   "judgment": "geometry",
+   "provenance": "v9 (certificat de voie morte, 23 septembre 2026)"
+  },
+  {
+   "family": "wspd_q34",
+   "name": "dead_q3_disk_too_small",
+   "gate": "wspd_q34",
+   "source": "lanes/q34_dead_lanes.cpp",
+   "replacements": [
+    [
+     "prove(3, kmax - 1, work)",
+     "prove(12, kmax - 1, work)"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "wspd q34 gate: indexed filter lost support/depth/key/complete shell\n",
+   "judgment": "geometry",
+   "provenance": "v9 (certificat de voie morte, 23 septembre 2026)"
   }
  ]
 }

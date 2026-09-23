@@ -9,9 +9,9 @@ sur un petit nuage deterministe, puis exige :
 
 - que validate_probe du worker accepte la sortie reelle (complete_relative)
   et que validate_external_wall tienne contre le mur mesure ici ;
-- que les deux voies geometriques epinglees (saturation, census q3 sur
-  feuille) soient publiees telles que demandees et donnent le meme objet
-  (catalogue, ordres, condense) que les voies eteintes ;
+- que les trois voies geometriques epinglees (saturation, census q3 sur
+  feuille, certificat de voie morte) soient publiees telles que demandees et
+  donnent le meme objet (catalogue, ordres, condense) que les voies eteintes ;
 - que des mutants de schema soient refuses : champ texte ou tableau
   inattendu, histogramme MEB malforme, comptabilite MEB non epinglee, mode
   retourne.
@@ -22,11 +22,17 @@ tient sous python3 -O. Ce petit nuage est un juge de raccord, pas une mesure.
 import copy
 import importlib.util
 import json
+import os
 from pathlib import Path
+import signal
 import struct
 import subprocess
 import sys
 import time
+
+# Delai interne inferieur au delai CTest (300 s) : a l'expiration, le groupe
+# de processus de la sonde est tue, jamais laisse orphelin.
+PROBE_TIMEOUT_SECONDS = 240
 
 
 def load_worker(path):
@@ -74,16 +80,23 @@ def main(argv):
     def run(case):
         argv_probe = [str(probe), str(data_file)] + worker.expected_probe_tail(case)
         started = time.monotonic()
-        done = subprocess.run(argv_probe, capture_output=True, timeout=600)
+        process = subprocess.Popen(argv_probe, stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
+        try:
+            stdout, _ = process.communicate(timeout=PROBE_TIMEOUT_SECONDS)
+        except subprocess.TimeoutExpired:
+            os.killpg(process.pid, signal.SIGKILL)
+            process.communicate()
+            raise
         elapsed = time.monotonic() - started
-        value = worker.strict_json(done.stdout)
-        return value, done.returncode, elapsed
+        value = worker.strict_json(stdout)
+        return value, process.returncode, elapsed
 
     base = dict(scene='gate', file=data_file.name, n=inputs['gate']['n'], k=5, s=8, workers=2, static_threads=2,
-                saturate_deep=True, q3_leaf=True, repeat=0)
+                saturate_deep=True, q3_leaf=True, dead_lanes=True, repeat=0)
     results = {}
     for label, case in (('pinned_on', base),
-                        ('pinned_off', dict(base, saturate_deep=False, q3_leaf=False, workers=1, static_threads=0))):
+                        ('pinned_off', dict(base, saturate_deep=False, q3_leaf=False, dead_lanes=False, workers=1,
+                                            static_threads=0))):
         try:
             value, code, elapsed = run(case)
             outcome = worker.validate_probe(value, case, code, inputs=inputs)
@@ -94,11 +107,21 @@ def main(argv):
             continue
         check(outcome == 'complete_relative', label + ': outcome ' + outcome)
         check(value['options']['atlas_saturate_deep'] is case['saturate_deep'] and
-              value['options']['q3_leaf_census'] is case['q3_leaf'], label + ': published modes')
+              value['options']['q3_leaf_census'] is case['q3_leaf'] and
+              value['options']['q34_dead_lanes'] is case['dead_lanes'], label + ': published modes')
         results[label] = (case, value)
     if len(results) == 2:
         on, off = results['pinned_on'][1], results['pinned_off'][1]
         check(worker.logical_result(on) == worker.logical_result(off), 'modes on/off change the object')
+        # Non-vacuite : les trois voies epinglees sont reellement exercees.
+        ledger = on['ledger']
+        check(ledger['q3_leaf_censuses'] > 0 and ledger['atlas_deep_cells'] > 0 and ledger['dead_q3_proved'] > 0 and
+              ledger['dead_q4_proved'] > 0 and ledger['dead_q3_open'] > 0 and ledger['dead_q4_open'] > 0,
+              'pinned modes not exercised: ' + json.dumps({key: ledger[key] for key in (
+                  'q3_leaf_censuses', 'atlas_deep_cells', 'dead_q3_proved', 'dead_q4_proved', 'dead_q3_open',
+                  'dead_q4_open')}, sort_keys=True))
+        check(off['ledger']['dead_loads'] == 0 and off['ledger']['q3_leaf_censuses'] == 0,
+              'modes off still ran the leaf census or the dead-lane certificate')
         check(len(on['orders']) == 5 and on['catalogue']['balls'] >= 1000,
               'coverage floor: 5 orders and >= 1000 catalogue balls, got ' +
               str(len(on['orders'])) + ' / ' + str(on['catalogue']['balls']))
@@ -113,7 +136,15 @@ def main(argv):
             ('saturation mode flipped', lambda v: v['options'].update(atlas_saturate_deep=False)),
             ('leaf mode flipped', lambda v: v['options'].update(q3_leaf_census=False)),
             ('leaf mode absent', lambda v: v['options'].pop('q3_leaf_census')),
+            ('dead-lane mode flipped', lambda v: v['options'].update(q34_dead_lanes=False)),
             ('stage times beyond total', lambda v: v['times_ms'].update(q34=v['times_ms']['chain_total'] + 60.0)),
+            ('meb histogram short', lambda v: v['tower_work'].update(meb_supports_by_size=[0])),
+            ('tower_work unknown integer', lambda v: v['tower_work'].update(extra=1)),
+            ('tower_work missing records', lambda v: v['tower_work'].pop('records')),
+            ('generator missing field', lambda v: v['generator'].pop('q34_expanded_pairs')),
+            ('ledger missing field', lambda v: v['ledger'].pop('q3_seeds')),
+            ('by_qmin empty', lambda v: v['catalogue'].update(by_qmin=[])),
+            ('by_shell empty', lambda v: v['catalogue'].update(by_shell=[])),
         ]
         killed = 0
         for label, mutate in mutants:

@@ -1,0 +1,69 @@
+--- /tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/base_wspd_q34.cpp	2026-09-23 01:45:08.291764611 +0000
++++ /tmp/claude-1000/-workspaces-E-HGP/b64b3f68-b0cf-4b1f-9ec0-8ffa4358295a/scratchpad/genx/pipeline/wspd_q34.cpp	2026-09-23 01:06:15.595854869 +0000
+@@ -1,4 +1,8 @@
+ #include "pipeline/wspd_q34.hpp"
++#include <x86intrin.h>
++#include <atomic>
++#include <cstdio>
++namespace mhgp9::gen { struct EdgeStat { std::atomic<unsigned long long> n[8]{}, cyc[8]{}, sites[8]{}, filt_cyc{}, filt_n{}, rej_n{}, ph[8][4]{}, sat_pt{}, sat_nv{}, all_pt{}, all_nv{}, sat_cert{}, sat_unvisited{}, splits{}, deep{}, root_active{}, root_n{}, root_inside_hist[12]{}; ~EdgeStat(){ const char* nm[8]={"q3only_dead","q3only_live","q4only_dead","q4only_live","both_dead","both_live","?","?"}; std::fprintf(stderr,"filter: n=%llu rejected=%llu cyc=%llu\n",(unsigned long long)filt_n.load(),(unsigned long long)rej_n.load(),(unsigned long long)filt_cyc.load()); std::fprintf(stderr,"atlas(both): point_tests all=%llu saturated=%llu node_visits all=%llu saturated=%llu certificates=%llu unvisited=%llu splits=%llu deep=%llu\n",(unsigned long long)all_pt.load(),(unsigned long long)sat_pt.load(),(unsigned long long)all_nv.load(),(unsigned long long)sat_nv.load(),(unsigned long long)sat_cert.load(),(unsigned long long)sat_unvisited.load(),(unsigned long long)splits.load(),(unsigned long long)deep.load()); for(int i=0;i<6;++i) std::fprintf(stderr,"%s: n=%llu cyc=%llu sites=%llu cover=%llu atlas=%llu q3=%llu q4=%llu\n",nm[i],(unsigned long long)n[i].load(),(unsigned long long)cyc[i].load(),(unsigned long long)sites[i].load(),(unsigned long long)ph[i][0].load(),(unsigned long long)ph[i][1].load(),(unsigned long long)ph[i][2].load(),(unsigned long long)ph[i][3].load()); } }; inline EdgeStat edge_stat; }
+ 
+ #include "parallel/joined_workers.hpp"
+ #include "parallel/work_reduction.hpp"
+@@ -489,6 +493,7 @@
+     if (mask == 0 || (mask & ~6U) != 0)
+       throw std::logic_error("mhgp9 gen global q34 received an inactive rectangle");
+     counter_add(work.expanded_pairs);
++    const auto t_f0 = __rdtsc();
+     if (options_.witness_mode != WspdQ34WitnessMode::Disabled) {
+       const auto points = index_->cloud().points();
+       const auto filtered = filter_q34_witnesses(*index_, singleton_box(points[a]),
+@@ -497,13 +502,21 @@
+       if ((mask & 2U) != 0 && (filtered & 2U) == 0) counter_add(work.witness.pair_q3_pairs);
+       if ((mask & 4U) != 0 && (filtered & 4U) == 0) counter_add(work.witness.pair_q4_pairs);
+       mask = filtered;
+-      if (mask == 0) { counter_add(work.witness.rejected_pairs); return; }
++      edge_stat.filt_n++; edge_stat.filt_cyc += __rdtsc()-t_f0;
++      if (mask == 0) { edge_stat.rej_n++; counter_add(work.witness.rejected_pairs); return; }
+     }
++    const auto t_e0 = __rdtsc();
++    const auto out0 = work.q3_emitted + work.q4_emitted;
++    const auto sites0 = work.cover_sites;
++    const int cls = mask==2?0:(mask==4?2:4);
++    struct Guard { WspdQ34Work& w; u64 out0, sites0; unsigned long long t0; int cls; unsigned long long p[4]{}; ~Guard(){ const int live = (w.q3_emitted+w.q4_emitted)>out0; edge_stat.n[cls+live]++; edge_stat.cyc[cls+live]+= __rdtsc()-t0; edge_stat.sites[cls+live]+= w.cover_sites-sites0; for(int j=0;j<4;++j) edge_stat.ph[cls+live][j]+=p[j]; } } guard{work,out0,sites0,t_e0,cls};
+     const bool q3 = (mask & 2U) != 0, q4 = (mask & 4U) != 0;
+     if (q3) counter_add(work.q3_edges);
+     if (q4) counter_add(work.q4_edges);
+     if (q3 && q4) counter_add(work.both_edges);
++    auto t_ph = __rdtsc();
+     const auto cover = Q34EdgeCover::make(index_, {a, b});
++    guard.p[0] += __rdtsc()-t_ph; t_ph = __rdtsc();
+     counter_add(work.cover_builds);
+     counter_add(work.cover_sites, static_cast<u64>(cover->site_count()));
+     work.max_cover_sites = std::max(work.max_cover_sites, static_cast<u64>(cover->site_count()));
+@@ -516,13 +529,18 @@
+         options_.q4_backend == WspdQ4Backend::Local28) {
+       atlas = Q4LocalAtlas::make(cover, k_, options_.local);
+       counter_add(work.q3_atlas.edges_with_atlas);
++      { const auto& sw=atlas->saturation_work(); const auto& aw=atlas->work();
++        edge_stat.sat_pt+=sw.prefixes.point_tests; edge_stat.sat_nv+=sw.prefixes.node_visits; edge_stat.all_pt+=aw.partition.point_tests; edge_stat.all_nv+=aw.partition.node_visits;
++        edge_stat.sat_cert+=sw.certificates; edge_stat.sat_unvisited+=sw.unvisited_site_mass; edge_stat.splits+=aw.splits; edge_stat.deep+=aw.deep_cells; }
+     }
++    guard.p[1] += __rdtsc()-t_ph; t_ph = __rdtsc();
+     if (q3) {
+       const auto root = atlas ? atlas->root_certified_inside_count() : std::nullopt;
+       if (root && *root >= k_ - 1) counter_add(work.q3_atlas.root_lane_skips);
+       else q3_edge(cover, atlas.get());
+       observe(cover);
+     }
++    guard.p[2] += __rdtsc()-t_ph; t_ph = __rdtsc();
+     if (q4) {
+       if (options_.q4_backend == WspdQ4Backend::Local28) {
+         const auto local = atlas
+@@ -537,6 +555,7 @@
+         observe(cover, window.peak_live_buffer_bytes);
+       }
+     }
++    guard.p[3] += __rdtsc()-t_ph;
+   }
+ 
+   void q3_seed(const Q34EdgeCoverPtr& cover, std::array<std::size_t, 3> ids, const Q4LocalAtlas* atlas) {

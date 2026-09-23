@@ -60,10 +60,19 @@ local ; bornes de census q3 −54 % mais 610 M tests ponctuels de frontière
 (contre-audit B) : gain net non qualifié, parcours de frontière par boîtes à
 faire.
 
-Suite : parallélisme de la tour au-delà de 24 fils (calendrier, tenue de
-livres), frontière de feuille par boîtes, seuil K−2 de l'atlas pour les arêtes
-q4 seules (proposition de l'auditeur A), registre par masque ; session G4 R3
-appariée voies allumées/éteintes.
+Arêtes sans sortie ([reçu](receipts/q34_dead_edges_20260923/README.md)) :
+91 % du temps q3/q4 va aux arêtes qui n'émettent rien. Le **certificat de voie
+morte** (`lanes/q34_dead_lanes`, défaut de la chaîne, épinglé par la sonde v5
+et le plan G4 v3) couvre le disque des centres possibles de chaque voie par
+des cellules portant T intérieurs uniformes ; il divise le CPU q3/q4 par 2,9 à
+K5 et K10 sur 08/000000 (prototype), condensés identiques sur les six cas.
+Protocole v5 durci : schémas exacts de la sonde, preflight natif sur la vraie
+sonde avant tout cas, résumés recalculés à la réception, campagne sans tour
+complète refusée, paquet recertifié contre les objets Git de son commit.
+
+Suite : session G4 R3 appariée (certificat allumé/éteint) ; coût du
+certificat lui-même (29 % à K5) et du filtre de témoins de paire (34 %) ;
+parallélisme de la tour au-delà de 24 fils ; seuil K−2 des arêtes q4 seules.
 
 ## État du dépôt au moment de l'ouverture (historique)
 

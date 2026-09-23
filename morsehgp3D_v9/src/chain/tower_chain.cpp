@@ -262,6 +262,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       o.q4_seed_cells = gen::Q4SeedCellOptions{gen::Q4SeedCellMode::LiveOnly, 64};
       o.q3_atlas_consultation = true;
       o.q3_leaf_census = options.q3_leaf_census;
+      o.dead_lanes = options.q34_dead_lanes;
       const auto r34 = gen::run_wspd_q34_parallel(
           index, kmax, options.separation_s, o, W,
           [&slots](std::size_t slot, const gen::Q34SeedCandidate& c) {
@@ -299,6 +300,12 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       l.q4_sweep_events = w.local.sweep.kept_events;
       l.q3_leaf_censuses = w.q3_atlas.leaf_censuses; l.q3_leaf_point_tests = w.q3_atlas.leaf_point_tests;
       l.q3_leaf_rejections = w.q3_atlas.leaf_rejections; l.q3_lower_bound_fallbacks = w.q3_atlas.lower_bound_fallbacks;
+      l.dead_loads = w.dead.loads; l.dead_form_sites = w.dead.form_sites; l.dead_cells = w.dead.cells;
+      l.dead_outside_cells = w.dead.outside_cells; l.dead_deep_cells = w.dead.deep_cells;
+      l.dead_failed_cells = w.dead.failed_cells;
+      l.dead_uniform_tests = w.dead.uniform_tests; l.dead_point_tests = w.dead.point_tests;
+      l.dead_q3_proved = w.dead.q3_proved; l.dead_q3_open = w.dead.q3_open;
+      l.dead_q4_proved = w.dead.q4_proved; l.dead_q4_open = w.dead.q4_open;
     }
     result.times.q34_ms = ms_since(t);
 
