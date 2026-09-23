@@ -1,0 +1,96 @@
+diff --git a/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp b/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp
+index 6cc488a77..ef1d182c8 100644
+--- a/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp
++++ b/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp
+@@ -17,6 +17,30 @@
+ #include <utility>
+ #include <vector>
+ 
++#include <x86intrin.h>
++#include <atomic>
++#include <cstdio>
++namespace mhgp9::gen::exp_core {
++constexpr int N = 10;
++const char* names[N] = {"core_build", "core_load", "core_prove", "cover_build", "cover_load", "cover_prove",
++                        "atlas", "q3", "q4", "cover_closed_edges"};
++struct Global {
++  std::atomic<unsigned long long> v[N]{};
++  ~Global() {
++    for (int i = 0; i < N; ++i) std::fprintf(stderr, "EXP_PHASE %s %llu\n", names[i], v[i].load());
++  }
++};
++inline Global global;
++struct Local {
++  unsigned long long v[N]{};
++  ~Local() { for (int i = 0; i < N; ++i) global.v[i] += v[i]; }
++};
++inline Local& local() { thread_local Local l; return l; }
++struct Clock {
++  unsigned long long t = __rdtsc();
++  void lap(int i) { const auto now = __rdtsc(); local().v[i] += now - t; t = now; }
++};
++}  // namespace mhgp9::gen::exp_core
+ namespace mhgp9::gen {
+ namespace {
+ 
+@@ -559,19 +583,24 @@ class Engine {
+   void filtered_edge(std::size_t a, std::size_t b, std::uint8_t mask) {
+     if (mask == 0 || (mask & ~6U) != 0)
+       throw std::logic_error("mhgp9 gen global q34 received an inactive filtered edge");
++    exp_core::Clock clock;
+     if (options_.dead_core) {
+       // Diametral core first: every credit it gives, the cover gives too.
+       // A lane it leaves open is rerun below on the full cover.
+       const auto core = Q34EdgeCover::make_diametral(index_, {a, b});
++      clock.lap(0);
+       counter_add(work.core_builds);
+       counter_add(work.core_sites, static_cast<u64>(core->site_count()));
+       merge(work.core_cover, core->work());
+       dead_.load(*core, work.dead_core);
++      clock.lap(1);
+       mask = static_cast<std::uint8_t>(mask & ~dead_.prove(k_, mask, work.dead_core));
++      clock.lap(2);
+       observe(core, static_cast<u64>(dead_.retained_bytes()));
+       if (mask == 0) { counter_add(work.core_closed_edges); return; }
+     }
+     const auto cover = Q34EdgeCover::make(index_, {a, b});
++    clock.lap(3);
+     counter_add(work.cover_builds);
+     counter_add(work.cover_sites, static_cast<u64>(cover->site_count()));
+     work.max_cover_sites = std::max(work.max_cover_sites, static_cast<u64>(cover->site_count()));
+@@ -581,9 +610,11 @@ class Engine {
+       // A proved lane is empty on the exact path too (certificate in
+       // lanes/q34_dead_lanes.hpp); an unproved lane runs unchanged.
+       dead_.load(*cover, work.dead);
++      clock.lap(4);
+       mask = static_cast<std::uint8_t>(mask & ~dead_.prove(k_, mask, work.dead));
++      clock.lap(5);
+       observe(cover, static_cast<u64>(dead_.retained_bytes()));
+-      if (mask == 0) return;
++      if (mask == 0) { exp_core::local().v[9] += 1; return; }
+     }
+     const bool q3 = (mask & 2U) != 0, q4 = (mask & 4U) != 0;
+     if (q3) counter_add(work.q3_edges);
+@@ -597,12 +628,14 @@ class Engine {
+       atlas = Q4LocalAtlas::make(cover, k_, options_.local);
+       counter_add(work.q3_atlas.edges_with_atlas);
+     }
++    clock.lap(6);
+     if (q3) {
+       const auto root = atlas ? atlas->root_certified_inside_count() : std::nullopt;
+       if (root && *root >= k_ - 1) counter_add(work.q3_atlas.root_lane_skips);
+       else q3_edge(cover, atlas.get());
+       observe(cover);
+     }
++    clock.lap(7);
+     if (q4) {
+       if (options_.q4_backend == WspdQ4Backend::Local28) {
+         const auto local = atlas
+@@ -617,6 +650,7 @@ class Engine {
+         observe(cover, window.peak_live_buffer_bytes);
+       }
+     }
++    clock.lap(8);
+   }
+ 
+   void q3_seed(const Q34EdgeCoverPtr& cover, std::array<std::size_t, 3> ids, const Q4LocalAtlas* atlas) {

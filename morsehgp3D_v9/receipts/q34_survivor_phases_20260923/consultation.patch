@@ -1,0 +1,106 @@
+diff --git a/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.cpp b/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.cpp
+index abfcdafca..fb7d52948 100644
+--- a/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.cpp
++++ b/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.cpp
+@@ -27,6 +27,7 @@ void Q34DeadLaneProver::load(const Q34EdgeCover& cover, Q34DeadLaneWork& work) {
+   // Invalid until this load completes: no failure below leaves a usable
+   // state from an earlier cover.
+   loaded_ = false;
++  consulted_ = 0;
+   const auto& index = *cover.index();
+   // Coordinates in spatial rank order, owned by the index itself: the cover
+   // ranges are read sequentially, with no per-prover copy.
+@@ -153,6 +154,7 @@ std::uint8_t Q34DeadLaneProver::cell(const Cell& c, unsigned depth, std::span<co
+       const i64 maximum = f.constant + f.x * (f.x < 0 ? c.left : c.right) + f.y * (f.y < 0 ? c.bottom : c.top);
+       if (maximum < 0) {
+         if (++inside >= target) {
++          if (depth == min_depth_ && tests > consulted_) consulted_ = tests;
+           counter_add(work.uniform_tests, tests);
+           counter_add(work.deep_cells);
+           return lanes;
+@@ -162,6 +164,7 @@ std::uint8_t Q34DeadLaneProver::cell(const Cell& c, unsigned depth, std::span<co
+       const i64 minimum = f.constant + f.x * (f.x < 0 ? c.right : c.left) + f.y * (f.y < 0 ? c.top : c.bottom);
+       if (minimum < 0) next.push_back(id);  // strictly inside somewhere in the cell
+     }
++    if (depth == min_depth_ && tests > consulted_) consulted_ = tests;
+     counter_add(work.uniform_tests, tests);
+     // q4 may already hold here (T4 <= inside < T3): only q3 is refined.
+     if ((need & 4U) != 0 && inside >= threshold4_) need = static_cast<std::uint8_t>(need & ~4U);
+diff --git a/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.hpp b/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.hpp
+index 44ffe40cd..ed41b731b 100644
+--- a/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.hpp
++++ b/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.hpp
+@@ -80,6 +80,8 @@ class Q34DeadLaneProver final {
+   [[nodiscard]] std::uint8_t prove(unsigned kmax, std::uint8_t lanes, Q34DeadLaneWork& work);
+   // Capacity of the reused private buffers (forms, IDs, frontiers).
+   [[nodiscard]] std::size_t retained_bytes() const;
++  std::size_t consulted_ = 0;  // EXPERIMENT
++  [[nodiscard]] std::size_t loaded_size() const { return forms_.size(); }
+ 
+  private:
+   struct Cell { i64 left, right, bottom, top; };
+diff --git a/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp b/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp
+index 6cc488a77..4d3281c6a 100644
+--- a/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp
++++ b/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp
+@@ -17,6 +17,32 @@
+ #include <utility>
+ #include <vector>
+ 
++#include <x86intrin.h>
++#include <atomic>
++#include <cstdio>
++namespace mhgp9::gen::exp_core {
++struct Global {
++  std::atomic<unsigned long long> v[2][8]{};
++  ~Global() {
++    const char* names[2] = {"closed", "open"};
++    for (int r = 0; r < 2; ++r)
++      std::fprintf(stderr, "EXP_CORE %s edges=%llu sites=%llu consulted=%llu build_cyc=%llu load_cyc=%llu prove_cyc=%llu early=%llu rest_cyc=%llu\n",
++                   names[r], v[r][0].load(), v[r][1].load(), v[r][2].load(), v[r][3].load(), v[r][4].load(),
++                   v[r][5].load(), v[r][6].load(), v[r][7].load());
++  }
++};
++inline Global global;
++struct Local {
++  unsigned long long rows[2][8]{};
++  ~Local() { for (int r = 0; r < 2; ++r) for (int i = 0; i < 8; ++i) global.v[r][i] += rows[r][i]; }
++};
++inline Local& local() { thread_local Local l; return l; }
++struct Scope {
++  bool open = false;
++  unsigned long long t = __rdtsc();
++  ~Scope() { if (open) local().rows[1][7] += __rdtsc() - t; }
++};
++}  // namespace mhgp9::gen::exp_core
+ namespace mhgp9::gen {
+ namespace {
+ 
+@@ -559,17 +585,27 @@ class Engine {
+   void filtered_edge(std::size_t a, std::size_t b, std::uint8_t mask) {
+     if (mask == 0 || (mask & ~6U) != 0)
+       throw std::logic_error("mhgp9 gen global q34 received an inactive filtered edge");
++    exp_core::Scope scope;
+     if (options_.dead_core) {
+       // Diametral core first: every credit it gives, the cover gives too.
+       // A lane it leaves open is rerun below on the full cover.
++      const auto t0 = __rdtsc();
+       const auto core = Q34EdgeCover::make_diametral(index_, {a, b});
++      const auto t1 = __rdtsc();
+       counter_add(work.core_builds);
+       counter_add(work.core_sites, static_cast<u64>(core->site_count()));
+       merge(work.core_cover, core->work());
+       dead_.load(*core, work.dead_core);
++      const auto t2 = __rdtsc();
+       mask = static_cast<std::uint8_t>(mask & ~dead_.prove(k_, mask, work.dead_core));
++      const auto t3 = __rdtsc();
+       observe(core, static_cast<u64>(dead_.retained_bytes()));
++      auto& row = exp_core::local().rows[mask == 0 ? 0 : 1];
++      row[0] += 1; row[1] += dead_.loaded_size(); row[2] += dead_.consulted_;
++      row[3] += t1 - t0; row[4] += t2 - t1; row[5] += t3 - t2;
++      if (dead_.consulted_ < dead_.loaded_size()) row[6] += 1;
+       if (mask == 0) { counter_add(work.core_closed_edges); return; }
++      scope.open = true;
+     }
+     const auto cover = Q34EdgeCover::make(index_, {a, b});
+     counter_add(work.cover_builds);

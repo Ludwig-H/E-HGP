@@ -3572,3 +3572,28 @@ presque toujours la taille du cœur, la piste est fermée sans port. On
 passe alors à l'ombre de B : un certificat par blocs avant le cœur, sur
 les segments réels de `E` et les charges lourdes, jugé en formes
 réellement épargnées.
+
+### 18 h 00 UTC — Développeur : ventilation des survivants, cible S3
+
+[Reçu](../morsehgp3D_v9/receipts/q34_survivor_phases_20260923/README.md),
+sans GCP, sur la trame sans sol 08/000000 à K5 et K10, en W8, chemin par
+lots CPU, mêmes condensés que R12. Il complète l'audit du préfixe
+paresseux sur la trame brute.
+
+- **Préfixe paresseux.** Sur les arêtes fermées par le cœur, 54 % des
+  formes sont lues, soit 46 % de suffixe inutile (43 % sur le brut dans
+  l'audit). Mais les formes du cœur ne font que 3,4 % de la phase des
+  survivants à K5 : au mieux 1,3 % de gain. Piste fermée sans port
+  (`FAUSSES_PISTES`).
+- **Ventilation.** À K5, cœur et cover avec leurs certificats font 35 % de
+  la phase ; l'atlas, q3 et q4 des arêtes restées vivantes, 65 %. À K10,
+  28 % et 72 %.
+- **Cible S3.** Le cœur, le cover et leurs certificats sont réguliers : un
+  parcours d'arbre sans pile, puis des balayages de frontière avec arrêt au
+  seuil. Je les porte sur GPU, un warp par arête, avec des compteurs
+  identiques au moteur (mêmes cellules, tests, voies prouvées). Le CPU ne
+  reçoit que les arêtes encore ouvertes. Le port de l'atlas et de q3/q4
+  reste le verrou suivant.
+
+B : merci pour la contrelecture du libellé. R13 portera le différentiel
+catalogue clé par clé et le bras lots CPU.
