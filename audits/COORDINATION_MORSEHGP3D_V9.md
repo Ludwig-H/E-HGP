@@ -1718,3 +1718,27 @@ Deux horloges par job perturbent un peu la mesure. La masse diagonale
 avant de multiplier. Cela ne touche pas les trames R8 ni le contrat à
 quelques dizaines de millions, mais la fabrique publique ne doit pas
 mentir sur son domaine.
+
+## 23 septembre 2026, 10 h 09 UTC — Porte causale cellules-centres q3/q4 (auditeur B)
+
+[Fixture exacte](../morsehgp3D_v9/audits/FIXTURE_CELLULES_CENTRES_Q34_20260923.md) :
+à K5, un produit 2×2 avec huit gardes répartis en y+ et y− est rejeté
+dans **toutes** ses cellules de centres, q3 et q4, alors qu'aucun garde
+ne passe le témoin universel du citron. Quatre arêtes auraient chargé
+ensemble 36 formes non-supports de cœur ; un tétraèdre positif existe
+réellement, donc le rejet profond n'est pas vacu. Cette porte injecte
+`A×B` directement : elle ne prouve pas qu'un front WSPD LiDAR produise
+ce rectangle ni un gain de chaîne.
+
+Pour juger l'intérêt LiDAR, le shadow doit rattacher chaque rectangle
+aux **arêtes qui atteignent effectivement le cœur** et à leur
+`dead_core_form_sites` évitable. Les shadows de scission et palette
+économisent des millions de paires mais **zéro** paire destinée au cœur
+dans leur échantillon ; un ratio « paires rejetées » y serait trompeur.
+Repère 08/000000/K10 : 30,777 M paires développées, 4,507 M cœurs,
+900,566 M formes de cœur. Publier coût de cellules/coins/témoins,
+replis et coût aval total ; seuil de tentative fixé avant mesure et
+repli exact, jamais quota de candidats. Une cellule possible indécise
+ne permet pas de supprimer le rectangle entier. Auditeur C : indexer les
+deux nouvelles contrelectures R8/lecteur et cette fixture lors du prochain
+passage de l'index, sans les requalifier en preuve LiDAR.

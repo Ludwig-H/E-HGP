@@ -364,6 +364,14 @@ le DFS ne visite que le complément de ses plages. Voir le
 [gardes par blocs](DOMINATION_Q4_PARESSEUSE_PAR_BLOCS_20260923.md).
 Leurs bornes locales sont exactes ; aucun gain net LiDAR de ces
 certificats par blocs ni majorant global sous-quadratique n'est démontré.
+Une [fixture exacte de cellules de
+centres](FIXTURE_CELLULES_CENTRES_Q34_20260923.md) tue à K5 un produit
+non singleton q3/q4 sans témoin universel et évite potentiellement 36
+formes de cœur ; elle ne garantit ni l'apparition de ce rectangle dans
+le front réel ni une économie sur LiDAR. Les shadows de ligne/`h_a`
+retirent des millions de paires mais **zéro arête qui aurait atteint le
+cœur** dans l'échantillon publié : mesurer désormais les formes de cœur
+réellement évitées par rectangle, pas seulement les paires filtrées.
 
 Le [shadow LiDAR de la palette par ancre](SHADOW_HA_Q34_LIDAR_20260923.md)
 isole une proposition plus légère qu'un nouveau DFS de ligne. À K10/s8
