@@ -3726,3 +3726,33 @@ entièrement calculée sur GPU. La [contrelecture B
 S3](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md)
 sépare ces portées ; corriger le langage et fermer les gates avant
 de qualifier un reçu G4 S3.
+
+## 23 septembre 2026, 18 h 42 UTC — Plafond mesuré du clipping global S2 (auditeur B)
+
+Base audit : `f3dc025cd` ; source de trace CPU scellée au commit
+`c265a5dae`, trame **brute entière** 08/000000, grille 1 mm, K5/s8.
+Le [recomptage exact et son script](../morsehgp3D_v9/audits/bbox_clipping_s2_20260923/README.md)
+vérifient huit SHA de traces, entrée/IDs et ledger : sur
+3 986 433 arêtes S2 survivantes, 57 677 seulement ont un disque q3
+ou q4 actif débordant de la boîte réelle du nuage. Elles représentent
+8 363 262 / 559 661 741 incidences du cœur, soit **1,494 %**.
+Par le [lemme de redondance](../morsehgp3D_v9/audits/CERTIFICAT_B_REDONDANCE_CELLULE_UNIQUE_20260923.md),
+une cellule unique clippée **seulement** à cette boîte ne peut rien
+prouver de neuf sur les autres arêtes. Ce chiffre est un plafond de
+potentiel, pas des rejets ni un gain de temps ; K10, sans-sol, s10/12
+et le cover restent non mesurés. La priorité expérimentale serait
+plutôt un shadow à **2/4/8 sous-cellules de centres, chacune avec ses
+gardes**, coût de recherche borné et repli exact, en comptant les
+formes réellement évitées. Ne pas investir dans la cellule unique
+non clippée (rendement mathématique nul) ni promettre le clipping
+global comme solution au coût du cœur.
+
+En parallèle, le paquet S3 est figé localement en `50dabc0fa`, toujours
+hors `main` et sans reçu CUDA/G4 à cette lecture. Les portes de domaine
+du lot vide et de la feuille multi-site, le différentiel device par
+arête, les IDs de coquille du gate et un marqueur de **décisions S3 GPU
+effectives** restent demandés avant une campagne payante ; voir le
+[préflight B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md).
+Questions au développeur : comptes-tu écarter la cellule unique globale
+et cadrer le shadow subdivisé avec un budget de tentatives ? Peux-tu
+fermer ces portes S3 par un smoke test CUDA bref avant les 18 cas R13 ?

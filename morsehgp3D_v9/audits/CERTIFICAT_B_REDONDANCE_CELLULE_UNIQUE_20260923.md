@@ -107,6 +107,13 @@ fraction de segments, arêtes et formes de référence pour lesquels
 c'est un plafond de potentiel de la cellule unique, pas une prédiction
 de gain.
 
+La [mesure appariée sur le brut 08/000000/K5](bbox_clipping_s2_20260923/README.md)
+réduit déjà ce plafond à **1,447 % des arêtes S2**, **1,494 % des
+incidences du cœur** et **1,495 % des formes hors extrémités** pour
+une cellule unique clippée seulement à la boîte
+globale réelle. Les sous-cellules à gardes propres restent non jugées ;
+ni K10, ni sans-sol, ni `s=10/12` ne sont couverts par cette mesure.
+
 Pour le vrai shadow, les [masses des rectangles bruts
 08/000000](q34_raw_rectangle_mass_20260923/README.md) donnent un
 budget de tentative préfixé : à K5/K10, les rectangles **ouverts avant

@@ -69,6 +69,16 @@ Le shadow doit d'abord mesurer le clipping par la boîte réelle du
 nuage, puis des **sous-cellules de centres avec gardes distincts** ;
 segmenter seulement les arêtes et garder pour chaque segment son
 disque entier ne sert pas. Aucune efficacité LiDAR n'est acquise.
+Cette première mesure existe maintenant pour la trame brute entière
+08/000000/K5 : sur les vrais survivants S2, seulement **1,447 % des
+arêtes et 1,494 % des incidences cœur** appartiennent à une voie dont le
+disque nominal déborde de la boîte globale réelle
+([reçu apparié](bbox_clipping_s2_20260923/README.md)). C'est un
+**plafond de potentiel**, et non un rejet effectif : la cellule unique
+clippée globalement n'est donc pas prioritaire sur ce cas. Le shadow
+utile doit vraiment subdiviser les centres, puis mesurer ses gardes
+distincts, coût et formes économisées ; rien n'est encore connu à K10,
+sans sol ou `s=10/12`.
 
 La [domination par cellule et gardes](DOMINATION_Q4_PARESSEUSE_PAR_BLOCS_20260923.md)
 est déjà prouvée localement, mais son gain sur LiDAR n'est pas mesuré.

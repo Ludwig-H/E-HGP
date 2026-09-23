@@ -220,14 +220,14 @@ de sites et temps de deux runs : c'est une projection, pas une borne ni
 un gain G4. Même retirer idéalement **toute** la phase
 des arêtes survivantes des trois lignes K5 de R12 laisserait 1,177 à
 1,513 s de chaîne, à autres phases inchangées : S3 seul ne suffit pas.
-Un [préflight B du diff S3 encore mutable](CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md)
+Un [préflight B du port S3 local non publié](CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md)
 signale avant G4 le lot CUDA vide avec pointeur nul, une feuille
 multi-site acceptée par la garde brute malgré le contrat du cover,
 les slabs de 3,25 Mio par warp au défaut, et le cover CPU reconstruit
 sur les arêtes encore ouvertes sans compteur physique séparé. La
 sonde, le worker G4, son selftest et le lecteur LiDAR passent en v18
-dans le **diff mutable**, pas encore dans un reçu qualifié. Le worker
-WIP accepte cependant un cas où les trois survivants sont tous
+dans le commit détaché `50dabc0fa`, pas encore dans un reçu qualifié. Le worker
+local accepte cependant un cas où les trois survivants sont tous
 `deferred` vers le CPU et le marque `GPU_executed` : temps device et
 préflight ne prouvent pas une décision GPU utile. Exiger le nombre
 d'arêtes réellement décidées et un différentiel CUDA par arête. La
@@ -243,6 +243,12 @@ du clipping par la boîte réelle du nuage, bien plus petite que le cube
 u18 en `z` sur 08/000000 ; l'autre solution couvre les centres par
 2/4/8 cellules à gardes distincts. Un test entier O(S) identifie
 d'abord les disques intérieurs qui rendent la cellule unique vaine.
+Le [recomptage exact des traces S2 brutes 08/000000/K5](bbox_clipping_s2_20260923/README.md)
+trouve seulement **57 677 / 3 986 433 arêtes (1,447 %) et
+8 363 262 / 559 661 741 incidences cœur (1,494 %)** avec un disque
+actif débordant de la boîte réelle du nuage. La cellule unique
+globalement clippée ne peut donc concerner que cette faible masse sur
+ce cas ; ce n'est ni un gain mesuré ni une conclusion pour K10/sans-sol.
 Le shadow doit limiter ses recherches et se replier sur le moteur,
 publier visites, tests et formes effectivement évitées sur brut et
 sans sol, sans annoncer de gain avant mesure.

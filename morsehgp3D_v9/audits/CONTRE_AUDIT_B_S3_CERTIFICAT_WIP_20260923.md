@@ -1,8 +1,8 @@
 # Préflight B du certificat S3 GPU — snapshot mutable
 
-23 septembre 2026. Lecture **sans modification du moteur** du worktree développeur `build/v9-open-worktree`, à partir de `b854088a7` avec diff S3 non publié. Ce document est un **signal de préflight**, pas une qualification du port ni un défaut attribué à R12. Revalider chaque ligne sur le commit finalement publié. Le contrat reste la tour entière sur plusieurs trames SemanticKITTI, d'abord K1..10 puis K1..5, en moins d'une seconde G4 ; aucune mesure S3 G4 n'existe ici.
+23 septembre 2026. Lecture **sans modification du moteur** du worktree développeur `build/v9-open-worktree`, dont le port S3 est désormais figé en commit local détaché `50dabc0fa` (mêmes sources moteur que son ancien hash `308110bc3`), **non publié sur `main`** à cette lecture. Ce document est un **signal de préflight**, pas une qualification du port ni un défaut attribué à R12. Revalider chaque ligne sur le commit finalement publié. Le contrat reste la tour entière sur plusieurs trames SemanticKITTI, d'abord K1..10 puis K1..5, en moins d'une seconde G4 ; aucune mesure S3 G4 n'existe ici.
 
-Le port hôte `gpu/certificate.hpp` suit à la lecture l'ordre des plages, les bornes fermées, les formes u18, les cellules de profondeur 2..6 et les seuils `K−1`/`K−2` du producteur. Le gate provisoire compare masques **et compteurs** sur des survivants synthétiques 2k/8k K3/5/10, ainsi que le report sous petite capacité. Ce n'est ni une comparaison CUDA exécutée ni un gate aux bornes u18, aux trames LiDAR ou à K1/2. Le `WarpGroup` et le noyau persistent viennent seulement d'apparaître dans un diff mutable ; ils doivent encore compiler, subir un différentiel par arête, un test des voies vides/différées et une campagne G4 avant toute déclaration d'exactitude device.
+Le port hôte `gpu/certificate.hpp` suit à la lecture l'ordre des plages, les bornes fermées, les formes u18, les cellules de profondeur 2..6 et les seuils `K−1`/`K−2` du producteur. Le gate provisoire compare masques **et compteurs** sur des survivants synthétiques 2k/8k K3/5/10, ainsi que le report sous petite capacité. Ce n'est ni une comparaison CUDA exécutée ni un gate aux bornes u18, aux trames LiDAR ou à K1/2. Le `WarpGroup` et le noyau persistent sont dans le commit local détaché ; ils doivent encore compiler, subir un différentiel par arête, un test des voies vides/différées et une campagne G4 avant toute déclaration d'exactitude device.
 
 La campagne locale observée après le commit détaché passe **148/148
 tests actifs**, un mutant étant désactivé, dans `build/v9-exp` (log
@@ -62,7 +62,7 @@ la séparation déjà introduite pour S2 entre préflight et nombre de
 cas/arêtes S3 effectivement achevés ; imposer un mutant « zéro arête,
 préflight GPU vrai, exécution S3 fausse » au lecteur G4 futur.
 
-Le worker v18 **WIP** corrige à présent la version et les leviers du
+Le worker v18 **local, non publié** corrige à présent la version et les leviers du
 protocole G4, mais son marqueur `GPU_executed` reste lié au levier, pas au
 nombre de certificats réellement **décidés** sur GPU. Contre-exemple
 local du lecteur : `survivors=deferred=3`, backend GPU et temps device
@@ -79,11 +79,11 @@ Lecture B sur le diff courant : `3 0.02 complete_relative [0]` pour
 Publier `certificate_decided_edges`/lancements réels et distinguer
 « filtre GPU », « certificat GPU utile » et « tour complète GPU ».
 
-Enfin, la sonde `bench/tower_probe.cpp` du diff annonce `mhgp9_tower_probe_v18`. Le worker, son selftest et le lecteur LiDAR ont été adaptés **dans le diff mutable** pendant cette contrelecture ; ils ont ensuite été figés dans un commit local sans reçu G4. La porte chaîne reste insuffisante sur les IDs des coquilles et le travail complet. Avant une VM, fermer ces portes et les deux défauts d'entrée. Le nouveau certificat S3 ne règle de toute façon pas seul le budget : R12 K5 laisse encore 1,177/1,388/1,513 s de chaîne si l'on retire fictivement **tous** les survivants et que les autres phases restent inchangées.
+Enfin, la sonde `bench/tower_probe.cpp` du commit annonce `mhgp9_tower_probe_v18`. Le worker, son selftest et le lecteur LiDAR ont été adaptés pendant cette contrelecture ; ils ont ensuite été figés dans un commit local sans reçu G4. La porte chaîne reste insuffisante sur les IDs des coquilles et le travail complet. Avant une VM, fermer ces portes et les deux défauts d'entrée. Le nouveau certificat S3 ne règle de toute façon pas seul le budget : R12 K5 laisse encore 1,177/1,388/1,513 s de chaîne si l'on retire fictivement **tous** les survivants et que les autres phases restent inchangées.
 
 ## Libellés à corriger avant de présenter le port
 
-Le développeur a depuis figé localement un paquet S3 (`308110bc3`,
+Le développeur a depuis figé localement un paquet S3 (`50dabc0fa`,
 encore hors `main` à cette lecture). Sa `PASSATION.md` reprend « 35/65 % »
 et « 28/72 % » comme si c'étaient des parts de calcul, puis ferme la
 piste des formes paresseuses sur un « au plus 1,3 % ». Le
