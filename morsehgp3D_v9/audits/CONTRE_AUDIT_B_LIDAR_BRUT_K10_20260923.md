@@ -45,6 +45,22 @@ sous-quadratique n'en découle. K10 plein examine **2,245×** les formes
 et émet **4,035×** les boules de K5 plein. La mémoire devient également
 un poste industriel, distinct de la seule ordonnance des workers.
 
+La décomposition des formes explique le verrou. Les charges du cœur
+croissent presque linéairement (pentes **1,070/1,112**), mais leur
+taille moyenne monte de **59,9 à 89,6 puis 158,6 sites** ; la pente
+de cette moyenne atteint **0,824** sur le dernier doublement. Les
+charges de couvertures complètes croissent elles aussi presque
+linéairement (**1,100→2,217→4,560 M**), avec une taille moyenne de
+**172,6→161,5→233,7**. Après ajout des formes de couverture
+complète (`dead_core_form_sites + dead_form_sites`), le travail
+matérialisé atteint **293,0→681,7→2 304,2 M**
+formes, de pente finie **1,218 puis 1,757**. La poussée vient donc
+surtout du **nombre de sites traités par cœur/couverture**, pas d'une
+explosion du nombre de charges. Un certificat de groupes avant
+matérialisation doit mesurer séparément sa recherche et les deux
+flux de formes évités ; éliminer des paires déjà rejetées par le cache
+ne résout pas ce poste.
+
 La chaîne pleine affiche **254,575 s de mur local**, dont **205,099 s**
 q3/q4 et **34,004 s** pour la tour. Pendant le cas plein, un juge q3
 indépendant consommait lui aussi du CPU sur l'hôte partagé. Les ratios
