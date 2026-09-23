@@ -1395,3 +1395,57 @@ Base : `513e0b26`. GCP non utilisé. Merci à B : les quatre points sont
    cette coupe.
 4. Statut des portes : 127 exécutées et une désactivée ; étape CTest verte à
    `0125dc18` (exécution 35833313204), workflow rouge par le selftest.
+
+## 23 septembre 2026, 09 h 20 UTC — Contrelectures B : densité, mutations et lecteur
+
+Base : `6bd90396`. Aucun appel GCP ni changement du moteur.
+
+- **Croissance LiDAR.** L'ablation `4acc31ac` a été recalculée depuis les
+  entrées v8 et les IDs originaux : l'unique ID 122516 explique bien le minimum
+  de hauteur à zéro dans le quart `x≥0,y<0` de 08/000200, mais son retrait ne
+  change presque pas la pente des formes K10, **2,042542→2,042528**. Les
+  effectifs, hashes et **14/84** franchissements `p_formes≥2` des trois scènes
+  concordent. Il reste une seule graine, une séquence, sans sol à 1 mm, un
+  essai par cas et `complete_relative`. Le JSON d'ablation n'a pas d'enveloppe
+  autonome liant commande et binaire ; aucune borne globale ni contrat G4.
+- **Mutants C.** Les dumps binaires locaux sain + 15 mutants complets ont été
+  contre-vérifiés : tailles multiples de 83, aucune clé dupliquée, **12
+  catalogues égaux en enregistrements entiers**, trois avec uniquement 2 502,
+  8 et 6 762 clés `(p,q,u)=(3,3,3)` omises. Une telle boule contribue à K4,
+  K5 **et K6** ; « deux derniers ordres » signifie K4–K5 *dans la fenêtre
+  testée K5*. Le mutant d'admission recompilé au bon site est distinct de
+  l'ancien objet et se termine par `invalid_input` **à K5 seulement** ; le
+  JSON K5/K7 des 35 noms conserve l'ancien objet pour ce mutant. Le bilan
+  corrigé combine donc deux expériences, il n'est pas une campagne K5/K7
+  homogène. Ce verdict vaut pour ces mutations et cette coupe 8k, pas comme
+  preuve universelle de complétude.
+  Les dumps, objets, codes de retour et hashes de binaires ne sont pas dans le
+  reçu versionné : après disparition du scratch, le résultat n'est plus
+  reconstituable à partir du seul JSON. Durcir `compare_dumps.py` (taille,
+  unicité) et le runner (retour, `recount_mismatch`, sources/binaire/dumps
+  épinglés) avant d'en faire une porte autonome.
+  La note C nomme encore `euler_chain_probe.patch` « prêt à porter » et
+  son calcul « hors chrono » : l'erratum B démontre le contraire pour cette
+  version du patch (`min(Kmax−2,n)` absent, calcul dans `census_ms`).
+- **CI et revalidation.** Le correctif `4b6e3aa6` répare ses deux causes
+  initiales et ses 27/27 selftests locaux ; il ne ferme pas l'identité d'une
+  *campagne*. Sans lire aucun fichier externe, `resolve_input('../fictional.u32le')`
+  et `resolve_input('/old_checkout/morsehgp3D_v8/../../fictional.u32le')`
+  produisent tous deux `/workspaces/fictional.u32le`, hors du dépôt. Le
+  revalidateur accepte un unique résumé synthétique cohérent (`cases=1`,
+  `campaigns=1`, code 0), même avec `record.case` et `record.argv[0]` faux :
+  il ne vérifie ni l'ensemble attendu de campagnes, ni le lien cas/entrée,
+  ni les `.failure.json` orphelins. Une entrée relative issue d'un autre cwd
+  est aussi archivée telle quelle puis relue relativement à ROOT. Confiner
+  les chemins canoniques au sous-arbre v8 attendu, lier le cas à son entrée
+  reconstruite, et exiger un manifeste de campagnes complet (ou annoncer
+  explicitement une validation de sous-ensemble). Les 60 cas du reçu ancien
+  ont été contrôlés indépendamment ; ces contre-exemples ne l'invalident pas.
+- **Portée mathématique.** Les inductions q3/q4 relues ne fournissent pas de
+  contre-exemple au moteur exact sous leurs préconditions (propriétaire,
+  positivité, index immuable, couverture et coquille admise). Elles ne
+  certifient pas les clés **absentes** d'un grand catalogue ; la tour FULL
+  et l'invariant d'Euler ne transforment pas `complete_relative` en preuve
+  absolue. Le certificat de crédit par nœud `a141881d` a bien conservé les
+  issues et digests sur son ablation, mais augmente le CPU de **27–32 %** :
+  fermer cette variante précise, non toutes les stratégies avant expansion.
