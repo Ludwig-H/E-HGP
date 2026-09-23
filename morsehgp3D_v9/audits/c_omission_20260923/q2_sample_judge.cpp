@@ -10,23 +10,32 @@
 // sites de coquille que le balayage en trouve. Aucune structure du generateur
 // (WSPD, temoins, Pool) n'est utilisee. Cout par site tire : O(n) candidats b,
 // chacun un balayage O(n) arrete des que p depasse Kmax-1 : jamais O(n^3).
-// Controle anti-vacuite : sur le premier site tire qui a une boule attendue, on
-// retire une boule de la table et le juge doit la declarer manquante.
+// Recoupement (contrelecture adverse de C) : niveau exact egal (Boost cpp_int), memes interieurs, arite 2 ;
+// sens inverse (EXTRA) : toute boule reguliere a 2 sites, d'arite 2, p <= Kmax-1, passant par un site tire,
+// doit etre retrouvee. Une coquille de plus de 12 sites trouvee sur une chaine complete est une omission.
+// Anti-vacuite ciblee : une cle trouvee de rang p = Kmax-1 est retiree et son site rejuge ; plancher
+// --min-top de cles p = Kmax-1. Sites tires par permutation a graine publiee (--seed), index verifie contre
+// les points d'entree ; sorties : incidences (site tire, partenaire), cles distinctes, empreinte FNV-1a.
 //
 //   q2_sample_judge family <uniform|terrain|clusters> <n> <Kmax> <sites> <workers>
 //   q2_sample_judge file <cut.u32le> <Kmax> <sites> <workers>
 //
-// Sortie : une ligne par cas ; code 0 conforme, 1 boule manquante, 3 vacuite.
+// Options : --seed=S, --min-top=N, --inject=level (mutant : niveaux faux, doit rendre 1).
+// Code 0 conforme ; 1 manquante, EXTRA ou recoupement faux ; 2 argument/chaine ; 3 vacuite.
 #include <algorithm>
 #include <cstdint>
 #include <cstdio>
 #include <fstream>
 #include <iterator>
 #include <map>
+#include <numeric>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <unordered_set>
 #include <vector>
+
+#include <boost/multiprecision/cpp_int.hpp>
 
 #include "src/chain/tower_chain.hpp"
 #include "src/tower/tree/cloud_index.hpp"
@@ -35,6 +44,9 @@
 using mhgp9::gen::Point3;
 using mhgp9::tower::BallData;
 using mhgp9::tower::P3;
+using boost::multiprecision::cpp_int;
+__extension__ typedef __int128 i128;
+__extension__ typedef unsigned __int128 u128;
 
 namespace {
 
@@ -61,12 +73,57 @@ inline std::int64_t power(const P3& x, const P3& a, const P3& b) {
   return (x.x - a.x) * (x.x - b.x) + (x.y - a.y) * (x.y - b.y) + (x.z - a.z) * (x.z - b.z);
 }
 
+std::uint64_t fnv_points(const std::vector<Point3>& pts) {
+  std::uint64_t h = 1469598103934665603ull;
+  for (const auto& p : pts)
+    for (const std::int64_t v : {std::int64_t(p.x), std::int64_t(p.y), std::int64_t(p.z)})
+      for (int b = 0; b < 8; ++b) { h ^= (std::uint64_t(v) >> (8 * b)) & 0xff; h *= 1099511628211ull; }
+  return h;
+}
+
+cpp_int big(i128 v) {
+  const bool neg = v < 0;
+  const u128 u = neg ? (u128)(-(v + 1)) + 1 : (u128)v;
+  cpp_int r = static_cast<std::uint64_t>(u >> 64);
+  r <<= 64;
+  r += static_cast<std::uint64_t>(u);
+  return neg ? cpp_int(-r) : r;
+}
+
+// Niveau du catalogue (U192 lo, mid, hi / den) egal a |a-b|^2 / 4 ? Avec a, b sur la coquille, ce rayon fixe la
+// sphere : la boule diametrale.
+bool same_level(const BallData& ball, const P3& a, const P3& b) {
+  cpp_int num = ball.level.num[2];
+  num <<= 64; num += ball.level.num[1];
+  num <<= 64; num += ball.level.num[0];
+  const std::int64_t dx = a.x - b.x, dy = a.y - b.y, dz = a.z - b.z;
+  return num * 4 == cpp_int(dx * dx + dy * dy + dz * dz) * big(ball.level.den);
+}
+
+// Tirage des sites : permutation de Fisher-Yates par splitmix64, graine publiee (distincte du juge q3).
+std::vector<std::size_t> sample_sites(std::size_t n, std::size_t take, std::uint64_t seed) {
+  std::vector<std::size_t> v(n);
+  std::iota(v.begin(), v.end(), std::size_t{0});
+  std::uint64_t s = seed;
+  const auto next = [&]() {
+    std::uint64_t z = (s += 0x9e3779b97f4a7c15ull);
+    z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9ull;
+    z = (z ^ (z >> 27)) * 0x94d049bb133111ebull;
+    return z ^ (z >> 31);
+  };
+  for (std::size_t i = 0; i + 1 < n && i < take; ++i) std::swap(v[i], v[i + next() % (n - i)]);
+  v.resize(std::min(take, n));
+  return v;
+}
+
 struct Totals {
-  std::uint64_t pairs = 0, expected = 0, found = 0, missing = 0, extended = 0, by_p[10] = {};
+  std::uint64_t pairs = 0, expected = 0, found = 0, missing = 0, extended = 0, over_shell = 0, cross_fail = 0,
+                extra = 0, by_p[10] = {};
 };
 
 int run(const std::string& label, const std::vector<Point3>& points, unsigned kmax, std::size_t sites,
-        std::size_t workers) {
+        std::size_t workers, std::uint64_t seed, std::uint64_t min_top, bool corrupt_level) {
+  if (kmax < 2 || kmax > 10) { std::fprintf(stderr, "Kmax must be in 2..10\n"); return 2; }
   mhgp9::ChainOptions o;
   o.kmax = kmax;
   o.workers = workers;
@@ -86,76 +143,140 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
   const auto ix = mhgp9::tower::build_cloud_index(input);
   const auto& pos = ix.upos;
   const std::size_t n = pos.size();
-  const auto& cat = r.catalogue_balls;
-  // Boules du catalogue par site de coquille.
+  // Coherence de l'index lu avec les points d'entree (sites distincts : une position par site).
+  if (n != points.size()) { std::printf("%s index_size_mismatch\n", label.c_str()); return 2; }
+  for (std::size_t u = 0; u < n; ++u) {
+    const auto& q = points[static_cast<std::size_t>(ix.point_id(static_cast<std::int32_t>(u)))];
+    if (pos[u].x != q.x || pos[u].y != q.y || pos[u].z != q.z) {
+      std::printf("%s index_position_mismatch\n", label.c_str());
+      return 2;
+    }
+  }
+  std::vector<BallData> cat = r.catalogue_balls;
+  if (corrupt_level) for (auto& ball : cat) ball.level.den += 1;  // mutant : niveaux faux
   std::vector<std::vector<std::uint32_t>> by_site(n);
   for (std::size_t i = 0; i < cat.size(); ++i)
     for (const auto s : cat[i].shell()) by_site[static_cast<std::size_t>(s)].push_back(static_cast<std::uint32_t>(i));
+  const unsigned pmax = kmax - 1;
 
-  Totals t;
-  bool mutant_done = false, mutant_killed = false;
-  const std::size_t take = std::min(sites, n);
-  std::vector<std::int32_t> shell;
-  for (std::size_t j = 0; j < take; ++j) {
-    const std::size_t a = (j * n) / take;
+  const auto judge_site = [&](std::size_t a, std::int64_t exclude, Totals& t, std::unordered_set<std::uint32_t>& keys,
+                              std::vector<std::string>& lines, bool& target_missed) {
+    std::vector<std::int32_t> shell, inside;
+    std::unordered_set<std::uint32_t> matched_here;
+    char buf[160];
     for (std::size_t b = 0; b < n; ++b) {
       if (b == a) continue;
       ++t.pairs;
-      unsigned p = 0;
-      shell.clear();
+      shell.clear(); inside.clear();
       bool over = false;
       for (std::size_t x = 0; x < n; ++x) {
         const auto w = power(pos[x], pos[a], pos[b]);
         if (w < 0) {
-          if (++p > kmax - 1) { over = true; break; }
+          inside.push_back(static_cast<std::int32_t>(x));
+          if (inside.size() > pmax) { over = true; break; }
         } else if (w == 0) {
           shell.push_back(static_cast<std::int32_t>(x));
         }
       }
       if (over) continue;
+      const unsigned p = static_cast<unsigned>(inside.size());
       ++t.expected;
       ++t.by_p[p];
-      if (shell.size() > 2) ++t.extended;
-      // Recherche d'une boule du catalogue portee par la meme sphere, en
-      // excluant eventuellement un indice (controle anti-vacuite).
-      const auto find = [&](std::int64_t exclude) -> std::int64_t {
-        for (const auto bi : by_site[a]) {
-          if (static_cast<std::int64_t>(bi) == exclude) continue;
-          const auto& ball = cat[bi];
-          if (ball.n_interior != p || ball.n_shell != shell.size()) continue;
-          bool same = true, has_b = false;
-          for (const auto s : ball.shell()) {
-            if (power(pos[static_cast<std::size_t>(s)], pos[a], pos[b]) != 0) { same = false; break; }
-            if (static_cast<std::size_t>(s) == b) has_b = true;
-          }
-          if (same && has_b) return static_cast<std::int64_t>(bi);
-        }
-        return -1;
-      };
-      const std::int64_t hit = find(-1);
-      const bool ok = hit >= 0;
-      // Anti-vacuite : la premiere boule attendue et trouvee est retiree de la
-      // table ; le juge doit alors ne plus en trouver aucune.
-      if (ok && !mutant_done) {
-        mutant_done = true;
-        mutant_killed = find(hit) < 0;
+      if (shell.size() > 12) {  // la chaine refuse toute coquille > 12 : sur une chaine complete, omission
+        ++t.over_shell; ++t.missing;
+        std::snprintf(buf, sizeof buf, "MISSING_SHELL_OVER_12 a=%zu b=%zu p=%u shell=%zu", a, b, p, shell.size());
+        lines.push_back(buf);
+        continue;
       }
-      if (ok) ++t.found;
-      else {
+      if (shell.size() > 2) ++t.extended;
+      std::int64_t hit = -1;
+      bool cross_ok = false;
+      for (const auto bi : by_site[a]) {
+        if (static_cast<std::int64_t>(bi) == exclude) continue;
+        const auto& ball = cat[bi];
+        if (ball.n_shell != shell.size()) continue;
+        bool on = true, has_b = false;
+        for (const auto s : ball.shell()) {
+          if (power(pos[static_cast<std::size_t>(s)], pos[a], pos[b]) != 0) { on = false; break; }
+          if (static_cast<std::size_t>(s) == b) has_b = true;
+        }
+        if (!on || !has_b || !same_level(ball, pos[a], pos[b])) continue;
+        hit = bi;
+        // Recoupement : memes interieurs (ids distincts), arite 2 (la paire a, b est antipodale).
+        std::vector<std::int32_t> ids(ball.interior().begin(), ball.interior().end());
+        std::sort(ids.begin(), ids.end());
+        std::vector<std::int32_t> mine(inside.begin(), inside.end());
+        std::sort(mine.begin(), mine.end());
+        cross_ok = ball.n_interior == p && ids == mine && std::adjacent_find(ids.begin(), ids.end()) == ids.end() &&
+                   ball.arity == 2;
+        break;
+      }
+      if (hit >= 0 && cross_ok) {
+        ++t.found;
+        keys.insert(static_cast<std::uint32_t>(hit));
+        matched_here.insert(static_cast<std::uint32_t>(hit));
+      } else if (hit >= 0) {
+        ++t.cross_fail;
+        std::snprintf(buf, sizeof buf, "CROSS_CHECK_FAILED a=%zu b=%zu p=%u shell=%zu", a, b, p, shell.size());
+        lines.push_back(buf);
+      } else {
         ++t.missing;
-        std::printf("%s MISSING a=%zu b=%zu p=%u shell=%zu\n", label.c_str(), a, b, p, shell.size());
+        if (exclude >= 0) {
+          const auto sh = cat[static_cast<std::size_t>(exclude)].shell();
+          target_missed = target_missed || std::find(sh.begin(), sh.end(), static_cast<std::int32_t>(b)) != sh.end();
+        }
+        std::snprintf(buf, sizeof buf, "MISSING a=%zu b=%zu p=%u shell=%zu", a, b, p, shell.size());
+        lines.push_back(buf);
       }
     }
+    // Sens inverse : boules regulieres a 2 sites, d'arite 2, p <= pmax, passant par a, non retrouvees.
+    if (exclude < 0) {
+      for (const auto bi : by_site[a]) {
+        const auto& ball = cat[bi];
+        if (ball.n_shell != 2 || ball.arity != 2 || ball.n_interior > pmax) continue;
+        if (matched_here.count(bi)) continue;
+        ++t.extra;
+        std::snprintf(buf, sizeof buf, "EXTRA a=%zu ball=%u p=%u", a, bi, unsigned(ball.n_interior));
+        lines.push_back(buf);
+      }
+    }
+  };
+  const auto sampled = sample_sites(n, sites, seed);
+  Totals t;
+  std::unordered_set<std::uint32_t> keys;
+  std::vector<std::string> lines;
+  bool dummy = false;
+  for (const auto a : sampled) judge_site(a, -1, t, keys, lines, dummy);
+  for (const auto& l : lines) std::printf("%s %s\n", label.c_str(), l.c_str());
+  std::uint64_t top_keys = 0, top_population = 0;
+  for (const auto k : keys) if (cat[k].n_interior == pmax) ++top_keys;
+  for (const auto& ball : cat) if (ball.n_shell == 2 && ball.arity == 2 && ball.n_interior == pmax) ++top_population;
+  // Mutant cible : une cle trouvee de rang p = Kmax-1, retiree, rejugee depuis un site tire de sa coquille ; un
+  // manquant doit porter l'autre site de sa coquille.
+  std::uint32_t target = UINT32_MAX;
+  for (const auto k : keys) if (cat[k].n_interior == pmax && (target == UINT32_MAX || k < target)) target = k;
+  bool mutant_killed = false;
+  if (target != UINT32_MAX) {
+    for (const auto a : sampled) {
+      const auto sh = cat[target].shell();
+      if (std::find(sh.begin(), sh.end(), static_cast<std::int32_t>(a)) == sh.end()) continue;
+      Totals tm; std::unordered_set<std::uint32_t> km; std::vector<std::string> lm;
+      judge_site(a, target, tm, km, lm, mutant_killed);
+      if (mutant_killed) break;
+    }
   }
-  std::printf("%s n=%zu kmax=%u balls=%zu sampled_sites=%zu pairs=%llu expected=%llu found=%llu missing=%llu "
-              "extended=%llu mutant_killed=%d",
-              label.c_str(), n, kmax, cat.size(), take, (unsigned long long)t.pairs, (unsigned long long)t.expected,
-              (unsigned long long)t.found, (unsigned long long)t.missing, (unsigned long long)t.extended,
-              mutant_killed ? 1 : 0);
-  for (unsigned p = 0; p < kmax && p < 10; ++p) std::printf(" p%u=%llu", p, (unsigned long long)t.by_p[p]);
+  std::printf("%s n=%zu kmax=%u balls=%zu input_fnv=%016llx seed=%016llx sampled_sites=%zu pairs=%llu "
+              "incidences=%llu found=%llu missing=%llu cross_fail=%llu extra=%llu unique_keys=%zu top_keys=%llu "
+              "top_population=%llu extended=%llu shell_over_12=%llu mutant_killed=%d",
+              label.c_str(), n, kmax, cat.size(), (unsigned long long)fnv_points(points), (unsigned long long)seed,
+              sampled.size(), (unsigned long long)t.pairs, (unsigned long long)t.expected, (unsigned long long)t.found,
+              (unsigned long long)t.missing, (unsigned long long)t.cross_fail, (unsigned long long)t.extra, keys.size(),
+              (unsigned long long)top_keys, (unsigned long long)top_population, (unsigned long long)t.extended,
+              (unsigned long long)t.over_shell, mutant_killed ? 1 : 0);
+  for (unsigned p = 0; p <= pmax && p < 10; ++p) std::printf(" p%u=%llu", p, (unsigned long long)t.by_p[p]);
   std::printf("\n");
-  if (t.missing) return 1;
-  if (!mutant_killed || t.expected == 0) return 3;
+  if (t.missing || t.cross_fail || t.extra) return 1;
+  if (!mutant_killed || top_keys < min_top) return 3;
   return 0;
 }
 
@@ -163,22 +284,32 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
 
 int main(int argc, char** argv) {
   try {
-    if (argc == 7 && std::string_view(argv[1]) == "family") {
-      const auto fx = mhgp9::gen::bench::make_front_fixture(std::stoul(argv[3]), argv[2], 3);
-      return run(std::string(argv[2]) + "_" + argv[3], fx.points, std::stoul(argv[4]), std::stoul(argv[5]),
-                 std::stoul(argv[6]));
+    std::uint64_t seed = 0xc3a5c85c97cb3127ull, min_top = 1;
+    bool corrupt_level = false;
+    std::vector<std::string> args;
+    for (int i = 1; i < argc; ++i) {
+      const std::string a = argv[i];
+      if (a == "--inject=level") corrupt_level = true;
+      else if (a.rfind("--seed=", 0) == 0) seed = std::stoull(a.substr(7), nullptr, 0);
+      else if (a.rfind("--min-top=", 0) == 0) min_top = std::stoull(a.substr(10));
+      else if (a.rfind("--", 0) == 0) { std::fprintf(stderr, "unknown option %s\n", a.c_str()); return 2; }
+      else args.push_back(a);
     }
-    if (argc == 6 && std::string_view(argv[1]) == "file") {
-      const std::string path = argv[2];
-      const auto slash = path.find_last_of('/');
-      return run(path.substr(slash == std::string::npos ? 0 : slash + 1), read_u32le(path), std::stoul(argv[3]),
-                 std::stoul(argv[4]), std::stoul(argv[5]));
+    if (args.size() == 6 && args[0] == "family") {
+      const auto fx = mhgp9::gen::bench::make_front_fixture(std::stoul(args[2]), args[1], 3);
+      return run(args[1] + "_" + args[2], fx.points, std::stoul(args[3]), std::stoul(args[4]), std::stoul(args[5]),
+                 seed, min_top, corrupt_level);
+    }
+    if (args.size() == 5 && args[0] == "file") {
+      const auto slash = args[1].find_last_of('/');
+      return run(args[1].substr(slash == std::string::npos ? 0 : slash + 1), read_u32le(args[1]), std::stoul(args[2]),
+                 std::stoul(args[3]), std::stoul(args[4]), seed, min_top, corrupt_level);
     }
   } catch (const std::exception& e) {
     std::fprintf(stderr, "error: %s\n", e.what());
     return 2;
   }
-  std::fprintf(stderr, "usage: q2_sample_judge family <name> <n> <Kmax> <sites> <workers> | "
-                       "file <cut.u32le> <Kmax> <sites> <workers>\n");
+  std::fprintf(stderr, "usage: q2_sample_judge family <name> <n> <Kmax> <sites> <workers> [--seed=S] [--min-top=N] | "
+                       "file <cut.u32le> <Kmax> <sites> <workers> [--seed=S] [--min-top=N]\n");
   return 2;
 }
