@@ -4143,3 +4143,23 @@ contrat.
   survivant).
 - Je lance R13 : mesure du port S3 et de sa sûreté sur le sans-sol de la
   séquence 08, s = 8. Ce n'est pas le contrat brut multi-séquence.
+
+### 21 h 30 UTC — Développeur : R13 `completed` (S3 GPU)
+
+[Reçu](../morsehgp3D_v9/receipts/g4_tower_r13_20260923/README.md) ;
+paquet `46c50432` ; `TERMINATED` certifié (20 h 15 UTC).
+- **Préflights jugés** : sur l'appareil, chaque survivant décidé est égal à
+  la référence CPU (masque et travail), à l'ardoise par défaut comme à
+  l'ardoise de 64 sites. Avec celle-ci, 3 404 arêtes sur 55 523 sont
+  rendues au CPU, le compte local exact.
+- **Objet** : 18/18 cas achevés. Les six épingles de C sont reproduites.
+  Les 12 comparaisons entre cas sont égales (condensés, ordres, travail
+  des certificats).
+- **Temps** : K5 1,74 / 2,20 / 2,35 s ; K10 5,91 / 7,83 / 7,97 s.
+- **Attribution à 000000/K5** : moteur 3,27 s ; lots CPU 3,84 ; filtre GPU
+  seul 2,34 ; S2 + S3 GPU 2,20.
+- **Covers reconstruits** : 708 686 à K5 et 1 463 362 à K10, tes chiffres
+  de trace.
+- **Portée** : sans sol, séquence 08, s = 8. Aucun contrat, aucune pente.
+  Le lot vide sur l'appareil reste un résidu.
+

@@ -272,11 +272,25 @@ Livré (sans GCP) :
 Local : même tour, même catalogue et même travail des certificats que le
 moteur sur la trame entière 08/000000/K5.
 
-Prochaine étape : session G4 R13. Elle mesure le gain de S3 et du
-préchauffage, et fait le différentiel clé par clé GPU/moteur sur les trois
-trames. Ensuite :
-- atlas et voies q3/q4 des arêtes vivantes, le poste dominant ;
-- tour D5.
+Session G4 R13 ([reçu](receipts/g4_tower_r13_20260923/README.md), paquet
+`46c50432`, **`completed`**, `TERMINATED` certifié) :
+- préflights GPU jugés arête par arête contre la référence CPU : ardoise par
+  défaut, puis ardoise de 64 sites (3 404 mises en attente, le compte local) ;
+- les 18 cas reproduisent les six condensés épinglés par C ;
+- **K5 1,74 / 2,20 / 2,35 s**, **K10 5,91 / 7,83 / 7,97 s** (−11 à −13 %
+  contre R12 à K5) ;
+- préchauffage : appel du filtre de 205–315 ms à 81–154 ms ;
+- S3 : 211 ms d'appel (189 d'appareil) pour 351 ms retirés aux survivants à
+  000000/K5. Le noyau (un warp par arête, 250 registres, 8 warps par SM) a
+  encore de la marge.
+
+Reste à 000000/K5 (2,20 s) : survivants 0,73 s (atlas, q3 et q4 des arêtes
+vivantes, et 0,7 M covers reconstruits), tour 0,75 s, certificats 0,21 s,
+q2 et recensement 0,20 s. Suite :
+- réduire le travail des survivants : shadow subdivisé avant cœur (B),
+  atlas, q3 et q4 sur GPU ;
+- tour D5 (résolution statique, avec son propre ledger) ;
+- noyau S3 : occupation et parcours.
 
 Suite : tour maigre (D5 de l'auditeur C :
 index des selles, saut au centre, images de naissance directes), puis
