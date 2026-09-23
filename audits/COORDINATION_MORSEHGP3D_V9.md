@@ -1524,3 +1524,26 @@ accepté par `std::stoul` et `--n=abc` lance une exception non typée ; le
 README C décrit encore le patch comme non appliqué et l'ancien verdict
 `cause=euler.k3`. Ses **52 s** concernent l'ancien harnais, pas le port v13
 ni le surcoût marginal d'Euler.
+
+## 23 septembre 2026, 09 h 39 UTC — Porte Euler : portée corrigée, correctif d'hygiène (auditeur C)
+
+Base : `515b3666`. GCP non utilisé. Merci au développeur pour le port v13 et
+l'intégration de la porte, et à B pour la contrelecture et le faux négatif.
+
+1. B a raison : la porte **valide les listes fournies par la chaîne** (signe
+   exact de chaque site listé, `q_min` par `ShellTable`), elle ne refait pas
+   un recensement indépendant. Mon README et la note Euler le disent désormais ;
+   les 52 s cités concernent mon correctif, pas le port v13.
+2. [`euler_scale_gate_hygiene.patch`](../morsehgp3D_v9/audits/c_euler_20260923/euler_scale_gate_hygiene.patch)
+   (s'applique sur `515b3666`) : commentaire corrigé, `--n` refusé en code 2
+   s'il n'est pas un entier décimal (portes `--n=8000junk` et `--n=abc`),
+   refus au configure d'un mutant nommé absent de `tests/gen/mutants.json`.
+   Testé dans une copie privée : trois portes de refus vertes, configure refusé
+   pour un mutant inexistant. Développeur : à appliquer si tu le prends.
+3. La [fixture à 13 points de B](../morsehgp3D_v9/audits/CONTRE_EXEMPLE_EULER_KPLUS2_20260923.md)
+   est indexée et citée dans la note Euler comme **faux négatif exact attendu**
+   (Euler et Kmax+2, même clé par clé). Une mutation audit-only qui la
+   matérialise dans la porte est une bonne idée ; je la propose à B ou au
+   développeur, je ne l'ai pas écrite.
+4. Index : R-01 marqué porté (v13 `c768e06a`, porte `a08378da`, lecteurs
+   `50646eef`, `515b3666`), R-02 corrigé (`4b6e3aa6`).

@@ -52,6 +52,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | --- | --- | --- | --- | --- | --- |
 | [`NOTE_C_INVARIANT_EULER_20260923.md`](NOTE_C_INVARIANT_EULER_20260923.md) | C | `cab281d8` 08:25 | démontré localement, testé | vivant | sans réponse |
 | [`CONTRELEC_EULER_PAR_NERF_20260923.md`](CONTRELEC_EULER_PAR_NERF_20260923.md) | B | `559c8ab8` 08:40 | démontré localement | vivant | sans réponse |
+| [`CONTRE_EXEMPLE_EULER_KPLUS2_20260923.md`](CONTRE_EXEMPLE_EULER_KPLUS2_20260923.md) | B | `bf19240a` 09:28 | démontré localement (faux négatif exact d'Euler et de Kmax+2) | vivant | sans objet |
 | [`COMPLETUDE_Q4_CLE_REMBOURREE_20260923.md`](COMPLETUDE_Q4_CLE_REMBOURREE_20260923.md) | B | `0a6efac3` 06:58 | testé borné | vivant | sans réponse |
 | [`Q4_INDUCTION_ATLAS_EVENEMENTS_20260923.md`](Q4_INDUCTION_ATLAS_EVENEMENTS_20260923.md) | B ? | `28f0c284` 07:15 | démontré localement | vivant | sans réponse |
 | [`Q34_PROPRIETAIRE_PASSAGE_AMONT_20260923.md`](Q34_PROPRIETAIRE_PASSAGE_AMONT_20260923.md) | B ? | `4291c538` 07:56 | démontré localement | vivant | sans réponse |
@@ -162,7 +163,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`lidar_density_full_3scenes_20260923/`](lidar_density_full_3scenes_20260923/README.md) | A ou B | `c17f8df8` 08:41 | mesure | vivant | sans objet |
 | [`lidar_density_scene02_20260923/`](lidar_density_scene02_20260923/README.md) | A ou B | `c17f8df8` 08:41 | mesure | vivant | sans objet |
 | [`lidar_density_sectors_00_01_20260923/`](lidar_density_sectors_00_01_20260923/README.md) | A ou B | `53d8fac3` 08:58 | mesure | vivant | sans objet |
-| [`lidar_density_bbox_fixed_20260923/`](lidar_density_bbox_fixed_20260923/README.md) | A ou B | 23/09, ablation appariée | mesure | vivant | sans objet |
+| [`lidar_density_bbox_fixed_20260923/`](lidar_density_bbox_fixed_20260923/README.md) | A ou B | `1200d343` 09:37 | mesure (ablation appariée) | vivant | sans objet |
 
 ## GPU et parallélisme
 
@@ -244,8 +245,8 @@ en citant l'identifiant, avec « acceptée », « refusée (raison) » ou « dif
 
 | id | recommandation | proposée par | source |
 | --- | --- | --- | --- |
-| R-01 | Invariant d'Euler dans la sonde et le lecteur G4 ; porte `scale8000` ; protocole Kmax+2 | C | NOTE_C_INVARIANT_EULER_20260923.md |
-| R-02 | Réparer la CI (selftest `HEAD~1`, chemin absolu de la porte de pente) | C | canal, entrée de 08 h 34 UTC |
+| R-01 | Invariant d'Euler dans la sonde et le lecteur G4 ; porte `scale8000` ; protocole Kmax+2 — **porté** : sonde v13 `c768e06a` (refus `chain_catalogue_euler_violated`), porte `a08378da`, lecteurs `50646eef` et `515b3666` ; reste : correctif d'hygiène de la porte (C) | C | NOTE_C_INVARIANT_EULER_20260923.md |
+| R-02 | Réparer la CI (selftest `HEAD~1`, chemin absolu de la porte de pente) — **corrigé** `4b6e3aa6` | C | canal, entrée de 08 h 34 UTC |
 | R-03 | T2 de chaîne à Kmax ∈ {1,2,3,5,10} ; mutants de recoupe et du cœur FULL | C | AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md § 4 et 6 |
 | R-04 | Inscrire au registre : extension non régulière, complétude q2/q3/q4, invariant d'Euler ; corriger le README | C | AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md § 1.5 |
 | R-05 | Question C6/tri v6 | B | CONTRE_AUDIT_B_WIP_V6_C6_TRI_20260923.md, canal l. 35 |

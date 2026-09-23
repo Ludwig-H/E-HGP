@@ -27,17 +27,24 @@ Hors produit, hors registre, `public_status=not_claimed`, GCP non utilisé.
 - `run_key_compare.py`, `compare_dumps.py` : comparaison clé par clé des
   catalogues mutés et sain (vidage local `EULER_DUMP`, jamais versionné).
 - `euler_scale8000_gate.patch` : porte CTest `mhgp9_chain_euler_scale8000`
-  (label `scale8000`, hors CI rapide), écrite à la demande du développeur ;
-  non appliquée. Trois familles v8 épinglées à n = 8 000 (`uniform`, `terrain`,
-  `clusters`), chaîne **sans tour** jusqu'au catalogue K5, recensement
-  indépendant de chaque ligne sur un index reconstruit, $q_{\min}$ recalculé par
-  `ShellTable` pour **chaque** boule (minimalité certifiée sans tour),
-  contributions par sous-coquilles, Euler pour K ≤ 3 ; puis K7 sur `uniform`
-  (Euler K ≤ 5 et restriction égale **clé par clé** au catalogue K5). Planchers
-  anti-vacuité ; mutant `dead_q3_disk_too_small` tué par la cause `euler.k3` ;
-  argument inconnu refusé (code 2). Local, deux fils : 52 s et 96 CPU·s pour la
-  porte saine, 11 s pour le mutant ; 2 559 030 boules jugées, 86 coquilles
-  étendues, 594 386 lignes de restriction égales.
+  (label `scale8000`, hors CI rapide), écrite à la demande du développeur et
+  **appliquée** par lui en `a08378da`, qui y a ajouté l'égalité avec les sommes
+  `euler_by_k` publiées par la chaîne v13 (`c768e06a`). Trois familles v8
+  épinglées à n = 8 000 (`uniform`, `terrain`, `clusters`), chaîne sans tour
+  jusqu'au catalogue K5, **validation des listes fournies par la chaîne**
+  (signe exact de la puissance de chaque site listé ; aucun site hors liste
+  n'est recherché : le recensement complet reste celui de la chaîne), $q_{\min}$
+  recalculé par `ShellTable` pour chaque boule, contributions par
+  sous-coquilles, Euler pour K ≤ 3 ; puis K7 sur `uniform` (Euler K ≤ 5 et
+  restriction égale **clé par clé** au catalogue K5). Depuis la v13, le mutant
+  `dead_q3_disk_too_small` est refusé par la chaîne elle-même
+  (`chain_catalogue_euler_violated`). Les 52 s mesurés concernent la version
+  du correctif, pas le port v13.
+- `euler_scale_gate_hygiene.patch` : correctif d'hygiène de cette porte
+  (commentaire « validation des listes fournies », `--n` refusé en code 2
+  s'il n'est pas un entier décimal, nouvelles portes `--n=8000junk` et
+  `--n=abc`, refus au configure d'un mutant nommé absent de
+  `tests/gen/mutants.json`) ; testé dans une copie privée.
 - `euler_chain_probe.patch` : correctif prêt à porter (chaîne et sonde), non
   appliqué ; `git apply --check` propre sur `4079cceb`.
 - `results/` : sorties JSON agrégées (aucune coordonnée), dont

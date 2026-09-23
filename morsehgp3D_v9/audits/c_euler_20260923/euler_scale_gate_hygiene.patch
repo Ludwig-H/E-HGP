@@ -1,0 +1,75 @@
+diff --git a/morsehgp3D_v9/CMakeLists.txt b/morsehgp3D_v9/CMakeLists.txt
+index fd8322d..b784973 100644
+--- a/morsehgp3D_v9/CMakeLists.txt
++++ b/morsehgp3D_v9/CMakeLists.txt
+@@ -186,6 +186,10 @@ mhgp9_product_executable(mhgp9_chain_euler_scale_gate tests/chain/euler_scale_ga
+ target_link_libraries(mhgp9_chain_euler_scale_gate PRIVATE mhgp9_chain)
+ mhgp9_gate(mhgp9_chain_euler_scale8000 0 mhgp9_chain_euler_scale_gate
+            ARGS --selftest EXPECT_PREFIX "euler_scale ok n=8000" LABELS "scale8000;chain;euler" TIMEOUT 1800)
++mhgp9_gate(mhgp9_chain_euler_scale_bad_size_suffix 2 mhgp9_chain_euler_scale_gate
++           ARGS --selftest --n=8000junk LABELS "gate;chain" TIMEOUT 60)
++mhgp9_gate(mhgp9_chain_euler_scale_bad_size_word 2 mhgp9_chain_euler_scale_gate
++           ARGS --selftest --n=abc LABELS "gate;chain" TIMEOUT 60)
+ mhgp9_gate(mhgp9_chain_euler_scale_bad_argument 2 mhgp9_chain_euler_scale_gate
+            ARGS --unknown LABELS "gate;chain" TIMEOUT 60)
+ # Mutant d'omission du generateur que les recoupements de la chaine ne voient
+@@ -195,9 +199,11 @@ mhgp9_gate(mhgp9_chain_euler_scale_bad_argument 2 mhgp9_chain_euler_scale_gate
+ function(mhgp9_euler_scale_mutant mutant expect)
+   string(JSON count LENGTH "${mhgp9_gen_mutant_text}" mutants)
+   math(EXPR last "${count} - 1")
++  set(found FALSE)
+   foreach(i RANGE ${last})
+     string(JSON name GET "${mhgp9_gen_mutant_text}" mutants ${i} name)
+     if(name STREQUAL mutant)
++      set(found TRUE)
+       string(JSON unit GET "${mhgp9_gen_mutant_text}" mutants ${i} source)
+       file(READ "${CMAKE_CURRENT_SOURCE_DIR}/src/gen/${unit}" text)
+       string(JSON rcount LENGTH "${mhgp9_gen_mutant_text}" mutants ${i} replacements)
+@@ -225,6 +231,9 @@ function(mhgp9_euler_scale_mutant mutant expect)
+                  ARGS --selftest EXPECT_PREFIX "${expect}" LABELS "scale8000;chain;euler;mutant" TIMEOUT 1800)
+     endif()
+   endforeach()
++  if(NOT found)
++    message(FATAL_ERROR "mhgp9: mutant ${mutant} absent de tests/gen/mutants.json (porte d'Euler)")
++  endif()
+ endfunction()
+ mhgp9_gate(mhgp9_chain_census_tower_bad_argument 2 mhgp9_chain_census_tower_gate
+            ARGS --unknown LABELS "gate;chain" TIMEOUT 60)
+diff --git a/morsehgp3D_v9/tests/chain/euler_scale_gate.cpp b/morsehgp3D_v9/tests/chain/euler_scale_gate.cpp
+index 537156b..80e1af2 100644
+--- a/morsehgp3D_v9/tests/chain/euler_scale_gate.cpp
++++ b/morsehgp3D_v9/tests/chain/euler_scale_gate.cpp
+@@ -10,9 +10,14 @@
+ // compensent). La contribution d'une boule (p interieurs, coquille U, centre c)
+ // est le coefficient de t^{K-1} dans t^p * somme_{T sous U, c dans conv(T)} (t-1)^{|T|-1}.
+ // Pour chaque boule, les T sont lus dans ShellTable::contains_center(), apres
+-// recensement independant de la ligne sur un index reconstruit (puissance
+-// exacte nulle sur chaque site de coquille, negative sur chaque interieur) et
+-// verification de q_min, qui certifie la minimalite du support sans tour FULL.
++// VALIDATION DES LISTES FOURNIES par la chaine sur un index reconstruit
++// (puissance exacte nulle sur chaque site de coquille listee, negative sur
++// chaque interieur liste) et verification de q_min, qui certifie la minimalite
++// du support sans tour FULL. Aucun site hors de ces listes n'est recherche : le
++// recensement complet reste celui de la chaine (ShellTable suppose les listes
++// completes). Fausse negative connue et attendue : la fixture a 13 points de
++// l'auditeur B (CONTRE_EXEMPLE_EULER_KPLUS2_20260923), dont les omissions se
++// compensent pour Euler et pour la restriction Kmax+2.
+ // La chaine tourne SANS tour : une omission du generateur est jugee par
+ // l'invariant, non par la detection partielle de la tour.
+ //
+@@ -134,7 +139,14 @@ int main(int argc, char** argv) {
+   for (int i = 1; i < argc; ++i) {
+     const std::string_view arg(argv[i]);
+     if (arg == "--selftest") selftest = true;
+-    else if (arg.starts_with("--n=")) n = std::stoul(std::string(arg.substr(4)));
++    else if (arg.starts_with("--n=")) {
++      const std::string_view digits = arg.substr(4);
++      if (digits.empty() || digits.size() > 5 || digits.find_first_not_of("0123456789") != std::string_view::npos) {
++        std::fprintf(stderr, "usage: mhgp9_chain_euler_scale_gate --selftest [--n=8000]\n");
++        return 2;
++      }
++      n = std::stoul(std::string(digits));
++    }
+     else { std::fprintf(stderr, "usage: mhgp9_chain_euler_scale_gate --selftest [--n=8000]\n"); return 2; }
+   }
+   if (!selftest || n < 64 || n > 65536) {

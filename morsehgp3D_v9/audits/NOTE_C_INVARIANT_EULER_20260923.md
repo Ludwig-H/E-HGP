@@ -174,6 +174,13 @@ hachés 64 bits, non sur les clés.
 
 ## Limites
 
+- **Faux négatif exact connu** : la [fixture à 13 points de
+  B](CONTRE_EXEMPLE_EULER_KPLUS2_20260923.md) construit deux boules
+  régulières de profondeur 4 dont les contributions se compensent à tous les
+  ordres jugés ; en les omettant, l'invariant à K5, l'invariant à K7 et même la
+  restriction K7→K5 comparée clé par clé passent, catalogue pourtant
+  incomplet. C'est la borne attendue de ce juge, pas un défaut observé du
+  générateur : garder T2 et, à l'échelle, un juge d'échantillon indépendant.
 - **Nécessaire, pas suffisant** : deux omissions de contributions opposées se
   compensent ; une boule dont toutes les contributions vérifiables sont nulles
   échappe. Les boules avec $p\geq K_{\max}-2$ ne comptent qu'aux deux ordres
