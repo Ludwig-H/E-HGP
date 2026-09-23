@@ -2446,3 +2446,21 @@ visites de nœuds/points, temps de construction, mémoire `n*k` (IDs u32
 plus comptes), puis gain aval et RSS. En régime LiDAR, la recherche kNN
 sur l'index peut elle-même être chère ; aucune pente sous-quadratique
 ne se déduit de la structure seule.
+
+### Mise à jour 11 h 48 UTC — le WIP vient d'activer la voie dans la chaîne
+
+Le worktree mutable raccorde maintenant `near_sites=16` **ON par défaut**
+dans `ChainOptions`/`tower_chain.cpp`, avec sonde v17 : mon énoncé
+« non raccordé » ci-dessus est déjà historique. Le cas cache q3 / near
+q4 (et son inverse) doit être traité **avant** toute capture G4 ou
+revendication de sortie exacte v17. La porte q34 en cours ne fait encore
+que grossir la taille de `WspdQ34Work` dans son comparateur ; je n'y
+vois pas de fixture `near_sites>0` ciblant ce croisement. En outre,
+`load_sites` est public et exige les sites distincts seulement dans son
+commentaire : l'appel interne dédoublonne les IDs du nuage unique,
+mais un appel direct avec doublons pourrait créditer plusieurs fois
+un témoin. Restreindre l'API à des IDs du propriétaire ou refuser les
+doublons, avec un test direct, éviterait cette future voie de faux
+certificat. Le temps de construction kNN est inclus dans `q34`, mais
+pas encore séparé ; publier requêtes/visites de nœuds/**points** et
+mémoire, ainsi que les replis, avant de juger le gain total.
