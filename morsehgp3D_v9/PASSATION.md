@@ -346,8 +346,22 @@ La porte d'objet juge chaque arête contre la voie q3 du moteur. L'ordre de
 balayage par anneaux autour du milieu divise le travail des recensements par
 36 à 08/000000/K5 (5,29 G → 146 M tests de points). En local (W8, CPU), le
 levier reproduit les condensés épinglés à K5 et K10, chaque arête étant
-jugée. Le noyau GPU compile (120 registres, sans débordement). Reste la
-session R15 : la mesure de l'appareil recouvert par les voies q4 du CPU.
+jugée. Le noyau GPU compile (120 registres, sans débordement).
+
+Session G4 R15 ([reçu](receipts/g4_tower_r15_20260923/README.md), paquet
+`8b47a75a`, **`completed`**, `TERMINATED` certifié) :
+- **K5 1,45 / 1,81 / 1,86 s**, **K10 5,24 / 6,72 / 6,69 s** ;
+- paires répétées et entrelacées à 000000 : S4a retire 0,16–0,18 s à K5
+  et 0,37–0,41 s à K10 ;
+- noyau q3 : 28 ms à K5, 92–98 ms à K10, caché derrière les voies q4 du CPU
+  (attente nulle) ; transferts des enregistrements du même ordre ;
+- préflights jugés, ardoises réduites (11 976 voies q3 en traîne) et six
+  épingles conformes.
+
+Reste à 000000/K5 (1,81 s) : atlas et q4 CPU 0,54 s, tour 0,56 s,
+certificats 0,14 s, q2, front, filtre et recensement environ 0,40 s.
+Suite : **S4b** (q4 sur l'appareil, conception en cours) et, en parallèle,
+le chemin critique de la tour (phase 0 statique séquentielle par ordre).
 
 Suite : tour maigre (D5 de l'auditeur C :
 index des selles, saut au centre, images de naissance directes), puis

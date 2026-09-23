@@ -1,0 +1,39 @@
+{
+  "case": {
+    "file": "data/scene_01.u32le",
+    "k": 10,
+    "levers": {
+      "atlas_saturate_deep": true,
+      "q2_jobs_by_mass": true,
+      "q34_batch_certificates": true,
+      "q34_batch_filter": true,
+      "q34_batch_q3": true,
+      "q34_dead_core": true,
+      "q34_dead_lanes": true,
+      "q34_fine_jobs": true,
+      "q34_gpu_certificates": true,
+      "q34_gpu_filter": true,
+      "q34_gpu_q3": true,
+      "q34_jobs_by_mass": true,
+      "q34_witness_cache": true,
+      "q3_leaf_census": true,
+      "tower_meb_proposal": true,
+      "tower_overlap_static": true
+    },
+    "n": 35551,
+    "repeat": 0,
+    "s": 8,
+    "scene": "01",
+    "static_threads": 48,
+    "workers": 48
+  },
+  "chain_total_ms": 5242.092,
+  "elapsed_seconds": 7.338695595000019,
+  "exit_code": 0,
+  "gnu_time_max_rss_kb": 3974044,
+  "index": 6,
+  "input_file_sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f",
+  "outcome": "complete_relative",
+  "probe_status": "complete_relative",
+  "tower_digest": "9ddbf7430c9086cc"
+}

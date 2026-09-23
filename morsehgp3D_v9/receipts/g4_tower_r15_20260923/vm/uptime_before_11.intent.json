@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "uptime"
+  ],
+  "cwd": "/tmp/ehgp-tower-v9-e12e2df5d0bf029f.9bLoM83f6k/output",
+  "exit_code": null,
+  "group_closed": false,
+  "per_command_watchdog": null,
+  "pid": null,
+  "session_work_deadline_epoch": 1790208263.8143091,
+  "started_utc": "2026-09-23T23:40:52.393411+00:00"
+}

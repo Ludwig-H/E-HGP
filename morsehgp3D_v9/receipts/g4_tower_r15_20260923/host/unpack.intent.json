@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "/home/codespace/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "ssh",
+    "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-b",
+    "--quiet",
+    "--ssh-key-file=/workspaces/.ehgp-sessions/v9tower.20260923T233612Z/key",
+    "--ssh-key-expiration=2026-09-24T00:46:16.577908Z",
+    "--ssh-flag=-n",
+    "--ssh-flag=-o BatchMode=yes",
+    "--ssh-flag=-o ConnectTimeout=15",
+    "--command=test \"$(sha256sum /tmp/ehgp-tower-v9-e12e2df5d0bf029f.9bLoM83f6k/snapshot.tar.gz | cut -d \" \" -f 1)\" = 0324fc546af5b16edaec8f7bc1cf1c9bd3b25fd86fa5aec708bb22e6d2a63caa && test \"$(sha256sum /tmp/ehgp-tower-v9-e12e2df5d0bf029f.9bLoM83f6k/source_manifest.json | cut -d \" \" -f 1)\" = 81ccedaf6bb11bd66eb9b72c8e3e3f01f6d7f306fbc7488e2b690b2a9fed72bb && test \"$(sha256sum /tmp/ehgp-tower-v9-e12e2df5d0bf029f.9bLoM83f6k/worker.py | cut -d \" \" -f 1)\" = 89983e24c80eac5e2a78432f197298eb932072641d39e691fc86c975b6f32a00 && test \"$(sha256sum /tmp/ehgp-tower-v9-e12e2df5d0bf029f.9bLoM83f6k/double_guard_verified | cut -d \" \" -f 1)\" = 1f7ad17c15a4fae1c49594e923db481b88ac9bff4cc0f867c08c366d668e8be0 && mkdir -m 700 /tmp/ehgp-tower-v9-e12e2df5d0bf029f.9bLoM83f6k/source && tar --no-same-owner --no-same-permissions -xzf /tmp/ehgp-tower-v9-e12e2df5d0bf029f.9bLoM83f6k/snapshot.tar.gz -C /tmp/ehgp-tower-v9-e12e2df5d0bf029f.9bLoM83f6k/source"
+  ],
+  "name": "unpack",
+  "started_epoch": 1790206742.8719652,
+  "timeout_seconds": 90
+}

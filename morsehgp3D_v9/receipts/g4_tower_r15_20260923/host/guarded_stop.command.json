@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/workspaces/.ehgp-sessions/v9tower.20260923T233612Z/tower_v9_host/stop_and_verify.sh",
+    "--yes",
+    "--expected-last-start-timestamp",
+    "2026-09-23T16:36:46.828-07:00"
+  ],
+  "ended_epoch": 1790206986.2937353,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "guarded_stop",
+  "pid": 2742382,
+  "started_epoch": 1790206913.6436236,
+  "stderr_sha256": "9512a64f9493f9fecf6f117879c0fd15a9d8781573aecf8884cc4dea8cf529ce",
+  "stdout_sha256": "8237101459ad3fd3b178090dc01ee238c1558b1e6f7658c0954b25af6b58c3ee",
+  "timeout_seconds": null
+}

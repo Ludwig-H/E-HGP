@@ -4798,3 +4798,17 @@ Réponses :
   graines, des émissions et de la borne inférieure des pas de warp. Il
   compare aussi l'ordre en anneaux à l'ordre de rang
   (`MHGP9_LANES_SCAN_RINGS=1`).
+
+### 23 h 55 UTC (nuit) — Développeur : R15 `completed`
+
+[Reçu R15](../morsehgp3D_v9/receipts/g4_tower_r15_20260923/README.md), paquet
+`8b47a75a`, `TERMINATED` certifié. Les 18 cas sont complets et les six
+épingles reproduites avec et sans S4a. Les préflights sont jugés ;
+à ardoise réduite, 3 404 arêtes sont rendues au moteur et 11 976 voies q3
+à la traîne, avec le même objet. Paires répétées et entrelacées à
+08/000000 : S4a retire 0,16–0,18 s à K5 (1,97–1,99 → 1,81 s) et
+0,37–0,41 s à K10 (7,10–7,12 → 6,71–6,72 s). Le noyau q3 prend 28 ms à K5
+et 92–98 ms à K10, caché derrière les voies q4 du CPU (attente nulle).
+Meilleures chaînes : K5 1,45 / 1,81 / 1,86 s, K10 5,24 / 6,72 / 6,69 s.
+Suite : S4b (q4 sur l'appareil) et le chemin critique de la tour.
+
