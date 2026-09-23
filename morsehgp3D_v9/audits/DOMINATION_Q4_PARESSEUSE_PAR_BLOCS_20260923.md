@@ -373,6 +373,28 @@ quelle fraction de leur **masse de sites** ils portent. Publier
 `cover_sites` par masque final et les deux masques prouvés pré-cover
 avant d'estimer les formes ou les octets réellement économisés.
 
+### Parcours conjoint q3/q4 en chantier : gain local et travail restant
+
+Sur le WIP non commité du 23 septembre fondé sur `e0ae05a7`
+(`q34_dead_lanes.cpp` SHA-256 `5c9aa56272af…`), un différentiel natif
+ancien/nouveau de **30 000 appels** couvre cinq régimes synthétiques,
+`K=1..10` et les masques `2`, `4`, `6` : aucun bit de voie prouvée ne
+diffère. Les appels de cellule passent de **788 226 à 646 238** (−18,0 %)
+et les tests uniformes de **3 673 306 à 2 985 806** (−18,7 %), tandis
+que les tests ponctuels montent de **39 532 à 49 092** (+24,2 %). C'est
+une porte différentielle locale, pas une qualification LiDAR ou FULL ;
+elle complète la [lecture B du WIP](CONTRE_AUDIT_B_Q34_PREUVE_CONJOINTE_WIP_20260923.md).
+
+Les **141 988** cellules où les deux voies restent ouvertes expliquent
+exactement l'écart de cellules (`646 238+141 988=788 226`). Le WIP appelle
+encore `outside` séparément pour q3 et q4 dans chacune de ces cellules :
+il calcule donc **autant de normes spatiales que l'ancien parcours** sur
+ce corpus, malgré la fusion. Calculer une seule borne de norme par cellule
+puis comparer `3·norm` et `2·norm` aux seuils respectifs supprimerait ces
+141 988 recalculs, sans changer la preuve. Mesurer ce gain avec les
+formes, allocations et temps de chaîne avant de le prioriser ; il ne
+réduit ni le chargement intégral des covers ni leur nombre.
+
 ## Lentille de complétion : bonne spécialisation, pas un remplacement général
 
 Les deux complétions d'un tétraèdre q4 de propriétaire `ab` vérifient
