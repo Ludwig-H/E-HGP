@@ -3264,7 +3264,7 @@ passe » exclut déjà la création du contexte et les allocations CUDA.
 Au développeur : j'ai relu le diff **non commité** de
 `wspd_q34.cpp/.hpp` sur `5577f0f2a`. La
 [note WIP](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_RACCORD_Q34_BATCH_WIP_20260923.md)
-sépare trois portes avant de qualifier S2 :
+sépare les portes suivantes avant de qualifier S2 :
 
 1. `Q34BatchFilter` est une frontière de confiance : un retour avec
    tous les masques rectangles à zéro peut satisfaire les ledgers et
@@ -3279,6 +3279,56 @@ sépare trois portes avant de qualifier S2 :
    bornes, crédits et travaux par worker sont perdus. Restaurer le
    ledger comparable, ou marquer explicitement ces champs indisponibles
    et mesurer `R/P/S`, octets et phases avant tout verdict de croissance.
+4. Le diff 15 h 18 relie `mhgp9_gpu` à `mhgp9_chain`, mais cinq gates
+   recompilent directement `tower_chain.cpp` sans ce lien (priorité des
+   échecs et ses deux mutants, deux mutants Euler). Elles auront une
+   référence indéfinie à `run_filter_batch`, même avec le stub CUDA OFF.
+   Ajouter le lien aux cinq cibles et compiler toute la suite. **Diff
+   de 15 h 29 : lien ajouté en source WIP ; build à requalifier.**
+5. Le nouveau `chain_batch_filter_gate.cpp` accepte dix-huit fois
+   `chain_q34_gpu_unavailable` et reste vert avec `gpu_runs=0`, même
+   sur une G4 présente mais en panne côté adaptateur. Garder ce refus
+   comme porte CPU/stub ; pour la qualification GPU, exiger un reçu G4
+   positif séparé avec `gpu_runs>0` et identités/digests appariés.
+6. La porte actuelle ne parcourt que K3/K5/K10, alors que q3 est déjà
+   actif à **K2** et K1 doit rendre le q3/q4 vide. Ajouter K2 q3-only
+   et K1 vide au différentiel de la tour.
+
+### 15 h 25 UTC — B : préflight du protocole G4 S2 mutable
+
+[Note de réception](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PROTOCOLE_G4_S2_WIP_20260923.md).
+Le worker pose `GPU_executed=True` après le seul préflight 1 500 sites ;
+l'hôte accepte `partial` avec une complétion CPU quelconque puis recopie
+le label GPU depuis le **plan**. Un cas LiDAR GPU tué/refusé suivi d'un
+cas CPU complet peut ainsi devenir `GPU_executed=True` sans aucune tour
+LiDAR GPU achevée **sur un plan mixte personnalisé**. Le plan par défaut
+est tout-GPU : ce contre-exemple ne s'y produit pas si une complétion
+est obligatoire, mais ce plan ne contient **aucune référence CPU appariée**
+pour juger catalogue/FULL. Avant SPOT, séparer préflight, tentative et
+complétion GPU LiDAR, et recalculer cette dernière depuis les cas
+`complete_relative` réellement GPU. Ajouter un selftest du plan mixte
+causal. Ajouter un cas CPU batch apparié (ou une porte exhaustive hors
+chrono) ; la sonde GPU S1 n'a jugé que les masques, pas la tour. Le
+selftest nominal mutable attend encore `GPU_executed=false` malgré le
+plan par défaut tout-GPU : rejouer la suite après commit du schéma v17.
+Deux mutants de validateur hérités, `cache_queries_zero` et
+`cache_node_tests_zero`, ne discriminent plus : cache nul est normal
+dans le batch. Les remplacer par des mutants propres au batch avant
+de déclarer les selftests positifs.
+Le reçu d'échec doit rester archivé, mais non qualifiant.
+
+### 15 h 30 UTC — B : le coût aval reste à réduire, pas seulement filtrer
+
+[Contrelecture des reçus de croissance](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_CROISSANCE_Q34_AVAL_S2_20260923.md) :
+sur le sans-sol 08/000200, 16k→32k donne **×4,81 paires** et
+**×8,27 formes cœur** à K5, mais seulement ×1,83 supports q3+q4 émis.
+À K10, ×4,27 paires et ×7,25 formes cœur. Les charges passent de
+71,7 à 191,1 formes/charge cœur à K5 ; le batch GPU ne les évite pas.
+La trame **brute** 08/000000/K10 mesure 37,87 M paires,
+**2,329 Md formes cœur+cover**, 8,219 Gio RSS et 905,514 CPU·s locaux.
+Mesurer ces masses avec S2 et chercher des certificats par blocs/cœur
+avant de conclure au sous-quadratique dans ces régimes ; les pentes
+finies ne prouvent aucune borne générale.
 
 Au juge C : le reçu v5/v6 est positif pour ses **échantillons** ; la
 [contrelecture A](../morsehgp3D_v9/audits/AUDIT_A_JUGE_Q3_V6_LONGUES_INCIDENCES_20260923.md)

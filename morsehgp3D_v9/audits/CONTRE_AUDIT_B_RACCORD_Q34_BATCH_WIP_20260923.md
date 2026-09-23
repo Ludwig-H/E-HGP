@@ -29,6 +29,11 @@ Un mutant `all_rect_masks_zero` doit être tué par la porte, et un
 mutant qui remplace une arête par une autre arête valide mais étrangère
 à son rectangle doit l'être aussi. Le `Q34BatchFilter` arbitraire ne
 peut être réputé exact grâce aux seules gardes de forme actuelles.
+L'[audit A compilé](q34_batch_duplicate_gate_20260923/README.md) apporte
+depuis un témoin plus fort que le tout-zéro : un doublon remplace une
+paire survivante à cardinalité et ledger identiques, supprime une clé
+q3 et passe `validate_completion`. Il n'impute pas cette corruption au
+kernel CUDA ; il prouve que la frontière actuelle ne la détecte pas.
 
 ## 2. Le batch n'est pas encore le tuilage borné S2a
 
@@ -46,6 +51,13 @@ peuvent croître beaucoup plus vite sur des scènes denses : aucun plafond
 de mémoire par tuile n'est établi pour des dizaines de millions de sites.
 Le `Q34FilterBatch` CPU garde en outre les vecteurs par bloc pendant
 qu'il recopie les survivants dans le vecteur final.
+L'adaptateur CUDA mutable ajoute `pair_mask` (**P octets**), `flags`
+et `positions` (**4P** chacun), puis jusqu'à **9S octets** de sorties
+device, hors autres tableaux, avec refus explicite si `P>2³¹−1`.
+L'hôte recrée `rank_points` (**12n octets**) et la garde brute rescane
+les plages des nœuds. `filter_ms` les inclut, `device_ms` les exclut :
+un prochain reçu ne doit pas annoncer un temps de chaîne à partir du
+seul compteur device.
 
 Un raccord batch complet est utile comme **étape fonctionnelle** ; il
 ne ferme pas S2a. Exiger ensuite des tuiles possédées de taille bornée,
@@ -66,7 +78,49 @@ sur le coût ou la sous-quadraticité si ces compteurs sont comparés au
 chemin historique. Renvoyer un bilan complet équivalent, ou marquer
 explicitement les champs indisponibles et mesurer séparément
 `R`, `P`, `S`, visites, coût de préparation/filtre/cœur et octets.
+Le `job_ns` des workers ne chronomètre plus que la collecte du front,
+alors que le chemin historique y inclut les arêtes :
+`q34_occupancy.job_sum_s/max_job_ms` n'est pas comparable ON/OFF.
+Conserver `front_ns`, `filter_ns`, `edges_ns` et leur somme séparés,
+sans inférer un meilleur équilibrage des anciennes colonnes.
 
-Ces trois portes concernent un **chantier mutable**. La prochaine
+## 4. Lien CMake manquant sur les cibles qui recompilent la chaîne
+
+Le diff de 15 h 18 fait appeler `gpu::run_filter_batch` depuis
+`tower_chain.cpp` et lie `mhgp9_gpu` à la bibliothèque `mhgp9_chain`.
+Cependant `mhgp9_chain_order_failure_priority_gate`, ses deux mutants
+et les deux mutants Euler recompilent directement **ce même `.cpp`**
+dans leurs exécutables et ne lient que `mhgp9_gen`. Ils garderont donc
+une référence indéfinie à `gpu::run_filter_batch`, même lorsque CUDA est
+désactivé et que l'implémentation attendue est le stub. C'est un blocage
+de build statiquement visible ; ajouter le lien `mhgp9_gpu` à ces cinq
+cibles, puis compiler l'ensemble des gates avec CUDA OFF et ON avant
+de publier la tranche.
+Au nouveau diff de 15 h 29, D a ajouté `mhgp9_gpu` aux cinq cibles.
+Le défaut de lien est donc **corrigé en source WIP** ; le build complet
+et son reçu restent à rejuger au commit. Les autres portes de cette
+note ne sont pas fermées par ce lien.
+
+## 5. La porte actuelle peut rester verte sans aucun GPU positif
+
+Le nouveau `chain_batch_filter_gate.cpp` accepte, pour chacun de ses
+18 cas, soit une chaîne GPU complète, soit
+`chain_q34_gpu_unavailable`. Son plancher final n'impose que
+`gpu_refusals+gpu_runs≥18` ; `gpu_runs=0` peut donc passer sur une VM
+GPU où l'adaptateur CUDA régresse et refuse systématiquement. C'est
+une bonne porte de refus explicite pour les builds sans appareil,
+mais pas une qualification du raccord GPU. Prévoir un **gate G4
+distinct** qui exige les 18 exécutions positives (ou un plan publié
+plus étroit fixé d'avance), leurs identités et digests, et échoue si
+`gpu_runs=0`. Ne pas faire passer le refus sans appareil pour un test
+device exact.
+
+La porte actuelle n'échantillonne que K3/K5/K10. Pourtant le front q3
+est déjà actif à **K2** (`requested_lane_mask=6` restreint à la voie 2),
+et la garde GPU mutable accepte désormais K1..10. Ajouter K2 q3-only
+au différentiel CPU/GPU et K1 vide pour vérifier la base de la tour ;
+sinon les deux premiers niveaux ne sont pas exercés par S2.
+
+Ces portes concernent un **chantier mutable**. La prochaine
 contrelecture doit repartir du commit publié, des tests causaux et du
 reçu intégré ; ne pas extrapoler les 43–107 ms de S1 à la tour.

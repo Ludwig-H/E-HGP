@@ -95,7 +95,7 @@ q3/q4 aux deux DFS ciblés avec leur ordre d'enfants ; 40 % comprend
 aussi le front non porté. Un chemin GPU intégré doit inclure les coûts
 de création/consommation des requêtes et une sortie bornée par lots.
 Le [préflight B du raccord batch WIP](CONTRE_AUDIT_B_RACCORD_Q34_BATCH_WIP_20260923.md)
-signale trois portes avant de qualifier S2 : adapter de filtre fiable
+signale plusieurs portes avant de qualifier S2 : adapter de filtre fiable
 et porte différentielle causale (les ledgers acceptent même un retour
 tout zéro), tuilage borné au lieu de matérialiser tous rectangles et
 survivants, et conservation des compteurs de travail du filtre.
@@ -128,6 +128,16 @@ et un reçu `partial` sans comparaison. **`c265a5da` publie maintenant
 par lots achevés sans jumeau moteur achevé de même fichier/K/s ; un reçu
 qui la masque est refusé. Ces mesures restent brutes et non appariées.
 R12, entièrement achevé, n'est pas touché.
+Le [préflight B du protocole G4 S2 WIP](CONTRE_AUDIT_B_PROTOCOLE_G4_S2_WIP_20260923.md)
+reste une photographie historique avant les corrections publiées ;
+ses objections de réception doivent être rejugées sur les sources et
+reçus R12, et non répétées comme défauts actuels. La
+[contrelecture B de la croissance aval](CONTRE_AUDIT_B_CROISSANCE_Q34_AVAL_S2_20260923.md)
+mesure, sur le sans-sol 08/000200 de 16k à 32k, ×4,81 paires développées
+et ×8,27 formes cœur à K5, pour ×1,83 émissions q3+q4. Sur la trame
+brute 08/000000/K10, le CPU local traite 37,87 M paires et 2,329 Md
+formes cœur+cover. Le filtre GPU ne supprime pas cette masse aval ;
+ces mesures ne prouvent ni une borne sous-quadratique ni le budget FULL.
 Le [shadow des rectangles](Q34_BLOCS_LIDAR_SHADOW_20260923.md) donne un
 critère d'ordonnancement S2a concret sur 08/000000/s8 : à K5, **1 081 123
 des 1 128 166** rectangles ouverts ont moins de 16 paires, mais ne portent
