@@ -77,17 +77,28 @@ contrat K10 exigerait un générateur K12 pour juger ses dix ordres. Le
 protocole Kmax+2 ajoute des témoins, mais une omission commune aux deux
 exécutions peut encore passer.
 
-Le port Euler v13 est **encore un WIP non publié** dans le worktree du
-constructeur au 23 septembre. Le diff actuel place les contributions dans
-le chrono `census_ms` (`tower_chain.cpp:486,539–601`) et refuse un `E_K`
-faux **avant** FULL (`:602–612`), tandis que la décision du développeur
-prévoit coût séparé et refus après une tour FULL réussie. Les lecteurs
-LiDAR et G4 épinglent toujours le schéma v12, alors que la sonde WIP écrit
-v13. Pour rendre le port qualifiable : chronométrer Euler distinctement,
-vérifier après FULL quand `run_tower=true`, et livrer en même temps lecteur,
-fixtures dégénérées et mutant d'omission. Pour `run_tower=false`, certifier
-la positivité des supports réguliers ou marquer `E_K=1` comme diagnostic
-conditionnel à cette propriété.
+Le port Euler v13 est au commit **`e76886af` du worktree constructeur**,
+non encore publié sur `origin/main` lors de cette lecture. La sonde écrit
+v13 et le lecteur G4 en vérifie la borne, le vecteur entier et les nouveaux
+champs `q34_occupancy`/`tower_phases_ms`. Le lecteur local LiDAR accepte
+v13 mais reste moins strict : sur une vraie réponse de 360 sites, K5/s8/W2,
+il accepte encore chacun des trois mutants *vecteur `euler.by_k` raccourci
+de 5 à 3*, *`q34_occupancy` absent*, *`tower_phases_ms` absent* ; le lecteur
+G4 les refuse. `bench/run_lidar_scaling.py:175–181` ne vérifie que le
+préfixe d'Euler et son selftest CMake relit toujours un cas v12. Aligner
+les deux validateurs et ajouter ces trois corruptions au selftest v13 avant
+de qualifier une nouvelle pente LiDAR.
+
+Le calcul Euler reste inclus dans `census_ms` (`tower_chain.cpp:486,539–601`)
+et un `E_K` faux refuse **avant** FULL (`:602–612`), alors que la décision
+du constructeur prévoit son coût séparé et un refus après tour FULL réussie.
+Les nouvelles portes mathématiques passent sur leurs cas actuels, sans
+contre-exemple trouvé à la formule ; leur test de mutants accepte cependant
+`cause=euler.chain_refused` pour **toute** erreur de chaîne
+(`chain_euler_gate.cpp:60–61`, `CMakeLists.txt:171–172`). Exiger la raison
+`chain_catalogue_euler_violated` et le statut Euler `fails` rendra le mutant
+causal. Pour `run_tower=false`, expliciter dans la preuve la positivité des
+supports réguliers, que les fabriques exactes q2/q3/q4 imposent déjà.
 
 Les certificats exacts actuellement raccordés comprennent la saturation
 profonde de l'atlas, le census q3 sur fragment complet, la preuve de voies
