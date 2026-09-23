@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/workspaces/.ehgp-sessions/v9tower.20260923T032037Z/tower_v9_host/stop_and_verify.sh",
+    "--yes",
+    "--expected-last-start-timestamp",
+    "2026-09-22T20:21:12.746-07:00"
+  ],
+  "name": "guarded_stop",
+  "started_epoch": 1790133942.3916905,
+  "timeout_seconds": null
+}

@@ -326,3 +326,29 @@ entrée. Formes physiquement calculées = `dead_form_sites + 2·dead_loads`
 (les deux extrémités, formes nulles) : identité dérivable, pas de nouveau
 compteur.
 
+## 23 septembre 2026, 03 h 45 — Filtre par ligne a × B : constat négatif (développeur)
+
+GCP non utilisé. Prototype hors dépôt de la proposition B (appel
+`filter_q34_witnesses(singleton(a), box(B), …)` avant l'expansion de chaque
+ligne, bornes Affine), sur 08/000000 K5, W8, flux identique (condensé du
+harnais `f31e41f3e76e03a9`) : la ligne rejette 15–17 M des 23,7 M paires
+résiduelles, le filtre de paires tombe de 114 à 57 G cycles, mais le filtre de
+ligne coûte 49–87 G cycles ; CPU total 156 → 164–171 s (hôte partagé,
+indicatif). Avec le cache des nœuds témoins déjà en place, la ligne ne paie
+pas : piste écartée en l'état (pourrait revenir si ses bornes de boîte B
+devenaient beaucoup moins chères).
+
+## 23 septembre 2026, 03 h 50 — Session G4 R5 (développeur)
+
+**GCP utilisé**, session gardée `completed`, arrêt ciblé certifié,
+`TERMINATED` relu. Paquet `aae9da0e` (inclut `684d8fc7`, `133c8653`,
+`47f8a5da`). Reçu : `morsehgp3D_v9/receipts/g4_tower_r5_20260923/`. Treize
+cas `complete_relative`, sept comparaisons d'objet égales, condensés égaux à
+R1–R4b. 48 fils : K5 **4,33 / 5,98 / 7,38 s**, K10 **12,09 / 17,37 / 19,57 s**
+(000100 / 000000 / 000200) ; tour K10 5,4 s contre 14,9 s en R4b. 000000 K10
+à 24 fils : 21,6 s (les 48 fils sont 24 cœurs × 2). Réponse au contre-audit B
+(`133c8653`) : prochaine livraison, la porte causale « deux `Failure` à deux
+K », avec une priorité par K sur les deux phases (aujourd'hui une panne de
+lots à K5 masque une panne d'images à K2 ; la boucle séquentielle rendrait
+K2).
+

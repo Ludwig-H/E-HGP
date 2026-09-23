@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/usr/bin/cmake",
+    "--version"
+  ],
+  "cwd": "/tmp/ehgp-tower-v9-6fafb553c6703d57.JeaCIo6q61/output",
+  "exit_code": null,
+  "group_closed": false,
+  "per_command_watchdog": null,
+  "pid": null,
+  "session_work_deadline_epoch": 1790135259.61879,
+  "started_utc": "2026-09-23T03:22:39.816710+00:00"
+}

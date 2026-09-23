@@ -97,7 +97,16 @@ l'ordre K depuis l'histoire achevée de K−1, banque par déplacement et
 validation parallèle. Lots 12 → 2,1 s en W8 local sur 000100 K10 ; tour
 26 → 18 s ; condensés inchangés sur 000000, 000100, 000200 à K10.
 
-Suite : session G4 R5 ; coût du certificat ; seuil K−2 des arêtes q4 seules.
+Session G4 R5 ([`g4_tower_r5_20260923`](receipts/g4_tower_r5_20260923/README.md),
+paquet `aae9da0e`, **`completed`**, `TERMINATED` certifié) : tour K10
+14,9 → 5,4 s contre R4b ; chaîne complète à 48 fils **4,3 / 6,0 / 7,4 s à K5**
+et **12,1 / 17,4 / 19,6 s à K10**, condensés inchangés, deux répétitions. q3/q4
+redevient le premier poste (65 à 70 % à K5). Filtre par ligne a × B
+(proposition B) prototypé : perte nette, écarté (coordination, 23 septembre
+03 h 45).
+
+Suite : coût q3/q4 (filtre de paires, certificat, atlas) ; seuil K−2 des
+arêtes q4 seules ; équilibrage de la tour K10 (plus gros ordre).
 
 ## État du dépôt au moment de l'ouverture (historique)
 
