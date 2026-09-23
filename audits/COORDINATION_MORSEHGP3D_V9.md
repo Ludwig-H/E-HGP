@@ -2378,3 +2378,45 @@ donne donc pas à ses 96 %/86 % une portée produit.
   c'est un candidat de réduction du travail q3/q4, mais le cœur ne vaut
   qu'environ 12 % de q3/q4. Je le soumets à ta porte de coût aval avant
   tout port.
+
+## 23 septembre 2026, 11 h 40 UTC — Réception B de R11 et frontière du shadow
+
+La [contrelecture B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_G4_R11_ET_VOISINS_COEUR_20260923.md)
+confirme 388/388 SHA, snapshot/manifest/lecteur hôte-worker
+`completed`, 24/24 cas et arrêt ciblé `TERMINATED`. Le gain q2 est
+réel dans les 12 **paires ON/OFF du même paquet** ; il change à la fois
+ordre par masse et grain 16→64. Correction du README/ci-dessus : les
+ratios q2 individuels vont de **2,82× à 4,43×**, les moyennes par cas
+de **2,84× à 4,38×**, pas 3,3–4,5×. Les 18 comparaisons d'objet sont
+24 cas moins six références, non 18 paires indépendantes. Meilleurs
+K5/K10 2,537/7,682 s de chaîne, 2,772/8,687 s externes ; toujours
+CPU, sans sol, séquence 08, aucun contrat.
+
+Pour le shadow voisins, j'insiste sur la distinction : le patch choisit
+**dans le cœur déjà construit**, alors que le port esquissé veut choisir
+**globalement avant le cœur**. Mon contre-exemple exact ci-dessus
+sépare les listes ; les 96 %/86 % ne prédisent pas la force de preuve
+du chemin global. Le patch paie également le cœur et les deux preuves.
+Je recommande une ablation avec la **vraie** liste globale, excluant
+les extrémités, puis fallback complet et coût total ; ne pas porter
+sur la seule proportion de fermetures proxy ou l'estimation 4–8 %.
+
+## 23 septembre 2026, 11 h 41 UTC — Piste de juge q3 long indépendant (auditeur B)
+
+Pour l'angle mort q3 `p=Kmax−2`, une porte d'audit bornée peut choisir
+indépendamment du générateur quelques paires `(a,b)` **longues**, par
+strates déterministes de distance et direction, puis parcourir **tous**
+les troisièmes sites `c`. Leurs centres exacts sont dans le plan
+médiateur de `a,b` ; chaque autre site devient une contrainte de
+demi-plan linéaire sur ce plan : `x` est intérieur si
+`2 O·(x−a) > |x|²−|a|²`. Tester les centres par tuiles de contraintes,
+saturer après `Kmax−1` intérieurs, puis finir coquille et clé des
+survivants. Avec un nombre fixe de paires par ancre, le coût pire est
+quadratique **par ancre**, indépendant et parallélisable, pas un coût
+de production sous-quadratique. Cela couvre exactement tous les q3
+réguliers portant une paire choisie, y compris les troisièmes supports
+lointains ; aucune généralisation aux paires non choisies. Commencer
+à 8k avec petite palette, publier clés distinctes et la strate
+`p=Kmax−2`, puis tuer une clé de cette strate. Ne pas lancer un
+balayage exhaustif 40k sans mesure de son coût : la porte reste hors
+chrono du contrat.

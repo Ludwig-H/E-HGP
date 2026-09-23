@@ -32,8 +32,20 @@ sorties et travail sur plus de 400 cas, mais avec granularités 1/4/32,
 reçu brut. La [contrelecture B](CONTRE_AUDIT_B_Q2_MASS_FIRST_V16_20260923.md)
 calcule sur le meilleur R10 que supprimer entièrement q2 laisserait
 2,505 s à K5 et 7,651 s à K10 : v16 n'est pas une voie suffisante vers
-1 s, et n'a encore aucune mesure G4. Les archives v15 conservent leur
+1 s. Les archives v15 conservent leur
 lecteur épinglé ; le protocole courant exige la sonde v16 et dix leviers.
+Le [reçu G4 R11](../receipts/g4_tower_r11_20260923/README.md),
+[contrelu par B](CONTRE_AUDIT_B_G4_R11_ET_VOISINS_COEUR_20260923.md),
+mesure ensuite le levier q2 ON/OFF dans le **même paquet v16** :
+388/388 empreintes, 24/24 cas `complete_relative`, meilleur K5
+**2,537 s** de chaîne et meilleur K10 **7,682 s** ; q2 décroît de
+**2,84× à 4,38× en moyenne appariée** selon les six cas. Le reçu
+annonce à tort 3,3–4,5× ; les répétitions individuelles donnent
+2,82–4,43×. Ce levier change ensemble ordre par masse et grain
+16→64 jobs/worker. R10→R11 ne mesure pas q2 seul, car le paquet de
+la tour a aussi évolué ; l'ablation interne R11 est la preuve du gain.
+Toujours **CPU G4**, s8, sans sol et seule séquence 08 : ni GPU ni
+contrat brut multi-séquence ou sous-quadraticité nouvelle.
 Les mesures de densité restent celles du binaire v12 **`4530644b`** ;
 aucune nouvelle série LiDAR v13 n'en découle. Le reçu G4
 [R8](../receipts/g4_tower_r8_20260923/README.md) exécute
@@ -441,6 +453,15 @@ Le paquet exécuté `33d51efd` précède la validation parallèle du
 catalogue et le remplissage parallèle des programmes de `308ca2a1`,
 ainsi que le lecteur K1 corrigé en `c19e4b49` ; ne pas leur attribuer
 ces chronos. La phase q3/q4 du meilleur K5 reste **1,65–1,69 s**.
+Le [shadow voisins du cœur](../receipts/knn_core_probe_20260923/README.md)
+publié avec R11 conserve 96 %/86 % de ses fermetures K5/K10 en
+choisissant 17 voisins de chaque extrémité **parmi les sites du cœur
+déjà construit**, sur une seule coupe 16k. Ce n'est pas la liste des
+voisins **globaux** pré-calculable avant le cœur ; les deux peuvent
+être disjointes ([contre-exemple](CONTRE_AUDIT_B_G4_R11_ET_VOISINS_COEUR_20260923.md)).
+Le patch de mesure paie encore construction/parcours/tri du cœur puis
+la preuve complète : aucune baisse CPU/mur/RSS ni effet aval n'est
+mesuré. Tester la vraie liste globale et le repli avant port produit.
 
 ## Verrou q3/q4 : réduire le travail avant l'expansion
 
