@@ -295,7 +295,10 @@ aucun cover ni travail aval n'est supprimé ici.
 
 Le [contre-audit du grand-livre q3/q4](LEDGER_VISITES_CACHEES_Q34_20260923.md)
 montre que six parcours d'index déjà comptés par le générateur et les
-sites balayés par le sweep q4 ne sont pas projetés dans la sonde FULL.
+sites balayés par le sweep q4 n'étaient pas projetés dans la sonde
+FULL v11 de R7b. Le port v12 `4530644b` les publie maintenant ; ses
+identités/bornes sont cohérentes avec les options actuelles de chaîne,
+mais leur croissance appariée reste à mesurer.
 Ils incluent les témoins par rectangle/paire, l'accès aux graines q3
 par arête et trois parcours q4 par arête. Sur un index à `2n−1` nœuds,
 leurs bornes par appel restent linéaires en `n` ; les comptes R7b publiés
@@ -303,13 +306,24 @@ ne permettent donc pas d'écarter un coût caché
 `(rectangles + paires recherchées + arêtes q3/q4)×n`. Publier ces
 comptes sur les coupes LiDAR appariées avant de conclure sur la pente.
 
+Le [reçu local de pente LiDAR v11](CONTRE_AUDIT_PENTE_LIDAR_LOCALE_PARTIELLE_20260923.md)
+est intègre (15/15 SHA et entrées vérifiées) mais partiel : une seule
+trame sans sol, K5 aux tailles 8k/16k/32k et K10 seulement à 8k/16k.
+Les chronos internes K5 croissent d'environ ×2 à chaque doublement,
+mais `core_sites` croît ×7,66 au premier ; à K10, ×5,69 de 8k à 16k.
+Ce signal ne qualifie ni le travail total sous-quadratique, ni G4/GPU.
+Le runner v2 de `4530644b` durcit les prochains reçus ; il ne complète pas
+rétroactivement les cas absents de cette capture.
+
 Le [shadow de scission des rectangles q3/q4](Q34_BLOCS_LIDAR_SHADOW_20260923.md)
 sur 08/000000 sans sol ferme 3,68 M paires à K5 et 4,12 M à K10 avant
 leur filtre individuel, mais paie 40,9 M et 62,5 M visites supplémentaires
 de nœuds témoins. Ces paires auraient déjà été rejetées par le filtre
 individuel : aucun cover aval n'est économisé. Ne pas porter cette scission
 naïve sans bilan apparié du travail complet ; le cache de témoins par boîte
-reste une hypothèse distincte.
+reste une hypothèse distincte. La contrelecture indépendante juge les
+certificats exacts sur la grille 1 mm, mais le reçu ne conserve pas les
+sorties brutes de cette sonde pour un rejeu indépendant.
 
 Pour q3, seuls les fragments d'atlas **complets** fournissent un compte
 réutilisable ; un certificat profond incomplet n'est qu'un minorant.
