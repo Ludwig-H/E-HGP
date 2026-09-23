@@ -275,7 +275,10 @@ couverture » dans la provenance sont plus fortes que cette comparaison
 de session. Le gate C++ local compare davantage de champs ; le patch
 C de coquilles étendues et ses six valeurs épinglées sont ensuite portés
 par **`18d7c69c7`** (quatre tests ciblés locaux, aucun CUDA ni reçu
-R13). Un plan personnalisé S3 GPU seul, sans survivant,
+R13). Un [contrôle B ultérieur](CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md)
+voit 26/26 auto-tests Python du protocole à `8ce818ff9` et reproduit
+localement l'épingle 08/000000/K5 avec le moteur W48 ; ces sorties ne
+sont pas un reçu G4 épinglé. Un plan personnalisé S3 GPU seul, sans survivant,
 peut encore étiqueter `GPU_executed` à partir du levier sans kernel S3 ;
 le plan R13 par défaut active aussi le filtre S2 GPU et n'est pas touché
 par ce contre-exemple. Recommander des libellés « même condensé

@@ -278,3 +278,17 @@ Le condensé FNV64 reste un témoin canonique à collision près, non une
 comparaison littérale indépendante ni une preuve de complétude commune
 aux deux bras. Les gardes CUDA et le classement `GPU_executed` gardent
 les réserves distinctes décrites plus haut.
+
+Contrôle indépendant supplémentaire du protocole publié à
+`8ce818ff9` : `python3 -B gcp-migration/tower_selftest_v9.py` a fini
+**26/26, code 0**, dans un worktree isolé ; seul le résultat de commande
+est conservé, pas un reçu formel. Les six épingles concordent avec le
+`PINS.json` de C, les 18 cas par défaut sont couverts et le lecteur
+rejuge les sorties brutes. Sur le binaire CPU local non épinglé
+`build/v9-exp/mhgp9_tower_probe`, un appel **moteur W48**, trame entière
+08/000000 sans sol, K5/s8, tous les leviers du cas R13, a donné code 0,
+`tower_digest=67450c64611075b1` et
+`catalogue_digest=5ad1fe09354411ba`, exactement l'épingle de C ;
+`chain_total=26,576 s` **sur CPU local chargé**, sans portée G4.
+Ce contrôle réduit le risque d'un refus de pin dépendant du nombre
+de workers ; il ne teste ni S3 CUDA, ni les cinq autres couples.
