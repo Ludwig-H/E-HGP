@@ -1,6 +1,6 @@
 # État courant des audits v9
 
-22 septembre 2026. Code jugé : **`5ab4326c`** (session G4 sur le paquet
+23 septembre 2026. Code jugé : **`5ab4326c`** (session G4 sur le paquet
 `e28296bb`, noyau MEB à `ad2d0ebb`, sonde v2 à `5ab4326c`). Cadre :
 `exploration_v9_hors_registre`,
 `reference_cpu`, `quantized_u18_input_only`, `not_claimed`. Ce fichier est le
@@ -76,7 +76,12 @@ par cas. À W48, la tour K1..5 prend **18,81 / 15,05 / 29,25 s** et K1..10
 **111,68 / 82,31 / 125,44 s** ; 000000/K10 descend à **70,00 s** en FULL
 statique W48. Les six cas communs ont `generator`, `catalogue`,
 `tower_work` et `orders` exactement égaux aux reçus locaux, pas seulement
-le condensé. Ce reçu n'est ni GPU, ni brut, ni multi-séquence, ni s10/s12 ;
+le condensé. Sous l'hypothèse du FULL non statique en un fil, le reste de
+la chaîne consomme en moyenne **42,6–44,6 des 48 CPU logiques** : son
+coût tient davantage au travail payé qu'à un manque évident de threads.
+La voie FULL statique modifie aussi les compteurs MEB/cache : son gain
+75,90→34,14 s n'est pas un facteur de parallélisme pur.
+Ce reçu n'est ni GPU, ni brut, ni multi-séquence, ni s10/s12 ;
 ces tailles voisines ne prouvent aucune pente sous-quadratique. Voir la
 [lecture des mesures](CONTRE_AUDIT_B_PREMIER_G4_20260922.md) et la
 [contrelecture du protocole](CONTRE_AUDIT_B_G4_R1_ET_SCHEMA_V2_20260922.md).
@@ -132,7 +137,10 @@ appariée.
    B](CONTRE_AUDIT_B_Q4_NIVEAUX_ORIENTES_20260922.md) propose une
    perturbation sortante qui préserve les strates dégénérées ; l'[oracle
    rationnel A](check_q4_outward_levels_20260922.py) retrouve les 5 926
-   centres peu profonds de 2 004 arrangements dégénérés après rabattement.
+   centres peu profonds de 2 004 arrangements dégénérés après rabattement
+   (profondeurs 0..2). B a reproduit **1 250 cas supplémentaires** à
+   profondeurs 3..7, couvrant localement le seuil K10 ; aucun constructeur
+   de niveaux ni moteur q4 n'est jugé par ces scripts.
    Ni le port symbolique, ni son coût réel, ni le census ne sont acquis.
    Plus grave pour
    la trame : le reçu 1 mm compte **2,779 milliards d'incidences
@@ -160,8 +168,11 @@ appariée.
    **toutes** ses faces q3 sont rejetées : les graines à parcourir ne
    peuvent pas être limitées aux q3 finalement émises. Un [certificat de
    cover par bloc d'arêtes survivantes](CONTRAT_COUTS_ET_PARALLELISATION.md)
-   partage le prédicat exact sur `E×Z` et son oracle entier passe ; c'est
-   une piste secondaire pour les 440 millions de visites de cover, à
+   partage le prédicat exact sur `E×Z`. Réduire les **vrais** extrema des
+   arêtes survivantes resserre toujours les bornes A×B ; l'[oracle
+   entier](check_cover_batch_u18_20260922.py) passe 1 000 familles et
+   deux cas discriminants. C'est une piste secondaire pour les
+   440 millions de visites de cover, à
    mesurer après le filtre de paire, sans lui attribuer le coût dominant
    de l'atlas.
 4. **Aval FULL, grandes coquilles et échelle** : les 12,0 M appels MEB
@@ -175,6 +186,11 @@ appariée.
    contrat comptable et la cause exacte de mutation sont corrigés à
    `5ab4326c`. Le gain local annoncé 130→109 s n'a pas encore de reçu
    apparié versionné ; l'amélioration G4 du MEB n'est pas mesurée.
+   La [découpe FULL proposée](PREFETCH_GEOMETRIE_FULL_PAR_K_20260923.md)
+   permettrait de préparer les BallIds géométriques de plusieurs K en
+   parallèle sous fenêtre d'octets, puis de garder la fermeture des lots
+   chronologique ; les 34,14 s de tour statique G4 ne sont pas ventilées
+   assez finement pour prédire un gain.
    Instrumenter les tailles de supports et le temps avant de promettre un
    gain. La [note B](PLATEAUX_GRANDES_COQUILLES_B_20260922.md)
    propose un quotient local compact, [contrelu par B sur sept petites

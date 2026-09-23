@@ -9,9 +9,11 @@ linéaire » et § « Si `s≈m` », sans modifier le moteur.
 ## Objet et borne de sortie
 
 Fixer l'arête propriétaire `ab` et son cover **complet**. Soit `h` le nombre de
-formes de sites non constantes, avec leurs IDs et multiplicités, et `m≤h` le
-nombre de droites géométriques distinctes. Les formes constantes négatives
-contribuent `p₀` ; les constantes nulles sont des contacts. À l'ordre `K`, poser
+formes de sites non constantes, avec leurs IDs et multiplicités, `m≤h` le
+nombre de droites géométriques distinctes et `g≤2m` le nombre de groupes
+par droite **orientée** primitive, chacun portant son poids et ses IDs. Les
+formes constantes négatives contribuent `p₀` ; les constantes nulles sont des
+contacts. À l'ordre `K`, poser
 `d=K−3−p₀`. Si `d<0`, aucun centre q4 n'est retenu sur cette arête. Sinon un
 centre candidat est l'intersection de deux droites indépendantes de profondeur
 stricte au plus `d`. La positivité du tétraèdre et la propriété de `ab` restent
@@ -33,12 +35,13 @@ construction. Elle prolonge par ce comptage direct le lemme 2.5 de
 ## Construction proposée sur modèle de comparaisons exactes
 
 1. Choisir un cisaillement entier inversible qui rend chaque droite graphe
-   `v=r_i(u)` : parmi `h+1` directions entières, au plus `h` sont interdites.
-   Séparer les formes selon le signe de leur coefficient de `v`. Pour la famille
+   `v=r_i(u)` : parmi `g+1` directions entières, au plus `g` sont interdites.
+   Séparer les groupes selon le signe de leur coefficient de `v`. Pour la famille
    `y_i>0`, les intérieurs sont sous la droite ; pour `y_i<0`, ils sont au-dessus.
 2. Traiter les dégénérescences par une perturbation **vers le côté non négatif**
-   de chaque forme signée, `f_i^ε=f_i+ε+ε^{i+2}`, avec `ε>0` formel et `i`
-   l'ID local distinct. Les constantes restent hors de l'arrangement. Les
+   de chaque groupe signé primitif, `f_i^ε=f_i+ε+ε^{i+2}`, avec `ε>0` formel
+   et `i` l'indice de groupe distinct. Les poids/IDs ne sont pas perturbés
+   séparément ; les constantes restent hors de l'arrangement. Les
    puissances propres brisent coïncidences et triples concurrences : le
    déterminant d'un triple comporte au coefficient de `ε^{i+2}` le produit
    croisé des normales des deux autres droites ; si le triple contient deux
@@ -49,12 +52,12 @@ construction. Elle prolonge par ce comptage direct le lemme 2.5 de
    spécialisée* de simulation symbolique, pas un résultat hérité de la
    [technique générale d'Edelsbrunner–Mücke](https://arxiv.org/abs/math/9410209).
 3. Pour `q=d+1`, construire les `q` niveaux les plus hauts de la première
-   famille et les `q` plus bas de la seconde. Chacune a `O(hq)` morceaux, et
+   famille et les `q` plus bas de la seconde. Chacune a `O(gq)` morceaux, et
    [Everett–Robert–van Kreveld](https://doi.org/10.1142/S0218195996000186)
-   donne `O(h log h+hq)` pour ses premiers niveaux ordinaires en position
-   générale. Le port doit accepter les droites parallèles restantes, sans
-   intersections à créer, ou les départager par un second infinitésimal de
-   pente qui conserve le décalage positif dominant ;
+   donne `O(g log g+gq)` pour ses premiers niveaux ordinaires en position
+   générale. Celle-ci **autorise les parallèles** dans l'énoncé précis de
+   [Halperin et al., annexe A](https://sarielhp.org/p/20/max_level/max_level.pdf),
+   mais interdit les triples concurrences, déjà cassées ici ;
    [Chan, §1](https://tmc.web.engr.illinois.edu/vio.pdf) décrit explicitement
    leur combinaison pour les demi-plans d'orientations mixtes. Énumérer les
    sommets internes à ces niveaux, puis balayer les intersections de leurs
@@ -64,8 +67,9 @@ construction. Elle prolonge par ce comptage direct le lemme 2.5 de
    morceaux et `I` intersections
    ([Bentley–Ottmann, 1979](https://www.itseng.org/research/papers/topics/VLSI_Physical_Design_Automation/Physical_Verification/DRC/Geometric_Intersection_Problems/1979-Bentley.pdf)).
    Interroger les `q` chaînes de niveaux de chaque famille à chaque sommet
-   permet de tester sa profondeur perturbée exacte en `O(q log h)` par sommet,
-   sans scan des `h` formes.
+   permet de tester sa profondeur perturbée **non pondérée** en `O(q log g)`
+   par sommet, sans scan des `h` formes. Elle fournit un surensemble du seuil
+   pondéré : tout poids de groupe est au moins un.
 4. Rabattre chaque sommet conservé sur l'intersection **originale** de ses
    deux droites, dédoublonner les centres rationnels, puis reporter les formes
    originales `f_i(c)≤0` ; elles donnent à la fois tous les intérieurs stricts
@@ -93,6 +97,52 @@ original isolé de profondeur zéro à l'origine : `f−ε` le perd, tandis que
 `f+ε` crée un petit carré de profondeur zéro dont les coins se rabattent tous
 à l'origine. Une perturbation générique non orientée n'est donc pas suffisante.
 
+**Contrôle indépendant complémentaire du commit A `fa27bf31`.** Son oracle
+`check_q4_outward_levels_20260922.py` couvre aléatoirement seulement
+`d=0…2`. J'ai chargé ce blob en mémoire et appelé sa fonction `check_case`
+sur 250 cas supplémentaires pour chacun des `d=3…7` : graine 230923,
+4 à 12 formes entières tirées dans les bornes du code ci-dessous, quadruplet
+antipodal tous les quatre cas et copie à coefficients triplés tous les six.
+La fonction
+compare les **ensembles** de centres originaux peu profonds et de centres
+perturbés rabattus, sans `assert` désactivable. Reproduction, sans écrire
+de fichier :
+
+```bash
+python3 - <<'PY'
+import random
+import subprocess
+source = subprocess.check_output(['git', 'show', 'fa27bf31:morsehgp3D_v9/audits/check_q4_outward_levels_20260922.py'], text=True)
+ns = {'__name__': 'audit_module'}
+exec(source, ns)
+rng = random.Random(230923)
+counts = {}
+for depth in range(3, 8):
+    exact = perturbed = 0
+    for case in range(250):
+        forms = []
+        for _ in range(rng.randrange(4, 13)):
+            x, y = rng.randrange(-3, 4), rng.randrange(-3, 4)
+            if x or y:
+                forms.append((rng.randrange(-4, 5), x, y))
+        if case % 4 == 0:
+            forms += [(0, 1, 0), (0, -1, 0), (0, 0, 1), (0, 0, -1)]
+        if forms and case % 6 == 0:
+            forms.append(tuple(3 * value for value in forms[0]))
+        a, b, _ = ns['check_case'](forms, depth, f'depth={depth}/case={case}')
+        exact += a
+        perturbed += b
+    counts[depth] = (exact, perturbed)
+print(counts)
+PY
+```
+
+Résultat PASS, couples `(centres originaux, sommets perturbés)` :
+`d=3: (2453,3098)` ; `d=4: (3730,4786)` ; `d=5: (4940,6452)` ;
+`d=6: (5970,7746)` ; `d=7: (6112,8190)`. C'est un contrôle
+**combinatoire local** de 1 250 cas, non un test du constructeur de niveaux,
+du moteur q4, du cover ni d'une trame LiDAR.
+
 Avec `d≤7` (`K≤10`), le schéma vise `O(h log h)` comparaisons géométriques
 et `O(h)` mémoire **par arête**, hors construction du cover, test de positivité
 et d'arête propriétaire sur la coquille, `q_min`, catalogue, intérieurs de FULL
@@ -109,16 +159,19 @@ coquille doivent être examinées par un oracle séparé.
 
 ## Coût de trame et contrelecture locale
 
-Le travail total doit inclure `Σ_e cover_sites(e)` pour lire/classer les
-formes, puis `Σ_e h_e`, ses tris/niveaux, l'expansion des arêtes WSPD, les
-sorties, la déduplication BallKey et FULL. Le reçu 1 mm cité
+Pour une voie qui **matérialise toutes les formes de chaque cover par arête**,
+le travail total inclut `Σ_e cover_sites(e)` pour les lire/classer, puis
+`Σ_e h_e`, ses tris/niveaux, l'expansion des arêtes WSPD, les sorties, la
+déduplication BallKey et FULL. Le reçu 1 mm cité
 dans [`Q4_STRUCTURE_ET_BORNES.md`, § coût global](Q4_STRUCTURE_ET_BORNES.md) donne
 `Σ_e cover_sites(e)=2 778 563 938` sur `1 872 168` arêtes, pour `n=39 885`
-sites ; ce n'est pas une mesure de `Σ_e h_e`. On a
-`n²=1 590 813 225`. **Lire une fois chaque cover par arête dépasse déjà
-`n²` sur cette trame.** L'algorithme local ne rend donc pas le générateur
-LiDAR sous-quadratique ; il faut partager/élider des covers entre arêtes ou
-réduire leur nombre, et mesurer la somme entière. Aucun extrapolat G4 ne suit.
+sites. C'est une **population logique certifiée du moteur v8**, ni le nombre
+de sites effectivement lus par son exécution, ni une mesure de `Σ_e h_e`.
+On a `n²=1 590 813 225` : **la seule voie hypothétique qui lirait chaque
+cover une fois par arête dépasserait déjà `n²` sur cette trame.** Ce n'est
+pas un minorant universel du générateur ; une voie sous-quadratique doit
+partager/élider ces covers ou réduire les arêtes, et mesurer sa somme entière.
+L'algorithme local seul n'apporte donc aucune borne LiDAR ou G4 globale.
 
 Deux nouvelles bornes de l'audit A résistent à la contrelecture :
 

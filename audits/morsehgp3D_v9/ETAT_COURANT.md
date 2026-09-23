@@ -52,6 +52,10 @@ grille 1 mm, s8, **K1..5 en 15–29 s** et **K1..10 en 82–125 s** à W48
 (70 s pour 000000/K10 avec FULL statique W48). Il utilise le paquet
 `e28296bb`, **avant** l'optimisation MEB et le nouveau ledger ; aucun GPU,
 contrat d'une seconde ou caractère sous-quadratique n'est acquis.
+Le ratio CPU·s/temps hors FULL, calculé en supposant la voie FULL non
+statique effectivement mono-fil, vaut 42,6–44,6 CPU logiques occupés sur
+48 dans les six cas W48. La priorité sur q3/q4 est donc de **retirer du
+travail** ou d'utiliser le GPU, pas de supposer que ces 48 fils attendent.
 
 Le [contre-audit de provenance et de schéma](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_G4_R1_ET_SCHEMA_V2_20260922.md)
 recoupe 175 hashes, les huit cas et l'arrêt ciblé. Il identifie deux
@@ -62,8 +66,10 @@ verts, et un cas censuré avec `group_closed=false` peut être accepté comme
 La [contrelecture du MEB diamètre](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_ANCHOR_MEB_DIAMETRE_20260922.md)
 est verte localement sur ses petites portes, mais son gain LiDAR n'a pas
 de reçu apparié ; les [niveaux q4 orientés](../../morsehgp3D_v9/audits/CONTRE_AUDIT_B_Q4_NIVEAUX_ORIENTES_20260922.md)
-restent une piste exacte locale, pas un port ni une réduction globale de
-`Σ_e cover_sites(e)=2,779` milliards sur la ligne 1 mm publiée.
+passent un contrôle combinatoire de 2 004 cas A et 1 250 cas indépendants
+jusqu'à la profondeur du K10, mais restent une piste **locale** : pas de
+constructeur, ni de port moteur, ni de réduction globale de la population
+logique `Σ_e cover_sites(e)=2,779` milliards sur la ligne 1 mm publiée.
 
 ## Lecture prioritaire
 

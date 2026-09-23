@@ -58,6 +58,26 @@ EPYC 7763 à quatre cœurs physiques, le G4 est un EPYC 9B45 à 24 cœurs,
 avec charges et environnement différents. À G4 seulement, W24→W48 sur
 000000 K5 fait 13,88→11,12 s pour q3/q4 ; une paire, pas une courbe.
 
+Un calcul de capacité sur les six cas W48/`static=0` donne une indication
+plus directe du parallélisme déjà utilisé. Si le FULL non statique consomme
+un fil pendant son intervalle, le reste de la chaîne occupe en moyenne
+`(chain_cpu_s−tower_s)/(chain_total_s−tower_s)` = **42,6 à 44,6 CPU
+logiques sur 48**. Ces six ratios sont calculés sur les bruts de la sonde,
+pas sur les temps arrondis du tableau. Ce n'est pas un profil par phase :
+q2, fusion et census sont inclus, et la charge utile réelle des cœurs SMT
+reste distincte des CPU·s. Mais l'amont n'apparaît pas massivement en
+attente de fils supplémentaires sur cette VM ; pour K5 il faut surtout
+réduire ses opérations/copies ou exploiter une autre architecture (GPU).
+À K10, le FULL en un fil reste séparément un verrou : la variante statique
+réduit son mur de 75,90 à 34,14 s sur 000000, sans le faire passer à 1 s.
+Cette comparaison n'est **pas** une efficacité de parallélisation pure :
+les deux modes ont mêmes catalogue, ordres et condensé, mais pas le même
+`tower_work`. Le cas séquentiel compte 12 003 966 appels MEB et
+1 065 359 881 tests de puissance, contre 11 309 383 et 1 000 198 900 en
+statique ; `resolver_cache_hits` passe de 12 284 408 à zéro. Il faut donc
+isoler travail algorithmique, cache et occupation par worker avant
+d'attribuer le facteur 2,22 aux seuls 48 fils.
+
 Le worker rapporte 486,6 s utiles pour les huit cas (474,5 s cumulés de
 chaîne). Les commandes hôte vont de la demande de démarrage à 23:26:36 UTC
 à l'arrêt vérifié à 23:38:25 UTC, soit ~11 min 49 s de fenêtre de contrôle ;
