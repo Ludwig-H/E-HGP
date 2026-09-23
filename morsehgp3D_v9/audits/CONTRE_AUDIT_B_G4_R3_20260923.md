@@ -39,7 +39,7 @@ Les identités de travail du certificat sont vraies pour chaque cas on :
 `dead_loads=cover_builds`,
 `dead_form_sites=cover_sites−2·cover_builds`, et
 `dead_q{3,4}_proved+dead_q{3,4}_open=q{3,4}_edges` du cas off.
-Le reçu réel ne manifeste aucune des quatre falsifications acceptées par
+Le reçu réel ne manifeste aucune des falsifications acceptées par
 le [lecteur v5](CONTRE_AUDIT_B_G4_RECEPTION_V5_20260923.md) ; leur
 existence interdit toutefois de transformer le simple statut
 `completed` en preuve fail-closed pour les campagnes suivantes.
@@ -66,6 +66,10 @@ et FULL 23,16 s contre 22,68 s en répétition W48. Ce seul rapprochement
 indique un faible gain marginal de 24 à 48 fils pour FULL, non une borne
 de scalabilité. Le nouveau tri/encodage FULL parallèle WIP est **absent**
 du snapshot R3.
+Sur 000000/K10 avec certificat, `497,4 CPU·s / 35,79 s mur ≈ 13,9`
+CPU actifs en moyenne sur toute la chaîne, malgré W48 demandé : cela
+signale du parallélisme inexploité ou des phases moins parallèles, sans
+attribuer ce ratio à une étape précise.
 
 À K10, même en rendant magiquement **gratuits q3/q4 et FULL**, la somme
 mesurée `q2+merge+census` vaut encore **2,000 / 1,388 / 2,041 s** selon

@@ -44,6 +44,24 @@ campagne payante avant correction.
    stderr des cas LiDAR. Voir `tower_session_v9.py:182` et
    `tower_worker_v9.py:596`.
 
+À la publication de R3, une seconde classe de lacune est reproductible
+sur son **vrai préflight non vacuant** : `validate_probe` rend encore
+`complete_relative` si l'on remplace isolément par zéro l'un de
+`ledger.dead_loads`, `ledger.dead_form_sites`, `ledger.cover_builds`,
+`generator.q34_expanded_pairs` ou `catalogue.q3_presentations`.
+L'auditeur A retrouve aussi `ledger.dead_q3_open`. Les comptes réels
+satisfont les identités
+`expanded_pairs=cover_builds+witness_rejected_pairs`,
+`dead_loads=cover_builds`,
+`dead_form_sites=cover_sites−2·dead_loads`,
+`dead_q3_open=q3_edges`, `dead_q4_open=q4_edges` **quand l'option est
+active**, et les émissions par arité
+du catalogue ; le schéma typé ne les **impose** pas. Ajouter ces mutations
+au préflight réel et aux selftests, après avoir rendu cohérente leur
+fixture factice. Cela ne remet pas en cause la concordance manuelle du
+[reçu R3](CONTRE_AUDIT_B_G4_R3_20260923.md), mais borne ce que le lecteur
+pourra certifier tout seul à l'avenir.
+
 ## Contrôles acquis et correction demandée
 
 Le snapshot est reconstruit depuis les objets Git du commit annoncé et le
