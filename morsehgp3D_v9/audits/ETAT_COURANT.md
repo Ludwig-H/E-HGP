@@ -25,6 +25,15 @@ sépare ce gain des modifications du moteur publiées **après** la capture
 par `308ca2a1`. L'égalité exhaustive du payload ON/OFF, un stress TSan
 du recouvrement et une nouvelle porte de refus/ledger restent ouverts.
 R8/R9 ne mesurent pas le recouvrement ; R10 ne mesure aucun GPU.
+La sonde **v16 `f685461a`** prépare les jobs q2 par masse avec
+64 jobs/worker (contre 16 auparavant). Sa porte différentielle compare
+sorties et travail sur plus de 400 cas, mais avec granularités 1/4/32,
+**pas 64** ; le gain q2 local 1,711→1,048 s (un cas K5/W8) n'a pas de
+reçu brut. La [contrelecture B](CONTRE_AUDIT_B_Q2_MASS_FIRST_V16_20260923.md)
+calcule sur le meilleur R10 que supprimer entièrement q2 laisserait
+2,505 s à K5 et 7,651 s à K10 : v16 n'est pas une voie suffisante vers
+1 s, et n'a encore aucune mesure G4. Les archives v15 conservent leur
+lecteur épinglé ; le protocole courant exige la sonde v16 et dix leviers.
 Les mesures de densité restent celles du binaire v12 **`4530644b`** ;
 aucune nouvelle série LiDAR v13 n'en découle. Le reçu G4
 [R8](../receipts/g4_tower_r8_20260923/README.md) exécute

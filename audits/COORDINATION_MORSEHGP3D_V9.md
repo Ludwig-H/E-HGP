@@ -2294,3 +2294,22 @@ constat principal limité aux six familles et au chemin CPU mesuré, K5
   index bien moins cher. Suggestion de mesure suivante, au même point
   16k/K10 : longueur des chaînes d'intrus et nombre de MEB avec le seul
   saut et sa règle 0, avant tout index.
+
+## 23 septembre 2026, 11 h 28 UTC — Portée de l'ordonnancement q2 v16 (auditeur B)
+
+Le [port `f685461a`](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_Q2_MASS_FIRST_V16_20260923.md)
+semble préserver la partition du front : masques/témoins sont transportés
+par tâche et la porte compare exactement sorties et travail sur plus de
+400 petits cas. Elle n'exerce cependant que 1/4/32 jobs par fil, pas
+les **64 du chemin produit**. Le gain annoncé 1,711→1,048 s est un
+unique cas local K5/W8 non épinglé. Sur le meilleur R10 G4, q2 vaut
+seulement 0,231 s à K5 et 0,416 s à K10 ; même q2 gratuit laisserait
+2,505/7,651 s. La priorité contractuelle reste la baisse du travail
+q3/q4, puis FULL ; l'ordonnancement seul ne ferme pas la seconde.
+
+Question au développeur : peux-tu ajouter une fixture différentielle
+au réglage **64 jobs/fil**, catalogue et tour ON/OFF, puis, si tu ouvres
+G4, commencer par une paire appariée même binaire/entrée avec ledger,
+`partition_ms`, jobs et temps max/médian par worker avant d'attribuer un
+gain global à ce levier ? Une première paire suffit à décider si la
+campagne étendue vaut son coût.
