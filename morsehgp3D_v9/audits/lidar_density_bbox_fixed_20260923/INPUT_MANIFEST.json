@@ -1,0 +1,103 @@
+{
+  "datasets": {
+    "half": {
+      "added_original_ids": [
+        61939,
+        122516
+      ],
+      "bbox": [
+        [
+          80271,
+          159832
+        ],
+        [
+          0,
+          22220
+        ],
+        [
+          0,
+          16573
+        ]
+      ],
+      "evicted_original_ids": [
+        104232,
+        125129
+      ],
+      "original_original_site_ids_sha256": "12aee1d0baa59a9664496d9f73925aa296d7542c3648fcb41128b9564554b532",
+      "original_points_sha256": "6ed1e22a2a448fce055a8701e9aa94905edad3710d3cde60e7ac4f246ad23b1a",
+      "original_site_ids_sha256": "77453933f83504093f317a70b37983540f18c691e1d5319feac666c0aadd2a40",
+      "points_file": "/tmp/mhgp9-extrema-ablation-20260923/s02_half_quarter_x_nonneg_y_neg_extrema.u32le",
+      "points_sha256": "8bd59bbf8b5c0a0e0b7a47cf021d4575098be338385b6ac7940058e745b6f5f0",
+      "site_ids_sha256": "916b901bb90317411a865bdb1ccd84c59ea96933641bc7c4ea607ff49ae2930a",
+      "sites": 7339
+    },
+    "quarter": {
+      "added_original_ids": [
+        61939,
+        122516,
+        125504
+      ],
+      "bbox": [
+        [
+          80271,
+          159832
+        ],
+        [
+          0,
+          22220
+        ],
+        [
+          0,
+          16573
+        ]
+      ],
+      "evicted_original_ids": [
+        71666,
+        78919,
+        120342
+      ],
+      "original_original_site_ids_sha256": "7e1e1a23ed0ddd3942f4c11e962a82da1148a18497b6ae3565a68b57bcbdd384",
+      "original_points_sha256": "40e1c5ec8306515f08278eea49f89bde2fc4d02748935114974111d82fbaeb4e",
+      "original_site_ids_sha256": "beac75b1f607282c33a012a7a024926d53edece7335aedf4b2aac78c09927da7",
+      "points_file": "/tmp/mhgp9-extrema-ablation-20260923/s02_quarter_quarter_x_nonneg_y_neg_extrema.u32le",
+      "points_sha256": "abf09869db68c688e62da1cc0e50aa66dd60c519fcf279794daaabd10bd36ebe",
+      "site_ids_sha256": "d4e38651ac6dfd2e153685f117a00b10c70d3572112b88f1aef5df70e9c6f664",
+      "sites": 3630
+    }
+  },
+  "encoded_sensor_origin": [
+    80271,
+    22224,
+    13694
+  ],
+  "extremal_original_ids": [
+    61939,
+    62917,
+    114308,
+    122516,
+    125504,
+    125525
+  ],
+  "full_bbox": [
+    [
+      80271,
+      159832
+    ],
+    [
+      0,
+      22220
+    ],
+    [
+      0,
+      16573
+    ]
+  ],
+  "schema": "mhgp9_density_extrema_ablation_inputs_v1",
+  "sector": "quarter_x_nonneg_y_neg",
+  "seed_hex": "d1da73a520260923",
+  "selection": "sector-local hash rank (equivalent to original global-hash intersection at original cardinality), force x/y/z extrema in every density; fill remaining slots with the same hash rank",
+  "source_density_manifest_sha256": "5b1be942ef14a436868df97cd9bc77e97f24fb2dad05ab70d0f28cfe2e5ca228",
+  "source_full_points_sha256": "6924df0523a457925a2398585fd170eeb02d6efacf9e673739d2c40b14fd1f68",
+  "source_manifest_sha256": "a37d4e46b529885b9fc370a25e361a302762b95109f00928b2b2e96fcac799da",
+  "source_scene": "08/000200"
+}

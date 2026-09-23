@@ -1,9 +1,9 @@
 # État courant des audits v9
 
-23 septembre 2026. Dernier port publié du lecteur LiDAR et de la CI :
-**`4b6e3aa6`** ; le moteur et la sonde v12 mesurés restent **`4530644b`**.
-La sonde publie les parcours q3/q4 jusque-là cachés et le runner local v2
-durcit la capture des pentes ; aucun nouveau reçu G4 n'en découle. Le dernier
+23 septembre 2026. Dernier port publié de la sonde et du lecteur v13 :
+**`c768e06a`**, puis porte Euler 8k **`a08378da`**. Les mesures de densité
+restent celles du binaire v12 **`4530644b`** ; aucun nouveau reçu G4 ni
+nouvelle série LiDAR v13 n'en découle. Le dernier
 [reçu G4 R7b](../receipts/g4_tower_r7b_20260923/README.md) exécute
 le paquet **`8e8b83a3`**, antérieur au Welzl move-to-front, aux
 séparateurs pseudo-aléatoires du tri FULL et à la libération précoce de
@@ -75,25 +75,29 @@ mutants d'omission échappant à la chaîne le violent à K5. La formule ne
 certifie pas les clés une à une : à K5 elle ne juge que K1..3, et le
 contrat K10 exigerait un générateur K12 pour juger ses dix ordres. Le
 protocole Kmax+2 ajoute des témoins, mais une omission commune aux deux
-exécutions peut encore passer.
+exécutions peut encore passer : un [contre-exemple exact à 13
+sites](CONTRE_EXEMPLE_EULER_KPLUS2_20260923.md) construit deux clés omises
+qui laissent à la fois `E_K=1` et la restriction K7→K5 inchangées. Son
+extension à 23 sites fait de même pour K12→K10 (K12 n'est pas encore un
+domaine produit). Elle ne signale aucune omission observée du générateur.
 
-Le port Euler v13 est au commit **`e76886af` du worktree constructeur**,
-non encore publié sur `origin/main` lors de cette lecture. La sonde écrit
-v13 et le lecteur G4 en vérifie la borne, le vecteur entier et les nouveaux
-champs `q34_occupancy`/`tower_phases_ms`. Le lecteur local LiDAR accepte
-v13 mais reste moins strict : sur une vraie réponse de 360 sites, K5/s8/W2,
-il accepte encore chacun des trois mutants *vecteur `euler.by_k` raccourci
-de 5 à 3*, *`q34_occupancy` absent*, *`tower_phases_ms` absent* ; le lecteur
-G4 les refuse. `bench/run_lidar_scaling.py:175–181` ne vérifie que le
-préfixe d'Euler et son selftest CMake relit toujours un cas v12. Aligner
-les deux validateurs et ajouter ces trois corruptions au selftest v13 avant
-de qualifier une nouvelle pente LiDAR.
+Le port Euler v13 est publié en **`c768e06a`**. La sonde écrit v13 et le
+lecteur G4 en vérifie la borne, la longueur du vecteur et les nouveaux
+champs `q34_occupancy`/`tower_phases_ms`. Dans ce commit, le lecteur local
+LiDAR acceptait trois mutations d'une vraie réponse de 360 sites, K5/s8/W2 :
+*vecteur `euler.by_k` raccourci de 5 à 3*, *`q34_occupancy` absent* et
+*`tower_phases_ms` absent* ; le lecteur G4 les refusait. Le port local
+**`7d6a8d13`** fixe déjà la longueur/type du vecteur et lie le schéma au
+résumé de campagne, mais ne vérifie toujours pas les deux champs de charge
+et de phases ; son selftest v13 synthétique ne les mute pas. Aligner ces
+deux champs sur le lecteur G4 avant de qualifier une nouvelle pente LiDAR.
 
 Le calcul Euler reste inclus dans `census_ms` (`tower_chain.cpp:486,539–601`)
 et un `E_K` faux refuse **avant** FULL (`:602–612`), alors que la décision
 du constructeur prévoit son coût séparé et un refus après tour FULL réussie.
-Les nouvelles portes mathématiques passent sur leurs cas actuels, sans
-contre-exemple trouvé à la formule ; leur test de mutants accepte cependant
+Les portes mathématiques passent sur leurs cas locaux, sans contre-exemple
+trouvé à la formule ; la porte 8k est ajoutée en `a08378da`. Le test des
+deux mutants de la chaîne accepte cependant
 `cause=euler.chain_refused` pour **toute** erreur de chaîne
 (`chain_euler_gate.cpp:60–61`, `CMakeLists.txt:171–172`). Exiger la raison
 `chain_catalogue_euler_violated` et le statut Euler `fails` rendra le mutant
@@ -387,6 +391,10 @@ sans sol et sans mesure G4. Une ablation appariée du seul site qui étend
 fortement `z` dans le quart chaud de 000200 laisse la pente K10 des formes
 à **2,042528** : cet extrême ne porte pas à lui seul le signal. Le secteur
 est fixe, mais l'étendue des sites sélectionnés varie avec la densité.
+Une [ablation à boîte exactement fixe](lidar_density_bbox_fixed_20260923/README.md)
+sur ce quart échange seulement trois puis deux IDs aux densités 1/4 et 1/2 ;
+la pente K10 des formes reste **2,058215 puis 2,042880**, pratiquement
+inchangée. Ce signal ne vient donc pas seulement de l'étendue de la boîte.
 Le [crédit exact par nœuds du certificat de cœur](../receipts/dead_node_credit_negative_20260923/README.md)
 a été essayé hors produit : mêmes voies et digest, mais CPU de chaîne
 **+27 % à K5 et +32 % à K10** sur la coupe 16k de 000000 ; cette variante

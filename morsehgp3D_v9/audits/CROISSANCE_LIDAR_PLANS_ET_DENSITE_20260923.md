@@ -151,6 +151,16 @@ ramène ce minimum à 8 573 sans faire disparaître le franchissement K10 :
 seul le signal observé ; les frontières réelles des autres échantillons,
 l'index et les certificats changent néanmoins avec la sélection.
 
+Une [contre-épreuve à boîte exactement fixe](lidar_density_bbox_fixed_20260923/README.md)
+impose les six extrema du quart plein aux niveaux 1/4 et 1/2, en gardant
+les mêmes effectifs et l'emboîtement : seulement trois puis deux IDs sont
+échangés. À K10, les pentes des formes `1/4→1/2` et `1/2→plein` restent
+**2,058215** et **2,042880**, contre 2,058490 et 2,042542 avec la
+sélection initiale. La variation de boîte n'explique donc pas à elle seule
+le signal de ce quart ; la distribution interne et l'index restent libres.
+Cette ablation porte sur un seul secteur, une seule graine et le même
+binaire v12, sans nouvelle conclusion sur le coût total.
+
 Le diagnostic détaillé porte encore sur une seule graine et trois scènes
 sans sol d'une **seule séquence 08**.
 Le thinning par hash réduit des sites dans le même support spatial
