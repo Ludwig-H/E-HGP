@@ -128,3 +128,25 @@ cache on/off à mêmes trame/K/s/W n'est archivée, et les gains locaux
 70/61/67 % de recherches évitées annoncés par le développeur n'ont pas
 encore de reçu apparié versionné. Le cache est une optimisation du
 filtre de paire, pas une réduction démontrée des covers ou formes.
+
+## Correctif API publié `a1d7a9bc`
+
+La révision relue localement sous `23074987`, puis publiée sur `main`
+sous `a1d7a9bc`, refuse désormais, **avant tout crédit**, deux nœuds dont les
+plages se chevauchent sur une même voie. Le contre-exemple de la feuille
+dupliquée et sa variante ancêtre/descendant renvoient maintenant
+`invalid_argument`, tandis que la porte des traces valides demeure verte.
+Une trace d'un autre index, si ses indices et plages recalculés dans
+l'index courant restent disjoints par voie, n'introduit pas de faux
+crédit : ses boîtes et populations sont elles aussi relues dans cet index.
+Le commentaire « doit provenir d'un seul appel tracé » est désormais
+plus restrictif que la condition mathématique réellement vérifiée.
+
+La validation ajoute un coût `O(m²)` **à chaque paire** retestée ; pour
+une trace interne `m≤17`, jusqu'à 136 comparaisons de plages, non
+comptées dans `witness_cache.node_tests`. Sur des millions de paires,
+mesurer ce coût dans l'ablation cache seule. Une trace opaque certifiée
+une fois à sa production éviterait cette revalidation répétée tout en
+gardant l'API fail-closed. Le correctif de réception v6 séparé est
+[contrelu ici](CONTRE_AUDIT_B_G4_RECEPTION_V5_20260923.md) ; il ne ferme
+pas encore la réception de tous les champs de garde archivés.

@@ -86,3 +86,34 @@ voies annoncées et rejuger son stderr GNU time côté hôte. Ajouter ces
 quatre mutations causales aux selftests normaux/`-O`, puis lire le reçu
 du snapshot commité avant toute dépense. Cela ne qualifie toujours ni le
 contrat d'une seconde ni le GPU : le protocole R3 reste CPU G4.
+
+## Relecture du correctif v6 publié `a1d7a9bc`
+
+Le correctif, d'abord relu sous `23074987` puis publié sur `main` sous
+`a1d7a9bc`, refuse les quatre contre-exemples
+ci-dessus dans le chemin principal : fermeture
+certifiée du groupe exigée côté invité et hôte, cible/génération/provenance
+du reçu liées à la session hôte, préflight non vacant côté invité et hôte,
+et son GNU time rejugé côté hôte. Sur un reçu R3 adapté en mémoire au
+schéma v6, la baseline passe et six mutations isolées de compteurs
+(`dead_loads`, `dead_form_sites`, `cover_builds`, `dead_q3_open`,
+`q34_expanded_pairs`, `q3_presentations`) sont refusées. Trois tests
+protocolaires ciblés, dont une session nominale et une censure, passent.
+Ces lectures ne sont ni une campagne LIVE v6 ni une qualification du plan
+G4 ; le selftest complet normal/`-O` et le snapshot figé restent à relire.
+
+Une lacune plus étroite demeure **dans la réception de la preuve archivée** :
+avec `generation` et `provenance` explicitement passées à
+`validate_received`, modifier seulement `guard_evidence.mark.instance`
+(ou `.project`/`.zone`) ou `guard_evidence.schedule.MODE` dans une copie
+temporaire du reçu donne encore `completed`. Le `mark` est vérifié pour
+ses durées et sa génération, mais pas sa cible ; le contenu de `schedule`
+n'est pas rejugé. Cela **n'invalide pas** la double garde indépendante
+avant lancement et l'arrêt ciblé, qui n'ont pas été modifiés par ces
+contre-fixtures. Pour rendre le reçu fail-closed, comparer tous les champs
+de cible du `mark` à la cible hôte, exiger `schedule.MODE=poweroff` et
+valider son horodatage/format selon le contrat existant. Ajouter ces
+mutations aux selftests de réception avant une nouvelle campagne payante.
+Les arguments optionnels
+`generation=None, provenance=None` de l'API de validation restent
+permissifs si un autre appelant les omet, même si `run_session` les passe.
