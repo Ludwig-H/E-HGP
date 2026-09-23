@@ -183,8 +183,10 @@ int main(int argc, char** argv) {
             auto batch = gen::run_q34_filter_batch_cpu(ix, k, r, 2);
             if (batch.survivors.empty()) return batch;
             if (kind == 0) {
-              batch.survivors.insert(batch.survivors.begin() + 1, batch.survivors.front());
-              ++batch.expanded_pairs;  // keep the pair count consistent: only the structure is wrong
+              // Constant counts (auditor A): one survivor replaced by a copy of
+              // another, so only the structure check can refuse it.
+              if (batch.survivors.size() < 2) return batch;
+              batch.survivors[1] = batch.survivors[0];
             } else {
               auto& edge = batch.survivors.back();
               edge.b_rank = edge.a_rank;  // a site paired with itself: in no WSPD rectangle
@@ -194,8 +196,11 @@ int main(int argc, char** argv) {
           refused = false;
           try {
             static_cast<void>(gen::run_wspd_q34_batched(index, kmax, 8, o, 2, sink.consumer(), 16, structural, nullptr));
-          } catch (const std::logic_error&) {
-            refused = true;
+          } catch (const std::logic_error& e) {
+            // The refusal must come from the structure walk, not the mass guard.
+            const std::string reason = e.what();
+            refused = reason.find(kind == 0 ? "duplicate, unordered or widened" : "outside its surviving rectangles") !=
+                      std::string::npos;
           }
           if (!refused) return fail(std::string("mutant.structure_survived ") + (kind == 0 ? "duplicate " : "foreign ") + where);
           ++mutants;

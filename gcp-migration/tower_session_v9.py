@@ -299,6 +299,8 @@ def validate_received(output, manifest, worker_pin, expected_cases, generation, 
     comparisons = payload.compare_cases(cases, outcomes, values)
     need(value.get('cross_worker_comparisons') == comparisons and all(item['equal'] for item in comparisons),
          'cross-worker object comparison')
+    need(value.get('unpaired_batch_cases') == payload.unpaired_batch_cases(cases, outcomes),
+         'unpaired batch/GPU cases recomputation')
     need(any(entry['outcome'] != 'skipped_budget' for entry in outcomes), 'no executed case')
     status = 'completed' if len(completed) == len(cases) else 'partial'
     need(value['status'] == status, 'worker status recomputation')
@@ -485,6 +487,9 @@ def run_session(args):
                                                             expected_cases, generation, provenance, verified_guard)
                         state['FULL_executed'] = True
                         state['GPU_executed'] = gpu_plan  # only after a validated reception
+                        # Batch/GPU towers never compared with a complete LiDAR engine twin.
+                        state['unpaired_batch_cases'] = payload.strict_json(
+                            (host / 'received/output/receipt.json').read_bytes())['unpaired_batch_cases']
                 except BaseException as error:
                     state.update(status='capture_failed', capture_error=type(error).__name__ + ': ' + str(error))
         finally:

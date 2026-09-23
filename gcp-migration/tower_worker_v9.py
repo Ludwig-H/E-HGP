@@ -783,6 +783,16 @@ def configure_command(tools, root, build):
             '-DCMAKE_CUDA_COMPILER=' + tools['nvcc']]
 
 
+def unpaired_batch_cases(cases, outcomes):
+    """Complete batch/GPU cases without a complete engine-path twin (same file,
+    K, s): their tower was never compared on LiDAR (auditor A, S2 partial)."""
+    engine = {(case['file'], case['k'], case['s']) for case, entry in zip(cases, outcomes)
+              if entry.get('outcome') == 'complete_relative' and not case['levers']['q34_batch_filter']}
+    return [index for index, (case, entry) in enumerate(zip(cases, outcomes))
+            if entry.get('outcome') == 'complete_relative' and case['levers']['q34_batch_filter'] and
+            (case['file'], case['k'], case['s']) not in engine]
+
+
 def compiled_dependencies(build, root, before):
     consumed, relative_seen = {}, set()
     depfiles = sorted(build.glob('CMakeFiles/*.dir/**/*.o.d'))
@@ -1009,6 +1019,8 @@ def execute(args):
         need(result['FULL_executed'], 'no case started within the useful budget')
         result['completed_case_indices'] = [e['index'] for e in outcomes if e['outcome'] == 'complete_relative']
         result['cross_worker_comparisons'] = compare_cases(cases, outcomes, values)
+        # A batch/GPU tower counts as verified on LiDAR only with its twin.
+        result['unpaired_batch_cases'] = unpaired_batch_cases(cases, outcomes)
         if any(e['outcome'] == 'probe_failed' for e in outcomes):
             result['status'] = 'probe_failed'
         elif not all(item['equal'] for item in result['cross_worker_comparisons']):

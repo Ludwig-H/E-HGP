@@ -201,7 +201,8 @@ def main():
         print('input refusal: selftest', file=sys.stderr)
         return 2
     for rule in config.get('sleep', []):
-        if rule['workers'] == workers and rule.get('k', k) == k and rule.get('scene', scene) == scene:
+        if (rule['workers'] == workers and rule.get('k', k) == k and rule.get('scene', scene) == scene and
+                rule.get('batch', levers.get('q34_batch_filter')) == levers.get('q34_batch_filter')):
             time.sleep(rule['seconds'])
     status = 'complete_relative'
     for rule in config.get('refuse', []):
@@ -1070,6 +1071,35 @@ class Protocol(unittest.TestCase):
                  'budget exhaustion: ' + repr(outcomes))
             need(not any((output / ('probe_' + str(i) + '.command.json')).exists() for i in range(3, 14)),
                  'skipped cases never launched')
+
+    def test_unpaired_gpu_case_is_marked(self):
+        # Auditor A: a complete GPU case whose engine twins never complete is
+        # received as partial, but published as unpaired, never as verified.
+        with tempfile.TemporaryDirectory() as temporary:
+            code, receipt, fake, host = run_scenario(
+                Path(temporary), tools=dict(sleep=[dict(workers=48, k=5, scene='00', batch=False, seconds=60),
+                                                   dict(workers=1, k=5, scene='00', batch=False, seconds=60)]),
+                patches=[(worker, 'CASE_CAP_SECONDS', 4)])
+            need(code == 0 and receipt['status'] == 'partial' and receipt['unpaired_batch_cases'] == [0, 12],
+                 'unpaired GPU cases: ' + json.dumps(receipt)[:600])
+            expect_certified_stop(receipt, fake)
+            value = worker.strict_json((host / 'received/output/receipt.json').read_bytes())
+            need(value['unpaired_batch_cases'] == [0, 12] and
+                 [value['case_outcomes'][i]['outcome'] for i in (0, 1, 12, 13)] ==
+                 ['complete_relative', 'killed_case_cap', 'complete_relative', 'killed_case_cap'],
+                 'worker unpaired list and outcomes')
+            pkg = package()
+            expected = session.validate_snapshot(pkg['archive'], pkg['manifest'])[0]
+            bound = (receipt['generation'], receipt['provenance'], receipt['verified_guard'])
+            tampered = Path(temporary) / 'tampered'
+            shutil.copytree(host / 'received/output', tampered)
+            forged = worker.strict_json((tampered / 'receipt.json').read_bytes())
+            forged['unpaired_batch_cases'] = []
+            (tampered / 'receipt.json').write_text(json.dumps(forged, indent=1, sort_keys=True))
+            with patch.object(worker, 'CASE_CAP_SECONDS', 4), \
+                    patch.object(worker, 'CUDA_PATHS', (str(Path(temporary) / 'fakebin/nvcc'),)):
+                need(refused(session.validate_received, tampered, pkg['manifest'], worker.sha(worker.__file__),
+                             expected, *bound), 'an unpaired GPU case hidden from the receipt is refused')
 
     def test_batch_preflight_must_equal_engine(self):
         with tempfile.TemporaryDirectory() as temporary:

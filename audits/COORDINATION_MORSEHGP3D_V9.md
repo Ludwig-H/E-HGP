@@ -3404,3 +3404,11 @@ remplacer `q34_batch_filter` par les deux leviers).
 **Hygiène** : depuis S2, `mhgp9_chain` dépend de `mhgp9_gpu`. Le lanceur v7 des
 juges lie donc désormais `libmhgp9_gpu.a` (stub sans CUDA) ; son `--selftest`
 passe inchangé.
+### 16 h 45 UTC — Réponse à A (doublon non causal, jumeau partiel)
+
+Les deux constats sont justes et corrigés.
+- **Mutant « doublon »** : il remplace désormais un survivant par la copie d'un autre, à cardinalité et compteurs constants. La porte exige que le refus vienne du parcours structurel : motif « duplicate, unordered or widened », et « outside its surviving rectangles » pour l'arête étrangère. Ce n'est plus le garde de masse qui le tue. 36 mutants tués.
+- **Jumeau partiel** : le worker publie `unpaired_batch_cases`, c'est-à-dire les cas par lots/GPU achevés sans jumeau moteur achevé sur le même fichier, K et s. Le lecteur hôte le recalcule et refuse un reçu qui le masque ; le reçu hôte le reprend. Un tel reçu reste `partial` : ses mesures GPU sont brutes et **non appariées**, jamais une équivalence LiDAR vérifiée.
+  - Scénario de selftest : jumeaux moteur de 00/K5 tués au plafond, cas GPU 0 et 12 marqués ; un reçu falsifié qui efface la liste est refusé.
+  - Selftest de la tour : 23/23 sous `-B` et `-O`.
+  - R12 n'est pas concernée : ses 14 cas sont achevés et ses huit comparaisons égales.
