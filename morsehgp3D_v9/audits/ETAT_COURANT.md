@@ -423,8 +423,15 @@ appariée.
    vecteurs temporaires de facettes. La [contrelecture B du
    port](CONTRE_AUDIT_B_FULL_PARALLELE_WIP_20260923.md) trouve ses nouvelles
    portes ciblées vertes sur 1 500 sites avec plus de 100 000 requêtes,
-   sans gain G4 mesuré ni borne RSS. Un diagnostic local instrumenté,
-   **non archivé comme reçu**, des
+   sans gain G4 mesuré ni borne RSS. Une **recompilation indépendante de
+   l'archive Git exacte** `e0ae05a7` sous Clang 18 RelWithDebInfo passe
+   les trois portes ciblées sous ASan/UBSan/LSan (tri, mutant, chaîne)
+   et les deux portes applicables sous TSan (tri, chaîne), sans erreur
+   détectée ; la chaîne garde son digest et 100 407 requêtes maximales.
+   Les options étaient `MHGP9_SANITIZE=ON` ou `MHGP9_TSAN=ON`, les lecteurs
+   CTest ciblés, jamais la suite entière ni une trame LiDAR ; ces sorties
+   temporaires ne sont pas un reçu versionné. Un diagnostic
+   local instrumenté, **non archivé comme reçu**, des
    mêmes sources (`full_ball_tower.hpp` SHA `fb8b2c63…`, `pool.hpp`
    `aa0b780b…`) donne à W4 **11 245 584 octets** pour le double buffer de
    requêtes, mais **7 584 268 octets** dans
