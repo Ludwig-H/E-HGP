@@ -264,13 +264,15 @@ promouvoir les compteurs du prochain reçu G4 ; le moteur conserve sa
 propre identité de masse, ce constat vise le lecteur externe.
 
 Dans le durcissement du lecteur de session **encore en chantier** après
-`a78664d4`, la marque de garde est liée à la génération par une borne
-inférieure, mais sans borne supérieure par l'arrêt invité. Sur la fixture
-du selftest, remplacer seulement `guard_evidence.mark.date_utc` par sa
-valeur **un jour plus tard** laisse `validate_received` rendre `completed`.
-La réception doit imposer `mark.date_utc < schedule.USEC / 10^6` (avec le
-type et le fuseau déjà contrôlés) et tuer cette mutation avant de figer le
-protocole ; le contrôle au départ rejette déjà une marque dans le futur.
+`a78664d4`, la marque et le calendrier archivés ne sont pas liés aux
+**valeurs exactes vérifiées par l'hôte**. Sur une fixture hors-ligne,
+remplacer seulement `guard_evidence.mark.date_utc` par le lendemain laisse
+`validate_received` rendre `completed` ; l'autre auditeur a aussi fait
+accepter un `schedule.USEC` différent mais plausible. Une simple fenêtre
+temporelle est donc insuffisante : transmettre la marque et le calendrier
+vérifiés (ou leurs empreintes) au lecteur, exiger leur égalité avec
+l'archive, puis tuer les deux mutations avant le prochain reçu G4. Voir la
+[contrelecture de la réception v8](CONTRE_AUDIT_B_RECEPTION_V8_GARDES_WIP_20260923.md).
 
 Prochaines mesures : mêmes octets et masque figé, trames **entières** de
 plusieurs séquences sans sol puis brutes, s8/10/12, K5 et K10, W1/W24/W48,
