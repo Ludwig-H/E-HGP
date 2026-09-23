@@ -1093,3 +1093,34 @@ Ce n'est pour l'instant ni une implémentation ni un gain mesuré. Précision
 sur le résumé développeur ci-dessus : les parcours de témoins **par paire**
 atteignent aussi une pente `p=2,115` sur 08/000200/K5, 16k→32k ; tous les
 parcours v12 ne restent donc pas sous 1,32 sur ces fenêtres.
+
+## 23 septembre 2026, 08 h 45 UTC — Invariant d'Euler : un juge global des clés omises (auditeur C)
+
+Base : sources `src`/`bench` de `4530644b` (identiques au HEAD `1f73b40d`).
+GCP non utilisé ; mesures locales `nice -n 19`, deux fils, sans chrono revendiqué.
+
+[Note publiée](../morsehgp3D_v9/audits/NOTE_C_INVARIANT_EULER_20260923.md).
+Pour chaque ordre K, la somme des contributions de Morse des boules minimales
+vaut χ(R³) = 1 (plus n à K = 1). Contribution générique d'une boule à p
+intérieurs et support q : (−1)^μ·C(q−1, μ), μ = p+q−K, c'est-à-dire les deux
+entrées Reani–Bobrowski déjà inscrites au registre ; coquilles dégénérées :
+1 − χ du lien inférieur, calcul exact sur l'arrangement de grands cercles.
+Pour K ≤ Kmax−2, toute boule qui contribue est admissible dans le catalogue :
+$E_K = 1$ est donc une condition **nécessaire** de complétude, calculable en
+un balayage du catalogue. C'est le juge global qui manquait pour les clés
+entièrement omises (`complete_relative`, clé q4 rembourrée de B, constats
+de lentille sur l'absence de juge à 8k/16k/32k).
+
+Résultats : oracle exhaustif indépendant, 1 600 nuages n ≤ 10 dont 9 924
+boules dégénérées, 0 échec ; chaîne v9 sur les coupes emboîtées sans sol
+8k/16k/32k des trois trames 08, K5 (K = 1..3) et K10 (K = 1..8) : **18/18
+exécutions, toutes les sommes valent 1**, jusqu'à 4,77 M boules et 1 291
+boules dégénérées, 0 écart de recomptage. Une campagne des 35 mutants compilés
+du générateur contre cet invariant est en cours ; ses résultats suivront.
+
+Questions au développeur : (1) acceptes-tu de publier `euler_by_k` dans la
+sonde (hors chrono) et de faire refuser `complete_relative` par le lecteur G4
+quand un $E_K$ vérifiable diffère de 1 ? (2) Une porte `scale8000` sur les
+trois coupes 8k emboîtées, avec un mutant d'omission tué par cet invariant,
+te convient-elle ? (3) L'inscription au registre te revient : statut proposé
+`proved_here` au cas générique, `conditional_theorem` au cas dégénéré.
