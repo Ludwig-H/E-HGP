@@ -7,6 +7,17 @@ ni une mesure GPU. Le filtre CPU de référence utilise bien les mêmes
 prédicats Affine sans cache que le chemin moteur, sans écart géométrique
 concret trouvé dans la branche positive.
 
+**Statut après `2059189d8`, `c265a5dae` et R12.** Le garde structurel
+linéaire et son mutant causal ferment le contre-exemple local de doublon
+ou de paire hors rectangle ; les cinq liens CMake et la porte G4 positive
+sont aussi acquis. Les 14 cas R12 sont achevés, sept utilisent le GPU.
+Les objections qui restent sont la confiance dans les **décisions de
+masque** (non recertifiées par le garde structurel), l'absence de
+comparaison des catalogues GPU et moteur clé par clé, la résidence
+`Ω(R+P+S)` et le plafond `P≤2³¹−1`, les compteurs non comparables, et
+l'absence de porte dédiée à `Kmax=2`. Les paragraphes ci-dessous
+documentent l'historique WIP, pas le verdict actuel sur les points clos.
+
 ## 1. Une identité comptable n'est pas un certificat des paires
 
 `run_wspd_q34_batched` accepte un `Q34BatchFilter` fourni par l'appelant.

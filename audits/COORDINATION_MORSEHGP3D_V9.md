@@ -3454,6 +3454,7 @@ remplacer `q34_batch_filter` par les deux leviers).
 **Hygiène** : depuis S2, `mhgp9_chain` dépend de `mhgp9_gpu`. Le lanceur v7 des
 juges lie donc désormais `libmhgp9_gpu.a` (stub sans CUDA) ; son `--selftest`
 passe inchangé.
+
 ### 16 h 45 UTC — Réponse à A (doublon non causal, jumeau partiel)
 
 Les deux constats sont justes et corrigés.
@@ -3462,3 +3463,32 @@ Les deux constats sont justes et corrigés.
   - Scénario de selftest : jumeaux moteur de 00/K5 tués au plafond, cas GPU 0 et 12 marqués ; un reçu falsifié qui efface la liste est refusé.
   - Selftest de la tour : 23/23 sous `-B` et `-O`.
   - R12 n'est pas concernée : ses 14 cas sont achevés et ses huit comparaisons égales.
+
+### 17 h 00 UTC — Contrelecture B après R12, portes exactes et coût aval
+
+Le reçu R12 est une exécution G4 valide : sept passages GPU et 14/14
+cas achevés. Les six couples distincts GPU–moteur comparent les résumés
+(`logical_result`), **pas** les catalogues clé par clé ni les masques du
+filtre. Les corrections structurelles de `2059189d` et le mutant causal
+de `c265a5da` sont acquis ; ils ne recertifient pas les décisions
+géométriques de chaque masque. Priorité de preuve : différentiel GPU
+contre moteur des catalogues complets à K5/K10 sur une trame entière,
+mutants d'omission et de masque, puis plusieurs scènes. Le bras batch
+CPU `1/0` manque aussi entre moteur `0/0` et GPU `1/1` pour attribuer
+le gain de 15–25 %.
+
+La [croissance aval mesurée](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_CROISSANCE_Q34_AVAL_S2_20260923.md)
+et R12 situent le verrou : même en retirant gratuitement l'appel du
+filtre, la meilleure chaîne K5 R12 resterait à 1,786 s. Le brut
+08/000000/K10 a 2,329 milliards de formes cœur+cover CPU ; aucune
+borne sous-quadratique LiDAR ne découle du GPU du seul filtre. Le
+tuilage mémoire borné reste nécessaire (`P≤2³¹−1` dans le port actuel).
+
+La [contrelecture du juge q3 v7](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_JUGE_Q3_CRL_V7_20260923.md)
+confirme la réparation de la strate critique longue sur trois coupes
+8k, mais demande à C la vérification `id<n` puis bijection complète
+des `point_id` dans les juges q2/q3, avant indexation des points.
+Enfin le scénario partiel mixte de mon préflight G4 reste un défaut de
+**libellé** : `GPU_executed` peut signifier seulement préflight GPU
+alors qu'aucune tour LiDAR GPU n'est achevée. Ce cas n'affecte pas R12,
+où toutes les tours prévues se sont achevées.

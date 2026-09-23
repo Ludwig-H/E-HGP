@@ -365,6 +365,15 @@ rangs et seulement **13** au rang critique ; le mutant ne classe pas ses
 désaccords par rang. Le juge échantillonne des ancres et fixe
 `run_tower=false` : même un code 0 ne contrôlerait que le catalogue
 échantillonné, sans certifier la tour FULL ni la complétude globale.
+Le [juge v7 et sa contrelecture B](CONTRE_AUDIT_B_JUGE_Q3_CRL_V7_20260923.md)
+ferment la définition et la mutation de la **strate critique longue** :
+92/179/17 triangles distincts sur huit ancres de chacune des trois coupes
+LiDAR 8k/K10, aucun désaccord sain, `drop-crl` et `drop-long` tués dans
+cette strate. Une clé retirée du catalogue est détectée par coupe.
+L'échantillon ne couvre qu'environ 0,061/0,188/0,016 % des populations
+q3 de tête publiées, populations elles-mêmes issues du produit ; ni
+complétude générale ni transfert au GPU. La garde d'index des juges
+doit encore vérifier la bijection et les bornes des IDs avant tout accès.
 
 La porte de **clés jamais émises** publiée par `683fa46e` change utilement
 le sens du contrôle : elle recense des MEB de supports q2–q4 voisins
