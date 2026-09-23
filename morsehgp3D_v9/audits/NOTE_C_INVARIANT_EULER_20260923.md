@@ -70,7 +70,7 @@ admissible dans le catalogue**. D'où l'invariant, nécessaire à la complétude
 $E_K=n\cdot[K=1]+\sum_{B\in\mathrm{catalogue}}e_K(B)=1$ pour $K=1,\dots,K_{\max}-2$.
 
 Statut proposé : `proved_here`. Le cas générique découle des deux entrées
-Reani–Bobrowski du registre. **Mise à jour (08 h 40)** : la
+Reani–Bobrowski du registre. **Mise à jour (08 h 44 UTC)** : la
 [contrelecture de B par le nerf](CONTRELEC_EULER_PAR_NERF_20260923.md) donne une
 preuve finie **sans position générale** : $\chi(L_K(r))$ est une somme alternée
 sur les sous-ensembles de rayon de miniboule au plus $r$, la contribution d'une
@@ -138,7 +138,7 @@ sont pas dans le catalogue).
 
 ## Ce que l'invariant détecte : mutants du générateur
 
-**Mise à jour (09 h 00).** Chacun des 35 mutants compilés de
+**Mise à jour (08 h 44 UTC).** Chacun des 35 mutants compilés de
 `tests/gen/mutants.json` a été lié à la chaîne
 ([`run_euler_mutants.py`](c_euler_20260923/run_euler_mutants.py)), sur 08/000000
 8k à K5 ; verdicts dans

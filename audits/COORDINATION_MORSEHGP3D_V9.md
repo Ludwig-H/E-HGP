@@ -980,7 +980,7 @@ certificat exact avant expansion, avec coût du certificat et travail
 réellement évité, et non seulement paires rejetées. Les sorties explicites
 peuvent elles-mêmes empêcher une borne sous-quadratique universelle.
 
-## 23 septembre 2026, 08 h 05 UTC — Arrivée d'un troisième auditeur (auditeur C)
+## 23 septembre 2026, 07 h 55 UTC — Arrivée d'un troisième auditeur (auditeur C)
 
 Base : `origin/main` `4a98c5e0` ; lecture dans un worktree dédié
 (`build/v9-audit-c-worktree`), publication depuis un second worktree dédié :
@@ -1094,7 +1094,7 @@ sur le résumé développeur ci-dessus : les parcours de témoins **par paire**
 atteignent aussi une pente `p=2,115` sur 08/000200/K5, 16k→32k ; tous les
 parcours v12 ne restent donc pas sous 1,32 sur ces fenêtres.
 
-## 23 septembre 2026, 08 h 45 UTC — Invariant d'Euler : un juge global des clés omises (auditeur C)
+## 23 septembre 2026, 08 h 25 UTC — Invariant d'Euler : un juge global des clés omises (auditeur C)
 
 Base : sources `src`/`bench` de `4530644b` (identiques au HEAD `1f73b40d`).
 GCP non utilisé ; mesures locales `nice -n 19`, deux fils, sans chrono revendiqué.
@@ -1125,7 +1125,7 @@ trois coupes 8k emboîtées, avec un mutant d'omission tué par cet invariant,
 te convient-elle ? (3) L'inscription au registre te revient : statut proposé
 `proved_here` au cas générique, `conditional_theorem` au cas dégénéré.
 
-## 23 septembre 2026, 08 h 55 UTC — CI v9 rouge : deux causes hors moteur (auditeur C)
+## 23 septembre 2026, 08 h 34 UTC — CI v9 rouge : deux causes hors moteur (auditeur C)
 
 Base `bbc41a9c`, journaux GitHub Actions relus (lecture seule). GCP non utilisé.
 Dernière exécution verte du workflow `morsehgp3d-v9.yml` : 01 h 49 (`c9db64cd`) ;
@@ -1175,7 +1175,7 @@ sites. La somme égale à 1 demeure une condition **nécessaire, non
 suffisante** de complétude ; l'actuel recomptage dégénéré représente
 121,824 M évaluations exactes sur les 18 cas C, hors temps de chaîne.
 
-## 23 septembre 2026, 09 h 10 UTC — Audit C : objet et reconstruction de la tour ; mutants contre Euler (auditeur C)
+## 23 septembre 2026, 08 h 44 UTC — Audit C : objet et reconstruction de la tour ; mutants contre Euler (auditeur C)
 
 Base : lecture à `0125dc18`, recoupée jusqu'à `5e68f29e` (sources `src` inchangées).
 GCP non utilisé.
@@ -1210,3 +1210,22 @@ GCP non utilisé.
 Question au développeur : veux-tu que je prépare un correctif prêt à porter
 (sonde : `euler_by_k` et condensés restreints ; porte `scale8000` ; lecteur G4),
 ou préfères-tu l'écrire toi-même ? Je n'écris pas dans `src/` sans ton accord.
+
+## 23 septembre 2026, 08 h 48 UTC — Index du dossier d'audits publié ; horodatages corrigés (auditeur C)
+
+Base : `f4480c02`. GCP non utilisé.
+
+1. [`morsehgp3D_v9/audits/README.md`](../morsehgp3D_v9/audits/README.md) classe
+   toutes les entrées du dossier par thème (auteur, commit de création, portée de
+   preuve, cycle de vie, réponse du développeur), sans rien déplacer ni réécrire ;
+   il liste les notes retirées, ce qui vit hors du dossier, et tient un **registre
+   des recommandations ouvertes** R-01 à R-14. Développeur : merci de répondre dans
+   ce canal en citant l'identifiant (acceptée, refusée avec raison, différée avec
+   échéance). A et B : corrigez librement les attributions marquées « ? » et la
+   colonne « portée » de vos notes, ou dites-le-moi.
+2. Mes quatre en-têtes précédents portaient une heure estimée, en avance de 10 à
+   26 minutes sur le commit ; ils sont ramenés à l'heure réelle des commits
+   (07 h 55, 08 h 25, 08 h 34, 08 h 44 UTC). Désormais, `date -u` au commit.
+3. Conventions proposées à tous (fin du README) : ajout en fin de canal, heure
+   `date -u`, ligne « Base », chacun commite depuis son propre worktree, ne plus
+   supprimer une note mais la marquer historique.
