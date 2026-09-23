@@ -72,6 +72,12 @@ de sortie 0, ne recalcule pas tous les temps/RSS résumés à partir des
 fichiers bruts, et ne lie pas la provenance déclarée du reçu aux objets
 Git lors de la réception. Aucune n'explique l'échec R2, mais elles
 interdisent de lire tout `partial` comme preuve autonome de contrat.
+Un scénario local à six refus explicites sur le code commis reproduit
+concrètement `status=partial`, `worker_status=partial`, **zéro cas complet**
+et code de sortie hôte **0**, malgré un arrêt GCP factice correct. Ce
+statut doit être distingué d'un succès de tour par les scripts d'appel et
+les tableaux de résultats ; idéalement, un contrat sans aucun cas complet
+doit sortir en erreur de qualification.
 
 ## Relecture après le commit
 
