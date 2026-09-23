@@ -191,8 +191,8 @@ leurs charges de cœur restent à environ **0,97**. Le signal de masse
 par cœur se renforce donc avec la densité sur cette trame, mais ce seul
 cas ne remplace pas la matrice sans sol K5/K10 ci-dessus. Les murs des
 12 nouvelles coupes ont subi de fortes interférences sur l'hôte partagé ;
-privilégier les compteurs dans ce reçu. Répéter sur d'autres séquences,
-plusieurs graines et les secteurs bruts à K10, puis comparer une sélection
+privilégier les compteurs dans ce reçu. Répéter sur d'autres séquences et
+plusieurs graines, puis comparer une sélection
 stratifiée par azimut/rayon en gardant K/s/W, segmentation et préparation
 séparés ;
 publier sortie, catalogue,
@@ -210,6 +210,20 @@ catalogue et **8,219 GiB** de RSS. Les comptes des cinq premiers ordres
 coïncident entre K5 et K10 à chaque taille, sans comparaison de leurs clés
 ou de leurs flux complets. Le changement de K modifie donc le signal des
 formes sur ce doublement fini, sans régler le coût absolu ni démontrer une
-croissance sous-quadratique générale. Les demi-scènes et quarts bruts
-restent mesurés à K5 dans la matrice précédente ; K10 brut ne mesure ici
-que les trois densités de la scène entière.
+croissance sous-quadratique générale.
+
+La [matrice brute K10 complète](lidar_raw_k10_sectors_20260923/README.md)
+mesure maintenant les **sept secteurs physiques aux trois densités** sur
+la même trame 08/000000. Sur les 14 liens de densité à secteur fixe, une
+pente des formes dépasse 2 : le quart `x≥0,y<0` entre 1/2 et entière
+atteint **2,057** ; le maximum des pentes CPU·s est **1,262**. Sur les
+18 liens spatiaux parent→enfant, quatre pentes des formes dépassent 2.
+À densité entière, la somme des quatre quarts contient **37,4 %** des
+formes du plein, mais **95,8 %** de ses charges de cœur et **99,1 %** des
+boules du catalogue. Les six demi-scènes K10 ont été rejouées avec les
+mêmes compteurs déterministes ; leurs murs restent sensibles à la
+contention. Ainsi, le besoin d'éviter des formes **par cœur** persiste
+à K10, même lorsque la pente du plein en densité reste sous 2. Les
+secteurs et sous-échantillons ne reconstituent pas la tour du plein et
+ne prouvent aucune borne asymptotique. Plusieurs séquences, graines et
+une mesure appariée du coût total sur G4 restent à produire.
