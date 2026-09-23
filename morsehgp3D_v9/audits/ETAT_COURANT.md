@@ -332,13 +332,16 @@ mutable précédent. Les slots et plages restent simultanément résidents
 durant la collecte ; mesurer le maximum par plage, la crête RSS, le temps
 et les échecs de ressources sur le chemin de chaîne. Le fast-path FULL
 rejuge strictement toutes les clés. Les portes locales passent, sans
-reçu G4 ni ablation FULL de ces changements. Le [contre-audit du chantier](CONTRE_AUDIT_B_TRI_FUSION_WIP_20260923.md)
-doit être relu à la lumière du **sample-sort commité** ; son calcul
-de tampon à 112 octets par présentation décrit une variante abandonnée.
+reçu G4 ni ablation FULL de ces changements. Le [contre-audit du
+sample-sort publié](CONTRE_AUDIT_B_SAMPLE_SORT_PUBLIE_20260923.md)
+sépare ce chemin du [tri WIP abandonné](CONTRE_AUDIT_B_TRI_FUSION_WIP_20260923.md).
 Le prélèvement de splitters prend jusqu'à `16×4W` clés **par slot non
 vide**, sans pondérer par sa taille : une répartition très inégale des
 présentations peut laisser une plage beaucoup plus grosse que la
-moyenne malgré `presentation_ranges>1`. Publier au moins le maximum et
+moyenne malgré `presentation_ranges>1`. Un mutant compilé produit deux plages,
+dont une vide et l'autre contenant tout, et passe encore la porte :
+ce compteur n'est pas un plancher de parallélisme utile. Publier le
+nombre de plages non vides, le maximum et
 la distribution des tailles de plages sur LiDAR ; comparer, si ce
 déséquilibre apparaît, un échantillon pondéré ou une partition en deux
 passes suivie d'un seul tri par plage. L'ordre exact ne dépend pas de

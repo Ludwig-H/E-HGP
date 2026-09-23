@@ -53,6 +53,16 @@ points, copies d'IDs et temps d'atlas, ainsi que les certificats,
 `Q4LocalSaturationWork`. `saturation_work.prefixes` reste un **sous-ensemble**
 du travail physique `partition`, sans addition.
 
+Le [reçu G4 R6](../receipts/g4_tower_r6_20260923/README.md) resserre
+la priorité pratique : après les filtres et certificats de voies, les
+trois trames sans sol ont seulement **6 166–8 338 arêtes q4 seules à K5**
+et **23 208–33 131 à K10** (`q4_edges−both_edges`), soit **1,2–2,3 %**
+des arêtes q4 survivantes selon scène/K. Les comptes sont identiques
+dans les paires cœur ON/OFF. Ce n'est toujours **pas** une part des
+cellules ni du temps d'atlas : une arête q4 seule peut coûter davantage
+qu'une mixte. Mais le taux historique 17,5 % ci-dessus ne représente
+plus le flux de la chaîne R6 ; instrumenter par masque avant ce port.
+
 Port conseillé : rôle immuable `Q4Only` ou `Q3Q4` à la factory de l'atlas,
 seuil `K−2` seulement pour le premier quand la saturation est activée,
 et validation du certificat contre le seuil choisi. Une cellule `Deep`
