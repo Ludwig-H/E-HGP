@@ -69,6 +69,56 @@ MHGP9_HD inline void add_dead(DeadWork& to, const DeadWork& from) {
   to.q4_proved += from.q4_proved; to.q4_open += from.q4_open;
 }
 
+// The same counters for ONE edge, in u32 (device registers): a walk visits
+// fewer than node_count (< 2^32) nodes, a load at most `capacity` sites, a
+// proof at most 1+4+...+4^6 = 5461 cells; the frontier tests (up to cells x
+// capacity) stay in u64.
+struct EdgeCoverWork {
+  u32 node_visits, bound_tests, point_tests, admitted_nodes, rejected_nodes, split_nodes;
+  u32 admitted_sites, rejected_sites, retained_ranges, merged_ranges;
+};
+struct EdgeDeadWork {
+  u32 loads, form_sites, cells, outside_cells, deep_cells, failed_cells;
+  u64 uniform_tests, point_tests;
+  u32 q3_proved, q3_open, q4_proved, q4_open;
+};
+struct EdgeWork {
+  u32 core_builds, core_sites, core_closed_edges;
+  EdgeCoverWork core_cover;
+  EdgeDeadWork dead_core;
+  u32 cover_builds, cover_sites, max_cover_sites;
+  EdgeCoverWork cover;
+  EdgeDeadWork dead;
+};
+
+MHGP9_HD inline void add_edge_cover(CoverWork& to, const EdgeCoverWork& from) {
+  to.node_visits += from.node_visits; to.bound_tests += from.bound_tests; to.point_tests += from.point_tests;
+  to.admitted_nodes += from.admitted_nodes; to.rejected_nodes += from.rejected_nodes;
+  to.split_nodes += from.split_nodes; to.admitted_sites += from.admitted_sites;
+  to.rejected_sites += from.rejected_sites; to.retained_ranges += from.retained_ranges;
+  to.merged_ranges += from.merged_ranges;
+}
+
+MHGP9_HD inline void add_edge_dead(DeadWork& to, const EdgeDeadWork& from) {
+  to.loads += from.loads; to.form_sites += from.form_sites; to.cells += from.cells;
+  to.outside_cells += from.outside_cells; to.deep_cells += from.deep_cells; to.failed_cells += from.failed_cells;
+  to.uniform_tests += from.uniform_tests; to.point_tests += from.point_tests;
+  to.q3_proved += from.q3_proved; to.q3_open += from.q3_open;
+  to.q4_proved += from.q4_proved; to.q4_open += from.q4_open;
+}
+
+// One edge's work into the totals; max_cover_sites by MAX.
+MHGP9_HD inline void add_edge(CertificateWork& to, const EdgeWork& from) {
+  to.core_builds += from.core_builds; to.core_sites += from.core_sites;
+  to.core_closed_edges += from.core_closed_edges;
+  add_edge_cover(to.core_cover, from.core_cover);
+  add_edge_dead(to.dead_core, from.dead_core);
+  to.cover_builds += from.cover_builds; to.cover_sites += from.cover_sites;
+  to.max_cover_sites = to.max_cover_sites < from.max_cover_sites ? from.max_cover_sites : to.max_cover_sites;
+  add_edge_cover(to.cover, from.cover);
+  add_edge_dead(to.dead, from.dead);
+}
+
 // Sums; max_cover_sites by MAX, as merge() in pipeline/wspd_q34.cpp.
 MHGP9_HD inline void add_certificate(CertificateWork& to, const CertificateWork& from) {
   to.core_builds += from.core_builds; to.core_sites += from.core_sites;
@@ -182,7 +232,7 @@ MHGP9_HD inline Ball edge_ball(const std::int32_t a[3], const std::int32_t b[3],
 // order; returns false (no usable output) when the sites exceed capacity.
 template <class Group>
 MHGP9_HD bool build_cover(const Group& group, const CertificateIndex& index, const Ball& ball,
-                          const CertificateSlab& slab, u32& range_count, u32& sites, CoverWork& work) {
+                          const CertificateSlab& slab, u32& range_count, u32& sites, EdgeCoverWork& work) {
   range_count = 0;
   sites = 0;
   u32 cursor = 0, previous_last = absent32;  // end of the last retained range (uniform)
@@ -264,7 +314,7 @@ MHGP9_HD inline i64 abs_i64(i64 x) { return x < 0 ? -x : x; }
 template <class Group>
 MHGP9_HD Prover load_forms(const Group& group, const CertificateIndex& index, const std::int32_t a[3],
                            const std::int32_t b[3], const CertificateSlab& slab, u32 range_count, u32 sites,
-                           DeadWork& work) {
+                           EdgeDeadWork& work) {
   Prover p{};
   i64 v[3], midpoint_twice[3];
   int main_axis = 0;
@@ -349,7 +399,7 @@ struct CellEntry {
 template <class Group>
 MHGP9_HD CellEntry enter_cell(const Group& group, const Prover& p, const CertificateSlab& slab, const ProverCell& c,
                               u8 depth, u32 frontier_level, u32 frontier_size, u32 inherited, u8 lanes,
-                              DeadWork& work) {
+                              EdgeDeadWork& work) {
   ++work.cells;
   u8 need = 0;
   if ((lanes & 2U) != 0 && !cell_outside(p, c, q3_disk_factor)) need = static_cast<u8>(need | 2U);
@@ -458,7 +508,7 @@ MHGP9_HD inline ProverCell child_cell(const ProverCell& c, u8 child) {
 // prove(): lanes of `lanes` (subset of 6) proved dead.
 template <class Group>
 MHGP9_HD u8 prove_lanes(const Group& group, Prover& p, const CertificateSlab& slab, unsigned kmax, u8 lanes,
-                        DeadWork& work) {
+                        EdgeDeadWork& work) {
   u8 tried = lanes;
   if (kmax < 2) tried = static_cast<u8>(tried & ~2U);
   if (kmax < 3) tried = static_cast<u8>(tried & ~4U);
@@ -509,14 +559,15 @@ MHGP9_HD u8 prove_lanes(const Group& group, Prover& p, const CertificateSlab& sl
 // `work` has received exactly the engine's certificate counters of this
 // edge and the result holds the lanes left for the q3/q4 generation (zero
 // when the core or the cover closed the edge). Deferred and fault add
-// nothing to `work`.
+// nothing to `work`. Only the leader lane writes `work` (on the device it
+// is the warp's total in shared memory).
 template <class Group>
 MHGP9_HD CertificateResult certify_edge(const Group& group, const CertificateIndex& index, u32 a_rank, u32 b_rank,
                                         u8 mask, unsigned kmax, bool dead_core, const CertificateSlab& slab,
                                         CertificateWork& work) {
   const std::int32_t* a = index.rank_points + 3 * static_cast<std::size_t>(a_rank);
   const std::int32_t* b = index.rank_points + 3 * static_cast<std::size_t>(b_rank);
-  CertificateWork local{};
+  EdgeWork local{};  // this edge's counters, added to `work` by the leader lane only
   u32 range_count = 0, sites = 0;
   if (dead_core) {
     if (!build_cover(group, index, edge_ball(a, b, true), slab, range_count, sites, local.core_cover))
@@ -528,7 +579,7 @@ MHGP9_HD CertificateResult certify_edge(const Group& group, const CertificateInd
     mask = static_cast<u8>(mask & ~prove_lanes(group, prover, slab, kmax, mask, local.dead_core));
     if (mask == 0) {
       ++local.core_closed_edges;
-      add_certificate(work, local);
+      if (group.leader()) add_edge(work, local);
       return CertificateResult{CertificateStatus::decided, 0};
     }
   }
@@ -540,7 +591,7 @@ MHGP9_HD CertificateResult certify_edge(const Group& group, const CertificateInd
   local.max_cover_sites = sites;
   Prover prover = load_forms(group, index, a, b, slab, range_count, sites, local.dead);
   mask = static_cast<u8>(mask & ~prove_lanes(group, prover, slab, kmax, mask, local.dead));
-  add_certificate(work, local);
+  if (group.leader()) add_edge(work, local);
   return CertificateResult{CertificateStatus::decided, mask};
 }
 

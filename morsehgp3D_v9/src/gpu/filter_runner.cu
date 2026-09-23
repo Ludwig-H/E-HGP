@@ -481,6 +481,9 @@ BatchOutput run_filter_batch(const FilterInput& input) {
 
 namespace {
 
+constexpr int certificate_threads = 128;
+constexpr int certificate_warps_per_block = certificate_threads / 32;
+
 // A CUDA warp as the 32-lane group of gpu/certificate.hpp. Every lane runs
 // the same uniform control flow; the host versions are never called.
 struct WarpGroup {
@@ -513,21 +516,28 @@ struct WarpGroup {
   }
 };
 
+// 128 registers (ptxas, sm_120, CUDA 12.9: no spill) so that four blocks, 16
+// warps, are resident per SM; the occupancy query sizes the grid from it.
 // Persistent warps: each takes the next edge from a global counter, runs it
 // in its own slab, and keeps its work; lane 0 writes the per-edge answer and,
 // at the end, the warp's work (summed on the host, in integers).
-__global__ void certificate_kernel(CertificateIndex index, const u32* edge_a, const u32* edge_b,
+__global__ void __launch_bounds__(certificate_threads, 4) certificate_kernel(CertificateIndex index, const u32* edge_a, const u32* edge_b,
                                    const u8* edge_mask, u32 edges, unsigned kmax, bool dead_core, u32 capacity,
                                    u32* ranges, i64* form_constant, i64* form_x, i64* form_y, u32* frontiers,
                                    unsigned long long* next_edge, u8* out_mask, u8* out_status,
                                    CertificateWork* warp_work, u32 warps) {
   const u32 warp = (blockIdx.x * blockDim.x + threadIdx.x) / 32;
+  // The warp's totals live in shared memory, written by its lane 0 only:
+  // two per-lane u64 ledgers would take most of the register file.
+  __shared__ CertificateWork totals[certificate_warps_per_block];
+  CertificateWork& work = totals[threadIdx.x / 32];
   if (warp >= warps) return;  // whole warps only: blockDim is a multiple of 32
   const WarpGroup group{threadIdx.x & 31U};
+  if (group.leader()) work = CertificateWork{};
+  group.sync();
   const std::size_t c = capacity;
   const CertificateSlab slab{ranges + 2 * c * warp, form_constant + c * warp, form_x + c * warp,
                              form_y + c * warp, frontiers + prover_levels * c * warp, capacity};
-  CertificateWork work{};
   for (;;) {
     unsigned long long edge = 0;
     if (group.leader()) edge = atomicAdd(next_edge, 1ULL);
@@ -582,7 +592,7 @@ CertificateOutput run_certificate_batch(const CertificateInput& input) {
     // decides, measured by the occupancy query): a slab for a warp that could
     // only start after every edge is claimed would be wasted memory. At most
     // a quarter of the free memory goes to slabs.
-    const int threads = 128;
+    const int threads = certificate_threads;
     int blocks_per_sm = 0;
     MHGP9_CUDA(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocks_per_sm, certificate_kernel, threads, 0));
     if (blocks_per_sm <= 0) throw CudaFailure{"certificate kernel cannot be resident on this device", true};
