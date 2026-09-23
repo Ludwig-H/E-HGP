@@ -58,3 +58,15 @@ l'objet sur plusieurs voies, mais ne mesure pas causalement le seul
 effet de q3 feuille. Pour une ablation de vitesse, faire des paires
 identiques en entrée, W, s, K et politique FULL, en ne variant qu'un
 levier à la fois ; inclure les coûts de coquille q3 et de balayage q4.
+La porte actuelle exige cinq ordres et 1 000 boules, mais pas
+`q3_leaf_censuses>0` ni une cellule saturée : son égalité on/off peut
+être verte sans exercer les deux nouveautés visées. Ajouter des fixtures
+non vacantes de chaque branche, dont la coquille q3 à quatre contacts
+décrite dans le contre-audit B de la feuille.
+
+Enfin, trois faiblesses plus anciennes demeurent hors de ce correctif :
+le lecteur hôte accepte encore un `partial` avec zéro cas complet et code
+de sortie 0, ne recalcule pas tous les temps/RSS résumés à partir des
+fichiers bruts, et ne lie pas la provenance déclarée du reçu aux objets
+Git lors de la réception. Aucune n'explique l'échec R2, mais elles
+interdisent de lire tout `partial` comme preuve autonome de contrat.
