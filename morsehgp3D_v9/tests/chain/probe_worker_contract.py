@@ -127,6 +127,24 @@ def main(argv):
               str(value['reason']))
     except (ValueError, KeyError, TypeError, UnicodeError, subprocess.TimeoutExpired) as error:
         check(False, 'real explicit refusal refused by the worker validator: ' + type(error).__name__ + ': ' + str(error))
+    # Lien dans les deux sens entre le refus Euler et le statut `fails`
+    # (contre-audit B) : jugement direct de validate_euler sur trois refus.
+    def euler_refusal(status, reason, euler_status, bound):
+        return dict(status=status, reason=reason, catalogue=dict(euler=dict(
+            status=euler_status, checkable_max_k=bound, by_k=[2] * bound + [0] * (5 - bound))))
+    euler_case = dict(k=5, n=360)
+    for label, value, accepted in (
+            ('euler refusal without fails', euler_refusal('invariant_violated', 'chain_catalogue_euler_violated',
+                                                          'not_checkable', 0), False),
+            ('fails without the euler refusal', euler_refusal('invariant_violated', 'other', 'fails', 3), False),
+            ('early refusal before euler', euler_refusal('resource_exhausted', 'x', 'not_checkable', 0), True),
+            ('euler refusal with fails', euler_refusal('invariant_violated', 'chain_catalogue_euler_violated',
+                                                       'fails', 3), True)):
+        try:
+            worker.validate_euler(value, euler_case)
+            check(accepted, 'validate_euler accepted: ' + label)
+        except ValueError:
+            check(not accepted, 'validate_euler refused: ' + label)
     if len(results) == 2:
         on, off = results['pinned_on'][1], results['pinned_off'][1]
         check(worker.logical_result(on) == worker.logical_result(off), 'modes on/off change the object')

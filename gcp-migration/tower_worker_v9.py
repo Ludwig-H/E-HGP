@@ -419,8 +419,9 @@ def validate_euler(value, case):
     if value['status'] == 'complete_relative':
         need(reached and euler['status'] == ('holds' if checkable else 'not_checkable') and
              euler['by_k'][:checkable] == [1] * checkable, 'euler invariant of a complete catalogue')
-    elif euler['status'] == 'fails':
-        need(reached and value['status'] == 'invariant_violated' and
+    elif value['reason'] == 'chain_catalogue_euler_violated' or euler['status'] == 'fails':
+        # Lien dans les deux sens : ce refus porte une somme fausse atteinte.
+        need(reached and euler['status'] == 'fails' and value['status'] == 'invariant_violated' and
              value['reason'] == 'chain_catalogue_euler_violated' and euler['by_k'][:checkable] != [1] * checkable,
              'euler failure without its refusal')
     elif euler['status'] == 'holds':

@@ -169,7 +169,9 @@ foreach(mutant IN ITEMS REGULAR_SHELLS_ONLY NO_SITE_TERM)
   target_link_libraries(mhgp9_chain_euler_${lower}_mutant_gate PRIVATE mhgp9_gen)
   target_compile_definitions(mhgp9_chain_euler_${lower}_mutant_gate PRIVATE MHGP9_EULER_MUTANT_${mutant}=1)
   mhgp9_gate(mhgp9_chain_euler_mutant_${lower} 1 mhgp9_chain_euler_${lower}_mutant_gate
-             ARGS --selftest EXPECT_PREFIX "cause=euler.chain_refused" LABELS "gate;chain;mutant" TIMEOUT 300)
+             ARGS --selftest
+             EXPECT_PREFIX "cause=euler.chain_refused square K3 s8 W1 reason=chain_catalogue_euler_violated"
+             LABELS "gate;chain;mutant" TIMEOUT 300)
 endforeach()
 mhgp9_product_executable(mhgp9_chain_static_paths_gate tests/chain/chain_static_paths_gate.cpp)
 target_link_libraries(mhgp9_chain_static_paths_gate PRIVATE mhgp9_chain)
@@ -273,7 +275,7 @@ if(Python3_Interpreter_FOUND AND EXISTS ${MHGP9_TOWER_WORKER})
   endforeach()
 endif()
 # Lecteur du runner de pente LiDAR (contre-audit B du 23 septembre 2026) : un
-# cas archive dont l'entree est un morceau v8 versionne est accepte, et 37
+# cas archive dont l'entree est un morceau v8 versionne est accepte, et 43
 # alterations (FNV d'entree, format, grille, fils statiques, champs lus apres
 # validation, IDs du morceau, chemin absolu d'un autre checkout...) sont
 # refusees ou re-ancrees. Sous python3 -O aussi.
@@ -289,9 +291,31 @@ if(Python3_Interpreter_FOUND AND EXISTS ${MHGP9_LIDAR_SCALING_CASE})
     add_test(NAME mhgp9_lidar_scaling_reader_${mode}
              COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=${Python3_EXECUTABLE}
                      "-DARGS=${py_flags} ${CMAKE_CURRENT_SOURCE_DIR}/bench/run_lidar_scaling.py --selftest ${MHGP9_LIDAR_SCALING_CASE}"
-                     "-DEXPECT_PREFIX=lidar_scaling_selftest mutants_killed=37/37"
+                     "-DEXPECT_PREFIX=lidar_scaling_selftest mutants_killed=43/43"
                      -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
     set_tests_properties(mhgp9_lidar_scaling_reader_${mode} PROPERTIES LABELS "gate;protocol" TIMEOUT 120)
+  endforeach()
+  # Revalidation du reçu archive contre sa matrice ANNONCEE (six campagnes,
+  # binaire e1ba126f, commit 4530644b), puis la meme matrice augmentee d'une
+  # campagne absente : refus (contre-audit B, sous-ensemble non vide).
+  set(MHGP9_LIDAR_SCALING_TAGS
+      "s00_k10_s8_w8_r0,s00_k5_s8_w8_r0,s01_k10_s8_w8_r0,s01_k5_s8_w8_r0,s02_k10_s8_w8_r0,s02_k5_s8_w8_r0")
+  foreach(variant IN ITEMS matrix missing_campaign)
+    if(variant STREQUAL "matrix")
+      set(tags "${MHGP9_LIDAR_SCALING_TAGS}")
+      set(expected 0)
+      set(line "lidar_scaling_revalidate cases=60 failures=0")
+    else()
+      set(tags "${MHGP9_LIDAR_SCALING_TAGS},s00_k5_s10_w8_r0")
+      set(expected 1)
+      set(line "lidar_scaling_revalidate cases=60 failures=1")
+    endif()
+    add_test(NAME mhgp9_lidar_scaling_revalidate_${variant}
+             COMMAND ${CMAKE_COMMAND} -DEXPECTED=${expected} -DCMD=${Python3_EXECUTABLE}
+                     "-DARGS=-B ${CMAKE_CURRENT_SOURCE_DIR}/bench/run_lidar_scaling.py --revalidate ${CMAKE_CURRENT_SOURCE_DIR}/receipts/lidar_scaling_local_20260923/out --work ${CMAKE_CURRENT_BINARY_DIR}/lidar_revalidate_${variant} --expect-campaigns ${tags} --expect-probe-sha256 e1ba126fbcea8ad483ebff2265f446c18e90eaefe04bf20021e76cd0df09af80 --expect-commit 4530644b"
+                     "-DEXPECT_PREFIX=${line}"
+                     -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
+    set_tests_properties(mhgp9_lidar_scaling_revalidate_${variant} PROPERTIES LABELS "gate;protocol" TIMEOUT 300)
   endforeach()
 endif()
 

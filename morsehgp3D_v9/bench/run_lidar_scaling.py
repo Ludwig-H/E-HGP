@@ -34,6 +34,7 @@ mesure G4. Aucun assert : tient sous python3 -O.
 """
 import argparse
 import hashlib
+import importlib.util
 import json
 import math
 from pathlib import Path
@@ -83,6 +84,21 @@ class Refusal(Exception):
     pass
 
 
+_WORKER = None
+
+
+def g4_reader():
+    """Le lecteur du worker G4 (memes regles v13 des deux cotes), charge une fois."""
+    global _WORKER
+    if _WORKER is None:
+        spec = importlib.util.spec_from_file_location('mhgp9_tower_worker_for_lidar_reader',
+                                                      ROOT / 'gcp-migration' / 'tower_worker_v9.py')
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _WORKER = module
+    return _WORKER
+
+
 def sha(raw):
     return hashlib.sha256(raw).hexdigest()
 
@@ -127,12 +143,13 @@ def resolve_input(argument):
     """Entree d'un cas archive, re-ancree sur ce depot : un chemin absolu d'un autre checkout est
     relu a partir de son segment morsehgp3D_v8/ ; sinon il est refuse."""
     path = Path(argument)
-    if not path.is_absolute():
-        return ROOT / path
     parts = path.parts
-    if 'morsehgp3D_v8' not in parts:
-        raise Refusal('archived input path outside this repository: ' + argument)
-    return ROOT.joinpath(*parts[parts.index('morsehgp3D_v8'):])
+    if '..' in parts or 'morsehgp3D_v8' not in parts:
+        raise Refusal('archived input path outside the v8 subtree of this repository: ' + argument)
+    resolved = ROOT.joinpath(*parts[parts.index('morsehgp3D_v8'):]).resolve()
+    if not resolved.is_relative_to((ROOT / 'morsehgp3D_v8').resolve()):
+        raise Refusal('archived input path escapes the v8 subtree: ' + argument)
+    return resolved
 
 
 def nested_indices(points, size):
@@ -177,15 +194,18 @@ def validate_probe(value, expected):
     need += [type(value.get('tower_digest')) is str and len(value['tower_digest']) == 16,
              number(times.get('chain_total')), number(times.get('digest')), number(value.get('chain_cpu_s')),
              type(value.get('peak_rss_kb')) is int and value['peak_rss_kb'] > 0]
-    if schema != 'mhgp9_tower_probe_v12':
-        catalogue = value.get('catalogue')
-        euler = catalogue.get('euler') if type(catalogue) is dict else None
-        checkable = min(expected['k'] - 2, sites) if expected['k'] >= 3 else 0
-        need += [type(euler) is dict and set(euler) == {'status', 'checkable_max_k', 'by_k'} and
-                 euler['checkable_max_k'] == checkable and
-                 euler['status'] == ('holds' if checkable else 'not_checkable') and
-                 type(euler['by_k']) is list and len(euler['by_k']) == expected['k'] and
-                 all(type(x) is int for x in euler['by_k']) and euler['by_k'][:checkable] == [1] * checkable]
+    if schema != 'mhgp9_tower_probe_v12' and all(need):
+        # v13 : champs de premier niveau exacts, puis Euler, occupation q3/q4 et
+        # phases de la tour juges par le lecteur G4 lui-meme.
+        reader = g4_reader()
+        case = dict(k=expected['k'], n=sites, workers=expected['workers'], static_threads=expected['static_threads'])
+        try:
+            need.append(set(value) == reader.TOP_KEYS and reader._catalogue(value['catalogue']))
+            reader.validate_euler(value, case)
+            reader.validate_occupancy(value, case)
+            reader.validate_tower_phases(value, case)
+        except (ValueError, KeyError, TypeError):
+            need.append(False)
     return all(need)
 
 
@@ -376,6 +396,15 @@ def selftest(case_path):
     v13['schema'] = PROBE_SCHEMA
     v13['catalogue']['euler'] = dict(status='holds' if checkable else 'not_checkable', checkable_max_k=checkable,
                                      by_k=[1] * checkable + [5] * (k - checkable))
+    q34_ms = v13['times_ms']['q34']
+    v13['q34_occupancy'] = dict(started_workers=expected['workers'], jobs=16 * expected['workers'], tasks_published=2,
+                                tasks_consumed=2, task_waits=1, wall_max_ms=q34_ms, wall_min_ms=q34_ms / 2,
+                                cpu_sum_s=0.001, wait_sum_s=0.001)
+    static_path = expected['static_threads'] > 1
+    v13['tower_phases_ms'] = dict(validate=1.0, static=0.0, lots=1.0 if static_path else 0.0, populations=0.0,
+                                  images=0.0, bank=1.0, encode=1.0, static_by_k=[0.0] * k,
+                                  lots_by_k=[1.0 if static_path else 0.0] * k, images_by_k=[0.0] * k,
+                                  encode_by_k=[1.0] * k, order_by_k=[0.0 if static_path else 1.0] * k)
     expected13 = dict(expected, schema=campaign_probe_schema(dict(schema=SUMMARY_SCHEMA, probe_schema=PROBE_SCHEMA)))
     if not validate_probe(v13, expected13):
         print('lidar_scaling_selftest cause=v13_baseline_refused')
@@ -388,6 +417,11 @@ def selftest(case_path):
         ('v13_euler_vacuous', lambda v: v['catalogue']['euler'].update(status='not_checkable')),
         ('v13_euler_absent', lambda v: v['catalogue'].pop('euler')),
         ('v13_euler_extra_key', lambda v: v['catalogue']['euler'].update(extra=1)),
+        ('v13_occupancy_absent', lambda v: v.pop('q34_occupancy')),
+        ('v13_phases_absent', lambda v: v.pop('tower_phases_ms')),
+        ('v13_occupancy_wall', lambda v: v['q34_occupancy'].update(wall_max_ms=v['times_ms']['q34'] + 5.0)),
+        ('v13_phases_beyond_tower', lambda v: v['tower_phases_ms'].update(bank=v['times_ms']['tower'] + 5.0)),
+        ('v13_top_extra', lambda v: v.update(extra=1)),
     ]
     for name, apply in table13:
         mutated = json.loads(json.dumps(v13))
@@ -408,7 +442,7 @@ def selftest(case_path):
     # Entree alteree d'un octet : le FNV recalcule ne correspond plus.
     changed = bytearray(raw)
     changed[0] ^= 1
-    total = len(table) + 5 + 7 + 2
+    total = len(table) + 5 + 12 + 2 + 1
     if not validate_probe(value, dict(expected, fnv=input_fnv(bytes(changed)))):
         killed += 1
     else:
@@ -424,6 +458,11 @@ def selftest(case_path):
     try:
         resolve_input('/elsewhere/checkout/other/' + Path(argv[0]).name)
         print('lidar_scaling_selftest survivor=path_outside_repository')
+    except Refusal:
+        killed += 1
+    try:
+        resolve_input('morsehgp3D_v8/../../../tmp/escape.u32le')
+        print('lidar_scaling_selftest survivor=path_dotdot_escape')
     except Refusal:
         killed += 1
     # Morceau v8 dont l'empreinte des IDs est fausse : refuse avant calcul.
@@ -450,9 +489,14 @@ def selftest(case_path):
     return 0 if killed == total else 1
 
 
-def revalidate(out_dir, work):
-    """Rejuge une campagne archivee : entrees reconstruites, FNV, lecteur, lignes du resume."""
-    report = dict(schema='mhgp9_lidar_scaling_revalidation_v1', cases=0, campaigns=[], failures=[])
+def revalidate(out_dir, work, expect):
+    """Rejuge une campagne archivee : entrees reconstruites, FNV, lecteur, lignes du resume.
+
+    `expect` lie la reception a une matrice ANNONCEE (campagnes, binaire, commit) :
+    sans elle, une reussite ne dirait que « les campagnes presentes sont
+    coherentes », jamais « la campagne entiere est recue »."""
+    report = dict(schema='mhgp9_lidar_scaling_revalidation_v2', cases=0, campaigns=[], failures=[],
+                  expected=expect)
     for summary_path in sorted(out_dir.rglob('SUMMARY_*.json')):
         summary = json.loads(summary_path.read_text())
         tag = summary_path.stem[len('SUMMARY_'):]
@@ -463,15 +507,28 @@ def revalidate(out_dir, work):
         _, _, cases = scene_cases(summary['scene'], tag, work)
         schema = campaign_probe_schema(summary)
         rows = {row['case']: row for row in summary['rows']}
+        if expect.get('probe_sha256') and summary.get('probe_sha256') != expect['probe_sha256']:
+            report['failures'].append(dict(case=tag, reasons=['probe_sha256']))
+        if expect.get('commit') and not str(summary.get('git_head', '')).startswith(expect['commit']):
+            report['failures'].append(dict(case=tag, reasons=['git_head']))
         checked = 0
         for name, size, _path, raw, provenance in cases:
             record = json.loads((summary_path.parent / (name + '.json')).read_text())
+            _path = Path(_path)
             expected = archived_expectations(record, size, raw, schema)
             reasons = []
             if record.get('outcome') != 'complete_relative' or record.get('exit_code') != 0:
                 reasons.append('outcome')
             if record.get('input') != provenance:
                 reasons.append('provenance')
+            if record.get('case') != name:
+                reasons.append('case_name')
+            argument = Path(record['argv'][0])
+            expected_input = (name + '.u32le') if provenance['kind'] == 'nested_disc' else None
+            if expected_input is not None and argument.name != expected_input:
+                reasons.append('input_argument')
+            if expected_input is None and (argument.parts[-2:] != _path.parts[-2:]):
+                reasons.append('input_argument')
             if (expected['k'], expected['s'], expected['workers']) != (summary['k'], summary['s'], summary['workers']):
                 reasons.append('command_parameters')
             if not validate_probe(record.get('probe'), expected):
@@ -485,7 +542,11 @@ def revalidate(out_dir, work):
             report['failures'].append(dict(case=tag, reasons=['summary_rows_%d_cases_%d' % (len(rows), checked)]))
         report['cases'] += checked
         report['campaigns'].append(dict(tag=tag, cases=checked, summary_sha256=sha(summary_path.read_bytes())))
+    tags = sorted(campaign['tag'] for campaign in report['campaigns'])
+    if expect.get('campaigns') is not None and tags != sorted(expect['campaigns']):
+        report['failures'].append(dict(case='matrix', reasons=['campaigns_expected_' + ','.join(sorted(expect['campaigns']))]))
     print(json.dumps(report, indent=1, sort_keys=True))
+    print('lidar_scaling_revalidate cases=%d failures=%d' % (report['cases'], len(report['failures'])))
     return 0 if report['cases'] > 0 and not report['failures'] else 1
 
 
@@ -493,6 +554,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--selftest', type=Path)
     parser.add_argument('--revalidate', type=Path)
+    parser.add_argument('--expect-campaigns', help='revalidation : etiquettes attendues, separees par des virgules')
+    parser.add_argument('--expect-probe-sha256', help='revalidation : empreinte attendue du binaire de sonde')
+    parser.add_argument('--expect-commit', help='revalidation : commit (prefixe) attendu dans les resumes')
     parser.add_argument('--probe', type=Path)
     parser.add_argument('--scene', choices=('00', '01', '02'))
     parser.add_argument('--k', type=int, choices=(5, 10))
@@ -509,7 +573,9 @@ def main():
             raise Refusal('--work is required')
         args.work.mkdir(parents=True, exist_ok=True)
         if args.revalidate is not None:
-            return revalidate(args.revalidate, args.work)
+            expect = dict(campaigns=args.expect_campaigns.split(',') if args.expect_campaigns else None,
+                          probe_sha256=args.expect_probe_sha256, commit=args.expect_commit)
+            return revalidate(args.revalidate, args.work, expect)
         if args.probe is None or args.scene is None or args.k is None or args.out is None:
             raise Refusal('--probe, --scene, --k and --out are required')
         if args.s < 8:
