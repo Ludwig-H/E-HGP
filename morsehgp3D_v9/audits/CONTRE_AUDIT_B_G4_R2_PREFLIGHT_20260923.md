@@ -47,6 +47,53 @@ clôture ; aucune réussite ou panne algorithmiques n'est déduite ici.
 Le contrôleur prévoit un arrêt ciblé en `finally`, même sur échec du
 worker, mais la preuve de cet arrêt dépend du reçu final.
 
+## Clôture observée à 00:43 UTC
+
+Le contrôleur a finalement rendu `status=worker_failed`, `worker_status=
+probe_failed`, code 1. L'archive récupérée a le SHA-256
+`98f557d7e7b4e6356a8210a31fb6bde3f53b11931b93934a8ad47a561c6569a0` ;
+le reçu hôte note `capture_received=true` et
+`targeted_shutdown_certified=true`. `guarded_stop` sort avec code 0 et
+son groupe de processus fermé. L'instance n'a pas été laissée active.
+Le worker invité déclare sources, binaire et dépendances compilées stables,
+`FULL_executed=true`, GPU faux ; **les treize cas** ont code de sonde 0,
+mais **treize `probe_failed`**, tous et seulement avec la raison annoncée
+`ValueError: probe counters tower_work`. Le reçu hôte garde
+`FULL_executed=false` parce qu'aucun résultat n'a été accepté par son
+lecteur : ne pas en conclure que la sonde invitée n'a pas calculé.
+
+Les sorties brutes de la sonde annoncent toutes `complete_relative`.
+Un diagnostic en mémoire qui remplace **seulement** les deux valeurs MEB
+mal typées par des entiers de test franchit `validate_probe` pour les
+treize cas ; ce n'est pas une correction du paquet exécuté ni une
+validation de leurs valeurs MEB. Les répétitions de chaque couple
+trame/K ont catalogue, ordres et digest identiques ; sur 08/000000,
+W24 et W48 K10 rendent le même objet. Les cinq premiers ordres de K10
+égalent les ordres K5 de chaque trame, bien que leurs catalogues globaux
+diffèrent. Ces contrôles bruts sont informatifs, **sans reçu G4 accepté**.
+
+Médianes des deux sorties brutes W48, en secondes ; le temps de chaîne
+comprend q2, q3/q4, FULL et les autres étapes natives, pas segmentation :
+
+| Trame 08/ | Sites | K | q2 | q3/q4 | FULL | Chaîne |
+|---|---:|---:|---:|---:|---:|---:|
+| 000000 | 39 885 | 5 | 0,457 | 8,492 | 3,807 | 13,252 |
+| 000100 | 35 551 | 5 | 0,236 | 6,713 | 3,090 | 10,455 |
+| 000200 | 45 845 | 5 | 0,525 | 14,812 | 4,074 | 19,946 |
+| 000000 | 39 885 | 10 | 0,780 | 23,972 | 22,985 | 50,071 |
+| 000100 | 35 551 | 10 | 0,419 | 17,582 | 17,480 | 37,317 |
+| 000200 | 45 845 | 10 | 0,825 | 38,854 | 22,311 | 64,289 |
+
+Le cas additionnel 08/000000/K10 W24/statique24 annonce 56,466 s de
+chaîne et le même digest que W48. Ce sont des **chronos exploratoires
+sur CPU G4**, non des résultats validés par le protocole, encore loin de
+1 s ; ils ne mesurent ni GPU ni plusieurs séquences. Sur 08/000000/K10,
+le registre brut compte 17,947 milliards de tests ponctuels d'atlas q4,
+12,392 milliards d'insertions d'IDs de **nœuds** frontaliers, 11,309
+millions d'appels MEB et 403,430 millions de visites d'index pour les
+intrus FULL. Le tri n'explique pas à lui seul ces coûts. Les masses
+q4 exigent un changement de travail total, pas seulement W48→GPU.
+
 Avant une autre session facturée : injecter dans `validate_probe` **la
 sortie réelle complète** d'une petite sonde v3, autoriser séparément les
 deux champs MEB selon leur type et leurs contraintes, vérifier le mode
