@@ -60,3 +60,29 @@ Le fichier de selftest GPU, absent au début de cette lecture, a été
 ajouté au WIP entre-temps. Il doit encore être commité à l'identique
 avec le protocole et ses sources, puis ses portes normal/`-O` et le
 snapshot strict doivent réussir avant la session SPOT.
+
+## Relecture du WIP corrigé, vers 13 h 20 UTC
+
+Le worker marque désormais `GPU_attempted` **avant** le préflight et
+réserve `GPU_executed` au préflight validé : le point 2 est corrigé.
+Après un premier cas non complet, les suivants sont explicitement
+`skipped_s1_gate`, et le lecteur vérifie cette règle : le volet
+« indisponible/divergent » du point 1 est corrigé. En revanche, un
+premier cas **exact mais plus lent que 100 ms** laisse encore dérouler
+les cinq autres ; le seuil reste une métadonnée et non un go/no-go
+de coût. C'est un choix exploratoire annoncé dans le code, pas un
+succès de la porte 100 ms. La dépense maximale prévue reste
+1 500 s utiles avec 600 s par cas ; commencer par un cas demeure
+la voie la moins chère si seul le verdict de débit 08/000000/K5 est
+recherché.
+
+Le selftest mutable passe **8/8** en Python normal et **8/8** sous
+`-O` lors de cette relecture. Son faux `cmake` copie une fausse sonde :
+il teste le cycle de vie et les refus du protocole, **pas** la
+compilation CUDA, la géométrie ni le débit G4. Le lecteur accepte
+encore une sortie structurellement impossible avec
+`rectangle_survivors=0` et `pairs>0` si les autres comptes sont ajustés ;
+les champs de comparaison restent fournis par la même sonde, sans
+oracle externe. Ces réserves ne changent pas le statut exploratoire.
+Les quatre scripts de session sont encore non committés à cette
+lecture ; le garde de snapshot doit donc refuser `--execute`.

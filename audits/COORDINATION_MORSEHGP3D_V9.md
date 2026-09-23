@@ -2963,3 +2963,42 @@ pendant un préflight qui échoue : distinguer tentative et validation.
 Le selftest manquant à 13 h 07 a maintenant été ajouté au WIP, mais
 aucune session réelle ne doit précéder son commit, ses gates et la
 validation stricte du snapshot. Aucun GCP lancé par B.
+
+### Mise à jour 13 h 20 UTC — GPU publié et protocole WIP corrigé (auditeur B)
+
+Le port CUDA S1 est désormais publié dans `0d5ad2e89` : préflight
+K/masques/IDs/rangs/pointeurs et garde de mémoire device présents.
+La [relecture B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PORTE_FILTRE_GPU_20260923.md)
+ne trouve pas de divergence des formules sous l'index certifié, mais
+`FilterInput` public ne contrôle pas la partition disjointe des enfants
+ni le domaine u18 des boîtes/points. Avec un index brut chevauchant,
+un témoin peut être crédité deux fois ; les limites entières ne valent
+pas hors u18. Soit restreindre l'API au producteur certifié, soit
+certifier l'entrée complète. Le scan des masses ne garde pas le cumul
+contre débordement si les rectangles sont dupliqués ; le garde mémoire
+GPU arrive après les allocations CPU par paire du probe. S1 reste une
+sonde `O(R+P)`/`O(P log R)`, non un chemin massif borné.
+
+Le [protocole WIP relu](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md)
+marque maintenant `GPU_attempted` dès le préflight et saute les cinq
+cas suivants si le premier est invalide/indisponible. **Il les exécute
+encore si ce premier cas est exact mais >100 ms** ; le seuil n'est donc
+pas un coupe-circuit de coût. Les selftests hors ligne passent 8/8
+normal et 8/8 sous `-O` avec une fausse sonde, sans compilation CUDA
+réelle. Les scripts restent non commités à cette lecture : la session
+G4 doit attendre le snapshot commité, et le résultat sera un filtre,
+pas une tour FULL.
+
+### Mise à jour 13 h 20 UTC — matrice brute K10 contre-vérifiée (auditeur B)
+
+Le complément A `64ab32da6` passe 52/52 hashes et les contrôles
+croisés d'entrées avec K5 ; 18 essais K10 nouveaux gardés, 6 premiers
+essais de moitié non gardés, 3 pleins K10 hérités. Les cinq ordres
+K10/K5 ont les mêmes **comptes**, pas un contrôle clé par clé.
+Recalcul indépendant : un lien de densité sur 14 franchit `p_formes=2`
+(quart x≥0,y<0, 2,057), quatre liens spatiaux sur 18 aussi ; les
+quarts au plein gardent 95,77 % des charges cœur et 99,10 % des boules,
+mais 37,42 % des formes. Une scène, CPU local partagé et coupes aux
+frontières changeantes ne prouvent aucune borne globale. Le README
+avait réintroduit « float32 par défaut » : B a rétabli le profil v9
+grille 1 mm prioritaire et actualisé `SHA256SUMS`.

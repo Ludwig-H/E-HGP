@@ -6,7 +6,8 @@
 [R11 G4 CPU](../receipts/g4_tower_r11_20260923/README.md), son
 [`SUMMARY.json`](../receipts/g4_tower_r11_20260923/SUMMARY.json), le
 [profil local des micro-leviers](../receipts/q34_micro_levers_20260923/README.md),
-et le chantier GPU **non commité** lu dans `build/v9-open-worktree`.
+le port GPU publié par `0d5ad2e89` et son protocole G4 encore mutable
+dans `build/v9-open-worktree`.
 
 ## Budget séquentiel observé
 
@@ -60,7 +61,7 @@ résultat ne se convertit pas directement en accélération face au CPU
 (`ledger.witness_rect_queries`, `expanded_pairs`,
 `witness_pair_queries`, `witness_cache_rejected_pairs`).
 
-## Port encore exploratoire au 23 septembre
+## Première lecture historique du port, avant publication
 
 Dans la première lecture du chantier, `src/gpu/witness_filter.hpp` transpose les bornes
 entières, crédits stricts et exclusions du filtre CPU dans une fonction
@@ -101,7 +102,7 @@ Points à fermer avant tout statut GPU :
    des tuiles/batches bornés et des offsets 64 bits avec refus explicite
    de débordement ; mesurer le pic réel avant promesse de résidence.
 
-Verdict : porte de fidélité hôte utile ; **backend GPU et contrat non
+Verdict de cette première lecture : porte de fidélité hôte utile ; **backend GPU et contrat non
 qualifiés**. La priorité d'architecture reste la réduction du travail
 q3/q4 et la parallélisation de l'aval, pas une interprétation du seul
 filtre comme solution de tour.
@@ -149,3 +150,41 @@ préflight du WIP, non une qualification publiée.
   autorise explicitement `__int128` en code device avec un compilateur
   hôte qui le prend en charge : il n'y a pas de blocage de langage
   démontré, seulement une porte de compilation et de débit à passer.
+
+## État du port publié `0d5ad2e89`, relu après le WIP
+
+Le commit ajoute effectivement le lanceur CUDA, le scan CUB, les transferts,
+la sonde et un préflight hôte dans `filter_runner.cu:125–150`. Il ferme les
+refus élémentaires K hors 3..10, tableaux nuls, IDs/plages de rangs hors
+tableau, masques hors q3/q4 et `rect_count>INT_MAX`. Ces défauts de la
+première lecture ne doivent donc **pas** être attribués au code publié.
+La sonde projette l'index certifié du générateur via `flatten_nodes` et
+compare les masques prévus au CPU ; aucun test CUDA positif, reçu G4 ou
+qualification de chaîne intégrée n'est encore publié.
+
+Le préflight ne constitue pas à lui seul un certificat pour un
+`FilterInput` arbitraire : il ne vérifie ni le domaine u18 des coordonnées
+et boîtes ni la partition disjointe des rangs par les deux enfants.
+Deux enfants qui revendiquent le même rang passent les contrôles actuels,
+alors que le DFS peut compter deux fois un témoin unique et rejeter une
+voie à tort. Des coordonnées hors u18 peuvent aussi sortir des bornes
+arithmétiques garanties de `witness_filter.hpp`. Ce n'est **pas** un défaut
+observé du producteur `Q2CensusIndex` ; soit rendre l'API brute interne
+à ce producteur certifié et l'annoncer, soit valider réellement ces
+invariants avant d'exposer `run_filters` à d'autres appelants.
+
+Les masses `u64` du scan ne sont pas contrôlées contre un débordement :
+la borne combinatoire attendue exige une WSPD sans rectangles dupliqués,
+invariant non vérifié par cette API brute. Le garde `pairs>free_bytes/2`
+évite une allocation excessive du masque **sur le GPU après le scan**,
+mais pas le coût hôte : la sonde a déjà construit ses vecteurs de référence
+par paire et parcouru toute la population. Le code reste donc à ce stade
+`O(R+P)` en mémoire et le noyau de paires paie `O(P log R)` pour la recherche
+d'offset ; ces coûts sont acceptables comme sonde S1 bornée, non comme
+architecture pour des dizaines de millions de points. Les tuiles décrites
+ci-dessus, la sortie consommée au fil de l'eau et les garde-fous sur le
+travail hôte sont des portes du prochain port.
+
+Conclusion inchangée : **port CUDA publié, mais ni compilation/exécution
+positive G4 ni temps de tour GPU qualifiés**. Le protocole G4 est encore
+hors commit à cette lecture et son garde doit refuser une session réelle.

@@ -51,13 +51,20 @@ montre que, dans R11, `chain_s−q34_s` vaut encore 0,874/1,062/1,106 s
 sur les trois trames K5 et au moins 3,235 s à K10 : déporter **seulement**
 les filtres ne peut qualifier la seconde si les autres phases restent
 inchangées et séquentielles. La porte de débit 0,1 s pour tous les masques
-sans cache demeure utile. Le lanceur CUDA S1 est maintenant publié par
-`0d5ad2e89`, avec validation hôte des IDs, plages et masques, et une sonde
-de comparaison de tous les masques ; il n'a encore ni test positif sur
-appareil ni résultat G4 publié. L'[audit du domaine u18](AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md)
-montre que sa garde accepte aussi des coordonnées hors u18 qui font
-déborder l'arithmétique signée du filtre : borner points et boîtes avant
-CUDA. Le profil local attribue environ 33 % du CPU
+sans cache demeure utile. Le lanceur CUDA S1 et sa sonde sont publiés
+par `0d5ad2e89`, sans test positif sur appareil ni résultat G4 ; le
+protocole SPOT reste mutable et non commité. La garde hôte vérifie les
+IDs, plages et masques, mais l'[audit A du domaine u18](AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md)
+démontre un débordement signé accepté sur coordonnées hors domaine.
+La [relecture B du port](CONTRE_AUDIT_B_PORTE_FILTRE_GPU_20260923.md)
+note aussi que `FilterInput` brut ne vérifie pas la partition disjointe
+des enfants : il n'est sûr qu'avec l'index certifié du producteur.
+Le scan et le probe gardent des buffers `O(R+P)`, tandis que le noyau
+de paires paie `O(P log R)` pour ses recherches d'offset ; ni mémoire
+massive ni vitesse GPU ne sont acquises. Le [préflight B du protocole
+G4](CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md) a
+8/8 selftests normaux et 8/8 sous `-O` **avec faux GPU**, pas de CUDA
+réel. Le profil local attribue environ 33 % du CPU
 q3/q4 aux deux DFS ciblés avec leur ordre d'enfants ; 40 % comprend
 aussi le front non porté. Un chemin GPU intégré doit inclure les coûts
 de création/consommation des requêtes et une sortie bornée par lots.
@@ -742,6 +749,11 @@ gardent formes, charges, paires, catalogue et ordres ; seules quelques
 visites de cache/témoins varient, avec au plus 0,51 % de CPU. Chaque
 morceau reconstruit sa propre tour : ces sommes ne dénombrent pas les
 arêtes traversantes et ne prouvent aucune borne sous-quadratique globale.
+La contre-vérification B du complément retrouve **52/52 SHA**, les 18
+cas K10 gardés sur 24 essais et les 21 lignes de la matrice ; les cinq
+premiers ordres K10 égalent les **comptes** K5 sur chaque entrée, pas
+les clés une à une. Sa mention de float32 comme défaut a été rectifiée :
+la grille 1 mm reste le profil contractuel prioritaire de v9.
 Le [crédit exact par nœuds du certificat de cœur](../receipts/dead_node_credit_negative_20260923/README.md)
 a été essayé hors produit : mêmes voies et digest, mais CPU de chaîne
 **+27 % à K5 et +32 % à K10** sur la coupe 16k de 000000 ; cette variante
