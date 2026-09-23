@@ -15,4 +15,28 @@ Le slab S3 vaut exactement `52×capacity` octets **par warp** : `2u32` de plages
 
 Le raccord `Engine::certified_edge` reconstruit sur CPU le cover des arêtes dont au moins une voie reste ouverte après S3, nécessaire à l'atlas et à la génération. Sur le sans-sol 08/000000 du reçu de phases, cela concernerait **708 686** arêtes K5 et **1 463 362** K10, et non tous les 900 377/1 934 399 covers initialement construits. `edges_ns` paie cette reconstruction, mais `work.cover.*` garde les **comptes logiques** du certificat GPU et ne la recompte pas ; les pics `peak_edge_buffer_bytes` excluent les slabs HBM et les cœurs GPU fermés ne passent plus par `observe`. Séparer travail physique CPU/GPU, pics RSS/HBM et ledger logique avant de comparer les coûts. Les identités agrégées de masques/compteurs du nouveau `check_certificate_batch` ne certifient pas chaque décision : exiger par arête le différentiel CPU/GPU et catalogue/tour clé par clé. Un `CertificateOutput.available=true` peut coexister avec une erreur d'allocation ou device capturée ; le bridge doit refuser **`error` non vide et `faults>0`**, pas seulement tester `available`.
 
+Le gate de chaîne WIP conserve dans son flux comparé les coefficients de
+boule, supports, profondeur et **taille** de coquille, mais pas les **IDs**
+de coquille malgré son commentaire. Son `same_work` compare seulement
+une partie de `WspdQ34Work`, laissant notamment les compteurs q3 et
+local/q4 de côté. Les condensés FULL ensuite comparés sont utiles mais
+ne transforment pas cette porte en égalité exhaustive du flux ou du
+travail. Copier les deux suites d'IDs `shell_first` et `shell_second`
+(leur séparation et leur ordre ont un sens dans le flux), puis trier
+seulement les **candidats** pour les comparer ; étendre le comparateur
+aux champs logiques q3, local/window, blocs, cellules et payload, puis
+tuer un mutant qui remplace un ID
+de coquille à taille inchangée. Couvrir aussi l'option `dead_core=false`
+et K2 sur **device**, pas seulement dans la référence CPU.
+
+Le cas vide a aussi une conséquence de **libellé** : la voie CUDA pose
+`available=true` et le nom du GPU après son préflight, puis retourne
+sans kernel lorsque `edges==0`. Le bridge publie ce nom comme
+`certificate_backend` et le gate compte alors un `gpu_run` sur la seule
+base d'un statut complet et d'un backend non CPU. Cela prouverait un
+appareil disponible, **pas** un certificat calculé sur GPU. Reprendre
+la séparation déjà introduite pour S2 entre préflight et nombre de
+cas/arêtes S3 effectivement achevés ; imposer un mutant « zéro arête,
+préflight GPU vrai, exécution S3 fausse » au lecteur G4 futur.
+
 Enfin, la sonde `bench/tower_probe.cpp` du diff annonce déjà `mhgp9_tower_probe_v18`, tandis que `gcp-migration/tower_worker_v9.py` et `bench/run_lidar_scaling.py` exigent encore **v17**. Sans adaptation du worker, du lecteur hôte, des selftests et des recettes, une session G4 S3 serait rejetée ou non qualifiante. Ne pas lancer de VM sur ce paquet mutable ; fermer d'abord cette porte locale. Le nouveau certificat S3 ne règle de toute façon pas seul le budget : R12 K5 laisse encore 1,177/1,388/1,513 s de chaîne si l'on retire fictivement **tous** les survivants et que les autres phases restent inchangées.

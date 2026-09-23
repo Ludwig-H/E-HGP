@@ -227,7 +227,9 @@ les slabs de 3,25 Mio par warp au défaut, et le cover CPU reconstruit
 sur les arêtes encore ouvertes sans compteur physique séparé. La
 sonde du diff émet v18 alors que les lecteurs G4/LiDAR attendent v17 :
 aucune session S3 ne doit être présentée comme qualifiée avant raccord
-et nouveaux tests. R12 publié n'est pas touché.
+et nouveaux tests. Le backend GPU d'un lot vide n'attesterait que le
+préflight, pas une exécution S3 ; séparer les deux marqueurs comme en
+S2. R12 publié n'est pas touché.
 Les [demi-scènes et quarts aux trois densités](lidar_raw_physical_scaling_20260923/README.md)
 restent dans le reçu v12 ; la somme de leurs tours ne reconstruit pas le
 plein. Une scène/K5/CPU ne prouve ni sous-quadraticité, ni contrat G4.

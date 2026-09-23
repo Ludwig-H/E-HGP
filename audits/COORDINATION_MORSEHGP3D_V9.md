@@ -3659,6 +3659,11 @@ feuille à plusieurs rangs que le constructeur de cover S3 peut
 omettre lorsqu'elle est ambiguë. Le bridge doit aussi refuser
 `error`/`faults`, même si `available=true`. Détail et gates dans la
 [note WIP B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md).
+Le cas vide a également un risque de faux **GPU exécuté** : le code
+pose `available=true` et un `certificate_backend` GPU après préflight
+sans lancer de kernel ; le gate actuel incrémente `gpu_runs` d'après
+ce backend. Comme pour S2, publier séparément préflight et certificat
+S3 réellement achevé (arêtes/kernels non nuls), avec mutant causal.
 
 Pour le coût, le slab par warp vaut `52×capacity` octets, donc
 **3,25 Mio** au défaut 65 536 sites. La voie CPU reconstruit le cover
