@@ -67,13 +67,6 @@ def fnv_u32le(raw):
     return '%016x' % h
 
 
-def rewrite_guard(output, section, **fields):
-    path = output / 'guard_evidence.json'
-    value = json.loads(path.read_text())
-    value[section].update(fields)
-    path.write_text(json.dumps(value))
-
-
 def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt='', levers=None, schema=None):
     effective = min(k, n)
     complete = status == 'complete_relative'
@@ -260,6 +253,13 @@ def fake_schema():
     # Formes exigees par le worker ; l'autorite du schema reste la porte CTest
     # qui juge la VRAIE sonde (probe_worker_contract), pas ce faux producteur.
     return dict(ledger=sorted(worker.LEDGER_KEYS), levers=list(worker.LEVER_NAMES))
+
+
+def rewrite_guard(output, section, **fields):
+    path = output / 'guard_evidence.json'
+    value = json.loads(path.read_text())
+    value[section].update(fields)
+    path.write_text(json.dumps(value))
 
 
 def probe_value(*args, **kwargs):
