@@ -127,3 +127,43 @@ la décrire comme une « tour achevée **sur** l'appareil » surinterprète
 le backend. Distinguer appareil disponible, filtre GPU, arêtes S3
 décidées sur GPU et tour mixte achevée ; seul un reçu G4 avec
 différentiel device peut qualifier S3.
+
+## Relecture du correctif `6596b13a2`, publié sous `545c71799` (19 h 21 UTC)
+
+Ce commit, initialement **local détaché** puis rebasé sur `main`, ajoute
+`group.sync()` avant chaque accès
+utile à la frontière du niveau courant, au lieu de compter sur les
+votes. Sous le flot uniforme du warp, cela ordonne aussi le réemploi
+après le retour anticipé signalé plus haut ; la **cause statique WAW
+semble fermée** par lecture. L'occupation mesurée remplace le nombre
+fixe de warps par SM et le paramètre de capacité permet une sonde de
+reports. Aucun noyau CUDA de ce commit n'a encore été compilé ou
+comparé sur appareil dans un reçu : ne pas transformer cette correction
+source en qualification G4.
+
+Les gardes publiques ci-dessus **restent ouvertes dans ce commit** :
+`filter_runner.cu` affecte toujours la plage
+`[edge_mask,edge_mask+edge_count)` avant le retour `edge_count==0`,
+alors que le validateur permet `edge_mask=nullptr` pour le lot vide.
+Le validateur accepte aussi une feuille couvrant plusieurs rangs ;
+`build_cover` peut alors devoir la diviser sans enfant. Enfin le
+masque q4 à K2 n'est pas refusé à l'entrée. Les nouveaux cas `K2`,
+sans cœur et capacité 64 renforcent les tests hôtes, mais ne ferment
+pas ces trois chemins bruts. Le nouveau condensé catalogue **inclut**
+les IDs triés des coquilles et une mutation en teste la sensibilité ;
+le gate de flux compare toutefois seulement leurs tailles, et un
+condensé n'est pas une comparaison littérale indépendante de leur
+appartenance attendue. Le dernier journal
+CTest ciblé observé (`build/v9-exp`, 19 h 08–19 h 12, **CUDA OFF**)
+contient 23 tests réussis, dont la porte chaîne à 24 flux/84 mutants
+et `gpu_runs=0` ; il n'est ni une suite complète ni un test device.
+
+Avant R13 payant : traiter ces trois gardes, exercer une fixture CUDA
+du retour anticipé/frère et une mise en attente réelle à capacité 64,
+puis comparer par arête masque et travail à la référence. Le nouveau
+protocole refuse désormais `deferred=survivors` dans son préflight
+réduit et exige zéro report sur les trames normales plus petites que
+l'ardoise ; cela corrige l'ancien faux « GPU utile » dans **ces cas**.
+Ce préflight device est une **intention de protocole**, pas encore un
+résultat. Un compteur explicite des arêtes décidées sur GPU reste
+préférable dans chaque reçu de production.

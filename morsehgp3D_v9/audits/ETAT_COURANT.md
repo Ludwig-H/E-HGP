@@ -229,20 +229,23 @@ signale avant G4 le lot CUDA vide avec pointeur nul, une feuille
 multi-site acceptée par la garde brute malgré le contrat du cover,
 les slabs de 3,25 Mio par warp au défaut, et le cover CPU reconstruit
 sur les arêtes encore ouvertes sans compteur physique séparé. La
-lecture statique du noyau trouve en outre un **retour anticipé sans
-`__syncwarp` après écritures partielles du frontier** : une cellule
-sœur réutilise ce tableau ; `__ballot_sync` n'ordonne pas la mémoire
-entre lanes selon la documentation CUDA. Ce risque WAW n'est pas une
-divergence G4 observée, mais exige une barrière et une porte device
-ciblée avant qualification S3. La
-sonde, le worker G4, son selftest et le lecteur LiDAR passent en v18
-dans le commit détaché `50dabc0fa`, pas encore dans un reçu qualifié. Le worker
-local accepte cependant un cas où les trois survivants sont tous
-`deferred` vers le CPU et le marque `GPU_executed` : temps device et
-préflight ne prouvent pas une décision GPU utile. Exiger le nombre
-d'arêtes réellement décidées et un différentiel CUDA par arête. La
-porte de chaîne compare encore les tailles, pas les IDs des coquilles,
-et seulement une partie du travail logique. R12 publié n'est pas touché.
+lecture statique du premier noyau `50dabc0fa` trouvait un **retour
+anticipé sans `__syncwarp` après écritures partielles du frontier** :
+`__ballot_sync` n'ordonne pas la mémoire entre lanes. Le correctif
+local `6596b13a2`, publié sur `main` sous `545c71799`, ajoute une
+barrière avant le réemploi ; le
+risque WAW paraît fermé en source, mais **aucune porte device** ne l'a
+encore éprouvé. La sonde, le worker G4, son selftest et le lecteur LiDAR
+passent en v18 ; le correctif exige désormais dans le préflight réduit
+au moins une décision GPU et au moins un report, puis zéro report sur
+les trames normales plus petites que l'ardoise. C'est un protocole,
+pas un reçu G4. Les trois gardes bruts (lot vide nul, feuille multi-site,
+q4 à K2) restent ouverts. Le digest catalogue inclut les IDs des
+coquilles, sans être une comparaison littérale indépendante ; la porte
+de flux ne compare encore que leurs tailles. Le journal local CUDA OFF
+du correctif a 23 tests ciblés réussis, pas 154/154 ni un test device.
+Exiger un différentiel CUDA par arête et le nombre de décisions GPU
+réelles. R12 publié n'est pas touché.
 La [preuve B de redondance d'une seule cellule de
 centres](CERTIFICAT_B_REDONDANCE_CELLULE_UNIQUE_20260923.md) affine la
 piste de rejet **avant** le cœur : si la cellule couvre le disque

@@ -3879,3 +3879,28 @@ Code prêt pour la session G4 R13 ; GCP non utilisé. Détail dans
   sites, même objet exigé). `deferred == 0` exigé sur les trames plus
   petites que l'ardoise. Travail des certificats comparé dès le préflight.
   Le jumeau doit avoir les mêmes leviers de certificat.
+
+## 23 septembre 2026, 19 h 21 UTC — Relecture du correctif S3 local (auditeur B)
+
+Le développeur a figé `6596b13a2`, puis l'a publié sur `main` sous
+`545c71799`, après le préflight `50dabc0fa`. La barrière de warp avant réemploi des frontières semble
+fermer le risque WAW statique ; l'occupation CUDA dimensionne désormais
+les slabs. Le protocole R13 exige un mélange de reports et décisions
+dans la sonde à capacité 64, et zéro report pour les trames normales
+plus petites que l'ardoise. **Aucun reçu device de ce commit** n'existe
+encore ; le journal local CUDA OFF ne contient que **23 tests ciblés
+réussis** (porte de chaîne : 24 flux, 84 mutants, `gpu_runs=0`).
+
+Trois gardes bruts demeurent malgré le message « garde d'entrée
+testée » : lot vide avec `edge_mask=nullptr` puis `nullptr+0` avant
+retour ; feuille multi-site acceptée que le cover peut tenter de
+diviser sans enfant ; voie q4 acceptée à K2. Voir la
+[relecture B actualisée](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md).
+Ce ne sont pas des divergences démontrées du chemin chaîne LiDAR,
+qui produit des feuilles unitaires et masques disponibles, mais des
+contrats de l'API CUDA à fermer avant R13 qualifiant. Le digest
+catalogue inclut désormais les IDs de coquille, mais son égalité
+FNV64 ne vaut pas un oracle littéral indépendant. Question au
+développeur : peux-tu fermer ces trois gardes et faire un smoke
+device causal S3 (frère après arrêt anticipé, report 64 sites)
+avant la campagne G4 complète ?
