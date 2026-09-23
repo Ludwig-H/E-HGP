@@ -55,28 +55,25 @@ sans cache demeure utile : la population R11/000000/K5 implique déjà
 au moins **253,6 M visites de nœuds** (rectangles plus une racine par
 paire), donc **>2,53 Md/s** pour la seule porte S1, transferts inclus ;
 le nombre réel de visites de paires sans cache est inconnu. Le lanceur
-CUDA S1 et sa sonde sont publiés
-par `0d5ad2e89`, sans test positif sur appareil ni résultat G4 ; le
-protocole SPOT reste mutable et non commité. La garde hôte vérifie les
-IDs, plages et masques, mais l'[audit A du domaine u18](AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md)
-démontre un débordement signé accepté sur coordonnées hors domaine.
-La [relecture B du port](CONTRE_AUDIT_B_PORTE_FILTRE_GPU_20260923.md)
-note aussi que `FilterInput` brut ne vérifie pas la partition disjointe
-des enfants. Même avec des points **dans** u18 et des plages disjointes,
-une boîte racine incohérente peut rejeter à tort la voie q4 (fixture
-K3, masque 4→0 dans l'[audit A](AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md)) :
-la frontière brute doit recevoir un index certifié ou vérifier ses boîtes.
+CUDA S1 (`0d5ad2e89`), la sonde v2 (`1c9c1e5d7`) et la garde brute avec
+protocole SPOT (`7565451fc`) sont publiés. La nouvelle garde refuse le
+débordement hors u18 et la boîte racine forgée qui donnait un faux rejet
+q4 ; la [fixture et la correction](AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md)
+sont documentées. Le snapshot strict du commit contient bien bench v2,
+garde et scripts ; ses **10/10 selftests** passent normalement et sous
+`-O`, avec fausse sonde. Aucun test positif CUDA/G4 ni temps de tour GPU
+n'en découle. La [tentative G4 1](../receipts/g4_gpu_s1_attempt1_20260923/README.md)
+a échoué à la configuration avant compilation (`CUDA_STANDARD 20` inconnu de CMake
+3.22.1) ; `6e0e43a0d` passe l'unité CUDA à C++17 et rapporte un build
+local avec cet outillage. Aucun masque n'a été calculé sur G4 dans ce reçu.
+La garde paie une lecture des points de chaque nœud, hors
+événements CUDA ; une certification linéaire réutilisable de l'index est
+préférable avant le tuilage S2.
 Le scan et le probe gardent des buffers `O(R+P)`, tandis que le noyau
 de paires paie `O(P log R)` pour ses recherches d'offset ; ni mémoire
-massive ni vitesse GPU ne sont acquises. Le [préflight B du protocole
-G4](CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md) a
-8/8 selftests normaux et 8/8 sous `-O` **avec faux GPU**, pas de CUDA
-réel. Le [mélange bench/protocole](CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md)
-qui aurait fait échouer le mutant après démarrage G4 est maintenant
-**refusé par `validate_sources` dans le WIP** ; bench v2 et scripts
-doivent encore être publiés dans un snapshot identique avant SPOT.
-Le selftest WIP étendu passe 10/10 normal et 10/10 sous `-O`, toujours
-avec une fausse sonde.
+massive ni vitesse GPU ne sont acquises. Le
+[préflight B](CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md)
+avait trouvé un mélange bench/protocole ; le paquet publié le refuse.
 La [proposition S2](PROPOSITION_B_GPU_STREAMING_S2_20260923.md)
 sépare le tuilage borné sans nouveau rejet (S2a) du certificat
 bloc/ligne avant expansion (S2b), avec tests causaux et arrêt de la
@@ -228,21 +225,20 @@ pour ces triangles aigus u18. La source et la
 [recette v5](c_omission_20260923/run_judges_v5.sh) de `c6042af2b`
 ajoutent la comparaison indépendante des clés canoniques q2/q3, un
 mutant de clé seule, des sites isolés choisis depuis les coordonnées et
-une provenance bloquante. **Aucun reçu v5 publié à ce stade** : ces
-portes nouvelles restent à exécuter et à lire. Le juge échantillonne des
-ancres et fixe `run_tower=false` : même un code 0 contrôlerait le
-catalogue sur cet échantillon, pas la tour FULL ni la complétude globale.
-Le commit **`c6042af2b`** publie le code des juges **v5** : clé de boule
-reconstruite indépendamment et mutant de clé seule, provenance
-**partiellement** bloquante, sites longs choisis depuis les coordonnées. La
-[contrelecture B](CONTRE_AUDIT_B_JUGES_C_V4_20260923.md) constate
-qu'aucun **reçu v5** n'est encore publié et que le mutant de
-sur-élagage sur ces sites reste seulement observé, sans incidence
-longue minimale ni code 1 exigé. Ne pas transférer les anciens codes 0
-au nouveau SHA. Deux substitutions `git` peuvent encore échouer sans
-faire échouer le runner ; un échec de redirection peut aussi imiter le
-code 1 attendu d'un mutant, et `STATUS` n'est pas vérifié. Les limites
-d'échantillonnage et de tour subsistent.
+une provenance **partiellement** bloquante. La
+[contrelecture B](CONTRE_AUDIT_B_JUGES_C_V4_20260923.md) a trouvé deux
+substitutions `git` dont l'échec pouvait être masqué et un code 1 de
+mutant imitable par échec de redirection. La
+[recette v6](c_omission_20260923/run_judges_v6_gates.sh) publiée par
+`abf3c3827` contrôle maintenant ces écritures, exige des marqueurs
+causaux et tente un mutant `drop-long`. L'[audit A des portes v6](AUDIT_A_JUGE_Q3_V6_LONGUES_INCIDENCES_20260923.md)
+relève deux limites encore ouvertes : le plancher long peut être atteint hors du
+rang q3 critique `p=Kmax−2`, et une observation `obs` peut accepter un
+refus du juge de code 2. **Aucun reçu v6 n'est publié** ; ne pas
+transférer les anciens codes 0 aux nouveaux SHA. Le juge échantillonne
+des ancres et fixe `run_tower=false` : même un code 0 ne contrôlerait
+que le catalogue échantillonné, sans certifier la tour FULL ni la
+complétude globale.
 
 La porte de **clés jamais émises** publiée par `683fa46e` change utilement
 le sens du contrôle : elle recense des MEB de supports q2–q4 voisins
@@ -1130,10 +1126,9 @@ plusieurs séquences sans sol puis brutes, s8/10/12, K5 et K10, W1/W24/W48,
 profil float32 et grille fine **séparés**. Les sept morceaux spatiaux
 1 mm du [reçu v8 LiDAR](../../morsehgp3D_v8/receipts/lidar_ground_20260921/README.md)
 ont maintenant des chronos v12 locaux sur les trois scènes sans sol de
-la séquence 08 ; la première trame brute a aussi ses sept secteurs à K5.
-La décimation emboîtée 1/4–1/2–1 est mesurée sur les sept secteurs des
-trois scènes sans sol à K5/K10, sur les sept secteurs de la première trame
-brute à K5/K10, et sur cette trame entière brute aux deux K. Répéter sur
+la séquence 08. La décimation emboîtée 1/4–1/2–1 est mesurée sur les
+sept secteurs de ces trois scènes sans sol à K5/K10 et sur les sept
+secteurs physiques de la trame brute 08/000000 à K5/K10. Répéter sur
 d'autres graines et séquences.
 Ni les morceaux ni les décimations ne valident le contrat de trame entière.
 Publier travail amont,

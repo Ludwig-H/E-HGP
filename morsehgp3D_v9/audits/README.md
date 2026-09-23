@@ -84,6 +84,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`CONTRE_AUDIT_B_Q3_FEUILLE_WIP_20260923.md`](CONTRE_AUDIT_B_Q3_FEUILLE_WIP_20260923.md) | B | `bb3c696e` 00:42 | démontré localement | clos (code publié) | acceptée |
 | [`CONTRE_AUDIT_B_JUGE_Q3_C_V3_20260923.md`](CONTRE_AUDIT_B_JUGE_Q3_C_V3_20260923.md) | B | `5b448b2ca` 12:49 | deux portes du juge q3 v3 corrigées par v4 | historique | acceptée |
 | [`CONTRE_AUDIT_B_JUGES_C_V4_20260923.md`](CONTRE_AUDIT_B_JUGES_C_V4_20260923.md) | B | `931d37cd1` 13:07 | clés canoniques, ancres isolées et provenance ; source v5 publiée, reçu ouvert | vivant pour la campagne | sans réponse |
+| [`AUDIT_A_JUGE_Q3_V6_LONGUES_INCIDENCES_20260923.md`](AUDIT_A_JUGE_Q3_V6_LONGUES_INCIDENCES_20260923.md) | A | 23/13:48 | portée du plancher q3 long au rang critique et refus de code 2 en observation ; recette v6 sans reçu | vivant | sans réponse |
 
 ## q4
 
@@ -208,7 +209,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`OBSTACLES_GPU_SOUS_SECONDE_20260923.md`](OBSTACLES_GPU_SOUS_SECONDE_20260923.md) | B ? | `c717a1f2` 05:56 | mesure | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_WIP_V6_C6_TRI_20260923.md`](CONTRE_AUDIT_B_WIP_V6_C6_TRI_20260923.md) | B | `73d1d0a6` 05:31 | démontré localement | vivant (hors v9) | sans réponse (question canal l. 35) |
 | [`CONTRE_AUDIT_B_PORTE_FILTRE_GPU_20260923.md`](CONTRE_AUDIT_B_PORTE_FILTRE_GPU_20260923.md) | B | `7a7987ad3` 12:58 | budget R11 et préflight du port CUDA S1 ; première lecture historique | vivant | sans réponse |
-| [`AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md`](AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md) | A | 23/13:17 | débordement hors u18 et faux rejet sur boîte u18 incohérente ; corrections ciblées | vivant | sans réponse |
+| [`AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md`](AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md) | A | 23/13:17 | contre-exemples fermés par `7565451fc` ; certificat d'index linéaire réutilisable pour S2 | clos pour les défauts, vivant pour le coût | corrigée |
 | [`PROPOSITION_B_GPU_STREAMING_S2_20260923.md`](PROPOSITION_B_GPU_STREAMING_S2_20260923.md) | B | `8432e2353` 13:28 | tuilage borné S2a et certificat bloc/ligne S2b avec portes causales | vivant | sans réponse |
 
 ## Annexes de l'auditeur C

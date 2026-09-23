@@ -1,4 +1,11 @@
-# S1 GPU : certifier le domaine numérique et les boîtes du filtre
+# S1 GPU : domaine u18 et boîtes, correction et coût de certification
+
+**Statut au commit publié `7565451fc` : les deux contre-exemples ci-dessous
+sont refusés par la nouvelle garde hôte.** Le code et les fixtures du
+snapshot initial `0d5ad2e89` restent ici pour expliquer la frontière
+géométrique ; ils ne décrivent plus un défaut ouvert de `run_filters`.
+Le protocole G4 et la sonde v2 sont publiés, mais aucun résultat CUDA/G4
+positif ni chrono de tour GPU n'en découle.
 
 23 septembre 2026. Relecture du commit publié `0d5ad2e89`, sans exécution
 CUDA. Le lanceur S1 est une sonde du filtre témoin q3/q4, pas une chaîne HGP
@@ -65,3 +72,37 @@ certifiées, mais empêche de traiter `run_filters` comme une frontière
 numérique autonome. La recherche binaire par paire et la matérialisation
 O(P) sont déjà relevées dans la [contrelecture B](CONTRE_AUDIT_B_PORTE_FILTRE_GPU_20260923.md)
 et exigent une ablation séparée ; elles ne sont pas des erreurs du masque.
+
+## Relecture de la correction publiée
+
+`validate_filter_input` dans `filter_runner.hpp` exige désormais le domaine
+u18 des points et des boîtes, la couverture de tous les rangs par la racine,
+la partition exacte des plages des enfants et l'inclusion de chaque point
+de la plage dans la boîte du nœud. La porte hôte publiée refuse la boîte
+forgée en vérifiant que la primitive non gardée ferait bien `4→0`, refuse
+les coordonnées `−1`, `262144` et les extrêmes `int32`, et accepte les
+deux bornes u18. C'est une fermeture causale des deux cas de cet audit.
+La garde visite aussi les nœuds orphelins : leurs boîtes sont certifiées
+même si un rectangle brut les référence. Son temps n'est pas inclus dans
+les événements CUDA de `gpu.total_ms`.
+
+**Coût à éviter lors du passage en flux borné.** La garde parcourt
+actuellement tous les rangs de **chaque** nœud ; elle paie
+`Σ_N |range(N)| = O(n·profondeur)` sur un arbre équilibré. S1 l'appelle
+une fois par exécution, hors des répétitions chaudes. Une S2 qui appellerait
+`run_filters` pour chaque tuile repaierait ce coût à chaque lot.
+Une certification suffisante en `O(n + nombre_de_nœuds)` est possible :
+faire de la racine `[0,n)` un arbre atteignable sans nœud orphelin ni
+second parent, vérifier la partition des rangs, vérifier chaque point
+**une seule fois dans sa feuille**, puis vérifier que la boîte de chaque
+parent contient celles de ses deux enfants. Par induction, chaque boîte
+contient alors tous les points de sa plage. Cette règle admet le producteur
+normal, dont les boîtes sont les enveloppes exactes ; elle peut refuser
+une entrée brute pourtant sûre avec boîtes larges non emboîtées. Si cette
+généralité est requise, agréger plutôt les vraies enveloppes des feuilles
+de bas en haut avant de comparer chaque boîte, toujours en temps linéaire.
+Pour S2, porter cette preuve dans un objet d'index immuable **certifié une
+fois**, réutilisé par les lots, évite de refaire même la vérification
+linéaire et conserve le refus des entrées brutes malformées à leur création.
+Comparer le coût de cette certification au mur complet du probe et à
+`gpu.total_ms` séparément, sans l'imputer au noyau.
