@@ -134,6 +134,17 @@ ses émissions et masses de candidats restent identiques. Les trois
 compteurs du cache témoin varient légèrement entre répétitions, sans
 changer l'objet.
 
+La reprise du cover complet à partir des nœuds terminaux du cœur est
+exacte en principe, mais R6 borne son bénéfice en visites : sur
+08/000100 et 000200, à K5 **et** K10, les visites du cœur seul excèdent
+déjà les visites du cover OFF (de **0,2 à 12,0 %** selon le cas). Même
+un second parcours gratuit ne ferait pas descendre ce compteur sous OFF.
+Sur 08/000000, il faudrait économiser au moins **81,3 %** des visites
+du cover ON à K5 et **72,6 %** à K10 pour atteindre seulement le niveau
+OFF. Cette borne ne condamne pas la reprise : elle peut réduire CPU et
+mur en conservant la baisse des formes chargées, mais impose de mesurer
+son coût mémoire et de viser ensuite un certificat **avant** l'expansion.
+
 ## Verrou q3/q4 : réduire le travail avant l'expansion
 
 Le certificat de voies mortes a un vrai bénéfice aval, mais construit
