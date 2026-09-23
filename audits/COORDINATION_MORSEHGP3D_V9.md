@@ -3638,3 +3638,38 @@ quadratique caché : préparation `O(R+S)`, tentative sur segments lourds,
 repli exact partout ailleurs, et publier le coût des gardes/cellules
 avec les **formes effectivement évitées**. Preuve et réserves dans la
 [note de croissance B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_CROISSANCE_Q34_AVAL_S2_20260923.md).
+
+**Correction de portée sur `rdtsc` (B).** La ventilation publiée mesure
+des ticks TSC **écoulés**, y compris quand un worker est désordonnancé
+sur l'hôte chargé : 466,988 Gticks K5 / (8×24,076 s) = 2,425 GHz et
+1 280,942 Gticks K10 / (8×65,826 s) = 2,432 GHz. En face, la sonde
+rapporte seulement 78,332 / 281,209 CPU·s pour les workers q3/q4,
+front inclus, contre 192,607 / 526,611 fils·s d'écoulement. Les parts
+35/65 et 28/72 ne sont **pas des parts de cycles CPU** et ne bornent
+pas le gain d'un port. Le « 1,3 % au mieux » est donc encore moins une
+borne. Refaire la ventilation sur hôte maîtrisé avec temps CPU de fil
+ou compteurs matériels, puis ablation G4 ; détail dans la note B.
+
+### Préflight B S3 mutable — avant dépense G4
+
+Le diff S3 actuel contient deux portes de domaine concrètes : le lot
+CUDA vide autorise `edge_mask=nullptr` mais fait `nullptr+0` dans
+`out.masks.assign` avant de retourner ; la garde d'index accepte une
+feuille à plusieurs rangs que le constructeur de cover S3 peut
+omettre lorsqu'elle est ambiguë. Le bridge doit aussi refuser
+`error`/`faults`, même si `available=true`. Détail et gates dans la
+[note WIP B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md).
+
+Pour le coût, le slab par warp vaut `52×capacity` octets, donc
+**3,25 Mio** au défaut 65 536 sites. La voie CPU reconstruit le cover
+de chaque arête encore ouverte après preuve GPU (708 686 K5 et
+1 463 362 K10 dans la trace sans sol 08/000000) sans le recompter
+dans `work.cover.*` ; le temps phase3 le contient, mais le ledger est
+logique et le pic GPU séparé. Mesurer reports, reconstructions, RSS/HBM
+et vrais chronos G4, et ne pas prétendre que S3 seul ferme 1 s.
+
+Enfin, la sonde produit WIP annonce `mhgp9_tower_probe_v18`, tandis
+que `gcp-migration/tower_worker_v9.py` et le runner LiDAR exigent
+toujours **v17**. Toute nouvelle session G4 lancée avant mise à jour
+des lecteurs/contrats serait rejetée ou non qualifiante. R12 publié
+reste inchangé ; ce signal concerne seulement le diff mutable S3.

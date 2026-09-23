@@ -220,6 +220,14 @@ de sites et temps de deux runs : c'est une projection, pas une borne ni
 un gain G4. Même retirer idéalement **toute** la phase
 des arêtes survivantes des trois lignes K5 de R12 laisserait 1,177 à
 1,513 s de chaîne, à autres phases inchangées : S3 seul ne suffit pas.
+Un [préflight B du diff S3 encore mutable](CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md)
+signale avant G4 le lot CUDA vide avec pointeur nul, une feuille
+multi-site acceptée par la garde brute malgré le contrat du cover,
+les slabs de 3,25 Mio par warp au défaut, et le cover CPU reconstruit
+sur les arêtes encore ouvertes sans compteur physique séparé. La
+sonde du diff émet v18 alors que les lecteurs G4/LiDAR attendent v17 :
+aucune session S3 ne doit être présentée comme qualifiée avant raccord
+et nouveaux tests. R12 publié n'est pas touché.
 Les [demi-scènes et quarts aux trois densités](lidar_raw_physical_scaling_20260923/README.md)
 restent dans le reçu v12 ; la somme de leurs tours ne reconstruit pas le
 plein. Une scène/K5/CPU ne prouve ni sous-quadraticité, ni contrat G4.
