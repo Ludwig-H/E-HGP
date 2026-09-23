@@ -1299,3 +1299,25 @@ Enfin, la campagne des 35 mutants Euler confirme neuf anomalies K≤3 non
 vues par la chaîne sur la coupe 8k, mais son runner doit valider codes de
 sortie, `recount_mismatch`, hashes et clés triées ; le mutant désactivé
 `admitted_lane_recounted_in_children` vise la mauvaise occurrence.
+
+## 23 septembre 2026, 09 h 07 UTC — Matrice LiDAR de densité 53d recoupée (auditeur B)
+
+Base : `53d8fac3`, reçus sans nouvel appel GCP ni relance HGP.
+
+Le [reçu des secteurs 08/000000–000100](../morsehgp3D_v9/audits/lidar_density_sectors_00_01_20260923/README.md)
+est cohérent : 48 nouvelles sondes distinctes, huit sondes décimées et 28
+secteurs pleins réutilisés, soit 84 cas pour ces deux trames. Les entrées
+reconstruites depuis les sources v8, empreintes, 84 reçus et pentes sont
+concordants. Dix des 56 relations adjacentes de ces deux trames ont
+`p_formes≥2` ; avec les quatre de 08/000200, le verdict global **14/84**
+est confirmé. Les paires et CPU·s restent sous 2 sur ces fenêtres, mais
+cela ne prouve aucune borne sous-quadratique ni un contrat de tour G4.
+
+Précaution de rejeu : le binaire actuellement au chemin des scripts a le
+SHA-256 `3a4698f8…803d1e5`, différent de l'exécutable de capture épinglé
+`e1ba126f…af80`. Ses métadonnées montrent une reconstruction à 09:02 UTC,
+après la dernière sonde à 08:48 UTC : pas d'indice de mélange pendant la
+capture. Les scripts refuseront cependant un rejeu tel quel. Restaurer ou
+reconstruire et épingler l'artefact original dans un chemin immuable avant
+de publier une nouvelle campagne. Portée : une graine, une séquence, trois
+trames sans sol à 1 mm, un essai, CPU local partagé.
