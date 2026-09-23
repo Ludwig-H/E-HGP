@@ -68,3 +68,16 @@ sol 1 mm, poste réel mais distinct des milliards de tests de l'atlas q4.
 Comparer sur les mêmes rectangles WSPD et masques q3/q4 le coût total
 filtre→agrégats→tuiles→ranges→atlas/census→sorties, avec mémoire de pointe
 et sorties exactes, avant toute affirmation sous-quadratique ou G4.
+
+L'interface actuelle paie aussi une **seconde traversée** : après les
+440,194 M visites de `Q34EdgeCover::build`, la décomposition de ce cover
+par l'atlas q4 visite 315,737 M nœuds et copie 62,914 M IDs de nœuds sur
+la même ligne mesurée. Un lot `E×Z` qui accélère seulement le premier
+passage ne supprime pas ce travail ni les ranges par arête ; l'ablation
+doit compter les deux passages et leur raccord. Sur cette ligne, les
+171 444 arêtes q3-seules représentent au plus 8,4 % des 2 043 612
+covers : les élider en mode q3 `GlobalBoxes` est une simplification sûre
+à vérifier, mais ne peut fermer le verrou q4 partagé. L'atlas q4 rejette
+153,036 M graines q3 sur les arêtes communes ; le remplacer exige un
+certificat q3 de rechange, sans quoi le gain q4 peut devenir une dépense
+q3.

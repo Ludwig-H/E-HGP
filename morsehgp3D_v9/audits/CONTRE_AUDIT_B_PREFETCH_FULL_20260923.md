@@ -99,3 +99,16 @@ Compléter par oracles de petits nuages à égalités de niveau/coquilles
 injectées pendant extraction, fenêtre future et fermeture d'un lot :
 aucune publication partielle, tous les workers joints, travail payé
 conservé. Aucun G4 nouveau n'a été lancé pour cet audit.
+
+La borne de bénéfice la plus simple est déjà discriminante. Si `G_k` est
+la préparation statique/géométrique de K et `C_k` sa fermeture ordonnée,
+le lookahead de `G_{k+1}` pendant `C_k` masque au plus
+`min(G_{k+1},C_k)` de mur, **avant contention**. Il ne masque pas la
+validation initiale du catalogue, le tri des BallKeys/niveaux, la
+programmation globale ni q3/q4 en amont. Si `C_k` est court, la piste
+asynchrone a peu de plafond même avec une implémentation parfaite ;
+le reçu G4 ne donne ni `G_k` ni `C_k`. Chronométrer ces deux grandeurs
+avant le port, ainsi que la synthèse et le digest que `tower_ms` exclut
+mais que `chain_total` inclut. Tous les chiffres G4 ci-dessus proviennent
+du paquet **antérieur** au nouveau MEB : ne pas attribuer le gain statique
+ou ce plafond à l'implémentation MEB actuelle.

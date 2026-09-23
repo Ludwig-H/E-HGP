@@ -81,6 +81,17 @@ statique ; `resolver_cache_hits` passe de 12 284 408 à zéro. Il faut donc
 isoler travail algorithmique, cache et occupation par worker avant
 d'attribuer le facteur 2,22 aux seuls 48 fils.
 
+Le temps `tower` se termine immédiatement après `build_full_ball_tower`
+(`src/chain/tower_chain.cpp:432–433`) ; le parcours des nœuds pour les
+`OrderSummary` et le calcul du digest (`:441–453`) viennent **ensuite**.
+Sur 000000/K10, la différence `chain_total−Σ(phases publiées)` est de
+**1,042 s** en mode temporel et **1,045 s** en mode statique ; à K5/W48,
+elle est de **0,201 s**. Cette différence inclut la synthèse/digest et
+d'éventuels petits frais non ventilés : ce n'est pas un chrono isolé du
+digest. Le mur contractuel l'inclut déjà. Un poste non ventilé de l'ordre
+de la cible entière interdit de projeter le contrat depuis les seules
+phases instrumentées ; ajouter un chrono distinct de publication/synthèse.
+
 Le worker rapporte 486,6 s utiles pour les huit cas (474,5 s cumulés de
 chaîne). Les commandes hôte vont de la demande de démarrage à 23:26:36 UTC
 à l'arrêt vérifié à 23:38:25 UTC, soit ~11 min 49 s de fenêtre de contrôle ;

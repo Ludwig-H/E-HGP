@@ -113,6 +113,14 @@ appariée.
    sortie** de la sonde, complète et refusée, avant une autre session
    facturée. Le lecteur de reçu doit aussi refuser toute commande tuée
    dont le groupe de processus n'est pas fermé, même en campagne `partial`.
+   Le [contre-test de provenance](CONTRE_AUDIT_B_G4_R1_ET_SCHEMA_V2_20260922.md)
+   montre qu'un paquet muté peut annoncer un commit inexistant et être
+   accepté par le contrôleur, et qu'une provenance différente dans le
+   reçu invité passe encore la validation finale. Recertifier les blobs
+   Git et l'identité du reçu avant la prochaine dépense G4 ; R1 a été
+   vérifié indépendamment et n'en est pas invalidé. Le lecteur accepte
+   aussi des sous-temps incohérents ; ajouter un contrôle de durée externe
+   avant de juger un objectif de 1 s.
 2. **Portes causales et entrée** : rejouer les 28 portes de `e28296bb`
    indépendamment ; les portes MEB et FULL ciblées du nouveau noyau passent
    déjà en Release et sous ASan/UBSan, mais pas une campagne appariée LiDAR.
@@ -152,7 +160,8 @@ appariée.
    `cover_sites` est une **population logique** additionnée sur des nœuds
    certifiés, pas autant de lectures de sites dans le moteur actuel ; le
    premier cover, sa décomposition et les IDs copiés ont leurs propres
-   compteurs. Census global et test
+   compteurs : **440,194 M** visites pour le construire, puis **315,737 M**
+   pour le redécomposer dans l'atlas q4, sur la ligne 1 mm. Census global et test
    `centre∈conv(coquille)` restent obligatoires ; le catalogue ne remplace
    pas automatiquement les présentations positives. La ligne v8 1 mm
    compte **171 444 arêtes q3 seules et 16,12 M census** que la réutilisation
@@ -178,11 +187,21 @@ appariée.
    **exactement les mêmes** bornes ; l'[oracle
    entier](check_cover_batch_u18_20260922.py) passe 1 000 familles et
    deux cas discriminants. Le [contre-audit B](CONTRE_AUDIT_B_COVER_BATCH_20260923.md)
-   note que l'oracle ne teste pas encore la subdivision `E×Z` ni le coût
-   de matérialisation/réemploi des extrema E. C'est une piste secondaire pour les
+   avait relevé l'absence de test de subdivision `E×Z` : l'oracle couvre
+   maintenant exactement 1 000 petites familles survivantes. Il ne teste
+   toujours ni le raccord des ranges, ni le coût de matérialisation/réemploi
+   des extrema E. C'est une piste secondaire pour les
    440 millions de visites de cover, à
    mesurer après le filtre de paire, sans lui attribuer le coût dominant
-   de l'atlas.
+   de l'atlas. Un [certificat de domination par
+   blocs](DOMINATION_Q4_PARESSEUSE_PAR_BLOCS_20260923.md) peut écarter des
+   formes q4 avant l'atlas pour plusieurs arêtes via des gardes plus proches
+   sur toute une cellule de centres ; l'[oracle
+   entier](check_q4_block_dominance_20260923.py) passe 1 200 boîtes.
+   À K10, huit gardes préservent le flux q4 courant, dix sont nécessaires
+   à une garantie autonome pour tout `q_min≥2`. **Le seuil q4 ne doit pas
+   élaguer l'atlas partagé q3** : une fixture K5 perdrait alors le quatrième
+   intérieur qui rejette une boule q3. Ni gain LiDAR ni borne globale acquis.
 4. **Aval FULL, grandes coquilles et échelle** : les 12,0 M appels MEB
    de 000000/K10 font 1,065 milliard de tests de puissance ; un test
    exact de la paire la plus éloignée peut éliminer toutes les autres
@@ -201,6 +220,13 @@ appariée.
    [contrelecture B](CONTRE_AUDIT_B_PREFETCH_FULL_20260923.md) exige un
    contexte possédé par K, l'annulation/jointure des jobs et distingue le
    scénario naïf de mémoire `60R` du plancher `4R` des cibles seules.
+   Une [piste exacte pour les intrus](INTRUS_FULL_PREFIXE_EXACT_20260923.md)
+   réutilise, par BallKey, un préfixe complet d'intérieurs Morton ; son
+   [oracle combinatoire](check_full_intruder_prefix_20260923.py) passe
+   1 336 782 paires de requêtes. Les répétitions par clé et par worker
+   manquent encore au reçu G4 : mesurer avant de réserver un cache. Les
+   clés déjà cataloguées peuvent lire leur liste globale d'intérieurs
+   aux ordres bas ; cela ne retire pas les intrus sur clés absentes à K10.
    Instrumenter les tailles de supports et le temps avant de promettre un
    gain. La [note B](PLATEAUX_GRANDES_COQUILLES_B_20260922.md)
    propose un quotient local compact, [contrelu par B sur sept petites

@@ -178,3 +178,46 @@ cas censuré, et tester causalement les deux issues `true`/`false`.
 Conserver la censure et ses logs, mais classer la fermeture non prouvée
 comme échec de protocole, sans poursuivre des mesures supposées isolées.
 L'arrêt GCE ciblé doit rester inconditionnel et indépendant de ce verdict.
+
+## Provenance déclarée, mais pas recertifiée par le lecteur
+
+Contre-test indépendant sur `5ab4326c`, **hors GCP** : le constructeur
+officiel `tower_snapshot_v9.collect` lit bien les blobs Git du commit et
+vérifie leur identité avant de fabriquer son paquet (`:106–136`). En
+revanche, le worker ne contrôle que la forme hexadécimale de `commit` et
+`tree` dans `validate_provenance` (`tower_worker_v9.py:219–229`), puis les
+SHA des fichiers **contre le manifeste transporté** (`:239–247`) ; il ne
+relit aucun objet Git. Le contrôleur `require_committed_protocol`
+(`tower_session_v9.py:425–435`) exige seulement la chaîne
+`protocol_source="commit"`. L'auditeur a muté une source du paquet
+selftest, recalculé son manifeste cohérent, indiqué les identifiants
+inexistants `commit=000…` et `tree=111…` : `validate_snapshot` accepte
+encore les huit cas et `require_committed_protocol` accepte le paquet.
+La revendication « ce paquet provient de ce commit » n'est donc pas
+validée à la frontière d'une session recevant un paquet externe ou
+altéré. Cela **n'invalide pas R1** : ses liens aux blobs Git ont été
+rejoués indépendamment plus haut.
+
+La réception finale a une deuxième lacune de liaison :
+`validate_received(output, manifest, worker_pin, expected_cases)` ne
+reçoit pas la provenance attendue. Remplacer uniquement
+`vm/receipt.json.provenance.commit` par `000…`, en laissant le reçu hôte
+inchangé, laisse encore le verdict `completed` dans le contre-test.
+Avant une nouvelle session facturée, reconstruire les blobs attendus
+depuis le commit annoncé (ou les comparer par une autre vérification Git
+équivalente) **et** exiger l'égalité de la provenance du reçu invité avec
+la provenance de paquet déjà vérifiée. Ajouter ces deux mutants au
+selftest sans toucher à la logique de l'arrêt ciblé.
+
+## Cohérence des chronos : garde à préparer pour le contrat
+
+`validate_probe` exige seulement que les sous-temps soient des nombres
+non négatifs (`tower_worker_v9.py:306–308`) ; `validate_gnu_time`
+(`:330–335`) cherche la ligne de durée externe sans en comparer la valeur.
+Une fausse sortie `complete_relative` avec `chain_total=0 ms` et
+`tower=100 000 ms` passe encore le lecteur. Les huit temps historiques R1
+ne sont pas soupçonnés par ce test : les durées externes de leurs commandes
+dépassent `chain_total` de **0,059 à 0,248 s**. Mais une future
+qualification à <1 s doit confronter chronos internes, temps externe
+parsable et frontière mesurée, avec une tolérance publiée ; un digest ou
+une publication hors sous-chrono reste inclus dans le mur.
