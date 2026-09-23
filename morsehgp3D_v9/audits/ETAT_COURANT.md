@@ -346,6 +346,17 @@ la distribution des tailles de plages sur LiDAR ; comparer, si ce
 déséquilibre apparaît, un échantillon pondéré ou une partition en deux
 passes suivie d'un seul tri par plage. L'ordre exact ne dépend pas de
 la qualité des splitters, seul le coût en dépend.
+Le [shadow de distribution](AUDIT_DISTRIBUTION_SAMPLE_SORT_20260923.md)
+mesure sur 08/000000 sans sol K5/W8 **32/32 plages non vides** et un
+maximum de **1,52 à 1,59 fois la moyenne** malgré des slots déséquilibrés
+par un facteur 5,40 : le déséquilibre redouté n'est donc pas observé
+sur cette trame. Il révèle en revanche le coût du double tri : avec les
+**mêmes** séparateurs et une suite finale de 1 306 699 présentations
+égale élément par élément, l'histogramme/scatter des slots bruts suivi
+d'un seul tri par plage enlève **31 077 584 comparaisons complètes**, au
+prix de **6 533 495 comparaisons de clés** de classification et d'un
+tampon/scatter. Le choix d'un échantillon global pondéré reste non
+mesuré ; les comparateurs ne sont pas un temps G4 ou un gain FULL.
 Pour comparer un futur reçu à R6, ajouter `times_ms.digest` à
 `chain_total` sur le périmètre mural ancien. Le nouveau `chain_cpu_s`
 exclut également le condensé, mais aucun `digest_cpu_s` n'est publié :
