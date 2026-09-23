@@ -658,6 +658,12 @@ class Protocol(unittest.TestCase):
         need(refused(worker.validate_plan, bad, manifest), 'duplicate case')
         bad['cases'][-1]['repeat'] = 1
         worker.validate_plan(bad, manifest)   # distinct repetition accepted
+        # Ablation plans: ON first (preflight levers), then OFF, accepted;
+        # OFF first is refused since the preflight would skip the ON path.
+        off = dict(plan['cases'][0], levers=dict(plan['cases'][0]['levers'], q34_dead_core=False), repeat=7)
+        worker.validate_plan(dict(plan, cases=[plan['cases'][0], off]), manifest)
+        need(refused(worker.validate_plan, dict(plan, cases=[off, plan['cases'][0]]), manifest),
+             'OFF-first plan would preflight without every lever')
         for bad in (dict(plan, schema='mhgp8_q34_spatial_plan_v1'), dict(plan, cases=[]),
                     dict(plan, cases=[dict(plan['cases'][0], repeat=i) for i in range(65)]), dict(plan, extra=1)):
             need(refused(worker.validate_plan, bad, manifest), 'plan envelope')
@@ -904,6 +910,27 @@ class Protocol(unittest.TestCase):
             killed = worker.strict_json((host / 'received/output/probe_7.command.json').read_bytes())
             need(killed['residual_or_interrupted_group_killed'] is True and 3.0 <= killed['elapsed_seconds'] < 30,
                  'probe group killed at its cap')
+            # The killed case's summary is part of the receipt: removing or
+            # altering it is refused (same cap as the session, never reread GCP).
+            pkg = package()
+            expected = session.validate_snapshot(pkg['archive'], pkg['manifest'])[0]
+            pin = worker.sha(worker.__file__)
+            bound = (receipt['generation'], receipt['provenance'], receipt['verified_guard'])
+            output = host / 'received/output'
+            with patch.object(worker, 'CASE_CAP_SECONDS', 4):
+                need(session.validate_received(output, pkg['manifest'], pin, expected, *bound) == 'partial',
+                     'partial revalidation')
+                for label, mutate in (
+                        ('killed summary removed', lambda o: (o / 'probe_7.summary.json').unlink()),
+                        ('killed summary elapsed', lambda o: (o / 'probe_7.summary.json').write_text(
+                            (o / 'probe_7.summary.json').read_text().replace('"elapsed_seconds": ',
+                                                                             '"elapsed_seconds": 1')))):
+                    tampered = Path(temporary) / 'tampered'
+                    shutil.copytree(output, tampered)
+                    mutate(tampered)
+                    need(refused(session.validate_received, tampered, pkg['manifest'], pin, expected, *bound),
+                         'tamper ' + label)
+                    shutil.rmtree(tampered)
 
     def test_budget_exhaustion_skips_following_cases(self):
         with tempfile.TemporaryDirectory() as temporary:

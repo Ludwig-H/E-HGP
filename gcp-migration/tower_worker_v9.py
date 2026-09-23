@@ -246,6 +246,10 @@ def validate_plan(plan, manifest):
             case['levers'][name] for name in LEVER_NAMES)
         need(identity not in seen, 'duplicate case needs an explicit distinct repetition')
         seen.add(identity)
+    # The preflight runs the levers of the first case: pin them all ON, so
+    # that every lever a later case may enable has been exercised first.
+    need(all(plan['cases'][0]['levers'][name] for name in LEVER_NAMES),
+         'the first case sets the preflight levers and must pin every lever ON')
     return plan['cases']
 
 

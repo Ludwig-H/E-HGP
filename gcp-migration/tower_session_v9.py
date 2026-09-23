@@ -246,6 +246,12 @@ def validate_received(output, manifest, worker_pin, expected_cases, generation, 
                 need(row.get('elapsed_seconds', 0) >= payload.CASE_CAP_SECONDS - 1.0, 'case killed before its cap')
             else:
                 exhausted = True
+            need(set(entry) == {'index', 'outcome', 'exit_code', 'elapsed_seconds'} and
+                 entry.get('elapsed_seconds') == row.get('elapsed_seconds'), 'killed case record fields')
+            need((output / (name + '.summary.json')).is_file(), 'killed case summary file missing')
+            summary = payload.strict_json((output / (name + '.summary.json')).read_bytes())
+            need(summary == dict(case=case, input_file_sha256=manifest[case['file']], **entry),
+                 'killed case summary file')
             continue
         need(outcome in ('complete_relative', 'explicit_refusal'), 'probe failure in an accepted receipt')
         need(row.get('group_closed') is True and not row.get('residual_or_interrupted_group_killed') and
@@ -258,6 +264,7 @@ def validate_received(output, manifest, worker_pin, expected_cases, generation, 
              entry.get('elapsed_seconds') == row.get('elapsed_seconds') and
              entry.get('chain_total_ms') == probe['times_ms']['chain_total'] and entry.get('gnu_time_max_rss_kb') == rss,
              'case summary differs from raw probe output / GNU time / command record')
+        need((output / (name + '.summary.json')).is_file(), 'case summary file missing')
         summary = payload.strict_json((output / (name + '.summary.json')).read_bytes())
         need(summary == dict(case=case, input_file_sha256=manifest[case['file']], **entry), 'case summary file')
         values[index] = probe
