@@ -263,6 +263,15 @@ les deux bornes par voie. Ajouter ces mutants au validateur avant de
 promouvoir les compteurs du prochain reçu G4 ; le moteur conserve sa
 propre identité de masse, ce constat vise le lecteur externe.
 
+Dans le durcissement du lecteur de session **encore en chantier** après
+`a78664d4`, la marque de garde est liée à la génération par une borne
+inférieure, mais sans borne supérieure par l'arrêt invité. Sur la fixture
+du selftest, remplacer seulement `guard_evidence.mark.date_utc` par sa
+valeur **un jour plus tard** laisse `validate_received` rendre `completed`.
+La réception doit imposer `mark.date_utc < schedule.USEC / 10^6` (avec le
+type et le fuseau déjà contrôlés) et tuer cette mutation avant de figer le
+protocole ; le contrôle au départ rejette déjà une marque dans le futur.
+
 Prochaines mesures : mêmes octets et masque figé, trames **entières** de
 plusieurs séquences sans sol puis brutes, s8/10/12, K5 et K10, W1/W24/W48,
 profil float32 et grille fine **séparés**. Les sept morceaux spatiaux
