@@ -84,6 +84,13 @@ ses plages : « CPU −10 à −20 % » omet **−8,09 et −21,18 %** ; « mur 
 à **−72,85 %** (08/000100/K10). Sa formule « générateur identique » doit
 viser les **sorties**, non `q34_cover_builds`. Ce sont des corrections
 de lecture du reçu, pas une invalidation de ses fichiers bruts.
+L'[erratum publié ensuite](../receipts/g4_tower_r6_20260923/ERRATUM.md)
+corrige le compteur de covers mais reste trop large avec « émissions »,
+« catalogue » et « travail FULL » identiques : le reçu n'archive que leurs
+**nombres/statistiques**, les résumés d'ordres et le condensé, pas les
+listes complètes de supports/boules. Les compteurs du cache témoin
+varient aussi entre ON/OFF des mêmes paires, et pas seulement entre
+répétitions. L'erratum est explicitement hors du `SHA256SUMS` de R6.
 
 ## Verdict et prochain verrou
 

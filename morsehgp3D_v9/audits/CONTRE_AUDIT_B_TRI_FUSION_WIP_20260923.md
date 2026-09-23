@@ -17,6 +17,11 @@ donc historiques, **pas une mesure ni une description du tri publié**.
 Le raccourci FULL, la séparation du digest et le défaut de réception
 `read` décrit plus bas ont bien été publiés ; le nouveau gather exige
 sa propre contrelecture de mémoire, d'ordre et d'échecs.
+La [contrelecture du tri effectivement publié](CONTRE_AUDIT_B_SAMPLE_SORT_PUBLIE_20260923.md)
+fait cette séparation. `6200bb5a` a depuis corrigé dans le produit le
+refus de ressources, le temps de fusion payé sur échec, les résumés
+d'ordres après échec et la borne externe incluant `read` ; le mutant
+ci-dessous reste l'historique du lecteur `50690c12`, pas son état courant.
 
 ## Ordres et chronos
 
@@ -61,7 +66,10 @@ Le tri parallèle alloue `buffer(n)` en plus de `all`. Sur
 q2/q3/q4 donnent **5 512 675 objets** ; avec l'ABI observée de
 `Presentation` à 112 octets, ce tampon représente environ
 **617 419 600 octets, soit 589 Mio**. C'est une projection à partir du
-reçu R6, **pas un pic RSS mesuré** du nouveau binaire. Le raccourci FULL
+reçu R6, **pas un pic RSS mesuré** du nouveau binaire. R6 avait déjà
+une co-résidence `slots→all` de deux ensembles de présentations ;
+ce tampon WIP n'impliquait donc pas à lui seul **+589 Mio de pic** par
+rapport à R6. Le raccourci FULL
 évite plus tard un tri de `BallId`, dont le tampon est d'un autre ordre
 de grandeur et d'une autre phase ; ne pas soustraire ces mémoires sans
 mesure de résidence simultanée. La sortie K10 R6 occupe déjà plusieurs
