@@ -1,0 +1,7 @@
+base_publiee=545c71799 (ab6eb44d3 = 308110bc3 publie, selftest du worker retouche ; puis corrections de revue)
+patch=catalogue_digest_gate.patch applique tel quel (git apply)
+suite: 100% tests passed, 0 tests failed out of 152 ; ctest_rc=0 ; un test desactive en amont
+porte: catalogue_digest_gate n=1500 runs=34 balls=1122536 extra_shell=5 extended_q2=8 extended_q3=4 extended_q4=2 alterations=6 blind_q2=18/20 blind_q3=13/20 blind_refused=0 digest_ms_max=171.064
+porte: exit=0 expected=0
+mutants skip_last et shell_arity_only: code 1, cause=catalogue_digest.recompute cospheric K5
+epingles rejouees (08/000000, moteur et certificats S3 CPU, K5 et K10): identiques, voir probes_545c71799/

@@ -1,0 +1,13 @@
+base=308110bc37842079a3f9eeff765e480b707853a1 (paquet local du developpeur, non publie a la redaction)
+worktree_auditeur=f3dc025cd96d758f518b9af5bb484242bf2d37cd
+build=Release, CPU (sans CUDA), BOOST_ROOT=build/v7_boost_gate/extracted/usr
+compilateur=g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+cmake=cmake version 3.28.3
+machine=8 coeurs locaux (codespace), pas G4
+sonde=mhgp9_tower_probe <full.u32le> K 8 --catalogue-digest [--lever=q34_batch_filter=1] [--lever=q34_batch_certificates=1]
+porte=mhgp9_catalogue_digest_gate --n=1500 ; mutants --n=1500 ; argument --n=abc
+suite=ctest -L gate -j3 (308110bc3 + patch)
+4f0d1e470e03fd1fd73a4a669f03bc51ffb9362c3e0ed1fa64627b6d2f3e871f  catalogue_digest_gate.patch
+0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf  morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le
+ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f  morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/full.u32le
+a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af  morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/full.u32le

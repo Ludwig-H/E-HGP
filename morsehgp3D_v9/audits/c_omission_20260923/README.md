@@ -479,6 +479,51 @@ corrigées) :
 - Les sites sont tirés par une permutation à graine publiée, distincte de
   celle du juge q2.
 
+#### Portes v8 (`run_judges_v8_gates.sh`, après la contrelecture B du juge v7)
+
+La [contrelecture B](../CONTRE_AUDIT_B_JUGE_Q3_CRL_V7_20260923.md) a
+relevé deux défauts : les juges indexaient l'entrée par `point_id(u)`
+**avant** d'avoir vérifié `point_id(u) < n`, et ne prouvaient pas que les
+PointIds forment une permutation. La v8 (`22e23015`) ajoute une garde
+avant tout échantillonnage :
+
+- l'index ne contient aucune position dupliquée ;
+- chaque rang porte un PointId inférieur à $n$, vérifié avant toute
+  indexation de l'entrée ;
+- les PointIds sont distincts (bitset de $n$ bits) et couvrent
+  $0..n-1$ ;
+- chaque position est celle du point d'entrée de même PointId. Le
+  multiensemble (coordonnées, PointId) de l'index égale donc celui de
+  l'entrée.
+
+Un refus rend le code 2 avec un marqueur `INDEX_*`, sans ligne de
+synthèse. Trois mutants par juge sont posés : identifiant hors bornes,
+doublon, rang retiré. Le lanceur exige pour chacun le code 2 exact, le
+marqueur et l'absence de synthèse. Le retrait de chacun de ces trois
+contrôles est détecté par le `--selftest` (mutation du lanceur vérifiée).
+Sont archivés avec le reçu : stderr de chaque cas, journaux de
+compilation des juges et sortie du `--selftest`. Un autre auditeur a
+ajouté l'empreinte de `libmhgp9_gpu.a` à la provenance (`4a64df6a`),
+puis C a rétabli le bit exécutable (`f3dc025c`). Exécution sur
+`f3dc025c`, sources produit `f9e6a552`, `STATUS=0`, sorties dans
+`results/gates_v8/` :
+
+| cas | code | attendu | désaccords (dont CRL) | incidences CRL / triangles CRL distincts | clé CRL retirée déclarée manquante | marqueur |
+| --- | ---: | ---: | ---: | ---: | --- | --- |
+| `q2_lidar_s02_8000_k5_index_duplicate` | 2 | 2 | — | — | — | INDEX_ID_DUPLICATE |
+| `q2_lidar_s02_8000_k5_index_missing` | 2 | 2 | — | — | — | INDEX_ID_MISSING |
+| `q2_lidar_s02_8000_k5_index_out-of-range` | 2 | 2 | — | — | — | INDEX_ID_OUT_OF_RANGE |
+| `q3_fixture_eq_index_duplicate` | 2 | 2 | — | — | — | INDEX_ID_DUPLICATE |
+| `q3_fixture_eq_index_missing` | 2 | 2 | — | — | — | INDEX_ID_MISSING |
+| `q3_fixture_eq_index_out-of-range` | 2 | 2 | — | — | — | INDEX_ID_OUT_OF_RANGE |
+
+**Lecture.** Les six mutants d'index sont refusés avant l'échantillonnage,
+chacun avec son marqueur. Les 23 cas v7 rejoués donnent des sorties
+**identiques octet pour octet** à celles de `results/gates_v7/`, obtenues
+avec les bibliothèques de `7565451f`. La garde ne change donc aucun
+verdict sur les entrées vérifiées. Ce n'est ni une extension de la portée
+des juges, ni un jugement du chemin GPU.
+
 ## Différentiel moteur / lots (S2, référence CPU)
 
 Le chemin q3/q4 par lots du développeur (`a6d81f9c`, levier

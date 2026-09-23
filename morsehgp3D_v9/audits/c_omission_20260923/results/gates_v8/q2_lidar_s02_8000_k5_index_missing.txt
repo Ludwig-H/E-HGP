@@ -1,0 +1,2 @@
+s02_k5_s8_w8_r0_nested_8000.u32le INDEX_ID_MISSING covered=7999 n=8000
+exit=2 expected=2

@@ -1,0 +1,2 @@
+fixture_eq INDEX_ID_MISSING covered=33 n=34
+exit=2 expected=2

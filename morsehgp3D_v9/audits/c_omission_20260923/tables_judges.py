@@ -75,8 +75,9 @@ def gates(d):
     for p in sorted(d.glob('q*_*.txt')):
         f, st, _ = summary_line(p)
         text = p.read_text()
-        marker = 'PRUNE_DISAGREES_CRL' if 'PRUNE_DISAGREES_CRL' in text else 'PRUNE_DISAGREES' if 'PRUNE_DISAGREES' in text \
-            else 'MISSING' if 'MISSING a=' in text else '—'
+        index = re.search(r'\bINDEX_[A-Z_]+', text)  # garde d'index (v8)
+        marker = index.group(0) if index else 'PRUNE_DISAGREES_CRL' if 'PRUNE_DISAGREES_CRL' in text \
+            else 'PRUNE_DISAGREES' if 'PRUNE_DISAGREES' in text else 'MISSING' if 'MISSING a=' in text else '—'
         dis = f"{f.get('prune_disagreements', '—')} ({f.get('crl_disagreements', '—')})" if f else '—'
         crl = f"{f.get('crl', '—')} / {f.get('crl_unique', '—')}" if f else '—'
         tk = {'1': 'oui', '0': 'non'}.get(f.get('crl_target_killed', ''), '—') if f else '—'

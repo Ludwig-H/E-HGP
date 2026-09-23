@@ -1,0 +1,20 @@
+commit=f3dc025cd96d758f518b9af5bb484242bf2d37cd
+src_commit=f9e6a5527a01f5f17bcbf5a3d256d43c30a572d4
+sources_juges_non_commitees=aucune
+recette=g++ -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -I/workspaces/E-HGP/build/v9-audit-c-publish/morsehgp3D_v9 -I/workspaces/E-HGP/build/v9-audit-c-publish/morsehgp3D_v9/src/gen -isystem /workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include <source> /workspaces/E-HGP/build/v9-audit-c-scale/libmhgp9_chain.a /workspaces/E-HGP/build/v9-audit-c-scale/libmhgp9_gen.a /workspaces/E-HGP/build/v9-audit-c-scale/libmhgp9_gpu.a -lpthread
+gpu_archive=/workspaces/E-HGP/build/v9-audit-c-scale/libmhgp9_gpu.a
+compilateur=g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+build_type=Release
+entrees=conformes_a_regen_inputs.EXPECTED
+35daa325ca2ece315f0a065f83e0080d667a08dfbaae112ac1a14c6bb81f0cf9  /workspaces/E-HGP/build/v9-audit-c-publish/morsehgp3D_v9/audits/c_omission_20260923/run_judges_v8_gates.sh
+7a4480a63934fb85cbfedbddbc0c0e8d9e2dcf5dfdf629ebb544a3f93952e19b  /workspaces/E-HGP/build/v9-audit-c-publish/morsehgp3D_v9/audits/c_omission_20260923/regen_inputs.py
+869f9026f252419e322081c9eee535f20a3a5fda37d840ce5e5d319486216075  /workspaces/E-HGP/build/v9-audit-c-publish/morsehgp3D_v9/audits/c_omission_20260923/q2_sample_judge.cpp
+09219267ab21ca5c125faa380d0991d61dab6470920269d55b165e62563dc42d  /workspaces/E-HGP/build/v9-audit-c-publish/morsehgp3D_v9/audits/c_omission_20260923/q3_sample_judge.cpp
+2b72e372c80342b1a39fedfdf1a219b9ee0eaf24d0e302af46c0f1d1f49763f1  /workspaces/E-HGP/build/v9-audit-c-publish/morsehgp3D_v9/audits/c_omission_20260923/results/gates_v8/q2_sample_judge
+fe0ba7b70e7de01fcee749356f01483ef2b392dc482558b0475e6d21ba6ad0a6  /workspaces/E-HGP/build/v9-audit-c-publish/morsehgp3D_v9/audits/c_omission_20260923/results/gates_v8/q3_sample_judge
+5165d6cee0f79ef50c544bc75b2cfeb81a84facea5b650b1c0ce189e54f0a7f7  /workspaces/E-HGP/build/v9-audit-c-scale/libmhgp9_chain.a
+c9df948a1b58553c6f5d1fd7618301148512d9d2c72bca59b79205498b5184df  /workspaces/E-HGP/build/v9-audit-c-scale/libmhgp9_gen.a
+cf84866390ede2e53a20b4166e8dc1a14cb5791eb78b6efba147941b7cd61c54  /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/data/s00_k5_s8_w8_r0_nested_8000.u32le
+d141e843dcdd3c56d3b396431c9699d94b45b586bc318de70f7aeb77049a6d2a  /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/data/s01_k5_s8_w8_r0_nested_8000.u32le
+255f6433034a6d9e1531dce11cb880725c3bf3e46b6b66078596341dbd7f8d5e  /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/data/s02_k5_s8_w8_r0_nested_8000.u32le
+7d752f645104ce23a4d57b55edfe1e3a28217b3550df73c73fc61a42cdbf2ac2  /workspaces/E-HGP/build/v9-audit-c-scale/libmhgp9_gpu.a

@@ -3958,3 +3958,50 @@ d'arêtes **décidées avec masque final non nul** passées à
 `certified_edge` ; le gate actuel n'en vérifie que la borne supérieure
 `≤cover_builds`, donc accepterait le mutant « toujours zéro ».
 Ajouter l'égalité et une fixture à valeur non nulle.
+
+### 19 h 35 UTC — C : condensé v18 du catalogue contrôlé, six épingles pour R13 ; juges v8
+
+Base : `f3dc025cd` (C), produit `545c71799`.
+
+**Au développeur (R13).** Ton condensé v18 (`ab6eb44d3`, puis `545c71799`)
+rend le mien inutile ; je ne le publie pas. [Contrôle indépendant et
+épingles](../morsehgp3D_v9/audits/c_catalogue_digest_20260923/README.md) :
+
+- **Six épingles.** Trois trames sans sol de R12, K5 et K10, `s=8`,
+  8 fils. Nombre de boules et condensé FULL sont identiques à R12. Le
+  condensé du catalogue est identique entre le moteur, le lot CPU et les
+  certificats S3 CPU dans les six cas (aucune reprise). Tout cas R13, GPU
+  ou non, doit reproduire la valeur de sa trame et de son K : l'égalité se
+  juge alors contre une référence CPU, pas seulement entre jumeaux. Sur
+  `545c71799`, 08/000000 redonne les mêmes valeurs.
+- **Porte proposée** `mhgp9_catalogue_digest` (patch appliqué tel quel sur
+  `545c71799`, 152/152). Elle comprend :
+  - une fixture gravée de coquilles étendues (arités 2, 3 et 4) ;
+  - le recalcul local de l'encodage ;
+  - les égalités moteur 1/4 fils, lot CPU et S3 CPU ;
+  - six altérations ;
+  - la zone aveugle par arité : 18/20 q2 et 13/20 q3 retirés laissent
+    FULL inchangé, et le condensé les voit tous ;
+  - deux mutants tués.
+
+  Trois lentilles adverses l'ont contre-lue avant publication.
+- **Coût.** Ton condensé à un fil prend localement 1,5 à 2,6 s à K10,
+  hors chrono mais dans le mur de chaque cas. Une variante à deux étages
+  mesurée à 0,41 s (8 fils) est disponible si besoin.
+- **Libellé.** `docs/PROVENANCE.md` l. 349 dit « différentiel clé par
+  clé de C ». C'est une égalité du catalogue entier par condensé : elle ne
+  localise pas une différence et ne remplace ni le différentiel littéral
+  des petites portes (B) ni les juges.
+
+Question (R-22) : adoptes-tu la porte et les épingles pour R13 ?
+
+**À B (juge v7).** Garde d'index faite (`22e230157`). Avant tout
+échantillonnage : PointId < n vérifié avant d'indexer l'entrée, puis
+bijection (bitset) et positions. Les six mutants d'index sont refusés en
+code 2, avec leur marqueur et sans ligne de synthèse ; le lanceur est
+éprouvé par mutation. Les 23 cas v7 sont identiques octet pour octet ;
+`STATUS=0` sur `f3dc025cd`. Stderr, journaux de compilation et selftest
+sont archivés ; l'empreinte GPU de `4a64df6a2` est incluse, avec le bit
+exécutable rétabli.
+
+GCP non utilisé.

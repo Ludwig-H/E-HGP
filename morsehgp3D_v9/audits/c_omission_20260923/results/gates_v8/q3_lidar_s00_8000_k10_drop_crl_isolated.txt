@@ -1,0 +1,17 @@
+s00_k5_s8_w8_r0_nested_8000.u32le PRUNE_DISAGREES a=1108 pruned=198 full=248
+s00_k5_s8_w8_r0_nested_8000.u32le PRUNE_DISAGREES_CRL a=1108 pruned=0 full=50 lost=50
+s00_k5_s8_w8_r0_nested_8000.u32le LONG_SITE a=1108 incidences=248
+s00_k5_s8_w8_r0_nested_8000.u32le PRUNE_DISAGREES a=5516 pruned=262 full=276
+s00_k5_s8_w8_r0_nested_8000.u32le PRUNE_DISAGREES_CRL a=5516 pruned=0 full=14 lost=14
+s00_k5_s8_w8_r0_nested_8000.u32le LONG_SITE a=5516 incidences=60
+s00_k5_s8_w8_r0_nested_8000.u32le PRUNE_DISAGREES a=6391 pruned=132 full=158
+s00_k5_s8_w8_r0_nested_8000.u32le PRUNE_DISAGREES_CRL a=6391 pruned=0 full=26 lost=26
+s00_k5_s8_w8_r0_nested_8000.u32le LONG_SITE a=6391 incidences=122
+s00_k5_s8_w8_r0_nested_8000.u32le PRUNE_DISAGREES a=5523 pruned=260 full=261
+s00_k5_s8_w8_r0_nested_8000.u32le PRUNE_DISAGREES_CRL a=5523 pruned=0 full=1 lost=1
+s00_k5_s8_w8_r0_nested_8000.u32le LONG_SITE a=5523 incidences=5
+s00_k5_s8_w8_r0_nested_8000.u32le PRUNE_DISAGREES a=1466 pruned=158 full=159
+s00_k5_s8_w8_r0_nested_8000.u32le PRUNE_DISAGREES_CRL a=1466 pruned=0 full=1 lost=1
+s00_k5_s8_w8_r0_nested_8000.u32le LONG_SITE a=1466 incidences=1
+s00_k5_s8_w8_r0_nested_8000.u32le n=8000 kmax=10 balls=1567942 input_fnv=5b72c71f0728bd0c seed=9e3779b97f4a7c15 mode=compare+drop-crl sampled_sites=8 partners=63992 kept=5902 triangles=255904008 acute=66972629 incidences=2719 found=2719 missing=0 cross_fail=0 extra=0 unique_keys=2627 q2_keys=0 top_keys=525 top_population=152067 extended=0 shell_over_12=0 mutant_killed=1 len_lt500=1 len_500_1600=2282 len_ge1600=436 top_lt500=0 top_500_1600=443 top_ge1600=92 prune_disagreements=5 crl=92 crl_unique=92 crl_disagreements=5 crl_lost=92 crl_target_killed=1 p0=60 p1=122 p2=181 p3=248 p4=300 p5=360 p6=434 p7=479 p8=535
+exit=1 expected=1

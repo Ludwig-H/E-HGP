@@ -1,0 +1,152 @@
+{
+ "schema": "c_catalogue_digest_pins_v1",
+ "encoding_commit": "308110bc3",
+ "probe_schema": "mhgp9_tower_probe_v18",
+ "note": "FULL digest and ball count equal to receipt R12 (g4_tower_r12_20260923) in all six cases; catalogue digest equal across the three CPU arms.",
+ "pins": [
+  {
+   "frame": "08/000000",
+   "file": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le",
+   "sites": 39885,
+   "input_hash": "5c785760053d17ce",
+   "K": 5,
+   "s": 8,
+   "workers": 8,
+   "balls": 1306696,
+   "tower_digest": "67450c64611075b1",
+   "catalogue_digest": "5ad1fe09354411ba",
+   "arms_equal": [
+    "engine",
+    "q34_batch_filter",
+    "q34_batch_filter+q34_batch_certificates"
+   ],
+   "catalogue_digest_ms": {
+    "engine": 428.28,
+    "batch": 394.204,
+    "s3cpu": 396.883
+   },
+   "s3_cpu_certificate_ms": 5337.194,
+   "s3_cpu_deferred": 0
+  },
+  {
+   "frame": "08/000000",
+   "file": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le",
+   "sites": 39885,
+   "input_hash": "5c785760053d17ce",
+   "K": 10,
+   "s": 8,
+   "workers": 8,
+   "balls": 5512670,
+   "tower_digest": "ac108f7f71096c3f",
+   "catalogue_digest": "a6e959d227f3dafa",
+   "arms_equal": [
+    "engine",
+    "q34_batch_filter",
+    "q34_batch_filter+q34_batch_certificates"
+   ],
+   "catalogue_digest_ms": {
+    "engine": 2334.243,
+    "batch": 2361.963,
+    "s3cpu": 2365.108
+   },
+   "s3_cpu_certificate_ms": 11875.845,
+   "s3_cpu_deferred": 0
+  },
+  {
+   "frame": "08/000100",
+   "file": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/full.u32le",
+   "sites": 35551,
+   "input_hash": "4210173194931f58",
+   "K": 5,
+   "s": 8,
+   "workers": 8,
+   "balls": 1095926,
+   "tower_digest": "dbf799c8ed83f53f",
+   "catalogue_digest": "a4a5149c15b4122e",
+   "arms_equal": [
+    "engine",
+    "q34_batch_filter",
+    "q34_batch_filter+q34_batch_certificates"
+   ],
+   "catalogue_digest_ms": {
+    "engine": 408.264,
+    "batch": 392.386,
+    "s3cpu": 434.976
+   },
+   "s3_cpu_certificate_ms": 3800.276,
+   "s3_cpu_deferred": 0
+  },
+  {
+   "frame": "08/000100",
+   "file": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/full.u32le",
+   "sites": 35551,
+   "input_hash": "4210173194931f58",
+   "K": 10,
+   "s": 8,
+   "workers": 8,
+   "balls": 4383302,
+   "tower_digest": "9ddbf7430c9086cc",
+   "catalogue_digest": "c5cddc5b0baefcf1",
+   "arms_equal": [
+    "engine",
+    "q34_batch_filter",
+    "q34_batch_filter+q34_batch_certificates"
+   ],
+   "catalogue_digest_ms": {
+    "engine": 1802.192,
+    "batch": 1730.419,
+    "s3cpu": 1467.527
+   },
+   "s3_cpu_certificate_ms": 7554.124,
+   "s3_cpu_deferred": 0
+  },
+  {
+   "frame": "08/000200",
+   "file": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/full.u32le",
+   "sites": 45845,
+   "input_hash": "1c41bd0d1d689300",
+   "K": 5,
+   "s": 8,
+   "workers": 8,
+   "balls": 1407885,
+   "tower_digest": "8240af3d4dce3d45",
+   "catalogue_digest": "143a367b4f27ef02",
+   "arms_equal": [
+    "engine",
+    "q34_batch_filter",
+    "q34_batch_filter+q34_batch_certificates"
+   ],
+   "catalogue_digest_ms": {
+    "engine": 422.217,
+    "batch": 443.489,
+    "s3cpu": 434.641
+   },
+   "s3_cpu_certificate_ms": 4249.124,
+   "s3_cpu_deferred": 0
+  },
+  {
+   "frame": "08/000200",
+   "file": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/full.u32le",
+   "sites": 45845,
+   "input_hash": "1c41bd0d1d689300",
+   "K": 10,
+   "s": 8,
+   "workers": 8,
+   "balls": 5483320,
+   "tower_digest": "ba973af0c8da95bd",
+   "catalogue_digest": "5c8cc01b1e45b461",
+   "arms_equal": [
+    "engine",
+    "q34_batch_filter",
+    "q34_batch_filter+q34_batch_certificates"
+   ],
+   "catalogue_digest_ms": {
+    "engine": 1843.157,
+    "batch": 2636.17,
+    "s3cpu": 1894.519
+   },
+   "s3_cpu_certificate_ms": 12894.647,
+   "s3_cpu_deferred": 0
+  }
+ ]
+}

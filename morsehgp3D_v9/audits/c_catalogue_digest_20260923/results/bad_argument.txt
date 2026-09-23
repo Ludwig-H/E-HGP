@@ -1,0 +1,2 @@
+argument refusal: --n must be in 200..100000
+exit=2 expected=2

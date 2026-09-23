@@ -1,0 +1,2 @@
+fixture_eq INDEX_ID_OUT_OF_RANGE u=1 id=34 n=34
+exit=2 expected=2

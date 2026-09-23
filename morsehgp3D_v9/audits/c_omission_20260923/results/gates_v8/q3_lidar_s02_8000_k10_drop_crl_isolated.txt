@@ -1,0 +1,11 @@
+s02_k5_s8_w8_r0_nested_8000.u32le PRUNE_DISAGREES a=526 pruned=121 full=129
+s02_k5_s8_w8_r0_nested_8000.u32le PRUNE_DISAGREES_CRL a=526 pruned=0 full=8 lost=8
+s02_k5_s8_w8_r0_nested_8000.u32le LONG_SITE a=526 incidences=40
+s02_k5_s8_w8_r0_nested_8000.u32le PRUNE_DISAGREES a=3005 pruned=113 full=118
+s02_k5_s8_w8_r0_nested_8000.u32le PRUNE_DISAGREES_CRL a=3005 pruned=0 full=5 lost=5
+s02_k5_s8_w8_r0_nested_8000.u32le LONG_SITE a=3005 incidences=19
+s02_k5_s8_w8_r0_nested_8000.u32le PRUNE_DISAGREES a=3006 pruned=172 full=177
+s02_k5_s8_w8_r0_nested_8000.u32le PRUNE_DISAGREES_CRL a=3006 pruned=0 full=5 lost=5
+s02_k5_s8_w8_r0_nested_8000.u32le LONG_SITE a=3006 incidences=21
+s02_k5_s8_w8_r0_nested_8000.u32le n=8000 kmax=10 balls=1083173 input_fnv=512525d7b53b577d seed=9e3779b97f4a7c15 mode=compare+drop-crl sampled_sites=8 partners=63992 kept=6081 triangles=255904008 acute=75878756 incidences=1140 found=1140 missing=0 cross_fail=0 extra=0 unique_keys=1123 q2_keys=0 top_keys=236 top_population=104131 extended=0 shell_over_12=0 mutant_killed=1 len_lt500=2 len_500_1600=1058 len_ge1600=80 top_lt500=0 top_500_1600=222 top_ge1600=18 prune_disagreements=3 crl=18 crl_unique=17 crl_disagreements=3 crl_lost=18 crl_target_killed=1 p0=19 p1=36 p2=60 p3=89 p4=137 p5=159 p6=184 p7=216 p8=240
+exit=1 expected=1

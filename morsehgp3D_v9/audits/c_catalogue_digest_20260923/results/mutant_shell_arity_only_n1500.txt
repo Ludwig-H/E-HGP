@@ -1,0 +1,2 @@
+cause=catalogue_digest.recompute cospheric K5
+exit=1 expected=1
