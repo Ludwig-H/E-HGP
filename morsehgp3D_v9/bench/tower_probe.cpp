@@ -150,7 +150,8 @@ int main(int argc, char** argv) {
               grid.c_str(), input.points.size(), input.hash);
   std::printf("\"options\":{\"K\":%u,\"K_effective\":%u,\"s\":%u,\"workers\":%zu,\"tower_static_threads\":%d,\"run_tower\":%s,"
               "\"atlas_saturate_deep\":%s},",
-              options.kmax, r.kmax_effective, options.separation_s, options.workers, options.tower_static_threads,
+              options.kmax, r.kmax_effective, options.separation_s, options.workers,
+              options.tower_static_threads >= 0 ? options.tower_static_threads : r.tower_static_threads,
               options.run_tower ? "true" : "false", options.atlas_saturate_deep ? "true" : "false");
   std::printf("\"times_ms\":{\"read\":%.3f,\"prepare\":%.3f,\"gen_index\":%.3f,\"q2\":%.3f,\"q34\":%.3f,\"merge\":%.3f,"
               "\"tower_index\":%.3f,\"census\":%.3f,\"tower\":%.3f,\"chain_total\":%.3f},\"chain_cpu_s\":%.3f,",

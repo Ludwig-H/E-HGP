@@ -430,7 +430,10 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     if (options.keep_catalogue) result.catalogue_balls = balls;
     if (options.run_tower) {
       t = Clock::now();
-      auto tw = tower::build_full_ball_tower(ix, balls, kmax, options.tower_static_threads);
+      const int static_threads = options.tower_static_threads >= 0 ? options.tower_static_threads
+                                 : (W > 1 ? static_cast<int>(W) : 0);
+      result.tower_static_threads = static_threads;
+      auto tw = tower::build_full_ball_tower(ix, balls, kmax, static_threads);
       result.times.tower_ms = ms_since(t);
       result.tower_stats = tw.stats;
       if (tw.status != tower::FullBallStatus::kCompleteRelative) {

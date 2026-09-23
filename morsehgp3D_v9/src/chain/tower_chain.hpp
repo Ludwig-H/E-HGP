@@ -42,7 +42,10 @@ struct ChainOptions {
   unsigned kmax = 5;
   unsigned separation_s = 8;   // jamais moins de 8 (consigne utilisateur)
   std::size_t workers = 1;     // generateur et census du catalogue
-  int tower_static_threads = 0;  // 0 = resolveur temporel sequentiel (voie par defaut v7)
+  // Resolution geometrique de la tour : 0 = voie temporelle sequentielle de la
+  // v7 ; T > 0 = voie statique sur T fils (meme objet, condenses identiques) ;
+  // -1 (defaut) = autant de fils que `workers` s'il y en a plus d'un, sinon 0.
+  int tower_static_threads = -1;
   bool run_tower = true;       // false : s'arreter au catalogue (mesure de l'amont)
   bool keep_catalogue = false; // publier le catalogue recoupe (portes, juges)
   // Atlas q4 saturant (option v8 de la reprise u18, desactivee par defaut) :
@@ -86,6 +89,7 @@ struct ChainResult {
   ChainStatus status = ChainStatus::kInvalidInput;
   std::string reason = "chain_uninitialized";
   unsigned kmax_effective = 0;
+  int tower_static_threads = 0;  // voie de resolution effective de la tour
   std::uint64_t sites = 0;
   ChainTimes times;
   CatalogueStats catalogue;
