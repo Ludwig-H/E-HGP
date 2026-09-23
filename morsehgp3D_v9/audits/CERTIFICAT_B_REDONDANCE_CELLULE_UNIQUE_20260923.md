@@ -78,8 +78,8 @@ survivants S2, son nombre de fermetures utiles doit être nul sous les
 hypothèses ci-dessus. Le shadow économique doit distinguer :
 
 1. la boîte globale **réelle** du nuage et la fraction d'arêtes/segments
-   dont le disque nominal touche cette boîte ; une cellule unique ne
-   peut aider que là ou avec une restriction plus forte ;
+   dont le disque nominal déborde réellement de cette boîte ; une cellule
+   unique ne peut aider que là ou avec une restriction plus forte ;
 2. plusieurs sous-cellules couvrant les centres, avec jeux de gardes
    distincts et seuils `K−1`/`K−2` appliqués **dans chaque** cellule ;
 3. le coût de préparation/recherche des gardes et le nombre de formes
@@ -103,8 +103,9 @@ Pour une voie et un segment `E`, **une seule** arête survivante dont le
 disque entier est dans la boîte exclut une fermeture de tout `E` par
 un jeu unique de gardes sur sa cellule non subdivisée. Publier la
 fraction de segments, arêtes et formes de référence pour lesquels
-**tous** les disques pertinents touchent une frontière ; c'est un
-plafond de potentiel de la cellule unique, pas une prédiction de gain.
+**tous** les disques pertinents débordent strictement de la boîte ;
+c'est un plafond de potentiel de la cellule unique, pas une prédiction
+de gain.
 
 Pour le vrai shadow, les [masses des rectangles bruts
 08/000000](q34_raw_rectangle_mass_20260923/README.md) donnent un
@@ -121,5 +122,5 @@ déjà 10,76/31,58 M : ne pas faire de ces nombres un gain annoncé.
 Arrêter cette piste expérimentale si, sur mêmes trames brutes et sans
 sol en 8k/16k/32k puis entières, les arêtes complètement fermées
 n'épargnent pas assez de formes et de temps de chaîne pour rembourser
-la recherche, le transport et les replis. Le moteur exact continue
-toujours sur les cas non certifiés.
+la recherche, le transport et les replis, avec `s=8,10,12` comparés.
+Le moteur exact continue toujours sur les cas non certifiés.
