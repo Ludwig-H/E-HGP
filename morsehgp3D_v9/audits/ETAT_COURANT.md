@@ -1,6 +1,6 @@
 # État courant des audits v9
 
-23 septembre 2026. Produit publié courant : **`458fb0ed`**. Le
+23 septembre 2026. Produit publié courant : **`78e94b04`**. Le
 [reçu G4 R6](../receipts/g4_tower_r6_20260923/README.md) exécute le
 snapshot **`78ce9fd4`** ; ses temps ne qualifient pas encore le
 sample-sort, le raccourci FULL ni la nouvelle frontière temporelle
@@ -16,10 +16,15 @@ GCP ciblée à ce moment : l'instance de campagne
 `ehgp-v7-4fa0e0789a7d5bb06b787d35` est déjà `TERMINATED` (dernier
 arrêt 04 h 50 min 54 s UTC) et aucune des autres instances SPOT du projet
 n'est en cours ; **aucun stop supplémentaire n'a été lancé**. Le commit
-`458fb0ed` aligne maintenant les littéraux sonde/worker/selftest en v10 et
-MEB v3, mais n'exporte pas encore les quatre compteurs de proposition dans
-le JSON jugé et n'a aucun reçu G4. Un nouveau plan épinglé et ses portes
-restent nécessaires avant une campagne. Le WIP v6 C6/tri observé en parallèle
+`458fb0ed` aligne les littéraux sonde/worker/selftest en v10 et MEB v3 ;
+`78e94b04` publie le levier ON/OFF et ses quatre compteurs dans le JSON
+jugé, sans reçu G4. Ce dernier commit garde pourtant les étiquettes
+`mhgp9_tower_probe_v10` et `mhgp9_tower_plan_v5` alors que les champs
+obligatoires et l'ensemble des leviers ont changé. La
+[rupture bidirectionnelle](PROTOCOLE_TOUR_V10_V5_RUPTURE_20260923.md)
+mérite des étiquettes v11/v6 et des mutations d'anciennes formes ; un
+nouveau plan épinglé reste nécessaire avant une campagne.
+Le WIP v6 C6/tri observé en parallèle
 est [contrelu séparément](CONTRE_AUDIT_B_WIP_V6_C6_TRI_20260923.md) :
 il n'est pas raccordé à v9 ni qualifié sur u18/G4.
 
@@ -338,10 +343,12 @@ compilée `-O2 -frounding-math -fno-fast-math` contre le header publié
 quatre arrondis et FTZ/DAZ activés ou non, sans divergence de
 clé, niveau, support, coquille ou statut ; ce sidecar ne remplace pas
 une porte FENV intégrée. Voir la [preuve et ses portes
-ouvertes](CONTRE_AUDIT_B_MEB_PROPOSE_WIP_20260923.md). Les nouveaux
-compteurs `proposals/verified/canonical/fallbacks` sont agrégés dans FULL,
-mais absents du JSON/lecteur v10 : publier leur ventilation avant tout
-reçu d'ablation. L'ordre Welzl inverse actuellement `power_order` alors
+ouvertes](CONTRE_AUDIT_B_MEB_PROPOSE_WIP_20260923.md). `78e94b04`
+publie maintenant les compteurs `proposals/verified/canonical/fallbacks`
+dans le JSON et un levier `tower_meb_proposal` ON/OFF. Le nouveau
+préflight exige une proposition vérifiée quand ce levier est actif ;
+l'ablation G4 complète reste à faire. L'ordre Welzl inverse actuellement
+`power_order` alors
 que la récursion insère dans l'ordre du tableau ; mesurer les deux ordres
 sur les mêmes facettes avant de le choisir pour le coût.
 
