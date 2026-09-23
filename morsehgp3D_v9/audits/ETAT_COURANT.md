@@ -1,9 +1,10 @@
 # État courant des audits v9
 
-23 septembre 2026. Produit publié courant : **`a78664d4`**. Le dernier
+23 septembre 2026. Produit publié courant : **`d49c99f7`**. Le dernier
 [reçu G4 R5](../receipts/g4_tower_r5_20260923/README.md) exécute le snapshot
 antérieur **`aae9da0e`** ; ses temps ne qualifient donc pas le correctif
-`84c74a5e` ni le nouveau cœur diamétral de `a78664d4`. Cadre :
+`84c74a5e`, le cœur diamétral de `a78664d4` ni la sonde v8 publiée dans
+`e5688680`. Aucun reçu R6 n'est encore publié. Cadre :
 `exploration_v9_hors_registre`, `reference_cpu`,
 `quantized_u18_input_only`, **`not_claimed`**. Ce fichier porte le verdict
 mutable. Les notes datées conservent preuves, contre-exemples et reçus.
@@ -38,10 +39,10 @@ profonde de l'atlas, le census q3 sur fragment complet, la preuve de voies
 q3/q4 mortes et le cache de nœuds témoins. Le propriétaire d'arête et les
 tests stricts gardent les contacts dans la coquille. La porte propriétaire
 de `84c74a5e` tue causalement l'ancien cache d'index par adresse nue et
-vérifie la réutilisation après `bad_alloc`. Son test ABA doit encore
-**exiger** le réemploi effectif de la même adresse dans chaque exécution :
-après 128 essais infructueux, il peut aujourd'hui réussir sans l'avoir
-exercé. Voir la [contrelecture du chargement des
+vérifie la réutilisation après `bad_alloc`. `e5688680` exige désormais le
+réemploi effectif de la même adresse hors ASan ; la quarantaine ASan
+empêche ce plancher sans invalider les autres contrôles. Voir la
+[contrelecture du chargement des
 formes](CONTRE_AUDIT_B_CHARGEMENT_FORMES_Q34_WIP_20260923.md) et la
 [preuve conjointe](CONTRE_AUDIT_B_Q34_PREUVE_CONJOINTE_WIP_20260923.md).
 
@@ -50,7 +51,10 @@ boule diamétrale de l'arête, sous-ensemble du cover complet ; toute voie
 ouverte repasse par celui-ci. Le sous-ensemble ne peut ajouter un faux
 témoin intérieur. Les portes locales comparent les candidats aux petits
 oracles et exercent fermeture puis repli, mais le levier est déjà **ON par
-défaut** sans reçu G4 ni ablation FULL qui l'isole. La porte FULL actuelle
+défaut** sans reçu G4 ni ablation FULL qui l'isole. `e5688680` protège
+aussi les consommateurs complets contre un cœur passé par erreur ; deux
+wrappers q4 à K1/2 rendent encore vide avant ce garde, écart d'API sans
+sortie fausse. La porte FULL actuelle
 compare les cinq leviers ensemble, donc couvre le raccord sans attribuer
 une égalité au seul cœur. Corriger aussi le commentaire de profondeur
 « exacte » dans `q34_dead_lanes.cpp` : sur le cœur, le compte ponctuel est
@@ -136,8 +140,9 @@ stable n'est établie ; les sorties JSON et le binaire local ne constituent
 pas un reçu G4. Entrée SHA256 `2632c86e…6c516e`, binaire
 `267dbed7…b7734` ; les sept sources principales ont les mêmes empreintes
 que le commit publié. Les mesures G4 doivent inclure les visites et tests
-du **core_cover**, aujourd'hui absents du registre de la sonde, ainsi que
-les temps et masses par worker pour diagnostiquer le chemin critique.
+du **core_cover**, publiés par la sonde v8 de `e5688680` mais jamais
+encore reçus sur G4, ainsi que les temps et masses par worker pour
+diagnostiquer le chemin critique.
 Le plan G4 v5 par défaut met les cinq leviers ON dans ses huit cas : une
 ablation causale du cœur exige des cas supplémentaires appariés, avec un
 préflight ON. L'expansion `A×B` demeure entière.
@@ -240,31 +245,27 @@ mesure des répétitions par clé et worker.
 ## Portes de preuve encore ouvertes
 
 Le protocole v6 a produit les reçus R4b/R5 complets, mais son lecteur
-accepte encore des incohérences de `guard_evidence.json` et des
-compteurs impossibles, notamment des rejets de cache avec zéro requête,
-`both_edges>q3_edges` ou `shell_over_12=1` sous statut complet. Les
-[contre-fixtures de garde](CONTRE_AUDIT_B_G4_RECEPTION_V5_20260923.md)
+acceptait des incohérences de `guard_evidence.json` et des compteurs
+impossibles. `e5688680` renforce les identités des voies, du cache, des
+coquilles et du cœur ; `d49c99f7` corrige la portée de la fixture de
+garde. Les [contre-fixtures v5](CONTRE_AUDIT_B_G4_RECEPTION_V5_20260923.md)
 et les [identités v6](RECEPTION_V6_IDENTITES_MANQUANTES_20260923.md)
-doivent devenir des mutants tués sur le snapshot publié. La
+restent l'historique des refus manquants. La
 contrelecture indépendante des **sorties effectivement reçues** R5
 reste positive ; un simple statut `completed` ne vaut pas réception
 fail-closed de toute campagne future. R2 demeure refusé, sans
 promotion rétrospective de ses chronos bruts.
 
-Le lecteur du plan v5 accepte aussi un registre **physiquement impossible**
-du cœur : sur un vrai JSON local, ajouter un million à
-`dead_core_q3_proved` laisse passer `validate_ledger_identities`, bien que
-`dead_core_q3_proved + dead_core_q3_open` dépasse `core_builds`.
-Pour chaque voie q3/q4, imposer `proved + open <= core_builds` au cœur et
-`proved + open <= cover_builds` au cover complet ; quand le levier tourne,
-la somme des deux voies est entre le nombre de builds et son double,
-même avec un masque partiel. Le faux reçu positif du selftest viole déjà
-les deux bornes par voie. Ajouter ces mutants au validateur avant de
-promouvoir les compteurs du prochain reçu G4 ; le moteur conserve sa
-propre identité de masse, ce constat vise le lecteur externe.
+Le lecteur du plan v5 acceptait aussi un registre **physiquement
+impossible** du cœur : ajouter un million à `dead_core_q3_proved` sur
+un vrai JSON local passait malgré un total de voies supérieur aux
+`core_builds`. `e5688680` impose maintenant les bornes `proved+open <=
+builds` par voie et des gardes de conservation ; la fixture factice est
+rendue physiquement cohérente. Vérifier ces mutations sur le snapshot
+figé avant R6, sans reporter ce défaut historique au lecteur v8.
 
-Dans le durcissement du lecteur de session **encore en chantier** après
-`a78664d4`, la marque et le calendrier archivés ne sont pas liés aux
+Dans le lecteur de session **publié** sous `e5688680`, la marque et le
+calendrier archivés ne sont toujours pas liés aux
 **valeurs exactes vérifiées par l'hôte**. Sur une fixture hors-ligne,
 remplacer seulement `guard_evidence.mark.date_utc` par le lendemain laisse
 `validate_received` rendre `completed` ; l'autre auditeur a aussi fait
