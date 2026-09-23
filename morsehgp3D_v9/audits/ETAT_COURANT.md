@@ -481,6 +481,12 @@ actuelle à 16 voisins réserve au moins **65 octets/site** (2,42 Gio à
 40 millions de sites) ; les visites de points du pré-calcul manquent
 encore au ledger de chaîne. Le WIP a aussi besoin du gate mixte
 cache q3/voisins q4 signalé par B avant capture.
+La [contrelecture B du raccord mutable v17](CONTRE_AUDIT_B_WIP_V17_VOISINS_20260923.md)
+relève que le chemin standard cache ON désactive provisoirement la
+preuve **avant** filtre par `&& false` : le défaut de ledger mixte est
+contourné, pas corrigé, et la voie ne tente les voisins qu'après le
+filtre. Cache OFF peut recharger deux fois les mêmes formes si le masque
+ne change pas. Aucun gate ciblé ni reçu v17 ne qualifie ce port.
 
 ## Verrou q3/q4 : réduire le travail avant l'expansion
 

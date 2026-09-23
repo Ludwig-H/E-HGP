@@ -2468,8 +2468,9 @@ mémoire, ainsi que les replis, avant de juger le gain total.
 ### Taille du changement de population testée
 
 Le shadow évaluait le sous-ensemble seulement sur les arêtes arrivées
-au cœur. Le port v17 le tente **avant le filtre ponctuel** sur toute
-arête non entièrement fermée par le cache. Dans le brut 08/000000/K5
+au cœur. La première ébauche v17 le plaçait **avant le filtre ponctuel**
+sur toute arête non entièrement fermée par le cache ; cette branche a
+depuis été désactivée provisoirement (mise à jour ci-dessous). Dans le brut 08/000000/K5
 du reçu v12, `expanded_pairs−witness_cache_rejected_pairs` vaut
 **9,59 M**, contre **3,99 M** constructions de cœur ; sur R11
 08/000000/K5, **7,16 M** contre **2,04 M**. C'est environ 2,4× à
@@ -2493,3 +2494,20 @@ ne pas assimiler aux 8k/16k/32k sans sol ni aux contrats G4. Pour v17,
 publier formes *évitées* avec coût intégral des voisins globaux et les
 sorties exactes sur cette même trame brute, sans confondre les deux
 populations de paires.
+
+### Mise à jour 11 h 53 UTC — contrelecture du raccord WIP v17
+
+La [note B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_WIP_V17_VOISINS_20260923.md)
+fige l'état source vu à 11 h 52. Avec cache ON par défaut,
+`wspd_q34.cpp:542` porte `&& false` : le certificat avant filtre est
+inactif, et le croisement cache/near du ledger est seulement contourné.
+La tentative réelle survient **après** le filtre ponctuel ; les
+9,59 M/7,16 M ci-dessus étaient un coût *potentiel de l'ébauche*,
+pas un décompte d'appels du programme actuel. Avec cache OFF, lorsque
+le filtre conserve le masque, le même certificat est recalculé deux
+fois sans nouveaux témoins. Le certificat sur tout sous-ensemble
+distinct du nuage est sûr, donc le k-NN global exact n'est pas
+mathématiquement requis ; voir la [note A](../morsehgp3D_v9/audits/CERTIFICAT_Q34_SOUS_ENSEMBLES_LOCAUX_20260923.md).
+Avant G4 v17 : corriger/clarifier la branche, portes cache mixte et
+cache OFF, refus du doublon par l'API publique, comparaison ON/OFF des
+sorties/ledger, formes et coûts complets sur mêmes trames.
