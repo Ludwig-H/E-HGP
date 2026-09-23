@@ -1,11 +1,12 @@
 # S4a : mesurer ensemble graines et cover, puis les vrais pas de warp
 
-23 septembre 2026. Lecture seule du plan S4 et du reçu G4 R14 au commit
-`3605cef99` (moteur `b68b6761`), des reçus CPU LiDAR brut, et du port S4a
-**WIP non commis** dans `build/v9-open-worktree` à cette date (`lanes.hpp`
-SHA-256 `31ff1ba41a263f0c7cd2d2631f529ef3c83f02f8716ce8ab86be1033854dd774`).
-Aucun essai G4 ni nouveau chrono dans cette note. Les nombres ci-dessous sont des comptes
-de travail, pas des prévisions de durée ou une qualification FULL.
+23 septembre 2026. Cette contrelecture part du plan S4 et du reçu G4 R14
+au commit `3605cef99` (moteur `b68b6761`), des reçus CPU LiDAR brut et
+du premier port S4a alors mutable (`lanes.hpp` SHA-256 `31ff1ba41…`).
+Le [reçu G4 R15 S4a](CONTRELECTURE_G4_R15_S4A_20260923.md) est désormais
+publié ; il mesure un gain réel, sans fournir encore les ballots physiques
+par graine ni la matrice de densités. Les nombres ci-dessous sont des
+comptes de travail, pas des prévisions de durée ou une qualification FULL.
 
 ## Ce que les reçus permettent réellement
 
@@ -146,10 +147,12 @@ nombre physique d'évaluations de `q3_power` vérifie
 arête. Cette nuance ne retire pas l'exactitude des sorties ; elle borne
 le sens du facteur 36 annoncé avant une mesure CUDA.
 
-Aucun reçu R15/S4a sur G4 n'accompagne encore le commit. Le port alloue
-ses tampons, téléverse l'index et reconstruit chaque cover au lieu de
-réutiliser la session/plages S4.0 projetées. Le prochain reçu doit
-séparer noyau, copies/allocations, attente de recouvrement et traîne CPU,
-puis mesurer la chaîne complète. Les pentes LiDAR v12 sur coupes physiques
+R15 mesure maintenant la chaîne complète sur trois trames sans sol :
+S4a gagne 0,163–0,177 s à K5 et 0,374–0,409 s à K10 dans les paires
+entrelacées de 08/000000. Il sépare noyau/transfert q3 et attente, mais
+ne compte pas les ballots physiques par graine ni la validation répétée
+de l'index. Le port alloue ses tampons, téléverse l'index et reconstruit
+chaque cover au lieu de réutiliser la session/plages S4.0 projetées.
+Les pentes LiDAR v12 sur coupes physiques
 et densités ne deviennent pas celles de S4a : les rejouer avec le nouveau
 compteur de ballots sur plein, moitiés et quarts est la suite pertinente.

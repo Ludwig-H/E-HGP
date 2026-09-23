@@ -333,3 +333,25 @@ de **0,567→0,435→0,315** pendant que celui des charges reste vers
 **0,97** : le raccord S2 n'a pas réduit cette masse sur ce panel.
 K10 S2, plusieurs scènes, graines et séquences restent à mesurer. Les matrices v12 et ce panel
 CPU ne prouvent aucune borne globale ni un temps G4.
+
+Le [quart **physique** sans sol de 08/000200/K10, répété avec trois graines](lidar_ground_hot_quarter_multiseed_20260923/README.md)
+confirme un cas sentinelle de cette matrice : `x≥0,y<0` donne des pentes
+`core_sites` de **2,046 / 2,077 / 2,025** au premier doublement
+1/4→1/2 ; au second, **2,035 / 1,916 / 2,048**. Le point voisin de
+`x=0` qui changeait de quart sous le signe quantifié a été attribué par
+son signe float32 physique ; les trois niveaux de chaque série utilisent
+la même définition. Ces trois graines ne transforment pas deux
+doublements finis en preuve asymptotique, mais rendent ce quart pertinent
+pour un rejeu prioritaire.
+
+Le [reçu G4 R15 S4a](CONTRELECTURE_G4_R15_S4A_20260923.md) apporte un gain
+apparié sur trois trames **entières** sans sol de la séquence 08. Il ne
+rejoue aucun demi, quart ou sous-échantillon : toutes les pentes et
+charges de cette synthèse restent celles de v12 CPU ou des sondes S2
+signalées ci-dessus. Pour examiner si **S4a** reste effectivement
+sous-quadratique dans les régimes d'intérêt, refaire sur le port la
+matrice des sept secteurs physiques aux densités globales emboîtées
+1/4, 1/2 et 1, avec K5/K10, en commençant par le quart sentinelle puis
+les trames entières. Apparier les digests et distinguer croissance des
+comptes de travail, mur de chaîne, segmentation et préparation. Les
+tours des morceaux ne recomposent pas la tour entière.

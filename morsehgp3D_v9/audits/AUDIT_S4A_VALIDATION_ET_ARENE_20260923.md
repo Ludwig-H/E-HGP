@@ -1,8 +1,11 @@
 # S4a massif : certifier l'index une fois et budgéter l'arène complète
 
-23 septembre 2026 — lecture du port local `aad7416a5` puis du correctif
-local `f7e465e0d`, `src/gpu/filter_runner.cu` SHA-256 `bc54dafe…`, sans
-mesure G4 nouvelle.
+23 septembre 2026 — lecture du port local repris sur `main` par
+`5ceb4d219`, puis du correctif `3765080cf` et de l'addendum
+`8b47a75a9`, `src/gpu/filter_runner.cu` SHA-256 `bc4d30ff…`. Le
+[reçu R15 G4](CONTRELECTURE_G4_R15_S4A_20260923.md) mesure désormais le
+port sur trois trames sans sol ; il n'isole pas le temps de validation de
+l'index ni un régime de plusieurs millions de points.
 Cette note concerne le coût de la chaîne et la distinction entre report
 d'arête et refus de l'appel, pas l'exactitude des boules acceptées.
 
@@ -66,18 +69,21 @@ arêtes, des sorties, des slabs et de l'arène (`:829–853`). Les slabs
 peuvent employer jusqu'à un autre quart de cette mémoire libre. Un
 `cudaMalloc` de ces buffers peut encore échouer : il devient
 `BatchError::capacity`, puis `ChainStatus::kResourceExhausted`
-(`tower_chain.cpp:316–325`), **sans** traîne CPU. Le commentaire source
-« never refuses the call » ne vaut donc que pour le débordement des
-enregistrements après allocation réussie. Pour des scènes massives,
+(`tower_chain.cpp:316–325`), **sans** traîne CPU. Le commentaire trompeur
+« never refuses the call » a été **corrigé par `8b47a75a9`** ; le
+comportement et le besoin de budget restent ceux décrits ici. Pour des scènes massives,
 budgéter les buffers fixes avant de choisir arène et nombre de warps,
 puis prévoir un retry contrôlé ou des lots bornés si l'allocation échoue.
 
 Quand l'arène déborde, `q3_lane` a déjà exécuté son census GPU ; le CPU
 recalcule ensuite l'arête. Le ledger `lanes_*` n'ajoute que les arêtes
 **décidées** (`filter_runner.cu:729–760`) et ne compte donc pas ce travail
-GPU perdu. Le prochain reçu doit publier capacité d'arène, réservations,
+GPU perdu. Un prochain reçu de croissance doit publier capacité d'arène, réservations,
 reports par cause, temps de noyau et de traîne, allocations, validation et
 mur de chaîne, sur plein, moitiés, quarts et densités 1/4–1/2–1. Un
 changement de mémoire libre peut changer la fraction reportée sans
 changer les octets d'entrée ; comparer des essais appariés avec cette
-fraction visible. Aucun contrat G4/FULL n'est inféré du commit local.
+fraction visible. R15 ne comporte aucun report S4a à capacité normale sur
+ses huit exécutions GPU S4a ; il confirme ce chemin sans exercer l'épuisement de
+l'arène. Aucun contrat de 1 s, 100 ms ou croissance sous-quadratique n'est
+inféré de ces commits et mesures.

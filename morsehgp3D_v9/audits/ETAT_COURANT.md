@@ -1,5 +1,18 @@
 # État courant des audits v9
 
+Le [reçu G4 R15 S4a](CONTRELECTURE_G4_R15_S4A_20260923.md) est maintenant
+publié : 326 empreintes relues, 18/18 tours `complete_relative`, six
+condensés épinglés reproduits et 12 comparaisons appariées égales. Sur
+08/000000, les paires S3/S4a de la même session donnent un gain réel de
+**0,163–0,177 s à K5** et **0,374–0,409 s à K10**. Les meilleures
+chaînes des trois trames sans sol de la séquence 08 restent **1,446 s à
+K5** et **5,242 s à K10** ; le contrat de 1 s n'est pas atteint. Même
+en retirant gratuitement toute la phase `edges_ms` CPU de R15, le reste
+mesuré des trois K5 vaut 1,072–1,350 s si les autres postes restent
+fixes : S4b et le chemin critique hors arêtes doivent progresser
+ensemble. R15 ne mesure ni demi-scènes, ni quarts, ni densités réduites ;
+les pentes v12 CPU ne se transfèrent pas à S4a.
+
 Le [reçu G4 R14](../receipts/g4_tower_r14_20260923/README.md),
 [contrelu indépendamment](CONTRELECTURE_G4_R14_RECU_20260923.md), ferme
 18/18 cas `complete_relative` sur trois trames **sans sol** de la seule
@@ -21,16 +34,16 @@ artificiellement sous-déclarées ; « kernel/transfert » désigne en outre
 des intervalles mêlant calcul, copies et allocations. Le temps total de
 chaîne reste exploitable sans cette attribution matérielle fine.
 
-Le constructeur a ensuite créé **`aad7416a5` localement** : port S4a q3
-sans atlas, nouveau levier de chaîne et protocole R15. Aucun reçu S4a/G4
-R15 n'est encore versionné ; R14 ne mesure que S2+S3. Les portes livrées
+Le constructeur a créé le port S4a q3 sans atlas, nouveau levier de chaîne
+et protocole R15, publié sur `main` par `5ceb4d219` puis corrigé par
+`3765080cf`. R14 mesure S2+S3 ; R15 mesure le port S4a. Les portes livrées
 comparent le port hôte à l'ancien moteur sur des fixtures synthétiques ;
 `--file` publie des statistiques, pas un gate LiDAR. Les 146 M tests q3
 annoncés après classement en anneaux sont des **tests logiques de scan** :
 le warp exécute aussi les voies après le site d'arrêt dans son dernier
 ballot. Les nouveaux tampons CUDA retéléversent l'index et reconstruisent
 les covers ; la session résidente S4.0 du plan n'est pas encore intégrée.
-Mesurer d'abord R15 apparié sur la trame entière, puis refaire les coupes
+Refaire maintenant les coupes
 physiques et densités emboîtées sur **ce** port ; les pentes v12 CPU ne
 qualifient pas S4a.
 
@@ -67,49 +80,53 @@ plan que de `G=Σg_e` au plus ; pour R14/K5, `G=9,318 M`, mais les
 pas un nombre de ballots. Publier les couples par arête, les ballots
 réels, quatre évaluations d'anneau par site, transferts et replis avant
 d'attribuer un coût ou une croissance à S4a.
-Le [préflight du WIP S4a](AUDIT_S4_WIP_EXCEPTIONS_WORKERS_20260923.md)
-avait repéré trois allocations/insertions **hors capture d'exception**
-dans `run_lanes_batch_host` du commit local `aad7416a5` : un `bad_alloc`
-d'un worker peut terminer le processus. Le correctif du commit local
-`f7e465e0d` (`lanes_host.hpp` SHA `50144a3e…`) englobe désormais tout le worker,
-réveille les attentes, joint avant relance et évite les slabs pour zéro
-arête : les fenêtres sont closes **à la lecture du source**. Sa nouvelle
-porte tente toutefois de créer environ **512 Gio d'enregistrements par
-worker** pour provoquer `bad_alloc` ; sous overcommit, elle peut épuiser
-la mémoire au lieu de produire une exception contrôlée. La remplacer par
-une injection bornée aux trois endroits, sans exécuter ce test géant. Le
-défaut de ledger `both_edges` est corrigé dans `aad7416a5`. Le gate de
-chaîne de `f7e465e0d` compare ce compteur et six autres champs entre S3,
-S4a jugé et S4a à ardoise réduite. Son exécution locale, 32 cas/code 0,
-donne `asked=368886`, `tails=174420`, `both=281530` ; S3 CPU ne reporte
-aucune arête, donc **au moins 87 064 occurrences** cumulent q3 reportée
-et q4 ouverte. Ce chemin est effectivement contrôlé, même si le gate
-n'impose pas encore la non-vacuité directement si sa fixture évolue.
-Comparer aussi `q4_emitted` du bras reporté. Aucune perte de boule n'était
-déduite du défaut de comptage initial. Le dossier de reçu S4a local ne
-contient à cette lecture qu'un `run.sh` : il prépare une trame sans sol
-entière K5/K10, sans validation JSON/digests ni empreintes du binaire et
-de l'entrée, et sans contrôle de propreté de l'arbre source. Aucun
-résultat de ce script n'est encore recevable ; il ne mesure ni demi-scènes,
-ni quarts, ni densités. Voir la [relecture WIP](AUDIT_S4_WIP_EXCEPTIONS_WORKERS_20260923.md).
-La réception v20 de `f7e465e0d` doit encore vérifier
-`q3_edges − lanes_asked ≤ certificats_différés` : toute voie q3 non
-demandée provient d'au plus une arête S3 différée. Elle interdit aussi
-**à tort** tout report S4a par défaut si `n<65536` : un contre-exemple
-exact de 28 679 sites/4 097 arêtes dépasse l'arène de **un record**
-malgré des covers de sept sites, et la traîne CPU reste exacte. Le
-préflight moteur jumeau doit prouver le travail positif du census q3 de
-feuille et du cache, dispensés à juste titre dans le bras S4a. Le [nouvel audit du
-coût S4a](AUDIT_S4A_VALIDATION_ET_ARENE_20260923.md) montre aussi que
-S2/S3/S4a rescannent chacun l'index par nœud et par point
+Le [préflight S4a](AUDIT_S4_WIP_EXCEPTIONS_WORKERS_20260923.md) avait
+repéré trois allocations/insertions **hors capture d'exception** dans
+`run_lanes_batch_host` du port `5ceb4d219` : un `bad_alloc` d'un worker
+pouvait terminer le processus. Le correctif `3765080cf` englobe tout le
+worker, réveille les attentes, joint avant relance et évite les slabs pour
+zéro arête : ces fenêtres sont closes **à la lecture du source**. Sa porte
+tente toutefois de créer environ **512 Gio d'enregistrements par worker**
+pour provoquer `bad_alloc` ; sous overcommit, elle peut épuiser la mémoire
+au lieu de livrer une exception contrôlée. Une injection bornée aux trois
+endroits reste préférable.
+
+`both_edges` est corrigé dans `5ceb4d219`. Le gate de chaîne de
+`3765080cf` compare sept champs du ledger entre S3, S4a jugé et S4a à
+ardoise réduite. Son exécution locale, 32 cas/code 0, donne
+`asked=368886`, `tails=174420`, `both=281530` ; S3 CPU ne reporte aucune
+arête, donc **au moins 87 064 occurrences** cumulent q3 reportée et q4
+ouverte. Ce chemin est effectivement contrôlé ; encoder directement
+cette non-vacuité préserverait la porte si la fixture évolue. Comparer
+aussi `q4_emitted` du bras reporté. Aucune perte de boule n'était déduite
+du défaut de comptage initial.
+
+La réception v20 de `3765080cf` vérifie désormais bien
+`q3_edges − lanes_asked ≤ certificats_différés`, avec deux mutants de
+subset/absence : l'objection d'un snapshot mutable précédent est close.
+Elle interdit cependant **à tort** tout report S4a par défaut si
+`n<65536` : un contre-exemple exact de 28 679 sites/4 097 arêtes dépasse
+l'arène d'**un record** malgré des covers de sept sites, et la traîne CPU
+reste exacte. Le préflight moteur jumeau doit aussi prouver le travail
+positif du census q3 de feuille et du cache, dispensés à juste titre dans
+le bras S4a. Dans R15, le jumeau produit bien ces deux comptes positifs ;
+le contrôle manque dans le lecteur. Le dossier de reçu S4a CPU local
+reste partiel à cette lecture : `run.sh` a produit quelques fichiers,
+mais pas de paquet final clos, sans
+validation JSON/digests, empreintes du binaire/entrée ou contrôle de
+propreté source. Il ne mesure ni demi-scènes, ni quarts, ni densités.
+
+Le [nouvel audit du coût S4a](AUDIT_S4A_VALIDATION_ET_ARENE_20260923.md)
+montre que S2/S3/S4a rescannent chacun l'index par nœud et par point
 (`26n` appartenances sur un arbre équilibré de `2^25` sites, au plus
 `55n` pour le constructeur u18 à milieu géométrique), hors chronos CUDA
-internes ; certifier
-une fois le propriétaire immuable ou calculer les extrema par induction
-réduirait ce poste. Le plafond commis de l'arène GPU permet une traîne CPU
-**si l'arène allouée déborde**, mais une allocation des autres buffers
-peut encore refuser toute la chaîne. Mesurer validation, mémoire fixe,
-reports et temps de traîne sur G4 avant de conclure au gain S4a massif.
+internes. Certifier une fois le propriétaire immuable ou calculer les
+extrema par induction réduirait ce poste. Le plafond d'arène GPU permet
+une traîne CPU **si l'arène allouée déborde**, mais une allocation des
+autres buffers peut encore refuser toute la chaîne. Le commentaire a été
+rectifié par `8b47a75a9` ; R15 confirme un gain S4a G4 sur trames sans
+sol de 35–46 k sites sans report normal, mais ne mesure pas séparément
+validation, capacité d'arène et régime massif.
 
 23 septembre 2026. Ports v13 publiés : sonde **`c768e06a`**, porte Euler
 8k **`a08378da`**, lecteur LiDAR **`50646eef`** puis **`1f048aae`**,
