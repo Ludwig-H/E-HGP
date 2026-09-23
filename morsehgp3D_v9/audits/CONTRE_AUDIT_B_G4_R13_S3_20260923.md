@@ -128,3 +128,91 @@ initialisations du lot S3 (`filter_runner.cu:616–643`). L'intervalle
 possibles attentes de soumission hôte. « Upload + noyau + download »
 n'est donc pas un découpage exhaustif, ni un temps d'activité pure du
 noyau.
+
+## Travail physique masqué : covers S3 reconstruits par le CPU
+
+Le flux GPU publie `mask`, `status` et des compteurs agrégés, **pas** les
+plages du cover. Après S3, pour chaque arête décidée dont une voie
+reste ouverte, `Engine::certified_edge` rappelle
+`Q34EdgeCover::make` sur CPU. Le cover complet fermé a pourtant déjà
+été construit dans le slab du warp GPU ; ce slab est écrasé à l'arête
+suivante. Le nombre `rebuilt_covers` suit ces parcours CPU, mais leurs
+visites de nœuds, tests et sites ne sont **pas** ajoutés au ledger
+géométrique logique. Ainsi « même travail » dans R13 compare les
+certificats logiques, **pas** tous les parcours physiques du chemin
+mixte : ne pas utiliser seul ce ledger pour juger sa croissance.
+
+| Trame sans sol | K | Covers GPU complets | Rebuilds CPU | Sites de tous les covers GPU | Plages ouvertes, bornes Mo¹ | `edges_ms` |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 08/000000 | 5 | 900 377 | 708 686 | 251 972 209 | 5,67–250,93 | 731 |
+| 08/000100 | 5 | 777 841 | 610 811 | 195 711 914 | 4,89–192,40 | 541 |
+| 08/000200 | 5 | 945 062 | 749 534 | 307 871 336 | 6,00–250,98 | 749 |
+| 08/000000 | 10 | 1 934 399 | 1 463 362 | 874 278 487 | 11,71–675,15 | 2 922 |
+| 08/000100 | 10 | 1 656 978 | 1 258 362 | 619 045 951 | 10,07–494,77 | 2 244 |
+| 08/000200 | 10 | 2 026 783 | 1 554 880 | 972 863 222 | 12,44–654,47 | 3 086 |
+
+¹ Décimaux, `8R≤octets≤2(V−C+4R)` ; `V` est le compteur publié
+`ledger.cover_node_visits`. Ces bornes ne sont pas des octets transférés.
+
+Les rebuilds représentent **75,6–79,3 %** des covers complets
+certifiés sur ces cas. `edges_ms` inclut aussi atlas, graines,
+q3/q4 et callbacks : il **ne mesure pas** le rebuild isolément.
+Même retirer fictivement tout `edges_ms` laisserait **1,196–1,599 s**
+de chaîne K5 ; la réutilisation seule ne qualifie donc pas la seconde
+sur l'architecture R13 inchangée. Les `cover_sites` incluent les
+covers fermés, non transférables pour la génération, et ne donnent
+aucune distribution de plages des covers ouverts. `retained_ranges`
+existe dans le code, mais n'est pas sérialisé dans le reçu. Un payload
+u32 de deux bornes par plage coûterait `8×Σranges_ouverts` octets,
+plus offsets et statuts ; cette somme reste **inconnue**. La mémoire
+CPU de `Range` est de 16 octets/plage sur LP64. Ne pas supposer que
+transférer les plages est gratuit parce que leur nombre de sites est
+grand ou petit.
+
+Une borne structurelle resserre seulement l'**espace des possibles**.
+Dans un parcours d'arbre binaire, `r` runs admis maximaux imposent au
+moins `r−1` runs rejetés ; le sous-arbre visité est complet, donc
+`V≥4r−3` visites de nœuds pour ce cover. En posant `V` les visites
+de tous les covers GPU, `C` leurs constructions et `R` les rebuilds
+(covers ouverts), chaque cover fermé visite au moins un nœud :
+`Σr_ouverts≤(V−C+4R)/4`. Les six lignes R13 ne bornent ainsi les
+`8Σr_ouverts` octets de plages u32 qu'entre **4,89–12,44 Mo de
+plancher** et **0,192–0,675 Go de plafond**, selon le cas ; ces
+intervalles ne sont ni une distribution ni un transfert mesuré.
+
+Une optimisation éventuelle doit importer **uniquement** les covers
+`decided && mask!=0`, complets et fermés :
+`|2z−a−b|²≤4|b−a|²`, contacts compris. Ce sont des intervalles
+`[first,last)` de **rangs spatiaux**, strictement ordonnés, disjoints
+et maximalement joints ; `Σ longueurs=site_count≥2` et les deux
+extrémités y figurent. Le cœur diamétral d'une arête fermée ne peut
+pas servir à q3/q4. Les consommateurs utilisent ces plages pour
+décomposer l'atlas, énumérer des témoins et recenser coquilles et
+intérieurs ; égalité de masque, de cardinalité ou de condensé final
+ne prouve pas l'égalité des plages. Le payload doit être lié au
+**même index immuable et au même ordinal d'arête**, posséder sa mémoire
+après le réemploi du slab et garder le travail logique S3 distinct
+des parcours physiques. `GpuPreparation::get` ne vérifie aujourd'hui
+pas l'identité de l'index demandé ; le chemin R13 n'en utilise qu'un,
+mais un import/flux multi-index doit la rendre explicite.
+
+Porte courte **avant** une nouvelle campagne G4 : sur mêmes entrées
+08/000000/K5 puis K10, publier pour `decided && mask!=0`
+`Σranges`, `Σsites`, p50/p95/p99/max des plages et sites, octets
+exportables, ainsi que le temps et les visites du seul rebuild CPU
+(W1/W48). Si ce budget est favorable, tuiler l'export avec offsets et
+statut transactionnels : manque de place → repli exact au rebuild CPU,
+jamais plage partielle. Une porte différentielle compare **plage par
+plage** l'import et `Q34EdgeCover::make`, puis flux de supports,
+coquilles, catalogue et FULL. L'ablation G4 doit mesurer compaction,
+D2H, pic HBM/RSS, rebuild restant et `chain_total` ON/OFF. Un scan en
+deux passes qui recalcule le cover sur GPU peut être exact, mais ce
+n'est plus la réutilisation du cover déjà calculé par S3 : facturer ce
+second parcours. Pour une capture en une passe, un append global borné
+peut réserver des plages puis publier `{ordinal,offset,count,sites}`
+seulement après succès ; l'ordre physique d'allocation peut varier,
+mais la restitution par ordinal doit être stable. `Range` hôte emploie
+deux `size_t` : il faut soit l'inflater depuis les deux u32, soit
+refondre les consommateurs pour une vue compacte possédée ; aucun
+zéro-copie implicite. Si le coût des plages domine, fusionner davantage
+d'aval q3/q4 sur GPU est une piste distincte à évaluer.
