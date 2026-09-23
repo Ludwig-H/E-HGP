@@ -177,6 +177,21 @@ entière est 08/000000 **sans sol** avec 200 ancres sur 39 885, non une
 trame brute multi-séquence ; les entrées ne sont pas hachées dans ces
 sorties. Le trou prioritaire de complétude demeure q3 à
 `p=Kmax−2`, particulièrement les supports longs.
+Dans le **juge q3 indépendant encore WIP** de C (`q3_sample_judge.cpp`,
+SHA-256 `9b2d7df3…86066b33` à 12 h 35), le plancher `top_keys` et la clé
+retirée pour le mutant filtrent seulement `p=Kmax−2`. Une présentation
+par triangle strictement aigu peut pourtant avoir `q_min=2` si sa
+coquille contient aussi une paire antipodale. Fixture entière K5 : centre
+`(100,100,100)`, coquille `(105,100,100)`, `(97,104,100)`, `(97,96,100)`,
+`(95,100,100)`, puis trois points strictement intérieurs
+`(100,100,100)`, `(101,100,100)`, `(100,101,100)`. Les trois premiers
+sites de coquille sont aigus (produits scalaires 48, 32, 32), mais les
+premier et quatrième sont antipodaux : `q_min=2`, `p=3=K5−2`. Le plancher
+et le mutant dits « q3 haut rang » peuvent ainsi être portés par une clé
+q2. Exiger `ball.arity==3` dans leur sélection, et comptabiliser à part
+les incidences aiguës de clés q2. C'est une correction de **portée du
+juge**, pas un défaut démontré du générateur ; aucun reçu du juge q3
+n'est encore publié.
 
 La porte de **clés jamais émises** publiée par `683fa46e` change utilement
 le sens du contrôle : elle recense des MEB de supports q2–q4 voisins
