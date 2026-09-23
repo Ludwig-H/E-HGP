@@ -53,6 +53,8 @@ int main(int argc, char** argv) {
   std::array<Bucket, 4> buckets{};  // |B|: 8..15, 16..31, 32..63, >=64.
   std::uint64_t all_front_mass = 0, eligible_rectangles = 0, pre_mass = 0, post_mass = 0;
   std::uint64_t post_rows = 0, rectangle_visits = 0, selected = 0;
+  std::uint64_t survivor_q3_credits = 0, survivor_q4_credits = 0;
+  std::uint64_t sampled_q3_credits = 0, sampled_q4_credits = 0;
   const auto start = std::chrono::steady_clock::now();
 
   const auto front = run_wspd_front(*index, 5, 8, WspdFrontMode::MidpointSamples,
@@ -74,6 +76,8 @@ int main(int argc, char** argv) {
         if (!mask) return;
         post_mass += mass;
         post_rows += ar.size();
+        if (mask & 2U) survivor_q3_credits += rectangle_work.q3_credits;
+        if (mask & 4U) survivor_q4_credits += rectangle_work.q4_credits;
 
         // Deterministic ~1/128 sample of surviving eligible rectangles,
         // one A row selected by node IDs. Never extrapolate it as a bound.
@@ -81,6 +85,8 @@ int main(int argc, char** argv) {
                                    std::uint64_t(rectangle.b_node) * 0xbf58476d1ce4e5b9ULL;
         if ((hash & 127U) != 0) return;
         ++selected;
+        if (mask & 2U) sampled_q3_credits += rectangle_work.q3_credits;
+        if (mask & 4U) sampled_q4_credits += rectangle_work.q4_credits;
         const auto rank = ar.first + (hash >> 7) % ar.size();
         const auto a = points[order[rank]];
         Q34WitnessSearchWork row_work{};
@@ -104,7 +110,11 @@ int main(int argc, char** argv) {
             << " eligible_rect " << eligible_rectangles
             << " pre_mass " << pre_mass << " post_mass " << post_mass
             << " post_rows " << post_rows << " rectangle_visits " << rectangle_visits
-            << " selected " << selected << " elapsed_s " << elapsed << '\n';
+            << " selected " << selected << " survivor_q3_credits " << survivor_q3_credits
+            << " survivor_q4_credits " << survivor_q4_credits
+            << " sampled_q3_credits " << sampled_q3_credits
+            << " sampled_q4_credits " << sampled_q4_credits
+            << " elapsed_s " << elapsed << '\n';
   for (unsigned i = 0; i < buckets.size(); ++i) {
     const auto& b = buckets[i];
     std::cout << "Bbucket " << i << " queries " << b.queries << " pair_mass " << b.pair_mass

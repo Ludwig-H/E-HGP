@@ -76,11 +76,11 @@ change pas la sonde. Le script n'exécute ni le reste du générateur, ni
 catalogue, ni FULL : c'est une observation géométrique locale, non un
 reçu de chaîne.
 
-| Trame 08 | Masse éligible après filtre rectangle / paires développées R4b | Lignes échantillonnées | Paires entièrement évitables dans l'échantillon | Visites DFS de ligne / paire évitable |
-| --- | ---: | ---: | ---: | ---: |
-| 000000 | 20 747 697 / 23 686 751 (87,6 %) | 191 | 3 207 | 15,7 |
-| 000100 | 9 423 007 / 11 960 420 (78,8 %) | 143 | 1 604 | 21,2 |
-| 000200 | 18 987 124 / 22 722 345 (83,6 %) | 275 | 3 926 | 29,8 |
+| Trame 08 | Masse éligible après filtre rectangle / paires développées R4b | Lignes échantillonnées | Paires entièrement évitables dans l'échantillon | Visites DFS de ligne / paire évitable | Crédits universels q3+q4 des rectangles échantillonnés |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 000000 | 20 747 697 / 23 686 751 (87,6 %) | 191 | 3 207 | 15,7 | 182 |
+| 000100 | 9 423 007 / 11 960 420 (78,8 %) | 143 | 1 604 | 21,2 | 151 |
+| 000200 | 18 987 124 / 22 722 345 (83,6 %) | 275 | 3 926 | 29,8 | 227 |
 
 La masse éligible est grande, mais l'échantillon d'**une ligne par
 rectangle** n'est pas un estimateur du gain global. Le DFS neuf coûte
@@ -88,12 +88,31 @@ ici 15,7–29,8 visites par paire qu'il écarterait entièrement, avant
 comparaison au filtre/cache de paire qu'il remplacerait ; aucune
 économie nette n'est prouvée. Ne pas activer ce port sur ces chiffres.
 Un transfert plus léger peut conserver les **seuls nœuds admis** par
-le filtre rectangle : au plus `(K−1)+(K−2)=2K−3≤17` entrées avec voies
-et comptes, disjointes par voie. Leur admission pour `A×B` reste vraie
-pour `{a}×B`; le DFS de ligne doit sauter exactement leurs sous-arbres
-par voie pour éviter tout double crédit. Ce ticket possédé est borné,
+le filtre rectangle : au plus `(K−1)+(K−2)=2K−3≤17` entrées pour
+`K≥3` (une à K2, zéro à K1), avec voies et comptes, disjointes par voie.
+Leur admission pour `A×B` reste vraie pour `{a}×B`. Le relais doit
+parcourir le **complément** des plages déjà créditées pour chaque voie :
+forcer la subdivision de tout ancêtre qui chevauche une plage du ticket,
+puis sauter le sous-arbre crédité. Sauter seulement le nœud exact du
+ticket serait faux : si trois sites crédités dans un enfant appartiennent
+à un parent de cinq sites que la ligne admet ensuite, un compte naïf
+`3+5=8` réutilise trois témoins (et pourrait atteindre un seuil 7 à
+tort). Ce ticket possédé est borné,
 contrairement à une frontière complète de sous-arbres indécis qui peut
-atteindre `Θ(n)` par rectangle. Mesurer son coût avant d'élargir l'API.
+atteindre `Θ(n)` par rectangle. Le nouveau compteur du sidecar n'observe
+qu'environ **0,83 à 1,06 crédit par rectangle échantillonné** en sommant
+les voies (un même site peut compter dans les deux). Ce ticket est donc
+souvent presque vide dans cet échantillon ; il ne suffit probablement
+pas, seul, à amortir 15,7–29,8 visites par paire évitable. Mesurer sa
+distribution et son coût avant d'élargir l'API. Si l'on vise un partage
+plus fort, raffiner conjointement le bloc A au premier nœud de témoins
+ambigu, en transmettant compte **et état de parcours Z** aux descendants,
+est une architecture à comparer : un curseur suffit seulement si l'ordre
+DFS des témoins est figé pour tous les descendants ; avec l'ordre actuel
+par distance au milieu de A×B, il faut conserver la pile pendante ou
+définir un ordre canonique. Elle partagerait le préfixe du DFS mais
+demande une preuve et une porte de non-double-comptage par voie, puis un
+bilan de travail total.
 
 Avant activation, compter en mode shadow `row_queries`, visites de
 nœuds, masse de lignes entièrement rejetées et masses q3/q4 retirées ;

@@ -455,7 +455,14 @@ appariée.
    temps de chaîne ni le chevauchement avec le cache ; ne pas porter le
    DFS de ligne neuf sans ablation appariée et seuil de coût. Un ticket
    borné des seuls nœuds témoins déjà admis par le rectangle pourrait
-   réduire cette répétition, jamais une frontière entière par rectangle.
+   réduire cette répétition, jamais une frontière entière par rectangle ;
+   la sonde ne voit toutefois que **0,83–1,06 crédit q3+q4 par rectangle
+   échantillonné**, ce qui limite cette piste seule. Un partage conjoint
+   du préfixe DFS entre descendants A, compte et état de parcours Z ensemble, est
+   à comparer avant un port de la ligne indépendante. Si un ticket partiel
+   est semé, le DFS doit visiter seulement le **complément** de ses plages
+   par voie, y compris en forçant la subdivision des ancêtres chevauchants ;
+   sinon un même témoin peut être compté deux fois.
    `47f8a5da` a ensuite remplacé le chargement des formes des voies mortes
    par des coordonnées rangées, mais sa copie privée par worker avait une
    résidence `12·n·W` et un cache indexé par adresse nue. La
@@ -559,8 +566,8 @@ appariée.
    déterminisation du premier échec et la borne explicite `u32` des nœuds
    d'un ordre. La borne d'ID de nœud ne resserre pas, pour une entrée
    admise, la limite existante des boules `u32` : à K≥2, chaque nouveau
-   nœud correspond à au plus un bloc de `program[K]`, donc au plus une
-   boule ; à K1, il y a au plus `2n−1` nœuds avec
+   nœud consomme au moins un bloc distinct de `program[K]`, donc leur
+   nombre ne dépasse pas celui des boules ; à K1, il y a au plus `2n−1` nœuds avec
    `n≤INT32_MAX`. C'est la croissance des boules qui reste à mesurer
    à 30 M sites. Le plancher logique des états
    simultanés est **635,2 Mio** sur 08/000000/K10 R4b, avant
