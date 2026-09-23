@@ -3,7 +3,10 @@
 23 septembre 2026. Ports v13 publiés : sonde **`c768e06a`**, porte Euler
 8k **`a08378da`**, lecteur LiDAR **`50646eef`**, lecteur G4 **`515b3666`**.
 Les mesures de densité restent celles du binaire v12 **`4530644b`** ;
-aucun nouveau reçu G4 ni nouvelle série LiDAR v13 n'en découle. Le dernier
+aucune nouvelle série LiDAR v13 n'en découle. Le dernier
+[reçu G4 R8](../receipts/g4_tower_r8_20260923/README.md) exécute
+`515b3666` sur CPU G4 et a sa
+[contrelecture indépendante](CONTRE_AUDIT_B_G4_R8_20260923.md). Le
 [reçu G4 R7b](../receipts/g4_tower_r7b_20260923/README.md) exécute
 le paquet **`8e8b83a3`**, antérieur au Welzl move-to-front, aux
 séparateurs pseudo-aléatoires du tri FULL et à la libération précoce de
@@ -259,6 +262,21 @@ seul et une seule séquence. R7b inclut d'autres changements depuis R6 :
 leur effet ne se déduit pas de cette ablation. Il n'exécute ni Welzl
 move-to-front, ni le nouvel échantillonnage FULL, ni la libération
 précoce de `key_slots`, et ne prouve pas la complétude des clés omises.
+
+Le [reçu R8](../receipts/g4_tower_r8_20260923/README.md) du paquet
+`515b3666` ajoute Euler et l'occupation q3/q4 : **20/20 cas FULL CPU
+`complete_relative`**, trois trames 08 **sans sol** à 1 mm, toutes les
+empreintes archivées vérifiées, lecteur du commit épinglé positif en
+Python normal et sous `-O`, arrêt ciblé `TERMINATED`. À W48/s8, la chaîne
+vaut **3,665–6,395 s à K5** et **9,403–15,192 s à K10**, digest de contrôle
+exclu. Euler tient sur les ordres jugés mais reste nécessaire seulement.
+L'attente de file occupe **35–49 %** du temps des fils q3/q4 à K5, donc
+l'ordonnancement mérite une ablation. La
+[contrelecture R8](CONTRE_AUDIT_B_G4_R8_20260923.md) relève le verrou
+supplémentaire : **chaîne hors q3/q4 = 1,147–1,685 s dès K5**, et tour
+aval seule **2,972–3,895 s à K10**. Accélérer le seul q3/q4 ne peut faire
+passer sous 1 s le chemin mesuré actuel. GPU, trames brutes avec sol,
+diversité des séquences et complétude absolue restent ouverts.
 
 ## Verrou q3/q4 : réduire le travail avant l'expansion
 

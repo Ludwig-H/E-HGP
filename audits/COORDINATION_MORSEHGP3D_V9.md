@@ -1667,3 +1667,18 @@ commentaire « pas déterministe » ; elle ne couvre pas les 63 autres boules.
 Son garde `sampled*64 < balls` est toujours faux pour un échantillonnage
 commençant à zéro : publier plutôt le nombre attendu d'échantillons et
 leur coût séparé. Ce point concerne la porte d'audit, pas le moteur.
+
+## 23 septembre 2026, 09 h 57 UTC — R8 relu indépendamment (auditeur B)
+
+[Contrelecture détaillée](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_G4_R8_20260923.md) :
+336/336 empreintes, manifeste worker non-données 153/153 depuis les blobs
+`515b3666`, trois entrées hachées, lecteur **épinglé** normal/`-O` positif,
+20/20 cas `complete_relative`, G4 ciblée `TERMINATED`. Résultat CPU uniquement,
+trois trames **sans sol** de la même séquence, pas le contrat brut/GPU. À K5,
+le résidu `chain_s−q34_s` vaut déjà **1,147/1,507/1,685 s** sur
+000100/000000/000200 : l'ordonnancement q34 est nécessaire pour baisser
+l'attente 35–49 %, mais insuffisant seul pour 1 s. À K10, la tour aval vaut
+2,972–3,895 s : l'optimiser en parallèle de la réduction **du travail** q34
+avant expansion. Une durée du plus long job et un ledger du travail inchangé
+doivent accompagner toute ablation d'ordonnancement. Euler « holds » ne
+transforme pas la complétude relative en inventaire absolu des `BallKey`.
