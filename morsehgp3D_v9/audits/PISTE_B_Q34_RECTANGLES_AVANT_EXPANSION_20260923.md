@@ -295,3 +295,32 @@ de la cellule des centres positifs à celui de la cellule négative
 inventerait 2 intérieurs et supprimerait à tort **les deux** supports.
 L'écriture avec coordonnées négatives sert la lecture ; ajouter 5 à
 toutes les ordonnées donne une fixture entière non négative u18.
+
+#### Domaine local des centres pour éviter le cube mondial entier
+
+Un amorçage exact par produit est disponible **avant** de connaître les
+paires. Poser `Dmax = max_{a∈box(A),b∈box(B)}|a−b|²`, soit la somme des
+trois termes `max(|A_i.lo−B_i.hi|,|A_i.hi−B_i.lo|)²`, et
+`M_i=[(A_i.lo+B_i.lo)/2,(A_i.hi+B_i.hi)/2]`, pavé des milieux
+possibles. Pour toute présentation positive dont `ab` est la plus
+longue arête, écrire le centre `c=Σλ_i p_i`, avec `λ_i>0` et
+`Σλ_i=1`. L'identité de variance donne
+`R²=Σ_{i<j}λ_iλ_j|p_i−p_j|² ≤ D·(q−1)/(2q)` pour `q=3,4` ;
+`|c−(a+b)/2|²=R²−D/4` donne alors
+`|c−(a+b)/2|² ≤ |a−b|²/12` pour q3 et `≤ |a−b|²/8` pour q4.
+Donc les centres du produit satisfont respectivement
+`dist(c,M)² ≤ Dmax/12` et `≤ Dmax/8`. Intersecter ces voisinages
+fermés avec le cube mondial u18 avant de scinder les cellules ; cela
+évite d'explorer des régions sans centre possible. L'exclusion par
+équidistance A/B ci-dessus peut encore resserrer le domaine.
+
+On peut éviter tout `sqrt` flottant : poser le pavé entier
+`M2_i=[A_i.lo+B_i.lo,A_i.hi+B_i.hi]` et, pour une cellule fermée C à
+coins entiers, calculer exactement `δ²=dist(2C,M2)²` par intervalles.
+La cellule est sûrement hors domaine si `12δ²>4Dmax` en q3 ou
+`8δ²>4Dmax` en q4 ; l'égalité reste possible. Avec coordonnées u18,
+`δ²≤12·262143²` et les produits de ce seul test tiennent sous `2^44`,
+donc en `i64`. Les frontières fractionnaires du véritable centre ne
+sont pas arrondies vers l'intérieur. Ce domaine local est un **surensemble**
+certifié, pas un certificat de voie morte : il reste à mesurer combien
+de cellules et de nœuds témoins il économise sur les coupes LiDAR.
