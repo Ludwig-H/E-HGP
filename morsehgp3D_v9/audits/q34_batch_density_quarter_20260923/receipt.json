@@ -1,0 +1,139 @@
+{
+  "schema": "mhgp9_audit_q34_batch_density_quarter_v1",
+  "tested_local_commit": "803216ba2c8d42f0d8f454cc0909a6c220ff3312",
+  "published_source_commit": "a6d81f9ce",
+  "binary_sha256": "076312fb9502dee5a7f0a5fbe549b68c942c511892b4c0ba5583770b511758d7",
+  "source_sha256": {
+    "src/gen/pipeline/wspd_q34.cpp": "1e34498e40f5a7a40c0e22ad14bb14bbaf23347494e0313553f51910d50c7892",
+    "src/chain/tower_chain.cpp": "4dcd5cdeab4887abf5d2c4a6942ddbc97e79d88e968d4c4e894e34f4dfb02748",
+    "bench/tower_probe.cpp": "d03445006f439643dd08aac050544f0881fd596c098993e149c086ede4b1d50b"
+  },
+  "input_manifest_sha256": "6e64125abddbfcd589ba61cf747e493e455adec4beeaea81c2739ce98fe16095",
+  "build": {
+    "CMAKE_BUILD_TYPE": "Release",
+    "MHGP9_ENABLE_CUDA": "OFF",
+    "CMAKE_CXX_COMPILER": "/usr/bin/c++"
+  },
+  "rows": [
+    {
+      "density": "quarter",
+      "mode": "engine",
+      "sites": 7692,
+      "input_file": "s00_quarter_quarter_x_nonneg_y_neg.u32le",
+      "input_sha256": "869fe8c51b89c64934ba55863fa17c321b1dfde1717abe2d7e053c415873272b",
+      "args": [
+        "5",
+        "8",
+        "--s=8",
+        "--static=8",
+        "--grid=1mm",
+        "--lever=q34_batch_filter=0",
+        "--lever=q34_gpu_filter=0"
+      ],
+      "exit_code": 0,
+      "external_wall_s": 1.3807269930002803,
+      "stdout_sha256": "42fbddf62659c3209817af7b26f0395cae198774b8735fa23b9877f5d9b24aa7",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "density": "quarter",
+      "mode": "batch",
+      "sites": 7692,
+      "input_file": "s00_quarter_quarter_x_nonneg_y_neg.u32le",
+      "input_sha256": "869fe8c51b89c64934ba55863fa17c321b1dfde1717abe2d7e053c415873272b",
+      "args": [
+        "5",
+        "8",
+        "--s=8",
+        "--static=8",
+        "--grid=1mm",
+        "--lever=q34_batch_filter=1",
+        "--lever=q34_gpu_filter=0"
+      ],
+      "exit_code": 0,
+      "external_wall_s": 1.3242552450001313,
+      "stdout_sha256": "97a3584883a98fb002d80f99677f0d4867f0b4f3c8db7d2162348f8f342fd4ee",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "density": "half",
+      "mode": "engine",
+      "sites": 15619,
+      "input_file": "s00_half_quarter_x_nonneg_y_neg.u32le",
+      "input_sha256": "fd8756d3f254fef35e56369d1618af9a33a30a038920cb77298cbf43ed60fd51",
+      "args": [
+        "5",
+        "8",
+        "--s=8",
+        "--static=8",
+        "--grid=1mm",
+        "--lever=q34_batch_filter=0",
+        "--lever=q34_gpu_filter=0"
+      ],
+      "exit_code": 0,
+      "external_wall_s": 3.1962405280000894,
+      "stdout_sha256": "dcad46b25a6e28e0854e3b474816fb9938babe0281804cb2ed52fdd493dcd119",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "density": "half",
+      "mode": "batch",
+      "sites": 15619,
+      "input_file": "s00_half_quarter_x_nonneg_y_neg.u32le",
+      "input_sha256": "fd8756d3f254fef35e56369d1618af9a33a30a038920cb77298cbf43ed60fd51",
+      "args": [
+        "5",
+        "8",
+        "--s=8",
+        "--static=8",
+        "--grid=1mm",
+        "--lever=q34_batch_filter=1",
+        "--lever=q34_gpu_filter=0"
+      ],
+      "exit_code": 0,
+      "external_wall_s": 3.4409973349997927,
+      "stdout_sha256": "9baf6ebb429c55e6a6115e1243b3e8f36570c525fc6d28ea7cba53f379df1147",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "density": "full",
+      "mode": "engine",
+      "sites": 31391,
+      "input_file": "s00_full_quarter_x_nonneg_y_neg.u32le",
+      "input_sha256": "7b8649e56fd7dc4380984d59492e1523fe65ca070cbab0f6883c14848d1a83a3",
+      "args": [
+        "5",
+        "8",
+        "--s=8",
+        "--static=8",
+        "--grid=1mm",
+        "--lever=q34_batch_filter=0",
+        "--lever=q34_gpu_filter=0"
+      ],
+      "exit_code": 0,
+      "external_wall_s": 7.700713053000072,
+      "stdout_sha256": "de16ef8689195ae97157db979d0cf3d991bcd356f8c7401e1835878216f2359a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "density": "full",
+      "mode": "batch",
+      "sites": 31391,
+      "input_file": "s00_full_quarter_x_nonneg_y_neg.u32le",
+      "input_sha256": "7b8649e56fd7dc4380984d59492e1523fe65ca070cbab0f6883c14848d1a83a3",
+      "args": [
+        "5",
+        "8",
+        "--s=8",
+        "--static=8",
+        "--grid=1mm",
+        "--lever=q34_batch_filter=1",
+        "--lever=q34_gpu_filter=0"
+      ],
+      "exit_code": 0,
+      "external_wall_s": 8.07665405600028,
+      "stdout_sha256": "25c9aa37ca02721d8531084617c5c7fe9cedccd4ed2a10f9c671947e81d02a14",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

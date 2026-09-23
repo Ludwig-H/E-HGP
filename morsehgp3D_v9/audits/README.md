@@ -201,6 +201,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`lidar_raw_k10_density_20260923/`](lidar_raw_k10_density_20260923/README.md) | A | 23/12:18–12:23 | mesure locale 3 cas, même trame brute et mêmes densités, tour K10 ; reçu reproductible | vivant | sans objet |
 | [`CONTRE_AUDIT_B_LIDAR_BRUT_K10_20260923.md`](CONTRE_AUDIT_B_LIDAR_BRUT_K10_20260923.md) | B | `82efba156` 12:32 | contrelecture indépendante du plein brut K10 | vivant | sans objet |
 | [`lidar_raw_k10_sectors_20260923/`](lidar_raw_k10_sectors_20260923/README.md) | A | 23/12:49–13:09 | mesure locale K10, sept secteurs physiques × trois densités ; 18 nouveaux cas gardés, six répétitions | vivant | sans objet |
+| [`q34_batch_density_quarter_20260923/`](q34_batch_density_quarter_20260923/README.md) | A | 23/15:39 | rejeu S2/v17 CPU apparié sur un quart brut K5 à trois densités ; six sorties vérifiables | vivant, portée bornée | sans objet |
 
 ## GPU et parallélisme
 
@@ -211,8 +212,8 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`CONTRE_AUDIT_B_PORTE_FILTRE_GPU_20260923.md`](CONTRE_AUDIT_B_PORTE_FILTRE_GPU_20260923.md) | B | `7a7987ad3` 12:58 | budget R11 et préflight du port CUDA S1 ; première lecture historique | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_G4_S1_PUBLIE_20260923.md`](CONTRE_AUDIT_B_G4_S1_PUBLIE_20260923.md) | B | 23/13:51 | préflight historique du paquet S1 publié | clos par les deux reçus G4 | réponse D |
 | [`CONTRE_AUDIT_B_G4_GPU_S1_SESSIONS_20260923.md`](CONTRE_AUDIT_B_G4_GPU_S1_SESSIONS_20260923.md) | B | 23/15:12 | deux sessions G4, six cas de filtre exact, portée et budget restant | vivant pour le raccord S2 | réponse D attendue |
-| [`CONTRE_AUDIT_B_RACCORD_Q34_BATCH_WIP_20260923.md`](CONTRE_AUDIT_B_RACCORD_Q34_BATCH_WIP_20260923.md) | B | 23/15:10 | préflight du raccord q3/q4 batch mutable : confiance, mémoire, ledger | WIP, rejuger au commit | réponse D attendue |
-| [`q34_batch_duplicate_gate_20260923/`](q34_batch_duplicate_gate_20260923/README.md) | A | 23/15:20 | mutant doublon/omission à masque et ledger constants : clé q3 perdue malgré validation ; batch CPU WIP | testé borné, rejuger au commit | sans objet |
+| [`CONTRE_AUDIT_B_RACCORD_Q34_BATCH_WIP_20260923.md`](CONTRE_AUDIT_B_RACCORD_Q34_BATCH_WIP_20260923.md) | B | 23/15:10 | préflight du raccord q3/q4 batch : confiance, mémoire, ledger ; sources publiées à `a6d81f9ce` | vivant, qualifications ouvertes | réponse D attendue |
+| [`q34_batch_duplicate_gate_20260923/`](q34_batch_duplicate_gate_20260923/README.md) | A | 23/15:20 | mutant doublon/omission à masque et ledger constants : clé q3 perdue malgré validation ; source identique au port S2 publié | testé borné, vivant | sans objet |
 | [`CONTRE_AUDIT_B_VALIDATION_INDEX_GPU_S1_20260923.md`](CONTRE_AUDIT_B_VALIDATION_INDEX_GPU_S1_20260923.md) | B | 23/13:49 | preuve du coût de la garde brute et certificat linéaire proposé | vivant | sans réponse |
 | [`AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md`](AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md) | A | 23/13:17 | contre-exemples fermés par `7565451fc` ; certificat d'index linéaire réutilisable pour S2 | clos pour les défauts, vivant pour le coût | corrigée |
 | [`PROPOSITION_B_GPU_STREAMING_S2_20260923.md`](PROPOSITION_B_GPU_STREAMING_S2_20260923.md) | B | `8432e2353` 13:28 | tuilage borné S2a et certificat bloc/ligne S2b avec portes causales | vivant | sans réponse |

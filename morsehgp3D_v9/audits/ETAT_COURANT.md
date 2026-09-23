@@ -99,18 +99,21 @@ signale trois portes avant de qualifier S2 : adapter de filtre fiable
 et porte différentielle causale (les ledgers acceptent même un retour
 tout zéro), tuilage borné au lieu de matérialiser tous rectangles et
 survivants, et conservation des compteurs de travail du filtre.
-Dans ce WIP, `q34_occupancy.cpu_sum_s` n'inclut pas la phase batch de
+Dans ce chemin, `q34_occupancy.cpu_sum_s` n'inclut pas la phase batch de
 filtrage ; comparer cette occupation à celle du moteur sous-estimerait
 le travail q3/q4 intégré. Le temps CPU du processus garde un périmètre
 plus large.
-Cette lecture porte sur un diff mutable, non sur le GPU S1 publié.
+Le préflight portait sur un diff mutable ; ses trois mécanismes restent
+visibles dans le port S2 publié par **`a6d81f9ce`**. La réception GPU
+de la chaîne sur G4 reste distincte.
 La [porte causale A](q34_batch_duplicate_gate_20260923/README.md) exerce
 le même point de confiance : à trois sites/K3, remplacer un survivant par
 un doublon de même masque conserve cardinalité, masses et compteurs,
 `validate_completion` réussit, mais l'unique clé q3 disparaît. Le reçu
-Release porte sur le batch CPU du WIP, avec mutation injectée ; aucune
-erreur spontanée CUDA ni tour FULL n'en est déduite. Il faut contrôler
-l'ordinal des paires et qualifier séparément leurs masques géométriques.
+Release porte sur le batch CPU du snapshot avant publication, avec mutation
+injectée ; aucune erreur spontanée CUDA ni tour FULL n'en est déduite.
+Il faut contrôler l'ordinal des paires et qualifier séparément leurs
+masques géométriques.
 Le [shadow des rectangles](Q34_BLOCS_LIDAR_SHADOW_20260923.md) donne un
 critère d'ordonnancement S2a concret sur 08/000000/s8 : à K5, **1 081 123
 des 1 128 166** rectangles ouverts ont moins de 16 paires, mais ne portent
@@ -130,8 +133,17 @@ sur la portion workers dans chaque cas. Cette borne conditionnelle
 n'inclut pas une réduction du travail ni un changement de coût par
 opération ; elle oriente la suite vers moins de paires, formes et
 sorties intermédiaires, avec coût aval complet.
-Les mesures de densité restent celles du binaire v12 **`4530644b`** ;
-aucune nouvelle série LiDAR v13 n'en découle. Le reçu G4
+La **matrice complète** de densité reste celle du binaire v12
+**`4530644b`**. Un [rejeu S2/v17 apparié](q34_batch_density_quarter_20260923/README.md)
+sur le quart brut `x≥0,y<0` de 08/000000 à K5 et aux mêmes trois densités
+trouve des tours/catalogues identiques moteur–batch CPU. Les formes cœur
+restent 3,549→14,655→52,302 M (`p=2,002/1,823`) ; au plein du quart,
+le batch sans cache passe de 97,76 à 162,48 M visites de paires témoins,
+de 44,225 à 46,253 CPU·s et de 585 328 à 597 424 KiB RSS. Une
+répétition locale et un quart ne qualifient ni la croissance globale de
+S2 ni CUDA/G4. Le runner LiDAR v17 constructeur force les leviers batch/GPU
+à `false` et n'échantillonne que des disques 8k/16k/32k ; il ne rejoue
+pas cette matrice. Le reçu G4
 [R8](../receipts/g4_tower_r8_20260923/README.md) exécute
 `515b3666` sur CPU G4 et a sa
 [contrelecture indépendante](CONTRE_AUDIT_B_G4_R8_20260923.md). Le
