@@ -9,6 +9,9 @@ worker SHA-256
 Le manifeste et les sources empaquetées concordent ; ce constat ne valide
 pas les sorties de calcul. Ne pas confondre l'étiquette de préparation
 `prepared_not_executed` du paquet avec le cycle de vie LIVE de la session.
+Le [reçu R2 versionné](../receipts/g4_tower_r2_20260923/README.md) a été
+publié ensuite au commit `bb2c40dc` ; son paquet reste celui de
+`0b29b6c3`, pas le protocole v4 publié entre-temps.
 
 ## Plan réellement envoyé
 

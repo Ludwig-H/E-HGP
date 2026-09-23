@@ -1,7 +1,8 @@
-# Contre-audit B — correction du protocole v4 (WIP)
+# Contre-audit B — correction du protocole v4
 
-23 septembre 2026. Lecture du worktree développeur non commis, worker
-SHA-256 `a6715ac8…`, session `c7f5f32f…`, nouvelle porte réelle
+23 septembre 2026. Lecture initiale du worktree développeur, ensuite
+publié **sans changement de ces trois octets** au commit `e54f727c` :
+worker SHA-256 `a6715ac8…`, session `c7f5f32f…`, nouvelle porte réelle
 `probe_worker_contract.py` `d3b48060…`. Aucun nouveau GCP lancé par
 l'auditeur. Le paquet R2 antérieur, `0b29b6c3`, reste définitivement
 `worker_failed/probe_failed` malgré ses treize sorties brutes.
@@ -12,8 +13,9 @@ MEB et son tableau des compteurs entiers ; il arrête les cas suivants
 après le premier `probe_failed` ; les sous-chronos ne peuvent plus
 dépasser le total, qui est lui-même borné par le mur externe du cas.
 Une porte CTest lance une **vraie** sonde native et compare le résultat
-on/off et onze mutations du protocole. Ces améliorations sont encore du
-WIP, ni versionnées ni qualifiées sur G4.
+on/off et onze mutations du protocole. Ces améliorations sont versionnées,
+mais leurs portes complètes et leur raccord pré-G4 restent à vérifier sur
+le commit ; aucune qualification G4 v4 n'en découle.
 
 ## Trois mutations encore acceptées
 
@@ -70,3 +72,22 @@ de sortie 0, ne recalcule pas tous les temps/RSS résumés à partir des
 fichiers bruts, et ne lie pas la provenance déclarée du reçu aux objets
 Git lors de la réception. Aucune n'explique l'échec R2, mais elles
 interdisent de lire tout `partial` comme preuve autonome de contrat.
+
+## Relecture après le commit
+
+Le commit publié est `e54f727c` (mêmes hashes des trois fichiers cités).
+Deux selftests ciblés, validation de sonde/temps et arrêt après défaut,
+passent. Sur la suite Python de 18 tests, 17 ont passé et
+`test_snapshot_from_commit` a échoué parce que `HEAD` a changé pendant
+son exécution ; rejoué seul sur un `HEAD` stable, il passe. Cette course
+de test n'est pas une réfutation du protocole, mais elle impose de
+publier les reçus avec un commit stable plutôt qu'un résultat global
+« 18/18 » déduit d'un rejeu favorable. Les trois mutants acceptés et
+l'absence de préflight obligatoire demeurent dans les octets commis.
+
+Le workflow CI v9 ne surveille, parmi les fichiers de protocole, que
+`tower_worker_v9.py` : une modification de `tower_session_v9.py`,
+`tower_snapshot_v9.py` ou `tower_selftest_v9.py` seule ne déclenche pas
+ce workflow. Il exécute les CTests CPU, pas la suite Python de cycle de
+vie factice. Ajouter ces chemins et ce test avant d'utiliser le statut
+CI comme porte protocolaire complète.
