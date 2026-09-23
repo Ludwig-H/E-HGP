@@ -3597,3 +3597,44 @@ paresseux sur la trame brute.
 
 B : merci pour la contrelecture du libellé. R13 portera le différentiel
 catalogue clé par clé et le bras lots CPU.
+
+### Contrelecture B des deux diagnostics de formes — 23 septembre
+
+Le préfixe de A est exact dans l'ordre courant : 242,982 M formes de
+cœur non lues sur le brut 08/000000/K5. Son analyseur remplit toutefois
+insuffisamment les classes `intersections` avant `summarize()` : leurs
+champs `post_closed_*`, `loads_full_prefix`, `loads_short_prefix` et
+`depth2_*` sont trompeurs. Les agrégats du README ne dépendent pas de
+ces champs et tiennent ; corriger ou marquer ces sous-champs indisponibles
+avant toute réutilisation. Les traces de jointure ne sont pas archivées.
+
+Le nouveau [reçu local des phases](../morsehgp3D_v9/receipts/q34_survivor_phases_20260923/README.md)
+sur **sans-sol** 08/000000/K5/K10 est cohérent, mais « 1,3 % de gain
+maximal » mélange une proportion de sites d'un run avec les cycles
+mesurés dans un second run. À présenter comme ordre de grandeur, pas
+comme borne ; les formes du cœur entières sont 3,4 % / 2,4 % de la
+phase dans cette seconde trace CPU. « Piste fermée » ne vaut au plus
+que pour la variante paresseuse seule, sur ce CPU et ce régime ; ni
+brut, ni GPU, ni rejet **avant** cœur ne sont jugés. Les `rdtsc` non
+sérialisés sur hôte partagé rendent les proportions indicatives.
+Surtout, sur les trois lignes G4 R12 K5, supprimer idéalement **tous**
+les survivants laisse 1,177/1,388/1,513 s de chaîne si les autres
+phases ne changent pas. S3 cœur/cover seul ne peut donc pas être le
+dernier levier du contrat. Détail dans la
+[note B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_VENTILATION_SURVIVANTS_20260923.md).
+
+**Ombre avant cœur, formule directement testable.** Dans la validation
+S2, garder les segments contigus de survivants par rectangle et leurs
+boîtes d'extrémités réelles. Pour une cellule `C` couvrant les centres
+positifs possédés, un garde réel `g` hors des deux plages originales
+est intérieur à toute boule de toute arête du segment si, à chacun
+des sommets `v` de `C`,
+`2|g−v|² < dist²(v,box(A_E))+dist²(v,box(B_E))`.
+La différence avec les deux distances aux extrémités est affine en
+`v`; `K−1` gardes distincts ferment donc q3 **et** q4, avant les
+formes du cœur. L'exemple entier à huit gardes de la proposition q4
+sépare ce test conditionnel du citron déjà payé. Ne pas ajouter de
+quadratique caché : préparation `O(R+S)`, tentative sur segments lourds,
+repli exact partout ailleurs, et publier le coût des gardes/cellules
+avec les **formes effectivement évitées**. Preuve et réserves dans la
+[note de croissance B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_CROISSANCE_Q34_AVAL_S2_20260923.md).

@@ -201,6 +201,21 @@ La pente finie de `Σh` au dernier doublement est encore **2,024** : ce
 shadow borne un potentiel de fabrication évitable, sans mesurer un gain
 CPU, sans conclure à une chaîne sous-quadratique et sans remplacer le
 certificat exact avant cœur.
+La [contrelecture B du préfixe](CONTRE_AUDIT_B_CROISSANCE_Q34_AVAL_S2_20260923.md)
+confirme ses sommes mais relève que l'analyseur publie des champs
+`post_closed_*` et `loads_full_prefix` faux dans ses seuls sous-groupes
+`intersections` ; ne pas les utiliser. Le reçu compact n'embarque pas
+les grosses traces nécessaires à la jointure autonome.
+Le [reçu local du développeur](../receipts/q34_survivor_phases_20260923/README.md),
+[contrelu par B](CONTRE_AUDIT_B_VENTILATION_SURVIVANTS_20260923.md),
+ventile les survivants sur une trame **sans sol** 08/000000 : cœur et
+cover occupent environ 35 % des cycles à K5, 28 % à K10, contre
+65/72 % pour atlas et voies. Son « 1,3 % maximal » pour les formes
+paresseuses mélange fraction de sites et cycles de deux runs ; c'est
+une estimation fragile, pas une borne. Les `rdtsc` sur hôte chargé ne
+transfèrent aucun gain G4. Même retirer idéalement **toute** la phase
+des arêtes survivantes des trois lignes K5 de R12 laisserait 1,177 à
+1,513 s de chaîne, à autres phases inchangées : S3 seul ne suffit pas.
 Les [demi-scènes et quarts aux trois densités](lidar_raw_physical_scaling_20260923/README.md)
 restent dans le reçu v12 ; la somme de leurs tours ne reconstruit pas le
 plein. Une scène/K5/CPU ne prouve ni sous-quadraticité, ni contrat G4.

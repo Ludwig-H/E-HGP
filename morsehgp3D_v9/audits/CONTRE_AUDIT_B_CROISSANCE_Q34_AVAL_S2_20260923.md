@@ -122,3 +122,89 @@ piste. Un résultat favorable demanderait encore une ablation ON/OFF
 avec flux complet de candidats, catalogue clé par clé, tour et digest
 identiques, plus CPU, mur G4 et HBM/RSS. L'étape industrielle suivante
 reste le tuilage borné : la liste globale S2 ne l'est pas.
+
+## Contrelecture du préfixe paresseux
+
+Le [reçu A](lazy_prefix_dead_core_20260923/README.md) mesure directement,
+sur le brut 08/000000/K5 aux trois densités, le plus grand ordinal de forme
+lu par le prouveur. Ses deux seuls accès à `forms_[id]` sont le balayage
+de la frontière et celui de `next`, constitué d'IDs déjà balayés : dans
+l'ordre présent, le suffixe après cet ordinal est effectivement omissible.
+J'ai recoupé les sommes, les pentes et les SHA du reçu : à pleine densité,
+**242 981 833 / 559 661 741** formes du cœur (43,42 %) ne sont pas lues,
+mais cela ne représente que **26,30 %** des formes cœur et cover réunies.
+Le préfixe lu croît encore avec une pente finie **2,024** au dernier
+doublement ; ni gain de temps ni croissance sous-quadratique n'est acquis.
+
+Réserve sur le fichier d'analyse auxiliaire : `analyze.py` ne remplit
+pour les classes `intersections` que `loads`, `forms` et le suffixe,
+puis leur applique `summarize()` comme si tous les autres compteurs
+étaient fournis. Ainsi les champs `post_closed_*`, `loads_full_prefix`,
+`loads_short_prefix` et `depth2_*` de ces **sous-classes** sont trompeurs
+(dans une classe `post_closed`, `post_closed_loads` sort même à zéro).
+Le README et `RESULTS.long4m` emploient les compteurs agrégés corrects ;
+ne pas exploiter les autres champs des intersections sans corriger
+l'analyseur. Le reçu compact hache ses fichiers conservés, mais les
+traces binaires, entrées et analyses détaillées restent sous `/tmp` :
+la jointure par arête n'est pas autonome à partir du seul commit.
+
+## Certificat simple à essayer dans l'ombre **avant** le cœur
+
+Le parcours de validation S2 connaît déjà, pour chaque rectangle ouvert,
+le segment contigu `E` de ses **arêtes réellement survivantes**, avant de
+libérer les rectangles et de distribuer des grains arbitraires de 64.
+Accumuler en un passage les boîtes des extrémités **réelles** de `E`
+coûte `O(R+S)` au total, sans expanser à nouveau `A×B`. Pour une cellule
+convexe fermée `C` couvrant tous les centres q3/q4 admissibles d'`E`,
+des gardes `g` réels distincts et chacun de ses sommets `v`, essayer
+la stricte comparaison exacte
+
+`2|g−v|² < dist²(v, box(A_E)) + dist²(v, box(B_E))`.                `(†)`
+
+Une enveloppe conservatrice des **présentations positives possédées par
+leur plus longue arête** est la boîte des milieux des arêtes d'`E`,
+élargie sur chaque axe d'un entier `r` tel que `8r²≥Dmax`, puis
+intersectée avec le cube de coordonnées de l'index ; la borne de
+variance barycentrique q4 est `|c−m|²≤D/8`, et q3 est plus serrée.
+Une subdivision couvrante peut rendre `C` plus utile sans exclure
+aucun centre. Cette enveloppe ne prétend rien pour un candidat non
+possédé par l'arête considérée.
+
+Le membre droit minore `|a−v|²+|b−v|²` pour toute arête `(a,b)∈E`.
+La différence `2|g−c|²−|a−c|²−|b−c|²` est **affine** en `c` ; si `(†)`
+tient pour tous les sommets, elle est négative dans toute `C`. À un
+centre d'une boule passant par `a,b`, les deux dernières distances
+valent le rayon au carré : `g` est donc strictement intérieur. Avec
+`K−1` gardes distincts, cela ferme **ensemble** q3 et q4 sur `E`
+avant toute forme du cœur ; `K−2` gardes ne ferment que q4. Un garde
+pris hors des deux plages de nœuds `A,B` du rectangle ne peut être une
+extrémité d'`E` et garantit le non-double-compte. Les gardes et les
+boîtes doivent appartenir au même index et au même masque de nuage.
+
+Un second minorant gratuit à ce même passage mérite d'être essayé **en
+alternative sommet par sommet**. Stocker la boîte `M_E` des milieux
+`m_e=(a+b)/2` et `Dmin=min_E|a−b|²`. L'identité
+`(|a−v|²+|b−v|²)/2=|v−m_e|²+|a−b|²/4` donne, pour toute arête,
+`L₂(v)=dist²(v,M_E)+Dmin/4 ≤ (|a−v|²+|b−v|²)/2`.
+Avec `L₁(v)=[dist²(v,box(A_E))+dist²(v,box(B_E))]/2`, tester
+`|g−v|² < max(L₁(v),L₂(v))` à **chaque** sommet de `C`. `L₁` et `L₂`
+minorent tous deux la même quantité pour toutes les arêtes ; le maximum
+reste sûr et peut sauver un segment d'arêtes longues dont les boîtes
+séparées sont lâches. Les milieux demi-entiers et `Dmin/4` doivent être
+comparés après multiplication entière commune, sans `float` ni
+arrondi vers le mauvais côté. Le calcul des trois boîtes et de `Dmin`
+reste `O(S)` ; l'intérêt et les visites de recherche de gardes restent
+à mesurer sur les vrais segments S2.
+
+Ce test est seulement **suffisant**. Une cellule de centres trop large,
+ou des boîtes d'extrémités trop lâches, peut le faire échouer alors
+qu'aucune sortie n'existe ; subdiviser seulement les segments lourds
+ou repasser au chemin exact. L'[exemple entier à huit gardes](DOMINATION_Q4_PARESSEUSE_PAR_BLOCS_20260923.md)
+montre qu'une division en deux demi-cellules peut fermer K5/q3+q4
+alors que le citron ponctuel S2 ne crédite aucun de ces gardes : il
+ne s'agit donc pas d'un simple recomptage du milieu. Mais sa fréquence
+sur LiDAR, son coût de recherche des gardes et le taux de repli sont
+**inconnus**. En shadow, compter les segments/voies effectivement
+certifiés, les formes cœur et cover que leurs arêtes auraient réellement
+chargées, ainsi que toutes les visites/boîtes/écritures supplémentaires.
+Le critère ne remplace pas le tuilage borné du lot S2.
