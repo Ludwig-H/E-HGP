@@ -75,6 +75,15 @@ foreach(gate IN ITEMS full_certificate full_coverage_certificate anchor_meb loca
   mhgp9_gate(mhgp9_tower_${gate}_bad_argument 2 mhgp9_tower_${gate}_gate
              ARGS --unknown LABELS "gate;tower" TIMEOUT 60)
 endforeach()
+# Tri parallele de la tour : permutation egale a std::sort pour tout nombre de
+# fils, et son mutant compile (fusions remplacees par des copies) tue.
+mhgp9_product_executable(mhgp9_tower_parallel_sort_gate tests/tower/parallel_sort_gate.cpp)
+mhgp9_gate(mhgp9_tower_parallel_sort 0 mhgp9_tower_parallel_sort_gate
+           ARGS --selftest LABELS "gate;tower" TIMEOUT 300)
+mhgp9_product_executable(mhgp9_tower_parallel_sort_mutant_gate tests/tower/parallel_sort_gate.cpp)
+target_compile_definitions(mhgp9_tower_parallel_sort_mutant_gate PRIVATE MHGP9_PARALLEL_SORT_MUTANT_COPY_PAIRS=1)
+mhgp9_gate(mhgp9_tower_parallel_sort_mutant_copy_pairs 1 mhgp9_tower_parallel_sort_mutant_gate
+           ARGS --selftest EXPECT_PREFIX "cause=parallel_sort.permutation" LABELS "gate;tower;mutant" TIMEOUT 300)
 mhgp9_gate(mhgp9_tower_full_certificate_rejects 0 mhgp9_tower_full_certificate_gate
            ARGS --rejects LABELS "gate;tower" TIMEOUT 60)
 mhgp9_gate(mhgp9_tower_full_ball_static_cpu1 0 mhgp9_tower_full_ball_tower_gate
@@ -117,6 +126,12 @@ foreach(kind IN ITEMS historical line12 shell14 spatial12 rejects)
   mhgp9_gate(mhgp9_chain_census_tower_${kind} 0 mhgp9_chain_census_tower_gate
              ARGS --${kind} LABELS "gate;chain;oracle" TIMEOUT 300)
 endforeach()
+# Voies de resolution de la tour sur un nuage de 1 500 sites : temporelle et
+# statique 1/4/8 fils, meme tour ; le tri parallele des requetes y est exerce.
+mhgp9_product_executable(mhgp9_chain_static_paths_gate tests/chain/chain_static_paths_gate.cpp)
+target_link_libraries(mhgp9_chain_static_paths_gate PRIVATE mhgp9_chain)
+mhgp9_gate(mhgp9_chain_static_paths 0 mhgp9_chain_static_paths_gate
+           ARGS --selftest LABELS "gate;chain" TIMEOUT 300)
 mhgp9_gate(mhgp9_chain_census_tower_bad_argument 2 mhgp9_chain_census_tower_gate
            ARGS --unknown LABELS "gate;chain" TIMEOUT 60)
 mhgp9_gate(mhgp9_chain_census_tower_mutant_assignment 1 mhgp9_chain_census_tower_gate

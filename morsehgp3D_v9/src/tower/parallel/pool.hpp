@@ -161,4 +161,55 @@ inline size_t parallel_items(size_t n, int threads, Fn&& fn) {
   return T;
 }
 
+// Tri parallele pour un ordre STRICT et TOTAL `less` (aucun ex aequo) : le
+// resultat est donc l'unique permutation triee, bit-identique au tri
+// sequentiel quel que soit le nombre de fils. Tranches triees en parallele,
+// puis fusions deux a deux en parallele (log2 tranches passes). Retourne le
+// nombre d'ouvriers crees au plus large.
+template <typename T, typename Less>
+inline size_t parallel_sort(std::vector<T>& values, int threads, Less less) {
+  const size_t n = values.size();
+  const size_t workers = planned_workers(n / 4096, threads);
+  if (workers <= 1) {
+    std::sort(values.begin(), values.end(), less);
+    return n > 0 ? 1 : 0;
+  }
+  const size_t runs = workers;
+  std::vector<size_t> bounds(runs + 1);
+  for (size_t r = 0; r <= runs; ++r) bounds[r] = n * r / runs;
+  size_t created = parallel_items(runs, threads, [&](size_t r, size_t) {
+    std::sort(values.begin() + bounds[r], values.begin() + bounds[r + 1], less);
+  });
+  std::vector<T> buffer(n);
+  std::vector<T>* from = &values;
+  std::vector<T>* to = &buffer;
+  while (bounds.size() > 2) {
+    const size_t pairs = (bounds.size() - 1) / 2;
+    std::vector<size_t> next;
+    next.push_back(0);
+    for (size_t j = 0; j < pairs; ++j) next.push_back(bounds[2 * j + 2]);
+    if ((bounds.size() - 1) % 2) next.push_back(bounds.back());
+    const size_t tasks = next.size() - 1;
+    created = std::max(created, parallel_items(tasks, threads, [&](size_t j, size_t) {
+#if defined(MHGP9_PARALLEL_SORT_MUTANT_COPY_PAIRS)
+      if (false) {
+#else
+      if (2 * j + 1 < bounds.size() - 1) {
+#endif
+        std::merge(from->begin() + bounds[2 * j], from->begin() + bounds[2 * j + 1],
+                   from->begin() + bounds[2 * j + 1], from->begin() + bounds[2 * j + 2],
+                   to->begin() + bounds[2 * j], less);
+      } else {
+        // Unpaired last run: copied as is. (Mutant gate: every pair copied.)
+        const size_t last = std::min(bounds.size() - 1, 2 * j + 2);
+        std::copy(from->begin() + bounds[2 * j], from->begin() + bounds[last], to->begin() + bounds[2 * j]);
+      }
+    }));
+    bounds.swap(next);
+    std::swap(from, to);
+  }
+  if (from != &values) values.swap(*from);
+  return created;
+}
+
 }  // namespace mhgp9::tower

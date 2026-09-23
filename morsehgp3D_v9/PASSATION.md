@@ -61,7 +61,7 @@ local ; bornes de census q3 −54 % mais 610 M tests ponctuels de frontière
 faire.
 
 Arêtes sans sortie ([reçu](receipts/q34_dead_edges_20260923/README.md)) :
-91 % du temps q3/q4 va aux arêtes qui n'émettent rien. Le **certificat de voie
+86 % des cycles q3/q4 instrumentés (97 % hors filtre de paires) vont aux arêtes qui n'émettent rien. Le **certificat de voie
 morte** (`lanes/q34_dead_lanes`, défaut de la chaîne, épinglé par la sonde v5
 et le plan G4 v3) couvre le disque des centres possibles de chaque voie par
 des cellules portant T intérieurs uniformes ; il divise le CPU q3/q4 par 2,9 à

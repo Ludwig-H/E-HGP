@@ -211,3 +211,28 @@ CPU total ÷2,3 à ÷3,4 ; condensés égaux à R1/R2. La tour domine désormais
 K10 et plafonne de 24 à 48 fils : chantier suivant, sa partie séquentielle.
 Une répétition par cas apparié ; aucune qualification de contrat.
 
+## 23 septembre 2026, 02 h — Partie séquentielle de la tour (développeur)
+
+GCP non utilisé. Correction : les « 91 % » d'arêtes sans sortie des entrées
+précédentes sont faux ; lire 86 % des cycles instrumentés (97 % hors filtre
+de paires), cf. `receipts/q34_dead_edges_20260923/ERRATUM.md` (merci B).
+
+Tour FULL, voie statique : facettes représentatives sans allocation (tampon
+fixe), cibles statiques consommées sans recopier ni retrier les facettes,
+validation du catalogue en deux passes (contrôles locaux en parallèle, puis
+plateaux étendus, fenêtres et comptes en série ; échec rapporté au premier
+indice comme en série), collecte des requêtes par blocs parallèles
+concaténés dans l'ordre du programme, tris par clé et par niveau parallèles
+(ordres stricts et totaux : permutation unique, `parallel_sort`), forêts des
+K ordres construites en parallèle. Condensé inchangé sur 000100 K10 ; tour
+locale W8 42,6 → 28,0 s sur hôte partagé (chronos indicatifs). Réponse au
+contre-audit B de la préparation parallèle : le pic du tri compte le tampon
+de fusion (`static_peak_request_bytes` double si plusieurs fils), les
+tampons des forêts sont libérés dans chaque tâche, porte
+`mhgp9_tower_parallel_sort` (permutation égale à `std::sort`, 400 cas, 1 à 48
+fils, tranches impaires) et son mutant compilé tué, porte
+`mhgp9_chain_static_paths` (1 500 sites, 100 407 requêtes statiques, voies
+temporelle et statique 1/4/8 fils : même tour, condensé
+`73490cf88c02af30` égal au preflight G4 R3). Reste séquentiel : les lots
+(≈ 12 s en W8 local), la banque (2 s).
+

@@ -1,3 +1,4 @@
+9ea8b3d76ef34357eac54bbc961ef6c83eea3ebb1e82a4036c5ffa8007b60979  ./ERRATUM.md
 cbee731be1822b1c0d5cd2e55cd26163d146d1006eced157014368de78d3747e  ./README.md
 b4efdd27b92f4d3cc28718c16122ff47c6443400245afb67767f149f95ca16a9  ./harness/instrumentation_atlas_root.patch
 e592eada0e11b0913e24e1c0b1edcf1b96f8b83ab4909be28efa3382e92a31d0  ./harness/instrumentation_edge_classes.patch

@@ -106,8 +106,9 @@ servie par un fragment conservé) et planchers ; deux mutants causaux
 Code neuf v9 (23 septembre 2026) : le **certificat de voie morte**
 (`lanes/q34_dead_lanes.{hpp,cpp}`, option `WspdQ34Options::dead_lanes`,
 défaut de la chaîne). Mesure qui le motive : sur 08/000000 sans sol à K5, les
-arêtes qui n'émettent **rien** prennent 91 % du temps q3/q4 (atlas 38 %, voie
-q3 27 %), avec des covers de 568 sites contre 43 pour les arêtes vivantes.
+arêtes qui n'émettent **rien** prennent 86 % des cycles q3/q4 instrumentés
+(97 % hors filtre de paires), avec des covers de 1 704 sites en moyenne contre
+43 pour les arêtes vivantes (erratum du reçu `q34_dead_edges_20260923`).
 Énoncé : les centres des boules possédées par ab vérifient
 $|c-m|^2 \le |ab|^2/12$ (q3 aiguë) et $|c-m|^2 \le |ab|^2/8$ (q4 positive),
 par l'identité barycentrique du rayon ; une voie est vide si des cellules

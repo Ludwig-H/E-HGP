@@ -371,14 +371,21 @@ class Builder {
     std::vector<FullCoveragePopulation>().swap(populations);
     std::vector<FullBallOrder> result;
     result.reserve(kmax);
+    // The K forests are independent encodings of their own drafts over the
+    // shared immutable bank: built in parallel on the static path, then
+    // validated and published in K order (same objects, same statuses).
+    std::vector<FullCoverageBuildResult> forests(kmax);
+    parallel_items(kmax, geometry_threads, [&](size_t i, size_t) {
+      forests[i] = build_full_coverage_certificate(static_cast<unsigned>(i + 1), bank.value, drafts[i].batches);
+      std::vector<FullCoverageBatch>().swap(drafts[i].batches);  // encoded: release at once
+    });
     for (unsigned k = 1; k <= kmax; ++k) {
-      auto forest = build_full_coverage_certificate(k, bank.value, drafts[k - 1].batches);
+      auto& forest = forests[k - 1];
       require(forest.status == FullCertificateStatus::kOk, "full_ball_structural_certificate",
           forest.status == FullCertificateStatus::kResourceExhausted ? FullBallStatus::kResourceExhausted
                                                                    : FullBallStatus::kInvariantViolated);
       require(forest.value.nodes().size() == drafts[k - 1].lower_nodes.size(), "full_ball_node_encoding");
       result.push_back({std::move(forest.value), std::move(drafts[k - 1].lower_nodes)});
-      std::vector<FullCoverageBatch>().swap(drafts[k - 1].batches);
     }
     return result;
   }
@@ -415,13 +422,44 @@ class Builder {
     return result;
   }
 
-  void validate_declared_support(const BallData& ball, const std::array<i32, 4>& support) {
+  // Checks of one catalogue ball that read only immutable inputs (safe in
+  // parallel); `checks` counts the declared-support certifications.
+  void check_ball_locally(const BallData& ball, u64& checks) const {
+    constexpr auto invalid = FullBallStatus::kInvalidInput;
+    require(ball.arity >= 2 && ball.arity <= 4 && ball.n_shell >= ball.arity &&
+        ball.n_shell <= kBallShellMax && ball.n_interior <= kBallInteriorMax &&
+        ball.level.den > 0, "full_ball_census_shape", invalid);
+    std::array<i32, kBallInteriorMax + kBallShellMax> selected{};
+    size_t n = 0;
+    for (const auto sites : {ball.interior(), ball.shell()}) for (i32 site : sites) {
+      require(site >= 0 && static_cast<size_t>(site) < ix.upos.size(), "full_ball_geometry_index", invalid);
+      selected[n++] = site;
+    }
+    std::sort(selected.begin(), selected.begin() + n);
+    require(std::adjacent_find(selected.begin(), selected.begin() + n) == selected.begin() + n,
+            "full_ball_repeated_census_site", invalid);
+    // Bound BEFORE any power/axis arithmetic, including malformed callers.
+    // u18 bounds (v9): q3 gives A<2^76, |B|<2^96, |C|<2^116 (auditor A);
+    // q4 gives A=det<2^60, |B|<2^81, |C|<2^100; q2 is smaller.
+    require(ball.key.a > 0 && ball.key.a < (i128{1} << 76) &&
+        uabs128(ball.key.c) < (u128{1} << 116), "full_ball_key_domain", invalid);
+    for (i128 b : ball.key.b) require(uabs128(b) < (u128{1} << 96), "full_ball_key_domain", invalid);
+    for (i32 site : ball.interior()) require(ball.key.power(ix.upos[site]) < 0, "full_ball_census_power", invalid);
+    for (i32 site : ball.shell()) require(ball.key.power(ix.upos[site]) == 0, "full_ball_census_power", invalid);
+    if (ball.n_shell == ball.arity) {
+      std::array<i32,4> support{};
+      std::copy(ball.shell().begin(), ball.shell().end(), support.begin());
+      validate_declared_support(ball, support, checks);
+    }
+  }
+
+  void validate_declared_support(const BallData& ball, const std::array<i32, 4>& support, u64& checks) const {
     // The caller has already validated indices, primitive-domain bounds and
     // every interior/shell power. A positive declared support reproducing the
     // ball certifies it directly, without enumerating any of its sub-supports.
     std::array<P3, 4> positions{};
     for (size_t j = 0; j < ball.arity; ++j) positions[j] = ix.upos[support[j]];
-    add(st.declared_support_checks);
+    add(checks);
     anchor_meb_detail::Candidate candidate;
     require(anchor_meb_detail::form(std::span<const P3>(positions.data(), ball.arity),
         {0, 1, 2, 3}, ball.arity, candidate), "full_ball_census_geometry", FullBallStatus::kInvalidInput);
@@ -457,38 +495,50 @@ class Builder {
     for (const auto& row : identity) domain.push_back(row.first);
     require(std::adjacent_find(domain.begin(), domain.end()) == domain.end(), "full_ball_duplicate_id", invalid);
     by_key.resize(balls.size()); std::iota(by_key.begin(), by_key.end(), BallId{0});
-    std::sort(by_key.begin(), by_key.end(), [&](BallId a, BallId b) { return balls[a].key < balls[b].key; });
+    // Keys are pairwise distinct (checked below): a strict total order, so
+    // the parallel sort is the unique sorted permutation.
+    parallel_sort(by_key, geometry_threads, [&](BallId a, BallId b) { return balls[a].key < balls[b].key; });
     for (size_t j = 1; j < by_key.size(); ++j)
       require(!(balls[by_key[j]].key == balls[by_key[j - 1]].key), "full_ball_duplicate_key", invalid);
     std::vector<u8> qmins(balls.size());
     std::vector<size_t> counts(kmax + 1, 0);
-    for (size_t j = 0; j < balls.size(); ++j) {
-      const auto& ball = balls[j];
-      require(ball.arity >= 2 && ball.arity <= 4 && ball.n_shell >= ball.arity &&
-          ball.n_shell <= kBallShellMax && ball.n_interior <= kBallInteriorMax &&
-          ball.level.den > 0, "full_ball_census_shape", invalid);
-      std::array<i32, kBallInteriorMax + kBallShellMax> selected{};
-      size_t n = 0;
-      for (const auto sites : {ball.interior(), ball.shell()}) for (i32 site : sites) {
-        require(site >= 0 && static_cast<size_t>(site) < ix.upos.size(), "full_ball_geometry_index", invalid);
-        selected[n++] = site;
+    // Pass 1, parallel on the static path: the per-ball exact checks that
+    // touch no shared state (shape, sites, key domain, census powers, and the
+    // declared support of regular balls). Pass 2, serial in index order: the
+    // plateau tables and witnesses of extended shells, rank windows, counts.
+    // The reported failure is the first one in index order, as sequentially.
+    const size_t absent_index = std::numeric_limits<size_t>::max();
+    size_t first_local_failure = absent_index;
+    Failure local_failure{FullBallStatus::kInvariantViolated, ""};
+    {
+      constexpr size_t block = 2048;
+      const size_t blocks = (balls.size() + block - 1) / block;
+      std::vector<size_t> failed_at(blocks, absent_index);
+      std::vector<Failure> failures(blocks, local_failure);
+      std::vector<u64> checks(blocks, 0);
+      parallel_items(blocks, geometry_threads, [&](size_t chunk, size_t) {
+        for (size_t j = chunk * block; j < std::min(balls.size(), (chunk + 1) * block); ++j) {
+          try {
+            check_ball_locally(balls[j], checks[chunk]);
+          } catch (const Failure& failure) {
+            failed_at[chunk] = j; failures[chunk] = failure;
+            return;
+          }
+        }
+      });
+      for (size_t c = 0; c < blocks; ++c) {
+        add(st.declared_support_checks, checks[c]);
+        if (failed_at[c] != absent_index && first_local_failure == absent_index) {
+          first_local_failure = failed_at[c]; local_failure = failures[c];
+        }
       }
-      std::sort(selected.begin(), selected.begin() + n);
-      require(std::adjacent_find(selected.begin(), selected.begin() + n) == selected.begin() + n,
-              "full_ball_repeated_census_site", invalid);
-      // Bound BEFORE any power/axis arithmetic, including malformed callers.
-      // u18 bounds (v9): q3 gives A<2^76, |B|<2^96, |C|<2^116 (auditor A);
-      // q4 gives A=det<2^60, |B|<2^81, |C|<2^100; q2 is smaller.
-      require(ball.key.a > 0 && ball.key.a < (i128{1} << 76) &&
-          uabs128(ball.key.c) < (u128{1} << 116), "full_ball_key_domain", invalid);
-      for (i128 b : ball.key.b) require(uabs128(b) < (u128{1} << 96), "full_ball_key_domain", invalid);
-      for (i32 site : ball.interior()) require(ball.key.power(ix.upos[site]) < 0, "full_ball_census_power", invalid);
-      for (i32 site : ball.shell()) require(ball.key.power(ix.upos[site]) == 0, "full_ball_census_power", invalid);
+    }
+    for (size_t j = 0; j < balls.size(); ++j) {
+      if (j == first_local_failure) throw local_failure;
+      const auto& ball = balls[j];
       std::array<i32,4> support{};
       unsigned q = ball.arity;
-      if (ball.n_shell == ball.arity) {
-        std::copy(ball.shell().begin(), ball.shell().end(), support.begin());
-      } else {
+      if (ball.n_shell != ball.arity) {
         local_plateau::LocalCensus local{ball.key, {}, {}};
         for (i32 site : ball.interior()) local.interior.push_back({ix.point_id(site), ix.upos[site]});
         for (i32 site : ball.shell()) local.shell.push_back({ix.point_id(site), ix.upos[site]});
@@ -501,9 +551,6 @@ class Builder {
           if (mask & (u16{1} << bit)) support[at++] = geometry_id(table.census().shell[bit].id);
         require(at == q, "full_ball_minimum_support");
         extra.emplace(static_cast<BallId>(j), std::move(table)); add(st.extra_records);
-      }
-      if (ball.n_shell == ball.arity) validate_declared_support(ball, support);
-      else {
         const auto witness = meb(std::span<const i32>(support.data(), q), st.validation_work);
         require(witness.support_size == q && witness.key == ball.key &&
             same_exact_level(witness.level, ball.level), "full_ball_census_geometry", invalid);
@@ -527,7 +574,8 @@ class Builder {
         rank[by_key[j]] = static_cast<BallId>(j);
         approx[by_key[j]] = level_approximation(balls[by_key[j]].level);
       }
-      std::sort(by_level.begin(), by_level.end(), [&](BallId a, BallId b) {
+      // Ties end on the by_key rank: a strict total order, parallel sorted.
+      parallel_sort(by_level, geometry_threads, [&](BallId a, BallId b) {
         const double x = approx[a], y = approx[b];
         if (x < y * kLevelFilterMargin) return true;
         if (y < x * kLevelFilterMargin) return false;
@@ -772,36 +820,72 @@ class Builder {
     require(next == pending.size(), "full_ball_batch_unconsumed_results");
   }
 
+  // Insertion sort of the first n <= kFacetMaxK sites of a facet key.
+  static void sort_prefix(ResolverCache::Key& key, size_t n) {
+    require(n <= key.size(), "full_ball_facet_cardinality");
+    for (size_t i = 1; i < n; ++i)
+      for (size_t j = i; j > 0 && key[j] < key[j - 1]; --j) std::swap(key[j], key[j - 1]);
+  }
+
   void prepare_static_order() {
     using Request = FullBallBatchRequest;
     std::vector<Request> requests;
     std::vector<StaticSeed> seeds;
-    for (BallId id : programs[current_k]) {
-      u16 contribution = 0; bool interior = false;
-      visit_block(id, contribution, interior, [&](std::vector<i32> sites) {
-        std::sort(sites.begin(), sites.end());
-        require(sites.size() == current_k && std::adjacent_find(sites.begin(), sites.end()) == sites.end(),
-                "full_ball_static_representative_cardinality");
-        requests.push_back({ResolverCache::key(sites), id, requests.size()});
-      });
-      const auto& b = balls[id];
-      if (current_k == static_cast<unsigned>(b.n_interior) + b.n_shell) {
-        ResolverCache::Key key{};
-        size_t n = 0;
-        for (i32 site : b.interior()) key[n++] = site;
-        for (i32 site : b.shell()) key[n++] = site;
-        std::sort(key.begin(), key.begin() + n);
-        seeds.push_back({key, id});
+    // Collection by fixed blocks of the program, in parallel on the static
+    // path, then concatenated in program order: ordinals are the positions of
+    // the sequential collection (same requests, same order, any thread count).
+    const auto& program = programs[current_k];
+    constexpr size_t block = 4096;
+    struct Collected { std::vector<std::pair<ResolverCache::Key, BallId>> requests; std::vector<StaticSeed> seeds; };
+    std::vector<Collected> collected((program.size() + block - 1) / block);
+    parallel_items(collected.size(), geometry_threads, [&](size_t chunk, size_t) {
+      auto& out = collected[chunk];
+      for (size_t j = chunk * block; j < std::min(program.size(), (chunk + 1) * block); ++j) {
+        const BallId id = program[j];
+        u16 contribution = 0; bool interior = false;
+        visit_block(id, contribution, interior, [&](std::span<const i32> facet) {
+          require(facet.size() == current_k && facet.size() <= kFacetMaxK,
+                  "full_ball_static_representative_cardinality");
+          auto key = ResolverCache::key(facet);
+          sort_prefix(key, facet.size());
+          require(std::adjacent_find(key.begin(), key.begin() + facet.size()) == key.begin() + facet.size(),
+                  "full_ball_static_representative_cardinality");
+          out.requests.emplace_back(key, id);
+        });
+        const auto& b = balls[id];
+        if (current_k == static_cast<unsigned>(b.n_interior) + b.n_shell) {
+          ResolverCache::Key key{};
+          size_t n = 0;
+          for (i32 site : b.interior()) { require(n < key.size(), "full_ball_static_seed_cardinality"); key[n++] = site; }
+          for (i32 site : b.shell()) { require(n < key.size(), "full_ball_static_seed_cardinality"); key[n++] = site; }
+          sort_prefix(key, n);
+          out.seeds.push_back({key, id});
+        }
       }
+    });
+    size_t total_requests = 0, total_seeds = 0;
+    for (const auto& c : collected) { total_requests += c.requests.size(); total_seeds += c.seeds.size(); }
+    requests.reserve(total_requests); seeds.reserve(total_seeds);
+    for (auto& c : collected) {
+      for (const auto& [key, id] : c.requests) requests.push_back({key, id, requests.size()});
+      seeds.insert(seeds.end(), c.seeds.begin(), c.seeds.end());
+      decltype(c.requests)().swap(c.requests); decltype(c.seeds)().swap(c.seeds);
     }
     st.static_requests[current_k] = requests.size();
     st.static_peak_request_bytes = std::max<u64>(st.static_peak_request_bytes,
         requests.capacity() * sizeof(Request));
-    std::sort(requests.begin(), requests.end(), [](const Request& a, const Request& b) {
+    // (key, ordinal) is a strict total order: the parallel sort is the unique
+    // sorted permutation, identical for every thread count.
+    const size_t sorters = parallel_sort(requests, geometry_threads, [](const Request& a, const Request& b) {
       if (a.key != b.key) return a.key < b.key;
       return a.ordinal < b.ordinal;  // earliest consumer first in each class
     });
-    std::sort(seeds.begin(), seeds.end(), [](const StaticSeed& a, const StaticSeed& b) { return a.key < b.key; });
+    // A parallel sort holds a second buffer of the same size at its peak.
+    if (sorters > 1)
+      st.static_peak_request_bytes = std::max<u64>(st.static_peak_request_bytes,
+          2 * static_cast<u64>(requests.capacity()) * sizeof(Request));
+    // Seed keys are pairwise distinct (checked below): a strict total order.
+    parallel_sort(seeds, geometry_threads, [](const StaticSeed& a, const StaticSeed& b) { return a.key < b.key; });
     for (size_t j = 1; j < seeds.size(); ++j)
       require(seeds[j - 1].key != seeds[j].key, "full_ball_static_duplicate_seed");
     std::vector<size_t> groups;
@@ -869,6 +953,18 @@ class Builder {
     }
     account();
   }
+  u64 resolve_static_target(const ExactLevel& before, u64 prior_count) {
+    require(static_cursor < static_targets.size(), "full_ball_static_target_missing");
+    const BallId target = static_targets[static_cursor++];
+    require(target < balls.size() && compare_exact_level(balls[target].level, before) < 0,
+            "full_ball_static_target_not_strict");
+    require(anchors[target] != absent, "full_ball_static_closed_anchor_missing");
+    return root(anchors[target], prior_count);
+  }
+  u64 resolve_static(const ExactLevel& before, u64 prior_count) {
+    add(st.representatives);
+    return resolve_static_target(before, prior_count);
+  }
   u64 resolve(std::vector<i32> sites, const ExactLevel& before, u64 prior_count) {
     add(st.representatives);
     std::sort(sites.begin(), sites.end());
@@ -878,14 +974,7 @@ class Builder {
       const PointId id = ix.point_id(sites.front());
       return root(std::lower_bound(domain.begin(), domain.end(), id) - domain.begin(), prior_count);
     }
-    if (geometry_threads) {
-      require(static_cursor < static_targets.size(), "full_ball_static_target_missing");
-      const BallId target = static_targets[static_cursor++];
-      require(target < balls.size() && compare_exact_level(balls[target].level, before) < 0,
-              "full_ball_static_target_not_strict");
-      require(anchors[target] != absent, "full_ball_static_closed_anchor_missing");
-      return root(anchors[target], prior_count);
-    }
+    if (geometry_threads) return resolve_static_target(before, prior_count);
     const auto initial_key = ResolverCache::key(sites);
     const u64 cached = resolver_cache.lookup(initial_key);
     if (cached != absent) return root(cached, prior_count);
@@ -950,10 +1039,17 @@ class Builder {
         interior = b.n_interior != 0;
       } else {
         require(current_k + 1 == b.n_interior + b.n_shell, "full_ball_regular_rank");
+        // Representative facets are built in a fixed buffer (current_k <=
+        // kFacetMaxK sites): no allocation per representative.
+        std::array<i32, kFacetMaxK> sites{};
         for (size_t omit = 0; omit < b.n_shell; ++omit) {
-          std::vector<i32> sites(b.interior().begin(), b.interior().end());
-          for (size_t j = 0; j < b.n_shell; ++j) if (j != omit) sites.push_back(b.shell_ids[j]);
-          emit(std::move(sites));
+          size_t n = 0;
+          for (i32 site : b.interior()) { require(n < sites.size(), "full_ball_representative_cardinality"); sites[n++] = site; }
+          for (size_t j = 0; j < b.n_shell; ++j) if (j != omit) {
+            require(n < sites.size(), "full_ball_representative_cardinality");
+            sites[n++] = b.shell_ids[j];
+          }
+          emit(std::span<const i32>(sites.data(), n));
         }
       }
     } else {
@@ -961,14 +1057,19 @@ class Builder {
       const auto rank = table.rank(current_k);
       require(rank.present, "full_ball_absent_scheduled_block");
       contribution = rank.contribution_shell; interior = rank.contribution_interior;
+      std::array<i32, kFacetMaxK> sites{};
       for (const auto& component : rank.strict_components) {
-        std::vector<i32> sites;
-        for (size_t j = 0; j < component.interior_prefix; ++j)
-          sites.push_back(geometry_id(table.census().interior[j].id));
+        size_t n = 0;
+        for (size_t j = 0; j < component.interior_prefix; ++j) {
+          require(n < sites.size(), "full_ball_representative_cardinality");
+          sites[n++] = geometry_id(table.census().interior[j].id);
+        }
         for (size_t j = 0; j < table.census().shell.size(); ++j)
-          if (component.representative_shell & (u16{1} << j))
-            sites.push_back(geometry_id(table.census().shell[j].id));
-        emit(std::move(sites));
+          if (component.representative_shell & (u16{1} << j)) {
+            require(n < sites.size(), "full_ball_representative_cardinality");
+            sites[n++] = geometry_id(table.census().shell[j].id);
+          }
+        emit(std::span<const i32>(sites.data(), n));
       }
     }
   }
@@ -976,8 +1077,11 @@ class Builder {
     Block block{id, {}, 0, false};
     add(st.anchor_blocks);
     if (balls[id].n_shell == balls[id].arity) add(st.regular_blocks); else add(st.extra_blocks);
-    visit_block(id, block.contribution, block.interior, [&](std::vector<i32> sites) {
-      block.roots.push_back(resolve(std::move(sites), level, prior_count));
+    visit_block(id, block.contribution, block.interior, [&](std::span<const i32> facet) {
+      // Static path (K>1): the facet was validated when its request was
+      // collected; only its precomputed target is consumed here.
+      if (geometry_threads && current_k > 1) block.roots.push_back(resolve_static(level, prior_count));
+      else block.roots.push_back(resolve(std::vector<i32>(facet.begin(), facet.end()), level, prior_count));
     });
     std::sort(block.roots.begin(), block.roots.end());
     block.roots.erase(std::unique(block.roots.begin(), block.roots.end()), block.roots.end());
