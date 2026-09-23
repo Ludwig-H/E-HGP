@@ -115,3 +115,16 @@ compilé contient bien l'option, puis garder le préflight
 GPU réel comme juge ultime. La comparaison causale est meilleure que
 la seule lecture des compteurs auto-déclarés, mais ne certifie pas
 encore FULL ni une géométrie indépendante.
+
+**Correctif WIP observé ensuite (vers 13 h 37 UTC).** Le développeur
+a ajouté à `validate_sources` les tokens de l'option
+`--inject=pair_mask` et du champ JSON `inject`. Sur le même snapshot
+mixte `0d5ad2e89` + scripts mutables, `validate_files` refuse maintenant
+`GPU probe schema/CLI differs from the S1 protocol` (code 1 local,
+aucun GCP). Le mélange de cette fixture est donc fermé **dans le WIP**,
+mais il reste à committer bench, protocole et porte ensemble, puis à
+vérifier le paquet immuable ; la recherche de tokens ne remplace pas
+le mutant causal exécuté sur G4.
+Le selftest WIP étendu passe désormais **10/10** en Python normal et
+**10/10** sous `-O` lors de la reprise locale ; il reste un test de
+protocole à fausse sonde, non une compilation CUDA positive.

@@ -3062,3 +3062,15 @@ peut être déclaré tué à tort. L'append du résultat et `STATUS` ne sont
 pas gardés. Une fixture de la fonction rend shell code 0 sans sortie
 ni `STATUS`. Exiger sortie neuve, écriture vérifiée et marqueur causal
 du mutant, pas seulement son code de retour.
+
+### Mise à jour 13 h 39 UTC — snapshot S1 mixte maintenant refusé en WIP
+
+D a ajouté au `validate_sources` mutable les tokens de la nouvelle
+option et du nouveau schéma ; le bench v2 est commité localement par
+`32269ace6`. La reproduction B `collect("0d5ad2e89",
+allow_uncommitted_protocol=True)` qui passait `validate_files` refuse
+maintenant avec `GPU probe schema/CLI differs from the S1 protocol`
+**avant GCP**. Le selftest WIP étendu passe 10/10 normal et 10/10
+sous `-O` (fausse sonde). Reste à publier bench+quatre scripts dans
+un même snapshot immuable et à passer le préflight CUDA réel ; ne pas
+transférer le succès du faux GPU au contrat.

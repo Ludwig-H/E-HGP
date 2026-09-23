@@ -67,10 +67,12 @@ de paires paie `O(P log R)` pour ses recherches d'offset ; ni mémoire
 massive ni vitesse GPU ne sont acquises. Le [préflight B du protocole
 G4](CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md) a
 8/8 selftests normaux et 8/8 sous `-O` **avec faux GPU**, pas de CUDA
-réel. Avant SPOT, le bench mutable avec `--inject=pair_mask` doit être
-commité **avec** les scripts : à cette lecture, le snapshot du commit
-GPU seul construirait un ancien bench et échouerait au préflight mutant
-après démarrage G4.
+réel. Le [mélange bench/protocole](CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md)
+qui aurait fait échouer le mutant après démarrage G4 est maintenant
+**refusé par `validate_sources` dans le WIP** ; bench v2 et scripts
+doivent encore être publiés dans un snapshot identique avant SPOT.
+Le selftest WIP étendu passe 10/10 normal et 10/10 sous `-O`, toujours
+avec une fausse sonde.
 La [proposition S2](PROPOSITION_B_GPU_STREAMING_S2_20260923.md)
 sépare le tuilage borné sans nouveau rejet (S2a) du certificat
 bloc/ligne avant expansion (S2b), avec tests causaux et arrêt de la
