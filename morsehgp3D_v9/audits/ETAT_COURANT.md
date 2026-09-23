@@ -70,8 +70,8 @@ d'attribuer un coût ou une croissance à S4a.
 Le [préflight du WIP S4a](AUDIT_S4_WIP_EXCEPTIONS_WORKERS_20260923.md)
 avait repéré trois allocations/insertions **hors capture d'exception**
 dans `run_lanes_batch_host` du commit local `aad7416a5` : un `bad_alloc`
-d'un worker peut terminer le processus. Le correctif mutable suivant
-(`lanes_host.hpp` SHA `50144a3e…`) englobe désormais tout le worker,
+d'un worker peut terminer le processus. Le correctif du commit local
+`f7e465e0d` (`lanes_host.hpp` SHA `50144a3e…`) englobe désormais tout le worker,
 réveille les attentes, joint avant relance et évite les slabs pour zéro
 arête : les fenêtres sont closes **à la lecture du source**. Sa nouvelle
 porte tente toutefois de créer environ **512 Gio d'enregistrements par
@@ -79,24 +79,34 @@ worker** pour provoquer `bad_alloc` ; sous overcommit, elle peut épuiser
 la mémoire au lieu de produire une exception contrôlée. La remplacer par
 une injection bornée aux trois endroits, sans exécuter ce test géant. Le
 défaut de ledger `both_edges` est corrigé dans `aad7416a5`. Le gate de
-chaîne **mutable** compare maintenant ce compteur et six autres champs
-entre S3, S4a jugé et S4a à ardoise réduite. Ses planchers séparés
-`tails>0` et `both>0` ne forcent toujours pas q3 différé **sur une arête
-dont q4 est ouverte** ; cette intersection et `q4_emitted` du bras reporté
-restent à contrôler. Aucune perte de boule n'était déduite du défaut de
-comptage initial. Le dossier de reçu S4a local ne contient à cette lecture
-qu'un `run.sh` : il prépare une trame sans sol entière K5/K10, sans
-validation JSON/digests ni empreintes des sources WIP et binaires. Aucun
+chaîne de `f7e465e0d` compare ce compteur et six autres champs entre S3,
+S4a jugé et S4a à ardoise réduite. Son exécution locale, 32 cas/code 0,
+donne `asked=368886`, `tails=174420`, `both=281530` ; S3 CPU ne reporte
+aucune arête, donc **au moins 87 064 occurrences** cumulent q3 reportée
+et q4 ouverte. Ce chemin est effectivement contrôlé, même si le gate
+n'impose pas encore la non-vacuité directement si sa fixture évolue.
+Comparer aussi `q4_emitted` du bras reporté. Aucune perte de boule n'était
+déduite du défaut de comptage initial. Le dossier de reçu S4a local ne
+contient à cette lecture qu'un `run.sh` : il prépare une trame sans sol
+entière K5/K10, sans validation JSON/digests ni empreintes du binaire et
+de l'entrée, et sans contrôle de propreté de l'arbre source. Aucun
 résultat de ce script n'est encore recevable ; il ne mesure ni demi-scènes,
 ni quarts, ni densités. Voir la [relecture WIP](AUDIT_S4_WIP_EXCEPTIONS_WORKERS_20260923.md).
-La réception v20 mutable doit encore vérifier
+La réception v20 de `f7e465e0d` doit encore vérifier
 `q3_edges − lanes_asked ≤ certificats_différés` : toute voie q3 non
-demandée provient d'au plus une arête S3 différée. Le [nouvel audit du
+demandée provient d'au plus une arête S3 différée. Elle interdit aussi
+**à tort** tout report S4a par défaut si `n<65536` : un contre-exemple
+exact de 28 679 sites/4 097 arêtes dépasse l'arène de **un record**
+malgré des covers de sept sites, et la traîne CPU reste exacte. Le
+préflight moteur jumeau doit prouver le travail positif du census q3 de
+feuille et du cache, dispensés à juste titre dans le bras S4a. Le [nouvel audit du
 coût S4a](AUDIT_S4A_VALIDATION_ET_ARENE_20260923.md) montre aussi que
 S2/S3/S4a rescannent chacun l'index par nœud et par point
-(`Θ(n log n)` sur un arbre médian), hors chronos CUDA internes ; certifier
+(`26n` appartenances sur un arbre équilibré de `2^25` sites, au plus
+`55n` pour le constructeur u18 à milieu géométrique), hors chronos CUDA
+internes ; certifier
 une fois le propriétaire immuable ou calculer les extrema par induction
-réduirait ce poste. Le plafond WIP de l'arène GPU permet une traîne CPU
+réduirait ce poste. Le plafond commis de l'arène GPU permet une traîne CPU
 **si l'arène allouée déborde**, mais une allocation des autres buffers
 peut encore refuser toute la chaîne. Mesurer validation, mémoire fixe,
 reports et temps de traîne sur G4 avant de conclure au gain S4a massif.

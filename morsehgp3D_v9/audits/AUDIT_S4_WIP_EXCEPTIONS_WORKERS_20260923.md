@@ -74,11 +74,18 @@ résultat S4a/G4 : aucun reçu R15 n'est présent ici.
 sept champs du ledger entre S3 seul, S3+S4a jugé et S3+S4a à ardoise réduite,
 dont `both_edges`, `cover_builds`, `cover_sites` et les deux voies mortes.
 La lacune « aucun contrôle de `both_edges` » ci-dessus est donc **corrigée
-dans ce WIP**. Le plancher `tails>0` et le plancher `both>0` portent encore
-sur des sommes séparées : ils ne forcent pas la même arête à avoir q3
-**différée** et q4 **ouverte**. Une fixture S3 de masque `6` avec report q3
-sur cette arête, ou un compteur explicite de l'intersection, puis un mutant
-qui omet son crédit `both_edges`, fermeraient la porte ciblée. Comparer aussi
+dans le commit local `f7e465e0d`**. La porte a été exécutée sur son
+binaire local `build/v9-exp/mhgp9_chain_batch_q3_gate` (SHA-256
+`a576edd6…`) avec `--n=1000` : 32 cas, `asked=368886`, `tails=174420`,
+`both=281530`, code 0. S3 est CPU dans cette porte et ne reporte aucune
+arête ; les reports q3 et les arêtes aux deux voies sont donc des
+sous-ensembles des arêtes demandées. Par inclusion-exclusion, **au moins
+87 064 occurrences d'arêtes-cas** ont simultanément q3 reportée et q4
+ouverte. Le chemin corrigé est ainsi exercé et la comparaison du ledger
+le contrôle effectivement sur cette fixture. Le code de gate n'encode
+toutefois que `tails>0` et `both>0` séparément : ajouter
+`tails + both > asked`, ou mieux le compte direct de l'intersection,
+préserverait cette non-vacuité si la fixture change. Comparer aussi
 `q4_emitted` à l'ardoise réduite : le gate compare actuellement cette masse
 entre S3 et S4a normal, mais pas avec le bras reporté.
 
@@ -86,9 +93,10 @@ Le nouveau `receipts/s4a_q3_lanes_local_20260923/run.sh` (SHA-256
 `f34fa558…`) est pour l'instant **un plan de capture**, seul fichier du
 dossier à cette lecture. Il projette 08/000000 sans sol, grille 1 mm,
 K5/K10/W8, trois modes de chaîne CPU et la comparaison huit anneaux/un
-anneau. Il ne rejoue pas les moitiés, quarts ou densités. Il écrit `HEAD`
-alors que les sources S4a et les portes sont encore modifiées hors commit,
-et ne lie ni empreintes des sources effectives, du binaire et de l'entrée,
+anneau. Il ne rejoue pas les moitiés, quarts ou densités. Les sources S4a
+sont désormais commises localement dans `f7e465e0d`, mais le script écrit
+seulement `HEAD` sans garde de propreté du worktree et ne lie ni
+empreintes des sources effectives, du binaire et de l'entrée,
 ni contrôle des statuts, des digests de catalogue/tour et des ledgers des
 JSON produits. Les futurs `SHA256SUMS` des seuls fichiers de sortie ne
 remplacent pas ces vérifications. Pour un reçu exploitable, figer ce paquet,
@@ -98,7 +106,7 @@ densités déjà archivée. Les statistiques `--file` ne sont pas une porte
 LiDAR d'exactitude, et la borne `warp_steps_lower_bound` reste un minorant
 par arête des ballots par graine (voir l'audit de couplage S4a).
 
-**Réception v20, WIP `gcp-migration/tower_worker_v9.py` SHA-256
+**Réception v20, commit local `f7e465e0d`, `gcp-migration/tower_worker_v9.py` SHA-256
 `89983e24…`.** Le validateur accepte maintenant à juste titre une traîne
 q3 à ardoise réduite et l'absence de census q3 de feuille quand S4a le
 remplace. Il garde toutefois une porte trop lâche dans `validate_lanes`
@@ -112,3 +120,37 @@ La borne gauche existe déjà ; ajouter la borne droite et un mutant avec
 une seule arête S3 différée mais deux voies q3 manquantes. Cela renforce
 la réception des comptes ; les digests du reçu restent une porte séparée
 pour l'objet. Voir aussi la [validation répétée et le budget d'arène](AUDIT_S4A_VALIDATION_ET_ARENE_20260923.md).
+
+La même réception refuse toute arête S4a reportée par défaut quand
+`case.n < 65536` (`validate_lanes:640–641`). Ce seuil borne seulement la
+population du **cover** face à l'ardoise de sites. Il ne borne ni les
+**4096 records par arête** ni l'arène globale, désormais dépendante de la
+mémoire GPU libre. Contre-exemple exact pour l'arène, sur l'API S4a :
+former `E=4097` grappes éloignées d'au moins 500 unités, chacune avec
+`a=(-10,0,0)`, `b=(10,0,0)` et cinq points `(0,u,v)` dont `(u,v)` est
+`(13,0),(0,13),(-13,0),(0,-13),(5,12)`, puis translater les grappes
+sur une grille positive u18. Chaque triangle `abx` est strictement aigu,
+avec `|ab|²=400>|ax|²=|bx|²=269`, et son circumcentre a une composante
+transverse `69x/338`. Pour un autre point `y` du cercle de rayon 13,
+sa puissance vaut `69(1−x·y/169)>0` ; les autres grappes sont plus loin.
+Les cinq graines par arête sont donc acceptées à K5. Le nuage a
+`7E=28679<65536` sites, chaque cover local a sept sites, mais les
+`5E=20485` records dépassent l'arène par défaut
+`4E+4096=20484` : au moins une arête est **légitimement reportée** et
+recalculable sur CPU. La fixture ne prétend pas que la WSPD choisit
+précisément ces arêtes ; elle réfute la règle générale du lecteur pour
+un appel S4a valide. Autoriser les reports par arène/records dans le
+lecteur, juger la traîne et les digests, et réserver un refus aux bornes
+effectivement certifiées. Ajouter une porte directe de ce cas au port
+S4a et un mutant de réception « report interdit car n<65536 ».
+
+Enfin, le préflight batch/GPU v20 contourne légitimement le census q3
+sur feuille et le cache de témoins ; `validate_preflight_work` dispense
+ces deux compteurs sous S4a/S2. Le jumeau `preflight_engine` est exécuté
+mais seulement validé comme sortie et comparé en objet/travail des
+certificats (`tower_worker_v9.py:1156–1170`), sans plancher positif pour
+ces leviers. R14 avait déjà 82 056 census q3 de feuille et 321 891
+rejets par cache sur ce préflight. Exiger leurs comptes positifs sur le
+**jumeau moteur**, avec mutants qui les annulent, restaure la porte
+annoncée « chaque levier actif a travaillé » sans imposer ces travaux à
+S4a.
