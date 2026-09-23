@@ -17,7 +17,8 @@ coordonnées float32 sont `x=−0,0000909044 m`, `y=−13,9133911 m` ; la
 grille commune l'encode à `(80271,8311,13780)`, avec `x=80271` égal à
 l'origine encodée. La coupe représentée le place donc en `x≥0,y<0` ;
 la coupe physique en `x<0,y<0`. Tous les autres retours des deux
-quarts gardent leur côté. Le rang `splitmix64` du site-grille 61939 est
+quarts gardent leur côté. L'indice `splitmix64` du site-grille 61939
+(compté à partir de zéro) est
 **34593/45845** : ce site n'est présent ni à 1/4 ni à 1/2 dans la
 matrice sans sol, donc seule la pente du dernier lien pouvait changer.
 

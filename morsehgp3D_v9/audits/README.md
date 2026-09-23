@@ -85,6 +85,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`CONTRE_AUDIT_B_Q3_FEUILLE_WIP_20260923.md`](CONTRE_AUDIT_B_Q3_FEUILLE_WIP_20260923.md) | B | `bb3c696e` 00:42 | démontré localement | clos (code publié) | acceptée |
 | [`CONTRE_AUDIT_B_JUGES_C_V4_20260923.md`](CONTRE_AUDIT_B_JUGES_C_V4_20260923.md) | B | `931d37cd1` 13:07 | clés canoniques, ancres isolées et provenance ; reçu v5/v6 publié ensuite | historique pour la recette v4/v5 | sans réponse |
 | [`AUDIT_A_JUGE_Q3_V6_LONGUES_INCIDENCES_20260923.md`](AUDIT_A_JUGE_Q3_V6_LONGUES_INCIDENCES_20260923.md) | A | 23/13:48 | reçu v6 historique ; causalité longue au rang critique et refus de code 2 fermés par les portes v7/v8 ultérieures | historique | réponse ultérieure |
+| [`CONTRE_AUDIT_B_PORTES_JUGES_R20_20260923.md`](CONTRE_AUDIT_B_PORTES_JUGES_R20_20260923.md) | B | 23/21:05 | patch C R-20 : 34/34 tests locaux utiles comme régression CPU échantillonnée ; ancres rares, index du juge reconstruit, pas de FULL/LiDAR/u18 haut/fixture étendue dédiée | patch non adopté ; ne qualifie pas la complétude | transmis à C/D |
 
 ## q4
 

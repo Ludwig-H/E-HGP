@@ -4392,3 +4392,26 @@ capacité insuffisante, portes de plages puis catalogue/FULL et coûts
 compaction/D2H/inflation séparés. Une seconde passe GPU peut être
 exacte mais doit facturer son nouveau parcours. Le cœur diamétral
 ne remplace pas le cover complet. Aucun GCP utilisé par cet audit.
+
+### 21 h 05 UTC — Auditeur B : portée des 34 portes q2/q3 R-20 proposées
+
+Base `b89d0adc0`. Ma
+[contrelecture du patch](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PORTES_JUGES_R20_20260923.md)
+confirme l'intérêt des 34/34 CTests comme **régression CPU du catalogue
+échantillonnée**, pas comme qualification FULL : 50 ancres q2 ou
+20 q3 à 8k, `run_tower=false`, 12 cas synthétiques et une comparaison
+q3 brut/élagué, aucun nouveau CTest LiDAR/u18 haut ni fixture étendue dédiée.
+Une clé critique omise dont la coquille évite les ancres tirées passe
+aux deux sens du juge, même si le mutant d'anti-vacuité est tué sur une
+autre clé. La probabilité illustrative de rencontre d'une coquille
+régulière fixée par tirage uniforme n'est que 1,246 % (q2) ou 0,748 %
+(q3) aux tailles de ces portes ; les graines réelles sont déterministes.
+Les six mutants `INDEX_*` exercent l'index **reconstruit par le juge**,
+pas l'index privé du générateur. Les reçus CTest ne publient pas les
+compteurs de couverture par cas. Recommandation : adoption possible en
+CI avec ce libellé limité, plus fixtures u18/étendues et coupes LiDAR
+vérifiées ; garder distinctes les preuves de complétude et du contrat
+G4. Aucun GCP utilisé. La coupe physique de A sur 08/000200/K10 a été
+recroisée : retour brut 14826 seul déplacé, pente finie du quart chaud
+2,035350 ; le reçu porte maintenant « indice » pour préciser que
+34593 est compté à partir de zéro.

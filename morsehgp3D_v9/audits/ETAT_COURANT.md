@@ -642,8 +642,21 @@ LiDAR 8k/K10, aucun désaccord sain, `drop-crl` et `drop-long` tués dans
 cette strate. Une clé retirée du catalogue est détectée par coupe.
 L'échantillon ne couvre qu'environ 0,061/0,188/0,016 % des populations
 q3 de tête publiées, populations elles-mêmes issues du produit ; ni
-complétude générale ni transfert au GPU. La garde d'index des juges
-doit encore vérifier la bijection et les bornes des IDs avant tout accès.
+complétude générale ni transfert au GPU. À cette version, la garde
+d'index des juges devait encore vérifier la bijection et les bornes
+des IDs avant tout accès.
+
+La [proposition R-20 de C](c_omission_20260923/judges_product_gates.patch)
+porte 21 `gate` et 13 `scale8000` en patch, **34/34** réussis
+localement mais pas encore intégrés. La
+[contrelecture B](CONTRE_AUDIT_B_PORTES_JUGES_R20_20260923.md) confirme
+leur utilité de régression et borne leur portée : 50 ancres q2 ou
+20 q3 sur 8 000 sites, aucun FULL (`run_tower=false`), aucun cas
+LiDAR/u18 haut ni fixture dédiée aux coquilles étendues ; les
+mutants `INDEX_*` n'altèrent que l'index reconstruit par le juge.
+Une omission régulière dont la coquille ne touche pas l'échantillon
+peut passer malgré tous les codes 0 et l'anti-vacuité. **34/34 n'est
+donc ni un certificat du catalogue complet ni de la tour K10**.
 
 La porte de **clés jamais émises** publiée par `683fa46e` change utilement
 le sens du contrôle : elle recense des MEB de supports q2–q4 voisins
