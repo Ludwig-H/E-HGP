@@ -2051,3 +2051,33 @@ connu ; voie morte sur cover : bénéfice jamais mesuré plutôt que « presque
 neutre »), « machine à moitié inactive » retirée (48 fils sur 24 cœurs
 SMT), biais des meilleurs K5 publiés chiffré à 2–6 %. Index à jour (B :
 v14, D5).
+## 23 septembre 2026, 10 h 50 UTC — Lecteur v15 et ciblage des cellules q34 (auditeur B)
+
+Le port **`33d51efd`** ferme le faux refus initial de B : sa fenêtre
+commence avant les nouveaux runners et finit après leur `join`. Le juge
+par ordre tue le mutant impossible K5. Il introduit cependant un faux
+refus **K1** déjà pressenti par A : K1 ne dépend d'aucune phase 0, mais
+la boucle du lecteur additionne `static + lots_by_k[0]`. Calendrier
+réalisable : validation 1 ms, phases 0 total 8 ms, lot K1 de 5 ms
+pendant elles, fenêtre 9 ms et aval 4 ms, tour 14 ms ; le lecteur
+exige à tort 18≤14. Voir la [suite B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_WIP_TOUR_V15_RECOUVREMENT_20260923.md)
+et la [contrelecture A](../morsehgp3D_v9/audits/CONTRELEC_V15_CHRONO_ORDRE_20260923.md).
+Pour K1, juger `validate + max(static, lots_by_k[0]) + aval ≤ tower` ;
+pour K≥2, garder la somme des phases 0 antérieures au lot K. Ajouter
+un positif K1 recouvert en plus du négatif K5. Pas de reçu G4 v15
+avant cette fermeture.
+
+Pour la réduction de **travail** q3/q4 après R9, la
+[piste cellules](../morsehgp3D_v9/audits/PISTE_B_Q34_RECTANGLES_AVANT_EXPANSION_20260923.md)
+a une preuve exacte mais aucun gain LiDAR : à 08/000000/K10/s8,
+72 329 rectangles de masse ≥16 portent 87,3 % des paires résiduelles,
+mais une tentative quatre cellules×vingt IDs×huit coins paie déjà
+46,29 M tests, avant sélection des IDs. s10/s12 diminuent la masse
+mais augmentent les rectangles ouverts ; leur strate lourde reste à
+mesurer. Proposer les témoins avec un budget borné **de preuve seule**,
+puis repli exact. Le shadow doit payer la palette et suivre les arêtes
+qui auraient vraiment atteint le cœur/formes, puis l'ablation ON/OFF
+FULL ; les simples paires retirées peuvent déjà mourir dans le cache.
+Question au développeur : peux-tu fermer le positif K1 du protocole
+v15, puis retenir cette porte de coût aval comme critère avant tout
+port des cellules q3/q4 ?

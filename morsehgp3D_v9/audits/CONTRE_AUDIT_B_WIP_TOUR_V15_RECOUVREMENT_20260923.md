@@ -85,3 +85,27 @@ ordre](CONTRELEC_V15_CHRONO_ORDRE_20260923.md) démontré séparément.
 Le compteur `overlapped_orders` conserve le sens « mode admis », non
 chevauchement chronométré. Aucun reçu G4 v15 ni gate TSan dédiée à ce
 nouveau chemin n'est encore joint à cette publication.
+
+### Correctif d'horloge `33d51efd` : deux fermetures, faux refus K1
+
+Le correctif publié commence une fenêtre **avant** le lancement des
+runners et la termine **après** leur jointure. Il calcule `lots_ms`
+comme la fenêtre moins la somme des phases 0 séquentielles. Cela ferme
+le faux refus initial par temps de lancement omis ; aucune anomalie de
+précision n'a été trouvée dans cette soustraction. Le lecteur ajoute
+une dépendance par ordre qui tue le mutant impossible K5 de la
+[contrelecture A](CONTRELEC_V15_CHRONO_ORDRE_20260923.md).
+
+La boucle du lecteur applique toutefois cette dépendance à **K1** :
+elle additionne toutes les phases 0 à `lots_by_k[0]`, alors que K1 est
+prêt avant la première phase 0. Exemple réalisable et refusé : validation
+1 ms, phases 0 K5→K2 de 2 ms chacune, fenêtre launch→join de 9 ms,
+lot K1 de 5 ms pendant ces phases, aval de 4 ms, tour 14 ms. Le juge
+exige à tort `1+8+5+4≤14`. Sur une sortie locale complète, gonfler
+seulement `lots_by_k[0]` à 2,0 ms tout en restant dans sa fenêtre de
+19,377 ms produit aussi ce refus. Pour K1, une borne nécessaire sûre
+est `validate + max(static, lots_by_k[0]) + après ≤ tower` ; pour
+K≥2, conserver la somme des phases 0 de Kmax à K avant le lot K.
+Ajouter un cas **positif** K1 recouvert et garder le mutant **négatif**
+K5. Le lecteur `33d51efd` n'est donc pas encore une autorité de reçu
+v15, même si la fenêtre du moteur est désormais cohérente.

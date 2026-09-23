@@ -552,3 +552,54 @@ masse `A×B` évitée **avant** de l'activer ; aucun gain LiDAR ni majorant
 sous-quadratique n'en découle aujourd'hui. Le domaine local `Dmax` de
 la section précédente réduit le nombre de cellules à visiter sans
 affaiblir ce repli.
+
+### Ciblage mesurable de la tentative et statut des voies
+
+Un shadow peut tenter le certificat **après** le filtre de rectangle
+seulement sur les produits lourds `|A||B|≥M`, avec M annoncé avant
+la campagne. Ce seuil sélectionne des *tentatives de preuve* ; il ne
+plafonne ni les candidats ni le repli exact. Sur 08/000000/K10 sans sol,
+les **sidecars locaux antérieurs à R9**, non des reçus du binaire R9,
+donnent :
+
+| s | Rectangles ouverts | Masse résiduelle de paires |
+| ---: | ---: | ---: |
+| 8 | 2 034 440 | 30 777 213 |
+| 10 | 2 198 900 | 24 383 658 |
+| 12 | 2 332 350 | 20 097 638 |
+
+À **s8 et M=16 seulement**, 72 329 rectangles (3,56 % des ouverts)
+concentrent 26 870 605 paires (87,3 % de la masse). Quatre cellules,
+vingt IDs et huit coins représentent déjà **46 290 560** comparaisons
+garde×coin, *avant* sélection des IDs, accès d'index et replis.
+Les nombres de rectangles éligibles à s10/s12 ne sont pas publiés : ne
+pas leur transférer le 3,56 % de s8. Sources :
+[`Q34_BLOCS_LIDAR_SHADOW_20260923.md`](Q34_BLOCS_LIDAR_SHADOW_20260923.md)
+et `shadow_ha_octant_rows_20260923.txt`. Une palette peut être proposée
+par descente spatiale ou cache de cellule avec budget de visites borné ;
+jamais par un scan caché de n sites **pour chaque rectangle**.
+
+Les seuils `p≥Kmax−1` en q3 et `p≥Kmax−2` en q4 suppriment seulement
+la **voie de présentation** correspondante de ce produit. Si une même
+`BallKey` admet ailleurs un support minimal plus petit (`q_min=2` ou
+`3`), sa fenêtre d'admission peut commencer plus tôt : ne jamais
+effacer la clé globale ni couper les autres voies sur la seule preuve
+q3/q4. Les tests de coquilles dégénérées et l'oracle de catalogue
+doivent juger cette couture ; le statut de complétude globale reste
+`complete_relative`. Les bornes de centres s'appliquent aux supports
+positifs dont `ab` est une plus longue arête propriétaire ; une autre
+arête propriétaire relève de son propre produit.
+
+Enfin, le shadow doit **marquer** chaque produit que le certificat
+aurait rejeté puis exécuter quand même le chemin actuel : compter les
+paires marquées qui auraient réellement atteint `dead_core`, leurs
+`dead_core_form_sites`/formes, covers et atlas. Les paires que le
+filtre ponctuel/cache aurait déjà éliminées ne sont pas un gain de
+formes. Une activation ON modifie l'état futur du cache des témoins ;
+une soustraction de temps shadow n'est donc pas une ablation causale.
+Après la porte mathématique et le shadow, comparer ON/OFF chaîne FULL
+sur 8k/16k/32k emboîtés puis trames entières **brutes et sans sol** de
+plusieurs séquences, K5/K10, s8/10/12 et W1/W48, avant GPU. Publier
+certificats, replis, travail aval, mur/CPU/RSS et objets exacts, afin
+de juger les pentes réellement mesurées plutôt que d'affirmer le
+sous-quadratique par le seul nombre de rectangles.

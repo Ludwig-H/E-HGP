@@ -22,6 +22,13 @@ seul `lots_by_k` à K5, le lecteur accepte **65,379 ms** de phases
 nécessairement disjointes pour **60,718 ms** de mur FULL. Une borne par
 ordre doit accompagner l'horloge commune proposée par B avant tout
 reçu G4 v15.
+Le correctif **`33d51efd`** mesure maintenant la fenêtre commune avant
+lancement des runners jusqu'au dernier `join` et ferme le faux refus
+initial de B ; son juge par ordre ferme le faux accord K5 d'A. Mais il
+additionne encore toutes les phases 0 au lot **K1**, qui démarre en
+parallèle : un calendrier réalisable de 14 ms est refusé. La
+[suite B](CONTRE_AUDIT_B_WIP_TOUR_V15_RECOUVREMENT_20260923.md)
+donne le contre-exemple et la borne K1 correcte ; aucun reçu G4 v15.
 Les mesures de densité restent celles du binaire v12 **`4530644b`** ;
 aucune nouvelle série LiDAR v13 n'en découle. Le reçu G4
 [R8](../receipts/g4_tower_r8_20260923/README.md) exécute
@@ -433,6 +440,16 @@ le front réel ni une économie sur LiDAR. Les shadows de ligne/`h_a`
 retirent des millions de paires mais **zéro arête qui aurait atteint le
 cœur** dans l'échantillon publié : mesurer désormais les formes de cœur
 réellement évitées par rectangle, pas seulement les paires filtrées.
+La [mise en budget des cellules](PISTE_B_Q34_RECTANGLES_AVANT_EXPANSION_20260923.md)
+ajoute un ciblage de **tentatives** sur produits lourds, sans quota de
+candidats : à s8/08/000000/K10, 72 329 rectangles ouverts de masse ≥16
+portent 87,3 % des paires résiduelles, mais quatre cellules×vingt IDs×huit
+coins paient déjà 46,29 M comparaisons avant sélection/repli. À s10/s12,
+les masses résiduelles baissent alors que les rectangles ouverts montent ;
+leur nombre lourd n'est pas mesuré. Un certificat ne supprime que son bit
+de voie q3 ou q4, jamais une `BallKey` globale qui pourrait avoir un
+`q_min` plus petit ailleurs. Un shadow doit suivre les arêtes réellement
+parvenues au cœur et l'état futur du cache avant toute ablation FULL.
 
 Le [shadow LiDAR de la palette par ancre](SHADOW_HA_Q34_LIDAR_20260923.md)
 isole une proposition plus légère qu'un nouveau DFS de ligne. À K10/s8
