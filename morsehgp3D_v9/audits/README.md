@@ -161,6 +161,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`CROISSANCE_LIDAR_PLANS_ET_DENSITE_20260923.md`](CROISSANCE_LIDAR_PLANS_ET_DENSITE_20260923.md) | A ou B | `bbc41a9c` 08:26 | mesure | vivant | sans réponse |
 | [`lidar_density_full_3scenes_20260923/`](lidar_density_full_3scenes_20260923/README.md) | A ou B | `c17f8df8` 08:41 | mesure | vivant | sans objet |
 | [`lidar_density_scene02_20260923/`](lidar_density_scene02_20260923/README.md) | A ou B | `c17f8df8` 08:41 | mesure | vivant | sans objet |
+| [`lidar_density_sectors_00_01_20260923/`](lidar_density_sectors_00_01_20260923/README.md) | A ou B | `53d8fac3` 08:58 | mesure | vivant | sans objet |
 
 ## GPU et parallélisme
 

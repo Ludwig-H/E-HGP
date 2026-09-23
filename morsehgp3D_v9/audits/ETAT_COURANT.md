@@ -67,6 +67,28 @@ moteur](CONTRE_AUDIT_A_MATH_MOTEUR_20260922.md), de
 [FULL](CONTRE_AUDIT_B_FULL_COUTS_ET_INTERFACES_20260922.md) et de la
 [porte T2](CONTRE_AUDIT_B_PORTE_PUBLIQUE_T2_20260922.md).
 
+La [note d'Euler par ordre](NOTE_C_INVARIANT_EULER_20260923.md),
+[démontrée aussi par le nerf sans position générale](CONTRELEC_EULER_PAR_NERF_20260923.md),
+donne un contrôle global **nécessaire** du catalogue : `E_K=1` pour
+`K≤Kmax−2`. Les 18 coupes LiDAR 8k/16k/32k publiées le satisfont et neuf
+mutants d'omission échappant à la chaîne le violent à K5. La formule ne
+certifie pas les clés une à une : à K5 elle ne juge que K1..3, et le
+contrat K10 exigerait un générateur K12 pour juger ses dix ordres. Le
+protocole Kmax+2 ajoute des témoins, mais une omission commune aux deux
+exécutions peut encore passer.
+
+Le port Euler v13 est **encore un WIP non publié** dans le worktree du
+constructeur au 23 septembre. Le diff actuel place les contributions dans
+le chrono `census_ms` (`tower_chain.cpp:486,539–601`) et refuse un `E_K`
+faux **avant** FULL (`:602–612`), tandis que la décision du développeur
+prévoit coût séparé et refus après une tour FULL réussie. Les lecteurs
+LiDAR et G4 épinglent toujours le schéma v12, alors que la sonde WIP écrit
+v13. Pour rendre le port qualifiable : chronométrer Euler distinctement,
+vérifier après FULL quand `run_tower=true`, et livrer en même temps lecteur,
+fixtures dégénérées et mutant d'omission. Pour `run_tower=false`, certifier
+la positivité des supports réguliers ou marquer `E_K=1` comme diagnostic
+conditionnel à cette propriété.
+
 Les certificats exacts actuellement raccordés comprennent la saturation
 profonde de l'atlas, le census q3 sur fragment complet, la preuve de voies
 q3/q4 mortes et le cache de nœuds témoins. Le propriétaire d'arête et les
