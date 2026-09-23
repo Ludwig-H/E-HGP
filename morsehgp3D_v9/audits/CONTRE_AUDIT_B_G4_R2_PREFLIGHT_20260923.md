@@ -114,6 +114,32 @@ supprimer *tout* q3/q4 laisserait plus de 26 s dans la chaîne ; supprimer
 *tout* FULL laisserait plus de 27 s. Les deux étapes doivent progresser
 pour viser une seconde.
 
+Les trois principaux chantiers issus de ces coûts sont :
+
+1. **q4 avant son atlas massif** : mesurer en mode sans effet les gardes
+   de blocs certifiés, puis seulement les raccords qui évitent vraiment
+   cellules, tests et copies sans perdre de présentation. Préserver un
+   minorant au centre du candidat ; retirer un site d'un fragment sans
+   ce certificat ne serait pas sûr.
+2. **Atlas partagé avec q3** : 78–83 % des arêtes q4 de ces lignes sont
+   mixtes, et l'atlas écarte 91–96 % des graines q3 qu'il localise.
+   Optimiser q4 en supprimant l'atlas sans remplacer son rejet q3
+   déplacerait probablement le coût. Le seuil K−2 des arêtes q4 seules
+   est exact mais ne couvre que 17–22 % des arêtes q4 ; sa part des tests
+   reste inconnue.
+3. **FULL par sous-phase** : séparer tri, MEB, recherche d'intrus et
+   publication, puis étudier les préfixes d'intrus et des tâches
+   géométriques indépendantes. À K10, les 11,309 M MEB et 403,430 M
+   nœuds d'intrus ne peuvent être attribués au tri. La sortie publiée
+   de 08/000000 a déjà un plancher de 1,009 Go ; le régime de plusieurs
+   dizaines de millions demande aussi un format compact/streaming.
+
+Les centres q4 de faible profondeur sont une piste collective plus
+radicale, mais son algorithme exact et son coût global restent à établir ;
+balayer naïvement toutes les droites entre elles redéplacerait un carré.
+Une simple fusion des deux parcours du cover est de priorité inférieure
+aux dizaines de milliards d'opérations d'atlas observées ici.
+
 Avant une autre session facturée : injecter dans `validate_probe` **la
 sortie réelle complète** d'une petite sonde v3, autoriser séparément les
 deux champs MEB selon leur type et leurs contraintes, vérifier le mode
