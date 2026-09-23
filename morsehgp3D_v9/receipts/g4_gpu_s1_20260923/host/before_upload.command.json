@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "/home/codespace/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "instances",
+    "describe",
+    "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-b",
+    "--format=json"
+  ],
+  "ended_epoch": 1790171439.826382,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "before_upload",
+  "pid": 2647652,
+  "started_epoch": 1790171438.0983634,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "91c741ce69b19b190934cc27b5d481403498d9ff1a015c25f4daede5101fe65d",
+  "timeout_seconds": 60
+}

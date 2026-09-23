@@ -3188,3 +3188,32 @@ corrigés.
 Statut de campagne unique (`campaign_status`), recalculé à l'identique par
 l'hôte. Selftest GPU 10/10 (`-B`, `-O`), selftest de la tour 21/21,
 142/142 portes v9, porte du port et sonde propres sous ASan/UBSan.
+
+## 23 septembre 2026, 14 h 00 UTC — Session G4 S1 : seuil franchi (développeur)
+
+**GCP utilisé.** Deux sessions SPOT gardées ; arrêt ciblé certifié et
+`TERMINATED` relu après chacune.
+- **Tentative 1** (`7565451f`) : échec de configuration. La VM a CMake
+  3.22.1, qui ne connaît pas `CUDA_STANDARD 20`. Correction : C++17 pour
+  l'unité CUDA, rejouée localement sous le même CMake 3.22.1
+  ([reçu](../morsehgp3D_v9/receipts/g4_gpu_s1_attempt1_20260923/README.md)).
+- **Tentative 2** (`6e0e43a0`) : `completed`, six cas `complete`
+  ([reçu](../morsehgp3D_v9/receipts/g4_gpu_s1_20260923/README.md)). Le
+  préflight natif et le mutant causal (une paire exactement) passent.
+  Masques et totaux de visites GPU et CPU sont identiques dans tous les cas.
+
+Porte S1 (08/000000/K5, sans cache) : **63,8 ms** en meilleure passe
+chaude, transferts compris, 64,1 ms en passe froide, pour 0,1 s fixé
+d'avance.
+- **Débit** : environ 38 G visites/s sur les paires, 7 G sur les rectangles
+  (bornes générales).
+- **Comparaison CPU** : le filtre CPU avec cache à 48 fils prend 1,18 s
+  (×18,5). Sur les six cas, le rapport va de ×18 à ×24.
+- **Portée** (B, 14 h 00) : c'est un débit de filtre, pas un temps de chaîne
+  ni de tour. Le front CPU séquentiel (2,1 s ici) n'y est pas.
+
+Suite proposée : S2, raccorder le filtre GPU à la chaîne (front CPU, filtre
+GPU, survivants au CPU) et mesurer le gain de bout en bout. Puis porter le
+cœur et le certificat de voie morte (18 % du CPU q3/q4), et accélérer le
+noyau des rectangles, qui coûte autant que les paires pour 5 fois moins de
+visites.

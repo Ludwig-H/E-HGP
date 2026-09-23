@@ -1,0 +1,314 @@
+{
+ "schema": "mhgp9_g4_gpu_s1_summary_v1",
+ "public_status": "not_claimed",
+ "worker_status": "completed",
+ "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+ "s1_threshold_ms": 100.0,
+ "preflight": {
+  "gpu_total_ms": 4.329,
+  "pairs": 431037,
+  "sites": 1500
+ },
+ "rows": [
+  {
+   "case": "probe_0",
+   "frame": "08/000000",
+   "sites": 39885,
+   "K": 5,
+   "s": 8,
+   "workers": 48,
+   "repeats": 3,
+   "outcome": "complete",
+   "wall_s": 6.028,
+   "population": {
+    "rectangles": 3133819,
+    "rectangle_survivors": 1128166,
+    "pairs": 23686751,
+    "pair_survivors": 2043612,
+    "q3_rejected": 16016152,
+    "q3_open": 1716642,
+    "q4_rejected": 21574127,
+    "q4_open": 1872168,
+    "front_product_visits": 8849315
+   },
+   "cpu_ms": {
+    "index_ms": 13.077,
+    "front_ms": 2058.755,
+    "rect_ms": 343.417,
+    "pair_nocache_ms": 2280.983,
+    "pair_cache_ms": 835.572
+   },
+   "visits": {
+    "rect": 229928699,
+    "pair": 1110657775
+   },
+   "gpu_ms": {
+    "upload_ms": 1.412,
+    "rect_ms": 32.513,
+    "scan_ms": 0.035,
+    "pair_ms": 29.031,
+    "download_ms": 0.81,
+    "total_ms": 63.801,
+    "first_total_ms": 64.084
+   },
+   "gpu_visits_per_s": 21782569771,
+   "filter_speedup_vs_cpu_cache": 18.48,
+   "mismatches": {
+    "rect": 0,
+    "pair": 0
+   },
+   "visits_equal": true,
+   "gnu_time_max_rss_kb": 232000
+  },
+  {
+   "case": "probe_1",
+   "frame": "08/000000",
+   "sites": 39885,
+   "K": 10,
+   "s": 8,
+   "workers": 48,
+   "repeats": 3,
+   "outcome": "complete",
+   "wall_s": 10.382,
+   "population": {
+    "rectangles": 4782714,
+    "rectangle_survivors": 2034440,
+    "pairs": 30777213,
+    "pair_survivors": 4507278,
+    "q3_rejected": 19317201,
+    "q3_open": 3603302,
+    "q4_rejected": 26124013,
+    "q4_open": 4455934,
+    "front_product_visits": 11204915
+   },
+   "cpu_ms": {
+    "index_ms": 13.012,
+    "front_ms": 3497.534,
+    "rect_ms": 609.229,
+    "pair_nocache_ms": 3995.27,
+    "pair_cache_ms": 1613.255
+   },
+   "visits": {
+    "rect": 427531521,
+    "pair": 1955790197
+   },
+   "gpu_ms": {
+    "upload_ms": 1.92,
+    "rect_ms": 50.811,
+    "scan_ms": 0.047,
+    "pair_ms": 49.185,
+    "download_ms": 1.076,
+    "total_ms": 103.039,
+    "first_total_ms": 105.066
+   },
+   "gpu_visits_per_s": 23834170547,
+   "filter_speedup_vs_cpu_cache": 21.57,
+   "mismatches": {
+    "rect": 0,
+    "pair": 0
+   },
+   "visits_equal": true,
+   "gnu_time_max_rss_kb": 277688
+  },
+  {
+   "case": "probe_2",
+   "frame": "08/000100",
+   "sites": 35551,
+   "K": 5,
+   "s": 8,
+   "workers": 48,
+   "repeats": 3,
+   "outcome": "complete",
+   "wall_s": 3.773,
+   "population": {
+    "rectangles": 2348056,
+    "rectangle_survivors": 920465,
+    "pairs": 11960420,
+    "pair_survivors": 1732176,
+    "q3_rejected": 8037446,
+    "q3_open": 1464292,
+    "q4_rejected": 10122271,
+    "q4_open": 1597313,
+    "front_product_visits": 6550841
+   },
+   "cpu_ms": {
+    "index_ms": 11.493,
+    "front_ms": 1499.018,
+    "rect_ms": 225.117,
+    "pair_nocache_ms": 1025.754,
+    "pair_cache_ms": 585.195
+   },
+   "visits": {
+    "rect": 161451331,
+    "pair": 577472117
+   },
+   "gpu_ms": {
+    "upload_ms": 1.057,
+    "rect_ms": 25.678,
+    "scan_ms": 0.031,
+    "pair_ms": 16.128,
+    "download_ms": 0.494,
+    "total_ms": 43.388,
+    "first_total_ms": 44.204
+   },
+   "gpu_visits_per_s": 17675057360,
+   "filter_speedup_vs_cpu_cache": 18.68,
+   "mismatches": {
+    "rect": 0,
+    "pair": 0
+   },
+   "visits_equal": true,
+   "gnu_time_max_rss_kb": 194176
+  },
+  {
+   "case": "probe_3",
+   "frame": "08/000100",
+   "sites": 35551,
+   "K": 10,
+   "s": 8,
+   "workers": 48,
+   "repeats": 3,
+   "outcome": "complete",
+   "wall_s": 6.227,
+   "population": {
+    "rectangles": 3549478,
+    "rectangle_survivors": 1637606,
+    "pairs": 17488839,
+    "pair_survivors": 3673260,
+    "q3_rejected": 10518008,
+    "q3_open": 2970498,
+    "q4_rejected": 13547371,
+    "q4_open": 3626435,
+    "front_product_visits": 8230059
+   },
+   "cpu_ms": {
+    "index_ms": 11.58,
+    "front_ms": 2524.741,
+    "rect_ms": 427.861,
+    "pair_nocache_ms": 1631.589,
+    "pair_cache_ms": 1109.63
+   },
+   "visits": {
+    "rect": 299972492,
+    "pair": 1099448839
+   },
+   "gpu_ms": {
+    "upload_ms": 1.364,
+    "rect_ms": 38.973,
+    "scan_ms": 0.041,
+    "pair_ms": 29.204,
+    "download_ms": 0.684,
+    "total_ms": 70.265,
+    "first_total_ms": 70.541
+   },
+   "gpu_visits_per_s": 20526296713,
+   "filter_speedup_vs_cpu_cache": 21.88,
+   "mismatches": {
+    "rect": 0,
+    "pair": 0
+   },
+   "visits_equal": true,
+   "gnu_time_max_rss_kb": 226068
+  },
+  {
+   "case": "probe_4",
+   "frame": "08/000200",
+   "sites": 45845,
+   "K": 5,
+   "s": 8,
+   "workers": 48,
+   "repeats": 3,
+   "outcome": "complete",
+   "wall_s": 5.577,
+   "population": {
+    "rectangles": 2964033,
+    "rectangle_survivors": 1179441,
+    "pairs": 22722345,
+    "pair_survivors": 2237912,
+    "q3_rejected": 15906902,
+    "q3_open": 1846559,
+    "q4_rejected": 20401525,
+    "q4_open": 2072084,
+    "front_product_visits": 8500753
+   },
+   "cpu_ms": {
+    "index_ms": 15.309,
+    "front_ms": 1988.503,
+    "rect_ms": 367.012,
+    "pair_nocache_ms": 1888.425,
+    "pair_cache_ms": 789.681
+   },
+   "visits": {
+    "rect": 240375478,
+    "pair": 1010699404
+   },
+   "gpu_ms": {
+    "upload_ms": 1.271,
+    "rect_ms": 32.568,
+    "scan_ms": 0.033,
+    "pair_ms": 29.498,
+    "download_ms": 0.805,
+    "total_ms": 64.175,
+    "first_total_ms": 65.523
+   },
+   "gpu_visits_per_s": 20157169497,
+   "filter_speedup_vs_cpu_cache": 18.02,
+   "mismatches": {
+    "rect": 0,
+    "pair": 0
+   },
+   "visits_equal": true,
+   "gnu_time_max_rss_kb": 229192
+  },
+  {
+   "case": "probe_5",
+   "frame": "08/000200",
+   "sites": 45845,
+   "K": 10,
+   "s": 8,
+   "workers": 48,
+   "repeats": 3,
+   "outcome": "complete",
+   "wall_s": 10.733,
+   "population": {
+    "rectangles": 4695935,
+    "rectangle_survivors": 2131699,
+    "pairs": 32789701,
+    "pair_survivors": 4927304,
+    "q3_rejected": 19593504,
+    "q3_open": 3845838,
+    "q4_rejected": 27841512,
+    "q4_open": 4866534,
+    "front_product_visits": 11112653
+   },
+   "cpu_ms": {
+    "index_ms": 15.298,
+    "front_ms": 3511.455,
+    "rect_ms": 586.584,
+    "pair_nocache_ms": 3979.242,
+    "pair_cache_ms": 1952.597
+   },
+   "visits": {
+    "rect": 419460956,
+    "pair": 2123647862
+   },
+   "gpu_ms": {
+    "upload_ms": 1.943,
+    "rect_ms": 46.529,
+    "scan_ms": 0.043,
+    "pair_ms": 57.081,
+    "download_ms": 1.16,
+    "total_ms": 106.756,
+    "first_total_ms": 109.044
+   },
+   "gpu_visits_per_s": 24545013203,
+   "filter_speedup_vs_cpu_cache": 23.78,
+   "mismatches": {
+    "rect": 0,
+    "pair": 0
+   },
+   "visits_equal": true,
+   "gnu_time_max_rss_kb": 281456
+  }
+ ]
+}

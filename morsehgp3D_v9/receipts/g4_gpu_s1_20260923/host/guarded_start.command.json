@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/workspaces/.ehgp-sessions/v9gpu.20260923T134905Z/gpu_filter_v9_host/start_and_verify.sh",
+    "--yes",
+    "--guest-shutdown-minutes",
+    "40",
+    "--handoff-file",
+    "/workspaces/.ehgp-sessions/v9gpu.20260923T134905Z/gpu_filter_v9_host/handoff.json",
+    "--lifecycle-state-file",
+    "/workspaces/.ehgp-sessions/v9gpu.20260923T134905Z/gpu_filter_v9_host/lifecycle.txt",
+    "--guard-mark-dir",
+    "/workspaces/.ehgp-sessions/v9gpu.20260923T134905Z/gpu_filter_v9_host/guardmarks"
+  ],
+  "ended_epoch": 1790171438.09719,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "guarded_start",
+  "pid": 2645929,
+  "started_epoch": 1790171358.4759567,
+  "stderr_sha256": "b3fad27e3465a92bffc3c0e2dc2083760e7c1cee6239f43cd3cb842b24b4da29",
+  "stdout_sha256": "a1d208238ac4b874cbc8bdfaefbf501953ce13dcb2151dbb8db2d7db15636b16",
+  "timeout_seconds": null
+}

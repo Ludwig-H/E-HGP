@@ -208,6 +208,18 @@ retenu : pas +1 des compteurs non contrôlé (−4 %, mais contrat public de
 dépassement changé), compteurs locaux du DFS (−0,9 %), raffinement des
 rectangles et cache par `b` (pertes).
 
+Voie GPU S1 (23 septembre après-midi) : filtre témoin exact q3/q4 porté
+hôte/device (`src/gpu/`), protocole G4 dédié `gcp-migration/gpu_filter_*_v9.py`.
+Session G4 S1 ([reçu](receipts/g4_gpu_s1_20260923/README.md), paquet
+`6e0e43a0`, **`completed`**, `TERMINATED` certifié) : sur 08/000000/K5, tout
+le filtrage sans cache (3,13 M rectangles, 23,7 M paires) tient en
+**63,8 ms** sur la RTX PRO 6000, contre 1,18 s au CPU à 48 fils avec cache
+(×18 à ×24 sur les six cas). Masques et totaux de visites identiques. Seuil
+S1 (0,1 s) franchi. Suite GPU : raccorder le passage à la chaîne (front CPU,
+filtre GPU, survivants au CPU), puis porter le cœur et le certificat de voie
+morte. La tentative 1 a échoué à la configuration (CMake 3.22.1 sur la VM,
+[reçu](receipts/g4_gpu_s1_attempt1_20260923/README.md)).
+
 Suite : tour maigre (D5 de l'auditeur C :
 index des selles, saut au centre, images de naissance directes), puis
 réfutation des ancres longues avant expansion (66–70 % du CPU q3/q4 selon C).

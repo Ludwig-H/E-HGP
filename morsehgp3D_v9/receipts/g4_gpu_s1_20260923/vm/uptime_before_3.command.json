@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "uptime"
+  ],
+  "cwd": "/tmp/ehgp-gpu-v9-c04946b0b5d309af.gRqDkkwPOn/output",
+  "elapsed_seconds": 0.0013515400000017053,
+  "ended_utc": "2026-09-23T13:51:36.664692+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 2609,
+  "session_work_deadline_epoch": 1790172966.688356,
+  "started_utc": "2026-09-23T13:51:36.663305+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "aecabf3e510950f833f1bce67dd5e1bc9c704f40d2a9a6b2ae54deecc9ec4ef2"
+}

@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/usr/bin/g++",
+    "--version"
+  ],
+  "cwd": "/tmp/ehgp-gpu-v9-c04946b0b5d309af.gRqDkkwPOn/output",
+  "exit_code": null,
+  "group_closed": false,
+  "per_command_watchdog": null,
+  "pid": null,
+  "session_work_deadline_epoch": 1790172966.688356,
+  "started_utc": "2026-09-23T13:51:06.993842+00:00"
+}
