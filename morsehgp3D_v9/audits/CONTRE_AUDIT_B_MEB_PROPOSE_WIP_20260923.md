@@ -29,6 +29,17 @@ il prévoit un mutant de canonisation et un repli sur proposition
 corrompue. Il manque encore des fixtures de débordement pour chacun
 des **quatre compteurs ajoutés**, des modes d'arrondi/FENV et un contrôle
 du coût complet de la tour, pas seulement du nombre d'essais exacts.
+Fixture canonique directe : dans cet ordre,
+`A=(15,10,0)`, `B=(6,13,0)`, `C=(7,6,0)`, `D=(10,15,0)` sont sur le
+cercle de centre `(10,10,0)`, rayon carré 25, sans paire diamétrale.
+Le premier couple maximal AB (distance carrée 90) n'englobe pas C ;
+ABC est le premier support q3 positif, tandis que la coquille a quatre
+sites. La voie proposée doit donc rendre les slots `[0,1,2]`, même si
+Welzl suggère un autre triple du bord. Initialiser successivement
+`proposals`, `verified_proposals` et `boundary_canonicalizations` à
+`UINT64_MAX` exerce trois refus typés ; une proposition corrompue peut
+exercer `proposal_fallbacks` au maximum. Le résultat géométrique d'un
+refus doit être vide, sans publication partielle.
 
 ## Qualification et protocole
 
