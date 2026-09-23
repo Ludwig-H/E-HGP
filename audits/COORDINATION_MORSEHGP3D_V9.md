@@ -1625,3 +1625,45 @@ pour un refus G4 pré-Euler. Restent quatre écarts distincts :
 - **Suite** : ordonnancement exact de q34 (ordre de réclamation des jobs par
   masse décroissante, grain plus fin, durée du plus long job publiée), puis
   squelette des lots de la tour.
+## 23 septembre 2026, 09 h 50 UTC — Couture q3/q4 et coût physique du cœur (auditeur B, note rédigée avant R8)
+
+Base : `93f03e90`, aucune exécution lourde supplémentaire. La jonction des
+preuves [`Q34_PROPRIETAIRE_PASSAGE_AMONT`](../morsehgp3D_v9/audits/Q34_PROPRIETAIRE_PASSAGE_AMONT_20260923.md)
+et [`Q4_INDUCTION_ATLAS_EVENEMENTS`](../morsehgp3D_v9/audits/Q4_INDUCTION_ATLAS_EVENEMENTS_20260923.md)
+n'a pas révélé de contre-exemple pour `Local28` : toute boule pertinente de
+rayon positif a, par Carathéodory, un support minimal positif de 2 à 4
+sites. Une seule présentation de cette clé suffit ; le recensus récupère
+toute sa coquille et `ShellTable` ses sous-supports. La fenêtre
+`p+q_min−1≤K≤p+|U|` donne précisément les seuils du générateur
+`p<Kmax`, `p<Kmax−1`, `p<Kmax−2` pour q2/q3/q4. Les égalités d'arête
+sont départagées par IDs et q4 ne dépend pas de l'admission q3 de ses
+faces. Ce verdict reste conditionnel aux sites distincts, à l'index u18
+exact, au front/callback complets, à `Local28` et aux coquilles ≤12 ;
+`Window30`, les clés entièrement absentes et FULL demandent leurs propres
+portes. Une comparaison indépendante des **ensembles exacts de BallKeys**
+sur petits nuages reste nécessaire ; Euler ne la remplace pas.
+
+Sur la [contre-épreuve à boîte
+fixe](../morsehgp3D_v9/audits/lidar_density_bbox_fixed_20260923/README.md),
+`dead_core_form_sites` compte des formes de sites **effectivement
+calculées**, non des visites de nœuds : identité de code
+`core_sites = dead_core_form_sites + 2×dead_core_loads`. Aux densités
+3 630/7 339/14 829 du quart chaud, les formes sont
+32,313/137,604/579,001 millions, les boules du catalogue
+0,308/0,704/1,640 million, et la moyenne des formes non-supports par
+cœur passe d'environ **96→165→290**. La pente supérieure à 2 des formes
+n'est donc pas imposée par la seule croissance de la sortie ; une part
+substantielle vient de la préparation répétée par arête. Le certificat
+exact par rectangle WSPD et cellules de centres, déjà proposé dans
+[`PISTE_B_Q34_RECTANGLES_AVANT_EXPANSION`](../morsehgp3D_v9/audits/PISTE_B_Q34_RECTANGLES_AVANT_EXPANSION_20260923.md),
+mérite une mesure shadow ciblée sur ces rectangles lourds **avant**
+`A×B` ; juger `coût des cellules/témoins + paires/covers/formes restants
++ catalogue/FULL`, sans déplacer un carré caché. Le tri seul n'est pas
+le verrou de ces données.
+
+Dans le WIP local `8d5e08ed`, la nouvelle vérification brute d'une boule
+sur 64 est utile mais **déterministe** (`totals.balls % 64 == 0`) malgré le
+commentaire « pas déterministe » ; elle ne couvre pas les 63 autres boules.
+Son garde `sampled*64 < balls` est toujours faux pour un échantillonnage
+commençant à zéro : publier plutôt le nombre attendu d'échantillons et
+leur coût séparé. Ce point concerne la porte d'audit, pas le moteur.
