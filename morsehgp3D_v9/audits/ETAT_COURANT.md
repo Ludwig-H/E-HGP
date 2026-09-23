@@ -390,6 +390,15 @@ appariée.
    reste `complete_relative` ; les lacunes v5 de réception demeurent pour un
    futur reçu arbitraire et `host/lifecycle.txt` reste à `targeted_running`
    malgré la preuve séparée d'arrêt `TERMINATED`.
+   Sur le chantier WIP suivant, le DFS conjoint q3/q4 rend les mêmes bits de
+   preuve que les deux DFS séparés sur **30 000** appels synthétiques, avec
+   18,7 % de tests uniformes en moins mais aucun gain LiDAR établi ; ses
+   compteurs de cellules ne se comparent plus directement à R3. Le cache
+   des nœuds témoins passe ses comparaisons sur de vraies traces, mais son
+   API publique permet de compter deux fois une feuille : voir la
+   [contrelecture B et sa reproduction](CONTRE_AUDIT_B_CACHE_TEMOINS_WIP_20260923.md).
+   Le chemin interne garde les nœuds disjoints ; le nouveau schéma de sonde
+   v6 et les portes de raccord sont en cours, sans nouveau reçu G4.
 4. **Aval FULL, grandes coquilles et échelle** : les 12,0 M appels MEB
    de 000000/K10 font 1,065 milliard de tests de puissance ; un test
    exact de la paire la plus éloignée peut éliminer toutes les autres
