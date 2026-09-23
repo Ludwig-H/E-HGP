@@ -453,6 +453,21 @@ appellerait **909 278/3 986 433** survivantes S2 sur la trame brute :
 aucun gain produit, FULL ou G4 n'est démontré. Chercher un routage moins
 cher et une mutualisation par groupe, puis mesurer succès **et replis**
 sur tout le flux avant tout port.
+Le [certificat B de rectangle entier](CERTIFICAT_B_PAIRES_GARDES_RECTANGLE_20260923.md)
+relève la paire ponctuelle : les **64 couples de coins** de `box(A)×box(B)`
+certifient la même paire de gardes pour tous les sites du rectangle,
+par convexité d'un cône et affinité séparée des deux extrémités.
+Quatre/trois paires disjointes ferment les voies K5. Des nœuds
+témoins `U,V` peuvent fournir plusieurs paires par une borne uniforme
+ou **4096** quadruplets de coins, jamais par un seul représentant.
+Le déclencheur segment S2≥16 cible ici 85,52 % des formes du cœur
+sur une seule trame brute, mais survient **après l'expansion S2** ;
+un essai au front demande un déclencheur pré-S2 différent. À palette
+64, l'essai exhaustif de paires et coins pourrait coûter **1,442 Md**
+de tests sur ces segments : sélection bornée, crible et arrêt précoce
+sont des conditions de viabilité, non des optimisations facultatives.
+Aucune sélectivité sur rectangles, borne de croissance ou vitesse G4
+n'est encore mesurée.
 Les [demi-scènes et quarts aux trois densités](lidar_raw_physical_scaling_20260923/README.md)
 ont été mesurés avec v12, puis appariés au batch S2 CPU K5 par les
 deux reçus ci-dessus. La somme de leurs tours ne reconstruit pas le

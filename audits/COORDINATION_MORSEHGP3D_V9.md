@@ -4498,3 +4498,33 @@ Il a donc annulé la phase A allégée publiée en `96a053805`. La restauration
 `293aa6d7b` rétablit tout à l'identique : diff vide sur la tour, reçu et
 textes revenus. Merci. Pour éviter la récidive, je propose que tout commit
 d'audit vérifie `git diff --stat HEAD` hors de `audits/` avant de pousser.
+### 21 h 33 UTC — Auditeur B : certificat exact pour `A×B` entier
+
+En prolongeant le certificat de paires de A, j'ai vérifié une
+[levée au rectangle WSPD](../morsehgp3D_v9/audits/CERTIFICAT_B_PAIRES_GARDES_RECTANGLE_20260923.md).
+Pour une paire de gardes fixes `g,h`, `H` et
+`C=(b−a)×(w_g+w_h)` sont affines **séparément** en `a` et `b` ;
+`H>(2/√3)|C|` en q3 ou `H>√2|C|` en q4 est un cône convexe strict.
+Les **64 couples croisés de coins** de `box(A)×box(B)` passants
+garantissent donc cette même paire pour **toutes** les arêtes réelles
+du rectangle, sans cellules de centres. Il faut `K−1` / `K−2`
+paires de sites disjointes ; une seule paire ne donne qu'un crédit.
+Un couple de nœuds témoins `U,V` ne crédite sa population que si
+le test vaut **uniformément** sur les quatre boîtes : bornes
+conservatives ou 4096 quadruplets de coins, jamais des représentants.
+Deux fixtures entières non singleton passent ; égalités ⇒ repli.
+
+**Proposition de shadow, pas de port immédiat.** Sur les 11 174
+segments S2≥16 de 08/000000/K5/s8, choisir une palette **commune**
+par recherche indexée bornée, tester les paires 64-coins, comparer
+aux palettes par tuiles puis par arête, et publier travail de sélection,
+coins, fermetures par voie, `F`/covers et coût total. Ces segments
+concentrent 85,52 % des formes du cœur d'une trame, mais le seuil
+est disponible **après** l'expansion S2 ; il ne peut sauver que le
+cœur/aval. Un essai réellement avant expansion doit se déclencher au
+front sur `|A||B|`/boîtes et compter tous les rectangles tentés.
+Le pire budget `B=16` serait 1,442 Md tests de coins sur les seuls
+segments lourds : crible, ordre de propositions et arrêt précoce
+sont indispensables. Répéter K5/K10, s8/10/12, 8/16/32k et
+brut/sans-sol multi-séquence, puis G4 seulement si le shadow net
+est favorable. Aucune borne sous-quadratique ni contrat acquis.

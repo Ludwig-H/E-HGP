@@ -56,6 +56,16 @@ du taux de fermeture du flux entier. `F` fermable 111 883/260 032 et
 travail effectivement économisé. Aucun résultat K10, sans-sol,
 multi-séquence, s10/s12 ou G4 n'en découle.
 
+Le glouton peut manquer un appariement ; ce n'est toutefois pas le
+premier verrou. À palette16, les comptes de sommets candidats et
+d'arêtes des graphes publiés donnent les conditions nécessaires
+`P≥2T` et `graph_edges≥T` pour chaque voie active : **même un matching
+optimal ne pourrait fermer plus de 34/60 puis 42/60** (contre 27 et
+40 observés). Ce sont des plafonds **optimistes**, pas des matchings
+trouvés ; les JSON ne donnent pas l'adjacence pour calculer l'optimum.
+Le graphe n'est pas garanti biparti par les quadrants. Différer un
+Blossom par arête ; accélérer d'abord la sélection de vrais sites.
+
 Surtout, le shadow sélectionne ses candidats en balayant **123 389
 sites par arête**, soit **7 403 340 lectures** pour 60 arêtes contre
 260 032 formes de cœur dans la première graine (×28,47) ; son
@@ -68,10 +78,35 @@ disponible avant `Q34EdgeCover::make_diametral`, pas un second scan
 qui mesure `F` ; après le cœur, la preuve peut encore épargner le
 chargement des formes et l'aval, mais pas la construction déjà payée.
 
-La prochaine porte pertinente est un **shadow** de quatre recherches
-indexées et bornées par arête, avec au plus `B` sites par quadrant,
-IDs et contacts exacts. Une palette partielle peut fermer une voie
-positivement ; si le budget s'épuise sans preuve, repli inchangé.
+Un déclencheur pré-cœur **existe déjà** dans le flux S2 : le nombre de
+survivantes par [segment de rectangle WSPD](s2_segment_mass_20260923/README.md).
+Sur la trame brute 08/000000/K5, les segments d'au moins 16 arêtes
+contiennent **396 481 arêtes (9,95 %)** mais **478 635 662 / 559 661 741
+formes du cœur (85,52 %)**. Cette longueur est connue après S2, avant
+le cœur, sans connaître `F` par arête. Un buffer privé de 15 arêtes par
+segment pourrait décider au 16e de router le segment vers une tentative
+de paires bornée ; les segments courts restent sur la voie actuelle.
+Ce seuil n'est pas universel : les quarts et densités du
+[panel S2](s2_segment_panel_20260923/README.md) montrent une
+concentration très différente. Mesurer son coût et le résidu plutôt
+que transférer les 85,52 % à d'autres scènes.
+
+Une première porte de **recherche indexée bornée** est désormais
+[mesurée par A](paired_guard_index_shadow_20260923/README.md) sur les
+mêmes 120 arêtes lourdes : palettes B16 identiques au scan, 67/120
+fermetures, 48 553 nœuds dépilés et 83 768 boîtes évaluées ; à
+64 nœuds/quadrant, seulement 21/120 fermetures positives. La
+[variante par nœuds](paired_guard_node_blocks_20260923/README.md)
+remonte ce budget à 32/120 avec cap4, mais reste lui aussi par
+arête. Ces reçus ne couvrent ni le flux entier ni les rectangles.
+Une palette partielle peut fermer une voie positivement ; si le
+budget s'épuise sans preuve, repli inchangé.
+Le certificat peut aussi être [relevé à tout un rectangle
+WSPD](CERTIFICAT_B_PAIRES_GARDES_RECTANGLE_20260923.md) par 64 tests
+de coins pour une paire commune : les segments lourds fournissent
+alors une tentative par rectangle, pas une recherche par arête. Ce
+chemin ne sauve toutefois **pas** le filtre/expansion S2 déjà payés ;
+une élimination avant S2 exige un déclencheur connu au front.
 Mesurer sur **toutes** les arêtes S2 le coût des tentatives et du
 déclencheur, visites de nœuds/feuilles, `F` et covers réellement évités,
 résidu q3/q4, puis chaîne complète. Inclure 8k/16k/32k et trames
