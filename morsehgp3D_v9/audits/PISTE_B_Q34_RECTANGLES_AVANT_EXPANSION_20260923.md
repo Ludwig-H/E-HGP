@@ -335,14 +335,21 @@ choisie par une recherche de voisins *approximative* d'un représentant
 de C : cette recherche propose seulement des témoins à essayer, elle
 ne décide jamais un rejet.
 
-Pour chaque `z∈P_C`, tester aux huit coins `v` de C les **deux** signes
-stricts `|z−v|² < min_{a∈box(A)}|a−v|²` et
-`|z−v|² < min_{b∈box(B)}|b−v|²`. Pour chaque `z,a` ou `z,b`
-fixé, la différence de distances carrées est affine en `v` ; les coins
-certifient donc le signe dans toute C. Un `z` admis est intérieur à
-toute boule candidate de centre dans C et ne peut appartenir à aucun
-facteur A/B : le choisir comme extrémité rendrait son signe égal à
-zéro. Si la palette certifie `K−1` IDs en q3 ou `K−2` en q4 **dans
+Pour chaque `z∈P_C`, exiger d'abord `z∉A∪B` (test d'ID/rang exact),
+puis tester aux huit coins `v` de C **soit** le signe strict
+`|z−v|² < min_{a∈box(A)}|a−v|²` à **tous** les coins, **soit** le signe
+analogue contre `box(B)` à **tous** les coins. Le côté peut varier entre
+témoins, mais reste fixe pour un témoin dans cette cellule. Pour chaque
+`z,a` ou `z,b` fixé, la différence de distances carrées est affine en
+`v` ; les coins certifient donc le signe dans toute C. Tout centre
+candidat est équidistant de `a` et `b` : être strictement plus proche
+que **l'un** des deux facteurs suffit à rendre `z` intérieur. Tester
+les deux côtés simultanément serait exact mais inutilement fort.
+Un « OU » pouvant changer **à chaque coin** serait en revanche faux :
+dans le plan u18, `A={(0,0)}`, `B={(10,0)}`, `z=(5,6)` et
+`C=[3,7]×{0}` passent côté B au coin gauche et côté A au coin droit,
+alors que `z` est extérieur à la boule centrée en `(5,0)` de rayon 5.
+Si la palette certifie `K−1` IDs en q3 ou `K−2` en q4 **dans
 chaque cellule possible**, la voie du produit meurt ; sinon la zone
 indécise suit exactement le chemin actuel. Les comptes des cellules
 ne s'additionnent jamais. Aux coins entiers u18, les distances carrées

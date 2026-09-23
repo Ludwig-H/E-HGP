@@ -33,6 +33,18 @@ Le digest reste synchrone dans `run_tower_chain` : la latence de cet appel
 est donc au moins `chain_total + digest`, même si la construction de la
 tour en mémoire s'achève avant le digest.
 
+Le lecteur mutable v9 vérifie seulement l'inégalité
+`chain_total + digest ≤ mur externe + 50 ms` et omet `read`, alors que la
+sonde chronomètre la lecture avant
+la chaîne et que `/usr/bin/time` enveloppe **l'exécutable entier**. Une
+mutation hors dépôt a pris une vraie sortie R6 convertie au schéma v9,
+fixé `digest=0,125 ms`, `read=3 600 000 ms` et un mur externe de 60 s :
+`validate_probe` et `validate_external_wall` l'ont **tous deux admise**.
+Le temps séquentiel publié dépassait pourtant 3 606 s. Pour la
+cohérence du reçu, borner `read + chain_total + digest` par le mur externe
+avec la tolérance annoncée et tuer cette mutation dans la porte worker.
+Cela ne met **pas** `read` dans le contrat in-memory de 1 s.
+
 ## Résidence mémoire et échecs
 
 Le tri parallèle alloue `buffer(n)` en plus de `all`. Sur
