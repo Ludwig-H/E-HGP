@@ -976,6 +976,15 @@ cas K10 gardés sur 24 essais et les 21 lignes de la matrice ; les cinq
 premiers ordres K10 égalent les **comptes** K5 sur chaque entrée, pas
 les clés une à une. Sa mention de float32 comme défaut a été rectifiée :
 la grille 1 mm reste le profil contractuel prioritaire de v9.
+Le [panel S2 CPU des demi-scènes brutes K5](s2_half_density_k5_20260923/README.md)
+apparie moteur et lot sur neuf entrées (plein et deux demis × trois
+densités), 18/18 sorties `complete_relative`. Six compteurs, dont formes
+réellement calculées, charges et paires développées, égalent exactement
+le reçu v12 sur **9/9** entrées : S2 n'a pas réduit cette masse ici.
+La somme des formes des deux demis vaut **0,567→0,435→0,315** de celle
+du plein lorsque la densité passe de 1/4 à 1/2 puis entière, alors que
+la part des charges reste vers **0,97**. Les temps muraux sont bruités ;
+aucune pente K10 S2 ou borne sous-quadratique nouvelle n'est acquise.
 Le [crédit exact par nœuds du certificat de cœur](../receipts/dead_node_credit_negative_20260923/README.md)
 a été essayé hors produit : mêmes voies et digest, mais CPU de chaîne
 **+27 % à K5 et +32 % à K10** sur la coupe 16k de 000000 ; cette variante

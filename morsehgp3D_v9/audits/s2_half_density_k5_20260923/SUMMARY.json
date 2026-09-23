@@ -1,0 +1,169 @@
+{
+  "attempts": 18,
+  "binary_sha256": "076312fb9502dee5a7f0a5fbe549b68c942c511892b4c0ba5583770b511758d7",
+  "cases": 9,
+  "complete": true,
+  "density_slopes": {
+    "full": {
+      "catalogue_balls": [
+        1.0090413793694453,
+        0.9342865433033807
+      ],
+      "chain_cpu_s": [
+        1.2431927071787028,
+        1.3063050929589948
+      ],
+      "chain_wall_ms": [
+        1.1304980790651786,
+        1.8436817100869114
+      ],
+      "core_cover_node_visits": [
+        1.3154322342691187,
+        1.5157985613120346
+      ],
+      "core_loads": [
+        1.1211443323243047,
+        1.2426135929707356
+      ],
+      "expanded_pairs": [
+        1.4542959626170886,
+        1.4953407975276871
+      ],
+      "forms_all": [
+        1.799740824199288,
+        2.1188062306617574
+      ],
+      "forms_off_endpoints": [
+        1.8231956327977268,
+        2.1363325684228927
+      ]
+    },
+    "half_x_neg": {
+      "catalogue_balls": [
+        1.020394098662319,
+        0.958584868461754
+      ],
+      "chain_cpu_s": [
+        1.2614349380677168,
+        1.3163187430895986
+      ],
+      "chain_wall_ms": [
+        0.2668280837553789,
+        1.8181569075738164
+      ],
+      "core_cover_node_visits": [
+        1.3203458980053782,
+        1.4432990380214077
+      ],
+      "core_loads": [
+        1.1189587915320542,
+        1.2086029082845342
+      ],
+      "expanded_pairs": [
+        1.624694820330853,
+        1.7174198488172883
+      ],
+      "forms_all": [
+        1.6253596609514926,
+        1.836199588821443
+      ],
+      "forms_off_endpoints": [
+        1.6699063212404315,
+        1.8726580750173274
+      ]
+    },
+    "half_x_nonneg": {
+      "catalogue_balls": [
+        1.007397742649008,
+        0.9117904282318448
+      ],
+      "chain_cpu_s": [
+        1.2235345768443442,
+        1.3084857469271456
+      ],
+      "chain_wall_ms": [
+        1.32979763436351,
+        2.7209135819612165
+      ],
+      "core_cover_node_visits": [
+        1.248272129480835,
+        1.4360530960491478
+      ],
+      "core_loads": [
+        1.1349828094958352,
+        1.281161036558499
+      ],
+      "expanded_pairs": [
+        1.4326195968476414,
+        1.2868546360155915
+      ],
+      "forms_all": [
+        1.2511686970524887,
+        1.4644239135227448
+      ],
+      "forms_off_endpoints": [
+        1.2575087533562308,
+        1.473386903146144
+      ]
+    }
+  },
+  "input_manifest_sha256": "6e64125abddbfcd589ba61cf747e493e455adec4beeaea81c2739ce98fe16095",
+  "paired": true,
+  "s2_build_receipt_sha256": "75a504bf824c921b7ed73c09da9d65f7431c869d33d24c7de784c648af48f536",
+  "schema": "mhgp9_s2_cpu_k5_half_density_summary_v1",
+  "source_commit": "a6d81f9ce",
+  "spatial": {
+    "full": {
+      "quadratic_reference": 0.5000554160309818,
+      "ratios_half_sum_over_full": {
+        "catalogue_balls": 0.9973979926663293,
+        "chain_cpu_s": 0.8894336855221826,
+        "chain_wall_ms": 1.4437211898809932,
+        "core_cover_node_visits": 0.7838854565135046,
+        "core_loads": 0.9691192602509562,
+        "expanded_pairs": 0.8063740348852292,
+        "forms_all": 0.3153337490689756,
+        "forms_off_endpoints": 0.30588540869162895
+      },
+      "sites": 123389
+    },
+    "half": {
+      "quadratic_reference": 0.5000216539043081,
+      "ratios_half_sum_over_full": {
+        "catalogue_balls": 0.9956316885748104,
+        "chain_cpu_s": 0.8861710323574731,
+        "chain_wall_ms": 1.0337762174668081,
+        "core_cover_node_visits": 0.8269590193453412,
+        "core_loads": 0.9704399958448959,
+        "expanded_pairs": 0.7754980486730708,
+        "forms_all": 0.4354046932352377,
+        "forms_off_endpoints": 0.4210384888062269
+      },
+      "sites": 61694
+    },
+    "quarter": {
+      "quadratic_reference": 0.500000383064288,
+      "ratios_half_sum_over_full": {
+        "catalogue_balls": 0.992650315560807,
+        "chain_cpu_s": 0.8860730636980186,
+        "chain_wall_ms": 1.4100764015822957,
+        "core_cover_node_visits": 0.8425951959353033,
+        "core_loads": 0.9681508184698655,
+        "expanded_pairs": 0.7309752720523036,
+        "forms_all": 0.5666550769761521,
+        "forms_off_endpoints": 0.5491171181252058
+      },
+      "sites": 30847
+    }
+  },
+  "v12_equal_cases": 9,
+  "v12_equal_fields": [
+    "sites",
+    "core_sites",
+    "dead_core_loads",
+    "catalogue_balls",
+    "expanded_pairs",
+    "dead_core_uniform_tests"
+  ],
+  "v12_summary_sha256": "9e6d8eccb79a64bb6b46e17336c37078bc1d9553a72915b478c4de417b9d43e9"
+}

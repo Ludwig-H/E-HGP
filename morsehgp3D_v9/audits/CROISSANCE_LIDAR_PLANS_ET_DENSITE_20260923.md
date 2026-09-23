@@ -279,7 +279,13 @@ dans cet essai ; le transfert sur G4 n'est pas mesuré. Le
 les arêtes traversant les quarts portent, à densité pleine, **69,06 %**
 des formes pour **3,94 %** des charges. Ce résultat localise le coût de
 réunification de la scène sans supposer qu'un axe de coupe est toujours
-défavorable. Le port S2 ne réduit pas, à lui seul, cette masse. Il reste
-à mesurer les **deux moitiés S2** et K10 sur toute la matrice 7×3,
-puis plusieurs scènes, graines et séquences. Les matrices v12 restent
-des diagnostics CPU de leur propre binaire.
+défavorable. Le [panel S2 des deux moitiés](s2_half_density_k5_20260923/README.md)
+compare maintenant moteur et lot CPU sur les neuf entrées K5 de la
+trame entière et de ses deux moitiés, aux trois densités. Six compteurs
+déterministes, dont formes du cœur et paires développées, coïncident
+**9/9** avec v12. Le rapport formes des moitiés sur le plein y tombe
+de **0,567→0,435→0,315** pendant que celui des charges reste vers
+**0,97** : le raccord S2 n'a pas réduit cette masse sur ce panel.
+K10 S2, les autres quarts sous un même binaire S2, plusieurs scènes,
+graines et séquences restent à mesurer. Les matrices v12 et ce panel
+CPU ne prouvent aucune borne globale ni un temps G4.
