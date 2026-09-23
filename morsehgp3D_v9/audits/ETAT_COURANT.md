@@ -504,17 +504,24 @@ une archive négative, encore non publiée : sur 08/000000 sans sol,
 régression q3/q4 K10 de 60,833 à 64,230 s en mur local. L'égalité
 des seuls résumés `catalogue` ne vérifie pas les clés ni la tour FULL.
 
-Un autre WIP, `types.hpp` SHA-256 `75ab2b5e…3b29303b`, remplace le
-contrôle d'overflow des incréments unitaires de ledger par `++value`.
-Sur les chemins privés de FULL partis de zéro, l'argument de coût est
-plausible ; les **API publiques à ledger fourni par l'appelant** ont
-en revanche un contrat vérifié différent. Les portes CTest
-`q3_ball_census` (`queries=UINT64_MAX`) et `q34_witness_search`
-(`queries` et `BoundsWork.queries` au maximum) exigent
-`overflow_error` ; leurs appels à `counter_add` boucleraient maintenant
-à zéro et feraient échouer ces deux gates. Lecture statique, sans
-rebuild : conserver un incrément contrôlé sur ces API ou isoler le
-chemin local non contrôlé, puis rejouer les portes avant publication.
+Le WIP mutable de micro-levier (`types.hpp` SHA-256 `596b5cd8…761b292`
+à 12 h 30) remplace l'incrément unitaire vérifié par `++value`, puis
+ajoute un précontrôle de marge dans census q3 et filtres/cache q3/q4.
+Cela peut réparer les **deux gates publiques** d'overflow signalées dans
+la première lecture, mais le contrôle n'est pas général. L'API publique
+`point_witness` accepte un `PredicateWork&` fourni par l'appelant et
+incrémente `point_tests` sans garde : avec `UINT64_MAX`, la fixture
+`Q2, a=(0,0,0), b=(2,0,0), z=(1,0,0)` compilée sur ce WIP renvoie
+`true, point_tests=0` au lieu de lever `overflow_error`. `run_q4_local_edge_candidates`
+et le prouveur de voies mortes exposent la même classe de ledger.
+Le nouveau précontrôle refuse en outre tout mot `≥2^63`, même si cet
+appel n'incrémenterait pas ce mot ; il change donc le domaine accepté sans
+débordement réel. Conserver l'incrément vérifié à la frontière publique et
+réserver l'incrément sans contrôle aux ledgers **privés** avec borne par
+appel démontrée ; ajouter une porte `PredicateWork` au maximum et rejouer
+les portes existantes. Le précontrôle scanne 25 puis parfois 12 mots par
+requête q3/q4 ; son coût doit être remesuré sur le binaire final avant
+de reprendre le gain CPU d'un reçu micro antérieur. Ce WIP n'est pas publié.
 
 ## Verrou q3/q4 : réduire le travail avant l'expansion
 
