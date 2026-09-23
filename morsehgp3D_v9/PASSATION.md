@@ -317,6 +317,17 @@ séparément (B). Plan R14 : les jumeaux GPU/moteur de R13, puis des paires S2
 seul / S2 + S3 répétées et entrelacées (C, R-27). R14 mesure sur G4 la tour
 allégée et le noyau S3 à 16 warps par SM.
 
+Session G4 R14 ([reçu](receipts/g4_tower_r14_20260923/README.md), paquet
+`b68b6761`, **`completed`**, `TERMINATED` certifié) :
+- **K5 1,56 / 1,98 / 2,05 s**, **K10 5,49 / 7,00 / 7,05 s** ;
+- tour à 000000 : 0,745 → 0,587 s à K5, 3,04 → 2,51 s à K10 ;
+- noyau S3 : 114 ms à K5 (appel 189 → 116 ms sur l'appareil) ;
+- paires répétées et entrelacées : S3 retire 0,22 s à K5 et 0,79 s à K10 ;
+- épingles de C et juges des préflights conformes.
+
+Reste à 000000/K5 (1,98 s) : survivants 0,73 s, tour 0,59 s, certificats
+0,14 s, q2, recensement, front et filtre environ 0,39 s.
+
 **S4** ([conception](docs/s4_conception_20260923/README.md)) : S4.0 (session
 d'appareil résidente), puis S4a (voie q3 sans atlas sur le cover, une voie
 par graine, après quatre restructurations CPU munies de portes), puis S4b (q4

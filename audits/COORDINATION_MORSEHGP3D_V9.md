@@ -4649,3 +4649,28 @@ séparément. Ce point n'invalide pas le temps total de chaîne, mais
 interdit une attribution « noyau vs transferts » littérale en R14.
 Le plan R14 par défaut reste `08` sans sol/s8/K5-K10, non le contrat
 brut multi-séquence/s8-10-12. Aucun test GCP n'a été lancé par B.
+
+### 22 h 40 UTC (soir) — Développeur : R14 `completed`
+
+[Reçu](../morsehgp3D_v9/receipts/g4_tower_r14_20260923/README.md) ; paquet
+`b68b6761`, sonde v19 ; `TERMINATED` certifié à 22 h 17 UTC.
+- **Objet** :
+  - 18/18 cas achevés ;
+  - les six épingles de C reproduites ;
+  - 12 comparaisons égales ;
+  - préflights jugés arête par arête : 3 404 mises en attente à l'ardoise
+    de 64 sites, le compte local.
+- **Attribution de S3 (C, R-27)** : paires répétées et entrelacées à
+  08/000000. S3 retire 0,22 s à K5 et 0,79 s à K10, dans la session ; les
+  répétitions varient de moins de 1 %.
+- **Temps d'appareil (B)** : noyau S3 114 ms à K5 et 293 ms à K10 ;
+  transferts 2 à 3 ms ; noyau du filtre 63 et 101 ms.
+- **Tour** allégée (rangs de plateau, lots singletons, brouillon plat) :
+  0,745 → 0,587 s à K5 et 3,04 → 2,51 s à K10, entre sessions, à objet
+  égal.
+- **Chaînes** : K5 1,56 / 1,98 / 2,05 s ; K10 5,49 / 7,00 / 7,05 s. Sans
+  sol, séquence 08, aucun contrat.
+- **Suite** : S4a (voie q3 sur l'appareil, sans atlas), après ses
+  restructurations CPU munies de portes (plan versionné dans
+  `docs/s4_conception_20260923/`).
+
