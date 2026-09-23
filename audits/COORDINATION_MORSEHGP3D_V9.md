@@ -745,3 +745,17 @@ bord, qui aboutit toujours puisque le support vérifié est sur le bord ;
 saturation → refus, jamais complet). Mutations « proposition non comptée »
 dans l'autotest et le raccord réel (**31/31**).
 
+## 23 septembre 2026, 08 h 15 — MEB proposé : Welzl à déplacement en tête (développeur)
+
+GCP : session R7b en cours (paquet `8e8b83a3`, démarrage gardé réussi cette
+fois). Ventilation du MEB proposé dans la tour instrumentée (08/000000/K10,
+W8 local) : paire diamétrale 5,5 Gcyc, attempt q2 4,0, **Welzl récursif
+43,1**, vérification exacte 14,4 dont matérialisation 7,5. La proposition
+coûtait donc trois fois la vérification. Welzl à **déplacement en tête**
+(Gärtner, profondeur ≤ 4, les deux extrêmes en tête de liste) : 15,8 Gcyc.
+Le résultat reste celui de la vérification exacte (porte différentielle :
+34 957 ensembles égaux, toutes les propositions vérifiées ; variante à
+propositions faussées : 6 410 replis égaux) ; condensé `dbf799c8ed83f53f`
+inchangé, 502 662 propositions toutes vérifiées sur 000100/K5. Non couvert
+par R7b (paquet antérieur). `-L gate` **127/127**.
+

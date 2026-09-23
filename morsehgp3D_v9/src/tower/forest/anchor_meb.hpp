@@ -9,7 +9,7 @@
 // anchor_meb is the reference: first maximal pair, then every triple and
 // quadruple in lexicographic order. anchor_meb_proposed returns the SAME
 // result (key, level, support slots, selected shell) with less work: a
-// double-precision Welzl run only PROPOSES a support, which the same exact
+// double-precision move-to-front Welzl run only PROPOSES a support, which the same exact
 // attempt verifies (positive support, every site contained). A verified
 // support is the MEB by uniqueness, and every valid support lies on its exact
 // boundary; the reference's first valid support is therefore found by the
@@ -175,14 +175,20 @@ inline bool proposal_contains(const Proposal& ball, const double* q) noexcept {
   return d <= ball.radius2 * (1 + 1e-12) + 1e-6;
 }
 
-// Welzl over the first n entries of order, with r (nr <= 4) on the boundary.
-inline Proposal welzl(const double (*p)[3], const u8* order, u8 n, u8* r, u8 nr) noexcept {
-  if (n == 0 || nr == 4) return boundary_ball(p, r, nr);
-  const u8 last = order[n - 1];
-  Proposal ball = welzl(p, order, static_cast<u8>(n - 1), r, nr);
-  if (proposal_contains(ball, p[last])) return ball;
-  r[nr] = last;
-  return welzl(p, order, static_cast<u8>(n - 1), r, static_cast<u8>(nr + 1));
+// Move-to-front Welzl (Gaertner): the ball with r (nr <= 4 sites) on its
+// boundary, extended over list[0..end); a site that forces a new ball moves
+// to the front of the list. Recursion depth <= 4, expected linear work.
+inline void welzl_mtf(const double (*p)[3], u8* list, u8 end, u8* r, u8 nr, Proposal& ball) noexcept {
+  ball = boundary_ball(p, r, nr);
+  if (nr == 4) return;
+  for (u8 i = 0; i < end; ++i) {
+    const u8 q = list[i];
+    if (proposal_contains(ball, p[q])) continue;
+    r[nr] = q;
+    welzl_mtf(p, list, i, r, static_cast<u8>(nr + 1), ball);
+    for (u8 j = i; j > 0; --j) list[j] = list[j - 1];
+    list[0] = q;
+  }
 }
 
 }  // namespace anchor_meb_detail
@@ -294,10 +300,11 @@ inline AnchorMebResult anchor_meb_impl(std::span<const P3> sites, AnchorMebWork&
       coordinates[i][1] = static_cast<double>(sites[i].y);
       coordinates[i][2] = static_cast<double>(sites[i].z);
     }
-    std::array<u8, kFacetMaxK> order{};
-    for (u8 i = 0; i < n; ++i) order[i] = power_order[static_cast<u8>(n - 1 - i)];  // extremes enter first
+    std::array<u8, kFacetMaxK> list{};
+    for (u8 i = 0; i < n; ++i) list[i] = power_order[i];  // the two extremes first
     u8 boundary_set[4] = {0, 0, 0, 0};
-    auto proposal = anchor_meb_detail::welzl(coordinates, order.data(), n, boundary_set, 0);
+    anchor_meb_detail::Proposal proposal;
+    anchor_meb_detail::welzl_mtf(coordinates, list.data(), n, boundary_set, 0, proposal);
 #if defined(MHGP9_MEB_PROPOSED_TEST_CORRUPT)
     // Test build only: every third proposal names a wrong site, so that the
     // exact verification refuses it and the fallback is exercised.
