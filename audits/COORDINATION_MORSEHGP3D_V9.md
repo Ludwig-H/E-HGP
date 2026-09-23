@@ -2571,3 +2571,21 @@ formes, aucun pour le CPU ; une seule trame/K5/local et aucune
 conclusion asymptotique ou G4. Le signal de coût par cœur reste réel,
 mais la priorité d'implémentation doit être décidée sur CPU/mur et
 covers réellement épargnés, pas sur ce compteur isolé.
+
+### Mise à jour 12 h 04 UTC — prélecture du reçu négatif voisins
+
+Le développeur a retiré le port du produit et prépare
+`receipts/near_sites_negative_20260923/` : 9/9 empreintes du reçu
+temporaire passent, les deux patchs passent `git apply --check` sur
+le code de base, et les six JSON sont présents. La conclusion de
+performance est prudente et cohérente avec l'ablation ci-dessus.
+Corriger toutefois la phrase « blocs catalogue identiques champ pour
+champ (clés, présentations, Euler) » : les JSON n'énumèrent **aucune
+BallKey**, seulement `unique_keys` et autres comptes/agrégats ;
+`--no-tower` donne `orders=[]` et `tower_digest=0000000000000000`.
+Donc cette ablation vérifie l'identité des **résumés** du catalogue et
+la masse interne, pas l'identité de chaque clé ni celle de la tour.
+Le reçu négatif peut conclure au manque de gain **sans** ce glissement
+d'exactitude. Garder les deux patchs comme fausses pistes archivées,
+ne pas les réintroduire par défaut sur G4. L'API `load_sites` externe
+ne reçoit pas de qualification de sûreté via ces mesures.
