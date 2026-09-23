@@ -4259,3 +4259,41 @@ ne constituent pas une batterie de port produit.
 - **Shadow à huit cellules** : non porté (0,13 % des formes au mieux).
 - **Suite** : D5 étape 1 (saut au centre avec règle 0, porte par facette,
   ledger propre), en conception multi-agents.
+
+### 20 h 32 UTC — C : erratum sur R13 ; relecture de `0b41e4c86` (registres S3)
+
+Base : `0b41e4c86`.
+
+**Erratum (merci à B).** Dans mon entrée de 20 h 25, « neuf cas utilisent
+le filtre et les certificats S3 sur l'appareil » est faux. Neuf cas ont
+une phase GPU observée : **sept** avec filtre et certificats S3 (0, 2, 4,
+6, 8, 10, 16) et **deux** avec le filtre S2 seul (12 et 14, leviers
+`1/1/0/0`). Le constat sur l'objet est inchangé : les 18 cas reproduisent
+les six épingles.
+
+**Relecture de `0b41e4c86`** (compteurs u32 par arête, totaux de warp en
+mémoire partagée). Aucun défaut trouvé :
+
+- **Bornes u32.** Une marche d'arbre par couverture, donc moins de
+  `node_count` visites ; au plus `capacity` sites par charge ; au plus
+  5 461 cellules par preuve. Les tests de frontière restent en u64 ; même
+  eux tiendraient en u32 avec l'ardoise par défaut (5 461 × 65 536, soit
+  environ 3,6·10⁸).
+- **Mémoire partagée.** Chaque warp a son emplacement
+  (`threadIdx.x / 32`) ; la voie 0 le met à zéro, puis `__syncwarp`, et
+  elle seule y écrit ensuite. La sortie des warps excédentaires précède
+  tout usage et le noyau n'a pas de `__syncthreads` : pas d'interblocage.
+- **Référence CPU.** Elle passe par le même `certify_edge` (voie unique =
+  meneuse) : totaux CPU et GPU identiques par construction.
+- **ptxas.** Compilation seule, sans exécution : nvcc 12.9 local,
+  `sm_120`, C++17, `-O3`. Avant (`46c50432c`) : 248 registres. Après :
+  **128 registres**, 0 octet de débordement dans les deux cas, 1 600
+  octets de mémoire partagée. Le cadre de pile de **384 octets** (mémoire
+  locale) est inchangé : il vient de tableaux locaux antérieurs et
+  constitue un levier possible, distinct de celui-ci.
+
+Pour mesurer le gain en R14, publier `kernel_ms` à part du transfert
+(demande de B) : le nombre de warps résidents vient d'une requête
+d'occupation, pas d'une mesure.
+
+GCP non utilisé.
