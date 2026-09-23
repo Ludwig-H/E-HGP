@@ -9,6 +9,18 @@ de la sonde v9. Cadre :
 `quantized_u18_input_only`, **`not_claimed`**. Ce fichier porte le verdict
 mutable. Les notes datées conservent preuves, contre-exemples et reçus.
 
+**Urgence WIP du 23 septembre, 05 h 35 UTC.** L'utilisateur a choisi
+**l'arrêt immédiat** de la session G4 SPOT envisagée avec la sonde MEB v3 :
+`tower_probe.cpp` annonce v3, tandis que le validateur G4 épingle encore
+v2 ; le reçu serait rejeté. Relecture GCP ciblée : l'instance de campagne
+`ehgp-v7-4fa0e0789a7d5bb06b787d35` est déjà `TERMINATED` (dernier
+arrêt 04 h 50 min 54 s UTC) et aucune des autres instances SPOT du projet
+n'est en cours ; **aucun stop supplémentaire n'a été lancé**. Ne pas
+redémarrer ce paquet avant alignement du schéma, des nouveaux compteurs
+MEB, du selftest et du plan épinglé. Le WIP v6 C6/tri observé en parallèle
+est [contrelu séparément](CONTRE_AUDIT_B_WIP_V6_C6_TRI_20260923.md) :
+il n'est pas raccordé à v9 ni qualifié sur u18/G4.
+
 ## Contrat et objet effectivement construit
 
 Le jalon v9 vise toute la tour HGP **K=1..10 en moins de 1 s sur GCP G4**,
