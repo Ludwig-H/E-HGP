@@ -237,6 +237,19 @@ ou de leurs flux complets. Le changement de K modifie donc le signal des
 formes sur ce doublement fini, sans régler le coût absolu ni démontrer une
 croissance sous-quadratique générale.
 
+La même correction vaut pour le **cover complet** lorsque sa voie morte
+charge les formes : il écrit aussi ses deux extrémités, absentes de
+`dead_form_sites`. Sur les trois cas bruts K10, la somme réellement écrite
+par les deux chargements vaut
+`dead_core_form_sites + dead_form_sites + 2 × (dead_core_loads + dead_loads)`,
+égale à `core_sites + cover_sites` dans ces sorties complètes,
+soit **298,608→693,370→2 328,973 M** formes, de pentes finies
+**1,215 / 1,748**. Le sous-total historique de la
+[contrelecture B](CONTRE_AUDIT_B_LIDAR_BRUT_K10_20260923.md) vaut
+292,965→681,708→2 304,229 M : il écarte jusqu'à **24,745 M** formes
+pourtant écrites. Cela ne change pas le verrou architectural : la masse
+par arête doit baisser, avec ses coûts de certificat et d'aval mesurés.
+
 La [matrice brute K10 complète](lidar_raw_k10_sectors_20260923/README.md)
 mesure maintenant les **sept secteurs physiques aux trois densités** sur
 la même trame 08/000000. Sur les 14 liens de densité à secteur fixe, une

@@ -1,10 +1,23 @@
 # Juge q3 v6 : rendre causale la porte des longues incidences
 
-23 septembre 2026. Audit A du commit publié `abf3c3827`, sans reçu v6 ni
-exécution GCP. La recette v6 corrige utilement les substitutions `git`
+23 septembre 2026. Audit A du commit publié `abf3c3827`, puis du
+[reçu v6](c_omission_20260923/README.md) publié par `88f30372` ; GCP
+non utilisé. La recette v6 corrige utilement les substitutions `git`
 masquées du lanceur v5, exige un répertoire neuf et des marqueurs pour les
 mutants. Les deux limites ci-dessous portent sur la **portée des portes**,
 pas sur une omission observée du générateur HGP.
+
+Le reçu est positif dans sa portée : `STATUS=0`, tous les 205 182
+incidences q2 et 286 706 incidences q3 échantillonnées présentes dans la
+campagne v5, puis deux mutants `drop-long` tués avec désaccord causal dans
+les portes v6. Les deux observations `obs` ont réellement rendu le code 0 ;
+le défaut de traitement du code 2 ci-dessous ne les a donc pas contaminées.
+Mais le cas isolé s02 passe `--min-long=50` avec **59** incidences longues
+tous rangs confondus et seulement **13** à `p=Kmax−2` (`top_ge1600`) ; s00
+en compte **308** et **64**. Les désaccords des mutants ne publient ni
+rang ni arité. Ce reçu confirme que la porte actuelle est utile sans
+établir une détection causale de la seule famille q3 longue au rang
+critique. Le juge reste échantillonné et `run_tower=false`.
 
 ## Le plancher long peut manquer le rang critique
 
@@ -57,8 +70,9 @@ juge de code 2 qui écrit une ligne `chain_status`, et vérifier un statut
 global non nul ainsi que la présence du journal de refus. Les gates
 strictes 0/1 et les marqueurs causaux restent utiles tels quels.
 
-La suite est un reçu v6 figé qui affiche par cas les comptes longs de la
-strate régulière au rang critique, les désaccords mutants de cette strate,
-les codes et les empreintes des sorties. Même réussi, ce juge reste
-échantillonné et `run_tower=false` : il ne certifie ni la tour FULL ni la
+La suite est une porte qui affiche par cas les comptes longs de la strate
+régulière au rang critique, les désaccords mutants de cette **même** strate,
+les codes et les empreintes des sorties. Même réussie, elle ne change pas
+le fait que le juge est échantillonné et `run_tower=false` : il ne certifie
+ni la tour FULL ni la
 complétude globale.

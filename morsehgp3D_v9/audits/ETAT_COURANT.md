@@ -93,6 +93,15 @@ attribue environ 33 % du CPU
 q3/q4 aux deux DFS ciblés avec leur ordre d'enfants ; 40 % comprend
 aussi le front non porté. Un chemin GPU intégré doit inclure les coûts
 de création/consommation des requêtes et une sortie bornée par lots.
+Le [shadow des rectangles](Q34_BLOCS_LIDAR_SHADOW_20260923.md) donne un
+critère d'ordonnancement S2a concret sur 08/000000/s8 : à K5, **1 081 123
+des 1 128 166** rectangles ouverts ont moins de 16 paires, mais ne portent
+que **8,3 %** des paires ; à K10, **1 962 111 des 2 034 440** en portent
+**12,7 %**. Si un bloc GPU traite une tuile par rectangle, ces millions de
+petites tuiles risquent de sous-remplir les blocs. Comparer un empaquetage
+stable de plusieurs petits rectangles par bloc/warp et le tuilage séparé
+des 47 043/72 329 grands rectangles, en conservant chaque ordinal et en
+facturant le coût d'empaquetage ; aucun gain S2 n'est encore mesuré.
 Les deux meilleures lignes R11 (08/000100) bornent aussi le gain du
 seul réordonnancement q3/q4 : les **48 workers logiques** consomment
 78,151 CPU·s en 1,661 s de mur maximal à K5 et 211,744 CPU·s en
@@ -218,7 +227,8 @@ acceptés et **26/67** q3 acceptés le font sur les quatre cas 8k de la
 seconde campagne, dont un K10. Cela prouve une différence à la tour
 témoin, pas une omission naturelle dans le générateur ni la complétude
 du témoin. Son juge q2 indépendant teste tous les partenaires d'ancres
-échantillonnées : **204 683 présentations admissibles présentes**, dont
+échantillonnées (première campagne) : **204 683 présentations admissibles
+présentes**, dont
 16 506 à `p=9`/K10. Ce ne sont pas des clés distinctes. La seule trame
 entière est 08/000000 **sans sol** avec 200 ancres sur 39 885, non une
 trame brute multi-séquence ; les entrées ne sont pas hachées dans ces
@@ -245,8 +255,15 @@ de `abf3c3827` vérifie substitutions et sorties, et exige un mutant
 l'[audit A des portes v6](AUDIT_A_JUGE_Q3_V6_LONGUES_INCIDENCES_20260923.md)
 relève que ce plancher peut être atteint hors du rang q3 critique
 `p=Kmax−2`, et qu'une observation `obs` peut accepter un refus du
-juge de code 2. **Aucun reçu v6 n'est publié** ; ne pas hériter des
-anciens codes 0. Le juge échantillonne des ancres et fixe
+juge de code 2. Le [reçu publié par `88f30372`](c_omission_20260923/README.md)
+est positif dans sa portée : `STATUS=0`, **205 182 incidences q2** et
+**286 706 incidences q3** échantillonnées toutes présentes en v5, dont
+**55 297 clés q3 régulières** au rang `p=Kmax−2` ; portes
+v6 avec mutants causaux tués. Les deux observations `obs` ont effectivement
+rendu 0 : le défaut de code 2 est latent, sans fausser ces sorties.
+En revanche, s02 passe le plancher de 50 avec 59 longues incidences tous
+rangs et seulement **13** au rang critique ; le mutant ne classe pas ses
+désaccords par rang. Le juge échantillonne des ancres et fixe
 `run_tower=false` : même un code 0 ne contrôlerait que le catalogue
 échantillonné, sans certifier la tour FULL ni la complétude globale.
 
@@ -778,10 +795,12 @@ La [contrelecture B](CONTRE_AUDIT_B_LIDAR_BRUT_K10_20260923.md)
 confirme **10/10 hashes**, les IDs/coordonnées emboîtés, les dix ordres
 et les pentes ; elle précise que les trois lignes historiques n'ont
 pas de champ `validated` archivé et que le cas plein chevauche un autre
-calcul CPU sur l'hôte partagé. Cœur **plus** couverture complète
-comptent **au moins 2,304 milliards** de formes hors extrémités au plein
-K10 ; la croissance
-du nombre moyen de sites par charge explique l'essentiel de leur pente.
+calcul CPU sur l'hôte partagé. Cœur **plus** couverture complète écrivent
+**2,329 milliards** de formes au plein K10 : le sous-total de **2,304
+milliards** de la contrelecture B omet leurs deux extrémités par charge,
+soit 24,745 M formes au plein. Sur les trois densités, le total exact vaut
+298,608→693,370→2 328,973 M (`p=1,215/1,748`) ; la croissance du nombre
+moyen de sites par charge explique l'essentiel de sa pente.
 Le [complément brut K10 par plans physiques](lidar_raw_k10_sectors_20260923/README.md)
 ferme maintenant la matrice **sept secteurs × trois densités** : dix-huit
 nouvelles sondes K10, six moitiés rejouées, et les trois pleins antérieurs

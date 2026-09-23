@@ -83,8 +83,8 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`CONTRE_AUDIT_B_PREATLAS_ET_Q3_20260922.md`](CONTRE_AUDIT_B_PREATLAS_ET_Q3_20260922.md) | B | `2c6d806e` 22/22:21 | démontré localement | vivant | différée sans échéance |
 | [`CONTRE_AUDIT_B_Q3_FEUILLE_WIP_20260923.md`](CONTRE_AUDIT_B_Q3_FEUILLE_WIP_20260923.md) | B | `bb3c696e` 00:42 | démontré localement | clos (code publié) | acceptée |
 | [`CONTRE_AUDIT_B_JUGE_Q3_C_V3_20260923.md`](CONTRE_AUDIT_B_JUGE_Q3_C_V3_20260923.md) | B | `5b448b2ca` 12:49 | deux portes du juge q3 v3 corrigées par v4 | historique | acceptée |
-| [`CONTRE_AUDIT_B_JUGES_C_V4_20260923.md`](CONTRE_AUDIT_B_JUGES_C_V4_20260923.md) | B | `931d37cd1` 13:07 | clés canoniques, ancres isolées et provenance ; source v5 publiée, reçu ouvert | vivant pour la campagne | sans réponse |
-| [`AUDIT_A_JUGE_Q3_V6_LONGUES_INCIDENCES_20260923.md`](AUDIT_A_JUGE_Q3_V6_LONGUES_INCIDENCES_20260923.md) | A | 23/13:48 | portée du plancher q3 long au rang critique et refus de code 2 en observation ; recette v6 sans reçu | vivant | sans réponse |
+| [`CONTRE_AUDIT_B_JUGES_C_V4_20260923.md`](CONTRE_AUDIT_B_JUGES_C_V4_20260923.md) | B | `931d37cd1` 13:07 | clés canoniques, ancres isolées et provenance ; reçu v5/v6 publié ensuite | historique pour la recette v4/v5 | sans réponse |
+| [`AUDIT_A_JUGE_Q3_V6_LONGUES_INCIDENCES_20260923.md`](AUDIT_A_JUGE_Q3_V6_LONGUES_INCIDENCES_20260923.md) | A | 23/13:48 | reçu v6 positif pour l'échantillon ; causalité longue au rang critique et refus de code 2 encore ouverts | vivant | sans réponse |
 
 ## q4
 
