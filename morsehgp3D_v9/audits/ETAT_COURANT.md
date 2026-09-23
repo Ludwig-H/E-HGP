@@ -186,6 +186,10 @@ appariée.
    contrat comptable et la cause exacte de mutation sont corrigés à
    `5ab4326c`. Le gain local annoncé 130→109 s n'a pas encore de reçu
    apparié versionné ; l'amélioration G4 du MEB n'est pas mesurée.
+   La [découpe FULL par K](PREFETCH_GEOMETRIE_FULL_PAR_K_20260923.md)
+   rend les BallIds géométriques pré-calculables sous fenêtre d'octets,
+   tandis que la fermeture des lots reste chronologique. Les 34,14 s de
+   tour statique G4 ne sont pas assez ventilées pour prédire un gain.
    Instrumenter les tailles de supports et le temps avant de promettre un
    gain. La [note B](PLATEAUX_GRANDES_COQUILLES_B_20260922.md)
    propose un quotient local compact, [contrelu par B sur sept petites
