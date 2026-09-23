@@ -1,8 +1,10 @@
 # État courant des audits v9
 
 23 septembre 2026. Code produit courant sur `origin/main` :
-**`099ca784`** (certificat de voies mortes q3/q4 et protocole v5), suivi
-du selftest de protocole `b4e480fc`. Le census q3 sur feuille et la sonde
+**`e0ae05a7`** (préparation/tri FULL statiques parallèles et erratum du
+reçu q3/q4), après le certificat de voies mortes et protocole v5
+`099ca784` puis le selftest `b4e480fc`. Le reçu G4 R3 exécute **ce dernier
+snapshot**, pas le nouveau port FULL. Le census q3 sur feuille et la sonde
 v4 venaient de `e54f727c` ; le reçu G4 R2 reste épinglé au code
 antérieur `0b29b6c3` et le reçu G4 R1 au paquet `e28296bb`. Noyau MEB à
 `ad2d0ebb`, atlas saturant et sonde v3 à `e6405952`, défaut FULL statique
@@ -417,6 +419,25 @@ appariée.
    [contrelecture B](CONTRE_AUDIT_B_PREFETCH_FULL_20260923.md) exige un
    contexte possédé par K, l'annulation/jointure des jobs et distingue le
    scénario naïf de mémoire `60R` du plancher `4R` des cibles seules.
+   Le port `e0ae05a7` construit les forêts K en parallèle et évite les
+   vecteurs temporaires de facettes. La [contrelecture B du
+   port](CONTRE_AUDIT_B_FULL_PARALLELE_WIP_20260923.md) trouve ses nouvelles
+   portes ciblées vertes sur 1 500 sites avec plus de 100 000 requêtes,
+   sans gain G4 mesuré ni borne RSS. Un diagnostic local instrumenté,
+   **non archivé comme reçu**, des
+   mêmes sources (`full_ball_tower.hpp` SHA `fb8b2c63…`, `pool.hpp`
+   `aa0b780b…`) donne à W4 **11 245 584 octets** pour le double buffer de
+   requêtes, mais **7 584 268 octets** dans
+   `static_peak_retained_bytes` : ce dernier est documenté comme capacité
+   échantillonnée après tri, pas comme pic co-résident. Publier un vrai pic
+   et le RSS des forêts K simultanées. Le gate de chaîne compte les workers
+   du résolveur, pas ceux du tri ; une mutation qui sérialise seulement le
+   tri peut encore passer : mesurer `sort_workers_created` dans la chaîne.
+   Enfin, l'allocation du second buffer peut retourner
+   `resource_exhausted` quand un `std::sort` en place réussirait ; une
+   injection locale sur `vector<int>` le reproduit, sans prouver qu'un FULL
+   30 M réussirait. Un repli ciblé sur cette allocation et son compteur
+   sont une protection simple à qualifier sous le contrat massif.
    Une [piste exacte pour les intrus](INTRUS_FULL_PREFIXE_EXACT_20260923.md)
    réutilise, par BallKey, un préfixe complet d'intérieurs Morton ; son
    [oracle combinatoire](check_full_intruder_prefix_20260923.py) passe
