@@ -48,7 +48,7 @@ PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
 PLAN_SCHEMA = 'mhgp9_tower_plan_v6'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v18'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v19'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -106,7 +106,8 @@ DEVICE_NAME = 'NVIDIA RTX PRO 6000 Blackwell Server Edition'
 CUDA_PATHS = ('/usr/local/cuda/bin/nvcc', '/usr/local/cuda-12.9/bin/nvcc')
 BATCH_KEYS = frozenset({'used', 'backend', 'front_ms', 'filter_ms', 'edges_ms', 'device_ms', 'rectangles', 'survivors',
                         'certificate_backend', 'certificate_ms', 'certificate_device_ms', 'deferred', 'judged_edges',
-                        'rebuilt_covers', 'certificate_warps'})
+                        'rebuilt_covers', 'certificate_warps', 'filter_kernel_ms', 'filter_transfer_ms',
+                        'certificate_kernel_ms', 'certificate_transfer_ms'})
 # v18 (S3) : certificats de voie morte par lots (CPU ou GPU). Leur travail ne
 # depend que des leviers q34_dead_lanes/q34_dead_core : deux cas du meme
 # (fichier, K, s) avec ces leviers egaux doivent avoir ces compteurs egaux.
@@ -506,7 +507,8 @@ def validate_euler(value, case):
 def validate_batch(value, case, capacity=0, judge=False):
     """Section q34_batch (v18) : phases du chemin par lots, a zero sur le chemin moteur."""
     batch, levers = value['q34_batch'], case['levers']
-    times = ('front_ms', 'filter_ms', 'edges_ms', 'device_ms', 'certificate_ms', 'certificate_device_ms')
+    times = ('front_ms', 'filter_ms', 'edges_ms', 'device_ms', 'certificate_ms', 'certificate_device_ms',
+             'filter_kernel_ms', 'filter_transfer_ms', 'certificate_kernel_ms', 'certificate_transfer_ms')
     need(type(batch) is dict and set(batch) == BATCH_KEYS and type(batch['used']) is bool and
          type(batch['backend']) is str and type(batch['certificate_backend']) is str and
          all(_number(batch[key]) for key in times) and _count(batch['rectangles']) and
@@ -527,6 +529,11 @@ def validate_batch(value, case, capacity=0, judge=False):
         # call launches no kernel, auditor B), and then at least one edge
         # decided on the device: a call deferring everything is no S3 run.
         ran = gpu_certificates and batch['survivors'] > 0
+        # v19 (B): the device interval split into kernel and transfers.
+        need(((batch['certificate_kernel_ms'] > 0 and batch['certificate_kernel_ms'] + batch['certificate_transfer_ms'] <=
+               batch['certificate_device_ms'] + 0.05) if ran else
+              batch['certificate_kernel_ms'] == 0 and batch['certificate_transfer_ms'] == 0),
+             'q34_batch certificate kernel/transfer split')
         need(batch['certificate_backend'] == (DEVICE_NAME if gpu_certificates else 'cpu') and
              (batch['certificate_device_ms'] > 0) == ran and (batch['certificate_warps'] > 0) == ran and
              batch['certificate_device_ms'] <= batch['certificate_ms'] + 0.05 and
@@ -544,12 +551,16 @@ def validate_batch(value, case, capacity=0, judge=False):
             need(batch['deferred'] == 0, 'device certificates deferred edges of a frame below the slab')
     else:
         need(batch['certificate_backend'] == '' and batch['certificate_ms'] == 0 and
-             batch['certificate_device_ms'] == 0 and
+             batch['certificate_device_ms'] == 0 and batch['certificate_kernel_ms'] == 0 and
+             batch['certificate_transfer_ms'] == 0 and
              all(batch[key] == 0 for key in ('deferred', 'judged_edges', 'rebuilt_covers', 'certificate_warps')),
              'q34_batch certificates without the lever')
     gpu = levers['q34_gpu_filter']
     need(batch['used'] is True and batch['backend'] == (DEVICE_NAME if gpu else 'cpu') and
          (batch['device_ms'] > 0) == gpu, 'q34_batch backend/device time')
+    need(((batch['filter_kernel_ms'] > 0 and batch['filter_kernel_ms'] + batch['filter_transfer_ms'] <=
+           batch['device_ms'] + 0.05) if gpu else
+          batch['filter_kernel_ms'] == 0 and batch['filter_transfer_ms'] == 0), 'q34_batch filter kernel/transfer split')
     need(batch['rectangles'] == ledger['q34_input_rectangles'] and
          batch['survivors'] == ledger['expanded_pairs'] - ledger['witness_rejected_pairs'] and
          batch['front_ms'] + batch['filter_ms'] + batch['certificate_ms'] + batch['edges_ms'] <=

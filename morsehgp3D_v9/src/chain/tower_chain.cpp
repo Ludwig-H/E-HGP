@@ -144,7 +144,7 @@ class GpuPreparation {
 };
 
 gen::Q34FilterBatch gpu_filter_batch(const GpuIndex& prepared, std::span<const gen::WspdRectangle> rectangles,
-                                     unsigned kmax, double& device_ms) {
+                                     unsigned kmax, double& device_ms, double& kernel_ms, double& transfer_ms) {
   const auto& flat = prepared.nodes;
   const auto& rank_points = prepared.rank_points;
   std::vector<gpu::u32> a(rectangles.size()), b(rectangles.size());
@@ -196,6 +196,8 @@ gen::Q34FilterBatch gpu_filter_batch(const GpuIndex& prepared, std::span<const g
   batch.rectangle_visits = out.rect_visits;
   batch.pair_visits = out.pair_visits;
   device_ms = out.total_ms;
+  kernel_ms = out.rect_ms + out.scan_ms + out.pair_ms + out.select_ms;
+  transfer_ms = out.upload_ms + out.download_ms;
   return batch;
 }
 
@@ -204,7 +206,8 @@ gen::Q34FilterBatch gpu_filter_batch(const GpuIndex& prepared, std::span<const g
 // or cover without its endpoints) is an invariant violation of the port.
 gen::Q34CertificateBatch gpu_certificate_batch(const GpuIndex& prepared, unsigned kmax, bool dead_core,
                                                std::span<const gen::Q34SurvivingEdge> survivors,
-                                               std::uint32_t capacity, double& device_ms, std::uint32_t& warps) {
+                                               std::uint32_t capacity, double& device_ms, std::uint32_t& warps,
+                                               double& kernel_ms, double& transfer_ms) {
   std::vector<gpu::u32> a(survivors.size()), b(survivors.size());
   std::vector<gpu::u8> lanes(survivors.size());
   for (std::size_t i = 0; i < survivors.size(); ++i) {
@@ -271,6 +274,8 @@ gen::Q34CertificateBatch gpu_certificate_batch(const GpuIndex& prepared, unsigne
   batch.dead = dead(w.dead);
   device_ms = out.total_ms;
   warps = out.warps;
+  kernel_ms = out.kernel_ms;
+  transfer_ms = out.upload_ms + out.download_ms;
   return batch;
 }
 
@@ -643,29 +648,29 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       if (!options.q34_batch_filter) {
         r34 = gen::run_wspd_q34_parallel(index, kmax, options.separation_s, o, W, consumer, jobs_per_worker);
       } else {
-        double device_ms = 0;
+        double device_ms = 0, filter_kernel_ms = 0, filter_transfer_ms = 0;
         gen::Q34BatchFilter filter;
         if (options.q34_gpu_filter) {
-          filter = [&device_ms, &gpu_preparation](const gen::Q2CensusIndex& ix, unsigned k,
-                                                 std::span<const gen::WspdRectangle> rects) {
-            return gpu_filter_batch(gpu_preparation.get(ix), rects, k, device_ms);
+          filter = [&device_ms, &filter_kernel_ms, &filter_transfer_ms, &gpu_preparation](
+                       const gen::Q2CensusIndex& ix, unsigned k, std::span<const gen::WspdRectangle> rects) {
+            return gpu_filter_batch(gpu_preparation.get(ix), rects, k, device_ms, filter_kernel_ms, filter_transfer_ms);
           };
         } else {
           filter = [W](const gen::Q2CensusIndex& ix, unsigned k, std::span<const gen::WspdRectangle> rects) {
             return gen::run_q34_filter_batch_cpu(ix, k, rects, W);
           };
         }
-        double certificate_device_ms = 0;
+        double certificate_device_ms = 0, certificate_kernel_ms = 0, certificate_transfer_ms = 0;
         std::uint32_t certificate_warps = 0;
         gen::Q34CertificateJudgeWork judge;
         gen::Q34CertificateFilter certificates;
         if (options.q34_gpu_certificates) {
           const std::uint32_t capacity = options.q34_certificate_capacity;
-          certificates = [&certificate_device_ms, &certificate_warps, &gpu_preparation, capacity](
-                             const gen::Q2CensusIndexPtr& ix, unsigned k, bool core,
-                             std::span<const gen::Q34SurvivingEdge> edges) {
+          certificates = [&certificate_device_ms, &certificate_warps, &certificate_kernel_ms, &certificate_transfer_ms,
+                          &gpu_preparation, capacity](const gen::Q2CensusIndexPtr& ix, unsigned k, bool core,
+                                                      std::span<const gen::Q34SurvivingEdge> edges) {
             return gpu_certificate_batch(gpu_preparation.get(*ix), k, core, edges, capacity, certificate_device_ms,
-                                         certificate_warps);
+                                         certificate_warps, certificate_kernel_ms, certificate_transfer_ms);
           };
         } else if (options.q34_batch_certificates) {
           certificates = [W](const gen::Q2CensusIndexPtr& ix, unsigned k, bool core,
@@ -698,6 +703,10 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         b.judged_edges = judge.judged;
         b.rebuilt_covers = timing.rebuilt_covers;
         b.certificate_warps = certificate_warps;
+        b.filter_kernel_ms = filter_kernel_ms;
+        b.filter_transfer_ms = filter_transfer_ms;
+        b.certificate_kernel_ms = certificate_kernel_ms;
+        b.certificate_transfer_ms = certificate_transfer_ms;
       }
       result.q34_expanded_pairs = r34.pipeline.work.expanded_pairs;
       result.q34_cover_builds = r34.pipeline.work.cover_builds;

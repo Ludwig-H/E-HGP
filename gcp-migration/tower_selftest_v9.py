@@ -132,12 +132,14 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
     # the expanded pairs minus the rejected ones.
     batch = dict(used=False, backend='', front_ms=0.0, filter_ms=0.0, edges_ms=0.0, device_ms=0.0, rectangles=0,
                  survivors=0, certificate_backend='', certificate_ms=0.0, certificate_device_ms=0.0, deferred=0,
-                 judged_edges=0, rebuilt_covers=0, certificate_warps=0)
+                 judged_edges=0, rebuilt_covers=0, certificate_warps=0, filter_kernel_ms=0.0, filter_transfer_ms=0.0,
+                 certificate_kernel_ms=0.0, certificate_transfer_ms=0.0)
     device = 'NVIDIA RTX PRO 6000 Blackwell Server Edition'
     if complete and levers.get('q34_batch_filter'):
         gpu = levers.get('q34_gpu_filter')
         batch = dict(batch, used=True, backend=device if gpu else 'cpu',
                      front_ms=0.03, filter_ms=0.03, edges_ms=0.03, device_ms=0.02 if gpu else 0.0,
+                     filter_kernel_ms=0.01 if gpu else 0.0, filter_transfer_ms=0.005 if gpu else 0.0,
                      rectangles=ledger['q34_input_rectangles'],
                      survivors=ledger['expanded_pairs'] - ledger['witness_rejected_pairs'])
         if levers.get('q34_batch_certificates'):
@@ -146,8 +148,10 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
             batch.update(certificate_backend=device if gpu_certificates else 'cpu', certificate_ms=0.03,
                          certificate_device_ms=0.02 if gpu_certificates else 0.0, deferred=deferred,
                          judged_edges=batch['survivors'] - deferred if judge else 0, rebuilt_covers=1,
-                         certificate_warps=4 if gpu_certificates else 0)
-    return dict(schema='mhgp9_tower_probe_v18', status=status,
+                         certificate_warps=4 if gpu_certificates else 0,
+                         certificate_kernel_ms=0.01 if gpu_certificates else 0.0,
+                         certificate_transfer_ms=0.005 if gpu_certificates else 0.0)
+    return dict(schema='mhgp9_tower_probe_v19', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
@@ -221,13 +225,16 @@ def main():
         return 2
     for rule in config.get('sleep', []):
         if (rule['workers'] == workers and rule.get('k', k) == k and rule.get('scene', scene) == scene and
-                rule.get('batch', levers.get('q34_batch_filter')) == levers.get('q34_batch_filter')):
+                rule.get('batch', levers.get('q34_batch_filter')) == levers.get('q34_batch_filter') and
+                rule.get('certificates', levers.get('q34_batch_certificates')) == levers.get('q34_batch_certificates')):
             time.sleep(rule['seconds'])
     status = 'complete_relative'
     for rule in config.get('refuse', []):
         if rule['scene'] == scene and rule['k'] == k:
             status = 'unsupported_degeneracy'
     salt = str(workers) if config.get('salt_by_workers') else ''
+    if config.get('salt_by_certificates') and levers.get('q34_batch_certificates'):
+        salt += 'certificates'  # a GPU case whose object differs from its engine twin
     value = probe_value(len(raw) // 12, config['fnv'][scene], k, int(options['s']), workers, int(options['static']),
                         status, salt, levers, config['schema'])
     for rule in config.get('malform', []):
@@ -723,17 +730,17 @@ class Protocol(unittest.TestCase):
              record['real_session_allowed'] is pkg['committed'], 'package record')
         cases, provenance = session.validate_snapshot(pkg['archive'], manifest)
         on = {name: True for name in worker.LEVER_NAMES}
-        # v18 arms: full GPU (every lever), engine twin, filter-only GPU, batch CPU.
+        # v19 (R14) arms: full GPU (every lever), engine twin, filter-only GPU;
+        # repeated and interleaved S2 / S2 + S3 pairs at 00 (auditor C, R-27).
         arms = dict(gpu=on, engine=worker.engine_levers(on),
-                    gpu_filter=dict(on, q34_batch_certificates=False, q34_gpu_certificates=False),
-                    batch_cpu=dict(on, q34_gpu_filter=False, q34_batch_certificates=False, q34_gpu_certificates=False))
-        expected = [(scene, k, 48, arm) for scene in ('00', '01', '02') for k in (5, 10) for arm in ('gpu', 'engine')]
-        expected += [('00', k, 48, arm) for k in (5, 10) for arm in ('gpu_filter', 'batch_cpu')]
-        expected += [('00', 5, 24, 'gpu'), ('00', 5, 1, 'engine')]
+                    gpu_filter=dict(on, q34_batch_certificates=False, q34_gpu_certificates=False))
+        expected = [(scene, k, arm, 0) for scene in ('00', '01', '02') for k in (5, 10) for arm in ('gpu', 'engine')]
+        expected += [('00', 5, 'gpu_filter', 0), ('00', 5, 'gpu', 1), ('00', 10, 'gpu_filter', 0), ('00', 10, 'gpu', 1),
+                     ('00', 5, 'gpu_filter', 1), ('00', 10, 'gpu_filter', 1)]
         need(provenance['commit'] == head and len(cases) == len(expected) == 18 and all(
-                (c['scene'], c['k'], c['workers']) == (scene, k, workers) and c['levers'] == arms[arm] and
-                c['s'] == 8 and c['static_threads'] == (c['workers'] if c['workers'] > 1 else 0) and c['repeat'] == 0
-                for c, (scene, k, workers, arm) in zip(cases, expected)),
+                (c['scene'], c['k'], c['repeat']) == (scene, k, repeat) and c['levers'] == arms[arm] and
+                c['s'] == 8 and c['workers'] == 48 and c['static_threads'] == 48
+                for c, (scene, k, arm, repeat) in zip(cases, expected)),
              'default plan order and parameters')
         # Temoin independant : git archive du meme commit, jamais le worktree.
         exported = subprocess.run(['git', '-C', str(ROOT), 'archive', '--format=tar', 'HEAD', worker.SOURCE_ROOT],
@@ -781,7 +788,7 @@ class Protocol(unittest.TestCase):
         bad = deepcopy(plan)
         bad['cases'].append(deepcopy(bad['cases'][0]))
         need(refused(worker.validate_plan, bad, manifest), 'duplicate case')
-        bad['cases'][-1]['repeat'] = 1
+        bad['cases'][-1]['repeat'] = 2  # repeat 1 of case 0 is already in the R14 plan
         worker.validate_plan(bad, manifest)   # distinct repetition accepted
         # Ablation plans: ON first (preflight levers), then OFF, accepted;
         # OFF first is refused since the preflight would skip the ON path.
@@ -1053,14 +1060,15 @@ class Protocol(unittest.TestCase):
             need(value['preflight']['deferred'] == 1 and (output / 'preflight_deferral.command.json').is_file() and
                  value['preflight']['engine_tower_digest'] == value['preflight']['tower_digest'],
                  'deferral preflight run and recorded')
-            need(value['GPU_preflight_executed'] is True and value['GPU_completed_cases'] == list(range(0, 17, 2)) and
+            need(value['GPU_preflight_executed'] is True and
+                 value['GPU_completed_cases'] == [0, 2, 4, 6, 8, 10, 12, 13, 14, 15, 16, 17] and
                  receipt['GPU_completed_cases'] == value['GPU_completed_cases'], 'GPU labels from complete LiDAR towers')
-            # v18 plan: GPU/engine pairs per (frame, K), then the 00 attribution
-            # arms (filter-only GPU, batch CPU) at K5 and K10, then W24/W1.
+            # v19 plan: GPU/engine pairs per (frame, K), then repeated and
+            # interleaved S2 / S2 + S3 pairs at 00, K5 and K10.
             need(value['completed_case_indices'] == list(range(18)) and value['cross_worker_comparisons'] == [
                 dict(reference=r, other=r + 1, equal=True) for r in range(0, 12, 2)] + [
                 dict(reference=reference, other=other, equal=True)
-                for reference, other in ((0, 12), (0, 13), (2, 14), (2, 15), (0, 16), (0, 17))] and
+                for reference, other in ((0, 12), (0, 13), (2, 14), (2, 15), (0, 16), (2, 17))] and
                  value['FULL_executed'] is True and value['provenance'] == receipt['provenance'], 'worker receipt')
             need(not (output / 'build').exists() and (output / 'configure.stdout').is_file(), 'capture excludes build')
             pkg = package()
@@ -1117,14 +1125,15 @@ class Protocol(unittest.TestCase):
     def test_partial_session_case_cap_and_refusal(self):
         with tempfile.TemporaryDirectory() as temporary:
             code, receipt, fake, host = run_scenario(
-                Path(temporary), tools=dict(sleep=[dict(workers=1, seconds=60)], refuse=[dict(scene='02', k=10)]),
+                Path(temporary), tools=dict(sleep=[dict(workers=48, k=10, scene='00', batch=True, certificates=False,
+                                                        seconds=60)], refuse=[dict(scene='02', k=10)]),
                 patches=[(worker, 'CASE_CAP_SECONDS', 4)])
             need(code == 0 and receipt['status'] == 'partial', 'partial host receipt: ' + json.dumps(receipt)[:600])
             expect_certified_stop(receipt, fake)
             value = worker.strict_json((host / 'received/output/receipt.json').read_bytes())
             outcomes = [entry['outcome'] for entry in value['case_outcomes']]
-            need(outcomes == ['complete_relative'] * 10 + ['explicit_refusal'] * 2 + ['complete_relative'] * 5 +
-                 ['killed_case_cap'],
+            need(outcomes == ['complete_relative'] * 10 + ['explicit_refusal'] * 2 + ['complete_relative'] * 2 +
+                 ['killed_case_cap'] + ['complete_relative'] * 2 + ['killed_case_cap'],
                  'cap kill and explicit refusal: ' + repr(outcomes))
             killed = worker.strict_json((host / 'received/output/probe_17.command.json').read_bytes())
             need(killed['residual_or_interrupted_group_killed'] is True and 3.0 <= killed['elapsed_seconds'] < 30,
@@ -1172,16 +1181,15 @@ class Protocol(unittest.TestCase):
         # received as partial, but published as unpaired, never as verified.
         with tempfile.TemporaryDirectory() as temporary:
             code, receipt, fake, host = run_scenario(
-                Path(temporary), tools=dict(sleep=[dict(workers=48, k=5, scene='00', batch=False, seconds=60),
-                                                   dict(workers=1, k=5, scene='00', batch=False, seconds=60)]),
+                Path(temporary), tools=dict(sleep=[dict(workers=48, k=5, scene='00', batch=False, seconds=60)]),
                 patches=[(worker, 'CASE_CAP_SECONDS', 4)])
             need(code == 0 and receipt['status'] == 'partial' and receipt['unpaired_batch_cases'] == [0, 12, 13, 16],
                  'unpaired GPU cases: ' + json.dumps(receipt)[:600])
             expect_certified_stop(receipt, fake)
             value = worker.strict_json((host / 'received/output/receipt.json').read_bytes())
             need(value['unpaired_batch_cases'] == [0, 12, 13, 16] and
-                 [value['case_outcomes'][i]['outcome'] for i in (0, 1, 16, 17)] ==
-                 ['complete_relative', 'killed_case_cap', 'complete_relative', 'killed_case_cap'],
+                 [value['case_outcomes'][i]['outcome'] for i in (0, 1, 12, 13)] ==
+                 ['complete_relative', 'killed_case_cap', 'complete_relative', 'complete_relative'],
                  'worker unpaired list and outcomes')
             pkg = package()
             expected = session.validate_snapshot(pkg['archive'], pkg['manifest'])[0]
@@ -1213,7 +1221,7 @@ class Protocol(unittest.TestCase):
             need(value['GPU_preflight_executed'] is True and value['GPU_attempted'] is True and
                  value['GPU_executed'] is False and
                  [entry['outcome'] for entry in value['case_outcomes']] ==
-                 ['killed_case_cap', 'complete_relative'] * 6 + ['killed_case_cap'] * 5 + ['complete_relative'],
+                 ['killed_case_cap', 'complete_relative'] * 6 + ['killed_case_cap'] * 6,
                  'worker GPU labels and outcomes')
             pkg = package()
             expected = session.validate_snapshot(pkg['archive'], pkg['manifest'])[0]
@@ -1312,7 +1320,7 @@ class Protocol(unittest.TestCase):
 
     def test_cross_worker_mismatch_is_a_failure(self):
         with tempfile.TemporaryDirectory() as temporary:
-            code, receipt, fake, _ = run_scenario(Path(temporary), tools=dict(salt_by_workers=True))
+            code, receipt, fake, _ = run_scenario(Path(temporary), tools=dict(salt_by_certificates=True))
             need(code == 1 and receipt['status'] == 'worker_failed' and
                  receipt['worker_status'] == 'cross_worker_mismatch', 'mismatch host receipt')
             expect_certified_stop(receipt, fake)

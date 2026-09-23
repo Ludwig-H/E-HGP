@@ -45,7 +45,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[2]
 V8 = ROOT / 'morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v18'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v19'
 # Schemas relus lors d'une revalidation d'archive (v12 : reçu du 23 septembre).
 KNOWN_SCHEMAS = ('mhgp9_tower_probe_v12', PROBE_SCHEMA)
 # Le schema de sonde d'une campagne est fixe par son RESUME, jamais par le JSON
@@ -415,7 +415,8 @@ def selftest(case_path):
     v13['q34_batch'] = dict(used=False, backend='', front_ms=0.0, filter_ms=0.0, edges_ms=0.0, device_ms=0.0,
                             rectangles=0, survivors=0, certificate_backend='', certificate_ms=0.0,
                             certificate_device_ms=0.0, deferred=0, judged_edges=0, rebuilt_covers=0,
-                            certificate_warps=0)
+                            certificate_warps=0, filter_kernel_ms=0.0, filter_transfer_ms=0.0,
+                            certificate_kernel_ms=0.0, certificate_transfer_ms=0.0)
     v13['catalogue_digest'] = '0123456789abcdef'
     v13['times_ms']['catalogue_digest'] = 0.0
     v13['options']['certificate_capacity'] = 0

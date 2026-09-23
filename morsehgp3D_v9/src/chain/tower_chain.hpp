@@ -197,6 +197,10 @@ struct Q34BatchTimes {
   std::uint64_t judged_edges = 0;    // survivants decides rejuges par la reference CPU (juge)
   std::uint64_t rebuilt_covers = 0;  // covers reconstruits par les ouvriers (hors registre)
   std::uint32_t certificate_warps = 0;  // warps du noyau (0 sur CPU ou sans survivant)
+  // v19 (B) : ventilation des passes d'appareil, noyaux et transferts
+  // (upload + download), par evenements CUDA ; zero sur CPU.
+  double filter_kernel_ms = 0, filter_transfer_ms = 0;
+  double certificate_kernel_ms = 0, certificate_transfer_ms = 0;
 };
 
 struct OrderSummary {

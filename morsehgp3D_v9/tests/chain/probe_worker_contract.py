@@ -193,6 +193,7 @@ def main(argv):
             ('batch backend relabelled', lambda v: v['q34_batch'].update(
                 backend='NVIDIA RTX PRO 6000 Blackwell Server Edition')),
             ('batch device time on the CPU', lambda v: v['q34_batch'].update(device_ms=1.0)),
+            ('filter kernel time on the CPU', lambda v: v['q34_batch'].update(filter_kernel_ms=0.5)),
             ('batch used flipped', lambda v: v['q34_batch'].update(used=False)),
             ('batch phases beyond q34', lambda v: v['q34_batch'].update(
                 edges_ms=v['times_ms']['q34'] + 5.0)),
@@ -252,6 +253,7 @@ def main(argv):
                 ('rebuilt covers beyond the covers', lambda v: v['q34_batch'].update(
                     rebuilt_covers=v['ledger']['cover_builds'] + 1)),
                 ('certificate warps on the CPU', lambda v: v['q34_batch'].update(certificate_warps=1)),
+                ('certificate kernel time on the CPU', lambda v: v['q34_batch'].update(certificate_kernel_ms=0.5)),
                 ('judge announced but not run', lambda v: v['options'].update(certificate_judge=True)),
             ]
             certificate_killed = 0
