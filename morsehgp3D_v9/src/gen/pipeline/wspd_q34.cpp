@@ -806,7 +806,7 @@ WspdQ34ParallelResult run_wspd_q34_parallel(Q2CensusIndexPtr index, unsigned kma
   if (result.pipeline.front.active_lane_mask == 0) return result;
 
   const auto plan = make_wspd_front_jobs(index, kmax, separation_s, options.front_mode,
-                                       target_jobs, options.requested_lane_mask);
+                                       target_jobs, options.requested_lane_mask, {}, options.jobs_by_mass);
   result.pipeline.front = plan->prefix_result();
   orchestration.prefix_product_visits = result.pipeline.front.work.product_visits;
   orchestration.jobs = static_cast<u64>(plan->job_count());
@@ -814,6 +814,10 @@ WspdQ34ParallelResult run_wspd_q34_parallel(Q2CensusIndexPtr index, unsigned kma
   orchestration.job_storage_bytes = static_cast<u64>(plan->retained_bytes());
   const auto started = std::min(worker_count, plan->job_count());
   orchestration.started_workers = static_cast<u64>(started);
+  // Claim order of the front jobs: plan order (with jobs_by_mass, the plan
+  // is prepared largest product first and stored by decreasing mass).
+  std::vector<std::size_t> job_order(plan->job_count());
+  for (std::size_t j = 0; j < job_order.size(); ++j) job_order[j] = j;
 
   // Copies and state allocations finish before the first emission. Each
   // function object is private; shared references captured by its target
@@ -857,7 +861,7 @@ WspdQ34ParallelResult run_wspd_q34_parallel(Q2CensusIndexPtr index, unsigned kma
       [&](std::size_t slot, const std::atomic<bool>& cancel) {
         auto& state = states[slot];
         const auto wall_start = wall_ns(), cpu_start = thread_cpu_ns();
-        u64 waited = 0;
+        u64 waited = 0, job_time = 0, longest_job = 0;
         const Q34SeedConsumer output = [&](const Q34SeedCandidate& candidate) {
           callbacks[slot](slot, candidate);
         };
@@ -921,7 +925,11 @@ WspdQ34ParallelResult run_wspd_q34_parallel(Q2CensusIndexPtr index, unsigned kma
               } else {
                 // Coarse job: an edge is never interrupted; run_job resumes an
                 // unvisited subtree or replays a counted terminal's callback.
-                const auto part = plan->run_job(*job, receiver);
+                const auto job_start = wall_ns();
+                const auto part = plan->run_job(job_order[*job], receiver);
+                const auto job_elapsed = wall_ns() - job_start;
+                counter_add(job_time, job_elapsed);
+                longest_job = std::max(longest_job, job_elapsed);
                 parallel_detail::merge_work(state.front, part.work);
                 counter_add(state.stats.jobs);
               }
@@ -942,7 +950,7 @@ WspdQ34ParallelResult run_wspd_q34_parallel(Q2CensusIndexPtr index, unsigned kma
           state.work = engine.work;
           state.split_rectangles = engine.split_rectangles;
         }  // Private engine buffers are released before this worker returns.
-        state.timing = {wall_ns() - wall_start, thread_cpu_ns() - cpu_start, waited};
+        state.timing = {wall_ns() - wall_start, thread_cpu_ns() - cpu_start, waited, job_time, longest_job};
         state.stats.front_products = state.front.product_visits;
         state.stats.input_rectangles = state.work.input_rectangles;
         state.stats.expanded_pairs = state.work.expanded_pairs;

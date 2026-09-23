@@ -202,10 +202,14 @@ struct WspdFrontDispatchResult {
   WspdFrontResult front;
   WspdFrontDispatchWork work;
 };
+// mass_first (v9, scheduling only): the preparation expands the pending
+// product of LARGEST pair mass first (ties: earliest discovered) instead of
+// breadth-first order, so that no job keeps a dense product whole; the jobs
+// are then stored by decreasing mass. Same rectangles, same totals.
 [[nodiscard]] std::unique_ptr<WspdFrontJobs> make_wspd_front_jobs(
     Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s,
     WspdFrontMode mode, std::size_t target_jobs,
-    std::uint8_t requested_lane_mask = 7, WspdFrontProposals proposals = {});
+    std::uint8_t requested_lane_mask = 7, WspdFrontProposals proposals = {}, bool mass_first = false);
 
 // An immutable, owning partition of ONE front traversal, not a catalogue
 // of its complete WSPD. The breadth-first preparation stops when pending
@@ -241,6 +245,9 @@ class WspdFrontJobs final {
   [[nodiscard]] const WspdFrontResult& prefix_result() const noexcept;
   [[nodiscard]] const Q2CensusIndex& index() const noexcept;
   [[nodiscard]] WspdFrontResult run_job(std::size_t id, const WspdRectangleConsumer& consumer) const;
+  // Unordered pair mass of the job's product (|A||B|, or |A|(|A|-1)/2 on the
+  // diagonal): a scheduling estimate only, never an output or a bound.
+  [[nodiscard]] u64 job_pair_mass(std::size_t id) const;
   // Retained job-vector capacity only; excludes the owned shared index,
   // plan metadata, preparation queue and independent worker stacks.
   [[nodiscard]] std::size_t retained_bytes() const;
@@ -258,7 +265,7 @@ class WspdFrontJobs final {
   friend class WspdFrontDispatch;
   friend std::unique_ptr<WspdFrontJobs> make_wspd_front_jobs(
       Q2CensusIndexPtr, unsigned, unsigned, WspdFrontMode, std::size_t, std::uint8_t,
-      WspdFrontProposals);
+      WspdFrontProposals, bool);
 };
 
 // Cooperative redistribution of UNVISITED products only. A terminal seed

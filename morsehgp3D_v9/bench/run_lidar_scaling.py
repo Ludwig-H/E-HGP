@@ -45,7 +45,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[2]
 V8 = ROOT / 'morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v13'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v14'
 # Schemas relus lors d'une revalidation d'archive (v12 : reçu du 23 septembre).
 KNOWN_SCHEMAS = ('mhgp9_tower_probe_v12', PROBE_SCHEMA)
 # Le schema de sonde d'une campagne est fixe par son RESUME, jamais par le JSON
@@ -61,7 +61,10 @@ INPUT_KEYS = frozenset({'format', 'grid', 'sites', 'hash'})
 FNV_PRIME = 1099511628211
 FNV_MASK = (1 << 64) - 1
 DEFAULT_LEVERS = dict(atlas_saturate_deep=True, q3_leaf_census=True, q34_dead_lanes=True, q34_witness_cache=True,
-                      q34_dead_core=True, tower_meb_proposal=True)
+                      q34_dead_core=True, tower_meb_proposal=True, q34_jobs_by_mass=True, q34_fine_jobs=True)
+# Leviers publies par schema de sonde (les archives v12 en ont six).
+LEVERS_V12 = {name: True for name in ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_witness_cache',
+                                      'q34_dead_core', 'tower_meb_proposal')}
 # Travail publie : front, filtres (visites des DFS de temoins), covers et
 # noyaux, preuves, graines et DFS q3/q4, atlas, balayages q4, catalogue, tour.
 WORK_KEYS = (
@@ -187,7 +190,7 @@ def validate_probe(value, expected):
     need += [options.get('K') == expected['k'], options.get('K_effective') == min(expected['k'], sites),
              options.get('s') == expected['s'], options.get('workers') == expected['workers'],
              options.get('tower_static_threads') == expected['static_threads'], options.get('run_tower') is True,
-             options.get('levers') == DEFAULT_LEVERS]
+             options.get('levers') == (LEVERS_V12 if schema == 'mhgp9_tower_probe_v12' else DEFAULT_LEVERS)]
     need += [[order.get('K') if type(order) is dict else None for order in orders] ==
              list(range(1, min(expected['k'], sites) + 1))]
     need += [all(type(value.get(section)) is dict and type(value[section].get(key)) is int for section, key in WORK_KEYS)]
@@ -397,9 +400,10 @@ def selftest(case_path):
     v13['catalogue']['euler'] = dict(status='holds' if checkable else 'not_checkable', checkable_max_k=checkable,
                                      by_k=[1] * checkable + [5] * (k - checkable))
     q34_ms = v13['times_ms']['q34']
-    v13['q34_occupancy'] = dict(started_workers=expected['workers'], jobs=16 * expected['workers'], tasks_published=2,
+    v13['q34_occupancy'] = dict(started_workers=expected['workers'], jobs=64 * expected['workers'], tasks_published=2,
                                 tasks_consumed=2, task_waits=1, wall_max_ms=q34_ms, wall_min_ms=q34_ms / 2,
-                                cpu_sum_s=0.001, wait_sum_s=0.001)
+                                cpu_sum_s=0.001, wait_sum_s=0.001, job_sum_s=0.001, max_job_ms=q34_ms / 4)
+    v13['options']['levers'] = dict(DEFAULT_LEVERS)
     static_path = expected['static_threads'] > 1
     v13['tower_phases_ms'] = dict(validate=1.0, static=0.0, lots=1.0 if static_path else 0.0, populations=0.0,
                                   images=0.0, bank=1.0, encode=1.0, static_by_k=[0.0] * k,

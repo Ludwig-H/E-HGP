@@ -232,6 +232,12 @@ def main(argv):
             ('tower static sum split', lambda v: v['tower_phases_ms'].update(
                 static=v['tower_phases_ms']['static'] + 5.0)),
             ('tower phases absent', lambda v: v.pop('tower_phases_ms')),
+            ('jobs-by-mass lever flipped', lambda v: v['options']['levers'].update(q34_jobs_by_mass=False)),
+            ('fine-jobs lever flipped', lambda v: v['options']['levers'].update(q34_fine_jobs=False)),
+            ('longest job beyond worker wall', lambda v: v['q34_occupancy'].update(
+                max_job_ms=v['q34_occupancy']['wall_max_ms'] + 5.0)),
+            ('job time beyond threads x wall', lambda v: v['q34_occupancy'].update(
+                job_sum_s=v['q34_occupancy']['job_sum_s'] + 1000.0)),
         ]
         killed = 0
         for label, mutate in mutants:

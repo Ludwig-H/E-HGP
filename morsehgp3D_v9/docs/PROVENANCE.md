@@ -254,3 +254,27 @@ Ce sont des mesures, jamais comparées entre exécutions. Le lecteur G4 borne :
 Il exige aussi que les phases relèvent exclusivement de la voie statique ou
 de la voie séquentielle, et que la phase 0 soit égale à la somme de ses
 valeurs par K. Porte `probe_worker_contract` : 49 mutants tués.
+
+### Ordonnancement des jobs du front q3/q4 (sonde v14)
+
+La session G4 R8 montre que les fils q34 passent 35 à 49 % de leur temps à
+attendre la file de tâches à K5 et W48. En local (000000 K5, W8), un seul job
+du front dure 14,8 s sur 22 s de q34 : la préparation en largeur laisse un
+produit dense entier. Deux leviers d'ordonnancement sont désormais actifs par
+défaut, épinglés dans le plan et publiés ; ils ne changent pas l'objet.
+- `q34_jobs_by_mass` : la préparation scinde d'abord le produit en attente de
+  plus grande masse de paires (`make_wspd_front_jobs(..., mass_first)`), puis
+  range les jobs par masse décroissante.
+- `q34_fine_jobs` : 64 jobs par fil au lieu de 16.
+
+En local, le plus long job passe de 14,8 à 2,9 s et l'attente de 11,9 à
+0,01 s, avec un condensé identique. `q34_occupancy` publie désormais
+`job_sum_s` et `max_job_ms`.
+
+Portes :
+- `wspd_front_jobs` : chaque plan est aussi préparé par masse et comparé au
+  front monolithique jugé par l'oracle indépendant (préfixe + jobs égaux, masses
+  non croissantes, plus de 1 000 plans).
+- `wspd_q34` : chaque cas parallèle est rejoué par masse, soit 425 cas
+  identiques à l'oracle rationnel et aux compteurs mono.
+- Porte de raccord : 53 mutants tués.

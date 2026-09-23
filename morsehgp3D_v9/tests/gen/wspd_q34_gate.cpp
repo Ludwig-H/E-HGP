@@ -53,7 +53,7 @@ struct GlobalGate : Gate {
   u64 s8_calls{},s10_calls{},s12_calls{},strict_w3_contacts{},strict_w4_contacts{};
   u64 independent_q2_cases{},independent_q3_cases{},isolated_cases{},extreme_calls{};
   u64 allocation_failures{},nested_calls{},owner_reset_calls{},input_alias_checks{};
-  u64 parallel_pipeline_calls{},parallel_w1_calls{},parallel_w2_calls{},parallel_w4_calls{};
+  u64 parallel_pipeline_calls{},parallel_w1_calls{},parallel_w2_calls{},parallel_w4_calls{},mass_first_cases{};
   u64 parallel_geometry_checks{},worker_ledger_checks{},callback_copy_checks{},multiworker_calls{};
   u64 parallel_callback_failures{},parallel_join_checks{},parallel_owner_resets{},parallel_empty_calls{};
   u64 indexed_calls{},indexed_pair_rejections{},indexed_rectangle_rejections{},boxed_calls{};
@@ -503,6 +503,13 @@ void parallel_case(GlobalGate& gate,const Points& points,const Output& all,unsig
   // two-pair grain and a one-task queue so that range splitting AND the
   // full-queue inline fallback are both exercised against the oracle.
   if (worker_count==4) {opts.parallel_task_pairs=2;opts.parallel_queue_capacity=1;}
+  // v9 mass-first front jobs (scheduling only): every parallel case is also
+  // run with them, against the same oracle stream and mono counters.
+  if (!opts.jobs_by_mass) {
+    auto massed=opts;massed.jobs_by_mass=true;
+    parallel_case(gate,points,all,k,massed,worker_count,grain);
+    ++gate.mass_first_cases;
+  }
   const auto index=mhgp9::gen::make_q2_cloud_index(mhgp9::gen::prepare_cloud(points));
   const auto expected=eligible(all,k,opts.requested_lane_mask);
   Output mono_output;
@@ -1094,7 +1101,8 @@ int main(int argc,char** argv) {
       gate.q3_front_rejections>0 && gate.q4_front_rejections>0 && gate.xi_tests>0 &&
       gate.q3_depth_rejections>0 && gate.q3_unread_sites>0 && gate.both_edges>0 &&
       gate.q3_only_edges>0 && gate.q4_only_edges>0 && gate.split_q3_only_edges>0 &&
-      gate.split_q4_only_edges>0 && gate.multiworker_calls>0 && gate.callback_copy_checks>0,
+      gate.split_q4_only_edges>0 && gate.multiworker_calls>0 && gate.callback_copy_checks>0 &&
+      gate.mass_first_cases>0,
       "global q34 gate nonvacuity failed");
     std::cout<<"{\"schema\":\"mhgp9_gen_wspd_q34_gate_v1\",\"status\":\"PASS\"";
 #define EMIT(field) std::cout<<",\"" #field "\":"<<gate.field
@@ -1108,7 +1116,7 @@ int main(int argc,char** argv) {
     EMIT(independent_q2_cases);EMIT(independent_q3_cases);EMIT(isolated_cases);EMIT(extreme_calls);
     EMIT(candidates);EMIT(q3);EMIT(q4);EMIT(max_shell);EMIT(permutations);EMIT(invalid_inputs);
     EMIT(allocation_failures);EMIT(callback_failures);EMIT(parallel_calls);EMIT(nested_calls);EMIT(owner_reset_calls);EMIT(input_alias_checks);
-    EMIT(parallel_pipeline_calls);EMIT(parallel_w1_calls);EMIT(parallel_w2_calls);EMIT(parallel_w4_calls);
+    EMIT(parallel_pipeline_calls);EMIT(mass_first_cases);EMIT(parallel_w1_calls);EMIT(parallel_w2_calls);EMIT(parallel_w4_calls);
     EMIT(parallel_geometry_checks);EMIT(worker_ledger_checks);EMIT(callback_copy_checks);EMIT(multiworker_calls);
     EMIT(parallel_callback_failures);EMIT(parallel_join_checks);EMIT(parallel_owner_resets);EMIT(parallel_empty_calls);
     EMIT(indexed_calls);EMIT(indexed_pair_rejections);EMIT(indexed_rectangle_rejections);EMIT(boxed_calls);

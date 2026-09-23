@@ -436,11 +436,15 @@ struct WspdFrontJobs::Impl {
   std::size_t terminals{};
 
   Impl(Q2CensusIndexPtr owner, unsigned k, unsigned s, WspdFrontMode strategy,
-       std::size_t target, std::uint8_t mask, WspdFrontProposals proposal_options)
+       std::size_t target, std::uint8_t mask, WspdFrontProposals proposal_options, bool mass_first)
       : index(std::move(owner)), kmax(k), separation(s), mode(strategy), requested_mask(mask),
         proposals(proposal_options) {
     const WspdRectangleConsumer unused = [](const WspdRectangle&) {};
     Front preparation(*index, kmax, separation, mode, unused, requested_mask, proposals);
+    if (mass_first) {
+      prepare_by_mass(preparation, target);
+      return;
+    }
     std::deque<Task> pending;
     pending.push_back(preparation.root_task());
     // A true FIFO of unvisited products, not a DFS stack whose small size
@@ -460,6 +464,42 @@ struct WspdFrontJobs::Impl {
       jobs.push_back(pending.front());
       pending.pop_front();
     }
+    prefix = preparation.result();
+  }
+
+  u64 mass(const Task& task) const {
+    const auto nodes = index->spatial_nodes();
+    const auto a = static_cast<u64>(nodes[task.a].range.size()), b = static_cast<u64>(nodes[task.b].range.size());
+    return task.a == task.b ? a * (a - 1) / 2 : a * b;
+  }
+
+  // Largest pending product first (a max-heap on mass, then discovery order),
+  // same stopping rule as the breadth-first preparation; terminals are jobs
+  // as found. The final jobs are ordered by decreasing mass (ties: discovery).
+  void prepare_by_mass(Front& preparation, std::size_t target) {
+    struct Entry { u64 mass; u64 sequence; Task task; };
+    const auto lower = [](const Entry& x, const Entry& y) {
+      return x.mass != y.mass ? x.mass < y.mass : x.sequence > y.sequence;
+    };
+    std::vector<Entry> heap;
+    u64 sequence = 0;
+    const auto push = [&](const Task& task) {
+      heap.push_back({mass(task), sequence++, task});
+      std::push_heap(heap.begin(), heap.end(), lower);
+    };
+    std::vector<Entry> found;  // terminals, kept with their mass
+    push(preparation.root_task());
+    while (!heap.empty() && found.size() < target && heap.size() < target - found.size()) {
+      std::pop_heap(heap.begin(), heap.end(), lower);
+      const auto task = heap.back().task;
+      heap.pop_back();
+      preparation.expand(task, push, [&](const Task& terminal) { found.push_back({mass(terminal), sequence++, terminal}); });
+    }
+    terminals = found.size();
+    found.insert(found.end(), heap.begin(), heap.end());
+    std::sort(found.begin(), found.end(), [&](const Entry& x, const Entry& y) { return lower(y, x); });
+    jobs.reserve(found.size());
+    for (const auto& entry : found) jobs.push_back(entry.task);
     prefix = preparation.result();
   }
 };
@@ -488,14 +528,24 @@ WspdFrontResult WspdFrontJobs::run_job(std::size_t id, const WspdRectangleConsum
                plan.proposals).run(plan.jobs[id]);
 }
 
+u64 WspdFrontJobs::job_pair_mass(std::size_t id) const {
+  const auto& plan = *implementation_;
+  if (id >= plan.jobs.size()) throw std::invalid_argument("mhgp9 gen WSPD requires an existing job");
+  const auto nodes = plan.index->spatial_nodes();
+  const auto a = static_cast<u64>(nodes[plan.jobs[id].a].range.size());
+  const auto b = static_cast<u64>(nodes[plan.jobs[id].b].range.size());
+  // n < 2^32 sites: both products stay below 2^64.
+  return plan.jobs[id].a == plan.jobs[id].b ? a * (a - 1) / 2 : a * b;
+}
+
 std::unique_ptr<WspdFrontJobs> make_wspd_front_jobs(
     Q2CensusIndexPtr index, unsigned kmax, unsigned separation_s, WspdFrontMode mode,
-    std::size_t target_jobs, std::uint8_t requested_lane_mask, WspdFrontProposals proposals) {
+    std::size_t target_jobs, std::uint8_t requested_lane_mask, WspdFrontProposals proposals, bool mass_first) {
   if (!index || target_jobs == 0)
     throw std::invalid_argument("mhgp9 gen WSPD jobs require an owning index and positive target");
   validate_front(kmax, separation_s, mode, requested_lane_mask, proposals);
   auto implementation = std::make_shared<WspdFrontJobs::Impl>(
-      std::move(index), kmax, separation_s, mode, target_jobs, requested_lane_mask, proposals);
+      std::move(index), kmax, separation_s, mode, target_jobs, requested_lane_mask, proposals, mass_first);
   return std::unique_ptr<WspdFrontJobs>(new WspdFrontJobs(std::move(implementation)));
 }
 

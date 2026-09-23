@@ -65,6 +65,11 @@ struct WspdQ34Options {
   // Pending tasks admitted before publishers fall back to inline expansion
   // (bounded memory, never a search or output quota).
   std::size_t parallel_queue_capacity{4096};
+  // Parallel entry only: the front job plan splits the pending product of
+  // largest pair mass first (make_wspd_front_jobs mass_first) and jobs are
+  // claimed by decreasing mass. Scheduling only: same rectangles, same
+  // stream; the prefix/job split of the front counters may differ.
+  bool jobs_by_mass{false};
 };
 
 struct WspdQ3AtlasWork {
@@ -231,6 +236,9 @@ struct WspdQ34TaskWork {
 // queue. Nanoseconds; they vary between runs and are never compared.
 struct WspdQ34WorkerTiming {
   u64 wall_ns{}, cpu_ns{}, wait_ns{};
+  // Wall time inside front jobs (their inline work: front, rectangle filter,
+  // unpublished rectangles and edges), summed and longest single job.
+  u64 job_ns{}, max_job_ns{};
 };
 
 struct WspdQ34ParallelResult {

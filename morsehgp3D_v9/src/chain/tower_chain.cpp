@@ -370,6 +370,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       o.dead_lanes = options.q34_dead_lanes;
       o.pair_witness_cache = options.q34_witness_cache;
       o.dead_core = options.q34_dead_core;
+      o.jobs_by_mass = options.q34_jobs_by_mass;
       const auto r34 = gen::run_wspd_q34_parallel(
           index, kmax, options.separation_s, o, W,
           [&slots](std::size_t slot, const gen::Q34SeedCandidate& c) {
@@ -381,7 +382,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
             p.shell = static_cast<std::uint32_t>(c.shell_first.size() + c.shell_second.size());
             slots[slot].push_back(p);
           },
-          16);
+          options.q34_fine_jobs ? 64 : 16);
       result.q34_expanded_pairs = r34.pipeline.work.expanded_pairs;
       result.q34_cover_builds = r34.pipeline.work.cover_builds;
       result.q3_emitted = r34.pipeline.work.q3_emitted;
@@ -400,6 +401,8 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
           o.wall_min_ms = first ? wall : std::min(o.wall_min_ms, wall);
           o.cpu_sum_s += static_cast<double>(timing.cpu_ns) / 1e9;
           o.wait_sum_s += static_cast<double>(timing.wait_ns) / 1e9;
+          o.job_sum_s += static_cast<double>(timing.job_ns) / 1e9;
+          o.max_job_ms = std::max(o.max_job_ms, static_cast<double>(timing.max_job_ns) / 1e6);
           first = false;
         }
       }

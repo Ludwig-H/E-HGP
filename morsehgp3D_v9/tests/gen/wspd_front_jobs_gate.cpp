@@ -101,6 +101,7 @@ struct Gate {
   u64 clouds{};
   u64 oracle_point_tests{};
   u64 mono_runs{};
+  u64 mass_first_plans{};
   u64 plans{};
   u64 ordered_replays{};
   u64 job_runs{};
@@ -495,6 +496,14 @@ void corpus(Gate& gate) {
               const auto plan = mhgp9::gen::make_wspd_front_jobs(index, kmax, s, mode, target, mask);
               gate.require(&plan->index() == index.get(), "job factory replaced the shared census index");
               compare_jobs(gate, *plan, reference, target);
+              // v9 mass-first preparation (scheduling only): same rectangles
+              // and totals, jobs stored by non-increasing pair mass.
+              const auto by_mass = mhgp9::gen::make_wspd_front_jobs(index, kmax, s, mode, target, mask, {}, true);
+              compare_jobs(gate, *by_mass, reference, target);
+              for (std::size_t j = 1; j < by_mass->job_count(); ++j)
+                gate.require(by_mass->job_pair_mass(j - 1) >= by_mass->job_pair_mass(j),
+                             "mass-first plan is not stored by non-increasing pair mass");
+              ++gate.mass_first_plans;
             }
             // Widened windows are qualified for the q2 lane alone (active mask 1).
             if (mode != WspdFrontMode::MidpointSamples || active_mask(kmax, mask) != 1) continue;
@@ -707,7 +716,7 @@ int main(int argc, char** argv) {
                      gate.limit_bites > 0 && gate.inheriting_plans > 1000 && inheriting.inherited_credits > 0 &&
                      inheriting.inherited_duplicates > 0 && inheriting.extended_inherited_duplicates > 0 &&
                      inheriting.inherited_rejections > 0 && inheriting.emitted_witness_credits > 0 &&
-                     gate.witness_carrying_jobs > 0;
+                     gate.witness_carrying_jobs > 0 && gate.mass_first_plans > 1000;
     // A lost floor names its counters: the message alone would not say which.
     if (!floors) {
       std::cerr << "mhgp9_gen_wspd_front_jobs_gate floors: inheriting_plans=" << gate.inheriting_plans
@@ -723,6 +732,7 @@ int main(int argc, char** argv) {
     gate.require(floors, "front-job gate lost a declared non-vacuity floor");
     std::cout << "mhgp9_gen_wspd_front_jobs_gate passed checks=" << gate.checks << " clouds=" << gate.clouds
               << " oracle_point_tests=" << gate.oracle_point_tests << " mono_runs=" << gate.mono_runs
+              << " mass_first_plans=" << gate.mass_first_plans
               << " plans=" << gate.plans << " ordered_replays=" << gate.ordered_replays
               << " job_runs=" << gate.job_runs << " zero_job_plans=" << gate.zero_job_plans
               << " all_terminal_plans=" << gate.all_terminal_plans << " terminal_jobs=" << gate.terminal_jobs

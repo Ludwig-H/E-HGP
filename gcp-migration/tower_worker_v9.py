@@ -48,7 +48,7 @@ PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
 PLAN_SCHEMA = 'mhgp9_tower_plan_v6'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v13'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v14'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -97,7 +97,7 @@ OUTCOMES = ('complete_relative', 'explicit_refusal', 'killed_case_cap', 'killed_
             'skipped_budget', 'probe_failed', 'skipped_protocol_defect')
 CASE_KEYS = frozenset({'scene', 'file', 'n', 'k', 's', 'workers', 'static_threads', 'levers', 'repeat'})
 LEVER_NAMES = ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_witness_cache', 'q34_dead_core',
-               'tower_meb_proposal')
+               'tower_meb_proposal', 'q34_jobs_by_mass', 'q34_fine_jobs')
 TOP_KEYS = frozenset({'schema', 'status', 'reason', 'input', 'options', 'times_ms', 'chain_cpu_s', 'generator',
                       'ledger', 'catalogue', 'q34_occupancy', 'tower_phases_ms', 'tower_work', 'orders',
                       'tower_digest', 'peak_rss_kb'})
@@ -143,7 +143,7 @@ EULER_KEYS = frozenset({'status', 'checkable_max_k', 'by_k'})
 EULER_STATUSES = ('holds', 'fails', 'not_checkable')
 # Occupation mesuree des ouvriers q3/q4 et chronos par phase de la tour (v13).
 OCCUPANCY_COUNTS = ('started_workers', 'jobs', 'tasks_published', 'tasks_consumed', 'task_waits')
-OCCUPANCY_TIMES = ('wall_max_ms', 'wall_min_ms', 'cpu_sum_s', 'wait_sum_s')
+OCCUPANCY_TIMES = ('wall_max_ms', 'wall_min_ms', 'cpu_sum_s', 'wait_sum_s', 'job_sum_s', 'max_job_ms')
 TOWER_PHASES = ('validate', 'static', 'lots', 'populations', 'images', 'bank', 'encode')
 TOWER_PHASES_BY_K = ('static_by_k', 'lots_by_k', 'images_by_k', 'encode_by_k', 'order_by_k')
 STATIC_PATH_PHASES = ('static', 'lots', 'populations', 'images')
@@ -445,6 +445,10 @@ def validate_occupancy(value, case):
          o['wall_min_ms'] <= o['wall_max_ms'] <= value['times_ms']['q34'] + PHASE_TOLERANCE_MS, 'q34 occupancy walls')
     budget = started * o['wall_max_ms'] / 1000.0
     need(o['cpu_sum_s'] <= budget * 1.01 + 0.01 and o['wait_sum_s'] <= budget + 0.01, 'q34 occupancy cpu/wait')
+    # v14 : mur dans les jobs du front (somme et plus long job), sous-chronos
+    # des boucles des fils.
+    need(o['max_job_ms'] <= o['wall_max_ms'] + PHASE_TOLERANCE_MS and o['job_sum_s'] <= budget + 0.01 and
+         (o['jobs'] == 0 or o['max_job_ms'] > 0 or o['job_sum_s'] == 0), 'q34 occupancy jobs')
 
 
 def validate_tower_phases(value, case):

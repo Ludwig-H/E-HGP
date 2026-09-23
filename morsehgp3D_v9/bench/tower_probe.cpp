@@ -7,7 +7,8 @@
 // Leviers (meme objet, travail different) : atlas_saturate_deep,
 // q3_leaf_census, q34_dead_lanes, q34_witness_cache, q34_dead_core (ce dernier
 // exige q34_dead_lanes, sinon la chaine refuse), tower_meb_proposal (MEB de la
-// tour propose puis verifie exactement). Tous sont publies dans
+// tour propose puis verifie exactement), q34_jobs_by_mass et q34_fine_jobs
+// (ordonnancement des jobs du front q3/q4 : ordre par masse, grain fin). Tous sont publies dans
 // options.levers ; un plan G4 les epingle explicitement, un nom inconnu est
 // refuse (code 2).
 //
@@ -138,6 +139,8 @@ int main(int argc, char** argv) {
         else if (name == "q34_witness_cache") options.q34_witness_cache = on;
         else if (name == "q34_dead_core") options.q34_dead_core = on;
         else if (name == "tower_meb_proposal") options.tower_meb_proposal = on;
+        else if (name == "q34_jobs_by_mass") options.q34_jobs_by_mass = on;
+        else if (name == "q34_fine_jobs") options.q34_fine_jobs = on;
         else throw std::invalid_argument("unknown lever");
       }
       else if (arg.starts_with("--n=")) prefix = static_cast<std::size_t>(parse_u(arg.substr(4)));
@@ -167,19 +170,21 @@ int main(int argc, char** argv) {
   const auto r = mhgp9::run_tower_chain(input.points, options);
   const auto& t = r.times;
   const auto& c = r.catalogue;
-  std::printf("{\"schema\":\"mhgp9_tower_probe_v13\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
+  std::printf("{\"schema\":\"mhgp9_tower_probe_v14\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
               r.reason.c_str());
   std::printf("\"input\":{\"format\":\"%s\",\"grid\":\"%s\",\"sites\":%zu,\"hash\":\"%016" PRIx64 "\"},", input.format.c_str(),
               grid.c_str(), input.points.size(), input.hash);
   std::printf("\"options\":{\"K\":%u,\"K_effective\":%u,\"s\":%u,\"workers\":%zu,\"tower_static_threads\":%d,\"run_tower\":%s,"
               "\"levers\":{\"atlas_saturate_deep\":%s,\"q3_leaf_census\":%s,\"q34_dead_lanes\":%s,"
-              "\"q34_witness_cache\":%s,\"q34_dead_core\":%s,\"tower_meb_proposal\":%s}},",
+              "\"q34_witness_cache\":%s,\"q34_dead_core\":%s,\"tower_meb_proposal\":%s,"
+              "\"q34_jobs_by_mass\":%s,\"q34_fine_jobs\":%s}},",
               options.kmax, r.kmax_effective, options.separation_s, options.workers,
               options.tower_static_threads >= 0 ? options.tower_static_threads : r.tower_static_threads,
               options.run_tower ? "true" : "false", options.atlas_saturate_deep ? "true" : "false",
               options.q3_leaf_census ? "true" : "false", options.q34_dead_lanes ? "true" : "false",
               options.q34_witness_cache ? "true" : "false", options.q34_dead_core ? "true" : "false",
-              options.tower_meb_proposal ? "true" : "false");
+              options.tower_meb_proposal ? "true" : "false", options.q34_jobs_by_mass ? "true" : "false",
+              options.q34_fine_jobs ? "true" : "false");
   std::printf("\"times_ms\":{\"read\":%.3f,\"prepare\":%.3f,\"gen_index\":%.3f,\"q2\":%.3f,\"q34\":%.3f,\"merge\":%.3f,"
               "\"tower_index\":%.3f,\"census\":%.3f,\"tower\":%.3f,\"chain_total\":%.3f,\"digest\":%.3f},"
               "\"chain_cpu_s\":%.3f,",
@@ -209,9 +214,9 @@ int main(int argc, char** argv) {
     const auto& o = r.q34_occupancy;
     std::printf("\"q34_occupancy\":{\"started_workers\":%" PRIu64 ",\"jobs\":%" PRIu64 ",\"tasks_published\":%" PRIu64
                 ",\"tasks_consumed\":%" PRIu64 ",\"task_waits\":%" PRIu64 ",\"wall_max_ms\":%.3f,\"wall_min_ms\":%.3f"
-                ",\"cpu_sum_s\":%.3f,\"wait_sum_s\":%.3f},",
+                ",\"cpu_sum_s\":%.3f,\"wait_sum_s\":%.3f,\"job_sum_s\":%.3f,\"max_job_ms\":%.3f},",
                 o.started_workers, o.jobs, o.tasks_published, o.tasks_consumed, o.task_waits, o.wall_max_ms,
-                o.wall_min_ms, o.cpu_sum_s, o.wait_sum_s);
+                o.wall_min_ms, o.cpu_sum_s, o.wait_sum_s, o.job_sum_s, o.max_job_ms);
     const auto& tt = r.tower_times;
     std::printf("\"tower_phases_ms\":{\"validate\":%.3f,\"static\":%.3f,\"lots\":%.3f,\"populations\":%.3f,"
                 "\"images\":%.3f,\"bank\":%.3f,\"encode\":%.3f",

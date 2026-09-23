@@ -68,6 +68,12 @@ struct ChainOptions {
   // MEB propose par Welzl en double et verifie exactement dans la tour
   // (anchor_meb_proposed), meme objet. Contrat v9 : active par defaut.
   bool tower_meb_proposal = true;
+  // Ordonnancement q3/q4 (meme objet) : jobs du front prepares en scindant
+  // d'abord le produit le plus massif, puis reclames par masse decroissante ;
+  // grain fin (64 jobs par fil au lieu de 16). Contrat v9 : actives par
+  // defaut, publies et epingles (reçu G4 R8 : fils q34 affames a W48).
+  bool q34_jobs_by_mass = true;
+  bool q34_fine_jobs = true;
 };
 
 // Temps de mur en millisecondes, CPU du processus en secondes.
@@ -136,6 +142,7 @@ struct GeneratorLedger {
 struct Q34Occupancy {
   std::uint64_t started_workers = 0, jobs = 0, tasks_published = 0, tasks_consumed = 0, task_waits = 0;
   double wall_max_ms = 0, wall_min_ms = 0, cpu_sum_s = 0, wait_sum_s = 0;
+  double job_sum_s = 0, max_job_ms = 0;  // mur dans les jobs du front : somme, plus long job
 };
 
 struct OrderSummary {

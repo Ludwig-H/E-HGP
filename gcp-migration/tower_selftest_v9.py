@@ -117,14 +117,15 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
         euler = dict(status='not_checkable', checkable_max_k=0, by_k=[0] * k)
     started = max(1, min(workers, 4))
     occupancy = dict(started_workers=started, jobs=4, tasks_published=2, tasks_consumed=2, task_waits=0,
-                     wall_max_ms=0.1, wall_min_ms=0.05, cpu_sum_s=0.0001 * started, wait_sum_s=0.0)
+                     wall_max_ms=0.1, wall_min_ms=0.05, cpu_sum_s=0.0001 * started, wait_sum_s=0.0,
+                     job_sum_s=0.00005 * started, max_job_ms=0.08)
     static_path = static > 1 and effective > 1
     phases = dict(validate=0.005, static=0.0, lots=0.01 if static_path else 0.0, populations=0.0,
                   images=0.01 if static_path else 0.0, bank=0.005, encode=0.01,
                   static_by_k=[0.0] * k, lots_by_k=[0.01 if static_path else 0.0] * k,
                   images_by_k=[0.01 if static_path else 0.0] * k, encode_by_k=[0.01] * k,
                   order_by_k=[0.0 if static_path else 0.005] * k)
-    return dict(schema='mhgp9_tower_probe_v13', status=status,
+    return dict(schema='mhgp9_tower_probe_v14', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
@@ -771,6 +772,10 @@ class Protocol(unittest.TestCase):
                      ('schema_v10', lambda v: v.update(schema='mhgp9_tower_probe_v10')),
                      ('schema_v11', lambda v: v.update(schema='mhgp9_tower_probe_v11')),
                      ('schema_v12', lambda v: v.update(schema='mhgp9_tower_probe_v12')),
+                     ('schema_v13', lambda v: v.update(schema='mhgp9_tower_probe_v13')),
+                     ('jobs_mass_mode', lambda v: v['options']['levers'].update(q34_jobs_by_mass=False)),
+                     ('fine_jobs_mode', lambda v: v['options']['levers'].update(q34_fine_jobs=False)),
+                     ('max_job_beyond_wall', lambda v: v['q34_occupancy'].update(max_job_ms=5.0)),
                      ('euler_fails_complete', lambda v: v['catalogue']['euler'].update(status='fails')),
                      ('euler_sum', lambda v: v['catalogue']['euler']['by_k'].__setitem__(0, 0)),
                      ('occupancy_absent', lambda v: v.pop('q34_occupancy')),
