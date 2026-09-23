@@ -1,0 +1,73 @@
+# Contre-audit B — cache de nœuds témoins q3/q4 en chantier
+
+23 septembre 2026. Lecture **WIP non commitée** du worktree développeur
+sur `e0ae05a7` : `q34_witness_search.cpp` SHA-256 `bfeada0bf3a7…`,
+son en-tête `64e47df3f7e2…`, `wspd_q34.cpp` `cb83bf12a168…` et
+`tower_chain.hpp` `d67493a9db41…`. Aucun chrono, reçu, G4 ni exposant
+de croissance de cette version n'est acquis. Cette note complète la
+[lecture de la preuve conjointe](CONTRE_AUDIT_B_Q34_PREUVE_CONJOINTE_WIP_20260923.md).
+
+## Ce que le cache peut réellement économiser
+
+La recherche complète sur une paire `(a,b)` peut conserver jusqu'à
+`(K−1)+(K−2)=2K−3≤17` nœuds qu'elle a admis comme témoins stricts.
+Pour la prochaine paire ayant la même extrémité `a`, ces nœuds sont
+**réévalués exactement** avec les nouvelles bornes ; un nœud admis
+crédite seulement les voies qu'il portait. Dans le parcours interne,
+les nœuds tracés forment une antichaîne **par voie** : dès l'admission,
+le bit de la voie est retiré avant la descente. Sous cet invariant, le
+cache ne peut rejeter qu'une voie que la recherche Affine complète
+aurait elle aussi rejetée. La lecture n'a pas trouvé de fausse
+exclusion sur ce chemin interne.
+
+Le cache s'exécute dans `Engine::edge`, **après**
+`expanded_pairs++`, avant la recherche complète et le cover. S'il
+rejette toutes les voies, il saute leur recherche et le cover ; mais
+**le filtre Affine existant aurait sauté le même cover**. Par rapport
+à la baseline actuelle, les masques finaux, `rejected_pairs`,
+`cover_builds`, `cover_sites`, `dead_form_sites`, sorties et tour doivent
+donc rester identiques cache on/off. Seul le coût des recherches de
+témoin par paire peut baisser. Cette variante n'élimine ni les 12–33 M
+paires développées ni le chargement de 1,8–9,3 Md formes observés dans
+R3 ; ne pas la présenter comme fermeture du verrou sous-quadratique.
+
+## Précondition non imposée à l'API publique
+
+La fonction publique `q34_cached_witness_rejections` accepte un
+`span<Q34WitnessNode>` arbitraire. Elle contrôle l'index du nœud et les
+bits de voie, **pas** la disjonction des plages par voie annoncée dans
+son commentaire. En donnant deux fois le même nœud feuille contenant
+un témoin strict unique à K=3, voie q3 (`T3=2`), le code crédite deux
+sites et peut renvoyer un faux rejet. Contre-fixture **exécutée
+localement** sur une compilation temporaire du WIP, hors dépôt puis
+nettoyée : `a=(0,0,0)`, `b=(10,0,0)`, témoin `z=(5,0,0)` isolé en
+feuille 3. À K=3, voie q3, la recherche complète laisse q3 ouverte
+(`full_open=2`) ; une entrée `{3,2}` donne rejet `0`, deux copies de
+cette entrée donnent rejet `2`. Au milieu, `4H_min=100>0` et `Xi=0`,
+mais il n'y a qu'**un** site distinct. Le chemin de production
+ne forge normalement pas ce span ; le problème est le contrat de
+l'interface exposée. Préférer une trace opaque, possédée et liée à
+l'identité de l'index, ou valider antichaîne et unicité par voie avant
+crédit. Si l'API reste publique, ajouter un refus causal de doublon,
+d'ancêtre/descendant et de trace d'un autre index. Cette exécution
+temporaire n'est pas un test archivé du produit.
+
+## Porte de mesure avant le prochain G4
+
+`ChainOptions::q34_witness_cache` devient `true` par défaut dans le
+WIP, mais `bench/tower_probe.cpp` n'a ni bascule CLI, ni champ d'option
+JSON, ni compteurs du cache. `ChainLedger` ne transporte pas
+`witness_cache.{queries,node_tests,q3_rejections,q4_rejections,
+full_rejections}` ni `witness.cache_rejected_pairs` ; le worker G4 v5
+ne connaît pas cette variante. Une future campagne se retrouverait
+incapable de l'identifier ou de l'ablater proprement. **Compléter
+CLI→JSON→ledger→validation hôte avant toute nouvelle dépense G4.**
+
+Une ablation appariée cache on/off à mêmes `s,K,W`, mode Affine et
+certificat de voies mortes doit comparer toute la chaîne et les masses
+invariantes citées plus haut, puis publier recherches évitées,
+`pairs.node_visits`, nœuds retestés, CPU/mur, RSS et tailles de trace.
+Une trace interne fait au plus 17 entrées à K10 ; son empreinte est à
+mesurer pour clôture comptable, mais le verrou de fond reste ailleurs.
+Les portes WIP actuelles utilisent des petits oracles et des mutants de
+bornes ; elles ne sont pas encore cette ablation ni une preuve de gain.
