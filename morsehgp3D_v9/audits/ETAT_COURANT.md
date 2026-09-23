@@ -289,6 +289,13 @@ rappelle que phase statique et lots de la tour se recouvrent déjà :
 leurs durées ne s'additionnent pas en temps mur. La vue exacte
 `E×C` proposée par B, avec gardes conservés et repli par cellule,
 reste à mesurer ; le premier crible `E_C` conservateur est mesuré plus bas.
+La lecture d'un **diff WIP non commité** de FULL dans
+[cette même note](CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md)
+ne trouve pas de contradiction logique à l'indexation des niveaux
+exacts par runs, sous tri exact et filtre flottant valide. La preuve
+du filtre requiert le mode d'arrondi des **workers**, vérifié seulement
+dans le fil appelant ; un autre fast path singleton a été ajouté au
+diff pendant l'audit. Aucun port, gain ni reçu n'en résulte encore.
 L'ablation interne S2 seul→S2+S3 n'a qu'un passage : les témoins
 moteur de ses deux bras dérivent aussi de **3,266 à 3,841 s** à K5
 et de **10,498 à 11,023 s** à K10. Les postes internes sont

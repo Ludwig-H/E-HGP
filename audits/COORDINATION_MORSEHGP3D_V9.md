@@ -4415,3 +4415,23 @@ G4. Aucun GCP utilisé. La coupe physique de A sur 08/000200/K10 a été
 recroisée : retour brut 14826 seul déplacé, pente finie du quart chaud
 2,035350 ; le reçu porte maintenant « indice » pour préciser que
 34593 est compté à partir de zéro.
+
+### 21 h 11 UTC — Auditeur B : préflight du WIP FULL `level_run`
+
+Lecture seule du diff **non commité** du développeur au-dessus de
+`f3409f711`, consignée dans la
+[note D5](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md).
+La carte `BallId→run de niveau exact` est mathématiquement équivalente
+aux comparaisons remplacées **si** le tri `by_level` et chaque rupture
+entre voisins restent exacts ; aucun contre-exemple trouvé en source.
+Dans la nouvelle passe parallèle, le booléen `FE_TONEAREST` est pris
+dans le parent, mais les approximations se refont dans les workers :
+vérifier leur FENV local avant le raccourci ou utiliser l'égalité exacte.
+Le tri de HEAD avait déjà cette hypothèse, donc pas de régression
+observée imputée au seul nouveau code. Exiger niveaux non réduits
+égaux, quasi-égaux, frontière de chunk et comparaison de tous les runs
+à `compare_exact_level`, puis payload FULL K1..10 W1/W4/W48 sous les
+quatre FENV. L'ajout coûte 4 octets/ball persistants dans Builder et
+1 octet/ball temporaire. Le même diff change maintenant aussi le fast
+path des lots singleton : isoler ses temps de ceux de `level_run`.
+Pas de build, chrono ou GCP par cet audit.

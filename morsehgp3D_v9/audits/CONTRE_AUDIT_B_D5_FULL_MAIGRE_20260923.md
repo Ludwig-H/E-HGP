@@ -173,3 +173,54 @@ racine pré-lot et le payload FULL entier, avec trois répétitions
 W48 puis W24/W1. Les millions de MEB et visites d'intrus de R13
 sont des **comptes sans temps isolé** : ils ne prouvent ni la vitesse
 du saut D5 ni un coût dominant de la phase statique.
+
+## Relecture d'un travail en cours : rangs de niveaux exacts FULL
+
+Lecture **sans modification** du diff non commité de
+`build/v9-open-worktree/morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp`
+au-dessus
+de `f3409f711` (23 septembre, 21 h 09 UTC). Ce n'est ni un port publié,
+ni un test exécuté, ni D5 complet. La proposition construit une fois
+`level_run[BallId]` sur le catalogue trié exactement et remplace des
+comparaisons répétées de niveaux par des comparaisons de rangs dans
+les lots et la résolution statique.
+
+Mathématiquement, **si** `by_level` est trié selon
+`compare_exact_level` et si une frontière de run est créée exactement
+pour chaque paire adjacente de niveaux inégaux, alors
+`run[a] < run[b] ⇔ level(a) < level(b)` et l'égalité des runs équivaut
+à `same_exact_level`. Les remplacements vus respectent alors
+les mêmes plateaux et les mêmes contrôles de stricte antériorité ; je
+n'ai pas trouvé de contre-exemple dans cette réduction logique.
+
+La nouvelle construction parallélise les frontières. Elle calcule
+`filter = (fegetround()==FE_TONEAREST)` dans le **fil appelant**, puis
+refait des approximations dans les workers. La preuve du filtre double
+de `level.hpp` est annoncée pour l'arrondi au plus proche ; il faut
+vérifier ce mode **dans chaque worker** avant de court-circuiter
+`same_exact_level`, ou employer toujours l'égalité exacte pour ce
+passage. Ce point n'est pas une divergence observée. Les autres modes
+du fil appelant tombent bien sur l'égalité exacte. L'ancien tri
+parallèle emploie déjà le même principe de filtre : le contrôle worker
+et sa porte méritent d'être communs, pas propres au nouveau vecteur.
+
+Porte avant réception : niveaux de même valeur sous représentations
+non réduites, voisins rationnels quasi égaux, grands mots U192/U320,
+plateaux traversant une frontière de chunk, et signe de comparaison
+des runs contre `compare_exact_level` pour **toutes les paires** de la
+fixture. Différentiel ancien/nouveau sur catalogue figé : lots et
+payload FULL complets K1..10, W1/W4/W48, les quatre modes FENV, normal
+et `-O`, puis ASan/UBSan et TSan si la voie parallèle est visée. Tuer
+des mutants de représentation `==`, de repli exact omis et de coupure
+de plateau. Mesurer `validate_ms`, temps total et pic RSS : le gain
+n'est pas encore connu ; `level_run` ajoute 4 octets par boule pendant
+la construction FULL et `starts` 1 octet par boule temporairement.
+
+Pendant cette relecture, le même diff WIP a aussi changé le chemin
+**singleton** de `order_lot` : il garde le buffer des racines pour le
+lot suivant, évite une allocation d'action pour un bloc inerte, mais
+copie les parents lorsqu'une action est publiée, au lieu de voler le
+buffer par `swap`. La topologie paraît préservée à la lecture du cas
+nominal ; aucune porte ni mesure ne l'établit encore. Séparer les deux
+leviers dans l'ablation, faute de quoi un gain ou une régression FULL
+ne peut être attribué au seul `level_run`.
