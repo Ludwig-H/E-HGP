@@ -1,7 +1,8 @@
 # État courant des audits v9
 
-23 septembre 2026. Code produit courant publié : **`aae9da0e`**
-(coordonnées q3/q4 ordonnées possédées par l'index), qui inclut
+23 septembre 2026. Code produit courant publié : **`84c74a5e`**
+(priorité FULL interphases, ledger d'échec, porte propriétaire q3/q4), après
+`aae9da0e` (coordonnées q3/q4 ordonnées possédées par l'index), qui inclut
 `133c8653` (statut public de la banque FULL et priorité d'échec par phase),
 `47f8a5da` (chargement des formes des voies mortes) et
 `684d8fc7` (ordres FULL concurrents et banque déplacée). Le dernier
@@ -488,9 +489,17 @@ appariée.
    coordonnées immuables partagées par l'index (`12·n` octets de plus)
    et `loaded_=false` dès l'entrée de `load()`. Le même reproducteur
    compilé contre ce commit rend `reused=0 fresh=0` ; une injection de
-   `bad_alloc` bloque ensuite `prove()`. La porte q3/q4 générale passe,
-   mais aucune porte produit dédiée ABA/échec de chargement n'existe
-   encore. Refaire une ablation de temps **et** RSS sur le même snapshot
+   `bad_alloc` bloque ensuite `prove()`. La porte q3/q4 générale passe.
+   La porte produit dédiée publiée à `84c74a5e` (SHA `1f673c66…`)
+   passe sur une réutilisation
+   réelle d'adresse (`aba_same_address=1`), 372 alternances et un
+   `bad_alloc` injecté après un chargement réussi. Son **plancher ABA
+   doit encore exiger `same_address`** (ou rendre code 3 si aucun essai ne
+   le réalise) : aujourd'hui, après 128 échecs de réemploi, elle compare
+   le dernier index à adresse différente et peut rendre code 0 sans
+   exercer l'ancien défaut à pointeur nu. Le mutant présent couvre
+   l'invalidation après `bad_alloc`, pas encore ce cas ABA. Refaire une
+   ablation de temps **et** RSS sur le même snapshot
    avant d'attribuer au changement le gain de brouillon 74→46 Gcycles.
    Les trois JSON locaux `build/v9-runs/dead_20260923/cache_s{00,01,02}_k5.json`
    donnent **69,763 / 61,155 / 66,851 %** pour
@@ -587,18 +596,17 @@ appariée.
    à 30 M sites. Le plancher logique des états
    simultanés est **635,2 Mio** sur 08/000000/K10 R4b, avant
    brouillons/catalogue ; mesurer RSS, mur et occupation par phase/K.
-   Une exception après un lot perd les compteurs privés du travail déjà
-   payé (injection reproduite). `133c8653` corrige le second défaut
-   initial : l'overload public de banque convertit désormais un échec de
-   lancement injecté en statut, et sa porte ciblée passe. Le premier
-   défaut de ledger demeure. Ce commit choisit le plus petit K **dans
-   chaque phase** en cas d'échecs concurrents ; une panne A/K3 peut
-   masquer une panne C/K2, contrairement à la priorité globale de la
-   boucle séquentielle annoncée par son commentaire. Soit documenter
-   la priorité par phase, soit résoudre les images C des K inférieurs
-   avant de retourner l'échec A. R5 mesure maintenant mur et RSS sur
-   ce port ; aucune ablation appariée des seuls ordres K parallèles
-   n'existe encore.
+   Sur `684d8fc7`, une exception après un lot perdait les compteurs
+   privés déjà payés (injection reproduite). `133c8653` a d'abord
+   corrigé l'overload public de banque, qui convertit maintenant un échec
+   de lancement en statut. `84c74a5e` (FULL SHA `6d474e92…`) ferme les
+   deux réserves d'échec restantes : il conserve le travail privé après
+   exception et choisit le plus petit K **entre** les phases A et C.
+   Sa porte causale isolée rend 19 contrôles, 12 échecs concurrents et le
+   digest de référence ; deux mutants ciblés (priorité inversée et
+   statistiques perdues) échouent pour la bonne raison. R5 mesure mur
+   et RSS sur le port FULL concurrent **avant** ce dernier correctif ;
+   aucune ablation appariée des seuls ordres K parallèles n'existe encore.
    Sur la meilleure répétition R5, même supprimer entièrement les temps
    q3/q4 **et** tour laisserait **2,50/3,39/3,44 s** à K10 pour les scènes
    01/00/02 de la chaîne actuelle. `q2+fusion+recensus` compte déjà

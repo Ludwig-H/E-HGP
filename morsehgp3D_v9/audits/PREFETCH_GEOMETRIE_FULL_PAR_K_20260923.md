@@ -154,3 +154,26 @@ fusionne au moins deux composantes de ces singletons :
 les débordements et les incohérences ; c'est surtout le nombre de boules
 `B` et la mémoire de leurs programmes, catalogues et forêts qu'il faut
 mesurer au contrat massif.
+
+### Clôture publiée `84c74a5e` des deux écarts d'échec
+
+Le produit (`full_ball_tower.hpp` SHA-256 `6d474e92…`) choisit désormais
+le premier échec dans l'ordre global K : si A échoue à K=f, il calcule
+encore les images C des K<f dont les lots ont réussi, puis relance la
+première `Failure` par K. Une fusion unique des `OrderState::st` s'exécute
+aussi après la jointure lors d'un échec ; le résultat reste transactionnel.
+La porte `order_failure_priority_gate.cpp` (SHA `67e00a7d…`) passe dans un
+build Release isolé : **19 contrôles**, dont 12 pannes concurrentes,
+comparaison statique 1/4/8 fils et digest complet
+`73490cf88c02af30`. Deux mutants compilés, priorité par phase et perte
+des compteurs sur échec, sortent avec les causes attendues. Les défauts
+de ledger et de priorité des révisions précédentes sont donc clos au
+niveau de cette porte ; R5 a été exécuté sur `aae9da0e` **avant** ce
+correctif, sans nouveau chrono G4/RSS.
+
+`merge_once()` marque la fusion avant ses additions contrôlées. Un
+débordement `u64` de ces additions pourrait masquer l'exception initiale
+et laisser un bilan partiel ; aucun cas admis proche du régime LiDAR ne
+le démontre, et `parallel_orders+=K` ne peut déborder dans un appel neuf
+avec K≤10. C'est une limite de robustesse extrême à garder distincte
+des deux défauts causaux corrigés.
