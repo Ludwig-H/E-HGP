@@ -671,7 +671,8 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       fail(ChainStatus::kInvalidInput, "chain_q34_gpu_q3_requires_batch_q3");
     if (options.q34_lanes_judge && !options.q34_batch_q3)
       fail(ChainStatus::kInvalidInput, "chain_q34_lanes_judge_requires_batch_q3");
-    if (options.q34_lanes_capacity != 0 && (!options.q34_batch_q3 || options.q34_lanes_capacity < 2))
+    if (options.q34_lanes_capacity != 0 &&
+        (!options.q34_batch_q3 || options.q34_lanes_capacity < 2 || options.q34_lanes_capacity > (1U << 20)))
       fail(ChainStatus::kInvalidInput, "chain_q34_lanes_capacity_requires_batch_q3_and_two_sites");
     if (points.size() < 2) fail(ChainStatus::kInvalidInput, "chain_requires_two_sites");
     if (points.size() > static_cast<std::size_t>(std::numeric_limits<std::int32_t>::max()))

@@ -118,7 +118,7 @@ struct ChainOptions {
   // meme en-tete) avant les ouvriers ; q34_gpu_q3 sur le GPU pendant que les
   // ouvriers font les voies q4. Exigent q34_batch_certificates (q34_gpu_q3
   // exige q34_batch_q3). q34_lanes_capacity fixe l'ardoise des sites (0 :
-  // defaut ; petite valeur : mise en attente) ; q34_lanes_judge rejuge chaque
+  // defaut ; 2..2^20 ; petite valeur : mise en attente) ; q34_lanes_judge rejuge chaque
   // arete decidee par la voie q3 du moteur (preflights). Meme objet ;
   // desactives par defaut.
   bool q34_batch_q3 = false;

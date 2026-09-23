@@ -407,6 +407,74 @@ aucun défaut bloquant, un constat réfuté, le reste corrigé) :
   plan R14 comprend les six jumeaux et des paires S2 / S2 + S3 répétées et
   entrelacées.
 
+### Voie q3 par lots sans atlas (S4a, sonde v20, 23 septembre 2026, nuit)
+
+Après les certificats (S3), un appel génère la voie q3 de chaque survivant
+certifié dont la voie q3 reste ouverte (`asked`), **sans atlas**. L'objet
+émis est celui du moteur ; les compteurs forment un registre déclaré du mode
+(`lanes_*`), jamais comparé au registre q3 du moteur.
+
+- **En-tête portable** `src/gpu/lanes.hpp` (groupe de 32 voies par arête,
+  `HostGroup` sur l'hôte, `WarpGroup` sur l'appareil) :
+  - le cover est reconstruit par `build_cover` de S3 ;
+  - ses sites suivent un **ordre de balayage fixe** : huit anneaux de
+    |2z−a−b|² dans [0, 4D], puis le rang à l'intérieur d'un anneau (stable).
+    Toute boule q3 possédée contient la boule de rayon |ab|/(2√3) autour du
+    milieu (R ≤ |ab|/√3 pour un triangle aigu de plus grand côté ab), donc
+    un recensement rejeté s'arrête tôt. `MHGP9_LANES_SCAN_RINGS` (mesure
+    seulement) règle le nombre d'anneaux ; 1 donne l'ordre de rang ;
+  - les graines sont tirées du cover par le prédicat du moteur (aigu strict,
+    ab possédée, ex æquo par la paire d'IDs triée). Une graine possédée
+    vérifie |2x−a−b|² ≤ 3D, donc l'**ensemble** des graines est celui du
+    moteur (seul leur ordre change) ;
+  - un recensement exact par graine, réparti par site sur les voies : la
+    puissance relative non réduite G|z−a|²−W·(z−a) de `make_q3` (< 2^116,
+    même signe que `ExactBall::power`), l'arrêt au (K−1)-ième site intérieur
+    retrouvé exactement dans le masque de ballot ;
+  - pour une graine acceptée : la clé `translated` puis `primitive` par pgcd
+    binaire (même diviseur que l'Euclide du moteur), le support trié, la
+    profondeur, la taille de coquille et son **empreinte** (somme et xor de
+    SplitMix64 des IDs, `q34_shell_hash`).
+- **Mise en attente = décision de mémoire seulement** : un cover au-delà de
+  l'ardoise (65 536 sites), des boules au-delà de l'ardoise d'enregistrements
+  (4 096) ou une réservation au-delà de l'arène (4 par arête + 4 096) rendent
+  l'arête au CPU (traîne : `Engine::certified_edge` avec la seule voie q3).
+- **Exécution** : `run_lanes_batch_host` (`src/gpu/lanes_host.hpp`, blocs
+  parallèles validés dans l'ordre des arêtes, réservation déterministe ;
+  toute exception est rendue après jointure de tous les fils) ;
+  `run_lanes_batch` (noyau `lanes_kernel`, warps persistants, 120 registres
+  sans débordement sur sm_120, arène à réservation atomique par arête,
+  jamais un préfixe publié).
+- **Chemin par lots** (`run_wspd_q34_batched`, `Q34LanesStage`) : l'appel
+  tourne avant les ouvriers sur le CPU, **pendant** eux sur l'appareil (fil
+  dédié, joint sur tout chemin). Les ouvriers font les autres voies (q4),
+  puis la traîne et le puits d'enregistrements. `both_edges` compte chaque
+  arête demandée dont q4 est ouverte, décidée ou en traîne (auditeur A).
+- **Frontière de confiance** : `check_lanes_batch` (formes, partition exacte
+  des enregistrements entre les arêtes décidées, enregistrements bien formés,
+  identités du registre) ; `judge_lanes_filter` recalcule chaque arête
+  décidée par la voie q3 du moteur (`engine_q3_records`, recensement
+  GlobalBoxes de l'index global : un autre algorithme) et compare
+  exactement clé, support, arité, profondeur et taille de coquille. Les IDs
+  de coquille ne sont comparés que par leur **empreinte** (contrôle à
+  collisions possibles, auditeur C) : la tour ne les consomme pas, elle
+  recalcule chaque coquille par recensement et compare sa taille.
+- **Chaîne** : leviers `q34_batch_q3` (CPU) et `q34_gpu_q3` (appareil),
+  `q34_lanes_judge`, `q34_lanes_capacity`. Les enregistrements deviennent
+  directement des présentations (sans `Q34SeedCandidate`).
+- **Sonde et protocole v20** : champs `lanes_*` de `q34_batch` et du
+  registre, préflight jugé, préflight à ardoise réduite (certificats 64
+  sites, voies q3 24 sites), plan R15 (paires S2 + S3 GPU / S2 + S3 + S4a
+  GPU répétées et entrelacées à 08/000000).
+- **Portes** : `mhgp9_gpu_lanes_port` (trois familles et une fixture
+  cosphérique gravée, K2/3/5/10), `mhgp9_chain_batch_q3` (condensés et
+  registre des voies égaux avec et sans le levier, à ardoise réduite),
+  contrat sonde/lecteur (15 mutants q3).
+- **Brouillon plat public** : la surcharge `FullCoverageFlatDraft` de
+  `build_full_coverage_certificate` valide chaque CSR avant sa première
+  lecture (auditeur B, débordement reproduit sous ASan) :
+  `coverage_flat_draft_shape`.
+
 ## Voie GPU S1 : `src/gpu/` (espace `mhgp9::gpu`, code neuf)
 
 23 septembre 2026. Première brique GPU de la v9, pour une expérience de

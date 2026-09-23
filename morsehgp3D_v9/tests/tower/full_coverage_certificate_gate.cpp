@@ -250,6 +250,39 @@ void structural_fixtures() {
   reject(3, store, bad, "coverage_birth_population");
   bad = batches; bad[0].actions[0].contributions.clear(); reject(3, store, bad, "coverage_birth_population");
 
+  // The flat form (static path): the same forest from the same batches, and
+  // every malformed public CSR refused before its first read (auditor B).
+  FullCoverageFlatDraft flat;
+  for (const auto& batch : batches) {
+    flat.open_batch(batch.level);
+    for (const auto& action : batch.actions) flat.add_action(action.parents, action.contributions);
+  }
+  {
+    auto from_flat = build_full_coverage_certificate(3, store, flat);
+    need(from_flat.status == FullCertificateStatus::kOk && from_flat.value.nodes().size() == forest.nodes().size() &&
+        from_flat.value.parents().size() == forest.parents().size() &&
+        from_flat.value.contributions().size() == forest.contributions().size(), "flat.same_forest");
+    for (u64 t = 0; t <= 14; ++t) for (bool closed : {false,true}) replay(from_flat.value, batches, t, 2, closed);
+  }
+  const auto reject_flat = [&](FullCoverageFlatDraft draft) {
+    auto result = build_full_coverage_certificate(3, store, draft);
+    need(result.status == FullCertificateStatus::kInvalidInput && empty(result.value) &&
+        std::string_view(result.reason) == "coverage_flat_draft_shape", "flat.shape_refused");
+    ++rejects;
+  };
+  {
+    FullCoverageFlatDraft short_batches;  // B's case: one level, only the initial offset
+    short_batches.level.push_back(level(1));
+    reject_flat(short_batches);
+  }
+  auto forged = flat; forged.batch_begin.pop_back(); reject_flat(forged);
+  forged = flat; std::swap(forged.batch_begin[1], forged.batch_begin[2]); reject_flat(forged);
+  forged = flat; forged.batch_begin.back() -= 1; reject_flat(forged);
+  forged = flat; forged.parent_begin.back() += 1; reject_flat(forged);
+  forged = flat; forged.contribution_begin.front() = 1; reject_flat(forged);
+  forged = flat; forged.contribution.pop_back(); reject_flat(forged);
+  forged = flat; forged.parent_begin.clear(); reject_flat(forged);
+
   // Every observed allocation in bank/build/read is denied persistently once.
   const auto fault_loop = [](auto operation, auto refused) {
     allocation_fault::calls = 0; allocation_fault::count = true;
@@ -311,7 +344,7 @@ int main(int argc, char** argv) {
   if (argc != 2 || std::string_view(argv[1]) != "--selftest") return 2;
   try {
     geometry_fixtures(); structural_fixtures(); domain_and_k1();
-    need(cuts == 30 && gamma_cuts == 40 && rejects >= 30 && allocation_rejects >= 20,
+    need(cuts == 60 && gamma_cuts == 40 && rejects >= 30 && allocation_rejects >= 20,
          "nonvacuity.floor");
     std::printf("full_coverage_certificate checks=%zu rejects=%zu replay_cuts=%zu gamma_cuts=%zu allocation_rejects=%zu authority=structural_only\n",
         checks, rejects, cuts, gamma_cuts, allocation_rejects);

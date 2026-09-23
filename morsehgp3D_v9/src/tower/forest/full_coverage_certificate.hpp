@@ -381,8 +381,29 @@ inline FullCoverageBuildResult build_full_coverage_certificate(unsigned order,
   return full_coverage_detail::build_from(order, std::move(bank), full_coverage_detail::BatchVectorSource{batches});
 }
 
+// The public flat form is checked as a whole before its first read (auditor
+// B, heap overflow under ASan on a short batch_begin): each CSR has one more
+// offset than rows, starts at 0, never decreases and ends at its array's size.
+inline bool full_coverage_flat_draft_shaped(const FullCoverageFlatDraft& draft) {
+  const auto csr = [](const std::vector<u64>& begin, size_t rows, size_t items) {
+    if (begin.size() != rows + 1 || begin.front() != 0 || begin.back() != items) return false;
+    for (size_t i = 0; i + 1 < begin.size(); ++i)
+      if (begin[i] > begin[i + 1]) return false;
+    return true;
+  };
+  if (draft.parent_begin.empty()) return false;
+  const size_t actions = draft.parent_begin.size() - 1;
+  return csr(draft.batch_begin, draft.level.size(), actions) && csr(draft.parent_begin, actions, draft.parent.size()) &&
+         csr(draft.contribution_begin, actions, draft.contribution.size());
+}
+
 inline FullCoverageBuildResult build_full_coverage_certificate(unsigned order,
     std::shared_ptr<const FullCoveragePopulations> bank, const FullCoverageFlatDraft& draft) {
+  if (!full_coverage_flat_draft_shaped(draft)) {
+    FullCoverageBuildResult result;
+    result.reason = "coverage_flat_draft_shape";
+    return result;
+  }
   return full_coverage_detail::build_from(order, std::move(bank), full_coverage_detail::FlatDraftSource{draft});
 }
 

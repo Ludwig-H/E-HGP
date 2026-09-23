@@ -42,6 +42,7 @@ inline LanesOutput run_lanes_batch_host(const LanesInput& input, std::size_t wor
   const LanesIndex index{CertificateIndex{input.index.nodes, input.escapes, static_cast<u32>(input.index.node_count),
                                           input.index.rank_points},
                          input.rank_ids};
+  if (edges == 0) return out;  // no slab: nothing to decide
   constexpr std::size_t grain = 64;
   const std::size_t blocks = (edges + grain - 1) / grain;
   const std::size_t threads = std::max<std::size_t>(1, std::min(workers, blocks));
@@ -52,26 +53,36 @@ inline LanesOutput run_lanes_batch_host(const LanesInput& input, std::size_t wor
   bool failed = false;
   std::exception_ptr failure;
   unsigned long long reserved = 0;
-  const auto worker = [&] {
-    std::vector<u32> ranges(2 * static_cast<std::size_t>(capacity)), ranks(capacity), seeds(capacity),
-        scratch(capacity);
-    std::vector<std::int32_t> points(3 * static_cast<std::size_t>(capacity));
-    std::vector<LaneRecord> slab_records(record_capacity);
-    const LanesSlab slab{ranges.data(), points.data(), ranks.data(), seeds.data(), scratch.data(),
-                         slab_records.data(), capacity, record_capacity};
-    std::vector<CertificateStatus> status;
-    std::vector<EdgeQ3Work> local;
-    std::vector<u32> counts;
-    std::vector<LaneRecord> records;
-    for (;;) {
-      const std::size_t block = next.fetch_add(1);
-      if (block >= blocks) return;
-      const std::size_t first = block * grain, last = std::min(edges, first + grain);
-      status.assign(last - first, CertificateStatus::decided);
-      local.assign(last - first, EdgeQ3Work{});
-      counts.assign(last - first, 0);
-      records.clear();
-      try {
+  // Every exception of a worker (slab allocation, block buffers, the lane,
+  // the ordered commit) is kept, stops the others and is rethrown after all
+  // are joined (auditor A): never a terminating thread, never a waiter left
+  // behind a commit that will not come. A failed call publishes nothing.
+  const auto fail = [&] {
+    const std::lock_guard<std::mutex> lock(mutex);
+    if (!failure) failure = std::current_exception();
+    failed = true;
+    turn.notify_all();
+  };
+  const auto worker = [&]() noexcept {
+    try {
+      std::vector<u32> ranges(2 * static_cast<std::size_t>(capacity)), ranks(capacity), seeds(capacity),
+          scratch(capacity);
+      std::vector<std::int32_t> points(3 * static_cast<std::size_t>(capacity));
+      std::vector<LaneRecord> slab_records(record_capacity);
+      const LanesSlab slab{ranges.data(), points.data(), ranks.data(), seeds.data(), scratch.data(),
+                           slab_records.data(), capacity, record_capacity};
+      std::vector<CertificateStatus> status;
+      std::vector<EdgeQ3Work> local;
+      std::vector<u32> counts;
+      std::vector<LaneRecord> records;
+      for (;;) {
+        const std::size_t block = next.fetch_add(1);
+        if (block >= blocks) return;
+        const std::size_t first = block * grain, last = std::min(edges, first + grain);
+        status.assign(last - first, CertificateStatus::decided);
+        local.assign(last - first, EdgeQ3Work{});
+        counts.assign(last - first, 0);
+        records.clear();
         for (std::size_t i = first; i < last; ++i) {
           u32 count = 0;
           status[i - first] = q3_lane(HostGroup{}, index, input.edge_a[i], input.edge_b[i], input.index.kmax, slab,
@@ -83,54 +94,47 @@ inline LanesOutput run_lanes_batch_host(const LanesInput& input, std::size_t wor
             records.back().edge = static_cast<u32>(i);
           }
         }
-      } catch (...) {
-        const std::lock_guard<std::mutex> lock(mutex);
-        if (!failure) failure = std::current_exception();
-        failed = true;
-        turn.notify_all();
-        return;
-      }
-      std::unique_lock<std::mutex> lock(mutex);
-      turn.wait(lock, [&] { return committed == block || failed; });
-      if (failed) return;
-      std::size_t cursor = 0;
-      for (std::size_t i = first; i < last; ++i) {
-        auto s = status[i - first];
-        const u32 count = counts[i - first];
-        if (s == CertificateStatus::decided) {
-          // The device's reservation: the counter always advances.
-          reserved += count;
-          if (reserved > arena) {
-            s = CertificateStatus::deferred;
-          } else {
-            out.record_begin[i] = static_cast<u32>(out.records.size());
-            out.record_count[i] = count;
-            out.records.insert(out.records.end(), records.begin() + static_cast<std::ptrdiff_t>(cursor),
-                               records.begin() + static_cast<std::ptrdiff_t>(cursor + count));
-            add_q3_edge(out.work, local[i - first]);
+        std::unique_lock<std::mutex> lock(mutex);
+        turn.wait(lock, [&] { return committed == block || failed; });
+        if (failed) return;
+        std::size_t cursor = 0;
+        for (std::size_t i = first; i < last; ++i) {
+          auto s = status[i - first];
+          const u32 count = counts[i - first];
+          if (s == CertificateStatus::decided) {
+            // The device's reservation: the counter always advances.
+            reserved += count;
+            if (reserved > arena) {
+              s = CertificateStatus::deferred;
+            } else {
+              out.record_begin[i] = static_cast<u32>(out.records.size());
+              out.record_count[i] = count;
+              out.records.insert(out.records.end(), records.begin() + static_cast<std::ptrdiff_t>(cursor),
+                                 records.begin() + static_cast<std::ptrdiff_t>(cursor + count));
+              add_q3_edge(out.work, local[i - first]);
+            }
+            cursor += count;
           }
-          cursor += count;
+          out.status[i] = static_cast<u8>(s);
+          if (s == CertificateStatus::deferred) ++out.deferred;
+          else if (s == CertificateStatus::fault) ++out.faults;
         }
-        out.status[i] = static_cast<u8>(s);
-        if (s == CertificateStatus::deferred) ++out.deferred;
-        else if (s == CertificateStatus::fault) ++out.faults;
+        ++committed;
+        turn.notify_all();
       }
-      ++committed;
-      turn.notify_all();
+    } catch (...) {
+      fail();
     }
   };
   std::vector<std::thread> pool;
   pool.reserve(threads);
-  try {
-    for (std::size_t t = 1; t < threads; ++t) pool.emplace_back(worker);
-  } catch (...) {
-    {
-      const std::lock_guard<std::mutex> lock(mutex);
-      failed = true;
-      turn.notify_all();
+  for (std::size_t t = 1; t < threads; ++t) {
+    try {
+      pool.emplace_back(worker);
+    } catch (...) {
+      fail();  // the calling thread still runs (and fails fast), then joins
+      break;
     }
-    for (auto& thread : pool) thread.join();
-    throw;
   }
   worker();
   for (auto& thread : pool) thread.join();

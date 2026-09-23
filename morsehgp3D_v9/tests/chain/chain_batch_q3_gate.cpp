@@ -11,7 +11,12 @@
 //     voies demandees decidees, juge de l'appel (juge_lanes_filter) sur toutes ;
 //   - ardoise reduite (q34_lanes_capacity) : des aretes sont rendues au CPU
 //     (traine) et les condenses ne changent pas ;
-//   - leviers incoherents refuses avec leur raison ; le levier GPU sans GPU
+//   - registre semantique des voies (auditeur A) : q3_edges, q4_edges,
+//     both_edges, covers et voies ouvertes egaux sans le levier, avec lui et
+//     avec l'ardoise reduite (une arete dont q3 part en traine et dont q4 est
+//     ouverte compte une fois dans both_edges) ;
+//   - leviers incoherents refuses avec leur raison (dont une ardoise au-dela
+//     de 2^20 sites) ; le levier GPU sans GPU
 //     est un refus explicite (jamais un repli silencieux).
 //
 //   mhgp9_chain_batch_q3_gate [--n=1000]
@@ -67,7 +72,7 @@ int main(int argc, char** argv) {
     std::fprintf(stderr, "usage: mhgp9_chain_batch_q3_gate [--n=1000]\n");
     return 2;
   }
-  unsigned long long cases = 0, asked = 0, judged = 0, records = 0, tails = 0, refusals = 0;
+  unsigned long long cases = 0, asked = 0, judged = 0, records = 0, tails = 0, refusals = 0, both = 0;
   for (const std::string_view family : {"uniform", "terrain", "clusters", "spheres"}) {
     const auto points = family == "spheres" ? sphere_fixture() : gen::bench::make_front_fixture(n, family, 3).points;
     for (const unsigned kmax : {2U, 3U, 5U, 10U}) {
@@ -96,6 +101,13 @@ int main(int argc, char** argv) {
           return fail("digest " + where);
         if (a.q3_emitted != b.q3_emitted || a.q4_emitted != b.q4_emitted || a.q3_emitted != c.q3_emitted)
           return fail("emitted " + where);
+        const auto lanes_of = [](const ChainResult& r) {
+          const auto& l = r.ledger;
+          return std::array<std::uint64_t, 7>{l.q3_edges, l.q4_edges, l.both_edges, l.cover_builds, l.cover_sites,
+                                              l.dead_q3_open, l.dead_q4_open};
+        };
+        if (lanes_of(a) != lanes_of(b) || lanes_of(a) != lanes_of(c)) return fail("ledger " + where);
+        both += a.ledger.both_edges;
         const auto& lb = b.q34_batch;
         const auto& lc = c.q34_batch;
         if (lb.lanes_backend != "cpu" || lb.lanes_decided != lb.lanes_asked || lb.lanes_deferred != 0 ||
@@ -152,6 +164,13 @@ int main(int argc, char** argv) {
   }
   {
     auto o = ok;
+    o.q34_batch_q3 = true;
+    o.q34_lanes_capacity = (1U << 20) + 1;
+    if (!refused(o, "chain_q34_lanes_capacity_requires_batch_q3_and_two_sites")) return fail("refusal.capacity_high");
+    ++refusals;
+  }
+  {
+    auto o = ok;
     o.q34_lanes_capacity = 64;
     if (!refused(o, "chain_q34_lanes_capacity_requires_batch_q3_and_two_sites")) return fail("refusal.capacity_off");
     ++refusals;
@@ -172,9 +191,10 @@ int main(int argc, char** argv) {
     }
     ++refusals;
   }
-  std::printf("chain_batch_q3_gate n=%zu cases=%llu asked=%llu judged=%llu records=%llu tails=%llu refusals=%llu "
-              "device=%s\n",
-              n, cases, asked, judged, records, tails, refusals, device ? "yes" : "no");
-  if (cases == 0 || asked == 0 || judged != asked || records == 0 || tails == 0 || refusals != 6) return 3;
+  std::printf("chain_batch_q3_gate n=%zu cases=%llu asked=%llu judged=%llu records=%llu tails=%llu both=%llu "
+              "refusals=%llu device=%s\n",
+              n, cases, asked, judged, records, tails, both, refusals, device ? "yes" : "no");
+  if (cases == 0 || asked == 0 || judged != asked || records == 0 || tails == 0 || both == 0 || refusals != 7)
+    return 3;
   return 0;
 }

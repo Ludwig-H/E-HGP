@@ -786,8 +786,14 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     if (edges == 0) return out;  // no kernel: warps stays 0 (the edge arrays may be null)
     const u32 capacity = input.capacity == 0 ? default_lanes_capacity : input.capacity;
     const u32 record_capacity = input.record_capacity == 0 ? default_record_capacity : input.record_capacity;
-    const std::size_t arena_capacity =
-        input.arena_capacity == 0 ? default_arena_capacity(edges) : input.arena_capacity;
+    std::size_t free_bytes = 0, total_bytes = 0;
+    MHGP9_CUDA(cudaMemGetInfo(&free_bytes, &total_bytes));
+    // The default arena is clamped to an eighth of the free memory (review of
+    // 23 September, night): at scale a full arena defers edges to the CPU
+    // tail, never refuses the call. An explicit arena is taken as given.
+    const std::size_t arena_capacity = input.arena_capacity != 0
+        ? input.arena_capacity
+        : std::max<std::size_t>(1, std::min(default_arena_capacity(edges), free_bytes / 8 / sizeof(LaneRecord)));
     out.status.assign(edges, 0);
     out.record_begin.assign(edges, 0);
     out.record_count.assign(edges, 0);
@@ -796,8 +802,6 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
         static_cast<std::size_t>(record_capacity) * sizeof(LaneRecord);
     int sms = 0;
     MHGP9_CUDA(cudaDeviceGetAttribute(&sms, cudaDevAttrMultiProcessorCount, 0));
-    std::size_t free_bytes = 0, total_bytes = 0;
-    MHGP9_CUDA(cudaMemGetInfo(&free_bytes, &total_bytes));
     const int threads = lanes_threads;
     int blocks_per_sm = 0;
     MHGP9_CUDA(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocks_per_sm, lanes_kernel, threads, 0));

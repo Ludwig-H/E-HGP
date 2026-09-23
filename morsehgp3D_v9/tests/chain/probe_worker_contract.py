@@ -78,8 +78,9 @@ def main(argv):
             failures.append(label)
         return ok
 
-    def run(case, path=data_file, judge=False):
-        argv_probe = [str(probe), str(path)] + worker.expected_probe_tail(case, judge=judge)
+    def run(case, path=data_file, judge=False, lanes_capacity=0):
+        argv_probe = [str(probe), str(path)] + worker.expected_probe_tail(case, judge=judge,
+                                                                          lanes_capacity=lanes_capacity)
         started = time.monotonic()
         process = subprocess.Popen(argv_probe, stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
         try:
@@ -304,6 +305,25 @@ def main(argv):
         if 'q3_on' in results:
             q3_case, lanes = results['q3_on']
             b = lanes['q34_batch']
+            # A preflight with every lever on runs the q3 lanes: the engine's
+            # atlas q3 lane (leaf census) never runs, and that is no defect.
+            try:
+                worker.validate_preflight_work(lanes, q3_case['levers'])
+            except (ValueError, KeyError, TypeError) as error:
+                check(False, 'q3 lanes run refused as a preflight: ' + str(error))
+            check(lanes['ledger']['q3_leaf_censuses'] == 0, 'engine leaf census ran under the q3 lanes')
+            # A reduced q3 slab: some lanes go to the CPU tail, whose covers
+            # are rebuilt a second time; same object and certificate work.
+            try:
+                small, code, _ = run(q3_case, lanes_capacity=worker.LANES_DEFERRAL_CAPACITY)
+                check(worker.validate_probe(small, q3_case, code, inputs=inputs,
+                                            lanes_capacity=worker.LANES_DEFERRAL_CAPACITY) == 'complete_relative' and
+                      worker.logical_result(small) == worker.logical_result(on) and
+                      worker.certificate_work(small) == worker.certificate_work(on) and
+                      0 < small['q34_batch']['lanes_deferred'] < small['q34_batch']['lanes_asked'],
+                      'reduced-slab q3 lanes case')
+            except (ValueError, KeyError, TypeError, UnicodeError, subprocess.TimeoutExpired) as error:
+                check(False, 'reduced-slab q3 lanes case refused: ' + type(error).__name__ + ': ' + str(error))
             check(b['lanes_backend'] == 'cpu' and b['lanes_ms'] > 0 and b['lanes_device_ms'] == 0 and
                   b['lanes_deferred'] == 0 and b['lanes_decided'] == b['lanes_asked'] > 0 and b['lanes_records'] > 0 and
                   worker.logical_result(lanes) == worker.logical_result(on) and

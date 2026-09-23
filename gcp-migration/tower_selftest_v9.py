@@ -165,6 +165,9 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                          lanes_transfer_ms=0.0003 if gpu_q3 else 0.0, lanes_wait_ms=0.0005, tail_ms=0.0005,
                          lanes_asked=2, lanes_decided=decided, lanes_deferred=deferred, lanes_records=1,
                          lanes_judged=decided if judge else 0, lanes_warps=4 if gpu_q3 else 0)
+            # The engine's atlas q3 lane never runs under the lever (as the
+            # real chain): no leaf census, and the preflight must accept it.
+            ledger.update(q3_leaf_censuses=0, q3_leaf_point_tests=0)
             ledger.update(lanes_edges=decided, lanes_cover_sites=5 * decided, lanes_cover_node_visits=4,
                           lanes_seed_tests=5 * decided, lanes_acute_sites=3, lanes_owner_rejections=1, lanes_seeds=2,
                           lanes_census_point_tests=8, lanes_census_inside_sites=4, lanes_census_shell_sites=3,
@@ -930,6 +933,11 @@ class Protocol(unittest.TestCase):
                               ('gpu lanes judge announced', lambda v: v['options'].update(lanes_judge=True)),
                               ('gpu lanes asked beyond q3 edges', lambda v: v['q34_batch'].update(
                                   lanes_asked=3, lanes_decided=3)),
+                              ('gpu lanes asked a subset', lambda v: (v['q34_batch'].update(
+                                  lanes_asked=1, lanes_decided=1), v['ledger'].update(lanes_edges=1))),
+                              ('gpu lanes asked none', lambda v: v['q34_batch'].update(
+                                  lanes_asked=0, lanes_decided=0, lanes_device_ms=0.0, lanes_kernel_ms=0.0,
+                                  lanes_transfer_ms=0.0, lanes_warps=0, lanes_records=0)),
                               ('gpu lanes records shifted', lambda v: v['q34_batch'].update(lanes_records=2)),
                               ('gpu lanes seeds shifted', lambda v: v['ledger'].update(lanes_seeds=3)),
                               ('gpu lanes census split', lambda v: v['ledger'].update(lanes_census_point_tests=9)),

@@ -82,8 +82,14 @@ struct LanesSlab {
 // ball of radius |ab|/(2 sqrt 3) around the midpoint (R <= |ab|/sqrt 3 for
 // an acute triangle of longest side ab), so the inner rings come first and a
 // rejected census stops early. Any fixed order gives the same balls; this
-// one fixes the counters of host and device alike.
-inline constexpr u32 scan_rings = 8;
+// one fixes the counters of host and device alike. MHGP9_LANES_SCAN_RINGS
+// (measurement builds only, 1..8) changes the number of rings; 1 is the
+// plain rank order of ScalarCover.
+#ifndef MHGP9_LANES_SCAN_RINGS
+#define MHGP9_LANES_SCAN_RINGS 8
+#endif
+inline constexpr u32 scan_rings = MHGP9_LANES_SCAN_RINGS;
+static_assert(scan_rings >= 1 && scan_rings <= 8, "the ring index is read back from three ballot bits");
 
 // Work of the q3 lanes (declared ledger of this mode, never compared with
 // the engine's own q3 ledger): the rebuilt cover, the seed scan (every cover

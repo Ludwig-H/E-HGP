@@ -144,7 +144,7 @@ int main(int argc, char** argv) {
       else if (arg == "--lanes-judge") options.q34_lanes_judge = true;
       else if (arg.starts_with("--lanes-capacity=")) {
         const auto capacity = parse_u(arg.substr(17));
-        if (capacity < 2 || capacity > 0xffffffffULL) throw std::invalid_argument("lanes capacity outside 2..2^32-1");
+        if (capacity < 2 || capacity > (1ULL << 20)) throw std::invalid_argument("lanes capacity outside 2..2^20");
         options.q34_lanes_capacity = static_cast<std::uint32_t>(capacity);
       }
       else if (arg.starts_with("--certificate-capacity=")) {

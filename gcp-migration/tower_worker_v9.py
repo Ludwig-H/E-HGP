@@ -576,7 +576,9 @@ def validate_batch(value, case, capacity=0, judge=False, lanes_capacity=0):
              batch['certificate_device_ms'] <= batch['certificate_ms'] + 0.05 and
              batch['deferred'] <= batch['survivors'] and (not ran or batch['deferred'] < batch['survivors']) and
              (gpu_certificates or batch['deferred'] == 0) and
-             batch['rebuilt_covers'] <= ledger['cover_builds'] and
+             # v20: a q3 lane deferred by the lanes call rebuilds its cover
+             # a second time in the tail (review of 23 September, night).
+             batch['rebuilt_covers'] <= ledger['cover_builds'] + batch['lanes_deferred'] and
              batch['judged_edges'] == (batch['survivors'] - batch['deferred'] if judge else 0),
              'q34_batch certificate backend/device time/deferred/judge')
         # A correct device defers only an edge whose core or cover exceeds its
@@ -619,7 +621,10 @@ def validate_lanes(value, case, lanes_capacity=0, judge=False):
     ran = gpu and batch['lanes_asked'] > 0
     need(batch['lanes_backend'] == (DEVICE_NAME if gpu else 'cpu') and
          batch['lanes_decided'] + batch['lanes_deferred'] == batch['lanes_asked'] and
-         batch['lanes_asked'] <= ledger['q3_edges'] and batch['lanes_decided'] == ledger['lanes_edges'] and
+         # Every q3 lane left open by a DECIDED certificate is asked; each
+         # certificate-deferred survivor adds at most one q3 edge (review).
+         batch['lanes_asked'] <= ledger['q3_edges'] <= batch['lanes_asked'] + batch['deferred'] and
+         batch['lanes_decided'] == ledger['lanes_edges'] and
          batch['lanes_records'] == ledger['lanes_emitted'] and
          batch['lanes_judged'] == (batch['lanes_decided'] if judge else 0) and
          (batch['lanes_device_ms'] > 0) == ran and (batch['lanes_warps'] > 0) == ran and
@@ -818,7 +823,9 @@ def validate_preflight_work(value, levers):
     ledger, generator = value['ledger'], value['generator']
     need(value['catalogue']['balls'] > 0 and generator['q3_emitted'] > 0 and generator['q4_emitted'] > 0 and
          ledger['cover_builds'] > 0, 'preflight did no geometric work')
-    need((not levers['q3_leaf_census'] or ledger['q3_leaf_censuses'] > 0) and
+    # v20: under q34_batch_q3 the engine's atlas q3 lane never runs (the
+    # lanes call and its tail use no atlas): no leaf census is owed.
+    need((not levers['q3_leaf_census'] or levers['q34_batch_q3'] or ledger['q3_leaf_censuses'] > 0) and
          (not levers['atlas_saturate_deep'] or ledger['atlas_deep_cells'] > 0) and
          (not levers['q34_dead_lanes'] or ledger['dead_q3_proved'] + ledger['dead_q4_proved'] > 0) and
          (not levers['q34_witness_cache'] or levers['q34_batch_filter'] or

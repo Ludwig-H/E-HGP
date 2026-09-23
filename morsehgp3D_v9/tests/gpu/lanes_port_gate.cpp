@@ -25,7 +25,11 @@
 //     empreinte ou une coquille faussee, une voie decidee non demandee, un
 //     registre faux d'une unite sont refuses ;
 //   - garde d'entree (validate_lanes_input) : l'entree reelle est acceptee,
-//     chaque champ forge un a un est refuse.
+//     chaque champ forge un a un est refuse ;
+//   - panne d'allocation de l'executeur hote (ardoise d'enregistrements
+//     demesuree, auditeur A) : exception rendue a l'appelant apres jointure de
+//     tous les fils, jamais une terminaison, a un et a plusieurs fils ; un lot
+//     vide rend un resultat vide.
 //
 //   mhgp9_gpu_lanes_port_gate [--n=2000] [--k=2,3,5,10]
 //   mhgp9_gpu_lanes_port_gate --file=nuage.u32le --k=5 [--workers=8]
@@ -41,6 +45,8 @@
 #include <fstream>
 #include <functional>
 #include <iterator>
+#include <new>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -326,7 +332,7 @@ int main(int argc, char** argv) {
     return file_stats(file, ks[0], workers);
   }
   unsigned long long edges = 0, q3_only = 0, rejections = 0, emitted = 0, wide_shells = 0, deferred = 0,
-                     mutants = 0, guards = 0, judged = 0;
+                     mutants = 0, guards = 0, judged = 0, faults = 0;
   const auto options = q34_options();
   // Engraved cospherical fixture: the integer points of the spheres of
   // radius 5 (scaled by 7) and 7 (scaled by 5), both of radius 35, around two
@@ -561,14 +567,37 @@ int main(int argc, char** argv) {
           if (gpu::validate_lanes_input(f).empty()) return fail(std::string("guard.accepted ") + name);
           ++guards;
         }
+        // An allocation failure in every worker's slab (records of 512 GiB):
+        // the call throws after joining its threads, with several blocks.
+        if (ea.size() > 128) {
+          for (const std::size_t threads : {std::size_t{1}, workers}) {
+            auto huge = in;
+            huge.record_capacity = 0xffffffffU;
+            bool thrown = false;
+            try {
+              static_cast<void>(gpu::run_lanes_batch_host(huge, threads));
+            } catch (const std::bad_alloc&) {
+              thrown = true;
+            } catch (const std::length_error&) {
+              thrown = true;
+            }
+            if (!thrown) return fail("fault.allocation_not_reported " + where_name);
+            ++faults;
+          }
+          auto empty = in;
+          empty.edge_count = 0;
+          const auto none = gpu::run_lanes_batch_host(empty, workers);
+          if (!none.error.empty() || !none.status.empty() || !none.records.empty() || none.work.edges != 0)
+            return fail("empty.not_empty " + where_name);
+        }
       }
     }
   }
   std::printf("lanes_port_gate n=%zu edges=%llu q3_only=%llu depth_rejections=%llu emitted=%llu wide_shells=%llu "
-              "deferred=%llu judged=%llu mutants=%llu guards=%llu\n",
-              n, edges, q3_only, rejections, emitted, wide_shells, deferred, judged, mutants, guards);
+              "deferred=%llu judged=%llu mutants=%llu guards=%llu faults=%llu\n",
+              n, edges, q3_only, rejections, emitted, wide_shells, deferred, judged, mutants, guards, faults);
   if (edges == 0 || q3_only == 0 || rejections == 0 || emitted == 0 || wide_shells == 0 || deferred == 0 ||
-      judged == 0 || guards == 0 || mutants == 0)
+      judged == 0 || guards == 0 || mutants == 0 || faults == 0)
     return 3;
   return 0;
 }

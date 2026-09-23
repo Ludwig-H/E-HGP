@@ -94,14 +94,14 @@ WORDS(Q4ShallowSetWork,25);WORDS(Q4FamilyWork,13);WORDS(Q4ShallowSweepWork,32);
 WORDS(Q4WindowSelectionWork,25);WORDS(Q4WindowSweepWork,57);WORDS(Q4WindowEdgeWork,116);
 WORDS(Q34WitnessSearchWork,25);WORDS(Q34WitnessBoundsWork,12);WORDS(WspdQ34WitnessWork,83);
 WORDS(Q3BallCensusWork,26);WORDS(Q4SeedCellWork,37);WORDS(WspdQ3AtlasWork,9);WORDS(Q34DeadLaneWork,12);
-WORDS(Q34WitnessCacheWork,5);WORDS(WspdQ34Work,476);
+WORDS(Q34WitnessCacheWork,5);WORDS(Q34LanesWork,24);WORDS(WspdQ34Work,500);
 #undef WORDS
-std::array<u64,476> logical_work(mhgp9::gen::WspdQ34Work work) {
+std::array<u64,500> logical_work(mhgp9::gen::WspdQ34Work work) {
   // These two capacity peaks depend on the private buffer's previous jobs;
   // they are paid separately, not erased from the published result.
   work.q3.peak_shell_bytes=0;
   work.peak_edge_buffer_bytes=0;
-  return std::bit_cast<std::array<u64,476>>(work);
+  return std::bit_cast<std::array<u64,500>>(work);
 }
 
 // Enumerate every small-cloud support once. An independent Gaussian rational
@@ -835,7 +835,7 @@ void indexed_fixtures(GlobalGate& gate) {
     "indexed global modes have no exercised rejection");
 }
 
-std::array<u64,476> without_filter_geometry(mhgp9::gen::WspdQ34Work work) {
+std::array<u64,500> without_filter_geometry(mhgp9::gen::WspdQ34Work work) {
   // Keep ALL rejection masses and all work downstream of filtering. Only the
   // four explicitly changed search/bounds ledgers are normalized away.
   work.witness.rectangles={};work.witness.pairs={};
@@ -953,7 +953,7 @@ void bounds_mode_global_fixtures(GlobalGate& gate) {
   normalize(out);gate.require(out==expected && !index && !cloud,"bounds callback owner reset lost payload");
 }
 
-std::array<u64,476> without_local_q4(mhgp9::gen::WspdQ34Work work) {
+std::array<u64,500> without_local_q4(mhgp9::gen::WspdQ34Work work) {
   // Only the selected q4 traversal is replaced. All q3, filtering, covers,
   // lane masses and output counters remain subject to exact comparison.
   work.local={};work.q4_seed_cells={};

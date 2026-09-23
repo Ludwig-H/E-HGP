@@ -334,6 +334,21 @@ par graine, après quatre restructurations CPU munies de portes), puis S4b (q4
 par la fenêtre exacte, derrière une porte de coût). Projection : K5 vers
 1,55–1,65 s à 08/000000.
 
+**S4a livré en local** (voie q3 sans atlas, [provenance](docs/PROVENANCE.md),
+sonde et protocole v20). Les quatre restructurations Ra1–Ra4 du plan sont
+réunies dans un seul en-tête portable (`src/gpu/lanes.hpp`) :
+- graines tirées du cover ;
+- recensement exact par graine, réparti par site ;
+- puissance non réduite, clé primitive seulement à l'acceptation ;
+- exécuteur hôte par lots.
+
+La porte d'objet juge chaque arête contre la voie q3 du moteur. L'ordre de
+balayage par anneaux autour du milieu divise le travail des recensements par
+36 à 08/000000/K5 (5,29 G → 146 M tests de points). En local (W8, CPU), le
+levier reproduit les condensés épinglés à K5 et K10, chaque arête étant
+jugée. Le noyau GPU compile (120 registres, sans débordement). Reste la
+session R15 : la mesure de l'appareil recouvert par les voies q4 du CPU.
+
 Suite : tour maigre (D5 de l'auditeur C :
 index des selles, saut au centre, images de naissance directes), puis
 réfutation des ancres longues avant expansion (66–70 % du CPU q3/q4 selon C).
