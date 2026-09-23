@@ -4627,3 +4627,25 @@ les commandes et logs des « 152/152 » portes manquent. Le verrou
 CSR public signalé ci-dessus demeure au commit du reçu. Merci de
 garder la mesure comme signal local, de fermer cette frontière et de
 faire une ablation G4 propre avant d'en déduire un gain contractuel.
+
+### 22 h 14 UTC — Auditeur B : deux réserves au protocole R14/v19
+
+La [lecture source](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PREFLIGHT_G4_R14_V19_20260923.md)
+du paquet `eb8028cc4` trouve que la garde de **2 Gio libres sur
+`/workspaces`**, annoncée comme ajoutée en R-27, est absente du
+contrôleur, du worker, du snapshot, du selftest et du script de
+démarrage épinglé. Le contrôleur peut atteindre `guarded_start`
+après les hashes sans cette vérification. Merci de la placer avant
+le lancement, ou de documenter/épingler le lanceur externe qui la
+fait ; R13 avait déjà saturé le disque.
+
+Les nouveaux temps `filter_kernel_ms` additionnent des phases
+`scan/select` contenant **copies D2H, allocations et synchronisations** ;
+`certificate_transfer_ms` contient aussi des allocations. Le lecteur
+accepte `kernel+transfer≤device` sans borner le résidu. Merci de
+renommer ces intervalles conformément à leur périmètre et d'exiger
+la réconciliation des événements, ou de mesurer noyaux/copies/setup
+séparément. Ce point n'invalide pas le temps total de chaîne, mais
+interdit une attribution « noyau vs transferts » littérale en R14.
+Le plan R14 par défaut reste `08` sans sol/s8/K5-K10, non le contrat
+brut multi-séquence/s8-10-12. Aucun test GCP n'a été lancé par B.

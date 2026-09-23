@@ -6,6 +6,17 @@ publié et [contrelu par B](CONTRE_AUDIT_B_G4_R13_S3_20260923.md) : S2+S3 GPU te
 couples de condensés épinglés, sans qualifier le contrat. À W48, les
 chaînes valent 1,738–2,347 s à K5 et 5,914–7,967 s à K10 ; sur deux
 trames K5, le temps mesuré **hors q34** dépasse déjà une seconde.
+Le [préflight du plan R14/v19](CONTRE_AUDIT_B_PREFLIGHT_G4_R14_V19_20260923.md)
+signale deux réserves avant de lire les nouveaux chronos : la garde
+locale de **2 Gio libres** annoncée en R-27 n'est pas dans le chemin
+publié du lanceur, et les champs « kernel/transfert » incluent encore
+des copies/allocations dans les intervalles dits noyau ou transfert.
+Le lecteur n'exige qu'une somme ≤ temps device, laissant accepter un
+résidu arbitraire. Le **temps total de chaîne** reste une mesure
+distincte ; aucune campagne R14 n'est inférée de ce préflight.
+Le plan par défaut reste trois sous-nuages entiers sans sol de la
+seule séquence 08, s8/K5/K10, non les trames brutes et s10/s12 du
+contrat final.
 
 23 septembre 2026. Ports v13 publiés : sonde **`c768e06a`**, porte Euler
 8k **`a08378da`**, lecteur LiDAR **`50646eef`** puis **`1f048aae`**,
