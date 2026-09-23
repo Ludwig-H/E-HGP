@@ -36,6 +36,25 @@ domaine du tableau MEB, puis ajouter ces trois mutants à la porte réelle
 et aux selftests. Les mutations déjà testées `saturate_deep` inversé et
 `chain_total=0` sont correctement refusées.
 
+La contrelecture après publication trouve quatre autres sorties
+factices acceptées comme `complete_relative` : supprimer
+`generator.q34_expanded_pairs`, supprimer `ledger.q3_seeds`, remplacer
+`catalogue.by_qmin` ou `catalogue.by_shell` par `[]`. La sonde native v4
+émet pourtant respectivement **7** clés `generator`, **38** clés
+`ledger`, puis des histogrammes de **3** et **17** entiers. Le schéma
+de réception doit fixer ces formes, refuser champs manquants/inconnus
+et tester ces quatre mutations ; une simple vérification « tous les
+champs présents sont entiers » n'atteste pas le travail mesuré. Ces
+mutations n'impliquent pas que la sonde native ait elle-même omis un
+compteur : c'est le **lecteur** qui les tolère.
+Les sept mutants de cette section, appliqués à la valeur factice de
+`tower_selftest_v9.probe_value`, ont été rejugés directement contre le
+worker publié : les sept rendent `complete_relative` avec code de
+sonde 0. Cette fixture factice ne publie elle-même que quatre champs
+`ledger` et cinq cases `by_shell` ; il faudra la synchroniser avec le
+schéma natif au moment de durcir le validateur, sans en faire l'autorité
+du schéma.
+
 ## Préflight et coût G4
 
 La nouvelle porte réelle est inscrite à CTest, mais ni le constructeur de
@@ -72,6 +91,9 @@ de sortie 0, ne recalcule pas tous les temps/RSS résumés à partir des
 fichiers bruts, et ne lie pas la provenance déclarée du reçu aux objets
 Git lors de la réception. Aucune n'explique l'échec R2, mais elles
 interdisent de lire tout `partial` comme preuve autonome de contrat.
+En particulier, il conserve les `probe_i.summary.json` sans les relire :
+les `elapsed_seconds`, `chain_total_ms` et `gnu_time_max_rss_kb` du reçu
+ne sont pas recoupés avec stdout et GNU time à cette étape.
 Un scénario local à six refus explicites sur le code commis reproduit
 concrètement `status=partial`, `worker_status=partial`, **zéro cas complet**
 et code de sortie hôte **0**, malgré un arrêt GCP factice correct. Ce

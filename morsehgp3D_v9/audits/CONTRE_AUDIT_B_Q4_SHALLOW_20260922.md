@@ -161,6 +161,54 @@ algorithmique pour profondeur stricte, concurrences, coïncidences de
 signes opposés et multiplicités, en payant aussi le cover. Aucune borne
 `O(m log m+Km)` n'est acquise pour la route q4.
 
+Relecture bibliographique du 23 septembre :
+[Chan, *Low-Dimensional Linear Programming with Violations*, §1](https://tmc.web.engr.illinois.edu/vio.pdf)
+décrit explicitement la construction des niveaux peu profonds des
+demi-plans **supérieurs et inférieurs**, puis leur intersection, avec
+`O(n log n+nk)` pour le problème 2D en position générale. La
+[preuve annexe de Halperin–Har-Peled–Mehlhorn–Oh–Sharir](https://sarielhp.org/p/20/max_level/max_level.pdf)
+donne `O(n log n+nk)` pour les niveaux ordinaires et une voie de
+perturbation symbolique permettant de rabattre certains résultats sur
+un arrangement dégénéré. Ces sources rendent plus crédible une
+**construction collective à deux familles** que le scan `s·m` par
+graine ; elles ne fournissent pas directement l'énumération exacte des
+centres q4 à profondeur *stricte* avec lignes de signes opposés
+coïncidentes, poids de sites, coquilles, verticales et propriétaire.
+Après regroupement de `C` sites en `m` droites, une cible conditionnelle
+est `O(C log C + mK polylog m + I)` par arête, où `I` est le coût de
+report des contacts/intérieurs nécessaires. Le terme `Ω(C+I)` est
+inévitable même si `m` est petit. Remplacer naïvement un groupe de poids
+par `O(K)` lignes perturbées ferait déjà apparaître un facteur `K²`
+dans la construction des niveaux ; `K≤10` n'annule pas l'obligation de
+mesurer le total sur toutes les arêtes.
+
+Le registre **brut, non accepté** G4 R2 sur 08/000000 sans sol à 1 mm
+rend ce terme décisif : `Σ cover_sites=2 963 451 407` à K5 et
+`7 805 426 490` à K10, pour `n=39 885` (`n²=1 590 813 225`).
+`cover_sites` est une population **logique** de ranges répétées, pas
+autant de lectures actuellement effectuées ; mais un constructeur de
+niveaux qui énumère/regroupe chaque site de **chaque cover complet** paierait
+au moins cette masse, déjà supérieure à `n²` sur ce régime important.
+À K10, même si chacune des `51 344` arêtes à cover sans voie q4
+contenait les `39 885` sites, les `4 455 934` covers q4 totaliseraient
+encore au moins `5 757 571 050` sites logiques, soit plus de `3,6n²`.
+La conclusion K10 vaut donc aussi pour un constructeur limité aux
+arêtes q4 ; ce minorant ne découle pas de l'agrégat K5 seul.
+La route collective doit donc filtrer/partager les formes avant ce
+regroupement, ou réduire le nombre/couverture d'arêtes, puis publier le
+nombre réel de sites lus. Une bonne borne `O(mK)` *après* matérialisation
+du cover ne clôt pas le P0 sous-quadratique global.
+
+Les comparaisons exactes de racines **sur une même droite** se réduisent
+aux produits i128 déjà bornés dans cette note, mais un balayage global
+peut comparer des intersections de deux paires de droites sans ligne
+commune : ses produits croisés exigent potentiellement environ 160 bits.
+Ni un cisaillement pour effacer les verticales ni une perturbation
+symbolique ne conservent automatiquement les bornes u18/i128 publiées.
+Il faut écrire et qualifier ces prédicats, prouver l'arrêt du reporting
+à profondeur `K−2`, puis payer census global et FULL avant de déclarer
+cette route sous-quadratique en régime LiDAR.
+
 Le lemme de cover propriétaire admet, pour les supports positifs q4, une
 petite marge exacte : tout intérieur/contact vérifie
 `|z−(a+b)/2|² < ((2+√3)/4)D < 15D/16`, soit le prédicat entier

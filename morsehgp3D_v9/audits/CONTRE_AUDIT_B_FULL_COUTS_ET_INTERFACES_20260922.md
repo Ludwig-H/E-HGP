@@ -157,6 +157,57 @@ d'octets et de temps incontournable pour le contrat multi-million :
 publier les pics simultanés et les copies, pas seulement la capacité
 finale `BallData`.
 
+## Relecture FULL et queue de chaîne G4 du 23 septembre
+
+La session G4 R1 a un reçu **accepté** ; R2 a des calculs bruts concordants,
+mais ses treize résultats sont `probe_failed` au validateur, donc ses
+temps restent exploratoires. La soustraction des huit sous-temps publiés
+`prepare+gen_index+q2+q34+merge+tower_index+census+tower` au
+`chain_total` donne, pour les mêmes trames sans sol 1 mm :
+
+| 08/ | K | Queue R1 acceptée | Queue R2 brute | Nœuds de la tour |
+| --- | ---: | ---: | ---: | ---: |
+| 000000 | 5 | 201,9 ms | 202,7 ms | 1 541 750 |
+| 000100 | 5 | 172,0 ms | 172,2 ms | 1 306 721 |
+| 000200 | 5 | 221,7 ms | 222,1 ms | 1 683 088 |
+| 000000 | 10 | 1 042,9 ms | 1 045,6 ms | 7 426 215 |
+| 000100 | 10 | 836,8 ms | 839,4 ms | 5 954 045 |
+| 000200 | 10 | 1 048,1 ms | 1 052,4 ms | 7 468 379 |
+
+Le code `src/chain/tower_chain.cpp:449–461`, **après** l'arrêt du chrono
+`tower_ms`, parcourt les nœuds de chaque ordre pour les synthèses, puis
+`tower_digest` relit nœuds, parents, successeurs, contributions et
+populations (`:155–187`). L'écart est donc un travail réel dans le
+`chain_total`, pas une latence à soustraire au constructeur FULL. Le
+digest sert au contrôle d'identité ; il faut mesurer séparément
+`orders_summary_ms` et `digest_ms`, puis figer avant qualification si le
+produit industriel doit calculer ce condensé pendant la construction ou
+seulement dans une passe de vérification hors contrat. Ne pas retirer
+après coup la queue du chrono qui échoue.
+
+Sur le premier cas R2 brut K10/W48, **même l'annulation idéale de q3/q4
+et de FULL laisserait 3,145 s** dans le `chain_total` actuel : q2
+0,794 s, fusion 0,789 s, recensus 0,494 s, queue 1,046 s, plus
+préparation/index. À K5, ce résidu est déjà 0,956 s sur 000000 et
+1,053 s sur 000200. La cible d'une seconde exige donc aussi de réduire
+ou requalifier ces postes ; un gain limité aux deux plus gros blocs ne
+suffit pas pour K10.
+
+Dans FULL, `full_ball_tower.hpp:605–617,895–912` effectue un
+`lower_bound(by_key)` pour chaque clé MEB. `by_key` est une permutation
+d'IDs qui relit des `BallKey` dispersées dans les `BallData` de 224 octets.
+Le brut R2 000000/K10 compte **11 309 383 recherches** parmi
+**5 512 670 boules** ; `log₂ B≈22,4` suggère un ordre de grandeur de
+250 millions de comparaisons et des accès irréguliers au catalogue de
+~1,235 Go. Ce n'est **pas** un compteur matériel ni un temps attribué.
+Un index de hachage immuable `BallKey→BallId`, avec égalité exacte en
+cas de collision et repli correct, mérite une ablation appariée contre
+le tableau trié. Mesurer séparément comparaisons/cache-misses, MEB,
+recherche d'intrus, fermeture et octets de cet index avant de promettre
+un gain. Les préfixes d'intrus réutilisables doivent rester liés à la
+même BallKey et au même index ; la fermeture des lots de niveau égal
+reste chronologique.
+
 ## Interface et expériences recommandées
 
 Le port FULL doit recevoir par BallKey **une seule identité canonique**,
