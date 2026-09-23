@@ -366,8 +366,8 @@
    "source": "lanes/q34_dead_lanes.cpp",
    "replacements": [
     [
-     "prove(3, kmax - 1, work)",
-     "prove(3, kmax - 2, work)"
+     "  threshold3_ = kmax >= 2 ? kmax - 1 : 0;",
+     "  threshold3_ = kmax >= 2 ? kmax - 2 : 0;"
     ]
    ],
    "expected_exit_code": 1,
@@ -382,8 +382,8 @@
    "source": "lanes/q34_dead_lanes.cpp",
    "replacements": [
     [
-     "prove(2, kmax - 2, work)",
-     "prove(2, kmax - 3, work)"
+     "  threshold4_ = kmax >= 3 ? kmax - 2 : 0;",
+     "  threshold4_ = kmax >= 3 ? kmax - 3 : 0;"
     ]
    ],
    "expected_exit_code": 1,
@@ -430,14 +430,62 @@
    "source": "lanes/q34_dead_lanes.cpp",
    "replacements": [
     [
-     "prove(3, kmax - 1, work)",
-     "prove(12, kmax - 1, work)"
+     "constexpr i64 q3_disk_factor = 3;",
+     "constexpr i64 q3_disk_factor = 12;"
     ]
    ],
    "expected_exit_code": 1,
    "expected_stderr": "wspd q34 gate: indexed filter lost support/depth/key/complete shell\n",
    "judgment": "geometry",
    "provenance": "v9 (certificat de voie morte, 23 septembre 2026)"
+  },
+  {
+   "family": "q34_witness_cache",
+   "name": "witness_cache_all_lanes",
+   "gate": "q34_witness_cache",
+   "source": "lanes/q34_witness_search.cpp",
+   "replacements": [
+    [
+     "    const std::uint8_t open = entry.lanes & lanes;",
+     "    const std::uint8_t open = lanes;"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "q34 witness cache gate: cached lanes differ from the pair's own exact search\n",
+   "judgment": "geometry",
+   "provenance": "v9 (cache des noeuds temoins, 23 septembre 2026)"
+  },
+  {
+   "family": "q34_witness_cache",
+   "name": "witness_cache_xi_lower_bound",
+   "gate": "q34_witness_cache",
+   "source": "lanes/q34_witness_search.cpp",
+   "replacements": [
+    [
+     "    const i128 sixteen_xi = 16 * xi.high;",
+     "    const i128 sixteen_xi = 16 * xi.low;"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "q34 witness cache gate: cached lanes not rejected by the other pair's exact search\n",
+   "judgment": "geometry",
+   "provenance": "v9 (cache des noeuds temoins, 23 septembre 2026)"
+  },
+  {
+   "family": "q34_witness_cache",
+   "name": "witness_cache_q4_threshold_k_minus_3",
+   "gate": "q34_witness_cache",
+   "source": "lanes/q34_witness_search.cpp",
+   "replacements": [
+    [
+     "  const std::array<unsigned, 2> threshold{static_cast<unsigned>(kmax) - 1,\n                                          kmax >= 3 ? static_cast<unsigned>(kmax) - 2 : 0};",
+     "  const std::array<unsigned, 2> threshold{static_cast<unsigned>(kmax) - 1,\n                                          kmax >= 3 ? static_cast<unsigned>(kmax) - 3 : 0};"
+    ]
+   ],
+   "expected_exit_code": 1,
+   "expected_stderr": "q34 witness cache gate: cached lanes not rejected by the other pair's exact search\n",
+   "judgment": "geometry",
+   "provenance": "v9 (cache des noeuds temoins, 23 septembre 2026)"
   }
  ]
 }

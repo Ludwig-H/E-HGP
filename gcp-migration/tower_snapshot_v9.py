@@ -94,12 +94,11 @@ def read_blobs(oids):
 
 def default_plan():
     # Voies epinglees : defauts v9 de la chaine (tour statique sur W fils,
-    # atlas saturant, census q3 sur feuille, certificat de voie morte),
-    # passes explicitement a la sonde.
+    # tous les leviers actifs), passes explicitement a la sonde.
     def case(scene, k, workers):
         return dict(scene=scene, file=worker.INPUTS[scene]['file'], n=worker.INPUTS[scene]['n'], k=k, s=8,
-                    workers=workers, static_threads=workers if workers > 1 else 0, saturate_deep=True,
-                    q3_leaf=True, dead_lanes=True, repeat=0)
+                    workers=workers, static_threads=workers if workers > 1 else 0,
+                    levers={name: True for name in worker.LEVER_NAMES}, repeat=0)
     # Ordre voulu : pour chaque scene K5 puis K10 a 48 fils, puis la scene 00
     # a K5 avec 24 puis 1 fil (le cas W1 est le plus susceptible d'etre coupe).
     cases = [case(scene, k, 48) for scene in ('00', '01', '02') for k in (5, 10)]

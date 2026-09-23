@@ -67,8 +67,7 @@ def fnv_u32le(raw):
     return '%016x' % h
 
 
-def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt='', saturate=True, leaf=True,
-                dead=True, schema=None):
+def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt='', levers=None, schema=None):
     effective = min(k, n)
     complete = status == 'complete_relative'
     orders = [dict(K=q, nodes=2 * n * q, births=n * q, merges=n * q - 1, parents=2 * n * q - 1, contributions=n * q)
@@ -78,8 +77,8 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
-                             run_tower=True, atlas_saturate_deep=saturate, q3_leaf_census=leaf,
-                             q34_dead_lanes=dead),
+                             run_tower=True,
+                             levers=dict(levers) if levers is not None else {name: True for name in schema['levers']}),
                 times_ms=dict({key: 0.125 for key in TIMES}, chain_total=1.5), chain_cpu_s=0.25,
                 generator=dict(q2_front_rectangles=3, q2_candidate_pairs=2, q2_accepted_pairs=1,
                                q34_expanded_pairs=4, q34_cover_builds=1, q3_emitted=2, q4_emitted=1),
@@ -99,18 +98,24 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
 def main():
     config = json.loads(pathlib.Path(CONFIG).read_text())
     path, k, workers = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
-    flags = [argument for argument in sys.argv[4:] if '=' not in argument]
-    options = dict(argument[2:].split('=', 1) for argument in sys.argv[4:] if '=' in argument)
-    if (set(options) != {'s', 'static', 'grid'} or options['grid'] != '1mm' or len(flags) != 3 or
-            flags[0] not in ('--saturate-deep', '--no-saturate-deep') or flags[1] not in ('--q3-leaf', '--no-q3-leaf') or
-            flags[2] not in ('--dead-lanes', '--no-dead-lanes')):
+    levers = {}
+    options = {}
+    for argument in sys.argv[4:]:
+        if argument.startswith('--lever='):
+            name, _, value = argument[len('--lever='):].partition('=')
+            levers[name] = value == '1'
+        elif '=' in argument:
+            key, _, value = argument[2:].partition('=')
+            options[key] = value
+        else:
+            options[argument] = None
+    if set(options) != {'s', 'static', 'grid'} or options['grid'] != '1mm' or sorted(levers) != sorted(config['schema']['levers']):
         print('argument refusal: selftest', file=sys.stderr)
         return 2
     raw = pathlib.Path(path).read_bytes()
     if pathlib.Path(path).name == 'preflight.u32le':
         value = probe_value(len(raw) // 12, fnv_u32le(raw), k, int(options['s']), workers, int(options['static']),
-                            'complete_relative', '', flags[0] == '--saturate-deep', flags[1] == '--q3-leaf',
-                            flags[2] == '--dead-lanes', config['schema'])
+                            'complete_relative', '', levers, config['schema'])
         if config.get('fail_preflight'):
             value['tower_work']['selftest_unknown'] = 1
         print(json.dumps(value, separators=(',', ':')))
@@ -128,8 +133,7 @@ def main():
             status = 'unsupported_degeneracy'
     salt = str(workers) if config.get('salt_by_workers') else ''
     value = probe_value(len(raw) // 12, config['fnv'][scene], k, int(options['s']), workers, int(options['static']),
-                        status, salt, flags[0] == '--saturate-deep', flags[1] == '--q3-leaf', flags[2] == '--dead-lanes',
-                        config['schema'])
+                        status, salt, levers, config['schema'])
     for rule in config.get('malform', []):
         if rule['scene'] == scene and rule['k'] == k:
             value['tower_work']['meb_accounting'] = 'selftest_unpinned_accounting'
@@ -218,7 +222,7 @@ def fnv_u32le_host(raw):
 def fake_schema():
     # Formes exigees par le worker ; l'autorite du schema reste la porte CTest
     # qui juge la VRAIE sonde (probe_worker_contract), pas ce faux producteur.
-    return dict(ledger=sorted(worker.LEDGER_KEYS))
+    return dict(ledger=sorted(worker.LEDGER_KEYS), levers=list(worker.LEVER_NAMES))
 
 
 def probe_value(*args, **kwargs):
@@ -553,7 +557,7 @@ class Protocol(unittest.TestCase):
             ('00', 5, 48), ('00', 10, 48), ('01', 5, 48), ('01', 10, 48), ('02', 5, 48), ('02', 10, 48),
             ('00', 5, 24), ('00', 5, 1)] and all(
                 c['s'] == 8 and c['static_threads'] == (c['workers'] if c['workers'] > 1 else 0) and
-                c['saturate_deep'] is True and c['q3_leaf'] is True and c['dead_lanes'] is True and c['repeat'] == 0
+                c['levers'] == {name: True for name in worker.LEVER_NAMES} and c['repeat'] == 0
                 for c in cases),
                'default plan order and parameters')
         # Temoin independant : git archive du meme commit, jamais le worktree.
@@ -588,8 +592,9 @@ class Protocol(unittest.TestCase):
         worker.validate_plan(plan, manifest)
         for key, value in [('k', 7), ('k', True), ('s', 9), ('s', 6), ('workers', 0), ('workers', 1025),
                            ('static_threads', -1), ('repeat', -1), ('n', 39884), ('n', True), ('scene', '03'),
-                           ('saturate_deep', 1), ('saturate_deep', None), ('q3_leaf', 0), ('q3_leaf', 'yes'),
-                           ('dead_lanes', 1), ('dead_lanes', None),
+                           ('levers', {}), ('levers', None),
+                           ('levers', dict({name: True for name in worker.LEVER_NAMES}, extra=True)),
+                           ('levers', dict({name: True for name in worker.LEVER_NAMES}, q34_dead_lanes=1)),
                            ('scene', '../00'), ('file', 'data/scene_01.u32le'), ('extra', 1)]:
             bad = deepcopy(plan)
             bad['cases'][0][key] = value
@@ -678,12 +683,13 @@ class Protocol(unittest.TestCase):
                      ('grid', lambda v: v['input'].update(grid='unspecified')),
                      ('K', lambda v: v['options'].update(K=10)), ('workers', lambda v: v['options'].update(workers=24)),
                      ('static', lambda v: v['options'].update(tower_static_threads=1)),
-                     ('saturate_mode', lambda v: v['options'].update(atlas_saturate_deep=False)),
-                     ('leaf_mode', lambda v: v['options'].update(q3_leaf_census=False)),
-                     ('leaf_mode_type', lambda v: v['options'].update(q3_leaf_census=1)),
-                     ('leaf_mode_absent', lambda v: v['options'].pop('q3_leaf_census')),
-                     ('dead_mode', lambda v: v['options'].update(q34_dead_lanes=False)),
-                     ('dead_mode_absent', lambda v: v['options'].pop('q34_dead_lanes')),
+                     ('saturate_mode', lambda v: v['options']['levers'].update(atlas_saturate_deep=False)),
+                     ('leaf_mode', lambda v: v['options']['levers'].update(q3_leaf_census=False)),
+                     ('leaf_mode_type', lambda v: v['options']['levers'].update(q3_leaf_census=1)),
+                     ('leaf_mode_absent', lambda v: v['options']['levers'].pop('q3_leaf_census')),
+                     ('dead_mode', lambda v: v['options']['levers'].update(q34_dead_lanes=False)),
+                     ('cache_mode', lambda v: v['options']['levers'].update(q34_witness_cache=False)),
+                     ('lever_unknown', lambda v: v['options']['levers'].update(extra=True)),
                      ('meb_accounting', lambda v: v['tower_work'].update(meb_accounting='other')),
                      ('meb_accounting_absent', lambda v: v['tower_work'].pop('meb_accounting')),
                      ('meb_sizes_type', lambda v: v['tower_work'].update(meb_supports_by_size='4,3')),

@@ -218,11 +218,12 @@ void merge(Q34WitnessBoundsWork& a, const Q34WitnessBoundsWork& b) {
 }
 
 void merge(WspdQ34WitnessWork& a, const WspdQ34WitnessWork& b) {
-  static_assert(sizeof(WspdQ34WitnessWork) == 8 * sizeof(u64) +
+  static_assert(sizeof(WspdQ34WitnessWork) == 9 * sizeof(u64) +
       2 * sizeof(Q34WitnessSearchWork) + 2 * sizeof(Q34WitnessBoundsWork));
   MHGP9G_ADD(input_pair_mass); MHGP9G_ADD(rejected_rectangles); MHGP9G_ADD(rectangle_pair_mass);
   MHGP9G_ADD(rectangle_q3_pairs); MHGP9G_ADD(rectangle_q4_pairs);
   MHGP9G_ADD(rejected_pairs); MHGP9G_ADD(pair_q3_pairs); MHGP9G_ADD(pair_q4_pairs);
+  MHGP9G_ADD(cache_rejected_pairs);
   merge(a.rectangles, b.rectangles); merge(a.pairs, b.pairs);
   merge(a.rectangles_bounds, b.rectangles_bounds); merge(a.pairs_bounds, b.pairs_bounds);
 }
@@ -266,9 +267,15 @@ void merge(Q34DeadLaneWork& a, const Q34DeadLaneWork& b) {
   MHGP9G_ADD(q3_proved); MHGP9G_ADD(q3_open); MHGP9G_ADD(q4_proved); MHGP9G_ADD(q4_open);
 }
 
+void merge(Q34WitnessCacheWork& a, const Q34WitnessCacheWork& b) {
+  static_assert(sizeof(Q34WitnessCacheWork) == 5 * sizeof(u64));
+  MHGP9G_ADD(queries); MHGP9G_ADD(node_tests); MHGP9G_ADD(q3_rejections); MHGP9G_ADD(q4_rejections);
+  MHGP9G_ADD(full_rejections);
+}
+
 void merge(WspdQ34Work& a, const WspdQ34Work& b) {
   static_assert(sizeof(WspdQ34Work) == 13 * sizeof(u64) + sizeof(Q34EdgeCoverWork) +
-      sizeof(WspdQ3Work) + sizeof(Q4LocalEdgeWork) + sizeof(Q4WindowEdgeWork) + sizeof(WspdQ34WitnessWork) + sizeof(Q3BallCensusWork) + sizeof(Q4SeedCellWork) + sizeof(WspdQ3AtlasWork) + sizeof(Q34DeadLaneWork));
+      sizeof(WspdQ3Work) + sizeof(Q4LocalEdgeWork) + sizeof(Q4WindowEdgeWork) + sizeof(WspdQ34WitnessWork) + sizeof(Q3BallCensusWork) + sizeof(Q4SeedCellWork) + sizeof(WspdQ3AtlasWork) + sizeof(Q34DeadLaneWork) + sizeof(Q34WitnessCacheWork));
   MHGP9G_ADD(input_rectangles); MHGP9G_ADD(expanded_pairs); MHGP9G_ADD(q3_edges);
   MHGP9G_ADD(q4_edges); MHGP9G_ADD(both_edges); MHGP9G_ADD(cover_builds);
   MHGP9G_ADD(cover_sites); MHGP9G_MAX(max_cover_sites); MHGP9G_MAX(peak_cover_bytes);
@@ -281,6 +288,7 @@ void merge(WspdQ34Work& a, const WspdQ34Work& b) {
   merge(a.q4_seed_cells, b.q4_seed_cells);
   merge(a.q3_atlas, b.q3_atlas);
   merge(a.dead, b.dead);
+  merge(a.witness_cache, b.witness_cache);
 }
 
 #undef MHGP9G_ADD
@@ -337,6 +345,11 @@ void validate(Q2CensusIndexPtr index, unsigned k, unsigned s,
       (options.q4_backend == WspdQ4Backend::Window30 &&
        options.q4_seed_cells.mode != Q4SeedCellMode::Individual))
     throw std::invalid_argument("mhgp9 gen invalid or incompatible q4 seed-cell options");
+  // The traced cache is the exact singleton Affine search only.
+  if (options.pair_witness_cache &&
+      (options.witness_mode == WspdQ34WitnessMode::Disabled ||
+       options.witness_bounds_mode != Q34WitnessBoundsMode::Affine))
+    throw std::invalid_argument("mhgp9 gen pair witness cache requires the Affine pair filter");
   // The leaf census reads the atlas that only the consultation builds, and
   // only Local28 has one: refuse an option that would be silently inert.
   if (options.q3_leaf_census &&
@@ -500,9 +513,27 @@ class Engine {
     counter_add(work.expanded_pairs);
     if (options_.witness_mode != WspdQ34WitnessMode::Disabled) {
       const auto points = index_->cloud().points();
-      const auto filtered = filter_q34_witnesses(*index_, singleton_box(points[a]),
-          singleton_box(points[b]), static_cast<std::uint8_t>(k_), mask, work.witness.pairs,
-          options_.witness_bounds_mode, work.witness.pairs_bounds);
+      std::uint8_t filtered = 0;
+      if (options_.pair_witness_cache) {
+        // Lanes proved by the nodes cached for this same endpoint a skip the
+        // search; the remaining lanes get the full (traced) search.
+        const std::uint8_t cached = cache_owner_ == a
+            ? q34_cached_witness_rejections(*index_, points[a], points[b], static_cast<std::uint8_t>(k_), mask,
+                                            cache_nodes_, work.witness_cache)
+            : std::uint8_t{0};
+        const auto open = static_cast<std::uint8_t>(mask & ~cached);
+        if (open == 0) counter_add(work.witness.cache_rejected_pairs);
+        else {
+          filtered = filter_q34_witnesses(*index_, points[a], points[b], static_cast<std::uint8_t>(k_), open,
+                                          work.witness.pairs, work.witness.pairs_bounds, trace_nodes_);
+          cache_owner_ = a;
+          cache_nodes_.swap(trace_nodes_);
+        }
+      } else {
+        filtered = filter_q34_witnesses(*index_, singleton_box(points[a]),
+            singleton_box(points[b]), static_cast<std::uint8_t>(k_), mask, work.witness.pairs,
+            options_.witness_bounds_mode, work.witness.pairs_bounds);
+      }
       if ((mask & 2U) != 0 && (filtered & 2U) == 0) counter_add(work.witness.pair_q3_pairs);
       if ((mask & 4U) != 0 && (filtered & 4U) == 0) counter_add(work.witness.pair_q4_pairs);
       mask = filtered;
@@ -518,8 +549,7 @@ class Engine {
       // A proved lane is empty on the exact path too (certificate in
       // lanes/q34_dead_lanes.hpp); an unproved lane runs unchanged.
       dead_.load(*cover, work.dead);
-      if ((mask & 2U) != 0 && dead_.prove_q3(k_, work.dead)) mask = static_cast<std::uint8_t>(mask & ~2U);
-      if ((mask & 4U) != 0 && dead_.prove_q4(k_, work.dead)) mask = static_cast<std::uint8_t>(mask & ~4U);
+      mask = static_cast<std::uint8_t>(mask & ~dead_.prove(k_, mask, work.dead));
       observe(cover, static_cast<u64>(dead_.retained_bytes()));
       if (mask == 0) return;
     }
@@ -719,6 +749,9 @@ class Engine {
   RectangleSplitter splitter_;
   std::vector<std::size_t> shell_;
   Q34DeadLaneProver dead_;
+  // Witness-node cache of the pair filter, owned by the last searched a.
+  std::size_t cache_owner_ = std::numeric_limits<std::size_t>::max();
+  std::vector<Q34WitnessNode> cache_nodes_, trace_nodes_;
 };
 
 }  // namespace

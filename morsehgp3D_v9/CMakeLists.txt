@@ -168,7 +168,7 @@ if(Python3_Interpreter_FOUND AND EXISTS ${MHGP9_TOWER_WORKER})
     add_test(NAME mhgp9_probe_worker_contract_${mode}
              COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=${Python3_EXECUTABLE}
                      "-DARGS=${py_flags} ${CMAKE_CURRENT_SOURCE_DIR}/tests/chain/probe_worker_contract.py $<TARGET_FILE:mhgp9_tower_probe> ${MHGP9_TOWER_WORKER} ${CMAKE_CURRENT_BINARY_DIR}/probe_worker_contract_${mode}"
-                     "-DEXPECT_PREFIX=probe_worker_contract mutants_killed=19/19"
+                     "-DEXPECT_PREFIX=probe_worker_contract mutants_killed=20/20"
                      -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
     set_tests_properties(mhgp9_probe_worker_contract_${mode} PROPERTIES LABELS "gate;probe;protocol" TIMEOUT 300)
   endforeach()
@@ -204,7 +204,7 @@ function(mhgp9_gen_gate gate labels)
 endfunction()
 foreach(gate IN ITEMS wspd_q34 q4_local q4_seed_cells q4_saturating_atlas q3_ball_census
     exact_ball q34_witness_search q34_pair_bounds q34_cover q2_census wspd_front
-    q2_prepared_bounds q2_joint_bounds q4_family q34_seed wspd_front_jobs)
+    q2_prepared_bounds q2_joint_bounds q4_family q34_seed wspd_front_jobs q34_witness_cache)
   mhgp9_gen_gate(${gate} "gate;gen;oracle")
 endforeach()
 foreach(gate IN ITEMS wspd_q2_census u18_numeric_domain q2_node_pool q2_terminal_pool

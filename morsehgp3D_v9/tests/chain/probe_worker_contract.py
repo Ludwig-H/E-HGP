@@ -9,9 +9,10 @@ sur un petit nuage deterministe, puis exige :
 
 - que validate_probe du worker accepte la sortie reelle (complete_relative)
   et que validate_external_wall tienne contre le mur mesure ici ;
-- que les trois voies geometriques epinglees (saturation, census q3 sur
-  feuille, certificat de voie morte) soient publiees telles que demandees et
-  donnent le meme objet (catalogue, ordres, condense) que les voies eteintes ;
+- que tous les leviers epingles (saturation, census q3 sur feuille,
+  certificat de voie morte, cache des temoins) soient publies tels que
+  demandes et donnent le meme objet (catalogue, ordres, condense) que les
+  leviers eteints ;
 - que des mutants de schema soient refuses : champ texte ou tableau
   inattendu, histogramme MEB malforme, comptabilite MEB non epinglee, mode
   retourne.
@@ -92,10 +93,10 @@ def main(argv):
         return value, process.returncode, elapsed
 
     base = dict(scene='gate', file=data_file.name, n=inputs['gate']['n'], k=5, s=8, workers=2, static_threads=2,
-                saturate_deep=True, q3_leaf=True, dead_lanes=True, repeat=0)
+                levers={name: True for name in worker.LEVER_NAMES}, repeat=0)
     results = {}
     for label, case in (('pinned_on', base),
-                        ('pinned_off', dict(base, saturate_deep=False, q3_leaf=False, dead_lanes=False, workers=1,
+                        ('pinned_off', dict(base, levers={name: False for name in worker.LEVER_NAMES}, workers=1,
                                             static_threads=0))):
         try:
             value, code, elapsed = run(case)
@@ -106,9 +107,7 @@ def main(argv):
                   str(error))
             continue
         check(outcome == 'complete_relative', label + ': outcome ' + outcome)
-        check(value['options']['atlas_saturate_deep'] is case['saturate_deep'] and
-              value['options']['q3_leaf_census'] is case['q3_leaf'] and
-              value['options']['q34_dead_lanes'] is case['dead_lanes'], label + ': published modes')
+        check(value['options']['levers'] == case['levers'], label + ': published levers')
         results[label] = (case, value)
     if len(results) == 2:
         on, off = results['pinned_on'][1], results['pinned_off'][1]
@@ -120,8 +119,9 @@ def main(argv):
               'pinned modes not exercised: ' + json.dumps({key: ledger[key] for key in (
                   'q3_leaf_censuses', 'atlas_deep_cells', 'dead_q3_proved', 'dead_q4_proved', 'dead_q3_open',
                   'dead_q4_open')}, sort_keys=True))
-        check(off['ledger']['dead_loads'] == 0 and off['ledger']['q3_leaf_censuses'] == 0,
-              'modes off still ran the leaf census or the dead-lane certificate')
+        check(off['ledger']['dead_loads'] == 0 and off['ledger']['q3_leaf_censuses'] == 0 and
+              off['ledger']['witness_cache_queries'] == 0 and ledger['witness_cache_rejected_pairs'] > 0,
+              'levers off still ran, or the witness cache never rejected a pair')
         check(len(on['orders']) == 5 and on['catalogue']['balls'] >= 1000,
               'coverage floor: 5 orders and >= 1000 catalogue balls, got ' +
               str(len(on['orders'])) + ' / ' + str(on['catalogue']['balls']))
@@ -133,10 +133,11 @@ def main(argv):
             ('meb histogram text', lambda v: v['tower_work'].update(meb_supports_by_size='0,1')),
             ('meb accounting unpinned', lambda v: v['tower_work'].update(meb_accounting='other_v3')),
             ('meb accounting absent', lambda v: v['tower_work'].pop('meb_accounting')),
-            ('saturation mode flipped', lambda v: v['options'].update(atlas_saturate_deep=False)),
-            ('leaf mode flipped', lambda v: v['options'].update(q3_leaf_census=False)),
-            ('leaf mode absent', lambda v: v['options'].pop('q3_leaf_census')),
-            ('dead-lane mode flipped', lambda v: v['options'].update(q34_dead_lanes=False)),
+            ('saturation lever flipped', lambda v: v['options']['levers'].update(atlas_saturate_deep=False)),
+            ('leaf lever flipped', lambda v: v['options']['levers'].update(q3_leaf_census=False)),
+            ('leaf lever absent', lambda v: v['options']['levers'].pop('q3_leaf_census')),
+            ('dead-lane lever flipped', lambda v: v['options']['levers'].update(q34_dead_lanes=False)),
+            ('witness-cache lever flipped', lambda v: v['options']['levers'].update(q34_witness_cache=False)),
             ('stage times beyond total', lambda v: v['times_ms'].update(q34=v['times_ms']['chain_total'] + 60.0)),
             ('meb histogram short', lambda v: v['tower_work'].update(meb_supports_by_size=[0])),
             ('tower_work unknown integer', lambda v: v['tower_work'].update(extra=1)),

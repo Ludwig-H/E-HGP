@@ -14,9 +14,9 @@ Ce qui change pour la v9 :
   epingles (sha256, taille, empreinte FNV-1a de la sonde) ;
 - chaque cas du plan a un plafond propre ; un cas qui l'atteint est tue et
   consigne, les suivants sont sautes quand le budget utile est epuise ;
-- chaque cas epingle les trois voies geometriques (saturation de l'atlas,
-  census q3 sur feuille, certificat de voie morte), passees explicitement a
-  la sonde et relues ;
+- chaque cas epingle tous les leviers de la chaine (`levers`, noms exacts :
+  meme objet, travail different), passes a la sonde par `--lever=NOM=0|1` et
+  relus dans sa sortie ;
 - une sortie de sonde refusee par le validateur est un defaut deterministe
   de protocole : les cas suivants sont sautes au lieu de repeter le calcul
   (session G4 R2 du 23 septembre 2026, treize cas refuses pour un champ).
@@ -46,9 +46,9 @@ HELPER = 'gcp-migration/full_probe_worker_v7.py'
 HELPER_SHA = 'da967163bdb7247bc6aad4df0c294cda1071076a0127cd5bd9f59bc0e4788439'
 PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
-PLAN_SCHEMA = 'mhgp9_tower_plan_v3'
+PLAN_SCHEMA = 'mhgp9_tower_plan_v4'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v5'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v6'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -95,13 +95,12 @@ PROBE_STATUSES = ('complete_relative', 'unsupported_degeneracy', 'invalid_input'
                   'resource_exhausted', 'invariant_violated')
 OUTCOMES = ('complete_relative', 'explicit_refusal', 'killed_case_cap', 'killed_budget',
             'skipped_budget', 'probe_failed', 'skipped_protocol_defect')
-CASE_KEYS = frozenset({'scene', 'file', 'n', 'k', 's', 'workers', 'static_threads', 'saturate_deep', 'q3_leaf',
-                       'dead_lanes', 'repeat'})
+CASE_KEYS = frozenset({'scene', 'file', 'n', 'k', 's', 'workers', 'static_threads', 'levers', 'repeat'})
+LEVER_NAMES = ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_witness_cache')
 TOP_KEYS = frozenset({'schema', 'status', 'reason', 'input', 'options', 'times_ms', 'chain_cpu_s', 'generator',
                       'ledger', 'catalogue', 'tower_work', 'orders', 'tower_digest', 'peak_rss_kb'})
 INPUT_KEYS = frozenset({'format', 'grid', 'sites', 'hash'})
-OPTION_KEYS = frozenset({'K', 'K_effective', 's', 'workers', 'tower_static_threads', 'run_tower', 'atlas_saturate_deep',
-                         'q3_leaf_census', 'q34_dead_lanes'})
+OPTION_KEYS = frozenset({'K', 'K_effective', 's', 'workers', 'tower_static_threads', 'run_tower', 'levers'})
 TIME_KEYS = frozenset({'read', 'prepare', 'gen_index', 'q2', 'q34', 'merge', 'tower_index', 'census', 'tower',
                        'chain_total'})
 ORDER_KEYS = frozenset({'K', 'nodes', 'births', 'merges', 'parents', 'contributions'})
@@ -122,7 +121,8 @@ LEDGER_KEYS = frozenset((
     'q4_seeds q4_live_leaves q4_whole_atlas_skips q4_sweep_events q3_leaf_censuses q3_leaf_point_tests '
     'q3_leaf_rejections q3_lower_bound_fallbacks dead_loads dead_form_sites dead_cells dead_outside_cells '
     'dead_deep_cells dead_failed_cells dead_uniform_tests dead_point_tests dead_q3_proved dead_q3_open '
-    'dead_q4_proved dead_q4_open').split())
+    'dead_q4_proved dead_q4_open witness_cache_queries witness_cache_node_tests '
+    'witness_cache_rejected_pairs').split())
 CATALOGUE_LISTS = dict(by_qmin=3, by_shell=17)
 CATALOGUE_KEYS = frozenset(('q2_presentations q3_presentations q4_presentations unique_keys balls '
                             'extra_shell_balls shell_over_12 max_shell max_interior census_nodes census_leaf_tests '
@@ -207,14 +207,20 @@ def validate_sources(read_bytes):
     need(b'mhgp9_product_executable(' + PROBE_TARGET.encode() + b' bench/tower_probe.cpp)' in cmake,
          'CMake target mhgp9_tower_probe absent')
     need(all(token in probe for token in (PROBE_SCHEMA.encode(), b'"--s="', b'"--static="', b'"--grid="',
-                                          b'"--saturate-deep"', b'"--no-saturate-deep"', b'"--q3-leaf"',
-                                          b'"--no-q3-leaf"', b'q3_leaf_census', b'"--dead-lanes"',
-                                          b'"--no-dead-lanes"', b'q34_dead_lanes')),
+                                          b'"--lever="', *(b'"' + name.encode() + b'"' for name in LEVER_NAMES))),
          'tower probe schema/CLI differs from the v9 protocol')
 
 
 def _integer(value, low, high):
     return type(value) is int and low <= value <= high
+
+
+def _levers(value):
+    return type(value) is dict and set(value) == set(LEVER_NAMES) and all(type(item) is bool for item in value.values())
+
+
+def lever_arguments(case):
+    return ['--lever=' + name + '=' + ('1' if case['levers'][name] else '0') for name in LEVER_NAMES]
 
 
 def validate_plan(plan, manifest):
@@ -228,11 +234,10 @@ def validate_plan(plan, manifest):
         need(case['n'] == INPUTS[case['scene']]['n'] and type(case['n']) is int, 'whole-frame size; prefixes forbidden')
         need(type(case['k']) is int and case['k'] in (5, 10) and type(case['s']) is int and case['s'] in (8, 10, 12) and
              _integer(case['workers'], 1, 48) and _integer(case['static_threads'], 0, 48) and
-             type(case['saturate_deep']) is bool and type(case['q3_leaf']) is bool and
-             type(case['dead_lanes']) is bool and
+             _levers(case['levers']) and
              _integer(case['repeat'], 0, (1 << 32) - 1), 'tower case domain')
-        identity = tuple(case[key] for key in ('scene', 'k', 's', 'workers', 'static_threads', 'saturate_deep',
-                                               'q3_leaf', 'dead_lanes', 'repeat'))
+        identity = tuple(case[key] for key in ('scene', 'k', 's', 'workers', 'static_threads', 'repeat')) + tuple(
+            case['levers'][name] for name in LEVER_NAMES)
         need(identity not in seen, 'duplicate case needs an explicit distinct repetition')
         seen.add(identity)
     return plan['cases']
@@ -317,17 +322,12 @@ def boot_epoch():
 def probe_command(build, root, case):
     return [str(build / PROBE_TARGET), str(root / case['file']), str(case['k']), str(case['workers']),
             '--s=' + str(case['s']), '--static=' + str(case['static_threads']), '--grid=1mm',
-            '--saturate-deep' if case['saturate_deep'] else '--no-saturate-deep',
-            '--q3-leaf' if case['q3_leaf'] else '--no-q3-leaf',
-            '--dead-lanes' if case['dead_lanes'] else '--no-dead-lanes']
+            *lever_arguments(case)]
 
 
 def expected_probe_tail(case):
     return [str(case['k']), str(case['workers']), '--s=' + str(case['s']),
-            '--static=' + str(case['static_threads']), '--grid=1mm',
-            '--saturate-deep' if case['saturate_deep'] else '--no-saturate-deep',
-            '--q3-leaf' if case['q3_leaf'] else '--no-q3-leaf',
-            '--dead-lanes' if case['dead_lanes'] else '--no-dead-lanes']
+            '--static=' + str(case['static_threads']), '--grid=1mm', *lever_arguments(case)]
 
 
 def _count(value):
@@ -411,8 +411,7 @@ def validate_probe(value, case, exit_code, inputs=None):
     need(type(options) is dict and set(options) == OPTION_KEYS and options['K'] == case['k'] and
          options['s'] == case['s'] and options['workers'] == case['workers'] and
          options['tower_static_threads'] == case['static_threads'] and options['run_tower'] is True and
-         options['atlas_saturate_deep'] is case['saturate_deep'] and options['q3_leaf_census'] is case['q3_leaf'] and
-         options['q34_dead_lanes'] is case['dead_lanes'] and
+         _levers(options['levers']) and options['levers'] == case['levers'] and
          type(options['K_effective']) is int, 'probe options')
     times = value['times_ms']
     need(type(times) is dict and set(times) == TIME_KEYS and all(_number(item) for item in times.values()) and

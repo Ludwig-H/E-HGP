@@ -263,6 +263,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       o.q3_atlas_consultation = true;
       o.q3_leaf_census = options.q3_leaf_census;
       o.dead_lanes = options.q34_dead_lanes;
+      o.pair_witness_cache = options.q34_witness_cache;
       const auto r34 = gen::run_wspd_q34_parallel(
           index, kmax, options.separation_s, o, W,
           [&slots](std::size_t slot, const gen::Q34SeedCandidate& c) {
@@ -306,6 +307,8 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       l.dead_uniform_tests = w.dead.uniform_tests; l.dead_point_tests = w.dead.point_tests;
       l.dead_q3_proved = w.dead.q3_proved; l.dead_q3_open = w.dead.q3_open;
       l.dead_q4_proved = w.dead.q4_proved; l.dead_q4_open = w.dead.q4_open;
+      l.witness_cache_queries = w.witness_cache.queries; l.witness_cache_node_tests = w.witness_cache.node_tests;
+      l.witness_cache_rejected_pairs = w.witness.cache_rejected_pairs;
     }
     result.times.q34_ms = ms_since(t);
 

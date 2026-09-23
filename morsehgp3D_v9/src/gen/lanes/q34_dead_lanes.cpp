@@ -9,6 +9,9 @@ namespace {
 constexpr unsigned scale_bits = 20;  // Q4LocalCell::scale_bits
 constexpr i64 scale = i64{1} << scale_bits;
 using Vec = std::array<i64, 3>;
+// Disk factors f with f*|u1*A+u2*B|^2 <= |v|^2: q3 (L^2/12) and q4 (L^2/8).
+constexpr i64 q3_disk_factor = 3;
+constexpr i64 q4_disk_factor = 2;
 i64 dot(const Vec& a, const Vec& b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]; }
 }  // namespace
 
@@ -68,28 +71,24 @@ std::size_t Q34DeadLaneProver::retained_bytes() const {
   return bytes;
 }
 
-bool Q34DeadLaneProver::prove_q3(unsigned kmax, Q34DeadLaneWork& work) {
-  if (kmax < 2) return false;
-  const bool dead = prove(3, kmax - 1, work);
-  counter_add(dead ? work.q3_proved : work.q3_open);
-  return dead;
-}
-
-bool Q34DeadLaneProver::prove_q4(unsigned kmax, Q34DeadLaneWork& work) {
-  if (kmax < 3) return false;
-  const bool dead = prove(2, kmax - 2, work);
-  counter_add(dead ? work.q4_proved : work.q4_open);
-  return dead;
-}
-
-bool Q34DeadLaneProver::prove(i64 disk_factor, std::size_t threshold, Q34DeadLaneWork& work) {
+std::uint8_t Q34DeadLaneProver::prove(unsigned kmax, std::uint8_t lanes, Q34DeadLaneWork& work) {
   if (!loaded_) throw std::logic_error("mhgp9 gen dead-lane prover used before load");
-  disk_factor_ = disk_factor;
-  threshold_ = threshold;
-  return cell({-2 * scale, 2 * scale, -2 * scale, 2 * scale}, 0, all_, 0, work);
+  if ((lanes & ~6U) != 0) throw std::invalid_argument("mhgp9 gen dead-lane prover lanes must be a subset of 2|4");
+  // T3 = K-1 (q3 seeds rejected at depth K-1), T4 = K-2 (q4 kept below K-2).
+  // A zero threshold proves nothing: such a lane is left to the exact path.
+  std::uint8_t tried = lanes;
+  if (kmax < 2) tried = static_cast<std::uint8_t>(tried & ~2U);
+  if (kmax < 3) tried = static_cast<std::uint8_t>(tried & ~4U);
+  threshold3_ = kmax >= 2 ? kmax - 1 : 0;
+  threshold4_ = kmax >= 3 ? kmax - 2 : 0;
+  std::uint8_t proved = 0;
+  if (tried != 0) proved = cell({-2 * scale, 2 * scale, -2 * scale, 2 * scale}, 0, all_, 0, tried, work);
+  if ((lanes & 2U) != 0) counter_add((proved & 2U) != 0 ? work.q3_proved : work.q3_open);
+  if ((lanes & 4U) != 0) counter_add((proved & 4U) != 0 ? work.q4_proved : work.q4_open);
+  return proved;
 }
 
-bool Q34DeadLaneProver::outside(const Cell& c) const {
+bool Q34DeadLaneProver::outside(const Cell& c, i64 disk_factor) const {
   // Exact lower bound of |alpha*A+beta*B|^2 over the closed cell, axis by
   // axis (nearest value of each affine coordinate to zero). |basis| <= 2^18
   // and |corner| <= 2^21: each coordinate < 2^40, the norm < 3*2^80, times
@@ -102,25 +101,32 @@ bool Q34DeadLaneProver::outside(const Cell& c) const {
     const i128 nearest = low > 0 ? low : (high < 0 ? high : 0);
     norm += nearest * nearest;
   }
-  return static_cast<i128>(disk_factor_) * norm > static_cast<i128>(diameter_squared_) * scale * scale;
+  return static_cast<i128>(disk_factor) * norm > static_cast<i128>(diameter_squared_) * scale * scale;
 }
 
-bool Q34DeadLaneProver::center_inside(i64 alpha, i64 beta) const {
+bool Q34DeadLaneProver::center_inside(i64 alpha, i64 beta, i64 disk_factor) const {
   i128 norm = 0;
   for (std::size_t i = 0; i < 3; ++i) {
     const i128 t = static_cast<i128>(a_basis_[i]) * alpha + static_cast<i128>(b_basis_[i]) * beta;
     norm += t * t;
   }
-  return static_cast<i128>(disk_factor_) * norm <= static_cast<i128>(diameter_squared_) * scale * scale;
+  return static_cast<i128>(disk_factor) * norm <= static_cast<i128>(diameter_squared_) * scale * scale;
 }
 
-bool Q34DeadLaneProver::cell(const Cell& c, unsigned depth, std::span<const std::uint32_t> frontier,
-                             std::size_t inherited, Q34DeadLaneWork& work) {
+std::uint8_t Q34DeadLaneProver::cell(const Cell& c, unsigned depth, std::span<const std::uint32_t> frontier,
+                                     std::size_t inherited, std::uint8_t lanes, Q34DeadLaneWork& work) {
+  // Returns the lanes of `lanes` that no center of this closed cell refutes:
+  // each is certified on the cell (disjoint from its disk, or T uniform
+  // interiors) or by its sub-cells. q3's disk lies inside q4's and T3>T4.
   counter_add(work.cells);
-  if (outside(c)) { counter_add(work.outside_cells); return true; }
+  std::uint8_t need = 0;
+  if ((lanes & 2U) != 0 && !outside(c, q3_disk_factor)) need = static_cast<std::uint8_t>(need | 2U);
+  if ((lanes & 4U) != 0 && !outside(c, q4_disk_factor)) need = static_cast<std::uint8_t>(need | 4U);
+  if (need == 0) { counter_add(work.outside_cells); return lanes; }
   std::size_t inside = inherited;
   if (depth >= min_depth_) {
-    if (inside >= threshold_) { counter_add(work.deep_cells); return true; }
+    const std::size_t target = (need & 2U) != 0 ? threshold3_ : threshold4_;
+    if (inside >= target) { counter_add(work.deep_cells); return lanes; }
     auto& next = levels_[depth];
     next.clear();
     u64 tests = 0;
@@ -129,10 +135,10 @@ bool Q34DeadLaneProver::cell(const Cell& c, unsigned depth, std::span<const std:
       const auto& f = forms_[id];
       const i64 maximum = f.constant + f.x * (f.x < 0 ? c.left : c.right) + f.y * (f.y < 0 ? c.bottom : c.top);
       if (maximum < 0) {
-        if (++inside >= threshold_) {
+        if (++inside >= target) {
           counter_add(work.uniform_tests, tests);
           counter_add(work.deep_cells);
-          return true;
+          return lanes;
         }
         continue;
       }
@@ -140,27 +146,51 @@ bool Q34DeadLaneProver::cell(const Cell& c, unsigned depth, std::span<const std:
       if (minimum < 0) next.push_back(id);  // strictly inside somewhere in the cell
     }
     counter_add(work.uniform_tests, tests);
-    // Exact depth at the lane center (left, bottom) when it is one: every
-    // site dropped above is positive there, every credited one negative.
-    if (center_inside(c.left, c.bottom)) {
-      std::size_t count = inside;
-      u64 points = 0;
-      for (const auto id : next) {
-        ++points;
-        const auto& f = forms_[id];
-        if (f.constant + f.x * c.left + f.y * c.bottom < 0 && ++count >= threshold_) break;
+    // q4 may already hold here (T4 <= inside < T3): only q3 is refined.
+    if ((need & 4U) != 0 && inside >= threshold4_) need = static_cast<std::uint8_t>(need & ~4U);
+    // Exact depth at a lane center of the cell (its corner): below the
+    // lane's T no certificate exists, the lane stops at once (cost only).
+    // Every site dropped above is positive there, every credited one negative.
+    std::size_t count = inside;
+    u64 points = 0;
+    bool counted = false, refuted = false;
+    for (const std::uint8_t lane : {std::uint8_t{2}, std::uint8_t{4}}) {
+      if ((need & lane) == 0) continue;
+      const std::size_t lane_target = lane == 2U ? threshold3_ : threshold4_;
+      if (!center_inside(c.left, c.bottom, lane == 2U ? q3_disk_factor : q4_disk_factor)) continue;
+      if (!counted) {
+        for (const auto id : next) {
+          ++points;
+          const auto& f = forms_[id];
+          if (f.constant + f.x * c.left + f.y * c.bottom < 0 && ++count >= threshold3_) break;
+        }
+        counted = true;
       }
-      counter_add(work.point_tests, points);
-      if (count < threshold_) { counter_add(work.failed_cells); return false; }
+      if (count < lane_target) {
+        need = static_cast<std::uint8_t>(need & ~lane);
+        lanes = static_cast<std::uint8_t>(lanes & ~lane);
+        refuted = true;
+      }
     }
+    counter_add(work.point_tests, points);
+    if (refuted) counter_add(work.failed_cells);
+    if (need == 0) return lanes;
     frontier = next;
   }
-  if (depth == max_depth_) { counter_add(work.failed_cells); return false; }
+  if (depth == max_depth_) {
+    counter_add(work.failed_cells);
+    return static_cast<std::uint8_t>(lanes & ~need);
+  }
   const i64 x = c.left + (c.right - c.left) / 2, y = c.bottom + (c.top - c.bottom) / 2;
-  return cell({c.left, x, c.bottom, y}, depth + 1, frontier, inside, work) &&
-         cell({x, c.right, c.bottom, y}, depth + 1, frontier, inside, work) &&
-         cell({c.left, x, y, c.top}, depth + 1, frontier, inside, work) &&
-         cell({x, c.right, y, c.top}, depth + 1, frontier, inside, work);
+  const Cell children[4] = {{c.left, x, c.bottom, y}, {x, c.right, c.bottom, y},
+                            {c.left, x, y, c.top}, {x, c.right, y, c.top}};
+  for (const auto& child : children) {
+    const std::uint8_t kept = cell(child, depth + 1, frontier, inside, need, work);
+    lanes = static_cast<std::uint8_t>(lanes & ~(need & ~kept));  // lanes refuted in the child
+    need = static_cast<std::uint8_t>(need & kept);
+    if (need == 0) break;
+  }
+  return lanes;
 }
 
 }  // namespace mhgp9::gen

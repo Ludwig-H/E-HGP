@@ -77,9 +77,15 @@ du certificat, quatorze cas complets, preflight natif accepté. q3/q4 ÷2,0 à
 **26,0 / 35,6 / 37,8 s à K10** (000100 / 000000 / 000200), condensés
 inchangés. À K10 la tour domine (17,5 à 22,8 s) et plafonne dès 24 fils.
 
-Suite : partie séquentielle de la tour (validation du catalogue, collecte et
-tri des requêtes statiques, lots, banque, forêts) ; coût du certificat
-lui-même et du filtre de témoins de paire ; seuil K−2 des arêtes q4 seules.
+Depuis R3 : préparation parallèle de la voie statique de la tour (validation,
+collecte, tris, forêts ; lots et banque restent séquentiels), preuve des deux
+voies mortes en une récursion, et **cache des nœuds témoins** du filtre de
+paires (70 % des paires rejetées sans recherche à K5 sur 08/000000).
+Protocole v6 : tous les leviers de la chaîne sont épinglés par cas
+(`levers`, `--lever=NOM=0|1`).
+
+Suite : session G4 R4 (leviers, ablation du cache) ; lots et banque de la
+tour ; coût du certificat ; seuil K−2 des arêtes q4 seules.
 
 ## État du dépôt au moment de l'ouverture (historique)
 

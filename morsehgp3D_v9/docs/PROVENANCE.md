@@ -121,6 +121,25 @@ avec et sans certificat sur toutes les fixtures contre l'oracle rationnel,
 identités de masse étendues aux voies prouvées, fixture d'une q3 presque
 équilatérale au bord du disque, cinq mutants causaux (seuils K−2 en q3 et
 K−3 en q4, contact compté intérieur, un seul coin, disque rétréci).
+Les deux voies sont prouvées en **une seule** récursion (le disque q3 est
+dans le disque q4 : une cellule qui tient K−1 intérieurs vaut pour les deux,
+K−2 pour q4 seule).
+
+Code neuf v9 (23 septembre 2026) : le **cache des nœuds témoins** du filtre de
+paires (`q34_cached_witness_rejections`, option
+`WspdQ34Options::pair_witness_cache`, défaut de la chaîne). Pour A = {a} et
+B = {b}, la recherche Affine est exacte : une voie est rejetée ssi elle a au
+moins T témoins stricts, et chaque nœud admis ne contient que des témoins
+stricts. La recherche tracée enregistre ses nœuds admis et leurs voies
+(disjoints par voie) ; pour la paire suivante de même extrémité a, ces nœuds
+sont retestés avec la **même** admission exacte, crédités seulement pour
+leurs voies : les voies qui atteignent T sont rejetées sans recherche, les
+autres passent par la recherche complète. Sur 08/000000 K5, 70 % des paires
+sont rejetées par le cache ; condensés inchangés sur les trois trames. Porte
+`q34_witness_cache` (24 804 paires : égalité avec la recherche sur la même
+paire, inclusion dans la recherche d'une autre paire) et trois mutants
+causaux (crédit toutes voies, borne basse de Ξ, seuil q4 à K−3) ; variante de
+la porte `wspd_q34` contre l'oracle rationnel.
 
 ## Chaîne : `src/chain/` (espace `mhgp9`, code neuf)
 

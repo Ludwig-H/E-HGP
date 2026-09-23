@@ -3,6 +3,8 @@
 #include "../pipeline/q2_census.hpp"
 
 #include <cstdint>
+#include <span>
+#include <vector>
 
 namespace mhgp9::gen {
 
@@ -122,5 +124,33 @@ struct Q34WitnessSearchWork {
     const Q2CensusIndex& index, const Box3& a, const Box3& b,
     std::uint8_t kmax, std::uint8_t lane_mask, Q34WitnessSearchWork& work,
     Q34WitnessBoundsMode mode, Q34WitnessBoundsWork& bounds_work);
+
+// v9 (23 septembre 2026): witness-node cache of the PAIR filter.
+//
+// For singleton A={a}, B={b}, the Affine search is exact: a lane is rejected
+// iff at least T strict witness sites exist (T=K-1 for q3, K-2 for q4), and
+// every admitted node holds only strict witnesses. The traced overload
+// records the admitted nodes and their lanes; per lane they are disjoint.
+// q34_cached_witness_rejections re-tests such nodes for ANOTHER pair (a', b')
+// with the SAME exact node admission (4Hmin>0 and alpha*(4Hmin)^2>16*Xi_high,
+// Hmin>0 excluding a' and b') and credits each node only for the lanes it was
+// recorded for: the lanes it returns hold T strict witnesses for (a', b'),
+// hence the full search would reject them too. The others are left to the
+// full search, never deduced. Nodes must come from one traced call.
+struct Q34WitnessNode {
+  std::size_t node{};
+  std::uint8_t lanes{};
+};
+struct Q34WitnessCacheWork {
+  u64 queries{}, node_tests{}, q3_rejections{}, q4_rejections{}, full_rejections{};
+  bool operator==(const Q34WitnessCacheWork&) const = default;
+};
+[[nodiscard]] std::uint8_t filter_q34_witnesses(
+    const Q2CensusIndex& index, Point3 a, Point3 b,
+    std::uint8_t kmax, std::uint8_t lane_mask, Q34WitnessSearchWork& work,
+    Q34WitnessBoundsWork& bounds_work, std::vector<Q34WitnessNode>& trace);
+[[nodiscard]] std::uint8_t q34_cached_witness_rejections(
+    const Q2CensusIndex& index, Point3 a, Point3 b, std::uint8_t kmax, std::uint8_t lane_mask,
+    std::span<const Q34WitnessNode> nodes, Q34WitnessCacheWork& work);
 
 }  // namespace mhgp9::gen

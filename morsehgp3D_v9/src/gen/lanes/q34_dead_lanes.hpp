@@ -72,27 +72,26 @@ class Q34DeadLaneProver final {
 
   // Forms of every cover site except a and b, in cover rank order.
   void load(const Q34EdgeCover& cover, Q34DeadLaneWork& work);
-  // Requires load(). K is the tower's Kmax (1..10). A lane whose threshold
-  // is zero (K<2 for q3, K<3 for q4) is never proved here.
-  [[nodiscard]] bool prove_q3(unsigned kmax, Q34DeadLaneWork& work);
-  [[nodiscard]] bool prove_q4(unsigned kmax, Q34DeadLaneWork& work);
+  // Requires load(). K is the tower's Kmax (1..10), `lanes` a subset of
+  // 2 (q3) | 4 (q4). Returns the subset proved dead, both lanes in ONE pass
+  // over the cells (the q3 disk lies inside the q4 disk). A lane whose
+  // threshold is zero (K<2 for q3, K<3 for q4) is never proved here.
+  [[nodiscard]] std::uint8_t prove(unsigned kmax, std::uint8_t lanes, Q34DeadLaneWork& work);
   // Capacity of the reused private buffers (forms, IDs, frontiers).
   [[nodiscard]] std::size_t retained_bytes() const;
 
  private:
   struct Cell { i64 left, right, bottom, top; };
   struct Form { i64 constant, x, y; };  // 2^20*k, x, y of L_z
-  bool prove(i64 disk_factor, std::size_t threshold, Q34DeadLaneWork& work);
-  bool cell(const Cell& c, unsigned depth, std::span<const std::uint32_t> frontier, std::size_t inherited,
-            Q34DeadLaneWork& work);
-  [[nodiscard]] bool outside(const Cell& c) const;
-  [[nodiscard]] bool center_inside(i64 alpha, i64 beta) const;
+  std::uint8_t cell(const Cell& c, unsigned depth, std::span<const std::uint32_t> frontier, std::size_t inherited,
+                    std::uint8_t lanes, Q34DeadLaneWork& work);
+  [[nodiscard]] bool outside(const Cell& c, i64 disk_factor) const;
+  [[nodiscard]] bool center_inside(i64 alpha, i64 beta, i64 disk_factor) const;
 
   unsigned max_depth_, min_depth_;
   std::array<i64, 3> a_basis_{}, b_basis_{};
   i64 diameter_squared_{};
-  i64 disk_factor_{};
-  std::size_t threshold_{};
+  std::size_t threshold3_{}, threshold4_{};
   bool loaded_{false};
   std::vector<Form> forms_;
   std::vector<std::uint32_t> all_;                   // 0..forms-1

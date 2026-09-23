@@ -73,6 +73,8 @@ struct GlobalGate : Gate {
   u64 leaf_calls{},leaf_censuses{},leaf_rejections{},leaf_point_tests{},leaf_fixture_censuses{};
   // v9 dead-lane certificate.
   u64 dead_calls{},dead_q3_proved{},dead_q3_open{},dead_q4_proved{},dead_q4_open{},dead_deep_cells{},dead_failed_cells{};
+  // v9 witness-node cache of the pair filter (with the dead-lane variant).
+  u64 cache_queries{},cache_node_tests{},cache_full_rejections{},cache_partial_rejections{};
 };
 
 // Every component is a standard-layout aggregate containing only u64 fields
@@ -89,15 +91,16 @@ WORDS(Q4LocalGeometryWork,27);WORDS(Q4LocalPartitionWork,20);
 WORDS(Q4LocalAtlasWork,38);WORDS(Q4LocalSweepWork,41);WORDS(Q4LocalEdgeWork,117);
 WORDS(Q4ShallowSetWork,25);WORDS(Q4FamilyWork,13);WORDS(Q4ShallowSweepWork,32);
 WORDS(Q4WindowSelectionWork,25);WORDS(Q4WindowSweepWork,57);WORDS(Q4WindowEdgeWork,116);
-WORDS(Q34WitnessSearchWork,25);WORDS(Q34WitnessBoundsWork,12);WORDS(WspdQ34WitnessWork,82);
-WORDS(Q3BallCensusWork,26);WORDS(Q4SeedCellWork,37);WORDS(WspdQ3AtlasWork,9);WORDS(Q34DeadLaneWork,12);WORDS(WspdQ34Work,445);
+WORDS(Q34WitnessSearchWork,25);WORDS(Q34WitnessBoundsWork,12);WORDS(WspdQ34WitnessWork,83);
+WORDS(Q3BallCensusWork,26);WORDS(Q4SeedCellWork,37);WORDS(WspdQ3AtlasWork,9);WORDS(Q34DeadLaneWork,12);
+WORDS(Q34WitnessCacheWork,5);WORDS(WspdQ34Work,451);
 #undef WORDS
-std::array<u64,445> logical_work(mhgp9::gen::WspdQ34Work work) {
+std::array<u64,451> logical_work(mhgp9::gen::WspdQ34Work work) {
   // These two capacity peaks depend on the private buffer's previous jobs;
   // they are paid separately, not erased from the published result.
   work.q3.peak_shell_bytes=0;
   work.peak_edge_buffer_bytes=0;
-  return std::bit_cast<std::array<u64,445>>(work);
+  return std::bit_cast<std::array<u64,451>>(work);
 }
 
 // Enumerate every small-cloud support once. An independent Gaussian rational
@@ -483,6 +486,16 @@ void global_lifecycle(GlobalGate& gate) {
   ++gate.input_alias_checks;
 }
 
+// The witness-node cache follows the pair order of each worker: its hits,
+// and hence the searches actually run, depend on the schedule. The pair
+// outcomes (rejections and lane masses) do not, and stay compared.
+mhgp9::gen::WspdQ34Work schedule_free(mhgp9::gen::WspdQ34Work work,const mhgp9::gen::WspdQ34Options& opts) {
+  if (opts.pair_witness_cache) {
+    work.witness.pairs={};work.witness.pairs_bounds={};work.witness.cache_rejected_pairs=0;work.witness_cache={};
+  }
+  return work;
+}
+
 void parallel_case(GlobalGate& gate,const Points& points,const Output& all,unsigned k,
                    mhgp9::gen::WspdQ34Options opts,std::size_t worker_count,std::size_t grain) {
   // Tiny fixtures never reach the default task grain: four-worker cases use a
@@ -514,7 +527,8 @@ void parallel_case(GlobalGate& gate,const Points& points,const Output& all,unsig
   gate.require(output==expected,"parallel global stream differs from independent rational support/depth/shell oracle");
   gate.require(result.pipeline.front.total_unordered_pairs==mono.front.total_unordered_pairs &&
     result.pipeline.front.active_lane_mask==mono.front.active_lane_mask &&
-    result.pipeline.front.work==mono.front.work && logical_work(result.pipeline.work)==logical_work(mono.work),
+    result.pipeline.front.work==mono.front.work &&
+    logical_work(schedule_free(result.pipeline.work,opts))==logical_work(schedule_free(mono.work,opts)),
     "parallel global logical counters differ from every mono counter");
   ++gate.parallel_geometry_checks;
   ++gate.parallel_pipeline_calls;
@@ -710,6 +724,9 @@ void indexed_fixtures(GlobalGate& gate) {
           // Dead-lane certificate: a proved lane must be empty on the oracle
           // too, so the comparison below is unchanged.
           config.dead_lanes=dead;
+          // The v9 variant also runs the witness-node cache, which needs the
+          // exact singleton Affine pair filter: same oracle comparison.
+          if (dead) {config.pair_witness_cache=true;config.witness_bounds_mode=mhgp9::gen::Q34WitnessBoundsMode::Affine;}
           Output actual;
           const auto result=mhgp9::gen::run_wspd_q34_candidates(index,k,8+2*(k%3),config,
               [&](const auto& value) {actual.push_back(copy(value));});
@@ -720,7 +737,9 @@ void indexed_fixtures(GlobalGate& gate) {
             w.q4_edges+v.rectangle_q4_pairs+v.pair_q4_pairs+w.dead.q4_proved==result.front.work.residual_pair_mass[2] &&
             w.expanded_pairs+v.rectangle_pair_mass==v.input_pair_mass &&
             w.cover_builds+v.rejected_pairs==w.expanded_pairs &&
-            v.pairs.queries==w.expanded_pairs,"indexed mass partition differs");
+            v.pairs.queries+v.cache_rejected_pairs==w.expanded_pairs &&
+            v.cache_rejected_pairs<=v.rejected_pairs &&
+            w.witness_cache.full_rejections>=v.cache_rejected_pairs,"indexed mass partition differs");
           gate.require((mode==mhgp9::gen::WspdQ34WitnessMode::Pair && v.rectangles==mhgp9::gen::Q34WitnessSearchWork{}) ||
             (mode==mhgp9::gen::WspdQ34WitnessMode::RectanglePair && v.rectangles.queries==w.input_rectangles),
             "indexed search entry ledger differs");
@@ -733,7 +752,11 @@ void indexed_fixtures(GlobalGate& gate) {
             ++gate.dead_calls;gate.dead_q3_proved+=d.q3_proved;gate.dead_q3_open+=d.q3_open;
             gate.dead_q4_proved+=d.q4_proved;gate.dead_q4_open+=d.q4_open;
             gate.dead_deep_cells+=d.deep_cells;gate.dead_failed_cells+=d.failed_cells;
-          } else gate.require(w.dead==mhgp9::gen::Q34DeadLaneWork{},"dead-lane certificate ran although disabled");
+            const auto& c=w.witness_cache;
+            gate.cache_queries+=c.queries;gate.cache_node_tests+=c.node_tests;gate.cache_full_rejections+=c.full_rejections;
+            gate.cache_partial_rejections+=c.q3_rejections+c.q4_rejections;
+          } else gate.require(w.dead==mhgp9::gen::Q34DeadLaneWork{} && w.witness_cache==mhgp9::gen::Q34WitnessCacheWork{} &&
+                v.cache_rejected_pairs==0,"dead-lane certificate or witness cache ran although disabled");
           if (census_mode==mhgp9::gen::WspdQ3CensusMode::GlobalBoxes) {
             ++gate.boxed_calls;
             const auto& atlas=w.q3_atlas;
@@ -789,7 +812,7 @@ void indexed_fixtures(GlobalGate& gate) {
     "indexed global modes have no exercised rejection");
 }
 
-std::array<u64,445> without_filter_geometry(mhgp9::gen::WspdQ34Work work) {
+std::array<u64,451> without_filter_geometry(mhgp9::gen::WspdQ34Work work) {
   // Keep ALL rejection masses and all work downstream of filtering. Only the
   // four explicitly changed search/bounds ledgers are normalized away.
   work.witness.rectangles={};work.witness.pairs={};
@@ -907,7 +930,7 @@ void bounds_mode_global_fixtures(GlobalGate& gate) {
   normalize(out);gate.require(out==expected && !index && !cloud,"bounds callback owner reset lost payload");
 }
 
-std::array<u64,445> without_local_q4(mhgp9::gen::WspdQ34Work work) {
+std::array<u64,451> without_local_q4(mhgp9::gen::WspdQ34Work work) {
   // Only the selected q4 traversal is replaced. All q3, filtering, covers,
   // lane masses and output counters remain subject to exact comparison.
   work.local={};work.q4_seed_cells={};
@@ -1046,6 +1069,8 @@ int main(int argc,char** argv) {
     gate.require(gate.dead_calls>0 && gate.dead_q3_proved>0 && gate.dead_q3_open>0 && gate.dead_q4_proved>0 &&
       gate.dead_q4_open>0 && gate.dead_deep_cells>0 && gate.dead_failed_cells>0,
       "dead-lane certificate was never exercised (proved and open lanes of both kinds, deep and failed cells)");
+    gate.require(gate.cache_queries>0 && gate.cache_node_tests>0 && gate.cache_full_rejections>0,
+      "pair witness cache was never exercised (queries, node tests, rejections without search)");
     gate.require(gate.q3>0 && gate.q4>0 && gate.max_shell>=30 && gate.fat_rectangles>0 &&
       gate.q3_front_rejections>0 && gate.q4_front_rejections>0 && gate.xi_tests>0 &&
       gate.q3_depth_rejections>0 && gate.q3_unread_sites>0 && gate.both_edges>0 &&
@@ -1079,6 +1104,7 @@ int main(int argc,char** argv) {
     EMIT(leaf_calls);EMIT(leaf_censuses);EMIT(leaf_rejections);EMIT(leaf_point_tests);EMIT(leaf_fixture_censuses);
     EMIT(dead_calls);EMIT(dead_q3_proved);EMIT(dead_q3_open);EMIT(dead_q4_proved);EMIT(dead_q4_open);
     EMIT(dead_deep_cells);EMIT(dead_failed_cells);
+    EMIT(cache_queries);EMIT(cache_node_tests);EMIT(cache_full_rejections);EMIT(cache_partial_rejections);
 #undef EMIT
     std::cout<<"}\n";
     return 0;

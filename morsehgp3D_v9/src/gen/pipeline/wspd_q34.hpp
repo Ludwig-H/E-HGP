@@ -45,6 +45,11 @@ struct WspdQ34Options {
   // (T=K-1 for q3, K-2 for q4). Such a lane emits nothing on the exact path
   // either: same stream. Off keeps the v8 path and every historical counter.
   bool dead_lanes{false};
+  // v9 option (Affine bounds only): the pair filter first re-tests, for the
+  // same endpoint a, the witness nodes admitted by the previous full search
+  // (lanes/q34_witness_search.hpp): lanes they prove rejected skip the
+  // search. Same surviving masks, same stream. Off keeps every v8 counter.
+  bool pair_witness_cache{false};
   // Parallel entry only: every surviving residual rectangle is published to
   // the team's bounded task queue, by ranges of a-ranks when its pair mass
   // exceeds this grain, so that any idle worker expands it; the discovering
@@ -70,6 +75,9 @@ struct WspdQ34WitnessWork {
   u64 input_pair_mass{}, rejected_rectangles{}, rectangle_pair_mass{};
   u64 rectangle_q3_pairs{}, rectangle_q4_pairs{};
   u64 rejected_pairs{}, pair_q3_pairs{}, pair_q4_pairs{};
+  // v9 witness-node cache: pairs rejected without a search (every open lane
+  // by cached nodes); pairs.queries counts only the searches actually run.
+  u64 cache_rejected_pairs{};
   Q34WitnessSearchWork rectangles, pairs;
   Q34WitnessBoundsWork rectangles_bounds, pairs_bounds;
   bool operator==(const WspdQ34WitnessWork&) const = default;
@@ -108,6 +116,7 @@ struct WspdQ34Work {
   // v9 dead-lane certificate; a proved lane is counted here, not in
   // q3_edges/q4_edges (lane mass identities include q3_proved/q4_proved).
   Q34DeadLaneWork dead;
+  Q34WitnessCacheWork witness_cache;
 };
 
 struct WspdQ34Result {

@@ -236,3 +236,21 @@ temporelle et statique 1/4/8 fils : même tour, condensé
 `73490cf88c02af30` égal au preflight G4 R3). Reste séquentiel : les lots
 (≈ 12 s en W8 local), la banque (2 s).
 
+## 23 septembre 2026, 03 h — Cache des témoins, preuve combinée, leviers (développeur)
+
+GCP non utilisé. Répartition mesurée du q3/q4 après certificat (08/000000
+K5, W8, cycles `rdtsc` indicatifs) : filtre de paires 31 %, certificat 33 %
+(version à frontière héritée, plus coûteuse en cycles que le prototype
+linéaire malgré moins de tests : confirmé, B avait raison), atlas 8 %, voies
+q3/q4 15 %, filtre de rectangles 11 %.
+
+- Certificat : les voies q3 et q4 sont prouvées en une seule récursion.
+- Cache des nœuds témoins du filtre de paires (preuve dans
+  `lanes/q34_witness_search.hpp`) : même admission exacte que la recherche,
+  crédit par voie enregistrée seulement (une première version créditait
+  toutes les voies et changeait le flux sur la trame réelle : mutant
+  `witness_cache_all_lanes`, tué par la nouvelle porte). 70 % / 61 % / 67 %
+  des paires rejetées sans recherche à K5 ; condensés inchangés.
+- Protocole v6 : `levers` épinglés par cas, sonde `--lever=NOM=0|1`, clés
+  exactes ; porte réelle à 20 mutants.
+

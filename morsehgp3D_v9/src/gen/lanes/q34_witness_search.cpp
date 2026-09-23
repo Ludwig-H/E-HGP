@@ -51,7 +51,7 @@ template <bool Exclusion, bool Affine>
 std::uint8_t filter_impl(
     const Q2CensusIndex& index, const Box3& a, const Box3& b,
     std::uint8_t kmax, std::uint8_t lane_mask, Q34WitnessSearchWork& work,
-    Q34WitnessBoundsWork* bounds_work) {
+    Q34WitnessBoundsWork* bounds_work, std::vector<Q34WitnessNode>* trace = nullptr) {
   static_assert(!Affine || Exclusion);
   if (kmax == 0 || kmax > 10 || (lane_mask & ~6U) != 0)
     throw std::invalid_argument("mhgp9 gen q34 witness search requires K1..10 and a subset of mask6");
@@ -186,7 +186,10 @@ std::uint8_t filter_impl(
         }
       }
     }
-    if (admitted_mask != 0) counter_add(work.admitted_nodes);
+    if (admitted_mask != 0) {
+      counter_add(work.admitted_nodes);
+      if (trace != nullptr) trace->push_back({frame.node, admitted_mask});
+    }
     if (frame.mask == 0) {
       if constexpr (Exclusion) {
         if (admitted_mask == input_mask) counter_add(work.fully_admitted_nodes);
@@ -211,6 +214,59 @@ std::uint8_t filter_impl(
 }
 
 }  // namespace
+
+std::uint8_t filter_q34_witnesses(
+    const Q2CensusIndex& index, Point3 a, Point3 b,
+    std::uint8_t kmax, std::uint8_t lane_mask, Q34WitnessSearchWork& work,
+    Q34WitnessBoundsWork& bounds_work, std::vector<Q34WitnessNode>& trace) {
+  trace.clear();
+  const Box3 box_a{a, a}, box_b{b, b};
+  return filter_impl<true, true>(index, box_a, box_b, kmax, lane_mask, work, &bounds_work, &trace);
+}
+
+std::uint8_t q34_cached_witness_rejections(
+    const Q2CensusIndex& index, Point3 a, Point3 b, std::uint8_t kmax, std::uint8_t lane_mask,
+    std::span<const Q34WitnessNode> cached, Q34WitnessCacheWork& work) {
+  if (kmax == 0 || kmax > 10 || (lane_mask & ~6U) != 0)
+    throw std::invalid_argument("mhgp9 gen q34 witness cache requires K1..10 and a subset of mask6");
+  const std::uint8_t available = kmax >= 3 ? 6 : kmax == 2 ? 2 : 0;
+  const std::uint8_t lanes = lane_mask & available;
+  counter_add(work.queries);
+  if (lanes == 0 || cached.empty()) return 0;
+  const PreparedPairCitronBounds prepared(a, b);  // validates both points
+  const auto nodes = index.spatial_nodes();
+  const std::array<unsigned, 2> threshold{static_cast<unsigned>(kmax) - 1,
+                                          kmax >= 3 ? static_cast<unsigned>(kmax) - 2 : 0};
+  std::array<unsigned, 2> count{};
+  for (const auto& entry : cached) {
+    if (entry.node >= nodes.size() || (entry.lanes & ~6U) != 0)
+      throw std::invalid_argument("mhgp9 gen q34 witness cache entry outside the index");
+    const std::uint8_t open = entry.lanes & lanes;
+    if (open == 0) continue;
+    const auto& node = nodes[entry.node];
+    counter_add(work.node_tests);
+    const auto h = Q34WitnessSearchBoundsAccess::h(prepared, node.box);
+    if (h.minimum4 <= 0) continue;  // also excludes a and b themselves
+    const auto xi = Q34WitnessSearchBoundsAccess::xi(prepared, node.box);
+    // Same exact admission as the search, written independently of its
+    // text (the v8 mutation sites stay unique): alpha*(4Hmin)^2 > 16*Xi_high
+    // with alpha = 3 (q3) or 2 (q4); products <2^80 (see filter_impl).
+    const i128 h_min_squared = static_cast<i128>(h.minimum4) * h.minimum4;
+    const i128 sixteen_xi = 16 * xi.high;
+    for (unsigned lane = 0; lane < 2; ++lane) {
+      const auto bit = static_cast<std::uint8_t>(2U << lane);
+      if ((open & bit) == 0 || count[lane] >= threshold[lane]) continue;
+      const i128 weight = 3 - static_cast<i128>(lane);
+      if (!(weight * h_min_squared > sixteen_xi)) continue;
+      count[lane] += static_cast<unsigned>(std::min<std::size_t>(threshold[lane] - count[lane], node.range.size()));
+    }
+  }
+  std::uint8_t rejected = 0;
+  if ((lanes & 2U) != 0 && count[0] >= threshold[0]) { rejected |= 2U; counter_add(work.q3_rejections); }
+  if ((lanes & 4U) != 0 && count[1] >= threshold[1]) { rejected |= 4U; counter_add(work.q4_rejections); }
+  if (rejected == lanes) counter_add(work.full_rejections);
+  return rejected;
+}
 
 std::uint8_t filter_q34_witnesses(
     const Q2CensusIndex& index, const Box3& a, const Box3& b,
