@@ -8,27 +8,19 @@ La sonde v14 **`67fce4e9`** et le correctif de réception/masse
 exécuté avec `fe1142b5`, est désormais versionné par **`76436d44`** ;
 les deux empreintes relevées par la [contrelecture B](CONTRE_AUDIT_B_G4_R9_ORDONNANCEMENT_20260923.md)
 avant publication sont inchangées. Le même commit publie la sonde v15,
-sans reçu G4 v15. Un [contre-audit B du WIP v15 de recouvrement FULL](CONTRE_AUDIT_B_WIP_TOUR_V15_RECOUVREMENT_20260923.md)
-relève une borne de durée du lecteur qui peut rejeter une sortie valide :
-K1 démarre avant l'horloge statique, alors que `lots_by_k` est borné
-par `static+lots`. Le port **`76436d44`** ajoute une porte de priorité
-des pannes sur les deux voies et un digest ON/OFF identique sur
-16k/K10 local ; l'égalité exhaustive du payload, un stress TSan propre
-au recouvrement et un reçu G4 v15 restent ouverts. Le défaut de durée
-du WIP reste dans ce port ; aucun reçu R8/R9 ne mesure son recouvrement.
-La [contrelecture complémentaire](CONTRELEC_V15_CHRONO_ORDRE_20260923.md)
-reproduit sur une sortie v15 locale le défaut inverse : en gonflant un
-seul `lots_by_k` à K5, le lecteur accepte **65,379 ms** de phases
-nécessairement disjointes pour **60,718 ms** de mur FULL. Une borne par
-ordre doit accompagner l'horloge commune proposée par B avant tout
-reçu G4 v15.
-Le correctif **`33d51efd`** mesure maintenant la fenêtre commune avant
-lancement des runners jusqu'au dernier `join` et ferme le faux refus
-initial de B ; son juge par ordre ferme le faux accord K5 d'A. Mais il
-additionne encore toutes les phases 0 au lot **K1**, qui démarre en
-parallèle : un calendrier réalisable de 14 ms est refusé. La
-[suite B](CONTRE_AUDIT_B_WIP_TOUR_V15_RECOUVREMENT_20260923.md)
-donne le contre-exemple et la borne K1 correcte ; aucun reçu G4 v15.
+sans reçu G4 v15. Le [contre-audit B du recouvrement FULL](CONTRE_AUDIT_B_WIP_TOUR_V15_RECOUVREMENT_20260923.md)
+et la [contrelecture par ordre](CONTRELEC_V15_CHRONO_ORDRE_20260923.md)
+ont trouvé respectivement un faux refus K1 et un faux accord K5 du
+lecteur initial. Le correctif **`33d51efd`** mesure la fenêtre commune
+lancement→jointure et ajoute la dépendance par ordre K≥2 : ces deux
+écarts initiaux sont traités dans ce port. Il reste un **faux refus K1**
+dans la nouvelle borne, qui additionne toutes les phases statiques à son
+lot alors que K1 peut les recouvrir ; une sortie 360 sites valide mutée
+dans le seul chrono K1 est rejetée. Pour K1, la borne nécessaire utilise
+`max(static, lots_by_k[0])`, puis les phases aval. La porte de priorité
+des pannes et un digest ON/OFF identique sur 16k/K10 sont publiés ;
+l'égalité exhaustive du payload, un stress TSan propre au recouvrement
+et un reçu G4 v15 restent ouverts. R8/R9 ne mesurent pas ce recouvrement.
 Les mesures de densité restent celles du binaire v12 **`4530644b`** ;
 aucune nouvelle série LiDAR v13 n'en découle. Le reçu G4
 [R8](../receipts/g4_tower_r8_20260923/README.md) exécute
@@ -104,12 +96,24 @@ donne un contrôle global **nécessaire** du catalogue : `E_K=1` pour
 mutants d'omission échappant à la chaîne le violent à K5. La formule ne
 certifie pas les clés une à une : à K5 elle ne juge que K1..3, et le
 contrat K10 exigerait un générateur K12 pour juger ses dix ordres. Le
-protocole Kmax+2 ajoute des témoins, mais une omission commune aux deux
-exécutions peut encore passer : un [contre-exemple exact à 13
+protocole Kmax+2 ajoute des témoins, mais **Euler et la restriction des
+clés seuls** peuvent manquer une omission commune aux deux exécutions :
+un [contre-exemple exact à 13
 sites](CONTRE_EXEMPLE_EULER_KPLUS2_20260923.md) construit deux clés omises
 qui laissent à la fois `E_K=1` et la restriction K7→K5 inchangées. Son
 extension à 23 sites fait de même pour K12→K10 (K12 n'est pas encore un
-domaine produit). Elle ne signale aucune omission observée du générateur.
+domaine produit). La [sonde d'omission de C](c_omission_20260923/README.md)
+montre que la **tour FULL refuse ces omissions de la fixture 13 sites**.
+Sur huit cas 8k (synthétiques et disques LiDAR de la seule séquence 08),
+elle refuse aussi **515/515 retraits isolés** de clés dont `p+u≤Kmax`,
+mais seulement **2/280** retraits échantillonnés dans la classe régulière
+de fin de fenêtre q2/q3 sont refusés, par connexité finale. C'est une
+observation d'échantillon et un argument de portée, pas encore une
+preuve générale de détection ni une preuve de complétude du générateur.
+La proposition constructive est de comparer K5 et K6 **avec tour FULL
+et restriction clé par clé** ; elle demande K11 pour le contrat K10,
+hors domaine courant, et doit encore traiter les omissions multiples.
+Aucune omission du générateur n'est constatée.
 
 Le port Euler v13 est publié en **`c768e06a`**. La sonde écrit v13 et le
 lecteur G4 en vérifie la borne, la longueur du vecteur et les nouveaux

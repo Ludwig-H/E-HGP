@@ -38,10 +38,11 @@ artificiel du temps statique entre ordres qui conserve `sum(static_by_k)`.
 Le test négatif v15 actuel ne modifie que cette première case ; il
 n'exerce pas la dépendance temporelle K5 ci-dessus.
 
-## Contrelecture du correctif WIP postérieur à `76436d44`
+## Contrelecture du correctif publié `33d51efd`
 
-Le correctif non committé ajoute bien une fenêtre commune et le juge
-par ordre K≥2. Il applique toutefois à **K1** la somme de **toutes**
+Le correctif, publié après cette première note, ajoute bien une fenêtre
+commune lancement→jointure et le juge par ordre K≥2. Le mutant K5
+initial est maintenant refusé. Il applique toutefois à **K1** la somme de **toutes**
 les phases 0 avant `lots_by_k[0]`. C'est faux : le runner K1 est prêt
 avant même le lancement des autres runners et peut recouvrir ces phases.
 Sur une sortie locale complète, `tower=65,993 ms`, `validate=10,066`,
@@ -49,8 +50,20 @@ Sur une sortie locale complète, `tower=65,993 ms`, `validate=10,066`,
 `11,893`. En ne portant que `lots_by_k[0]` à `42,313 ms`, la fenêtre
 commune est respectée et le chemin nécessaire
 `validate + max(static, lots_by_k[0]) + après = 64,272 ms` tient dans
-le mur, mais le lecteur WIP **refuse** la sortie. Pour K1, remplacer
+le mur, mais le lecteur publié **refuse** la sortie. Pour K1, remplacer
 la somme fautive par ce `max` (avec tolérance d'arrondi) ; pour K≥2,
 conserver la somme des phases 0 de Kmax à K, qui précèdent réellement
 le lot K. Ce cas doit accompagner le mutant K5 afin de fermer les deux
 sens de la porte.
+
+Une seconde contre-épreuve sur le **port publié**, avec la validation
+complète d'une sortie réelle de 360 sites, confirme le même écart : en
+ne remplaçant que `lots_by_k[0]` par `static=19,065 ms`, le chemin
+physiquement nécessaire vaut `validate+max(static, lot K1)+aval=33,514 ms`,
+inférieur au mur FULL de **35,219 ms**. Le lecteur la refuse pourtant
+avec `tower phase A of order 1 before its phase 0`. La nouvelle porte
+qui exige `static_by_k[0]=0` est utile, mais son test actuel modifie cette
+case sans préserver `static=sum(static_by_k)` : il échoue aussi à une
+ancienne garde. Transférer une durée de K2 à K1, somme inchangée,
+isolerait ce nouveau contrôle. Aucun reçu G4 v15 ne découle de ces
+contre-épreuves locales.
