@@ -78,8 +78,8 @@ def main(argv):
             failures.append(label)
         return ok
 
-    def run(case):
-        argv_probe = [str(probe), str(data_file)] + worker.expected_probe_tail(case)
+    def run(case, path=data_file):
+        argv_probe = [str(probe), str(path)] + worker.expected_probe_tail(case)
         started = time.monotonic()
         process = subprocess.Popen(argv_probe, stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True)
         try:
@@ -109,6 +109,24 @@ def main(argv):
         check(outcome == 'complete_relative', label + ': outcome ' + outcome)
         check(value['options']['levers'] == case['levers'], label + ': published levers')
         results[label] = (case, value)
+    # Refus explicite REEL avant l'etape Euler du recensement (revue v13 : le
+    # lecteur l'avait pris pour un defaut de protocole) : les 30 points entiers
+    # de x^2+y^2+z^2 = 25 forment une coquille de plus de 12 sites.
+    sphere = [(x, y, z) for x in range(-5, 6) for y in range(-5, 6) for z in range(-5, 6) if x * x + y * y + z * z == 25]
+    degenerate_raw = b''.join(struct.pack('<3I', 1000 + x, 1000 + y, 1000 + z) for x, y, z in sphere)
+    degenerate_raw += cloud(40, 11)
+    degenerate_file = workdir / 'probe_worker_contract_degenerate.u32le'
+    degenerate_file.write_bytes(degenerate_raw)
+    inputs['degenerate'] = dict(n=len(degenerate_raw) // 12, fnv=worker.input_fnv(degenerate_raw))
+    refusal_case = dict(base, scene='degenerate', file=degenerate_file.name, n=inputs['degenerate']['n'])
+    try:
+        value, code, _ = run(refusal_case, degenerate_file)
+        outcome = worker.validate_probe(value, refusal_case, code, inputs=inputs)
+        check(outcome == 'explicit_refusal' and value['reason'] == 'chain_shell_above_12' and
+              value['catalogue']['euler']['status'] == 'not_checkable', 'degenerate refusal: ' + outcome + ' ' +
+              str(value['reason']))
+    except (ValueError, KeyError, TypeError, UnicodeError, subprocess.TimeoutExpired) as error:
+        check(False, 'real explicit refusal refused by the worker validator: ' + type(error).__name__ + ': ' + str(error))
     if len(results) == 2:
         on, off = results['pinned_on'][1], results['pinned_off'][1]
         check(worker.logical_result(on) == worker.logical_result(off), 'modes on/off change the object')

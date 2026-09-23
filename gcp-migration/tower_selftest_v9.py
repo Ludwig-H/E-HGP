@@ -111,6 +111,10 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
     checkable = min(k - 2, n) if k >= 3 else 0
     euler = dict(status='holds' if checkable else 'not_checkable', checkable_max_k=checkable,
                  by_k=[1] * checkable + [0] * (k - checkable))
+    if not complete:
+        # Comme la vraie sonde : un refus avant l'etape Euler du recensement
+        # ne publie ni borne ni sommes (revue du 23 septembre, faux defaut v13).
+        euler = dict(status='not_checkable', checkable_max_k=0, by_k=[0] * k)
     started = max(1, min(workers, 4))
     occupancy = dict(started_workers=started, jobs=4, tasks_published=2, tasks_consumed=2, task_waits=0,
                      wall_max_ms=0.1, wall_min_ms=0.05, cpu_sum_s=0.0001 * started, wait_sum_s=0.0)

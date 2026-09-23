@@ -406,15 +406,28 @@ def _catalogue(value):
 
 def validate_euler(value, case):
     """Euler v13 : ordres verifiables min(K-2, n) (rien sous K3), sommes publiees
-    pour K = 1..K ; une tour complete exige `holds` (toutes egales a 1)."""
+    pour K = 1..K ; une tour complete exige `holds` (toutes egales a 1).
+
+    Un refus explicite anterieur a l'etape Euler du recensement (generateur,
+    fusion, recensement, coquille > 12, ressources) publie `not_checkable` et
+    une borne 0 : c'est un refus valide, jamais un defaut de protocole. `fails`
+    n'existe qu'avec son propre refus."""
     euler = value['catalogue']['euler']
     checkable = min(case['k'] - 2, case['n']) if case['k'] >= 3 else 0
-    need(euler['checkable_max_k'] == checkable and len(euler['by_k']) == case['k'], 'euler bound/length')
+    need(len(euler['by_k']) == case['k'], 'euler length')
+    reached = euler['checkable_max_k'] == checkable and (checkable > 0 or euler['status'] == 'not_checkable')
     if value['status'] == 'complete_relative':
-        need(euler['status'] == ('holds' if checkable else 'not_checkable') and
+        need(reached and euler['status'] == ('holds' if checkable else 'not_checkable') and
              euler['by_k'][:checkable] == [1] * checkable, 'euler invariant of a complete catalogue')
     elif euler['status'] == 'fails':
-        need(value['reason'] == 'chain_catalogue_euler_violated', 'euler failure without its refusal')
+        need(reached and value['status'] == 'invariant_violated' and
+             value['reason'] == 'chain_catalogue_euler_violated' and euler['by_k'][:checkable] != [1] * checkable,
+             'euler failure without its refusal')
+    elif euler['status'] == 'holds':
+        need(reached and checkable > 0 and euler['by_k'][:checkable] == [1] * checkable,
+             'euler holds of a later refusal')
+    else:
+        need(euler['checkable_max_k'] in (0, checkable), 'euler bound of an early refusal')
 
 
 def validate_occupancy(value, case):
