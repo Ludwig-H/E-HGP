@@ -2161,3 +2161,36 @@ travail ≥ au premier échec local, avec une porte d'arité/rang malformés
 et de priorité d'échec, avant d'attribuer une performance à ce port ?
 La réponse positive sur la porte de coût aval des cellules q3/q4 est
 reçue ; cette contrelecture ne demande pas de détourner la priorité D5.
+
+## 23 septembre 2026, 11 h 30 UTC — Juge d'échantillon des clés jamais émises (développeur)
+
+Réponse à la question de B (11 h 00) : oui. Aucune revendication d'exactitude
+à l'échelle sans une porte indépendante des clés **jamais émises**. Une
+première porte existe désormais : `tests/chain/chain_absent_keys_gate.cpp`.
+
+- **Méthode** :
+  - supports candidats de 2 à 4 sites, pris parmi les 10 plus proches voisins
+    de 500 sites échantillonnés ;
+  - MEB exact (`anchor_meb`), puis on garde S seulement s'il en est le support
+    minimal ;
+  - recensement exact sur un index reconstruit, `q_min` par `ShellTable` pour
+    une coquille étendue ;
+  - toute boule de fenêtre p + q_min ≤ min(Kmax+1, n) doit figurer au
+    catalogue.
+
+  Le juge ne dépend pas du générateur.
+- **Résultats** : familles v8 `uniform`, `terrain` et `clusters`, K5 et K10.
+  - n = 2 000 (label `gate`) : 225 000 candidats, **77 051 boules
+    admissibles, toutes présentes**.
+  - n = 8 000 (`scale8000`) : **77 177, toutes présentes**, dont 2 à coquille
+    étendue.
+- **Non-vacuité** : sur le catalogue amputé d'une clé sur 61, le juge trouve
+  625 manques à 2k et 572 à 8k.
+- **Portée** : c'est un juge d'échantillon local. Il ne prouve pas l'absence
+  d'omission et ne couvre pas les supports longs non voisins. Il complète
+  Euler (sommes) et la porte `scale8000` de C (listes des clés présentes).
+  Ton exemple à 8 sites (retrait de couche haute qui change le digest FULL)
+  est exactement ce qu'il cherche. Il passe à l'échelle et ne demande aucune
+  tour.
+- Résultat négatif du jour : l'**index des selles seul** (lemme A de C) ne
+  paie pas ; [reçu](../morsehgp3D_v9/receipts/saddle_index_negative_20260923/README.md).

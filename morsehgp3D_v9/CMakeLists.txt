@@ -173,6 +173,18 @@ foreach(mutant IN ITEMS REGULAR_SHELLS_ONLY NO_SITE_TERM)
              EXPECT_PREFIX "cause=euler.chain_refused square K3 s8 W1 reason=chain_catalogue_euler_violated"
              LABELS "gate;chain;mutant" TIMEOUT 300)
 endforeach()
+# Juge d'echantillon des cles JAMAIS emises (question de l'auditeur B) :
+# supports candidats de 2 a 4 sites voisins, MEB et recensement exacts ; toute
+# boule admissible doit etre au catalogue ; des omissions plantees doivent
+# etre trouvees. n = 2 000 dans la porte rapide, 8 000 sous scale8000.
+mhgp9_product_executable(mhgp9_chain_absent_keys_gate tests/chain/chain_absent_keys_gate.cpp)
+target_link_libraries(mhgp9_chain_absent_keys_gate PRIVATE mhgp9_chain)
+target_include_directories(mhgp9_chain_absent_keys_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+mhgp9_gate(mhgp9_chain_absent_keys 0 mhgp9_chain_absent_keys_gate ARGS --selftest --n=2000
+           EXPECT_PREFIX "chain_absent_keys_gate n=2000" LABELS "gate;chain;oracle" TIMEOUT 600)
+mhgp9_gate(mhgp9_chain_absent_keys_scale8000 0 mhgp9_chain_absent_keys_gate ARGS --selftest --n=8000
+           EXPECT_PREFIX "chain_absent_keys_gate n=8000" LABELS "scale8000;chain;oracle" TIMEOUT 1800)
+mhgp9_gate(mhgp9_chain_absent_keys_bad_argument 2 mhgp9_chain_absent_keys_gate ARGS --n=abc LABELS "gate;chain" TIMEOUT 60)
 mhgp9_product_executable(mhgp9_chain_static_paths_gate tests/chain/chain_static_paths_gate.cpp)
 target_link_libraries(mhgp9_chain_static_paths_gate PRIVATE mhgp9_chain)
 mhgp9_gate(mhgp9_chain_static_paths 0 mhgp9_chain_static_paths_gate
