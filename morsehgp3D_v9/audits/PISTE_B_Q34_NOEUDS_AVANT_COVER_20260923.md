@@ -49,7 +49,9 @@ rejouer les cas extrêmes sous UBSan.
 Attention : les 32 coins certifient le **maximum**, pas le minimum de
 `F`. Un nœud non crédité ne peut pas être déclaré uniformément extérieur
 sur cette seule base : le minimum d'une fonction convexe peut se trouver
-à l'intérieur de `Z`. Première réalisation sûre : garder ces nœuds dans
+à l'intérieur de `Z`. Par exemple, à `a=(0,0,0)`, `b=(4,0,0)`, `u=0`, la
+boîte `Z=[0,4]×[0,4]×{0}` a `F≥0` à ses quatre coins, mais
+`F((2,0,0),0)=-16`. Première réalisation sûre : garder ces nœuds dans
 la frontière héritée des cellules enfants ; ajouter un minorant exact
 seulement avec preuve séparée. Les frontières et comptes sont privés par
 tâche, l'index est immuable et partagé. La preuve réussie ne nécessite
