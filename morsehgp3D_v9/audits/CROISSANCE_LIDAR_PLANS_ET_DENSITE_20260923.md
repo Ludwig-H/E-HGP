@@ -279,6 +279,17 @@ secteurs et sous-échantillons ne reconstituent pas la tour du plein et
 ne prouvent aucune borne asymptotique. Plusieurs séquences, graines et
 une mesure appariée du coût total sur G4 restent à produire.
 
+Une [contre-épreuve avec deux autres graines](lidar_raw_hot_quarter_multiseed_20260923/README.md)
+garde le **même quart physique brut** `x≥0,y<0` de 08/000000 et refait
+les décimations globales emboîtées à K5/K10. À K10, la pente du total
+de formes calculées entre demi-densité et plein vaut **2,029** avec la
+graine historique, puis **1,971** et **2,095** ; le franchissement de 2
+n'est donc pas stable au tirage, mais la sensibilité de la masse du
+cœur demeure. À K5, le premier lien donne **2,002 / 1,957 / 1,860**.
+Les douze pentes de paires développées restent sous 2. Les huit
+nouvelles sondes sont locales CPU/W8 et ne portent que sur ce quart :
+elles ne qualifient ni la trame entière ni une borne sous-quadratique.
+
 Le [rejeu S2/v17 sur le quart brut chaud](q34_batch_density_quarter_20260923/README.md)
 garde les mêmes trois entrées et compare moteur et filtre par lots CPU,
 K5/s8/W8. Leurs formes de cœur sont identiques :

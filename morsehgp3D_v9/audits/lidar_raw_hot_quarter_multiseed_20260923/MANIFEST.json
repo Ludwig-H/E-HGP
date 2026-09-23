@@ -1,0 +1,41 @@
+{
+  "baseline_seed_checked": "d1da73a520260923",
+  "cases": {
+    "s1_half": {
+      "density": "half",
+      "input_fnv": "a7ac7f264dcd4586",
+      "points_sha256": "8bd7ffcf8972ca5bbe96065aaef0b0e1d3f56329464e987484a95e9277fb1642",
+      "raw_ids_sha256": "ec8268390a7a59ae42462aef865bbf59b906396cae93622e91340a7fbac75129",
+      "seed": "7d1c9a5eb3f24680",
+      "sites": 15612
+    },
+    "s1_quarter": {
+      "density": "quarter",
+      "input_fnv": "d7c6d0b5f247c9bb",
+      "points_sha256": "2b28a9b5f056e4ba1de00114048cbf7850086af8e7d014d44a206093b5e99f2e",
+      "raw_ids_sha256": "48f23a2e64261e64c82a5c1b13458b957ed8ebb5d55e569d1043688c0d61e2a2",
+      "seed": "7d1c9a5eb3f24680",
+      "sites": 7755
+    },
+    "s2_half": {
+      "density": "half",
+      "input_fnv": "884aee932eb069bf",
+      "points_sha256": "32e7d6322203a5f47acfa4ed9a98bad00d351645a7e8dda68f7fee0e6438ed8c",
+      "raw_ids_sha256": "8a2486d32ff21ad3ea13e022e358b106f2a47d0071f4feb1f6e618d398681ef2",
+      "seed": "2b85d41e0c93a76f",
+      "sites": 15580
+    },
+    "s2_quarter": {
+      "density": "quarter",
+      "input_fnv": "ef15d7e6d3664ed4",
+      "points_sha256": "9c85ca9abae99c5c4c1108a99561b70980ceb41946ffbe47ddb8a86dd07fc084",
+      "raw_ids_sha256": "4c19e0515eff42e810820f5e749493b504c5bcf4b5f5d9ef32c2f4139c7ddf93",
+      "seed": "2b85d41e0c93a76f",
+      "sites": 7755
+    }
+  },
+  "schema": "mhgp9_hot_quarter_multiseed_inputs_v1",
+  "selection": "global splitmix64(raw_return_id XOR seed), first floor(n/4), first floor(n/2), then physical-sector intersection; original whole-scene u18/1mm coordinates",
+  "source_manifest_sha256": "6e64125abddbfcd589ba61cf747e493e455adec4beeaea81c2739ce98fe16095",
+  "source_physical_sector": "quarter_x_nonneg_y_neg"
+}

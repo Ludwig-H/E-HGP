@@ -391,8 +391,7 @@ class Builder {
       for (size_t begin = 0; begin < program.size();) {
         size_t end = begin + 1;
         const auto& level = balls[program[begin]].level;
-        const u32 run = level_run[program[begin]];
-        while (end < program.size() && level_run[program[end]] == run) ++end;
+        while (end < program.size() && same_exact_level(level, balls[program[end]].level)) ++end;
         // No anchor of this lot is installed until EVERY representative resolves.
         // Block slots are reused from lot to lot (no allocation per lot).
         if (lot_blocks.size() < end - begin) lot_blocks.resize(end - begin);
@@ -703,7 +702,7 @@ class Builder {
     return id;
   }
 
-  void order_block(OrderState& o, Block& block, BallId id, u64 prior_count) {
+  void order_block(OrderState& o, Block& block, BallId id, const ExactLevel& level, u64 prior_count) {
     block.ball = id; block.roots.clear(); block.contribution = 0; block.interior = false;
     add(o.st.anchor_blocks);
     if (balls[id].n_shell == balls[id].arity) add(o.st.regular_blocks); else add(o.st.extra_blocks);
@@ -720,7 +719,8 @@ class Builder {
       add(o.st.representatives);
       require(o.static_cursor < o.static_targets.size(), "full_ball_static_target_missing");
       const BallId target = o.static_targets[o.static_cursor++];
-      require(target < balls.size() && level_run[target] < level_run[id], "full_ball_static_target_not_strict");
+      require(target < balls.size() && compare_exact_level(balls[target].level, level) < 0,
+              "full_ball_static_target_not_strict");
       require(o.anchors[target] != kAbsent32, "full_ball_static_closed_anchor_missing");
       block.roots.push_back(order_root(o, o.anchors[target], prior_count));
     });
@@ -734,25 +734,24 @@ class Builder {
       return parents.empty() ? static_cast<u32>(ball) : kAbsent32;
     };
     if (blocks.size() == 1) {
-      // Same action as the grouped path, built only when it is published: an
-      // inert block (one parent, no contribution) allocates nothing, and the
-      // block keeps its roots buffer for the next lot (no steal, no regrowth).
       add(o.st.singleton_lots);
-      const auto& block = blocks.front();
-      const bool contributes = block.contribution || block.interior;
-      if (contributes) add(o.st.contributions);
-      u64 target;
-      if (block.roots.size() == 1) target = block.roots.front();
-      else {
-        if (block.roots.empty()) require(contributes, "full_ball_distinct_births");
-        target = order_new_node(o, level, block.roots, birth_of(block.roots, block.ball));
+      auto& block = blocks.front();
+      FullCoverageAction action;
+      action.parents.swap(block.roots);
+      if (block.contribution || block.interior) {
+        action.contributions.push_back({kBallTag | block.ball, block.contribution, block.interior});
+        add(o.st.contributions);
       }
-      if (block.roots.size() != 1 || contributes) {
-        auto& batch = o.draft.batches.emplace_back();
-        batch.level = level;
-        auto& action = batch.actions.emplace_back();
-        action.parents.assign(block.roots.begin(), block.roots.end());
-        if (contributes) action.contributions.push_back({kBallTag | block.ball, block.contribution, block.interior});
+      u64 target;
+      if (action.parents.size() == 1) target = action.parents.front();
+      else {
+        if (action.parents.empty()) require(action.contributions.size() == 1, "full_ball_distinct_births");
+        target = order_new_node(o, level, action.parents, birth_of(action.parents, block.ball));
+      }
+      if (action.parents.size() != 1 || !action.contributions.empty()) {
+        FullCoverageBatch batch{level, {}};
+        batch.actions.push_back(std::move(action));
+        o.draft.batches.push_back(std::move(batch));
       } else add(o.st.inert_blocks);
       require(o.anchors[block.ball] == kAbsent32 && target != absent, "full_ball_anchor_duplicate");
       o.anchors[block.ball] = static_cast<u32>(target);
@@ -819,12 +818,11 @@ class Builder {
     for (size_t begin = 0; begin < program.size();) {
       size_t end = begin + 1;
       const auto& level = balls[program[begin]].level;
-      const u32 run = level_run[program[begin]];
-      while (end < program.size() && level_run[program[end]] == run) ++end;
+      while (end < program.size() && same_exact_level(level, balls[program[end]].level)) ++end;
       if (o.lot_blocks.size() < end - begin) o.lot_blocks.resize(end - begin);
       const std::span<Block> blocks(o.lot_blocks.data(), end - begin);
       const u64 prior_count = o.current.levels.size();
-      for (size_t j = begin; j < end; ++j) order_block(o, blocks[j - begin], program[j], prior_count);
+      for (size_t j = begin; j < end; ++j) order_block(o, blocks[j - begin], program[j], level, prior_count);
       order_lot(o, blocks, level);
       begin = end;
     }
@@ -962,7 +960,6 @@ class Builder {
     }
   }
   std::vector<std::vector<BallId>> programs;
-  std::vector<u32> level_run;  // exact level run of each ball (validate_catalogue)
   std::unordered_map<BallId, local_plateau::ShellTable> extra;
   std::vector<FullCoveragePopulation> populations;
   std::vector<u64> population_ids, anchors, compressed;
@@ -1163,9 +1160,8 @@ class Builder {
     // certified double filter decides clear gaps, the exact U320 comparison
     // decides the rest, and equal levels keep their by_key rank.
     auto by_level = by_key;
-    std::vector<double> approx;  // certified filter values, reused by the level runs below
     if (std::fegetround() == FE_TONEAREST) {
-      approx.resize(balls.size());
+      std::vector<double> approx(balls.size());
       std::vector<BallId> rank(balls.size());
       for (size_t j = 0; j < by_key.size(); ++j) {
         rank[by_key[j]] = static_cast<BallId>(j);
@@ -1182,45 +1178,6 @@ class Builder {
     } else {
       std::stable_sort(by_level.begin(), by_level.end(), [&](BallId a, BallId b) {
         return compare_exact_level(balls[a].level, balls[b].level) < 0;
-      });
-    }
-    // Exact level runs: equal exact levels share one run index, increasing
-    // along by_level, so that for catalogue balls level(a) < level(b) <=>
-    // level_run[a] < level_run[b] and equality <=> equal runs. The certified
-    // double filter separates clear gaps; the exact comparison decides the
-    // rest. Phase 0 and phase A then compare runs instead of U320 products.
-    level_run.assign(balls.size(), 0);
-    {
-      // Parallel in two passes: run starts and their count per chunk, then
-      // chunk offsets and the runs themselves.
-      const size_t n = by_level.size();
-      const size_t chunks = std::max<size_t>(1, std::min<size_t>(n / 65536 + 1, 256));
-      const auto range = [&](size_t c) { return std::pair<size_t, size_t>{n * c / chunks, n * (c + 1) / chunks}; };
-      std::vector<unsigned char> starts(n, 0);
-      std::vector<u64> offsets(chunks, 0);
-      parallel_items(chunks, geometry_threads, [&](size_t c, size_t) {
-        const auto [begin, end] = range(c);
-        u64 count = 0;
-        for (size_t j = std::max<size_t>(1, begin); j < end; ++j) {
-          const BallId a = by_level[j - 1], b = by_level[j];
-          const bool clear = !approx.empty() && (approx[a] < approx[b] * kLevelFilterMargin ||
-                                                 approx[b] < approx[a] * kLevelFilterMargin);
-          const bool differ = clear || !same_exact_level(balls[a].level, balls[b].level);
-          starts[j] = differ ? 1 : 0;
-          count += differ ? 1 : 0;
-        }
-        offsets[c] = count;
-      });
-      u64 total = 0;
-      for (auto& offset : offsets) { const u64 count = offset; offset = total; total += count; }
-      require(total < kAbsent32, "full_ball_level_run_representation", FullBallStatus::kResourceExhausted);
-      parallel_items(chunks, geometry_threads, [&](size_t c, size_t) {
-        const auto [begin, end] = range(c);
-        u64 run = offsets[c];
-        for (size_t j = begin; j < end; ++j) {
-          if (j != 0 && starts[j] != 0) ++run;
-          level_run[by_level[j]] = static_cast<u32>(run);
-        }
       });
     }
     // Programs in by_level order, filled in parallel at per-chunk offsets
@@ -1616,12 +1573,13 @@ class Builder {
         BallId target;
         if (seed != seeds.end() && seed->key == first.key) {
           target = seed->ball;
-          require(level_run[target] < level_run[first.consumer], "full_ball_static_seed_not_strict");
+          require(compare_exact_level(balls[target].level, before) < 0, "full_ball_static_seed_not_strict");
           add(w.seeded);
         } else target = static_terminal(first.key, before, w.work, w.scratch, seeds);
         for (size_t r = groups[group]; r < groups[group + 1]; ++r) {
           const auto& request = requests[r];
-          require(level_run[first.consumer] <= level_run[request.consumer], "full_ball_static_request_chronology");
+          require(compare_exact_level(before, balls[request.consumer].level) <= 0,
+                  "full_ball_static_request_chronology");
           static_targets[request.ordinal] = target;
         }
       }

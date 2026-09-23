@@ -1223,6 +1223,14 @@ globaux sont les mêmes `30 847→61 694→123 389` à chaque comparaison ;
 calculs **séparés** et omettent les incidences entre secteurs : elles
 montrent où étudier la croissance, sans fournir un algorithme exact
 pour la trame entière ni une borne asymptotique.
+La [contre-épreuve multi-graine du quart brut chaud](lidar_raw_hot_quarter_multiseed_20260923/README.md)
+garde `x≥0,y<0` physique de 08/000000 et les mêmes octets u18 du plein.
+Avec deux autres décimations globales emboîtées, `p_core` K10 sur le lien
+1/2→plein vaut **2,029 / 1,971 / 2,095** pour les trois graines ; le
+franchissement de 2 varie avec le tirage, la masse par cœur reste
+sensible. À K5 sur le premier lien, **2,002 / 1,957 / 1,860**. Les huit
+nouvelles sondes restent CPU/W8 locales, `complete_relative`, et ce
+seul quart ne représente ni plusieurs séquences ni la trame entière.
 La forme du cœur n'est pas le seul travail volumineux. Sur le plein brut
 K5 aux trois densités, `dead_uniform_tests` compte
 165,153→467,564→1 459,833 M tests (pentes 1,501/1,643),
