@@ -2897,3 +2897,54 @@ dans **`e2fd6866`**, et la campagne v3 a été arrêtée avant tout reçu.
   filtre actuel.
 
 Résultats et README à la fin de la campagne.
+
+### Mise à jour 13 h 05 UTC — préflight B du nouveau lanceur CUDA WIP
+
+Le worktree de D contient désormais `filter_runner.cu` et un probe qui
+prévoit le contrôle de **tous** les masques et visites, sans reçu G4 pour
+l'instant. La [note B mise à jour](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PORTE_FILTRE_GPU_20260923.md)
+relève quatre points avant dépense : valider `FilterInput` (IDs/rangs/K,
+produits de tailles et `rect_count<=INT_MAX` pour le scan CUB), borner
+les buffers `O(R+P)`, mesurer l'overhead du `pair_kernel` qui fait une
+recherche binaire `log R` **par paire** (≈0,5 milliard d'itérations pour
+R11/000000/K5), et distinguer meilleur passage GPU chaud de la chaîne
+intégrée. Aucun CTest CUDA positif n'est encore enregistré ; le gate
+hôte ne teste pas les transferts. Ce sont des observations du WIP,
+pas un jugement du port final.
+
+### Mise à jour 13 h 06 UTC — juge C v4, corrections et réserves
+
+Les deux corrections v3 (famille haute q3 régulière, égalité exacte des
+coquilles) sont confirmées. La [contrelecture B v4](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_JUGES_C_V4_20260923.md)
+garde trois réserves : `ball.key` non jugée indépendamment ;
+`git`/`sha256sum` du bloc de provenance toujours non bloquants ; sites
+`LONG_SITE` extraits du parcours **déjà élagué**, donc un site dont
+toutes les incidences longues sont perdues échappe au compare ciblé.
+La vérification JSON annexée examine une source antérieure au v4, pas
+sa campagne relancée. Aucun reçu v4 final à cette lecture.
+
+### Mise à jour 13 h 07 UTC — précision sur les demi-scènes brutes K10
+
+La campagne A `6c1766f8` a été contre-vérifiée : manifeste, binaire,
+six entrées, double exécution et pentes sont cohérents. Les deux moitiés
+pleines totalisent **517 507 111** formes cœur, soit **41,78 %** du plein,
+pour 96,90 % des charges, 99,59 % des boules et 91,09 % du CPU·s.
+Il s'agit d'une seule scène, CPU partagé, ni borne globale ni contrat.
+La phrase « float32 par défaut » du README de ce reçu était périmée
+pour v9 ; B l'a corrigée en « float32 exact (objectif secondaire) » et
+a recalculé son entrée dans `SHA256SUMS` (28/28 vérifications passent).
+
+### Mise à jour 13 h 08 UTC — sûreté du réemploi des formes cœur
+
+La proposition A de fusion à rebours cœur⊂cover est mathématiquement
+exacte sous **même index et même arête canonisée** : les plages de rangs
+sont croissantes et chaque forme ne dépend que de l'arête et du site.
+Piège concret du port actuel : `core` est détruit à la fin du `if` dans
+`wspd_q34.cpp` **avant** la construction du cover complet, et le prover
+ne garde pas les rangs des formes compactées. Prolonger la vie du cœur
+ou conserver ses plages ; invalider `loaded_` avant toute extension et
+ne le rétablir qu'après réussite. Le ledger historique `form_sites` doit
+continuer à représenter tous les sites chargés, avec `reused/new` séparés.
+Mesurer la masse des cœurs des **seules arêtes ouvertes** et le coût de
+fusion : les totaux agrégés actuels ne donnent pas le gain potentiel ;
+ce levier ne change ni covers, ni paires, ni exposant global.

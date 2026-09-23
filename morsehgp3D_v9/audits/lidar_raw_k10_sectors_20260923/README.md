@@ -73,7 +73,7 @@ p=log(W₂/W₁)/log(n₂/n₁) changent la géométrie lorsque la densité ou l
 secteur change : elles ne prouvent aucune borne asymptotique. La somme
 des tours de morceaux ne reconstruit pas la tour de la scène entière.
 Le CPU local partagé et une seule scène ne qualifient pas G4, GPU,
-float32 par défaut ni le contrat industriel.
+float32 exact (objectif secondaire de v9) ni le contrat industriel.
 
 Lecture reproductible depuis les sources versionnées : régénérer les
 entrées avec generate.py du reçu K5, puis lancer run_and_check.py verify

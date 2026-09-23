@@ -62,11 +62,11 @@ résultat ne se convertit pas directement en accélération face au CPU
 
 ## Port encore exploratoire au 23 septembre
 
-Dans le chantier lu, `src/gpu/witness_filter.hpp` transpose les bornes
+Dans la première lecture du chantier, `src/gpu/witness_filter.hpp` transpose les bornes
 entières, crédits stricts et exclusions du filtre CPU dans une fonction
 hôte/device ; aucune divergence arithmétique concrète n'a été trouvée
 sous les préconditions u18 et index certifié. Mais
-`src/gpu/filter_runner.hpp` n'a **pas encore d'implémentation CUDA** :
+`src/gpu/filter_runner.hpp` n'avait **pas encore d'implémentation CUDA** :
 ni noyau, ni scan, ni transferts, ni temps G4, ni masques GPU publiés.
 La porte hôte `tests/gpu/witness_filter_port_gate.cpp` compare des
 rectangles synthétiques et des paires échantillonnées, sans construire
@@ -105,3 +105,39 @@ Verdict : porte de fidélité hôte utile ; **backend GPU et contrat non
 qualifiés**. La priorité d'architecture reste la réduction du travail
 q3/q4 et la parallélisation de l'aval, pas une interprétation du seul
 filtre comme solution de tour.
+
+## Relecture du nouveau lanceur CUDA mutable, vers 13 h 05 UTC
+
+Le développeur a depuis ajouté `src/gpu/filter_runner.cu`, un stub et
+`bench/gpu_filter_probe.cpp` dans son **worktree non commité**. La sonde
+compare maintenant, par conception, tous les masques du GPU aux masques
+CPU avec/sans cache et les nombres de visites. Elle n'a toujours aucun
+reçu d'exécution CUDA ; CMake n'enregistre qu'un CTest positif du port
+**hôte**, plus un refus d'argument du probe. Cette section est un
+préflight du WIP, non une qualification publiée.
+
+- `run_filters` ne valide pas `FilterInput` : `rect_a/b` peuvent indexer
+  hors `nodes`, un rang peut dépasser `rank_points`, et `K=0` invalide les
+  seuils. `DeviceBuffer::allocate` multiplie `count*sizeof(T)` sans test ;
+  `3*rank_count` et la conversion de `rect_count` vers `int` pour CUB
+  ne sont pas bornées. Un préflight hôte doit refuser ces cas **avant**
+  un lancement device ou une allocation.
+- Le scan des masses et la recherche du dernier offset de rectangle
+  sont cohérents en lecture statique, y compris les rectangles vides.
+  Leur coût est toutefois à mesurer : `pair_kernel` effectue une
+  recherche binaire indépendante dans environ 3,13 M offsets pour
+  **chacune** des 23,69 M paires de R11/000000/K5, soit environ
+  0,5 milliard d'itérations de recherche avant les DFS. Un découpage
+  par tuiles de rectangles/paires éviterait ce terme `P log R` et
+  bornerait les buffers sans changer les masques.
+- Les événements couvrent bien les copies H2D/D2H **de chaque passe**,
+  le scan et les noyaux, mais `total_ms` conserve la meilleure passe
+  chaude après création du contexte et allocations initiales ;
+  `first_total_ms` garde le premier passage. Index/front, construction
+  de requêtes, copies CPU de référence, intégration catalogue et FULL
+  sont hors de ces durées. Publier le premier passage, la passe chaude,
+  le mur complet du probe et le mur de chaîne distinctement.
+- Des événements CUDA créés avant une erreur ne sont détruits qu'au
+  succès ; corriger cette fuite de ressource. Le coût et la compilation
+  du `__int128` device restent à constater sur G4, sans conclusion
+  avant le build et un test positif.
