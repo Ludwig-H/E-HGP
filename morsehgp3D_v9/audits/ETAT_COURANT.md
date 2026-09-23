@@ -110,13 +110,17 @@ ces tailles voisines ne prouvent aucune pente sous-quadratique. Voir la
 [lecture des mesures](CONTRE_AUDIT_B_PREMIER_G4_20260922.md) et la
 [contrelecture du protocole](CONTRE_AUDIT_B_G4_R1_ET_SCHEMA_V2_20260922.md).
 
-Le [préflight B de G4 R2](CONTRE_AUDIT_B_G4_R2_PREFLIGHT_20260923.md)
-porte sur le paquet `0b29b6c3`, treize cas W48/W24 statiques à deux
-répétitions pour les six cas principaux. À 00:38 UTC la session était
-encore en cours ; **aucune sortie v3 normale ne passe le contrôle de schéma**
-`probe counters tower_work` après calcul. Son statut final et son arrêt
-ciblé restent à vérifier au reçu ; ses éventuels chronos bruts ne
-qualifieront pas le contrat.
+La [session G4 R2](CONTRE_AUDIT_B_G4_R2_PREFLIGHT_20260923.md) sur le
+paquet `0b29b6c3` est close avec `worker_failed/probe_failed` : les
+treize sondes invitées ont calculé et rendu code 0, mais le worker a
+refusé les treize JSON sur `tower_work`. L'arrêt ciblé est certifié ;
+**aucun reçu G4 accepté** n'en découle. Les médianes W48 des chronos
+bruts de chaîne K5 sont 13,252/10,455/19,946 s et K10
+50,071/37,317/64,289 s pour 08/000000, 000100, 000200.
+Sur 000000/K10, le registre brut annonce 17,947 milliards de tests
+ponctuels d'atlas q4 et 12,392 milliards d'insertions d'IDs de nœuds
+frontaliers : le travail total, et pas seulement le nombre de workers, doit
+changer. Ces diagnostics exploratoires ne qualifient ni 1 s ni GPU.
 
 Le chiffre v8 de 104,63 s portait sur le seul flux q3/q4 en mode digest :
 aucune régression ni accélération v9 ne se déduit de cette comparaison non
