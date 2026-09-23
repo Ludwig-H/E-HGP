@@ -1,0 +1,2 @@
+scene_00_full.u32le n=39885 kmax=5 balls_engine=1306696 balls_batch=1306696 first_difference=none digest_engine=67450c64611075b1 digest_batch=67450c64611075b1 same_catalogue=1 same_orders=1 same_digest=1 same_euler=1 euler=holds batch_used=1 batch_backend=cpu batch_rectangles=3133819 batch_survivors=2043612
+exit=0 expected=0

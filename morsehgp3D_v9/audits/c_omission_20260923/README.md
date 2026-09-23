@@ -76,6 +76,8 @@ Pour une coquille régulière ($u=q$) :
   `STATUS`) ;
   `verification_juge_q3.json` (vérification adverse du juge q3).
 - `run_digest_campaign.sh`, `results/digest/` : condensés des tours acceptées.
+- `batch_diff.cpp`, `run_batch_diff.sh`, `results/batch_diff_v1/` : différentiel
+  moteur / lots du chemin q3/q4 S2 (section finale).
 - `results/` : sorties brutes et `TABLEAUX.md`. Les coupes LiDAR 8k
   (`s00`, `s01`, `s02`, disques emboîtés du runner v12) et la trame entière
   08/000000 ne sont pas copiées ici : `regen_inputs.py` les régénère bit à
@@ -476,6 +478,45 @@ corrigées) :
   ne valent des millimètres qu'en mode `file`.
 - Les sites sont tirés par une permutation à graine publiée, distincte de
   celle du juge q2.
+
+## Différentiel moteur / lots (S2, référence CPU)
+
+Le chemin q3/q4 par lots du développeur (`a6d81f9c`, levier
+`q34_batch_filter`) décide tous les rectangles puis toutes les paires en un
+appel, que le GPU peut exécuter. A et B ont montré que cet appel est une
+frontière de confiance (un doublon ou des masques nuls passent les identités
+de masse). `batch_diff.cpp` exécute deux chaînes sur les mêmes points
+(moteur, puis lots en référence CPU) et compare les deux catalogues
+**complets**, champ par champ après tri canonique (clé, niveau, arité,
+intérieurs, coquille), puis les ordres, le condensé FULL et les sommes
+d'Euler. `--inject=drop-one` retire une boule du catalogue par lots et doit
+être vu. Lanceur `run_batch_diff.sh`, sources épinglées à `111f871d`
+avant exécution, produit à `a6d81f9c`, `STATUS=0`, sorties dans
+`results/batch_diff_v1/` :
+
+| cas | Kmax | boules moteur | boules lots | première différence | même condensé FULL | mêmes ordres | Euler | survivants du lot | code / attendu |
+| --- | ---: | ---: | ---: | --- | --- | --- | --- | ---: | --- |
+| `lidar_s00_8000_k10` | 10 | 1 567 942 | 1 567 942 | none | oui | oui | holds | 948 457 | 0 / 0 |
+| `lidar_s00_8000_k5` | 5 | 342 181 | 342 181 | none | oui | oui | holds | 414 260 | 0 / 0 |
+| `lidar_s01_8000_k10` | 10 | 987 076 | 987 076 | none | oui | oui | holds | 1 042 440 | 0 / 0 |
+| `lidar_s01_8000_k5` | 5 | 257 607 | 257 607 | none | oui | oui | holds | 486 984 | 0 / 0 |
+| `lidar_s02_8000_k10` | 10 | 1 083 173 | 1 083 173 | none | oui | oui | holds | 619 237 | 0 / 0 |
+| `lidar_s02_8000_k5` | 5 | 278 809 | 278 809 | none | oui | oui | holds | 275 467 | 0 / 0 |
+| `lidar_scene00_full_k10` | 10 | 5 512 670 | 5 512 670 | none | oui | oui | holds | 4 507 278 | 0 / 0 |
+| `lidar_scene00_full_k5` | 5 | 1 306 696 | 1 306 696 | none | oui | oui | holds | 2 043 612 | 0 / 0 |
+| `mutant_drop_one_s02_k5` | 5 | 278 809 | 278 808 | 139404 | oui | oui | holds | 275 467 | 1 / 1 |
+| `uniform_8000_k10` | 10 | 3 088 676 | 3 088 676 | none | oui | oui | holds | 891 809 | 0 / 0 |
+
+**Lecture.** Sur les trois coupes LiDAR 8k à K5 et K10, la trame entière
+08/000000 sans sol à K5 et K10 (5 512 670 boules, 4 507 278 survivants du
+lot à K10) et l'uniforme 8k à K10, les catalogues sont **identiques clé par
+clé**, de même que les tours FULL et les sommes d'Euler ; le mutant est
+détecté. Les verdicts des juges d'échantillon rendus sur le chemin moteur
+valent donc pour le chemin par lots sur ces entrées. Ce n'est ni une
+qualification du GPU (le lot CPU de référence partage `filter_impl` avec le
+moteur ; une erreur commune aux deux ne serait vue que par les juges
+indépendants et Euler), ni une mesure de temps, ni une preuve pour d'autres
+nuages.
 
 Bibliothèques : la sonde d'omission a été compilée contre les sources de
 `67fce4e9` (v14) ; la première campagne du juge q2 contre celles de

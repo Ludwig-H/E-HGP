@@ -72,11 +72,18 @@ btype=$(grep '^CMAKE_BUILD_TYPE:' "$BUILD/CMakeCache.txt") || die "CMAKE_BUILD_T
 [ "${btype#*=}" = "Release" ] || die "build non Release (${btype#*=})"
 python3 "$HERE/regen_inputs.py" --check "$D" > "$O/inputs_check.txt" 2>&1 || die "entrees non conformes a regen_inputs.EXPECTED"
 provenance "$SRC" "$O/PROVENANCE.txt" || die "provenance git"
-nice -n 19 cmake --build "$BUILD" --parallel 3 --target mhgp9_chain mhgp9_gen > "$O/build_libs.log" 2>&1 || die "build bibliotheques"
+# Depuis S2 (a6d81f9c), mhgp9_chain depend de mhgp9_gpu (lanceur CUDA ou stub sans CUDA).
+GPU_LIB=""
+if grep -q 'mhgp9_gpu' "$SRC/morsehgp3D_v9/CMakeLists.txt"; then
+  nice -n 19 cmake --build "$BUILD" --parallel 3 --target mhgp9_chain mhgp9_gen mhgp9_gpu > "$O/build_libs.log" 2>&1 || die "build bibliotheques"
+  GPU_LIB="$BUILD/libmhgp9_gpu.a"
+else
+  nice -n 19 cmake --build "$BUILD" --parallel 3 --target mhgp9_chain mhgp9_gen > "$O/build_libs.log" 2>&1 || die "build bibliotheques"
+fi
 RECIPE="g++ -O3 -DNDEBUG -std=c++20 -Wall -Wextra -Wpedantic -Werror -I$SRC/morsehgp3D_v9 -I$SRC/morsehgp3D_v9/src/gen -isystem $BOOST_INC"
 Q2="$O/q2_sample_judge"; Q3="$O/q3_sample_judge"
-$RECIPE "$HERE/q2_sample_judge.cpp" "$BUILD/libmhgp9_chain.a" "$BUILD/libmhgp9_gen.a" -lpthread -o "$Q2" || die "compilation q2"
-$RECIPE "$HERE/q3_sample_judge.cpp" "$BUILD/libmhgp9_chain.a" "$BUILD/libmhgp9_gen.a" -lpthread -o "$Q3" || die "compilation q3"
+$RECIPE "$HERE/q2_sample_judge.cpp" "$BUILD/libmhgp9_chain.a" "$BUILD/libmhgp9_gen.a" $GPU_LIB -lpthread -o "$Q2" || die "compilation q2"
+$RECIPE "$HERE/q3_sample_judge.cpp" "$BUILD/libmhgp9_chain.a" "$BUILD/libmhgp9_gen.a" $GPU_LIB -lpthread -o "$Q3" || die "compilation q3"
 provenance "$SRC" "$O/PROVENANCE.after_build.txt" || die "provenance git apres construction"
 cmp -s "$O/PROVENANCE.txt" "$O/PROVENANCE.after_build.txt" || die "depot modifie pendant la construction"
 st=$(git -C "$HERE" status --porcelain -- q2_sample_judge.cpp q3_sample_judge.cpp run_judges_v7_gates.sh regen_inputs.py) || die "git status juges"

@@ -1,0 +1,2 @@
+uniform_8000 n=8000 kmax=10 balls_engine=3088676 balls_batch=3088676 first_difference=none digest_engine=6f6243900bf9235a digest_batch=6f6243900bf9235a same_catalogue=1 same_orders=1 same_digest=1 same_euler=1 euler=holds batch_used=1 batch_backend=cpu batch_rectangles=3810716 batch_survivors=891809
+exit=0 expected=0

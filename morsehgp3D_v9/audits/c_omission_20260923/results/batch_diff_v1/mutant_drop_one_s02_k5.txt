@@ -1,0 +1,2 @@
+s02_k5_s8_w8_r0_nested_8000.u32le n=8000 kmax=5 balls_engine=278809 balls_batch=278808 first_difference=139404 digest_engine=9ef07ff0d2f60c17 digest_batch=9ef07ff0d2f60c17 same_catalogue=0 same_orders=1 same_digest=1 same_euler=1 euler=holds batch_used=1 batch_backend=cpu batch_rectangles=542408 batch_survivors=275467
+exit=1 expected=1

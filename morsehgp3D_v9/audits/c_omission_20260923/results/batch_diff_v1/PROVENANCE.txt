@@ -1,0 +1,8 @@
+commit=111f871da1ed6448ead23679023ea41bd70be0fe
+src_commit=a6d81f9ce9f7e916384b044b771665f621a086eb
+49f8a1ac29b520cb41105715597acc6c0f0518f6242de4dcda43e3b8e34c9a13  /workspaces/E-HGP/build/v9-audit-c-publish/morsehgp3D_v9/audits/c_omission_20260923/batch_diff.cpp
+6f411eddb5002980062645304d5c677844eb11015f89d48322826eb507abae82  /workspaces/E-HGP/build/v9-audit-c-publish/morsehgp3D_v9/audits/c_omission_20260923/run_batch_diff.sh
+1ae3f0744c17a38884e1c60fac7502f5f200a7c4250a806d84a3ebab2e51afac  /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/batch_diff_v1/batch_diff
+87048ca79150b3b78701eaeec166c5ccdeb0bc4d27446707fc95f7d665e783fd  /workspaces/E-HGP/build/v9-audit-c-scale/libmhgp9_chain.a
+d368ae6caae561e317484d2858f43314e6e0b130b94923743de41bc28ca8c8c0  /workspaces/E-HGP/build/v9-audit-c-scale/libmhgp9_gen.a
+2d02810d53f92fae6146b57557a58c4668ade95f9450d88d8739f2e058ed000c  /workspaces/E-HGP/build/v9-audit-c-scale/libmhgp9_gpu.a

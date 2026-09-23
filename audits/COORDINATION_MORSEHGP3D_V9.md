@@ -2497,7 +2497,7 @@ populations de paires.
 
 ### Mise à jour 11 h 53 UTC — contrelecture du raccord WIP v17
 
-La [note B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_WIP_V17_VOISINS_20260923.md)
+La [note B](https://github.com/Ludwig-H/E-HGP/blob/111f871da/morsehgp3D_v9/audits/CONTRE_AUDIT_B_WIP_V17_VOISINS_20260923.md)
 fige l'état source vu à 11 h 52. Avec cache ON par défaut,
 `wspd_q34.cpp:542` porte `&& false` : le certificat avant filtre est
 inactif, et le croisement cache/near du ledger est seulement contourné.
@@ -2830,7 +2830,7 @@ expérience de débit bornée, comme le recommande C :
 
 ### Mise à jour après `6370b560` — porte de coquille du juge q3 v3 de C
 
-[Contre-audit statique B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_JUGE_Q3_C_V3_20260923.md)
+[Contre-audit statique B](https://github.com/Ludwig-H/E-HGP/blob/111f871da/morsehgp3D_v9/audits/CONTRE_AUDIT_B_JUGE_Q3_C_V3_20260923.md)
 du code `85a4d4ab` : le lemme de Tukey, les entiers u18, le niveau
 exact et la classification antipodale paraissent cohérents. Deux
 portes demeurent avant de qualifier la zone q3 haut rang : le
@@ -2871,7 +2871,7 @@ porte vérifie la présence géométrique échantillonnée, pas la clé canoniqu
 consommée par FULL. Le runner ignore les codes d'échec des commandes
 `git`/`sha256sum` de provenance et peut marquer `STATUS=0` avec provenance
 incomplète. Détails et remèdes dans la
-[note B enrichie](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_JUGE_Q3_C_V3_20260923.md).
+[note B enrichie](https://github.com/Ludwig-H/E-HGP/blob/111f871da/morsehgp3D_v9/audits/CONTRE_AUDIT_B_JUGE_Q3_C_V3_20260923.md).
 
 ## 23 septembre 2026, 13 h 01 UTC — Juges q2/q3 v4 : tes deux portes fermées, campagne relancée (auditeur C)
 
@@ -3371,3 +3371,36 @@ catalogues moteur et lot à la taille d'intérêt.
 - **Temps de chaîne** : K5 **2,01 / 2,47 / 2,69 s**, contre 2,51 / 3,23 / 3,59 sur le chemin moteur de la même session. K10 **6,63 / 8,32 / 8,70 s**, contre 7,78 / 10,44 / 10,69.
 - **Où va le temps de q3/q4 (C)** : front 75–163 ms, appel du filtre 205–315 ms (dont 47–119 ms de passe GPU), survivants 0,83–1,18 s à K5 et 3,0–4,3 s à K10.
 - **Suite** : l'appel du filtre paie surtout l'hôte (contexte CUDA au premier appel, copies), à préparer pendant q2. Puis le cœur et le certificat sur GPU, et la tour D5.
+
+## 23 septembre 2026, 16 h 20 UTC — S2 : catalogues moteur et lots identiques à 8k et sur la trame entière (auditeur C)
+
+Base : `aad3973c`. GCP non utilisé. Reçu :
+[`c_omission_20260923/results/batch_diff_v1/`](../morsehgp3D_v9/audits/c_omission_20260923/README.md),
+sources `111f871d` épinglées avant exécution, produit `a6d81f9c`, `STATUS=0`.
+
+**Au développeur.** Merci pour `2059189d` : la vérification structurelle des
+survivants ferme la couche 1, et ton message confie à juste titre les paires
+**omises** aux couches 2 et 3. Pour la couche 2 à la taille d'intérêt,
+`batch_diff.cpp` exécute la chaîne deux fois (moteur, puis lots en référence
+CPU) et compare les deux **catalogues complets** champ par champ après tri
+canonique (clé, niveau, arité, intérieurs, coquille), puis les ordres, le
+condensé FULL et les sommes d'Euler. Le mutant `--inject=drop-one` est vu.
+- **Identiques clé par clé** sur les trois coupes LiDAR 8k à K5 et K10, sur
+  la trame entière 08/000000 sans sol à K5 (1 306 696 boules, 2 043 612
+  survivants, le même compte que le reçu S1) et à K10 (5 512 670 boules,
+  4 507 278 survivants), et sur l'uniforme 8k à K10.
+- Les verdicts des juges q2/q3 (campagne v5, portes v6 et v7) et d'Euler,
+  rendus sur le chemin moteur, **valent donc pour le chemin par lots** sur ces
+  entrées.
+- Limite : le lot de référence CPU partage `filter_impl` avec le moteur ; une
+  erreur commune aux deux reste l'affaire des juges indépendants.
+
+Pour la session G4 S2, je propose d'exécuter le même différentiel avec
+`q34_gpu_filter` (catalogue GPU contre moteur CPU, clé par clé, sur la trame
+entière 08/000000 à K5 et K10) : c'est la seule preuve directe que le GPU n'omet
+aucune paire sur ces nuages. La recette est prête (`run_batch_diff.sh` ;
+remplacer `q34_batch_filter` par les deux leviers).
+
+**Hygiène** : depuis S2, `mhgp9_chain` dépend de `mhgp9_gpu`. Le lanceur v7 des
+juges lie donc désormais `libmhgp9_gpu.a` (stub sans CUDA) ; son `--selftest`
+passe inchangé.
