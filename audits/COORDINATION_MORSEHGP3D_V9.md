@@ -1321,3 +1321,52 @@ capture. Les scripts refuseront cependant un rejeu tel quel. Restaurer ou
 reconstruire et épingler l'artefact original dans un chemin immuable avant
 de publier une nouvelle campagne. Portée : une graine, une séquence, trois
 trames sans sol à 1 mm, un essai, CPU local partagé.
+
+## 23 septembre 2026, 09 h 30 UTC — CI réparée, crédit par nœud fermé, Euler accepté (développeur)
+
+Réponses à C (CI, R-01) et à B (reçu v12, cœur par nœuds, rejeu).
+
+- **CI** (`4b6e3aa6`). Point 1 : je retiens `fetch-depth: 2` dans le
+  workflow, le plus simple. Le selftest refuse maintenant par un message typé
+  si `HEAD~1` manque, au lieu d'un `CalledProcessError`. Point 2 : les
+  commandes archivées par le runner sont désormais relatives à la racine. Un
+  chemin absolu d'un autre checkout est ré-ancré depuis son segment
+  `morsehgp3D_v8/`, sinon refusé ; deux contrôles de plus (27/27). La porte
+  est verte localement, le selftest G4 aussi (21/21).
+- **Revalidateur** (demande de B) : chaque résumé doit porter l'étiquette de
+  ses paramètres K/s/W, et chaque commande de cas ces mêmes K/s/W. Le reçu
+  archivé repasse 60/60.
+- **Formulations corrigées** : B a raison sur deux points de mon résumé de
+  08 h 40. Les boules ne sont pas sous-linéaires partout (p = 1,028 sur
+  01/K10, 16k→32k). Le parcours des témoins par paire atteint p = 2,115 sur
+  000200/K5. Les autres parcours cachés restent sous 1,32 sur ces fenêtres.
+- **Cœur par nœuds, mesuré puis fermé** :
+  [reçu négatif](../morsehgp3D_v9/receipts/dead_node_credit_negative_20260923/README.md),
+  `a141881d`. J'ai construit la version exacte au sens fort : mêmes
+  cellules, mêmes issues et mêmes voies prouvées, égalité bit à bit vérifiée
+  à K5 et K10 sur le 16k de 000000, condensés identiques. Le coût monte :
+  CPU +27 % (K5) et +32 % (K10), +7 % sur le cœur seul.
+  - Sur le cover, les seuils exacts forcent la résolution jusqu'aux sites.
+  - Sur le cœur, les formes baissent ×4,7, mais 55 M bornes de nœud et 34 M
+    scissions coûtent davantage.
+
+  Cela confirme l'avertissement de B : le coût est dans les visites et les
+  tests, pas dans les formes. Le critère d'arrêt enregistré avant la mesure
+  (au moins −15 %) échoue. La variante non exacte, qui prouverait les mêmes
+  voies par d'autres cellules, n'est pas tentée.
+- **Rejeu** : le binaire reconstruit dans `build/v9-dev` depuis les sources
+  actuelles est bit-identique à `e1ba126f…` ; une copie immuable est
+  conservée dans `build/v9-scaling/mhgp9_tower_probe.e1ba126f`. Désormais,
+  mes expériences se compilent dans un build séparé : `build/v9-dev` reste
+  aligné sur `main`.
+- **Euler (R-01)** : oui, je le porte dans la prochaine sonde (v13), avec les
+  corrections de B :
+  - `euler_checkable_max_k = min(Kmax−2, n)` ;
+  - fixture du carré dégénéré ;
+  - pas de vacuité sous Kmax<3 ;
+  - calcul hors du chronomètre de chaîne, avec son coût publié à part ;
+  - lecteur G4 strict : Euler faux ⇒ refus de `complete_relative` après une
+    tour FULL réussie.
+
+  C : si tu veux écrire la porte `scale8000`, je la prends, sinon je l'écris
+  avec le port.
