@@ -36,6 +36,20 @@ trames 08/000000, 000100 et 000200 sont d'une seule séquence, pas une
 qualification multi-séquence. Les coupes capteur servent au diagnostic de
 croissance, jamais à remplacer une trame entière.
 
+Pour ce diagnostic LiDAR, les **deux moitiés** sont séparées par le plan
+capteur `x=0` et les **quatre quarts** par `x=0` et `y=0` : deux plans
+verticaux contenant le capteur, sans sous-échantillonnage ; les points sur
+un plan vont au côté non négatif. Il faut publier ces découpes pour la
+trame brute entière aussi bien que pour le régime sans sol.
+Les sept fichiers actuels découpent la **géométrie sur grille 1 mm** : leurs
+IDs sont disjoints et reforment exactement chaque trame sans sol. Une
+coordonnée float32 brute de 08/000200, négative à 0,09 mm du plan, devient
+`x=0` sur grille et change de moitié ; la
+[contrelecture des découpes](DECOUPES_CAPTEUR_LIDAR_BRUT_ET_GRILLE_20260923.md)
+sépare donc explicitement coupe brute et coupe quantifiée. Les disques
+emboîtés 8k/16k/32k du runner de pente sont un **autre** diagnostic ; ils
+ne remplacent ni ces découpes par plans ni la trame entière.
+
 La chaîne produit des candidats de miniballes k-Gabriel locales, recoupe
 leurs `BallKey`, recense exactement chaque clé **émise**, puis construit
 la tour FULL relative à ce catalogue. Elle vérifie le support minimal
@@ -299,14 +313,22 @@ Le [contre-audit du grand-livre q3/q4](LEDGER_VISITES_CACHEES_Q34_20260923.md)
 montre que six parcours d'index déjà comptés par le générateur et les
 sites balayés par le sweep q4 n'étaient pas projetés dans la sonde
 FULL v11 de R7b. Le port v12 `4530644b` les publie maintenant ; ses
-identités/bornes sont cohérentes avec les options actuelles de chaîne,
-mais leur croissance appariée reste à mesurer.
+identités/bornes sont cohérentes avec les options actuelles de chaîne.
 Ils incluent les témoins par rectangle/paire, l'accès aux graines q3
 par arête et trois parcours q4 par arête. Sur un index à `2n−1` nœuds,
 leurs bornes par appel restent linéaires en `n` ; les comptes R7b publiés
 ne permettent donc pas d'écarter un coût caché
-`(rectangles + paires recherchées + arêtes q3/q4)×n`. Publier ces
-comptes sur les coupes LiDAR appariées avant de conclure sur la pente.
+`(rectangles + paires recherchées + arêtes q3/q4)×n`. Le reçu v12
+ci-dessous publie leur croissance sur trois trames LiDAR appariées.
+
+Le [reçu local v12](../receipts/lidar_scaling_local_20260923/README.md)
+archive trois trames sans sol à K5/K10 : **60 cas de sonde et six résumés**,
+soit 66 JSON ; la formule « 66 cas » du README compte aussi les résumés.
+Sur 08/000200/K10, de 16k à 32k, les paires développées font ×4,27 et les
+sites énumérés dans les cœurs ×7,25, alors que le catalogue de boules fait
+×1,86. C'est un signal local de coût caché à attaquer avant le cœur,
+pas une borne asymptotique. Les temps viennent d'un hôte CPU partagé ; le
+reçu n'est ni G4 ni une preuve de contrat ou de complétude absolue.
 
 Le [reçu local de pente LiDAR v11](CONTRE_AUDIT_PENTE_LIDAR_LOCALE_PARTIELLE_20260923.md)
 est intègre (15/15 SHA et entrées vérifiées) mais partiel : une seule
