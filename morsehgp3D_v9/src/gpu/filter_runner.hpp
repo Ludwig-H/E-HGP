@@ -101,10 +101,16 @@ FilterOutput run_filters(const FilterInput& input);
 // rectangle), with their spatial ranks and lanes; plus the rectangle masks
 // and the lane rejections among the expanded pairs. Same validation and
 // kernels as run_filters; `repeats` is ignored (one pass).
+// Why a batch pass produced no answer: the input guard refused it, no device
+// (or a build without CUDA), a capacity limit (CUB int range, device memory,
+// host allocation), or a fault of the pass on a present device.
+enum class BatchError : u8 { none, input_guard, no_device, capacity, device_fault };
+
 struct BatchOutput {
   bool available = false;
   std::string device;
   std::string error;  // non-empty: nothing below is valid
+  BatchError error_kind = BatchError::none;
   bool stack_failure = false;
   std::vector<u8> rect_masks;
   std::vector<u32> survivor_a, survivor_b;  // spatial ranks

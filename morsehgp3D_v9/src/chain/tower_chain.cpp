@@ -68,10 +68,13 @@ void require(bool ok, const char* reason) {
   if (!ok) fail(ChainStatus::kInvariantViolated, reason);
 }
 
-// Device absent or CUDA error: an explicit refusal of the q34_gpu_filter
-// lever, never a silent CPU fallback.
-struct GpuUnavailable : std::runtime_error {
-  using std::runtime_error::runtime_error;
+// Why the device batch call gave no answer, as a chain status (never a
+// silent CPU fallback): no device or an input-guard refusal (invalid_input,
+// the lever cannot be honoured), a capacity limit (resource_exhausted), a
+// fault of the pass on a present device (invariant_violated).
+struct GpuRefusal : std::runtime_error {
+  ChainStatus status;
+  GpuRefusal(ChainStatus s, const std::string& reason) : std::runtime_error(reason), status(s) {}
 };
 
 // The batch call of gen::run_wspd_q34_batched on the device: flat copy of the
@@ -110,8 +113,19 @@ gen::Q34FilterBatch gpu_filter_batch(const gen::Q2CensusIndex& index, unsigned k
   in.rect_count = rectangles.size();
   in.kmax = kmax;
   auto out = gpu::run_filter_batch(in);
+  switch (out.error_kind) {
+    case gpu::BatchError::none:
+      break;
+    case gpu::BatchError::input_guard:
+    case gpu::BatchError::no_device:
+      throw GpuRefusal(ChainStatus::kInvalidInput, "chain_q34_gpu_unavailable: " + out.error);
+    case gpu::BatchError::capacity:
+      throw GpuRefusal(ChainStatus::kResourceExhausted, "chain_q34_gpu_capacity: " + out.error);
+    case gpu::BatchError::device_fault:
+      throw GpuRefusal(ChainStatus::kInvariantViolated, "chain_q34_gpu_fault: " + out.error);
+  }
   if (!out.available || !out.error.empty())
-    throw GpuUnavailable(out.error.empty() ? std::string("no CUDA device") : out.error);
+    throw GpuRefusal(ChainStatus::kInvariantViolated, "chain_q34_gpu_fault: unclassified: " + out.error);
   if (out.stack_failure) throw std::logic_error("chain_q34_gpu_stack_bound_violated");
   const std::size_t survivors = out.survivor_mask.size();
   if (out.survivor_a.size() != survivors || out.survivor_b.size() != survivors)
@@ -468,8 +482,8 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         try {
           r34 = gen::run_wspd_q34_batched(index, kmax, options.separation_s, o, W, consumer, jobs_per_worker,
                                           filter, &timing);
-        } catch (const GpuUnavailable& e) {
-          fail(ChainStatus::kInvalidInput, std::string("chain_q34_gpu_unavailable: ") + e.what());
+        } catch (const GpuRefusal& e) {
+          fail(e.status, e.what());
         }
         auto& b = result.q34_batch;
         b.used = true;

@@ -192,10 +192,13 @@ def validate_received(output, manifest, worker_pin, expected_cases, generation, 
     canonical = lambda items: sorted(json.dumps(item, sort_keys=True) for item in items)
     need(type(value.get('commands')) is list and canonical(rows.values()) == canonical(value['commands']),
          'worker command list/raw receipts mismatch')
-    need(set(FIXED_COMMANDS) <= set(rows), 'environment/build commands absent')
+    # v17: the engine twin of a batch preflight is a fixed command too.
+    batch_plan = expected_cases[0]['levers']['q34_batch_filter']
+    fixed = FIXED_COMMANDS + (('preflight_engine',) if batch_plan else ())
+    need(set(fixed) <= set(rows), 'environment/build commands absent')
     for stem, row in rows.items():
         match = CASE_COMMAND.fullmatch(stem)
-        need(stem in FIXED_COMMANDS or (match is not None and int(match.group(2)) < len(expected_cases)),
+        need(stem in fixed or (match is not None and int(match.group(2)) < len(expected_cases)),
              'unexpected worker command: ' + stem)
         if match is None or match.group(1) != 'probe':
             need(row.get('exit_code') == 0 and row.get('group_closed') is True and
@@ -223,9 +226,21 @@ def validate_received(output, manifest, worker_pin, expected_cases, generation, 
          pre_argv[3].endswith('/' + payload.PREFLIGHT_FILE) and pre_argv[4:] == payload.expected_probe_tail(pre_case),
          'exact preflight invocation')
     pre_value = payload.strict_json((output / 'preflight.stdout').read_bytes())
+    expected_preflight = dict(sites=pre_case['n'], tower_digest=pre_value['tower_digest'])
+    if batch_plan:
+        engine_case = dict(pre_case, levers=payload.engine_levers(pre_case['levers']))
+        engine_argv = rows['preflight_engine']['argv']
+        need(engine_argv[:4] == pre_argv[:4] and engine_argv[4:] == payload.expected_probe_tail(engine_case),
+             'exact engine preflight invocation')
+        engine_value = payload.strict_json((output / 'preflight_engine.stdout').read_bytes())
+        need(payload.validate_probe(engine_value, engine_case, 0, inputs=payload.preflight_inputs(pre_raw)) ==
+             'complete_relative' and engine_value['tower_digest'] == pre_value['tower_digest'] and
+             payload.logical_result(engine_value) == payload.logical_result(pre_value),
+             'engine preflight recomputation / batch tower differs from the engine path')
+        payload.validate_gnu_time((output / 'preflight_engine.stderr').read_text(errors='replace'), 0)
+        expected_preflight['engine_tower_digest'] = engine_value['tower_digest']
     need(payload.validate_probe(pre_value, pre_case, 0, inputs=payload.preflight_inputs(pre_raw)) == 'complete_relative'
-         and value.get('preflight') == dict(sites=pre_case['n'], tower_digest=pre_value['tower_digest']),
-         'preflight recomputation')
+         and value.get('preflight') == expected_preflight, 'preflight recomputation')
     payload.validate_external_wall(pre_value, rows['preflight'].get('elapsed_seconds'))
     payload.validate_preflight_work(pre_value, pre_case['levers'])
     payload.validate_gnu_time((output / 'preflight.stderr').read_text(errors='replace'), 0)
@@ -323,8 +338,10 @@ def run_session(args):
                GCP_INSTANCE_NAME=TARGET['instance'], GCP_SSH_KEY_FILE=str(key),
                PATH=str(args.gcloud.parent) + os.pathsep + os.environ.get('PATH', ''))
     commands = Commands(host, env)
+    gpu_plan = payload.plan_uses_gpu(expected_cases)
     state = dict(status='failed', target=TARGET, public_status='not_claimed', targeted_shutdown_certified=False,
-                 backend='reference_cpu', GPU_executed=False, FULL_executed=False, useful_budget_seconds=useful,
+                 backend='cuda_g4' if gpu_plan else 'reference_cpu', GPU_planned=gpu_plan, GPU_executed=False,
+                 FULL_executed=False, useful_budget_seconds=useful,
                  case_cap_seconds=cap, guest_shutdown_minutes=int(payload.GUEST_SHUTDOWN_MINUTES),
                  max_run_seconds=int(payload.MAX_RUN_SECONDS), provenance=provenance,
                  snapshot_sha256=args.snapshot_sha256, manifest_sha256=args.manifest_sha256,
@@ -467,8 +484,7 @@ def run_session(args):
                         state['status'] = validate_received(host / 'received/output', manifest, args.worker_sha256,
                                                             expected_cases, generation, provenance, verified_guard)
                         state['FULL_executed'] = True
-                        state['GPU_executed'] = payload.plan_uses_gpu(expected_cases)
-                        state['backend'] = 'cuda_g4' if state['GPU_executed'] else 'reference_cpu'
+                        state['GPU_executed'] = gpu_plan  # only after a validated reception
                 except BaseException as error:
                     state.update(status='capture_failed', capture_error=type(error).__name__ + ': ' + str(error))
         finally:

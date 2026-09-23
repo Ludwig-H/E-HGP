@@ -93,16 +93,19 @@ def read_blobs(oids):
 
 
 def default_plan():
-    # Voies epinglees : defauts v9 de la chaine (tour statique sur W fils,
-    # tous les leviers actifs), passes explicitement a la sonde.
-    def case(scene, k, workers):
+    # Voies epinglees : defauts v9 de la chaine (tour statique sur W fils),
+    # passees explicitement a la sonde. v17 : chaque (scene, K) tourne sur le
+    # chemin GPU (tous les leviers) puis sur son jumeau moteur (sans lots ni
+    # GPU), que la comparaison d'objet juge ; puis la scene 00 a K5 avec
+    # 24 fils (GPU) et 1 fil (moteur, le plus susceptible d'etre coupe).
+    def case(scene, k, workers, gpu):
+        levers = {name: True for name in worker.LEVER_NAMES}
+        if not gpu:
+            levers = worker.engine_levers(levers)
         return dict(scene=scene, file=worker.INPUTS[scene]['file'], n=worker.INPUTS[scene]['n'], k=k, s=8,
-                    workers=workers, static_threads=workers if workers > 1 else 0,
-                    levers={name: True for name in worker.LEVER_NAMES}, repeat=0)
-    # Ordre voulu : pour chaque scene K5 puis K10 a 48 fils, puis la scene 00
-    # a K5 avec 24 puis 1 fil (le cas W1 est le plus susceptible d'etre coupe).
-    cases = [case(scene, k, 48) for scene in ('00', '01', '02') for k in (5, 10)]
-    cases += [case('00', 5, 24), case('00', 5, 1)]
+                    workers=workers, static_threads=workers if workers > 1 else 0, levers=levers, repeat=0)
+    cases = [case(scene, k, 48, gpu) for scene in ('00', '01', '02') for k in (5, 10) for gpu in (True, False)]
+    cases += [case('00', 5, 24, True), case('00', 5, 1, False)]
     return dict(schema=worker.PLAN_SCHEMA, cases=cases)
 
 

@@ -13,7 +13,11 @@ FilterOutput run_filters(const FilterInput& input) {
 BatchOutput run_filter_batch(const FilterInput& input) {
   BatchOutput out;
   out.error = validate_filter_input(input);
-  if (out.error.empty()) out.error = "built without MHGP9_ENABLE_CUDA";
+  out.error_kind = BatchError::input_guard;
+  if (out.error.empty()) {
+    out.error = "built without MHGP9_ENABLE_CUDA";
+    out.error_kind = BatchError::no_device;
+  }
   return out;
 }
 

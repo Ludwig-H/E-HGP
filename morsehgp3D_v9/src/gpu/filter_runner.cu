@@ -8,6 +8,8 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <new>
+#include <stdexcept>
 #include <string>
 
 namespace mhgp9::gpu {
@@ -15,10 +17,12 @@ namespace {
 
 struct CudaFailure {
   std::string what;
+  bool capacity = false;  // a size/memory limit, not a fault of the pass
 };
 
 void check(cudaError_t code, const char* expression) {
-  if (code != cudaSuccess) throw CudaFailure{std::string(expression) + ": " + cudaGetErrorString(code)};
+  if (code != cudaSuccess)
+    throw CudaFailure{std::string(expression) + ": " + cudaGetErrorString(code), code == cudaErrorMemoryAllocation};
 }
 #define MHGP9_CUDA(expression) check((expression), #expression)
 
@@ -43,6 +47,29 @@ class DeviceBuffer {
  private:
   T* pointer_ = nullptr;
   std::size_t count_ = 0;
+};
+
+// Events destroyed on every path, only those actually created.
+template <int N>
+class EventSet {
+ public:
+  EventSet() = default;
+  EventSet(const EventSet&) = delete;
+  EventSet& operator=(const EventSet&) = delete;
+  ~EventSet() {
+    for (int i = 0; i < created_; ++i) cudaEventDestroy(events_[i]);
+  }
+  void create() {
+    for (auto& event : events_) {
+      MHGP9_CUDA(cudaEventCreate(&event));
+      ++created_;
+    }
+  }
+  cudaEvent_t operator[](int i) const { return events_[i]; }
+
+ private:
+  cudaEvent_t events_[N]{};
+  int created_ = 0;
 };
 
 // One atomic per warp for the visit counters.
@@ -202,8 +229,8 @@ FilterOutput run_filters(const FilterInput& input) {
                                              static_cast<int>(input.rect_count)));
     scan_storage.allocate(std::max<std::size_t>(scan_bytes, 1));
 
-    cudaEvent_t e[6];
-    for (auto& event : e) MHGP9_CUDA(cudaEventCreate(&event));
+    EventSet<6> e;
+    e.create();
     const int threads = 128;
     int sms = 0;
     MHGP9_CUDA(cudaDeviceGetAttribute(&sms, cudaDevAttrMultiProcessorCount, 0));
@@ -279,7 +306,6 @@ FilterOutput run_filters(const FilterInput& input) {
       out.pair_visits = visit_counts[1];
       out.stack_failure = out.stack_failure || failed != 0;
     }
-    for (auto& event : e) cudaEventDestroy(event);
   } catch (const CudaFailure& failure) {
     out.error = failure.what;
   } catch (const std::exception& failure) {  // host side of the pass (e.g. bad_alloc of the mask copies)
@@ -291,11 +317,15 @@ FilterOutput run_filters(const FilterInput& input) {
 BatchOutput run_filter_batch(const FilterInput& input) {
   BatchOutput out;
   out.error = validate_filter_input(input);
-  if (!out.error.empty()) return out;
+  if (!out.error.empty()) {
+    out.error_kind = BatchError::input_guard;
+    return out;
+  }
   try {
     int devices = 0;
     if (cudaGetDeviceCount(&devices) != cudaSuccess || devices == 0) {
       out.error = "no CUDA device";
+      out.error_kind = BatchError::no_device;
       return out;
     }
     MHGP9_CUDA(cudaSetDevice(0));
@@ -311,8 +341,8 @@ BatchOutput run_filter_batch(const FilterInput& input) {
       return static_cast<int>(std::max<unsigned long long>(1, std::min<unsigned long long>(
           (items + threads - 1) / threads, static_cast<unsigned long long>(sms) * 64)));
     };
-    cudaEvent_t e[7];
-    for (auto& event : e) MHGP9_CUDA(cudaEventCreate(&event));
+    EventSet<7> e;
+    e.create();
     DeviceBuffer<FlatNode> nodes;
     DeviceBuffer<std::int32_t> rank_points;
     DeviceBuffer<u32> rect_a, rect_b, flags, positions, out_a, out_b;
@@ -363,10 +393,11 @@ BatchOutput run_filter_batch(const FilterInput& input) {
                             cudaMemcpyDeviceToHost));
       pairs = tail[0] + tail[1];
     }
-    if (pairs > static_cast<unsigned long long>(0x7fffffff)) throw CudaFailure{"expanded pairs exceed the CUB int range"};
+    if (pairs > static_cast<unsigned long long>(0x7fffffff))
+      throw CudaFailure{"expanded pairs exceed the CUB int range", true};
     std::size_t free_bytes = 0, total_bytes = 0;
     MHGP9_CUDA(cudaMemGetInfo(&free_bytes, &total_bytes));
-    if (pairs * 10 > free_bytes / 2) throw CudaFailure{"pair buffers exceed half of the free device memory"};
+    if (pairs * 10 > free_bytes / 2) throw CudaFailure{"pair buffers exceed half of the free device memory", true};
     MHGP9_CUDA(cudaEventRecord(e[3]));
     unsigned long long survivors = 0;
     if (pairs != 0) {
@@ -432,11 +463,18 @@ BatchOutput run_filter_batch(const FilterInput& input) {
     out.pair_q3_rejected = counts[2];
     out.pair_q4_rejected = counts[3];
     out.stack_failure = failed != 0;
-    for (auto& event : e) cudaEventDestroy(event);
   } catch (const CudaFailure& failure) {
     out.error = failure.what;
+    out.error_kind = failure.capacity ? BatchError::capacity : BatchError::device_fault;
+  } catch (const std::bad_alloc& failure) {
+    out.error = std::string("host: ") + failure.what();
+    out.error_kind = BatchError::capacity;
+  } catch (const std::length_error& failure) {
+    out.error = std::string("host: ") + failure.what();
+    out.error_kind = BatchError::capacity;
   } catch (const std::exception& failure) {
     out.error = std::string("host: ") + failure.what();
+    out.error_kind = BatchError::device_fault;
   }
   return out;
 }

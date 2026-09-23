@@ -186,8 +186,9 @@ def main():
         return 2
     raw = pathlib.Path(path).read_bytes()
     if pathlib.Path(path).name == 'preflight.u32le':
+        salt = 'batch' if config.get('preflight_batch_differs') and levers.get('q34_batch_filter') else ''
         value = probe_value(len(raw) // 12, fnv_u32le(raw), k, int(options['s']), workers, int(options['static']),
-                            'complete_relative', '', levers, config['schema'])
+                            'complete_relative', salt, levers, config['schema'])
         if config.get('fail_preflight'):
             value['tower_work']['selftest_unknown'] = 1
         if config.get('vacuous_preflight'):
@@ -667,11 +668,13 @@ class Protocol(unittest.TestCase):
              record['protocol_source'] == ('commit' if pkg['committed'] else 'worktree_uncommitted') and
              record['real_session_allowed'] is pkg['committed'], 'package record')
         cases, provenance = session.validate_snapshot(pkg['archive'], manifest)
-        need(provenance['commit'] == head and [(c['scene'], c['k'], c['workers']) for c in cases] == [
-            ('00', 5, 48), ('00', 10, 48), ('01', 5, 48), ('01', 10, 48), ('02', 5, 48), ('02', 10, 48),
-            ('00', 5, 24), ('00', 5, 1)] and all(
+        on = {name: True for name in worker.LEVER_NAMES}
+        need(provenance['commit'] == head and [(c['scene'], c['k'], c['workers'], c['levers']['q34_gpu_filter'])
+                                               for c in cases] == [
+            (scene, k, 48, gpu) for scene in ('00', '01', '02') for k in (5, 10) for gpu in (True, False)] + [
+            ('00', 5, 24, True), ('00', 5, 1, False)] and all(
                 c['s'] == 8 and c['static_threads'] == (c['workers'] if c['workers'] > 1 else 0) and
-                c['levers'] == {name: True for name in worker.LEVER_NAMES} and c['repeat'] == 0
+                c['levers'] == (on if c['levers']['q34_gpu_filter'] else worker.engine_levers(on)) and c['repeat'] == 0
                 for c in cases),
                'default plan order and parameters')
         # Temoin independant : git archive du meme commit, jamais le worktree.
@@ -725,9 +728,12 @@ class Protocol(unittest.TestCase):
         # Ablation plans: ON first (preflight levers), then OFF, accepted;
         # OFF first is refused since the preflight would skip the ON path.
         off = dict(plan['cases'][0], levers=dict(plan['cases'][0]['levers'], q34_dead_core=False), repeat=7)
-        worker.validate_plan(dict(plan, cases=[plan['cases'][0], off]), manifest)
-        need(refused(worker.validate_plan, dict(plan, cases=[off, plan['cases'][0]]), manifest),
+        twin = plan['cases'][1]  # the engine-path twin of the first (GPU) case
+        worker.validate_plan(dict(plan, cases=[plan['cases'][0], off, twin]), manifest)
+        need(refused(worker.validate_plan, dict(plan, cases=[off, plan['cases'][0], twin]), manifest),
              'OFF-first plan would preflight without every lever')
+        need(refused(worker.validate_plan, dict(plan, cases=[plan['cases'][0], off]), manifest),
+             'batch/GPU cases without an engine-path twin')
         for bad in (dict(plan, schema='mhgp8_q34_spatial_plan_v1'), dict(plan, schema='mhgp9_tower_plan_v5'),
                     dict(plan, cases=[]),
                     dict(plan, cases=[dict(plan['cases'][0], repeat=i) for i in range(65)]), dict(plan, extra=1)):
@@ -955,8 +961,11 @@ class Protocol(unittest.TestCase):
                  '--execute' in worker_call, 'worker budget arguments')
             output = host / 'received/output'
             value = worker.strict_json((output / 'receipt.json').read_bytes())
-            need(value['completed_case_indices'] == list(range(8)) and value['cross_worker_comparisons'] == [
-                dict(reference=0, other=6, equal=True), dict(reference=0, other=7, equal=True)] and
+            # v17 default plan: GPU case then its engine twin per (frame, K),
+            # then 00/K5 at 24 (GPU) and 1 (engine) workers.
+            need(value['completed_case_indices'] == list(range(14)) and value['cross_worker_comparisons'] == [
+                dict(reference=r, other=r + 1, equal=True) for r in range(0, 12, 2)] + [
+                dict(reference=0, other=12, equal=True), dict(reference=0, other=13, equal=True)] and
                  value['FULL_executed'] is True and value['provenance'] == receipt['provenance'], 'worker receipt')
             need(not (output / 'build').exists() and (output / 'configure.stdout').is_file(), 'capture excludes build')
             pkg = package()
@@ -1019,9 +1028,9 @@ class Protocol(unittest.TestCase):
             expect_certified_stop(receipt, fake)
             value = worker.strict_json((host / 'received/output/receipt.json').read_bytes())
             outcomes = [entry['outcome'] for entry in value['case_outcomes']]
-            need(outcomes == ['complete_relative'] * 5 + ['explicit_refusal', 'complete_relative', 'killed_case_cap'],
+            need(outcomes == ['complete_relative'] * 10 + ['explicit_refusal'] * 2 + ['complete_relative', 'killed_case_cap'],
                  'cap kill and explicit refusal: ' + repr(outcomes))
-            killed = worker.strict_json((host / 'received/output/probe_7.command.json').read_bytes())
+            killed = worker.strict_json((host / 'received/output/probe_13.command.json').read_bytes())
             need(killed['residual_or_interrupted_group_killed'] is True and 3.0 <= killed['elapsed_seconds'] < 30,
                  'probe group killed at its cap')
             # The killed case's summary is part of the receipt: removing or
@@ -1036,9 +1045,9 @@ class Protocol(unittest.TestCase):
                 need(session.validate_received(output, pkg['manifest'], pin, expected, *bound) == 'partial',
                      'partial revalidation')
                 for label, mutate in (
-                        ('killed summary removed', lambda o: (o / 'probe_7.summary.json').unlink()),
-                        ('killed summary elapsed', lambda o: (o / 'probe_7.summary.json').write_text(
-                            (o / 'probe_7.summary.json').read_text().replace('"elapsed_seconds": ',
+                        ('killed summary removed', lambda o: (o / 'probe_13.summary.json').unlink()),
+                        ('killed summary elapsed', lambda o: (o / 'probe_13.summary.json').write_text(
+                            (o / 'probe_13.summary.json').read_text().replace('"elapsed_seconds": ',
                                                                              '"elapsed_seconds": 1')))):
                     tampered = Path(temporary) / 'tampered'
                     shutil.copytree(output, tampered)
@@ -1057,10 +1066,24 @@ class Protocol(unittest.TestCase):
             output = host / 'received/output'
             value = worker.strict_json((output / 'receipt.json').read_bytes())
             outcomes = [entry['outcome'] for entry in value['case_outcomes']]
-            need(outcomes == ['complete_relative', 'killed_budget'] + ['skipped_budget'] * 6,
+            need(outcomes == ['complete_relative'] * 2 + ['killed_budget'] + ['skipped_budget'] * 11,
                  'budget exhaustion: ' + repr(outcomes))
-            need(not any((output / ('probe_' + str(i) + '.command.json')).exists() for i in range(2, 8)),
+            need(not any((output / ('probe_' + str(i) + '.command.json')).exists() for i in range(3, 14)),
                  'skipped cases never launched')
+
+    def test_batch_preflight_must_equal_engine(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            code, receipt, fake, host = run_scenario(Path(temporary), tools=dict(preflight_batch_differs=True))
+            need(code == 1 and receipt['status'] == 'worker_failed' and receipt['worker_status'] == 'preflight_failed'
+                 and receipt['backend'] == 'cuda_g4' and receipt['GPU_planned'] is True and
+                 receipt['GPU_executed'] is False, 'batch preflight differing from the engine path: ' +
+                 json.dumps(receipt)[:600])
+            expect_certified_stop(receipt, fake)
+            output = host / 'received/output'
+            value = worker.strict_json((output / 'receipt.json').read_bytes())
+            need('differs from the engine path' in value.get('error', '') and value['GPU_attempted'] is True and
+                 value['GPU_executed'] is False and not (output / 'probe_0.command.json').exists(),
+                 'no LiDAR case after a differing batch preflight')
 
     def test_protocol_defect_stops_the_campaign(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -1071,10 +1094,10 @@ class Protocol(unittest.TestCase):
             output = host / 'received/output'
             value = worker.strict_json((output / 'receipt.json').read_bytes())
             outcomes = [entry['outcome'] for entry in value['case_outcomes']]
-            need(outcomes == ['complete_relative', 'probe_failed'] + ['skipped_protocol_defect'] * 6,
+            need(outcomes == ['complete_relative'] * 2 + ['probe_failed'] + ['skipped_protocol_defect'] * 11,
                  'protocol defect skips the following cases: ' + repr(outcomes))
-            need('probe counters tower_work' in value['case_outcomes'][1]['reason'] and
-                 not any((output / ('probe_' + str(i) + '.command.json')).exists() for i in range(2, 8)),
+            need('probe counters tower_work' in value['case_outcomes'][2]['reason'] and
+                 not any((output / ('probe_' + str(i) + '.command.json')).exists() for i in range(3, 14)),
                  'skipped cases never launched after a protocol defect')
 
     def test_preflight_failure_runs_no_case(self):

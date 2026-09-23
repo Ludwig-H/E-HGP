@@ -257,6 +257,11 @@ def plan_uses_gpu(cases):
     return any(case['levers']['q34_gpu_filter'] for case in cases)
 
 
+def engine_levers(levers):
+    """The same levers on the engine path (no batch filter, no device)."""
+    return dict(levers, q34_batch_filter=False, q34_gpu_filter=False)
+
+
 def lever_arguments(case):
     return ['--lever=' + name + '=' + ('1' if case['levers'][name] else '0') for name in LEVER_NAMES]
 
@@ -282,6 +287,11 @@ def validate_plan(plan, manifest):
     # that every lever a later case may enable has been exercised first.
     need(all(plan['cases'][0]['levers'][name] for name in LEVER_NAMES),
          'the first case sets the preflight levers and must pin every lever ON')
+    # v17: every (frame, K, s) run on the batch path has an engine-path twin,
+    # so that the cross-case object comparison judges the batch/GPU tower.
+    engine = {(c['scene'], c['k'], c['s']) for c in plan['cases'] if not c['levers']['q34_batch_filter']}
+    need(all((c['scene'], c['k'], c['s']) in engine for c in plan['cases'] if c['levers']['q34_batch_filter']),
+         'a batch/GPU case without an engine-path twin on the same frame, K and s')
     return plan['cases']
 
 
@@ -913,8 +923,26 @@ def execute(args):
         except (ValueError, KeyError, TypeError, UnicodeError) as error:
             raise PreflightFailed(type(error).__name__ + ': ' + str(error)) from error
         result['preflight'] = dict(sites=pre_case['n'], tower_digest=pre_value['tower_digest'])
+        if pre_case['levers']['q34_batch_filter']:
+            # Engine-path twin of the preflight: the batch (and device) tower
+            # must equal the engine tower before any LiDAR case runs.
+            engine_case = dict(pre_case, levers=engine_levers(pre_case['levers']))
+            engine_row = worker.command('preflight_engine', [TIME, '-v', str(binary), str(output / PREFLIGHT_FILE),
+                                                             *expected_probe_tail(engine_case)])
+            try:
+                need(engine_row['exit_code'] == 0, 'engine preflight exit code')
+                engine_value = strict_json((output / 'preflight_engine.stdout').read_bytes())
+                need(validate_probe(engine_value, engine_case, 0, inputs=preflight_inputs(pre_raw)) ==
+                     'complete_relative', 'engine preflight not complete')
+                validate_gnu_time((output / 'preflight_engine.stderr').read_text(errors='replace'), 0)
+                need(engine_value['tower_digest'] == pre_value['tower_digest'] and
+                     logical_result(engine_value) == logical_result(pre_value),
+                     'batch/GPU preflight tower differs from the engine path')
+            except (ValueError, KeyError, TypeError, UnicodeError) as error:
+                raise PreflightFailed(type(error).__name__ + ': ' + str(error)) from error
+            result['preflight']['engine_tower_digest'] = engine_value['tower_digest']
         if pre_case['levers']['q34_gpu_filter']:
-            result['GPU_executed'] = True  # validated device pass (backend and survivors judged)
+            result['GPU_executed'] = True  # validated device pass, equal to the engine tower
 
         def left():
             try:
