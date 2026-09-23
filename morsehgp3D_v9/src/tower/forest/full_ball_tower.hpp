@@ -1269,14 +1269,21 @@ class Builder {
         }
       }
     });
-    size_t total_requests = 0, total_seeds = 0;
-    for (const auto& c : collected) { total_requests += c.requests.size(); total_seeds += c.seeds.size(); }
-    requests.reserve(total_requests); seeds.reserve(total_seeds);
-    for (auto& c : collected) {
-      for (const auto& [key, id] : c.requests) requests.push_back({key, id, requests.size()});
-      seeds.insert(seeds.end(), c.seeds.begin(), c.seeds.end());
-      decltype(c.requests)().swap(c.requests); decltype(c.seeds)().swap(c.seeds);
+    // Concatenation in program order, in parallel at precomputed offsets: the
+    // ordinal of a request is its position in the sequential collection.
+    std::vector<size_t> request_at(collected.size() + 1, 0), seed_at(collected.size() + 1, 0);
+    for (size_t c = 0; c < collected.size(); ++c) {
+      request_at[c + 1] = request_at[c] + collected[c].requests.size();
+      seed_at[c + 1] = seed_at[c] + collected[c].seeds.size();
     }
+    requests.resize(request_at.back()); seeds.resize(seed_at.back());
+    parallel_items(collected.size(), geometry_threads, [&](size_t chunk, size_t) {
+      auto& c = collected[chunk];
+      for (size_t j = 0; j < c.requests.size(); ++j)
+        requests[request_at[chunk] + j] = {c.requests[j].first, c.requests[j].second, request_at[chunk] + j};
+      std::copy(c.seeds.begin(), c.seeds.end(), seeds.begin() + static_cast<std::ptrdiff_t>(seed_at[chunk]));
+      decltype(c.requests)().swap(c.requests); decltype(c.seeds)().swap(c.seeds);
+    });
     st.static_requests[current_k] = requests.size();
     st.static_peak_request_bytes = std::max<u64>(st.static_peak_request_bytes,
         requests.capacity() * sizeof(Request));
@@ -1294,9 +1301,20 @@ class Builder {
     parallel_sort(seeds, geometry_threads, [](const StaticSeed& a, const StaticSeed& b) { return a.key < b.key; });
     for (size_t j = 1; j < seeds.size(); ++j)
       require(seeds[j - 1].key != seeds[j].key, "full_ball_static_duplicate_seed");
+    // Group starts (first request of each key), found by chunks in parallel.
     std::vector<size_t> groups;
-    for (size_t j = 0; j < requests.size(); ++j)
-      if (!j || requests[j].key != requests[j - 1].key) groups.push_back(j);
+    {
+      const size_t chunks = std::max<size_t>(1, std::min<size_t>(requests.size() / 65536 + 1, 256));
+      std::vector<std::vector<size_t>> starts(chunks);
+      parallel_items(chunks, geometry_threads, [&](size_t c, size_t) {
+        for (size_t j = requests.size() * c / chunks; j < requests.size() * (c + 1) / chunks; ++j)
+          if (!j || requests[j].key != requests[j - 1].key) starts[c].push_back(j);
+      });
+      size_t total = 0;
+      for (const auto& part : starts) total += part.size();
+      groups.reserve(total + 1);
+      for (const auto& part : starts) groups.insert(groups.end(), part.begin(), part.end());
+    }
     st.static_unique[current_k] = groups.size();
     groups.push_back(requests.size());
     static_cursor = 0;

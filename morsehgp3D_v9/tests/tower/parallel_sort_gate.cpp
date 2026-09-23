@@ -10,8 +10,8 @@
 //   mhgp9_tower_parallel_sort_gate --selftest
 //
 // Code 0 conforme, 1 desaccord (ligne `cause=`), 2 argument, 3 plancher.
-// Compile avec MHGP9_PARALLEL_SORT_MUTANT_COPY_PAIRS, une fusion devient une
-// simple copie : la porte doit rendre 1 (mutant tue).
+// Compile avec MHGP9_PARALLEL_SORT_MUTANT_UNSORTED_BUCKET, un seau reste non
+// trie : la porte doit rendre 1 (mutant tue).
 #include <algorithm>
 #include <cstdint>
 #include <cstdio>

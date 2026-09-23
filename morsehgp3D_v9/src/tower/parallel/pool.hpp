@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <memory>
 #include <cstddef>
 #include <exception>
 #include <mutex>
@@ -163,9 +164,12 @@ inline size_t parallel_items(size_t n, int threads, Fn&& fn) {
 
 // Tri parallele pour un ordre STRICT et TOTAL `less` (aucun ex aequo) : le
 // resultat est donc l'unique permutation triee, bit-identique au tri
-// sequentiel quel que soit le nombre de fils. Tranches triees en parallele,
-// puis fusions deux a deux en parallele (log2 tranches passes). Retourne le
-// nombre d'ouvriers crees au plus large.
+// sequentiel quel que soit le nombre de fils. Tri par echantillonnage, sans
+// fusion serielle : des separateurs pris a des positions fixes de l'entree
+// coupent l'ordre en seaux [s_{b-1}, s_b) ; chaque tranche de l'entree
+// repartit ses elements dans les seaux (en parallele), puis chaque seau est
+// recopie a sa place et trie (en parallele). Retourne le nombre d'ouvriers
+// crees au plus large. Pic : un second tampon de n elements.
 template <typename T, typename Less>
 inline size_t parallel_sort(std::vector<T>& values, int threads, Less less) {
   const size_t n = values.size();
@@ -174,41 +178,49 @@ inline size_t parallel_sort(std::vector<T>& values, int threads, Less less) {
     std::sort(values.begin(), values.end(), less);
     return n > 0 ? 1 : 0;
   }
-  const size_t runs = workers;
-  std::vector<size_t> bounds(runs + 1);
-  for (size_t r = 0; r <= runs; ++r) bounds[r] = n * r / runs;
-  size_t created = parallel_items(runs, threads, [&](size_t r, size_t) {
-    std::sort(values.begin() + bounds[r], values.begin() + bounds[r + 1], less);
-  });
-  std::vector<T> buffer(n);
-  std::vector<T>* from = &values;
-  std::vector<T>* to = &buffer;
-  while (bounds.size() > 2) {
-    const size_t pairs = (bounds.size() - 1) / 2;
-    std::vector<size_t> next;
-    next.push_back(0);
-    for (size_t j = 0; j < pairs; ++j) next.push_back(bounds[2 * j + 2]);
-    if ((bounds.size() - 1) % 2) next.push_back(bounds.back());
-    const size_t tasks = next.size() - 1;
-    created = std::max(created, parallel_items(tasks, threads, [&](size_t j, size_t) {
-#if defined(MHGP9_PARALLEL_SORT_MUTANT_COPY_PAIRS)
-      if (false) {
-#else
-      if (2 * j + 1 < bounds.size() - 1) {
-#endif
-        std::merge(from->begin() + bounds[2 * j], from->begin() + bounds[2 * j + 1],
-                   from->begin() + bounds[2 * j + 1], from->begin() + bounds[2 * j + 2],
-                   to->begin() + bounds[2 * j], less);
-      } else {
-        // Unpaired last run: copied as is. (Mutant gate: every pair copied.)
-        const size_t last = std::min(bounds.size() - 1, 2 * j + 2);
-        std::copy(from->begin() + bounds[2 * j], from->begin() + bounds[last], to->begin() + bounds[2 * j]);
-      }
-    }));
-    bounds.swap(next);
-    std::swap(from, to);
+  const size_t wanted = 4 * workers;
+  const size_t samples = std::min(n, 32 * wanted);
+  std::vector<T> sample;
+  sample.reserve(samples);
+  for (size_t i = 0; i < samples; ++i) sample.push_back(values[(i * n) / samples]);
+  std::sort(sample.begin(), sample.end(), less);
+  std::vector<T> splitters;  // strictly increasing
+  for (size_t b = 1; b < wanted; ++b) {
+    const T& candidate = sample[(b * sample.size()) / wanted];
+    if (splitters.empty() || less(splitters.back(), candidate)) splitters.push_back(candidate);
   }
-  if (from != &values) values.swap(*from);
+  const size_t buckets = splitters.size() + 1;
+  const size_t chunks = 4 * workers;
+  std::vector<u32> bucket_of(n);
+  std::vector<size_t> counts(chunks * buckets, 0);
+  size_t created = parallel_items(chunks, threads, [&](size_t c, size_t) {
+    for (size_t i = n * c / chunks; i < n * (c + 1) / chunks; ++i) {
+      const size_t b = static_cast<size_t>(
+          std::upper_bound(splitters.begin(), splitters.end(), values[i], less) - splitters.begin());
+      bucket_of[i] = static_cast<u32>(b);
+      ++counts[c * buckets + b];
+    }
+  });
+  // Bucket-major offsets: bucket b occupies [first[b], first[b+1]).
+  std::vector<size_t> offset(chunks * buckets), first(buckets + 1);
+  size_t at = 0;
+  for (size_t b = 0; b < buckets; ++b) {
+    first[b] = at;
+    for (size_t c = 0; c < chunks; ++c) { offset[c * buckets + b] = at; at += counts[c * buckets + b]; }
+  }
+  first[buckets] = n;
+  auto scattered = std::make_unique_for_overwrite<T[]>(n);
+  created = std::max(created, parallel_items(chunks, threads, [&](size_t c, size_t) {
+    size_t* cursor = offset.data() + c * buckets;
+    for (size_t i = n * c / chunks; i < n * (c + 1) / chunks; ++i) scattered[cursor[bucket_of[i]]++] = values[i];
+  }));
+  created = std::max(created, parallel_items(buckets, threads, [&](size_t b, size_t) {
+    std::copy(scattered.get() + first[b], scattered.get() + first[b + 1], values.begin() + first[b]);
+#if defined(MHGP9_PARALLEL_SORT_MUTANT_UNSORTED_BUCKET)
+    if (b == buckets / 2) return;  // mutant: one bucket left unsorted
+#endif
+    std::sort(values.begin() + first[b], values.begin() + first[b + 1], less);
+  }));
   return created;
 }
 

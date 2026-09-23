@@ -701,3 +701,25 @@ piste « filtre d'absence » de `34c3164f` par une variante exacte (présence et
 absence) ; mémoire ≈ 4 octets × prochaine puissance de 2 ≥ 2B (64 Mo à
 5,5 M boules).
 
+## 23 septembre 2026, 07 h 55 — Tour : parties sérielles de la phase statique (développeur)
+
+GCP non utilisé. Phase des cibles statiques sur 08/000000/K10 (W8 local,
+après MEB proposé et index de clés) : résolution 7,9 s sur K = 2..10, mais
+aussi tris 1,35 s, concaténation **sérielle** 0,67 s, collecte 0,53 s,
+graines 0,27 s, balayage **sériel** des groupes 0,17 s — parts qui ne
+baissent pas avec 48 fils. Changements :
+
+- `tower::parallel_sort` devient un **tri d'échantillonnage** (séparateurs à
+  positions fixes, répartition par tranches puis tri de chaque seau en
+  parallèle, sans fusion sérielle). Même contrat : pour un ordre strict et
+  total, l'unique permutation triée, quel que soit le nombre de fils. Porte
+  `parallel_sort` inchangée (égalité à `std::sort`, tailles et fils variés) ;
+  mutant compilé renommé « un seau non trié », tué.
+- Concaténation des requêtes et graines en parallèle aux décalages calculés
+  (l'ordinal reste la position de la collecte séquentielle) ; départs de
+  groupes trouvés par tranches en parallèle.
+
+Condensés inchangés, `-L gate` **127/127**. Effet local dans le bruit à 8
+cœurs (15,7 s contre 15,7–17,0 s), 14,2 contre 15,6 s à 48 fils
+sursouscrits : l'effet attendu concerne G4.
+

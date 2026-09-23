@@ -81,13 +81,13 @@ mhgp9_test_executable(mhgp9_tower_population_bank_gate tests/tower/population_ba
 mhgp9_gate(mhgp9_tower_population_bank 0 mhgp9_tower_population_bank_gate
            ARGS --selftest LABELS "gate;tower" TIMEOUT 120)
 # Tri parallele de la tour : permutation egale a std::sort pour tout nombre de
-# fils, et son mutant compile (fusions remplacees par des copies) tue.
+# fils, et son mutant compile (un seau laisse non trie) tue.
 mhgp9_product_executable(mhgp9_tower_parallel_sort_gate tests/tower/parallel_sort_gate.cpp)
 mhgp9_gate(mhgp9_tower_parallel_sort 0 mhgp9_tower_parallel_sort_gate
            ARGS --selftest LABELS "gate;tower" TIMEOUT 300)
 mhgp9_product_executable(mhgp9_tower_parallel_sort_mutant_gate tests/tower/parallel_sort_gate.cpp)
-target_compile_definitions(mhgp9_tower_parallel_sort_mutant_gate PRIVATE MHGP9_PARALLEL_SORT_MUTANT_COPY_PAIRS=1)
-mhgp9_gate(mhgp9_tower_parallel_sort_mutant_copy_pairs 1 mhgp9_tower_parallel_sort_mutant_gate
+target_compile_definitions(mhgp9_tower_parallel_sort_mutant_gate PRIVATE MHGP9_PARALLEL_SORT_MUTANT_UNSORTED_BUCKET=1)
+mhgp9_gate(mhgp9_tower_parallel_sort_mutant_unsorted_bucket 1 mhgp9_tower_parallel_sort_mutant_gate
            ARGS --selftest EXPECT_PREFIX "cause=parallel_sort.permutation" LABELS "gate;tower;mutant" TIMEOUT 300)
 mhgp9_gate(mhgp9_tower_full_certificate_rejects 0 mhgp9_tower_full_certificate_gate
            ARGS --rejects LABELS "gate;tower" TIMEOUT 60)
