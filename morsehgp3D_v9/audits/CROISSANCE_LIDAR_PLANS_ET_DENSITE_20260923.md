@@ -179,9 +179,14 @@ approximatif ; il ne reproduit ni les faisceaux d'un autre capteur, ni des
 passages superposés. Les temps proviennent d'un hôte CPU partagé et les
 cas à densité entière portent le libellé de sonde historique
 `grid=unspecified`, même si leur entrée 1 mm est attestée par le manifeste.
-Répéter sur d'autres séquences et plusieurs graines, puis comparer une
-sélection stratifiée par azimut/rayon et le sol brut, en gardant
-K/s/W, segmentation et préparation séparés ; publier sortie, catalogue,
+Un [premier reçu brut](lidar_raw_physical_scaling_20260923/README.md)
+couvre désormais 08/000000/K5 avec les plans **float32 physiques** et
+trois densités de la trame entière : il retrouve `p_formes=2,136` au
+dernier doublement, avec CPU `p=1,297`. Ce seul cas ne remplace pas la
+matrice sans sol K5/K10 ci-dessus. Répéter sur d'autres séquences,
+plusieurs graines et K10, puis comparer une sélection stratifiée par
+azimut/rayon en gardant K/s/W, segmentation et préparation séparés ;
+publier sortie, catalogue,
 paires, témoins, populations logiques et formes du cœur, atlas, q3/q4,
 CPU, mur et mémoire. Ni ces pentes finies ni les ratios spatiaux ne
 démontrent une borne sous-quadratique globale ou le contrat G4.

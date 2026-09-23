@@ -1,0 +1,234 @@
+{
+  "datasets": {
+    "full": {
+      "full": {
+        "grid_full_site_ids_file": "s00_full_full.grid_full_site_ids.u32le",
+        "grid_full_site_ids_sha256": "a6979864df3179a4488f8dfbb4a01949d3de6e0ebebac1bd3364f33741168597",
+        "points_file": "s00_full_full.u32le",
+        "points_sha256": "233cc4ea8cac6e0b1155ea845af57b32e5236764bf2e119557aeab5bac76c172",
+        "raw_return_ids_file": "s00_full_full.raw_return_ids.u32le",
+        "raw_return_ids_sha256": "796e9814dd2dff7778ad8d1bb55f5113ab54206ff8b246e6432200f9a6833f7f",
+        "sites": 123389
+      },
+      "half_x_neg": {
+        "grid_full_site_ids_file": "s00_full_half_x_neg.grid_full_site_ids.u32le",
+        "grid_full_site_ids_sha256": "b3937c86bdc4648e0ce67411754e7f29cf07b2c0f0732125016e39ff5cb0595f",
+        "points_file": "s00_full_half_x_neg.u32le",
+        "points_sha256": "a5c3209d8523fee7f0614ef91cd4907679366a999305e6f664fab3a38b27bb2c",
+        "raw_return_ids_file": "s00_full_half_x_neg.raw_return_ids.u32le",
+        "raw_return_ids_sha256": "8c76ac3d790275e71ab43f5fb85e6574674137265bdab30e9e12a04a30dcce7f",
+        "sites": 61045
+      },
+      "half_x_nonneg": {
+        "grid_full_site_ids_file": "s00_full_half_x_nonneg.grid_full_site_ids.u32le",
+        "grid_full_site_ids_sha256": "09c8f344801fa02f21cfb7c449e0e0e790d08ec7190e723cb877f619a66daaad",
+        "points_file": "s00_full_half_x_nonneg.u32le",
+        "points_sha256": "ca0270d9557964bd7c6ae5c7769d5ffe3cd9d87b56f0cb95c1ae965e79f56cc3",
+        "raw_return_ids_file": "s00_full_half_x_nonneg.raw_return_ids.u32le",
+        "raw_return_ids_sha256": "aa4c1df31653be4edff07255f9c74edb0e0b0400d9cb7cf51bdd7f974998e07d",
+        "sites": 62344
+      },
+      "quarter_x_neg_y_neg": {
+        "grid_full_site_ids_file": "s00_full_quarter_x_neg_y_neg.grid_full_site_ids.u32le",
+        "grid_full_site_ids_sha256": "206acd48dc64818acdde0869ccfca8a5e817faa72d1054615242855cb0d157c8",
+        "points_file": "s00_full_quarter_x_neg_y_neg.u32le",
+        "points_sha256": "f2f8d39b23efe0f2656996bc4fb8b8796408fc64bbbf79268725282b96cfb7c9",
+        "raw_return_ids_file": "s00_full_quarter_x_neg_y_neg.raw_return_ids.u32le",
+        "raw_return_ids_sha256": "dc43f4b5d490828bfdecc09ca59c6e9c0519d8a7e3c14c0f80d9db8282e97dc5",
+        "sites": 30265
+      },
+      "quarter_x_neg_y_nonneg": {
+        "grid_full_site_ids_file": "s00_full_quarter_x_neg_y_nonneg.grid_full_site_ids.u32le",
+        "grid_full_site_ids_sha256": "52264f4e3f92706491225ec4ed81972f9cbcce34ce35dda8404905e874412ba5",
+        "points_file": "s00_full_quarter_x_neg_y_nonneg.u32le",
+        "points_sha256": "eb8e6f93ff3f2494849f4bee22214b8d1d70f082e1677c78e0d8616e235b259c",
+        "raw_return_ids_file": "s00_full_quarter_x_neg_y_nonneg.raw_return_ids.u32le",
+        "raw_return_ids_sha256": "fd69b4d0e913829d47597e982cca9462e63c4a09d961cb340790d925f0d902b8",
+        "sites": 30780
+      },
+      "quarter_x_nonneg_y_neg": {
+        "grid_full_site_ids_file": "s00_full_quarter_x_nonneg_y_neg.grid_full_site_ids.u32le",
+        "grid_full_site_ids_sha256": "ad11a622bc009de3177795df9a890963778a9d62d49f4afb7b7f302b4dfd449a",
+        "points_file": "s00_full_quarter_x_nonneg_y_neg.u32le",
+        "points_sha256": "7b8649e56fd7dc4380984d59492e1523fe65ca070cbab0f6883c14848d1a83a3",
+        "raw_return_ids_file": "s00_full_quarter_x_nonneg_y_neg.raw_return_ids.u32le",
+        "raw_return_ids_sha256": "0ead7ce73bfdeaf4fdcb21179f08fa7da2f1370820bfa873ec6b9169c478668c",
+        "sites": 31391
+      },
+      "quarter_x_nonneg_y_nonneg": {
+        "grid_full_site_ids_file": "s00_full_quarter_x_nonneg_y_nonneg.grid_full_site_ids.u32le",
+        "grid_full_site_ids_sha256": "35b5147b5a07dd87d6c2fea96725a05f7f6aa2a1a583c4a466c5ccf60eb54b32",
+        "points_file": "s00_full_quarter_x_nonneg_y_nonneg.u32le",
+        "points_sha256": "5cdc3832e8b7431214a373729f9a2b8dd047d5f8263a6677042016d3f92e49f6",
+        "raw_return_ids_file": "s00_full_quarter_x_nonneg_y_nonneg.raw_return_ids.u32le",
+        "raw_return_ids_sha256": "2f4208aa2d4d499ee6c350d089db16751c0f42877ef53fb2445f306c7a982404",
+        "sites": 30953
+      }
+    },
+    "half": {
+      "full": {
+        "grid_full_site_ids_file": "s00_half_full.grid_full_site_ids.u32le",
+        "grid_full_site_ids_sha256": "efee63f61521e66ca8c592d2e0f390b9d97f6c55fd39cb4f77171644eb3ed6b0",
+        "points_file": "s00_half_full.u32le",
+        "points_sha256": "9b745ea012a418076c9e570a5f57fd1f36fc1fbcaa467ec1335202cd5bf4adb1",
+        "raw_return_ids_file": "s00_half_full.raw_return_ids.u32le",
+        "raw_return_ids_sha256": "23b62b6176d14e9dff93ef508ed171521631e40607191819b9503c6103f9bba6",
+        "sites": 61694
+      },
+      "half_x_neg": {
+        "grid_full_site_ids_file": "s00_half_half_x_neg.grid_full_site_ids.u32le",
+        "grid_full_site_ids_sha256": "85d4d5eac75f1a414ba8b1feda42a841665023946c2a71499ee4efd3295167da",
+        "points_file": "s00_half_half_x_neg.u32le",
+        "points_sha256": "9c8f6b69ce202c8398dc5503a75800187ed22c1a745a4db9eaf3ff5a2b936fdc",
+        "raw_return_ids_file": "s00_half_half_x_neg.raw_return_ids.u32le",
+        "raw_return_ids_sha256": "6d14a6423b6fa06aa7ef478c66b0f196810b169d87e01b5d5d6d111b84b897fd",
+        "sites": 30644
+      },
+      "half_x_nonneg": {
+        "grid_full_site_ids_file": "s00_half_half_x_nonneg.grid_full_site_ids.u32le",
+        "grid_full_site_ids_sha256": "4dd3819929a70f62a0f9ee240168b673f85a20588dd5b02ded2dfa02d28c9d70",
+        "points_file": "s00_half_half_x_nonneg.u32le",
+        "points_sha256": "afcbb1b887555abdb28655c0031d4180b2fec9bb7251e7e9d882e5949f4d8e1f",
+        "raw_return_ids_file": "s00_half_half_x_nonneg.raw_return_ids.u32le",
+        "raw_return_ids_sha256": "1495593f9fd35caccf0bb89cb0ab70258a79e9d74cdb1216452f434b8a7e5a70",
+        "sites": 31050
+      },
+      "quarter_x_neg_y_neg": {
+        "grid_full_site_ids_file": "s00_half_quarter_x_neg_y_neg.grid_full_site_ids.u32le",
+        "grid_full_site_ids_sha256": "e06676dd30a76b07590291344f6c88647ee0002acc4c6c42f9c79e9b475abd02",
+        "points_file": "s00_half_quarter_x_neg_y_neg.u32le",
+        "points_sha256": "fe2cbf5be5f7ce4e4b42562829e5cbbf960423988c6c39c31e0ab9d371e428e6",
+        "raw_return_ids_file": "s00_half_quarter_x_neg_y_neg.raw_return_ids.u32le",
+        "raw_return_ids_sha256": "23ee85d409517e766e7182465b1b984c0e8c9d8d05c884c69e3ab332cb7a1e03",
+        "sites": 15217
+      },
+      "quarter_x_neg_y_nonneg": {
+        "grid_full_site_ids_file": "s00_half_quarter_x_neg_y_nonneg.grid_full_site_ids.u32le",
+        "grid_full_site_ids_sha256": "fae58158aeba081bef6f370ef24cddd24bb1f073a5e4fd29a77c48bf2a0c32ff",
+        "points_file": "s00_half_quarter_x_neg_y_nonneg.u32le",
+        "points_sha256": "eb1d2e6b8e9da5306dea12898b51c60f325da84f29288fca2d8b6a2bd148dd21",
+        "raw_return_ids_file": "s00_half_quarter_x_neg_y_nonneg.raw_return_ids.u32le",
+        "raw_return_ids_sha256": "74cb96b354cc149dcc9a68ea4d1eb7fa836fc4c76f1a0966a4428f68904dbf53",
+        "sites": 15427
+      },
+      "quarter_x_nonneg_y_neg": {
+        "grid_full_site_ids_file": "s00_half_quarter_x_nonneg_y_neg.grid_full_site_ids.u32le",
+        "grid_full_site_ids_sha256": "2658e054c72b8290133aeb953dda60d2350a5cca9000fc1436d399089be2bd20",
+        "points_file": "s00_half_quarter_x_nonneg_y_neg.u32le",
+        "points_sha256": "fd8756d3f254fef35e56369d1618af9a33a30a038920cb77298cbf43ed60fd51",
+        "raw_return_ids_file": "s00_half_quarter_x_nonneg_y_neg.raw_return_ids.u32le",
+        "raw_return_ids_sha256": "2f8f4ee3a0ebcd0ccdc5051701e37b5eb4b1aebd90c274334946f3414ece5f5f",
+        "sites": 15619
+      },
+      "quarter_x_nonneg_y_nonneg": {
+        "grid_full_site_ids_file": "s00_half_quarter_x_nonneg_y_nonneg.grid_full_site_ids.u32le",
+        "grid_full_site_ids_sha256": "7be6f7accbf1b0f7033307c82b8fcfe8c88fb3c20da63be33e02798fa8adc045",
+        "points_file": "s00_half_quarter_x_nonneg_y_nonneg.u32le",
+        "points_sha256": "8531136d076c983920cbdda750c8080737014b4d615611ab33b0979c6041bbdf",
+        "raw_return_ids_file": "s00_half_quarter_x_nonneg_y_nonneg.raw_return_ids.u32le",
+        "raw_return_ids_sha256": "da931d3e3dee7068adca6dbb822bc9cba0cf33dd6d1d68c36896fe8c20c8a9dc",
+        "sites": 15431
+      }
+    },
+    "quarter": {
+      "full": {
+        "grid_full_site_ids_file": "s00_quarter_full.grid_full_site_ids.u32le",
+        "grid_full_site_ids_sha256": "5b8976f888671c6bb40e0e121d30a9c694a127a1ddaa6a141a3da19d0c366e09",
+        "points_file": "s00_quarter_full.u32le",
+        "points_sha256": "0bd6bf8482717249e3375936ce78e5641f9aa7f5f980497a2f9c2bee4e293bd7",
+        "raw_return_ids_file": "s00_quarter_full.raw_return_ids.u32le",
+        "raw_return_ids_sha256": "003706e4f890eaffec82f6399afe5a12f9486bf659699636d2ab7f894eb35195",
+        "sites": 30847
+      },
+      "half_x_neg": {
+        "grid_full_site_ids_file": "s00_quarter_half_x_neg.grid_full_site_ids.u32le",
+        "grid_full_site_ids_sha256": "d7e13895b0cd4d23a7b79813a58b22a099413763448d37298b7e2493715f8bef",
+        "points_file": "s00_quarter_half_x_neg.u32le",
+        "points_sha256": "7f621b4a0627504cc04016997ada95cebeae8cc655910049370ae862e0cfc418",
+        "raw_return_ids_file": "s00_quarter_half_x_neg.raw_return_ids.u32le",
+        "raw_return_ids_sha256": "baa21d7748cfd6e212b59c2f08b08fdce5b433a880dc2e0c7d6db5f227466237",
+        "sites": 15437
+      },
+      "half_x_nonneg": {
+        "grid_full_site_ids_file": "s00_quarter_half_x_nonneg.grid_full_site_ids.u32le",
+        "grid_full_site_ids_sha256": "e8bedf2a7bb14e52c76b59fe9fbfb30974c579ecd18e64db423fb6efd81e3414",
+        "points_file": "s00_quarter_half_x_nonneg.u32le",
+        "points_sha256": "4e6e3baf3d1731b94ede56eb82433b3936b8f91a681bb39526294a7eaafc4209",
+        "raw_return_ids_file": "s00_quarter_half_x_nonneg.raw_return_ids.u32le",
+        "raw_return_ids_sha256": "dd5fdb5a5f0cb29e71853064b480bd64bbea23b03565a1271f0f745b22f8f552",
+        "sites": 15410
+      },
+      "quarter_x_neg_y_neg": {
+        "grid_full_site_ids_file": "s00_quarter_quarter_x_neg_y_neg.grid_full_site_ids.u32le",
+        "grid_full_site_ids_sha256": "47caf7323717fcc2e735dcbe3f4288bd834066a3fe118271f525cc428a1a74ce",
+        "points_file": "s00_quarter_quarter_x_neg_y_neg.u32le",
+        "points_sha256": "85713bf52d73e618741eb1f55cebe3339ff957270bab0bb469baf5f5ba3235df",
+        "raw_return_ids_file": "s00_quarter_quarter_x_neg_y_neg.raw_return_ids.u32le",
+        "raw_return_ids_sha256": "d7b1b2fcbd60355d1bc0a8638310d1a939e6cb0fff13efc22fb312c1126cbf2f",
+        "sites": 7649
+      },
+      "quarter_x_neg_y_nonneg": {
+        "grid_full_site_ids_file": "s00_quarter_quarter_x_neg_y_nonneg.grid_full_site_ids.u32le",
+        "grid_full_site_ids_sha256": "5ea50c9eea2e16334ac2d9fdf20255355dc0a14343c15a8d0c19b37b1c7dd5db",
+        "points_file": "s00_quarter_quarter_x_neg_y_nonneg.u32le",
+        "points_sha256": "faa25e0164345e8e2fad4f3d13cdc3eb0fcdc7f0c0266ac497e98da4d48bbdc4",
+        "raw_return_ids_file": "s00_quarter_quarter_x_neg_y_nonneg.raw_return_ids.u32le",
+        "raw_return_ids_sha256": "793e6072ad171ababc1ff1cc44c038bc5e3eab7946ba273d9c0d0768be5d0525",
+        "sites": 7788
+      },
+      "quarter_x_nonneg_y_neg": {
+        "grid_full_site_ids_file": "s00_quarter_quarter_x_nonneg_y_neg.grid_full_site_ids.u32le",
+        "grid_full_site_ids_sha256": "c43a417df8cb7d277e8e53269282e4af4295d7833017bda88357d100af313e95",
+        "points_file": "s00_quarter_quarter_x_nonneg_y_neg.u32le",
+        "points_sha256": "869fe8c51b89c64934ba55863fa17c321b1dfde1717abe2d7e053c415873272b",
+        "raw_return_ids_file": "s00_quarter_quarter_x_nonneg_y_neg.raw_return_ids.u32le",
+        "raw_return_ids_sha256": "255a984bd799823cfc69fd92e7f908560dd5007bc219b0934f909e4b57409fa3",
+        "sites": 7692
+      },
+      "quarter_x_nonneg_y_nonneg": {
+        "grid_full_site_ids_file": "s00_quarter_quarter_x_nonneg_y_nonneg.grid_full_site_ids.u32le",
+        "grid_full_site_ids_sha256": "28780b71149dba4f5ea30aae9e435b90daf765cbf0a8838c3dc2cbb73e30a500",
+        "points_file": "s00_quarter_quarter_x_nonneg_y_nonneg.u32le",
+        "points_sha256": "2f269285bf18738e1994d0d647c21e64cd3c13f783825864bdfc6ecf7655daa0",
+        "raw_return_ids_file": "s00_quarter_quarter_x_nonneg_y_nonneg.raw_return_ids.u32le",
+        "raw_return_ids_sha256": "c14eb01f6548765ce16bb73cbd569065798650cf4a0f9d912221b1691d414059",
+        "sites": 7718
+      }
+    }
+  },
+  "density_policy": "global splitmix64(original return ID XOR seed), first floor(n/4), first floor(n/2), all; then sector intersection",
+  "encoded_sensor_origin": [
+    79602,
+    79917,
+    27639
+  ],
+  "float32_unique_sites": 123389,
+  "geometry_policy": "joint original return ID to whole-scene u18/1mm coordinates; no per-sector translation",
+  "global_density_sizes": {
+    "full": 123389,
+    "half": 61694,
+    "quarter": 30847
+  },
+  "global_sites": 123389,
+  "grid_side_moved_original_ids": [
+    49349,
+    57964,
+    118789
+  ],
+  "grid_unique_sites": 123389,
+  "raw_returns": 123389,
+  "raw_to_float32_bijective": true,
+  "raw_to_grid_bijective": true,
+  "schema": "mhgp9_raw_physical_sector_density_inputs_v1",
+  "sector_policy": "original float32 sensor x<0/x>=0 then y<0/y>=0; no poses",
+  "seed_hex": "d1da73a520260923",
+  "source_float32_full_points_sha256": "412b9d40c899419dec8f2d126a4d03737aa3538dc5fe3ad0ec7770bf9f1568eb",
+  "source_float32_manifest": "morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_float32/MANIFEST.json",
+  "source_float32_manifest_sha256": "c424724e5a863ccaac6096ac53b4bb48fde19c03217f911f252452bb5f75f5c2",
+  "source_float32_raw_to_full_sha256": "ee889a1345c4f09131f5fcc486239f37fbd62deb2dfc5385f1c8fbaaca6cc025",
+  "source_full_ids_sha256": "a6979864df3179a4488f8dfbb4a01949d3de6e0ebebac1bd3364f33741168597",
+  "source_grid_full_points_sha256": "233cc4ea8cac6e0b1155ea845af57b32e5236764bf2e119557aeab5bac76c172",
+  "source_grid_manifest": "morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_grid/MANIFEST.json",
+  "source_grid_manifest_sha256": "c745ec8608ea861368110cc1b0c98be71038aec6fcad31392e494fd4135589d7",
+  "source_grid_raw_to_full_sha256": "f25dcdb4a6c51cb07594e9d3bc4c88fe725b62c6792e250672ddd3db81f30ee5"
+}

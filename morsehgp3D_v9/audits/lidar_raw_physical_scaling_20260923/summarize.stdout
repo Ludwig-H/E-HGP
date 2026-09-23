@@ -1,0 +1,73 @@
+{
+  "density_slopes": [
+    {
+      "from": "quarter_full",
+      "n_ratio": 2.0,
+      "p": {
+        "catalogue_balls": 1.0090413793694453,
+        "chain_cpu_s": 1.217529009417408,
+        "chain_wall_s": 1.136595839786836,
+        "core_sites": 1.799740824199288,
+        "dead_core_form_sites": 1.8231956327977268,
+        "dead_core_forms_per_load": 0.7020513004734219,
+        "dead_core_loads": 1.1211443323243047,
+        "dead_core_uniform_tests": 1.6034717764543596,
+        "expanded_pairs": 1.4542959626170886,
+        "external_wall_s": 1.1361119356282183,
+        "q34_wall_s": 1.1630050154365315
+      },
+      "to": "half_full"
+    },
+    {
+      "from": "half_full",
+      "n_ratio": 2.0000162090316724,
+      "p": {
+        "catalogue_balls": 0.9342865433033807,
+        "chain_cpu_s": 1.2973923674230088,
+        "chain_wall_s": 1.2390784403485702,
+        "core_sites": 2.1188062306617574,
+        "dead_core_form_sites": 2.1363325684228927,
+        "dead_core_forms_per_load": 0.8937189754521572,
+        "dead_core_loads": 1.2426135929707356,
+        "dead_core_uniform_tests": 1.7530484413094094,
+        "expanded_pairs": 1.4953407975276871,
+        "external_wall_s": 1.2254525849050484,
+        "q34_wall_s": 1.3117924330779864
+      },
+      "to": "full_full"
+    }
+  ],
+  "n_valid_cases": 9,
+  "spatial_sums": {
+    "halves": {
+      "quadratic_reference": 0.5000554160309818,
+      "sum_piece_over_full": {
+        "catalogue_balls": 0.9973979926663293,
+        "chain_cpu_s": 0.9001293243939451,
+        "chain_wall_s": 0.971268926204926,
+        "core_sites": 0.3153337490689756,
+        "dead_core_form_sites": 0.30588540869162895,
+        "dead_core_loads": 0.9691192602509562,
+        "dead_core_uniform_tests": 0.589308280156224,
+        "expanded_pairs": 0.8063740348852292,
+        "external_wall_s": 0.9724873685863418,
+        "q34_wall_s": 0.9563307340526654
+      }
+    },
+    "quarters": {
+      "quadratic_reference": 0.25004271864418237,
+      "sum_piece_over_full": {
+        "catalogue_balls": 0.9946301485585666,
+        "chain_cpu_s": 0.8740506573113843,
+        "chain_wall_s": 1.0420258813445147,
+        "core_sites": 0.3091519811428382,
+        "dead_core_form_sites": 0.29973089089389376,
+        "dead_core_loads": 0.9610518977742759,
+        "dead_core_uniform_tests": 0.5770744551014666,
+        "expanded_pairs": 0.7336796973971548,
+        "external_wall_s": 1.041493885031408,
+        "q34_wall_s": 1.0321019003208254
+      }
+    }
+  }
+}

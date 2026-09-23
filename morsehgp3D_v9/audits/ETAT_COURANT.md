@@ -453,6 +453,16 @@ Le paquet exécuté `33d51efd` précède la validation parallèle du
 catalogue et le remplissage parallèle des programmes de `308ca2a1`,
 ainsi que le lecteur K1 corrigé en `c19e4b49` ; ne pas leur attribuer
 ces chronos. La phase q3/q4 du meilleur K5 reste **1,65–1,69 s**.
+La [contrelecture de la passe 2](CONTRE_AUDIT_B_G4_R10_ET_PASSE2_20260923.md)
+ne trouve pas de course dans les plages de dispersion, mais note que
+`records` devient zéro sur tout refus tardif. Un essai local minimal
+sur trois sites collinéaires, deux records et K1 reproduit
+`full_ball_outside_rank_window` avec `records=0` après `308ca2a1`,
+contre `records=1` à `33d51efd` ; statut et raison restent identiques.
+Sur 08/000000 sans sol K5, un binaire local postérieur au port rend le
+même digest R10 avec 1 306 696 boules, franchissant les seuils des deux
+voies parallèles. Cela soutient l'identité des sorties sur ce cas, sans
+remplacer une porte de payload complet ni une qualification G4 du port.
 Le [shadow voisins du cœur](../receipts/knn_core_probe_20260923/README.md)
 publié avec R11 conserve 96 %/86 % de ses fermetures K5/K10 en
 choisissant 17 voisins de chaque extrémité **parmi les sites du cœur
@@ -617,6 +627,19 @@ Une [ablation à boîte exactement fixe](lidar_density_bbox_fixed_20260923/READM
 sur ce quart échange seulement trois puis deux IDs aux densités 1/4 et 1/2 ;
 la pente K10 des formes reste **2,058215 puis 2,042880**, pratiquement
 inchangée. Ce signal ne vient donc pas seulement de l'étendue de la boîte.
+Le [premier reçu brut avec sol](lidar_raw_physical_scaling_20260923/README.md)
+ajoute **neuf cas K5** sur une trame entière 08/000000 à 1 mm : sept
+secteurs par plans **float32 physiques** et trois densités emboîtées de
+la trame entière. La sélection garde les 123 389 retours sans fusion ;
+trois changeraient de secteur si le signe était pris après grille.
+Sur 30 847→61 694→123 389 sites, les formes réellement chargées par
+le cœur passent de 35,46→125,48→551,69 M, soit des pentes finies
+**1,823 puis 2,136**, contre **1,218 puis 1,297** pour CPU·s. Les deux
+moitiés cumulent 97,0 % des charges de cœur du plein, mais seulement
+30,6 % de ses formes : 43,68 contre 138,39 formes par charge.
+C'est un verrou de **masse par cœur**, pas seulement de nombre de cœurs.
+Le plein prend 48,36 s de chaîne locale W8 et 1,93 GiB RSS ; ni borne
+asymptotique ni contrat G4 ne sont acquis.
 Le [crédit exact par nœuds du certificat de cœur](../receipts/dead_node_credit_negative_20260923/README.md)
 a été essayé hors produit : mêmes voies et digest, mais CPU de chaîne
 **+27 % à K5 et +32 % à K10** sur la coupe 16k de 000000 ; cette variante
