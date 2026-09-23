@@ -6,27 +6,29 @@ des diffs non commis `tower_worker_v9.py`, `tower_session_v9.py` et
 Le protocole peut encore changer ; cette note ne décrit pas un reçu
 publié.
 
-**Relecture après publication (`c265a5dae`, reçu R12 sur `2059189d8`).**
+**Relecture après publication (`f9e6a5527`, reçu R12 sur `2059189d8`).**
 R12 est un vrai reçu G4, 14/14 cas achevés dont sept GPU ; le scénario
 partiel ci-dessous **ne s'y produit pas**. Le code courant recalcule et
 publie `unpaired_batch_cases` pour les tours par lots achevées sans jumeau
 moteur achevé ; son selftest refuse une dissimulation. Le lien CUDA, les
-selftests v17 et le mutant doublon ont été corrigés. Il reste toutefois
-possible, avec un plan mixte autorisé, que seul le préflight GPU réussisse,
-qu'aucun cas LiDAR GPU ne s'achève et qu'un cas CPU s'achève : le worker
-marque `GPU_executed` au préflight (`tower_worker_v9.py:955`), et l'hôte
-le déduit du plan à réception partielle (`tower_session_v9.py:489`).
-`unpaired_batch_cases` est alors vide, puisqu'aucun cas batch n'est
-achevé. Ces marqueurs signifient au plus « GPU vu dans le préflight »,
-pas « tour LiDAR GPU achevée ». Ce défaut de **libellé** ne retire rien
-aux sept cas GPU complets de R12. Le différentiel catalogue GPU–moteur
+selftests v17 et le mutant doublon ont été corrigés. **Le défaut de
+libellé est maintenant clos** : le worker sépare
+`GPU_preflight_executed` de `GPU_completed_cases`, ne met
+`GPU_executed=true` qu'après au moins une tour LiDAR GPU achevée ;
+l'hôte recalcule la liste et rejette sa falsification. Le scénario
+adverse mixte (tous GPU tués, jumeaux CPU complets) passe avec
+`GPU_executed=false`. Rejeu B local sans GCP : **24/24 selftests** Python
+normal, et le nouveau test ciblé **1/1** sous `-O`. Un premier lancement
+de la suite entière artificiellement coupé à 60 s a rendu un échec
+partiel ; il n'est pas une qualification du correctif, et le rejeu
+complet sans coupure passe. Le différentiel catalogue GPU–moteur
 clé par clé reste à faire ; les six paires distinctes de R12 comparent
 une projection logique, pas les catalogues entiers.
 Dans R12, `catalogue.euler.status=holds` ne porte que sur les degrés
 jusqu'à `checkable_max_k=3` de la dimension simpliciale ; ce n'est pas
 une vérification indépendante des dix niveaux de la tour.
 
-## Faux statut positif possible dans une réception partielle
+## Scénario historique WIP, fermé par `f9e6a5527`
 
 Le worker met `GPU_executed=True` dès que le **préflight de 1 500 sites**
 utilise le levier GPU et réussit. L'hôte accepte ensuite une campagne

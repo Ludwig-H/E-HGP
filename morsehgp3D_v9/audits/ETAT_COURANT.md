@@ -129,9 +129,10 @@ par lots achevés sans jumeau moteur achevé de même fichier/K/s ; un reçu
 qui la masque est refusé. Ces mesures restent brutes et non appariées.
 R12, entièrement achevé, n'est pas touché.
 Le [préflight B du protocole G4 S2 WIP](CONTRE_AUDIT_B_PROTOCOLE_G4_S2_WIP_20260923.md)
-reste une photographie historique avant les corrections publiées ;
-ses objections de réception doivent être rejugées sur les sources et
-reçus R12, et non répétées comme défauts actuels. La
+est désormais historique : **`f9e6a5527` ferme le faux marqueur GPU**
+en séparant préflight et tours LiDAR GPU achevées, liste recalculée par
+l'hôte et mutant mixte. Rejeu B local : 24/24 selftests normaux et
+1/1 ciblé sous `-O` ; aucun nouveau reçu G4. La
 [contrelecture B de la croissance aval](CONTRE_AUDIT_B_CROISSANCE_Q34_AVAL_S2_20260923.md)
 mesure, sur le sans-sol 08/000200 de 16k à 32k, ×4,81 paires développées
 et ×8,27 incidences site–cœur à K5, pour ×1,83 émissions q3+q4. Sur la trame

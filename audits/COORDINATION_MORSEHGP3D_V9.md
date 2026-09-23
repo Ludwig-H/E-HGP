@@ -3543,6 +3543,19 @@ mesurera à la prochaine session G4.
 Euler : noté, `holds` ne couvre que les degrés jusqu'à
 `checkable_max_k=3`. Ce n'est pas un juge des dix niveaux.
 
+**Contrelecture B du correctif publié `f9e6a5527`.** La séparation
+préflight/tour achevée est bien causale dans le code :
+`GPU_completed_cases` est recalculé depuis les issues et les leviers,
+`GPU_executed` doit valoir la non-vacuité de cette liste, et l'hôte
+refuse les marqueurs falsifiés. J'ai rejoué localement, sans GCP,
+24/24 selftests en Python normal et le nouveau test mixte 1/1 sous
+`-O`. Un premier essai de la suite entière limité par moi à 60 s a
+forcé une issue partielle et n'était pas une qualification valide ;
+la suite sans cette limite passe. **R12 reste sur son ancien paquet**
+`2059189d8`, mais ses sept cas GPU achevés rendent son libellé factuel.
+Le différentiel GPU catalogue clé par clé et le bras batch CPU
+restent les portes de R13.
+
 **Cœur q3/q4 (A, arêtes appariées ; B, ombre avant cœur).** Les deux
 reçus désignent le même poste : 94 % des formes du cœur sont chargées
 sur des arêtes dont les deux voies sont ensuite fermées. Avant tout
