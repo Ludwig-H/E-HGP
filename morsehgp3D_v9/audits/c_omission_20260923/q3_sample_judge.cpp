@@ -28,10 +28,12 @@
 //   q3_sample_judge file <cut.u32le> <Kmax> <sites> <workers> [options]
 //   q3_sample_judge fixture-eq [options]         (fixture d'egalite gravee, Kmax = 5, tous les sites)
 // options : --compare | --no-prune ; --seed=<u64> ; --sites=<i,j,...> ; --long-sites=<N> ; --min-top=<n> ;
-//           --inject=overprune | --inject=level | --inject=shell-dup | --inject=key
+//           --min-long=<n> ; --inject=overprune | --inject=level | --inject=shell-dup | --inject=key |
+//           --inject=drop-long (partenaires >= 1600 unites retires du parcours elague : --compare doit le voir)
 //
 // Code 0 conforme ; 1 manquante, EXTRA, desaccord d'elagage ou recoupement faux ; 2 argument/chaine ;
-// 3 vacuite (plancher --min-top de cles q3 regulieres p = Kmax-2, arite 3, non atteint ; mutant cible non tue).
+// 3 vacuite (plancher --min-top de cles q3 regulieres p = Kmax-2, arite 3, ou --min-long d'incidences longues
+// non atteint ; mutant cible non tue).
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -75,6 +77,8 @@ struct Options {
   bool shell_dup = false;      // mutant : dernier site de coquille remplace par le premier (doublon)
   bool corrupt_key = false;    // mutant : cle seule faussee (c + 1), niveau et coquille intacts
   std::size_t long_sites = 0;  // --long-sites=N : N sites les plus isoles (distance au Kmax-ieme voisin)
+  bool drop_long = false;      // mutant : partenaires b a >= 1600 unites retires du parcours elague
+  std::uint64_t min_long = 0;  // --min-long=N : plancher d'incidences >= 1600 unites (sinon code 3)
   std::vector<std::size_t> sites;  // --sites= : sites imposes (indices de l'index), a la place du tirage
 };
 
@@ -391,6 +395,10 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
     for (std::size_t b = 0; b < n; ++b) {
       if (b == a) continue;
       ++t.partners;
+      if (prune && opt.drop_long) {  // mutant : le parcours elague perd les ancres longues
+        const V e = sub(pos[b], pos[a]);
+        if (dot(e, e) >= 1600ll * 1600) continue;
+      }
       if (prune) {
         inner.clear();
         diametral_interior(tree, pos[a], pos[b], inner);
@@ -603,7 +611,8 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
               "prune_disagreements=%d",
               label.c_str(), n, kmax, cat.size(), (unsigned long long)fnv_points(points), (unsigned long long)opt.seed,
               opt.mode == 0 ? "prune" : opt.mode == 1 ? "no-prune" : "compare",
-              opt.overprune ? "+overprune" : opt.corrupt_level ? "+level" : opt.shell_dup ? "+shell-dup" : opt.corrupt_key ? "+key" : "",
+              opt.overprune ? "+overprune" : opt.corrupt_level ? "+level" : opt.shell_dup ? "+shell-dup" : opt.corrupt_key ? "+key"
+              : opt.drop_long ? "+drop-long" : "",
               sampled.size(), (unsigned long long)t.partners, (unsigned long long)t.kept,
               (unsigned long long)t.triangles, (unsigned long long)t.acute, (unsigned long long)t.incidences,
               (unsigned long long)t.found, (unsigned long long)t.missing, (unsigned long long)t.cross_fail,
@@ -616,7 +625,7 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
   for (unsigned p = 0; p <= pmax; ++p) std::printf(" p%u=%llu", p, (unsigned long long)t.by_p[p]);
   std::printf("\n");
   if (t.missing || t.cross_fail || t.extra || disagreements) return 1;
-  if (!mutant_killed || top_keys < opt.min_top) return 3;
+  if (!mutant_killed || top_keys < opt.min_top || t.by_len[2] < opt.min_long) return 3;
   return 0;
 }
 
@@ -634,6 +643,8 @@ int main(int argc, char** argv) {
       else if (a == "--inject=level") opt.corrupt_level = true;
       else if (a == "--inject=shell-dup") opt.shell_dup = true;
       else if (a == "--inject=key") opt.corrupt_key = true;
+      else if (a == "--inject=drop-long") opt.drop_long = true;
+      else if (a.rfind("--min-long=", 0) == 0) opt.min_long = std::stoull(a.substr(11));
       else if (a.rfind("--long-sites=", 0) == 0) opt.long_sites = std::stoul(a.substr(13));
       else if (a.rfind("--sites=", 0) == 0) {
         std::string list = a.substr(8);
