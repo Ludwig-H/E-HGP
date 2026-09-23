@@ -2789,3 +2789,41 @@ ces hypothèses et conserver la vitesse du filtre actuel, ou porter les
 bornes entières si le juge doit sortir de ce profil. Ce certificat
 ne couvre **pas** les entrées float32/triangles non aigus, ni les clés
 non échantillonnées et ne corrige pas le top `q_min=3` signalé par A.
+## 23 septembre 2026, 13 h 00 UTC — Réponse du développeur : voisins proches, micro-leviers q3/q4
+
+GCP non utilisé. Deux reçus négatifs publiés, aucun changement de code
+produit dans ce commit.
+
+- **Voisins proches** ([reçu](../morsehgp3D_v9/receipts/near_sites_negative_20260923/README.md)) :
+  deux placements mesurés (après le cache de la même ancre ; sur les seuls
+  survivants du filtre ponctuel). K5 −1,3 à −2 % de CPU q3/q4, K10
+  **+3,7 %** : fermé, code retiré, patchs archivés. Les remarques de B
+  (croisement cache/voisins, API `load_sites` à doublons, coûts kNN) sont
+  sans objet pour le produit ; la phrase d'exactitude est corrigée selon
+  B 12 h 04 (seuls les résumés du catalogue sont égaux, `--no-tower`, ni
+  clés une à une ni tour). La note de C sur les sous-ensembles locaux est
+  juste ; la mesure montre que les formes des voisins coûtent à peu près
+  ce que coûtent la recherche de paire et le noyau qu'elles remplacent.
+- **Micro-leviers** ([reçu](../morsehgp3D_v9/receipts/q34_micro_levers_20260923/README.md),
+  profil `SIGPROF` joint) : filtrage (front, rectangles, paires) ≈ 40 %
+  du CPU q3/q4, cœur et certificat 18 %, génération 25 %, aucun poste
+  au-delà de 16 %. Raffinement des rectangles : +12 à +42 % (le défaut
+  `nodes[absent]` relevé par B à 12 h 10 est réel pour un seuil 1 ; les
+  seuils mesurés, 4, 16 et 64, n'y entrent pas ; il est noté avec le
+  patch archivé). Cache par `b` : +2 %. **Pas +1 des compteurs sans
+  contrôle** : −4 % et condensé FULL identique, mais j'accepte les trois
+  objections de B (autres API publiques sans marge, champs MAX refusés,
+  `bit_cast` fragile) : non retenu, `counter_add` reste contrôlé partout.
+  La version sûre (compteurs locaux du seul DFS, ajout contrôlé) ne
+  gagne que 0,9 % : non retenue non plus. Merci à B pour les deux portes
+  de dépassement annoncées avant l'exécution.
+
+Suite : la marge d'ordonnancement CPU est épuisée (B, 33 ms) et les
+micro-leviers valent quelques pourcents. J'ouvre la voie GPU par une
+expérience de débit bornée, comme le recommande C :
+- **Objet** : le filtre témoin exact des rectangles et des paires (40 % du
+  CPU) sur G4, même arithmétique entière que `filter_impl`.
+- **Juge** : masques GPU égaux aux masques CPU requête par requête.
+- **Seuil fixé d'avance** : poursuivre seulement si toute la population
+  de filtrage de 08/000000/K5, sans cache, tient en 0,1 s au plus sur le
+  GPU, transferts compris.

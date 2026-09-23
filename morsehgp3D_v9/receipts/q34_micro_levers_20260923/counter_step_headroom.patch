@@ -1,0 +1,74 @@
+diff -ru a/morsehgp3D_v9/src/gen/core/types.hpp b/morsehgp3D_v9/src/gen/core/types.hpp
+--- a/morsehgp3D_v9/src/gen/core/types.hpp	2026-09-23 12:45:25.329936695 +0000
++++ b/morsehgp3D_v9/src/gen/core/types.hpp	2026-09-23 12:45:25.383936696 +0000
+@@ -1,9 +1,12 @@
+ #pragma once
+ 
++#include <array>
++#include <bit>
+ #include <cstddef>
+ #include <cstdint>
+ #include <limits>
+ #include <stdexcept>
++#include <type_traits>
+ 
+ namespace mhgp9::gen {
+ 
+@@ -127,7 +130,24 @@
+   u64 negative_probes{};
+ };
+ 
+-inline void counter_add(u64& value, u64 increment = 1) {
++// One step carries no check and no throw (hot path). It cannot wrap: a
++// ledger that starts from zero never reaches 2^63 in a feasible run, and a
++// public entry that receives a caller's ledger first requires the headroom
++// below (one call makes far fewer than 2^63 steps).
++inline void counter_add(u64& value) noexcept { ++value; }
++
++// Caller-supplied ledger (all-u64 aggregate): any word at or above 2^63 is
++// refused before the call changes it.
++template <class Work>
++void require_ledger_headroom(const Work& work) {
++  static_assert(std::is_trivially_copyable_v<Work> && sizeof(Work) % sizeof(u64) == 0);
++  const auto words = std::bit_cast<std::array<u64, sizeof(Work) / sizeof(u64)>>(work);
++  for (const auto word : words)
++    if ((word >> 63) != 0) throw std::overflow_error("mhgp9 gen work counter overflow");
++}
++
++// Arbitrary increments (masses, sizes) keep the exact overflow refusal.
++inline void counter_add(u64& value, u64 increment) {
+   if (increment > std::numeric_limits<u64>::max() - value) {
+     throw std::overflow_error("mhgp9 gen work counter overflow");
+   }
+diff -ru a/morsehgp3D_v9/src/gen/lanes/q34_witness_search.cpp b/morsehgp3D_v9/src/gen/lanes/q34_witness_search.cpp
+--- a/morsehgp3D_v9/src/gen/lanes/q34_witness_search.cpp	2026-09-23 12:45:25.335936696 +0000
++++ b/morsehgp3D_v9/src/gen/lanes/q34_witness_search.cpp	2026-09-23 12:45:25.383936696 +0000
+@@ -58,6 +58,9 @@
+   require_valid_box(a);
+   require_valid_box(b);
+ 
++  require_ledger_headroom(work);
++  if constexpr (Exclusion) require_ledger_headroom(*bounds_work);
++
+   const std::uint8_t available = kmax >= 3 ? 6 : kmax == 2 ? 2 : 0;
+   std::uint8_t remaining = lane_mask & available;
+   counter_add(work.queries);
+@@ -229,6 +232,7 @@
+     std::span<const Q34WitnessNode> cached, Q34WitnessCacheWork& work) {
+   if (kmax == 0 || kmax > 10 || (lane_mask & ~6U) != 0)
+     throw std::invalid_argument("mhgp9 gen q34 witness cache requires K1..10 and a subset of mask6");
++  require_ledger_headroom(work);
+   const std::uint8_t available = kmax >= 3 ? 6 : kmax == 2 ? 2 : 0;
+   const std::uint8_t lanes = lane_mask & available;
+   counter_add(work.queries);
+diff -ru a/morsehgp3D_v9/src/gen/lanes/q3_ball_census.cpp b/morsehgp3D_v9/src/gen/lanes/q3_ball_census.cpp
+--- a/morsehgp3D_v9/src/gen/lanes/q3_ball_census.cpp	2026-09-23 12:45:25.340936696 +0000
++++ b/morsehgp3D_v9/src/gen/lanes/q3_ball_census.cpp	2026-09-23 12:45:25.383936696 +0000
+@@ -84,6 +84,7 @@
+   if (nodes.empty())
+     throw std::logic_error("mhgp9 gen q3 census index has no root");
+ 
++  require_ledger_headroom(work);
+   shell.clear();
+   counter_add(work.queries);
+   const PreparedPower prepared(ball);

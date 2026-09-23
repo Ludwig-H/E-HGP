@@ -196,6 +196,17 @@ par masse (sonde v16), q2 divisé par 3 à 4,5. **Chaîne K5 2,54 / 3,21 /
 - l'index des selles seul ([négatif](receipts/saddle_index_negative_20260923/README.md)) ;
 - le pouvoir de preuve des voisins proches pour le certificat, 96 % des
   fermetures du cœur à K5 ([mesure](receipts/knn_core_probe_20260923/README.md)).
+- le certificat sur les voisins proches **globaux** (liste kNN de 16 par
+  site) : exact mais neutre, CPU q34 −2 % à K5 et +3,7 % à K10
+  ([négatif](receipts/near_sites_negative_20260923/README.md)).
+
+Profil q3/q4 par échantillonnage (`SIGPROF`) : le filtrage (front,
+rectangles, paires) fait environ 40 % du CPU, le cœur et le certificat 18 %,
+la génération q3/q4 25 %, sans poste au-delà de 16 %
+([reçu](receipts/q34_micro_levers_20260923/README.md)). Aucun micro-levier
+retenu : pas +1 des compteurs non contrôlé (−4 %, mais contrat public de
+dépassement changé), compteurs locaux du DFS (−0,9 %), raffinement des
+rectangles et cache par `b` (pertes).
 
 Suite : tour maigre (D5 de l'auditeur C :
 index des selles, saut au centre, images de naissance directes), puis

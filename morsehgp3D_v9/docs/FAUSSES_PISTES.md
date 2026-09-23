@@ -88,6 +88,10 @@ parents FULL (liste ciblée dans le [rapport 15](audit_v8/15_entrees_v8_non_lues
 | Rejeter q4 seul pour supprimer l'atlas | réserve de méthode, pas une réfutation : l'atlas sert aussi aux graines q3 |
 | Crédit par nœuds d'index du certificat de voie morte, décisions exactes identiques | mêmes cellules et voies prouvées, mais CPU +27 % (K5) et +32 % (K10), +7 % sur le cœur seul : les seuils exacts forcent la résolution jusqu'aux sites ([reçu](../receipts/dead_node_credit_negative_20260923/README.md)) |
 | Index des selles seul dans la phase 0 de la tour (lemme A du D5) | 1,01 M MEB évités à K10 16k, mais 10,2 M entrées à construire et trier : phase 0 inchangée ou plus lente ([reçu](../receipts/saddle_index_negative_20260923/README.md)) |
+| Certificat de voie morte sur les 16 plus proches voisins globaux des extrémités (q3/q4) | exact, 62 % des requêtes de paire évitées à K5, mais 764 M tests de formes : CPU q34 −2 % à K5, +3,7 % à K10 ([reçu](../receipts/near_sites_negative_20260923/README.md)) |
+| Raffiner en rectangles enfants un rectangle résiduel qui échoue au filtre témoin | paires développées 23,7 → 7,4 M, mais visites du filtre de rectangle ×2 et rejets bon marché du cache perdus : CPU q3/q4 +12 à +42 % ([reçu](../receipts/q34_micro_levers_20260923/README.md)) |
+| Second cache de nœuds témoins par extrémité `b` | évite la recherche qui aurait établi le cache de la ligne `a` : recherches de paire +14 %, CPU +2 % ([reçu](../receipts/q34_micro_levers_20260923/README.md)) |
+| Pas +1 des compteurs de travail sans contrôle de dépassement | CPU q3/q4 −4 %, mais change le contrat de dépassement des API publiques à ledger fourni (B) ; la version sûre, compteurs locaux du seul DFS témoin, ne gagne que 0,9 % ([reçu](../receipts/q34_micro_levers_20260923/README.md)) |
 | Assimiler une sonde d'une arête ou un quart spatial à une mesure d'échelle | diagnostic « 8k/16k/32k » constant par construction (7 tests pour tout n) |
 | Exposant par relation parent/enfant comme verdict de croissance | un compteur exactement linéaire reçoit 0,78 à 1,27 |
 

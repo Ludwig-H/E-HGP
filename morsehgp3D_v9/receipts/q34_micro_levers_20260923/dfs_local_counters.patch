@@ -1,0 +1,85 @@
+--- a/morsehgp3D_v9/src/gen/lanes/q34_witness_search.cpp	2026-09-23 12:25:30.527915180 +0000
++++ b/morsehgp3D_v9/src/gen/lanes/q34_witness_search.cpp	2026-09-23 12:25:30.630915181 +0000
+@@ -33,13 +33,13 @@
+ 
+ constexpr std::size_t stack_capacity = index_stack_frames;
+ 
+-[[nodiscard]] i64 midpoint_distance16(const std::array<i64, 3>& center4,
+-                                      const Box3& box) {
++[[nodiscard, gnu::always_inline]] inline i64 midpoint_distance16(const std::array<i64, 3>& center4,
++                                                                 const Box3& box) {
+   i64 result = 0;
+   for (std::size_t axis = 0; axis < 3; ++axis) {
+-    const i64 delta = std::max<i64>({0,
+-        4 * static_cast<i64>(box.low[axis]) - center4[axis],
+-        center4[axis] - 4 * static_cast<i64>(box.high[axis])});
++    const i64 below = 4 * static_cast<i64>(box.low[axis]) - center4[axis];
++    const i64 above = center4[axis] - 4 * static_cast<i64>(box.high[axis]);
++    const i64 delta = std::max(std::max(below, above), i64{0});
+     result += delta * delta;
+   }
+   // Sixteen times the squared distance from the product-box midpoint.
+@@ -47,11 +47,63 @@
+   return result;
+ }
+ 
++void accumulate(Q34WitnessSearchWork& a, const Q34WitnessSearchWork& b) {
++  static_assert(sizeof(Q34WitnessSearchWork) == 25 * sizeof(u64));
++  for (auto field : {&Q34WitnessSearchWork::queries, &Q34WitnessSearchWork::q3_queries,
++       &Q34WitnessSearchWork::q4_queries, &Q34WitnessSearchWork::prepared_bounds,
++       &Q34WitnessSearchWork::node_visits, &Q34WitnessSearchWork::h_bound_tests,
++       &Q34WitnessSearchWork::xi_bound_tests, &Q34WitnessSearchWork::point_tests,
++       &Q34WitnessSearchWork::h_excluded_nodes, &Q34WitnessSearchWork::admitted_nodes,
++       &Q34WitnessSearchWork::fully_admitted_nodes, &Q34WitnessSearchWork::leaf_remainders,
++       &Q34WitnessSearchWork::split_nodes, &Q34WitnessSearchWork::q3_lane_tests,
++       &Q34WitnessSearchWork::q4_lane_tests, &Q34WitnessSearchWork::q3_admitted_nodes,
++       &Q34WitnessSearchWork::q4_admitted_nodes, &Q34WitnessSearchWork::q3_credits,
++       &Q34WitnessSearchWork::q4_credits, &Q34WitnessSearchWork::q3_rejected,
++       &Q34WitnessSearchWork::q4_rejected, &Q34WitnessSearchWork::midpoint_box_tests,
++       &Q34WitnessSearchWork::pending_nodes_skipped})
++    counter_add(a.*field, b.*field);
++  a.peak_stack = std::max(a.peak_stack, b.peak_stack);
++  a.stack_storage_bytes = std::max(a.stack_storage_bytes, b.stack_storage_bytes);
++}
++
++void accumulate(Q34WitnessBoundsWork& a, const Q34WitnessBoundsWork& b) {
++  static_assert(sizeof(Q34WitnessBoundsWork) == 12 * sizeof(u64));
++  for (auto field : {&Q34WitnessBoundsWork::queries, &Q34WitnessBoundsWork::pair_preparations,
++       &Q34WitnessBoundsWork::general_preparations, &Q34WitnessBoundsWork::affine_h_tests,
++       &Q34WitnessBoundsWork::affine_xi_tests, &Q34WitnessBoundsWork::xi_on_nonpositive_minimum,
++       &Q34WitnessBoundsWork::q3_exclusion_tests, &Q34WitnessBoundsWork::q4_exclusion_tests,
++       &Q34WitnessBoundsWork::q3_excluded_nodes, &Q34WitnessBoundsWork::q4_excluded_nodes,
++       &Q34WitnessBoundsWork::fully_excluded_nodes, &Q34WitnessBoundsWork::mixed_terminal_nodes})
++    counter_add(a.*field, b.*field);
++}
++
++template <bool Exclusion, bool Affine>
++std::uint8_t filter_body(
++    const Q2CensusIndex& index, const Box3& a, const Box3& b,
++    std::uint8_t kmax, std::uint8_t lane_mask, Q34WitnessSearchWork& work,
++    Q34WitnessBoundsWork* bounds_work, std::vector<Q34WitnessNode>* trace);
++
++// Counters accumulate in locals (no aliasing with the trace or the index)
++// and are added to the caller's work once per call.
+ template <bool Exclusion, bool Affine>
+ std::uint8_t filter_impl(
+     const Q2CensusIndex& index, const Box3& a, const Box3& b,
+     std::uint8_t kmax, std::uint8_t lane_mask, Q34WitnessSearchWork& work,
+     Q34WitnessBoundsWork* bounds_work, std::vector<Q34WitnessNode>* trace = nullptr) {
++  Q34WitnessSearchWork local{};
++  Q34WitnessBoundsWork bounds_local{};
++  const auto result = filter_body<Exclusion, Affine>(index, a, b, kmax, lane_mask, local,
++      Exclusion ? &bounds_local : nullptr, trace);
++  accumulate(work, local);
++  if constexpr (Exclusion) accumulate(*bounds_work, bounds_local);
++  return result;
++}
++
++template <bool Exclusion, bool Affine>
++[[gnu::always_inline]] inline std::uint8_t filter_body(
++    const Q2CensusIndex& index, const Box3& a, const Box3& b,
++    std::uint8_t kmax, std::uint8_t lane_mask, Q34WitnessSearchWork& work,
++    Q34WitnessBoundsWork* bounds_work, std::vector<Q34WitnessNode>* trace) {
+   static_assert(!Affine || Exclusion);
+   if (kmax == 0 || kmax > 10 || (lane_mask & ~6U) != 0)
+     throw std::invalid_argument("mhgp9 gen q34 witness search requires K1..10 and a subset of mask6");

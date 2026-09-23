@@ -1,0 +1,65 @@
+--- a/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp	2026-09-23 12:25:30.538915180 +0000
++++ b/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp	2026-09-23 12:25:47.006915476 +0000
+@@ -4,6 +4,7 @@
+ #include "parallel/work_reduction.hpp"
+ 
+ #include <algorithm>
++#include <cstdlib>
+ #include <optional>
+ #include <array>
+ #include <functional>
+@@ -498,6 +499,15 @@
+   void expand(std::size_t a_first, std::size_t a_last, std::size_t b_first, std::size_t b_last,
+               std::uint8_t mask) {
+     const auto order = index_->spatial_order();
++    if (b_cache_on_) {
++      // EXPERIMENT: one witness cache per b of this range, beside the a cache.
++      if (b_cache_.size() < b_last - b_first) b_cache_.resize(b_last - b_first);
++      for (std::size_t j = 0; j < b_last - b_first; ++j) b_cache_[j].clear();
++      for (auto ai = a_first; ai < a_last; ++ai)
++        for (auto bi = b_first; bi < b_last; ++bi)
++          edge(order[ai], order[bi], mask, bi - b_first);
++      return;
++    }
+     for (auto ai = a_first; ai < a_last; ++ai)
+       for (auto bi = b_first; bi < b_last; ++bi)
+         edge(order[ai], order[bi], mask);
+@@ -514,7 +524,8 @@
+     work.peak_edge_buffer_bytes = std::max(work.peak_edge_buffer_bytes, live);
+   }
+ 
+-  void edge(std::size_t a, std::size_t b, std::uint8_t mask) {
++  void edge(std::size_t a, std::size_t b, std::uint8_t mask,
++            std::size_t b_slot = std::numeric_limits<std::size_t>::max()) {
+     if (mask == 0 || (mask & ~6U) != 0)
+       throw std::logic_error("mhgp9 gen global q34 received an inactive rectangle");
+     counter_add(work.expanded_pairs);
+@@ -528,13 +539,18 @@
+             ? q34_cached_witness_rejections(*index_, points[a], points[b], static_cast<std::uint8_t>(k_), mask,
+                                             cache_nodes_, work.witness_cache)
+             : std::uint8_t{0};
+-        const auto open = static_cast<std::uint8_t>(mask & ~cached);
++        auto open = static_cast<std::uint8_t>(mask & ~cached);
++        const bool b_cached = b_slot != std::numeric_limits<std::size_t>::max();
++        if (open != 0 && b_cached && !b_cache_[b_slot].empty())
++          open = static_cast<std::uint8_t>(open & ~q34_cached_witness_rejections(*index_, points[a], points[b],
++              static_cast<std::uint8_t>(k_), open, b_cache_[b_slot], work.witness_cache));
+         if (open == 0) counter_add(work.witness.cache_rejected_pairs);
+         else {
+           filtered = filter_q34_witnesses(*index_, points[a], points[b], static_cast<std::uint8_t>(k_), open,
+                                           work.witness.pairs, work.witness.pairs_bounds, trace_nodes_);
+           cache_owner_ = a;
+           cache_nodes_.swap(trace_nodes_);
++          if (b_cached) b_cache_[b_slot].assign(cache_nodes_.begin(), cache_nodes_.end());
+         }
+       } else {
+         filtered = filter_q34_witnesses(*index_, singleton_box(points[a]),
+@@ -771,6 +787,8 @@
+   // Witness-node cache of the pair filter, owned by the last searched a.
+   std::size_t cache_owner_ = std::numeric_limits<std::size_t>::max();
+   std::vector<Q34WitnessNode> cache_nodes_, trace_nodes_;
++  bool b_cache_on_ = std::getenv("MHGP9_B_CACHE") != nullptr;  // EXPERIMENT
++  std::vector<std::vector<Q34WitnessNode>> b_cache_;
+ };
+ 
+ }  // namespace

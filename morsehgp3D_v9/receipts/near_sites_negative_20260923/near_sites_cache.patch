@@ -1,0 +1,638 @@
+diff --git a/morsehgp3D_v9/CMakeLists.txt b/morsehgp3D_v9/CMakeLists.txt
+index ed9eab55..3e2a5d97 100644
+--- a/morsehgp3D_v9/CMakeLists.txt
++++ b/morsehgp3D_v9/CMakeLists.txt
+@@ -110,7 +110,7 @@ add_library(mhgp9_gen STATIC
+   src/gen/lanes/q4_center_map.cpp src/gen/lanes/q4_local_partition.cpp
+   src/gen/lanes/q4_local.cpp src/gen/lanes/q4_shallow_set.cpp src/gen/lanes/q4_shallow.cpp
+   src/gen/lanes/q4_window.cpp src/gen/pipeline/wspd_q34.cpp src/gen/lanes/q34_witness_search.cpp
+-  src/gen/lanes/q3_ball_census.cpp src/gen/lanes/q34_dead_lanes.cpp)
++  src/gen/lanes/q3_ball_census.cpp src/gen/lanes/q34_dead_lanes.cpp src/gen/lanes/q34_near_sites.cpp)
+ target_include_directories(mhgp9_gen PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/gen")
+ target_link_libraries(mhgp9_gen PUBLIC Threads::Threads)
+ 
+diff --git a/morsehgp3D_v9/bench/tower_probe.cpp b/morsehgp3D_v9/bench/tower_probe.cpp
+index d9b862ec..cc558920 100644
+--- a/morsehgp3D_v9/bench/tower_probe.cpp
++++ b/morsehgp3D_v9/bench/tower_probe.cpp
+@@ -10,7 +10,8 @@
+ // tour propose puis verifie exactement), q34_jobs_by_mass et q34_fine_jobs
+ // (ordonnancement des jobs du front q3/q4 : ordre par masse, grain fin),
+ // tower_overlap_static (phase A de la tour recouvrant la phase 0),
+-// q2_jobs_by_mass (plan de jobs q2 par masse, 64 jobs par fil). Tous sont publies dans
++// q2_jobs_by_mass (plan de jobs q2 par masse, 64 jobs par fil),
++// q34_near_prover (certificat de voie morte sur les voisins proches). Tous sont publies dans
+ // options.levers ; un plan G4 les epingle explicitement, un nom inconnu est
+ // refuse (code 2).
+ //
+@@ -145,6 +146,7 @@ int main(int argc, char** argv) {
+         else if (name == "q34_fine_jobs") options.q34_fine_jobs = on;
+         else if (name == "tower_overlap_static") options.tower_overlap_static = on;
+         else if (name == "q2_jobs_by_mass") options.q2_jobs_by_mass = on;
++        else if (name == "q34_near_prover") options.q34_near_prover = on;
+         else throw std::invalid_argument("unknown lever");
+       }
+       else if (arg.starts_with("--n=")) prefix = static_cast<std::size_t>(parse_u(arg.substr(4)));
+@@ -174,14 +176,14 @@ int main(int argc, char** argv) {
+   const auto r = mhgp9::run_tower_chain(input.points, options);
+   const auto& t = r.times;
+   const auto& c = r.catalogue;
+-  std::printf("{\"schema\":\"mhgp9_tower_probe_v16\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
++  std::printf("{\"schema\":\"mhgp9_tower_probe_v17\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
+               r.reason.c_str());
+   std::printf("\"input\":{\"format\":\"%s\",\"grid\":\"%s\",\"sites\":%zu,\"hash\":\"%016" PRIx64 "\"},", input.format.c_str(),
+               grid.c_str(), input.points.size(), input.hash);
+   std::printf("\"options\":{\"K\":%u,\"K_effective\":%u,\"s\":%u,\"workers\":%zu,\"tower_static_threads\":%d,\"run_tower\":%s,"
+               "\"levers\":{\"atlas_saturate_deep\":%s,\"q3_leaf_census\":%s,\"q34_dead_lanes\":%s,"
+               "\"q34_witness_cache\":%s,\"q34_dead_core\":%s,\"tower_meb_proposal\":%s,"
+-              "\"q34_jobs_by_mass\":%s,\"q34_fine_jobs\":%s,\"tower_overlap_static\":%s,\"q2_jobs_by_mass\":%s}},",
++              "\"q34_jobs_by_mass\":%s,\"q34_fine_jobs\":%s,\"tower_overlap_static\":%s,\"q2_jobs_by_mass\":%s,\"q34_near_prover\":%s}},",
+               options.kmax, r.kmax_effective, options.separation_s, options.workers,
+               options.tower_static_threads >= 0 ? options.tower_static_threads : r.tower_static_threads,
+               options.run_tower ? "true" : "false", options.atlas_saturate_deep ? "true" : "false",
+@@ -189,7 +191,7 @@ int main(int argc, char** argv) {
+               options.q34_witness_cache ? "true" : "false", options.q34_dead_core ? "true" : "false",
+               options.tower_meb_proposal ? "true" : "false", options.q34_jobs_by_mass ? "true" : "false",
+               options.q34_fine_jobs ? "true" : "false", options.tower_overlap_static ? "true" : "false",
+-              options.q2_jobs_by_mass ? "true" : "false");
++              options.q2_jobs_by_mass ? "true" : "false", options.q34_near_prover ? "true" : "false");
+   std::printf("\"times_ms\":{\"read\":%.3f,\"prepare\":%.3f,\"gen_index\":%.3f,\"q2\":%.3f,\"q34\":%.3f,\"merge\":%.3f,"
+               "\"tower_index\":%.3f,\"census\":%.3f,\"tower\":%.3f,\"chain_total\":%.3f,\"digest\":%.3f},"
+               "\"chain_cpu_s\":%.3f,",
+@@ -238,7 +240,7 @@ int main(int argc, char** argv) {
+   }
+   {
+     const auto& l = r.ledger;
+-    const std::pair<const char*, std::uint64_t> rows[] = {{"expanded_pairs",l.expanded_pairs},{"cover_builds",l.cover_builds},{"cover_sites",l.cover_sites},{"cover_node_visits",l.cover_node_visits},{"q3_edges",l.q3_edges},{"q4_edges",l.q4_edges},{"both_edges",l.both_edges},{"witness_input_pair_mass",l.witness_input_pair_mass},{"witness_rejected_rectangles",l.witness_rejected_rectangles},{"witness_rejected_pairs",l.witness_rejected_pairs},{"q3_seeds",l.q3_seeds},{"q3_ball_builds",l.q3_ball_builds},{"q3_depth_rejections",l.q3_depth_rejections},{"q3_census_bounds",l.q3_census_bounds},{"q3_census_point_tests",l.q3_census_point_tests},{"q3_atlas_edges",l.q3_atlas_edges},{"q3_atlas_locations",l.q3_atlas_locations},{"q3_atlas_rejections",l.q3_atlas_rejections},{"q3_atlas_outside_domain",l.q3_atlas_outside_domain},{"atlas_cells",l.atlas_cells},{"atlas_leaf_cells",l.atlas_leaf_cells},{"atlas_deep_cells",l.atlas_deep_cells},{"atlas_outside_cells",l.atlas_outside_cells},{"atlas_splits",l.atlas_splits},{"atlas_node_visits",l.atlas_node_visits},{"atlas_block_bounds",l.atlas_block_bounds},{"atlas_point_tests",l.atlas_point_tests},{"atlas_ids_copied",l.atlas_ids_copied},{"q4_seeds",l.q4_seeds},{"q4_live_leaves",l.q4_live_leaves},{"q4_whole_atlas_skips",l.q4_whole_atlas_skips},{"q4_sweep_events",l.q4_sweep_events},{"q3_leaf_censuses",l.q3_leaf_censuses},{"q3_leaf_point_tests",l.q3_leaf_point_tests},{"q3_leaf_rejections",l.q3_leaf_rejections},{"q3_lower_bound_fallbacks",l.q3_lower_bound_fallbacks},{"dead_loads",l.dead_loads},{"dead_form_sites",l.dead_form_sites},{"dead_cells",l.dead_cells},{"dead_outside_cells",l.dead_outside_cells},{"dead_deep_cells",l.dead_deep_cells},{"dead_failed_cells",l.dead_failed_cells},{"dead_uniform_tests",l.dead_uniform_tests},{"dead_point_tests",l.dead_point_tests},{"dead_q3_proved",l.dead_q3_proved},{"dead_q3_open",l.dead_q3_open},{"dead_q4_proved",l.dead_q4_proved},{"dead_q4_open",l.dead_q4_open},{"witness_cache_queries",l.witness_cache_queries},{"witness_cache_node_tests",l.witness_cache_node_tests},{"witness_cache_rejected_pairs",l.witness_cache_rejected_pairs},{"core_builds",l.core_builds},{"core_sites",l.core_sites},{"core_closed_edges",l.core_closed_edges},{"dead_core_loads",l.dead_core_loads},{"dead_core_form_sites",l.dead_core_form_sites},{"dead_core_cells",l.dead_core_cells},{"dead_core_uniform_tests",l.dead_core_uniform_tests},{"dead_core_point_tests",l.dead_core_point_tests},{"dead_core_q3_proved",l.dead_core_q3_proved},{"dead_core_q3_open",l.dead_core_q3_open},{"dead_core_q4_proved",l.dead_core_q4_proved},{"dead_core_q4_open",l.dead_core_q4_open},{"core_cover_node_visits",l.core_cover_node_visits},{"core_cover_bound_tests",l.core_cover_bound_tests},{"core_cover_point_tests",l.core_cover_point_tests},{"dead_core_outside_cells",l.dead_core_outside_cells},{"dead_core_deep_cells",l.dead_core_deep_cells},{"dead_core_failed_cells",l.dead_core_failed_cells},{"q34_input_rectangles",l.q34_input_rectangles},{"witness_rect_queries",l.witness_rect_queries},{"witness_rect_node_visits",l.witness_rect_node_visits},{"witness_pair_queries",l.witness_pair_queries},{"witness_pair_node_visits",l.witness_pair_node_visits},{"q3_edge_queries",l.q3_edge_queries},{"q3_seed_node_visits",l.q3_seed_node_visits},{"q3_seed_point_tests",l.q3_seed_point_tests},{"q3_seed_bound_tests",l.q3_seed_bound_tests},{"q4_geometry_preparations",l.q4_geometry_preparations},{"q4_domain_node_visits",l.q4_domain_node_visits},{"q4_cover_decomposition_node_visits",l.q4_cover_decomposition_node_visits},{"q4_seed_node_visits",l.q4_seed_node_visits},{"q4_seed_cell_queries",l.q4_seed_cell_queries},{"q4_sweep_active_sites",l.q4_sweep_active_sites}};
++    const std::pair<const char*, std::uint64_t> rows[] = {{"expanded_pairs",l.expanded_pairs},{"cover_builds",l.cover_builds},{"cover_sites",l.cover_sites},{"cover_node_visits",l.cover_node_visits},{"q3_edges",l.q3_edges},{"q4_edges",l.q4_edges},{"both_edges",l.both_edges},{"witness_input_pair_mass",l.witness_input_pair_mass},{"witness_rejected_rectangles",l.witness_rejected_rectangles},{"witness_rejected_pairs",l.witness_rejected_pairs},{"q3_seeds",l.q3_seeds},{"q3_ball_builds",l.q3_ball_builds},{"q3_depth_rejections",l.q3_depth_rejections},{"q3_census_bounds",l.q3_census_bounds},{"q3_census_point_tests",l.q3_census_point_tests},{"q3_atlas_edges",l.q3_atlas_edges},{"q3_atlas_locations",l.q3_atlas_locations},{"q3_atlas_rejections",l.q3_atlas_rejections},{"q3_atlas_outside_domain",l.q3_atlas_outside_domain},{"atlas_cells",l.atlas_cells},{"atlas_leaf_cells",l.atlas_leaf_cells},{"atlas_deep_cells",l.atlas_deep_cells},{"atlas_outside_cells",l.atlas_outside_cells},{"atlas_splits",l.atlas_splits},{"atlas_node_visits",l.atlas_node_visits},{"atlas_block_bounds",l.atlas_block_bounds},{"atlas_point_tests",l.atlas_point_tests},{"atlas_ids_copied",l.atlas_ids_copied},{"q4_seeds",l.q4_seeds},{"q4_live_leaves",l.q4_live_leaves},{"q4_whole_atlas_skips",l.q4_whole_atlas_skips},{"q4_sweep_events",l.q4_sweep_events},{"q3_leaf_censuses",l.q3_leaf_censuses},{"q3_leaf_point_tests",l.q3_leaf_point_tests},{"q3_leaf_rejections",l.q3_leaf_rejections},{"q3_lower_bound_fallbacks",l.q3_lower_bound_fallbacks},{"dead_loads",l.dead_loads},{"dead_form_sites",l.dead_form_sites},{"dead_cells",l.dead_cells},{"dead_outside_cells",l.dead_outside_cells},{"dead_deep_cells",l.dead_deep_cells},{"dead_failed_cells",l.dead_failed_cells},{"dead_uniform_tests",l.dead_uniform_tests},{"dead_point_tests",l.dead_point_tests},{"dead_q3_proved",l.dead_q3_proved},{"dead_q3_open",l.dead_q3_open},{"dead_q4_proved",l.dead_q4_proved},{"dead_q4_open",l.dead_q4_open},{"witness_cache_queries",l.witness_cache_queries},{"witness_cache_node_tests",l.witness_cache_node_tests},{"witness_cache_rejected_pairs",l.witness_cache_rejected_pairs},{"core_builds",l.core_builds},{"core_sites",l.core_sites},{"core_closed_edges",l.core_closed_edges},{"dead_core_loads",l.dead_core_loads},{"dead_core_form_sites",l.dead_core_form_sites},{"dead_core_cells",l.dead_core_cells},{"dead_core_uniform_tests",l.dead_core_uniform_tests},{"dead_core_point_tests",l.dead_core_point_tests},{"dead_core_q3_proved",l.dead_core_q3_proved},{"dead_core_q3_open",l.dead_core_q3_open},{"dead_core_q4_proved",l.dead_core_q4_proved},{"dead_core_q4_open",l.dead_core_q4_open},{"core_cover_node_visits",l.core_cover_node_visits},{"core_cover_bound_tests",l.core_cover_bound_tests},{"core_cover_point_tests",l.core_cover_point_tests},{"dead_core_outside_cells",l.dead_core_outside_cells},{"dead_core_deep_cells",l.dead_core_deep_cells},{"dead_core_failed_cells",l.dead_core_failed_cells},{"q34_input_rectangles",l.q34_input_rectangles},{"witness_rect_queries",l.witness_rect_queries},{"witness_rect_node_visits",l.witness_rect_node_visits},{"witness_pair_queries",l.witness_pair_queries},{"witness_pair_node_visits",l.witness_pair_node_visits},{"q3_edge_queries",l.q3_edge_queries},{"q3_seed_node_visits",l.q3_seed_node_visits},{"q3_seed_point_tests",l.q3_seed_point_tests},{"q3_seed_bound_tests",l.q3_seed_bound_tests},{"q4_geometry_preparations",l.q4_geometry_preparations},{"q4_domain_node_visits",l.q4_domain_node_visits},{"q4_cover_decomposition_node_visits",l.q4_cover_decomposition_node_visits},{"q4_seed_node_visits",l.q4_seed_node_visits},{"q4_seed_cell_queries",l.q4_seed_cell_queries},{"q4_sweep_active_sites",l.q4_sweep_active_sites},{"near_loads",l.near_loads},{"near_form_sites",l.near_form_sites},{"near_cells",l.near_cells},{"near_uniform_tests",l.near_uniform_tests},{"near_point_tests",l.near_point_tests},{"near_q3_proved",l.near_q3_proved},{"near_q3_open",l.near_q3_open},{"near_q4_proved",l.near_q4_proved},{"near_q4_open",l.near_q4_open},{"near_closed_pairs",l.near_closed_pairs},{"near_list_node_visits",l.near_list_node_visits}};
+     std::printf("\"ledger\":{");
+     bool first = true;
+     for (const auto& [name, value] : rows) {
+diff --git a/morsehgp3D_v9/src/chain/tower_chain.cpp b/morsehgp3D_v9/src/chain/tower_chain.cpp
+index f2cb54e2..9d5d37d2 100644
+--- a/morsehgp3D_v9/src/chain/tower_chain.cpp
++++ b/morsehgp3D_v9/src/chain/tower_chain.cpp
+@@ -372,6 +372,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
+       o.pair_witness_cache = options.q34_witness_cache;
+       o.dead_core = options.q34_dead_core;
+       o.jobs_by_mass = options.q34_jobs_by_mass;
++      o.near_sites = options.q34_near_prover ? 16 : 0;
+       const auto r34 = gen::run_wspd_q34_parallel(
+           index, kmax, options.separation_s, o, W,
+           [&slots](std::size_t slot, const gen::Q34SeedCandidate& c) {
+@@ -455,6 +456,11 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
+       l.q4_cover_decomposition_node_visits = w.local.geometry.cover_node_visits;
+       l.q4_seed_node_visits = w.local.node_visits; l.q4_seed_cell_queries = w.q4_seed_cells.queries;
+       l.q4_sweep_active_sites = w.local.sweep.active_sites;
++      l.near_loads = w.near_dead.loads; l.near_form_sites = w.near_dead.form_sites; l.near_cells = w.near_dead.cells;
++      l.near_uniform_tests = w.near_dead.uniform_tests; l.near_point_tests = w.near_dead.point_tests;
++      l.near_q3_proved = w.near_dead.q3_proved; l.near_q3_open = w.near_dead.q3_open;
++      l.near_q4_proved = w.near_dead.q4_proved; l.near_q4_open = w.near_dead.q4_open;
++      l.near_closed_pairs = w.near_closed_pairs; l.near_list_node_visits = w.near_list_node_visits;
+     }
+     result.times.q34_ms = ms_since(t);
+ 
+diff --git a/morsehgp3D_v9/src/chain/tower_chain.hpp b/morsehgp3D_v9/src/chain/tower_chain.hpp
+index eb8e6601..12e56d52 100644
+--- a/morsehgp3D_v9/src/chain/tower_chain.hpp
++++ b/morsehgp3D_v9/src/chain/tower_chain.hpp
+@@ -81,6 +81,10 @@ struct ChainOptions {
+   // Ordonnancement q2 (meme objet) : plan de jobs du front prepare par masse
+   // decroissante et 64 jobs par fil (le plus long job faisait tout q2).
+   bool q2_jobs_by_mass = true;
++  // Certificat de voie morte sur les 16 plus proches voisins de a et de b,
++  // apres le cache des temoins et avant la recherche complete (meme objet :
++  // tout sous-ensemble de sites est sur).
++  bool q34_near_prover = true;
+ };
+ 
+ // Temps de mur en millisecondes, CPU du processus en secondes.
+@@ -141,6 +145,10 @@ struct GeneratorLedger {
+       witness_pair_node_visits, q3_edge_queries, q3_seed_node_visits, q3_seed_point_tests, q3_seed_bound_tests,
+       q4_geometry_preparations, q4_domain_node_visits, q4_cover_decomposition_node_visits, q4_seed_node_visits,
+       q4_seed_cell_queries, q4_sweep_active_sites;
++  // Near-site certificate (q34_near_prover): prover work, pairs it closes and
++  // the build of the near lists.
++  std::uint64_t near_loads, near_form_sites, near_cells, near_uniform_tests, near_point_tests, near_q3_proved,
++      near_q3_open, near_q4_proved, near_q4_open, near_closed_pairs, near_list_node_visits;
+ };
+ 
+ // Occupation mesuree des ouvriers q3/q4 (jamais comparee entre executions) :
+diff --git a/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.cpp b/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.cpp
+index abfcdafc..943eb775 100644
+--- a/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.cpp
++++ b/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.cpp
+@@ -80,6 +80,45 @@ void Q34DeadLaneProver::load(const Q34EdgeCover& cover, Q34DeadLaneWork& work) {
+   loaded_ = true;
+ }
+ 
++void Q34DeadLaneProver::load_sites(Point3 a, Point3 b, std::span<const Point3> sites, Q34DeadLaneWork& work) {
++  // Invalid until this load completes (as load()).
++  loaded_ = false;
++  Vec v{}, midpoint_twice{};
++  std::size_t main_axis = 0;
++  for (std::size_t i = 0; i < 3; ++i) {
++    v[i] = static_cast<i64>(b[i]) - a[i];
++    midpoint_twice[i] = static_cast<i64>(a[i]) + b[i];
++    if (std::llabs(v[i]) > std::llabs(v[main_axis])) main_axis = i;
++  }
++  // Same integer basis and bounds as load().
++  const std::size_t axis_i = (main_axis + 1) % 3, axis_j = (main_axis + 2) % 3;
++  const i64 h = std::llabs(v[main_axis]), sign = v[main_axis] > 0 ? 1 : -1;
++  a_basis_ = {0, 0, 0}; b_basis_ = {0, 0, 0};
++  a_basis_[axis_i] = h; a_basis_[main_axis] = -sign * v[axis_i];
++  b_basis_[axis_j] = h; b_basis_[main_axis] = -sign * v[axis_j];
++  diameter_squared_ = dot(v, v);
++  if (diameter_squared_ == 0) throw std::invalid_argument("mhgp9 gen dead-lane prover requires distinct endpoints");
++  counter_add(work.loads);
++  const i64 am = a_basis_[main_axis], ai = a_basis_[axis_i], bm = b_basis_[main_axis], bj = b_basis_[axis_j];
++  forms_.resize(sites.size());
++  std::size_t n = 0;
++  for (const auto& z : sites) {
++    Vec w{};
++    for (std::size_t i = 0; i < 3; ++i) w[i] = 2 * static_cast<i64>(z[i]) - midpoint_twice[i];
++    forms_[n++] = {scale * (dot(w, w) - diameter_squared_), -2 * (w[main_axis] * am + w[axis_i] * ai),
++                   -2 * (w[main_axis] * bm + w[axis_j] * bj)};
++  }
++  if (forms_.size() > std::numeric_limits<std::uint32_t>::max())
++    throw std::overflow_error("mhgp9 gen dead-lane prover site set exceeds u32 frontier IDs");
++  const auto old = all_.size();
++  if (old < n) {
++    all_.resize(n);
++    for (std::size_t i = old; i < n; ++i) all_[i] = static_cast<std::uint32_t>(i);
++  }
++  counter_add(work.form_sites, static_cast<u64>(n));
++  loaded_ = true;
++}
++
+ std::size_t Q34DeadLaneProver::retained_bytes() const {
+   std::size_t bytes = forms_.capacity() * sizeof(Form) + all_.capacity() * sizeof(std::uint32_t);
+   for (const auto& level : levels_) bytes += level.capacity() * sizeof(std::uint32_t);
+diff --git a/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.hpp b/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.hpp
+index 44ffe40c..ed0759d2 100644
+--- a/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.hpp
++++ b/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.hpp
+@@ -73,6 +73,10 @@ class Q34DeadLaneProver final {
+   // Forms of every cover site in cover rank order; a and b get identically
+   // zero forms (never credited). form_sites counts the other sites.
+   void load(const Q34EdgeCover& cover, Q34DeadLaneWork& work);
++  // v9: forms of an explicit set of DISTINCT sites (none may repeat) for the
++  // owner edge ab; a and b may be among them (identically zero forms). Any
++  // such subset of the cloud is sound: it can only remove credits.
++  void load_sites(Point3 a, Point3 b, std::span<const Point3> sites, Q34DeadLaneWork& work);
+   // Requires load(). K is the tower's Kmax (1..10), `lanes` a subset of
+   // 2 (q3) | 4 (q4). Returns the subset proved dead, both lanes in ONE pass
+   // over the cells (the q3 disk lies inside the q4 disk). A lane whose
+diff --git a/morsehgp3D_v9/src/gen/lanes/q34_near_sites.cpp b/morsehgp3D_v9/src/gen/lanes/q34_near_sites.cpp
+new file mode 100644
+index 00000000..1d58edc8
+--- /dev/null
++++ b/morsehgp3D_v9/src/gen/lanes/q34_near_sites.cpp
+@@ -0,0 +1,134 @@
++#include "lanes/q34_near_sites.hpp"
++
++#include <algorithm>
++#include <exception>
++#include <limits>
++#include <stdexcept>
++#include <thread>
++#include <utility>
++
++namespace mhgp9::gen {
++namespace {
++
++using Candidate = std::pair<i64, std::uint32_t>;  // squared distance, original ID
++
++i64 squared_distance(const Point3& p, const Point3& q) {
++  i64 sum = 0;
++  for (std::size_t axis = 0; axis < 3; ++axis) {
++    const i64 d = static_cast<i64>(p[axis]) - static_cast<i64>(q[axis]);
++    sum += d * d;  // |d| < 2^18: each square < 2^36, the sum < 2^38
++  }
++  return sum;
++}
++
++// Exact lower bound of the squared distance from p to a closed box.
++i64 box_distance(const Point3& p, const Box3& box) {
++  i64 sum = 0;
++  for (std::size_t axis = 0; axis < 3; ++axis) {
++    const i64 x = p[axis], low = box.low[axis], high = box.high[axis];
++    const i64 d = x < low ? low - x : (x > high ? x - high : 0);
++    sum += d * d;
++  }
++  return sum;
++}
++
++// The k nearest other sites of `id`: max-heap on (distance, ID); a node is
++// skipped only when its box lower bound is STRICTLY above the worst kept
++// distance (an equal bound may still hold a smaller ID).
++void nearest(const Q2CensusIndex& index, std::size_t id, unsigned k, std::vector<Candidate>& heap,
++             std::vector<std::size_t>& stack, std::uint32_t* out, std::uint8_t& count, Q34NearSitesWork& work) {
++  const auto nodes = index.spatial_nodes();
++  const auto order = index.spatial_order();
++  const auto points = index.cloud().points();
++  const auto& p = points[id];
++  heap.clear();
++  stack.clear();
++  stack.push_back(0);
++  counter_add(work.queries);
++  while (!stack.empty()) {
++    const auto& node = nodes[stack.back()];
++    stack.pop_back();
++    counter_add(work.node_visits);
++    const i64 bound = box_distance(p, node.box);
++    if (heap.size() == k && bound > heap.front().first) continue;
++    if (node.range.size() == 1) {
++      const auto site = order[node.range.first];
++      if (site == id) continue;
++      counter_add(work.point_tests);
++      const Candidate candidate{squared_distance(p, points[site]), static_cast<std::uint32_t>(site)};
++      if (heap.size() < k) {
++        heap.push_back(candidate);
++        std::push_heap(heap.begin(), heap.end());
++      } else if (candidate < heap.front()) {
++        std::pop_heap(heap.begin(), heap.end());
++        heap.back() = candidate;
++        std::push_heap(heap.begin(), heap.end());
++      }
++      continue;
++    }
++    // Nearer child popped first.
++    const auto& left = nodes[node.left];
++    const auto& right = nodes[node.right];
++    if (box_distance(p, left.box) <= box_distance(p, right.box)) {
++      stack.push_back(node.right);
++      stack.push_back(node.left);
++    } else {
++      stack.push_back(node.left);
++      stack.push_back(node.right);
++    }
++  }
++  std::sort_heap(heap.begin(), heap.end());
++  count = static_cast<std::uint8_t>(heap.size());
++  for (std::size_t j = 0; j < heap.size(); ++j) out[j] = heap[j].second;
++}
++
++}  // namespace
++
++Q34NearSitesPtr Q34NearSites::build(Q2CensusIndexPtr index, unsigned k, std::size_t workers) {
++  if (!index) throw std::invalid_argument("mhgp9 gen near sites require an immutable index");
++  if (k == 0 || k > 64) throw std::invalid_argument("mhgp9 gen near sites require k in 1..64");
++  if (workers == 0) throw std::invalid_argument("mhgp9 gen near sites require at least one worker");
++  const std::size_t n = index->cloud().points().size();
++  if (n > std::numeric_limits<std::uint32_t>::max()) throw std::overflow_error("mhgp9 gen near sites exceed u32 IDs");
++  std::shared_ptr<Q34NearSites> result(new Q34NearSites());
++  result->k_ = k;
++  result->ids_.assign(n * k, 0);
++  result->counts_.assign(n, 0);
++  const std::size_t threads = std::max<std::size_t>(1, std::min(workers, n / 1024 + 1));
++  std::vector<Q34NearSitesWork> parts(threads);
++  std::vector<std::exception_ptr> failures(threads);
++  // Every thread catches its own failure: no exception leaves a std::thread.
++  const auto run = [&](std::size_t t) {
++    try {
++      std::vector<Candidate> heap;
++      std::vector<std::size_t> stack;
++      heap.reserve(k + 1);
++      for (std::size_t id = n * t / threads; id < n * (t + 1) / threads; ++id)
++        nearest(*index, id, k, heap, stack, result->ids_.data() + id * k, result->counts_[id], parts[t]);
++    } catch (...) {
++      failures[t] = std::current_exception();
++    }
++  };
++  {
++    std::vector<std::thread> pool;
++    pool.reserve(threads - 1);
++    std::exception_ptr launch;
++    try {
++      for (std::size_t t = 1; t < threads; ++t) pool.emplace_back(run, t);
++    } catch (...) {
++      launch = std::current_exception();
++    }
++    if (!launch) run(0);
++    for (auto& thread : pool) thread.join();
++    if (launch) std::rethrow_exception(launch);
++    for (const auto& failure : failures) if (failure) std::rethrow_exception(failure);
++  }
++  for (const auto& part : parts) {
++    counter_add(result->work_.queries, part.queries);
++    counter_add(result->work_.node_visits, part.node_visits);
++    counter_add(result->work_.point_tests, part.point_tests);
++  }
++  return result;
++}
++
++}  // namespace mhgp9::gen
+diff --git a/morsehgp3D_v9/src/gen/lanes/q34_near_sites.hpp b/morsehgp3D_v9/src/gen/lanes/q34_near_sites.hpp
+new file mode 100644
+index 00000000..14d7fff6
+--- /dev/null
++++ b/morsehgp3D_v9/src/gen/lanes/q34_near_sites.hpp
+@@ -0,0 +1,51 @@
++#pragma once
++
++#include <cstddef>
++#include <cstdint>
++#include <memory>
++#include <span>
++#include <vector>
++
++#include "pipeline/q2_census.hpp"
++
++namespace mhgp9::gen {
++
++// v9 (23 septembre 2026). The k nearest OTHER sites of every site of an
++// immutable index: exact squared distances, ties broken by original ID, so
++// the lists are a deterministic function of the cloud (any worker count).
++// They only feed the near-site dead-lane certificate (lanes/q34_dead_lanes),
++// for which ANY site subset is sound: a list changes the work, never the
++// emitted stream.
++struct Q34NearSitesWork {
++  u64 queries{}, node_visits{}, point_tests{};
++  bool operator==(const Q34NearSitesWork&) const = default;
++};
++
++class Q34NearSites;
++using Q34NearSitesPtr = std::shared_ptr<const Q34NearSites>;
++
++class Q34NearSites final {
++ public:
++  // k in 1..64; workers >= 1 threads split the sites statically.
++  [[nodiscard]] static Q34NearSitesPtr build(Q2CensusIndexPtr index, unsigned k, std::size_t workers);
++  Q34NearSites(const Q34NearSites&) = delete;
++  Q34NearSites& operator=(const Q34NearSites&) = delete;
++  // The (at most k) nearest other sites of original ID `id`, nearest first.
++  [[nodiscard]] std::span<const std::uint32_t> of(std::size_t id) const noexcept {
++    return {ids_.data() + id * k_, counts_[id]};
++  }
++  [[nodiscard]] unsigned k() const noexcept { return k_; }
++  [[nodiscard]] const Q34NearSitesWork& work() const noexcept { return work_; }
++  [[nodiscard]] std::size_t retained_bytes() const noexcept {
++    return ids_.capacity() * sizeof(std::uint32_t) + counts_.capacity() * sizeof(std::uint8_t);
++  }
++
++ private:
++  Q34NearSites() = default;
++  unsigned k_{};
++  std::vector<std::uint32_t> ids_;   // n * k, row id holds the nearest sites of id
++  std::vector<std::uint8_t> counts_;  // per id, min(k, n - 1)
++  Q34NearSitesWork work_{};
++};
++
++}  // namespace mhgp9::gen
+diff --git a/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp b/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp
+index 143b8b0f..096a83ee 100644
+--- a/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp
++++ b/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp
+@@ -274,8 +274,8 @@ void merge(Q34WitnessCacheWork& a, const Q34WitnessCacheWork& b) {
+ }
+ 
+ void merge(WspdQ34Work& a, const WspdQ34Work& b) {
+-  static_assert(sizeof(WspdQ34Work) == 16 * sizeof(u64) + 2 * sizeof(Q34EdgeCoverWork) +
+-      sizeof(WspdQ3Work) + sizeof(Q4LocalEdgeWork) + sizeof(Q4WindowEdgeWork) + sizeof(WspdQ34WitnessWork) + sizeof(Q3BallCensusWork) + sizeof(Q4SeedCellWork) + sizeof(WspdQ3AtlasWork) + 2 * sizeof(Q34DeadLaneWork) + sizeof(Q34WitnessCacheWork));
++  static_assert(sizeof(WspdQ34Work) == 20 * sizeof(u64) + 2 * sizeof(Q34EdgeCoverWork) +
++      sizeof(WspdQ3Work) + sizeof(Q4LocalEdgeWork) + sizeof(Q4WindowEdgeWork) + sizeof(WspdQ34WitnessWork) + sizeof(Q3BallCensusWork) + sizeof(Q4SeedCellWork) + sizeof(WspdQ3AtlasWork) + 3 * sizeof(Q34DeadLaneWork) + sizeof(Q34WitnessCacheWork));
+   MHGP9G_ADD(input_rectangles); MHGP9G_ADD(expanded_pairs); MHGP9G_ADD(q3_edges);
+   MHGP9G_ADD(q4_edges); MHGP9G_ADD(both_edges); MHGP9G_ADD(cover_builds);
+   MHGP9G_ADD(cover_sites); MHGP9G_MAX(max_cover_sites); MHGP9G_MAX(peak_cover_bytes);
+@@ -292,6 +292,9 @@ void merge(WspdQ34Work& a, const WspdQ34Work& b) {
+   MHGP9G_ADD(core_builds); MHGP9G_ADD(core_sites); MHGP9G_ADD(core_closed_edges);
+   merge(a.core_cover, b.core_cover);
+   merge(a.dead_core, b.dead_core);
++  merge(a.near_dead, b.near_dead);
++  MHGP9G_ADD(near_closed_pairs); MHGP9G_ADD(near_list_queries); MHGP9G_ADD(near_list_node_visits);
++  MHGP9G_ADD(near_list_point_tests);
+ }
+ 
+ #undef MHGP9G_ADD
+@@ -350,6 +353,9 @@ void validate(Q2CensusIndexPtr index, unsigned k, unsigned s,
+     throw std::invalid_argument("mhgp9 gen invalid or incompatible q4 seed-cell options");
+   if (options.dead_core && !options.dead_lanes)
+     throw std::invalid_argument("mhgp9 gen dead-lane core requires the dead-lane certificate");
++  if (options.near_sites != 0 &&
++      (!options.dead_lanes || options.witness_mode == WspdQ34WitnessMode::Disabled || options.near_sites > 64))
++    throw std::invalid_argument("mhgp9 gen near-site certificate requires dead lanes, a witness mode and k <= 64");
+   // The traced cache is the exact singleton Affine search only.
+   if (options.pair_witness_cache &&
+       (options.witness_mode == WspdQ34WitnessMode::Disabled ||
+@@ -380,7 +386,9 @@ void validate_completion(const WspdQ34Result& result, const WspdQ34Options& opti
+   counter_add(q4, witness.rectangle_q4_pairs); counter_add(q4, witness.pair_q4_pairs);
+   counter_add(q3, result.work.dead.q3_proved); counter_add(q4, result.work.dead.q4_proved);
+   counter_add(q3, result.work.dead_core.q3_proved); counter_add(q4, result.work.dead_core.q4_proved);
++  counter_add(q3, result.work.near_dead.q3_proved); counter_add(q4, result.work.near_dead.q4_proved);
+   counter_add(covered, result.work.core_closed_edges);
++  counter_add(covered, result.work.near_closed_pairs);
+   counter_add(expanded, witness.rectangle_pair_mass);
+   counter_add(covered, witness.rejected_pairs);
+   if (q3 != result.front.work.residual_pair_mass[1] ||
+@@ -419,10 +427,10 @@ using RectangleSplitter = std::function<bool(const RectangleTask&)>;
+ class Engine {
+  public:
+   Engine(Q2CensusIndexPtr index, unsigned k, WspdQ34Options options,
+-         const Q34SeedConsumer& consumer, RectangleSplitter splitter = {})
++         const Q34SeedConsumer& consumer, RectangleSplitter splitter = {}, Q34NearSitesPtr near = {})
+       : index_(std::move(index)), k_(k), options_(options), consumer_(consumer),
+         sink_([this](const Q34SeedCandidate& candidate) { emit(candidate); }),
+-        splitter_(std::move(splitter)) {}
++        splitter_(std::move(splitter)), near_(std::move(near)) {}
+   Engine(const Engine&) = delete;
+   Engine& operator=(const Engine&) = delete;
+   Engine(Engine&&) = delete;
+@@ -528,7 +536,24 @@ class Engine {
+             ? q34_cached_witness_rejections(*index_, points[a], points[b], static_cast<std::uint8_t>(k_), mask,
+                                             cache_nodes_, work.witness_cache)
+             : std::uint8_t{0};
+-        const auto open = static_cast<std::uint8_t>(mask & ~cached);
++        auto open = static_cast<std::uint8_t>(mask & ~cached);
++        // Only after a valid cache of this same a: the first pair of each a
++        // keeps the full search that establishes the cache.
++        if (open != 0 && near_ && cache_owner_ == a) {
++          // Near-site certificate on the open lanes: a proved lane leaves
++          // the mask (and the witness lane accounting) before the search.
++          const auto proved = near_certificate(a, b, open);
++          open = static_cast<std::uint8_t>(open & ~proved);
++          mask = static_cast<std::uint8_t>(mask & ~proved);
++          if (open == 0) {
++            // The lanes left in the mask are the cached ones: rejected by
++            // the cache, counted as pair rejections as on the search path.
++            if ((mask & 2U) != 0) counter_add(work.witness.pair_q3_pairs);
++            if ((mask & 4U) != 0) counter_add(work.witness.pair_q4_pairs);
++            counter_add(work.near_closed_pairs);
++            return;
++          }
++        }
+         if (open == 0) counter_add(work.witness.cache_rejected_pairs);
+         else {
+           filtered = filter_q34_witnesses(*index_, points[a], points[b], static_cast<std::uint8_t>(k_), open,
+@@ -537,6 +562,11 @@ class Engine {
+           cache_nodes_.swap(trace_nodes_);
+         }
+       } else {
++        if (near_) {
++          const auto proved = near_certificate(a, b, mask);
++          mask = static_cast<std::uint8_t>(mask & ~proved);
++          if (mask == 0) { counter_add(work.near_closed_pairs); return; }
++        }
+         filtered = filter_q34_witnesses(*index_, singleton_box(points[a]),
+             singleton_box(points[b]), static_cast<std::uint8_t>(k_), mask, work.witness.pairs,
+             options_.witness_bounds_mode, work.witness.pairs_bounds);
+@@ -606,6 +636,21 @@ class Engine {
+     }
+   }
+ 
++  // Dead-lane certificate on the union of the near lists of a and b
++  // (distinct sites, sorted by ID): returns the lanes of `lanes` proved.
++  std::uint8_t near_certificate(std::size_t a, std::size_t b, std::uint8_t lanes) {
++    near_ids_.clear();
++    for (const auto id : near_->of(a)) near_ids_.push_back(id);
++    for (const auto id : near_->of(b)) near_ids_.push_back(id);
++    std::sort(near_ids_.begin(), near_ids_.end());
++    near_ids_.erase(std::unique(near_ids_.begin(), near_ids_.end()), near_ids_.end());
++    const auto points = index_->cloud().points();
++    near_points_.clear();
++    for (const auto id : near_ids_) near_points_.push_back(points[id]);
++    dead_.load_sites(points[a], points[b], near_points_, work.near_dead);
++    return dead_.prove(k_, lanes, work.near_dead);
++  }
++
+   void q3_seed(const Q34EdgeCoverPtr& cover, std::array<std::size_t, 3> ids, const Q4LocalAtlas* atlas) {
+     auto& q3 = work.q3;
+     const auto points = index_->cloud().points();
+@@ -768,6 +813,9 @@ class Engine {
+   RectangleSplitter splitter_;
+   std::vector<std::size_t> shell_;
+   Q34DeadLaneProver dead_;
++  Q34NearSitesPtr near_;
++  std::vector<std::uint32_t> near_ids_;
++  std::vector<Point3> near_points_;
+   // Witness-node cache of the pair filter, owned by the last searched a.
+   std::size_t cache_owner_ = std::numeric_limits<std::size_t>::max();
+   std::vector<Q34WitnessNode> cache_nodes_, trace_nodes_;
+@@ -780,11 +828,17 @@ WspdQ34Result run_wspd_q34_candidates(Q2CensusIndexPtr index, unsigned kmax,
+   validate(index, kmax, separation_s, options, static_cast<bool>(consumer));
+   WspdQ34Result result = empty_result(index, kmax, options);
+   if (result.front.active_lane_mask == 0) return result;
+-  Engine engine(index, kmax, options, consumer);
++  const auto near = options.near_sites ? Q34NearSites::build(index, options.near_sites, 1) : Q34NearSitesPtr{};
++  Engine engine(index, kmax, options, consumer, {}, near);
+   result.front = run_wspd_front(*index, kmax, separation_s, options.front_mode,
+       [&](const WspdRectangle& rectangle) { engine.rectangle(rectangle); },
+       options.requested_lane_mask);
+   result.work = engine.work;
++  if (near) {
++    result.work.near_list_queries = near->work().queries;
++    result.work.near_list_node_visits = near->work().node_visits;
++    result.work.near_list_point_tests = near->work().point_tests;
++  }
+   validate_completion(result, options);
+   return result;
+ }
+@@ -814,6 +868,9 @@ WspdQ34ParallelResult run_wspd_q34_parallel(Q2CensusIndexPtr index, unsigned kma
+   orchestration.job_storage_bytes = static_cast<u64>(plan->retained_bytes());
+   const auto started = std::min(worker_count, plan->job_count());
+   orchestration.started_workers = static_cast<u64>(started);
++  // Near lists built once, before the workers, on the same thread budget.
++  const auto near = options.near_sites ? Q34NearSites::build(index, options.near_sites, worker_count)
++                                       : Q34NearSitesPtr{};
+   // Claim order of the front jobs: plan order (with jobs_by_mass, the plan
+   // is prepared largest product first and stored by decreasing mass).
+   std::vector<std::size_t> job_order(plan->job_count());
+@@ -879,7 +936,7 @@ WspdQ34ParallelResult run_wspd_q34_parallel(Q2CensusIndexPtr index, unsigned kma
+                 queue.wake.notify_one();
+                 return true;
+               };
+-          Engine engine(index, kmax, options, output, splitter);
++          Engine engine(index, kmax, options, output, splitter, near);
+           const WspdRectangleConsumer receiver = [&](const WspdRectangle& rectangle) {
+             engine.rectangle(rectangle);
+           };
+@@ -982,6 +1039,11 @@ WspdQ34ParallelResult run_wspd_q34_parallel(Q2CensusIndexPtr index, unsigned kma
+     throw std::logic_error("mhgp9 gen parallel q34 lost its front job partition");
+   if (result.tasks.published != result.tasks.consumed || !queue.pending.empty())
+     throw std::logic_error("mhgp9 gen parallel q34 lost a published rectangle range");
++  if (near) {
++    result.pipeline.work.near_list_queries = near->work().queries;
++    result.pipeline.work.near_list_node_visits = near->work().node_visits;
++    result.pipeline.work.near_list_point_tests = near->work().point_tests;
++  }
+   validate_completion(result.pipeline, options);
+   return result;
+ }
+diff --git a/morsehgp3D_v9/src/gen/pipeline/wspd_q34.hpp b/morsehgp3D_v9/src/gen/pipeline/wspd_q34.hpp
+index 94191a22..8379939f 100644
+--- a/morsehgp3D_v9/src/gen/pipeline/wspd_q34.hpp
++++ b/morsehgp3D_v9/src/gen/pipeline/wspd_q34.hpp
+@@ -6,6 +6,7 @@
+ #include "lanes/q34_witness_search.hpp"
+ #include "lanes/q3_ball_census.hpp"
+ #include "lanes/q34_dead_lanes.hpp"
++#include "lanes/q34_near_sites.hpp"
+ #include "wspd/front.hpp"
+ 
+ #include <functional>
+@@ -51,6 +52,12 @@ struct WspdQ34Options {
+   // it, only for the lanes this core leaves open. A subset can only remove
+   // credits, never add one: same proved lanes are sound, same stream.
+   bool dead_core{false};
++  // v9 option (requires dead_lanes and a witness mode): after the witness
++  // cache and BEFORE the full pair search, the dead-lane certificate is
++  // attempted on the union of the `near_sites` nearest other sites of a and
++  // of b (lanes/q34_near_sites). Any site subset is sound: a proved lane is
++  // empty; the others continue unchanged (search, core, cover). 0 = off.
++  unsigned near_sites{0};
+   // v9 option (Affine bounds only): the pair filter first re-tests, for the
+   // same endpoint a, the witness nodes admitted by the previous full search
+   // (lanes/q34_witness_search.hpp): lanes they prove rejected skip the
+@@ -135,6 +142,12 @@ struct WspdQ34Work {
+   u64 core_builds{}, core_sites{}, core_closed_edges{};
+   Q34EdgeCoverWork core_cover;
+   Q34DeadLaneWork dead_core;
++  // v9 near-site certificate (near_sites): its prover work, the pairs it
++  // closes (with the cache for cached lanes) and the near-list build.
++  // expanded = cover_builds + core_closed_edges + rejected + near_closed.
++  Q34DeadLaneWork near_dead;
++  u64 near_closed_pairs{};
++  u64 near_list_queries{}, near_list_node_visits{}, near_list_point_tests{};
+ };
+ 
+ struct WspdQ34Result {
+diff --git a/morsehgp3D_v9/tests/gen/wspd_q34_gate.cpp b/morsehgp3D_v9/tests/gen/wspd_q34_gate.cpp
+index cd73aebc..040f6830 100644
+--- a/morsehgp3D_v9/tests/gen/wspd_q34_gate.cpp
++++ b/morsehgp3D_v9/tests/gen/wspd_q34_gate.cpp
+@@ -94,14 +94,14 @@ WORDS(Q4ShallowSetWork,25);WORDS(Q4FamilyWork,13);WORDS(Q4ShallowSweepWork,32);
+ WORDS(Q4WindowSelectionWork,25);WORDS(Q4WindowSweepWork,57);WORDS(Q4WindowEdgeWork,116);
+ WORDS(Q34WitnessSearchWork,25);WORDS(Q34WitnessBoundsWork,12);WORDS(WspdQ34WitnessWork,83);
+ WORDS(Q3BallCensusWork,26);WORDS(Q4SeedCellWork,37);WORDS(WspdQ3AtlasWork,9);WORDS(Q34DeadLaneWork,12);
+-WORDS(Q34WitnessCacheWork,5);WORDS(WspdQ34Work,476);
++WORDS(Q34WitnessCacheWork,5);WORDS(WspdQ34Work,492);
+ #undef WORDS
+-std::array<u64,476> logical_work(mhgp9::gen::WspdQ34Work work) {
++std::array<u64,492> logical_work(mhgp9::gen::WspdQ34Work work) {
+   // These two capacity peaks depend on the private buffer's previous jobs;
+   // they are paid separately, not erased from the published result.
+   work.q3.peak_shell_bytes=0;
+   work.peak_edge_buffer_bytes=0;
+-  return std::bit_cast<std::array<u64,476>>(work);
++  return std::bit_cast<std::array<u64,492>>(work);
+ }
+ 
+ // Enumerate every small-cloud support once. An independent Gaussian rational
+@@ -835,7 +835,7 @@ void indexed_fixtures(GlobalGate& gate) {
+     "indexed global modes have no exercised rejection");
+ }
+ 
+-std::array<u64,476> without_filter_geometry(mhgp9::gen::WspdQ34Work work) {
++std::array<u64,492> without_filter_geometry(mhgp9::gen::WspdQ34Work work) {
+   // Keep ALL rejection masses and all work downstream of filtering. Only the
+   // four explicitly changed search/bounds ledgers are normalized away.
+   work.witness.rectangles={};work.witness.pairs={};
+@@ -953,7 +953,7 @@ void bounds_mode_global_fixtures(GlobalGate& gate) {
+   normalize(out);gate.require(out==expected && !index && !cloud,"bounds callback owner reset lost payload");
+ }
+ 
+-std::array<u64,476> without_local_q4(mhgp9::gen::WspdQ34Work work) {
++std::array<u64,492> without_local_q4(mhgp9::gen::WspdQ34Work work) {
+   // Only the selected q4 traversal is replaced. All q3, filtering, covers,
+   // lane masses and output counters remain subject to exact comparison.
+   work.local={};work.q4_seed_cells={};

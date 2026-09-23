@@ -1,0 +1,135 @@
+diff --git a/morsehgp3D_v9/src/chain/tower_chain.cpp b/morsehgp3D_v9/src/chain/tower_chain.cpp
+index f2cb54e2..76f68d57 100644
+--- a/morsehgp3D_v9/src/chain/tower_chain.cpp
++++ b/morsehgp3D_v9/src/chain/tower_chain.cpp
+@@ -1,6 +1,7 @@
+ #include "tower_chain.hpp"
+ 
+ #include <algorithm>
++#include <cstdlib>
+ #include <bit>
+ #include <array>
+ #include <atomic>
+@@ -372,6 +373,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
+       o.pair_witness_cache = options.q34_witness_cache;
+       o.dead_core = options.q34_dead_core;
+       o.jobs_by_mass = options.q34_jobs_by_mass;
++      if (const char* e = std::getenv("MHGP9_RECT_REFINE")) o.rect_refine_min = std::strtoull(e, nullptr, 10);  // EXPERIMENT
+       const auto r34 = gen::run_wspd_q34_parallel(
+           index, kmax, options.separation_s, o, W,
+           [&slots](std::size_t slot, const gen::Q34SeedCandidate& c) {
+diff --git a/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp b/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp
+index 143b8b0f..f3b8a84c 100644
+--- a/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp
++++ b/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp
+@@ -218,12 +218,12 @@ void merge(Q34WitnessBoundsWork& a, const Q34WitnessBoundsWork& b) {
+ }
+ 
+ void merge(WspdQ34WitnessWork& a, const WspdQ34WitnessWork& b) {
+-  static_assert(sizeof(WspdQ34WitnessWork) == 9 * sizeof(u64) +
++  static_assert(sizeof(WspdQ34WitnessWork) == 10 * sizeof(u64) +
+       2 * sizeof(Q34WitnessSearchWork) + 2 * sizeof(Q34WitnessBoundsWork));
+   MHGP9G_ADD(input_pair_mass); MHGP9G_ADD(rejected_rectangles); MHGP9G_ADD(rectangle_pair_mass);
+   MHGP9G_ADD(rectangle_q3_pairs); MHGP9G_ADD(rectangle_q4_pairs);
+   MHGP9G_ADD(rejected_pairs); MHGP9G_ADD(pair_q3_pairs); MHGP9G_ADD(pair_q4_pairs);
+-  MHGP9G_ADD(cache_rejected_pairs);
++  MHGP9G_ADD(cache_rejected_pairs); MHGP9G_ADD(refined_rectangles);
+   merge(a.rectangles, b.rectangles); merge(a.pairs, b.pairs);
+   merge(a.rectangles_bounds, b.rectangles_bounds); merge(a.pairs_bounds, b.pairs_bounds);
+ }
+@@ -453,7 +453,47 @@ class Engine {
+         counter_add(work.witness.rectangle_pair_mass, mass);
+         return;
+       }
++      if (options_.rect_refine_min != 0 && mass >= options_.rect_refine_min) {
++        refine(rectangle.a_node, rectangle.b_node, mask);
++        return;
++      }
++    }
++    expand_rectangle(rectangle.a_node, rectangle.b_node, mask, mass);
++  }
++
++  // A child of a filtered rectangle: every pair of the parent lies in
++  // exactly one child, and the box filter is sound on any box pair.
++  void refine(std::size_t a_node, std::size_t b_node, std::uint8_t mask) {
++    const auto nodes = index_->spatial_nodes();
++    const auto& an = nodes[a_node];
++    const auto& bn = nodes[b_node];
++    const bool a_leaf = an.left == Q2SpatialNode::absent, b_leaf = bn.left == Q2SpatialNode::absent;
++    const bool split_a = !a_leaf && (b_leaf || an.range.size() >= bn.range.size());
++    const std::array<std::size_t, 2> children = split_a ? std::array<std::size_t, 2>{an.left, an.right}
++                                                        : std::array<std::size_t, 2>{bn.left, bn.right};
++    for (const auto child : children) {
++      const auto ca = split_a ? child : a_node, cb = split_a ? b_node : child;
++      const auto mass = static_cast<u64>(nodes[ca].range.size()) * nodes[cb].range.size();
++      counter_add(work.witness.refined_rectangles);
++      const auto filtered = filter_q34_witnesses(*index_, nodes[ca].box, nodes[cb].box,
++          static_cast<std::uint8_t>(k_), mask, work.witness.rectangles, options_.witness_bounds_mode,
++          work.witness.rectangles_bounds);
++      if ((mask & 2U) != 0 && (filtered & 2U) == 0) counter_add(work.witness.rectangle_q3_pairs, mass);
++      if ((mask & 4U) != 0 && (filtered & 4U) == 0) counter_add(work.witness.rectangle_q4_pairs, mass);
++      if (filtered == 0) {
++        counter_add(work.witness.rectangle_pair_mass, mass);
++        continue;
++      }
++      const bool splittable = nodes[ca].left != Q2SpatialNode::absent || nodes[cb].left != Q2SpatialNode::absent;
++      if (splittable && mass >= options_.rect_refine_min) refine(ca, cb, filtered);
++      else expand_rectangle(ca, cb, filtered, mass);
+     }
++  }
++
++  void expand_rectangle(std::size_t a_node, std::size_t b_node, std::uint8_t mask, u64 mass) {
++    const auto nodes = index_->spatial_nodes();
++    const auto a = nodes[a_node].range;
++    const auto b = nodes[b_node].range;
+     // This is an explicit expansion of the certified residual WSPD products,
+     // not an all-pairs fallback. The front's disjoint cover guarantees one
+     // visit per unordered residual edge, even when both lanes survive.
+@@ -466,7 +506,7 @@ class Engine {
+       if (rows < a.size()) counter_add(split_rectangles);
+       for (auto start = a.first; start < a.last; start += rows) {
+         const auto stop = std::min(start + rows, a.last);
+-        if (!splitter_(RectangleTask{rectangle.a_node, rectangle.b_node, start, stop, mask}))
++        if (!splitter_(RectangleTask{a_node, b_node, start, stop, mask}))
+           expand(start, stop, b.first, b.last, mask);
+       }
+       return;
+diff --git a/morsehgp3D_v9/src/gen/pipeline/wspd_q34.hpp b/morsehgp3D_v9/src/gen/pipeline/wspd_q34.hpp
+index 94191a22..7bb48a23 100644
+--- a/morsehgp3D_v9/src/gen/pipeline/wspd_q34.hpp
++++ b/morsehgp3D_v9/src/gen/pipeline/wspd_q34.hpp
+@@ -62,6 +62,9 @@ struct WspdQ34Options {
+   // worker expands inline only what the full queue refuses. Whole edges are
+   // never split. Zero disables sharing (historical Coarse jobs only).
+   std::size_t parallel_task_pairs{256};
++  // EXPERIMENT: refine a rectangle that fails the witness filter into child
++  // rectangles while its pair mass is at least this (0 = expand at once).
++  u64 rect_refine_min{0};
+   // Pending tasks admitted before publishers fall back to inline expansion
+   // (bounded memory, never a search or output quota).
+   std::size_t parallel_queue_capacity{4096};
+@@ -90,6 +93,8 @@ struct WspdQ34WitnessWork {
+   // v9 witness-node cache: pairs rejected without a search (every open lane
+   // by cached nodes); pairs.queries counts only the searches actually run.
+   u64 cache_rejected_pairs{};
++  // Child rectangles filtered by refinement (rect_refine_min).
++  u64 refined_rectangles{};
+   Q34WitnessSearchWork rectangles, pairs;
+   Q34WitnessBoundsWork rectangles_bounds, pairs_bounds;
+   bool operator==(const WspdQ34WitnessWork&) const = default;
+diff --git a/morsehgp3D_v9/tests/gen/wspd_q34_gate.cpp b/morsehgp3D_v9/tests/gen/wspd_q34_gate.cpp
+index cd73aebc..0780277f 100644
+--- a/morsehgp3D_v9/tests/gen/wspd_q34_gate.cpp
++++ b/morsehgp3D_v9/tests/gen/wspd_q34_gate.cpp
+@@ -92,9 +92,9 @@ WORDS(Q4LocalGeometryWork,27);WORDS(Q4LocalPartitionWork,20);
+ WORDS(Q4LocalAtlasWork,38);WORDS(Q4LocalSweepWork,41);WORDS(Q4LocalEdgeWork,117);
+ WORDS(Q4ShallowSetWork,25);WORDS(Q4FamilyWork,13);WORDS(Q4ShallowSweepWork,32);
+ WORDS(Q4WindowSelectionWork,25);WORDS(Q4WindowSweepWork,57);WORDS(Q4WindowEdgeWork,116);
+-WORDS(Q34WitnessSearchWork,25);WORDS(Q34WitnessBoundsWork,12);WORDS(WspdQ34WitnessWork,83);
++WORDS(Q34WitnessSearchWork,25);WORDS(Q34WitnessBoundsWork,12);WORDS(WspdQ34WitnessWork,84);
+ WORDS(Q3BallCensusWork,26);WORDS(Q4SeedCellWork,37);WORDS(WspdQ3AtlasWork,9);WORDS(Q34DeadLaneWork,12);
+-WORDS(Q34WitnessCacheWork,5);WORDS(WspdQ34Work,476);
++WORDS(Q34WitnessCacheWork,5);WORDS(WspdQ34Work,477);
+ #undef WORDS
+ std::array<u64,476> logical_work(mhgp9::gen::WspdQ34Work work) {
+   // These two capacity peaks depend on the private buffer's previous jobs;
