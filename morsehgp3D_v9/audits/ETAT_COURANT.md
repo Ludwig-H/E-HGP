@@ -1,6 +1,7 @@
 # État courant des audits v9
 
-23 septembre 2026. Code courant lu : **`e54f727c`** (census q3 sur feuille,
+23 septembre 2026. Dernier code produit lu sur `origin/main` :
+**`e54f727c`** (census q3 sur feuille,
 portes du générateur portées et sonde v4) ; reçu G4 R2 épinglé au code
 antérieur `0b29b6c3` et reçu G4 R1 au paquet `e28296bb`. Noyau MEB à
 `ad2d0ebb`, atlas saturant et sonde v3 à `e6405952`, défaut FULL statique
@@ -171,42 +172,35 @@ appariée.
    les modes de saturation/feuille et inscrit à CTest une vraie sonde native
    jugée par ce worker, avec onze mutations. Les 18 selftests du protocole
    et ses deux portes natives normal/`-O` passent en rejeu local ; aucun
-   nouveau cas G4 n'en découle. La [contrelecture B du
-   v4](CONTRE_AUDIT_B_PROTOCOLE_V4_WIP_20260923.md) relève encore trois
-   lacunes de schéma FULL (histogramme MEB de longueur libre, clé inconnue,
-   absence de `records`) et l'absence de porte native **obligatoire** avant
-   une session G4 payante. Fermer ce contrôle sur le snapshot commité, puis
-   ablater séparément feuille, saturation et politique FULL ; ne pas
-   convertir les sorties brutes refusées de R2 en reçu accepté. Le lecteur
-   de reçu doit aussi refuser toute commande tuée dont le groupe de
-   processus n'est pas fermé, même en campagne `partial`. Sa tolérance
-   `validate_external_wall` est encore **1 seconde absolue** : elle accepte
-   1 050 ms de chaîne pour 100 ms de mur externe. Resserrer cette cohérence
-   avant de juger la cible 100 ms, et publier le mur externe lui-même.
-   Le [scénario B](CONTRE_AUDIT_B_PROTOCOLE_V4_WIP_20260923.md) reproduit
-   aussi `partial` avec **zéro cas complet** et code hôte 0 ; un tel reçu
-   ne peut être lu comme succès de tour.
-   Le protocole **v5 encore en WIP** ajoute le mode `q34_dead_lanes`, mais
-   son validateur accepte `complete_relative` avec ce booléen vrai et
-   **aucun** des sept compteurs `dead_*` : la fausse sonde nominale de son
-   propre selftest n'en émet aucun. Rejeu direct du `validate_probe` sur
-   cette sonde : quatre variantes (`base`, compteurs absents, compteurs
-   nuls, `generator.q3_emitted` absent) rendent toutes
-   `complete_relative`. Le contrôle actuel exige seulement un ledger non
-   vide d'entiers non négatifs. Avant un reçu G4 v5, rendre obligatoires les
-   clés et identités du travail réel, notamment `dead_loads` et
-   `dead_form_sites` que la sonde n'exporte pas encore, puis **exiger dans
-   le préflight** une fixture native où une voie est effectivement prouvée
-   morte ; le petit gate actuel l'exerce mais ne l'asserte pas. Ce
-   constat vise le WIP lu le 23 septembre, pas le paquet R1/R2 épinglé.
-   Le [contre-test de provenance](CONTRE_AUDIT_B_G4_R1_ET_SCHEMA_V2_20260922.md)
-   montre qu'un paquet muté peut annoncer un commit inexistant et être
-   accepté par le contrôleur, et qu'une provenance différente dans le
-   reçu invité passe encore la validation finale. Recertifier les blobs
-   Git et l'identité du reçu avant la prochaine dépense G4 ; R1 a été
-   vérifié indépendamment et n'en est pas invalidé. Le lecteur accepte
-   aussi des sous-temps incohérents ; ajouter un contrôle de durée externe
-   avant de juger un objectif de 1 s.
+   nouveau cas G4 n'en découle. Les défauts v4 reproduits dans la
+   [contrelecture B](CONTRE_AUDIT_B_PROTOCOLE_V4_WIP_20260923.md)
+   concernaient schéma FULL incomplet, préflight facultatif, tolérance de
+   mur externe d'une seconde et campagne `partial` sans tour complète.
+   La révision **v5 encore en WIP** impose maintenant les clés et types
+   exacts, histogrammes de longueur fixe, un préflight natif avant LiDAR,
+   une tolérance de 0,05 s et au moins un cas complet à la réception. Elle
+   recertifie aussi les blobs depuis le commit annoncé, en réponse au
+   [contre-test de provenance](CONTRE_AUDIT_B_G4_R1_ET_SCHEMA_V2_20260922.md).
+   Une compilation indépendante des sources WIP du 23 septembre et le vrai
+   préflight de 1 500 sites/K5/W2 donnent `complete_relative` avec
+   **23 848 voies q3 et 26 428 voies q4 prouvées mortes** : les deux branches
+   sont exercées. Mais `validate_probe` accepte encore, sur une copie de
+   cette sortie réelle, chacune des six mutations isolées qui mettent à
+   zéro `dead_loads`, `dead_form_sites`, `dead_q3_open`, `cover_builds`,
+   `generator.q34_expanded_pairs` ou `catalogue.q3_presentations`.
+   Les identités testables sont notamment
+   `expanded_pairs=cover_builds+witness_rejected_pairs`,
+   `dead_loads=cover_builds`,
+   `dead_form_sites=cover_sites−2·dead_loads`,
+   `dead_q3_open=q3_edges`, `dead_q4_open=q4_edges` quand l'option
+   `dead_lanes` est active,
+   et les présentations par arité du catalogue égales aux émissions du
+   générateur. Les imposer dans le validateur et les tuer en selftest avant
+   un reçu G4 v5. Le préflight indépendant repose sur des objets `/tmp`
+   non versionnés et ne qualifie pas encore le paquet final ; ablater
+   séparément les trois options sur les trames entières. Le lecteur doit
+   encore certifier la fermeture du groupe de toute commande tuée, même en
+   campagne partielle. Ne pas convertir les sorties R2 refusées en reçu accepté.
 2. **Portes causales et entrée** : rejouer les 28 portes de `e28296bb`
    indépendamment ; les portes MEB et FULL ciblées du nouveau noyau passent
    déjà en Release et sous ASan/UBSan, mais pas une campagne appariée LiDAR.
@@ -321,16 +315,34 @@ appariée.
    physiques. Une petite palette de vrais gardes **adaptée par cellule**
    peut tenter le certificat avant le cover, avec repli exact et budget
    d'effort ; les gardes universels sont déjà traités par le filtre citron.
-   La fixture K5 distingue les deux preuves. Le WIP met déjà cette option
+   La fixture K5 distingue les deux preuves. Le hook du filtre de paire
+   doit aussi proposer les petits nœuds **écartés par Xi**, pas seulement
+   ses feuilles : ils peuvent contenir tous les gardes non universels.
+   Le WIP met déjà cette option
    **par défaut dans la chaîne** sans mesure LiDAR appariée ; la garder
    expérimentale jusqu'à publication des formes chargées, succès par arête
    et coûts réellement évités. Sa `docs/PROVENANCE.md` en cours annonce
    **91 % du temps q3/q4** sur des arêtes sans émission et des covers moyens
-   de 568 contre 43 sites, sans reçu ni méthode de profil par arête
-   identifiables dans le dossier à cette date. Le brut R2 démontre une
-   **proportion d'arêtes q4 muettes** supérieure à 91 %, pas une fraction
-   de temps ; demander entrée, code/options, définition des classes et
-   chronos avant de fonder le défaut sur cette attribution. Ni gain
+   de 568 contre 43 sites. Le nouveau reçu local
+   `receipts/q34_dead_edges_20260923/`, encore absent de `origin/main` à
+   cette lecture, apporte le harnais K5 de 08/000000 et les classes de
+   cycles, avec hashes internes cohérents.
+   Il donne **96,69 % des cycles d'arêtes après filtre** aux classes sans
+   émission, ou **85,69 % avec le filtre de paire inclus** : 91 % n'est
+   reconstructible avec aucun de ces dénominateurs. Le cover moyen vaut
+   **1 453 contre 43** pour les arêtes *mixtes* mortes/vivantes, et
+   **1 704 contre 43** pour toutes les classes mortes/vivantes ; le 568
+   de `PROVENANCE` reste sans définition dans cette capture. Indiquer le
+   dénominateur et les classes exacts avant de citer une part du temps.
+   L'essai linéaire du harnais conserve les mêmes émissions et digest et
+   annonce q3/q4 **592→205 CPU·s à K5, 1 600→557 à K10** ; la variante à
+   frontière baisse ses visites de 9,94→6,75 G à K5 et 30,1→17,7 G à K10
+   sur 000100. Ces signaux sont utiles, mais l'archive ne ferme pas encore
+   les commandes, environnement et SHA des binaires du prototype : son
+   patch imprime une ligne `refine:` absente de la sortie publiée. Aucun
+   de ces chiffres n'est une ablation G4 de la tour FULL.
+   Le brut R2 démontre une **proportion d'arêtes q4 muettes** supérieure à
+   91 %, pas une fraction de temps. Ni gain
    LiDAR ni borne globale acquis.
 4. **Aval FULL, grandes coquilles et échelle** : les 12,0 M appels MEB
    de 000000/K10 font 1,065 milliard de tests de puissance ; un test

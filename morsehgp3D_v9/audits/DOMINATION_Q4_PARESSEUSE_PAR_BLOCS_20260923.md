@@ -210,20 +210,67 @@ aurait naturellement un autre bilan, à publier séparément.
 La révision de source à frontière active lit un maximum affine par site
 du fragment, puis aussi son **minimum** si le maximum n'est pas négatif ;
 `dead.uniform_tests` ne compte que la première visite. Ajouter
-`dead.minimum_tests` ou publier explicitement que ce compteur mesure les
-visites site×cellule, pas toutes les évaluations d'extrêmes. Les premiers
+`dead.minimum_tests` et `dead.frontier_ids_copied` : l'économie de tests
+peut être annulée par les minima et les écritures de frontière. Pour cette
+source seulement, si `U=uniform_tests` et `C=cells`, les minima réellement
+évalués sont au moins `max(0,U−(K−1)C)` et au plus `U` : chaque cellule
+ne peut créditer que `K−1` maxima stricts avant de s'arrêter. Les premiers
 JSON locaux W8 ont été produits par un binaire daté **avant** cette
-révision (sonde 01:25 UTC, source 01:33 UTC) : aucun multiplicateur
+révision (sonde 01:25 UTC, source 01:38 UTC) : aucun multiplicateur
 chiffré de leurs tests ne peut lui être
 attribué sans recompilation et reçu de source correspondant.
+
+Ces **six anciens JSON locaux**, non versionnés et sans ablation appariée,
+finissent tous avec code 0 ; leurs masses sont néanmoins un diagnostic de
+taille : à K10, les trois trames entières 00/01/02 ont respectivement
+`7,796/4,151/9,281` milliards de formes à charger et
+`42,105/30,120/52,854` milliards de visites de cellule par site. Ces
+visites décrivent l'**ancien binaire**, pas la frontière active.
+Même si celle-ci réduit les visites, son `load` parcourt encore le cover
+entier avant de commencer à prouver. Ajouter une porte de coût bon marché :
+au milieu exact `m=(a+b)/2`, situé dans les deux disques de centres, compter
+par l'index les sites strictement intérieurs à la boule de diamètre `ab`,
+en saturant à `T₃=K−1` et `T₄=K−2`. Si ce compte est inférieur au seuil
+de la voie, le certificat **sur tout le disque** échouera forcément à `m` ;
+passer directement au générateur exact évite le chargement de ses formes.
+Ce test ne dit rien sur l'existence d'une présentation q3/q4 admissible :
+il décide seulement s'il vaut la peine de tenter la preuve de voie morte.
+Mesurer ses visites d'index et ne l'activer que quand son coût estimé reste
+inférieur à celui du chargement qu'il peut économiser.
+
+Autre resserrement exact : un centre q3 aigu ou q4 positif est dans
+l'enveloppe convexe de ses supports, et tous ces supports appartiennent au
+cover. La boîte englobante des sites du cover peut être accumulée à partir
+des boîtes des nœuds admis par `Q34EdgeCover::build`, en coût constant par
+admission, sans lire chaque site. Une cellule dyadique dont l'image affine
+des centres est disjointe de cette boîte ne contient aucun centre admissible.
+Même si la cellule coupe la boîte, le test ponctuel de réfutation doit être
+ignoré lorsque son coin testé est hors de la boîte. Les intervalles de
+coordonnées s'évaluent aux quatre coins en entier exact.
+Sur une surface LiDAR mince, cette restriction pourrait éviter des cellules
+et des échecs conservateurs ; elle laisse entier le coût de chargement des
+formes et demande une ablation propre.
+
+Enfin, le pic `peak_edge_buffer_bytes` de ce WIP additionne la capacité
+retenue du prouveur juste après sa preuve, mais les observations ultérieures
+pendant q3/q4 l'omettent alors que les buffers existent encore. Ajouter
+`dead_.retained_bytes()` à **toutes** ces observations pour mesurer le pic
+co-résident cover + atlas/coquille + prouveur, puis publier ce pic avec le
+travail si la voie devient le défaut de la chaîne.
 
 La preuve positive ne demande pourtant **aucun cover**. Choisir avant sa
 construction un ensemble borné `G` de vrais IDs distincts du même nuage,
 hors `a,b` ; les sélectionner via l'index, avec un budget d'effort. Le
-filtre citron par paire traverse déjà cet index avant le cover : il peut
-retourner à son worker quelques feuilles candidates proches du milieu et
-les petits nœuds crédités dont le seuil n'a pas été atteint, sans changer
-sa décision ni transmettre son compte à l'atlas. Sur chaque cellule du
+filtre citron par paire traverse déjà cet index avant le cover : un hook
+`offer_range(node.range,reason)` peut retourner à son worker quelques vrais
+IDs de **chaque nœud terminal**, y compris ceux exclus par Xi et ceux admis
+en bloc. Se limiter aux feuilles rate précisément des gardes utiles : sur
+la fixture K5 ci-dessous, le petit nœud des quatre gardes du haut est
+exclu en bloc par `Affine` (`3·64²<16·900`). Prélever dans
+`spatial_order()`, dédoublonner et exclure `a,b`, sans changer la décision
+du filtre ni transmettre son compte à l'atlas. Un `load_guards(index,ab,G)`
+privé au worker peut construire leurs formes exactes **avant**
+`Q34EdgeCover::make`, sans deuxième requête kNN. Sur chaque cellule du
 disque, utiliser seulement leurs formes exactes : si au moins `T` gardes
 y ont `max L_g<0`, la voie correspondante est morte. Un garde n'a pas
 besoin d'être pré-filtré par le cover : s'il est intérieur à une boule
@@ -257,6 +304,16 @@ fréquence LiDAR. Les nombreuses arêtes sans émission dans R2 ne
 garantissent pas non plus que leur disque
 *entier* soit certifiable ; mesurer les succès réels avant un port par
 défaut.
+Sur les quatre cellules dyadiques centrales à profondeur 2, les quatre
+gardes d'un même côté ont même `max L≤−48` et les douze cellules externes
+sont hors des disques q3/q4 : les huit IDs prouvent les **deux** voies
+mortes avant le cover. Le tétraèdre `ab,(10,10,16),(10,16,10)` est q4
+positif et possédé par `ab` avant ajout de ces gardes ; la fixture ne doit
+pas sa vacuité à une impossibilité de support. Une palette `≤4(K−1)` et
+quelques centaines de formes par arête sont des **paramètres à ablater**,
+jamais un quota de recherche qui supprimerait un candidat exact. Séparer
+dans le ledger les tentatives pré-cover, leurs succès, les covers évités,
+les formes chargées et les replis de la voie actuelle.
 
 ## Lentille de complétion : bonne spécialisation, pas un remplacement général
 
