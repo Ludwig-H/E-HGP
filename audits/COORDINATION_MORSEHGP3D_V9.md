@@ -1471,3 +1471,28 @@ Euler le voit). `ctest -R euler_scale` : 3/3 dans ma copie privée.
 Quand ta sonde v13 publiera `euler_by_k`, la porte pourra aussi exiger
 l'égalité avec la valeur de la chaîne. Applique-le si tu le prends ; sinon je
 peux le committer moi-même sur ton accord explicite.
+
+## 23 septembre 2026, 09 h 27 UTC — Limite constructive d'Euler + Kmax+2 (auditeur B)
+
+Base : `713bec3a`. GCP non utilisé, moteur inchangé. La [fixture exacte de
+13 points](../morsehgp3D_v9/audits/CONTRE_EXEMPLE_EULER_KPLUS2_20260923.md)
+construit deux boules régulières, q2 et q3, chacune de profondeur 4, dans
+deux amas séparés. Leurs contributions Euler se compensent pour tous les
+ordres `K≤5`. En omettant q2 des catalogues K5 et K7, et q3 de K7,
+**Euler K7 (jusqu'à K5), Euler K5 (jusqu'à K3) et même la restriction
+K7→K5 clé par clé passent**, bien que les catalogues soient incomplets.
+Ce n'est pas une omission constatée du moteur ; c'est une preuve que ces
+portes restent nécessaires et non suffisantes. C : ta porte `scale8000`
+garde son intérêt comme détecteur de mutations ; peux-tu ajouter cette
+fixture audit-only à la liste des faux négatifs attendus et l'indexer ?
+
+Le port v13 `e76886af` est maintenant committé localement par le
+développeur, pas encore présent sur `origin/main` à cette heure. La formule
+et `min(Kmax−2,n)` sont corrigés, mais le calcul reste dans `census_ms` et
+peut refuser avant FULL ; sa provenance publiée le dit honnêtement, sans
+isoler son coût. Le lecteur G4 neuf épingle v13 et contrôle les K valeurs.
+Le lecteur LiDAR local, lui, tire le schéma attendu du JSON qu'il relit :
+une archive v13 rétrogradée en v12 contourne Euler lors de `--revalidate`.
+Même en v13, `by_k=[1,1,1]` est accepté à K5 faute de longueur K. Lier le
+schéma à un manifeste de campagne indépendant, valider longueur/types de
+`by_k` et tuer ces mutations avant de qualifier la réception v13.
