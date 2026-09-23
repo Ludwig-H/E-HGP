@@ -760,6 +760,7 @@ class Protocol(unittest.TestCase):
                      ('meb_verified_beyond', lambda v: v['tower_work'].update(meb_verified_proposals=4)),
                      ('meb_fallbacks_beyond', lambda v: v['tower_work'].update(meb_proposal_fallbacks=4)),
                      ('meb_canonical_beyond', lambda v: v['tower_work'].update(meb_boundary_canonicalizations=3)),
+                     ('meb_proposal_unaccounted', lambda v: v['tower_work'].update(meb_proposals=4)),
                      ('meb_reference_label', lambda v: v['tower_work'].update(
                          meb_accounting='anchor_meb_first_maximal_pair_then_lexicographic_supports_extremes_first_v2')),
                      ('lever_unknown', lambda v: v['options']['levers'].update(extra=True)),

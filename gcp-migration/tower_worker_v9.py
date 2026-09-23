@@ -458,8 +458,7 @@ def validate_ledger_identities(value, levers):
         # Every proposal is verified, canonicalized from a verified one, or
         # falls back to the reference enumeration; one proposal per MEB at most.
         need(tower['meb_accounting'] == MEB_ACCOUNTING and tower['meb_proposals'] <= tower['meb_calls'] and
-             tower['meb_verified_proposals'] <= tower['meb_proposals'] and
-             tower['meb_proposal_fallbacks'] <= tower['meb_proposals'] and
+             tower['meb_verified_proposals'] + tower['meb_proposal_fallbacks'] == tower['meb_proposals'] and
              tower['meb_boundary_canonicalizations'] <= tower['meb_verified_proposals'],
              'tower MEB proposal identity')
     else:

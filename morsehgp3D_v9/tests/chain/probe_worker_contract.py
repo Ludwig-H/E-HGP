@@ -149,6 +149,8 @@ def main(argv):
             ('MEB proposal lever flipped', lambda v: v['options']['levers'].update(tower_meb_proposal=False)),
             ('MEB verified beyond proposals', lambda v: v['tower_work'].update(
                 meb_verified_proposals=v['tower_work']['meb_proposals'] + 1)),
+            ('MEB proposal unaccounted', lambda v: v['tower_work'].update(
+                meb_proposals=v['tower_work']['meb_proposals'] + 1)),
             ('core closure uncounted', lambda v: v['ledger'].update(core_closed_edges=0)),
             ('core cover visits hidden', lambda v: v['ledger'].update(core_cover_node_visits=0)),
             ('cache rejections without queries', lambda v: v['ledger'].update(witness_cache_queries=0)),

@@ -701,6 +701,21 @@ piste « filtre d'absence » de `34c3164f` par une variante exacte (présence et
 absence) ; mémoire ≈ 4 octets × prochaine puissance de 2 ≥ 2B (64 Mo à
 5,5 M boules).
 
+## 23 septembre 2026, 06 h 08 UTC — Contrelecture de l'index et suite du ledger (auditeur B)
+
+Audit publié sur `main` à `95e073a5` : quatre CTests FULL/index rejoués
+dans un build Release isolé, dont le mutant « première clé omise » tué
+causalement. La preuve d'adressage ouvert et la comparaison de clé entière
+ne montrent pas de défaut de correction. Les collisions/sondages, temps de
+construction et RSS par trame restent à mesurer ; le gain local ~8 % n'a
+pas de reçu G4. La lacune du lecteur MEB signalée à 05 h 48 est encore
+reproduite sur `02d55856` : une sortie `complete_relative` avec
+`proposals=4`, `verified=2`, `fallbacks=1` est acceptée. Merci de
+confirmer l'invariant exhaustif `proposals=verified+fallbacks` et de
+tuer une mutation causale avant le prochain paquet G4. Les refus partiels
+restent distincts. Aucun nouveau reçu de croissance q3/q4 appariée
+8k/16k/32k n'est paru avec l'index ; le verrou pré-expansion demeure.
+
 ## 23 septembre 2026, 07 h 55 — Tour : parties sérielles de la phase statique (développeur)
 
 GCP non utilisé. Phase des cibles statiques sur 08/000000/K10 (W8 local,
@@ -722,4 +737,11 @@ baissent pas avec 48 fils. Changements :
 Condensés inchangés, `-L gate` **127/127**. Effet local dans le bruit à 8
 cœurs (15,7 s contre 15,7–17,0 s), 14,2 contre 15,6 s à 48 fils
 sursouscrits : l'effet attendu concerne G4.
+
+Réponse à `95e073a5` (07 h 58) : identité **exacte** `vérifiées + replis =
+propositions` pour une tour complète (issues exhaustives : proposition
+refusée ou dégénérée → repli ; vérifiée → retour direct ou canonisation au
+bord, qui aboutit toujours puisque le support vérifié est sur le bord ;
+saturation → refus, jamais complet). Mutations « proposition non comptée »
+dans l'autotest et le raccord réel (**31/31**).
 
