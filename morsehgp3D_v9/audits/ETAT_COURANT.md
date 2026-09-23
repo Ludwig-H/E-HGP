@@ -250,6 +250,14 @@ de flux ne compare encore que leurs tailles. Le journal local CUDA OFF
 du correctif a 23 tests ciblés réussis, pas 154/154 ni un test device.
 Exiger un différentiel CUDA par arête et le nombre de décisions GPU
 réelles. R12 publié n'est pas touché.
+L'[audit C du condensé du catalogue](c_catalogue_digest_20260923/README.md)
+épingle maintenant six valeurs CPU (trois trames sans sol 08, K5/K10)
+égales entre moteur, lot CPU et S3 CPU. Son gate causal de coquilles
+étendues reste un **patch d'audit**, pas un CTest produit ; le lecteur
+R13 ne vérifie pas encore ces six épingles. Aucun reçu R13/S3 G4 n'est
+publié au contrôle du 23 septembre à 19 h 43 UTC. Les gardes d'entrée
+et un juge CPU sont en correction **mutable** chez le développeur,
+sans transfert de qualification au `main` publié.
 La [preuve B de redondance d'une seule cellule de
 centres](CERTIFICAT_B_REDONDANCE_CELLULE_UNIQUE_20260923.md) affine la
 piste de rejet **avant** le cœur : si la cellule couvre le disque

@@ -173,3 +173,35 @@ l'ardoise ; cela corrige l'ancien faux « GPU utile » dans **ces cas**.
 Ce préflight device est une **intention de protocole**, pas encore un
 résultat. Un compteur explicite des arêtes décidées sur GPU reste
 préférable dans chaque reçu de production.
+
+## Reprise R13 sur `main` après l'audit C (19 h 41 UTC)
+
+À cette relecture, `origin/main=306e186cc` n'ajoute aucun code produit
+après `545c71799` : les trois gardes bruts ci-dessus restent donc
+ouverts dans le **code publié**. Le worktree constructeur contient
+un **diff mutable** qui avance le retour du lot vide avant l'intervalle
+de pointeurs, impose les feuilles unitaires et limite les masques selon
+K ; ses tests et le juge CPU optionnel sont en cours. Aucun de ces
+fichiers mutables ne qualifie le commit publié ni CUDA/G4.
+
+L'[audit indépendant C du condensé du catalogue](c_catalogue_digest_20260923/README.md)
+épingle six valeurs sur les trois trames sans sol de R12, à K5/K10,
+identiques entre moteur, lot CPU et S3 CPU. Sa porte de coquilles
+étendues, altérations et deux mutants est un **patch proposé** qui
+s'applique à `545c71799`, pas encore un CTest du moteur publié. Le
+plan R13 comporte 18 cas GPU/jumeau sur ces mêmes trames de la seule
+séquence 08 ; le worker compare les condensés des jumeaux, mais ne
+vérifie pas encore les **six valeurs CPU épinglées**. Un condensé FNV64
+identique est un contrôle du catalogue à collision près, non une
+comparaison littérale ni un juge d'omissions communes aux deux bras.
+Faire du gate C et des six épingles un préflight sans coût G4 est donc
+un progrès d'exactitude bien ciblé.
+
+Aucun reçu R13/S3 sur G4 n'est publié ; les cinq VM relues à 19 h 38 UTC
+sont `TERMINATED`. Le dernier résultat G4 reste R12 **S2**, sur trois
+trames sans sol de la seule séquence 08 : K1..5 prend 2,01–2,69 s,
+K1..10 6,63–8,70 s. Même enlever fictivement tous les survivants S3
+laisserait 1,177–1,513 s sur les trois lignes K5 si les autres phases
+ne changent pas. R13 doit donc être présenté comme une mesure du port
+S3 et de sa sûreté, **pas** comme une qualification anticipée du contrat
+brut, multi-séquence ou sous la seconde.

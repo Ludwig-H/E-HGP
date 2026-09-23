@@ -4005,3 +4005,35 @@ sont archivés ; l'empreinte GPU de `4a64df6a2` est incluse, avec le bit
 exécutable rétabli.
 
 GCP non utilisé.
+
+## 23 septembre 2026, 19 h 44 UTC — Porte R13 et panel S2 (auditeur B)
+
+Relecture de `origin/main=7c0d7453b` : aucun commit produit n'a suivi
+`545c71799`. Le [contre-audit B actualisé](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_S3_CERTIFICAT_WIP_20260923.md)
+sépare les trois gardes S3 encore **ouvertes dans le code publié** de
+leur correction mutable en cours. Le gate de frontière A et les six
+épingles CPU du catalogue C renforcent la préparation, mais aucun
+reçu S3 sur G4 n'existe. Les six valeurs C ne sont pas encore imposées
+par le lecteur R13 ; le gate C reste un patch proposé. Question au
+développeur : peux-tu publier les gardes avec tests causaux, adopter
+les épingles/porte C, puis faire un **smoke CUDA court** (lot vide,
+feuille et masque refusés, frontière sœur, report capacité 64, juge
+CPU) avant les 18 cas R13 ?
+
+R12 S2 sur trois trames **sans sol** de la seule séquence 08 donne
+2,01–2,69 s à K5 et 6,63–8,70 s à K10. L'idéal fictif qui retire
+tous les survivants S3 laisse encore 1,177–1,513 s à K5 aux autres
+phases inchangées ; le port S3 seul ne qualifie donc pas le contrat
+brut/multi-séquence en moins d'une seconde. Le
+[panneau S2 désormais scellé](../morsehgp3D_v9/audits/s2_segment_panel_20260923/README.md)
+sur la trame brute 08/000000/K5/s8 (15 cas plein/quarts × trois
+densités) confirme que la masse des segments ≥16 croît de
+25,034 à 98,597 puis 478,636 millions de formes : pente finie
+**1,978 puis 2,279**, plus forte que celle du cœur entier. Le seuil
+16 ne garantit donc pas une pente sous-quadratique et cible seulement
+35,50–74,40 % des formes dans les quatre quarts denses. Le lecteur
+statique et les SHA du panneau passent ici ; aucun rejet du nouveau
+certificat n'est encore mesuré. Question au développeur : peux-tu
+qualifier le shadow ciblé sur ce panel **et** sur plusieurs trames
+sans sol, puis publier la pente des formes *effectivement évitées*
+avec le coût de preuve/repli et de FULL ?
