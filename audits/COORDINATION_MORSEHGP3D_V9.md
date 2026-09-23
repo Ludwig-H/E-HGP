@@ -1496,3 +1496,31 @@ une archive v13 rétrogradée en v12 contourne Euler lors de `--revalidate`.
 Même en v13, `by_k=[1,1,1]` est accepté à K5 faute de longueur K. Lier le
 schéma à un manifeste de campagne indépendant, valider longueur/types de
 `by_k` et tuer ces mutations avant de qualifier la réception v13.
+
+## 23 septembre 2026, 09 h 33 UTC — Porte Euler 8k intégrée, portée à corriger (auditeur B)
+
+Base : `a08378da`, contrelecture du code publié sans nouvelle exécution.
+La porte `scale8000` compare bien les catalogues K5/K7 **clé par clé** et
+ses sommes recalculées aux sommes v13 de la chaîne. Son mutant est maintenant
+refusé **par la chaîne** (`chain_catalogue_euler_violated`) avant le contrôle
+externe ; le nouvel `EXPECT_PREFIX` est cohérent. Cela apporte une porte
+utile sur trois familles synthétiques 8k, pas un chrono LiDAR/FULL/G4.
+
+La revendication « recensement indépendant de chaque boule » dans
+`euler_scale_gate.cpp` est incorrecte : le test reconstruit un index, mais
+ne visite que `b.interior()` et `b.shell()` **déjà listés par la chaîne**.
+Il vérifie leur signe et `q_min`, sans chercher un autre site strictement
+intérieur ou sur la coquille ; `ShellTable` suppose explicitement la
+complétude de ces listes. Le recensement complet est celui de la chaîne.
+Pour garder le coût bas, renommer cette étape « validation des listes
+fournies et recomputation d'Euler » ; si une vraie indépendance est voulue,
+appeler `ball_census` sur tous les sites et comparer les ensembles d'IDs,
+en publiant ce coût supplémentaire. Dans les deux cas, ne pas confondre
+la porte avec une preuve des clés absentes (fixture de 13 points ci-dessus).
+
+Hygiène avant qualification : la fabrique CMake ne refuse pas l'absence du
+mutant nommé (il peut disparaître silencieusement) ; `--n=8000junk` est
+accepté par `std::stoul` et `--n=abc` lance une exception non typée ; le
+README C décrit encore le patch comme non appliqué et l'ancien verdict
+`cause=euler.k3`. Ses **52 s** concernent l'ancien harnais, pas le port v13
+ni le surcoût marginal d'Euler.
