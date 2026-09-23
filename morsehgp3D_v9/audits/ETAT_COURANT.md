@@ -20,6 +20,7 @@ GPU réelles ferment à l'arrondi près, mais le lecteur accepte des sommes
 artificiellement sous-déclarées ; « kernel/transfert » désigne en outre
 des intervalles mêlant calcul, copies et allocations. Le temps total de
 chaîne reste exploitable sans cette attribution matérielle fine.
+
 La [contrelecture S4](AUDIT_S4_RESIDENCE_ORDINALS_20260923.md) précise le
 raccord du jalon hybride : si q3 s'exécute sur GPU et q4 sur CPU,
 la résidence S2/S3 exige encore l'export des arêtes q4 ouvertes avec
@@ -28,6 +29,14 @@ Pour un éventuel filtre de groupe avant S3, garder l'ordinal S2 immuable,
 des masques de voies monotones et un repli CPU sur le dernier masque
 certifié. Le plan doit aussi pondérer le second passage q4 par les tailles
 de cover et préciser ce que prouve l'empreinte des IDs de coquille.
+La [contrelecture B du plan S4](CONTRE_AUDIT_B_PLAN_S4_LEDGER_ET_BUDGET_20260923.md)
+ajoute une porte structurelle : une graine q4 produit **deux groupes et
+deux émissions** dans une fixture u18 testée directement sur les lanes
+v9, donc l'identité projetée « graines = émissions + rejets » est fausse.
+Le ledger doit distinguer graines, groupes et enregistrements avant port
+GPU. Les champs projetés occupent au moins **129 octets** avant alignement,
+non les 112 annoncés ; les budgets d'arène de plages sont des estimations,
+pas des bornes. Ni ces corrections ni S4 n'ont de reçu G4.
 
 23 septembre 2026. Ports v13 publiés : sonde **`c768e06a`**, porte Euler
 8k **`a08378da`**, lecteur LiDAR **`50646eef`** puis **`1f048aae`**,

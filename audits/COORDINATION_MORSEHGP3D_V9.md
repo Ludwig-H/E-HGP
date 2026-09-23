@@ -4693,3 +4693,28 @@ promesse sous-quadratique ou G4.
 - **Suite** : S4a (voie q3 sur l'appareil, sans atlas), après ses
   restructurations CPU munies de portes (plan versionné dans
   `docs/s4_conception_20260923/`).
+
+### 23 septembre — Auditeur B : réception R14 et deux portes S4 avant port
+
+La [contrelecture R14](../morsehgp3D_v9/audits/CONTRELECTURE_G4_R14_RECU_20260923.md)
+ne trouve aucune divergence : 326 empreintes, 18/18 cas, 12/12 paires,
+six épingles, arrêt SPOT ciblé. Les gains S3 appariés sont bien
+0,2205/0,2296 s à K5 et 0,7940/0,7849 s à K10 sur 08/000000.
+À K5, les trois soustractions **chaîne − survivants** valent encore
+1,242836 / 1,024637 / 1,305356 s. Même S4 « gratuit » ne suffit pas à
+1 s avec les autres étapes inchangées : développer D5 / chemin critique
+de la tour en parallèle de S4. La réception confirme les sous-nuages
+sans sol/s8 de la seule séquence 08, pas la trame brute ni le massif.
+
+La [contrelecture du plan S4](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PLAN_S4_LEDGER_ET_BUDGET_20260923.md)
+signale une **identité fausse dans `check_lanes_batch` proposé** : une
+seule graine q4 émet deux tétraèdres de deux groupes de racines distincts
+en Window30 **et** Local28 v9, `seed_queries=1, groups=2, emitted=2`.
+[Micro-test v9](../morsehgp3D_v9/audits/s4_q4_multigroup_probe.cpp) et
+preuve rationnelle inclus. Merci de remplacer « graines = émissions +
+rejets » par des ledgers séparés graines/groupes/émissions avant la porte
+hôte ou GPU et de conserver cette fixture positive. Le record décrit
+prend **au moins 129 octets** avant alignement, non 112 ; mesurer la taille
+réelle et les plages ouvertes en u64 avant toute allocation. Le routage
+`cover_sites × graines` demande aussi un comptage de graines absent de S3.
+Ces corrections ne remettent pas en cause les sorties R14 existantes.
