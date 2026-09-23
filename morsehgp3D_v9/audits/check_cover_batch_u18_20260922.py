@@ -2,9 +2,9 @@
 """Oracle entier du certificat de cover commun à un bloc d'arêtes.
 
 Le cover d'une arête ab est la boule fermée de centre (a+b)/2 et de rayon
-|a-b|. Les intervalles ci-dessous certifient un produit A×B×Z ; une
-subdivision exacte rend chaque cover individuel. Ce test ne mesure pas le
-pipeline WSPD, l'atlas q4 ni le temps de la tour.
+|a-b|. Les intervalles ci-dessous certifient un produit A×B×Z ou son
+résidu réel E×Z ; une subdivision exacte rend chaque cover individuel.
+Ce test ne mesure pas le pipeline WSPD, l'atlas q4 ni le temps de la tour.
 """
 from __future__ import annotations
 
@@ -64,6 +64,25 @@ def cover_form(a: Point, b: Point, z: Point) -> int:
     return value
 
 
+def surviving_edge_bounds(edges: list[tuple[Point, Point]], z: Box) -> tuple[int, int]:
+    """Certify E×Z from actual surviving edges, rather than their A×B box."""
+    require(bool(edges), "empty surviving edge family")
+    sums = [tuple(a[i] + b[i] for i in range(3)) for a, b in edges]
+    radii4 = [4 * sum((a[i] - b[i]) ** 2 for i in range(3))
+              for a, b in edges]
+    nearest = farthest = 0
+    for i in range(3):
+        low = 2 * z.lo[i] - max(s[i] for s in sums)
+        high = 2 * z.hi[i] - min(s[i] for s in sums)
+        mn, mx = abs_min_max(low, high)
+        nearest += mn * mn
+        farthest += mx * mx
+    lower, upper = nearest - max(radii4), farthest - min(radii4)
+    require(-(12 * M * M) <= lower <= upper <= 12 * M * M,
+            "surviving-edge bounds exceed certified i64 u18 domain")
+    return lower, upper
+
+
 def verify_grouped(edges: list[tuple[Point, Point]],
                    witnesses: list[Point]) -> int:
     """Split edge×Z cells; all terminal tiles are disjoint and exact."""
@@ -120,10 +139,32 @@ def main() -> None:
                 "tangent point is not an equality")
         require(cover_bounds(box([a]), box([b]), box([z])) == (0, 0),
                 "tangent box should admit exactly")
+        require(surviving_edge_bounds([(a, b)], box([z])) == (0, 0),
+                "surviving-edge tangent should admit exactly")
+
+    # Sparse diagonal survivors: unrelated Cartesian pairs inflate the radius.
+    aa = [(0, 0, 0), (100, 0, 0)]
+    bb = [(0, 100, 0), (100, 100, 0)]
+    ee = [(aa[0], bb[0]), (aa[1], bb[1])]
+    zz = box([(50, 175, 0)])
+    require(cover_bounds(box(aa), box(bb), zz)[0] <= 0 <
+            surviving_edge_bounds(ee, zz)[0],
+            "sparse residual should gain a certified rejection")
+    # Crossed survivors: Cartesian boxes suggest near-zero edge length,
+    # although the only surviving edges are long and share one midpoint.
+    bb = [(0, 1, 0), (100, 1, 0)]
+    ee = [(aa[0], bb[1]), (aa[1], bb[0])]
+    zz = box([(50, 0, 0), (50, 1, 0)])
+    require(cover_bounds(box(aa), box(bb), zz)[1] > 0 >=
+            surviving_edge_bounds(ee, zz)[1],
+            "sparse residual should gain a certified admission")
+
     rng = random.Random(20260922)
     box_cases = 0
     grouped_cases = 0
     grouped_visits = 0
+    sparse_families = 0
+    sharper_lower = sharper_upper = 0
     for case in range(1001):
         count_a, count_b, count_z = (rng.randint(1, 5),
                                     rng.randint(1, 5),
@@ -144,11 +185,29 @@ def main() -> None:
                     box_cases += 1
         edges = [(pa, pb) for pa in aa for pb in bb if pa != pb]
         if edges:
+            # A nonempty, possibly sparse subset of the actual product.
+            survivors = [edge for edge in edges if rng.randrange(3) == 0]
+            if not survivors:
+                survivors = [edges[rng.randrange(len(edges))]]
+            edge_lower, edge_upper = surviving_edge_bounds(survivors, box(zz))
+            require(lower <= edge_lower <= edge_upper <= upper,
+                    "survivor interval must refine the Cartesian interval")
+            for pa, pb in survivors:
+                for pz in zz:
+                    require(edge_lower <= cover_form(pa, pb, pz) <= edge_upper,
+                            "survivor interval excludes an exact edge-site value")
+            sparse_families += 1
+            sharper_lower += edge_lower > lower
+            sharper_upper += edge_upper < upper
             grouped_visits += verify_grouped(edges, zz)
             grouped_cases += 1
     print(json.dumps({"status": "PASS", "box_triplets": box_cases,
                       "grouped_families": grouped_cases,
                       "grouped_visits": grouped_visits,
+                      "surviving_families": sparse_families,
+                      "sharper_lower": sharper_lower,
+                      "sharper_upper": sharper_upper,
+                      "sparse_discriminants": 2,
                       "tangent_fixtures": 3}, sort_keys=True))
 
 

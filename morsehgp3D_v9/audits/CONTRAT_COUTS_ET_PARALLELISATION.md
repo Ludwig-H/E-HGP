@@ -26,7 +26,7 @@ La [tour v7 G4](../../morsehgp3D_v7/docs/RESULTATS_TOUR_CACHE_G4_20260910.md) do
 
 L'entrée v8 `run_wspd_q34_parallel` partage l'index et les jobs du front. Une arête résiduelle construit son cover, puis éventuellement un atlas Local28 commun aux voies q3/q4. La file actuelle divise les rectangles en plages de rangs A **avant** l'expansion des arêtes ; `Engine::edge`, le census q3 de chaque graine, la construction et le balayage de l'atlas q4 restent synchrones dans un worker. Les callbacks sont privés par slot, mais leurs vues sont empruntées pendant l'appel. Les tâches publiées refusées sont traitées localement, ce qui préserve la complétude. L'annulation joint tous les workers. Ces invariants, présents dans [wspd_q34.cpp](../../morsehgp3D_v8/src/pipeline/wspd_q34.cpp), sont à conserver lors du découpage intérieur.
 
-Sur le reçu 1 mm, avant 849 780 émissions, le front laisse 23,687 millions de paires développées et 2,044 millions de covers ; q3 examine 184,462 millions de graines propriétaires et aiguës, dont 153,036 millions sont rejetées par l'atlas, puis construit 31,425 millions de boules. L'atlas prépare 38,795 millions de cellules, paie **3,252 milliards** de bornes de blocs, **7,316 milliards** de tests de points et **5,547 milliards** d'IDs copiés dans les frontières ; le tri q4 compte 163,678 millions de comparaisons. Le census q3 ajoute 1,126 milliard de bornes préparées. Ces colonnes n'ont pas le même coût unitaire et certaines sont des sous-comptes : ne jamais les sommer en un « nombre d'opérations ». Le modèle de croissance doit publier au minimum : produits de front, masse résiduelle par voie, paires réellement développées, covers et leurs sites payés, graines, cellules/fragments/IDs copiés, bornes et tests q3/q4, événements/tri, sorties, clés, catalogue, parents, temps CPU/mur et RSS par phase.
+Sur le reçu 1 mm, avant 849 780 émissions, le front laisse 23,687 millions de paires développées et 2,044 millions de covers ; q3 examine 184,462 millions de graines propriétaires et aiguës, dont 153,036 millions sont rejetées par l'atlas, puis construit 31,425 millions de boules. L'atlas prépare 38,795 millions de cellules, paie **3,252 milliards** de bornes de blocs, **7,316 milliards** de tests de points et **5,547 milliards** d'IDs copiés dans les frontières ; le tri q4 compte 163,678 millions de comparaisons. Le census q3 ajoute 1,126 milliard de bornes préparées. Ces colonnes n'ont pas le même coût unitaire et certaines sont des sous-comptes : ne jamais les sommer en un « nombre d'opérations ». Le modèle de croissance doit publier au minimum : produits de front, masse résiduelle par voie, paires réellement développées, covers, populations logiques et nœuds visités, graines, cellules/fragments/IDs copiés, bornes et tests q3/q4, événements/tri, sorties, clés, catalogue, parents, temps CPU/mur et RSS par phase.
 
 Le [protocole spatial brut](../../morsehgp3D_v8/receipts/q34_spatial_20260921/README.md) a déjà une relation défavorable sur 08/000000 : trame→moitié x+, exposant observé 2,502 pour les bornes q3 et 2,332 pour les bornes de blocs q4 ; les sorties q3/q4 ont des exposants nettement inférieurs sur ses six relations. Les coupes modifient densité et frontières : ce sont des diagnostics de régime, pas une preuve asymptotique. Il faut répéter le même grand-livre sur plusieurs **séquences** entières, brutes et sans sol à masque figé, K5/K10 et s8/s10/s12, sans choisir après coup le meilleur morceau. Ajouter un diagnostic séparé de captations LiDAR superposées et de densités accrues, sans supposer leur alignement : des passages proches peuvent grossir les frontières actives et les coquilles sans contact exactement cosphérique. Le coût global visé est sensible aux sorties : une garantie universelle strictement sous-quadratique est impossible si le résultat explicite lui-même est quadratique.
 
@@ -65,6 +65,34 @@ propriété de l'index : `Q4LocalGeometry::decompose_cover` consomme ces
 ranges. Une partition du produit en tuiles disjointes ou un tri final
 par `(arête, rang Z)` peut fournir l'ordre, puis il faut fusionner les
 ranges adjacents et facturer matérialisation, allocations et copies.
+
+**Après le filtre de paires, réduire les vraies arêtes survivantes.**
+L'enveloppe A×B peut être très lâche quand `E` est un résidu clairsemé.
+Pour une tuile bornée `E`, réduire en `O(|E|)` ses extrema exacts
+`S_i^- = min_{(a,b)∈E}(a_i+b_i)`, `S_i^+`,
+`R^- = min_{(a,b)∈E}4|a-b|²` et `R^+`.
+Pour le nœud Z, poser `T_i=[2Z_i^-−S_i^+,2Z_i^+−S_i^-]` ; alors
+
+`L_E = Σ_i minsq(T_i)−R^+ ≤ F(e,z) ≤ U_E = Σ_i maxsq(T_i)−R^-`
+
+pour tous `e∈E,z∈Z`. Les intervalles des `T_i` sont contenus dans ceux
+de A×B et `R^-,R^+` resserrent les bornes du rayon, donc
+`L≤L_E≤U_E≤U` : aucune décision ancienne n'est perdue. Ces réductions
+associatives conviennent à un lot CPU/GPU, **sans supposer un LiDAR
+aligné**. L'[oracle entier](check_cover_batch_u18_20260922.py) vérifie
+43 386 triplets A×B×Z et 1 000 familles survivantes en modes normal/`-O` ;
+ses bornes se resserrent strictement 916/943 fois, et deux familles
+clairsemées distinguent rejet/admission de l'ambiguïté A×B. Cela n'est
+**pas** une mesure de rejet sur vrais résidus LiDAR. Payer la réduction,
+les décisions `E×Z`, les replis exacts, les handles, la production finale
+de ranges **par arête** et le coût aval d'atlas dans le même chrono ;
+garder un grain explicite pour les tuiles même si le front laisse un grand
+`|B|` dans un seul job. Aucun compte de profondeur n'est transféré par
+ce certificat de cover.
+La même tuile pourrait borner la lentille du domaine positif q4, mais
+son `completion_box` exclut **les deux endpoints propres à chaque arête** :
+une admission `E×Z` ne fournit pas cette boîte tant que Z peut contenir
+un endpoint de E. Certifier cette disjonction ou raffiner avant agrégation.
 
 L'[oracle entier autonome](check_cover_batch_u18_20260922.py) passe en
 Python normal et `-O` : 45 871 triplets de points bornés, 1 001

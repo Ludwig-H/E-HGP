@@ -515,6 +515,27 @@ payées par le moteur actuel. À K5, la borne agrégée
 croissance sous-quadratique. Le reçu distingue les visites du premier
 cover, celles de sa décomposition et les IDs réellement copiés : les
 facturer séparément avant tout port des niveaux.
+
+**Réutilisation exacte de la première traversée du cover.** Le DFS de
+`Q34EdgeCover::build` connaît déjà les nœuds admis. Pour une arête q4,
+une pile postordre peut fusionner deux enfants entièrement admis en leur
+parent et produire la frontière maximale de nœuds couverts ; les ranges
+triés/fusionnés se déduisent de cette frontière. C'est la même partition
+de sites que celle reconstruite aujourd'hui par
+`Q4LocalGeometry::decompose_cover`, sans seconde visite globale de
+l'index. Dans le reçu v8 1 mm, cette seconde traversée compte
+**315 736 960 visites** et copie **62 914 199 IDs de nœuds** ; le
+premier cover compte déjà **440 194 038 visites**. Le port doit conserver
+la même frontière, les mêmes compteurs de populations et les réponses
+q3/q4/FULL ; il ne s'impose pas aux arêtes q3 seules. La lentille du
+domaine positif q4 est contenue dans le cover, car
+`|z−(a+b)/2|²=(|z−a|²+|z−b|²)/2−|a−b|²/4≤3|a−b|²/4`.
+Une traversée conjointe peut donc transmettre les exclusions, mais
+redémarrer aveuglément le domaine sur les seuls nœuds du cover pourrait
+augmenter les visites si cela perd un rejet à leur ancêtre. Tester le
+DFS conjoint et son coût de bornes avant port. Ces économies de
+préparation ne touchent pas les **11,43 milliards** de visites de
+partition d'atlas du même reçu : elles ne ferment pas le verrou principal.
 Comparer, sur les mêmes arêtes échantillonnées, `m`, centres peu profonds
 exacts, centres positifs possédés, temps d'énumération et les
 `11,433` milliards de visites de l'atlas ; une construction complète
