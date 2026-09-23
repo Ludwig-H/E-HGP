@@ -41,6 +41,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`ETAT_COURANT.md`](ETAT_COURANT.md) | DEV puis A et B | `3595725a` 22/21:18 | synthèse | vivant | sans objet |
 | [`AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md`](AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md) | C | `f4480c02` 08:44 | démontré localement, mesure | vivant | sans réponse |
 | [`AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md`](AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md) | C | 23/10:12 | synthèse, shadow, mesure locale | vivant | sans réponse |
+| [`CONTRE_AUDIT_B_ALTERNATIVES_C_20260923.md`](CONTRE_AUDIT_B_ALTERNATIVES_C_20260923.md) | B | `59b370f7` 10:31 | contrelecture des projections G4 | vivant | sans réponse |
 | [`ERRATUM_B_AUDIT_C_OBJET_ET_EULER_20260923.md`](ERRATUM_B_AUDIT_C_OBJET_ET_EULER_20260923.md) | B | `0fe53513` 08:52 | démontré localement, contrelecture | vivant | sans réponse |
 | [`AUDIT_A_ARCHITECTURE_K_GABRIEL_20260922.md`](AUDIT_A_ARCHITECTURE_K_GABRIEL_20260922.md) | A | `0674dc02` 22/21:44 | méthode | historique | acceptée (canal l. 139) |
 | [`CONTRAT_COUTS_ET_PARALLELISATION.md`](CONTRAT_COUTS_ET_PARALLELISATION.md) | A | `0674dc02` 22/21:44 | mesure, méthode | vivant | acceptée en partie |
@@ -147,6 +148,8 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`RECTIFICATIF_R8_Q34_ORDONNANCEMENT_20260923.md`](RECTIFICATIF_R8_Q34_ORDONNANCEMENT_20260923.md) | A | 23/10:00 | démontré dans le code, mesure R8 | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_V14_ORDONNANCEMENT_20260923.md`](CONTRE_AUDIT_B_V14_ORDONNANCEMENT_20260923.md) | B | `a514de68` 10:22 | portes et protocole v14 | vivant | sans réponse |
 | [`RECEPTION_V14_CHRONOS_Q34_20260923.md`](RECEPTION_V14_CHRONOS_Q34_20260923.md) | A | 23/10:20 | méthode (deux mutations acceptées à `fe1142b5`) | vivant | sans réponse |
+| [`CONTRE_AUDIT_B_WIP_TOUR_V15_RECOUVREMENT_20260923.md`](CONTRE_AUDIT_B_WIP_TOUR_V15_RECOUVREMENT_20260923.md) | B | `f5ef37f7` 10:32 | contrelecture WIP, faux refus de durée possible | vivant | sans réponse |
+| [`CONTRELEC_V15_CHRONO_ORDRE_20260923.md`](CONTRELEC_V15_CHRONO_ORDRE_20260923.md) | A | 23/10:34 | mutation réelle, faux accord de durée K5 | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_LECTEURS_1F048_20260923.md`](CONTRE_AUDIT_B_LECTEURS_1F048_20260923.md) | B | `758236b4` 10:07 | méthode (rejeu du lecteur) | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_G4_R8_20260923.md`](CONTRE_AUDIT_B_G4_R8_20260923.md) | B | `2faf5b59` 09:57 | mesure | vivant ; seuil de tâche rectifié ci-dessus | sans objet |
 | [`CONTRE_AUDIT_B_G4_R7B_20260923.md`](CONTRE_AUDIT_B_G4_R7B_20260923.md) | B | `b46826e2` 06:24 | mesure | historique | sans objet |

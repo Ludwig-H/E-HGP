@@ -11,6 +11,12 @@ K1 démarre avant l'horloge statique, alors que `lots_by_k` est borné
 par `static+lots`. La propriété de données paraît plausible en lecture
 statique, mais égalité ON/OFF, pannes et TSan de cette voie manquent.
 Ce WIP postérieur à `fe1142b5` ne qualifie aucun reçu R8/R9.
+La [contrelecture complémentaire](CONTRELEC_V15_CHRONO_ORDRE_20260923.md)
+reproduit sur une sortie v15 locale le défaut inverse : en gonflant un
+seul `lots_by_k` à K5, le lecteur accepte **65,379 ms** de phases
+nécessairement disjointes pour **60,718 ms** de mur FULL. Une borne par
+ordre doit accompagner l'horloge commune proposée par B avant tout
+reçu G4 v15.
 Les mesures de densité restent celles du binaire v12 **`4530644b`** ;
 aucune nouvelle série LiDAR v13 n'en découle. Le dernier
 [reçu G4 R8](../receipts/g4_tower_r8_20260923/README.md) exécute
