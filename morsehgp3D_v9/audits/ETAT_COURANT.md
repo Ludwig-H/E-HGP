@@ -58,7 +58,10 @@ IDs, plages et masques, mais l'[audit A du domaine u18](AUDIT_A_GPU_S1_DOMAINE_U
 démontre un débordement signé accepté sur coordonnées hors domaine.
 La [relecture B du port](CONTRE_AUDIT_B_PORTE_FILTRE_GPU_20260923.md)
 note aussi que `FilterInput` brut ne vérifie pas la partition disjointe
-des enfants : il n'est sûr qu'avec l'index certifié du producteur.
+des enfants. Même avec des points **dans** u18 et des plages disjointes,
+une boîte racine incohérente peut rejeter à tort la voie q4 (fixture
+K3, masque 4→0 dans l'[audit A](AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md)) :
+la frontière brute doit recevoir un index certifié ou vérifier ses boîtes.
 Le scan et le probe gardent des buffers `O(R+P)`, tandis que le noyau
 de paires paie `O(P log R)` pour ses recherches d'offset ; ni mémoire
 massive ni vitesse GPU ne sont acquises. Le [préflight B du protocole
@@ -203,17 +206,20 @@ entière est 08/000000 **sans sol** avec 200 ancres sur 39 885, non une
 trame brute multi-séquence ; les entrées ne sont pas hachées dans ces
 sorties. Le trou prioritaire de complétude demeure q3 à
 `p=Kmax−2`, particulièrement les supports longs.
-Le [juge q3 indépendant v4 de C](c_omission_20260923/q3_sample_judge.cpp)
-(publié par `e2fd68662`) ferme les deux portes signalées par A et B :
+Le [juge q3 indépendant de C](c_omission_20260923/q3_sample_judge.cpp)
+ferme depuis v4 (`e2fd68662`) les deux portes signalées par A et B :
 `top_keys` et le mutant ciblent désormais les clés **régulières q3**
 (`q_min=3`, trois sites de coquille, `p=Kmax−2`) ; les clés q2 rencontrées
 par des triangles aigus sont comptées séparément. Le recoupement compare
 les **ensembles exacts d'IDs de coquille**, et le mutant de coquille
 corrompue est prévu. Le [certificat de B](CERTIFICAT_B_MARGE_JUGE_Q3_U18_20260923.md)
 établit la sûreté du filtre flottant sous IEEE binary64 sans fast-math
-pour ces triangles aigus u18. La [recette v4](c_omission_20260923/run_judges_v4.sh)
-épingle sources, compilation, binaires et entrées ; la campagne est
-relancée, **sans reçu v4 publié à ce stade**. Le juge échantillonne des
+pour ces triangles aigus u18. La source et la
+[recette v5](c_omission_20260923/run_judges_v5.sh) de `c6042af2b`
+ajoutent la comparaison indépendante des clés canoniques q2/q3, un
+mutant de clé seule, des sites isolés choisis depuis les coordonnées et
+une provenance bloquante. **Aucun reçu v5 publié à ce stade** : ces
+portes nouvelles restent à exécuter et à lire. Le juge échantillonne des
 ancres et fixe `run_tower=false` : même un code 0 contrôlerait le
 catalogue sur cet échantillon, pas la tour FULL ni la complétude globale.
 
@@ -1106,8 +1112,8 @@ ont maintenant des chronos v12 locaux sur les trois scènes sans sol de
 la séquence 08 ; la première trame brute a aussi ses sept secteurs à K5.
 La décimation emboîtée 1/4–1/2–1 est mesurée sur les sept secteurs des
 trois scènes sans sol à K5/K10, sur les sept secteurs de la première trame
-brute à K5 et sur cette trame entière brute à K10. Répéter sur d'autres
-graines et séquences, puis compléter les secteurs bruts à K10.
+brute à K5/K10, et sur cette trame entière brute aux deux K. Répéter sur
+d'autres graines et séquences.
 Ni les morceaux ni les décimations ne valident le contrat de trame entière.
 Publier travail amont,
 formes et atlas, candidats

@@ -1,9 +1,9 @@
 # Contre-audit B — juge indépendant q3 de C, version publiée v3
 
-23 septembre 2026. Lecture statique du
-[`q3_sample_judge.cpp`](c_omission_20260923/q3_sample_judge.cpp) et de
-[`run_judges_v3.sh`](c_omission_20260923/run_judges_v3.sh) publiés par
-`85a4d4ab`. Aucune exécution lourde ajoutée ici. La campagne v3 n'a
+23 septembre 2026. Lecture statique de `q3_sample_judge.cpp` et de
+`run_judges_v3.sh` tels que publiés par `85a4d4ab` ; la source courante
+et la recette du dossier sont désormais v5. Aucune exécution lourde
+ajoutée ici. La campagne v3 n'a
 **pas encore de reçu publié** à ce commit ; les résultats préliminaires
 du binaire antérieur ne qualifient pas automatiquement le code durci.
 

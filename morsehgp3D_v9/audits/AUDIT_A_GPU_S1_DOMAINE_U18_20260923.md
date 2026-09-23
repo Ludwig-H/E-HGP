@@ -1,4 +1,4 @@
-# S1 GPU : borner le domaine numérique avant le filtre exact
+# S1 GPU : certifier le domaine numérique et les boîtes du filtre
 
 23 septembre 2026. Relecture du commit publié `0d5ad2e89`, sans exécution
 CUDA. Le lanceur S1 est une sonde du filtre témoin q3/q4, pas une chaîne HGP
@@ -28,10 +28,32 @@ SHA-256 que les objets du commit publié : `filter_runner.cu`
 `witness_filter.hpp`
 `5d011aad968f5c64bca8ff0703fb021b5d368c93ed3a90d187802e1c109f820c`.
 
-Correction ciblée : au même préflight O(n+R), exiger pour chaque coordonnée
+**Une simple borne u18 ne suffit pas.** Même avec deux points licites
+`a=(0,0,0)` et `b=(2,0,0)`, trois nœuds (racine `[0,2)`, deux feuilles
+singleton), le rectangle des feuilles, `K=3` et masque q4 `4`, la garde
+accepte une boîte de racine forgée `x=[1,1]`. Les autres boîtes et les
+plages restent correctes et disjointes. Le filtre hôte publié rend
+`4` avec la boîte certifiée `x=[0,2]` (3 visites), mais **`0`** avec
+la boîte forgée (1 visite) : il crédite alors à tort les deux points
+sur la base d'une boîte prétendument entièrement intérieure, bien que
+les deux points soient sur la coquille de la boule diamétrale. C'est
+un **faux rejet q4**, donc un risque de complétude pour un appelant de
+`FilterInput` brut. La sonde courante construit normalement les nœuds
+avec `flatten_nodes(*index)` depuis l'index certifié du moteur ; ce
+contre-exemple ne lui attribue pas de sortie LiDAR fausse.
+
+Correction numérique : au même préflight O(n+R), exiger pour chaque coordonnée
 de point et chaque borne de boîte le domaine entier u18 déclaré
 `0..262143`, et `low≤high` par axe ; tester les deux extrêmes autorisés,
 `-1`, `262144` et les deux `INT32_*`, avec refus **avant** tout appel CUDA.
+Correction géométrique : transporter un **index certifié immuable** avec
+la requête, ou vérifier une fois que les feuilles couvrent exactement
+leurs rangs et points, que les enfants partitionnent la plage du parent
+et que chaque boîte est l'enveloppe des points de sa plage. Une telle
+certification peut être réutilisée entre lots ; une vérification complète
+par appel annulerait une partie du gain du filtre GPU. Ajouter la
+fixture `masque 4→0` à la porte d'entrée brute, en plus des refus de
+coordonnées hors u18.
 Si l'API veut un jour accepter d'autres coordonnées, elle devra plutôt
 élargir les bornes arithmétiques et le contrat du filtre, puis refaire les
 preuves et tests. Les produits `3*rank_count` et `count*sizeof(T)` ne

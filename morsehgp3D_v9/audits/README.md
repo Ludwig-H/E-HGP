@@ -1,8 +1,8 @@
 # Index des audits de la v9
 
-Tenu par l'auditeur C depuis le 23 septembre 2026, avec l'accord de B et du
-développeur (canal, entrées de 08 h 00 et 08 h 40 UTC environ ; A n'a pas encore
-répondu). **Aucune note n'est déplacée ni réécrite** : cet index les classe.
+Ouvert par l'auditeur C le 23 septembre 2026, puis mis à jour par les
+auditeurs. Les notes de preuve historiques restent à leur place ; cet
+index distingue leur portée actuelle.
 La synthèse reste [`ETAT_COURANT.md`](ETAT_COURANT.md) ; le dialogue passe par
 le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORSEHGP3D_V9.md).
 État de l'index : `origin/main` au moment du commit qui le modifie.
@@ -59,7 +59,9 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`CONTRE_EXEMPLE_EULER_KPLUS2_20260923.md`](CONTRE_EXEMPLE_EULER_KPLUS2_20260923.md) | B | `bf19240a` 09:28 | démontré localement (faux négatif exact d'Euler et de Kmax+2) | vivant | sans objet |
 | [`LEMME_PREMIERE_COFACETTE_OMISSION_20260923.md`](LEMME_PREMIERE_COFACETTE_OMISSION_20260923.md) | A | 23/11:07 | preuve conditionnelle de refus FULL, résolveur interne | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_OMISSIONS_ET_PORTEE_REVISION_C_20260923.md`](CONTRE_AUDIT_B_OMISSIONS_ET_PORTEE_REVISION_C_20260923.md) | B | `8b62e4fd` 11:02 | contrelecture de la sonde d'omission C, recherche de condensés | vivant | sans objet |
+| [`CONTRE_AUDIT_B_JUGE_Q2_ET_DIGEST_C_20260923.md`](CONTRE_AUDIT_B_JUGE_Q2_ET_DIGEST_C_20260923.md) | B | `074b5da0e` 11:32 | omissions provoquées et 204 683 présentations q2 ; demande de juge q3 désormais historique | vivant pour les mesures | sans objet |
 | [`CONTRELEC_JUGE_CLES_ABSENTES_20260923.md`](CONTRELEC_JUGE_CLES_ABSENTES_20260923.md) | A | 23/11:30 | lecture de la porte synthétique `683fa46e` ; mutations et débordement de coquille à préciser | vivant | sans réponse |
+| [`CONTRE_AUDIT_B_JUGE_CLES_ABSENTES_20260923.md`](CONTRE_AUDIT_B_JUGE_CLES_ABSENTES_20260923.md) | B | `c179025bf` 11:23 | limites du juge échantillonné de clés jamais émises | vivant | sans réponse |
 | [`COMPLETUDE_Q4_CLE_REMBOURREE_20260923.md`](COMPLETUDE_Q4_CLE_REMBOURREE_20260923.md) | B | `0a6efac3` 06:58 | testé borné | vivant | sans réponse |
 | [`Q4_INDUCTION_ATLAS_EVENEMENTS_20260923.md`](Q4_INDUCTION_ATLAS_EVENEMENTS_20260923.md) | B ? | `28f0c284` 07:15 | démontré localement | vivant | sans réponse |
 | [`Q34_PROPRIETAIRE_PASSAGE_AMONT_20260923.md`](Q34_PROPRIETAIRE_PASSAGE_AMONT_20260923.md) | B ? | `4291c538` 07:56 | démontré localement | vivant | sans réponse |
@@ -71,6 +73,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | note | auteur | créée | portée | cycle | réponse du développeur |
 | --- | --- | --- | --- | --- | --- |
 | [`CONTRE_AUDIT_B_U18_ET_SONDE_20260922.md`](CONTRE_AUDIT_B_U18_ET_SONDE_20260922.md) | B | `0786d6c1` 22/22:59 | démontré localement | historique | acceptée |
+| [`CERTIFICAT_B_MARGE_JUGE_Q3_U18_20260923.md`](CERTIFICAT_B_MARGE_JUGE_Q3_U18_20260923.md) | B | `d3ece2d0b` 12:45 | preuve conditionnelle IEEE binary64/u18 du filtre du juge q3 | vivant | sans objet |
 
 ## q3
 
@@ -79,6 +82,8 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`Q3_STRUCTURE_ET_BORNES.md`](Q3_STRUCTURE_ET_BORNES.md) | A | `0674dc02` 22/21:44 | démontré localement | vivant | acceptée en partie |
 | [`CONTRE_AUDIT_B_PREATLAS_ET_Q3_20260922.md`](CONTRE_AUDIT_B_PREATLAS_ET_Q3_20260922.md) | B | `2c6d806e` 22/22:21 | démontré localement | vivant | différée sans échéance |
 | [`CONTRE_AUDIT_B_Q3_FEUILLE_WIP_20260923.md`](CONTRE_AUDIT_B_Q3_FEUILLE_WIP_20260923.md) | B | `bb3c696e` 00:42 | démontré localement | clos (code publié) | acceptée |
+| [`CONTRE_AUDIT_B_JUGE_Q3_C_V3_20260923.md`](CONTRE_AUDIT_B_JUGE_Q3_C_V3_20260923.md) | B | `5b448b2ca` 12:49 | deux portes du juge q3 v3 corrigées par v4 | historique | acceptée |
+| [`CONTRE_AUDIT_B_JUGES_C_V4_20260923.md`](CONTRE_AUDIT_B_JUGES_C_V4_20260923.md) | B | `931d37cd1` 13:07 | clés canoniques, ancres isolées et provenance ; source v5 publiée, reçu ouvert | vivant pour la campagne | sans réponse |
 
 ## q4
 
@@ -105,6 +110,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`CACHE_TEMOINS_COUT_VALIDATION_20260923.md`](CACHE_TEMOINS_COUT_VALIDATION_20260923.md) | B ? | `128fb231` 06:26 | mesure | vivant | sans réponse |
 | [`LEDGER_VISITES_CACHEES_Q34_20260923.md`](LEDGER_VISITES_CACHEES_Q34_20260923.md) | B | `5270f3df` 07:43 | mesure | clos (4530644b) | acceptée |
 | [`CORE_LIDAR_LOCAL_20260923.md`](CORE_LIDAR_LOCAL_20260923.md) | A ou B | `3a18c863` 04:43 | shadow | vivant | sans objet |
+| [`CONTRE_AUDIT_B_WIP_V17_VOISINS_20260923.md`](CONTRE_AUDIT_B_WIP_V17_VOISINS_20260923.md) | B | `8f42c9702` 11:53 | préflight de 16 voisins ; port retiré après reçu négatif | historique | sans objet |
 | [`SHADOW_HA_Q34_LIDAR_20260923.md`](SHADOW_HA_Q34_LIDAR_20260923.md) | B ? | `34c3164f` 05:44 | shadow | vivant | différée sans échéance |
 | [`SHADOW_HA_OCTANT_Q34_LIDAR_20260923.md`](SHADOW_HA_OCTANT_Q34_LIDAR_20260923.md) | B ? | `128fb231` 06:26 | shadow | vivant | sans réponse |
 | [`Q34_BLOCS_LIDAR_SHADOW_20260923.md`](Q34_BLOCS_LIDAR_SHADOW_20260923.md) | A ? | `867e68b3` 07:25 | shadow | négatif | sans objet |
@@ -151,6 +157,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | --- | --- | --- | --- | --- | --- |
 | [`RECTIFICATIF_R8_Q34_ORDONNANCEMENT_20260923.md`](RECTIFICATIF_R8_Q34_ORDONNANCEMENT_20260923.md) | A | 23/10:00 | démontré dans le code, mesure R8 | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_V14_ORDONNANCEMENT_20260923.md`](CONTRE_AUDIT_B_V14_ORDONNANCEMENT_20260923.md) | B | `a514de68` 10:22 | portes et protocole v14 | vivant | sans réponse |
+| [`CONTRE_AUDIT_B_Q2_MASS_FIRST_V16_20260923.md`](CONTRE_AUDIT_B_Q2_MASS_FIRST_V16_20260923.md) | B | `f115a39a9` 11:29 | porte différentielle directe à 64 jobs encore ouverte ; R11 remplace la projection avant G4 | vivant | sans réponse |
 | [`RECEPTION_V14_CHRONOS_Q34_20260923.md`](RECEPTION_V14_CHRONOS_Q34_20260923.md) | A | 23/10:20 | méthode (deux mutations acceptées à `fe1142b5`) | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_WIP_TOUR_V15_RECOUVREMENT_20260923.md`](CONTRE_AUDIT_B_WIP_TOUR_V15_RECOUVREMENT_20260923.md) | B | `f5ef37f7` 10:32 | contrelecture WIP, défauts d'horloge K1/K5 clos par `33d51efd` et `c19e4b49` ; égalité complète du payload et TSan encore ouverts | historique pour l'horloge | corrigée pour l'horloge |
 | [`CONTRELEC_V15_CHRONO_ORDRE_20260923.md`](CONTRELEC_V15_CHRONO_ORDRE_20260923.md) | A | 23/10:34 | mutations K5/K1 et réception du correctif | clos (`c19e4b49`) | corrigée |
@@ -159,6 +166,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`RECEPTION_G4_R10_20260923.md`](RECEPTION_G4_R10_20260923.md) | A | 23/11:07 | réception CPU G4 appariée, recouvrement FULL | vivant | sans objet |
 | [`CONTRE_AUDIT_B_G4_R10_ET_PASSE2_20260923.md`](CONTRE_AUDIT_B_G4_R10_ET_PASSE2_20260923.md) | B | `3a57a6d6` 11:13 | mesure (R10) | vivant | sans objet |
 | [`CONTRE_AUDIT_B_G4_R11_ET_VOISINS_COEUR_20260923.md`](CONTRE_AUDIT_B_G4_R11_ET_VOISINS_COEUR_20260923.md) | B | `2485da41` 11:40 | réception CPU G4 R11 et portée conditionnelle du shadow voisins | vivant | sans objet |
+| [`CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md`](CONTRE_AUDIT_B_PROTOCOLE_G4_FILTRE_S1_WIP_20260923.md) | B | `ac197535a` 13:11 | préflight du protocole GPU S1 mutable, faux-GPU seulement | vivant jusqu'au reçu G4 | sans réponse |
 | [`CERTIFICAT_Q34_SOUS_ENSEMBLES_LOCAUX_20260923.md`](CERTIFICAT_Q34_SOUS_ENSEMBLES_LOCAUX_20260923.md) | A | 23/11:48 | preuve : témoins distincts arbitraires ; alternative au k-NN global exact et budget mémoire WIP | vivant | sans objet |
 | [`CONTRE_AUDIT_B_G4_R8_20260923.md`](CONTRE_AUDIT_B_G4_R8_20260923.md) | B | `2faf5b59` 09:57 | mesure | vivant ; seuil de tâche rectifié ci-dessus | sans objet |
 | [`CONTRE_AUDIT_B_G4_R7B_20260923.md`](CONTRE_AUDIT_B_G4_R7B_20260923.md) | B | `b46826e2` 06:24 | mesure | historique | sans objet |
@@ -188,7 +196,9 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`lidar_density_sectors_00_01_20260923/`](lidar_density_sectors_00_01_20260923/README.md) | A ou B | `53d8fac3` 08:58 | mesure | vivant | sans objet |
 | [`lidar_density_bbox_fixed_20260923/`](lidar_density_bbox_fixed_20260923/README.md) | A ou B | `1200d343` 09:37 | mesure (ablation appariée) | vivant | sans objet |
 | [`lidar_raw_physical_scaling_20260923/`](lidar_raw_physical_scaling_20260923/README.md) | A | 23/11:30–11:52 | mesure locale 21 cas, trame brute entière K5, sept secteurs physiques × trois densités ; reçu reproductible | vivant | sans objet |
+| [`CONTRE_AUDIT_B_LIDAR_BRUT_PHYSIQUE_20260923.md`](CONTRE_AUDIT_B_LIDAR_BRUT_PHYSIQUE_20260923.md) | B | `53a2e5d29` 11:50 | contrelecture indépendante de la matrice brute K5 ; proposition voisins depuis retirée | vivant pour les mesures | sans objet |
 | [`lidar_raw_k10_density_20260923/`](lidar_raw_k10_density_20260923/README.md) | A | 23/12:18–12:23 | mesure locale 3 cas, même trame brute et mêmes densités, tour K10 ; reçu reproductible | vivant | sans objet |
+| [`CONTRE_AUDIT_B_LIDAR_BRUT_K10_20260923.md`](CONTRE_AUDIT_B_LIDAR_BRUT_K10_20260923.md) | B | `82efba156` 12:32 | contrelecture indépendante du plein brut K10 | vivant | sans objet |
 | [`lidar_raw_k10_sectors_20260923/`](lidar_raw_k10_sectors_20260923/README.md) | A | 23/12:49–13:09 | mesure locale K10, sept secteurs physiques × trois densités ; 18 nouveaux cas gardés, six répétitions | vivant | sans objet |
 
 ## GPU et parallélisme
@@ -197,7 +207,9 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | --- | --- | --- | --- | --- | --- |
 | [`OBSTACLES_GPU_SOUS_SECONDE_20260923.md`](OBSTACLES_GPU_SOUS_SECONDE_20260923.md) | B ? | `c717a1f2` 05:56 | mesure | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_WIP_V6_C6_TRI_20260923.md`](CONTRE_AUDIT_B_WIP_V6_C6_TRI_20260923.md) | B | `73d1d0a6` 05:31 | démontré localement | vivant (hors v9) | sans réponse (question canal l. 35) |
-| [`AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md`](AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md) | A | 23/13:17 | défaut de garde démontré sur S1 publié ; correction ciblée | vivant | sans réponse |
+| [`CONTRE_AUDIT_B_PORTE_FILTRE_GPU_20260923.md`](CONTRE_AUDIT_B_PORTE_FILTRE_GPU_20260923.md) | B | `7a7987ad3` 12:58 | budget R11 et préflight du port CUDA S1 ; première lecture historique | vivant | sans réponse |
+| [`AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md`](AUDIT_A_GPU_S1_DOMAINE_U18_20260923.md) | A | 23/13:17 | débordement hors u18 et faux rejet sur boîte u18 incohérente ; corrections ciblées | vivant | sans réponse |
+| [`PROPOSITION_B_GPU_STREAMING_S2_20260923.md`](PROPOSITION_B_GPU_STREAMING_S2_20260923.md) | B | `8432e2353` 13:28 | tuilage borné S2a et certificat bloc/ligne S2b avec portes causales | vivant | sans réponse |
 
 ## Annexes de l'auditeur C
 
@@ -206,7 +218,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`c_audit_20260923/`](c_audit_20260923/README.md) | C | `f4480c02` 08:44 | pièces de l'audit C | vivant | sans objet |
 | [`c_euler_20260923/`](c_euler_20260923/README.md) | C | `cab281d8` 08:25 | testé, sondes | vivant | sans objet |
 | [`c_alternatives_20260923/`](c_alternatives_20260923/README.md) | C | 23/10:12 | propositions, jurys, réfutations, expériences | vivant | sans objet |
-| [`c_omission_20260923/`](c_omission_20260923/README.md) | C | 23/10:49 | shadow, échantillon 8k | vivant | sans objet |
+| [`c_omission_20260923/`](c_omission_20260923/README.md) | C | 23/10:49 | shadow, échantillons 8k et juge q2 sur trame sans sol entière | vivant | sans objet |
 
 ## Sondes et sorties à la racine du dossier
 
@@ -293,7 +305,7 @@ en citant l'identifiant, avec « acceptée », « refusée (raison) » ou « dif
 | R-17 | Une seule session G4 GPU à seuils fixés d'avance, comparée à la base CPU réordonnancée | C | AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md § 3.3 et raccord R8 |
 | R-18 | Décisions de contrat à acter avec l'utilisateur : sortie compacte, digest hors chrono, expansion chronométrée à part ; 100 ms à reformuler | C | AUDIT_C_ALTERNATIVES_CONTRAT_LIDAR_G4_20260923.md § 1 et 5 |
 | R-19 | Porte `scale8000` : recenser par balayage brut **toutes** les boules à coquille étendue (86 à 8k), publier l'effectif échantillonné par famille, corriger le commentaire « pas deterministe » | C | canal, entrée de 10 h 12 UTC |
-| R-20 | Angle mort conjoint Euler + tour (fusions seules à Kmax : q2 à p=Kmax−1, q3 à p=Kmax−2) : à K5, exécution de contrôle Kmax+1 avec tour et restriction clé par clé ; à K10, domaine d'audit K11 ou juge d'échantillon dédié (q2 : juge indépendant livré, 204 683/204 683 ; q3 à p=Kmax−2 : à concevoir) | C | c_omission_20260923/README.md, AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md § 3.1 |
+| R-20 | Angle mort conjoint Euler + tour (fusions seules à Kmax : q2 à p=Kmax−1, q3 à p=Kmax−2) : à K5, contrôle Kmax+1 avec tour et restriction clé par clé ; à K10, K11 hors domaine ou juge échantillonné (q2 : 204 683/204 683 présentations ; q3 régulier : source et recette v5 publiées, reçu et portée encore à qualifier) | C | c_omission_20260923/README.md, AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md § 3.1 |
 
 ## Conventions proposées (à adopter par tous)
 
