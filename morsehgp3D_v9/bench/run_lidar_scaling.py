@@ -47,6 +47,11 @@ V8 = ROOT / 'morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_
 PROBE_SCHEMA = 'mhgp9_tower_probe_v13'
 # Schemas relus lors d'une revalidation d'archive (v12 : reçu du 23 septembre).
 KNOWN_SCHEMAS = ('mhgp9_tower_probe_v12', PROBE_SCHEMA)
+# Le schema de sonde d'une campagne est fixe par son RESUME, jamais par le JSON
+# de cas relu (contre-audit B) : un resume v2 est une campagne de sonde v12, un
+# resume v3 porte `probe_schema`.
+SUMMARY_SCHEMA = 'mhgp9_lidar_scaling_v3'
+SUMMARY_PROBE_SCHEMAS = {'mhgp9_lidar_scaling_v2': 'mhgp9_tower_probe_v12'}
 PIECES = ('full', 'half_x_neg', 'half_x_nonneg', 'quarter_x_neg_y_neg', 'quarter_x_neg_y_nonneg',
           'quarter_x_nonneg_y_neg', 'quarter_x_nonneg_y_nonneg')
 NESTED = (8000, 16000, 32000)
@@ -176,9 +181,11 @@ def validate_probe(value, expected):
         catalogue = value.get('catalogue')
         euler = catalogue.get('euler') if type(catalogue) is dict else None
         checkable = min(expected['k'] - 2, sites) if expected['k'] >= 3 else 0
-        need += [type(euler) is dict and euler.get('checkable_max_k') == checkable and
-                 euler.get('status') == ('holds' if checkable else 'not_checkable') and
-                 type(euler.get('by_k')) is list and euler['by_k'][:checkable] == [1] * checkable]
+        need += [type(euler) is dict and set(euler) == {'status', 'checkable_max_k', 'by_k'} and
+                 euler['checkable_max_k'] == checkable and
+                 euler['status'] == ('holds' if checkable else 'not_checkable') and
+                 type(euler['by_k']) is list and len(euler['by_k']) == expected['k'] and
+                 all(type(x) is int for x in euler['by_k']) and euler['by_k'][:checkable] == [1] * checkable]
     return all(need)
 
 
@@ -283,14 +290,18 @@ def expected_from_argv(argv, sites, raw):
                 fnv=input_fnv(raw), grid=flags.get('--grid', 'unspecified'))
 
 
-def archived_expectations(record, sites, raw):
-    """Attentes d'un cas archive : sa commande et le schema qu'il declare (connu)."""
-    expected = expected_from_argv(record['argv'], sites, raw)
-    probe = record.get('probe')
-    schema = probe.get('schema') if type(probe) is dict else None
-    if schema not in KNOWN_SCHEMAS:
-        raise Refusal('archived probe schema unknown: ' + str(schema))
-    return dict(expected, schema=schema)
+def campaign_probe_schema(summary):
+    """Schema de sonde d'une campagne, fixe par son resume."""
+    if summary.get('schema') == SUMMARY_SCHEMA and summary.get('probe_schema') in KNOWN_SCHEMAS:
+        return summary['probe_schema']
+    if summary.get('schema') in SUMMARY_PROBE_SCHEMAS and 'probe_schema' not in summary:
+        return SUMMARY_PROBE_SCHEMAS[summary['schema']]
+    raise Refusal('campaign summary schema unknown: ' + str(summary.get('schema')))
+
+
+def archived_expectations(record, sites, raw, schema):
+    """Attentes d'un cas archive : sa commande et le schema de SA campagne."""
+    return dict(expected_from_argv(record['argv'], sites, raw), schema=schema)
 
 
 def mutants(value):
@@ -339,7 +350,11 @@ def selftest(case_path):
     value = record['probe']
     argv = record['argv']
     raw = resolve_input(argv[0]).read_bytes()
-    expected = archived_expectations(record, record['input']['sites'], raw)
+    summaries = sorted(case_path.parent.glob('SUMMARY_*.json'))
+    if len(summaries) != 1:
+        raise Refusal('the archived case needs exactly one campaign summary beside it')
+    expected = archived_expectations(record, record['input']['sites'], raw,
+                                     campaign_probe_schema(json.loads(summaries[0].read_text())))
     if not validate_probe(value, expected):
         print('lidar_scaling_selftest cause=baseline_refused')
         return 1
@@ -352,10 +367,48 @@ def selftest(case_path):
             print('lidar_scaling_selftest survivor=' + name)
         else:
             killed += 1
+    # Variante v13 du meme cas (bloc Euler ajoute) dans une campagne v3 : le
+    # schema attendu vient du resume, une retrogradation en v12 ne contourne
+    # pas Euler ; longueur, types et statut de by_k sont exiges.
+    k = expected['k']
+    checkable = min(k - 2, expected['sites']) if k >= 3 else 0
+    v13 = json.loads(json.dumps(value))
+    v13['schema'] = PROBE_SCHEMA
+    v13['catalogue']['euler'] = dict(status='holds' if checkable else 'not_checkable', checkable_max_k=checkable,
+                                     by_k=[1] * checkable + [5] * (k - checkable))
+    expected13 = dict(expected, schema=campaign_probe_schema(dict(schema=SUMMARY_SCHEMA, probe_schema=PROBE_SCHEMA)))
+    if not validate_probe(v13, expected13):
+        print('lidar_scaling_selftest cause=v13_baseline_refused')
+        return 1
+    table13 = [
+        ('v13_downgraded_to_v12', lambda v: v.update(schema='mhgp9_tower_probe_v12')),
+        ('v13_euler_short', lambda v: v['catalogue']['euler']['by_k'].pop()),
+        ('v13_euler_text', lambda v: v['catalogue']['euler']['by_k'].__setitem__(k - 1, '5')),
+        ('v13_euler_sum', lambda v: v['catalogue']['euler']['by_k'].__setitem__(0, 2)),
+        ('v13_euler_vacuous', lambda v: v['catalogue']['euler'].update(status='not_checkable')),
+        ('v13_euler_absent', lambda v: v['catalogue'].pop('euler')),
+        ('v13_euler_extra_key', lambda v: v['catalogue']['euler'].update(extra=1)),
+    ]
+    for name, apply in table13:
+        mutated = json.loads(json.dumps(v13))
+        apply(mutated)
+        if validate_probe(mutated, expected13):
+            print('lidar_scaling_selftest survivor=' + name)
+        else:
+            killed += 1
+    if campaign_probe_schema(dict(schema='mhgp9_lidar_scaling_v2')) != 'mhgp9_tower_probe_v12':
+        print('lidar_scaling_selftest survivor=v2_campaign_schema')
+    else:
+        killed += 1
+    try:
+        campaign_probe_schema(dict(schema='mhgp9_lidar_scaling_v2', probe_schema=PROBE_SCHEMA))
+        print('lidar_scaling_selftest survivor=v2_campaign_claims_v13')
+    except Refusal:
+        killed += 1
     # Entree alteree d'un octet : le FNV recalcule ne correspond plus.
     changed = bytearray(raw)
     changed[0] ^= 1
-    total = len(table) + 5
+    total = len(table) + 5 + 7 + 2
     if not validate_probe(value, dict(expected, fnv=input_fnv(bytes(changed)))):
         killed += 1
     else:
@@ -408,11 +461,12 @@ def revalidate(out_dir, work):
         if tag != bound:
             report['failures'].append(dict(case=tag, reasons=['summary_parameters_' + bound]))
         _, _, cases = scene_cases(summary['scene'], tag, work)
+        schema = campaign_probe_schema(summary)
         rows = {row['case']: row for row in summary['rows']}
         checked = 0
         for name, size, _path, raw, provenance in cases:
             record = json.loads((summary_path.parent / (name + '.json')).read_text())
-            expected = archived_expectations(record, size, raw)
+            expected = archived_expectations(record, size, raw, schema)
             reasons = []
             if record.get('outcome') != 'complete_relative' or record.get('exit_code') != 0:
                 reasons.append('outcome')
@@ -475,8 +529,9 @@ def main():
         for name, size, path, _raw, provenance in cases:
             rows.append(run_case(args, name, path, provenance, args.out, size))
         nested_rows = sorted((r for r in rows if '_nested_' in r['case']), key=lambda r: r['sites'])
-        summary = dict(schema='mhgp9_lidar_scaling_v2', scene=args.scene, k=args.k, workers=args.workers, s=args.s,
-                       repeat=args.repeat, public_status='not_claimed', probe_sha256=probe_sha, git_head=head,
+        summary = dict(schema=SUMMARY_SCHEMA, probe_schema=PROBE_SCHEMA, scene=args.scene, k=args.k,
+                       workers=args.workers, s=args.s, repeat=args.repeat, public_status='not_claimed',
+                       probe_sha256=probe_sha, git_head=head,
                        git_trees=trees, worktree_dirty_src_or_bench=bool(dirty.strip()),
                        v8_manifest_sha256=sha(manifest_raw), mask=manifest.get('mask'), profile=manifest.get('profile'),
                        rows=rows, nested_slopes={key: slopes(nested_rows, key)
