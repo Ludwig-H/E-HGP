@@ -121,18 +121,20 @@ callback présente cette clé ([q4_local.cpp:438–462](../src/gen/lanes/q4_loca
 
 ## Raccord amont, obligation distincte
 
-Une revue indépendante du front v9 ne relève pas de perte évidente de cette
-arête : les terminaux partitionnent les paires non ordonnées ; chaque refus de
-la voie q4 exige `K−2` témoins **distincts et strictement intérieurs** à
-toute boule positive portée par la paire, ce qui contredit `p<K−2` pour `S`.
-Les bornes `H_min/Ξ_max` sont conservatrices, les témoins universels sont
-disjoints des extrémités, le cache rejuge ses témoins pour une nouvelle paire,
-le cœur diamétral n'est qu'un sous-ensemble du cover, et la voie q4 ne dépend
-pas de l'admission q3. Cet enchaînement reste **sous les invariants certifiés
-de l'index et des prédicats** ; il doit être présenté et testé comme une
-obligation séparée de l'induction `Local28` ci-dessus. Le backend optionnel
-`Window30` relève d'une preuve différente, par couches duales et rangs
-d'événements : aucune étape propre à sa fenêtre n'est déduite ici de l'atlas.
+La [preuve statique dédiée au passage de l'arête
+propriétaire](Q34_PROPRIETAIRE_PASSAGE_AMONT_20260923.md) traite maintenant
+cette obligation sous les invariants du front, de l'index et des prédicats
+entiers, sans étendre la présente induction à `Window30` ou à FULL.
+
+La note amont démontre la partition des paires et l'impossibilité de réunir
+`K−2` témoins **distincts et strictement intérieurs** lorsque `p<K−2`.
+Elle traite séparément les bornes `H_min/Ξ_max`, le cache revalidé sur la
+paire, le cœur diamétral et l'indépendance du masque q4 vis-à-vis de q3.
+Ces résultats restent **sous les invariants certifiés de l'index et des
+prédicats** et demandent une porte globale non triviale pour la chaîne
+complète. Le backend optionnel `Window30` relève d'une preuve différente,
+par couches duales et rangs d'événements : aucune étape propre à sa fenêtre
+n'est déduite ici de l'atlas.
 
 ## Portes et limite de conclusion
 

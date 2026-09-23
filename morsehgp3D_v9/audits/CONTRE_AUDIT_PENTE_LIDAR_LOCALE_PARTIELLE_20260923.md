@@ -67,6 +67,22 @@ répétitions ou les autres scènes absentes de ce reçu. Leur qualification sur
 une campagne v2 reste à examiner séparément ; la priorité de mesure reste
 la croissance des compteurs lourds et le coût total sur LiDAR réel.
 
+**Contrat d'entrée encore ouvert dans v2.** `validate_probe` contrôle le
+nombre de sites, mais ni `input.hash`, ni `input.format`, ni `input.grid`, ni
+`options.tower_static_threads`. Une mutation locale du JSON 8k archivé,
+adapté au schéma/champs v12, reste acceptée après substitution indépendante
+de `input.hash=0000000000000000`, `input.format=u16le`,
+`input.grid=other` ou `tower_static_threads=0` (quatre `True` de
+`validate_probe`). Le test juge **le lecteur Python**, pas une sortie
+réelle de la sonde v12 ; le binaire normal lit bien le chemin demandé.
+Le worker G4 possède déjà `input_fnv(raw)` et compare l'identité complète.
+Pour rendre le prochain reçu local autoritatif, calculer ce FNV sur les
+octets effectivement fournis, exiger sa correspondance dans le JSON ainsi
+que `u32le` et le nombre de threads effectif attendu ; passer explicitement
+`--grid=1mm` à la sonde et vérifier ce libellé. Ajouter ces quatre mutations
+à une porte du runner. Le SHA-256 du fichier dans la provenance reste utile,
+mais ne remplace pas le lien avec l'entrée annoncée par la sonde.
+
 **Verdict :** reçu partiel et intègre, premier signal utile mais pas preuve
 de sous-quadraticité dans les régimes LiDAR, ni qualification FULL exacte
 globale, ni résultat G4/GPU, ni contrat sous la seconde.

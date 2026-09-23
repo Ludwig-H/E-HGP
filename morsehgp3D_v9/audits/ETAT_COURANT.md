@@ -1,6 +1,8 @@
 # État courant des audits v9
 
-23 septembre 2026. Produit publié courant : **`ec6d1b74`**. Le dernier
+23 septembre 2026. Produit publié courant : **`4530644b`**. La sonde v12
+publie les parcours q3/q4 jusque-là cachés et le runner local v2 durcit la
+capture des pentes ; aucun nouveau reçu G4 n'en découle. Le dernier
 [reçu G4 R7b](../receipts/g4_tower_r7b_20260923/README.md) exécute
 le paquet **`8e8b83a3`**, antérieur au Welzl move-to-front, aux
 séparateurs pseudo-aléatoires du tri FULL et à la libération précoce de
@@ -314,6 +316,9 @@ mais `core_sites` croît ×7,66 au premier ; à K10, ×5,69 de 8k à 16k.
 Ce signal ne qualifie ni le travail total sous-quadratique, ni G4/GPU.
 Le runner v2 de `4530644b` durcit les prochains reçus ; il ne complète pas
 rétroactivement les cas absents de cette capture.
+Sa porte locale doit encore apparier `input.hash` aux octets fournis et
+vérifier format, grille 1 mm et threads effectifs : quatre mutations de ces
+champs passent aujourd'hui son `validate_probe`.
 
 Le [shadow de scission des rectangles q3/q4](Q34_BLOCS_LIDAR_SHADOW_20260923.md)
 sur 08/000000 sans sol ferme 3,68 M paires à K5 et 4,12 M à K10 avant
@@ -352,7 +357,11 @@ rejetées : ne pas limiter ses graines aux q3 finalement émises
 [revue d'induction de l'atlas](Q4_INDUCTION_ATLAS_EVENEMENTS_20260923.md)
 explicite, pour une arête propriétaire q4 déjà transmise avec cover complet,
 pourquoi le centre positif échappe aux refus `Outside`/`Deep` et atteint un
-groupe émis, même si les faces q3 sont rejetées. Le
+groupe émis, même si les faces q3 sont rejetées. La
+[preuve amont q3/q4](Q34_PROPRIETAIRE_PASSAGE_AMONT_20260923.md) établit
+conditionnellement que les filtres du front, des rectangles, des paires et
+du cœur ne perdent pas l'arête propriétaire d'un support positif admissible ;
+elle ne borne pas le coût global. Le
 [gate de flux entier à douze sites](q4_global_12sites_20260923/README.md)
 compare **108 sorties complètes** à l'oracle rationnel sur deux permutations,
 `s=8/10/12`, `Local28`/`Window30` et mono/W1/W4. Il ferme cette fixture
