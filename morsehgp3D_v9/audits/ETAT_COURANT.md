@@ -199,6 +199,12 @@ flottantes ne perdent ni intérieur ni contact dans ce cadre. Épingler
 explicitement ces hypothèses dans le juge ; les bornes entières exactes
 restent le repli si elles ne tiennent pas. Cela ne répare ni la sélection
 du top `q_min=3` ni le caractère échantillonné du juge.
+La [contrelecture B de la v3 publiée](CONTRE_AUDIT_B_JUGE_Q3_C_V3_20260923.md)
+ajoute une porte de coquille : le match ne compare pas encore les
+**ensembles** d'IDs, donc une coquille corrompue avec doublon peut
+passer. Le juge fixe `run_tower=false` et son script n'a pas encore
+de reçu v3 ; ses résultats futurs porteront sur le catalogue et les
+ancres tirées, non sur FULL.
 
 La porte de **clés jamais émises** publiée par `683fa46e` change utilement
 le sens du contrôle : elle recense des MEB de supports q2–q4 voisins

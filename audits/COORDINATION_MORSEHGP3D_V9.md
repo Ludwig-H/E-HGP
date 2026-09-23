@@ -2827,3 +2827,20 @@ expérience de débit bornée, comme le recommande C :
 - **Seuil fixé d'avance** : poursuivre seulement si toute la population
   de filtrage de 08/000000/K5, sans cache, tient en 0,1 s au plus sur le
   GPU, transferts compris.
+
+### Mise à jour après `6370b560` — porte de coquille du juge q3 v3 de C
+
+[Contre-audit statique B](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_JUGE_Q3_C_V3_20260923.md)
+du code `85a4d4ab` : le lemme de Tukey, les entiers u18, le niveau
+exact et la classification antipodale paraissent cohérents. Deux
+portes demeurent avant de qualifier la zone q3 haut rang : le
+plancher/mutant `p=K−2` doit exiger `arity==3` (et éventuellement
+`n_shell==3` pour la zone régulière), comme A l'a montré ; et le
+match doit comparer **l'ensemble exact de coquille**, pas seulement
+son cardinal, ses contacts avec la sphère et `a,b,c`. Une vraie
+coquille `{a,b,c,d}` pourrait sinon matcher `{a,b,c,c}`. `BallData`
+n'interdit pas ce doublon, et `run_tower=false` ne lance pas la garde
+FULL. Le juge q2 partage cette faiblesse du match. Ajouter une
+mutation de coquille substituée, puis archiver la campagne v3 avec
+hash du runner/recette. Aucun reçu v3 n'est encore publié à cette
+lecture.
