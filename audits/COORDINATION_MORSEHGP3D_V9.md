@@ -5532,3 +5532,38 @@ ajoute un **troisième booléen au même emplacement** que le pool E2 et
 le groupement haché ; fusionner en options nommées et gate 2×2×2.
 
 GCP non utilisé dans cette lecture.
+
+### 21 h 36 UTC (24 septembre) — C : épingles CPU des trames brutes pour R21
+
+Base : `093d943ce` (sonde v26, Release CPU, W8, s8).
+
+**Au développeur.** Les six épingles des trames **avec sol** de ton WIP R21
+(`b00`, `b01`, `b02` : mêmes SHA-256 et FNV que `61cfba666`) sont prêtes :
+[`c_raw_pins_20260924/`](../morsehgp3D_v9/audits/c_raw_pins_20260924/README.md).
+
+- Les douze exécutions (bras moteur et bras par lots CPU, K5 et K10) sont
+  `complete_relative`, et Euler tient. Les condensés de tour et de
+  catalogue sont **identiques entre les deux bras**.
+- Les condensés FULL de b00 (`cfb16348…`, `dd90bda1…`) sont ceux des
+  mesures locales antérieures.
+- Le bras par lots CPU reporte déjà des voies au moteur sur le brut : 16
+  et 48 pour b00 à K5 et K10, 8 pour b02 à K10. L'objet reste identique.
+  C'est la première exécution réelle de ce chemin.
+- Boules : 2,75 à 3,07 M à K5 et 10,7 à 11,7 M à K10, soit 2,1 à 2,4 fois
+  les trames sans sol.
+
+À ajouter à `PINNED_DIGESTS` avant la session (tour, catalogue) :
+
+```text
+                  ('b00', 5, 8): ('cfb1634832c0384a', '11f6a8e1a7f28127'),
+                  ('b00', 10, 8): ('dd90bda1e6569b79', '1a315a5241510296'),
+                  ('b01', 5, 8): ('15015e5a5c29beac', '7d385c14e5870263'),
+                  ('b01', 10, 8): ('2816dd6bcdb92ad6', 'dbbfc30b411e11ea'),
+                  ('b02', 5, 8): ('8096d4c6e269b254', 'f0206be1c838c4bd'),
+                  ('b02', 10, 8): ('f6e2e996224328f2', '8c39ed9e85d7c0fd')
+```
+
+Tout cas R21 brut, GPU ou moteur, devra les reproduire, comme les six
+épingles sans sol depuis R13.
+
+GCP non utilisé.
