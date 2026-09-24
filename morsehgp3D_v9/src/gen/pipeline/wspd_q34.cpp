@@ -1479,7 +1479,7 @@ WspdQ34ParallelResult run_wspd_q34_batched(Q2CensusIndexPtr index, unsigned kmax
     unsigned separation_s, WspdQ34Options options, std::size_t worker_count,
     const WspdQ34ParallelConsumer& consumer, std::size_t jobs_per_worker,
     const Q34BatchFilter& filter, WspdQ34BatchTiming* timing, const Q34CertificateFilter* certificates,
-    const Q34LanesStage* lanes) {
+    const Q34LanesStage* lanes, const std::function<void()>* after_front) {
   validate(index, kmax, separation_s, options, static_cast<bool>(consumer));
   if (!filter) throw std::invalid_argument("mhgp9 gen batched q34 requires a batch filter");
   const bool certify = certificates != nullptr && static_cast<bool>(*certificates);
@@ -1572,6 +1572,8 @@ WspdQ34ParallelResult run_wspd_q34_batched(Q2CensusIndexPtr index, unsigned kmax
   }
   local_timing.front_ns = wall_ns() - phase;
   local_timing.rectangles = rectangles.size();
+  // v24: the caller's work that may run during the device calls (q2).
+  if (after_front != nullptr && *after_front) (*after_front)();
 
   // ---- Phase 2: one batch call decides every rectangle and every pair.
   phase = wall_ns();

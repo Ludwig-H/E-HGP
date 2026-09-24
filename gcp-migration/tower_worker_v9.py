@@ -48,7 +48,7 @@ PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
 PLAN_SCHEMA = 'mhgp9_tower_plan_v6'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v23'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v24'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -99,7 +99,9 @@ CASE_KEYS = frozenset({'scene', 'file', 'n', 'k', 's', 'workers', 'static_thread
 LEVER_NAMES = ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_witness_cache', 'q34_dead_core',
                'tower_meb_proposal', 'q34_jobs_by_mass', 'q34_fine_jobs', 'tower_overlap_static',
                'q2_jobs_by_mass', 'q34_batch_filter', 'q34_gpu_filter', 'q34_batch_certificates',
-               'q34_gpu_certificates', 'q34_batch_q3', 'q34_gpu_q3', 'q34_batch_q4')
+               'q34_gpu_certificates', 'q34_batch_q3', 'q34_gpu_q3', 'q34_batch_q4',
+               # v24 : q2 pendant les appels de l'appareil (exige q34_batch_filter).
+               'q2_during_device')
 # v17 (S2) : filtre q3/q4 par lots, puis sur GPU. Le build G4 active CUDA
 # (nvcc et nvidia-smi existants, aucune installation) ; l'appareil attendu :
 DEVICE_NAME = 'NVIDIA RTX PRO 6000 Blackwell Server Edition'
@@ -111,7 +113,8 @@ BATCH_KEYS = frozenset({'used', 'backend', 'front_ms', 'filter_ms', 'edges_ms', 
                         'lanes_device_ms', 'lanes_kernel_ms', 'lanes_transfer_ms', 'lanes_wait_ms', 'tail_ms',
                         'lanes_asked', 'lanes_decided', 'lanes_deferred', 'lanes_records', 'lanes_judged',
                         'lanes_warps', 'lanes_setup_ms', 'lanes_finish_ms', 'lanes_convert_ms', 'lanes_tasks',
-                        'lanes_max_task_steps', 'lanes_plan_ms', 'lanes_task_ms', 'lanes_compact_ms'})
+                        'lanes_max_task_steps', 'lanes_plan_ms', 'lanes_task_ms', 'lanes_compact_ms',
+                        'gpu_prepare_ms', 'gpu_prepare_wait_ms'})
 # v20 (S4a) : voie q3 des survivants certifies par lots, sans atlas (CPU ou
 # GPU). Chronos et comptes de l'appel, registre declare lanes_* du mode.
 LANES_TIMES = ('lanes_ms', 'lanes_device_ms', 'lanes_kernel_ms', 'lanes_transfer_ms', 'lanes_wait_ms', 'tail_ms',
@@ -174,8 +177,8 @@ PINNED_DIGESTS = {('00', 5, 8): ('67450c64611075b1', '5ad1fe09354411ba'),
                   ('01', 10, 8): ('9ddbf7430c9086cc', 'c5cddc5b0baefcf1'),
                   ('02', 5, 8): ('8240af3d4dce3d45', '143a367b4f27ef02'),
                   ('02', 10, 8): ('ba973af0c8da95bd', '5c8cc01b1e45b461')}
-TIME_KEYS = frozenset({'read', 'prepare', 'gen_index', 'q2', 'q34', 'merge', 'tower_index', 'census', 'tower',
-                       'chain_total', 'digest', 'catalogue_digest'})
+TIME_KEYS = frozenset({'read', 'prepare', 'gen_index', 'q2', 'q2_wait', 'q34', 'merge', 'tower_index', 'census',
+                       'tower', 'chain_total', 'digest', 'catalogue_digest'})
 ORDER_KEYS = frozenset({'K', 'nodes', 'births', 'merges', 'parents', 'contributions'})
 # tower_work : compteurs entiers, sauf ces deux champs types du noyau MEB
 # (libelle de comptabilite epingle, histogramme des tailles de supports).
@@ -331,7 +334,8 @@ def _levers(value):
             (value['q34_batch_certificates'] or not value['q34_gpu_certificates']) and
             (value['q34_batch_certificates'] or not value['q34_batch_q3']) and
             (value['q34_batch_q3'] or not value['q34_gpu_q3']) and
-            (value['q34_batch_q3'] or not value['q34_batch_q4']))
+            (value['q34_batch_q3'] or not value['q34_batch_q4']) and
+            (value['q34_batch_filter'] or not value['q2_during_device']))
 
 
 def uses_device(levers):
@@ -345,7 +349,8 @@ def plan_uses_gpu(cases):
 def engine_levers(levers):
     """The same levers on the engine path (no batch call, no device)."""
     return dict(levers, q34_batch_filter=False, q34_gpu_filter=False, q34_batch_certificates=False,
-                q34_gpu_certificates=False, q34_batch_q3=False, q34_gpu_q3=False, q34_batch_q4=False)
+                q34_gpu_certificates=False, q34_batch_q3=False, q34_gpu_q3=False, q34_batch_q4=False,
+                q2_during_device=False)
 
 
 def lever_arguments(case):
@@ -565,7 +570,9 @@ def validate_batch(value, case, capacity=0, judge=False, lanes_capacity=0):
     """Section q34_batch (v18) : phases du chemin par lots, a zero sur le chemin moteur."""
     batch, levers = value['q34_batch'], case['levers']
     times = ('front_ms', 'filter_ms', 'edges_ms', 'device_ms', 'certificate_ms', 'certificate_device_ms',
-             'filter_kernel_ms', 'filter_transfer_ms', 'certificate_kernel_ms', 'certificate_transfer_ms')
+             'filter_kernel_ms', 'filter_transfer_ms', 'certificate_kernel_ms', 'certificate_transfer_ms',
+             # v24 : preparation de l'appareil (son mur, l'attente du premier appel).
+             'gpu_prepare_ms', 'gpu_prepare_wait_ms')
     need(type(batch) is dict and set(batch) == BATCH_KEYS and type(batch['used']) is bool and
          type(batch['backend']) is str and type(batch['certificate_backend']) is str and
          type(batch['lanes_backend']) is str and
@@ -583,6 +590,12 @@ def validate_batch(value, case, capacity=0, judge=False, lanes_capacity=0):
              all(batch[key] == 0 for key in ('deferred', 'judged_edges', 'rebuilt_covers', 'certificate_warps')),
              'q34_batch filled on the engine path')
         return
+    # v24 : la preparation n'existe qu'avec un levier de l'appareil ; son
+    # attente ne depasse pas son mur.
+    device_levers = levers['q34_gpu_filter'] or levers['q34_gpu_certificates'] or levers['q34_gpu_q3']
+    need((batch['gpu_prepare_ms'] > 0 and batch['gpu_prepare_wait_ms'] <= batch['gpu_prepare_ms'] + 0.05)
+         if device_levers else batch['gpu_prepare_ms'] == 0 and batch['gpu_prepare_wait_ms'] == 0,
+         'q34_batch device preparation times')
     certificates, gpu_certificates = levers['q34_batch_certificates'], levers['q34_gpu_certificates']
     if certificates:
         # A device pass only when there is something to decide (an empty
@@ -977,7 +990,13 @@ def validate_probe(value, case, exit_code, inputs=None, capacity=0, judge=False,
          _number(value['chain_cpu_s']), 'probe times')
     # Les etapes sont des sous-chronos du total de chaine (la lecture est
     # mesuree a part) : leur somme ne peut pas le depasser, a l'arrondi pres.
-    need(sum(times[key] for key in STAGE_TIME_KEYS) <= times['chain_total'] + 0.01 * len(STAGE_TIME_KEYS),
+    # v24 : sous q2_during_device, q2 recouvre q34 ; seule l'attente du fil
+    # principal apres q34 (q2_wait) entre dans la somme, et elle ne depasse
+    # pas le mur propre de q2. Sans le levier, q2_wait est nul.
+    overlapped = case['levers']['q2_during_device'] and value['options']['K_effective'] >= 2
+    stages = [key for key in STAGE_TIME_KEYS if not (overlapped and key == 'q2')] + (['q2_wait'] if overlapped else [])
+    need(sum(times[key] for key in stages) <= times['chain_total'] + 0.01 * len(stages) and
+         (times['q2_wait'] <= times['q2'] + 0.05 if overlapped else times['q2_wait'] == 0),
          'probe stage times exceed the chain total')
     need(_counters(value['generator'], GENERATOR_KEYS), 'probe counters generator')
     need(_tower_work(value['tower_work']), 'probe counters tower_work')

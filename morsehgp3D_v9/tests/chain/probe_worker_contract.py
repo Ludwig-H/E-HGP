@@ -113,6 +113,10 @@ def main(argv):
                         ('q4_on', dict(base, levers=dict(engine_levers, q34_batch_filter=True,
                                                          q34_batch_certificates=True, q34_batch_q3=True,
                                                          q34_batch_q4=True))),
+                        # v24: q2 on its own thread during the (host) batch calls.
+                        ('q2_overlap_on', dict(base, levers=dict(engine_levers, q34_batch_filter=True,
+                                                                 q34_batch_certificates=True, q34_batch_q3=True,
+                                                                 q34_batch_q4=True, q2_during_device=True))),
                         ('pinned_off', dict(base, levers={name: False for name in worker.LEVER_NAMES}, workers=1,
                                             static_threads=0))):
         try:
@@ -126,6 +130,15 @@ def main(argv):
         check(outcome == 'complete_relative', label + ': outcome ' + outcome)
         check(value['options']['levers'] == case['levers'], label + ': published levers')
         results[label] = (case, value)
+    # v24: q2 during the batch calls publishes the same object and counts as
+    # the sequential q4 case, its own wall and a wait no larger.
+    if 'q2_overlap_on' in results and 'q4_on' in results:
+        overlapped, sequential = results['q2_overlap_on'][1], results['q4_on'][1]
+        check(worker.logical_result(overlapped) == worker.logical_result(sequential) and
+              overlapped['times_ms']['q2'] > 0 and overlapped['times_ms']['q2_wait'] <= overlapped['times_ms']['q2'] and
+              sequential['times_ms']['q2_wait'] == 0, 'q2 overlap: object or times differ from the sequential case')
+    else:
+        check(False, 'q2 overlap case absent')
     # The GPU lever: without a device, an explicit refusal naming it (never a
     # silent CPU run); with one, the same object as the engine path.
     gpu_cases = (('gpu_on', dict(base, levers={name: True for name in worker.LEVER_NAMES})),

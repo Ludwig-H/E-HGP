@@ -134,11 +134,20 @@ struct ChainOptions {
   // petite valeur : mise en attente). Meme objet ; desactive par defaut.
   bool q34_batch_q4 = false;
   std::uint32_t q34_lanes_events = 0;
+  // v24 : q2 (qui ne depend que de l'index) tourne pendant les appels de
+  // l'appareil du chemin par lots (filtre, certificats, voies), ou le CPU
+  // attend : lance sur un fil a part des que le front q34 est construit,
+  // joint avant la fusion. Ses presentations vont dans des ardoises a part.
+  // Meme objet ; exige q34_batch_filter ; desactive par defaut.
+  bool q2_during_device = false;
 };
 
 // Temps de mur en millisecondes, CPU du processus en secondes.
 struct ChainTimes {
-  double prepare_ms = 0, gen_index_ms = 0, q2_ms = 0, q34_ms = 0;
+  // v24 : sous q2_during_device, q2_ms est le mur propre de q2 (recouvert
+  // par q34) et q2_wait_ms l'attente du fil principal apres q34 ; sinon
+  // q2_wait_ms = 0.
+  double prepare_ms = 0, gen_index_ms = 0, q2_ms = 0, q2_wait_ms = 0, q34_ms = 0;
   double merge_ms = 0, tower_index_ms = 0, census_ms = 0, tower_ms = 0, total_ms = 0;
   // Verification digest of the published tower, measured after total_ms
   // (not part of the chain's construction time).
@@ -249,6 +258,10 @@ struct Q34BatchTimes {
   // v22 (H1): the device runner's host setup and finish outside its events,
   // and the chain's conversion of the call's output (statuses, records).
   double lanes_setup_ms = 0, lanes_finish_ms = 0, lanes_convert_ms = 0;
+  // v24 : la preparation de l'appareil (contexte, index plat, ardoises
+  // residentes) sur son fil : son mur, et l'attente du premier appel qui la
+  // rejoint (0 si elle etait finie).
+  double gpu_prepare_ms = 0, gpu_prepare_wait_ms = 0;
   std::uint64_t lanes_asked = 0, lanes_decided = 0, lanes_deferred = 0, lanes_records = 0, lanes_judged = 0;
   std::uint32_t lanes_warps = 0;
   // v23 (S4b tasks, lanes plan step 2): the (edge, seed range) tasks of the

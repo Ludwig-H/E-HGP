@@ -55,7 +55,7 @@ import sys
 import time
 
 TIMES = ('read', 'prepare', 'gen_index', 'q2', 'q34', 'merge', 'tower_index', 'census', 'tower', 'chain_total', 'digest',
-         'catalogue_digest')
+         'catalogue_digest')  # v24: q2_wait set apart (zero without q2_during_device)
 
 
 def fnv_u32le(raw):
@@ -140,7 +140,8 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                  lanes_device_ms=0.0, lanes_kernel_ms=0.0, lanes_transfer_ms=0.0, lanes_wait_ms=0.0, tail_ms=0.0,
                  lanes_asked=0, lanes_decided=0, lanes_deferred=0, lanes_records=0, lanes_judged=0, lanes_warps=0,
                  lanes_setup_ms=0.0, lanes_finish_ms=0.0, lanes_convert_ms=0.0, lanes_tasks=0,
-                 lanes_max_task_steps=0, lanes_plan_ms=0.0, lanes_task_ms=0.0, lanes_compact_ms=0.0)
+                 lanes_max_task_steps=0, lanes_plan_ms=0.0, lanes_task_ms=0.0, lanes_compact_ms=0.0,
+                 gpu_prepare_ms=0.0, gpu_prepare_wait_ms=0.0)
     ledger.update({name: 0 for name in schema['ledger'] if name.startswith(('lanes_', 'lanes4_'))})
     device = 'NVIDIA RTX PRO 6000 Blackwell Server Edition'
     if complete and levers.get('q34_batch_filter'):
@@ -149,7 +150,9 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                      front_ms=0.03, filter_ms=0.03, edges_ms=0.03, device_ms=0.02 if gpu else 0.0,
                      filter_kernel_ms=0.01 if gpu else 0.0, filter_transfer_ms=0.005 if gpu else 0.0,
                      rectangles=ledger['q34_input_rectangles'],
-                     survivors=ledger['expanded_pairs'] - ledger['witness_rejected_pairs'])
+                     survivors=ledger['expanded_pairs'] - ledger['witness_rejected_pairs'],
+                     # v24: the device preparation exists with a device lever only.
+                     gpu_prepare_ms=0.01 if worker.uses_device(levers) else 0.0, gpu_prepare_wait_ms=0.0)
         if levers.get('q34_batch_certificates'):
             gpu_certificates = levers.get('q34_gpu_certificates')
             deferred = 1 if gpu_certificates and capacity else 0
@@ -196,7 +199,7 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                               lanes4_group_steps=9)
                 ledger.update(atlas_deep_cells=0)  # no atlas under the q4 lanes (as the real chain)
                 batch.update(lanes_records=2)
-    return dict(schema='mhgp9_tower_probe_v23', status=status,
+    return dict(schema='mhgp9_tower_probe_v24', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
@@ -204,7 +207,9 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                              lanes_capacity=lanes_capacity, lanes_judge=bool(judge and levers.get('q34_batch_q3')),
                              lanes_events=0,
                              levers=levers),
-                times_ms=dict({key: 0.125 for key in TIMES}, chain_total=1.5), chain_cpu_s=0.25,
+                times_ms=dict({key: 0.125 for key in TIMES}, chain_total=1.5,
+                              q2_wait=0.05 if levers.get('q2_during_device') and effective >= 2 else 0.0),
+                chain_cpu_s=0.25,
                 generator=dict(q2_front_rectangles=3, q2_candidate_pairs=2, q2_accepted_pairs=1,
                                q34_expanded_pairs=ledger['expanded_pairs'], q34_cover_builds=ledger['cover_builds'],
                                q3_emitted=2,
@@ -795,10 +800,10 @@ class Protocol(unittest.TestCase):
         # v21 (R16) arms: full GPU (every lever), engine twin, S4a GPU without
         # the q4 lanes; repeated and interleaved S4a / S4a + S4b pairs at 00
         # (auditor C, R-27).
-        arms = dict(gpu=on, engine=worker.engine_levers(on), gpu_s4a=dict(on, q34_batch_q4=False))
+        arms = dict(gpu=on, engine=worker.engine_levers(on), gpu_q2seq=dict(on, q2_during_device=False))
         expected = [(scene, k, arm, 0) for scene in ('00', '01', '02') for k in (5, 10) for arm in ('gpu', 'engine')]
-        expected += [('00', 5, 'gpu_s4a', 0), ('00', 5, 'gpu', 1), ('00', 10, 'gpu_s4a', 0), ('00', 10, 'gpu', 1),
-                     ('00', 5, 'gpu_s4a', 1), ('00', 10, 'gpu_s4a', 1)]
+        expected += [('00', 5, 'gpu_q2seq', 0), ('00', 5, 'gpu', 1), ('00', 10, 'gpu_q2seq', 0), ('00', 10, 'gpu', 1),
+                     ('00', 5, 'gpu_q2seq', 1), ('00', 10, 'gpu_q2seq', 1)]
         need(provenance['commit'] == head and len(cases) == len(expected) == 18 and all(
                 (c['scene'], c['k'], c['repeat']) == (scene, k, repeat) and c['levers'] == arms[arm] and
                 c['s'] == 8 and c['workers'] == 48 and c['static_threads'] == 48
@@ -979,6 +984,12 @@ class Protocol(unittest.TestCase):
                               # v21: the q4 lanes rules.
                               ('gpu q4 without q3 lanes', lambda v: v['options']['levers'].update(q34_batch_q3=False)),
                               ('gpu q4 lever dropped', lambda v: v['options']['levers'].update(q34_batch_q4=False)),
+                              # v24: q2 during the device calls, device preparation.
+                              ('gpu q2 wait beyond q2', lambda v: v['times_ms'].update(q2_wait=0.2)),
+                              ('gpu q2 counted twice', lambda v: v['times_ms'].update(q2=1.0, q2_wait=0.9)),
+                              ('gpu device preparation absent', lambda v: v['q34_batch'].update(gpu_prepare_ms=0.0)),
+                              ('gpu device preparation wait beyond',
+                               lambda v: v['q34_batch'].update(gpu_prepare_wait_ms=0.5)),
                               ('gpu q4 seeds split', lambda v: v['ledger'].update(lanes4_certified=2)),
                               ('gpu q4 groups split', lambda v: v['ledger'].update(lanes4_groups=4)),
                               ('gpu q4 records shifted', lambda v: v['q34_batch'].update(lanes_records=1)),

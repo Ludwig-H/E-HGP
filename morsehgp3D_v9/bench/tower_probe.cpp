@@ -182,6 +182,7 @@ int main(int argc, char** argv) {
         else if (name == "q34_batch_q3") options.q34_batch_q3 = on;
         else if (name == "q34_gpu_q3") options.q34_gpu_q3 = on;
         else if (name == "q34_batch_q4") options.q34_batch_q4 = on;
+        else if (name == "q2_during_device") options.q2_during_device = on;
         else throw std::invalid_argument("unknown lever");
       }
       else if (arg.starts_with("--n=")) prefix = static_cast<std::size_t>(parse_u(arg.substr(4)));
@@ -211,7 +212,7 @@ int main(int argc, char** argv) {
   const auto r = mhgp9::run_tower_chain(input.points, options);
   const auto& t = r.times;
   const auto& c = r.catalogue;
-  std::printf("{\"schema\":\"mhgp9_tower_probe_v23\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
+  std::printf("{\"schema\":\"mhgp9_tower_probe_v24\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
               r.reason.c_str());
   std::printf("\"input\":{\"format\":\"%s\",\"grid\":\"%s\",\"sites\":%zu,\"hash\":\"%016" PRIx64 "\"},", input.format.c_str(),
               grid.c_str(), input.points.size(), input.hash);
@@ -221,7 +222,8 @@ int main(int argc, char** argv) {
               "\"q34_witness_cache\":%s,\"q34_dead_core\":%s,\"tower_meb_proposal\":%s,"
               "\"q34_jobs_by_mass\":%s,\"q34_fine_jobs\":%s,\"tower_overlap_static\":%s,\"q2_jobs_by_mass\":%s,"
               "\"q34_batch_filter\":%s,\"q34_gpu_filter\":%s,\"q34_batch_certificates\":%s,"
-              "\"q34_gpu_certificates\":%s,\"q34_batch_q3\":%s,\"q34_gpu_q3\":%s,\"q34_batch_q4\":%s}},",
+              "\"q34_gpu_certificates\":%s,\"q34_batch_q3\":%s,\"q34_gpu_q3\":%s,\"q34_batch_q4\":%s,"
+              "\"q2_during_device\":%s}},",
               options.kmax, r.kmax_effective, options.separation_s, options.workers,
               options.tower_static_threads >= 0 ? options.tower_static_threads : r.tower_static_threads,
               options.run_tower ? "true" : "false", options.q34_certificate_capacity,
@@ -235,12 +237,15 @@ int main(int argc, char** argv) {
               options.q2_jobs_by_mass ? "true" : "false", options.q34_batch_filter ? "true" : "false",
               options.q34_gpu_filter ? "true" : "false", options.q34_batch_certificates ? "true" : "false",
               options.q34_gpu_certificates ? "true" : "false", options.q34_batch_q3 ? "true" : "false",
-              options.q34_gpu_q3 ? "true" : "false", options.q34_batch_q4 ? "true" : "false");
-  std::printf("\"times_ms\":{\"read\":%.3f,\"prepare\":%.3f,\"gen_index\":%.3f,\"q2\":%.3f,\"q34\":%.3f,\"merge\":%.3f,"
+              options.q34_gpu_q3 ? "true" : "false", options.q34_batch_q4 ? "true" : "false",
+              options.q2_during_device ? "true" : "false");
+  std::printf("\"times_ms\":{\"read\":%.3f,\"prepare\":%.3f,\"gen_index\":%.3f,\"q2\":%.3f,\"q2_wait\":%.3f,"
+              "\"q34\":%.3f,\"merge\":%.3f,"
               "\"tower_index\":%.3f,\"census\":%.3f,\"tower\":%.3f,\"chain_total\":%.3f,\"digest\":%.3f,"
               "\"catalogue_digest\":%.3f},"
               "\"chain_cpu_s\":%.3f,",
-              read_ms, t.prepare_ms, t.gen_index_ms, t.q2_ms, t.q34_ms, t.merge_ms, t.tower_index_ms, t.census_ms, t.tower_ms,
+              read_ms, t.prepare_ms, t.gen_index_ms, t.q2_ms, t.q2_wait_ms, t.q34_ms, t.merge_ms, t.tower_index_ms,
+              t.census_ms, t.tower_ms,
               t.total_ms, t.digest_ms, t.catalogue_digest_ms, t.cpu_s);
   std::printf("\"generator\":{\"q2_front_rectangles\":%" PRIu64 ",\"q2_candidate_pairs\":%" PRIu64 ",\"q2_accepted_pairs\":%" PRIu64
               ",\"q34_expanded_pairs\":%" PRIu64 ",\"q34_cover_builds\":%" PRIu64 ",\"q3_emitted\":%" PRIu64 ",\"q4_emitted\":%" PRIu64 "},",
@@ -293,7 +298,7 @@ int main(int argc, char** argv) {
                 ",\"lanes_judged\":%" PRIu64 ",\"lanes_warps\":%u,\"lanes_setup_ms\":%.3f"
                 ",\"lanes_finish_ms\":%.3f,\"lanes_convert_ms\":%.3f,\"lanes_tasks\":%" PRIu64
                 ",\"lanes_max_task_steps\":%" PRIu64 ",\"lanes_plan_ms\":%.3f,\"lanes_task_ms\":%.3f"
-                ",\"lanes_compact_ms\":%.3f},",
+                ",\"lanes_compact_ms\":%.3f,\"gpu_prepare_ms\":%.3f,\"gpu_prepare_wait_ms\":%.3f},",
                 b.used ? "true" : "false", backend.c_str(), b.front_ms, b.filter_ms, b.edges_ms, b.device_ms,
                 b.rectangles, b.survivors, certificate_backend.c_str(), b.certificate_ms, b.certificate_device_ms,
                 b.deferred, b.judged_edges, b.rebuilt_covers, b.certificate_warps, b.filter_kernel_ms,
@@ -301,7 +306,7 @@ int main(int argc, char** argv) {
                 b.lanes_ms, b.lanes_device_ms, b.lanes_kernel_ms, b.lanes_transfer_ms, b.lanes_wait_ms, b.tail_ms,
                 b.lanes_asked, b.lanes_decided, b.lanes_deferred, b.lanes_records, b.lanes_judged, b.lanes_warps,
                 b.lanes_setup_ms, b.lanes_finish_ms, b.lanes_convert_ms, b.lanes_tasks, b.lanes_max_task_steps,
-                b.lanes_plan_ms, b.lanes_task_ms, b.lanes_compact_ms);
+                b.lanes_plan_ms, b.lanes_task_ms, b.lanes_compact_ms, b.gpu_prepare_ms, b.gpu_prepare_wait_ms);
     const auto& tt = r.tower_times;
     std::printf("\"tower_phases_ms\":{\"validate\":%.3f,\"static\":%.3f,\"lots\":%.3f,\"populations\":%.3f,"
                 "\"images\":%.3f,\"bank\":%.3f,\"encode\":%.3f",

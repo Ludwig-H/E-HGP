@@ -100,16 +100,24 @@ int main(int argc, char** argv) {
         with_q4_small.q34_lanes_judge = false;
         with_q4_small.q34_lanes_capacity = 24;
         with_q4_small.q34_lanes_events = 2;
+        // v24: q2 on its own thread during the batch calls (host path here).
+        auto with_q4_q2 = with_q4;
+        with_q4_q2.q2_during_device = true;
         const auto a = run_tower_chain(points, base);
         const auto b = run_tower_chain(points, lanes);
         const auto c = run_tower_chain(points, small);
         const auto d = run_tower_chain(points, with_q4);
         const auto e = run_tower_chain(points, with_q4_small);
+        const auto f = run_tower_chain(points, with_q4_q2);
         if (a.status != ChainStatus::kComplete || b.status != ChainStatus::kComplete ||
             c.status != ChainStatus::kComplete || d.status != ChainStatus::kComplete ||
-            e.status != ChainStatus::kComplete)
-          return fail("status " + where + " " + b.reason + " " + c.reason + " " + d.reason + " " + e.reason);
-        for (const auto* r : {&b, &c, &d, &e})
+            e.status != ChainStatus::kComplete || f.status != ChainStatus::kComplete)
+          return fail("status " + where + " " + b.reason + " " + c.reason + " " + d.reason + " " + e.reason + " " +
+                      f.reason);
+        if (f.q2_accepted_pairs != a.q2_accepted_pairs || (kmax >= 2 && f.times.q2_wait_ms > f.times.q2_ms + 0.05) ||
+            (kmax < 2 && f.times.q2_wait_ms != 0))
+          return fail("q2_overlap " + where);
+        for (const auto* r : {&b, &c, &d, &e, &f})
           if (a.tower_digest != r->tower_digest || a.catalogue_digest != r->catalogue_digest ||
               a.q3_emitted != r->q3_emitted || a.q4_emitted != r->q4_emitted)
             return fail("digest " + where);
@@ -213,6 +221,14 @@ int main(int argc, char** argv) {
     if (!refused(o, "chain_q34_lanes_events_requires_batch_q4")) return fail("refusal.events");
     ++refusals;
   }
+  {
+    auto o = ok;
+    o.q34_batch_filter = false;
+    o.q34_batch_certificates = false;
+    o.q2_during_device = true;  // v24: requires the batch path
+    if (!refused(o, "chain_q2_during_device_requires_batch_filter")) return fail("refusal.q2_during_device");
+    ++refusals;
+  }
   bool device = false;
   {
     auto o = ok;
@@ -234,7 +250,7 @@ int main(int argc, char** argv) {
               n, cases, asked, judged, records, tails, both, q4_emitted, q4_tails, refusals, device ? "yes" : "no");
   // tails + both > asked (auditor A): some edge has its q3 lane in the tail
   // AND its q4 lane open, the case the both_edges comparison guards.
-  if (cases == 0 || asked == 0 || judged != asked || records == 0 || tails == 0 || both == 0 || refusals != 9 ||
+  if (cases == 0 || asked == 0 || judged != asked || records == 0 || tails == 0 || both == 0 || refusals != 10 ||
       tails + both <= asked || q4_emitted == 0 || q4_tails == 0)
     return 3;
   return 0;

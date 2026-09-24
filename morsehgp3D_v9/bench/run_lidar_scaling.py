@@ -45,7 +45,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[2]
 V8 = ROOT / 'morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v23'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v24'
 # Schemas relus lors d'une revalidation d'archive (v12 : reçu du 23 septembre).
 KNOWN_SCHEMAS = ('mhgp9_tower_probe_v12', PROBE_SCHEMA)
 # Le schema de sonde d'une campagne est fixe par son RESUME, jamais par le JSON
@@ -65,7 +65,8 @@ DEFAULT_LEVERS = dict(atlas_saturate_deep=True, q3_leaf_census=True, q34_dead_la
                       tower_overlap_static=True, q2_jobs_by_mass=True,
                       # v17/v18/v20: the local campaign keeps the engine path (no GPU here).
                       q34_batch_filter=False, q34_gpu_filter=False, q34_batch_certificates=False,
-                      q34_gpu_certificates=False, q34_batch_q3=False, q34_gpu_q3=False, q34_batch_q4=False)
+                      q34_gpu_certificates=False, q34_batch_q3=False, q34_gpu_q3=False, q34_batch_q4=False,
+                      q2_during_device=False)
 # Leviers publies par schema de sonde (les archives v12 en ont six).
 LEVERS_V12 = {name: True for name in ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_witness_cache',
                                       'q34_dead_core', 'tower_meb_proposal')}
@@ -421,7 +422,8 @@ def selftest(case_path):
                             lanes_wait_ms=0.0, tail_ms=0.0, lanes_asked=0, lanes_decided=0, lanes_deferred=0,
                             lanes_records=0, lanes_judged=0, lanes_warps=0, lanes_setup_ms=0.0,
                             lanes_finish_ms=0.0, lanes_convert_ms=0.0, lanes_tasks=0, lanes_max_task_steps=0,
-                            lanes_plan_ms=0.0, lanes_task_ms=0.0, lanes_compact_ms=0.0)
+                            lanes_plan_ms=0.0, lanes_task_ms=0.0, lanes_compact_ms=0.0,
+                            gpu_prepare_ms=0.0, gpu_prepare_wait_ms=0.0)
     # v20: the declared q3 lanes ledger, zero on the engine path.
     for name in ('lanes_edges', 'lanes_cover_sites', 'lanes_cover_node_visits', 'lanes_seed_tests',
                  'lanes_acute_sites', 'lanes_owner_rejections', 'lanes_seeds', 'lanes_census_point_tests',
@@ -433,6 +435,7 @@ def selftest(case_path):
     v13['catalogue_digest'] = '0123456789abcdef'
     v13['presentation_digest'] = 'fedcba9876543210'
     v13['times_ms']['catalogue_digest'] = 0.0
+    v13['times_ms']['q2_wait'] = 0.0
     v13['options']['certificate_capacity'] = 0
     v13['options']['certificate_judge'] = False
     v13['options']['lanes_capacity'] = 0

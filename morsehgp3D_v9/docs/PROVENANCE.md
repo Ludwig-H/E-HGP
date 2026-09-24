@@ -716,6 +716,35 @@ registre ne changent pas.
     projection de 68 à 76 ms ;
   - comparer les condensés des bras jumeaux.
 
+### q2 pendant les appels de l'appareil (levier `q2_during_device`, sonde v24, 24 septembre 2026)
+
+Sur le chemin par lots, le CPU attend pendant les appels de l'appareil
+(filtre, certificats, voies : environ 380 ms à 08/000000/K5 dans R18). q2
+ne dépend que de l'index : sous le levier, il part sur un fil à part dès que
+le front q34 est construit (crochet `after_front` de
+`run_wspd_q34_batched`), et il est joint après q34 sur tous les chemins.
+- **Ardoises** : les présentations de q2 vont dans des ardoises à part,
+  ajoutées à celles de q34 avant la fusion, qui trie tout. Même objet.
+- **Échecs** : un échec de q2 est rapporté avant un échec de q34, comme dans
+  l'ordre séquentiel. Si le crochet n'est jamais appelé, q2 tourne après
+  q34.
+- **Temps** : `times_ms.q2` est le mur propre de q2, depuis son lancement.
+  `times_ms.q2_wait` est l'attente du fil principal après q34, soit
+  `max(0, fin de q2 − fin de q34)` : elle ne dépasse jamais `q2` par
+  construction. Le lecteur somme les étapes avec `q2_wait` au lieu de `q2`
+  sous le levier.
+- **Préparation de l'appareil** : `q34_batch.gpu_prepare_ms` (son mur) et
+  `gpu_prepare_wait_ms` (l'attente du premier appel qui la rejoint). Sans
+  q2 avant le front, elle n'est plus cachée que par le front ; R19 mesure
+  si elle retarde le filtre.
+- **Portes** : bras q2 recouvert dans `mhgp9_chain_batch_q3` (mêmes
+  condensés, mêmes comptes q2) et refus sans `q34_batch_filter` ; cas réel
+  `q2_overlap_on` du contrat sonde/lecteur (même résultat logique que le cas
+  séquentiel) ; mutants de l'autotest (attente au-delà de q2, q2 compté deux
+  fois, préparation absente ou attente au-delà).
+- **Plan R19** : paires q2 séquentiel / q2 recouvert, répétées et
+  entrelacées à 08/000000, à K5 et à K10.
+
 ## Voie GPU S1 : `src/gpu/` (espace `mhgp9::gpu`, code neuf)
 
 23 septembre 2026. Première brique GPU de la v9, pour une expérience de

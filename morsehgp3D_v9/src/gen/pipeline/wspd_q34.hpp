@@ -521,6 +521,7 @@ struct WspdQ34BatchTiming {
     WspdQ34Options options, std::size_t worker_count,
     const WspdQ34ParallelConsumer& consumer, std::size_t jobs_per_worker,
     const Q34BatchFilter& filter, WspdQ34BatchTiming* timing,
-    const Q34CertificateFilter* certificates = nullptr, const Q34LanesStage* lanes = nullptr);
+    const Q34CertificateFilter* certificates = nullptr, const Q34LanesStage* lanes = nullptr,
+    const std::function<void()>* after_front = nullptr);  // v24: called once the front is built
 
 }  // namespace mhgp9::gen

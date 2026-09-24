@@ -98,19 +98,20 @@ def default_plan():
     # sur le chemin GPU complet (filtre, certificats et voies q3 et q4 sur
     # l'appareil) puis sur son jumeau moteur (sans lots ni GPU), que la
     # comparaison d'objet juge (condenses de tour et de catalogue, travail des
-    # certificats) ; a 00, K5 et K10, paires S4a GPU / S4a + S4b GPU repetees
-    # et entrelacees (auditeur C, R-27) pour attribuer le gain des voies q4.
+    # certificats) ; a 00, K5 et K10, paires repetees et entrelacees
+    # (auditeur C, R-27). v24 (R19) : q2 sequentiel / q2 pendant les appels
+    # de l'appareil (q2_during_device), pour attribuer le recouvrement.
     def case(scene, k, arm, repeat=0):
         levers = {name: True for name in worker.LEVER_NAMES}
         if arm == 'engine':
             levers = worker.engine_levers(levers)
-        elif arm == 'gpu_s4a':
-            levers.update(q34_batch_q4=False)
+        elif arm == 'gpu_q2seq':
+            levers.update(q2_during_device=False)
         return dict(scene=scene, file=worker.INPUTS[scene]['file'], n=worker.INPUTS[scene]['n'], k=k, s=8,
                     workers=48, static_threads=48, levers=levers, repeat=repeat)
     cases = [case(scene, k, arm) for scene in ('00', '01', '02') for k in (5, 10) for arm in ('gpu', 'engine')]
-    cases += [case('00', 5, 'gpu_s4a'), case('00', 5, 'gpu', 1), case('00', 10, 'gpu_s4a'), case('00', 10, 'gpu', 1),
-              case('00', 5, 'gpu_s4a', 1), case('00', 10, 'gpu_s4a', 1)]
+    cases += [case('00', 5, 'gpu_q2seq'), case('00', 5, 'gpu', 1), case('00', 10, 'gpu_q2seq'),
+              case('00', 10, 'gpu', 1), case('00', 5, 'gpu_q2seq', 1), case('00', 10, 'gpu_q2seq', 1)]
     return dict(schema=worker.PLAN_SCHEMA, cases=cases)
 
 

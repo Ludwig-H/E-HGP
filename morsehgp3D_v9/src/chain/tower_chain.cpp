@@ -123,6 +123,7 @@ class GpuPreparation {
   // lanes: also reserve the lanes call's resident slabs (v9 H1) during q2.
   void start(const gen::Q2CensusIndex& index, bool lanes, std::uint32_t lanes_capacity, std::uint32_t lanes_events) {
     thread_ = std::thread([this, &index, lanes, lanes_capacity, lanes_events] {
+      const auto begin = Clock::now();
       try {
         static_cast<void>(gpu::warm_up());  // errors are classified by the batch call
         if (lanes) static_cast<void>(gpu::warm_up_lanes(lanes_capacity, 0, lanes_events));
@@ -130,16 +131,23 @@ class GpuPreparation {
       } catch (...) {
         failure_ = std::current_exception();
       }
+      prepare_ms_ = ms_since(begin);
     });
   }
   // The prepared index (rethrows a preparation failure); prepares it here if
-  // the thread was never started.
+  // the thread was never started. v24: the first call's wait is recorded.
   const GpuIndex& get(const gen::Q2CensusIndex& index) {
-    join();
+    if (thread_.joinable()) {
+      const auto begin = Clock::now();
+      join();
+      wait_ms_ = ms_since(begin);
+    }
     if (failure_) std::rethrow_exception(failure_);
     if (!prepared_) prepared_ = prepare_gpu_index(index);
     return *prepared_;
   }
+  double prepare_ms() const { return prepare_ms_; }
+  double wait_ms() const { return wait_ms_; }
 
  private:
   void join() {
@@ -148,6 +156,7 @@ class GpuPreparation {
   std::thread thread_;
   std::optional<GpuIndex> prepared_;
   std::exception_ptr failure_;
+  double prepare_ms_ = 0, wait_ms_ = 0;
 };
 
 gen::Q34FilterBatch gpu_filter_batch(const GpuIndex& prepared, std::span<const gen::WspdRectangle> rectangles,
@@ -712,6 +721,8 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     if (options.q34_lanes_events != 0 &&
         (!options.q34_batch_q4 || options.q34_lanes_events > (1U << 20)))
       fail(ChainStatus::kInvalidInput, "chain_q34_lanes_events_requires_batch_q4");
+    if (options.q2_during_device && !options.q34_batch_filter)
+      fail(ChainStatus::kInvalidInput, "chain_q2_during_device_requires_batch_filter");
     if (points.size() < 2) fail(ChainStatus::kInvalidInput, "chain_requires_two_sites");
     if (points.size() > static_cast<std::size_t>(std::numeric_limits<std::int32_t>::max()))
       fail(ChainStatus::kInvalidInput, "chain_too_many_sites");
@@ -740,12 +751,14 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
                             options.q34_lanes_events);
 
     std::vector<std::vector<Presentation>> slots(W);
-    t = Clock::now();
-    {
+    // q2 into its own slots (v24: possibly on a thread during the device
+    // calls of q34); the slots are appended to q34's before the merge.
+    std::vector<std::vector<Presentation>> q2_slots(W);
+    const auto run_q2 = [&] {
       std::vector<gen::Q2CensusConsumer> consumers;
       consumers.reserve(W);
       for (std::size_t w = 0; w < W; ++w) {
-        auto* out = &slots[w];
+        auto* out = &q2_slots[w];
         consumers.emplace_back([out, &points](const gen::Q2Support& s) {
           Presentation p;
           const auto lo = std::min(s.a_id, s.b_id), hi = std::max(s.a_id, s.b_id);
@@ -768,8 +781,41 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       result.q2_front_rectangles = r2.input_rectangles;
       result.q2_candidate_pairs = r2.candidate_pairs;
       result.q2_accepted_pairs = r2.accepted_pairs;
+    };
+    // v24: under q2_during_device (batch path, K >= 2) q2 runs on its own
+    // thread, launched once the q34 front is built (the device calls then
+    // leave the CPU idle), joined on every path after q34. A q2 failure is
+    // reported before a q34 one, as in the sequential order. If the hook
+    // never fires (q34 refused before its front), q2 runs after q34.
+    const bool q2_overlapped = options.q2_during_device && kmax >= 2;
+    std::thread q2_thread;
+    std::exception_ptr q2_failure;
+    // q2's wall runs from its launch to its end (thread start included), and
+    // the main thread's wait is max(0, q2's end - q34's end): the wait never
+    // exceeds q2's wall, by construction.
+    Clock::time_point q2_launch{}, q2_end{};
+    struct Q2Joiner {
+      std::thread& thread;
+      ~Q2Joiner() {
+        if (thread.joinable()) thread.join();
+      }
+    } q2_joiner{q2_thread};
+    const std::function<void()> launch_q2 = [&] {
+      q2_launch = Clock::now();
+      q2_thread = std::thread([&] {
+        try {
+          run_q2();
+        } catch (...) {
+          q2_failure = std::current_exception();
+        }
+        q2_end = Clock::now();
+      });
+    };
+    if (!q2_overlapped) {
+      t = Clock::now();
+      run_q2();
+      result.times.q2_ms = ms_since(t);
     }
-    result.times.q2_ms = ms_since(t);
 
     t = Clock::now();
     if (kmax >= 2) {
@@ -876,9 +922,15 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         try {
           r34 = gen::run_wspd_q34_batched(index, kmax, options.separation_s, o, W, consumer, jobs_per_worker,
                                           filter, &timing, certificates ? &certificates : nullptr,
-                                          lanes.filter ? &lanes : nullptr);
+                                          lanes.filter ? &lanes : nullptr, q2_overlapped ? &launch_q2 : nullptr);
         } catch (const GpuRefusal& e) {
+          if (q2_thread.joinable()) q2_thread.join();
+          if (q2_failure) std::rethrow_exception(q2_failure);  // q2 first, as sequentially
           fail(e.status, e.what());
+        } catch (...) {
+          if (q2_thread.joinable()) q2_thread.join();
+          if (q2_failure) std::rethrow_exception(q2_failure);
+          throw;
         }
         auto& b = result.q34_batch;
         b.used = true;
@@ -908,6 +960,10 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         b.lanes_setup_ms = options.q34_gpu_q3 ? lanes_setup_ms : 0.0;
         b.lanes_finish_ms = options.q34_gpu_q3 ? lanes_finish_ms : 0.0;
         b.lanes_convert_ms = lanes_convert_ms;
+        // v24: the device preparation's wall and the first call's wait for it
+        // (joined by the first device call; zero on the CPU batch path).
+        b.gpu_prepare_ms = gpu_preparation.prepare_ms();
+        b.gpu_prepare_wait_ms = gpu_preparation.wait_ms();
         b.lanes_wait_ms = static_cast<double>(timing.lanes_wait_ns) / 1e6;
         b.tail_ms = static_cast<double>(timing.tail_ns) / 1e6;
         b.lanes_asked = timing.lanes_asked;
@@ -1022,6 +1078,29 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       }
     }
     result.times.q34_ms = ms_since(t);
+    if (q2_overlapped) {
+      // v24: the main thread's wait for q2 after q34 (all of q2 if the hook
+      // never fired), then q2's failure before anything later.
+      auto q34_end = Clock::now();
+      if (q2_thread.joinable()) {
+        q2_thread.join();
+      } else {
+        q2_launch = q34_end;
+        try {
+          run_q2();
+        } catch (...) {
+          q2_failure = std::current_exception();
+        }
+        q2_end = Clock::now();
+      }
+      const auto millis = [](Clock::duration d) { return std::chrono::duration<double, std::milli>(d).count(); };
+      result.times.q2_ms = millis(q2_end - q2_launch);
+      result.times.q2_wait_ms = q2_end > q34_end ? millis(q2_end - q34_end) : 0.0;
+      if (q2_failure) std::rethrow_exception(q2_failure);
+    }
+    // q2's slots join q34's (moved, not copied): the merge sorts them all.
+    slots.insert(slots.end(), std::make_move_iterator(q2_slots.begin()), std::make_move_iterator(q2_slots.end()));
+    std::vector<std::vector<Presentation>>().swap(q2_slots);
 
     // ---- Fusion : une boule par cle (union q2 u q3 u q4).
     PhaseClock merge_clock{result.times.merge_ms};
