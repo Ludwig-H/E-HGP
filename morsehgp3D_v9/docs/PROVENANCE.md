@@ -1370,6 +1370,123 @@ voie) et les deux mutants de priorité et de compteurs, placés aussi dans la
 voie recouverte. En local (W8, 16k K10), la tour passe de 4,5–4,96 s à
 4,26–4,28 s, avec un condensé identique.
 
+### Queue de la tour en pipeline (E4, 24 septembre 2026)
+
+Étape E4 du plan de la tour ([conception](tour_voies_conception_20260924/README.md)).
+Même objet : condensés épinglés, `tower_work` champ par champ et IDs de
+population inchangés. Option du constructeur `pipelined_tail` et de la chaîne
+`tower_pipelined_tail`, **active par défaut** ; elle n'agit que sur la voie
+statique recouverte (`tower_overlap_static`). Coupée, elle rend la queue
+d'avant, gardée comme témoin : `assign_populations`, puis les images, après la
+jointure. La sonde ne publie pas encore l'option (protocole du meneur).
+
+**IDs de population par décalage statique.** La construction séquentielle
+nomme la population d'une boule à sa première contribution, en parcourant
+K = 1..Kmax, puis les lots, les actions et les contributions. Le bloc d'une
+boule contribue à l'ordre K si `count_block_at` lui donne un masque de
+coquille non vide ou son intérieur, ce qui ne dépend que de la boule et de K :
+- une boule régulière ne contribue qu'à K = p + u (son ordre de facettes
+  p + u − 1 ne contribue pas) ;
+- une coquille étendue contribue aux rangs où sa table laisse un site de
+  coquille hors de toute composante stricte locale, parfois à plusieurs
+  ordres (le cercle d'un carré contribue à K3 et à K4).
+
+Chaque bloc paraît au plus une fois par ordre, et la phase A publie tout bloc
+contributeur. Soit $f(b)$ le premier ordre contributeur de $b$ et $o(K)$ le
+nombre de boules telles que $f(b) < K$, calculés en parallèle à la fin de la
+validation. L'ID de $b$ vaut alors $n + o(f(b)) + r(b)$, où $r(b)$ est le rang
+de $b$ parmi les boules de premier ordre $f(b)$, dans la suite des
+contributions de cet ordre. Ce sont les IDs du témoin.
+
+**Pipeline.** Dès la fin de sa phase A, l'ordre K lance un fil auxiliaire
+(phase B) qui nomme ses nouvelles boules et construit leurs lignes en
+parallèle, aux places $n + o(K) + r$. Les références à une boule de premier
+ordre plus bas sont gardées et nommées après la jointure
+(`population_deferred_refs`). Pendant ce temps, le fil de l'ordre attend la
+phase A de K − 1, puis calcule ses images verticales (phase C, sur les rangs
+de plateau depuis E1). B et C touchent des parties disjointes du brouillon
+(contributions, parents). Le fil de l'ordre 1 dimensionne une seule fois le
+tableau des lignes, à l'ouverture de la fenêtre, pendant la phase 0 ; les
+fils auxiliaires l'attendent avant toute écriture.
+
+Variante écartée (`fcf708d2`, annulée par `5394a975`) : dimensionner ce
+tableau après la phase 0, une fois son arène de requêtes libérée. Aucun gain
+de résidence mesurable (pic de la sonde à K10 : 3,79–4,13 Go pour la base,
+3,95–4,14 Go pour les deux variantes ; harnais de la tour seule : 3,87 Go
+pour le témoin, 3,76 Go en pipeline). En revanche, toutes les phases B
+attendent la fin de la phase 0 : à K10, la part exposée des populations
+passait de 31–127 ms à 660–1 082 ms (local, W8).
+
+**Échecs.** Tout ce qui est calculable est calculé : B exige A(K), C exige
+A(K) et A(K − 1). Après la jointure, l'échec retenu est celui de la boucle
+séquentielle : la phase 0, puis les autres exceptions par K, puis, par K, les
+lots, les populations et les images. Un point de panne des populations
+(`MHGP9_TESTING`) rejoint ceux des lots et des images, sur toutes les voies.
+
+**Banque.** Le domaine est strictement croissant. S'il commence à 0 et finit
+à n − 1, c'est exactement {0, …, n − 1} : l'appartenance devient p < n, au
+lieu d'une recherche dichotomique, que gardent les autres domaines. Même
+réponse, même contrôle, même confiance.
+
+**Chronos.** Sur la voie en pipeline, les trois temps suivants
+s'additionnent :
+- `lots` : la fenêtre jusqu'à la fin de la **dernière** phase A, moins la
+  phase 0 ;
+- `populations` : la part exposée ensuite, jusqu'à la fin de la dernière
+  phase B ;
+- `images` : le reste de la fenêtre.
+
+`images_by_k` reste le temps d'images de l'ordre **dans** la phase `images`
+(sa part après la dernière phase B), ce qui garde valides les bornes du
+lecteur G4. Les étapes propres de chaque ordre, recouvertes, sont dans
+`images_own_by_k` et `populations_by_k` (nouveaux, non publiés par la sonde).
+
+**Portes.**
+- `mhgp9_tower_full_ball_pipelined_cpu2` et `_cpu4` : toutes les fixtures de
+  l'oracle par la voie en pipeline, appariées à la voie temporelle et au
+  témoin (mêmes IDs, lignes, références, topologie, travail champ par
+  champ). Planchers : 14 références différées sur 12 fixtures, 168 ordres
+  en pipeline. Les refus passent aussi par cette voie.
+- `mhgp9_chain_tower_tail` : chaîne sur 1 500 sites et six carrés plantés,
+  à K5, avec 1, 2, 3, 4 et 8 fils, et le témoin à 4 et 8 fils. Même
+  condensé, même banque, mêmes références, mêmes champs de `tower_work`.
+  Planchers : une étape B chronométrée par ordre K ≥ 2, au moins une
+  référence différée par carré.
+- `mhgp9_chain_order_failure_priority` : trois voies (classique, recouverte
+  témoin, recouverte en pipeline) et onze scénarios, dont cinq avec des
+  pannes de populations.
+- `mhgp9_tower_population_bank` : un juge linéaire sur des domaines dense,
+  décalé, presque dense et creux, aux ids de bord.
+- Mutants tués : décalage compté sur les contributions et non à la première
+  rencontre (tour et chaîne), références différées jamais renommées,
+  domaine dense inclusif. Les deux mutants de priorité restent tués, sur la
+  voie en pipeline.
+
+**Mesures locales** (08/000000, W8, trois paires entrelacées par K, base
+`d1d03839` contre ce code, même source de sonde ; hôte partagé et très chargé,
+charge 17 à 46 sur 8 cœurs : **indicatif**). Les condensés épinglés sont
+reproduits et `tower_work` est égal champ par champ dans les 12 exécutions.
+Compteurs déterministes : 897 776 lignes à K5, 4 414 230 à K10 ; aucune
+référence différée sur cette trame (227 et 444 coquilles étendues, aucune ne
+contribue à deux ordres) ; ordres en pipeline = Kmax.
+
+| K | bras | tour (ms) | populations | images | banque | encodage | queue |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 5 | base | 4 813 / 4 629 / 4 811 | 280 / 273 / 211 | 122 / 190 / 187 | 166 / 138 / 147 | 302 / 266 / 371 | 870 / 868 / 915 |
+| 5 | E4 | 3 941 / 4 278 / 2 774 | 46 / 48 / 40 | 106 / 112 / 56 | 19 / 11 / 10 | 258 / 150 / 124 | 429 / 320 / 229 |
+| 10 | base | 45 512 / 44 146 / 44 611 | 2 645 / 2 808 / 2 790 | 898 / 1 230 / 1 014 | 1 871 / 1 518 / 1 720 | 1 434 / 1 076 / 1 328 | 6 847 / 6 632 / 6 852 |
+| 10 | E4 | 35 674 / 38 783 / 38 619 | 127 / 103 / 31 | 245 / 271 / 113 | 129 / 209 / 148 | 1 458 / 1 311 / 1 076 | 1 959 / 1 894 / 1 368 |
+
+La queue (populations + images + banque + encodage) passe, en médiane, de
+870 à 320 ms à K5 et de 6 847 à 1 894 ms à K10 ; l'encodage (E5) en est
+désormais la plus grosse part. Le mur de la tour baisse en médiane de 4 811
+à 3 941 ms à K5 et de 44 611 à 38 619 ms à K10, mais il suit surtout la
+phase 0, dont la dispersion sur cet hôte est du même ordre. Harnais de la
+tour seule sur le
+même catalogue (hors dépôt, banque dense dans les deux bras) : populations
+et images exposées de 152–235 à 43–80 ms à K5 et de 1 272–1 784 à 47–53 ms
+à K10. Toute durée G4 reste à mesurer.
+
 ### Ordonnancement des jobs du front q2 (sonde v16)
 
 Le recensement q2 découpait lui aussi son front en largeur (16 jobs par fil,
