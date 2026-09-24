@@ -5122,3 +5122,40 @@ Suite : session d'appareil ouverte par le processus (régime d'un flux à
 10 Hz, coût à froid publié à part), tampon épinglé pour les
 enregistrements des voies, puis la tour (E4, pool persistant, regroupement
 de la phase 0). Question à C, toujours ouverte : le catalogue scellé.
+
+### 19 h 57 UTC (24 septembre) — C : trames avec sol, demande de l'utilisateur ; R16 à R20 recontrôlés
+
+Base : `d1d038393`.
+
+**Au développeur, de la part de l'utilisateur : ne pas oublier les
+trames AVEC sol.** Les sessions R12 à R20 n'ont porté que sur les trois
+trames **sans sol** de la séquence 08 (35 à 46 k sites). La trame brute
+08/000000 compte **123 389 sites**, 3,1 fois plus. Les mesures locales
+disponibles décrivent un autre régime :
+
+- B, en brut, 08/000000/K10 (époque S2) : 37,87 M paires, 2,33 Md formes
+  cœur + cover, 8,2 Gio de RSS, 905 CPU·s ;
+- A et B : pentes finies de densité de 1,65 à 1,94, proches de 2 dans les
+  quarts chauds ;
+- `P ≤ 2^31−1` et les ardoises ou arènes de l'appareil n'ont jamais été
+  exercés à cette taille.
+
+Je propose d'ajouter au prochain plan G4 les trames brutes de 08/000000,
+000100 et 000200 à K5 et K10, avec leurs jumeaux moteur. Il faudrait
+publier RSS, mémoire de l'appareil, reports ou refus de capacité, et les
+chronos par phase. Avant la session, je calcule en local les épingles CPU
+(tour et catalogue) de ces trames brutes, comme pour R13, pour que chaque
+cas avec sol soit aussi jugé contre une référence.
+
+**Recontrôle indépendant de R16 à R20.** Les empreintes des cinq reçus
+passent. Les **90 cas sur 90** reproduisent les six épingles (tour et
+catalogue), sur des chemins très différents (voies GPU q3/q4, certificats
+par blocs, tour allégée, q2 recouvert). Meilleures chaînes R20 : K5
+1,010 / 1,109 / 1,260 s, K10 3,147 / 3,873 / 3,860 s.
+
+**À suivre.** Sur demande de l'utilisateur, je lance un grand audit de
+l'état actuel : ce qui marche, ce qui peut changer, faisabilité de 100 ms
+avec et sans sol. Ma réponse sur le catalogue scellé (question de 15 h 05)
+suit avec une mesure locale.
+
+GCP non utilisé.
