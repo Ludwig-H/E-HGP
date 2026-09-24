@@ -398,76 +398,96 @@ MHGP9_HD CertificateStatus q4_seed(const Group& group, const LanesIndex& index, 
       w.foreign_candidates += foreign;
       w.list_steps += (buffered + Group::size - 1) / Group::size + steps;
     }
-    for (;;) {
-      // Least-ID undecided candidate (L7), then its position in the list.
-      u32 best = 0xffffffffU;
-      for (u32 base = 0; base < m; base += Group::size) {
-        const u32 v = group.reduce_min(base, m, [&](u32 k) -> u32 {
-          const u32 i = q4.list[k];
-          const u32 bits = q4.bits[i];
-          return (bits & q4_candidate_bit) != 0 && (bits & q4_decided_bit) == 0 ? id_of(i) : 0xffffffffU;
-        });
-        best = v < best ? v : best;
-      }
-      if (group.leader()) w.group_steps += steps;
-      if (best == 0xffffffffU) break;
-      u32 where = 0xffffffffU;
-      for (u32 base = 0; base < m; base += Group::size) {
-        const u32 v = group.reduce_min(base, m, [&](u32 k) -> u32 {
-          return id_of(q4.list[k]) == best ? q4.list[k] : 0xffffffffU;
-        });
-        where = v < where ? v : where;
-      }
-      const Q4Pivot pivot = q4_pivot(f, a, point_of(where));
-      u32 depth = lens[j], group_size = 0, candidates = 0;
+    // T1 (v9, 24 septembre 2026, plan des voies, etape 1): every undecided
+    // candidate of the bucket, in list order, resolves its own root class by
+    // one pass against its pivot form, which STOPS as soon as the depth
+    // reaches T (the class is rejected whatever its representative: depth is
+    // a class property, L4). A pass marks the members it read (current-pass
+    // bit), then turns them decided: a class is resolved once when its pass
+    // completes, and a rejected class's members read before the stop are
+    // skipped. A completed pass handles its class like v1's group: size,
+    // fingerprint, positivity of its candidates, least valid ID. Foreign
+    // candidates share no class with this bucket's candidates (a class's
+    // root is one value), so the least candidate ID of a class is v1's pivot
+    // (the representative, L7). The bucket's emissions are put back in
+    // representative order: the records are those of v1, in the same order.
+    const u32 bucket_first = record_count;
+    for (u32 k = 0; k < m; ++k) {
+      const u32 ci = q4.list[k];
+      const u32 cbits = q4.bits[ci];  // same value on every lane: uniform flow
+      if ((cbits & q4_candidate_bit) == 0 || (cbits & q4_decided_bit) != 0) continue;
+      const Q4Pivot pivot = q4_pivot(f, a, point_of(ci));
+      u32 depth = lens[j], group_size = 0, candidates = 0, passed = 0, rep = 0xffffffffU;
       u64 group_sum = 0, group_xor = 0;
+      bool rejected = false;
       for (u32 base = 0; base < m; base += Group::size) {
         u32 same = 0, inside = 0;
-        group.ballot2(base, m, [&](u32 k) -> u32 {
-          const u32 i = q4.list[k];
+        group.ballot2(base, m, [&](u32 kk) -> u32 {
+          const u32 i = q4.list[kk];
           const std::int32_t* z = point_of(i);
           const i64 side = side_of(f, a, z);
           const int order = q4_compare(pivot, a, z, side);
           if (order == 0) {
-            q4.bits[i] |= q4_group_bit | q4_decided_bit;
+            q4.bits[i] |= q4_group_bit;
             return 1U;
           }
           return (side < 0 && order > 0) || (side > 0 && order < 0) ? 2U : 0U;
         }, same, inside);
+        ++passed;
         depth += popcount32(inside);
         group_size += popcount32(same);
-        if (same != 0)
+        if (same != 0) {
           group.fingerprint(same, [&](u32 lane) { return mix64(id_of(q4.list[base + lane])); }, group_sum,
                             group_xor);
+          // The lane reads the bits it has just written itself.
+          const u32 v = group.reduce_min(base, m, [&](u32 kk) -> u32 {
+            const u32 bits = q4.bits[q4.list[kk]];
+            return (bits & q4_group_bit) != 0 && (bits & q4_candidate_bit) != 0 ? id_of(q4.list[kk]) : 0xffffffffU;
+          });
+          rep = v < rep ? v : rep;
+        }
+#if defined(MHGP9_Q4_LANES_MUTANT_EARLY_EXIT_BELOW_T)
+        if (depth + 1 >= threshold) {  // mutant: stops one interior site too early
+#else
+        if (depth >= threshold) {
+#endif
+          rejected = true;
+          break;
+        }
       }
       group.sync();
       if (group.leader()) {
         ++w.groups;
-        w.compare_steps += steps;
-        w.group_steps += 2 * steps;  // locate + compare
+        w.compare_steps += passed;
+        w.group_steps += passed;
         w.max_group = w.max_group < group_size ? group_size : w.max_group;
       }
-      if (depth >= threshold) {
-        for (u32 base = 0; base < m; base += Group::size)
+      if (rejected) {
+        // The members read before the stop: decided (their class is rejected).
+        for (u32 base = 0; base < passed * Group::size && base < m; base += Group::size)
           group.for_each(m - base < Group::size ? m - base : Group::size, [&](u32 l) {
-            q4.bits[q4.list[base + l]] &= ~q4_group_bit;
+            u32& bits = q4.bits[q4.list[base + l]];
+            if ((bits & q4_group_bit) != 0) bits = (bits & ~q4_group_bit) | q4_decided_bit;
           });
         group.sync();
         if (group.leader()) {
           ++w.depth_rejected_groups;
-          w.group_steps += steps;  // reset
+          w.group_steps += passed;  // members turned decided
         }
         continue;
       }
-      // Positivity of the group's candidates, then the least valid ID.
+      // Positivity of the class's candidates (the members turn decided), then
+      // the least valid ID.
       u32 valid_id = 0xffffffffU;
       for (u32 base = 0; base < m; base += Group::size) {
         u32 tested = 0, unused = 0;
-        group.ballot2(base, m, [&](u32 k) -> u32 {
-          const u32 i = q4.list[k];
+        group.ballot2(base, m, [&](u32 kk) -> u32 {
+          const u32 i = q4.list[kk];
           u32 bits = q4.bits[i];
-          const bool test = (bits & q4_group_bit) != 0 && (bits & q4_candidate_bit) != 0;
-          bits &= ~(q4_group_bit | q4_valid_bit);  // a valid mark belongs to this group only
+          const bool member = (bits & q4_group_bit) != 0;
+          const bool test = member && (bits & q4_candidate_bit) != 0;
+          bits &= ~(q4_group_bit | q4_valid_bit);  // a valid mark belongs to this class only
+          if (member) bits |= q4_decided_bit;
           if (test) {
             const std::int32_t* y = point_of(i);
             if (q4_positive(f, a, y, q4_pivot(f, a, y))) bits |= q4_valid_bit;
@@ -476,8 +496,8 @@ MHGP9_HD CertificateStatus q4_seed(const Group& group, const LanesIndex& index, 
           return test ? 1U : 0U;
         }, tested, unused);
         candidates += popcount32(tested);
-        const u32 v = group.reduce_min(base, m, [&](u32 k) -> u32 {
-          const u32 i = q4.list[k];
+        const u32 v = group.reduce_min(base, m, [&](u32 kk) -> u32 {
+          const u32 i = q4.list[kk];
           return (q4.bits[i] & q4_valid_bit) != 0 ? id_of(i) : 0xffffffffU;
         });
         valid_id = v < valid_id ? v : valid_id;
@@ -494,8 +514,8 @@ MHGP9_HD CertificateStatus q4_seed(const Group& group, const LanesIndex& index, 
       }
       u32 chosen = 0xffffffffU;
       for (u32 base = 0; base < m; base += Group::size) {
-        const u32 v = group.reduce_min(base, m, [&](u32 k) -> u32 {
-          const u32 i = q4.list[k];
+        const u32 v = group.reduce_min(base, m, [&](u32 kk) -> u32 {
+          const u32 i = q4.list[kk];
           return (q4.bits[i] & q4_valid_bit) != 0 && id_of(i) == valid_id ? i : 0xffffffffU;
         });
         chosen = v < chosen ? v : chosen;
@@ -513,7 +533,7 @@ MHGP9_HD CertificateStatus q4_seed(const Group& group, const LanesIndex& index, 
             ids[q - 1] = t;
           }
         for (int p = 0; p < 4; ++p) r.support[p] = ids[p];
-        r.edge = absent32;
+        r.edge = rep;  // sort key of the bucket's emissions (reset below)
         r.depth = depth;
         r.shell = group_size + shell_count;
         r.arity = 4;
@@ -525,6 +545,17 @@ MHGP9_HD CertificateStatus q4_seed(const Group& group, const LanesIndex& index, 
       ++record_count;
       ++emits;
     }
+    // v1's order: the bucket's emissions by increasing representative ID.
+    if (group.leader()) {
+      for (u32 p = bucket_first + 1; p < record_count; ++p)
+        for (u32 q = p; q > bucket_first && slab.records[q].edge < slab.records[q - 1].edge; --q) {
+          const LaneRecord t = slab.records[q];
+          slab.records[q] = slab.records[q - 1];
+          slab.records[q - 1] = t;
+        }
+      for (u32 p = bucket_first; p < record_count; ++p) slab.records[p].edge = absent32;
+    }
+    group.sync();
   }
   if (group.leader()) {
     if (emits != 0) ++w.emitting_seeds;

@@ -7,12 +7,14 @@
 #include "lanes/q3_ball_census.hpp"
 #include "lanes/q34_dead_lanes.hpp"
 #include "wspd/front.hpp"
+#include "../../common/raw_vector.hpp"
 
 #include <array>
 #include <cstdint>
 #include <functional>
 #include <span>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 namespace mhgp9::gen {
@@ -411,15 +413,19 @@ struct Q34CertificateJudgeWork {
 // One emitted q3 ball (gpu::LaneRecord): primitive key {A, Bx, By, Bz, C},
 // sorted support IDs (support[3] = UINT32_MAX), strict interior count, shell
 // size and fingerprint (wrapping sum and xor of q34_shell_hash of its IDs).
+// Trivially default constructible (v9, 24 septembre 2026): a batch's records
+// are allocated without zero fill (RawVector) and written field by field;
+// every other construction value-initialises (`Q34LaneRecord r{}`).
 struct Q34LaneRecord {
-  std::array<i128, 5> key{};
-  std::array<std::uint32_t, 4> support{};
-  std::uint32_t edge{};  // survivor ordinal
-  std::uint32_t depth{}, shell{};
-  std::uint8_t arity{};
-  u64 shell_sum{}, shell_xor{};
+  std::array<i128, 5> key;
+  std::array<std::uint32_t, 4> support;
+  std::uint32_t edge;  // survivor ordinal
+  std::uint32_t depth, shell;
+  std::uint8_t arity;
+  u64 shell_sum, shell_xor;
   bool operator==(const Q34LaneRecord&) const = default;
 };
+static_assert(std::is_trivially_default_constructible_v<Q34LaneRecord>);
 
 // SplitMix64 finalizer (gpu::mix64): the shell fingerprint of one input ID.
 [[nodiscard]] inline u64 q34_shell_hash(u64 x) noexcept {
@@ -433,7 +439,7 @@ struct Q34LanesBatch {
   std::vector<std::uint8_t> decided;        // per survivor: lanes decided by the call (subset of asked)
   std::vector<std::uint32_t> record_begin;  // per survivor: first record of its slice
   std::vector<std::uint32_t> record_count;  // per survivor: its records (0 unless decided)
-  std::vector<Q34LaneRecord> records;       // the slices, in any order of the edges (q3 and q4)
+  RawVector<Q34LaneRecord> records;         // the slices, in any order of the edges (q3 and q4)
   Q34LanesWork work;                        // decided edges only (prologue and q3 lanes)
   Q34Lanes4Work work4;                      // decided edges only (S4b q4 lanes)
   std::string backend;                      // "cpu" or the device name

@@ -162,7 +162,7 @@ struct Slab {
 };
 
 gen::Q34LaneRecord record_of(const gpu::LaneRecord& from, std::uint32_t edge) {
-  gen::Q34LaneRecord to;
+  gen::Q34LaneRecord to{};
   for (int c = 0; c < 5; ++c) to.key[c] = from.key[c];
   for (int c = 0; c < 4; ++c) to.support[c] = from.support[c];
   to.edge = edge;

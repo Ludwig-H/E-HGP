@@ -119,6 +119,13 @@ struct FullBallTimes {
   double validate_ms = 0, static_ms = 0, lots_ms = 0, populations_ms = 0, images_ms = 0, bank_ms = 0,
          encode_ms = 0;
   std::array<double, 11> static_by_k{}, lots_by_k{}, images_by_k{}, encode_by_k{}, order_by_k{};
+  // v9 E0 (plan of the tower judge): sub-timers, each inside its phase.
+  // Validation: input and identity, key sort or presorted scan, key index,
+  // pass 1, pass 2, level sort, level runs, programs and population slots.
+  std::array<double, 8> validate_parts{};
+  // Phase 0 of order K: collection and concatenation, the two sorts, the
+  // group starts, the resolution (targets of every group).
+  std::array<double, 11> static_collect_by_k{}, static_sort_by_k{}, static_groups_by_k{}, static_resolve_by_k{};
 };
 struct FullBallTowerResult {
   FullBallStatus status = FullBallStatus::kInvalidInput;
@@ -185,41 +192,62 @@ struct History {
     return token;
   }
 };
+// Level keys of a lower history: exact levels (sequential path, witness) or
+// exact plateau ranks (static path, v9 E1: rank = level_run + 1 of the lot's
+// catalogue level, 0 for the zero level of K1). level_run is an exact order
+// isomorphism of the catalogue's levels (equal levels share a run) and the
+// zero level lies below every catalogue level, so every closed or open cut
+// answers the same on ranks as on exact levels (U320 compare replaced by u32).
+namespace history_keys {
+inline int compare(const ExactLevel& a, const ExactLevel& b) { return compare_exact_level(a, b); }
+inline int compare(u32 a, u32 b) { return (a > b) - (a < b); }
+inline bool valid(const ExactLevel& level) { return level.den > 0; }
+inline bool valid(u32) { return true; }
+template <class Key> inline bool admitted(const Key& level, const Key& cut, bool closed) {
+  const int cmp = compare(level, cut);
+  return cmp < 0 || (closed && cmp == 0);
+}
+}  // namespace history_keys
+
 // Working view for chronologically increasing LOWER closed cuts. Component
 // labels are separate from DSU representatives, so union by rank is permitted.
 // The immutable source history still answers arbitrary historical export cuts.
-class MonotoneHistory {
+template <class Key>
+class MonotoneHistoryOf {
  public:
-  MonotoneHistory(const History& history, FullBallStats& stats) : source(history), st(stats),
-      heads(history.levels.size(), absent), links(history.levels.size(), absent),
-      parent(history.levels.size()), owner(history.levels.size()), rank(history.levels.size(), 0) {
-    const size_t n = source.levels.size();
-    require(source.next.size() == n, "full_ball_lower_history_shape");
+  MonotoneHistoryOf(std::span<const Key> levels, std::span<const u64> next_of, FullBallStats& stats)
+      : levels(levels), next_of(next_of), st(stats),
+      heads(levels.size(), absent), links(levels.size(), absent),
+      parent(levels.size()), owner(levels.size()), rank(levels.size(), 0) {
+    const size_t n = levels.size();
+    require(next_of.size() == n, "full_ball_lower_history_shape");
     std::iota(parent.begin(), parent.end(), u64{0});
     std::iota(owner.begin(), owner.end(), u64{0});
     for (size_t node = 0; node < n; ++node) {
-      require(source.levels[node].den > 0 && (!node ||
-          compare_exact_level(source.levels[node - 1], source.levels[node]) <= 0),
+      require(history_keys::valid(levels[node]) && (!node ||
+          history_keys::compare(levels[node - 1], levels[node]) <= 0),
           "full_ball_lower_history_chronology");
-      const u64 next = source.next[node];
+      const u64 next = next_of[node];
       if (next == absent) continue;
-      require(next > node && next < n && compare_exact_level(source.levels[node], source.levels[next]) < 0,
+      require(next > node && next < n && history_keys::compare(levels[node], levels[next]) < 0,
           "full_ball_lower_history_edge");
       add(st.lower_edges_indexed);
       links[node] = heads[next]; heads[next] = node;
     }
   }
 
-  u64 root_at(u64 token, const ExactLevel& cut, bool closed) {
+  u64 root_at(u64 token, const Key& cut, bool closed) {
     add(st.lower_queries);
-    require(cut.den > 0, "full_ball_lower_cut_domain");
+    require(history_keys::valid(cut), "full_ball_lower_cut_domain");
     if (has_cut) {
-      const int cmp = compare_exact_level(cut, previous_cut);
+      const int cmp = history_keys::compare(cut, previous_cut);
       require(cmp > 0 || (cmp == 0 && (closed || !previous_closed)), "full_ball_lower_cut_not_monotone");
     }
     has_cut = true; previous_cut = cut; previous_closed = closed;
-    while (cursor < source.levels.size() &&
-        full_coverage_detail::admitted(source.levels[cursor], cut, closed)) {
+#if defined(MHGP9_TOWER_MUTANT_RUNS_OPEN_CUT)
+    if constexpr (std::is_same_v<Key, u32>) closed = false;  // mutant: rank cuts read as open
+#endif
+    while (cursor < levels.size() && history_keys::admitted(levels[cursor], cut, closed)) {
       add(st.lower_nodes_activated);
       u64 representative = cursor;
       for (u64 child = heads[cursor]; child != absent; child = links[child]) {
@@ -236,12 +264,13 @@ class MonotoneHistory {
   }
 
  private:
-  const History& source;
+  std::span<const Key> levels;
+  std::span<const u64> next_of;
   FullBallStats& st;
   std::vector<u64> heads, links, parent, owner;
   std::vector<u8> rank;
   size_t cursor = 0;
-  ExactLevel previous_cut{};
+  Key previous_cut{};
   bool has_cut = false, previous_closed = false;
 
   u64 find(u64 token) {
@@ -261,6 +290,12 @@ class MonotoneHistory {
     if (rank[a] == rank[b]) ++rank[a];  // rank <= log2(node count) <= 64
     return a;
   }
+};
+// Exact levels: the sequential path and the witness of the rank cursor.
+class MonotoneHistory : public MonotoneHistoryOf<ExactLevel> {
+ public:
+  MonotoneHistory(const History& history, FullBallStats& stats)
+      : MonotoneHistoryOf<ExactLevel>(history.levels, history.next, stats) {}
 };
 struct Draft {
   std::vector<FullCoverageBatch> batches;  // sequential path
@@ -406,7 +441,7 @@ class Builder {
       }
       if (geometry_threads && k > 1) {
         require(static_cursor == static_targets.size(), "full_ball_static_unconsumed_targets");
-        std::vector<BallId>().swap(static_targets);
+        RawVector<BallId>().swap(static_targets);
       }
       u64 live = 0;
       for (u64 next : current.next) if (next == absent) ++live;
@@ -418,6 +453,7 @@ class Builder {
       lower_anchors = std::move(anchors);
       times->order_by_k[k] = ms_since(order_start);
     }
+    release_static_arena();
     // Construction indices and histories are dead after the last order; no
     // published object borrows them. Release before copying the immutable bank.
     lower_history = {};
@@ -493,11 +529,15 @@ class Builder {
     std::vector<u32> anchors;          // node per ball of this order (kAbsent32)
     History current;
     std::vector<u64> compressed;
-    std::vector<BallId> static_targets;
+    RawVector<BallId> static_targets;
     size_t static_cursor = 0;
     std::vector<Block> lot_blocks;
     Draft draft;
     std::vector<u32> birth_ball;       // per node: ball of a birth, or kAbsent32
+    // v9 E1: per node, the exact plateau rank of its level (level_run + 1 of
+    // its lot, 0 for the zero level of K1); the images compare these u32.
+    std::vector<u32> runs;
+    u32 lot_run = 0;
   };
   // Node IDs of one order in u32: an order with 2^32-1 nodes or more is an
   // explicit resource refusal on this path (never a truncation). At 30 M
@@ -517,6 +557,7 @@ class Builder {
       times->static_by_k[k] = ms_since(start);
       times->static_ms += times->static_by_k[k];
     }
+    release_static_arena();
     // A Failure is reported for the SMALLEST K over both phases, as the
     // sequential loop would: when the lots of order f fail, the images of
     // the orders below f (whose lots all succeeded) are still resolved.
@@ -637,6 +678,7 @@ class Builder {
             wake.notify_all();
           }
         }
+        release_static_arena();
       } catch (...) { cancel(); throw; }
       if (static_failure) cancel();
       for (auto& runner : runners) runner.join();
@@ -704,6 +746,7 @@ class Builder {
     o.current.levels.push_back(level); o.current.next.push_back(absent); o.compressed.push_back(id);
     for (u64 parent : parents) { o.current.next[parent] = id; o.compressed[parent] = id; }
     o.birth_ball.push_back(birth);
+    o.runs.push_back(o.lot_run);
     if (parents.empty()) add(o.st.births); else add(o.st.merges);
     return id;
   }
@@ -816,6 +859,11 @@ class Builder {
     o.draft.flat_form = true;
     if (o.k == 1) {
       const ExactLevel zero{{0, 0, 0}, 1};
+#if defined(MHGP9_TOWER_MUTANT_RUNS_ZERO_COLLIDES)
+      o.lot_run = 1;  // mutant: the zero level shares the rank of the lowest catalogue level
+#else
+      o.lot_run = 0;  // the zero level is below every catalogue level
+#endif
       o.draft.flat.open_batch(zero);
       for (size_t j = 0; j < domain.size(); ++j) {
         const FullCoverageRef ref{j, 1, false};  // domain singleton j (population j)
@@ -833,12 +881,14 @@ class Builder {
       if (o.lot_blocks.size() < end - begin) o.lot_blocks.resize(end - begin);
       const std::span<Block> blocks(o.lot_blocks.data(), end - begin);
       const u64 prior_count = o.current.levels.size();
+      require(run < kAbsent32 - 1, "full_ball_level_run_representation", FullBallStatus::kResourceExhausted);
+      o.lot_run = run + 1;
       for (size_t j = begin; j < end; ++j) order_block(o, blocks[j - begin], program[j], prior_count);
       order_lot(o, blocks, level);
       begin = end;
     }
     if (o.k > 1) require(o.static_cursor == o.static_targets.size(), "full_ball_static_unconsumed_targets");
-    std::vector<BallId>().swap(o.static_targets);
+    RawVector<BallId>().swap(o.static_targets);
     decltype(o.lot_blocks)().swap(o.lot_blocks);
     decltype(o.compressed)().swap(o.compressed);
     u64 live = 0;
@@ -877,8 +927,11 @@ class Builder {
   }
 
   void order_images(OrderState& o, const OrderState* lower) {
-    static const History empty_history;
-    MonotoneHistory cursor(lower ? lower->current : empty_history, o.st);
+    // Closed cuts compared on exact plateau ranks (E1): same answers as the
+    // exact levels (level_run is an order isomorphism), same counters.
+    MonotoneHistoryOf<u32> cursor(lower ? std::span<const u32>(lower->runs) : std::span<const u32>(),
+                                  lower ? std::span<const u64>(lower->current.next) : std::span<const u64>(), o.st);
+    require(o.runs.size() == o.current.levels.size(), "full_ball_image_rank_shape");
     o.draft.lower_nodes.reserve(o.current.levels.size());
     u64 node = 0;
     require(o.draft.flat_form, "full_ball_draft_form");
@@ -889,7 +942,7 @@ class Builder {
       require(node < o.current.levels.size(), "full_ball_image_node_count");
       u64 image = absent;
       if (o.k > 1) {
-        const auto& level = o.current.levels[node];
+        const u32 level = o.runs[node];
         if (parents.empty()) {
           const u32 ball = o.birth_ball[node];
           require(ball != kAbsent32 && lower->anchors[ball] != kAbsent32, "full_ball_vertical_birth_anchor");
@@ -920,7 +973,12 @@ class Builder {
   FullBallTimes* times;  // phase wall times (the caller's, or unused_times)
   bool overlap_static_lots = false;  // phase A of order K starts once phase 0 of K is done
   using StaticSeed = FullBallBatchSeed;
-  std::vector<BallId> static_targets;
+  RawVector<BallId> static_targets;  // one target per request, every slot written
+  // Arena of the phase-0 requests, reused from order to order (default
+  // initialised: every slot is written by the parallel copy), released
+  // after the last order's phase 0 (release_static_arena).
+  RawVector<FullBallBatchRequest> static_request_arena;
+  void release_static_arena() { RawVector<FullBallBatchRequest>().swap(static_request_arena); }
   size_t static_cursor = 0;
   std::vector<PointId> domain;
   std::vector<std::pair<PointId,i32>> identity;
@@ -1054,6 +1112,12 @@ class Builder {
 
   void validate_catalogue() {
     constexpr auto invalid = FullBallStatus::kInvalidInput;
+    auto lap_start = PhaseClock::now();
+    const auto lap = [&](size_t part) {  // E0 sub-timers of the validation
+      const auto now = PhaseClock::now();
+      times->validate_parts[part] = std::chrono::duration<double, std::milli>(now - lap_start).count();
+      lap_start = now;
+    };
     require(requested > 0 && requested <= kFacetMaxK && ix.valid && !ix.upos.empty() &&
         !ix.has_duplicate_positions() && ix.input_count <= static_cast<u64>(std::numeric_limits<i32>::max()) &&
         balls.size() <= std::numeric_limits<BallId>::max(), "full_ball_input_domain", invalid);
@@ -1067,6 +1131,7 @@ class Builder {
     std::sort(identity.begin(), identity.end());
     for (const auto& row : identity) domain.push_back(row.first);
     require(std::adjacent_find(domain.begin(), domain.end()) == domain.end(), "full_ball_duplicate_id", invalid);
+    lap(0);
     by_key.resize(balls.size()); std::iota(by_key.begin(), by_key.end(), BallId{0});
     // A catalogue already in STRICTLY increasing key order (the chain's) is
     // certified by this one scan: the identity is then the unique sorted
@@ -1081,7 +1146,9 @@ class Builder {
       for (size_t j = 1; j < by_key.size(); ++j)
         require(!(balls[by_key[j]].key == balls[by_key[j - 1]].key), "full_ball_duplicate_key", invalid);
     }
+    lap(1);
     build_key_index();  // keys are distinct from here on
+    lap(2);
     std::vector<size_t> counts(kmax + 1, 0);
     // Pass 1, parallel on the static path: the per-ball exact checks that
     // touch no shared state (shape, sites, key domain, census powers, and the
@@ -1113,6 +1180,7 @@ class Builder {
           first_local_failure = failed_at[c]; local_failure = failures[c];
         }
       }
+      lap(3);
     }
     // Pass 2. Regular balls in parallel (rank window, per-order counts; their
     // q_min is their arity), extended shells serially in index order (plateau
@@ -1171,6 +1239,7 @@ class Builder {
         for (unsigned k = 1; k <= kmax; ++k) counts[k] += local[k];
       add(st.records, balls.size());
     }
+    lap(4);
     // Same order as a stable sort of by_key under compare_exact_level: the
     // certified double filter decides clear gaps, the exact U320 comparison
     // decides the rest, and equal levels keep their by_key rank.
@@ -1201,6 +1270,7 @@ class Builder {
     // level_run[a] < level_run[b] and equality <=> equal runs. The certified
     // double filter separates clear gaps; the exact comparison decides the
     // rest. Phase 0 and phase A then compare runs instead of U320 products.
+    lap(5);
     level_run.assign(balls.size(), 0);
     {
       // Parallel in two passes: run starts and their count per chunk, then
@@ -1235,6 +1305,7 @@ class Builder {
         }
       });
     }
+    lap(6);
     // Programs in by_level order, filled in parallel at per-chunk offsets
     // (counts, prefix, scatter): the same vectors as the serial append.
     programs.resize(kmax + 1);
@@ -1270,6 +1341,7 @@ class Builder {
       });
     }
     population_ids.assign(balls.size(), absent);
+    lap(7);
   }
 
   i32 geometry_id(PointId id) const {
@@ -1396,8 +1468,8 @@ class Builder {
     add(st.resolve_work.proposal_fallbacks, w.resolve_work.proposal_fallbacks);
   }
 
-  void prepare_external_batch(const std::vector<FullBallBatchRequest>& requests,
-      const std::vector<size_t>& groups, const std::vector<StaticSeed>& seeds) {
+  void prepare_external_batch(const RawVector<FullBallBatchRequest>& requests,
+      const std::vector<size_t>& groups, const RawVector<StaticSeed>& seeds) {
     const BallId missing = std::numeric_limits<BallId>::max();
     std::vector<BallId> unique_targets(groups.size() - 1, missing);
     std::vector<FullBallBatchRequest> pending;
@@ -1507,9 +1579,15 @@ class Builder {
 
   void prepare_static_order() {
     failpoint_after_static(current_k);
+    auto lap_start = PhaseClock::now();
+    const auto lap = [&](std::array<double, 11>& into) {  // E0 sub-timers of phase 0
+      const auto now = PhaseClock::now();
+      into[current_k] = std::chrono::duration<double, std::milli>(now - lap_start).count();
+      lap_start = now;
+    };
     using Request = FullBallBatchRequest;
-    std::vector<Request> requests;
-    std::vector<StaticSeed> seeds;
+    auto& requests = static_request_arena;
+    RawVector<StaticSeed> seeds;
     // Collection by fixed blocks of the program, in parallel on the static
     // path, then concatenated in program order: ordinals are the positions of
     // the sequential collection (same requests, same order, any thread count).
@@ -1549,7 +1627,12 @@ class Builder {
       request_at[c + 1] = request_at[c] + collected[c].requests.size();
       seed_at[c + 1] = seed_at[c] + collected[c].seeds.size();
     }
+    // Default-initialised slots: the parallel copy writes every one (the
+    // ordinals are the positions of the collection). A larger order than the
+    // arena's reallocates without copying the stale requests.
+    if (requests.capacity() < request_at.back()) { requests.clear(); requests.shrink_to_fit(); }
     requests.resize(request_at.back()); seeds.resize(seed_at.back());
+    poison_unwritten(requests, 0); poison_unwritten(seeds, 0);
     parallel_items(collected.size(), geometry_threads, [&](size_t chunk, size_t) {
       auto& c = collected[chunk];
       for (size_t j = 0; j < c.requests.size(); ++j)
@@ -1557,6 +1640,7 @@ class Builder {
       std::copy(c.seeds.begin(), c.seeds.end(), seeds.begin() + static_cast<std::ptrdiff_t>(seed_at[chunk]));
       decltype(c.requests)().swap(c.requests); decltype(c.seeds)().swap(c.seeds);
     });
+    lap(times->static_collect_by_k);
     st.static_requests[current_k] = requests.size();
     st.static_peak_request_bytes = std::max<u64>(st.static_peak_request_bytes,
         requests.capacity() * sizeof(Request));
@@ -1574,6 +1658,7 @@ class Builder {
     parallel_sort(seeds, geometry_threads, [](const StaticSeed& a, const StaticSeed& b) { return a.key < b.key; });
     for (size_t j = 1; j < seeds.size(); ++j)
       require(seeds[j - 1].key != seeds[j].key, "full_ball_static_duplicate_seed");
+    lap(times->static_sort_by_k);
     // Group starts (first request of each key), found by chunks in parallel.
     std::vector<size_t> groups;
     {
@@ -1591,11 +1676,16 @@ class Builder {
     st.static_unique[current_k] = groups.size();
     groups.push_back(requests.size());
     static_cursor = 0;
-    static_targets.assign(requests.size(), std::numeric_limits<BallId>::max());
+    // Every ordinal is written by exactly one group (the groups partition the
+    // requests, the ordinals are a permutation): no sentinel fill.
+    static_targets.resize(requests.size());
+    poison_unwritten(static_targets, 0);
     st.static_peak_target_bytes = std::max<u64>(st.static_peak_target_bytes,
         static_targets.capacity() * sizeof(BallId));
+    lap(times->static_groups_by_k);
     if (batch_resolver.resolve) {
       prepare_external_batch(requests, groups, seeds);
+      lap(times->static_resolve_by_k);
       return;
     }
     struct Worker { FullBallStats work; std::vector<NodeRef> scratch; u64 seeded = 0; };
@@ -1648,6 +1738,7 @@ class Builder {
       throw;
     }
     account();
+    lap(times->static_resolve_by_k);
   }
   u64 resolve_static_target(const ExactLevel& before, u64 prior_count) {
     require(static_cursor < static_targets.size(), "full_ball_static_target_missing");

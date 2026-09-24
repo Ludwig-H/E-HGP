@@ -211,7 +211,7 @@ int main(int argc, char** argv) {
   const auto r = mhgp9::run_tower_chain(input.points, options);
   const auto& t = r.times;
   const auto& c = r.catalogue;
-  std::printf("{\"schema\":\"mhgp9_tower_probe_v21\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
+  std::printf("{\"schema\":\"mhgp9_tower_probe_v22\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
               r.reason.c_str());
   std::printf("\"input\":{\"format\":\"%s\",\"grid\":\"%s\",\"sites\":%zu,\"hash\":\"%016" PRIx64 "\"},", input.format.c_str(),
               grid.c_str(), input.points.size(), input.hash);
@@ -290,26 +290,35 @@ int main(int argc, char** argv) {
                 ",\"lanes_backend\":\"%s\",\"lanes_ms\":%.3f,\"lanes_device_ms\":%.3f,\"lanes_kernel_ms\":%.3f"
                 ",\"lanes_transfer_ms\":%.3f,\"lanes_wait_ms\":%.3f,\"tail_ms\":%.3f,\"lanes_asked\":%" PRIu64
                 ",\"lanes_decided\":%" PRIu64 ",\"lanes_deferred\":%" PRIu64 ",\"lanes_records\":%" PRIu64
-                ",\"lanes_judged\":%" PRIu64 ",\"lanes_warps\":%u},",
+                ",\"lanes_judged\":%" PRIu64 ",\"lanes_warps\":%u,\"lanes_setup_ms\":%.3f"
+                ",\"lanes_finish_ms\":%.3f,\"lanes_convert_ms\":%.3f},",
                 b.used ? "true" : "false", backend.c_str(), b.front_ms, b.filter_ms, b.edges_ms, b.device_ms,
                 b.rectangles, b.survivors, certificate_backend.c_str(), b.certificate_ms, b.certificate_device_ms,
                 b.deferred, b.judged_edges, b.rebuilt_covers, b.certificate_warps, b.filter_kernel_ms,
                 b.filter_transfer_ms, b.certificate_kernel_ms, b.certificate_transfer_ms, lanes_backend.c_str(),
                 b.lanes_ms, b.lanes_device_ms, b.lanes_kernel_ms, b.lanes_transfer_ms, b.lanes_wait_ms, b.tail_ms,
-                b.lanes_asked, b.lanes_decided, b.lanes_deferred, b.lanes_records, b.lanes_judged, b.lanes_warps);
+                b.lanes_asked, b.lanes_decided, b.lanes_deferred, b.lanes_records, b.lanes_judged, b.lanes_warps,
+                b.lanes_setup_ms, b.lanes_finish_ms, b.lanes_convert_ms);
     const auto& tt = r.tower_times;
     std::printf("\"tower_phases_ms\":{\"validate\":%.3f,\"static\":%.3f,\"lots\":%.3f,\"populations\":%.3f,"
                 "\"images\":%.3f,\"bank\":%.3f,\"encode\":%.3f",
                 tt.validate_ms, tt.static_ms, tt.lots_ms, tt.populations_ms, tt.images_ms, tt.bank_ms, tt.encode_ms);
     const std::pair<const char*, const std::array<double, 11>*> per_k[] = {
         {"static_by_k", &tt.static_by_k}, {"lots_by_k", &tt.lots_by_k}, {"images_by_k", &tt.images_by_k},
-        {"encode_by_k", &tt.encode_by_k}, {"order_by_k", &tt.order_by_k}};
+        {"encode_by_k", &tt.encode_by_k}, {"order_by_k", &tt.order_by_k},
+        // v22 (E0): phase-0 sub-timers of each order.
+        {"static_collect_by_k", &tt.static_collect_by_k}, {"static_sort_by_k", &tt.static_sort_by_k},
+        {"static_groups_by_k", &tt.static_groups_by_k}, {"static_resolve_by_k", &tt.static_resolve_by_k}};
     for (const auto& [name, values] : per_k) {
       std::printf(",\"%s\":[", name);
       for (unsigned k = 1; k <= options.kmax; ++k) std::printf("%s%.3f", k > 1 ? "," : "", (*values)[k]);
       std::printf("]");
     }
-    std::printf("},");
+    // v22 (E0): validation sub-timers (input, key sort, key index, pass 1,
+    // pass 2, level sort, level runs, programs).
+    std::printf(",\"validate_parts\":[");
+    for (size_t p = 0; p < tt.validate_parts.size(); ++p) std::printf("%s%.3f", p ? "," : "", tt.validate_parts[p]);
+    std::printf("]},");
   }
   {
     const auto& l = r.ledger;

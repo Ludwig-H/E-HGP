@@ -18,10 +18,17 @@
 #include <thread>
 #include <vector>
 
+#include "../../common/raw_vector.hpp"
 #include "../core/mutants.hpp"
 #include "../core/types.hpp"
 
 namespace mhgp9::tower {
+
+// Vecteur a initialisation par defaut (src/common/raw_vector.hpp) : tampons
+// dont chaque case est ecrite avant toute lecture (v9 E1).
+using mhgp9::DefaultInitAllocator;
+using mhgp9::RawVector;
+using mhgp9::poison_unwritten;
 
 inline size_t planned_workers(size_t items, int threads) {
   if (threads <= 1 || items <= 1) return 1;
@@ -171,8 +178,8 @@ inline size_t parallel_items(size_t n, int threads, Fn&& fn) {
 // repartit ses elements dans les seaux (en parallele), puis chaque seau est
 // recopie a sa place et trie (en parallele). Retourne le nombre d'ouvriers
 // crees au plus large. Pic : un second tampon de n elements.
-template <typename T, typename Less>
-inline size_t parallel_sort(std::vector<T>& values, int threads, Less less) {
+template <typename T, typename A, typename Less>
+inline size_t parallel_sort(std::vector<T, A>& values, int threads, Less less) {
   const size_t n = values.size();
   const size_t workers = planned_workers(n / 4096, threads);
   if (workers <= 1) {
@@ -198,7 +205,7 @@ inline size_t parallel_sort(std::vector<T>& values, int threads, Less less) {
   }
   const size_t buckets = splitters.size() + 1;
   const size_t chunks = 4 * workers;
-  std::vector<u32> bucket_of(n);
+  RawVector<u32> bucket_of(n);  // every slot written by its chunk below
   std::vector<size_t> counts(chunks * buckets, 0);
   size_t created = parallel_items(chunks, threads, [&](size_t c, size_t) {
     for (size_t i = n * c / chunks; i < n * (c + 1) / chunks; ++i) {

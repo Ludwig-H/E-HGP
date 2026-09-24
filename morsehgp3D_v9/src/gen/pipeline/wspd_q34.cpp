@@ -1199,7 +1199,7 @@ Q34CertificateFilter judge_certificate_filter(Q34CertificateFilter inner, std::s
 namespace {
 
 Q34LaneRecord lane_record(const Q34SeedCandidate& c) {
-  Q34LaneRecord r;
+  Q34LaneRecord r{};
   r.key = c.ball.coefficients();
   for (std::size_t j = 0; j < 4; ++j)
     r.support[j] = j < c.arity ? static_cast<std::uint32_t>(c.support_ids[j]) : std::numeric_limits<std::uint32_t>::max();

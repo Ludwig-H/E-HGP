@@ -337,6 +337,7 @@ def main(argv):
                 ('lanes backend relabelled', lambda v: v['q34_batch'].update(
                     lanes_backend='NVIDIA RTX PRO 6000 Blackwell Server Edition')),
                 ('lanes device time on the CPU', lambda v: v['q34_batch'].update(lanes_device_ms=0.5)),
+                ('lanes setup on the CPU', lambda v: v['q34_batch'].update(lanes_setup_ms=0.01)),
                 ('lanes kernel time on the CPU', lambda v: v['q34_batch'].update(lanes_kernel_ms=0.5)),
                 ('lanes warps on the CPU', lambda v: v['q34_batch'].update(lanes_warps=1)),
                 ('lanes deferral below the slab', lambda v: v['q34_batch'].update(

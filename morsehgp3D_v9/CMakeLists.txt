@@ -405,6 +405,15 @@ mhgp9_gate(mhgp9_gpu_lanes_port_scale8000 0 mhgp9_gpu_lanes_port_gate ARGS --n=8
            EXPECT_PREFIX "lanes_port_gate n=8000" LABELS "scale8000;gpu;oracle" TIMEOUT 2400)
 mhgp9_gate(mhgp9_gpu_lanes_port_bad_argument 2 mhgp9_gpu_lanes_port_gate ARGS --k=11
            LABELS "gate;gpu" TIMEOUT 60)
+# T1 (etape 1 des voies) : un mutant qui arrete la passe d'une classe un
+# site interieur trop tot rejette des classes de profondeur T-1 ; la porte
+# de port (voies q4 contre le moteur) le tue a K3.
+mhgp9_product_executable(mhgp9_gpu_lanes_port_early_exit_mutant_gate tests/gpu/lanes_port_gate.cpp)
+target_link_libraries(mhgp9_gpu_lanes_port_early_exit_mutant_gate PRIVATE mhgp9_gen)
+target_include_directories(mhgp9_gpu_lanes_port_early_exit_mutant_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+target_compile_definitions(mhgp9_gpu_lanes_port_early_exit_mutant_gate PRIVATE MHGP9_Q4_LANES_MUTANT_EARLY_EXIT_BELOW_T=1)
+mhgp9_gate(mhgp9_gpu_lanes_port_mutant_early_exit 1 mhgp9_gpu_lanes_port_early_exit_mutant_gate ARGS --n=2000 --k=3
+           EXPECT_PREFIX "cause=" LABELS "gate;gpu;mutant" TIMEOUT 600)
 # Mode --compare (revue S4b) : planchers exiges et seulement avec --compare,
 # --compare seulement sur un fichier, nuage refuse = 2 ; deux points (fixture
 # de l'auditeur) = comparaison vide sous plancher (3) ; tetraedre a racine sur
@@ -455,6 +464,19 @@ mhgp9_product_executable(mhgp9_chain_static_paths_gate tests/chain/chain_static_
 target_link_libraries(mhgp9_chain_static_paths_gate PRIVATE mhgp9_chain)
 mhgp9_gate(mhgp9_chain_static_paths 0 mhgp9_chain_static_paths_gate
            ARGS --selftest LABELS "gate;chain" TIMEOUT 300)
+# Images par rangs de plateau (E1) : la voie statique compare des rangs u32,
+# la voie temporelle garde les niveaux exacts (temoin). Deux mutants de la
+# chaine recompilee : coupe fermee lue ouverte, niveau zero au rang du plus
+# bas niveau du catalogue ; la voie statique s'ecarte du temoin.
+foreach(mutant IN ITEMS RUNS_OPEN_CUT RUNS_ZERO_COLLIDES)
+  string(TOLOWER ${mutant} lower)
+  mhgp9_product_executable(mhgp9_chain_static_paths_${lower}_mutant_gate
+                           tests/chain/chain_static_paths_gate.cpp src/chain/tower_chain.cpp)
+  target_link_libraries(mhgp9_chain_static_paths_${lower}_mutant_gate PRIVATE mhgp9_gen mhgp9_gpu)
+  target_compile_definitions(mhgp9_chain_static_paths_${lower}_mutant_gate PRIVATE MHGP9_TOWER_MUTANT_${mutant}=1)
+  mhgp9_gate(mhgp9_chain_static_paths_mutant_${lower} 1 mhgp9_chain_static_paths_${lower}_mutant_gate
+             ARGS --selftest EXPECT_PREFIX "cause=" LABELS "gate;chain;tower;mutant" TIMEOUT 300)
+endforeach()
 # Porte d'echelle de l'auditeur C : invariant d'Euler par ordre K sur le
 # catalogue reel de la chaine (NOTE_C_INVARIANT_EULER_20260923, preuve sans
 # position generale CONTRELEC_EULER_PAR_NERF_20260923). Trois familles v8

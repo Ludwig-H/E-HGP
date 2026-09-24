@@ -120,10 +120,12 @@ class GpuPreparation {
   GpuPreparation(const GpuPreparation&) = delete;
   GpuPreparation& operator=(const GpuPreparation&) = delete;
   ~GpuPreparation() { join(); }
-  void start(const gen::Q2CensusIndex& index) {
-    thread_ = std::thread([this, &index] {
+  // lanes: also reserve the lanes call's resident slabs (v9 H1) during q2.
+  void start(const gen::Q2CensusIndex& index, bool lanes, std::uint32_t lanes_capacity, std::uint32_t lanes_events) {
+    thread_ = std::thread([this, &index, lanes, lanes_capacity, lanes_events] {
       try {
         static_cast<void>(gpu::warm_up());  // errors are classified by the batch call
+        if (lanes) static_cast<void>(gpu::warm_up_lanes(lanes_capacity, 0, lanes_events));
         prepared_ = prepare_gpu_index(index);
       } catch (...) {
         failure_ = std::current_exception();
@@ -292,7 +294,8 @@ gen::Q34CertificateBatch gpu_certificate_batch(const GpuIndex& prepared, unsigne
 gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::span<const gen::Q34SurvivingEdge> survivors,
                                std::span<const std::uint8_t> asked, bool device, std::uint32_t capacity,
                                std::uint32_t events, std::size_t workers, double& device_ms, double& kernel_ms,
-                               double& transfer_ms, std::uint32_t& warps) {
+                               double& transfer_ms, std::uint32_t& warps, double& setup_ms, double& finish_ms,
+                               double& convert_ms) {
   std::vector<std::size_t> where;
   std::vector<gpu::u32> a, b;
   std::vector<gpu::u8> lanes;
@@ -318,6 +321,7 @@ gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::spa
   in.capacity = capacity;
   in.event_capacity = events;
   auto out = device ? gpu::run_lanes_batch(in) : gpu::run_lanes_batch_host(in, workers);
+  const auto convert_start = Clock::now();
   switch (out.error_kind) {
     case gpu::BatchError::none:
       break;
@@ -346,7 +350,8 @@ gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::spa
     batch.record_begin[where[i]] = out.record_begin[i];
     batch.record_count[where[i]] = out.record_count[i];
   }
-  batch.records.resize(out.records.size());
+  batch.records.resize(out.records.size());  // default-initialised: every record written below
+  poison_unwritten(batch.records, 0);
   tower::parallel_ranges(out.records.size(), static_cast<int>(std::max<std::size_t>(1, workers)),
                          [&](std::size_t first, std::size_t last, std::size_t) {
     for (std::size_t r = first; r < last; ++r) {
@@ -396,6 +401,9 @@ gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::spa
   kernel_ms = out.kernel_ms;
   transfer_ms = out.upload_ms + out.download_ms;
   warps = out.warps;
+  setup_ms = out.setup_ms;
+  finish_ms = out.finish_ms;
+  convert_ms = ms_since(convert_start);
   return batch;
 }
 
@@ -717,7 +725,8 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     GpuPreparation gpu_preparation;
     if (options.q34_batch_filter && (options.q34_gpu_filter || options.q34_gpu_certificates || options.q34_gpu_q3) &&
         kmax >= 2)
-      gpu_preparation.start(*index);
+      gpu_preparation.start(*index, options.q34_batch_q3 && options.q34_gpu_q3, options.q34_lanes_capacity,
+                            options.q34_lanes_events);
 
     std::vector<std::vector<Presentation>> slots(W);
     t = Clock::now();
@@ -819,6 +828,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         // S4a: the q3 lanes of the certified survivors, their records turned
         // into presentations of the worker slot that receives them.
         double lanes_device_ms = 0, lanes_kernel_ms = 0, lanes_transfer_ms = 0;
+        double lanes_setup_ms = 0, lanes_finish_ms = 0, lanes_convert_ms = 0;
         std::uint32_t lanes_warps = 0;
         gen::Q34LanesJudgeWork lanes_judge;
         gen::Q34LanesStage lanes;
@@ -826,11 +836,13 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
           const bool device = options.q34_gpu_q3;
           const std::uint32_t capacity = options.q34_lanes_capacity, events = options.q34_lanes_events;
           lanes.filter = [&gpu_preparation, &lanes_device_ms, &lanes_kernel_ms, &lanes_transfer_ms, &lanes_warps,
+                          &lanes_setup_ms, &lanes_finish_ms, &lanes_convert_ms,
                           device, capacity, events, W](const gen::Q2CensusIndexPtr& ix, unsigned k,
                                                        std::span<const gen::Q34SurvivingEdge> edges,
                                                        std::span<const std::uint8_t> asked) {
             return lanes_batch(gpu_preparation.get(*ix), k, edges, asked, device, capacity, events, W,
-                               lanes_device_ms, lanes_kernel_ms, lanes_transfer_ms, lanes_warps);
+                               lanes_device_ms, lanes_kernel_ms, lanes_transfer_ms, lanes_warps, lanes_setup_ms,
+                               lanes_finish_ms, lanes_convert_ms);
           };
           lanes.lanes = options.q34_batch_q4 && kmax >= 3 ? 6 : 2;
           if (options.q34_lanes_judge) lanes.filter = gen::judge_lanes_filter(std::move(lanes.filter), o, W, &lanes_judge);
@@ -881,6 +893,9 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         b.lanes_device_ms = options.q34_gpu_q3 ? lanes_device_ms : 0.0;
         b.lanes_kernel_ms = options.q34_gpu_q3 ? lanes_kernel_ms : 0.0;
         b.lanes_transfer_ms = options.q34_gpu_q3 ? lanes_transfer_ms : 0.0;
+        b.lanes_setup_ms = options.q34_gpu_q3 ? lanes_setup_ms : 0.0;
+        b.lanes_finish_ms = options.q34_gpu_q3 ? lanes_finish_ms : 0.0;
+        b.lanes_convert_ms = lanes_convert_ms;
         b.lanes_wait_ms = static_cast<double>(timing.lanes_wait_ns) / 1e6;
         b.tail_ms = static_cast<double>(timing.tail_ns) / 1e6;
         b.lanes_asked = timing.lanes_asked;

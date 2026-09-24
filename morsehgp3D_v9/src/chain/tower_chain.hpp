@@ -246,6 +246,9 @@ struct Q34BatchTimes {
   std::string lanes_backend;
   double lanes_ms = 0, lanes_device_ms = 0, lanes_kernel_ms = 0, lanes_transfer_ms = 0;
   double lanes_wait_ms = 0, tail_ms = 0;
+  // v22 (H1): the device runner's host setup and finish outside its events,
+  // and the chain's conversion of the call's output (statuses, records).
+  double lanes_setup_ms = 0, lanes_finish_ms = 0, lanes_convert_ms = 0;
   std::uint64_t lanes_asked = 0, lanes_decided = 0, lanes_deferred = 0, lanes_records = 0, lanes_judged = 0;
   std::uint32_t lanes_warps = 0;
 };

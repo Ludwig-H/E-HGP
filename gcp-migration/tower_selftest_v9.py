@@ -128,7 +128,9 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                   images=0.01 if static_path else 0.0, bank=0.005, encode=0.01,
                   static_by_k=[0.0] * k, lots_by_k=[0.01 if static_path else 0.0] * k,
                   images_by_k=[0.01 if static_path else 0.0] * k, encode_by_k=[0.01] * k,
-                  order_by_k=[0.0 if static_path else 0.005] * k)
+                  order_by_k=[0.0 if static_path else 0.005] * k,
+                  static_collect_by_k=[0.0] * k, static_sort_by_k=[0.0] * k, static_groups_by_k=[0.0] * k,
+                  static_resolve_by_k=[0.0] * k, validate_parts=[0.0005] * 8)
     # v17: the batch path's phases (zero on the engine path); survivors are
     # the expanded pairs minus the rejected ones.
     batch = dict(used=False, backend='', front_ms=0.0, filter_ms=0.0, edges_ms=0.0, device_ms=0.0, rectangles=0,
@@ -136,7 +138,8 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                  judged_edges=0, rebuilt_covers=0, certificate_warps=0, filter_kernel_ms=0.0, filter_transfer_ms=0.0,
                  certificate_kernel_ms=0.0, certificate_transfer_ms=0.0, lanes_backend='', lanes_ms=0.0,
                  lanes_device_ms=0.0, lanes_kernel_ms=0.0, lanes_transfer_ms=0.0, lanes_wait_ms=0.0, tail_ms=0.0,
-                 lanes_asked=0, lanes_decided=0, lanes_deferred=0, lanes_records=0, lanes_judged=0, lanes_warps=0)
+                 lanes_asked=0, lanes_decided=0, lanes_deferred=0, lanes_records=0, lanes_judged=0, lanes_warps=0,
+                 lanes_setup_ms=0.0, lanes_finish_ms=0.0, lanes_convert_ms=0.0)
     ledger.update({name: 0 for name in schema['ledger'] if name.startswith(('lanes_', 'lanes4_'))})
     device = 'NVIDIA RTX PRO 6000 Blackwell Server Edition'
     if complete and levers.get('q34_batch_filter'):
@@ -164,7 +167,9 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                          lanes_device_ms=0.0015 if gpu_q3 else 0.0, lanes_kernel_ms=0.001 if gpu_q3 else 0.0,
                          lanes_transfer_ms=0.0003 if gpu_q3 else 0.0, lanes_wait_ms=0.0005, tail_ms=0.0005,
                          lanes_asked=2, lanes_decided=decided, lanes_deferred=deferred, lanes_records=1,
-                         lanes_judged=decided if judge else 0, lanes_warps=4 if gpu_q3 else 0)
+                         lanes_judged=decided if judge else 0, lanes_warps=4 if gpu_q3 else 0,
+                         lanes_setup_ms=0.0001 if gpu_q3 else 0.0, lanes_finish_ms=0.0001 if gpu_q3 else 0.0,
+                         lanes_convert_ms=0.0001)
             # The engine's atlas q3 lane never runs under the lever (as the
             # real chain): no leaf census, and the preflight must accept it.
             ledger.update(q3_leaf_censuses=0, q3_leaf_point_tests=0)
@@ -187,7 +192,7 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                               lanes4_group_steps=9)
                 ledger.update(atlas_deep_cells=0)  # no atlas under the q4 lanes (as the real chain)
                 batch.update(lanes_records=2)
-    return dict(schema='mhgp9_tower_probe_v21', status=status,
+    return dict(schema='mhgp9_tower_probe_v22', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
@@ -976,6 +981,8 @@ class Protocol(unittest.TestCase):
                               ('gpu q4 emitted beyond q4', lambda v: v['ledger'].update(
                                   lanes4_emitted=2, lanes4_groups=4, lanes4_emitting_seeds=1, lanes4_shell_ids=8)),
                               ('gpu q4 shells short', lambda v: v['ledger'].update(lanes4_shell_ids=3)),
+                              ('gpu lanes convert beyond the call',
+                               lambda v: v['q34_batch'].update(lanes_convert_ms=1.0)),
                               ('gpu q4 list steps below filter steps',
                                lambda v: v['ledger'].update(lanes4_list_steps=0)),
                               ('gpu q4 group steps below locate+compare',
@@ -1032,6 +1039,11 @@ class Protocol(unittest.TestCase):
                      ('occupancy_wall', lambda v: v['q34_occupancy'].update(wall_max_ms=50.0)),
                      ('tower_phases_absent', lambda v: v.pop('tower_phases_ms')),
                      ('tower_phases_beyond', lambda v: v['tower_phases_ms'].update(bank=50.0)),
+                     ('tower_validate_parts_beyond',
+                      lambda v: v['tower_phases_ms']['validate_parts'].__setitem__(0, 50.0)),
+                     ('tower_validate_parts_short', lambda v: v['tower_phases_ms']['validate_parts'].pop()),
+                     ('tower_static_parts_beyond',
+                      lambda v: v['tower_phases_ms']['static_resolve_by_k'].__setitem__(1, 50.0)),
                      ('status', lambda v: v.update(status='complete')),
                      ('hash', lambda v: v['input'].update(hash='0' * 16)),
                      ('sites', lambda v: v['input'].update(sites=data['n'] - 1)),

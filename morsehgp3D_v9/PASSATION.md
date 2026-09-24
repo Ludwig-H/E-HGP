@@ -390,6 +390,26 @@ Suite, pour le contrat de 1 s à K5 :
   recouvrement avec les certificats ;
 - ensuite, les certificats et le front/filtre.
 
+**Conception tour + voies**
+([synthèse](docs/tour_voies_conception_20260924/README.md)). Deux panneaux de
+trois conceptions, avec un juge chacun, ont produit des plans par étapes :
+- la tour vise ≤ 200 ms à K5 ;
+- l'appel des voies vise ≤ 80 ms à K5.
+
+Point corrigé : à K5, l'ordre critique de la fenêtre de la tour est K3, pas
+K5. La phase 0 séquentielle pèse autant que la phase A.
+
+L'étape 1 des deux pistes est réalisée en local, avec les mêmes condensés,
+le même `tower_work` et toutes les arêtes égales au moteur à K5 et K10 :
+- **tour** : arène de requêtes sans mise à zéro, images par rangs de
+  plateau, sous-chronos E0 ;
+- **voies** : buffers résidents réservés pendant q2, plus d'initialisation
+  par valeur, T1 par candidats indépendants à sortie anticipée
+  (`group_steps` −70 %), sous-chronos ;
+- **protocole** : sonde et protocole v22.
+
+Prochaine étape : session G4 R17.
+
 Suite : tour maigre (D5 de l'auditeur C :
 index des selles, saut au centre, images de naissance directes), puis
 réfutation des ancres longues avant expansion (66–70 % du CPU q3/q4 selon C).

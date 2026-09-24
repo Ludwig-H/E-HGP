@@ -10,6 +10,7 @@
 #include "certificate.hpp"
 #include "q4_lanes.hpp"
 #include "witness_filter.hpp"
+#include "../common/raw_vector.hpp"
 
 #include <cstdint>
 #include <string>
@@ -268,15 +269,23 @@ struct LanesOutput {
   BatchError error_kind = BatchError::none;
   std::vector<u8> status;                       // per edge: CertificateStatus
   std::vector<u32> record_begin, record_count;  // per edge (decided): its slice of records
-  std::vector<LaneRecord> records;              // slices in reservation order; edge = input edge index
+  RawVector<LaneRecord> records;                // slices in reservation order; edge = input edge index
   Q3Work work{};                                // decided edges only (prologue and q3 lanes)
   Q4Work work4{};                               // decided edges only (S4b q4 lanes)
   std::uint64_t deferred = 0, faults = 0;
   std::uint32_t capacity = 0, record_capacity = 0, warps = 0;
   // cudaEvent timings (ms): upload, kernel, download, whole pass.
   double upload_ms = 0, kernel_ms = 0, download_ms = 0, total_ms = 0;
+  // v9 H1: host sub-timers outside the events: setup (entry to the first
+  // event: guards, probe, sizing) and finish (last event to return: ledger
+  // reduction, statuses, compaction of a hole).
+  double setup_ms = 0, finish_ms = 0;
 };
 LanesOutput run_lanes_batch(const LanesInput& input);
+// Reserves the lanes call's resident per-warp slabs (v9 H1), to be called
+// during q2; empty string on success. Any error is classified again by the
+// batch call.
+std::string warm_up_lanes(u32 capacity, u32 record_capacity, u32 event_capacity);
 
 // Opens the device's primary context (process-wide), so that the first
 // batch call does not pay it; empty string on success. Any error is left to

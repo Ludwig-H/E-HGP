@@ -7,7 +7,9 @@
 #include <cuda_runtime.h>
 
 #include <algorithm>
+#include <chrono>
 #include <cstdio>
+#include <mutex>
 #include <new>
 #include <stdexcept>
 #include <string>
@@ -38,15 +40,26 @@ class DeviceBuffer {
   void allocate(std::size_t count) {
     if (pointer_ != nullptr) cudaFree(pointer_);
     pointer_ = nullptr;
-    count_ = count;
+    count_ = capacity_ = 0;
     if (count != 0) MHGP9_CUDA(cudaMalloc(reinterpret_cast<void**>(&pointer_), count * sizeof(T)));
+    count_ = capacity_ = count;
+  }
+  // Grow-only (resident buffers, v9 H1): keeps the allocation when it holds
+  // `count` elements, reallocates otherwise.
+  void reserve(std::size_t count) {
+    if (count <= capacity_) {
+      count_ = count;
+      return;
+    }
+    allocate(count);
   }
   T* get() const { return pointer_; }
   std::size_t size() const { return count_; }
+  std::size_t capacity_bytes() const { return capacity_ * sizeof(T); }
 
  private:
   T* pointer_ = nullptr;
-  std::size_t count_ = 0;
+  std::size_t count_ = 0, capacity_ = 0;
 };
 
 // Events destroyed on every path, only those actually created.
@@ -811,7 +824,79 @@ __global__ void __launch_bounds__(lanes_threads, 4) lanes_kernel(LanesIndex inde
 
 }  // namespace
 
+namespace {
+
+// v9 H1 (24 septembre 2026): the lanes call's device buffers are RESIDENT,
+// grow-only and reused (no cudaMalloc/cudaFree of about 9.5 GB per call);
+// warm_up_lanes reserves the per-warp slabs during q2. The device properties
+// and the occupancy are probed once. Calls are serialised by the mutex. The
+// structure is leaked on purpose: no cudaFree after the runtime's teardown.
+// Sizing adds the resident bytes to the free memory, so the decisions (warps,
+// arena clamp, refusals) do not depend on the history of calls.
+struct LanesResident {
+  std::mutex mu;
+  bool probed = false;
+  std::string name;
+  int sms = 0, blocks_per_sm = 0;
+  DeviceBuffer<FlatNode> nodes;
+  DeviceBuffer<u32> escapes, rank_ids, edge_a, edge_b, ranges, ranks, seeds, scratch, events, out_begin, out_count;
+  DeviceBuffer<u8> lanes_in, out_status;
+  DeviceBuffer<Q4Work> warp_work4;
+  DeviceBuffer<std::int32_t> rank_points, points;
+  DeviceBuffer<LaneRecord> slab_records, arena;
+  DeviceBuffer<unsigned long long> counters;
+  DeviceBuffer<Q3Work> warp_work;
+  std::size_t device_bytes() const {
+    return nodes.capacity_bytes() + escapes.capacity_bytes() + rank_ids.capacity_bytes() + edge_a.capacity_bytes() +
+           edge_b.capacity_bytes() + ranges.capacity_bytes() + ranks.capacity_bytes() + seeds.capacity_bytes() +
+           scratch.capacity_bytes() + events.capacity_bytes() + out_begin.capacity_bytes() +
+           out_count.capacity_bytes() + lanes_in.capacity_bytes() + out_status.capacity_bytes() +
+           warp_work4.capacity_bytes() + rank_points.capacity_bytes() + points.capacity_bytes() +
+           slab_records.capacity_bytes() + arena.capacity_bytes() + counters.capacity_bytes() +
+           warp_work.capacity_bytes();
+  }
+  // Device name, SM count and lanes occupancy, once (the caller holds mu).
+  void probe() {
+    if (probed) return;
+    cudaDeviceProp properties{};
+    MHGP9_CUDA(cudaGetDeviceProperties(&properties, 0));
+    MHGP9_CUDA(cudaDeviceGetAttribute(&sms, cudaDevAttrMultiProcessorCount, 0));
+    MHGP9_CUDA(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocks_per_sm, lanes_kernel, lanes_threads, 0));
+    if (blocks_per_sm <= 0) throw CudaFailure{"lanes kernel cannot be resident on this device", true};
+    name = properties.name;
+    probed = true;
+  }
+  std::size_t max_warps() const {
+    return static_cast<std::size_t>(sms) * static_cast<std::size_t>(blocks_per_sm) * (lanes_threads / 32);
+  }
+  // Per-warp slabs for `warps` warps (grow-only).
+  void reserve_slabs(std::size_t warps, u32 capacity, u32 record_capacity, u32 event_capacity) {
+    const std::size_t cap = capacity;
+    ranges.reserve(2 * cap * warps);
+    points.reserve(3 * cap * warps);
+    ranks.reserve(cap * warps);
+    seeds.reserve(cap * warps);
+    scratch.reserve(cap * warps);
+    events.reserve(3 * static_cast<std::size_t>(event_capacity) * warps);
+    slab_records.reserve(static_cast<std::size_t>(record_capacity) * warps);
+    warp_work.reserve(warps);
+    warp_work4.reserve(warps);
+    counters.reserve(2);
+  }
+};
+LanesResident& lanes_resident() {
+  static LanesResident* resident = new LanesResident;  // leaked on purpose (see above)
+  return *resident;
+}
+
+double host_ms_since(std::chrono::steady_clock::time_point start) {
+  return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
+}
+
+}  // namespace
+
 LanesOutput run_lanes_batch(const LanesInput& input) {
+  const auto entry = std::chrono::steady_clock::now();
   LanesOutput out;
   out.error = validate_lanes_input(input);
   if (!out.error.empty()) {
@@ -826,9 +911,10 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
       return out;
     }
     MHGP9_CUDA(cudaSetDevice(0));
-    cudaDeviceProp properties{};
-    MHGP9_CUDA(cudaGetDeviceProperties(&properties, 0));
-    out.device = properties.name;
+    auto& res = lanes_resident();
+    std::lock_guard<std::mutex> lock(res.mu);
+    res.probe();
+    out.device = res.name;
     out.available = true;
     MHGP9_CUDA(cudaFree(nullptr));
     const std::size_t edges = input.edge_count;
@@ -838,6 +924,7 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     const u32 event_capacity = input.event_capacity == 0 ? default_event_capacity : input.event_capacity;
     std::size_t free_bytes = 0, total_bytes = 0;
     MHGP9_CUDA(cudaMemGetInfo(&free_bytes, &total_bytes));
+    free_bytes += res.device_bytes();  // resident buffers count as free: history-independent sizing
     // The default arena is clamped to an eighth of the free memory (review of
     // 23 September, night): at scale an overflow of the ALLOCATED arena defers
     // edges to the CPU tail. A failed allocation of the buffers themselves is
@@ -853,99 +940,77 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
         (2 * sizeof(u32) + 3 * sizeof(std::int32_t) + 3 * sizeof(u32)) +
         static_cast<std::size_t>(record_capacity) * sizeof(LaneRecord) +
         3 * static_cast<std::size_t>(event_capacity) * sizeof(u32);
-    int sms = 0;
-    MHGP9_CUDA(cudaDeviceGetAttribute(&sms, cudaDevAttrMultiProcessorCount, 0));
     const int threads = lanes_threads;
-    int blocks_per_sm = 0;
-    MHGP9_CUDA(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocks_per_sm, lanes_kernel, threads, 0));
-    if (blocks_per_sm <= 0) throw CudaFailure{"lanes kernel cannot be resident on this device", true};
     const std::size_t arena_bytes = arena_capacity * sizeof(LaneRecord);
     if (arena_bytes > free_bytes / 4) throw CudaFailure{"record arena exceeds a quarter of the free device memory", true};
     const std::size_t by_memory = (free_bytes / 4) / slab_bytes;
-    const std::size_t wanted = std::min<std::size_t>(
-        static_cast<std::size_t>(sms) * static_cast<std::size_t>(blocks_per_sm) * (threads / 32), edges);
-    const std::size_t warps = std::min(wanted, by_memory);
+    const std::size_t warps = std::min(std::min(res.max_warps(), edges), by_memory);
     if (warps == 0) throw CudaFailure{"no lanes slab fits in a quarter of the free device memory", true};
     out.capacity = capacity;
     out.record_capacity = record_capacity;
     out.warps = static_cast<u32>(warps);
-    const std::size_t cap = capacity;
     EventSet<4> e;
     e.create();
-    DeviceBuffer<FlatNode> nodes;
-    DeviceBuffer<u32> escapes, rank_ids, edge_a, edge_b, ranges, ranks, seeds, scratch, events, out_begin, out_count;
-    DeviceBuffer<u8> lanes_in;
-    DeviceBuffer<Q4Work> warp_work4;
-    DeviceBuffer<std::int32_t> rank_points, points;
-    DeviceBuffer<u8> out_status;
-    DeviceBuffer<LaneRecord> slab_records, arena;
-    DeviceBuffer<unsigned long long> counters;
-    DeviceBuffer<Q3Work> warp_work;
+    out.setup_ms = host_ms_since(entry);
     MHGP9_CUDA(cudaEventRecord(e[0]));
-    nodes.allocate(input.index.node_count);
-    escapes.allocate(input.index.node_count);
-    rank_points.allocate(3 * input.index.rank_count);
-    rank_ids.allocate(input.index.rank_count);
-    edge_a.allocate(edges);
-    edge_b.allocate(edges);
-    out_status.allocate(edges);
-    out_begin.allocate(edges);
-    out_count.allocate(edges);
-    ranges.allocate(2 * cap * warps);
-    points.allocate(3 * cap * warps);
-    ranks.allocate(cap * warps);
-    seeds.allocate(cap * warps);
-    scratch.allocate(cap * warps);
-    events.allocate(3 * static_cast<std::size_t>(event_capacity) * warps);
-    warp_work4.allocate(warps);
-    if (input.edge_lanes != nullptr) lanes_in.allocate(edges);
-    slab_records.allocate(static_cast<std::size_t>(record_capacity) * warps);
-    arena.allocate(arena_capacity);
-    counters.allocate(2);
-    warp_work.allocate(warps);
-    MHGP9_CUDA(cudaMemcpy(nodes.get(), input.index.nodes, input.index.node_count * sizeof(FlatNode),
+    res.nodes.reserve(input.index.node_count);
+    res.escapes.reserve(input.index.node_count);
+    res.rank_points.reserve(3 * input.index.rank_count);
+    res.rank_ids.reserve(input.index.rank_count);
+    res.edge_a.reserve(edges);
+    res.edge_b.reserve(edges);
+    res.out_status.reserve(edges);
+    res.out_begin.reserve(edges);
+    res.out_count.reserve(edges);
+    res.reserve_slabs(warps, capacity, record_capacity, event_capacity);
+    if (input.edge_lanes != nullptr) res.lanes_in.reserve(edges);
+    res.arena.reserve(arena_capacity);
+    MHGP9_CUDA(cudaMemcpy(res.nodes.get(), input.index.nodes, input.index.node_count * sizeof(FlatNode),
                           cudaMemcpyHostToDevice));
-    MHGP9_CUDA(cudaMemcpy(escapes.get(), input.escapes, input.index.node_count * sizeof(u32),
+    MHGP9_CUDA(cudaMemcpy(res.escapes.get(), input.escapes, input.index.node_count * sizeof(u32),
                           cudaMemcpyHostToDevice));
-    MHGP9_CUDA(cudaMemcpy(rank_points.get(), input.index.rank_points,
+    MHGP9_CUDA(cudaMemcpy(res.rank_points.get(), input.index.rank_points,
                           3 * input.index.rank_count * sizeof(std::int32_t), cudaMemcpyHostToDevice));
-    MHGP9_CUDA(cudaMemcpy(rank_ids.get(), input.rank_ids, input.index.rank_count * sizeof(u32),
+    MHGP9_CUDA(cudaMemcpy(res.rank_ids.get(), input.rank_ids, input.index.rank_count * sizeof(u32),
                           cudaMemcpyHostToDevice));
-    MHGP9_CUDA(cudaMemcpy(edge_a.get(), input.edge_a, edges * sizeof(u32), cudaMemcpyHostToDevice));
-    MHGP9_CUDA(cudaMemcpy(edge_b.get(), input.edge_b, edges * sizeof(u32), cudaMemcpyHostToDevice));
-    MHGP9_CUDA(cudaMemset(counters.get(), 0, 2 * sizeof(unsigned long long)));
-    MHGP9_CUDA(cudaMemset(warp_work.get(), 0, warps * sizeof(Q3Work)));
-    MHGP9_CUDA(cudaMemset(warp_work4.get(), 0, warps * sizeof(Q4Work)));
+    MHGP9_CUDA(cudaMemcpy(res.edge_a.get(), input.edge_a, edges * sizeof(u32), cudaMemcpyHostToDevice));
+    MHGP9_CUDA(cudaMemcpy(res.edge_b.get(), input.edge_b, edges * sizeof(u32), cudaMemcpyHostToDevice));
+    MHGP9_CUDA(cudaMemset(res.counters.get(), 0, 2 * sizeof(unsigned long long)));
+    MHGP9_CUDA(cudaMemset(res.warp_work.get(), 0, warps * sizeof(Q3Work)));
+    MHGP9_CUDA(cudaMemset(res.warp_work4.get(), 0, warps * sizeof(Q4Work)));
     if (input.edge_lanes != nullptr)
-      MHGP9_CUDA(cudaMemcpy(lanes_in.get(), input.edge_lanes, edges, cudaMemcpyHostToDevice));
+      MHGP9_CUDA(cudaMemcpy(res.lanes_in.get(), input.edge_lanes, edges, cudaMemcpyHostToDevice));
     MHGP9_CUDA(cudaEventRecord(e[1]));
-    const LanesIndex index{CertificateIndex{nodes.get(), escapes.get(), static_cast<u32>(input.index.node_count),
-                                            rank_points.get()},
-                           rank_ids.get()};
+    const LanesIndex index{CertificateIndex{res.nodes.get(), res.escapes.get(),
+                                            static_cast<u32>(input.index.node_count), res.rank_points.get()},
+                           res.rank_ids.get()};
     const int blocks = static_cast<int>((warps * 32 + threads - 1) / threads);
-    lanes_kernel<<<blocks, threads>>>(index, edge_a.get(), edge_b.get(),
-        input.edge_lanes != nullptr ? lanes_in.get() : nullptr, static_cast<u32>(edges), input.index.kmax, capacity,
-        record_capacity, event_capacity, ranges.get(), points.get(), ranks.get(), seeds.get(), scratch.get(),
-        slab_records.get(), events.get(), arena.get(), arena_capacity, counters.get(), counters.get() + 1,
-        out_status.get(), out_begin.get(), out_count.get(), warp_work.get(), warp_work4.get(),
-        static_cast<u32>(warps));
+    lanes_kernel<<<blocks, threads>>>(index, res.edge_a.get(), res.edge_b.get(),
+        input.edge_lanes != nullptr ? res.lanes_in.get() : nullptr, static_cast<u32>(edges), input.index.kmax,
+        capacity, record_capacity, event_capacity, res.ranges.get(), res.points.get(), res.ranks.get(),
+        res.seeds.get(), res.scratch.get(), res.slab_records.get(), res.events.get(), res.arena.get(),
+        arena_capacity, res.counters.get(), res.counters.get() + 1, res.out_status.get(), res.out_begin.get(),
+        res.out_count.get(), res.warp_work.get(), res.warp_work4.get(), static_cast<u32>(warps));
     MHGP9_CUDA(cudaGetLastError());
     MHGP9_CUDA(cudaEventRecord(e[2]));
     std::vector<Q3Work> works(warps);
     std::vector<Q4Work> works4(warps);
     unsigned long long counts[2] = {0, 0};
-    MHGP9_CUDA(cudaMemcpy(counts, counters.get(), sizeof(counts), cudaMemcpyDeviceToHost));
-    MHGP9_CUDA(cudaMemcpy(out.status.data(), out_status.get(), edges, cudaMemcpyDeviceToHost));
-    MHGP9_CUDA(cudaMemcpy(out.record_begin.data(), out_begin.get(), edges * sizeof(u32), cudaMemcpyDeviceToHost));
-    MHGP9_CUDA(cudaMemcpy(out.record_count.data(), out_count.get(), edges * sizeof(u32), cudaMemcpyDeviceToHost));
-    MHGP9_CUDA(cudaMemcpy(works.data(), warp_work.get(), warps * sizeof(Q3Work), cudaMemcpyDeviceToHost));
-    MHGP9_CUDA(cudaMemcpy(works4.data(), warp_work4.get(), warps * sizeof(Q4Work), cudaMemcpyDeviceToHost));
+    MHGP9_CUDA(cudaMemcpy(counts, res.counters.get(), sizeof(counts), cudaMemcpyDeviceToHost));
+    MHGP9_CUDA(cudaMemcpy(out.status.data(), res.out_status.get(), edges, cudaMemcpyDeviceToHost));
+    MHGP9_CUDA(cudaMemcpy(out.record_begin.data(), res.out_begin.get(), edges * sizeof(u32),
+                          cudaMemcpyDeviceToHost));
+    MHGP9_CUDA(cudaMemcpy(out.record_count.data(), res.out_count.get(), edges * sizeof(u32),
+                          cudaMemcpyDeviceToHost));
+    MHGP9_CUDA(cudaMemcpy(works.data(), res.warp_work.get(), warps * sizeof(Q3Work), cudaMemcpyDeviceToHost));
+    MHGP9_CUDA(cudaMemcpy(works4.data(), res.warp_work4.get(), warps * sizeof(Q4Work), cudaMemcpyDeviceToHost));
     const std::size_t used = static_cast<std::size_t>(std::min<unsigned long long>(counts[1], arena_capacity));
-    std::vector<LaneRecord> reserved(used);
+    RawVector<LaneRecord> reserved(used);  // written whole by the copy below (no zero fill)
     if (used != 0)
-      MHGP9_CUDA(cudaMemcpy(reserved.data(), arena.get(), used * sizeof(LaneRecord), cudaMemcpyDeviceToHost));
+      MHGP9_CUDA(cudaMemcpy(reserved.data(), res.arena.get(), used * sizeof(LaneRecord), cudaMemcpyDeviceToHost));
     MHGP9_CUDA(cudaEventRecord(e[3]));
     MHGP9_CUDA(cudaEventSynchronize(e[3]));
+    const auto finish = std::chrono::steady_clock::now();
     for (const auto& w : works) add_q3(out.work, w);
     for (const auto& w : works4) add_q4(out.work4, w);
     for (std::size_t i = 0; i < edges; ++i) {
@@ -968,6 +1033,7 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     out.kernel_ms = elapsed(e[1], e[2]);
     out.download_ms = elapsed(e[2], e[3]);
     out.total_ms = elapsed(e[0], e[3]);
+    out.finish_ms = host_ms_since(finish);
   } catch (const CudaFailure& failure) {
     out.error = failure.what;
     out.error_kind = failure.capacity ? BatchError::capacity : BatchError::device_fault;
@@ -982,6 +1048,21 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     out.error_kind = BatchError::device_fault;
   }
   return out;
+}
+
+std::string warm_up_lanes(u32 capacity, u32 record_capacity, u32 event_capacity) {
+  try {
+    MHGP9_CUDA(cudaSetDevice(0));
+    auto& res = lanes_resident();
+    std::lock_guard<std::mutex> lock(res.mu);
+    res.probe();
+    res.reserve_slabs(res.max_warps(), capacity == 0 ? default_lanes_capacity : capacity,
+                      record_capacity == 0 ? default_record_capacity : record_capacity,
+                      event_capacity == 0 ? default_event_capacity : event_capacity);
+    return {};
+  } catch (const CudaFailure& failure) {
+    return failure.what;  // the batch call classifies any error again
+  }
 }
 
 std::string warm_up() {

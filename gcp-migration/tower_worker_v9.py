@@ -48,7 +48,7 @@ PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
 PLAN_SCHEMA = 'mhgp9_tower_plan_v6'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v21'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v22'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -110,10 +110,13 @@ BATCH_KEYS = frozenset({'used', 'backend', 'front_ms', 'filter_ms', 'edges_ms', 
                         'certificate_kernel_ms', 'certificate_transfer_ms', 'lanes_backend', 'lanes_ms',
                         'lanes_device_ms', 'lanes_kernel_ms', 'lanes_transfer_ms', 'lanes_wait_ms', 'tail_ms',
                         'lanes_asked', 'lanes_decided', 'lanes_deferred', 'lanes_records', 'lanes_judged',
-                        'lanes_warps'})
+                        'lanes_warps', 'lanes_setup_ms', 'lanes_finish_ms', 'lanes_convert_ms'})
 # v20 (S4a) : voie q3 des survivants certifies par lots, sans atlas (CPU ou
 # GPU). Chronos et comptes de l'appel, registre declare lanes_* du mode.
-LANES_TIMES = ('lanes_ms', 'lanes_device_ms', 'lanes_kernel_ms', 'lanes_transfer_ms', 'lanes_wait_ms', 'tail_ms')
+LANES_TIMES = ('lanes_ms', 'lanes_device_ms', 'lanes_kernel_ms', 'lanes_transfer_ms', 'lanes_wait_ms', 'tail_ms',
+               # v22 (H1) : installation et fin hors evenements de l'appareil,
+               # conversion de la sortie par la chaine.
+               'lanes_setup_ms', 'lanes_finish_ms', 'lanes_convert_ms')
 LANES_COUNTS = ('lanes_asked', 'lanes_decided', 'lanes_deferred', 'lanes_records', 'lanes_judged', 'lanes_warps')
 LANES_LEDGER = ('lanes_edges', 'lanes_cover_sites', 'lanes_cover_node_visits', 'lanes_seed_tests',
                 'lanes_acute_sites', 'lanes_owner_rejections', 'lanes_seeds', 'lanes_census_point_tests',
@@ -210,7 +213,13 @@ EULER_STATUSES = ('holds', 'fails', 'not_checkable')
 OCCUPANCY_COUNTS = ('started_workers', 'jobs', 'tasks_published', 'tasks_consumed', 'task_waits')
 OCCUPANCY_TIMES = ('wall_max_ms', 'wall_min_ms', 'cpu_sum_s', 'wait_sum_s', 'job_sum_s', 'max_job_ms')
 TOWER_PHASES = ('validate', 'static', 'lots', 'populations', 'images', 'bank', 'encode')
-TOWER_PHASES_BY_K = ('static_by_k', 'lots_by_k', 'images_by_k', 'encode_by_k', 'order_by_k')
+TOWER_PHASES_BY_K = ('static_by_k', 'lots_by_k', 'images_by_k', 'encode_by_k', 'order_by_k',
+                     # v22 (E0) : sous-chronos de la phase 0 de chaque ordre.
+                     'static_collect_by_k', 'static_sort_by_k', 'static_groups_by_k', 'static_resolve_by_k')
+TOWER_STATIC_PARTS = ('static_collect_by_k', 'static_sort_by_k', 'static_groups_by_k', 'static_resolve_by_k')
+# v22 (E0) : sous-chronos de la validation (entree, tri des cles, index, passes
+# 1 et 2, tri des niveaux, suites, programmes).
+TOWER_VALIDATE_PARTS = 8
 STATIC_PATH_PHASES = ('static', 'lots', 'populations', 'images')
 # Arrondi des chronos imprimes a 0,001 ms ; marge relative des sommes CPU.
 PHASE_TOLERANCE_MS = 0.01
@@ -643,7 +652,12 @@ def validate_lanes(value, case, lanes_capacity=0, judge=False):
          (not ran or batch['lanes_decided'] > 0) and
          ((batch['lanes_kernel_ms'] > 0 and batch['lanes_kernel_ms'] + batch['lanes_transfer_ms'] <=
            batch['lanes_device_ms'] + 0.05 and batch['lanes_device_ms'] <= batch['lanes_ms'] + 0.05) if ran else
-          batch['lanes_kernel_ms'] == 0 and batch['lanes_transfer_ms'] == 0 and batch['lanes_device_ms'] == 0),
+          batch['lanes_kernel_ms'] == 0 and batch['lanes_transfer_ms'] == 0 and batch['lanes_device_ms'] == 0) and
+         # v22 : intervalles disjoints dans le mur de l'appel ; installation et
+         # fin nulles hors de l'appareil.
+         batch['lanes_setup_ms'] + batch['lanes_device_ms'] + batch['lanes_finish_ms'] + batch['lanes_convert_ms'] <=
+         batch['lanes_ms'] + 0.05 and
+         (gpu or (batch['lanes_setup_ms'] == 0 and batch['lanes_finish_ms'] == 0)),
          'q3 lanes backend/counts/device time/judge')
     # The reduced-slab preflight defers some but never all q3 lanes. Below
     # the default site slab a correct call may still defer an edge beyond its
@@ -711,12 +725,20 @@ def validate_tower_phases(value, case):
     """Chronos de phase de la tour : sous-chronos du mur de la tour, par K
     bornes par leur etape parallele, voie statique ou sequentielle exclusive."""
     phases = value['tower_phases_ms']
-    need(type(phases) is dict and set(phases) == set(TOWER_PHASES + TOWER_PHASES_BY_K) and
+    need(type(phases) is dict and set(phases) == set(TOWER_PHASES + TOWER_PHASES_BY_K + ('validate_parts',)) and
          all(_number(phases[key]) for key in TOWER_PHASES) and
          all(type(phases[key]) is list and len(phases[key]) == case['k'] and all(_number(x) for x in phases[key])
-             for key in TOWER_PHASES_BY_K), 'tower phase fields')
+             for key in TOWER_PHASES_BY_K) and
+         type(phases['validate_parts']) is list and len(phases['validate_parts']) == TOWER_VALIDATE_PARTS and
+         all(_number(x) for x in phases['validate_parts']), 'tower phase fields')
     if value['status'] != 'complete_relative':
         return
+    # v22 : chaque sous-chrono est dans sa phase (validation ; phase 0 de
+    # l'ordre, voie statique ou sequentielle).
+    need(sum(phases['validate_parts']) <= phases['validate'] + PHASE_TOLERANCE_MS * TOWER_VALIDATE_PARTS and
+         all(sum(phases[key][k] for key in TOWER_STATIC_PARTS) <=
+             phases['static_by_k'][k] + phases['order_by_k'][k] + PHASE_TOLERANCE_MS * len(TOWER_STATIC_PARTS)
+             for k in range(case['k'])), 'tower sub-timers outside their phase')
     total = sum(phases[key] for key in TOWER_PHASES) + sum(phases['order_by_k'])
     need(total <= value['times_ms']['tower'] + PHASE_TOLERANCE_MS * (len(TOWER_PHASES) + case['k']),
          'tower phases exceed the tower time')
