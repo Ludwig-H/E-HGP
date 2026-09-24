@@ -5303,3 +5303,46 @@ sous une condition : [la proposition](../morsehgp3D_v9/audits/PROPOSITION_C_CATA
 Le grand audit demandé par l'utilisateur est en cours.
 
 GCP non utilisé.
+
+### 20 h 49 UTC (24 septembre) — C : grand audit de la v9 ; 100 ms ; épingles brutes en cours
+
+Base : `093d943ce`.
+
+À la demande de l'utilisateur, [grand audit](../morsehgp3D_v9/audits/AUDIT_C_GRAND_AUDIT_V9_20260924.md) :
+six lecteurs, trois concepteurs et trois sceptiques, en lecture seule,
+corrigés par les commits de B et v26 arrivés entre-temps.
+
+- **100 ms : infaisable avec les algorithmes connus**, dans les quatre cas.
+  FULL seul prend 374 à 456 ms à K5 et 1,61 à 1,95 s à K10. Plusieurs
+  étapes dépassent chacune 100 ms à K5. La sortie explicite est dans le
+  budget. Cibles étagées proposées (R-30) :
+  - 1 s à K5 sans sol, presque atteint ;
+  - 1 s à K5 avec sol, qui demande la tour sur GPU ;
+  - 250 à 500 ms à K5 et environ 1 s à K10 sans sol, en fin de refonte.
+- **Où va le temps** : l'appareil n'occupe que 19 à 22 % du mur, et K10 est
+  lié au CPU. La fenêtre de la tour est déjà ordonnée de façon optimale :
+  seul le débit de la phase 0 la déplace, puis la phase A mono-fil de
+  l'ordre haut (148 ms à K5, 544 ms à K10) devient le plancher. Front,
+  recensement, fusion et noyau du filtre n'ont pas bougé depuis R12.
+- **Classement** (R-33), pour le développeur :
+  1. groupement de la phase 0 sans tri de 56 o, et radix des niveaux ;
+  2. E6 ;
+  3. glu q3/q4 parallèle et session résidente (plafond de 210 ms à K5) ;
+  4. recensement dans la fenêtre de l'appareil ;
+  5. E4 et E5 ;
+  6. phase A parallèle après E6.
+
+  Mesurer d'abord (R-31) : sous-chronos, médianes, contrat gelé.
+- **Sol** (R-32) : ton WIP R21 `61cfba666` ajoute b00, b01 et b02. Je
+  calcule en local leurs épingles (moteur et lots CPU, K5 et K10) :
+  [`c_raw_pins_20260924/`](../morsehgp3D_v9/audits/c_raw_pins_20260924/README.md).
+  Valeurs à suivre. À ajouter au lecteur avant la session. Il faut aussi un
+  report par arête pour l'arène de cover, dont le dépassement refuse
+  aujourd'hui tout le cas.
+- **Confiance** (R-34) : Kmax+2 à K5 et juges stratifiés sur trames
+  entières ; épingle sans leviers ; GPU jugé sur LiDAR ; TSan.
+
+Question à l'utilisateur, relayée : acceptes-tu ces cibles étagées, 100 ms
+restant un horizon de recherche ?
+
+GCP non utilisé.
