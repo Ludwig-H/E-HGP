@@ -204,6 +204,137 @@ foreach(mutant IN ITEMS SKIP_LAST SHELL_ARITY_ONLY)
   mhgp9_gate(mhgp9_catalogue_digest_mutant_${lower} 1 mhgp9_catalogue_digest_${lower}_mutant_gate ARGS --n=1500
              EXPECT_LINE "cause=catalogue_digest.recompute cospheric K5" LABELS "gate;chain;mutant" TIMEOUT 900)
 endforeach()
+# Juges d'echantillon q2/q3 independants du generateur (auditeur C, R-20) :
+# regression CPU ECHANTILLONNEE du catalogue, pas une qualification de la
+# completude FULL (run_tower=false, ancres tirees). Pour des sites tires, toute
+# boule diametrale (q2) ou circonscrite a un triangle aigu (q3) admissible,
+# recensee en entiers par balayage, doit etre au catalogue avec son niveau exact
+# (Boost cpp_int), sa cle, ses interieurs et sa coquille ; sens inverse (EXTRA) ;
+# anti-vacuite par une cle retiree puis rejugee. Zone visee : l'angle mort
+# d'Euler et de la tour (fusions seules a Kmax : q2 a p = Kmax-1, q3 a
+# p = Kmax-2). La garde d'index porte sur l'index RECONSTRUIT par le juge.
+# Controles globaux : cle en double ; boule etendue non appariee quand tous
+# les sites sont tires (fixtures). La coquille q4 a 5 sites de la fixture
+# cospherique n'est vue par aucun juge (porte du condense seulement).
+# Porte rapide : fixtures gravees (egalite, strate CRL, coquilles etendues a
+# comptes exacts), familles uniformes 2 000 en u16 et transportees dans le haut
+# du domaine u18, mutants du catalogue lu (niveau, doublon, cle, coquille
+# etendue tronquee, boule etendue dupliquee ou fantome) et de l'elagage tues
+# avec leur marqueur, mutants d'index refuses en code 2.
+# scale8000 : trois familles a K5 et K10, une famille u18 haute, un parcours
+# brut q3 compare a l'elagage, et les coupes LiDAR 1 mm de 8 000 sites des
+# trois trames sans sol, regenerees et epinglees (hors depot versionne).
+foreach(judge IN ITEMS q2 q3)
+  mhgp9_product_executable(mhgp9_${judge}_sample_judge tests/chain/${judge}_sample_judge.cpp)
+  target_link_libraries(mhgp9_${judge}_sample_judge PRIVATE mhgp9_chain)
+  target_include_directories(mhgp9_${judge}_sample_judge PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+  mhgp9_gate(mhgp9_${judge}_sample_judge_bad_argument 2 mhgp9_${judge}_sample_judge ARGS bogus
+             LABELS "gate;chain" TIMEOUT 60)
+  # Comptes exacts de la fixture (tous les sites tires) : q2 34, q3 3 (voir l'en-tete des juges).
+  if(judge STREQUAL "q2")
+    set(expect_extended 34)
+  else()
+    set(expect_extended 3)
+  endif()
+  mhgp9_gate(mhgp9_${judge}_judge_fixture_cospheric 0 mhgp9_${judge}_sample_judge
+             ARGS fixture-cospheric --expect-extended=${expect_extended}
+             EXPECT_PREFIX "fixture_cospheric n=417 kmax=5" LABELS "gate;chain;oracle" TIMEOUT 300)
+  mhgp9_gate(mhgp9_${judge}_judge_mutant_shell_trim 1 mhgp9_${judge}_sample_judge ARGS fixture-cospheric --inject=shell-trim
+             EXPECT_PREFIX "fixture_cospheric MISSING a=" LABELS "gate;chain;oracle;mutant" TIMEOUT 300)
+  # Controles globaux : boule etendue dupliquee (cle en double), boule etendue fantome (non appariee alors que
+  # tous les sites sont tires).
+  mhgp9_gate(mhgp9_${judge}_judge_mutant_ext_dup 1 mhgp9_${judge}_sample_judge ARGS fixture-cospheric --inject=ext-dup
+             EXPECT_PREFIX "fixture_cospheric DUPLICATE_KEY" LABELS "gate;chain;oracle;mutant" TIMEOUT 300)
+  mhgp9_gate(mhgp9_${judge}_judge_mutant_ext_phantom 1 mhgp9_${judge}_sample_judge ARGS fixture-cospheric --inject=ext-phantom
+             EXPECT_PREFIX "fixture_cospheric EXTRA_EXTENDED" LABELS "gate;chain;oracle;mutant" TIMEOUT 300)
+endforeach()
+mhgp9_gate(mhgp9_q3_judge_fixture_eq 0 mhgp9_q3_sample_judge ARGS fixture-eq --compare
+           EXPECT_PREFIX "fixture_eq n=34 kmax=5" LABELS "gate;chain;oracle" TIMEOUT 120)
+mhgp9_gate(mhgp9_q3_judge_fixture_crl 0 mhgp9_q3_sample_judge ARGS fixture-crl --compare --sites=0 --min-crl=1
+           EXPECT_PREFIX "fixture_crl n=33 kmax=5" LABELS "gate;chain;oracle" TIMEOUT 120)
+foreach(mode IN ITEMS family family-u18)
+  if(mode STREQUAL "family")
+    set(tag "")
+  else()
+    set(tag "_u18")
+  endif()
+  mhgp9_gate(mhgp9_q3_judge_uniform_2000${tag}_k5 0 mhgp9_q3_sample_judge ARGS ${mode} uniform 2000 5 20 4 --min-top=100 --min-crl=1
+             EXPECT_PREFIX "uniform_2000${tag} n=2000 kmax=5" LABELS "gate;chain;oracle" TIMEOUT 300)
+  mhgp9_gate(mhgp9_q2_judge_uniform_2000${tag}_k5 0 mhgp9_q2_sample_judge ARGS ${mode} uniform 2000 5 50 4 --min-top=100
+             EXPECT_PREFIX "uniform_2000${tag} n=2000 kmax=5" LABELS "gate;chain;oracle" TIMEOUT 300)
+endforeach()
+# Mutants du catalogue lu par le juge (niveaux faux, coquille a doublon, cle
+# seule faussee) : omission declaree (code 1, marqueur MISSING).
+foreach(inj IN ITEMS level shell-dup key)
+  string(REPLACE "-" "_" tag ${inj})
+  mhgp9_gate(mhgp9_q3_judge_mutant_${tag} 1 mhgp9_q3_sample_judge ARGS fixture-eq --inject=${inj}
+             EXPECT_PREFIX "fixture_eq MISSING a=" LABELS "gate;chain;oracle;mutant" TIMEOUT 120)
+  mhgp9_gate(mhgp9_q2_judge_mutant_${tag} 1 mhgp9_q2_sample_judge ARGS family uniform 2000 5 50 4 --inject=${inj}
+             EXPECT_PREFIX "uniform_2000 MISSING a=" LABELS "gate;chain;oracle;mutant" TIMEOUT 300)
+endforeach()
+# Mutants de l'elagage du juge q3 : sur-elagage sur la fixture d'egalite ;
+# arete longue et strate CRL retirees sur la fixture CRL (desaccord CRL).
+mhgp9_gate(mhgp9_q3_judge_mutant_overprune 1 mhgp9_q3_sample_judge ARGS fixture-eq --compare --inject=overprune
+           EXPECT_PREFIX "fixture_eq PRUNE_DISAGREES a=" LABELS "gate;chain;oracle;mutant" TIMEOUT 120)
+foreach(inj IN ITEMS drop-long drop-crl)
+  string(REPLACE "-" "_" tag ${inj})
+  mhgp9_gate(mhgp9_q3_judge_mutant_${tag} 1 mhgp9_q3_sample_judge
+             ARGS fixture-crl --compare --sites=0 --min-crl=1 --inject=${inj}
+             EXPECT_PREFIX "fixture_crl PRUNE_DISAGREES_CRL" LABELS "gate;chain;oracle;mutant" TIMEOUT 120)
+endforeach()
+# Garde d'index du juge : refus en code 2 avant tout tirage.
+foreach(pair IN ITEMS out-of-range:INDEX_ID_OUT_OF_RANGE duplicate:INDEX_ID_DUPLICATE missing:INDEX_ID_MISSING)
+  string(REPLACE ":" ";" parts ${pair})
+  list(GET parts 0 inj)
+  list(GET parts 1 marker)
+  string(REPLACE "-" "_" tag ${inj})
+  mhgp9_gate(mhgp9_q3_judge_index_${tag} 2 mhgp9_q3_sample_judge ARGS fixture-eq --compare --inject=index-${inj}
+             EXPECT_PREFIX "fixture_eq ${marker}" LABELS "gate;chain;oracle;mutant" TIMEOUT 120)
+  mhgp9_gate(mhgp9_q2_judge_index_${tag} 2 mhgp9_q2_sample_judge ARGS family uniform 2000 5 50 4 --inject=index-${inj}
+             EXPECT_PREFIX "uniform_2000 ${marker}" LABELS "gate;chain;oracle;mutant" TIMEOUT 300)
+endforeach()
+# scale8000 : trois familles, K5 et K10, planchers de cles de tete et de strate CRL.
+foreach(family IN ITEMS uniform terrain clusters)
+  foreach(k IN ITEMS 5 10)
+    mhgp9_gate(mhgp9_q2_judge_${family}_8000_k${k} 0 mhgp9_q2_sample_judge ARGS family ${family} 8000 ${k} 50 4 --min-top=100
+               EXPECT_PREFIX "${family}_8000 n=8000 kmax=${k}" LABELS "scale8000;chain;oracle" TIMEOUT 1200)
+    mhgp9_gate(mhgp9_q3_judge_${family}_8000_k${k} 0 mhgp9_q3_sample_judge
+               ARGS family ${family} 8000 ${k} 20 4 --min-top=100 --min-crl=1
+               EXPECT_PREFIX "${family}_8000 n=8000 kmax=${k}" LABELS "scale8000;chain;oracle" TIMEOUT 1800)
+  endforeach()
+endforeach()
+mhgp9_gate(mhgp9_q3_judge_terrain_8000_k10_compare 0 mhgp9_q3_sample_judge
+           ARGS family terrain 8000 10 10 4 --compare --min-top=100 --min-crl=100
+           EXPECT_PREFIX "terrain_8000 n=8000 kmax=10" LABELS "scale8000;chain;oracle" TIMEOUT 1800)
+mhgp9_gate(mhgp9_q2_judge_terrain_8000_u18_k10 0 mhgp9_q2_sample_judge ARGS family-u18 terrain 8000 10 50 4 --min-top=100
+           EXPECT_PREFIX "terrain_8000_u18 n=8000 kmax=10" LABELS "scale8000;chain;oracle" TIMEOUT 1200)
+mhgp9_gate(mhgp9_q3_judge_terrain_8000_u18_k10 0 mhgp9_q3_sample_judge
+           ARGS family-u18 terrain 8000 10 20 4 --min-top=100 --min-crl=1
+           EXPECT_PREFIX "terrain_8000_u18 n=8000 kmax=10" LABELS "scale8000;chain;oracle" TIMEOUT 1800)
+# Coupes LiDAR 1 mm (8 000 sites des trames sans sol 08/000000, 000100 et
+# 000200 du recu v8), regenerees par bench/run_lidar_scaling.py et epinglees.
+find_package(Python3 COMPONENTS Interpreter)
+if(Python3_Interpreter_FOUND)
+  set(MHGP9_JUDGE_CUTS ${CMAKE_CURRENT_BINARY_DIR}/lidar_judge_cuts)
+  add_test(NAME mhgp9_lidar_judge_cuts
+           COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=${Python3_EXECUTABLE}
+                   "-DARGS=-B ${CMAKE_CURRENT_SOURCE_DIR}/tests/chain/lidar_judge_cuts.py ${MHGP9_JUDGE_CUTS}"
+                   "-DEXPECT_PREFIX=lidar_judge_cuts ok" -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
+  set_tests_properties(mhgp9_lidar_judge_cuts PROPERTIES LABELS "scale8000;chain;oracle" TIMEOUT 600
+                       FIXTURES_SETUP mhgp9_lidar_judge_cuts)
+  foreach(scene IN ITEMS s00 s01 s02)
+    foreach(k IN ITEMS 5 10)
+      mhgp9_gate(mhgp9_q2_judge_lidar_${scene}_8000_k${k} 0 mhgp9_q2_sample_judge
+                 ARGS file ${MHGP9_JUDGE_CUTS}/lidar_${scene}_8000.u32le ${k} 50 4 --min-top=20
+                 EXPECT_PREFIX "lidar_${scene}_8000.u32le n=8000 kmax=${k}" LABELS "scale8000;chain;oracle" TIMEOUT 1200)
+      mhgp9_gate(mhgp9_q3_judge_lidar_${scene}_8000_k${k} 0 mhgp9_q3_sample_judge
+                 ARGS file ${MHGP9_JUDGE_CUTS}/lidar_${scene}_8000.u32le ${k} 20 4 --min-top=20
+                 EXPECT_PREFIX "lidar_${scene}_8000.u32le n=8000 kmax=${k}" LABELS "scale8000;chain;oracle" TIMEOUT 1800)
+      set_tests_properties(mhgp9_q2_judge_lidar_${scene}_8000_k${k} mhgp9_q3_judge_lidar_${scene}_8000_k${k}
+                           PROPERTIES FIXTURES_REQUIRED mhgp9_lidar_judge_cuts)
+    endforeach()
+  endforeach()
+endif()
 mhgp9_product_executable(mhgp9_chain_batch_certificates_gate tests/chain/chain_batch_certificates_gate.cpp)
 target_link_libraries(mhgp9_chain_batch_certificates_gate PRIVATE mhgp9_chain)
 target_include_directories(mhgp9_chain_batch_certificates_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
