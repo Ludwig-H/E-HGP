@@ -421,9 +421,32 @@ Les sous-chronos E0 placent le chemin critique de la tour à K5 dans la
 des niveaux 31 ms) et la queue 98 ms. À K10, la phase 0 séquentielle
 domine (1,30 s).
 
-Suite, pour le contrat de 1 s à K5 (reste 1,395 s à 000000) :
-- tour E3 (phase A maigre) puis E2 (pool, sections série) ;
-- voies, étape 2 (tâches) puis étape 3 (travail de masse).
+Étape 2 livrée et mesurée : session G4 R18
+([reçu](receipts/g4_tower_r18_20260924/README.md), paquet `446b45f7`,
+**`completed`**, `TERMINATED` certifié). Une première tentative avait été
+refusée avant démarrage, faute d'authentification GCP. Contenu :
+- tour E3 (phase A maigre) et E2 (sections série de la validation) ;
+- voies en tâches (arête, plage de graines), en étapes P, T et C sur
+  l'appareil ; sonde v23.
+
+Résultats :
+- **K5 1,05 / 1,25 / 1,36 s**, **K10 3,26 / 4,27 / 4,18 s** ; 12
+  comparaisons égales ;
+- tour à K5 : 501 → 417 ms ;
+- appel des voies à K5 : 199 → 147 ms (noyau 93 ms : P 12, T 49, C 32).
+
+À K5, la fenêtre de la tour est bornée par la phase 0 séquentielle des
+ordres (207 ms) suivie de la phase A des ordres inférieurs ; la queue vaut
+environ 90 ms.
+
+Suite, pour le contrat de 1 s à K5 (reste 1,251 s à 000000) :
+- compactage C des voies (32 ms à 000000 contre 3 ms à 000100) et étape 3
+  des voies ;
+- noyau des certificats (145 ms, une arête par warp : même traîne que les
+  voies avant les tâches) ;
+- tour : phase 0 concurrente, queue en pipeline (E4, E5), catalogue scellé
+  (décision) ;
+- front, filtre, q2, recensement.
 
 Suite : tour maigre (D5 de l'auditeur C :
 index des selles, saut au centre, images de naissance directes), puis

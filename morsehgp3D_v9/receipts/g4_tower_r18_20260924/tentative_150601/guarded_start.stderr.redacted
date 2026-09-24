@@ -1,0 +1,4 @@
+ERROR: (gcloud.compute.instances.describe) Could not fetch resource:
+ - Authentication backend unavailable.
+
+[ERREUR] Préconditions absentes : cible g4-standard-48 Spot, maintenance TERMINATE, redémarrage automatique désactivé, label project=e-hgp, action STOP et maxRunDuration entre 30 s et 8 h sont obligatoires.

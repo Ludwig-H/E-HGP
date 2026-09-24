@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/usr/local/cuda/bin/nvcc",
+    "--version"
+  ],
+  "cwd": "/tmp/ehgp-tower-v9-3069d9eb6e0ff27f.sioeeNRciM/output",
+  "elapsed_seconds": 0.0012434589999941181,
+  "ended_utc": "2026-09-24T15:09:08.031130+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 1810,
+  "session_work_deadline_epoch": 1790264047.612858,
+  "started_utc": "2026-09-24T15:09:08.029853+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "28acf7c60a358550618607525561537e387a326bd4e453cb9cc6c261b96ec3b7"
+}
