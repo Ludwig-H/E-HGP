@@ -45,7 +45,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[2]
 V8 = ROOT / 'morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v24'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v25'
 # Schemas relus lors d'une revalidation d'archive (v12 : reçu du 23 septembre).
 KNOWN_SCHEMAS = ('mhgp9_tower_probe_v12', PROBE_SCHEMA)
 # Le schema de sonde d'une campagne est fixe par son RESUME, jamais par le JSON
@@ -423,12 +423,15 @@ def selftest(case_path):
                             lanes_records=0, lanes_judged=0, lanes_warps=0, lanes_setup_ms=0.0,
                             lanes_finish_ms=0.0, lanes_convert_ms=0.0, lanes_tasks=0, lanes_max_task_steps=0,
                             lanes_plan_ms=0.0, lanes_task_ms=0.0, lanes_compact_ms=0.0,
-                            gpu_prepare_ms=0.0, gpu_prepare_wait_ms=0.0)
+                            gpu_prepare_ms=0.0, gpu_prepare_wait_ms=0.0, lanes_fused_seeds=0,
+                            lanes_fused_chunks=0, lanes_fused_q3_chunks=0, lanes_fused_census_chunks=0,
+                            lanes_fused_fallbacks=0)
     # v20: the declared q3 lanes ledger, zero on the engine path.
     for name in ('lanes_edges', 'lanes_cover_sites', 'lanes_cover_node_visits', 'lanes_seed_tests',
                  'lanes_acute_sites', 'lanes_owner_rejections', 'lanes_seeds', 'lanes_census_point_tests',
                  'lanes_census_inside_sites', 'lanes_census_shell_sites', 'lanes_census_outside_sites',
-                 'lanes_depth_rejections', 'lanes_emitted', 'lanes_shell_ids', 'lanes_q3_edges', 'lanes_census_seeds'):
+                 'lanes_depth_rejections', 'lanes_emitted', 'lanes_shell_ids', 'lanes_q3_edges', 'lanes_census_seeds',
+                 'lanes_pruned_sites'):
         v13['ledger'].setdefault(name, 0)
     for name in g4_reader().LANES4_LEDGER:
         v13['ledger'].setdefault(name, 0)

@@ -214,6 +214,8 @@ struct GeneratorLedger {
       lanes_census_shell_sites, lanes_census_outside_sites, lanes_depth_rejections, lanes_emitted, lanes_shell_ids;
   // v21 S4b: q3 lanes and their seeds, and the declared q4 lanes ledger.
   std::uint64_t lanes_q3_edges, lanes_census_seeds;
+  // v25 (lanes plan step 3, L11): cover sites pruned by the disk of centres.
+  std::uint64_t lanes_pruned_sites;
   std::uint64_t lanes4_edges, lanes4_seeds, lanes4_certified, lanes4_certified_chunk1, lanes4_survivors,
       lanes4_pass_chunks, lanes4_pass_site_tests, lanes4_buffered_events, lanes4_max_buffered, lanes4_live_buckets,
       lanes4_filter_steps, lanes4_bucket_events, lanes4_candidates, lanes4_foreign_candidates, lanes4_groups,
@@ -270,6 +272,12 @@ struct Q34BatchTimes {
   // the CPU).
   std::uint64_t lanes_tasks = 0, lanes_max_task_steps = 0;
   double lanes_plan_ms = 0, lanes_task_ms = 0, lanes_compact_ms = 0;
+  // v25 (lanes plan step 3, L15): the fused q3 + q4 pass over all the
+  // call's tasks (both backends, functions of the input and B): seeds,
+  // chunks read, chunks read by the census alone, chunks the census
+  // consumed, tasks rerun unfused.
+  std::uint64_t lanes_fused_seeds = 0, lanes_fused_chunks = 0, lanes_fused_q3_chunks = 0,
+                lanes_fused_census_chunks = 0, lanes_fused_fallbacks = 0;
 };
 
 struct OrderSummary {

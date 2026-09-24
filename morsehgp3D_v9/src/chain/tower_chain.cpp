@@ -353,6 +353,7 @@ gen::Q34CertificateBatch gpu_certificate_batch(const GpuIndex& prepared, unsigne
 struct LanesCallSteps {
   std::uint64_t tasks = 0, max_task_steps = 0;
   double plan_ms = 0, task_ms = 0, compact_ms = 0;
+  gpu::LanesFusedWork fused{0, 0, 0, 0, 0};  // v25 (L15)
 };
 
 gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::span<const gen::Q34SurvivingEdge> survivors,
@@ -454,6 +455,7 @@ gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::spa
   t.shell_ids = w.shell_ids;
   t.q3_edges = w.q3_edges;
   t.census_seeds = w.census_seeds;
+  t.pruned_sites = w.pruned_sites;
   const auto& w4 = out.work4;
   batch.work4 = gen::Q34Lanes4Work{w4.edges, w4.seeds, w4.certified, w4.certified_chunk1, w4.survivors,
       w4.pass_chunks, w4.pass_site_tests, w4.buffered_events, w4.max_buffered, w4.live_buckets, w4.filter_steps,
@@ -472,6 +474,7 @@ gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::spa
   steps.plan_ms = out.plan_ms;
   steps.task_ms = out.task_ms;
   steps.compact_ms = out.compact_ms;
+  steps.fused = out.fused;
   convert_ms = ms_since(convert_start);
   return batch;
 }
@@ -1036,6 +1039,11 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         b.lanes_plan_ms = options.q34_gpu_q3 ? lanes_steps.plan_ms : 0.0;
         b.lanes_task_ms = options.q34_gpu_q3 ? lanes_steps.task_ms : 0.0;
         b.lanes_compact_ms = options.q34_gpu_q3 ? lanes_steps.compact_ms : 0.0;
+        b.lanes_fused_seeds = lanes_steps.fused.seeds;
+        b.lanes_fused_chunks = lanes_steps.fused.chunks;
+        b.lanes_fused_q3_chunks = lanes_steps.fused.q3_chunks;
+        b.lanes_fused_census_chunks = lanes_steps.fused.census_chunks;
+        b.lanes_fused_fallbacks = lanes_steps.fused.fallbacks;
       }
       result.q34_expanded_pairs = r34.pipeline.work.expanded_pairs;
       result.q34_cover_builds = r34.pipeline.work.cover_builds;
@@ -1118,6 +1126,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       l.lanes_depth_rejections = w.lanes.depth_rejections; l.lanes_emitted = w.lanes.emitted;
       l.lanes_shell_ids = w.lanes.shell_ids;
       l.lanes_q3_edges = w.lanes.q3_edges; l.lanes_census_seeds = w.lanes.census_seeds;
+      l.lanes_pruned_sites = w.lanes.pruned_sites;
       {
         const auto& q = w.lanes4;
         l.lanes4_edges = q.edges; l.lanes4_seeds = q.seeds; l.lanes4_certified = q.certified;

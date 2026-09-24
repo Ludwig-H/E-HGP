@@ -276,13 +276,14 @@ void merge(Q34WitnessCacheWork& a, const Q34WitnessCacheWork& b) {
 }
 
 void merge(Q34LanesWork& a, const Q34LanesWork& b) {
-  static_assert(sizeof(Q34LanesWork) == 16 * sizeof(u64) + sizeof(Q34EdgeCoverWork));
+  static_assert(sizeof(Q34LanesWork) == 17 * sizeof(u64) + sizeof(Q34EdgeCoverWork));
   MHGP9G_ADD(edges); MHGP9G_ADD(cover_sites); MHGP9G_MAX(max_cover_sites);
   merge(a.cover, b.cover);
   MHGP9G_ADD(seed_tests); MHGP9G_ADD(acute_sites); MHGP9G_ADD(owner_rejections); MHGP9G_ADD(seeds);
   MHGP9G_ADD(q3_edges); MHGP9G_ADD(census_seeds);
   MHGP9G_ADD(census_point_tests); MHGP9G_ADD(census_inside_sites); MHGP9G_ADD(census_shell_sites);
   MHGP9G_ADD(census_outside_sites); MHGP9G_ADD(depth_rejections); MHGP9G_ADD(emitted); MHGP9G_ADD(shell_ids);
+  MHGP9G_ADD(pruned_sites);
 }
 
 void merge(Q34Lanes4Work& a, const Q34Lanes4Work& b) {
@@ -1320,6 +1321,8 @@ void check_lanes_batch(const Q34LanesBatch& batch, const Q2CensusIndex& index, u
       w.emitted == records3 && w.shell_ids == shells3 && w.census_seeds == w.depth_rejections + w.emitted &&
       w.census_seeds <= w.seeds && w.acute_sites == w.owner_rejections + w.seeds &&
       w.seed_tests == w.cover_sites && w.cover.admitted_sites == w.cover_sites && w.cover_sites >= 2 * w.edges &&
+      // L11: the pruned sites are classified cover sites, never tested as seeds.
+      w.pruned_sites <= w.seed_tests && w.acute_sites + w.pruned_sites <= w.seed_tests &&
       w.census_point_tests == w.census_inside_sites + w.census_shell_sites + w.census_outside_sites &&
       w.census_shell_sites >= w.shell_ids && w.max_cover_sites <= w.cover_sites &&
       (w.edges == 0) == (w.max_cover_sites == 0) &&

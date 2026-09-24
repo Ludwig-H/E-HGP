@@ -141,7 +141,9 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                  lanes_asked=0, lanes_decided=0, lanes_deferred=0, lanes_records=0, lanes_judged=0, lanes_warps=0,
                  lanes_setup_ms=0.0, lanes_finish_ms=0.0, lanes_convert_ms=0.0, lanes_tasks=0,
                  lanes_max_task_steps=0, lanes_plan_ms=0.0, lanes_task_ms=0.0, lanes_compact_ms=0.0,
-                 gpu_prepare_ms=0.0, gpu_prepare_wait_ms=0.0)
+                 gpu_prepare_ms=0.0, gpu_prepare_wait_ms=0.0,
+                 lanes_fused_seeds=0, lanes_fused_chunks=0, lanes_fused_q3_chunks=0, lanes_fused_census_chunks=0,
+                 lanes_fused_fallbacks=0)
     ledger.update({name: 0 for name in schema['ledger'] if name.startswith(('lanes_', 'lanes4_'))})
     device = 'NVIDIA RTX PRO 6000 Blackwell Server Edition'
     if complete and levers.get('q34_batch_filter'):
@@ -186,7 +188,9 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                           lanes_seed_tests=5 * decided, lanes_acute_sites=3, lanes_owner_rejections=1, lanes_seeds=2,
                           lanes_census_point_tests=8, lanes_census_inside_sites=4, lanes_census_shell_sites=3,
                           lanes_census_outside_sites=1, lanes_depth_rejections=1, lanes_emitted=1, lanes_shell_ids=3,
-                          lanes_q3_edges=decided, lanes_census_seeds=2)
+                          lanes_q3_edges=decided, lanes_census_seeds=2,
+                          # v25: one cover site pruned (L11).
+                          lanes_pruned_sites=1)
             if levers.get('q34_batch_q4'):
                 # v21: the q4 lane of the edge with both lanes open, same call.
                 ledger.update(lanes4_edges=1, lanes4_seeds=2, lanes4_certified=1, lanes4_certified_chunk1=1,
@@ -200,8 +204,11 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                               lanes4_max_group=1, lanes4_constant_shell_sites=3, lanes4_list_steps=4,
                               lanes4_group_steps=9)
                 ledger.update(atlas_deep_cells=0)  # no atlas under the q4 lanes (as the real chain)
-                batch.update(lanes_records=2)
-    return dict(schema='mhgp9_tower_probe_v24', status=status,
+                batch.update(lanes_records=2,
+                             # v25: the two seeds of the edge with both lanes fused (L15).
+                             lanes_fused_seeds=2, lanes_fused_chunks=4, lanes_fused_q3_chunks=1,
+                             lanes_fused_census_chunks=2, lanes_fused_fallbacks=0)
+    return dict(schema='mhgp9_tower_probe_v25', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
@@ -1016,7 +1023,18 @@ class Protocol(unittest.TestCase):
                                lambda v: v['q34_batch'].update(lanes_max_task_steps=10 ** 6)),
                               ('gpu lanes plan step zero', lambda v: v['q34_batch'].update(lanes_plan_ms=0.0)),
                               ('gpu lanes steps beyond the kernel',
-                               lambda v: v['q34_batch'].update(lanes_task_ms=1.0))):
+                               lambda v: v['q34_batch'].update(lanes_task_ms=1.0)),
+                              # v25: the fused pass (L15) and the pruned sites (L11).
+                              ('gpu lanes fused seeds above q4 seeds',
+                               lambda v: v['q34_batch'].update(lanes_fused_seeds=3, lanes_fused_chunks=5)),
+                              ('gpu lanes fused q3 chunks above chunks',
+                               lambda v: v['q34_batch'].update(lanes_fused_q3_chunks=5)),
+                              ('gpu lanes fused pass beyond the q4 pass',
+                               lambda v: v['q34_batch'].update(lanes_fused_chunks=6, lanes_fused_q3_chunks=0)),
+                              ('gpu lanes fallbacks above tasks',
+                               lambda v: v['q34_batch'].update(lanes_fused_fallbacks=3)),
+                              ('gpu lanes pruned sites among the acute sites',
+                               lambda v: v['ledger'].update(lanes_pruned_sites=8))):
             bad = deepcopy(gpu_good)
             mutate(bad)
             need(refused(worker.validate_probe, bad, gpu_case, 0), 'batch/GPU probe mutation ' + label)
@@ -1121,6 +1139,8 @@ class Protocol(unittest.TestCase):
                      ('lanes_ledger_on_engine', lambda v: v['ledger'].update(lanes_edges=1)),
                      ('lanes_backend_on_engine', lambda v: v['q34_batch'].update(lanes_backend='cpu')),
                      ('lanes_tasks_on_engine', lambda v: v['q34_batch'].update(lanes_tasks=1)),
+                     ('lanes_fused_on_engine', lambda v: v['q34_batch'].update(lanes_fused_seeds=1)),
+                     ('lanes_pruned_on_engine', lambda v: v['ledger'].update(lanes_pruned_sites=1)),
                      ('core_closed_shifted', lambda v: v['ledger'].update(core_closed_edges=2)),
                      ('rect_queries_shifted', lambda v: v['ledger'].update(witness_rect_queries=8)),
                      ('q3_seed_visits_split', lambda v: v['ledger'].update(q3_seed_node_visits=6)),

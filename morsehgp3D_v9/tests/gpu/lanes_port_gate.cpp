@@ -223,6 +223,7 @@ gen::Q34LanesWork work_of(const gpu::Q3Work& w) {
   t.census_inside_sites = w.census_inside_sites;
   t.census_shell_sites = w.census_shell_sites;
   t.census_outside_sites = w.census_outside_sites;
+  t.pruned_sites = w.pruned_sites;
   t.depth_rejections = w.depth_rejections;
   t.emitted = w.emitted;
   t.shell_ids = w.shell_ids;

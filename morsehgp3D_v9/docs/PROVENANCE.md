@@ -973,7 +973,7 @@ $\Delta_4$), ni graine, ni membre d'une classe émise.
 - **Registre** : `seed_tests` reste la taille du cover (chaque site est
   classé une fois : test L11, puis test de graine s'il est gardé) ; le
   nombre de sites élagués est tenu dans `Q3Work::pruned_sites`, publié par
-  la sonde au protocole v24. Changent : recensements, passes, événements
+  la sonde au protocole v25. Changent : recensements, passes, événements
   tamponnés (un site gardé peut lire un paquet plus tôt), tâches.
 - **Mesures hôte** (08/000000, compteurs déterministes) :
 
@@ -1087,7 +1087,7 @@ du registre (`proved_here`).
   seul recensement après l'arrêt de la passe, paquets consommés par le
   recensement (ce qu'il aurait lu seul), tâches rejouées. Le registre
   déclaré des deux voies reste celui des phases séparées. Publiés par la
-  sonde au protocole v24.
+  sonde au protocole v25.
 - **Mesures hôte** (08/000000, après L10) :
 
   | | K5 | K10 |
@@ -1124,6 +1124,35 @@ du registre (`proved_here`).
   un trafic mesuré : si la passe fusionnée ralentit le vote de lentilles sur
   G4 plus que les paquets de recensement retirés ne rapportent, la mesure
   appariée le montrera.
+
+#### Sonde et protocole v25
+
+Commit séparé de l'agent, écrit en v24 ; l'intégrateur l'a fusionné avec
+la v24 déjà publiée (recouvrement q2, préparation de l'appareil) sous le nom
+v25 : union des champs des deux.
+- **Registre** (arêtes décidées) : `lanes_pruned_sites` (L11), dans
+  `gen::Q34LanesWork` et le registre de la chaîne. Identités, à la frontière
+  (`check_lanes_batch`) et au lecteur : `pruned_sites <= seed_tests` et
+  `acute_sites + pruned_sites <= seed_tests` (chaque site du cover est classé
+  une fois ; un site élagué n'est jamais testé comme graine) ;
+  `seed_tests == cover_sites` inchangée.
+- **`q34_batch`** (appel entier, deux dorsales, égaux entre le jumeau et
+  l'appareil) : `lanes_fused_seeds`, `lanes_fused_chunks`,
+  `lanes_fused_q3_chunks`, `lanes_fused_census_chunks`,
+  `lanes_fused_fallbacks` (L15). Le lecteur exige :
+  - graines ≤ paquets, paquets du recensement seul et paquets consommés par
+    le recensement ≤ paquets, paquets > 0 exactement quand il y a des
+    graines fusionnées, replis ≤ tâches ;
+  - sans arête reportée : graines fusionnées ≤ graines q4, paquets de la
+    passe fusionnée ≤ paquets de passe q4, paquets consommés par le
+    recensement ≤ points de recensement ;
+  - tout à zéro sans le levier q4, ou sur le chemin moteur.
+- **Mutants** : cinq dans l'autotest du protocole (appareil), deux sur le
+  chemin moteur, trois dans le contrat sonde/lecteur (CPU) ; planchers du
+  contrat : sites élagués > 0 sur le cas q3, graines fusionnées > 0 et aucun
+  repli sur le cas q4.
+- Porte `mhgp9_gen_wspd_q34` : inventaire des mots du registre (27 pour
+  `Q34LanesWork`, 531 pour `WspdQ34Work`).
 
 ## Voie GPU S1 : `src/gpu/` (espace `mhgp9::gpu`, code neuf)
 

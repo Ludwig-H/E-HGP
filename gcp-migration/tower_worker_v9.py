@@ -48,7 +48,7 @@ PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
 PLAN_SCHEMA = 'mhgp9_tower_plan_v6'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v24'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v25'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -114,7 +114,9 @@ BATCH_KEYS = frozenset({'used', 'backend', 'front_ms', 'filter_ms', 'edges_ms', 
                         'lanes_asked', 'lanes_decided', 'lanes_deferred', 'lanes_records', 'lanes_judged',
                         'lanes_warps', 'lanes_setup_ms', 'lanes_finish_ms', 'lanes_convert_ms', 'lanes_tasks',
                         'lanes_max_task_steps', 'lanes_plan_ms', 'lanes_task_ms', 'lanes_compact_ms',
-                        'gpu_prepare_ms', 'gpu_prepare_wait_ms'})
+                        'gpu_prepare_ms', 'gpu_prepare_wait_ms',
+                        'lanes_fused_seeds', 'lanes_fused_chunks', 'lanes_fused_q3_chunks',
+                        'lanes_fused_census_chunks', 'lanes_fused_fallbacks'})
 # v20 (S4a) : voie q3 des survivants certifies par lots, sans atlas (CPU ou
 # GPU). Chronos et comptes de l'appel, registre declare lanes_* du mode.
 LANES_TIMES = ('lanes_ms', 'lanes_device_ms', 'lanes_kernel_ms', 'lanes_transfer_ms', 'lanes_wait_ms', 'tail_ms',
@@ -127,11 +129,19 @@ LANES_STEP_TIMES = ('lanes_plan_ms', 'lanes_task_ms', 'lanes_compact_ms')
 LANES_COUNTS = ('lanes_asked', 'lanes_decided', 'lanes_deferred', 'lanes_records', 'lanes_judged', 'lanes_warps',
                 # v23 : taches (arete, plage de graines) de l'appel et plus
                 # grand travail declare d'une tache, sur les deux dorsales.
-                'lanes_tasks', 'lanes_max_task_steps')
+                'lanes_tasks', 'lanes_max_task_steps',
+                # v25 (etape 3 des voies, L15) : passe fusionnee q3 + q4 sur
+                # toutes les taches de l'appel, sur les deux dorsales.
+                'lanes_fused_seeds', 'lanes_fused_chunks', 'lanes_fused_q3_chunks', 'lanes_fused_census_chunks',
+                'lanes_fused_fallbacks')
+LANES_FUSED = ('lanes_fused_seeds', 'lanes_fused_chunks', 'lanes_fused_q3_chunks', 'lanes_fused_census_chunks',
+               'lanes_fused_fallbacks')
 LANES_LEDGER = ('lanes_edges', 'lanes_cover_sites', 'lanes_cover_node_visits', 'lanes_seed_tests',
                 'lanes_acute_sites', 'lanes_owner_rejections', 'lanes_seeds', 'lanes_census_point_tests',
                 'lanes_census_inside_sites', 'lanes_census_shell_sites', 'lanes_census_outside_sites',
-                'lanes_depth_rejections', 'lanes_emitted', 'lanes_shell_ids', 'lanes_q3_edges', 'lanes_census_seeds')
+                'lanes_depth_rejections', 'lanes_emitted', 'lanes_shell_ids', 'lanes_q3_edges', 'lanes_census_seeds',
+                # v25 (etape 3 des voies, L11) : sites du cover elagues.
+                'lanes_pruned_sites')
 # v21 (S4b) : registre declare des voies q4 de l'appel (lentilles, groupes).
 LANES4_LEDGER = tuple('lanes4_' + name for name in (
     'edges seeds certified certified_chunk1 survivors pass_chunks pass_site_tests buffered_events max_buffered '
@@ -211,7 +221,7 @@ LEDGER_KEYS = frozenset((
     'lanes_edges lanes_cover_sites lanes_cover_node_visits lanes_seed_tests lanes_acute_sites '
     'lanes_owner_rejections lanes_seeds lanes_census_point_tests lanes_census_inside_sites '
     'lanes_census_shell_sites lanes_census_outside_sites lanes_depth_rejections lanes_emitted '
-    'lanes_shell_ids lanes_q3_edges lanes_census_seeds').split()) | frozenset(LANES4_LEDGER)
+    'lanes_shell_ids lanes_q3_edges lanes_census_seeds lanes_pruned_sites').split()) | frozenset(LANES4_LEDGER)
 CATALOGUE_LISTS = dict(by_qmin=3, by_shell=17)
 CATALOGUE_KEYS = frozenset(('q2_presentations q3_presentations q4_presentations unique_keys balls '
                             'extra_shell_balls shell_over_12 max_shell max_interior census_nodes census_leaf_tests '
@@ -650,7 +660,8 @@ def validate_lanes(value, case, lanes_capacity=0, judge=False):
     """v20 (S4a) : appel des voies q3 et registre declare lanes_* du mode."""
     batch, levers, ledger = value['q34_batch'], case['levers'], value['ledger']
     if not levers['q34_batch_q4'] or value['options']['K'] < 3:
-        need(all(ledger[key] == 0 for key in LANES4_LEDGER), 'q4 lanes filled without the lever')
+        need(all(ledger[key] == 0 for key in LANES4_LEDGER) and all(batch[key] == 0 for key in LANES_FUSED),
+             'q4 lanes filled without the lever')
     if not levers['q34_batch_q3']:
         need(batch['lanes_backend'] == '' and all(batch[key] == 0 for key in LANES_TIMES + LANES_COUNTS) and
              all(ledger[key] == 0 for key in LANES_LEDGER), 'q3 lanes filled without the lever')
@@ -696,6 +707,26 @@ def validate_lanes(value, case, lanes_capacity=0, judge=False):
            batch['lanes_max_task_steps'] <= ledger['lanes_census_point_tests'] + ledger['lanes4_pass_chunks'] +
            ledger['lanes4_filter_steps'] + ledger['lanes4_list_steps'] + ledger['lanes4_group_steps'])),
          'q3 lanes tasks')
+    # v25 (etape 3 des voies) : L15, passe fusionnee sur toutes les taches ;
+    # une graine lit au moins un paquet, les paquets du recensement seul et
+    # ceux consommes par le recensement sont des paquets lus, un repli est
+    # une tache ; sans arete reportee, les graines fusionnees sont des
+    # graines q4, les paquets de la passe des paquets de passe q4 et chaque
+    # paquet consomme par le recensement y teste au moins un site. L11 : les
+    # sites elagues sont des sites classes, jamais testes comme graines.
+    f = {key: batch[key] for key in LANES_FUSED}
+    need(f['lanes_fused_seeds'] <= f['lanes_fused_chunks'] and
+         f['lanes_fused_q3_chunks'] <= f['lanes_fused_chunks'] and
+         f['lanes_fused_census_chunks'] <= f['lanes_fused_chunks'] and
+         (f['lanes_fused_chunks'] > 0) == (f['lanes_fused_seeds'] > 0) and
+         f['lanes_fused_fallbacks'] <= batch['lanes_tasks'] and
+         (batch['lanes_deferred'] > 0 or
+          (f['lanes_fused_seeds'] <= ledger['lanes4_seeds'] and
+           f['lanes_fused_chunks'] - f['lanes_fused_q3_chunks'] <= ledger['lanes4_pass_chunks'] and
+           f['lanes_fused_census_chunks'] <= ledger['lanes_census_point_tests'])) and
+         ledger['lanes_pruned_sites'] <= ledger['lanes_seed_tests'] and
+         ledger['lanes_acute_sites'] + ledger['lanes_pruned_sites'] <= ledger['lanes_seed_tests'],
+         'q3/q4 lanes fused pass and pruned sites')
     # The reduced-slab preflight defers some but never all q3 lanes. Below
     # the default site slab a correct call may still defer an edge beyond its
     # record slab or the record arena (auditor's exact 4 097-cluster fixture,

@@ -343,6 +343,7 @@ def main(argv):
                 check(False, 'reduced-slab q3 lanes case refused: ' + type(error).__name__ + ': ' + str(error))
             check(b['lanes_backend'] == 'cpu' and b['lanes_ms'] > 0 and b['lanes_device_ms'] == 0 and
                   b['lanes_tasks'] > 0 and b['lanes_max_task_steps'] > 0 and
+                  lanes['ledger']['lanes_pruned_sites'] > 0 and
                   b['lanes_deferred'] == 0 and b['lanes_decided'] == b['lanes_asked'] > 0 and b['lanes_records'] > 0 and
                   worker.logical_result(lanes) == worker.logical_result(on) and
                   worker.certificate_work(lanes) == worker.certificate_work(on),
@@ -360,6 +361,9 @@ def main(argv):
                 ('lanes tasks above seeds', lambda v: v['q34_batch'].update(
                     lanes_tasks=v['ledger']['lanes_seeds'] + 1)),
                 ('lanes tasks without steps', lambda v: v['q34_batch'].update(lanes_max_task_steps=0)),
+                # v25: the pruned sites are classified cover sites (L11).
+                ('lanes pruned above seed tests', lambda v: v['ledger'].update(
+                    lanes_pruned_sites=v['ledger']['lanes_seed_tests'] + 1)),
                 ('lanes deferral below the slab', lambda v: v['q34_batch'].update(
                     lanes_deferred=1, lanes_decided=v['q34_batch']['lanes_decided'] - 1)),
                 ('lanes judged without the judge', lambda v: v['q34_batch'].update(lanes_judged=1)),
@@ -396,6 +400,7 @@ def main(argv):
             q4_case, lanes4 = results['q4_on']
             l4 = lanes4['ledger']
             check(l4['lanes4_emitted'] > 0 and l4['lanes4_emitted'] == lanes4['generator']['q4_emitted'] and
+                  lanes4['q34_batch']['lanes_fused_seeds'] > 0 and lanes4['q34_batch']['lanes_fused_fallbacks'] == 0 and
                   worker.logical_result(lanes4) == worker.logical_result(on) and
                   worker.certificate_work(lanes4) == worker.certificate_work(on) and
                   lanes4['q34_batch']['lanes_records'] == l4['lanes_emitted'] + l4['lanes4_emitted'],
@@ -423,6 +428,12 @@ def main(argv):
                     lanes4_group_steps=2 * v['ledger']['lanes4_compare_steps'] - 1)),
                 ('q4 compare steps short', lambda v: v['ledger'].update(
                     lanes4_compare_steps=v['ledger']['lanes4_groups'] - 1)),
+                # v25: the fused pass (L15) within the q4 ledger and its chunks.
+                ('q4 fused seeds above q4 seeds', lambda v: v['q34_batch'].update(
+                    lanes_fused_seeds=v['ledger']['lanes4_seeds'] + 1,
+                    lanes_fused_chunks=v['q34_batch']['lanes_fused_chunks'] + v['ledger']['lanes4_seeds'] + 1)),
+                ('q4 fused census chunks above chunks', lambda v: v['q34_batch'].update(
+                    lanes_fused_census_chunks=v['q34_batch']['lanes_fused_chunks'] + 1)),
             ]
             q4_killed = 0
             for label, mutate in q4_mutants:

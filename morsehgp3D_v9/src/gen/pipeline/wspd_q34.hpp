@@ -124,6 +124,9 @@ struct Q34LanesWork {
   u64 q3_edges{}, census_seeds{};  // S4b: edges whose q3 lane ran, and their seeds
   u64 census_point_tests{}, census_inside_sites{}, census_shell_sites{}, census_outside_sites{};
   u64 depth_rejections{}, emitted{}, shell_ids{};
+  // v9 lanes plan step 3 (L11): cover sites pruned by the disk of centres,
+  // among the seed_tests (every cover site is classified once).
+  u64 pruned_sites{};
   bool operator==(const Q34LanesWork&) const = default;
 };
 
