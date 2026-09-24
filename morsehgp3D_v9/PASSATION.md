@@ -439,7 +439,20 @@ Résultats :
 ordres (207 ms) suivie de la phase A des ordres inférieurs ; la queue vaut
 environ 90 ms.
 
-Suite, pour le contrat de 1 s à K5 (reste 1,251 s à 000000) :
+Session G4 R19 ([reçu](receipts/g4_tower_r19_20260924/README.md), paquet
+`e9f0a104`, **`completed`**, `TERMINATED` certifié). Contenu : q2 pendant les
+appels de l'appareil (levier `q2_during_device`, sonde v24) et certificats
+S3 par blocs.
+- **K5 1,03 / 1,18 / 1,31 s**, **K10 3,21 / 4,01 / 4,05 s** ; 12
+  comparaisons égales.
+- Le recouvrement de q2 retire 60 à 97 ms à K5 et 130 à 234 ms à K10
+  (paires entrelacées).
+- La préparation de l'appareil (136 à 224 ms) n'est plus cachée que par le
+  front : le filtre l'attend jusqu'à 102 ms. C'est le prochain poste.
+- Noyau des certificats : 117 → 90 ms à K5.
+
+Suite, pour le contrat de 1 s à K5 (le plan ci-dessous date de R18 ; il
+reste 1,175 s à 000000 après R19) :
 - compactage C des voies (32 ms à 000000 contre 3 ms à 000100) et étape 3
   des voies ;
 - noyau des certificats (145 ms, une arête par warp : même traîne que les
