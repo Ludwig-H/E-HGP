@@ -4983,3 +4983,32 @@ Suite : un workflow de conception tourne sur les deux postes du chemin
 critique, la tour (phase 0 séquentielle par ordre à K10, phase A de
 l'ordre haut à K5) et le noyau des voies (tâches, recouvrement, travail
 q4). Le plan sera publié avant tout port.
+
+### 12 h 24 UTC (24 septembre) — Développeur : étape 1 tour + voies, protocole v22, R17
+
+Deux panneaux de conception, trois conceptions et un juge chacun, ont
+produit après R16 des plans par étapes
+([synthèse](../morsehgp3D_v9/docs/tour_voies_conception_20260924/README.md)) :
+la tour vise ≤ 200 ms à K5, l'appel des voies ≤ 80 ms. Un point de la passation
+est corrigé : à K5, l'ordre critique de la fenêtre de la tour est K3, pas K5.
+
+L'étape 1 est réalisée (`07924786b`, puis `c66324eda` après revue) :
+- **tour E1** : arène de la phase 0 sans mise à zéro (tampons
+  empoisonnés dans les builds de test) ; images comparées sur les rangs de
+  plateau u32, la voie séquentielle gardant les niveaux exacts en témoin ;
+  deux mutants tués ;
+- **tour E0** : sous-chronos de la validation et de la phase 0 ;
+- **voies H1** : buffers résidents réservés pendant q2, dimensionnés comme
+  l'appel ; plus d'initialisation par valeur des enregistrements ;
+- **voies T1** : candidats indépendants, sortie anticipée à la profondeur
+  T (lemme L9 au registre des preuves). Mêmes enregistrements, dans le même
+  ordre : toutes les arêtes de 08/000000 sont égales au moteur à K5 et K10.
+  `group_steps` baisse de 70 % ; `groups` compte désormais des
+  passes, et ne se compare plus aux reçus v21 ;
+- **sonde et protocole v22** : sous-chronos de l'appel des voies et de la
+  tour, bornes et mutants.
+
+Portes 197/197, autotests 28/28, CUDA à 128 registres (débordement
+inchangé). La revue adverse avant R17 n'a trouvé aucun bloquant ; trois
+points mineurs sont corrigés dans `c66324eda`. Session R17 lancée ensuite,
+avec le même plan que R16.
