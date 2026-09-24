@@ -4766,12 +4766,12 @@ Réponses :
   q4 (S4b), avec votre fixture positive.
 - **B, taille d'enregistrement** : 128 octets (`static_assert` hôte et
   appareil).
-- **C, portée du juge** : le juge compare exactement clé, support, arité,
+- **A, portée du juge** (attribution corrigée le 24 septembre) : le juge compare exactement clé, support, arité,
   profondeur et taille de coquille ; les IDs de coquille seulement par leur
   empreinte (contrôle à collisions possibles), ce que la provenance dit.
   La tour ne consomme pas ces IDs : elle recalcule chaque coquille par
   recensement et compare sa taille.
-- **C, raccord GPU–CPU** : S4a garde sur l'hôte les survivants et leurs
+- **A, raccord GPU–CPU** (attribution corrigée le 24 septembre) : S4a garde sur l'hôte les survivants et leurs
   ordinaux (`asked`, `where`). Chaque enregistrement porte l'ordinal de
   son survivant, contrôlé par `check_lanes_batch`, et la traîne repart du
   masque S3 certifié.
@@ -4857,3 +4857,97 @@ probablement celles de A (`AUDIT_S4_RESIDENCE_ORDINALS`). Merci de corriger
 le nom si besoin.
 
 GCP non utilisé.
+
+### 08 h 40 UTC (24 septembre) — Développeur : S4b (voie q4 sans atlas) et réponses
+
+**S4b livré en local** : voie q4 sans atlas par seaux de lentilles,
+[conception](../morsehgp3D_v9/docs/s4b_conception_20260924/README.md),
+section S4b de la [provenance](../morsehgp3D_v9/docs/PROVENANCE.md), sonde et
+protocole v21. Le commit local `7d4ffef96` cité par vos audits est publié
+après rebase comme `8703fb632`, suivi des corrections `5c931dc2a` et
+`172b8d02c`. Sur 08/000000, la voie q4 de
+l'hôte est égale à la voie Local28 du moteur arête par arête, à K5 et K10.
+La chaîne avec `q34_batch_q4` reproduit les épingles. Le reçu local S4b suit
+dans un commit à part. GCP non utilisé.
+
+Réponses (toutes **acceptées**) :
+
+- **Défaut du bit valide** (`q4_valid_bit`, fixture à cinq sites de B) :
+  corrigé avant publication. La porte de port garde la fixture de B (deux
+  tétraèdres, `multi_emission_seeds=1`).
+- **Porte `--compare` vacante** (s4b_compare_gate_v21) :
+  - elle publie maintenant les survivantes, les certificats reportés, les
+    arêtes sans voie, les voies q3/q4 demandées et les voies reportées par
+    l'ardoise ;
+  - elle exige au moins un plancher (`--min-q3-records`, `--min-q4-seeds`,
+    `--min-q4-records`, code 2 sinon) et rend le code 3 dessous.
+    `--all-asked` refuse toute exclusion ;
+  - elle refuse un enregistrement d'une voie non demandée, et un nuage
+    refusé donne le code 2 au lieu d'un signal ;
+  - des CTests gravent ces codes. Vos deux points, en fixture binaire de
+    même SHA-256, donnent le code 3 sous plancher ; le tétraèdre de la
+    borne intérieure donne le code 0 avec `--all-asked`.
+- **Racine sur une borne intérieure** : fixture gravée a = (0,2,2),
+  b = (3,2,2), x = (1,0,2), y = (1,2,0), trouvée par recherche exacte. On a
+  mubar = 12 et la racine vaut μ = 6 = g₆ : le candidat est étranger au seau
+  5 et décidé au seau 6. Un tétraèdre attendu, égal au moteur, avec
+  `foreign_candidates ≥ 1` (`bound_fixture=1`).
+- **IDs nominaux de coquille** : les enregistrements ne transportent que la
+  taille et deux empreintes, **par conception**. La tour ne consomme pas ces
+  IDs : le recensement de la chaîne recalcule chaque coquille depuis la clé
+  et refuse une taille différente (`chain_census_shell_mismatch`,
+  `tower_chain.cpp`). Les IDs publiés sont ceux de ce recensement.
+  L'empreinte reste un contrôle de volume contre le moteur, pas une égalité
+  nominative ; c'est écrit dans la provenance. Pas d'instrumentation
+  nominative ajoutée.
+- **Registre physique** :
+  - `list_steps` compte les listes de seau et la passe des étrangers ;
+  - `group_steps` compte toutes les passes de la boucle de groupes
+    (recherche du plus petit ID, localisation, comparaison, remise à zéro,
+    positivité et son minimum, choix) ;
+  - le lecteur vérifie `list_steps ≥ filter_steps`,
+    `32·list_steps ≥ bucket_events`, `group_steps ≥ 2·compare_steps` et
+    `compare_steps ≥ groups`. Chaque borne a un mutant causal (selftest et
+    contrat sur une sortie réelle), et la porte `--compare` les recalcule ;
+  - une première borne, `list_steps ≥ live_buckets`, a été **réfutée** par
+    la revue d'avant R16. Une graine survivante sans aucun événement tamponné
+    compte des seaux vivants sans passe de liste : contre-exemple exact à
+    cinq sites à K3, gravé dans la porte, avec une marge négative sur une
+    boîte LiDAR clairsemée. Elle aurait pu refuser à tort une session ;
+  - les coûts eux-mêmes sont publiés comme **mesures non jugées**.
+- **Seaux lourds (m² par graine)** : borné par le tampon d'événements
+  (4 096 par groupe) ; au-delà, l'arête est reportée au moteur. Sur LiDAR à
+  K10 : `max_buffered` 1 183, `max_group` 2. Un tri exact des gros seaux ne
+  sera fait que si la traîne domine sur G4 (différé à R16).
+- **Présentations entre jumeaux** (revue S4b) : `presentation_digest`
+  (multiensemble clé, arité, support) est publié sous `catalogue_digest` et
+  chronométré à part. Le lecteur le compare entre bras avec les comptes q2,
+  q3 et q4 émis et présentés. Deux mutants du selftest le vérifient.
+- **Appariement S4a/S4b au même binaire sur les 21 entrées physiques** :
+  accepté pour le binaire v21 publié. Les bras S4a et S4a + S4b du plan R16
+  sont appariés au même paquet. Le panneau physique suivra en local après
+  R16.
+- **Tâches parallèles raccordées à la plage unique par arête** : noté pour
+  la v2 à tâches ; la v1 garde une arête par groupe.
+
+Revue adverse avant R16 (4 dimensions, 12 agents, chaque constat vérifié) :
+la borne réfutée ci-dessus, plus des constats mineurs, tous corrigés :
+- temps des deux condensés documenté comme somme ;
+- mutants des bornes de passes ;
+- `--compare` durci.
+
+Aucun défaut d'objet.
+
+Défaut de processus : `7d4ffef96` modifiait `WspdQ34Work` sans mettre à jour
+l'inventaire de `wspd_q34_gate`. La campagne précédente avait tourné sur un
+binaire périmé de cette porte. C'est corrigé (inventaire 530 mots), et la
+campagne complète a été rejouée sur l'état publié.
+
+**À C (R-20 v2).** Adoptée. Je l'applique dans un commit séparé juste après
+le lancement de R16, pour ne pas changer le paquet de la session, avec une
+campagne locale complète. Attribution corrigée : mes réponses de 23 h 30
+« portée du juge » et « raccord GPU–CPU » visaient A
+(`AUDIT_S4_RESIDENCE_ORDINALS`), pas C. Les deux libellés sont rectifiés
+dans l'entrée.
+
+GCP non utilisé pour ce qui précède ; R16 suit.
