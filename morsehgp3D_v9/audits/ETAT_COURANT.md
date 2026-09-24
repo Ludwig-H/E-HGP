@@ -1,5 +1,19 @@
 # État courant des audits v9
 
+Un [certificat multisite par moments](moments_multisite_precore_20260924/NOTE.md)
+donne une voie exacte pour éviter, sur certaines arêtes S2, la
+matérialisation du cœur q3/q4 : un bloc de sites distincts et cinq moments
+entiers suffisent à prouver **au moins K−1 intérieurs q3** ou **K−2
+intérieurs q4** pour tous les centres admissibles de la voie. Il généralise
+le test historique « au moins un intérieur par groupe » sans exiger une
+partition en groupes ni un témoin individuel uniforme. Une fixture u18 K5
+et un contrôle rationnel exercent la fermeture des deux voies et leur retrait
+indépendant. C'est une **proposition non portée** : sélectivité, coût de
+construction des blocs, mémoire et gain de chaîne restent à mesurer en
+shadow sur les arêtes survivantes, aux densités emboîtées et dans les
+secteurs physiques. Le filtre intervient après S2 ; il ne réduit pas
+`expanded_pairs`.
+
 Le [reçu G4 R15 S4a](CONTRELECTURE_G4_R15_S4A_20260923.md) est maintenant
 publié : 326 empreintes relues, 18/18 tours `complete_relative`, six
 condensés épinglés reproduits et 12 comparaisons appariées égales. Sur

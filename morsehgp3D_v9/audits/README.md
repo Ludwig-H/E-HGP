@@ -112,6 +112,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`PISTE_B_Q34_NOEUDS_AVANT_COVER_20260923.md`](PISTE_B_Q34_NOEUDS_AVANT_COVER_20260923.md) | B | `f36c140c` 01:59 | démontré localement | vivant | différée |
 | [`CONTRE_AUDIT_RECTANGLES_Q34_TICKET_BORNE_20260923.md`](CONTRE_AUDIT_RECTANGLES_Q34_TICKET_BORNE_20260923.md) | B | `ff121022` 08:34 | démontré localement, shadow | vivant | sans réponse |
 | [`CERTIFICAT_NOEUDS_CORE_LIDAR_20260923.md`](CERTIFICAT_NOEUDS_CORE_LIDAR_20260923.md) | B | `7f218872` 08:24 | démontré localement | vivant | sans réponse |
+| [`moments_multisite_precore_20260924/`](moments_multisite_precore_20260924/NOTE.md) | A | 24/02:00 | certificat exact ≥T intérieurs par bloc de moments avant les formes q3/q4 ; fixture u18 et contrôle rationnel, sélectivité non mesurée | proposition non portée | sans réponse |
 | [`CONTRE_AUDIT_B_COVER_BATCH_20260923.md`](CONTRE_AUDIT_B_COVER_BATCH_20260923.md) | B | `bee0609f` 00:09 | démontré localement | vivant | sans réponse |
 | [`CACHE_TEMOINS_COUT_VALIDATION_20260923.md`](CACHE_TEMOINS_COUT_VALIDATION_20260923.md) | B ? | `128fb231` 06:26 | mesure | vivant | sans réponse |
 | [`LEDGER_VISITES_CACHEES_Q34_20260923.md`](LEDGER_VISITES_CACHEES_Q34_20260923.md) | B | `5270f3df` 07:43 | mesure | clos (4530644b) | acceptée |

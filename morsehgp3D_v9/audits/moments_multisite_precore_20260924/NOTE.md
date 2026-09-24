@@ -1,0 +1,35 @@
+# Crédit multisite par moments avant les formes du cœur q3/q4
+
+24 septembre 2026 — proposition exacte, **non portée et non chronométrée**. Cadre : exploration v9 hors registre, CPU de référence, coordonnées entières u18 ; aucun contrat FULL/G4 acquis. Le filtre s'appliquerait **par arête propriétaire après l'expansion S2**, avant `make_diametral` et `Q34DeadLaneProver::load`. Il ne peut pas réduire `expanded_pairs`. Un échec conserve le chemin actuel entier.
+
+## Certificat d'un bloc
+
+Fixer un bloc `G` de `N` sites du nuage, **distincts en IDs**, sans exiger qu'ils soient tous dans le cœur diamétral. Préparer une fois `N`, `Z=Σz` (trois coordonnées) et `Q=Σ|z|²`. Pour l'arête `ab`, poser `d=b−a`, `D=|d|²>0`, `s=a+b`, puis
+
+`W=2Z−Ns`, `H=4[s·Z−Q−N(a·b)]`, `X=|d×W|²`.
+
+Ce sont exactement les moments `H,W,X` du [certificat historique de groupes de gardes](../CERTIFICAT_B_GROUPES_GARDES_Q34_20260923.md) ; **seule la borne de cardinalité ci-dessous est nouvelle**. Avec `w_z=2z−s`, on a aussi `H=ND−Σ|w_z|²` et `W=Σw_z`.
+
+Une boule possédée par `ab` a pour centre `c=s/2+t`, `t·d=0`. La marge d'intérieur strict de `z` est
+
+`P_z(c)=|a−c|²−|z−c|²=(D−|w_z|²)/4+w_z·t`.
+
+La voie q3 impose `|t|²≤D/12`, la voie q4 `|t|²≤D/8`. Ainsi, sur chaque disque contenant tous ses centres admissibles, `ΣP_z(c)` est minorée respectivement par `H/4−√(X/12)` et `H/4−√(X/8)`. De plus chaque marge est majorée par `|a−c|²=D/4+|t|²`, donc par `U₃=D/3` ou `U₄=3D/8`. Si moins de `T` sites étaient strictement intérieurs, les au plus `T−1` marges positives contribueraient au total au plus `(T−1)U`, tandis que les autres seraient non positives. **Une minoration stricte `ΣP>(T−1)U` certifie donc au moins `T` intérieurs distincts à tous les centres de la voie.** Aucune borne de coquille ou compte transférable au census n'en découle.
+
+Pour `T₃=K−1>0`, le test entier exact est `A₃=3H−4(T₃−1)D>0` **et** `A₃²>12X`. Pour `T₄=K−2>0`, c'est `A₄=2H−3(T₄−1)D>0` **et** `A₄²>8X`. À `T=1`, ces tests redeviennent exactement ceux du certificat historique `≥1/groupe`. Les égalités ne prouvent rien. Chaque test retire uniquement le bit de sa voie ; si les deux bits actifs sont retirés, les formes du cœur et le cover complet sont évités. Toute voie non prouvée suit exactement le traitement existant. Pour une antichaîne de blocs à IDs disjoints, les crédits entiers certifiés séparément peuvent s'additionner **dans une même voie** jusqu'au seuil ; ne jamais additionner un nœud et son descendant, ni des crédits q3 à q4. La première ablation devrait rester à **un bloc proche du milieu** par arête.
+
+## Fixture entière K5
+
+`a=(5,10,10)`, `b=(15,10,10)` et huit gardes distincts : `(10,10±1,10±3)` pour les quatre signes, puis `(10,10±3,10±1)` pour les quatre signes. Tous sont u18 et dans le cœur fermé. `D=100`, chaque `|w_z|²=40`, `H=480`, `W=0`, `X=0`. À K5, `T₃=4`, `A₃=240>0`; `T₄=3`, `A₄=360>0` : les deux voies ferment sans forme individuelle.
+
+Aucun garde ne fournit pourtant un témoin universel isolé : pour chacun, choisir `t=−(4/5)(g−s/2)`. Alors `t·d=0`, `|t|²=32/5<D/12`, mais `P_g(s/2+t)=−1`. La fixture démontre le critère multisite et l'absence de témoins unitaires ; **elle ne sépare pas sa puissance de toutes les partitions en groupes** : les gardes opposés forment ici quatre paires certifiables. Son intérêt possible est le test d'un bloc agrégé en temps constant, sans choisir ni apparier les gardes. En retirant un garde, le test K5 q3 échoue et q4 réussit, ce qui exerce le retrait indépendant des bits. [`check.py`](check.py) contrôle ces identités en arithmétique entière/rationnelle, sans HGP.
+
+Le certificat historique garantit `≥1` intérieur **par groupe**, puis cherche `T` groupes disjoints ; il peut réussir quand ce test d'un gros bloc échoue. La contre-fixture de quatre triples de cet audit en est un exemple : son agrégat a `D=196`, `H=376`, d'où `A₃=−1224` pour `T₃=4`. Le [certificat par nœuds et cellules](../CERTIFICAT_NOEUDS_CORE_LIDAR_20260923.md) crédite pour sa part toute la population seulement si **chaque** site est uniformément intérieur sur la cellule. Ce test-ci crédite `T` sites d'un seul bloc via leur somme, même si aucun garde n'est uniforme sur le disque entier.
+
+## Coût, bornes et shadow
+
+Pour `N<2¹⁷` et les coordonnées non négatives `≤M=2¹⁸−1`, `D<2³⁸`, `|w_z|²<2⁴⁰`, `|H|<2⁵⁷`, `|W_i|<2³⁶`, `X<2¹¹²`. À `K≤10`, `|A₃|,|A₄|<2⁵⁹`, donc leurs carrés et `12X` tiennent en **i128 signé**, sous réserve de promouvoir avant toute multiplication. `Z_i<2³⁵` et `Q<2⁵⁵` permettent des moments de cinq mots de 64 bits (`N,Z_x,Z_y,Z_z,Q`), soit **40 octets par bloc** avant clés/alignement. Les moments sur tous les nœuds d'un arbre binaire à `n` feuilles pourraient coûter jusqu'à `40(2n−1)` octets : environ **9,4 Mio à 123 389 sites**, en plus de l'index. Commencer par un niveau grossier ou des voxels choisis ; compter aussi clés, table, construction et accès. Pour `N` plus grand ou un autre profil, recalculer les bornes et utiliser un entier plus large vérifié ou un repli sûr.
+
+Le signal expérimental est substantiel sans être un gain acquis : sur la trame brute 08/000000 pleine à K5, les arêtes traversant les quarts physiques portent **386,5 M / 559,7 M** formes, et **98,94 %** de ces formes traversantes appartiennent à des arêtes dont les deux voies ne ferment qu'après leur matérialisation ([trace appariée](../edge_matched_core_20260923/README.md)). Les [pentes LiDAR](../ETAT_COURANT.md) concernent aussi d'autres scènes, quarts et densités ; ni un axe `x=0` ni un unique seuil de distance ne doivent être codés en hypothèse.
+
+Shadow à coût borné sur les **arêtes S2 survivantes** : préparer quelques blocs spatiaux immuables par trame, aiguiller sans dépendre d'un plan capteur, exécuter les deux tests entiers sans modifier la sortie, puis joindre par ID d'arête le masque obtenu, les bits réellement fermés par S3 et les formes baseline. Couvrir trames brutes et sans sol, pleines/moitiés/quarts **physiques** et densités globales emboîtées `1/4,1/2,1`, à K5/K10. Publier sélectivité q3/q4/deux voies, `F` baseline potentiellement évité, faux espoirs, mémoire, temps de préparation/lookup/test, travail S2/S3/cover/catalogue, CPU et mur à plusieurs workers. Si port positif, vérifier sorties/IDs/digests exacts ; distinguer `core_sites` logique baseline des **formes effectivement matérialisées** et ne pas réutiliser son ancienne identité comptable. Aucun coût de groupes sur 64 coins ne se transfère automatiquement au test multisite : le terme `(T−1)U(D)` change la dépendance en `a,b` et exige sa propre preuve avant tout usage sur un produit `A×B`.
