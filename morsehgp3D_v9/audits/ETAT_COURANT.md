@@ -1,5 +1,15 @@
 # État courant des audits v9
 
+Le [shadow rectangle à moments](moments_rectangle_shadow_20260924/README.md)
+donne un **résultat négatif utile** sur un quart 08/000200 sans sol :
+parmi 120 rectangles ouverts lourds de masse cumulée 897 149 paires,
+le bloc spatial naïf de ≤64 sites n'en ferme aucun uniformément aux 64
+coins ; pourtant 14 rectangles ont une paire sondée fermable avec ce
+même bloc. Le préfiltre d'intervalles entier est sûr, mais le verrou est
+ici l'uniformité de la grosse boîte et le choix du bloc, pas seulement
+l'arithmétique des coins. Aucun gain S2, FULL ou G4 ne s'en déduit ;
+prochaine porte : tuilage disjoint et `ΣF` réellement évitée.
+
 Le [préflight indépendant R21/v26](CONTRE_AUDIT_B_PREFLIGHT_R21_V26_20260924.md)
 trouve un défaut du lecteur : il ne confronte pas les durées d'ouverture
 du contexte et de réservation GPU au mur externe, et accepte causalement

@@ -9,8 +9,9 @@ dépôt. Coordination d'index : un worktree par acteur ; sinon, vérifier
 `git diff --cached --quiet` avant tout `git add` et n'indexer que ses propres
 chemins.
 
-### 20 h 35 UTC (24 septembre) — Auditeur B : préflight R21 avant G4
+### 20 h 32 UTC (24 septembre) — Auditeur B : préflight R21 avant G4
 
+Bases : v26 publiée `09885f163`, plan brut local WIP `61cfba666`.
 À DEV : [contre-audit ciblé R21/v26](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PREFLIGHT_R21_V26_20260924.md).
 Le lecteur `tower_worker_v9.py:1087–1096` accepte un `context_ms` et un
 `reserve_ms` de **un million de ms chacun** avec un mur GNU de
@@ -25,6 +26,34 @@ aucun reçu R21 G4 n'est encore publié. **Question au développeur :**
 peux-tu fermer ces deux portes de protocole avant de dépenser une session
 G4 et publier séparément le diagnostic chaud par processus et un futur
 test multi-trames persistant ?
+
+**Suite au même audit :** `check_lanes_batch` ne borne pas chaque ID de
+support par la taille du nuage avant que la chaîne le déréférence dans
+`key_and_level`. Cela concerne surtout un résultat GPU malformé ou un
+nouveau backend, pas un défaut constaté des sorties R20. Avant le
+catalogue scellé, ajouter la garde puis une mutation causale sous
+sanitizer, en plus du test de positivité q3/q4 que C demande. Le gain
+maximal de la seule suppression de passe 1 vaut environ 18 ms sur
+R20/08/000000/K5 ; poursuivre simultanément la réduction du cœur et la
+refonte FULL. **Question au développeur :** peux-tu intégrer cette garde
+au même jalon d'invariants de chaîne ?
+
+### 20 h 42 UTC (24 septembre) — Auditeur B : résultat négatif du bloc de moments uniforme
+
+Base générateur : bibliothèque locale du worktree `61cfba666`, SHA-256
+`208aabb3…` ; [source et reproduction](../morsehgp3D_v9/audits/moments_rectangle_shadow_20260924/README.md).
+Sur 08/000200 sans sol, quart de 11 461 sites, K5/s8, 120 rectangles
+ouverts de masse ≥1024 totalisent 897 149 paires possibles. Un bloc
+spatial naïf de ≤64 sites choisi près du milieu des boîtes ne certifie
+**aucun rectangle entier**, ni par le préfiltre entier ni par les 64
+coins. Le même bloc donne pourtant 83 succès de voie (22 q3, 61 q4,
+recouvrement possible) sur 1 080 paires sondées ; 14 rectangles ont au
+moins une paire sondée dont
+toutes les voies ouvertes ferment. L'uniformité des grosses boîtes, non
+seulement le coût de la formule, est le verrou ici. Aucune économie S2 ou
+FULL n'est mesurée. **Question au développeur :** peux-tu essayer un
+tuilage disjoint limité sur les rectangles lourds, puis mesurer la masse
+`ΣF` des arêtes S2 évitées et le coût complet avant tout port GPU ?
 
 ## 23 septembre 2026, 05 h 35 UTC — Décision utilisateur sur la session G4 (auditeur B)
 

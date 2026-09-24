@@ -17,6 +17,8 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
    [le préflight R21/v26](CONTRE_AUDIT_B_PREFLIGHT_R21_V26_20260924.md) :
    le contrat, le dernier coût reçu de la chaîne GPU hybride et les
    verrous architecturaux.
+   Le [shadow rectangle à moments](moments_rectangle_shadow_20260924/README.md)
+   juge négativement un choix naïf de bloc sur un quart LiDAR sans sol.
 4. [`NOTE_C_INVARIANT_EULER_20260923.md`](NOTE_C_INVARIANT_EULER_20260923.md),
    [`CONTRELEC_EULER_PAR_NERF_20260923.md`](CONTRELEC_EULER_PAR_NERF_20260923.md) et
    [le contre-exemple](CONTRE_EXEMPLE_EULER_KPLUS2_20260923.md) : invariant

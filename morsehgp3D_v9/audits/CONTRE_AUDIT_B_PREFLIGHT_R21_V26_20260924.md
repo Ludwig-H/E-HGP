@@ -102,4 +102,42 @@ désactivé lorsqu'un `batch_resolver` externe est branché. Un simple
 callback GPU peut donc détériorer FULL ; sa parallélisation doit être
 vérifiée de bout en bout, avec comparaison exacte des sorties.
 
+## Portes d'exactitude et autres essais encore dus
+
+Le [catalogue scellé proposé par C](PROPOSITION_C_CATALOGUE_SCELLE_20260924.md)
+peut supprimer la passe 1 de FULL **seulement après** avoir transféré
+dans la chaîne le test exact de positivité des supports réguliers. La
+chaîne recalcule aujourd'hui q3 sans acuité stricte et q4 avec `det>0`
+sans tous les poids strictement positifs ; le recensement et Euler ne
+remplacent pas ce test. La proposition de C pose explicitement cette
+condition. Sur R20/08/000000/K5, la passe 1 ne vaut que 17,9 ms des
+70,5 ms de validation et 421,5 ms de FULL : levier exact et intéressant,
+mais insuffisant isolément pour 100 ms.
+
+Une garde de domaine paraît aussi manquer au bord des enregistrements
+GPU : `gen::check_lanes_batch` vérifie arité, ordre, extrémités et champs
+comptables, mais pas visiblement `support[k] < spatial_order.size()` pour
+chaque support. `chain::key_and_level` indexe ensuite `points` avec ces
+supports avant toute garde de ce type. Les enregistrements normaux sont
+construits par le moteur ; le cas signalé est celui d'un résultat de
+batch corrompu ou d'un nouveau backend. Il faut un mutant ciblé avec
+ASan/UBSan et un refus typé avant d'utiliser ces enregistrements pour
+sceller le catalogue. Cette lecture statique n'est pas une corruption
+observée sur R20.
+
+Les essais restants, à distinguer des reçus acquis :
+
+| Porte | Dernière preuve pertinente | À produire |
+| --- | --- | --- |
+| Croissance 8k/16k/32k | six campagnes locales v12, s8, avec plusieurs pentes `core_sites` ≥ 2 | refaire sur chemin récent, K5/K10, sans sol puis brut ; compiler travail total et sortie, pas seulement temps mur |
+| Séparation WSPD | R20/R21 s8 seulement | mêmes entrées et sortie exacte à s8/10/12, coût complet G4 et pente locale |
+| FULL K5 exact | T2 public recalcule la chaîne à `kmax=10,s=8` sur fixtures ; R20 est `complete_relative` | porte T2 directe `kmax=5`, variations s/W, comparaison structurelle des nœuds, parents, liens et coquilles |
+| Régimes LiDAR | R20 sans sol, trois trames de 08 ; R21 brut planifié mais non reçu | plusieurs séquences, trames entières brutes et sans sol, segmentation et coût total séparés |
+| Session et capacité | R21 processus par cas ; aucun 10M+ qualifié | flux persistant multi-trames, RSS/VRAM/pagination, adressage et sortie explicite à dizaines de millions |
+
+La grille 1 mm est le profil temporel prioritaire décidé par l'utilisateur ;
+le float32 natif reste un objectif secondaire distinct, non couvert par
+ces qualifications u18. Aucun sous-ensemble 8k/16k/32k ne remplace une
+trame entière pour le contrat de temps.
+
 GCP non utilisé dans ce contre-audit ; aucun nouveau contrat acquis.
