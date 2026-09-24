@@ -1306,6 +1306,10 @@ void check_lanes_batch(const Q34LanesBatch& batch, const Q2CensusIndex& index, u
       }
       if (record.edge != j || !shape || !has_a || !has_b || record.key[0] <= 0)
         throw std::logic_error("mhgp9 gen batched q34 lanes call returned a malformed or misplaced record");
+      // Auditor B (before R21): every support ID lies in the cloud before the
+      // chain dereferences it (the supports are sorted: the last is the max).
+      if (s[arity - 1] >= order.size())
+        throw std::logic_error("mhgp9 gen batched q34 lanes call returned a support outside the cloud");
       if (arity == 3) {
         ++records3;
         counter_add(shells3, static_cast<u64>(record.shell));

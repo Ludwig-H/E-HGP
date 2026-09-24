@@ -1208,6 +1208,51 @@ un flux LiDAR à 10 Hz ouvre le contexte au démarrage, pas à chaque trame.
   entrelacées à 00 K5/K10. Le coût à froid reste publié : c'est la
   différence entre les bras, plus `context_ms`.
 
+### Intégration de la tour et sonde v27 (25 septembre 2026, avant R21)
+
+Les trois séries de la tour (queue en pipeline E4, regroupement haché de la
+phase 0, pool persistant E2) ont été écrites en parallèle sur `d1d03839`,
+puis revues séparément par un sceptique et par l'auditeur B.
+- **Options nommées.** Chaque série avait ajouté un booléen positionnel
+  juste après `overlap_static`. Une fusion qui n'en garde qu'un aurait
+  compilé avec le mauvais levier (auditeur B). `build_full_ball_tower` et
+  le `Builder` prennent désormais l'agrégat `FullBallTowerOptions`
+  (`overlap_static`, `pipelined_tail`, `hash_grouping`, `persistent_pool`,
+  `trace`). Un booléen nu ne s'y convertit pas : les deux appels restés
+  positionnels dans la porte du pool ont échoué à la compilation, comme
+  voulu.
+- **Porte 2×2×2.** `mhgp9_chain_tower_tail` exécute en plus les huit
+  combinaisons des trois leviers à 4 fils statiques, et le témoin complet à
+  8 fils. Toutes rendent le même condensé, la même banque, les mêmes
+  références de contribution et le même `tower_work`. Chaque levier prend
+  réellement son chemin : ordres en pipeline, ordres hachés
+  (`FullBallStats::hashed_orders`, métadonnée de chemin hors `tower_work`)
+  et fils du pool.
+- **Sonde v27.**
+  - Leviers `tower_pipelined_tail`, `tower_hash_grouping` et
+    `tower_persistent_pool`.
+  - Section `tower_detail` : ordres en pipeline, références différées,
+    ordres hachés, fils et appels du pool, fils d'aide et de phase A,
+    création du pool, pas de population et d'images de chaque ordre.
+  - Le lecteur exige ces chemins sous leurs leviers et zéro sans eux.
+- **Mur externe (auditeur B).** `validate_external_wall` borne aussi
+  `context_ms + reserve_ms` de la session d'appareil, jamais
+  `chain_total`. L'autotest ajoute le mutant d'une session d'un million de
+  millisecondes dans un mur de 2 ms.
+- **Garde des supports (auditeur B).** `check_lanes_batch` refuse un ID de
+  support hors du nuage avant que la chaîne ne le déréférence.
+  `mhgp9_gpu_lanes_port` ajoute ce mutant de frontière : les supports
+  restent triés et gardent les deux extrémités de l'arête.
+- **Trames brutes.** Les épingles CPU de C (`audits/c_raw_pins_20260924`)
+  entrent dans `PINNED_DIGESTS`.
+- **Plan R21 (34 cas).**
+  - Les trames sans sol, bras GPU (session chaude, L15 désactivée) et
+    jumeau moteur, à K5 et K10.
+  - À 00, les paires froid/chaud répétées et entrelacées, puis le bras
+    `gpu_tower_witness` (les trois leviers de la tour coupés), deux fois à
+    K5 et à K10.
+  - Enfin, les trois trames brutes avec sol, GPU et moteur, à K5 et K10.
+
 ## Voie GPU S1 : `src/gpu/` (espace `mhgp9::gpu`, code neuf)
 
 23 septembre 2026. Première brique GPU de la v9, pour une expérience de

@@ -45,7 +45,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[2]
 V8 = ROOT / 'morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v26'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v27'
 # Schemas relus lors d'une revalidation d'archive (v12 : reçu du 23 septembre).
 KNOWN_SCHEMAS = ('mhgp9_tower_probe_v12', PROBE_SCHEMA)
 # Le schema de sonde d'une campagne est fixe par son RESUME, jamais par le JSON
@@ -66,7 +66,9 @@ DEFAULT_LEVERS = dict(atlas_saturate_deep=True, q3_leaf_census=True, q34_dead_la
                       # v17/v18/v20: the local campaign keeps the engine path (no GPU here).
                       q34_batch_filter=False, q34_gpu_filter=False, q34_batch_certificates=False,
                       q34_gpu_certificates=False, q34_batch_q3=False, q34_gpu_q3=False, q34_batch_q4=False,
-                      q2_during_device=False, q34_lanes_fused=False, device_session=False)
+                      q2_during_device=False, q34_lanes_fused=False, device_session=False,
+                      # v27: the tower's three sibling levers, on as in the chain.
+                      tower_pipelined_tail=True, tower_hash_grouping=True, tower_persistent_pool=True)
 # Leviers publies par schema de sonde (les archives v12 en ont six).
 LEVERS_V12 = {name: True for name in ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_witness_cache',
                                       'q34_dead_core', 'tower_meb_proposal')}
@@ -439,6 +441,14 @@ def selftest(case_path):
     v13['presentation_digest'] = 'fedcba9876543210'
     # v26: the device session, closed on the local engine path.
     v13['device_session'] = dict(opened=False, context_ms=0.0, reserve_ms=0.0)
+    # v27: the tower's paths under its sibling levers (static path above one thread).
+    on_static = expected['static_threads'] > 1 and min(k, expected['sites']) > 1
+    v13['tower_detail'] = dict(pipelined_orders=k if on_static else 0, population_deferred_refs=0,
+                               hashed_orders=k - 1 if on_static else 0,
+                               pool_threads=expected['static_threads'] - 1 if on_static else 0,
+                               pool_jobs=3 if on_static else 0, helper_threads=0, runner_threads=k if on_static else 0,
+                               pool_ms=0.01 if on_static else 0.0, populations_by_k=[0.0] * k,
+                               images_own_by_k=[0.0] * k)
     v13['times_ms']['catalogue_digest'] = 0.0
     v13['times_ms']['q2_wait'] = 0.0
     v13['options']['certificate_capacity'] = 0

@@ -209,7 +209,7 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                     # v25: the two seeds of the edge with both lanes fused (L15).
                     batch.update(lanes_fused_seeds=2, lanes_fused_chunks=4, lanes_fused_q3_chunks=1,
                                  lanes_fused_census_chunks=2, lanes_fused_fallbacks=0)
-    return dict(schema='mhgp9_tower_probe_v26', status=status,
+    return dict(schema='mhgp9_tower_probe_v27', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
@@ -248,7 +248,21 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                 # v26: the device session opened before the chain under its lever.
                 device_session=dict(opened=bool(levers.get('device_session')),
                                     context_ms=0.1 if levers.get('device_session') else 0.0,
-                                    reserve_ms=0.05 if levers.get('device_session') else 0.0))
+                                    reserve_ms=0.05 if levers.get('device_session') else 0.0),
+                tower_detail=tower_detail(levers, effective, k, static, complete))
+
+
+def tower_detail(levers, effective, k, static, complete):
+    # v27: the tower's paths under its three sibling levers (never tower_work).
+    static_path = complete and static > 1 and effective > 1
+    pipelined = static_path and levers.get('tower_overlap_static') and levers.get('tower_pipelined_tail')
+    hashed = static_path and levers.get('tower_hash_grouping')
+    pooled = static_path and levers.get('tower_persistent_pool')
+    return dict(pipelined_orders=effective if pipelined else 0, population_deferred_refs=0,
+                hashed_orders=effective - 1 if hashed else 0, pool_threads=static - 1 if pooled else 0,
+                pool_jobs=3 if pooled else 0, helper_threads=5, runner_threads=effective if static_path else 0,
+                pool_ms=0.01 if pooled else 0.0, populations_by_k=[0.01 if pipelined else 0.0] * k,
+                images_own_by_k=[0.02 if pipelined else 0.0] * k)
 
 
 def main():
@@ -710,10 +724,12 @@ class Protocol(unittest.TestCase):
             for field in ('tower_digest', 'catalogue_digest'):
                 bad = dict(value, **{field: '0' * 16})
                 need(refused(worker.validate_probe, bad, gpu_case, 0), 'pinned ' + field + ' differs')
-        need(worker.PINNED_DIGESTS == {} and len(PINNED_REAL) == 6 and
-             {(scene, k, 8) for scene in ('00', '01', '02') for k in (5, 10)} == set(PINNED_REAL) and
+        # v27: twelve pins, the six ground-free LiDAR frames and C's six raw
+        # frames with ground (every scene of the inputs, at K5 and K10).
+        need(worker.PINNED_DIGESTS == {} and len(PINNED_REAL) == 12 and
+             {(scene, k, 8) for scene in worker.INPUTS for k in (5, 10)} == set(PINNED_REAL) and
              all(re.fullmatch('[0-9a-f]{16}', d) for pair in PINNED_REAL.values() for d in pair),
-             'six pinned LiDAR values')
+             'twelve pinned LiDAR values')
 
     def test_pins_and_guard_arithmetic(self):
         for name, pin in session.GUARDS.items():
@@ -820,11 +836,18 @@ class Protocol(unittest.TestCase):
         # v26 (R21): L15 off in the whole plan; the GPU arm opens the device
         # session, gpu_cold does not.
         gpu = dict(on, q34_lanes_fused=False)
-        arms = dict(gpu=gpu, engine=worker.engine_levers(gpu), gpu_cold=dict(gpu, device_session=False))
+        arms = dict(gpu=gpu, engine=worker.engine_levers(gpu), gpu_cold=dict(gpu, device_session=False),
+                    gpu_tower_witness=dict(gpu, tower_pipelined_tail=False, tower_hash_grouping=False,
+                                           tower_persistent_pool=False))
         expected = [(scene, k, arm, 0) for scene in ('00', '01', '02') for k in (5, 10) for arm in ('gpu', 'engine')]
         expected += [('00', 5, 'gpu_cold', 0), ('00', 5, 'gpu', 1), ('00', 10, 'gpu_cold', 0),
                      ('00', 10, 'gpu', 1), ('00', 5, 'gpu_cold', 1), ('00', 10, 'gpu_cold', 1)]
-        need(provenance['commit'] == head and len(cases) == len(expected) == 18 and all(
+        # v27 (R21): the tower without its three sibling levers, at 00.
+        expected += [('00', 5, 'gpu_tower_witness', 0), ('00', 10, 'gpu_tower_witness', 0),
+                     ('00', 5, 'gpu_tower_witness', 1), ('00', 10, 'gpu_tower_witness', 1)]
+        # v26 (R21): the raw frames with ground, after the ground-free ones.
+        expected += [(scene, k, arm, 0) for scene in ('b00', 'b01', 'b02') for k in (5, 10) for arm in ('gpu', 'engine')]
+        need(provenance['commit'] == head and len(cases) == len(expected) == 34 and all(
                 (c['scene'], c['k'], c['repeat']) == (scene, k, repeat) and c['levers'] == arms[arm] and
                 c['s'] == 8 and c['workers'] == 48 and c['static_threads'] == 48
                 for c, (scene, k, arm, repeat) in zip(cases, expected)),
@@ -1054,7 +1077,18 @@ class Protocol(unittest.TestCase):
                                lambda v: v['device_session'].update(context_ms=0.0)),
                               ('gpu device session reserve without opening',
                                lambda v: v['device_session'].update(opened=False)),
-                              ('gpu device session section absent', lambda v: v.pop('device_session'))):
+                              ('gpu device session section absent', lambda v: v.pop('device_session')),
+                              # v27: the tower's paths under its sibling levers.
+                              ('tower detail pipelined orders short',
+                               lambda v: v['tower_detail'].update(pipelined_orders=4)),
+                              ('tower detail no hashed order', lambda v: v['tower_detail'].update(hashed_orders=0)),
+                              ('tower detail hashed orders beyond phase 0',
+                               lambda v: v['tower_detail'].update(hashed_orders=5)),
+                              ('tower detail pool threads shifted',
+                               lambda v: v['tower_detail'].update(pool_threads=46)),
+                              ('tower detail pool without jobs', lambda v: v['tower_detail'].update(pool_jobs=0)),
+                              ('tower detail by-k short', lambda v: v['tower_detail']['populations_by_k'].pop()),
+                              ('tower detail absent', lambda v: v.pop('tower_detail'))):
             bad = deepcopy(gpu_good)
             mutate(bad)
             need(refused(worker.validate_probe, bad, gpu_case, 0), 'batch/GPU probe mutation ' + label)
@@ -1074,6 +1108,22 @@ class Protocol(unittest.TestCase):
             bad = deepcopy(unfused)
             mutate(bad)
             need(refused(worker.validate_probe, bad, unfused_case, 0), 'unfused probe mutation ' + label)
+        # v27: the tower witness arm (its three sibling levers off) takes no
+        # pipelined, hashed or pooled path.
+        witness_case = dict(gpu_case, levers=dict(gpu_case['levers'], tower_pipelined_tail=False,
+                                                  tower_hash_grouping=False, tower_persistent_pool=False))
+        witness = probe_value(data['n'], data['fnv'], 5, 8, 48, 48, levers=witness_case['levers'])
+        need(worker.validate_probe(worker.strict_json(json.dumps(witness)), witness_case, 0) == 'complete_relative',
+             'valid GPU probe of the tower witness arm')
+        for label, mutate in (('hashed orders without the lever', lambda v: v['tower_detail'].update(hashed_orders=4)),
+                              ('pool threads without the lever', lambda v: v['tower_detail'].update(pool_threads=47,
+                                                                                                    pool_jobs=3)),
+                              ('pipelined steps without the lever',
+                               lambda v: v['tower_detail'].update(populations_by_k=[0.0, 1.0, 0.0, 0.0, 0.0])),
+                              ('pool time without the pool', lambda v: v['tower_detail'].update(pool_ms=1.0))):
+            bad = deepcopy(witness)
+            mutate(bad)
+            need(refused(worker.validate_probe, bad, witness_case, 0), 'tower witness mutation ' + label)
         # v20: a q3 lane deferred below the site slab (record slab or arena
         # overflow) is a legitimate memory decision: accepted.
         deferred_lane = deepcopy(gpu_good)
@@ -1102,6 +1152,16 @@ class Protocol(unittest.TestCase):
         need(refused(worker.validate_external_wall, good, -1.0) and
              refused(worker.validate_external_wall, dict(good, times_ms=dict(good['times_ms'], chain_total=9000.0)),
                      5.0), 'chain total bounded by the external wall')
+        # v27 (auditor B before R21): the device session opened before the
+        # chain is inside the external wall bound, never in chain_total.
+        session_wall = sum(gpu_good['times_ms'][key] for key in ('read', 'chain_total', 'digest', 'catalogue_digest'))
+        session_wall += gpu_good['device_session']['context_ms'] + gpu_good['device_session']['reserve_ms']
+        worker.validate_external_wall(gpu_good, session_wall / 1000.0)
+        huge = deepcopy(gpu_good)
+        huge['device_session'].update(context_ms=1e6, reserve_ms=1e6)
+        need(refused(worker.validate_external_wall, huge, session_wall / 1000.0),
+             'device session bounded by the external wall')
+        worker.validate_external_wall(huge, 2e3 + session_wall / 1000.0)
         mutations = [('schema', lambda v: v.update(schema='mhgp9_tower_probe_v0')),
                      ('schema_v10', lambda v: v.update(schema='mhgp9_tower_probe_v10')),
                      ('schema_v11', lambda v: v.update(schema='mhgp9_tower_probe_v11')),
@@ -1273,14 +1333,17 @@ class Protocol(unittest.TestCase):
                  value['preflight']['engine_tower_digest'] == value['preflight']['tower_digest'],
                  'deferral preflight run and recorded')
             need(value['GPU_preflight_executed'] is True and
-                 value['GPU_completed_cases'] == [0, 2, 4, 6, 8, 10, 12, 13, 14, 15, 16, 17] and
+                 value['GPU_completed_cases'] == [0, 2, 4, 6, 8, 10] + list(range(12, 22)) + list(range(22, 34, 2)) and
                  receipt['GPU_completed_cases'] == value['GPU_completed_cases'], 'GPU labels from complete LiDAR towers')
             # v21 plan: GPU/engine pairs per (frame, K), then repeated and
             # interleaved S4a / S4a + S4b pairs at 00, K5 and K10.
-            need(value['completed_case_indices'] == list(range(18)) and value['cross_worker_comparisons'] == [
+            # v27 (R21): then the tower witness arm at 00 and the raw frames.
+            need(value['completed_case_indices'] == list(range(34)) and value['cross_worker_comparisons'] == [
                 dict(reference=r, other=r + 1, equal=True) for r in range(0, 12, 2)] + [
                 dict(reference=reference, other=other, equal=True)
-                for reference, other in ((0, 12), (0, 13), (2, 14), (2, 15), (0, 16), (2, 17))] and
+                for reference, other in ((0, 12), (0, 13), (2, 14), (2, 15), (0, 16), (2, 17), (0, 18), (2, 19),
+                                         (0, 20), (2, 21))] + [
+                dict(reference=r, other=r + 1, equal=True) for r in range(22, 34, 2)] and
                  value['FULL_executed'] is True and value['provenance'] == receipt['provenance'], 'worker receipt')
             need(not (output / 'build').exists() and (output / 'configure.stdout').is_file(), 'capture excludes build')
             pkg = package()
@@ -1345,7 +1408,8 @@ class Protocol(unittest.TestCase):
             value = worker.strict_json((host / 'received/output/receipt.json').read_bytes())
             outcomes = [entry['outcome'] for entry in value['case_outcomes']]
             need(outcomes == ['complete_relative'] * 10 + ['explicit_refusal'] * 2 + ['complete_relative'] * 2 +
-                 ['killed_case_cap'] + ['complete_relative'] * 2 + ['killed_case_cap'],
+                 ['killed_case_cap'] + ['complete_relative'] * 2 + ['killed_case_cap'] +
+                 ['complete_relative'] * 16,  # v27: tower witness arm (4), raw frames with ground (12)
                  'cap kill and explicit refusal: ' + repr(outcomes))
             killed = worker.strict_json((host / 'received/output/probe_17.command.json').read_bytes())
             need(killed['residual_or_interrupted_group_killed'] is True and 3.0 <= killed['elapsed_seconds'] < 30,
@@ -1383,9 +1447,9 @@ class Protocol(unittest.TestCase):
             output = host / 'received/output'
             value = worker.strict_json((output / 'receipt.json').read_bytes())
             outcomes = [entry['outcome'] for entry in value['case_outcomes']]
-            need(outcomes == ['complete_relative'] * 2 + ['killed_budget'] + ['skipped_budget'] * 15,
+            need(outcomes == ['complete_relative'] * 2 + ['killed_budget'] + ['skipped_budget'] * 31,
                  'budget exhaustion: ' + repr(outcomes))
-            need(not any((output / ('probe_' + str(i) + '.command.json')).exists() for i in range(3, 18)),
+            need(not any((output / ('probe_' + str(i) + '.command.json')).exists() for i in range(3, 34)),
                  'skipped cases never launched')
 
     def test_unpaired_gpu_case_is_marked(self):
@@ -1395,11 +1459,12 @@ class Protocol(unittest.TestCase):
             code, receipt, fake, host = run_scenario(
                 Path(temporary), tools=dict(sleep=[dict(workers=48, k=5, scene='00', batch=False, seconds=60)]),
                 patches=[(worker, 'CASE_CAP_SECONDS', 4)])
-            need(code == 0 and receipt['status'] == 'partial' and receipt['unpaired_batch_cases'] == [0, 12, 13, 16],
+            need(code == 0 and receipt['status'] == 'partial' and
+                 receipt['unpaired_batch_cases'] == [0, 12, 13, 16, 18, 20],
                  'unpaired GPU cases: ' + json.dumps(receipt)[:600])
             expect_certified_stop(receipt, fake)
             value = worker.strict_json((host / 'received/output/receipt.json').read_bytes())
-            need(value['unpaired_batch_cases'] == [0, 12, 13, 16] and
+            need(value['unpaired_batch_cases'] == [0, 12, 13, 16, 18, 20] and
                  [value['case_outcomes'][i]['outcome'] for i in (0, 1, 12, 13)] ==
                  ['complete_relative', 'killed_case_cap', 'complete_relative', 'complete_relative'],
                  'worker unpaired list and outcomes')
@@ -1433,7 +1498,8 @@ class Protocol(unittest.TestCase):
             need(value['GPU_preflight_executed'] is True and value['GPU_attempted'] is True and
                  value['GPU_executed'] is False and
                  [entry['outcome'] for entry in value['case_outcomes']] ==
-                 ['killed_case_cap', 'complete_relative'] * 6 + ['killed_case_cap'] * 6,
+                 ['killed_case_cap', 'complete_relative'] * 6 + ['killed_case_cap'] * 10 +
+                 ['killed_case_cap', 'complete_relative'] * 6,
                  'worker GPU labels and outcomes')
             pkg = package()
             expected = session.validate_snapshot(pkg['archive'], pkg['manifest'])[0]
@@ -1487,10 +1553,10 @@ class Protocol(unittest.TestCase):
             output = host / 'received/output'
             value = worker.strict_json((output / 'receipt.json').read_bytes())
             outcomes = [entry['outcome'] for entry in value['case_outcomes']]
-            need(outcomes == ['complete_relative'] * 2 + ['probe_failed'] + ['skipped_protocol_defect'] * 15,
+            need(outcomes == ['complete_relative'] * 2 + ['probe_failed'] + ['skipped_protocol_defect'] * 31,
                  'protocol defect skips the following cases: ' + repr(outcomes))
             need('probe counters tower_work' in value['case_outcomes'][2]['reason'] and
-                 not any((output / ('probe_' + str(i) + '.command.json')).exists() for i in range(3, 18)),
+                 not any((output / ('probe_' + str(i) + '.command.json')).exists() for i in range(3, 34)),
                  'skipped cases never launched after a protocol defect')
 
     def test_preflight_failure_runs_no_case(self):
@@ -1525,7 +1591,7 @@ class Protocol(unittest.TestCase):
 
     def test_zero_complete_campaign_is_refused(self):
         with tempfile.TemporaryDirectory() as temporary:
-            refuse = [dict(scene=scene, k=k) for scene in ('00', '01', '02') for k in (5, 10)]
+            refuse = [dict(scene=scene, k=k) for scene in ('00', '01', '02', 'b00', 'b01', 'b02') for k in (5, 10)]
             code, receipt, fake, host = run_scenario(Path(temporary), tools=dict(refuse=refuse))
             need(code == 1 and receipt['status'] != 'completed' and receipt['status'] != 'partial',
                  'zero-complete campaign must not be a success: ' + json.dumps(receipt)[:600])

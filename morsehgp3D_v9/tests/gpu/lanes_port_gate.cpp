@@ -1068,6 +1068,30 @@ int main(int argc, char** argv) {
           if (!refused) return fail(std::string("mutant.survived ") + name + " " + where_name);
           ++mutants;
         }
+        // Boundary guard (auditor B, before R21): a support ID outside the
+        // cloud, supports kept sorted and both edge ends kept, is refused by
+        // check_lanes_batch itself, before the chain dereferences it.
+        {
+          auto mutated = reference_batch;
+          auto& record = mutated.records[first];
+          const auto order = index->spatial_order();
+          const auto ida = static_cast<std::uint32_t>(order[survivors[target].a_rank]);
+          const auto idb = static_cast<std::uint32_t>(order[survivors[target].b_rank]);
+          for (unsigned k = 0; k < record.arity; ++k)
+            if (record.support[k] != ida && record.support[k] != idb) {
+              record.support[k] = static_cast<std::uint32_t>(order.size() + 7);
+              break;
+            }
+          std::sort(record.support.begin(), record.support.begin() + record.arity);
+          bool refused = false;
+          try {
+            gen::check_lanes_batch(mutated, *index, kmax, survivors, asked);
+          } catch (const std::logic_error& e) {
+            refused = std::string_view(e.what()).find("support outside the cloud") != std::string_view::npos;
+          }
+          if (!refused) return fail("boundary.support_range " + where_name);
+          ++mutants;
+        }
       }
       // 4. Reduced capacities: exactly the edges beyond them are deferred.
       if (!where.empty()) {

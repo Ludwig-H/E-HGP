@@ -112,11 +112,22 @@ def default_plan():
             levers = worker.engine_levers(levers)
         elif arm == 'gpu_cold':
             levers.update(device_session=False)
+        elif arm == 'gpu_tower_witness':
+            # v27 (R21, auditeur B) : la tour sans ses trois leviers freres
+            # (queue en pipeline, regroupement hache, pool persistant).
+            levers.update(tower_pipelined_tail=False, tower_hash_grouping=False, tower_persistent_pool=False)
         return dict(scene=scene, file=worker.INPUTS[scene]['file'], n=worker.INPUTS[scene]['n'], k=k, s=8,
                     workers=48, static_threads=48, levers=levers, repeat=repeat)
     cases = [case(scene, k, arm) for scene in ('00', '01', '02') for k in (5, 10) for arm in ('gpu', 'engine')]
     cases += [case('00', 5, 'gpu_cold'), case('00', 5, 'gpu', 1), case('00', 10, 'gpu_cold'),
               case('00', 10, 'gpu', 1), case('00', 5, 'gpu_cold', 1), case('00', 10, 'gpu_cold', 1)]
+    cases += [case('00', 5, 'gpu_tower_witness'), case('00', 10, 'gpu_tower_witness'),
+              case('00', 5, 'gpu_tower_witness', 1), case('00', 10, 'gpu_tower_witness', 1)]
+    # v26 (R21) : les trames brutes, sol compris (123 a 126 k sites), apres
+    # les trames sans sol pour ne pas les exposer au budget ; bras GPU et
+    # jumeau moteur a K5 et K10. Elles se qualifient a part : aucun succes
+    # sans sol ne leur est transfere.
+    cases += [case(scene, k, arm) for scene in ('b00', 'b01', 'b02') for k in (5, 10) for arm in ('gpu', 'engine')]
     return dict(schema=worker.PLAN_SCHEMA, cases=cases)
 
 

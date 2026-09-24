@@ -48,7 +48,7 @@ PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
 PLAN_SCHEMA = 'mhgp9_tower_plan_v6'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v26'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v27'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -62,6 +62,7 @@ REQUIRED_SOURCES = frozenset({CMAKE_LISTS, SOURCE_ROOT + '/cmake/run_expect.cmak
                               CHAIN_SOURCE, SOURCE_ROOT + '/src/chain/tower_chain.hpp'})
 PROBE_TARGET = 'mhgp9_tower_probe'
 INPUT_ROOT = 'morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6'
+RAW_INPUT_ROOT = 'morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i'
 # Trames entieres (jamais un prefixe). fnv = empreinte FNV-1a 64 imprimee par
 # la sonde (n puis x, y, z en u64 LE) ; celle de la scene 00 est recoupee
 # avec la sortie C++ de mhgp9_tower_probe a d2700314 (5c785760053d17ce).
@@ -72,6 +73,16 @@ INPUTS = {
                sha256='ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f', fnv='4210173194931f58'),
     '02': dict(file='data/scene_02.u32le', source=INPUT_ROOT + '/scene_02_grid/full.u32le', n=45845,
                sha256='a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af', fnv='1c41bd0d1d689300'),
+    # v26 (R21, demande de l'utilisateur relayee par C) : les memes trames
+    # BRUTES, sol compris, sur la meme grille 1 mm (capture R2 faisant
+    # autorite du recu v8 float32_precision). La sonde C++ a recoupe
+    # l'empreinte de b00 (4120701a6194c19b) a 09885f16.
+    'b00': dict(file='data/scene_b00.u32le', source=RAW_INPUT_ROOT + '/scene_00_000000_grid/full.u32le', n=123389,
+                sha256='233cc4ea8cac6e0b1155ea845af57b32e5236764bf2e119557aeab5bac76c172', fnv='4120701a6194c19b'),
+    'b01': dict(file='data/scene_b01.u32le', source=RAW_INPUT_ROOT + '/scene_01_000100_grid/full.u32le', n=124479,
+                sha256='de45e8dcaf5610cd71a369b613f16914d5713e77cbe1532122ec2e823bc0b4ad', fnv='d2bd37fb9befdd7d'),
+    'b02': dict(file='data/scene_b02.u32le', source=RAW_INPUT_ROOT + '/scene_02_000200_grid/full.u32le', n=125526,
+                sha256='37a7be399fae909a1291cddfc3ca5b972d3effdfa8dc8cd87a41accd5fa0f5f7', fnv='583db2f3deafe8e9'),
 }
 TIME = '/usr/bin/time'
 BOOST_HEADER = '/usr/include/boost/multiprecision/cpp_int.hpp'
@@ -106,7 +117,11 @@ LEVER_NAMES = ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_w
                'q34_lanes_fused',
                # v26 : session d'appareil ouverte par le processus avant la
                # chaine (exige un levier de l'appareil).
-               'device_session')
+               'device_session',
+               # v27 : les trois leviers freres de la tour (queue en pipeline
+               # E4, regroupement hache de la phase 0, pool persistant E2) ;
+               # meme objet, actifs par defaut dans la chaine.
+               'tower_pipelined_tail', 'tower_hash_grouping', 'tower_persistent_pool')
 # v17 (S2) : filtre q3/q4 par lots, puis sur GPU. Le build G4 active CUDA
 # (nvcc et nvidia-smi existants, aucune installation) ; l'appareil attendu :
 DEVICE_NAME = 'NVIDIA RTX PRO 6000 Blackwell Server Edition'
@@ -170,7 +185,12 @@ TOP_KEYS = frozenset({'schema', 'status', 'reason', 'input', 'options', 'times_m
                       'ledger', 'catalogue', 'q34_occupancy', 'q34_batch', 'tower_phases_ms', 'tower_work', 'orders',
                       'tower_digest', 'catalogue_digest', 'presentation_digest', 'peak_rss_kb',
                       # v26 : session d'appareil ouverte avant la chaine.
-                      'device_session'})
+                      'device_session',
+                      # v27 : chemins et sous-chronos de la tour hors tower_work.
+                      'tower_detail'})
+TOWER_DETAIL_COUNTS = ('pipelined_orders', 'population_deferred_refs', 'hashed_orders', 'pool_threads', 'pool_jobs',
+                       'helper_threads', 'runner_threads')
+TOWER_DETAIL_BY_K = ('populations_by_k', 'images_own_by_k')
 DEVICE_SESSION_KEYS = frozenset({'opened', 'context_ms', 'reserve_ms'})
 INPUT_KEYS = frozenset({'format', 'grid', 'sites', 'hash'})
 OPTION_KEYS = frozenset({'K', 'K_effective', 's', 'workers', 'tower_static_threads', 'run_tower', 'certificate_capacity',
@@ -194,7 +214,16 @@ PINNED_DIGESTS = {('00', 5, 8): ('67450c64611075b1', '5ad1fe09354411ba'),
                   ('01', 5, 8): ('dbf799c8ed83f53f', 'a4a5149c15b4122e'),
                   ('01', 10, 8): ('9ddbf7430c9086cc', 'c5cddc5b0baefcf1'),
                   ('02', 5, 8): ('8240af3d4dce3d45', '143a367b4f27ef02'),
-                  ('02', 10, 8): ('ba973af0c8da95bd', '5c8cc01b1e45b461')}
+                  ('02', 10, 8): ('ba973af0c8da95bd', '5c8cc01b1e45b461'),
+                  # v27 (R21) : epingles CPU des trames brutes avec sol,
+                  # calculees par C a 093d943c (moteur et lots CPU egaux,
+                  # audits/c_raw_pins_20260924), relues par B.
+                  ('b00', 5, 8): ('cfb1634832c0384a', '11f6a8e1a7f28127'),
+                  ('b00', 10, 8): ('dd90bda1e6569b79', '1a315a5241510296'),
+                  ('b01', 5, 8): ('15015e5a5c29beac', '7d385c14e5870263'),
+                  ('b01', 10, 8): ('2816dd6bcdb92ad6', 'dbbfc30b411e11ea'),
+                  ('b02', 5, 8): ('8096d4c6e269b254', 'f0206be1c838c4bd'),
+                  ('b02', 10, 8): ('f6e2e996224328f2', '8c39ed9e85d7c0fd')}
 TIME_KEYS = frozenset({'read', 'prepare', 'gen_index', 'q2', 'q2_wait', 'q34', 'merge', 'tower_index', 'census',
                        'tower', 'chain_total', 'digest', 'catalogue_digest'})
 ORDER_KEYS = frozenset({'K', 'nodes', 'births', 'merges', 'parents', 'contributions'})
@@ -807,6 +836,31 @@ def validate_occupancy(value, case):
          (o['jobs'] == 0 or o['max_job_ms'] > 0 or o['job_sum_s'] == 0), 'q34 occupancy jobs')
 
 
+def validate_tower_detail(value, case):
+    """v27 : chemins de la tour (hors tower_work) sous ses trois leviers freres."""
+    detail, levers = value['tower_detail'], case['levers']
+    need(type(detail) is dict and set(detail) == set(TOWER_DETAIL_COUNTS + TOWER_DETAIL_BY_K + ('pool_ms',)) and
+         all(_count(detail[key]) for key in TOWER_DETAIL_COUNTS) and _number(detail['pool_ms']) and
+         all(type(detail[key]) is list and len(detail[key]) == case['k'] and all(_number(x) for x in detail[key])
+             for key in TOWER_DETAIL_BY_K), 'tower detail fields')
+    if value['status'] != 'complete_relative':
+        return
+    effective = value['options']['K_effective']
+    static_path = case['static_threads'] > 1 and effective > 1
+    pipelined = static_path and levers['tower_overlap_static'] and levers['tower_pipelined_tail']
+    hashed = static_path and levers['tower_hash_grouping']
+    pooled = static_path and levers['tower_persistent_pool']
+    # La queue en pipeline couvre chaque ordre ; le regroupement hache, chaque
+    # phase 0 (K >= 2) ; le pool a W - 1 fils et sert au moins un appel.
+    need(detail['pipelined_orders'] == (effective if pipelined else 0) and
+         (detail['population_deferred_refs'] == 0 or pipelined) and
+         (0 < detail['hashed_orders'] <= effective - 1 if hashed else detail['hashed_orders'] == 0) and
+         detail['pool_threads'] == (case['static_threads'] - 1 if pooled else 0) and
+         (detail['pool_jobs'] > 0) == pooled and (pooled or detail['pool_ms'] == 0) and
+         (pipelined or all(x == 0 for key in TOWER_DETAIL_BY_K for x in detail[key])),
+         'tower detail paths under their levers')
+
+
 def validate_tower_phases(value, case):
     """Chronos de phase de la tour : sous-chronos du mur de la tour, par K
     bornes par leur etape parallele, voie statique ou sequentielle exclusive."""
@@ -1053,6 +1107,7 @@ def validate_probe(value, case, exit_code, inputs=None, capacity=0, judge=False,
     validate_occupancy(value, case)
     validate_batch(value, case, capacity, judge, lanes_capacity)
     validate_tower_phases(value, case)
+    validate_tower_detail(value, case)
     orders = value['orders']
     need(type(orders) is list and all(type(order) is dict and set(order) == ORDER_KEYS and
                                       all(_count(item) for item in order.values()) for order in orders), 'probe orders')
@@ -1089,11 +1144,15 @@ def validate_external_wall(value, elapsed_seconds):
     mesure apres lui (times_ms.read/chain_total/digest, sequentiels dans la
     sonde) sont bornes ensemble par le mur externe du cas (GNU time enveloppe
     tout l'executable). La lecture n'entre pas pour autant dans le contrat."""
-    times = value['times_ms']
+    # v27 (auditeur B, avant R21) : la session d'appareil (contexte puis
+    # reservations) est ouverte sequentiellement avant la chaine ; elle entre
+    # dans la borne externe, jamais dans chain_total.
+    times, session = value['times_ms'], value['device_session']
     need(_number(elapsed_seconds) and
-         (times['read'] + times['chain_total'] + times['digest'] + times['catalogue_digest']) / 1000.0 <=
+         (times['read'] + times['chain_total'] + times['digest'] + times['catalogue_digest'] +
+          session['context_ms'] + session['reserve_ms']) / 1000.0 <=
          elapsed_seconds + EXTERNAL_WALL_TOLERANCE_SECONDS,
-         'read, chain total and digest exceed the external wall time of the case')
+         'read, device session, chain total and digest exceed the external wall time of the case')
 
 
 def validate_gnu_time(text, exit_code):

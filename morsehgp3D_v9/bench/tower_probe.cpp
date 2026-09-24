@@ -189,6 +189,9 @@ int main(int argc, char** argv) {
         else if (name == "q2_during_device") options.q2_during_device = on;
         else if (name == "q34_lanes_fused") options.q34_lanes_fused = on;
         else if (name == "device_session") device_session = on;
+        else if (name == "tower_pipelined_tail") options.tower_pipelined_tail = on;
+        else if (name == "tower_hash_grouping") options.tower_hash_grouping = on;
+        else if (name == "tower_persistent_pool") options.tower_persistent_pool = on;
         else throw std::invalid_argument("unknown lever");
       }
       else if (arg.starts_with("--n=")) prefix = static_cast<std::size_t>(parse_u(arg.substr(4)));
@@ -222,7 +225,7 @@ int main(int argc, char** argv) {
   const auto r = mhgp9::run_tower_chain(input.points, options);
   const auto& t = r.times;
   const auto& c = r.catalogue;
-  std::printf("{\"schema\":\"mhgp9_tower_probe_v26\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
+  std::printf("{\"schema\":\"mhgp9_tower_probe_v27\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
               r.reason.c_str());
   std::printf("\"input\":{\"format\":\"%s\",\"grid\":\"%s\",\"sites\":%zu,\"hash\":\"%016" PRIx64 "\"},", input.format.c_str(),
               grid.c_str(), input.points.size(), input.hash);
@@ -233,7 +236,8 @@ int main(int argc, char** argv) {
               "\"q34_jobs_by_mass\":%s,\"q34_fine_jobs\":%s,\"tower_overlap_static\":%s,\"q2_jobs_by_mass\":%s,"
               "\"q34_batch_filter\":%s,\"q34_gpu_filter\":%s,\"q34_batch_certificates\":%s,"
               "\"q34_gpu_certificates\":%s,\"q34_batch_q3\":%s,\"q34_gpu_q3\":%s,\"q34_batch_q4\":%s,"
-              "\"q2_during_device\":%s,\"q34_lanes_fused\":%s,\"device_session\":%s}},",
+              "\"q2_during_device\":%s,\"q34_lanes_fused\":%s,\"device_session\":%s,"
+              "\"tower_pipelined_tail\":%s,\"tower_hash_grouping\":%s,\"tower_persistent_pool\":%s}},",
               options.kmax, r.kmax_effective, options.separation_s, options.workers,
               options.tower_static_threads >= 0 ? options.tower_static_threads : r.tower_static_threads,
               options.run_tower ? "true" : "false", options.q34_certificate_capacity,
@@ -249,7 +253,8 @@ int main(int argc, char** argv) {
               options.q34_gpu_certificates ? "true" : "false", options.q34_batch_q3 ? "true" : "false",
               options.q34_gpu_q3 ? "true" : "false", options.q34_batch_q4 ? "true" : "false",
               options.q2_during_device ? "true" : "false", options.q34_lanes_fused ? "true" : "false",
-              device_session ? "true" : "false");
+              device_session ? "true" : "false", options.tower_pipelined_tail ? "true" : "false",
+              options.tower_hash_grouping ? "true" : "false", options.tower_persistent_pool ? "true" : "false");
   std::printf("\"times_ms\":{\"read\":%.3f,\"prepare\":%.3f,\"gen_index\":%.3f,\"q2\":%.3f,\"q2_wait\":%.3f,"
               "\"q34\":%.3f,\"merge\":%.3f,"
               "\"tower_index\":%.3f,\"census\":%.3f,\"tower\":%.3f,\"chain_total\":%.3f,\"digest\":%.3f,"
@@ -390,8 +395,22 @@ int main(int argc, char** argv) {
               "\"peak_rss_kb\":%ld,", r.tower_digest, catalogue, presentations, peak_rss_kb());
   // v26: the device session opened before the chain (not in chain_total).
   const bool opened = device_session && session.error.empty();
-  std::printf("\"device_session\":{\"opened\":%s,\"context_ms\":%.3f,\"reserve_ms\":%.3f}}\n",
+  std::printf("\"device_session\":{\"opened\":%s,\"context_ms\":%.3f,\"reserve_ms\":%.3f},",
               opened ? "true" : "false", device_session ? session.context_ms : 0.0,
               opened ? session.reserve_ms : 0.0);
+  // v27: paths of the tower under its three sibling levers (never tower_work).
+  std::printf("\"tower_detail\":{\"pipelined_orders\":%" PRIu64 ",\"population_deferred_refs\":%" PRIu64
+              ",\"hashed_orders\":%" PRIu64 ",\"pool_threads\":%" PRIu64 ",\"pool_jobs\":%" PRIu64
+              ",\"helper_threads\":%" PRIu64 ",\"runner_threads\":%" PRIu64 ",\"pool_ms\":%.3f",
+              ts.pipelined_orders, ts.population_deferred_refs, ts.hashed_orders, ts.pool_threads, ts.pool_jobs,
+              ts.helper_threads, ts.runner_threads, r.tower_times.pool_ms);
+  const std::pair<const char*, const std::array<double, 11>*> detail_by_k[] = {
+      {"populations_by_k", &r.tower_times.populations_by_k}, {"images_own_by_k", &r.tower_times.images_own_by_k}};
+  for (const auto& [name, values] : detail_by_k) {
+    std::printf(",\"%s\":[", name);
+    for (unsigned k = 1; k <= options.kmax; ++k) std::printf("%s%.3f", k > 1 ? "," : "", (*values)[k]);
+    std::printf("]");
+  }
+  std::printf("}}\n");
   return r.status == mhgp9::ChainStatus::kComplete ? 0 : 3;
 }
