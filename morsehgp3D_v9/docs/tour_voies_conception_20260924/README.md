@@ -133,3 +133,29 @@ plage de graines) des voies q3/q4 ».
 - **Reste à mesurer sur G4** : le noyau et ses sous-chronos P, T et C. Le
   juge projette 68 à 76 ms de noyau à K5. Ce n'est qu'une projection tant
   qu'une session ne l'a pas mesuré.
+
+## Étape 3 des voies réalisée : C sans boucle, L11, L10, L15
+
+Détail, mesures et portes : [PROVENANCE](../PROVENANCE.md), section « Étape 3
+du plan des voies ». L'objet, les enregistrements (octets et ordre) et les
+condensés épinglés ne changent pas ; seuls des compteurs déclarés changent.
+- **C** : R18 mesurait 32 ms à 08/000000 K5 (3 ms à 000100). Deux boucles
+  séries sur les tâches d'une arête (réplique par fil, rassemblement par
+  warp) : une arête de 18 630 sites porte 10 473 tâches. Réplique en O(1)
+  par balayage des enregistrements des tâches, placement par tâche.
+- **L11** : élagage exact des sites hors du disque des centres (44,9 % du
+  cover à K5, 44,6 % à K10), nouveau lemme au registre des preuves.
+- **L10** : ordre axial en 26 classes entières. Depuis l'étape 2, paquets de
+  passe −32,5 % (K5) et −36,1 % (K10), points de recensement −38,4 % et
+  −36,7 %, plus lourde tâche 7 114 → 5 810 et 27 057 → 19 999 pas.
+- **L15** : passe fusionnée q3 + q4 ; 7,2 M (K5) et 35,4 M (K10) paquets de
+  recensement absorbés par la passe de lentilles. Débordement ptxas de T
+  accru (550/616 o de code) : effet net à mesurer sur G4 (`--unfused`).
+- **T3 non fait** : il faut modifier le noyau des certificats, en cours de
+  réécriture par une autre session ; gain borné par la marche d'arbre de P
+  (P = 12 ms à K5 et 30 ms à K10 dans R18, marche comprise).
+- **Protocole v25** (commit séparé, écrit en v24 et fusionné avec la v24 publiée) : `lanes_pruned_sites` au registre,
+  compteurs de la passe fusionnée dans `q34_batch`.
+
+Toute durée G4 de cette étape reste à mesurer ; les gains ci-dessus sont des
+compteurs hôte déterministes.
