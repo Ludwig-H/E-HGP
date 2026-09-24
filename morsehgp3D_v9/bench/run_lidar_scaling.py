@@ -66,7 +66,7 @@ DEFAULT_LEVERS = dict(atlas_saturate_deep=True, q3_leaf_census=True, q34_dead_la
                       # v17/v18/v20: the local campaign keeps the engine path (no GPU here).
                       q34_batch_filter=False, q34_gpu_filter=False, q34_batch_certificates=False,
                       q34_gpu_certificates=False, q34_batch_q3=False, q34_gpu_q3=False, q34_batch_q4=False,
-                      q2_during_device=False)
+                      q2_during_device=False, q34_lanes_fused=False)
 # Leviers publies par schema de sonde (les archives v12 en ont six).
 LEVERS_V12 = {name: True for name in ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_witness_cache',
                                       'q34_dead_core', 'tower_meb_proposal')}

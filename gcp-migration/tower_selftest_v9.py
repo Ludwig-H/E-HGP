@@ -204,10 +204,11 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                               lanes4_max_group=1, lanes4_constant_shell_sites=3, lanes4_list_steps=4,
                               lanes4_group_steps=9)
                 ledger.update(atlas_deep_cells=0)  # no atlas under the q4 lanes (as the real chain)
-                batch.update(lanes_records=2,
-                             # v25: the two seeds of the edge with both lanes fused (L15).
-                             lanes_fused_seeds=2, lanes_fused_chunks=4, lanes_fused_q3_chunks=1,
-                             lanes_fused_census_chunks=2, lanes_fused_fallbacks=0)
+                batch.update(lanes_records=2)
+                if levers.get('q34_lanes_fused'):
+                    # v25: the two seeds of the edge with both lanes fused (L15).
+                    batch.update(lanes_fused_seeds=2, lanes_fused_chunks=4, lanes_fused_q3_chunks=1,
+                                 lanes_fused_census_chunks=2, lanes_fused_fallbacks=0)
     return dict(schema='mhgp9_tower_probe_v25', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
@@ -302,7 +303,8 @@ def main():
                 rule.get('certificates', levers.get('q34_batch_certificates')) == levers.get('q34_batch_certificates') and
                 rule.get('lanes', levers.get('q34_batch_q3')) == levers.get('q34_batch_q3') and
                 rule.get('q4', levers.get('q34_batch_q4')) == levers.get('q34_batch_q4') and
-                rule.get('q2_overlap', levers.get('q2_during_device')) == levers.get('q2_during_device')):
+                rule.get('q2_overlap', levers.get('q2_during_device')) == levers.get('q2_during_device') and
+                rule.get('fused', levers.get('q34_lanes_fused')) == levers.get('q34_lanes_fused')):
             time.sleep(rule['seconds'])
     status = 'complete_relative'
     for rule in config.get('refuse', []):
@@ -807,13 +809,13 @@ class Protocol(unittest.TestCase):
              record['real_session_allowed'] is pkg['committed'], 'package record')
         cases, provenance = session.validate_snapshot(pkg['archive'], manifest)
         on = {name: True for name in worker.LEVER_NAMES}
-        # v21 (R16) arms: full GPU (every lever), engine twin, S4a GPU without
-        # the q4 lanes; repeated and interleaved S4a / S4a + S4b pairs at 00
-        # (auditor C, R-27).
-        arms = dict(gpu=on, engine=worker.engine_levers(on), gpu_q2seq=dict(on, q2_during_device=False))
+        # v21 (R16) arms: full GPU (every lever), engine twin; v25 (R20):
+        # lanes without the fused pass (L15), repeated and interleaved pairs
+        # at 00 (auditor C, R-27).
+        arms = dict(gpu=on, engine=worker.engine_levers(on), gpu_unfused=dict(on, q34_lanes_fused=False))
         expected = [(scene, k, arm, 0) for scene in ('00', '01', '02') for k in (5, 10) for arm in ('gpu', 'engine')]
-        expected += [('00', 5, 'gpu_q2seq', 0), ('00', 5, 'gpu', 1), ('00', 10, 'gpu_q2seq', 0), ('00', 10, 'gpu', 1),
-                     ('00', 5, 'gpu_q2seq', 1), ('00', 10, 'gpu_q2seq', 1)]
+        expected += [('00', 5, 'gpu_unfused', 0), ('00', 5, 'gpu', 1), ('00', 10, 'gpu_unfused', 0),
+                     ('00', 10, 'gpu', 1), ('00', 5, 'gpu_unfused', 1), ('00', 10, 'gpu_unfused', 1)]
         need(provenance['commit'] == head and len(cases) == len(expected) == 18 and all(
                 (c['scene'], c['k'], c['repeat']) == (scene, k, repeat) and c['levers'] == arms[arm] and
                 c['s'] == 8 and c['workers'] == 48 and c['static_threads'] == 48
@@ -1038,6 +1040,22 @@ class Protocol(unittest.TestCase):
             bad = deepcopy(gpu_good)
             mutate(bad)
             need(refused(worker.validate_probe, bad, gpu_case, 0), 'batch/GPU probe mutation ' + label)
+        # v25: without q34_lanes_fused the tasks keep the separate phases,
+        # the fused counters stay at zero.
+        unfused_case = dict(gpu_case, levers=dict(gpu_case['levers'], q34_lanes_fused=False))
+        unfused = probe_value(data['n'], data['fnv'], 5, 8, 48, 48, levers=unfused_case['levers'])
+        need(worker.validate_probe(worker.strict_json(json.dumps(unfused)), unfused_case, 0) == 'complete_relative',
+             'valid GPU probe without the fused pass')
+        need(unfused['q34_batch']['lanes_fused_seeds'] == 0, 'selftest unfused probe without fused counters')
+        for label, mutate in (('fused counters without the lever',
+                               lambda v: v['q34_batch'].update(lanes_fused_seeds=2, lanes_fused_chunks=4)),
+                              ('fused fallbacks without the lever',
+                               lambda v: v['q34_batch'].update(lanes_fused_fallbacks=1)),
+                              ('fused lever without q4', lambda v: v['options']['levers'].update(
+                                  q34_batch_q4=False, q34_lanes_fused=True))):
+            bad = deepcopy(unfused)
+            mutate(bad)
+            need(refused(worker.validate_probe, bad, unfused_case, 0), 'unfused probe mutation ' + label)
         # v20: a q3 lane deferred below the site slab (record slab or arena
         # overflow) is a legitimate memory decision: accepted.
         deferred_lane = deepcopy(gpu_good)
@@ -1299,7 +1317,7 @@ class Protocol(unittest.TestCase):
     def test_partial_session_case_cap_and_refusal(self):
         with tempfile.TemporaryDirectory() as temporary:
             code, receipt, fake, host = run_scenario(
-                Path(temporary), tools=dict(sleep=[dict(workers=48, k=10, scene='00', batch=True, q2_overlap=False,
+                Path(temporary), tools=dict(sleep=[dict(workers=48, k=10, scene='00', batch=True, fused=False,
                                                         seconds=60)], refuse=[dict(scene='02', k=10)]),
                 patches=[(worker, 'CASE_CAP_SECONDS', 4)])
             need(code == 0 and receipt['status'] == 'partial', 'partial host receipt: ' + json.dumps(receipt)[:600])

@@ -101,7 +101,9 @@ LEVER_NAMES = ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_w
                'q2_jobs_by_mass', 'q34_batch_filter', 'q34_gpu_filter', 'q34_batch_certificates',
                'q34_gpu_certificates', 'q34_batch_q3', 'q34_gpu_q3', 'q34_batch_q4',
                # v24 : q2 pendant les appels de l'appareil (exige q34_batch_filter).
-               'q2_during_device')
+               'q2_during_device',
+               # v25 : passe fusionnee q3 + q4 des voies (L15, exige q34_batch_q4).
+               'q34_lanes_fused')
 # v17 (S2) : filtre q3/q4 par lots, puis sur GPU. Le build G4 active CUDA
 # (nvcc et nvidia-smi existants, aucune installation) ; l'appareil attendu :
 DEVICE_NAME = 'NVIDIA RTX PRO 6000 Blackwell Server Edition'
@@ -345,7 +347,8 @@ def _levers(value):
             (value['q34_batch_certificates'] or not value['q34_batch_q3']) and
             (value['q34_batch_q3'] or not value['q34_gpu_q3']) and
             (value['q34_batch_q3'] or not value['q34_batch_q4']) and
-            (value['q34_batch_filter'] or not value['q2_during_device']))
+            (value['q34_batch_filter'] or not value['q2_during_device']) and
+            (value['q34_batch_q4'] or not value['q34_lanes_fused']))
 
 
 def uses_device(levers):
@@ -360,7 +363,7 @@ def engine_levers(levers):
     """The same levers on the engine path (no batch call, no device)."""
     return dict(levers, q34_batch_filter=False, q34_gpu_filter=False, q34_batch_certificates=False,
                 q34_gpu_certificates=False, q34_batch_q3=False, q34_gpu_q3=False, q34_batch_q4=False,
-                q2_during_device=False)
+                q2_during_device=False, q34_lanes_fused=False)
 
 
 def lever_arguments(case):
@@ -662,6 +665,9 @@ def validate_lanes(value, case, lanes_capacity=0, judge=False):
     if not levers['q34_batch_q4'] or value['options']['K'] < 3:
         need(all(ledger[key] == 0 for key in LANES4_LEDGER) and all(batch[key] == 0 for key in LANES_FUSED),
              'q4 lanes filled without the lever')
+    # v25 : sans q34_lanes_fused, les taches gardent les phases separees.
+    need(levers['q34_lanes_fused'] or all(batch[key] == 0 for key in LANES_FUSED),
+         'q3/q4 lanes fused pass without the lever')
     if not levers['q34_batch_q3']:
         need(batch['lanes_backend'] == '' and all(batch[key] == 0 for key in LANES_TIMES + LANES_COUNTS) and
              all(ledger[key] == 0 for key in LANES_LEDGER), 'q3 lanes filled without the lever')

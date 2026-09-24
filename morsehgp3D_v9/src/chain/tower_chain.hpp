@@ -140,6 +140,10 @@ struct ChainOptions {
   // joint avant la fusion. Ses presentations vont dans des ardoises a part.
   // Meme objet ; exige q34_batch_filter ; desactive par defaut.
   bool q2_during_device = false;
+  // v25 (L15) : passe fusionnee q3 + q4 par graine dans les taches des voies
+  // (gpu/lanes_tasks.hpp) ; sans elle, les deux phases separees. Memes
+  // octets ; exige q34_batch_q4 ; desactive par defaut.
+  bool q34_lanes_fused = false;
 };
 
 // Temps de mur en millisecondes, CPU du processus en secondes.

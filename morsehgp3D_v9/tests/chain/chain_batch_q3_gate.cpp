@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
     return 2;
   }
   unsigned long long cases = 0, asked = 0, judged = 0, records = 0, tails = 0, refusals = 0, both = 0,
-                     q4_emitted = 0, q4_tails = 0;
+                     q4_emitted = 0, q4_tails = 0, fused_seeds = 0;
   for (const std::string_view family : {"uniform", "terrain", "clusters", "spheres"}) {
     const auto points = family == "spheres" ? sphere_fixture() : gen::bench::make_front_fixture(n, family, 3).points;
     for (const unsigned kmax : {2U, 3U, 5U, 10U}) {
@@ -103,21 +103,37 @@ int main(int argc, char** argv) {
         // v24: q2 on its own thread during the batch calls (host path here).
         auto with_q4_q2 = with_q4;
         with_q4_q2.q2_during_device = true;
+        // v25 (L15): the fused q3 + q4 pass in the lanes tasks.
+        auto with_q4_fused = with_q4;
+        with_q4_fused.q34_lanes_fused = true;
+        with_q4_q2.q34_lanes_fused = true;
         const auto a = run_tower_chain(points, base);
         const auto b = run_tower_chain(points, lanes);
         const auto c = run_tower_chain(points, small);
         const auto d = run_tower_chain(points, with_q4);
         const auto e = run_tower_chain(points, with_q4_small);
         const auto f = run_tower_chain(points, with_q4_q2);
+        const auto g = run_tower_chain(points, with_q4_fused);
         if (a.status != ChainStatus::kComplete || b.status != ChainStatus::kComplete ||
             c.status != ChainStatus::kComplete || d.status != ChainStatus::kComplete ||
-            e.status != ChainStatus::kComplete || f.status != ChainStatus::kComplete)
+            e.status != ChainStatus::kComplete || f.status != ChainStatus::kComplete ||
+            g.status != ChainStatus::kComplete)
           return fail("status " + where + " " + b.reason + " " + c.reason + " " + d.reason + " " + e.reason + " " +
-                      f.reason);
+                      f.reason + " " + g.reason);
+        // v25: the fused pass declares the separate phases' ledger and
+        // records; its counters exist under the lever only.
+        const auto& lg = g.q34_batch;
+        if (lg.lanes_records != d.q34_batch.lanes_records || g.ledger.lanes4_seeds != d.ledger.lanes4_seeds ||
+            g.ledger.lanes4_pass_chunks != d.ledger.lanes4_pass_chunks ||
+            g.ledger.lanes_census_point_tests != d.ledger.lanes_census_point_tests ||
+            d.q34_batch.lanes_fused_seeds != 0 || d.q34_batch.lanes_fused_chunks != 0 ||
+            (kmax < 3 && lg.lanes_fused_seeds != 0) || lg.lanes_fused_seeds > g.ledger.lanes4_seeds)
+          return fail("fused " + where);
+        fused_seeds += lg.lanes_fused_seeds;
         if (f.q2_accepted_pairs != a.q2_accepted_pairs || (kmax >= 2 && f.times.q2_wait_ms > f.times.q2_ms + 0.05) ||
             (kmax < 2 && f.times.q2_wait_ms != 0))
           return fail("q2_overlap " + where);
-        for (const auto* r : {&b, &c, &d, &e, &f})
+        for (const auto* r : {&b, &c, &d, &e, &f, &g})
           if (a.tower_digest != r->tower_digest || a.catalogue_digest != r->catalogue_digest ||
               a.q3_emitted != r->q3_emitted || a.q4_emitted != r->q4_emitted)
             return fail("digest " + where);
@@ -229,6 +245,28 @@ int main(int argc, char** argv) {
     if (!refused(o, "chain_q2_during_device_requires_batch_filter")) return fail("refusal.q2_during_device");
     ++refusals;
   }
+  {
+    auto o = ok;
+    o.q34_batch_q3 = true;
+    o.q34_lanes_fused = true;  // v25: requires the q4 lanes
+    if (!refused(o, "chain_q34_lanes_fused_requires_batch_q4")) return fail("refusal.lanes_fused");
+    ++refusals;
+  }
+  {
+    // Review before R20: a refusal of the generator after the device
+    // preparation started and took the index (dead-lane core without its
+    // certificate, found by the batch path's validation right after the
+    // front) unwinds the chain; the preparation owns its index, the refusal
+    // stays explicit.
+    auto o = ok;
+    o.q34_batch_certificates = false;
+    o.q34_dead_lanes = false;
+    o.q34_dead_core = true;
+    o.q34_gpu_filter = true;
+    o.q2_during_device = true;
+    if (!refused(o, "chain_invalid_argument: mhgp9 gen dead-lane core")) return fail("refusal.prepared_unwind");
+    ++refusals;
+  }
   bool device = false;
   {
     auto o = ok;
@@ -246,12 +284,13 @@ int main(int argc, char** argv) {
     ++refusals;
   }
   std::printf("chain_batch_q3_gate n=%zu cases=%llu asked=%llu judged=%llu records=%llu tails=%llu both=%llu "
-              "q4_emitted=%llu q4_tails=%llu refusals=%llu device=%s\n",
-              n, cases, asked, judged, records, tails, both, q4_emitted, q4_tails, refusals, device ? "yes" : "no");
+              "q4_emitted=%llu q4_tails=%llu fused_seeds=%llu refusals=%llu device=%s\n",
+              n, cases, asked, judged, records, tails, both, q4_emitted, q4_tails, fused_seeds, refusals,
+              device ? "yes" : "no");
   // tails + both > asked (auditor A): some edge has its q3 lane in the tail
   // AND its q4 lane open, the case the both_edges comparison guards.
-  if (cases == 0 || asked == 0 || judged != asked || records == 0 || tails == 0 || both == 0 || refusals != 10 ||
-      tails + both <= asked || q4_emitted == 0 || q4_tails == 0)
+  if (cases == 0 || asked == 0 || judged != asked || records == 0 || tails == 0 || both == 0 || refusals != 12 ||
+      tails + both <= asked || q4_emitted == 0 || q4_tails == 0 || fused_seeds == 0)
     return 3;
   return 0;
 }

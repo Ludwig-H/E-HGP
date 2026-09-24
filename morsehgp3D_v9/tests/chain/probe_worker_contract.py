@@ -109,14 +109,20 @@ def main(argv):
                         # call (host emulation of gpu/lanes.hpp).
                         ('q3_on', dict(base, levers=dict(engine_levers, q34_batch_filter=True,
                                                          q34_batch_certificates=True, q34_batch_q3=True))),
-                        # v21: the q4 lanes in the same call (host emulation of gpu/q4_lanes.hpp).
+                        # v21: the q4 lanes in the same call (host emulation of gpu/q4_lanes.hpp),
+                        # v25: with the fused pass (L15).
                         ('q4_on', dict(base, levers=dict(engine_levers, q34_batch_filter=True,
                                                          q34_batch_certificates=True, q34_batch_q3=True,
-                                                         q34_batch_q4=True))),
+                                                         q34_batch_q4=True, q34_lanes_fused=True))),
+                        # v25: the same call with the separate phases.
+                        ('q4_unfused', dict(base, levers=dict(engine_levers, q34_batch_filter=True,
+                                                              q34_batch_certificates=True, q34_batch_q3=True,
+                                                              q34_batch_q4=True))),
                         # v24: q2 on its own thread during the (host) batch calls.
                         ('q2_overlap_on', dict(base, levers=dict(engine_levers, q34_batch_filter=True,
                                                                  q34_batch_certificates=True, q34_batch_q3=True,
-                                                                 q34_batch_q4=True, q2_during_device=True))),
+                                                                 q34_batch_q4=True, q34_lanes_fused=True,
+                                                                 q2_during_device=True))),
                         ('pinned_off', dict(base, levers={name: False for name in worker.LEVER_NAMES}, workers=1,
                                             static_threads=0))):
         try:
@@ -139,6 +145,19 @@ def main(argv):
               sequential['times_ms']['q2_wait'] == 0, 'q2 overlap: object or times differ from the sequential case')
     else:
         check(False, 'q2 overlap case absent')
+    # v25: the separate phases publish the same object, the same declared
+    # lanes ledger and records, and no fused counter.
+    if 'q4_unfused' in results and 'q4_on' in results:
+        unfused, fused = results['q4_unfused'][1], results['q4_on'][1]
+        lanes_keys = worker.LANES_LEDGER + worker.LANES4_LEDGER
+        check(worker.logical_result(unfused) == worker.logical_result(fused) and
+              all(unfused['ledger'][key] == fused['ledger'][key] for key in lanes_keys) and
+              unfused['q34_batch']['lanes_records'] == fused['q34_batch']['lanes_records'] and
+              all(unfused['q34_batch'][key] == 0 for key in worker.LANES_FUSED) and
+              fused['q34_batch']['lanes_fused_seeds'] > 0,
+              'fused pass: object, lanes ledger or counters differ from the separate phases')
+    else:
+        check(False, 'unfused q4 lanes case absent')
     # The GPU lever: without a device, an explicit refusal naming it (never a
     # silent CPU run); with one, the same object as the engine path.
     gpu_cases = (('gpu_on', dict(base, levers={name: True for name in worker.LEVER_NAMES})),

@@ -869,6 +869,19 @@ le front q34 est construit (crochet `after_front` de
   fois, préparation absente ou attente au-delà).
 - **Plan R19** : paires q2 séquentiel / q2 recouvert, répétées et
   entrelacées à 08/000000, à K5 et à K10.
+- **Préparation en deux étapes** (après R19, qui mesure une attente du
+  filtre jusqu'à 102 ms) : le fil de préparation part à l'entrée de la
+  chaîne. L'étape A ouvre le contexte, puis aplatit l'index dès que la
+  chaîne le fournit ; le filtre et les certificats n'attendent qu'elle.
+  L'étape B réserve en arrière-plan les ardoises résidentes des voies.
+  `gpu_prepare_ms` est le mur de l'étape A. La revue d'avant R20 a trouvé
+  un accès après libération : l'objet est déclaré avant l'index de la
+  chaîne et n'en gardait qu'un pointeur, si bien qu'un refus du générateur
+  pendant l'étape A libérait l'index sous le fil. La préparation partage
+  désormais la propriété de l'index, et une chaîne déjà terminée n'entre
+  pas dans l'étape A. La porte `mhgp9_chain_batch_q3` ajoute ce refus
+  (cœur mort sans son certificat, levier GPU du filtre, q2 recouvert) ; elle
+  passe sous ASan.
 ### Étape 3 du plan des voies (24 septembre 2026, après R18)
 
 Plan du juge des voies, « Étape 3 — réduire le travail de masse », précédé
@@ -1153,6 +1166,17 @@ v25 : union des champs des deux.
   repli sur le cas q4.
 - Porte `mhgp9_gen_wspd_q34` : inventaire des mots du registre (27 pour
   `Q34LanesWork`, 531 pour `WspdQ34Work`).
+- **Levier `q34_lanes_fused`** (ajouté à l'intégration, même protocole v25) :
+  la chaîne passe `LanesInput::fused_pass` depuis ses options (désactivé par
+  défaut, exige `q34_batch_q4`, refus
+  `chain_q34_lanes_fused_requires_batch_q4`). Le lecteur exige les compteurs
+  de fusion nuls sans lui. La porte `mhgp9_chain_batch_q3` ajoute un bras
+  fusionné (mêmes condensés, mêmes enregistrements et même registre déclaré
+  que les phases séparées, plancher de graines fusionnées > 0, onze refus) ;
+  le contrat sonde/lecteur compare `q4_on` (fusionné) et `q4_unfused`. Le
+  plan R20 remplace le bras `gpu_q2seq` de R19 par `gpu_unfused` : paires
+  répétées et entrelacées à 00 K5/K10, pour mesurer L15 sur la même VM
+  (la passe fusionnée porte plus de débordements de registres dans T).
 
 ## Voie GPU S1 : `src/gpu/` (espace `mhgp9::gpu`, code neuf)
 

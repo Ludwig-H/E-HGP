@@ -100,18 +100,19 @@ def default_plan():
     # comparaison d'objet juge (condenses de tour et de catalogue, travail des
     # certificats) ; a 00, K5 et K10, paires repetees et entrelacees
     # (auditeur C, R-27). v24 (R19) : q2 sequentiel / q2 pendant les appels
-    # de l'appareil (q2_during_device), pour attribuer le recouvrement.
+    # de l'appareil (q2_during_device), pour attribuer le recouvrement. v25
+    # (R20) : voies sans la passe fusionnee (q34_lanes_fused, L15) / avec.
     def case(scene, k, arm, repeat=0):
         levers = {name: True for name in worker.LEVER_NAMES}
         if arm == 'engine':
             levers = worker.engine_levers(levers)
-        elif arm == 'gpu_q2seq':
-            levers.update(q2_during_device=False)
+        elif arm == 'gpu_unfused':
+            levers.update(q34_lanes_fused=False)
         return dict(scene=scene, file=worker.INPUTS[scene]['file'], n=worker.INPUTS[scene]['n'], k=k, s=8,
                     workers=48, static_threads=48, levers=levers, repeat=repeat)
     cases = [case(scene, k, arm) for scene in ('00', '01', '02') for k in (5, 10) for arm in ('gpu', 'engine')]
-    cases += [case('00', 5, 'gpu_q2seq'), case('00', 5, 'gpu', 1), case('00', 10, 'gpu_q2seq'),
-              case('00', 10, 'gpu', 1), case('00', 5, 'gpu_q2seq', 1), case('00', 10, 'gpu_q2seq', 1)]
+    cases += [case('00', 5, 'gpu_unfused'), case('00', 5, 'gpu', 1), case('00', 10, 'gpu_unfused'),
+              case('00', 10, 'gpu', 1), case('00', 5, 'gpu_unfused', 1), case('00', 10, 'gpu_unfused', 1)]
     return dict(schema=worker.PLAN_SCHEMA, cases=cases)
 
 

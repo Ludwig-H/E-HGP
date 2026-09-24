@@ -118,9 +118,11 @@ GpuIndex prepare_gpu_index(const gen::Q2CensusIndex& index) {
 // wait for stage A only (get). Stage B then reserves the lanes call's
 // resident slabs in the background, during those calls; the lanes call
 // needs no wait (the runner's resident buffers are guarded by their mutex
-// and grow on demand). The index is immutable: read-only sharing. Joined
-// through the destructor on every path; a chain that never provides the
-// index releases the thread.
+// and grow on demand). The index is immutable: read-only sharing, owned
+// here too (the object is declared before the chain's index, so a chain
+// that unwinds frees its index first; review before R20). Joined through
+// the destructor on every path; a chain that never provides the index, or
+// ends before stage A takes it, releases the thread without a preparation.
 class GpuPreparation {
  public:
   GpuPreparation() = default;
@@ -141,11 +143,11 @@ class GpuPreparation {
       const auto begin = Clock::now();
       try {
         static_cast<void>(gpu::warm_up());  // errors are classified by the batch call
-        const gen::Q2CensusIndex* index = nullptr;
+        gen::Q2CensusIndexPtr index;
         {
           std::unique_lock<std::mutex> lock(mu_);
           wake_.wait(lock, [&] { return index_ != nullptr || released_; });
-          index = index_;
+          if (!released_) index = index_;
         }
         if (index != nullptr) prepared_ = prepare_gpu_index(*index);
       } catch (...) {
@@ -169,10 +171,10 @@ class GpuPreparation {
       }
     });
   }
-  void provide_index(const gen::Q2CensusIndex& index) {
+  void provide_index(const gen::Q2CensusIndexPtr& index) {
     {
       std::lock_guard<std::mutex> lock(mu_);
-      index_ = &index;
+      index_ = index;
     }
     wake_.notify_all();
   }
@@ -201,7 +203,7 @@ class GpuPreparation {
   std::thread thread_;
   std::mutex mu_;
   std::condition_variable wake_;
-  const gen::Q2CensusIndex* index_ = nullptr;
+  gen::Q2CensusIndexPtr index_;
   bool released_ = false, stage_a_done_ = false, started_ = false, waited_ = false;
   std::optional<GpuIndex> prepared_;
   std::exception_ptr failure_;
@@ -358,7 +360,7 @@ struct LanesCallSteps {
 
 gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::span<const gen::Q34SurvivingEdge> survivors,
                                std::span<const std::uint8_t> asked, bool device, std::uint32_t capacity,
-                               std::uint32_t events, std::size_t workers, double& device_ms, double& kernel_ms,
+                               std::uint32_t events, bool fused, std::size_t workers, double& device_ms, double& kernel_ms,
                                double& transfer_ms, std::uint32_t& warps, double& setup_ms, double& finish_ms,
                                double& convert_ms, LanesCallSteps& steps) {
   std::vector<std::size_t> where;
@@ -385,6 +387,7 @@ gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::spa
   in.edge_count = where.size();
   in.capacity = capacity;
   in.event_capacity = events;
+  in.fused_pass = fused;
   auto out = device ? gpu::run_lanes_batch(in) : gpu::run_lanes_batch_host(in, workers);
   const auto convert_start = Clock::now();
   switch (out.error_kind) {
@@ -782,6 +785,8 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       fail(ChainStatus::kInvalidInput, "chain_q34_lanes_events_requires_batch_q4");
     if (options.q2_during_device && !options.q34_batch_filter)
       fail(ChainStatus::kInvalidInput, "chain_q2_during_device_requires_batch_filter");
+    if (options.q34_lanes_fused && !options.q34_batch_q4)
+      fail(ChainStatus::kInvalidInput, "chain_q34_lanes_fused_requires_batch_q4");
     if (points.size() < 2) fail(ChainStatus::kInvalidInput, "chain_requires_two_sites");
     if (points.size() > static_cast<std::size_t>(std::numeric_limits<std::int32_t>::max()))
       fail(ChainStatus::kInvalidInput, "chain_too_many_sites");
@@ -810,7 +815,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     t = Clock::now();
     const gen::Q2CensusIndexPtr index = gen::make_q2_cloud_index(cloud);
     result.times.gen_index_ms = ms_since(t);
-    gpu_preparation.provide_index(*index);
+    gpu_preparation.provide_index(index);
 
     std::vector<std::vector<Presentation>> slots(W);
     // q2 into its own slots (v24: possibly on a thread during the device
@@ -955,12 +960,13 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         if (options.q34_batch_q3 && kmax >= 2) {
           const bool device = options.q34_gpu_q3;
           const std::uint32_t capacity = options.q34_lanes_capacity, events = options.q34_lanes_events;
+          const bool fused = options.q34_lanes_fused;
           lanes.filter = [&gpu_preparation, &lanes_device_ms, &lanes_kernel_ms, &lanes_transfer_ms, &lanes_warps,
                           &lanes_setup_ms, &lanes_finish_ms, &lanes_convert_ms, &lanes_steps,
-                          device, capacity, events, W](const gen::Q2CensusIndexPtr& ix, unsigned k,
-                                                       std::span<const gen::Q34SurvivingEdge> edges,
-                                                       std::span<const std::uint8_t> asked) {
-            return lanes_batch(gpu_preparation.get(*ix), k, edges, asked, device, capacity, events, W,
+                          device, capacity, events, fused, W](const gen::Q2CensusIndexPtr& ix, unsigned k,
+                                                              std::span<const gen::Q34SurvivingEdge> edges,
+                                                              std::span<const std::uint8_t> asked) {
+            return lanes_batch(gpu_preparation.get(*ix), k, edges, asked, device, capacity, events, fused, W,
                                lanes_device_ms, lanes_kernel_ms, lanes_transfer_ms, lanes_warps, lanes_setup_ms,
                                lanes_finish_ms, lanes_convert_ms, lanes_steps);
           };
