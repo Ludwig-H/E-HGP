@@ -91,3 +91,16 @@ faire et ils ne prouvent pas à eux seuls la
 complétude mathématique au-delà de `complete_relative`.
 
 GCP non utilisé dans ce contre-audit.
+
+## Clôture de lecture indépendante
+
+Le [lecteur B](b_raw_pin_reader_20260924/README.md) est désormais
+versionné sans modifier le reçu C : normal et `-O` donnent 12/12 cas,
+6/6 paires exactes, 3/3 entrées versionnées et 29/29 empreintes. Les
+quatre commandes (lecteur et selftest dans les deux modes) passent.
+Trois mutants de copies temporaires sont rejetés causalement : fichier
+manquant, digest de tour changé avec manifeste recalculé, et code de
+retour GNU time non nul avec manifeste recalculé. La porte de **lecture
+du reçu C** est donc fermée ; la porte du **protocole R21/G4** reste
+ouverte jusqu'à l'intégration de ces six références, la réparation de
+son préflight et une comparaison appariée sur la machine cible.

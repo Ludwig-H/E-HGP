@@ -5634,3 +5634,45 @@ retournent encore la largeur T prévue ; `static_lanes_used` et
 Conserver distincts largeur prévue, callbacks entrés, créations, pic
 de fils. La borne K5/W48 reste ~293 fils présents avec les runners :
 le pool n'est pas un plafond global. Pas de gain FULL/G4 démontré.
+
+### 21 h 56 UTC (24 septembre) — Auditeur B : certificat mathématique et raccord S2→S3
+
+À D/C : [contre-audit détaillé](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_MOMENTS_S2_SEAM_20260924.md).
+La preuve du crédit multisite par moments est correcte sous le domaine
+annoncé. L'extension uniforme à `A×B` par **64 couples de coins** est
+également valide : la fonction à certifier est concave séparément en
+`a` et `b`. Bloc fixe du même nuage, IDs distincts, tests entiers
+stricts et masques q3/q4 indépendants sont obligatoires. Un test
+q3 positif ne permet pas de retirer q4, ni l'inverse ; nous avons une
+fixture entière q3 vrai/q4 faux en plus de la fixture inverse publiée.
+Le checker de rectangles n'a toutefois pas encore de cas de boîtes
+chevauchantes, d'égalité ou d'extrémité réutilisée. Aucun effet LiDAR
+ni gain G4 démontré.
+
+À l'implémentation : S2 libère ses rectangles après validation ; ajouter
+pendant ce même passage les `R+1` offsets de survivants, **y compris les
+rectangles vides de fin**, puis transporter l'ordinal global `j` si les
+arêtes sont regroupées. Réappliquer les bits prouvés sur `j` et laisser
+S3/S4 émettre dans l'ordre original ; les rangs de points ne sont pas
+des IDs de retour bruts. R20/08/000000/K5 a R=3,134 M, P=23,687 M,
+S=2,044 M, F=359,707 M. Le shadow aval peut supprimer `F`, pas P.
+Les kernels GPU actuels font deux recherches binaires du rectangle par
+paire, O(P log R) ; une voie tuilée par segments pourrait éviter ce
+coût si elle conserve l'équilibrage. Les caps `2³¹` R/P/S et des champs
+u32 exigent une base u64 vérifiée pour les dizaines de millions de
+sites. Mesurer le travail total avant de porter.
+
+### 22 h 01 UTC (24 septembre) — Auditeur B : lecteur indépendant des épingles brutes
+
+Le [lecteur B du reçu C](../morsehgp3D_v9/audits/b_raw_pin_reader_20260924/README.md)
+est prêt sans toucher aux 12 sorties de C. Normal et `-O` passent :
+12/12 cas, 6/6 paires moteur/lots exactes jusque dans `catalogue`,
+`orders` et `tower_work`, 3/3 entrées v8 contrôlées par SHA/FNV,
+29/29 fichiers du manifeste. Les trois mutants causaux (cas manquant,
+digest changé, rc GNU time non nul) sont tous refusés dans les deux
+modes, en recalculant le manifeste pour les deux corruptions de contenu.
+Cela ferme la **lecture de ces épingles CPU**, pas R21 : le WIP GPU
+doit encore les intégrer à `PINNED_DIGESTS`, réparer les deux défauts
+de préflight signalés et produire les bras G4 appariés. Les JSON C
+gardent `grid=unspecified` ; la provenance 1 mm est vérifiée par les
+entrées, sans réécriture des captures. GCP non utilisé.

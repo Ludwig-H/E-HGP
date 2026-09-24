@@ -28,12 +28,15 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
    populations et images, avec attribution temporelle et ressources à
    mesurer ; ces trois WIP frères ne sont pas encore un moteur combiné.
    Les [épingles brutes CPU de C](CONTRE_AUDIT_B_EPINGLES_BRUTES_C_PREFLIGHT_20260924.md)
-   attendent leur porte de clôture avant d'autoriser R21.
+   ont un [lecteur indépendant normal/`-O` et mutants](b_raw_pin_reader_20260924/README.md) ;
+   leur intégration et le préflight R21 restent ouverts.
    Le [grand audit C](AUDIT_C_GRAND_AUDIT_V9_20260924.md) et sa
    [contrelecture B](CONTRE_AUDIT_B_GRAND_AUDIT_C_100MS_20260924.md)
    distinguent mesures, projections et contrat inchangé de 100 ms.
    Le [shadow rectangle à moments](moments_rectangle_shadow_20260924/README.md)
    juge négativement un choix naïf de bloc sur un quart LiDAR sans sol.
+   Le [contre-audit moments/S2→S3](CONTRE_AUDIT_B_MOMENTS_S2_SEAM_20260924.md)
+   valide la preuve conditionnelle et définit le raccord sans changement de sortie.
 4. [`NOTE_C_INVARIANT_EULER_20260923.md`](NOTE_C_INVARIANT_EULER_20260923.md),
    [`CONTRELEC_EULER_PAR_NERF_20260923.md`](CONTRELEC_EULER_PAR_NERF_20260923.md) et
    [le contre-exemple](CONTRE_EXEMPLE_EULER_KPLUS2_20260923.md) : invariant
@@ -132,6 +135,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`CONTRE_AUDIT_RECTANGLES_Q34_TICKET_BORNE_20260923.md`](CONTRE_AUDIT_RECTANGLES_Q34_TICKET_BORNE_20260923.md) | B | `ff121022` 08:34 | démontré localement, shadow | vivant | sans réponse |
 | [`CERTIFICAT_NOEUDS_CORE_LIDAR_20260923.md`](CERTIFICAT_NOEUDS_CORE_LIDAR_20260923.md) | B | `7f218872` 08:24 | démontré localement | vivant | sans réponse |
 | [`moments_multisite_precore_20260924/`](moments_multisite_precore_20260924/NOTE.md) | A | 24/02:00 | certificat exact ≥T intérieurs par bloc de moments avant les formes q3/q4 ; fixture u18 et contrôle rationnel, sélectivité non mesurée | proposition non portée | sans réponse |
+| [`CONTRE_AUDIT_B_MOMENTS_S2_SEAM_20260924.md`](CONTRE_AUDIT_B_MOMENTS_S2_SEAM_20260924.md) | B | 24/22:01 | contrepreuve mathématique et raccord O(R+S) ; aucun port ni chrono | vivant | transmis à D/C |
 | [`CONTRE_AUDIT_B_COVER_BATCH_20260923.md`](CONTRE_AUDIT_B_COVER_BATCH_20260923.md) | B | `bee0609f` 00:09 | démontré localement | vivant | sans réponse |
 | [`CACHE_TEMOINS_COUT_VALIDATION_20260923.md`](CACHE_TEMOINS_COUT_VALIDATION_20260923.md) | B ? | `128fb231` 06:26 | mesure | vivant | sans réponse |
 | [`LEDGER_VISITES_CACHEES_Q34_20260923.md`](LEDGER_VISITES_CACHEES_Q34_20260923.md) | B | `5270f3df` 07:43 | mesure | clos (4530644b) | acceptée |

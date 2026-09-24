@@ -72,20 +72,30 @@ la seule séquence 08. Les 29 fichiers du manifeste passent SHA-256 ;
 les 12 sorties ont code nul et statut `complete_relative`, et les six
 paires moteur/lots coïncident pour les digests et objets de tour. Le
 script crée néanmoins `DONE` sans vérifier ces conditions ; un lecteur
-versionné normal/`-O` avec mutations et les épingles dans R21 restent à
-faire. L'invariant Euler n'est contrôlé que jusqu'à K−2, et les JSON
+indépendant [versionné](b_raw_pin_reader_20260924/README.md) ferme
+maintenant 12/12 cas, 6/6 paires, 3/3 entrées et 29/29 empreintes,
+en normal/`-O`, avec trois mutations causales rejetées. Les épingles
+restent à intégrer au **protocole R21**. L'invariant Euler n'est contrôlé
+que jusqu'à K−2, et les JSON
 disent `grid=unspecified` malgré la provenance 1 mm indépendante.
 Ces épingles ne sont ni chrono GPU/G4, ni qualification de plusieurs
 séquences ou du float32 brut.
+
 Le plan R21 à 30 cas reste bloqué avant G4 : attente nominale de 18 cas,
 durées CUDA d'ouverture/réservation omises du garde-mur externe, et six
 épingles brutes absentes de `PINNED_DIGESTS`. Le statut `partial` ne doit
 pas dispenser les cas bruts. Le prochain test algorithmique à fort levier
-est un relevé complet **S2→S3** des survivants/masques/ordinals et du
+est un [relevé complet **S2→S3**](CONTRE_AUDIT_B_MOMENTS_S2_SEAM_20260924.md)
+des survivants/masques/ordinals et du
 travail de cœur `F` par arête sans changer les sorties, puis un BVH exact
 borné sur les groupes lourds. Le résultat positif actuel concerne un
 groupe favorable d'une trame avec sol ; aucune sélectivité sans sol n'est
-encore acquise.
+encore acquise. Le certificat multisite et son extension exacte aux
+64 couples de coins sont recevables mathématiquement, mais aucun port
+ni gain n'est validé. Le filtre après S2 ne peut pas réduire les paires
+déjà développées ; le chemin GPU recherche encore deux fois le rectangle
+de chaque paire, et ses plafonds `2³¹` imposeront une stratégie tuilée
+pour le massif.
 
 Le [contre-audit R20 et 100 ms](CONTRE_AUDIT_B_R20_ET_TRAJECTOIRE_100MS_20260924.md)
 reçoit la session G4 publiée (`d1d038393`) : 326/326 empreintes et
