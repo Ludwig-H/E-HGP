@@ -17,6 +17,10 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
    [le préflight R21/v26](CONTRE_AUDIT_B_PREFLIGHT_R21_V26_20260924.md) :
    le contrat, le dernier coût reçu de la chaîne GPU hybride et les
    verrous architecturaux.
+   La [feuille de route chiffrée 100 ms FULL explicite](PLAN_CRITIQUE_100MS_FULL_20260924.md)
+   sépare budget expérimental, refontes nécessaires et tous les profils
+   encore à qualifier. Le [retest R21](CONTRE_AUDIT_R21_PREFLIGHT_20260924.md)
+   confirme le selftest rouge et le trou du mur CUDA avant tout nouveau G4.
    Le [contre-audit du pool E2 local](CONTRE_AUDIT_B_POOL_E2_WIP_20260924.md)
    distingue réemploi de fils et plafond réel de concurrence ; un
    [reproducteur minimal](pool_e2_exception_probe_20260924.cpp) accompagne
@@ -43,6 +47,10 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
    sites ouvre une jointure exacte aux coûts `F_e`; la [palette de blocs
    testée](b_moments_palette_20260924/README.md) ne ferme pratiquement
    aucune arête/voie sur ses deux petits cas et ne justifie aucun port GPU.
+   La [contrelecture mathématique des nœuds BVH](CONTRELECTURE_FORMES_BVH_AVANT_S3_20260924.md)
+   et son [plan de sonde bornée](b_spatial_block_probe_plan_20260924/README.md)
+   définissent une autre preuve pré-cœur exacte, dont le coût est encore
+   à mesurer.
    L'[audit des octets FULL](CONTRE_AUDIT_FULL_R20_OCTETS_100MS_20260924.md)
    écarte une prétendue impossibilité mémoire de 100 ms, sans promettre
    ce temps ; le [trou de complétude des épingles brutes](b_full_raw_completeness_gap_20260924/README.md)
@@ -139,6 +147,8 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 
 | note | auteur | créée | portée | cycle | réponse du développeur |
 | --- | --- | --- | --- | --- | --- |
+| [`CONTRELECTURE_FORMES_BVH_AVANT_S3_20260924.md`](CONTRELECTURE_FORMES_BVH_AVANT_S3_20260924.md) | B | 24/22:53 | preuve exacte 8 coins/nœud/cellule et contraintes d'antichaîne ; sélectivité non mesurée | vivant, méthode | transmis à D/C |
+| [`b_spatial_block_probe_plan_20260924/`](b_spatial_block_probe_plan_20260924/README.md) | B | 24/22:53 | protocole borné de shadow avant formes, sans port produit | pilote en cours | transmis à D/C |
 | [`PISTE_B_Q34_RECTANGLES_AVANT_EXPANSION_20260923.md`](PISTE_B_Q34_RECTANGLES_AVANT_EXPANSION_20260923.md) | B | `de26dd7a` 03:03 | démontré localement | vivant | refusée en partie, différée |
 | [`FIXTURE_CELLULES_CENTRES_Q34_20260923.md`](FIXTURE_CELLULES_CENTRES_Q34_20260923.md) | B | `e3fb7999` 10:12 | démontré localement (fixture exacte), pas une preuve LiDAR | vivant | sans réponse |
 | [`PISTE_B_Q34_NOEUDS_AVANT_COVER_20260923.md`](PISTE_B_Q34_NOEUDS_AVANT_COVER_20260923.md) | B | `f36c140c` 01:59 | démontré localement | vivant | différée |
@@ -163,6 +173,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 
 | note | auteur | créée | portée | cycle | réponse du développeur |
 | --- | --- | --- | --- | --- | --- |
+| [`PLAN_CRITIQUE_100MS_FULL_20260924.md`](PLAN_CRITIQUE_100MS_FULL_20260924.md) | B | 24/23:00 | coûts R20 et enveloppe expérimentale 100 ms, sortie explicite comprise | vivant, aucune accélération acquise | transmis à D/C |
 | [`CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md`](CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md) | B | `a514de68` 10:22 + mise à jour | projection D5 bornée ; index seul négatif ; R13 montre le recouvrement statique/lots ; shadow racine pré-lot à garder | vivant | réponse D attendue |
 | [`CONTRE_AUDIT_B_PHASE_A_ALLEGEE_20260923.md`](CONTRE_AUDIT_B_PHASE_A_ALLEGEE_20260923.md) | B | 23/soir | cinq paires locales de tour validées, run exact et singleton relus ; phase A plus rapide, tour K5 non stable ; provenance binaire/entrée/log non épinglée | vivant, aucun G4 ni gain de contrat | transmis à D |
 | [`CONTRE_AUDIT_B_BROUILLON_PLAT_FULL_WIP_20260923.md`](CONTRE_AUDIT_B_BROUILLON_PLAT_FULL_WIP_20260923.md) | B | 23/21:56, addendum soir | surcharge CSR publique sans validation avant accès ; défaut exécuté sous ASan sur CSR invalide ; gain d'allocations/groupes non mesuré | défaut publié historique, corrigé dans `3765080cf` ; sorties internes valides non accusées | corrigée pour le CSR |
@@ -201,6 +212,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 
 | note | auteur | créée | portée | cycle | réponse du développeur |
 | --- | --- | --- | --- | --- | --- |
+| [`CONTRE_AUDIT_R21_PREFLIGHT_20260924.md`](CONTRE_AUDIT_R21_PREFLIGHT_20260924.md) | B | 24/22:59 | test nominal WIP rouge, mutant du mur CUDA accepté normal/`-O`, épingles brutes non branchées | vivant, G4 en attente | transmis à D/C |
 | [`CONTRE_AUDIT_B_R20_ET_TRAJECTOIRE_100MS_20260924.md`](CONTRE_AUDIT_B_R20_ET_TRAJECTOIRE_100MS_20260924.md) | B | 24/soir | reçu R20 vérifié ; budgets K5/K10 ; preuve 64 coins des moments multisites ; trajectoire 100 ms conditionnelle | vivant, aucun contrat acquis | transmis dans la coordination |
 | [`RECTIFICATIF_R8_Q34_ORDONNANCEMENT_20260923.md`](RECTIFICATIF_R8_Q34_ORDONNANCEMENT_20260923.md) | A | 23/10:00 | démontré dans le code, mesure R8 | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_V14_ORDONNANCEMENT_20260923.md`](CONTRE_AUDIT_B_V14_ORDONNANCEMENT_20260923.md) | B | `a514de68` 10:22 | portes et protocole v14 | vivant | sans réponse |

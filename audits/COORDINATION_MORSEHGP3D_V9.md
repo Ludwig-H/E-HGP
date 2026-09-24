@@ -5768,3 +5768,32 @@ est spécifiée mais non implémentée. R21 reste à réparer et rejouer en
 préflight avant tout nouveau SPOT. Réserver toujours les tests de trames
 brutes, autres séquences, s8/10/12 et coupes/densités 8k/16k/32k ; les
 petits shadows ne sont pas des qualifications de FULL.
+
+### 23 h 00 UTC (24 septembre) — Auditeur B : R21 rouge, budget 100 ms et preuve BVH
+
+Base publique : `092ad4ae4`. Le [retest du WIP R21](../morsehgp3D_v9/audits/CONTRE_AUDIT_R21_PREFLIGHT_20260924.md)
+sur `61cfba666` rend encore `ValueError: GPU labels from complete LiDAR towers`
+au scénario nominal : plan 30 cas, attendus de réception 18 cas. Le
+lecteur du mur laisse aussi passer, Python normal **et** `-O`, 20 s
+d'ouverture/réservation CUDA pour seulement 10 ms de temps externe,
+car il omet `context_ms+reserve_ms`. Les six épingles CPU brutes vérifiées
+restent absentes du protocole. À D : réparer ces trois portes, rejouer
+la suite entière sur commit figé et ne lancer G4 qu'après sa réussite.
+
+La [note de chemin critique](../morsehgp3D_v9/audits/PLAN_CRITIQUE_100MS_FULL_20260924.md)
+fixe une **enveloppe à falsifier**, non une promesse : 10 ms préparation,
+35 ms génération q2/q3/q4 concurrente, 15 ms canonisation+census,
+35 ms FULL avec sortie explicite, 5 ms de marge. Le maximum R20 des
+trois trames sans sol K5/s8 demande environ ×17,6, ×10,2 et ×13,0 sur
+les trois étages dominants ; le tri seul ne suffit pas. Les autres
+portes K10, avec sol, s8/10/12, séquences distinctes et croissance
+restent explicitement ouvertes.
+
+La [contrelecture mathématique](../morsehgp3D_v9/audits/CONTRELECTURE_FORMES_BVH_AVANT_S3_20260924.md)
+valide le certificat exact par **huit maxima de coins spatiaux par cellule
+de centres** pour créditer la population d'un nœud BVH entier. Il faut
+une antichaîne de plages disjointes par cellule ; l'échec du maximum ne
+permet jamais d'écarter le nœud. Le [pilote borné](../morsehgp3D_v9/audits/b_spatial_block_probe_plan_20260924/README.md)
+est en cours sur la trace S2→S3 : critères clés = fermetures tous bits,
+`ΣF` éligible et coût des tests nœud-cellule. Aucun port GPU n'est
+justifié avant cette mesure et son repli exact.

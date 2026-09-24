@@ -1,5 +1,29 @@
 # État courant des audits v9
 
+La [feuille de route auditée vers 100 ms explicites](PLAN_CRITIQUE_100MS_FULL_20260924.md)
+pose une enveloppe **expérimentale** de 10/35/15/35/5 ms pour
+préparation, génération concurrente, canonisation/census, FULL et marge.
+Sur les trois trames sans sol R20 K5/s8 de la seule séquence 08, la chaîne
+reste à **1,010/1,109/1,260 s** ; au pire, q3/q4, l'aval de
+canonisation et FULL demanderaient respectivement environ ×17,6, ×10,2
+et ×13,0 pour cette enveloppe. La sortie explicite et ses octets sont
+dans le budget ; aucun de ces gains n'est acquis. Les autres profils
+(K10, avec sol, s10/12, plusieurs séquences, coupes et densités,
+plusieurs dizaines de millions de sites) restent des portes séparées.
+
+La [contrelecture mathématique des boîtes BVH avant S3](CONTRELECTURE_FORMES_BVH_AVANT_S3_20260924.md)
+prouve qu'un nœud spatial entier peut être crédité sur une cellule de
+centres par huit maxima de coins exacts, à condition de maintenir une
+antichaîne de sites **par cellule** ; un nœud qui échoue au test ne peut
+pas être supprimé sans minorant distinct. Le [pilote borné](b_spatial_block_probe_plan_20260924/README.md)
+mesurera si cette preuve évite réellement les formes et à quel coût.
+Pour l'instant, c'est une méthode, **pas** un gain du moteur. Le
+[retest du WIP R21](CONTRE_AUDIT_R21_PREFLIGHT_20260924.md) échoue au
+selftest nominal sur un plan 30 cas attendu encore comme 18 ; son lecteur
+accepte sous Python normal/`-O` un mutant dont la session CUDA de 20 s
+précède un mur externe de 10 ms. G4 reste en attente d'un préflight
+réparé et gelé ; le reçu R20 demeure le dernier chrono contractuel.
+
 Le [relevé audit-only S2→S3](b_s2_trace_20260924/README.md) fournit
 maintenant, sur **un seul quart sans sol de 1 288 sites** (08/000200,
 K10/s8/W8), les 55 657 arêtes survivantes avec ordinal, rectangle,
