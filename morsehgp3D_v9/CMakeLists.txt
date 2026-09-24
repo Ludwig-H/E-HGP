@@ -107,7 +107,7 @@ mhgp9_gate(mhgp9_tower_parallel_sort_mutant_unsorted_bucket 1 mhgp9_tower_parall
 # appel) ; --fixtures juge la tour pool actif et coupe a 1, 2, 3, 4 et 8 fils
 # (condense, tower_work, compteurs deterministes) et le refus de ressource ;
 # la trame 08/000000 a K5 (label lidar) avec ses condenses epingles. Le
-# mutant d'execution parallel-admit-partial-launch (voie par appel) et cinq
+# mutant d'execution parallel-admit-partial-launch (voie par appel) et six
 # mutants compiles du pool sont tues.
 mhgp9_test_executable(mhgp9_tower_task_pool_gate tests/tower/task_pool_gate.cpp src/chain/tower_chain.cpp)
 target_link_libraries(mhgp9_tower_task_pool_gate PRIVATE mhgp9_gen mhgp9_gpu)
@@ -125,13 +125,14 @@ mhgp9_gate(mhgp9_tower_task_pool_lidar_k5 0 mhgp9_tower_task_pool_gate
            ARGS --frame=${CMAKE_CURRENT_SOURCE_DIR}/../morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le
                 --k=5 --tower=67450c64611075b1 --catalogue=5ad1fe09354411ba
            EXPECT_PREFIX "task_pool_gate frame towers=10" LABELS "lidar;tower" TIMEOUT 3600)
-foreach(mutant IN ITEMS ADMIT_PARTIAL RETURN_BEFORE_JOIN NESTED_QUEUE STALE_FENV BYPASS)
+foreach(mutant IN ITEMS ADMIT_PARTIAL RETURN_BEFORE_JOIN NESTED_QUEUE STALE_FENV BYPASS JOIN_CLOSED)
   string(TOLOWER ${mutant} lower)
   mhgp9_test_executable(mhgp9_tower_task_pool_${lower}_mutant_gate tests/tower/task_pool_gate.cpp)
   target_compile_definitions(mhgp9_tower_task_pool_${lower}_mutant_gate PRIVATE MHGP9_POOL_MUTANT_${mutant}=1)
 endforeach()
 foreach(pair IN ITEMS "admit_partial:pool.partial_launch_admitted" "return_before_join:pool.returned_before_join"
-                      "nested_queue:pool.nested_deadlock" "stale_fenv:pool.stale_fenv" "bypass:pool.bypassed")
+                      "nested_queue:pool.nested_deadlock" "stale_fenv:pool.stale_fenv" "bypass:pool.bypassed"
+                      "join_closed:pool.joined_closed_job")
   string(REPLACE ":" ";" parts ${pair})
   list(GET parts 0 lower)
   list(GET parts 1 cause)

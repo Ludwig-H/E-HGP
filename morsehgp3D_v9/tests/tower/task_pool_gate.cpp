@@ -1,12 +1,14 @@
 // MorseHGP3D v9 — porte du pool persistant de la tour (v9 E2, parallel/pool.hpp).
 //
 // --unit : le TaskPool seul, sous PoolScope.
-//   - run_threads appelle fn(t) une fois par t dans [0, count), t = 0 sur le
-//     fil proprietaire, chaque t sur un seul fil ; parallel_items, _ranges et
+//   - run_threads appelle fn(0) sur le fil proprietaire et fn(t) au plus une
+//     fois par t dans [1, count), chaque t sur un seul fil (une fois chacun
+//     quand le proprietaire les attend) ; parallel_items, _ranges et
 //     parallel_sort servis par le pool (compteur de travaux) avec les memes
 //     sorties que sans pool, pour 2, 3, 4 et 8 participants ;
-//   - retour seulement apres l'accuse de tous les fils (travail lent sur un
-//     ouvrier, jamais un retour anticipe) ;
+//   - retour seulement apres la sortie de tous les fils entres (travail lent
+//     sur un ouvrier, jamais un retour anticipe) ; un fil reveille apres la
+//     fermeture d'un travail ne l'execute jamais (crochet de retard) ;
 //   - premiere exception capturee, relancee sur le proprietaire, pool
 //     reutilisable ensuite ;
 //   - appels imbriques (part du proprietaire, ouvriers du pool) et appels
@@ -98,7 +100,7 @@ void with_watchdog(const char* cause, int seconds, Body&& body) {
 }
 
 struct UnitCounts {
-  std::uint64_t checks = 0, pool_jobs = 0, worker_items = 0, nested_calls = 0;
+  std::uint64_t checks = 0, pool_jobs = 0, worker_items = 0, nested_calls = 0, late_skips = 0;
 };
 
 void unit_dispatch(UnitCounts& counts) {
@@ -109,12 +111,17 @@ void unit_dispatch(UnitCounts& counts) {
       fail("pool.participants=" + std::to_string(pool.participants()));
     for (std::size_t count = 2; count <= participants; ++count) {
       // run_threads: every t exactly once, t = 0 on the owner.
+      // The owner waits for every other index: each then runs exactly once.
       std::vector<std::thread::id> who(count);
       std::vector<std::atomic<int>> hits(count);
-      std::atomic<std::size_t> finished{0};
+      std::atomic<std::size_t> finished{0}, started{0};
       const std::uint64_t before = pool.jobs();
       pd::run_threads(count, [&](std::size_t t) {
         if (t < count) { who[t] = std::this_thread::get_id(); hits[t].fetch_add(1); }
+        if (t == 0) {
+          const auto limit = std::chrono::steady_clock::now() + std::chrono::seconds(20);
+          while (started.load() + 1 < count && std::chrono::steady_clock::now() < limit) std::this_thread::yield();
+        } else started.fetch_add(1);
         finished.fetch_add(1);
       });
       ++counts.checks;
@@ -269,12 +276,53 @@ void unit_fenv(UnitCounts& counts) {
   for (const int mode : {FE_UPWARD, FE_TONEAREST, FE_DOWNWARD}) {
     if (std::fesetround(mode) != 0) fail("fenv.unsupported_mode", 2);
     std::vector<int> seen(4, -1);
-    pd::run_threads(4, [&](std::size_t t) { seen[t] = std::fegetround(); });
+    std::atomic<int> recorded{0};
+    pd::run_threads(4, [&](std::size_t t) {
+      seen[t] = std::fegetround();
+      if (t != 0) { recorded.fetch_add(1); return; }
+      const auto limit = std::chrono::steady_clock::now() + std::chrono::seconds(20);  // every index runs
+      while (recorded.load() < 3 && std::chrono::steady_clock::now() < limit) std::this_thread::yield();
+    });
     std::fesetround(initial);
     ++counts.checks;
     for (std::size_t t = 0; t < seen.size(); ++t)
       if (seen[t] != mode) fail("pool.stale_fenv t=" + std::to_string(t));
   }
+}
+
+// A pool thread woken late (join delay hook) finds the job closed and skips
+// it. The job borrows only static storage: a thread that ran it after the
+// owner returned would be counted, never read a dead frame.
+std::atomic<int> late_calls{0}, late_after_return{0};
+std::atomic<bool> late_returned{false};
+struct LateJob {
+  void operator()(std::size_t t) const {
+    if (t == 0) return;  // the owner's share: nothing to drain
+    late_calls.fetch_add(1);
+    if (late_returned.load()) late_after_return.fetch_add(1);
+  }
+};
+LateJob late_job;
+
+void unit_late_join(UnitCounts& counts) {
+  TaskPool pool(4);
+  PoolScope scope(&pool);
+  pd::join_delay_ms = 200;
+  pd::join_delay_index = 3;
+  int skipped = 0;
+  for (int round = 0; round < 3; ++round) {
+    late_calls = 0; late_after_return = 0; late_returned = false;
+    pd::run_threads(4, late_job);
+    late_returned = true;
+    std::this_thread::sleep_for(std::chrono::milliseconds(400));  // the late thread has woken and decided
+    ++counts.checks;
+    if (late_after_return.load() != 0) fail_now("pool.joined_closed_job calls=" + std::to_string(late_calls.load()));
+    if (late_calls.load() < 3) ++skipped;
+  }
+  pd::join_delay_index = 0;
+  pd::join_delay_ms = 0;
+  if (skipped == 0) fail("floor.late_join_not_exercised", 3);
+  counts.late_skips += static_cast<std::uint64_t>(skipped);
 }
 
 void unit_launch(UnitCounts& counts) {
@@ -321,11 +369,13 @@ int run_unit() {
   unit_exceptions(counts);
   unit_nested(counts);
   unit_fenv(counts);
+  unit_late_join(counts);
   unit_launch(counts);
-  std::printf("task_pool_gate unit checks=%llu pool_jobs=%llu worker_items=%llu nested_calls=%llu\n",
+  std::printf("task_pool_gate unit checks=%llu pool_jobs=%llu worker_items=%llu nested_calls=%llu late_skips=%llu\n",
               static_cast<unsigned long long>(counts.checks), static_cast<unsigned long long>(counts.pool_jobs),
               static_cast<unsigned long long>(counts.worker_items),
-              static_cast<unsigned long long>(counts.nested_calls));
+              static_cast<unsigned long long>(counts.nested_calls),
+              static_cast<unsigned long long>(counts.late_skips));
   // 2, 3, 4 and 8 participants: 1 + 2 + 3 + 7 run_threads jobs and five
   // helper jobs each (items, ranges, the three steps of the sort).
   if (counts.pool_jobs < 33 || counts.worker_items == 0 || counts.nested_calls < 16) {

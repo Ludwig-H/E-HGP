@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <atomic>
 #include <cfenv>
+#include <chrono>
 #include <memory>
 #include <cstddef>
 #include <exception>
@@ -59,6 +60,15 @@ namespace parallel_detail {
 inline thread_local size_t launch_fail_after = (size_t)-1;
 inline std::atomic<size_t> launch_started{0};
 inline std::atomic<size_t> launch_active{0};
+// Pool thread `join_delay_index` sleeps join_delay_ms after each wake-up,
+// before trying to join the job (gate of the late-join rule).
+inline std::atomic<size_t> join_delay_index{0};
+inline std::atomic<unsigned> join_delay_ms{0};
+#endif
+#if defined(MHGP9_POOL_MUTANT_JOIN_CLOSED)
+#define MHGP9_POOL_JOIN_CLOSED true  // mutant: a late thread joins a closed job
+#else
+#define MHGP9_POOL_JOIN_CLOSED false
 #endif
 // Threads created by the per-call path of run_threads, process-wide (the
 // persistent pool's own threads are not counted here). A tower publishes the
@@ -75,11 +85,16 @@ struct JoinThreads {
 };
 
 // Persistent pool (v9 E2): participants() - 1 threads created ONCE, plus the
-// owner thread, which runs its own share as worker 0. run(count, fn) calls
-// fn(t) exactly once for every t in [0, count) (t = 0 on the owner, t >= 1 on
-// pool thread t) and returns only after every pool thread has acknowledged
-// the job, including the threads with t >= count: the job fields are never
-// rewritten while a thread may still read them. Contracts:
+// owner thread, which runs its own share as worker 0. run(count, fn) is for
+// the helpers' pull loops, where ONE call drains the whole shared work: it
+// calls fn(0) on the owner and fn(t) at most once on each pool thread t in
+// [1, count) that JOINS the job while it is open; once fn(0) has returned the
+// owner closes the job (no thread joins any more) and returns when every
+// joined thread has left it. A thread woken after the close skips the job
+// without reading its fields, so the fields are never rewritten while a
+// thread may still read them, and the end of a job never waits for a thread
+// that the scheduler has not run yet (a thread created per call must run
+// once before it can be joined). Contracts:
 //  - admission: the threads wait until EVERY thread exists; a creation
 //    failure cancels them (they exit without reading any job), joins them
 //    and rethrows, so a partially created pool is never published and no
@@ -132,7 +147,7 @@ class TaskPool {
   TaskPool(const TaskPool&) = delete;
   TaskPool& operator=(const TaskPool&) = delete;
   ~TaskPool() {
-    stopping_ = true;
+    stopping_.store(true, std::memory_order_release);
     generation_.fetch_add(1, std::memory_order_release);
     generation_.notify_all();
     for (auto& th : threads_) th.join();
@@ -153,9 +168,10 @@ class TaskPool {
     job_context_ = &fn;
     job_count_ = count;
     std::fegetenv(&job_env_);
-    pending_.store(static_cast<u32>(threads_.size()), std::memory_order_relaxed);
     ++jobs_;
-    generation_.fetch_add(1, std::memory_order_release);
+    const u32 generation = generation_.load(std::memory_order_relaxed) + 1;  // the owner alone writes it
+    state_.store((static_cast<u64>(generation) << 32) | kOpen, std::memory_order_release);
+    generation_.store(generation, std::memory_order_release);
     generation_.notify_all();
     std::exception_ptr own;
     {
@@ -169,8 +185,10 @@ class TaskPool {
       try { fn(0); } catch (...) { own = std::current_exception(); }
     }
 #if !defined(MHGP9_POOL_MUTANT_RETURN_BEFORE_JOIN)
-    for (u32 p = pending_.load(std::memory_order_acquire); p != 0; p = pending_.load(std::memory_order_acquire))
-      pending_.wait(p, std::memory_order_acquire);
+    // Close the job, then wait for the threads that joined it.
+    for (u64 left = state_.fetch_and(~kOpen, std::memory_order_acq_rel) & ~kOpen; (left & kActive) != 0;
+         left = state_.load(std::memory_order_acquire))
+      state_.wait(left, std::memory_order_acquire);
 #endif
 #if defined(MHGP9_POOL_MUTANT_NESTED_QUEUE)
     busy_.store(false);
@@ -187,15 +205,20 @@ class TaskPool {
  private:
   std::vector<std::thread> threads_;
   std::atomic<u32> admission_{0};  // 0 waiting, 1 admitted, 2 cancelled
-  std::atomic<u32> generation_{0};
-  std::atomic<u32> pending_{0};    // pool threads that have not acknowledged the job
-  // Job fields: written by the owner before the generation's release, read
-  // by the threads after its acquire, never rewritten before every ack.
+  std::atomic<u32> generation_{0};  // wake-up word: the generation of the last job
+  // Job state: generation (high 32 bits), open bit, threads inside (low 31
+  // bits). A thread joins by compare-and-swap while the job of ITS generation
+  // is open, and leaves by decrement; the owner closes it by clearing kOpen.
+  static constexpr u64 kOpen = u64{1} << 31, kActive = kOpen - 1;
+  std::atomic<u64> state_{0};
+  // Job fields: written by the owner before the state's release, read by a
+  // thread only after joining (acquire), never rewritten before the job is
+  // closed and every joined thread has left.
   void (*job_invoke_)(void*, size_t) = nullptr;
   void* job_context_ = nullptr;
   size_t job_count_ = 0;
   std::fenv_t job_env_{};
-  bool stopping_ = false;
+  std::atomic<bool> stopping_{false};
   u64 jobs_ = 0;
   std::mutex error_mu_;
   std::exception_ptr worker_error_;
@@ -220,7 +243,20 @@ class TaskPool {
     for (;;) {
       generation_.wait(seen, std::memory_order_acquire);
       seen = generation_.load(std::memory_order_acquire);
-      if (stopping_) return;
+      if (stopping_.load(std::memory_order_acquire)) return;
+#if defined(MHGP9_TESTING)
+      if (index == join_delay_index) std::this_thread::sleep_for(std::chrono::milliseconds(join_delay_ms.load()));
+#endif
+      // Join the job of generation `seen` while it is open; a closed or
+      // superseded job is skipped without reading its fields.
+      bool joined = false;
+      for (u64 state = state_.load(std::memory_order_acquire);
+           (state >> 32) == seen && ((state & kOpen) != 0 || MHGP9_POOL_JOIN_CLOSED);)
+        if (state_.compare_exchange_weak(state, state + 1, std::memory_order_acq_rel, std::memory_order_acquire)) {
+          joined = true;
+          break;
+        }
+      if (!joined) continue;
       if (index < job_count_) {
 #if !defined(MHGP9_POOL_MUTANT_STALE_FENV)
         std::fesetenv(&job_env_);
@@ -232,7 +268,8 @@ class TaskPool {
           if (!worker_error_) worker_error_ = std::current_exception();
         }
       }
-      if (pending_.fetch_sub(1, std::memory_order_acq_rel) == 1) pending_.notify_one();
+      const u64 left = state_.fetch_sub(1, std::memory_order_acq_rel) - 1;
+      if ((left & (kOpen | kActive)) == 0) state_.notify_all();  // the last one out of a closed job
     }
   }
 };
