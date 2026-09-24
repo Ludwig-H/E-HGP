@@ -686,7 +686,7 @@ registre ne changent pas.
     arène de l'auditeur), la sortie entière des tâches est égale octet pour
     octet à celle du chemin à une tâche par arête (`single_task_batch`, un
     exécuteur indépendant de `lanes_tasks.hpp`). Variantes : B ∈ {1, 512, ∞},
-    1, 3 et 4 fils, fenêtres de 97 et 16 384 arêtes. Identités : B = ∞ donne
+    1, 3, 4 et 8 fils, fenêtres de 97 et 16 384 arêtes. Identités : B = ∞ donne
     une tâche par arête à graines, B = 1 une tâche par graine. Avec cover,
     enregistrements, événements ou arène réduits, les arêtes en attente sont
     celles du chemin à une tâche, avec un plancher > 0 par genre. Les arènes
@@ -695,7 +695,11 @@ registre ne changent pas.
     arêtes réelles n'exercent jamais, et six découpages ;
   - le mode `--compare` compare aussi, sur toutes les arêtes demandées d'un
     nuage fichier, le jumeau à tâches (B = 512 et B = ∞) au chemin à une
-    tâche, octet pour octet (ligne `lanes_tasks_compare`) ;
+    tâche, octet pour octet (ligne `lanes_tasks_compare`). Avec `--device`,
+    il compare de même l'appel de l'**appareil** et publie ses sous-chronos
+    (ligne `lanes_device_compare`). Sans appareil, c'est un refus explicite
+    (code 2, porte `mhgp9_gpu_lanes_port_device_absent`), jamais un vert par
+    vacuité ;
   - **cinq mutants** compilés, chacun tué (code 1) par le contrôle qui le
     vise : dernière plage partielle oubliée (`split.count`) ; placement par
     ordre d'achèvement, émulé sur l'hôte par des tâches exécutées à rebours
@@ -704,9 +708,13 @@ registre ne changent pas.
     attente/panne inversée (`replay.`).
 - **Non vérifié localement** (aucun GPU dans le conteneur) : l'exécution des
   noyaux, l'égalité octet pour octet appareil/jumeau, les chemins de refus
-  sur l'appareil et toute durée. Une session G4 doit montrer les
-  sous-chronos P/T/C et le noyau K5 face à la projection de 68 à 76 ms, et
-  comparer les condensés des bras jumeaux.
+  sur l'appareil et toute durée. Une session G4 doit :
+  - lancer `mhgp9_gpu_lanes_port_gate --file=<08/000000> --k=5 --compare
+    --all-asked --min-q4-records=1 --device`, puis la même chose à K10
+    (égalité octet pour octet appareil/jumeau) ;
+  - montrer les sous-chronos P/T/C (sonde v23) et le noyau K5 face à la
+    projection de 68 à 76 ms ;
+  - comparer les condensés des bras jumeaux.
 
 ## Voie GPU S1 : `src/gpu/` (espace `mhgp9::gpu`, code neuf)
 

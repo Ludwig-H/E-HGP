@@ -24,6 +24,7 @@
 #include <condition_variable>
 #include <exception>
 #include <mutex>
+#include <stdexcept>
 #include <thread>
 #include <vector>
 

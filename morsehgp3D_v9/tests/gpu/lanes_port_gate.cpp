@@ -43,7 +43,8 @@
 //
 //   mhgp9_gpu_lanes_port_gate [--n=2000] [--k=2,3,5,10]
 //   mhgp9_gpu_lanes_port_gate --file=nuage.u32le --k=5 [--workers=8] [--compare
-//     [--min-q3-records=N] [--min-q4-seeds=N] [--min-q4-records=N] [--all-asked]]
+//     [--min-q3-records=N] [--min-q4-seeds=N] [--min-q4-records=N] [--all-asked]
+//     [--device]]
 //     (statistiques de travail par arete sur un nuage fichier ; avec
 //     --compare, les voies q3 et q4 de chaque arete certifiee comparees a
 //     celles du moteur : code 1 au premier ecart. Les exclusions sont
@@ -52,7 +53,10 @@
 //     plancher est exige (code 2 sinon) ; code 3 sous un plancher, ou avec
 //     --all-asked si une arete demandee n'est pas comparee ; code 1 si les
 //     identites du registre q4 du lecteur sont violees ; code 2 pour un
-//     nuage refuse par prepare_cloud.)
+//     nuage refuse par prepare_cloud. S4b taches : le jumeau a taches est
+//     compare octet pour octet au chemin a une tache par arete (B = 512 et
+//     B = infini) ; avec --device (session G4), l'appel de l'appareil aussi,
+//     code 2 sans appareil.)
 //
 // Code 0 conforme, 1 desaccord ou mutant survivant (`cause=`), 2 argument,
 // 3 plancher.
@@ -431,9 +435,10 @@ int tasks_against_reference(const gpu::LanesInput& in, std::size_t workers, cons
     gpu::u64 budget;
     std::size_t threads, window;
   };
+  // Threads 1, 3, 8 and the gate's own count; windows 97 and the default.
   const Run runs[] = {{1, workers, gpu::lanes_host_window},
                       {0, 1, 97},
-                      {0, workers, gpu::lanes_host_window},
+                      {0, 8, gpu::lanes_host_window},
                       {gpu::single_task_budget, 3, gpu::lanes_host_window}};
   unsigned long long tasks[3] = {0, 0, 0};
   for (const auto& run : runs) {
@@ -509,6 +514,7 @@ Certified certified_survivors(const gen::Q2CensusIndexPtr& index, unsigned kmax,
 struct CompareFloors {
   unsigned long long q3_records = 0, q4_seeds = 0, q4_records = 0;
   bool all_asked = false;
+  bool device = false;  // S4b tasks: also the device call, byte for byte (G4)
 };
 
 int file_compare(const gen::Q2CensusIndexPtr& index, const Certified& certified, unsigned kmax,
@@ -604,6 +610,24 @@ int file_compare(const gen::Q2CensusIndexPtr& index, const Certified& certified,
                 "max_task_steps=%llu max_steps_single=%llu identical=1\n",
                 kmax, ta.size(), reference.records.size(), static_cast<unsigned long long>(reference.deferred), tasks,
                 tasks_single, max_steps, max_steps_single);
+    // --device (G4): the device call (default B) against the same
+    // single-task path, byte for byte, with the host twin's task counters;
+    // refused (code 2) where no device answers.
+    if (floors.device) {
+      const auto device = gpu::run_lanes_batch(in);
+      if (device.error_kind == gpu::BatchError::no_device || device.error_kind == gpu::BatchError::input_guard) {
+        std::printf("lanes_device_compare absent error=%s\n", device.error.c_str());
+        return 2;
+      }
+      std::string why;
+      if (!same_output(device, reference, why)) return fail("compare.device " + why);
+      if (device.tasks != tasks || device.max_task_steps != max_steps) return fail("compare.device_tasks");
+      std::printf("lanes_device_compare K=%u device=%s tasks=%llu max_task_steps=%llu warps=%u kernel_ms=%.3f "
+                  "plan_ms=%.3f task_ms=%.3f compact_ms=%.3f total_ms=%.3f identical=1\n",
+                  kmax, device.device.c_str(), static_cast<unsigned long long>(device.tasks),
+                  static_cast<unsigned long long>(device.max_task_steps), device.warps, device.kernel_ms,
+                  device.plan_ms, device.task_ms, device.compact_ms, device.total_ms);
+    }
   }
   const bool all = certificate_deferred == 0 && lanes_deferred == 0;
   const bool floors_ok = records3 >= floors.q3_records && w4.seeds >= floors.q4_seeds &&
@@ -732,6 +756,8 @@ int main(int argc, char** argv) {
       if (!floor_of(arg.substr(17), floors.q4_records)) return 2;
     } else if (arg == "--all-asked") {
       floors.all_asked = true;
+    } else if (arg == "--device") {
+      floors.device = true;
     } else {
       return 2;
     }
@@ -743,7 +769,7 @@ int main(int argc, char** argv) {
   // Floors only with --compare, --compare only on a file and never without
   // a floor (a comparison of nothing would be equal).
   const bool any_floor = floors.q3_records != 0 || floors.q4_seeds != 0 || floors.q4_records != 0;
-  if (!compare && (any_floor || floors.all_asked)) return 2;
+  if (!compare && (any_floor || floors.all_asked || floors.device)) return 2;
   if (compare && (file.empty() || !any_floor)) return 2;
   if (!file.empty()) {
     if (ks.size() != 1) return 2;

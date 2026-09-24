@@ -397,7 +397,7 @@ mhgp9_gate(mhgp9_gpu_certificate_port_bad_argument 2 mhgp9_gpu_certificate_port_
 # hote), juge arete par arete contre la voie q3 du moteur, executeur par lots,
 # capacites reduites, mutants de sortie et garde d'entree.
 mhgp9_product_executable(mhgp9_gpu_lanes_port_gate tests/gpu/lanes_port_gate.cpp)
-target_link_libraries(mhgp9_gpu_lanes_port_gate PRIVATE mhgp9_gen)
+target_link_libraries(mhgp9_gpu_lanes_port_gate PRIVATE mhgp9_gen mhgp9_gpu)
 target_include_directories(mhgp9_gpu_lanes_port_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
 mhgp9_gate(mhgp9_gpu_lanes_port 0 mhgp9_gpu_lanes_port_gate ARGS --n=2000
            EXPECT_PREFIX "lanes_port_gate n=2000" LABELS "gate;gpu;oracle" TIMEOUT 1800)
@@ -409,7 +409,7 @@ mhgp9_gate(mhgp9_gpu_lanes_port_bad_argument 2 mhgp9_gpu_lanes_port_gate ARGS --
 # site interieur trop tot rejette des classes de profondeur T-1 ; la porte
 # de port (voies q4 contre le moteur) le tue a K3.
 mhgp9_product_executable(mhgp9_gpu_lanes_port_early_exit_mutant_gate tests/gpu/lanes_port_gate.cpp)
-target_link_libraries(mhgp9_gpu_lanes_port_early_exit_mutant_gate PRIVATE mhgp9_gen)
+target_link_libraries(mhgp9_gpu_lanes_port_early_exit_mutant_gate PRIVATE mhgp9_gen mhgp9_gpu)
 target_include_directories(mhgp9_gpu_lanes_port_early_exit_mutant_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
 target_compile_definitions(mhgp9_gpu_lanes_port_early_exit_mutant_gate PRIVATE MHGP9_Q4_LANES_MUTANT_EARLY_EXIT_BELOW_T=1)
 mhgp9_gate(mhgp9_gpu_lanes_port_mutant_early_exit 1 mhgp9_gpu_lanes_port_early_exit_mutant_gate ARGS --n=2000 --k=3
@@ -426,7 +426,7 @@ mhgp9_gate(mhgp9_gpu_lanes_port_mutant_early_exit 1 mhgp9_gpu_lanes_port_early_e
 foreach(mutant IN ITEMS LAST_RANGE_FORGOTTEN COMPLETION_ORDER SEGMENTS_SWAPPED DEFERRED_COUNTERS FAULT_FIRST)
   string(TOLOWER ${mutant} lower)
   mhgp9_product_executable(mhgp9_gpu_lanes_tasks_${lower}_mutant_gate tests/gpu/lanes_port_gate.cpp)
-  target_link_libraries(mhgp9_gpu_lanes_tasks_${lower}_mutant_gate PRIVATE mhgp9_gen)
+  target_link_libraries(mhgp9_gpu_lanes_tasks_${lower}_mutant_gate PRIVATE mhgp9_gen mhgp9_gpu)
   target_include_directories(mhgp9_gpu_lanes_tasks_${lower}_mutant_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
   target_compile_definitions(mhgp9_gpu_lanes_tasks_${lower}_mutant_gate PRIVATE MHGP9_LANES_TASKS_MUTANT_${mutant}=1)
 endforeach()
@@ -464,6 +464,17 @@ mhgp9_gate(mhgp9_gpu_lanes_port_compare_bound 0 mhgp9_gpu_lanes_port_gate
            ARGS --file=${mhgp9_lanes_fixtures}/bound_tetra.u32le --k=3 --workers=1 --compare --all-asked
                 --min-q4-seeds=1 --min-q4-records=1
            EXPECT_PREFIX "lanes_compare K=3" LABELS "gate;gpu" TIMEOUT 60)
+# --device (S4b taches, pour une session G4) : l'appel de l'appareil compare
+# octet pour octet au chemin a une tache ; --device seulement avec --compare
+# (2) ; sans CUDA, refus explicite (2), jamais un vert par vacuite.
+mhgp9_gate(mhgp9_gpu_lanes_port_device_without_compare 2 mhgp9_gpu_lanes_port_gate ARGS --device
+           LABELS "gate;gpu" TIMEOUT 60)
+if(NOT MHGP9_ENABLE_CUDA)
+  mhgp9_gate(mhgp9_gpu_lanes_port_device_absent 2 mhgp9_gpu_lanes_port_gate
+             ARGS --file=${mhgp9_lanes_fixtures}/bound_tetra.u32le --k=3 --workers=1 --compare --all-asked
+                  --min-q4-seeds=1 --device
+             EXPECT_PREFIX "lanes_device_compare absent" LABELS "gate;gpu" TIMEOUT 60)
+endif()
 
 # Sonde S1 : meme population que la chaine (front, rectangles, paires), CPU
 # puis GPU, masques compares requete par requete. Sans MHGP9_ENABLE_CUDA le
