@@ -107,6 +107,21 @@ mhgp9_gate(mhgp9_tower_full_ball_static_cpu1 0 mhgp9_tower_full_ball_tower_gate
            ARGS --static-1 LABELS "gate;tower;oracle" TIMEOUT 300)
 mhgp9_gate(mhgp9_tower_full_ball_static_cpu4 0 mhgp9_tower_full_ball_tower_gate
            ARGS --static-4 LABELS "gate;tower;oracle" TIMEOUT 300)
+# v9 E4 : queue de la tour en pipeline (voie statique recouverte, 2 et 4 fils),
+# jugee par l'oracle, appariee a la voie temporelle et au temoin
+# (assign_populations apres la jointure) : memes IDs de population, meme
+# charge utile, meme travail ; planchers sur les references differees (coquilles
+# etendues qui contribuent a deux ordres). Mutant compile : decalage compte
+# sur les contributions au lieu de la premiere rencontre, tue par le carre.
+foreach(threads IN ITEMS 2 4)
+  mhgp9_gate(mhgp9_tower_full_ball_pipelined_cpu${threads} 0 mhgp9_tower_full_ball_tower_gate
+             ARGS --pipelined-${threads} LABELS "gate;tower;oracle" TIMEOUT 300)
+endforeach()
+mhgp9_product_executable(mhgp9_tower_offset_on_contributions_mutant_gate tests/tower/full_ball_tower_gate.cpp)
+target_compile_definitions(mhgp9_tower_offset_on_contributions_mutant_gate PRIVATE
+                           MHGP9_TOWER_MUTANT_OFFSET_ON_CONTRIBUTIONS=1)
+mhgp9_gate(mhgp9_tower_full_ball_mutant_offset_on_contributions 1 mhgp9_tower_offset_on_contributions_mutant_gate
+           ARGS --pipelined-4 EXPECT_PREFIX "refusal=full_ball_population_offset" LABELS "gate;tower;mutant" TIMEOUT 300)
 
 # ---- Generateur exact (port de morsehgp3D_v8, 3f0d188f, espace mhgp9::gen).
 # Port en bloc de la bibliotheque mhgp8_p0 (voie float32 exclue) ; le retrait

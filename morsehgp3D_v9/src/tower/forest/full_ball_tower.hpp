@@ -672,11 +672,15 @@ class Builder {
   // before; lots_by_k is each order's own phase A (it may overlap phase 0);
   // lots_ms is the launch-to-join window minus phase 0.
   std::vector<FullBallOrder> run_orders_overlapped(std::vector<OrderState>& orders) {
-    // v9 E4 (pipelined tail, default): after its phase A, the runner of order
-    // K assigns the population IDs of the balls whose FIRST contributing
-    // order is K (static offset, compute_population_offsets) and builds their
-    // rows, then waits for phase A of order K-1 and runs its vertical images.
-    // Without it (witness), phases B and C run after the join, as before.
+    // v9 E4 (pipelined tail, default): after its phase A, order K starts a
+    // helper that assigns the population IDs of the balls whose FIRST
+    // contributing order is K (static offset, compute_population_offsets)
+    // and builds their rows, while its runner waits for phase A of order K-1
+    // and runs its vertical images. Everything computable is computed (B
+    // needs A(K), C needs A(K) and A(K-1)); after the join the failure kept is
+    // the sequential one: phase 0, other exceptions by K, then by K lots,
+    // populations, images. Without it (witness), phases B and C run after
+    // the join, as before.
     const bool pipelined = pipelined_tail;
     std::vector<std::optional<Failure>> failures(kmax), population_failures(kmax), image_failures(kmax);
     bool merged = false;
@@ -702,7 +706,9 @@ class Builder {
       char rows_state = 0;
       bool cancelled = false;
       ready[0] = 1;
-      std::vector<std::exception_ptr> errors(kmax);
+      // Other exceptions, one slot per order and step (each written by one
+      // thread): phase A (and the sizing on order 1), B (helper), C.
+      std::vector<std::exception_ptr> errors(kmax), population_errors(kmax), image_errors(kmax);
       std::vector<std::thread> runners;
       runners.reserve(kmax);
       parallel_detail::JoinThreads joined{runners};
@@ -750,19 +756,27 @@ class Builder {
             if (!pipelined) return;
             publish(lots_state[i], lots_ok ? 1 : 2);
             if (!lots_ok) return;
-            char rows = 0;
-            {
-              std::unique_lock<std::mutex> lock(mu);
-              wake.wait(lock, [&] { return rows_state != 0; });
-              rows = rows_state;
-            }
-            if (rows == 1) {
-              const auto populations_start = PhaseClock::now();
-              try { order_populations(orders[i]); } catch (const Failure& f) { population_failures[i] = f; }
-              catch (...) { errors[i] = std::current_exception(); return; }
-              times->populations_by_k[i + 1] = ms_since(populations_start);
-              populations_end[i] = PhaseClock::now();
-            }
+            // Phase B of K on a helper thread (the rows in parallel inside),
+            // phase C of K on this runner once phase A of K-1 is done: they
+            // touch disjoint parts of the draft (contributions / parents).
+            std::vector<std::thread> helper;
+            parallel_detail::JoinThreads helper_joined{helper};
+            try {
+              helper.emplace_back([&, i] {
+                char rows = 0;
+                {
+                  std::unique_lock<std::mutex> lock(mu);
+                  wake.wait(lock, [&] { return rows_state != 0; });
+                  rows = rows_state;
+                }
+                if (rows != 1) return;  // the sizing failed: reported by order 1
+                const auto populations_start = PhaseClock::now();
+                try { order_populations(orders[i]); } catch (const Failure& f) { population_failures[i] = f; }
+                catch (...) { population_errors[i] = std::current_exception(); }
+                times->populations_by_k[i + 1] = ms_since(populations_start);
+                populations_end[i] = PhaseClock::now();
+              });
+            } catch (...) { population_errors[i] = std::current_exception(); return; }
             bool lower_done = true;
             if (i > 0) {
               std::unique_lock<std::mutex> lock(mu);
@@ -772,7 +786,7 @@ class Builder {
             if (!lower_done) return;  // images of K need the completed phase A of K-1
             const auto images_start = PhaseClock::now();
             try { order_images(orders[i], i ? &orders[i - 1] : nullptr); } catch (const Failure& f) { image_failures[i] = f; }
-            catch (...) { errors[i] = std::current_exception(); }
+            catch (...) { image_errors[i] = std::current_exception(); }
             times->images_by_k[i + 1] = ms_since(images_start);
           });
       } catch (...) { cancel(); throw; }
@@ -813,7 +827,9 @@ class Builder {
         times->lots_ms = std::max(0.0, ms_since(window_start) - times->static_ms);
       }
       if (static_failure) throw *static_failure;
-      for (const auto& error : errors) if (error) std::rethrow_exception(error);
+      for (size_t i = 0; i < kmax; ++i)
+        for (const auto* slot : {&errors, &population_errors, &image_errors})
+          if ((*slot)[i]) std::rethrow_exception((*slot)[i]);
       if (pipelined) {
         // Everything computable was computed; the reported failure is the
         // sequential loop's: the smallest K, and in order K its lots, then

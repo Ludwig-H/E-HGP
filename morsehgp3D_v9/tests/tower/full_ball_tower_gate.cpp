@@ -1,6 +1,11 @@
 // Bounded independent Gram/Gamma judge of the ball-catalogue FULL producer.
 // All subset enumeration, explicit facet membership and point sets live HERE,
 // never in the product. Catalogues are not made by WSPD or product predicates.
+// Modes: --selftest (temporal path), --static-1 / --static-4 (static path,
+// paired with the temporal payload), --pipelined-2 / --pipelined-4 (v9 E4:
+// overlapped static path with the pipelined tail, paired with the temporal
+// payload AND with the overlapped witness tail: same population IDs, same
+// payload, same work; floors on the references deferred to the join).
 #include <algorithm>
 #include <bit>
 #include <cstdio>
@@ -28,6 +33,8 @@ using Snapshot = std::map<u32, FullNodeId>;  // oracle facet -> product live roo
 struct Failure { const char* why; };
 std::string context;
 int static_threads = 0;
+bool overlap = false, pipelined = false;  // v9 E4 modes (--pipelined-N)
+u64 deferred_refs = 0, deferred_fixtures = 0, pipelined_orders = 0, witness_checks = 0;
 u64 paired_payload_checks = 0, deduplicated = 0, seeded_unique = 0;
 u64 post_seed_queries = 0, post_seed_hits = 0, post_seed_terminals = 0;
 u64 checks = 0, clouds = 0, orders = 0, cuts = 0, facets = 0, vertical = 0;
@@ -318,6 +325,36 @@ void same_payload(const FullBallTowerResult& a, const FullBallTowerResult& b) {
   }
 }
 
+// The declared work of two builds of the same tower (v9 E4: pipelined tail
+// against its witness), field by field, except the path's own counters.
+void same_work(const FullBallTowerResult& a, const FullBallTowerResult& b) {
+  const auto& x = a.stats;
+  const auto& y = b.stats;
+  for (const auto field : {&FullBallStats::records, &FullBallStats::extra_records, &FullBallStats::anchor_blocks,
+                           &FullBallStats::regular_blocks, &FullBallStats::extra_blocks, &FullBallStats::representatives,
+                           &FullBallStats::anchor_hits, &FullBallStats::key_lookups, &FullBallStats::intruder_queries,
+                           &FullBallStats::intruder_nodes, &FullBallStats::intruder_power_tests,
+                           &FullBallStats::interior_ranges, &FullBallStats::same_radius_steps,
+                           &FullBallStats::descending_steps, &FullBallStats::max_chain_steps, &FullBallStats::births,
+                           &FullBallStats::merges, &FullBallStats::contributions, &FullBallStats::inert_blocks,
+                           &FullBallStats::declared_support_checks, &FullBallStats::singleton_lots,
+                           &FullBallStats::grouped_lots, &FullBallStats::lot_dsu_slots,
+                           &FullBallStats::lower_edges_indexed, &FullBallStats::lower_nodes_activated,
+                           &FullBallStats::lower_edges_activated, &FullBallStats::lower_queries,
+                           &FullBallStats::lower_find_steps, &FullBallStats::lower_path_writes,
+                           &FullBallStats::static_workers_created, &FullBallStats::static_lanes_used,
+                           &FullBallStats::parallel_orders, &FullBallStats::overlapped_orders,
+                           &FullBallStats::presorted_catalogues})
+    need(x.*field == y.*field, "paired.same_work");
+  need(x.static_requests == y.static_requests && x.static_unique == y.static_unique &&
+       x.static_seeded == y.static_seeded && x.static_post_seed_queries == y.static_post_seed_queries &&
+       x.static_post_seed_hits == y.static_post_seed_hits &&
+       x.static_post_seed_terminals == y.static_post_seed_terminals, "paired.same_static_work");
+  need(x.resolve_work.calls == y.resolve_work.calls && x.resolve_work.power_tests == y.resolve_work.power_tests &&
+       x.resolve_work.pair_distances == y.resolve_work.pair_distances &&
+       x.validation_work.calls == y.validation_work.calls, "paired.same_meb_work");
+}
+
 void check_fixture(const Fixture& fixture, unsigned variant) {
   context = std::string(fixture.name) + "/variant" + std::to_string(variant);
   const auto in = input(fixture, variant);
@@ -357,7 +394,27 @@ void check_fixture(const Fixture& fixture, unsigned variant) {
       need(entire != key, "post_seed.square_partial_population_misses_lookup");
     }
   }
-  auto result = build_full_ball_tower(ix, balls, fixture.kmax, static_threads);
+  auto result = build_full_ball_tower(ix, balls, fixture.kmax, static_threads, {}, true, overlap, pipelined);
+  if (result.status != FullBallStatus::kCompleteRelative) std::printf("refusal=%s\n", result.reason);
+  if (overlap && pipelined) {
+    // v9 E4: the overlapped witness tail (IDs assigned after the join by
+    // first encounter) must give the same IDs, payload and work.
+    const auto witness = build_full_ball_tower(ix, balls, fixture.kmax, static_threads, {}, true, true, false);
+    const u64 before_checks = checks;
+    same_payload(witness, result);
+    same_work(witness, result);
+    witness_checks += checks - before_checks;
+    need(result.stats.pipelined_orders == fixture.kmax && witness.stats.pipelined_orders == 0 &&
+         witness.stats.population_deferred_refs == 0 && result.stats.overlapped_orders == fixture.kmax,
+         "pipelined.path_taken");
+    pipelined_orders += result.stats.pipelined_orders;
+    deferred_refs += result.stats.population_deferred_refs;
+    if (result.stats.population_deferred_refs) ++deferred_fixtures;
+    // The square's circle (an extended shell, q_min 2) contributes at K3 and
+    // K4: its K4 reference names the ID first assigned at K3.
+    if (std::string_view(fixture.name) == "square")
+      need(result.stats.population_deferred_refs == 1, "pipelined.square_one_deferred_reference");
+  }
   if (static_threads) {
     const auto baseline = build_full_ball_tower(ix, balls, fixture.kmax);
     const u64 before_checks = checks;
@@ -473,7 +530,7 @@ void rejection_fixtures() {
   const auto balls = catalogue(fixture.points, ix, model, fixture.kmax);
   const auto reject = [&](const CloudIndex& index, const std::vector<BallData>& catalogue,
       unsigned kmax, const char* why) {
-    const auto result = build_full_ball_tower(index, catalogue, kmax, static_threads);
+    const auto result = build_full_ball_tower(index, catalogue, kmax, static_threads, {}, true, overlap, pipelined);
     need(result.status != FullBallStatus::kCompleteRelative && result.orders.empty(), why);
     ++rejections;
   };
@@ -520,6 +577,16 @@ int selftest() {
     need(births > 50 && merges > 10 && growth > 0 && overlap_cuts > 0 &&
         regular > 0 && extra > 0 && anchors > 0 && representatives > 0 && intruders > 0 && same_radius > 0,
         "nonvacuity.topology_growth_overlap_and_resolver");
+    if (overlap && pipelined) {
+      // Several fixtures (the square, and the doubled/partial squares) hold
+      // an extended shell contributing to two orders.
+      need(deferred_refs >= 14 && deferred_fixtures >= 12 && witness_checks > 5000 && pipelined_orders >= 150,
+           "nonvacuity.pipelined_deferred_and_witness");
+      std::printf("pipelined static_threads=%d deferred_refs=%llu deferred_fixtures=%llu witness_checks=%llu "
+                  "pipelined_orders=%llu\n", static_threads, static_cast<unsigned long long>(deferred_refs),
+                  static_cast<unsigned long long>(deferred_fixtures), static_cast<unsigned long long>(witness_checks),
+                  static_cast<unsigned long long>(pipelined_orders));
+    }
     if (static_threads) {
       need(paired_payload_checks > 100 && deduplicated > 0 && seeded_unique > 0,
            "nonvacuity.static_dedup_seed_and_exact_payload");
@@ -551,6 +618,7 @@ int selftest() {
     return 0;
   } catch (const Failure& failure) {
     std::fprintf(stderr, "FAIL [%s] %s\n", context.c_str(), failure.why);
+    std::printf("cause=%s context=%s\n", failure.why, context.c_str());
   } catch (const std::exception& error) {
     std::fprintf(stderr, "EXCEPTION [%s] %s\n", context.c_str(), error.what());
   }
@@ -561,6 +629,10 @@ int selftest() {
 int main(int argc, char** argv) {
   if (argc == 2 && std::string_view(argv[1]) == "--static-1") static_threads = 1;
   else if (argc == 2 && std::string_view(argv[1]) == "--static-4") static_threads = 4;
+  else if (argc == 2 && (std::string_view(argv[1]) == "--pipelined-2" || std::string_view(argv[1]) == "--pipelined-4")) {
+    static_threads = std::string_view(argv[1]).back() - '0';
+    overlap = pipelined = true;
+  }
   else if (argc == 2 && std::string_view(argv[1]) == "--expect-launch-failure") {
     const auto fixture = fixtures()[1];
     const auto in = input(fixture, 0);
