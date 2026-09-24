@@ -4,8 +4,11 @@
 contient trois trames sans sol de la séquence 08 à grille 1 mm,
 K5/K10, s8/W8 : chaque
 trame entière, ses deux moitiés `x<0`/`x≥0`, ses quatre quarts selon `y`,
-et trois sous-nuages emboîtés. Les plans sont ceux du
-[capteur](DECOUPES_CAPTEUR_LIDAR_BRUT_ET_GRILLE_20260923.md). Je relis ici
+et trois sous-nuages emboîtés. Les plans passent par le
+[capteur](DECOUPES_CAPTEUR_LIDAR_BRUT_ET_GRILLE_20260923.md), mais les
+côtés de cette matrice historique suivent le **signe quantifié** : un
+retour de 08/000200 change de côté selon son signe float32 physique,
+contre-éprouvé plus bas. Je relis ici
 les six résumés, **42 cas de secteurs** au total. Une seule exécution par
 cas, sur hôte CPU partagé ; les compteurs de travail sont le signal
 principal, les temps CPU restent indicatifs. Statut `complete_relative` :
@@ -164,6 +167,16 @@ sept franchissements du total des formes se recalculent à partir des
 `core_sites` gardés dans le reçu. Les ratios spatiaux
 parent→morceau demeurent un autre diagnostic : même à densité 1/4 ou
 1/2, la somme des tours des morceaux ne reconstruit pas la tour globale.
+
+Contrelecture du 24 septembre : les **126/126 cas** sans sol ont été
+recoupés avec les 84 sorties de densité et les 42 reçus v12 aux effectifs,
+`core_sites`, `expanded_pairs`, CPU·s et à l'identité
+`core_sites = dead_core_form_sites + 2×dead_core_loads`, sans écart.
+Le recalcul des 84 pentes de densité donne 10/84 `p_core≥2`, **0/84**
+`p_CPU≥2` et **0/84** `p_expanded_pairs≥2`. Les 21 cas bruts K5 et les
+21 K10 ont aussi été recoupés aux lignes de leurs reçus. Ces accords
+contrôlent le calcul et la provenance des pentes, pas la complétude
+absolue des catalogues.
 
 Le **secteur** reste fixe, mais l'étendue des sites retenus ne l'est pas.
 Dans le quart `x≥0,y<0` de 000200, un seul ID original `122516`, présent
@@ -345,13 +358,41 @@ doublements finis en preuve asymptotique, mais rendent ce quart pertinent
 pour un rejeu prioritaire.
 
 Le [reçu G4 R15 S4a](CONTRELECTURE_G4_R15_S4A_20260923.md) apporte un gain
-apparié sur trois trames **entières** sans sol de la séquence 08. Il ne
-rejoue aucun demi, quart ou sous-échantillon : toutes les pentes et
-charges de cette synthèse restent celles de v12 CPU ou des sondes S2
-signalées ci-dessus. Pour examiner si **S4a** reste effectivement
-sous-quadratique dans les régimes d'intérêt, refaire sur le port la
-matrice des sept secteurs physiques aux densités globales emboîtées
-1/4, 1/2 et 1, avec K5/K10, en commençant par le quart sentinelle puis
-les trames entières. Apparier les digests et distinguer croissance des
-comptes de travail, mur de chaîne, segmentation et préparation. Les
-tours des morceaux ne recomposent pas la tour entière.
+apparié sur trois trames **entières** sans sol de la séquence 08, sans
+demi-scène, quart ni sous-échantillon. Un
+[rejeu CPU S3/S4a apparié](s4a_ground_hot_quarter_20260923/README.md)
+mesure maintenant le **quart physique** `x≥0,y<0` de 08/000200/K10 à
+3 609 → 7 387 → 14 828 sites, avec la même sélection globale emboîtée.
+Les six sorties ont les mêmes condensés de tour et de catalogue, les dix
+ordres et sept comptes structurels communs ; une septième tentative,
+géométriquement valide mais sous contention, est exclue des pentes.
+Les deux bras conservent exactement **34,673 → 153,448 → 582,997 M**
+`core_sites`, soit `p=2,077/1,916`. S4a déplace q3 après le cœur sans
+réduire cette masse. Ses tests logiques de census par lanes croissent
+**43,220 → 130,416 → 372,784 M**, `p=1,542/1,507` ; ils ne sont pas
+des ballots physiques. Les CPU·s de chaîne croissent d'exposants
+**1,391/1,410** pour S3 et **1,393/1,406** pour S4a sur ces deux
+liens. Les murs sont descriptifs sur l'hôte partagé, et la sonde CPU ne
+transfère pas ses pentes de temps à G4.
+
+La suite est le panneau S4a des **sept secteurs physiques** aux densités
+globales emboîtées 1/4, 1/2 et 1, avec K5/K10 et plusieurs trames puis
+séquences. Apparier les digests et distinguer croissance des comptes de
+travail, mur de chaîne, segmentation et préparation. Les tours des
+morceaux ne recomposent pas la tour entière.
+
+**Voie constructive à éprouver sur ce panneau.** Le chargement actuel
+du cœur calcule une forme par site du disque diamétral **avant** le
+certificat S3, sur CPU comme sur GPU. Le
+[BVH de paires de gardes](paired_guard_group_bvh_20260923/README.md)
+possède déjà un certificat exact sur boîtes de couples d'arêtes : il peut
+réduire les masques q3/q4 des survivantes S2 **avant** les deux chemins
+de chargement, puis laisser chaque voie indécise au repli actuel. Sur un
+groupe favorable du plein brut K5, 24 537 arêtes fermées représentent
+153,838 M formes de cœur évitables en principe ; ce potentiel n'est
+pas un gain intégré. Le test décisif est le dispatch de **tous** les
+groupes sur les quarts chauds et pleins aux densités appariées, avec
+coût de préparation, `core_sites`, sorties exactes, catalogue et temps
+de chaîne. Le [lemme des paires](CERTIFICAT_B_PAIRES_GARDES_RECTANGLE_20260923.md)
+garde les égalités en repli et des IDs de gardes disjoints ; les
+ordinaux S2 et masques initiaux doivent survivre au regroupement.

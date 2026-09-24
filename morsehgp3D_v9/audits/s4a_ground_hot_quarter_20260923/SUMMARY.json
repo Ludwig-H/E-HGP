@@ -1,0 +1,615 @@
+{
+  "attempts": 7,
+  "cases": {
+    "physical_full": {
+      "s3": {
+        "catalogue_digest": "d8d9bde1214ee3af",
+        "chain_cpu_s": 202.212,
+        "chain_total_ms": 29067.282,
+        "external_wall_s": 30.11634907899861,
+        "ledger": {
+          "core_sites": 582997435,
+          "expanded_pairs": 9794837,
+          "lanes_census_point_tests": 0,
+          "lanes_cover_sites": 0,
+          "lanes_edges": 0,
+          "lanes_emitted": 0,
+          "lanes_seed_tests": 0,
+          "lanes_seeds": 0,
+          "q3_edges": 483205,
+          "q4_edges": 459377
+        },
+        "q34_batch": {
+          "backend": "cpu",
+          "certificate_backend": "cpu",
+          "certificate_device_ms": 0.0,
+          "certificate_kernel_ms": 0.0,
+          "certificate_ms": 5259.305,
+          "certificate_transfer_ms": 0.0,
+          "certificate_warps": 0,
+          "deferred": 0,
+          "device_ms": 0.0,
+          "edges_ms": 11012.43,
+          "filter_kernel_ms": 0.0,
+          "filter_ms": 7400.537,
+          "filter_transfer_ms": 0.0,
+          "front_ms": 530.207,
+          "judged_edges": 0,
+          "lanes_asked": 0,
+          "lanes_backend": "",
+          "lanes_decided": 0,
+          "lanes_deferred": 0,
+          "lanes_device_ms": 0.0,
+          "lanes_judged": 0,
+          "lanes_kernel_ms": 0.0,
+          "lanes_ms": 0.0,
+          "lanes_records": 0,
+          "lanes_transfer_ms": 0.0,
+          "lanes_wait_ms": 0.0,
+          "lanes_warps": 0,
+          "rebuilt_covers": 494956,
+          "rectangles": 1531295,
+          "survivors": 1999884,
+          "tail_ms": 0.0,
+          "used": true
+        },
+        "tower_digest": "06a78c55c8c65435"
+      },
+      "s4a": {
+        "catalogue_digest": "d8d9bde1214ee3af",
+        "chain_cpu_s": 202.498,
+        "chain_total_ms": 30482.403,
+        "external_wall_s": 31.53811663200031,
+        "ledger": {
+          "core_sites": 582997435,
+          "expanded_pairs": 9794837,
+          "lanes_census_point_tests": 372783993,
+          "lanes_cover_sites": 132932042,
+          "lanes_edges": 483205,
+          "lanes_emitted": 927572,
+          "lanes_seed_tests": 132932042,
+          "lanes_seeds": 16619674,
+          "q3_edges": 483205,
+          "q4_edges": 459377
+        },
+        "q34_batch": {
+          "backend": "cpu",
+          "certificate_backend": "cpu",
+          "certificate_device_ms": 0.0,
+          "certificate_kernel_ms": 0.0,
+          "certificate_ms": 5177.7,
+          "certificate_transfer_ms": 0.0,
+          "certificate_warps": 0,
+          "deferred": 0,
+          "device_ms": 0.0,
+          "edges_ms": 8720.438,
+          "filter_kernel_ms": 0.0,
+          "filter_ms": 7412.369,
+          "filter_transfer_ms": 0.0,
+          "front_ms": 575.559,
+          "judged_edges": 0,
+          "lanes_asked": 483205,
+          "lanes_backend": "cpu",
+          "lanes_decided": 483205,
+          "lanes_deferred": 0,
+          "lanes_device_ms": 0.0,
+          "lanes_judged": 0,
+          "lanes_kernel_ms": 0.0,
+          "lanes_ms": 3845.038,
+          "lanes_records": 927572,
+          "lanes_transfer_ms": 0.0,
+          "lanes_wait_ms": 0.0,
+          "lanes_warps": 0,
+          "rebuilt_covers": 459377,
+          "rectangles": 1531295,
+          "survivors": 1999884,
+          "tail_ms": 30.062,
+          "used": true
+        },
+        "tower_digest": "06a78c55c8c65435"
+      }
+    },
+    "s1_half": {
+      "s3": {
+        "catalogue_digest": "745214ebc4600418",
+        "chain_cpu_s": 75.69,
+        "chain_total_ms": 10944.56,
+        "external_wall_s": 11.390191592996416,
+        "ledger": {
+          "core_sites": 153447866,
+          "expanded_pairs": 2944182,
+          "lanes_census_point_tests": 0,
+          "lanes_cover_sites": 0,
+          "lanes_edges": 0,
+          "lanes_emitted": 0,
+          "lanes_seed_tests": 0,
+          "lanes_seeds": 0,
+          "q3_edges": 238333,
+          "q4_edges": 227199
+        },
+        "q34_batch": {
+          "backend": "cpu",
+          "certificate_backend": "cpu",
+          "certificate_device_ms": 0.0,
+          "certificate_kernel_ms": 0.0,
+          "certificate_ms": 1803.543,
+          "certificate_transfer_ms": 0.0,
+          "certificate_warps": 0,
+          "deferred": 0,
+          "device_ms": 0.0,
+          "edges_ms": 4508.695,
+          "filter_kernel_ms": 0.0,
+          "filter_ms": 2546.641,
+          "filter_transfer_ms": 0.0,
+          "front_ms": 189.16,
+          "judged_edges": 0,
+          "lanes_asked": 0,
+          "lanes_backend": "",
+          "lanes_decided": 0,
+          "lanes_deferred": 0,
+          "lanes_device_ms": 0.0,
+          "lanes_judged": 0,
+          "lanes_kernel_ms": 0.0,
+          "lanes_ms": 0.0,
+          "lanes_records": 0,
+          "lanes_transfer_ms": 0.0,
+          "lanes_wait_ms": 0.0,
+          "lanes_warps": 0,
+          "rebuilt_covers": 244257,
+          "rectangles": 624583,
+          "survivors": 862123,
+          "tail_ms": 0.0,
+          "used": true
+        },
+        "tower_digest": "5d1e579b4817cb2a"
+      },
+      "s4a": {
+        "catalogue_digest": "745214ebc4600418",
+        "chain_cpu_s": 76.004,
+        "chain_total_ms": 11988.85,
+        "external_wall_s": 12.44699782099633,
+        "ledger": {
+          "core_sites": 153447866,
+          "expanded_pairs": 2944182,
+          "lanes_census_point_tests": 130415570,
+          "lanes_cover_sites": 50729255,
+          "lanes_edges": 238333,
+          "lanes_emitted": 403138,
+          "lanes_seed_tests": 50729255,
+          "lanes_seeds": 6579969,
+          "q3_edges": 238333,
+          "q4_edges": 227199
+        },
+        "q34_batch": {
+          "backend": "cpu",
+          "certificate_backend": "cpu",
+          "certificate_device_ms": 0.0,
+          "certificate_kernel_ms": 0.0,
+          "certificate_ms": 1832.584,
+          "certificate_transfer_ms": 0.0,
+          "certificate_warps": 0,
+          "deferred": 0,
+          "device_ms": 0.0,
+          "edges_ms": 3619.982,
+          "filter_kernel_ms": 0.0,
+          "filter_ms": 2558.925,
+          "filter_transfer_ms": 0.0,
+          "front_ms": 183.488,
+          "judged_edges": 0,
+          "lanes_asked": 238333,
+          "lanes_backend": "cpu",
+          "lanes_decided": 238333,
+          "lanes_deferred": 0,
+          "lanes_device_ms": 0.0,
+          "lanes_judged": 0,
+          "lanes_kernel_ms": 0.0,
+          "lanes_ms": 1894.049,
+          "lanes_records": 403138,
+          "lanes_transfer_ms": 0.0,
+          "lanes_wait_ms": 0.0,
+          "lanes_warps": 0,
+          "rebuilt_covers": 227199,
+          "rectangles": 624583,
+          "survivors": 862123,
+          "tail_ms": 12.697,
+          "used": true
+        },
+        "tower_digest": "5d1e579b4817cb2a"
+      }
+    },
+    "s1_quarter": {
+      "s3": {
+        "catalogue_digest": "0483ce1f9b3bbf3e",
+        "chain_cpu_s": 27.954,
+        "chain_total_ms": 6406.493,
+        "external_wall_s": 6.613354419001553,
+        "ledger": {
+          "core_sites": 34672784,
+          "expanded_pairs": 929662,
+          "lanes_census_point_tests": 0,
+          "lanes_cover_sites": 0,
+          "lanes_edges": 0,
+          "lanes_emitted": 0,
+          "lanes_seed_tests": 0,
+          "lanes_seeds": 0,
+          "q3_edges": 115292,
+          "q4_edges": 109896
+        },
+        "q34_batch": {
+          "backend": "cpu",
+          "certificate_backend": "cpu",
+          "certificate_device_ms": 0.0,
+          "certificate_kernel_ms": 0.0,
+          "certificate_ms": 715.112,
+          "certificate_transfer_ms": 0.0,
+          "certificate_warps": 0,
+          "deferred": 0,
+          "device_ms": 0.0,
+          "edges_ms": 2193.222,
+          "filter_kernel_ms": 0.0,
+          "filter_ms": 1557.295,
+          "filter_transfer_ms": 0.0,
+          "front_ms": 288.857,
+          "judged_edges": 0,
+          "lanes_asked": 0,
+          "lanes_backend": "",
+          "lanes_decided": 0,
+          "lanes_deferred": 0,
+          "lanes_device_ms": 0.0,
+          "lanes_judged": 0,
+          "lanes_kernel_ms": 0.0,
+          "lanes_ms": 0.0,
+          "lanes_records": 0,
+          "lanes_transfer_ms": 0.0,
+          "lanes_wait_ms": 0.0,
+          "lanes_warps": 0,
+          "rebuilt_covers": 118037,
+          "rectangles": 236835,
+          "survivors": 344498,
+          "tail_ms": 0.0,
+          "used": true
+        },
+        "tower_digest": "8684be3da6e71984"
+      },
+      "s4a": {
+        "catalogue_digest": "0483ce1f9b3bbf3e",
+        "chain_cpu_s": 28.021,
+        "chain_total_ms": 5120.954,
+        "external_wall_s": 5.318501588997606,
+        "ledger": {
+          "core_sites": 34672784,
+          "expanded_pairs": 929662,
+          "lanes_census_point_tests": 43220043,
+          "lanes_cover_sites": 17925032,
+          "lanes_edges": 115292,
+          "lanes_emitted": 179825,
+          "lanes_seed_tests": 17925032,
+          "lanes_seeds": 2366789,
+          "q3_edges": 115292,
+          "q4_edges": 109896
+        },
+        "q34_batch": {
+          "backend": "cpu",
+          "certificate_backend": "cpu",
+          "certificate_device_ms": 0.0,
+          "certificate_kernel_ms": 0.0,
+          "certificate_ms": 804.236,
+          "certificate_transfer_ms": 0.0,
+          "certificate_warps": 0,
+          "deferred": 0,
+          "device_ms": 0.0,
+          "edges_ms": 1733.239,
+          "filter_kernel_ms": 0.0,
+          "filter_ms": 799.733,
+          "filter_transfer_ms": 0.0,
+          "front_ms": 78.766,
+          "judged_edges": 0,
+          "lanes_asked": 115292,
+          "lanes_backend": "cpu",
+          "lanes_decided": 115292,
+          "lanes_deferred": 0,
+          "lanes_device_ms": 0.0,
+          "lanes_judged": 0,
+          "lanes_kernel_ms": 0.0,
+          "lanes_ms": 773.102,
+          "lanes_records": 179825,
+          "lanes_transfer_ms": 0.0,
+          "lanes_wait_ms": 0.0,
+          "lanes_warps": 0,
+          "rebuilt_covers": 109896,
+          "rectangles": 236835,
+          "survivors": 344498,
+          "tail_ms": 9.598,
+          "used": true
+        },
+        "tower_digest": "8684be3da6e71984"
+      }
+    }
+  },
+  "output_rejected_attempts": [],
+  "schema": "mhgp9_s4a_hot_quarter_summary_v1",
+  "sites": [
+    3609,
+    7387,
+    14828
+  ],
+  "slopes": {
+    "s3": {
+      "catalogue_balls": {
+        "p": [
+          1.1346082788372778,
+          1.2244202375388265
+        ],
+        "values": [
+          309932,
+          698589,
+          1639642
+        ]
+      },
+      "chain_cpu_s": {
+        "p": [
+          1.390616086148781,
+          1.4102709881963438
+        ],
+        "values": [
+          27.954,
+          75.69,
+          202.212
+        ]
+      },
+      "chain_total_ms": {
+        "p": [
+          0.7476438236788705,
+          1.401803773116644
+        ],
+        "values": [
+          6406.493,
+          10944.56,
+          29067.282
+        ]
+      },
+      "core_sites": {
+        "p": [
+          2.076538549302116,
+          1.9156578169019287
+        ],
+        "values": [
+          34672784,
+          153447866,
+          582997435
+        ]
+      },
+      "expanded_pairs": {
+        "p": [
+          1.609353269829942,
+          1.7250746321846033
+        ],
+        "values": [
+          929662,
+          2944182,
+          9794837
+        ]
+      },
+      "lanes_census_point_tests": {
+        "p": null,
+        "values": [
+          0,
+          0,
+          0
+        ]
+      },
+      "lanes_cover_sites": {
+        "p": null,
+        "values": [
+          0,
+          0,
+          0
+        ]
+      },
+      "lanes_edges": {
+        "p": null,
+        "values": [
+          0,
+          0,
+          0
+        ]
+      },
+      "lanes_emitted": {
+        "p": null,
+        "values": [
+          0,
+          0,
+          0
+        ]
+      },
+      "lanes_seed_tests": {
+        "p": null,
+        "values": [
+          0,
+          0,
+          0
+        ]
+      },
+      "lanes_seeds": {
+        "p": null,
+        "values": [
+          0,
+          0,
+          0
+        ]
+      },
+      "q3_edges": {
+        "p": [
+          1.013834938956328,
+          1.0143177601488982
+        ],
+        "values": [
+          115292,
+          238333,
+          483205
+        ]
+      },
+      "q4_edges": {
+        "p": [
+          1.0139619915628877,
+          1.0104038424845265
+        ],
+        "values": [
+          109896,
+          227199,
+          459377
+        ]
+      }
+    },
+    "s4a": {
+      "catalogue_balls": {
+        "p": [
+          1.1346082788372778,
+          1.2244202375388265
+        ],
+        "values": [
+          309932,
+          698589,
+          1639642
+        ]
+      },
+      "chain_cpu_s": {
+        "p": [
+          1.3930536320934686,
+          1.4063579880814125
+        ],
+        "values": [
+          28.021,
+          76.004,
+          202.498
+        ]
+      },
+      "chain_total_ms": {
+        "p": [
+          1.1875569196854248,
+          1.339234250145732
+        ],
+        "values": [
+          5120.954,
+          11988.85,
+          30482.403
+        ]
+      },
+      "core_sites": {
+        "p": [
+          2.076538549302116,
+          1.9156578169019287
+        ],
+        "values": [
+          34672784,
+          153447866,
+          582997435
+        ]
+      },
+      "expanded_pairs": {
+        "p": [
+          1.609353269829942,
+          1.7250746321846033
+        ],
+        "values": [
+          929662,
+          2944182,
+          9794837
+        ]
+      },
+      "lanes_census_point_tests": {
+        "p": [
+          1.5418618131783333,
+          1.5072901155467422
+        ],
+        "values": [
+          43220043,
+          130415570,
+          372783993
+        ]
+      },
+      "lanes_cover_sites": {
+        "p": [
+          1.4523491619456113,
+          1.3825220590933929
+        ],
+        "values": [
+          17925032,
+          50729255,
+          132932042
+        ]
+      },
+      "lanes_edges": {
+        "p": [
+          1.013834938956328,
+          1.0143177601488982
+        ],
+        "values": [
+          115292,
+          238333,
+          483205
+        ]
+      },
+      "lanes_emitted": {
+        "p": [
+          1.1270486574556007,
+          1.195890875694679
+        ],
+        "values": [
+          179825,
+          403138,
+          927572
+        ]
+      },
+      "lanes_seed_tests": {
+        "p": [
+          1.4523491619456113,
+          1.3825220590933929
+        ],
+        "values": [
+          17925032,
+          50729255,
+          132932042
+        ]
+      },
+      "lanes_seeds": {
+        "p": [
+          1.4274867178294282,
+          1.3297402536167966
+        ],
+        "values": [
+          2366789,
+          6579969,
+          16619674
+        ]
+      },
+      "q3_edges": {
+        "p": [
+          1.013834938956328,
+          1.0143177601488982
+        ],
+        "values": [
+          115292,
+          238333,
+          483205
+        ]
+      },
+      "q4_edges": {
+        "p": [
+          1.0139619915628877,
+          1.0104038424845265
+        ],
+        "values": [
+          109896,
+          227199,
+          459377
+        ]
+      }
+    }
+  },
+  "status": "complete_relative",
+  "successful_cases": 6,
+  "timing_rejected_attempts": [
+    3
+  ]
+}

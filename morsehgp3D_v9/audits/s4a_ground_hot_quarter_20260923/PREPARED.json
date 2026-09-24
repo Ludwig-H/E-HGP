@@ -1,0 +1,56 @@
+{
+  "K": 10,
+  "binary": "/workspaces/E-HGP/build/v9-open-worktree/build/v9-exp/mhgp9_tower_probe",
+  "binary_sha256": "eea3040cf4150599ca7ab5c71a4f0e3738f2975483584527f339d3d2600d08e9",
+  "cases": {
+    "physical_full": {
+      "baseline_catalogue_balls": 1639642,
+      "baseline_core_sites": 582997435,
+      "baseline_expanded_pairs": 9794837,
+      "baseline_stdout_sha256": "7493d0fa054886198c73b760be41ff29809ad4badda3bc94363be447cf25d374",
+      "baseline_tower_digest": "06a78c55c8c65435",
+      "file": "inputs/physical_full.u32le",
+      "fnv64": "d42e56787f9a03a0",
+      "sha256": "f4b372962872a91575010af427ff101fb018a62f05dcf2c537bccf07c55e5bb0",
+      "sites": 14828
+    },
+    "s1_half": {
+      "baseline_catalogue_balls": 698589,
+      "baseline_core_sites": 153447866,
+      "baseline_expanded_pairs": 2944182,
+      "baseline_stdout_sha256": "ad4c666a92f4a8c18880391888d7affc51f3b7647acf27db2b019e46e318e1a7",
+      "baseline_tower_digest": "5d1e579b4817cb2a",
+      "file": "inputs/s1_half.u32le",
+      "fnv64": "9b54bf67cf6c6787",
+      "sha256": "ed85a028af0a1a1daf3c3a17cbfea7d484f2428e7c5a916a2f3b4b6e3bb104d2",
+      "sites": 7387
+    },
+    "s1_quarter": {
+      "baseline_catalogue_balls": 309932,
+      "baseline_core_sites": 34672784,
+      "baseline_expanded_pairs": 929662,
+      "baseline_stdout_sha256": "4abdf59405aeec4ab39648613021bb9222e80b579d673b1671f9f15bd3e106f4",
+      "baseline_tower_digest": "8684be3da6e71984",
+      "file": "inputs/s1_quarter.u32le",
+      "fnv64": "3832d655049a8e97",
+      "sha256": "a5cdb880271d3100b618274d762d54b2d621d87c71e7cf76b82b474e9185cf06",
+      "sites": 3609
+    }
+  },
+  "generator_sha256": "139e1f0715810bc8b959eda16705b21e33c4eb599eb2ba474dee112835ab304b",
+  "grid": "1mm/u18",
+  "s": 8,
+  "schema": "mhgp9_s4a_hot_quarter_prepared_v1",
+  "sector": "08/000200 sans sol, physical x>=0,y<0",
+  "seed": "7d1c9a5eb3f24680",
+  "source_head": "7ceadffad1de860e30325ae357ba3243f269d48b",
+  "source_manifest_sha256": "1cd693b57cbd35d2f2f9b76cdaf14334c575cb7340cc88c5c869bf8c889bfaa8",
+  "source_objects": {
+    "morsehgp3D_v9/CMakeLists.txt": "143b7b0b31bee62f551ee21c999ee46a253e8a51",
+    "morsehgp3D_v9/bench/tower_probe.cpp": "2231b1964f434255cd655090bb06f77ec8ebd683",
+    "morsehgp3D_v9/src": "064e30629574e057bf699ba7a2bbe911240a99aa"
+  },
+  "static_threads": 8,
+  "status": "prepared_no_hgp_measurements",
+  "workers": 8
+}

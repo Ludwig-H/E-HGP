@@ -64,6 +64,22 @@ réservation dépasse **l'arène déjà allouée**, la seule arête est marquée
 tranches décidées sont compactées sans trou. Le résultat reste exact sur
 ce chemin à la lecture du source.
 
+Le budget des **slabs fixes** mérite autant d'attention que l'arène.
+`filter_runner.hpp:225–229` fixe par défaut 65 536 sites et 4 096
+records par warp ; `filter_runner.cu:801–805` prévoit ainsi
+`65 536×32 + 4 096×128 = 2 621 440` octets par warp. R15 annonce
+**3 008 warps** sur 08/000000/K5 et K10 : le code demande donc
+**7 885 291 520 octets, soit 7,344 Gio de slabs** par appel q3, avant
+l'index et les sorties. L'arène par défaut ajoute environ **343 Mio à
+K5** (`lanes_asked=701 678`) ou **702 Mio à K10**
+(`lanes_asked=1 437 421`), tant que le clamp de mémoire libre ne la
+réduit pas. Ce sont des capacités calculées à partir du source et du
+reçu, pas une mesure de pic VRAM. Publier les octets effectivement
+alloués et le maximum des covers par lot ; étudier des classes de taille
+ou des tuiles bornées avec report exact des arêtes hors classe, en
+comptant le tri/prépassage nécessaire. La grille capteur ne doit pas
+servir d'hypothèse de capacité.
+
 `free_bytes` est toutefois lu **avant** les allocations de l'index, des
 arêtes, des sorties, des slabs et de l'arène (`:829–853`). Les slabs
 peuvent employer jusqu'à un autre quart de cette mémoire libre. Un

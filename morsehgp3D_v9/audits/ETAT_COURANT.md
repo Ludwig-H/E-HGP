@@ -11,7 +11,27 @@ en retirant gratuitement toute la phase `edges_ms` CPU de R15, le reste
 mesuré des trois K5 vaut 1,072–1,350 s si les autres postes restent
 fixes : S4b et le chemin critique hors arêtes doivent progresser
 ensemble. R15 ne mesure ni demi-scènes, ni quarts, ni densités réduites ;
-les pentes v12 CPU ne se transfèrent pas à S4a.
+les pentes v12 CPU ne se transfèrent pas à S4a. Sur 08/000000, R14 et
+R15 ont exactement les mêmes `core_sites` : **359,707 M à K5** et
+**909,580 M à K10**. S4a accélère q3 en aval, sans réduire la
+matérialisation des formes du cœur qui porte plusieurs pentes LiDAR
+défavorables.
+
+La [matrice de croissance LiDAR](CROISSANCE_LIDAR_PLANS_ET_DENSITE_20260923.md)
+répond séparément aux deux variations demandées : trame entière → deux
+moitiés → quatre quarts selon les plans capteur, et densités globales
+emboîtées 1/4 → 1/2 → 1 dans **chaque** secteur. Sur trois trames sans
+sol × K5/K10, le v12 CPU publie 126 cas ; 13/36 pentes spatiales
+dépassent 2 et 10/84 pentes de densité des `core_sites` atteignent 2,
+malgré des pentes de temps CPU inférieures à 2 sur ces liens. Le brut
+avec sol couvre les
+sept secteurs et trois densités de 08/000000 à K5/K10. Ces pentes finies
+isolent un verrou réel de formes calculées ; elles ne démontrent aucune
+borne asymptotique, et R15 S4a n'a pas encore le même panneau apparié.
+Dans la matrice sans sol v12, les côtés utilisent le signe **quantifié** :
+il coïncide avec le float32 physique sur 08/000000 et 08/000100, mais
+déplace un retour de 08/000200. La contre-épreuve du quart chaud à K10
+selon le signe physique maintient `p_core=2,035350`.
 
 Le [reçu G4 R14](../receipts/g4_tower_r14_20260923/README.md),
 [contrelu indépendamment](CONTRELECTURE_G4_R14_RECU_20260923.md), ferme
@@ -96,25 +116,33 @@ endroits reste préférable.
 ardoise réduite. Son exécution locale, 32 cas/code 0, donne
 `asked=368886`, `tails=174420`, `both=281530` ; S3 CPU ne reporte aucune
 arête, donc **au moins 87 064 occurrences** cumulent q3 reportée et q4
-ouverte. Ce chemin est effectivement contrôlé ; encoder directement
-cette non-vacuité préserverait la porte si la fixture évolue. Comparer
-aussi `q4_emitted` du bras reporté. Aucune perte de boule n'était déduite
-du défaut de comptage initial.
+ouverte. Ce chemin est effectivement contrôlé ; `507580243` ajoute
+le plancher `tails+both>asked` et compare aussi `q4_emitted` du bras
+reporté. Aucune perte de boule n'était déduite du défaut de comptage
+initial.
 
-La réception v20 de `3765080cf` vérifie désormais bien
-`q3_edges − lanes_asked ≤ certificats_différés`, avec deux mutants de
-subset/absence : l'objection d'un snapshot mutable précédent est close.
-Elle interdit cependant **à tort** tout report S4a par défaut si
-`n<65536` : un contre-exemple exact de 28 679 sites/4 097 arêtes dépasse
-l'arène d'**un record** malgré des covers de sept sites, et la traîne CPU
-reste exacte. Le préflight moteur jumeau doit aussi prouver le travail
-positif du census q3 de feuille et du cache, dispensés à juste titre dans
-le bras S4a. Dans R15, le jumeau produit bien ces deux comptes positifs ;
-le contrôle manque dans le lecteur. Le dossier de reçu S4a CPU local
-reste partiel à cette lecture : `run.sh` a produit quelques fichiers,
-mais pas de paquet final clos, sans
-validation JSON/digests, empreintes du binaire/entrée ou contrôle de
-propreté source. Il ne mesure ni demi-scènes, ni quarts, ni densités.
+La réception v20 de `3765080cf` vérifie
+`q3_edges − lanes_asked ≤ certificats_différés`. Le correctif
+**`507580243`** accepte maintenant le report S4a par records ou arène
+même si `n<65536` : le contre-exemple exact de 28 679 sites/4 097
+arêtes est dans son gate direct. Il applique au jumeau moteur, dans le
+worker **et** le contrôleur, les planchers de census q3 de feuille et
+du cache ; R15 avait déjà ces comptes positifs. Une fixture équivalente
+de 4 400 sites/40 arêtes réduirait fortement le coût de cette porte,
+mais reste une proposition mathématique non exécutée. Un
+[reçu d'audit CPU S3/S4a](s4a_ground_hot_quarter_20260923/README.md)
+couvre maintenant le quart physique chaud de 08/000200/K10 aux trois
+densités emboîtées : six sorties appariées vérifiées, une tentative
+géométriquement valide écartée des temps pour contention. S4a garde les
+mêmes **34,673→153,448→582,997 M** `core_sites` que S3, de pentes
+**2,077/1,916** ; ses tests q3 logiques ont des pentes **1,542/1,507**.
+Le CPU·s de chaîne S4a donne **1,393/1,406** sur ces deux liens, sans
+preuve asymptotique ni transfert de chrono à G4. Le
+[reçu local du développeur](../receipts/s4a_q3_lanes_local_20260923/README.md)
+sur la trame entière 08/000000 est maintenant publié par `54f6249a4` :
+six bras S3/S4a CPU/jugé K5/K10 donnent les mêmes condensés tour et
+catalogue, mais aucune coupe ni densité. Ses temps sur hôte partagé
+restent descriptifs.
 
 Le [nouvel audit du coût S4a](AUDIT_S4A_VALIDATION_ET_ARENE_20260923.md)
 montre que S2/S3/S4a rescannent chacun l'index par nœud et par point
