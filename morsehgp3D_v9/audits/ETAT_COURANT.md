@@ -6,7 +6,9 @@ lecteur normal/`-O` passent, 18 tours `complete_relative` et 12
 comparaisons égales. Sur les trois trames **sans sol de la seule séquence
 08**, s8/W48/u18, K1..5 prend **1,010 / 1,109 / 1,260 s** et K1..10
 **3,147 / 3,873 / 3,860 s** (ordre 000100/000000/000200). Aucun
-contrat d'une seconde n'est acquis. La fusion L15 ralentit le noyau
+contrat d'une seconde n'est acquis. L'utilisateur a confirmé que les
+**100 ms incluent la tour explicite** (tous nœuds, parents, liens et leur
+matérialisation). La fusion L15 ralentit le noyau
 apparié et reste désactivée ; les 30/151 ms « transfert des voies »
 incluent aussi des opérations hôte. À K5, FULL seul coûte 374–456 ms,
 et la chaîne **hors FULL** 636–804 ms : le préchauffage et l'épinglage

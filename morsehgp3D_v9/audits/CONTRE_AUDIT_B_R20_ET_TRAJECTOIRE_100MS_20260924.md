@@ -8,6 +8,10 @@ K=1..5, sur plusieurs trames SemanticKITTI sans sol à grille 1 mm/u18,
 **sans perdre la qualification distincte des trames brutes avec sol**.
 Le jalon de 100 ms vient après celui
 de 1 s. Aucun temps de cette note ne qualifie un nouveau contrat.
+**Décision explicite de l'utilisateur, le 24 septembre : les 100 ms
+incluent la tour matérialisée avec tous ses nœuds, parents et liens.**
+Une forme compacte interne est permise seulement si sa conversion en cette
+sortie explicite est elle aussi dans le chronomètre.
 
 ## Ce qui est vérifié, et ce qui ne l'est pas
 
@@ -165,9 +169,10 @@ la voie K séquentielle : un résolveur GPU ne peut y être branché comme
 un simple plugin. Pour conserver les IDs de populations, il faut dériver
 leur **premier ordinal de rencontre** puis les numéroter par scan stable ;
 un offset de catalogue ou un ID GPU arbitraire changerait la sortie.
-Une représentation compacte interne est souhaitable, mais l'expansion
-requise par l'API et ses octets doivent rester dans le chronomètre du
-contrat tant qu'un autre livrable n'est pas explicitement accepté.
+Une représentation compacte interne peut aider la mémoire et les scans,
+mais **l'expansion intégrale des nœuds, parents et liens est dans les
+100 ms**, conformément à la décision utilisateur. Son coût et les octets
+écrits doivent être publiés, pas déplacés hors mesure.
 
 ## Porte de décision à coût maîtrisé
 

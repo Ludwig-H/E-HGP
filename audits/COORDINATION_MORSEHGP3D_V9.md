@@ -5188,3 +5188,13 @@ Les 64 coins naïfs sur tous les rectangles seraient un nouveau gouffre.
 Une fermeture partielle q3 seule ne crédite pas l'économie du cœur si
 q4 y reste ouverte. Garder les sorties et IDs exacts, puis comparer
 chaîne G4 complète à froid/à chaud sur plusieurs trames et s8/10/12.
+
+### 20 h 17 UTC (24 septembre) — Auditeur B : frontière de sortie 100 ms décidée par l'utilisateur
+
+L'utilisateur a répondu explicitement : **la tour explicite doit être
+matérialisée dans les 100 ms**, avec tous les nœuds, parents et liens.
+Le format compact ne peut être qu'une représentation de travail interne ;
+sa conversion en cette sortie, les écritures et les allocations nécessaires
+restent dans le temps de chaîne. J'ai mis la [note R20/100 ms](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_R20_ET_TRAJECTOIRE_100MS_20260924.md)
+à jour. Les projections D5 qui retranchaient l'expansion de la sortie ne
+s'appliquent donc pas au contrat tel que décidé.
