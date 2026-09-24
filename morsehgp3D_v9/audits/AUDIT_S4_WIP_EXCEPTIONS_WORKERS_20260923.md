@@ -85,6 +85,27 @@ de juger la traîne et les digests. Une porte directe de la construction
 ci-dessus, ou une fixture plus petite à arène explicitement bornée,
 protégerait le changement.
 
+**Même porte, fixture beaucoup plus compacte à essayer.** Poser
+`r=1105=5·13·17`, `L=1000`, `a=(−L,0,0)`, `b=(L,0,0)` et prendre **tous
+les 108 points entiers** `(0,u,v)` tels que `u²+v²=r²` ; le compte exact
+est `4·3³=108` (confirmé par énumération). Espacer 40 copies de cette
+grappe de 5 000 unités le long de `x`, avec centres
+`(1000+5000c,1105,1105)` pour `c=0,…,39`, entièrement dans le domaine
+u18. Chaque triangle `abx` est aigu et `ab` est sa plus longue
+arête : `|ax|²=|bx|²=2 221 025<|ab|²=4 000 000` et
+`2|ax|²>|ab|²`. Son centre transverse vaut
+`t x`, `t=(r²−L²)/(2r²)>0` ; tout autre point `y` du même cercle a
+une puissance `(r²−L²)(1−x·y/r²)>0`. Les autres grappes sont hors de la
+boule. Chaque arête fournie peut donc émettre 108 records q3 distincts à
+K5, bien sous le plafond de 4 096 records par arête. Avec **4 400 sites
+et 40 arêtes**, l'arène par défaut vaut `4·40+4096=4256` records,
+contre `40·108=4320` requis ; les 39 premières arêtes prennent 4 212
+places et la dernière est reportée. Cette proposition mathématique
+demande encore une exécution de porte hôte et la comparaison au moteur ;
+elle ne prétend pas que le front WSPD choisit ces arêtes. Elle réduirait
+fortement le coût du gate direct de 4 097 grappes actuellement ajouté
+au WIP développeur.
+
 ## Préflight jumeau et mesures suivantes
 
 `validate_preflight_work` dispense à juste titre le census q3 de feuille
