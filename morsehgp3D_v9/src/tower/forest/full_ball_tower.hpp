@@ -122,16 +122,19 @@ struct FullBallOrder {
 // sequential path: each order whole (order_by_k); both: bank and encoding
 // (wall and per order). Arrays are indexed by K (entry 0 unused).
 // v9 E4, pipelined tail (overlapped static path): phases B and C of order K
-// run on its own runner inside the window, so lots_ms is the window up to
-// the end of the LAST phase A minus phase 0, populations_ms the exposed part
-// of the window after it until the last population step ends, images_ms the
-// rest of the window (the three are additive); populations_by_k and
-// images_by_k are each order's own steps (overlapped, never summed).
+// run inside the window (B on a helper of its runner, C on the runner), so
+// lots_ms is the window up to the end of the LAST phase A minus phase 0,
+// populations_ms the exposed part of the window after it until the last
+// population step ends, images_ms the rest of the window (the three are
+// additive). images_by_k stays each order's image time INSIDE the images
+// phase (the part of its step after the last population step; its whole
+// step on the other paths); images_own_by_k and populations_by_k are each
+// order's own steps (overlapped, never summed; zero on the other paths).
 struct FullBallTimes {
   double validate_ms = 0, static_ms = 0, lots_ms = 0, populations_ms = 0, images_ms = 0, bank_ms = 0,
          encode_ms = 0;
   std::array<double, 11> static_by_k{}, lots_by_k{}, images_by_k{}, encode_by_k{}, order_by_k{};
-  std::array<double, 11> populations_by_k{};
+  std::array<double, 11> populations_by_k{}, images_own_by_k{};
   // v9 E0 (plan of the tower judge): sub-timers, each inside its phase.
   // Validation: input and identity, key sort or presorted scan, key index,
   // pass 1, pass 2, level sort, level runs, programs and population slots.
@@ -715,7 +718,8 @@ class Builder {
       // One window from the first runner launch to the last join: phase 0
       // and every order's phase A lie inside it (lots_ms = window - static).
       const auto window_start = PhaseClock::now();
-      std::vector<PhaseClock::time_point> lots_end(kmax, window_start), populations_end(kmax, window_start);
+      std::vector<PhaseClock::time_point> lots_end(kmax, window_start), populations_end(kmax, window_start),
+          images_begin(kmax, window_start), images_end(kmax, window_start);
       const auto cancel = [&] {
         { std::lock_guard<std::mutex> lock(mu); cancelled = true; }
         wake.notify_all();
@@ -784,10 +788,10 @@ class Builder {
               lower_done = lots_state[i - 1] == 1;
             }
             if (!lower_done) return;  // images of K need the completed phase A of K-1
-            const auto images_start = PhaseClock::now();
+            images_begin[i] = PhaseClock::now();
             try { order_images(orders[i], i ? &orders[i - 1] : nullptr); } catch (const Failure& f) { image_failures[i] = f; }
             catch (...) { image_errors[i] = std::current_exception(); }
-            times->images_by_k[i + 1] = ms_since(images_start);
+            images_end[i] = PhaseClock::now();
           });
       } catch (...) { cancel(); throw; }
       std::optional<Failure> static_failure;
@@ -823,6 +827,10 @@ class Builder {
         times->lots_ms = std::max(0.0, span_ms(window_start, last_lots) - times->static_ms);
         times->populations_ms = span_ms(last_lots, last_populations);
         times->images_ms = std::max(0.0, span_ms(last_populations, join));
+        for (size_t i = 0; i < kmax; ++i) {
+          times->images_own_by_k[i + 1] = span_ms(images_begin[i], images_end[i]);
+          times->images_by_k[i + 1] = std::max(0.0, span_ms(std::max(images_begin[i], last_populations), images_end[i]));
+        }
       } else {
         times->lots_ms = std::max(0.0, ms_since(window_start) - times->static_ms);
       }
