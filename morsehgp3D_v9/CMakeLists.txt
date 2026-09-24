@@ -102,18 +102,23 @@ target_compile_definitions(mhgp9_tower_parallel_sort_mutant_gate PRIVATE MHGP9_P
 mhgp9_gate(mhgp9_tower_parallel_sort_mutant_unsorted_bucket 1 mhgp9_tower_parallel_sort_mutant_gate
            ARGS --selftest EXPECT_PREFIX "cause=parallel_sort.permutation" LABELS "gate;tower;mutant" TIMEOUT 300)
 # Pool persistant de la tour (v9 E2, parallel/pool.hpp) : --unit juge le pool
-# seul (indices, jonction, exceptions, imbrication sous chien de garde, fils
-# tiers, environnement flottant, echec de lancement du pool et de la voie par
-# appel) ; --fixtures juge la tour pool actif et coupe a 1, 2, 3, 4 et 8 fils
-# (condense, tower_work, compteurs deterministes) et le refus de ressource ;
-# la trame 08/000000 a K5 (label lidar) avec ses condenses epingles. Le
-# mutant d'execution parallel-admit-partial-launch (voie par appel) et six
-# mutants compiles du pool sont tues.
+# seul (indices, jonction, ouvriers engages mesures, exceptions et leur ordre,
+# imbrication sous chien de garde, fils tiers, environnement flottant, echec
+# de lancement du pool et de la voie par appel) ; --priority juge qu'une
+# entree hors domaine reste invalide quand le lancement du pool echoue ;
+# --fixtures juge la tour pool actif et coupe a 1, 2, 3, 4 et 8 fils
+# (condense, tower_work, compteurs deterministes, travaux du pool egaux a
+# chaque W) et le refus de ressource ; la trame 08/000000 a K5 (label lidar)
+# avec ses condenses epingles et exactement 58 travaux du pool. Le mutant
+# d'execution parallel-admit-partial-launch (voie par appel) et neuf mutants
+# compiles du pool sont tues.
 mhgp9_test_executable(mhgp9_tower_task_pool_gate tests/tower/task_pool_gate.cpp src/chain/tower_chain.cpp)
 target_link_libraries(mhgp9_tower_task_pool_gate PRIVATE mhgp9_gen mhgp9_gpu)
 target_compile_definitions(mhgp9_tower_task_pool_gate PRIVATE MHGP9_POOL_GATE_CHAIN=1)
 mhgp9_gate(mhgp9_tower_task_pool_unit 0 mhgp9_tower_task_pool_gate
            ARGS --unit EXPECT_PREFIX "task_pool_gate unit" LABELS "gate;tower" TIMEOUT 300)
+mhgp9_gate(mhgp9_tower_task_pool_priority 0 mhgp9_tower_task_pool_gate
+           ARGS --priority EXPECT_PREFIX "task_pool_gate priority" LABELS "gate;tower" TIMEOUT 120)
 mhgp9_gate(mhgp9_tower_task_pool_fixtures 0 mhgp9_tower_task_pool_gate
            ARGS --fixtures EXPECT_PREFIX "task_pool_gate fixtures" LABELS "gate;tower;chain" TIMEOUT 1200)
 mhgp9_gate(mhgp9_tower_task_pool_bad_argument 2 mhgp9_tower_task_pool_gate
@@ -125,20 +130,28 @@ mhgp9_gate(mhgp9_tower_task_pool_lidar_k5 0 mhgp9_tower_task_pool_gate
            ARGS --frame=${CMAKE_CURRENT_SOURCE_DIR}/../morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le
                 --k=5 --tower=67450c64611075b1 --catalogue=5ad1fe09354411ba
            EXPECT_PREFIX "task_pool_gate frame towers=10" LABELS "lidar;tower" TIMEOUT 3600)
-foreach(mutant IN ITEMS ADMIT_PARTIAL RETURN_BEFORE_JOIN NESTED_QUEUE STALE_FENV BYPASS JOIN_CLOSED)
+foreach(mutant IN ITEMS ADMIT_PARTIAL RETURN_BEFORE_JOIN NESTED_QUEUE STALE_FENV BYPASS JOIN_CLOSED DECLARED STALE_ERROR)
   string(TOLOWER ${mutant} lower)
   mhgp9_test_executable(mhgp9_tower_task_pool_${lower}_mutant_gate tests/tower/task_pool_gate.cpp)
   target_compile_definitions(mhgp9_tower_task_pool_${lower}_mutant_gate PRIVATE MHGP9_POOL_MUTANT_${mutant}=1)
 endforeach()
 foreach(pair IN ITEMS "admit_partial:pool.partial_launch_admitted" "return_before_join:pool.returned_before_join"
                       "nested_queue:pool.nested_deadlock" "stale_fenv:pool.stale_fenv" "bypass:pool.bypassed"
-                      "join_closed:pool.joined_closed_job")
+                      "join_closed:pool.joined_closed_job" "declared:pool.declared_workers"
+                      "stale_error:pool.stale_error")
   string(REPLACE ":" ";" parts ${pair})
   list(GET parts 0 lower)
   list(GET parts 1 cause)
   mhgp9_gate(mhgp9_tower_task_pool_mutant_${lower} 1 mhgp9_tower_task_pool_${lower}_mutant_gate
              ARGS --unit EXPECT_PREFIX "cause=${cause}" LABELS "gate;tower;mutant" TIMEOUT 300)
 endforeach()
+# Mutant de la tour : le pool cree avant les controles seriels du domaine (une
+# entree invalide deviendrait un refus de ressource).
+mhgp9_test_executable(mhgp9_tower_task_pool_before_domain_mutant_gate tests/tower/task_pool_gate.cpp)
+target_compile_definitions(mhgp9_tower_task_pool_before_domain_mutant_gate PRIVATE MHGP9_POOL_GATE_TOWER=1
+                           MHGP9_POOL_MUTANT_BEFORE_DOMAIN=1)
+mhgp9_gate(mhgp9_tower_task_pool_mutant_before_domain 1 mhgp9_tower_task_pool_before_domain_mutant_gate
+           ARGS --priority EXPECT_PREFIX "cause=tower.domain_after_launch" LABELS "gate;tower;mutant" TIMEOUT 120)
 mhgp9_gate(mhgp9_tower_full_certificate_rejects 0 mhgp9_tower_full_certificate_gate
            ARGS --rejects LABELS "gate;tower" TIMEOUT 60)
 mhgp9_gate(mhgp9_tower_full_ball_static_cpu1 0 mhgp9_tower_full_ball_tower_gate

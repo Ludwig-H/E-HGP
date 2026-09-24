@@ -9,8 +9,16 @@
 //   - retour seulement apres la sortie de tous les fils entres (travail lent
 //     sur un ouvrier, jamais un retour anticipe) ; un fil reveille apres la
 //     fermeture d'un travail ne l'execute jamais (crochet de retard) ;
+//   - ouvriers engages MESURES : run_threads rend 1 + les fils entres dans le
+//     travail (exactement `count` quand le proprietaire les attend, 1 + les
+//     fils entres quand un fil en retard saute le travail), jamais le nombre
+//     de participants declare ;
 //   - premiere exception capturee, relancee sur le proprietaire, pool
-//     reutilisable ensuite ;
+//     reutilisable ensuite ; une exception qui echappe a fn sur le
+//     proprietaire ET sur un fil du pool (run_threads direct, sans
+//     enveloppe) : la premiere capturee est relancee dans les deux ordres
+//     forces (crochet de compte des captures), et le travail suivant ne
+//     releve aucune exception perimee ;
 //   - appels imbriques (part du proprietaire, ouvriers du pool) et appels
 //     d'un fil tiers : jamais sur le pool, jamais d'interblocage (chien de
 //     garde) ;
@@ -24,13 +32,22 @@
 //   meme catalogue est identique (condense, tower_work et compteurs
 //   deterministes) pool actif et coupe, a 1, 2, 3, 4 et 8 fils, phase A
 //   recouvrante ou non ; option de chaine (defaut actif) ; echec de
-//   lancement de la tour = refus de ressource, pool actif ou coupe.
+//   lancement de la tour = refus de ressource, pool actif ou coupe ; plus
+//   les cas de --priority.
+// --priority (cible avec la tour seule) : une entree refusee par les
+//   controles seriels du domaine (K = 0, K = 11, index invalide), avec
+//   l'echec de lancement du premier fil du pool, reste une entree invalide
+//   (full_ball_input_domain) pool actif ou coupe, comme avant E2 ; temoin :
+//   un K valide avec le meme echec est le refus de ressource, pool actif.
 // --frame=CHEMIN --k=K --tower=HEX --catalogue=HEX : meme identite sur une
 //   trame LiDAR (chaine a 8 fils, condenses epingles), temps entrelaces
-//   pool actif / coupe publies a titre indicatif.
+//   pool actif / coupe publies a titre indicatif ; nombre EXACT de travaux
+//   du pool a chaque W > 1 et dans la chaine (08/000000 : 58 a K5, 108 a
+//   K10).
 //
-// Planchers (code 3) : travaux servis par le pool, fils du pool = W - 1,
-// moins de fils crees par la tour avec le pool que sans, requetes statiques.
+// Planchers (code 3) : travaux servis par le pool (le meme nombre a chaque
+// W > 1 d'un meme catalogue), fils du pool = W - 1, moins de fils crees par
+// la tour avec le pool que sans, requetes statiques.
 // Code 0 conforme, 1 desaccord (ligne `cause=`), 2 argument, 3 plancher.
 #include <algorithm>
 #include <atomic>
@@ -52,7 +69,10 @@
 #include "../../src/tower/parallel/pool.hpp"
 #if defined(MHGP9_POOL_GATE_CHAIN)
 #include "../../src/chain/tower_chain.hpp"
+#endif
+#if defined(MHGP9_POOL_GATE_CHAIN) || defined(MHGP9_POOL_GATE_TOWER)
 #include "../../src/tower/forest/full_ball_tower.hpp"
+#include "../../src/tower/tree/cloud_index.hpp"
 #endif
 
 #if !defined(MHGP9_TESTING)
@@ -100,7 +120,7 @@ void with_watchdog(const char* cause, int seconds, Body&& body) {
 }
 
 struct UnitCounts {
-  std::uint64_t checks = 0, pool_jobs = 0, worker_items = 0, nested_calls = 0, late_skips = 0;
+  std::uint64_t checks = 0, pool_jobs = 0, worker_items = 0, nested_calls = 0, late_skips = 0, error_jobs = 0;
 };
 
 void unit_dispatch(UnitCounts& counts) {
@@ -116,7 +136,7 @@ void unit_dispatch(UnitCounts& counts) {
       std::vector<std::atomic<int>> hits(count);
       std::atomic<std::size_t> finished{0}, started{0};
       const std::uint64_t before = pool.jobs();
-      pd::run_threads(count, [&](std::size_t t) {
+      const std::size_t engaged = pd::run_threads(count, [&](std::size_t t) {
         if (t < count) { who[t] = std::this_thread::get_id(); hits[t].fetch_add(1); }
         if (t == 0) {
           const auto limit = std::chrono::steady_clock::now() + std::chrono::seconds(20);
@@ -133,20 +153,29 @@ void unit_dispatch(UnitCounts& counts) {
         for (std::size_t u = 0; u < t; ++u)
           if (who[u] == who[t]) fail("pool.index_shared_thread");
       }
+      // Every index ran once: exactly `count` workers engaged.
+      if (engaged != count)
+        fail("pool.engaged_count count=" + std::to_string(count) + " engaged=" + std::to_string(engaged));
     }
     // The helpers on the pool: same results as without it.
     const int threads = static_cast<int>(participants);
     const std::size_t n = 20000;
     std::vector<std::atomic<std::uint32_t>> seen(n);
+    std::vector<std::atomic<bool>> worked(participants);
     std::atomic<std::uint64_t> by_workers{0};
     std::uint64_t before = pool.jobs();
     const std::size_t engaged = mhgp9::tower::parallel_items(n, threads, [&](std::size_t i, std::size_t t) {
       if (t >= participants) fail_now("pool.worker_index_range");
       seen[i].fetch_add(1);
+      worked[t].store(true);
       if (t != 0) by_workers.fetch_add(1);
     });
     ++counts.checks;
-    if (engaged != participants || pool.jobs() != before + 1) fail("pool.items_not_served");
+    // Measured: at least every worker that took an item, at most the pool.
+    std::size_t working = 0;
+    for (const auto& w : worked) working += w.load() ? 1 : 0;
+    if (engaged < std::max<std::size_t>(working, 1) || engaged > participants || pool.jobs() != before + 1)
+      fail("pool.items_not_served engaged=" + std::to_string(engaged) + " working=" + std::to_string(working));
     for (std::size_t i = 0; i < n; ++i)
       if (seen[i].load() != 1) fail("pool.items_coverage i=" + std::to_string(i));
     counts.worker_items += by_workers.load();
@@ -232,6 +261,52 @@ void unit_exceptions(UnitCounts& counts) {
   if (sum.load() != 100) fail("pool.unusable_after_exception");
 }
 
+// An exception escapes fn on the owner AND on a pool thread in the same job
+// (run_threads called directly, no capturing wrapper). Both orders are
+// forced with the capture counter: the first captured is rethrown, and the
+// next job, whose fn never throws, must not rethrow the other one.
+void unit_error_order(UnitCounts& counts) {
+  TaskPool pool(2);
+  PoolScope scope(&pool);
+  const auto wait_for = [](const auto& ready) {
+    const auto limit = std::chrono::steady_clock::now() + std::chrono::seconds(20);
+    while (!ready() && std::chrono::steady_clock::now() < limit) std::this_thread::yield();
+  };
+  for (const bool worker_first : {true, false}) {
+    const std::size_t base = pd::job_error_captures.load();
+    const auto captured = [&] { return pd::job_error_captures.load() > base; };
+    std::atomic<bool> entered{false};
+    std::string thrown = "none";
+    try {
+      pd::run_threads(2, [&](std::size_t t) {
+        if (t == 1) {
+          entered.store(true);
+          if (!worker_first) wait_for(captured);  // after the owner's capture
+          throw std::runtime_error("pool_gate_worker");
+        }
+        if (worker_first) wait_for(captured);  // after the thread's capture
+        else wait_for([&] { return entered.load(); });  // the thread is inside the job
+        throw std::runtime_error("pool_gate_owner");
+      });
+    } catch (const std::runtime_error& e) {
+      thrown = e.what();
+    }
+    std::string next = "none";
+    try {
+      pd::run_threads(2, [](std::size_t) {});
+    } catch (const std::runtime_error& e) {
+      next = e.what();
+    }
+    ++counts.checks;
+    if (next != "none") fail("pool.stale_error thrown=" + thrown + " next=" + next);
+    if (!entered.load() || pd::job_error_captures.load() != base + 2)
+      fail("floor.error_order_not_exercised captures=" + std::to_string(pd::job_error_captures.load() - base), 3);
+    const std::string expected = worker_first ? "pool_gate_worker" : "pool_gate_owner";
+    if (thrown != expected) fail("pool.error_order thrown=" + thrown + " expected=" + expected);
+    ++counts.error_jobs;
+  }
+}
+
 void unit_nested(UnitCounts& counts) {
   with_watchdog("pool.nested_deadlock", 30, [&] {
     TaskPool pool(4);
@@ -312,11 +387,15 @@ void unit_late_join(UnitCounts& counts) {
   int skipped = 0;
   for (int round = 0; round < 3; ++round) {
     late_calls = 0; late_after_return = 0; late_returned = false;
-    pd::run_threads(4, late_job);
+    const std::size_t engaged = pd::run_threads(4, late_job);
+    const int joined = late_calls.load();  // final: every joined thread has left
     late_returned = true;
     std::this_thread::sleep_for(std::chrono::milliseconds(400));  // the late thread has woken and decided
     ++counts.checks;
     if (late_after_return.load() != 0) fail_now("pool.joined_closed_job calls=" + std::to_string(late_calls.load()));
+    // Engaged workers are measured: the owner and the threads that joined.
+    if (engaged != 1 + static_cast<std::size_t>(joined))
+      fail("pool.declared_workers engaged=" + std::to_string(engaged) + " joined=" + std::to_string(joined));
     if (late_calls.load() < 3) ++skipped;
   }
   pd::join_delay_index = 0;
@@ -367,23 +446,76 @@ int run_unit() {
   unit_join(counts);  // first: a pool that returns early would corrupt every later check
   unit_dispatch(counts);
   unit_exceptions(counts);
+  unit_error_order(counts);
   unit_nested(counts);
   unit_fenv(counts);
   unit_late_join(counts);
   unit_launch(counts);
-  std::printf("task_pool_gate unit checks=%llu pool_jobs=%llu worker_items=%llu nested_calls=%llu late_skips=%llu\n",
+  std::printf("task_pool_gate unit checks=%llu pool_jobs=%llu worker_items=%llu nested_calls=%llu late_skips=%llu "
+              "error_jobs=%llu\n",
               static_cast<unsigned long long>(counts.checks), static_cast<unsigned long long>(counts.pool_jobs),
               static_cast<unsigned long long>(counts.worker_items),
               static_cast<unsigned long long>(counts.nested_calls),
-              static_cast<unsigned long long>(counts.late_skips));
+              static_cast<unsigned long long>(counts.late_skips), static_cast<unsigned long long>(counts.error_jobs));
   // 2, 3, 4 and 8 participants: 1 + 2 + 3 + 7 run_threads jobs and five
   // helper jobs each (items, ranges, the three steps of the sort).
-  if (counts.pool_jobs < 33 || counts.worker_items == 0 || counts.nested_calls < 16) {
+  if (counts.pool_jobs < 33 || counts.worker_items == 0 || counts.nested_calls < 16 || counts.error_jobs != 2) {
     std::printf("cause=floor.unit\n");
     return 3;
   }
   return 0;
 }
+
+#if defined(MHGP9_POOL_GATE_CHAIN) || defined(MHGP9_POOL_GATE_TOWER)
+// Failure priority across the pool's creation: an input refused by the
+// serial domain checks is invalid input whatever the thread resources, pool
+// on and off, since these checks run before any thread exists (as before
+// E2). Control: a valid order with the same launch failure reaches the pool
+// and is the resource refusal. Returns the number of towers judged.
+std::uint64_t priority_fixtures() {
+  using mhgp9::tower::FullBallStatus;
+  std::vector<mhgp9::tower::InputPoint> input{{7, {100, 200, 300}}, {3, {4000, 50, 60}}, {9, {70, 8000, 90}}};
+  const auto valid = mhgp9::tower::build_cloud_index(input);
+  input[1].position.x = mhgp9::tower::kCoordMax + 1;  // outside the u18 profile: the index is invalid
+  const auto outside = mhgp9::tower::build_cloud_index(input);
+  if (!valid.valid || outside.valid) fail("priority.fixture_index");
+  struct Case {
+    const char* name;
+    const mhgp9::tower::CloudIndex* ix;
+    unsigned kmax;
+  };
+  std::uint64_t towers = 0;
+  for (const Case& c : {Case{"k0", &valid, 0u}, Case{"k11", &valid, 11u}, Case{"invalid_index", &outside, 2u}})
+    for (const bool pool : {true, false}) {
+      pd::launch_fail_after = 1;
+      const auto tw = mhgp9::tower::build_full_ball_tower(*c.ix, {}, c.kmax, 4, {}, true, true, pool);
+      pd::launch_fail_after = static_cast<std::size_t>(-1);
+      ++towers;
+      const std::string where = std::string(c.name) + " pool=" + (pool ? "1" : "0") + " status=" +
+                                std::to_string(static_cast<int>(tw.status)) + " reason=" + tw.reason;
+      if (tw.status != FullBallStatus::kInvalidInput || std::string_view(tw.reason) != "full_ball_input_domain")
+        fail("tower.domain_after_launch " + where);
+      if (!tw.orders.empty() || tw.stats.pool_threads != 0 || pd::launch_active.load() != 0)
+        fail("tower.domain_refusal_state " + where);
+    }
+  {
+    pd::launch_fail_after = 1;
+    const auto tw = mhgp9::tower::build_full_ball_tower(valid, {}, 2, 4, {}, true, true, true);
+    pd::launch_fail_after = static_cast<std::size_t>(-1);
+    ++towers;
+    if (tw.status != FullBallStatus::kResourceExhausted ||
+        std::string_view(tw.reason) != "full_ball_thread_launch_failed" || pd::launch_active.load() != 0)
+      fail(std::string("floor.priority_control reason=") + tw.reason, 3);
+  }
+  return towers;
+}
+
+int run_priority() {
+  const std::uint64_t towers = priority_fixtures();
+  std::printf("task_pool_gate priority towers=%llu\n", static_cast<unsigned long long>(towers));
+  return 0;
+}
+#endif
 
 #if defined(MHGP9_POOL_GATE_CHAIN)
 using mhgp9::tower::FullBallStats;
@@ -436,7 +568,7 @@ mhgp9::tower::CloudIndex index_of(const std::vector<mhgp9::gen::Point3>& points)
 }
 
 struct Identity {
-  std::uint64_t towers = 0, pool_towers = 0, pool_jobs_min = ~0ull, max_requests = 0;
+  std::uint64_t towers = 0, pool_towers = 0, pool_jobs_min = ~0ull, pool_jobs_max = 0, max_requests = 0;
   std::uint64_t threads_on = 0, threads_off = 0;  // summed over the W > 1 towers
 };
 
@@ -452,6 +584,9 @@ void identity(const char* label, const std::vector<mhgp9::gen::Point3>& points, 
   std::vector<std::uint64_t> counters;
   for (const bool overlap : {true, false}) {
     if (!overlap && !both_overlaps) continue;
+    // Every helper call with more than one planned worker is a pool job:
+    // the same count at every W > 1 of one catalogue and path.
+    std::uint64_t group_jobs = 0;
     for (const int w : {1, 2, 3, 4, 8})
       for (const bool pool : {true, false}) {
         const auto t0 = std::chrono::steady_clock::now();
@@ -472,6 +607,11 @@ void identity(const char* label, const std::vector<mhgp9::gen::Point3>& points, 
         if (pool && w > 1) {
           ++id.pool_towers;
           id.pool_jobs_min = std::min<std::uint64_t>(id.pool_jobs_min, s.pool_jobs);
+          id.pool_jobs_max = std::max<std::uint64_t>(id.pool_jobs_max, s.pool_jobs);
+          if (group_jobs == 0) group_jobs = s.pool_jobs;
+          else if (s.pool_jobs != group_jobs)
+            fail("tower.pool_jobs_vary " + where + " jobs=" + std::to_string(s.pool_jobs) + " first=" +
+                 std::to_string(group_jobs));
           if (s.pool_threads != static_cast<std::uint64_t>(w - 1)) fail("floor.pool_threads " + where, 3);
           id.threads_on += created;
         } else {
@@ -488,12 +628,19 @@ void identity(const char* label, const std::vector<mhgp9::gen::Point3>& points, 
   }
 }
 
-int check_floors(const Identity& id, std::uint64_t min_requests, std::uint64_t min_jobs) {
-  std::printf("identity towers=%llu pool_towers=%llu min_pool_jobs=%llu max_static_requests=%llu "
-              "threads_created_pool_on=%llu threads_created_pool_off=%llu\n",
+// exact_jobs (0: none): the pool job count every W > 1 pool tower must have.
+int check_floors(const Identity& id, std::uint64_t min_requests, std::uint64_t min_jobs,
+                 std::uint64_t exact_jobs = 0) {
+  std::printf("identity towers=%llu pool_towers=%llu min_pool_jobs=%llu max_pool_jobs=%llu "
+              "max_static_requests=%llu threads_created_pool_on=%llu threads_created_pool_off=%llu\n",
               static_cast<unsigned long long>(id.towers), static_cast<unsigned long long>(id.pool_towers),
-              static_cast<unsigned long long>(id.pool_jobs_min), static_cast<unsigned long long>(id.max_requests),
-              static_cast<unsigned long long>(id.threads_on), static_cast<unsigned long long>(id.threads_off));
+              static_cast<unsigned long long>(id.pool_jobs_min), static_cast<unsigned long long>(id.pool_jobs_max),
+              static_cast<unsigned long long>(id.max_requests), static_cast<unsigned long long>(id.threads_on),
+              static_cast<unsigned long long>(id.threads_off));
+  if (exact_jobs != 0 && (id.pool_jobs_min != exact_jobs || id.pool_jobs_max != exact_jobs)) {
+    std::printf("cause=tower.pool_jobs_count expected=%llu\n", static_cast<unsigned long long>(exact_jobs));
+    return 1;
+  }
   if (id.pool_towers == 0 || id.pool_jobs_min < min_jobs || id.max_requests < min_requests ||
       !(id.threads_on < id.threads_off)) {
     std::printf("cause=floor.identity\n");
@@ -545,6 +692,7 @@ int run_fixtures() {
         fail(std::string("tower.launch_failure pool=") + (pool ? "1" : "0") + " reason=" + tw.reason);
     }
   }
+  priority_fixtures();
   const int floors = check_floors(id, 8192, 50);
   if (floors) return floors;
   std::printf("task_pool_gate fixtures towers=%llu\n", static_cast<unsigned long long>(id.towers));
@@ -585,11 +733,15 @@ int run_frame(const std::string& path, unsigned kmax, std::uint64_t tower_pin, s
               static_cast<unsigned long long>(r.catalogue_digest),
               static_cast<unsigned long long>(r.tower_stats.pool_jobs));
   if (r.tower_digest != tower_pin || r.catalogue_digest != catalogue_pin) fail("frame.pinned_digests");
+  // Every helper call with more than one planned worker is a pool job: the
+  // same count for every W >= 2, EXACTLY 58 on 08/000000 at K5 and 108 at
+  // K10 (a job added, removed or split changes it), in the chain as in
+  // every tower below.
+  const std::uint64_t exact_jobs = kmax == 5 ? 58 : 108;
+  if (r.tower_stats.pool_jobs != exact_jobs) fail("tower.pool_jobs_count chain");
   Identity id;
   identity("frame", points, kmax, r.catalogue_balls, r, id, false, true);
-  // Every helper call with more than one planned worker is a pool job, the
-  // same count for every W >= 2 (58 on 08/000000 at K5).
-  const int floors = check_floors(id, 100000, kmax == 5 ? 58 : 100);
+  const int floors = check_floors(id, 100000, exact_jobs, exact_jobs);
   if (floors) return floors;
   std::printf("task_pool_gate frame towers=%llu\n", static_cast<unsigned long long>(id.towers));
   return 0;
@@ -611,7 +763,7 @@ bool parse_hex(std::string_view s, std::uint64_t& out) {
 
 int main(int argc, char** argv) {
   const auto usage = [] {
-    std::fprintf(stderr, "usage: mhgp9_tower_task_pool_gate --unit [--inject=MUTANT] | --fixtures | "
+    std::fprintf(stderr, "usage: mhgp9_tower_task_pool_gate --unit [--inject=MUTANT] | --priority | --fixtures | "
                          "--frame=PATH --k=K --tower=HEX --catalogue=HEX\n");
     return 2;
   };
@@ -625,6 +777,9 @@ int main(int argc, char** argv) {
       }
       return run_unit();
     }
+#if defined(MHGP9_POOL_GATE_CHAIN) || defined(MHGP9_POOL_GATE_TOWER)
+    if (mode == "--priority" && argc == 2) return run_priority();
+#endif
 #if defined(MHGP9_POOL_GATE_CHAIN)
     if (mode == "--fixtures" && argc == 2) return run_fixtures();
     if (mode.starts_with("--frame=")) {

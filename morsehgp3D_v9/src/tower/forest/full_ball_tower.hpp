@@ -57,6 +57,10 @@ struct FullBallStats {
   // Actual post-exchange lookup attempts, exact hits and returned terminals.
   // Initial seeds stay in static_seeded; shortcut terminals pay no anchor hit.
   std::array<u64, kFacetMaxK + 1> static_post_seed_queries{}, static_post_seed_hits{}, static_post_seed_terminals{};
+  // Resolution lanes and workers ENGAGED (measured, scheduling metadata):
+  // threads created per call, or on the persistent pool (v9 E2) the owner
+  // and the pool threads that joined the job; static_workers_created sums
+  // the calls with more than one engaged worker.
   u64 static_workers_created = 0, static_peak_request_bytes = 0, static_peak_target_bytes = 0;
   u64 static_lanes_used = 0, static_peak_retained_bytes = 0;
   u64 static_peak_seed_bytes = 0, static_peak_group_bytes = 0, static_peak_worker_bytes = 0;
@@ -498,12 +502,15 @@ class Builder {
 
   // v9 E2: with more than one geometry thread, one persistent pool of
   // geometry_threads participants (the calling thread and W - 1 threads) is
-  // created before the validation and serves every helper this thread calls
-  // until the tower is published; the helpers called elsewhere (pool
-  // threads, phase-A runners, this thread's own share of a job) keep their
-  // own threads. Same partition of the work, same objects. A thread that
-  // cannot be created refuses the build as before (std::system_error, before
-  // any work). The thread counters are recorded on every exit.
+  // created after the serial input-domain checks and before the rest of the
+  // validation, and serves every helper this thread calls until the tower is
+  // published; the helpers called elsewhere (pool threads, phase-A runners,
+  // this thread's own share of a job) keep their own threads. Same partition
+  // of the work, same objects. As before E2, an input refused by the serial
+  // checks is kInvalidInput whatever the thread resources (no thread exists
+  // yet), and a thread that cannot be created then refuses the build
+  // (std::system_error, before any parallel work). The thread counters are
+  // recorded on every exit.
   std::vector<FullBallOrder> run() {
     struct ThreadLedger {
       FullBallStats& st;
@@ -516,19 +523,29 @@ class Builder {
     };
     std::optional<parallel_detail::TaskPool> pool;
     ThreadLedger ledger{st, pool};
+    const auto validate_start = PhaseClock::now();
+#if !defined(MHGP9_POOL_MUTANT_BEFORE_DOMAIN)
+    validate_input_domain();
+#endif
+    const double domain_ms = ms_since(validate_start);
     if (use_pool && geometry_threads > 1) {
       const auto pool_start = PhaseClock::now();
       pool.emplace(static_cast<size_t>(geometry_threads));
       times->pool_ms = ms_since(pool_start);
     }
     parallel_detail::PoolScope scope(pool ? &*pool : nullptr);
-    return run_orders();
+#if defined(MHGP9_POOL_MUTANT_BEFORE_DOMAIN)
+    validate_input_domain();  // mutant: the domain checks after the pool's creation
+#endif
+    return run_orders(domain_ms);
   }
 
-  std::vector<FullBallOrder> run_orders() {
+  // domain_ms: wall time of validate_input_domain, part of validate_ms (the
+  // pool's creation between the two is pool_ms).
+  std::vector<FullBallOrder> run_orders(double domain_ms) {
     const auto validate_start = PhaseClock::now();
     validate_catalogue();
-    times->validate_ms = ms_since(validate_start);
+    times->validate_ms = domain_ms + ms_since(validate_start);
     require(geometry_threads >= 0, "full_ball_static_threads", FullBallStatus::kInvalidInput);
     require(!batch_resolver.resolve || geometry_threads > 0,
         "full_ball_batch_requires_static", FullBallStatus::kInvalidInput);
@@ -1637,14 +1654,11 @@ class Builder {
         "full_ball_census_geometry", FullBallStatus::kInvalidInput);
   }
 
-  void validate_catalogue() {
+  // Serial checks of the input domain (orders, index, u18 profile, point
+  // ids), run by run() before any thread exists. Validation part 0.
+  void validate_input_domain() {
     constexpr auto invalid = FullBallStatus::kInvalidInput;
-    auto lap_start = PhaseClock::now();
-    const auto lap = [&](size_t part) {  // E0 sub-timers of the validation
-      const auto now = PhaseClock::now();
-      times->validate_parts[part] = std::chrono::duration<double, std::milli>(now - lap_start).count();
-      lap_start = now;
-    };
+    const auto start = PhaseClock::now();
     require(requested > 0 && requested <= kFacetMaxK && ix.valid && !ix.upos.empty() &&
         !ix.has_duplicate_positions() && ix.input_count <= static_cast<u64>(std::numeric_limits<i32>::max()) &&
         balls.size() <= std::numeric_limits<BallId>::max(), "full_ball_input_domain", invalid);
@@ -1658,7 +1672,18 @@ class Builder {
     std::sort(identity.begin(), identity.end());
     for (const auto& row : identity) domain.push_back(row.first);
     require(std::adjacent_find(domain.begin(), domain.end()) == domain.end(), "full_ball_duplicate_id", invalid);
-    lap(0);
+    times->validate_parts[0] = ms_since(start);
+  }
+
+  // The rest of the validation (parts 1 to 7), after validate_input_domain.
+  void validate_catalogue() {
+    constexpr auto invalid = FullBallStatus::kInvalidInput;
+    auto lap_start = PhaseClock::now();
+    const auto lap = [&](size_t part) {  // E0 sub-timers of the validation
+      const auto now = PhaseClock::now();
+      times->validate_parts[part] = std::chrono::duration<double, std::milli>(now - lap_start).count();
+      lap_start = now;
+    };
     by_key.resize(balls.size()); std::iota(by_key.begin(), by_key.end(), BallId{0});
     // A catalogue already in STRICTLY increasing key order (the chain's) is
     // certified by this one scan: the identity is then the unique sorted
@@ -2481,12 +2506,14 @@ class Builder {
     if (!hashed) {
       // (key, ordinal) is a strict total order: the parallel sort is the unique
       // sorted permutation, identical for every thread count.
-      const size_t sorters = parallel_sort(requests, geometry_threads, [](const Request& a, const Request& b) {
+      // A parallel sort holds a second buffer of the same size at its peak,
+      // whatever the number of workers it engages.
+      const bool split_sort = parallel_sort_splits(requests.size(), geometry_threads);
+      parallel_sort(requests, geometry_threads, [](const Request& a, const Request& b) {
         if (a.key != b.key) return a.key < b.key;
         return a.ordinal < b.ordinal;  // earliest consumer first in each class
       });
-      // A parallel sort holds a second buffer of the same size at its peak.
-      if (sorters > 1)
+      if (split_sort)
         st.static_peak_request_bytes = std::max<u64>(st.static_peak_request_bytes,
             2 * static_cast<u64>(requests.capacity()) * sizeof(Request));
     }
@@ -2585,8 +2612,11 @@ class Builder {
     };
     try {
       const size_t lanes = parallel_ranges(groups.size() - 1, geometry_threads, job);
+      // Workers engaged (measured): the threads created for the call or, on
+      // the persistent pool, the owner and the pool threads that joined the
+      // job. One lane is the caller alone.
       add(st.static_lanes_used, lanes);
-      if (lanes > 1) add(st.static_workers_created, lanes);  // one lane uses the caller
+      if (lanes > 1) add(st.static_workers_created, lanes);
     }
     catch (...) {
       account();

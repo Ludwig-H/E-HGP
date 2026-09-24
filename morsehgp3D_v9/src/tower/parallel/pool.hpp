@@ -3,10 +3,12 @@
 // Deux primitives, toutes deux a tirage dynamique et a fusion en ORDRE
 // D'INDEX (jamais en ordre d'achevement) : la sortie est bit-identique au
 // sequentiel quel que soit le nombre de fils. Chaque primitive RETOURNE le
-// nombre d'ouvriers reellement engages (fils crees pour l'appel, ou
-// participants d'un pool persistant, appelant compris) : c'est cette valeur,
-// et elle seule, que les compteurs publient (mutant `parallel-one-worker` : un
-// seul fil quel que soit le budget — la metadonnee mesuree le trahit).
+// nombre d'ouvriers reellement engages : les fils crees pour l'appel ou, sur
+// un pool persistant, l'appelant plus les fils du pool qui ont rejoint le
+// travail et execute sa boucle (compte a la jonction, jamais le nombre de
+// participants) : c'est cette valeur, et elle seule, que les compteurs
+// publient (mutant `parallel-one-worker` : un seul fil quel que soit le
+// budget — la metadonnee mesuree le trahit).
 //
 // v9 E2 (pool persistant de la tour) : un TaskPool cree une fois par
 // construction de tour sert les primitives appelees par SON fil proprietaire
@@ -64,6 +66,9 @@ inline std::atomic<size_t> launch_active{0};
 // before trying to join the job (gate of the late-join rule).
 inline std::atomic<size_t> join_delay_index{0};
 inline std::atomic<unsigned> join_delay_ms{0};
+// Exceptions captured by TaskPool jobs (owner or thread), counted after the
+// capture (gate of the first-exception rule).
+inline std::atomic<size_t> job_error_captures{0};
 #endif
 #if defined(MHGP9_POOL_MUTANT_JOIN_CLOSED)
 #define MHGP9_POOL_JOIN_CLOSED true  // mutant: a late thread joins a closed job
@@ -89,8 +94,9 @@ struct JoinThreads {
 // the helpers' pull loops, where ONE call drains the whole shared work: it
 // calls fn(0) on the owner and fn(t) at most once on each pool thread t in
 // [1, count) that JOINS the job while it is open; once fn(0) has returned the
-// owner closes the job (no thread joins any more) and returns when every
-// joined thread has left it. A thread woken after the close skips the job
+// owner closes the job (no thread joins any more) and returns, when every
+// joined thread has left it, the number of workers ENGAGED: 1 + the joined
+// threads that ran fn (measured, never `count`). A thread woken after the close skips the job
 // without reading its fields, so the fields are never rewritten while a
 // thread may still read them, and the end of a job never waits for a thread
 // that the scheduler has not run yet (a thread created per call must run
@@ -100,8 +106,10 @@ struct JoinThreads {
 //    and rethrows, so a partially created pool is never published and no
 //    job ever waits for a participant that does not exist;
 //  - exceptions: fn is the helpers' capturing wrapper; an exception that
-//    still escapes (on the owner or a thread) is kept, the others finish,
-//    and the first one is rethrown on the owner after the join;
+//    still escapes (on the owner or a thread) is captured in one slot under
+//    a mutex, the first captured wins, the others finish; after the join
+//    the slot is emptied on every exit and its exception rethrown on the
+//    owner, so the next job starts clean;
 //  - floating point: each job carries the owner's floating-point
 //    environment, installed by every thread before fn, as a thread created
 //    for the call would inherit it (the certified level filter reads the
@@ -158,7 +166,7 @@ class TaskPool {
   bool owned_by_this_thread() const { return current_pool == this; }
 
   template <typename Fn>
-  void run(size_t count, Fn& fn) {
+  size_t run(size_t count, Fn& fn) {
 #if defined(MHGP9_POOL_MUTANT_NESTED_QUEUE)
     // mutant: a submission while a job runs waits for the pool (a queue)
     for (bool busy = busy_.load(); busy; busy = busy_.load()) busy_.wait(true);
@@ -168,12 +176,15 @@ class TaskPool {
     job_context_ = &fn;
     job_count_ = count;
     std::fegetenv(&job_env_);
+    job_engaged_.store(0, std::memory_order_relaxed);  // published by the state's release below
     ++jobs_;
     const u32 generation = generation_.load(std::memory_order_relaxed) + 1;  // the owner alone writes it
     state_.store((static_cast<u64>(generation) << 32) | kOpen, std::memory_order_release);
     generation_.store(generation, std::memory_order_release);
     generation_.notify_all();
+#if defined(MHGP9_POOL_MUTANT_STALE_ERROR)
     std::exception_ptr own;
+#endif
     {
 #if !defined(MHGP9_POOL_MUTANT_NESTED_QUEUE)
       struct NoPool {  // the owner's share: nested helpers use their own threads
@@ -182,7 +193,15 @@ class TaskPool {
         ~NoPool() { current_pool = saved; }
       } no_pool;
 #endif
-      try { fn(0); } catch (...) { own = std::current_exception(); }
+      try {
+        fn(0);
+      } catch (...) {
+#if defined(MHGP9_POOL_MUTANT_STALE_ERROR)
+        own = std::current_exception();  // mutant: the owner's exception kept apart
+#else
+        capture_error();
+#endif
+      }
     }
 #if !defined(MHGP9_POOL_MUTANT_RETURN_BEFORE_JOIN)
     // Close the job, then wait for the threads that joined it.
@@ -194,12 +213,19 @@ class TaskPool {
     busy_.store(false);
     busy_.notify_all();
 #endif
-    if (own) std::rethrow_exception(own);
-    if (worker_error_) {
-      std::exception_ptr error;
-      error.swap(worker_error_);
-      std::rethrow_exception(error);
-    }
+    // Every joined thread has left (the state's acquire): the slot and the
+    // engaged count are final.
+#if defined(MHGP9_POOL_MUTANT_STALE_ERROR)
+    if (own) std::rethrow_exception(own);  // mutant: a thread's exception left for the next job
+#endif
+    std::exception_ptr error;
+    error.swap(job_error_);  // emptied on every exit
+    if (error) std::rethrow_exception(error);
+#if defined(MHGP9_POOL_MUTANT_DECLARED)
+    return count;  // mutant: the declared participants, not the engaged workers
+#else
+    return 1 + job_engaged_.load(std::memory_order_relaxed);
+#endif
   }
 
  private:
@@ -218,10 +244,19 @@ class TaskPool {
   void* job_context_ = nullptr;
   size_t job_count_ = 0;
   std::fenv_t job_env_{};
+  std::atomic<size_t> job_engaged_{0};  // joined threads that ran fn in this job
   std::atomic<bool> stopping_{false};
   u64 jobs_ = 0;
   std::mutex error_mu_;
-  std::exception_ptr worker_error_;
+  std::exception_ptr job_error_;  // first exception captured in this job
+
+  void capture_error() {
+    std::lock_guard<std::mutex> lock(error_mu_);
+    if (!job_error_) job_error_ = std::current_exception();
+#if defined(MHGP9_TESTING)
+    job_error_captures.fetch_add(1);
+#endif
+  }
 #if defined(MHGP9_POOL_MUTANT_NESTED_QUEUE)
   std::atomic<bool> busy_{false};
 #endif
@@ -258,14 +293,14 @@ class TaskPool {
         }
       if (!joined) continue;
       if (index < job_count_) {
+        job_engaged_.fetch_add(1, std::memory_order_relaxed);  // read by the owner after this thread leaves
 #if !defined(MHGP9_POOL_MUTANT_STALE_FENV)
         std::fesetenv(&job_env_);
 #endif
         try {
           job_invoke_(job_context_, index);
         } catch (...) {
-          std::lock_guard<std::mutex> lock(error_mu_);
-          if (!worker_error_) worker_error_ = std::current_exception();
+          capture_error();
         }
       }
       const u64 left = state_.fetch_sub(1, std::memory_order_acq_rel) - 1;
@@ -286,13 +321,13 @@ class PoolScope {
   TaskPool* saved_;
 };
 
+// Runs fn(t) for t in [0, count) and returns the workers engaged: `count`
+// threads created for the call, or on the current pool of this thread the
+// owner plus the pool threads that joined the job (TaskPool::run).
 template <typename Fn>
-inline void run_threads(size_t count, Fn&& fn) {
+inline size_t run_threads(size_t count, Fn&& fn) {
 #if !defined(MHGP9_POOL_MUTANT_BYPASS)
-  if (TaskPool* pool = current_pool; pool && count <= pool->participants()) {
-    pool->run(count, fn);
-    return;
-  }
+  if (TaskPool* pool = current_pool; pool && count <= pool->participants()) return pool->run(count, fn);
 #endif
   std::atomic<unsigned> admission{0};  // 0 waiting, 1 admitted, 2 cancelled
   std::vector<std::thread> pool;
@@ -326,6 +361,7 @@ inline void run_threads(size_t count, Fn&& fn) {
   }
   admission.store(1);
   admission.notify_all();
+  return count;
 }
 
 struct FirstException {
@@ -350,7 +386,8 @@ struct FirstException {
 // Decoupe [0, n) en tranches contigues (≈ 8 par ouvrier), executees par
 // tirage dynamique ; `fn(b, e, worker)` traite la tranche [b, e). Retourne
 // le nombre d'ouvriers engages (1 = sequentiel, aucun fil ; sur le pool
-// courant du fil appelant, l'appelant est l'ouvrier 0).
+// courant du fil appelant, l'appelant est l'ouvrier 0 et seuls comptent les
+// fils du pool entres dans le travail).
 template <typename Fn>
 inline size_t parallel_ranges(size_t n, int threads, Fn&& fn) {
   const size_t T = planned_workers(n, threads);
@@ -362,7 +399,7 @@ inline size_t parallel_ranges(size_t n, int threads, Fn&& fn) {
   const size_t nchunks = (n + chunk - 1) / chunk;
   std::atomic<size_t> next{0};
   parallel_detail::FirstException fx;
-  parallel_detail::run_threads(T, [&](size_t t) {
+  const size_t engaged = parallel_detail::run_threads(T, [&](size_t t) {
       try {
         for (;;) {
           if (fx.stop.load()) break;
@@ -375,7 +412,7 @@ inline size_t parallel_ranges(size_t n, int threads, Fn&& fn) {
       }
     });
   fx.rethrow_if_any();
-  return T;
+  return engaged;
 }
 
 // Meme contrat, une tache par item : `fn(i, worker)`.
@@ -388,7 +425,7 @@ inline size_t parallel_items(size_t n, int threads, Fn&& fn) {
   }
   std::atomic<size_t> next{0};
   parallel_detail::FirstException fx;
-  parallel_detail::run_threads(T, [&](size_t t) {
+  const size_t engaged = parallel_detail::run_threads(T, [&](size_t t) {
       try {
         for (;;) {
           if (fx.stop.load()) break;
@@ -401,7 +438,7 @@ inline size_t parallel_items(size_t n, int threads, Fn&& fn) {
       }
     });
   fx.rethrow_if_any();
-  return T;
+  return engaged;
 }
 
 // Tri parallele pour un ordre STRICT et TOTAL `less` (aucun ex aequo) : le
@@ -412,12 +449,16 @@ inline size_t parallel_items(size_t n, int threads, Fn&& fn) {
 // pourrait aligner) coupent l'ordre en seaux [s_{b-1}, s_b) ; chaque tranche de l'entree
 // repartit ses elements dans les seaux (en parallele), puis chaque seau est
 // recopie a sa place et trie (en parallele). Retourne le nombre d'ouvriers
-// crees au plus large. Pic : un second tampon de n elements.
+// engages au plus large (mesure). Pic : un second tampon de n elements,
+// alloue si et seulement si parallel_sort_splits(n, threads), quel que soit
+// le nombre d'ouvriers engages.
+inline bool parallel_sort_splits(size_t n, int threads) { return planned_workers(n / 4096, threads) > 1; }
+
 template <typename T, typename A, typename Less>
 inline size_t parallel_sort(std::vector<T, A>& values, int threads, Less less) {
   const size_t n = values.size();
   const size_t workers = planned_workers(n / 4096, threads);
-  if (workers <= 1) {
+  if (!parallel_sort_splits(n, threads)) {
     std::sort(values.begin(), values.end(), less);
     return n > 0 ? 1 : 0;
   }
@@ -442,7 +483,7 @@ inline size_t parallel_sort(std::vector<T, A>& values, int threads, Less less) {
   const size_t chunks = 4 * workers;
   RawVector<u32> bucket_of(n);  // every slot written by its chunk below
   std::vector<size_t> counts(chunks * buckets, 0);
-  size_t created = parallel_items(chunks, threads, [&](size_t c, size_t) {
+  size_t engaged = parallel_items(chunks, threads, [&](size_t c, size_t) {
     for (size_t i = n * c / chunks; i < n * (c + 1) / chunks; ++i) {
       const size_t b = static_cast<size_t>(
           std::upper_bound(splitters.begin(), splitters.end(), values[i], less) - splitters.begin());
@@ -459,18 +500,18 @@ inline size_t parallel_sort(std::vector<T, A>& values, int threads, Less less) {
   }
   first[buckets] = n;
   auto scattered = std::make_unique_for_overwrite<T[]>(n);
-  created = std::max(created, parallel_items(chunks, threads, [&](size_t c, size_t) {
+  engaged = std::max(engaged, parallel_items(chunks, threads, [&](size_t c, size_t) {
     size_t* cursor = offset.data() + c * buckets;
     for (size_t i = n * c / chunks; i < n * (c + 1) / chunks; ++i) scattered[cursor[bucket_of[i]]++] = values[i];
   }));
-  created = std::max(created, parallel_items(buckets, threads, [&](size_t b, size_t) {
+  engaged = std::max(engaged, parallel_items(buckets, threads, [&](size_t b, size_t) {
     std::copy(scattered.get() + first[b], scattered.get() + first[b + 1], values.begin() + first[b]);
 #if defined(MHGP9_PARALLEL_SORT_MUTANT_UNSORTED_BUCKET)
     if (b == buckets / 2) return;  // mutant: one bucket left unsorted
 #endif
     std::sort(values.begin() + first[b], values.begin() + first[b + 1], less);
   }));
-  return created;
+  return engaged;
 }
 
 }  // namespace mhgp9::tower
