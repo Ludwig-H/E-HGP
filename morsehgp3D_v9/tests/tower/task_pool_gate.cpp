@@ -587,7 +587,9 @@ int run_frame(const std::string& path, unsigned kmax, std::uint64_t tower_pin, s
   if (r.tower_digest != tower_pin || r.catalogue_digest != catalogue_pin) fail("frame.pinned_digests");
   Identity id;
   identity("frame", points, kmax, r.catalogue_balls, r, id, false, true);
-  const int floors = check_floors(id, 100000, 30);
+  // Every helper call with more than one planned worker is a pool job, the
+  // same count for every W >= 2 (58 on 08/000000 at K5).
+  const int floors = check_floors(id, 100000, kmax == 5 ? 58 : 100);
   if (floors) return floors;
   std::printf("task_pool_gate frame towers=%llu\n", static_cast<unsigned long long>(id.towers));
   return 0;

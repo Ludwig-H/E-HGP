@@ -1516,6 +1516,133 @@ même catalogue (hors dépôt, banque dense dans les deux bras) : populations
 et images exposées de 152–235 à 43–80 ms à K5 et de 1 272–1 784 à 47–53 ms
 à K10. Toute durée G4 reste à mesurer.
 
+### Pool persistant de la tour (étape E2 du plan de la tour, 24 septembre 2026)
+
+Option `tower_persistent_pool` de `ChainOptions` (option `persistent_pool`
+du constructeur et de `build_full_ball_tower`), **active par défaut**. La
+sonde ne la publie pas : son protocole est gelé, l'intégration revient au
+responsable du protocole. Même objet : condensés et `tower_work` identiques.
+
+Avant : `parallel_detail::run_threads` créait puis joignait T fils à chaque
+appel de `parallel_items`, `parallel_ranges` et `parallel_sort` (trois appels
+par tri). À 08/000000 K5, une tour fait 58 appels à plus d'un ouvrier :
+validation, phase 0 (dix par ordre), populations, images, banque, encodage.
+
+Après (`src/tower/parallel/pool.hpp`, `TaskPool`) :
+- **un pool de W participants** (le fil appelant et W − 1 fils) est créé au
+  début de `Builder::run`, avant la validation (`times.pool_ms`), et détruit
+  après l'encodage ;
+- **seul le fil propriétaire s'en sert** : un `PoolScope` l'installe dans un
+  pointeur `thread_local`, et les primitives appelées par ce fil y exécutent
+  leur boucle de tirage, l'appelant étant l'ouvrier 0. Tranches, indices
+  d'ouvrier et valeur rendue ne changent pas, la sortie est bit-identique ;
+- **appels imbriqués** : la part du propriétaire pendant un travail, les fils
+  du pool et les fils tiers (coureurs de la phase A recouvrante, qui appellent
+  `order_prepare_lean`) gardent leurs propres fils. Aucun travail n'attend
+  un pool occupé, donc pas d'interblocage ;
+- **fermeture** : un fil du pool entre dans le travail de sa génération par
+  compare-and-swap tant qu'il est ouvert. Quand la boucle du propriétaire a
+  tout tiré, il ferme le travail et n'attend que les fils entrés. Un fil
+  réveillé après la fermeture saute le travail sans en lire les champs. La
+  fin d'un travail n'attend donc jamais un fil que l'ordonnanceur n'a pas
+  encore servi (un fil créé par appel doit, lui, tourner une fois pour être
+  joint) ;
+- **environnement flottant** : chaque travail porte celui du propriétaire
+  (`fegetenv` / `fesetenv`), comme un fil créé pour l'appel en hériterait.
+  Le filtre certifié des niveaux lit le mode d'arrondi ;
+- **admission** : les fils attendent que tous existent. Un échec de création
+  les annule, les joint et relance `std::system_error` avant tout travail
+  (refus `full_ball_thread_launch_failed`, comme avant). Le crochet
+  `MHGP9_TESTING` de lancement s'applique à la création du pool ;
+- **exceptions** : la première est capturée par les enveloppes, l'arrêt est
+  demandé, puis elle est relancée sur le propriétaire après la sortie des
+  fils entrés.
+
+Compteurs de `FullBallStats`, hors `tower_work`, pour les portes :
+- `pool_threads` et `pool_jobs` ;
+- `helper_threads` : fils créés par la voie par appel pendant la
+  construction. C'est le delta d'un compteur de processus, exact quand la
+  tour est seule, comme dans la chaîne ;
+- `runner_threads`.
+
+Portes (`tests/tower/task_pool_gate.cpp`, cible de test avec la chaîne
+recompilée) :
+- `mhgp9_tower_task_pool_unit` (`--unit`) juge le pool seul :
+  - indices : l'appelant est l'ouvrier 0, un fil par indice ;
+  - les trois primitives sont servies par le pool avec les mêmes sorties,
+    de 2 à 8 participants ;
+  - jonction : jamais de retour avant la sortie d'un fil entré ;
+  - première exception relancée, pool réutilisable ensuite ;
+  - imbrication et fil tiers, sous un chien de garde de 30 s ;
+  - environnement flottant (FE_UPWARD, FE_DOWNWARD) ;
+  - fil en retard qui saute un travail fermé (crochet de retard) ;
+  - échec de lancement du pool et de la voie par appel.
+- `mhgp9_tower_task_pool_fixtures` : nuage de trois grappes (1 500 sites),
+  K5 et K8. La tour construite sur le même catalogue est identique pool actif
+  et coupé : condensé, `tower_work` et 87 autres compteurs déterministes, à
+  1, 2, 3, 4 et 8 fils, phase A recouvrante ou non. Elle vérifie aussi
+  l'option de chaîne et le refus de ressource à l'échec de lancement, pool
+  actif ou coupé. Planchers : au moins 50 travaux du pool par tour,
+  W − 1 fils du pool, moins de fils créés qu'avec le pool coupé.
+- `mhgp9_tower_task_pool_lidar_k5` (label `lidar`, environ 2 à 4 min en
+  local) : sur la trame 08/000000, les condensés épinglés `67450c64611075b1`
+  / `5ad1fe09354411ba` et la même identité à 1, 2, 3, 4 et 8 fils. Plancher :
+  58 travaux du pool.
+- Mutants tués (code 1) :
+  - six mutants compilés du pool : pool partiel publié, retour avant la
+    jonction, file d'attente sur un pool occupé (interblocage), environnement
+    flottant périmé, pool contourné, fil en retard entrant dans un travail
+    fermé ;
+  - le mutant d'exécution `parallel-admit-partial-launch` de la voie par
+    appel, qu'aucune porte v9 ne tuait.
+- Sous `MHGP9_TSAN` (lancé avec `setarch -R`, sans quoi TSAN refuse la
+  disposition mémoire du noyau), sans rapport :
+  - les portes `--unit` et `--fixtures` du pool ;
+  - `population_bank`, `parallel_sort`, `full_ball_tower --static-4` ;
+  - `chain_static_paths` et `order_failure_priority`.
+
+Fils créés par une tour à 08/000000 (compteurs déterministes, pool actif
+contre coupé) :
+
+| K | W | travaux du pool | fils créés, pool actif | fils créés, pool coupé | évités |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 5 | 8 | 58 | 52 | 502 | 450 |
+| 5 | 48 | 58 | 269 | 2 643 | 2 374 |
+| 10 | 8 | 108 | 97 | 953 | 856 |
+| 10 | 48 | 108 | 514 | 5 397 | 4 883 |
+
+Avec le pool restent les W − 1 fils du pool, un coureur par ordre et les fils
+de `order_prepare_lean` appelés par les coureurs (au plus W par ordre).
+
+Mesures locales, **indicatives** : hôte de 8 cœurs partagé, charge de 23 à
+37 pendant toutes les mesures.
+- **Coût par appel** (200 appels de `parallel_items` à éléments vides) :
+  - fils par appel : 0,57 ms de CPU à W8 et 3,7 ms à W48, surtout du
+    noyau ; 4,5 à 15 ms de mur ;
+  - pool : 0,5 µs (W8) à 2,7 µs (W48) de mur.
+  - Une première version, où chaque travail attendait l'accusé de tous les
+    fils du pool, coûtait encore 5 à 20 ms de mur par appel sous cette
+    charge. D'où la fermeture décrite plus haut.
+- **Sonde, W8, trois paires entrelacées** (base `d1d038393` contre pool),
+  en ms :
+  - K5 : tour 5 198 / 4 639 / 5 311 contre 5 207 / 5 234 / 3 142 ;
+    validation 981 / 785 / 872 contre 738 / 935 / 615 ; phase 0 2 767 /
+    2 698 / 2 919 contre 2 848 / 2 891 / 1 759 ;
+  - K10 : tour 45 509 / 44 603 / 42 941 contre 38 221 / 43 168 / 42 214 ;
+    validation 6 058 / 4 844 / 3 673 contre 4 195 / 4 389 / 3 608 ;
+    phase 0 32 438 / 32 073 / 31 772 contre 27 775 / 31 739 / 30 487.
+- **Tour seule** sur le même catalogue, pool actif et coupé entrelacés
+  (écart apparié médian) :
+  - K5 W8, six paires : phase 0 −162 ms (5 paires sur 6), validation −8 ms ;
+  - K10 W8, quatre paires : phase 0 +2,5 s (1 paire sur 4) ;
+  - K10 W48, quatre paires : phase 0 −307 ms (3 sur 4).
+
+Le bruit de cet hôte (±15 % d'une tour à l'autre) couvre l'effet attendu :
+aucun gain de mur local n'est établi. Le gain sur G4 (48 fils, W − 1
+créations et jonctions par appel retirées du chemin du propriétaire) reste
+une **projection** jusqu'à une session qui mesure `tower_persistent_pool`
+en paires entrelacées (levier à ajouter à la sonde).
+
 ### Ordonnancement des jobs du front q2 (sonde v16)
 
 Le recensement q2 découpait lui aussi son front en largeur (16 jobs par fil,
