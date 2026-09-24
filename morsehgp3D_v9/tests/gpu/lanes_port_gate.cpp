@@ -26,6 +26,10 @@
 //     registre faux d'une unite sont refuses ;
 //   - garde d'entree (validate_lanes_input) : l'entree reelle est acceptee,
 //     chaque champ forge un a un est refuse ;
+//   - arene par defaut depassee sous l'ardoise de sites (contre-exemple exact
+//     de l'auditeur : 4 097 grappes de sept sites, cinq boules acceptees par
+//     arete a K5, 20 485 enregistrements pour une arene de 20 484) : une seule
+//     arete mise en attente, les autres egales au moteur ;
 //   - panne d'allocation de l'executeur hote (ardoise d'enregistrements
 //     demesuree, auditeur A) : exception rendue a l'appelant apres jointure de
 //     tous les fils, jamais une terminaison, a un et a plusieurs fils ; un lot
@@ -38,6 +42,7 @@
 // Code 0 conforme, 1 desaccord ou mutant survivant (`cause=`), 2 argument,
 // 3 plancher.
 #include <algorithm>
+#include <array>
 #include <charconv>
 #include <cstdint>
 #include <cstdio>
@@ -593,11 +598,52 @@ int main(int argc, char** argv) {
       }
     }
   }
+  // The auditor's arena fixture: default arena 4E + 4096 records, 5E needed.
+  unsigned long long arena_deferred = 0;
+  {
+    constexpr int clusters = 4097;
+    std::vector<gen::Point3> points;
+    for (int c = 0; c < clusters; ++c) {
+      const int cx = 1000 + 500 * (c % 17), cy = 1000 + 500 * ((c / 17) % 17), cz = 1000 + 500 * (c / 289);
+      for (const auto& d : {std::array<int, 3>{-10, 0, 0}, {10, 0, 0}, {0, 13, 0}, {0, 0, 13}, {0, -13, 0},
+                            {0, 0, -13}, {0, 5, 12}})
+        points.push_back({cx + d[0], cy + d[1], cz + d[2]});
+    }
+    const auto index = gen::make_q2_cloud_index(gen::prepare_cloud(points));
+    const Flat flat(*index);
+    const auto order = index->spatial_order();
+    std::vector<gpu::u32> rank_of(order.size());
+    for (std::size_t r = 0; r < order.size(); ++r) rank_of[order[r]] = static_cast<gpu::u32>(r);
+    std::vector<gpu::u32> ea, eb;
+    for (int c = 0; c < clusters; ++c) {
+      ea.push_back(rank_of[7 * c]);
+      eb.push_back(rank_of[7 * c + 1]);
+    }
+    const auto out = gpu::run_lanes_batch_host(flat.input(5, ea, eb), workers);
+    if (!out.error.empty() || out.faults != 0 || out.deferred != 1 ||
+        out.records.size() != 5 * static_cast<std::size_t>(clusters - 1))
+      return fail("arena.deferral");
+    for (int c = 0; c < clusters; ++c) {
+      const bool is_deferred = out.status[c] == static_cast<gpu::u8>(gpu::CertificateStatus::deferred);
+      if (is_deferred) {
+        ++arena_deferred;
+        continue;
+      }
+      std::vector<gen::Q34LaneRecord> slice;
+      for (gpu::u32 r = 0; r < out.record_count[c]; ++r)
+        slice.push_back(record_of(out.records[out.record_begin[c] + r], 0));
+      if (c % 64 == 0 &&
+          !same_records(slice, gen::engine_q3_records(index, 5, options, order[ea[c]], order[eb[c]])))
+        return fail("arena.records");
+      if (slice.size() != 5) return fail("arena.five_balls");
+    }
+  }
   std::printf("lanes_port_gate n=%zu edges=%llu q3_only=%llu depth_rejections=%llu emitted=%llu wide_shells=%llu "
-              "deferred=%llu judged=%llu mutants=%llu guards=%llu faults=%llu\n",
-              n, edges, q3_only, rejections, emitted, wide_shells, deferred, judged, mutants, guards, faults);
+              "deferred=%llu judged=%llu mutants=%llu guards=%llu faults=%llu arena_deferred=%llu\n",
+              n, edges, q3_only, rejections, emitted, wide_shells, deferred, judged, mutants, guards, faults,
+              arena_deferred);
   if (edges == 0 || q3_only == 0 || rejections == 0 || emitted == 0 || wide_shells == 0 || deferred == 0 ||
-      judged == 0 || guards == 0 || mutants == 0 || faults == 0)
+      judged == 0 || guards == 0 || mutants == 0 || faults == 0 || arena_deferred != 1)
     return 3;
   return 0;
 }

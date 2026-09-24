@@ -242,6 +242,7 @@ def validate_received(output, manifest, worker_pin, expected_cases, generation, 
              payload.logical_result(engine_value) == payload.logical_result(pre_value) and
              payload.certificate_work(engine_value) == payload.certificate_work(pre_value),
              'engine preflight recomputation / batch tower or certificate work differs from the engine path')
+        payload.validate_preflight_work(engine_value, engine_case['levers'])
         payload.validate_gnu_time((output / 'preflight_engine.stderr').read_text(errors='replace'), 0)
         expected_preflight['engine_tower_digest'] = engine_value['tower_digest']
     if deferral_plan:

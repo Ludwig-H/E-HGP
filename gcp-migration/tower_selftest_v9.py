@@ -245,6 +245,8 @@ def main():
         if config.get('vacuous_preflight'):
             value['generator'].update(q3_emitted=0, q4_emitted=0)
             value['catalogue'].update(q3_presentations=0, q4_presentations=0)
+        if config.get('vacuous_engine_preflight') and not levers.get('q34_batch_filter'):
+            value['ledger'].update(q3_leaf_censuses=0, q3_leaf_point_tests=0)
         print(json.dumps(value, separators=(',', ':')))
         return 0
     scene = pathlib.Path(path).name[len('scene_'):-len('.u32le')]
@@ -926,8 +928,6 @@ class Protocol(unittest.TestCase):
                               ('gpu lanes device time zero', lambda v: v['q34_batch'].update(lanes_device_ms=0.0)),
                               ('gpu lanes warps zero', lambda v: v['q34_batch'].update(lanes_warps=0)),
                               ('gpu lanes kernel beyond device', lambda v: v['q34_batch'].update(lanes_kernel_ms=1.0)),
-                              ('gpu lanes deferred below the slab', lambda v: v['q34_batch'].update(
-                                  lanes_deferred=1, lanes_decided=1)),
                               ('gpu lanes capacity unannounced', lambda v: v['options'].update(lanes_capacity=24)),
                               ('gpu lanes judged without the judge', lambda v: v['q34_batch'].update(lanes_judged=1)),
                               ('gpu lanes judge announced', lambda v: v['options'].update(lanes_judge=True)),
@@ -948,6 +948,13 @@ class Protocol(unittest.TestCase):
             bad = deepcopy(gpu_good)
             mutate(bad)
             need(refused(worker.validate_probe, bad, gpu_case, 0), 'batch/GPU probe mutation ' + label)
+        # v20: a q3 lane deferred below the site slab (record slab or arena
+        # overflow) is a legitimate memory decision: accepted.
+        deferred_lane = deepcopy(gpu_good)
+        deferred_lane['q34_batch'].update(lanes_deferred=1, lanes_decided=1)
+        deferred_lane['ledger'].update(lanes_edges=1, lanes_cover_sites=5, lanes_seed_tests=5)
+        need(worker.validate_probe(worker.strict_json(json.dumps(deferred_lane)), gpu_case, 0) == 'complete_relative',
+             'a q3 lane deferred below the site slab is accepted')
         # v18: a judged probe must report every decided edge as judged.
         judged = probe_value(data['n'], data['fnv'], 5, 8, 48, 48, judge=True)
         need(worker.validate_probe(worker.strict_json(json.dumps(judged)), gpu_case, 0, judge=True) ==
@@ -1356,6 +1363,18 @@ class Protocol(unittest.TestCase):
                  'vacuous preflight host receipt: ' + json.dumps(receipt)[:600])
             expect_certified_stop(receipt, fake)
             need(not (host / 'received/output/probe_0.command.json').exists(), 'no case after a vacuous preflight')
+
+    def test_vacuous_engine_twin_runs_no_case(self):
+        # v20: the engine twin of the preflight must show the leaf census the
+        # batch arm bypasses; without it, no LiDAR case runs.
+        with tempfile.TemporaryDirectory() as temporary:
+            code, receipt, fake, host = run_scenario(Path(temporary), tools=dict(vacuous_engine_preflight=True))
+            need(code == 1 and receipt['worker_status'] == 'preflight_failed',
+                 'vacuous engine twin host receipt: ' + json.dumps(receipt)[:600])
+            expect_certified_stop(receipt, fake)
+            value = worker.strict_json((host / 'received/output/receipt.json').read_bytes())
+            need('did not exercise an active lever' in value.get('error', '') and
+                 not (host / 'received/output/probe_0.command.json').exists(), 'no case after a vacuous engine twin')
 
     def test_zero_complete_campaign_is_refused(self):
         with tempfile.TemporaryDirectory() as temporary:

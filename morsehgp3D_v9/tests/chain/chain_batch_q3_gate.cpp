@@ -99,7 +99,8 @@ int main(int argc, char** argv) {
         if (a.tower_digest != b.tower_digest || a.catalogue_digest != b.catalogue_digest ||
             a.tower_digest != c.tower_digest || a.catalogue_digest != c.catalogue_digest)
           return fail("digest " + where);
-        if (a.q3_emitted != b.q3_emitted || a.q4_emitted != b.q4_emitted || a.q3_emitted != c.q3_emitted)
+        if (a.q3_emitted != b.q3_emitted || a.q4_emitted != b.q4_emitted || a.q3_emitted != c.q3_emitted ||
+            a.q4_emitted != c.q4_emitted)
           return fail("emitted " + where);
         const auto lanes_of = [](const ChainResult& r) {
           const auto& l = r.ledger;
@@ -194,7 +195,10 @@ int main(int argc, char** argv) {
   std::printf("chain_batch_q3_gate n=%zu cases=%llu asked=%llu judged=%llu records=%llu tails=%llu both=%llu "
               "refusals=%llu device=%s\n",
               n, cases, asked, judged, records, tails, both, refusals, device ? "yes" : "no");
-  if (cases == 0 || asked == 0 || judged != asked || records == 0 || tails == 0 || both == 0 || refusals != 7)
+  // tails + both > asked (auditor A): some edge has its q3 lane in the tail
+  // AND its q4 lane open, the case the both_edges comparison guards.
+  if (cases == 0 || asked == 0 || judged != asked || records == 0 || tails == 0 || both == 0 || refusals != 7 ||
+      tails + both <= asked)
     return 3;
   return 0;
 }

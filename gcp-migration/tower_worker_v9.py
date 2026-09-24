@@ -633,12 +633,13 @@ def validate_lanes(value, case, lanes_capacity=0, judge=False):
            batch['lanes_device_ms'] + 0.05 and batch['lanes_device_ms'] <= batch['lanes_ms'] + 0.05) if ran else
           batch['lanes_kernel_ms'] == 0 and batch['lanes_transfer_ms'] == 0 and batch['lanes_device_ms'] == 0),
          'q3 lanes backend/counts/device time/judge')
-    # A correct call defers only an edge beyond its slab: some but never all
-    # on the reduced-slab preflight, none on a frame below the default slab.
+    # The reduced-slab preflight defers some but never all q3 lanes. Below
+    # the default site slab a correct call may still defer an edge beyond its
+    # record slab or the record arena (auditor's exact 4 097-cluster fixture,
+    # gate mhgp9_gpu_lanes_port): a deferral is judged by the tail and the
+    # digests, never refused by the reader.
     if lanes_capacity:
         need(0 < batch['lanes_deferred'] < batch['lanes_asked'], 'reduced-slab q3 lanes deferred none or all edges')
-    elif case['n'] < DEFAULT_LANES_CAPACITY:
-        need(batch['lanes_deferred'] == 0, 'q3 lanes deferred edges of a frame below the slab')
     need(ledger['lanes_seeds'] == ledger['lanes_depth_rejections'] + ledger['lanes_emitted'] and
          ledger['lanes_acute_sites'] == ledger['lanes_owner_rejections'] + ledger['lanes_seeds'] and
          ledger['lanes_seed_tests'] == ledger['lanes_cover_sites'] and
@@ -1165,6 +1166,9 @@ def execute(args):
                      logical_result(engine_value) == logical_result(pre_value) and
                      certificate_work(engine_value) == certificate_work(pre_value),
                      'batch/GPU preflight tower or certificate work differs from the engine path')
+                # v20: the engine twin proves the work of the levers the batch
+                # arm legitimately bypasses (leaf census, witness cache).
+                validate_preflight_work(engine_value, engine_case['levers'])
             except (ValueError, KeyError, TypeError, UnicodeError) as error:
                 raise PreflightFailed(type(error).__name__ + ': ' + str(error)) from error
             result['preflight']['engine_tower_digest'] = engine_value['tower_digest']
