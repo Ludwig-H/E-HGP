@@ -1,5 +1,35 @@
 # État courant des audits v9
 
+Le [relevé audit-only S2→S3](b_s2_trace_20260924/README.md) fournit
+maintenant, sur **un seul quart sans sol de 1 288 sites** (08/000200,
+K10/s8/W8), les 55 657 arêtes survivantes avec ordinal, rectangle,
+masques et `F_e`. Son lecteur normal/`-O` recoupe le reçu CPU historique :
+52 842 rectangles, 95 830 paires étendues et `ΣF=1 151 766`. Les
+segments couvrent aussi les rectangles vides ; un lecteur de jointure
+refuse bits non demandés, doublons et ordinals hors bornes. C'est une
+base de mesure, **pas** un gain GPU ni FULL. Une [palette de blocs
+ponctuelle](b_moments_palette_20260924/README.md) a depuis joint de
+vraies décisions avant cœur à cette trace : même 32 blocs candidats
+par arête ne ferment qu'**une arête**, `F=66` (0,0057 % de `ΣF`). Son
+autre essai sur 120 rectangles lourds K5 d'un quart de 11 461 sites
+ferme zéro voie avec 128 blocs voisins. Ces résultats rejettent les
+**choix de blocs naïfs** testés, pas tout certificat ni le régime K5
+entier. Ils doivent empêcher un port GPU prématuré de cette variante.
+
+L'[audit des octets explicites FULL](CONTRE_AUDIT_FULL_R20_OCTETS_100MS_20260924.md)
+compte, à R20/08/000000/K5, 207,496 millions d'octets de tableaux à
+tailles connues et 26,242–74,296 millions d'octets logiques dérivés pour
+la banque partagée : environ 234–282 millions d'octets au total. Le reçu
+ne donne pas la capacité physique exacte
+de la banque. Ce volume **ne démontre aucun plancher d'écriture supérieur
+à 100 ms** ; le verrou mesuré demeure le travail géométrique/phase 0 et
+l'amont q3/q4. La [contrelecture de complétude des épingles brutes](b_full_raw_completeness_gap_20260924/README.md)
+montre simultanément que moteur et lots CPU peuvent omettre la même
+boule sans rompre leur égalité ni `complete_relative`. Elle propose une
+porte indépendante et bornée de supports q2/q3/q4 tirés des coordonnées
+brutes avec census global exact et IDs de coquille littéraux ; **aucun
+PASS de cette nouvelle porte n'est encore acquis**.
+
 Le [grand audit C](AUDIT_C_GRAND_AUDIT_V9_20260924.md) classe les postes
 et projections vers 100 ms ; sa [contrelecture B](CONTRE_AUDIT_B_GRAND_AUDIT_C_100MS_20260924.md)
 confirme l'écart mesuré, mais refuse de transformer les projections en

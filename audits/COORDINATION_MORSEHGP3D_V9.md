@@ -5731,3 +5731,40 @@ ledger, puis les trames pleines ; les agrégats existants ne permettent
 pas d'affirmer un gain net du certificat. Détails dans le
 [contre-audit S2→S3](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_MOMENTS_S2_SEAM_20260924.md).
 GCP non utilisé.
+
+### 22 h 43 UTC (24 septembre) — Auditeur B : chiffres nouveaux utiles à 100 ms
+
+À D/C : le [sidecar S2→S3 audit-only](../morsehgp3D_v9/audits/b_s2_trace_20260924/README.md)
+est prêt sur un unique quartier sans sol de 1 288 sites, K10/s8/W8.
+Lectures normal/`-O` recoupent le reçu CPU historique : R=52 842,
+P=95 830, S=55 657, `ΣF=1 151 766`. Chaque survivante a un ordinal,
+un segment de rectangle, masque q3/q4 et `F_e`. Un lecteur de jointure
+échoue fermé sur doublons/ordinals/bits invalides et ne comptabilise une
+économie de cœur **éligible** que si toutes les voies ouvertes sont prouvées
+avant le cœur ; même cette économie n'est pas un chrono mesuré.
+
+J'ai testé exactement les moments ponctuels avec le bloc BVH proche de
+chaque arête, puis 8 et 32 blocs voisins. Les [résultats](../morsehgp3D_v9/audits/b_moments_palette_20260924/README.md)
+sont **1 arête fermée et `F=66` seulement**, inchangés sous 445 249 puis
+1 780 993 certificats, soit 0,0057 % de `ΣF` sur ce quartier K10.
+Avant S2, 128 blocs voisins sur chacun de 120 rectangles lourds d'un
+autre quart K5 ne ferment aucune voie. Ne pas porter ces choix naïfs de
+blocs sur G4 ; ils ne réfutent ni un certificat différent ni le régime
+K5 entier. Pour le prochain essai, il faut une structure de garde qui
+crédite directement un **nœud spatial entier** sur une cellule de centres,
+sans matérialiser chaque forme : le maximum de la forme affine en centre,
+convexe en site, sur boîte spatiale × cellule de centres est atteint aux
+8×4 couples de coins. Preuve/domaines et coût de ce schéma sont en
+contrelecture indépendante, **pas encore acquis**.
+
+La [sortie FULL explicite R20 K5](../morsehgp3D_v9/audits/CONTRE_AUDIT_FULL_R20_OCTETS_100MS_20260924.md)
+est de 207,496 millions d'octets pour cinq tableaux, plus une banque
+partagée dérivée à 26,242–74,296 millions : aucune barrière d'écriture
+au-dessus de 100 ms n'est démontrée. Le problème observé est le travail
+phase 0/cibles, géométrie, front et S2/S3. Enfin, les épingles CPU brutes
+de C ne ferment pas une omission commune de q2/q3/q4 ; la [porte à
+supports indépendants](../morsehgp3D_v9/audits/b_full_raw_completeness_gap_20260924/README.md)
+est spécifiée mais non implémentée. R21 reste à réparer et rejouer en
+préflight avant tout nouveau SPOT. Réserver toujours les tests de trames
+brutes, autres séquences, s8/10/12 et coupes/densités 8k/16k/32k ; les
+petits shadows ne sont pas des qualifications de FULL.

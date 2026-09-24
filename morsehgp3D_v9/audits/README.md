@@ -39,6 +39,14 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
    valide la preuve conditionnelle et définit le raccord sans changement de sortie ;
    ses [fixtures de coins et contacts](b_moments_rectangle_edges_20260924/README.md)
    cherchent des contradictions aux bords du domaine.
+   Le [relevé ordinal S2→S3](b_s2_trace_20260924/README.md) sur 1 288
+   sites ouvre une jointure exacte aux coûts `F_e`; la [palette de blocs
+   testée](b_moments_palette_20260924/README.md) ne ferme pratiquement
+   aucune arête/voie sur ses deux petits cas et ne justifie aucun port GPU.
+   L'[audit des octets FULL](CONTRE_AUDIT_FULL_R20_OCTETS_100MS_20260924.md)
+   écarte une prétendue impossibilité mémoire de 100 ms, sans promettre
+   ce temps ; le [trou de complétude des épingles brutes](b_full_raw_completeness_gap_20260924/README.md)
+   exige encore une porte de supports indépendante du catalogue émis.
 4. [`NOTE_C_INVARIANT_EULER_20260923.md`](NOTE_C_INVARIANT_EULER_20260923.md),
    [`CONTRELEC_EULER_PAR_NERF_20260923.md`](CONTRELEC_EULER_PAR_NERF_20260923.md) et
    [le contre-exemple](CONTRE_EXEMPLE_EULER_KPLUS2_20260923.md) : invariant

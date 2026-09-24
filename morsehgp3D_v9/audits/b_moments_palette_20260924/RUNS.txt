@@ -1,0 +1,27 @@
+Command: timeout 120s /tmp/mhgp9-audit-palette-20260924 quarter_full.u32le 5 1024
+Exit: 0
+sites=11461 K=5 min_group=3 front=520210 open=245818 selected=120 selected_mass=897149 distance_scans=2750520 certificates=15360 wall_s=19.5179 front_check=520210
+palette=1 full=0 full_mass=0 q3=0 q4=0
+palette=8 full=0 full_mass=0 q3=0 q4=0
+palette=32 full=0 full_mass=0 q3=0 q4=0
+palette=128 full=0 full_mass=0 q3=0 q4=0
+
+Command: timeout 120s /tmp/mhgp9-audit-palette-20260924 quarter_full.u32le 5 1024 16
+Exit: 0
+sites=11461 K=5 min_group=16 front=520210 open=245818 selected=120 selected_mass=897149 distance_scans=2750520 certificates=15360 wall_s=19.1838 front_check=520210
+palette=1 full=0 full_mass=0 q3=0 q4=0
+palette=8 full=0 full_mass=0 q3=0 q4=0
+palette=32 full=0 full_mass=0 q3=0 q4=0
+palette=128 full=0 full_mass=0 q3=0 q4=0
+
+Command: timeout 120s /tmp/mhgp9-audit-palette-20260924 quarter_full.u32le 5 1024 32
+Exit: 0
+sites=11461 K=5 min_group=32 front=520210 open=245818 selected=120 selected_mass=897149 distance_scans=2750520 certificates=15360 wall_s=19.6407 front_check=520210
+palette=1 full=0 full_mass=0 q3=0 q4=0
+palette=8 full=0 full_mass=0 q3=0 q4=0
+palette=32 full=0 full_mass=0 q3=0 q4=0
+palette=128 full=0 full_mass=0 q3=0 q4=0
+
+Command: timeout 10s /tmp/mhgp9-audit-palette-20260924 quarter_full.u32le 4294967301 1024
+Exit: 1
+K outside [4,10]

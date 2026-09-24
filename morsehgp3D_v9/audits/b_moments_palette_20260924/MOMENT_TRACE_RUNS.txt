@@ -1,0 +1,24 @@
+Compile moment_trace.cpp as palette.cpp above, replacing source and output name.
+Run palette 1 (use a fresh output path; the archived one already exists):
+  timeout 120s /tmp/mhgp9-audit-moment-trace-20260924 \
+    morsehgp3D_v9/audits/s4a_cpu_scene02_physical_panel_20260924/inputs/quarter_quarter_x_nonneg_y_nonneg.u32le \
+    morsehgp3D_v9/audits/b_s2_trace_20260924/quarter_1288.trace.tsv \
+    /tmp/mhgp9-audit-moment1-replay.tsv 1
+  python3 -B morsehgp3D_v9/audits/b_s2_trace_20260924/join_shadow.py \
+    /tmp/mhgp9-audit-moment1-replay.tsv
+Repeat with fresh output paths and final arguments 8 and 32.
+
+Palette 1: exit 0
+edges=55657 F=1151766 palette=1 candidate_tests=55657 fully_proved=1 fully_proved_F=66
+Join: exit 0; full_closed_edges=1; eligible_core_skip_F=66; q3_proved_edges=1; q4_proved_edges=0.
+
+Palette 8: exit 0
+edges=55657 F=1151766 palette=8 candidate_tests=445249 fully_proved=1 fully_proved_F=66
+Join: exit 0; full_closed_edges=1; eligible_core_skip_F=66; q3_proved_edges=1; q4_proved_edges=0.
+
+Palette 32: exit 0
+edges=55657 F=1151766 palette=32 candidate_tests=1780993 fully_proved=1 fully_proved_F=66
+Join: exit 0; full_closed_edges=1; eligible_core_skip_F=66; q3_proved_edges=1; q4_proved_edges=0.
+
+All three proof TSVs had SHA-256 212e6746f62badf4e6c1ffd7a4a4f02813dde52390c42962a92c9eb3a7d6a0d0.
+Only the palette-1 TSV is retained; the duplicate 8/32 files were removed.
