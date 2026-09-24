@@ -1372,7 +1372,8 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
                                              tower::FullBallTowerOptions{
                                                  .overlap_static = options.tower_overlap_static,
                                                  .pipelined_tail = options.tower_pipelined_tail,
-                                                 .hash_grouping = options.tower_hash_grouping});
+                                                 .hash_grouping = options.tower_hash_grouping,
+                                                 .persistent_pool = options.tower_persistent_pool});
       result.times.tower_ms = ms_since(t);
       result.tower_stats = tw.stats;
       result.tower_times = tw.times;

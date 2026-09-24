@@ -106,6 +106,12 @@ struct ChainOptions {
   // le temoin trie (tri par cle et ordinal). Memes classes, memes cibles,
   // memes compteurs, meme objet. Contrat v9 : actif par defaut.
   bool tower_hash_grouping = true;
+  // v9 E2 : pool persistant de la tour (tower_static_threads > 1) : un pool
+  // de T participants cree une fois par tour sert les primitives paralleles
+  // de son fil (validation, phase 0, populations, images, banque, encodage)
+  // au lieu de creer leurs fils a chaque appel. Meme objet (memes condenses,
+  // meme tower_work). Actif par defaut ; la sonde ne le publie pas encore.
+  bool tower_persistent_pool = true;
   // Ordonnancement q2 (meme objet) : plan de jobs du front prepare par masse
   // decroissante et 64 jobs par fil (le plus long job faisait tout q2).
   bool q2_jobs_by_mass = true;

@@ -3,13 +3,23 @@
 // Deux primitives, toutes deux a tirage dynamique et a fusion en ORDRE
 // D'INDEX (jamais en ordre d'achevement) : la sortie est bit-identique au
 // sequentiel quel que soit le nombre de fils. Chaque primitive RETOURNE le
-// nombre d'ouvriers reellement crees : c'est cette valeur, et elle seule,
-// que les compteurs publient (mutant `parallel-one-worker` : un seul fil
-// cree quel que soit le budget — la metadonnee mesuree le trahit).
+// nombre d'ouvriers reellement engages (fils crees pour l'appel, ou
+// participants d'un pool persistant, appelant compris) : c'est cette valeur,
+// et elle seule, que les compteurs publient (mutant `parallel-one-worker` : un
+// seul fil quel que soit le budget — la metadonnee mesuree le trahit).
+//
+// v9 E2 (pool persistant de la tour) : un TaskPool cree une fois par
+// construction de tour sert les primitives appelees par SON fil proprietaire
+// (PoolScope, pointeur thread_local) ; toute autre invocation — depuis un
+// ouvrier du pool, depuis la part du proprietaire pendant un travail, depuis
+// un fil tiers (coureurs de la phase A) — garde ses propres fils, comme
+// avant. Meme partition du travail, memes indices d'ouvrier : sortie
+// bit-identique.
 #pragma once
 
 #include <algorithm>
 #include <atomic>
+#include <cfenv>
 #include <memory>
 #include <cstddef>
 #include <exception>
@@ -50,6 +60,11 @@ inline thread_local size_t launch_fail_after = (size_t)-1;
 inline std::atomic<size_t> launch_started{0};
 inline std::atomic<size_t> launch_active{0};
 #endif
+// Threads created by the per-call path of run_threads, process-wide (the
+// persistent pool's own threads are not counted here). A tower publishes the
+// delta over its build: exact when it is the process's only client of these
+// helpers during the build, as in the chain.
+inline std::atomic<u64> spawned_threads{0};
 
 struct JoinThreads {
   std::vector<std::thread>& threads;
@@ -59,8 +74,189 @@ struct JoinThreads {
   }
 };
 
+// Persistent pool (v9 E2): participants() - 1 threads created ONCE, plus the
+// owner thread, which runs its own share as worker 0. run(count, fn) calls
+// fn(t) exactly once for every t in [0, count) (t = 0 on the owner, t >= 1 on
+// pool thread t) and returns only after every pool thread has acknowledged
+// the job, including the threads with t >= count: the job fields are never
+// rewritten while a thread may still read them. Contracts:
+//  - admission: the threads wait until EVERY thread exists; a creation
+//    failure cancels them (they exit without reading any job), joins them
+//    and rethrows, so a partially created pool is never published and no
+//    job ever waits for a participant that does not exist;
+//  - exceptions: fn is the helpers' capturing wrapper; an exception that
+//    still escapes (on the owner or a thread) is kept, the others finish,
+//    and the first one is rethrown on the owner after the join;
+//  - floating point: each job carries the owner's floating-point
+//    environment, installed by every thread before fn, as a thread created
+//    for the call would inherit it (the certified level filter reads the
+//    rounding mode);
+//  - nesting: while its own share runs, the owner has no current pool, and
+//    the pool threads never have one: a helper called from inside a job
+//    creates its own threads (no queue on a busy pool, no deadlock).
+class TaskPool;
+inline thread_local TaskPool* current_pool = nullptr;
+
+class TaskPool {
+ public:
+  explicit TaskPool(size_t participants) {
+    const size_t count = participants > 1 ? participants - 1 : 0;
+    threads_.reserve(count);
+    try {
+      for (size_t t = 0; t < count; ++t) {
+#if defined(MHGP9_TESTING)
+        if (t == launch_fail_after) {
+          while (launch_started.load() < t) std::this_thread::yield();
+          throw std::system_error(std::make_error_code(std::errc::resource_unavailable_try_again));
+        }
+#endif
+        threads_.emplace_back([this, t] { worker(t + 1); });
+      }
+    } catch (...) {
+#if defined(MHGP9_POOL_MUTANT_ADMIT_PARTIAL)
+      if (!threads_.empty()) {  // mutant: the partial pool is published with the threads it has
+        admission_.store(1);
+        admission_.notify_all();
+        return;
+      }
+#endif
+      admission_.store(2);
+      admission_.notify_all();
+      for (auto& th : threads_) th.join();
+      threads_.clear();
+      throw;
+    }
+    admission_.store(1);
+    admission_.notify_all();
+  }
+  TaskPool(const TaskPool&) = delete;
+  TaskPool& operator=(const TaskPool&) = delete;
+  ~TaskPool() {
+    stopping_ = true;
+    generation_.fetch_add(1, std::memory_order_release);
+    generation_.notify_all();
+    for (auto& th : threads_) th.join();
+  }
+  size_t participants() const { return threads_.size() + 1; }
+  size_t threads() const { return threads_.size(); }
+  u64 jobs() const { return jobs_; }  // read by the owner only
+  bool owned_by_this_thread() const { return current_pool == this; }
+
+  template <typename Fn>
+  void run(size_t count, Fn& fn) {
+#if defined(MHGP9_POOL_MUTANT_NESTED_QUEUE)
+    // mutant: a submission while a job runs waits for the pool (a queue)
+    for (bool busy = busy_.load(); busy; busy = busy_.load()) busy_.wait(true);
+    busy_.store(true);
+#endif
+    job_invoke_ = [](void* context, size_t t) { (*static_cast<Fn*>(context))(t); };
+    job_context_ = &fn;
+    job_count_ = count;
+    std::fegetenv(&job_env_);
+    pending_.store(static_cast<u32>(threads_.size()), std::memory_order_relaxed);
+    ++jobs_;
+    generation_.fetch_add(1, std::memory_order_release);
+    generation_.notify_all();
+    std::exception_ptr own;
+    {
+#if !defined(MHGP9_POOL_MUTANT_NESTED_QUEUE)
+      struct NoPool {  // the owner's share: nested helpers use their own threads
+        TaskPool* saved = current_pool;
+        NoPool() { current_pool = nullptr; }
+        ~NoPool() { current_pool = saved; }
+      } no_pool;
+#endif
+      try { fn(0); } catch (...) { own = std::current_exception(); }
+    }
+#if !defined(MHGP9_POOL_MUTANT_RETURN_BEFORE_JOIN)
+    for (u32 p = pending_.load(std::memory_order_acquire); p != 0; p = pending_.load(std::memory_order_acquire))
+      pending_.wait(p, std::memory_order_acquire);
+#endif
+#if defined(MHGP9_POOL_MUTANT_NESTED_QUEUE)
+    busy_.store(false);
+    busy_.notify_all();
+#endif
+    if (own) std::rethrow_exception(own);
+    if (worker_error_) {
+      std::exception_ptr error;
+      error.swap(worker_error_);
+      std::rethrow_exception(error);
+    }
+  }
+
+ private:
+  std::vector<std::thread> threads_;
+  std::atomic<u32> admission_{0};  // 0 waiting, 1 admitted, 2 cancelled
+  std::atomic<u32> generation_{0};
+  std::atomic<u32> pending_{0};    // pool threads that have not acknowledged the job
+  // Job fields: written by the owner before the generation's release, read
+  // by the threads after its acquire, never rewritten before every ack.
+  void (*job_invoke_)(void*, size_t) = nullptr;
+  void* job_context_ = nullptr;
+  size_t job_count_ = 0;
+  std::fenv_t job_env_{};
+  bool stopping_ = false;
+  u64 jobs_ = 0;
+  std::mutex error_mu_;
+  std::exception_ptr worker_error_;
+#if defined(MHGP9_POOL_MUTANT_NESTED_QUEUE)
+  std::atomic<bool> busy_{false};
+#endif
+
+  void worker(size_t index) {
+#if defined(MHGP9_TESTING)
+    launch_active.fetch_add(1);
+    launch_started.fetch_add(1);
+    struct ActiveGuard {
+      ~ActiveGuard() { launch_active.fetch_sub(1); }
+    } active_guard;
+#endif
+    admission_.wait(0);
+    if (admission_.load() != 1) return;
+#if defined(MHGP9_POOL_MUTANT_NESTED_QUEUE)
+    current_pool = this;  // mutant: nested helpers of a job submit to this pool
+#endif
+    u32 seen = 0;
+    for (;;) {
+      generation_.wait(seen, std::memory_order_acquire);
+      seen = generation_.load(std::memory_order_acquire);
+      if (stopping_) return;
+      if (index < job_count_) {
+#if !defined(MHGP9_POOL_MUTANT_STALE_FENV)
+        std::fesetenv(&job_env_);
+#endif
+        try {
+          job_invoke_(job_context_, index);
+        } catch (...) {
+          std::lock_guard<std::mutex> lock(error_mu_);
+          if (!worker_error_) worker_error_ = std::current_exception();
+        }
+      }
+      if (pending_.fetch_sub(1, std::memory_order_acq_rel) == 1) pending_.notify_one();
+    }
+  }
+};
+
+// Installs `pool` as the current pool of THIS thread for the scope (nullptr:
+// none), restoring the previous one on exit.
+class PoolScope {
+ public:
+  explicit PoolScope(TaskPool* pool) : saved_(current_pool) { current_pool = pool; }
+  PoolScope(const PoolScope&) = delete;
+  PoolScope& operator=(const PoolScope&) = delete;
+  ~PoolScope() { current_pool = saved_; }
+ private:
+  TaskPool* saved_;
+};
+
 template <typename Fn>
 inline void run_threads(size_t count, Fn&& fn) {
+#if !defined(MHGP9_POOL_MUTANT_BYPASS)
+  if (TaskPool* pool = current_pool; pool && count <= pool->participants()) {
+    pool->run(count, fn);
+    return;
+  }
+#endif
   std::atomic<unsigned> admission{0};  // 0 waiting, 1 admitted, 2 cancelled
   std::vector<std::thread> pool;
   pool.reserve(count);
@@ -84,6 +280,7 @@ inline void run_threads(size_t count, Fn&& fn) {
         admission.wait(0);
         if (admission.load() == 1) fn(t);
       });
+      spawned_threads.fetch_add(1, std::memory_order_relaxed);
     }
   } catch (...) {
     admission.store(MHGP9_MUTANT("parallel-admit-partial-launch") ? 1u : 2u);
@@ -115,7 +312,8 @@ struct FirstException {
 
 // Decoupe [0, n) en tranches contigues (≈ 8 par ouvrier), executees par
 // tirage dynamique ; `fn(b, e, worker)` traite la tranche [b, e). Retourne
-// le nombre d'ouvriers crees (1 = sequentiel, aucun fil).
+// le nombre d'ouvriers engages (1 = sequentiel, aucun fil ; sur le pool
+// courant du fil appelant, l'appelant est l'ouvrier 0).
 template <typename Fn>
 inline size_t parallel_ranges(size_t n, int threads, Fn&& fn) {
   const size_t T = planned_workers(n, threads);

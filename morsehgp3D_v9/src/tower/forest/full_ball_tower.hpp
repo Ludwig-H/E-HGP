@@ -69,6 +69,13 @@ struct FullBallStats {
   // ball whose FIRST contributing order is lower (an extended shell that
   // contributes to several orders), named after the join.
   u64 pipelined_orders = 0, population_deferred_refs = 0;
+  // v9 E2 (persistent pool): threads created by this build's pool (W - 1;
+  // 0 when it is off or W <= 1) and helper calls it served; threads created
+  // by the per-call helpers during the build (process-wide delta of
+  // parallel_detail::spawned_threads, exact when the tower is the process's
+  // only client of the helpers, as in the chain); phase-A runner threads of
+  // the overlapped path. Scheduling metadata, never part of tower_work.
+  u64 pool_threads = 0, pool_jobs = 0, helper_threads = 0, runner_threads = 0;
   // False after a backend failure whose paid work could not be recovered.
   bool static_batch_work_known = true;
   AnchorMebWork validation_work, resolve_work;
@@ -143,6 +150,10 @@ struct FullBallTowerOptions {
   // sorted witness (sort of the 56-byte requests). Same classes, first
   // requests, targets, counters and objects.
   bool hash_grouping = true;
+  // v9 E2: with static_threads > 1, one pool of static_threads participants
+  // created once serves the build's parallel helpers instead of creating
+  // their threads at every call. Same objects.
+  bool persistent_pool = true;
   // Gates only: the static targets and class firsts of every order (never
   // read by the product).
   FullBallStaticTrace* trace = nullptr;
@@ -169,6 +180,7 @@ struct FullBallOrder {
 // step on the other paths); images_own_by_k and populations_by_k are each
 // order's own steps (overlapped, never summed; zero on the other paths).
 struct FullBallTimes {
+  double pool_ms = 0;  // v9 E2: creation of the persistent pool, before the validation
   double validate_ms = 0, static_ms = 0, lots_ms = 0, populations_ms = 0, images_ms = 0, bank_ms = 0,
          encode_ms = 0;
   std::array<double, 11> static_by_k{}, lots_by_k{}, images_by_k{}, encode_by_k{}, order_by_k{};
@@ -481,10 +493,39 @@ class Builder {
       : ix(index), balls(census), requested(max_k), st(stats), resolver_cache(stats),
         geometry_threads(static_threads), batch_resolver(batch), propose_meb(meb_proposal),
         times(phase_times ? phase_times : &unused_times), overlap_static_lots(options.overlap_static),
-        pipelined_tail(options.pipelined_tail), hashed_groups(options.hash_grouping),
-        static_trace(options.trace) {}
+        use_pool(options.persistent_pool), pipelined_tail(options.pipelined_tail),
+        hashed_groups(options.hash_grouping), static_trace(options.trace) {}
 
+  // v9 E2: with more than one geometry thread, one persistent pool of
+  // geometry_threads participants (the calling thread and W - 1 threads) is
+  // created before the validation and serves every helper this thread calls
+  // until the tower is published; the helpers called elsewhere (pool
+  // threads, phase-A runners, this thread's own share of a job) keep their
+  // own threads. Same partition of the work, same objects. A thread that
+  // cannot be created refuses the build as before (std::system_error, before
+  // any work). The thread counters are recorded on every exit.
   std::vector<FullBallOrder> run() {
+    struct ThreadLedger {
+      FullBallStats& st;
+      const std::optional<parallel_detail::TaskPool>& pool;
+      const u64 spawned_before = parallel_detail::spawned_threads.load(std::memory_order_relaxed);
+      ~ThreadLedger() {
+        st.helper_threads = parallel_detail::spawned_threads.load(std::memory_order_relaxed) - spawned_before;
+        if (pool) { st.pool_threads = pool->threads(); st.pool_jobs = pool->jobs(); }
+      }
+    };
+    std::optional<parallel_detail::TaskPool> pool;
+    ThreadLedger ledger{st, pool};
+    if (use_pool && geometry_threads > 1) {
+      const auto pool_start = PhaseClock::now();
+      pool.emplace(static_cast<size_t>(geometry_threads));
+      times->pool_ms = ms_since(pool_start);
+    }
+    parallel_detail::PoolScope scope(pool ? &*pool : nullptr);
+    return run_orders();
+  }
+
+  std::vector<FullBallOrder> run_orders() {
     const auto validate_start = PhaseClock::now();
     validate_catalogue();
     times->validate_ms = ms_since(validate_start);
@@ -873,6 +914,7 @@ class Builder {
             catch (...) { image_errors[i] = std::current_exception(); }
             images_end[i] = PhaseClock::now();
           });
+          ++st.runner_threads;
         }
       } catch (...) { cancel(); throw; }
       std::optional<Failure> static_failure;
@@ -1434,6 +1476,7 @@ class Builder {
   FullBallTimes unused_times;
   FullBallTimes* times;  // phase wall times (the caller's, or unused_times)
   bool overlap_static_lots = false;  // phase A of order K starts once phase 0 of K is done
+  bool use_pool = true;  // v9 E2: persistent pool of the geometry threads (run)
   bool pipelined_tail = true;  // v9 E4: phases B and C inside the overlapped window
   RawVector<u8> first_order;   // v9 E4: first contributing order per ball, 0 if none <= kmax
   std::array<u64, kFacetMaxK + 2> population_offset{};  // v9 E4: #balls of first order < K
