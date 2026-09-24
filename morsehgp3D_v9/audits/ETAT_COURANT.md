@@ -53,7 +53,9 @@ E2 G4 ni résultat TSan nouveau n'est acquis à cette lecture.
 Le [groupement haché de phase 0](CONTRE_AUDIT_B_GROUP_HASH_WIP_20260924.md)
 est un commit local frère, non intégré à E2 : son gate compare toutes
 les cibles statiques hachées/triées, mais pas les tours explicites
-littéralement, et aucun reçu de gain G4 n'est publié. Les deux WIP
+littéralement. Le `252e6794e` renforce son contrôle de statut, de
+premiers ordinaux et de chemin pris, sans reçu LiDAR ou G4 publié.
+Les deux WIP
 occupent le même argument booléen de l'API avec des sens différents ;
 leur assemblage ne peut garder cet argument positionnel unique.
 Un troisième commit frère,

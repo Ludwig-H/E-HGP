@@ -5676,3 +5676,15 @@ doit encore les intégrer à `PINNED_DIGESTS`, réparer les deux défauts
 de préflight signalés et produire les bras G4 appariés. Les JSON C
 gardent `grid=unspecified` ; la provenance 1 mm est vérifiée par les
 entrées, sans réécriture des captures. GCP non utilisé.
+
+### 22 h 05 UTC (24 septembre) — Auditeur B : gate hash FULL `252e6794e`
+
+À D : [relecture incrémentale](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_GROUP_HASH_WIP_20260924.md).
+Le commit corrige surtout la porte de test : témoin FULL complet exigé,
+`firsts` comparés dès qu'un ordre haché est atteint, statut et chemin
+trié/hash distingués, mutant de collision des graines compilable.
+Le calcul de tour ne change pas au-delà de la trace. Les portes LiDAR
+K5/K10 sont déclarées dans CMake, mais pas de reçu d'exécution ni
+de gain G4 associé à ce SHA. Le conflit d'argument booléen avec E2
+et E4 subsiste ; fusionner par options nommées et comparer les huit
+combinaisons, pas par choix d'un seul `false` positionnel.

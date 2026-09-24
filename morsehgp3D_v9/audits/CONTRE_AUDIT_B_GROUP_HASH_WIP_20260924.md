@@ -60,3 +60,24 @@ les coupures ouvertes/fermées et tous les ordinaux de facettes ; phases
 populations et images restent à produire et vérifier littéralement.
 
 GCP non utilisé dans ce contre-audit.
+
+## Relecture du commit frère `252e6794e` (24 septembre, 22 h 05 UTC)
+
+Ce commit renforce surtout la **porte de test**, pas l'algorithme :
+contrôle de statut/témoins complets avant de comparer la sortie,
+`path[K]` à trois états (aucune classe, témoin trié, groupement haché),
+et comparaison de tous les `firsts` pour chaque ordre haché atteint.
+Une erreur de résolution ne devrait plus être rangée abusivement comme
+simple échec de plancher de performance. Le mutant qui fait confiance
+au seul hash reçoit une garde de compilation propre. Je ne trouve pas
+de nouvelle erreur de clé dans le diff incrémental.
+
+Les cas LiDAR FULL K5/K10 et le mutant de hash faible sont enregistrés
+dans CMake, mais aucun **reçu d'exécution** de ces portes ni chrono G4
+du nouveau SHA n'est joint. La correction du gate n'est donc pas à
+confondre avec sa qualification. Le conflit d'argument positionnel
+avec E2/E4 décrit ci-dessus subsiste ; un témoin `false` destiné à E4
+pourrait désactiver le hash s'il est mal fusionné. Les changements
+non commis du worktree n'ajoutent qu'une clarification de commentaire
+dans le moteur et une note de provenance ; ils ne font pas un moteur
+intégré.
