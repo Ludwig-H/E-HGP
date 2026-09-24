@@ -1087,7 +1087,7 @@ class Builder {
   // compares whole keys: a collision costs a probe, never a wrong ball.
   // Built in parallel by compare-and-swap; the slot layout may depend on the
   // schedule, the answer of every lookup does not.
-  std::vector<u32> key_slots;
+  RawVector<u32> key_slots;  // zeroed in parallel by build_key_index (E2)
   u64 key_mask = 0;
   static u64 key_hash(const BallKey& key) {
     u64 h = 0x9e3779b97f4a7c15ull;
@@ -1103,7 +1103,11 @@ class Builder {
   void build_key_index() {
     u64 capacity = 16;
     while (capacity < 2 * static_cast<u64>(balls.size())) capacity *= 2;
-    key_slots.assign(capacity, 0);
+    key_slots.resize(capacity);  // v9 E2: zeroed in parallel, not by a serial fill
+    parallel_ranges(capacity, geometry_threads, [&](size_t begin, size_t end, size_t) {
+      std::fill(key_slots.begin() + static_cast<std::ptrdiff_t>(begin),
+                key_slots.begin() + static_cast<std::ptrdiff_t>(end), u32{0});
+    });
     key_mask = capacity - 1;
     parallel_ranges(balls.size(), geometry_threads, [&](size_t begin, size_t end, size_t) {
       for (size_t id = begin; id < end; ++id) {
@@ -1131,10 +1135,11 @@ class Builder {
     }
   }
   std::vector<std::vector<BallId>> programs;
-  std::vector<u32> level_run;  // exact level run of each ball (validate_catalogue)
+  RawVector<u32> level_run;  // exact level run of each ball (validate_catalogue; every slot written)
   std::unordered_map<BallId, local_plateau::ShellTable> extra;
   std::vector<FullCoveragePopulation> populations;
-  std::vector<u64> population_ids, anchors, compressed;
+  RawVector<u64> population_ids;  // filled with `absent` in parallel (validate_catalogue)
+  std::vector<u64> anchors, compressed;
   History current;
   std::vector<NodeRef> stack;
   std::vector<Block> lot_blocks;  // reused slots of the current lot
@@ -1237,8 +1242,21 @@ class Builder {
     // permutation and keys are distinct. Otherwise keys are sorted and must
     // be pairwise distinct: a strict total order, so the parallel sort is
     // the unique sorted permutation.
+    // v9 E2: the scan in parallel chunks; chunk c judges the pairs (j-1, j)
+    // for j in its range, so a pair across a chunk edge is judged by the
+    // chunk on its right. Same boolean as the serial scan.
     bool presorted = true;
-    for (size_t j = 1; j < balls.size() && presorted; ++j) presorted = balls[j - 1].key < balls[j].key;
+    {
+      const size_t n = balls.size();
+      const size_t chunks = std::max<size_t>(1, std::min<size_t>(n / 65536 + 1, 256));
+      std::vector<unsigned char> ordered(chunks, 1);
+      parallel_items(chunks, geometry_threads, [&](size_t c, size_t) {
+        const size_t begin = std::max<size_t>(1, n * c / chunks), end = n * (c + 1) / chunks;
+        for (size_t j = begin; j < end; ++j)
+          if (!(balls[j - 1].key < balls[j].key)) { ordered[c] = 0; return; }
+      });
+      for (const auto flag : ordered) presorted = presorted && flag != 0;
+    }
     if (presorted) add(st.presorted_catalogues);
     else {
       parallel_sort(by_key, geometry_threads, [&](BallId a, BallId b) { return balls[a].key < balls[b].key; });
@@ -1343,14 +1361,16 @@ class Builder {
     // certified double filter decides clear gaps, the exact U320 comparison
     // decides the rest, and equal levels keep their by_key rank.
     auto by_level = by_key;
-    std::vector<double> approx;  // certified filter values, reused by the level runs below
+    RawVector<double> approx;  // certified filter values (every slot written), reused by the level runs
     if (std::fegetround() == FE_TONEAREST) {
       approx.resize(balls.size());
-      std::vector<BallId> rank(balls.size());
-      for (size_t j = 0; j < by_key.size(); ++j) {
-        rank[by_key[j]] = static_cast<BallId>(j);
-        approx[by_key[j]] = level_approximation(balls[by_key[j]].level);
-      }
+      RawVector<BallId> rank(balls.size());  // v9 E2: every slot written below, in parallel
+      parallel_ranges(by_key.size(), geometry_threads, [&](size_t begin, size_t end, size_t) {
+        for (size_t j = begin; j < end; ++j) {
+          rank[by_key[j]] = static_cast<BallId>(j);
+          approx[by_key[j]] = level_approximation(balls[by_key[j]].level);
+        }
+      });
       // Ties end on the by_key rank: a strict total order, parallel sorted.
       parallel_sort(by_level, geometry_threads, [&](BallId a, BallId b) {
         const double x = approx[a], y = approx[b];
@@ -1370,7 +1390,7 @@ class Builder {
     // double filter separates clear gaps; the exact comparison decides the
     // rest. Phase 0 and phase A then compare runs instead of U320 products.
     lap(5);
-    level_run.assign(balls.size(), 0);
+    level_run.resize(balls.size());  // v9 E2: every slot written by the second pass below
     {
       // Parallel in two passes: run starts and their count per chunk, then
       // chunk offsets and the runs themselves.
@@ -1439,7 +1459,11 @@ class Builder {
         }
       });
     }
-    population_ids.assign(balls.size(), absent);
+    population_ids.resize(balls.size());
+    parallel_ranges(balls.size(), geometry_threads, [&](size_t begin, size_t end, size_t) {
+      std::fill(population_ids.begin() + static_cast<std::ptrdiff_t>(begin),
+                population_ids.begin() + static_cast<std::ptrdiff_t>(end), absent);
+    });
     lap(7);
   }
 
