@@ -10,8 +10,10 @@ empreintes sont conservées. Pour `core_sites`, **7/18 pentes spatiales** et
 pentes CPU·s de chaîne restent sous 2 dans les deux axes. À densité pleine,
 la somme des cœurs des deux moitiés vaut **0,899** fois celui de la scène,
 pour un repère quadratique de **0,508** calculé sur leurs tailles réelles.
-Le quart chaud `x≥0,y<0` porte 583,0 M des 1 069,2 M formes de la scène ;
-ses pentes de densité sont 2,077 puis 1,916. Les murs sous garde sont
+Le quart chaud `x≥0,y<0`, **recalculé comme problème distinct**, traite
+583,0 M formes contre 1 069,2 M pour la scène entière ; ces deux totaux
+ne forment pas une partition des arêtes ni des formes du plein. Ses pentes
+de densité sont 2,077 puis 1,916. Les murs sous garde sont
 descriptifs, car la charge externe varie entre bras ; ce panneau d'une
 seule scène et d'une seule graine n'est ni G4, ni FULL brut avec sol, ni
 une borne asymptotique.
@@ -89,6 +91,14 @@ ledger ne compte pas encore la reconstruction de chaque liste de seau
 ni les réductions min et de présentation par groupe ; mesurer ces
 passes avant de projeter son temps GPU. Le plan de tâches parallèles
 doit aussi raccorder ses sorties à la plage unique par arête du batch.
+La [nouvelle porte fichier S4b v21 en WIP](s4b_compare_gate_v21_20260924/README.md)
+compare utilement les enregistrements q4 sur les arêtes qu'elle visite,
+mais saute les arêtes reportées, ne borne pas le nombre de graines ou
+d'émissions et ne compare que taille/empreintes de coquille. Deux points
+font rendre `equal=1` avec zéro graine et zéro tétraèdre ; une fixture
+tétraédrique à seaux de largeur nulle exerce au contraire une émission.
+Publier les exclusions et un plancher positif sur LiDAR, puis juger les IDs
+de coquille sur petites fixtures, avant de dire « toutes les arêtes ».
 
 La [matrice de croissance LiDAR](CROISSANCE_LIDAR_PLANS_ET_DENSITE_20260923.md)
 répond séparément aux deux variations demandées : trame entière → deux
