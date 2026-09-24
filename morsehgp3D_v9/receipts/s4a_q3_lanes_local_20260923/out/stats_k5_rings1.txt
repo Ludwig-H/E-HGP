@@ -1,0 +1,6 @@
+lanes_stats file=morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le K=5 edges=701678
+census_point_tests sum=5285780658 p50=60 p90=1081 p99=51712 p999=1445536 max=24782835
+cover_sites sum=87666729 p50=24 p90=162 p99=2375 p999=8495 max=18864
+seeds sum=9318486 p50=3 p90=20 p99=159 p999=981 max=9415
+emitted sum=691284 p50=0 p90=3 p99=6 p999=8 max=14
+warp_steps_lower_bound sum=165476132 p50=2 p90=34 p99=1616 p999=45173 max=774464
