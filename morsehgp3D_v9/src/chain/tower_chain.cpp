@@ -8,6 +8,7 @@
 #include <ctime>
 #include <exception>
 #include <limits>
+#include <condition_variable>
 #include <mutex>
 #include <new>
 #include <optional>
@@ -111,36 +112,80 @@ GpuIndex prepare_gpu_index(const gen::Q2CensusIndex& index) {
   return out;
 }
 
-// Opens the CUDA context and prepares the flat index on its own thread while
-// q2 runs (the index is immutable: read-only sharing). Joined before the
-// batch call and, through the destructor, on every failure path.
+// Prepares the device on its own thread, in two stages (v24, after R19):
+// stage A opens the CUDA context from the chain's entry, then flattens the
+// index as soon as the chain provides it; the filter and certificate calls
+// wait for stage A only (get). Stage B then reserves the lanes call's
+// resident slabs in the background, during those calls; the lanes call
+// needs no wait (the runner's resident buffers are guarded by their mutex
+// and grow on demand). The index is immutable: read-only sharing. Joined
+// through the destructor on every path; a chain that never provides the
+// index releases the thread.
 class GpuPreparation {
  public:
   GpuPreparation() = default;
   GpuPreparation(const GpuPreparation&) = delete;
   GpuPreparation& operator=(const GpuPreparation&) = delete;
-  ~GpuPreparation() { join(); }
-  // lanes: also reserve the lanes call's resident slabs (v9 H1) during q2.
-  void start(const gen::Q2CensusIndex& index, bool lanes, std::uint32_t lanes_capacity, std::uint32_t lanes_events) {
-    thread_ = std::thread([this, &index, lanes, lanes_capacity, lanes_events] {
+  ~GpuPreparation() {
+    {
+      std::lock_guard<std::mutex> lock(mu_);
+      released_ = true;
+    }
+    wake_.notify_all();
+    join();
+  }
+  // lanes: stage B reserves the lanes call's resident slabs (v9 H1).
+  void start(bool lanes, std::uint32_t lanes_capacity, std::uint32_t lanes_events) {
+    started_ = true;
+    thread_ = std::thread([this, lanes, lanes_capacity, lanes_events] {
       const auto begin = Clock::now();
       try {
         static_cast<void>(gpu::warm_up());  // errors are classified by the batch call
-        if (lanes) static_cast<void>(gpu::warm_up_lanes(lanes_capacity, 0, lanes_events));
-        prepared_ = prepare_gpu_index(index);
+        const gen::Q2CensusIndex* index = nullptr;
+        {
+          std::unique_lock<std::mutex> lock(mu_);
+          wake_.wait(lock, [&] { return index_ != nullptr || released_; });
+          index = index_;
+        }
+        if (index != nullptr) prepared_ = prepare_gpu_index(*index);
       } catch (...) {
         failure_ = std::current_exception();
       }
       prepare_ms_ = ms_since(begin);
+      {
+        std::lock_guard<std::mutex> lock(mu_);
+        stage_a_done_ = true;
+      }
+      wake_.notify_all();
+      bool stage_b = false;
+      {
+        std::lock_guard<std::mutex> lock(mu_);
+        stage_b = lanes && !failure_ && prepared_ && !released_;  // never for a chain already ending
+      }
+      try {
+        if (stage_b) static_cast<void>(gpu::warm_up_lanes(lanes_capacity, 0, lanes_events));
+      } catch (...) {
+        // The lanes call reserves and classifies again.
+      }
     });
   }
-  // The prepared index (rethrows a preparation failure); prepares it here if
-  // the thread was never started. v24: the first call's wait is recorded.
+  void provide_index(const gen::Q2CensusIndex& index) {
+    {
+      std::lock_guard<std::mutex> lock(mu_);
+      index_ = &index;
+    }
+    wake_.notify_all();
+  }
+  // The prepared index once stage A is done (rethrows a preparation
+  // failure); prepares it here if the thread was never started. The first
+  // call's wait is recorded.
   const GpuIndex& get(const gen::Q2CensusIndex& index) {
-    if (thread_.joinable()) {
+    if (started_ && !waited_) {
       const auto begin = Clock::now();
-      join();
+      std::unique_lock<std::mutex> lock(mu_);
+      wake_.wait(lock, [&] { return stage_a_done_; });
       wait_ms_ = ms_since(begin);
+      waited_ = true;
     }
     if (failure_) std::rethrow_exception(failure_);
     if (!prepared_) prepared_ = prepare_gpu_index(index);
@@ -154,6 +199,10 @@ class GpuPreparation {
     if (thread_.joinable()) thread_.join();
   }
   std::thread thread_;
+  std::mutex mu_;
+  std::condition_variable wake_;
+  const gen::Q2CensusIndex* index_ = nullptr;
+  bool released_ = false, stage_a_done_ = false, started_ = false, waited_ = false;
   std::optional<GpuIndex> prepared_;
   std::exception_ptr failure_;
   double prepare_ms_ = 0, wait_ms_ = 0;
@@ -737,6 +786,14 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     const unsigned kmax = options.kmax;
     result.kmax_effective = static_cast<unsigned>(std::min<std::size_t>(kmax, points.size()));
     const std::size_t W = options.workers;
+    // S2: device preparation from the chain's entry (stage A: context, then
+    // the flat index once built; stage B: the lanes slabs, in the
+    // background); the first device call waits for stage A only.
+    GpuPreparation gpu_preparation;
+    if (options.q34_batch_filter && (options.q34_gpu_filter || options.q34_gpu_certificates || options.q34_gpu_q3) &&
+        kmax >= 2 && points.size() >= 2)
+      gpu_preparation.start(options.q34_batch_q3 && options.q34_gpu_q3, options.q34_lanes_capacity,
+                            options.q34_lanes_events);
 
     // ---- Generateur (configuration mesuree des recus v8).
     auto t = Clock::now();
@@ -750,12 +807,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     t = Clock::now();
     const gen::Q2CensusIndexPtr index = gen::make_q2_cloud_index(cloud);
     result.times.gen_index_ms = ms_since(t);
-    // S2: CUDA context and flat index prepared during q2 (joined before q34).
-    GpuPreparation gpu_preparation;
-    if (options.q34_batch_filter && (options.q34_gpu_filter || options.q34_gpu_certificates || options.q34_gpu_q3) &&
-        kmax >= 2)
-      gpu_preparation.start(*index, options.q34_batch_q3 && options.q34_gpu_q3, options.q34_lanes_capacity,
-                            options.q34_lanes_events);
+    gpu_preparation.provide_index(*index);
 
     std::vector<std::vector<Presentation>> slots(W);
     // q2 into its own slots (v24: possibly on a thread during the device
