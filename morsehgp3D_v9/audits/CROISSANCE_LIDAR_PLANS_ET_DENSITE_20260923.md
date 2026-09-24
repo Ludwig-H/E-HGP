@@ -1,5 +1,26 @@
 # Croissance LiDAR : secteurs capteur et densité, deux axes distincts
 
+**Lecture au 24 septembre.** Les deux variations sont effectivement
+mesurées, mais seulement à tailles finies. Les demi-scènes et quarts
+sont définis par deux plans passant par le capteur ; à secteur fixé, les
+densités 1/4 ⊂ 1/2 ⊂ 1 sont tirées globalement par ID puis intersectées
+avec le secteur. Les pentes emploient les **effectifs réels** et les formes
+du cœur incluent les deux extrémités traitées par charge.
+
+| Régime et binaire | Liens spatiaux `p_core>2` | Liens de densité `p_core≥2` | Portée |
+| --- | ---: | ---: | --- |
+| Sans sol, v12 CPU, trois trames 08, K5/K10 | 13/36 | 10/84 | Temps CPU et paires développées sous 2 sur les 84 liens de densité ; pas sur tous les compteurs internes. |
+| Brut avec sol, v12 CPU, 08/000000 K5 | 7/18 | 2/14 | Sept secteurs physiques et trois densités. |
+| Brut avec sol, v12 CPU, 08/000000 K10 | 3/18 | 1/14 | Même entrée et coupes que K5. |
+| Sans sol, S4a CPU, quart physique chaud 08/000200 K10 | — | 1/2 | `p_core=2,077/1,916` ; un seul quart, une graine. |
+
+Ces franchissements ne prouvent pas une borne asymptotique quadratique,
+pas plus que les pentes de temps inférieures à 2 ne prouvent la
+sous-quadraticité. Le reçu **G4 R15 S4a** porte sur les trames entières
+seulement : une matrice spatiale × densité S4a appariée manque encore.
+Les coupes et décimations sont des problèmes HGP distincts ; leurs tours
+ne s'additionnent pas pour reconstituer celle de la trame entière.
+
 23 septembre 2026. Le [reçu local v12](../receipts/lidar_scaling_local_20260923/README.md)
 contient trois trames sans sol de la séquence 08 à grille 1 mm,
 K5/K10, s8/W8 : chaque

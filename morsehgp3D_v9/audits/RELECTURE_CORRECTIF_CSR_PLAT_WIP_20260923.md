@@ -1,5 +1,10 @@
 # Relecture du correctif CSR plat FULL (WIP)
 
+**Addendum du 24 septembre 2026.** La relecture ci-dessous porte sur des
+sources mutables non commises au moment des essais. Le correctif de la
+surcharge CSR publique a ensuite été publié sur `main` dans `3765080cf` ;
+les tests locaux décrits ici ne sont pas transférés à ce commit.
+
 23 septembre 2026. Relecture de la surcharge publique de
 `build_full_coverage_certificate` après le contre-audit B
 `CONTRE_AUDIT_B_BROUILLON_PLAT_FULL_WIP_20260923.md` et son addendum exécuté

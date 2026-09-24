@@ -10,12 +10,20 @@ K5** et **5,242 s à K10** ; le contrat de 1 s n'est pas atteint. Même
 en retirant gratuitement toute la phase `edges_ms` CPU de R15, le reste
 mesuré des trois K5 vaut 1,072–1,350 s si les autres postes restent
 fixes : S4b et le chemin critique hors arêtes doivent progresser
-ensemble. R15 ne mesure ni demi-scènes, ni quarts, ni densités réduites ;
+ensemble. R15 G4 ne mesure ni demi-scènes, ni quarts, ni densités réduites ;
 les pentes v12 CPU ne se transfèrent pas à S4a. Sur 08/000000, R14 et
 R15 ont exactement les mêmes `core_sites` : **359,707 M à K5** et
 **909,580 M à K10**. S4a accélère q3 en aval, sans réduire la
 matérialisation des formes du cœur qui porte plusieurs pentes LiDAR
 défavorables.
+
+Préflight du [prototype scratch S4b J8](AUDIT_S4B_J8_BIT_FINAL_20260924.md)
+au 24 septembre : neuf bornes de grille sont encodées dans un `uint8_t`,
+donc le signe final est perdu et `lens[7]` reste zéro. Aucun certificat
+DESIGN J8 ne peut alors conclure pour K5/K10, et son dernier seau peut
+modifier l'objet. Cela concerne le prototype non publié, pas le moteur
+S4a sur `main` ; élargir le masque, exercer le bit 8 et refaire la
+comparaison d'objets avant d'utiliser ses coûts.
 
 La [matrice de croissance LiDAR](CROISSANCE_LIDAR_PLANS_ET_DENSITE_20260923.md)
 répond séparément aux deux variations demandées : trame entière → deux
@@ -63,9 +71,9 @@ annoncés après classement en anneaux sont des **tests logiques de scan** :
 le warp exécute aussi les voies après le site d'arrêt dans son dernier
 ballot. Les nouveaux tampons CUDA retéléversent l'index et reconstruisent
 les covers ; la session résidente S4.0 du plan n'est pas encore intégrée.
-Refaire maintenant les coupes
-physiques et densités emboîtées sur **ce** port ; les pentes v12 CPU ne
-qualifient pas S4a.
+Étendre à **ce** port la contre-épreuve des coupes physiques et densités
+emboîtées : le reçu CPU du seul quart chaud 08/000200/K10, cité plus bas,
+ne couvre pas les autres secteurs. Les pentes v12 CPU ne qualifient pas S4a.
 
 La [contrelecture S4](AUDIT_S4_RESIDENCE_ORDINALS_20260923.md) précise le
 raccord du jalon hybride : si q3 s'exécute sur GPU et q4 sur CPU,
@@ -1779,13 +1787,15 @@ maintenant un **heap-buffer-overflow exécuté** dans `FlatDraftSource::actions`
 sur une banque valide et un CSR public invalide. Cela n'est pas une erreur
 géométrique démontrée sur la sortie interne valide ; la surcharge publique
 doit refuser la forme avant tout parcours.
-La [relecture du correctif CSR mutable](RELECTURE_CORRECTIF_CSR_PLAT_WIP_20260923.md)
+La [relecture du correctif CSR sur sources mutables](RELECTURE_CORRECTIF_CSR_PLAT_WIP_20260923.md)
 constate que le constructeur valide désormais les trois tableaux d'offsets
 **avant** ce premier accès. Le micro-test causal de B et la porte modifiée
 passent sous GCC 13.3 ASan/UBSan ; le micro-test revient à
 `kInvalidInput/coverage_flat_draft_shape`. C'est une correction positive
-de la frontière publique **dans le worktree non commis**, pas encore une
-qualification FULL/G4. Le gate compare seulement les **tailles** des
+de la frontière publique, d'abord relue dans un worktree mutable puis
+**publiée sur `main` par `3765080cf`**. Les tests de cette relecture ne
+sont pas un rejeu du commit ni une qualification FULL/G4 dédiée. Le gate
+compare seulement les **tailles** des
 arènes vectorielle/plate et ne faute pas la surcharge plate : compléter
 l'égalité champ par champ et les pannes d'allocation de cette voie.
 Le [reçu plat local](CONTRE_AUDIT_B_RECU_BROUILLON_PLAT_LOCAL_20260923.md)
@@ -1796,9 +1806,9 @@ seule paire K10 exploitable passe de 14,705 à 11,327 s. Les résultats
 sont `complete_relative`, sans catalogue clé par clé ni payload FULL
 archivé. L'affirmation 152/152 portes n'est pas accompagnée du log,
 les binaires n'ont que des préfixes SHA et aucune commande n'est
-épinglée. Le défaut de forme CSR subsiste dans **ce paquet historique**,
-avec correctif mutable relu ci-dessus ; aucun
-résultat G4 du chemin plat n'est publié.
+épinglée. Le défaut de forme CSR subsiste dans **ce paquet historique** ;
+le correctif a été publié ensuite par `3765080cf`. Aucune ablation G4
+propre au chemin plat n'est publiée.
 
 La [réduction de la phase A en graphe
 temporel](PHASE_A_GRAPHE_TEMPOREL_20260923.md) retrouve exactement
@@ -1890,9 +1900,9 @@ lie la marque et le calendrier archivés aux **valeurs exactes** déjà
 vérifiées par l'hôte. `a5872918` répare les appels du selftest à cette
 nouvelle interface. Sur contenu figé, les **21/21 selftests** passent en
 Python normal puis sous `-O`, avec les mutations de date future et de
-calendrier plausible refusées. Ces portes hors GCP ne certifient pas
-encore un reçu R6 ; la contrelecture des sorties brutes R5 reste
-positive et R2 demeure refusé. Les [contre-fixtures
+calendrier plausible refusées. Avant `78ce9fd4` et sa réception, ces portes
+hors GCP ne certifiaient pas encore R6 ; la contrelecture des sorties
+brutes R5 restait positive et R2 demeure refusé. Les [contre-fixtures
 v5](CONTRE_AUDIT_B_G4_RECEPTION_V5_20260923.md), les [identités
 v6](RECEPTION_V6_IDENTITES_MANQUANTES_20260923.md) et la
 [relecture v8](CONTRE_AUDIT_B_RECEPTION_V8_GARDES_WIP_20260923.md)
@@ -1904,7 +1914,7 @@ et le lecteur contrôle aussi le résumé exact de chaque cas tué dans
 une réception `partial`. Un fichier absent rend un refus typé. Sur
 ce commit figé, **21/21 selftests normal et 21/21 sous `-O`** passent,
 dont les mutations ON/OFF de plan et suppression/altération du résumé.
-R6 apporte maintenant cette preuve de réception pour le snapshot.
+R6 a ensuite apporté cette preuve de réception pour le snapshot.
 
 `50690c12` remplace la fusion série par un **sample-sort parallèle** :
 tris des slots, splitters de clés, puis tris de plages possédées ; une
