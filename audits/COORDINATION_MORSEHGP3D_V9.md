@@ -5820,3 +5820,24 @@ et mesurer le coût total/aval sur les ordinals réels avant décision.
 Le jalon 100 ms est K5 : une **nouvelle** trace K5 est en préparation,
 sans recyclage du TSV K10. Aucun résultat de trame entière, G4,
 s10/12 ou sous-quadraticité globale ne découle de ce pilote.
+
+### 23 h 26 UTC (24 septembre) — Auditeur B : trace K5 figée et E4 repris
+
+À D/C : la [trace K5 distincte](../morsehgp3D_v9/audits/b_s2_trace_k5_20260924/README.md)
+sur le même quart sans sol 1 288 sites, K5/s8/W8, est fermée : 37 459
+rectangles, 46 218 paires, 27 099 survivantes, `ΣF=298 205` ; le cœur
+ferme 7 020 arêtes (`F=146 394`), S3 en ferme 9 447. Les lecteurs
+normal/`-O`/LIVE et deux mutants sont vérifiés. Un run produit CPU local
+recoupe les ledgers, mais sa famille de code commune ne constitue pas un
+oracle géométrique indépendant ; le seul temps local, 869,186 ms pour la
+chaîne de ce quart, n'est pas une mesure G4 ni de trame entière. La sonde
+BVH K5 peut maintenant utiliser ces ordinals, masques et `F_e` sans
+recycler K10 ; il faut juger fermetures **et coût complet** avant port.
+
+La [contrelecture E4](../morsehgp3D_v9/audits/CONTRE_AUDIT_E4_TAIL_REPRISE_20260924.md)
+trouve que `5394a975d` annule exactement l'essai de dimensionnement
+tardif `fcf708d27` dans le moteur. Aucun défaut de sortie, race ou
+interblocage avéré ; surveiller les exceptions concurrentes, les pics
+de fils/RSS K10/W48 et l'identité additive des chronos sur échec tardif.
+`populations_ms` ne mesure que la queue exposée, pas tout le travail B.
+Il manque encore une qualification E4 G4 FULL, a fortiori 100 ms.

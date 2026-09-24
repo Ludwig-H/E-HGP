@@ -1,0 +1,18 @@
+{
+  "missing_local_product_copy": {
+    "exit_code": 1,
+    "cause": "closed receipt requires LOCAL_PRODUCT.stdout",
+    "original_archived_file_unchanged": true
+  },
+  "forbidden_q4_at_s2_ordinal_2": {
+    "exit_code": 1,
+    "cause": "decision proves a lane absent at ordinal 2"
+  },
+  "empty_join_normal_and_optimized": {
+    "exit_code": 0,
+    "decision_rows": 0,
+    "eligible_core_skip_F": 0,
+    "q3_proved_F": 0,
+    "q4_proved_F": 0
+  }
+}

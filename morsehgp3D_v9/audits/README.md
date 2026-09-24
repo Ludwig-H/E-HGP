@@ -30,7 +30,9 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
    mais son intégration avec E2 et son gain G4 restent ouverts.
    La [queue FULL E4](CONTRE_AUDIT_B_QUEUE_E4_WIP_20260924.md) recouvre
    populations et images, avec attribution temporelle et ressources à
-   mesurer ; ces trois WIP frères ne sont pas encore un moteur combiné.
+   mesurer ; sa [reprise contre-auditée](CONTRE_AUDIT_E4_TAIL_REPRISE_20260924.md)
+   revient au dimensionnement initial et ne montre pas de défaut de
+   résultat avéré. Ces trois WIP frères ne sont pas encore un moteur combiné.
    Les [épingles brutes CPU de C](CONTRE_AUDIT_B_EPINGLES_BRUTES_C_PREFLIGHT_20260924.md)
    ont un [lecteur indépendant normal/`-O` et mutants](b_raw_pin_reader_20260924/README.md) ;
    leur intégration et le préflight R21 restent ouverts.
@@ -47,6 +49,9 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
    sites ouvre une jointure exacte aux coûts `F_e`; la [palette de blocs
    testée](b_moments_palette_20260924/README.md) ne ferme pratiquement
    aucune arête/voie sur ses deux petits cas et ne justifie aucun port GPU.
+   La [trace K5 séparée](b_s2_trace_k5_20260924/README.md) donne les
+   ordinals et `F_e` du régime visé par les 100 ms ; elle recoupe un
+   run CPU local de même famille de code, pas un oracle indépendant.
    La [contrelecture mathématique des nœuds BVH](CONTRELECTURE_FORMES_BVH_AVANT_S3_20260924.md)
    et son [pilote borné K10](b_spatial_block_probe_plan_20260924/README.md)
    montrent une preuve pré-cœur exacte mais trop coûteuse dans cette
@@ -149,6 +154,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | --- | --- | --- | --- | --- | --- |
 | [`CONTRELECTURE_FORMES_BVH_AVANT_S3_20260924.md`](CONTRELECTURE_FORMES_BVH_AVANT_S3_20260924.md) | B | 24/22:53 | preuve exacte 8 coins/nœud/cellule et contraintes d'antichaîne ; sélectivité non mesurée | vivant, méthode | transmis à D/C |
 | [`b_spatial_block_probe_plan_20260924/`](b_spatial_block_probe_plan_20260924/README.md) | B | 24/22:53, reçu 23:12 | shadow K10 exact sur 256 arêtes ; 136 fermetures, 5,12 M coins et 2,93 M points témoins ; signal de coût défavorable | vivant, aucun port produit | transmis à D/C |
+| [`b_s2_trace_k5_20260924/`](b_s2_trace_k5_20260924/README.md) | B | 24/23:25 | trace K5 de 27 099 survivantes, `ΣF=298 205`, 7 020 fermetures core ; lectures normal/`-O`/LIVE et run CPU local concordants | vivant, shadow sans chrono G4 ni oracle indépendant | transmis à D/C |
 | [`PISTE_B_Q34_RECTANGLES_AVANT_EXPANSION_20260923.md`](PISTE_B_Q34_RECTANGLES_AVANT_EXPANSION_20260923.md) | B | `de26dd7a` 03:03 | démontré localement | vivant | refusée en partie, différée |
 | [`FIXTURE_CELLULES_CENTRES_Q34_20260923.md`](FIXTURE_CELLULES_CENTRES_Q34_20260923.md) | B | `e3fb7999` 10:12 | démontré localement (fixture exacte), pas une preuve LiDAR | vivant | sans réponse |
 | [`PISTE_B_Q34_NOEUDS_AVANT_COVER_20260923.md`](PISTE_B_Q34_NOEUDS_AVANT_COVER_20260923.md) | B | `f36c140c` 01:59 | démontré localement | vivant | différée |
@@ -174,6 +180,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | note | auteur | créée | portée | cycle | réponse du développeur |
 | --- | --- | --- | --- | --- | --- |
 | [`PLAN_CRITIQUE_100MS_FULL_20260924.md`](PLAN_CRITIQUE_100MS_FULL_20260924.md) | B | 24/23:00 | coûts R20 et enveloppe expérimentale 100 ms, sortie explicite comprise | vivant, aucune accélération acquise | transmis à D/C |
+| [`CONTRE_AUDIT_E4_TAIL_REPRISE_20260924.md`](CONTRE_AUDIT_E4_TAIL_REPRISE_20260924.md) | B | 24/23:25 | reprise E4 : dimensionnement tardif annulé, pas de défaut de résultat avéré ; chronos d'échec et pic K10/W48 à vérifier | vivant, aucune mesure G4 | transmis à D/C |
 | [`CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md`](CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md) | B | `a514de68` 10:22 + mise à jour | projection D5 bornée ; index seul négatif ; R13 montre le recouvrement statique/lots ; shadow racine pré-lot à garder | vivant | réponse D attendue |
 | [`CONTRE_AUDIT_B_PHASE_A_ALLEGEE_20260923.md`](CONTRE_AUDIT_B_PHASE_A_ALLEGEE_20260923.md) | B | 23/soir | cinq paires locales de tour validées, run exact et singleton relus ; phase A plus rapide, tour K5 non stable ; provenance binaire/entrée/log non épinglée | vivant, aucun G4 ni gain de contrat | transmis à D |
 | [`CONTRE_AUDIT_B_BROUILLON_PLAT_FULL_WIP_20260923.md`](CONTRE_AUDIT_B_BROUILLON_PLAT_FULL_WIP_20260923.md) | B | 23/21:56, addendum soir | surcharge CSR publique sans validation avant accès ; défaut exécuté sous ASan sur CSR invalide ; gain d'allocations/groupes non mesuré | défaut publié historique, corrigé dans `3765080cf` ; sorties internes valides non accusées | corrigée pour le CSR |

@@ -44,6 +44,17 @@ ferme zéro voie avec 128 blocs voisins. Ces résultats rejettent les
 **choix de blocs naïfs** testés, pas tout certificat ni le régime K5
 entier. Ils doivent empêcher un port GPU prématuré de cette variante.
 
+La [trace K5 distincte](b_s2_trace_k5_20260924/README.md) sur ce même
+quart fige 37 459 rectangles, 46 218 paires étendues, 27 099 survivantes
+et `ΣF=298 205`. Le cœur ferme 7 020 arêtes, pesant 146 394 incidences
+de sites ; S3 ferme finalement 9 447 arêtes. Lecteurs normal/`-O`/LIVE,
+deux mutants et recoupement d'un **nouveau** run produit CPU local
+passent. Ce run appartient à la même famille de code et ne remplace
+pas un oracle géométrique indépendant ; son unique `chain_total=869,186
+ms` est un chrono local sur 1 288 sites, pas une qualification G4. Cette
+trace sert à mesurer une sonde pré-cœur **K5** avec ses vrais ordinals,
+ses deux masques et le travail aval évitable, sans recycler K10.
+
 L'[audit des octets explicites FULL](CONTRE_AUDIT_FULL_R20_OCTETS_100MS_20260924.md)
 compte, à R20/08/000000/K5, 207,496 millions d'octets de tableaux à
 tailles connues et 26,242–74,296 millions d'octets logiques dérivés pour
@@ -127,6 +138,15 @@ G4 ne sérialise pas encore ce mode ni les nouveaux sous-chronos ; aucun
 reçu E4 n'est disponible. L'intégration exige désormais **trois**
 options distinctes et huit combinaisons de gate. Le pic de fils/RSS
 peut augmenter et reste non mesuré.
+La [contrelecture de la reprise E4](CONTRE_AUDIT_E4_TAIL_REPRISE_20260924.md)
+constate que `5394a975d` annule dans le moteur l'essai de dimensionnement
+tardif `fcf708d27`, après absence de gain RSS local et forte croissance
+de la queue exposée. Aucune race, erreur de résultat ou interblocage
+avéré n'a été trouvée sur ce chemin. Restent non couverts : exceptions
+d'allocation/lancement concurrentes, pic K10/W48 de fils et mémoire,
+et comptabilité additive des chronos en cas d'échec statique tardif.
+`populations_ms` mesure seulement une queue visible, jamais tout le
+travail B ; E4 n'a ni reçu G4 ni résultat FULL à 100 ms.
 
 Les [épingles CPU brutes de C](CONTRE_AUDIT_B_EPINGLES_BRUTES_C_PREFLIGHT_20260924.md)
 sont publiées au `5102ec2cc` sur trois trames entières **avec sol** de
