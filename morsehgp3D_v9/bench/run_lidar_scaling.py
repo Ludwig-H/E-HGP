@@ -45,7 +45,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[2]
 V8 = ROOT / 'morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v25'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v26'
 # Schemas relus lors d'une revalidation d'archive (v12 : reçu du 23 septembre).
 KNOWN_SCHEMAS = ('mhgp9_tower_probe_v12', PROBE_SCHEMA)
 # Le schema de sonde d'une campagne est fixe par son RESUME, jamais par le JSON
@@ -66,7 +66,7 @@ DEFAULT_LEVERS = dict(atlas_saturate_deep=True, q3_leaf_census=True, q34_dead_la
                       # v17/v18/v20: the local campaign keeps the engine path (no GPU here).
                       q34_batch_filter=False, q34_gpu_filter=False, q34_batch_certificates=False,
                       q34_gpu_certificates=False, q34_batch_q3=False, q34_gpu_q3=False, q34_batch_q4=False,
-                      q2_during_device=False, q34_lanes_fused=False)
+                      q2_during_device=False, q34_lanes_fused=False, device_session=False)
 # Leviers publies par schema de sonde (les archives v12 en ont six).
 LEVERS_V12 = {name: True for name in ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_witness_cache',
                                       'q34_dead_core', 'tower_meb_proposal')}
@@ -437,6 +437,8 @@ def selftest(case_path):
         v13['ledger'].setdefault(name, 0)
     v13['catalogue_digest'] = '0123456789abcdef'
     v13['presentation_digest'] = 'fedcba9876543210'
+    # v26: the device session, closed on the local engine path.
+    v13['device_session'] = dict(opened=False, context_ms=0.0, reserve_ms=0.0)
     v13['times_ms']['catalogue_digest'] = 0.0
     v13['times_ms']['q2_wait'] = 0.0
     v13['options']['certificate_capacity'] = 0
@@ -468,6 +470,7 @@ def selftest(case_path):
         ('v13_euler_absent', lambda v: v['catalogue'].pop('euler')),
         ('v13_euler_extra_key', lambda v: v['catalogue']['euler'].update(extra=1)),
         ('v13_occupancy_absent', lambda v: v.pop('q34_occupancy')),
+        ('v13_device_session_opened', lambda v: v['device_session'].update(opened=True, context_ms=1.0)),
         ('v13_phases_absent', lambda v: v.pop('tower_phases_ms')),
         ('v13_occupancy_wall', lambda v: v['q34_occupancy'].update(wall_max_ms=v['times_ms']['q34'] + 5.0)),
         ('v13_phases_beyond_tower', lambda v: v['tower_phases_ms'].update(bank=v['times_ms']['tower'] + 5.0)),
@@ -495,7 +498,7 @@ def selftest(case_path):
     # Entree alteree d'un octet : le FNV recalcule ne correspond plus.
     changed = bytearray(raw)
     changed[0] ^= 1
-    total = len(table) + 5 + 15 + 2 + 1
+    total = len(table) + 5 + len(table13) + 2 + 1
     if not validate_probe(value, dict(expected, fnv=input_fnv(bytes(changed)))):
         killed += 1
     else:

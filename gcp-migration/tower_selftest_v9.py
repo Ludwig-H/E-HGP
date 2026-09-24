@@ -209,7 +209,7 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                     # v25: the two seeds of the edge with both lanes fused (L15).
                     batch.update(lanes_fused_seeds=2, lanes_fused_chunks=4, lanes_fused_q3_chunks=1,
                                  lanes_fused_census_chunks=2, lanes_fused_fallbacks=0)
-    return dict(schema='mhgp9_tower_probe_v25', status=status,
+    return dict(schema='mhgp9_tower_probe_v26', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
@@ -244,7 +244,11 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                                 meb_proposal_fallbacks=1 if levers['tower_meb_proposal'] else 0),
                 orders=orders, tower_digest=digest if complete else '0' * 16,
                 catalogue_digest=digest[::-1] if complete else '0' * 16,
-                presentation_digest=digest[8:] + digest[:8] if complete else '0' * 16, peak_rss_kb=2048)
+                presentation_digest=digest[8:] + digest[:8] if complete else '0' * 16, peak_rss_kb=2048,
+                # v26: the device session opened before the chain under its lever.
+                device_session=dict(opened=bool(levers.get('device_session')),
+                                    context_ms=0.1 if levers.get('device_session') else 0.0,
+                                    reserve_ms=0.05 if levers.get('device_session') else 0.0))
 
 
 def main():
@@ -304,7 +308,8 @@ def main():
                 rule.get('lanes', levers.get('q34_batch_q3')) == levers.get('q34_batch_q3') and
                 rule.get('q4', levers.get('q34_batch_q4')) == levers.get('q34_batch_q4') and
                 rule.get('q2_overlap', levers.get('q2_during_device')) == levers.get('q2_during_device') and
-                rule.get('fused', levers.get('q34_lanes_fused')) == levers.get('q34_lanes_fused')):
+                rule.get('fused', levers.get('q34_lanes_fused')) == levers.get('q34_lanes_fused') and
+                rule.get('session', levers.get('device_session')) == levers.get('device_session')):
             time.sleep(rule['seconds'])
     status = 'complete_relative'
     for rule in config.get('refuse', []):
@@ -697,7 +702,7 @@ class Protocol(unittest.TestCase):
     def test_pinned_digests(self):
         data = worker.INPUTS['00']
         gpu_case = snapshot.default_plan()['cases'][0]
-        value = probe_value(data['n'], data['fnv'], 5, 8, 48, 48)
+        value = probe_value(data['n'], data['fnv'], 5, 8, 48, 48, levers=gpu_case['levers'])
         pin = (value['tower_digest'], value['catalogue_digest'])
         with patch.object(worker, 'PINNED_DIGESTS', {('00', 5, 8): pin}):
             need(worker.validate_probe(worker.strict_json(json.dumps(value)), gpu_case, 0) == 'complete_relative',
@@ -812,10 +817,13 @@ class Protocol(unittest.TestCase):
         # v21 (R16) arms: full GPU (every lever), engine twin; v25 (R20):
         # lanes without the fused pass (L15), repeated and interleaved pairs
         # at 00 (auditor C, R-27).
-        arms = dict(gpu=on, engine=worker.engine_levers(on), gpu_unfused=dict(on, q34_lanes_fused=False))
+        # v26 (R21): L15 off in the whole plan; the GPU arm opens the device
+        # session, gpu_cold does not.
+        gpu = dict(on, q34_lanes_fused=False)
+        arms = dict(gpu=gpu, engine=worker.engine_levers(gpu), gpu_cold=dict(gpu, device_session=False))
         expected = [(scene, k, arm, 0) for scene in ('00', '01', '02') for k in (5, 10) for arm in ('gpu', 'engine')]
-        expected += [('00', 5, 'gpu_unfused', 0), ('00', 5, 'gpu', 1), ('00', 10, 'gpu_unfused', 0),
-                     ('00', 10, 'gpu', 1), ('00', 5, 'gpu_unfused', 1), ('00', 10, 'gpu_unfused', 1)]
+        expected += [('00', 5, 'gpu_cold', 0), ('00', 5, 'gpu', 1), ('00', 10, 'gpu_cold', 0),
+                     ('00', 10, 'gpu', 1), ('00', 5, 'gpu_cold', 1), ('00', 10, 'gpu_cold', 1)]
         need(provenance['commit'] == head and len(cases) == len(expected) == 18 and all(
                 (c['scene'], c['k'], c['repeat']) == (scene, k, repeat) and c['levers'] == arms[arm] and
                 c['s'] == 8 and c['workers'] == 48 and c['static_threads'] == 48
@@ -946,7 +954,9 @@ class Protocol(unittest.TestCase):
         plan_case = dict(snapshot.default_plan()['cases'][0], levers=engine)
         data = worker.INPUTS['00']
         good = probe_value(data['n'], data['fnv'], 5, 8, 48, 48, levers=engine)
-        gpu_case = snapshot.default_plan()['cases'][0]
+        # Every lever ON (the fused pass L15 included, which the R21 plan
+        # leaves OFF), so that every batch/GPU rule is exercised.
+        gpu_case = dict(snapshot.default_plan()['cases'][0], levers={name: True for name in worker.LEVER_NAMES})
         gpu_good = probe_value(data['n'], data['fnv'], 5, 8, 48, 48)
         need(worker.validate_probe(worker.strict_json(json.dumps(gpu_good)), gpu_case, 0) == 'complete_relative',
              'valid GPU batch probe')
@@ -1036,7 +1046,15 @@ class Protocol(unittest.TestCase):
                               ('gpu lanes fallbacks above tasks',
                                lambda v: v['q34_batch'].update(lanes_fused_fallbacks=3)),
                               ('gpu lanes pruned sites among the acute sites',
-                               lambda v: v['ledger'].update(lanes_pruned_sites=8))):
+                               lambda v: v['ledger'].update(lanes_pruned_sites=8)),
+                              # v26: the device session requested by the lever.
+                              ('gpu device session not opened',
+                               lambda v: v['device_session'].update(opened=False, reserve_ms=0.0)),
+                              ('gpu device session without context time',
+                               lambda v: v['device_session'].update(context_ms=0.0)),
+                              ('gpu device session reserve without opening',
+                               lambda v: v['device_session'].update(opened=False)),
+                              ('gpu device session section absent', lambda v: v.pop('device_session'))):
             bad = deepcopy(gpu_good)
             mutate(bad)
             need(refused(worker.validate_probe, bad, gpu_case, 0), 'batch/GPU probe mutation ' + label)
@@ -1159,6 +1177,8 @@ class Protocol(unittest.TestCase):
                      ('lanes_tasks_on_engine', lambda v: v['q34_batch'].update(lanes_tasks=1)),
                      ('lanes_fused_on_engine', lambda v: v['q34_batch'].update(lanes_fused_seeds=1)),
                      ('lanes_pruned_on_engine', lambda v: v['ledger'].update(lanes_pruned_sites=1)),
+                     ('device_session_on_engine', lambda v: v['device_session'].update(opened=True, context_ms=1.0)),
+                     ('device_session_time_on_engine', lambda v: v['device_session'].update(context_ms=1.0)),
                      ('core_closed_shifted', lambda v: v['ledger'].update(core_closed_edges=2)),
                      ('rect_queries_shifted', lambda v: v['ledger'].update(witness_rect_queries=8)),
                      ('q3_seed_visits_split', lambda v: v['ledger'].update(q3_seed_node_visits=6)),
@@ -1317,7 +1337,7 @@ class Protocol(unittest.TestCase):
     def test_partial_session_case_cap_and_refusal(self):
         with tempfile.TemporaryDirectory() as temporary:
             code, receipt, fake, host = run_scenario(
-                Path(temporary), tools=dict(sleep=[dict(workers=48, k=10, scene='00', batch=True, fused=False,
+                Path(temporary), tools=dict(sleep=[dict(workers=48, k=10, scene='00', batch=True, session=False,
                                                         seconds=60)], refuse=[dict(scene='02', k=10)]),
                 patches=[(worker, 'CASE_CAP_SECONDS', 4)])
             need(code == 0 and receipt['status'] == 'partial', 'partial host receipt: ' + json.dumps(receipt)[:600])

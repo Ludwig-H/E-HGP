@@ -48,7 +48,7 @@ PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
 PLAN_SCHEMA = 'mhgp9_tower_plan_v6'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v25'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v26'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -103,7 +103,10 @@ LEVER_NAMES = ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_w
                # v24 : q2 pendant les appels de l'appareil (exige q34_batch_filter).
                'q2_during_device',
                # v25 : passe fusionnee q3 + q4 des voies (L15, exige q34_batch_q4).
-               'q34_lanes_fused')
+               'q34_lanes_fused',
+               # v26 : session d'appareil ouverte par le processus avant la
+               # chaine (exige un levier de l'appareil).
+               'device_session')
 # v17 (S2) : filtre q3/q4 par lots, puis sur GPU. Le build G4 active CUDA
 # (nvcc et nvidia-smi existants, aucune installation) ; l'appareil attendu :
 DEVICE_NAME = 'NVIDIA RTX PRO 6000 Blackwell Server Edition'
@@ -165,7 +168,10 @@ CERTIFICATE_WORK_KEYS = ('expanded_pairs', 'witness_rejected_pairs', 'cover_buil
                          'dead_core_failed_cells')
 TOP_KEYS = frozenset({'schema', 'status', 'reason', 'input', 'options', 'times_ms', 'chain_cpu_s', 'generator',
                       'ledger', 'catalogue', 'q34_occupancy', 'q34_batch', 'tower_phases_ms', 'tower_work', 'orders',
-                      'tower_digest', 'catalogue_digest', 'presentation_digest', 'peak_rss_kb'})
+                      'tower_digest', 'catalogue_digest', 'presentation_digest', 'peak_rss_kb',
+                      # v26 : session d'appareil ouverte avant la chaine.
+                      'device_session'})
+DEVICE_SESSION_KEYS = frozenset({'opened', 'context_ms', 'reserve_ms'})
 INPUT_KEYS = frozenset({'format', 'grid', 'sites', 'hash'})
 OPTION_KEYS = frozenset({'K', 'K_effective', 's', 'workers', 'tower_static_threads', 'run_tower', 'certificate_capacity',
                          'certificate_judge', 'lanes_capacity', 'lanes_judge', 'lanes_events', 'levers'})
@@ -348,7 +354,9 @@ def _levers(value):
             (value['q34_batch_q3'] or not value['q34_gpu_q3']) and
             (value['q34_batch_q3'] or not value['q34_batch_q4']) and
             (value['q34_batch_filter'] or not value['q2_during_device']) and
-            (value['q34_batch_q4'] or not value['q34_lanes_fused']))
+            (value['q34_batch_q4'] or not value['q34_lanes_fused']) and
+            (value['q34_gpu_filter'] or value['q34_gpu_certificates'] or value['q34_gpu_q3'] or
+             not value['device_session']))
 
 
 def uses_device(levers):
@@ -363,7 +371,7 @@ def engine_levers(levers):
     """The same levers on the engine path (no batch call, no device)."""
     return dict(levers, q34_batch_filter=False, q34_gpu_filter=False, q34_batch_certificates=False,
                 q34_gpu_certificates=False, q34_batch_q3=False, q34_gpu_q3=False, q34_batch_q4=False,
-                q2_during_device=False, q34_lanes_fused=False)
+                q2_during_device=False, q34_lanes_fused=False, device_session=False)
 
 
 def lever_arguments(case):
@@ -387,10 +395,13 @@ def validate_plan(plan, manifest):
             case['levers'][name] for name in LEVER_NAMES)
         need(identity not in seen, 'duplicate case needs an explicit distinct repetition')
         seen.add(identity)
-    # The preflight runs the levers of the first case: pin them all ON, so
-    # that every lever a later case may enable has been exercised first.
-    need(all(plan['cases'][0]['levers'][name] for name in LEVER_NAMES),
-         'the first case sets the preflight levers and must pin every lever ON')
+    # The preflight runs the levers of the first case: it pins ON every lever
+    # that some case of the plan enables, so that each has been exercised
+    # first (v26: a lever measured slower, such as q34_lanes_fused after R20,
+    # may stay OFF in the whole plan).
+    need(all(plan['cases'][0]['levers'][name] for name in LEVER_NAMES
+             if any(c['levers'][name] for c in plan['cases'])),
+         'the first case sets the preflight levers and must pin ON every lever the plan enables')
     # v17: every (frame, K, s) run on the batch path has an engine-path twin,
     # so that the cross-case object comparison judges the batch/GPU tower.
     # v18: with the same certificate levers, so that its certificate work is
@@ -1049,11 +1060,22 @@ def validate_probe(value, case, exit_code, inputs=None, capacity=0, judge=False,
          type(value['catalogue_digest']) is str and re.fullmatch('[0-9a-f]{16}', value['catalogue_digest']) and
          type(value['presentation_digest']) is str and re.fullmatch('[0-9a-f]{16}', value['presentation_digest']) and
          type(value['peak_rss_kb']) is int and value['peak_rss_kb'] >= -1, 'probe digest/RSS')
+    # v26 : la session d'appareil (contexte, ardoises des voies) est ouverte
+    # par le processus avant l'horloge de la chaine, sous le seul levier
+    # device_session ; son cout est publie a part, jamais dans chain_total.
+    session, requested = value['device_session'], case['levers']['device_session']
+    need(type(session) is dict and set(session) == DEVICE_SESSION_KEYS and type(session['opened']) is bool and
+         _number(session['context_ms']) and _number(session['reserve_ms']) and
+         (session['opened'] is False or requested) and
+         (requested or (session['context_ms'] == 0 and session['reserve_ms'] == 0)) and
+         (session['opened'] or session['reserve_ms'] == 0), 'probe device session')
     effective = min(case['k'], case['n'])
     if value['status'] == 'complete_relative':
         need(exit_code == 0 and options['K_effective'] == effective and
              [order['K'] for order in orders] == list(range(1, effective + 1)), 'complete tower: code 0, orders 1..K')
         validate_ledger_identities(value, case['levers'])
+        need(not requested or (session['opened'] and session['context_ms'] > 0),
+             'complete device case without its requested session')
         pin = PINNED_DIGESTS.get((case['scene'], case['k'], case['s'])) if inputs is None else None
         need(pin is None or (value['tower_digest'], value['catalogue_digest']) == pin,
              'tower or catalogue digest differs from the pinned CPU value')

@@ -329,4 +329,16 @@ std::string warm_up_lanes(u32 capacity, u32 record_capacity, u32 event_capacity)
 // the batch call itself, which classifies it.
 std::string warm_up();
 
+// v26 (after R20): a device session opened by the process before its frames,
+// as a LiDAR stream does once at start: the primary context (warm_up), then
+// the lanes call's resident slabs (warm_up_lanes with the call's capacities).
+// The chain never opens it; its device preparation then finds the context
+// ready. Walls in milliseconds; error empty on success (any error is left to
+// the batch calls, which classify it).
+struct DeviceSession {
+  std::string error;
+  double context_ms = 0, reserve_ms = 0;
+};
+DeviceSession open_device_session(u32 lanes_capacity, u32 lanes_events);
+
 }  // namespace mhgp9::gpu

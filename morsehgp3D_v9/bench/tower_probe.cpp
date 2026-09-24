@@ -46,6 +46,7 @@
 #include <vector>
 
 #include "../src/chain/tower_chain.hpp"
+#include "../src/gpu/filter_runner.hpp"
 
 namespace {
 
@@ -117,6 +118,9 @@ long peak_rss_kb() {
 
 int main(int argc, char** argv) {
   mhgp9::ChainOptions options;
+  // v26: the device session is opened by the process before the chain's
+  // clock (a LiDAR stream opens it once), published apart.
+  bool device_session = false;
   std::string path, grid = "unspecified";
   std::size_t prefix = 0;
   try {
@@ -184,6 +188,7 @@ int main(int argc, char** argv) {
         else if (name == "q34_batch_q4") options.q34_batch_q4 = on;
         else if (name == "q2_during_device") options.q2_during_device = on;
         else if (name == "q34_lanes_fused") options.q34_lanes_fused = on;
+        else if (name == "device_session") device_session = on;
         else throw std::invalid_argument("unknown lever");
       }
       else if (arg.starts_with("--n=")) prefix = static_cast<std::size_t>(parse_u(arg.substr(4)));
@@ -210,10 +215,14 @@ int main(int argc, char** argv) {
   }
   const double read_ms =
       std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - read_start).count();
+  // v26: context and lanes slabs before the chain; a failure is left to the
+  // chain's device calls, which refuse explicitly.
+  mhgp9::gpu::DeviceSession session;
+  if (device_session) session = mhgp9::gpu::open_device_session(options.q34_lanes_capacity, options.q34_lanes_events);
   const auto r = mhgp9::run_tower_chain(input.points, options);
   const auto& t = r.times;
   const auto& c = r.catalogue;
-  std::printf("{\"schema\":\"mhgp9_tower_probe_v25\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
+  std::printf("{\"schema\":\"mhgp9_tower_probe_v26\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
               r.reason.c_str());
   std::printf("\"input\":{\"format\":\"%s\",\"grid\":\"%s\",\"sites\":%zu,\"hash\":\"%016" PRIx64 "\"},", input.format.c_str(),
               grid.c_str(), input.points.size(), input.hash);
@@ -224,7 +233,7 @@ int main(int argc, char** argv) {
               "\"q34_jobs_by_mass\":%s,\"q34_fine_jobs\":%s,\"tower_overlap_static\":%s,\"q2_jobs_by_mass\":%s,"
               "\"q34_batch_filter\":%s,\"q34_gpu_filter\":%s,\"q34_batch_certificates\":%s,"
               "\"q34_gpu_certificates\":%s,\"q34_batch_q3\":%s,\"q34_gpu_q3\":%s,\"q34_batch_q4\":%s,"
-              "\"q2_during_device\":%s,\"q34_lanes_fused\":%s}},",
+              "\"q2_during_device\":%s,\"q34_lanes_fused\":%s,\"device_session\":%s}},",
               options.kmax, r.kmax_effective, options.separation_s, options.workers,
               options.tower_static_threads >= 0 ? options.tower_static_threads : r.tower_static_threads,
               options.run_tower ? "true" : "false", options.q34_certificate_capacity,
@@ -239,7 +248,8 @@ int main(int argc, char** argv) {
               options.q34_gpu_filter ? "true" : "false", options.q34_batch_certificates ? "true" : "false",
               options.q34_gpu_certificates ? "true" : "false", options.q34_batch_q3 ? "true" : "false",
               options.q34_gpu_q3 ? "true" : "false", options.q34_batch_q4 ? "true" : "false",
-              options.q2_during_device ? "true" : "false", options.q34_lanes_fused ? "true" : "false");
+              options.q2_during_device ? "true" : "false", options.q34_lanes_fused ? "true" : "false",
+              device_session ? "true" : "false");
   std::printf("\"times_ms\":{\"read\":%.3f,\"prepare\":%.3f,\"gen_index\":%.3f,\"q2\":%.3f,\"q2_wait\":%.3f,"
               "\"q34\":%.3f,\"merge\":%.3f,"
               "\"tower_index\":%.3f,\"census\":%.3f,\"tower\":%.3f,\"chain_total\":%.3f,\"digest\":%.3f,"
@@ -377,6 +387,11 @@ int main(int argc, char** argv) {
     std::snprintf(presentations, sizeof presentations, "\"%016" PRIx64 "\"", r.presentation_digest);
   }
   std::printf("],\"tower_digest\":\"%016" PRIx64 "\",\"catalogue_digest\":%s,\"presentation_digest\":%s,"
-              "\"peak_rss_kb\":%ld}\n", r.tower_digest, catalogue, presentations, peak_rss_kb());
+              "\"peak_rss_kb\":%ld,", r.tower_digest, catalogue, presentations, peak_rss_kb());
+  // v26: the device session opened before the chain (not in chain_total).
+  const bool opened = device_session && session.error.empty();
+  std::printf("\"device_session\":{\"opened\":%s,\"context_ms\":%.3f,\"reserve_ms\":%.3f}}\n",
+              opened ? "true" : "false", device_session ? session.context_ms : 0.0,
+              opened ? session.reserve_ms : 0.0);
   return r.status == mhgp9::ChainStatus::kComplete ? 0 : 3;
 }

@@ -744,7 +744,7 @@ if(Python3_Interpreter_FOUND AND EXISTS ${MHGP9_LIDAR_SCALING_CASE})
     add_test(NAME mhgp9_lidar_scaling_reader_${mode}
              COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=${Python3_EXECUTABLE}
                      "-DARGS=${py_flags} ${CMAKE_CURRENT_SOURCE_DIR}/bench/run_lidar_scaling.py --selftest ${MHGP9_LIDAR_SCALING_CASE}"
-                     "-DEXPECT_PREFIX=lidar_scaling_selftest mutants_killed=46/46"
+                     "-DEXPECT_PREFIX=lidar_scaling_selftest mutants_killed=47/47"
                      -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
     set_tests_properties(mhgp9_lidar_scaling_reader_${mode} PROPERTIES LABELS "gate;protocol" TIMEOUT 120)
   endforeach()

@@ -1178,6 +1178,36 @@ v25 : union des champs des deux.
   répétées et entrelacées à 00 K5/K10, pour mesurer L15 sur la même VM
   (la passe fusionnée porte plus de débordements de registres dans T).
 
+### Session d'appareil et sonde v26 (24 septembre 2026, après R20)
+
+R20 montre que l'étape A de la préparation (129 à 189 ms) est presque
+entièrement la création du contexte CUDA (`cudaFree(0)`), que le filtre
+attend encore 11 à 82 ms à K5. Ce coût est payé une fois par processus :
+un flux LiDAR à 10 Hz ouvre le contexte au démarrage, pas à chaque trame.
+- **API** : `gpu::open_device_session(lanes_capacity, lanes_events)`
+  (`src/gpu/filter_runner.hpp`) ouvre le contexte primaire (`warm_up`) puis
+  réserve les ardoises résidentes des voies (`warm_up_lanes`). Elle rend les
+  deux murs et une erreur vide en cas de succès ; une erreur est laissée aux
+  appels de l'appareil, qui la classent. La chaîne ne l'ouvre jamais : sa
+  préparation trouve alors le contexte prêt.
+- **Sonde v26** : levier `device_session`, qui est un levier de processus et
+  non de chaîne. Sous ce levier, la sonde ouvre la session avant l'horloge
+  de la chaîne. Elle publie `device_session` (`opened`, `context_ms`,
+  `reserve_ms`), hors de `chain_total`. Sans appareil, la chaîne refuse
+  ensuite explicitement (`chain_q34_gpu_unavailable`).
+- **Lecteur** : le levier exige un levier de l'appareil. Sans lui, la
+  section est à zéro et fermée. Un cas complet sous le levier exige une
+  session ouverte et un temps de contexte non nul. L'autotest ajoute six
+  mutants (session non ouverte, sans temps, réservation sans ouverture,
+  section absente, session sur le chemin moteur).
+- **Règle du premier cas** : le préflight épingle à ON chaque levier
+  qu'active un cas du plan, et non plus tous les leviers. Un levier mesuré
+  plus lent peut ainsi rester à OFF dans tout le plan.
+- **Plan R21** : L15 (`q34_lanes_fused`) désactivée dans tout le plan ; bras
+  GPU avec la session ; bras `gpu_cold` sans elle, en paires répétées et
+  entrelacées à 00 K5/K10. Le coût à froid reste publié : c'est la
+  différence entre les bras, plus `context_ms`.
+
 ## Voie GPU S1 : `src/gpu/` (espace `mhgp9::gpu`, code neuf)
 
 23 septembre 2026. Première brique GPU de la v9, pour une expérience de

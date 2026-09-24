@@ -1440,4 +1440,16 @@ std::string warm_up() {
   return {};
 }
 
+DeviceSession open_device_session(u32 lanes_capacity, u32 lanes_events) {
+  DeviceSession out;
+  const auto start = std::chrono::steady_clock::now();
+  out.error = warm_up();
+  const auto opened = std::chrono::steady_clock::now();
+  out.context_ms = std::chrono::duration<double, std::milli>(opened - start).count();
+  if (!out.error.empty()) return out;
+  out.error = warm_up_lanes(lanes_capacity, 0, lanes_events);
+  out.reserve_ms = host_ms_since(opened);
+  return out;
+}
+
 }  // namespace mhgp9::gpu
