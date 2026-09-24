@@ -137,7 +137,7 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                  certificate_kernel_ms=0.0, certificate_transfer_ms=0.0, lanes_backend='', lanes_ms=0.0,
                  lanes_device_ms=0.0, lanes_kernel_ms=0.0, lanes_transfer_ms=0.0, lanes_wait_ms=0.0, tail_ms=0.0,
                  lanes_asked=0, lanes_decided=0, lanes_deferred=0, lanes_records=0, lanes_judged=0, lanes_warps=0)
-    ledger.update({name: 0 for name in schema['ledger'] if name.startswith('lanes_')})
+    ledger.update({name: 0 for name in schema['ledger'] if name.startswith(('lanes_', 'lanes4_'))})
     device = 'NVIDIA RTX PRO 6000 Blackwell Server Edition'
     if complete and levers.get('q34_batch_filter'):
         gpu = levers.get('q34_gpu_filter')
@@ -171,13 +171,28 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
             ledger.update(lanes_edges=decided, lanes_cover_sites=5 * decided, lanes_cover_node_visits=4,
                           lanes_seed_tests=5 * decided, lanes_acute_sites=3, lanes_owner_rejections=1, lanes_seeds=2,
                           lanes_census_point_tests=8, lanes_census_inside_sites=4, lanes_census_shell_sites=3,
-                          lanes_census_outside_sites=1, lanes_depth_rejections=1, lanes_emitted=1, lanes_shell_ids=3)
-    return dict(schema='mhgp9_tower_probe_v20', status=status,
+                          lanes_census_outside_sites=1, lanes_depth_rejections=1, lanes_emitted=1, lanes_shell_ids=3,
+                          lanes_q3_edges=decided, lanes_census_seeds=2)
+            if levers.get('q34_batch_q4'):
+                # v21: the q4 lane of the edge with both lanes open, same call.
+                ledger.update(lanes4_edges=1, lanes4_seeds=2, lanes4_certified=1, lanes4_certified_chunk1=1,
+                              lanes4_survivors=1, lanes4_pass_chunks=3, lanes4_pass_site_tests=10,
+                              lanes4_buffered_events=3, lanes4_max_buffered=2, lanes4_live_buckets=2,
+                              lanes4_filter_steps=1, lanes4_bucket_events=3, lanes4_candidates=2,
+                              lanes4_foreign_candidates=0, lanes4_groups=3, lanes4_compare_steps=3,
+                              lanes4_depth_rejected_groups=1, lanes4_positivity_tests=2,
+                              lanes4_groups_without_valid=1, lanes4_emitted=1, lanes4_emitting_seeds=1,
+                              lanes4_multi_emission_seeds=0, lanes4_max_emissions_per_seed=1, lanes4_shell_ids=4,
+                              lanes4_max_group=1, lanes4_constant_shell_sites=3)
+                ledger.update(atlas_deep_cells=0)  # no atlas under the q4 lanes (as the real chain)
+                batch.update(lanes_records=2)
+    return dict(schema='mhgp9_tower_probe_v21', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
                              run_tower=True, certificate_capacity=capacity, certificate_judge=judge,
                              lanes_capacity=lanes_capacity, lanes_judge=bool(judge and levers.get('q34_batch_q3')),
+                             lanes_events=0,
                              levers=levers),
                 times_ms=dict({key: 0.125 for key in TIMES}, chain_total=1.5), chain_cpu_s=0.25,
                 generator=dict(q2_front_rectangles=3, q2_candidate_pairs=2, q2_accepted_pairs=1,
@@ -222,6 +237,9 @@ def main():
             options[argument] = None
     capacity = int(options.pop('certificate-capacity', 0))
     lanes_capacity = int(options.pop('lanes-capacity', 0))
+    if options.pop('lanes-events', None) is not None:
+        print('argument refusal: selftest lanes events', file=sys.stderr)
+        return 2
     judge = '--certificate-judge' in options
     options.pop('--certificate-judge', None)
     lanes_judge = '--lanes-judge' in options
@@ -257,7 +275,8 @@ def main():
         if (rule['workers'] == workers and rule.get('k', k) == k and rule.get('scene', scene) == scene and
                 rule.get('batch', levers.get('q34_batch_filter')) == levers.get('q34_batch_filter') and
                 rule.get('certificates', levers.get('q34_batch_certificates')) == levers.get('q34_batch_certificates') and
-                rule.get('lanes', levers.get('q34_batch_q3')) == levers.get('q34_batch_q3')):
+                rule.get('lanes', levers.get('q34_batch_q3')) == levers.get('q34_batch_q3') and
+                rule.get('q4', levers.get('q34_batch_q4')) == levers.get('q34_batch_q4')):
             time.sleep(rule['seconds'])
     status = 'complete_relative'
     for rule in config.get('refuse', []):
@@ -762,13 +781,13 @@ class Protocol(unittest.TestCase):
              record['real_session_allowed'] is pkg['committed'], 'package record')
         cases, provenance = session.validate_snapshot(pkg['archive'], manifest)
         on = {name: True for name in worker.LEVER_NAMES}
-        # v20 (R15) arms: full GPU (every lever), engine twin, S2 + S3 GPU
-        # without the q3 lanes; repeated and interleaved S3 / S3 + S4a pairs
-        # at 00 (auditor C, R-27).
-        arms = dict(gpu=on, engine=worker.engine_levers(on), gpu_s3=dict(on, q34_batch_q3=False, q34_gpu_q3=False))
+        # v21 (R16) arms: full GPU (every lever), engine twin, S4a GPU without
+        # the q4 lanes; repeated and interleaved S4a / S4a + S4b pairs at 00
+        # (auditor C, R-27).
+        arms = dict(gpu=on, engine=worker.engine_levers(on), gpu_s4a=dict(on, q34_batch_q4=False))
         expected = [(scene, k, arm, 0) for scene in ('00', '01', '02') for k in (5, 10) for arm in ('gpu', 'engine')]
-        expected += [('00', 5, 'gpu_s3', 0), ('00', 5, 'gpu', 1), ('00', 10, 'gpu_s3', 0), ('00', 10, 'gpu', 1),
-                     ('00', 5, 'gpu_s3', 1), ('00', 10, 'gpu_s3', 1)]
+        expected += [('00', 5, 'gpu_s4a', 0), ('00', 5, 'gpu', 1), ('00', 10, 'gpu_s4a', 0), ('00', 10, 'gpu', 1),
+                     ('00', 5, 'gpu_s4a', 1), ('00', 10, 'gpu_s4a', 1)]
         need(provenance['commit'] == head and len(cases) == len(expected) == 18 and all(
                 (c['scene'], c['k'], c['repeat']) == (scene, k, repeat) and c['levers'] == arms[arm] and
                 c['s'] == 8 and c['workers'] == 48 and c['static_threads'] == 48
@@ -938,13 +957,24 @@ class Protocol(unittest.TestCase):
                               ('gpu lanes asked none', lambda v: v['q34_batch'].update(
                                   lanes_asked=0, lanes_decided=0, lanes_device_ms=0.0, lanes_kernel_ms=0.0,
                                   lanes_transfer_ms=0.0, lanes_warps=0, lanes_records=0)),
-                              ('gpu lanes records shifted', lambda v: v['q34_batch'].update(lanes_records=2)),
+                              ('gpu lanes records shifted', lambda v: v['q34_batch'].update(
+                                  lanes_records=v['q34_batch']['lanes_records'] + 1)),
                               ('gpu lanes seeds shifted', lambda v: v['ledger'].update(lanes_seeds=3)),
                               ('gpu lanes census split', lambda v: v['ledger'].update(lanes_census_point_tests=9)),
                               ('gpu lanes shells short', lambda v: v['ledger'].update(lanes_shell_ids=2)),
                               ('gpu lanes seed tests shifted', lambda v: v['ledger'].update(lanes_seed_tests=11)),
                               ('gpu lanes without the lever', lambda v: v['options']['levers'].update(
-                                  q34_batch_q3=False, q34_gpu_q3=False))):
+                                  q34_batch_q3=False, q34_gpu_q3=False, q34_batch_q4=False)),
+                              # v21: the q4 lanes rules.
+                              ('gpu q4 without q3 lanes', lambda v: v['options']['levers'].update(q34_batch_q3=False)),
+                              ('gpu q4 lever dropped', lambda v: v['options']['levers'].update(q34_batch_q4=False)),
+                              ('gpu q4 seeds split', lambda v: v['ledger'].update(lanes4_certified=2)),
+                              ('gpu q4 groups split', lambda v: v['ledger'].update(lanes4_groups=4)),
+                              ('gpu q4 records shifted', lambda v: v['q34_batch'].update(lanes_records=1)),
+                              ('gpu q4 emitted beyond q4', lambda v: v['ledger'].update(
+                                  lanes4_emitted=2, lanes4_groups=4, lanes4_emitting_seeds=1, lanes4_shell_ids=8)),
+                              ('gpu q4 shells short', lambda v: v['ledger'].update(lanes4_shell_ids=3)),
+                              ('gpu lanes events unannounced', lambda v: v['options'].update(lanes_events=8))):
             bad = deepcopy(gpu_good)
             mutate(bad)
             need(refused(worker.validate_probe, bad, gpu_case, 0), 'batch/GPU probe mutation ' + label)
@@ -952,7 +982,7 @@ class Protocol(unittest.TestCase):
         # overflow) is a legitimate memory decision: accepted.
         deferred_lane = deepcopy(gpu_good)
         deferred_lane['q34_batch'].update(lanes_deferred=1, lanes_decided=1)
-        deferred_lane['ledger'].update(lanes_edges=1, lanes_cover_sites=5, lanes_seed_tests=5)
+        deferred_lane['ledger'].update(lanes_edges=1, lanes_q3_edges=1, lanes_cover_sites=5, lanes_seed_tests=5)
         need(worker.validate_probe(worker.strict_json(json.dumps(deferred_lane)), gpu_case, 0) == 'complete_relative',
              'a q3 lane deferred below the site slab is accepted')
         # v18: a judged probe must report every decided edge as judged.
@@ -1128,8 +1158,8 @@ class Protocol(unittest.TestCase):
             need(value['GPU_preflight_executed'] is True and
                  value['GPU_completed_cases'] == [0, 2, 4, 6, 8, 10, 12, 13, 14, 15, 16, 17] and
                  receipt['GPU_completed_cases'] == value['GPU_completed_cases'], 'GPU labels from complete LiDAR towers')
-            # v20 plan: GPU/engine pairs per (frame, K), then repeated and
-            # interleaved S3 / S3 + S4a pairs at 00, K5 and K10.
+            # v21 plan: GPU/engine pairs per (frame, K), then repeated and
+            # interleaved S4a / S4a + S4b pairs at 00, K5 and K10.
             need(value['completed_case_indices'] == list(range(18)) and value['cross_worker_comparisons'] == [
                 dict(reference=r, other=r + 1, equal=True) for r in range(0, 12, 2)] + [
                 dict(reference=reference, other=other, equal=True)
@@ -1190,7 +1220,7 @@ class Protocol(unittest.TestCase):
     def test_partial_session_case_cap_and_refusal(self):
         with tempfile.TemporaryDirectory() as temporary:
             code, receipt, fake, host = run_scenario(
-                Path(temporary), tools=dict(sleep=[dict(workers=48, k=10, scene='00', batch=True, lanes=False,
+                Path(temporary), tools=dict(sleep=[dict(workers=48, k=10, scene='00', batch=True, q4=False,
                                                         seconds=60)], refuse=[dict(scene='02', k=10)]),
                 patches=[(worker, 'CASE_CAP_SECONDS', 4)])
             need(code == 0 and receipt['status'] == 'partial', 'partial host receipt: ' + json.dumps(receipt)[:600])

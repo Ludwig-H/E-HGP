@@ -94,24 +94,23 @@ def read_blobs(oids):
 
 def default_plan():
     # Voies epinglees : defauts v9 de la chaine (tour statique sur W fils),
-    # passees explicitement a la sonde. v20 (R15) : chaque (scene, K) tourne
-    # sur le chemin GPU complet (filtre, certificats et voies q3 sur
+    # passees explicitement a la sonde. v21 (R16) : chaque (scene, K) tourne
+    # sur le chemin GPU complet (filtre, certificats et voies q3 et q4 sur
     # l'appareil) puis sur son jumeau moteur (sans lots ni GPU), que la
     # comparaison d'objet juge (condenses de tour et de catalogue, travail des
-    # certificats) ; a 00, K5 et K10, paires S2 + S3 GPU / S2 + S3 + S4a GPU
-    # repetees et entrelacees (auditeur C, R-27) pour attribuer le gain des
-    # voies q3.
+    # certificats) ; a 00, K5 et K10, paires S4a GPU / S4a + S4b GPU repetees
+    # et entrelacees (auditeur C, R-27) pour attribuer le gain des voies q4.
     def case(scene, k, arm, repeat=0):
         levers = {name: True for name in worker.LEVER_NAMES}
         if arm == 'engine':
             levers = worker.engine_levers(levers)
-        elif arm == 'gpu_s3':
-            levers.update(q34_batch_q3=False, q34_gpu_q3=False)
+        elif arm == 'gpu_s4a':
+            levers.update(q34_batch_q4=False)
         return dict(scene=scene, file=worker.INPUTS[scene]['file'], n=worker.INPUTS[scene]['n'], k=k, s=8,
                     workers=48, static_threads=48, levers=levers, repeat=repeat)
     cases = [case(scene, k, arm) for scene in ('00', '01', '02') for k in (5, 10) for arm in ('gpu', 'engine')]
-    cases += [case('00', 5, 'gpu_s3'), case('00', 5, 'gpu', 1), case('00', 10, 'gpu_s3'), case('00', 10, 'gpu', 1),
-              case('00', 5, 'gpu_s3', 1), case('00', 10, 'gpu_s3', 1)]
+    cases += [case('00', 5, 'gpu_s4a'), case('00', 5, 'gpu', 1), case('00', 10, 'gpu_s4a'), case('00', 10, 'gpu', 1),
+              case('00', 5, 'gpu_s4a', 1), case('00', 10, 'gpu_s4a', 1)]
     return dict(schema=worker.PLAN_SCHEMA, cases=cases)
 
 

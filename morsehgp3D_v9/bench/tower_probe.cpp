@@ -4,7 +4,7 @@
 //                     [--no-tower] [--n=prefixe] [--grid=libelle]
 //                     [--catalogue-digest] [--certificate-capacity=N]
 //                     [--certificate-judge] [--lanes-capacity=N]
-//                     [--lanes-judge] [--lever=NOM=0|1 ...]
+//                     [--lanes-judge] [--lanes-events=N] [--lever=NOM=0|1 ...]
 //
 // Leviers (meme objet, travail different) : atlas_saturate_deep,
 // q3_leaf_census, q34_dead_lanes, q34_witness_cache, q34_dead_core (ce dernier
@@ -21,7 +21,8 @@
 // q34_gpu_certificates (cet appel sur le GPU), q34_batch_q3 (v20 S4a : voie
 // q3 des survivants certifies en un appel, sans atlas, exige
 // q34_batch_certificates) et q34_gpu_q3 (cet appel sur le GPU pendant les
-// voies q4 des ouvriers, exige q34_batch_q3). Tous sont publies dans
+// voies q4 des ouvriers, exige q34_batch_q3), q34_batch_q4 (v21 S4b : la voie
+// q4 dans le meme appel, sans atlas, exige q34_batch_q3). Tous sont publies dans
 // options.levers ; un plan G4 les epingle explicitement, un nom inconnu est
 // refuse (code 2).
 //
@@ -147,6 +148,11 @@ int main(int argc, char** argv) {
         if (capacity < 2 || capacity > (1ULL << 20)) throw std::invalid_argument("lanes capacity outside 2..2^20");
         options.q34_lanes_capacity = static_cast<std::uint32_t>(capacity);
       }
+      else if (arg.starts_with("--lanes-events=")) {
+        const auto events = parse_u(arg.substr(15));
+        if (events < 1 || events > (1ULL << 20)) throw std::invalid_argument("lanes events outside 1..2^20");
+        options.q34_lanes_events = static_cast<std::uint32_t>(events);
+      }
       else if (arg.starts_with("--certificate-capacity=")) {
         const auto capacity = parse_u(arg.substr(23));
         if (capacity < 2 || capacity > 0xffffffffULL) throw std::invalid_argument("certificate capacity outside 2..2^32-1");
@@ -175,6 +181,7 @@ int main(int argc, char** argv) {
         else if (name == "q34_gpu_certificates") options.q34_gpu_certificates = on;
         else if (name == "q34_batch_q3") options.q34_batch_q3 = on;
         else if (name == "q34_gpu_q3") options.q34_gpu_q3 = on;
+        else if (name == "q34_batch_q4") options.q34_batch_q4 = on;
         else throw std::invalid_argument("unknown lever");
       }
       else if (arg.starts_with("--n=")) prefix = static_cast<std::size_t>(parse_u(arg.substr(4)));
@@ -204,22 +211,22 @@ int main(int argc, char** argv) {
   const auto r = mhgp9::run_tower_chain(input.points, options);
   const auto& t = r.times;
   const auto& c = r.catalogue;
-  std::printf("{\"schema\":\"mhgp9_tower_probe_v20\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
+  std::printf("{\"schema\":\"mhgp9_tower_probe_v21\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
               r.reason.c_str());
   std::printf("\"input\":{\"format\":\"%s\",\"grid\":\"%s\",\"sites\":%zu,\"hash\":\"%016" PRIx64 "\"},", input.format.c_str(),
               grid.c_str(), input.points.size(), input.hash);
   std::printf("\"options\":{\"K\":%u,\"K_effective\":%u,\"s\":%u,\"workers\":%zu,\"tower_static_threads\":%d,\"run_tower\":%s,"
-              "\"certificate_capacity\":%u,\"certificate_judge\":%s,\"lanes_capacity\":%u,\"lanes_judge\":%s,"
+              "\"certificate_capacity\":%u,\"certificate_judge\":%s,\"lanes_capacity\":%u,\"lanes_judge\":%s,\"lanes_events\":%u,"
               "\"levers\":{\"atlas_saturate_deep\":%s,\"q3_leaf_census\":%s,\"q34_dead_lanes\":%s,"
               "\"q34_witness_cache\":%s,\"q34_dead_core\":%s,\"tower_meb_proposal\":%s,"
               "\"q34_jobs_by_mass\":%s,\"q34_fine_jobs\":%s,\"tower_overlap_static\":%s,\"q2_jobs_by_mass\":%s,"
               "\"q34_batch_filter\":%s,\"q34_gpu_filter\":%s,\"q34_batch_certificates\":%s,"
-              "\"q34_gpu_certificates\":%s,\"q34_batch_q3\":%s,\"q34_gpu_q3\":%s}},",
+              "\"q34_gpu_certificates\":%s,\"q34_batch_q3\":%s,\"q34_gpu_q3\":%s,\"q34_batch_q4\":%s}},",
               options.kmax, r.kmax_effective, options.separation_s, options.workers,
               options.tower_static_threads >= 0 ? options.tower_static_threads : r.tower_static_threads,
               options.run_tower ? "true" : "false", options.q34_certificate_capacity,
               options.q34_certificate_judge ? "true" : "false", options.q34_lanes_capacity,
-              options.q34_lanes_judge ? "true" : "false",
+              options.q34_lanes_judge ? "true" : "false", options.q34_lanes_events,
               options.atlas_saturate_deep ? "true" : "false",
               options.q3_leaf_census ? "true" : "false", options.q34_dead_lanes ? "true" : "false",
               options.q34_witness_cache ? "true" : "false", options.q34_dead_core ? "true" : "false",
@@ -228,7 +235,7 @@ int main(int argc, char** argv) {
               options.q2_jobs_by_mass ? "true" : "false", options.q34_batch_filter ? "true" : "false",
               options.q34_gpu_filter ? "true" : "false", options.q34_batch_certificates ? "true" : "false",
               options.q34_gpu_certificates ? "true" : "false", options.q34_batch_q3 ? "true" : "false",
-              options.q34_gpu_q3 ? "true" : "false");
+              options.q34_gpu_q3 ? "true" : "false", options.q34_batch_q4 ? "true" : "false");
   std::printf("\"times_ms\":{\"read\":%.3f,\"prepare\":%.3f,\"gen_index\":%.3f,\"q2\":%.3f,\"q34\":%.3f,\"merge\":%.3f,"
               "\"tower_index\":%.3f,\"census\":%.3f,\"tower\":%.3f,\"chain_total\":%.3f,\"digest\":%.3f,"
               "\"catalogue_digest\":%.3f},"
@@ -306,7 +313,7 @@ int main(int argc, char** argv) {
   }
   {
     const auto& l = r.ledger;
-    const std::pair<const char*, std::uint64_t> rows[] = {{"expanded_pairs",l.expanded_pairs},{"cover_builds",l.cover_builds},{"cover_sites",l.cover_sites},{"cover_node_visits",l.cover_node_visits},{"q3_edges",l.q3_edges},{"q4_edges",l.q4_edges},{"both_edges",l.both_edges},{"witness_input_pair_mass",l.witness_input_pair_mass},{"witness_rejected_rectangles",l.witness_rejected_rectangles},{"witness_rejected_pairs",l.witness_rejected_pairs},{"q3_seeds",l.q3_seeds},{"q3_ball_builds",l.q3_ball_builds},{"q3_depth_rejections",l.q3_depth_rejections},{"q3_census_bounds",l.q3_census_bounds},{"q3_census_point_tests",l.q3_census_point_tests},{"q3_atlas_edges",l.q3_atlas_edges},{"q3_atlas_locations",l.q3_atlas_locations},{"q3_atlas_rejections",l.q3_atlas_rejections},{"q3_atlas_outside_domain",l.q3_atlas_outside_domain},{"atlas_cells",l.atlas_cells},{"atlas_leaf_cells",l.atlas_leaf_cells},{"atlas_deep_cells",l.atlas_deep_cells},{"atlas_outside_cells",l.atlas_outside_cells},{"atlas_splits",l.atlas_splits},{"atlas_node_visits",l.atlas_node_visits},{"atlas_block_bounds",l.atlas_block_bounds},{"atlas_point_tests",l.atlas_point_tests},{"atlas_ids_copied",l.atlas_ids_copied},{"q4_seeds",l.q4_seeds},{"q4_live_leaves",l.q4_live_leaves},{"q4_whole_atlas_skips",l.q4_whole_atlas_skips},{"q4_sweep_events",l.q4_sweep_events},{"q3_leaf_censuses",l.q3_leaf_censuses},{"q3_leaf_point_tests",l.q3_leaf_point_tests},{"q3_leaf_rejections",l.q3_leaf_rejections},{"q3_lower_bound_fallbacks",l.q3_lower_bound_fallbacks},{"dead_loads",l.dead_loads},{"dead_form_sites",l.dead_form_sites},{"dead_cells",l.dead_cells},{"dead_outside_cells",l.dead_outside_cells},{"dead_deep_cells",l.dead_deep_cells},{"dead_failed_cells",l.dead_failed_cells},{"dead_uniform_tests",l.dead_uniform_tests},{"dead_point_tests",l.dead_point_tests},{"dead_q3_proved",l.dead_q3_proved},{"dead_q3_open",l.dead_q3_open},{"dead_q4_proved",l.dead_q4_proved},{"dead_q4_open",l.dead_q4_open},{"witness_cache_queries",l.witness_cache_queries},{"witness_cache_node_tests",l.witness_cache_node_tests},{"witness_cache_rejected_pairs",l.witness_cache_rejected_pairs},{"core_builds",l.core_builds},{"core_sites",l.core_sites},{"core_closed_edges",l.core_closed_edges},{"dead_core_loads",l.dead_core_loads},{"dead_core_form_sites",l.dead_core_form_sites},{"dead_core_cells",l.dead_core_cells},{"dead_core_uniform_tests",l.dead_core_uniform_tests},{"dead_core_point_tests",l.dead_core_point_tests},{"dead_core_q3_proved",l.dead_core_q3_proved},{"dead_core_q3_open",l.dead_core_q3_open},{"dead_core_q4_proved",l.dead_core_q4_proved},{"dead_core_q4_open",l.dead_core_q4_open},{"core_cover_node_visits",l.core_cover_node_visits},{"core_cover_bound_tests",l.core_cover_bound_tests},{"core_cover_point_tests",l.core_cover_point_tests},{"dead_core_outside_cells",l.dead_core_outside_cells},{"dead_core_deep_cells",l.dead_core_deep_cells},{"dead_core_failed_cells",l.dead_core_failed_cells},{"q34_input_rectangles",l.q34_input_rectangles},{"witness_rect_queries",l.witness_rect_queries},{"witness_rect_node_visits",l.witness_rect_node_visits},{"witness_pair_queries",l.witness_pair_queries},{"witness_pair_node_visits",l.witness_pair_node_visits},{"q3_edge_queries",l.q3_edge_queries},{"q3_seed_node_visits",l.q3_seed_node_visits},{"q3_seed_point_tests",l.q3_seed_point_tests},{"q3_seed_bound_tests",l.q3_seed_bound_tests},{"q4_geometry_preparations",l.q4_geometry_preparations},{"q4_domain_node_visits",l.q4_domain_node_visits},{"q4_cover_decomposition_node_visits",l.q4_cover_decomposition_node_visits},{"q4_seed_node_visits",l.q4_seed_node_visits},{"q4_seed_cell_queries",l.q4_seed_cell_queries},{"q4_sweep_active_sites",l.q4_sweep_active_sites},{"lanes_edges",l.lanes_edges},{"lanes_cover_sites",l.lanes_cover_sites},{"lanes_cover_node_visits",l.lanes_cover_node_visits},{"lanes_seed_tests",l.lanes_seed_tests},{"lanes_acute_sites",l.lanes_acute_sites},{"lanes_owner_rejections",l.lanes_owner_rejections},{"lanes_seeds",l.lanes_seeds},{"lanes_census_point_tests",l.lanes_census_point_tests},{"lanes_census_inside_sites",l.lanes_census_inside_sites},{"lanes_census_shell_sites",l.lanes_census_shell_sites},{"lanes_census_outside_sites",l.lanes_census_outside_sites},{"lanes_depth_rejections",l.lanes_depth_rejections},{"lanes_emitted",l.lanes_emitted},{"lanes_shell_ids",l.lanes_shell_ids}};
+    const std::pair<const char*, std::uint64_t> rows[] = {{"expanded_pairs",l.expanded_pairs},{"cover_builds",l.cover_builds},{"cover_sites",l.cover_sites},{"cover_node_visits",l.cover_node_visits},{"q3_edges",l.q3_edges},{"q4_edges",l.q4_edges},{"both_edges",l.both_edges},{"witness_input_pair_mass",l.witness_input_pair_mass},{"witness_rejected_rectangles",l.witness_rejected_rectangles},{"witness_rejected_pairs",l.witness_rejected_pairs},{"q3_seeds",l.q3_seeds},{"q3_ball_builds",l.q3_ball_builds},{"q3_depth_rejections",l.q3_depth_rejections},{"q3_census_bounds",l.q3_census_bounds},{"q3_census_point_tests",l.q3_census_point_tests},{"q3_atlas_edges",l.q3_atlas_edges},{"q3_atlas_locations",l.q3_atlas_locations},{"q3_atlas_rejections",l.q3_atlas_rejections},{"q3_atlas_outside_domain",l.q3_atlas_outside_domain},{"atlas_cells",l.atlas_cells},{"atlas_leaf_cells",l.atlas_leaf_cells},{"atlas_deep_cells",l.atlas_deep_cells},{"atlas_outside_cells",l.atlas_outside_cells},{"atlas_splits",l.atlas_splits},{"atlas_node_visits",l.atlas_node_visits},{"atlas_block_bounds",l.atlas_block_bounds},{"atlas_point_tests",l.atlas_point_tests},{"atlas_ids_copied",l.atlas_ids_copied},{"q4_seeds",l.q4_seeds},{"q4_live_leaves",l.q4_live_leaves},{"q4_whole_atlas_skips",l.q4_whole_atlas_skips},{"q4_sweep_events",l.q4_sweep_events},{"q3_leaf_censuses",l.q3_leaf_censuses},{"q3_leaf_point_tests",l.q3_leaf_point_tests},{"q3_leaf_rejections",l.q3_leaf_rejections},{"q3_lower_bound_fallbacks",l.q3_lower_bound_fallbacks},{"dead_loads",l.dead_loads},{"dead_form_sites",l.dead_form_sites},{"dead_cells",l.dead_cells},{"dead_outside_cells",l.dead_outside_cells},{"dead_deep_cells",l.dead_deep_cells},{"dead_failed_cells",l.dead_failed_cells},{"dead_uniform_tests",l.dead_uniform_tests},{"dead_point_tests",l.dead_point_tests},{"dead_q3_proved",l.dead_q3_proved},{"dead_q3_open",l.dead_q3_open},{"dead_q4_proved",l.dead_q4_proved},{"dead_q4_open",l.dead_q4_open},{"witness_cache_queries",l.witness_cache_queries},{"witness_cache_node_tests",l.witness_cache_node_tests},{"witness_cache_rejected_pairs",l.witness_cache_rejected_pairs},{"core_builds",l.core_builds},{"core_sites",l.core_sites},{"core_closed_edges",l.core_closed_edges},{"dead_core_loads",l.dead_core_loads},{"dead_core_form_sites",l.dead_core_form_sites},{"dead_core_cells",l.dead_core_cells},{"dead_core_uniform_tests",l.dead_core_uniform_tests},{"dead_core_point_tests",l.dead_core_point_tests},{"dead_core_q3_proved",l.dead_core_q3_proved},{"dead_core_q3_open",l.dead_core_q3_open},{"dead_core_q4_proved",l.dead_core_q4_proved},{"dead_core_q4_open",l.dead_core_q4_open},{"core_cover_node_visits",l.core_cover_node_visits},{"core_cover_bound_tests",l.core_cover_bound_tests},{"core_cover_point_tests",l.core_cover_point_tests},{"dead_core_outside_cells",l.dead_core_outside_cells},{"dead_core_deep_cells",l.dead_core_deep_cells},{"dead_core_failed_cells",l.dead_core_failed_cells},{"q34_input_rectangles",l.q34_input_rectangles},{"witness_rect_queries",l.witness_rect_queries},{"witness_rect_node_visits",l.witness_rect_node_visits},{"witness_pair_queries",l.witness_pair_queries},{"witness_pair_node_visits",l.witness_pair_node_visits},{"q3_edge_queries",l.q3_edge_queries},{"q3_seed_node_visits",l.q3_seed_node_visits},{"q3_seed_point_tests",l.q3_seed_point_tests},{"q3_seed_bound_tests",l.q3_seed_bound_tests},{"q4_geometry_preparations",l.q4_geometry_preparations},{"q4_domain_node_visits",l.q4_domain_node_visits},{"q4_cover_decomposition_node_visits",l.q4_cover_decomposition_node_visits},{"q4_seed_node_visits",l.q4_seed_node_visits},{"q4_seed_cell_queries",l.q4_seed_cell_queries},{"q4_sweep_active_sites",l.q4_sweep_active_sites},{"lanes_edges",l.lanes_edges},{"lanes_cover_sites",l.lanes_cover_sites},{"lanes_cover_node_visits",l.lanes_cover_node_visits},{"lanes_seed_tests",l.lanes_seed_tests},{"lanes_acute_sites",l.lanes_acute_sites},{"lanes_owner_rejections",l.lanes_owner_rejections},{"lanes_seeds",l.lanes_seeds},{"lanes_census_point_tests",l.lanes_census_point_tests},{"lanes_census_inside_sites",l.lanes_census_inside_sites},{"lanes_census_shell_sites",l.lanes_census_shell_sites},{"lanes_census_outside_sites",l.lanes_census_outside_sites},{"lanes_depth_rejections",l.lanes_depth_rejections},{"lanes_emitted",l.lanes_emitted},{"lanes_shell_ids",l.lanes_shell_ids},{"lanes_q3_edges",l.lanes_q3_edges},{"lanes_census_seeds",l.lanes_census_seeds},{"lanes4_edges",l.lanes4_edges},{"lanes4_seeds",l.lanes4_seeds},{"lanes4_certified",l.lanes4_certified},{"lanes4_certified_chunk1",l.lanes4_certified_chunk1},{"lanes4_survivors",l.lanes4_survivors},{"lanes4_pass_chunks",l.lanes4_pass_chunks},{"lanes4_pass_site_tests",l.lanes4_pass_site_tests},{"lanes4_buffered_events",l.lanes4_buffered_events},{"lanes4_max_buffered",l.lanes4_max_buffered},{"lanes4_live_buckets",l.lanes4_live_buckets},{"lanes4_filter_steps",l.lanes4_filter_steps},{"lanes4_bucket_events",l.lanes4_bucket_events},{"lanes4_candidates",l.lanes4_candidates},{"lanes4_foreign_candidates",l.lanes4_foreign_candidates},{"lanes4_groups",l.lanes4_groups},{"lanes4_compare_steps",l.lanes4_compare_steps},{"lanes4_depth_rejected_groups",l.lanes4_depth_rejected_groups},{"lanes4_positivity_tests",l.lanes4_positivity_tests},{"lanes4_groups_without_valid",l.lanes4_groups_without_valid},{"lanes4_emitted",l.lanes4_emitted},{"lanes4_emitting_seeds",l.lanes4_emitting_seeds},{"lanes4_multi_emission_seeds",l.lanes4_multi_emission_seeds},{"lanes4_max_emissions_per_seed",l.lanes4_max_emissions_per_seed},{"lanes4_shell_ids",l.lanes4_shell_ids},{"lanes4_max_group",l.lanes4_max_group},{"lanes4_constant_shell_sites",l.lanes4_constant_shell_sites}};
     std::printf("\"ledger\":{");
     bool first = true;
     for (const auto& [name, value] : rows) {

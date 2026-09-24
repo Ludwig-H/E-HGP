@@ -94,10 +94,13 @@ static_assert(scan_rings >= 1 && scan_rings <= 8, "the ring index is read back f
 // Work of the q3 lanes (declared ledger of this mode, never compared with
 // the engine's own q3 ledger): the rebuilt cover, the seed scan (every cover
 // site is tested once), and the censuses in scan order.
+// `edges` counts the decided edges (one prologue each: cover, scan order,
+// seeds), `q3_edges` those whose q3 lane ran and `census_seeds` their seeds.
 struct Q3Work {
   u64 edges, cover_sites, max_cover_sites;
   CoverWork cover;
   u64 seed_tests, acute_sites, owner_rejections, seeds;
+  u64 q3_edges, census_seeds;
   u64 census_point_tests, census_inside_sites, census_shell_sites, census_outside_sites;
   u64 depth_rejections, emitted, shell_ids;
 };
@@ -108,6 +111,7 @@ struct EdgeQ3Work {
   u32 cover_sites;
   EdgeCoverWork cover;
   u32 seed_tests, acute_sites, owner_rejections, seeds;
+  u32 q3_edges, census_seeds;
   u64 census_point_tests, census_inside_sites, census_shell_sites, census_outside_sites;
   u32 depth_rejections, emitted;
   u64 shell_ids;
@@ -120,6 +124,7 @@ MHGP9_HD inline void add_q3_edge(Q3Work& to, const EdgeQ3Work& from) {
   add_edge_cover(to.cover, from.cover);
   to.seed_tests += from.seed_tests; to.acute_sites += from.acute_sites;
   to.owner_rejections += from.owner_rejections; to.seeds += from.seeds;
+  to.q3_edges += from.q3_edges; to.census_seeds += from.census_seeds;
   to.census_point_tests += from.census_point_tests; to.census_inside_sites += from.census_inside_sites;
   to.census_shell_sites += from.census_shell_sites; to.census_outside_sites += from.census_outside_sites;
   to.depth_rejections += from.depth_rejections; to.emitted += from.emitted; to.shell_ids += from.shell_ids;
@@ -133,6 +138,7 @@ MHGP9_HD inline void add_q3(Q3Work& to, const Q3Work& from) {
   add_cover(to.cover, from.cover);
   to.seed_tests += from.seed_tests; to.acute_sites += from.acute_sites;
   to.owner_rejections += from.owner_rejections; to.seeds += from.seeds;
+  to.q3_edges += from.q3_edges; to.census_seeds += from.census_seeds;
   to.census_point_tests += from.census_point_tests; to.census_inside_sites += from.census_inside_sites;
   to.census_shell_sites += from.census_shell_sites; to.census_outside_sites += from.census_outside_sites;
   to.depth_rejections += from.depth_rejections; to.emitted += from.emitted; to.shell_ids += from.shell_ids;
@@ -257,12 +263,14 @@ MHGP9_HD inline bool pair_below(u32 p, u32 x, u32 low, u32 high) {
 // `local` holds this edge's work and slab.records[0, record_count) its
 // emitted balls in seed order (edge field unset); on deferred or fault the
 // caller adds nothing. Every lane gets the same result (uniform flow).
+// Prologue of an edge, shared by its q3 and q4 lanes: the cover, its sites
+// in scan order (slab.points / slab.ranks[0, sites)) and the owned acute
+// seeds (slab.seeds[0, seeds), scan positions). `local` receives the cover
+// and seed-scan counters. Uniform result.
 template <class Group>
-MHGP9_HD CertificateStatus q3_lane(const Group& group, const LanesIndex& index, u32 a_rank, u32 b_rank,
-                                   unsigned kmax, const LanesSlab& slab, u32& record_count, EdgeQ3Work& local) {
-  record_count = 0;
-  local = EdgeQ3Work{};
-  if (kmax < 2) return CertificateStatus::fault;  // no q3 lane below K2
+MHGP9_HD CertificateStatus lanes_prologue(const Group& group, const LanesIndex& index, u32 a_rank, u32 b_rank,
+                                          const LanesSlab& slab, u32& sites_out, u32& seeds_out, EdgeQ3Work& local) {
+  sites_out = seeds_out = 0;
   const std::int32_t* a = index.tree.rank_points + 3 * static_cast<std::size_t>(a_rank);
   const std::int32_t* b = index.tree.rank_points + 3 * static_cast<std::size_t>(b_rank);
   const u32 id_a = index.rank_ids[a_rank], id_b = index.rank_ids[b_rank];
@@ -368,7 +376,23 @@ MHGP9_HD CertificateStatus q3_lane(const Group& group, const LanesIndex& index, 
   local.seed_tests = sites;
   local.seeds = seeds;
   group.sync();
+  sites_out = sites;
+  seeds_out = seeds;
+  return CertificateStatus::decided;
+}
 
+// The q3 censuses of the prologue's seeds, appended at
+// slab.records[record_count, ...). Uniform result.
+template <class Group>
+MHGP9_HD CertificateStatus q3_census(const Group& group, const LanesIndex& index, u32 a_rank, u32 b_rank,
+                                     unsigned kmax, const LanesSlab& slab, u32 sites, u32 seeds, u32& record_count,
+                                     EdgeQ3Work& local) {
+  if (kmax < 2) return CertificateStatus::fault;  // no q3 lane below K2
+  const std::int32_t* a = index.tree.rank_points + 3 * static_cast<std::size_t>(a_rank);
+  const u32 id_a = index.rank_ids[a_rank], id_b = index.rank_ids[b_rank];
+  const std::int32_t* b = index.tree.rank_points + 3 * static_cast<std::size_t>(b_rank);
+  ++local.q3_edges;
+  local.census_seeds += seeds;
   // One census per seed, split across the lanes by site.
   const u32 threshold = kmax - 1;
   for (u32 i = 0; i < seeds; ++i) {
@@ -441,6 +465,19 @@ MHGP9_HD CertificateStatus q3_lane(const Group& group, const LanesIndex& index, 
   }
   group.sync();  // the leader's records, copied out by every lane
   return CertificateStatus::decided;
+}
+
+// The q3 lane alone: prologue then censuses (S4a).
+template <class Group>
+MHGP9_HD CertificateStatus q3_lane(const Group& group, const LanesIndex& index, u32 a_rank, u32 b_rank,
+                                   unsigned kmax, const LanesSlab& slab, u32& record_count, EdgeQ3Work& local) {
+  record_count = 0;
+  local = EdgeQ3Work{};
+  if (kmax < 2) return CertificateStatus::fault;  // no q3 lane below K2
+  u32 sites = 0, seeds = 0;
+  const auto status = lanes_prologue(group, index, a_rank, b_rank, slab, sites, seeds, local);
+  if (status != CertificateStatus::decided) return status;
+  return q3_census(group, index, a_rank, b_rank, kmax, slab, sites, seeds, record_count, local);
 }
 
 }  // namespace mhgp9::gpu

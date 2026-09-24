@@ -125,6 +125,13 @@ struct ChainOptions {
   bool q34_gpu_q3 = false;
   bool q34_lanes_judge = false;
   std::uint32_t q34_lanes_capacity = 0;
+  // v21 S4b : la voie q4 des memes survivants dans le meme appel, sans atlas
+  // (gpu/q4_lanes.hpp : lentilles sur une grille entiere, groupes resolus par
+  // formes pivots) ; exige q34_batch_q3 ; sur le GPU avec q34_gpu_q3.
+  // q34_lanes_events fixe le tampon d'evenements q4 par graine (0 : defaut ;
+  // petite valeur : mise en attente). Meme objet ; desactive par defaut.
+  bool q34_batch_q4 = false;
+  std::uint32_t q34_lanes_events = 0;
 };
 
 // Temps de mur en millisecondes, CPU du processus en secondes.
@@ -191,6 +198,14 @@ struct GeneratorLedger {
   std::uint64_t lanes_edges, lanes_cover_sites, lanes_cover_node_visits, lanes_seed_tests, lanes_acute_sites,
       lanes_owner_rejections, lanes_seeds, lanes_census_point_tests, lanes_census_inside_sites,
       lanes_census_shell_sites, lanes_census_outside_sites, lanes_depth_rejections, lanes_emitted, lanes_shell_ids;
+  // v21 S4b: q3 lanes and their seeds, and the declared q4 lanes ledger.
+  std::uint64_t lanes_q3_edges, lanes_census_seeds;
+  std::uint64_t lanes4_edges, lanes4_seeds, lanes4_certified, lanes4_certified_chunk1, lanes4_survivors,
+      lanes4_pass_chunks, lanes4_pass_site_tests, lanes4_buffered_events, lanes4_max_buffered, lanes4_live_buckets,
+      lanes4_filter_steps, lanes4_bucket_events, lanes4_candidates, lanes4_foreign_candidates, lanes4_groups,
+      lanes4_compare_steps, lanes4_depth_rejected_groups, lanes4_positivity_tests, lanes4_groups_without_valid,
+      lanes4_emitted, lanes4_emitting_seeds, lanes4_multi_emission_seeds, lanes4_max_emissions_per_seed,
+      lanes4_shell_ids, lanes4_max_group, lanes4_constant_shell_sites;
 };
 
 // Occupation mesuree des ouvriers q3/q4 (jamais comparee entre executions) :

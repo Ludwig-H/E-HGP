@@ -291,15 +291,17 @@ gen::Q34CertificateBatch gpu_certificate_batch(const GpuIndex& prepared, unsigne
 // violation of the port.
 gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::span<const gen::Q34SurvivingEdge> survivors,
                                std::span<const std::uint8_t> asked, bool device, std::uint32_t capacity,
-                               std::size_t workers, double& device_ms, double& kernel_ms, double& transfer_ms,
-                               std::uint32_t& warps) {
+                               std::uint32_t events, std::size_t workers, double& device_ms, double& kernel_ms,
+                               double& transfer_ms, std::uint32_t& warps) {
   std::vector<std::size_t> where;
   std::vector<gpu::u32> a, b;
+  std::vector<gpu::u8> lanes;
   for (std::size_t j = 0; j < survivors.size(); ++j)
     if (asked[j] != 0) {
       where.push_back(j);
       a.push_back(survivors[j].a_rank);
       b.push_back(survivors[j].b_rank);
+      lanes.push_back(asked[j]);
     }
   gpu::LanesInput in;
   in.index.nodes = prepared.nodes.data();
@@ -311,8 +313,10 @@ gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::spa
   in.rank_ids = prepared.rank_ids.data();
   in.edge_a = a.data();
   in.edge_b = b.data();
+  in.edge_lanes = lanes.data();
   in.edge_count = where.size();
   in.capacity = capacity;
+  in.event_capacity = events;
   auto out = device ? gpu::run_lanes_batch(in) : gpu::run_lanes_batch_host(in, workers);
   switch (out.error_kind) {
     case gpu::BatchError::none:
@@ -338,7 +342,7 @@ gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::spa
   batch.record_count.assign(survivors.size(), 0);
   for (std::size_t i = 0; i < n; ++i) {
     if (out.status[i] != static_cast<gpu::u8>(gpu::CertificateStatus::decided)) continue;
-    batch.decided[where[i]] = 2;
+    batch.decided[where[i]] = lanes[i];
     batch.record_begin[where[i]] = out.record_begin[i];
     batch.record_count[where[i]] = out.record_count[i];
   }
@@ -354,7 +358,7 @@ gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::spa
       to.edge = static_cast<std::uint32_t>(where[from.edge]);
       to.depth = from.depth;
       to.shell = from.shell;
-      to.arity = static_cast<std::uint8_t>(from.arity == 3 ? 3 : 0);
+      to.arity = static_cast<std::uint8_t>(from.arity == 3 || from.arity == 4 ? from.arity : 0);
       to.shell_sum = from.shell_sum;
       to.shell_xor = from.shell_xor;
     }
@@ -379,6 +383,14 @@ gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::spa
   t.depth_rejections = w.depth_rejections;
   t.emitted = w.emitted;
   t.shell_ids = w.shell_ids;
+  t.q3_edges = w.q3_edges;
+  t.census_seeds = w.census_seeds;
+  const auto& w4 = out.work4;
+  batch.work4 = gen::Q34Lanes4Work{w4.edges, w4.seeds, w4.certified, w4.certified_chunk1, w4.survivors,
+      w4.pass_chunks, w4.pass_site_tests, w4.buffered_events, w4.max_buffered, w4.live_buckets, w4.filter_steps,
+      w4.bucket_events, w4.candidates, w4.foreign_candidates, w4.groups, w4.compare_steps,
+      w4.depth_rejected_groups, w4.positivity_tests, w4.groups_without_valid, w4.emitted, w4.emitting_seeds,
+      w4.multi_emission_seeds, w4.max_emissions_per_seed, w4.shell_ids, w4.max_group, w4.constant_shell_sites};
   device_ms = out.total_ms;
   kernel_ms = out.kernel_ms;
   transfer_ms = out.upload_ms + out.download_ms;
@@ -674,6 +686,11 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     if (options.q34_lanes_capacity != 0 &&
         (!options.q34_batch_q3 || options.q34_lanes_capacity < 2 || options.q34_lanes_capacity > (1U << 20)))
       fail(ChainStatus::kInvalidInput, "chain_q34_lanes_capacity_requires_batch_q3_and_two_sites");
+    if (options.q34_batch_q4 && !options.q34_batch_q3)
+      fail(ChainStatus::kInvalidInput, "chain_q34_batch_q4_requires_batch_q3");
+    if (options.q34_lanes_events != 0 &&
+        (!options.q34_batch_q4 || options.q34_lanes_events > (1U << 20)))
+      fail(ChainStatus::kInvalidInput, "chain_q34_lanes_events_requires_batch_q4");
     if (points.size() < 2) fail(ChainStatus::kInvalidInput, "chain_requires_two_sites");
     if (points.size() > static_cast<std::size_t>(std::numeric_limits<std::int32_t>::max()))
       fail(ChainStatus::kInvalidInput, "chain_too_many_sites");
@@ -805,21 +822,22 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         gen::Q34LanesStage lanes;
         if (options.q34_batch_q3 && kmax >= 2) {
           const bool device = options.q34_gpu_q3;
-          const std::uint32_t capacity = options.q34_lanes_capacity;
+          const std::uint32_t capacity = options.q34_lanes_capacity, events = options.q34_lanes_events;
           lanes.filter = [&gpu_preparation, &lanes_device_ms, &lanes_kernel_ms, &lanes_transfer_ms, &lanes_warps,
-                          device, capacity, W](const gen::Q2CensusIndexPtr& ix, unsigned k,
-                                               std::span<const gen::Q34SurvivingEdge> edges,
-                                               std::span<const std::uint8_t> asked) {
-            return lanes_batch(gpu_preparation.get(*ix), k, edges, asked, device, capacity, W, lanes_device_ms,
-                               lanes_kernel_ms, lanes_transfer_ms, lanes_warps);
+                          device, capacity, events, W](const gen::Q2CensusIndexPtr& ix, unsigned k,
+                                                       std::span<const gen::Q34SurvivingEdge> edges,
+                                                       std::span<const std::uint8_t> asked) {
+            return lanes_batch(gpu_preparation.get(*ix), k, edges, asked, device, capacity, events, W,
+                               lanes_device_ms, lanes_kernel_ms, lanes_transfer_ms, lanes_warps);
           };
+          lanes.lanes = options.q34_batch_q4 && kmax >= 3 ? 6 : 2;
           if (options.q34_lanes_judge) lanes.filter = gen::judge_lanes_filter(std::move(lanes.filter), o, W, &lanes_judge);
           lanes.sink = [&slots](std::size_t slot, std::span<const gen::Q34LaneRecord> records) {
             auto& out = slots[slot];
             for (const auto& r : records) {
               Presentation p;
               p.arity = r.arity;
-              p.support = {r.support[0], r.support[1], r.support[2], 0};
+              p.support = {r.support[0], r.support[1], r.support[2], r.arity == 4 ? r.support[3] : 0};
               p.key = r.key;
               p.depth = r.depth;
               p.shell = r.shell;
@@ -950,6 +968,23 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       l.lanes_census_outside_sites = w.lanes.census_outside_sites;
       l.lanes_depth_rejections = w.lanes.depth_rejections; l.lanes_emitted = w.lanes.emitted;
       l.lanes_shell_ids = w.lanes.shell_ids;
+      l.lanes_q3_edges = w.lanes.q3_edges; l.lanes_census_seeds = w.lanes.census_seeds;
+      {
+        const auto& q = w.lanes4;
+        l.lanes4_edges = q.edges; l.lanes4_seeds = q.seeds; l.lanes4_certified = q.certified;
+        l.lanes4_certified_chunk1 = q.certified_chunk1; l.lanes4_survivors = q.survivors;
+        l.lanes4_pass_chunks = q.pass_chunks; l.lanes4_pass_site_tests = q.pass_site_tests;
+        l.lanes4_buffered_events = q.buffered_events; l.lanes4_max_buffered = q.max_buffered;
+        l.lanes4_live_buckets = q.live_buckets; l.lanes4_filter_steps = q.filter_steps;
+        l.lanes4_bucket_events = q.bucket_events; l.lanes4_candidates = q.candidates;
+        l.lanes4_foreign_candidates = q.foreign_candidates; l.lanes4_groups = q.groups;
+        l.lanes4_compare_steps = q.compare_steps; l.lanes4_depth_rejected_groups = q.depth_rejected_groups;
+        l.lanes4_positivity_tests = q.positivity_tests; l.lanes4_groups_without_valid = q.groups_without_valid;
+        l.lanes4_emitted = q.emitted; l.lanes4_emitting_seeds = q.emitting_seeds;
+        l.lanes4_multi_emission_seeds = q.multi_emission_seeds;
+        l.lanes4_max_emissions_per_seed = q.max_emissions_per_seed; l.lanes4_shell_ids = q.shell_ids;
+        l.lanes4_max_group = q.max_group; l.lanes4_constant_shell_sites = q.constant_shell_sites;
+      }
     }
     result.times.q34_ms = ms_since(t);
 

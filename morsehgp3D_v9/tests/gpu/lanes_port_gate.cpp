@@ -26,10 +26,16 @@
 //     registre faux d'une unite sont refuses ;
 //   - garde d'entree (validate_lanes_input) : l'entree reelle est acceptee,
 //     chaque champ forge un a un est refuse ;
-//   - arene par defaut depassee sous l'ardoise de sites (contre-exemple exact
-//     de l'auditeur : 4 097 grappes de sept sites, cinq boules acceptees par
-//     arete a K5, 20 485 enregistrements pour une arene de 20 484) : une seule
-//     arete mise en attente, les autres egales au moteur ;
+//   - arene par defaut depassee sous l'ardoise de sites (fixture exacte et
+//     compacte de l'auditeur : 45 grappes de 110 sites, 108 boules q3 par
+//     arete a K5, 4 860 enregistrements pour une arene de 4 816) : la seule
+//     derniere arete mise en attente, les autres egales au moteur ;
+//   - S4b, voie q4 (gpu/q4_lanes.hpp) : sur chaque arete certifiee dont la
+//     voie q4 reste ouverte, les tetraedres de la voie q4 du moteur
+//     (gen::engine_q4_records, Local28 a atlas) ; lot mixte q3 + q4 accepte
+//     par check_lanes_batch et judge_lanes_filter ; fixture de l'auditeur B
+//     (une graine, deux groupes, deux tetraedres a K3) ; tampon d'evenements
+//     reduit : mises en attente, les autres aretes egales ; mutants q4 ;
 //   - panne d'allocation de l'executeur hote (ardoise d'enregistrements
 //     demesuree, auditeur A) : exception rendue a l'appelant apres jointure de
 //     tous les fils, jamais une terminaison, a un et a plusieurs fils ; un lot
@@ -125,6 +131,14 @@ struct Flat {
   }
 };
 
+struct Q4Buffers {
+  std::vector<gpu::u32> positions, bits, list;
+  gpu::Q4Slab view{};
+  explicit Q4Buffers(gpu::u32 capacity) : positions(capacity), bits(capacity), list(capacity) {
+    view = gpu::Q4Slab{positions.data(), bits.data(), list.data(), capacity};
+  }
+};
+
 struct Slab {
   std::vector<gpu::u32> ranges, ranks, seeds, scratch;
   std::vector<std::int32_t> points;
@@ -168,6 +182,14 @@ bool same_records(std::vector<gen::Q34LaneRecord> a, std::vector<gen::Q34LaneRec
   return a == b;
 }
 
+gen::Q34Lanes4Work work4_of(const gpu::Q4Work& w) {
+  return gen::Q34Lanes4Work{w.edges, w.seeds, w.certified, w.certified_chunk1, w.survivors, w.pass_chunks,
+      w.pass_site_tests, w.buffered_events, w.max_buffered, w.live_buckets, w.filter_steps, w.bucket_events,
+      w.candidates, w.foreign_candidates, w.groups, w.compare_steps, w.depth_rejected_groups, w.positivity_tests,
+      w.groups_without_valid, w.emitted, w.emitting_seeds, w.multi_emission_seeds, w.max_emissions_per_seed,
+      w.shell_ids, w.max_group, w.constant_shell_sites};
+}
+
 gen::Q34LanesWork work_of(const gpu::Q3Work& w) {
   gen::Q34LanesWork t;
   t.edges = w.edges;
@@ -188,19 +210,23 @@ gen::Q34LanesWork work_of(const gpu::Q3Work& w) {
   t.depth_rejections = w.depth_rejections;
   t.emitted = w.emitted;
   t.shell_ids = w.shell_ids;
+  t.q3_edges = w.q3_edges;
+  t.census_seeds = w.census_seeds;
   return t;
 }
 
 // The host batch output mapped to survivor ordinals (as the chain does).
-gen::Q34LanesBatch batch_of(const gpu::LanesOutput& out, const std::vector<std::size_t>& where, std::size_t n) {
+gen::Q34LanesBatch batch_of(const gpu::LanesOutput& out, const std::vector<std::size_t>& where, std::size_t n,
+                            const std::vector<gpu::u8>* lanes = nullptr) {
   gen::Q34LanesBatch batch;
   batch.backend = out.device;
   batch.decided.assign(n, 0);
   batch.record_begin.assign(n, 0);
   batch.record_count.assign(n, 0);
+  batch.work4 = work4_of(out.work4);
   for (std::size_t i = 0; i < where.size(); ++i)
     if (out.status[i] == static_cast<gpu::u8>(gpu::CertificateStatus::decided)) {
-      batch.decided[where[i]] = 2;
+      batch.decided[where[i]] = lanes == nullptr ? 2 : (*lanes)[i];
       batch.record_begin[where[i]] = out.record_begin[i];
       batch.record_count[where[i]] = out.record_count[i];
     }
@@ -337,7 +363,8 @@ int main(int argc, char** argv) {
     return file_stats(file, ks[0], workers);
   }
   unsigned long long edges = 0, q3_only = 0, rejections = 0, emitted = 0, wide_shells = 0, deferred = 0,
-                     mutants = 0, guards = 0, judged = 0, faults = 0;
+                     mutants = 0, guards = 0, judged = 0, faults = 0, q4_judged = 0, q4_deferred = 0;
+  gpu::Q4Work q4_total{};
   const auto options = q34_options();
   // Engraved cospherical fixture: the integer points of the spheres of
   // radius 5 (scaled by 7) and 7 (scaled by 5), both of radius 35, around two
@@ -524,6 +551,98 @@ int main(int argc, char** argv) {
           if (!same_records(slice, per_edge[i])) return fail("small.records " + where_name);
         }
       }
+      // 6. S4b: the q4 lanes edge by edge against the engine's q4 lane, then
+      // one mixed q3 + q4 batch through the boundary and the judge, a reduced
+      // event buffer, and q4 output mutants.
+      if (kmax >= 3) {
+        Q4Buffers q4b(gpu::default_event_capacity);
+        std::vector<std::size_t> where4;
+        std::vector<gpu::u32> fa, fb;
+        std::vector<gpu::u8> lanes;
+        std::vector<std::uint8_t> asked6(survivors.size(), 0);
+        for (std::size_t j = 0; j < survivors.size(); ++j) {
+          if (certified.certificates.deferred[j] != 0) continue;
+          const auto mask = static_cast<gpu::u8>(certified.certificates.masks[j] & 6U);
+          if (mask == 0) continue;
+          where4.push_back(j);
+          fa.push_back(survivors[j].a_rank);
+          fb.push_back(survivors[j].b_rank);
+          lanes.push_back(mask);
+          asked6[j] = mask;
+          if ((mask & 4U) == 0) continue;
+          gpu::u32 count = 0;
+          gpu::EdgeQ3Work l3{};
+          gpu::Q4Work w4{};
+          const auto status = gpu::edge_lanes(gpu::HostGroup{}, view, survivors[j].a_rank, survivors[j].b_rank, 4,
+                                              kmax, slab.view, q4b.view, count, l3, w4);
+          if (status != gpu::CertificateStatus::decided) return fail("q4.undecided " + where_name);
+          std::vector<gen::Q34LaneRecord> mine;
+          for (gpu::u32 r = 0; r < count; ++r) mine.push_back(record_of(slab.records[r], 0));
+          const auto reference = gen::engine_q4_records(index, kmax, options, order[survivors[j].a_rank],
+                                                        order[survivors[j].b_rank]);
+          if (!same_records(mine, reference)) return fail("q4.records " + where_name);
+          gpu::add_q4(q4_total, w4);
+        }
+        auto in6 = flat.input(kmax, fa, fb);
+        in6.edge_lanes = lanes.data();
+        const auto out6 = gpu::run_lanes_batch_host(in6, workers);
+        if (!out6.error.empty() || out6.deferred != 0 || out6.faults != 0)
+          return fail("q4.batch " + where_name + " deferred=" + std::to_string(out6.deferred) + " faults=" +
+                      std::to_string(out6.faults) + " records=" + std::to_string(out6.records.size()) + " edges=" +
+                      std::to_string(where4.size()) + " " + out6.error);
+        const auto batch6 = batch_of(out6, where4, survivors.size(), &lanes);
+        gen::Q34LanesJudgeWork judge6;
+        const auto judged6 = gen::judge_lanes_filter(
+            [&](const gen::Q2CensusIndexPtr&, unsigned, std::span<const gen::Q34SurvivingEdge>,
+                std::span<const std::uint8_t>) { return batch6; },
+            options, workers, &judge6);
+        try {
+          static_cast<void>(judged6(index, kmax, survivors, asked6));
+        } catch (const std::exception& e) {
+          return fail(std::string("q4.judge_refused_real ") + where_name + " " + e.what());
+        }
+        q4_judged += judge6.judged;
+        // Reduced event buffer: deferrals, the other edges unchanged.
+        auto small6 = in6;
+        small6.event_capacity = 2;
+        const auto outs = gpu::run_lanes_batch_host(small6, workers);
+        if (!outs.error.empty() || outs.faults != 0) return fail("q4.small " + where_name);
+        q4_deferred += outs.deferred;
+        // Output mutants on a q4 record: the judge or the boundary refuses.
+        std::size_t target = batch6.records.size();
+        for (std::size_t r = 0; r < batch6.records.size(); ++r)
+          if (batch6.records[r].arity == 4) {
+            target = r;
+            break;
+          }
+        if (target < batch6.records.size()) {
+          const std::vector<std::pair<const char*, std::function<void(gen::Q34LanesBatch&)>>> q4_cases{
+              {"q4_depth", [&](gen::Q34LanesBatch& b) { b.records[target].depth ^= 1U; }},
+              {"q4_key", [&](gen::Q34LanesBatch& b) { b.records[target].key[4] += 1; }},
+              {"q4_support", [&](gen::Q34LanesBatch& b) { b.records[target].support[1] ^= 1U; }},
+              {"q4_fingerprint", [&](gen::Q34LanesBatch& b) { b.records[target].shell_sum += 1; }},
+              {"q4_arity", [&](gen::Q34LanesBatch& b) { b.records[target].arity = 3; }},
+              {"q4_groups", [&](gen::Q34LanesBatch& b) { ++b.work4.groups; }},
+              {"q4_seeds", [&](gen::Q34LanesBatch& b) { ++b.work4.certified; }},
+          };
+          for (const auto& [name, mutate] : q4_cases) {
+            auto mutated = batch6;
+            mutate(mutated);
+            const auto mutant = gen::judge_lanes_filter(
+                [&](const gen::Q2CensusIndexPtr&, unsigned, std::span<const gen::Q34SurvivingEdge>,
+                    std::span<const std::uint8_t>) { return mutated; },
+                options, workers, nullptr);
+            bool refused = false;
+            try {
+              static_cast<void>(mutant(index, kmax, survivors, asked6));
+            } catch (const std::logic_error&) {
+              refused = true;
+            }
+            if (!refused) return fail(std::string("q4.mutant_survived ") + name + " " + where_name);
+            ++mutants;
+          }
+        }
+      }
       // 5. Input guard (never a device call here).
       if (!guarded && ea.size() >= 2) {
         guarded = true;
@@ -598,16 +717,55 @@ int main(int argc, char** argv) {
       }
     }
   }
-  // The auditor's arena fixture: default arena 4E + 4096 records, 5E needed.
+  // Auditor B's multi-group fixture: one seed, two root groups, two
+  // tetrahedra at K3 (edge of IDs 0 and 1).
+  unsigned long long b_fixture = 0;
+  {
+    const std::vector<gen::Point3> points{{0, 0, 2}, {4, 0, 2}, {2, 3, 2}, {2, 2, 4}, {2, 2, 0}};
+    const auto index = gen::make_q2_cloud_index(gen::prepare_cloud(points));
+    const Flat flat(*index);
+    const auto order = index->spatial_order();
+    gpu::u32 ra = 0, rb = 0;
+    for (std::size_t r = 0; r < order.size(); ++r) {
+      if (order[r] == 0) ra = static_cast<gpu::u32>(r);
+      if (order[r] == 1) rb = static_cast<gpu::u32>(r);
+    }
+    Slab slab(gpu::default_lanes_capacity, gpu::default_record_capacity);
+    Q4Buffers q4b(gpu::default_event_capacity);
+    gpu::u32 count = 0;
+    gpu::EdgeQ3Work l3{};
+    gpu::Q4Work w4{};
+    if (gpu::edge_lanes(gpu::HostGroup{}, flat.view(), ra, rb, 4, 3, slab.view, q4b.view, count, l3, w4) !=
+        gpu::CertificateStatus::decided)
+      return fail("b_fixture.status");
+    std::vector<gen::Q34LaneRecord> mine;
+    for (gpu::u32 r = 0; r < count; ++r) mine.push_back(record_of(slab.records[r], 0));
+    if (count != 2 || w4.multi_emission_seeds != 1 || w4.groups < 2 ||
+        !same_records(mine, gen::engine_q4_records(index, 3, options, 0, 1)))
+      return fail("b_fixture.two_tetrahedra");
+    gpu::add_q4(q4_total, w4);
+    b_fixture = count;
+  }
+  // The auditor's compact arena fixture: 45 clusters, each a = (-1000,0,0),
+  // b = (1000,0,0) and the 108 integer points (0,u,v) with u^2+v^2 = 1105^2.
+  // Every triangle abx is acute with ab longest and every other point of the
+  // circle is outside its ball: 108 q3 balls per edge at K5, 4 860 records
+  // for a default arena of 16E + 4096 = 4 816: exactly the last edge (host
+  // order) is deferred, the others equal to the engine.
   unsigned long long arena_deferred = 0;
   {
-    constexpr int clusters = 4097;
+    constexpr int clusters = 45, radius = 1105, half = 1000;
+    std::vector<std::array<int, 2>> circle;
+    for (int u = -radius; u <= radius; ++u)
+      for (int v = -radius; v <= radius; ++v)
+        if (u * u + v * v == radius * radius) circle.push_back({u, v});
+    if (circle.size() != 108) return fail("arena.circle");
     std::vector<gen::Point3> points;
     for (int c = 0; c < clusters; ++c) {
-      const int cx = 1000 + 500 * (c % 17), cy = 1000 + 500 * ((c / 17) % 17), cz = 1000 + 500 * (c / 289);
-      for (const auto& d : {std::array<int, 3>{-10, 0, 0}, {10, 0, 0}, {0, 13, 0}, {0, 0, 13}, {0, -13, 0},
-                            {0, 0, -13}, {0, 5, 12}})
-        points.push_back({cx + d[0], cy + d[1], cz + d[2]});
+      const int cx = 1000 + 5000 * c;
+      points.push_back({cx - half, radius, radius});
+      points.push_back({cx + half, radius, radius});
+      for (const auto& [u, v] : circle) points.push_back({cx, radius + u, radius + v});
     }
     const auto index = gen::make_q2_cloud_index(gen::prepare_cloud(points));
     const Flat flat(*index);
@@ -615,35 +773,44 @@ int main(int argc, char** argv) {
     std::vector<gpu::u32> rank_of(order.size());
     for (std::size_t r = 0; r < order.size(); ++r) rank_of[order[r]] = static_cast<gpu::u32>(r);
     std::vector<gpu::u32> ea, eb;
+    const std::size_t stride = 2 + circle.size();
     for (int c = 0; c < clusters; ++c) {
-      ea.push_back(rank_of[7 * c]);
-      eb.push_back(rank_of[7 * c + 1]);
+      ea.push_back(rank_of[stride * c]);
+      eb.push_back(rank_of[stride * c + 1]);
     }
     const auto out = gpu::run_lanes_batch_host(flat.input(5, ea, eb), workers);
     if (!out.error.empty() || out.faults != 0 || out.deferred != 1 ||
-        out.records.size() != 5 * static_cast<std::size_t>(clusters - 1))
+        out.status.back() != static_cast<gpu::u8>(gpu::CertificateStatus::deferred) ||
+        out.records.size() != 108 * static_cast<std::size_t>(clusters - 1))
       return fail("arena.deferral");
     for (int c = 0; c < clusters; ++c) {
-      const bool is_deferred = out.status[c] == static_cast<gpu::u8>(gpu::CertificateStatus::deferred);
-      if (is_deferred) {
+      if (out.status[c] == static_cast<gpu::u8>(gpu::CertificateStatus::deferred)) {
         ++arena_deferred;
         continue;
       }
       std::vector<gen::Q34LaneRecord> slice;
       for (gpu::u32 r = 0; r < out.record_count[c]; ++r)
         slice.push_back(record_of(out.records[out.record_begin[c] + r], 0));
-      if (c % 64 == 0 &&
+      if (slice.size() != 108) return fail("arena.balls");
+      if (c % 8 == 0 &&
           !same_records(slice, gen::engine_q3_records(index, 5, options, order[ea[c]], order[eb[c]])))
         return fail("arena.records");
-      if (slice.size() != 5) return fail("arena.five_balls");
     }
   }
   std::printf("lanes_port_gate n=%zu edges=%llu q3_only=%llu depth_rejections=%llu emitted=%llu wide_shells=%llu "
-              "deferred=%llu judged=%llu mutants=%llu guards=%llu faults=%llu arena_deferred=%llu\n",
+              "deferred=%llu judged=%llu mutants=%llu guards=%llu faults=%llu arena_deferred=%llu q4_edges=%llu "
+              "q4_seeds=%llu q4_survivors=%llu q4_groups=%llu q4_emitted=%llu q4_multi=%llu q4_without_valid=%llu "
+              "q4_max_group=%llu q4_judged=%llu q4_deferred=%llu b_fixture=%llu\n",
               n, edges, q3_only, rejections, emitted, wide_shells, deferred, judged, mutants, guards, faults,
-              arena_deferred);
+              arena_deferred, q4_total.edges, q4_total.seeds, q4_total.survivors, q4_total.groups, q4_total.emitted,
+              q4_total.multi_emission_seeds, q4_total.groups_without_valid, q4_total.max_group, q4_judged,
+              q4_deferred, b_fixture);
   if (edges == 0 || q3_only == 0 || rejections == 0 || emitted == 0 || wide_shells == 0 || deferred == 0 ||
-      judged == 0 || guards == 0 || mutants == 0 || faults == 0 || arena_deferred != 1)
+      judged == 0 || guards == 0 || mutants == 0 || faults == 0 || arena_deferred != 1 || q4_total.edges == 0 ||
+      q4_total.certified_chunk1 == 0 || q4_total.survivors == 0 || q4_total.emitted == 0 ||
+      q4_total.multi_emission_seeds == 0 || q4_total.groups_without_valid == 0 ||
+      q4_total.depth_rejected_groups == 0 || q4_total.max_group < 3 || q4_judged == 0 || q4_deferred == 0 ||
+      b_fixture != 2)
     return 3;
   return 0;
 }

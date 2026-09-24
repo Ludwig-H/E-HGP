@@ -109,6 +109,10 @@ def main(argv):
                         # call (host emulation of gpu/lanes.hpp).
                         ('q3_on', dict(base, levers=dict(engine_levers, q34_batch_filter=True,
                                                          q34_batch_certificates=True, q34_batch_q3=True))),
+                        # v21: the q4 lanes in the same call (host emulation of gpu/q4_lanes.hpp).
+                        ('q4_on', dict(base, levers=dict(engine_levers, q34_batch_filter=True,
+                                                         q34_batch_certificates=True, q34_batch_q3=True,
+                                                         q34_batch_q4=True))),
                         ('pinned_off', dict(base, levers={name: False for name in worker.LEVER_NAMES}, workers=1,
                                             static_threads=0))):
         try:
@@ -183,7 +187,7 @@ def main(argv):
         on, off, batched = results['pinned_on'][1], results['pinned_off'][1], results['batch_on'][1]
         check(worker.logical_result(on) == worker.logical_result(off) == worker.logical_result(batched) and
               all(label not in results or worker.logical_result(results[label][1]) == worker.logical_result(on)
-                  for label in ('gpu_on', 'gpu_certificates_on', 'gpu_q3_on', 'cert_on', 'q3_on')),
+                  for label in ('gpu_on', 'gpu_certificates_on', 'gpu_q3_on', 'cert_on', 'q3_on', 'q4_on')),
               'modes on/off/batch/certificates/gpu change the object')
         # v17: the batch path ran (CPU backend), searched each expanded pair
         # once without the cache, and its survivors reached the cores.
@@ -365,6 +369,47 @@ def main(argv):
             print('probe_worker_contract q3_mutants_killed=' + str(q3_killed) + '/' + str(len(q3_mutants)))
         else:
             check(False, 'q3 lanes case absent')
+        # v21: the q4 lanes of the same call ran, judged by the engine's q4
+        # lane in the judged run, same object; its preflight rule and mutants.
+        if 'q4_on' in results:
+            q4_case, lanes4 = results['q4_on']
+            l4 = lanes4['ledger']
+            check(l4['lanes4_emitted'] > 0 and l4['lanes4_emitted'] == lanes4['generator']['q4_emitted'] and
+                  worker.logical_result(lanes4) == worker.logical_result(on) and
+                  worker.certificate_work(lanes4) == worker.certificate_work(on) and
+                  lanes4['q34_batch']['lanes_records'] == l4['lanes_emitted'] + l4['lanes4_emitted'],
+                  'q4 lanes path not exercised or its object differs')
+            try:
+                worker.validate_preflight_work(lanes4, q4_case['levers'])
+                judged4, code, _ = run(q4_case, judge=True)
+                check(worker.validate_probe(judged4, q4_case, code, inputs=inputs, judge=True) == 'complete_relative' and
+                      judged4['q34_batch']['lanes_judged'] == judged4['q34_batch']['lanes_decided'] > 0,
+                      'judged q4 lanes case')
+            except (ValueError, KeyError, TypeError, UnicodeError, subprocess.TimeoutExpired) as error:
+                check(False, 'q4 lanes case refused: ' + type(error).__name__ + ': ' + str(error))
+            q4_mutants = [
+                ('q4 seeds split', lambda v: v['ledger'].update(lanes4_certified=v['ledger']['lanes4_certified'] + 1)),
+                ('q4 groups split', lambda v: v['ledger'].update(lanes4_groups=v['ledger']['lanes4_groups'] + 1)),
+                ('q4 records shifted', lambda v: v['q34_batch'].update(
+                    lanes_records=v['q34_batch']['lanes_records'] - 1)),
+                ('q4 lever dropped', lambda v: v['options']['levers'].update(q34_batch_q4=False)),
+                ('q4 without q3 lanes', lambda v: v['options']['levers'].update(q34_batch_q3=False)),
+                ('q4 shells short', lambda v: v['ledger'].update(lanes4_shell_ids=0)),
+                ('q4 events announced', lambda v: v['options'].update(lanes_events=8)),
+            ]
+            q4_killed = 0
+            for label, mutate in q4_mutants:
+                bad = copy.deepcopy(lanes4)
+                mutate(bad)
+                try:
+                    worker.validate_probe(bad, q4_case, 0, inputs=inputs)
+                except (ValueError, KeyError, TypeError):
+                    q4_killed += 1
+                    continue
+                check(False, 'q4 lanes mutant accepted: ' + label)
+            print('probe_worker_contract q4_mutants_killed=' + str(q4_killed) + '/' + str(len(q4_mutants)))
+        else:
+            check(False, 'q4 lanes case absent')
         engine_filled = copy.deepcopy(on)
         engine_filled['q34_batch'].update(lanes_backend='cpu')
         try:

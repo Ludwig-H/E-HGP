@@ -1259,6 +1259,27 @@ Le plan de campagne v2 est `validated_test_protocol_only`. Il fixe les sources $
 
 Les théorèmes S.1–S.6 de [`TOUR_BOULES_SATUREES.md`](TOUR_BOULES_SATUREES.md) donnent une représentation combinatoire exacte de Gamma par saturés et une forêt de Kruskal commune aux ordres. Il reste à construire un oracle indépendant borné, à convertir ses coupes en `MergeForest`, `coverage_log` et applications verticales canoniques, puis à certifier la persistance et les dégénérescences. La voie brute possède jusqu'à $O(n^4)$ supports, $O(n^5)$ memberships et $O(M^2)$ paires de générateurs; elle est donc un oracle petit $n$, pas un remplacement scalable de la voie actuelle. Une sous-famille proposée puis saturée reste `partial_refinement`.
 
+### V9-S4 — voies q3/q4 sans atlas (S4a, S4b, `morsehgp3D_v9`)
+
+Portée : la génération des boules q3 et q4 d'une arête certifiée par
+`src/gpu/lanes.hpp` et `src/gpu/q4_lanes.hpp`, comparée à la voie produit
+(atlas Local28, recensement GlobalBoxes). Notations : arête $ab$, $D=\lvert b-a\rvert^2$, graine $x$ possédée et strictement aiguë, $E=\lvert x-a\rvert^2$, $F=\lvert x-b\rvert^2$, $n=(b-a)\times(x-a)$, $G=\lvert n\rvert^2$, $S(z)=n\cdot(z-a)$ et $P(z)=G\lvert z-a\rvert^2-W\cdot(z-a)$ la puissance relative non réduite de `make_q3`. La famille q4 de la graine est $f_z(\mu)=P(z)-\mu S(z)$.
+
+| énoncé | statut | portée |
+| --- | --- | --- |
+| suffisance du cover pour q3 : la boule q3 possédée positive d'une graine est dans la boule fermée $\lvert 2z-a-b\rvert^2\leq 4D$ | `proved_here` | $R+\lvert c-m\rvert\leq\sqrt{3}\lvert ab\rvert/2<\lvert ab\rvert$ ; le recensement du cover égale celui du nuage |
+| suffisance du cover pour q4 : une boule q4 possédée positive est dans le cover | `proved_here` | $R+\lvert c-m\rvert\leq(\sqrt{3/8}+\sqrt{1/8})\lvert ab\rvert<\lvert ab\rvert$ par le lemme de la lentille ($8\lvert c-m\rvert^2\leq D$) |
+| les graines tirées du cover sont exactement celles de la marche de l'index | `proved_here` | une graine possédée vérifie $E\leq D$ et $F\leq D$, donc $\lvert 2x-a-b\rvert^2=2E+2F-D\leq 3D$ |
+| L1 (lentille affine) : un site intérieur strict aux membres des deux bouts d'un intervalle de $\mu$ l'est à tout membre de l'intervalle | `proved_here` | $f_z$ est affine en $\mu$ ; le compte de lentille minore la profondeur de tout membre de l'intervalle, racines des groupes comprises |
+| L2 (domaine) : toute racine émise vérifie $2\mu^2\leq Q$ avec $Q=D(3G-2EF)>0$ | `proved_here` | lemme de la lentille (constante $\alpha_4=2$, déjà porteur dans le certificat de voie morte et les cellules Outside de Local28) : $\lvert c-m\rvert^2=R^2-D/4$, $R^2=(DEF+\mu^2)/(4G)$ ; $Q\geq DG/3$ car $R_0\leq\lvert ab\rvert/\sqrt{3}$ |
+| L3 (candidats) : un $y$ émis vérifie $S(y)\neq 0$ et $P(y)>0$ | `proved_here` | la positivité place le centre strictement du côté de $y$ du plan $abx$, donc $\mathrm{sgn}\,\mu=\mathrm{sgn}\,S(y)$ et $P(y)=\mu S(y)>0$ |
+| L4 (profondeur d'intervalle) : dans un seau vivant $[g_j,g_{j+1}]$, la profondeur à la racine $r$ vaut la lentille plus les sorties de racine $>r$ plus les entrées de racine $<r$ | `proved_here` | partition du cover en sites de lentille, événements du seau, sites extérieurs aux deux bouts et constantes ; le groupe de $r$ est parmi les événements |
+| L5 (pivot) : $\mathrm{sgn}(\mathrm{racine}_z-\mathrm{racine}_w)=\mathrm{sgn}(Q_w(z))\,\mathrm{sgn}(S(w))\,\mathrm{sgn}(S(z))$ | `proved_here` | $G\,Q_w(z)=S(w)P(z)-P(w)S(z)$, où $Q_w$ est le numérateur non normalisé de `make_q4` pour $a,b,x,w$ ; les deux membres sont des quadriques de même terme en $\lvert v\rvert^2$ nulles en $a,b,x,w$ |
+| L6 (propriété des racines) : un seau possède $[g_j,g_{j+1})$, le dernier aussi sa borne haute | `proved_here` | chaque racine de $[-\bar\mu,\bar\mu]$ est dans exactement un seau ; une racine possédée par un seau mort a une profondeur au moins égale à sa lentille, donc au moins $T=K-2$ |
+| L7 (première présentation) : le produit émet le plus petit ID du groupe qui est possédé, positif et canonique | `proved_here` | ordre (racine, ID) du balayage Local28 ; les non-candidats échouent la possession, la canonicité ou la positivité (L3) |
+| L8 (unicité) : (arête, support trié) est unique | `proved_here` | quatre points non coplanaires fixent une sphère donc une racine ; la possession fixe l'arête ; la règle canonique ne laisse émettre $\lbrace x,y\rbrace$ qu'à la plus petite graine aiguë |
+| les voies sans atlas égalent la voie produit sur les trames LiDAR | `validated_host_software` | portes `mhgp9_gpu_lanes_port` et `mhgp9_chain_batch_q3` (familles, fixtures cosphériques, fixture multi-groupes de l'auditeur B) ; 08/000000 : toutes les arêtes q4 égales au moteur à K5 et K10, condensés épinglés reproduits ; ni preuve de complétude des clés jamais proposées, ni statut public |
+
 ## 10. Règles de publication d'un résultat
 
 Pour la ligne enregistrée au contrat public v2, une expérimentation ou une

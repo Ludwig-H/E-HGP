@@ -33,6 +33,7 @@ inline LanesOutput run_lanes_batch_host(const LanesInput& input, std::size_t wor
   const std::size_t edges = input.edge_count;
   const u32 capacity = input.capacity == 0 ? default_lanes_capacity : input.capacity;
   const u32 record_capacity = input.record_capacity == 0 ? default_record_capacity : input.record_capacity;
+  const u32 event_capacity = input.event_capacity == 0 ? default_event_capacity : input.event_capacity;
   const std::size_t arena = input.arena_capacity == 0 ? default_arena_capacity(edges) : input.arena_capacity;
   out.capacity = capacity;
   out.record_capacity = record_capacity;
@@ -71,8 +72,11 @@ inline LanesOutput run_lanes_batch_host(const LanesInput& input, std::size_t wor
       std::vector<LaneRecord> slab_records(record_capacity);
       const LanesSlab slab{ranges.data(), points.data(), ranks.data(), seeds.data(), scratch.data(),
                            slab_records.data(), capacity, record_capacity};
+      std::vector<u32> positions(event_capacity), bits(event_capacity), list(event_capacity);
+      const Q4Slab q4{positions.data(), bits.data(), list.data(), event_capacity};
       std::vector<CertificateStatus> status;
       std::vector<EdgeQ3Work> local;
+      std::vector<Q4Work> local4;
       std::vector<u32> counts;
       std::vector<LaneRecord> records;
       for (;;) {
@@ -81,12 +85,14 @@ inline LanesOutput run_lanes_batch_host(const LanesInput& input, std::size_t wor
         const std::size_t first = block * grain, last = std::min(edges, first + grain);
         status.assign(last - first, CertificateStatus::decided);
         local.assign(last - first, EdgeQ3Work{});
+        local4.assign(last - first, Q4Work{});
         counts.assign(last - first, 0);
         records.clear();
         for (std::size_t i = first; i < last; ++i) {
           u32 count = 0;
-          status[i - first] = q3_lane(HostGroup{}, index, input.edge_a[i], input.edge_b[i], input.index.kmax, slab,
-                                      count, local[i - first]);
+          const u8 lanes = input.edge_lanes == nullptr ? u8{2} : input.edge_lanes[i];
+          status[i - first] = edge_lanes(HostGroup{}, index, input.edge_a[i], input.edge_b[i], lanes,
+                                         input.index.kmax, slab, q4, count, local[i - first], local4[i - first]);
           if (status[i - first] != CertificateStatus::decided) continue;
           counts[i - first] = count;
           for (u32 r = 0; r < count; ++r) {
@@ -112,6 +118,7 @@ inline LanesOutput run_lanes_batch_host(const LanesInput& input, std::size_t wor
               out.records.insert(out.records.end(), records.begin() + static_cast<std::ptrdiff_t>(cursor),
                                  records.begin() + static_cast<std::ptrdiff_t>(cursor + count));
               add_q3_edge(out.work, local[i - first]);
+              add_q4(out.work4, local4[i - first]);
             }
             cursor += count;
           }

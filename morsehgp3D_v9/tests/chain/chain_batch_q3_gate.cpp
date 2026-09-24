@@ -11,6 +11,9 @@
 //     voies demandees decidees, juge de l'appel (juge_lanes_filter) sur toutes ;
 //   - ardoise reduite (q34_lanes_capacity) : des aretes sont rendues au CPU
 //     (traine) et les condenses ne changent pas ;
+//   - S4b (q34_batch_q4) : la voie q4 dans le meme appel, jugee (voie q4 du
+//     moteur), memes condenses et meme registre des voies ; ardoise et tampon
+//     d'evenements reduits : traine, memes condenses ;
 //   - registre semantique des voies (auditeur A) : q3_edges, q4_edges,
 //     both_edges, covers et voies ouvertes egaux sans le levier, avec lui et
 //     avec l'ardoise reduite (une arete dont q3 part en traine et dont q4 est
@@ -72,7 +75,8 @@ int main(int argc, char** argv) {
     std::fprintf(stderr, "usage: mhgp9_chain_batch_q3_gate [--n=1000]\n");
     return 2;
   }
-  unsigned long long cases = 0, asked = 0, judged = 0, records = 0, tails = 0, refusals = 0, both = 0;
+  unsigned long long cases = 0, asked = 0, judged = 0, records = 0, tails = 0, refusals = 0, both = 0,
+                     q4_emitted = 0, q4_tails = 0;
   for (const std::string_view family : {"uniform", "terrain", "clusters", "spheres"}) {
     const auto points = family == "spheres" ? sphere_fixture() : gen::bench::make_front_fixture(n, family, 3).points;
     for (const unsigned kmax : {2U, 3U, 5U, 10U}) {
@@ -90,15 +94,33 @@ int main(int argc, char** argv) {
         auto small = lanes;
         small.q34_lanes_judge = false;
         small.q34_lanes_capacity = 24;
+        auto with_q4 = lanes;
+        with_q4.q34_batch_q4 = true;
+        auto with_q4_small = with_q4;
+        with_q4_small.q34_lanes_judge = false;
+        with_q4_small.q34_lanes_capacity = 24;
+        with_q4_small.q34_lanes_events = 2;
         const auto a = run_tower_chain(points, base);
         const auto b = run_tower_chain(points, lanes);
         const auto c = run_tower_chain(points, small);
+        const auto d = run_tower_chain(points, with_q4);
+        const auto e = run_tower_chain(points, with_q4_small);
         if (a.status != ChainStatus::kComplete || b.status != ChainStatus::kComplete ||
-            c.status != ChainStatus::kComplete)
-          return fail("status " + where + " " + b.reason + " " + c.reason);
-        if (a.tower_digest != b.tower_digest || a.catalogue_digest != b.catalogue_digest ||
-            a.tower_digest != c.tower_digest || a.catalogue_digest != c.catalogue_digest)
-          return fail("digest " + where);
+            c.status != ChainStatus::kComplete || d.status != ChainStatus::kComplete ||
+            e.status != ChainStatus::kComplete)
+          return fail("status " + where + " " + b.reason + " " + c.reason + " " + d.reason + " " + e.reason);
+        for (const auto* r : {&b, &c, &d, &e})
+          if (a.tower_digest != r->tower_digest || a.catalogue_digest != r->catalogue_digest ||
+              a.q3_emitted != r->q3_emitted || a.q4_emitted != r->q4_emitted)
+            return fail("digest " + where);
+        if (kmax >= 3) {
+          const auto& ld = d.q34_batch;
+          if (ld.lanes_decided != ld.lanes_asked || ld.lanes_judged != ld.lanes_decided ||
+              d.ledger.lanes4_emitted + 0 != d.q4_emitted || d.ledger.lanes4_edges == 0)
+            return fail("q4_lanes " + where);
+          q4_emitted += d.ledger.lanes4_emitted;
+          q4_tails += e.q34_batch.lanes_deferred;
+        }
         if (a.q3_emitted != b.q3_emitted || a.q4_emitted != b.q4_emitted || a.q3_emitted != c.q3_emitted ||
             a.q4_emitted != c.q4_emitted)
           return fail("emitted " + where);
@@ -107,7 +129,9 @@ int main(int argc, char** argv) {
           return std::array<std::uint64_t, 7>{l.q3_edges, l.q4_edges, l.both_edges, l.cover_builds, l.cover_sites,
                                               l.dead_q3_open, l.dead_q4_open};
         };
-        if (lanes_of(a) != lanes_of(b) || lanes_of(a) != lanes_of(c)) return fail("ledger " + where);
+        if (lanes_of(a) != lanes_of(b) || lanes_of(a) != lanes_of(c) || lanes_of(a) != lanes_of(d) ||
+            lanes_of(a) != lanes_of(e))
+          return fail("ledger " + where);
         both += a.ledger.both_edges;
         const auto& lb = b.q34_batch;
         const auto& lc = c.q34_batch;
@@ -176,6 +200,19 @@ int main(int argc, char** argv) {
     if (!refused(o, "chain_q34_lanes_capacity_requires_batch_q3_and_two_sites")) return fail("refusal.capacity_off");
     ++refusals;
   }
+  {
+    auto o = ok;
+    o.q34_batch_q4 = true;
+    if (!refused(o, "chain_q34_batch_q4_requires_batch_q3")) return fail("refusal.batch_q4");
+    ++refusals;
+  }
+  {
+    auto o = ok;
+    o.q34_batch_q3 = true;
+    o.q34_lanes_events = 8;
+    if (!refused(o, "chain_q34_lanes_events_requires_batch_q4")) return fail("refusal.events");
+    ++refusals;
+  }
   bool device = false;
   {
     auto o = ok;
@@ -193,12 +230,12 @@ int main(int argc, char** argv) {
     ++refusals;
   }
   std::printf("chain_batch_q3_gate n=%zu cases=%llu asked=%llu judged=%llu records=%llu tails=%llu both=%llu "
-              "refusals=%llu device=%s\n",
-              n, cases, asked, judged, records, tails, both, refusals, device ? "yes" : "no");
+              "q4_emitted=%llu q4_tails=%llu refusals=%llu device=%s\n",
+              n, cases, asked, judged, records, tails, both, q4_emitted, q4_tails, refusals, device ? "yes" : "no");
   // tails + both > asked (auditor A): some edge has its q3 lane in the tail
   // AND its q4 lane open, the case the both_edges comparison guards.
-  if (cases == 0 || asked == 0 || judged != asked || records == 0 || tails == 0 || both == 0 || refusals != 7 ||
-      tails + both <= asked)
+  if (cases == 0 || asked == 0 || judged != asked || records == 0 || tails == 0 || both == 0 || refusals != 9 ||
+      tails + both <= asked || q4_emitted == 0 || q4_tails == 0)
     return 3;
   return 0;
 }

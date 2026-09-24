@@ -202,6 +202,30 @@ struct HostGroup {
         x ^= v;
       }
   }
+  // Minimum of code(base + l) over the lanes l with base + l < count
+  // (0xffffffff when none).
+  template <class Code>
+  [[nodiscard]] u32 reduce_min(u32 base, u32 count, Code code) const {
+    u32 best = 0xffffffffU;
+    for (u32 lane = 0; lane < size && base + lane < count; ++lane) {
+      const u32 v = code(base + lane);
+      best = v < best ? v : best;
+    }
+    return best;
+  }
+  // One evaluation per lane, then: the sums of the two packed words w0, w1,
+  // and the ballots of the flags `first`, `second` (S4b lens pass).
+  template <class Code>
+  void vote(u32 base, u32 count, Code code, u32& w0, u32& w1, u32& first, u32& second) const {
+    w0 = w1 = first = second = 0;
+    for (u32 lane = 0; lane < size && base + lane < count; ++lane) {
+      const auto v = code(base + lane);
+      w0 += v.w0;
+      w1 += v.w1;
+      if (v.first) first |= 1U << lane;
+      if (v.second) second |= 1U << lane;
+    }
+  }
   [[nodiscard]] bool leader() const { return true; }
   void sync() const {}
 };

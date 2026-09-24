@@ -8,7 +8,7 @@
 // the CUDA translation unit.
 
 #include "certificate.hpp"
-#include "lanes.hpp"
+#include "q4_lanes.hpp"
 #include "witness_filter.hpp"
 
 #include <cstdint>
@@ -201,7 +201,7 @@ struct CertificateOutput {
 };
 CertificateOutput run_certificate_batch(const CertificateInput& input);
 
-// ---- S4a (chain): q3 lanes of certified edges ---------------------------
+// ---- S4a/S4b (chain): q3 and q4 lanes of certified edges -----------------
 //
 // One warp per edge (gpu/lanes.hpp): the cover rebuilt, the seeds drawn from
 // it, one exact ScalarCover census per seed, the key of every accepted ball.
@@ -216,17 +216,22 @@ struct LanesInput {
   const u32* rank_ids = nullptr;  // original input ID of every spatial rank
   const u32* edge_a = nullptr;    // spatial ranks
   const u32* edge_b = nullptr;
+  const u8* edge_lanes = nullptr;  // S4b: lanes asked per edge (2, 4 or 6); null: q3 only
   std::size_t edge_count = 0;
   u32 capacity = 0;                // sites per slab; 0 selects the default
   u32 record_capacity = 0;         // records per slab; 0 selects the default
   std::size_t arena_capacity = 0;  // records of the call; 0 selects the default
+  u32 event_capacity = 0;          // S4b: buffered q4 events per seed; 0 selects the default
 };
 
 inline constexpr u32 default_lanes_capacity = 1U << 16;
 inline constexpr u32 default_record_capacity = 1U << 12;
-// Default arena: four records per edge plus one slab (R14: about one q3 ball
-// per edge at K5, two at K10).
-inline std::size_t default_arena_capacity(std::size_t edges) { return 4 * edges + default_record_capacity; }
+inline constexpr u32 default_event_capacity = 1U << 12;
+// Default arena: sixteen records per edge plus one slab (R15: about one q3
+// ball per edge at K5, two at K10; with the q4 lane, 3.2 records per edge on
+// LiDAR at K10 and up to 8 on the uniform family). The device clamps it to
+// an eighth of the free memory; an overflow defers edges, never refuses.
+inline std::size_t default_arena_capacity(std::size_t edges) { return 16 * edges + default_record_capacity; }
 
 // Host-side refusal before any device call; empty when accepted: the index
 // and escape links of validate_certificate_input, the rank IDs, K >= 2, edge
@@ -245,6 +250,12 @@ inline std::string validate_lanes_input(const LanesInput& input) {
     if (input.edge_a[i] >= input.index.rank_count || input.edge_b[i] >= input.index.rank_count ||
         input.edge_a[i] == input.edge_b[i])
       return "edge rank outside the index";
+  if (input.edge_lanes != nullptr)
+    for (std::size_t i = 0; i < input.edge_count; ++i) {
+      const u8 lanes = input.edge_lanes[i];
+      if (lanes == 0 || (lanes & ~6U) != 0 || ((lanes & 4U) != 0 && input.index.kmax < 3))
+        return "edge lanes outside the domain of K";
+    }
   if (input.capacity == 1) return "slab capacity below two sites";
   if (input.arena_capacity > static_cast<std::size_t>(0xffffffffU)) return "record arena exceeds 2^32-1";
   return {};
@@ -258,7 +269,8 @@ struct LanesOutput {
   std::vector<u8> status;                       // per edge: CertificateStatus
   std::vector<u32> record_begin, record_count;  // per edge (decided): its slice of records
   std::vector<LaneRecord> records;              // slices in reservation order; edge = input edge index
-  Q3Work work{};                                // decided edges only
+  Q3Work work{};                                // decided edges only (prologue and q3 lanes)
+  Q4Work work4{};                               // decided edges only (S4b q4 lanes)
   std::uint64_t deferred = 0, faults = 0;
   std::uint32_t capacity = 0, record_capacity = 0, warps = 0;
   // cudaEvent timings (ms): upload, kernel, download, whole pass.

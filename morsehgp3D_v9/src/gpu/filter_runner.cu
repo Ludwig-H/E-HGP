@@ -524,6 +524,38 @@ struct WarpGroup {
     (void)mask; (void)h; (void)sum; (void)x;
 #endif
   }
+  template <class Code>
+  __host__ __device__ u32 reduce_min(u32 base, u32 count, Code code) const {
+#if defined(__CUDA_ARCH__)
+    const u32 i = base + lane;
+    return __reduce_min_sync(0xffffffffU, i < count ? code(i) : 0xffffffffU);
+#else
+    (void)base; (void)count; (void)code;
+    return 0xffffffffU;
+#endif
+  }
+  template <class Code>
+  __host__ __device__ void vote(u32 base, u32 count, Code code, u32& w0, u32& w1, u32& first, u32& second) const {
+#if defined(__CUDA_ARCH__)
+    const u32 i = base + lane;
+    u32 a = 0, b = 0;
+    bool f = false, s = false;
+    if (i < count) {
+      const auto v = code(i);
+      a = v.w0;
+      b = v.w1;
+      f = v.first;
+      s = v.second;
+    }
+    w0 = __reduce_add_sync(0xffffffffU, a);
+    w1 = __reduce_add_sync(0xffffffffU, b);
+    first = __ballot_sync(0xffffffffU, f);
+    second = __ballot_sync(0xffffffffU, s);
+#else
+    (void)base; (void)count; (void)code;
+    w0 = w1 = first = second = 0;
+#endif
+  }
   __host__ __device__ bool leader() const { return lane == 0; }
   __host__ __device__ void sync() const {
 #if defined(__CUDA_ARCH__)
@@ -713,21 +745,31 @@ constexpr int lanes_warps_per_block = lanes_threads / 32;
 // reservation fails too). Lane 0 writes the per-edge answer and the warp's
 // work (shared memory).
 __global__ void __launch_bounds__(lanes_threads, 4) lanes_kernel(LanesIndex index, const u32* edge_a,
-    const u32* edge_b, u32 edges, unsigned kmax, u32 capacity, u32 record_capacity, u32* ranges,
-    std::int32_t* points, u32* ranks, u32* seeds, u32* scratch, LaneRecord* slab_records, LaneRecord* arena,
-    unsigned long long arena_capacity, unsigned long long* next_edge, unsigned long long* reserved, u8* out_status,
-    u32* out_begin, u32* out_count, Q3Work* warp_work, u32 warps) {
+    const u32* edge_b, const u8* edge_lanes_in, u32 edges, unsigned kmax, u32 capacity, u32 record_capacity,
+    u32 event_capacity, u32* ranges, std::int32_t* points, u32* ranks, u32* seeds, u32* scratch,
+    LaneRecord* slab_records, u32* events, LaneRecord* arena, unsigned long long arena_capacity,
+    unsigned long long* next_edge, unsigned long long* reserved, u8* out_status, u32* out_begin, u32* out_count,
+    Q3Work* warp_work, Q4Work* warp_work4, u32 warps) {
   const u32 warp = (blockIdx.x * blockDim.x + threadIdx.x) / 32;
   __shared__ Q3Work totals[lanes_warps_per_block];
+  __shared__ Q4Work totals4[lanes_warps_per_block];
+  __shared__ Q4Work edge4[lanes_warps_per_block];  // the current edge's q4 work (leader lane)
   Q3Work& work = totals[threadIdx.x / 32];
+  Q4Work& work4 = totals4[threadIdx.x / 32];
+  Q4Work& local4 = edge4[threadIdx.x / 32];
   if (warp >= warps) return;
   const WarpGroup group{threadIdx.x & 31U};
-  if (group.leader()) work = Q3Work{};
+  if (group.leader()) {
+    work = Q3Work{};
+    work4 = Q4Work{};
+  }
   group.sync();
   const std::size_t c = capacity;
   const LanesSlab slab{ranges + 2 * c * warp, points + 3 * c * warp, ranks + c * warp, seeds + c * warp,
                        scratch + c * warp, slab_records + static_cast<std::size_t>(record_capacity) * warp, capacity,
                        record_capacity};
+  const std::size_t e = event_capacity;
+  const Q4Slab q4{events + 3 * e * warp, events + 3 * e * warp + e, events + 3 * e * warp + 2 * e, event_capacity};
   for (;;) {
     unsigned long long edge = 0;
     if (group.leader()) edge = atomicAdd(next_edge, 1ULL);
@@ -735,7 +777,8 @@ __global__ void __launch_bounds__(lanes_threads, 4) lanes_kernel(LanesIndex inde
     if (edge >= edges) break;
     u32 count = 0;
     EdgeQ3Work local;
-    auto status = q3_lane(group, index, edge_a[edge], edge_b[edge], kmax, slab, count, local);
+    const u8 lanes = edge_lanes_in == nullptr ? u8{2} : edge_lanes_in[edge];
+    auto status = edge_lanes(group, index, edge_a[edge], edge_b[edge], lanes, kmax, slab, q4, count, local, local4);
     unsigned long long begin = 0;
     if (status == CertificateStatus::decided) {
       if (group.leader()) begin = atomicAdd(reserved, static_cast<unsigned long long>(count));
@@ -753,11 +796,17 @@ __global__ void __launch_bounds__(lanes_threads, 4) lanes_kernel(LanesIndex inde
       out_status[edge] = static_cast<u8>(status);
       out_begin[edge] = static_cast<u32>(status == CertificateStatus::decided ? begin : 0);
       out_count[edge] = status == CertificateStatus::decided ? count : 0;
-      if (status == CertificateStatus::decided) add_q3_edge(work, local);
+      if (status == CertificateStatus::decided) {
+        add_q3_edge(work, local);
+        add_q4(work4, local4);
+      }
     }
     group.sync();
   }
-  if (group.leader()) warp_work[warp] = work;
+  if (group.leader()) {
+    warp_work[warp] = work;
+    warp_work4[warp] = work4;
+  }
 }
 
 }  // namespace
@@ -786,6 +835,7 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     if (edges == 0) return out;  // no kernel: warps stays 0 (the edge arrays may be null)
     const u32 capacity = input.capacity == 0 ? default_lanes_capacity : input.capacity;
     const u32 record_capacity = input.record_capacity == 0 ? default_record_capacity : input.record_capacity;
+    const u32 event_capacity = input.event_capacity == 0 ? default_event_capacity : input.event_capacity;
     std::size_t free_bytes = 0, total_bytes = 0;
     MHGP9_CUDA(cudaMemGetInfo(&free_bytes, &total_bytes));
     // The default arena is clamped to an eighth of the free memory (review of
@@ -801,7 +851,8 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     out.record_count.assign(edges, 0);
     const std::size_t slab_bytes = static_cast<std::size_t>(capacity) *
         (2 * sizeof(u32) + 3 * sizeof(std::int32_t) + 3 * sizeof(u32)) +
-        static_cast<std::size_t>(record_capacity) * sizeof(LaneRecord);
+        static_cast<std::size_t>(record_capacity) * sizeof(LaneRecord) +
+        3 * static_cast<std::size_t>(event_capacity) * sizeof(u32);
     int sms = 0;
     MHGP9_CUDA(cudaDeviceGetAttribute(&sms, cudaDevAttrMultiProcessorCount, 0));
     const int threads = lanes_threads;
@@ -822,7 +873,9 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     EventSet<4> e;
     e.create();
     DeviceBuffer<FlatNode> nodes;
-    DeviceBuffer<u32> escapes, rank_ids, edge_a, edge_b, ranges, ranks, seeds, scratch, out_begin, out_count;
+    DeviceBuffer<u32> escapes, rank_ids, edge_a, edge_b, ranges, ranks, seeds, scratch, events, out_begin, out_count;
+    DeviceBuffer<u8> lanes_in;
+    DeviceBuffer<Q4Work> warp_work4;
     DeviceBuffer<std::int32_t> rank_points, points;
     DeviceBuffer<u8> out_status;
     DeviceBuffer<LaneRecord> slab_records, arena;
@@ -843,6 +896,9 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     ranks.allocate(cap * warps);
     seeds.allocate(cap * warps);
     scratch.allocate(cap * warps);
+    events.allocate(3 * static_cast<std::size_t>(event_capacity) * warps);
+    warp_work4.allocate(warps);
+    if (input.edge_lanes != nullptr) lanes_in.allocate(edges);
     slab_records.allocate(static_cast<std::size_t>(record_capacity) * warps);
     arena.allocate(arena_capacity);
     counters.allocate(2);
@@ -859,24 +915,31 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     MHGP9_CUDA(cudaMemcpy(edge_b.get(), input.edge_b, edges * sizeof(u32), cudaMemcpyHostToDevice));
     MHGP9_CUDA(cudaMemset(counters.get(), 0, 2 * sizeof(unsigned long long)));
     MHGP9_CUDA(cudaMemset(warp_work.get(), 0, warps * sizeof(Q3Work)));
+    MHGP9_CUDA(cudaMemset(warp_work4.get(), 0, warps * sizeof(Q4Work)));
+    if (input.edge_lanes != nullptr)
+      MHGP9_CUDA(cudaMemcpy(lanes_in.get(), input.edge_lanes, edges, cudaMemcpyHostToDevice));
     MHGP9_CUDA(cudaEventRecord(e[1]));
     const LanesIndex index{CertificateIndex{nodes.get(), escapes.get(), static_cast<u32>(input.index.node_count),
                                             rank_points.get()},
                            rank_ids.get()};
     const int blocks = static_cast<int>((warps * 32 + threads - 1) / threads);
-    lanes_kernel<<<blocks, threads>>>(index, edge_a.get(), edge_b.get(), static_cast<u32>(edges),
-        input.index.kmax, capacity, record_capacity, ranges.get(), points.get(), ranks.get(), seeds.get(),
-        scratch.get(), slab_records.get(), arena.get(), arena_capacity, counters.get(), counters.get() + 1, out_status.get(),
-        out_begin.get(), out_count.get(), warp_work.get(), static_cast<u32>(warps));
+    lanes_kernel<<<blocks, threads>>>(index, edge_a.get(), edge_b.get(),
+        input.edge_lanes != nullptr ? lanes_in.get() : nullptr, static_cast<u32>(edges), input.index.kmax, capacity,
+        record_capacity, event_capacity, ranges.get(), points.get(), ranks.get(), seeds.get(), scratch.get(),
+        slab_records.get(), events.get(), arena.get(), arena_capacity, counters.get(), counters.get() + 1,
+        out_status.get(), out_begin.get(), out_count.get(), warp_work.get(), warp_work4.get(),
+        static_cast<u32>(warps));
     MHGP9_CUDA(cudaGetLastError());
     MHGP9_CUDA(cudaEventRecord(e[2]));
     std::vector<Q3Work> works(warps);
+    std::vector<Q4Work> works4(warps);
     unsigned long long counts[2] = {0, 0};
     MHGP9_CUDA(cudaMemcpy(counts, counters.get(), sizeof(counts), cudaMemcpyDeviceToHost));
     MHGP9_CUDA(cudaMemcpy(out.status.data(), out_status.get(), edges, cudaMemcpyDeviceToHost));
     MHGP9_CUDA(cudaMemcpy(out.record_begin.data(), out_begin.get(), edges * sizeof(u32), cudaMemcpyDeviceToHost));
     MHGP9_CUDA(cudaMemcpy(out.record_count.data(), out_count.get(), edges * sizeof(u32), cudaMemcpyDeviceToHost));
     MHGP9_CUDA(cudaMemcpy(works.data(), warp_work.get(), warps * sizeof(Q3Work), cudaMemcpyDeviceToHost));
+    MHGP9_CUDA(cudaMemcpy(works4.data(), warp_work4.get(), warps * sizeof(Q4Work), cudaMemcpyDeviceToHost));
     const std::size_t used = static_cast<std::size_t>(std::min<unsigned long long>(counts[1], arena_capacity));
     std::vector<LaneRecord> reserved(used);
     if (used != 0)
@@ -884,6 +947,7 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     MHGP9_CUDA(cudaEventRecord(e[3]));
     MHGP9_CUDA(cudaEventSynchronize(e[3]));
     for (const auto& w : works) add_q3(out.work, w);
+    for (const auto& w : works4) add_q4(out.work4, w);
     for (std::size_t i = 0; i < edges; ++i) {
       if (out.status[i] == static_cast<u8>(CertificateStatus::deferred)) ++out.deferred;
       else if (out.status[i] != static_cast<u8>(CertificateStatus::decided)) ++out.faults;
