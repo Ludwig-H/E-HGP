@@ -2,6 +2,7 @@
 // ball censuses. No claim of WSPD completeness, archive authority, or speed.
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <cfenv>
 #include <chrono>
@@ -61,6 +62,11 @@ struct FullBallStats {
   u64 parallel_orders = 0;  // orders built by the concurrent static path
   u64 overlapped_orders = 0;  // of which with phase A overlapping phase 0 (overlap_static)
   u64 presorted_catalogues = 0;  // key order certified by one scan, no sort
+  // v9 E4 (pipelined tail): orders whose population IDs, rows and vertical
+  // images ran inside the overlapped window, and the contributions naming a
+  // ball whose FIRST contributing order is lower (an extended shell that
+  // contributes to several orders), named after the join.
+  u64 pipelined_orders = 0, population_deferred_refs = 0;
   // False after a backend failure whose paid work could not be recovered.
   bool static_batch_work_known = true;
   AnchorMebWork validation_work, resolve_work;
@@ -115,10 +121,17 @@ struct FullBallOrder {
 // its own thread), phase B (population IDs), phase C (vertical images, same);
 // sequential path: each order whole (order_by_k); both: bank and encoding
 // (wall and per order). Arrays are indexed by K (entry 0 unused).
+// v9 E4, pipelined tail (overlapped static path): phases B and C of order K
+// run on its own runner inside the window, so lots_ms is the window up to
+// the end of the LAST phase A minus phase 0, populations_ms the exposed part
+// of the window after it until the last population step ends, images_ms the
+// rest of the window (the three are additive); populations_by_k and
+// images_by_k are each order's own steps (overlapped, never summed).
 struct FullBallTimes {
   double validate_ms = 0, static_ms = 0, lots_ms = 0, populations_ms = 0, images_ms = 0, bank_ms = 0,
          encode_ms = 0;
   std::array<double, 11> static_by_k{}, lots_by_k{}, images_by_k{}, encode_by_k{}, order_by_k{};
+  std::array<double, 11> populations_by_k{};
   // v9 E0 (plan of the tower judge): sub-timers, each inside its phase.
   // Validation: input and identity, key sort or presorted scan, key index,
   // pass 1, pass 2, level sort, level runs, programs and population slots.
@@ -148,9 +161,10 @@ inline void require(bool ok, const char* reason, FullBallStatus status = FullBal
 }
 #if defined(MHGP9_TESTING)
 // Test failpoints, never compiled in a product target: bit K-1 makes order K
-// fail at the end of its lots (A) or of its vertical images (C). The
-// sequential path checks both at the end of order K, lots first.
-inline std::atomic<u32> failpoint_lots{0}, failpoint_images{0}, failpoint_static{0};
+// fail at the end of its lots (A), of its population IDs (B, v9 E4) or of its
+// vertical images (C). The sequential path checks the three at the end of
+// order K, in this order.
+inline std::atomic<u32> failpoint_lots{0}, failpoint_images{0}, failpoint_static{0}, failpoint_populations{0};
 inline void failpoint(const std::atomic<u32>& mask, bool lots, unsigned k) {
   static constexpr const char* kLots[] = {"failpoint_lots_k1", "failpoint_lots_k2", "failpoint_lots_k3",
       "failpoint_lots_k4", "failpoint_lots_k5", "failpoint_lots_k6", "failpoint_lots_k7", "failpoint_lots_k8",
@@ -163,6 +177,14 @@ inline void failpoint(const std::atomic<u32>& mask, bool lots, unsigned k) {
 }
 inline void failpoint_after_lots(unsigned k) { failpoint(failpoint_lots, true, k); }
 inline void failpoint_after_images(unsigned k) { failpoint(failpoint_images, false, k); }
+inline void failpoint_after_populations(unsigned k) {
+  static constexpr const char* kPopulations[] = {"failpoint_populations_k1", "failpoint_populations_k2",
+      "failpoint_populations_k3", "failpoint_populations_k4", "failpoint_populations_k5", "failpoint_populations_k6",
+      "failpoint_populations_k7", "failpoint_populations_k8", "failpoint_populations_k9",
+      "failpoint_populations_k10"};
+  if (k >= 1 && k <= 10 && ((failpoint_populations.load() >> (k - 1)) & 1U))
+    throw Failure{FullBallStatus::kInvariantViolated, kPopulations[k - 1]};
+}
 // Phase 0 (static targets) of order K, static path only.
 inline void failpoint_after_static(unsigned k) {
   static constexpr const char* kStatic[] = {"failpoint_static_k1", "failpoint_static_k2", "failpoint_static_k3",
@@ -174,6 +196,7 @@ inline void failpoint_after_static(unsigned k) {
 #else
 inline void failpoint_after_lots(unsigned) {}
 inline void failpoint_after_images(unsigned) {}
+inline void failpoint_after_populations(unsigned) {}
 inline void failpoint_after_static(unsigned) {}
 #endif
 inline void add(u64& count, u64 amount = 1) {
@@ -385,10 +408,11 @@ class Builder {
  public:
   Builder(const CloudIndex& index, std::span<const BallData> census, unsigned max_k, FullBallStats& stats,
       int static_threads = 0, FullBallBatchResolver batch = {}, bool meb_proposal = true,
-      FullBallTimes* phase_times = nullptr, bool overlap_static = false)
+      FullBallTimes* phase_times = nullptr, bool overlap_static = false, bool pipelined = true)
       : ix(index), balls(census), requested(max_k), st(stats), resolver_cache(stats),
         geometry_threads(static_threads), batch_resolver(batch), propose_meb(meb_proposal),
-        times(phase_times ? phase_times : &unused_times), overlap_static_lots(overlap_static) {}
+        times(phase_times ? phase_times : &unused_times), overlap_static_lots(overlap_static),
+        pipelined_tail(pipelined) {}
 
   std::vector<FullBallOrder> run() {
     const auto validate_start = PhaseClock::now();
@@ -448,6 +472,7 @@ class Builder {
       for (u64 next : current.next) if (next == absent) ++live;
       require(live == 1, "full_ball_final_component_count");
       failpoint_after_lots(k);
+      failpoint_after_populations(k);
       failpoint_after_images(k);
       drafts.push_back(std::move(draft));
       lower_history = std::move(current);
@@ -470,6 +495,7 @@ class Builder {
     decltype(programs)().swap(programs);
     decltype(extra)().swap(extra);
     decltype(population_ids)().swap(population_ids);
+    decltype(first_order)().swap(first_order);
     decltype(anchors)().swap(anchors);
     decltype(compressed)().swap(compressed);
     current = {};
@@ -546,6 +572,9 @@ class Builder {
     std::vector<u32> lean_k1;            // K1: domain index of each facet's site, in visit order
     size_t lean_failed = std::numeric_limits<size_t>::max();  // first block whose count fails
     Failure lean_failure{FullBallStatus::kInvariantViolated, ""};
+    // v9 E4 (pipelined tail): positions of the draft's contributions naming a
+    // ball whose first contributing order is lower (named after the join).
+    std::vector<size_t> deferred;
   };
   // Node IDs of one order in u32: an order with 2^32-1 nodes or more is an
   // explicit resource refusal on this path (never a truncation). At 30 M
@@ -595,8 +624,9 @@ class Builder {
       const auto populations_start = PhaseClock::now();
       if (lots_done == kmax) assign_populations(orders);
       times->populations_ms = ms_since(populations_start);
+      const size_t imaged = populations_done(failures, lots_done);
       const auto images_start = PhaseClock::now();
-      parallel_items(lots_done, geometry_threads, [&](size_t i, size_t) {
+      parallel_items(imaged, geometry_threads, [&](size_t i, size_t) {
         const auto start = PhaseClock::now();
         try { order_images(orders[i], i ? &orders[i - 1] : nullptr); } catch (const Failure& f) { failures[i] = f; }
         times->images_by_k[i + 1] = ms_since(start);
@@ -616,6 +646,19 @@ class Builder {
     return finish(drafts);
   }
 
+  // Population failpoints of the unpipelined paths (MHGP9_TESTING only): the
+  // IDs of every order are assigned at once, so the failpoint of order K
+  // (below the first lot failure) is recorded as its failure, before its
+  // images, as the sequential loop would. Returns the number of orders whose
+  // images run: those below the first lot or population failure.
+  size_t populations_done(std::vector<std::optional<Failure>>& failures, size_t lots_done) {
+    for (size_t i = 0; i < lots_done; ++i) {
+      try { failpoint_after_populations(static_cast<unsigned>(i + 1)); }
+      catch (const Failure& f) { failures[i] = f; return i; }
+    }
+    return lots_done;
+  }
+
   // Overlapped static path (same objects): phase 0 runs by DECREASING K on
   // the geometry threads while one runner per order waits for its own static
   // targets and then runs its phase A; order 1 has none and starts at once.
@@ -629,7 +672,13 @@ class Builder {
   // before; lots_by_k is each order's own phase A (it may overlap phase 0);
   // lots_ms is the launch-to-join window minus phase 0.
   std::vector<FullBallOrder> run_orders_overlapped(std::vector<OrderState>& orders) {
-    std::vector<std::optional<Failure>> failures(kmax);
+    // v9 E4 (pipelined tail, default): after its phase A, the runner of order
+    // K assigns the population IDs of the balls whose FIRST contributing
+    // order is K (static offset, compute_population_offsets) and builds their
+    // rows, then waits for phase A of order K-1 and runs its vertical images.
+    // Without it (witness), phases B and C run after the join, as before.
+    const bool pipelined = pipelined_tail;
+    std::vector<std::optional<Failure>> failures(kmax), population_failures(kmax), image_failures(kmax);
     bool merged = false;
     const auto merge_once = [&] {
       if (merged) return;
@@ -637,11 +686,20 @@ class Builder {
       for (auto& o : orders) merge_order_stats(o.st);
       add(st.parallel_orders, kmax);
       add(st.overlapped_orders, kmax);
+      if (pipelined) {
+        add(st.pipelined_orders, kmax);
+        for (const auto& o : orders) add(st.population_deferred_refs, o.deferred.size());
+      }
     };
     try {
       std::mutex mu;
       std::condition_variable wake;
       std::vector<char> ready(kmax, 0);
+      // Pipelined tail: phase A state per order (0 pending, 1 done, 2 failed
+      // or never run) and the population rows' state (0 pending, 1 sized, 2
+      // failed); both only move under `mu`, then `wake` is notified.
+      std::vector<char> lots_state(kmax, 0);
+      char rows_state = 0;
       bool cancelled = false;
       ready[0] = 1;
       std::vector<std::exception_ptr> errors(kmax);
@@ -651,8 +709,13 @@ class Builder {
       // One window from the first runner launch to the last join: phase 0
       // and every order's phase A lie inside it (lots_ms = window - static).
       const auto window_start = PhaseClock::now();
+      std::vector<PhaseClock::time_point> lots_end(kmax, window_start), populations_end(kmax, window_start);
       const auto cancel = [&] {
         { std::lock_guard<std::mutex> lock(mu); cancelled = true; }
+        wake.notify_all();
+      };
+      const auto publish = [&](char& state, char value) {
+        { std::lock_guard<std::mutex> lock(mu); state = value; }
         wake.notify_all();
       };
       try {
@@ -661,12 +724,56 @@ class Builder {
             {
               std::unique_lock<std::mutex> lock(mu);
               wake.wait(lock, [&] { return ready[i] != 0 || cancelled; });
-              if (!ready[i]) return;
+              if (!ready[i]) {
+                lots_state[i] = 2;
+                lock.unlock();
+                wake.notify_all();
+                return;
+              }
+            }
+            if (pipelined && i == 0) {
+              // The rows array is sized once, before any runner writes a row.
+              try { prepare_population_rows(); publish(rows_state, 1); }
+              catch (...) {
+                errors[i] = std::current_exception();
+                publish(rows_state, 2);
+                publish(lots_state[i], 2);
+                return;
+              }
             }
             const auto start = PhaseClock::now();
-            try { order_lots(orders[i]); } catch (const Failure& f) { failures[i] = f; }
+            bool lots_ok = false;
+            try { order_lots(orders[i]); lots_ok = true; } catch (const Failure& f) { failures[i] = f; }
             catch (...) { errors[i] = std::current_exception(); }
             times->lots_by_k[i + 1] = ms_since(start);
+            lots_end[i] = PhaseClock::now();
+            if (!pipelined) return;
+            publish(lots_state[i], lots_ok ? 1 : 2);
+            if (!lots_ok) return;
+            char rows = 0;
+            {
+              std::unique_lock<std::mutex> lock(mu);
+              wake.wait(lock, [&] { return rows_state != 0; });
+              rows = rows_state;
+            }
+            if (rows == 1) {
+              const auto populations_start = PhaseClock::now();
+              try { order_populations(orders[i]); } catch (const Failure& f) { population_failures[i] = f; }
+              catch (...) { errors[i] = std::current_exception(); return; }
+              times->populations_by_k[i + 1] = ms_since(populations_start);
+              populations_end[i] = PhaseClock::now();
+            }
+            bool lower_done = true;
+            if (i > 0) {
+              std::unique_lock<std::mutex> lock(mu);
+              wake.wait(lock, [&] { return lots_state[i - 1] != 0 || (cancelled && !ready[i - 1]); });
+              lower_done = lots_state[i - 1] == 1;
+            }
+            if (!lower_done) return;  // images of K need the completed phase A of K-1
+            const auto images_start = PhaseClock::now();
+            try { order_images(orders[i], i ? &orders[i - 1] : nullptr); } catch (const Failure& f) { image_failures[i] = f; }
+            catch (...) { errors[i] = std::current_exception(); }
+            times->images_by_k[i + 1] = ms_since(images_start);
           });
       } catch (...) { cancel(); throw; }
       std::optional<Failure> static_failure;
@@ -690,9 +797,40 @@ class Builder {
       } catch (...) { cancel(); throw; }
       if (static_failure) cancel();
       for (auto& runner : runners) runner.join();
-      times->lots_ms = std::max(0.0, ms_since(window_start) - times->static_ms);
+      if (pipelined) {
+        // Additive split of the window (FullBallTimes): up to the last phase
+        // A, then the exposed populations, then the exposed images.
+        const auto join = PhaseClock::now();
+        const auto last_lots = *std::max_element(lots_end.begin(), lots_end.end());
+        const auto last_populations = std::max(last_lots, *std::max_element(populations_end.begin(), populations_end.end()));
+        const auto span_ms = [](PhaseClock::time_point a, PhaseClock::time_point b) {
+          return std::chrono::duration<double, std::milli>(b - a).count();
+        };
+        times->lots_ms = std::max(0.0, span_ms(window_start, last_lots) - times->static_ms);
+        times->populations_ms = span_ms(last_lots, last_populations);
+        times->images_ms = std::max(0.0, span_ms(last_populations, join));
+      } else {
+        times->lots_ms = std::max(0.0, ms_since(window_start) - times->static_ms);
+      }
       if (static_failure) throw *static_failure;
       for (const auto& error : errors) if (error) std::rethrow_exception(error);
+      if (pipelined) {
+        // Everything computable was computed; the reported failure is the
+        // sequential loop's: the smallest K, and in order K its lots, then
+        // its populations, then its images.
+#if defined(MHGP9_FULL_ORDERS_MUTANT_PHASE_PRIORITY)
+        // mutant: a lot failure masks lower images
+        if (std::any_of(failures.begin(), failures.end(), [](const auto& f) { return f.has_value(); }))
+          for (auto& f : image_failures) f.reset();
+#endif
+        for (size_t i = 0; i < kmax; ++i) {
+          if (failures[i]) throw *failures[i];
+          if (population_failures[i]) throw *population_failures[i];
+          if (image_failures[i]) throw *image_failures[i];
+        }
+        name_deferred_populations(orders);
+        merge_once();
+      } else {
       size_t lots_done = 0;
       while (lots_done < kmax && !failures[lots_done]) ++lots_done;
 #if defined(MHGP9_FULL_ORDERS_MUTANT_PHASE_PRIORITY)
@@ -701,8 +839,9 @@ class Builder {
       const auto populations_start = PhaseClock::now();
       if (lots_done == kmax) assign_populations(orders);
       times->populations_ms = ms_since(populations_start);
+      const size_t imaged = populations_done(failures, lots_done);
       const auto images_start = PhaseClock::now();
-      parallel_items(lots_done, geometry_threads, [&](size_t i, size_t) {
+      parallel_items(imaged, geometry_threads, [&](size_t i, size_t) {
         const auto start = PhaseClock::now();
         try { order_images(orders[i], i ? &orders[i - 1] : nullptr); } catch (const Failure& f) { failures[i] = f; }
         times->images_by_k[i + 1] = ms_since(start);
@@ -710,6 +849,7 @@ class Builder {
       times->images_ms = ms_since(images_start);
       for (auto& failure : failures) if (failure) throw *failure;
       merge_once();
+      }
     } catch (...) {
 #if !defined(MHGP9_FULL_ORDERS_MUTANT_DROP_FAILED_STATS)
       merge_once();
@@ -1025,6 +1165,121 @@ class Builder {
     });
   }
 
+  // ---- v9 E4, pipelined tail: population IDs by static offset.
+  //
+  // The sequential construction names a ball's population at its FIRST
+  // contribution, walking K = 1..Kmax, then batches, actions and
+  // contributions (assign_populations, kept as the witness). A ball's block
+  // contributes at order K iff count_block_at gives it a non-empty shell
+  // contribution or its interior, a function of the ball and K only: a
+  // regular ball contributes at K = p+u alone (its facet order p+u-1 does
+  // not), an extended shell at the ranks whose table leaves some shell site
+  // outside every strict local component (possibly several ranks). Each
+  // ball's block appears at most once per order and every contributing block
+  // is published by phase A. Hence, with first(b) the smallest contributing
+  // order of b and offset(K) = #{b : first(b) < K}, the ID of b is
+  // n + offset(first(b)) + the rank of b among the balls of first order
+  // first(b), in that order's contribution sequence: the same IDs.
+  bool pipelined_populations() const {
+    return geometry_threads > 1 && kmax > 1 && !batch_resolver.resolve && overlap_static_lots && pipelined_tail;
+  }
+  void compute_population_offsets() {
+    first_order.resize(balls.size());  // every slot written below
+    constexpr size_t block = 16384;
+    const size_t chunks = std::max<size_t>(1, (balls.size() + block - 1) / block);
+    std::vector<std::array<u64, kFacetMaxK + 1>> counts(chunks);
+    parallel_items(chunks, geometry_threads, [&](size_t c, size_t) {
+      auto& local = counts[c];
+      local.fill(0);
+      for (size_t j = c * block; j < std::min(balls.size(), (c + 1) * block); ++j) {
+        const auto& b = balls[j];
+        u8 first = 0;
+        if (b.n_shell == b.arity) {
+          if (static_cast<unsigned>(b.n_interior) + b.n_shell <= kmax) {
+            first = static_cast<u8>(b.n_interior + b.n_shell);
+            ++local[first];
+          }
+        } else {
+          const auto& table = extra.at(static_cast<BallId>(j));
+          const unsigned lo = b.n_interior + b.arity - 1;
+          const unsigned hi = std::min<unsigned>(kmax, b.n_interior + b.n_shell);
+          for (unsigned k = lo; k <= hi; ++k) {
+            const auto rank = table.rank(k);
+            if (!rank.contribution_shell && !rank.contribution_interior) continue;
+            if (!first) first = static_cast<u8>(k);
+#if defined(MHGP9_TOWER_MUTANT_OFFSET_ON_CONTRIBUTIONS)
+            ++local[k];  // mutant: every contribution counted, not the first encounter
+#else
+            ++local[k];
+            break;
+#endif
+          }
+        }
+        first_order[j] = first;
+      }
+    });
+    population_offset.fill(0);
+    for (unsigned k = 1; k <= kmax; ++k) {
+      u64 count = 0;
+      for (const auto& local : counts) add(count, local[k]);
+      population_offset[k + 1] = population_offset[k];
+      add(population_offset[k + 1], count);
+    }
+    require(population_offset[kmax + 1] <= std::numeric_limits<u64>::max() - domain.size(),
+            "full_ball_population_count", FullBallStatus::kResourceExhausted);
+  }
+  // The rows array (domain singletons first, then n + offset(Kmax+1) balls),
+  // sized once on the runner of order 1 before any other runner writes a row.
+  void prepare_population_rows() {
+    populations.resize(domain.size() + population_offset[kmax + 1]);
+    for (size_t j = 0; j < domain.size(); ++j) populations[j] = {{}, {domain[j]}};
+  }
+  // Phase B of one order, on its runner: IDs of the balls whose first order
+  // is K, in contribution order, at n + offset(K); references to older balls
+  // are kept for name_deferred_populations; then the new rows, in parallel.
+  void order_populations(OrderState& o) {
+    require(o.draft.flat_form, "full_ball_draft_form");
+    const u64 base = domain.size() + population_offset[o.k];
+    u64 next = base;
+    std::vector<BallId> fresh;
+    auto& refs = o.draft.flat.contribution;
+    o.deferred.clear();
+    for (size_t c = 0; c < refs.size(); ++c) {
+      auto& ref = refs[c];
+      if ((ref.population & kBallTag) == 0) continue;  // K1 domain singleton j: population j
+      const auto ball = static_cast<BallId>(ref.population & ~kBallTag);
+      require(ball < balls.size() && first_order[ball] != 0 && first_order[ball] <= o.k,
+              "full_ball_population_first_order");
+      if (first_order[ball] < o.k) { o.deferred.push_back(c); continue; }
+      require(population_ids[ball] == absent, "full_ball_population_duplicate");
+      population_ids[ball] = next;
+      ref.population = next++;
+      fresh.push_back(ball);
+    }
+    require(next - base == population_offset[o.k + 1] - population_offset[o.k], "full_ball_population_offset");
+    parallel_ranges(fresh.size(), geometry_threads, [&](size_t begin, size_t end, size_t) {
+      for (size_t j = begin; j < end; ++j) {
+        const BallId id = fresh[j];
+        auto& row = populations[base + j];
+        for (i32 site : balls[id].interior()) row.interior.push_back(ix.point_id(site));
+        for (i32 site : balls[id].shell()) row.shell.push_back(ix.point_id(site));
+        std::sort(row.interior.begin(), row.interior.end()); std::sort(row.shell.begin(), row.shell.end());
+      }
+    });
+    failpoint_after_populations(o.k);
+  }
+  // After the join, every order's phase B done: the references to balls of a
+  // lower first order receive the ID that order assigned.
+  void name_deferred_populations(std::vector<OrderState>& orders) {
+    for (auto& o : orders)
+      for (const size_t c : o.deferred) {
+        auto& ref = o.draft.flat.contribution[c];
+        const auto ball = static_cast<BallId>(ref.population & ~kBallTag);
+        require(population_ids[ball] != absent, "full_ball_population_deferred_unnamed");
+        ref.population = population_ids[ball];
+      }
+  }
+
   void order_images(OrderState& o, const OrderState* lower) {
     // Closed cuts compared on exact plateau ranks (E1): same answers as the
     // exact levels (level_run is an order isomorphism), same counters.
@@ -1071,6 +1326,9 @@ class Builder {
   FullBallTimes unused_times;
   FullBallTimes* times;  // phase wall times (the caller's, or unused_times)
   bool overlap_static_lots = false;  // phase A of order K starts once phase 0 of K is done
+  bool pipelined_tail = true;  // v9 E4: phases B and C inside the overlapped window
+  RawVector<u8> first_order;   // v9 E4: first contributing order per ball, 0 if none <= kmax
+  std::array<u64, kFacetMaxK + 2> population_offset{};  // v9 E4: #balls of first order < K
   using StaticSeed = FullBallBatchSeed;
   RawVector<BallId> static_targets;  // one target per request, every slot written
   // Arena of the phase-0 requests, reused from order to order (default
@@ -1464,6 +1722,7 @@ class Builder {
       std::fill(population_ids.begin() + static_cast<std::ptrdiff_t>(begin),
                 population_ids.begin() + static_cast<std::ptrdiff_t>(end), absent);
     });
+    if (pipelined_populations()) compute_population_offsets();  // v9 E4
     lap(7);
   }
 
@@ -2148,13 +2407,17 @@ class Builder {
 // enumeration for every local MEB: same objects, different work.
 // overlap_static: on the static path, phase A of each order starts as soon as
 // its phase 0 is done (phase 0 by decreasing K): same objects and statuses.
+// pipelined_tail (v9 E4, default true, only with overlap_static): the
+// population IDs (static offsets), rows and vertical images of each order run
+// on its runner inside the overlapped window; false keeps them after the
+// join (assign_populations, the witness). Same objects, IDs and statuses.
 inline FullBallTowerResult build_full_ball_tower(const CloudIndex& ix, std::span<const BallData> balls,
     unsigned kmax, int static_threads = 0, FullBallBatchResolver batch = {}, bool meb_proposal = true,
-    bool overlap_static = false) {
+    bool overlap_static = false, bool pipelined_tail = true) {
   FullBallTowerResult result;
   try {
     result.orders = full_ball_detail::Builder(ix, balls, kmax, result.stats, static_threads, batch, meb_proposal,
-                                              &result.times, overlap_static).run();
+                                              &result.times, overlap_static, pipelined_tail).run();
     result.status = FullBallStatus::kCompleteRelative; result.reason = kFullBallAuthority;
   } catch (const full_ball_detail::Failure& error) {
     result.status = error.status; result.reason = error.reason;

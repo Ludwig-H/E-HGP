@@ -59,14 +59,33 @@ inline bool strictly_ordered(const Points& points) {
     if (points[i - 1] >= points[i]) return false;
   return true;
 }
-inline bool valid_population_row(std::span<const PointId> domain, const FullCoveragePopulation& row) {
+// v9 E4: exact membership in a STRICTLY increasing domain. A domain of n ids
+// whose first is 0 and last is n-1 is exactly {0, ..., n-1} (n distinct
+// increasing integers in [0, n-1]), so p is a member iff p < n: the same
+// answer as the binary search, in O(1). Any other domain keeps the search.
+struct DomainMembership {
+  std::span<const PointId> domain;
+  bool dense = false;
+  explicit DomainMembership(std::span<const PointId> ordered)
+      : domain(ordered), dense(!ordered.empty() && ordered.front() == 0 &&
+                               static_cast<u64>(ordered.back()) + 1 == ordered.size()) {}
+  bool contains(PointId p) const {
+#if defined(MHGP9_BANK_MUTANT_DENSE_INCLUSIVE)
+    if (dense) return static_cast<u64>(p) <= domain.size();  // mutant: the id n is admitted
+#else
+    if (dense) return static_cast<u64>(p) < domain.size();
+#endif
+    return std::binary_search(domain.begin(), domain.end(), p);
+  }
+};
+inline bool valid_population_row(const DomainMembership& domain, const FullCoveragePopulation& row) {
   // A representation bound of the mask, NOT a cloud/work/time ceiling.
   if (row.shell.size() > std::numeric_limits<u16>::digits ||
       (row.interior.empty() && row.shell.empty()) ||
       !strictly_ordered(row.interior) || !strictly_ordered(row.shell)) return false;
   for (const auto* points : {&row.interior, &row.shell})
     for (PointId p : *points)
-      if (!std::binary_search(domain.begin(), domain.end(), p)) return false;
+      if (!domain.contains(p)) return false;
   for (PointId p : row.shell)
     if (std::binary_search(row.interior.begin(), row.interior.end(), p)) return false;
   return true;
@@ -81,9 +100,10 @@ inline FullCoveragePopulationResult build_full_coverage_populations(
     // Thread launch or allocation failures are statuses, as in the copying
     // overload, never an exception escaping this public entry point.
     std::atomic<bool> valid{true};
+    const full_coverage_detail::DomainMembership members(domain);  // domain strictly ordered (checked above)
     parallel_ranges(rows.size(), threads, [&](size_t begin, size_t end, size_t) {
       for (size_t i = begin; i < end && valid.load(std::memory_order_relaxed); ++i)
-        if (!full_coverage_detail::valid_population_row(domain, rows[i])) valid.store(false);
+        if (!full_coverage_detail::valid_population_row(members, rows[i])) valid.store(false);
     });
     if (!valid.load()) return result;
     auto bank = std::make_shared<FullCoveragePopulations>();
@@ -110,8 +130,9 @@ inline FullCoveragePopulationResult build_full_coverage_populations(
   FullCoveragePopulationResult result;
   if (domain.empty() || rows.empty()) return result;
   if (!full_coverage_detail::strictly_ordered(domain)) return result;
+  const full_coverage_detail::DomainMembership members(domain);
   for (const auto& row : rows)
-    if (!full_coverage_detail::valid_population_row(domain, row)) return result;
+    if (!full_coverage_detail::valid_population_row(members, row)) return result;
   try {
     auto bank = std::make_shared<FullCoveragePopulations>();
     bank->domain_.assign(domain.begin(), domain.end());

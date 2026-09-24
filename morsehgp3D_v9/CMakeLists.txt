@@ -85,6 +85,13 @@ endforeach()
 mhgp9_test_executable(mhgp9_tower_population_bank_gate tests/tower/population_bank_gate.cpp)
 mhgp9_gate(mhgp9_tower_population_bank 0 mhgp9_tower_population_bank_gate
            ARGS --selftest LABELS "gate;tower" TIMEOUT 120)
+# v9 E4 : appartenance exacte par domaine dense (0..n-1 : p < n) ; mutant
+# compile (l'id n admis) tue par le juge lineaire de la porte.
+mhgp9_test_executable(mhgp9_tower_population_bank_dense_inclusive_mutant_gate tests/tower/population_bank_gate.cpp)
+target_compile_definitions(mhgp9_tower_population_bank_dense_inclusive_mutant_gate PRIVATE
+                           MHGP9_BANK_MUTANT_DENSE_INCLUSIVE=1)
+mhgp9_gate(mhgp9_tower_population_bank_mutant_dense_inclusive 1 mhgp9_tower_population_bank_dense_inclusive_mutant_gate
+           ARGS --selftest EXPECT_PREFIX "cause=bank.dense_membership" LABELS "gate;tower;mutant" TIMEOUT 120)
 # Tri parallele de la tour : permutation egale a std::sort pour tout nombre de
 # fils, et son mutant compile (un seau laisse non trie) tue.
 mhgp9_product_executable(mhgp9_tower_parallel_sort_gate tests/tower/parallel_sort_gate.cpp)

@@ -93,6 +93,13 @@ struct ChainOptions {
   // faite (phase 0 par K decroissant), meme objet. Contrat v9 : actif par
   // defaut, publie et epingle.
   bool tower_overlap_static = true;
+  // v9 E4 : queue de la tour en pipeline (exige tower_overlap_static, sinon
+  // sans effet). Apres sa phase A, le fil de l'ordre K nomme ses populations
+  // par decalage statique, construit leurs lignes, puis attend la phase A de
+  // K-1 et calcule ses images verticales, dans la fenetre recouverte. Faux :
+  // populations et images apres la jointure (assign_populations, temoin).
+  // Meme objet, memes IDs de population ; actif par defaut.
+  bool tower_pipelined_tail = true;
   // Ordonnancement q2 (meme objet) : plan de jobs du front prepare par masse
   // decroissante et 64 jobs par fil (le plus long job faisait tout q2).
   bool q2_jobs_by_mass = true;
