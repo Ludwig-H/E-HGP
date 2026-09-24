@@ -1,4 +1,4 @@
-# S4b exploratoire : le neuvième signe de la grille J8 est perdu
+# S4b exploratoire : bit J8, seaux et coût du raffinement
 
 **Addendum mutable du 24 septembre, 00:53 UTC.** Le constructeur a élargi
 `dn`, `dp`, `a8`, `b8` à `uint16_t` dans le scratch : nouveau source SHA-256
@@ -170,3 +170,78 @@ multiensemble avec le produit. Publier maxima et sommes par arête de
 chaîne sur les demi-scènes, quarts et densités LiDAR avant toute
 projection sous-quadratique. Même un coût `O(events log events)` **par
 seed** ne borne pas la somme sur toutes les graines.
+
+## Raffinement octaire scratch : un carré non compté et des rescans entiers
+
+Le scratch CPU `s4b/syn/syn_probe.cpp` du 24 septembre, source SHA-256
+`e182f165c657e9f16162b21ac1853ed6366c9d53a3be8769148e3857560f0dee`,
+est **distinct** du DESIGN J8 ci-dessus et de tout port produit. Sur la
+trame **sans sol entière 08/000000**, les sorties du raffinement `REFINE=1`,
+`J=8`, `R=4`, `stride=1` égalent le multiensemble q4 du produit dans ce
+rejeu local : 158 496/158 496 à K5 et 1 732 548/1 732 548 à K10,
+avec zéro faute déclarée. Les stdout scratch K5/K10 ont respectivement
+les SHA-256 `b780c49a33612162e56a9ed31af0288d8d83d6281e117f861640a5535cb2cb85`
+et `661e5bd448077517af3ebcbccdcaaa236336a6cdb70ca14787ccff6a31403128`.
+`compare_steps` baisse de 636 128 à 423 540 (K5), et de 8 488 182 à
+4 529 432 (K10) par rapport au même scratch sans raffinement. Ces
+compteurs ne mesurent pas tout le travail du raffinement.
+
+Dans `resolve`, une fois le groupe de racines égales `grp` construit,
+chaque candidat encore actif appelle `std::find(grp.begin(), grp.end(), c2)`.
+Si les `m` événements sont tous candidats d'un même groupe, il y a
+exactement `1+⋯+m=m(m+1)/2` comparaisons de positions, indépendamment
+de leur ordre. Elles sont absentes de `compare_steps` et `grp_steps2` ;
+le raffinement ne sépare pas des racines **exactement égales**. La
+[fixture entière autonome](s4b_refined_group_fixture_20260924.py) énumère
+les sites de trois nuages u18 translatés : `m=60,282,1439` donnent
+respectivement **1 830, 39 903, 1 036 080** recherches d'indices, face
+à **2, 9, 45** pas de comparaison déclarés pour le groupe. Elle passe
+en Python normal et `-O`.
+
+Construction à l'échelle entière `L` : `a=(-24L,0,7L)`, `b=(24L,0,7L)`,
+`x=(0,15L,-20L)` ; les `y` sont les points entiers sur la sphère centrée
+en zéro de rayon `25L`, satisfaisant
+`max(|y−a|²,|y−b|²,|y−x|²)≤|ab|²`, `B(y)≠0` et `P(y)>0`.
+La translation commune `(25L,25L,25L)` met tous les sites dans u18
+pour `L=1,10,100`. Chaque `abxy` appartient au cover complet et a `ab`
+pour plus longue arête (IDs `a,b,x,y` dans cet ordre pour départager les
+ex æquo) ; la graine `abx` est aiguë. Les événements ont
+la même racine exacte `P/B=−10080L³`, strictement dans le seau vivant
+J8 `j=3`. Les lentilles valent `[m,m,m,0,0,0,0,0]` : ni K5 ni K10 ne
+ferme cette graine avant le groupe. Le site `(0,−15L,−20L)` donne une
+boule q4 strictement positive centrée en zéro, avec poids
+`(10/27,10/27,7/54,7/54)` ; tous les `y` sont sur sa coquille.
+L'ancien code FULL refuse les coquilles au-dessus de 12 sites ; cette
+fixture démontre le coût **du générateur q4/scratch**, pas une sortie FULL
+valide ni une croissance LiDAR.
+
+Correction linéaire locale : marquer chaque `cand` par sa position dans
+`ev`, puis balayer une fois `grp` pour former `gc` avec les seules
+positions encore actives ; les marquer consommées. Le choix final du
+plus petit ID valide et le tri des IDs de coquille restent inchangés.
+Comparer ensuite à nouveau le multiensemble complet, y compris les
+coquilles et cas de racines sur borne. Une permutation de `gc` ne doit
+pas être interprétée comme une modification de l'objet émis.
+
+Un autre coût manque à la somme des pas déclarés : chaque graine non
+certifiée balaie **tout son cover** pour calculer `Lsize`, puis le
+rebalaie **une fois par seau vivant** pour bâtir `ev`. Le scratch compte
+873 097 survivantes/3 135 073 chunks à K5 et
+4 490 527/27 565 075 à K10. Comme `used=ceil(n/32)`, la somme des
+tailles de covers des survivantes vaut au moins
+`32·surv_chunks−31·surv`, soit 73 256 329 et 742 876 063 sites.
+`Lsize` plus **un seul** seau vivant imposent donc déjà au moins
+**146 512 658 / 1 485 752 126** visites de sites ; les 3 668 184 /
+20 406 103 seaux effectivement vivants contiennent respectivement
+2 795 087 / 15 915 576 rescans **en plus** du premier seau par graine.
+En incluant aussi le premier passage de signes, le scratch exécute donc
+au moins **222 564 074 / 2 244 543 765** itérations de sites pour
+ces survivantes seules. Ce plancher ne concerne pas un algorithme S4b
+futur et ne compte pas les graines certifiées ni l'amont.
+Le `filt_steps=ceil(buffered/32)` ne les représente pas. Un ledger utile
+séparerait `full_rescan_sites`, `live_bucket_scan_sites`, comparaisons de
+tri, tests d'appartenance `grp` et lectures/écritures des événements,
+avec maxima par arête et par graine. La comparaison doit porter sur le
+**mur de chaîne S2–S4b/FULL**, et sur les demi-scènes, quarts et trois
+densités emboîtées déjà définies ; ni `probe_s` CPU ni les pas simulés
+ne prédisent seuls le GPU G4 ou une pente sous-quadratique.

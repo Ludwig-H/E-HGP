@@ -34,6 +34,19 @@ trois/six présentations sur ce nuage dans un rejeu local, sans trace
 nominative des supports ni port du DESIGN.
 Prévoir un tri/balayage exact pour les gros seaux et mesurer la traîne
 sur LiDAR avant toute affirmation de coût S4b.
+Le [raffinement octaire scratch](AUDIT_S4B_J8_BIT_FINAL_20260924.md)
+égale aussi le multiensemble q4 du produit sur **une trame sans sol
+entière**, 158 496 objets à K5 et 1 732 548 à K10 ; ce n'est toujours
+ni un port produit ni une chaîne G4. Son ledger omet la recherche linéaire
+des candidats dans les groupes de racines égales : une [fixture u18
+exacte](s4b_refined_group_fixture_20260924.py) force 1 036 080 tests
+d'appartenance pour un groupe de 1 439, contre 45 pas déclarés. Il omet
+aussi les rescans de tout le cover pour `Lsize` et chaque seau vivant :
+au moins 146,5 M/1,486 Md visites supplémentaires à K5/K10 sur la
+trame sondée. Marquer les candidats par position et rassembler les
+groupes en un passage retire le carré local ; compter ces rescans et
+mesurer la chaîne appariée sur le panneau spatial/densité avant de
+projeter la pente GPU.
 
 La [matrice de croissance LiDAR](CROISSANCE_LIDAR_PLANS_ET_DENSITE_20260923.md)
 répond séparément aux deux variations demandées : trame entière → deux
@@ -104,7 +117,8 @@ v9, donc l'identité projetée « graines = émissions + rejets » est fausse.
 Le ledger doit distinguer graines, groupes et enregistrements avant port
 GPU. Les champs projetés occupent au moins **129 octets** avant alignement,
 non les 112 annoncés ; les budgets d'arène de plages sont des estimations,
-pas des bornes. Ni ces corrections ni S4 n'ont de reçu G4.
+pas des bornes. R15 mesure S4a sur G4 ; ces corrections du ledger et le
+DESIGN S4b n'y sont pas qualifiés.
 Le jumeau CPU/GPU compare deux chemins issus des mêmes survivants : il
 détecte une divergence, pas une clé omise par les deux. Conserver le juge
 échantillonné de clés admissibles indépendantes en parallèle de la porte
