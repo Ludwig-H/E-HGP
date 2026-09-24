@@ -152,7 +152,9 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                      rectangles=ledger['q34_input_rectangles'],
                      survivors=ledger['expanded_pairs'] - ledger['witness_rejected_pairs'],
                      # v24: the device preparation exists with a device lever only.
-                     gpu_prepare_ms=0.01 if worker.uses_device(levers) else 0.0, gpu_prepare_wait_ms=0.0)
+                     gpu_prepare_ms=0.01 if (levers.get('q34_gpu_filter') or levers.get('q34_gpu_certificates') or
+                                             levers.get('q34_gpu_q3')) else 0.0,
+                     gpu_prepare_wait_ms=0.0)
         if levers.get('q34_batch_certificates'):
             gpu_certificates = levers.get('q34_gpu_certificates')
             deferred = 1 if gpu_certificates and capacity else 0
