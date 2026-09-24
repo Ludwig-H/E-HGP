@@ -232,9 +232,10 @@ struct LanesInput {
   std::size_t arena_capacity = 0;  // records of the call; 0 selects the default
   u32 event_capacity = 0;          // S4b: buffered q4 events per seed; 0 selects the default
   // S4b tasks: B in seed-chunks (0: default_task_budget; single_task_budget:
-  // one task per edge), the cover arena in sites (0: a quarter of the free
-  // device memory, no limit on the host) and the staging arena in records
-  // (0: default_staging_capacity). None of them changes a decided output.
+  // one task per edge), the cover arena in sites (0: a sixth of the device's
+  // total memory at 20 bytes a site, refused above half of the free memory;
+  // no limit on the host) and the staging arena in records (0:
+  // default_staging_capacity). None of them changes a decided output.
   u64 task_budget = 0;
   u64 cover_capacity = 0;
   u64 staging_capacity = 0;
@@ -250,7 +251,9 @@ inline constexpr u32 default_event_capacity = 1U << 12;
 inline std::size_t default_arena_capacity(std::size_t edges) { return 16 * edges + default_record_capacity; }
 // Default staging arena of the tasks: twice the default arena (the staged
 // records also hold those of edges deferred afterwards). The device clamps
-// it to an eighth of the free memory; an overflow refuses the call.
+// it to an eighth of the free memory (and the arena to half of that); an
+// overflow defers every non-faulty edge of the call to the CPU tail, never
+// refuses it (review before R18).
 inline std::size_t default_staging_capacity(std::size_t edges) { return 2 * default_arena_capacity(edges); }
 
 // Host-side refusal before any device call; empty when accepted: the index

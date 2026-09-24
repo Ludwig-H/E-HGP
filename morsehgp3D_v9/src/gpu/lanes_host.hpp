@@ -378,7 +378,24 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
   };
   if (cover_capacity != 0 && covers > cover_capacity) return refuse("lanes cover arena exceeded");
   if (tasks_total > 0xffffffffULL) return refuse("lanes task table exceeds 2^32 tasks");
-  if (staged > staging_capacity) return refuse("lanes staging arena exceeded");
+  if (staged > staging_capacity) {
+    // As the device (review before R18): a staging overflow defers every
+    // non-faulty edge to the CPU tail, with no record and no ledger; it
+    // never refuses the call.
+    for (std::size_t e = 0; e < out.status.size(); ++e) {
+      if (out.status[e] != static_cast<u8>(CertificateStatus::fault))
+        out.status[e] = static_cast<u8>(CertificateStatus::deferred);
+      out.record_begin[e] = 0;
+      out.record_count[e] = 0;
+    }
+    out.records.clear();
+    out.work = Q3Work{};
+    out.work4 = Q4Work{};
+    out.deferred = out.faults = 0;
+    for (const auto status : out.status)
+      if (status == static_cast<u8>(CertificateStatus::deferred)) ++out.deferred;
+      else ++out.faults;
+  }
   const double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
   out.kernel_ms = ms;
   out.total_ms = ms;

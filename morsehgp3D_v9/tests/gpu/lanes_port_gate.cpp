@@ -1131,8 +1131,10 @@ int main(int argc, char** argv) {
               ++tally.runs;
             }
           }
-          // The arenas: exactly full is accepted, one short refuses the
-          // whole call (capacity), whatever B.
+          // The arenas: exactly full is accepted; one site short of the cover
+          // arena refuses the whole call (capacity); one record short of the
+          // staging arena defers every edge (no fault here), with no record
+          // and no ledger, never a refusal (review before R18), whatever B.
           for (const gpu::u64 budget : {gpu::u64{1}, gpu::u64{0}}) {
             auto x = base;
             x.task_budget = budget;
@@ -1150,9 +1152,14 @@ int main(int argc, char** argv) {
             if (reference.records.size() >= 2) {
               auto short_staging = x;
               short_staging.staging_capacity = reference.records.size() - 1;
-              const auto refused2 = gpu::run_lanes_batch_host(short_staging, workers);
-              if (refused2.error_kind != gpu::BatchError::capacity || !refused2.records.empty())
-                return fail("tasks.staging_refusal " + where_name);
+              const auto deferred = gpu::run_lanes_batch_host(short_staging, workers);
+              bool all_deferred = deferred.error.empty() && deferred.records.empty() && deferred.faults == 0 &&
+                                  deferred.deferred == deferred.status.size() && deferred.work.edges == 0 &&
+                                  deferred.work4.edges == 0 && !deferred.status.empty();
+              for (const auto status : deferred.status)
+                all_deferred = all_deferred && status == static_cast<gpu::u8>(gpu::CertificateStatus::deferred);
+              for (const auto count : deferred.record_count) all_deferred = all_deferred && count == 0;
+              if (!all_deferred) return fail("tasks.staging_deferral " + where_name);
               ++tasks_refusals;
             }
           }

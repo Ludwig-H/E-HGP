@@ -983,7 +983,7 @@ namespace {
 // site) and the records and events (T); the cover arena holds 20 bytes a
 // site (coordinates 12, rank 4, seed position 4: the portable functions read
 // slab.points as before), by default a sixth of the device's TOTAL memory
-// (97.9 GB on G4: 816 M sites, 2.15 times the largest call measured,
+// (97 887 MiB on G4: about 855 M sites, 2.25 times the largest call measured,
 // 08/000200 K10 with 379 M). Per edge about 470 bytes (plan, prologue
 // ledger, task slot, scans, answer), per task 32 bytes.
 struct LanesResident {
@@ -1140,15 +1140,18 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     std::size_t free_bytes = 0, total_bytes = 0;
     MHGP9_CUDA(cudaMemGetInfo(&free_bytes, &total_bytes));
     free_bytes += res.device_bytes();  // resident buffers count as free: history-independent sizing
-    // The default arenas are clamped to an eighth of the free memory each
-    // (review of 23 September, night): at scale an overflow of the final
-    // arena defers edges to the CPU tail, an overflow of the staging arena
-    // refuses the call. A failed allocation of the buffers themselves is
-    // still a capacity refusal (auditor, AUDIT_S4A_VALIDATION_ET_ARENE). An
-    // explicit capacity is taken as given.
+    // The default staging arena is clamped to an eighth of the free memory
+    // and the final arena to half of that (review of 23 September, night;
+    // review before R18: staging stays twice the arena when the clamps bind).
+    // An overflow of the final arena defers edges to the CPU tail; an
+    // overflow of the staging arena defers every non-faulty edge (below):
+    // neither refuses the call. A failed allocation of the buffers
+    // themselves is still a capacity refusal (auditor,
+    // AUDIT_S4A_VALIDATION_ET_ARENE). An explicit capacity is taken as given.
     const std::size_t clamp = std::max<std::size_t>(1, free_bytes / 8 / sizeof(LaneRecord));
-    const std::size_t arena_capacity =
-        input.arena_capacity != 0 ? input.arena_capacity : std::min(default_arena_capacity(edges), clamp);
+    const std::size_t arena_capacity = input.arena_capacity != 0
+        ? input.arena_capacity
+        : std::max<std::size_t>(1, std::min(default_arena_capacity(edges), clamp / 2));
     const std::size_t staging_capacity = input.staging_capacity != 0
         ? static_cast<std::size_t>(input.staging_capacity)
         : std::min(default_staging_capacity(edges), clamp);
@@ -1249,23 +1252,36 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     MHGP9_CUDA(cudaEventRecord(e[3]));
     unsigned long long staged = 0;
     MHGP9_CUDA(cudaMemcpy(&staged, counter + 3, sizeof(staged), cudaMemcpyDeviceToHost));
-    if (staged > staging_capacity) throw CudaFailure{"lanes staging arena exceeded", true};
+    // A staging overflow never refuses the call (review before R18: an arena
+    // overflow defers, never refuses): every edge but a faulty one is
+    // deferred to the CPU tail, with no record and no ledger. It depends on
+    // the input only (the staged total), the same on the host twin.
+    const bool overflow = staged > staging_capacity;
     // ---- C: replay, the counts' scan (arena rule), gather and ledger.
     lanes_replay_kernel<<<fill_blocks, threads>>>(res.plans.get(), res.task_first.get(), res.tasks.get(),
         static_cast<u32>(edges), record_capacity, res.pre_status.get(), res.record_counts.get());
     MHGP9_CUDA(cudaGetLastError());
-    exclusive_scan(res, res.record_counts.get(), res.record_prefix.get(), edges);
-    lanes_gather_kernel<<<static_cast<int>((gather_warps * 32 + threads - 1) / threads), threads>>>(
-        res.plans.get(), res.plan_work.get(), res.slots.get(), res.task_first.get(), res.tasks.get(),
-        res.pre_status.get(), res.record_counts.get(), res.record_prefix.get(), static_cast<u32>(edges),
-        arena_capacity, res.staging.get(), res.arena.get(), res.out_status.get(), res.out_begin.get(),
-        res.out_count.get(), counter + 4, res.warp_work.get(), res.warp_work4.get(), static_cast<u32>(gather_warps));
-    MHGP9_CUDA(cudaGetLastError());
+    if (!overflow) {
+      exclusive_scan(res, res.record_counts.get(), res.record_prefix.get(), edges);
+      lanes_gather_kernel<<<static_cast<int>((gather_warps * 32 + threads - 1) / threads), threads>>>(
+          res.plans.get(), res.plan_work.get(), res.slots.get(), res.task_first.get(), res.tasks.get(),
+          res.pre_status.get(), res.record_counts.get(), res.record_prefix.get(), static_cast<u32>(edges),
+          arena_capacity, res.staging.get(), res.arena.get(), res.out_status.get(), res.out_begin.get(),
+          res.out_count.get(), counter + 4, res.warp_work.get(), res.warp_work4.get(),
+          static_cast<u32>(gather_warps));
+      MHGP9_CUDA(cudaGetLastError());
+    }
     MHGP9_CUDA(cudaEventRecord(e[4]));
-    std::vector<Q3Work> works(gather_warps);
-    std::vector<Q4Work> works4(gather_warps);
+    std::vector<Q3Work> works(overflow ? 0 : gather_warps);
+    std::vector<Q4Work> works4(overflow ? 0 : gather_warps);
     unsigned long long counts[8] = {0, 0, 0, 0, 0, 0, 0, 0};
     MHGP9_CUDA(cudaMemcpy(counts, counter, sizeof(counts), cudaMemcpyDeviceToHost));
+    if (overflow) {
+      MHGP9_CUDA(cudaMemcpy(out.status.data(), res.pre_status.get(), edges, cudaMemcpyDeviceToHost));
+      for (auto& status : out.status)
+        if (status != static_cast<u8>(CertificateStatus::fault)) status = static_cast<u8>(CertificateStatus::deferred);
+      counts[4] = 0;
+    } else {
     MHGP9_CUDA(cudaMemcpy(out.status.data(), res.out_status.get(), edges, cudaMemcpyDeviceToHost));
     MHGP9_CUDA(cudaMemcpy(out.record_begin.data(), res.out_begin.get(), edges * sizeof(u32),
                           cudaMemcpyDeviceToHost));
@@ -1274,6 +1290,7 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     MHGP9_CUDA(cudaMemcpy(works.data(), res.warp_work.get(), gather_warps * sizeof(Q3Work), cudaMemcpyDeviceToHost));
     MHGP9_CUDA(
         cudaMemcpy(works4.data(), res.warp_work4.get(), gather_warps * sizeof(Q4Work), cudaMemcpyDeviceToHost));
+    }
     const std::size_t used = static_cast<std::size_t>(counts[4]);
     if (used > arena_capacity) throw CudaFailure{"lanes decided records exceed the arena", false};
     out.records.resize(used);  // written whole by the copy below (no zero fill)
