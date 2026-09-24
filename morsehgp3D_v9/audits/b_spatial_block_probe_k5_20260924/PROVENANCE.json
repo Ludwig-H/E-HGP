@@ -1,0 +1,50 @@
+{
+  "schema": "mhgp9_b_spatial_block_k5_bounded_pilot_provenance_v1",
+  "scope": "audit_only_no_ground_quarter_08_000200_K5_s8_256_ordinals",
+  "trace_published_commit": "e447847ae4ed803d7121ed2f4176d2eb23d2a442",
+  "product_library_base_commit": "47c667dd53565ae92a08dc1788666a752acfb8a9",
+  "worktree_head_at_final_probe_build": "e447847ae4ed803d7121ed2f4176d2eb23d2a442",
+  "product_source_changes_between_these_commits": "none_git_diff_name_only",
+  "build_type": "Release",
+  "compiler": "GNU 13.3.0",
+  "build_directory": "/tmp/mhgp9-audit-spatial-block-k5-build-20260924",
+  "sha256": {
+    "readme": "863121fc3ee612762955b21c2aa3d4cdf08302c270d76ea8b7619192d01fb1a9",
+    "probe_cpp": "96f57588cd355a7afafe93433451adbb6df2dafb8b113a27992642a7213b8feb",
+    "summarize_py": "28529bc81bb91ddf02b20dd4b83d9afdc1bf9ebf49e4997f87e1b88822071c22",
+    "cmake_lists": "1e67fa93bc7ab397831ebb736b9d0e69fab2046af3b6c1e19624f2fed6d5792a",
+    "geometry_fixture": "cf4e48e23d6f2e653a9a82d13af25cf54376c0788129512dd1b4283e196c28ba",
+    "geometry_fixture_reader": "5cd5f72e97fdbf32238fa38b3cd6c79fc1f34410adf1aad5a0006ceb11b7e8fe",
+    "binary": "6336c1f7ca2b67ff1e8b013a464756b844b5a5e0f8ce485735994b8bb8f654c0",
+    "mhgp9_gen_library": "e17932e499905ae2ae389b243b1fdf973303091719d55514379abce978f395b0",
+    "s2_k5_result_json": "28a3dbf011b31371e6eab3854f3a6fb294462a4a20d3420aa017b4ece4ddabe9",
+    "s2_k5_trace": "7d5823ea50c45ef0dd7a95ddd17bf09cf2819f13ae11355d92fc9100e2e40297",
+    "input_xyz": "33630aea9492d3b059001e10c74ba30bec143dd7a1a0be6b25f8701b2f2a5e8f",
+    "input_raw_ids": "d473e6314cf322c9213998906d3c43f59ee5044b809a8545fe4febe9113e053a",
+    "pilot_detail": "6d06d798f370a0c231ad8250edad8a438d628a9de7a4bf7632c3f478470ed9b0",
+    "pilot_shadow": "d8bb2b9dbb5d1643544188ca496bcca11924d94fde38992a9573532e8e8a755b",
+    "pilot_result": "a2fa5b38ccd14164c38bc88428610dd95d3c4a2cb47e147b63f357884e87dcaf"
+  },
+  "commands": {
+    "configure": "cmake -S morsehgp3D_v9/audits/b_spatial_block_probe_k5_20260924 -B /tmp/mhgp9-audit-spatial-block-k5-build-20260924 -DCMAKE_BUILD_TYPE=Release -DMHGP9_BOOST_INCLUDE_DIR=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "build": "cmake --build /tmp/mhgp9-audit-spatial-block-k5-build-20260924 --target mhgp9_b_spatial_block_probe_k5 -j4",
+    "geometry_fixture": "python3 -B morsehgp3D_v9/audits/b_spatial_block_probe_k5_20260924/verify_geometry_fixture.py",
+    "geometry_fixture_optimized": "python3 -B -O morsehgp3D_v9/audits/b_spatial_block_probe_k5_20260924/verify_geometry_fixture.py",
+    "selftest": "/tmp/mhgp9-audit-spatial-block-k5-build-20260924/mhgp9_b_spatial_block_probe_k5 --selftest",
+    "mutation_shell": "/tmp/mhgp9-audit-spatial-block-k5-build-20260924/mhgp9_b_spatial_block_probe_k5 --mutate-allow-shell",
+    "mutation_exclusion": "/tmp/mhgp9-audit-spatial-block-k5-build-20260924/mhgp9_b_spatial_block_probe_k5 --mutate-exclusion-sign",
+    "probe": "/tmp/mhgp9-audit-spatial-block-k5-build-20260924/mhgp9_b_spatial_block_probe_k5 morsehgp3D_v9/audits/s4a_cpu_scene02_physical_panel_20260924/inputs/quarter_quarter_x_nonneg_y_nonneg.u32le morsehgp3D_v9/audits/s4a_cpu_scene02_physical_panel_20260924/inputs/quarter_quarter_x_nonneg_y_nonneg.raw_return_ids.u32le morsehgp3D_v9/audits/b_s2_trace_k5_20260924/quarter_1288_k5.trace.tsv morsehgp3D_v9/audits/b_s2_trace_k5_20260924/RESULT.json morsehgp3D_v9/audits/b_spatial_block_probe_k5_20260924/pilot_detail.tsv morsehgp3D_v9/audits/b_spatial_block_probe_k5_20260924/pilot_shadow.tsv",
+    "summary": "python3 -B morsehgp3D_v9/audits/b_spatial_block_probe_k5_20260924/summarize.py morsehgp3D_v9/audits/b_spatial_block_probe_k5_20260924/pilot_detail.tsv morsehgp3D_v9/audits/b_spatial_block_probe_k5_20260924/pilot_shadow.tsv morsehgp3D_v9/audits/b_spatial_block_probe_k5_20260924/PILOT_RESULT.json",
+    "join": "python3 -B morsehgp3D_v9/audits/b_s2_trace_k5_20260924/join_shadow.py morsehgp3D_v9/audits/b_spatial_block_probe_k5_20260924/pilot_shadow.tsv"
+  },
+  "checks": {
+    "geometry_fixture_normal_and_optimized": "exit_0_geometry_fixture_ok",
+    "selftest": "exit_0_selftest_ok",
+    "mutation_shell": "exit_1_gate_credited_point_not_strictly_interior",
+    "mutation_exclusion": "exit_1_gate_excluded_node_contains_interior_site",
+    "probe": "exit_0_selected_256_visited_256_complete_256_incomplete_0",
+    "summary_normal_and_optimized": "same_object_as_pilot_result_sha256_semantic_45505b28df7e1748e107fb520025e57b635aa8fcec541aa0a15d49e9d84840d8",
+    "join": "exit_0"
+  },
+  "timing_scope": "shared_local_CPU_after_input_hash_trace_validation_cloud_and_index_preparation; no GCP_or_full_frame_or_FULL_tower"
+}

@@ -21,6 +21,8 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
    sépare budget expérimental, refontes nécessaires et tous les profils
    encore à qualifier. Le [retest R21](CONTRE_AUDIT_R21_PREFLIGHT_20260924.md)
    confirme le selftest rouge et le trou du mur CUDA avant tout nouveau G4.
+   La [note d'architecture GPU](ARCHITECTURE_GPU_100MS_Q34_FULL_20260924.md)
+   expose deux refontes et leurs critères de rejet, sans gain acquis.
    Le [contre-audit du pool E2 local](CONTRE_AUDIT_B_POOL_E2_WIP_20260924.md)
    distingue réemploi de fils et plafond réel de concurrence ; un
    [reproducteur minimal](pool_e2_exception_probe_20260924.cpp) accompagne
@@ -52,6 +54,9 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
    La [trace K5 séparée](b_s2_trace_k5_20260924/README.md) donne les
    ordinals et `F_e` du régime visé par les 100 ms ; elle recoupe un
    run CPU local de même famille de code, pas un oracle indépendant.
+   La [sonde BVH K5](b_spatial_block_probe_k5_20260924/README.md) gagne
+   46 fermetures sur 256 arêtes sélectionnées, mais paie 6,842 M
+   formes exactes pour `ΣF=5 634` : ce port naïf n'est pas économique.
    La [comparaison s8/10/12 locale](b_s8_s10_s12_k5_quarter_20260924/README.md)
    sépare baisse de paires et hausse des rectangles à sortie identique,
    sans classer les durées sous contention.
@@ -157,6 +162,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | --- | --- | --- | --- | --- | --- |
 | [`CONTRELECTURE_FORMES_BVH_AVANT_S3_20260924.md`](CONTRELECTURE_FORMES_BVH_AVANT_S3_20260924.md) | B | 24/22:53 | preuve exacte 8 coins/nœud/cellule et contraintes d'antichaîne ; sélectivité non mesurée | vivant, méthode | transmis à D/C |
 | [`b_spatial_block_probe_plan_20260924/`](b_spatial_block_probe_plan_20260924/README.md) | B | 24/22:53, reçu 23:12 | shadow K10 exact sur 256 arêtes ; 136 fermetures, 5,12 M coins et 2,93 M points témoins ; signal de coût défavorable | vivant, aucun port produit | transmis à D/C |
+| [`b_spatial_block_probe_k5_20260924/`](b_spatial_block_probe_k5_20260924/README.md) | B | 24/23:37 | shadow K5 exact sur 256 arêtes ; 133 fermetures contre 87 core, mais 6,842 M formes pour `ΣF=5 634` | négatif pour ce parcours, pas de port produit | transmis à D/C |
 | [`b_s2_trace_k5_20260924/`](b_s2_trace_k5_20260924/README.md) | B | 24/23:25 | trace K5 de 27 099 survivantes, `ΣF=298 205`, 7 020 fermetures core ; lectures normal/`-O`/LIVE et run CPU local concordants | vivant, shadow sans chrono G4 ni oracle indépendant | transmis à D/C |
 | [`b_s8_s10_s12_k5_quarter_20260924/`](b_s8_s10_s12_k5_quarter_20260924/README.md) | B | 24/23:34 | même quart K5 : 46 218/40 728/37 843 paires étendues à s8/10/12, 27 099 survivantes et digests identiques | testé borné, murs locaux non classants ; G4 multi-trames ouvert | transmis à D/C |
 | [`PISTE_B_Q34_RECTANGLES_AVANT_EXPANSION_20260923.md`](PISTE_B_Q34_RECTANGLES_AVANT_EXPANSION_20260923.md) | B | `de26dd7a` 03:03 | démontré localement | vivant | refusée en partie, différée |
@@ -184,6 +190,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | note | auteur | créée | portée | cycle | réponse du développeur |
 | --- | --- | --- | --- | --- | --- |
 | [`PLAN_CRITIQUE_100MS_FULL_20260924.md`](PLAN_CRITIQUE_100MS_FULL_20260924.md) | B | 24/23:00 | coûts R20 et enveloppe expérimentale 100 ms, sortie explicite comprise | vivant, aucune accélération acquise | transmis à D/C |
+| [`ARCHITECTURE_GPU_100MS_Q34_FULL_20260924.md`](ARCHITECTURE_GPU_100MS_Q34_FULL_20260924.md) | B | 24/23:37 | deux refontes GPU/FULL complémentaires, dépendances exactes et portes de réfutation | méthode, sans gain mesuré | transmis à D/C |
 | [`CONTRE_AUDIT_E4_TAIL_REPRISE_20260924.md`](CONTRE_AUDIT_E4_TAIL_REPRISE_20260924.md) | B | 24/23:25 | reprise E4 : dimensionnement tardif annulé, pas de défaut de résultat avéré ; chronos d'échec et pic K10/W48 à vérifier | vivant, aucune mesure G4 | transmis à D/C |
 | [`CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md`](CONTRE_AUDIT_B_D5_FULL_MAIGRE_20260923.md) | B | `a514de68` 10:22 + mise à jour | projection D5 bornée ; index seul négatif ; R13 montre le recouvrement statique/lots ; shadow racine pré-lot à garder | vivant | réponse D attendue |
 | [`CONTRE_AUDIT_B_PHASE_A_ALLEGEE_20260923.md`](CONTRE_AUDIT_B_PHASE_A_ALLEGEE_20260923.md) | B | 23/soir | cinq paires locales de tour validées, run exact et singleton relus ; phase A plus rapide, tour K5 non stable ; provenance binaire/entrée/log non épinglée | vivant, aucun G4 ni gain de contrat | transmis à D |

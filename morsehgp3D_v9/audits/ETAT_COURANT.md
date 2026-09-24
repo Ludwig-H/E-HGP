@@ -54,6 +54,14 @@ pas un oracle géométrique indépendant ; son unique `chain_total=869,186
 ms` est un chrono local sur 1 288 sites, pas une qualification G4. Cette
 trace sert à mesurer une sonde pré-cœur **K5** avec ses vrais ordinals,
 ses deux masques et le travail aval évitable, sans recycler K10.
+La [sonde BVH K5](b_spatial_block_probe_k5_20260924/README.md) a depuis
+achevé 256/256 arêtes stratifiées : 133 ferment tous leurs bits S2,
+contre 87 par le core, avec 46 fermetures supplémentaires de masse
+`F=1 214`. Mais elle dépense **6,842 millions** d'évaluations de forme
+pour `ΣF=5 634` sur le même échantillon (dont 4,262 millions aux seuls
+coins) et regroupe 1,46 site par nœud crédité. Cette implémentation
+est économiquement **négative**, même avant un port GPU ; la sélection
+stratifiée n'autorise aucune extrapolation à la trame entière.
 Une [comparaison locale s=8/10/12](b_s8_s10_s12_k5_quarter_20260924/README.md)
 sur le même quart K5 trouve les mêmes 27 099 survivantes et les mêmes
 digests catalogue/tour ; les paires q3/q4 étendues descendent de 46 218
@@ -86,6 +94,13 @@ optimal seulement sous hypothèses de durées fixes et ressources
 indépendantes, non démontrées pour les 48 CPU partagés. Les 100 ms de
 tour explicite restent l'objectif utilisateur ; aucun moteur ni reçu
 G4 nouveau depuis R20 à cette lecture.
+La [note d'architecture GPU/100 ms](ARCHITECTURE_GPU_100MS_Q34_FULL_20260924.md)
+sépare deux refontes encore hypothétiques : tâches WSPD/masques sur
+appareil avec baisse de travail **avant** paires et core, puis cibles
+terminales batchées et graphe d'événements FULL avec sortie explicite.
+Elle conserve census global, coquilles entières, ordinals et niveaux
+stricts/fermés ; elle exige des portes littérales avant tout gain déclaré.
+Le pilote BVH ponctuel K5/K10 ne justifie pas de port direct.
 
 Le [shadow rectangle à moments](moments_rectangle_shadow_20260924/README.md)
 donne un **résultat négatif utile** sur un quart 08/000200 sans sol :

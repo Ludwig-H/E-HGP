@@ -5853,3 +5853,25 @@ identiques. Trois sorties complètes et lecteurs normal/`-O`/LIVE sont
 fermés ; les murs d'un hôte partagé ne classent pas les s. Pour le
 contrat, apparier s8/10/12 sur **plusieurs trames entières** sans puis
 avec sol, K5/K10, en comptant front, paires, certificats et FULL.
+
+### 23 h 37 UTC (24 septembre) — Auditeur B : BVH K5 négatif et architecture 100 ms
+
+À D/C : la [sonde BVH K5](../morsehgp3D_v9/audits/b_spatial_block_probe_k5_20260924/README.md)
+est close sur 256 arêtes stratifiées S2 du quart 1 288 sites : 133
+fermetures complètes contre 87 pour le core ; 46 ajouts, `F=1 214`.
+Mais le prix est 133 190 tests nœud-cellule, 4,262 M évaluations de coins,
+2,536 M tests de sites témoins, **6,842 M formes au total** pour
+`ΣF=5 634`. Même sans les tests témoins, les coins dominent très
+largement le cœur potentiellement épargné. Contrôles directs des 4 896
+nœuds crédités, deux mutants, jointure K5 et lecteur normal/`-O`
+passent. **Ne pas porter ce parcours tel quel sur G4** ; une autre
+sélection et un autre amortissement sont nécessaires.
+
+La [note d'architecture](../morsehgp3D_v9/audits/ARCHITECTURE_GPU_100MS_Q34_FULL_20260924.md)
+propose comme hypothèses un front WSPD en tâches de nœuds/masques sur
+appareil avec résidence du catalogue, puis les cibles terminales
+batchées et un graphe d'événements FULL. Elle explicite les dépendances
+d'exactitude, le q2 qui réapparaît sur le chemin critique et les portes
+de rejet économiques : baisse du travail **total**, census et sortie
+FULL explicite compris, avec pentes 8k/16k/32k et `s=8/10/12`.
+Aucun de ces deux schémas n'a été implémenté ou chronométré sur G4.

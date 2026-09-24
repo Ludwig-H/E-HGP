@@ -1,0 +1,19 @@
+{
+  "schema": "mhgp9_b_spatial_block_exact_fixture_v1",
+  "Q": 1048576,
+  "edge": {"a": [0, 0, 0], "b": [4, 0, 0]},
+  "cases": {
+    "endpoint_shell": {"z": [0, 0, 0], "alpha": 0, "beta": 0, "H": 0},
+    "midpoint_interior": {"z": [2, 0, 0], "alpha": 0, "beta": 0, "H": -16777216},
+    "corner_failure_box": {
+      "low": [0, 0, 0], "high": [4, 4, 0],
+      "cell": [0, 0, 0, 0], "max_32_H": 67108864,
+      "actual_interior_site": [2, 0, 0]
+    },
+    "uniform_midpoint_cell": {
+      "low": [2, 0, 0], "high": [2, 0, 0],
+      "cell": [-262144, 262144, -262144, 262144],
+      "max_32_H": -16777216
+    }
+  }
+}

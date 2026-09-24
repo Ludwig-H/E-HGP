@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.20)
+project(mhgp9_b_spatial_block_probe_k5 LANGUAGES CXX)
+
+add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/../.." "${CMAKE_CURRENT_BINARY_DIR}/product")
+find_package(OpenSSL REQUIRED COMPONENTS Crypto)
+add_executable(mhgp9_b_spatial_block_probe_k5 probe.cpp)
+target_link_libraries(mhgp9_b_spatial_block_probe_k5 PRIVATE mhgp9_gen OpenSSL::Crypto)
+target_include_directories(mhgp9_b_spatial_block_probe_k5 SYSTEM PRIVATE "${MHGP9_BOOST_INCLUDE_DIR}")
+target_compile_features(mhgp9_b_spatial_block_probe_k5 PRIVATE cxx_std_20)
+target_compile_options(mhgp9_b_spatial_block_probe_k5 PRIVATE -Wall -Wextra -Wpedantic -Werror)
