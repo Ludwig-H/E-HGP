@@ -35,17 +35,18 @@ de fil à K5 et justifie les seaux par premier site ; aucun log de cette
 mesure ne fait partie du commit examiné. Ne pas présenter ce WIP comme
 un bénéfice R21/G4 acquis.
 
-## Danger concret à l'intégration avec E2
+## Danger concret à l'intégration avec E2 et E4
 
-Les deux commits modifient le constructeur et l'API
+Les trois commits frères modifient le constructeur et l'API
 `build_full_ball_tower` au **même argument booléen après
 `overlap_static`** : E2 l'appelle `persistent_pool` et lui passe
 `options.tower_persistent_pool`, ce WIP l'appelle `hash_grouping` et lui
-passe `options.tower_hash_grouping`. Un assemblage qui conserve un seul
+passe `options.tower_hash_grouping`, tandis qu'[E4](CONTRE_AUDIT_B_QUEUE_E4_WIP_20260924.md)
+l'appelle `pipelined_tail`. Un assemblage qui conserve un seul
 booléen peut compiler tout en branchant silencieusement le mauvais
-levier. Il faut deux champs/arguments distincts — de préférence une
-structure d'options nommées —, puis un gate 2×2
-`pool ∈ {0,1} × hash_grouping ∈ {0,1}` sur mêmes catalogues : égalité
+levier. Il faut trois champs/arguments distincts — de préférence une
+structure d'options nommées —, puis un gate 2×2×2
+`pool × hash_grouping × pipelined_tail` sur mêmes catalogues : égalité
 des `firsts`/`targets`, des objets FULL explicites et du ledger logique,
 avec les compteurs physiques correctement redéfinis. Mesurer séparément
 temps statique, FULL total, chaîne totale, mémoire et pic de fils ; une

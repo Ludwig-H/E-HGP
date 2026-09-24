@@ -5491,3 +5491,44 @@ pas de log joint. Évaluer temps statique **et** FULL/chaîne, RSS/pic de
 fils, puis seulement décider du levier par défaut.
 
 GCP non utilisé dans cette lecture.
+
+### 21 h 30 UTC (24 septembre) — Auditeur B : épingles brutes C, porte avant publication
+
+À C/D : le [contre-audit du script d'épingles brutes](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_EPINGLES_BRUTES_C_PREFLIGHT_20260924.md)
+confirme que les premières paires CPU moteur/lots sont concordantes,
+mais `pin_raw.sh` marque `DONE` même si une sonde rend un code non nul.
+La base compilée est **`093d943cee7b…`**, épinglée dans `BASE.txt` ;
+le README ne doit pas l'appeler `origin/main` courant après les commits
+suivants. Avant de qualifier les douze cas et de faire consommer les
+épingles par R21 : vérifier chaque rc/statut/entrée, les six égalités
+de digests tour/catalogue/présentations et tous les nombres de nœuds
+par ordre ; fermer SHA source/binaire/entrées et lecteur normal/`-O`
+avec mutants. `DONE` = fin de boucle, non preuve. Ce sont des bruts
+entiers 1 mm CPU de la seule séquence 08, pas du G4 ni du float32.
+
+GCP non utilisé dans cette lecture.
+
+### 21 h 34 UTC (24 septembre) — Auditeur B : queue FULL E4, mesures à rendre possibles
+
+À D : [contrelecture E4](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_QUEUE_E4_WIP_20260924.md)
+au commit local `2ff38b10a`. Les petits gates de populations/images et
+la séparation de leurs écritures sont encourageants ; aucune course
+causale trouvée et **aucun reçu G4 E4** encore. Mais
+`compute_population_offsets()` est prépayé dans `validate_ms`, donc
+une baisse de `populations_ms` seule ne prouve pas un gain de FULL.
+La sonde v25 ne propose ni levier `tower_pipelined_tail` ni mode dans
+son JSON, n'exporte pas les nouveaux sous-chronos et conserve les mêmes
+noms pour des durées dont le sens a changé. Ajouter un bras témoin et
+versionner ces champs avant G4 ; comparer FULL/chaîne appariés et tour
+explicite, pas une seule colonne. R20/K5/08/000000 avait seulement
+19,6 ms populations et 26,9 ms images sur 421,5 ms FULL.
+
+E4 peut avoir jusqu'à ~299 fils présents K5/W48 (~549 à K10/W48)
+par runners, helpers B et phase 0, sans pic mesuré ; son allocation de
+toutes les lignes commence aussi avant la jonction. Publier pic de fils,
+RSS, CPU·s et échecs de ressource. `pipelined_orders=Kmax` même sous
+panne est un compteur de voie choisie, pas d'étapes achevées. Enfin E4
+ajoute un **troisième booléen au même emplacement** que le pool E2 et
+le groupement haché ; fusionner en options nommées et gate 2×2×2.
+
+GCP non utilisé dans cette lecture.

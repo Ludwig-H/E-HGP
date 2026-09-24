@@ -51,7 +51,23 @@ est un commit local frère, non intégré à E2 : son gate compare toutes
 les cibles statiques hachées/triées, mais pas les tours explicites
 littéralement, et aucun reçu de gain G4 n'est publié. Les deux WIP
 occupent le même argument booléen de l'API avec des sens différents ;
-leur assemblage doit nommer les deux options et tester les quatre modes.
+leur assemblage ne peut garder cet argument positionnel unique.
+Un troisième commit frère,
+[E4](CONTRE_AUDIT_B_QUEUE_E4_WIP_20260924.md), ajoute lui aussi un
+booléen au même emplacement pour recouvrir populations et images.
+Il pré-calcule des offsets dans `validate_ms`, non dans
+`populations_ms` : seul FULL total apparié jugera son effet. La sonde
+G4 ne sérialise pas encore ce mode ni les nouveaux sous-chronos ; aucun
+reçu E4 n'est disponible. L'intégration exige désormais **trois**
+options distinctes et huit combinaisons de gate. Le pic de fils/RSS
+peut augmenter et reste non mesuré.
+
+Les [épingles CPU brutes de C](CONTRE_AUDIT_B_EPINGLES_BRUTES_C_PREFLIGHT_20260924.md)
+sont en calcul local sur trois trames entières avec sol de 08. Leur
+script note les retours mais crée `DONE` sans les contrôler ; la porte
+de clôture doit valider les 12 statuts, six paires de digests/ordres,
+entrées et provenance avant qu'elles servent à juger R21. Aucun reçu
+brut qualifié n'est encore publié à cette lecture.
 
 Le [contre-audit R20 et 100 ms](CONTRE_AUDIT_B_R20_ET_TRAJECTOIRE_100MS_20260924.md)
 reçoit la session G4 publiée (`d1d038393`) : 326/326 empreintes et

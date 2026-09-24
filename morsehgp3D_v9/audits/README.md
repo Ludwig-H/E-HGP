@@ -24,6 +24,11 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
    Le [groupement haché de phase 0](CONTRE_AUDIT_B_GROUP_HASH_WIP_20260924.md)
    est un autre WIP local : ses cibles statiques sont comparées finement,
    mais son intégration avec E2 et son gain G4 restent ouverts.
+   La [queue FULL E4](CONTRE_AUDIT_B_QUEUE_E4_WIP_20260924.md) recouvre
+   populations et images, avec attribution temporelle et ressources à
+   mesurer ; ces trois WIP frères ne sont pas encore un moteur combiné.
+   Les [épingles brutes CPU de C](CONTRE_AUDIT_B_EPINGLES_BRUTES_C_PREFLIGHT_20260924.md)
+   attendent leur porte de clôture avant d'autoriser R21.
    Le [grand audit C](AUDIT_C_GRAND_AUDIT_V9_20260924.md) et sa
    [contrelecture B](CONTRE_AUDIT_B_GRAND_AUDIT_C_100MS_20260924.md)
    distinguent mesures, projections et contrat inchangé de 100 ms.
