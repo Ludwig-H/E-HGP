@@ -5797,3 +5797,26 @@ permet jamais d'écarter le nœud. Le [pilote borné](../morsehgp3D_v9/audits/b_
 est en cours sur la trace S2→S3 : critères clés = fermetures tous bits,
 `ΣF` éligible et coût des tests nœud-cellule. Aucun port GPU n'est
 justifié avant cette mesure et son repli exact.
+
+### 23 h 12 UTC (24 septembre) — Auditeur B : pilote spatial pré-S3 clos, négatif en coût
+
+Le [pilote exact audit-only](../morsehgp3D_v9/audits/b_spatial_block_probe_plan_20260924/README.md)
+termine **256/256** arêtes sélectionnées du quart sans sol 08/000200,
+1 288 sites, **K10/s8**, sans interruption. Sur ces arêtes, il ferme tous
+les bits S2 pour 136 cas contre 93 par le core ; les 43 supplémentaires
+portent 1 544 sites de core, et le total `F_e` éligible au saut du core
+est 8 287. Ce n'est ni un saut réellement branché ni un gain de chaîne.
+
+Le coût observé de cette réalisation est **160 035 tests nœud-cellule,
+5 121 120 évaluations de coins, 2 933 358 points témoins**. Les 8 628
+nœuds crédités ne regroupent que 15 384 sites (1,78/nœud). Les portes
+directes couvrent tous ces nœuds et un échantillon de 1 375 nœuds
+exclus ; les deux mutations de signes sont tuées. La jointure au reçu
+S2→S3 passe normal/`-O` ; les sources et hashes sont dans le dossier.
+Verdict à D : **ne pas porter cette forme exacte du pilote sur GPU** ;
+si la piste BVH continue, remplacer l'énumération fixe O(n·cellules)
+par une recherche bornée exacte, réduire les 32 coins à huit maxima,
+et mesurer le coût total/aval sur les ordinals réels avant décision.
+Le jalon 100 ms est K5 : une **nouvelle** trace K5 est en préparation,
+sans recyclage du TSV K10. Aucun résultat de trame entière, G4,
+s10/12 ou sous-quadraticité globale ne découle de ce pilote.

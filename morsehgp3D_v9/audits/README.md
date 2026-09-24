@@ -48,9 +48,9 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
    testée](b_moments_palette_20260924/README.md) ne ferme pratiquement
    aucune arête/voie sur ses deux petits cas et ne justifie aucun port GPU.
    La [contrelecture mathématique des nœuds BVH](CONTRELECTURE_FORMES_BVH_AVANT_S3_20260924.md)
-   et son [plan de sonde bornée](b_spatial_block_probe_plan_20260924/README.md)
-   définissent une autre preuve pré-cœur exacte, dont le coût est encore
-   à mesurer.
+   et son [pilote borné K10](b_spatial_block_probe_plan_20260924/README.md)
+   montrent une preuve pré-cœur exacte mais trop coûteuse dans cette
+   implémentation locale ; K5 n'en hérite ni la sélectivité ni le coût.
    L'[audit des octets FULL](CONTRE_AUDIT_FULL_R20_OCTETS_100MS_20260924.md)
    écarte une prétendue impossibilité mémoire de 100 ms, sans promettre
    ce temps ; le [trou de complétude des épingles brutes](b_full_raw_completeness_gap_20260924/README.md)
@@ -148,7 +148,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | note | auteur | créée | portée | cycle | réponse du développeur |
 | --- | --- | --- | --- | --- | --- |
 | [`CONTRELECTURE_FORMES_BVH_AVANT_S3_20260924.md`](CONTRELECTURE_FORMES_BVH_AVANT_S3_20260924.md) | B | 24/22:53 | preuve exacte 8 coins/nœud/cellule et contraintes d'antichaîne ; sélectivité non mesurée | vivant, méthode | transmis à D/C |
-| [`b_spatial_block_probe_plan_20260924/`](b_spatial_block_probe_plan_20260924/README.md) | B | 24/22:53 | protocole borné de shadow avant formes, sans port produit | pilote en cours | transmis à D/C |
+| [`b_spatial_block_probe_plan_20260924/`](b_spatial_block_probe_plan_20260924/README.md) | B | 24/22:53, reçu 23:12 | shadow K10 exact sur 256 arêtes ; 136 fermetures, 5,12 M coins et 2,93 M points témoins ; signal de coût défavorable | vivant, aucun port produit | transmis à D/C |
 | [`PISTE_B_Q34_RECTANGLES_AVANT_EXPANSION_20260923.md`](PISTE_B_Q34_RECTANGLES_AVANT_EXPANSION_20260923.md) | B | `de26dd7a` 03:03 | démontré localement | vivant | refusée en partie, différée |
 | [`FIXTURE_CELLULES_CENTRES_Q34_20260923.md`](FIXTURE_CELLULES_CENTRES_Q34_20260923.md) | B | `e3fb7999` 10:12 | démontré localement (fixture exacte), pas une preuve LiDAR | vivant | sans réponse |
 | [`PISTE_B_Q34_NOEUDS_AVANT_COVER_20260923.md`](PISTE_B_Q34_NOEUDS_AVANT_COVER_20260923.md) | B | `f36c140c` 01:59 | démontré localement | vivant | différée |

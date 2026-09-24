@@ -3,7 +3,8 @@
 Portée : le seul quartier sans sol `08/000200`, 1 288 sites u18/1 mm,
 K10/s8, et les 55 657 survivants S2 du
 [`b_s2_trace_20260924`](../b_s2_trace_20260924/README.md). Cette note est
-un plan, pas une mesure ni une qualification du moteur.
+le plan de la sonde ; la capture bornée figure à la fin. Elle ne qualifie
+pas le moteur.
 
 ## Raccord minimal
 
@@ -115,7 +116,7 @@ les petits nœuds, pas une égalité forcée au baseline.
 Premier passage borné : 256 ordinals déterministes mêlant des strates de
 `F_e`, masques S2 et succès/échecs core ; cap global de `10^6` tests
 nœud-cellule, 50 000 cellules et 30 s mur. Vérifier par énumération directe
-les sites réels de chaque nœud crédité dans un sous-échantillon fixé, aux
+les sites réels de chaque nœud crédité, aux
 quatre coins de la cellule ; refuser la sonde à la première discordance.
 Publier le nombre d'arêtes complètement examinées et celles interrompues.
 Une extension aux 55 657 arêtes dépend de ces coûts observés ; extrapoler
@@ -127,3 +128,84 @@ cellules par arête ; une énumération naïve nœuds × cellules dépasse 14
 millions de tests pour **une** arête. Mesurer les nœuds crédités entiers,
 les nœuds écartés, les feuilles et les arrêts anticipés avant tout jugement
 de coût total. Un score de preuves seul ne justifie pas ce chemin.
+
+## Capture bornée exécutée
+
+Le code autonome [`probe.cpp`](probe.cpp) n'appelle que la préparation du
+nuage et son index public. Il épingle par SHA-256 le `RESULT.json`, les deux
+entrées et le TSV de trace avant de calculer, puis vérifie 55 657 ordinals
+contigus, les IDs locaux/bruts, les masques, les masses publiées et la
+permutation spatiale. L'inverse ID→rang est construit **une fois**. Les
+256 arêtes sont choisies de façon déterministe dans les strates masque S2 ×
+`F_e` × preuve core, avec remplissage par hachage stable. Elles sont toutes
+terminées ; le tri final par ordinal n'a donc pas tronqué de strate.
+
+La frontière contient seulement des plages disjointes. Un nœud dont les
+32 coins sont strictement négatifs donne son effectif à la cellule ; les
+nœuds ambigus sont raffinés ou transmis. Un minorant distinct exclut les
+nœuds sans intérieur possible. Le coin témoin, quand il appartient au
+disque, réfute une voie uniquement après un compte exact des sites ; cette
+énumération ponctuelle est comptée à part. `complete=1` dans le TSV signifie
+que le parcours a atteint sa conclusion sans budget, même si le masque
+prouvé vaut zéro. Une arête interrompue aurait émis masque zéro.
+
+| Échantillon K10/s8 | Valeur |
+| --- | ---: |
+| Arêtes choisies / terminées / interrompues | 256 / 256 / 0 |
+| `ΣF_e` de cet échantillon | 10 037 |
+| Cellules / tests nœud-cellule / coins évalués | 7 708 / 160 035 / 5 121 120 |
+| Sites crédités / nœuds crédités | 15 384 / 8 628 |
+| Nœuds exclus / feuilles ambiguës / divisions | 46 332 / 37 825 / 67 250 |
+| Évaluations ponctuelles des centres témoins | 2 933 358 |
+| Nœuds crédités vérifiés directement | 8 628 sur 8 628 ; 15 384 sites |
+| Nœuds exclus vérifiés directement | 1 375 ; 4 763 sites |
+| Tous bits S2 fermés par bloc / core sur ces arêtes | 136 / 93 |
+| Fermetures bloc et core / bloc seul | 93 / 43 |
+| `F_e` éligible à éviter le core entier | 8 287, dont 1 544 sur 43 arêtes non fermées par core |
+
+Le TSV clairsemé [`pilot_shadow.tsv`](pilot_shadow.tsv) passe
+[`join_shadow.py`](../b_s2_trace_20260924/join_shadow.py) : q3 prouvé sur
+92 arêtes et `F=5 437`, q4 sur 105 et `F=5 966`, union `F=8 369`,
+intersection `F=3 034`. Les quatre classes par voie, avec masses `F_e`,
+figurent dans [`PILOT_RESULT.json`](PILOT_RESULT.json). Dans cet échantillon,
+aucune voie prouvée par core n'échappe au bloc ; les 27 preuves q3 et 35
+preuves q4 de `bloc∖core` restent des certificats candidats supplémentaires,
+pas des sorties produit. L'éligibilité `F_e` n'est pas du temps économisé.
+
+| Strate `F_e` | Arêtes | Fermetures tous bits | `F_e` éligible | Nœud-cellule | Coins | Points témoins | Mur arêtes (ms) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| ≤8 | 50 | 0 | 0 | 716 | 22 912 | 128 800 | 2,659 |
+| 9–32 | 114 | 58 | 1 241 | 82 953 | 2 654 496 | 1 951 112 | 136,182 |
+| 33–128 | 60 | 46 | 2 393 | 53 928 | 1 725 696 | 574 832 | 57,207 |
+| >128 | 32 | 32 | 4 653 | 22 438 | 718 016 | 278 614 | 23,556 |
+
+Le détail **par masque S2, strate `F_e` et état core** est dans
+`PILOT_RESULT.json` (`by_stratum`). Les 256 durées par arête totalisent
+219,604 ms mur et 100,590 ms CPU local ; 14,607 ms de contrôles directs
+sont inclus dans le mur. L'enveloppe du passage après construction de
+l'index prend 351,991 ms mur local partagé. Ces horloges dépendent de la
+charge et de l'instrumentation, et ne mesurent ni une intégration pré-S3
+ni G4. Le compte témoin exact seul visite 2,93 millions de sites, face à
+10 037 sites cumulés dans les cores de l'échantillon. Les 15 384 sites
+crédités par 8 628 nœuds font seulement **1,78 site par nœud** : le
+regroupement spatial est peu exploité ici. Avec 5,12 millions de coins
+évalués en sus, cette implémentation donne un signal de coût défavorable,
+sans condamnation de la famille BVH ni mesure de gain produit.
+
+Le test `--selftest` passe. `--mutate-allow-shell` et
+`--mutate-exclusion-sign` échouent tous deux au code 1 sur les portes de
+géométrie directe. Tous les nœuds crédités sont énumérés sur leurs vrais
+sites aux quatre coins de cellule ; les nœuds exclus sont contrôlés sur un
+sous-ensemble déterministe de petits nœuds. Les sources, binaire, bibliothèque,
+entrées et reçus sont identifiés dans [`PROVENANCE.json`](PROVENANCE.json).
+Une contrelecture indépendante du binaire épinglé a retrouvé le passage du
+selftest, le rejet géométrique des deux mutations et l'identité du résumé
+en lectures Python normale et `-O`.
+
+La sélection est volontairement stratifiée et ne représente pas les
+55 657 arêtes ; ni les 136 fermetures ni `F_e=8 287` ne s'extrapolent.
+Cette capture est **K10** : le jalon 100 ms visé pour **K5** a les seuils
+q3/q4 **4/3**, au lieu de **9/8**, et peut changer la sélectivité comme le
+coût. Une trace S2 K5 propre serait nécessaire ; réutiliser ce TSV K10
+serait invalide. Aucun contrat FULL, G4, trame entière ou croissance
+globale n'est acquis.

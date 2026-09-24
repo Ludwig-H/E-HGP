@@ -1,0 +1,43 @@
+{
+  "schema": "mhgp9_b_spatial_block_bounded_pilot_provenance_v1",
+  "scope": "audit_only_no_ground_quarter_08_000200_K10_s8_256_ordinals",
+  "source_commit_before_sidecar": "ea7ec38e4b55e49b31104a6c9184303b5b30cedd",
+  "build_type": "Release",
+  "compiler": "GNU 13.3.0",
+  "build_directory": "/tmp/mhgp9-audit-spatial-block-build-20260924",
+  "sha256": {
+    "mathematical_note": "c1837d2ea101a5dfe78df07109c4707abdb59b95295f5c0d9bbdfaa1c73521f8",
+    "readme": "70a3a91d3c2bec46070caf48aad54f4152642e58a765d34c78c589baefd69da6",
+    "probe_cpp": "52afc54f6ed8bf2b07da8baf0e5778bc468eb22ac91b95f0bfa6f4e26545a8ec",
+    "summarize_py": "c3fcbb60121922509f9cc678ecd299e856af7b9d3677f4675ca3d5ff47b27d19",
+    "cmake_lists": "bdd2b08f2e35800b5110408682bad7e0b0bb2443675f8ff5413ccb26466d8d7d",
+    "binary": "92f47ee65c847b4a5b73fc8ab45717c7e645552998a3166aaed7df8066fbd13d",
+    "mhgp9_gen_library": "e17932e499905ae2ae389b243b1fdf973303091719d55514379abce978f395b0",
+    "s2_result_json": "64805a85c1fc0abea2a1df6affb36116e4325f515e74f977df60d37a4e3b77cf",
+    "input_xyz": "33630aea9492d3b059001e10c74ba30bec143dd7a1a0be6b25f8701b2f2a5e8f",
+    "input_raw_ids": "d473e6314cf322c9213998906d3c43f59ee5044b809a8545fe4febe9113e053a",
+    "s2_trace": "6bb07e89ed89b514278e58e7d635459d8ec50f67af82d260d7ecf22e119d1d6e",
+    "pilot_detail": "2fcc46d5487902344958d08769f407b47cf485974267d32f406067994a4d78c8",
+    "pilot_shadow": "376d6eaaeadb495b3d6e9a0296685e38aece129e5043422828b85829a45567c4",
+    "pilot_result": "6555567e173042f1405e72e131d73f228028de4501669de25e49babb10aff4d9"
+  },
+  "commands": {
+    "configure": "cmake -S morsehgp3D_v9/audits/b_spatial_block_probe_plan_20260924 -B /tmp/mhgp9-audit-spatial-block-build-20260924 -DCMAKE_BUILD_TYPE=Release -DMHGP9_BOOST_INCLUDE_DIR=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "build": "cmake --build /tmp/mhgp9-audit-spatial-block-build-20260924 --target mhgp9_b_spatial_block_probe -j4",
+    "selftest": "/tmp/mhgp9-audit-spatial-block-build-20260924/mhgp9_b_spatial_block_probe --selftest",
+    "mutation_shell": "/tmp/mhgp9-audit-spatial-block-build-20260924/mhgp9_b_spatial_block_probe --mutate-allow-shell",
+    "mutation_exclusion": "/tmp/mhgp9-audit-spatial-block-build-20260924/mhgp9_b_spatial_block_probe --mutate-exclusion-sign",
+    "probe": "/tmp/mhgp9-audit-spatial-block-build-20260924/mhgp9_b_spatial_block_probe morsehgp3D_v9/audits/s4a_cpu_scene02_physical_panel_20260924/inputs/quarter_quarter_x_nonneg_y_nonneg.u32le morsehgp3D_v9/audits/s4a_cpu_scene02_physical_panel_20260924/inputs/quarter_quarter_x_nonneg_y_nonneg.raw_return_ids.u32le morsehgp3D_v9/audits/b_s2_trace_20260924/quarter_1288.trace.tsv morsehgp3D_v9/audits/b_s2_trace_20260924/RESULT.json morsehgp3D_v9/audits/b_spatial_block_probe_plan_20260924/pilot_detail.tsv morsehgp3D_v9/audits/b_spatial_block_probe_plan_20260924/pilot_shadow.tsv",
+    "summary": "python3 -B morsehgp3D_v9/audits/b_spatial_block_probe_plan_20260924/summarize.py morsehgp3D_v9/audits/b_spatial_block_probe_plan_20260924/pilot_detail.tsv morsehgp3D_v9/audits/b_spatial_block_probe_plan_20260924/pilot_shadow.tsv morsehgp3D_v9/audits/b_spatial_block_probe_plan_20260924/PILOT_RESULT.json",
+    "join": "python3 -B morsehgp3D_v9/audits/b_s2_trace_20260924/join_shadow.py morsehgp3D_v9/audits/b_spatial_block_probe_plan_20260924/pilot_shadow.tsv"
+  },
+  "checks": {
+    "selftest": "exit_0",
+    "mutation_shell": "exit_1_gate_credited_point_not_strictly_interior",
+    "mutation_exclusion": "exit_1_gate_excluded_node_contains_interior_site",
+    "probe": "exit_0_selected_256_visited_256_complete_256_incomplete_0",
+    "summary": "exit_0",
+    "join": "exit_0"
+  },
+  "timing_scope": "shared_local_CPU_after_input_hash_trace_validation_cloud_and_index_preparation; no GCP_or_full_frame"
+}

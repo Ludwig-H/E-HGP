@@ -15,9 +15,13 @@ La [contrelecture mathématique des boîtes BVH avant S3](CONTRELECTURE_FORMES_B
 prouve qu'un nœud spatial entier peut être crédité sur une cellule de
 centres par huit maxima de coins exacts, à condition de maintenir une
 antichaîne de sites **par cellule** ; un nœud qui échoue au test ne peut
-pas être supprimé sans minorant distinct. Le [pilote borné](b_spatial_block_probe_plan_20260924/README.md)
-mesurera si cette preuve évite réellement les formes et à quel coût.
-Pour l'instant, c'est une méthode, **pas** un gain du moteur. Le
+pas être supprimé sans minorant distinct. Le [pilote borné K10](b_spatial_block_probe_plan_20260924/README.md)
+termine ses 256 arêtes d'un quart de 1 288 sites : 136 fermetures
+complètes contre 93 pour le cœur seul, mais 5,12 millions de coins et
+2,93 millions de tests ponctuels pour 8 287 incidences de cœur seulement
+*éligibles* à être évitées. Chaque nœud crédité ne regroupe en moyenne
+que 1,78 site. Cette réalisation est un **signal de coût défavorable**,
+non un gain du moteur ; K5 exige une trace S2 distincte. Le
 [retest du WIP R21](CONTRE_AUDIT_R21_PREFLIGHT_20260924.md) échoue au
 selftest nominal sur un plan 30 cas attendu encore comme 18 ; son lecteur
 accepte sous Python normal/`-O` un mutant dont la session CUDA de 20 s

@@ -1,0 +1,313 @@
+{
+  "any_bit_classes_F": {
+    "block_and_core": 6947,
+    "block_only": 1422,
+    "core_only": 0,
+    "neither": 1668
+  },
+  "any_bit_classes_edges": {
+    "block_and_core": 102,
+    "block_only": 39,
+    "core_only": 0,
+    "neither": 115
+  },
+  "by_stratum": {
+    "mask_2_F_33_128_core_none": {
+      "F": 408,
+      "corner_evals": 299968,
+      "edges": 10,
+      "eligible_F": 193,
+      "full_closed_edges": 5,
+      "gate_ms": 0.165,
+      "node_tests": 9374,
+      "point_tests": 48841,
+      "wall_ms": 13.919
+    },
+    "mask_2_F_33_128_core_some": {
+      "F": 473,
+      "corner_evals": 225216,
+      "edges": 10,
+      "eligible_F": 473,
+      "full_closed_edges": 10,
+      "gate_ms": 0.182,
+      "node_tests": 7038,
+      "point_tests": 61225,
+      "wall_ms": 10.945
+    },
+    "mask_2_F_9_32_core_none": {
+      "F": 147,
+      "corner_evals": 145888,
+      "edges": 10,
+      "eligible_F": 15,
+      "full_closed_edges": 1,
+      "gate_ms": 0.085,
+      "node_tests": 4559,
+      "point_tests": 91927,
+      "wall_ms": 9.71
+    },
+    "mask_2_F_9_32_core_some": {
+      "F": 205,
+      "corner_evals": 231872,
+      "edges": 10,
+      "eligible_F": 205,
+      "full_closed_edges": 10,
+      "gate_ms": 0.491,
+      "node_tests": 7246,
+      "point_tests": 61037,
+      "wall_ms": 5.663
+    },
+    "mask_2_F_gt_128_core_some": {
+      "F": 1517,
+      "corner_evals": 190752,
+      "edges": 10,
+      "eligible_F": 1517,
+      "full_closed_edges": 10,
+      "gate_ms": 0.215,
+      "node_tests": 5961,
+      "point_tests": 41593,
+      "wall_ms": 3.664
+    },
+    "mask_4_F_33_128_core_none": {
+      "F": 503,
+      "corner_evals": 315296,
+      "edges": 10,
+      "eligible_F": 416,
+      "full_closed_edges": 8,
+      "gate_ms": 0.276,
+      "node_tests": 9853,
+      "point_tests": 116780,
+      "wall_ms": 5.245
+    },
+    "mask_4_F_33_128_core_some": {
+      "F": 632,
+      "corner_evals": 226880,
+      "edges": 10,
+      "eligible_F": 632,
+      "full_closed_edges": 10,
+      "gate_ms": 0.214,
+      "node_tests": 7090,
+      "point_tests": 38386,
+      "wall_ms": 4.127
+    },
+    "mask_4_F_9_32_core_none": {
+      "F": 223,
+      "corner_evals": 229280,
+      "edges": 10,
+      "eligible_F": 133,
+      "full_closed_edges": 6,
+      "gate_ms": 0.444,
+      "node_tests": 7165,
+      "point_tests": 149347,
+      "wall_ms": 6.882
+    },
+    "mask_4_F_9_32_core_some": {
+      "F": 233,
+      "corner_evals": 203968,
+      "edges": 10,
+      "eligible_F": 233,
+      "full_closed_edges": 10,
+      "gate_ms": 0.698,
+      "node_tests": 6374,
+      "point_tests": 91881,
+      "wall_ms": 7.414
+    },
+    "mask_4_F_gt_128_core_some": {
+      "F": 1436,
+      "corner_evals": 202624,
+      "edges": 10,
+      "eligible_F": 1436,
+      "full_closed_edges": 10,
+      "gate_ms": 0.325,
+      "node_tests": 6332,
+      "point_tests": 50733,
+      "wall_ms": 3.203
+    },
+    "mask_6_F_33_128_core_none": {
+      "F": 467,
+      "corner_evals": 274656,
+      "edges": 10,
+      "eligible_F": 122,
+      "full_closed_edges": 3,
+      "gate_ms": 0.188,
+      "node_tests": 8583,
+      "point_tests": 148263,
+      "wall_ms": 5.484
+    },
+    "mask_6_F_33_128_core_some": {
+      "F": 557,
+      "corner_evals": 383680,
+      "edges": 10,
+      "eligible_F": 557,
+      "full_closed_edges": 10,
+      "gate_ms": 0.284,
+      "node_tests": 11990,
+      "point_tests": 161337,
+      "wall_ms": 17.487
+    },
+    "mask_6_F_9_32_core_none": {
+      "F": 826,
+      "corner_evals": 1180096,
+      "edges": 52,
+      "eligible_F": 197,
+      "full_closed_edges": 10,
+      "gate_ms": 7.905,
+      "node_tests": 36878,
+      "point_tests": 1157941,
+      "wall_ms": 74.909
+    },
+    "mask_6_F_9_32_core_some": {
+      "F": 473,
+      "corner_evals": 663392,
+      "edges": 22,
+      "eligible_F": 458,
+      "full_closed_edges": 21,
+      "gate_ms": 2.377,
+      "node_tests": 20731,
+      "point_tests": 398979,
+      "wall_ms": 31.604
+    },
+    "mask_6_F_gt_128_core_none": {
+      "F": 279,
+      "corner_evals": 83008,
+      "edges": 2,
+      "eligible_F": 279,
+      "full_closed_edges": 2,
+      "gate_ms": 0.167,
+      "node_tests": 2594,
+      "point_tests": 77970,
+      "wall_ms": 8.103
+    },
+    "mask_6_F_gt_128_core_some": {
+      "F": 1421,
+      "corner_evals": 241632,
+      "edges": 10,
+      "eligible_F": 1421,
+      "full_closed_edges": 10,
+      "gate_ms": 0.578,
+      "node_tests": 7551,
+      "point_tests": 108318,
+      "wall_ms": 8.586
+    },
+    "mask_6_F_le_8_core_none": {
+      "F": 237,
+      "corner_evals": 22912,
+      "edges": 50,
+      "eligible_F": 0,
+      "full_closed_edges": 0,
+      "gate_ms": 0.013,
+      "node_tests": 716,
+      "point_tests": 128800,
+      "wall_ms": 2.659
+    }
+  },
+  "complete": 256,
+  "cpu_ms_sum_edges": 100.59,
+  "full_closed": {
+    "block_F": 8287,
+    "block_edges": 136,
+    "block_only_F": 1544,
+    "block_only_edges": 43,
+    "both_F": 6743,
+    "both_edges": 93,
+    "core_F": 6743,
+    "core_edges": 93
+  },
+  "gate_ms_sum_edges": 14.607,
+  "lane_classes_F": {
+    "q3": {
+      "block_and_core": 4494,
+      "block_only": 943,
+      "core_only": 0,
+      "neither": 1573
+    },
+    "q4": {
+      "block_and_core": 4700,
+      "block_only": 1266,
+      "core_only": 0,
+      "neither": 1321
+    }
+  },
+  "lane_classes_edges": {
+    "q3": {
+      "block_and_core": 65,
+      "block_only": 27,
+      "core_only": 0,
+      "neither": 114
+    },
+    "q4": {
+      "block_and_core": 70,
+      "block_only": 35,
+      "core_only": 0,
+      "neither": 101
+    }
+  },
+  "limits": "single_1288_site_S2_trace_256_selected_no_G4_no_full_frame_no_product_speedup",
+  "sample_F": 10037,
+  "schema": "mhgp9_b_spatial_block_bounded_pilot_v1",
+  "scope": "audit_only_no_ground_quarter_08_000200_K10_s8",
+  "selected": 256,
+  "selection": "splitmix64_deterministic_24_strata_mask_F_core_status_first10_then_fill256",
+  "sha256": {
+    "detail": "2fcc46d5487902344958d08769f407b47cf485974267d32f406067994a4d78c8",
+    "shadow": "376d6eaaeadb495b3d6e9a0296685e38aece129e5043422828b85829a45567c4"
+  },
+  "shadow_join": {
+    "decision_rows": 256,
+    "decisions_sha256": "376d6eaaeadb495b3d6e9a0296685e38aece129e5043422828b85829a45567c4",
+    "eligible_core_skip_F": 8287,
+    "full_closed_edges": 136,
+    "intersection_proved_F": 3034,
+    "q3_proved_F": 5437,
+    "q3_proved_edges": 92,
+    "q4_proved_F": 5966,
+    "q4_proved_edges": 105,
+    "scope": "audit_only_no_ground_quarter_08_000200",
+    "status": "eligibility_only_not_measured_savings",
+    "union_proved_F": 8369
+  },
+  "trace_core_closed_F": 610738,
+  "trace_sum_F": 1151766,
+  "visited": 256,
+  "visited_strata": {
+    "mask_2_F_33_128_core_none": 10,
+    "mask_2_F_33_128_core_some": 10,
+    "mask_2_F_9_32_core_none": 10,
+    "mask_2_F_9_32_core_some": 10,
+    "mask_2_F_gt_128_core_some": 10,
+    "mask_4_F_33_128_core_none": 10,
+    "mask_4_F_33_128_core_some": 10,
+    "mask_4_F_9_32_core_none": 10,
+    "mask_4_F_9_32_core_some": 10,
+    "mask_4_F_gt_128_core_some": 10,
+    "mask_6_F_33_128_core_none": 10,
+    "mask_6_F_33_128_core_some": 10,
+    "mask_6_F_9_32_core_none": 52,
+    "mask_6_F_9_32_core_some": 22,
+    "mask_6_F_gt_128_core_none": 2,
+    "mask_6_F_gt_128_core_some": 10,
+    "mask_6_F_le_8_core_none": 50
+  },
+  "wall_ms_median_edge": 0.391,
+  "wall_ms_sum_edges": 219.604,
+  "work": {
+    "cells": 7708,
+    "corner_evals": 5121120,
+    "corner_tests": 160035,
+    "credited_nodes": 8628,
+    "credited_sites": 15384,
+    "exclude_gate_nodes": 1375,
+    "exclude_gate_sites": 4763,
+    "excluded_nodes": 46332,
+    "fixed_centers": 4952,
+    "fixed_refutations": 141,
+    "frontier_copies": 151335,
+    "gate_nodes": 8628,
+    "gate_sites": 15384,
+    "lb_tests": 151407,
+    "leaf_ambiguous": 37825,
+    "node_tests": 160035,
+    "outside_cells": 2934,
+    "point_tests": 2933358,
+    "splits": 67250
+  }
+}
