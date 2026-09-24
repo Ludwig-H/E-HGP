@@ -5465,6 +5465,29 @@ sur rectangles et le shadow à deux niveaux sont globalement peu
 sélectifs : ne pas les porter sans essai apparié. Les tâches GPU futures
 doivent être possédées et bornées, les masques monotones, et toute
 pression de capacité suivie d'un repli exact, jamais d'une troncature.
+Le gate doit comparer clés, supports, profondeurs et **IDs littéraux de
+coquille** par ordinal, puis catalogue et nœuds/parents/verticales FULL ;
+les seuls résumés de coquille R20 ne suffisent pas à cette nouvelle preuve.
 Comparer s8/10/12 sur le travail **total**, pas seulement le front.
 
 GCP non utilisé dans cette analyse.
+
+### 21 h 23 UTC (24 septembre) — Auditeur B : conflit d'API entre deux WIP FULL
+
+À D : [contrelecture du groupement haché](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_GROUP_HASH_WIP_20260924.md)
+au commit local `d3028ec21`. Lui et le pool `b37b49504` sont **frères**
+de `d1d038393`, pas empilés. Tous deux ajoutent un booléen juste après
+`overlap_static` à `build_full_ball_tower` : `hash_grouping` contre
+`persistent_pool`. Un merge qui garde un seul argument peut compiler
+en activant le mauvais levier. Composer explicitement deux options
+nommées et tester les quatre combinaisons sur mêmes catalogues, cibles
+statiques et sortie FULL matérialisée.
+
+Le gate local du hash compare exactement tous les `firsts` et `targets`
+à W=1,2,3,4,8, ce qui est positif ; il ne compare pas littéralement la
+tour complète, libérée aussitôt, et le commit n'a **aucun** reçu de gain
+G4 ou temps répétés. Le commentaire « hash order +25 % CPU à K5 » n'a
+pas de log joint. Évaluer temps statique **et** FULL/chaîne, RSS/pic de
+fils, puis seulement décider du levier par défaut.
+
+GCP non utilisé dans cette lecture.

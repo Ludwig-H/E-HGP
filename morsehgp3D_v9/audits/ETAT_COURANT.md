@@ -37,6 +37,22 @@ par nouveau processus ne prouve pas encore un flux multi-trames persistant.
 environ 223 ms de FULL, en plus de 636–804 ms hors FULL : 100 ms exige
 une refonte couplée de l'amont q3/q4 et de la tour, pas seulement le tri.
 
+Le [pool E2](CONTRE_AUDIT_B_POOL_E2_WIP_20260924.md) au commit local
+`b37b49504` réemploie les fils du propriétaire de phase 0, mais ne borne
+pas les K runners et leurs auxiliaires : jusqu'à 293 fils présents
+à K5/W48 par le code, pic LiDAR non mesuré. Un reproducteur compilé
+montre qu'une erreur ouvrière peut contaminer le job brut suivant si
+propriétaire et ouvrier lèvent ensemble ; les wrappers du moteur capturent
+normalement cette paire, donc aucun faux résultat R20 n'est déduit.
+`static_workers_created` change aussi de sens sous réemploi. Aucun reçu
+E2 G4 ni résultat TSan nouveau n'est acquis à cette lecture.
+Le [groupement haché de phase 0](CONTRE_AUDIT_B_GROUP_HASH_WIP_20260924.md)
+est un commit local frère, non intégré à E2 : son gate compare toutes
+les cibles statiques hachées/triées, mais pas les tours explicites
+littéralement, et aucun reçu de gain G4 n'est publié. Les deux WIP
+occupent le même argument booléen de l'API avec des sens différents ;
+leur assemblage doit nommer les deux options et tester les quatre modes.
+
 Le [contre-audit R20 et 100 ms](CONTRE_AUDIT_B_R20_ET_TRAJECTOIRE_100MS_20260924.md)
 reçoit la session G4 publiée (`d1d038393`) : 326/326 empreintes et
 lecteur normal/`-O` passent, 18 tours `complete_relative` et 12
