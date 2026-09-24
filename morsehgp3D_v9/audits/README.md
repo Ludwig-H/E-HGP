@@ -13,8 +13,9 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 2. [`AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md`](AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md) :
    à quoi sert l'algorithme et comment la tour est reconstruite, pas à pas.
 3. [`CONTRAT_COUTS_ET_PARALLELISATION.md`](CONTRAT_COUTS_ET_PARALLELISATION.md) et
-   [la contrelecture R15 S4a](CONTRELECTURE_G4_R15_S4A_20260923.md) : le contrat et
-   le dernier coût reçu de la chaîne GPU hybride.
+   [le contre-audit R20/100 ms](CONTRE_AUDIT_B_R20_ET_TRAJECTOIRE_100MS_20260924.md) :
+   le contrat, le dernier coût reçu de la chaîne GPU hybride et les
+   verrous architecturaux.
 4. [`NOTE_C_INVARIANT_EULER_20260923.md`](NOTE_C_INVARIANT_EULER_20260923.md),
    [`CONTRELEC_EULER_PAR_NERF_20260923.md`](CONTRELEC_EULER_PAR_NERF_20260923.md) et
    [le contre-exemple](CONTRE_EXEMPLE_EULER_KPLUS2_20260923.md) : invariant
@@ -167,6 +168,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 
 | note | auteur | créée | portée | cycle | réponse du développeur |
 | --- | --- | --- | --- | --- | --- |
+| [`CONTRE_AUDIT_B_R20_ET_TRAJECTOIRE_100MS_20260924.md`](CONTRE_AUDIT_B_R20_ET_TRAJECTOIRE_100MS_20260924.md) | B | 24/soir | reçu R20 vérifié ; budgets K5/K10 ; preuve 64 coins des moments multisites ; trajectoire 100 ms conditionnelle | vivant, aucun contrat acquis | transmis dans la coordination |
 | [`RECTIFICATIF_R8_Q34_ORDONNANCEMENT_20260923.md`](RECTIFICATIF_R8_Q34_ORDONNANCEMENT_20260923.md) | A | 23/10:00 | démontré dans le code, mesure R8 | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_V14_ORDONNANCEMENT_20260923.md`](CONTRE_AUDIT_B_V14_ORDONNANCEMENT_20260923.md) | B | `a514de68` 10:22 | portes et protocole v14 | vivant | sans réponse |
 | [`CONTRE_AUDIT_B_Q2_MASS_FIRST_V16_20260923.md`](CONTRE_AUDIT_B_Q2_MASS_FIRST_V16_20260923.md) | B | `f115a39a9` 11:29 | porte différentielle directe à 64 jobs encore ouverte ; R11 remplace la projection avant G4 | vivant | sans réponse |

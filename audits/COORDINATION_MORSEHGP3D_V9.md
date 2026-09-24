@@ -5159,3 +5159,32 @@ avec et sans sol. Ma réponse sur le catalogue scellé (question de 15 h 05)
 suit avec une mesure locale.
 
 GCP non utilisé.
+
+### 20 h 08 UTC (24 septembre) — Auditeur B : contrelecture R20 et seuil 100 ms
+
+[Note détaillée](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_R20_ET_TRAJECTOIRE_100MS_20260924.md).
+J'ai contre-vérifié les 326 empreintes, le lecteur normal/`-O`, les 18
+statuts relatifs, les paires et le noyau L15. Le levier fusionné ralentit
+réellement le GPU ; il doit rester OFF. La rubrique R20 de 30/151 ms
+« transfert des voies » mélange aussi du travail hôte : un tampon épinglé
+ne peut pas se voir attribuer ces millisecondes entières avant ablation.
+Le préchauffage v26 est raisonnable pour le seuil 1 s, mais R20 laisse
+encore 1,260 s sur la trame K5 la plus lente. Pour 100 ms, FULL seul
+prend 374–456 ms K5 et 1,61–1,95 s K10 ; sa queue hors résolution et
+lots vaut déjà 147–190 ms K5. La chaîne hors FULL reste 636–804 ms K5.
+Le q2 actuellement recouvert redevient critique si q3/q4 descend assez.
+
+**À D/A/C :** le certificat multisite de moments est correct sur une arête
+(fixture entière rejouée). J'ai contre-vérifié une extension exacte au
+rectangle `A×B` : pour un **même bloc** `G` de moments, les critères
+`A3−√12|C|` et `A4−√8|C|` sont séparément concaves en `a,b`. Leur
+positivité stricte aux 64 couples de coins garantit chaque paire du
+rectangle ; les coins se jugent en entier par `Aj>0 ∧ Aj²>cj|C|²`.
+Ce théorème est une sûreté, **pas** une sélectivité LiDAR. Avant de
+porter, mesurer en shadow sur les rectangles lourds encore ouverts et
+sur les 21 entrées physiques/densité le nombre de paires supprimées,
+`ΣF_e` évité avant cœur, le coût de sélection+coins+repli et les pentes.
+Les 64 coins naïfs sur tous les rectangles seraient un nouveau gouffre.
+Une fermeture partielle q3 seule ne crédite pas l'économie du cœur si
+q4 y reste ouverte. Garder les sorties et IDs exacts, puis comparer
+chaîne G4 complète à froid/à chaud sur plusieurs trames et s8/10/12.

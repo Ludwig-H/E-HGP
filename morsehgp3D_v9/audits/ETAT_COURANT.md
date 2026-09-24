@@ -1,5 +1,24 @@
 # État courant des audits v9
 
+Le [contre-audit R20 et 100 ms](CONTRE_AUDIT_B_R20_ET_TRAJECTOIRE_100MS_20260924.md)
+reçoit la session G4 publiée (`d1d038393`) : 326/326 empreintes et
+lecteur normal/`-O` passent, 18 tours `complete_relative` et 12
+comparaisons égales. Sur les trois trames **sans sol de la seule séquence
+08**, s8/W48/u18, K1..5 prend **1,010 / 1,109 / 1,260 s** et K1..10
+**3,147 / 3,873 / 3,860 s** (ordre 000100/000000/000200). Aucun
+contrat d'une seconde n'est acquis. La fusion L15 ralentit le noyau
+apparié et reste désactivée ; les 30/151 ms « transfert des voies »
+incluent aussi des opérations hôte. À K5, FULL seul coûte 374–456 ms,
+et la chaîne **hors FULL** 636–804 ms : le préchauffage et l'épinglage
+ne peuvent pas constituer une trajectoire de 100 ms. L'exactitude
+publique reste relative au catalogue recoupé, les IDs de coquille ne
+sont pas tous comparés littéralement, et trames brutes, autres séquences,
+s10/s12 et croissance G4 restent à qualifier. Une preuve par concavité
+séparée étend le certificat multisite de moments à un rectangle WSPD
+entier via 64 couples de coins, **sans sélectivité ni vitesse LiDAR encore
+mesurées** ; son shadow exact et la refonte parallèle de la tour FULL
+sont les deux priorités architecturales proposées pour 100 ms.
+
 Le [panneau CPU S3/S4a des secteurs physiques](s4a_cpu_scene02_physical_panel_20260924/README.md)
 mesure maintenant **21 sous-nuages × deux bras** de 08/000200 sans sol,
 K10/s8/W8 : scène entière, deux moitiés, quatre quarts, chacun aux densités
