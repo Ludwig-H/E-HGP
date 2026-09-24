@@ -408,7 +408,22 @@ le même `tower_work` et toutes les arêtes égales au moteur à K5 et K10 :
   (`group_steps` −70 %), sous-chronos ;
 - **protocole** : sonde et protocole v22.
 
-Prochaine étape : session G4 R17.
+Session G4 R17 ([reçu](receipts/g4_tower_r17_20260924/README.md), paquet
+`b557fb75`, **`completed`**, `TERMINATED` certifié) :
+- **K5 1,14 / 1,40 / 1,52 s**, **K10 3,53 / 4,62 / 4,57 s** ;
+- à 000000 : −0,13 s à K5 et −0,50 à −0,54 s à K10 par rapport à R16 ;
+- tour à K5 : 566 → 501 ms ; appel des voies : 275 → 199 ms, dont un
+  noyau de 147 ms et 13 ms d'hôte ;
+- 12 comparaisons égales, condensé des présentations compris.
+
+Les sous-chronos E0 placent le chemin critique de la tour à K5 dans la
+**phase A de l'ordre 5** (227 ms, un fil). La validation vaut 91 ms (tri
+des niveaux 31 ms) et la queue 98 ms. À K10, la phase 0 séquentielle
+domine (1,30 s).
+
+Suite, pour le contrat de 1 s à K5 (reste 1,395 s à 000000) :
+- tour E3 (phase A maigre) puis E2 (pool, sections série) ;
+- voies, étape 2 (tâches) puis étape 3 (travail de masse).
 
 Suite : tour maigre (D5 de l'auditeur C :
 index des selles, saut au centre, images de naissance directes), puis

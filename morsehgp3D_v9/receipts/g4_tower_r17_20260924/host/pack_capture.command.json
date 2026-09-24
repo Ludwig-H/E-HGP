@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "/home/codespace/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "ssh",
+    "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-b",
+    "--quiet",
+    "--ssh-key-file=/workspaces/.ehgp-sessions/v9tower.20260924T122459Z/key",
+    "--ssh-key-expiration=2026-09-24T13:35:03.469349Z",
+    "--ssh-flag=-n",
+    "--ssh-flag=-o BatchMode=yes",
+    "--ssh-flag=-o ConnectTimeout=15",
+    "--command=tar -czf /tmp/ehgp-tower-v9-706bf69daa2c4946.hJ8DV54gNM/capture.tar.gz --exclude=output/build -C /tmp/ehgp-tower-v9-706bf69daa2c4946.hJ8DV54gNM output; capture_code=$?; sha256sum /tmp/ehgp-tower-v9-706bf69daa2c4946.hJ8DV54gNM/capture.tar.gz; exit \"$capture_code\""
+  ],
+  "ended_epoch": 1790252951.7697453,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "pack_capture",
+  "pid": 1204178,
+  "started_epoch": 1790252946.9999678,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "8708bac43e805e1e22ee44b140f05e206653fe65ca1bd3e83f0a29e00c97f357",
+  "timeout_seconds": 90
+}

@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/usr/bin/cmake",
+    "--build",
+    "/tmp/ehgp-tower-v9-706bf69daa2c4946.hJ8DV54gNM/output/build",
+    "--target",
+    "mhgp9_tower_probe",
+    "--parallel",
+    "48"
+  ],
+  "cwd": "/tmp/ehgp-tower-v9-706bf69daa2c4946.hJ8DV54gNM/output",
+  "exit_code": null,
+  "group_closed": false,
+  "per_command_watchdog": null,
+  "pid": null,
+  "session_work_deadline_epoch": 1790254317.6663787,
+  "started_utc": "2026-09-24T12:27:00.707550+00:00"
+}

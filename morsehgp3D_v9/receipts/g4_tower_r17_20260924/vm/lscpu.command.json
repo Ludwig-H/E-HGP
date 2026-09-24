@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "lscpu"
+  ],
+  "cwd": "/tmp/ehgp-tower-v9-706bf69daa2c4946.hJ8DV54gNM/output",
+  "elapsed_seconds": 0.016945539999994708,
+  "ended_utc": "2026-09-24T12:26:58.088511+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 2196,
+  "session_work_deadline_epoch": 1790254317.6663787,
+  "started_utc": "2026-09-24T12:26:58.071538+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "2efda043bcd879a936a13bdaddc2667f9e4e6dc97ad64164c1ed5e1a54a6cf71"
+}
