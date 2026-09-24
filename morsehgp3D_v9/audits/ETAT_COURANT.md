@@ -17,13 +17,19 @@ R15 ont exactement les mêmes `core_sites` : **359,707 M à K5** et
 matérialisation des formes du cœur qui porte plusieurs pentes LiDAR
 défavorables.
 
-Préflight du [prototype scratch S4b J8](AUDIT_S4B_J8_BIT_FINAL_20260924.md)
-au 24 septembre : neuf bornes de grille sont encodées dans un `uint8_t`,
-donc le signe final est perdu et `lens[7]` reste zéro. Aucun certificat
-DESIGN J8 ne peut alors conclure pour K5/K10, et son dernier seau peut
-modifier l'objet. Cela concerne le prototype non publié, pas le moteur
-S4a sur `main` ; élargir le masque, exercer le bit 8 et refaire la
-comparaison d'objets avant d'utiliser ses coûts.
+Le [préflight du prototype scratch S4b J8](AUDIT_S4B_J8_BIT_FINAL_20260924.md)
+a décelé neuf bornes encodées dans `uint8_t` : le neuvième signe était
+perdu et `lens[7]` restait zéro. Le constructeur a depuis élargi ces
+masques à `uint16_t` dans son source local ; les rejeux K5/K10 à pas 20
+sur 08/000000 donnent `design_compare=1` sur **7 771/85 491** objets
+q4 des seules arêtes sondées. Cela corrige le préflight ponctuel, sans
+source/binaire/reçu formellement reliés ni port produit.
+Même après cette correction, une [famille u18 de seaux
+vivants](AUDIT_S4B_J8_BIT_FINAL_20260924.md)
+force `m²` comparaisons de racines par graine pour seulement `K−2`
+groupes peu profonds ; `m=6554` donne 42 954 916 comparaisons.
+Prévoir un tri/balayage exact pour les gros seaux et mesurer la traîne
+sur LiDAR avant toute affirmation de coût S4b.
 
 La [matrice de croissance LiDAR](CROISSANCE_LIDAR_PLANS_ET_DENSITE_20260923.md)
 répond séparément aux deux variations demandées : trame entière → deux
@@ -1973,6 +1979,10 @@ Ni les morceaux ni les décimations ne valident le contrat de trame entière.
 Publier travail amont,
 formes et atlas, candidats
 résiduels, coquilles, catalogue, sorties FULL, CPU/mur et RSS par phase,
-y compris les échecs et les replis exacts. Une exécution GPU de toute
-la tour, avec transferts, buffers résidents et retours CPU exacts, reste
-entièrement à construire et à juger. Verdict public : **`not_claimed`**.
+y compris les échecs et les replis exacts. R15 exécute déjà une **tour
+entière hybride G4** (S2/S3/S4a sur GPU, q4 et FULL sur CPU), avec
+transferts et retours CPU exacts, jugée
+`complete_relative` sur trois trames sans sol de la seule séquence 08.
+La session à buffers résidents, le profil brut float32 par défaut, les
+autres séquences et le seuil d'une seconde restent à construire ou à
+qualifier. Verdict public : **`not_claimed`**.
