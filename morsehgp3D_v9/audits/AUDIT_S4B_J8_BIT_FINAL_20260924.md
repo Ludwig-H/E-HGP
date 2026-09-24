@@ -245,3 +245,91 @@ avec maxima par arête et par graine. La comparaison doit porter sur le
 **mur de chaîne S2–S4b/FULL**, et sur les demi-scènes, quarts et trois
 densités emboîtées déjà définies ; ni `probe_s` CPU ni les pas simulés
 ne prédisent seuls le GPU G4 ou une pente sous-quadratique.
+
+## Premier port HostGroup WIP : un bit valide d'un groupe contamine le suivant
+
+Le plan local `build/s4b-prototypes/PLAN_S4B_SYNTHESIS.md` du
+24 septembre, SHA-256
+`b00c14d2fcde5897200d691a1b363c59c7424b45ebf63df8d824bd79554c772d`,
+prévoit déjà un tampon d'événements et des masques de groupe : s'ils sont
+portés fidèlement, ils peuvent supprimer les deux coûts cachés **du
+simulateur** signalés ci-dessus. Les projections de 18,93 M/119,51 M pas
+et de 27–69/120–320 ms GPU restent des modèles tant que la voie portée
+et ses compteurs physiques ne sont pas reçus.
+
+Une première version **non publiée**, `build/v9-open-worktree/morsehgp3D_v9/src/gpu/q4_lanes.hpp`
+(SHA-256 `51bee1f570047adc5f49af0d565001e6b025bbddc0e90285fdd9b980fd833f2b`),
+utilise ces masques mais présente un défaut d'objet différent. Elle
+ne porte encore ni raffinement octaire, ni découpage en tâches, ni
+fusion q3/q4, ni noyau de clés séparé : aucun chrono de cette version
+ne qualifierait le schéma S4b.3 du plan. Le port efface `q4_valid_bit`
+au **début du seau** (`:374`), puis le pose pour
+les candidats positifs d'un groupe (`:449–463`). Les réductions de
+`valid_id` et `chosen` (`:465–486`) parcourent tout le seau en ne
+vérifiant que ce bit. Au groupe suivant du **même seau**, l'ID valide
+du groupe précédent reste donc éligible. Les comptes `groups=emitted=2`
+peuvent rester corrects alors que support et clé sont erronés.
+
+Le [gate HostGroup direct](s4b_valid_group_gate_20260924.cpp) fournit
+`a=(0,0,0)`, `b=(200,0,0)`, `x=(100,120,0)`,
+`y₃=(100,0,110)`, `y₄=(100,0,111)`, K5, IDs dans cet ordre.
+Les deux racines q4 positives et possédées sont **distinctes mais dans
+le même seau J8** (`5040000/11` et `18568000/37`, entre 0 et 819512) ;
+leurs profondeurs sont 0 et 1. Compilé avec
+`g++ -std=c++20 -O1 -Wall -Wextra -Wpedantic -Werror`, en incluant
+les headers WIP du développeur sans les modifier, le gate rend code 1
+(même résultat en `-O2`) :
+
+```sh
+g++ -std=c++20 -O1 -Wall -Wextra -Wpedantic -Werror \
+  -I build/v9-open-worktree/morsehgp3D_v9/src/gpu \
+  -I build/v9-open-worktree/morsehgp3D_v9/src \
+  morsehgp3D_v9/audits/s4b_valid_group_gate_20260924.cpp \
+  -o /tmp/mhgp9_s4b_valid_group_gate_20260924
+/tmp/mhgp9_s4b_valid_group_gate_20260924
+```
+
+```text
+status=0 groups=2 emitted=2 records=2
+record0 support=0,1,2,3 depth=0 shell=4
+record1 support=0,1,2,3 depth=1 shell=4
+```
+
+Le second support attendu est `0,1,2,4`, avec une autre clé. Une
+correction sans balayage supplémentaire consiste à effacer
+`q4_valid_bit` de **chaque événement** dans le passage de comparaison
+du groupe courant (`:416–426`), avant le test de positivité ; conserver
+`q4_decided_bit`. Rejouer le gate puis l'égalité nominative multiensemble
+sur deux groupes du même seau et les fixtures cosphériques. Il s'agit
+du **port WIP**, pas d'un défaut observé du produit publié ou de R15.
+
+Le port WIP a bien remplacé les rescans **du cover** par un tampon. Son
+ledger n'inclut toutefois pas encore tous ses parcours réels : chaque
+seau vivant rebalaye le tampon entier pour reconstruire `q4.list`
+(`:350–365`), tandis que `filter_steps` ne compte que le premier
+filtrage et `bucket_events` les seules admissions. Chaque groupe fait
+ensuite deux réductions min sur toute la liste, une comparaison, et,
+s'il est peu profond, un passage positivité/réduction puis un choix
+final sur la liste (`:394–486`) ; `compare_steps` n'en compte qu'un.
+Ajouter des compteurs `bucket_scan_steps`, `minimum_scan_steps` et
+`presentation_scan_steps`, leurs maxima par tâche, et les confrontations
+host/device avant d'utiliser 18,93 M/119,51 M pas scratch pour une
+projection de temps ou d'équilibrage GPU. Cela n'invalide pas la voie à
+tampons : le coût de ces listes peut être réduit et mesuré sans changer
+la preuve géométrique.
+
+Le découpage annoncé en tâches `(arête, ≤32 graines)` a un raccord de
+sortie à préciser avant le port GPU. Le contrat actuel `Q34LanesBatch`
+donne **une seule plage contiguë** `record_begin[j], record_count[j]`
+par arête (`src/gen/pipeline/wspd_q34.hpp:431–435`) ; le contrôle et le
+juge parcourent cette plage (`wspd_q34.cpp:1268–1298,1377–1383`). Si
+plusieurs warps réservent atomiquement des records de tâches distinctes,
+leurs plages peuvent s'entrelacer avec celles d'autres arêtes. Il faut
+soit un répertoire de plages par tâche puis un compactage déterministe
+par arête, soit un premier passage de comptes suivi d'une réservation
+unique par arête. Ne publier une arête que lorsque **toutes** ses tâches
+sont décidées et écarter toutes ses plages au repli ; inclure ce
+compactage, son stockage et la synchronisation dans le coût K-B/clé.
+Le tri ultérieur des présentations ne répare pas une plage attribuée à
+la mauvaise arête. Le port WIP actuel `edge_lanes` traite encore l'arête
+entière et n'exerce donc pas ce problème de tâches multiples.

@@ -47,6 +47,17 @@ trame sondée. Marquer les candidats par position et rassembler les
 groupes en un passage retire le carré local ; compter ces rescans et
 mesurer la chaîne appariée sur le panneau spatial/densité avant de
 projeter la pente GPU.
+Le premier [port HostGroup S4b WIP](AUDIT_S4B_J8_BIT_FINAL_20260924.md)
+montre déjà un défaut d'objet causal, distinct du coût du simulateur :
+`q4_valid_bit` survit entre deux groupes de racines du même seau.
+Un [gate direct à cinq sites](s4b_valid_group_gate_20260924.cpp) obtient
+deux émissions mais répète le premier support à la seconde au lieu
+de choisir le cinquième site. Effacer ce bit pendant la comparaison de
+chaque groupe et rejouer le gate avant toute qualification S4b. Le port
+à tampons évite les rescans de cover du simulateur, mais son ledger ne
+compte pas encore la reconstruction de chaque liste de seau ni les
+réductions min et de présentation par groupe ; mesurer ces passes avant
+de projeter son temps GPU.
 
 La [matrice de croissance LiDAR](CROISSANCE_LIDAR_PLANS_ET_DENSITE_20260923.md)
 répond séparément aux deux variations demandées : trame entière → deux
