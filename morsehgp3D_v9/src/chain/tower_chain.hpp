@@ -52,7 +52,9 @@ struct ChainOptions {
   // cle, niveau, arite, interieurs et coquille tries), calcule apres la tour
   // pendant que le catalogue vit encore ; son mur et son CPU sont retires du
   // total de la chaine (times.catalogue_digest_ms), le catalogue est libere
-  // dans la chaine comme sans l'option. Differentiel GPU/moteur. v18 :
+  // dans la chaine comme sans l'option. Differentiel GPU/moteur. v21 : la
+  // meme option calcule aussi presentation_digest a la fusion, compte dans
+  // le meme temps et le meme CPU (retires de merge_ms et du total). v18 :
   // q34_certificate_capacity fixe l'ardoise des warps du GPU (0 : defaut) ;
   // une petite valeur force la mise en attente (porte et preflight G4).
   bool catalogue_digest = false;
@@ -141,7 +143,10 @@ struct ChainTimes {
   // Verification digest of the published tower, measured after total_ms
   // (not part of the chain's construction time).
   double digest_ms = 0;
-  double catalogue_digest_ms = 0;  // idem, condense du catalogue (si demande)
+  // idem : condense des presentations (a la fusion) + condense du catalogue
+  // (apres la tour), si demandes ; non nul possible sur un refus posterieur
+  // a la fusion, les deux condenses etant alors publies a 0.
+  double catalogue_digest_ms = 0;
   double cpu_s = 0;
 };
 

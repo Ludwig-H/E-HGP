@@ -976,6 +976,12 @@ class Protocol(unittest.TestCase):
                               ('gpu q4 emitted beyond q4', lambda v: v['ledger'].update(
                                   lanes4_emitted=2, lanes4_groups=4, lanes4_emitting_seeds=1, lanes4_shell_ids=8)),
                               ('gpu q4 shells short', lambda v: v['ledger'].update(lanes4_shell_ids=3)),
+                              ('gpu q4 list steps below filter steps',
+                               lambda v: v['ledger'].update(lanes4_list_steps=0)),
+                              ('gpu q4 group steps below locate+compare',
+                               lambda v: v['ledger'].update(lanes4_group_steps=5)),
+                              ('gpu q4 compare steps below groups',
+                               lambda v: v['ledger'].update(lanes4_compare_steps=2)),
                               ('gpu lanes events unannounced', lambda v: v['options'].update(lanes_events=8))):
             bad = deepcopy(gpu_good)
             mutate(bad)

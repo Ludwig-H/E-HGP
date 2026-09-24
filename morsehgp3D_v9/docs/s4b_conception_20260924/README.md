@@ -99,10 +99,13 @@ corrections suivantes, toutes locales (CPU) :
   présentés.
 - **Porte fichier non vacante.** Le mode `--compare` publie les survivantes,
   les certificats reportés, les arêtes sans voie, les voies demandées et
-  les voies reportées par l'ardoise (repli moteur dans la chaîne). Il impose
-  des planchers de graines et d'enregistrements, et `--all-asked` refuse
-  toute exclusion. Les deux points de l'auditeur donnent maintenant le
-  code 3 ; son tétraèdre à seaux de largeur nulle donne le code 0.
+  les voies reportées par l'ardoise (repli moteur dans la chaîne). Il exige
+  au moins un plancher de graines ou d'enregistrements (code 2 sinon), et
+  `--all-asked` refuse toute exclusion. Il refuse aussi un enregistrement
+  d'une voie non demandée et vérifie les identités du registre q4 du
+  lecteur. Avec un plancher, les deux points de l'auditeur donnent le code
+  3 et son tétraèdre à seaux de largeur nulle le code 0. Des CTests gravent
+  ces codes sur des fixtures binaires (`tests/gpu/fixtures/`).
 - **Racine sur une borne intérieure** (L6). La fixture a = (0,2,2),
   b = (3,2,2), x = (1,0,2), y = (1,2,0) est gravée dans la porte : la
   racine de y vaut $\mu=6=g_6$. Le candidat est étranger au seau 5 et décidé
@@ -111,8 +114,13 @@ corrections suivantes, toutes locales (CPU) :
   listes de seau et la passe des étrangers. `group_steps` compte toutes les
   passes de la boucle de groupes, dont `compare_steps` n'est qu'une partie.
   Ces coûts, avec `pass_site_tests` et `bucket_events`, sont des mesures
-  **non jugées**. Seules les identités de graines, de groupes et d'émissions
-  sont contrôlées.
+  **non jugées**. Le lecteur ne contrôle que des identités et des bornes :
+  graines, groupes, émissions, `list_steps ≥ filter_steps`,
+  `32·list_steps ≥ bucket_events`, `group_steps ≥ 2·compare_steps` et
+  `compare_steps ≥ groups`. La revue suivante a réfuté une première borne,
+  `list_steps ≥ live_buckets` : une graine survivante sans aucun événement
+  a des seaux vivants sans passe de liste. Le contre-exemple à cinq sites
+  est gravé dans la porte.
 - **Seaux lourds.** La famille u18 de l'auditeur force m² comparaisons par
   graine. La v1 les borne par le tampon d'événements (4 096) : au-delà,
   l'arête est reportée au moteur. Sur LiDAR, `max_buffered` vaut 1 183 et

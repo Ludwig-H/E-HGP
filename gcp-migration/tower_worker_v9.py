@@ -677,8 +677,12 @@ def validate_lanes(value, case, lanes_capacity=0, judge=False):
              4 * ledger['lanes4_emitted'] <= ledger['lanes4_shell_ids'] and
              ledger['lanes4_max_buffered'] <= ledger['lanes4_buffered_events'] and
              ledger['lanes4_pass_chunks'] >= ledger['lanes4_seeds'] and
-             # every live bucket builds its list, every group locates and compares
-             ledger['lanes4_list_steps'] >= ledger['lanes4_live_buckets'] and
+             # a survivor has a live bucket whose list pass rereads its buffer
+             # (its filter steps) and every bucket list is read; a survivor
+             # without event has live buckets and no list step (review S4b)
+             ledger['lanes4_list_steps'] >= ledger['lanes4_filter_steps'] and
+             32 * ledger['lanes4_list_steps'] >= ledger['lanes4_bucket_events'] and
+             # every group locates its pivot and compares its list
              ledger['lanes4_group_steps'] >= 2 * ledger['lanes4_compare_steps'] and
              ledger['lanes4_compare_steps'] >= ledger['lanes4_groups'], 'q4 lanes ledger identity')
 

@@ -396,6 +396,12 @@ def main(argv):
                 ('q4 without q3 lanes', lambda v: v['options']['levers'].update(q34_batch_q3=False)),
                 ('q4 shells short', lambda v: v['ledger'].update(lanes4_shell_ids=0)),
                 ('q4 events announced', lambda v: v['options'].update(lanes_events=8)),
+                ('q4 list steps short', lambda v: v['ledger'].update(
+                    lanes4_list_steps=v['ledger']['lanes4_filter_steps'] - 1)),
+                ('q4 group steps short', lambda v: v['ledger'].update(
+                    lanes4_group_steps=2 * v['ledger']['lanes4_compare_steps'] - 1)),
+                ('q4 compare steps short', lambda v: v['ledger'].update(
+                    lanes4_compare_steps=v['ledger']['lanes4_groups'] - 1)),
             ]
             q4_killed = 0
             for label, mutate in q4_mutants:

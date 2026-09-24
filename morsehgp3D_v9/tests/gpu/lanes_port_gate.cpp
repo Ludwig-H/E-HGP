@@ -48,8 +48,11 @@
 //     --compare, les voies q3 et q4 de chaque arete certifiee comparees a
 //     celles du moteur : code 1 au premier ecart. Les exclusions sont
 //     publiees : survivantes, certificats reportes, aretes sans voie, voies
-//     reportees par l'ardoise (repli moteur dans la chaine). Code 3 sous un
-//     plancher, ou avec --all-asked si une arete demandee n'est pas comparee.)
+//     reportees par l'ardoise (repli moteur dans la chaine). Au moins un
+//     plancher est exige (code 2 sinon) ; code 3 sous un plancher, ou avec
+//     --all-asked si une arete demandee n'est pas comparee ; code 1 si les
+//     identites du registre q4 du lecteur sont violees ; code 2 pour un
+//     nuage refuse par prepare_cloud.)
 //
 // Code 0 conforme, 1 desaccord ou mutant survivant (`cause=`), 2 argument,
 // 3 plancher.
@@ -326,9 +329,15 @@ int file_compare(const gen::Q2CensusIndexPtr& index, const Certified& certified,
       continue;
     }
     if (status != gpu::CertificateStatus::decided) return fail("compare.fault");
+    // A record or q4 work of a lane that was not asked is a port fault.
     std::vector<gen::Q34LaneRecord> mine3, mine4;
-    for (gpu::u32 r = 0; r < count; ++r)
-      (slab.records[r].arity == 3 ? mine3 : mine4).push_back(record_of(slab.records[r], 0));
+    for (gpu::u32 r = 0; r < count; ++r) {
+      const auto arity = slab.records[r].arity;
+      if ((arity == 3 && (lanes & 2U) == 0) || (arity == 4 && (lanes & 4U) == 0) || (arity != 3 && arity != 4))
+        return fail("compare.unasked_arity edge " + std::to_string(j));
+      (arity == 3 ? mine3 : mine4).push_back(record_of(slab.records[r], 0));
+    }
+    if ((lanes & 4U) == 0 && l4.seeds != 0) return fail("compare.unasked_q4 edge " + std::to_string(j));
     if ((lanes & 2U) != 0) {
       if (!same_records(mine3, gen::engine_q3_records(index, kmax, options, order[e.a_rank], order[e.b_rank])))
         return fail("compare.q3 edge " + std::to_string(j));
@@ -346,23 +355,31 @@ int file_compare(const gen::Q2CensusIndexPtr& index, const Certified& certified,
     gpu::add_q4(w4, l4);
   }
   const bool all = certificate_deferred == 0 && lanes_deferred == 0;
+  const bool floors_ok = records3 >= floors.q3_records && w4.seeds >= floors.q4_seeds &&
+                         records4 >= floors.q4_records && (!floors.all_asked || all);
   std::printf("lanes_compare K=%u survivors=%zu certificate_deferred=%llu no_lanes=%llu q3_asked=%llu "
               "q4_asked=%llu lanes_deferred=%llu edges=%llu q3_edges=%llu q4_edges=%llu q3_records=%llu "
-              "q4_seeds=%llu q4_records=%llu all_asked_compared=%d equal=1\n",
+              "q4_seeds=%llu q4_records=%llu all_asked_compared=%d floors_ok=%d equal=1\n",
               kmax, certified.survivors.size(), certificate_deferred, no_lanes, q3_asked, q4_asked,
-              lanes_deferred, edges, q3_edges, q4_edges, records3, w4.seeds, records4, all ? 1 : 0);
+              lanes_deferred, edges, q3_edges, q4_edges, records3, w4.seeds, records4, all ? 1 : 0,
+              floors_ok ? 1 : 0);
   std::printf("q4_ledger seeds=%llu certified=%llu certified_chunk1=%llu survivors=%llu pass_chunks=%llu "
               "buffered_events=%llu max_buffered=%llu live_buckets=%llu groups=%llu compare_steps=%llu "
               "depth_rejected_groups=%llu groups_without_valid=%llu emitted=%llu multi_emission_seeds=%llu "
-              "max_emissions_per_seed=%llu max_group=%llu foreign_candidates=%llu\n",
+              "max_emissions_per_seed=%llu max_group=%llu foreign_candidates=%llu filter_steps=%llu "
+              "bucket_events=%llu list_steps=%llu group_steps=%llu\n",
               w4.seeds, w4.certified, w4.certified_chunk1, w4.survivors, w4.pass_chunks, w4.buffered_events,
               w4.max_buffered, w4.live_buckets, w4.groups, w4.compare_steps, w4.depth_rejected_groups,
               w4.groups_without_valid, w4.emitted, w4.multi_emission_seeds, w4.max_emissions_per_seed, w4.max_group,
-              w4.foreign_candidates);
-  if (records3 < floors.q3_records || w4.seeds < floors.q4_seeds || records4 < floors.q4_records ||
-      (floors.all_asked && !all))
-    return 3;
-  return 0;
+              w4.foreign_candidates, w4.filter_steps, w4.bucket_events, w4.list_steps, w4.group_steps);
+  // The reader's identities of the q4 ledger (tower_worker_v9 validate_lanes)
+  // on the exact per-edge work.
+  if (w4.seeds != w4.certified + w4.survivors || w4.certified_chunk1 > w4.certified ||
+      w4.groups != w4.depth_rejected_groups + w4.groups_without_valid + w4.emitted || w4.emitted != records4 ||
+      w4.list_steps < w4.filter_steps || 32 * w4.list_steps < w4.bucket_events ||
+      w4.group_steps < 2 * w4.compare_steps || w4.compare_steps < w4.groups)
+    return fail("compare.q4_ledger");
+  return floors_ok ? 0 : 3;
 }
 
 int file_stats(const std::string& path, unsigned kmax, std::size_t workers, bool compare,
@@ -378,7 +395,13 @@ int file_stats(const std::string& path, unsigned kmax, std::size_t workers, bool
     points[i] = gen::Point3{static_cast<std::int32_t>(c[0]), static_cast<std::int32_t>(c[1]),
                             static_cast<std::int32_t>(c[2])};
   }
-  const auto index = gen::make_q2_cloud_index(gen::prepare_cloud(points));
+  gen::Q2CensusIndexPtr index;
+  try {
+    index = gen::make_q2_cloud_index(gen::prepare_cloud(points));
+  } catch (const std::invalid_argument& e) {
+    std::fprintf(stderr, "refused cloud: %s\n", e.what());
+    return 2;
+  }
   const auto certified = certified_survivors(index, kmax, workers);
   if (compare) return file_compare(index, certified, kmax, floors);
   const Flat flat(*index);
@@ -447,6 +470,7 @@ int main(int argc, char** argv) {
       if (ks.empty()) return 2;
     } else if (arg.starts_with("--file=")) {
       file = std::string(arg.substr(7));
+      if (file.empty()) return 2;
     } else if (arg == "--compare") {
       compare = true;
     } else if (arg.starts_with("--min-q3-records=")) {
@@ -465,11 +489,18 @@ int main(int argc, char** argv) {
     std::fprintf(stderr, "usage: mhgp9_gpu_lanes_port_gate [--n=2000] [--k=2,3,5,10]\n");
     return 2;
   }
-  if (!compare && (floors.q3_records != 0 || floors.q4_seeds != 0 || floors.q4_records != 0 || floors.all_asked))
-    return 2;
+  // Floors only with --compare, --compare only on a file and never without
+  // a floor (a comparison of nothing would be equal).
+  const bool any_floor = floors.q3_records != 0 || floors.q4_seeds != 0 || floors.q4_records != 0;
+  if (!compare && (any_floor || floors.all_asked)) return 2;
+  if (compare && (file.empty() || !any_floor)) return 2;
   if (!file.empty()) {
     if (ks.size() != 1) return 2;
-    return file_stats(file, ks[0], workers, compare, floors);
+    try {
+      return file_stats(file, ks[0], workers, compare, floors);
+    } catch (const std::exception& e) {
+      return fail(std::string("file.exception ") + e.what());
+    }
   }
   unsigned long long edges = 0, q3_only = 0, rejections = 0, emitted = 0, wide_shells = 0, deferred = 0,
                      mutants = 0, guards = 0, judged = 0, faults = 0, q4_judged = 0, q4_deferred = 0;
@@ -888,6 +919,37 @@ int main(int argc, char** argv) {
     gpu::add_q4(q4_total, w4);
     bound_fixture = count;
   }
+  // A surviving seed without any buffered event (review S4b): on the edge of
+  // IDs 0 and 3 at K3, one seed survives with live buckets and no list
+  // step, so live_buckets > list_steps (the reader's first bound was false);
+  // list_steps >= filter_steps and 32 list_steps >= bucket_events hold.
+  unsigned long long zero_buffer_fixture = 0;
+  {
+    const std::vector<gen::Point3> points{{30, 24, 8}, {14, 6, 6}, {27, 35, 29}, {4, 17, 26}, {13, 38, 29}};
+    const auto index = gen::make_q2_cloud_index(gen::prepare_cloud(points));
+    const Flat flat(*index);
+    const auto order = index->spatial_order();
+    gpu::u32 ra = 0, rb = 0;
+    for (std::size_t r = 0; r < order.size(); ++r) {
+      if (order[r] == 0) ra = static_cast<gpu::u32>(r);
+      if (order[r] == 3) rb = static_cast<gpu::u32>(r);
+    }
+    Slab slab(gpu::default_lanes_capacity, gpu::default_record_capacity);
+    Q4Buffers q4b(gpu::default_event_capacity);
+    gpu::u32 count = 0;
+    gpu::EdgeQ3Work l3{};
+    gpu::Q4Work w4{};
+    if (gpu::edge_lanes(gpu::HostGroup{}, flat.view(), ra, rb, 4, 3, slab.view, q4b.view, count, l3, w4) !=
+        gpu::CertificateStatus::decided)
+      return fail("zero_buffer.status");
+    std::vector<gen::Q34LaneRecord> mine;
+    for (gpu::u32 r = 0; r < count; ++r) mine.push_back(record_of(slab.records[r], 0));
+    if (count == 0 || w4.live_buckets <= w4.list_steps || w4.list_steps < w4.filter_steps ||
+        32 * w4.list_steps < w4.bucket_events || !same_records(mine, gen::engine_q4_records(index, 3, options, 0, 3)))
+      return fail("zero_buffer.survivor");
+    gpu::add_q4(q4_total, w4);
+    zero_buffer_fixture = count;
+  }
   // The auditor's compact arena fixture: 45 clusters, each a = (-1000,0,0),
   // b = (1000,0,0) and the 108 integer points (0,u,v) with u^2+v^2 = 1105^2.
   // Every triangle abx is acute with ab longest and every other point of the
@@ -942,17 +1004,18 @@ int main(int argc, char** argv) {
   std::printf("lanes_port_gate n=%zu edges=%llu q3_only=%llu depth_rejections=%llu emitted=%llu wide_shells=%llu "
               "deferred=%llu judged=%llu mutants=%llu guards=%llu faults=%llu arena_deferred=%llu q4_edges=%llu "
               "q4_seeds=%llu q4_survivors=%llu q4_groups=%llu q4_emitted=%llu q4_multi=%llu q4_without_valid=%llu "
-              "q4_max_group=%llu q4_judged=%llu q4_deferred=%llu b_fixture=%llu bound_fixture=%llu\n",
+              "q4_max_group=%llu q4_judged=%llu q4_deferred=%llu b_fixture=%llu bound_fixture=%llu "
+              "zero_buffer_fixture=%llu\n",
               n, edges, q3_only, rejections, emitted, wide_shells, deferred, judged, mutants, guards, faults,
               arena_deferred, q4_total.edges, q4_total.seeds, q4_total.survivors, q4_total.groups, q4_total.emitted,
               q4_total.multi_emission_seeds, q4_total.groups_without_valid, q4_total.max_group, q4_judged,
-              q4_deferred, b_fixture, bound_fixture);
+              q4_deferred, b_fixture, bound_fixture, zero_buffer_fixture);
   if (edges == 0 || q3_only == 0 || rejections == 0 || emitted == 0 || wide_shells == 0 || deferred == 0 ||
       judged == 0 || guards == 0 || mutants == 0 || faults == 0 || arena_deferred != 1 || q4_total.edges == 0 ||
       q4_total.certified_chunk1 == 0 || q4_total.survivors == 0 || q4_total.emitted == 0 ||
       q4_total.multi_emission_seeds == 0 || q4_total.groups_without_valid == 0 ||
       q4_total.depth_rejected_groups == 0 || q4_total.max_group < 3 || q4_judged == 0 || q4_deferred == 0 ||
-      b_fixture != 2 || bound_fixture != 1)
+      b_fixture != 2 || bound_fixture != 1 || zero_buffer_fixture == 0)
     return 3;
   return 0;
 }

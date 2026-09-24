@@ -522,8 +522,10 @@ section V9-S4). L'objet émis est celui de la voie Local28 du moteur.
 - **Chaîne** : levier `q34_batch_q4` (exige `q34_batch_q3`) et option
   `q34_lanes_events`. Sous `catalogue_digest`, la chaîne publie aussi
   `presentation_digest`, un condensé sans ordre du multiensemble (clé,
-  arité, support) de toutes les présentations. Il est chronométré à part,
-  comme le condensé du catalogue. Le lecteur compare ce condensé et les
+  arité, support) de toutes les présentations. Son temps s'ajoute à celui du
+  condensé du catalogue dans `times_ms.catalogue_digest` : c'est la somme des
+  deux, retirée de la fusion et du total. Elle peut être non nulle sur un
+  refus postérieur à la fusion. Le lecteur compare ce condensé et les
   comptes de présentations entre bras jumeaux (contrelecture S4b : un
   échange de présentations qui préserverait les boules ne passe plus).
 - **Sonde et protocole v21** : levier et registre `lanes4_*`, borne des
@@ -536,13 +538,16 @@ section V9-S4). L'objet émis est celui de la voie Local28 du moteur.
     multi-groupes de l'auditeur B ; fixture d'une racine sur une borne
     intérieure de la grille ($\mu=6=g_6$, candidat étranger du seau 5,
     décidé au seau 6) ; lot mixte q3 + q4 passé à la frontière et au juge ;
-    tampon réduit ; sept mutants q4. Son mode `--compare` publie les
-    exclusions (certificats reportés, arêtes sans voie, voies reportées),
-    impose des planchers (`--min-q4-seeds`, `--min-q4-records`) et, avec
-    `--all-asked`, refuse une exclusion ;
+    tampon réduit ; sept mutants q4 ; graine survivante sans événement.
+    Son mode `--compare` publie les exclusions (certificats reportés, arêtes
+    sans voie, voies reportées) et exige au moins un plancher
+    (`--min-q3-records`, `--min-q4-seeds`, `--min-q4-records`). Avec
+    `--all-asked`, il refuse une exclusion. Il vérifie aussi les identités
+    du registre q4, et des CTests gravent ses codes 0, 2 et 3 ;
   - `mhgp9_chain_batch_q3` : bras S4b jugé et bras à ardoise et tampon
     réduits ;
-  - contrat sonde/lecteur v21.
+  - contrat sonde/lecteur v21 (dix mutants q4, dont les trois bornes de
+    passes).
 
 ## Voie GPU S1 : `src/gpu/` (espace `mhgp9::gpu`, code neuf)
 

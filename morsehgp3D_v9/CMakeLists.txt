@@ -274,6 +274,30 @@ mhgp9_gate(mhgp9_gpu_lanes_port_scale8000 0 mhgp9_gpu_lanes_port_gate ARGS --n=8
            EXPECT_PREFIX "lanes_port_gate n=8000" LABELS "scale8000;gpu;oracle" TIMEOUT 2400)
 mhgp9_gate(mhgp9_gpu_lanes_port_bad_argument 2 mhgp9_gpu_lanes_port_gate ARGS --k=11
            LABELS "gate;gpu" TIMEOUT 60)
+# Mode --compare (revue S4b) : planchers exiges et seulement avec --compare,
+# --compare seulement sur un fichier, nuage refuse = 2 ; deux points (fixture
+# de l'auditeur) = comparaison vide sous plancher (3) ; tetraedre a racine sur
+# une borne interieure = toutes les aretes demandees comparees (0).
+set(mhgp9_lanes_fixtures "${CMAKE_CURRENT_SOURCE_DIR}/tests/gpu/fixtures")
+mhgp9_gate(mhgp9_gpu_lanes_port_floor_without_compare 2 mhgp9_gpu_lanes_port_gate ARGS --min-q4-seeds=1
+           LABELS "gate;gpu" TIMEOUT 60)
+mhgp9_gate(mhgp9_gpu_lanes_port_bad_floor 2 mhgp9_gpu_lanes_port_gate
+           ARGS --file=${mhgp9_lanes_fixtures}/two_points.u32le --k=3 --compare --min-q3-records=x
+           LABELS "gate;gpu" TIMEOUT 60)
+mhgp9_gate(mhgp9_gpu_lanes_port_compare_without_file 2 mhgp9_gpu_lanes_port_gate ARGS --compare --min-q3-records=1
+           LABELS "gate;gpu" TIMEOUT 60)
+mhgp9_gate(mhgp9_gpu_lanes_port_compare_without_floor 2 mhgp9_gpu_lanes_port_gate
+           ARGS --file=${mhgp9_lanes_fixtures}/two_points.u32le --k=3 --compare LABELS "gate;gpu" TIMEOUT 60)
+mhgp9_gate(mhgp9_gpu_lanes_port_compare_refused_cloud 2 mhgp9_gpu_lanes_port_gate
+           ARGS --file=${mhgp9_lanes_fixtures}/duplicate_sites.u32le --k=3 --compare --min-q4-records=1
+           LABELS "gate;gpu" TIMEOUT 60)
+mhgp9_gate(mhgp9_gpu_lanes_port_compare_empty 3 mhgp9_gpu_lanes_port_gate
+           ARGS --file=${mhgp9_lanes_fixtures}/two_points.u32le --k=3 --workers=1 --compare --min-q4-records=1
+           EXPECT_PREFIX "lanes_compare K=3 survivors=1" LABELS "gate;gpu" TIMEOUT 60)
+mhgp9_gate(mhgp9_gpu_lanes_port_compare_bound 0 mhgp9_gpu_lanes_port_gate
+           ARGS --file=${mhgp9_lanes_fixtures}/bound_tetra.u32le --k=3 --workers=1 --compare --all-asked
+                --min-q4-seeds=1 --min-q4-records=1
+           EXPECT_PREFIX "lanes_compare K=3" LABELS "gate;gpu" TIMEOUT 60)
 
 # Sonde S1 : meme population que la chaine (front, rectangles, paires), CPU
 # puis GPU, masques compares requete par requete. Sans MHGP9_ENABLE_CUDA le

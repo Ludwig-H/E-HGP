@@ -661,8 +661,9 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
   ChainResult result;
   const auto total_start = Clock::now();
   const double cpu_start = process_cpu_s();
-  // Catalogue digest (verification, not construction): computed while the
-  // catalogue is alive, then its wall and CPU are taken out of the chain's.
+  // Presentation and catalogue digests (verification, not construction): the
+  // first at the merge, the second while the catalogue is alive; their wall
+  // and CPU, summed, are taken out of the chain's (times.catalogue_digest_ms).
   double catalogue_ms = 0, catalogue_cpu = 0;
   try {
     if (options.kmax < 1 || options.kmax > 10) fail(ChainStatus::kInvalidInput, "chain_kmax_outside_1_10");
