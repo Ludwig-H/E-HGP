@@ -167,14 +167,16 @@ foreach(kind IN ITEMS historical line12 shell14 spatial12 rejects)
 endforeach()
 # Voies de resolution de la tour sur un nuage de 1 500 sites : temporelle et
 # statique 1/4/8 fils, meme tour ; le tri parallele des requetes y est exerce.
-# Priorite des echecs de la tour (plus petit K sur les phases A et C) et
-# travail paye compte apres echec : points de panne MHGP9_TESTING, chaine
-# recompilee dans la cible de test (le generateur ne voit pas la tour).
+# Priorite des echecs de la tour (plus petit K, puis lots, populations et
+# images de K) et travail paye compte apres echec : points de panne
+# MHGP9_TESTING, chaine recompilee dans la cible de test (le generateur ne
+# voit pas la tour) ; voies classique, recouverte temoin et recouverte en
+# pipeline (v9 E4 : 3 x 11 scenarios x 3 voies de fils, delai 600 s).
 mhgp9_test_executable(mhgp9_chain_order_failure_priority_gate
                       tests/chain/order_failure_priority_gate.cpp src/chain/tower_chain.cpp)
 target_link_libraries(mhgp9_chain_order_failure_priority_gate PRIVATE mhgp9_gen mhgp9_gpu)
 mhgp9_gate(mhgp9_chain_order_failure_priority 0 mhgp9_chain_order_failure_priority_gate
-           ARGS --selftest LABELS "gate;chain;tower" TIMEOUT 300)
+           ARGS --selftest LABELS "gate;chain;tower" TIMEOUT 600)
 foreach(mutant IN ITEMS PHASE_PRIORITY DROP_FAILED_STATS)
   string(TOLOWER ${mutant} lower)
   mhgp9_test_executable(mhgp9_chain_order_failure_${lower}_mutant_gate
@@ -184,9 +186,9 @@ foreach(mutant IN ITEMS PHASE_PRIORITY DROP_FAILED_STATS)
                              PRIVATE MHGP9_FULL_ORDERS_MUTANT_${mutant}=1)
 endforeach()
 mhgp9_gate(mhgp9_chain_order_failure_mutant_phase_priority 1 mhgp9_chain_order_failure_phase_priority_mutant_gate
-           ARGS --selftest EXPECT_PREFIX "cause=priority" LABELS "gate;chain;tower;mutant" TIMEOUT 300)
+           ARGS --selftest EXPECT_PREFIX "cause=priority" LABELS "gate;chain;tower;mutant" TIMEOUT 600)
 mhgp9_gate(mhgp9_chain_order_failure_mutant_drop_failed_stats 1 mhgp9_chain_order_failure_drop_failed_stats_mutant_gate
-           ARGS --selftest EXPECT_PREFIX "cause=ledger.paid_work_lost" LABELS "gate;chain;tower;mutant" TIMEOUT 300)
+           ARGS --selftest EXPECT_PREFIX "cause=ledger.paid_work_lost" LABELS "gate;chain;tower;mutant" TIMEOUT 600)
 # Invariant d'Euler du catalogue (note C, preuve par le nerf de B) : sommes
 # egales a 1 sur K <= min(Kmax-2, n) pour des fixtures degenerees (carre plan,
 # deux sites, solides cospheriques) et des nuages entiers aleatoires ; statut
