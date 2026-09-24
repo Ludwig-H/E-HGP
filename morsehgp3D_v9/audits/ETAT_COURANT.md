@@ -1,5 +1,21 @@
 # État courant des audits v9
 
+Le [panneau CPU S3/S4a des secteurs physiques](s4a_cpu_scene02_physical_panel_20260924/README.md)
+mesure maintenant **21 sous-nuages × deux bras** de 08/000200 sans sol,
+K10/s8/W8 : scène entière, deux moitiés, quatre quarts, chacun aux densités
+globales emboîtées 1/4, 1/2 et 1. Les 42 sorties et les 21 paires de
+catalogues/ordres/compteurs communs sont validées ; 44 tentatives et 178
+empreintes sont conservées. Pour `core_sites`, **7/18 pentes spatiales** et
+**2/14 pentes de densité** atteignent 2 (maximum 3,296 et 2,077) ; les
+pentes CPU·s de chaîne restent sous 2 dans les deux axes. À densité pleine,
+la somme des cœurs des deux moitiés vaut **0,899** fois celui de la scène,
+pour un repère quadratique de **0,508** calculé sur leurs tailles réelles.
+Le quart chaud `x≥0,y<0` porte 583,0 M des 1 069,2 M formes de la scène ;
+ses pentes de densité sont 2,077 puis 1,916. Les murs sous garde sont
+descriptifs, car la charge externe varie entre bras ; ce panneau d'une
+seule scène et d'une seule graine n'est ni G4, ni FULL brut avec sol, ni
+une borne asymptotique.
+
 Un [certificat multisite par moments](moments_multisite_precore_20260924/NOTE.md)
 donne une voie exacte pour éviter, sur certaines arêtes S2, la
 matérialisation du cœur q3/q4 : un bloc de sites distincts et cinq moments
@@ -59,7 +75,7 @@ aussi les rescans de tout le cover pour `Lsize` et chaque seau vivant :
 au moins 146,5 M/1,486 Md visites supplémentaires à K5/K10 sur la
 trame sondée. Marquer les candidats par position et rassembler les
 groupes en un passage retire le carré local ; compter ces rescans et
-mesurer la chaîne appariée sur le panneau spatial/densité avant de
+mesurer la chaîne **S4b** appariée sur le panneau spatial/densité avant de
 projeter la pente GPU.
 Le [premier port HostGroup S4b WIP](AUDIT_S4B_J8_BIT_FINAL_20260924.md)
 avait un défaut d'objet causal : `q4_valid_bit` survivait entre deux
@@ -87,8 +103,9 @@ et trois densités de 08/000000 à K5/K10. Ces pentes finies
 isolent un verrou réel de formes calculées : `dead_core_loads` reste
 sous 2 sur les 108 liens spatiaux et les 84 liens de densité sans sol,
 mais la **taille moyenne du cœur chargé** fait monter leur produit.
-Elles ne démontrent aucune borne asymptotique, et R15 S4a n'a pas encore
-le même panneau apparié.
+Elles ne démontrent aucune borne asymptotique ; le nouveau panneau CPU
+S4a sur 08/000200 utilise les côtés float32 physiques et une autre graine.
+R15 G4 ne couvre toujours pas ces coupes.
 Dans la matrice sans sol v12, les côtés utilisent le signe **quantifié** :
 il coïncide avec le float32 physique sur 08/000000 et 08/000100, mais
 déplace un retour de 08/000200. La contre-épreuve du quart chaud à K10
@@ -124,9 +141,9 @@ annoncés après classement en anneaux sont des **tests logiques de scan** :
 le warp exécute aussi les voies après le site d'arrêt dans son dernier
 ballot. Les nouveaux tampons CUDA retéléversent l'index et reconstruisent
 les covers ; la session résidente S4.0 du plan n'est pas encore intégrée.
-Étendre à **ce** port la contre-épreuve des coupes physiques et densités
-emboîtées : le reçu CPU du seul quart chaud 08/000200/K10, cité plus bas,
-ne couvre pas les autres secteurs. Les pentes v12 CPU ne qualifient pas S4a.
+Le panneau CPU couvre désormais les sept secteurs physiques de
+08/000200/K10 à trois densités. Étendre la contre-épreuve à K5, à d'autres
+trames et au chemin G4 ; les pentes v12 ne qualifient pas ces ports.
 
 La [contrelecture S4](AUDIT_S4_RESIDENCE_ORDINALS_20260923.md) précise le
 raccord du jalon hybride : si q3 s'exécute sur GPU et q4 sur CPU,

@@ -12,12 +12,18 @@ du cœur incluent les deux extrémités traitées par charge.
 | Sans sol, v12 CPU, trois trames 08, K5/K10 | 13/36 | 10/84 | Temps CPU et paires développées sous 2 sur les 84 liens de densité ; pas sur tous les compteurs internes. |
 | Brut avec sol, v12 CPU, 08/000000 K5 | 7/18 | 2/14 | Sept secteurs physiques et trois densités. |
 | Brut avec sol, v12 CPU, 08/000000 K10 | 3/18 | 1/14 | Même entrée et coupes que K5. |
-| Sans sol, S4a CPU, quart physique chaud 08/000200 K10 | — | 1/2 | `p_core=2,077/1,916` ; un seul quart, une graine. |
+| Sans sol, S4a CPU, 08/000200 K10 | 7/18 | 2/14 | [21 entrées physiques appariées S3/S4a](s4a_cpu_scene02_physical_panel_20260924/README.md), une scène et une graine. |
 
 Ces franchissements ne prouvent pas une borne asymptotique quadratique,
 pas plus que les pentes de temps inférieures à 2 ne prouvent la
-sous-quadraticité. Le reçu **G4 R15 S4a** porte sur les trames entières
-seulement : une matrice spatiale × densité S4a appariée manque encore.
+sous-quadraticité. Le panneau S4a CPU existe maintenant pour les sept
+secteurs de 08/000200/K10 : 7/18 liens spatiaux de `core_sites` et 2/14
+liens de densité atteignent 2, contre 3/18 et 0/14 pour les paires
+développées, 0/18 et 0/14 pour les CPU·s de chaîne. Le maximum du cœur
+est 3,296 dans l'axe spatial et 2,077 dans l'axe densité. À densité pleine,
+la somme des cœurs des deux moitiés vaut 0,899 fois le plein, tandis que
+`B=Σ(n_morceau/n_plein)²=0,508` ; ces ratios décrivent une découpe finie.
+Le reçu **G4 R15 S4a** porte toujours sur les trames entières seulement.
 Les coupes et décimations sont des problèmes HGP distincts ; leurs tours
 ne s'additionnent pas pour reconstituer celle de la trame entière.
 
@@ -445,13 +451,14 @@ des ballots physiques. Les CPU·s de chaîne croissent d'exposants
 liens. Les murs sont descriptifs sur l'hôte partagé, et la sonde CPU ne
 transfère pas ses pentes de temps à G4.
 
-La suite est le panneau S4a des **sept secteurs physiques** aux densités
-globales emboîtées 1/4, 1/2 et 1, avec K5/K10 et plusieurs trames puis
-séquences. Apparier les digests et distinguer croissance des comptes de
-travail, mur de chaîne, segmentation et préparation. Les tours des
-morceaux ne recomposent pas la tour entière.
+Le [panneau S4a CPU des sept secteurs physiques](s4a_cpu_scene02_physical_panel_20260924/README.md)
+est maintenant reçu à K10 pour cette scène et cette graine. Suite : K5,
+plusieurs trames puis séquences, trames brutes avec sol et, séparément,
+le chemin G4. Distinguer croissance des comptes de travail, mur de chaîne,
+segmentation et préparation. Les tours des morceaux ne recomposent pas
+la tour entière.
 
-**Voie constructive à éprouver sur ce panneau.** Le chargement actuel
+**Voie constructive à éprouver sur les entrées de ce panneau.** Le chargement actuel
 du cœur calcule une forme par site du disque diamétral **avant** le
 certificat S3, sur CPU comme sur GPU. Le
 [BVH de paires de gardes](paired_guard_group_bvh_20260923/README.md)

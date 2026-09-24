@@ -1,0 +1,33 @@
+{
+  "schema": "mhgp9_s4a_cpu_physical_panel_build_v1",
+  "source_commit": "7ceadffad1de860e30325ae357ba3243f269d48b",
+  "source_archive_sha256": "1b54e0b35f3333dc595d4958e692ad710bf0e2cae1a99b3be706352899497eda",
+  "source_archive_paths": [
+    "morsehgp3D_v9/src",
+    "morsehgp3D_v9/bench",
+    "morsehgp3D_v9/tests",
+    "morsehgp3D_v9/cmake",
+    "morsehgp3D_v9/CMakeLists.txt"
+  ],
+  "source_objects": {
+    "morsehgp3D_v9/src": "064e30629574e057bf699ba7a2bbe911240a99aa",
+    "morsehgp3D_v9/bench/tower_probe.cpp": "2231b1964f434255cd655090bb06f77ec8ebd683",
+    "morsehgp3D_v9/CMakeLists.txt": "143b7b0b31bee62f551ee21c999ee46a253e8a51"
+  },
+  "build_type": "Release",
+  "cuda": false,
+  "sanitizers": false,
+  "compiler": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "cmake": "3.28.3",
+  "boost_include_dir": "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+  "target": "mhgp9_tower_probe",
+  "binary_sha256": "eea3040cf4150599ca7ab5c71a4f0e3738f2975483584527f339d3d2600d08e9",
+  "build_location": "/tmp/mhgp9-s4a-panel-EaI22j",
+  "commands": [
+    "git archive --format=tar --output=<temporary>/snapshot.tar 7ceadffad1de860e30325ae357ba3243f269d48b morsehgp3D_v9/src morsehgp3D_v9/bench morsehgp3D_v9/tests morsehgp3D_v9/cmake morsehgp3D_v9/CMakeLists.txt",
+    "tar -xf <temporary>/snapshot.tar -C <temporary>",
+    "cmake -S <temporary>/morsehgp3D_v9 -B <temporary>/build -DCMAKE_BUILD_TYPE=Release -DMHGP9_BOOST_INCLUDE_DIR=/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include -DMHGP9_ENABLE_CUDA=OFF",
+    "cmake --build <temporary>/build --target mhgp9_tower_probe -j 8"
+  ],
+  "observation": "The immutable snapshot build reproduced the exact SHA-256 of the prior hot-quarter S3/S4a CPU receipt; the developer worktree and its mutable build outputs were not used for new measurements."
+}
