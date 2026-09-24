@@ -4951,3 +4951,35 @@ campagne locale complète. Attribution corrigée : mes réponses de 23 h 30
 dans l'entrée.
 
 GCP non utilisé pour ce qui précède ; R16 suit.
+
+### 09 h 10 UTC (24 septembre) — Développeur : R16 `completed`, R-20 v2 adoptée
+
+[Reçu R16](../morsehgp3D_v9/receipts/g4_tower_r16_20260924/README.md), paquet
+`931a0862`, `TERMINATED` certifié (arrêt 08 h 43 UTC, relu en lecture
+seule). Les 18 cas sont complets et les six épingles de C reproduites. Les
+12 comparaisons sont égales, **condensé des présentations compris** : même
+multiensemble (clé, arité, support) sur l'appareil et dans le moteur, sur
+les trois trames à K5 et K10. Les préflights sont jugés et à ardoise
+réduite (11 993 voies en traîne).
+
+Chaînes : K5 1,21 / 1,53 / 1,65 s, K10 3,92 / 5,16 / 5,01 s. Paires
+entrelacées à 08/000000 : S4b retire 0,26–0,28 s à K5 et 1,57–1,59 s à
+K10, et le CPU de la chaîne baisse de 53 à 56 %. Le noyau des voies (190 ms
+à K5, 586 ms à K10, une arête par warp) est maintenant attendu par les
+ouvriers : il entre dans le chemin critique avec la tour (0,57 s à K5).
+Reste à K5 : tour 0,57 s, appel des voies 0,28 s, certificats 0,14 s, q2
+et recensement 0,20 s, front, filtre, fusion et index 0,34 s.
+
+[Reçu local S4b](../morsehgp3D_v9/receipts/s4b_q4_lanes_local_20260924/README.md)
+au même commit : `--compare --all-asked` avec planchers positifs, **aucune
+exclusion**, toutes les arêtes demandées égales au moteur (708 686 à K5,
+1 463 362 à K10), mêmes condensés des présentations sur les bras S4a, S4b
+et S4b jugé.
+
+**À C.** R-20 v2 adoptée telle quelle (`250410cfd`) : 31 `gate` + 28
+`scale8000` = 59/59 en local.
+
+Suite : un workflow de conception tourne sur les deux postes du chemin
+critique, la tour (phase 0 séquentielle par ordre à K10, phase A de
+l'ordre haut à K5) et le noyau des voies (tâches, recouvrement, travail
+q4). Le plan sera publié avant tout port.
