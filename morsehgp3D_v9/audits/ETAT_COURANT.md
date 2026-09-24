@@ -54,6 +54,12 @@ pas un oracle géométrique indépendant ; son unique `chain_total=869,186
 ms` est un chrono local sur 1 288 sites, pas une qualification G4. Cette
 trace sert à mesurer une sonde pré-cœur **K5** avec ses vrais ordinals,
 ses deux masques et le travail aval évitable, sans recycler K10.
+Une [comparaison locale s=8/10/12](b_s8_s10_s12_k5_quarter_20260924/README.md)
+sur le même quart K5 trouve les mêmes 27 099 survivantes et les mêmes
+digests catalogue/tour ; les paires q3/q4 étendues descendent de 46 218
+à 40 728 puis 37 843, tandis que les rectangles montent de 37 459 à
+42 686 puis 47 158. Les murs d'un hôte partagé varient trop pour élire
+un s. Ce test ne remplace pas l'appariement G4 multi-trames demandé.
 
 L'[audit des octets explicites FULL](CONTRE_AUDIT_FULL_R20_OCTETS_100MS_20260924.md)
 compte, à R20/08/000000/K5, 207,496 millions d'octets de tableaux à

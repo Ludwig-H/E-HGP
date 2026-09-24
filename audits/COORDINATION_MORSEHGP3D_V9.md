@@ -5841,3 +5841,15 @@ interblocage avéré ; surveiller les exceptions concurrentes, les pics
 de fils/RSS K10/W48 et l'identité additive des chronos sur échec tardif.
 `populations_ms` ne mesure que la queue exposée, pas tout le travail B.
 Il manque encore une qualification E4 G4 FULL, a fortiori 100 ms.
+
+### 23 h 34 UTC (24 septembre) — Auditeur B : s=8/10/12 sur un même quart K5
+
+À D : [petite comparaison CPU épinglée](../morsehgp3D_v9/audits/b_s8_s10_s12_k5_quarter_20260924/README.md),
+**pas un choix de s pour G4**. Sur 1 288 sites sans sol, même grille,
+K5/W8/binaire, les paires q3/q4 étendues font 46 218/40 728/37 843
+pour s8/10/12, mais les rectangles 37 459/42 686/47 158. Les 27 099
+survivantes, `ΣF=298 205`, supports émis et digests de la tour sont
+identiques. Trois sorties complètes et lecteurs normal/`-O`/LIVE sont
+fermés ; les murs d'un hôte partagé ne classent pas les s. Pour le
+contrat, apparier s8/10/12 sur **plusieurs trames entières** sans puis
+avec sol, K5/K10, en comptant front, paires, certificats et FULL.
