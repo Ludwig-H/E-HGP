@@ -703,14 +703,16 @@ class Builder {
       std::condition_variable wake;
       std::vector<char> ready(kmax, 0);
       // Pipelined tail: phase A state per order (0 pending, 1 done, 2 failed
-      // or never run) and the population rows' state (0 pending, 1 sized, 2
-      // failed); both only move under `mu`, then `wake` is notified.
+      // or never run) and the population rows' state (0 pending, 1 sized);
+      // both only move under `mu`, then `wake` is notified. The rows array is
+      // sized once, after phase 0 has released its arena (peak residence as
+      // before), and before any helper writes a row.
       std::vector<char> lots_state(kmax, 0);
       char rows_state = 0;
       bool cancelled = false;
       ready[0] = 1;
       // Other exceptions, one slot per order and step (each written by one
-      // thread): phase A (and the sizing on order 1), B (helper), C.
+      // thread): phase A, B (helper), C.
       std::vector<std::exception_ptr> errors(kmax), population_errors(kmax), image_errors(kmax);
       std::vector<std::thread> runners;
       runners.reserve(kmax);
@@ -741,16 +743,6 @@ class Builder {
                 return;
               }
             }
-            if (pipelined && i == 0) {
-              // The rows array is sized once, before any runner writes a row.
-              try { prepare_population_rows(); publish(rows_state, 1); }
-              catch (...) {
-                errors[i] = std::current_exception();
-                publish(rows_state, 2);
-                publish(lots_state[i], 2);
-                return;
-              }
-            }
             const auto start = PhaseClock::now();
             bool lots_ok = false;
             try { order_lots(orders[i]); lots_ok = true; } catch (const Failure& f) { failures[i] = f; }
@@ -767,13 +759,13 @@ class Builder {
             parallel_detail::JoinThreads helper_joined{helper};
             try {
               helper.emplace_back([&, i] {
-                char rows = 0;
+                bool rows = false;
                 {
                   std::unique_lock<std::mutex> lock(mu);
-                  wake.wait(lock, [&] { return rows_state != 0; });
-                  rows = rows_state;
+                  wake.wait(lock, [&] { return rows_state != 0 || cancelled; });
+                  rows = rows_state == 1;
                 }
-                if (rows != 1) return;  // the sizing failed: reported by order 1
+                if (!rows) return;  // cancelled: phase 0 failed, or the sizing threw
                 const auto populations_start = PhaseClock::now();
                 try { order_populations(orders[i]); } catch (const Failure& f) { population_failures[i] = f; }
                 catch (...) { population_errors[i] = std::current_exception(); }
@@ -812,6 +804,10 @@ class Builder {
           }
         }
         release_static_arena();
+        if (pipelined && !static_failure) {
+          prepare_population_rows();
+          publish(rows_state, 1);
+        }
       } catch (...) { cancel(); throw; }
       if (static_failure) cancel();
       for (auto& runner : runners) runner.join();
@@ -1253,7 +1249,7 @@ class Builder {
             "full_ball_population_count", FullBallStatus::kResourceExhausted);
   }
   // The rows array (domain singletons first, then n + offset(Kmax+1) balls),
-  // sized once on the runner of order 1 before any other runner writes a row.
+  // sized once by the phase-0 thread after its last order, before any row.
   void prepare_population_rows() {
     populations.resize(domain.size() + population_offset[kmax + 1]);
     for (size_t j = 0; j < domain.size(); ++j) populations[j] = {{}, {domain[j]}};
