@@ -16,6 +16,18 @@ trois entrées doivent être épinglés **intégralement** dans le reçu ; les
 entrées sont empruntées au reçu v8, pas à l'archive du code. Une
 vérification indépendante de leurs trois SHA/taille/FNV a passé, mais
 le script ne la fait pas lui-même.
+SHA-256 complets vérifiés à la lecture : b00
+`233cc4ea8cac6e0b1155ea845af57b32e5236764bf2e119557aeab5bac76c172`,
+b01 `de45e8dcaf5610cd71a369b613f16914d5713e77cbe1532122ec2e823bc0b4ad`,
+b02 `37a7be399fae909a1291cddfc3ca5b972d3effdfa8dc8cd87a41accd5fa0f5f7` ;
+binaire `1afdf9948624949f6b593db055ca95e3b1454a5ca168af6dacfd6dcf0b0aa3b1`.
+Le script omet aussi `--grid=1mm` : la sonde écrit
+`"input.grid":"unspecified"` dans ses JSON. Le code de la sonde
+utilise ce drapeau comme **libellé seulement**, donc les condensés
+géométriques ne changent pas, mais le reçu ne s'auto-décrit pas comme
+grille 1 mm et le lecteur R21 exige `grid == "1mm"` pour ses propres
+cas. Publier honnêtement cette différence et la chaîne de provenance
+des entrées ; ne pas réécrire silencieusement les JSON capturés.
 
 `pin_raw.sh` n'active que `set -u` et enregistre le code de retour de
 chaque sonde sans l'exiger nul ; après la boucle, il crée `DONE`
@@ -25,6 +37,17 @@ nœuds par ordre, ni les six égalités moteur↔lots. `DONE` doit donc être
 interprété comme **fin de boucle**, jamais preuve de 12 succès. Aucun
 échec des cas déjà terminés n'est allégué : les premières paires
 relues sont concordantes.
+
+Contrôle local indépendant après fin de la boucle, vers 21 h 36 UTC :
+**12/12** fichiers JSON lisibles ont `complete_relative`, u32/s8/W8,
+et les douze sorties `/usr/bin/time -v` indiquent code 0. Sur les
+**six paires**, les trois digests tour/catalogue/présentations et les
+tableaux `orders` complets coïncident exactement (comparaison JSON
+canonique). Les trois effectifs/FNV sont 123 389/`4120701a6194c19b`,
+124 479/`d2bd37fb9befdd7d` et 125 526/`583db2f3deafe8e9`.
+C'est un résultat positif **sur les fichiers locaux** ; il ne transforme
+pas `DONE` en lecteur versionné et mutant, ni ces sorties en preuve
+FULL/G4 ou en reçu publié par C.
 
 Avant publication et avant utilisation comme épingles R21 : fermer les
 12 codes de retour et 12 statuts `complete_relative`, les six paires

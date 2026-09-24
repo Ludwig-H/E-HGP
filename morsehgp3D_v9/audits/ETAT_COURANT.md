@@ -64,10 +64,12 @@ peut augmenter et reste non mesuré.
 
 Les [épingles CPU brutes de C](CONTRE_AUDIT_B_EPINGLES_BRUTES_C_PREFLIGHT_20260924.md)
 sont en calcul local sur trois trames entières avec sol de 08. Leur
-script note les retours mais crée `DONE` sans les contrôler ; la porte
-de clôture doit valider les 12 statuts, six paires de digests/ordres,
-entrées et provenance avant qu'elles servent à juger R21. Aucun reçu
-brut qualifié n'est encore publié à cette lecture.
+script note les retours mais crée `DONE` sans les contrôler. Une lecture
+indépendante des fichiers locaux terminés trouve 12/12 statuts et codes
+nuls et six paires de digests/ordres égales ; il reste à versionner une
+porte de clôture des entrées, de la provenance et des mutants avant
+qu'elles servent à juger R21. Aucun reçu brut qualifié n'est encore
+publié à cette lecture.
 
 Le [contre-audit R20 et 100 ms](CONTRE_AUDIT_B_R20_ET_TRAJECTOIRE_100MS_20260924.md)
 reçoit la session G4 publiée (`d1d038393`) : 326/326 empreintes et

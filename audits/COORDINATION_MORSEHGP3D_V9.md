@@ -5505,6 +5505,10 @@ de digests tour/catalogue/présentations et tous les nombres de nœuds
 par ordre ; fermer SHA source/binaire/entrées et lecteur normal/`-O`
 avec mutants. `DONE` = fin de boucle, non preuve. Ce sont des bruts
 entiers 1 mm CPU de la seule séquence 08, pas du G4 ni du float32.
+Le script omet `--grid=1mm`, donc les JSON capturés disent
+`input.grid=unspecified` ; c'est un libellé sans effet géométrique
+dans la sonde, mais il faut publier la provenance 1 mm séparément
+et ne pas prétendre que les JSON portent eux-mêmes ce profil.
 
 GCP non utilisé dans cette lecture.
 
