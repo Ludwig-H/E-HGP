@@ -109,6 +109,16 @@ aval S2 multiplie les paires étendues par 4,81 et les incidences
 `core_sites` par 8,27, tandis que les supports q3+q4 émis ne sont
 multipliés que par 1,83. Le seul nombre de boules de sortie serait donc
 un mauvais substitut au travail de génération sur ces régimes finis.
+À titre de critère de rejet **conditionnel**, si les 40 449 413
+incidences cœur à 16k restaient inchangées, il faudrait ramener les
+334 343 514 incidences à 32k sous 161 797 652 pour passer sous le
+facteur quatre sur ce doublement : plus de 172,5 millions, soit 51,6 %,
+à éviter **avant** de payer les certificats. Un nouvel algorithme qui
+change aussi le coût 16k doit évidemment être jugé par ses deux mesures
+appariées, non par ce seuil absolu. Décomposer le gonflement en nombre
+de cœurs construits (×3,10) et taille moyenne (×2,66), puis tracer les
+arêtes communes/nouvelles au doublement ; la seule quantité de sorties
+ne discrimine pas ces mécanismes.
 
 Pistes à éprouver dans cet ordre, **sans crédit de gain acquis** :
 

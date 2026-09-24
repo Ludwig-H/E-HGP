@@ -5410,3 +5410,61 @@ compare pas `static_threads=1` sur cette paire. Voir la note ciblée ;
 ce point P2 ne remet pas en cause un succès R20.
 
 GCP non utilisé dans cet audit.
+
+### 21 h 15 UTC (24 septembre) — Auditeur B : lecture du pool E2 local et phase A temporelle
+
+À D : lecture **sans build ni modification** du commit local E2
+`b37b49504`, dans [la note ciblée](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_POOL_E2_WIP_20260924.md).
+Le pool réemploie W−1 fils pour le propriétaire de la phase 0, mais les
+K runners ouvrent encore chacun jusqu'à W aides : borne K5/W48 = 293
+fils présents, pilote inclus, contre 294 sans pool ; le gain de créations
+cumulées est plausible, le gain G4 et le pic réel restent à mesurer.
+`static_workers_created` compte désormais des voies réutilisées comme
+des créations. Deux portes de refus manquent : exception propriétaire
+et ouvrière dans le même job suivie d'un job sain (erreur ouvrière
+résiduelle dans la primitive), et entrée invalide plus échec de création
+du pool (priorité de statut modifiée). Les wrappers du moteur capturent
+normalement la première de ces exceptions : aucun faux résultat R20
+déduit. Un reproducteur indépendant compilé sur `b37b49504` rend bien
+`first=owner_A`, puis `second=worker_B` pour le job pourtant sain.
+Si le pool vise un plafond CPU, il faut des quotas ou un
+ordonnanceur DAG commun, pas seulement les réemplois de phase 0.
+
+La [preuve max-ID de phase A](../morsehgp3D_v9/audits/PHASE_A_MAX_ID_COMPOSANTE_20260923.md)
+résiste à la contrelecture **sous ses hypothèses** de cibles terminales
+strictement antérieures et de plateaux fermés ensemble. Elle ne donne
+pas seule la tour explicite : garder tous les ordinaux de facettes,
+contributions et groupes ; reconstituer les coupures ouvertes/fermées,
+puis les populations et images verticales aux anciens seuils. Premier
+port sûr : sidecar sur mêmes catalogues, comparaison de chaque racine
+pré-lot et des brouillons/batches complets, puis phases B/C inchangées.
+Ni Borůvka ni cette matérialisation n'ont encore de coût G4 qualifié.
+
+GCP non utilisé dans cette lecture.
+
+### 21 h 16 UTC (24 septembre) — Auditeur B : cible q3/q4 sous-quadratique mesurable
+
+À D/C : le [diagnostic aval S2](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_CROISSANCE_Q34_AVAL_S2_20260923.md)
+sur 08/000200 sans sol K5/s8 donne 16k→32k : paires étendues ×4,81,
+`core_sites` ×8,27 (40,449 M→334,344 M), supports émis ×1,83.
+Les cœurs construits font ×3,10 et les sites moyens par cœur ×2,66.
+Si le coût 16k restait inchangé, **plus de 51,6 %** des incidences 32k
+devraient disparaître simplement pour passer sous ×4 sur ce doublement,
+certificat compris ; réévaluer les deux tailles après toute modification.
+
+La piste à tester en shadow est une hiérarchie **des arêtes orientées
+réellement survivantes de S2**, groupées sur des descripteurs disponibles
+avant cœur (boîtes d'extrémités, milieu, direction, diamètre), avec IDs,
+ordinaux et masques S2 conservés. Une preuve de bloc par moments entiers
+ou paires de gardes doit couvrir *toutes* les arêtes du nœud ; sinon
+subdivision puis repli S3/S4 exact, sans histograms A²/B². Un résultat
+favorable sur un seul groupe du [shadow BVH apparié](../morsehgp3D_v9/audits/paired_guard_group_bvh_20260923/README.md)
+ferme 153,8 M incidences sur 368,0 M, mais **ni dispatch global ni coût
+de preuve ni gain net n'est connu**. Le shadow de moments à 64 coins
+sur rectangles et le shadow à deux niveaux sont globalement peu
+sélectifs : ne pas les porter sans essai apparié. Les tâches GPU futures
+doivent être possédées et bornées, les masques monotones, et toute
+pression de capacité suivie d'un repli exact, jamais d'une troncature.
+Comparer s8/10/12 sur le travail **total**, pas seulement le front.
+
+GCP non utilisé dans cette analyse.
