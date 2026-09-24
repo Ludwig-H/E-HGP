@@ -443,7 +443,7 @@ précalculé. Mêmes valeurs i128, mêmes comparaisons.
 
 **Compteurs de l'hôte, avant → après** (08/000000, mode fichier de la
 porte ; toutes les arêtes identiques aux deux témoins et au prouveur
-produit) :
+produit ; [reçu local](../receipts/s3_certificate_chunks_local_20260924/README.md)) :
 
 | K | arêtes | pas de parcours (1 nœud par pas) | blocs de décision | pas de rejeu | passes de chargement |
 | ---: | ---: | ---: | ---: | ---: | ---: |
