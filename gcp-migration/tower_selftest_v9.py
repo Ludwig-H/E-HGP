@@ -294,7 +294,8 @@ def main():
                 rule.get('batch', levers.get('q34_batch_filter')) == levers.get('q34_batch_filter') and
                 rule.get('certificates', levers.get('q34_batch_certificates')) == levers.get('q34_batch_certificates') and
                 rule.get('lanes', levers.get('q34_batch_q3')) == levers.get('q34_batch_q3') and
-                rule.get('q4', levers.get('q34_batch_q4')) == levers.get('q34_batch_q4')):
+                rule.get('q4', levers.get('q34_batch_q4')) == levers.get('q34_batch_q4') and
+                rule.get('q2_overlap', levers.get('q2_during_device')) == levers.get('q2_during_device')):
             time.sleep(rule['seconds'])
     status = 'complete_relative'
     for rule in config.get('refuse', []):
@@ -1278,7 +1279,7 @@ class Protocol(unittest.TestCase):
     def test_partial_session_case_cap_and_refusal(self):
         with tempfile.TemporaryDirectory() as temporary:
             code, receipt, fake, host = run_scenario(
-                Path(temporary), tools=dict(sleep=[dict(workers=48, k=10, scene='00', batch=True, q4=False,
+                Path(temporary), tools=dict(sleep=[dict(workers=48, k=10, scene='00', batch=True, q2_overlap=False,
                                                         seconds=60)], refuse=[dict(scene='02', k=10)]),
                 patches=[(worker, 'CASE_CAP_SECONDS', 4)])
             need(code == 0 and receipt['status'] == 'partial', 'partial host receipt: ' + json.dumps(receipt)[:600])
