@@ -519,6 +519,20 @@ target_include_directories(mhgp9_gpu_lanes_axial_four_bits_mutant_gate PRIVATE "
 target_compile_definitions(mhgp9_gpu_lanes_axial_four_bits_mutant_gate PRIVATE MHGP9_LANES_MUTANT_AXIAL_FOUR_BITS=1)
 mhgp9_gate(mhgp9_gpu_lanes_mutant_axial_four_bits 1 mhgp9_gpu_lanes_axial_four_bits_mutant_gate
            ARGS --n=2000 --k=3 EXPECT_PREFIX "cause=" LABELS "gate;gpu;mutant" TIMEOUT 600)
+# L15 (etape 3 des voies) : passe fusionnee q3 + q4 par graine dans une
+# tache T, comparee octet pour octet (registre compris) au chemin a une tache
+# par arete, qui garde les deux phases separees. Deux mutants tues (code 1) :
+# recensement fusionne arrete a K-2 (edge.records ou tasks.bytes) ; passe de
+# lentilles arretee avec le recensement (tasks.bytes).
+foreach(mutant IN ITEMS FUSED_Q3_AT_K_MINUS_2 FUSED_JOINT_STOP)
+  string(TOLOWER ${mutant} lower)
+  mhgp9_product_executable(mhgp9_gpu_lanes_${lower}_mutant_gate tests/gpu/lanes_port_gate.cpp)
+  target_link_libraries(mhgp9_gpu_lanes_${lower}_mutant_gate PRIVATE mhgp9_gen mhgp9_gpu)
+  target_include_directories(mhgp9_gpu_lanes_${lower}_mutant_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+  target_compile_definitions(mhgp9_gpu_lanes_${lower}_mutant_gate PRIVATE MHGP9_LANES_MUTANT_${mutant}=1)
+  mhgp9_gate(mhgp9_gpu_lanes_mutant_${lower} 1 mhgp9_gpu_lanes_${lower}_mutant_gate
+             ARGS --n=2000 --k=3 EXPECT_PREFIX "cause=" LABELS "gate;gpu;mutant" TIMEOUT 600)
+endforeach()
 # Mode --compare (revue S4b) : planchers exiges et seulement avec --compare,
 # --compare seulement sur un fichier, nuage refuse = 2 ; deux points (fixture
 # de l'auditeur) = comparaison vide sous plancher (3) ; tetraedre a racine sur
@@ -561,6 +575,14 @@ mhgp9_gate(mhgp9_gpu_lanes_mutant_prune_small_disk_fixture 1 mhgp9_gpu_lanes_pru
 # (2) ; sans CUDA, refus explicite (2), jamais un vert par vacuite.
 mhgp9_gate(mhgp9_gpu_lanes_port_device_without_compare 2 mhgp9_gpu_lanes_port_gate ARGS --device
            LABELS "gate;gpu" TIMEOUT 60)
+# --unfused (L15) : les taches sans passe fusionnee (mesure appariee sur G4) ;
+# seulement avec --compare (2) ; meme sortie que le chemin a une tache (0).
+mhgp9_gate(mhgp9_gpu_lanes_port_unfused_without_compare 2 mhgp9_gpu_lanes_port_gate ARGS --unfused
+           LABELS "gate;gpu" TIMEOUT 60)
+mhgp9_gate(mhgp9_gpu_lanes_port_compare_unfused 0 mhgp9_gpu_lanes_port_gate
+           ARGS --file=${mhgp9_lanes_fixtures}/bound_tetra.u32le --k=3 --workers=1 --compare --all-asked
+                --min-q4-seeds=1 --min-q4-records=1 --unfused
+           EXPECT_PREFIX "lanes_compare K=3" LABELS "gate;gpu" TIMEOUT 60)
 if(NOT MHGP9_ENABLE_CUDA)
   mhgp9_gate(mhgp9_gpu_lanes_port_device_absent 2 mhgp9_gpu_lanes_port_gate
              ARGS --file=${mhgp9_lanes_fixtures}/bound_tetra.u32le --k=3 --workers=1 --compare --all-asked

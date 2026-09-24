@@ -239,6 +239,11 @@ struct LanesInput {
   u64 task_budget = 0;
   u64 cover_capacity = 0;
   u64 staging_capacity = 0;
+  // L15 (lanes plan step 3): an edge with both lanes runs its q3 census and
+  // q4 lens pass in one scan per seed. The same output either way; false
+  // (the port gate's --unfused, for a paired device measurement) keeps the
+  // separate phases.
+  bool fused_pass = true;
 };
 
 inline constexpr u32 default_lanes_capacity = 1U << 16;
@@ -309,6 +314,9 @@ struct LanesOutput {
   // its scan; host: wall clock of each phase).
   std::uint64_t tasks = 0, max_task_steps = 0;
   double plan_ms = 0, task_ms = 0, compact_ms = 0;
+  // L15 (lanes plan step 3): the fused pass over all the call's tasks (a
+  // function of the input and B, equal between the host twin and the device).
+  LanesFusedWork fused{0, 0, 0, 0, 0};
 };
 LanesOutput run_lanes_batch(const LanesInput& input);
 // Reserves the lanes call's resident per-warp slabs (v9 H1), to be called

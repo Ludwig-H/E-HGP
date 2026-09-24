@@ -857,7 +857,8 @@ __global__ void __launch_bounds__(lanes_threads, 4) lanes_task_kernel(LanesIndex
     std::int32_t* cover_points, u32* cover_ranks, u32* cover_seeds, LanesTask* tasks,
     unsigned long long task_count, LaneRecord* slab_records, u32* events, LaneRecord* staging,
     unsigned long long staging_capacity, unsigned long long* next_task, unsigned long long* staged,
-    unsigned long long* max_steps, LanesTaskWork* slots, LanesTaskRecords* task_records, u32 warps) {
+    unsigned long long* max_steps, LanesTaskWork* slots, LanesTaskRecords* task_records,
+    unsigned long long* fused_counters, bool fused_pass, u32 warps) {
   const u32 warp = (blockIdx.x * blockDim.x + threadIdx.x) / 32;
   __shared__ Q4Work task4[lanes_warps_per_block];  // the current task's q4 work (leader lane)
   Q4Work& w4 = task4[threadIdx.x / 32];
@@ -866,6 +867,8 @@ __global__ void __launch_bounds__(lanes_threads, 4) lanes_task_kernel(LanesIndex
   const std::size_t e = event_capacity;
   const Q4Slab q4{events + 3 * e * warp, events + 3 * e * warp + e, events + 3 * e * warp + 2 * e, event_capacity};
   LaneRecord* records = slab_records + static_cast<std::size_t>(record_capacity) * warp;
+  LanesFusedWork fused{0, 0, 0, 0, 0};  // the leader's sums, one atomic per field at the end
+  unsigned long long warp_max_steps = 0;
   for (;;) {
     unsigned long long t = 0;
     if (group.leader()) t = atomicAdd(next_task, 1ULL);
@@ -876,28 +879,38 @@ __global__ void __launch_bounds__(lanes_threads, 4) lanes_task_kernel(LanesIndex
     const LanesSlab slab{nullptr, cover_points + 3 * plan.offset, cover_ranks + plan.offset,
                          cover_seeds + plan.offset, nullptr, records, capacity, record_capacity};
     const u64 steps = lanes_task(group, index, edge_a[task.edge], edge_b[task.edge], plan.lanes, kmax, slab,
-                                 plan.sites, task.first, task.last, q4, task, w4, slots[task.edge]);
+                                 plan.sites, task.first, task.last, q4, task, w4, slots[task.edge], fused, fused_pass);
     unsigned long long begin = 0;
     const u32 n = task.q3 + task.q4;
     if (task.fail_phase == 0 && n != 0) {
       if (group.leader()) begin = atomicAdd(staged, static_cast<unsigned long long>(n));
       begin = __shfl_sync(0xffffffffU, begin, 0);
       if (begin + n <= staging_capacity) {
-        // Word by word (16 u64 a record): coalesced, and no record held in registers.
+        // Word by word (16 u64 a record): coalesced, and no record held in
+        // registers; the task's r-th record at lanes_task_slab_index.
         static_assert(sizeof(LaneRecord) % sizeof(u64) == 0, "a record is a whole number of u64 words");
         constexpr u32 words = sizeof(LaneRecord) / sizeof(u64);
-        const u64* from = reinterpret_cast<const u64*>(records);
         u64* to = reinterpret_cast<u64*>(staging + begin);
-        group.for_each(n * words, [&](u32 i) { to[i] = from[i]; });
+        group.for_each(n * words, [&](u32 i) {
+          const u64* from = reinterpret_cast<const u64*>(records + lanes_task_slab_index(task, record_capacity, i / words));
+          to[i] = from[i % words];
+        });
       }
     }
     if (group.leader()) {
       task.begin = begin;
       tasks[t] = task;
       lanes_task_publish(task, t, slots[task.edge], task_records[t]);
-      atomicMax(max_steps, static_cast<unsigned long long>(steps));
+      warp_max_steps = warp_max_steps < steps ? steps : warp_max_steps;
     }
     group.sync();
+  }
+  if (group.leader()) {
+    if (warp_max_steps != 0) atomicMax(max_steps, warp_max_steps);
+    const unsigned long long values[5] = {fused.seeds, fused.chunks, fused.q3_chunks, fused.census_chunks,
+                                          fused.fallbacks};
+    for (int k = 0; k < 5; ++k)
+      if (values[k] != 0) atomicAdd(fused_counters + k, values[k]);
   }
 }
 
@@ -1122,7 +1135,7 @@ struct LanesResident {
     cover_points.reserve(3 * cover_sites);
     cover_ranks.reserve(cover_sites);
     cover_seeds.reserve(cover_sites);
-    counters.reserve(8);
+    counters.reserve(16);
   }
 };
 LanesResident& lanes_resident() {
@@ -1277,7 +1290,7 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
                           cudaMemcpyHostToDevice));
     MHGP9_CUDA(cudaMemcpy(res.edge_a.get(), input.edge_a, edges * sizeof(u32), cudaMemcpyHostToDevice));
     MHGP9_CUDA(cudaMemcpy(res.edge_b.get(), input.edge_b, edges * sizeof(u32), cudaMemcpyHostToDevice));
-    MHGP9_CUDA(cudaMemset(res.counters.get(), 0, 8 * sizeof(unsigned long long)));
+    MHGP9_CUDA(cudaMemset(res.counters.get(), 0, 16 * sizeof(unsigned long long)));
     if (input.edge_lanes != nullptr)
       MHGP9_CUDA(cudaMemcpy(res.lanes_in.get(), input.edge_lanes, edges, cudaMemcpyHostToDevice));
     MHGP9_CUDA(cudaEventRecord(e[1]));
@@ -1285,7 +1298,9 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
                                             static_cast<u32>(input.index.node_count), res.rank_points.get()},
                            res.rank_ids.get()};
     const int threads = lanes_threads;
-    unsigned long long* counter = res.counters.get();  // 0 next edge, 1 cover, 2 next task, 3 staged, 4 decided, 5 max steps
+    // 0 next edge, 1 cover, 2 next task, 3 staged, 4 decided, 5 max steps,
+    // 8..12 the fused pass (seeds, chunks, q3 chunks, census chunks, fallbacks).
+    unsigned long long* counter = res.counters.get();
     // ---- P, then the task counts' scan.
     lanes_plan_kernel<<<static_cast<int>((plan_warps * 32 + threads - 1) / threads), threads>>>(index,
         res.edge_a.get(), res.edge_b.get(), input.edge_lanes != nullptr ? res.lanes_in.get() : nullptr,
@@ -1314,7 +1329,8 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
           res.edge_a.get(), res.edge_b.get(), input.index.kmax, capacity, record_capacity, event_capacity,
           res.plans.get(), res.cover_points.get(), res.cover_ranks.get(), res.cover_seeds.get(), res.tasks.get(),
           task_count, res.slab_records.get(), res.events.get(), res.staging.get(), staging_capacity, counter + 2,
-          counter + 3, counter + 5, res.slots.get(), res.task_scan.get(), static_cast<u32>(task_warps));
+          counter + 3, counter + 5, res.slots.get(), res.task_scan.get(), counter + 8, input.fused_pass,
+          static_cast<u32>(task_warps));
       MHGP9_CUDA(cudaGetLastError());
     }
     MHGP9_CUDA(cudaEventRecord(e[3]));
@@ -1347,7 +1363,7 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     MHGP9_CUDA(cudaEventRecord(e[4]));
     std::vector<Q3Work> works(gather_warps);
     std::vector<Q4Work> works4(gather_warps);
-    unsigned long long counts[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    unsigned long long counts[16] = {};
     MHGP9_CUDA(cudaMemcpy(counts, counter, sizeof(counts), cudaMemcpyDeviceToHost));
     MHGP9_CUDA(cudaMemcpy(out.status.data(), res.out_status.get(), edges, cudaMemcpyDeviceToHost));
     MHGP9_CUDA(cudaMemcpy(out.record_begin.data(), res.out_begin.get(), edges * sizeof(u32), cudaMemcpyDeviceToHost));
@@ -1373,6 +1389,7 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     out.warps = static_cast<u32>(task_warps);
     out.tasks = task_count;
     out.max_task_steps = counts[5];
+    out.fused = LanesFusedWork{counts[8], counts[9], counts[10], counts[11], counts[12]};
     out.upload_ms = elapsed(e[0], e[1]);
     out.plan_ms = elapsed(e[1], e[2]);
     out.task_ms = elapsed(e[2], e[3]);

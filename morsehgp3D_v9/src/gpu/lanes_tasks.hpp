@@ -75,9 +75,34 @@ MHGP9_HD inline u32 lanes_task_count(u32 sites, u32 seeds, u64 budget) {
 struct LanesTask {
   u32 edge, first, last;
   u32 q3, q4;
-  u8 fail_phase, fail_kind, unused0, unused1;
+  u8 fail_phase, fail_kind, layout, unused1;  // layout: 1 when the fused pass placed the records (L15)
   u64 begin;
 };
+
+// The slab index of a task's r-th record in staging order (its q3 records,
+// then its q4 records): the fused pass (L15) keeps the q3 records at the top
+// of the slab, last to first, and the q4 records from the bottom.
+MHGP9_HD inline u32 lanes_task_slab_index(const LanesTask& task, u32 record_capacity, u32 r) {
+  if (task.layout == 0) return r;
+  return r < task.q3 ? record_capacity - 1 - r : r - task.q3;
+}
+
+// L15 counters of the call, summed over ALL its tasks (order-free): seeds
+// run by the fused pass, the chunks it read (each read once for both
+// lanes), those read by the census alone after the lens pass had stopped,
+// the chunks the census consumed (what a separate census would have read:
+// census_chunks - q3_chunks were absorbed by the lens pass), and the tasks
+// rerun unfused because their records did not fit the slab.
+struct LanesFusedWork {
+  u64 seeds, chunks, q3_chunks, census_chunks, fallbacks;
+};
+MHGP9_HD inline void add_fused(LanesFusedWork& to, const LanesFusedWork& from) {
+  to.seeds += from.seeds;
+  to.chunks += from.chunks;
+  to.q3_chunks += from.q3_chunks;
+  to.census_chunks += from.census_chunks;
+  to.fallbacks += from.fallbacks;
+}
 
 // P's answer for one edge: the prologue's status (decided: the tasks run),
 // the cover's place in the arena, its sites, seeds and tasks.
@@ -221,6 +246,116 @@ MHGP9_HD u32 lanes_plan_order(const Group& group, const LanesIndex& index, u32 a
 
 // ---- T ---------------------------------------------------------------------
 
+// L15 (lanes plan step 3, 24 septembre 2026): the seeds [first, last) of an
+// edge with BOTH lanes in one scan per seed. The census of the seed's q3
+// ball and the lens pass of its q4 family read the same 32-site chunks in
+// the same order; P is computed once per site (the lens vote keeps the sign
+// of P = f(0) per lane, LaneSigns). Each scan stops exactly where it would
+// alone (the census at its (K-1)-th site of negative power, the pass at
+// certification) and the other goes on, so decisions, records and counters
+// are those of the separate phases (edge_lanes' q3 census then q4 seeds).
+// Records: q3 at the top of the slab (last to first), q4 from the bottom;
+// the task keeps its sequential failure semantics (a q3 fault stops the
+// task with no q4 record; a q4 failure closes the q4 lane, the census goes
+// on to the end of the range). If a record would not fit the slab the
+// outcome is `fallback`: nothing is published and the caller reruns the
+// task unfused (the separate phases' own slab rule then decides).
+enum class LanesFused : u8 { done, q3_failed, fallback };
+
+template <class Group>
+MHGP9_HD LanesFused lanes_task_fused(const Group& group, const LanesIndex& index, u32 a_rank, u32 b_rank,
+                                     unsigned kmax, const LanesSlab& slab, u32 sites, u32 first, u32 last,
+                                     const Q4Slab& q4, LanesTask& task, Q4Work& w4, EdgeQ3Work& census,
+                                     LanesFusedWork& fused) {
+  const std::int32_t* a = index.tree.rank_points + 3 * static_cast<std::size_t>(a_rank);
+  const std::int32_t* b = index.tree.rank_points + 3 * static_cast<std::size_t>(b_rank);
+  const u32 id_a = index.rank_ids[a_rank], id_b = index.rank_ids[b_rank];
+  const u32 capacity = slab.record_capacity;
+#if defined(MHGP9_LANES_MUTANT_FUSED_Q3_AT_K_MINUS_2)
+  const u32 threshold3 = kmax - 2;  // mutant: the fused census stops one interior site early
+#else
+  const u32 threshold3 = kmax - 1;
+#endif
+  const u32 threshold4 = kmax - 2;
+  u32 c3 = 0, c4 = 0;
+  bool q4_open = true;
+  u32 seeds = 0, chunks = 0, q3_chunks = 0, census_chunks = 0;  // this task's L15 counters
+  for (u32 i = first; i < last; ++i) {
+    const u32 seed = slab.seeds[i];
+    const std::int32_t* x = slab.points + 3 * static_cast<std::size_t>(seed);
+    Q4Pass p;  // p.f.form: the seed's q3 form, shared by both lanes
+    if (!q3_form(a, b, x, p.f.form)) {  // a q3 fault comes before every q4 seed
+      task.q3 = c3;
+      task.q4 = 0;
+      task.fail_phase = 2;
+      task.fail_kind = static_cast<u8>(CertificateStatus::fault);
+      return LanesFused::q3_failed;
+    }
+    bool pass = q4_open;
+    if (pass && !q4_pass_begin(a, b, x, p)) {  // a q4 fault closes the q4 lane
+      q4_open = pass = false;
+      task.q4 = c4;
+      task.fail_phase = 4;
+      task.fail_kind = static_cast<u8>(CertificateStatus::fault);
+    }
+    Q3Census c{0, 0, 0, 0, 0, false};
+    LaneSigns signs;
+    for (u32 base = 0; base < sites; base += Group::size) {
+      const bool lens = pass && !p.certified;
+#if defined(MHGP9_LANES_MUTANT_FUSED_JOINT_STOP)
+      if (c.rejected) break;  // mutant: the lens pass stops with the census
+#endif
+      if (c.rejected && !lens) break;
+      ++chunks;
+      u32 inside = 0, zero = 0;
+      if (lens) {
+        q4_pass_chunk(group, index, a, slab, sites, threshold4, q4, base, p, signs);
+        if (!c.rejected) group.ballot2(base, sites, [&](u32 t) { return signs.get(t - base); }, inside, zero);
+      } else {
+        ++q3_chunks;
+        group.ballot2(base, sites, [&](u32 t) -> u32 {
+          const i128 power = q3_power(p.f.form, a, slab.points + 3 * static_cast<std::size_t>(t));
+          return (power < 0 ? 1U : 0U) | (power == 0 ? 2U : 0U);
+        }, inside, zero);
+      }
+      if (!c.rejected) {
+        ++census_chunks;
+        q3_census_chunk(group, index, slab, sites, threshold3, base, inside, zero, c);
+      }
+    }
+    ++seeds;
+    q3_census_count(c, census);
+    if (c.rejected) {
+      ++census.depth_rejections;
+    } else {
+      if (c3 + c4 == capacity) return LanesFused::fallback;
+      if (group.leader())
+        q3_record(p.f.form, a, id_a, id_b, index.rank_ids[slab.ranks[seed]], c, slab.records[capacity - 1 - c3]);
+      ++c3;
+      ++census.emitted;
+      census.shell_ids += c.shell;
+    }
+    if (pass) {
+      const LanesSlab below{slab.ranges, slab.points, slab.ranks, slab.seeds, slab.scratch, slab.records,
+                            slab.capacity, capacity - c3};
+      const auto status = q4_seed_finish(group, index, a, b, id_a, id_b, seed, below, sites, kmax, q4, p, c4, w4);
+      if (status != CertificateStatus::decided) {
+        if (c4 == capacity - c3) return LanesFused::fallback;  // the slab is full: the unfused rule decides
+        q4_open = false;
+        task.q4 = c4;
+        task.fail_phase = 4;
+        task.fail_kind = static_cast<u8>(status);
+      }
+    }
+  }
+  task.q3 = c3;
+  if (q4_open) task.q4 = c4;
+  task.layout = 1;
+  group.sync();  // the leader's records
+  if (group.leader()) add_fused(fused, LanesFusedWork{seeds, chunks, q3_chunks, census_chunks, 0});
+  return LanesFused::done;
+}
+
 // T: the seeds [first, last) of an edge whose cover and seeds are at
 // slab.points / ranks / seeds; the records (q3 of the range, then q4 of the
 // range, each in seed order) at slab.records[0, q3 + q4). A q3 failure stops
@@ -232,13 +367,38 @@ MHGP9_HD u32 lanes_plan_order(const Group& group, const LanesIndex& index, u32 a
 template <class Group>
 MHGP9_HD u64 lanes_task(const Group& group, const LanesIndex& index, u32 a_rank, u32 b_rank, u8 lanes,
                         unsigned kmax, const LanesSlab& slab, u32 sites, u32 first, u32 last, const Q4Slab& q4,
-                        LanesTask& task, Q4Work& w4, LanesTaskWork& slot) {
+                        LanesTask& task, Q4Work& w4, LanesTaskWork& slot, LanesFusedWork& fused,
+                        bool fused_pass = true) {
   task.q3 = task.q4 = 0;
-  task.fail_phase = task.fail_kind = 0;
+  task.fail_phase = task.fail_kind = task.layout = 0;
   if (group.leader()) w4 = Q4Work{};
   group.sync();
   u32 count = 0;
   u64 steps = 0;
+  if (fused_pass && lanes == 6) {  // L15: both lanes in one scan per seed
+    EdgeQ3Work census{};
+    const LanesFused outcome =
+        lanes_task_fused(group, index, a_rank, b_rank, kmax, slab, sites, first, last, q4, task, w4, census, fused);
+    if (outcome != LanesFused::fallback) {
+      steps = lanes_census_steps(census);
+      if (group.leader()) lanes_add_census_work(slot, census);
+      if (outcome == LanesFused::done) {
+        group.sync();  // the leader's q4 work
+        if (group.leader()) lanes_add_q4_work(slot, w4);
+        steps += lanes_q4_steps(w4);
+      }
+      group.sync();
+      return steps;
+    }
+    // The records did not fit: the task again, unfused, from a clean state.
+    task.q3 = task.q4 = 0;
+    task.fail_phase = task.fail_kind = task.layout = 0;
+    if (group.leader()) {
+      w4 = Q4Work{};
+      ++fused.fallbacks;
+    }
+    group.sync();
+  }
   if ((lanes & 2U) != 0) {
     EdgeQ3Work census{};
     const auto status = q3_census_range(group, index, a_rank, b_rank, kmax, slab, sites, first, last, count, census);

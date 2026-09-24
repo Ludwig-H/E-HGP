@@ -44,7 +44,7 @@
 //   mhgp9_gpu_lanes_port_gate [--n=2000] [--k=2,3,5,10]
 //   mhgp9_gpu_lanes_port_gate --file=nuage.u32le --k=5 [--workers=8] [--compare
 //     [--min-q3-records=N] [--min-q4-seeds=N] [--min-q4-records=N] [--all-asked]
-//     [--device]]
+//     [--device] [--unfused]]
 //     (statistiques de travail par arete sur un nuage fichier ; avec
 //     --compare, les voies q3 et q4 de chaque arete certifiee comparees a
 //     celles du moteur : code 1 au premier ecart. Les exclusions sont
@@ -56,7 +56,8 @@
 //     nuage refuse par prepare_cloud. S4b taches : le jumeau a taches est
 //     compare octet pour octet au chemin a une tache par arete (B = 512 et
 //     B = infini) ; avec --device (session G4), l'appel de l'appareil aussi,
-//     code 2 sans appareil.)
+//     code 2 sans appareil ; --unfused (L15) : taches sans passe fusionnee,
+//     meme sortie, pour une mesure appariee de l'appareil.)
 //
 // Code 0 conforme, 1 desaccord ou mutant survivant (`cause=`), 2 argument,
 // 3 plancher.
@@ -510,6 +511,7 @@ int replay_fixtures(unsigned long long& cases) {
 struct TaskTally {
   unsigned long long runs = 0, tasks_one = 0, tasks_default = 0, tasks_single = 0, extra_tasks = 0;
   unsigned long long max_steps_default = 0, max_steps_single = 0;
+  unsigned long long fused_seeds = 0, fused_q3_chunks = 0, fused_fallbacks = 0;  // L15
 };
 
 std::string budget_name(gpu::u64 budget) {
@@ -530,22 +532,31 @@ int tasks_against_reference(const gpu::LanesInput& in, std::size_t workers, cons
   struct Run {
     gpu::u64 budget;
     std::size_t threads, window;
+    bool fused;
   };
-  // Threads 1, 3, 8 and the gate's own count; windows 97 and the default.
-  const Run runs[] = {{1, workers, gpu::lanes_host_window},
-                      {0, 1, 97},
-                      {0, 8, gpu::lanes_host_window},
-                      {gpu::single_task_budget, 3, gpu::lanes_host_window}};
+  // Threads 1, 3, 8 and the gate's own count; windows 97 and the default;
+  // the default B without the fused pass (L15: the same bytes either way).
+  const Run runs[] = {{1, workers, gpu::lanes_host_window, true},
+                      {0, 1, 97, true},
+                      {0, 8, gpu::lanes_host_window, true},
+                      {gpu::single_task_budget, 3, gpu::lanes_host_window, true},
+                      {0, workers, gpu::lanes_host_window, false}};
   unsigned long long tasks[3] = {0, 0, 0};
   for (const auto& run : runs) {
     auto x = in;
     x.task_budget = run.budget;
+    x.fused_pass = run.fused;
     const auto out = gpu::run_lanes_tasks_host(x, run.threads, run.window);
     std::string why;
     if (!same_output(out, reference, why))
       return fail("tasks.bytes " + name + " B=" + budget_name(run.budget) + " threads=" + std::to_string(run.threads) +
-                  " window=" + std::to_string(run.window) + " " + why);
+                  " window=" + std::to_string(run.window) + (run.fused ? "" : " unfused") + " " + why);
+    if (!run.fused && (out.fused.seeds != 0 || out.fused.chunks != 0 || out.fused.fallbacks != 0))
+      return fail("tasks.unfused_counters " + name);
     ++tally.runs;
+    tally.fused_seeds += out.fused.seeds;
+    tally.fused_q3_chunks += out.fused.q3_chunks;
+    tally.fused_fallbacks += out.fused.fallbacks;
     const int slot = run.budget == 1 ? 0 : (run.budget == 0 ? 1 : 2);
     if (slot == 1 && tasks[1] != 0 && tasks[1] != out.tasks) return fail("tasks.count_depends_on_threads " + name);
     tasks[slot] = out.tasks;
@@ -611,6 +622,7 @@ struct CompareFloors {
   unsigned long long q3_records = 0, q4_seeds = 0, q4_records = 0;
   bool all_asked = false;
   bool device = false;  // S4b tasks: also the device call, byte for byte (G4)
+  bool unfused = false;  // L15: the task runs (host twin, device) without the fused pass
 };
 
 int file_compare(const gen::Q2CensusIndexPtr& index, const Certified& certified, unsigned kmax,
@@ -679,6 +691,7 @@ int file_compare(const gen::Q2CensusIndexPtr& index, const Certified& certified,
   // then B = infinity) against the single-task path, byte for byte; the
   // largest declared work of one task in both.
   unsigned long long tasks = 0, tasks_single = 0, max_steps = 0, max_steps_single = 0;
+  gpu::LanesFusedWork fused{0, 0, 0, 0, 0};
   {
     std::vector<gpu::u32> ta, tb;
     std::vector<gpu::u8> tl;
@@ -692,6 +705,7 @@ int file_compare(const gen::Q2CensusIndexPtr& index, const Certified& certified,
     }
     auto in = flat.input(kmax, ta, tb);
     in.edge_lanes = tl.data();
+    in.fused_pass = !floors.unfused;
     const auto reference = single_task_batch(in, workers);
     for (const gpu::u64 budget : {gpu::u64{0}, gpu::single_task_budget}) {
       auto x = in;
@@ -701,11 +715,14 @@ int file_compare(const gen::Q2CensusIndexPtr& index, const Certified& certified,
       if (!same_output(out, reference, why)) return fail("compare.tasks B=" + budget_name(budget) + " " + why);
       (budget == 0 ? tasks : tasks_single) = out.tasks;
       (budget == 0 ? max_steps : max_steps_single) = out.max_task_steps;
+      if (budget == 0) fused = out.fused;
     }
     std::printf("lanes_tasks_compare K=%u edges=%zu records=%zu deferred=%llu tasks=%llu tasks_single=%llu "
-                "max_task_steps=%llu max_steps_single=%llu identical=1\n",
+                "max_task_steps=%llu max_steps_single=%llu fused_seeds=%llu fused_chunks=%llu fused_q3_chunks=%llu "
+                "fused_census_chunks=%llu fused_fallbacks=%llu identical=1\n",
                 kmax, ta.size(), reference.records.size(), static_cast<unsigned long long>(reference.deferred), tasks,
-                tasks_single, max_steps, max_steps_single);
+                tasks_single, max_steps, max_steps_single, fused.seeds, fused.chunks, fused.q3_chunks,
+                fused.census_chunks, fused.fallbacks);
     const auto& r3 = reference.work;
     std::printf("q3_ledger cover_sites=%llu pruned_sites=%llu seed_tests=%llu seeds=%llu census_point_tests=%llu "
                 "census_inside_sites=%llu census_outside_sites=%llu depth_rejections=%llu emitted=%llu\n",
@@ -723,6 +740,10 @@ int file_compare(const gen::Q2CensusIndexPtr& index, const Certified& certified,
       std::string why;
       if (!same_output(device, reference, why)) return fail("compare.device " + why);
       if (device.tasks != tasks || device.max_task_steps != max_steps) return fail("compare.device_tasks");
+      if (device.fused.seeds != fused.seeds || device.fused.chunks != fused.chunks ||
+          device.fused.q3_chunks != fused.q3_chunks || device.fused.census_chunks != fused.census_chunks ||
+          device.fused.fallbacks != fused.fallbacks)
+        return fail("compare.device_fused");
       std::printf("lanes_device_compare K=%u device=%s tasks=%llu max_task_steps=%llu warps=%u kernel_ms=%.3f "
                   "plan_ms=%.3f task_ms=%.3f compact_ms=%.3f total_ms=%.3f identical=1\n",
                   kmax, device.device.c_str(), static_cast<unsigned long long>(device.tasks),
@@ -859,6 +880,8 @@ int main(int argc, char** argv) {
       floors.all_asked = true;
     } else if (arg == "--device") {
       floors.device = true;
+    } else if (arg == "--unfused") {
+      floors.unfused = true;
     } else {
       return 2;
     }
@@ -870,7 +893,7 @@ int main(int argc, char** argv) {
   // Floors only with --compare, --compare only on a file and never without
   // a floor (a comparison of nothing would be equal).
   const bool any_floor = floors.q3_records != 0 || floors.q4_seeds != 0 || floors.q4_records != 0;
-  if (!compare && (any_floor || floors.all_asked || floors.device)) return 2;
+  if (!compare && (any_floor || floors.all_asked || floors.device || floors.unfused)) return 2;
   if (compare && (file.empty() || !any_floor)) return 2;
   if (!file.empty()) {
     if (ks.size() != 1) return 2;
@@ -1232,6 +1255,7 @@ int main(int argc, char** argv) {
               if (!same_output(out, ref, why))
                 return fail("tasks.small_bytes " + where_name + " " + v.name + " B=" + budget_name(budget) + " " + why);
               ++tally.runs;
+              tally.fused_fallbacks += out.fused.fallbacks;
             }
           }
           // The arenas: exactly full is accepted; one site short of the cover
@@ -1519,14 +1543,15 @@ int main(int argc, char** argv) {
   std::printf("lanes_tasks runs=%llu tasks_b1=%llu tasks_default=%llu tasks_single=%llu extra_tasks=%llu "
               "max_steps_default=%llu max_steps_single=%llu deferred_cover=%llu deferred_records=%llu "
               "deferred_events=%llu deferred_arena=%llu refusals=%llu replay_cases=%llu pruned_sites=%llu "
-              "cover_sites=%llu\n",
+              "cover_sites=%llu fused_seeds=%llu fused_q3_chunks=%llu fused_fallbacks=%llu\n",
               tally.runs, tally.tasks_one, tally.tasks_default, tally.tasks_single, tally.extra_tasks,
               tally.max_steps_default, tally.max_steps_single, tasks_deferred_cover, tasks_deferred_records,
               tasks_deferred_events, tasks_deferred_arena, tasks_refusals, replay_cases, pruned_sites,
-              pruned_cover_sites);
+              pruned_cover_sites, tally.fused_seeds, tally.fused_q3_chunks, tally.fused_fallbacks);
   if (tally.runs == 0 || tally.extra_tasks == 0 || tally.tasks_one <= tally.tasks_default ||
       tasks_deferred_cover == 0 || tasks_deferred_records == 0 || (any_q4 && tasks_deferred_events == 0) ||
       tasks_deferred_arena == 0 || tasks_refusals == 0 || replay_cases != 20015 || pruned_sites == 0 ||
+      (any_q4 && (tally.fused_seeds == 0 || tally.fused_q3_chunks == 0 || tally.fused_fallbacks == 0)) ||
       tally.max_steps_default > tally.max_steps_single)
     return 3;
   if (edges == 0 || q3_only == 0 || rejections == 0 || emitted == 0 || wide_shells == 0 || deferred == 0 ||

@@ -92,14 +92,36 @@ inline constexpr u32 q4_decided_bit = 1U << 19;
 inline constexpr u32 q4_group_bit = 1U << 20;
 inline constexpr u32 q4_valid_bit = 1U << 21;
 
-// The seed's family: d = b - a, u = x - a, n = d x u, S(z) = n.(z - a),
-// P(z) = G|z-a|^2 - W.(z - a) (q3_form), and the grid g[0..8] of L2.
+MHGP9_HD inline void cross3(const i64 p[3], const i64 q[3], i64 out[3]) {
+  out[0] = p[1] * q[2] - p[2] * q[1];
+  out[1] = p[2] * q[0] - p[0] * q[2];
+  out[2] = p[0] * q[1] - p[1] * q[0];
+}
+
+// The seed's family as the lens pass reads it: n = d x u (d = b - a,
+// u = x - a), S(z) = n.(z - a), P(z) = G|z-a|^2 - W.(z - a) (q3_form), and
+// the grid g[0..8] of L2. The survivor stage adds the frame (d, u and their
+// squares), recomputed then: it is not live through the pass (L15: the
+// fused pass holds the census state too).
 struct Q4Family {
   Q3Form form;
-  i64 d[3], u[3], n[3];
-  i64 dd, uu;
+  i64 n[3];
   i64 grid[q4_buckets + 1];
 };
+struct Q4Frame {
+  i64 d[3], u[3];
+  i64 dd, uu;
+};
+
+MHGP9_HD inline void q4_frame(const std::int32_t a[3], const std::int32_t b[3], const std::int32_t x[3], Q4Frame& fr) {
+  fr.dd = fr.uu = 0;
+  for (int k = 0; k < 3; ++k) {
+    fr.d[k] = static_cast<i64>(b[k]) - a[k];
+    fr.u[k] = static_cast<i64>(x[k]) - a[k];
+    fr.dd += fr.d[k] * fr.d[k];
+    fr.uu += fr.u[k] * fr.u[k];
+  }
+}
 
 MHGP9_HD inline i64 side_of(const Q4Family& f, const std::int32_t a[3], const std::int32_t z[3]) {
   i64 s = 0;
@@ -113,20 +135,15 @@ MHGP9_HD inline i64 side_of(const Q4Family& f, const std::int32_t a[3], const st
 MHGP9_HD inline bool q4_family(const std::int32_t a[3], const std::int32_t b[3], const std::int32_t x[3],
                                Q4Family& f) {
   if (!q3_form(a, b, x, f.form)) return false;
+  Q4Frame fr;
+  q4_frame(a, b, x, fr);
   i64 ff = 0;
-  f.dd = f.uu = 0;
   for (int k = 0; k < 3; ++k) {
-    f.d[k] = static_cast<i64>(b[k]) - a[k];
-    f.u[k] = static_cast<i64>(x[k]) - a[k];
     const i64 e = static_cast<i64>(x[k]) - b[k];
-    f.dd += f.d[k] * f.d[k];
-    f.uu += f.u[k] * f.u[k];
     ff += e * e;
   }
-  f.n[0] = f.d[1] * f.u[2] - f.d[2] * f.u[1];
-  f.n[1] = f.d[2] * f.u[0] - f.d[0] * f.u[2];
-  f.n[2] = f.d[0] * f.u[1] - f.d[1] * f.u[0];
-  const i128 q = static_cast<i128>(f.dd) * (3 * f.form.gram - 2 * static_cast<i128>(f.uu) * ff);
+  cross3(fr.d, fr.u, f.n);
+  const i128 q = static_cast<i128>(fr.dd) * (3 * f.form.gram - 2 * static_cast<i128>(fr.uu) * ff);
   if (q <= 0) return false;
   u64 m = 0;
   for (int bit = 59; bit >= 0; --bit) {
@@ -149,11 +166,18 @@ MHGP9_HD inline void q4_signs(const Q4Family& f, const std::int32_t a[3], const 
                               u32& neg, u32& pos) {
   side = side_of(f, a, z);
   const i128 power = q3_power(f.form, a, z);
-  neg = pos = 0;
-  for (u32 k = 0; k <= q4_buckets; ++k) {
-    const i128 value = power - static_cast<i128>(f.grid[k]) * side;
-    if (value < 0) neg |= 1U << k;
-    if (value > 0) pos |= 1U << k;
+  // The grid is symmetric (g[half - i] = -g[half + i], g[half] = 0): four
+  // products give the nine values P - g_k S exactly.
+  constexpr u32 half = q4_buckets / 2;
+  neg = (power < 0 ? 1U : 0U) << half;
+  pos = (power > 0 ? 1U : 0U) << half;
+  for (u32 i = 1; i <= half; ++i) {
+    const i128 product = static_cast<i128>(f.grid[half + i]) * side;
+    const i128 above = power - product, below = power + product;
+    if (above < 0) neg |= 1U << (half + i);
+    if (above > 0) pos |= 1U << (half + i);
+    if (below < 0) neg |= 1U << (half - i);
+    if (below > 0) pos |= 1U << (half - i);
   }
 }
 
@@ -170,23 +194,18 @@ struct Q4Pivot {
   i128 num[3];
 };
 
-MHGP9_HD inline void cross3(const i64 p[3], const i64 q[3], i64 out[3]) {
-  out[0] = p[1] * q[2] - p[2] * q[1];
-  out[1] = p[2] * q[0] - p[0] * q[2];
-  out[2] = p[0] * q[1] - p[1] * q[0];
-}
-
-MHGP9_HD inline Q4Pivot q4_pivot(const Q4Family& f, const std::int32_t a[3], const std::int32_t w[3]) {
+MHGP9_HD inline Q4Pivot q4_pivot(const Q4Family& f, const Q4Frame& fr, const std::int32_t a[3],
+                                  const std::int32_t w[3]) {
   i64 v[3];
   for (int k = 0; k < 3; ++k) v[k] = static_cast<i64>(w[k]) - a[k];
   i64 c0[3], c1[3];
-  cross3(f.u, v, c0);
-  cross3(v, f.d, c1);
+  cross3(fr.u, v, c0);
+  cross3(v, fr.d, c1);
   const i64 vv = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
   Q4Pivot p{};
-  p.det = static_cast<i128>(f.d[0]) * c0[0] + static_cast<i128>(f.d[1]) * c0[1] + static_cast<i128>(f.d[2]) * c0[2];
+  p.det = static_cast<i128>(fr.d[0]) * c0[0] + static_cast<i128>(fr.d[1]) * c0[1] + static_cast<i128>(fr.d[2]) * c0[2];
   for (int k = 0; k < 3; ++k)
-    p.num[k] = static_cast<i128>(f.dd) * c0[k] + static_cast<i128>(f.uu) * c1[k] + static_cast<i128>(vv) * f.n[k];
+    p.num[k] = static_cast<i128>(fr.dd) * c0[k] + static_cast<i128>(fr.uu) * c1[k] + static_cast<i128>(vv) * f.n[k];
   return p;
 }
 
@@ -203,14 +222,14 @@ MHGP9_HD inline int q4_compare(const Q4Pivot& c, const std::int32_t a[3], const 
 
 // make_q4's positivity: barycentric weights num.cof_r > 0 and 2det^2 - sum > 0
 // (each weight <= 108M^6 < 2^117).
-MHGP9_HD inline bool q4_positive(const Q4Family& f, const std::int32_t a[3], const std::int32_t y[3],
+MHGP9_HD inline bool q4_positive(const Q4Frame& fr, const std::int32_t a[3], const std::int32_t y[3],
                                  const Q4Pivot& p) {
   i64 v[3];
   for (int k = 0; k < 3; ++k) v[k] = static_cast<i64>(y[k]) - a[k];
   i64 cof[3][3];
-  cross3(f.u, v, cof[0]);
-  cross3(v, f.d, cof[1]);
-  cross3(f.d, f.u, cof[2]);
+  cross3(fr.u, v, cof[0]);
+  cross3(v, fr.d, cof[1]);
+  cross3(fr.d, fr.u, cof[2]);
   i128 remaining = 2 * p.det * p.det;
   for (int r = 0; r < 3; ++r) {
     const i128 weight = p.num[0] * cof[r][0] + p.num[1] * cof[r][1] + p.num[2] * cof[r][2];
@@ -239,6 +258,110 @@ MHGP9_HD inline i64 dist2(const std::int32_t p[3], const std::int32_t q[3]) {
   return s;
 }
 
+// The lens pass of one seed, chunk by chunk (S4b); since L15 the task runs
+// it fused with the census of the seed's q3 ball.
+struct Q4Pass {
+  Q4Family f;
+  u32 lens[q4_buckets];
+  u32 buffered, chunks, shell_count;
+  u64 shell_sum, shell_xor;
+  bool certified, overflow;
+};
+
+// The lane vote of the lens pass: packed lens counts, event and constant
+// shell flags.
+struct Q4Vote {
+  u32 w0, w1;
+  bool first, second;
+};
+
+// Per lane of the current chunk, the sign bits of P = f(0) (bit 0: P < 0,
+// bit 1: P = 0), which the fused census reads instead of recomputing the
+// power: a device lane keeps its own, the host group all 32. NoLaneSigns
+// drops them (the q4 lane alone).
+struct NoLaneSigns {
+  MHGP9_HD void set(u32, u32) const {}
+};
+struct LaneSigns {
+#if defined(__CUDA_ARCH__)
+  u32 value = 0;
+  MHGP9_HD void set(u32, u32 v) { value = v; }
+  MHGP9_HD u32 get(u32) const { return value; }
+#else
+  u32 value[32] = {};
+  MHGP9_HD void set(u32 lane, u32 v) { value[lane] = v; }
+  MHGP9_HD u32 get(u32 lane) const { return value[lane]; }
+#endif
+};
+
+// The seed's family (false: a fault of the port, never a decision) and an
+// empty pass.
+MHGP9_HD inline bool q4_pass_begin(const std::int32_t a[3], const std::int32_t b[3], const std::int32_t x[3],
+                                   Q4Pass& p) {
+  for (u32 j = 0; j < q4_buckets; ++j) p.lens[j] = 0;
+  p.buffered = p.chunks = p.shell_count = 0;
+  p.shell_sum = p.shell_xor = 0;
+  p.certified = p.overflow = false;
+  return q4_family(a, b, x, p.f);
+}
+
+// One chunk of the lens pass at `base`: the lens counts, the constant shell,
+// the events of the buckets live at the chunk's start buffered (an overflow
+// is remembered, the pass goes on), certification after the chunk.
+template <class Group, class Signs>
+MHGP9_HD void q4_pass_chunk(const Group& group, const LanesIndex& index, const std::int32_t* a, const LanesSlab& slab,
+                            u32 sites, u32 threshold, const Q4Slab& q4, u32 base, Q4Pass& p, Signs& signs) {
+  ++p.chunks;
+  u32 live = 0;
+  for (u32 j = 0; j < q4_buckets; ++j) live |= (p.lens[j] < threshold ? 1U : 0U) << j;
+  u32 w0 = 0, w1 = 0, events = 0, zeros = 0;
+  group.vote(base, sites, [&](u32 s) -> Q4Vote {
+    i64 side = 0;
+    u32 neg = 0, pos = 0;
+    q4_signs(p.f, a, slab.points + 3 * static_cast<std::size_t>(s), side, neg, pos);
+    constexpr u32 middle = q4_buckets / 2;  // g = 0: f = P
+    signs.set(s - base, ((neg >> middle) & 1U) | ((((neg | pos) >> middle) & 1U) == 0 ? 2U : 0U));
+    Q4Vote v{0, 0, false, side == 0 && ((neg | pos) & (1U << middle)) == 0};
+    for (u32 j = 0; j < q4_buckets; ++j) {
+      if (q4_lens(neg, j)) {
+        if (j < 4) v.w0 += 1U << (8 * j);
+        else v.w1 += 1U << (8 * (j - 4));
+      } else if (((live >> j) & 1U) != 0 && q4_event(side, neg, pos, j)) {
+        v.first = true;
+      }
+    }
+    return v;
+  }, w0, w1, events, zeros);
+  for (u32 j = 0; j < 4; ++j) {
+    p.lens[j] += (w0 >> (8 * j)) & 0xffU;
+    p.lens[j + 4] += (w1 >> (8 * j)) & 0xffU;
+  }
+  if (zeros != 0) {
+    p.shell_count += popcount32(zeros);
+    group.fingerprint(zeros, [&](u32 lane) { return mix64(index.rank_ids[slab.ranks[base + lane]]); }, p.shell_sum,
+                      p.shell_xor);
+  }
+  if (events != 0 && !p.overflow) {
+    const u32 add = popcount32(events);
+    if (add > q4.capacity - p.buffered) {
+      p.overflow = true;
+    } else {
+      const u32 at = p.buffered;
+      group.for_set(events, [&](u32 lane, u32 rank) { q4.positions[at + rank] = base + lane; });
+      p.buffered += add;
+    }
+  }
+  bool all = true;
+  for (u32 j = 0; j < q4_buckets; ++j) all = all && p.lens[j] >= threshold;
+  p.certified = all;
+}
+
+template <class Group>
+MHGP9_HD CertificateStatus q4_seed_finish(const Group& group, const LanesIndex& index, const std::int32_t* a,
+                                          const std::int32_t* b, u32 id_a, u32 id_b, u32 seed, const LanesSlab& slab,
+                                          u32 sites, unsigned kmax, const Q4Slab& q4, Q4Pass& p, u32& record_count,
+                                          Q4Work& w);
+
 // The q4 lane of one seed (scan position `seed`) of an edge whose sites are
 // slab.points / slab.ranks[0, sites) in scan order. Appends its records at
 // slab.records[record_count, ...). Uniform result.
@@ -246,80 +369,48 @@ template <class Group>
 MHGP9_HD CertificateStatus q4_seed(const Group& group, const LanesIndex& index, const std::int32_t* a,
                                    const std::int32_t* b, u32 id_a, u32 id_b, u32 seed, const LanesSlab& slab,
                                    u32 sites, unsigned kmax, const Q4Slab& q4, u32& record_count, Q4Work& w) {
+  Q4Pass p;
+  if (!q4_pass_begin(a, b, slab.points + 3 * static_cast<std::size_t>(seed), p))
+    return CertificateStatus::fault;  // an owned acute seed has its family
+  NoLaneSigns none;
+  for (u32 base = 0; base < sites && !p.certified; base += Group::size)
+    q4_pass_chunk(group, index, a, slab, sites, kmax - 2, q4, base, p, none);
+  return q4_seed_finish(group, index, a, b, id_a, id_b, seed, slab, sites, kmax, q4, p, record_count, w);
+}
+
+// After the pass (certified, or every chunk read): the seed's pass counters,
+// then a survivor's filter, buckets and T1 classes (records at
+// slab.records[record_count, ...)). Uniform result.
+template <class Group>
+MHGP9_HD CertificateStatus q4_seed_finish(const Group& group, const LanesIndex& index, const std::int32_t* a,
+                                          const std::int32_t* b, u32 id_a, u32 id_b, u32 seed, const LanesSlab& slab,
+                                          u32 sites, unsigned kmax, const Q4Slab& q4, Q4Pass& p, u32& record_count,
+                                          Q4Work& w) {
   const std::int32_t* x = slab.points + 3 * static_cast<std::size_t>(seed);
   const u32 id_x = index.rank_ids[slab.ranks[seed]];
-  Q4Family f{};
-  if (!q4_family(a, b, x, f)) return CertificateStatus::fault;  // an owned acute seed has its family
+  const Q4Family& f = p.f;
+  Q4Frame fr;  // the survivor stage's frame, recomputed (not live through the pass)
+  q4_frame(a, b, x, fr);
   const u32 threshold = kmax - 2;
   const u32 low = id_a < id_b ? id_a : id_b, high = id_a < id_b ? id_b : id_a;
-  u32 lens[q4_buckets];
-  for (u32 j = 0; j < q4_buckets; ++j) lens[j] = 0;
-  u32 buffered = 0, chunks = 0, shell_count = 0;
-  u64 shell_sum = 0, shell_xor = 0;
-  bool certified = false, overflow = false;
-  struct Vote {
-    u32 w0, w1;
-    bool first, second;
-  };
-  for (u32 base = 0; base < sites; base += Group::size) {
-    ++chunks;
-    u32 live = 0;
-    for (u32 j = 0; j < q4_buckets; ++j) live |= (lens[j] < threshold ? 1U : 0U) << j;
-    u32 w0 = 0, w1 = 0, events = 0, zeros = 0;
-    group.vote(base, sites, [&](u32 s) -> Vote {
-      i64 side = 0;
-      u32 neg = 0, pos = 0;
-      q4_signs(f, a, slab.points + 3 * static_cast<std::size_t>(s), side, neg, pos);
-      Vote v{0, 0, false, side == 0 && ((neg | pos) & (1U << (q4_buckets / 2))) == 0};
-      for (u32 j = 0; j < q4_buckets; ++j) {
-        if (q4_lens(neg, j)) {
-          if (j < 4) v.w0 += 1U << (8 * j);
-          else v.w1 += 1U << (8 * (j - 4));
-        } else if (((live >> j) & 1U) != 0 && q4_event(side, neg, pos, j)) {
-          v.first = true;
-        }
-      }
-      return v;
-    }, w0, w1, events, zeros);
-    for (u32 j = 0; j < 4; ++j) {
-      lens[j] += (w0 >> (8 * j)) & 0xffU;
-      lens[j + 4] += (w1 >> (8 * j)) & 0xffU;
-    }
-    if (zeros != 0) {
-      shell_count += popcount32(zeros);
-      group.fingerprint(zeros, [&](u32 lane) { return mix64(index.rank_ids[slab.ranks[base + lane]]); },
-                        shell_sum, shell_xor);
-    }
-    if (events != 0 && !overflow) {
-      const u32 add = popcount32(events);
-      if (add > q4.capacity - buffered) {
-        overflow = true;
-      } else {
-        group.for_set(events, [&](u32 lane, u32 rank) { q4.positions[buffered + rank] = base + lane; });
-        buffered += add;
-      }
-    }
-    bool all = true;
-    for (u32 j = 0; j < q4_buckets; ++j) all = all && lens[j] >= threshold;
-    if (all) {
-      certified = true;
-      break;
-    }
-  }
+  u32 lens[q4_buckets];  // indexed by bucket below: a local copy, the pass state stays in registers
+  for (u32 j = 0; j < q4_buckets; ++j) lens[j] = p.lens[j];
+  const u32 buffered = p.buffered, chunks = p.chunks, shell_count = p.shell_count;
+  const u64 shell_sum = p.shell_sum, shell_xor = p.shell_xor;
   group.sync();
   if (group.leader()) {
     ++w.seeds;
     w.pass_chunks += chunks;
     w.pass_site_tests += sites < chunks * Group::size ? sites : chunks * Group::size;
   }
-  if (certified) {
+  if (p.certified) {
     if (group.leader()) {
       ++w.certified;
       if (chunks == 1) ++w.certified_chunk1;
     }
     return CertificateStatus::decided;
   }
-  if (overflow) return CertificateStatus::deferred;
+  if (p.overflow) return CertificateStatus::deferred;
   if (group.leader()) {
     ++w.survivors;
     w.buffered_events += buffered;
@@ -337,7 +428,7 @@ MHGP9_HD CertificateStatus q4_seed(const Group& group, const LanesIndex& index, 
     bool candidate = ((pos >> (q4_buckets / 2)) & 1U) != 0;  // P(y) > 0 (L3)
     if (candidate) {
       const u32 id_y = index.rank_ids[slab.ranks[s]];
-      const i64 diameter = f.dd;
+      const i64 diameter = fr.dd;
       const i64 ay = dist2(a, y), by = dist2(b, y), xy = dist2(x, y);
       const u32 lx = id_x < id_y ? id_x : id_y, hx = id_x < id_y ? id_y : id_x;
       const bool xy_below = lx < low || (lx == low && hx < high);
@@ -420,7 +511,7 @@ MHGP9_HD CertificateStatus q4_seed(const Group& group, const LanesIndex& index, 
       const u32 ci = q4.list[k];
       const u32 cbits = q4.bits[ci];  // same value on every lane: uniform flow
       if ((cbits & q4_candidate_bit) == 0 || (cbits & q4_decided_bit) != 0) continue;
-      const Q4Pivot pivot = q4_pivot(f, a, point_of(ci));
+      const Q4Pivot pivot = q4_pivot(f, fr, a, point_of(ci));
       u32 depth = lens[j], group_size = 0, candidates = 0, passed = 0, rep = 0xffffffffU;
       u64 group_sum = 0, group_xor = 0;
       bool rejected = false;
@@ -494,7 +585,7 @@ MHGP9_HD CertificateStatus q4_seed(const Group& group, const LanesIndex& index, 
           if (member) bits |= q4_decided_bit;
           if (test) {
             const std::int32_t* y = point_of(i);
-            if (q4_positive(f, a, y, q4_pivot(f, a, y))) bits |= q4_valid_bit;
+            if (q4_positive(fr, a, y, q4_pivot(f, fr, a, y))) bits |= q4_valid_bit;
           }
           q4.bits[i] = bits;
           return test ? 1U : 0U;
@@ -528,7 +619,7 @@ MHGP9_HD CertificateStatus q4_seed(const Group& group, const LanesIndex& index, 
       if (record_count == slab.record_capacity) return CertificateStatus::deferred;
       if (group.leader()) {
         LaneRecord& r = slab.records[record_count];
-        q4_key(q4_pivot(f, a, point_of(chosen)), a, r.key);
+        q4_key(q4_pivot(f, fr, a, point_of(chosen)), a, r.key);
         u32 ids[4] = {id_a, id_b, id_x, valid_id};
         for (int p = 1; p < 4; ++p)
           for (int q = p; q > 0 && ids[q] < ids[q - 1]; --q) {

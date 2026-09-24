@@ -537,6 +537,72 @@ MHGP9_HD CertificateStatus lanes_prologue(const Group& group, const LanesIndex& 
   return CertificateStatus::decided;
 }
 
+// One census's state (S4a; since L15 also fed by the fused pass): the
+// sites read in scan order, those of negative and of zero power among them,
+// the shell fingerprint (whole chunks only: a rejected census has none).
+struct Q3Census {
+  u32 read, depth, shell;
+  u64 shell_sum, shell_xor;
+  bool rejected;
+};
+
+// One chunk of a census at `base` from its ballots (bit l: site base + l
+// of negative power in `inside`, of zero power in `zero`): the sequential
+// census stops at the need-th site of negative power (its exact stopping
+// site recovered from the mask), else it reads the whole chunk.
+template <class Group>
+MHGP9_HD void q3_census_chunk(const Group& group, const LanesIndex& index, const LanesSlab& slab, u32 sites,
+                              u32 threshold, u32 base, u32 inside, u32 zero, Q3Census& c) {
+  const u32 need = threshold - c.depth;  // >= 1: depth < K-1 while the census runs
+  if (popcount32(inside) >= need) {
+    const u32 stop = nth_set_bit(inside, need);
+    const u32 read = stop == 31 ? 0xffffffffU : ((1U << (stop + 1)) - 1U);
+    c.read += stop + 1;
+    c.depth += need;
+    c.shell += popcount32(zero & read);
+    c.rejected = true;
+    return;
+  }
+  const u32 lanes = sites - base < Group::size ? sites - base : Group::size;
+  c.read += lanes;
+  c.depth += popcount32(inside);
+  c.shell += popcount32(zero);
+  if (zero != 0)
+    group.fingerprint(zero, [&](u32 lane) { return mix64(index.rank_ids[slab.ranks[base + lane]]); }, c.shell_sum,
+                      c.shell_xor);
+}
+
+// A finished census's counters, as a census in scan order counts them.
+MHGP9_HD inline void q3_census_count(const Q3Census& c, EdgeQ3Work& local) {
+  local.census_point_tests += c.read;
+  local.census_inside_sites += c.depth;
+  local.census_shell_sites += c.shell;
+  local.census_outside_sites += c.read - c.depth - c.shell;
+}
+
+// The record of an accepted census (one lane writes it).
+MHGP9_HD inline void q3_record(const Q3Form& form, const std::int32_t a[3], u32 id_a, u32 id_b, u32 id_x,
+                               const Q3Census& c, LaneRecord& r) {
+  q3_key(form, a, r.key);
+  u32 ids[3] = {id_a, id_b, id_x};
+  for (int p = 1; p < 3; ++p)
+    for (int q = p; q > 0 && ids[q] < ids[q - 1]; --q) {
+      const u32 t = ids[q];
+      ids[q] = ids[q - 1];
+      ids[q - 1] = t;
+    }
+  r.support[0] = ids[0];
+  r.support[1] = ids[1];
+  r.support[2] = ids[2];
+  r.support[3] = absent32;
+  r.edge = absent32;
+  r.depth = c.depth;
+  r.shell = c.shell;
+  r.arity = 3;
+  r.shell_sum = c.shell_sum;
+  r.shell_xor = c.shell_xor;
+}
+
 // The q3 censuses of the seeds [first, last) of the prologue, appended at
 // slab.records[record_count, ...) in seed order: a record slab full at an
 // accepted seed defers, a seed without its ball is a fault (the records
@@ -556,69 +622,26 @@ MHGP9_HD CertificateStatus q3_census_range(const Group& group, const LanesIndex&
     const std::int32_t* x = slab.points + 3 * static_cast<std::size_t>(slab.seeds[i]);
     Q3Form form{};
     if (!q3_form(a, b, x, form)) return CertificateStatus::fault;  // an owned acute seed has its ball
-    u32 depth = 0, shell = 0;
-    u64 shell_sum = 0, shell_xor = 0;
-    bool rejected = false;
-    for (u32 base = 0; base < sites; base += Group::size) {
+    Q3Census c{0, 0, 0, 0, 0, false};
+    for (u32 base = 0; base < sites && !c.rejected; base += Group::size) {
       u32 inside = 0, zero = 0;
       group.ballot2(base, sites, [&](u32 t) -> u32 {
         const i128 power = q3_power(form, a, slab.points + 3 * static_cast<std::size_t>(t));
         return (power < 0 ? 1U : 0U) | (power == 0 ? 2U : 0U);
       }, inside, zero);
-      const u32 need = threshold - depth;  // >= 1: depth < K-1 while the census runs
-      if (popcount32(inside) >= need) {
-        // The sequential census stops at the need-th site of negative power.
-        const u32 stop = nth_set_bit(inside, need);
-        const u32 read = stop == 31 ? 0xffffffffU : ((1U << (stop + 1)) - 1U);
-        const u32 zeros = popcount32(zero & read);
-        local.census_point_tests += stop + 1;
-        local.census_inside_sites += need;
-        local.census_shell_sites += zeros;
-        local.census_outside_sites += stop + 1 - need - zeros;
-        rejected = true;
-        break;
-      }
-      const u32 lanes = sites - base < Group::size ? sites - base : Group::size;
-      const u32 in = popcount32(inside), zeros = popcount32(zero);
-      depth += in;
-      shell += zeros;
-      local.census_point_tests += lanes;
-      local.census_inside_sites += in;
-      local.census_shell_sites += zeros;
-      local.census_outside_sites += lanes - in - zeros;
-      if (zero != 0)
-        group.fingerprint(zero, [&](u32 lane) { return mix64(index.rank_ids[slab.ranks[base + lane]]); },
-                          shell_sum, shell_xor);
+      q3_census_chunk(group, index, slab, sites, threshold, base, inside, zero, c);
     }
-    if (rejected) {
+    q3_census_count(c, local);
+    if (c.rejected) {
       ++local.depth_rejections;
       continue;
     }
     if (record_count == slab.record_capacity) return CertificateStatus::deferred;
-    if (group.leader()) {
-      LaneRecord& r = slab.records[record_count];
-      q3_key(form, a, r.key);
-      u32 ids[3] = {id_a, id_b, index.rank_ids[slab.ranks[slab.seeds[i]]]};
-      for (int p = 1; p < 3; ++p)
-        for (int q = p; q > 0 && ids[q] < ids[q - 1]; --q) {
-          const u32 t = ids[q];
-          ids[q] = ids[q - 1];
-          ids[q - 1] = t;
-        }
-      r.support[0] = ids[0];
-      r.support[1] = ids[1];
-      r.support[2] = ids[2];
-      r.support[3] = absent32;
-      r.edge = absent32;
-      r.depth = depth;
-      r.shell = shell;
-      r.arity = 3;
-      r.shell_sum = shell_sum;
-      r.shell_xor = shell_xor;
-    }
+    if (group.leader())
+      q3_record(form, a, id_a, id_b, index.rank_ids[slab.ranks[slab.seeds[i]]], c, slab.records[record_count]);
     ++record_count;
     ++local.emitted;
-    local.shell_ids += shell;
+    local.shell_ids += c.shell;
   }
   group.sync();  // the leader's records, copied out by every lane
   return CertificateStatus::decided;

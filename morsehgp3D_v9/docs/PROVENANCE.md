@@ -1050,6 +1050,81 @@ porte l'élagage. `MHGP9_LANES_SCAN_AXIAL=0` rend les anneaux.
 - **ptxas** : P 112 registres, 104 o de pile (les 26 compteurs de classes),
   sans débordement ; T inchangé.
 
+#### L15 : passe fusionnée q3 + q4 par graine
+
+Pour une arête aux deux voies, une tâche T lisait le cover deux fois par
+graine : le recensement de la boule q3 (toutes les graines de la plage),
+puis la passe de lentilles q4. `lanes_task_fused` (`lanes_tasks.hpp`) les
+fait lire **les mêmes paquets de 32 sites dans le même ordre** ; $P$ est
+calculé une fois par site : le vote de lentilles garde par voie le signe de
+$P=f_z(0)$ (bit du milieu, $g_4=0$ ; `LaneSigns`), que le recensement relit.
+Chacun s'arrête où il s'arrêterait seul (le recensement à son $(K-1)$-ième
+site intérieur, la passe à la certification) et l'autre continue. Lemme L15
+du registre (`proved_here`).
+
+- **Enregistrements** : q3 en haut de l'ardoise (du dernier au premier), q4
+  en bas ; la tâche porte `layout = 1` et `lanes_task_slab_index` les rend
+  dans l'ordre séquentiel (q3 de la plage, puis q4) à la copie vers l'arène
+  de préparation, sur l'appareil comme sur l'hôte.
+- **Préséance** : une panne q3 arrête la tâche sans enregistrement q4 ; une
+  défaillance q4 (panne, tampon d'événements) ferme la voie q4 et le
+  recensement va au bout de la plage : c'est l'ordre d'`edge_lanes`. Si un
+  enregistrement ne tient pas dans l'ardoise, la tâche est **rejouée sans
+  fusion** (`fallback`) : la règle d'ardoise des phases séparées décide ;
+  sans débordement, aucune de ces règles n'aurait joué.
+- **Refonte sans effet** (mêmes enregistrements et même registre, vérifié
+  sur la trame épinglée contre L10) : recensement par paquets
+  (`q3_census_chunk`, compteurs dérivés en fin de graine par
+  `q3_census_count`), graine q4 en `q4_pass_begin` / `q4_pass_chunk` /
+  `q4_seed_finish`. Pour contenir les registres de la passe fusionnée :
+  - les neuf signes $P-g_kS$ viennent de **quatre produits** (grille
+    symétrique : $g_{4\pm i}=\pm t_i$), au lieu de neuf, exactement ;
+  - le repère $(d,u,\lvert d\rvert^2,\lvert u\rvert^2)$ de la famille n'est
+    plus vivant pendant la passe : l'étage des survivantes le recalcule
+    (`Q4Frame`).
+- **Compteurs** (`LanesOutput::fused`, sur toutes les tâches de l'appel,
+  sommes sans ordre) : graines fusionnées, paquets lus, paquets lus par le
+  seul recensement après l'arrêt de la passe, paquets consommés par le
+  recensement (ce qu'il aurait lu seul), tâches rejouées. Le registre
+  déclaré des deux voies reste celui des phases séparées. Publiés par la
+  sonde au protocole v24.
+- **Mesures hôte** (08/000000, après L10) :
+
+  | | K5 | K10 |
+  | --- | ---: | ---: |
+  | graines fusionnées | 6 635 428 | 29 281 785 |
+  | paquets lus par la passe fusionnée | 11 054 684 | 64 573 165 |
+  | dont recensement seul | 61 123 | 109 531 |
+  | paquets de recensement absorbés | 7 211 245 | 35 357 588 |
+  | lectures séparées → fusionnées | 18 265 929 → 11 054 684 | 99 930 753 → 64 573 165 |
+  | tâches rejouées sans fusion | 0 | 0 |
+
+  Un paquet de recensement ne calcule que $P$ ; avec les poids SASS de la
+  conception (`q3_power` 162, paquet de lentilles 905 par site), le travail
+  retiré vaut environ 11 % de celui de la passe de lentilles à K5 et 9 % à
+  K10. Les quatre produits retirent en outre cinq produits i128 × i64 par
+  site de chaque passe. **Projection**, à mesurer sur G4.
+- **Portes** : la sortie entière des tâches (registre compris) est égale
+  octet pour octet au chemin à une tâche par arête, qui garde les phases
+  **séparées** : c'est la porte différentielle de la fusion, sur toutes les
+  familles et les deux trames K5/K10 (`identical=1`). Les tâches sans
+  fusion (`LanesInput::fused_pass = false`) rendent les mêmes octets et des
+  compteurs de fusion nuls. Planchers : graines fusionnées, paquets de
+  recensement seul et replis (ardoise d'enregistrements réduite) > 0.
+  Mutants tués : recensement fusionné arrêté à $K-2$
+  (`q4.judge_refused_real`), passe de lentilles arrêtée avec le recensement
+  (`tasks.bytes`, registre q4).
+- **Mesure appariée G4** : `mhgp9_gpu_lanes_port_gate --compare --device`
+  avec et sans `--unfused` donne les sous-chronos T de l'appareil avec et
+  sans fusion, sur les mêmes arêtes.
+- **ptxas** : T reste à 128 registres ; la passe fusionnée porte l'état du
+  recensement pendant le vote de lentilles : 256 o de pile, 550 o de
+  débordement en écriture et 616 en lecture (112 et 84 avant ; chemin non
+  fusionné seul : 96 o de pile, 114 et 132). Ce sont des tailles de code, pas
+  un trafic mesuré : si la passe fusionnée ralentit le vote de lentilles sur
+  G4 plus que les paquets de recensement retirés ne rapportent, la mesure
+  appariée le montrera.
+
 ## Voie GPU S1 : `src/gpu/` (espace `mhgp9::gpu`, code neuf)
 
 23 septembre 2026. Première brique GPU de la v9, pour une expérience de

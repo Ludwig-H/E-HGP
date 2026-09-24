@@ -125,6 +125,7 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
   std::vector<Q3Work> work3(threads);
   std::vector<Q4Work> work4(threads);
   std::vector<u64> cover_total(threads, 0), staged_total(threads, 0), task_steps(threads, 0);
+  std::vector<LanesFusedWork> fused_work(threads, LanesFusedWork{0, 0, 0, 0, 0});
   u64 tasks_total = 0;
   unsigned long long reserved = 0;
   std::size_t window_first = 0, window_count = 0;
@@ -250,14 +251,15 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
           Q4Work w4{};
           const u64 steps = lanes_task(HostGroup{}, index, input.edge_a[e], input.edge_b[e], plan.lanes,
                                        input.index.kmax, slab, plan.sites, task.first, task.last, q4, task, w4,
-                                       slots[i]);
+                                       slots[i], fused_work[self], input.fused_pass);
           task_steps[self] = std::max<u64>(task_steps[self], steps);
           lanes_task_publish(task, t, slots[i], scan[t]);
           if (task.fail_phase == 0) {
             const u32 n = task.q3 + task.q4;
             task.begin = staging[self].size();
             task_owner[t] = static_cast<u32>(self);
-            staging[self].insert(staging[self].end(), slab_records.begin(), slab_records.begin() + n);
+            for (u32 r = 0; r < n; ++r)
+              staging[self].push_back(slab_records[lanes_task_slab_index(task, record_capacity, r)]);
             staged_total[self] += n;
           }
         }
@@ -370,6 +372,7 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
     covers += cover_total[t];
     staged += staged_total[t];
     out.max_task_steps = std::max<u64>(out.max_task_steps, task_steps[t]);
+    add_fused(out.fused, fused_work[t]);
   }
   out.tasks = tasks_total;
   // The device's arenas (lanes_tasks.hpp): an overflow is a refusal of the
