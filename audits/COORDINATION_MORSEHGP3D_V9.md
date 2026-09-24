@@ -5571,3 +5571,50 @@ Tout cas R21 brut, GPU ou moteur, devra les reproduire, comme les six
 épingles sans sol depuis R13.
 
 GCP non utilisé.
+
+### 21 h 43 UTC (24 septembre) — Auditeur B : réception des épingles brutes et priorité 100 ms
+
+À C/D : contrelecture du reçu brut publié au `5102ec2cc` : les **29**
+entrées du manifeste SHA passent ; **12/12** sondes ont rc 0 et
+`complete_relative` ; les six paires moteur/lots ont les mêmes objets
+`catalogue`, `orders`, condensés de tour/catalogue/présentations et
+compteurs de travail. Les trois entrées v8 sont retrouvées par SHA/FNV.
+Les [détails et réserves](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_EPINGLES_BRUTES_C_PREFLIGHT_20260924.md)
+restent importants : `DONE` ne contrôle rien, les JSON portent
+`grid=unspecified`, Euler n'est testé que jusqu'à K−2, et le binaire
+compilé n'est pas archivé dans le manifeste. La revendication « première
+exécution réelle » doit préciser **le chemin CPU complet à quatre
+leviers sur brut avec sol** : l'ancien gate 08/000000 sans sol n'activait
+que le filtre CPU par lots, tandis que R20 activait q3/q4 sur GPU.
+Dans le README brut, le facteur boules brut/sans-sol est plutôt
+**2,1–2,5×** (b01/K5 atteint 2,507), et le RSS K10 va environ de
+**6,6 à 7,4 Gio**, non 6,8–7,5 Gio.
+
+R21 n'est **pas** prêt pour G4 : le WIP développeur à 30 cas exige encore
+18 dans `test_nominal_session_completed`, le lecteur du mur externe omet
+`context_ms+reserve_ms`, et `PINNED_DIGESTS` n'inclut pas les six nouvelles
+épingles. Corriger ces trois points, rendre les cas bruts obligatoires
+(pas seulement un résultat `partial`) et relire normal/`-O` sur SHA gelé
+avant une nouvelle SPOT. Aucun GCP lancé pour ce contre-audit.
+
+Pour la cible **100 ms FULL K5 sans sol**, les R20 à 1,010–1,260 s ont
+déjà FULL seul à 374–456 ms et q3/q4 autour de 0,5 s : ne pas investir
+dans une variante de tri isolée comme trajectoire entière. Le meilleur
+prochain test algorithmique est le BVH des couples d'arêtes **après S2,
+avant le cœur**, avec ordinal global/masque q3-q4 conservés, gardes
+disjointes par voie, repli exact et mesure de `ΣF` réellement évitée
+**moins** le coût dispatch/BVH/certificats. Le shadow positif
+`paired_guard_group_bvh_20260923` ferme 153,8 M incidences de cœur sur
+un groupe favorable d'une trame **brute** (27,5 % du global brut), mais
+pas encore le LiDAR sans sol ni le temps total ; le shadow à grosses
+boîtes uniforme fut quasi nul. Un shadow S2→S3 avec segments de
+survivants, ordinal, masques et `F` par arête doit d'abord mesurer les
+distributions complètes sans changer le produit. Ce BVH aval ne peut
+réduire les paires **déjà expansées** ; seuls des certificats ciblés
+avant S2 peuvent le faire.
+
+Mesurer d'abord les trois scènes sans sol complètes, les coupes physiques
+et densités 1/2, 1/4 ; conserver s8/10/12, K5/K10, les trames brutes et
+d'autres séquences dans le plan de validation. L'objectif est la tour
+explicite : tous nœuds, parents et liens dans le chronomètre, pas un
+décodage différé.

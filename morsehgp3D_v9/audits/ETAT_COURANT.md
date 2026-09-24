@@ -63,13 +63,25 @@ options distinctes et huit combinaisons de gate. Le pic de fils/RSS
 peut augmenter et reste non mesuré.
 
 Les [épingles CPU brutes de C](CONTRE_AUDIT_B_EPINGLES_BRUTES_C_PREFLIGHT_20260924.md)
-sont en calcul local sur trois trames entières avec sol de 08. Leur
-script note les retours mais crée `DONE` sans les contrôler. Une lecture
-indépendante des fichiers locaux terminés trouve 12/12 statuts et codes
-nuls et six paires de digests/ordres égales ; il reste à versionner une
-porte de clôture des entrées, de la provenance et des mutants avant
-qu'elles servent à juger R21. Aucun reçu brut qualifié n'est encore
-publié à cette lecture.
+sont publiées au `5102ec2cc` sur trois trames entières **avec sol** de
+la seule séquence 08. Les 29 fichiers du manifeste passent SHA-256 ;
+les 12 sorties ont code nul et statut `complete_relative`, et les six
+paires moteur/lots coïncident pour les digests et objets de tour. Le
+script crée néanmoins `DONE` sans vérifier ces conditions ; un lecteur
+versionné normal/`-O` avec mutations et les épingles dans R21 restent à
+faire. L'invariant Euler n'est contrôlé que jusqu'à K−2, et les JSON
+disent `grid=unspecified` malgré la provenance 1 mm indépendante.
+Ces épingles ne sont ni chrono GPU/G4, ni qualification de plusieurs
+séquences ou du float32 brut.
+Le plan R21 à 30 cas reste bloqué avant G4 : attente nominale de 18 cas,
+durées CUDA d'ouverture/réservation omises du garde-mur externe, et six
+épingles brutes absentes de `PINNED_DIGESTS`. Le statut `partial` ne doit
+pas dispenser les cas bruts. Le prochain test algorithmique à fort levier
+est un relevé complet **S2→S3** des survivants/masques/ordinals et du
+travail de cœur `F` par arête sans changer les sorties, puis un BVH exact
+borné sur les groupes lourds. Le résultat positif actuel concerne un
+groupe favorable d'une trame avec sol ; aucune sélectivité sans sol n'est
+encore acquise.
 
 Le [contre-audit R20 et 100 ms](CONTRE_AUDIT_B_R20_ET_TRAJECTOIRE_100MS_20260924.md)
 reçoit la session G4 publiée (`d1d038393`) : 326/326 empreintes et
