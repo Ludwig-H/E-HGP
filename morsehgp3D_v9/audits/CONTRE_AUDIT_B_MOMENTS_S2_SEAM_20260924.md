@@ -37,6 +37,16 @@ Le vérificateur de rectangles actuel exerce surtout une boîte positive
 et ses translations/homothéties, pas les boîtes qui se chevauchent ni
 une extrémité réutilisée ; c'est une lacune de **tests**, non un
 contre-exemple à la preuve.
+Le [contrôle additionnel B](b_moments_rectangle_edges_20260924/README.md)
+ferme cette lacune bornée : normal/`-O`, neuf fixtures entières,
+boîtes chevauchantes, garde coïncidant avec une extrémité, égalités
+strictes et q3/q4 indépendantes. Trois boîtes positives ont 64 coins
+croisés distincts et 729 couples entiers chacune, tous concordants.
+Deux boîtes qui se chevauchent échouent uniformément malgré des arêtes
+individuelles positives : le produit de boîtes contient un `a=b`
+virtuel, impossible à certifier comme arête de longueur positive. Cette
+perte de sélectivité est normale ; dans un BVH de couples, il faut
+diviser ces boîtes, pas supprimer leurs arêtes réelles.
 
 Les deux voies ne sont pas substituables. La fixture à sept gardes de
 la note ferme q4 mais pas q3. Réciproquement, à K5,
@@ -114,6 +124,38 @@ doit publier les nouvelles identités et les **formes réellement
 matérialisées**, pas appeler `core_sites` baseline un gain déjà payé.
 
 ## 3. Porte expérimentale avant port G4
+
+Les reçus déjà publiés ne permettent **pas** de calculer cette
+sélectivité après coup. R20 archive des JSON agrégés, sans arêtes
+survivantes individuelles. Le
+[panneau des 21 sous-nuages](s4a_cpu_scene02_physical_panel_20260924/README.md)
+archive ses entrées u32/IDs et 42 sorties agrégées, mais pas leurs
+arêtes, masques ou `F_e`. Les anciennes traces complètes d'arêtes
+brutes étaient temporaires et ne sont plus présentes ; seul le
+[`dominant_group.bin`](paired_guard_group_bvh_20260923/README.md)
+statique de 67 827 arêtes **avec sol** subsiste, sans ordinal S2 ni
+masque post-S3. Un smoke exact de huit arêtes issues de ce groupe avec
+un bloc voisin de 64 sites ne ferme aucune voie, pour `ΣF_e=44 174` :
+c'est un contrôle de lecture/arithmetic **non représentatif**, pas une
+estimation de sélectivité. La prochaine mesure sans sol exige donc une
+trace d'audit au raccord S2→S3 ou un rejeu autonome du même front et
+filtre ; les sommes JSON ne suffisent pas.
+
+Une sidecar sans modification du moteur est possible via le front et
+`run_q34_filter_batch_cpu`, puis les API de cœur/cover/prover, mais c'est
+une **vraie réexécution CPU** de S2/S3, pas un traitement des reçus ni
+un chrono G4. Les trois scènes sans sol ont 39 885, 35 551 et 45 845
+sites ; leurs survivants cumulés valent environ 6,014 M à K5 et
+13,108 M à K10. Même un enregistrement minimal de 16 octets par arête
+représente environ **306 Mo pour les six cas** ; avec ordinal u64, environ
+459 Mo, avant offsets et sous-nuages. La tranche entière 08/000200/K10
+du panneau CPU a pris environ 85 s de mur, 570 CPU·s et 3,94 Go RSS :
+prévoir des minutes et plusieurs Go pour la campagne complète. Une
+première fixture sur un seul quartier de 1 288 sites doit valider le
+schéma, les IDs et les identités `S=core_builds=dead_core_loads`,
+`ΣF_e=core_sites`, puis seulement étendre aux trames. Les ordres GPU et
+CPU pouvant différer, comparer multisets et sommes entre backends,
+pas les ordinaux de deux exécutions différentes.
 
 Commencer par un ledger sans modification de sortie au raccord S2→S3 :
 par segment/masque, nombre d'arêtes, `F` baseline par arête, travail

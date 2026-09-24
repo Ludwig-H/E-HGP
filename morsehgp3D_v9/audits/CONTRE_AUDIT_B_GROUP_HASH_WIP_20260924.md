@@ -81,3 +81,18 @@ pourrait désactiver le hash s'il est mal fusionné. Les changements
 non commis du worktree n'ajoutent qu'une clarification de commentaire
 dans le moteur et une note de provenance ; ils ne font pas un moteur
 intégré.
+
+Rejeu local borné ensuite sur le **build Release déjà présent** dans
+`wt-group/build/v9` à HEAD `252e6794e` :
+`ctest --test-dir build/v9 --output-on-failure -V -j1 --timeout 60
+-R '^mhgp9_tower_static_grouping($|_weak_hash$|_bad_argument$|_mutant_)'`
+donne **6/6 PASS en 48,10 s**. Le témoin normal couvre 18 essais et
+1 685 484 requêtes ; le hash faible exerce 108 184 847 rejets de tag
+et 53 331 074 rejets de tag de graines. Les trois mutants sont tués
+causalement avec code exact 1 et sortie géométrique/ordinale incorrecte :
+`trust_hash` et `last_ordinal` par `grouping.firsts`,
+`seed_trust_hash` par `grouping.targets` ; le runner refuse les signaux.
+Les binaires postdatent les sources, mais ce n'est **pas** une compilation
+fraîche épinglée ni un reçu autonome de provenance ; ce résultat renforce
+le gate synthétique seulement. Aucun cas LiDAR, tour complète littérale
+ou gain de temps G4 n'a été exécuté dans cette relecture.

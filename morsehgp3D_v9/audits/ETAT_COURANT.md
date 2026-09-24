@@ -54,7 +54,9 @@ Le [groupement haché de phase 0](CONTRE_AUDIT_B_GROUP_HASH_WIP_20260924.md)
 est un commit local frère, non intégré à E2 : son gate compare toutes
 les cibles statiques hachées/triées, mais pas les tours explicites
 littéralement. Le `252e6794e` renforce son contrôle de statut, de
-premiers ordinaux et de chemin pris, sans reçu LiDAR ou G4 publié.
+premiers ordinaux et de chemin pris. Six portes synthétiques passent
+sur un build Release existant, trois mutants tués causalement ; ni
+reçu LiDAR, ni compilation fraîche épinglée, ni gain G4 publié.
 Les deux WIP
 occupent le même argument booléen de l'API avec des sens différents ;
 leur assemblage ne peut garder cet argument positionnel unique.
@@ -86,7 +88,9 @@ séquences ou du float32 brut.
 Le plan R21 à 30 cas reste bloqué avant G4 : attente nominale de 18 cas,
 durées CUDA d'ouverture/réservation omises du garde-mur externe, et six
 épingles brutes absentes de `PINNED_DIGESTS`. Le statut `partial` ne doit
-pas dispenser les cas bruts. Le prochain test algorithmique à fort levier
+pas dispenser les cas bruts. Son autotest nominal a été rejoué au
+`61cfba666` : code 1 sur les labels GPU attendus des anciens cas, sans
+aucun appel GCP. Le prochain test algorithmique à fort levier
 est un [relevé complet **S2→S3**](CONTRE_AUDIT_B_MOMENTS_S2_SEAM_20260924.md)
 des survivants/masques/ordinals et du
 travail de cœur `F` par arête sans changer les sorties, puis un BVH exact
@@ -94,7 +98,10 @@ borné sur les groupes lourds. Le résultat positif actuel concerne un
 groupe favorable d'une trame avec sol ; aucune sélectivité sans sol n'est
 encore acquise. Le certificat multisite et son extension exacte aux
 64 couples de coins sont recevables mathématiquement, mais aucun port
-ni gain n'est validé. Le filtre après S2 ne peut pas réduire les paires
+ni gain n'est validé. Neuf [fixtures entières de bord](b_moments_rectangle_edges_20260924/README.md)
+passent en normal/`-O` (boîtes recouvrantes, contact d'extrémité,
+égalités strictes et voies indépendantes) ; elles ne mesurent pas le
+LiDAR. Le filtre après S2 ne peut pas réduire les paires
 déjà développées ; le chemin GPU recherche encore deux fois le rectangle
 de chaque paire, et ses plafonds `2³¹` imposeront une stratégie tuilée
 pour le massif.

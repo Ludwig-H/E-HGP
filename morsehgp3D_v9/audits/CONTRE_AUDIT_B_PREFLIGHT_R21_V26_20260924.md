@@ -223,3 +223,23 @@ ces qualifications u18. Aucun sous-ensemble 8k/16k/32k ne remplace une
 trame entière pour le contrat de temps.
 
 GCP non utilisé dans ce contre-audit ; aucun nouveau contrat acquis.
+
+## Relecture vivante du 24 septembre, 22 h 10 UTC
+
+Depuis la rédaction historique ci-dessus, C a publié ses six
+[épingles CPU brutes](c_raw_pins_20260924/README.md), et le
+[lecteur indépendant B](b_raw_pin_reader_20260924/README.md) les accepte
+12/12 avec trois mutants causaux rejetés. La phrase ancienne « pas de
+condensés CPU indépendants épinglés » ne décrit donc **plus** l'état
+actuel. Ils ne figurent toutefois toujours **pas** dans
+`PINNED_DIGESTS` du WIP R21 `61cfba666`, et les autres défauts de
+préflight ne sont pas réparés.
+
+Rejeu ciblé, **sans GCP**, sur ce SHA exact :
+`python3 -B gcp-migration/tower_selftest_v9.py Protocol.test_nominal_session_completed`
+rend code **1** après 59,228 s avec `ValueError: GPU labels from complete
+LiDAR towers` à `tower_selftest_v9.py:1277`. L'assertion immédiatement
+suivante attend encore `completed_case_indices == list(range(18))`
+alors que le plan est à 30 cas. Ce résultat ne juge pas le moteur
+géométrique ; il confirme que la porte nominale du protocole est rouge
+sur la version courante et qu'une session SPOT serait prématurée.

@@ -5688,3 +5688,46 @@ K5/K10 sont déclarées dans CMake, mais pas de reçu d'exécution ni
 de gain G4 associé à ce SHA. Le conflit d'argument booléen avec E2
 et E4 subsiste ; fusionner par options nommées et comparer les huit
 combinaisons, pas par choix d'un seul `false` positionnel.
+
+### 22 h 10 UTC (24 septembre) — Auditeur B : deux relectures locales exécutées
+
+À D : le préflight R21 du WIP `61cfba666` a été **rejoué** sans GCP :
+`python3 -B gcp-migration/tower_selftest_v9.py Protocol.test_nominal_session_completed`
+rend code 1 en 59,228 s, `GPU labels from complete LiDAR towers` à
+`tower_selftest_v9.py:1277`. Le test suivant attend encore 18 indices
+pour un plan de 30. Les six épingles CPU brutes C sont maintenant
+fermées par notre lecteur, mais absentes de `PINNED_DIGESTS`. Corriger
+attendus, pinning et borne du mur CUDA, puis rejouer normal/`-O` sur
+SHA gelé avant SPOT.
+
+Le groupe hash `252e6794e` a **6/6 portes synthétiques Release** dans
+son build existant (48,10 s) : témoin normal, hash faible, argument
+invalide et trois mutants. Les mutants échouent par `firsts`/`targets`
+incorrects avec code 1, non par signal ; le hash faible exerce des
+collisions. C'est un bon signal de correction locale, pas un reçu de
+compilation fraîche, de tour LiDAR FULL ou de vitesse G4. Détails dans
+les [notes R21](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PREFLIGHT_R21_V26_20260924.md)
+et [hash](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_GROUP_HASH_WIP_20260924.md).
+
+### 22 h 15 UTC (24 septembre) — Auditeur B : coins exacts et absence de trace LiDAR
+
+Le [nouveau contrôle mathématique](../morsehgp3D_v9/audits/b_moments_rectangle_edges_20260924/README.md)
+passe normal/`-O` sur neuf fixtures : trois boîtes positives aux
+64 coins croisés et 729 couples entiers chacune (deux voies, q4 seule,
+q3 seule), deux boîtes chevauchantes et quatre égalités refusées.
+Un garde peut reprendre une extrémité sans crédit fictif : sa marge est
+nulle. Une boîte chevauchante peut contenir le `a=b` **virtuel** qui
+empêche une preuve uniforme, même si des arêtes réelles sont positives ;
+la subdiviser plutôt que rejeter le groupe. Ce sont des tests finis de
+la preuve, **pas** une mesure de sélectivité LiDAR.
+
+R20 et le panneau de 21 sous-nuages n'archivent **aucune trace d'arêtes**
+individuelles sans sol. Une sidecar front+S2+S3 est possible sans éditer
+le moteur, mais doit réellement rejouer le calcul CPU : environ 6,014 M
+survivantes K5 et 13,108 M K10 pour les trois trames, soit 306 Mo de
+trace minimale à 16 octets, minutes de calcul et plusieurs Go de RSS.
+Commencer par le quartier de 1 288 sites et recouper les identités de
+ledger, puis les trames pleines ; les agrégats existants ne permettent
+pas d'affirmer un gain net du certificat. Détails dans le
+[contre-audit S2→S3](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_MOMENTS_S2_SEAM_20260924.md).
+GCP non utilisé.
