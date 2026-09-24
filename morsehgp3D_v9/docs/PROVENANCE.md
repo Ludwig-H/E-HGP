@@ -951,6 +951,63 @@ registres, sans débordement.
 **Non mesuré** : la durée de C sur G4. Projection (non un reçu) : trois
 noyaux sans chaîne série et trois balayages CUB, de l'ordre de 1 ms à K5.
 
+#### L11 : élagage exact du cover par le disque des centres
+
+Lemme L11 du registre des preuves (V9-S4, `proved_here`) : avec
+$w=2z-a-b$, $\nu=D-\lvert w\rvert^2$ et $\delta=D\lvert w\rvert^2-(w\cdot v)^2$,
+un site tel que $\nu<0$ et $\nu^2>2\delta$ est strictement extérieur à
+toute sphère passant par $a$ et $b$ de centre dans le disque des centres
+$\Delta_4$. Il n'est donc ni intérieur ni sur une coquille des boules q3 des
+graines, ni lentille d'aucun seau (chaque seau a son bout intérieur dans
+$\Delta_4$), ni graine, ni membre d'une classe émise.
+
+- **Code** (`lanes.hpp`) : `lanes_order` calcule une fois par site sa
+  classe de balayage (`lanes_scan_class`, rangée dans `slab.ranges`, libre
+  après le remplissage des rangs), retire les sites élagués de l'ordre de
+  balayage, et rend le nombre de sites gardés : les graines, les
+  recensements, les passes et le découpage en tâches ne voient plus qu'eux.
+  Le test est entier (`lanes_axial_terms` en i64, $\nu^2$ et $2\delta$ en
+  i128 ; bornes gravées par `static_assert` sur le domaine u18). L'arène de
+  covers réserve toujours le cover entier (même règle de refus).
+  `lanes_seed_code` isole le prédicat de graine, inchangé.
+- **Registre** : `seed_tests` reste la taille du cover (chaque site est
+  classé une fois : test L11, puis test de graine s'il est gardé) ; le
+  nombre de sites élagués est tenu dans `Q3Work::pruned_sites`, publié par
+  la sonde au protocole v24. Changent : recensements, passes, événements
+  tamponnés (un site gardé peut lire un paquet plus tôt), tâches.
+- **Mesures hôte** (08/000000, compteurs déterministes) :
+
+  | compteur | K5 avant | K5 après | K10 avant | K10 après |
+  | --- | ---: | ---: | ---: | ---: |
+  | sites élagués / cover | 0 / 91 079 913 | 40 914 459 (44,9 %) | 0 / 322 415 174 | 143 777 889 (44,6 %) |
+  | points des recensements q3 | 145 783 580 | 118 736 176 | 980 035 984 | 785 560 284 |
+  | paquets de passe q4 | 17 312 783 | 15 065 569 | 106 636 691 | 87 941 750 |
+  | certifiées au premier paquet | 5 338 976 | 5 372 666 | 20 885 337 | 21 035 206 |
+  | événements tamponnés | 9 066 964 | 9 417 751 | 78 105 353 | 80 314 568 |
+  | tâches | 2 500 659 | 2 009 427 | 9 581 649 | 7 306 047 |
+  | plus lourde tâche (pas) | 7 114 | 7 104 | 27 057 | 27 034 |
+
+  Graines, certifications, survivantes, classes et émissions inchangées.
+- **Portes** :
+  - `mhgp9_gpu_lanes_port` : sur chaque famille et chaque K, aucun site
+    élagué n'est une graine possédée (sinon code 3, `cause=prune.seed`),
+    avec un plancher de sites élagués > 0 ; toutes les autres sections
+    inchangées ;
+  - fixture minimale `tests/gpu/fixtures/prune_annulus.u32le` (quatre
+    points, K3) trouvée par recherche hors dépôt avec une variante qui
+    n'élaguait que les sites **non graines** situés entre le disque
+    $16\lvert c-m\rvert^2\leq D$ et $\Delta_4$ : un tel site décide d'une
+    boule q3. Le produit l'égale au moteur ;
+  - mutant `MHGP9_LANES_MUTANT_PRUNE_SMALL_DISK` (disque
+    $16\lvert c-m\rvert^2\leq D$) tué sur les familles
+    (`edge.seeds_or_emitted`) et sur la fixture (`compare.q3`) ;
+  - build `MHGP9_LANES_PRUNE=0` (porte `mhgp9_gpu_lanes_port_unpruned`,
+    K3 et K5) : même objet, vert ;
+  - trame épinglée, `--compare --all-asked` : `equal=1`, `identical=1` à K5
+    et K10 ; condensés de la chaîne épinglés à K5 et K10.
+- **ptxas** : P passe de 96 à 80 registres (la classe est calculée une fois
+  par site, et non plus à chaque vote), sans débordement ; T inchangé.
+
 ## Voie GPU S1 : `src/gpu/` (espace `mhgp9::gpu`, code neuf)
 
 23 septembre 2026. Première brique GPU de la v9, pour une expérience de

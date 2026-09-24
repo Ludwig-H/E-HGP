@@ -185,6 +185,7 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
           const auto status = lanes_plan_cover(HostGroup{}, index, input.edge_a[e], input.edge_b[e], lanes,
                                                input.index.kmax, walk, range_count, sites, local);
           if (status == CertificateStatus::decided) {
+            const u32 cover = sites;  // reserved whole (the device's arena rule), kept sites below
             auto& points = cover_points[self];
             auto& ranks = cover_ranks[self];
             auto& seeds = cover_seeds[self];
@@ -200,7 +201,7 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
             plan.sites = sites;
             plan.tasks = lanes_task_count(sites, plan.seeds, budget);
             cover_owner[i] = static_cast<u32>(self);
-            cover_total[self] += sites;
+            cover_total[self] += cover;
           }
           plan.status = static_cast<u8>(status);
         }

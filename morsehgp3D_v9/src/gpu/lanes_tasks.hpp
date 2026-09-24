@@ -206,10 +206,11 @@ MHGP9_HD CertificateStatus lanes_plan_cover(const Group& group, const LanesIndex
 
 // P, step 2, once the cover has its place (slab.points / ranks / seeds
 // there): scan order, seeds, and the edge's own q3 counters (q3_edges and
-// census_seeds, as q3_census). Returns the number of seeds.
+// census_seeds, as q3_census). Returns the number of seeds; `sites` becomes
+// the number of sites kept by L11 (the tasks' scans run over them).
 template <class Group>
 MHGP9_HD u32 lanes_plan_order(const Group& group, const LanesIndex& index, u32 a_rank, u32 b_rank, u8 lanes,
-                              const LanesSlab& slab, u32 range_count, u32 sites, EdgeQ3Work& local) {
+                              const LanesSlab& slab, u32 range_count, u32& sites, EdgeQ3Work& local) {
   const u32 seeds = lanes_order(group, index, a_rank, b_rank, slab, range_count, sites, local);
   if ((lanes & 2U) != 0) {
     ++local.q3_edges;

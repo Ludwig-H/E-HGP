@@ -354,6 +354,43 @@ bool same_output(const gpu::LanesOutput& a, const gpu::LanesOutput& b, std::stri
   return false;
 }
 
+// L11 (lanes plan step 3): on every edge, the cover sites the prologue
+// prunes (lanes_outside_centres) are counted, and none may be an owned
+// acute seed (lanes_seed_code == 3): a pruned seed would lose its balls.
+// Returns 3 (invariant violated) with a `cause=` line, else 0; `pruned`
+// and `sites` receive the totals.
+int prune_invariant(const gpu::LanesIndex& view, const std::vector<gpu::u32>& ea, const std::vector<gpu::u32>& eb,
+                    unsigned long long& pruned, unsigned long long& sites) {
+  std::vector<gpu::u32> ranges(2 * std::size_t{gpu::default_lanes_capacity});
+  const gpu::LanesSlab walk{ranges.data(), nullptr, nullptr, nullptr, nullptr, nullptr, gpu::default_lanes_capacity, 0};
+  for (std::size_t i = 0; i < ea.size(); ++i) {
+    gpu::u32 range_count = 0, count = 0;
+    gpu::EdgeQ3Work local{};
+    if (gpu::lanes_cover(gpu::HostGroup{}, view, ea[i], eb[i], walk, range_count, count, local) !=
+        gpu::CertificateStatus::decided)
+      continue;
+    const std::int32_t* a = view.tree.rank_points + 3 * std::size_t{ea[i]};
+    const std::int32_t* b = view.tree.rank_points + 3 * std::size_t{eb[i]};
+    const gpu::i64 diameter = gpu::dist2(a, b);
+    for (gpu::u32 r = 0; r < range_count; ++r)
+      for (gpu::u32 rank = ranges[2 * r]; rank < ranges[2 * r + 1]; ++rank) {
+        const std::int32_t* z = view.tree.rank_points + 3 * std::size_t{rank};
+        gpu::i64 num = 0;
+        gpu::i128 den = 0;
+        gpu::lanes_axial_terms(a, b, z, num, den);
+        ++sites;
+        if (!gpu::lanes_outside_centres(num, den)) continue;
+        ++pruned;
+        if (gpu::lanes_seed_code(a, b, z, diameter, view.rank_ids[ea[i]], view.rank_ids[eb[i]], view.rank_ids[rank]) ==
+            3U) {
+          std::printf("cause=prune.seed edge %zu rank %u\n", i, rank);
+          return 3;
+        }
+      }
+  }
+  return 0;
+}
+
 // Engraved replays (lanes_replay against edge_lanes' sequential order, by
 // hand): faults and deferrals never come from the real edges, so their
 // precedence is judged here. Each case: record capacity, lanes, tasks
@@ -669,6 +706,11 @@ int file_compare(const gen::Q2CensusIndexPtr& index, const Certified& certified,
                 "max_task_steps=%llu max_steps_single=%llu identical=1\n",
                 kmax, ta.size(), reference.records.size(), static_cast<unsigned long long>(reference.deferred), tasks,
                 tasks_single, max_steps, max_steps_single);
+    const auto& r3 = reference.work;
+    std::printf("q3_ledger cover_sites=%llu pruned_sites=%llu seed_tests=%llu seeds=%llu census_point_tests=%llu "
+                "census_inside_sites=%llu census_outside_sites=%llu depth_rejections=%llu emitted=%llu\n",
+                r3.cover_sites, r3.pruned_sites, r3.seed_tests, r3.seeds, r3.census_point_tests,
+                r3.census_inside_sites, r3.census_outside_sites, r3.depth_rejections, r3.emitted);
     // --device (G4): the device call (default B) against the same
     // single-task path, byte for byte, with the host twin's task counters;
     // refused (code 2) where no device answers.
@@ -846,6 +888,7 @@ int main(int argc, char** argv) {
   TaskTally tally;
   unsigned long long tasks_deferred_cover = 0, tasks_deferred_records = 0, tasks_deferred_events = 0,
                      tasks_deferred_arena = 0, tasks_refusals = 0, replay_cases = 0;
+  unsigned long long pruned_sites = 0, pruned_cover_sites = 0;  // L11
   if (const int code = replay_fixtures(replay_cases); code != 0) return code;
   gpu::Q4Work q4_total{};
   const auto options = q34_options();
@@ -1147,6 +1190,7 @@ int main(int argc, char** argv) {
           auto base = flat.input(kmax, ta, tb);
           base.edge_lanes = tl.data();
           if (const int code = tasks_against_reference(base, workers, where_name, true, tally); code != 0) return code;
+          if (const int code = prune_invariant(view, ta, tb, pruned_sites, pruned_cover_sites); code != 0) return code;
           const auto reference = single_task_batch(base, workers);
           std::vector<gpu::u32> sorted = cover_sites;
           std::sort(sorted.begin(), sorted.end());
@@ -1474,13 +1518,15 @@ int main(int argc, char** argv) {
   const bool any_q4 = std::any_of(ks.begin(), ks.end(), [](unsigned k) { return k >= 3; });
   std::printf("lanes_tasks runs=%llu tasks_b1=%llu tasks_default=%llu tasks_single=%llu extra_tasks=%llu "
               "max_steps_default=%llu max_steps_single=%llu deferred_cover=%llu deferred_records=%llu "
-              "deferred_events=%llu deferred_arena=%llu refusals=%llu replay_cases=%llu\n",
+              "deferred_events=%llu deferred_arena=%llu refusals=%llu replay_cases=%llu pruned_sites=%llu "
+              "cover_sites=%llu\n",
               tally.runs, tally.tasks_one, tally.tasks_default, tally.tasks_single, tally.extra_tasks,
               tally.max_steps_default, tally.max_steps_single, tasks_deferred_cover, tasks_deferred_records,
-              tasks_deferred_events, tasks_deferred_arena, tasks_refusals, replay_cases);
+              tasks_deferred_events, tasks_deferred_arena, tasks_refusals, replay_cases, pruned_sites,
+              pruned_cover_sites);
   if (tally.runs == 0 || tally.extra_tasks == 0 || tally.tasks_one <= tally.tasks_default ||
       tasks_deferred_cover == 0 || tasks_deferred_records == 0 || (any_q4 && tasks_deferred_events == 0) ||
-      tasks_deferred_arena == 0 || tasks_refusals == 0 || replay_cases != 20015 ||
+      tasks_deferred_arena == 0 || tasks_refusals == 0 || replay_cases != 20015 || pruned_sites == 0 ||
       tally.max_steps_default > tally.max_steps_single)
     return 3;
   if (edges == 0 || q3_only == 0 || rejections == 0 || emitted == 0 || wide_shells == 0 || deferred == 0 ||

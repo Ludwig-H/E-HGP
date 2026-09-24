@@ -100,6 +100,7 @@ struct Q3Work {
   u64 edges, cover_sites, max_cover_sites;
   CoverWork cover;
   u64 seed_tests, acute_sites, owner_rejections, seeds;
+  u64 pruned_sites;  // L11: cover sites removed from the scan order (of the seed_tests)
   u64 q3_edges, census_seeds;
   u64 census_point_tests, census_inside_sites, census_shell_sites, census_outside_sites;
   u64 depth_rejections, emitted, shell_ids;
@@ -111,6 +112,7 @@ struct EdgeQ3Work {
   u32 cover_sites;
   EdgeCoverWork cover;
   u32 seed_tests, acute_sites, owner_rejections, seeds;
+  u32 pruned_sites;
   u32 q3_edges, census_seeds;
   u64 census_point_tests, census_inside_sites, census_shell_sites, census_outside_sites;
   u32 depth_rejections, emitted;
@@ -123,7 +125,7 @@ MHGP9_HD inline void add_q3_edge(Q3Work& to, const EdgeQ3Work& from) {
   to.max_cover_sites = to.max_cover_sites < from.cover_sites ? from.cover_sites : to.max_cover_sites;
   add_edge_cover(to.cover, from.cover);
   to.seed_tests += from.seed_tests; to.acute_sites += from.acute_sites;
-  to.owner_rejections += from.owner_rejections; to.seeds += from.seeds;
+  to.owner_rejections += from.owner_rejections; to.seeds += from.seeds; to.pruned_sites += from.pruned_sites;
   to.q3_edges += from.q3_edges; to.census_seeds += from.census_seeds;
   to.census_point_tests += from.census_point_tests; to.census_inside_sites += from.census_inside_sites;
   to.census_shell_sites += from.census_shell_sites; to.census_outside_sites += from.census_outside_sites;
@@ -137,7 +139,7 @@ MHGP9_HD inline void add_q3(Q3Work& to, const Q3Work& from) {
   to.max_cover_sites = to.max_cover_sites < from.max_cover_sites ? from.max_cover_sites : to.max_cover_sites;
   add_cover(to.cover, from.cover);
   to.seed_tests += from.seed_tests; to.acute_sites += from.acute_sites;
-  to.owner_rejections += from.owner_rejections; to.seeds += from.seeds;
+  to.owner_rejections += from.owner_rejections; to.seeds += from.seeds; to.pruned_sites += from.pruned_sites;
   to.q3_edges += from.q3_edges; to.census_seeds += from.census_seeds;
   to.census_point_tests += from.census_point_tests; to.census_inside_sites += from.census_inside_sites;
   to.census_shell_sites += from.census_shell_sites; to.census_outside_sites += from.census_outside_sites;
@@ -257,6 +259,97 @@ MHGP9_HD inline bool pair_below(u32 p, u32 x, u32 low, u32 high) {
 // and WarpGroup implement `fingerprint(mask, h, sum, x)` (sum and x are
 // ADDED to).
 
+// L11 (lanes plan step 3, 24 septembre 2026; STATUT V9-S4): with
+// w = 2z-a-b, v = b-a, num = D-|w|^2 and den = D|w|^2-(w.v)^2 >= 0, a cover
+// site with num < 0 and num^2 > 2 den is STRICTLY OUTSIDE every sphere
+// through a and b whose centre lies in the disk of centres
+// Delta4 = {c : (c-m).v = 0, 8|c-m|^2 <= D}: 4(|z-c|^2-|a-c|^2) =
+// |w|^2-D-4w.u >= -num-sqrt(2 den) > 0 for c = m+u, u.v = 0, |u|^2 <= D/8.
+// Those spheres hold every seed's q3 ball (|c0-m|^2 <= D/12) and every
+// member of the q4 family whose centre is in Delta4 (2mu^2 <= Q, L2), which
+// every bucket of the grid has at its inner end (|g_j| <= mubar-1 or 0).
+// Such a site is never inside a census ball, never a lens site, never on a
+// shell, never a seed, never a member of an emittable class: it is removed
+// from the scan order (only declared counters change: pruned_sites, the
+// seed scan, censuses, passes, tasks). |num| <= 3D, den <= 4D^2 < 2^78:
+// num^2 < 2^80 in i128. MHGP9_LANES_PRUNE=0 (measurement and gate builds
+// only) keeps every site.
+#ifndef MHGP9_LANES_PRUNE
+#define MHGP9_LANES_PRUNE 1
+#endif
+inline constexpr bool lanes_prune = MHGP9_LANES_PRUNE != 0;
+
+// Engraved bounds on the u18 domain (coordinates 0..262143): |w|^2 < 2^40
+// and D < 2^38 in i64; |num| <= max(|w|^2, D), den <= D|w|^2; num^2 and
+// 2 den in i128 (L10 compares 64 num^2 with 144 den at most).
+inline constexpr i128 lanes_max_ww = i128{3} * (2 * 262143) * (2 * 262143);
+inline constexpr i128 lanes_max_dd = i128{3} * 262143 * 262143;
+static_assert(lanes_max_ww < (i128{1} << 62) && lanes_max_dd < (i128{1} << 62), "num = D - |w|^2 in i64");
+static_assert(64 * lanes_max_ww * lanes_max_ww < (i128{1} << 126), "64 num^2 in i128");
+static_assert(144 * lanes_max_dd * lanes_max_ww < (i128{1} << 126), "144 den in i128");
+
+MHGP9_HD inline bool lanes_outside_centres(i64 num, i128 den) {
+#if defined(MHGP9_LANES_MUTANT_PRUNE_SMALL_DISK)
+  return num < 0 && static_cast<i128>(num) * num > den;  // mutant: the disk 16|c-m|^2 <= D, too small
+#else
+  return num < 0 && static_cast<i128>(num) * num > 2 * den;
+#endif
+}
+
+// The axial terms of a site z of the edge (a, b): num and den above.
+MHGP9_HD inline void lanes_axial_terms(const std::int32_t a[3], const std::int32_t b[3], const std::int32_t z[3],
+                                       i64& num, i128& den) {
+  i64 ww = 0, wv = 0, dd = 0;
+  for (int axis = 0; axis < 3; ++axis) {
+    const i64 w = 2 * static_cast<i64>(z[axis]) - a[axis] - b[axis];
+    const i64 v = static_cast<i64>(b[axis]) - a[axis];
+    ww += w * w;
+    wv += w * v;
+    dd += v * v;
+  }
+  num = dd - ww;
+  den = static_cast<i128>(dd) * ww - static_cast<i128>(wv) * wv;
+}
+
+// A site's place in the scan: its class (scan order: increasing class,
+// increasing rank inside a class), or lanes_pruned_class.
+inline constexpr u32 lanes_pruned_class = 63;
+inline constexpr u32 scan_classes = scan_rings;
+static_assert(scan_classes <= 32 && lanes_pruned_class >= 32, "a kept class has five bits, the pruned one the sixth");
+
+// The rings order (8 rings of |w|^2 in [0, 4D], ring r = number of
+// thresholds (i+1)D/2 below |w|^2), after L11.
+MHGP9_HD inline u32 lanes_scan_class(const std::int32_t a[3], const std::int32_t b[3], const std::int32_t z[3],
+                                     i64 diameter) {
+  i64 num = 0;
+  i128 den = 0;
+  lanes_axial_terms(a, b, z, num, den);
+  if (lanes_prune && lanes_outside_centres(num, den)) return lanes_pruned_class;
+  const i64 norm = diameter - num;
+  u32 r = 0;
+  for (u32 i = 0; i + 1 < scan_rings; ++i) r += 2 * norm > static_cast<i64>(i + 1) * diameter ? 1U : 0U;
+  return r;
+}
+
+// The seed code of a site x of the edge (a, b): 0 not strictly acute, 1
+// acute but ab not owned, 3 an owned acute seed (the engine's q3_edge
+// predicate, ties broken by the sorted ID pair).
+MHGP9_HD inline u32 lanes_seed_code(const std::int32_t a[3], const std::int32_t b[3], const std::int32_t x[3],
+                                    i64 diameter, u32 id_a, u32 id_b, u32 id_x) {
+  const u32 low = id_a < id_b ? id_a : id_b, high = id_a < id_b ? id_b : id_a;
+  i64 ax = 0, bx = 0;
+  for (int axis = 0; axis < 3; ++axis) {
+    const i64 da = static_cast<i64>(x[axis]) - a[axis], db = static_cast<i64>(x[axis]) - b[axis];
+    ax += da * da;
+    bx += db * db;
+  }
+  if (!(diameter + ax > bx && diameter + bx > ax && ax + bx > diameter)) return 0U;
+  if (ax > diameter || bx > diameter) return 1U;
+  if ((ax == diameter && pair_below(id_a, id_x, low, high)) || (bx == diameter && pair_below(id_b, id_x, low, high)))
+    return 1U;
+  return 3U;
+}
+
 // ---- One edge -------------------------------------------------------------
 
 // Prologue of an edge, shared by its q3 and q4 lanes, in two steps (v9
@@ -279,12 +372,13 @@ MHGP9_HD CertificateStatus lanes_cover(const Group& group, const LanesIndex& ind
 }
 
 // lanes_order: the cover sites (ranges of lanes_cover, through
-// slab.scratch) in scan order at slab.points / slab.ranks[0, sites) and the
-// owned acute seeds at slab.seeds[0, seeds) (scan positions); `local`
-// receives the seed-scan counters. Returns the number of seeds.
+// slab.scratch) kept by L11 in scan order at slab.points / slab.ranks[0,
+// sites) (`sites`: the cover's sites in, the kept ones out) and the owned
+// acute seeds at slab.seeds[0, seeds) (scan positions); `local` receives
+// the seed-scan counters. Returns the number of seeds.
 template <class Group>
 MHGP9_HD u32 lanes_order(const Group& group, const LanesIndex& index, u32 a_rank, u32 b_rank, const LanesSlab& slab,
-                         u32 range_count, u32 sites, EdgeQ3Work& local) {
+                         u32 range_count, u32& sites, EdgeQ3Work& local) {
   const std::int32_t* a = index.tree.rank_points + 3 * static_cast<std::size_t>(a_rank);
   const std::int32_t* b = index.tree.rank_points + 3 * static_cast<std::size_t>(b_rank);
   const u32 id_a = index.rank_ids[a_rank], id_b = index.rank_ids[b_rank];
@@ -298,49 +392,54 @@ MHGP9_HD u32 lanes_order(const Group& group, const LanesIndex& index, u32 a_rank
   }
   group.sync();
 
-  i64 diameter = 0, center_twice[3];
+  i64 diameter = 0;
   for (int axis = 0; axis < 3; ++axis) {
     const i64 delta = static_cast<i64>(b[axis]) - a[axis];
     diameter += delta * delta;
-    center_twice[axis] = static_cast<i64>(a[axis]) + b[axis];
   }
-  // The cover sites in scan order (rings, then rank): a counting pass, then
-  // a stable scatter. The ring index comes back in two ballots (bits 0-1, 2).
-  const auto ring = [&](u32 s) -> u32 {
+  // The class of every site, once, in slab.ranges (free after the fill).
+  group.for_each(sites, [&](u32 s) {
     const std::int32_t* p = index.tree.rank_points + 3 * static_cast<std::size_t>(slab.scratch[s]);
-    i64 norm = 0;
-    for (int axis = 0; axis < 3; ++axis) {
-      const i64 delta = 2 * static_cast<i64>(p[axis]) - center_twice[axis];
-      norm += delta * delta;
-    }
-    u32 r = 0;
-    for (u32 i = 0; i + 1 < scan_rings; ++i) r += 2 * norm > static_cast<i64>(i + 1) * diameter ? 1U : 0U;
-    return r;
-  };
-  u32 ring_begin[scan_rings];
-  for (u32 r = 0; r < scan_rings; ++r) ring_begin[r] = 0;
-  const auto ring_masks = [&](u32 base, u32 masks[scan_rings]) {
-    u32 bit0 = 0, bit1 = 0, bit2 = 0, unused = 0;
-    group.ballot2(base, sites, ring, bit0, bit1);
-    group.ballot2(base, sites, [&](u32 s) { return ring(s) >> 2; }, bit2, unused);
+    slab.ranges[s] = lanes_scan_class(a, b, p, diameter);
+  });
+  group.sync();
+  // The kept sites in scan order (classes, then rank): a counting pass,
+  // then a stable scatter. Each chunk's classes come back in three ballots
+  // (bits 0-4 the class, bit 5 pruned).
+  const auto class_bits = [&](u32 base, u32 bits[6]) {
+    group.ballot2(base, sites, [&](u32 s) { return slab.ranges[s] & 3U; }, bits[0], bits[1]);
+    group.ballot2(base, sites, [&](u32 s) { return (slab.ranges[s] >> 2) & 3U; }, bits[2], bits[3]);
+    group.ballot2(base, sites, [&](u32 s) { return (slab.ranges[s] >> 4) & 3U; }, bits[4], bits[5]);
     const u32 lanes = sites - base < Group::size ? sites - base : Group::size;
     const u32 valid = lanes == 32 ? 0xffffffffU : ((1U << lanes) - 1U);
-    for (u32 r = 0; r < scan_rings; ++r)
-      masks[r] = valid & ((r & 1U) != 0 ? bit0 : ~bit0) & ((r & 2U) != 0 ? bit1 : ~bit1) &
-                 ((r & 4U) != 0 ? bit2 : ~bit2);
+    bits[5] &= valid;  // pruned
   };
+  const auto class_mask = [](const u32 bits[6], u32 valid, u32 r) {
+    u32 m = valid & ~bits[5];
+    for (u32 k = 0; k < 5; ++k) m &= ((r >> k) & 1U) != 0 ? bits[k] : ~bits[k];
+    return m;
+  };
+  u32 class_begin[scan_classes];
+  for (u32 r = 0; r < scan_classes; ++r) class_begin[r] = 0;
+  u32 pruned = 0;
   for (u32 base = 0; base < sites; base += Group::size) {
-    u32 masks[scan_rings];
-    ring_masks(base, masks);
-    for (u32 r = 0; r + 1 < scan_rings; ++r) ring_begin[r + 1] += popcount32(masks[r]);
+    u32 bits[6];
+    class_bits(base, bits);
+    const u32 lanes = sites - base < Group::size ? sites - base : Group::size;
+    const u32 valid = lanes == 32 ? 0xffffffffU : ((1U << lanes) - 1U);
+    pruned += popcount32(bits[5]);
+    for (u32 r = 0; r + 1 < scan_classes; ++r) class_begin[r + 1] += popcount32(class_mask(bits, valid, r));
   }
-  for (u32 r = 1; r < scan_rings; ++r) ring_begin[r] += ring_begin[r - 1];
+  for (u32 r = 1; r < scan_classes; ++r) class_begin[r] += class_begin[r - 1];
   for (u32 base = 0; base < sites; base += Group::size) {
-    u32 masks[scan_rings];
-    ring_masks(base, masks);
-    for (u32 r = 0; r < scan_rings; ++r) {
-      group.for_set(masks[r], [&](u32 lane, u32 order) {
-        const u32 rank = slab.scratch[base + lane], to = ring_begin[r] + order;
+    u32 bits[6];
+    class_bits(base, bits);
+    const u32 lanes = sites - base < Group::size ? sites - base : Group::size;
+    const u32 valid = lanes == 32 ? 0xffffffffU : ((1U << lanes) - 1U);
+    for (u32 r = 0; r < scan_classes; ++r) {
+      const u32 mask = class_mask(bits, valid, r);
+      group.for_set(mask, [&](u32 lane, u32 order) {
+        const u32 rank = slab.scratch[base + lane], to = class_begin[r] + order;
         const std::int32_t* p = index.tree.rank_points + 3 * static_cast<std::size_t>(rank);
         std::int32_t* q = slab.points + 3 * static_cast<std::size_t>(to);
         q[0] = p[0];
@@ -348,40 +447,29 @@ MHGP9_HD u32 lanes_order(const Group& group, const LanesIndex& index, u32 a_rank
         q[2] = p[2];
         slab.ranks[to] = rank;
       });
-      ring_begin[r] += popcount32(masks[r]);
+      class_begin[r] += popcount32(mask);
     }
   }
   group.sync();
+  // Every cover site is classified once (L11 test, then the seed test on
+  // the kept ones): seed_tests stays the cover's size.
+  local.seed_tests = sites;
+  local.pruned_sites = pruned;
+  sites -= pruned;
 
   // Seeds: strictly acute, ab owned (the engine's q3_edge predicate).
-  const u32 low = id_a < id_b ? id_a : id_b, high = id_a < id_b ? id_b : id_a;
   u32 seeds = 0;
   for (u32 base = 0; base < sites; base += Group::size) {
     u32 acute = 0, owned = 0;
     group.ballot2(base, sites, [&](u32 s) -> u32 {
-      const std::int32_t* x = slab.points + 3 * static_cast<std::size_t>(s);
-      i64 ax = 0, bx = 0;
-      for (int axis = 0; axis < 3; ++axis) {
-        const i64 da = static_cast<i64>(x[axis]) - a[axis], db = static_cast<i64>(x[axis]) - b[axis];
-        ax += da * da;
-        bx += db * db;
-      }
-      if (!(diameter + ax > bx && diameter + bx > ax && ax + bx > diameter)) return 0U;
-      if (ax > diameter || bx > diameter) return 1U;
-      if (ax == diameter || bx == diameter) {
-        const u32 id = index.rank_ids[slab.ranks[s]];
-        if ((ax == diameter && pair_below(id_a, id, low, high)) ||
-            (bx == diameter && pair_below(id_b, id, low, high)))
-          return 1U;
-      }
-      return 3U;
+      return lanes_seed_code(a, b, slab.points + 3 * static_cast<std::size_t>(s), diameter, id_a, id_b,
+                             index.rank_ids[slab.ranks[s]]);
     }, acute, owned);
     group.for_set(owned, [&](u32 lane, u32 rank) { slab.seeds[seeds + rank] = base + lane; });
     local.acute_sites += popcount32(acute);
     local.owner_rejections += popcount32(acute & ~owned);
     seeds += popcount32(owned);
   }
-  local.seed_tests = sites;
   local.seeds = seeds;
   group.sync();
   return seeds;

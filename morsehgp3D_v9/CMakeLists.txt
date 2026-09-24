@@ -484,6 +484,22 @@ mhgp9_gate(mhgp9_gpu_lanes_tasks_mutant_deferred_counters 1 mhgp9_gpu_lanes_task
            ARGS --n=2000 --k=3 EXPECT_PREFIX "cause=tasks.small_bytes" LABELS "gate;gpu;mutant" TIMEOUT 600)
 mhgp9_gate(mhgp9_gpu_lanes_tasks_mutant_fault_first 1 mhgp9_gpu_lanes_tasks_fault_first_mutant_gate
            ARGS --n=2000 --k=3 EXPECT_PREFIX "cause=replay." LABELS "gate;gpu;mutant" TIMEOUT 600)
+# L11 (etape 3 des voies, lemme V9-S4) : les sites du cover hors du disque
+# des centres sont retires de l'ordre de balayage. Mutant « disque trop
+# petit » (16|c-m|^2 <= D au lieu de 8) tue par la porte de port (code 1) ;
+# build sans elagage (MHGP9_LANES_PRUNE=0) : meme objet, porte verte.
+mhgp9_product_executable(mhgp9_gpu_lanes_prune_small_disk_mutant_gate tests/gpu/lanes_port_gate.cpp)
+target_link_libraries(mhgp9_gpu_lanes_prune_small_disk_mutant_gate PRIVATE mhgp9_gen mhgp9_gpu)
+target_include_directories(mhgp9_gpu_lanes_prune_small_disk_mutant_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+target_compile_definitions(mhgp9_gpu_lanes_prune_small_disk_mutant_gate PRIVATE MHGP9_LANES_MUTANT_PRUNE_SMALL_DISK=1)
+mhgp9_gate(mhgp9_gpu_lanes_mutant_prune_small_disk 1 mhgp9_gpu_lanes_prune_small_disk_mutant_gate
+           ARGS --n=2000 --k=3 EXPECT_PREFIX "cause=" LABELS "gate;gpu;mutant" TIMEOUT 600)
+mhgp9_product_executable(mhgp9_gpu_lanes_port_unpruned_gate tests/gpu/lanes_port_gate.cpp)
+target_link_libraries(mhgp9_gpu_lanes_port_unpruned_gate PRIVATE mhgp9_gen mhgp9_gpu)
+target_include_directories(mhgp9_gpu_lanes_port_unpruned_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+target_compile_definitions(mhgp9_gpu_lanes_port_unpruned_gate PRIVATE MHGP9_LANES_PRUNE=0)
+mhgp9_gate(mhgp9_gpu_lanes_port_unpruned 0 mhgp9_gpu_lanes_port_unpruned_gate ARGS --n=2000 --k=3,5
+           EXPECT_PREFIX "lanes_port_gate n=2000" LABELS "gate;gpu" TIMEOUT 1200)
 # Mode --compare (revue S4b) : planchers exiges et seulement avec --compare,
 # --compare seulement sur un fichier, nuage refuse = 2 ; deux points (fixture
 # de l'auditeur) = comparaison vide sous plancher (3) ; tetraedre a racine sur
@@ -508,6 +524,19 @@ mhgp9_gate(mhgp9_gpu_lanes_port_compare_bound 0 mhgp9_gpu_lanes_port_gate
            ARGS --file=${mhgp9_lanes_fixtures}/bound_tetra.u32le --k=3 --workers=1 --compare --all-asked
                 --min-q4-seeds=1 --min-q4-records=1
            EXPECT_PREFIX "lanes_compare K=3" LABELS "gate;gpu" TIMEOUT 60)
+# L11 : fixture minimale de quatre points (recherche hors depot, variante
+# qui n'elaguait que les sites non graines entre les deux disques) ; un site
+# entre le disque 16|c-m|^2 <= D et le disque des centres decide d'une boule
+# q3. Le produit l'egale au moteur (0), le mutant « disque trop petit » est
+# tue (1, compare.q3).
+mhgp9_gate(mhgp9_gpu_lanes_port_compare_prune_annulus 0 mhgp9_gpu_lanes_port_gate
+           ARGS --file=${mhgp9_lanes_fixtures}/prune_annulus.u32le --k=3 --workers=1 --compare --all-asked
+                --min-q3-records=1
+           EXPECT_PREFIX "lanes_compare K=3" LABELS "gate;gpu" TIMEOUT 60)
+mhgp9_gate(mhgp9_gpu_lanes_mutant_prune_small_disk_fixture 1 mhgp9_gpu_lanes_prune_small_disk_mutant_gate
+           ARGS --file=${mhgp9_lanes_fixtures}/prune_annulus.u32le --k=3 --workers=1 --compare --all-asked
+                --min-q3-records=1
+           EXPECT_PREFIX "cause=compare.q3" LABELS "gate;gpu;mutant" TIMEOUT 60)
 # --device (S4b taches, pour une session G4) : l'appel de l'appareil compare
 # octet pour octet au chemin a une tache ; --device seulement avec --compare
 # (2) ; sans CUDA, refus explicite (2), jamais un vert par vacuite.
