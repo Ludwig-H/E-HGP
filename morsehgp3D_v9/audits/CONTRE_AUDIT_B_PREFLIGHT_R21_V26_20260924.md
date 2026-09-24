@@ -129,8 +129,8 @@ Les essais restants, à distinguer des reçus acquis :
 
 | Porte | Dernière preuve pertinente | À produire |
 | --- | --- | --- |
-| Croissance 8k/16k/32k | six campagnes locales v12, s8, avec plusieurs pentes `core_sites` ≥ 2 | refaire sur chemin récent, K5/K10, sans sol puis brut ; compiler travail total et sortie, pas seulement temps mur |
-| Séparation WSPD | R20/R21 s8 seulement | mêmes entrées et sortie exacte à s8/10/12, coût complet G4 et pente locale |
+| Croissance 8k/16k/32k | six campagnes locales v12, **60 sondes** sans sol/s8, avec plusieurs pentes `core_sites` ≥ 2 ; secteurs bruts v12 sur une trame | refaire sur chemin récent, K5/K10, sans sol puis brut ; compiler travail total et sortie, pas seulement temps mur |
+| Séparation WSPD | R8 historique CPU G4 compare s8/10/12 à K5 sur trois trames 08 ; R20/R21 GPU courant s8 seulement | mêmes entrées et sortie exacte à s8/10/12, K5/K10, coût complet G4 et pente locale |
 | FULL K5 exact | T2 public recalcule la chaîne à `kmax=10,s=8` sur fixtures ; R20 est `complete_relative` | porte T2 directe `kmax=5`, variations s/W, comparaison structurelle des nœuds, parents, liens et coquilles |
 | Régimes LiDAR | R20 sans sol, trois trames de 08 ; R21 brut planifié mais non reçu | plusieurs séquences, trames entières brutes et sans sol, segmentation et coût total séparés |
 | Session et capacité | R21 processus par cas ; aucun 10M+ qualifié | flux persistant multi-trames, RSS/VRAM/pagination, adressage et sortie explicite à dizaines de millions |

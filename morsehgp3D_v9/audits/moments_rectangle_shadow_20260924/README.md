@@ -2,7 +2,7 @@
 
 24 septembre 2026, auditeur B, hors moteur et hors registre.
 [Source](shadow.cpp) SHA-256
-`24f08f682a4432c18e3f54424a150719764942b2649f41a7ac29c2d9d36e633e`.
+`a3421f8d340eb67a034b179827f618e666cd25469eacbb033aa6a589502b780f`.
 Entrée : quart physique sans sol de 08/000200, 11 461 sites, fichier
 `../s4a_cpu_scene02_physical_panel_20260924/inputs/quarter_full.u32le`,
 SHA-256 `825d005ea9c3e1b8509e26bd5adda746a80779f1e12e8a7e05c1b01bc9f7e7ae`.
@@ -21,7 +21,12 @@ timeout 120s /tmp/mhgp9_moments_shadow \
   morsehgp3D_v9/audits/s4a_cpu_scene02_physical_panel_20260924/inputs/quarter_full.u32le 5 1024
 ```
 
-Le front est le vrai `MidpointSamples`, `K=5,s=8`, puis le filtre de
+Un dernier argument facultatif fixe `s` (8 par défaut) ; les appels
+`... 5 1024 8`, `... 5 1024 10`, `... 5 1024 12` ont été rejoués sur
+le même input et le même binaire. Ils comparent **front et shadow
+seulement**, pas la chaîne FULL aux trois séparations.
+
+Le front est le vrai `MidpointSamples`, `K=5,s∈{8,10,12}`, puis le filtre de
 témoin affine q3/q4 est appelé sur chaque rectangle. Seuls les produits
 encore ouverts et de masse `|A||B|≥1024` sont inspectés. Un seul bloc
 `G` de ≤64 sites est choisi par descente de l'index spatial vers le
@@ -53,27 +58,64 @@ pas la réutiliser pour de grands blocs sans recalculer les bornes.
 
 ## Résultat et verdict
 
-Rejeu B : **520 210** rectangles de front, **245 818** ouverts, seulement
-**120** avec masse ≥1024, de masse cumulée **897 149 paires**.
-Ni le préfiltre ni les 64 coins n'ont certifié q3, q4 ou les deux sur
-aucun des 120 rectangles. Sur neuf paires ponctuelles échantillonnées
-par rectangle (premier/médian/dernier rang de chaque facteur), le **même
-G** certifie q3 dans 22/1080 tests et q4 dans 61/1080 ; dans 14/120
-rectangles, au moins une paire échantillonnée ferme toutes ses voies
-encore ouvertes. Cela suggère que la grosse boîte uniforme masque un
-gain ponctuel, sans quantifier les paires réelles évitables.
+Rejeu B, même input et K5 :
+
+| s | rectangles front | ouverts | lourds ≥1024 | masse lourde | certifiés uniformément | succès q3/q4 parmi 9 paires sondées par rectangle | rectangles avec ≥1 paire fermant toutes ses voies |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 8 | 520 210 | 245 818 | 120 | 897 149 | 0 | 22 / 61 sur 1 080 | 14 |
+| 10 | 614 267 | 263 712 | 150 | 770 735 | 0 | 0 / 43 sur 1 350 | 8 |
+| 12 | 703 786 | 278 579 | 159 | 580 251 | 0 | 0 / 14 sur 1 431 | 3 |
+
+Ni le préfiltre ni les 64 coins ne certifient un de ces rectangles
+lourds avec ce G. Le nombre de rectangles monte avec `s`, tandis que
+la masse des seuls produits lourds baisse ; les masses légères, la
+sélection, le cœur et l'aval ne sont pas chiffrés ici. Les fronts
+diffèrent : les succès sur neuf paires sondées ne sont pas une
+comparaison appariée paire par paire. Le même G peut certifier une
+paire particulière sans certifier toute sa boîte : la grosse boîte
+uniforme masque un gain ponctuel, sans quantifier les paires réelles
+évitables.
 
 Durées internes du seul sous-échantillon, **descriptives** sur hôte
-partagé : choix/sommation de G ~85 µs, sondage des 1080 paires ~139 µs,
-préfiltre ~29 µs, 64 coins à échec précoce ~17 µs. Elles ne sont pas des
+partagé : choix/sommation de G ~85–100 µs, sondage de neuf paires par
+rectangle ~115–139 µs, préfiltre ~29–34 µs, 64 coins à échec précoce
+~15–17 µs pour les trois `s`. Elles ne sont pas des
 temps G4 ni des chronos de chaîne. Dans ce régime, optimiser seulement
 la formule des coins ne résoudrait pas le coût de sélection, et appliquer
 64 coins à tous les 245 818 rectangles serait injustifié.
 
-**Décision : ne pas porter cette sélection de G telle quelle.** Tester
-ensuite un tuilage *disjoint* limité des grands rectangles avec héritage
-du bloc et des moments ; mesurer `ΣF` des arêtes S2 réellement évitées,
-les sorties q3/q4, le coût de sélection/tuilage/repli et la chaîne FULL.
+### Tuilage disjoint borné, même bloc G
+
+Le [second sidecar](tiles.cpp), SHA-256
+`ba994e6d86b6b9680c24ab8dc2589d9a0ea00989405ed31e5994035def8226c9`,
+inclut le `shadow.cpp` voisin et conserve le même G de chaque racine.
+À chaque profondeur, il divise en deux le facteur de plus grande
+population par les enfants exacts de l'index. Les sous-produits sont
+disjoints ; le script vérifie la conservation de la masse et la
+monotonie des voies certifiées. Rejeu avec les mêmes options, en
+remplaçant `shadow.cpp` par `tiles.cpp` dans la commande de compilation :
+
+| profondeur | tuiles | masse totale | voies closes par 64 coins | masse dont toutes les voies ouvertes sont closes | voies closes par préfiltre |
+| ---: | ---: | ---: | --- | ---: | ---: |
+| 0 | 120 | 897 149 | aucune | 0 | 0 |
+| 1 | 240 | 897 149 | q4 sur une tuile | 4 620 | 0 |
+| 2 | 480 | 897 149 | q4 sur deux tuiles, q3 seule sur une autre | 4 620 | 0 |
+
+Les 418 paires de la tuile q3 seule à profondeur 2 ne sont **pas**
+retirables si q4 reste ouverte. Les 4 620 paires entièrement fermées
+ne représentent que **0,515 %** de la masse lourde pré-S2. C'est
+un *plafond* dans ce sous-échantillon : si ces paires ne survivent pas
+jusqu'à S2, l'économie réelle est nulle. Le préfiltre d'intervalles
+ne ferme aucune des **840 tuiles testées**, même lorsqu'un coin réussit ;
+ici il ajoute du travail sans réduire les tests de coins. Les 2 191
+évaluations effectives de coins (arrêt précoce) et les allocations
+de tuiles restent à payer. Ces résultats ne justifient pas de porter
+ce tuilage tel quel dans le moteur.
+
+**Décision : ne pas porter cette sélection de G ni ce tuilage tels quels.**
+Le prochain essai utile est un certificat plus local, par arête S2 ou
+par tuile choisie avec un meilleur G, avec jointure à `ΣF` des arêtes
+réellement évitées, sorties q3/q4 et coût sélection/preuve/repli/FULL.
 Ce shadow n'exécute ni S2, ni le cœur, ni FULL ; il n'établit ni gain ni
 sous-quadraticité. Une réussite sur une paire sondée ne permet jamais de
 fermer le rectangle entier.

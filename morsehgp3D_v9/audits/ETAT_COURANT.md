@@ -7,8 +7,11 @@ le bloc spatial naïf de ≤64 sites n'en ferme aucun uniformément aux 64
 coins ; pourtant 14 rectangles ont une paire sondée fermable avec ce
 même bloc. Le préfiltre d'intervalles entier est sûr, mais le verrou est
 ici l'uniformité de la grosse boîte et le choix du bloc, pas seulement
-l'arithmétique des coins. Aucun gain S2, FULL ou G4 ne s'en déduit ;
-prochaine porte : tuilage disjoint et `ΣF` réellement évitée.
+l'arithmétique des coins. Même deux niveaux de tuilage disjoint ne
+ferment au plus que 4 620/897 149 paires lourdes pré-S2 (0,515 %), et
+le préfiltre ne ferme aucune des 840 tuiles. Aucun gain S2, FULL ou G4
+ne s'en déduit ; prochaine porte : bloc mieux choisi ou certificat par
+arête, joint à `ΣF` réellement évitée.
 
 Le [préflight indépendant R21/v26](CONTRE_AUDIT_B_PREFLIGHT_R21_V26_20260924.md)
 trouve un défaut du lecteur : il ne confronte pas les durées d'ouverture

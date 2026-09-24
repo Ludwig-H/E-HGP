@@ -113,10 +113,12 @@ static std::uint32_t load32(const unsigned char* p) {
   return std::uint32_t(p[0])|(std::uint32_t(p[1])<<8)|(std::uint32_t(p[2])<<16)|(std::uint32_t(p[3])<<24);
 }
 int main(int argc,char** argv) try {
-  if(argc!=4) throw std::runtime_error("usage: shadow points.u32le K min_product");
+  if(argc!=4&&argc!=5) throw std::runtime_error("usage: shadow points.u32le K min_product [s]");
   const unsigned k=std::stoul(argv[2]);
   const std::uint64_t min_product=std::stoull(argv[3]);
+  const unsigned separation_s=argc==5?std::stoul(argv[4]):8;
   if(k<4||k>10) throw std::runtime_error("K outside [4,10]");
+  if(separation_s<2||separation_s>32) throw std::runtime_error("s outside [2,32]");
   std::ifstream file(argv[1],std::ios::binary);
   if(!file) throw std::runtime_error("cannot open input");
   const std::vector<unsigned char> raw{std::istreambuf_iterator<char>(file),{}};
@@ -132,7 +134,7 @@ int main(int argc,char** argv) try {
   std::uint64_t sampled_pairs=0,sampled_pair_q3=0,sampled_pair_q4=0,rect_any_sample=0;
   std::uint64_t corner_ms_ns=0,cheap_ms_ns=0,select_ms_ns=0,sample_ms_ns=0;
   const auto start=std::chrono::steady_clock::now();
-  const auto result=run_wspd_front(*index,k,8,WspdFrontMode::MidpointSamples,[&](const WspdRectangle& r) {
+  const auto result=run_wspd_front(*index,k,separation_s,WspdFrontMode::MidpointSamples,[&](const WspdRectangle& r) {
     ++front;
     const auto& a=nodes[r.a_node],&b=nodes[r.b_node];
     Q34WitnessSearchWork work{};Q34WitnessBoundsWork bounds{};
@@ -174,7 +176,7 @@ int main(int argc,char** argv) try {
     cheap_3+=bool(fast&2);cheap_4+=bool(fast&4);cheap_both+=fast==mask;
   },6);
   const auto wall=std::chrono::duration<double>(std::chrono::steady_clock::now()-start).count();
-  std::cout<<"sites "<<points.size()<<" K "<<k<<" min_product "<<min_product<<" front "<<front
+  std::cout<<"sites "<<points.size()<<" K "<<k<<" s "<<separation_s<<" min_product "<<min_product<<" front "<<front
       <<" open "<<open<<" selected "<<selected<<" selected_pair_mass "<<selected_mass
       <<" group_below_threshold "<<groups_small<<" corner_q3 "<<corners_3<<" corner_q4 "<<corners_4
       <<" corner_all_open_lanes "<<corners_both<<" cheap_q3 "<<cheap_3<<" cheap_q4 "<<cheap_4

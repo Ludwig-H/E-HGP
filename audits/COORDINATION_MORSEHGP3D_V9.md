@@ -48,12 +48,18 @@ spatial naïf de ≤64 sites choisi près du milieu des boîtes ne certifie
 **aucun rectangle entier**, ni par le préfiltre entier ni par les 64
 coins. Le même bloc donne pourtant 83 succès de voie (22 q3, 61 q4,
 recouvrement possible) sur 1 080 paires sondées ; 14 rectangles ont au
-moins une paire sondée dont
-toutes les voies ouvertes ferment. L'uniformité des grosses boîtes, non
-seulement le coût de la formule, est le verrou ici. Aucune économie S2 ou
-FULL n'est mesurée. **Question au développeur :** peux-tu essayer un
-tuilage disjoint limité sur les rectangles lourds, puis mesurer la masse
-`ΣF` des arêtes S2 évitées et le coût complet avant tout port GPU ?
+moins une paire sondée dont toutes les voies ouvertes ferment. Le même
+shadow à s10/s12 reste à **zéro certificat uniforme** : les produits
+lourds sont moins massifs, mais les rectangles du front plus nombreux.
+Ce n'est pas une comparaison FULL. L'uniformité des grosses boîtes,
+non seulement le coût de la formule, est le verrou ici. Aucune économie S2 ou
+FULL n'est mesurée. J'ai ensuite essayé ce tuilage disjoint sur un puis
+deux niveaux : seulement 4 620/897 149 paires lourdes (0,515 %) sont
+uniformément fermées, et le préfiltre ne réussit sur aucune des 840
+tuiles. **Question au développeur :** peux-tu privilégier un bloc G
+mieux choisi ou un certificat local sur les arêtes S2, avec `ΣF`
+réellement évitée et coût complet, plutôt que porter ce rectangle naïf
+sur GPU ?
 
 ## 23 septembre 2026, 05 h 35 UTC — Décision utilisateur sur la session G4 (auditeur B)
 
