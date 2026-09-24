@@ -32,8 +32,9 @@
 // de la tour (et du catalogue), puis le temoin a --witness-threads et la voie
 // hachee a chaque --threads, comparees au temoin.
 //
-// Planchers (code 3) : voie effectivement prise a chaque ordre (hashed = 1
-// d'un cote, 0 de l'autre), classes a plusieurs requetes, graines trouvees,
+// Planchers (code 3) : voie effectivement prise a chaque ordre (trace path =
+// 2 pour la voie hachee, 1 pour le temoin), classes a plusieurs requetes,
+// graines trouvees,
 // plus d'un ouvrier a W >= 2, au moins 8 192 requetes a un ordre (--selftest)
 // ou --min-requests (--file). Code 0 conforme, 1 desaccord (ligne `cause=`),
 // 2 argument ou entree, 3 plancher.
@@ -89,7 +90,7 @@ const char* differing_work(const FullBallStats& a, const FullBallStats& b, bool 
     MHGP9_SAME(static_workers_created) MHGP9_SAME(static_lanes_used) MHGP9_SAME(parallel_orders)
     MHGP9_SAME(overlapped_orders)
   }
-  for (const auto* work : {&FullBallStats::validation_work, &FullBallStats::resolve_work}) {
+  for (const auto work : {&FullBallStats::validation_work, &FullBallStats::resolve_work}) {
     const auto& x = a.*work;
     const auto& y = b.*work;
     if (x.calls != y.calls || x.supports_by_size != y.supports_by_size || x.power_tests != y.power_tests ||
@@ -136,21 +137,25 @@ struct Tally {
   std::uint64_t tag_rejects = 0, seed_tag_rejects = 0, probes = 0, runs = 0, multi_worker = 0;
 };
 
-// The hashed run `h` against the witness `w`: firsts, then targets, then
-// status, digest and work (the firsts are recorded when the classes are
-// known, before any resolution failure).
+// The hashed run `h` against the complete witness `w`: the firsts of every
+// order whose classes `h` reached (recorded before any resolution failure),
+// then the targets of every order, then status, path, digest and work.
 void compare(const char* label, const Run& w, const Run& h, unsigned kmax, std::uint64_t digest, Tally& t) {
+  if (w.tower.status != FullBallStatus::kCompleteRelative)
+    throw Mismatch{std::string("cause=witness.status reason=") + w.tower.reason + where(label, w, kmax)};
   for (unsigned k = 2; k <= kmax; ++k) {
-    if (w.trace.hashed[k] != 0 || h.trace.hashed[k] != 1)
-      throw Floor{"cause=floor.path" + where(label, h, k)};
-    if (w.trace.firsts[k].size() != w.tower.stats.static_requests[k] || h.trace.firsts[k] != w.trace.firsts[k])
+    if (w.trace.path[k] != 1 || w.trace.firsts[k].size() != w.tower.stats.static_requests[k] ||
+        w.trace.targets[k].size() != w.tower.stats.static_requests[k])
+      throw Floor{"cause=floor.witness_path" + where(label, w, k)};
+    if (h.trace.path[k] && h.trace.firsts[k] != w.trace.firsts[k])
       throw Mismatch{"cause=grouping.firsts" + where(label, h, k)};
   }
   for (unsigned k = 2; k <= kmax; ++k)
-    if (w.trace.targets[k].size() != w.tower.stats.static_requests[k] || h.trace.targets[k] != w.trace.targets[k])
-      throw Mismatch{"cause=grouping.targets" + where(label, h, k)};
-  if (w.tower.status != FullBallStatus::kCompleteRelative || h.tower.status != FullBallStatus::kCompleteRelative)
+    if (h.trace.targets[k] != w.trace.targets[k]) throw Mismatch{"cause=grouping.targets" + where(label, h, k)};
+  if (h.tower.status != FullBallStatus::kCompleteRelative)
     throw Mismatch{std::string("cause=grouping.status reason=") + h.tower.reason + where(label, h, kmax)};
+  for (unsigned k = 2; k <= kmax; ++k)
+    if (h.trace.path[k] != 2) throw Floor{"cause=floor.path" + where(label, h, k)};
   if (w.digest != digest || h.digest != digest) throw Mismatch{"cause=grouping.digest" + where(label, h, kmax)};
   if (const char* field = differing_work(w.tower.stats, h.tower.stats, w.threads == h.threads && w.overlap == h.overlap))
     throw Mismatch{std::string("cause=grouping.work field=") + field + where(label, h, kmax)};

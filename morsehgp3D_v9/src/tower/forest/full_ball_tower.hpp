@@ -115,15 +115,15 @@ struct FullBallBatchResolver {
 // per request ordinal, its static target and the ordinal of the FIRST
 // request of its class (minimum ordinal of the requests of equal facet key).
 // Firsts are recorded when the classes are known, targets at the end of the
-// order's phase 0. hashed[K] = 1 when order K was grouped by the hashed path;
-// tag_rejects and probes are schedule-dependent diagnostics of that path
+// order's phase 0. path[K]: 0 while order K has no classes, 1 when they came
+// from the sorted witness, 2 from the hashed grouping; tag_rejects and probes are schedule-dependent diagnostics of that path
 // (tag matches refused by the exact key compare, slots probed beyond the
 // home slot), never work counters; seed_tag_rejects: the same refusals in
 // the lookups of its seed index.
 struct FullBallStaticTrace {
   std::array<std::vector<u32>, kFacetMaxK + 1> targets;
   std::array<std::vector<u64>, kFacetMaxK + 1> firsts;
-  std::array<u64, kFacetMaxK + 1> hashed{}, tag_rejects{}, probes{}, seed_tag_rejects{};
+  std::array<u64, kFacetMaxK + 1> path{}, tag_rejects{}, probes{}, seed_tag_rejects{};
 };
 // Named switches of the static tower path (review before R21: three sibling
 // work series each added a positional bool right after overlap_static; a
@@ -2151,7 +2151,9 @@ class Builder {
       if (seen == 0) return nullptr;
       if ((seen ^ h) >> 32) continue;  // another tag: another key
       const StaticSeed& seed = seeds[(seen & kLowHalf) - 1];
-#if !defined(MHGP9_TOWER_GROUP_MUTANT_SEED_TRUST_HASH)
+#if defined(MHGP9_TOWER_GROUP_MUTANT_SEED_TRUST_HASH)
+      static_cast<void>(rejects);  // mutant: a tag match taken for the seed's key
+#else
       if (seed.key != key) { ++rejects; continue; }  // exact: the whole key
 #endif
       return &seed;
@@ -2250,7 +2252,7 @@ class Builder {
       auto& firsts = static_trace->firsts[current_k];
       firsts.resize(n);
       for (size_t i = 0; i < n; ++i) firsts[i] = (group_table[static_targets[i]] & kLowHalf) - 1;
-      static_trace->hashed[current_k] = 1;
+      static_trace->path[current_k] = 2;
       static_trace->tag_rejects[current_k] = static_trace->probes[current_k] = 0;
       for (const auto& d : diagnostics) {
         static_trace->tag_rejects[current_k] += d[0];
@@ -2477,7 +2479,7 @@ class Builder {
       firsts.assign(requests.size(), 0);
       for (size_t g = 0; g + 1 < groups.size(); ++g)
         for (size_t r = groups[g]; r < groups[g + 1]; ++r) firsts[requests[r].ordinal] = requests[groups[g]].ordinal;
-      static_trace->hashed[current_k] = 0;
+      static_trace->path[current_k] = 1;
     }
     static_cursor = 0;
     // Every ordinal is written by exactly one group (the groups partition the
