@@ -467,8 +467,10 @@ mhgp9_gate(mhgp9_chain_static_paths 0 mhgp9_chain_static_paths_gate
 # Images par rangs de plateau (E1) : la voie statique compare des rangs u32,
 # la voie temporelle garde les niveaux exacts (temoin). Deux mutants de la
 # chaine recompilee : coupe fermee lue ouverte, niveau zero au rang du plus
-# bas niveau du catalogue ; la voie statique s'ecarte du temoin.
-foreach(mutant IN ITEMS RUNS_OPEN_CUT RUNS_ZERO_COLLIDES)
+# bas niveau du catalogue ; E3 : une facette oubliee par le decompte de la
+# phase A maigre (cibles statiques non consommees). La voie statique s'ecarte
+# du temoin.
+foreach(mutant IN ITEMS RUNS_OPEN_CUT RUNS_ZERO_COLLIDES COUNT_SKIPS_FACET)
   string(TOLOWER ${mutant} lower)
   mhgp9_product_executable(mhgp9_chain_static_paths_${lower}_mutant_gate
                            tests/chain/chain_static_paths_gate.cpp src/chain/tower_chain.cpp)

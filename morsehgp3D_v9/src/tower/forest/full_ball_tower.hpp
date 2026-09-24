@@ -539,6 +539,13 @@ class Builder {
     // its lot, 0 for the zero level of K1); the images compare these u32.
     std::vector<u32> runs;
     u32 lot_run = 0;
+    // v9 E3 (lean phase A): per program position, prepared in parallel.
+    std::vector<u32> lean_count;         // facets of the block (targets consumed)
+    std::vector<u16> lean_contribution;
+    std::vector<u8> lean_interior;
+    std::vector<u32> lean_k1;            // K1: domain index of each facet's site, in visit order
+    size_t lean_failed = std::numeric_limits<size_t>::max();  // first block whose count fails
+    Failure lean_failure{FullBallStatus::kInvariantViolated, ""};
   };
   // Node IDs of one order in u32: an order with 2^32-1 nodes or more is an
   // explicit resource refusal on this path (never a truncation). At 30 M
@@ -742,9 +749,12 @@ class Builder {
   }
 
   u64 order_new_node(OrderState& o, const ExactLevel& level, const std::vector<u64>& parents, u32 birth) {
-    const u64 id = o.current.levels.size();
+    // v9 E3: the static path keeps no ExactLevel per node (the images read
+    // the plateau ranks); the node count is the size of `next`.
+    static_cast<void>(level);
+    const u64 id = o.current.next.size();
     require(id < kAbsent32, "full_ball_node_representation", FullBallStatus::kResourceExhausted);
-    o.current.levels.push_back(level); o.current.next.push_back(absent); o.compressed.push_back(id);
+    o.current.next.push_back(absent); o.compressed.push_back(id);
     for (u64 parent : parents) { o.current.next[parent] = id; o.compressed[parent] = id; }
     o.birth_ball.push_back(birth);
     o.runs.push_back(o.lot_run);
@@ -752,28 +762,105 @@ class Builder {
     return id;
   }
 
-  void order_block(OrderState& o, Block& block, BallId id, u64 prior_count) {
+  // v9 E3 (lean phase A, plan of the tower judge): the history-free data of
+  // every block of the order, in parallel before the sequential loop (the
+  // facet count, contribution and interior of count_block_at; for K1 the
+  // domain index of each facet's site). A count failure is kept for the
+  // FIRST failing block and thrown by the loop when it reaches that block,
+  // after the same counters: the reported failure is the sequential one.
+  void order_prepare_lean(OrderState& o) {
+    const auto& program = programs[o.k];
+    const size_t n = program.size();
+    o.lean_count.assign(n, 0);
+    o.lean_contribution.assign(n, 0);
+    o.lean_interior.assign(n, 0);
+    o.lean_failed = std::numeric_limits<size_t>::max();
+    constexpr size_t block = 4096;
+    const size_t chunks = (n + block - 1) / block;
+    const size_t none = std::numeric_limits<size_t>::max();
+    std::vector<size_t> failed_at(chunks, none);
+    std::vector<Failure> failures(chunks, Failure{FullBallStatus::kInvariantViolated, ""});
+    parallel_items(chunks, geometry_threads, [&](size_t chunk, size_t) {
+      for (size_t j = chunk * block; j < std::min(n, (chunk + 1) * block); ++j) {
+        try {
+          u16 contribution = 0; bool interior = false;
+          o.lean_count[j] = count_block_at(o.k, program[j], contribution, interior);
+          o.lean_contribution[j] = contribution;
+          o.lean_interior[j] = interior ? 1 : 0;
+        } catch (const Failure& failure) {
+          failed_at[chunk] = j; failures[chunk] = failure;
+          return;
+        }
+      }
+    });
+    for (size_t c = 0; c < chunks; ++c)
+      if (failed_at[c] != none) { o.lean_failed = failed_at[c]; o.lean_failure = failures[c]; break; }
+    if (o.k != 1) return;
+    // K1: the facets are single sites; their domain indices in visit order
+    // (up to the first failing block, which the loop never passes).
+    o.lean_k1.clear();
+    for (size_t j = 0; j < std::min(n, o.lean_failed); ++j) {
+      u16 contribution = 0; bool interior = false;
+      visit_block_at(1, program[j], contribution, interior, [&](std::span<const i32> facet) {
+        require(facet.size() == 1, "full_ball_representative_cardinality");
+        const PointId point = ix.point_id(facet.front());
+        o.lean_k1.push_back(static_cast<u32>(std::lower_bound(domain.begin(), domain.end(), point) - domain.begin()));
+      });
+    }
+  }
+
+  // The loop's appends are bounded by the prepared counts: a node, an action
+  // and a batch per block at most (plus the K1 domain), a parent per facet,
+  // a contribution per block. Reserved once (no regrowth copies in the loop).
+  void reserve_lean(OrderState& o) {
+    const size_t blocks = programs[o.k].size();
+    size_t facets = 0;
+    for (const u32 count : o.lean_count) facets += count;
+    const size_t nodes = blocks + (o.k == 1 ? domain.size() : 0);
+    o.current.next.reserve(nodes); o.compressed.reserve(nodes);
+    o.birth_ball.reserve(nodes); o.runs.reserve(nodes);
+    auto& d = o.draft.flat;
+    d.level.reserve(nodes + 1); d.batch_begin.reserve(nodes + 2);
+    d.parent_begin.reserve(nodes + 1); d.contribution_begin.reserve(nodes + 1);
+    d.parent.reserve(facets); d.contribution.reserve(nodes);
+  }
+  // Prefetch distances of the lean loop (facets ahead): hints only.
+  static constexpr size_t kLeanAnchorAhead = 24, kLeanRootAhead = 8, kLeanBlockAhead = 8;
+  // One block of the lean loop: the counters, requires and roots of
+  // order_block in the same order, without building the facets.
+  void order_block_lean(OrderState& o, Block& block, size_t position, BallId id, u64 prior_count,
+                        size_t& k1_cursor) {
     block.ball = id; block.roots.clear(); block.contribution = 0; block.interior = false;
     add(o.st.anchor_blocks);
     if (balls[id].n_shell == balls[id].arity) add(o.st.regular_blocks); else add(o.st.extra_blocks);
-    u16 contribution = 0; bool interior = false;
-    visit_block_at(o.k, id, contribution, interior, [&](std::span<const i32> facet) {
-      if (o.k == 1) {
-        add(o.st.representatives);
-        require(facet.size() == 1, "full_ball_representative_cardinality");
-        const PointId point = ix.point_id(facet.front());
-        block.roots.push_back(order_root(o, std::lower_bound(domain.begin(), domain.end(), point) - domain.begin(),
-                                         prior_count));
-        return;
-      }
+    if (position == o.lean_failed) throw o.lean_failure;
+    const u32 facets = o.lean_count[position];
+    for (u32 f = 0; f < facets; ++f) {
       add(o.st.representatives);
+      if (o.k == 1) {
+        require(k1_cursor < o.lean_k1.size(), "full_ball_representative_cardinality");
+        block.roots.push_back(order_root(o, o.lean_k1[k1_cursor++], prior_count));
+        continue;
+      }
       require(o.static_cursor < o.static_targets.size(), "full_ball_static_target_missing");
+      // The targets are known ahead: prefetch the anchor of a later facet and
+      // the compressed slot of a nearer one (an anchor of an earlier lot).
+      if (o.static_cursor + kLeanAnchorAhead < o.static_targets.size()) {
+        const BallId later = o.static_targets[o.static_cursor + kLeanAnchorAhead];
+        if (later < o.anchors.size()) __builtin_prefetch(&o.anchors[later]);
+      }
+      if (o.static_cursor + kLeanRootAhead < o.static_targets.size()) {
+        const BallId nearer = o.static_targets[o.static_cursor + kLeanRootAhead];
+        if (nearer < o.anchors.size() && o.anchors[nearer] < o.compressed.size())
+          __builtin_prefetch(&o.compressed[o.anchors[nearer]]);
+      }
       const BallId target = o.static_targets[o.static_cursor++];
       require(target < balls.size() && level_run[target] < level_run[id], "full_ball_static_target_not_strict");
       require(o.anchors[target] != kAbsent32, "full_ball_static_closed_anchor_missing");
       block.roots.push_back(order_root(o, o.anchors[target], prior_count));
-    });
-    block.contribution = contribution; block.interior = interior;
+    }
+    block.contribution = o.lean_contribution[position];
+    block.interior = o.lean_interior[position] != 0;
     std::sort(block.roots.begin(), block.roots.end());
     block.roots.erase(std::unique(block.roots.begin(), block.roots.end()), block.roots.end());
   }
@@ -874,6 +961,9 @@ class Builder {
       }
     }
     const auto& program = programs[o.k];
+    order_prepare_lean(o);
+    reserve_lean(o);
+    size_t k1_cursor = 0;
     for (size_t begin = 0; begin < program.size();) {
       size_t end = begin + 1;
       const auto& level = balls[program[begin]].level;
@@ -881,13 +971,21 @@ class Builder {
       while (end < program.size() && level_run[program[end]] == run) ++end;
       if (o.lot_blocks.size() < end - begin) o.lot_blocks.resize(end - begin);
       const std::span<Block> blocks(o.lot_blocks.data(), end - begin);
-      const u64 prior_count = o.current.levels.size();
+      const u64 prior_count = o.current.next.size();
       require(run < kAbsent32 - 1, "full_ball_level_run_representation", FullBallStatus::kResourceExhausted);
       o.lot_run = run + 1;
-      for (size_t j = begin; j < end; ++j) order_block(o, blocks[j - begin], program[j], prior_count);
+      // The anchor written by a later lot's block: prefetched for writing.
+      if (begin + kLeanBlockAhead < program.size()) __builtin_prefetch(&o.anchors[program[begin + kLeanBlockAhead]], 1);
+      for (size_t j = begin; j < end; ++j)
+        order_block_lean(o, blocks[j - begin], j, program[j], prior_count, k1_cursor);
       order_lot(o, blocks, level);
       begin = end;
     }
+    require(o.k != 1 || k1_cursor == o.lean_k1.size(), "full_ball_k1_facets_unconsumed");
+    decltype(o.lean_count)().swap(o.lean_count);
+    decltype(o.lean_contribution)().swap(o.lean_contribution);
+    decltype(o.lean_interior)().swap(o.lean_interior);
+    decltype(o.lean_k1)().swap(o.lean_k1);
     if (o.k > 1) require(o.static_cursor == o.static_targets.size(), "full_ball_static_unconsumed_targets");
     RawVector<BallId>().swap(o.static_targets);
     decltype(o.lot_blocks)().swap(o.lot_blocks);
@@ -932,15 +1030,15 @@ class Builder {
     // exact levels (level_run is an order isomorphism), same counters.
     MonotoneHistoryOf<u32> cursor(lower ? std::span<const u32>(lower->runs) : std::span<const u32>(),
                                   lower ? std::span<const u64>(lower->current.next) : std::span<const u64>(), o.st);
-    require(o.runs.size() == o.current.levels.size(), "full_ball_image_rank_shape");
-    o.draft.lower_nodes.reserve(o.current.levels.size());
+    require(o.runs.size() == o.current.next.size(), "full_ball_image_rank_shape");
+    o.draft.lower_nodes.reserve(o.current.next.size());
     u64 node = 0;
     require(o.draft.flat_form, "full_ball_draft_form");
     const auto& flat = o.draft.flat;
     for (size_t a = 0; a < flat.actions(); ++a) {
       const auto parents = flat.parents_of(a);
       if (parents.size() == 1) continue;  // continuation: no node
-      require(node < o.current.levels.size(), "full_ball_image_node_count");
+      require(node < o.current.next.size(), "full_ball_image_node_count");
       u64 image = absent;
       if (o.k > 1) {
         const u32 level = o.runs[node];
@@ -957,7 +1055,7 @@ class Builder {
       o.draft.lower_nodes.push_back(image);
       ++node;
     }
-    require(node == o.current.levels.size(), "full_ball_image_node_count");
+    require(node == o.current.next.size(), "full_ball_image_node_count");
     failpoint_after_images(o.k);
   }
 
@@ -1820,6 +1918,30 @@ class Builder {
   template<class Emit>
   void visit_block(BallId id, u16& contribution, bool& interior, Emit&& emit) const {
     visit_block_at(current_k, id, contribution, interior, std::forward<Emit>(emit));
+  }
+  // v9 E3: the facet COUNT, contribution and interior of visit_block_at
+  // without building the facets (no site copies, no identity lookups): the
+  // same requires in the same order, the number of facets it would emit.
+  u32 count_block_at(unsigned k, BallId id, u16& contribution, bool& interior) const {
+    const auto& b = balls[id];
+    if (b.n_shell == b.arity) {
+      if (k == b.n_interior + b.n_shell) {
+        contribution = static_cast<u16>((1u << b.n_shell) - 1);
+        interior = b.n_interior != 0;
+        return 0;
+      }
+      require(k + 1 == b.n_interior + b.n_shell, "full_ball_regular_rank");
+#if defined(MHGP9_TOWER_MUTANT_COUNT_SKIPS_FACET)
+      return b.n_shell - 1;  // mutant: one facet of the block forgotten
+#else
+      return b.n_shell;
+#endif
+    }
+    const auto& table = extra.at(id);
+    const auto rank = table.rank(k);
+    require(rank.present, "full_ball_absent_scheduled_block");
+    contribution = rank.contribution_shell; interior = rank.contribution_interior;
+    return static_cast<u32>(rank.strict_components.size());
   }
   // Same as visit_block for an explicit order k (parallel orders).
   template<class Emit>
