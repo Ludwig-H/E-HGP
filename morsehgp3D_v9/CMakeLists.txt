@@ -500,6 +500,25 @@ target_include_directories(mhgp9_gpu_lanes_port_unpruned_gate PRIVATE "${CMAKE_C
 target_compile_definitions(mhgp9_gpu_lanes_port_unpruned_gate PRIVATE MHGP9_LANES_PRUNE=0)
 mhgp9_gate(mhgp9_gpu_lanes_port_unpruned 0 mhgp9_gpu_lanes_port_unpruned_gate ARGS --n=2000 --k=3,5
            EXPECT_PREFIX "lanes_port_gate n=2000" LABELS "gate;gpu" TIMEOUT 1200)
+# L10 (etape 3 des voies) : ordre de balayage axial en 26 classes entieres.
+# Tout ordre fixe donne le meme objet : le build aux anneaux
+# (MHGP9_LANES_SCAN_AXIAL=0) reste vert. Un defaut de la seule classe ne
+# change que l'ordre ; le mutant vise donc le tri par comptage elargi a cinq
+# bits : la passe de comptage lit les classes 16 a 25 comme 0 a 9, les
+# decalages ne sont plus ceux de la dispersion (trous, sites perdus), tue par
+# la porte de port (code 1).
+mhgp9_product_executable(mhgp9_gpu_lanes_port_rings_gate tests/gpu/lanes_port_gate.cpp)
+target_link_libraries(mhgp9_gpu_lanes_port_rings_gate PRIVATE mhgp9_gen mhgp9_gpu)
+target_include_directories(mhgp9_gpu_lanes_port_rings_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+target_compile_definitions(mhgp9_gpu_lanes_port_rings_gate PRIVATE MHGP9_LANES_SCAN_AXIAL=0)
+mhgp9_gate(mhgp9_gpu_lanes_port_rings 0 mhgp9_gpu_lanes_port_rings_gate ARGS --n=2000 --k=3,5
+           EXPECT_PREFIX "lanes_port_gate n=2000" LABELS "gate;gpu" TIMEOUT 1200)
+mhgp9_product_executable(mhgp9_gpu_lanes_axial_four_bits_mutant_gate tests/gpu/lanes_port_gate.cpp)
+target_link_libraries(mhgp9_gpu_lanes_axial_four_bits_mutant_gate PRIVATE mhgp9_gen mhgp9_gpu)
+target_include_directories(mhgp9_gpu_lanes_axial_four_bits_mutant_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+target_compile_definitions(mhgp9_gpu_lanes_axial_four_bits_mutant_gate PRIVATE MHGP9_LANES_MUTANT_AXIAL_FOUR_BITS=1)
+mhgp9_gate(mhgp9_gpu_lanes_mutant_axial_four_bits 1 mhgp9_gpu_lanes_axial_four_bits_mutant_gate
+           ARGS --n=2000 --k=3 EXPECT_PREFIX "cause=" LABELS "gate;gpu;mutant" TIMEOUT 600)
 # Mode --compare (revue S4b) : planchers exiges et seulement avec --compare,
 # --compare seulement sur un fichier, nuage refuse = 2 ; deux points (fixture
 # de l'auditeur) = comparaison vide sous plancher (3) ; tetraedre a racine sur

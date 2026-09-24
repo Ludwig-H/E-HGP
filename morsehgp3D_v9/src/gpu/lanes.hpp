@@ -76,7 +76,9 @@ struct LanesSlab {
   u32 capacity, record_capacity;
 };
 
-// Scan order: the cover sites by ring of |2z-a-b|^2 in [0, 4D] (eight rings
+// Scan order (before the lanes plan step 3; since L10 the default is the
+// axial order below, the rings stay under MHGP9_LANES_SCAN_AXIAL=0): the
+// cover sites by ring of |2z-a-b|^2 in [0, 4D] (eight rings
 // of equal width, ring r = number of thresholds (i+1)D/2, i < 7, below it),
 // increasing rank inside a ring (stable). Every owned q3 ball contains the
 // ball of radius |ab|/(2 sqrt 3) around the midpoint (R <= |ab|/sqrt 3 for
@@ -314,17 +316,53 @@ MHGP9_HD inline void lanes_axial_terms(const std::int32_t a[3], const std::int32
 // A site's place in the scan: its class (scan order: increasing class,
 // increasing rank inside a class), or lanes_pruned_class.
 inline constexpr u32 lanes_pruned_class = 63;
-inline constexpr u32 scan_classes = scan_rings;
+
+// L10 (lanes plan step 3, 24 septembre 2026): the AXIAL scan order. With
+// t = nu / sqrt(delta) (+infinity when delta = 0 <= nu), the fraction of the
+// disk of centres Delta4 whose spheres hold the site strictly inside grows
+// with t: all of it for t >= sqrt 2, none for t <= -sqrt 2 (pruned by L11).
+// The rings (|w|^2 only) ignore the distance to the axis ab. The site's
+// class is k = 12 - max{i in [-13, 12] : t >= i/8} in [0, 25] (i = -13:
+// none, only for sites L11 would prune), decided EXACTLY: t >= i/8 iff
+// 8 nu >= i sqrt(delta), i.e. for i >= 0: nu >= 0 and 64 nu^2 >= i^2 delta;
+// for i < 0: nu >= 0 or 64 nu^2 <= i^2 delta (64 nu^2 and 144 delta < 2^86,
+// bounds engraved above). The predicate is monotone in i: five steps of
+// bisection. Classes in increasing order, ranks increasing inside a class.
+// Any fixed order gives the same balls (L10, STATUT V9-S4): only declared
+// counters change. MHGP9_LANES_SCAN_AXIAL=0 (measurement and gate builds
+// only) restores the rings.
+#ifndef MHGP9_LANES_SCAN_AXIAL
+#define MHGP9_LANES_SCAN_AXIAL 1
+#endif
+inline constexpr bool lanes_scan_axial = MHGP9_LANES_SCAN_AXIAL != 0;
+inline constexpr u32 axial_classes = 26;
+inline constexpr u32 scan_classes = lanes_scan_axial ? axial_classes : scan_rings;
 static_assert(scan_classes <= 32 && lanes_pruned_class >= 32, "a kept class has five bits, the pruned one the sixth");
 
-// The rings order (8 rings of |w|^2 in [0, 4D], ring r = number of
-// thresholds (i+1)D/2 below |w|^2), after L11.
+MHGP9_HD inline bool lanes_axial_at_least(i64 num, i128 den, int i) {
+  const i128 lhs = 64 * static_cast<i128>(num) * num, rhs = static_cast<i128>(i * i) * den;
+  return i >= 0 ? num >= 0 && lhs >= rhs : num >= 0 || lhs <= rhs;
+}
+
+MHGP9_HD inline u32 lanes_axial_class(i64 num, i128 den) {
+  int low = -13, high = 12;  // lanes_axial_at_least holds at low (-13: by convention), fails above high
+  while (low < high) {
+    const int mid = low + (high - low + 1) / 2;
+    if (lanes_axial_at_least(num, den, mid)) low = mid;
+    else high = mid - 1;
+  }
+  return static_cast<u32>(12 - low);
+}
+
+// The site's class: pruned (L11), else the axial class (or the ring:
+// number of thresholds (i+1)D/2 below |w|^2 in [0, 4D]).
 MHGP9_HD inline u32 lanes_scan_class(const std::int32_t a[3], const std::int32_t b[3], const std::int32_t z[3],
                                      i64 diameter) {
   i64 num = 0;
   i128 den = 0;
   lanes_axial_terms(a, b, z, num, den);
   if (lanes_prune && lanes_outside_centres(num, den)) return lanes_pruned_class;
+  if (lanes_scan_axial) return lanes_axial_class(num, den);
   const i64 norm = diameter - num;
   u32 r = 0;
   for (u32 i = 0; i + 1 < scan_rings; ++i) r += 2 * norm > static_cast<i64>(i + 1) * diameter ? 1U : 0U;
@@ -414,11 +452,16 @@ MHGP9_HD u32 lanes_order(const Group& group, const LanesIndex& index, u32 a_rank
     const u32 valid = lanes == 32 ? 0xffffffffU : ((1U << lanes) - 1U);
     bits[5] &= valid;  // pruned
   };
-  const auto class_mask = [](const u32 bits[6], u32 valid, u32 r) {
+  const auto class_mask = [](const u32 bits[6], u32 valid, u32 r, u32 class_bits_read) {
     u32 m = valid & ~bits[5];
-    for (u32 k = 0; k < 5; ++k) m &= ((r >> k) & 1U) != 0 ? bits[k] : ~bits[k];
+    for (u32 k = 0; k < class_bits_read; ++k) m &= ((r >> k) & 1U) != 0 ? bits[k] : ~bits[k];
     return m;
   };
+#if defined(MHGP9_LANES_MUTANT_AXIAL_FOUR_BITS)
+  constexpr u32 count_bits = 4;  // mutant: the counting pass reads classes 16..25 as 0..9 (wrong offsets)
+#else
+  constexpr u32 count_bits = 5;
+#endif
   u32 class_begin[scan_classes];
   for (u32 r = 0; r < scan_classes; ++r) class_begin[r] = 0;
   u32 pruned = 0;
@@ -428,7 +471,7 @@ MHGP9_HD u32 lanes_order(const Group& group, const LanesIndex& index, u32 a_rank
     const u32 lanes = sites - base < Group::size ? sites - base : Group::size;
     const u32 valid = lanes == 32 ? 0xffffffffU : ((1U << lanes) - 1U);
     pruned += popcount32(bits[5]);
-    for (u32 r = 0; r + 1 < scan_classes; ++r) class_begin[r + 1] += popcount32(class_mask(bits, valid, r));
+    for (u32 r = 0; r + 1 < scan_classes; ++r) class_begin[r + 1] += popcount32(class_mask(bits, valid, r, count_bits));
   }
   for (u32 r = 1; r < scan_classes; ++r) class_begin[r] += class_begin[r - 1];
   for (u32 base = 0; base < sites; base += Group::size) {
@@ -437,9 +480,12 @@ MHGP9_HD u32 lanes_order(const Group& group, const LanesIndex& index, u32 a_rank
     const u32 lanes = sites - base < Group::size ? sites - base : Group::size;
     const u32 valid = lanes == 32 ? 0xffffffffU : ((1U << lanes) - 1U);
     for (u32 r = 0; r < scan_classes; ++r) {
-      const u32 mask = class_mask(bits, valid, r);
+      const u32 mask = class_mask(bits, valid, r, 5);
       group.for_set(mask, [&](u32 lane, u32 order) {
         const u32 rank = slab.scratch[base + lane], to = class_begin[r] + order;
+#if defined(MHGP9_LANES_MUTANT_AXIAL_FOUR_BITS)
+        if (to >= sites) return;  // the mutant's surplus writes stay inside the reserved cover (no crash)
+#endif
         const std::int32_t* p = index.tree.rank_points + 3 * static_cast<std::size_t>(rank);
         std::int32_t* q = slab.points + 3 * static_cast<std::size_t>(to);
         q[0] = p[0];

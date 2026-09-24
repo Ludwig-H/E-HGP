@@ -1008,6 +1008,48 @@ $\Delta_4$), ni graine, ni membre d'une classe émise.
 - **ptxas** : P passe de 96 à 80 registres (la classe est calculée une fois
   par site, et non plus à chaque vote), sans débordement ; T inchangé.
 
+#### L10 : ordre de balayage axial en 26 classes entières
+
+Les anneaux ne regardaient que $\lvert w\rvert^2$ et ignoraient la distance
+à l'axe $ab$. L'ordre axial range les sites gardés par
+$t=\nu/\sqrt{\delta}$, fonction croissante de la part de $\Delta_4$ dont les
+sphères contiennent le site : toute pour $t\geq\sqrt{2}$, aucune sous
+$-\sqrt{2}$ (sites élagués par L11). Classe
+$k=12-\max\lbrace i\in[-13,12] : t\geq i/8\rbrace$, décidée exactement
+(`lanes_axial_at_least` : $64\nu^2$ contre $i^2\delta$ selon les signes de
+$\nu$ et $i$, bornes gravées), par bissection en cinq pas ; rangs croissants
+dans une classe. Les classes tiennent sur cinq bits de vote ; le sixième
+porte l'élagage. `MHGP9_LANES_SCAN_AXIAL=0` rend les anneaux.
+
+- **Objet inchangé** (lemme L10 du registre) : tout ordre fixé des sites
+  gardés donne les mêmes boules ; seuls les compteurs déclarés changent (et,
+  au plus, une mise en attente de mémoire du tampon d'événements).
+- **Mesures hôte** (08/000000, après L11 → après L10) :
+
+  | compteur | K5 | K10 |
+  | --- | ---: | ---: |
+  | points des recensements q3 | 118 736 176 → 89 758 300 | 785 560 284 → 620 739 849 |
+  | paquets de passe q4 | 15 065 569 → 11 680 121 | 87 941 750 → 68 118 302 |
+  | certifiées au premier paquet | 5 372 666 → 5 719 526 | 21 035 206 → 23 227 114 |
+  | événements tamponnés | 9 417 751 → 9 129 566 | 80 314 568 → 74 919 196 |
+  | pas de listes / de classes | 4 979 772 / 1 400 340 → 4 958 219 / 1 395 718 | 34 309 433 / 15 947 469 → 33 927 024 / 15 804 487 |
+  | plus lourde tâche (pas) | 7 104 → 5 810 | 27 034 → 19 999 |
+
+  Depuis l'étape 2 (avant L11) : paquets de passe −32,5 % à K5 et −36,1 %
+  à K10, points de recensement −38,4 % et −36,7 %. Les tâches ne changent
+  pas (elles ne dépendent que des sites gardés et des graines).
+- **Portes** : build aux anneaux (`mhgp9_gpu_lanes_port_rings`, K3 et K5)
+  vert. Un défaut de la seule classe ne change que l'ordre, donc ne peut
+  être tué par une porte d'objet ; le mutant vise le tri par comptage élargi
+  à cinq bits (`MHGP9_LANES_MUTANT_AXIAL_FOUR_BITS` : la passe de comptage
+  relit les classes 16 à 25 comme 0 à 9), tué par `edge.records`. Une
+  première version du mutant, appliquée aux deux passes, ne faisait que
+  permuter le balayage : elle survivait, conformément au lemme. Trame
+  épinglée : `equal=1`, `identical=1` à K5 et K10 ; condensés de la chaîne
+  épinglés à K5 et K10.
+- **ptxas** : P 112 registres, 104 o de pile (les 26 compteurs de classes),
+  sans débordement ; T inchangé.
+
 ## Voie GPU S1 : `src/gpu/` (espace `mhgp9::gpu`, code neuf)
 
 23 septembre 2026. Première brique GPU de la v9, pour une expérience de
