@@ -464,9 +464,9 @@ mhgp9_gate(mhgp9_gpu_lanes_port_mutant_early_exit 1 mhgp9_gpu_lanes_port_early_e
 # reduites, refus d'arene, repliques gravees). Cinq mutants, chacun tue
 # (code 1) par le controle qui le vise : derniere plage partielle oubliee
 # (split.count), placement par ordre d'achevement emule par des taches
-# executees a rebours (tasks.bytes), segments q3 et q4 permutes
+# placees entieres a rebours (tasks.bytes), segments q3 et q4 permutes
 # (tasks.bytes), compteurs d'une arete en attente ajoutes (tasks.small_bytes),
-# preseance attente/panne inversee (replay.).
+# preseance attente/panne inversee dans le rejeu par balayage (replay.).
 foreach(mutant IN ITEMS LAST_RANGE_FORGOTTEN COMPLETION_ORDER SEGMENTS_SWAPPED DEFERRED_COUNTERS FAULT_FIRST)
   string(TOLOWER ${mutant} lower)
   mhgp9_product_executable(mhgp9_gpu_lanes_tasks_${lower}_mutant_gate tests/gpu/lanes_port_gate.cpp)

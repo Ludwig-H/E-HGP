@@ -386,6 +386,29 @@ int replay_fixtures(unsigned long long& cases) {
       {"exact_then_deferral", 4, 6, {{2, 0, 4, D}, {2, 1, 0, 0}}, S::deferred, 0},
       {"q4_only_exact", 2, 4, {{0, 1, 0, 0}, {0, 1, 0, 0}}, S::decided, 2},
   };
+  // C step v2: the product lanes_replay_scan (first failure by minimum of
+  // lanes_fail_position, prefix by the inclusive scan of the task table)
+  // against the sequential witness lanes_replay. The edge's tasks sit after
+  // one task of another edge with records (the scan's base is subtracted).
+  const auto product = [](const std::vector<gpu::LanesTask>& own, gpu::u32 capacity, gpu::u32& records) {
+    std::vector<gpu::LanesTask> table(1);
+    table[0].q3 = 3;
+    table[0].q4 = 5;
+    table.insert(table.end(), own.begin(), own.end());
+    std::vector<gpu::LanesTaskRecords> scan(table.size());
+    gpu::LanesTaskWork slot{};
+    for (std::size_t t = 0; t < table.size(); ++t) {
+      gpu::LanesTaskRecords mine{};
+      if (t == 0) {
+        mine = gpu::LanesTaskRecords{table[0].q3, table[0].q4};
+      } else {
+        gpu::lanes_task_publish(table[t], t, slot, mine);
+      }
+      scan[t] = t == 0 ? mine : gpu::LanesRecordsSum{}(scan[t - 1], mine);
+    }
+    return gpu::lanes_replay_scan(table.data(), scan.data(), 1, static_cast<gpu::u32>(own.size()), slot.fail_first,
+                                  capacity, records);
+  };
   for (const auto& c : table) {
     std::vector<gpu::LanesTask> tasks;
     for (const auto& t : c.tasks) {
@@ -396,11 +419,47 @@ int replay_fixtures(unsigned long long& cases) {
       task.fail_kind = static_cast<gpu::u8>(t[3]);
       tasks.push_back(task);
     }
-    gpu::u32 records = 0;
+    gpu::u32 records = 0, scanned = 0;
     const auto status =
         gpu::lanes_replay(tasks.data(), static_cast<gpu::u32>(tasks.size()), c.lanes, c.capacity, records);
-    if (status != c.expected || records != c.records) return fail(std::string("replay.") + c.name);
+    const auto scan_status = product(tasks, c.capacity, scanned);
+    if (status != c.expected || records != c.records || scan_status != c.expected || scanned != c.records)
+      return fail(std::string("replay.") + c.name);
     ++cases;
+  }
+  // Seeded tables (1..6 tasks, 0..3 records per phase, a failure in an asked
+  // phase with probability 1/4, capacity 0..12): product == witness.
+  {
+    unsigned long long state = 0x9e3779b97f4a7c15ULL;
+    const auto next = [&](gpu::u32 bound) {
+      state = state * 6364136223846793005ULL + 1442695040888963407ULL;
+      return static_cast<gpu::u32>((state >> 33) % bound);
+    };
+    unsigned long long failures = 0, deferrals = 0;
+    for (int round = 0; round < 20000; ++round) {
+      const gpu::u8 lanes = static_cast<gpu::u8>(2 * (1 + next(3)));  // 2, 4 or 6
+      std::vector<gpu::LanesTask> tasks(1 + next(6));
+      for (auto& task : tasks) {
+        task.q3 = (lanes & 2U) != 0 ? next(4) : 0;
+        task.q4 = (lanes & 4U) != 0 ? next(4) : 0;
+        if (next(4) == 0) {
+          const bool q4 = (lanes & 4U) != 0 && ((lanes & 2U) == 0 || next(2) == 1);
+          task.fail_phase = q4 ? 4 : 2;
+          task.fail_kind = static_cast<gpu::u8>(next(2) == 0 ? D : F);
+          if (q4) continue;
+          task.q4 = 0;  // a q3 failure stops the task before its q4 phase
+        }
+      }
+      const gpu::u32 capacity = next(13);
+      gpu::u32 records = 0, scanned = 0;
+      const auto status = gpu::lanes_replay(tasks.data(), static_cast<gpu::u32>(tasks.size()), lanes, capacity, records);
+      const auto scan_status = product(tasks, capacity, scanned);
+      if (status != scan_status || records != scanned) return fail("replay.seeded round " + std::to_string(round));
+      failures += status == S::fault;
+      deferrals += status == S::deferred;
+    }
+    if (failures == 0 || deferrals == 0) return fail("replay.seeded_floor");
+    cases += 20000;
   }
   // The split: ceil(seeds / per), per = max(1, B / ceil(sites/32)).
   if (gpu::lanes_task_count(40, 17, 1) != 17 || gpu::lanes_task_count(40, 17, 6) != 6 ||
@@ -1421,7 +1480,7 @@ int main(int argc, char** argv) {
               tasks_deferred_events, tasks_deferred_arena, tasks_refusals, replay_cases);
   if (tally.runs == 0 || tally.extra_tasks == 0 || tally.tasks_one <= tally.tasks_default ||
       tasks_deferred_cover == 0 || tasks_deferred_records == 0 || (any_q4 && tasks_deferred_events == 0) ||
-      tasks_deferred_arena == 0 || tasks_refusals == 0 || replay_cases != 15 ||
+      tasks_deferred_arena == 0 || tasks_refusals == 0 || replay_cases != 20015 ||
       tally.max_steps_default > tally.max_steps_single)
     return 3;
   if (edges == 0 || q3_only == 0 || rejections == 0 || emitted == 0 || wide_shells == 0 || deferred == 0 ||

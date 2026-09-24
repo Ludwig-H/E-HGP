@@ -113,6 +113,7 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
   std::vector<LanesTaskWork> slots;     // the edge's tasks' work
   std::vector<std::size_t> task_first;  // window-local, size n + 1
   std::vector<LanesTask> tasks;
+  std::vector<LanesTaskRecords> scan;   // per task: its records, then their inclusive scan (C)
   std::vector<u32> task_owner;          // thread whose staging holds the task's records
   std::vector<u8> pre_status;           // after the replay, before the arena rule
   std::vector<u32> counts;
@@ -209,6 +210,7 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
           task_first.assign(window_count + 1, 0);
           for (std::size_t i = 0; i < window_count; ++i) task_first[i + 1] = task_first[i] + plans[i].tasks;
           tasks.assign(task_first[window_count], LanesTask{});
+          scan.assign(tasks.size(), LanesTaskRecords{0, 0});
           task_owner.assign(tasks.size(), 0);
           for (std::size_t i = 0; i < window_count; ++i) {
             const u64 per = lanes_seeds_per_task(plans[i].sites, budget);
@@ -249,6 +251,7 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
                                        input.index.kmax, slab, plan.sites, task.first, task.last, q4, task, w4,
                                        slots[i]);
           task_steps[self] = std::max<u64>(task_steps[self], steps);
+          lanes_task_publish(task, t, slots[i], scan[t]);
           if (task.fail_phase == 0) {
             const u32 n = task.q3 + task.q4;
             task.begin = staging[self].size();
@@ -258,17 +261,23 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
           }
         }
         if (!barrier.arrive_and_wait()) return;
-        if (self == 0) lap(task_ms);
-        // ---- C: replay per edge (parallel), arena rule in edge order
-        // (thread 0), then gather and ledger (parallel).
+        // ---- C (step v2): the inclusive scan of the tasks' records (thread
+        // 0), the replay per edge in O(1) (parallel), the arena rule in edge
+        // order (thread 0), then the ledger per edge and the gather per task
+        // (parallel), with the device's functions.
+        if (self == 0) {
+          lap(task_ms);
+          for (std::size_t t = 1; t < scan.size(); ++t) scan[t] = LanesRecordsSum{}(scan[t - 1], scan[t]);
+        }
+        if (!barrier.arrive_and_wait()) return;
         for (;;) {
           const std::size_t i = next_gather.fetch_add(1);
           if (i >= window_count) break;
           auto status = static_cast<CertificateStatus>(plans[i].status);
           u32 count = 0;
           if (status == CertificateStatus::decided)
-            status = lanes_replay(tasks.data() + task_first[i], plans[i].tasks, plans[i].lanes, record_capacity,
-                                  count);
+            status = lanes_replay_scan(tasks.data(), scan.data(), task_first[i], plans[i].tasks, slots[i].fail_first,
+                                       record_capacity, count);
           pre_status[i] = static_cast<u8>(status);
           counts[i] = count;
         }
@@ -279,15 +288,16 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
             const std::size_t e = window_first + i;
             auto s = static_cast<CertificateStatus>(pre_status[i]);
             if (s == CertificateStatus::decided) {
-              // The device's reservation: the counter always advances.
-              reserved += counts[i];
-              if (reserved > arena) {
+              // The device's rule: the exclusive prefix of the counts (the
+              // counter always advances).
+              if (!lanes_edge_kept(pre_status[i], reserved, counts[i], arena)) {
                 s = CertificateStatus::deferred;
               } else {
                 out.record_begin[e] = static_cast<u32>(begin);
                 out.record_count[e] = counts[i];
                 begin += counts[i];
               }
+              reserved += counts[i];
             }
             out.status[e] = static_cast<u8>(s);
             if (s == CertificateStatus::deferred) ++out.deferred;
@@ -297,17 +307,16 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
           out.records.resize(begin);
           poison_unwritten(out.records, from);
           next_gather.store(0);
+          next_task.store(0);
         }
         if (!barrier.arrive_and_wait()) return;
         for (;;) {
           const std::size_t i = next_gather.fetch_add(1);
           if (i >= window_count) break;
-          const std::size_t e = window_first + i;
-          const bool decided = out.status[e] == static_cast<u8>(CertificateStatus::decided);
 #if defined(MHGP9_LANES_TASKS_MUTANT_DEFERRED_COUNTERS)
           const bool counted = plans[i].status == static_cast<u8>(CertificateStatus::decided);  // mutant
 #else
-          const bool counted = decided;
+          const bool counted = out.status[window_first + i] == static_cast<u8>(CertificateStatus::decided);
 #endif
           if (counted) {
             EdgeQ3Work e3{};
@@ -316,27 +325,21 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
             add_q3_edge(work3[self], e3);
             add_q4(work4[self], e4);
           }
-          if (!decided) continue;
-          LaneRecord* to = out.records.data() + out.record_begin[e];
-          const std::size_t first = task_first[i], last = task_first[i + 1];
-          const auto copy = [&](std::size_t t, u32 skip, u32 n) {
-            const LaneRecord* from = staging[task_owner[t]].data() + tasks[t].begin + skip;
-            for (u32 r = 0; r < n; ++r) {
-              *to = from[r];
-              to->edge = static_cast<u32>(e);
-              ++to;
-            }
-          };
-#if defined(MHGP9_LANES_TASKS_MUTANT_COMPLETION_ORDER)
-          // mutant: each task's records placed whole, in completion order
-          for (std::size_t t = last; t-- > first;) copy(t, 0, tasks[t].q3 + tasks[t].q4);
-#elif defined(MHGP9_LANES_TASKS_MUTANT_SEGMENTS_SWAPPED)
-          for (std::size_t t = first; t < last; ++t) copy(t, tasks[t].q3, tasks[t].q4);  // mutant: q4 first
-          for (std::size_t t = first; t < last; ++t) copy(t, 0, tasks[t].q3);
-#else
-          for (std::size_t t = first; t < last; ++t) copy(t, 0, tasks[t].q3);
-          for (std::size_t t = first; t < last; ++t) copy(t, tasks[t].q3, tasks[t].q4);
-#endif
+        }
+        for (;;) {
+          const std::size_t t = next_task.fetch_add(1);
+          if (t >= tasks.size()) break;
+          const LanesTask& task = tasks[t];
+          const std::size_t i = task.edge, e = window_first + i;
+          if (out.status[e] != static_cast<u8>(CertificateStatus::decided) || task.q3 + task.q4 == 0) continue;
+          u64 to3 = 0, to4 = 0;
+          lanes_task_destinations(scan.data(), task, task_first[i], plans[i].tasks, t, out.record_begin[e], to3, to4);
+          const LaneRecord* from = staging[task_owner[t]].data() + task.begin;
+          for (u32 r = 0; r < task.q3 + task.q4; ++r) {
+            LaneRecord& to = out.records[r < task.q3 ? to3 + r : to4 + (r - task.q3)];
+            to = from[r];
+            to.edge = static_cast<u32>(e);
+          }
         }
         if (!barrier.arrive_and_wait()) return;
         if (self == 0) lap(compact_ms);

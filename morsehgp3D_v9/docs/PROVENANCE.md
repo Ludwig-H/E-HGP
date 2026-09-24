@@ -869,6 +869,87 @@ le front q34 est construit (crochet `after_front` de
   fois, préparation absente ou attente au-delà).
 - **Plan R19** : paires q2 séquentiel / q2 recouvert, répétées et
   entrelacées à 08/000000, à K5 et à K10.
+### Étape 3 du plan des voies (24 septembre 2026, après R18)
+
+Plan du juge des voies, « Étape 3 — réduire le travail de masse », précédé
+de la correction de l'étape C mesurée par R18. L'objet, les enregistrements
+(octets et ordre), les statuts et les mises en attente ne changent pas ;
+seuls des compteurs déclarés changent, et ils sont nommés ci-dessous.
+
+#### Étape C sans boucle sur les tâches d'une arête
+
+**Diagnostic** (R18, 08/000000) : C coûte 32,2 ms à K5 contre 2,6 ms à
+000100 et 20,2 ms à 000200 ; 80,9 ms à K10 (000000), 7,0 et 41,0 ms sur les
+deux autres trames. Un harnais hôte (hors dépôt) rejoue le front dans
+l'ordre d'appel de G4 (48 ouvriers × 64 jobs) et retrouve **exactement** les
+tâches de R18 (2 500 659, 1 083 881, 3 016 003 à K5 ; 9 581 649, 3 514 578,
+10 212 503 à K10). Il publie, par arête, sites, graines, tâches et
+enregistrements. Deux boucles séries sur les tâches d'une arête faisaient
+la traîne de C :
+- `lanes_replay_kernel`, **un fil par arête**, parcourait phases × tâches ;
+- `lanes_gather_kernel`, **un warp par arête**, parcourait de même toutes
+  ses tâches, une lecture dépendante par tâche, même vide.
+
+Une arête de 18 630 sites a 583 paquets de 32 sites, plus que B = 512 : une
+graine par tâche, soit **10 473 tâches** pour ses 10 473 graines. Les plus
+longues chaînes séries (étapes réplique / rassemblement) valent :
+
+| trame, K | tâches max. d'une arête | réplique | rassemblement | C mesuré (R18) |
+| --- | ---: | ---: | ---: | ---: |
+| 000000, K5 | 10 473 | 18 830 | 19 376 | 32,2 ms |
+| 000100, K5 | 934 | 1 510 | 2 004 | 2,6 ms |
+| 000200, K5 | 4 235 | 8 470 | 8 895 | 20,2 ms |
+| 000000, K10 | 14 865 | 20 946 | 22 839 | 80,9 ms |
+| 000100, K10 | 964 | 1 830 | 4 078 | 7,0 ms |
+| 000200, K10 | 4 235 | 8 470 | 11 324 | 41,0 ms |
+
+(rassemblement : 9 024 warps à pas fixe, comme le noyau.) À K5, C suit la
+somme des deux chaînes à 0,7–1,2 µs par pas ; à K10 s'y ajoute le débit
+(23 M pas de rassemblement au total). Les arêtes de tête n'ont **aucun**
+enregistrement : ce n'est que du parcours.
+
+**Correction** (`lanes_tasks.hpp`, `filter_runner.cu`, `lanes_host.hpp`) :
+- T publie, par tâche, ses enregistrements par phase (`LanesTaskRecords`)
+  et, en cas de défaillance, sa position séquentielle
+  `lanes_fail_position` = (phase, indice dans la table) dans l'emplacement
+  de son arête, par minimum atomique (`fail_first`, sans dépendance à
+  l'ordre d'achèvement) ;
+- un balayage CUB inclusif, en place, des enregistrements des tâches ;
+- C1, **un fil par arête, O(1)** : `lanes_replay_scan`. Le rejeu
+  séquentiel rend « en attente » au premier élément dont le préfixe dépasse
+  l'ardoise, s'il précède ou est la première défaillance $i_f$, sinon le
+  genre de $i_f$. Le préfixe ne décroît pas, donc cela équivaut à
+  préfixe$(i_f)$ > ardoise : deux lectures du balayage suffisent ;
+- balayage exclusif des comptes (règle de l'arène, inchangée) ;
+- C2, un warp par arête : réponse et registre (inchangés, sans copie) ;
+- C3, **un warp par 32 tâches consécutives** : chaque tâche copie ses
+  enregistrements à leur place (`lanes_task_destinations` : tous les q3 de
+  l'arête dans l'ordre des tâches, puis tous ses q4), en parties de 16 o
+  réparties sur les voies ; le champ `edge` est posé au passage ;
+- plus de lecture hôte entre T et C : le débordement de l'arène de
+  préparation est lu par les noyaux sur le compteur de l'appareil (même
+  règle : toute arête non en panne en attente, sans enregistrement ni
+  registre).
+
+Le jumeau hôte exécute les mêmes fonctions (balayage, `lanes_replay_scan`,
+`lanes_edge_kept`, `lanes_task_destinations`), le rassemblement par tâche.
+`lanes_replay` reste le **témoin séquentiel**.
+
+**Portes** : `mhgp9_gpu_lanes_port` (toutes sections, sortie octet pour
+octet contre le chemin à une tâche par arête) ; les neuf répliques gravées
+jugent désormais le produit et le témoin, placées derrière une tâche d'une
+autre arête (base du balayage soustraite), plus **20 000 tables tirées**
+(1 à 6 tâches, défaillances et capacités aléatoires, planchers de pannes et
+d'attentes > 0) où produit et témoin doivent coïncider. Les cinq mutants de
+l'étape 2 restent tués : préséance inversée dans `lanes_replay_scan`,
+segments permutés et ordre d'achèvement dans `lanes_task_destinations`.
+Trame épinglée, `--compare --all-asked` : `equal=1` et `identical=1` à K5
+et K10. ptxas (sm_120, CUDA 12.9) : T 128 registres, 112 o de débordement en
+écriture et 84 en lecture (128 et 100 avant) ; C1 46, C2 40, C3 40
+registres, sans débordement.
+
+**Non mesuré** : la durée de C sur G4. Projection (non un reçu) : trois
+noyaux sans chaîne série et trois balayages CUB, de l'ordre de 1 ms à K5.
 
 ## Voie GPU S1 : `src/gpu/` (espace `mhgp9::gpu`, code neuf)
 

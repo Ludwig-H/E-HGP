@@ -13,15 +13,18 @@
 //   then the q4 seed (if asked); the records of the task go to the group's
 //   record slab, then to one reservation of a STAGING arena; the task keeps
 //   its record counts per phase and its first failure (phase, kind);
-// - C, one per edge: lanes_replay rejoues the sequential precedence of
-//   edge_lanes (prologue, the q3 seeds in order, then the q4 seeds in
-//   order; a record slab full on the edge's TOTAL defers), then the caller
-//   applies the arena rule in edge order (counter always advanced) and
-//   gathers the records of a decided edge in (phase, task) order: all its
-//   q3 records, then all its q4 records, in seed order — exactly the
-//   records, order, statuses and ledger of edge_lanes. The ledger of an
-//   edge's tasks is accumulated in the edge's slot (sums and maxima,
-//   commutative) and reduced over the decided edges only.
+// - C: the replay of the sequential precedence of edge_lanes (prologue,
+//   the q3 seeds in order, then the q4 seeds in order; a record slab full
+//   on the edge's TOTAL defers), then the arena rule in edge order (counter
+//   always advanced), the records of a decided edge placed in (phase, task)
+//   order: all its q3 records, then all its q4 records, in seed order —
+//   exactly the records, order, statuses and ledger of edge_lanes. The
+//   ledger of an edge's tasks is accumulated in the edge's slot (sums and
+//   maxima, commutative) and reduced over the decided edges only. Since the
+//   C step v2 (lanes plan step 3) no loop runs over an edge's tasks: T
+//   publishes each task's records and its failure (order-free minimum), the
+//   replay (lanes_replay_scan) and the places (lanes_task_destinations) read
+//   the inclusive scan of the task records in O(1).
 // Why the object is unchanged: every seed of edge_lanes is run once, by the
 // same functions, on the same cover in the same scan order; seeds are
 // independent (no state crosses a seed except the record slab and the
@@ -84,12 +87,34 @@ struct LanesPlan {
   u8 status, lanes, unused0, unused1;
 };
 
+// The first failure of an edge's tasks in edge_lanes' sequential order
+// (every q3 seed before every q4 seed; the tasks of an edge are consecutive
+// seed ranges, consecutive in the table): the q3 phase of the task at table
+// index t is at position t, its q4 phase at 2^32 + t. No failure: ~0.
+inline constexpr u64 lanes_no_failure = ~0ULL;
+MHGP9_HD inline u64 lanes_fail_position(u32 fail_phase, u64 t) {
+  return (fail_phase == 4 ? (u64{1} << 32) : u64{0}) | t;
+}
+
 // The work of an edge's tasks, accumulated in the edge's slot: the census
-// part of EdgeQ3Work (in u64) and the q4 work.
+// part of EdgeQ3Work (in u64) and the q4 work; `fail_first` is the minimum
+// lanes_fail_position of its failed tasks (C step v2).
 struct LanesTaskWork {
   u64 census_point_tests, census_inside_sites, census_shell_sites, census_outside_sites;
   u64 depth_rejections, emitted, shell_ids;
   Q4Work w4;
+  u64 fail_first = lanes_no_failure;
+};
+
+// Records of one task per phase; the C step scans them over the task table
+// (inclusive, table order) to replay and place without a loop over tasks.
+struct LanesTaskRecords {
+  u64 q3, q4;
+};
+struct LanesRecordsSum {
+  MHGP9_HD LanesTaskRecords operator()(const LanesTaskRecords& x, const LanesTaskRecords& y) const {
+    return LanesTaskRecords{x.q3 + y.q3, x.q4 + y.q4};
+  }
 };
 
 // Portable integer atomics (device: atomicAdd/atomicMax; host: GCC
@@ -111,6 +136,16 @@ MHGP9_HD inline void atomic_max_u64(u64& to, u64 value) {
 #else
   u64 seen = __atomic_load_n(&to, __ATOMIC_RELAXED);
   while (seen < value && !__atomic_compare_exchange_n(&to, &seen, value, true, __ATOMIC_RELAXED, __ATOMIC_RELAXED)) {
+  }
+#endif
+}
+
+MHGP9_HD inline void atomic_min_u64(u64& to, u64 value) {
+#if defined(__CUDA_ARCH__)
+  atomicMin(&to, value);
+#else
+  u64 seen = __atomic_load_n(&to, __ATOMIC_RELAXED);
+  while (seen > value && !__atomic_compare_exchange_n(&to, &seen, value, true, __ATOMIC_RELAXED, __ATOMIC_RELAXED)) {
   }
 #endif
 }
@@ -237,24 +272,99 @@ MHGP9_HD u64 lanes_task(const Group& group, const LanesIndex& index, u32 a_rank,
   return steps;
 }
 
+// T, end of a task (leader, table index t): its records per phase for the
+// C scans, and its failure into its edge's first failure (order-free
+// minimum: the result does not depend on which task ends first).
+MHGP9_HD inline void lanes_task_publish(const LanesTask& task, u64 t, LanesTaskWork& slot, LanesTaskRecords& records) {
+  records.q3 = task.q3;
+  records.q4 = task.q4;
+  if (task.fail_phase != 0) atomic_min_u64(slot.fail_first, lanes_fail_position(task.fail_phase, t));
+}
+
 // ---- C ---------------------------------------------------------------------
 
-// C: the status of an edge whose prologue was decided, from its tasks in
-// table order, as the sequential edge_lanes: the q3 phase (tasks in order),
-// then the q4 phase; in each segment the records come before the task's
-// failure. The records of the edge overflow the record slab as soon as
-// their running total exceeds record_capacity (deferred); otherwise the
-// first failure met decides. `records` receives the edge's total (decided).
+// C step v2 (lanes plan step 3, 24 septembre 2026): the replay and the
+// placement of an edge read O(1) values instead of looping over its tasks
+// (the loops made a heavy edge with thousands of tasks the tail of C on G4:
+// 32 ms at 08/000000 K5). `scan` is the inclusive scan, in table order, of
+// the tasks' LanesTaskRecords; the edge's tasks are [first, first + count).
+//
+// lanes_replay_scan equals lanes_replay (the sequential witness below, gate
+// mhgp9_gpu_lanes_port): let i_f be the first failure in the sequential
+// order (q3 items, then q4 items, each in task order) and prefix(i) the
+// records of the items up to i (included). The witness returns deferred at
+// the first item whose prefix exceeds record_capacity, if it comes before
+// or at i_f, else the kind of i_f (else decided with the total). The prefix
+// never decreases, so an item i <= i_f with prefix(i) > capacity exists iff
+// prefix(i_f) > capacity: the status is a function of i_f (the minimum of
+// lanes_fail_position, the order of edge_lanes) and prefix(i_f) (two scan
+// reads). Unasked phases have neither records nor failures.
+MHGP9_HD inline CertificateStatus lanes_replay_scan(const LanesTask* tasks, const LanesTaskRecords* scan, u64 first,
+                                                    u32 count, u64 fail_first, u32 record_capacity, u32& records) {
+  records = 0;
+  if (count == 0) return CertificateStatus::decided;  // no seed: no task, no record
+  const LanesTaskRecords base = first == 0 ? LanesTaskRecords{0, 0} : scan[first - 1];
+  const LanesTaskRecords end = scan[first + count - 1];
+  const u64 q3 = end.q3 - base.q3;
+  if (fail_first == lanes_no_failure) {
+    const u64 total = q3 + (end.q4 - base.q4);
+    if (total > record_capacity) return CertificateStatus::deferred;
+    records = static_cast<u32>(total);
+    return CertificateStatus::decided;
+  }
+  const u64 t = fail_first & 0xffffffffULL;  // table index of the failing task
+  const LanesTaskRecords at = scan[t];
+  const u64 prefix = (fail_first >> 32) == 0 ? at.q3 - base.q3 : q3 + (at.q4 - base.q4);
+#if defined(MHGP9_LANES_TASKS_MUTANT_FAULT_FIRST)
+  // mutant: the failure's kind wins over a record overflow met before it
+  if (tasks[t].fail_kind == static_cast<u8>(CertificateStatus::fault)) return CertificateStatus::fault;
+#endif
+  if (prefix > record_capacity) return CertificateStatus::deferred;
+  return static_cast<CertificateStatus>(tasks[t].fail_kind);
+}
+
+// An edge's answer after the arena rule: decided by the replay and its
+// records within the arena at its exclusive prefix (counter always
+// advanced, edge order).
+MHGP9_HD inline bool lanes_edge_kept(u8 replay_status, u64 prefix, u64 records, u64 arena_capacity) {
+  return replay_status == static_cast<u8>(CertificateStatus::decided) && prefix + records <= arena_capacity;
+}
+
+// Where the records of the task at table index t go, for a decided edge
+// whose slice begins at `begin`: all the q3 records of the edge in task
+// order, then all its q4 records in task order (edge_lanes' order).
+MHGP9_HD inline void lanes_task_destinations(const LanesTaskRecords* scan, const LanesTask& task, u64 first,
+                                             u32 count, u64 t, u64 begin, u64& to3, u64& to4) {
+  const LanesTaskRecords base = first == 0 ? LanesTaskRecords{0, 0} : scan[first - 1];
+  const LanesTaskRecords end = scan[first + count - 1];
+  const LanesTaskRecords at = scan[t];
+#if defined(MHGP9_LANES_TASKS_MUTANT_COMPLETION_ORDER)
+  // mutant: each task's records placed whole, in the reverse table order
+  // (the order in which the emulation completes them)
+  static_cast<void>(base);
+  to3 = begin + (end.q3 + end.q4) - (at.q3 + at.q4);
+  to4 = to3 + task.q3;
+#elif defined(MHGP9_LANES_TASKS_MUTANT_SEGMENTS_SWAPPED)
+  to4 = begin + (at.q4 - task.q4 - base.q4);  // mutant: the q4 segment first
+  to3 = begin + (end.q4 - base.q4) + (at.q3 - task.q3 - base.q3);
+#else
+  to3 = begin + (at.q3 - task.q3 - base.q3);
+  to4 = begin + (end.q3 - base.q3) + (at.q4 - task.q4 - base.q4);
+#endif
+}
+
+// The sequential witness of lanes_replay_scan (gate mhgp9_gpu_lanes_port
+// compares both on engraved tables and on every real edge): the status of
+// an edge whose prologue was decided, from its tasks in table order, as the
+// sequential edge_lanes: the q3 phase (tasks in order), then the q4 phase;
+// in each segment the records come before the task's failure. The records
+// of the edge overflow the record slab as soon as their running total
+// exceeds record_capacity (deferred); otherwise the first failure met
+// decides. `records` receives the edge's total (decided).
 MHGP9_HD inline CertificateStatus lanes_replay(const LanesTask* tasks, u32 count, u8 lanes, u32 record_capacity,
                                                u32& records) {
   records = 0;
   u64 total = 0;
-#if defined(MHGP9_LANES_TASKS_MUTANT_FAULT_FIRST)
-  // mutant: a fault anywhere wins over a deferral met before it
-  for (u32 t = 0; t < count; ++t)
-    if (tasks[t].fail_phase != 0 && tasks[t].fail_kind == static_cast<u8>(CertificateStatus::fault))
-      return CertificateStatus::fault;
-#endif
   for (u32 phase = 2; phase <= 4; phase += 2) {
     if ((lanes & phase) == 0) continue;
     for (u32 t = 0; t < count; ++t) {

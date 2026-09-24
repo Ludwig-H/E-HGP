@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstddef>
 #include <cstdio>
 #include <mutex>
 #include <new>
@@ -812,8 +813,11 @@ __global__ void __launch_bounds__(lanes_threads, 4) lanes_plan_kernel(LanesIndex
         plan.tasks = lanes_task_count(sites, plan.seeds, budget);
       }
     }
+    // The slot: counters at zero, no failure yet (C step v2).
+    constexpr u32 fail_word = offsetof(LanesTaskWork, fail_first) / sizeof(u64);
+    static_assert(offsetof(LanesTaskWork, fail_first) % sizeof(u64) == 0, "fail_first is a u64 word of the slot");
     u64* words = reinterpret_cast<u64*>(slots + edge);
-    group.for_each(slot_words, [&](u32 i) { words[i] = 0; });
+    group.for_each(slot_words, [&](u32 i) { words[i] = i == fail_word ? lanes_no_failure : 0; });
     if (group.leader()) {
       plans[edge] = plan;
       plan_work[edge] = local;
@@ -853,7 +857,7 @@ __global__ void __launch_bounds__(lanes_threads, 4) lanes_task_kernel(LanesIndex
     std::int32_t* cover_points, u32* cover_ranks, u32* cover_seeds, LanesTask* tasks,
     unsigned long long task_count, LaneRecord* slab_records, u32* events, LaneRecord* staging,
     unsigned long long staging_capacity, unsigned long long* next_task, unsigned long long* staged,
-    unsigned long long* max_steps, LanesTaskWork* slots, u32 warps) {
+    unsigned long long* max_steps, LanesTaskWork* slots, LanesTaskRecords* task_records, u32 warps) {
   const u32 warp = (blockIdx.x * blockDim.x + threadIdx.x) / 32;
   __shared__ Q4Work task4[lanes_warps_per_block];  // the current task's q4 work (leader lane)
   Q4Work& w4 = task4[threadIdx.x / 32];
@@ -890,39 +894,44 @@ __global__ void __launch_bounds__(lanes_threads, 4) lanes_task_kernel(LanesIndex
     if (group.leader()) {
       task.begin = begin;
       tasks[t] = task;
+      lanes_task_publish(task, t, slots[task.edge], task_records[t]);
       atomicMax(max_steps, static_cast<unsigned long long>(steps));
     }
     group.sync();
   }
 }
 
-// C, first part: the replay of each edge's tasks (lanes_replay), before the
-// arena rule; the counts of the edges still decided feed the scan.
+// C (step v2, lanes plan step 3): no loop over an edge's tasks anywhere.
+// The task records' inclusive scan (CUB, in place) comes first; then:
+// - C1, one thread per edge: the replay in O(1) (lanes_replay_scan), before
+//   the arena rule; the counts of the edges still decided feed the scan;
+// - C2, one warp per edge: the arena rule (exclusive prefix of the counts,
+//   counter always advanced), the answer and the ledger (lane 0, shared
+//   memory, then per warp);
+// - C3, one warp per 32 consecutive tasks: each task's records copied to
+//   their places (lanes_task_destinations), records spread over the lanes.
+// A staging overflow (the device's own counter, no host round trip) defers
+// every non-faulty edge with no record and no ledger, as the host twin.
 __global__ void lanes_replay_kernel(const LanesPlan* plans, const unsigned long long* task_first,
-                                    const LanesTask* tasks, u32 edges, u32 record_capacity, u8* pre_status,
-                                    unsigned long long* counts) {
+                                    const LanesTask* tasks, const LanesTaskRecords* scan, const LanesTaskWork* slots,
+                                    u32 edges, u32 record_capacity, u8* pre_status, unsigned long long* counts) {
   const std::size_t stride = static_cast<std::size_t>(gridDim.x) * blockDim.x;
   for (std::size_t e = static_cast<std::size_t>(blockIdx.x) * blockDim.x + threadIdx.x; e < edges; e += stride) {
     const LanesPlan plan = plans[e];
     auto status = static_cast<CertificateStatus>(plan.status);
     u32 count = 0;
     if (status == CertificateStatus::decided)
-      status = lanes_replay(tasks + task_first[e], plan.tasks, plan.lanes, record_capacity, count);
+      status = lanes_replay_scan(tasks, scan, task_first[e], plan.tasks, slots[e].fail_first, record_capacity, count);
     pre_status[e] = static_cast<u8>(status);
     counts[e] = status == CertificateStatus::decided ? count : 0;
   }
 }
 
-// C, second part: one warp per edge. The arena rule in edge order (the
-// exclusive prefix of the counts: the counter always advanced), the answer,
-// the records of a decided edge gathered at its prefix in (phase, task)
-// order, and its ledger (lane 0, shared memory, then per warp).
-__global__ void __launch_bounds__(lanes_threads) lanes_gather_kernel(const LanesPlan* plans,
-    const EdgeQ3Work* plan_work, const LanesTaskWork* slots, const unsigned long long* task_first,
-    const LanesTask* tasks, const u8* pre_status, const unsigned long long* counts,
-    const unsigned long long* prefix, u32 edges, unsigned long long arena_capacity, const LaneRecord* staging,
-    LaneRecord* arena, u8* out_status, u32* out_begin, u32* out_count, unsigned long long* decided_records,
-    Q3Work* warp_work, Q4Work* warp_work4, u32 warps) {
+__global__ void __launch_bounds__(lanes_threads) lanes_answer_kernel(const LanesPlan* plans,
+    const EdgeQ3Work* plan_work, const LanesTaskWork* slots, const u8* pre_status, const unsigned long long* counts,
+    const unsigned long long* prefix, u32 edges, unsigned long long arena_capacity, const unsigned long long* staged,
+    unsigned long long staging_capacity, u8* out_status, u32* out_begin, u32* out_count,
+    unsigned long long* decided_records, Q3Work* warp_work, Q4Work* warp_work4, u32 warps) {
   const u32 warp = (blockIdx.x * blockDim.x + threadIdx.x) / 32;
   __shared__ Q3Work totals[lanes_warps_per_block];
   __shared__ Q4Work totals4[lanes_warps_per_block];
@@ -930,50 +939,84 @@ __global__ void __launch_bounds__(lanes_threads) lanes_gather_kernel(const Lanes
   Q4Work& work4 = totals4[threadIdx.x / 32];
   if (warp >= warps) return;
   const WarpGroup group{threadIdx.x & 31U};
+  const bool overflow = *staged > staging_capacity;
   if (group.leader()) {
     work = Q3Work{};
     work4 = Q4Work{};
   }
   group.sync();
   for (std::size_t e = warp; e < edges; e += warps) {
-    auto status = static_cast<CertificateStatus>(pre_status[e]);
-    const unsigned long long begin = prefix[e], count = counts[e];
-    if (status == CertificateStatus::decided && begin + count > arena_capacity) status = CertificateStatus::deferred;
-    const bool decided = status == CertificateStatus::decided;
-    const LanesPlan plan = plans[e];
-    if (decided) {
-      const LanesTask* own = tasks + task_first[e];
-      LaneRecord* to = arena + begin;
-      for (u32 phase = 2; phase <= 4; phase += 2)
-        for (u32 t = 0; t < plan.tasks; ++t) {
-          const u32 n = phase == 2 ? own[t].q3 : own[t].q4;
-          const LaneRecord* from = staging + own[t].begin + (phase == 2 ? 0U : own[t].q3);
-          group.for_each(n, [&](u32 r) {
-            LaneRecord record = from[r];
-            record.edge = static_cast<u32>(e);
-            to[r] = record;
-          });
-          to += n;
-        }
-    }
     if (group.leader()) {
-      out_status[e] = static_cast<u8>(status);
+      const u8 replay = pre_status[e];
+      const unsigned long long begin = prefix[e], count = counts[e];
+      const bool decided = !overflow && lanes_edge_kept(replay, begin, count, arena_capacity);
+      u8 status = replay;
+      if (overflow) status = replay == static_cast<u8>(CertificateStatus::fault) ? replay : static_cast<u8>(CertificateStatus::deferred);
+      else if (replay == static_cast<u8>(CertificateStatus::decided) && !decided)
+        status = static_cast<u8>(CertificateStatus::deferred);
+      out_status[e] = status;
       out_begin[e] = decided ? static_cast<u32>(begin) : 0U;
       out_count[e] = decided ? static_cast<u32>(count) : 0U;
       if (decided) {
         EdgeQ3Work e3;
         Q4Work e4;
-        lanes_edge_work(plan_work[e], slots[e], plan.lanes, e3, e4);
+        lanes_edge_work(plan_work[e], slots[e], plans[e].lanes, e3, e4);
         add_q3_edge(work, e3);
         add_q4(work4, e4);
         if (count != 0) atomicAdd(decided_records, count);
       }
     }
-    group.sync();
   }
+  group.sync();
   if (group.leader()) {
     warp_work[warp] = work;
     warp_work4[warp] = work4;
+  }
+}
+
+__global__ void __launch_bounds__(lanes_threads) lanes_gather_kernel(const LanesPlan* plans,
+    const unsigned long long* task_first, const LanesTask* tasks, const LanesTaskRecords* scan, const u8* pre_status,
+    const unsigned long long* counts, const unsigned long long* prefix, unsigned long long task_count,
+    unsigned long long arena_capacity, const unsigned long long* staged, unsigned long long staging_capacity,
+    const LaneRecord* staging, LaneRecord* arena) {
+  if (*staged > staging_capacity) return;  // overflow: nothing is gathered
+  static_assert(sizeof(LaneRecord) % sizeof(uint4) == 0 && alignof(LaneRecord) >= alignof(uint4),
+                "a record is a whole number of aligned 16-byte parts");
+  constexpr u32 parts = sizeof(LaneRecord) / sizeof(uint4);
+  constexpr u32 edge_part = offsetof(LaneRecord, edge) / sizeof(uint4);
+  static_assert(offsetof(LaneRecord, edge) % sizeof(uint4) == 0, "the edge field opens a 16-byte part (.x)");
+  const u32 lane = threadIdx.x & 31U;
+  const unsigned long long warps = static_cast<unsigned long long>(gridDim.x) * (blockDim.x / 32);
+  const unsigned long long warp = (static_cast<unsigned long long>(blockIdx.x) * blockDim.x + threadIdx.x) / 32;
+  for (unsigned long long base = warp * 32; base < task_count; base += warps * 32) {
+    const unsigned long long t = base + lane;
+    unsigned long long from = 0, to3 = 0, to4 = 0;
+    u32 n3 = 0, n4 = 0, edge = 0;
+    if (t < task_count) {
+      const LanesTask task = tasks[t];
+      if (task.fail_phase == 0 && task.q3 + task.q4 != 0 &&
+          lanes_edge_kept(pre_status[task.edge], prefix[task.edge], counts[task.edge], arena_capacity)) {
+        lanes_task_destinations(scan, task, task_first[task.edge], plans[task.edge].tasks, t, prefix[task.edge], to3,
+                                to4);
+        from = task.begin;
+        n3 = task.q3;
+        n4 = task.q4;
+        edge = task.edge;
+      }
+    }
+    for (u32 pending = __ballot_sync(0xffffffffU, n3 + n4 != 0); pending != 0; pending &= pending - 1) {
+      const int j = __ffs(static_cast<int>(pending)) - 1;
+      const unsigned long long src = __shfl_sync(0xffffffffU, from, j), d3 = __shfl_sync(0xffffffffU, to3, j),
+                               d4 = __shfl_sync(0xffffffffU, to4, j);
+      const u32 m3 = __shfl_sync(0xffffffffU, n3, j), m4 = __shfl_sync(0xffffffffU, n4, j),
+                e = __shfl_sync(0xffffffffU, edge, j);
+      for (u32 c = lane; c < parts * (m3 + m4); c += 32) {
+        const u32 r = c / parts, part = c % parts;
+        uint4 v = reinterpret_cast<const uint4*>(staging + src + r)[part];
+        if (part == edge_part) v.x = e;
+        reinterpret_cast<uint4*>(arena + (r < m3 ? d3 + r : d4 + (r - m3)))[part] = v;
+      }
+    }
   }
 }
 
@@ -1016,6 +1059,7 @@ struct LanesResident {
   DeviceBuffer<EdgeQ3Work> plan_work;
   DeviceBuffer<LanesTaskWork> slots;
   DeviceBuffer<LanesTask> tasks;
+  DeviceBuffer<LanesTaskRecords> task_scan;
   DeviceBuffer<unsigned char> scan_storage;
   std::size_t device_bytes() const {
     return nodes.capacity_bytes() + escapes.capacity_bytes() + rank_ids.capacity_bytes() + edge_a.capacity_bytes() +
@@ -1027,7 +1071,8 @@ struct LanesResident {
            staging.capacity_bytes() + counters.capacity_bytes() + task_counts.capacity_bytes() +
            task_first.capacity_bytes() + record_counts.capacity_bytes() + record_prefix.capacity_bytes() +
            warp_work.capacity_bytes() + plans.capacity_bytes() + plan_work.capacity_bytes() +
-           slots.capacity_bytes() + tasks.capacity_bytes() + scan_storage.capacity_bytes();
+           slots.capacity_bytes() + tasks.capacity_bytes() + task_scan.capacity_bytes() +
+           scan_storage.capacity_bytes();
   }
   // Device name, SM count, total memory and occupancies, once (the caller
   // holds mu).
@@ -1038,7 +1083,7 @@ struct LanesResident {
     MHGP9_CUDA(cudaDeviceGetAttribute(&sms, cudaDevAttrMultiProcessorCount, 0));
     MHGP9_CUDA(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&plan_blocks, lanes_plan_kernel, lanes_threads, 0));
     MHGP9_CUDA(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&task_blocks, lanes_task_kernel, lanes_threads, 0));
-    MHGP9_CUDA(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&gather_blocks, lanes_gather_kernel, lanes_threads, 0));
+    MHGP9_CUDA(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&gather_blocks, lanes_answer_kernel, lanes_threads, 0));
     if (plan_blocks <= 0 || task_blocks <= 0 || gather_blocks <= 0)
       throw CudaFailure{"lanes kernels cannot be resident on this device", true};
     std::size_t free_bytes = 0;
@@ -1097,6 +1142,17 @@ void exclusive_scan(LanesResident& res, const unsigned long long* in, unsigned l
   MHGP9_CUDA(cub::DeviceScan::ExclusiveSum(nullptr, bytes, in, out, static_cast<int>(count)));
   res.scan_storage.reserve(std::max<std::size_t>(bytes, 1));
   MHGP9_CUDA(cub::DeviceScan::ExclusiveSum(res.scan_storage.get(), bytes, in, out, static_cast<int>(count)));
+}
+
+// cub::DeviceScan::InclusiveScan of the tasks' records, in place (C step v2).
+void inclusive_task_scan(LanesResident& res, LanesTaskRecords* data, std::size_t count) {
+  if (count == 0) return;
+  if (count > static_cast<std::size_t>(0x7fffffff)) throw CudaFailure{"lanes task scan exceeds the CUB int range", true};
+  std::size_t bytes = 0;
+  MHGP9_CUDA(cub::DeviceScan::InclusiveScan(nullptr, bytes, data, data, LanesRecordsSum{}, static_cast<int>(count)));
+  res.scan_storage.reserve(std::max<std::size_t>(bytes, 1));
+  MHGP9_CUDA(cub::DeviceScan::InclusiveScan(res.scan_storage.get(), bytes, data, data, LanesRecordsSum{},
+                                            static_cast<int>(count)));
 }
 
 // The total of an exclusive scan: last prefix plus last item.
@@ -1246,6 +1302,7 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     if (task_count > res.task_capacity()) throw CudaFailure{"lanes task table exceeds its capacity", true};
     // ---- The task table, then T.
     res.tasks.reserve(std::max<std::size_t>(task_count, 1));
+    res.task_scan.reserve(std::max<std::size_t>(task_count, 1));
     const std::size_t task_warps = std::min<std::size_t>(task_warps_max, std::max<unsigned long long>(task_count, 1));
     const int fill_blocks = static_cast<int>(std::min<std::size_t>((edges + threads - 1) / threads,
                                                                    static_cast<std::size_t>(res.sms) * 64));
@@ -1257,51 +1314,48 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
           res.edge_a.get(), res.edge_b.get(), input.index.kmax, capacity, record_capacity, event_capacity,
           res.plans.get(), res.cover_points.get(), res.cover_ranks.get(), res.cover_seeds.get(), res.tasks.get(),
           task_count, res.slab_records.get(), res.events.get(), res.staging.get(), staging_capacity, counter + 2,
-          counter + 3, counter + 5, res.slots.get(), static_cast<u32>(task_warps));
+          counter + 3, counter + 5, res.slots.get(), res.task_scan.get(), static_cast<u32>(task_warps));
       MHGP9_CUDA(cudaGetLastError());
     }
     MHGP9_CUDA(cudaEventRecord(e[3]));
-    unsigned long long staged = 0;
-    MHGP9_CUDA(cudaMemcpy(&staged, counter + 3, sizeof(staged), cudaMemcpyDeviceToHost));
-    // A staging overflow never refuses the call (review before R18: an arena
-    // overflow defers, never refuses): every edge but a faulty one is
-    // deferred to the CPU tail, with no record and no ledger. It depends on
-    // the input only (the staged total), the same on the host twin.
-    const bool overflow = staged > staging_capacity;
-    // ---- C: replay, the counts' scan (arena rule), gather and ledger.
+    // ---- C (step v2): the task records' scan, replay, the counts' scan
+    // (arena rule), answer and ledger, gather. No host read in between: a
+    // staging overflow is read by the kernels on the device's own counter
+    // (review before R18: it never refuses the call; every edge but a faulty
+    // one is deferred to the CPU tail, with no record and no ledger; it
+    // depends on the input only, the same on the host twin).
+    inclusive_task_scan(res, res.task_scan.get(), task_count);
     lanes_replay_kernel<<<fill_blocks, threads>>>(res.plans.get(), res.task_first.get(), res.tasks.get(),
-        static_cast<u32>(edges), record_capacity, res.pre_status.get(), res.record_counts.get());
+        res.task_scan.get(), res.slots.get(), static_cast<u32>(edges), record_capacity, res.pre_status.get(),
+        res.record_counts.get());
     MHGP9_CUDA(cudaGetLastError());
-    if (!overflow) {
-      exclusive_scan(res, res.record_counts.get(), res.record_prefix.get(), edges);
-      lanes_gather_kernel<<<static_cast<int>((gather_warps * 32 + threads - 1) / threads), threads>>>(
-          res.plans.get(), res.plan_work.get(), res.slots.get(), res.task_first.get(), res.tasks.get(),
-          res.pre_status.get(), res.record_counts.get(), res.record_prefix.get(), static_cast<u32>(edges),
-          arena_capacity, res.staging.get(), res.arena.get(), res.out_status.get(), res.out_begin.get(),
-          res.out_count.get(), counter + 4, res.warp_work.get(), res.warp_work4.get(),
-          static_cast<u32>(gather_warps));
+    exclusive_scan(res, res.record_counts.get(), res.record_prefix.get(), edges);
+    lanes_answer_kernel<<<static_cast<int>((gather_warps * 32 + threads - 1) / threads), threads>>>(
+        res.plans.get(), res.plan_work.get(), res.slots.get(), res.pre_status.get(), res.record_counts.get(),
+        res.record_prefix.get(), static_cast<u32>(edges), arena_capacity, counter + 3, staging_capacity,
+        res.out_status.get(), res.out_begin.get(), res.out_count.get(), counter + 4, res.warp_work.get(),
+        res.warp_work4.get(), static_cast<u32>(gather_warps));
+    MHGP9_CUDA(cudaGetLastError());
+    if (task_count != 0) {
+      const int copy_blocks = static_cast<int>(std::min<unsigned long long>(
+          (task_count + threads - 1) / threads, static_cast<unsigned long long>(res.sms) * 64));
+      lanes_gather_kernel<<<copy_blocks, threads>>>(res.plans.get(), res.task_first.get(), res.tasks.get(),
+          res.task_scan.get(), res.pre_status.get(), res.record_counts.get(), res.record_prefix.get(), task_count,
+          arena_capacity, counter + 3, staging_capacity, res.staging.get(), res.arena.get());
       MHGP9_CUDA(cudaGetLastError());
     }
     MHGP9_CUDA(cudaEventRecord(e[4]));
-    std::vector<Q3Work> works(overflow ? 0 : gather_warps);
-    std::vector<Q4Work> works4(overflow ? 0 : gather_warps);
+    std::vector<Q3Work> works(gather_warps);
+    std::vector<Q4Work> works4(gather_warps);
     unsigned long long counts[8] = {0, 0, 0, 0, 0, 0, 0, 0};
     MHGP9_CUDA(cudaMemcpy(counts, counter, sizeof(counts), cudaMemcpyDeviceToHost));
-    if (overflow) {
-      MHGP9_CUDA(cudaMemcpy(out.status.data(), res.pre_status.get(), edges, cudaMemcpyDeviceToHost));
-      for (auto& status : out.status)
-        if (status != static_cast<u8>(CertificateStatus::fault)) status = static_cast<u8>(CertificateStatus::deferred);
-      counts[4] = 0;
-    } else {
     MHGP9_CUDA(cudaMemcpy(out.status.data(), res.out_status.get(), edges, cudaMemcpyDeviceToHost));
-    MHGP9_CUDA(cudaMemcpy(out.record_begin.data(), res.out_begin.get(), edges * sizeof(u32),
-                          cudaMemcpyDeviceToHost));
-    MHGP9_CUDA(cudaMemcpy(out.record_count.data(), res.out_count.get(), edges * sizeof(u32),
-                          cudaMemcpyDeviceToHost));
+    MHGP9_CUDA(cudaMemcpy(out.record_begin.data(), res.out_begin.get(), edges * sizeof(u32), cudaMemcpyDeviceToHost));
+    MHGP9_CUDA(cudaMemcpy(out.record_count.data(), res.out_count.get(), edges * sizeof(u32), cudaMemcpyDeviceToHost));
     MHGP9_CUDA(cudaMemcpy(works.data(), res.warp_work.get(), gather_warps * sizeof(Q3Work), cudaMemcpyDeviceToHost));
-    MHGP9_CUDA(
-        cudaMemcpy(works4.data(), res.warp_work4.get(), gather_warps * sizeof(Q4Work), cudaMemcpyDeviceToHost));
-    }
+    MHGP9_CUDA(cudaMemcpy(works4.data(), res.warp_work4.get(), gather_warps * sizeof(Q4Work), cudaMemcpyDeviceToHost));
+    if (counts[3] > staging_capacity && counts[4] != 0)
+      throw CudaFailure{"lanes staging overflow with gathered records", false};
     const std::size_t used = static_cast<std::size_t>(counts[4]);
     if (used > arena_capacity) throw CudaFailure{"lanes decided records exceed the arena", false};
     out.records.resize(used);  // written whole by the copy below (no zero fill)
