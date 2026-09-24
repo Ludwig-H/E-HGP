@@ -465,10 +465,17 @@ GatheredPresentations gather_presentations(std::vector<std::vector<Presentation>
   std::size_t total = 0;
   for (const auto& slot : slots) total += slot.size();
   const std::size_t wanted = total < 4096 ? 1 : 4 * std::max<std::size_t>(1, workers);
+  // The sample has a fixed total (16 keys per wanted range and per worker),
+  // shared among the slots in proportion to their sizes: its serial sort
+  // does not grow with the number of slots (q2's own slots, review before
+  // R19). Deterministic: a function of the slots only.
   std::vector<Key5> sample;
-  for (const auto& slot : slots)
-    for (std::size_t i = 1; i <= 16 * wanted && !slot.empty(); ++i)
-      sample.push_back(slot[(slot.size() * i) / (16 * wanted + 1)].key);
+  const std::size_t budget = 16 * wanted * std::max<std::size_t>(1, workers);
+  for (const auto& slot : slots) {
+    if (slot.empty()) continue;
+    const std::size_t k = std::min(slot.size(), std::max<std::size_t>(1, budget * slot.size() / total));
+    for (std::size_t i = 1; i <= k; ++i) sample.push_back(slot[(slot.size() * i) / (k + 1)].key);
+  }
   std::sort(sample.begin(), sample.end());
   sample.erase(std::unique(sample.begin(), sample.end()), sample.end());
   std::vector<Key5> splitters;  // strictly increasing
