@@ -48,7 +48,7 @@ PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
 PLAN_SCHEMA = 'mhgp9_tower_plan_v6'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v22'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v23'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -110,14 +110,21 @@ BATCH_KEYS = frozenset({'used', 'backend', 'front_ms', 'filter_ms', 'edges_ms', 
                         'certificate_kernel_ms', 'certificate_transfer_ms', 'lanes_backend', 'lanes_ms',
                         'lanes_device_ms', 'lanes_kernel_ms', 'lanes_transfer_ms', 'lanes_wait_ms', 'tail_ms',
                         'lanes_asked', 'lanes_decided', 'lanes_deferred', 'lanes_records', 'lanes_judged',
-                        'lanes_warps', 'lanes_setup_ms', 'lanes_finish_ms', 'lanes_convert_ms'})
+                        'lanes_warps', 'lanes_setup_ms', 'lanes_finish_ms', 'lanes_convert_ms', 'lanes_tasks',
+                        'lanes_max_task_steps', 'lanes_plan_ms', 'lanes_task_ms', 'lanes_compact_ms'})
 # v20 (S4a) : voie q3 des survivants certifies par lots, sans atlas (CPU ou
 # GPU). Chronos et comptes de l'appel, registre declare lanes_* du mode.
 LANES_TIMES = ('lanes_ms', 'lanes_device_ms', 'lanes_kernel_ms', 'lanes_transfer_ms', 'lanes_wait_ms', 'tail_ms',
                # v22 (H1) : installation et fin hors evenements de l'appareil,
                # conversion de la sortie par la chaine.
-               'lanes_setup_ms', 'lanes_finish_ms', 'lanes_convert_ms')
-LANES_COUNTS = ('lanes_asked', 'lanes_decided', 'lanes_deferred', 'lanes_records', 'lanes_judged', 'lanes_warps')
+               'lanes_setup_ms', 'lanes_finish_ms', 'lanes_convert_ms',
+               # v23 (S4b taches) : etapes P, T et C de l'appareil.
+               'lanes_plan_ms', 'lanes_task_ms', 'lanes_compact_ms')
+LANES_STEP_TIMES = ('lanes_plan_ms', 'lanes_task_ms', 'lanes_compact_ms')
+LANES_COUNTS = ('lanes_asked', 'lanes_decided', 'lanes_deferred', 'lanes_records', 'lanes_judged', 'lanes_warps',
+                # v23 : taches (arete, plage de graines) de l'appel et plus
+                # grand travail declare d'une tache, sur les deux dorsales.
+                'lanes_tasks', 'lanes_max_task_steps')
 LANES_LEDGER = ('lanes_edges', 'lanes_cover_sites', 'lanes_cover_node_visits', 'lanes_seed_tests',
                 'lanes_acute_sites', 'lanes_owner_rejections', 'lanes_seeds', 'lanes_census_point_tests',
                 'lanes_census_inside_sites', 'lanes_census_shell_sites', 'lanes_census_outside_sites',
@@ -657,8 +664,25 @@ def validate_lanes(value, case, lanes_capacity=0, judge=False):
          # fin nulles hors de l'appareil.
          batch['lanes_setup_ms'] + batch['lanes_device_ms'] + batch['lanes_finish_ms'] + batch['lanes_convert_ms'] <=
          batch['lanes_ms'] + 0.05 and
-         (gpu or (batch['lanes_setup_ms'] == 0 and batch['lanes_finish_ms'] == 0)),
+         (gpu or (batch['lanes_setup_ms'] == 0 and batch['lanes_finish_ms'] == 0)) and
+         # v23 : les etapes P, T et C sont dans le noyau de l'appareil, P et
+         # C non nulles quand il a tourne ; nulles hors de l'appareil.
+         ((batch['lanes_plan_ms'] > 0 and batch['lanes_compact_ms'] > 0 and
+           sum(batch[key] for key in LANES_STEP_TIMES) <= batch['lanes_kernel_ms'] + 0.05) if ran else
+          all(batch[key] == 0 for key in LANES_STEP_TIMES)),
          'q3 lanes backend/counts/device time/judge')
+    # v23 : une tache a au moins une graine et au moins un pas declare (un
+    # paquet de recensement ou de passe) ; sans arete reportee, les taches
+    # tiennent dans les graines et la plus lourde dans la somme des pas du
+    # registre (ceil(x/32) <= x).
+    need((batch['lanes_max_task_steps'] > 0) == (batch['lanes_tasks'] > 0) and
+         (batch['lanes_asked'] > 0 or batch['lanes_tasks'] == 0) and
+         (batch['lanes_deferred'] > 0 or
+          (batch['lanes_tasks'] <= ledger['lanes_seeds'] and
+           (batch['lanes_tasks'] > 0) == (ledger['lanes_seeds'] > 0) and
+           batch['lanes_max_task_steps'] <= ledger['lanes_census_point_tests'] + ledger['lanes4_pass_chunks'] +
+           ledger['lanes4_filter_steps'] + ledger['lanes4_list_steps'] + ledger['lanes4_group_steps'])),
+         'q3 lanes tasks')
     # The reduced-slab preflight defers some but never all q3 lanes. Below
     # the default site slab a correct call may still defer an edge beyond its
     # record slab or the record arena (auditor's exact 4 097-cluster fixture,

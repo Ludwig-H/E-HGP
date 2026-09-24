@@ -139,7 +139,8 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                  certificate_kernel_ms=0.0, certificate_transfer_ms=0.0, lanes_backend='', lanes_ms=0.0,
                  lanes_device_ms=0.0, lanes_kernel_ms=0.0, lanes_transfer_ms=0.0, lanes_wait_ms=0.0, tail_ms=0.0,
                  lanes_asked=0, lanes_decided=0, lanes_deferred=0, lanes_records=0, lanes_judged=0, lanes_warps=0,
-                 lanes_setup_ms=0.0, lanes_finish_ms=0.0, lanes_convert_ms=0.0)
+                 lanes_setup_ms=0.0, lanes_finish_ms=0.0, lanes_convert_ms=0.0, lanes_tasks=0,
+                 lanes_max_task_steps=0, lanes_plan_ms=0.0, lanes_task_ms=0.0, lanes_compact_ms=0.0)
     ledger.update({name: 0 for name in schema['ledger'] if name.startswith(('lanes_', 'lanes4_'))})
     device = 'NVIDIA RTX PRO 6000 Blackwell Server Edition'
     if complete and levers.get('q34_batch_filter'):
@@ -169,7 +170,10 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                          lanes_asked=2, lanes_decided=decided, lanes_deferred=deferred, lanes_records=1,
                          lanes_judged=decided if judge else 0, lanes_warps=4 if gpu_q3 else 0,
                          lanes_setup_ms=0.0001 if gpu_q3 else 0.0, lanes_finish_ms=0.0001 if gpu_q3 else 0.0,
-                         lanes_convert_ms=0.0001)
+                         lanes_convert_ms=0.0001,
+                         # v23: two tasks (one per seed), P/T/C inside the kernel.
+                         lanes_tasks=2, lanes_max_task_steps=3, lanes_plan_ms=0.0003 if gpu_q3 else 0.0,
+                         lanes_task_ms=0.0003 if gpu_q3 else 0.0, lanes_compact_ms=0.0002 if gpu_q3 else 0.0)
             # The engine's atlas q3 lane never runs under the lever (as the
             # real chain): no leaf census, and the preflight must accept it.
             ledger.update(q3_leaf_censuses=0, q3_leaf_point_tests=0)
@@ -192,7 +196,7 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                               lanes4_group_steps=9)
                 ledger.update(atlas_deep_cells=0)  # no atlas under the q4 lanes (as the real chain)
                 batch.update(lanes_records=2)
-    return dict(schema='mhgp9_tower_probe_v22', status=status,
+    return dict(schema='mhgp9_tower_probe_v23', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
@@ -989,7 +993,16 @@ class Protocol(unittest.TestCase):
                                lambda v: v['ledger'].update(lanes4_group_steps=5)),
                               ('gpu q4 compare steps below groups',
                                lambda v: v['ledger'].update(lanes4_compare_steps=2)),
-                              ('gpu lanes events unannounced', lambda v: v['options'].update(lanes_events=8))):
+                              ('gpu lanes events unannounced', lambda v: v['options'].update(lanes_events=8)),
+                              # v23: the tasks of the call and the device's three steps.
+                              ('gpu lanes tasks above seeds', lambda v: v['q34_batch'].update(lanes_tasks=3)),
+                              ('gpu lanes tasks without steps',
+                               lambda v: v['q34_batch'].update(lanes_max_task_steps=0)),
+                              ('gpu lanes task steps beyond the ledger',
+                               lambda v: v['q34_batch'].update(lanes_max_task_steps=10 ** 6)),
+                              ('gpu lanes plan step zero', lambda v: v['q34_batch'].update(lanes_plan_ms=0.0)),
+                              ('gpu lanes steps beyond the kernel',
+                               lambda v: v['q34_batch'].update(lanes_task_ms=1.0))):
             bad = deepcopy(gpu_good)
             mutate(bad)
             need(refused(worker.validate_probe, bad, gpu_case, 0), 'batch/GPU probe mutation ' + label)
@@ -1093,6 +1106,7 @@ class Protocol(unittest.TestCase):
                      ('dead_q3_open_shifted', lambda v: v['ledger'].update(dead_q3_open=3)),
                      ('lanes_ledger_on_engine', lambda v: v['ledger'].update(lanes_edges=1)),
                      ('lanes_backend_on_engine', lambda v: v['q34_batch'].update(lanes_backend='cpu')),
+                     ('lanes_tasks_on_engine', lambda v: v['q34_batch'].update(lanes_tasks=1)),
                      ('core_closed_shifted', lambda v: v['ledger'].update(core_closed_edges=2)),
                      ('rect_queries_shifted', lambda v: v['ledger'].update(witness_rect_queries=8)),
                      ('q3_seed_visits_split', lambda v: v['ledger'].update(q3_seed_node_visits=6)),

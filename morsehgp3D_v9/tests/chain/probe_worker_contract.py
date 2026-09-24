@@ -329,6 +329,7 @@ def main(argv):
             except (ValueError, KeyError, TypeError, UnicodeError, subprocess.TimeoutExpired) as error:
                 check(False, 'reduced-slab q3 lanes case refused: ' + type(error).__name__ + ': ' + str(error))
             check(b['lanes_backend'] == 'cpu' and b['lanes_ms'] > 0 and b['lanes_device_ms'] == 0 and
+                  b['lanes_tasks'] > 0 and b['lanes_max_task_steps'] > 0 and
                   b['lanes_deferred'] == 0 and b['lanes_decided'] == b['lanes_asked'] > 0 and b['lanes_records'] > 0 and
                   worker.logical_result(lanes) == worker.logical_result(on) and
                   worker.certificate_work(lanes) == worker.certificate_work(on),
@@ -340,6 +341,12 @@ def main(argv):
                 ('lanes setup on the CPU', lambda v: v['q34_batch'].update(lanes_setup_ms=0.01)),
                 ('lanes kernel time on the CPU', lambda v: v['q34_batch'].update(lanes_kernel_ms=0.5)),
                 ('lanes warps on the CPU', lambda v: v['q34_batch'].update(lanes_warps=1)),
+                # v23: the device's steps are zero on the CPU; the tasks are
+                # bounded by the seeds and carry declared steps.
+                ('lanes step times on the CPU', lambda v: v['q34_batch'].update(lanes_task_ms=0.01)),
+                ('lanes tasks above seeds', lambda v: v['q34_batch'].update(
+                    lanes_tasks=v['ledger']['lanes_seeds'] + 1)),
+                ('lanes tasks without steps', lambda v: v['q34_batch'].update(lanes_max_task_steps=0)),
                 ('lanes deferral below the slab', lambda v: v['q34_batch'].update(
                     lanes_deferred=1, lanes_decided=v['q34_batch']['lanes_decided'] - 1)),
                 ('lanes judged without the judge', lambda v: v['q34_batch'].update(lanes_judged=1)),

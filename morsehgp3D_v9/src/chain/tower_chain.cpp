@@ -291,11 +291,17 @@ gen::Q34CertificateBatch gpu_certificate_batch(const GpuIndex& prepared, unsigne
 // survivors are sent; the answer is mapped back to survivor ordinals. Same
 // error classes as the other device calls; a faulted edge is an invariant
 // violation of the port.
+// v23: the tasks and step times of the call (gpu/lanes_tasks.hpp).
+struct LanesCallSteps {
+  std::uint64_t tasks = 0, max_task_steps = 0;
+  double plan_ms = 0, task_ms = 0, compact_ms = 0;
+};
+
 gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::span<const gen::Q34SurvivingEdge> survivors,
                                std::span<const std::uint8_t> asked, bool device, std::uint32_t capacity,
                                std::uint32_t events, std::size_t workers, double& device_ms, double& kernel_ms,
                                double& transfer_ms, std::uint32_t& warps, double& setup_ms, double& finish_ms,
-                               double& convert_ms) {
+                               double& convert_ms, LanesCallSteps& steps) {
   std::vector<std::size_t> where;
   std::vector<gpu::u32> a, b;
   std::vector<gpu::u8> lanes;
@@ -403,6 +409,11 @@ gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::spa
   warps = out.warps;
   setup_ms = out.setup_ms;
   finish_ms = out.finish_ms;
+  steps.tasks = out.tasks;
+  steps.max_task_steps = out.max_task_steps;
+  steps.plan_ms = out.plan_ms;
+  steps.task_ms = out.task_ms;
+  steps.compact_ms = out.compact_ms;
   convert_ms = ms_since(convert_start);
   return batch;
 }
@@ -830,19 +841,20 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         double lanes_device_ms = 0, lanes_kernel_ms = 0, lanes_transfer_ms = 0;
         double lanes_setup_ms = 0, lanes_finish_ms = 0, lanes_convert_ms = 0;
         std::uint32_t lanes_warps = 0;
+        LanesCallSteps lanes_steps;
         gen::Q34LanesJudgeWork lanes_judge;
         gen::Q34LanesStage lanes;
         if (options.q34_batch_q3 && kmax >= 2) {
           const bool device = options.q34_gpu_q3;
           const std::uint32_t capacity = options.q34_lanes_capacity, events = options.q34_lanes_events;
           lanes.filter = [&gpu_preparation, &lanes_device_ms, &lanes_kernel_ms, &lanes_transfer_ms, &lanes_warps,
-                          &lanes_setup_ms, &lanes_finish_ms, &lanes_convert_ms,
+                          &lanes_setup_ms, &lanes_finish_ms, &lanes_convert_ms, &lanes_steps,
                           device, capacity, events, W](const gen::Q2CensusIndexPtr& ix, unsigned k,
                                                        std::span<const gen::Q34SurvivingEdge> edges,
                                                        std::span<const std::uint8_t> asked) {
             return lanes_batch(gpu_preparation.get(*ix), k, edges, asked, device, capacity, events, W,
                                lanes_device_ms, lanes_kernel_ms, lanes_transfer_ms, lanes_warps, lanes_setup_ms,
-                               lanes_finish_ms, lanes_convert_ms);
+                               lanes_finish_ms, lanes_convert_ms, lanes_steps);
           };
           lanes.lanes = options.q34_batch_q4 && kmax >= 3 ? 6 : 2;
           if (options.q34_lanes_judge) lanes.filter = gen::judge_lanes_filter(std::move(lanes.filter), o, W, &lanes_judge);
@@ -904,6 +916,11 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         b.lanes_records = timing.lanes_records;
         b.lanes_judged = lanes_judge.judged;
         b.lanes_warps = lanes_warps;
+        b.lanes_tasks = lanes_steps.tasks;
+        b.lanes_max_task_steps = lanes_steps.max_task_steps;
+        b.lanes_plan_ms = options.q34_gpu_q3 ? lanes_steps.plan_ms : 0.0;
+        b.lanes_task_ms = options.q34_gpu_q3 ? lanes_steps.task_ms : 0.0;
+        b.lanes_compact_ms = options.q34_gpu_q3 ? lanes_steps.compact_ms : 0.0;
       }
       result.q34_expanded_pairs = r34.pipeline.work.expanded_pairs;
       result.q34_cover_builds = r34.pipeline.work.cover_builds;

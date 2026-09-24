@@ -666,6 +666,20 @@ registre ne changent pas.
 - **API inchangée** : `LanesInput` gagne `task_budget`, `cover_capacity` et
   `staging_capacity`, tous à 0 par défaut. La chaîne et le registre ne
   changent pas.
+- **Sonde et protocole v23** : `q34_batch` publie `lanes_tasks` et
+  `lanes_max_task_steps` sur les deux dorsales (fonctions de l'entrée et de
+  B, égales entre le jumeau et l'appareil), et `lanes_plan_ms`,
+  `lanes_task_ms` et `lanes_compact_ms` sur l'appareil seulement (nuls sur
+  le CPU). Le lecteur exige :
+  - P et C non nuls quand l'appareil a tourné, et P + T + C dans le noyau ;
+  - une tâche porte au moins un pas déclaré, et aucune tâche sans arête
+    demandée ;
+  - sans arête reportée : au plus une tâche par graine, des tâches dès
+    qu'il y a des graines, et la plus lourde tâche bornée par la somme des
+    pas du registre.
+
+  Mutants : cinq dans l'autotest du protocole (appareil), trois dans le
+  contrat sonde/lecteur (CPU), un sur le chemin moteur.
 - **Portes** :
   - `mhgp9_gpu_lanes_port`, section 7. Sur chaque famille et chaque K, et
     sur les quatre fixtures (multi-groupes B, borne intérieure, tampon vide,

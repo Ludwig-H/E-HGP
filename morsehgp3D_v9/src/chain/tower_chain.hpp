@@ -251,6 +251,12 @@ struct Q34BatchTimes {
   double lanes_setup_ms = 0, lanes_finish_ms = 0, lanes_convert_ms = 0;
   std::uint64_t lanes_asked = 0, lanes_decided = 0, lanes_deferred = 0, lanes_records = 0, lanes_judged = 0;
   std::uint32_t lanes_warps = 0;
+  // v23 (S4b tasks, lanes plan step 2): the (edge, seed range) tasks of the
+  // call and the largest declared work of one task (both backends, functions
+  // of the input and B), and the device's three steps P, T and C (zero on
+  // the CPU).
+  std::uint64_t lanes_tasks = 0, lanes_max_task_steps = 0;
+  double lanes_plan_ms = 0, lanes_task_ms = 0, lanes_compact_ms = 0;
 };
 
 struct OrderSummary {

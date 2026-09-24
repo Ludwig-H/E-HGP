@@ -211,7 +211,7 @@ int main(int argc, char** argv) {
   const auto r = mhgp9::run_tower_chain(input.points, options);
   const auto& t = r.times;
   const auto& c = r.catalogue;
-  std::printf("{\"schema\":\"mhgp9_tower_probe_v22\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
+  std::printf("{\"schema\":\"mhgp9_tower_probe_v23\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
               r.reason.c_str());
   std::printf("\"input\":{\"format\":\"%s\",\"grid\":\"%s\",\"sites\":%zu,\"hash\":\"%016" PRIx64 "\"},", input.format.c_str(),
               grid.c_str(), input.points.size(), input.hash);
@@ -291,14 +291,17 @@ int main(int argc, char** argv) {
                 ",\"lanes_transfer_ms\":%.3f,\"lanes_wait_ms\":%.3f,\"tail_ms\":%.3f,\"lanes_asked\":%" PRIu64
                 ",\"lanes_decided\":%" PRIu64 ",\"lanes_deferred\":%" PRIu64 ",\"lanes_records\":%" PRIu64
                 ",\"lanes_judged\":%" PRIu64 ",\"lanes_warps\":%u,\"lanes_setup_ms\":%.3f"
-                ",\"lanes_finish_ms\":%.3f,\"lanes_convert_ms\":%.3f},",
+                ",\"lanes_finish_ms\":%.3f,\"lanes_convert_ms\":%.3f,\"lanes_tasks\":%" PRIu64
+                ",\"lanes_max_task_steps\":%" PRIu64 ",\"lanes_plan_ms\":%.3f,\"lanes_task_ms\":%.3f"
+                ",\"lanes_compact_ms\":%.3f},",
                 b.used ? "true" : "false", backend.c_str(), b.front_ms, b.filter_ms, b.edges_ms, b.device_ms,
                 b.rectangles, b.survivors, certificate_backend.c_str(), b.certificate_ms, b.certificate_device_ms,
                 b.deferred, b.judged_edges, b.rebuilt_covers, b.certificate_warps, b.filter_kernel_ms,
                 b.filter_transfer_ms, b.certificate_kernel_ms, b.certificate_transfer_ms, lanes_backend.c_str(),
                 b.lanes_ms, b.lanes_device_ms, b.lanes_kernel_ms, b.lanes_transfer_ms, b.lanes_wait_ms, b.tail_ms,
                 b.lanes_asked, b.lanes_decided, b.lanes_deferred, b.lanes_records, b.lanes_judged, b.lanes_warps,
-                b.lanes_setup_ms, b.lanes_finish_ms, b.lanes_convert_ms);
+                b.lanes_setup_ms, b.lanes_finish_ms, b.lanes_convert_ms, b.lanes_tasks, b.lanes_max_task_steps,
+                b.lanes_plan_ms, b.lanes_task_ms, b.lanes_compact_ms);
     const auto& tt = r.tower_times;
     std::printf("\"tower_phases_ms\":{\"validate\":%.3f,\"static\":%.3f,\"lots\":%.3f,\"populations\":%.3f,"
                 "\"images\":%.3f,\"bank\":%.3f,\"encode\":%.3f",
