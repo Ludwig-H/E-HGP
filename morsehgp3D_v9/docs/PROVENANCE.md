@@ -1618,9 +1618,9 @@ de la tour et du catalogue (K5 `67450c64611075b1` / `5ad1fe09354411ba`, K10
 `ac108f7f71096c3f` / `a6e959d227f3dafa`). Elle compare ensuite le témoin à
 8 fils à la voie hachée à 1, 2, 3, 4 et 8 fils.
 
-**Mesures locales** (08/000000, hôte partagé de 8 cœurs, charge 30 à 40 :
-indicatives seulement). Condensés épinglés reproduits et `tower_work`
-identique champ par champ à chaque exécution.
+**Mesures locales** (08/000000, hôte partagé de 8 cœurs, chargé par
+d'autres sessions : indicatives seulement). Condensés épinglés reproduits et
+`tower_work` identique champ par champ à chaque exécution.
 - **Temps CPU par fil**, tour seule sur le catalogue K5, W1, ordre 5 :
   - témoin : tri des requêtes 229–243 ms, tri des graines 43–45 ms,
     résolution 1 681–1 767 ms ;
@@ -1632,15 +1632,23 @@ identique champ par champ à chaque exécution.
 - **Somme des temps CPU** de la résolution à W8 : 1 717–1 720 → 1 677–1 681 ms
   à l'ordre 5 ; 38,5–38,8 → 37,9–38,0 s sur les ordres 2 à 10 du catalogue
   K10. S'y ajoutent les classes (0,76–0,78 s) et la collecte (0,18 s).
-- **Sonde v25 à W8**, paires entrelacées base `d1d038393` / voie hachée,
-  sommes sur K = 2..Kmax :
+- **Tour seule, même binaire** (catalogue gardé, W8, paires entrelacées,
+  charge 14 environ) : phase 0 à K5 1 514 / 1 640 / 1 678 / 1 517 →
+  1 250 / 1 267 / 1 363 / 1 309 ms, tour 2 668 / 2 977 / 2 980 / 2 723 →
+  2 503 / 2 422 / 2 502 / 2 383 ms ; temps CPU du processus à K10
+  65,3 / 65,3 / 65,8 → 61,4 / 61,0 / 61,4 s.
+- **Sonde v25 à W8**, paires entrelacées base `d1d038393` → voie hachée,
+  sommes sur K = 2..Kmax, prises quand la charge était retombée (12 à 16) ;
+  à K5 la voie hachée passe d'abord dans chaque paire, à K10 la base :
 
 | K | tri + groupes (ms) | phase 0 (ms) | tour (ms) |
 | --- | --- | --- | --- |
-| 5 | 1 081 / 915 / 767 → 183 / 249 / 227 | 3 573 / 3 496 / 2 896 → 2 238 / 3 106 / 2 464 | 7 180 / 7 017 / 5 423 → 4 792 / 6 756 / 5 467 |
-| 10 | 4 972 / 4 601 / 3 454 → 1 197 / 1 053 / 803 | 33 958 / 31 417 / 21 556 → 36 516 / 30 654 / 22 770 | 45 194 / 41 674 / 30 009 → 51 297 / 42 826 / 31 976 |
+| 5 | 514 / 530 / 480 → 107 / 126 / 117 | 1 816 / 1 847 / 1 941 → 1 197 / 1 364 / 1 446 | 3 181 / 3 246 / 3 301 → 2 343 / 2 695 / 2 800 |
+| 10 | 2 656 / 1 511 / 1 541 → 470 / 244 / 362 | 16 574 / 9 534 / 9 987 → 11 560 / 6 431 / 8 687 | 22 966 / 12 542 / 13 573 → 16 924 / 8 924 / 12 058 |
 
-Le tri et les groupes baissent de 70 à 83 %. À K10, la phase 0 et la tour ne
-se comparent pas d'un bras à l'autre : la validation, dont le code n'a pas
-changé, prend 16 à 45 % de plus du côté de la voie hachée. La charge de l'hôte
-a dérivé pendant les paires. La mesure qui compte est celle de G4, à 48 fils.
+À l'ordre 5 de K5, le tri et les groupes passent de 193 / 209 / 213 ms à
+38 / 50 / 38 ms. Les séries prises sous une charge de 30 à 40 donnent la
+même baisse du tri et des groupes (70 à 83 %), mais une phase 0 et une tour
+dominées par la dérive de la charge : la validation, dont le code n'a pas
+changé, y varie jusqu'à 45 % d'un bras à l'autre. La mesure qui compte est
+celle de G4, à 48 fils.
