@@ -133,6 +133,33 @@ propriétaire, positivité et `lens[4]=0`. Les comparaisons qui découlent
 de la boucle sont respectivement `5²,6²,9²,33²,129²,6554²` ; trois
 groupes restent peu profonds à K5 dès que `m≥3`.
 
+**Observation produit locale non scellée, distincte du scratch J8.** À `L=10`,
+la fixture énumère désormais les **126 tétraèdres** du nuage de neuf
+sites en arithmétique rationnelle : les seuls supports q4 strictement
+positifs sont `abxy_110` à `abxy_115`, de profondeurs `0..5` ; il y en a
+trois admissibles à K5 et six à K10. Le binaire produit CPU v20 du
+[reçu S4a local](s4a_ground_hot_quarter_20260923/README.md), SHA-256
+`eea3040cf4150599ca7ab5c71a4f0e3738f2975483584527f339d3d2600d08e9`,
+a été rejoué sur les neuf triples u32le dans l'ordre écrit plus haut
+(SHA-256 de l'entrée
+`040c44bf4e4a542081aa4ac4ce7830c308788f4426d0873287eecb033c6d7ef0`).
+À `--s=8 --static=8 --grid=1mm --catalogue-digest`, W1, le second bras
+ajoute `q34_batch_filter=1`, `q34_batch_certificates=1` et garde les
+deux leviers GPU à zéro. Les bras moteur et S2/S3 CPU par lots rendent
+chacun `complete_relative`, **3/6**
+présentations q4 à K5/K10 et les mêmes condensés de catalogue et de tour
+entre bras : `0bd6d9370c47804e` / `ab4d011dd514fd81` à K5,
+`2e5756b94e14ec8b` / `84f479f2dda58041` à K10. Les stdout temporaires
+des quatre rejeux portent les SHA-256, dans l'ordre K5 moteur/lot puis
+K10 moteur/lot : `7351014ebc011788acaf5e9263373bda3f415489c8a028cce596a8064fc0343c`,
+`1ac17cd96cd0cbbeafa3127d168b5e445a2399ae83b922e39509667d0e84c8b2`,
+`b0c78ce1561c51c81d47fba22cbcbd91a544e6d30fc460a8b743781a69cc7998`,
+`64191007e93ea0f1f98824c82a1a048d53c4e74312bb267cd41388a3f88bac56`.
+Le produit ne publie pas ici les supports individuels : l'accord de
+compte avec l'oracle n'en est pas un juge nominatif. Il établit que le
+petit adversaire parcourt effectivement la voie q4 du produit ; **aucun
+DESIGN J8 n'est porté ni chronométré** par ce rejeu.
+
 Pour borner ce poste, basculer les gros seaux vers un **tri exact des
 racines puis un balayage des entrées/sorties par groupe**, comme la
 primitive familiale existante, avec `lens[j]` comme profondeur initiale.

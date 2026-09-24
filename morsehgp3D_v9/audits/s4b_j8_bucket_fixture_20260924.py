@@ -6,6 +6,7 @@ claim a LiDAR growth bound. No files are read or written.
 """
 
 from fractions import Fraction
+from itertools import combinations
 from math import isqrt
 
 
@@ -65,11 +66,63 @@ def check(l: int) -> tuple[int, int, int]:
     return events, events * events, min(events, 3)
 
 
+def solve(matrix: list[list[int]], rhs: list[Fraction]) -> tuple[Fraction, ...] | None:
+    """Tiny independent rational solver for the nine-point global q4 check."""
+    n = len(matrix)
+    rows = [[Fraction(x) for x in row] + [Fraction(y)]
+            for row, y in zip(matrix, rhs)]
+    need(len(rows) == n and all(len(row) == n + 1 for row in rows), "matrix shape")
+    for col in range(n):
+        pivot = next((r for r in range(col, n) if rows[r][col]), None)
+        if pivot is None:
+            return None
+        rows[col], rows[pivot] = rows[pivot], rows[col]
+        scale = rows[col][col]
+        rows[col] = [x / scale for x in rows[col]]
+        for r in range(n):
+            if r != col:
+                scale = rows[r][col]
+                rows[r] = [rows[r][j] - scale * rows[col][j]
+                           for j in range(n + 1)]
+    return tuple(row[-1] for row in rows)
+
+
+def check_global_l10() -> None:
+    """Enumerate every tetrahedron, including alternatives to the ab family."""
+    points = [(0, 0, 0), (200, 0, 0), (100, 120, 0)] + [
+        (100, 0, z) for z in range(110, 116)
+    ]
+    positive = []
+    for ids in combinations(range(len(points)), 4):
+        support = [points[i] for i in ids]
+        matrix = [[2 * (support[j][c] - support[0][c]) for c in range(3)]
+                  for j in range(1, 4)]
+        rhs = [sum(v * v for v in support[j]) -
+               sum(v * v for v in support[0]) for j in range(1, 4)]
+        center = solve(matrix, rhs)
+        if center is None:
+            continue
+        barycentric = solve([[support[j][c] for j in range(4)]
+                             for c in range(3)] + [[1] * 4], list(center) + [1])
+        if barycentric is None or min(barycentric) <= 0:
+            continue
+        radius2 = sum((center[c] - support[0][c]) ** 2 for c in range(3))
+        depth = sum(sum((center[c] - point[c]) ** 2 for c in range(3)) < radius2
+                    for i, point in enumerate(points) if i not in ids)
+        positive.append((ids, depth))
+    expected = [((0, 1, 2, i), i - 3) for i in range(3, 9)]
+    need(positive == expected, "all positive q4 supports and depths at L=10")
+    need(sum(depth <= 2 for _, depth in positive) == 3, "K5 q4 count")
+    need(sum(depth <= 7 for _, depth in positive) == 6, "K10 q4 count")
+    print("L=10 global_q4_positive=6 shallow_K5=3 shallow_K10=6")
+
+
 def main() -> None:
     for l in (8, 10, 16, 64, 256, 13107):
         events, comparisons, shallow_k5 = check(l)
         print(f"L={l} events={events} comparisons={comparisons} "
               f"shallow_K5={shallow_k5}")
+    check_global_l10()
 
 
 if __name__ == "__main__":

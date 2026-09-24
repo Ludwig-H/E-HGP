@@ -28,6 +28,10 @@ Même après cette correction, une [famille u18 de seaux
 vivants](AUDIT_S4B_J8_BIT_FINAL_20260924.md)
 force `m²` comparaisons de racines par graine pour seulement `K−2`
 groupes peu profonds ; `m=6554` donne 42 954 916 comparaisons.
+L'oracle rationnel complet des neuf sites à `L=10` trouve exactement
+trois/six supports q4 admissibles à K5/K10 ; le produit CPU v20 émet
+trois/six présentations sur ce nuage dans un rejeu local, sans trace
+nominative des supports ni port du DESIGN.
 Prévoir un tri/balayage exact pour les gros seaux et mesurer la traîne
 sur LiDAR avant toute affirmation de coût S4b.
 
