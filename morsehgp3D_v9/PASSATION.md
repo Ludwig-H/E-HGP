@@ -369,8 +369,26 @@ sur toutes les arêtes demandées : 576 456 à K5 et 1 357 994 à K10, soit
 les condensés épinglés, ainsi que le condensé des présentations du bras
 moteur. Le noyau compile sur sm_120.
 
-Suite : session G4 R16 (S4a contre S4a + S4b), puis le chemin critique de la
-tour (phase 0 statique séquentielle par ordre).
+Session G4 R16 ([reçu](receipts/g4_tower_r16_20260924/README.md), paquet
+`931a0862`, **`completed`**, `TERMINATED` certifié) :
+- **K5 1,21 / 1,53 / 1,65 s**, **K10 3,92 / 5,16 / 5,01 s** ;
+- paires répétées et entrelacées à 000000 : S4b retire 0,26–0,28 s à K5
+  et 1,57–1,59 s à K10 ; CPU de la chaîne −53 % à K5 et −56 % à K10 ;
+- 12 comparaisons égales, dont le condensé des présentations : même
+  multiensemble (clé, arité, support) sur l'appareil et dans le moteur ;
+- préflights jugés, ardoises réduites (11 993 voies en traîne) et six
+  épingles conformes.
+
+Le noyau des voies (190 ms à K5, 586 ms à K10, une arête par warp) entre
+dans le chemin critique : les ouvriers l'attendent. Reste à 000000/K5
+(1,53 s) : tour 0,57 s, appel des voies 0,28 s, certificats 0,14 s, q2 et
+recensement 0,20 s, front, filtre, fusion et index environ 0,34 s.
+
+Suite, pour le contrat de 1 s à K5 :
+- la tour (phase A mono-fil de l'ordre le plus haut, phase 0) ;
+- le noyau des voies : tâches (arête, graines) et raffinement des seaux,
+  recouvrement avec les certificats ;
+- ensuite, les certificats et le front/filtre.
 
 Suite : tour maigre (D5 de l'auditeur C :
 index des selles, saut au centre, images de naissance directes), puis
