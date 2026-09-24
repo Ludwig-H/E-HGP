@@ -116,10 +116,11 @@ struct FullBallBatchResolver {
 // request of its class (minimum ordinal of the requests of equal facet key).
 // Firsts are recorded when the classes are known, targets at the end of the
 // order's phase 0. path[K]: 0 while order K has no classes, 1 when they came
-// from the sorted witness, 2 from the hashed grouping; tag_rejects and probes are schedule-dependent diagnostics of that path
-// (tag matches refused by the exact key compare, slots probed beyond the
-// home slot), never work counters; seed_tag_rejects: the same refusals in
-// the lookups of its seed index.
+// from the sorted witness, 2 from the hashed grouping. tag_rejects and probes
+// are schedule-dependent diagnostics of the hashed grouping (tag matches
+// refused by the exact key compare, slots probed beyond the home slot),
+// never work counters; seed_tag_rejects: the same refusals in the lookups of
+// its seed index.
 struct FullBallStaticTrace {
   std::array<std::vector<u32>, kFacetMaxK + 1> targets;
   std::array<std::vector<u64>, kFacetMaxK + 1> firsts;
