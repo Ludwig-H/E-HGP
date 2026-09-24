@@ -40,8 +40,18 @@ trois charges locales ont été recalculés. Ces cas sont utiles, mais restent
 plusieurs séquences, ni le profil float32 secondaire. Les cas bruts n'ont
 pas encore de condensés CPU indépendants épinglés : la comparaison interne
 des jumeaux établit une identité relative, pas une référence absolue.
+Un mutant qui remplace ensemble les condensés de tour, catalogue et
+présentations du cas brut 08/000000/K5 reste accepté par le lecteur
+`complete_relative` : la clé correspondante manque bien à
+`PINNED_DIGESTS`. Le jumeau détecterait la corruption d'un seul bras,
+mais pas une erreur commune. En positif, les nuages sans sol des trois
+trames sont des sous-ensembles exacts des entrées brutes correspondantes,
+sans site hors brut après la grille commune.
 Avec un budget utile de 1 500 s et 600 s au plus par cas, un reçu partiel
-est possible ; publier précisément les cas achevés et les reports/refus.
+est possible ; `validate_received` accepte `partial` dès qu'une seule tour
+du plan est achevée, même si les douze cas bruts sont tous reportés.
+Publier précisément les cas achevés et les reports/refus ; ne pas annoncer
+« brut testé » sur le seul statut global.
 
 Le même commit WIP a encore des scénarios d'autotest codés pour les 18
 anciens cas (`tower_selftest_v9.py`, p. ex. `test_budget_exhaustion_skips_following_cases`,
@@ -50,7 +60,12 @@ anciens cas (`tower_selftest_v9.py`, p. ex. `test_budget_exhaustion_skips_follow
 Une exécution sur le worktree actif a donné 28 tests dont six erreurs de
 scénarios ; comme ce worktree bougeait pendant l'exécution, **ce n'est pas
 une qualification figée ni un échec du moteur**. La discordance des
-assertions est néanmoins visible dans le source `61cfba666`. Corriger les
+assertions est néanmoins visible dans le source `61cfba666`. Un rejeu
+ciblé ultérieur de
+`Protocol.test_nominal_session_completed` sur ce WIP échoue en 24,79 s
+sur `GPU labels from complete LiDAR towers` (attendu à 18 cas, plan à
+30) : la porte nominale est donc réellement rouge, indépendamment de
+la première suite interrompue. Corriger les
 attendus et rejouer normal puis `-O` sur un SHA gelé avant le prochain G4.
 
 Le bras dit « chaud » de R21 ouvre encore un **nouveau processus pour
@@ -77,6 +92,24 @@ parents, contributions, nœuds inférieurs) dans `chain_total`, mais la
 résolution de certaines facettes et les copies/encodages imposent une
 refonte conjointe, pas seulement un meilleur digest.
 
+Le chemin critique actuel cache aussi q2 : la chaîne lance q2 après le
+front q3/q4 et le rejoint après les autres travaux q3/q4 ; les 75–115 ms
+de q2 K5 mesurés dans R20 sont donc recouverts aujourd'hui. Si les voies
+q3/q4 deviennent beaucoup plus courtes, cette limite réapparaîtra.
+À 08/000000/K5, les trois noyaux GPU filtre/certificats/voies prennent
+environ 64 + 90 + 57 = 211 ms dans leurs passes sérielles actuelles,
+sans front, recensement ni FULL. Une mise en flux des rectangles pourrait
+chevaucher ces étapes, mais devra préserver la propriété exacte des
+rectangles, les masques monotones et les ordinaux de sortie. La seule
+superposition des passes ne suffira pas à 100 ms sans réduction du
+travail géométrique et refonte de FULL.
+Le signal de croissance renforce cette priorité sans prouver une loi
+asymptotique : sur 08/000200 sans sol, la sonde 16k→32k/K5 de l'audit
+aval S2 multiplie les paires étendues par 4,81 et les incidences
+`core_sites` par 8,27, tandis que les supports q3+q4 émis ne sont
+multipliés que par 1,83. Le seul nombre de boules de sortie serait donc
+un mauvais substitut au travail de génération sur ces régimes finis.
+
 Pistes à éprouver dans cet ordre, **sans crédit de gain acquis** :
 
 1. Diminuer exactement les paires/charges du cœur q3/q4 avant émission,
@@ -101,6 +134,45 @@ Attention à `Builder::run()` : le chemin parallèle entre ordres K est
 désactivé lorsqu'un `batch_resolver` externe est branché. Un simple
 callback GPU peut donc détériorer FULL ; sa parallélisation doit être
 vérifiée de bout en bout, avec comparaison exacte des sorties.
+
+### Concurrence imbriquée à mesurer, pas gain acquis
+
+Le reçu R20/08/000000/K5 fixe `workers=48`,
+`tower_static_threads=48` et `tower_overlap_static=true`. Dans
+`run_orders_overlapped`, cinq fils exécutent les ordres K ; chacun peut
+lancer `parallel_items(chunks, 48)` depuis `order_prepare_lean`, tandis
+que la phase statique emploie elle aussi jusqu'à 48 fils. Avec
+`planned_workers=min(threads,items)`, la **borne architecturale** est
+5×48 + 48 + 5 = 293 fils créés, plus le fil pilote, et non un pic
+observé. Les tailles
+de programmes et le calendrier peuvent la réduire. Aucun reçu R20 ne
+mesure le nombre simultané ni l'ablation de cet emboîtement. Avant de
+conclure que davantage de CPU aide FULL, instrumenter le pic de fils et
+comparer, sur même catalogue et même G4, les couples de largeur
+phase-statique/ordres (8, 16, 24, 48), avec trois répétitions, même
+empreinte de tour et coûts mur/CPU par phase. Un ordonnanceur commun
+borné à 48 fils est une piste si la contention se confirme.
+
+Une lecture ciblée des durées de vie v22–v26 n'a montré ni course ni
+utilisation après libération causale : la préparation GPU possède son
+index, publie sous mutex/condition et joint son fil ; q2 et les voies
+q3/q4 joignent leurs ouvriers avant destruction ; les états FULL sont
+privés par K et les runners joints avant lecture des résultats. Ce n'est
+pas une preuve exhaustive d'absence de course. Aucun résultat TSan
+nouveau n'est revendiqué pour ces tranches ; une porte TSan rejouable
+reste utile après correction des gates.
+
+Le chemin d'échec mérite aussi une porte spécifique : dans les chemins
+parallèles (avec ou sans overlap), les préparations statiques précèdent
+tous les lots ; toute panne statique est donc lancée avant la lecture
+des pannes de lots, même si le plus petit K en panne est un lot. Avec
+`static K4 + lots K2`, la boucle séquentielle K croissant renvoie
+`lots K2`, alors que les deux chemins parallèles renvoient `static K4`. Le gate
+`order_failure_priority_gate.cpp` couvre déjà cette paire à quatre fils,
+mais ne la compare pas à `static_threads=1` ; son commentaire promet
+pourtant la même priorité. Ajouter ce contrôle différentiel. C'est une
+discordance de refus, **pas** un faux succès géométrique connu et pas une
+explication des 1,1 s R20.
 
 ## Portes d'exactitude et autres essais encore dus
 

@@ -118,7 +118,7 @@ int main(int argc,char** argv) try {
   const std::uint64_t min_product=std::stoull(argv[3]);
   const unsigned separation_s=argc==5?std::stoul(argv[4]):8;
   if(k<4||k>10) throw std::runtime_error("K outside [4,10]");
-  if(separation_s<2||separation_s>32) throw std::runtime_error("s outside [2,32]");
+  if(separation_s<8||separation_s>32) throw std::runtime_error("s outside [8,32]");
   std::ifstream file(argv[1],std::ios::binary);
   if(!file) throw std::runtime_error("cannot open input");
   const std::vector<unsigned char> raw{std::istreambuf_iterator<char>(file),{}};

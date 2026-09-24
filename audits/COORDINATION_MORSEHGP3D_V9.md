@@ -5372,3 +5372,41 @@ Question à l'utilisateur, relayée : acceptes-tu ces cibles étagées, 100 ms
 restant un horizon de recherche ?
 
 GCP non utilisé.
+
+### 21 h 05 UTC (24 septembre) — Auditeur B : préflight R21 avant nouvelle G4
+
+À D/C : sur le WIP `61cfba666`, je recommande de **ne pas lancer encore
+R21**. Le [contre-audit ciblé](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PREFLIGHT_R21_V26_20260924.md)
+montre que `validate_external_wall` accepte 3 000 s de
+`device_session.context_ms + reserve_ms` dans 0,002 s de mur externe ; son
+autotest actuel passe ce mutant. Le test nominal du plan 30 cas échoue
+effectivement en 24,79 s car il attend encore 18 étiquettes. Corriger le
+mur (sans changer `chain_total`), ajouter une mutation causale de session,
+mettre à jour les attentes 30 cas et rejouer normal/`-O` sur un SHA gelé.
+Les trois entrées brutes ont bien SHA/taille/FNV vérifiés et les sans-sol
+sont leurs sous-ensembles exacts, mais les digests bruts restent relatifs
+GPU/jumeau, sans épingles indépendantes. Un reçu `partial` peut omettre
+tous les cas bruts : vérifier les statuts **par cas**. Le bras chaud ouvre
+un processus par cas, pas encore une boucle multi-trames persistante.
+
+Le contrat utilisateur confirmé demeure **100 ms pour la tour FULL K5
+sans sol déjà explicite**, et la cible 1 s/100 ms sur trames complètes,
+avec sol aussi, reste active ; les paliers proposés par C sont des jalons
+de recherche, non un remplacement du contrat. Après portes R21, mesurer
+séparément les coûts et sorties FULL et q3/q4 sur s8/10/12, plusieurs
+séquences, puis croissance 8k/16k/32k du travail total sur chemins récents.
+
+À D : autre poste FULL quantifiable à vérifier avant la prochaine G4.
+R20/K5 utilise `tower_static_threads=48` et `tower_overlap_static=true` ;
+les cinq ordres peuvent chacun ouvrir jusqu'à 48 ouvriers de préparation
+pendant qu'une phase 0 en ouvre jusqu'à 48, soit une borne de 293 fils
+créés plus le pilote, non un pic mesuré. Instrumenter le pic et faire
+une ablation à largeurs 8/16/24/48 sur **même** catalogue, en gardant
+l'identité explicite des sorties. C'est potentiellement de la contention
+CPU/mémoire, pas un gain déjà démontré. Il existe aussi une discordance
+de priorité de refus `static K4 + lots K2` entre boucle séquentielle
+(`lots K2`) et chemins parallèles (`static K4`) ; le gate actuel ne
+compare pas `static_threads=1` sur cette paire. Voir la note ciblée ;
+ce point P2 ne remet pas en cause un succès R20.
+
+GCP non utilisé dans cet audit.

@@ -2,7 +2,7 @@
 
 24 septembre 2026, auditeur B, hors moteur et hors registre.
 [Source](shadow.cpp) SHA-256
-`a3421f8d340eb67a034b179827f618e666cd25469eacbb033aa6a589502b780f`.
+`7a74a0946ae3dbc7089061c4abe25c4d8eb3495e330ddd73f717748ef398f1d3`.
 Entrée : quart physique sans sol de 08/000200, 11 461 sites, fichier
 `../s4a_cpu_scene02_physical_panel_20260924/inputs/quarter_full.u32le`,
 SHA-256 `825d005ea9c3e1b8509e26bd5adda746a80779f1e12e8a7e05c1b01bc9f7e7ae`.
@@ -21,7 +21,7 @@ timeout 120s /tmp/mhgp9_moments_shadow \
   morsehgp3D_v9/audits/s4a_cpu_scene02_physical_panel_20260924/inputs/quarter_full.u32le 5 1024
 ```
 
-Un dernier argument facultatif fixe `s` (8 par défaut) ; les appels
+Un dernier argument facultatif fixe `s` (8 par défaut, jamais <8) ; les appels
 `... 5 1024 8`, `... 5 1024 10`, `... 5 1024 12` ont été rejoués sur
 le même input et le même binaire. Ils comparent **front et shadow
 seulement**, pas la chaîne FULL aux trois séparations.
