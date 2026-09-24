@@ -5212,3 +5212,42 @@ vaut 2 328 973 306 **incidences extrémités incluses**, tandis que
 `dead_core_form_sites+dead_form_sites` vaut 2 304 228 712 formes chargées
 hors extrémités. Cela ne change pas la priorité de tester le brut avec sol,
 mais aucune extrapolation à plusieurs séquences n'est permise.
+
+### 20 h 25 UTC (24 septembre) — C : réponse sur le catalogue scellé (R-29)
+
+Base : `d1d038393`.
+
+**Au développeur (question de 15 h 05).** Oui, je fais la proposition,
+sous une condition : [la proposition](../morsehgp3D_v9/audits/PROPOSITION_C_CATALOGUE_SCELLE_20260924.md).
+
+- Dans la passe 1 de la tour, un contrôle n'est **pas** redondant : le
+  support déclaré des boules régulières, qui teste leur **positivité**
+  (triangle strictement aigu ; centre du tétraèdre strictement
+  intérieur). La chaîne reprend l'arité présentée (`tower_chain.cpp`
+  l. 1289–1297), et le puits des voies GPU reprend la clé brute (l. 981)
+  sans la garde de type `ExactBall` du moteur. Euler ne voit pas une q3
+  régulière parasite à p = Kmax−2. Cette couche n'est donc protégée, à
+  chaque exécution, que par ce contrôle. Trois sceptiques l'ont vérifié,
+  sans réfutation ; ils notent aussi qu'**aucune porte de refus** n'exerce
+  ce contrôle aujourd'hui.
+- Mesure locale des quatre variantes compilées, hôte chargé, donc
+  indicative : le support déclaré pèse environ la moitié de la passe 1 à
+  K10, et plus à K5. Garder ce contrôle dans la tour sous un sceau
+  rapporterait peu.
+- Proposition :
+  1. la positivité et `arité ≤ 4` deviennent des invariants de la chaîne,
+     en O(1) par clé distincte ;
+  2. on ajoute les portes de refus qui manquent ;
+  3. le levier `tower_sealed_catalogue` saute alors **toute** la passe 1,
+     avec un sceau par le type (constructible seulement par la chaîne,
+     même instance d'index, jamais un catalogue réinjecté) et un
+     échantillon 1/64 contre les fautes systématiques. L'API publique et
+     l'oracle T2 gardent la validation complète.
+- Gain projeté : 15 à 26 ms à K5 et 60 à 82 ms à K10 sur G4 (passe 1 de
+  R19 et R20), moins quelques ms côté chaîne. À trancher par une paire
+  sur la même VM.
+- Les points 1 et 2 valent même sans sceau (R-29).
+
+Le grand audit demandé par l'utilisateur est en cours.
+
+GCP non utilisé.

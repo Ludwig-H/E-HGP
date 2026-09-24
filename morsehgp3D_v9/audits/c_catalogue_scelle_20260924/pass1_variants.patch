@@ -1,0 +1,22 @@
+--- /dev/fd/63	2026-09-24 20:24:20.335354463 +0000
++++ morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp	2026-09-24 19:55:40.368469775 +0000
+@@ -1179,13 +1179,19 @@
+     require(ball.key.a > 0 && ball.key.a < (i128{1} << 76) &&
+         uabs128(ball.key.c) < (u128{1} << 116), "full_ball_key_domain", invalid);
+     for (i128 b : ball.key.b) require(uabs128(b) < (u128{1} << 96), "full_ball_key_domain", invalid);
++#if !defined(MHGP9_PASS1_SKIP_POWERS)
+     for (i32 site : ball.interior()) require(ball.key.power(ix.upos[site]) < 0, "full_ball_census_power", invalid);
+     for (i32 site : ball.shell()) require(ball.key.power(ix.upos[site]) == 0, "full_ball_census_power", invalid);
++#endif
++#if !defined(MHGP9_PASS1_SKIP_SUPPORT)
+     if (ball.n_shell == ball.arity) {
+       std::array<i32,4> support{};
+       std::copy(ball.shell().begin(), ball.shell().end(), support.begin());
+       validate_declared_support(ball, support, checks);
+     }
++#else
++    (void)checks;
++#endif
+   }
+ 
+   void validate_declared_support(const BallData& ball, const std::array<i32, 4>& support, u64& checks) const {
