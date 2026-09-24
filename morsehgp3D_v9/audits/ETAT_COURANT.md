@@ -36,12 +36,16 @@ répond séparément aux deux variations demandées : trame entière → deux
 moitiés → quatre quarts selon les plans capteur, et densités globales
 emboîtées 1/4 → 1/2 → 1 dans **chaque** secteur. Sur trois trames sans
 sol × K5/K10, le v12 CPU publie 126 cas ; 13/36 pentes spatiales
-dépassent 2 et 10/84 pentes de densité des `core_sites` atteignent 2,
-malgré des pentes de temps CPU inférieures à 2 sur ces liens. Le brut
-avec sol couvre les
-sept secteurs et trois densités de 08/000000 à K5/K10. Ces pentes finies
-isolent un verrou réel de formes calculées ; elles ne démontrent aucune
-borne asymptotique, et R15 S4a n'a pas encore le même panneau apparié.
+à densité entière dépassent 2 ; le croisement des trois densités donne
+**5/36→10/36→13/36**, soit 28/108 liens spatiaux, et 10/84 liens de
+densité des `core_sites` atteignent 2. Les pentes de temps CPU restent
+inférieures à 2 sur ces liens. Le brut avec sol couvre les sept secteurs
+et trois densités de 08/000000 à K5/K10. Ces pentes finies
+isolent un verrou réel de formes calculées : `dead_core_loads` reste
+sous 2 sur les 108 liens spatiaux et les 84 liens de densité sans sol,
+mais la **taille moyenne du cœur chargé** fait monter leur produit.
+Elles ne démontrent aucune borne asymptotique, et R15 S4a n'a pas encore
+le même panneau apparié.
 Dans la matrice sans sol v12, les côtés utilisent le signe **quantifié** :
 il coïncide avec le float32 physique sur 08/000000 et 08/000100, mais
 déplace un retour de 08/000200. La contre-épreuve du quart chaud à K10

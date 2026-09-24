@@ -21,6 +21,37 @@ seulement : une matrice spatiale × densité S4a appariée manque encore.
 Les coupes et décimations sont des problèmes HGP distincts ; leurs tours
 ne s'additionnent pas pour reconstituer celle de la trame entière.
 
+**Croisement des deux axes sur les reçus CPU.** Pour les liens spatiaux
+`plein→demi` et `demi→quart`, le nombre de pentes `p_core≥2` à densité
+`1/4 / 1/2 / 1` est **5/36 / 10/36 / 13/36** sur les trois trames sans
+sol v12 (coupes historiques au signe quantifié), **2/6 / 3/6 / 2/6**
+sur le brut physique 08/000000/K5, et **0/6 / 1/6 / 2/6** sur le même
+brut/K10. Le total sans sol est 28/108 liens spatiaux ; les 13/36 du
+tableau correspondent à la seule densité entière. Les effectifs réels
+des enfants, jamais un facteur deux imposé, entrent dans ces pentes.
+Cette fréquence croît avec la densité dans le panneau sans sol ; elle
+n'est pas monotone dans tous les bras bruts. Les 10/84 franchissements
+sans sol sur l'axe densité restent un diagnostic **distinct**. Sur ces
+108 liens spatiaux sans sol, les paires développées franchissent 2 dans
+16 cas, mais ni les CPU·s ni les boules du catalogue ne le font ; une
+masse interne défavorable ne qualifie pas à elle seule le temps total.
+
+L'identité exacte `core_sites = dead_core_loads × taille_moyenne_du_cœur`
+sépare ces effets. Dans les 84 liens de densité sans sol, les pentes du
+nombre de charges sont **1,064–1,296** et celles de la taille moyenne
+**0,099–0,870** ; 0/84 charges mais 10/84 totaux franchissent 2. Dans
+les 108 liens spatiaux, les charges vont de **0,710 à 1,575** (0/108
+franchissement) tandis que la taille moyenne va de **−0,297 à 2,416** ;
+28/108 totaux franchissent 2. Les reçus bruts physiques confirment la
+même séparation : charges au maximum **1,296** sur les liens de densité
+et **1,261** sur les liens spatiaux, à K5 ou K10. Ici `dead_core_loads`
+est lu directement dans le brut ; pour les résumés sans sol, il se
+reconstruit par `(core_sites − dead_core_form_sites)/2`, identité vérifiée
+sur les 126 sorties. La croissance défavorable de la masse calculée se
+situe donc, dans ces panneaux, surtout dans **les sites par cœur chargé**.
+Une optimisation du seul nombre de charges ne suffira pas à traiter ce
+verrou ; le coût d'un certificat avant `load` reste à mesurer.
+
 23 septembre 2026. Le [reçu local v12](../receipts/lidar_scaling_local_20260923/README.md)
 contient trois trames sans sol de la séquence 08 à grille 1 mm,
 K5/K10, s8/W8 : chaque
@@ -239,6 +270,20 @@ approximatif ; il ne reproduit ni les faisceaux d'un autre capteur, ni des
 passages superposés. Les temps proviennent d'un hôte CPU partagé et les
 cas à densité entière portent le libellé de sonde historique
 `grid=unspecified`, même si leur entrée 1 mm est attestée par le manifeste.
+La graine de thinning est commune aux trames : `splitmix64(ID XOR seed)`
+ne fournit donc pas trois tirages indépendants. Pour les trames **brutes**
+08/000000, 000100 et 000200, dont les IDs de retour recommencent à zéro,
+les sélections 1/4 des **indices d'acquisition** se recouvrent à plus de
+99,97 % entre paires de trames ; ce ne sont pas les mêmes points 3D.
+Après le masque sans sol, les sous-ensembles des indices de retour bruts
+retenus ne se recouvrent plus qu'à **17,90–19,61 %** du plus petit
+échantillon 1/4, proches de l'attente conditionnelle de tirages
+indépendants sur ces masques ; les IDs de sites effectivement hachés
+restent couplés. Les 126 cas réutilisent aussi les mêmes secteurs,
+densités emboîtées et deux K : on ne peut pas les traiter comme 126
+répétitions indépendantes. Garder cette série appariée, puis ajouter des
+graines propres à chaque trame pour la sensibilité, avec une sélection
+globale emboîtée par trame et la jointure brut/sans-sol par retour brut.
 Un [premier reçu brut](lidar_raw_physical_scaling_20260923/README.md)
 couvre désormais les **21** croisements des sept secteurs 08/000000/K5
 définis par plans **float32 physiques** et des trois densités emboîtées.
@@ -389,8 +434,12 @@ ordres et sept comptes structurels communs ; une septième tentative,
 géométriquement valide mais sous contention, est exclue des pentes.
 Les deux bras conservent exactement **34,673 → 153,448 → 582,997 M**
 `core_sites`, soit `p=2,077/1,916`. S4a déplace q3 après le cœur sans
-réduire cette masse. Ses tests logiques de census par lanes croissent
-**43,220 → 130,416 → 372,784 M**, `p=1,542/1,507` ; ils ne sont pas
+réduire cette masse. Ici, le **quart physique** contient
+`344 498→862 123→1 999 884` charges ; les sites moyens par charge
+passent de **100,65→177,99→291,52**. Les pentes `p_core` se décomposent
+ainsi en `p_charges=1,281/1,208` et `p_taille=0,796/0,708`, sur les
+effectifs réels 3 609→7 387→14 828. Ses tests logiques de census par lanes
+croissent de **43,220 → 130,416 → 372,784 M**, `p=1,542/1,507` ; ils ne sont pas
 des ballots physiques. Les CPU·s de chaîne croissent d'exposants
 **1,391/1,410** pour S3 et **1,393/1,406** pour S4a sur ces deux
 liens. Les murs sont descriptifs sur l'hôte partagé, et la sonde CPU ne
