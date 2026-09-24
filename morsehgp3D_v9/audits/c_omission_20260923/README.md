@@ -526,6 +526,8 @@ des juges, ni un jugement du chemin GPU.
 
 ## Port des juges en portes produit (R-20)
 
+*Version 1, remplacée par la version 2 ci-dessous ; ses pièces restent citées par la contrelecture B.*
+
 [`judges_product_gates.patch`](judges_product_gates.patch), sur
 `6e5b54e7a`, où il s'applique tel quel. Il copie les deux juges v8 à
 l'identique dans `tests/chain/` et enregistre 34 CTest à code de sortie
@@ -560,6 +562,85 @@ Les 34 passent sur `f56d64a81`, dont le produit est identique à
 
 Une fois le patch adopté, les copies de `tests/chain/` font référence et
 les sources de ce dossier deviennent historiques.
+
+### Version 2 du port (réponse à la contrelecture B)
+
+La [contrelecture B](../CONTRE_AUDIT_B_PORTES_JUGES_R20_20260923.md) a
+qualifié la v1 de régression CPU **échantillonnée** du catalogue, pas de
+preuve de complétude FULL. Elle demandait quatre compléments : une entrée
+haute u18, une dégénérescence à coquille étendue, des coupes LiDAR 1 mm
+régénérées et épinglées, et les compteurs de chaque cas. La v2
+([`judges_product_gates_v2.patch`](judges_product_gates_v2.patch), base
+`350f82e66`) les apporte ainsi :
+
+- **Fixture cosphérique gravée** (`fixture-cospheric`, 417 points, tous
+  tirés, Kmax = 5). Trois configurations sont centrées en des points sans
+  axe ni symétrie commune, loin d'un fond de 400 points :
+  - un cube : sphère circonscrite, coquille 8, et six sphères de face,
+    coquille 4 (q2) ;
+  - un triangle aigu et un point hors plan sur sa sphère : coquille 4
+    (q3) ;
+  - cinq points de $x^2+y^2+z^2=9$ : q4, coquille 5. Cette boule n'est
+    vue par **aucun** des deux juges ; seule la porte du condensé la
+    couvre. Ces points portent aussi une boule q2 de coquille 3.
+
+  Les comptes exacts sont exigés par `--expect-extended` : 34 pour q2
+  (8 + 24 + 2) et 3 pour q3. Si la coquille q3 gravée disparaît, q3 compte
+  0 et rend 3 ; si le cube est cassé, q2 compte 26 et rend 3 (rejoué par
+  fichiers).
+- **Famille haute u18** (`family-u18`) : $x \mapsto 4x+1$, une similitude
+  exacte. Les compteurs sont identiques à ceux de la famille d'origine, sur
+  des coordonnées jusqu'à 262 141.
+- **Contrôles globaux** :
+  - clé en double (`DUPLICATE_KEY`) ;
+  - quand tous les sites sont tirés, toute boule étendue de l'arité du
+    juge avec p ≤ pmax doit avoir été appariée (`EXTRA_EXTENDED`). Elle est
+    en effet toujours vue depuis une paire antipodale (q2), ou depuis un
+    triangle aigu de grand cercle contenant le centre (q3).
+- **Mutants**, tués sur la fixture :
+  - `shell-trim` (coquilles étendues tronquées), marqueur `MISSING` ;
+  - `ext-dup` (boule étendue dupliquée), marqueur `DUPLICATE_KEY` ;
+  - `ext-phantom` (boule étendue à clé faussée), marqueur
+    `EXTRA_EXTENDED`.
+- **Coupes LiDAR** : `tests/chain/lidar_judge_cuts.py` régénère les
+  coupes de 8 000 sites des trois trames sans sol par
+  `bench/run_lidar_scaling.py`, avec contrôle du MANIFEST v8. Il les
+  compare aux empreintes épinglées et les écrit hors versionnement (dépôt
+  sans git, dossier ignoré ou hors dépôt ; sinon refus, de même si git
+  échoue). C'est la fixture CTest préalable aux douze juges LiDAR.
+- **Reçu** : compteurs de chaque cas qui publie une synthèse
+  (`results/judges_product_v2/counters.tsv`) et résumés CTest.
+
+Trois lentilles adverses (code des juges, CMake et script, portée face à
+B) ont contre-lu une première version de la v2, et sept constats mineurs
+ont été confirmés. Tous sont corrigés ci-dessus :
+- le plancher `--min-extended=1` n'épinglait pas les coquilles gravées :
+  des sphères accidentelles entre configurations alignées fournissaient 18
+  des 21 incidences q3 ;
+- la coquille q4 n'était vue par aucun juge ;
+- le sens inverse ignorait les boules étendues ;
+- les échecs de git étaient mal traités ;
+- un renvoi « README » était implicite.
+
+**Résultats** sur la base `350f82e66`, 59 tests, machine locale chargée :
+
+- porte rapide : **31/31** en 13 s ;
+- `scale8000` : **28/28** en 333 s, deux en parallèle ;
+- fixture : q2 34 incidences étendues et 12 044 trouvées ; q3 3 étendues
+  et 38 700 trouvées ; aucune manquante ;
+- coupes LiDAR 8k : de 0 à 4 incidences q2 à coquille étendue par cas,
+  les seules coquilles étendues réelles hors fixture ;
+- familles u18 : compteurs identiques à leurs sources u16 ;
+- tous les cas propres : `dup_keys=0`, `extra_extended=0`.
+
+**Portée.** C'est une régression **échantillonnée**. Une clé omise dont
+aucun site de coquille n'est tiré échappe aux deux sens du juge sur les
+familles et les coupes LiDAR ; seule la fixture tire tous ses sites. La
+fraction de clés de tête couvertes reste inférieure à 1 % sur LiDAR (par
+exemple 484 sur 71 785 à s00/K5). `run_tower=false` : la tour n'est pas
+exercée. La garde d'index porte sur l'index reconstruit par le juge, pas
+sur l'index privé de la chaîne. Rien de ceci ne qualifie la complétude
+FULL, le contrat G4, la trame brute, les autres séquences ou une pente.
 
 ## Différentiel moteur / lots (S2, référence CPU)
 

@@ -1,14 +1,16 @@
 // Auditeur C, 23 septembre 2026 — juge d'echantillon q3 independant du generateur (audit, hors produit).
 //
 // Cible : les boules q3 admissibles (p <= Kmax-2 interieurs stricts), dont la famille p = Kmax-2 est la zone
-// que ni Euler ni la tour FULL ne jugent (README du dossier). Pour un site a tire, toute boule circonscrite a
-// un triangle STRICTEMENT aigu (a,b,c) (centre dans l'interieur relatif, donc support positif, q_min <= 3)
+// que ni Euler ni la tour FULL ne jugent (morsehgp3D_v9/audits/c_omission_20260923/README.md). Pour un site a
+// tire, toute boule circonscrite a un triangle STRICTEMENT aigu (a,b,c) (centre dans l'interieur relatif, donc
+// support positif, q_min <= 3)
 // ayant p <= Kmax-2 interieurs stricts est admise : le catalogue DOIT contenir une boule de meme sphere
 // (niveau exact egal et coquille contenant a,b,c), de meme coquille, de memes interieurs et d'arite coherente.
 // Sens inverse (EXTRA) : toute boule reguliere a 3 sites d'arite 3 et p <= Kmax-2 dont la coquille contient un
 // site tire doit etre retrouvee par l'enumeration (sinon elle est non critique ou mal recensee).
 //
-// Elagage exact (lemme de la demi-boule diametrale, preuve dans le README) : pour toute sphere B passant par a
+// Elagage exact (lemme de la demi-boule diametrale, preuve dans morsehgp3D_v9/audits/c_omission_20260923/
+// README.md) : pour toute sphere B passant par a
 // et b, de centre O, et m le milieu de ab, tout site strictement interieur a la boule diametrale D_ab tel que
 // (y-m).(O-m) >= 0 est strictement interieur a B. Une arete ab d'une boule admissible a donc une profondeur de
 // Tukey (demi-plans fermes, plan orthogonal a ab) <= Kmax-2 parmi les projections des interieurs stricts de
@@ -28,6 +30,13 @@
 //   q3_sample_judge file <cut.u32le> <Kmax> <sites> <workers> [options]
 //   q3_sample_judge fixture-eq [options]         (fixture d'egalite gravee, Kmax = 5, tous les sites)
 //   q3_sample_judge fixture-crl [options]        (fixture CRL minimale gravee, Kmax = 5)
+//   q3_sample_judge family-u18 <uniform|terrain|clusters> <n> <Kmax> <sites> <workers>  (famille par x -> 4x + 1)
+//   q3_sample_judge fixture-cospheric [options]  (coquilles etendues gravees, Kmax = 5, tous les sites)
+// --min-extended=N : plancher de boules a coquille etendue trouvees (sinon code 3) ; --inject=shell-trim :
+// mutant retirant le dernier site de chaque coquille etendue du catalogue lu (doit rendre 1).
+// --expect-extended=N : compte exact (code 3 sinon). Controles globaux : cle en double (DUPLICATE_KEY, code 1) ;
+// si tous les sites sont tires, boule etendue de l'arite du juge non appariee (EXTRA_EXTENDED, code 1).
+// Mutants : --inject=ext-dup (boule etendue dupliquee), --inject=ext-phantom (boule etendue a cle faussee).
 // options : --compare | --no-prune ; --seed=<u64> ; --sites=<i,j,...> ; --long-sites=<N> ; --min-top=<n> ;
 //           --min-long=<n> ; --inject=overprune | --inject=level | --inject=shell-dup | --inject=key |
 //           --inject=drop-long (triangles d'arete max >= 1600 unites retires du parcours elague) |
@@ -417,6 +426,60 @@ int check_index(const std::string& label, const std::vector<Point3>& points, con
   return 0;
 }
 
+// v9 (contrelecture B des portes R-20, 23 septembre 2026) : fixture gravee de coquilles etendues, famille
+// transportee dans le haut du domaine u18, plancher de boules a coquille etendue.
+std::uint64_t g_min_extended = 0;  // --min-extended=N (sinon code 3)
+std::int64_t g_expect_extended = -1;  // --expect-extended=N : compte exact (sinon code 3)
+bool g_ext_dup = false;      // --inject=ext-dup : boule etendue dupliquee (DUPLICATE_KEY, doit rendre 1)
+bool g_ext_phantom = false;  // --inject=ext-phantom : boule etendue fantome (EXTRA_EXTENDED si tous les sites)
+bool g_shell_trim = false;  // --inject=shell-trim : coquilles etendues tronquees (doit rendre 1)
+
+// Coquilles etendues gravees, echelle 100, trois configurations centrees en des points sans axe ni symetrie
+// commune (aucune sphere ne passe par deux configurations), loin d'un fond de 400 points pseudo-aleatoires dans
+// [0, 30000)^3 :
+//   - huit coins d'un cube : sphere circonscrite (q2, coquille 8) et six spheres de face (q2, coquille 4) ;
+//   - triangle aigu (5,0,0), (-3,4,0), (-3,-4,0) et le point (0,0,5) de sa sphere (q3, coquille 4) ;
+//   - cinq points entiers de x^2+y^2+z^2 = 9 sans paire antipodale ni triplet coplanaire avec le centre (q4,
+//     coquille 5) : cette boule n'est vue par AUCUN des deux juges (ni paire diametrale ni triangle aigu de grand
+//     cercle) ; elle n'est jugee que cote catalogue (porte du condense). Ses points portent en outre une boule q2
+//     a coquille 3 (angle droit en (-3,0,0)).
+// Comptes exacts attendus (tous les sites tires, Kmax = 5) : q2 extended = 8 + 24 + 2 = 34 ; q3 extended = 3.
+std::vector<Point3> fixture_cospheric() {
+  using C = mhgp9::gen::Coordinate;
+  std::vector<Point3> pts;
+  const auto add = [&](int ox, int oy, int oz, int x, int y, int z) {
+    pts.push_back(Point3{static_cast<C>(ox + 100 * x), static_cast<C>(oy + 100 * y), static_cast<C>(oz + 100 * z)});
+  };
+  for (const int x : {-1, 1})
+    for (const int y : {-1, 1})
+      for (const int z : {-1, 1}) add(100000, 70000, 130000, x, y, z);
+  const int tri[4][3] = {{5, 0, 0}, {-3, 4, 0}, {-3, -4, 0}, {0, 0, 5}};
+  for (const auto& p : tri) add(150000, 125000, 60000, p[0], p[1], p[2]);
+  const int five[5][3] = {{-3, 0, 0}, {-2, -2, -1}, {-2, -2, 1}, {-1, 2, -2}, {2, -1, 2}};
+  for (const auto& p : five) add(205000, 185000, 115000, p[0], p[1], p[2]);
+  std::uint64_t state = 0x9e3779b97f4a7c15ull;
+  for (int i = 0; i < 400; ++i) {
+    C c[3];
+    for (auto& v : c) {
+      state = state * 6364136223846793005ull + 1442695040888963407ull;
+      v = static_cast<C>((state >> 33) % 30000);
+    }
+    pts.push_back(Point3{c[0], c[1], c[2]});
+  }
+  return pts;
+}
+
+// Famille transportee par x -> 4x + 1 : similitude exacte (memes boules, memes rangs, memes coquilles), qui
+// porte les coordonnees de [0, 65535] dans [1, 262141] et exerce l'arithmetique du haut du domaine u18.
+std::vector<Point3> to_u18_high(std::vector<Point3> pts) {
+  for (auto& p : pts)
+    for (auto* c : {&p.x, &p.y, &p.z}) {
+      if (*c < 0 || *c > 65535) throw std::invalid_argument("family coordinate outside [0, 65535]");
+      *c = 4 * *c + 1;
+    }
+  return pts;
+}
+
 int run(const std::string& label, const std::vector<Point3>& points, unsigned kmax, std::size_t sites,
         std::size_t workers, const Options& opt) {
   if (kmax < 3 || kmax > 10) { std::fprintf(stderr, "Kmax must be in 3..10\n"); return 2; }
@@ -444,6 +507,17 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
     for (auto& ball : cat)
       if (ball.n_shell >= 3) ball.shell_ids[ball.n_shell - 1] = ball.shell_ids[0];
   if (opt.corrupt_key) for (auto& ball : cat) ball.key.c += 1;
+  if (g_shell_trim)  // mutant : coquille etendue privee de son dernier site
+    for (auto& ball : cat)
+      if (ball.n_shell > ball.arity) --ball.n_shell;
+  if (g_ext_dup || g_ext_phantom)  // mutants : copie d'une boule etendue d'arite 3, a l'identique ou cle faussee
+    for (std::size_t i = 0; i < cat.size(); ++i)
+      if (cat[i].arity == 3 && cat[i].n_shell > 3) {
+        BallData copy = cat[i];
+        if (g_ext_phantom) copy.key.c += 1;
+        cat.push_back(copy);
+        break;
+      }
   std::vector<std::vector<std::uint32_t>> by_site(n);
   for (std::size_t i = 0; i < cat.size(); ++i)
     for (const auto s : cat[i].shell()) by_site[static_cast<std::size_t>(s)].push_back(static_cast<std::uint32_t>(i));
@@ -703,6 +777,37 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
       if (mutant_killed) break;
     }
   }
+  // v9 : cles en double (toujours) ; si tous les sites sont tires, toute boule etendue d'arite 3 et
+  // p <= pmax du catalogue doit avoir ete appariee (elle est vue depuis une paire antipodale de sa coquille en
+  // q2, depuis un triangle aigu de grand cercle contenant le centre en q3).
+  std::uint64_t dup_keys = 0, extra_extended = 0;
+  bool all_sites = false;
+  {
+    std::vector<std::uint32_t> order(cat.size());
+    for (std::uint32_t i = 0; i < order.size(); ++i) order[i] = i;
+    std::sort(order.begin(), order.end(), [&](std::uint32_t l, std::uint32_t r) { return cat[l].key < cat[r].key; });
+    for (std::size_t i = 1; i < order.size(); ++i)
+      if (!(cat[order[i - 1]].key < cat[order[i]].key)) {
+        ++dup_keys;
+        std::printf("%s DUPLICATE_KEY ball=%u other=%u\n", label.c_str(), order[i], order[i - 1]);
+      }
+    std::vector<bool> seen(n, false);
+    std::size_t distinct = 0;
+    for (const auto a : sampled)
+      if (a < n && !seen[a]) { seen[a] = true; ++distinct; }
+    all_sites = distinct == n;
+    if (all_sites)
+      for (std::uint32_t bi = 0; bi < cat.size(); ++bi) {
+        const auto& ball = cat[bi];
+        if (ball.arity != 3 || ball.n_shell <= 3 || ball.n_interior > pmax || keys.count(bi)) continue;
+        ++extra_extended;
+        std::printf("%s EXTRA_EXTENDED ball=%u p=%u shell=%u\n", label.c_str(), bi, unsigned(ball.n_interior),
+                    unsigned(ball.n_shell));
+      }
+  }
+  if (g_expect_extended >= 0 && t.extended != static_cast<std::uint64_t>(g_expect_extended))
+    std::printf("%s EXTENDED_COUNT got=%llu expected=%lld\n", label.c_str(), (unsigned long long)t.extended,
+                (long long)g_expect_extended);
   std::printf("%s n=%zu kmax=%u balls=%zu input_fnv=%016llx seed=%016llx mode=%s%s sampled_sites=%zu partners=%llu "
               "kept=%llu triangles=%llu acute=%llu incidences=%llu found=%llu missing=%llu cross_fail=%llu extra=%llu "
               "unique_keys=%zu q2_keys=%llu top_keys=%llu top_population=%llu extended=%llu shell_over_12=%llu mutant_killed=%d "
@@ -723,14 +828,18 @@ int run(const std::string& label, const std::vector<Point3>& points, unsigned km
               (unsigned long long)t.by_len_top[2], disagreements, (unsigned long long)t.crl, crl_all.size(),
               crl_disagreements, (unsigned long long)crl_lost, crl_target_killed ? 1 : 0);
   for (unsigned p = 0; p <= pmax; ++p) std::printf(" p%u=%llu", p, (unsigned long long)t.by_p[p]);
-  std::printf("\n");
+  std::printf(" dup_keys=%llu extra_extended=%llu all_sites=%d\n", (unsigned long long)dup_keys,
+              (unsigned long long)extra_extended, all_sites ? 1 : 0);
   const bool vacuous_crl = crl_all.size() < opt.min_crl || (opt.min_crl > 0 && !crl_target_killed);
   if (opt.drop_crl || opt.drop_long) {  // mutant d'enumeration : tue seulement par un desaccord, sur une strate non vide
     if (vacuous_crl || disagreements == 0) return 3;
     return 1;
   }
-  if (t.missing || t.cross_fail || t.extra || disagreements) return 1;
-  if (!mutant_killed || top_keys < opt.min_top || t.by_len[2] < opt.min_long || vacuous_crl) return 3;
+  if (t.missing || t.cross_fail || t.extra || disagreements || dup_keys || extra_extended) return 1;
+  if (!mutant_killed || top_keys < opt.min_top || t.by_len[2] < opt.min_long || vacuous_crl ||
+      t.extended < g_min_extended ||
+      (g_expect_extended >= 0 && t.extended != static_cast<std::uint64_t>(g_expect_extended)))
+    return 3;
   return 0;
 }
 
@@ -748,6 +857,7 @@ int main(int argc, char** argv) {
       else if (a == "--inject=level") opt.corrupt_level = true;
       else if (a == "--inject=shell-dup") opt.shell_dup = true;
       else if (a == "--inject=key") opt.corrupt_key = true;
+      else if (a == "--inject=shell-trim") g_shell_trim = true;
       else if (a == "--inject=index-out-of-range") g_index_inject = IndexInject::kOutOfRange;
       else if (a == "--inject=index-duplicate") g_index_inject = IndexInject::kDuplicate;
       else if (a == "--inject=index-missing") g_index_inject = IndexInject::kMissing;
@@ -755,6 +865,10 @@ int main(int argc, char** argv) {
       else if (a == "--inject=drop-crl") opt.drop_crl = true;
       else if (a.rfind("--min-long=", 0) == 0) opt.min_long = std::stoull(a.substr(11));
       else if (a.rfind("--min-crl=", 0) == 0) opt.min_crl = std::stoull(a.substr(10));
+      else if (a.rfind("--min-extended=", 0) == 0) g_min_extended = std::stoull(a.substr(15));
+      else if (a.rfind("--expect-extended=", 0) == 0) g_expect_extended = std::stoll(a.substr(18));
+      else if (a == "--inject=ext-dup") g_ext_dup = true;
+      else if (a == "--inject=ext-phantom") g_ext_phantom = true;
       else if (a.rfind("--long-sites=", 0) == 0) opt.long_sites = std::stoul(a.substr(13));
       else if (a.rfind("--sites=", 0) == 0) {
         std::string list = a.substr(8);
@@ -777,6 +891,13 @@ int main(int argc, char** argv) {
     }
     if (args.size() == 1 && args[0] == "fixture-eq") return run("fixture_eq", fixture_eq(), 5, 1000, 1, opt);
     if (args.size() == 1 && args[0] == "fixture-crl") return run("fixture_crl", fixture_crl(), 5, 1000, 1, opt);
+    if (args.size() == 1 && args[0] == "fixture-cospheric")
+      return run("fixture_cospheric", fixture_cospheric(), 5, 1000, 1, opt);
+    if (args.size() == 6 && args[0] == "family-u18") {
+      const auto fx = mhgp9::gen::bench::make_front_fixture(std::stoul(args[2]), args[1], 3);
+      return run(args[1] + "_" + args[2] + "_u18", to_u18_high(fx.points), std::stoul(args[3]), std::stoul(args[4]),
+                 std::stoul(args[5]), opt);
+    }
     if (args.size() == 6 && args[0] == "family") {
       const auto fx = mhgp9::gen::bench::make_front_fixture(std::stoul(args[2]), args[1], 3);
       return run(args[1] + "_" + args[2], fx.points, std::stoul(args[3]), std::stoul(args[4]), std::stoul(args[5]), opt);

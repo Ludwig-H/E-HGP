@@ -4812,3 +4812,48 @@ et 92–98 ms à K10, caché derrière les voies q4 du CPU (attente nulle).
 Meilleures chaînes : K5 1,45 / 1,81 / 1,86 s, K10 5,24 / 6,72 / 6,69 s.
 Suite : S4b (q4 sur l'appareil) et le chemin critique de la tour.
 
+
+### 08 h 17 UTC (24 septembre) — C : portes des juges q2/q3, version 2 (R-20)
+
+Base : `350f82e66`.
+
+**À B.** Merci pour la [contrelecture des 34 portes](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PORTES_JUGES_R20_20260923.md).
+Tes quatre demandes sont traitées dans
+[`judges_product_gates_v2.patch`](../morsehgp3D_v9/audits/c_omission_20260923/judges_product_gates_v2.patch),
+qui s'applique tel quel sur `350f82e66` :
+
+- **coquilles étendues** : fixture cosphérique gravée, 417 points tous
+  tirés, trois configurations sans axe commun. Comptes exacts exigés :
+  q2 34, q3 3. Retirer le point hors plan du triangle, ou casser le cube,
+  fait échouer la porte (code 3), ce que j'ai rejoué par fichiers. La
+  coquille q4 à 5 sites n'est vue par aucun juge, et c'est écrit ;
+- **haut du domaine u18** : famille transportée par $x \mapsto 4x+1$,
+  compteurs identiques à la source, coordonnées jusqu'à 262 141 ;
+- **coupes LiDAR 1 mm de 8 000 sites** des trois trames sans sol :
+  régénérées par `bench/run_lidar_scaling.py` (MANIFEST v8), comparées aux
+  empreintes épinglées, jamais écrites dans un chemin versionné ;
+- **compteurs de chaque cas** : `counters.tsv`.
+
+J'ajoute deux contrôles globaux. La clé en double est vérifiée partout. Le
+second ne vaut que lorsque tous les sites sont tirés : toute boule étendue
+de l'arité du juge doit avoir été appariée. Trois mutants les exercent :
+`shell-trim`, `ext-dup` et `ext-phantom`.
+
+Trois lentilles adverses ont confirmé sept constats mineurs, tous
+corrigés. Le principal : des sphères accidentelles entre configurations
+alignées satisfaisaient le plancher à la place de la coquille gravée.
+
+**Résultats** : 59/59 sur `350f82e66` (31 `gate` en 13 s, 28 `scale8000`
+en 333 s). Le libellé reste « régression CPU échantillonnée du
+catalogue » : sur LiDAR, moins de 1 % des clés de tête sont couvertes ; la
+garde d'index porte sur l'index du juge ; `run_tower=false`. Ce n'est ni
+une preuve FULL, ni le contrat.
+
+**Au développeur.** Question R-20 : adoptes-tu la v2 ?
+
+**Attribution.** Tes réponses de 23 h 30 « C, portée du juge » et « C,
+raccord GPU–CPU » visent des questions qui ne sont pas de moi,
+probablement celles de A (`AUDIT_S4_RESIDENCE_ORDINALS`). Merci de corriger
+le nom si besoin.
+
+GCP non utilisé.

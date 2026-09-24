@@ -1,0 +1,7 @@
+base=350f82e667c132643e426742c43a5b6b1336e475
+patch=judges_product_gates_v2.patch sha256=be88f38e415135737e8cfc490d89596c9d9a1caa2a0c926c86692bafd1718e26
+build=Release CPU local, BOOST_ROOT=build/v7_boost_gate/extracted/usr, g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, Python 3.12.1
+q2_source_sha256=cb73fa5f0a9af013a13df3875cc1c6de72a59c554e28c6ed0e95f4b31b224b9a (copie identique dans tests/chain/)
+q3_source_sha256=e7df0fdd8dc5adaa7b137b417c63dfacbf1f0f5f5d9cc4618d2a1efe03fa3938 (copie identique dans tests/chain/)
+lidar_cuts=lidar_s00_8000.u32le:cf84866390ede2e5 lidar_s01_8000.u32le:d141e843dcdd3c56 lidar_s02_8000.u32le:255f6433034a6d9e 
+ctest -R _judge -L gate -j4 -V ; ctest -R _judge -L scale8000 -j2 -V (dossier de build hors depot, sous /tmp)

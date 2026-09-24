@@ -1,0 +1,31 @@
+ 1/28 Test #81: mhgp9_lidar_judge_cuts ....................   Passed    0.08 sec
+ 2/28 Test #77: mhgp9_q3_judge_clusters_8000_k10 ..........   Passed   54.86 sec
+ 3/28 Test #78: mhgp9_q3_judge_terrain_8000_k10_compare ...   Passed   89.43 sec
+ 4/28 Test #85: mhgp9_q3_judge_lidar_s00_8000_k10 .........   Passed   48.56 sec
+ 5/28 Test #76: mhgp9_q2_judge_clusters_8000_k10 ..........   Passed   55.89 sec
+ 6/28 Test #89: mhgp9_q3_judge_lidar_s01_8000_k10 .........   Passed   51.49 sec
+ 7/28 Test #69: mhgp9_q3_judge_uniform_8000_k10 ...........   Passed   39.16 sec
+ 8/28 Test #68: mhgp9_q2_judge_uniform_8000_k10 ...........   Passed   35.30 sec
+ 9/28 Test #84: mhgp9_q2_judge_lidar_s00_8000_k10 .........   Passed   28.23 sec
+10/28 Test #93: mhgp9_q3_judge_lidar_s02_8000_k10 .........   Passed   35.06 sec
+11/28 Test #87: mhgp9_q3_judge_lidar_s01_8000_k5 ..........   Passed   18.51 sec
+12/28 Test #88: mhgp9_q2_judge_lidar_s01_8000_k10 .........   Passed   24.69 sec
+13/28 Test #67: mhgp9_q3_judge_uniform_8000_k5 ............   Passed   14.01 sec
+14/28 Test #66: mhgp9_q2_judge_uniform_8000_k5 ............   Passed    8.74 sec
+15/28 Test #91: mhgp9_q3_judge_lidar_s02_8000_k5 ..........   Passed   12.53 sec
+16/28 Test #83: mhgp9_q3_judge_lidar_s00_8000_k5 ..........   Passed   19.72 sec
+17/28 Test #92: mhgp9_q2_judge_lidar_s02_8000_k10 .........   Passed   18.32 sec
+18/28 Test #75: mhgp9_q3_judge_clusters_8000_k5 ...........   Passed   19.60 sec
+19/28 Test #80: mhgp9_q3_judge_terrain_8000_u18_k10 .......   Passed   12.65 sec
+20/28 Test #86: mhgp9_q2_judge_lidar_s01_8000_k5 ..........   Passed    8.43 sec
+21/28 Test #74: mhgp9_q2_judge_clusters_8000_k5 ...........   Passed   13.82 sec
+22/28 Test #73: mhgp9_q3_judge_terrain_8000_k10 ...........   Passed   14.40 sec
+23/28 Test #90: mhgp9_q2_judge_lidar_s02_8000_k5 ..........   Passed    7.36 sec
+24/28 Test #82: mhgp9_q2_judge_lidar_s00_8000_k5 ..........   Passed   11.55 sec
+25/28 Test #72: mhgp9_q2_judge_terrain_8000_k10 ...........   Passed    6.31 sec
+26/28 Test #71: mhgp9_q3_judge_terrain_8000_k5 ............   Passed    7.46 sec
+27/28 Test #70: mhgp9_q2_judge_terrain_8000_k5 ............   Passed    3.69 sec
+28/28 Test #79: mhgp9_q2_judge_terrain_8000_u18_k10 .......   Passed    6.27 sec
+The following tests passed:
+100% tests passed, 0 tests failed out of 28
+Total Test time (real) = 333.17 sec
