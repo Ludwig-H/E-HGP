@@ -91,6 +91,10 @@ ledger ne compte pas encore la reconstruction de chaque liste de seau
 ni les réductions min et de présentation par groupe ; mesurer ces
 passes avant de projeter son temps GPU. Le plan de tâches parallèles
 doit aussi raccorder ses sorties à la plage unique par arête du batch.
+Pour chiffrer S4b sur les 21 entrées physiques/densité, apparier **S4a et
+S4b avec le même binaire v21** : le panneau S3/S4a existant est épinglé au
+v20. Ses entrées et digests servent de témoins de cohérence, pas de base
+causale pour un écart de temps ou de compteurs entre versions.
 La [nouvelle porte fichier S4b v21 en WIP](s4b_compare_gate_v21_20260924/README.md)
 compare utilement les enregistrements q4 sur les arêtes qu'elle visite,
 mais saute les arêtes reportées, ne borne pas le nombre de graines ou
