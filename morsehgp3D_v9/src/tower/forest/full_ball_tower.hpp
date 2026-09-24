@@ -1287,6 +1287,9 @@ class Builder {
   // After the join, every order's phase B done: the references to balls of a
   // lower first order receive the ID that order assigned.
   void name_deferred_populations(std::vector<OrderState>& orders) {
+#if defined(MHGP9_TOWER_MUTANT_DEFERRED_UNNAMED)
+    return;  // mutant: the references to balls of a lower first order keep their ball tag
+#endif
     for (auto& o : orders)
       for (const size_t c : o.deferred) {
         auto& ref = o.draft.flat.contribution[c];

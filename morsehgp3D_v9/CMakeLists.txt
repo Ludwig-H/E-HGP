@@ -117,11 +117,16 @@ foreach(threads IN ITEMS 2 4)
   mhgp9_gate(mhgp9_tower_full_ball_pipelined_cpu${threads} 0 mhgp9_tower_full_ball_tower_gate
              ARGS --pipelined-${threads} LABELS "gate;tower;oracle" TIMEOUT 300)
 endforeach()
-mhgp9_product_executable(mhgp9_tower_offset_on_contributions_mutant_gate tests/tower/full_ball_tower_gate.cpp)
-target_compile_definitions(mhgp9_tower_offset_on_contributions_mutant_gate PRIVATE
-                           MHGP9_TOWER_MUTANT_OFFSET_ON_CONTRIBUTIONS=1)
+# Second mutant : references differees jamais renommees (banque hors bornes).
+foreach(mutant IN ITEMS OFFSET_ON_CONTRIBUTIONS DEFERRED_UNNAMED)
+  string(TOLOWER ${mutant} lower)
+  mhgp9_product_executable(mhgp9_tower_${lower}_mutant_gate tests/tower/full_ball_tower_gate.cpp)
+  target_compile_definitions(mhgp9_tower_${lower}_mutant_gate PRIVATE MHGP9_TOWER_MUTANT_${mutant}=1)
+endforeach()
 mhgp9_gate(mhgp9_tower_full_ball_mutant_offset_on_contributions 1 mhgp9_tower_offset_on_contributions_mutant_gate
            ARGS --pipelined-4 EXPECT_PREFIX "refusal=full_ball_population_offset" LABELS "gate;tower;mutant" TIMEOUT 300)
+mhgp9_gate(mhgp9_tower_full_ball_mutant_deferred_unnamed 1 mhgp9_tower_deferred_unnamed_mutant_gate
+           ARGS --pipelined-4 EXPECT_PREFIX "refusal=full_ball_structural_certificate" LABELS "gate;tower;mutant" TIMEOUT 300)
 
 # ---- Generateur exact (port de morsehgp3D_v8, 3f0d188f, espace mhgp9::gen).
 # Port en bloc de la bibliotheque mhgp8_p0 (voie float32 exclue) ; le retrait
@@ -633,6 +638,23 @@ mhgp9_gate(mhgp9_gpu_filter_probe_bad_argument 2 mhgp9_gpu_filter_probe ARGS mis
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/gpu_probe_empty.u32le "")
 mhgp9_gate(mhgp9_gpu_filter_probe_empty_input 2 mhgp9_gpu_filter_probe
            ARGS ${CMAKE_CURRENT_BINARY_DIR}/gpu_probe_empty.u32le 5 1 --cpu-only LABELS "gate;gpu" TIMEOUT 60)
+# v9 E4 : queue de la tour en pipeline sur la chaine (1 500 sites et six
+# carres plantes, K5) : 1, 2, 3, 4 et 8 fils et le temoin a 4 et 8 fils,
+# meme condense, memes IDs de population, meme travail publie ; planchers sur
+# les references differees. Le mutant du decalage compte sur les
+# contributions, compile dans la chaine, est refuse a 2 fils.
+mhgp9_product_executable(mhgp9_chain_tower_tail_gate tests/chain/tower_tail_gate.cpp)
+target_link_libraries(mhgp9_chain_tower_tail_gate PRIVATE mhgp9_chain)
+mhgp9_gate(mhgp9_chain_tower_tail 0 mhgp9_chain_tower_tail_gate
+           ARGS --selftest EXPECT_PREFIX "tower_tail_gate digest=" LABELS "gate;chain;tower" TIMEOUT 600)
+mhgp9_gate(mhgp9_chain_tower_tail_bad_argument 2 mhgp9_chain_tower_tail_gate
+           ARGS --unknown LABELS "gate;chain" TIMEOUT 60)
+mhgp9_product_executable(mhgp9_chain_tower_tail_offset_mutant_gate tests/chain/tower_tail_gate.cpp src/chain/tower_chain.cpp)
+target_link_libraries(mhgp9_chain_tower_tail_offset_mutant_gate PRIVATE mhgp9_gen mhgp9_gpu)
+target_compile_definitions(mhgp9_chain_tower_tail_offset_mutant_gate PRIVATE MHGP9_TOWER_MUTANT_OFFSET_ON_CONTRIBUTIONS=1)
+mhgp9_gate(mhgp9_chain_tower_tail_mutant_offset_on_contributions 1 mhgp9_chain_tower_tail_offset_mutant_gate
+           ARGS --selftest EXPECT_LINE "cause=chain.status static=2 pipelined=1 reason=tower: full_ball_population_offset"
+           LABELS "gate;chain;tower;mutant" TIMEOUT 600)
 mhgp9_product_executable(mhgp9_chain_static_paths_gate tests/chain/chain_static_paths_gate.cpp)
 target_link_libraries(mhgp9_chain_static_paths_gate PRIVATE mhgp9_chain)
 mhgp9_gate(mhgp9_chain_static_paths 0 mhgp9_chain_static_paths_gate
