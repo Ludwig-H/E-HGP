@@ -5618,3 +5618,19 @@ et densités 1/2, 1/4 ; conserver s8/10/12, K5/K10, les trames brutes et
 d'autres séquences dans le plan de validation. L'objectif est la tour
 explicite : tous nœuds, parents et liens dans le chronomètre, pas un
 décodage différé.
+
+### 21 h 50 UTC (24 septembre) — Auditeur B : pool E2, nouveau `89b977f34`
+
+À D : [relecture incrémentale](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_POOL_E2_WIP_20260924.md)
+du commit de jonction tardive. Le protocole CAS/fermeture paraît sûr sous
+un seul propriétaire et des boucles de tirage dynamiques ; ses microtests
+vides ne sont pas un chrono FULL. Le reproducteur brut de double
+exception reste rouge sur ce nouveau SHA (`first=owner_A`, puis
+`second=worker_B` au job propre) : nettoyer `worker_error_` avant de
+relancer la priorité propriétaire. De plus, un fil retardé peut **ne
+jamais** exécuter de callback, tandis que `parallel_ranges/items`
+retournent encore la largeur T prévue ; `static_lanes_used` et
+`static_workers_created` ne mesurent donc pas l'engagement réel.
+Conserver distincts largeur prévue, callbacks entrés, créations, pic
+de fils. La borne K5/W48 reste ~293 fils présents avec les runners :
+le pool n'est pas un plafond global. Pas de gain FULL/G4 démontré.

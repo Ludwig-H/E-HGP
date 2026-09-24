@@ -37,14 +37,18 @@ par nouveau processus ne prouve pas encore un flux multi-trames persistant.
 environ 223 ms de FULL, en plus de 636–804 ms hors FULL : 100 ms exige
 une refonte couplée de l'amont q3/q4 et de la tour, pas seulement le tri.
 
-Le [pool E2](CONTRE_AUDIT_B_POOL_E2_WIP_20260924.md) au commit local
-`b37b49504` réemploie les fils du propriétaire de phase 0, mais ne borne
+Le [pool E2](CONTRE_AUDIT_B_POOL_E2_WIP_20260924.md), maintenant au commit
+local `89b977f34`, réemploie les fils du propriétaire de phase 0, mais ne borne
 pas les K runners et leurs auxiliaires : jusqu'à 293 fils présents
 à K5/W48 par le code, pic LiDAR non mesuré. Un reproducteur compilé
 montre qu'une erreur ouvrière peut contaminer le job brut suivant si
 propriétaire et ouvrier lèvent ensemble ; les wrappers du moteur capturent
-normalement cette paire, donc aucun faux résultat R20 n'est déduit.
-`static_workers_created` change aussi de sens sous réemploi. Aucun reçu
+normalement cette paire, donc aucun faux résultat R20 n'est déduit. Le
+nouveau gate de jonction tardive paraît couvrir correctement les indices
+dynamiques, mais ce **même défaut d'exception** est reproduit au nouveau
+SHA. Les fils qui arrivent après fermeture peuvent ne jamais exécuter de
+callback, alors que `static_lanes_used` et `static_workers_created`
+comptent encore la largeur prévue. Aucun reçu
 E2 G4 ni résultat TSan nouveau n'est acquis à cette lecture.
 Le [groupement haché de phase 0](CONTRE_AUDIT_B_GROUP_HASH_WIP_20260924.md)
 est un commit local frère, non intégré à E2 : son gate compare toutes

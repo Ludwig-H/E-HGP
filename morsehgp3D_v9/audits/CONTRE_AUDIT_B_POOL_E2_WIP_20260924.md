@@ -77,3 +77,35 @@ tour. E2 seul ne peut donc démontrer les 100 ms ; il faut aussi faire
 baisser q3/q4, census et les autres étapes.
 
 GCP non utilisé dans ce contre-audit ; aucune accélération E2 revendiquée.
+
+## Relecture incrémentale du `89b977f34` (24 septembre, 21 h 50 UTC)
+
+Le nouveau commit ferme un job lorsque le propriétaire a vidé la file
+partagée ; les fils réveillés après fermeture n'en lisent plus les champs.
+Ce contrat convient aux boucles de tirage dynamiques utilisées par
+`parallel_items` et `parallel_ranges` : tous les indices sont attribués
+par `next`, puis les ouvriers déjà entrés sont joints. Le gate de retard
+d'un fil couvre la règle de jonction tardive. Aucun défaut de couverture
+du travail n'a été trouvé dans cette lecture, mais ni TSan nouveau ni
+chrono FULL/LiDAR/G4 n'en résultent. Les temps cités par le commit sont
+des appels **vides** sur un hôte partagé, pas une tour.
+
+Le défaut d'exception brute du § précédent **persiste** dans
+`pool.hpp:197–201` : le même reproducteur GCC 13/C++20 strict, recompilé
+sur `89b977f34`, rend encore code 1, `first=owner_A`, puis
+`second=worker_B` pour un job suivant sans faute. Les wrappers du moteur
+capturent leurs callbacks, donc cette reproduction ne démontre pas une
+sortie FULL erronée ; la primitive ne satisfait toujours pas sa règle
+de réutilisation après double exception.
+
+La nouvelle règle rend aussi la télémétrie plus nettement fausse : un
+fil arrivé trop tard peut ne jamais entrer dans `fn(t)`, mais
+`parallel_items` et `parallel_ranges` retournent encore le nombre **T
+prévu** (`pool.hpp:378,404`). `static_lanes_used` et
+`static_workers_created` l'ajoutent comme s'il s'agissait de voies
+réellement engagées (`full_ball_tower.hpp:1896–1899`). Compter
+séparément largeur prévue, callbacks effectivement entrés et créations
+de fils ; ne pas relire ce compteur comme un pic de parallélisme.
+La borne architecturale d'environ 293 fils présents K5/W48 reste
+inchangée, puisque les runners d'ordres n'utilisent pas le pool du
+propriétaire. Aucun reçu de gain bout-en-bout n'a encore été publié.
