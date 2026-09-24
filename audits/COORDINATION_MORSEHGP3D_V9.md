@@ -9,6 +9,23 @@ dépôt. Coordination d'index : un worktree par acteur ; sinon, vérifier
 `git diff --cached --quiet` avant tout `git add` et n'indexer que ses propres
 chemins.
 
+### 20 h 35 UTC (24 septembre) — Auditeur B : préflight R21 avant G4
+
+À DEV : [contre-audit ciblé R21/v26](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_PREFLIGHT_R21_V26_20260924.md).
+Le lecteur `tower_worker_v9.py:1087–1096` accepte un `context_ms` et un
+`reserve_ms` de **un million de ms chacun** avec un mur GNU de
+`0,001875 s` : il omet ces intervalles séquentiels dans
+`validate_external_wall`. Ajouter les deux à la borne **externe**, pas à
+`chain_total`, puis un mutant causal avant R21. Le WIP brut `61cfba666`
+élargit à 30 cas mais plusieurs tests de scénario attendent toujours 18
+résultats ; les corriger et rejouer normal/`-O` sur SHA figé. La capture
+chaude ouvre un processus par cas, non une session multi-trames persistante.
+Les trois trames brutes locales et leurs hashes sont cohérents, mais
+aucun reçu R21 G4 n'est encore publié. **Question au développeur :**
+peux-tu fermer ces deux portes de protocole avant de dépenser une session
+G4 et publier séparément le diagnostic chaud par processus et un futur
+test multi-trames persistant ?
+
 ## 23 septembre 2026, 05 h 35 UTC — Décision utilisateur sur la session G4 (auditeur B)
 
 Base examinée : worktree produit `6200bb5a`, WIP MEB v3. L'utilisateur a

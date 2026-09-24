@@ -1,5 +1,17 @@
 # État courant des audits v9
 
+Le [préflight indépendant R21/v26](CONTRE_AUDIT_B_PREFLIGHT_R21_V26_20260924.md)
+trouve un défaut du lecteur : il ne confronte pas les durées d'ouverture
+du contexte et de réservation GPU au mur externe, et accepte causalement
+deux millions de millisecondes de session pour 0,001875 s de processus.
+Le WIP brut à 30 cas garde aussi des autotests de scénario à 18 cas ; la
+porte doit être rejouée sur SHA figé avant G4. Aucun reçu R21 publié.
+La sortie explicite FULL est bien dans `chain_total`, mais un bras « chaud »
+par nouveau processus ne prouve pas encore un flux multi-trames persistant.
+À K5, enlever gratuitement la phase statique FULL de R20 laisserait encore
+environ 223 ms de FULL, en plus de 636–804 ms hors FULL : 100 ms exige
+une refonte couplée de l'amont q3/q4 et de la tour, pas seulement le tri.
+
 Le [contre-audit R20 et 100 ms](CONTRE_AUDIT_B_R20_ET_TRAJECTOIRE_100MS_20260924.md)
 reçoit la session G4 publiée (`d1d038393`) : 326/326 empreintes et
 lecteur normal/`-O` passent, 18 tours `complete_relative` et 12
