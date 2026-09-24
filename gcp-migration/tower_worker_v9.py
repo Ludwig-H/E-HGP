@@ -696,7 +696,8 @@ def validate_lanes(value, case, lanes_capacity=0, judge=False):
              # without event has live buckets and no list step (review S4b)
              ledger['lanes4_list_steps'] >= ledger['lanes4_filter_steps'] and
              32 * ledger['lanes4_list_steps'] >= ledger['lanes4_bucket_events'] and
-             # every group locates its pivot and compares its list
+             # T1 (v22) : chaque passe compare au moins un paquet ; une passe
+             # rejetee rend aussi ses membres decides
              ledger['lanes4_group_steps'] >= 2 * ledger['lanes4_compare_steps'] and
              ledger['lanes4_compare_steps'] >= ledger['lanes4_groups'], 'q4 lanes ledger identity')
 

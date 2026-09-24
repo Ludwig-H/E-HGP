@@ -411,6 +411,7 @@ class Builder {
       anchors.assign(balls.size(), absent);
       current = {}; compressed.clear();
       if (geometry_threads && k > 1) prepare_static_order();
+      if (k == kmax) release_static_arena();  // the last order's phase 0 is done
       MonotoneHistory lower_cursor(lower_history, st);
       Draft draft;
       if (k == 1) {

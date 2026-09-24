@@ -43,9 +43,13 @@ inline constexpr u32 q4_buckets = 8;  // J
 // stage, groups and emissions kept apart (a seed may emit from several
 // groups, auditor B). The survivor stage's chunk passes are all counted
 // (auditor, 24 septembre): list_steps = the bucket list and foreign passes
-// of every live bucket, group_steps = every pass of the group loop (least
-// ID search, locate, compare, reset, positivity and its minimum, choice);
-// compare_steps is the compare part of group_steps.
+// of every live bucket, group_steps = every chunk pass of T1 (compare,
+// members turned decided on a rejection, positivity and its minimum,
+// choice); compare_steps is the compare part of group_steps. Since T1 (v22)
+// `groups` counts CLASS PASSES: a rejected class is counted once per
+// candidate lying beyond the stop chunk of the passes before it (plus
+// once), and max_group is the most members read by one pass (a lower bound
+// on the largest class). Not comparable with the v21 ledger.
 struct Q4Work {
   u64 edges, seeds, certified, certified_chunk1, survivors, pass_chunks, pass_site_tests;
   u64 buffered_events, max_buffered, live_buckets, filter_steps, bucket_events, candidates, foreign_candidates;

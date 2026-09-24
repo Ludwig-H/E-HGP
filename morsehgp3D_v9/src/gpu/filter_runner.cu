@@ -869,6 +869,12 @@ struct LanesResident {
   std::size_t max_warps() const {
     return static_cast<std::size_t>(sms) * static_cast<std::size_t>(blocks_per_sm) * (lanes_threads / 32);
   }
+  // Bytes of one warp's slab (the call and the warm-up size alike).
+  static std::size_t slab_bytes(u32 capacity, u32 record_capacity, u32 event_capacity) {
+    return static_cast<std::size_t>(capacity) * (2 * sizeof(u32) + 3 * sizeof(std::int32_t) + 3 * sizeof(u32)) +
+           static_cast<std::size_t>(record_capacity) * sizeof(LaneRecord) +
+           3 * static_cast<std::size_t>(event_capacity) * sizeof(u32);
+  }
   // Per-warp slabs for `warps` warps (grow-only).
   void reserve_slabs(std::size_t warps, u32 capacity, u32 record_capacity, u32 event_capacity) {
     const std::size_t cap = capacity;
@@ -936,10 +942,7 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     out.status.assign(edges, 0);
     out.record_begin.assign(edges, 0);
     out.record_count.assign(edges, 0);
-    const std::size_t slab_bytes = static_cast<std::size_t>(capacity) *
-        (2 * sizeof(u32) + 3 * sizeof(std::int32_t) + 3 * sizeof(u32)) +
-        static_cast<std::size_t>(record_capacity) * sizeof(LaneRecord) +
-        3 * static_cast<std::size_t>(event_capacity) * sizeof(u32);
+    const std::size_t slab_bytes = LanesResident::slab_bytes(capacity, record_capacity, event_capacity);
     const int threads = lanes_threads;
     const std::size_t arena_bytes = arena_capacity * sizeof(LaneRecord);
     if (arena_bytes > free_bytes / 4) throw CudaFailure{"record arena exceeds a quarter of the free device memory", true};
@@ -1056,9 +1059,16 @@ std::string warm_up_lanes(u32 capacity, u32 record_capacity, u32 event_capacity)
     auto& res = lanes_resident();
     std::lock_guard<std::mutex> lock(res.mu);
     res.probe();
-    res.reserve_slabs(res.max_warps(), capacity == 0 ? default_lanes_capacity : capacity,
-                      record_capacity == 0 ? default_record_capacity : record_capacity,
-                      event_capacity == 0 ? default_event_capacity : event_capacity);
+    const u32 cap = capacity == 0 ? default_lanes_capacity : capacity;
+    const u32 rec = record_capacity == 0 ? default_record_capacity : record_capacity;
+    const u32 evt = event_capacity == 0 ? default_event_capacity : event_capacity;
+    // Sized as the call (a quarter of the free memory, resident bytes
+    // counted as free): the call never needs more warps than this reserve.
+    std::size_t free_bytes = 0, total_bytes = 0;
+    MHGP9_CUDA(cudaMemGetInfo(&free_bytes, &total_bytes));
+    free_bytes += res.device_bytes();
+    const std::size_t warps = std::min(res.max_warps(), (free_bytes / 4) / LanesResident::slab_bytes(cap, rec, evt));
+    if (warps != 0) res.reserve_slabs(warps, cap, rec, evt);
     return {};
   } catch (const CudaFailure& failure) {
     return failure.what;  // the batch call classifies any error again

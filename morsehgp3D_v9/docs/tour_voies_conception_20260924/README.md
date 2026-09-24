@@ -98,8 +98,13 @@ phase 0 −11 % ; images de l'ordre 5 de 132–143 à 47–57 ms. Condensés et
   résout seul sa classe de racines, avec **sortie anticipée** dès que la
   profondeur atteint T. Les membres lus sont marqués décidés. Les émissions
   du seau sont retriées par représentant : ce sont les mêmes enregistrements,
-  dans le même ordre (lemme L9 au registre des preuves). Sur 08/000000 à K5,
-  toutes les arêtes sont égales au moteur et `group_steps` baisse de 70 %.
+  dans le même ordre (lemme L9 au registre des preuves). Sur 08/000000, à K5
+  comme à K10, toutes les arêtes sont égales au moteur et `group_steps`
+  baisse de 70 % (moins de passes : ni recherche du plus petit ID, ni
+  localisation). Depuis T1, `groups`, `depth_rejected_groups` et `max_group`
+  comptent des **passes** et non des classes. Une classe rejetée peut être
+  comptée plusieurs fois, et `max_group` minore la plus grande classe. Ces
+  champs ne se comparent pas aux reçus v21 (revue avant R17).
 - **Chronos** : installation et fin de l'appel hors événements, conversion
   par la chaîne (sonde v22).
 
