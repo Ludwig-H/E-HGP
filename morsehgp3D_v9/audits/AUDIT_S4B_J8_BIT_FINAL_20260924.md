@@ -1,5 +1,17 @@
 # S4b exploratoire : bit J8, seaux et coût du raffinement
 
+**Mise à jour WIP du 24 septembre, 01:46 UTC.** Le constructeur a déjà
+corrigé le bit valide du port hôte dans le source local non publié,
+SHA-256 `0d32fa499b289b611d7f12a7fad576ec150000f208aa4b3c168bc2b2013aba33` :
+le passage de positivité efface maintenant `q4_valid_bit` pour **chaque**
+événement avant de tester le groupe courant. Le
+[gate à cinq sites](s4b_valid_group_gate_20260924.cpp) rend code 0 en
+`-O1` et `-O2`, avec supports distincts `0,1,2,3` et `0,1,2,4`,
+profondeurs 0/1. Le défaut causal décrit plus bas est donc **clos à
+ce stade WIP local** ; ni égalité multiensemble sur LiDAR ni port GPU
+ne découle de ce seul rejeu. Les coûts de liste et le raccord des
+tâches restent ouverts.
+
 **Addendum mutable du 24 septembre, 00:53 UTC.** Le constructeur a élargi
 `dn`, `dp`, `a8`, `b8` à `uint16_t` dans le scratch : nouveau source SHA-256
 `0c2d6d6e4d77df6d77efa211ead419e111e26b46353f546e777dd2dba279b852`,
