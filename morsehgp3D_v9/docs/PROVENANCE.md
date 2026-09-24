@@ -1526,3 +1526,121 @@ est préparé par masse décroissante (`WspdQ2Schedule::mass_first`), avec
 acceptées et le même catalogue. Porte `wspd_q2_parallel` : chaque exécution
 parallèle est rejouée avec le plan par masse, ce qui donne la même sortie et le
 même travail mono (au moins 400 exécutions).
+
+### Tour statique : regroupement de la phase 0 sans tri (24 septembre 2026, après R20)
+
+À R20 (G4, 08/000000, K5), le tri parallèle des requêtes de la phase 0 coûtait
+28 ms à l'ordre 5 : un tri par échantillonnage qui disperse et trie des
+enregistrements `FullBallBatchRequest` entiers de 56 o (clé de 40 o,
+consommateur, ordinal). La résolution n'a besoin que de trois choses :
+- la partition des requêtes en classes de clé égale ;
+- la **première** requête de chaque classe, c'est-à-dire l'ordinal minimal,
+  dont le consommateur donne `before` ;
+- une cible par classe, recopiée à chaque ordinal de la classe.
+
+**Voie hachée** (`resolve_hashed_order`, défaut). Les requêtes ne bougent
+plus. Une table à adressage ouvert de mots de 8 o, `(étiquette << 32) |
+(ordinal + 1)`, donne en une passe parallèle la case de classe de chaque
+requête. L'étiquette est la moitié haute d'un hachage 64 bits de la clé.
+- Une étiquette égale n'est qu'une candidate : la classe est décidée en
+  comparant les **clés entières**. Une collision fait sonder plus loin et ne
+  fusionne jamais deux clés.
+- Le mot garde l'ordinal minimal de sa classe, par comparaison-échange.
+- Les graines ne sont plus triées non plus : une seconde table des mêmes mots
+  les indexe, et une clé égale trouvée à l'insertion donne le refus du témoin
+  (`full_ball_static_duplicate_seed`). La recherche de graine de la classe et
+  celles de `static_terminal` passent par cet index, avec comparaison exacte.
+- Les classes sont résolues par site minimal croissant (seaux de l'indice de
+  site, d'ordre de Morton, au plus 2^16, comptage puis dispersion). En ordre
+  de hachage, la résolution coûtait environ 25 % de CPU de plus que dans
+  l'ordre des clés du témoin (K5, W1), à cause de la localité des boules
+  terminales et des nœuds de l'index.
+- Chaque classe est résolue une fois, avec le même `static_terminal`, dont
+  les seules entrées sont la clé et le premier consommateur. Son mot devient
+  `(cible << 32) | rang de niveau du premier consommateur`.
+- Une passe de collecte écrit la cible de chaque requête et vérifie sa
+  chronologie (`full_ball_static_request_chronology`, comme le témoin).
+- Des pipelines de préchargement couvrent la case de départ de chaque
+  requête, puis, pour chaque classe, le mot, la première requête, son
+  consommateur et la case de graine.
+
+**Même objet.** Les classes, les premières requêtes et les cibles sont celles
+du témoin. Tous les compteurs de travail sont des sommes ou des maxima sur
+les classes, donc indépendants de l'ordre :
+- `static_requests`, `static_unique`, `static_seeded` ;
+- les compteurs de résolution : `anchor_hits`, `key_lookups`, `intruder_*`,
+  `interior_ranges`, `same_radius_steps`, `descending_steps`,
+  `max_chain_steps`, `static_post_seed_*` et `resolve_work` ;
+- les voies de résolution (`static_lanes_used`, `static_workers_created`),
+  planifiées sur le même nombre de classes.
+
+Seuls changent l'ordre de résolution des classes et les capacités
+échantillonnées `static_peak_*` : il n'y a plus de second tampon de requêtes,
+et les tables sont comptées dans `static_peak_group_bytes` et
+`static_peak_seed_bytes`. La disposition des tables peut dépendre de
+l'ordonnancement, jamais une réponse. Les sous-chronos gardent leur place :
+`static_sort_by_k` mesure l'index des graines, `static_groups_by_k` les
+classes, `static_resolve_by_k` la résolution et la collecte.
+
+**Témoin et options.** La voie triée reste le témoin :
+- option du constructeur `hash_grouping`, défaut `true` ;
+- `ChainOptions::tower_hash_grouping`, défaut `true` ;
+- le résolveur par lots (`FullBallBatchResolver`) garde le témoin, parce que
+  sa vue attend des requêtes triées et uniques ;
+- un ordre de 2^31 requêtes ou graines, ou plus, passe par le témoin (moitiés
+  de 32 bits des mots), avec le même objet.
+
+La sonde v25 ne publie pas encore ce levier : le protocole l'intégrera.
+`FullBallStaticTrace` (portes seulement) enregistre, par ordre, les cibles
+statiques et le premier ordinal de la classe de chaque requête.
+
+**Porte** `static_grouping` (`tests/tower/static_grouping_gate.cpp`). Pour
+chaque ordre K ≥ 2, elle compare le témoin et la voie hachée **octet pour
+octet** : cibles statiques, premières requêtes, puis condensé, statut et tous
+les champs de travail de `FullBallStats` (les compteurs de voies à W égal).
+- W parcourt 1, 2, 3, 4 et 8, phase A recouvrante ou non ;
+- nuages : grappes u18 de 1 500 et 240 sites, grille cosphérique 3 × 3 × 3 ;
+- planchers : voie effectivement prise à chaque ordre, classes à plusieurs
+  requêtes, graines trouvées, plus d'un ouvrier à W ≥ 2, au moins 8 192
+  requêtes à un ordre.
+
+Variante à **hachage faible** (quatre valeurs, cible de test) : des clés
+distinctes partagent étiquette et case de départ, et la comparaison exacte
+doit les séparer. Les planchers exigent des refus d'étiquette dans les
+classes et dans l'index des graines. Trois mutants sont tués (code 1) :
+- étiquette prise pour l'égalité des clés des classes (`cause=grouping.firsts`) ;
+- étiquette prise pour l'égalité des clés des graines
+  (`cause=grouping.targets`) ;
+- première requête prise à l'ordinal maximal (`cause=grouping.firsts`).
+
+Sur la trame 08/000000 (label `lidar`), la porte vérifie les condensés épinglés
+de la tour et du catalogue (K5 `67450c64611075b1` / `5ad1fe09354411ba`, K10
+`ac108f7f71096c3f` / `a6e959d227f3dafa`). Elle compare ensuite le témoin à
+8 fils à la voie hachée à 1, 2, 3, 4 et 8 fils.
+
+**Mesures locales** (08/000000, hôte partagé de 8 cœurs, charge 30 à 40 :
+indicatives seulement). Condensés épinglés reproduits et `tower_work`
+identique champ par champ à chaque exécution.
+- **Temps CPU par fil**, tour seule sur le catalogue K5, W1, ordre 5 :
+  - témoin : tri des requêtes 229–243 ms, tri des graines 43–45 ms,
+    résolution 1 681–1 767 ms ;
+  - voie hachée : index des graines 18 ms, classes 44–48 ms, dispersion
+    6 ms, résolution 1 694–1 717 ms, collecte 11 ms.
+- **Recherche de graine** (K5, W1, compteur de cycles) : environ 915 cycles
+  par recherche dichotomique, contre environ 440 par l'index (1,03 M
+  recherches à l'ordre 5).
+- **Somme des temps CPU** de la résolution à W8 : 1 717–1 720 → 1 677–1 681 ms
+  à l'ordre 5 ; 38,5–38,8 → 37,9–38,0 s sur les ordres 2 à 10 du catalogue
+  K10. S'y ajoutent les classes (0,76–0,78 s) et la collecte (0,18 s).
+- **Sonde v25 à W8**, paires entrelacées base `d1d038393` / voie hachée,
+  sommes sur K = 2..Kmax :
+
+| K | tri + groupes (ms) | phase 0 (ms) | tour (ms) |
+| --- | --- | --- | --- |
+| 5 | 1 081 / 915 / 767 → 183 / 249 / 227 | 3 573 / 3 496 / 2 896 → 2 238 / 3 106 / 2 464 | 7 180 / 7 017 / 5 423 → 4 792 / 6 756 / 5 467 |
+| 10 | 4 972 / 4 601 / 3 454 → 1 197 / 1 053 / 803 | 33 958 / 31 417 / 21 556 → 36 516 / 30 654 / 22 770 | 45 194 / 41 674 / 30 009 → 51 297 / 42 826 / 31 976 |
+
+Le tri et les groupes baissent de 70 à 83 %. À K10, la phase 0 et la tour ne
+se comparent pas d'un bras à l'autre : la validation, dont le code n'a pas
+changé, prend 16 à 45 % de plus du côté de la voie hachée. La charge de l'hôte
+a dérivé pendant les paires. La mesure qui compte est celle de G4, à 48 fils.
