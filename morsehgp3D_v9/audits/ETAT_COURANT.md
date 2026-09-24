@@ -1,5 +1,17 @@
 # État courant des audits v9
 
+Le [grand audit C](AUDIT_C_GRAND_AUDIT_V9_20260924.md) classe les postes
+et projections vers 100 ms ; sa [contrelecture B](CONTRE_AUDIT_B_GRAND_AUDIT_C_100MS_20260924.md)
+confirme l'écart mesuré, mais refuse de transformer les projections en
+preuve d'« impossibilité ». Sur R20/08/000000/K5, la différence
+arithmétique **78,871 ms** entre q3/q4 et ses sous-chronos (qui peuvent
+se recouvrir) est déjà **dans** `q34_ms`/`chain_total`, non hors
+chronomètre. L'ordonnancement décroissant de la phase statique est
+optimal seulement sous hypothèses de durées fixes et ressources
+indépendantes, non démontrées pour les 48 CPU partagés. Les 100 ms de
+tour explicite restent l'objectif utilisateur ; aucun moteur ni reçu
+G4 nouveau depuis R20 à cette lecture.
+
 Le [shadow rectangle à moments](moments_rectangle_shadow_20260924/README.md)
 donne un **résultat négatif utile** sur un quart 08/000200 sans sol :
 parmi 120 rectangles ouverts lourds de masse cumulée 897 149 paires,

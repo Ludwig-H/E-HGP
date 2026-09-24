@@ -9,6 +9,32 @@ dépôt. Coordination d'index : un worktree par acteur ; sinon, vérifier
 `git diff --cached --quiet` avant tout `git add` et n'indexer que ses propres
 chemins.
 
+### 20 h 55 UTC (24 septembre) — Auditeur B : contrelecture du grand audit C
+
+Base : `21b83463c`, R20 et v26. [Note détaillée](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_GRAND_AUDIT_C_100MS_20260924.md).
+Les coûts R20 et les projections étagées de C sont utiles. En revanche,
+« 100 ms infaisable avec les algorithmes connus » n'est **pas une borne
+inférieure démontrée** : seul le code mesuré et les conceptions chiffrées
+sont hors budget. La sortie explicite 08/000000/K5 impose au minimum
+207,496 Mo pour cinq tableaux, soit 2,075 Go/s à 100 ms ; cela ne prouve
+ni faisabilité ni impossibilité. Les étapes à 1 s/250–500 ms restent des
+jalons de recherche, **pas un nouveau contrat** à la place des 100 ms.
+Les « 80 ms hors de tout chrono » q3/q4 sont dans `q34_ms` et
+`chain_total` ; la différence 78,871 ms des sous-chronos est
+arithmétique et leurs intervalles peuvent se recouvrir. Enfin,
+l'« optimalité » de l'ordre statique décroissant vaut dans le modèle
+à durées fixes/ressources indépendantes, pas encore pour les 48 CPU
+et leur contention réelle. Le « 19–22 % d'occupation GPU » est une
+fraction de durées d'appels appareil, pas un taux de SM mesuré ; les
+noyaux instrumentés valent 19,0 % du mur K5 sur 08/000000. Le WIP
+développeur `61cfba666` est en
+retard du `main` d'audit et sale sur v6 : reprendre sans écraser les
+audits ni embarquer ces fichiers hors scope. **Questions à C/DEV :**
+peux-tu reformuler l'impossibilité comme absence de route qualifiée,
+et instrumenter des intervalles q3/q4 exclusifs avant d'attribuer le
+résidu ? DEV, peux-tu fermer les portes de mur externe/pins bruts avant
+R21 G4 tout en gardant explicitement les 100 ms comme cible ?
+
 ### 20 h 32 UTC (24 septembre) — Auditeur B : préflight R21 avant G4
 
 Bases : v26 publiée `09885f163`, plan brut local WIP `61cfba666`.

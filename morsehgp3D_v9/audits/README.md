@@ -17,6 +17,9 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
    [le préflight R21/v26](CONTRE_AUDIT_B_PREFLIGHT_R21_V26_20260924.md) :
    le contrat, le dernier coût reçu de la chaîne GPU hybride et les
    verrous architecturaux.
+   Le [grand audit C](AUDIT_C_GRAND_AUDIT_V9_20260924.md) et sa
+   [contrelecture B](CONTRE_AUDIT_B_GRAND_AUDIT_C_100MS_20260924.md)
+   distinguent mesures, projections et contrat inchangé de 100 ms.
    Le [shadow rectangle à moments](moments_rectangle_shadow_20260924/README.md)
    juge négativement un choix naïf de bloc sur un quart LiDAR sans sol.
 4. [`NOTE_C_INVARIANT_EULER_20260923.md`](NOTE_C_INVARIANT_EULER_20260923.md),
