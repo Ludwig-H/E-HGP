@@ -286,7 +286,7 @@ void merge(Q34LanesWork& a, const Q34LanesWork& b) {
 }
 
 void merge(Q34Lanes4Work& a, const Q34Lanes4Work& b) {
-  static_assert(sizeof(Q34Lanes4Work) == 26 * sizeof(u64));
+  static_assert(sizeof(Q34Lanes4Work) == 28 * sizeof(u64));
   MHGP9G_ADD(edges); MHGP9G_ADD(seeds); MHGP9G_ADD(certified); MHGP9G_ADD(certified_chunk1);
   MHGP9G_ADD(survivors); MHGP9G_ADD(pass_chunks); MHGP9G_ADD(pass_site_tests); MHGP9G_ADD(buffered_events);
   MHGP9G_MAX(max_buffered); MHGP9G_ADD(live_buckets); MHGP9G_ADD(filter_steps); MHGP9G_ADD(bucket_events);
@@ -294,7 +294,7 @@ void merge(Q34Lanes4Work& a, const Q34Lanes4Work& b) {
   MHGP9G_ADD(depth_rejected_groups); MHGP9G_ADD(positivity_tests); MHGP9G_ADD(groups_without_valid);
   MHGP9G_ADD(emitted); MHGP9G_ADD(emitting_seeds); MHGP9G_ADD(multi_emission_seeds);
   MHGP9G_MAX(max_emissions_per_seed); MHGP9G_ADD(shell_ids); MHGP9G_MAX(max_group);
-  MHGP9G_ADD(constant_shell_sites);
+  MHGP9G_ADD(constant_shell_sites); MHGP9G_ADD(list_steps); MHGP9G_ADD(group_steps);
 }
 
 void merge(WspdQ34Work& a, const WspdQ34Work& b) {

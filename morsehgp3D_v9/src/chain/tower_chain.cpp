@@ -390,7 +390,8 @@ gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::spa
       w4.pass_chunks, w4.pass_site_tests, w4.buffered_events, w4.max_buffered, w4.live_buckets, w4.filter_steps,
       w4.bucket_events, w4.candidates, w4.foreign_candidates, w4.groups, w4.compare_steps,
       w4.depth_rejected_groups, w4.positivity_tests, w4.groups_without_valid, w4.emitted, w4.emitting_seeds,
-      w4.multi_emission_seeds, w4.max_emissions_per_seed, w4.shell_ids, w4.max_group, w4.constant_shell_sites};
+      w4.multi_emission_seeds, w4.max_emissions_per_seed, w4.shell_ids, w4.max_group, w4.constant_shell_sites,
+      w4.list_steps, w4.group_steps};
   device_ms = out.total_ms;
   kernel_ms = out.kernel_ms;
   transfer_ms = out.upload_ms + out.download_ms;
@@ -984,6 +985,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         l.lanes4_multi_emission_seeds = q.multi_emission_seeds;
         l.lanes4_max_emissions_per_seed = q.max_emissions_per_seed; l.lanes4_shell_ids = q.shell_ids;
         l.lanes4_max_group = q.max_group; l.lanes4_constant_shell_sites = q.constant_shell_sites;
+        l.lanes4_list_steps = q.list_steps; l.lanes4_group_steps = q.group_steps;
       }
     }
     result.times.q34_ms = ms_since(t);
@@ -996,6 +998,43 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     result.catalogue.q4_presentations = gathered.by_arity[4];
     require(gathered.by_arity[0] == 0 && gathered.by_arity[1] == 0, "chain_presentation_arity");
     result.presentation_ranges = gathered.ranges.size();
+    if (options.catalogue_digest) {
+      // Verification only (timed and charged apart, as the catalogue digest):
+      // an order-free digest of every presentation's key, arity and support.
+      const auto digest_start = Clock::now();
+      const double digest_cpu = process_cpu_s();
+      std::vector<std::array<std::uint64_t, 2>> parts(gathered.ranges.size());
+      tower::parallel_items(gathered.ranges.size(), static_cast<int>(W), [&](std::size_t b, std::size_t) {
+        std::uint64_t sum = 0, x = 0;
+        for (const auto& p : gathered.ranges[b]) {
+          std::uint64_t h = 1469598103934665603ULL;
+          const auto word = [&h](std::uint64_t v) {
+            for (int k = 0; k < 8; ++k) h = (h ^ ((v >> (8 * k)) & 0xffU)) * 1099511628211ULL;
+          };
+          for (const auto c : p.key) {
+            word(static_cast<std::uint64_t>(c));
+            word(static_cast<std::uint64_t>(c >> 64));
+          }
+          word(p.arity);
+          for (const auto s : p.support) word(s);
+          const std::uint64_t m = gen::q34_shell_hash(h);
+          sum += m;
+          x ^= m;
+        }
+        parts[b] = {sum, x};
+      });
+      std::uint64_t sum = 0, x = 0;
+      for (const auto& part : parts) {
+        sum += part[0];
+        x ^= part[1];
+      }
+      result.presentation_digest = gen::q34_shell_hash(sum ^ (x * 0x9e3779b97f4a7c15ULL));
+      const auto digest_span = Clock::now() - digest_start;
+      catalogue_ms += std::chrono::duration<double, std::milli>(digest_span).count();
+      merge_clock.start += digest_span;  // out of merge_ms, as out of the total
+      const double digest_cpu_end = process_cpu_s();
+      if (digest_cpu >= 0 && digest_cpu_end >= 0) catalogue_cpu += digest_cpu_end - digest_cpu;
+    }
     const auto& groups = gathered.representatives;  // one per key, key order
     const std::size_t unique = groups.size();
     result.catalogue.unique_keys = unique;
@@ -1171,9 +1210,9 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       const auto digest_start = Clock::now();
       const double digest_cpu = process_cpu_s();
       result.catalogue_digest = catalogue_digest(balls);
-      catalogue_ms = ms_since(digest_start);
+      catalogue_ms += ms_since(digest_start);
       const double digest_cpu_end = process_cpu_s();
-      if (digest_cpu >= 0 && digest_cpu_end >= 0) catalogue_cpu = digest_cpu_end - digest_cpu;
+      if (digest_cpu >= 0 && digest_cpu_end >= 0) catalogue_cpu += digest_cpu_end - digest_cpu;
     }
     result.status = ChainStatus::kComplete;
     result.reason = "complete_relative_to_cross_checked_catalogue";
@@ -1203,6 +1242,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     result.catalogue_balls.clear();
     result.orders.clear();
     result.catalogue_digest = 0;
+    result.presentation_digest = 0;
   }
   result.times.total_ms = ms_since(total_start) - catalogue_ms;
   result.times.catalogue_digest_ms = catalogue_ms;
@@ -1220,6 +1260,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       result.orders.clear();
       result.tower_digest = 0;
       result.catalogue_digest = 0;
+      result.presentation_digest = 0;
     };
     try {
       result.tower_digest = tower_digest(result.tower);

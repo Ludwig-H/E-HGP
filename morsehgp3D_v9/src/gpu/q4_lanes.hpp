@@ -41,12 +41,17 @@ inline constexpr u32 q4_buckets = 8;  // J
 
 // Work of the q4 lanes (declared ledger, S4b): seeds, lens pass, survivor
 // stage, groups and emissions kept apart (a seed may emit from several
-// groups, auditor B).
+// groups, auditor B). The survivor stage's chunk passes are all counted
+// (auditor, 24 septembre): list_steps = the bucket list and foreign passes
+// of every live bucket, group_steps = every pass of the group loop (least
+// ID search, locate, compare, reset, positivity and its minimum, choice);
+// compare_steps is the compare part of group_steps.
 struct Q4Work {
   u64 edges, seeds, certified, certified_chunk1, survivors, pass_chunks, pass_site_tests;
   u64 buffered_events, max_buffered, live_buckets, filter_steps, bucket_events, candidates, foreign_candidates;
   u64 groups, compare_steps, depth_rejected_groups, positivity_tests, groups_without_valid, emitted;
   u64 emitting_seeds, multi_emission_seeds, max_emissions_per_seed, shell_ids, max_group, constant_shell_sites;
+  u64 list_steps, group_steps;
 };
 
 // Sums; the max_* fields by MAX.
@@ -66,6 +71,8 @@ MHGP9_HD inline void add_q4(Q4Work& to, const Q4Work& from) {
   to.shell_ids += from.shell_ids;
   to.max_group = to.max_group < from.max_group ? from.max_group : to.max_group;
   to.constant_shell_sites += from.constant_shell_sites;
+  to.list_steps += from.list_steps;
+  to.group_steps += from.group_steps;
 }
 
 // Per-group scratch of the survivor stage: `capacity` buffered events.
@@ -384,10 +391,12 @@ MHGP9_HD CertificateStatus q4_seed(const Group& group, const LanesIndex& index, 
       foreign += popcount32(fore);
     }
     group.sync();
+    const u32 steps = (m + Group::size - 1) / Group::size;  // one pass over the bucket's list
     if (group.leader()) {
       ++w.live_buckets;
       w.bucket_events += m;
       w.foreign_candidates += foreign;
+      w.list_steps += (buffered + Group::size - 1) / Group::size + steps;
     }
     for (;;) {
       // Least-ID undecided candidate (L7), then its position in the list.
@@ -400,6 +409,7 @@ MHGP9_HD CertificateStatus q4_seed(const Group& group, const LanesIndex& index, 
         });
         best = v < best ? v : best;
       }
+      if (group.leader()) w.group_steps += steps;
       if (best == 0xffffffffU) break;
       u32 where = 0xffffffffU;
       for (u32 base = 0; base < m; base += Group::size) {
@@ -433,7 +443,8 @@ MHGP9_HD CertificateStatus q4_seed(const Group& group, const LanesIndex& index, 
       group.sync();
       if (group.leader()) {
         ++w.groups;
-        w.compare_steps += (m + Group::size - 1) / Group::size;
+        w.compare_steps += steps;
+        w.group_steps += 2 * steps;  // locate + compare
         w.max_group = w.max_group < group_size ? group_size : w.max_group;
       }
       if (depth >= threshold) {
@@ -442,7 +453,10 @@ MHGP9_HD CertificateStatus q4_seed(const Group& group, const LanesIndex& index, 
             q4.bits[q4.list[base + l]] &= ~q4_group_bit;
           });
         group.sync();
-        if (group.leader()) ++w.depth_rejected_groups;
+        if (group.leader()) {
+          ++w.depth_rejected_groups;
+          w.group_steps += steps;  // reset
+        }
         continue;
       }
       // Positivity of the group's candidates, then the least valid ID.
@@ -472,6 +486,7 @@ MHGP9_HD CertificateStatus q4_seed(const Group& group, const LanesIndex& index, 
       if (group.leader()) {
         w.positivity_tests += candidates;
         w.candidates += candidates;
+        w.group_steps += 2 * steps;  // positivity + its minimum
       }
       if (valid_id == 0xffffffffU) {
         if (group.leader()) ++w.groups_without_valid;
@@ -485,6 +500,7 @@ MHGP9_HD CertificateStatus q4_seed(const Group& group, const LanesIndex& index, 
         });
         chosen = v < chosen ? v : chosen;
       }
+      if (group.leader()) w.group_steps += steps;  // choice
       if (record_count == slab.record_capacity) return CertificateStatus::deferred;
       if (group.leader()) {
         LaneRecord& r = slab.records[record_count];

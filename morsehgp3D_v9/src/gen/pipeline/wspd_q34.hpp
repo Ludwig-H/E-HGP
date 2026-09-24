@@ -133,6 +133,7 @@ struct Q34Lanes4Work {
   u64 foreign_candidates{}, groups{}, compare_steps{}, depth_rejected_groups{}, positivity_tests{};
   u64 groups_without_valid{}, emitted{}, emitting_seeds{}, multi_emission_seeds{}, max_emissions_per_seed{};
   u64 shell_ids{}, max_group{}, constant_shell_sites{};
+  u64 list_steps{}, group_steps{};  // every chunk pass of the survivor stage
   bool operator==(const Q34Lanes4Work&) const = default;
 };
 

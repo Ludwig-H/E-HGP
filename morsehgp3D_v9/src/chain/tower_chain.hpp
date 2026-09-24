@@ -205,7 +205,7 @@ struct GeneratorLedger {
       lanes4_filter_steps, lanes4_bucket_events, lanes4_candidates, lanes4_foreign_candidates, lanes4_groups,
       lanes4_compare_steps, lanes4_depth_rejected_groups, lanes4_positivity_tests, lanes4_groups_without_valid,
       lanes4_emitted, lanes4_emitting_seeds, lanes4_multi_emission_seeds, lanes4_max_emissions_per_seed,
-      lanes4_shell_ids, lanes4_max_group, lanes4_constant_shell_sites;
+      lanes4_shell_ids, lanes4_max_group, lanes4_constant_shell_sites, lanes4_list_steps, lanes4_group_steps;
 };
 
 // Occupation mesuree des ouvriers q3/q4 (jamais comparee entre executions) :
@@ -272,6 +272,12 @@ struct ChainResult {
   std::uint64_t tower_digest = 0;
   // Condense canonique du catalogue (0 si non demande).
   std::uint64_t catalogue_digest = 0;
+  // v21 : condense du multiensemble de TOUTES les presentations (cle, arite,
+  // support), independant de l'ordre (somme et xor de melanges), calcule avec
+  // catalogue_digest : un support duplique ou perdu sous une cle presentee
+  // plusieurs fois le change, contrairement aux condenses de tour et de
+  // catalogue (revue S4b). 0 si non demande.
+  std::uint64_t presentation_digest = 0;
   // Tour complete si status == kComplete et run_tower : proprietaire du
   // resultat (le catalogue et l'index sont liberes avant publication).
   tower::FullBallTowerResult tower;

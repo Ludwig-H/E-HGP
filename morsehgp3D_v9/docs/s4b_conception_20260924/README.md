@@ -68,8 +68,9 @@ On mesure d'abord ; tâches et raffinement suivent si la traîne domine sur G4.
 Pour comparaison, une passe sur tout le cover pour chaque graine demanderait
 580,7 M paquets à K5.
 
-La v1 est égale à la voie q4 du moteur (Local28) arête par arête sur **toutes**
-les arêtes de 08/000000, à K5 comme à K10. La chaîne avec le levier
+La v1 est égale à la voie q4 du moteur (Local28) arête par arête sur toutes
+les arêtes q4 demandées de 08/000000, à K5 comme à K10 (voir le reçu local
+pour les exclusions, nulles ou comptées). La chaîne avec le levier
 `q34_batch_q4` reproduit les condensés épinglés. Ce premier essai a aussi
 révélé un défaut de port, corrigé : un drapeau « valide » laissé d'un groupe
 au suivant produisait des supports dupliqués. La chaîne l'a refusé
@@ -84,3 +85,42 @@ au suivant produisait des supports dupliqués. La chaîne l'a refusé
 - `mhgp9_chain_batch_q3` : bras S4b jugé, et bras à ardoise et tampon
   réduits ; mêmes condensés, même registre des voies.
 - Contrat sonde/lecteur v21 : cas q4 réel, jugé, et mutants.
+
+## Contrelectures et corrections (24 septembre 2026)
+
+Une revue adverse du port et les audits déposés sur `main` ont conduit aux
+corrections suivantes, toutes locales (CPU) :
+
+- **Présentations comparées entre jumeaux.** Les condensés de tour et de
+  catalogue ne voient pas un échange de présentations qui préserve les
+  boules. La chaîne publie désormais `presentation_digest`, un condensé
+  sans ordre de (clé, arité, support) sur toutes les présentations. Le
+  lecteur le compare entre bras, avec les comptes q2/q3/q4 émis et
+  présentés.
+- **Porte fichier non vacante.** Le mode `--compare` publie les survivantes,
+  les certificats reportés, les arêtes sans voie, les voies demandées et
+  les voies reportées par l'ardoise (repli moteur dans la chaîne). Il impose
+  des planchers de graines et d'enregistrements, et `--all-asked` refuse
+  toute exclusion. Les deux points de l'auditeur donnent maintenant le
+  code 3 ; son tétraèdre à seaux de largeur nulle donne le code 0.
+- **Racine sur une borne intérieure** (L6). La fixture a = (0,2,2),
+  b = (3,2,2), x = (1,0,2), y = (1,2,0) est gravée dans la porte : la
+  racine de y vaut $\mu=6=g_6$. Le candidat est étranger au seau 5 et décidé
+  au seau 6 ; on attend un tétraèdre, ni zéro ni deux.
+- **Registre complet du stade des survivants.** `list_steps` compte les
+  listes de seau et la passe des étrangers. `group_steps` compte toutes les
+  passes de la boucle de groupes, dont `compare_steps` n'est qu'une partie.
+  Ces coûts, avec `pass_site_tests` et `bucket_events`, sont des mesures
+  **non jugées**. Seules les identités de graines, de groupes et d'émissions
+  sont contrôlées.
+- **Seaux lourds.** La famille u18 de l'auditeur force m² comparaisons par
+  graine. La v1 les borne par le tampon d'événements (4 096) : au-delà,
+  l'arête est reportée au moteur. Sur LiDAR, `max_buffered` vaut 1 183 et
+  `max_group` 2 à K10. Un tri exact des gros seaux reste la suite si la
+  traîne domine sur G4.
+- **Coquilles.** Les enregistrements ne transportent que la taille et deux
+  empreintes de coquille. Les IDs nominaux publiés viennent du recensement
+  de la chaîne, qui recalcule la coquille depuis la clé et refuse une
+  taille différente (`chain_census_shell_mismatch`). L'égalité nominative
+  des IDs collectés par les voies n'est donc pas une propriété de l'objet
+  publié.

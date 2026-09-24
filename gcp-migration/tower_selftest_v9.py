@@ -183,7 +183,8 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                               lanes4_depth_rejected_groups=1, lanes4_positivity_tests=2,
                               lanes4_groups_without_valid=1, lanes4_emitted=1, lanes4_emitting_seeds=1,
                               lanes4_multi_emission_seeds=0, lanes4_max_emissions_per_seed=1, lanes4_shell_ids=4,
-                              lanes4_max_group=1, lanes4_constant_shell_sites=3)
+                              lanes4_max_group=1, lanes4_constant_shell_sites=3, lanes4_list_steps=4,
+                              lanes4_group_steps=9)
                 ledger.update(atlas_deep_cells=0)  # no atlas under the q4 lanes (as the real chain)
                 batch.update(lanes_records=2)
     return dict(schema='mhgp9_tower_probe_v21', status=status,
@@ -218,7 +219,8 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                                 meb_boundary_canonicalizations=1 if levers['tower_meb_proposal'] else 0,
                                 meb_proposal_fallbacks=1 if levers['tower_meb_proposal'] else 0),
                 orders=orders, tower_digest=digest if complete else '0' * 16,
-                catalogue_digest=digest[::-1] if complete else '0' * 16, peak_rss_kb=2048)
+                catalogue_digest=digest[::-1] if complete else '0' * 16,
+                presentation_digest=digest[8:] + digest[:8] if complete else '0' * 16, peak_rss_kb=2048)
 
 
 def main():
@@ -1103,7 +1105,9 @@ class Protocol(unittest.TestCase):
                      ('counter_negative', lambda v: v['catalogue'].update(balls=-1)),
                      ('shell_list', lambda v: v['catalogue'].update(by_shell=[1, -2])),
                      ('digest', lambda v: v.update(tower_digest='ABCDEF0123456789')),
-                     ('digest_len', lambda v: v.update(tower_digest='0' * 15)), ('extra', lambda v: v.update(extra=1))]
+                     ('digest_len', lambda v: v.update(tower_digest='0' * 15)), ('extra', lambda v: v.update(extra=1)),
+                     ('presentation_digest_absent', lambda v: v.pop('presentation_digest')),
+                     ('presentation_digest_null', lambda v: v.update(presentation_digest=None))]
         for label, mutate in mutations:
             bad = deepcopy(good)
             mutate(bad)
@@ -1128,6 +1132,15 @@ class Protocol(unittest.TestCase):
              'costs are not compared')
         other['tower_digest'] = '0' * 16
         need(worker.compare_cases(cases, outcomes, {0: good, 1: other})[0]['equal'] is False, 'digest compared')
+        # v21 (review S4b): the presentation multiset and counts are compared.
+        for label, mutate in (('presentation digest', lambda v: v.update(presentation_digest='1' * 16)),
+                              ('q4 presentations', lambda v: (v['generator'].update(
+                                  q4_emitted=v['generator']['q4_emitted'] + 1), v['catalogue'].update(
+                                  q4_presentations=v['catalogue']['q4_presentations'] + 1)))):
+            twin = deepcopy(good)
+            mutate(twin)
+            need(worker.compare_cases(cases, outcomes, {0: good, 1: twin})[0]['equal'] is False,
+                 'cross-case comparison blind to the ' + label)
 
     def test_nominal_session_completed(self):
         with tempfile.TemporaryDirectory() as temporary:

@@ -429,6 +429,7 @@ def selftest(case_path):
     for name in g4_reader().LANES4_LEDGER:
         v13['ledger'].setdefault(name, 0)
     v13['catalogue_digest'] = '0123456789abcdef'
+    v13['presentation_digest'] = 'fedcba9876543210'
     v13['times_ms']['catalogue_digest'] = 0.0
     v13['options']['certificate_capacity'] = 0
     v13['options']['certificate_judge'] = False

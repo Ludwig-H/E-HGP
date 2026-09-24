@@ -475,6 +475,75 @@ certifié dont la voie q3 reste ouverte (`asked`), **sans atlas**. L'objet
   lecture (auditeur B, débordement reproduit sous ASan) :
   `coverage_flat_draft_shape`.
 
+### Voie q4 par lots sans atlas (S4b, sonde v21, 24 septembre 2026)
+
+Le même appel génère aussi la voie q4 des survivants certifiés dont la voie
+q4 reste ouverte, **sans atlas ni fenêtre** ([conception](s4b_conception_20260924/README.md),
+lemmes L1–L8 au [registre des preuves](../../docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md),
+section V9-S4). L'objet émis est celui de la voie Local28 du moteur.
+
+- **En-tête portable** `src/gpu/q4_lanes.hpp`, appelé par `edge_lanes`
+  après le prologue et les recensements q3 de S4a, avec le même groupe de
+  32 voies par arête et les mêmes graines. Pour chaque graine possédée
+  strictement aiguë :
+  - famille $P-\mu S$ et domaine L2 : grille entière symétrique de huit
+    seaux ;
+  - passe de lentilles dans l'ordre des anneaux, contrôlée après chaque
+    paquet de 32 sites ;
+  - tampon des événements des seaux vivants, puis filtre des candidats
+    (positif, possédé, canonique) ;
+  - groupes de racines par formes pivots (numérateur de `make_q4`) ;
+  - profondeur L4, racines aux bornes L6, émission du plus petit ID positif
+    L7.
+
+  Aucun flottant.
+- **Mise en attente = décision de mémoire seulement** : tampon d'événements
+  (4 096 par groupe), ardoise d'enregistrements, arène (16 par arête + 4 096,
+  bornée au huitième de la mémoire libre sur l'appareil). La traîne CPU passe
+  par `Engine::certified_edge` avec les voies demandées.
+- **Registre déclaré** `lanes4_*` (28 compteurs), jamais comparé aux
+  registres q4 du moteur. `list_steps` et `group_steps` comptent toutes les
+  passes du stade des survivants : listes de seau, étrangers, recherche du
+  plus petit ID, localisation, comparaison, remise à zéro, positivité et son
+  minimum, choix. Les identités (graines, groupes, émissions) sont vérifiées
+  par `check_lanes_batch` et le lecteur. Les coûts eux-mêmes sont des
+  **mesures non jugées** : `pass_site_tests`, `bucket_events`,
+  `compare_steps`, `list_steps`, `group_steps`.
+- **Coût borné par la mémoire** : un seau de m événements coûte au plus
+  6⌈m/32⌉ passes par groupe, donc O(m²/32) par graine dans le pire cas (la
+  famille u18 de l'auditeur à seaux vivants). Au-delà du tampon, l'arête est
+  reportée. Sur 08/000000/K10 : `max_buffered` 1 183, `max_group` 2.
+- **Frontière de confiance** : `check_lanes_batch` accepte les arités 3 et
+  4. `judge_lanes_filter` recalcule chaque arête décidée par
+  `engine_q3_records` et `engine_q4_records`. Comme pour q3, les IDs de
+  coquille ne sont comparés que par leur empreinte. La tour ne les consomme
+  pas : le recensement de la chaîne recalcule chaque coquille à partir de la
+  clé et refuse une taille différente (`chain_census_shell_mismatch`).
+- **Chaîne** : levier `q34_batch_q4` (exige `q34_batch_q3`) et option
+  `q34_lanes_events`. Sous `catalogue_digest`, la chaîne publie aussi
+  `presentation_digest`, un condensé sans ordre du multiensemble (clé,
+  arité, support) de toutes les présentations. Il est chronométré à part,
+  comme le condensé du catalogue. Le lecteur compare ce condensé et les
+  comptes de présentations entre bras jumeaux (contrelecture S4b : un
+  échange de présentations qui préserverait les boules ne passe plus).
+- **Sonde et protocole v21** : levier et registre `lanes4_*`, borne des
+  arêtes demandées sur les arêtes q3 ou q4 ouvertes, exemption du plancher
+  d'atlas sous `q34_batch_q4`, plan R16 (paires S4a / S4a + S4b répétées et
+  entrelacées à 08/000000).
+- **Portes** :
+  - `mhgp9_gpu_lanes_port` : q4 arête par arête contre `engine_q4_records`
+    sur trois familles ; fixture cosphérique à groupes de 75 sites ; fixture
+    multi-groupes de l'auditeur B ; fixture d'une racine sur une borne
+    intérieure de la grille ($\mu=6=g_6$, candidat étranger du seau 5,
+    décidé au seau 6) ; lot mixte q3 + q4 passé à la frontière et au juge ;
+    tampon réduit ; sept mutants q4. Son mode `--compare` publie les
+    exclusions (certificats reportés, arêtes sans voie, voies reportées),
+    impose des planchers (`--min-q4-seeds`, `--min-q4-records`) et, avec
+    `--all-asked`, refuse une exclusion ;
+  - `mhgp9_chain_batch_q3` : bras S4b jugé et bras à ardoise et tampon
+    réduits ;
+  - contrat sonde/lecteur v21.
+
 ## Voie GPU S1 : `src/gpu/` (espace `mhgp9::gpu`, code neuf)
 
 23 septembre 2026. Première brique GPU de la v9, pour une expérience de

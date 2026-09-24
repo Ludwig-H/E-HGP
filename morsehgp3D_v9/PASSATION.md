@@ -360,8 +360,17 @@ Session G4 R15 ([reçu](receipts/g4_tower_r15_20260923/README.md), paquet
 
 Reste à 000000/K5 (1,81 s) : atlas et q4 CPU 0,54 s, tour 0,56 s,
 certificats 0,14 s, q2, front, filtre et recensement environ 0,40 s.
-Suite : **S4b** (q4 sur l'appareil, conception en cours) et, en parallèle,
-le chemin critique de la tour (phase 0 statique séquentielle par ordre).
+**S4b livré en local** (voie q4 sans atlas par seaux de lentilles,
+[conception](docs/s4b_conception_20260924/README.md),
+[provenance](docs/PROVENANCE.md), sonde et protocole v21). Sur 08/000000,
+la voie q4 de l'hôte est égale à la voie Local28 du moteur, arête par arête,
+sur toutes les arêtes demandées : 576 456 à K5 et 1 357 994 à K10, soit
+158 496 et 1 732 548 tétraèdres. La chaîne avec `q34_batch_q4` reproduit
+les condensés épinglés, ainsi que le condensé des présentations du bras
+moteur. Le noyau compile sur sm_120.
+
+Suite : session G4 R16 (S4a contre S4a + S4b), puis le chemin critique de la
+tour (phase 0 statique séquentielle par ordre).
 
 Suite : tour maigre (D5 de l'auditeur C :
 index des selles, saut au centre, images de naissance directes), puis

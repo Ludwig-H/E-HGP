@@ -124,7 +124,7 @@ LANES4_LEDGER = tuple('lanes4_' + name for name in (
     'edges seeds certified certified_chunk1 survivors pass_chunks pass_site_tests buffered_events max_buffered '
     'live_buckets filter_steps bucket_events candidates foreign_candidates groups compare_steps '
     'depth_rejected_groups positivity_tests groups_without_valid emitted emitting_seeds multi_emission_seeds '
-    'max_emissions_per_seed shell_ids max_group constant_shell_sites').split())
+    'max_emissions_per_seed shell_ids max_group constant_shell_sites list_steps group_steps').split())
 # v18 (S3) : certificats de voie morte par lots (CPU ou GPU). Leur travail ne
 # depend que des leviers q34_dead_lanes/q34_dead_core : deux cas du meme
 # (fichier, K, s) avec ces leviers egaux doivent avoir ces compteurs egaux.
@@ -140,7 +140,7 @@ CERTIFICATE_WORK_KEYS = ('expanded_pairs', 'witness_rejected_pairs', 'cover_buil
                          'dead_core_failed_cells')
 TOP_KEYS = frozenset({'schema', 'status', 'reason', 'input', 'options', 'times_ms', 'chain_cpu_s', 'generator',
                       'ledger', 'catalogue', 'q34_occupancy', 'q34_batch', 'tower_phases_ms', 'tower_work', 'orders',
-                      'tower_digest', 'catalogue_digest', 'peak_rss_kb'})
+                      'tower_digest', 'catalogue_digest', 'presentation_digest', 'peak_rss_kb'})
 INPUT_KEYS = frozenset({'format', 'grid', 'sites', 'hash'})
 OPTION_KEYS = frozenset({'K', 'K_effective', 's', 'workers', 'tower_static_threads', 'run_tower', 'certificate_capacity',
                          'certificate_judge', 'lanes_capacity', 'lanes_judge', 'lanes_events', 'levers'})
@@ -676,7 +676,11 @@ def validate_lanes(value, case, lanes_capacity=0, judge=False):
              ledger['lanes4_emitted'] <= value['generator']['q4_emitted'] and
              4 * ledger['lanes4_emitted'] <= ledger['lanes4_shell_ids'] and
              ledger['lanes4_max_buffered'] <= ledger['lanes4_buffered_events'] and
-             ledger['lanes4_pass_chunks'] >= ledger['lanes4_seeds'], 'q4 lanes ledger identity')
+             ledger['lanes4_pass_chunks'] >= ledger['lanes4_seeds'] and
+             # every live bucket builds its list, every group locates and compares
+             ledger['lanes4_list_steps'] >= ledger['lanes4_live_buckets'] and
+             ledger['lanes4_group_steps'] >= 2 * ledger['lanes4_compare_steps'] and
+             ledger['lanes4_compare_steps'] >= ledger['lanes4_groups'], 'q4 lanes ledger identity')
 
 
 def validate_occupancy(value, case):
@@ -936,6 +940,7 @@ def validate_probe(value, case, exit_code, inputs=None, capacity=0, judge=False,
                                       all(_count(item) for item in order.values()) for order in orders), 'probe orders')
     need(type(value['tower_digest']) is str and re.fullmatch('[0-9a-f]{16}', value['tower_digest']) and
          type(value['catalogue_digest']) is str and re.fullmatch('[0-9a-f]{16}', value['catalogue_digest']) and
+         type(value['presentation_digest']) is str and re.fullmatch('[0-9a-f]{16}', value['presentation_digest']) and
          type(value['peak_rss_kb']) is int and value['peak_rss_kb'] >= -1, 'probe digest/RSS')
     effective = min(case['k'], case['n'])
     if value['status'] == 'complete_relative':
@@ -972,10 +977,17 @@ def validate_gnu_time(text, exit_code):
 
 def logical_result(value):
     """Projection comparee entre nombres d'ouvriers : l'objet, pas les couts."""
+    # v21 (review S4b): every presentation (key, arity, support) and their
+    # counts too, which the tower and catalogue digests do not see.
+    generator, catalogue = value['generator'], value['catalogue']
     return dict(hash=value['input']['hash'], sites=value['input']['sites'],
-                K_effective=value['options']['K_effective'], unique_keys=value['catalogue']['unique_keys'],
-                balls=value['catalogue']['balls'], euler=value['catalogue']['euler'], orders=value['orders'],
-                tower_digest=value['tower_digest'], catalogue_digest=value['catalogue_digest'])
+                K_effective=value['options']['K_effective'], unique_keys=catalogue['unique_keys'],
+                balls=catalogue['balls'], euler=catalogue['euler'], orders=value['orders'],
+                tower_digest=value['tower_digest'], catalogue_digest=value['catalogue_digest'],
+                presentation_digest=value['presentation_digest'],
+                presentations=(generator['q2_accepted_pairs'], generator['q3_emitted'], generator['q4_emitted'],
+                               catalogue['q2_presentations'], catalogue['q3_presentations'],
+                               catalogue['q4_presentations']))
 
 
 def certificate_work(value):

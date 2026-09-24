@@ -42,8 +42,14 @@
 //     vide rend un resultat vide.
 //
 //   mhgp9_gpu_lanes_port_gate [--n=2000] [--k=2,3,5,10]
-//   mhgp9_gpu_lanes_port_gate --file=nuage.u32le --k=5 [--workers=8]
-//     (statistiques de travail par arete sur un nuage fichier, sans porte)
+//   mhgp9_gpu_lanes_port_gate --file=nuage.u32le --k=5 [--workers=8] [--compare
+//     [--min-q3-records=N] [--min-q4-seeds=N] [--min-q4-records=N] [--all-asked]]
+//     (statistiques de travail par arete sur un nuage fichier ; avec
+//     --compare, les voies q3 et q4 de chaque arete certifiee comparees a
+//     celles du moteur : code 1 au premier ecart. Les exclusions sont
+//     publiees : survivantes, certificats reportes, aretes sans voie, voies
+//     reportees par l'ardoise (repli moteur dans la chaine). Code 3 sous un
+//     plancher, ou avec --all-asked si une arete demandee n'est pas comparee.)
 //
 // Code 0 conforme, 1 desaccord ou mutant survivant (`cause=`), 2 argument,
 // 3 plancher.
@@ -187,7 +193,7 @@ gen::Q34Lanes4Work work4_of(const gpu::Q4Work& w) {
       w.pass_site_tests, w.buffered_events, w.max_buffered, w.live_buckets, w.filter_steps, w.bucket_events,
       w.candidates, w.foreign_candidates, w.groups, w.compare_steps, w.depth_rejected_groups, w.positivity_tests,
       w.groups_without_valid, w.emitted, w.emitting_seeds, w.multi_emission_seeds, w.max_emissions_per_seed,
-      w.shell_ids, w.max_group, w.constant_shell_sites};
+      w.shell_ids, w.max_group, w.constant_shell_sites, w.list_steps, w.group_steps};
 }
 
 gen::Q34LanesWork work_of(const gpu::Q3Work& w) {
@@ -276,7 +282,91 @@ Certified certified_survivors(const gen::Q2CensusIndexPtr& index, unsigned kmax,
 }
 
 // Per-edge work statistics of the q3 lanes on one cloud (no gate).
-int file_stats(const std::string& path, unsigned kmax, std::size_t workers) {
+// Every certified edge's asked lanes (q3 and, from K3, q4) against the
+// engine's own lanes, edge by edge, on a file cloud (reports).
+struct CompareFloors {
+  unsigned long long q3_records = 0, q4_seeds = 0, q4_records = 0;
+  bool all_asked = false;
+};
+
+int file_compare(const gen::Q2CensusIndexPtr& index, const Certified& certified, unsigned kmax,
+                 const CompareFloors& floors) {
+  const Flat flat(*index);
+  const auto view = flat.view();
+  const auto order = index->spatial_order();
+  const auto options = q34_options();
+  Slab slab(gpu::default_lanes_capacity, gpu::default_record_capacity);
+  Q4Buffers q4b(gpu::default_event_capacity);
+  gpu::Q3Work w3{};
+  gpu::Q4Work w4{};
+  unsigned long long edges = 0, q3_edges = 0, q4_edges = 0, records3 = 0, records4 = 0;
+  unsigned long long certificate_deferred = 0, no_lanes = 0, q3_asked = 0, q4_asked = 0, lanes_deferred = 0;
+  for (std::size_t j = 0; j < certified.survivors.size(); ++j) {
+    // Excluded edges are counted: in the chain a deferred certificate or
+    // lanes call falls back to the engine itself (both lanes).
+    if (certified.certificates.deferred[j] != 0) {
+      ++certificate_deferred;
+      continue;
+    }
+    const auto lanes = static_cast<gpu::u8>(certified.certificates.masks[j] & (kmax >= 3 ? 6U : 2U));
+    if (lanes == 0) {
+      ++no_lanes;
+      continue;
+    }
+    q3_asked += (lanes & 2U) != 0;
+    q4_asked += (lanes & 4U) != 0;
+    gpu::u32 count = 0;
+    gpu::EdgeQ3Work l3{};
+    gpu::Q4Work l4{};
+    const auto& e = certified.survivors[j];
+    const auto status =
+        gpu::edge_lanes(gpu::HostGroup{}, view, e.a_rank, e.b_rank, lanes, kmax, slab.view, q4b.view, count, l3, l4);
+    if (status == gpu::CertificateStatus::deferred) {
+      ++lanes_deferred;
+      continue;
+    }
+    if (status != gpu::CertificateStatus::decided) return fail("compare.fault");
+    std::vector<gen::Q34LaneRecord> mine3, mine4;
+    for (gpu::u32 r = 0; r < count; ++r)
+      (slab.records[r].arity == 3 ? mine3 : mine4).push_back(record_of(slab.records[r], 0));
+    if ((lanes & 2U) != 0) {
+      if (!same_records(mine3, gen::engine_q3_records(index, kmax, options, order[e.a_rank], order[e.b_rank])))
+        return fail("compare.q3 edge " + std::to_string(j));
+      ++q3_edges;
+    }
+    if ((lanes & 4U) != 0) {
+      if (!same_records(mine4, gen::engine_q4_records(index, kmax, options, order[e.a_rank], order[e.b_rank])))
+        return fail("compare.q4 edge " + std::to_string(j));
+      ++q4_edges;
+    }
+    ++edges;
+    records3 += mine3.size();
+    records4 += mine4.size();
+    gpu::add_q3_edge(w3, l3);
+    gpu::add_q4(w4, l4);
+  }
+  const bool all = certificate_deferred == 0 && lanes_deferred == 0;
+  std::printf("lanes_compare K=%u survivors=%zu certificate_deferred=%llu no_lanes=%llu q3_asked=%llu "
+              "q4_asked=%llu lanes_deferred=%llu edges=%llu q3_edges=%llu q4_edges=%llu q3_records=%llu "
+              "q4_seeds=%llu q4_records=%llu all_asked_compared=%d equal=1\n",
+              kmax, certified.survivors.size(), certificate_deferred, no_lanes, q3_asked, q4_asked,
+              lanes_deferred, edges, q3_edges, q4_edges, records3, w4.seeds, records4, all ? 1 : 0);
+  std::printf("q4_ledger seeds=%llu certified=%llu certified_chunk1=%llu survivors=%llu pass_chunks=%llu "
+              "buffered_events=%llu max_buffered=%llu live_buckets=%llu groups=%llu compare_steps=%llu "
+              "depth_rejected_groups=%llu groups_without_valid=%llu emitted=%llu multi_emission_seeds=%llu "
+              "max_emissions_per_seed=%llu max_group=%llu foreign_candidates=%llu\n",
+              w4.seeds, w4.certified, w4.certified_chunk1, w4.survivors, w4.pass_chunks, w4.buffered_events,
+              w4.max_buffered, w4.live_buckets, w4.groups, w4.compare_steps, w4.depth_rejected_groups,
+              w4.groups_without_valid, w4.emitted, w4.multi_emission_seeds, w4.max_emissions_per_seed, w4.max_group,
+              w4.foreign_candidates);
+  if (records3 < floors.q3_records || w4.seeds < floors.q4_seeds || records4 < floors.q4_records ||
+      (floors.all_asked && !all))
+    return 3;
+  return 0;
+}
+
+int file_stats(const std::string& path, unsigned kmax, std::size_t workers, bool compare,
+               const CompareFloors& floors) {
   std::ifstream in(path, std::ios::binary);
   std::vector<char> bytes((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
   if (!in.eof() && !in.good()) return 2;
@@ -290,6 +380,7 @@ int file_stats(const std::string& path, unsigned kmax, std::size_t workers) {
   }
   const auto index = gen::make_q2_cloud_index(gen::prepare_cloud(points));
   const auto certified = certified_survivors(index, kmax, workers);
+  if (compare) return file_compare(index, certified, kmax, floors);
   const Flat flat(*index);
   const auto view = flat.view();
   Slab slab(gpu::default_lanes_capacity, gpu::default_record_capacity);
@@ -335,6 +426,12 @@ int main(int argc, char** argv) {
   std::size_t n = 2000, workers = 4;
   std::vector<unsigned> ks{2, 3, 5, 10};
   std::string file;
+  bool compare = false;
+  CompareFloors floors;
+  const auto floor_of = [](std::string_view text, unsigned long long& out) {
+    const auto [end, error] = std::from_chars(text.data(), text.data() + text.size(), out);
+    return error == std::errc{} && end == text.data() + text.size();
+  };
   for (int i = 1; i < argc; ++i) {
     const std::string_view arg(argv[i]);
     if (arg.starts_with("--n=")) {
@@ -350,6 +447,16 @@ int main(int argc, char** argv) {
       if (ks.empty()) return 2;
     } else if (arg.starts_with("--file=")) {
       file = std::string(arg.substr(7));
+    } else if (arg == "--compare") {
+      compare = true;
+    } else if (arg.starts_with("--min-q3-records=")) {
+      if (!floor_of(arg.substr(17), floors.q3_records)) return 2;
+    } else if (arg.starts_with("--min-q4-seeds=")) {
+      if (!floor_of(arg.substr(15), floors.q4_seeds)) return 2;
+    } else if (arg.starts_with("--min-q4-records=")) {
+      if (!floor_of(arg.substr(17), floors.q4_records)) return 2;
+    } else if (arg == "--all-asked") {
+      floors.all_asked = true;
     } else {
       return 2;
     }
@@ -358,9 +465,11 @@ int main(int argc, char** argv) {
     std::fprintf(stderr, "usage: mhgp9_gpu_lanes_port_gate [--n=2000] [--k=2,3,5,10]\n");
     return 2;
   }
+  if (!compare && (floors.q3_records != 0 || floors.q4_seeds != 0 || floors.q4_records != 0 || floors.all_asked))
+    return 2;
   if (!file.empty()) {
     if (ks.size() != 1) return 2;
-    return file_stats(file, ks[0], workers);
+    return file_stats(file, ks[0], workers, compare, floors);
   }
   unsigned long long edges = 0, q3_only = 0, rejections = 0, emitted = 0, wide_shells = 0, deferred = 0,
                      mutants = 0, guards = 0, judged = 0, faults = 0, q4_judged = 0, q4_deferred = 0;
@@ -746,6 +855,39 @@ int main(int argc, char** argv) {
     gpu::add_q4(q4_total, w4);
     b_fixture = count;
   }
+  // A root exactly on an INTERIOR bound of the grid (L6): a = (0,2,2),
+  // b = (3,2,2), x = (1,0,2), y = (1,2,0) give mubar = 12, the grid
+  // -12,-9,...,12 and the root of y at mu = 6 = g_6, the high end of bucket
+  // 5 and the low end of bucket 6. Found by an exact search; the candidate
+  // is foreign in bucket 5 and decided in bucket 6: one tetrahedron at K3,
+  // not two (examined twice) and not zero (examined nowhere).
+  unsigned long long bound_fixture = 0;
+  {
+    const std::vector<gen::Point3> points{{0, 2, 2}, {3, 2, 2}, {1, 0, 2}, {1, 2, 0}};
+    const auto index = gen::make_q2_cloud_index(gen::prepare_cloud(points));
+    const Flat flat(*index);
+    const auto order = index->spatial_order();
+    gpu::u32 ra = 0, rb = 0;
+    for (std::size_t r = 0; r < order.size(); ++r) {
+      if (order[r] == 0) ra = static_cast<gpu::u32>(r);
+      if (order[r] == 1) rb = static_cast<gpu::u32>(r);
+    }
+    Slab slab(gpu::default_lanes_capacity, gpu::default_record_capacity);
+    Q4Buffers q4b(gpu::default_event_capacity);
+    gpu::u32 count = 0;
+    gpu::EdgeQ3Work l3{};
+    gpu::Q4Work w4{};
+    if (gpu::edge_lanes(gpu::HostGroup{}, flat.view(), ra, rb, 4, 3, slab.view, q4b.view, count, l3, w4) !=
+        gpu::CertificateStatus::decided)
+      return fail("bound_fixture.status");
+    std::vector<gen::Q34LaneRecord> mine;
+    for (gpu::u32 r = 0; r < count; ++r) mine.push_back(record_of(slab.records[r], 0));
+    if (count != 1 || w4.foreign_candidates == 0 ||
+        !same_records(mine, gen::engine_q4_records(index, 3, options, 0, 1)))
+      return fail("bound_fixture.one_tetrahedron");
+    gpu::add_q4(q4_total, w4);
+    bound_fixture = count;
+  }
   // The auditor's compact arena fixture: 45 clusters, each a = (-1000,0,0),
   // b = (1000,0,0) and the 108 integer points (0,u,v) with u^2+v^2 = 1105^2.
   // Every triangle abx is acute with ab longest and every other point of the
@@ -800,17 +942,17 @@ int main(int argc, char** argv) {
   std::printf("lanes_port_gate n=%zu edges=%llu q3_only=%llu depth_rejections=%llu emitted=%llu wide_shells=%llu "
               "deferred=%llu judged=%llu mutants=%llu guards=%llu faults=%llu arena_deferred=%llu q4_edges=%llu "
               "q4_seeds=%llu q4_survivors=%llu q4_groups=%llu q4_emitted=%llu q4_multi=%llu q4_without_valid=%llu "
-              "q4_max_group=%llu q4_judged=%llu q4_deferred=%llu b_fixture=%llu\n",
+              "q4_max_group=%llu q4_judged=%llu q4_deferred=%llu b_fixture=%llu bound_fixture=%llu\n",
               n, edges, q3_only, rejections, emitted, wide_shells, deferred, judged, mutants, guards, faults,
               arena_deferred, q4_total.edges, q4_total.seeds, q4_total.survivors, q4_total.groups, q4_total.emitted,
               q4_total.multi_emission_seeds, q4_total.groups_without_valid, q4_total.max_group, q4_judged,
-              q4_deferred, b_fixture);
+              q4_deferred, b_fixture, bound_fixture);
   if (edges == 0 || q3_only == 0 || rejections == 0 || emitted == 0 || wide_shells == 0 || deferred == 0 ||
       judged == 0 || guards == 0 || mutants == 0 || faults == 0 || arena_deferred != 1 || q4_total.edges == 0 ||
       q4_total.certified_chunk1 == 0 || q4_total.survivors == 0 || q4_total.emitted == 0 ||
       q4_total.multi_emission_seeds == 0 || q4_total.groups_without_valid == 0 ||
       q4_total.depth_rejected_groups == 0 || q4_total.max_group < 3 || q4_judged == 0 || q4_deferred == 0 ||
-      b_fixture != 2)
+      b_fixture != 2 || bound_fixture != 1)
     return 3;
   return 0;
 }
