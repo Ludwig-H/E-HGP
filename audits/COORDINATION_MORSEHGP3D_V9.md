@@ -5030,7 +5030,7 @@ avec le même plan que R16.
 - **voies**, étape 2 (réalisée par un agent de la session, relue) : tâches
   (arête, plage de graines) en trois étapes P, T et C, placement canonique,
   jumeau hôte identique octet pour octet au chemin à une tâche par arête.
-  La plus lourde tâche est 11 à 12 fois plus légère ;  est égal
+  La plus lourde tâche est 11 à 12 fois plus légère ; `--compare` est égal
   sur 08/000000 à K5 et K10 ; sonde et protocole v23.
 
 Arbre intégré : 205/205 portes, autotests 28/28, épingles reproduites à K5
