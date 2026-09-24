@@ -385,7 +385,7 @@ mhgp9_gate(mhgp9_gpu_witness_filter_port_scale8000 0 mhgp9_gpu_witness_filter_po
 mhgp9_gate(mhgp9_gpu_witness_filter_port_bad_argument 2 mhgp9_gpu_witness_filter_port_gate ARGS --n=abc
            LABELS "gate;gpu" TIMEOUT 60)
 mhgp9_product_executable(mhgp9_gpu_certificate_port_gate tests/gpu/certificate_port_gate.cpp)
-target_link_libraries(mhgp9_gpu_certificate_port_gate PRIVATE mhgp9_gen)
+target_link_libraries(mhgp9_gpu_certificate_port_gate PRIVATE mhgp9_gen mhgp9_gpu)
 target_include_directories(mhgp9_gpu_certificate_port_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
 mhgp9_gate(mhgp9_gpu_certificate_port 0 mhgp9_gpu_certificate_port_gate ARGS --n=2000
            EXPECT_PREFIX "gpu_certificate_port_gate n=2000" LABELS "gate;gpu;oracle" TIMEOUT 900)
@@ -393,6 +393,50 @@ mhgp9_gate(mhgp9_gpu_certificate_port_scale8000 0 mhgp9_gpu_certificate_port_gat
            EXPECT_PREFIX "gpu_certificate_port_gate n=8000" LABELS "scale8000;gpu;oracle" TIMEOUT 2400)
 mhgp9_gate(mhgp9_gpu_certificate_port_bad_argument 2 mhgp9_gpu_certificate_port_gate ARGS --k=11
            LABELS "gate;gpu" TIMEOUT 60)
+# Mode fichier (24 septembre 2026) : --workers, --min-edges et --device
+# seulement avec --file (2) ; un seul K (2) ; sans CUDA, --device est un
+# refus explicite (2), jamais un vert par vacuite. La trame epinglee
+# 08/000000 (v8, sol retire) a K5 : chaque survivante, les deux parcours,
+# les deux chargements et le prouveur produit (label lidar, hors campagne
+# gate : environ 3 minutes sur 4 fils).
+mhgp9_gate(mhgp9_gpu_certificate_port_device_without_file 2 mhgp9_gpu_certificate_port_gate ARGS --device
+           LABELS "gate;gpu" TIMEOUT 60)
+mhgp9_gate(mhgp9_gpu_certificate_port_file_two_k 2 mhgp9_gpu_certificate_port_gate
+           ARGS --file=${CMAKE_CURRENT_SOURCE_DIR}/tests/gpu/fixtures/bound_tetra.u32le --k=3,5
+           LABELS "gate;gpu" TIMEOUT 60)
+if(NOT MHGP9_ENABLE_CUDA)
+  mhgp9_gate(mhgp9_gpu_certificate_port_device_absent 2 mhgp9_gpu_certificate_port_gate
+             ARGS --file=${CMAKE_CURRENT_SOURCE_DIR}/tests/gpu/fixtures/bound_tetra.u32le --k=3 --workers=1 --device
+             EXPECT_PREFIX "certificate_device_compare absent" LABELS "gate;gpu" TIMEOUT 60)
+endif()
+mhgp9_gate(mhgp9_gpu_certificate_port_lidar_k5 0 mhgp9_gpu_certificate_port_gate
+           ARGS --file=${CMAKE_CURRENT_SOURCE_DIR}/../morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le
+                --k=5 --workers=4 --min-edges=2000000
+           EXPECT_PREFIX "certificate_port_file K=5 survivors=2043612 decided=2043612 deferred=0"
+           LABELS "lidar;gpu;oracle" TIMEOUT 3600)
+# Parcours et chargement par blocs du certificat (24 septembre 2026,
+# build_cover_chunked, load_forms_chunked) : quatre mutants compiles du
+# produit, chacun tue (code 1) par la porte de port : successeur hors bloc
+# pris pour le debut du bloc suivant et fils gauche de la derniere voie
+# saute (walk., parcours par blocs contre build_cover) ; fenetre de
+# chargement qui recommence sa premiere plage (load., formes contre
+# load_forms) ; norme partagee comparee au facteur q3 pour la voie q4
+# (port., prouveur produit).
+foreach(mutant IN ITEMS CHUNK_FAR_ESCAPE CHUNK_SPLIT_BOUNDARY LOAD_WINDOW_RESTART SHARED_NORM_FACTOR)
+  string(TOLOWER ${mutant} lower)
+  mhgp9_product_executable(mhgp9_gpu_certificate_${lower}_mutant_gate tests/gpu/certificate_port_gate.cpp)
+  target_link_libraries(mhgp9_gpu_certificate_${lower}_mutant_gate PRIVATE mhgp9_gen mhgp9_gpu)
+  target_include_directories(mhgp9_gpu_certificate_${lower}_mutant_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+  target_compile_definitions(mhgp9_gpu_certificate_${lower}_mutant_gate PRIVATE MHGP9_CERTIFICATE_MUTANT_${mutant}=1)
+endforeach()
+mhgp9_gate(mhgp9_gpu_certificate_mutant_chunk_far_escape 1 mhgp9_gpu_certificate_chunk_far_escape_mutant_gate
+           ARGS --n=2000 --k=3 EXPECT_PREFIX "cause=walk." LABELS "gate;gpu;mutant" TIMEOUT 600)
+mhgp9_gate(mhgp9_gpu_certificate_mutant_chunk_split_boundary 1 mhgp9_gpu_certificate_chunk_split_boundary_mutant_gate
+           ARGS --n=2000 --k=3 EXPECT_PREFIX "cause=walk." LABELS "gate;gpu;mutant" TIMEOUT 600)
+mhgp9_gate(mhgp9_gpu_certificate_mutant_load_window_restart 1 mhgp9_gpu_certificate_load_window_restart_mutant_gate
+           ARGS --n=2000 --k=3 EXPECT_PREFIX "cause=load." LABELS "gate;gpu;mutant" TIMEOUT 600)
+mhgp9_gate(mhgp9_gpu_certificate_mutant_shared_norm_factor 1 mhgp9_gpu_certificate_shared_norm_factor_mutant_gate
+           ARGS --n=2000 --k=3 EXPECT_PREFIX "cause=port." LABELS "gate;gpu;mutant" TIMEOUT 600)
 # S4a : port portable de la voie q3 sans atlas (gpu/lanes.hpp, emulation
 # hote), juge arete par arete contre la voie q3 du moteur, executeur par lots,
 # capacites reduites, mutants de sortie et garde d'entree.

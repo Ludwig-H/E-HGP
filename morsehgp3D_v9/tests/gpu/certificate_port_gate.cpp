@@ -21,18 +21,48 @@
 //   - garde d'entree du GPU (validate_certificate_input, seule garantie de
 //     terminaison et de bornes du noyau) : l'entree reelle est acceptee,
 //     chaque champ forge un a un est refuse (liens d'echappement cycliques ou
-//     incoherents, rangs, masques, capacite).
+//     incoherents, rangs, masques, capacite) ;
+//   - parcours par blocs (24 septembre 2026, build_cover_chunked, celui de
+//     l'appareil et du jumeau) : sur chaque arete, pour la boule du coeur ET
+//     celle du cover, a pleine capacite et a capacite 64, meme reponse, memes
+//     plages (octet pour octet), memes sites et meme travail de parcours que
+//     build_cover (un noeud par pas, le temoin) ; certify_edge des deux
+//     parcours rend le meme statut, le meme masque et le meme travail.
+//     Planchers : blocs, blocs a plusieurs noeuds visites, et chaque sortie
+//     d'un bloc (fils gauche et echappement dans le bloc, fils gauche au-dela
+//     de la derniere voie, echappement au-dela du bloc, fin de l'index),
+//     parcours mis en attente ; mutants du comparateur (travail, plage).
+//     Trois mutants compiles du produit (MHGP9_CERTIFICATE_MUTANT_*) sont
+//     tues par cette porte (code 1, `cause=`).
 //
 //   mhgp9_gpu_certificate_port_gate [--n=2000] [--k=2,3,5,10]
+//   mhgp9_gpu_certificate_port_gate --file=nuage.u32le --k=5 [--workers=4]
+//     [--min-edges=N] [--device]
+//     (toutes les survivantes d'un nuage fichier : les deux parcours, les
+//     deux chargements et le prouveur produit, arete par arete ; publie le
+//     travail en passes de groupe, avant (visites, une passe par plage) et
+//     apres (blocs, fenetres de 32 sites) ; code 3 sous le plancher d'aretes
+//     ou d'une classe de sortie. Avec --device (session G4), l'appel de
+//     l'appareil (gpu::run_certificate_batch) compare au jumeau, octet pour
+//     octet : statuts, masques et travail somme ; sans appareil, refus
+//     explicite (code 2, ligne `certificate_device_compare absent`).)
 //
 // Code 0 conforme, 1 desaccord ou mutant survivant (`cause=`), 2 argument,
 // 3 plancher.
 #include <algorithm>
+#include <atomic>
 #include <charconv>
 #include <cstdint>
 #include <cstdio>
+#include <cstring>
+#include <exception>
+#include <fstream>
+#include <iterator>
+#include <mutex>
+#include <stdexcept>
 #include <string>
 #include <string_view>
+#include <thread>
 #include <vector>
 
 #include "../../src/gen/lanes/edge_cover.hpp"
@@ -95,6 +125,14 @@ bool same_dead(const gpu::DeadWork& a, const gpu::DeadWork& b) {
          a.outside_cells == b.outside_cells && a.deep_cells == b.deep_cells && a.failed_cells == b.failed_cells &&
          a.uniform_tests == b.uniform_tests && a.point_tests == b.point_tests && a.q3_proved == b.q3_proved &&
          a.q3_open == b.q3_open && a.q4_proved == b.q4_proved && a.q4_open == b.q4_open;
+}
+
+bool same_edge_cover(const gpu::EdgeCoverWork& a, const gpu::EdgeCoverWork& b) {
+  return a.node_visits == b.node_visits && a.bound_tests == b.bound_tests && a.point_tests == b.point_tests &&
+         a.admitted_nodes == b.admitted_nodes && a.rejected_nodes == b.rejected_nodes &&
+         a.split_nodes == b.split_nodes && a.admitted_sites == b.admitted_sites &&
+         a.rejected_sites == b.rejected_sites && a.retained_ranges == b.retained_ranges &&
+         a.merged_ranges == b.merged_ranges;
 }
 
 bool same_work(const gpu::CertificateWork& a, const gpu::CertificateWork& b) {
@@ -166,6 +204,145 @@ struct Slab {
   }
 };
 
+// Chunked walk statistics (floors, not a judge): chunks, visits, and how
+// each chunk ends or goes on.
+struct WalkStats {
+  unsigned long long walks = 0, deferred = 0, chunks = 0, visits = 0, multi = 0, forms = 0, load_passes = 0;
+  unsigned long long replay_steps = 0;  // replay iterations: a run of split nodes, or one other node
+  unsigned long long in_splits = 0, in_escapes = 0, exit_splits = 0, exit_escapes = 0, exit_ends = 0;
+  void add(const WalkStats& o) {
+    walks += o.walks;
+    deferred += o.deferred;
+    chunks += o.chunks;
+    visits += o.visits;
+    multi += o.multi;
+    forms += o.forms;
+    load_passes += o.load_passes;
+    replay_steps += o.replay_steps;
+    in_splits += o.in_splits;
+    in_escapes += o.in_escapes;
+    exit_splits += o.exit_splits;
+    exit_escapes += o.exit_escapes;
+    exit_ends += o.exit_ends;
+  }
+  [[nodiscard]] bool floors() const {
+    return walks > 0 && deferred > 0 && chunks > 0 && visits > chunks && multi > 0 && forms > 0 && in_splits > 0 &&
+           in_escapes > 0 && exit_splits > 0 && exit_escapes > 0 && exit_ends > 0;
+  }
+};
+
+// The host group of the twin, counting the chunks of build_cover_chunked and
+// classifying their ends by an independent chase of the ballot planes, and
+// counting the group passes of the form loads (for_each: 32 sites a pass).
+struct ChunkCountingGroup : gpu::HostGroup {
+  WalkStats* stats;
+  template <class F>
+  void for_each(gpu::u32 count, F f) const {
+    stats->load_passes += (count + 31) / 32;
+    gpu::HostGroup::for_each(count, f);
+  }
+  template <unsigned N, class Code>
+  void ballot_bits(gpu::u32 base, gpu::u32 count, Code code, gpu::u32 (&planes)[N]) const {
+    gpu::HostGroup::ballot_bits(base, count, code, planes);
+    ++stats->chunks;
+    gpu::u32 lane = 0, visited = 1;
+    bool run = false;  // inside a run of split nodes
+    for (;; ++visited) {
+      if (((planes[0] >> lane) & 1U) != 0) {
+        if (!run) ++stats->replay_steps;
+        run = true;
+        if (lane == 31) {
+          ++stats->exit_splits;
+          break;
+        }
+        ++stats->in_splits;
+        ++lane;
+        continue;
+      }
+      run = false;
+      ++stats->replay_steps;
+      gpu::u32 offset = 0;
+      for (unsigned k = 0; k < 5; ++k) offset |= ((planes[2 + k] >> lane) & 1U) << k;
+      if (offset == gpu::chunk_exit) {
+        ++stats->exit_escapes;
+        break;
+      }
+      if (base + offset + 1 >= count) {
+        ++stats->exit_ends;
+        break;
+      }
+      ++stats->in_escapes;
+      lane = offset + 1;
+    }
+    if (visited > 1) ++stats->multi;
+  }
+};
+
+bool same_prover(const gpu::Prover& a, const gpu::Prover& b) {
+  for (int i = 0; i < 3; ++i)
+    if (a.a_basis[i] != b.a_basis[i] || a.b_basis[i] != b.b_basis[i]) return false;
+  return a.diameter_squared == b.diameter_squared && a.disk_bound == b.disk_bound && a.n == b.n;
+}
+
+// The chunked walk against build_cover (one node per step) on one ball of
+// edge ab: same answer, same work (also when the slab overflows), and when
+// decided the same range count, sites and ranges, byte for byte; then the
+// chunked form load against load_forms (one pass per range) on those
+// ranges: same prover, same work, and the same three form arrays, byte for
+// byte. Empty when equal.
+std::string compare_walks(const gpu::CertificateIndex& view, const std::int32_t* pa, const std::int32_t* pb,
+                          bool diametral, const Slab& chunked, const Slab& sequential, WalkStats& stats,
+                          unsigned long long* mutants) {
+  const auto ball = gpu::edge_ball(pa, pb, diametral);
+  gpu::u32 rc1 = 0, s1 = 0, rc2 = 0, s2 = 0;
+  gpu::EdgeCoverWork w1{}, w2{};
+  const bool ok1 = gpu::build_cover_chunked(ChunkCountingGroup{{}, &stats}, view, ball, chunked.view, rc1, s1, w1);
+  const bool ok2 = gpu::build_cover(gpu::HostGroup{}, view, ball, sequential.view, rc2, s2, w2);
+  ++stats.walks;
+  if (ok1 != ok2) return "walk.deferral";
+  if (!same_edge_cover(w1, w2)) return "walk.work";
+  if (!ok1) {
+    ++stats.deferred;
+    return {};
+  }
+  stats.visits += w1.node_visits;
+  if (rc1 != rc2 || s1 != s2) return "walk.shape";
+  if (!std::equal(chunked.ranges.begin(), chunked.ranges.begin() + 2 * std::size_t{rc1}, sequential.ranges.begin()))
+    return "walk.ranges";
+  if (s1 < 2) return "walk.endpoints";
+  gpu::EdgeDeadWork d1{}, d2{};
+  const auto p1 = gpu::load_forms_chunked(gpu::HostGroup{}, view, pa, pb, chunked.view, rc1, s1, d1);
+  const auto p2 = gpu::load_forms(gpu::HostGroup{}, view, pa, pb, sequential.view, rc2, s2, d2);
+  if (!same_prover(p1, p2) || d1.loads != d2.loads || d1.form_sites != d2.form_sites) return "load.prover";
+  const auto same_forms = [&](const std::vector<gpu::i64>& x, const std::vector<gpu::i64>& y) {
+    return std::equal(x.begin(), x.begin() + s1, y.begin());
+  };
+  if (!same_forms(chunked.fc, sequential.fc) || !same_forms(chunked.fx, sequential.fx) ||
+      !same_forms(chunked.fy, sequential.fy))
+    return "load.forms";
+  stats.forms += s1;
+  if (mutants != nullptr) {
+    // Comparator mutant: one form off by one.
+    auto f = chunked.fy;
+    ++f[s1 - 1];
+    if (same_forms(f, sequential.fy)) return "mutant.load_form_survived";
+    ++*mutants;
+    // Comparator mutants: one counter and one range bound off by one.
+    auto w = w1;
+    ++w.merged_ranges;
+    if (same_edge_cover(w, w2)) return "mutant.walk_work_survived";
+    ++*mutants;
+    if (rc1 != 0) {
+      auto r = chunked.ranges;
+      ++r[2 * std::size_t{rc1} - 1];
+      if (std::equal(r.begin(), r.begin() + 2 * std::size_t{rc1}, sequential.ranges.begin()))
+        return "mutant.walk_range_survived";
+      ++*mutants;
+    }
+  }
+  return {};
+}
+
 std::vector<unsigned> parse_list(std::string_view text) {
   std::vector<unsigned> out;
   while (!text.empty()) {
@@ -183,29 +360,272 @@ std::vector<unsigned> parse_list(std::string_view text) {
 
 }  // namespace
 
+template <class T>
+bool parse_number(std::string_view digits, T& value) {
+  const auto [end, error] = std::from_chars(digits.data(), digits.data() + digits.size(), value);
+  return !digits.empty() && error == std::errc{} && end == digits.data() + digits.size();
+}
+
+// Every survivor of a file cloud (real batch path, CPU filter): the chunked
+// walk against build_cover on both balls, certify_edge with both walks, and
+// the product prover, edge by edge; the call's own walks are counted (visits
+// = warp steps of the sequential walk, chunks = decision passes of the
+// chunked walk). Deterministic totals whatever the worker count.
+int file_mode(const std::string& path, unsigned kmax, std::size_t workers, unsigned long long min_edges,
+              bool device) {
+  std::ifstream in(path, std::ios::binary);
+  std::vector<char> bytes((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+  if (bytes.empty() || bytes.size() % 12 != 0) return 2;
+  std::vector<gen::Point3> points(bytes.size() / 12);
+  for (std::size_t i = 0; i < points.size(); ++i) {
+    std::uint32_t c[3];
+    std::memcpy(c, bytes.data() + 12 * i, 12);
+    points[i] = gen::Point3{static_cast<std::int32_t>(c[0]), static_cast<std::int32_t>(c[1]),
+                            static_cast<std::int32_t>(c[2])};
+  }
+  gen::Q2CensusIndexPtr index;
+  try {
+    index = gen::make_q2_cloud_index(gen::prepare_cloud(points));
+  } catch (const std::invalid_argument& e) {
+    std::fprintf(stderr, "refused cloud: %s\n", e.what());
+    return 2;
+  }
+  std::vector<gen::Q34SurvivingEdge> survivors;
+  const gen::Q34BatchFilter capture = [&](const gen::Q2CensusIndex& ix, unsigned k,
+                                          std::span<const gen::WspdRectangle> rectangles) {
+    auto batch = gen::run_q34_filter_batch_cpu(ix, k, rectangles, workers);
+    survivors = batch.survivors;
+    return batch;
+  };
+  static_cast<void>(gen::run_wspd_q34_batched(index, kmax, 8, q34_options(), workers,
+                                              [](std::size_t, const gen::Q34SeedCandidate&) {}, 16, capture,
+                                              nullptr));
+  const auto nodes = gpu::flatten_nodes(*index);
+  const auto escapes = gpu::flatten_escapes(*index);
+  std::vector<std::int32_t> rank_points;
+  for (const auto& p : index->spatial_points()) {
+    rank_points.push_back(p.x);
+    rank_points.push_back(p.y);
+    rank_points.push_back(p.z);
+  }
+  const gpu::CertificateIndex view{nodes.data(), escapes.data(), static_cast<gpu::u32>(nodes.size()),
+                                   rank_points.data()};
+  const auto order = index->spatial_order();
+  const gpu::u32 capacity = gpu::default_certificate_capacity;
+  struct Part {
+    WalkStats call, walks, witness_call;
+    gpu::CertificateWork work{};
+    unsigned long long decided = 0, deferred = 0, core_closed = 0;
+    std::size_t failed_at = ~std::size_t{0};
+    std::string cause;
+    std::exception_ptr error;
+  };
+  std::vector<Part> parts(workers);
+  std::vector<gpu::u8> twin_status(survivors.size(), 0xff), twin_mask(survivors.size(), 0);
+  std::atomic<std::size_t> next{0};
+  constexpr std::size_t grain = 4096;
+  const auto run = [&](Part& part) {
+    gen::Q34DeadLaneProver prover;
+    Slab full(capacity), witness(capacity);
+    for (;;) {
+      const std::size_t block = next.fetch_add(1);
+      if (block * grain >= survivors.size()) return;
+      for (std::size_t j = block * grain; j < std::min(survivors.size(), (block + 1) * grain); ++j) {
+        const auto& edge = survivors[j];
+        const auto fault = [&](const std::string& cause) {
+          if (j < part.failed_at) {
+            part.failed_at = j;
+            part.cause = cause + " K" + std::to_string(kmax) + " survivor " + std::to_string(j);
+          }
+        };
+        const std::int32_t* pa = rank_points.data() + 3 * std::size_t{edge.a_rank};
+        const std::int32_t* pb = rank_points.data() + 3 * std::size_t{edge.b_rank};
+        std::string cause;
+        for (const bool diametral : {true, false})
+          if (cause.empty()) cause = compare_walks(view, pa, pb, diametral, full, witness, part.walks, nullptr);
+        if (!cause.empty()) {
+          fault(cause);
+          return;
+        }
+        gpu::CertificateWork got{}, seq{};
+        const auto result = gpu::certify_edge(ChunkCountingGroup{{}, &part.call}, view, edge.a_rank, edge.b_rank,
+                                              edge.mask, kmax, true, full.view, got);
+        const auto one = gpu::certify_edge<gpu::CertificateWalk::sequential>(
+            ChunkCountingGroup{{}, &part.witness_call}, view, edge.a_rank, edge.b_rank, edge.mask, kmax, true,
+            witness.view, seq);
+        if (one.status != result.status || one.mask != result.mask || !same_work(seq, got)) {
+          fault("walk.certificate");
+          return;
+        }
+        twin_status[j] = static_cast<gpu::u8>(result.status);
+        twin_mask[j] = result.status == gpu::CertificateStatus::decided ? result.mask : edge.mask;
+        const auto expected = product(index, prover, order[edge.a_rank], order[edge.b_rank], edge.mask, kmax);
+        if (result.status == gpu::CertificateStatus::deferred) {
+          if (expected.core_sites <= capacity && expected.cover_sites <= capacity) {
+            fault("port.deferral");
+            return;
+          }
+          ++part.deferred;
+          continue;
+        }
+        if (result.status != gpu::CertificateStatus::decided) {
+          fault("port.status");
+          return;
+        }
+        if (result.mask != expected.mask) {
+          fault("port.mask");
+          return;
+        }
+        if (!same_work(got, expected.work)) {
+          fault("port.work");
+          return;
+        }
+        ++part.decided;
+        part.core_closed += got.core_closed_edges;
+        gpu::add_certificate(part.work, got);
+      }
+    }
+  };
+  {
+    std::vector<std::thread> threads;
+    for (std::size_t t = 0; t < workers; ++t)
+      threads.emplace_back([&, t] {
+        try {
+          run(parts[t]);
+        } catch (...) {
+          parts[t].error = std::current_exception();
+        }
+      });
+    for (auto& t : threads) t.join();
+    for (const auto& part : parts)
+      if (part.error) std::rethrow_exception(part.error);
+  }
+  Part total;
+  for (const auto& part : parts) {
+    total.call.add(part.call);
+    total.walks.add(part.walks);
+    total.witness_call.add(part.witness_call);
+    gpu::add_certificate(total.work, part.work);
+    total.decided += part.decided;
+    total.deferred += part.deferred;
+    total.core_closed += part.core_closed;
+    if (part.failed_at < total.failed_at) {
+      total.failed_at = part.failed_at;
+      total.cause = part.cause;
+    }
+  }
+  if (!total.cause.empty()) return fail(total.cause);
+  if (device) {
+    // The device call on every survivor against the twin, byte for byte:
+    // per-edge statuses and masks (the input mask when deferred) and the
+    // work summed over the decided edges.
+    std::vector<gpu::u32> ea, eb;
+    std::vector<gpu::u8> em;
+    for (const auto& e : survivors) {
+      ea.push_back(e.a_rank);
+      eb.push_back(e.b_rank);
+      em.push_back(e.mask);
+    }
+    gpu::CertificateInput in;
+    in.index.nodes = nodes.data();
+    in.index.node_count = nodes.size();
+    in.index.rank_points = rank_points.data();
+    in.index.rank_count = rank_points.size() / 3;
+    in.index.kmax = kmax;
+    in.escapes = escapes.data();
+    in.edge_a = ea.data();
+    in.edge_b = eb.data();
+    in.edge_mask = em.data();
+    in.edge_count = ea.size();
+    in.dead_core = true;
+    const auto out = gpu::run_certificate_batch(in);
+    if (out.error_kind == gpu::BatchError::no_device) {
+      std::printf("certificate_device_compare absent error=%s\n", out.error.c_str());
+      return 2;
+    }
+    if (!out.error.empty()) return fail("device.error " + out.error);
+    if (out.status.size() != survivors.size() || out.masks.size() != survivors.size())
+      return fail("device.shape");
+    for (std::size_t j = 0; j < survivors.size(); ++j)
+      if (out.status[j] != twin_status[j] || out.masks[j] != twin_mask[j])
+        return fail("device.edge survivor " + std::to_string(j));
+    if (!same_work(out.work, total.work)) return fail("device.work");
+    std::printf("certificate_device_compare K=%u device=%s edges=%zu deferred=%llu identical=1 warps=%u "
+                "kernel_ms=%.3f upload_ms=%.3f download_ms=%.3f total_ms=%.3f\n",
+                kmax, out.device.c_str(), survivors.size(), static_cast<unsigned long long>(out.deferred),
+                out.warps, out.kernel_ms, out.upload_ms, out.download_ms, out.total_ms);
+  }
+  const unsigned long long visits = total.work.core_cover.node_visits + total.work.cover.node_visits;
+  std::printf("certificate_port_file K=%u survivors=%zu decided=%llu deferred=%llu core_closed=%llu "
+              "call_visits=%llu call_chunks=%llu multi_chunks=%llu in_splits=%llu in_escapes=%llu "
+              "exit_splits=%llu exit_escapes=%llu exit_ends=%llu replay_steps=%llu load_passes_before=%llu "
+              "load_passes_after=%llu "
+              "compared_walks=%llu compared_visits=%llu compared_forms=%llu "
+              "core_sites=%llu cover_sites=%llu cells=%llu uniform_tests=%llu\n",
+              kmax, survivors.size(), total.decided, total.deferred, total.core_closed, visits, total.call.chunks,
+              total.call.multi, total.call.in_splits, total.call.in_escapes, total.call.exit_splits,
+              total.call.exit_escapes, total.call.exit_ends, total.call.replay_steps, total.witness_call.load_passes,
+              total.call.load_passes,
+              total.walks.walks, total.walks.visits, total.walks.forms,
+              total.work.core_sites, total.work.cover_sites, total.work.dead_core.cells + total.work.dead.cells,
+              total.work.dead_core.uniform_tests + total.work.dead.uniform_tests);
+  const auto& c = total.call;
+  const bool floors = total.decided >= min_edges && total.decided > 0 && c.chunks > 0 && visits > c.chunks &&
+                      c.multi > 0 && c.in_splits > 0 && c.in_escapes > 0 && c.exit_splits > 0 &&
+                      c.exit_escapes > 0 && c.exit_ends > 0 && total.walks.walks == 2 * survivors.size() &&
+                      c.load_passes > 0 && c.load_passes <= total.witness_call.load_passes;
+  if (!floors) {
+    std::printf("cause=floor\n");
+    return 3;
+  }
+  return 0;
+}
+
 int main(int argc, char** argv) {
-  std::size_t n = 2000;
+  std::size_t n = 2000, workers = 4;
+  unsigned long long min_edges = 1;
+  std::string file;
+  bool k_given = false, file_options = false, device = false;
   std::vector<unsigned> ks{2, 3, 5, 10};
   for (int i = 1; i < argc; ++i) {
     const std::string_view arg(argv[i]);
     if (arg.starts_with("--n=")) {
-      const auto digits = arg.substr(4);
-      const auto [end, error] = std::from_chars(digits.data(), digits.data() + digits.size(), n);
-      if (digits.empty() || error != std::errc{} || end != digits.data() + digits.size()) return 2;
+      if (!parse_number(arg.substr(4), n)) return 2;
     } else if (arg.starts_with("--k=")) {
       ks = parse_list(arg.substr(4));
+      k_given = true;
       if (ks.empty()) return 2;
+    } else if (arg.starts_with("--file=")) {
+      file = std::string(arg.substr(7));
+      if (file.empty()) return 2;
+    } else if (arg.starts_with("--workers=")) {
+      if (!parse_number(arg.substr(10), workers) || workers == 0 || workers > 256) return 2;
+      file_options = true;
+    } else if (arg.starts_with("--min-edges=")) {
+      if (!parse_number(arg.substr(12), min_edges)) return 2;
+      file_options = true;
+    } else if (arg == "--device") {
+      device = true;
+      file_options = true;
     } else {
       return 2;
     }
   }
   if (n < 64 || n > 65536 || std::any_of(ks.begin(), ks.end(), [](unsigned k) { return k < 2 || k > 10; })) {
-    std::fprintf(stderr, "usage: mhgp9_gpu_certificate_port_gate [--n=2000] [--k=2,3,5,10]\n");
+    std::fprintf(stderr, "usage: mhgp9_gpu_certificate_port_gate [--n=2000] [--k=2,3,5,10]\n"
+                         "       mhgp9_gpu_certificate_port_gate --file=nuage.u32le --k=K [--workers=4] "
+                         "[--min-edges=N]\n");
     return 2;
   }
+  if (!file.empty()) {
+    if (!k_given || ks.size() != 1) return 2;
+    return file_mode(file, ks[0], workers, min_edges, device);
+  }
+  if (file_options) return 2;  // --workers, --min-edges and --device only with --file
   unsigned long long edges = 0, deferred = 0, core_closed = 0, cover_closed = 0, open = 0, mutants = 0,
                      coverless = 0, guards = 0;
   gpu::CertificateWork total{};
+  WalkStats walk;
   for (const std::string_view family : {"uniform", "terrain", "clusters"}) {
     const auto fixture = gen::bench::make_front_fixture(n, family, 3);
     const auto cloud = gen::prepare_cloud(fixture.points);
@@ -368,14 +788,33 @@ int main(int argc, char** argv) {
         }
       }
       gen::Q34DeadLaneProver prover;
-      Slab full(static_cast<gpu::u32>(n)), small(64);
+      Slab full(static_cast<gpu::u32>(n)), small(64), witness(static_cast<gpu::u32>(n)), witness_small(64);
       for (const auto& edge : survivors) {
         const auto a = order[edge.a_rank], b = order[edge.b_rank];
+        const std::string at = where + " edge " + std::to_string(a) + "-" + std::to_string(b);
+        // The chunked walk against build_cover, on both balls of the edge,
+        // at full and at reduced capacity.
+        {
+          const std::int32_t* pa = rank_points.data() + 3 * std::size_t{edge.a_rank};
+          const std::int32_t* pb = rank_points.data() + 3 * std::size_t{edge.b_rank};
+          for (const bool diametral : {true, false}) {
+            auto cause = compare_walks(view, pa, pb, diametral, full, witness, walk,
+                                       edges % 997 == 1 && diametral ? &mutants : nullptr);
+            if (cause.empty()) cause = compare_walks(view, pa, pb, diametral, small, witness_small, walk, nullptr);
+            if (!cause.empty()) return fail(cause + " " + at);
+          }
+        }
         const auto expected = product(index, prover, a, b, edge.mask, kmax);
         gpu::CertificateWork got{};
         const auto result = gpu::certify_edge(gpu::HostGroup{}, view, edge.a_rank, edge.b_rank, edge.mask, kmax,
                                               true, full.view, got);
-        const std::string at = where + " edge " + std::to_string(a) + "-" + std::to_string(b);
+        {
+          gpu::CertificateWork seq{};
+          const auto one = gpu::certify_edge<gpu::CertificateWalk::sequential>(
+              gpu::HostGroup{}, view, edge.a_rank, edge.b_rank, edge.mask, kmax, true, witness.view, seq);
+          if (one.status != result.status || one.mask != result.mask || !same_work(seq, got))
+            return fail("walk.certificate " + at);
+        }
         if (result.status != gpu::CertificateStatus::decided) return fail("port.status " + at);
         if (result.mask != expected.mask) return fail("port.mask " + at);
         if (!same_work(got, expected.work)) return fail("port.work " + at);
@@ -430,7 +869,9 @@ int main(int argc, char** argv) {
   }
   std::printf("gpu_certificate_port_gate n=%zu edges=%llu core_closed=%llu cover_closed=%llu open=%llu "
               "deferred=%llu cells=%llu outside=%llu deep=%llu failed=%llu uniform_tests=%llu point_tests=%llu "
-              "merged_ranges=%llu q3_proved=%llu q4_proved=%llu mutants=%llu coverless=%llu guards=%llu\n",
+              "merged_ranges=%llu q3_proved=%llu q4_proved=%llu mutants=%llu coverless=%llu guards=%llu "
+              "walks=%llu walk_deferred=%llu visits=%llu chunks=%llu multi_chunks=%llu forms=%llu in_splits=%llu "
+              "in_escapes=%llu exit_splits=%llu exit_escapes=%llu exit_ends=%llu\n",
               n, edges, core_closed, cover_closed, open, deferred, total.dead_core.cells + total.dead.cells,
               total.dead_core.outside_cells + total.dead.outside_cells,
               total.dead_core.deep_cells + total.dead.deep_cells,
@@ -439,7 +880,8 @@ int main(int argc, char** argv) {
               total.dead_core.point_tests + total.dead.point_tests,
               total.core_cover.merged_ranges + total.cover.merged_ranges,
               total.dead_core.q3_proved + total.dead.q3_proved, total.dead_core.q4_proved + total.dead.q4_proved,
-              mutants, coverless, guards);
+              mutants, coverless, guards, walk.walks, walk.deferred, walk.visits, walk.chunks, walk.multi, walk.forms,
+              walk.in_splits, walk.in_escapes, walk.exit_splits, walk.exit_escapes, walk.exit_ends);
   const bool floors = edges > 0 && core_closed > 0 && cover_closed > 0 && open > 0 && deferred > 0 &&
                       total.dead_core.outside_cells > 0 && total.dead.outside_cells > 0 &&
                       total.dead_core.deep_cells > 0 && total.dead.deep_cells > 0 &&
@@ -447,7 +889,8 @@ int main(int argc, char** argv) {
                       total.dead_core.point_tests > 0 && total.dead.point_tests > 0 &&
                       total.core_cover.merged_ranges > 0 && total.cover.merged_ranges > 0 &&
                       total.dead.q3_proved > 0 && total.dead.q4_proved > 0 && total.dead.q3_open > 0 &&
-                      total.dead.q4_open > 0 && mutants >= 12 && coverless >= 1000 && guards >= 3 * 16;
+                      total.dead.q4_open > 0 && mutants >= 12 && coverless >= 1000 && guards >= 3 * 16 &&
+                      walk.floors();
   if (!floors) {
     std::printf("cause=floor\n");
     return 3;

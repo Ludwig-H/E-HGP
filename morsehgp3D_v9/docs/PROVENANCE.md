@@ -389,6 +389,131 @@ aucun défaut bloquant, un constat réfuté, le reste corrigé) :
     CPU ;
   - 00/K5 à 24 fils (GPU) et à 1 fil (moteur).
 
+### Parcours et chargement par blocs du certificat (S3, 24 septembre 2026)
+
+L'appel des certificats coûte 145 ms à K5 sur G4 (noyau 117 ms, R18), soit
+environ 12 % de la chaîne. **La sortie ne change pas** : masques, statuts,
+mises en attente et registre, champ par champ. Aucun champ de sonde nouveau.
+
+**Mesure d'abord** (jumeau hôte, groupe compteur, survivantes de 08/000000
+dans l'ordre de l'appareil ; totaux égaux au registre des reçus G4) :
+- pas de warp à K5 (2 043 612 arêtes) : parcours d'arbre 540,6 M visites
+  (70 %), cellules 93,3 M, votes de frontière 77,4 M, passes de chargement
+  59,0 M ; à K10 (4 507 278 arêtes) : 1 394 M visites sur 1 996 M ;
+- par arête : médiane 294 pas, p99 1 412, maximum 5 142, pour environ
+  256 000 pas par warp (3 008 warps) : **la traîne est négligeable** ;
+- modèle à débit plafonné du juge des voies, recalé sur les six couples
+  (trame, K) de R15–R18 (médianes des noyaux) : erreur RMS 1,0 % (plafond
+  752) ou 0,8 % (sans plafond). Part du parcours 64 à 74 %, part de la traîne
+  0,1 à 1,9 %. Un coût unique par pas de warp s'ajuste encore à 1,3 % : le
+  noyau suit le nombre de pas de warp, et les coûts par catégorie restent
+  mal séparés (mélanges presque proportionnels d'une trame à l'autre).
+
+Conclusion : le débit domine, et le parcours en est l'essentiel. Découper
+une arête en tâches ne gagnerait rien. Il faut réduire le parcours.
+
+**Parcours par blocs** (`build_cover_chunked`, `src/gpu/certificate.hpp`).
+Le parcours sans pile visite les nœuds dans l'ordre préfixe : un nœud
+scindé continue à son fils gauche, le nœud suivant (garde
+`validate_certificate_input` ; `flatten_escapes` sur l'hôte), un nœud admis
+ou rejeté à son lien d'échappement.
+- Les 32 voies décident les 32 nœuds consécutifs [base, base + 32), un par
+  voie, avec exactement la décision entière de `build_cover`. C'est une
+  fonction pure du nœud et de la boule, et la garde couvre tout l'index :
+  décider un nœud que le parcours sautera n'écrit rien.
+- Sept votes publient le mot de décision (scindé, admis, décalage du
+  successeur borné à 31).
+- Le parcours séquentiel est ensuite **rejoué** sur ces bits : mêmes nœuds
+  visités, dans le même ordre, mêmes compteurs, mêmes plages et même arrêt de
+  capacité. Une suite de nœuds scindés est prise d'un coup. Un successeur
+  hors du bloc ouvre le bloc suivant.
+
+`build_cover` reste le témoin (et le parcours des voies, `gpu/lanes.hpp`,
+inchangé).
+
+**Chargement par fenêtres** (`load_forms_chunked`). Une passe du groupe
+pour 32 sites, au lieu d'une passe par plage (10 sites en moyenne). La case
+s reçoit le s-ième site des plages dans l'ordre, comme dans `load_forms`,
+qui reste le témoin.
+
+**Norme partagée**. La borne inférieure exacte de la norme sur une cellule,
+et la norme en un centre, sont calculées une fois pour les deux disques (q3
+et q4) au lieu d'une fois par voie. Le second membre des disques est
+précalculé. Mêmes valeurs i128, mêmes comparaisons.
+
+**Compteurs de l'hôte, avant → après** (08/000000, mode fichier de la
+porte ; toutes les arêtes identiques aux deux témoins et au prouveur
+produit) :
+
+| K | arêtes | pas de parcours (1 nœud par pas) | blocs de décision | pas de rejeu | passes de chargement |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 5 | 2 043 612 | 540 624 193 | 93 621 341 | 410 957 802 | 58 955 540 → 20 830 439 |
+| 10 | 4 507 278 | 1 394 025 439 | 228 671 376 | 1 059 220 070 | 161 704 731 → 59 128 851 |
+
+Les cellules et les votes de frontière ne changent pas. Un pas de rejeu
+(une suite de nœuds scindés, ou un nœud admis ou rejeté) ne calcule aucune
+décision et ne suit aucun lien d'échappement dans le bloc ; il relit (L1)
+les bornes de rang d'un nœud non scindé.
+
+**ptxas** (sm_120, CUDA 12.9, noyau `certificate_kernel`) : 128 → 124
+registres, pile 384 → 368 o, aucun débordement. Les autres noyaux sont
+inchangés.
+
+**Portes** (`mhgp9_gpu_certificate_port`, `tests/gpu/certificate_port_gate.cpp`) :
+- sur chaque arête (trois familles, K2, K3, K5 et K10), pour la boule du
+  cœur **et** celle du cover, à pleine capacité et à capacité 64 :
+  - parcours par blocs contre `build_cover` : même réponse, même travail
+    (aussi en débordement), mêmes plages octet pour octet ;
+  - chargement par fenêtres contre `load_forms` : même prouveur et mêmes
+    trois tableaux de formes, octet pour octet ;
+  - `certify_edge` des deux chemins : même statut, même masque, même
+    travail ;
+- le prouveur produit reste le juge du chemin par blocs ;
+- planchers : blocs, blocs à plusieurs visites, formes, parcours en attente,
+  et chaque sortie de bloc (fils gauche et échappement dans le bloc, fils
+  gauche au-delà de la dernière voie, échappement au-delà du bloc, fin de
+  l'index) ;
+- mutants du comparateur : travail, plage et forme faux d'une unité ;
+- **quatre mutants compilés du produit**, chacun tué (code 1) :
+  - successeur hors bloc pris pour le début du bloc suivant (`walk.`) ;
+  - fils gauche de la dernière voie sauté (`walk.`) ;
+  - fenêtre de chargement qui recommence sa première plage (`load.`) ;
+  - norme partagée comparée au facteur q3 pour la voie q4 (`port.`) ;
+- **mode fichier** `--file=… --k=K [--workers=N] [--min-edges=N]
+  [--device]` : toutes les survivantes d'un nuage, les deux parcours, les
+  deux chargements et le prouveur produit, arête par arête. Porte
+  `mhgp9_gpu_certificate_port_lidar_k5` sur la trame épinglée à K5 (label
+  `lidar`, hors campagne `gate`) : 2 043 612 arêtes identiques. Avec
+  `--device`, l'appel de l'appareil est comparé au jumeau octet pour octet
+  (statuts, masques, travail sommé). Sans appareil, c'est un refus
+  explicite (code 2, porte `mhgp9_gpu_certificate_port_device_absent`).
+  K10 a été passé à la main : 4 507 278 arêtes identiques (8 min sur 4 fils).
+
+La chaîne CPU n'exécute pas `certificate.hpp` (sa référence est le
+prouveur produit) : ses condensés épinglés ne peuvent pas changer
+localement. Ils sont inchangés à 08/000000 : tour, catalogue et
+présentations `67450c64611075b1`, `5ad1fe09354411ba`, `a2aa4b20ca392dfe` à
+K5 et `ac108f7f71096c3f`, `a6e959d227f3dafa`, `43ff64fb1c3846d9` à K10.
+
+**Non vérifié localement** (aucun GPU) : l'exécution du noyau, l'égalité
+appareil/jumeau et toute durée. Une session G4 doit :
+- lancer `mhgp9_gpu_certificate_port_gate --file=<08/000000> --k=5
+  --workers=8 --min-edges=2000000 --device`, puis la même chose à K10 ;
+- garder le juge (`--certificate-judge`) et les six condensés épinglés ;
+- lire `certificate_kernel_ms` face à la **projection** ci-dessous.
+
+**Projection, non mesurée** : 52 à 71 ms de noyau à K5 (mesuré : 113 à
+117 ms) et 132 à 181 ms à K10 (mesuré : 286 à 300 ms). Elle applique aux
+deux calages du modèle, avec les compteurs ci-dessus :
+- un bloc de décision coûtant 1 à 1,5 visite ;
+- un pas de rejeu coûtant 0,2 à 0,35 visite ;
+- une fenêtre de chargement coûtant 1 à 1,5 passe ;
+- des cellules réduites de 0 à 15 %.
+
+Ces coûts sont des hypothèses. Le trafic L2 des blocs (32 nœuds de 40 o
+chargés par bloc, contre un nœud par visite) n'est pas modélisé : seule une
+session G4 dira s'il pèse.
+
 ### Tour allégée et sonde v19 (23 septembre 2026, soir)
 
 - **Rangs de plateau** (`aa29245f`) : après le tri exact `by_level`, chaque

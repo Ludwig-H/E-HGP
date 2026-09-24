@@ -514,6 +514,17 @@ struct WarpGroup {
     first = second = 0;
 #endif
   }
+  template <unsigned N, class Code>
+  __host__ __device__ void ballot_bits(u32 base, u32 count, Code code, u32 (&planes)[N]) const {
+#if defined(__CUDA_ARCH__)
+    const u32 i = base + lane;
+    const u32 c = i < count ? code(i) : 0U;
+    for (unsigned k = 0; k < N; ++k) planes[k] = __ballot_sync(0xffffffffU, ((c >> k) & 1U) != 0);
+#else
+    (void)base; (void)count; (void)code;
+    for (unsigned k = 0; k < N; ++k) planes[k] = 0;
+#endif
+  }
   template <class F>
   __host__ __device__ void for_set(u32 mask, F f) const {
     if (((mask >> lane) & 1U) != 0) f(lane, popcount32(mask & ((1U << lane) - 1U)));

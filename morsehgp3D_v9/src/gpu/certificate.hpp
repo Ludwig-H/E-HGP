@@ -8,12 +8,14 @@
 // (lanes/q34_dead_lanes.cpp). Same integer arithmetic, same site order, same
 // cells, same early stops and the same work counters, field by field.
 //
-// One edge is processed by a GROUP of 32 lanes: the tree walk and the cell
-// recursion are uniform (every lane runs them); the frontier scans are
-// split across the lanes with ballots, the exact stopping position of the
-// sequential scan is recovered from the ballot masks, and the partial sites
-// are compacted in scan order. HostGroup emulates the group sequentially,
-// WarpGroup (filter_runner.cu) maps it to one CUDA warp.
+// One edge is processed by a GROUP of 32 lanes: the cell recursion is
+// uniform (every lane runs it); the tree walk decides 32 consecutive nodes
+// at once and replays the sequential walk from the ballots (chunked walk,
+// 24 septembre 2026, below); the frontier scans are split across the lanes
+// with ballots, the exact stopping position of the sequential scan is
+// recovered from the ballot masks, and the partial sites are compacted in
+// scan order. HostGroup emulates the group sequentially, WarpGroup
+// (filter_runner.cu) maps it to one CUDA warp.
 //
 // Exactness is judged, not assumed: the host compilation is compared edge by
 // edge, counter by counter, with the product prover on LiDAR edges
@@ -180,6 +182,17 @@ struct HostGroup {
       if ((c & 2U) != 0) second |= 1U << lane;
     }
   }
+  // Bit l of planes[k]: bit k of code(base + l), for base + l < count (the
+  // chunked walk of the S3 certificate: N one-bit ballots of one word).
+  template <unsigned N, class Code>
+  void ballot_bits(u32 base, u32 count, Code code, u32 (&planes)[N]) const {
+    for (unsigned k = 0; k < N; ++k) planes[k] = 0;
+    for (u32 lane = 0; lane < size && base + lane < count; ++lane) {
+      const u32 c = code(base + lane);
+      for (unsigned k = 0; k < N; ++k)
+        if (((c >> k) & 1U) != 0) planes[k] |= 1U << lane;
+    }
+  }
   // f(lane, rank) for every set lane, rank = set lanes below it.
   template <class F>
   void for_set(u32 mask, F f) const {
@@ -235,6 +248,17 @@ MHGP9_HD inline u32 popcount32(u32 x) {
   return static_cast<u32>(__popc(x));
 #else
   return static_cast<u32>(__builtin_popcount(x));
+#endif
+}
+
+// Number of consecutive set bits of x from bit 0 (32 when x is all ones).
+MHGP9_HD inline u32 trailing_ones32(u32 x) {
+  const u32 zeros = ~x;
+  if (zeros == 0) return 32;
+#if defined(__CUDA_ARCH__)
+  return static_cast<u32>(__ffs(static_cast<int>(zeros)) - 1);
+#else
+  return static_cast<u32>(__builtin_ctz(zeros));
 #endif
 }
 
@@ -329,11 +353,142 @@ MHGP9_HD bool build_cover(const Group& group, const CertificateIndex& index, con
   return true;
 }
 
+// ---- Chunked walk of the certificate (24 septembre 2026) ----------------
+//
+// build_cover visits nodes one at a time: every lane of the group runs the
+// same node, and each step waits for the node, then for its escape link. On
+// the survivors of 08/000000 this walk is about two thirds of the warp steps
+// of the certificate call (541 M node visits at K5 for 94 M chunks below).
+//
+// The walk visits nodes in increasing preorder: a split node continues at
+// its left child, the next preorder node (validate_certificate_input, and
+// flatten_escapes on the host, refuse any other layout); an admitted or
+// rejected node continues at its escape link. build_cover_chunked decides
+// the 32 consecutive nodes [base, base + 32) at once, one per lane, with
+// exactly the integer decision of build_cover (a pure function of the node
+// and the ball: deciding a node that the walk then skips writes nothing and
+// every node of the index is inside the guard's domain), and ballots the
+// decision word. It then REPLAYS the sequential walk from those uniform
+// bits: the same visited nodes in the same order, the same counters, the
+// same ranges and the same capacity stop. A successor at or beyond base + 32
+// starts the next chunk there. Only the lanes' decisions are parallel; the
+// object and the ledger are those of build_cover, node for node (compared
+// on every edge by tests/gpu/certificate_port_gate.cpp).
+
+// Decision word of node i in the chunk starting at base: bit 0 split,
+// bit 1 admitted (neither: rejected), bits 2..6 the successor offset of a
+// non-split node, min(escape - base, 32) - 1 (31: the successor leaves the
+// chunk and the replay reads the escape link itself). Escape links advance
+// (guard), so escape - base >= 1.
+inline constexpr unsigned chunk_planes = 7;
+inline constexpr u32 chunk_exit = 31;
+
+MHGP9_HD inline u32 chunk_code(const CertificateIndex& index, const Ball& ball, u32 base, u32 i) {
+  const FlatNode& node = index.nodes[i];
+  bool admit = false, reject = false;
+  if (node.last - node.first == 1) {
+    const std::int32_t* p = index.rank_points + 3 * static_cast<std::size_t>(node.first);
+    i64 norm = 0;
+    for (int axis = 0; axis < 3; ++axis) {
+      const i64 delta = 2 * static_cast<i64>(p[axis]) - ball.center_twice[axis];
+      norm += delta * delta;
+    }
+    admit = norm <= ball.radius_fourfold;
+    reject = !admit;
+  } else {
+    i64 minimum = 0, maximum = 0;
+    for (int axis = 0; axis < 3; ++axis) {
+      const i64 low = 2 * static_cast<i64>(node.box.low[axis]) - ball.center_twice[axis];
+      const i64 high = 2 * static_cast<i64>(node.box.high[axis]) - ball.center_twice[axis];
+      const i64 nearest = low > 0 ? low : (high < 0 ? high : 0);
+      minimum += nearest * nearest;
+      maximum += max_i64(low * low, high * high);
+    }
+    reject = minimum > ball.radius_fourfold;
+    admit = !reject && maximum <= ball.radius_fourfold;
+  }
+  if (!admit && !reject) return 1U;
+  const u32 reach = index.escapes[i] - base;
+  return (admit ? 2U : 0U) | (((reach < 32 ? reach : 32U) - 1U) << 2);
+}
+
+template <class Group>
+MHGP9_HD bool build_cover_chunked(const Group& group, const CertificateIndex& index, const Ball& ball,
+                                  const CertificateSlab& slab, u32& range_count, u32& sites, EdgeCoverWork& work) {
+  range_count = 0;
+  sites = 0;
+  u32 cursor = 0, previous_last = absent32;  // end of the last retained range (uniform)
+  while (cursor < index.node_count) {
+    const u32 base = cursor;
+    u32 planes[chunk_planes];
+    group.ballot_bits(base, index.node_count,
+                      [&](u32 i) -> u32 { return chunk_code(index, ball, base, i); }, planes);
+    // The replay: build_cover's loop body with the decision read from the
+    // planes; cursor stays in [base, base + 32) inside this loop. A run of
+    // split nodes (each continues at the next node, its left child) only
+    // adds to three counters: it is taken at once.
+    for (;;) {
+      const u32 lane = cursor - base;
+      const u32 splits = trailing_ones32(planes[0] >> lane);  // at most 32 - lane
+      if (splits != 0) {
+        work.node_visits += splits;
+        work.bound_tests += splits;  // a split node is never a leaf
+        work.split_nodes += splits;
+#if defined(MHGP9_CERTIFICATE_MUTANT_CHUNK_SPLIT_BOUNDARY)
+        // mutant: a split node on the chunk's last lane skips its subtree
+        cursor = lane + splits == 32 ? index.escapes[base + 31] : cursor + splits;
+#else
+        cursor += splits;  // the left child of the last split node of the run
+#endif
+      } else {
+        ++work.node_visits;
+        const FlatNode& node = index.nodes[cursor];
+        const u32 size = node.last - node.first;
+        if (size == 1) ++work.point_tests;
+        else ++work.bound_tests;
+        if (((planes[1] >> lane) & 1U) != 0) {
+          ++work.admitted_nodes;
+          work.admitted_sites += size;
+          if (size > slab.capacity - sites) return false;
+          sites += size;
+          if (range_count != 0 && previous_last == node.first) {
+            if (group.leader()) slab.ranges[2 * (range_count - 1) + 1] = node.last;
+            ++work.merged_ranges;
+          } else {
+            if (group.leader()) {
+              slab.ranges[2 * range_count] = node.first;
+              slab.ranges[2 * range_count + 1] = node.last;
+            }
+            ++range_count;
+            ++work.retained_ranges;
+          }
+          previous_last = node.last;
+        } else {
+          ++work.rejected_nodes;
+          work.rejected_sites += size;
+        }
+        u32 offset = 0;
+        for (unsigned k = 0; k < 5; ++k) offset |= ((planes[2 + k] >> lane) & 1U) << k;
+#if defined(MHGP9_CERTIFICATE_MUTANT_CHUNK_FAR_ESCAPE)
+        // mutant: a successor beyond the chunk is taken as the next chunk
+        cursor = offset < chunk_exit ? base + offset + 1 : base + 32;
+#else
+        cursor = offset < chunk_exit ? base + offset + 1 : index.escapes[cursor];
+#endif
+      }
+      if (cursor >= index.node_count || cursor - base >= 32) break;
+    }
+  }
+  group.sync();  // the leader's ranges, read by every lane of load_forms
+  return true;
+}
+
 // ---- Dead-lane prover (Q34DeadLaneProver) ------------------------------
 
 struct Prover {
   i64 a_basis[3], b_basis[3];
   i64 diameter_squared;
+  i128 disk_bound;  // |v|^2 * scale^2 (< 3 * 2^76), the right side of both lane disks
   u32 threshold3, threshold4;
   u32 n;  // loaded sites (forms), a and b included
 };
@@ -344,17 +499,21 @@ inline constexpr i64 q4_disk_factor = 2;
 
 MHGP9_HD inline i64 abs_i64(i64 x) { return x < 0 ? -x : x; }
 
-// load(): forms of every site of the ranges, in range order.
-template <class Group>
-MHGP9_HD Prover load_forms(const Group& group, const CertificateIndex& index, const std::int32_t a[3],
-                           const std::int32_t b[3], const CertificateSlab& slab, u32 range_count, u32 sites,
-                           EdgeDeadWork& work) {
+// The prover basis of edge ab (Q34DeadLaneProver::load) and the form of
+// one site, written at `slot`.
+struct FormBasis {
+  i64 midpoint_twice[3];
+  int main_axis, axis_i, axis_j;
+  i64 am, ai, bm, bj;
+};
+
+MHGP9_HD inline Prover make_prover(const std::int32_t a[3], const std::int32_t b[3], FormBasis& f) {
   Prover p{};
-  i64 v[3], midpoint_twice[3];
+  i64 v[3];
   int main_axis = 0;
   for (int i = 0; i < 3; ++i) {
     v[i] = static_cast<i64>(b[i]) - a[i];
-    midpoint_twice[i] = static_cast<i64>(a[i]) + b[i];
+    f.midpoint_twice[i] = static_cast<i64>(a[i]) + b[i];
     if (abs_i64(v[i]) > abs_i64(v[main_axis])) main_axis = i;
   }
   const int axis_i = (main_axis + 1) % 3, axis_j = (main_axis + 2) % 3;
@@ -365,21 +524,93 @@ MHGP9_HD Prover load_forms(const Group& group, const CertificateIndex& index, co
   p.b_basis[axis_j] = h;
   p.b_basis[main_axis] = -sign * v[axis_j];
   p.diameter_squared = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+  p.disk_bound = static_cast<i128>(p.diameter_squared) * prover_scale * prover_scale;
+  f.main_axis = main_axis;
+  f.axis_i = axis_i;
+  f.axis_j = axis_j;
+  f.am = p.a_basis[main_axis];
+  f.ai = p.a_basis[axis_i];
+  f.bm = p.b_basis[main_axis];
+  f.bj = p.b_basis[axis_j];
+  return p;
+}
+
+MHGP9_HD inline void write_form(const Prover& p, const FormBasis& f, const std::int32_t* z,
+                                const CertificateSlab& slab, u32 slot) {
+  i64 w[3];
+  for (int k = 0; k < 3; ++k) w[k] = 2 * static_cast<i64>(z[k]) - f.midpoint_twice[k];
+  slab.form_constant[slot] = prover_scale * (w[0] * w[0] + w[1] * w[1] + w[2] * w[2] - p.diameter_squared);
+  slab.form_x[slot] = -2 * (w[f.main_axis] * f.am + w[f.axis_i] * f.ai);
+  slab.form_y[slot] = -2 * (w[f.main_axis] * f.bm + w[f.axis_j] * f.bj);
+}
+
+// load(): forms of every site of the ranges, in range order, one pass of
+// the group per range (the witness of load_forms_chunked).
+template <class Group>
+MHGP9_HD Prover load_forms(const Group& group, const CertificateIndex& index, const std::int32_t a[3],
+                           const std::int32_t b[3], const CertificateSlab& slab, u32 range_count, u32 sites,
+                           EdgeDeadWork& work) {
+  FormBasis f;
+  Prover p = make_prover(a, b, f);
   ++work.loads;
-  const i64 am = p.a_basis[main_axis], ai = p.a_basis[axis_i], bm = p.b_basis[main_axis], bj = p.b_basis[axis_j];
   u32 offset = 0;
   for (u32 r = 0; r < range_count; ++r) {
     const u32 first = slab.ranges[2 * r], last = slab.ranges[2 * r + 1];
     group.for_each(last - first, [&](u32 i) {
-      const std::int32_t* z = index.rank_points + 3 * static_cast<std::size_t>(first + i);
-      i64 w[3];
-      for (int k = 0; k < 3; ++k) w[k] = 2 * static_cast<i64>(z[k]) - midpoint_twice[k];
-      slab.form_constant[offset + i] = prover_scale * (w[0] * w[0] + w[1] * w[1] + w[2] * w[2] - p.diameter_squared);
-      slab.form_x[offset + i] = -2 * (w[main_axis] * am + w[axis_i] * ai);
-      slab.form_y[offset + i] = -2 * (w[main_axis] * bm + w[axis_j] * bj);
+      write_form(p, f, index.rank_points + 3 * static_cast<std::size_t>(first + i), slab, offset + i);
     });
     offset += last - first;
   }
+  group.sync();
+  p.n = sites;
+  work.form_sites += sites - 2;  // caller guarantees sites >= 2 (a and b)
+  return p;
+}
+
+// The same forms at the same slots, one pass of the group per 32 SITES
+// (24 septembre 2026): a range holds 10 sites on average on 08/000000, so
+// one pass per range left most lanes idle (59 M passes at K5 for 21 M
+// windows). Slot s holds the s-th site of the ranges in range order, as in
+// load_forms: lane k of the window starting at slot `base` walks the ranges
+// from the window's first range and position (uniform) to its own site.
+template <class Group>
+MHGP9_HD Prover load_forms_chunked(const Group& group, const CertificateIndex& index, const std::int32_t a[3],
+                                   const std::int32_t b[3], const CertificateSlab& slab, u32 range_count,
+                                   u32 sites, EdgeDeadWork& work) {
+  FormBasis f;
+  Prover p = make_prover(a, b, f);
+  ++work.loads;
+  u32 range = 0, skip = 0;  // the window's first range, and its sites already loaded (uniform)
+  for (u32 base = 0; base < sites; base += 32) {
+    const u32 count = sites - base < 32 ? sites - base : 32U;
+    group.for_each(count, [&](u32 k) {
+#if defined(MHGP9_CERTIFICATE_MUTANT_LOAD_WINDOW_RESTART)
+      u32 r = range, position = k;  // mutant: the window restarts its first range
+#else
+      u32 r = range, position = skip + k;
+#endif
+      for (;;) {  // ends: slot base + k < sites, the sum of the range sizes
+        const u32 size = slab.ranges[2 * r + 1] - slab.ranges[2 * r];
+        if (position < size) break;
+        position -= size;
+        ++r;
+      }
+      write_form(p, f, index.rank_points + 3 * static_cast<std::size_t>(slab.ranges[2 * r] + position), slab,
+                 base + k);
+    });
+    for (u32 left = count; left != 0;) {  // the next window's first range and position
+      const u32 rest = slab.ranges[2 * range + 1] - slab.ranges[2 * range] - skip;
+      if (left < rest) {
+        skip += left;
+        left = 0;
+      } else {
+        left -= rest;
+        ++range;
+        skip = 0;
+      }
+    }
+  }
+  (void)range_count;  // the windows end with the sites
   group.sync();
   p.n = sites;
   work.form_sites += sites - 2;  // caller guarantees sites >= 2 (a and b)
@@ -390,7 +621,12 @@ struct ProverCell {
   i64 left, right, bottom, top;
 };
 
-MHGP9_HD inline bool cell_outside(const Prover& p, const ProverCell& c, i64 disk_factor) {
+// Exact lower bound of |alpha*A+beta*B|^2 over the closed cell (axis by
+// axis, nearest value of each affine coordinate to zero), and the same norm
+// at one center. A lane disk f*|.|^2 <= |v|^2 * scale^2 compares ONE norm
+// with its factor (3 for q3, 2 for q4): the norm is computed once for both
+// lanes (24 septembre 2026; before, once per lane, same values).
+MHGP9_HD inline i128 cell_norm(const Prover& p, const ProverCell& c) {
   i128 norm = 0;
   for (int i = 0; i < 3; ++i) {
     const i64 x = p.a_basis[i], y = p.b_basis[i];
@@ -399,18 +635,25 @@ MHGP9_HD inline bool cell_outside(const Prover& p, const ProverCell& c, i64 disk
     const i128 nearest = low > 0 ? low : (high < 0 ? high : 0);
     norm += nearest * nearest;
   }
-  return static_cast<i128>(disk_factor) * norm >
-         static_cast<i128>(p.diameter_squared) * prover_scale * prover_scale;
+  return norm;
 }
 
-MHGP9_HD inline bool center_inside(const Prover& p, i64 alpha, i64 beta, i64 disk_factor) {
+MHGP9_HD inline i128 center_norm(const Prover& p, i64 alpha, i64 beta) {
   i128 norm = 0;
   for (int i = 0; i < 3; ++i) {
     const i128 t = static_cast<i128>(p.a_basis[i]) * alpha + static_cast<i128>(p.b_basis[i]) * beta;
     norm += t * t;
   }
-  return static_cast<i128>(disk_factor) * norm <=
-         static_cast<i128>(p.diameter_squared) * prover_scale * prover_scale;
+  return norm;
+}
+
+// The lane disk of `disk_factor` misses the cell (cell norm) / holds the center (center norm).
+MHGP9_HD inline bool disk_misses(const Prover& p, i128 norm, i64 disk_factor) {
+  return static_cast<i128>(disk_factor) * norm > p.disk_bound;
+}
+
+MHGP9_HD inline bool disk_holds(const Prover& p, i128 norm, i64 disk_factor) {
+  return static_cast<i128>(disk_factor) * norm <= p.disk_bound;
 }
 
 // A frame of the explicit cell recursion (cell() of the prover), kept once
@@ -436,8 +679,14 @@ MHGP9_HD CellEntry enter_cell(const Group& group, const Prover& p, const Certifi
                               EdgeDeadWork& work) {
   ++work.cells;
   u8 need = 0;
-  if ((lanes & 2U) != 0 && !cell_outside(p, c, q3_disk_factor)) need = static_cast<u8>(need | 2U);
-  if ((lanes & 4U) != 0 && !cell_outside(p, c, q4_disk_factor)) need = static_cast<u8>(need | 4U);
+  const i128 norm = cell_norm(p, c);
+  if ((lanes & 2U) != 0 && !disk_misses(p, norm, q3_disk_factor)) need = static_cast<u8>(need | 2U);
+#if defined(MHGP9_CERTIFICATE_MUTANT_SHARED_NORM_FACTOR)
+  // mutant: the shared norm compared with the q3 factor for the q4 lane
+  if ((lanes & 4U) != 0 && !disk_misses(p, norm, q3_disk_factor)) need = static_cast<u8>(need | 4U);
+#else
+  if ((lanes & 4U) != 0 && !disk_misses(p, norm, q4_disk_factor)) need = static_cast<u8>(need | 4U);
+#endif
   if (need == 0) {
     ++work.outside_cells;
     return CellEntry{true, lanes, {}};
@@ -486,11 +735,12 @@ MHGP9_HD CellEntry enter_cell(const Group& group, const Prover& p, const Certifi
     u32 count = inside;
     u64 points = 0;
     bool counted = false, refuted = false;
+    const i128 center = need != 0 ? center_norm(p, c.left, c.bottom) : i128{0};
     for (int step = 0; step < 2; ++step) {  // lane 2 (q3) then 4 (q4), no initializer_list on the device
       const u8 lane = step == 0 ? u8{2} : u8{4};
       if ((need & lane) == 0) continue;
       const u32 lane_target = lane == 2U ? p.threshold3 : p.threshold4;
-      if (!center_inside(p, c.left, c.bottom, lane == 2U ? q3_disk_factor : q4_disk_factor)) continue;
+      if (!disk_holds(p, center, lane == 2U ? q3_disk_factor : q4_disk_factor)) continue;
       if (!counted) {
         u64 scanned = next_size;
         for (u32 base = 0; base < next_size; base += 32) {
@@ -589,13 +839,39 @@ MHGP9_HD u8 prove_lanes(const Group& group, Prover& p, const CertificateSlab& sl
 
 // ---- One surviving edge (Engine::filtered_edge, certificate part) --------
 
+// The walk and the form load of the core and the cover: build_cover_chunked
+// and load_forms_chunked on the device and in the host twin; build_cover
+// (one node per step, also the walk of the lanes, gpu/lanes.hpp) and
+// load_forms (one pass per range) stay as the witness the port gate
+// compares them with, edge by edge and byte for byte.
+enum class CertificateWalk : u8 { sequential = 0, chunked = 1 };
+
+template <CertificateWalk Walk, class Group>
+MHGP9_HD bool certificate_cover(const Group& group, const CertificateIndex& index, const Ball& ball,
+                                const CertificateSlab& slab, u32& range_count, u32& sites, EdgeCoverWork& work) {
+  if constexpr (Walk == CertificateWalk::chunked)
+    return build_cover_chunked(group, index, ball, slab, range_count, sites, work);
+  else
+    return build_cover(group, index, ball, slab, range_count, sites, work);
+}
+
+template <CertificateWalk Walk, class Group>
+MHGP9_HD Prover certificate_forms(const Group& group, const CertificateIndex& index, const std::int32_t a[3],
+                                  const std::int32_t b[3], const CertificateSlab& slab, u32 range_count, u32 sites,
+                                  EdgeDeadWork& work) {
+  if constexpr (Walk == CertificateWalk::chunked)
+    return load_forms_chunked(group, index, a, b, slab, range_count, sites, work);
+  else
+    return load_forms(group, index, a, b, slab, range_count, sites, work);
+}
+
 // `mask` is the edge's surviving lanes (nonzero subset of 6). On decided,
 // `work` has received exactly the engine's certificate counters of this
 // edge and the result holds the lanes left for the q3/q4 generation (zero
 // when the core or the cover closed the edge). Deferred and fault add
 // nothing to `work`. Only the leader lane writes `work` (on the device it
 // is the warp's total in shared memory).
-template <class Group>
+template <CertificateWalk Walk = CertificateWalk::chunked, class Group>
 MHGP9_HD CertificateResult certify_edge(const Group& group, const CertificateIndex& index, u32 a_rank, u32 b_rank,
                                         u8 mask, unsigned kmax, bool dead_core, const CertificateSlab& slab,
                                         CertificateWork& work) {
@@ -604,12 +880,12 @@ MHGP9_HD CertificateResult certify_edge(const Group& group, const CertificateInd
   EdgeWork local{};  // this edge's counters, added to `work` by the leader lane only
   u32 range_count = 0, sites = 0;
   if (dead_core) {
-    if (!build_cover(group, index, edge_ball(a, b, true), slab, range_count, sites, local.core_cover))
+    if (!certificate_cover<Walk>(group, index, edge_ball(a, b, true), slab, range_count, sites, local.core_cover))
       return CertificateResult{CertificateStatus::deferred, mask};
     if (sites < 2) return CertificateResult{CertificateStatus::fault, mask};
     ++local.core_builds;
     local.core_sites += sites;
-    Prover prover = load_forms(group, index, a, b, slab, range_count, sites, local.dead_core);
+    Prover prover = certificate_forms<Walk>(group, index, a, b, slab, range_count, sites, local.dead_core);
     mask = static_cast<u8>(mask & ~prove_lanes(group, prover, slab, kmax, mask, local.dead_core));
     if (mask == 0) {
       ++local.core_closed_edges;
@@ -617,13 +893,13 @@ MHGP9_HD CertificateResult certify_edge(const Group& group, const CertificateInd
       return CertificateResult{CertificateStatus::decided, 0};
     }
   }
-  if (!build_cover(group, index, edge_ball(a, b, false), slab, range_count, sites, local.cover))
+  if (!certificate_cover<Walk>(group, index, edge_ball(a, b, false), slab, range_count, sites, local.cover))
     return CertificateResult{CertificateStatus::deferred, mask};
   if (sites < 2) return CertificateResult{CertificateStatus::fault, mask};
   ++local.cover_builds;
   local.cover_sites += sites;
   local.max_cover_sites = sites;
-  Prover prover = load_forms(group, index, a, b, slab, range_count, sites, local.dead);
+  Prover prover = certificate_forms<Walk>(group, index, a, b, slab, range_count, sites, local.dead);
   mask = static_cast<u8>(mask & ~prove_lanes(group, prover, slab, kmax, mask, local.dead));
   if (group.leader()) add_edge(work, local);
   return CertificateResult{CertificateStatus::decided, mask};
