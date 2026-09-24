@@ -259,27 +259,35 @@ MHGP9_HD inline bool pair_below(u32 p, u32 x, u32 low, u32 high) {
 
 // ---- One edge -------------------------------------------------------------
 
-// The q3 lane of one edge whose q3 lane a certificate left open. On decided,
-// `local` holds this edge's work and slab.records[0, record_count) its
-// emitted balls in seed order (edge field unset); on deferred or fault the
-// caller adds nothing. Every lane gets the same result (uniform flow).
-// Prologue of an edge, shared by its q3 and q4 lanes: the cover, its sites
-// in scan order (slab.points / slab.ranks[0, sites)) and the owned acute
-// seeds (slab.seeds[0, seeds), scan positions). `local` receives the cover
-// and seed-scan counters. Uniform result.
+// Prologue of an edge, shared by its q3 and q4 lanes, in two steps (v9
+// S4b tasks, 24 septembre 2026: the task runner reserves the cover's place
+// in its arena between them). lanes_cover: the cover's ranges in
+// slab.ranges (range_count ranges, `sites` sites) and its counters; deferred
+// beyond slab.capacity, fault below two sites. Uniform result.
 template <class Group>
-MHGP9_HD CertificateStatus lanes_prologue(const Group& group, const LanesIndex& index, u32 a_rank, u32 b_rank,
-                                          const LanesSlab& slab, u32& sites_out, u32& seeds_out, EdgeQ3Work& local) {
-  sites_out = seeds_out = 0;
+MHGP9_HD CertificateStatus lanes_cover(const Group& group, const LanesIndex& index, u32 a_rank, u32 b_rank,
+                                       const LanesSlab& slab, u32& range_count, u32& sites, EdgeQ3Work& local) {
+  range_count = sites = 0;
   const std::int32_t* a = index.tree.rank_points + 3 * static_cast<std::size_t>(a_rank);
   const std::int32_t* b = index.tree.rank_points + 3 * static_cast<std::size_t>(b_rank);
-  const u32 id_a = index.rank_ids[a_rank], id_b = index.rank_ids[b_rank];
   const CertificateSlab view{slab.ranges, nullptr, nullptr, nullptr, nullptr, slab.capacity};
-  u32 range_count = 0, sites = 0;
   if (!build_cover(group, index.tree, edge_ball(a, b, false), view, range_count, sites, local.cover))
     return CertificateStatus::deferred;
   if (sites < 2) return CertificateStatus::fault;
   local.cover_sites = sites;
+  return CertificateStatus::decided;
+}
+
+// lanes_order: the cover sites (ranges of lanes_cover, through
+// slab.scratch) in scan order at slab.points / slab.ranks[0, sites) and the
+// owned acute seeds at slab.seeds[0, seeds) (scan positions); `local`
+// receives the seed-scan counters. Returns the number of seeds.
+template <class Group>
+MHGP9_HD u32 lanes_order(const Group& group, const LanesIndex& index, u32 a_rank, u32 b_rank, const LanesSlab& slab,
+                         u32 range_count, u32 sites, EdgeQ3Work& local) {
+  const std::int32_t* a = index.tree.rank_points + 3 * static_cast<std::size_t>(a_rank);
+  const std::int32_t* b = index.tree.rank_points + 3 * static_cast<std::size_t>(b_rank);
+  const u32 id_a = index.rank_ids[a_rank], id_b = index.rank_ids[b_rank];
 
   // The cover ranks in range order (increasing rank).
   u32 position = 0;
@@ -376,26 +384,41 @@ MHGP9_HD CertificateStatus lanes_prologue(const Group& group, const LanesIndex& 
   local.seed_tests = sites;
   local.seeds = seeds;
   group.sync();
+  return seeds;
+}
+
+// The whole prologue: the cover, its sites in scan order (slab.points /
+// slab.ranks[0, sites)) and the owned acute seeds (slab.seeds[0, seeds),
+// scan positions). `local` receives the cover and seed-scan counters.
+// Uniform result.
+template <class Group>
+MHGP9_HD CertificateStatus lanes_prologue(const Group& group, const LanesIndex& index, u32 a_rank, u32 b_rank,
+                                          const LanesSlab& slab, u32& sites_out, u32& seeds_out, EdgeQ3Work& local) {
+  sites_out = seeds_out = 0;
+  u32 range_count = 0, sites = 0;
+  const auto status = lanes_cover(group, index, a_rank, b_rank, slab, range_count, sites, local);
+  if (status != CertificateStatus::decided) return status;
+  seeds_out = lanes_order(group, index, a_rank, b_rank, slab, range_count, sites, local);
   sites_out = sites;
-  seeds_out = seeds;
   return CertificateStatus::decided;
 }
 
-// The q3 censuses of the prologue's seeds, appended at
-// slab.records[record_count, ...). Uniform result.
+// The q3 censuses of the seeds [first, last) of the prologue, appended at
+// slab.records[record_count, ...) in seed order: a record slab full at an
+// accepted seed defers, a seed without its ball is a fault (the records
+// before either stay valid). `local` receives the census counters only.
+// Uniform result.
 template <class Group>
-MHGP9_HD CertificateStatus q3_census(const Group& group, const LanesIndex& index, u32 a_rank, u32 b_rank,
-                                     unsigned kmax, const LanesSlab& slab, u32 sites, u32 seeds, u32& record_count,
-                                     EdgeQ3Work& local) {
+MHGP9_HD CertificateStatus q3_census_range(const Group& group, const LanesIndex& index, u32 a_rank, u32 b_rank,
+                                           unsigned kmax, const LanesSlab& slab, u32 sites, u32 first, u32 last,
+                                           u32& record_count, EdgeQ3Work& local) {
   if (kmax < 2) return CertificateStatus::fault;  // no q3 lane below K2
   const std::int32_t* a = index.tree.rank_points + 3 * static_cast<std::size_t>(a_rank);
   const u32 id_a = index.rank_ids[a_rank], id_b = index.rank_ids[b_rank];
   const std::int32_t* b = index.tree.rank_points + 3 * static_cast<std::size_t>(b_rank);
-  ++local.q3_edges;
-  local.census_seeds += seeds;
   // One census per seed, split across the lanes by site.
   const u32 threshold = kmax - 1;
-  for (u32 i = 0; i < seeds; ++i) {
+  for (u32 i = first; i < last; ++i) {
     const std::int32_t* x = slab.points + 3 * static_cast<std::size_t>(slab.seeds[i]);
     Q3Form form{};
     if (!q3_form(a, b, x, form)) return CertificateStatus::fault;  // an owned acute seed has its ball
@@ -465,6 +488,17 @@ MHGP9_HD CertificateStatus q3_census(const Group& group, const LanesIndex& index
   }
   group.sync();  // the leader's records, copied out by every lane
   return CertificateStatus::decided;
+}
+
+// The q3 censuses of all the prologue's seeds, with the edge's q3 counters.
+template <class Group>
+MHGP9_HD CertificateStatus q3_census(const Group& group, const LanesIndex& index, u32 a_rank, u32 b_rank,
+                                     unsigned kmax, const LanesSlab& slab, u32 sites, u32 seeds, u32& record_count,
+                                     EdgeQ3Work& local) {
+  if (kmax < 2) return CertificateStatus::fault;  // no q3 lane below K2
+  ++local.q3_edges;
+  local.census_seeds += seeds;
+  return q3_census_range(group, index, a_rank, b_rank, kmax, slab, sites, 0, seeds, record_count, local);
 }
 
 // The q3 lane alone: prologue then censuses (S4a).

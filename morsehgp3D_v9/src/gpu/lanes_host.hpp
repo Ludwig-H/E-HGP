@@ -3,11 +3,20 @@
 // MorseHGP3D v9 (23 septembre 2026) — S4a: host run of gpu/lanes.hpp
 // (HostGroup), the reference of the device call (same slabs, same deferral
 // rules, same records) and the CPU implementation of the chain lever
-// q34_batch_q3. Edges are processed in parallel by blocks; the blocks are
-// committed in edge order, so the arena reservation (and a deferral when it
-// is full) is deterministic whatever the number of threads.
+// q34_batch_q3.
+//
+// v9 S4b tasks (24 septembre 2026, lanes plan step 2): the host twin runs
+// the SAME three steps as the device (gpu/lanes_tasks.hpp) — P per edge,
+// T per (edge, seed range) task, C per edge (replay, arena rule in edge
+// order, gather in (phase, task) order, ledger of the decided edges) — over
+// windows of edges (bounded host memory: the covers of one window at a
+// time). Its output (records, begins, counts, statuses, ledgers) is a
+// function of the input only: the same for every thread count, window size
+// and task order, and byte-identical to the device call and to the
+// one-task-per-edge run (B = single_task_budget).
 
 #include "filter_runner.hpp"
+#include "lanes_tasks.hpp"
 
 #include <algorithm>
 #include <atomic>
@@ -20,7 +29,50 @@
 
 namespace mhgp9::gpu {
 
-inline LanesOutput run_lanes_batch_host(const LanesInput& input, std::size_t workers) {
+namespace lanes_host_detail {
+
+// A barrier that a failure opens for good: every waiter returns false and
+// leaves (auditor A: never a waiter left behind, never a terminating thread).
+class PhaseBarrier {
+ public:
+  explicit PhaseBarrier(std::size_t count) : count_(count) {}
+  bool arrive_and_wait() {
+    std::unique_lock<std::mutex> lock(mutex_);
+    if (failed_) return false;
+    const std::size_t generation = generation_;
+    if (++waiting_ == count_) {
+      waiting_ = 0;
+      ++generation_;
+      turn_.notify_all();
+      return true;
+    }
+    turn_.wait(lock, [&] { return generation_ != generation || failed_; });
+    return !failed_;
+  }
+  void fail() {
+    const std::lock_guard<std::mutex> lock(mutex_);
+    failed_ = true;
+    turn_.notify_all();
+  }
+  bool failed() {
+    const std::lock_guard<std::mutex> lock(mutex_);
+    return failed_;
+  }
+
+ private:
+  std::mutex mutex_;
+  std::condition_variable turn_;
+  std::size_t count_, waiting_ = 0, generation_ = 0;
+  bool failed_ = false;
+};
+
+}  // namespace lanes_host_detail
+
+inline constexpr std::size_t lanes_host_window = 16384;  // edges whose covers live at once on the host
+
+// The three steps over windows of `window` edges (>= 1). run_lanes_batch_host
+// is this with lanes_host_window; the gates vary the window.
+inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t workers, std::size_t window) {
   LanesOutput out;
   out.error = validate_lanes_input(input);
   if (!out.error.empty()) {
@@ -35,6 +87,10 @@ inline LanesOutput run_lanes_batch_host(const LanesInput& input, std::size_t wor
   const u32 record_capacity = input.record_capacity == 0 ? default_record_capacity : input.record_capacity;
   const u32 event_capacity = input.event_capacity == 0 ? default_event_capacity : input.event_capacity;
   const std::size_t arena = input.arena_capacity == 0 ? default_arena_capacity(edges) : input.arena_capacity;
+  const u64 budget = input.task_budget == 0 ? default_task_budget : input.task_budget;
+  const u64 staging_capacity =
+      input.staging_capacity == 0 ? default_staging_capacity(edges) : input.staging_capacity;
+  const u64 cover_capacity = input.cover_capacity;  // 0: no limit on the host
   out.capacity = capacity;
   out.record_capacity = record_capacity;
   out.status.assign(edges, 0);
@@ -44,90 +100,245 @@ inline LanesOutput run_lanes_batch_host(const LanesInput& input, std::size_t wor
                                           input.index.rank_points},
                          input.rank_ids};
   if (edges == 0) return out;  // no slab: nothing to decide
-  constexpr std::size_t grain = 64;
-  const std::size_t blocks = (edges + grain - 1) / grain;
-  const std::size_t threads = std::max<std::size_t>(1, std::min(workers, blocks));
-  std::atomic<std::size_t> next{0};
-  std::mutex mutex;
-  std::condition_variable turn;
-  std::size_t committed = 0;  // blocks committed, in order
-  bool failed = false;
-  std::exception_ptr failure;
+  if (window == 0) window = 1;
+  const std::size_t windows = (edges + window - 1) / window;
+  const std::size_t threads = std::max<std::size_t>(1, std::min(workers, edges));
+
+  // Per-window state (shared, written in disjoint parts or by thread 0
+  // between barriers).
+  std::vector<LanesPlan> plans;
+  std::vector<EdgeQ3Work> plan_work;
+  std::vector<u32> cover_owner;         // thread whose cover store holds the edge
+  std::vector<LanesTaskWork> slots;     // the edge's tasks' work
+  std::vector<std::size_t> task_first;  // window-local, size n + 1
+  std::vector<LanesTask> tasks;
+  std::vector<u32> task_owner;          // thread whose staging holds the task's records
+  std::vector<u8> pre_status;           // after the replay, before the arena rule
+  std::vector<u32> counts;
+  std::atomic<std::size_t> next_edge{0}, next_task{0}, next_gather{0};
+  // Per-thread stores and results.
+  std::vector<std::vector<std::int32_t>> cover_points(threads);
+  std::vector<std::vector<u32>> cover_ranks(threads), cover_seeds(threads);
+  std::vector<RawVector<LaneRecord>> staging(threads);
+  std::vector<Q3Work> work3(threads);
+  std::vector<Q4Work> work4(threads);
+  std::vector<u64> cover_total(threads, 0), staged_total(threads, 0), task_steps(threads, 0);
+  u64 tasks_total = 0;
   unsigned long long reserved = 0;
-  // Every exception of a worker (slab allocation, block buffers, the lane,
-  // the ordered commit) is kept, stops the others and is rethrown after all
-  // are joined (auditor A): never a terminating thread, never a waiter left
-  // behind a commit that will not come. A failed call publishes nothing.
+  std::size_t window_first = 0, window_count = 0;
+  double plan_ms = 0, task_ms = 0, compact_ms = 0;
+  std::exception_ptr failure;
+  std::mutex failure_mutex;
+  lanes_host_detail::PhaseBarrier barrier(threads);
   const auto fail = [&] {
-    const std::lock_guard<std::mutex> lock(mutex);
-    if (!failure) failure = std::current_exception();
-    failed = true;
-    turn.notify_all();
+    {
+      const std::lock_guard<std::mutex> lock(failure_mutex);
+      if (!failure) failure = std::current_exception();
+    }
+    barrier.fail();
   };
-  const auto worker = [&]() noexcept {
+  const auto worker = [&](std::size_t self) noexcept {
     try {
-      std::vector<u32> ranges(2 * static_cast<std::size_t>(capacity)), ranks(capacity), seeds(capacity),
-          scratch(capacity);
-      std::vector<std::int32_t> points(3 * static_cast<std::size_t>(capacity));
+      std::vector<u32> ranges(2 * static_cast<std::size_t>(capacity)), scratch(capacity);
       std::vector<LaneRecord> slab_records(record_capacity);
-      const LanesSlab slab{ranges.data(), points.data(), ranks.data(), seeds.data(), scratch.data(),
-                           slab_records.data(), capacity, record_capacity};
       std::vector<u32> positions(event_capacity), bits(event_capacity), list(event_capacity);
       const Q4Slab q4{positions.data(), bits.data(), list.data(), event_capacity};
-      std::vector<CertificateStatus> status;
-      std::vector<EdgeQ3Work> local;
-      std::vector<Q4Work> local4;
-      std::vector<u32> counts;
-      std::vector<LaneRecord> records;
-      for (;;) {
-        const std::size_t block = next.fetch_add(1);
-        if (block >= blocks) return;
-        const std::size_t first = block * grain, last = std::min(edges, first + grain);
-        status.assign(last - first, CertificateStatus::decided);
-        local.assign(last - first, EdgeQ3Work{});
-        local4.assign(last - first, Q4Work{});
-        counts.assign(last - first, 0);
-        records.clear();
-        for (std::size_t i = first; i < last; ++i) {
-          u32 count = 0;
-          const u8 lanes = input.edge_lanes == nullptr ? u8{2} : input.edge_lanes[i];
-          status[i - first] = edge_lanes(HostGroup{}, index, input.edge_a[i], input.edge_b[i], lanes,
-                                         input.index.kmax, slab, q4, count, local[i - first], local4[i - first]);
-          if (status[i - first] != CertificateStatus::decided) continue;
-          counts[i - first] = count;
-          for (u32 r = 0; r < count; ++r) {
-            records.push_back(slab_records[r]);
-            records.back().edge = static_cast<u32>(i);
-          }
+      const LanesSlab walk{ranges.data(), nullptr, nullptr, nullptr, scratch.data(), nullptr, capacity, 0};
+      std::chrono::steady_clock::time_point mark{};  // thread 0: start of the current phase
+      const auto lap = [&](double& to) {
+        const auto now = std::chrono::steady_clock::now();
+        to += std::chrono::duration<double, std::milli>(now - mark).count();
+        mark = now;
+      };
+      for (std::size_t w = 0; w < windows; ++w) {
+        // Thread 0 opens the window; every thread empties its own stores
+        // (the last barrier of the previous window ended every reader).
+        if (self == 0) {
+          window_first = w * window;
+          window_count = std::min(edges, window_first + window) - window_first;
+          plans.assign(window_count, LanesPlan{});
+          plan_work.assign(window_count, EdgeQ3Work{});
+          cover_owner.assign(window_count, 0);
+          slots.assign(window_count, LanesTaskWork{});
+          next_edge.store(0);
+          next_task.store(0);
+          next_gather.store(0);
         }
-        std::unique_lock<std::mutex> lock(mutex);
-        turn.wait(lock, [&] { return committed == block || failed; });
-        if (failed) return;
-        std::size_t cursor = 0;
-        for (std::size_t i = first; i < last; ++i) {
-          auto s = status[i - first];
-          const u32 count = counts[i - first];
-          if (s == CertificateStatus::decided) {
-            // The device's reservation: the counter always advances.
-            reserved += count;
-            if (reserved > arena) {
-              s = CertificateStatus::deferred;
-            } else {
-              out.record_begin[i] = static_cast<u32>(out.records.size());
-              out.record_count[i] = count;
-              out.records.insert(out.records.end(), records.begin() + static_cast<std::ptrdiff_t>(cursor),
-                                 records.begin() + static_cast<std::ptrdiff_t>(cursor + count));
-              add_q3_edge(out.work, local[i - first]);
-              add_q4(out.work4, local4[i - first]);
+        cover_points[self].clear();
+        cover_ranks[self].clear();
+        cover_seeds[self].clear();
+        staging[self].clear();
+        if (!barrier.arrive_and_wait()) return;
+        if (self == 0) mark = std::chrono::steady_clock::now();
+        // ---- P: one per edge of the window.
+        for (;;) {
+          const std::size_t i = next_edge.fetch_add(1);
+          if (i >= window_count) break;
+          const std::size_t e = window_first + i;
+          const u8 lanes = input.edge_lanes == nullptr ? u8{2} : input.edge_lanes[e];
+          u32 range_count = 0, sites = 0;
+          EdgeQ3Work& local = plan_work[i];
+          LanesPlan& plan = plans[i];
+          plan.lanes = lanes;
+          const auto status = lanes_plan_cover(HostGroup{}, index, input.edge_a[e], input.edge_b[e], lanes,
+                                               input.index.kmax, walk, range_count, sites, local);
+          if (status == CertificateStatus::decided) {
+            auto& points = cover_points[self];
+            auto& ranks = cover_ranks[self];
+            auto& seeds = cover_seeds[self];
+            const std::size_t offset = ranks.size();
+            points.resize(3 * (offset + sites));
+            ranks.resize(offset + sites);
+            seeds.resize(offset + sites);
+            const LanesSlab placed{ranges.data(), points.data() + 3 * offset, ranks.data() + offset,
+                                   seeds.data() + offset, scratch.data(), nullptr, capacity, 0};
+            plan.seeds = lanes_plan_order(HostGroup{}, index, input.edge_a[e], input.edge_b[e], lanes, placed,
+                                          range_count, sites, local);
+            plan.offset = offset;
+            plan.sites = sites;
+            plan.tasks = lanes_task_count(sites, plan.seeds, budget);
+            cover_owner[i] = static_cast<u32>(self);
+            cover_total[self] += sites;
+          }
+          plan.status = static_cast<u8>(status);
+        }
+        if (!barrier.arrive_and_wait()) return;
+        if (self == 0) {
+          // The task table of the window, in (edge, range) order.
+          task_first.assign(window_count + 1, 0);
+          for (std::size_t i = 0; i < window_count; ++i) task_first[i + 1] = task_first[i] + plans[i].tasks;
+          tasks.assign(task_first[window_count], LanesTask{});
+          task_owner.assign(tasks.size(), 0);
+          for (std::size_t i = 0; i < window_count; ++i) {
+            const u64 per = lanes_seeds_per_task(plans[i].sites, budget);
+            for (u32 k = 0; k < plans[i].tasks; ++k) {
+              LanesTask& t = tasks[task_first[i] + k];
+              t.edge = static_cast<u32>(i);
+              t.first = static_cast<u32>(k * per);
+              t.last = static_cast<u32>(std::min<u64>(plans[i].seeds, k * per + per));
             }
-            cursor += count;
           }
-          out.status[i] = static_cast<u8>(s);
-          if (s == CertificateStatus::deferred) ++out.deferred;
-          else if (s == CertificateStatus::fault) ++out.faults;
+          tasks_total += tasks.size();
+          pre_status.assign(window_count, 0);
+          counts.assign(window_count, 0);
+          lap(plan_ms);
         }
-        ++committed;
-        turn.notify_all();
+        if (!barrier.arrive_and_wait()) return;
+        // ---- T: one per task.
+        for (;;) {
+          std::size_t t = next_task.fetch_add(1);
+          if (t >= tasks.size()) break;
+#if defined(MHGP9_LANES_TASKS_MUTANT_COMPLETION_ORDER)
+          t = tasks.size() - 1 - t;  // mutant emulation: the tasks complete in reverse order
+#endif
+          LanesTask& task = tasks[t];
+          const std::size_t i = task.edge, e = window_first + i;
+          const LanesPlan& plan = plans[i];
+          const u32 owner = cover_owner[i];
+          const LanesSlab slab{nullptr,
+                               cover_points[owner].data() + 3 * plan.offset,
+                               cover_ranks[owner].data() + plan.offset,
+                               cover_seeds[owner].data() + plan.offset,
+                               nullptr,
+                               slab_records.data(),
+                               capacity,
+                               record_capacity};
+          Q4Work w4{};
+          const u64 steps = lanes_task(HostGroup{}, index, input.edge_a[e], input.edge_b[e], plan.lanes,
+                                       input.index.kmax, slab, plan.sites, task.first, task.last, q4, task, w4,
+                                       slots[i]);
+          task_steps[self] = std::max<u64>(task_steps[self], steps);
+          if (task.fail_phase == 0) {
+            const u32 n = task.q3 + task.q4;
+            task.begin = staging[self].size();
+            task_owner[t] = static_cast<u32>(self);
+            staging[self].insert(staging[self].end(), slab_records.begin(), slab_records.begin() + n);
+            staged_total[self] += n;
+          }
+        }
+        if (!barrier.arrive_and_wait()) return;
+        if (self == 0) lap(task_ms);
+        // ---- C: replay per edge (parallel), arena rule in edge order
+        // (thread 0), then gather and ledger (parallel).
+        for (;;) {
+          const std::size_t i = next_gather.fetch_add(1);
+          if (i >= window_count) break;
+          auto status = static_cast<CertificateStatus>(plans[i].status);
+          u32 count = 0;
+          if (status == CertificateStatus::decided)
+            status = lanes_replay(tasks.data() + task_first[i], plans[i].tasks, plans[i].lanes, record_capacity,
+                                  count);
+          pre_status[i] = static_cast<u8>(status);
+          counts[i] = count;
+        }
+        if (!barrier.arrive_and_wait()) return;
+        if (self == 0) {
+          std::size_t begin = out.records.size();
+          for (std::size_t i = 0; i < window_count; ++i) {
+            const std::size_t e = window_first + i;
+            auto s = static_cast<CertificateStatus>(pre_status[i]);
+            if (s == CertificateStatus::decided) {
+              // The device's reservation: the counter always advances.
+              reserved += counts[i];
+              if (reserved > arena) {
+                s = CertificateStatus::deferred;
+              } else {
+                out.record_begin[e] = static_cast<u32>(begin);
+                out.record_count[e] = counts[i];
+                begin += counts[i];
+              }
+            }
+            out.status[e] = static_cast<u8>(s);
+            if (s == CertificateStatus::deferred) ++out.deferred;
+            else if (s == CertificateStatus::fault) ++out.faults;
+          }
+          const std::size_t from = out.records.size();
+          out.records.resize(begin);
+          poison_unwritten(out.records, from);
+          next_gather.store(0);
+        }
+        if (!barrier.arrive_and_wait()) return;
+        for (;;) {
+          const std::size_t i = next_gather.fetch_add(1);
+          if (i >= window_count) break;
+          const std::size_t e = window_first + i;
+          const bool decided = out.status[e] == static_cast<u8>(CertificateStatus::decided);
+#if defined(MHGP9_LANES_TASKS_MUTANT_DEFERRED_COUNTERS)
+          const bool counted = plans[i].status == static_cast<u8>(CertificateStatus::decided);  // mutant
+#else
+          const bool counted = decided;
+#endif
+          if (counted) {
+            EdgeQ3Work e3{};
+            Q4Work e4{};
+            lanes_edge_work(plan_work[i], slots[i], plans[i].lanes, e3, e4);
+            add_q3_edge(work3[self], e3);
+            add_q4(work4[self], e4);
+          }
+          if (!decided) continue;
+          LaneRecord* to = out.records.data() + out.record_begin[e];
+          const std::size_t first = task_first[i], last = task_first[i + 1];
+          const auto copy = [&](std::size_t t, u32 skip, u32 n) {
+            const LaneRecord* from = staging[task_owner[t]].data() + tasks[t].begin + skip;
+            for (u32 r = 0; r < n; ++r) {
+              *to = from[r];
+              to->edge = static_cast<u32>(e);
+              ++to;
+            }
+          };
+#if defined(MHGP9_LANES_TASKS_MUTANT_COMPLETION_ORDER)
+          // mutant: each task's records placed whole, in completion order
+          for (std::size_t t = last; t-- > first;) copy(t, 0, tasks[t].q3 + tasks[t].q4);
+#elif defined(MHGP9_LANES_TASKS_MUTANT_SEGMENTS_SWAPPED)
+          for (std::size_t t = first; t < last; ++t) copy(t, tasks[t].q3, tasks[t].q4);  // mutant: q4 first
+          for (std::size_t t = first; t < last; ++t) copy(t, 0, tasks[t].q3);
+#else
+          for (std::size_t t = first; t < last; ++t) copy(t, 0, tasks[t].q3);
+          for (std::size_t t = first; t < last; ++t) copy(t, tasks[t].q3, tasks[t].q4);
+#endif
+        }
+        if (!barrier.arrive_and_wait()) return;
+        if (self == 0) lap(compact_ms);
       }
     } catch (...) {
       fail();
@@ -137,19 +348,47 @@ inline LanesOutput run_lanes_batch_host(const LanesInput& input, std::size_t wor
   pool.reserve(threads);
   for (std::size_t t = 1; t < threads; ++t) {
     try {
-      pool.emplace_back(worker);
+      pool.emplace_back(worker, t);
     } catch (...) {
       fail();  // the calling thread still runs (and fails fast), then joins
       break;
     }
   }
-  worker();
+  worker(0);
   for (auto& thread : pool) thread.join();
   if (failure) std::rethrow_exception(failure);
+  if (barrier.failed()) throw std::logic_error("mhgp9 lanes host twin: a phase barrier failed without a cause");
+  u64 covers = 0, staged = 0;
+  for (std::size_t t = 0; t < threads; ++t) {
+    add_q3(out.work, work3[t]);
+    add_q4(out.work4, work4[t]);
+    covers += cover_total[t];
+    staged += staged_total[t];
+    out.max_task_steps = std::max<u64>(out.max_task_steps, task_steps[t]);
+  }
+  out.tasks = tasks_total;
+  // The device's arenas (lanes_tasks.hpp): an overflow is a refusal of the
+  // whole call, decided on totals that do not depend on the order.
+  const auto refuse = [&](const char* why) {
+    LanesOutput refused;
+    refused.error = why;
+    refused.error_kind = BatchError::capacity;
+    return refused;
+  };
+  if (cover_capacity != 0 && covers > cover_capacity) return refuse("lanes cover arena exceeded");
+  if (tasks_total > 0xffffffffULL) return refuse("lanes task table exceeds 2^32 tasks");
+  if (staged > staging_capacity) return refuse("lanes staging arena exceeded");
   const double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
   out.kernel_ms = ms;
   out.total_ms = ms;
+  out.plan_ms = plan_ms;
+  out.task_ms = task_ms;
+  out.compact_ms = compact_ms;
   return out;
+}
+
+inline LanesOutput run_lanes_batch_host(const LanesInput& input, std::size_t workers) {
+  return run_lanes_tasks_host(input, workers, lanes_host_window);
 }
 
 }  // namespace mhgp9::gpu

@@ -58,6 +58,7 @@
 // 3 plancher.
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <charconv>
 #include <cstdint>
 #include <cstdio>
@@ -69,6 +70,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <thread>
 #include <vector>
 
 #include "../../src/gen/pipeline/wspd_q34.hpp"
@@ -244,6 +246,223 @@ gen::Q34LanesBatch batch_of(const gpu::LanesOutput& out, const std::vector<std::
   return batch;
 }
 
+// ---- S4b tasks (lanes plan step 2) -----------------------------------------
+
+// The single-task path of S4b step 1, independent of gpu/lanes_tasks.hpp:
+// edge_lanes per edge (blocks of 64 edges in parallel, one slab per
+// thread), committed in edge order under the arena rule (counter always
+// advanced). The reference of every task run below.
+gpu::LanesOutput single_task_batch(const gpu::LanesInput& in, std::size_t workers,
+                                 std::size_t* with_seeds = nullptr) {
+  gpu::LanesOutput out;
+  out.error = gpu::validate_lanes_input(in);
+  if (!out.error.empty()) return out;
+  out.available = true;
+  out.device = "cpu";
+  const std::size_t edges = in.edge_count;
+  const gpu::u32 capacity = in.capacity == 0 ? gpu::default_lanes_capacity : in.capacity;
+  const gpu::u32 record_capacity = in.record_capacity == 0 ? gpu::default_record_capacity : in.record_capacity;
+  const gpu::u32 event_capacity = in.event_capacity == 0 ? gpu::default_event_capacity : in.event_capacity;
+  const std::size_t arena = in.arena_capacity == 0 ? gpu::default_arena_capacity(edges) : in.arena_capacity;
+  out.capacity = capacity;
+  out.record_capacity = record_capacity;
+  out.status.assign(edges, 0);
+  out.record_begin.assign(edges, 0);
+  out.record_count.assign(edges, 0);
+  const gpu::LanesIndex index{gpu::CertificateIndex{in.index.nodes, in.escapes, static_cast<gpu::u32>(in.index.node_count),
+                                                    in.index.rank_points},
+                              in.rank_ids};
+  constexpr std::size_t grain = 64;
+  const std::size_t blocks = (edges + grain - 1) / grain;
+  std::vector<std::vector<gpu::LaneRecord>> block_records(blocks);
+  std::vector<gpu::CertificateStatus> status(edges, gpu::CertificateStatus::decided);
+  std::vector<gpu::u32> counts(edges, 0);
+  std::vector<gpu::EdgeQ3Work> local(edges);
+  std::vector<gpu::Q4Work> local4(edges);
+  std::atomic<std::size_t> next{0};
+  const auto work = [&] {
+    Slab slab(capacity, record_capacity);
+    Q4Buffers q4b(event_capacity);
+    for (;;) {
+      const std::size_t block = next.fetch_add(1);
+      if (block >= blocks) return;
+      for (std::size_t i = block * grain; i < std::min(edges, block * grain + grain); ++i) {
+        gpu::u32 count = 0;
+        const gpu::u8 lanes = in.edge_lanes == nullptr ? gpu::u8{2} : in.edge_lanes[i];
+        status[i] = gpu::edge_lanes(gpu::HostGroup{}, index, in.edge_a[i], in.edge_b[i], lanes, in.index.kmax,
+                                    slab.view, q4b.view, count, local[i], local4[i]);
+        if (status[i] != gpu::CertificateStatus::decided) continue;
+        counts[i] = count;
+        block_records[block].insert(block_records[block].end(), slab.records.begin(), slab.records.begin() + count);
+      }
+    }
+  };
+  std::vector<std::thread> pool;
+  for (std::size_t t = 1; t < std::max<std::size_t>(1, std::min(workers, blocks)); ++t) pool.emplace_back(work);
+  work();
+  for (auto& thread : pool) thread.join();
+  unsigned long long reserved = 0;
+  for (std::size_t block = 0; block < blocks; ++block) {
+    std::size_t cursor = 0;
+    for (std::size_t i = block * grain; i < std::min(edges, block * grain + grain); ++i) {
+      auto st = status[i];
+      if (st == gpu::CertificateStatus::decided) {
+        reserved += counts[i];
+        if (reserved > arena) {
+          st = gpu::CertificateStatus::deferred;
+        } else {
+          out.record_begin[i] = static_cast<gpu::u32>(out.records.size());
+          out.record_count[i] = counts[i];
+          for (gpu::u32 r = 0; r < counts[i]; ++r) {
+            out.records.push_back(block_records[block][cursor + r]);
+            out.records.back().edge = static_cast<gpu::u32>(i);
+          }
+          gpu::add_q3_edge(out.work, local[i]);
+          gpu::add_q4(out.work4, local4[i]);
+        }
+        cursor += counts[i];
+      }
+      out.status[i] = static_cast<gpu::u8>(st);
+      if (st == gpu::CertificateStatus::deferred) ++out.deferred;
+      else if (st == gpu::CertificateStatus::fault) ++out.faults;
+      if (with_seeds != nullptr && st == gpu::CertificateStatus::decided && local[i].seeds != 0) ++*with_seeds;
+    }
+  }
+  return out;
+}
+
+// The whole output, byte for byte: statuses, slices, records, both ledgers
+// and the deferral counts.
+bool same_output(const gpu::LanesOutput& a, const gpu::LanesOutput& b, std::string& why) {
+  const auto bytes = [](const auto& x, const auto& y) {
+    return x.size() == y.size() &&
+           (x.empty() || std::memcmp(x.data(), y.data(), x.size() * sizeof(*x.data())) == 0);
+  };
+  if (!a.error.empty() || !b.error.empty()) why = "error " + a.error + "|" + b.error;
+  else if (!bytes(a.status, b.status)) why = "status";
+  else if (!bytes(a.record_begin, b.record_begin)) why = "record_begin";
+  else if (!bytes(a.record_count, b.record_count)) why = "record_count";
+  else if (!bytes(a.records, b.records)) why = "records";
+  else if (std::memcmp(&a.work, &b.work, sizeof(a.work)) != 0) why = "work";
+  else if (std::memcmp(&a.work4, &b.work4, sizeof(a.work4)) != 0) why = "work4";
+  else if (a.deferred != b.deferred || a.faults != b.faults) why = "counts";
+  else return true;
+  return false;
+}
+
+// Engraved replays (lanes_replay against edge_lanes' sequential order, by
+// hand): faults and deferrals never come from the real edges, so their
+// precedence is judged here. Each case: record capacity, lanes, tasks
+// (q3, q4, failure phase, kind), expected status and records.
+int replay_fixtures(unsigned long long& cases) {
+  using S = gpu::CertificateStatus;
+  constexpr auto D = static_cast<gpu::u8>(S::deferred), F = static_cast<gpu::u8>(S::fault);
+  struct Case {
+    const char* name;
+    gpu::u32 capacity;
+    gpu::u8 lanes;
+    std::vector<std::array<gpu::u32, 4>> tasks;  // q3, q4, fail_phase, fail_kind
+    S expected;
+    gpu::u32 records;
+  };
+  const std::vector<Case> table{
+      {"decided", 4, 6, {{1, 1, 0, 0}, {1, 1, 0, 0}}, S::decided, 4},
+      {"total_overflow", 3, 6, {{1, 1, 0, 0}, {1, 1, 0, 0}}, S::deferred, 0},
+      // Task 0's record slab full (its 9th q3 record) before a q3 fault of task 1.
+      {"deferral_then_fault", 8, 2, {{8, 0, 2, D}, {0, 0, 2, F}}, S::deferred, 0},
+      // The total passes the capacity in task 1's segment, before its fault.
+      {"overflow_then_fault", 3, 2, {{2, 0, 0, 0}, {2, 0, 2, F}}, S::deferred, 0},
+      {"fault_then_overflow", 3, 2, {{1, 0, 2, F}, {5, 0, 0, 0}}, S::fault, 0},
+      // Every q3 seed comes before every q4 seed: a q3 fault of task 1 wins
+      // over a q4 deferral of task 0.
+      {"q3_phase_first", 8, 6, {{0, 0, 4, D}, {0, 0, 2, F}}, S::fault, 0},
+      // A q4 event deferral of task 0 comes before a q4 fault of task 1.
+      {"q4_deferral_then_fault", 8, 6, {{1, 0, 4, D}, {1, 0, 4, F}}, S::deferred, 0},
+      // q3 total exactly at the capacity, then a q4 deferral: deferred.
+      {"exact_then_deferral", 4, 6, {{2, 0, 4, D}, {2, 1, 0, 0}}, S::deferred, 0},
+      {"q4_only_exact", 2, 4, {{0, 1, 0, 0}, {0, 1, 0, 0}}, S::decided, 2},
+  };
+  for (const auto& c : table) {
+    std::vector<gpu::LanesTask> tasks;
+    for (const auto& t : c.tasks) {
+      gpu::LanesTask task{};
+      task.q3 = t[0];
+      task.q4 = t[1];
+      task.fail_phase = static_cast<gpu::u8>(t[2]);
+      task.fail_kind = static_cast<gpu::u8>(t[3]);
+      tasks.push_back(task);
+    }
+    gpu::u32 records = 0;
+    const auto status =
+        gpu::lanes_replay(tasks.data(), static_cast<gpu::u32>(tasks.size()), c.lanes, c.capacity, records);
+    if (status != c.expected || records != c.records) return fail(std::string("replay.") + c.name);
+    ++cases;
+  }
+  // The split: ceil(seeds / per), per = max(1, B / ceil(sites/32)).
+  if (gpu::lanes_task_count(40, 17, 1) != 17 || gpu::lanes_task_count(40, 17, 6) != 6 ||
+      gpu::lanes_task_count(40, 17, gpu::single_task_budget) != 1 || gpu::lanes_task_count(40, 0, 1) != 0 ||
+      gpu::lanes_task_count(1000, 33, 512) != 3 || gpu::lanes_task_count(32, 32, 512) != 1)
+    return fail("split.count");
+  cases += 6;
+  return 0;
+}
+
+struct TaskTally {
+  unsigned long long runs = 0, tasks_one = 0, tasks_default = 0, tasks_single = 0, extra_tasks = 0;
+  unsigned long long max_steps_default = 0, max_steps_single = 0;
+};
+
+std::string budget_name(gpu::u64 budget) {
+  return budget == gpu::single_task_budget ? std::string("inf") : std::to_string(budget == 0 ? gpu::default_task_budget : budget);
+}
+
+// The task runs of one input against the single-task path, byte for byte:
+// B in {1, default, infinity}, with several thread counts and windows.
+// `clean`: the reference must decide every edge (default capacities), and
+// then B = infinity has one task per edge with seeds and B = 1 one task per
+// seed.
+int tasks_against_reference(const gpu::LanesInput& in, std::size_t workers, const std::string& name, bool clean,
+                            TaskTally& tally) {
+  std::size_t with_seeds = 0;
+  const auto reference = single_task_batch(in, workers, &with_seeds);
+  if (!reference.error.empty() || reference.faults != 0 || (clean && reference.deferred != 0))
+    return fail("tasks.reference " + name);
+  struct Run {
+    gpu::u64 budget;
+    std::size_t threads, window;
+  };
+  const Run runs[] = {{1, workers, gpu::lanes_host_window},
+                      {0, 1, 97},
+                      {0, workers, gpu::lanes_host_window},
+                      {gpu::single_task_budget, 3, gpu::lanes_host_window}};
+  unsigned long long tasks[3] = {0, 0, 0};
+  for (const auto& run : runs) {
+    auto x = in;
+    x.task_budget = run.budget;
+    const auto out = gpu::run_lanes_tasks_host(x, run.threads, run.window);
+    std::string why;
+    if (!same_output(out, reference, why))
+      return fail("tasks.bytes " + name + " B=" + budget_name(run.budget) + " threads=" + std::to_string(run.threads) +
+                  " window=" + std::to_string(run.window) + " " + why);
+    ++tally.runs;
+    const int slot = run.budget == 1 ? 0 : (run.budget == 0 ? 1 : 2);
+    if (slot == 1 && tasks[1] != 0 && tasks[1] != out.tasks) return fail("tasks.count_depends_on_threads " + name);
+    tasks[slot] = out.tasks;
+    if (slot == 1) tally.max_steps_default = std::max<unsigned long long>(tally.max_steps_default, out.max_task_steps);
+    if (slot == 2) tally.max_steps_single = std::max<unsigned long long>(tally.max_steps_single, out.max_task_steps);
+  }
+  if (clean) {
+    // B = infinity: one task per edge with seeds; B = 1: one per seed.
+    if (tasks[2] != with_seeds || tasks[0] != reference.work.seeds || tasks[1] < tasks[2] || tasks[0] < tasks[1])
+      return fail("tasks.split_identity " + name);
+  }
+  tally.tasks_one += tasks[0];
+  tally.tasks_default += tasks[1];
+  tally.tasks_single += tasks[2];
+  tally.extra_tasks += tasks[1] - std::min(tasks[1], tasks[2]);
+  return 0;
+}
+
 std::vector<unsigned> parse_list(std::string_view text) {
   std::vector<unsigned> out;
   while (!text.empty()) {
@@ -293,7 +512,7 @@ struct CompareFloors {
 };
 
 int file_compare(const gen::Q2CensusIndexPtr& index, const Certified& certified, unsigned kmax,
-                 const CompareFloors& floors) {
+                 const CompareFloors& floors, std::size_t workers) {
   const Flat flat(*index);
   const auto view = flat.view();
   const auto order = index->spatial_order();
@@ -354,6 +573,38 @@ int file_compare(const gen::Q2CensusIndexPtr& index, const Certified& certified,
     gpu::add_q3_edge(w3, l3);
     gpu::add_q4(w4, l4);
   }
+  // S4b tasks: the batch of every asked edge, task host twin (default B,
+  // then B = infinity) against the single-task path, byte for byte; the
+  // largest declared work of one task in both.
+  unsigned long long tasks = 0, tasks_single = 0, max_steps = 0, max_steps_single = 0;
+  {
+    std::vector<gpu::u32> ta, tb;
+    std::vector<gpu::u8> tl;
+    for (std::size_t j = 0; j < certified.survivors.size(); ++j) {
+      if (certified.certificates.deferred[j] != 0) continue;
+      const auto lanes = static_cast<gpu::u8>(certified.certificates.masks[j] & (kmax >= 3 ? 6U : 2U));
+      if (lanes == 0) continue;
+      ta.push_back(certified.survivors[j].a_rank);
+      tb.push_back(certified.survivors[j].b_rank);
+      tl.push_back(lanes);
+    }
+    auto in = flat.input(kmax, ta, tb);
+    in.edge_lanes = tl.data();
+    const auto reference = single_task_batch(in, workers);
+    for (const gpu::u64 budget : {gpu::u64{0}, gpu::single_task_budget}) {
+      auto x = in;
+      x.task_budget = budget;
+      const auto out = gpu::run_lanes_batch_host(x, workers);
+      std::string why;
+      if (!same_output(out, reference, why)) return fail("compare.tasks B=" + budget_name(budget) + " " + why);
+      (budget == 0 ? tasks : tasks_single) = out.tasks;
+      (budget == 0 ? max_steps : max_steps_single) = out.max_task_steps;
+    }
+    std::printf("lanes_tasks_compare K=%u edges=%zu records=%zu deferred=%llu tasks=%llu tasks_single=%llu "
+                "max_task_steps=%llu max_steps_single=%llu identical=1\n",
+                kmax, ta.size(), reference.records.size(), static_cast<unsigned long long>(reference.deferred), tasks,
+                tasks_single, max_steps, max_steps_single);
+  }
   const bool all = certificate_deferred == 0 && lanes_deferred == 0;
   const bool floors_ok = records3 >= floors.q3_records && w4.seeds >= floors.q4_seeds &&
                          records4 >= floors.q4_records && (!floors.all_asked || all);
@@ -403,7 +654,7 @@ int file_stats(const std::string& path, unsigned kmax, std::size_t workers, bool
     return 2;
   }
   const auto certified = certified_survivors(index, kmax, workers);
-  if (compare) return file_compare(index, certified, kmax, floors);
+  if (compare) return file_compare(index, certified, kmax, floors, workers);
   const Flat flat(*index);
   const auto view = flat.view();
   Slab slab(gpu::default_lanes_capacity, gpu::default_record_capacity);
@@ -496,6 +747,8 @@ int main(int argc, char** argv) {
   if (compare && (file.empty() || !any_floor)) return 2;
   if (!file.empty()) {
     if (ks.size() != 1) return 2;
+    unsigned long long replay_cases = 0;
+    if (const int code = replay_fixtures(replay_cases); code != 0) return code;
     try {
       return file_stats(file, ks[0], workers, compare, floors);
     } catch (const std::exception& e) {
@@ -504,6 +757,11 @@ int main(int argc, char** argv) {
   }
   unsigned long long edges = 0, q3_only = 0, rejections = 0, emitted = 0, wide_shells = 0, deferred = 0,
                      mutants = 0, guards = 0, judged = 0, faults = 0, q4_judged = 0, q4_deferred = 0;
+  // S4b tasks.
+  TaskTally tally;
+  unsigned long long tasks_deferred_cover = 0, tasks_deferred_records = 0, tasks_deferred_events = 0,
+                     tasks_deferred_arena = 0, tasks_refusals = 0, replay_cases = 0;
+  if (const int code = replay_fixtures(replay_cases); code != 0) return code;
   gpu::Q4Work q4_total{};
   const auto options = q34_options();
   // Engraved cospherical fixture: the integer points of the spheres of
@@ -783,6 +1041,97 @@ int main(int argc, char** argv) {
           }
         }
       }
+      // 7. S4b tasks (lanes plan step 2): the three steps of
+      // gpu/lanes_tasks.hpp against the single-task path, byte for byte, on
+      // every certified edge with an open lane (q3 and, from K3, q4): B in
+      // {1, default, infinity}, several threads and windows; then with the
+      // cover, records, events or arena reduced (the deferred edges are the
+      // single-task path's, floors > 0); then the arena refusals.
+      {
+        std::vector<gpu::u32> ta, tb;
+        std::vector<gpu::u8> tl;
+        for (std::size_t j = 0; j < survivors.size(); ++j) {
+          if (certified.certificates.deferred[j] != 0) continue;
+          const auto mask = static_cast<gpu::u8>(certified.certificates.masks[j] & (kmax >= 3 ? 6U : 2U));
+          if (mask == 0) continue;
+          ta.push_back(survivors[j].a_rank);
+          tb.push_back(survivors[j].b_rank);
+          tl.push_back(mask);
+        }
+        if (!ta.empty()) {
+          auto base = flat.input(kmax, ta, tb);
+          base.edge_lanes = tl.data();
+          if (const int code = tasks_against_reference(base, workers, where_name, true, tally); code != 0) return code;
+          const auto reference = single_task_batch(base, workers);
+          std::vector<gpu::u32> sorted = cover_sites;
+          std::sort(sorted.begin(), sorted.end());
+          struct Variant {
+            const char* name;
+            gpu::LanesInput in;
+            unsigned long long* deferred;
+          };
+          std::vector<Variant> variants;
+          if (!sorted.empty()) {
+            auto x = base;
+            x.capacity = std::max<gpu::u32>(2, sorted[sorted.size() / 2]);
+            variants.push_back({"cover", x, &tasks_deferred_cover});
+          }
+          {
+            auto x = base;
+            x.record_capacity = 2;
+            variants.push_back({"records", x, &tasks_deferred_records});
+          }
+          if (kmax >= 3) {
+            auto x = base;
+            x.event_capacity = 2;
+            variants.push_back({"events", x, &tasks_deferred_events});
+          }
+          if (reference.records.size() >= 2) {
+            auto x = base;
+            x.arena_capacity = reference.records.size() / 2;
+            variants.push_back({"arena", x, &tasks_deferred_arena});
+          }
+          for (const auto& v : variants) {
+            const auto ref = single_task_batch(v.in, workers);
+            if (!ref.error.empty() || ref.faults != 0) return fail("tasks.small_reference " + where_name + " " + v.name);
+            *v.deferred += ref.deferred;
+            for (const gpu::u64 budget : {gpu::u64{1}, gpu::u64{0}}) {
+              auto x = v.in;
+              x.task_budget = budget;
+              const auto out = gpu::run_lanes_batch_host(x, workers);
+              std::string why;
+              if (!same_output(out, ref, why))
+                return fail("tasks.small_bytes " + where_name + " " + v.name + " B=" + budget_name(budget) + " " + why);
+              ++tally.runs;
+            }
+          }
+          // The arenas: exactly full is accepted, one short refuses the
+          // whole call (capacity), whatever B.
+          for (const gpu::u64 budget : {gpu::u64{1}, gpu::u64{0}}) {
+            auto x = base;
+            x.task_budget = budget;
+            x.cover_capacity = reference.work.cover_sites;
+            x.staging_capacity = std::max<std::size_t>(1, reference.records.size());
+            std::string why;
+            if (!same_output(gpu::run_lanes_batch_host(x, workers), reference, why))
+              return fail("tasks.arena_full " + where_name + " " + why);
+            auto short_cover = x;
+            short_cover.cover_capacity = reference.work.cover_sites - 1;
+            const auto refused = gpu::run_lanes_batch_host(short_cover, workers);
+            if (refused.error_kind != gpu::BatchError::capacity || !refused.records.empty() || !refused.status.empty())
+              return fail("tasks.cover_refusal " + where_name);
+            ++tasks_refusals;
+            if (reference.records.size() >= 2) {
+              auto short_staging = x;
+              short_staging.staging_capacity = reference.records.size() - 1;
+              const auto refused2 = gpu::run_lanes_batch_host(short_staging, workers);
+              if (refused2.error_kind != gpu::BatchError::capacity || !refused2.records.empty())
+                return fail("tasks.staging_refusal " + where_name);
+              ++tasks_refusals;
+            }
+          }
+        }
+      }
       // 5. Input guard (never a device call here).
       if (!guarded && ea.size() >= 2) {
         guarded = true;
@@ -885,6 +1234,11 @@ int main(int argc, char** argv) {
       return fail("b_fixture.two_tetrahedra");
     gpu::add_q4(q4_total, w4);
     b_fixture = count;
+    const std::vector<gpu::u32> fa{ra}, fb{rb};
+    const std::vector<gpu::u8> fl{6};
+    auto fin = flat.input(3, fa, fb);
+    fin.edge_lanes = fl.data();
+    if (const int code = tasks_against_reference(fin, workers, "b_fixture", true, tally); code != 0) return code;
   }
   // A root exactly on an INTERIOR bound of the grid (L6): a = (0,2,2),
   // b = (3,2,2), x = (1,0,2), y = (1,2,0) give mubar = 12, the grid
@@ -918,6 +1272,11 @@ int main(int argc, char** argv) {
       return fail("bound_fixture.one_tetrahedron");
     gpu::add_q4(q4_total, w4);
     bound_fixture = count;
+    const std::vector<gpu::u32> fa{ra}, fb{rb};
+    const std::vector<gpu::u8> fl{6};
+    auto fin = flat.input(3, fa, fb);
+    fin.edge_lanes = fl.data();
+    if (const int code = tasks_against_reference(fin, workers, "bound_fixture", true, tally); code != 0) return code;
   }
   // A surviving seed without any buffered event (review S4b): on the edge of
   // IDs 0 and 3 at K3, one seed survives with live buckets and no list
@@ -949,6 +1308,12 @@ int main(int argc, char** argv) {
       return fail("zero_buffer.survivor");
     gpu::add_q4(q4_total, w4);
     zero_buffer_fixture = count;
+    const std::vector<gpu::u32> fa{ra}, fb{rb};
+    const std::vector<gpu::u8> fl{6};
+    auto fin = flat.input(3, fa, fb);
+    fin.edge_lanes = fl.data();
+    if (const int code = tasks_against_reference(fin, workers, "zero_buffer_fixture", true, tally); code != 0)
+      return code;
   }
   // The auditor's compact arena fixture: 45 clusters, each a = (-1000,0,0),
   // b = (1000,0,0) and the 108 integer points (0,u,v) with u^2+v^2 = 1105^2.
@@ -1000,6 +1365,10 @@ int main(int argc, char** argv) {
           !same_records(slice, gen::engine_q3_records(index, 5, options, order[ea[c]], order[eb[c]])))
         return fail("arena.records");
     }
+    // The same deferral (edge order, counter always advanced) for every B.
+    if (const int code = tasks_against_reference(flat.input(5, ea, eb), workers, "arena_fixture", false, tally);
+        code != 0)
+      return code;
   }
   std::printf("lanes_port_gate n=%zu edges=%llu q3_only=%llu depth_rejections=%llu emitted=%llu wide_shells=%llu "
               "deferred=%llu judged=%llu mutants=%llu guards=%llu faults=%llu arena_deferred=%llu q4_edges=%llu "
@@ -1010,6 +1379,18 @@ int main(int argc, char** argv) {
               arena_deferred, q4_total.edges, q4_total.seeds, q4_total.survivors, q4_total.groups, q4_total.emitted,
               q4_total.multi_emission_seeds, q4_total.groups_without_valid, q4_total.max_group, q4_judged,
               q4_deferred, b_fixture, bound_fixture, zero_buffer_fixture);
+  const bool any_q4 = std::any_of(ks.begin(), ks.end(), [](unsigned k) { return k >= 3; });
+  std::printf("lanes_tasks runs=%llu tasks_b1=%llu tasks_default=%llu tasks_single=%llu extra_tasks=%llu "
+              "max_steps_default=%llu max_steps_single=%llu deferred_cover=%llu deferred_records=%llu "
+              "deferred_events=%llu deferred_arena=%llu refusals=%llu replay_cases=%llu\n",
+              tally.runs, tally.tasks_one, tally.tasks_default, tally.tasks_single, tally.extra_tasks,
+              tally.max_steps_default, tally.max_steps_single, tasks_deferred_cover, tasks_deferred_records,
+              tasks_deferred_events, tasks_deferred_arena, tasks_refusals, replay_cases);
+  if (tally.runs == 0 || tally.extra_tasks == 0 || tally.tasks_one <= tally.tasks_default ||
+      tasks_deferred_cover == 0 || tasks_deferred_records == 0 || (any_q4 && tasks_deferred_events == 0) ||
+      tasks_deferred_arena == 0 || tasks_refusals == 0 || replay_cases != 15 ||
+      tally.max_steps_default > tally.max_steps_single)
+    return 3;
   if (edges == 0 || q3_only == 0 || rejections == 0 || emitted == 0 || wide_shells == 0 || deferred == 0 ||
       judged == 0 || guards == 0 || mutants == 0 || faults == 0 || arena_deferred != 1 || q4_total.edges == 0 ||
       q4_total.certified_chunk1 == 0 || q4_total.survivors == 0 || q4_total.emitted == 0 ||

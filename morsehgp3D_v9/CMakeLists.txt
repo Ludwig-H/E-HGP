@@ -400,7 +400,7 @@ mhgp9_product_executable(mhgp9_gpu_lanes_port_gate tests/gpu/lanes_port_gate.cpp
 target_link_libraries(mhgp9_gpu_lanes_port_gate PRIVATE mhgp9_gen)
 target_include_directories(mhgp9_gpu_lanes_port_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
 mhgp9_gate(mhgp9_gpu_lanes_port 0 mhgp9_gpu_lanes_port_gate ARGS --n=2000
-           EXPECT_PREFIX "lanes_port_gate n=2000" LABELS "gate;gpu;oracle" TIMEOUT 900)
+           EXPECT_PREFIX "lanes_port_gate n=2000" LABELS "gate;gpu;oracle" TIMEOUT 1800)
 mhgp9_gate(mhgp9_gpu_lanes_port_scale8000 0 mhgp9_gpu_lanes_port_gate ARGS --n=8000 --k=5
            EXPECT_PREFIX "lanes_port_gate n=8000" LABELS "scale8000;gpu;oracle" TIMEOUT 2400)
 mhgp9_gate(mhgp9_gpu_lanes_port_bad_argument 2 mhgp9_gpu_lanes_port_gate ARGS --k=11
@@ -414,6 +414,32 @@ target_include_directories(mhgp9_gpu_lanes_port_early_exit_mutant_gate PRIVATE "
 target_compile_definitions(mhgp9_gpu_lanes_port_early_exit_mutant_gate PRIVATE MHGP9_Q4_LANES_MUTANT_EARLY_EXIT_BELOW_T=1)
 mhgp9_gate(mhgp9_gpu_lanes_port_mutant_early_exit 1 mhgp9_gpu_lanes_port_early_exit_mutant_gate ARGS --n=2000 --k=3
            EXPECT_PREFIX "cause=" LABELS "gate;gpu;mutant" TIMEOUT 600)
+# S4b taches (etape 2 des voies, gpu/lanes_tasks.hpp) : la porte de port
+# compare octet pour octet les trois etapes P/T/C du jumeau au chemin a une
+# tache par arete (B en {1, defaut, infini}, fils, fenetres, capacites
+# reduites, refus d'arene, repliques gravees). Cinq mutants, chacun tue
+# (code 1) par le controle qui le vise : derniere plage partielle oubliee
+# (split.count), placement par ordre d'achevement emule par des taches
+# executees a rebours (tasks.bytes), segments q3 et q4 permutes
+# (tasks.bytes), compteurs d'une arete en attente ajoutes (tasks.small_bytes),
+# preseance attente/panne inversee (replay.).
+foreach(mutant IN ITEMS LAST_RANGE_FORGOTTEN COMPLETION_ORDER SEGMENTS_SWAPPED DEFERRED_COUNTERS FAULT_FIRST)
+  string(TOLOWER ${mutant} lower)
+  mhgp9_product_executable(mhgp9_gpu_lanes_tasks_${lower}_mutant_gate tests/gpu/lanes_port_gate.cpp)
+  target_link_libraries(mhgp9_gpu_lanes_tasks_${lower}_mutant_gate PRIVATE mhgp9_gen)
+  target_include_directories(mhgp9_gpu_lanes_tasks_${lower}_mutant_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+  target_compile_definitions(mhgp9_gpu_lanes_tasks_${lower}_mutant_gate PRIVATE MHGP9_LANES_TASKS_MUTANT_${mutant}=1)
+endforeach()
+mhgp9_gate(mhgp9_gpu_lanes_tasks_mutant_last_range_forgotten 1 mhgp9_gpu_lanes_tasks_last_range_forgotten_mutant_gate
+           ARGS --n=2000 --k=3 EXPECT_PREFIX "cause=split.count" LABELS "gate;gpu;mutant" TIMEOUT 600)
+mhgp9_gate(mhgp9_gpu_lanes_tasks_mutant_completion_order 1 mhgp9_gpu_lanes_tasks_completion_order_mutant_gate
+           ARGS --n=2000 --k=3 EXPECT_PREFIX "cause=tasks.bytes" LABELS "gate;gpu;mutant" TIMEOUT 600)
+mhgp9_gate(mhgp9_gpu_lanes_tasks_mutant_segments_swapped 1 mhgp9_gpu_lanes_tasks_segments_swapped_mutant_gate
+           ARGS --n=2000 --k=3 EXPECT_PREFIX "cause=tasks.bytes" LABELS "gate;gpu;mutant" TIMEOUT 600)
+mhgp9_gate(mhgp9_gpu_lanes_tasks_mutant_deferred_counters 1 mhgp9_gpu_lanes_tasks_deferred_counters_mutant_gate
+           ARGS --n=2000 --k=3 EXPECT_PREFIX "cause=tasks.small_bytes" LABELS "gate;gpu;mutant" TIMEOUT 600)
+mhgp9_gate(mhgp9_gpu_lanes_tasks_mutant_fault_first 1 mhgp9_gpu_lanes_tasks_fault_first_mutant_gate
+           ARGS --n=2000 --k=3 EXPECT_PREFIX "cause=replay." LABELS "gate;gpu;mutant" TIMEOUT 600)
 # Mode --compare (revue S4b) : planchers exiges et seulement avec --compare,
 # --compare seulement sur un fichier, nuage refuse = 2 ; deux points (fixture
 # de l'auditeur) = comparaison vide sous plancher (3) ; tetraedre a racine sur

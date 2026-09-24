@@ -109,3 +109,27 @@ phase 0 −11 % ; images de l'ordre 5 de 132–143 à 47–57 ms. Condensés et
   par la chaîne (sonde v22).
 
 La session G4 R17 mesure l'étape 1 des deux pistes.
+
+## Étape 2 des voies réalisée : tâches (arête, plage de graines)
+
+Détail et portes : [PROVENANCE](../PROVENANCE.md), section « Tâches (arête,
+plage de graines) des voies q3/q4 ».
+- **Trois étapes portables** (`src/gpu/lanes_tasks.hpp`), les mêmes sur
+  l'appareil et dans le jumeau hôte :
+  - P par arête : cover, ordre de balayage et graines dans une arène de
+    covers de 20 o par site ;
+  - T par plage de graines : au plus B = 512 graines × paquets de 32 sites ;
+  - C par arête : préséance d'`edge_lanes` rejouée, arène finale dans
+    l'ordre des arêtes, rassemblement q3 puis q4.
+- **Sortie** : sur l'hôte, égale octet pour octet au chemin à une tâche par
+  arête, pour tout B, tout nombre de fils et toute fenêtre, y compris avec
+  des capacités réduites. Un débordement d'arène (covers, préparation) est un
+  refus de capacité de l'appel.
+- **Mesures locales** (compteurs, 08/000000) :
+  - K5 : 2,50 M tâches ; plus lourde tâche 7 114 pas déclarés, contre
+    86 847 pour une arête entière ;
+  - K10 : 9,58 M tâches ; plus lourde tâche 27 057 pas, contre 290 184.
+- **ptxas** : T à 128 registres et 128 o de débordement, contre 224 avant.
+- **Reste à mesurer sur G4** : le noyau et ses sous-chronos P, T et C. Le
+  juge projette 68 à 76 ms de noyau à K5. Ce n'est qu'une projection tant
+  qu'une session ne l'a pas mesuré.

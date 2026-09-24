@@ -751,25 +751,172 @@ namespace {
 constexpr int lanes_threads = 128;
 constexpr int lanes_warps_per_block = lanes_threads / 32;
 
-// Persistent warps as the certificate kernel: each takes the next edge, runs
-// its q3 lane in its own slab, then (decided) reserves its records in the
-// arena with one atomic and copies them; an edge whose reservation passes the
-// arena end is deferred (the counter advances anyway: every later
-// reservation fails too). Lane 0 writes the per-edge answer and the warp's
-// work (shared memory).
-__global__ void __launch_bounds__(lanes_threads, 4) lanes_kernel(LanesIndex index, const u32* edge_a,
-    const u32* edge_b, const u8* edge_lanes_in, u32 edges, unsigned kmax, u32 capacity, u32 record_capacity,
-    u32 event_capacity, u32* ranges, std::int32_t* points, u32* ranks, u32* seeds, u32* scratch,
-    LaneRecord* slab_records, u32* events, LaneRecord* arena, unsigned long long arena_capacity,
-    unsigned long long* next_edge, unsigned long long* reserved, u8* out_status, u32* out_begin, u32* out_count,
+// ---- S4b tasks (24 septembre 2026, lanes plan step 2): the call in three
+// steps of gpu/lanes_tasks.hpp, on one stream, with two host reads of
+// counters (after P: the cover arena and the task count; after T: the
+// staging arena). Persistent warps take the next edge or task from a global
+// counter; the output never depends on which warp ran what, nor when.
+
+// P: each warp takes the next edge, builds its cover in its walk slab,
+// reserves its sites in the cover arena (one atomic, counter always
+// advanced), writes the scan order and seeds there, then the edge's plan,
+// prologue ledger and empty task slot. A cover beyond the arena leaves the
+// plan without tasks: the host refuses the call before T.
+__global__ void __launch_bounds__(lanes_threads, 4) lanes_plan_kernel(LanesIndex index, const u32* edge_a,
+    const u32* edge_b, const u8* edge_lanes_in, u32 edges, unsigned kmax, u32 capacity, u64 budget, u32* ranges,
+    u32* scratch, std::int32_t* cover_points, u32* cover_ranks, u32* cover_seeds, unsigned long long cover_capacity,
+    unsigned long long* next_edge, unsigned long long* cover_reserved, LanesPlan* plans, EdgeQ3Work* plan_work,
+    LanesTaskWork* slots, unsigned long long* task_counts, u32 warps) {
+  const u32 warp = (blockIdx.x * blockDim.x + threadIdx.x) / 32;
+  if (warp >= warps) return;
+  const WarpGroup group{threadIdx.x & 31U};
+  const std::size_t c = capacity;
+  const LanesSlab walk{ranges + 2 * c * warp, nullptr, nullptr, nullptr, scratch + c * warp, nullptr, capacity, 0};
+  static_assert(sizeof(LanesTaskWork) % sizeof(u64) == 0, "the task slot is a whole number of u64 words");
+  constexpr u32 slot_words = sizeof(LanesTaskWork) / sizeof(u64);
+  for (;;) {
+    unsigned long long edge = 0;
+    if (group.leader()) edge = atomicAdd(next_edge, 1ULL);
+    edge = __shfl_sync(0xffffffffU, edge, 0);
+    if (edge >= edges) break;
+    const u8 lanes = edge_lanes_in == nullptr ? u8{2} : edge_lanes_in[edge];
+    EdgeQ3Work local;
+    u32 range_count = 0, sites = 0;
+    const auto status = lanes_plan_cover(group, index, edge_a[edge], edge_b[edge], lanes, kmax, walk, range_count,
+                                         sites, local);
+    LanesPlan plan{};
+    plan.lanes = lanes;
+    plan.status = static_cast<u8>(status);
+    if (status == CertificateStatus::decided) {
+      unsigned long long offset = 0;
+      if (group.leader()) offset = atomicAdd(cover_reserved, static_cast<unsigned long long>(sites));
+      offset = __shfl_sync(0xffffffffU, offset, 0);
+      if (offset + sites <= cover_capacity) {
+        const LanesSlab placed{walk.ranges, cover_points + 3 * offset, cover_ranks + offset, cover_seeds + offset,
+                               walk.scratch, nullptr, capacity, 0};
+        plan.seeds = lanes_plan_order(group, index, edge_a[edge], edge_b[edge], lanes, placed, range_count, sites,
+                                      local);
+        plan.offset = offset;
+        plan.sites = sites;
+        plan.tasks = lanes_task_count(sites, plan.seeds, budget);
+      }
+    }
+    u64* words = reinterpret_cast<u64*>(slots + edge);
+    group.for_each(slot_words, [&](u32 i) { words[i] = 0; });
+    if (group.leader()) {
+      plans[edge] = plan;
+      plan_work[edge] = local;
+      task_counts[edge] = plan.tasks;
+    }
+    group.sync();
+  }
+}
+
+// The task table: (edge, first seed, last seed) of every task, in (edge,
+// range) order, at the edge's exclusive prefix of the task counts.
+__global__ void lanes_fill_kernel(const LanesPlan* plans, const unsigned long long* task_first, u32 edges,
+                                  u64 budget, LanesTask* tasks) {
+  const std::size_t stride = static_cast<std::size_t>(gridDim.x) * blockDim.x;
+  for (std::size_t e = static_cast<std::size_t>(blockIdx.x) * blockDim.x + threadIdx.x; e < edges; e += stride) {
+    const LanesPlan plan = plans[e];
+    const u64 per = lanes_seeds_per_task(plan.sites, budget);
+    const unsigned long long first = task_first[e];
+    for (u32 k = 0; k < plan.tasks; ++k) {
+      LanesTask task{};
+      task.edge = static_cast<u32>(e);
+      task.first = static_cast<u32>(k * per);
+      const u64 last = k * per + per;
+      task.last = static_cast<u32>(last < plan.seeds ? last : plan.seeds);
+      tasks[first + k] = task;
+    }
+  }
+}
+
+// T: each warp takes the next task, runs its seeds in its record slab, then
+// (no failure) reserves its records in the staging arena with one atomic
+// (counter always advanced; beyond the arena the host refuses the call) and
+// copies them. Lane 0 writes the task back and adds its work to the edge's
+// slot (integer sums and maxima: order-free).
+__global__ void __launch_bounds__(lanes_threads, 4) lanes_task_kernel(LanesIndex index, const u32* edge_a,
+    const u32* edge_b, unsigned kmax, u32 capacity, u32 record_capacity, u32 event_capacity, const LanesPlan* plans,
+    std::int32_t* cover_points, u32* cover_ranks, u32* cover_seeds, LanesTask* tasks,
+    unsigned long long task_count, LaneRecord* slab_records, u32* events, LaneRecord* staging,
+    unsigned long long staging_capacity, unsigned long long* next_task, unsigned long long* staged,
+    unsigned long long* max_steps, LanesTaskWork* slots, u32 warps) {
+  const u32 warp = (blockIdx.x * blockDim.x + threadIdx.x) / 32;
+  __shared__ Q4Work task4[lanes_warps_per_block];  // the current task's q4 work (leader lane)
+  Q4Work& w4 = task4[threadIdx.x / 32];
+  if (warp >= warps) return;
+  const WarpGroup group{threadIdx.x & 31U};
+  const std::size_t e = event_capacity;
+  const Q4Slab q4{events + 3 * e * warp, events + 3 * e * warp + e, events + 3 * e * warp + 2 * e, event_capacity};
+  LaneRecord* records = slab_records + static_cast<std::size_t>(record_capacity) * warp;
+  for (;;) {
+    unsigned long long t = 0;
+    if (group.leader()) t = atomicAdd(next_task, 1ULL);
+    t = __shfl_sync(0xffffffffU, t, 0);
+    if (t >= task_count) break;
+    LanesTask task = tasks[t];
+    const LanesPlan plan = plans[task.edge];
+    const LanesSlab slab{nullptr, cover_points + 3 * plan.offset, cover_ranks + plan.offset,
+                         cover_seeds + plan.offset, nullptr, records, capacity, record_capacity};
+    const u64 steps = lanes_task(group, index, edge_a[task.edge], edge_b[task.edge], plan.lanes, kmax, slab,
+                                 plan.sites, task.first, task.last, q4, task, w4, slots[task.edge]);
+    unsigned long long begin = 0;
+    const u32 n = task.q3 + task.q4;
+    if (task.fail_phase == 0 && n != 0) {
+      if (group.leader()) begin = atomicAdd(staged, static_cast<unsigned long long>(n));
+      begin = __shfl_sync(0xffffffffU, begin, 0);
+      if (begin + n <= staging_capacity) {
+        // Word by word (16 u64 a record): coalesced, and no record held in registers.
+        static_assert(sizeof(LaneRecord) % sizeof(u64) == 0, "a record is a whole number of u64 words");
+        constexpr u32 words = sizeof(LaneRecord) / sizeof(u64);
+        const u64* from = reinterpret_cast<const u64*>(records);
+        u64* to = reinterpret_cast<u64*>(staging + begin);
+        group.for_each(n * words, [&](u32 i) { to[i] = from[i]; });
+      }
+    }
+    if (group.leader()) {
+      task.begin = begin;
+      tasks[t] = task;
+      atomicMax(max_steps, static_cast<unsigned long long>(steps));
+    }
+    group.sync();
+  }
+}
+
+// C, first part: the replay of each edge's tasks (lanes_replay), before the
+// arena rule; the counts of the edges still decided feed the scan.
+__global__ void lanes_replay_kernel(const LanesPlan* plans, const unsigned long long* task_first,
+                                    const LanesTask* tasks, u32 edges, u32 record_capacity, u8* pre_status,
+                                    unsigned long long* counts) {
+  const std::size_t stride = static_cast<std::size_t>(gridDim.x) * blockDim.x;
+  for (std::size_t e = static_cast<std::size_t>(blockIdx.x) * blockDim.x + threadIdx.x; e < edges; e += stride) {
+    const LanesPlan plan = plans[e];
+    auto status = static_cast<CertificateStatus>(plan.status);
+    u32 count = 0;
+    if (status == CertificateStatus::decided)
+      status = lanes_replay(tasks + task_first[e], plan.tasks, plan.lanes, record_capacity, count);
+    pre_status[e] = static_cast<u8>(status);
+    counts[e] = status == CertificateStatus::decided ? count : 0;
+  }
+}
+
+// C, second part: one warp per edge. The arena rule in edge order (the
+// exclusive prefix of the counts: the counter always advanced), the answer,
+// the records of a decided edge gathered at its prefix in (phase, task)
+// order, and its ledger (lane 0, shared memory, then per warp).
+__global__ void __launch_bounds__(lanes_threads) lanes_gather_kernel(const LanesPlan* plans,
+    const EdgeQ3Work* plan_work, const LanesTaskWork* slots, const unsigned long long* task_first,
+    const LanesTask* tasks, const u8* pre_status, const unsigned long long* counts,
+    const unsigned long long* prefix, u32 edges, unsigned long long arena_capacity, const LaneRecord* staging,
+    LaneRecord* arena, u8* out_status, u32* out_begin, u32* out_count, unsigned long long* decided_records,
     Q3Work* warp_work, Q4Work* warp_work4, u32 warps) {
   const u32 warp = (blockIdx.x * blockDim.x + threadIdx.x) / 32;
   __shared__ Q3Work totals[lanes_warps_per_block];
   __shared__ Q4Work totals4[lanes_warps_per_block];
-  __shared__ Q4Work edge4[lanes_warps_per_block];  // the current edge's q4 work (leader lane)
   Q3Work& work = totals[threadIdx.x / 32];
   Q4Work& work4 = totals4[threadIdx.x / 32];
-  Q4Work& local4 = edge4[threadIdx.x / 32];
   if (warp >= warps) return;
   const WarpGroup group{threadIdx.x & 31U};
   if (group.leader()) {
@@ -777,41 +924,38 @@ __global__ void __launch_bounds__(lanes_threads, 4) lanes_kernel(LanesIndex inde
     work4 = Q4Work{};
   }
   group.sync();
-  const std::size_t c = capacity;
-  const LanesSlab slab{ranges + 2 * c * warp, points + 3 * c * warp, ranks + c * warp, seeds + c * warp,
-                       scratch + c * warp, slab_records + static_cast<std::size_t>(record_capacity) * warp, capacity,
-                       record_capacity};
-  const std::size_t e = event_capacity;
-  const Q4Slab q4{events + 3 * e * warp, events + 3 * e * warp + e, events + 3 * e * warp + 2 * e, event_capacity};
-  for (;;) {
-    unsigned long long edge = 0;
-    if (group.leader()) edge = atomicAdd(next_edge, 1ULL);
-    edge = __shfl_sync(0xffffffffU, edge, 0);
-    if (edge >= edges) break;
-    u32 count = 0;
-    EdgeQ3Work local;
-    const u8 lanes = edge_lanes_in == nullptr ? u8{2} : edge_lanes_in[edge];
-    auto status = edge_lanes(group, index, edge_a[edge], edge_b[edge], lanes, kmax, slab, q4, count, local, local4);
-    unsigned long long begin = 0;
-    if (status == CertificateStatus::decided) {
-      if (group.leader()) begin = atomicAdd(reserved, static_cast<unsigned long long>(count));
-      begin = __shfl_sync(0xffffffffU, begin, 0);
-      if (begin + count > arena_capacity) {
-        status = CertificateStatus::deferred;
-      } else {
-        group.for_each(count, [&](u32 r) {
-          arena[begin + r] = slab.records[r];
-          arena[begin + r].edge = static_cast<u32>(edge);
-        });
-      }
+  for (std::size_t e = warp; e < edges; e += warps) {
+    auto status = static_cast<CertificateStatus>(pre_status[e]);
+    const unsigned long long begin = prefix[e], count = counts[e];
+    if (status == CertificateStatus::decided && begin + count > arena_capacity) status = CertificateStatus::deferred;
+    const bool decided = status == CertificateStatus::decided;
+    const LanesPlan plan = plans[e];
+    if (decided) {
+      const LanesTask* own = tasks + task_first[e];
+      LaneRecord* to = arena + begin;
+      for (u32 phase = 2; phase <= 4; phase += 2)
+        for (u32 t = 0; t < plan.tasks; ++t) {
+          const u32 n = phase == 2 ? own[t].q3 : own[t].q4;
+          const LaneRecord* from = staging + own[t].begin + (phase == 2 ? 0U : own[t].q3);
+          group.for_each(n, [&](u32 r) {
+            LaneRecord record = from[r];
+            record.edge = static_cast<u32>(e);
+            to[r] = record;
+          });
+          to += n;
+        }
     }
     if (group.leader()) {
-      out_status[edge] = static_cast<u8>(status);
-      out_begin[edge] = static_cast<u32>(status == CertificateStatus::decided ? begin : 0);
-      out_count[edge] = status == CertificateStatus::decided ? count : 0;
-      if (status == CertificateStatus::decided) {
-        add_q3_edge(work, local);
-        add_q4(work4, local4);
+      out_status[e] = static_cast<u8>(status);
+      out_begin[e] = decided ? static_cast<u32>(begin) : 0U;
+      out_count[e] = decided ? static_cast<u32>(count) : 0U;
+      if (decided) {
+        EdgeQ3Work e3;
+        Q4Work e4;
+        lanes_edge_work(plan_work[e], slots[e], plan.lanes, e3, e4);
+        add_q3_edge(work, e3);
+        add_q4(work4, e4);
+        if (count != 0) atomicAdd(decided_records, count);
       }
     }
     group.sync();
@@ -827,67 +971,102 @@ __global__ void __launch_bounds__(lanes_threads, 4) lanes_kernel(LanesIndex inde
 namespace {
 
 // v9 H1 (24 septembre 2026): the lanes call's device buffers are RESIDENT,
-// grow-only and reused (no cudaMalloc/cudaFree of about 9.5 GB per call);
-// warm_up_lanes reserves the per-warp slabs during q2. The device properties
-// and the occupancy are probed once. Calls are serialised by the mutex. The
-// structure is leaked on purpose: no cudaFree after the runtime's teardown.
-// Sizing adds the resident bytes to the free memory, so the decisions (warps,
-// arena clamp, refusals) do not depend on the history of calls.
+// grow-only and reused (no cudaMalloc/cudaFree of gigabytes per call);
+// warm_up_lanes reserves the per-warp slabs and the cover arena during q2.
+// The device properties and the occupancies are probed once. Calls are
+// serialised by the mutex. The structure is leaked on purpose: no cudaFree
+// after the runtime's teardown. Sizing adds the resident bytes to the free
+// memory, or reads the total memory, so the decisions (warps, arenas,
+// refusals) do not depend on the history of calls.
+//
+// S4b tasks: per-warp slabs are the walk (P: ranges and scratch, 12 bytes a
+// site) and the records and events (T); the cover arena holds 20 bytes a
+// site (coordinates 12, rank 4, seed position 4: the portable functions read
+// slab.points as before), by default a sixth of the device's TOTAL memory
+// (97.9 GB on G4: 816 M sites, 2.15 times the largest call measured,
+// 08/000200 K10 with 379 M). Per edge about 470 bytes (plan, prologue
+// ledger, task slot, scans, answer), per task 32 bytes.
 struct LanesResident {
   std::mutex mu;
   bool probed = false;
   std::string name;
-  int sms = 0, blocks_per_sm = 0;
+  int sms = 0, plan_blocks = 0, task_blocks = 0, gather_blocks = 0;
+  std::size_t total_memory = 0;
   DeviceBuffer<FlatNode> nodes;
-  DeviceBuffer<u32> escapes, rank_ids, edge_a, edge_b, ranges, ranks, seeds, scratch, events, out_begin, out_count;
-  DeviceBuffer<u8> lanes_in, out_status;
+  DeviceBuffer<u32> escapes, rank_ids, edge_a, edge_b, ranges, scratch, events, out_begin, out_count;
+  DeviceBuffer<u32> cover_ranks, cover_seeds;
+  DeviceBuffer<u8> lanes_in, out_status, pre_status;
   DeviceBuffer<Q4Work> warp_work4;
-  DeviceBuffer<std::int32_t> rank_points, points;
-  DeviceBuffer<LaneRecord> slab_records, arena;
-  DeviceBuffer<unsigned long long> counters;
+  DeviceBuffer<std::int32_t> rank_points, cover_points;
+  DeviceBuffer<LaneRecord> slab_records, arena, staging;
+  DeviceBuffer<unsigned long long> counters, task_counts, task_first, record_counts, record_prefix;
   DeviceBuffer<Q3Work> warp_work;
+  DeviceBuffer<LanesPlan> plans;
+  DeviceBuffer<EdgeQ3Work> plan_work;
+  DeviceBuffer<LanesTaskWork> slots;
+  DeviceBuffer<LanesTask> tasks;
+  DeviceBuffer<unsigned char> scan_storage;
   std::size_t device_bytes() const {
     return nodes.capacity_bytes() + escapes.capacity_bytes() + rank_ids.capacity_bytes() + edge_a.capacity_bytes() +
-           edge_b.capacity_bytes() + ranges.capacity_bytes() + ranks.capacity_bytes() + seeds.capacity_bytes() +
-           scratch.capacity_bytes() + events.capacity_bytes() + out_begin.capacity_bytes() +
-           out_count.capacity_bytes() + lanes_in.capacity_bytes() + out_status.capacity_bytes() +
-           warp_work4.capacity_bytes() + rank_points.capacity_bytes() + points.capacity_bytes() +
-           slab_records.capacity_bytes() + arena.capacity_bytes() + counters.capacity_bytes() +
-           warp_work.capacity_bytes();
+           edge_b.capacity_bytes() + ranges.capacity_bytes() + scratch.capacity_bytes() + events.capacity_bytes() +
+           out_begin.capacity_bytes() + out_count.capacity_bytes() + cover_ranks.capacity_bytes() +
+           cover_seeds.capacity_bytes() + lanes_in.capacity_bytes() + out_status.capacity_bytes() +
+           pre_status.capacity_bytes() + warp_work4.capacity_bytes() + rank_points.capacity_bytes() +
+           cover_points.capacity_bytes() + slab_records.capacity_bytes() + arena.capacity_bytes() +
+           staging.capacity_bytes() + counters.capacity_bytes() + task_counts.capacity_bytes() +
+           task_first.capacity_bytes() + record_counts.capacity_bytes() + record_prefix.capacity_bytes() +
+           warp_work.capacity_bytes() + plans.capacity_bytes() + plan_work.capacity_bytes() +
+           slots.capacity_bytes() + tasks.capacity_bytes() + scan_storage.capacity_bytes();
   }
-  // Device name, SM count and lanes occupancy, once (the caller holds mu).
+  // Device name, SM count, total memory and occupancies, once (the caller
+  // holds mu).
   void probe() {
     if (probed) return;
     cudaDeviceProp properties{};
     MHGP9_CUDA(cudaGetDeviceProperties(&properties, 0));
     MHGP9_CUDA(cudaDeviceGetAttribute(&sms, cudaDevAttrMultiProcessorCount, 0));
-    MHGP9_CUDA(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&blocks_per_sm, lanes_kernel, lanes_threads, 0));
-    if (blocks_per_sm <= 0) throw CudaFailure{"lanes kernel cannot be resident on this device", true};
+    MHGP9_CUDA(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&plan_blocks, lanes_plan_kernel, lanes_threads, 0));
+    MHGP9_CUDA(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&task_blocks, lanes_task_kernel, lanes_threads, 0));
+    MHGP9_CUDA(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&gather_blocks, lanes_gather_kernel, lanes_threads, 0));
+    if (plan_blocks <= 0 || task_blocks <= 0 || gather_blocks <= 0)
+      throw CudaFailure{"lanes kernels cannot be resident on this device", true};
+    std::size_t free_bytes = 0;
+    MHGP9_CUDA(cudaMemGetInfo(&free_bytes, &total_memory));
     name = properties.name;
     probed = true;
   }
-  std::size_t max_warps() const {
+  std::size_t max_warps(int blocks_per_sm) const {
     return static_cast<std::size_t>(sms) * static_cast<std::size_t>(blocks_per_sm) * (lanes_threads / 32);
   }
-  // Bytes of one warp's slab (the call and the warm-up size alike).
-  static std::size_t slab_bytes(u32 capacity, u32 record_capacity, u32 event_capacity) {
-    return static_cast<std::size_t>(capacity) * (2 * sizeof(u32) + 3 * sizeof(std::int32_t) + 3 * sizeof(u32)) +
-           static_cast<std::size_t>(record_capacity) * sizeof(LaneRecord) +
+  // Bytes of one warp's slabs: the walk (P) and the records and events (T).
+  static std::size_t walk_bytes(u32 capacity) { return static_cast<std::size_t>(capacity) * 3 * sizeof(u32); }
+  static std::size_t task_slab_bytes(u32 record_capacity, u32 event_capacity) {
+    return static_cast<std::size_t>(record_capacity) * sizeof(LaneRecord) +
            3 * static_cast<std::size_t>(event_capacity) * sizeof(u32);
   }
-  // Per-warp slabs for `warps` warps (grow-only).
-  void reserve_slabs(std::size_t warps, u32 capacity, u32 record_capacity, u32 event_capacity) {
+  static constexpr std::size_t cover_site_bytes = 3 * sizeof(std::int32_t) + 2 * sizeof(u32);
+  std::size_t default_cover_capacity() const { return total_memory / 6 / cover_site_bytes; }
+  std::size_t task_capacity() const { return std::min<std::size_t>(total_memory / 16 / sizeof(LanesTask), 0xffffffffULL); }
+  // Warps of P and T that the memory allows (an eighth of the free memory
+  // each), capped by residency.
+  std::size_t plan_warps(std::size_t free_bytes, u32 capacity) const {
+    return std::min(max_warps(plan_blocks), (free_bytes / 8) / walk_bytes(capacity));
+  }
+  std::size_t task_warps(std::size_t free_bytes, u32 record_capacity, u32 event_capacity) const {
+    return std::min(max_warps(task_blocks), (free_bytes / 8) / task_slab_bytes(record_capacity, event_capacity));
+  }
+  // Slabs for `pw` P warps and `tw` T warps, the cover arena (grow-only).
+  void reserve_slabs(std::size_t pw, std::size_t tw, u32 capacity, u32 record_capacity, u32 event_capacity,
+                     std::size_t cover_sites) {
     const std::size_t cap = capacity;
-    ranges.reserve(2 * cap * warps);
-    points.reserve(3 * cap * warps);
-    ranks.reserve(cap * warps);
-    seeds.reserve(cap * warps);
-    scratch.reserve(cap * warps);
-    events.reserve(3 * static_cast<std::size_t>(event_capacity) * warps);
-    slab_records.reserve(static_cast<std::size_t>(record_capacity) * warps);
-    warp_work.reserve(warps);
-    warp_work4.reserve(warps);
-    counters.reserve(2);
+    ranges.reserve(2 * cap * pw);
+    scratch.reserve(cap * pw);
+    events.reserve(3 * static_cast<std::size_t>(event_capacity) * tw);
+    slab_records.reserve(static_cast<std::size_t>(record_capacity) * tw);
+    cover_points.reserve(3 * cover_sites);
+    cover_ranks.reserve(cover_sites);
+    cover_seeds.reserve(cover_sites);
+    counters.reserve(8);
   }
 };
 LanesResident& lanes_resident() {
@@ -897,6 +1076,35 @@ LanesResident& lanes_resident() {
 
 double host_ms_since(std::chrono::steady_clock::time_point start) {
   return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
+}
+
+// cub::DeviceScan::ExclusiveSum of `count` u64 into the resident storage.
+void exclusive_scan(LanesResident& res, const unsigned long long* in, unsigned long long* out, std::size_t count) {
+  if (count == 0) return;
+  if (count > static_cast<std::size_t>(0x7fffffff)) throw CudaFailure{"lanes scan exceeds the CUB int range", true};
+  std::size_t bytes = 0;
+  MHGP9_CUDA(cub::DeviceScan::ExclusiveSum(nullptr, bytes, in, out, static_cast<int>(count)));
+  res.scan_storage.reserve(std::max<std::size_t>(bytes, 1));
+  MHGP9_CUDA(cub::DeviceScan::ExclusiveSum(res.scan_storage.get(), bytes, in, out, static_cast<int>(count)));
+}
+
+// The total of an exclusive scan: last prefix plus last item.
+unsigned long long scan_total(const unsigned long long* in, const unsigned long long* out, std::size_t count) {
+  if (count == 0) return 0;
+  unsigned long long tail[2] = {0, 0};
+  MHGP9_CUDA(cudaMemcpy(&tail[0], out + count - 1, sizeof(unsigned long long), cudaMemcpyDeviceToHost));
+  MHGP9_CUDA(cudaMemcpy(&tail[1], in + count - 1, sizeof(unsigned long long), cudaMemcpyDeviceToHost));
+  return tail[0] + tail[1];
+}
+
+// A refused or failed call publishes nothing but its device and its error.
+LanesOutput refused(const LanesOutput& from, std::string error, BatchError kind) {
+  LanesOutput out;
+  out.available = from.available;
+  out.device = from.device;
+  out.error = std::move(error);
+  out.error_kind = kind;
+  return out;
 }
 
 }  // namespace
@@ -928,31 +1136,41 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     const u32 capacity = input.capacity == 0 ? default_lanes_capacity : input.capacity;
     const u32 record_capacity = input.record_capacity == 0 ? default_record_capacity : input.record_capacity;
     const u32 event_capacity = input.event_capacity == 0 ? default_event_capacity : input.event_capacity;
+    const u64 budget = input.task_budget == 0 ? default_task_budget : input.task_budget;
     std::size_t free_bytes = 0, total_bytes = 0;
     MHGP9_CUDA(cudaMemGetInfo(&free_bytes, &total_bytes));
     free_bytes += res.device_bytes();  // resident buffers count as free: history-independent sizing
-    // The default arena is clamped to an eighth of the free memory (review of
-    // 23 September, night): at scale an overflow of the ALLOCATED arena defers
-    // edges to the CPU tail. A failed allocation of the buffers themselves is
+    // The default arenas are clamped to an eighth of the free memory each
+    // (review of 23 September, night): at scale an overflow of the final
+    // arena defers edges to the CPU tail, an overflow of the staging arena
+    // refuses the call. A failed allocation of the buffers themselves is
     // still a capacity refusal (auditor, AUDIT_S4A_VALIDATION_ET_ARENE). An
-    // explicit arena is taken as given.
-    const std::size_t arena_capacity = input.arena_capacity != 0
-        ? input.arena_capacity
-        : std::max<std::size_t>(1, std::min(default_arena_capacity(edges), free_bytes / 8 / sizeof(LaneRecord)));
+    // explicit capacity is taken as given.
+    const std::size_t clamp = std::max<std::size_t>(1, free_bytes / 8 / sizeof(LaneRecord));
+    const std::size_t arena_capacity =
+        input.arena_capacity != 0 ? input.arena_capacity : std::min(default_arena_capacity(edges), clamp);
+    const std::size_t staging_capacity = input.staging_capacity != 0
+        ? static_cast<std::size_t>(input.staging_capacity)
+        : std::min(default_staging_capacity(edges), clamp);
+    const std::size_t cover_capacity = input.cover_capacity != 0 ? static_cast<std::size_t>(input.cover_capacity)
+                                                                  : res.default_cover_capacity();
     out.status.assign(edges, 0);
     out.record_begin.assign(edges, 0);
     out.record_count.assign(edges, 0);
-    const std::size_t slab_bytes = LanesResident::slab_bytes(capacity, record_capacity, event_capacity);
-    const int threads = lanes_threads;
-    const std::size_t arena_bytes = arena_capacity * sizeof(LaneRecord);
-    if (arena_bytes > free_bytes / 4) throw CudaFailure{"record arena exceeds a quarter of the free device memory", true};
-    const std::size_t by_memory = (free_bytes / 4) / slab_bytes;
-    const std::size_t warps = std::min(std::min(res.max_warps(), edges), by_memory);
-    if (warps == 0) throw CudaFailure{"no lanes slab fits in a quarter of the free device memory", true};
+    if (arena_capacity * sizeof(LaneRecord) > free_bytes / 4)
+      throw CudaFailure{"record arena exceeds a quarter of the free device memory", true};
+    if (staging_capacity * sizeof(LaneRecord) > free_bytes / 4)
+      throw CudaFailure{"staging arena exceeds a quarter of the free device memory", true};
+    if (cover_capacity * LanesResident::cover_site_bytes > free_bytes / 2)
+      throw CudaFailure{"cover arena exceeds half of the free device memory", true};
+    const std::size_t plan_warps = std::min(res.plan_warps(free_bytes, capacity), edges);
+    const std::size_t task_warps_max = res.task_warps(free_bytes, record_capacity, event_capacity);
+    const std::size_t gather_warps = std::min(res.max_warps(res.gather_blocks), edges);
+    if (plan_warps == 0 || task_warps_max == 0)
+      throw CudaFailure{"no lanes slab fits in an eighth of the free device memory", true};
     out.capacity = capacity;
     out.record_capacity = record_capacity;
-    out.warps = static_cast<u32>(warps);
-    EventSet<4> e;
+    EventSet<6> e;
     e.create();
     out.setup_ms = host_ms_since(entry);
     MHGP9_CUDA(cudaEventRecord(e[0]));
@@ -965,9 +1183,20 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     res.out_status.reserve(edges);
     res.out_begin.reserve(edges);
     res.out_count.reserve(edges);
-    res.reserve_slabs(warps, capacity, record_capacity, event_capacity);
+    res.pre_status.reserve(edges);
+    res.plans.reserve(edges);
+    res.plan_work.reserve(edges);
+    res.slots.reserve(edges);
+    res.task_counts.reserve(edges);
+    res.task_first.reserve(edges);
+    res.record_counts.reserve(edges);
+    res.record_prefix.reserve(edges);
+    res.reserve_slabs(plan_warps, task_warps_max, capacity, record_capacity, event_capacity, cover_capacity);
     if (input.edge_lanes != nullptr) res.lanes_in.reserve(edges);
     res.arena.reserve(arena_capacity);
+    res.staging.reserve(staging_capacity);
+    res.warp_work.reserve(gather_warps);
+    res.warp_work4.reserve(gather_warps);
     MHGP9_CUDA(cudaMemcpy(res.nodes.get(), input.index.nodes, input.index.node_count * sizeof(FlatNode),
                           cudaMemcpyHostToDevice));
     MHGP9_CUDA(cudaMemcpy(res.escapes.get(), input.escapes, input.index.node_count * sizeof(u32),
@@ -978,41 +1207,80 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
                           cudaMemcpyHostToDevice));
     MHGP9_CUDA(cudaMemcpy(res.edge_a.get(), input.edge_a, edges * sizeof(u32), cudaMemcpyHostToDevice));
     MHGP9_CUDA(cudaMemcpy(res.edge_b.get(), input.edge_b, edges * sizeof(u32), cudaMemcpyHostToDevice));
-    MHGP9_CUDA(cudaMemset(res.counters.get(), 0, 2 * sizeof(unsigned long long)));
-    MHGP9_CUDA(cudaMemset(res.warp_work.get(), 0, warps * sizeof(Q3Work)));
-    MHGP9_CUDA(cudaMemset(res.warp_work4.get(), 0, warps * sizeof(Q4Work)));
+    MHGP9_CUDA(cudaMemset(res.counters.get(), 0, 8 * sizeof(unsigned long long)));
     if (input.edge_lanes != nullptr)
       MHGP9_CUDA(cudaMemcpy(res.lanes_in.get(), input.edge_lanes, edges, cudaMemcpyHostToDevice));
     MHGP9_CUDA(cudaEventRecord(e[1]));
     const LanesIndex index{CertificateIndex{res.nodes.get(), res.escapes.get(),
                                             static_cast<u32>(input.index.node_count), res.rank_points.get()},
                            res.rank_ids.get()};
-    const int blocks = static_cast<int>((warps * 32 + threads - 1) / threads);
-    lanes_kernel<<<blocks, threads>>>(index, res.edge_a.get(), res.edge_b.get(),
-        input.edge_lanes != nullptr ? res.lanes_in.get() : nullptr, static_cast<u32>(edges), input.index.kmax,
-        capacity, record_capacity, event_capacity, res.ranges.get(), res.points.get(), res.ranks.get(),
-        res.seeds.get(), res.scratch.get(), res.slab_records.get(), res.events.get(), res.arena.get(),
-        arena_capacity, res.counters.get(), res.counters.get() + 1, res.out_status.get(), res.out_begin.get(),
-        res.out_count.get(), res.warp_work.get(), res.warp_work4.get(), static_cast<u32>(warps));
+    const int threads = lanes_threads;
+    unsigned long long* counter = res.counters.get();  // 0 next edge, 1 cover, 2 next task, 3 staged, 4 decided, 5 max steps
+    // ---- P, then the task counts' scan.
+    lanes_plan_kernel<<<static_cast<int>((plan_warps * 32 + threads - 1) / threads), threads>>>(index,
+        res.edge_a.get(), res.edge_b.get(), input.edge_lanes != nullptr ? res.lanes_in.get() : nullptr,
+        static_cast<u32>(edges), input.index.kmax, capacity, budget, res.ranges.get(), res.scratch.get(),
+        res.cover_points.get(), res.cover_ranks.get(), res.cover_seeds.get(), cover_capacity, counter, counter + 1,
+        res.plans.get(), res.plan_work.get(), res.slots.get(), res.task_counts.get(), static_cast<u32>(plan_warps));
     MHGP9_CUDA(cudaGetLastError());
+    exclusive_scan(res, res.task_counts.get(), res.task_first.get(), edges);
     MHGP9_CUDA(cudaEventRecord(e[2]));
-    std::vector<Q3Work> works(warps);
-    std::vector<Q4Work> works4(warps);
-    unsigned long long counts[2] = {0, 0};
-    MHGP9_CUDA(cudaMemcpy(counts, res.counters.get(), sizeof(counts), cudaMemcpyDeviceToHost));
+    unsigned long long cover_used = 0;
+    MHGP9_CUDA(cudaMemcpy(&cover_used, counter + 1, sizeof(cover_used), cudaMemcpyDeviceToHost));
+    const unsigned long long task_count = scan_total(res.task_counts.get(), res.task_first.get(), edges);
+    if (cover_used > cover_capacity) throw CudaFailure{"lanes cover arena exceeded", true};
+    if (task_count > res.task_capacity()) throw CudaFailure{"lanes task table exceeds its capacity", true};
+    // ---- The task table, then T.
+    res.tasks.reserve(std::max<std::size_t>(task_count, 1));
+    const std::size_t task_warps = std::min<std::size_t>(task_warps_max, std::max<unsigned long long>(task_count, 1));
+    const int fill_blocks = static_cast<int>(std::min<std::size_t>((edges + threads - 1) / threads,
+                                                                   static_cast<std::size_t>(res.sms) * 64));
+    if (task_count != 0) {
+      lanes_fill_kernel<<<fill_blocks, threads>>>(res.plans.get(), res.task_first.get(), static_cast<u32>(edges),
+                                                  budget, res.tasks.get());
+      MHGP9_CUDA(cudaGetLastError());
+      lanes_task_kernel<<<static_cast<int>((task_warps * 32 + threads - 1) / threads), threads>>>(index,
+          res.edge_a.get(), res.edge_b.get(), input.index.kmax, capacity, record_capacity, event_capacity,
+          res.plans.get(), res.cover_points.get(), res.cover_ranks.get(), res.cover_seeds.get(), res.tasks.get(),
+          task_count, res.slab_records.get(), res.events.get(), res.staging.get(), staging_capacity, counter + 2,
+          counter + 3, counter + 5, res.slots.get(), static_cast<u32>(task_warps));
+      MHGP9_CUDA(cudaGetLastError());
+    }
+    MHGP9_CUDA(cudaEventRecord(e[3]));
+    unsigned long long staged = 0;
+    MHGP9_CUDA(cudaMemcpy(&staged, counter + 3, sizeof(staged), cudaMemcpyDeviceToHost));
+    if (staged > staging_capacity) throw CudaFailure{"lanes staging arena exceeded", true};
+    // ---- C: replay, the counts' scan (arena rule), gather and ledger.
+    lanes_replay_kernel<<<fill_blocks, threads>>>(res.plans.get(), res.task_first.get(), res.tasks.get(),
+        static_cast<u32>(edges), record_capacity, res.pre_status.get(), res.record_counts.get());
+    MHGP9_CUDA(cudaGetLastError());
+    exclusive_scan(res, res.record_counts.get(), res.record_prefix.get(), edges);
+    lanes_gather_kernel<<<static_cast<int>((gather_warps * 32 + threads - 1) / threads), threads>>>(
+        res.plans.get(), res.plan_work.get(), res.slots.get(), res.task_first.get(), res.tasks.get(),
+        res.pre_status.get(), res.record_counts.get(), res.record_prefix.get(), static_cast<u32>(edges),
+        arena_capacity, res.staging.get(), res.arena.get(), res.out_status.get(), res.out_begin.get(),
+        res.out_count.get(), counter + 4, res.warp_work.get(), res.warp_work4.get(), static_cast<u32>(gather_warps));
+    MHGP9_CUDA(cudaGetLastError());
+    MHGP9_CUDA(cudaEventRecord(e[4]));
+    std::vector<Q3Work> works(gather_warps);
+    std::vector<Q4Work> works4(gather_warps);
+    unsigned long long counts[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    MHGP9_CUDA(cudaMemcpy(counts, counter, sizeof(counts), cudaMemcpyDeviceToHost));
     MHGP9_CUDA(cudaMemcpy(out.status.data(), res.out_status.get(), edges, cudaMemcpyDeviceToHost));
     MHGP9_CUDA(cudaMemcpy(out.record_begin.data(), res.out_begin.get(), edges * sizeof(u32),
                           cudaMemcpyDeviceToHost));
     MHGP9_CUDA(cudaMemcpy(out.record_count.data(), res.out_count.get(), edges * sizeof(u32),
                           cudaMemcpyDeviceToHost));
-    MHGP9_CUDA(cudaMemcpy(works.data(), res.warp_work.get(), warps * sizeof(Q3Work), cudaMemcpyDeviceToHost));
-    MHGP9_CUDA(cudaMemcpy(works4.data(), res.warp_work4.get(), warps * sizeof(Q4Work), cudaMemcpyDeviceToHost));
-    const std::size_t used = static_cast<std::size_t>(std::min<unsigned long long>(counts[1], arena_capacity));
-    RawVector<LaneRecord> reserved(used);  // written whole by the copy below (no zero fill)
+    MHGP9_CUDA(cudaMemcpy(works.data(), res.warp_work.get(), gather_warps * sizeof(Q3Work), cudaMemcpyDeviceToHost));
+    MHGP9_CUDA(
+        cudaMemcpy(works4.data(), res.warp_work4.get(), gather_warps * sizeof(Q4Work), cudaMemcpyDeviceToHost));
+    const std::size_t used = static_cast<std::size_t>(counts[4]);
+    if (used > arena_capacity) throw CudaFailure{"lanes decided records exceed the arena", false};
+    out.records.resize(used);  // written whole by the copy below (no zero fill)
     if (used != 0)
-      MHGP9_CUDA(cudaMemcpy(reserved.data(), res.arena.get(), used * sizeof(LaneRecord), cudaMemcpyDeviceToHost));
-    MHGP9_CUDA(cudaEventRecord(e[3]));
-    MHGP9_CUDA(cudaEventSynchronize(e[3]));
+      MHGP9_CUDA(cudaMemcpy(out.records.data(), res.arena.get(), used * sizeof(LaneRecord), cudaMemcpyDeviceToHost));
+    MHGP9_CUDA(cudaEventRecord(e[5]));
+    MHGP9_CUDA(cudaEventSynchronize(e[5]));
     const auto finish = std::chrono::steady_clock::now();
     for (const auto& w : works) add_q3(out.work, w);
     for (const auto& w : works4) add_q4(out.work4, w);
@@ -1020,35 +1288,25 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
       if (out.status[i] == static_cast<u8>(CertificateStatus::deferred)) ++out.deferred;
       else if (out.status[i] != static_cast<u8>(CertificateStatus::decided)) ++out.faults;
     }
-    if (counts[1] <= arena_capacity) {
-      out.records = std::move(reserved);  // every reservation was decided: the slices partition it
-    } else {
-      // A deferred reservation left a hole: keep the decided slices only.
-      for (std::size_t i = 0; i < edges; ++i) {
-        if (out.status[i] != static_cast<u8>(CertificateStatus::decided)) continue;
-        const std::size_t begin = out.record_begin[i];
-        out.record_begin[i] = static_cast<u32>(out.records.size());
-        out.records.insert(out.records.end(), reserved.begin() + static_cast<std::ptrdiff_t>(begin),
-                           reserved.begin() + static_cast<std::ptrdiff_t>(begin + out.record_count[i]));
-      }
-    }
+    out.warps = static_cast<u32>(task_warps);
+    out.tasks = task_count;
+    out.max_task_steps = counts[5];
     out.upload_ms = elapsed(e[0], e[1]);
-    out.kernel_ms = elapsed(e[1], e[2]);
-    out.download_ms = elapsed(e[2], e[3]);
-    out.total_ms = elapsed(e[0], e[3]);
+    out.plan_ms = elapsed(e[1], e[2]);
+    out.task_ms = elapsed(e[2], e[3]);
+    out.compact_ms = elapsed(e[3], e[4]);
+    out.kernel_ms = elapsed(e[1], e[4]);
+    out.download_ms = elapsed(e[4], e[5]);
+    out.total_ms = elapsed(e[0], e[5]);
     out.finish_ms = host_ms_since(finish);
   } catch (const CudaFailure& failure) {
-    out.error = failure.what;
-    out.error_kind = failure.capacity ? BatchError::capacity : BatchError::device_fault;
+    return refused(out, failure.what, failure.capacity ? BatchError::capacity : BatchError::device_fault);
   } catch (const std::bad_alloc& failure) {
-    out.error = std::string("host: ") + failure.what();
-    out.error_kind = BatchError::capacity;
+    return refused(out, std::string("host: ") + failure.what(), BatchError::capacity);
   } catch (const std::length_error& failure) {
-    out.error = std::string("host: ") + failure.what();
-    out.error_kind = BatchError::capacity;
+    return refused(out, std::string("host: ") + failure.what(), BatchError::capacity);
   } catch (const std::exception& failure) {
-    out.error = std::string("host: ") + failure.what();
-    out.error_kind = BatchError::device_fault;
+    return refused(out, std::string("host: ") + failure.what(), BatchError::device_fault);
   }
   return out;
 }
@@ -1062,13 +1320,13 @@ std::string warm_up_lanes(u32 capacity, u32 record_capacity, u32 event_capacity)
     const u32 cap = capacity == 0 ? default_lanes_capacity : capacity;
     const u32 rec = record_capacity == 0 ? default_record_capacity : record_capacity;
     const u32 evt = event_capacity == 0 ? default_event_capacity : event_capacity;
-    // Sized as the call (a quarter of the free memory, resident bytes
-    // counted as free): the call never needs more warps than this reserve.
+    // Sized as the call (resident bytes counted as free; the default cover
+    // arena from the total memory): the call never needs more than this.
     std::size_t free_bytes = 0, total_bytes = 0;
     MHGP9_CUDA(cudaMemGetInfo(&free_bytes, &total_bytes));
     free_bytes += res.device_bytes();
-    const std::size_t warps = std::min(res.max_warps(), (free_bytes / 4) / LanesResident::slab_bytes(cap, rec, evt));
-    if (warps != 0) res.reserve_slabs(warps, cap, rec, evt);
+    const std::size_t pw = res.plan_warps(free_bytes, cap), tw = res.task_warps(free_bytes, rec, evt);
+    if (pw != 0 && tw != 0) res.reserve_slabs(pw, tw, cap, rec, evt, res.default_cover_capacity());
     return {};
   } catch (const CudaFailure& failure) {
     return failure.what;  // the batch call classifies any error again

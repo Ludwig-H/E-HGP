@@ -549,6 +549,151 @@ section V9-S4). L'objet émis est celui de la voie Local28 du moteur.
   - contrat sonde/lecteur v21 (dix mutants q4, dont les trois bornes de
     passes).
 
+### Tâches (arête, plage de graines) des voies q3/q4 (S4b, étape 2 du plan des voies, 24 septembre 2026)
+
+Étape 2 du plan du juge des voies ([conception](tour_voies_conception_20260924/README.md),
+« T2 simplifié ») : l'appel des voies ne donne plus une arête entière à un
+warp. Il découpe le travail en **tâches (arête, plage de graines)**, pour
+qu'une arête lourde ne fasse plus la traîne du noyau (R16 : l'arête la plus
+lourde à 0,87 de l'appel). L'objet, les enregistrements, les statuts et le
+registre ne changent pas.
+
+- **En-tête portable** `src/gpu/lanes_tasks.hpp`, trois étapes exécutées par
+  les mêmes fonctions sur l'appareil (`WarpGroup`) et par le jumeau hôte
+  (`HostGroup`) :
+  - **P, une par arête** : validité des voies demandées, cover
+    (`lanes_cover`), ordre de balayage et graines (`lanes_order`), écrits à la
+    place de l'arête dans une **arène de covers** ; nombre de tâches
+    `lanes_task_count(sites, graines, B)`, fonction de l'entrée seule ;
+  - **T, une par tâche** : pour chaque graine de la plage, le recensement q3
+    (`q3_census_range`) puis la graine q4 (`q4_seed`, T1 inchangé). Les
+    enregistrements vont dans l'ardoise du groupe, puis dans **une**
+    réservation d'une arène de préparation. La tâche garde ses comptes par
+    phase et sa première défaillance (phase, genre). Son travail s'ajoute à
+    l'emplacement de son arête (sommes et maxima entiers : l'ordre des tâches
+    ne compte pas) ;
+  - **C, une par arête** : `lanes_replay` rejoue la préséance séquentielle
+    d'`edge_lanes` (prologue ; graines q3 dans l'ordre ; puis graines q4 dans
+    l'ordre ; ardoise d'enregistrements dépassée sur le **total** de l'arête).
+    Suivent la règle de l'arène finale dans l'ordre des arêtes (compteur
+    toujours avancé : préfixe exclusif des comptes), le rassemblement dans
+    l'ordre (arête, phase, tâche) — tous les q3 de l'arête, puis tous ses
+    q4 —, et le registre réduit sur les seules arêtes décidées.
+- **Pourquoi l'objet ne change pas** : chaque graine d'`edge_lanes` est
+  exécutée une fois, par les mêmes fonctions, sur le même cover dans le même
+  ordre de balayage. Les graines sont indépendantes : rien ne passe d'une
+  graine à l'autre, sauf l'ardoise d'enregistrements et les compteurs.
+  L'ordre de sortie et les mises en attente sont reconstruits à partir des
+  comptes par tâche, jamais de l'ordre d'achèvement. La sortie de
+  l'appareil devient canonique : l'arène suivait jusqu'ici l'ordre des
+  atomiques, et sa mise en attente sur débordement n'était pas reproductible.
+  Elle est désormais **égale octet pour octet** à celle du jumeau.
+- **Découpage B** : une tâche regroupe les graines consécutives d'une arête
+  dont la borne graines × ⌈sites/32⌉ (paquets de 32 sites des passes) ne
+  dépasse pas B, avec au moins une graine. **B = 512 par défaut** : les
+  paquets de passe de lentilles d'une tâche restent sous environ 0,5 ms d'un
+  warp seul sur G4 (2 473 cycles par paquet dans le calage « plafond 752 »
+  du juge, 2,4 GHz). B = 1 donne une graine par tâche, B = ∞ une tâche par
+  arête (l'étape 1). `MHGP9_LANES_TASK_BUDGET` (builds de mesure
+  seulement) change le défaut. Aucune valeur de B ne change une sortie
+  décidée : la porte le vérifie pour B ∈ {1, 512, ∞}.
+- **Mesures locales** (compteurs déterministes, jumeau hôte, 08/000000) :
+  - K5 : 2 500 659 tâches pour 597 250 arêtes à graines (708 686 arêtes).
+    Travail déclaré de la plus lourde tâche (`lanes_task_steps` : paquets
+    de recensement, de passe, de filtre, de listes et de classes) :
+    **7 114 pas**, contre 86 847 pour une tâche par arête ;
+  - K10 : 9 581 649 tâches pour 1 337 836 arêtes à graines (1 463 362
+    arêtes) ; plus lourde tâche **27 057 pas**, contre 290 184.
+
+  Les deux lignes `lanes_tasks_compare` (mode `--compare`) donnent aussi
+  `identical=1` : sur toutes les arêtes demandées, le jumeau à tâches rend
+  la même sortie, octet pour octet, que le chemin à une tâche par arête.
+  Sur le chemin CPU de la chaîne (jumeau, W6, hôte chargé, deux paires
+  entrelacées), l'appel des voies à K5 passe de 10,9 s à 6,9 s, avec les
+  mêmes condensés. C'est une indication, pas un reçu.
+
+  La durée sur l'appareil n'est **pas** mesurée ici. Le modèle du juge
+  (hors dépôt, `tasks.cpp` / `bsel`, coûts de 000000 avec T1) donne pour la
+  tâche la plus lourde environ 1,7 ms à K5 et 5,9 ms à K10 à B = 512 : une
+  graine survivante coûte jusqu'à 1 à 2 ms à elle seule.
+- **Mémoire** :
+  - **arène de covers à 20 o par site** : coordonnées 12, rang 4, position
+    de graine 4, les graines à la même place que les sites. Les fonctions
+    portables lisent `slab.points` comme avant. La variante à 4 o par site
+    (rangs seuls, points relus dans `rank_points`) ajouterait une lecture
+    dépendante dans les boucles chaudes (recensement, passe, filtre,
+    comparaisons) sans mesure pour la justifier. Volumes : 91 M sites à K5
+    (1,8 Go), 322 M à K10 (6,4 Go), au plus 379 M mesurés (08/000200 K10,
+    7,6 Go). Capacité par défaut : un sixième de la mémoire **totale** de
+    l'appareil (816 M sites sur G4), réservée pendant q2 par
+    `warm_up_lanes` ;
+  - **ardoises par warp** : marche de P (plages et rangs, 12 o par site, soit
+    768 Kio) ; enregistrements et événements de T (560 Kio). Avant : 2,6 Mio
+    par warp ;
+  - **par arête** environ 470 o (plan, registre du prologue, emplacement des
+    tâches, balayages, réponse) ; **par tâche** 32 o ;
+  - **arène de préparation** : deux fois l'arène finale par défaut, bornée au
+    huitième de la mémoire libre.
+
+  Tous les buffers restent résidents et ne font que grandir
+  (`LanesResident`). Le dimensionnement ne dépend que de l'entrée et de la
+  mémoire (totale, ou libre plus résidente), jamais de l'historique.
+- **Refus** : l'arène de covers, la table des tâches et l'arène de
+  préparation se décident sur des totaux qui ne dépendent pas de l'ordre
+  (sites réservés, tâches, enregistrements préparés). Leur dépassement est un
+  **refus de capacité explicite de l'appel** (`BatchError::capacity`, lu
+  entre les étapes), jamais un préfixe ni une mise en attente dépendant du
+  temps. La mise en attente reste une décision de mémoire par arête : cover,
+  événements, enregistrements, arène finale dans l'ordre des arêtes.
+- **Jumeau hôte** (`run_lanes_tasks_host`, `run_lanes_batch_host`) : les
+  trois étapes par fenêtres de 16 384 arêtes (seuls les covers d'une fenêtre
+  vivent à la fois), fils coordonnés par barrières. Une exception ouvre
+  toutes les barrières et est rendue après jointure. La sortie ne dépend ni
+  du nombre de fils, ni de la fenêtre, ni de l'ordre des tâches.
+- **Appareil** (`filter_runner.cu`) : noyaux `lanes_plan_kernel`,
+  `lanes_fill_kernel`, `lanes_task_kernel`, `lanes_replay_kernel` et
+  `lanes_gather_kernel`, deux balayages CUB, deux lectures de compteurs par
+  l'hôte (après P, après T). Registres ptxas (sm_120, CUDA 12.9) :
+  - T : 128 registres, 128 o de débordement en écriture et 100 en lecture ;
+    l'ancien `lanes_kernel` en avait 224 et 124. Le travail q3 d'une tâche
+    est versé à son arête dès la fin de la phase q3 ;
+  - P : 96 registres, sans débordement ;
+  - rassemblement 72, remplissage 36, réplique 24 registres, sans débordement.
+
+  Sous-chronos de `LanesOutput` : `plan_ms` (P et son balayage), `task_ms`
+  (lecture des compteurs, table, T), `compact_ms` (C et son balayage).
+  Compteurs : `tasks`, `max_task_steps`.
+- **API inchangée** : `LanesInput` gagne `task_budget`, `cover_capacity` et
+  `staging_capacity`, tous à 0 par défaut. La chaîne et le registre ne
+  changent pas.
+- **Portes** :
+  - `mhgp9_gpu_lanes_port`, section 7. Sur chaque famille et chaque K, et
+    sur les quatre fixtures (multi-groupes B, borne intérieure, tampon vide,
+    arène de l'auditeur), la sortie entière des tâches est égale octet pour
+    octet à celle du chemin à une tâche par arête (`single_task_batch`, un
+    exécuteur indépendant de `lanes_tasks.hpp`). Variantes : B ∈ {1, 512, ∞},
+    1, 3 et 4 fils, fenêtres de 97 et 16 384 arêtes. Identités : B = ∞ donne
+    une tâche par arête à graines, B = 1 une tâche par graine. Avec cover,
+    enregistrements, événements ou arène réduits, les arêtes en attente sont
+    celles du chemin à une tâche, avec un plancher > 0 par genre. Les arènes
+    exactement pleines sont acceptées ; une case de moins refuse l'appel.
+    Neuf répliques gravées couvrent la préséance attente/panne, que les
+    arêtes réelles n'exercent jamais, et six découpages ;
+  - le mode `--compare` compare aussi, sur toutes les arêtes demandées d'un
+    nuage fichier, le jumeau à tâches (B = 512 et B = ∞) au chemin à une
+    tâche, octet pour octet (ligne `lanes_tasks_compare`) ;
+  - **cinq mutants** compilés, chacun tué (code 1) par le contrôle qui le
+    vise : dernière plage partielle oubliée (`split.count`) ; placement par
+    ordre d'achèvement, émulé sur l'hôte par des tâches exécutées à rebours
+    (`tasks.bytes`) ; segments q3 et q4 permutés (`tasks.bytes`) ; compteurs
+    d'une arête en attente ajoutés (`tasks.small_bytes`) ; préséance
+    attente/panne inversée (`replay.`).
+- **Non vérifié localement** (aucun GPU dans le conteneur) : l'exécution des
+  noyaux, l'égalité octet pour octet appareil/jumeau, les chemins de refus
+  sur l'appareil et toute durée. Une session G4 doit montrer les
+  sous-chronos P/T/C et le noyau K5 face à la projection de 68 à 76 ms, et
+  comparer les condensés des bras jumeaux.
+
 ## Voie GPU S1 : `src/gpu/` (espace `mhgp9::gpu`, code neuf)
 
 23 septembre 2026. Première brique GPU de la v9, pour une expérience de
