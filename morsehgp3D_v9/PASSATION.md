@@ -451,15 +451,31 @@ S3 par blocs.
   front : le filtre l'attend jusqu'à 102 ms. C'est le prochain poste.
 - Noyau des certificats : 117 → 90 ms à K5.
 
-Suite, pour le contrat de 1 s à K5 (le plan ci-dessous date de R18 ; il
-reste 1,175 s à 000000 après R19) :
-- compactage C des voies (32 ms à 000000 contre 3 ms à 000100) et étape 3
-  des voies ;
-- noyau des certificats (145 ms, une arête par warp : même traîne que les
-  voies avant les tâches) ;
-- tour : phase 0 concurrente, queue en pipeline (E4, E5), catalogue scellé
-  (décision) ;
-- front, filtre, q2, recensement.
+Session G4 R20 ([reçu](receipts/g4_tower_r20_20260924/README.md), paquet
+`48791e72`, **`completed`**, `TERMINATED` certifié). Contenu : étape 3 des
+voies (C sans boucle sur les tâches, L11, L10, L15 sous le levier
+`q34_lanes_fused`), préparation de l'appareil en deux étapes, sonde v25.
+- **K5 1,01 / 1,11 / 1,26 s**, **K10 3,15 / 3,87 / 3,86 s** ; 12
+  comparaisons égales.
+- Appel des voies à 000000 : 145 → 112 ms à K5 (noyau 57 ms : P 15, T 40,
+  C 1) et 580 → 454 ms à K10.
+- **L15 mesuré plus lent** : T +4 % à K5 et +3,5 % à K10 en paires
+  entrelacées. Le levier reste désactivé par défaut.
+- L'attente de la préparation (11 à 82 ms à K5) vient de la création du
+  contexte CUDA, payée une fois par processus : les deux étapes ne la
+  cachent pas.
+- Le transfert des enregistrements des voies (128 o, mémoire pageable)
+  coûte 30 ms à K5 et 151 ms à K10.
+
+Suite, pour le contrat de 1 s à K5 (il reste 1,109 s à 000000 et 1,26 s à
+000200 après R20) :
+- session d'appareil ouverte par le processus avant la trame (régime d'un
+  flux LiDAR à 10 Hz), coût à froid publié à part ;
+- tampon hôte épinglé résident pour les enregistrements des voies ;
+- tour : queue en pipeline (E4), pool persistant, regroupement de la
+  phase 0 sans tri des requêtes de 56 o, encodage scindé (E5), catalogue
+  scellé (décision) ;
+- front, filtre (partie hôte d'environ 25 ms), certificats, recensement.
 
 Suite : tour maigre (D5 de l'auditeur C :
 index des selles, saut au centre, images de naissance directes), puis

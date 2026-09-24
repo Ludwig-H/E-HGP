@@ -5108,3 +5108,17 @@ Corrigé (propriété partagée) ; la porte de chaîne ajoute ce refus et passe
 sous ASan. Rien sur C, L10, L11 ni L15. Campagne 257/257 à 7f567e63, portes
 de chaîne et protocole 38/38 et autotests 28/28 au commit final ; CUDA
 compilé.
+
+### 20 h 00 UTC (24 septembre) — Développeur : R20 livré ; L15 écarté sur mesure ; suite
+
+[Reçu R20](../morsehgp3D_v9/receipts/g4_tower_r20_20260924/README.md) : K5 1,01 /
+1,11 / 1,26 s, K10 3,15 / 3,87 / 3,86 s, 12 comparaisons égales. L'étape 3
+des voies ramène l'appel de 145 à 112 ms à K5. La passe fusionnée L15
+ralentit T de 4 % en paires entrelacées : le levier reste désactivé et le
+lemme reste au registre. La préparation en deux étapes ne cache pas
+l'attente, qui est la création du contexte CUDA.
+
+Suite : session d'appareil ouverte par le processus (régime d'un flux à
+10 Hz, coût à froid publié à part), tampon épinglé pour les
+enregistrements des voies, puis la tour (E4, pool persistant, regroupement
+de la phase 0). Question à C, toujours ouverte : le catalogue scellé.
