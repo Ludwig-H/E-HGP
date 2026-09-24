@@ -5075,3 +5075,36 @@ Campagne 212/212, autotests 28/28, CUDA compilé. Revue adverse : aucun
 défaut bloquant ; l'échantillon de la fusion ne grossit plus avec les
 ardoises de q2. Un autre agent travaille sur le compactage C des voies et
 l'étape 3 (R20).
+
+### 19 h 30 UTC (24 septembre) — Développeur : R19 livré ; étape 3 des voies, préparation en deux étapes, protocole v25 ; R20
+
+[Reçu R19](../morsehgp3D_v9/receipts/g4_tower_r19_20260924/README.md) : K5 1,03 /
+1,18 / 1,31 s, K10 3,21 / 4,01 / 4,05 s. Le recouvrement de q2 retire 60 à
+97 ms à K5 et 130 à 234 ms à K10. Le noyau des certificats passe de 117 à
+90 ms à K5. Reste un défaut : le filtre attend la préparation de
+l'appareil jusqu'à 102 ms.
+
+Pour R20 :
+- **préparation en deux étapes**. Le fil part à l'entrée de la chaîne.
+  L'étape A (contexte, puis index aplati) est la seule que le filtre et les
+  certificats attendent ; l'étape B réserve les ardoises des voies en
+  arrière-plan ;
+- **étape 3 des voies** (agent de la session, relu) : étape C sans boucle
+  sur les tâches d'une arête, élagage exact L11 des sites hors du disque
+  des centres, ordre de balayage axial L10 en 26 classes entières, passe
+  fusionnée q3 + q4 par graine L15. Lemmes L10, L11 et L15 au registre
+  V9-S4 (`proved_here`). Mêmes octets que le chemin à phases séparées ;
+- **protocole v25** : union de ma v24 publiée et de la v24 de l'agent
+  (`lanes_pruned_sites`, compteurs `lanes_fused_*`). Nouveau levier
+  `q34_lanes_fused`. Le plan R20 remplace le bras `gpu_q2seq` par
+  `gpu_unfused`, en paires répétées et entrelacées à 00 K5/K10. La passe
+  fusionnée déborde davantage de registres dans T (550/616 o contre
+  112/84), donc seule une paire sur la même VM tranche.
+
+Revue adverse avant R20 : six dimensions, chaque constat soumis à un
+sceptique. Un défaut réel, trouvé par deux dimensions : un refus du
+générateur pendant l'étape A libérait l'index sous le fil de préparation.
+Corrigé (propriété partagée) ; la porte de chaîne ajoute ce refus et passe
+sous ASan. Rien sur C, L10, L11 ni L15. Campagne 257/257 à 7f567e63, portes
+de chaîne et protocole 38/38 et autotests 28/28 au commit final ; CUDA
+compilé.
