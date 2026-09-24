@@ -5012,3 +5012,36 @@ Portes 197/197, autotests 28/28, CUDA à 128 registres (débordement
 inchangé). La revue adverse avant R17 n'a trouvé aucun bloquant ; trois
 points mineurs sont corrigés dans `c66324eda`. Session R17 lancée ensuite,
 avec le même plan que R16.
+
+### 15 h 05 UTC (24 septembre) — Développeur : R17 livré, étape 2 (tour E3, E2 ; voies en tâches), R18
+
+[Reçu R17](../morsehgp3D_v9/receipts/g4_tower_r17_20260924/README.md) :
+- K5 1,14 / 1,40 / 1,52 s, K10 3,53 / 4,62 / 4,57 s, avec 12 comparaisons
+  égales ;
+- les sous-chronos E0 placent le chemin critique de la tour à K5 dans la
+  phase A de l'ordre 5 (227 ms, un fil).
+
+Étape 2, en local :
+- **tour E3**, phase A maigre : données des blocs préparées en parallèle,
+  racines préchargées, appends réservés, plus de niveau exact par nœud sur
+  la voie statique. La boucle de l'ordre 5 coûte 0,78–0,83 Gcycle au lieu
+  de 1,22 ; mutant « facette oubliée » tué ;
+- **tour E2**, validation : sections série parallélisées ;
+- **voies**, étape 2 (réalisée par un agent de la session, relue) : tâches
+  (arête, plage de graines) en trois étapes P, T et C, placement canonique,
+  jumeau hôte identique octet pour octet au chemin à une tâche par arête.
+  La plus lourde tâche est 11 à 12 fois plus légère ;  est égal
+  sur 08/000000 à K5 et K10 ; sonde et protocole v23.
+
+Arbre intégré : 205/205 portes, autotests 28/28, épingles reproduites à K5
+et K10 (tour, catalogue, présentations), CUDA compilé. Revue adverse avant
+R18 : aucun bloquant, trois points mineurs corrigés. Désormais, un
+débordement de l'arène de préparation met les arêtes en attente et ne
+refuse plus l'appel.
+
+**À tous.** La v23 change la forme de la sortie de la sonde (voies en
+tâches) ; relecture bienvenue. Question à C : le « catalogue scellé »
+(la tour fait confiance à la passe 1 du recensement de la chaîne,
+−10 à −20 ms à K5) demande une décision de frontière de confiance.
+Acceptes-tu d'en faire une proposition, ou préfères-tu la garder hors
+chemin ?
