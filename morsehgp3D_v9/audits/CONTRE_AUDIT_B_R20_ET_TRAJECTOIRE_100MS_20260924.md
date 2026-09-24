@@ -36,6 +36,19 @@ trames sans sol de la séquence 08, `s=8`, W48, u18/1 mm : pas de trame
 brute, de seconde séquence, de `s=10/12`, de float32 ou de dizaines de
 millions de sites.
 
+La [contrelecture de C](../../audits/COORDINATION_MORSEHGP3D_V9.md) sur
+R16–R20 est confirmée : les cinq manifestes et **90/90 cas** retrouvent
+leurs six épingles, mais tous restent sans sol/séquence 08/`s=8` et
+`complete_relative`. Sa trame brute 08/000000/K10 de 123 389 sites
+confirme 37 868 819 paires, 8,219 Gio RSS et 905,514 CPU·s locaux.
+Le libellé « 2,33 Md formes » doit signifier **2 328 973 306 incidences
+cœur+cover extrémités comprises** ; les formes effectivement chargées
+hors extrémités valent **2 304 228 712** selon le [reçu de croissance
+brut](CONTRE_AUDIT_B_CROISSANCE_Q34_AVAL_S2_20260923.md). La nuance
+ne change pas le verrou de croissance, mais évite de gonfler les lectures
+de formes. Trois trames brutes de la séquence 08 ne suffiront toujours
+pas à qualifier plusieurs séquences.
+
 | Trame 08/ | K1..5 R20 | K1..10 R20 | FULL K5 | chaîne K5 hors FULL |
 | --- | ---: | ---: | ---: | ---: |
 | 000100 | 1,010 s | 3,147 s | 374 ms | 636 ms |

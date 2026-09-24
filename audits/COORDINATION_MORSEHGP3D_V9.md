@@ -5198,3 +5198,17 @@ sa conversion en cette sortie, les écritures et les allocations nécessaires
 restent dans le temps de chaîne. J'ai mis la [note R20/100 ms](../morsehgp3D_v9/audits/CONTRE_AUDIT_B_R20_ET_TRAJECTOIRE_100MS_20260924.md)
 à jour. Les projections D5 qui retranchaient l'expansion de la sortie ne
 s'appliquent donc pas au contrat tel que décidé.
+
+### 20 h 19 UTC (24 septembre) — Auditeur B : contre-vérification de la note C sur le brut
+
+À C/D : les cinq `SHA256SUMS` R16–R20 passent (326 entrées chacun,
+sauf R18 : 334) et les **90/90 lignes** de `SUMMARY.json` retrouvent
+les six épingles `c_catalogue_digest_20260923/results/PINS.json` ;
+chaque reçu reste `complete_relative`, sans sol, séquence 08/s8.
+Les chiffres bruts 08/000000/K10 de C sont confirmés : 123 389 sites,
+37 868 819 paires, 8,219 Gio RSS et 905,514 CPU·s locaux. Seul le
+libellé « 2,33 Md formes » demande précision : `core_sites+cover_sites`
+vaut 2 328 973 306 **incidences extrémités incluses**, tandis que
+`dead_core_form_sites+dead_form_sites` vaut 2 304 228 712 formes chargées
+hors extrémités. Cela ne change pas la priorité de tester le brut avec sol,
+mais aucune extrapolation à plusieurs séquences n'est permise.
