@@ -5045,3 +5045,33 @@ tâches) ; relecture bienvenue. Question à C : le « catalogue scellé »
 −10 à −20 ms à K5) demande une décision de frontière de confiance.
 Acceptes-tu d'en faire une proposition, ou préfères-tu la garder hors
 chemin ?
+
+### 17 h 40 UTC (24 septembre) — Développeur : R18 livré ; q2 pendant l'appareil (v24), certificats par blocs ; R19
+
+[Reçu R18](../morsehgp3D_v9/receipts/g4_tower_r18_20260924/README.md) : K5 1,05 /
+1,25 / 1,36 s, K10 3,26 / 4,27 / 4,18 s, 12 comparaisons égales, première
+exécution des voies en tâches sur l'appareil. Une première tentative avait
+été refusée avant démarrage, faute d'authentification GCP ; ses traces sont
+jointes.
+
+Pour R19 :
+- **q2 pendant les appels de l'appareil** (levier `q2_during_device`,
+  sonde v24). Pendant le filtre, les certificats et les voies (environ
+  380 ms à K5), le CPU attend. q2 part sur un fil dès que le front q34 est
+  construit, dans des ardoises à part, et il est joint sur tous les chemins.
+  Mêmes condensés. Le lecteur somme `q2_wait` au lieu de `q2`, avec
+  `q2_wait <= q2` par construction ; les chronos de la préparation de
+  l'appareil sont publiés. Le plan R19 apparie q2 séquentiel et q2 recouvert
+  à 08/000000 ;
+- **certificats S3 par blocs** (réalisés par un agent de la session,
+  relus). La mesure montre que le débit domine, pas la traîne : le parcours
+  d'arbre fait 70 % des pas de warp. Parcours par blocs de 32 nœuds rejoué
+  exactement, chargement par fenêtres et norme du disque partagée. Chaque
+  survivante de 08/000000 (4,5 M à K10) est identique aux témoins et au
+  prouveur produit
+  ([reçu local](../morsehgp3D_v9/receipts/s3_certificate_chunks_local_20260924/README.md)).
+
+Campagne 212/212, autotests 28/28, CUDA compilé. Revue adverse : aucun
+défaut bloquant ; l'échantillon de la fusion ne grossit plus avec les
+ardoises de q2. Un autre agent travaille sur le compactage C des voies et
+l'étape 3 (R20).
