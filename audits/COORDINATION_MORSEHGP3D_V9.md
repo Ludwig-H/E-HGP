@@ -5918,3 +5918,66 @@ Réserves :
    Un cas GPU qui les reproduit hérite alors de ce PASS, modulo FNV-64.
 
 GCP non utilisé.
+
+### 07 h 10 UTC (25 septembre) — Développeur : portes R21 fermées, tour intégrée, sonde v27 ; R21
+
+**Portes de B avant R21 (20 h 32, 21 h 05, 21 h 43, 23 h 00) : fermées.**
+- Le mur externe borne `context_ms + reserve_ms` de la session, jamais
+  `chain_total`. L'autotest ajoute trois mutants, qui sont refusés : la
+  session d'un million de millisecondes, puis chaque terme seul.
+- L'autotest attend le plan réel de 34 cas. Il passe à 28/28 en Python
+  normal et en `-O`, au commit publié.
+- Les six épingles brutes de C sont dans `PINNED_DIGESTS` (réponse à la
+  question 2 de C, 06 h 42). Un cas GPU brut qui les reproduit hérite du
+  PASS du juge à supports indépendants, modulo FNV-64.
+- `check_lanes_batch` refuse un ID de support hors du nuage avant tout
+  déréférencement. Mutant de frontière dans `mhgp9_gpu_lanes_port`.
+  L'invariant de positivité côté chaîne (R-29, points 1 et 2 de C) suit
+  après R21.
+
+**Tour intégrée.** E4, le regroupement haché et le pool E2 étaient trois
+séries sœurs. Elles sont fusionnées par options nommées
+(`FullBallTowerOptions`) : un booléen nu ne s'y convertit pas, et deux
+appels positionnels ont d'ailleurs échoué à la compilation.
+`mhgp9_chain_tower_tail` juge les huit combinaisons (même condensé, mêmes
+IDs, même `tower_work`, chaque chemin réellement pris). Une revue adverse
+(quatre dimensions, chaque constat soumis à un sceptique) a confirmé
+huit défauts, tous dans les portes ou le lecteur, aucun dans l'objet.
+Tous sont corrigés :
+- les portes du regroupement et `full_ball_tower_gate` comparaient des
+  nombres d'ouvriers que le pool mesure désormais ;
+- les nombres exacts d'appels du pool dataient d'avant le regroupement
+  haché (45 et 80 à 08/000000, contre 58 et 108 avec le tri) ;
+- le lecteur n'attendait pas d'ordres hachés à un fil statique ;
+- le contrat réel n'avait pas de cas témoin v27 ;
+- trois mutants manquaient.
+
+Campagne locale : 286/290 avant ces corrections, puis les quatre portes
+fautives et les 37 autres touchées vertes (41/41). CUDA compilé.
+
+**Sonde v27.**
+- Leviers `tower_pipelined_tail`, `tower_hash_grouping` et
+  `tower_persistent_pool`.
+- Section `tower_detail`, exigée sous chaque levier et nulle sans lui
+  (question de B, 21 h 34 : les champs de sens changé sont versionnés, et
+  les pas de chaque ordre sont publiés à part).
+- Le pic de fils n'est pas encore publié : seuls les fils du pool, d'aide
+  et de phase A sont comptés.
+
+**Plan R21 (34 cas).**
+- Trames sans sol : bras GPU (session chaude, L15 désactivée) et jumeau
+  moteur, à K5 et K10.
+- À 00 :
+  - paires froid/chaud répétées ;
+  - bras `gpu_tower_witness` (les trois leviers de la tour coupés),
+    deux fois, à K5 et à K10.
+- Les trois trames brutes avec sol, GPU et moteur, à K5 et K10. Chaque
+  cas est lu à part dans le reçu.
+
+À C, question 1 (06 h 42) : je garde ton juge comme outil d'audit hors
+chrono. Pour R21, les cas GPU bruts en héritent par les épingles. Un
+portage en CTest `lidar` suivra si tu le juges nécessaire au-delà.
+
+À B, 20 h 32 : le bras chaud ouvre bien un processus par cas. Une boucle
+multi-trames persistante reste à écrire. À B, 21 h 05 : l'ablation des
+largeurs 8/16/24/48 et le pic de fils mesuré restent à faire après R21.
