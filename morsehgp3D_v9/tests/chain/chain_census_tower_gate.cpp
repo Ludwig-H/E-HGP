@@ -11,7 +11,7 @@
 namespace {
 u64 oracle_mebs = 0, oracle_components = 0, catalogue_rows = 0, tower_pairs = 0;
 u64 census_runs = 0, high_order_facets = 0, high_order_verticals = 0, shell12 = 0;
-u64 q3_rows = 0, q4_rows = 0, euler_runs = 0;
+u64 q3_rows = 0, q4_rows = 0, euler_runs = 0, sealed_runs = 0;
 oracle::Mutation oracle_mutation = oracle::Mutation::none;
 bool omit_census_ball = false;
 
@@ -207,16 +207,21 @@ void large_case(const Fixture& fixture, unsigned variant) {
                               static_cast<mhgp9::gen::Coordinate>(p.z)});
       in_rank.push_back({static_cast<PointId>(j), p});
     }
+    // R-29: the tower of the sealed catalogue (tower_sealed_catalogue, pass
+    // 1 on its 1/64 sample) must equal the reference judged against Gamma.
     FullBallTowerResult published_reference;
-    for (std::size_t workers : {1u, 4u}) {
+    for (bool sealed : {false, true}) for (std::size_t workers : {1u, 4u}) {
       mhgp9::ChainOptions options;
       options.kmax = 10; options.separation_s = 8; options.workers = workers; options.run_tower = true;
+      options.tower_sealed_catalogue = sealed;
       auto chain = mhgp9::run_tower_chain(chain_points, options);
       if (chain.status != mhgp9::ChainStatus::kComplete)
         std::fprintf(stderr, "chain refusal=%s\n", chain.reason.c_str());
       need(chain.status == mhgp9::ChainStatus::kComplete && chain.tower.orders.size() == 10 &&
            chain.tower_digest == mhgp9::tower_digest(chain.tower), "T2.chain.published_tower");
-      if (workers == 1) {
+      need(chain.tower_stats.sealed_catalogues == (sealed ? 1u : 0u), "T2.chain.seal_path");
+      sealed_runs += sealed ? 1 : 0;
+      if (!sealed && workers == 1) {
         check_large_cuts(chain.tower, in_rank, model);
         published_reference = std::move(chain.tower);
       } else { same_payload(published_reference, chain.tower); ++tower_pairs; }
@@ -277,8 +282,8 @@ int main(int argc, char** argv) {
         {42,7,24},{62,94,47},{3,29,58},{85,73,15},{29,36,97},{58,65,3}}, 10};
     } else return 2;
     for (unsigned variant = 0; variant < 2; ++variant) large_case(fixture, variant);
-    need(clouds == 2 && orders == 220 && census_runs == 6 && euler_runs == 6 && tower_pairs == 18 &&
-         high_order_facets > 0 && high_order_verticals > 0, "T2.nonvacuity");
+    need(clouds == 2 && orders == 260 && census_runs == 6 && euler_runs == 6 && tower_pairs == 22 &&
+         sealed_runs == 4 && high_order_facets > 0 && high_order_verticals > 0, "T2.nonvacuity");
     if (mode == "--shell14") need(shell12 == 6, "T2.nonvacuity.shell12");
     if (mode == "--spatial12") need(q3_rows > 0 && q4_rows > 0, "T2.nonvacuity.three_dimensional_supports");
     std::printf("{\"status\":\"passed\",\"scope\":\"bounded_real_census_FULL_K1_K10\","
