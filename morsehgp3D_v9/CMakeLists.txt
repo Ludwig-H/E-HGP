@@ -750,6 +750,44 @@ foreach(mutant IN ITEMS RUNS_OPEN_CUT RUNS_ZERO_COLLIDES COUNT_SKIPS_FACET)
   mhgp9_gate(mhgp9_chain_static_paths_mutant_${lower} 1 mhgp9_chain_static_paths_${lower}_mutant_gate
              ARGS --selftest EXPECT_PREFIX "cause=" LABELS "gate;chain;tower;mutant" TIMEOUT 300)
 endforeach()
+# R-29 (auditeur C, catalogue scelle) : positivite des supports reguliers et
+# domaine des cles etablis par le recensement de la chaine, puis levier
+# tower_sealed_catalogue (passe 1 de la tour sur l'echantillon 1/64). Cible
+# de test (chaine recompilee avec MHGP9_CHAIN_TEST_SEAM : presentations
+# forgees a la fusion, fautes de plomberie du catalogue). Refus directs de la
+# tour (triangle obtus, tetraedre a centre exterieur), refus de la chaine
+# (chain_nonpositive_regular_support, sous le sceau et sans ; refus types
+# d'arite et d'ID), faute systematique prise par l'echantillon, residu isole
+# declare, egalite scelle / non scelle (condenses, tower_work, ordres) a K3,
+# K5, K10, 1 et 4 fils et voie CPU par lots. Trois mutants tues (code 1) :
+# chaine sans positivite, tour sans positivite du support declare,
+# echantillon declare mais jamais execute.
+function(mhgp9_sealed_catalogue_executable name)
+  mhgp9_product_executable(${name} tests/chain/sealed_catalogue_gate.cpp src/chain/tower_chain.cpp)
+  target_include_directories(${name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/gen")
+  target_link_libraries(${name} PRIVATE mhgp9_gen mhgp9_gpu)
+  target_compile_definitions(${name} PRIVATE MHGP9_CHAIN_TEST_SEAM=1 ${ARGN})
+endfunction()
+mhgp9_sealed_catalogue_executable(mhgp9_chain_sealed_catalogue_gate)
+mhgp9_gate(mhgp9_chain_sealed_catalogue 0 mhgp9_chain_sealed_catalogue_gate ARGS --selftest
+           EXPECT_PREFIX "sealed_catalogue_gate direct=4 forged=8 typed=3 faults=3 sealed_runs=10"
+           LABELS "gate;chain;tower" TIMEOUT 900)
+mhgp9_gate(mhgp9_chain_sealed_catalogue_bad_argument 2 mhgp9_chain_sealed_catalogue_gate ARGS --unknown
+           LABELS "gate;chain" TIMEOUT 60)
+foreach(pair IN ITEMS CHAIN_MUTANT_NO_POSITIVITY:forged.q3+sealed=1+W=1
+                      TOWER_MUTANT_SUPPORT_NO_POSITIVITY:tower_direct.q3+threads=0
+                      TOWER_MUTANT_SEAL_NO_SAMPLE:fault.systematic+sealed=1+W=4)
+  string(REPLACE ":" ";" parts ${pair})
+  list(GET parts 0 mutant)
+  list(GET parts 1 cause)
+  string(REPLACE "+" " " cause_words ${cause})
+  string(REPLACE "CHAIN_MUTANT_" "" short ${mutant})
+  string(REPLACE "TOWER_MUTANT_" "" short ${short})
+  string(TOLOWER ${short} lower)
+  mhgp9_sealed_catalogue_executable(mhgp9_chain_sealed_catalogue_${lower}_mutant_gate MHGP9_${mutant}=1)
+  mhgp9_gate(mhgp9_chain_sealed_catalogue_mutant_${lower} 1 mhgp9_chain_sealed_catalogue_${lower}_mutant_gate
+             ARGS --selftest EXPECT_PREFIX "cause=${cause_words}" LABELS "gate;chain;tower;mutant" TIMEOUT 900)
+endforeach()
 # Regroupement de la phase 0 sans tri des requetes de 56 o (classes de hachage
 # exactes, tests/tower/static_grouping_gate.cpp) : temoin trie contre voie
 # hachee, cibles statiques et premieres requetes octet pour octet a chaque

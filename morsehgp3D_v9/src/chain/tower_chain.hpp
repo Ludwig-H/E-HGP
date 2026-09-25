@@ -382,10 +382,13 @@ std::uint64_t catalogue_digest(std::span<const tower::BallData> balls);
 // a la fusion, avec cle et niveau des formules de la tour, profondeur et
 // coquille recensees exactement par balayage de tous les sites : une
 // presentation que tous les autres recoupements de la chaine acceptent.
-// `fault` : alteration du catalogue recense entre la chaine et la tour
-// (plomberie) : le premier interieur de chaque boule (systematique) ou de la
-// seule boule `fault_ball` (isolee) remplace par le plus petit site hors de
-// la boule.
+// Un support mal forme (arite hors de 2..4, ID hors du nuage) est presente
+// brut (cle nulle), pour les refus types du recensement. `fault` :
+// alteration du catalogue recense entre la chaine et la tour (plomberie) :
+// le premier interieur de chaque boule REGULIERE a interieurs (systematique)
+// ou de la seule boule `fault_ball` (isolee, si reguliere a interieurs)
+// remplace par le plus petit site hors de la boule. Les coquilles etendues
+// sont exclues : la passe 2, inchangee sous le sceau, les revalide deja.
 namespace chain_test {
 struct ForgedSupport {
   unsigned arity = 0;

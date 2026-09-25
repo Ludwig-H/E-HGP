@@ -1227,18 +1227,24 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     // Gates only: forged presentations enter the merge like any producer's
     // (engine consumer, lanes sink, q2), key and level from the support,
     // depth and shell counted exactly over every site.
+    // A malformed support (arity outside 2..4, an ID outside the cloud) is
+    // presented raw (zero key), for the census's typed refusals.
     for (const auto& forged : chain_test::seam.forged) {
       Presentation p;
       p.arity = static_cast<std::uint8_t>(forged.arity);
       p.support = forged.ids;
-      tower::BallKey key;
-      tower::ExactLevel level;
-      key_and_level(points, p, &key, &level);
-      p.key = to_key5(key);
-      for (const auto& site : points) {
-        const tower::i128 power = key.power(to_p3(site));
-        p.depth += power < 0 ? 1 : 0;
-        p.shell += power == 0 ? 1 : 0;
+      bool well_formed = forged.arity >= 2 && forged.arity <= 4;
+      for (unsigned j = 0; well_formed && j < forged.arity; ++j) well_formed = forged.ids[j] < points.size();
+      if (well_formed) {
+        tower::BallKey key;
+        tower::ExactLevel level;
+        key_and_level(points, p, &key, &level);
+        p.key = to_key5(key);
+        for (const auto& site : points) {
+          const tower::i128 power = key.power(to_p3(site));
+          p.depth += power < 0 ? 1 : 0;
+          p.shell += power == 0 ? 1 : 0;
+        }
       }
       slots.front().push_back(p);
     }
@@ -1455,7 +1461,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         if (chain_test::seam.fault == chain_test::CatalogueFault::kSingleInterior && g != chain_test::seam.fault_ball)
           continue;
         auto& b = balls[g];
-        if (b.n_interior == 0) continue;
+        if (b.n_interior == 0 || b.n_shell != b.arity) continue;  // regular balls with interiors only
         tower::i32 outside = 0;
         const auto in_ball = [&b](tower::i32 u) {
           for (const auto part : {b.interior(), b.shell()})
