@@ -9,6 +9,7 @@
 #include <exception>
 #include <limits>
 #include <condition_variable>
+#include <memory>
 #include <mutex>
 #include <new>
 #include <optional>
@@ -602,25 +603,61 @@ tower::P3 to_p3(const gen::Point3& p) { return tower::P3{p.x, p.y, p.z}; }
 
 Key5 to_key5(const tower::BallKey& k) { return Key5{k.a, k.b[0], k.b[1], k.b[2], k.c}; }
 
+// The support's positions and forms, kept for its positivity (R-29).
+struct SupportForm {
+  std::array<tower::P3, 4> p{};
+  tower::Q3Form three{};
+  tower::Q4Form four{};
+};
+
 // Cle et niveau de la tour depuis un support (formules v7, independantes de v8).
+// Arity 2..4 and support IDs inside the cloud are required first (R-29: the
+// consumers and the lanes sink only copy them).
 void key_and_level(std::span<const gen::Point3> points, const Presentation& p,
-                   tower::BallKey* key, tower::ExactLevel* level) {
+                   tower::BallKey* key, tower::ExactLevel* level, SupportForm* form = nullptr) {
   using namespace tower;
-  const P3 a = to_p3(points[p.support[0]]), b = to_p3(points[p.support[1]]);
+  require(p.arity >= 2 && p.arity <= 4, "chain_presentation_arity");
+  for (unsigned j = 0; j < p.arity; ++j) require(p.support[j] < points.size(), "chain_support_id_outside_cloud");
+  SupportForm local;
+  SupportForm& f = form ? *form : local;
+  for (unsigned j = 0; j < p.arity; ++j) f.p[j] = to_p3(points[p.support[j]]);
+  const P3 a = f.p[0], b = f.p[1];
   if (p.arity == 2) {
     *key = q2_ball_key(a, b);
     *level = promote_level(q2_exact_level(p3_norm2(p3_sub(a, b))));
   } else if (p.arity == 3) {
-    const P3 x = to_p3(points[p.support[2]]);
-    *key = q3_ball_key(q3_form(a, b, x));
+    const P3 x = f.p[2];
+    f.three = q3_form(a, b, x);
+    *key = q3_ball_key(f.three);
     *level = promote_level(q3_exact_level(a, b, x));
   } else {
-    const P3 x = to_p3(points[p.support[2]]), y = to_p3(points[p.support[3]]);
-    const Q4Form form = q4_form(a, b, x, y);
-    require(form.det > 0, "chain_q4_support_flat");
-    *key = ball_key_reduce(q4_ball_form(form));
-    *level = q4_level_raw(form);
+    const P3 x = f.p[2], y = f.p[3];
+    f.four = q4_form(a, b, x, y);
+    require(f.four.det > 0, "chain_q4_support_flat");
+    *key = ball_key_reduce(q4_ball_form(f.four));
+    *level = q4_level_raw(f.four);
   }
+}
+
+// R-29: positivity of a regular ball's support, in exact integers: the
+// predicate of the tower's pass 1 (anchor_meb_detail::form) on the same
+// support set. q2: always positive (the midpoint is inside the segment; two
+// distinct sites by the shell check). q3: strictly acute triangle (three
+// dot products on u18 differences, in i64) and G > 0. q4: det > 0 and the
+// centre strictly inside (q4_center_strictly_inside). The three are
+// invariant under a permutation of the support (q4_form canonicalizes the
+// orientation, the inside test reads it).
+bool regular_support_positive(const SupportForm& f, unsigned arity) {
+#if defined(MHGP9_CHAIN_MUTANT_NO_POSITIVITY)
+  return true;  // mutant: the chain never tests positivity (the tower's pass 1 alone)
+#endif
+  using namespace tower;
+  if (arity == 2) return true;
+  const P3 &a = f.p[0], &b = f.p[1], &c = f.p[2];
+  if (arity == 3)
+    return p3_dot(p3_sub(b, a), p3_sub(c, a)) > 0 && p3_dot(p3_sub(a, b), p3_sub(c, b)) > 0 &&
+           p3_dot(p3_sub(a, c), p3_sub(b, c)) > 0 && f.three.g > 0;
+  return f.four.det > 0 && q4_center_strictly_inside(f.four, a, b, c, f.p[3]);
 }
 
 // Execute job(i) pour i dans [0, count) sur au plus `workers` fils ; la
@@ -680,6 +717,17 @@ void fnv_level(std::uint64_t& h, const tower::ExactLevel& level) {
 
 }  // namespace
 
+// R-29: the only issuer of tower::SealedCatalogue (friend of the type), used
+// by run_tower_chain alone, after its census of every distinct key on `ix`
+// and its Euler check: the catalogue is moved in and the index bound.
+class ChainCatalogueSealer {
+ public:
+  static std::unique_ptr<const tower::SealedCatalogue> seal(const tower::CloudIndex& ix,
+                                                            std::vector<tower::BallData>&& balls) {
+    return std::unique_ptr<const tower::SealedCatalogue>(new tower::SealedCatalogue(ix, std::move(balls)));
+  }
+};
+
 std::uint64_t tower_digest(const tower::FullBallTowerResult& result) {
   std::uint64_t h = 14695981039346656037ull;
   fnv(h, result.orders.size());
@@ -715,7 +763,7 @@ std::uint64_t tower_digest(const tower::FullBallTowerResult& result) {
   return h;
 }
 
-std::uint64_t catalogue_digest(const std::vector<tower::BallData>& balls) {
+std::uint64_t catalogue_digest(std::span<const tower::BallData> balls) {
   std::vector<std::size_t> order(balls.size());
   for (std::size_t i = 0; i < order.size(); ++i) order[i] = i;
   std::sort(order.begin(), order.end(), [&](std::size_t x, std::size_t y) { return balls[x].key < balls[y].key; });
@@ -1175,6 +1223,26 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     // q2's slots join q34's (moved, not copied): the merge sorts them all.
     slots.insert(slots.end(), std::make_move_iterator(q2_slots.begin()), std::make_move_iterator(q2_slots.end()));
     std::vector<std::vector<Presentation>>().swap(q2_slots);
+#if defined(MHGP9_CHAIN_TEST_SEAM)
+    // Gates only: forged presentations enter the merge like any producer's
+    // (engine consumer, lanes sink, q2), key and level from the support,
+    // depth and shell counted exactly over every site.
+    for (const auto& forged : chain_test::seam.forged) {
+      Presentation p;
+      p.arity = static_cast<std::uint8_t>(forged.arity);
+      p.support = forged.ids;
+      tower::BallKey key;
+      tower::ExactLevel level;
+      key_and_level(points, p, &key, &level);
+      p.key = to_key5(key);
+      for (const auto& site : points) {
+        const tower::i128 power = key.power(to_p3(site));
+        p.depth += power < 0 ? 1 : 0;
+        p.shell += power == 0 ? 1 : 0;
+      }
+      slots.front().push_back(p);
+    }
+#endif
 
     // ---- Fusion : une boule par cle (union q2 u q3 u q4).
     PhaseClock merge_clock{result.times.merge_ms};
@@ -1254,6 +1322,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       std::array<std::uint64_t, 5> by_q{};
       std::array<std::uint64_t, 17> by_shell{};
       std::array<std::int64_t, 11> euler{};  // contributions d'Euler par ordre K (indice K)
+      std::array<std::uint64_t, 5> regular{};  // R-29: certified regular supports by arity
     };
     // Coefficient de t^{K-1} dans t^p (t-1)^{j-1} : (-1)^{j-1-i} C(j-1, i), i = K-1-p.
     const auto euler_add = [kmax](std::array<std::int64_t, 11>& e, std::size_t p, std::size_t j, std::int64_t count) {
@@ -1271,8 +1340,13 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       const Presentation& rep = *groups[g];  // plus petite arite presentee
       tower::BallKey key;
       tower::ExactLevel level;
-      key_and_level(points, rep, &key, &level);
+      SupportForm form;
+      key_and_level(points, rep, &key, &level, &form);  // arity 2..4 and IDs checked there (R-29)
       require(to_key5(key) == rep.key, "chain_key_mismatch_v8_v7");
+      // R-29: the key's u18 domain before any census arithmetic, and a
+      // positive level denominator (the tower's pass-1 shape and domain).
+      require(tower::ball_key_in_u18_domain(key), "chain_ball_key_domain");
+      require(level.den > 0, "chain_ball_level_denominator");
       const auto status = tower::ball_census(ix, key, rep.depth, std::numeric_limits<std::size_t>::max(),
                                              &st.in, &st.sh, &st.depth, &st.scratch);
       require(status == tower::CensusStatus::kOk, "chain_census_interior_overflow");
@@ -1286,8 +1360,24 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         return;  // refus de domaine explicite, jamais une troncature
       }
       require(st.in.size() <= tower::kBallInteriorMax, "chain_interior_above_representation");
+      std::sort(st.in.begin(), st.in.end());
+      std::sort(st.sh.begin(), st.sh.end());
       unsigned q = rep.arity;
-      if (st.sh.size() != rep.arity) {
+      if (st.sh.size() == rep.arity) {
+        // R-29: a regular shell IS the declared support (geometry IDs of the
+        // presented input IDs, as sets) and that support is positive: with
+        // the key and level recomputed from it above, the tower's pass-1
+        // declared-support check holds for this ball.
+        std::array<tower::i32, 4> support;  // unused slots sort last
+        support.fill(std::numeric_limits<tower::i32>::max());
+        for (unsigned j = 0; j < rep.arity; ++j) support[j] = geo_of_id[rep.support[j]];
+        std::sort(support.begin(), support.end());
+        require(std::equal(st.sh.begin(), st.sh.end(), support.begin()), "chain_regular_shell_differs_from_support");
+        require(regular_support_positive(form, rep.arity), "chain_nonpositive_regular_support");
+        ++st.regular[rep.arity];
+        // Coquille reguliere : T = U seule (centre interieur au support positif).
+        euler_add(st.euler, st.in.size(), q, 1);
+      } else {
         ++st.extra;
         tower::local_plateau::LocalCensus local{key, {}, {}};
         for (auto u : st.in) local.interior.push_back({ix.point_id(u), ix.upos[(std::size_t)u]});
@@ -1295,6 +1385,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         const auto table = tower::local_plateau::ShellTable::prepare(std::move(local));
         q = table.q_min();
         require(q == rep.arity, "chain_qmin_differs_from_min_presented_arity");
+        require(q <= st.sh.size(), "chain_qmin_above_shell");
         // Euler d'une coquille etendue : sous-coquilles T (|T| >= 2) dont
         // l'enveloppe convexe contient le centre, comptees par taille.
         std::array<std::int64_t, 13> by_size{};
@@ -1307,9 +1398,6 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
 #endif
         for (std::size_t j = 2; j <= st.sh.size(); ++j)
           if (by_size[j]) euler_add(st.euler, st.in.size(), j, by_size[j]);
-      } else {
-        // Coquille reguliere : T = U seule (centre interieur au support positif).
-        euler_add(st.euler, st.in.size(), q, 1);
       }
       require(st.in.size() + q <= std::min<std::size_t>(kmax + 1, points.size()),
               "chain_ball_outside_rank_window");
@@ -1320,8 +1408,6 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       b.arity = static_cast<tower::u8>(q);
       b.n_interior = static_cast<tower::u8>(st.in.size());
       b.n_shell = static_cast<tower::u8>(st.sh.size());
-      std::sort(st.in.begin(), st.in.end());
-      std::sort(st.sh.begin(), st.sh.end());
       std::copy(st.in.begin(), st.in.end(), b.interior_ids);
       std::copy(st.sh.begin(), st.sh.end(), b.shell_ids);
       keep[g] = 1;
@@ -1335,6 +1421,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       for (std::size_t q = 0; q < 5; ++q) result.catalogue.balls_by_qmin[q] += st.by_q[q];
       for (std::size_t s = 0; s < 17; ++s) result.catalogue.balls_by_shell[s] += st.by_shell[s];
       for (std::size_t k = 1; k <= 10; ++k) result.catalogue.euler_by_k[k] += st.euler[k];
+      for (std::size_t q = 0; q < 5; ++q) result.catalogue.regular_supports_by_arity[q] += st.regular[q];
     }
     gathered = GatheredPresentations{};  // groups is not read past this point
     result.catalogue.shell_over_cap = over_cap.load();
@@ -1361,19 +1448,48 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     if (result.catalogue.euler_status == EulerStatus::kFails)
       fail(ChainStatus::kInvariantViolated, "chain_catalogue_euler_violated");
 
+#if defined(MHGP9_CHAIN_TEST_SEAM)
+    // Gates only: a plumbing fault between the chain's census and the tower.
+    if (chain_test::seam.fault != chain_test::CatalogueFault::kNone) {
+      for (std::size_t g = 0; g < balls.size(); ++g) {
+        if (chain_test::seam.fault == chain_test::CatalogueFault::kSingleInterior && g != chain_test::seam.fault_ball)
+          continue;
+        auto& b = balls[g];
+        if (b.n_interior == 0) continue;
+        tower::i32 outside = 0;
+        const auto in_ball = [&b](tower::i32 u) {
+          for (const auto part : {b.interior(), b.shell()})
+            if (std::find(part.begin(), part.end(), u) != part.end()) return true;
+          return false;
+        };
+        while (in_ball(outside)) ++outside;
+        b.interior_ids[0] = outside;
+      }
+    }
+#endif
     // ---- Tour FULL.
     if (options.keep_catalogue) result.catalogue_balls = balls;
+    // R-29: under tower_sealed_catalogue the catalogue moves into the seal
+    // (bound to `ix`, declared after it); it is read back from the seal.
+    std::unique_ptr<const tower::SealedCatalogue> sealed;
     if (options.run_tower) {
       t = Clock::now();
       const int static_threads = options.tower_static_threads >= 0 ? options.tower_static_threads
                                  : (W > 1 ? static_cast<int>(W) : 0);
       result.tower_static_threads = static_threads;
-      auto tw = tower::build_full_ball_tower(ix, balls, kmax, static_threads, {}, options.tower_meb_proposal,
-                                             tower::FullBallTowerOptions{
-                                                 .overlap_static = options.tower_overlap_static,
-                                                 .pipelined_tail = options.tower_pipelined_tail,
-                                                 .hash_grouping = options.tower_hash_grouping,
-                                                 .persistent_pool = options.tower_persistent_pool});
+      const tower::FullBallTowerOptions tower_options{.overlap_static = options.tower_overlap_static,
+                                                      .pipelined_tail = options.tower_pipelined_tail,
+                                                      .hash_grouping = options.tower_hash_grouping,
+                                                      .persistent_pool = options.tower_persistent_pool};
+      tower::FullBallTowerResult tw;
+      if (options.tower_sealed_catalogue) {
+        sealed = ChainCatalogueSealer::seal(ix, std::move(balls));
+        tw = tower::build_full_ball_tower(*sealed, kmax, static_threads, {}, options.tower_meb_proposal,
+                                          tower_options);
+      } else {
+        tw = tower::build_full_ball_tower(ix, balls, kmax, static_threads, {}, options.tower_meb_proposal,
+                                          tower_options);
+      }
       result.times.tower_ms = ms_since(t);
       result.tower_stats = tw.stats;
       result.tower_times = tw.times;
@@ -1399,13 +1515,14 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     if (options.catalogue_digest) {
       const auto digest_start = Clock::now();
       const double digest_cpu = process_cpu_s();
-      result.catalogue_digest = catalogue_digest(balls);
+      result.catalogue_digest = catalogue_digest(sealed ? sealed->balls() : std::span<const tower::BallData>(balls));
       catalogue_ms += ms_since(digest_start);
       const double digest_cpu_end = process_cpu_s();
       if (digest_cpu >= 0 && digest_cpu_end >= 0) catalogue_cpu += digest_cpu_end - digest_cpu;
     }
     result.status = ChainStatus::kComplete;
-    result.reason = "complete_relative_to_cross_checked_catalogue";
+    result.reason = sealed ? "complete_relative_to_cross_checked_catalogue_sealed_in_process_census"
+                           : "complete_relative_to_cross_checked_catalogue";
   } catch (const Failure& f) {
     result.status = f.status;
     result.reason = f.reason;

@@ -12,7 +12,14 @@
 //   - le compte d'interieurs et la taille de coquille emis par le generateur
 //     sont recalcules par un census exact sur l'index de la tour ;
 //   - q_min recalcule sur la coquille (quotient local) doit egaler la plus
-//     petite arite presentee (sinon une voie du generateur est incomplete).
+//     petite arite presentee (sinon une voie du generateur est incomplete) ;
+//   - R-29 (auditeur C) : par cle distincte, en O(1) et en entiers exacts,
+//     arite presentee 2..4, domaine u18 de la cle (avant le recensement),
+//     denominateur du niveau > 0, et pour une coquille REGULIERE (autant de
+//     sites que l'arite) : coquille recensee = support presente, support
+//     positif (q3 : triangle strictement aigu ; q4 : centre strictement
+//     interieur) ; refus type chain_nonpositive_regular_support. Toute voie
+//     (moteur, voies GPU, q2) passe par ce controle.
 // Une coquille de plus de 12 sites est un REFUS DE DOMAINE explicite
 // (kUnsupportedDegeneracy), jamais une troncature (contre-audit A § 1).
 #pragma once
@@ -163,6 +170,15 @@ struct ChainOptions {
   // (gpu/lanes_tasks.hpp) ; sans elle, les deux phases separees. Memes
   // octets ; exige q34_batch_q4 ; desactive par defaut.
   bool q34_lanes_fused = false;
+  // R-29 (auditeur C) : catalogue scelle. Apres son recensement, la chaine
+  // remet le catalogue a la tour sous un tower::SealedCatalogue (seule la
+  // chaine en construit un, lie a la meme instance d'index, jamais un
+  // catalogue reinjecte) ; la tour ne rejoue sa passe 1 de validation que
+  // sur un echantillon a pas fixe (une boule sur 64). Meme objet, memes
+  // condenses, meme tower_work ; la raison publiee devient
+  // complete_relative_to_cross_checked_catalogue_sealed_in_process_census.
+  // Sans effet si run_tower est faux. Desactive par defaut.
+  bool tower_sealed_catalogue = false;
 };
 
 // Temps de mur en millisecondes, CPU du processus en secondes.
@@ -204,6 +220,10 @@ struct CatalogueStats {
   std::array<std::int64_t, 11> euler_by_k{};  // indice K = 1..10
   unsigned euler_checkable_max_k = 0;
   EulerStatus euler_status = EulerStatus::kNotCheckable;
+  // R-29 : boules a coquille reguliere dont la chaine a certifie le support
+  // (coquille = support, positivite), par arite (indice 2..4) ; leur somme
+  // vaut balls - extra_shell_balls sur un catalogue complet.
+  std::array<std::uint64_t, 5> regular_supports_by_arity{};
 };
 
 // Registre du generateur q3/q4 (copie scalaire des compteurs v8, sommes sur
@@ -353,6 +373,32 @@ std::uint64_t tower_digest(const tower::FullBallTowerResult& tower);
 
 // Condense canonique d'un catalogue : boules triees par cle, puis cle,
 // niveau exact, arite, interieurs tries et coquille triee (FNV-1a 64).
-std::uint64_t catalogue_digest(const std::vector<tower::BallData>& balls);
+std::uint64_t catalogue_digest(std::span<const tower::BallData> balls);
+
+#if defined(MHGP9_CHAIN_TEST_SEAM)
+// Portes seulement (tests/chain/sealed_catalogue_gate.cpp), jamais compile
+// dans une cible produit : la cible de test recompile tower_chain.cpp avec
+// MHGP9_CHAIN_TEST_SEAM. `forged` : supports (IDs d'entree) presentes en plus
+// a la fusion, avec cle et niveau des formules de la tour, profondeur et
+// coquille recensees exactement par balayage de tous les sites : une
+// presentation que tous les autres recoupements de la chaine acceptent.
+// `fault` : alteration du catalogue recense entre la chaine et la tour
+// (plomberie) : le premier interieur de chaque boule (systematique) ou de la
+// seule boule `fault_ball` (isolee) remplace par le plus petit site hors de
+// la boule.
+namespace chain_test {
+struct ForgedSupport {
+  unsigned arity = 0;
+  std::array<std::uint32_t, 4> ids{};
+};
+enum class CatalogueFault { kNone, kSystematicInterior, kSingleInterior };
+struct Seam {
+  std::vector<ForgedSupport> forged;
+  CatalogueFault fault = CatalogueFault::kNone;
+  std::size_t fault_ball = 0;
+};
+inline Seam seam;
+}  // namespace chain_test
+#endif
 
 }  // namespace mhgp9

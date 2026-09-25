@@ -22,6 +22,12 @@
 #include "../parallel/pool.hpp"
 #include <optional>
 
+namespace mhgp9 {
+// R-29 (auditor C): the only issuer of tower::SealedCatalogue, defined once,
+// in src/chain/tower_chain.cpp, after the chain's own census.
+class ChainCatalogueSealer;
+}  // namespace mhgp9
+
 namespace mhgp9::tower {
 
 inline constexpr const char* kFullBallAuthority =
@@ -83,6 +89,10 @@ struct FullBallStats {
   // Orders whose phase 0 grouped its requests by exact hash classes (the
   // sorted witness otherwise). Path metadata, never part of tower_work.
   u64 hashed_orders = 0;
+  // R-29: 1 when the catalogue came under a SealedCatalogue (validation
+  // pass 1 reduced to its fixed-stride sample), and the balls that sample
+  // checked (ceil(n / kSealSampleStride)). Path metadata, never tower_work.
+  u64 sealed_catalogues = 0, seal_sampled_balls = 0;
   // False after a backend failure whose paid work could not be recovered.
   bool static_batch_work_known = true;
   AnchorMebWork validation_work, resolve_work;
@@ -165,6 +175,45 @@ struct FullBallTowerOptions {
   // read by the product).
   FullBallStaticTrace* trace = nullptr;
 };
+// u18 domain of a catalogue key (v9), checked BEFORE any power or axis
+// arithmetic, including for malformed callers: q3 gives A<2^76, |B|<2^96,
+// |C|<2^116 (auditor A); q4 gives A=det<2^60, |B|<2^81, |C|<2^100; q2 is
+// smaller. Shared by the tower's pass 1 and the chain's census (R-29).
+inline bool ball_key_in_u18_domain(const BallKey& key) {
+  if (!(key.a > 0 && key.a < (i128{1} << 76) && uabs128(key.c) < (u128{1} << 116))) return false;
+  for (i128 b : key.b)
+    if (!(uabs128(b) < (u128{1} << 96))) return false;
+  return true;
+}
+
+// R-29 (auditor C, PROPOSITION_C_CATALOGUE_SCELLE_20260924): a catalogue
+// whose per-ball checks of validation pass 1 its producer established in
+// process, on THIS index instance: shape, sites, key domain and census
+// powers by the chain's exact census of every distinct key, declared support
+// of every regular ball (shell = support, positivity, key and level
+// recomputed from the support). Only ::mhgp9::ChainCatalogueSealer builds
+// one, after its census: never a data flag, never a catalogue handed back
+// (a copy kept by keep_catalogue goes through the public, fully validated
+// overload). It owns the catalogue (moved in, const from then on) and binds
+// the index it was censused on. Under a seal the tower runs pass 1 on the
+// fixed-stride sample only (one ball in kSealSampleStride, index 0 mod the
+// stride, every run: a systematic plumbing fault is caught, an isolated one
+// is a declared residual); pass 2 and everything after it are unchanged.
+class SealedCatalogue {
+ public:
+  SealedCatalogue(const SealedCatalogue&) = delete;
+  SealedCatalogue& operator=(const SealedCatalogue&) = delete;
+  const CloudIndex& index() const { return *index_; }
+  std::span<const BallData> balls() const { return balls_; }
+
+ private:
+  friend class ::mhgp9::ChainCatalogueSealer;
+  SealedCatalogue(const CloudIndex& index, std::vector<BallData>&& balls) : index_(&index), balls_(std::move(balls)) {}
+  const CloudIndex* index_;
+  const std::vector<BallData> balls_;
+};
+inline constexpr size_t kSealSampleStride = 64;
+
 struct FullBallOrder {
   FullCoverageCertificate forest;
   // Image at the node's closed creation level. Queries normalize in the lower
@@ -496,12 +545,16 @@ class Builder {
  public:
   Builder(const CloudIndex& index, std::span<const BallData> census, unsigned max_k, FullBallStats& stats,
       int static_threads = 0, FullBallBatchResolver batch = {}, bool meb_proposal = true,
-      FullBallTimes* phase_times = nullptr, const FullBallTowerOptions& options = {})
+      FullBallTimes* phase_times = nullptr, const FullBallTowerOptions& options = {},
+      const SealedCatalogue* seal = nullptr)
       : ix(index), balls(census), requested(max_k), st(stats), resolver_cache(stats),
         geometry_threads(static_threads), batch_resolver(batch), propose_meb(meb_proposal),
         times(phase_times ? phase_times : &unused_times), overlap_static_lots(options.overlap_static),
         use_pool(options.persistent_pool), pipelined_tail(options.pipelined_tail),
-        hashed_groups(options.hash_grouping), static_trace(options.trace) {}
+        hashed_groups(options.hash_grouping), static_trace(options.trace),
+        // R-29: sealed only for the seal's own index instance and storage.
+        sealed(seal != nullptr && &seal->index() == &index && seal->balls().data() == census.data() &&
+               seal->balls().size() == census.size()) {}
 
   // v9 E2: with more than one geometry thread, one persistent pool of
   // geometry_threads participants (the calling thread and W - 1 threads) is
@@ -1504,6 +1557,9 @@ class Builder {
   // (sort of the 56-byte requests by key and ordinal, then group starts).
   bool hashed_groups = true;
   FullBallStaticTrace* static_trace = nullptr;  // gates only
+  // R-29: pass 1 on the fixed-stride sample only (build_full_ball_tower of a
+  // SealedCatalogue, bound to this index instance and storage).
+  bool sealed = false;
   using StaticSeed = FullBallBatchSeed;
   RawVector<BallId> static_targets;  // one target per request, every slot written
   // Arena of the phase-0 requests, reused from order to order (default
@@ -1617,11 +1673,7 @@ class Builder {
     require(std::adjacent_find(selected.begin(), selected.begin() + n) == selected.begin() + n,
             "full_ball_repeated_census_site", invalid);
     // Bound BEFORE any power/axis arithmetic, including malformed callers.
-    // u18 bounds (v9): q3 gives A<2^76, |B|<2^96, |C|<2^116 (auditor A);
-    // q4 gives A=det<2^60, |B|<2^81, |C|<2^100; q2 is smaller.
-    require(ball.key.a > 0 && ball.key.a < (i128{1} << 76) &&
-        uabs128(ball.key.c) < (u128{1} << 116), "full_ball_key_domain", invalid);
-    for (i128 b : ball.key.b) require(uabs128(b) < (u128{1} << 96), "full_ball_key_domain", invalid);
+    require(ball_key_in_u18_domain(ball.key), "full_ball_key_domain", invalid);
     for (i32 site : ball.interior()) require(ball.key.power(ix.upos[site]) < 0, "full_ball_census_power", invalid);
     for (i32 site : ball.shell()) require(ball.key.power(ix.upos[site]) == 0, "full_ball_census_power", invalid);
     if (ball.n_shell == ball.arity) {
@@ -1639,8 +1691,17 @@ class Builder {
     for (size_t j = 0; j < ball.arity; ++j) positions[j] = ix.upos[support[j]];
     add(checks);
     anchor_meb_detail::Candidate candidate;
+#if defined(MHGP9_TOWER_MUTANT_SUPPORT_NO_POSITIVITY)
+    // Mutant (R-29 refusal gate): the declared support's forms are built
+    // without its positivity test (obtuse triangle, centre outside).
+    candidate.a = positions[0];
+    candidate.b = positions[1];
+    if (ball.arity == 3) candidate.three = q3_form(positions[0], positions[1], positions[2]);
+    if (ball.arity == 4) candidate.four = q4_form(positions[0], positions[1], positions[2], positions[3]);
+#else
     require(anchor_meb_detail::form(std::span<const P3>(positions.data(), ball.arity),
         {0, 1, 2, 3}, ball.arity, candidate), "full_ball_census_geometry", FullBallStatus::kInvalidInput);
+#endif
     BallKey key;
     ExactLevel level;
     if (ball.arity == 2) {
@@ -1723,17 +1784,29 @@ class Builder {
     // declared support of regular balls). Pass 2, serial in index order: the
     // plateau tables and witnesses of extended shells, rank windows, counts.
     // The reported failure is the first one in index order, as sequentially.
+    // R-29: under a seal, pass 1 checks the balls of index 0 mod
+    // kSealSampleStride only (the block is a multiple of the stride): the
+    // same sample whatever the number of threads.
+    static_assert(2048 % kSealSampleStride == 0);
     const size_t absent_index = std::numeric_limits<size_t>::max();
     size_t first_local_failure = absent_index;
     Failure local_failure{FullBallStatus::kInvariantViolated, ""};
     {
       constexpr size_t block = 2048;
       const size_t blocks = (balls.size() + block - 1) / block;
+      const size_t step = sealed ? kSealSampleStride : 1;
       std::vector<size_t> failed_at(blocks, absent_index);
       std::vector<Failure> failures(blocks, local_failure);
       std::vector<u64> checks(blocks, 0);
+      if (sealed) {
+        st.sealed_catalogues = 1;
+        st.seal_sampled_balls = (balls.size() + kSealSampleStride - 1) / kSealSampleStride;
+      }
       parallel_items(blocks, geometry_threads, [&](size_t chunk, size_t) {
-        for (size_t j = chunk * block; j < std::min(balls.size(), (chunk + 1) * block); ++j) {
+#if defined(MHGP9_TOWER_MUTANT_SEAL_NO_SAMPLE)
+        if (sealed) return;  // mutant: a sample declared (counted) but never run
+#endif
+        for (size_t j = chunk * block; j < std::min(balls.size(), (chunk + 1) * block); j += step) {
           try {
             check_ball_locally(balls[j], checks[chunk]);
           } catch (const Failure& failure) {
@@ -2914,18 +2987,16 @@ class Builder {
 };
 }  // namespace full_ball_detail
 
-// meb_proposal selects anchor_meb_proposed (default) or the reference
-// enumeration for every local MEB: same objects, different work.
-// options (FullBallTowerOptions): the static path's named switches.
-inline FullBallTowerResult build_full_ball_tower(const CloudIndex& ix, std::span<const BallData> balls,
-    unsigned kmax, int static_threads = 0, FullBallBatchResolver batch = {}, bool meb_proposal = true,
-    const FullBallTowerOptions& options = {}) {
+namespace full_ball_detail {
+inline FullBallTowerResult build_tower(const CloudIndex& ix, std::span<const BallData> balls, unsigned kmax,
+    int static_threads, FullBallBatchResolver batch, bool meb_proposal, const FullBallTowerOptions& options,
+    const SealedCatalogue* seal) {
   FullBallTowerResult result;
   try {
-    result.orders = full_ball_detail::Builder(ix, balls, kmax, result.stats, static_threads, batch, meb_proposal,
-                                              &result.times, options).run();
+    result.orders = Builder(ix, balls, kmax, result.stats, static_threads, batch, meb_proposal, &result.times,
+                            options, seal).run();
     result.status = FullBallStatus::kCompleteRelative; result.reason = kFullBallAuthority;
-  } catch (const full_ball_detail::Failure& error) {
+  } catch (const Failure& error) {
     result.status = error.status; result.reason = error.reason;
   } catch (const std::bad_alloc&) {
     result.status = FullBallStatus::kResourceExhausted; result.reason = "full_ball_allocation_failed";
@@ -2938,6 +3009,28 @@ inline FullBallTowerResult build_full_ball_tower(const CloudIndex& ix, std::span
   }
   if (result.status != FullBallStatus::kCompleteRelative) result.orders.clear();
   return result;
+}
+}  // namespace full_ball_detail
+
+// meb_proposal selects anchor_meb_proposed (default) or the reference
+// enumeration for every local MEB: same objects, different work.
+// options (FullBallTowerOptions): the static path's named switches.
+// The public entry: the whole validation, whatever the caller.
+inline FullBallTowerResult build_full_ball_tower(const CloudIndex& ix, std::span<const BallData> balls,
+    unsigned kmax, int static_threads = 0, FullBallBatchResolver batch = {}, bool meb_proposal = true,
+    const FullBallTowerOptions& options = {}) {
+  return full_ball_detail::build_tower(ix, balls, kmax, static_threads, batch, meb_proposal, options, nullptr);
+}
+
+// R-29: the tower of a SealedCatalogue, on the index the seal binds (the
+// chain's call only): pass 1 of the validation on its fixed-stride sample,
+// everything else as above. Same objects, statuses and tower_work as the
+// public entry on the same catalogue when the seal's guarantees hold.
+inline FullBallTowerResult build_full_ball_tower(const SealedCatalogue& sealed, unsigned kmax,
+    int static_threads = 0, FullBallBatchResolver batch = {}, bool meb_proposal = true,
+    const FullBallTowerOptions& options = {}) {
+  return full_ball_detail::build_tower(sealed.index(), sealed.balls(), kmax, static_threads, batch, meb_proposal,
+                                       options, &sealed);
 }
 
 inline FullNodeId full_ball_vertical_root_at(const FullBallTowerResult& tower, unsigned k,
