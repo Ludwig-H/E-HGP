@@ -1445,6 +1445,10 @@ compteurs recouverts et en pipeline ; tour complète sous pause au condensé
 de la tour sans pause. Le mutant `TIMERS_AFTER_JOIN` rétablit l'ancien ordre
 des déclarations. Il n'est enregistré et tué que sous ASan
 (`-DMHGP9_SANITIZE=ON`), par le rapport d'écriture après libération.
+Exécution locale : le mutant meurt au premier cas (écriture de 8 octets
+après libération dans un fil d'ordre, 19 s) ; la porte corrigée passe sous
+ASan (301 s) et en Release (25 s). Condensés épinglés reproduits à K5 et K10
+sur 08/000000, `tower_work` égal champ par champ.
 
 **Banque.** Le domaine est strictement croissant. S'il commence à 0 et finit
 à n − 1, c'est exactement {0, …, n − 1} : l'appartenance devient p < n, au

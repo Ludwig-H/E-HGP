@@ -195,9 +195,10 @@ mhgp9_gate(mhgp9_chain_order_failure_mutant_drop_failed_stats 1 mhgp9_chain_orde
 # travail des coureurs compte apres la jointure (planchers). Le mutant
 # TIMERS_AFTER_JOIN (chronos et `publish` declares apres la jointure, donc
 # liberes avant elle) n'ecrit qu'en memoire liberee : il n'est tue que sous
-# ASan (-DMHGP9_SANITIZE=ON), rapport sur stdout.
+# ASan (-DMHGP9_SANITIZE=ON), rapport sur stdout. Duree locale : 25 s en
+# Release, 300 s sous ASan.
 mhgp9_gate(mhgp9_chain_order_failure_unwind 0 mhgp9_chain_order_failure_priority_gate
-           ARGS --unwind EXPECT_PREFIX "order_failure_unwind_gate checks=28" LABELS "gate;chain;tower" TIMEOUT 600)
+           ARGS --unwind EXPECT_PREFIX "order_failure_unwind_gate checks=28" LABELS "gate;chain;tower" TIMEOUT 900)
 if(MHGP9_SANITIZE)
   mhgp9_test_executable(mhgp9_chain_order_failure_timers_after_join_mutant_gate
                         tests/chain/order_failure_priority_gate.cpp src/chain/tower_chain.cpp)
