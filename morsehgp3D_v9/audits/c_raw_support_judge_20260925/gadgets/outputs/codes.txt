@@ -1,0 +1,9 @@
+over12_k3_K3 rc=0 want=0
+mine_over12_K3 rc=3 want=3
+dom24_K3 rc=0 want=0
+dom26_K3 rc=0 want=0
+dom26_K4 rc=2 want=2
+domcap_K3 rc=0 want=0
+g28b_p2_K3 rc=0 want=0
+g28b_p2_K4 rc=2 want=2
+dedup1500_K5 rc=0 want=0

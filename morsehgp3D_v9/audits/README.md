@@ -37,7 +37,10 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
    résultat avéré. Ces trois WIP frères ne sont pas encore un moteur combiné.
    Les [épingles brutes CPU de C](CONTRE_AUDIT_B_EPINGLES_BRUTES_C_PREFLIGHT_20260924.md)
    ont un [lecteur indépendant normal/`-O` et mutants](b_raw_pin_reader_20260924/README.md) ;
-   leur intégration et le préflight R21 restent ouverts.
+   leur intégration et le préflight R21 restent ouverts. Le
+   [juge à supports indépendants](c_raw_support_judge_20260925/README.md)
+   réalise la porte de complétude bornée de B : vert sur les six cas
+   bruts, 14 mutants tués ; recherche adverse, pas complétude.
    Le [grand audit C](AUDIT_C_GRAND_AUDIT_V9_20260924.md) et sa
    [contrelecture B](CONTRE_AUDIT_B_GRAND_AUDIT_C_100MS_20260924.md)
    distinguent mesures, projections et contrat inchangé de 100 ms.
@@ -360,6 +363,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`PROPOSITION_C_CATALOGUE_SCELLE_20260924.md`](PROPOSITION_C_CATALOGUE_SCELLE_20260924.md) et [`c_catalogue_scelle_20260924/`](c_catalogue_scelle_20260924/README.md) | C | 24/20:25 | catalogue scellé : positivité des supports réguliers d'abord dans la chaîne, puis passe 1 de la tour sautée sous sceau ; mesure locale de la passe 1 | vivant | sans réponse |
 | [`AUDIT_C_GRAND_AUDIT_V9_20260924.md`](AUDIT_C_GRAND_AUDIT_V9_20260924.md) | C | 24/20:49 | grand audit demandé par l'utilisateur : ce qui marche, où va le temps, trames avec sol, classement des changements, 100 ms infaisable avec les algorithmes connus | vivant | sans réponse |
 | [`c_raw_pins_20260924/`](c_raw_pins_20260924/README.md) | C | 24/20:49 | épingles CPU des trames brutes b00/b01/b02 de R21 : six paires (FULL, catalogue), moteur = lots CPU, Euler tient ; reports de voies déjà exercés (16/48/8) | vivant | sans réponse |
+| [`c_raw_support_judge_20260925/`](c_raw_support_judge_20260925/README.md) | C | 25/06:41 | juge à supports indépendants (spécification B) sur les trames brutes b00/b01/b02 × K5/K10, lié aux épingles : 675–1 024 clés admissibles distinctes par cas toutes présentes (clé, niveau, `p`, `q_min`, IDs complets), strates non vacantes, 14 mutants tués par leur seul marqueur, fixture étendue exacte ; v3 après deux revues adverses, gadgets archivés | vivant | sans réponse |
 
 ## Sondes et sorties à la racine du dossier
 
@@ -462,6 +466,7 @@ en citant l'identifiant, avec « acceptée », « refusée (raison) » ou « dif
 | R-32 | Trames avec sol : épingles CPU avant R21 (**faites**, `c_raw_pins_20260924/PINS_RAW.json`) ; arène de cover des voies et grosses arêtes (> 2^16 sites, > 2^12 événements) en report par arête ou appels fenêtrés, jamais un refus du cas entier ; publier tailles maximales, reports, traîne, arène, pic appareil, phases de la tour, Euler K10 | C | AUDIT_C_GRAND_AUDIT_V9_20260924.md § 4, 5, 6 C |
 | R-33 | Leviers classés par gain (K10 d'abord) : groupement de la phase 0 sans tri de 56 o et radix des niveaux ; E6 ; glu q3/q4 parallèle et session résidente ; recensement dans la fenêtre de l'appareil ; E4/E5 ; phase A parallèle après E6 ; arrêter les micro-leviers K5 sans sol et la prolifération des leviers (préréglages) | C | AUDIT_C_GRAND_AUDIT_V9_20260924.md § 6 B, E |
 | R-34 | Confiance : Kmax+2 à K5 sur trames entières et juges stratifiés entiers (angle mort 26,9 % / 11,0 %) ; épingle sans leviers ; GPU jugé sur coupe LiDAR, à K10 et sur chemins de capacité ; bornes des IDs dans `check_lanes_batch` ; TSan et compute-sanitizer ; bras T2 aux leviers G4 ; revue indépendante v22–v26 | C | AUDIT_C_GRAND_AUDIT_V9_20260924.md § 7, 8 |
+| R-35 | Porte de complétude bornée sur trames brutes (spécification B) : juge à supports indépendants **vert sur les six cas** b00/b01/b02 × K5/K10 ; à porter en porte hors chrono avant R21 et à rejouer à tout changement du générateur ; un cas GPU hérite du PASS en reproduisant l'épingle du catalogue (FNV-64, pas égalité littérale) ; restent les coquilles étendues brutes (R-19), d'autres séquences et le float32 | C | c_raw_support_judge_20260925/README.md |
 
 ## Conventions proposées (à adopter par tous)
 

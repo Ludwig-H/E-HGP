@@ -1,0 +1,10 @@
+fixture_cospheric ANCHORS seed=5eed2026c0ffee25 count=32 242:random 125:random 257:random 38:random 326:random 122:random 97:random 260:random 309:random 25:random 109:random 96:random 313:random 36:random 50:random 117:random 15:density_tail 16:density_tail 12:density_tail 13:density_tail 14:density_tail 1:density_tail 8:density_tail 5:density_tail 218:radius_quantile 159:radius_quantile 373:radius_quantile 185:radius_quantile 49:radius_quantile 276:radius_quantile 370:radius_quantile 414:radius_quantile
+fixture_cospheric EXPECTED keys=1155 q2crit=13 q3crit=71 q3crit_long=71 q4pos=205 extended_q2=6 extended_q3=1 extended_q4=1
+fixture_cospheric WITNESS q2crit key=(1,-355700,-309900,-175200,60907100000) p=4 q=2 support=[16,8] interior=[12,13,14,15] shell=[8,16]
+fixture_cospheric WITNESS q3crit_long key=(34237,-12157535300,-10620291600,-5994875300,2083255096400000) p=3 q=3 support=[15,8,11] interior=[12,13,14] shell=[8,11,15]
+fixture_cospheric WITNESS q4pos key=(62049901,-562632220913,-2967899790713,-2427077662227,59953551485825742) p=1 q=4 support=[313,106,287,381] interior=[260] shell=[106,287,313,381]
+fixture_cospheric CATALOGUE catalogue_digest=7cd7ccb1c1351cd8 input_fnv=40b5c33ab8e48f3d s=8 workers=4 levers=default(engine)
+fixture_cospheric INJECT drop-q2 key=(1,-355700,-309900,-175200,60907100000) expect=MISSING_KEY
+fixture_cospheric MISSING_KEY p=4 q=2 shell=2 key=(1,-355700,-309900,-175200,60907100000) anchor=16 support=[16,8] interior=[12,13,14,15] shell=[8,16] q=2
+fixture_cospheric n=417 kmax=5 anchors=32 supports=22272 degenerate=19 positive=1933 too_deep=614 admissible=1229 expected_unique=1155 found=1154 missing=1 level_diff=0 interior_diff=0 shell_diff=0 arity_diff=0 extended=8 extended_q2=6 extended_q3=1 extended_q4=1 shell_over_12=0 shell_domain=0 big_forms=0 q2crit=12 q3crit=71 q3crit_long=71 q4pos=205 catalogue=23516
+fixture_cospheric MUTANT_KILLED inject=drop-q2 marker=MISSING_KEY

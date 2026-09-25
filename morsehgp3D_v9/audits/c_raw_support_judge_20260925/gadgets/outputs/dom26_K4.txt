@@ -1,0 +1,7 @@
+dom26.u32le ANCHORS seed=0000000000000005 count=32 218:random 68:random 33:random 24:random 49:random 58:random 79:random 42:random 259:random 55:random 40:random 18:random 297:random 224:random 0:random 210:random 115:density_tail 74:density_tail 162:density_tail 96:density_tail 43:density_tail 85:density_tail 167:density_tail 98:density_tail 193:radius_quantile 191:radius_quantile 201:radius_quantile 128:radius_quantile 125:radius_quantile 86:radius_quantile 168:radius_quantile 87:radius_quantile
+dom26.u32le SHELL_OVER_12 key=(1,-262000,-262000,-262000,51452474375) p=2 q<=3 shell=26 anchor=0 support=[0,1,2] interior=[26,27] shell_ids=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
+dom26.u32le EXPECTED keys=1099 q2crit=41 q3crit=199 q3crit_long=199 q4pos=139 extended_q2=1 extended_q3=0 extended_q4=0
+dom26.u32le WITNESS q2crit key=(1,-510562,-38331,-111828,65754043191) p=3 q=2 support=[74,235] interior=[105,142,226] shell=[74,235]
+dom26.u32le WITNESS q3crit_long key=(550516,-142336498125,-142868865025,-142047115200,27627859435850000) p=2 q=3 support=[18,16,26] interior=[4,14] shell=[16,18,26]
+dom26.u32le WITNESS q4pos key=(6052367,-1561975914000,-1594213322125,-1557192783375,305859034293500000) p=1 q=4 support=[24,4,19,26] interior=[8] shell=[4,19,24,26]
+dom26.u32le chain_status=unsupported_degeneracy reason=chain_shell_above_12

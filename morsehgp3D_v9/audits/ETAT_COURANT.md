@@ -80,8 +80,13 @@ l'amont q3/q4. La [contrelecture de complétude des épingles brutes](b_full_raw
 montre simultanément que moteur et lots CPU peuvent omettre la même
 boule sans rompre leur égalité ni `complete_relative`. Elle propose une
 porte indépendante et bornée de supports q2/q3/q4 tirés des coordonnées
-brutes avec census global exact et IDs de coquille littéraux ; **aucun
-PASS de cette nouvelle porte n'est encore acquis**.
+brutes avec census global exact et IDs de coquille littéraux. Le
+[juge de C](c_raw_support_judge_20260925/README.md) la réalise : **vert
+sur les six cas** bruts, avec 675 à 1 024 clés admissibles distinctes
+par cas, toutes présentes avec leurs IDs complets. Les quatre strates
+sont non vacantes, 14 mutants sont tués et la fixture étendue est
+exacte. C'est une recherche adverse bornée, pas une complétude, ni
+GPU/G4.
 
 Le [grand audit C](AUDIT_C_GRAND_AUDIT_V9_20260924.md) classe les postes
 et projections vers 100 ms ; sa [contrelecture B](CONTRE_AUDIT_B_GRAND_AUDIT_C_100MS_20260924.md)

@@ -1,0 +1,8 @@
+mine_over12.u32le ANCHORS seed=5eed2026c0ffee25 count=32 203:random 89:random 381:random 332:random 184:random 408:random 31:random 321:random 256:random 406:random 245:random 156:random 328:random 120:random 301:random 138:random 114:density_tail 92:density_tail 32:density_tail 157:density_tail 25:density_tail 94:density_tail 386:density_tail 216:density_tail 373:radius_quantile 370:radius_quantile 276:radius_quantile 237:radius_quantile 400:radius_quantile 185:radius_quantile 364:radius_quantile 169:radius_quantile
+mine_over12.u32le EXPECTED keys=683 q2crit=46 q3crit=172 q3crit_long=0 q4pos=44 extended_q2=26 extended_q3=4 extended_q4=0
+mine_over12.u32le WITNESS q2crit key=(1,-200800,-200200,-200200,30120090000) p=2 q=2 support=[94,298] interior=[216,386] shell=[94,298]
+mine_over12.u32le WITNESS q3crit key=(1,-200150,-200150,-200600,30090000000) p=1 q=3 support=[92,279,298] interior=[239] shell=[92,279,298]
+mine_over12.u32le WITNESS q4pos key=(1,-199820,-200180,-200540,30054000000) p=0 q=4 support=[92,239,157,279] interior=[] shell=[92,157,239,279]
+mine_over12.u32le CATALOGUE catalogue_digest=2f5cbf1aecbcf1ad input_fnv=dfef1ba2b55dbec8 s=8 workers=2 levers=default(engine)
+mine_over12.u32le n=414 kmax=3 anchors=32 supports=22272 degenerate=140 positive=2082 too_deep=956 admissible=774 expected_unique=683 found=683 missing=0 level_diff=0 interior_diff=0 shell_diff=0 arity_diff=0 extended=30 extended_q2=26 extended_q3=4 extended_q4=0 shell_over_12=0 shell_domain=0 big_forms=0 q2crit=46 q3crit=172 q3crit_long=0 q4pos=44 catalogue=8379
+mine_over12.u32le VACUOUS strata=q3crit_long

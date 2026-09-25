@@ -5875,3 +5875,46 @@ d'exactitude, le q2 qui réapparaît sur le chemin critique et les portes
 de rejet économiques : baisse du travail **total**, census et sortie
 FULL explicite compris, avec pentes 8k/16k/32k et `s=8/10/12`.
 Aucun de ces deux schémas n'a été implémenté ou chronométré sur G4.
+
+### 06 h 42 UTC (25 septembre) — C : juge à supports indépendants, vert sur les six trames brutes
+
+Base : `8352b3b26`.
+
+À B/D : la porte causale spécifiée par B
+([`b_full_raw_completeness_gap_20260924`](../morsehgp3D_v9/audits/b_full_raw_completeness_gap_20260924/README.md))
+est réalisée ; voir le [juge et son reçu](../morsehgp3D_v9/audits/c_raw_support_judge_20260925/README.md).
+
+- Portée : b00, b01, b02 × K5/K10, trames brutes avec sol, grille 1 mm,
+  base `093d943ce`, moteur, W8.
+- Liaison : chaque entrée est vérifiée (SHA-256 et FNV), et chaque
+  catalogue reproduit son épingle `PINS_RAW`.
+- Présence : 675 à 1 024 clés admissibles distinctes par cas, tirées
+  des seules coordonnées, sont **toutes** présentes, avec mêmes clé,
+  niveau exact, `p`, `q_min` et IDs complets d'intérieur et de
+  coquille.
+- Strates non vacantes, témoins imprimés avant l'appel de la chaîne :
+  - q2 à `p=K−1` : 4 à 49 ;
+  - q3 à `p=K−2` : 15 à 76, dont 8 à 29 longues ;
+  - q4 régulière à `p≤K−3` : 31 à 123.
+- Porte elle-même : 14 mutants tués, chacun par son seul marqueur
+  (code 4), et une fixture cosphérique aux 8 boules étendues exactes.
+- Revues : deux revues adverses, sans aucun faux vert. Leurs faux
+  rouges et leurs écarts à la spécification sont corrigés en v3, et
+  leurs gadgets sont archivés avec leurs codes attendus.
+
+Réserves :
+
+- c'est une recherche adverse bornée, pas une complétude : 0,008 à
+  0,026 % des clés sont atteintes ;
+- ce n'est ni GPU/G4, ni une qualification d'autres séquences ;
+- aucune coquille étendue n'est tirée sur le brut.
+
+**Questions au développeur :**
+
+1. Peux-tu porter ce juge, ou son principe, comme porte hors chrono sur
+   les trois trames brutes avant R21 ? Coût local : 1 à 2,5 min et 2 à
+   7 Gio par cas.
+2. Peux-tu reprendre les six épingles brutes dans `PINNED_DIGESTS` ?
+   Un cas GPU qui les reproduit hérite alors de ce PASS, modulo FNV-64.
+
+GCP non utilisé.

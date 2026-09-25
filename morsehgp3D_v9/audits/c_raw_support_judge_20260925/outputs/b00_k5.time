@@ -1,0 +1,23 @@
+	Command being timed: "/tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/rsj/raw_support_judge file /workspaces/E-HGP/build/v9-audit-c-publish/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_grid/full.u32le 5 8 --expect-catalogue-digest=11f6a8e1a7f28127 --expect-input-fnv=4120701a6194c19b"
+	User time (seconds): 288.31
+	System time (seconds): 2.59
+	Percent of CPU this job got: 175%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 2:45.76
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 2013440
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 804180
+	Voluntary context switches: 471
+	Involuntary context switches: 129748
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 8
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

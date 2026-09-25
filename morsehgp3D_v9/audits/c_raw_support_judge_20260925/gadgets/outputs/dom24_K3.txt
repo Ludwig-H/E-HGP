@@ -1,0 +1,7 @@
+dom24.u32le ANCHORS seed=0000000000000005 count=32 218:random 68:random 33:random 24:random 49:random 58:random 79:random 42:random 259:random 55:random 40:random 18:random 297:random 224:random 0:random 210:random 113:density_tail 72:density_tail 160:density_tail 94:density_tail 41:density_tail 83:density_tail 165:density_tail 96:density_tail 191:radius_quantile 189:radius_quantile 217:radius_quantile 53:radius_quantile 273:radius_quantile 193:radius_quantile 125:radius_quantile 128:radius_quantile
+dom24.u32le EXPECTED keys=752 q2crit=55 q3crit=194 q3crit_long=194 q4pos=60 extended_q2=1 extended_q3=0 extended_q4=0
+dom24.u32le WITNESS q2crit key=(1,-495038,-469004,-378448,149839663420) p=2 q=2 support=[94,216] interior=[41,120] shell=[94,216]
+dom24.u32le WITNESS q3crit_long key=(82,-21545009,-21517462,-21029390,4174427791000) p=1 q=3 support=[24,6,9] interior=[25] shell=[6,9,24]
+dom24.u32le WITNESS q4pos key=(7696704,-1979595414000,-2019633542000,-1989236842875,388239607620625000) p=0 q=4 support=[24,2,4,8] interior=[] shell=[2,4,8,24]
+dom24.u32le CATALOGUE catalogue_digest=cff5a6d4b4fc3bcb input_fnv=d74b7c559c151a10 s=8 workers=2 levers=default(engine)
+dom24.u32le n=300 kmax=3 anchors=32 supports=22272 degenerate=8 positive=2448 too_deep=1276 admissible=802 expected_unique=752 found=752 missing=0 level_diff=0 interior_diff=0 shell_diff=0 arity_diff=0 extended=1 extended_q2=1 extended_q3=0 extended_q4=0 shell_over_12=0 shell_domain=0 big_forms=0 q2crit=55 q3crit=194 q3crit_long=194 q4pos=60 catalogue=5644

@@ -1,0 +1,11 @@
+full.u32le ANCHORS seed=5eed2026c0ffee25 count=32 75668:random 33353:random 14715:random 113462:random 18534:random 78506:random 23403:random 9628:random 25062:random 3821:random 46464:random 55214:random 35330:random 14124:random 67901:random 119841:random 123141:density_tail 123138:density_tail 123139:density_tail 122694:density_tail 122700:density_tail 122696:density_tail 122692:density_tail 1700:density_tail 71865:radius_quantile 36760:radius_quantile 73482:radius_quantile 23628:radius_quantile 23582:radius_quantile 106881:radius_quantile 102827:radius_quantile 3110:radius_quantile
+full.u32le EXPECTED keys=675 q2crit=49 q3crit=69 q3crit_long=29 q4pos=56 extended_q2=0 extended_q3=0 extended_q4=0
+full.u32le WITNESS q2crit key=(1,-287341,-164296,-2438,27361174978) p=4 q=2 support=[123141,122696] interior=[122692,122694,123138,123139] shell=[122696,123141]
+full.u32le WITNESS q3crit key=(5327,-750542280,-804708222,-277604284,60443603510957) p=3 q=3 support=[23628,24353,24340] interior=[24081,24323,24345] shell=[23628,24340,24353]
+full.u32le WITNESS q3crit_long key=(604458012376,-177201067353227800,-104391269725278161,-16047888117178320,17494415291825821186128) p=3 q=3 support=[123138,123232,123066] interior=[123072,123139,123166] shell=[123066,123138,123232]
+full.u32le WITNESS q4pos key=(7179,-1011479259,-1084517307,-374090593,81460171145100) p=2 q=4 support=[23628,24290,24323,24340] interior=[24081,24345] shell=[23628,24290,24323,24340]
+full.u32le CATALOGUE catalogue_digest=11f6a8e1a7f28127 input_fnv=4120701a6194c19b s=8 workers=8 levers=default(engine)
+full.u32le INJECT interior-sub key=(1,-294891,-172680,-26394,29193688198) expect=INTERIOR_DIFF
+full.u32le INTERIOR_DIFF p=2/2 catalogue=[528,123139] key=(1,-294891,-172680,-26394,29193688198) anchor=123141 support=[123141,123232] interior=[123138,123139] shell=[123141,123232] q=2
+full.u32le n=123389 kmax=5 anchors=32 supports=22272 degenerate=6 positive=1407 too_deep=624 admissible=697 expected_unique=675 found=674 missing=0 level_diff=0 interior_diff=1 shell_diff=0 arity_diff=0 extended=0 extended_q2=0 extended_q3=0 extended_q4=0 shell_over_12=0 shell_domain=0 big_forms=0 q2crit=49 q3crit=69 q3crit_long=29 q4pos=56 catalogue=2822052
+full.u32le MUTANT_KILLED inject=interior-sub marker=INTERIOR_DIFF

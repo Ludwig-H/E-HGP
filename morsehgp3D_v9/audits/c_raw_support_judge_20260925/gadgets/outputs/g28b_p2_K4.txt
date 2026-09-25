@@ -1,0 +1,8 @@
+g28b_p2.u32le ANCHORS seed=0000000000000007 count=32 3687:random 1650:random 4056:random 1760:random 1190:random 476:random 1735:random 2661:random 2479:random 2614:random 2441:random 4306:random 2398:random 1047:random 723:random 1322:random 3551:density_tail 3878:density_tail 3784:density_tail 3985:density_tail 3182:density_tail 3541:density_tail 3396:density_tail 3262:density_tail 479:radius_quantile 1481:radius_quantile 1216:radius_quantile 3236:radius_quantile 553:radius_quantile 1055:radius_quantile 3606:radius_quantile 3801:radius_quantile
+g28b_p2.u32le SHELL_OVER_12 key=(1,-380010,-420682,-298586,102633633655) p=2 q<=3 shell=28 anchor=1650 support=[1650,1651,1652,1653] interior=[1678,1679] shell_ids=[1650,1651,1652,1653,1654,1655,1656,1657,1658,1659,1660,1661,1662,1663,1664,1665,1666,1667,1668,1669,1670,1671,1672,1673,1674,1675,1676,1677]
+g28b_p2.u32le EXPECTED keys=893 q2crit=65 q3crit=142 q3crit_long=91 q4pos=87 extended_q2=17 extended_q3=21 extended_q4=6
+g28b_p2.u32le WITNESS q2crit key=(1,-467500,-309652,-426238,124029860687) p=3 q=2 support=[1735,1729] interior=[1726,1728,1737] shell=[1729,1735]
+g28b_p2.u32le WITNESS q3crit key=(11,-5142686,-3406142,-4688870,1364421006265) p=2 q=3 support=[1735,1729,1711] interior=[1728,1737] shell=[1711,1729,1735]
+g28b_p2.u32le WITNESS q3crit_long key=(308038392353,-12129293721150091,-34034498158226870,-3093320944878945,1056866792331409123395) p=2 q=3 support=[3262,3611,3723] interior=[3708,4338] shell=[3262,3611,3723]
+g28b_p2.u32le WITNESS q4pos key=(9,-2272060,-2677316,-3198112,626616604404) p=1 q=4 support=[479,469,466,457] interior=[468] shell=[457,466,469,479]
+g28b_p2.u32le chain_status=unsupported_degeneracy reason=chain_shell_above_12
