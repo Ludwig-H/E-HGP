@@ -1423,6 +1423,29 @@ séquentielle : la phase 0, puis les autres exceptions par K, puis, par K, les
 lots, les populations et les images. Un point de panne des populations
 (`MHGP9_TESTING`) rejoint ceux des lots et des images, sur toutes les voies.
 
+**Durée de vie (correctif de revue).** Une exception autre qu'une panne (une
+allocation refusée par l'arène de la phase 0, un fil qui ne peut être lancé)
+déroule la portée de la voie recouverte pendant que des fils d'ordre
+tournent encore. Les chronos de fin de phase, le début de fenêtre et les
+fermetures `cancel` / `publish` étaient déclarés après la jointure : libérés
+avant elle, ils recevaient encore les écritures des fils (écriture après
+libération sous ASan, là où `d1d03839` rendait un refus propre
+`full_ball_allocation_failed`). Tout objet touché par un fil d'ordre ou son
+auxiliaire est désormais déclaré avant la jointure. Porte
+`mhgp9_chain_order_failure_unwind` (mode `--unwind` de la porte de
+priorité) : points de panne `MHGP9_TESTING` d'allocation en phase 0 (K5,
+premier ordre de la phase 0 descendante, puis K3) et de lancement d'un fil
+d'ordre (K1, K3), sur les trois voies et avec 1, 4 et 8 fils, soit 28
+contrôles. Le statut attendu est un refus de ressource
+(`full_ball_allocation_failed`, `full_ball_thread_launch_failed`). Chaque fil
+marque une pause de 50 ms après sa phase A, pour écrire après que
+l'appelant a quitté sa portée. Planchers : sur les 12 cas recouverts où le
+fil de K1 existe, pause prise, naissances comptées après la jointure,
+compteurs recouverts et en pipeline ; tour complète sous pause au condensé
+de la tour sans pause. Le mutant `TIMERS_AFTER_JOIN` rétablit l'ancien ordre
+des déclarations. Il n'est enregistré et tué que sous ASan
+(`-DMHGP9_SANITIZE=ON`), par le rapport d'écriture après libération.
+
 **Banque.** Le domaine est strictement croissant. S'il commence à 0 et finit
 à n − 1, c'est exactement {0, …, n − 1} : l'appartenance devient p < n, au
 lieu d'une recherche dichotomique, que gardent les autres domaines. Même
@@ -1445,8 +1468,10 @@ lecteur G4. Les étapes propres de chaque ordre, recouvertes, sont dans
 - `mhgp9_tower_full_ball_pipelined_cpu2` et `_cpu4` : toutes les fixtures de
   l'oracle par la voie en pipeline, appariées à la voie temporelle et au
   témoin (mêmes IDs, lignes, références, topologie, travail champ par
-  champ). Planchers : 14 références différées sur 12 fixtures, 168 ordres
-  en pipeline. Les refus passent aussi par cette voie.
+  champ). Planchers de la porte : au moins 14 références différées sur au
+  moins 12 fixtures, 150 ordres en pipeline (168 mesurés) et plus de 5 000
+  contrôles appariés au témoin (7 624 mesurés). Les refus passent aussi par
+  cette voie.
 - `mhgp9_chain_tower_tail` : chaîne sur 1 500 sites et six carrés plantés,
   à K5, avec 1, 2, 3, 4 et 8 fils, et le témoin à 4 et 8 fils. Même
   condensé, même banque, mêmes références, mêmes champs de `tower_work`.
