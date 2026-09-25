@@ -1874,3 +1874,140 @@ même baisse du tri et des groupes (70 à 83 %), mais une phase 0 et une tour
 dominées par la dérive de la charge : la validation, dont le code n'a pas
 changé, y varie jusqu'à 45 % d'un bras à l'autre. La mesure qui compte est
 celle de G4, à 48 fils.
+
+### Positivité côté chaîne et catalogue scellé (R-29, 25 septembre 2026)
+
+Proposition de l'auditeur C
+([catalogue scellé](../audits/PROPOSITION_C_CATALOGUE_SCELLE_20260924.md),
+coordination du 24 septembre, 20 h 25). La passe 1 de la validation de la
+tour (`check_ball_locally`) était le seul contrôle d'exécution de la
+**positivité** des supports réguliers. Or le puits des voies GPU reprend la
+clé brute, et Euler ne voit pas une q3 régulière parasite à p = Kmax − 2.
+
+**Invariants de la chaîne** (points 1 et 2 de C, sans levier). Pour chaque
+clé distincte, dans la boucle de recensement, en O(1) et en entiers exacts :
+- arité présentée 2 à 4 et IDs du support dans le nuage, avant tout
+  déréférencement (`chain_presentation_arity`,
+  `chain_support_id_outside_cloud`) ;
+- domaine u18 de la clé avant l'arithmétique du recensement (prédicat
+  partagé avec la tour, `ball_key_in_u18_domain` ; `chain_ball_key_domain`),
+  dénominateur du niveau positif (`chain_ball_level_denominator`) ;
+- coquille régulière : la coquille recensée **est** le support présenté, comme
+  ensembles (`chain_regular_shell_differs_from_support`), et ce support est
+  positif (`chain_nonpositive_regular_support`) : pour q3, triangle
+  strictement aigu et G > 0 ; pour q4, `det > 0` et centre strictement
+  intérieur. C'est le prédicat de `anchor_meb_detail::form`, invariant par
+  permutation du support ;
+- coquille étendue : `q_min` au plus la taille de la coquille.
+
+Toutes les voies passent par ces contrôles : moteur, voies GPU et q2.
+Compteur : `CatalogueStats::regular_supports_by_arity`, dont la somme vaut le
+nombre de boules régulières. Quatre de ces refus ne sont pas atteignables
+avec des formules exactes sur des entrées u18 : coquille différente du
+support, domaine de la clé (bornes analytiques de l'auditeur A),
+dénominateur nul et `q_min` au-delà de la coquille. Ce sont des gardes
+défensives.
+
+**Pourquoi la passe 1 est alors établie.** Chaque contrôle de
+`check_ball_locally` a son équivalent dans la chaîne :
+- forme (arité 2 à 4, coquille entre l'arité et 12 sites, au plus
+  9 intérieurs, dénominateur positif) : contrôles explicites ci-dessus et
+  refus existants ;
+- sites dans l'index, sans répétition, puissances (intérieurs < 0, coquille
+  = 0) : c'est la définition même de la sortie de `ball_census`, exécutée sur
+  la même clé et le même index authentique, qui visite chaque feuille une
+  fois et classe par le signe exact de la puissance ;
+- domaine de la clé : contrôle explicite ;
+- support déclaré d'une boule régulière : clé et niveau recalculés depuis le
+  support par les formules de la tour, coquille égale au support, support
+  positif.
+
+**Levier `tower_sealed_catalogue`** (`ChainOptions`, défaut `false`).
+- Après son recensement et Euler, la chaîne déplace le catalogue dans un
+  `tower::SealedCatalogue`. Seul `mhgp9::ChainCatalogueSealer`, défini dans
+  `tower_chain.cpp`, peut en construire un : constructeur privé, ni copie ni
+  déplacement. Le sceau lie l'instance d'index recensée.
+- `build_full_ball_tower(const SealedCatalogue&, …)` ne rejoue la passe 1
+  que sur un échantillon à pas fixe : une boule sur 64, d'indice
+  0 mod 64, à chaque exécution, quel que soit le nombre de fils.
+- La passe 2 est inchangée : tables de plateau, témoins MEB des coquilles
+  étendues (qui revérifient puissances et domaine), fenêtres de rang.
+- L'API publique et les tours de l'oracle T2 gardent la validation complète.
+  Une copie gardée par `keep_catalogue` repasse par la surcharge publique.
+- Raison publiée : `complete_relative_to_cross_checked_catalogue_sealed_in_process_census`.
+  Statut inchangé : `complete_relative`, sans changement de statut public.
+- Chemin : `FullBallStats::sealed_catalogues` et `seal_sampled_balls`
+  (métadonnées, jamais `tower_work`).
+- **Résidu déclaré** : une faute isolée d'une boule **régulière** hors de
+  l'échantillon n'est pas garantie sous le sceau. Une faute systématique est
+  prise par l'échantillon.
+
+**Portes.**
+- `mhgp9_chain_sealed_catalogue` (`tests/chain/sealed_catalogue_gate.cpp`,
+  cible de test recompilant la chaîne avec `MHGP9_CHAIN_TEST_SEAM`) :
+  - la tour publique refuse un triangle obtus et un tétraèdre à centre
+    extérieur (`full_ball_census_geometry`, 0 et 4 fils) ;
+  - la chaîne refuse les mêmes supports forgés à la fusion, avec clé,
+    niveau, profondeur et coquille exacts (le triangle à p = Kmax − 2),
+    scellé ou non, à 1 et 4 fils. Elle refuse aussi une arité 5, une arité 1
+    et un ID hors du nuage (refus typés) ;
+  - une faute systématique de plomberie est refusée sous le sceau par
+    l'échantillon (`tower: full_ball_census_power`) ; une faute isolée est
+    refusée sans sceau, et le résidu est imprimé ;
+  - tour scellée et non scellée : mêmes condensés (tour, catalogue,
+    présentations), mêmes ordres, même `tower_work` à W égal ; à K3, K5 et
+    K10, à 1 et 4 fils, et sur la voie CPU par lots avec voies q3/q4 ;
+  - planchers : chemin du sceau pris, taille de l'échantillon, supports
+    q3 et q4 certifiés, coquilles étendues.
+- Trois mutants tués (code 1) :
+  - chaîne sans positivité : sous le sceau, le triangle obtus forgé est
+    **publié** `complete_relative` ;
+  - tour sans positivité du support déclaré ;
+  - échantillon compté mais jamais exécuté.
+- La porte T2 (`chain_census_tower_gate`) compare en plus les tours scellées
+  à 1 et 4 fils à la tour jugée contre le modèle Γ. Ses planchers passent de
+  18 à 22 paires et de 220 à 260 ordres.
+
+**Mesures locales** (08/000000 sans sol, W8, hôte de 8 cœurs partagé et
+très chargé, charge de 30 à 83 : les temps sont **indicatifs**, seuls les
+compteurs sont exacts).
+- Compteurs : à K5, 1 306 696 boules, dont 1 306 469 régulières certifiées
+  par la chaîne (q2 456 695, q3 691 282, q4 158 492). Sous le sceau, la
+  passe 1 contrôle 20 418 boules (1 sur 64), dont 20 413 supports déclarés,
+  contre 1 306 469 sans sceau. À K10 : 5 512 670 boules, 86 136
+  échantillonnées, 86 128 supports déclarés contre 5 512 226.
+- Épingles reproduites dans tous les bras, `tower_work` identique :
+  K5 `67450c64611075b1` / `5ad1fe09354411ba`, K10 `ac108f7f71096c3f` /
+  `a6e959d227f3dafa`. Trame brute avec sol b00 à K5 (2 822 052 boules,
+  44 095 échantillonnées) : `cfb1634832c0384a` / `11f6a8e1a7f28127`.
+- Sonde (copie locale avec le levier, hors dépôt), quatre rondes entrelacées
+  base `273c33f7c` / levier coupé / levier actif, ordre tournant, K5.
+  - Passe 1 : 194 / 576 / 308 / 411 ms (coupé) → 9 / 11 / 38 / 29 ms (actif).
+  - Validation : 557 / 1 541 / 1 106 / 1 159 → 583 / 543 / 881 / 756 ms.
+  - Chaîne : 28 à 108 s, dominée par q3/q4 et par la charge d'une ronde à l'autre.
+- Tour seule sur le catalogue de la chaîne (harnais local, même processus,
+  paires entrelacées, ordre alterné) :
+
+| K | paires | passe 1 (ms), médiane | validation (ms), médiane |
+| ---: | ---: | --- | --- |
+| 5 | 10 | 423 → 22 (320–566 → 15–33) | 1 264 → 833 |
+| 10 | 4 | 2 193 → 45 (1 733–2 255 → 33–61) | 5 353 → 3 333 |
+| 5, brut b00 | 2 | 699 / 855 → 26 / 22 | 2 635 / 2 763 → 1 696 / 2 096 |
+
+- Coût des contrôles ajoutés au recensement (microbanc local, temps CPU
+  d'un fil, meilleur de cinq, sur les 1 306 469 boules régulières de K5) :
+  34 ns par clé, soit 45 ms de CPU. Le recensement étant parallèle, cela fait
+  environ 6 ms de mur à W8 et 1 ms à W48. Le temps de recensement de la sonde
+  ne tranche pas : il varie du simple au double d'une ronde à l'autre sous
+  cette charge.
+
+Sur G4 (48 fils), la passe 1 valait 15 à 26 ms à K5 et 60 à 82 ms à K10
+(R19, R20, relevé de C). Le gain attendu en est proche, moins l'échantillon
+(1/64 de la passe) et environ 1 ms de contrôles dans le recensement. C'est
+une projection : seule une paire sur la même VM la tranchera.
+
+**Sonde** (le levier n'y est pas encore câblé) : publier le levier
+`tower_sealed_catalogue`, `tower_stats.sealed_catalogues` et
+`seal_sampled_balls`, `tower_stats.declared_support_checks` et
+`catalogue.regular_supports_by_arity[2..4]`. Les temps `validate` et
+`validate_parts[3]` (passe 1) sont déjà publiés.
