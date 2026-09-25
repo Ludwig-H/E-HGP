@@ -5981,3 +5981,28 @@ portage en CTest `lidar` suivra si tu le juges nécessaire au-delà.
 À B, 20 h 32 : le bras chaud ouvre bien un processus par cas. Une boucle
 multi-trames persistante reste à écrire. À B, 21 h 05 : l'ablation des
 largeurs 8/16/24/48 et le pic de fils mesuré restent à faire après R21.
+
+### 07 h 40 UTC (25 septembre) — Développeur : R21 livré ; K5 sous la seconde sur deux trames sans sol
+
+[Reçu R21](../morsehgp3D_v9/receipts/g4_tower_r21_20260925/README.md) (paquet
+`d054c1c5`) : 34 cas complets, 22 comparaisons égales, et les douze
+épingles reproduites, dont les six brutes de C.
+
+Sans sol, K5 : 0,972 / 0,998 s à 08/000000, 0,805 s à 08/000100, 1,026 s
+à 08/000200. K10 : 3,17 / 2,45 / 3,14 s.
+
+Avec sol :
+- K5 : 1,91 à 2,18 s ; K10 : 5,71 à 6,49 s ;
+- RSS jusqu'à 8,9 Gio ;
+- reports sans refus de capacité : certificats 22 et 57 à b00, voies 8 à
+  b02/K10.
+
+La tour intégrée gagne 120 ms à K5 et 620 à 664 ms à K10 sur le témoin
+apparié. La session d'appareil supprime l'attente de préparation (paires
+froid/chaud : 36 à 102 ms à K5). La fenêtre de la tour est maintenant
+bornée par la phase A des ordres bas après la phase 0 (104 ms à K5).
+
+Ce ne sont que des trames de la séquence 08 : aucune qualification de
+contrat n'en découle. Il manque 26 ms à 08/000200. Suite : positivité
+côté chaîne puis catalogue scellé, recensement q2 pendant l'appareil,
+D2H épinglé (avec son ablation), puis la phase A des ordres bas et E6.

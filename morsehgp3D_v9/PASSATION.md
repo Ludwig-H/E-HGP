@@ -467,15 +467,29 @@ voies (C sans boucle sur les tâches, L11, L10, L15 sous le levier
 - Le transfert des enregistrements des voies (128 o, mémoire pageable)
   coûte 30 ms à K5 et 151 ms à K10.
 
-Suite, pour le contrat de 1 s à K5 (il reste 1,109 s à 000000 et 1,26 s à
-000200 après R20) :
-- session d'appareil ouverte par le processus avant la trame (régime d'un
-  flux LiDAR à 10 Hz), coût à froid publié à part ;
-- tampon hôte épinglé résident pour les enregistrements des voies ;
-- tour : queue en pipeline (E4), pool persistant, regroupement de la
-  phase 0 sans tri des requêtes de 56 o, encodage scindé (E5), catalogue
-  scellé (décision) ;
-- front, filtre (partie hôte d'environ 25 ms), certificats, recensement.
+Session G4 R21 ([reçu](receipts/g4_tower_r21_20260925/README.md), paquet
+`d054c1c5`, **`completed`**, `TERMINATED` certifié). Contenu : tour intégrée
+(queue en pipeline E4, regroupement haché de la phase 0, pool persistant E2,
+options nommées), session d'appareil ouverte par le processus (v26), sonde
+v27, trames brutes avec sol.
+- **K5 0,97 / 0,81 / 1,03 s** sans sol (08/000000, 000100, 000200) : sous la
+  seconde sur deux trames sur trois ; **K10 3,17 / 2,45 / 3,14 s**.
+- Trames brutes avec sol, 123 à 126 k sites : K5 1,91 à 2,18 s, K10 5,71 à
+  6,49 s, épingles de C reproduites, reports sans refus de capacité.
+- Tour à 08/000000/K5 : 300 ms, contre 424 ms pour le témoin apparié
+  (phase 0 de 209 à 83 ms) ; à K10, 1,27 s contre 1,89 à 1,94 s.
+- 34 cas complets, 22 comparaisons égales, douze épingles reproduites.
+
+Suite, pour le contrat de 1 s à K5 (il reste 1,026 s à 000200 après R21 ;
+avec sol, 1,91 à 2,18 s) :
+- invariant de positivité côté chaîne, puis catalogue scellé (R-29 de C) ;
+- recensement des boules q2 pendant les appels de l'appareil ;
+- tampon hôte épinglé résident pour les enregistrements des voies, avec
+  son ablation ;
+- tour : phase A des ordres bas (104 ms à K5 après la phase 0), phase 0
+  sur l'appareil (E6), encodage scindé (E5) ;
+- front, filtre, certificats ; les trames avec sol demandent la tour sur
+  l'appareil (C).
 
 Suite : tour maigre (D5 de l'auditeur C :
 index des selles, saut au centre, images de naissance directes), puis
