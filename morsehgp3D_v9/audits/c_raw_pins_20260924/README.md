@@ -35,8 +35,10 @@ GCP non utilisé.
 
 Contrôles de cohérence :
 - les condensés FULL de b00 (`cfb16348…` à K5, `dd90bda1…` à K10) sont ceux des mesures brutes locales antérieures, obtenues avec d'autres binaires ;
-- le bras par lots CPU **reporte** déjà des voies au moteur sur ces trames brutes, avec les capacités par défaut : 16 et 48 pour b00 à K5 et K10, 8 pour b02 à K10. L'objet reste identique. C'est la première exécution de ce chemin sur des trames réelles.
+- le bras par lots CPU **reporte** déjà des voies au moteur sur ces trames brutes, avec les capacités par défaut : 16 et 48 pour b00 à K5 et K10, 8 pour b02 à K10. L'objet reste identique. C'est la première exécution du **chemin CPU complet à quatre leviers** (filtre, certificats, voies q3 et q4) sur des trames brutes avec sol. Précision de B : l'ancienne porte sur 08/000000 sans sol n'activait que le filtre CPU par lots, et R20 exécutait q3/q4 sur GPU.
 
-Ordre de grandeur, sans valeur de chronométrage (hôte local W8) : 2,75 à 3,07 M boules à K5 et 10,7 à 11,7 M à K10, soit 2,1 à 2,4 fois les trames sans sol ; RSS de 1,8 à 2,1 Gio à K5 et de 6,8 à 7,5 Gio à K10.
+Ordre de grandeur, sans valeur de chronométrage (hôte local W8) : 2,75 à 3,07 M boules à K5 et 10,7 à 11,7 M à K10, soit **2,1 à 2,5 fois** les trames sans sol (b01/K5 atteint 2,507). Le pic de RSS publié par la sonde (`peak_rss_kb`) va de 1,8 à 2,0 Gio à K5 et de 6,6 à 7,3 Gio à K10 ; les rapports GNU time, en Mio, donnent des valeurs voisines. Correction de B (21 h 43) : la première version donnait 2,1–2,4 fois et 6,8–7,5 Gio.
+
+Réserves (B) : les JSON portent `grid=unspecified`, faute d'option `--grid` ; la grille 1 mm est établie par les SHA-256 des entrées v8. Seule l'empreinte du binaire (`probe.sha256`) est archivée, pas le binaire. `DONE` n'est qu'un marqueur de fin ; Euler n'est vérifié que jusqu'à K−2.
 
 Fichiers : `PINS_RAW.json`, les sorties `probes/*.json`, les rapports GNU time `probes/*.time`, le script `pin_raw.sh`, `BASE.txt` et `probe.sha256`.
