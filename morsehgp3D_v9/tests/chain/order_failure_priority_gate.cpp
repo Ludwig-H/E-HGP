@@ -16,7 +16,21 @@
 // de ressource (jamais un invariant), avec le temps de fusion paye publie et
 // aucun resume d'ordre.
 //
-//   mhgp9_chain_order_failure_priority_gate --selftest
+// Mode --unwind (correctif v9 E4) : exceptions autres qu'une panne sur la
+// voie statique recouverte, qui deroulent la portee des coureurs pendant
+// qu'ils tournent. Une allocation refusee en phase 0 (K5, premier ordre de
+// la phase 0 descendante, puis K3) et un coureur qui ne peut etre lance (K1,
+// K3) donnent un refus de ressource (full_ball_allocation_failed,
+// full_ball_thread_launch_failed) sur les trois voies et avec 1, 4 et 8
+// fils ; chaque coureur marque une pause apres sa phase A, pour que
+// l'appelant ait quitte sa portee avant l'ecriture suivante. Planchers :
+// sur chaque cas recouvert a coureur, pauses prises, naissances non nulles
+// (la phase A du coureur K1 est comptee apres la jointure), compteurs
+// recouverts et en pipeline ; tour complete sous pause au condense de la
+// tour sans pause. Le mutant TIMERS_AFTER_JOIN (chronos declares apres la
+// jointure) n'est tue que sous ASan (MHGP9_SANITIZE).
+//
+//   mhgp9_chain_order_failure_priority_gate --selftest | --unwind
 //
 // Code 0 conforme, 1 desaccord (ligne `cause=`), 2 argument, 3 plancher.
 #include <tuple>
@@ -41,11 +55,86 @@ struct Scenario {
 struct Mode {
   bool overlap, pipelined;
 };
+
+// Exceptions other than Failure while the runners of the overlapped path run
+// (v9 E4 fix): a clean resource refusal on every path, paid work merged
+// after the join, never a write into a released scope.
+int unwind_gate(const std::vector<mhgp9::gen::Point3>& points) {
+  namespace detail = mhgp9::tower::full_ball_detail;
+  const auto bit = [](unsigned k) { return 1U << (k - 1); };
+  const auto run = [&](Mode mode, int statics) {
+    mhgp9::ChainOptions options;
+    options.kmax = 5;
+    options.workers = 4;
+    options.tower_static_threads = statics;
+    options.tower_overlap_static = mode.overlap;
+    options.tower_pipelined_tail = mode.pipelined;
+    return mhgp9::run_tower_chain(points, options);
+  };
+  const Mode modes[] = {{true, true}, {true, false}, {false, true}};
+  struct Case {
+    unsigned alloc, launch;
+    const char* expected;
+  };
+  const Case cases[] = {{bit(5), 0, "tower: full_ball_allocation_failed"},
+                        {bit(3), 0, "tower: full_ball_allocation_failed"},
+                        {0, bit(3), "tower: full_ball_thread_launch_failed"},
+                        {0, bit(1), "tower: full_ball_thread_launch_failed"}};
+  std::uint64_t checks = 0, live_runner_cases = 0, expected_live = 0;
+  detail::failpoint_runner_pause_ms = 50;
+  for (const auto& mode : modes)
+    for (const auto& c : cases)
+      for (const int statics : {1, 4, 8}) {
+        // Runners exist only on the overlapped path (statics > 1).
+        const bool runners = mode.overlap && statics > 1;
+        if (c.launch && !runners) continue;
+        const std::uint64_t pauses_before = detail::runner_pauses.load();
+        detail::failpoint_static_alloc = c.alloc;
+        detail::failpoint_launch = c.launch;
+        const auto r = run(mode, statics);
+        detail::failpoint_static_alloc = 0;
+        detail::failpoint_launch = 0;
+        ++checks;
+        if (r.status != mhgp9::ChainStatus::kResourceExhausted || r.reason != c.expected) {
+          std::printf("cause=unwind.status static=%d overlap=%d pipelined=%d expected=%s status=%d reason=%s\n",
+                      statics, mode.overlap ? 1 : 0, mode.pipelined ? 1 : 0, c.expected,
+                      static_cast<int>(r.status), r.reason.c_str());
+          return 1;
+        }
+        // A runner of order 1 exists unless its own launch failed.
+        if (!runners || c.launch == bit(1)) continue;
+        ++expected_live;
+        if (detail::runner_pauses.load() > pauses_before && r.tower_stats.births > 0 &&
+            r.tower_stats.overlapped_orders == 5 && r.tower_stats.pipelined_orders == (mode.pipelined ? 5U : 0U))
+          ++live_runner_cases;
+      }
+  // The pause changes no object: same tower digest as without it.
+  const auto paused = run({true, true}, 4);
+  detail::failpoint_runner_pause_ms = 0;
+  const auto plain = run({true, true}, 4);
+  checks += 2;
+  if (paused.status != mhgp9::ChainStatus::kComplete || plain.status != mhgp9::ChainStatus::kComplete ||
+      paused.tower_digest != plain.tower_digest) {
+    std::printf("cause=unwind.complete paused=%s plain=%s\n", paused.reason.c_str(), plain.reason.c_str());
+    return 1;
+  }
+  std::printf("order_failure_unwind_gate checks=%llu live_runner_cases=%llu/%llu digest=%016llx\n",
+              static_cast<unsigned long long>(checks), static_cast<unsigned long long>(live_runner_cases),
+              static_cast<unsigned long long>(expected_live), static_cast<unsigned long long>(plain.tower_digest));
+  // 3 modes x 2 allocation cases x 3 thread counts + 2 overlapped modes x 2
+  // launch cases x 2 thread counts, then the paired complete runs.
+  if (checks != 18 + 8 + 2 || expected_live != 12 || live_runner_cases != expected_live) {
+    std::printf("cause=floor.unwind\n");
+    return 3;
+  }
+  return 0;
+}
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc != 2 || std::string_view(argv[1]) != "--selftest") {
-    std::fprintf(stderr, "usage: mhgp9_chain_order_failure_priority_gate --selftest\n");
+  const bool unwind = argc == 2 && std::string_view(argv[1]) == "--unwind";
+  if (argc != 2 || (!unwind && std::string_view(argv[1]) != "--selftest")) {
+    std::fprintf(stderr, "usage: mhgp9_chain_order_failure_priority_gate --selftest | --unwind\n");
     return 2;
   }
   // Trois grappes u18 (LCG 64 bits), comme le preflight natif du worker G4.
@@ -60,6 +149,7 @@ int main(int argc, char** argv) {
     }
     points.push_back({c[0], c[1], c[2]});
   }
+  if (unwind) return unwind_gate(points);
   namespace detail = mhgp9::tower::full_ball_detail;
   const auto bit = [](unsigned k) { return 1U << (k - 1); };
   const Scenario scenarios[] = {

@@ -189,6 +189,28 @@ mhgp9_gate(mhgp9_chain_order_failure_mutant_phase_priority 1 mhgp9_chain_order_f
            ARGS --selftest EXPECT_PREFIX "cause=priority" LABELS "gate;chain;tower;mutant" TIMEOUT 600)
 mhgp9_gate(mhgp9_chain_order_failure_mutant_drop_failed_stats 1 mhgp9_chain_order_failure_drop_failed_stats_mutant_gate
            ARGS --selftest EXPECT_PREFIX "cause=ledger.paid_work_lost" LABELS "gate;chain;tower;mutant" TIMEOUT 600)
+# Correctif v9 E4 : une exception autre qu'une panne (allocation refusee en
+# phase 0, coureur non lance) deroule la portee de la voie recouverte pendant
+# que les coureurs tournent ; refus de ressource propre sur les trois voies,
+# travail des coureurs compte apres la jointure (planchers). Le mutant
+# TIMERS_AFTER_JOIN (chronos et `publish` declares apres la jointure, donc
+# liberes avant elle) n'ecrit qu'en memoire liberee : il n'est tue que sous
+# ASan (-DMHGP9_SANITIZE=ON), rapport sur stdout.
+mhgp9_gate(mhgp9_chain_order_failure_unwind 0 mhgp9_chain_order_failure_priority_gate
+           ARGS --unwind EXPECT_PREFIX "order_failure_unwind_gate checks=28" LABELS "gate;chain;tower" TIMEOUT 600)
+if(MHGP9_SANITIZE)
+  mhgp9_test_executable(mhgp9_chain_order_failure_timers_after_join_mutant_gate
+                        tests/chain/order_failure_priority_gate.cpp src/chain/tower_chain.cpp)
+  target_link_libraries(mhgp9_chain_order_failure_timers_after_join_mutant_gate PRIVATE mhgp9_gen mhgp9_gpu)
+  target_compile_definitions(mhgp9_chain_order_failure_timers_after_join_mutant_gate
+                             PRIVATE MHGP9_FULL_ORDERS_MUTANT_TIMERS_AFTER_JOIN=1)
+  mhgp9_gate(mhgp9_chain_order_failure_mutant_timers_after_join 1
+             mhgp9_chain_order_failure_timers_after_join_mutant_gate
+             ARGS --unwind EXPECT_PREFIX "SUMMARY: AddressSanitizer: heap-use-after-free"
+             LABELS "gate;chain;tower;mutant" TIMEOUT 1200)
+  set_tests_properties(mhgp9_chain_order_failure_mutant_timers_after_join PROPERTIES
+                       ENVIRONMENT "ASAN_OPTIONS=log_path=stdout")
+endif()
 # Invariant d'Euler du catalogue (note C, preuve par le nerf de B) : sommes
 # egales a 1 sur K <= min(Kmax-2, n) pour des fixtures degenerees (carre plan,
 # deux sites, solides cospheriques) et des nuages entiers aleatoires ; statut

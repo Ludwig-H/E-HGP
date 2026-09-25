@@ -8,6 +8,8 @@
 #include <chrono>
 #include <condition_variable>
 #include <mutex>
+#include <new>
+#include <system_error>
 #include <thread>
 #include <numeric>
 #include <unordered_map>
@@ -196,11 +198,36 @@ inline void failpoint_after_static(unsigned k) {
   if (k >= 1 && k <= 10 && ((failpoint_static.load() >> (k - 1)) & 1U))
     throw Failure{FullBallStatus::kInvariantViolated, kStatic[k - 1]};
 }
+// Exceptions other than Failure on the overlapped static path (v9 E4 fix):
+// bit K-1 of failpoint_static_alloc makes phase 0 of order K throw
+// std::bad_alloc (the static request arena failing), bit K-1 of
+// failpoint_launch makes the launch of the runner of order K throw
+// std::system_error. A nonzero failpoint_runner_pause_ms delays every runner
+// between its phase A and its next write, so that a caller unwinding on such
+// an exception has left its scope first; runner_pauses counts the delays.
+inline std::atomic<u32> failpoint_static_alloc{0}, failpoint_launch{0}, failpoint_runner_pause_ms{0};
+inline std::atomic<u64> runner_pauses{0};
+inline void failpoint_static_allocation(unsigned k) {
+  if (k >= 1 && k <= 10 && ((failpoint_static_alloc.load() >> (k - 1)) & 1U)) throw std::bad_alloc();
+}
+inline void failpoint_runner_launch(unsigned k) {
+  if (k >= 1 && k <= 10 && ((failpoint_launch.load() >> (k - 1)) & 1U))
+    throw std::system_error(std::make_error_code(std::errc::resource_unavailable_try_again));
+}
+inline void failpoint_runner_pause() {
+  if (const u32 ms = failpoint_runner_pause_ms.load()) {
+    runner_pauses.fetch_add(1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+  }
+}
 #else
 inline void failpoint_after_lots(unsigned) {}
 inline void failpoint_after_images(unsigned) {}
 inline void failpoint_after_populations(unsigned) {}
 inline void failpoint_after_static(unsigned) {}
+inline void failpoint_static_allocation(unsigned) {}
+inline void failpoint_runner_launch(unsigned) {}
+inline void failpoint_runner_pause() {}
 #endif
 inline void add(u64& count, u64 amount = 1) {
   require(amount <= std::numeric_limits<u64>::max() - count, "full_ball_counter_overflow",
@@ -712,9 +739,12 @@ class Builder {
       // Other exceptions, one slot per order and step (each written by one
       // thread): phase A (and the sizing on order 1), B (helper), C.
       std::vector<std::exception_ptr> errors(kmax), population_errors(kmax), image_errors(kmax);
+#if defined(MHGP9_FULL_ORDERS_MUTANT_TIMERS_AFTER_JOIN)
+      // mutant: the runners' timers and `publish` die before the join
       std::vector<std::thread> runners;
       runners.reserve(kmax);
       parallel_detail::JoinThreads joined{runners};
+#endif
       // One window from the first runner launch to the last join: phase 0
       // and every order's phase A lie inside it (lots_ms = window - static).
       const auto window_start = PhaseClock::now();
@@ -728,8 +758,17 @@ class Builder {
         { std::lock_guard<std::mutex> lock(mu); state = value; }
         wake.notify_all();
       };
+#if !defined(MHGP9_FULL_ORDERS_MUTANT_TIMERS_AFTER_JOIN)
+      // LIFETIME: every object a runner or its helper touches is declared
+      // ABOVE `joined`, so it outlives the join on every exit path (a phase-0
+      // or launch exception unwinds this scope while runners still run).
+      std::vector<std::thread> runners;
+      runners.reserve(kmax);
+      parallel_detail::JoinThreads joined{runners};
+#endif
       try {
-        for (size_t i = 0; i < kmax; ++i)
+        for (size_t i = 0; i < kmax; ++i) {
+          failpoint_runner_launch(static_cast<unsigned>(i + 1));
           runners.emplace_back([&, i] {
             {
               std::unique_lock<std::mutex> lock(mu);
@@ -756,6 +795,7 @@ class Builder {
             try { order_lots(orders[i]); lots_ok = true; } catch (const Failure& f) { failures[i] = f; }
             catch (...) { errors[i] = std::current_exception(); }
             times->lots_by_k[i + 1] = ms_since(start);
+            failpoint_runner_pause();  // tests only: outlast an unwinding caller
             lots_end[i] = PhaseClock::now();
             if (!pipelined) return;
             publish(lots_state[i], lots_ok ? 1 : 2);
@@ -793,6 +833,7 @@ class Builder {
             catch (...) { image_errors[i] = std::current_exception(); }
             images_end[i] = PhaseClock::now();
           });
+        }
       } catch (...) { cancel(); throw; }
       std::optional<Failure> static_failure;
       try {
@@ -1988,6 +2029,7 @@ class Builder {
 
   void prepare_static_order() {
     failpoint_after_static(current_k);
+    failpoint_static_allocation(current_k);
     auto lap_start = PhaseClock::now();
     const auto lap = [&](std::array<double, 11>& into) {  // E0 sub-timers of phase 0
       const auto now = PhaseClock::now();
