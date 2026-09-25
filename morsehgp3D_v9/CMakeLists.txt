@@ -699,6 +699,54 @@ foreach(mutant IN ITEMS RUNS_OPEN_CUT RUNS_ZERO_COLLIDES COUNT_SKIPS_FACET)
   mhgp9_gate(mhgp9_chain_static_paths_mutant_${lower} 1 mhgp9_chain_static_paths_${lower}_mutant_gate
              ARGS --selftest EXPECT_PREFIX "cause=" LABELS "gate;chain;tower;mutant" TIMEOUT 300)
 endforeach()
+# Regroupement de la phase 0 sans tri des requetes de 56 o (classes de hachage
+# exactes, tests/tower/static_grouping_gate.cpp) : temoin trie contre voie
+# hachee, cibles statiques et premieres requetes octet pour octet a chaque
+# ordre, W = 1, 2, 3, 4, 8, meme tour et memes compteurs. Cibles de test
+# (motif 0xA5 des tampons non ecrits, table de groupes comprise) ; la chaine
+# est recompilee dans chaque cible, pour que les defines du hachage et des
+# mutants voient toute instanciation de la tour. Variante a hachage faible
+# (quatre valeurs) : collisions forcees, separees par la comparaison exacte
+# (planchers, classes et index des graines). Trois mutants tues (code 1) :
+# etiquette de hachage prise pour l'egalite des cles des classes, puis des
+# graines (avec le hachage faible) ; premiere requete d'une classe prise a
+# l'ordinal maximal. La trame 08/000000 (label lidar, hors campagne
+# gate) : condenses epingles, temoin a 8 fils, voie hachee a 1, 2, 3, 4, 8.
+function(mhgp9_grouping_executable name)
+  mhgp9_test_executable(${name} tests/tower/static_grouping_gate.cpp src/chain/tower_chain.cpp)
+  target_link_libraries(${name} PRIVATE mhgp9_gen mhgp9_gpu)
+  if(ARGN)
+    target_compile_definitions(${name} PRIVATE ${ARGN})
+  endif()
+endfunction()
+mhgp9_grouping_executable(mhgp9_tower_static_grouping_gate)
+mhgp9_grouping_executable(mhgp9_tower_static_grouping_weak_gate MHGP9_TOWER_GROUP_TEST_WEAK_HASH=1)
+mhgp9_grouping_executable(mhgp9_tower_static_grouping_trust_hash_mutant_gate
+                          MHGP9_TOWER_GROUP_TEST_WEAK_HASH=1 MHGP9_TOWER_GROUP_MUTANT_TRUST_HASH=1)
+mhgp9_grouping_executable(mhgp9_tower_static_grouping_seed_trust_hash_mutant_gate
+                          MHGP9_TOWER_GROUP_TEST_WEAK_HASH=1 MHGP9_TOWER_GROUP_MUTANT_SEED_TRUST_HASH=1)
+mhgp9_grouping_executable(mhgp9_tower_static_grouping_last_ordinal_mutant_gate MHGP9_TOWER_GROUP_MUTANT_LAST_ORDINAL=1)
+mhgp9_gate(mhgp9_tower_static_grouping 0 mhgp9_tower_static_grouping_gate ARGS --selftest
+           EXPECT_PREFIX "static_grouping_gate mode=hash" LABELS "gate;tower" TIMEOUT 600)
+mhgp9_gate(mhgp9_tower_static_grouping_weak_hash 0 mhgp9_tower_static_grouping_weak_gate ARGS --selftest
+           EXPECT_PREFIX "static_grouping_gate mode=weak_hash" LABELS "gate;tower" TIMEOUT 600)
+mhgp9_gate(mhgp9_tower_static_grouping_bad_argument 2 mhgp9_tower_static_grouping_gate ARGS --unknown
+           LABELS "gate;tower" TIMEOUT 60)
+mhgp9_gate(mhgp9_tower_static_grouping_mutant_trust_hash 1 mhgp9_tower_static_grouping_trust_hash_mutant_gate
+           ARGS --selftest EXPECT_PREFIX "cause=grouping.firsts" LABELS "gate;tower;mutant" TIMEOUT 600)
+mhgp9_gate(mhgp9_tower_static_grouping_mutant_seed_trust_hash 1 mhgp9_tower_static_grouping_seed_trust_hash_mutant_gate
+           ARGS --selftest EXPECT_PREFIX "cause=grouping.targets" LABELS "gate;tower;mutant" TIMEOUT 600)
+mhgp9_gate(mhgp9_tower_static_grouping_mutant_last_ordinal 1 mhgp9_tower_static_grouping_last_ordinal_mutant_gate
+           ARGS --selftest EXPECT_PREFIX "cause=grouping.firsts" LABELS "gate;tower;mutant" TIMEOUT 600)
+set(MHGP9_FRAME_000000 ${CMAKE_CURRENT_SOURCE_DIR}/../morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le)
+mhgp9_gate(mhgp9_tower_static_grouping_lidar_k5 0 mhgp9_tower_static_grouping_gate
+           ARGS --file=${MHGP9_FRAME_000000} --k=5 --digest=67450c64611075b1 --catalogue-digest=5ad1fe09354411ba
+                --threads=1,2,3,4,8 --witness-threads=8 --min-requests=1000000
+           EXPECT_PREFIX "static_grouping_frame K=5" LABELS "lidar;grouping" TIMEOUT 3600)
+mhgp9_gate(mhgp9_tower_static_grouping_lidar_k10 0 mhgp9_tower_static_grouping_gate
+           ARGS --file=${MHGP9_FRAME_000000} --k=10 --digest=ac108f7f71096c3f --catalogue-digest=a6e959d227f3dafa
+                --threads=1,2,3,4,8 --witness-threads=8 --min-requests=3000000
+           EXPECT_PREFIX "static_grouping_frame K=10" LABELS "lidar;grouping" TIMEOUT 5400)
 # Porte d'echelle de l'auditeur C : invariant d'Euler par ordre K sur le
 # catalogue reel de la chaine (NOTE_C_INVARIANT_EULER_20260923, preuve sans
 # position generale CONTRELEC_EULER_PAR_NERF_20260923). Trois familles v8

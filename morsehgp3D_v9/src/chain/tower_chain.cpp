@@ -1369,7 +1369,10 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
                                  : (W > 1 ? static_cast<int>(W) : 0);
       result.tower_static_threads = static_threads;
       auto tw = tower::build_full_ball_tower(ix, balls, kmax, static_threads, {}, options.tower_meb_proposal,
-                                             options.tower_overlap_static, options.tower_pipelined_tail);
+                                             tower::FullBallTowerOptions{
+                                                 .overlap_static = options.tower_overlap_static,
+                                                 .pipelined_tail = options.tower_pipelined_tail,
+                                                 .hash_grouping = options.tower_hash_grouping});
       result.times.tower_ms = ms_since(t);
       result.tower_stats = tw.stats;
       result.tower_times = tw.times;

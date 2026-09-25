@@ -340,7 +340,8 @@ int main(int argc, char** argv) {
       ++tried[q];
       auto reduced = probe_catalogue;
       reduced.erase(reduced.begin() + static_cast<std::ptrdiff_t>(zone[z]));
-      const auto tw = mhgp9::tower::build_full_ball_tower(ix, reduced, kmax, 4, {}, false, false);
+      const auto tw = mhgp9::tower::build_full_ball_tower(ix, reduced, kmax, 4, {}, false,
+                                                         mhgp9::tower::FullBallTowerOptions{});
       if (tw.status != mhgp9::tower::FullBallStatus::kCompleteRelative) {
         ++refused[q];
         continue;

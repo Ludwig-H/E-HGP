@@ -100,6 +100,12 @@ struct ChainOptions {
   // populations et images apres la jointure (assign_populations, temoin).
   // Meme objet, memes IDs de population ; actif par defaut.
   bool tower_pipelined_tail = true;
+  // Tour statique : la phase 0 regroupe ses requetes par classes de hachage
+  // exactes (table a adressage ouvert, cles comparees en entier, premiere
+  // requete = ordinal minimal), sans trier les requetes de 56 o ; false garde
+  // le temoin trie (tri par cle et ordinal). Memes classes, memes cibles,
+  // memes compteurs, meme objet. Contrat v9 : actif par defaut.
+  bool tower_hash_grouping = true;
   // Ordonnancement q2 (meme objet) : plan de jobs du front prepare par masse
   // decroissante et 64 jobs par fil (le plus long job faisait tout q2).
   bool q2_jobs_by_mass = true;

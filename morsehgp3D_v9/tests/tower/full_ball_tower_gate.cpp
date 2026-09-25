@@ -394,12 +394,14 @@ void check_fixture(const Fixture& fixture, unsigned variant) {
       need(entire != key, "post_seed.square_partial_population_misses_lookup");
     }
   }
-  auto result = build_full_ball_tower(ix, balls, fixture.kmax, static_threads, {}, true, overlap, pipelined);
+  auto result = build_full_ball_tower(ix, balls, fixture.kmax, static_threads, {}, true,
+      FullBallTowerOptions{.overlap_static = overlap, .pipelined_tail = pipelined});
   if (result.status != FullBallStatus::kCompleteRelative) std::printf("refusal=%s\n", result.reason);
   if (overlap && pipelined) {
     // v9 E4: the overlapped witness tail (IDs assigned after the join by
     // first encounter) must give the same IDs, payload and work.
-    const auto witness = build_full_ball_tower(ix, balls, fixture.kmax, static_threads, {}, true, true, false);
+    const auto witness = build_full_ball_tower(ix, balls, fixture.kmax, static_threads, {}, true,
+        FullBallTowerOptions{.overlap_static = true, .pipelined_tail = false});
     const u64 before_checks = checks;
     same_payload(witness, result);
     same_work(witness, result);
@@ -530,7 +532,8 @@ void rejection_fixtures() {
   const auto balls = catalogue(fixture.points, ix, model, fixture.kmax);
   const auto reject = [&](const CloudIndex& index, const std::vector<BallData>& catalogue,
       unsigned kmax, const char* why) {
-    const auto result = build_full_ball_tower(index, catalogue, kmax, static_threads, {}, true, overlap, pipelined);
+    const auto result = build_full_ball_tower(index, catalogue, kmax, static_threads, {}, true,
+        FullBallTowerOptions{.overlap_static = overlap, .pipelined_tail = pipelined});
     need(result.status != FullBallStatus::kCompleteRelative && result.orders.empty(), why);
     ++rejections;
   };

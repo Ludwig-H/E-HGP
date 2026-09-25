@@ -111,6 +111,41 @@ struct FullBallBatchResolver {
   void (*resolve)(void*, const FullBallGeometryView&, const FullBallBatchView&,
                   FullBallBatchResult&) = nullptr;
 };
+// Witness of phase 0 for gates, never read by the product: per order K and
+// per request ordinal, its static target and the ordinal of the FIRST
+// request of its class (minimum ordinal of the requests of equal facet key).
+// Firsts are recorded when the classes are known, targets at the end of the
+// order's phase 0. hashed[K] = 1 when order K was grouped by the hashed path;
+// tag_rejects and probes are schedule-dependent diagnostics of that path
+// (tag matches refused by the exact key compare, slots probed beyond the
+// home slot), never work counters; seed_tag_rejects: the same refusals in
+// the lookups of its seed index.
+struct FullBallStaticTrace {
+  std::array<std::vector<u32>, kFacetMaxK + 1> targets;
+  std::array<std::vector<u64>, kFacetMaxK + 1> firsts;
+  std::array<u64, kFacetMaxK + 1> hashed{}, tag_rejects{}, probes{}, seed_tag_rejects{};
+};
+// Named switches of the static tower path (review before R21: three sibling
+// work series each added a positional bool right after overlap_static; a
+// merge keeping one of them would compile with another lever on). An
+// aggregate: a bare bool never converts to it.
+struct FullBallTowerOptions {
+  // Phase A of each order starts as soon as its phase 0 is done (phase 0 by
+  // decreasing K): same objects and statuses.
+  bool overlap_static = false;
+  // v9 E4 (only with overlap_static): the population IDs (static offsets),
+  // rows and vertical images of each order run on its runner inside the
+  // overlapped window; false keeps them after the join (assign_populations,
+  // the witness). Same objects, IDs and statuses.
+  bool pipelined_tail = true;
+  // Phase 0 groups its requests by exact hash classes; false keeps the
+  // sorted witness (sort of the 56-byte requests). Same classes, first
+  // requests, targets, counters and objects.
+  bool hash_grouping = true;
+  // Gates only: the static targets and class firsts of every order (never
+  // read by the product).
+  FullBallStaticTrace* trace = nullptr;
+};
 struct FullBallOrder {
   FullCoverageCertificate forest;
   // Image at the node's closed creation level. Queries normalize in the lower
@@ -141,8 +176,11 @@ struct FullBallTimes {
   // Validation: input and identity, key sort or presorted scan, key index,
   // pass 1, pass 2, level sort, level runs, programs and population slots.
   std::array<double, 8> validate_parts{};
-  // Phase 0 of order K: collection and concatenation, the two sorts, the
-  // group starts, the resolution (targets of every group).
+  // Phase 0 of order K: collection and concatenation, the sorts (sorted
+  // witness: requests and seeds; hashed grouping: no sort, the seed index),
+  // the classes (witness: group starts; hashed: the exact hash classes in
+  // smallest-site order), the resolution (targets of every class; hashed:
+  // and their gather by request).
   std::array<double, 11> static_collect_by_k{}, static_sort_by_k{}, static_groups_by_k{}, static_resolve_by_k{};
 };
 struct FullBallTowerResult {
@@ -438,11 +476,12 @@ class Builder {
  public:
   Builder(const CloudIndex& index, std::span<const BallData> census, unsigned max_k, FullBallStats& stats,
       int static_threads = 0, FullBallBatchResolver batch = {}, bool meb_proposal = true,
-      FullBallTimes* phase_times = nullptr, bool overlap_static = false, bool pipelined = true)
+      FullBallTimes* phase_times = nullptr, const FullBallTowerOptions& options = {})
       : ix(index), balls(census), requested(max_k), st(stats), resolver_cache(stats),
         geometry_threads(static_threads), batch_resolver(batch), propose_meb(meb_proposal),
-        times(phase_times ? phase_times : &unused_times), overlap_static_lots(overlap_static),
-        pipelined_tail(pipelined) {}
+        times(phase_times ? phase_times : &unused_times), overlap_static_lots(options.overlap_static),
+        pipelined_tail(options.pipelined_tail), hashed_groups(options.hash_grouping),
+        static_trace(options.trace) {}
 
   std::vector<FullBallOrder> run() {
     const auto validate_start = PhaseClock::now();
@@ -1397,13 +1436,27 @@ class Builder {
   bool pipelined_tail = true;  // v9 E4: phases B and C inside the overlapped window
   RawVector<u8> first_order;   // v9 E4: first contributing order per ball, 0 if none <= kmax
   std::array<u64, kFacetMaxK + 2> population_offset{};  // v9 E4: #balls of first order < K
+  // Phase-0 classes by exact hash classes (default) or by the sorted witness
+  // (sort of the 56-byte requests by key and ordinal, then group starts).
+  bool hashed_groups = true;
+  FullBallStaticTrace* static_trace = nullptr;  // gates only
   using StaticSeed = FullBallBatchSeed;
   RawVector<BallId> static_targets;  // one target per request, every slot written
   // Arena of the phase-0 requests, reused from order to order (default
   // initialised: every slot is written by the parallel copy), released
   // after the last order's phase 0 (release_static_arena).
   RawVector<FullBallBatchRequest> static_request_arena;
-  void release_static_arena() { RawVector<FullBallBatchRequest>().swap(static_request_arena); }
+  // Open-addressing table of the hashed grouping, reused from order to order:
+  // zeroed by the chunks of the concatenation (every slot once) before use.
+  RawVector<u64> group_table;
+  // Seed index of the hashed grouping (same words: tag << 32 | seed + 1),
+  // zeroed with the group table; the seeds are then never sorted.
+  RawVector<u64> seed_table;
+  void release_static_arena() {
+    RawVector<FullBallBatchRequest>().swap(static_request_arena);
+    RawVector<u64>().swap(group_table);
+    RawVector<u64>().swap(seed_table);
+  }
   size_t static_cursor = 0;
   std::vector<PointId> domain;
   std::vector<std::pair<PointId,i32>> identity;
@@ -1840,8 +1893,11 @@ class Builder {
   }
 
   // Geometry-only: immutable index/catalogue and rank, never anchors or DSU.
+  // find_seed(key): the seed of exactly this key or nullptr (sorted witness:
+  // binary search of the sorted seeds; hashed grouping: the seed index).
+  template <class FindSeed>
   BallId static_terminal(ResolverCache::Key key, const ExactLevel& before,
-      FullBallStats& work, std::vector<NodeRef>& scratch, std::span<const StaticSeed> seeds) const {
+      FullBallStats& work, std::vector<NodeRef>& scratch, FindSeed&& find_seed) const {
     std::span<i32> sites(key.data(), current_k);
     auto local = meb(sites, work.resolve_work);
     u64 length = 0;
@@ -1865,9 +1921,7 @@ class Builder {
       sites[local.support_slots[0]] = z;
       std::sort(sites.begin(), sites.end());
       add(work.static_post_seed_queries[current_k]);
-      const auto seed = std::lower_bound(seeds.begin(), seeds.end(), key,
-          [](const StaticSeed& a, const ResolverCache::Key& value) { return a.key < value; });
-      if (seed != seeds.end() && seed->key == key) {
+      if (const StaticSeed* seed = find_seed(key)) {
         const auto& b = balls[seed->ball];
         // Whole I union U, in this Builder's index and K. A surviving support
         // or partial shell is NOT a seed: it can preserve the previous radius.
@@ -2027,6 +2081,265 @@ class Builder {
       for (size_t j = i; j > 0 && key[j] < key[j - 1]; --j) std::swap(key[j], key[j - 1]);
   }
 
+  // ---- Hashed grouping of phase 0 (default; the sorted witness is kept).
+  //
+  // The resolution needs the partition of the requests into classes of equal
+  // facet key, the FIRST request of each class (minimum ordinal: its consumer
+  // gives `before`) and one target per class. The 56-byte requests are never
+  // moved: one open-addressing table of 8-byte words, (hash tag << 32) |
+  // (ordinal + 1), finds the class slot of every request in one parallel
+  // pass. A tag match is only a candidate: the class is decided by comparing
+  // the WHOLE keys (a collision probes on, never merges two keys). The word
+  // keeps the minimum ordinal of its class by compare-and-swap. The seeds
+  // are not sorted either: a second table of the same words indexes them
+  // (exact compare, duplicates refused on insertion) for the seed lookups of
+  // the class and of static_terminal. Each class is then resolved once, in
+  // smallest-site order (same static_terminal as the witness, whose inputs
+  // are only the key and the first consumer), its word becomes (target <<
+  // 32) | first consumer's level run, and a gather pass gives every request
+  // its target and checks its chronology. Same classes, same firsts, same
+  // targets and same counters (sums and maxima over classes); only the order
+  // in which classes are resolved changes, and the table layouts may depend
+  // on the schedule, never an answer.
+  static constexpr size_t kHashGroupMaxRequests = size_t{1} << 31;  // ordinal + 1 and slots in 32 bits
+  static constexpr u64 kLowHalf = 0xffffffffull;
+  // Prefetch distances: home slots of the grouping pass; table words, first
+  // requests and first consumers of the resolution (three stages).
+  static constexpr size_t kGroupAhead = 16, kClassWordAhead = 24, kClassFirstAhead = 12, kClassBallAhead = 4;
+  static u64 group_hash(const FullBallFacetKey& key) {
+#if defined(MHGP9_TOWER_GROUP_TEST_WEAK_HASH)
+    // Test build only: four hash values in all, so that distinct keys share
+    // tag and home slot and the exact key compare must split them.
+    u64 h = static_cast<u64>(static_cast<u32>(key[0]) & 3U) + 1;
+#else
+    u64 h = 0x9e3779b97f4a7c15ull;
+    for (size_t j = 0; j + 1 < key.size(); j += 2) {
+      h ^= static_cast<u64>(static_cast<u32>(key[j])) | (static_cast<u64>(static_cast<u32>(key[j + 1])) << 32);
+      h *= 0xbf58476d1ce4e5b9ull; h ^= h >> 31;
+    }
+#endif
+    h ^= h >> 33; h *= 0xff51afd7ed558ccdull; h ^= h >> 33; h *= 0xc4ceb9fe1a85ec53ull; h ^= h >> 33;
+    return h;
+  }
+
+  // Seed index: the seeds stay in collection order; an equal key found on
+  // insertion is the witness's duplicate refusal.
+  void index_seeds(const RawVector<StaticSeed>& seeds, size_t slots) {
+    const u64 mask = static_cast<u64>(slots) - 1;
+    parallel_ranges(seeds.size(), geometry_threads, [&](size_t begin, size_t end, size_t) {
+      for (size_t i = begin; i < end; ++i) {
+        const u64 h = group_hash(seeds[i].key);
+        const u64 word = (h & ~kLowHalf) | static_cast<u64>(i + 1);
+        for (u64 at = h & mask;; at = (at + 1) & mask) {
+          std::atomic_ref<u64> slot(seed_table[at]);
+          u64 seen = slot.load(std::memory_order_relaxed);
+          if (seen == 0 && slot.compare_exchange_strong(seen, word, std::memory_order_relaxed)) break;
+          require((seen ^ word) >> 32 || seeds[(seen & kLowHalf) - 1].key != seeds[i].key,
+                  "full_ball_static_duplicate_seed");
+        }
+      }
+    });
+  }
+  // The seed of exactly `key`, or nullptr; `rejects` counts tag matches
+  // refused by the exact key compare (diagnostic).
+  const StaticSeed* find_indexed_seed(const RawVector<StaticSeed>& seeds, size_t slots,
+                                      const FullBallFacetKey& key, u64& rejects) const {
+    if (!slots) return nullptr;
+    const u64 mask = static_cast<u64>(slots) - 1, h = group_hash(key);
+    for (u64 at = h & mask;; at = (at + 1) & mask) {
+      const u64 seen = seed_table[at];
+      if (seen == 0) return nullptr;
+      if ((seen ^ h) >> 32) continue;  // another tag: another key
+      const StaticSeed& seed = seeds[(seen & kLowHalf) - 1];
+#if !defined(MHGP9_TOWER_GROUP_MUTANT_SEED_TRUST_HASH)
+      if (seed.key != key) { ++rejects; continue; }  // exact: the whole key
+#endif
+      return &seed;
+    }
+  }
+
+  template <class Lap>
+  void resolve_hashed_order(const RawVector<FullBallBatchRequest>& requests, const RawVector<StaticSeed>& seeds,
+                            size_t slots, size_t seed_slots, Lap& lap) {
+    const size_t n = requests.size();
+    static_cursor = 0;
+    // Every slot is written by the grouping pass (the class slot), then
+    // replaced by the target in the gather pass.
+    static_targets.resize(n);
+    poison_unwritten(static_targets, 0);
+    st.static_peak_target_bytes = std::max<u64>(st.static_peak_target_bytes,
+        static_targets.capacity() * sizeof(BallId));
+    const u64 mask = static_cast<u64>(slots) - 1;
+    // Locality: classes are resolved by increasing smallest site (buckets of
+    // the Morton-ordered site index, at most 2^16), close to the key order of
+    // the witness: neighbouring facets share their terminal balls and index
+    // nodes (resolution in hash order measured +25 % thread CPU at K5).
+    const u64 sites = ix.upos.size();
+    const u64 buckets = std::max<u64>(1, std::min<u64>(sites, u64{1} << 16));
+    std::vector<u32> bucket_at(buckets + 1, 0);  // counts, then cursors
+    const auto bucket_of = [&](const FullBallFacetKey& key) {
+      const u64 site = static_cast<u64>(static_cast<u32>(key[0]));  // a site index of the catalogue
+      return static_cast<u32>(std::min<u64>(buckets - 1, site * buckets / std::max<u64>(1, sites)));
+    };
+    // New classes of each lane: (bucket, slot), in the lane's own order.
+    std::vector<std::vector<std::array<u32, 2>>> fresh(planned_workers(n, geometry_threads));
+    std::vector<std::array<u64, 2>> diagnostics(fresh.size(), std::array<u64, 2>{});
+    parallel_ranges(n, geometry_threads, [&](size_t begin, size_t end, size_t lane) {
+      auto& mine = fresh[lane];
+      u64 rejects = 0, probes = 0;
+      // Home slots are hashed kGroupAhead requests ahead and prefetched.
+      std::array<u64, kGroupAhead> ahead{};
+      for (size_t j = begin; j < std::min(end, begin + kGroupAhead); ++j) {
+        ahead[j % kGroupAhead] = group_hash(requests[j].key);
+        __builtin_prefetch(&group_table[ahead[j % kGroupAhead] & mask]);
+      }
+      for (size_t i = begin; i < end; ++i) {
+        const auto& key = requests[i].key;
+        const u64 h = ahead[i % kGroupAhead];
+        if (i + kGroupAhead < end) {
+          const u64 later = group_hash(requests[i + kGroupAhead].key);
+          ahead[i % kGroupAhead] = later;
+          __builtin_prefetch(&group_table[later & mask]);
+        }
+        const u64 word = (h & ~kLowHalf) | static_cast<u64>(i + 1);
+        u64 at = h & mask;
+        for (;; at = (at + 1) & mask, ++probes) {
+          std::atomic_ref<u64> slot(group_table[at]);
+          u64 seen = slot.load(std::memory_order_relaxed);
+          if (seen == 0) {
+            if (slot.compare_exchange_strong(seen, word, std::memory_order_relaxed)) {
+              const u32 bucket = bucket_of(key);  // new class, first request so far
+              mine.push_back({bucket, static_cast<u32>(at)});
+              std::atomic_ref<u32>(bucket_at[bucket]).fetch_add(1, std::memory_order_relaxed);
+              break;
+            }
+          }
+          if ((seen ^ word) >> 32) continue;  // another tag: another key
+#if !defined(MHGP9_TOWER_GROUP_MUTANT_TRUST_HASH)
+          // Exact: the whole key, never the hash alone.
+          if (requests[(seen & kLowHalf) - 1].key != key) { ++rejects; continue; }
+#endif
+          // Same key: the word keeps the minimum ordinal (only requests of
+          // this class ever write this slot again).
+#if defined(MHGP9_TOWER_GROUP_MUTANT_LAST_ORDINAL)
+          while ((seen & kLowHalf) < i + 1 &&  // mutant: the class keeps its LAST request
+                 !slot.compare_exchange_weak(seen, word, std::memory_order_relaxed)) {}
+#else
+          while ((seen & kLowHalf) > i + 1 &&
+                 !slot.compare_exchange_weak(seen, word, std::memory_order_relaxed)) {}
+#endif
+          break;
+        }
+        static_targets[i] = static_cast<BallId>(at);  // the class slot until the gather
+      }
+      diagnostics[lane][0] += rejects; diagnostics[lane][1] += probes;  // several ranges per lane
+    });
+    u64 fresh_bytes = bucket_at.capacity() * sizeof(u32);
+    for (const auto& part : fresh) add(fresh_bytes, part.capacity() * sizeof(part.front()));
+    u32 total = 0;  // < 2^31 classes (at most one per request)
+    for (auto& at : bucket_at) { const u32 c = at; at = total; total += c; }
+    RawVector<u32> classes(total);  // every slot written once by the scatter
+    poison_unwritten(classes, 0);
+    parallel_items(fresh.size(), geometry_threads, [&](size_t lane, size_t) {
+      for (const auto& [bucket, slot] : fresh[lane])
+        classes[std::atomic_ref<u32>(bucket_at[bucket]).fetch_add(1, std::memory_order_relaxed)] = slot;
+      std::vector<std::array<u32, 2>>().swap(fresh[lane]);
+    });
+    st.static_unique[current_k] = classes.size();
+    if (static_trace) {  // gates only
+      auto& firsts = static_trace->firsts[current_k];
+      firsts.resize(n);
+      for (size_t i = 0; i < n; ++i) firsts[i] = (group_table[static_targets[i]] & kLowHalf) - 1;
+      static_trace->hashed[current_k] = 1;
+      static_trace->tag_rejects[current_k] = static_trace->probes[current_k] = 0;
+      for (const auto& d : diagnostics) {
+        static_trace->tag_rejects[current_k] += d[0];
+        static_trace->probes[current_k] += d[1];
+      }
+    }
+    lap(times->static_groups_by_k);
+    struct Worker { FullBallStats work; std::vector<NodeRef> scratch; u64 seeded = 0, seed_rejects = 0; };
+    std::vector<Worker> workers(planned_workers(classes.size(), geometry_threads));
+    const auto account = [&] {
+      u64 worker_bytes = workers.capacity() * sizeof(Worker);
+      for (const auto& w : workers) add(worker_bytes, w.scratch.capacity() * sizeof(NodeRef));
+      u64 seed_bytes = seeds.capacity() * sizeof(StaticSeed);
+      add(seed_bytes, seed_table.capacity() * sizeof(u64));
+      u64 group_bytes = group_table.capacity() * sizeof(u64);
+      add(group_bytes, classes.capacity() * sizeof(u32)); add(group_bytes, fresh_bytes);
+      st.static_peak_seed_bytes = std::max(st.static_peak_seed_bytes, seed_bytes);
+      st.static_peak_group_bytes = std::max(st.static_peak_group_bytes, group_bytes);
+      st.static_peak_worker_bytes = std::max(st.static_peak_worker_bytes, worker_bytes);
+      u64 retained = requests.capacity() * sizeof(FullBallBatchRequest);
+      add(retained, static_targets.capacity() * sizeof(BallId));
+      add(retained, seed_bytes); add(retained, group_bytes); add(retained, worker_bytes);
+      // Sampled retained capacities only, not transient reallocations or RSS.
+      st.static_peak_retained_bytes = std::max(st.static_peak_retained_bytes, retained);
+      for (const auto& w : workers) {
+        merge_static_work(w.work);
+        add(st.static_seeded[current_k], w.seeded);
+        if (static_trace) static_trace->seed_tag_rejects[current_k] += w.seed_rejects;
+      }
+    };
+    if (static_trace) static_trace->seed_tag_rejects[current_k] = 0;
+    const u64 seed_mask = static_cast<u64>(seed_slots) - 1;
+    const auto job = [&](size_t begin, size_t end, size_t worker) {
+      auto& w = workers[worker];
+      const auto find_seed = [&](const FullBallFacetKey& key) {
+        return find_indexed_seed(seeds, seed_slots, key, w.seed_rejects);
+      };
+      for (size_t c = begin; c < end; ++c) {
+        // Prefetch pipeline over the classes of this range (a word read
+        // ahead is still a first ordinal: only this range writes its slots).
+        if (c + kClassWordAhead < end) __builtin_prefetch(&group_table[classes[c + kClassWordAhead]]);
+        if (c + kClassFirstAhead < end)
+          __builtin_prefetch(&requests[(group_table[classes[c + kClassFirstAhead]] & kLowHalf) - 1]);
+        if (c + kClassBallAhead < end) {
+          const auto& later = requests[(group_table[classes[c + kClassBallAhead]] & kLowHalf) - 1];
+          __builtin_prefetch(&balls[later.consumer].level);
+          __builtin_prefetch(&level_run[later.consumer]);
+          if (seed_slots) __builtin_prefetch(&seed_table[group_hash(later.key) & seed_mask]);
+        }
+        u64& word = group_table[classes[c]];  // this class's slot, written by this job only
+        const auto& first = requests[(word & kLowHalf) - 1];
+        const auto& before = balls[first.consumer].level;
+        BallId target;
+        if (const StaticSeed* seed = find_seed(first.key)) {
+          target = seed->ball;
+          require(level_run[target] < level_run[first.consumer], "full_ball_static_seed_not_strict");
+          add(w.seeded);
+        } else target = static_terminal(first.key, before, w.work, w.scratch, find_seed);
+        word = (static_cast<u64>(target) << 32) | level_run[first.consumer];
+      }
+    };
+    try {
+      const size_t lanes = parallel_ranges(classes.size(), geometry_threads, job);
+      add(st.static_lanes_used, lanes);
+      if (lanes > 1) add(st.static_workers_created, lanes);  // one lane uses the caller
+    }
+    catch (...) {
+      account();
+      throw;
+    }
+    account();
+    // Gather: each request reads its class's target; the chronology of the
+    // witness (no request of a class precedes its first request's level).
+    parallel_ranges(n, geometry_threads, [&](size_t begin, size_t end, size_t) {
+      for (size_t i = begin; i < end; ++i) {
+        if (i + kGroupAhead < end) {
+          __builtin_prefetch(&group_table[static_targets[i + kGroupAhead]]);
+          __builtin_prefetch(&level_run[requests[i + kGroupAhead].consumer]);
+        }
+        const u64 word = group_table[static_targets[i]];
+        require(static_cast<u32>(word & kLowHalf) <= level_run[requests[i].consumer],
+                "full_ball_static_request_chronology");
+        static_targets[i] = static_cast<BallId>(word >> 32);
+      }
+    });
+    lap(times->static_resolve_by_k);
+    trace_static_targets();
+  }
+
   void prepare_static_order() {
     failpoint_after_static(current_k);
     failpoint_static_allocation(current_k);
@@ -2084,32 +2397,65 @@ class Builder {
     if (requests.capacity() < request_at.back()) { requests.clear(); requests.shrink_to_fit(); }
     requests.resize(request_at.back()); seeds.resize(seed_at.back());
     poison_unwritten(requests, 0); poison_unwritten(seeds, 0);
+    // Hashed grouping (default) unless the batch resolver is bound (its view
+    // takes sorted unique requests: the sorted witness serves it) or the
+    // ordinals and slots of the order do not fit the 32-bit halves of a
+    // table word (the witness groups that order, same object).
+    const bool hashed = hashed_groups && !batch_resolver.resolve && requests.size() < kHashGroupMaxRequests &&
+                        seeds.size() < kHashGroupMaxRequests;
+    // Powers of two >= 2 x entries: load factor <= 1/2.
+    const auto table = [](RawVector<u64>& words, size_t entries) -> size_t {
+      if (!entries) return 0;
+      size_t slots = 16;
+      while (slots < 2 * entries) slots *= 2;
+      if (words.capacity() < slots) { words.clear(); words.shrink_to_fit(); }
+      words.resize(slots);
+      poison_unwritten(words, 0);  // test builds: a slice left unzeroed breaks the gates
+      return slots;
+    };
+    const size_t slots = hashed ? table(group_table, requests.size()) : 0;
+    const size_t seed_slots = hashed ? table(seed_table, seeds.size()) : 0;
     parallel_items(collected.size(), geometry_threads, [&](size_t chunk, size_t) {
       auto& c = collected[chunk];
       for (size_t j = 0; j < c.requests.size(); ++j)
         requests[request_at[chunk] + j] = {c.requests[j].first, c.requests[j].second, request_at[chunk] + j};
       std::copy(c.seeds.begin(), c.seeds.end(), seeds.begin() + static_cast<std::ptrdiff_t>(seed_at[chunk]));
       decltype(c.requests)().swap(c.requests); decltype(c.seeds)().swap(c.seeds);
+      // The same chunks zero the group and seed tables, each its own slice
+      // (every slot once).
+      for (auto [words, size] : {std::pair{&group_table, slots}, std::pair{&seed_table, seed_slots}})
+        if (size)
+          std::fill(words->begin() + static_cast<std::ptrdiff_t>(size * chunk / collected.size()),
+                    words->begin() + static_cast<std::ptrdiff_t>(size * (chunk + 1) / collected.size()), u64{0});
     });
     lap(times->static_collect_by_k);
     st.static_requests[current_k] = requests.size();
     st.static_peak_request_bytes = std::max<u64>(st.static_peak_request_bytes,
         requests.capacity() * sizeof(Request));
-    // (key, ordinal) is a strict total order: the parallel sort is the unique
-    // sorted permutation, identical for every thread count.
-    const size_t sorters = parallel_sort(requests, geometry_threads, [](const Request& a, const Request& b) {
-      if (a.key != b.key) return a.key < b.key;
-      return a.ordinal < b.ordinal;  // earliest consumer first in each class
-    });
-    // A parallel sort holds a second buffer of the same size at its peak.
-    if (sorters > 1)
-      st.static_peak_request_bytes = std::max<u64>(st.static_peak_request_bytes,
-          2 * static_cast<u64>(requests.capacity()) * sizeof(Request));
-    // Seed keys are pairwise distinct (checked below): a strict total order.
-    parallel_sort(seeds, geometry_threads, [](const StaticSeed& a, const StaticSeed& b) { return a.key < b.key; });
-    for (size_t j = 1; j < seeds.size(); ++j)
-      require(seeds[j - 1].key != seeds[j].key, "full_ball_static_duplicate_seed");
+    if (!hashed) {
+      // (key, ordinal) is a strict total order: the parallel sort is the unique
+      // sorted permutation, identical for every thread count.
+      const size_t sorters = parallel_sort(requests, geometry_threads, [](const Request& a, const Request& b) {
+        if (a.key != b.key) return a.key < b.key;
+        return a.ordinal < b.ordinal;  // earliest consumer first in each class
+      });
+      // A parallel sort holds a second buffer of the same size at its peak.
+      if (sorters > 1)
+        st.static_peak_request_bytes = std::max<u64>(st.static_peak_request_bytes,
+            2 * static_cast<u64>(requests.capacity()) * sizeof(Request));
+    }
+    if (hashed) index_seeds(seeds, seed_slots);  // no sort: duplicates refused on insertion
+    else {
+      // Seed keys are pairwise distinct (checked below): a strict total order.
+      parallel_sort(seeds, geometry_threads, [](const StaticSeed& a, const StaticSeed& b) { return a.key < b.key; });
+      for (size_t j = 1; j < seeds.size(); ++j)
+        require(seeds[j - 1].key != seeds[j].key, "full_ball_static_duplicate_seed");
+    }
     lap(times->static_sort_by_k);
+    if (hashed) {
+      resolve_hashed_order(requests, seeds, slots, seed_slots, lap);
+      return;
+    }
     // Group starts (first request of each key), found by chunks in parallel.
     std::vector<size_t> groups;
     {
@@ -2126,6 +2472,13 @@ class Builder {
     }
     st.static_unique[current_k] = groups.size();
     groups.push_back(requests.size());
+    if (static_trace) {  // gates only: the first (minimum) ordinal of each request's class
+      auto& firsts = static_trace->firsts[current_k];
+      firsts.assign(requests.size(), 0);
+      for (size_t g = 0; g + 1 < groups.size(); ++g)
+        for (size_t r = groups[g]; r < groups[g + 1]; ++r) firsts[requests[r].ordinal] = requests[groups[g]].ordinal;
+      static_trace->hashed[current_k] = 0;
+    }
     static_cursor = 0;
     // Every ordinal is written by exactly one group (the groups partition the
     // requests, the ordinals are a permutation): no sentinel fill.
@@ -2137,6 +2490,7 @@ class Builder {
     if (batch_resolver.resolve) {
       prepare_external_batch(requests, groups, seeds);
       lap(times->static_resolve_by_k);
+      trace_static_targets();
       return;
     }
     struct Worker { FullBallStats work; std::vector<NodeRef> scratch; u64 seeded = 0; };
@@ -2171,7 +2525,11 @@ class Builder {
           target = seed->ball;
           require(level_run[target] < level_run[first.consumer], "full_ball_static_seed_not_strict");
           add(w.seeded);
-        } else target = static_terminal(first.key, before, w.work, w.scratch, seeds);
+        } else target = static_terminal(first.key, before, w.work, w.scratch, [&](const ResolverCache::Key& key) {
+          const auto found = std::lower_bound(seeds.begin(), seeds.end(), key,
+              [](const StaticSeed& a, const ResolverCache::Key& value) { return a.key < value; });
+          return found != seeds.end() && found->key == key ? &*found : static_cast<const StaticSeed*>(nullptr);
+        });
         for (size_t r = groups[group]; r < groups[group + 1]; ++r) {
           const auto& request = requests[r];
           require(level_run[first.consumer] <= level_run[request.consumer], "full_ball_static_request_chronology");
@@ -2190,6 +2548,10 @@ class Builder {
     }
     account();
     lap(times->static_resolve_by_k);
+    trace_static_targets();
+  }
+  void trace_static_targets() {
+    if (static_trace) static_trace->targets[current_k].assign(static_targets.begin(), static_targets.end());
   }
   u64 resolve_static_target(const ExactLevel& before, u64 prior_count) {
     require(static_cursor < static_targets.size(), "full_ball_static_target_missing");
@@ -2474,19 +2836,14 @@ class Builder {
 
 // meb_proposal selects anchor_meb_proposed (default) or the reference
 // enumeration for every local MEB: same objects, different work.
-// overlap_static: on the static path, phase A of each order starts as soon as
-// its phase 0 is done (phase 0 by decreasing K): same objects and statuses.
-// pipelined_tail (v9 E4, default true, only with overlap_static): the
-// population IDs (static offsets), rows and vertical images of each order run
-// on its runner inside the overlapped window; false keeps them after the
-// join (assign_populations, the witness). Same objects, IDs and statuses.
+// options (FullBallTowerOptions): the static path's named switches.
 inline FullBallTowerResult build_full_ball_tower(const CloudIndex& ix, std::span<const BallData> balls,
     unsigned kmax, int static_threads = 0, FullBallBatchResolver batch = {}, bool meb_proposal = true,
-    bool overlap_static = false, bool pipelined_tail = true) {
+    const FullBallTowerOptions& options = {}) {
   FullBallTowerResult result;
   try {
     result.orders = full_ball_detail::Builder(ix, balls, kmax, result.stats, static_threads, batch, meb_proposal,
-                                              &result.times, overlap_static, pipelined_tail).run();
+                                              &result.times, options).run();
     result.status = FullBallStatus::kCompleteRelative; result.reason = kFullBallAuthority;
   } catch (const full_ball_detail::Failure& error) {
     result.status = error.status; result.reason = error.reason;
