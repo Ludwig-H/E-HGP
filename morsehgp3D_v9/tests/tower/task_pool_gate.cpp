@@ -488,7 +488,8 @@ std::uint64_t priority_fixtures() {
   for (const Case& c : {Case{"k0", &valid, 0u}, Case{"k11", &valid, 11u}, Case{"invalid_index", &outside, 2u}})
     for (const bool pool : {true, false}) {
       pd::launch_fail_after = 1;
-      const auto tw = mhgp9::tower::build_full_ball_tower(*c.ix, {}, c.kmax, 4, {}, true, true, pool);
+      const auto tw = mhgp9::tower::build_full_ball_tower(*c.ix, {}, c.kmax, 4, {}, true,
+          mhgp9::tower::FullBallTowerOptions{.overlap_static = true, .persistent_pool = pool});
       pd::launch_fail_after = static_cast<std::size_t>(-1);
       ++towers;
       const std::string where = std::string(c.name) + " pool=" + (pool ? "1" : "0") + " status=" +
@@ -500,7 +501,8 @@ std::uint64_t priority_fixtures() {
     }
   {
     pd::launch_fail_after = 1;
-    const auto tw = mhgp9::tower::build_full_ball_tower(valid, {}, 2, 4, {}, true, true, true);
+    const auto tw = mhgp9::tower::build_full_ball_tower(valid, {}, 2, 4, {}, true,
+        mhgp9::tower::FullBallTowerOptions{.overlap_static = true, .persistent_pool = true});
     pd::launch_fail_after = static_cast<std::size_t>(-1);
     ++towers;
     if (tw.status != FullBallStatus::kResourceExhausted ||
