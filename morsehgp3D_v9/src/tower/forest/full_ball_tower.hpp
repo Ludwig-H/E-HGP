@@ -80,6 +80,9 @@ struct FullBallStats {
   // only client of the helpers, as in the chain); phase-A runner threads of
   // the overlapped path. Scheduling metadata, never part of tower_work.
   u64 pool_threads = 0, pool_jobs = 0, helper_threads = 0, runner_threads = 0;
+  // Orders whose phase 0 grouped its requests by exact hash classes (the
+  // sorted witness otherwise). Path metadata, never part of tower_work.
+  u64 hashed_orders = 0;
   // False after a backend failure whose paid work could not be recovered.
   bool static_batch_work_known = true;
   AnchorMebWork validation_work, resolve_work;
@@ -2474,6 +2477,7 @@ class Builder {
     // table word (the witness groups that order, same object).
     const bool hashed = hashed_groups && !batch_resolver.resolve && requests.size() < kHashGroupMaxRequests &&
                         seeds.size() < kHashGroupMaxRequests;
+    if (hashed) add(st.hashed_orders);
     // Powers of two >= 2 x entries: load factor <= 1/2.
     const auto table = [](RawVector<u64>& words, size_t entries) -> size_t {
       if (!entries) return 0;
