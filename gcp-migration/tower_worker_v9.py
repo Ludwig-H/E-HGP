@@ -848,7 +848,9 @@ def validate_tower_detail(value, case):
     effective = value['options']['K_effective']
     static_path = case['static_threads'] > 1 and effective > 1
     pipelined = static_path and levers['tower_overlap_static'] and levers['tower_pipelined_tail']
-    hashed = static_path and levers['tower_hash_grouping']
+    # Revue avant R21 : a un fil statique, la boucle sequentielle passe aussi
+    # par la phase 0 (regroupement hache) ; a zero, le cache de resolution.
+    hashed = case['static_threads'] >= 1 and effective > 1 and levers['tower_hash_grouping']
     pooled = static_path and levers['tower_persistent_pool']
     # La queue en pipeline couvre chaque ordre ; le regroupement hache, chaque
     # phase 0 (K >= 2) ; le pool a W - 1 fils et sert au moins un appel.

@@ -42,8 +42,8 @@
 // --frame=CHEMIN --k=K --tower=HEX --catalogue=HEX : meme identite sur une
 //   trame LiDAR (chaine a 8 fils, condenses epingles), temps entrelaces
 //   pool actif / coupe publies a titre indicatif ; nombre EXACT de travaux
-//   du pool a chaque W > 1 et dans la chaine (08/000000 : 58 a K5, 108 a
-//   K10).
+//   du pool a chaque W > 1 et dans la chaine (08/000000 : 45 a K5, 80 a
+//   K10, sous le regroupement hache de la phase 0 ; 58 et 108 avec le tri).
 //
 // Planchers (code 3) : travaux servis par le pool (le meme nombre a chaque
 // W > 1 d'un meme catalogue), fils du pool = W - 1, moins de fils crees par
@@ -695,7 +695,7 @@ int run_fixtures() {
     }
   }
   priority_fixtures();
-  const int floors = check_floors(id, 8192, 50);
+  const int floors = check_floors(id, 8192, 40);  // hashed grouping: 45 or more per fixture tower
   if (floors) return floors;
   std::printf("task_pool_gate fixtures towers=%llu\n", static_cast<unsigned long long>(id.towers));
   return 0;
@@ -736,10 +736,13 @@ int run_frame(const std::string& path, unsigned kmax, std::uint64_t tower_pin, s
               static_cast<unsigned long long>(r.tower_stats.pool_jobs));
   if (r.tower_digest != tower_pin || r.catalogue_digest != catalogue_pin) fail("frame.pinned_digests");
   // Every helper call with more than one planned worker is a pool job: the
-  // same count for every W >= 2, EXACTLY 58 on 08/000000 at K5 and 108 at
+  // same count for every W >= 2, EXACTLY 45 on 08/000000 at K5 and 80 at
   // K10 (a job added, removed or split changes it), in the chain as in
   // every tower below.
-  const std::uint64_t exact_jobs = kmax == 5 ? 58 : 108;
+  // Integration before R21: the hashed phase-0 grouping (default) makes
+  // fewer helper calls than the sorted witness the counts were first pinned
+  // on (58 and 108).
+  const std::uint64_t exact_jobs = kmax == 5 ? 45 : 80;
   if (r.tower_stats.pool_jobs != exact_jobs) fail("tower.pool_jobs_count chain");
   Identity id;
   identity("frame", points, kmax, r.catalogue_balls, r, id, false, true);

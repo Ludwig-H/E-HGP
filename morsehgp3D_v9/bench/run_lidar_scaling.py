@@ -444,7 +444,7 @@ def selftest(case_path):
     # v27: the tower's paths under its sibling levers (static path above one thread).
     on_static = expected['static_threads'] > 1 and min(k, expected['sites']) > 1
     v13['tower_detail'] = dict(pipelined_orders=k if on_static else 0, population_deferred_refs=0,
-                               hashed_orders=k - 1 if on_static else 0,
+                               hashed_orders=k - 1 if expected['static_threads'] >= 1 and k > 1 else 0,
                                pool_threads=expected['static_threads'] - 1 if on_static else 0,
                                pool_jobs=3 if on_static else 0, helper_threads=0, runner_threads=k if on_static else 0,
                                pool_ms=0.01 if on_static else 0.0, populations_by_k=[0.0] * k,

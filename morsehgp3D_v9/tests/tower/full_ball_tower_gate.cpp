@@ -342,7 +342,9 @@ void same_work(const FullBallTowerResult& a, const FullBallTowerResult& b) {
                            &FullBallStats::lower_edges_indexed, &FullBallStats::lower_nodes_activated,
                            &FullBallStats::lower_edges_activated, &FullBallStats::lower_queries,
                            &FullBallStats::lower_find_steps, &FullBallStats::lower_path_writes,
-                           &FullBallStats::static_workers_created, &FullBallStats::static_lanes_used,
+                           // static_workers_created and static_lanes_used are measured
+                           // scheduling metadata on the persistent pool (review before
+                           // R21): not compared.
                            &FullBallStats::parallel_orders, &FullBallStats::overlapped_orders,
                            &FullBallStats::presorted_catalogues})
     need(x.*field == y.*field, "paired.same_work");

@@ -256,7 +256,7 @@ def tower_detail(levers, effective, k, static, complete):
     # v27: the tower's paths under its three sibling levers (never tower_work).
     static_path = complete and static > 1 and effective > 1
     pipelined = static_path and levers.get('tower_overlap_static') and levers.get('tower_pipelined_tail')
-    hashed = static_path and levers.get('tower_hash_grouping')
+    hashed = complete and static >= 1 and effective > 1 and levers.get('tower_hash_grouping')
     pooled = static_path and levers.get('tower_persistent_pool')
     return dict(pipelined_orders=effective if pipelined else 0, population_deferred_refs=0,
                 hashed_orders=effective - 1 if hashed else 0, pool_threads=static - 1 if pooled else 0,
@@ -1120,7 +1120,11 @@ class Protocol(unittest.TestCase):
                                                                                                     pool_jobs=3)),
                               ('pipelined steps without the lever',
                                lambda v: v['tower_detail'].update(populations_by_k=[0.0, 1.0, 0.0, 0.0, 0.0])),
-                              ('pool time without the pool', lambda v: v['tower_detail'].update(pool_ms=1.0))):
+                              ('pool time without the pool', lambda v: v['tower_detail'].update(pool_ms=1.0)),
+                              ('deferred references without the pipelined tail',
+                               lambda v: v['tower_detail'].update(population_deferred_refs=1)),
+                              ('pipelined orders without the lever',
+                               lambda v: v['tower_detail'].update(pipelined_orders=5))):
             bad = deepcopy(witness)
             mutate(bad)
             need(refused(worker.validate_probe, bad, witness_case, 0), 'tower witness mutation ' + label)
@@ -1161,6 +1165,11 @@ class Protocol(unittest.TestCase):
         huge['device_session'].update(context_ms=1e6, reserve_ms=1e6)
         need(refused(worker.validate_external_wall, huge, session_wall / 1000.0),
              'device session bounded by the external wall')
+        for field in ('context_ms', 'reserve_ms'):  # each term alone (review before R21)
+            one = deepcopy(gpu_good)
+            one['device_session'][field] = 1e6
+            need(refused(worker.validate_external_wall, one, session_wall / 1000.0),
+                 'device session ' + field + ' alone bounded by the external wall')
         worker.validate_external_wall(huge, 2e3 + session_wall / 1000.0)
         mutations = [('schema', lambda v: v.update(schema='mhgp9_tower_probe_v0')),
                      ('schema_v10', lambda v: v.update(schema='mhgp9_tower_probe_v10')),

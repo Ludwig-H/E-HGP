@@ -119,7 +119,12 @@ Run build(const mhgp9::tower::CloudIndex& ix, const std::vector<mhgp9::tower::Ba
   r.hashed = hashed;
   r.overlap = overlap;
   r.tower = mhgp9::tower::build_full_ball_tower(ix, balls, kmax, threads, {}, true,
-      mhgp9::tower::FullBallTowerOptions{.overlap_static = overlap, .hash_grouping = hashed, .trace = &r.trace});
+      // Pool off (review before R21): this gate judges hash against sort on
+      // the per-call helpers, whose worker counts are the planned widths,
+      // deterministic and equal on both paths; pool x hash is judged by
+      // mhgp9_chain_tower_tail (eight combinations) and task_pool_gate.
+      mhgp9::tower::FullBallTowerOptions{.overlap_static = overlap, .hash_grouping = hashed,
+                                         .persistent_pool = false, .trace = &r.trace});
   r.digest = mhgp9::tower_digest(r.tower);
   r.tower.orders.clear();  // the digest is kept, the forests are not needed
   r.tower.orders.shrink_to_fit();

@@ -123,6 +123,12 @@ def main(argv):
                                                                  q34_batch_certificates=True, q34_batch_q3=True,
                                                                  q34_batch_q4=True, q34_lanes_fused=True,
                                                                  q2_during_device=True))),
+                        # v27: the tower without its three sibling levers, on
+                        # the static path (two threads): no pipelined, hashed
+                        # or pooled order, same object as pinned_on.
+                        ('tower_witness', dict(base, levers=dict(engine_levers, tower_pipelined_tail=False,
+                                                                 tower_hash_grouping=False,
+                                                                 tower_persistent_pool=False))),
                         ('pinned_off', dict(base, levers={name: False for name in worker.LEVER_NAMES}, workers=1,
                                             static_threads=0))):
         try:
@@ -145,6 +151,17 @@ def main(argv):
               sequential['times_ms']['q2_wait'] == 0, 'q2 overlap: object or times differ from the sequential case')
     else:
         check(False, 'q2 overlap case absent')
+    # v27: the tower's three sibling levers take their paths on the real
+    # probe, and the witness arm none of them, with the same object.
+    if 'tower_witness' in results and 'pinned_on' in results:
+        on, witness = results['pinned_on'][1]['tower_detail'], results['tower_witness'][1]['tower_detail']
+        check(worker.logical_result(results['tower_witness'][1]) == worker.logical_result(results['pinned_on'][1]) and
+              on['pipelined_orders'] == 5 and on['hashed_orders'] == 4 and on['pool_threads'] == 1 and
+              on['pool_jobs'] > 0 and witness['pipelined_orders'] == 0 and witness['hashed_orders'] == 0 and
+              witness['pool_threads'] == 0 and witness['pool_jobs'] == 0,
+              'tower levers: paths or object differ between the default and the witness arm')
+    else:
+        check(False, 'tower witness case absent')
     # v25: the separate phases publish the same object, the same declared
     # lanes ledger and records, and no fused counter.
     if 'q4_unfused' in results and 'q4_on' in results:
