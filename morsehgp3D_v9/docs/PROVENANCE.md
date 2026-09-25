@@ -1529,13 +1529,21 @@ par tri). À 08/000000 K5, une tour fait 58 appels à plus d'un ouvrier :
 validation, phase 0 (dix par ordre), populations, images, banque, encodage.
 
 Après (`src/tower/parallel/pool.hpp`, `TaskPool`) :
-- **un pool de W participants** (le fil appelant et W − 1 fils) est créé au
-  début de `Builder::run`, avant la validation (`times.pool_ms`), et détruit
-  après l'encodage ;
+- **un pool de W participants** (le fil appelant et W − 1 fils) est créé dans
+  `Builder::run` après les contrôles sériels du domaine d'entrée (ordres,
+  index, profil u18, identifiants ; partie 0 de la validation) et avant le
+  reste de la validation (`times.pool_ms`), puis détruit après l'encodage ;
 - **seul le fil propriétaire s'en sert** : un `PoolScope` l'installe dans un
   pointeur `thread_local`, et les primitives appelées par ce fil y exécutent
-  leur boucle de tirage, l'appelant étant l'ouvrier 0. Tranches, indices
-  d'ouvrier et valeur rendue ne changent pas, la sortie est bit-identique ;
+  leur boucle de tirage, l'appelant étant l'ouvrier 0. Tranches et indices
+  d'ouvrier ne changent pas, la sortie est bit-identique ;
+- **ouvriers engagés mesurés** : `TaskPool::run` rend 1 plus le nombre de fils
+  du pool entrés dans le travail qui ont exécuté sa boucle, jamais le nombre
+  de participants. `run_threads` et les trois primitives rendent cette valeur
+  (le nombre de fils créés sur la voie par appel). `static_lanes_used` et
+  `static_workers_created` redeviennent donc des mesures sur le pool ; le
+  second tampon du tri parallèle est compté par `parallel_sort_splits`, qui
+  ne dépend que de n et de W ;
 - **appels imbriqués** : la part du propriétaire pendant un travail, les fils
   du pool et les fils tiers (coureurs de la phase A recouvrante, qui appellent
   `order_prepare_lean`) gardent leurs propres fils. Aucun travail n'attend
@@ -1552,11 +1560,21 @@ Après (`src/tower/parallel/pool.hpp`, `TaskPool`) :
   Le filtre certifié des niveaux lit le mode d'arrondi ;
 - **admission** : les fils attendent que tous existent. Un échec de création
   les annule, les joint et relance `std::system_error` avant tout travail
-  (refus `full_ball_thread_launch_failed`, comme avant). Le crochet
+  parallèle (refus `full_ball_thread_launch_failed`, comme avant). Le crochet
   `MHGP9_TESTING` de lancement s'applique à la création du pool ;
+- **priorité des refus** : comme avant E2, une entrée refusée par les
+  contrôles sériels du domaine reste `invalid_input`
+  (`full_ball_input_domain`) quelles que soient les ressources de fils,
+  puisqu'aucun fil n'existe encore. Une première version créait le pool
+  avant ces contrôles : une entrée hors domaine devenait un refus de
+  ressource quand le lancement échouait ;
 - **exceptions** : la première est capturée par les enveloppes, l'arrêt est
   demandé, puis elle est relancée sur le propriétaire après la sortie des
-  fils entrés.
+  fils entrés. Une exception qui échappe à `fn` (hors enveloppe) sur le
+  propriétaire comme sur un fil va dans un seul emplacement, sous verrou : la
+  première capturée gagne, et l'emplacement est vidé à chaque sortie. Une
+  première version relançait toujours celle du propriétaire et laissait
+  celle du fil au travail suivant.
 
 Compteurs de `FullBallStats`, hors `tower_work`, pour les portes :
 - `pool_threads` et `pool_jobs` ;
@@ -1572,34 +1590,66 @@ recompilée) :
   - les trois primitives sont servies par le pool avec les mêmes sorties,
     de 2 à 8 participants ;
   - jonction : jamais de retour avant la sortie d'un fil entré ;
+  - ouvriers engagés : exactement `count` quand le propriétaire attend chaque
+    indice, 1 plus les fils entrés quand un fil en retard saute le travail ;
   - première exception relancée, pool réutilisable ensuite ;
+  - exception échappant à `fn` sur le propriétaire et sur un fil, les deux
+    ordres forcés par un crochet de compte des captures : la première est
+    relancée et le travail suivant n'en relève aucune ;
   - imbrication et fil tiers, sous un chien de garde de 30 s ;
   - environnement flottant (FE_UPWARD, FE_DOWNWARD) ;
   - fil en retard qui saute un travail fermé (crochet de retard) ;
   - échec de lancement du pool et de la voie par appel.
+- `mhgp9_tower_task_pool_priority` (`--priority`) : K = 0, K = 11 et un index
+  invalide, chacun avec l'échec de lancement du premier fil du pool, donnent
+  `invalid_input` / `full_ball_input_domain`, pool actif et coupé ; témoin :
+  un K valide avec le même échec est le refus de ressource, pool actif.
 - `mhgp9_tower_task_pool_fixtures` : nuage de trois grappes (1 500 sites),
   K5 et K8. La tour construite sur le même catalogue est identique pool actif
   et coupé : condensé, `tower_work` et 87 autres compteurs déterministes, à
   1, 2, 3, 4 et 8 fils, phase A recouvrante ou non. Elle vérifie aussi
-  l'option de chaîne et le refus de ressource à l'échec de lancement, pool
-  actif ou coupé. Planchers : au moins 50 travaux du pool par tour,
-  W − 1 fils du pool, moins de fils créés qu'avec le pool coupé.
+  l'option de chaîne, le refus de ressource à l'échec de lancement, pool
+  actif ou coupé, et les cas de `--priority`. Le nombre de travaux du pool est
+  le même à chaque W > 1 d'un catalogue et d'un chemin. Planchers : au moins
+  50 travaux du pool par tour, W − 1 fils du pool, moins de fils créés
+  qu'avec le pool coupé.
 - `mhgp9_tower_task_pool_lidar_k5` (label `lidar`, environ 2 à 4 min en
   local) : sur la trame 08/000000, les condensés épinglés `67450c64611075b1`
-  / `5ad1fe09354411ba` et la même identité à 1, 2, 3, 4 et 8 fils. Plancher :
-  58 travaux du pool.
+  / `5ad1fe09354411ba` et la même identité à 1, 2, 3, 4 et 8 fils. Le nombre
+  de travaux du pool est **exact** : 58 dans la chaîne et dans chaque tour à
+  W > 1 (108 à K10, même porte avec `--k=10`, non enregistrée). Un travail
+  ajouté, retiré ou scindé la fait échouer.
 - Mutants tués (code 1) :
-  - six mutants compilés du pool : pool partiel publié, retour avant la
+  - neuf mutants compilés du pool : pool partiel publié, retour avant la
     jonction, file d'attente sur un pool occupé (interblocage), environnement
     flottant périmé, pool contourné, fil en retard entrant dans un travail
-    fermé ;
+    fermé, nombre d'ouvriers déclaré au lieu de mesuré, exception de fil
+    laissée au travail suivant, pool créé avant les contrôles du domaine ;
   - le mutant d'exécution `parallel-admit-partial-launch` de la voie par
     appel, qu'aucune porte v9 ne tuait.
 - Sous `MHGP9_TSAN` (lancé avec `setarch -R`, sans quoi TSAN refuse la
   disposition mémoire du noyau), sans rapport :
-  - les portes `--unit` et `--fixtures` du pool ;
+  - les portes `--unit`, `--priority` et `--fixtures` du pool ;
   - `population_bank`, `parallel_sort`, `full_ball_tower --static-4` ;
   - `chain_static_paths` et `order_failure_priority`.
+
+Correctifs de revue (25 septembre 2026, commit `c89aae137`), mesurés en
+local :
+- `chain_static_paths` publie `workers_created=16` à 4 fils, en Release
+  (trois passages) comme sous TSAN : 4 ordres × 4 ouvriers entrés dans le
+  travail de résolution, une mesure et non plus une déclaration ;
+- 2 000 appels de `parallel_ranges` sur 64 éléments vides, pool de 4 : le
+  propriétaire tire tout seul et l'appel rend 1 dans les 2 000 cas. La
+  version déclarative rendait 4 dans 1 998 cas (mesure de la revue) ;
+- la porte de trame à K10 (`--k=10`) trouve exactement 108 travaux du pool
+  dans la chaîne et à W = 2, 3, 4 et 8, avec les condensés épinglés ;
+  fils créés à W8 : 97 pool actif, 953 pool coupé, comme avant les
+  correctifs ;
+- sonde, W8, trois paires entrelacées contre la base `d1d038393`, charge 9
+  à 16 : condensés et `tower_work` identiques dans les douze passages.
+  Tour à K5 : 1 959 / 1 417 / 1 427 ms (base) contre 1 577 / 1 409 /
+  1 368 ms. À K10 : 10 443 / 18 194 / 13 573 ms contre 18 042 / 17 677 /
+  9 260 ms. Le bruit domine à K10 ; ces temps sont indicatifs.
 
 Fils créés par une tour à 08/000000 (compteurs déterministes, pool actif
 contre coupé) :
