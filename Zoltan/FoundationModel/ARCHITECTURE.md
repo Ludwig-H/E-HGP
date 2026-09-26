@@ -259,10 +259,11 @@ Avec une bande $L = 2$ et un budget de 4 096 jetons par trame :
 | --- | --- | --- |
 | tour par trame, $K \leq 5$, sans sol | 0,76–0,98 s | reçu R22 |
 | tour par trame, $K \leq 5$, brut | 1,81–2,03 s | reçu R22 |
-| tokenisation de SemanticKITTI (23 201 trames d'entraînement) | ≈ 12–13 h sur une G4, une fois | produit des deux précédents |
+| tokenisation des 19 130 trames d'entraînement (00–07, 09, 10) | ≈ 10 h sur une G4, une fois | produit des deux précédents |
 | RSS de la tour | 1,2–6,4 Go | reçu R22 |
 | cache de jetons, 4 096 jetons × ~700 flottants | ≈ 11 Mo par trame en float32, ≈ 5,6 Mo en float16 | à confirmer, porte G0.5 |
-| cache total SemanticKITTI | ≈ 130–260 Go | idem |
+| cache des 23 201 trames annotées (00–10) | ≈ 130 Go | idem |
+| cache des 43 552 trames des 22 séquences, pour le pré-entraînement | ≈ 250 Go | idem |
 
 Le cache est le vrai poste dimensionnant, pas le calcul. Il impose une décision
 explicite : **quantifier le descripteur en float16 et stocker les canaux exacts
