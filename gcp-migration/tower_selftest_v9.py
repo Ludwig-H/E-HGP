@@ -356,6 +356,11 @@ def main():
                             frames)
         if config.get('deferral_differs') and (capacity or lanes_capacity):
             value['catalogue_digest'] = '0' * 15 + '1'
+            # v30: forge a coherent process object, so the causal refusal
+            # remains the comparison with the default-slab twin, not the
+            # newly enforced body/frame-0 consistency check.
+            for frame in value['frames']['results']:
+                frame['catalogue_digest'] = value['catalogue_digest']
         if config.get('fail_preflight'):
             value['tower_work']['selftest_unknown'] = 1
         if config.get('vacuous_preflight'):

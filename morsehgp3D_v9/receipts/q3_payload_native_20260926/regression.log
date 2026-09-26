@@ -1,0 +1,116 @@
+Start testing: Sep 26 20:19 UTC
+----------------------------------------------------------
+120/329 Testing: mhgp9_chain_q3_payload
+120/329 Test: mhgp9_chain_q3_payload
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/mhgp9_chain_q3_payload_gate" "-DARGS=" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=chain_q3_payload_gate n=64" "-P" "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v9-q3-payload-integration-20260926
+"mhgp9_chain_q3_payload" start time: Sep 26 20:19 UTC
+Output:
+----------------------------------------------------------
+chain_q3_payload_gate n=64 cases=192 imports=90862 ids=351828 fallbacks=40898 tails=24952 extra=144 judged=16 shape_refusals=8 multi_chunk_records=85363 multi_chunk_imports=45421 merge_ranges=16 presentation_bytes=112
+
+<end of output>
+Test time =   8.84 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp9_chain_q3_payload" end time: Sep 26 20:19 UTC
+"mhgp9_chain_q3_payload" time elapsed: 00:00:08
+----------------------------------------------------------
+
+121/329 Testing: mhgp9_chain_payload_ordinal_mutant
+121/329 Test: mhgp9_chain_payload_ordinal_mutant
+Command: "/usr/bin/cmake" "-DEXPECTED=1" "-DCMD=/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/mhgp9_chain_payload_ordinal_mutant_gate" "-DARGS=" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=cause=status" "-P" "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v9-q3-payload-integration-20260926
+"mhgp9_chain_payload_ordinal_mutant" start time: Sep 26 20:19 UTC
+Output:
+----------------------------------------------------------
+cause=status uniform/K3/W1/mode0 complete_relative_to_cross_checked_catalogue chain_payload_id_outside_cloud
+
+<end of output>
+Test time =   0.22 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp9_chain_payload_ordinal_mutant" end time: Sep 26 20:19 UTC
+"mhgp9_chain_payload_ordinal_mutant" time elapsed: 00:00:00
+----------------------------------------------------------
+
+122/329 Testing: mhgp9_chain_payload_rank_as_id_mutant
+122/329 Test: mhgp9_chain_payload_rank_as_id_mutant
+Command: "/usr/bin/cmake" "-DEXPECTED=1" "-DCMD=/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/mhgp9_chain_payload_rank_as_id_mutant_gate" "-DARGS=" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=cause=status" "-P" "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v9-q3-payload-integration-20260926
+"mhgp9_chain_payload_rank_as_id_mutant" start time: Sep 26 20:19 UTC
+Output:
+----------------------------------------------------------
+cause=status uniform/K3/W1/mode0 complete_relative_to_cross_checked_catalogue chain_payload_noninterior_id
+
+<end of output>
+Test time =   0.21 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp9_chain_payload_rank_as_id_mutant" end time: Sep 26 20:19 UTC
+"mhgp9_chain_payload_rank_as_id_mutant" time elapsed: 00:00:00
+----------------------------------------------------------
+
+150/329 Testing: mhgp9_gpu_interior_payload
+150/329 Test: mhgp9_gpu_interior_payload
+Command: "/usr/bin/cmake" "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/mhgp9_gpu_interior_payload_gate" "-DARGS=" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=payload PASS" "-P" "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v9-q3-payload-integration-20260926
+"mhgp9_gpu_interior_payload" start time: Sep 26 20:19 UTC
+Output:
+----------------------------------------------------------
+payload PASS calls=140 q3=9602 q4=1648 ids=18873 extra_shell=203 deferred=3768 permuted=121 fused_fallbacks=68 device_calls=0 direct_chunks=28 max_depth=8
+
+<end of output>
+Test time =   2.05 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp9_gpu_interior_payload" end time: Sep 26 20:19 UTC
+"mhgp9_gpu_interior_payload" time elapsed: 00:00:02
+----------------------------------------------------------
+
+151/329 Testing: mhgp9_gpu_interior_rank_as_id_mutant
+151/329 Test: mhgp9_gpu_interior_rank_as_id_mutant
+Command: "/usr/bin/cmake" "-DEXPECTED=1" "-DCMD=/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/mhgp9_gpu_interior_rank_as_id_mutant_gate" "-DARGS=" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=cause=interior_ids_differ" "-P" "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v9-q3-payload-integration-20260926
+"mhgp9_gpu_interior_rank_as_id_mutant" start time: Sep 26 20:19 UTC
+Output:
+----------------------------------------------------------
+cause=interior_ids_differ
+
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp9_gpu_interior_rank_as_id_mutant" end time: Sep 26 20:19 UTC
+"mhgp9_gpu_interior_rank_as_id_mutant" time elapsed: 00:00:00
+----------------------------------------------------------
+
+152/329 Testing: mhgp9_gpu_interior_omit_last_mutant
+152/329 Test: mhgp9_gpu_interior_omit_last_mutant
+Command: "/usr/bin/cmake" "-DEXPECTED=1" "-DCMD=/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/mhgp9_gpu_interior_omit_last_mutant_gate" "-DARGS=" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=cause=interior_ids_differ" "-P" "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/cmake/run_expect.cmake"
+Directory: /workspaces/E-HGP/build/v9-q3-payload-integration-20260926
+"mhgp9_gpu_interior_omit_last_mutant" start time: Sep 26 20:19 UTC
+Output:
+----------------------------------------------------------
+cause=interior_ids_differ
+
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"mhgp9_gpu_interior_omit_last_mutant" end time: Sep 26 20:19 UTC
+"mhgp9_gpu_interior_omit_last_mutant" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Sep 26 20:19 UTC
+
+chain =   9.27 sec*proc
+
+gate =  11.34 sec*proc
+
+gpu =   2.07 sec*proc
+
+mutant =   0.45 sec*proc
+
+payload =  11.34 sec*proc
+

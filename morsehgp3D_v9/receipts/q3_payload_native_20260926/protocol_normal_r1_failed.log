@@ -1,0 +1,15 @@
+....E..........................
+======================================================================
+ERROR: test_deferral_preflight_must_equal_default (__main__.Protocol.test_deferral_preflight_must_equal_default)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/mhgp9-audit-resume-20260926/gcp-migration/tower_selftest_v9.py", line 1830, in test_deferral_preflight_must_equal_default
+    need('reduced-slab preflight differs' in value.get('error', '') and
+  File "/tmp/mhgp9-audit-resume-20260926/gcp-migration/tower_worker_v9.py", line 333, in need
+    raise ValueError(reason)
+ValueError: no LiDAR case after a differing deferral preflight
+
+----------------------------------------------------------------------
+Ran 31 tests in 262.175s
+
+FAILED (errors=1)

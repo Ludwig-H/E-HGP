@@ -99,7 +99,7 @@ def main(argv):
     # judged apart (explicit refusal without a device).
     engine_levers = worker.engine_levers({name: True for name in worker.LEVER_NAMES})
     base = dict(scene='gate', file=data_file.name, n=inputs['gate']['n'], k=5, s=8, workers=2, static_threads=2,
-                levers=engine_levers, repeat=0)
+                levers=engine_levers, repeat=0, frames=1)
     results = {}
     for label, case in (('pinned_on', base),
                         ('batch_on', dict(base, levers=dict(engine_levers, q34_batch_filter=True))),
@@ -133,6 +133,12 @@ def main(argv):
                                                           q34_batch_q4=True, q2_during_device=True,
                                                           tower_sealed_catalogue=True, q2_early_census=True,
                                                           q34_lanes_pinned=True))),
+                        # v30: exactly the r22 arm plus complete q3 IDs.
+                        ('payload_on', dict(base, levers=dict(engine_levers, q34_batch_filter=True,
+                                                              q34_batch_certificates=True, q34_batch_q3=True,
+                                                              q34_batch_q4=True, q2_during_device=True,
+                                                              tower_sealed_catalogue=True, q2_early_census=True,
+                                                              q34_lanes_pinned=True, q3_interior_payload=True))),
                         ('tower_witness', dict(base, levers=dict(engine_levers, tower_pipelined_tail=False,
                                                                  tower_hash_grouping=False,
                                                                  tower_persistent_pool=False))),
@@ -173,6 +179,63 @@ def main(argv):
               'r22 levers: paths or object differ from the q4 case')
     else:
         check(False, 'r22 levers case absent')
+    # v30: the real FULL probe, not a fabricated JSON, exercises the new
+    # provenance and strict payload accounting. ON/OFF have identical
+    # geometry/generator work; only the consumer's global census decreases.
+    if {'r22_on', 'payload_on'} <= set(results):
+        off_case, off_value = results['r22_on']
+        payload_case, payload_value = results['payload_on']
+        cat = payload_value['catalogue']
+        check(worker.payload_pair_equal(payload_value, off_value) and
+              cat['payload_keys'] > 0 and cat['payload_ids'] > 0 and
+              cat['census_nodes'] < off_value['catalogue']['census_nodes'] and
+              payload_value['reason'] == 'complete_relative_to_cross_checked_catalogue_sealed_in_process_payload',
+              'payload ON/OFF object, producer ledger, paid census or provenance differs')
+        complete = [dict(outcome='complete_relative')] * 2
+        check(worker.compare_cases([off_case, payload_case], complete, {0: off_value, 1: payload_value}) ==
+              [dict(reference=0, other=1, equal=True)], 'payload actual ON/OFF pair comparison')
+        try:
+            worker.validate_preflight_work(payload_value, payload_case['levers'])
+            payload_judged, code, elapsed = run(payload_case, judge=True)
+            check(worker.validate_probe(payload_judged, payload_case, code, inputs=inputs, judge=True) ==
+                  'complete_relative' and
+                  worker.payload_pair_equal(payload_judged, off_value, require_reduced_census=False) and
+                  all(payload_judged['catalogue'][name] == cat[name] for name in
+                      ('payload_keys', 'payload_ids', 'payload_fallback_keys')) and
+                  payload_judged['q34_batch']['lanes_judged'] == payload_judged['q34_batch']['lanes_decided'] > 0,
+                  'payload independent global judge or its paid census differs')
+            worker.validate_external_wall(payload_judged, elapsed)
+        except (ValueError, KeyError, TypeError, UnicodeError, subprocess.TimeoutExpired) as error:
+            check(False, 'payload real judged probe refused: ' + type(error).__name__ + ': ' + str(error))
+        payload_mutants = [
+            ('payload key omitted', lambda v: v['catalogue'].pop('payload_keys')),
+            ('payload key ledger shifted', lambda v: v['catalogue'].update(payload_keys=cat['payload_keys'] + 1)),
+            ('payload IDs beyond stride', lambda v: v['catalogue'].update(payload_ids=4 * cat['payload_keys'])),
+            ('payload fallback uncounted', lambda v: v['catalogue'].update(payload_fallback_keys=cat['payload_fallback_keys'] + 1)),
+            ('payload still announces census', lambda v: v.update(
+                reason='complete_relative_to_cross_checked_catalogue_sealed_in_process_census')),
+            ('payload lever omitted', lambda v: v['options']['levers'].pop('q3_interior_payload')),
+        ]
+        payload_killed = 0
+        for label, mutate in payload_mutants:
+            bad = copy.deepcopy(payload_value)
+            mutate(bad)
+            try:
+                worker.validate_probe(bad, payload_case, 0, inputs=inputs)
+            except (ValueError, KeyError, TypeError):
+                payload_killed += 1
+                continue
+            check(False, 'payload mutant accepted: ' + label)
+        bad = copy.deepcopy(payload_value)
+        bad['ledger']['lanes_census_point_tests'] += 1
+        check(not worker.payload_pair_equal(bad, off_value), 'payload pair blind to producer work drift')
+        print('probe_worker_contract payload_mutants_killed=' + str(payload_killed) + '/' +
+              str(len(payload_mutants)) + ' payload_keys=' + str(cat['payload_keys']) +
+              ' payload_ids=' + str(cat['payload_ids']) + ' payload_fallback_keys=' + str(cat['payload_fallback_keys']) +
+              ' census_nodes_on=' + str(cat['census_nodes']) +
+              ' census_nodes_off=' + str(off_value['catalogue']['census_nodes']))
+    else:
+        check(False, 'payload ON/OFF case absent')
     # The engine levers keep the seal (every lever on but the batch and
     # device ones); the unsealed pass 1 is the all-off case's: one declared
     # support check per regular ball, no sample.

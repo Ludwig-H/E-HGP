@@ -33,3 +33,16 @@ La porte producteur compare 140 appels, 9 602 records q3, 1 648 q4 et
 
 Ces comptes sont des planchers de couverture, pas des chronos de tour
 LiDAR ni une preuve de complexité. La qualification CUDA sera distincte.
+
+Trois portes de non-régression passent aussi : ancien batch q3,
+records pinned et catalogue scellé (`regression.log`). La vraie sonde
+avec son lecteur passe normal/−O (`worker_contract*.log`) : mêmes objets,
+8 043 clés et 15 325 IDs importés ; 331 805 visites de census contre
+747 272 sans import, sur la petite fixture synthétique seulement.
+
+Premier replay intégral du protocole : 31 tests dans chaque mode,
+une erreur de fixture conservée dans `protocol_*_r1_failed.log`.
+Le faux reçu de déferral modifiait le condensé catalogue du corps mais
+pas celui de `frames.results` ajouté en v30 ; il était donc rejeté avant
+la comparaison ciblée. Le correctif modifie les deux ensemble, sans
+affaiblir le lecteur ni toucher au moteur. Le replay corrigé est distinct.

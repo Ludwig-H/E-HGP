@@ -1,0 +1,9 @@
+{"command": ["/home/codespace/.python/current/bin/python3", "-O", "-B", "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/tests/chain/probe_worker_contract.py", "/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/mhgp9_tower_probe", "/tmp/mhgp9-audit-resume-20260926/gcp-migration/tower_worker_v9.py", "/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/worker_contract_O_work"], "sha256": {"/tmp/mhgp9-audit-resume-20260926/gcp-migration/tower_worker_v9.py": "49b096b3a7ef630f122b3577dda1878e69c3e9d2378a6a219c979a906cfb0f2b", "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/tests/chain/probe_worker_contract.py": "d648b176fd352a094dc460ca6e255c713d42a8b9c3585878e76ffd00908dc043", "/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/mhgp9_tower_probe": "3647d90463cb693cea318e9171139b7de15c6467c3a2fb03c9244c256c8817ef"}}
+probe_worker_contract payload_mutants_killed=6/6 payload_keys=8043 payload_ids=15325 payload_fallback_keys=0 census_nodes_on=331805 census_nodes_off=747272
+probe_worker_contract batch_mutants_killed=11/11
+probe_worker_contract certificate_mutants_killed=13/13
+probe_worker_contract q3_mutants_killed=20/20
+probe_worker_contract q4_mutants_killed=12/12
+probe_worker_contract mutants_killed=61/61
+{"digest": "de4fd25a546ff3f5", "failures": 0, "gate": "probe_worker_contract"}
+{"exit_code": 0, "pins_unchanged": true}
