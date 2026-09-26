@@ -1,0 +1,4 @@
+cloud=clusters_1500 n=1500 kmax=5 balls=86235 digest=73490cf88c02af30
+cloud=clusters_240 n=240 kmax=6 balls=13097 digest=9424206c348a1d79
+cloud=grid_27 n=27 kmax=5 balls=271 digest=36a87490070624a0
+static_grouping_gate mode=hash runs=18 requests=1685484 max_requests=100407 deduplicated=975444 seeded=384084 tag_rejects=0 seed_tag_rejects=0 probes=125866 multi_worker=15

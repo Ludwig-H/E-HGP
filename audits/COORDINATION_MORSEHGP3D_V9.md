@@ -6006,3 +6006,50 @@ Ce ne sont que des trames de la séquence 08 : aucune qualification de
 contrat n'en découle. Il manque 26 ms à 08/000200. Suite : positivité
 côté chaîne puis catalogue scellé, recensement q2 pendant l'appareil,
 D2H épinglé (avec son ablation), puis la phase A des ordres bas et E6.
+
+### 01 h 33 UTC (26 septembre) — C : contre-lecture de R21, temps avec sol, revue de la tour intégrée
+
+Base : `273c33f7c`.
+
+À D (et B) : voir la [note](../morsehgp3D_v9/audits/CONTRE_AUDIT_C_R21_TOUR_INTEGREE_20260926.md)
+et son [annexe](../morsehgp3D_v9/audits/c_r21_20260926/README.md).
+Méthode : sept pistes, des sceptiques sur chaque constat, puis deux
+vérificateurs de la note.
+
+- **Reçu tenu.**
+  - 534/534, 34 cas `complete_relative`, douze épingles reproduites
+    par chaque cas, 22 comparaisons recalculées égales.
+  - Écarts : 3,16 et non 3,17 ; q34 0,54 ; gain de tour de −107 à
+    −124 ms à K5.
+  - « Euler partout » ne vaut que jusqu'à K−2.
+  - La relecture de `TERMINATED` n'a pas de pièce dans le reçu.
+- **Tour intégrée.**
+  - Aucun défaut d'objet, de course ni de durée de vie trouvé.
+  - 13 constats confirmés, tous de gravité basse. Les plus urgents :
+    - (2) `pipelined_tail` change le statut sous double panne ;
+    - (3) le chemin anti-blocage n'est pas testé ;
+    - (8) la fixture de frontière `n+7` laisse passer un `>` ;
+    - (9) `PINNED_DIGESTS` n'est indexé que par `s=8`.
+  - TSan est sans rapport sur la chaîne intégrée (coupe 8k, K5, W4,
+    condensés = Release), mais sa couverture est partielle : l'hôte
+    était saturé.
+- **Temps avec sol.**
+  - La chaîne fait ×2,2, et non ×3,1 : elle suit le catalogue.
+  - Au brut K5, la glu hôte autour des appels (≈ 378 ms) dépasse les
+    noyaux (357 ms). Le front est borné par une tâche traînarde.
+  - **À K5, la fenêtre de la tour est bornée par A(Kmax)** : fenêtre =
+    static(5) + A(5) à 0,2 ms près. « Phase A des ordres bas » ne
+    rapporte rien à K5.
+
+**Questions au développeur :**
+
+1. Peux-tu reformuler l'étape « phase A des ordres bas » en A(Kmax) ?
+   Allègement d'abord, puis parallélisation après preuve.
+2. Pour 1 s au brut K5, trois leviers manquent au plan : A(Kmax), la
+   glu hôte de q3/q4 (≈ 300 ms) et le front (tâche traînarde). Peux-tu
+   les ajouter ? Le plan actuel donne 1,8 à 1,9 s (projection).
+3. Peux-tu reprendre les constats 2, 3, 8 et 9 au prochain jalon de
+   portes ? Et passer TSan sur la porte des huit combinaisons et sur
+   `--unwind` quand l'hôte est calme ?
+
+GCP non utilisé.

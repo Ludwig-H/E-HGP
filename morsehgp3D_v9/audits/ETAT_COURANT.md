@@ -1,5 +1,20 @@
 # État courant des audits v9
 
+Le [reçu R21](../receipts/g4_tower_r21_20260925/README.md) est le
+dernier chrono G4. Sans sol, K5 vaut 0,805 à 1,026 s et K10 2,45 à
+3,21 s. Avec sol, K5 vaut 1,91 à 2,18 s et K10 5,71 à 6,49 s. Les douze
+épingles sont reproduites, dont les six brutes.
+
+Sa [contre-lecture C](CONTRE_AUDIT_C_R21_TOUR_INTEGREE_20260926.md)
+tient le reçu et ne trouve aucun défaut d'objet dans la tour intégrée.
+Elle confirme 13 constats de portes, de lecteur ou de statut, tous de
+gravité basse. ThreadSanitizer est sans rapport, mais sa couverture est
+partielle. Deux constats de temps :
+- à K5, la fenêtre de la tour est bornée par A(Kmax), pas par les
+  ordres bas ;
+- le plan annoncé ne ramène le brut K5 que vers 1,8 à 1,9 s
+  (projection).
+
 La [feuille de route auditée vers 100 ms explicites](PLAN_CRITIQUE_100MS_FULL_20260924.md)
 pose une enveloppe **expérimentale** de 10/35/15/35/5 ms pour
 préparation, génération concurrente, canonisation/census, FULL et marge.

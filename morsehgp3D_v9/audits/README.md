@@ -41,6 +41,11 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
    [juge à supports indépendants](c_raw_support_judge_20260925/README.md)
    réalise la porte de complétude bornée de B : vert sur les six cas
    bruts, 14 mutants tués ; recherche adverse, pas complétude.
+   Le [reçu R21](../receipts/g4_tower_r21_20260925/README.md) a sa
+   [contre-lecture C](CONTRE_AUDIT_C_R21_TOUR_INTEGREE_20260926.md) :
+   reçu tenu, douze épingles reproduites, tour intégrée sans défaut
+   d'objet trouvé, attribution du temps avec sol ; à K5, la fenêtre de
+   la tour est bornée par A(Kmax), pas par les ordres bas.
    Le [grand audit C](AUDIT_C_GRAND_AUDIT_V9_20260924.md) et sa
    [contrelecture B](CONTRE_AUDIT_B_GRAND_AUDIT_C_100MS_20260924.md)
    distinguent mesures, projections et contrat inchangé de 100 ms.
@@ -364,6 +369,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`AUDIT_C_GRAND_AUDIT_V9_20260924.md`](AUDIT_C_GRAND_AUDIT_V9_20260924.md) | C | 24/20:49 | grand audit demandé par l'utilisateur : ce qui marche, où va le temps, trames avec sol, classement des changements, 100 ms infaisable avec les algorithmes connus | vivant | sans réponse |
 | [`c_raw_pins_20260924/`](c_raw_pins_20260924/README.md) | C | 24/20:49 | épingles CPU des trames brutes b00/b01/b02 de R21 : six paires (FULL, catalogue), moteur = lots CPU, Euler tient ; reports de voies déjà exercés (16/48/8) | vivant | sans réponse |
 | [`c_raw_support_judge_20260925/`](c_raw_support_judge_20260925/README.md) | C | 25/06:41 | juge à supports indépendants (spécification B) sur les trames brutes b00/b01/b02 × K5/K10, lié aux épingles : 675–1 024 clés admissibles distinctes par cas toutes présentes (clé, niveau, `p`, `q_min`, IDs complets), strates non vacantes, 14 mutants tués par leur seul marqueur, fixture étendue exacte ; v3 après deux revues adverses, gadgets archivés | vivant | sans réponse |
+| [`CONTRE_AUDIT_C_R21_TOUR_INTEGREE_20260926.md`](CONTRE_AUDIT_C_R21_TOUR_INTEGREE_20260926.md) et [`c_r21_20260926/`](c_r21_20260926/README.md) | C | 26/01:33 | contre-lecture de R21 (reçu tenu, écarts d'arrondi et deux affirmations non étayées), attribution du temps avec sol (×2,2, pas ×3,1 ; A(Kmax) borne la tour à K5 ; glu hôte > noyaux ; plan → 1,8–1,9 s au brut K5), potentiel d'une tour sur l'appareil, revue vérifiée de la tour intégrée (13 constats bas) et TSan partiel sans rapport | vivant | sans réponse |
 
 ## Sondes et sorties à la racine du dossier
 
@@ -467,6 +473,8 @@ en citant l'identifiant, avec « acceptée », « refusée (raison) » ou « dif
 | R-33 | Leviers classés par gain (K10 d'abord) : groupement de la phase 0 sans tri de 56 o et radix des niveaux ; E6 ; glu q3/q4 parallèle et session résidente ; recensement dans la fenêtre de l'appareil ; E4/E5 ; phase A parallèle après E6 ; arrêter les micro-leviers K5 sans sol et la prolifération des leviers (préréglages) | C | AUDIT_C_GRAND_AUDIT_V9_20260924.md § 6 B, E |
 | R-34 | Confiance : Kmax+2 à K5 sur trames entières et juges stratifiés entiers (angle mort 26,9 % / 11,0 %) ; épingle sans leviers ; GPU jugé sur coupe LiDAR, à K10 et sur chemins de capacité ; bornes des IDs dans `check_lanes_batch` ; TSan et compute-sanitizer ; bras T2 aux leviers G4 ; revue indépendante v22–v26 | C | AUDIT_C_GRAND_AUDIT_V9_20260924.md § 7, 8 |
 | R-35 | Porte de complétude bornée sur trames brutes (spécification B) : juge à supports indépendants **vert sur les six cas** b00/b01/b02 × K5/K10 ; à porter en porte hors chrono avant R21 et à rejouer à tout changement du générateur ; un cas GPU hérite du PASS en reproduisant l'épingle du catalogue (FNV-64, pas égalité littérale) ; restent les coquilles étendues brutes (R-19), d'autres séquences et le float32 | C | c_raw_support_judge_20260925/README.md |
+| R-36 | Temps avec sol (R21) : à K5 la fenêtre de la tour est bornée par A(Kmax) sur un fil (125–157 ms sans sol, 331–367 ms brut), pas par les ordres bas ; la glu hôte de q3/q4 (≈ 300 ms brut K5) dépasse les noyaux ; le front est borné par une tâche traînarde ; le plan annoncé mène le brut K5 vers 1,8–1,9 s ; 1 s demande A(Kmax) allégée puis parallèle (preuve d'abord), glu hôte parallèle, front équilibré puis sur l'appareil ; une tour sur l'appareil n'est ni suffisante ni établie comme nécessaire ; publier les diagnostics du § 4 du grand audit dans R22 | C | CONTRE_AUDIT_C_R21_TOUR_INTEGREE_20260926.md § 2–4, 7 |
+| R-37 | Tour intégrée : 13 constats confirmés de gravité basse ; d'abord 2 (statut changé par `pipelined_tail` sous double panne), 3 (chemin anti-blocage non testé), 8 (fixture de support égal à `n`), 9 (épingles indexées par (trame, K), refus d'un cas sans épingle) ; puis 1, 10, 11, 12 et les commentaires ; TSan des huit combinaisons de la queue et de `--unwind` à hôte calme | C | CONTRE_AUDIT_C_R21_TOUR_INTEGREE_20260926.md § 5 |
 
 ## Conventions proposées (à adopter par tous)
 
