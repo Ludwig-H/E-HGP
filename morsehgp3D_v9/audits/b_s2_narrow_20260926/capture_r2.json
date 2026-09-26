@@ -1,0 +1,465 @@
+{
+  "schema": "mhgp9_audit_b_s2_narrow_v1",
+  "status": "completed",
+  "contract_certified": false,
+  "gcp_used": false,
+  "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+  "commands": [
+    {
+      "argv": [
+        "/tmp/mhgp9-b-s2-narrow-gate"
+      ],
+      "returncode": 0,
+      "wall_s": 0.040266966000672255,
+      "stdout": "{\"status\":\"pass\",\"guard_checks\":19,\"numeric_checks\":116049,\"narrow\":58098,\"wide\":57930,\"h_rejected\":83972}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/tmp/mhgp9-b-s2-narrow-gate-san"
+      ],
+      "returncode": 0,
+      "wall_s": 0.16643985800055816,
+      "stdout": "{\"status\":\"pass\",\"guard_checks\":19,\"numeric_checks\":116049,\"narrow\":58098,\"wide\":57930,\"h_rejected\":83972}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/tmp/mhgp9-b-s2-narrow-sample-r2",
+        "synthetic",
+        "terrain",
+        "8000",
+        "1024",
+        "5"
+      ],
+      "returncode": 0,
+      "wall_s": 0.74466388700057,
+      "stdout": "{\"status\":\"pass\",\"kind\":\"terrain\",\"n\":8000,\"k\":5,\"s\":8,\"stride\":1024,\"rectangles\":275078,\"surviving_rectangles\":114243,\"pair_mass\":140093,\"queries\":137,\"open\":125,\"rejected\":12,\"visits\":5889,\"eligible\":3463,\"fallback\":0,\"h_rejected\":2426,\"output_hash\":13163913760816951731,\"preparation_s\":0.739800098,\"baseline_s\":[0.000283388,0.000208839,0.000159938],\"candidate_s\":[0.000187289,0.000172061,0.000166620]}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/tmp/mhgp9-b-s2-narrow-sample-r2",
+        "synthetic",
+        "terrain",
+        "16000",
+        "1024",
+        "5"
+      ],
+      "returncode": 0,
+      "wall_s": 1.6433237870005541,
+      "stdout": "{\"status\":\"pass\",\"kind\":\"terrain\",\"n\":16000,\"k\":5,\"s\":8,\"stride\":1024,\"rectangles\":596933,\"surviving_rectangles\":238511,\"pair_mass\":285984,\"queries\":280,\"open\":257,\"rejected\":23,\"visits\":12463,\"eligible\":7369,\"fallback\":0,\"h_rejected\":5094,\"output_hash\":2076823828380239055,\"preparation_s\":1.635013010,\"baseline_s\":[0.000618402,0.000384086,0.000374758],\"candidate_s\":[0.000398703,0.000390007,0.000378134]}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/tmp/mhgp9-b-s2-narrow-sample-r2",
+        "synthetic",
+        "terrain",
+        "32000",
+        "1024",
+        "5"
+      ],
+      "returncode": 0,
+      "wall_s": 3.5962884840000697,
+      "stdout": "{\"status\":\"pass\",\"kind\":\"terrain\",\"n\":32000,\"k\":5,\"s\":8,\"stride\":1024,\"rectangles\":1255028,\"surviving_rectangles\":508162,\"pair_mass\":591301,\"queries\":578,\"open\":541,\"rejected\":37,\"visits\":27703,\"eligible\":16164,\"fallback\":0,\"h_rejected\":11539,\"output_hash\":773878835588924419,\"preparation_s\":3.579995640,\"baseline_s\":[0.001430656,0.000870883,0.000856325],\"candidate_s\":[0.001173877,0.000858710,0.000848701]}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/tmp/mhgp9-b-s2-narrow-sample-r2",
+        "synthetic",
+        "clusters",
+        "8000",
+        "1024",
+        "5"
+      ],
+      "returncode": 0,
+      "wall_s": 3.260859259999961,
+      "stdout": "{\"status\":\"pass\",\"kind\":\"clusters\",\"n\":8000,\"k\":5,\"s\":8,\"stride\":1024,\"rectangles\":1067876,\"surviving_rectangles\":317674,\"pair_mass\":28352433,\"queries\":27688,\"open\":477,\"rejected\":27211,\"visits\":388579,\"eligible\":287541,\"fallback\":88274,\"h_rejected\":12764,\"output_hash\":14462221072162691451,\"preparation_s\":3.173770838,\"baseline_s\":[0.014214003,0.014335119,0.014134987],\"candidate_s\":[0.013471511,0.013452636,0.013535770]}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/tmp/mhgp9-b-s2-narrow-sample-r2",
+        "synthetic",
+        "clusters",
+        "16000",
+        "1024",
+        "5"
+      ],
+      "returncode": 0,
+      "wall_s": 8.632511356000578,
+      "stdout": "{\"status\":\"pass\",\"kind\":\"clusters\",\"n\":16000,\"k\":5,\"s\":8,\"stride\":1024,\"rectangles\":2608905,\"surviving_rectangles\":687568,\"pair_mass\":112770168,\"queries\":110128,\"open\":1033,\"rejected\":109095,\"visits\":1480424,\"eligible\":1096313,\"fallback\":352472,\"h_rejected\":31639,\"output_hash\":3863565784631012663,\"preparation_s\":8.323954492,\"baseline_s\":[0.051749039,0.051923564,0.051593589],\"candidate_s\":[0.049308942,0.048715877,0.048691061]}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/tmp/mhgp9-b-s2-narrow-sample-r2",
+        "synthetic",
+        "clusters",
+        "32000",
+        "1024",
+        "5"
+      ],
+      "returncode": 0,
+      "wall_s": 21.49771429500015,
+      "stdout": "{\"status\":\"pass\",\"kind\":\"clusters\",\"n\":32000,\"k\":5,\"s\":8,\"stride\":1024,\"rectangles\":5890626,\"surviving_rectangles\":1468115,\"pair_mass\":449652733,\"queries\":439114,\"open\":2394,\"rejected\":436720,\"visits\":5625123,\"eligible\":4136692,\"fallback\":1408424,\"h_rejected\":80007,\"output_hash\":17610014727661275923,\"preparation_s\":20.364143850,\"baseline_s\":[0.189936069,0.190182549,0.187826399],\"candidate_s\":[0.180144175,0.190753192,0.180845361]}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/tmp/mhgp9-b-s2-narrow-sample-r2",
+        "file",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le",
+        "1024",
+        "5"
+      ],
+      "returncode": 0,
+      "wall_s": 16.1307037760007,
+      "stdout": "{\"status\":\"pass\",\"kind\":\"u32le\",\"n\":39885,\"k\":5,\"s\":8,\"stride\":1024,\"rectangles\":3133819,\"surviving_rectangles\":1128166,\"pair_mass\":23686751,\"queries\":23132,\"open\":1990,\"rejected\":21142,\"visits\":1087274,\"eligible\":863302,\"fallback\":122642,\"h_rejected\":101330,\"output_hash\":16544146866707046743,\"preparation_s\":15.892763738,\"baseline_s\":[0.039788644,0.039020333,0.038848172],\"candidate_s\":[0.038435673,0.038410637,0.037584027]}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/tmp/mhgp9-b-s2-narrow-sample-r2",
+        "file",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le",
+        "1024",
+        "10"
+      ],
+      "returncode": 0,
+      "wall_s": 30.55653843500022,
+      "stdout": "{\"status\":\"pass\",\"kind\":\"u32le\",\"n\":39885,\"k\":10,\"s\":8,\"stride\":1024,\"rectangles\":4782714,\"surviving_rectangles\":2034440,\"pair_mass\":30777213,\"queries\":30056,\"open\":4445,\"rejected\":25611,\"visits\":1922002,\"eligible\":1560782,\"fallback\":160613,\"h_rejected\":200607,\"output_hash\":6930004809666958589,\"preparation_s\":30.117177648,\"baseline_s\":[0.072876765,0.071306078,0.071906487],\"candidate_s\":[0.071510309,0.075951793,0.070659593]}\n",
+      "stderr": ""
+    }
+  ],
+  "git_head": "1e0674f7a1688181cdd7e176507feb72e6b96118",
+  "files": [
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/core/fixed_signed.hpp",
+      "sha256": "fa47693cf55ccbb7938ea31ec4926560ab060e495b93d5f3f7e0d97441cae7a2"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/core/types.hpp",
+      "sha256": "e10ae7eba705440ee43e2d27d81dcea0cce0e5b5fb7935532ee7dff08a889547"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/edge_cover.hpp",
+      "sha256": "cca7971b9f80e29e24323e3ada6e0f33ae64a486500993be7fc4adda5171ba7b"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/exact_ball.hpp",
+      "sha256": "dd98bad923e25545c55d6a42959612a4df728cbbb7ef0fbe3cb91b1b21053659"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/family_certificate.hpp",
+      "sha256": "f8066fdbb29467b1d0683a84acba2fcbab18546fc3b0885ec1475ca47c7941b0"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q34_collective.hpp",
+      "sha256": "ef0a5e4d54df08aac4656dca28853cb30df1da460e609e5a6d8f49be6daeb42e"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q34_cover.hpp",
+      "sha256": "8d234834347973b5df1dd57b48fe60e72d95efa4a19dde6a60e7b0c85955d5a9"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.hpp",
+      "sha256": "90abb5adba45769b61e038f64ca64b896c36aaaaee407dac2f77356f1c1e2312"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q34_pair_bounds.hpp",
+      "sha256": "6c066154dc92522c398c9d64a9d1291228baef9ac1e48e585b1dee27c4f9f503"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q34_pruning.hpp",
+      "sha256": "89836a856a7e7107cdfd99dd7b4fd9c40e1a724e25afb5747025e6076792d350"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q34_seed.hpp",
+      "sha256": "d16e023786333853764f34ff860872242bbb326ffe6001c80f8edd6761540b37"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q34_witness_search.hpp",
+      "sha256": "64e47df3f7e2a7bd244e177c710d794a7b93645c66e27d5f1cbdf75d9aa1dd54"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q3_ball_census.hpp",
+      "sha256": "29e7821cea13785ffa50fee1caa3c97e2773ecd4fb20d7b45727f6017560f877"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q4_center_map.hpp",
+      "sha256": "fe529d66124066750cd268df8f238ef086298250f753587ef66ebef0cb9b7721"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q4_family.hpp",
+      "sha256": "205ac9261a9e0a6f3a31f7a8c405d611c0d81b0f05d956bff49432545c65b4c7"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q4_local.hpp",
+      "sha256": "b32a7d43a99bc910fcaba8cb46e3742126a8d80f72df9e1016cc142a1883d129"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q4_local_partition.hpp",
+      "sha256": "2bfa9344fa427e4ed039f6e33b53b7af9584c7c997973e6bd85e7c623df09d53"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q4_positive_domain.hpp",
+      "sha256": "9052d5de3d7299a45d3ef8922a11cc5bee35958d2f8f0ccb80ccbb773db773ed"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q4_seed_cells.hpp",
+      "sha256": "13557e67b9e7798344db7822639eec32b74e3d294cd8024422f7584ba4a8e11d"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q4_shallow.hpp",
+      "sha256": "4fc57e653596aa790b20f28f81baa6e08aaef5c7a077db5232bf33fea2a5ce72"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q4_shallow_set.hpp",
+      "sha256": "520dd43fd2c3c21270d301825231447c0d9eb15f57bc05a8760ff883d81974a5"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q4_window.hpp",
+      "sha256": "f7f218866410ef7577916271a5fe1529f6b4f5c245022596ea16b45edbb52ba6"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/parallel/joined_workers.hpp",
+      "sha256": "71692965d0846e3d32389f1520d75fa044a027dc1c161f566fb881ced1b681d6"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/parallel/work_reduction.hpp",
+      "sha256": "c51db66408d47cf05334cfbece1bc1cfadeb796757e6062698aadcd816fa97a4"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/pipeline/axis_q2.hpp",
+      "sha256": "05815de48676ad759ef016bd401abca90207d326da4bf699a9017fc0473c0d29"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/pipeline/local_credits.hpp",
+      "sha256": "c96a54b28fc7dda2f6bf09fb2fd0f3b39ccb269bf1c96724065c323277dd6156"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/pipeline/prepared_cloud.hpp",
+      "sha256": "b2931391ff2b37d366e7bb939dc03af83acfdf603158ff0a94fe931a7914ae40"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/pipeline/q2_census.hpp",
+      "sha256": "76a5084abaf7c87bc60eafd2bde1db6eb9bcd0c62214f855007996d51c0f4ee8"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/pipeline/q2_census_parallel.hpp",
+      "sha256": "d3da6a2ffc12315fa5877ac86e1667441dcf0a67107354773093508bc14bb45e"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/pipeline/q2_census_resume.hpp",
+      "sha256": "ea8e5e403f56deeabb3f1a269604121614927ae974520368fea3b8faf26c3233"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/pipeline/q2_joint_bounds.hpp",
+      "sha256": "abd9722b5229dd9949fa3bc45023a0882faad5477bbe5fd2315bf568327b0be6"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/pipeline/q2_node_pool.hpp",
+      "sha256": "1db443979613fa83e57686ab2faf4aa6c9c06b3c2b0da93c5f3f48e0ec41730c"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/pipeline/tube_credits.hpp",
+      "sha256": "a7e9d50b42ba5b007fee9889327ebdffcd7373dc24dcf497e5d549b01798107c"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/pipeline/wspd_q2_batched.hpp",
+      "sha256": "ef7613355fd64d1773e4de17f26c7aca75d0f13f3594599c9bab5960e0835177"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/pipeline/wspd_q2_census.hpp",
+      "sha256": "cd174cb4f8426427b18d62d9db59343cc1fda0668ee29b7f14e886feca816331"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/pipeline/wspd_q2_cooperative.hpp",
+      "sha256": "1d87c9f091446b5c0886f6c4126e2c5e804f45aca05fcd32b1d39b4cc10edb0f"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/pipeline/wspd_q2_parallel.hpp",
+      "sha256": "96076667a4c876f011613f511649c23de97abb6f59c80ed847b40a74678a3349"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/pipeline/wspd_q2_ranges.hpp",
+      "sha256": "d81ef2ab7e3b88eae8dcb5adc6d12c747eb8286d40e94b2ef1b351704bfba24c"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/pipeline/wspd_q34.hpp",
+      "sha256": "dfd658a4069a33022d1930b6265ad28b8b002d5aa98330a331e4e97658b462d1"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/spindle/predicates.hpp",
+      "sha256": "170aec0446223cc5dd6351155d0974ab4ba7a6524c290d22ccaaa33804e6f057"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/spindle/q2_prepared_bounds.hpp",
+      "sha256": "16a9a9ae2e5d49e9cfcb3d417c681fd27dc4997d12e5e9582a53dde61e0c2e7f"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/wspd/front.hpp",
+      "sha256": "29c0c5cd5d930ec3711f0541764c1d3b31f805b75da868f5ec329fbf4b2598fb"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/edge_cover.cpp",
+      "sha256": "2343675da88120cb28c2e6fca8db6b46a44596d02f97c0b374fc1e35566b626f"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/exact_ball.cpp",
+      "sha256": "857f66ff7c07693295d4503955b4bba54b6768fe577a2b670a1621267695f765"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/family_certificate.cpp",
+      "sha256": "f4b1287c441c88f036f87e485c9a0151f3409bf8138a7b0f5ca9e59a1d984f89"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q34_collective.cpp",
+      "sha256": "f001323bfe5baee2727104d73b7987de42e6d053aeede462d7543a631d07d37c"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q34_cover.cpp",
+      "sha256": "0a6d92a7c1682c09c207da651da70b3de9789e515793305bf642ba67f254a16b"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q34_dead_lanes.cpp",
+      "sha256": "0ab2489816be606182ca55da8b679125edec181bdc8132159d20f9daa9fd5074"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q34_pruning.cpp",
+      "sha256": "b6548afa720242c7a0e6c8d6d6b983b4c6876958af0ba8fa994160b2fcc69b9c"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q34_seed.cpp",
+      "sha256": "4bfdc88aaae74a193ff095877632a72bef6a767501546736bc65ea0727734bd7"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q34_witness_search.cpp",
+      "sha256": "7459f1e6033510dafd7a2d2efc388e467ee76594b0f8698851d00b0b46305a71"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q3_ball_census.cpp",
+      "sha256": "98d73132d11a89ff94fe35088569a1667fe9ffa7d571597b9ad0ce04e4a500eb"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q4_center_map.cpp",
+      "sha256": "a6a4ccff44928f4fe9639779e0afc086ebccfe358595c383ee06c19eb7ca1f42"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q4_family.cpp",
+      "sha256": "162b1489e3e581d838af0218f64e6f91c51592802aadf9c880913f3ccc056a57"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q4_local.cpp",
+      "sha256": "8ebba8c4319e47e4b01ff404a83a134357765c56c61630dcb89475c6af6c9abf"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q4_local_partition.cpp",
+      "sha256": "6771572cef7f32ce435ac2a44f55cdbe23c2cf6ce615053dcba996ef1851a8e2"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q4_positive_domain.cpp",
+      "sha256": "9204473159a6adfbda332d4266a64d104478b92b4696d2af88c3fb137160e6e3"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q4_shallow.cpp",
+      "sha256": "5f56816bc1ca8f6b151f6ad9f3bbc4f45ab64a14d5f223a95f596dcd09d08a8b"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q4_shallow_set.cpp",
+      "sha256": "b825f5b809452c71b7e34d82381ad09d9084a11117bea116f9d6c0bddede05c3"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/lanes/q4_window.cpp",
+      "sha256": "e1320b7c747d5078963c9bc9a7d9cf235735a144801d43310ed582b7f606494c"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/pipeline/axis_q2.cpp",
+      "sha256": "1543a21ac72f30212295ba224eebfa28e7964917cb88bfb5a05c1c1bd9793658"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/pipeline/local_credits.cpp",
+      "sha256": "e10a7ed4ca8ad33aa9c08fdca8d26b89876dab07852edad8703c1c8f84bb7f4f"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/pipeline/prepared_cloud.cpp",
+      "sha256": "c2a2bac4b364e0110ea08d886c8dfb93983b8a6bd9f814599b76ca97cd95f34f"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/pipeline/q2_census.cpp",
+      "sha256": "103f368d421f3a57db337290c9f8d23f0ae3ca117594f4fa8965ee075a4d3591"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/pipeline/q2_census_parallel.cpp",
+      "sha256": "a786d0932e077311e95e0af7162f9a1774d16199f4b6d559d3105cdb16b1b035"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/pipeline/wspd_q34.cpp",
+      "sha256": "4118ca3d2d112b9c8a9ba62cfc9da1a1106d1835342e92f8f7b98ee003ea6e63"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen/wspd/front.cpp",
+      "sha256": "83c8465d0280e6b5496ad5eb730655cde32b42e3e2d5b536d4363ba26af5f685"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gpu/witness_filter.hpp",
+      "sha256": "5d011aad968f5c64bca8ff0703fb021b5d368c93ed3a90d187802e1c109f820c"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gpu/flat_index.hpp",
+      "sha256": "6b7fc4caee14cf31ae3c76c3a783d82c9f00c5d48c1b33d00e4947f3550104f8"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/tests/gen/front_fixtures.hpp",
+      "sha256": "d5532618b5b2067b09491694ef800eeb661186b93ff57c45b68e44fbc9840e16"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/CMakeLists.txt",
+      "sha256": "6e8c8df36edcbdd7397b5c98dc2990870faf000b29b6d6ff5e8583958c0cc5c2"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/audits/b_s2_narrow_20260926/narrow_pair.hpp",
+      "sha256": "6b10e1779554dbb193bbb7799726830df3decc21fb1742bd3d583afb93a447f2"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/audits/b_s2_narrow_20260926/gate.cpp",
+      "sha256": "cb4d0543699a20baccc1e9c60a3c913729e832e71f908222c65902c253575fa3"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/audits/b_s2_narrow_20260926/sample.cpp",
+      "sha256": "df71dad2d8f7122b7a5a8ad970effbc0ae38e840fe6772fdfb6f8048e7e9d23f"
+    },
+    {
+      "path": "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/audits/b_s2_narrow_20260926/run.py",
+      "sha256": "9caf9b4c2546ec6910e8f2adbffdbe01288c43d7ec9a23c638c8b537aa3e485c"
+    },
+    {
+      "path": "/tmp/mhgp9-b-s2-narrow-sample-r2",
+      "sha256": "e46dcb81f725286ac951350c9b2e48e1954f5c3d1b15d1dfee47fd52f0b93abb"
+    },
+    {
+      "path": "/tmp/mhgp9-b-s2-narrow-gate",
+      "sha256": "3c3910cc96fe625453664c55b041670a215363f84622e009d5645df4d7434674"
+    },
+    {
+      "path": "/tmp/mhgp9-b-s2-narrow-gate-san",
+      "sha256": "6dd56ceb060ab0c7c3bd3978c060289e2422890a3e98929e06d59de55d635199"
+    },
+    {
+      "path": "/tmp/mhgp9-b-100ms-20260926-build/libmhgp9_gen.a",
+      "sha256": "2ccc01095a83028884fbc14c08755151d17179a55f4e16642228995bc2a3bbe9"
+    },
+    {
+      "path": "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le",
+      "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf"
+    }
+  ],
+  "earlier_setup_failures": [
+    "CMake and gate compile initially lacked Boost include path; no execution",
+    "sample initial -Werror compile refused unsigned-to-signed list narrowing and unused nodiscard; no execution",
+    "capture.json preserved failed: per-case nonvacuity required both arithmetic branches and both mask outcomes even when one absent from sample; numeric code unchanged by correction"
+  ]
+}

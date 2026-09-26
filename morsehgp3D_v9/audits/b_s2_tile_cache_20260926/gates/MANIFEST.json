@@ -1,0 +1,77 @@
+{
+  "source_sha256": "b77f1aba3cb02bd93f6a79555d29bbf6149778a5198f93f783dedb7663a3c07d",
+  "runner_sha256": "eba72ab2ceb5a696f92487c0b73f422aeb1b2de488a46a66a176dd54469182eb",
+  "library_sha256": "2ccc01095a83028884fbc14c08755151d17179a55f4e16642228995bc2a3bbe9",
+  "commands": [
+    {
+      "name": "compile_normal",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-I",
+        "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen",
+        "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/audits/b_s2_tile_cache_20260926/gate.cpp",
+        "/tmp/mhgp9-b-100ms-20260926-build/libmhgp9_gen.a",
+        "-o",
+        "/tmp/mhgp9-tile-cache-gates-rz47rpym/normal"
+      ],
+      "returncode": 0,
+      "expected": 0
+    },
+    {
+      "name": "normal",
+      "argv": [
+        "/tmp/mhgp9-tile-cache-gates-rz47rpym/normal"
+      ],
+      "returncode": 0,
+      "expected": 0
+    },
+    {
+      "name": "compile_mutant",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-I",
+        "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/src/gen",
+        "-DMHGP9_TILE_CACHE_MUTANT_NO_RETEST=1",
+        "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/audits/b_s2_tile_cache_20260926/gate.cpp",
+        "/tmp/mhgp9-b-100ms-20260926-build/libmhgp9_gen.a",
+        "-o",
+        "/tmp/mhgp9-tile-cache-gates-rz47rpym/mutant"
+      ],
+      "returncode": 0,
+      "expected": 0
+    },
+    {
+      "name": "mutant",
+      "argv": [
+        "/tmp/mhgp9-tile-cache-gates-rz47rpym/mutant"
+      ],
+      "returncode": 1,
+      "expected": 1
+    }
+  ],
+  "status": "completed",
+  "output_sha256": {
+    "mutant.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compile_normal.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "normal.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "mutant.stderr": "0051fd438e9421839f3f59cb6fcc0f7bec5de97461eda8615729b674e63a7e88",
+    "compile_normal.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compile_mutant.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compile_mutant.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "normal.stdout": "ca4d4205b8ec1387106db113b7a647327778a5ae70460256bb1beca797526aa4"
+  }
+}

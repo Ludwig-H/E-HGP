@@ -1,0 +1,51 @@
+[
+  {
+    "command": [
+      "/tmp/mhgp9-front-waves-san-20260926",
+      "--fixtures"
+    ],
+    "returncode": 0,
+    "expected": 0,
+    "wall_s": 0.8429794909998236
+  },
+  {
+    "command": [
+      "/tmp/mhgp9-front-waves-san-20260926",
+      "--mutant",
+      "drop"
+    ],
+    "returncode": 1,
+    "expected": 1,
+    "wall_s": 0.02025426799991692
+  },
+  {
+    "command": [
+      "/tmp/mhgp9-front-waves-san-20260926",
+      "--mutant",
+      "depth"
+    ],
+    "returncode": 1,
+    "expected": 1,
+    "wall_s": 0.017075294999813195
+  },
+  {
+    "command": [
+      "/tmp/mhgp9-front-waves-san-20260926",
+      "--mutant",
+      "pending"
+    ],
+    "returncode": 1,
+    "expected": 1,
+    "wall_s": 0.021592314000372426
+  },
+  {
+    "command": [
+      "/tmp/mhgp9-front-waves-san-20260926",
+      "--mutant",
+      "mask"
+    ],
+    "returncode": 1,
+    "expected": 1,
+    "wall_s": 0.0218321169995761
+  }
+]

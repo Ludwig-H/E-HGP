@@ -1,0 +1,119 @@
+[
+  {
+    "command": [
+      "/tmp/mhgp9-front-waves-20260926",
+      "--synthetic",
+      "uniform",
+      "8000",
+      "5",
+      "8"
+    ],
+    "returncode": 0,
+    "expected": 0,
+    "wall_s": 6.356170952999491
+  },
+  {
+    "command": [
+      "/tmp/mhgp9-front-waves-20260926",
+      "--synthetic",
+      "uniform",
+      "16000",
+      "5",
+      "8"
+    ],
+    "returncode": 0,
+    "expected": 0,
+    "wall_s": 18.51924219600005
+  },
+  {
+    "command": [
+      "/tmp/mhgp9-front-waves-20260926",
+      "--synthetic",
+      "uniform",
+      "32000",
+      "5",
+      "8"
+    ],
+    "returncode": 0,
+    "expected": 0,
+    "wall_s": 45.35362303900001
+  },
+  {
+    "command": [
+      "/tmp/mhgp9-front-waves-20260926",
+      "--synthetic",
+      "terrain",
+      "8000",
+      "5",
+      "8"
+    ],
+    "returncode": 0,
+    "expected": 0,
+    "wall_s": 1.2003427139998166
+  },
+  {
+    "command": [
+      "/tmp/mhgp9-front-waves-20260926",
+      "--synthetic",
+      "terrain",
+      "16000",
+      "5",
+      "8"
+    ],
+    "returncode": 0,
+    "expected": 0,
+    "wall_s": 2.6369087240000226
+  },
+  {
+    "command": [
+      "/tmp/mhgp9-front-waves-20260926",
+      "--synthetic",
+      "terrain",
+      "32000",
+      "5",
+      "8"
+    ],
+    "returncode": 0,
+    "expected": 0,
+    "wall_s": 5.698541392000152
+  },
+  {
+    "command": [
+      "/tmp/mhgp9-front-waves-20260926",
+      "--synthetic",
+      "rows",
+      "8000",
+      "5",
+      "8"
+    ],
+    "returncode": 0,
+    "expected": 0,
+    "wall_s": 0.07293783700060885
+  },
+  {
+    "command": [
+      "/tmp/mhgp9-front-waves-20260926",
+      "--synthetic",
+      "rows",
+      "16000",
+      "5",
+      "8"
+    ],
+    "returncode": 0,
+    "expected": 0,
+    "wall_s": 0.1535124040001392
+  },
+  {
+    "command": [
+      "/tmp/mhgp9-front-waves-20260926",
+      "--synthetic",
+      "rows",
+      "32000",
+      "5",
+      "8"
+    ],
+    "returncode": 0,
+    "expected": 0,
+    "wall_s": 0.2989312189993143
+  }
+]

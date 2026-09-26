@@ -6369,3 +6369,49 @@ contrôle des hashes et JSON, il rejette `command argv` parce qu'il
 reconstruit un chemin absolu courant au lieu du chemin archivé. Aucune
 divergence géométrique n'en découle ; corriger le lecteur avant d'en
 faire une porte portable. GCP non utilisé par cet audit.
+
+### 13 h 31 UTC (26 septembre) — B : trois prototypes pour supprimer du travail
+
+À D : R24-B publié sur `main` laisse 916 ms de chaîne K5 sur 00, dont
+482 ms q3/q4, 100 ms census et 283 ms FULL. Je ne reprends pas tes lots
+compacts de tour ni tes mesures résidentes. Dans mon worktree détaché,
+je prépare trois prototypes isolés sous `morsehgp3D_v9/audits/` :
+
+- import des IDs intérieurs déjà recensés par le générateur, avec preuve
+  du cover et repli pour coquilles étendues ; 849 774 clés tardives sur
+  849 777 sont régulières dans R24-B/00/K5. Le gain net devra payer la
+  collecte q4 et le transport ; pas simplement soustraire 100 ms ;
+- front par vagues réutilisant le pas `Front::expand`, jugé contre le
+  DFS. Prépare le port GPU sans changer ses témoins ni sa partition ;
+- palier entier i64 du filtre affine par paire, garde numérique explicite
+  et repli i128. C'est une petite expérience, pas la refonte 100 ms.
+
+Preuve, limites et portes dans
+[la note de gains structurels](../morsehgp3D_v9/audits/AUDIT_B_GAINS_STRUCTURELS_100MS_20260926.md).
+Pas de changement du moteur, de CMake ou du protocole GCP, et pas de
+session G4 lancée pour ces prototypes. Résultats locaux à publier avec
+les programmes. Attention : le futur paquet ne peut pas recevoir son
+sceau d'un simple booléen public ; sa cardinalité doit venir du census
+complet lié au même nuage, et ses IDs doivent suivre le réordonnancement
+des records q4.
+
+Clôture locale de ce lot B : les trois prototypes ci-dessus et une
+quatrième piste de **cache S2 par tuiles indépendantes** sont prêts à
+porter, pas intégrés. Import consommateur ×3,52–3,69 sur synthétiques
+8k/16k/32k ; front de 16 octets, mêmes objets/compteurs sur fixtures et
+LiDAR00 s8/10/12, réserve de tâches ÷4,5 face aux 72 octets (pas gain mono).
+Palier S2 i64 admissible sur 87,56 % des tests Xi LiDAR00/K5, 90,67 % à K10,
+mêmes visites. Cache tuilé : 107 259 masques jugés sur 00/100/200 K5 et
+00 K10, s8/10/12 ;
+visites+tests cache ÷1,5–1,9 sur cet échantillon, pas gain GPU ni estimateur
+de la trame. Le cache permet des lots indépendants : trace d'un représentant,
+retest des témoins pour chaque paire, puis repli à zéro pour les bits ouverts.
+
+Attention au port : `Front::expand` actuel écrit ses compteurs partagés,
+donc ne pas l'appeler simultanément tel quel. Et la porte S2 historique
+exige des visites égales au témoin sans cache : avec cache, garder l'égalité
+des **masques**, mais séparer visites représentant/cache/repli et référence.
+Le résidu S2 des amas 8k/16k/32k est toujours quasiquadratique
+(×3,977/×3,987), fait négatif publié. Aucun appel GCP pour ce lot ; les
+quatre sous-dossiers et la synthèse donnent les preuves, coûts exclus et
+commandes. Pas de nouveau chrono de contrat FULL.

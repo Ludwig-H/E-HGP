@@ -18,6 +18,18 @@ parents FULL (liste ciblée dans le [rapport 15](audit_v8/15_entrees_v8_non_lues
 
 ## Objet et mathématiques
 
+Compléments expérimentaux du 26 septembre, sans fermeture abusive des
+architectures voisines : voir [les quatre prototypes 100 ms](../audits/AUDIT_B_GAINS_STRUCTURELS_100MS_20260926.md).
+Un compte arbitraire accompagné d'IDs tous valides ne prouve pas la
+complétude : retirer un ID et décrémenter ce compte trompe les contrôles
+locaux. Le paquet doit venir d'un census complet certifié. Réutiliser le
+**rejet** d'une paire voisine sans retester ses témoins est faux
+(fixture x={0,10,1,5,6}, K3) ; partager les nœuds témoins puis retester reste
+valide. Enfin, copier les tâches génériques72 octets dans un front large
+coûte 1,264 Go de réserves à uniforme32k ; le format spécifique q3/q4 de
+16 octets ramène ce poste à281 Mo. Le front par vagues reste ouvert pour
+GPU, mais ne donne pas de gain mono sur les cas testés.
+
 | piste | fermée par |
 | --- | --- |
 | Porter le fold v4 (union des facettes des boules émises) comme tour FULL | registre `false_in_general` : E5 crée une fausse naissance puis une fausse fusion ; minima isolés et K = n absents |

@@ -1,0 +1,194 @@
+{
+  "base_commit": "1e0674f7a1688181cdd7e176507feb72e6b96118",
+  "build": "/tmp/mhgp9-census-payload-capture-0wer4jh7",
+  "source_sha256": {
+    "morsehgp3D_v9/audits/b_census_payload_20260926/payload_probe.cpp": "b29f06e7b21f113f78c90f3d5a9d0a1567764a952efcf00d8fe5d413162dcbbf",
+    "morsehgp3D_v9/src/tower/forest/ball_data.hpp": "cb53d281765a984096b775521db1e6b42893684840f7adca89bc69e52ca92b8a",
+    "morsehgp3D_v9/src/tower/lanes/keys.hpp": "919f9713ba08a2f061a90b87f6b38228fb97575f3419793046fbe3c04ce933fa",
+    "morsehgp3D_v9/src/tower/core/device.hpp": "741377a5f8c0599754116a2426b71daf0a355eb89cae1403cdc08544ac0ae46e",
+    "morsehgp3D_v9/src/tower/core/intmath.hpp": "28a1fc6279e3b449c4bb6e47a1e6168a4dcf19a16210ab27f564723ba900e52e",
+    "morsehgp3D_v9/src/tower/core/types.hpp": "3ab5e0378b8b2bf5a24a3594ae64f37e7f5fa29a72abf335225b2c2ff4c97d6d",
+    "morsehgp3D_v9/src/tower/lanes/level.hpp": "4acd8df236721d4158527421400c1a44a37687807be15b66e17d2bf689c5f980",
+    "morsehgp3D_v9/src/tower/core/wide.hpp": "877ba8c4bd045c023f3cd64e8f7fc5edf0d074bfd0c5fac9510306e06f5f387e",
+    "morsehgp3D_v9/src/tower/core/mutants.hpp": "50c7c50e36f401ef323917df0ba1d0546f9ce09bb4138fb8051ca45ceadcab9a",
+    "morsehgp3D_v9/src/tower/lanes/q4.hpp": "467d8cbed7e364b88efdbd3cbbb6409594fb08530a2c11fb143e701c0ae8cdd9",
+    "morsehgp3D_v9/src/tower/lanes/q3.hpp": "5b443889ddde4906a28bc921e3473d2dd9c4cd4f677a67b87903bc4b5b7ac588",
+    "morsehgp3D_v9/src/tower/tree/cloud_index.hpp": "2426a0cfa42689aed25b8a9c6630d92c54aa3cf4704273d58173ccad29275c5f",
+    "morsehgp3D_v9/src/tower/core/morton.hpp": "8ad508002ac68264a9985bac21d5e5934d843066f5804119149995dae1b4652d",
+    "morsehgp3D_v9/src/tower/pipeline/census.hpp": "f35bdf0d87a2e667fb54743790a83f329428c5e3f7a12f61ca1f0012a361352c",
+    "morsehgp3D_v9/audits/b_census_payload_20260926/run.py": "ae2ca433c767760ef75cf15e59f6ebc70225acaa5aec2c2c8fe319436cbfa08e"
+  },
+  "hostname": "codespaces-0bcb78",
+  "uname": [
+    "Linux",
+    "codespaces-0bcb78",
+    "6.8.0-1064-azure",
+    "#72~22.04.1-Ubuntu SMP Wed Jul 22 23:39:45 UTC 2026",
+    "x86_64"
+  ],
+  "scope": "consumer_only_synthetic_reference_packet_cpu_one_thread",
+  "gcp_used": false,
+  "commands": [
+    {
+      "label": "compiler_release",
+      "argv": [
+        "g++",
+        "--version"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "wall_seconds": 0.002850055694580078
+    },
+    {
+      "label": "compiler_sanitize",
+      "argv": [
+        "clang++",
+        "--version"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "wall_seconds": 0.020806312561035156
+    },
+    {
+      "label": "compile_release",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-O3",
+        "-DNDEBUG",
+        "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/audits/b_census_payload_20260926/payload_probe.cpp",
+        "-o",
+        "/tmp/mhgp9-census-payload-capture-0wer4jh7/payload_probe"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "wall_seconds": 3.9591543674468994
+    },
+    {
+      "label": "compile_sanitize",
+      "argv": [
+        "clang++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-O1",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-fno-omit-frame-pointer",
+        "/tmp/mhgp9-audit-20260926/morsehgp3D_v9/audits/b_census_payload_20260926/payload_probe.cpp",
+        "-o",
+        "/tmp/mhgp9-census-payload-capture-0wer4jh7/payload_probe_sanitize"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "wall_seconds": 6.545060157775879
+    },
+    {
+      "label": "selftest_release",
+      "argv": [
+        "/tmp/mhgp9-census-payload-capture-0wer4jh7/payload_probe",
+        "--selftest"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "wall_seconds": 0.003459453582763672
+    },
+    {
+      "label": "selftest_sanitize",
+      "argv": [
+        "/tmp/mhgp9-census-payload-capture-0wer4jh7/payload_probe_sanitize",
+        "--selftest"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "wall_seconds": 0.03763699531555176
+    },
+    {
+      "label": "bad_argument",
+      "argv": [
+        "/tmp/mhgp9-census-payload-capture-0wer4jh7/payload_probe",
+        "--unknown"
+      ],
+      "returncode": 2,
+      "expected": 2,
+      "wall_seconds": 0.0021207332611083984
+    },
+    {
+      "label": "bad_size",
+      "argv": [
+        "/tmp/mhgp9-census-payload-capture-0wer4jh7/payload_probe",
+        "--benchmark",
+        "1",
+        "1"
+      ],
+      "returncode": 1,
+      "expected": 1,
+      "wall_seconds": 0.0017480850219726562
+    },
+    {
+      "label": "bench_8000",
+      "argv": [
+        "/tmp/mhgp9-census-payload-capture-0wer4jh7/payload_probe",
+        "--benchmark",
+        "8000",
+        "5"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "wall_seconds": 0.017661333084106445
+    },
+    {
+      "label": "bench_16000",
+      "argv": [
+        "/tmp/mhgp9-census-payload-capture-0wer4jh7/payload_probe",
+        "--benchmark",
+        "16000",
+        "5"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "wall_seconds": 0.03423881530761719
+    },
+    {
+      "label": "bench_32000",
+      "argv": [
+        "/tmp/mhgp9-census-payload-capture-0wer4jh7/payload_probe",
+        "--benchmark",
+        "32000",
+        "5"
+      ],
+      "returncode": 0,
+      "expected": 0,
+      "wall_seconds": 0.06252288818359375
+    }
+  ],
+  "source_after_sha256": {
+    "morsehgp3D_v9/audits/b_census_payload_20260926/payload_probe.cpp": "b29f06e7b21f113f78c90f3d5a9d0a1567764a952efcf00d8fe5d413162dcbbf",
+    "morsehgp3D_v9/src/tower/forest/ball_data.hpp": "cb53d281765a984096b775521db1e6b42893684840f7adca89bc69e52ca92b8a",
+    "morsehgp3D_v9/src/tower/lanes/keys.hpp": "919f9713ba08a2f061a90b87f6b38228fb97575f3419793046fbe3c04ce933fa",
+    "morsehgp3D_v9/src/tower/core/device.hpp": "741377a5f8c0599754116a2426b71daf0a355eb89cae1403cdc08544ac0ae46e",
+    "morsehgp3D_v9/src/tower/core/intmath.hpp": "28a1fc6279e3b449c4bb6e47a1e6168a4dcf19a16210ab27f564723ba900e52e",
+    "morsehgp3D_v9/src/tower/core/types.hpp": "3ab5e0378b8b2bf5a24a3594ae64f37e7f5fa29a72abf335225b2c2ff4c97d6d",
+    "morsehgp3D_v9/src/tower/lanes/level.hpp": "4acd8df236721d4158527421400c1a44a37687807be15b66e17d2bf689c5f980",
+    "morsehgp3D_v9/src/tower/core/wide.hpp": "877ba8c4bd045c023f3cd64e8f7fc5edf0d074bfd0c5fac9510306e06f5f387e",
+    "morsehgp3D_v9/src/tower/core/mutants.hpp": "50c7c50e36f401ef323917df0ba1d0546f9ce09bb4138fb8051ca45ceadcab9a",
+    "morsehgp3D_v9/src/tower/lanes/q4.hpp": "467d8cbed7e364b88efdbd3cbbb6409594fb08530a2c11fb143e701c0ae8cdd9",
+    "morsehgp3D_v9/src/tower/lanes/q3.hpp": "5b443889ddde4906a28bc921e3473d2dd9c4cd4f677a67b87903bc4b5b7ac588",
+    "morsehgp3D_v9/src/tower/tree/cloud_index.hpp": "2426a0cfa42689aed25b8a9c6630d92c54aa3cf4704273d58173ccad29275c5f",
+    "morsehgp3D_v9/src/tower/core/morton.hpp": "8ad508002ac68264a9985bac21d5e5934d843066f5804119149995dae1b4652d",
+    "morsehgp3D_v9/src/tower/pipeline/census.hpp": "f35bdf0d87a2e667fb54743790a83f329428c5e3f7a12f61ca1f0012a361352c",
+    "morsehgp3D_v9/audits/b_census_payload_20260926/run.py": "ae2ca433c767760ef75cf15e59f6ebc70225acaa5aec2c2c8fe319436cbfa08e"
+  },
+  "binaries_sha256": {
+    "/tmp/mhgp9-census-payload-capture-0wer4jh7/payload_probe": "08d59500e00957c1d0d04440dd67fcd61e4011e30a6407be2617613afb1fdec0",
+    "/tmp/mhgp9-census-payload-capture-0wer4jh7/payload_probe_sanitize": "2a4b81f29552edc555b37d5fb500842273747ec167d49ec6e5c9b9ec34ce8117"
+  },
+  "status": "completed"
+}

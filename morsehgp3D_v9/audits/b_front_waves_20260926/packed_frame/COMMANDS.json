@@ -1,0 +1,41 @@
+[
+  {
+    "command": [
+      "/tmp/mhgp9-front-waves-packed-20260926",
+      "--packed",
+      "--frame",
+      "/tmp/mhgp9-audit-20260926/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le",
+      "5",
+      "8"
+    ],
+    "returncode": 0,
+    "expected": 0,
+    "wall_s": 11.285242427000412
+  },
+  {
+    "command": [
+      "/tmp/mhgp9-front-waves-packed-20260926",
+      "--packed",
+      "--frame",
+      "/tmp/mhgp9-audit-20260926/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le",
+      "5",
+      "10"
+    ],
+    "returncode": 0,
+    "expected": 0,
+    "wall_s": 13.2885202260004
+  },
+  {
+    "command": [
+      "/tmp/mhgp9-front-waves-packed-20260926",
+      "--packed",
+      "--frame",
+      "/tmp/mhgp9-audit-20260926/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le",
+      "5",
+      "12"
+    ],
+    "returncode": 0,
+    "expected": 0,
+    "wall_s": 15.174915549000616
+  }
+]

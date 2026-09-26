@@ -1,0 +1,16 @@
+[
+  {
+    "command": [
+      "/tmp/mhgp9-front-waves-packed-20260926",
+      "--packed",
+      "--synthetic",
+      "uniform",
+      "32000",
+      "5",
+      "8"
+    ],
+    "returncode": 0,
+    "expected": 0,
+    "wall_s": 42.374114627999916
+  }
+]

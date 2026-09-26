@@ -1,5 +1,20 @@
 # État courant des audits v9
 
+**Nouvelles pistes 100 ms, 26 septembre** : [synthèse et décisions de port](AUDIT_B_GAINS_STRUCTURELS_100MS_20260926.md).
+Quatre prototypes locaux isolés, sans changement du moteur : import des
+intérieurs déjà comptés (consommateur synthétique ×3,52–3,69, pas gain FULL),
+front par vagues au format16 octets (mêmes objets/compteurs, mémoire des
+tâches ÷4,5, pas encore CUDA), palier i64 exact de S2 (87,56/90,67 % des
+tests Xi LiDAR00 K5/K10 admissibles), et cache de témoins par tuiles
+indépendantes (107 259 masques égaux, travail géométrique sondé ÷1,5–1,9,
+temps GPU inconnu). Fixtures, mutants, tests 8k/16k/32k des briques
+concernées et lecteurs normal/−O sont publiés dans les quatre dossiers liés.
+Le résidu S2 des amas reste quasi quadratique (×3,977/×3,987) ; aucun
+sous-quadratique global nouvellement acquis. Produit et contrat inchangés,
+GCP non utilisé dans ce lot. Priorités au développeur : récupérer les IDs
+à l'émission q3, front GPU compact, bras S2 séparés, en parallèle des lots
+FULL compacts de tous les ordres.
+
 **Complément G4 R24-B du 26 septembre** : [reçu brut et lecture](../receipts/g4_tower_r24b_20260926/README.md),
 [plan et analyseur](b_g4_r24_20260926/README.md). Une session SPOT gardée,
 arrêt ciblé puis état GCE `TERMINATED` relu. Sur la seule trame
