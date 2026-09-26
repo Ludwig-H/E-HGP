@@ -15,9 +15,13 @@ Deux modules, deux roles nettement separes :
   aucun terme en `C(n, k)`, et gradient analytique partout dans `R^d` ;
 
 * `tower` : l'objet. Maxima locaux par ascension quasi-Newton multi-departs,
-  niveaux de col par chemins explicites (minorants monotones), liaison
-  simple sur ces niveaux, bassins des observations, enregistrement canonique
-  et digest sha256.
+  niveaux de col par chemins explicites, liaison simple sur ces niveaux,
+  bassins des observations, enregistrement canonique et digest sha256. Le
+  niveau publie n'est PAS un minorant certifie du niveau de col : un chemin
+  continu en donnerait un, mais le minimum sur un echantillon fini du chemin
+  majore ce minorant. Le module raffine donc le long de l'axe du chemin pour
+  redescendre vers le vrai minimum, et l'ecart residuel est mesure contre une
+  minimisation independante (paragraphe 2 de `tower`).
 
 Calibration des deux axes : le comptage de boules est un estimateur a noyau
 indicatrice de boule, donc le seuil d'ordre `k` au rayon `sqrt(a)` est le

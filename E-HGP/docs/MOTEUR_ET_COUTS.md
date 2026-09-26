@@ -309,8 +309,13 @@ Trois lectures, dans cet ordre.
    finit par arriver ; c'est exactement la limite de l'apprentissage de
    descripteurs annoncée ci-dessus.
 
-**Campagne complète (84 cellules), et ce qu'elle change.** La sonde a été
-rejouée sur toute sa grille ($d=2,10,50,200$, dimension intrinsèque 2 et 5,
+**Campagne complète (84 cellules, dont 42 calculs spectraux distincts), et ce
+qu'elle change.** Précision due au contre-audit : la moitié spectrale de la
+campagne ne dépend pas de l'ordre $k$, et elle était recalculée à l'identique
+pour chaque valeur de `--orders` (digest structurel identique, indice de Rand
+identique à neuf chiffres). Les 84 lignes du tableau reposent donc sur **42**
+calculs spectraux distincts, et il ne faut pas les compter deux fois. La sonde
+a été rejouée sur toute sa grille ($d=2,10,50,200$, dimension intrinsèque 2 et 5,
 $n=300$ et $1000$, ordres 1 et 5, trois régimes de bruit, 128 descripteurs).
 Quatre faits nouveaux, dans l'ordre de leur importance.
 
@@ -338,6 +343,18 @@ Quatre faits nouveaux, dans l'ordre de leur importance.
    $d=200$, ni $n=3000$ ni $m=512$ descripteurs ne ramènent un seul mode
    supplémentaire ni un indice de Rand non nul : la cause n'est ni
    statistique ni algorithmique, c'est le contraste lui-même.
+
+**Le niveau de col de la tour spectrale n'est PAS certifié**, et c'est une
+correction du contre-audit. Le théorème du col de montagne donne bien un
+minorant pour un chemin **continu**, mais l'implémentation prend le minimum
+sur un chemin **échantillonné** : elle peut donc manquer un col plus bas entre
+deux points de grille. Le sens de l'erreur est connu (le niveau publié est
+au-dessus du vrai col) et les excès mesurés contre une minimisation
+unidimensionnelle indépendante valent $+2{,}0\cdot10^{-2}$, $+1{,}2\cdot10^{-3}$
+et $+2{,}3\cdot10^{-4}$ selon la finesse. Le raffinement par grilles emboîtées
+ajouté depuis est décroissant par construction. Seule la certification par
+segment **rationnel exact** de `engine/segment.py` porte le mot « certifié » ;
+la couche spectrale, non.
 
 **Deux pièges de méthode, mesurés, à ne pas reproduire.** Une ascension de
 gradient **non convergée fabrique des maxima** : en $d=50$ une montée à pas
@@ -427,6 +444,17 @@ verdict tient, et trois précisions s'ajoutent.
 * **Aucun régime ne sauve l'axe d'ordre dans ce banc** : ni le bruit de fond
   ($-0{,}148$ à $-0{,}275$ en $d\geq50$), ni les densités différentes, ni les
   amas filiformes.
+* **Deux réserves du contre-audit, à lire avec les chiffres.** La coupe « au
+  pic » retombe silencieusement sur le dernier niveau quand aucun niveau ne
+  donne entre 2 et 25 groupes recevables : la partition est alors **triviale**
+  et son indice de Rand quasi nul est noyé dans la moyenne. Une partie des
+  valeurs proches de zéro de cette colonne sont donc des **replis** et non des
+  échecs mesurés. Et la graine de cellule utilisait `hash()` d'une chaîne,
+  randomisé par processus : c'est ce qui explique que ma propre réexécution
+  retrouve $-0{,}067$ là où l'agent annonçait $-0{,}070$. Le défaut est
+  corrigé (graine par `crc32`, porte avec quatre graines gravées), la
+  conclusion ne bouge pas, mais aucune de ces deux colonnes ne doit être citée
+  au centième.
 
 **La conjecture de sortie, et c'est la piste la plus prometteuse du chantier.**
 Ce qui manque à la tour n'est peut-être pas l'axe d'ordre mais la **règle

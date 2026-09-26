@@ -33,7 +33,11 @@ usage reel, et il est annonce comme tel.
 DEUX COUPES, pour ne pas confondre qualite d'arbre et qualite de selection :
 
 * coupe au VRAI nombre de classes : tous les points etiquetes, aucun rejet
-  de bruit ; elle juge l'arbre seul ;
+  de bruit ; elle juge l'arbre seul. Sa distribution est BIMODALE, et le
+  tableau des regimes le publie : une cellule est resolue (`ari >= 0.95`) ou
+  en echec total (`ari <= 0.05`), il n'y a presque rien entre les deux, donc
+  la moyenne se lit comme une PART DE CELLULES RESOLUES et jamais comme une
+  qualite moyenne ;
 * coupe SPONTANEE : meme regle pour toutes les methodes dendrogrammes (plus
   grand saut de niveau de fusion, entre 2 et 25 groupes), plus le rejet de
   bruit propre a la tour (une observation non encore nee, `a_k(x_i) > a`,
@@ -712,8 +716,21 @@ def method_names(rows):
     return sorted(seen, key=rank)
 
 
-def table_by_dimension(rows, cut, field, families=None, noise=None, title=""):
-    """Tableau texte : methodes en lignes, dimensions en colonnes."""
+def table_by_dimension(
+    rows, cut, field, families=None, noise=None, title="", require_peak=False
+):
+    """Tableau texte : methodes en lignes, dimensions en colonnes.
+
+    `require_peak` ne garde que les cellules ou la regle du pic a trouve un
+    niveau recevable POUR LA METHODE DE LA LIGNE. Sans cette restriction, un
+    taux comme la part du bruit rejete se lit a l'envers : une cellule ou la
+    regle echoue rend un groupe unique au dernier niveau, ou tout le monde est
+    ne, donc un rejet de bruit de zero. La moyenne devient alors le taux de
+    SUCCES de la regle deguise en taux de rejet. Mesure du 26 septembre 2026
+    sur le recu de campagne : a `k = 2`, `d = 200`, les vingt cellules
+    bruitees valent exactement `0` ou `1`, et les dix zeros sont exactement
+    les dix cellules a groupe unique.
+    """
     dims = sorted({row["dim"] for row in rows})
     lines = []
     if title:
@@ -725,13 +742,17 @@ def table_by_dimension(rows, cut, field, families=None, noise=None, title=""):
         cells = []
         for dim in dims:
 
-            def keep(row, dim=dim):
+            def keep(row, dim=dim, name=name):
                 if row["dim"] != dim:
                     return False
                 if families is not None and row["family"] not in families:
                     return False
                 if noise is not None and row["noise_share"] not in noise:
                     return False
+                if require_peak:
+                    entry = row["methods"].get(name)
+                    if entry is not None and not entry.get("peak_admissible", True):
+                        return False
                 return True
 
             values = collect(rows, name, cut, field, keep)
@@ -821,6 +842,59 @@ def timing_table(rows):
                 "%13.3f" % (float(np.mean(values)) if values else float("nan"))
             )
         lines.append("%-22s" % name + "  " + "  ".join(cells))
+    return "\n".join(lines)
+
+
+def regime_table(rows, cut, resolved=0.95, failed=0.05):
+    """Part des cellules RESOLUES et part des cellules en ECHEC TOTAL.
+
+    Garde-fou contre la moyenne trompeuse. A la coupe au vrai nombre, la
+    distribution des indices de Rand n'est pas etalee : elle est BIMODALE. Sur
+    le recu de campagne du 26 septembre 2026, la tour a l'ordre `1` rend
+    `ari >= 0.95` sur 70 a 75 pour cent des cellules sans bruit et
+    `ari <= 0.05` sur 100 pour cent des cellules bruitees des `d >= 10` ; il
+    n'y a presque rien entre les deux. La colonne de moyennes voisine de
+    `0.37` n'est donc pas une qualite moyenne, c'est une PART DE CELLULES
+    RESOLUES, et elle doit etre lue comme telle. Publier les deux parts
+    interdit la lecture fausse.
+    """
+    dims = sorted({row["dim"] for row in rows})
+    lines = [
+        "regimes a la coupe %s : pour cent de cellules a ari >= %.2f / a ari <= %.2f"
+        % (cut, resolved, failed)
+    ]
+    header = "%-22s %-11s" % ("methode", "bruit") + "".join(
+        "  d=%-11d" % dim for dim in dims
+    )
+    lines.append(header)
+    lines.append("-" * len(header))
+    shares = sorted({row["noise_share"] for row in rows})
+    for name in method_names(rows):
+        for noise_share in shares:
+            cells = []
+            for dim in dims:
+                values = collect(
+                    rows,
+                    name,
+                    cut,
+                    "ari",
+                    lambda row, dim=dim, noise_share=noise_share: (
+                        row["dim"] == dim and row["noise_share"] == noise_share
+                    ),
+                )
+                if values.size == 0:
+                    cells.append("%-13s" % "    -")
+                else:
+                    cells.append(
+                        "%5.0f /%-7.0f"
+                        % (
+                            100.0 * float(np.mean(values >= resolved)),
+                            100.0 * float(np.mean(values <= failed)),
+                        )
+                    )
+            lines.append(
+                "%-22s %-11.2f" % (name, noise_share) + "  " + "  ".join(cells)
+            )
     return "\n".join(lines)
 
 
@@ -1077,6 +1151,8 @@ def report(rows):
         verdict_table(rows, "peak"),
         verdict_table(rows, "peak", require_peak=True),
         peak_failure_table(rows),
+        regime_table(rows, "fixed"),
+        regime_table(rows, "peak"),
         table_by_dimension(
             rows,
             "fixed",
@@ -1108,6 +1184,24 @@ def report(rows):
             "noise_recall",
             noise=(0.3,),
             title="part du bruit de fond rejete, coupe au pic, bruit 30 pour cent",
+        ),
+        table_by_dimension(
+            rows,
+            "peak",
+            "noise_recall",
+            noise=(0.3,),
+            require_peak=True,
+            title=(
+                "part du bruit de fond rejete, coupe au pic, bruit 30 pour cent,"
+                " CELLULES A PIC RECEVABLE SEULEMENT"
+            ),
+        ),
+        table_by_dimension(
+            rows,
+            "peak",
+            "ari",
+            require_peak=True,
+            title="ari, coupe au pic, CELLULES A PIC RECEVABLE SEULEMENT",
         ),
         table_by_dimension(
             rows,

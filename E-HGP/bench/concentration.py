@@ -14,7 +14,10 @@ Trois mesures, pour `k` dans une liste d'ordres :
   boule englobante minimale est VIDE des autres observations. Une telle
   partie engendre une naissance de composante dans `Gamma_k` : la part
   mesuree est donc, a un facteur `C(n, k)` pres, le nombre de naissances de
-  la tour d'ordre `k`.
+  la tour d'ordre `k`. Cette part est ESTIMEE sur `--subsets` parties
+  tirees : elle ne dit rien des que le compte cherche tombe sous
+  `C(n, k) / --subsets`, et c'est la table `exact2` qui prend le relais a
+  l'ordre 2.
 * (b) OBSTRUCTION DE SIGNAL : moyenne et ecart-type du rayon de boule
   englobante normalise par la distance typique entre paires, a comparer a
   la valeur du simplexe regulier `sqrt((k - 1) / (2 k))`. Quand la mesure
@@ -27,7 +30,11 @@ Trois mesures, pour `k` dans une liste d'ordres :
 
 Chaque mesure est reprise apres trois changements de representation :
 blanchiment (Mahalanobis empirique), projection sur les `r` premieres
-composantes principales, projection aleatoire de Johnson-Lindenstrauss.
+composantes principales, projection aleatoire de Johnson-Lindenstrauss. Le rang
+de l'ACP vaut par defaut la dimension intrinseque declaree de la famille, et
+`--pca-rank` l'impose : pour une variete NON LINEAIRE le rang qui conserve
+l'objet est celui de l'enveloppe affine du support (3 pour le rouleau suisse),
+pas la dimension de la variete (2).
 
 La boule englobante est recalculee ici, independamment de
 `src/ehgp/exact/meb.py` : methode d'ensemble actif (ajout du point le plus
@@ -40,11 +47,11 @@ soit la table demandee, et son echec met le code de sortie a 3.
 Deux tables completent les trois mesures :
 
 * `exact2` : le compte EXACT des paires a boule diametrale vide, sans aucun
-  echantillonnage, par trois chemins independants (arbre k-d, matrice de
-  Gram, boule certifiee) qui doivent donner le meme entier. C'est elle qui
-  donne l'exposant en `n` du nombre de naissances a l'ordre 2, que la table
-  `free` ne peut pas mesurer des que la part libre tombe sous
-  `1 / --subsets`.
+  echantillonnage, par trois chemins independants (matrice de Gram en
+  reference, arbre k-d et boule certifiee en controle) qui doivent donner le
+  meme entier. C'est elle qui donne l'exposant en `n` du nombre de naissances
+  a l'ordre 2, que la table `free` ne peut pas mesurer des que la part libre
+  tombe sous `1 / --subsets`.
 * `cout` : le taux de repli par enumeration et le temps PROCESSEUR par
   boule, par cellule `(d, k)`.
 
@@ -477,8 +484,15 @@ def pair_distortion(before, after, rng, budget=4000):
     return float(np.max(np.abs(relative - 1.0))) if relative.size else 0.0
 
 
-def represent(points, kind, intrinsic, rng, epsilon):
-    """Applique un changement de representation ; renvoie (nuage, etiquette)."""
+def represent(points, kind, intrinsic, rng, epsilon, pca_rank=0):
+    """Applique un changement de representation ; renvoie (nuage, etiquette).
+
+    `pca_rank`, s'il est strictement positif, remplace le rang de l'ACP par une
+    valeur imposee. C'est indispensable pour une variete NON LINEAIRE, dont le
+    rang du support (la dimension de son enveloppe affine) depasse la dimension
+    de la variete : le rouleau suisse est une surface, mais son enveloppe affine
+    est de dimension 3, et seule une ACP de rang 3 est une isometrie.
+    """
     if kind == "raw":
         return points, "raw(d=%d)" % points.shape[1]
     if kind == "rot":
@@ -489,7 +503,8 @@ def represent(points, kind, intrinsic, rng, epsilon):
         result = whiten(points)
         return result, "whiten(d=%d)" % result.shape[1]
     if kind == "pca":
-        result = principal(points, max(1, intrinsic))
+        rank = pca_rank if pca_rank > 0 else max(1, intrinsic)
+        result = principal(points, rank)
         return result, "pca(d=%d)" % result.shape[1]
     if kind == "jl":
         result = johnson_lindenstrauss(points, rng, epsilon)
@@ -975,7 +990,9 @@ def table_contrast(options, ledger):
             for index in range(options.seeds):
                 rng = np.random.default_rng(options.seed + 65537 * index + count)
                 points = make_cloud(name, count, dimension, intrinsic, options.noise, rng)
-                view, label = represent(points, kind, intrinsic, rng, options.jl_epsilon)
+                view, label = represent(
+                    points, kind, intrinsic, rng, options.jl_epsilon, options.pca_rank
+                )
                 result = density_contrast(view, options.neighbours, rng)
                 means.append(result["mean"])
                 cvs.append(result["cv"])
@@ -1029,7 +1046,7 @@ def _shuffle(rng, values):
 
     Le controle par permutation du paragraphe 5.2 n'a de valeur que si l'on peut
     montrer qu'il echoue quand le melange n'en est plus un : c'est le mutant
-    « permutation inerte ».
+    "permutation inerte".
     """
     return rng.permutation(values)
 
@@ -1064,7 +1081,8 @@ def table_signal(options, ledger):
                         count, dimension, options.signal_rank, level, rng, options.signal_slope
                     )
                     view, label = represent(
-                        points, kind, options.signal_rank, rng, options.jl_epsilon
+                        points, kind, options.signal_rank, rng, options.jl_epsilon,
+                        options.pca_rank,
                     )
                     squared = _squared_matrix(view)
                     order = min(options.neighbours, count - 1)
@@ -1162,7 +1180,16 @@ def _squared_matrix(points):
 
 
 def table_dimsweep(options, ledger):
-    """Ambiant contre intrinseque : `d` varie, `r` reste fixe."""
+    """Ambiant contre intrinseque : `d` varie, `r` reste fixe.
+
+    La table publie la DISTORSION DE FORME des paires a cote de la part libre,
+    parce que la part libre seule ne dit rien de la fidelite de la
+    representation : c'est tout le propos du paragraphe 3.4 du document, et sans
+    les deux colonnes cote a cote la lecture fautive reste possible. La
+    distorsion est un maximum apres division par le rapport median, donc elle
+    ignore un facteur d'echelle global et vaut exactement zero pour une
+    isometrie.
+    """
     rows = []
     count = options.n_list[0]
     order = options.dimsweep_order
@@ -1180,15 +1207,19 @@ def table_dimsweep(options, ledger):
             for kind in options.representations:
                 shares = []
                 contrasts = []
+                distortions = []
                 label = kind
                 for index in range(options.seeds):
                     rng = np.random.default_rng(options.seed + 31337 * index + 17 * dimension)
                     points = make_cloud(name, count, dimension, target, options.noise, rng)
-                    view, label = represent(points, kind, target, rng, options.jl_epsilon)
+                    view, label = represent(
+                        points, kind, target, rng, options.jl_epsilon, options.pca_rank
+                    )
                     subsets, _complete = subset_sample(count, order, options.subsets, rng)
                     result = measure_order(view, order, subsets, ledger)
                     shares.append(result["share"])
                     contrasts.append(density_contrast(view, options.neighbours, rng)["cv"])
+                    distortions.append(pair_distortion(points, view, rng))
                 rows.append(
                     [
                         name,
@@ -1198,12 +1229,22 @@ def table_dimsweep(options, ledger):
                         order,
                         summarise(shares),
                         summarise(contrasts),
+                        summarise(distortions),
                     ]
                 )
     print_table(
         "(a)+(c) balayage de la dimension ambiante a dimension intrinseque fixee "
         "(n=%d, bruit=%.3f)" % (count, options.noise),
-        ["famille", "d", "r", "representation", "k", "part libre", "cv du comptage"],
+        [
+            "famille",
+            "d",
+            "r",
+            "representation",
+            "k",
+            "part libre",
+            "cv du comptage",
+            "distorsion de forme",
+        ],
         rows,
     )
     return rows
@@ -1224,7 +1265,9 @@ def table_noise(options, ledger):
                 for index in range(options.seeds):
                     rng = np.random.default_rng(options.seed + 999331 * index + dimension)
                     points = make_cloud("flat_noise", count, dimension, 2, level, rng)
-                    view, label = represent(points, kind, 2, rng, options.jl_epsilon)
+                    view, label = represent(
+                        points, kind, 2, rng, options.jl_epsilon, options.pca_rank
+                    )
                     subsets, _complete = subset_sample(count, order, options.subsets, rng)
                     result = measure_order(view, order, subsets, ledger)
                     shares.append(result["share"])
@@ -1273,7 +1316,9 @@ def table_repr(options, ledger):
                 for index in range(options.seeds):
                     rng = np.random.default_rng(options.seed + 224737 * index + count)
                     points = make_cloud(name, count, dimension, intrinsic, options.noise, rng)
-                    view, label = represent(points, kind, intrinsic, rng, options.jl_epsilon)
+                    view, label = represent(
+                        points, kind, intrinsic, rng, options.jl_epsilon, options.pca_rank
+                    )
                     scale = _median_pair_distance(view, rng)
                     if scale <= 0.0:
                         continue
@@ -1460,7 +1505,9 @@ def table_tower(options, ledger):
                         % (name, index, order, len(state.component_births) - mine)
                     )
             for kind in ("rot", "pca", "jl", "whiten"):
-                view, label = represent(points, kind, intrinsic, rng, options.jl_epsilon)
+                view, label = represent(
+                    points, kind, intrinsic, rng, options.jl_epsilon, options.pca_rank
+                )
                 candidate = FullTower(quantise(view, options.tower_bits), options.tower_k)
                 distortion = pair_distortion(points, view, rng, budget=400)
                 for order in range(1, options.tower_k + 1):
@@ -1742,16 +1789,20 @@ def table_exact2(options, ledger):
             gram_values = []
             kd_values = []
             meb_values = []
-            started = time.process_time()
+            gram_cpu = 0.0
+            control_cpu = 0.0
             for index in range(options.seeds):
                 rng = np.random.default_rng(options.seed + 7919 * index + 13 * count)
                 points = make_cloud(name, count, dimension, intrinsic, noise, rng)
+                started = time.process_time()
                 gram_values.append(_free_pairs_gram(points))
+                gram_cpu += time.process_time() - started
+                started = time.process_time()
                 if count <= options.exact2_kd_max:
                     kd_values.append(_free_pairs_kdtree(points))
                 if count <= options.exact2_meb_max:
                     meb_values.append(free_count_strict(points, 2))
-            elapsed = time.process_time() - started
+                control_cpu += time.process_time() - started
             for path, values in (("arbre k-d", kd_values), ("boule", meb_values)):
                 if values and values != gram_values:
                     ledger.failures.append(
@@ -1775,7 +1826,8 @@ def table_exact2(options, ledger):
                     "%.2f" % (mean / count),
                     "%.1f" % (sum(kd_values) / len(kd_values)) if kd_values else "-",
                     "%.1f" % (sum(meb_values) / len(meb_values)) if meb_values else "-",
-                    "%.1f" % elapsed,
+                    "%.3f" % (gram_cpu / options.seeds),
+                    "%.3f" % (control_cpu / options.seeds),
                 ]
             )
             cells += 1
@@ -1800,7 +1852,8 @@ def table_exact2(options, ledger):
             "par point",
             "controle k-d",
             "controle boule",
-            "s processeur",
+            "s Gram/nuage",
+            "s controles/nuage",
         ],
         rows,
     )
@@ -1838,9 +1891,11 @@ def table_cout(options, ledger):
     """Cout de la boule certifiee : taux de repli et temps PROCESSEUR par boule.
 
     Le document publiait un taux de repli et un cout par boule qu'aucune
-    commande ne produisait. Ils sont mesures ici, en temps processeur, seule
-    grandeur qui ne depende pas de la charge de la machine, et les cellules
-    sont exactement celles que le paragraphe 1.2 cite.
+    commande ne produisait. Ils sont mesures ici, en temps processeur, bien
+    moins sensible que le temps horloge a la charge de la machine, et les
+    cellules sont exactement celles que le paragraphe 1.2 cite. Le taux de repli
+    est deterministe a l'entier pres ; les temps ne le sont pas, et seuls leurs
+    ordres de grandeur sont a retenir.
     """
     rows = []
     cells = 0
@@ -1956,6 +2011,7 @@ def build_parser():
         "--representations", type=_str_list, default=["raw", "whiten", "pca", "jl"]
     )
     parser.add_argument("--jl-epsilon", type=float, default=0.5)
+    parser.add_argument("--pca-rank", type=int, default=0)
     parser.add_argument("--signal-dims", type=_int_list, default=[2, 5, 20, 50, 200])
     parser.add_argument("--signal-noise", type=_float_list, default=[0.0, 0.03, 0.1, 0.3])
     parser.add_argument("--signal-rank", type=int, default=2)
@@ -2004,7 +2060,7 @@ def main(argv=None):
     wanted = options.table
     # Porte de l'instrument. Elle precede TOUTE table, y compris quand une
     # seule table est demandee : c'est la seule maniere de rendre vraie la
-    # phrase « sans validation, aucune table n'est publiee ». Sa graine et son
+    # phrase "sans validation, aucune table n'est publiee". Sa graine et son
     # generateur lui sont propres, donc son execution ne deplace aucune mesure.
     table_selftest(options, ledger)
     if wanted != "selftest":

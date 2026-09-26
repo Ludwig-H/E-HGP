@@ -65,9 +65,23 @@ RESULTATS MESURES le 26 septembre 2026 (conteneur du depot, huit coeurs,
         --n 300,1000 --orders 1,5 \
         --noise-modes none,isotropic_norm,per_coordinate --features 128 --seeds 1
 
-quatre-vingt-quatre cellules, `separation = 8`, `intrinsic_noise = 1`,
-`bandwidth_scale = 0.35`, `G = 4` amas. Moyennes d'ARI, empirique contre
-spectral :
+Quatre-vingt-quatre cellules EMPIRIQUES, `separation = 8`,
+`intrinsic_noise = 1`, `bandwidth_scale = 0.35`, `G = 4` amas. Deux comptes a
+ne pas confondre, et la sonde les imprime tous les deux depuis qu'ils ont ete
+mesures :
+
+* la chaine SPECTRALE ne recoit jamais l'ordre `k`, donc les 84 cellules ne
+  contiennent que 42 tours spectrales, chacune comptee deux fois (digest
+  structurel identique a `k = 1` et `k = 5`). Le recalcul a l'identique coutait
+  243 s sur 513 s de temps spectral ; il est supprime ;
+* sur ces 42 tours, seulement 38 DIGESTS sont distincts, et les quatre
+  doublons ne sont pas un hasard : a `d = 2` avec `intrinsic = 2` il reste
+  `free = 0` coordonnee ambiante, donc les trois regimes de bruit produisent
+  LE MEME NUAGE. La colonne `d = 2` du tableau ci-dessous est une seule mesure
+  affichee trois fois, et non trois regimes ; elle ne peut pas servir a
+  comparer les regimes, seulement de point de depart intrinseque.
+
+Moyennes d'ARI, empirique contre spectral :
 
     regime            d=2      d=10     d=50     d=200
     none        k=1  1,00/1,00  0,93/1,00  0,93/1,00  0,93/1,00
@@ -169,6 +183,26 @@ plongement, et la tour n'a plus qu'un mode. C'est l'obstruction de signal
 deja mesuree sur le rayon de boule englobante, revue dans la variable
 spectrale — et c'est un indicateur d'arret UTILISABLE, puisqu'il ne demande
 aucune etiquette.
+
+COUT MESURE, ET IL EST L'AUTRE MOITIE DE LA REPONSE. Temps CPU du processus
+(`resource.getrusage`, BLAS monofil, `d = 50`, `m = 128`, quatre tailles), avec
+la pente en `log2` d'un doublement a l'autre :
+
+    n      tour empirique          chaine spectrale (ajustement + tour)
+           cpu_s     pente         cpu_s     pente    evaluations de chemin
+     375   0,267       -           0,448       -                522
+     750   0,927     1,80          0,536     0,26               522
+    1500   4,751     2,36          1,247     1,22               522
+    3000  17,074     1,85          2,209     0,82               522
+
+La tour empirique est donc bien QUADRATIQUE en `n` (`O(q T n^2)` : `O(q n)`
+aretes, `O(T n)` par arete), ce que la mission autorise mais qui se paie ; la
+chaine spectrale est LINEAIRE en `n`, et son nombre d'evaluations de chemin ne
+depend pas de `n` du tout mais du nombre de maxima trouves (522 = 6 paires fois
+33 noeuds plus 6 fois 9 sondes de raffinement, a 4 maxima). Le croisement est
+atteint vers `n = 750` sur cette cellule. Le cout de l'ajustement seul, lui,
+est detaille et mesure dans `log_density.py` (paragraphe 5) : lineaire en `n`,
+lineaire en `d`, entre `m^2` et `m^3` en `m`.
 
 Usage :
 
@@ -346,6 +380,19 @@ def persistence_classes(births, merges, ascending, max_classes):
     GRANDE est plus ancienne). La regle ne regarde que l'ordre des
     naissances et les niveaux de fusion : elle s'applique telle quelle aux
     deux tours, ce qui est la condition pour que la comparaison soit juste.
+
+    DEGENERESCENCE MESUREE A L'ORDRE 1, a savoir avant de lire la colonne
+    `per_e` : la tour empirique a l'ordre `k = 1` naît TOUTE au niveau zero,
+    parce que `a_1(x_i) = 0` (l'observation est sa propre plus proche
+    observation). Le compteur le publie (`distinct_births = 1`). La
+    persistance de chaque feuille s'y reduit donc a `|niveau de mort|`, et la
+    regle degenere exactement en un saut sur les niveaux de fusion TRIES : sur
+    la cellule `d = 50, di = 2, n = 300, per_coordinate`, la regle de
+    persistance et cette regle equivalente renvoient toutes deux `2`. Autrement
+    dit la colonne `per_e` a `k = 1` ne mesure aucune persistance ; elle
+    redevient informative des `k >= 2`, ou les naissances sont distinctes. La
+    colonne `per_s` de la tour spectrale, elle, porte de vraies naissances (les
+    valeurs des maxima) a tout ordre.
     """
     births = np.asarray(births, dtype=float)
     total = births.size

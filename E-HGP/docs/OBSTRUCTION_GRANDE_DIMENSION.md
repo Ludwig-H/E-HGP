@@ -132,9 +132,14 @@ Trois précautions, sans lesquelles l'obstruction serait surévaluée.
    moins, $864\,520$ boules toutes certifiées
    ([`MESURES_CONCENTRATION_20260925.md`](MESURES_CONCENTRATION_20260925.md)) :
    à rang intrinsèque $r=2$ fixé, la part libre $\varphi_5$ vaut
-   $0{,}003\pm0{,}001$ de $d=2$ à $d=200$ et le compte de naissances reste
-   quasi linéaire en $n$ (exposant $\approx0{,}75$), tandis qu'à $r=d$ elle
-   passe de $0{,}004$ à $1{,}000$. Un plongement isométrique exact laisse la
+   $0{,}003\pm0{,}001$ de $d=2$ à $d=200$, tandis qu'à $r=d$ elle passe de
+   $0{,}004$ à $1{,}000$. **Correction du contre-audit** : l'exposant
+   $\approx0{,}75$ que j'annonçais pour le compte de naissances sans bruit est
+   tiré d'une cellule **sous sa propre résolution** (part libre mesurée
+   $0{,}001\pm0{,}002$, soit de l'ordre d'un seul tirage) : il n'est pas
+   soutenu et ne doit pas être cité. Ce qui reste établi est la constance de
+   $\varphi_5$ en $d$ à rang fixé, et l'exposant $1{,}96$ du régime bruité
+   ci-dessous, mesuré sur des parts libres bien au-dessus du bruit. Un plongement isométrique exact laisse la
    mesure inchangée **chiffre par chiffre**.
 4. **Mais le bruit ambiant ramène l'obstruction**, et c'est le régime des
    données réelles : sur une variété de dimension 2 dans $\mathbb{R}^{200}$

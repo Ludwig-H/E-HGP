@@ -149,7 +149,7 @@ Acquis, avec la commande qui le reproduit :
 | certificat de séparation exact (hyperplan et sphère), zéro faux | **démontré et mesuré** |
 | niveau de fusion **certifié exact** par le moteur seul : 21 paires sur 21 à l'ordre 1 en $d=20$ | **démontré** |
 | certificat de séparation efficace aux ordres $k\geq2$ | **non acquis** |
-| obstruction gouvernée par la dimension **intrinsèque**, pas l'ambiante ($\varphi_5$ constante de $d=2$ à $200$ à rang 2 fixé) | **mesuré** |
+| obstruction gouvernée par la dimension **intrinsèque**, pas l'ambiante ($\varphi_5$ constante de $d=2$ à $200$ à rang 2 fixé) | **mesuré** ; l'exposant $0{,}75$ du régime sans bruit, lui, était sous sa résolution et est retiré |
 | bruit ambiant sur une variété de rang 2 : exposant du compte de naissances $1{,}96$ (quadratique) | **mesuré** |
 | blanchiment interdit : en rang $d\geq n-1$ la tour devient celle d'un simplexe régulier, indépendante des données | **démontré** |
 | tour régularisée contre tour empirique sous bruit ambiant : ARI $0{,}994$ contre $0{,}000$ à $(d=50,k=5)$ | **mesuré** |
