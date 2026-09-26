@@ -77,6 +77,7 @@ prétextes dérivés de la filtration.
 | [`OBJET.md`](OBJET.md) | ce que la tour est et publie ; les six primitives qu'une architecture y lit |
 | [`ETAT_DE_LART.md`](ETAT_DE_LART.md) | le verrou, comment la littérature le rattrape, et **la table de substitution** |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | HGP-UNet : la condensation, le chemin dans le treillis, les six composants, les conceptions écartées |
+| [`SPECIFICATION.md`](SPECIFICATION.md) | le contrat algorithmique du tokenizer : condensation, échelle, matrices, départage, portes |
 | [`JETON.md`](JETON.md) | les variables de nœud, cinq familles, une seule normalisée |
 | [`MESURE.md`](MESURE.md) | la doctrine de substitution, les **témoins négatifs**, les prédictions pré-enregistrées, les lois d'échelle |
 | [`PLAN.md`](PLAN.md) | six phases, ce que chacune produit, ce qui l'annule |
@@ -105,6 +106,30 @@ Et avec des **prédictions écrites d'avance**, y compris celle-ci : *le gain do
 être faible ou nul en champ proche, dense, uniforme, à étiquetage complet.* Si
 l'on gagne uniformément, le gain vient probablement du budget de calcul, et il
 faut chercher le confondant avant de publier.
+
+## Ce que l'audit de conception a déjà corrigé
+
+Trois affirmations de mes premières versions étaient fausses, et les
+corrections valent mieux que les erreurs :
+
+1. **« Sélectionner quelques milliers de jetons parmi 16 M nœuds. »** Faux
+   cadrage : un U-Net lit $L$ coupes, soit l'ordre d'un U-Net 3D ordinaire.
+2. **« Le chemin diagonal iso-densité est le bon défaut. »** Faux : faire
+   croître $K$ avec $r$ est **anti-monotone**, les ensembles ne s'emboîtent
+   pas, donc aucun pooling n'existe entre ses niveaux. Grossir, c'est
+   $r \uparrow$ et $K \downarrow$. Cette correction est ce qui a rendu OM
+   **structurel** : aucun chemin monotone unique ne voit un objet mince et
+   lointain.
+3. **« Les augmentations rigides sont gratuites. »** Vrai de l'objet, faux du
+   moteur : la quantification à 1 mm casse la commutation. On recalcule, et la
+   dérive devient une mesure utile.
+
+Et une limite de fond, qui manquait : **la densité ne sépare pas ce qui se
+touche.** Une voiture posée sur l'asphalte est density-connectée au sol ; aucun
+$(K, r)$ ne les sépare, là où un superpoint de SPT y parvient par les normales.
+La parade de principe est l'axe $K$ — un contact ténu est un pont de bruit, et
+le chapitre 7 du manuscrit dit que $K$ y résiste — mais elle doit être
+**mesurée**, pas supposée.
 
 ## Ce qui est revendicable
 

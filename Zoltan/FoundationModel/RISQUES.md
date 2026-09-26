@@ -78,7 +78,30 @@ carré peut cesser de commuter. Enfin, pour $K \geq 2$ un point appartient à
 plusieurs branches : le « niveau de sortie » est un événement partiel, et c'est
 la masse $m_\tau$ du § 9.1 qui le gère, pas un comptage.
 
-### R5 — l'avantage se referme avec l'échelle
+### R5 — la densité ne sépare pas ce qui se touche
+
+*Le risque, et c'est le plus fondamental.* La tour sépare par la densité, jamais
+par la géométrie différentielle. Une voiture posée sur l'asphalte, un poteau
+dans l'herbe, un piéton sur la chaussée forment un continuum de retours :
+**aucun couple $(K, r)$ ne les sépare**. Un superpoint de SPT y parvient, parce
+qu'il regarde les normales. C'est une différence de nature, et elle borne le
+plafond d'oracle là où sont les classes qui comptent.
+
+*Détection.* Porte 0.9 de [`MESURE.md`](MESURE.md) : plafond d'oracle par
+classe, **stratifié par contact avec le sol**, en fonction de $K$, avec et sans
+retrait du sol.
+
+*Parades, d'inégale valeur.* L'**axe $K$** est la parade de principe : un
+contact ténu est un pont de bruit au sens du chapitre 7, et $K$ est exactement
+ce qui y résiste ; la question devient quantitative (porte 0.8). Le **retrait du
+sol** est la parade pratique, universelle dans le domaine — mais c'est un
+prétraitement à seuil posé à la main, donc exactement la constante que ce
+dossier prétend supprimer : on le garde comme repère, jamais comme solution. Le
+**relèvement métrique** en $(x, y, z, \lambda n)$ est séduisant mais endetté :
+le chantier `E-HGP/` a mesuré l'explosion des naissances avec la dimension, donc
+on compte les naissances en dimension 6 avant d'y croire (porte 0.10).
+
+### R6 — l'avantage se referme avec l'échelle
 
 *Le risque.* Un a priori structurel aide le plus quand les données manquent. Un
 modèle de fondation est entraîné sur beaucoup de données. L'écart peut donc se
@@ -100,6 +123,9 @@ défendable, à condition de ne pas avoir promis l'autre.
 | Le sol domine la hiérarchie en une composante géante | plafond d'oracle sur la classe « route », statistiques de niveau | l'axe $K$ ; mesurer aussi le régime sans sol, sans en faire le contrat |
 | Les lots de trames ont des hiérarchies de formes différentes | ingénierie | cibles de compte par niveau, comme tout réseau épars |
 | Le modèle apprend la portée plutôt que la forme | ablation du canal $\log r$, prédictions P1 et P2 | garder la portée explicite ; égaliser en augmentation |
+| **La quantification à 1 mm casse l'équivariance** : `tourner → quantifier → tour` ne commute pas, et un prédicat exact peut basculer sur une égalité | porte 0.7 | recalculer la tour par vue augmentée, ne jamais supposer la commutation ; si la dérive vaut le gain mesuré, affiner la grille avant toute conclusion |
+| Les objets mobiles se traînent dans l'agrégat multi-trames de FM-6 | courbes par classe dynamique | fenêtres courtes, classes dynamiques rapportées à part ; l'agrégat est une **cible dense**, jamais « la vérité géométrique » |
+| Payer $K \leq 10$ alors que $K \leq 6$ suffirait | porte 0.8 | fixer $K_{\max}$ sur la mesure, pas sur le domaine du moteur |
 | Le gain vient du budget de calcul | règle du budget apparié, prédiction P6 | comparaison à paramètres, époques et matériel égaux |
 | L'axe des ordres ne sert à rien | bras S5, témoin T4 | le retirer et simplifier ; résultat négatif net, à publier |
 | Une variable de filtration donnée en entrée fuit vers sa propre cible de pré-entraînement | revue de conception | ne jamais donner en entrée ce que l'on prédit au même moment |
@@ -153,14 +179,35 @@ Une piste ne se rouvre qu'avec un **fait nouveau** : une preuve, une fixture ou
 une mesure épinglée qui contredit la raison de sa fermeture. Jamais sur un banc
 d'essai.
 
-## 5. Ce qui n'est pas un risque
+## 5. Trois erreurs de conception déjà commises et corrigées
+
+Elles figurent ici parce qu'elles sont instructives, et pour que personne ne les
+refasse.
+
+1. **« Il faut sélectionner quelques milliers de jetons parmi 16 M nœuds. »**
+   Faux cadrage : un U-Net lit $L$ coupes, soit l'ordre de grandeur d'un U-Net
+   3D ordinaire. Corrigé en [`ARCHITECTURE.md`](ARCHITECTURE.md) § 2.
+2. **« Le chemin diagonal iso-densité est le bon défaut. »** Faux : faire
+   croître $K$ avec $r$ est **anti-monotone**, les ensembles ne s'emboîtent pas,
+   donc il n'existe aucune application de pooling. Grossir, c'est $r \uparrow$
+   et $K \downarrow$. L'iso-densité est une famille **latérale**, que consomme
+   OM. Corrigé en § 4.2, et c'est cette correction qui a rendu OM structurel.
+3. **« Rotations, translations et homothéties commutent avec la tour, donc ces
+   augmentations sont gratuites. »** Vrai de l'objet, faux du moteur : la
+   quantification à 1 mm change l'accrochage à la grille. Corrigé en § 7.5 ; on
+   recalcule, et la dérive devient une mesure utile (porte 0.7).
+
+Une quatrième correction, de sens : le **calendrier de $K$** va de $K$ **élevé**
+aux niveaux fins à $K$ **faible** aux niveaux grossiers, et non l'inverse.
+
+## 6. Ce qui n'est pas un risque
 
 - **La laminarité.** § 9.1 démontre que l'arbre est une partition des
   $(K-1)$-simplexes ; la partition de l'unité $w_{x\tau} = S_\tau/T_x$ relie
   points et facettes. Ce point a été soulevé et tranché.
 - **Le déterminisme et la reproductibilité** de la tokenisation : mesurés.
-- **L'équivariance rigide et d'échelle** : rotations, translations et
-  homothéties commutent avec la tour, donc les augmentations correspondantes
-  sont gratuites.
+- **Le recouvrement au-dessus du premier étage** : il n'y en a pas. Deux
+  antichaînes emboîtées du même arbre donnent un pooling dur ; seul le passage
+  points → nœuds est doux, et c'est là que vit l'information d'ordre supérieur.
 - **Le coût de séquence** : un U-Net lit $L$ coupes, pas les millions de nœuds
   de la tour.

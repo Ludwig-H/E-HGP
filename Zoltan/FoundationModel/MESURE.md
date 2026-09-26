@@ -115,6 +115,59 @@ condensé existe.
 - **Naturalité** : après condensation couplée entre ordres, revérifier que
   l'image d'une fusion est la fusion des images. Ce n'est pas automatique.
 
+### 0.7 Stabilité de la tour sous rotation pure
+
+La tour est équivariante en théorie ; le moteur consomme un nuage **quantifié à
+1 mm**, donc le chemin réel `tourner → quantifier → tour` ne commute pas, et les
+prédicats exacts peuvent basculer sur une égalité.
+
+Mesure : dérive du condensé de tour, du nombre de nœuds par niveau et du
+plafond d'oracle sous rotations pures autour de $z$. C'est une **mesure directe
+de la stabilité de l'objet au pas de quantification choisi**, utile bien
+au-delà de ce dossier : si la dérive est forte, la grille de 1 mm est trop
+grossière pour la géométrie observée. Coût : quelques heures.
+
+Conséquence opérationnelle quelle que soit l'issue : **on recalcule la tour par
+vue augmentée**, on ne suppose pas la commutation.
+
+### 0.8 Quels ordres $K$ servent, et où le pont de bruit casse
+
+Deux questions, une seule expérience, aucune apprentissage.
+
+- **Quels $K$ ?** Plafond d'oracle et pureté par ordre. La tour à
+  $K \leq 10$ coûte environ cinq fois celle à $K \leq 5$ ; si les ordres $7$ à
+  $10$ n'ajoutent rien, la question est réglée pour tout le reste du projet.
+- **Où casse le pont ?** Pour un contact objet–sol donné, le plus petit $K$ qui
+  sépare les deux composantes. Le chapitre 7 du manuscrit dit que $K$ résiste
+  aux ponts de bruit et le Théorème 3 chiffre la fraction récupérable ; il faut
+  la courbe empirique, par classe.
+
+### 0.9 Plafond d'oracle stratifié par **contact**
+
+C'est la porte qui décide du potentiel en instance, et elle manquait.
+
+Plafond d'oracle par classe, **en séparant les objets en contact avec le sol
+des objets isolés**, en fonction de $K$, **avec et sans retrait du sol**. Trois
+lectures :
+
+1. l'écart entre les deux strates mesure exactement ce que la limite de fond
+   coûte (§ 4.6 de l'[architecture](ARCHITECTURE.md)) ;
+2. la pente en $K$ dit si l'axe des ordres remplace le retrait du sol. Si oui,
+   c'est un résultat en soi : on supprime un prétraitement à seuil posé à la
+   main ;
+3. le régime sans sol sert de **repère**, jamais de contrat : il masque la
+   difficulté au lieu de la résoudre.
+
+### 0.10 Relèvement métrique : compter les naissances avant d'y croire
+
+Construire la tour sur $(x, y, z, \lambda n)$ sépare des surfaces en contact
+d'orientations différentes. Avant tout port, une seule mesure : **le nombre de
+naissances d'une trame relevée en dimension 6**, contre la même trame en
+dimension 3. Le chantier [`E-HGP/`](../../E-HGP/) a mesuré que les naissances
+passent de $O(n)$ à $\binom{n}{k}$ quand la dimension monte, l'obstruction
+étant gouvernée par la dimension intrinsèque et ramenée par le bruit ambiant.
+Si elles explosent, la piste se ferme en une journée.
+
 ## 3. Axe 1 — l'étude de substitution
 
 Six bras, un par ligne de la table de substitution. Tout est fixé sauf la ligne
@@ -199,6 +252,8 @@ avant de mesurer est ce qui transforme un écart en explication.
 | P5 | le gain sur les classes **filiformes** dépend du calendrier de $K$, et **disparaît si l'on retire $K = 1$** | HGP retarde la naissance des structures minces à $K$ élevé |
 | P6 | le gain est **faible ou nul** en champ proche, dense, uniforme, à étiquetage complet | il n'y a là aucune variation d'échelle à absorber |
 | P7 | l'arbre **condensé** est nettement plus stable sous décimation que l'arbre brut | il ne garde que les événements qui ont de la masse, donc ceux qui survivent à une perte de points |
+| P8 | **FM-6 bat FM-5** : une cible dense d'agrégat multi-trames apprend mieux qu'un simple accord entre deux vues pauvres | un accord entre deux vues peut être satisfait par une représentation triviale, une cible dense non |
+| P9 | le plus petit $K$ qui sépare un objet de son support **croît avec la portée** | le contact se fait par moins de retours quand la densité tombe |
 
 **P6 est la plus importante.** Si l'on gagne uniformément, y compris là où la
 théorie ne prédit rien, le gain vient probablement du budget de calcul ou d'un
@@ -280,6 +335,9 @@ quand c'est défavorable.
 | S5 (axe des ordres) ne paie pas | retirer OM ; le projet perd sa contribution la plus spécifique et il faut le reconnaître |
 | S7 à coût appris ne bat pas l'excès de masse sur le même arbre | garder la sélection statistique ; la tête apprise ne se justifie pas |
 | Le plafond d'oracle chute fortement à la condensation, quel que soit $\alpha$ | condenser plus tard dans la chaîne, ou garder deux échelles, une condensée pour le contexte et une brute pour les niveaux fins |
+| Le plafond d'oracle sur les objets **en contact** reste bas à tout $K$, sans retrait du sol | la limite de fond mord ; soit on assume le retrait du sol et on le dit, soit on mesure le relèvement métrique (porte 0.10) |
+| Les ordres $7$ à $10$ n'ajoutent rien (porte 0.8) | fixer $K_{\max} = 6$ partout et diviser le coût de préparation par cinq |
+| La dérive sous rotation pure (porte 0.7) est du même ordre que le gain mesuré | la grille de 1 mm est trop grossière ; aucun écart de modèle n'est interprétable avant de l'avoir affinée |
 | Le plafond d'oracle est bas sur les classes filiformes même avec $K = 1$ | la tour perd ces classes ; se replier sur l'instance et l'anomalie |
 | P1 à P4 se vérifient, P6 aussi | le mécanisme est établi ; passer à l'échelle |
 | Gain uniforme, y compris là où P6 prédit rien | chercher le confondant avant de publier |

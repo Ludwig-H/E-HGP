@@ -69,7 +69,7 @@ qu'elle se procure aujourd'hui par des constantes.
 6. **Une lecture exacte vers les points** (§ 9.1 et Proposition 7) : remplace
    l'interpolation trilinéaire ou $k$-NN du décodeur.
 
-## 4. Le vrai problème de conception : le chemin dans le treillis
+## 4. Ce que le treillis permet, et ce qu'il ne permettra jamais
 
 ### 4.1 Pourquoi une coupe horizontale est le mauvais objet
 
@@ -85,22 +85,71 @@ Conséquence directe sur l'architecture : **l'échelle ne doit jamais être un
 rayon global, et le modèle doit voir plusieurs ordres.** Ce n'est pas une
 préférence de conception, c'est une conséquence d'un théorème de stabilité.
 
-### 4.2 Deux axes indépendants, donc trois familles de chemins
+### 4.2 Quels chemins sont des échelles, et lesquels n'en sont pas
 
-La bifiltration offre ce qu'aucune architecture n'a : **deux axes de
-grossissement indépendants**.
+*Section corrigée. Une première version recommandait un chemin diagonal
+iso-densité comme défaut ; il n'est pas emboîtant, donc il ne peut pas être une
+échelle de pooling. La correction est plus instructive que l'erreur.*
 
-- horizontal, $r$ croissant à $K$ fixé : **grossir en espace à densité
-  décroissante** ;
-- vertical, $K$ croissant à $r$ fixé : **grossir en exigence de densité à
-  échelle fixée** ;
-- diagonal, $K$ et $r$ croissant ensemble à $\hat f_K \propto K/r^{3}$ constant :
-  **grossir en espace à densité constante** — un véritable espace d'échelle
-  iso-densité.
+Un U-Net exige que chaque unité d'un niveau tombe dans **exactement une** unité
+du niveau suivant. Cela demande que les ensembles de niveau soient emboîtés, et
+la condition est immédiate :
 
-Le chemin diagonal est à mon avis le bon défaut, et c'est un choix de fond : il
-sépare proprement « je regarde plus grand » de « je regarde plus dense », ce
-qu'aucun voxel ne sait faire. Il doit être mesuré contre les deux autres.
+$L_K(r) \subseteq L_{K'}(r') \quad \text{dès que} \quad r' \geq r \ \text{ et } \ K' \leq K.$
+
+En effet, si $|B(y, r) \cap \mathcal{X}| \geq K$ et $r' \geq r$, alors
+$|B(y, r') \cap \mathcal{X}| \geq K \geq K'$. Et la condition sur $K$ est
+essentielle : un point qui a exactement $K$ voisins dans $B(y, r')$ appartient à
+$L_K(r')$ mais pas à $L_{K'}(r')$ pour $K' > K$. **Grossir, c'est donc augmenter
+$r$ et décroître $K$, jamais l'inverse.**
+
+Trois familles de chemins sont donc des échelles valides :
+
+| chemin | mouvement | effet |
+| --- | --- | --- |
+| **horizontal** | $r \uparrow$, $K$ fixé | grossir en espace, à exigence de densité constante |
+| **vertical** | $r$ fixé, $K \downarrow$ | grossir en relâchant l'exigence de densité, à échelle fixée |
+| **anti-diagonal** | $r \uparrow$ et $K \downarrow$ | grossissement rapide sur les deux axes |
+
+Et une famille n'en est **pas** une : le chemin **iso-densité**
+$\hat f_K \propto K/r^{3}$ constant, qui fait croître $K$ avec $r$. Il est
+séduisant — « grossir en espace à densité constante » — mais il est
+**anti-monotone** : ses ensembles ne s'emboîtent pas, donc il n'existe aucune
+application de pooling entre ses niveaux. Ce n'est pas un défaut de réglage,
+c'est une impossibilité.
+
+**Ce que l'iso-densité est vraiment, et où il sert.** C'est une famille
+**latérale** : plusieurs lectures de la même scène au même niveau de densité et
+à des échelles spatiales différentes, reliées par les cartes verticales et non
+par du pooling. C'est exactement ce que consomme le mixage d'ordres (OM).
+
+### 4.2 bis Pourquoi OM devient structurel, et non facultatif
+
+La monotonie a une conséquence qui change le statut du mixage d'ordres.
+
+Le long d'une échelle, $K$ **décroît** avec la profondeur : les niveaux fins
+travaillent à $K$ élevé (exigence forte, beaucoup de petites composantes), les
+niveaux grossiers à $K$ faible (exigence faible, peu de grandes composantes).
+C'est l'inverse de ce qu'une première version de ce document affirmait.
+
+Or la sémantique tire dans l'autre sens. Un objet mince et lointain — un poteau
+à quarante mètres, quinze retours sur deux mètres — naît **tard** à $K$ élevé et
+**tôt** à $K$ faible. Il vit donc dans le coin « $K$ petit, $r$ petit » du
+treillis. Une échelle monotone unique traverse ce coin au mieux en diagonale :
+aux niveaux fins elle est à $K$ élevé, où le poteau n'existe pas encore ; aux
+niveaux grossiers elle est à $K$ faible, où il a déjà fusionné avec le sol ou la
+végétation.
+
+**Aucun chemin monotone unique ne voit cet objet.** La seule issue est de faire
+tourner **plusieurs branches à des $K$ différents** et de les fuser
+latéralement. C'est OM, et cela cesse d'être un enrichissement : c'est la
+condition pour que les classes filiformes soient visibles du modèle. La
+prédiction P5 devient donc un test du dispositif entier, pas d'un module.
+
+Bonne nouvelle d'ingénierie : les cartes verticales de la v9 vont de $K$ vers
+$K-1$, c'est-à-dire **exactement dans le sens du grossissement**. Le moteur
+publie déjà la seule application dont l'architecture a besoin pour changer
+d'ordre.
 
 ### 4.3 La condensation : l'étape que le manuscrit prescrit déjà
 
@@ -132,7 +181,7 @@ directes de l'architecture :
 3. le niveau de sortie $\hat\lambda_x$ de chaque point, **rendu comme variable
    par point**. La condensation est donc un *changement de représentation* et
    non une perte : ce qu'elle retire de la structure, elle le rend en scalaire ;
-4. la **tête de sélection** du modèle, par le mécanisme du § 5.2 (voir § 5 bis).
+4. la **tête de sélection** du modèle, par le mécanisme du § 5.2 du manuscrit (voir le composant SEL, § 5).
 
 **Ce qu'elle doit rendre stable, et c'est une prédiction.** L'arbre brut bouge
 beaucoup sous décimation : chaque micro-fusion se déplace. L'arbre condensé ne
@@ -193,6 +242,60 @@ et c'est la mesure de l'adaptativité. Il faut le publier (histogramme de $r$
 par niveau et par tranche de portée), car c'est l'observable qui montre que
 l'architecture fait ce qu'elle prétend.
 
+### 4.6 La limite de fond : la densité ne sépare pas ce qui se touche
+
+Cette section manquait, et c'est la limitation la plus importante du projet.
+
+**L'énoncé.** La tour sépare par la **densité**, jamais par la géométrie
+différentielle. Deux objets dont les retours forment un continuum — une voiture
+posée sur l'asphalte, un poteau dans l'herbe, un piéton sur la chaussée — sont
+density-connectés. Il n'existe alors **aucun couple $(K, r)$** qui les sépare.
+Un superpoint de SPT, lui, y parvient : il regarde les normales, la planéité,
+l'élévation, et une portière n'a pas la normale du sol même là où elle le
+touche.
+
+C'est une différence de nature et il faut la dire avant qu'un relecteur ne la
+trouve. Elle borne directement le plafond d'oracle de la porte 0.1, et elle le
+borne **là où sont les classes qui comptent**.
+
+**Trois parades, d'inégale valeur.**
+
+*L'axe $K$, et c'est la parade de principe.* Un contact entre une voiture et le
+sol passe le plus souvent par une poignée de retours. Dans le vocabulaire du
+chapitre 7 du manuscrit, c'est **un pont de bruit**, et $K$ est exactement le
+paramètre qui y résiste : à $K$ élevé il faut $K$ retours simultanés dans une
+même boule pour propager la connexité, ce qu'un contact ténu ne fournit pas. Le
+Théorème 3 chiffre même la fraction récupérable avant fusion parasite. **La
+limite et son remède sont donc tous deux dans la théorie**, et la question
+devient quantitative : à quel $K$ le pont casse-t-il, sur de vraies scènes ?
+C'est mesurable sans apprentissage.
+
+*Le retrait du sol, et son ironie.* C'est la parade pratique, universelle dans
+le domaine — ALPINE atteint $\mathrm{PQ} = 64{,}2$ après elle, et le corpus v9
+maintient des trames sans sol pour cette raison. Mais il faut reconnaître ce
+qu'elle est : **un prétraitement à seuil posé à la main**, c'est-à-dire
+exactement le genre de constante que tout ce dossier prétend supprimer. On ne
+peut donc pas la présenter comme une solution ; on la garde comme un régime de
+comparaison, et on mesure ce que $K$ fait **sans elle**. Si $K$ remplace le
+retrait du sol, c'est un résultat en soi.
+
+*Le relèvement métrique, et sa dette.* La tour n'est pas attachée à
+$\mathbb{R}^{3}$ : elle se calcule dans tout espace euclidien. On peut donc la
+construire sur $(x, y, z, \lambda n)$ avec $n$ la normale estimée, où deux
+surfaces en contact mais d'orientations différentes deviennent distantes. C'est
+séduisant et il faut être prudent : le chantier `E-HGP/` du dépôt a **mesuré**
+que les naissances de la tour passent de $O(n)$ à $\binom{n}{k}$ quand la
+dimension monte, l'obstruction étant gouvernée par la dimension **intrinsèque**
+et ramenée par le bruit ambiant. Avant tout port, il faut donc simplement
+compter les naissances d'une trame relevée en dimension 6. Si elles explosent,
+la piste se ferme d'elle-même, et c'est une expérience d'une journée.
+
+**Ce qu'on en fait.** On mesure le plafond d'oracle **stratifié par contact** :
+objets en contact avec le sol contre objets isolés, en fonction de $K$, avec et
+sans retrait du sol. C'est la porte 0.9. Tant que cette courbe n'existe pas,
+toute discussion sur le potentiel du projet en segmentation d'instance est de
+la spéculation.
+
 ## 5. Les six composants
 
 ### FP — Pooling de filtration
@@ -202,13 +305,32 @@ l'affectation du niveau $\ell-1$ vers le niveau $\ell$, normalisée en lignes
 par les poids $w_{x\tau} = S_\tau / T_x$ du § 9.1. Le dépliage est $P_\ell$
 appliqué en sens inverse, avec connexion de saut, comme dans tout U-Net.
 
-Trois propriétés qu'un *grid pooling* n'a pas : l'affectation est **douce**
-(un point appartenant à plusieurs nœuds répartit une masse totale de $1$),
-**canonique** (aucune grille, aucune graine), et **conservative** (la masse est
-préservée sur toute antichaîne).
+Trois propriétés qu'un *grid pooling* n'a pas : l'affectation est **canonique**
+(aucune grille, aucune graine), **conservative** (la masse est préservée sur
+toute antichaîne), et douce là où il le faut — voir ci-dessous.
 
-Le recouvrement se paie en nombre de non-zéros de $P_\ell$. C'est une
-statistique à mesurer avant tout entraînement — elle décide du coût réel.
+**Un seul étage est doux, et c'est une simplification importante.** Il faut
+distinguer deux interfaces, ce qu'une première version de ce document
+confondait.
+
+- **Niveau 0 vers niveau 1, points vers nœuds : doux.** L'arbre est un arbre de
+  **facettes** ; une antichaîne de cet arbre **partitionne** les facettes ; et
+  les poids du § 9.1 poussent cette partition en une **partition de l'unité sur
+  les points** : $w_{xv} = \sum_{\tau \in v} S_\tau / T_x$, de somme $1$ sur
+  l'antichaîne. C'est ici, et seulement ici, que le recouvrement pour
+  $K \geq 2$ se manifeste. Le nombre de non-zéros de $P_1$ est donc la seule
+  statistique de coût à surveiller (porte 0.5).
+- **Niveau $\ell$ vers niveau $\ell+1$ : dur.** Deux antichaînes emboîtées du
+  même arbre condensé donnent à chaque nœud du niveau fin **exactement un**
+  ancêtre au niveau grossier. $P_{\ell+1}$ est une matrice $0/1$ à une entrée
+  par ligne : un pooling ordinaire, creux, sans recouvrement.
+- **Changement d'ordre, $K$ vers $K-1$ : dur aussi.** La carte verticale envoie
+  un nœud d'ordre $K$ sur un unique nœud d'ordre $K-1$, et elle est orientée
+  dans le sens du grossissement (§ 4.2 bis).
+
+Autrement dit, la crainte d'un $P_\ell$ dense à tous les étages était infondée :
+**le recouvrement ne coûte qu'à l'entrée**, et au-dessus l'échelle est une
+contraction d'arbre ordinaire.
 
 ### MGA — Attention sur le graphe de fusion, à biais ultramétrique
 
@@ -249,9 +371,12 @@ grand. Aucune architecture à un seul graphe de voisinage ne peut offrir ce
 choix.
 
 Trois réalisations, par coût croissant : **calendrier de $K$ selon la
-profondeur** (défaut, gratuit : $K$ petit aux niveaux fins, grand aux niveaux
-grossiers), **attention croisée entre ordres au goulot**, **branches parallèles
-par $K$** (borne supérieure coûteuse, à mesurer une fois).
+profondeur** — et le sens est imposé par la monotonie du § 4.2, $K$ **élevé aux
+niveaux fins**, **faible aux niveaux grossiers** —, **attention croisée entre
+ordres au goulot**, et **branches parallèles par $K$**. Le § 4.2 bis montre que
+la troisième n'est pas la borne supérieure coûteuse qu'on croyait mais la
+**seule** qui rende visibles les objets minces et lointains : c'est donc elle
+qu'il faut mesurer en premier, pas en dernier.
 
 ### PUR — Lecture par partition de l'unité
 
@@ -267,7 +392,7 @@ Voir § 7.
 ### SEL — Tête de sélection apprise, ou « hacker HDBSCAN »
 
 C'est la conséquence la plus productive de la condensation, et elle vient
-encore du manuscrit. Le § 5.2 observe que l'extraction d'un partitionnement à
+encore du manuscrit. Le § 5.2 du manuscrit observe que l'extraction d'un partitionnement à
 plat depuis l'arbre condensé est un **programme dynamique ascendant** à
 fonction de coût **remplaçable** :
 
@@ -279,7 +404,7 @@ masse est un critère purement statistique, aveugle à la géométrie »** ; en
 substituant une évaluation propre au problème — alignement d'une structure,
 volume attendu, conformité à un modèle 3D — « l'algorithme se transforme en un
 extracteur guidé géométriquement ». C'est ce que font les deux applications du
-§ 5.3 et du § 5.4, avec des coûts écrits à la main.
+§ 5.3 et du § 5.4 du manuscrit, avec des coûts écrits à la main.
 
 **Le mouvement du modèle de fondation est donc évident : apprendre ce coût.**
 On pose $\mathrm{loss}(C) = -g_\theta(h_C)$, où $h_C$ est l'état du nœud produit
@@ -353,7 +478,7 @@ tour fournit une tâche où il n'existe pas.** C'est, à ma connaissance, la
 première famille de prétextes 3D dont on peut argumenter cela par construction
 et non par expérience.
 
-### 7.2 Les cinq tâches
+### 7.2 Les six tâches
 
 | tâche | cible | pourquoi elle n'est pas locale |
 | --- | --- | --- |
@@ -362,6 +487,7 @@ et non par expérience.
 | **FM-3 profil en $K$** | l'ordre auquel un nœud cesse d'exister | mesure la densité locale relative au reste |
 | **FM-4 rétablissement** | masquer une région, prédire la **structure de fusion** qu'elle aurait | reconstruction topologique, pas géométrique |
 | **FM-5 accord inter-vues** | même structure de fusion sous décimation en portée et occultation | c'est l'hypothèse d'invariance, posée en fonction de perte |
+| **FM-6 distillation d'agrégat** | depuis une trame isolée, la structure de fusion de la tour de l'agrégat multi-trames | § 7.6 : une **cible dense** au lieu d'un simple accord entre deux vues pauvres |
 
 Toutes ces cibles sont **exactes et gratuites** : elles sortent du moteur, sans
 annotation.
@@ -382,14 +508,69 @@ les augmentations que le domaine impose : décimation en portée selon le modèl
 de balayage, retrait d'anneaux, occultation par secteur. L'invariant demandé à
 l'élève est que **la structure**, et non les coordonnées, soit préservée.
 
-### 7.5 Un cadeau pratique : les augmentations qui ne coûtent rien
+### 7.5 Augmentations : ce qui commute, et ce que la quantification casse
 
-Les rotations, translations et changements d'échelle uniformes **commutent
-exactement** avec la tour : le nuage tourne, la tour tourne avec lui, sans
-recalcul. Seules les augmentations de densité et d'occultation la changent —
-et ce sont précisément celles que l'on veut pour FM-5. Il suffit donc de
-**pré-calculer une banque de quelques vues décimées par trame**. Le
-pré-entraînement n'a jamais besoin de recalculer une tour en ligne.
+*Section corrigée. Une première version affirmait que les rotations, les
+translations et les homothéties commutent exactement avec la tour et que ces
+augmentations étaient donc gratuites. C'est vrai de l'objet mathématique et
+**faux du moteur**.*
+
+L'objet mathématique est bien équivariant : $\rho(\sigma)$, la condition de
+Gabriel et l'ordre des niveaux sont invariants par isométrie et covariants par
+homothétie. Mais le moteur consomme un nuage **quantifié sur une grille de
+1 mm**. Le chemin réel est `tourner → quantifier → tour`, et une rotation change
+l'accrochage à la grille : le nuage quantifié n'est pas l'image du nuage
+quantifié. Les prédicats étant exacts, un accrochage différent peut de surcroît
+**faire basculer une égalité** — un plateau cosphérique se scinde, une
+multifusion devient deux fusions.
+
+Trois conséquences pratiques :
+
+1. **Recalculer, ne pas supposer.** Le moteur est assez rapide pour des
+   centaines de milliers de trames ; on pré-calcule donc une **banque de vues
+   augmentées** — rotations, décimations en portée, retraits d'anneaux,
+   occultations — chacune avec sa tour. C'est un coût de préparation, pas une
+   difficulté.
+2. **Mesurer l'écart, parce qu'il est informatif.** La dérive du condensé de la
+   tour sous rotation pure est une **mesure directe de la stabilité de l'objet
+   au niveau de quantification choisi**. Si elle est forte, la grille de 1 mm
+   est trop grossière pour la géométrie observée, et c'est un fait utile bien
+   au-delà de ce dossier. Porte 0.7 de [`MESURE.md`](MESURE.md).
+3. **La rotation devient une augmentation informative.** Puisqu'elle n'est pas
+   gratuite, elle teste quelque chose : l'invariance du modèle à une
+   perturbation de l'ordre du millimètre. C'est exactement le régime où les
+   prédicats exacts peuvent basculer, donc le pire cas honnête.
+
+### 7.6 Le temps, et la meilleure cible d'apprentissage du projet
+
+Un LiDAR automobile produit une séquence, pas une trame. La tour, elle, est
+définie par trame. Deux usages, et le second est le plus intéressant.
+
+**Usage en ligne.** Une tour par trame, plus une attention temporelle entre
+nœuds de trames voisines, recalée par l'odométrie. Classique.
+
+**Usage en apprentissage, et c'est là que se trouve le vrai levier.** On
+agrège $N$ trames consécutives en compensant le mouvement propre, et on calcule
+**une tour sur l'agrégat**. Le nuage agrégé est dense : c'est, autant qu'on
+puisse l'obtenir, la **géométrie réelle** de la scène. La trame isolée en est un
+échantillon clairsemé.
+
+On tient alors une cible que le poster demandait sans pouvoir la produire :
+
+> **FM-6 — distillation d'agrégat.** Depuis une trame isolée, prédire la
+> structure de fusion que la tour de l'agrégat multi-trames possède.
+
+C'est l'hypothèse centrale du projet transformée en fonction de perte
+**supervisée par la géométrie elle-même**. Là où FM-5 demande seulement que
+deux vues s'accordent — ce qui peut être satisfait par une représentation
+triviale —, FM-6 donne la bonne réponse. Et elle est gratuite : l'odométrie est
+disponible.
+
+Deux précautions honnêtes. Les objets **mobiles** se traînent dans l'agrégat ;
+on se limite donc à des fenêtres courtes, et l'on rapporte séparément les
+classes dynamiques. Et l'agrégat n'est pas la vérité : c'est un meilleur
+échantillon, pas la surface. On ne doit donc jamais parler de « vérité
+géométrique » mais de **cible dense**.
 
 ## 8. Variables de nœud
 
