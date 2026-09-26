@@ -54,6 +54,12 @@ zéro — dont le *pooling*, le voisinage, l'encodage de position relative et le
 décodeur sont tous lus dans la bifiltration $(K, r)$, plus une famille de
 prétextes dérivés de la filtration.
 
+Le [pilote de guidage](GUIDAGE_FULL_ET_PREENTRAINEMENT_20260926.md) teste aussi
+FULL comme **enseignant seul pendant le pré-entraînement**, avec PTv3 ordinaire
+à l'inférence. Un plan croisé sépare la valeur de ces cibles de celle du
+tokenizer HGP. Le premier prétexte interroge la connexité K1 ; les ordres
+supérieurs sont ajoutés ensuite à budget identique.
+
 ```text
       points
         | CONDENSATION  seuil RELATIF sur la masse m_tau du 9.1
@@ -73,6 +79,7 @@ prétextes dérivés de la filtration.
 | --- | --- |
 | [`AUDIT_V9_ET_ARCHITECTURE_20260926.md`](AUDIT_V9_ET_ARCHITECTURE_20260926.md) | audit transversal v9 → modèle : contrat d'export, jetons, cartes entre K, coût et portes de décision |
 | [`CONTRAT_COUPES_ET_MASSES_20260926.md`](CONTRAT_COUPES_ET_MASSES_20260926.md) | suite constructive : flux d'incidences, snapshots, composition pondérée, réserves et 11 fixtures rationnelles |
+| [`GUIDAGE_FULL_ET_PREENTRAINEMENT_20260926.md`](GUIDAGE_FULL_ET_PREENTRAINEMENT_20260926.md) | FULL enseignant ou tokenizer, perte de connexité, visibilité, transport inter-vues et contre-exemples exécutables |
 | [`OBJET.md`](OBJET.md) | ce que la tour est et publie ; les six primitives qu'une architecture y lit |
 | [`ETAT_DE_LART.md`](ETAT_DE_LART.md) | le verrou, comment la littérature le rattrape, et **la table de substitution** |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | HGP-UNet : la condensation, le chemin dans le treillis, les six composants, les conceptions écartées |
@@ -91,20 +98,20 @@ on fixe le squelette, les paramètres, la recette, les données et le budget, et
 on remplace un seul composant à la fois — l'échelle, le regroupement, le
 voisinage, l'encodage de position, l'axe des ordres, le décodeur.
 
-Et avec des **témoins négatifs**, qui sont la partie que personne ne fait :
+Et avec des **témoins négatifs** :
 
 - **T2, canal de densité seul** — donner $\hat f_K(x)$ comme simple variable à
-  un PTv3 inchangé. Si cela capte l'essentiel du gain, la tour n'apporte rien
-  de plus qu'un canal de densité. **Le témoin le moins cher et le plus
-  tranchant ; il se fait en premier.**
-- **T1, tour brouillée** — mêmes niveaux, mêmes tailles, points réaffectés au
-  hasard. Si les performances tiennent, ce n'est pas *cette* structure qui
-  aide.
+  un PTv3 inchangé, puis renforcer ce témoin par rayons K-NN et anisotropie.
+  S'il capte le gain, la variante testée ne démontre pas de valeur
+  supplémentaire. **Ce témoin se prépare en premier.**
+- **T1, hiérarchie témoin** — budgets de niveaux, tailles et arêtes appariés,
+  avec couverture et quotients valides. Si les performances tiennent, la
+  structure exacte ne démontre pas de gain dans ce bras.
 
-Et avec des **prédictions écrites d'avance**, y compris celle-ci : *le gain doit
-être faible ou nul en champ proche, dense, uniforme, à étiquetage complet.* Si
-l'on gagne uniformément, le gain vient probablement du budget de calcul, et il
-faut chercher le confondant avant de publier.
+Et avec des **prédictions écrites d'avance**, dont celle d'un gain plus faible
+en champ proche, dense, uniforme, à étiquetage complet. Une tendance différente
+conduit à revoir l'explication proposée et les coûts ; elle n'invalide pas
+automatiquement un gain correctement mesuré.
 
 ## Ce que l'audit de conception a déjà corrigé
 

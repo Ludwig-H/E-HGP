@@ -277,14 +277,14 @@ limite et son remède sont donc tous deux dans la théorie**, et la question
 devient quantitative : à quel $K$ le pont casse-t-il, sur de vraies scènes ?
 C'est mesurable sans apprentissage.
 
-*Le retrait du sol, et son ironie.* C'est la parade pratique, universelle dans
-le domaine — ALPINE atteint $\mathrm{PQ} = 64{,}2$ après elle, et le corpus v9
-maintient des trames sans sol pour cette raison. Mais il faut reconnaître ce
-qu'elle est : **un prétraitement à seuil posé à la main**, c'est-à-dire
-exactement le genre de constante que tout ce dossier prétend supprimer. On ne
-peut donc pas la présenter comme une solution ; on la garde comme un régime de
-comparaison, et on mesure ce que $K$ fait **sans elle**. Si $K$ remplace le
-retrait du sol, c'est un résultat en soi.
+*Une branche non-sol avec contexte.* Le sans-sol est un régime prioritaire du
+moteur et une variante légitime du réseau. Comparer FULL sur brut à FULL sur
+non-sol avec une branche sol/contexte, puis restituer les prédictions vers
+**tous les retours**. Le masque géométrique est produit sur la trame entière
+avant les vues et son coût est payé ; il ne devient pas une classe sémantique.
+Mesurer erreurs de retrait et perte de contexte. Kmax, α et les coupes
+comportent déjà des choix : l'existence de paramètres ne justifie pas
+d'exclure cette variante. Si K permet de s'en passer, ce sera un résultat.
 
 *Le relèvement métrique, et sa dette.* La tour n'est pas attachée à
 $\mathbb{R}^{3}$ : elle se calcule dans tout espace euclidien. On peut donc la
@@ -474,51 +474,62 @@ Deux raisons, et elles pèsent plus que l'élégance :
 
 ## 7. Pré-entraînement
 
-### 7.1 Pourquoi la tour répond au raccourci géométrique
+### 7.1 Deux rôles de FULL à distinguer
 
-Sonata a établi le diagnostic central de la SSL 3D : les représentations
-s'effondrent sur des indices spatiaux de bas niveau, **parce que la géométrie
-est l'entrée**. Prédire une coordonnée masquée se résout par interpolation
-locale. Sonata *atténue* : bruit gaussien sur les coordonnées masquées,
-ordonnanceur de masque, suppression du décodeur hiérarchique.
+Le [contrat de guidage](GUIDAGE_FULL_ET_PREENTRAINEMENT_20260926.md) définit
+deux interventions : FULL comme **enseignant dans la perte**, avec un PTv3
+ordinaire à l'inférence, et FULL comme **structure de calcul** dans HGP-UNet.
+Le plan croisé A0G0/A0G1/A1G0/A1G1 distingue leurs gains et leur interaction.
+Commencer par l'enseignant K1 demande seulement les coupes de couverture ;
+FP/PUR à K supérieur attendent le supplément pondéré.
 
-Les cibles de la tour permettent des prétextes structurels exacts, mais
-l'absence de raccourci géométrique reste à établir. À K=1, deux points
-fusionnent au rayon égal à la moitié de leur distance : une cible FM-1 peut
-être locale. Pour chaque tâche, masquer les variables qui révèlent la cible,
-puis comparer à un prédicteur fondé sur la géométrie locale et à un contexte
-plus large.
+[Sonata](https://arxiv.org/html/2503.16429v1) motive le diagnostic des
+raccourcis spatiaux. Dans notre cas, retirer un scalaire cible ne suffit pas
+si parents, graphes ou biais calculés sur la vue complète le révèlent.
+L'élève ne reçoit que sa vue V et, dans le bras architectural, FULL(V)
+recalculé. FULL(T), sur la vue enseignante, reste dans la perte.
 
 ### 7.2 Les six tâches
 
-| tâche | cible | pourquoi elle n'est pas locale |
+| tâche | cible proposée | limite à traiter |
 | --- | --- | --- |
-| **FM-1 fusion** | $\log r_{uv}$ pour deux nœuds adjacents | goulot de densité entre eux |
-| **FM-2 persistance** | mort $-$ naissance d'un nœud | dépend de tout le voisinage jusqu'à la fusion |
-| **FM-3 profil en $K$** | l'ordre auquel un nœud cesse d'exister | mesure la densité locale relative au reste |
-| **FM-4 rétablissement** | masquer une région, prédire la **structure de fusion** qu'elle aurait | reconstruction topologique, pas géométrique |
-| **FM-5 accord inter-vues** | même structure de fusion sous décimation en portée et occultation | c'est l'hypothèse d'invariance, posée en fonction de perte |
-| **FM-6 distillation d'agrégat** | depuis une trame isolée, la structure de fusion de la tour de l'agrégat multi-trames | § 7.6 : une **cible dense** au lieu d'un simple accord entre deux vues pauvres |
+| **FM-1 fusion** | connexité K1 d'une paire de retours à un rayon interrogé | témoins distance, voisinage local et MST sur V ; horizon déclaré |
+| **FM-2 persistance** | survie ou rayon d'un état identifié | naissances et censure, variables et ancêtres enseignants cachés |
+| **FM-3 profil en K** | lectures des mêmes retours dans plusieurs ordres | pas d'identité de nœud supposée ; couverture et recouvrement explicites |
+| **FM-4 rétablissement** | relations enseignantes après suppression d'une région | structure cachée non identifiable en général ; prédiction conditionnelle |
+| **FM-5 accord inter-vues** | features sur les mêmes IDs et supports pondérés dans la perte | les deux arbres recalculés peuvent différer ; accord seul trivial |
+| **FM-6 distillation d'agrégat** | relations d'une cible temporelle plus informée | régime secondaire avec alignement, visibilité et mouvement |
 
-Ces cibles sont **exactes une fois la tour et les incidences nécessaires
-calculées**, sans annotation ; leur préparation, stockage et alignement entre
-vues doivent entrer dans le coût total.
+Commencer avec FM-1 et la recette SSL de référence. Ajouter un prétexte à la
+fois. Les relations FULL sont exactes sur l'enseignant ; leur prédiction
+depuis une vue appauvrie et leur intérêt sémantique restent à mesurer.
+Préparation, requêtes et cache entrent dans le coût total.
 
 ### 7.3 Masquage par nœuds entiers
 
-En traitement du langage, masquer un mot entier bat le masquage de sous-mots.
-La tour donne l'unité correspondante en 3D : **on masque un nœud entier, pas
-des points au hasard.** Un nœud fournit un masque structurel cohérent ;
-vérifier par témoin local si son contenu reste prévisible par interpolation. C'est le levier le plus
-simple à essayer, et il se greffe sur n'importe quelle recette d'auto-
-distillation existante sans changer le reste.
+Un nœud peut définir un masque structurel cohérent. Sa sélection depuis la
+tour complète peut aussi renseigner sur la cible : c'est une intervention à
+comparer à des masques géométriques de mêmes volume et cardinal.
+Le premier pilote utilise des masques indépendants des réponses FULL(T).
+Les features, parents et poids de la région cachée ne passent pas dans le
+forward. Fixer V puis changer la seule partie cachée de T doit laisser ce
+forward inchangé.
 
 ### 7.4 Auto-distillation
 
-En parallèle, une auto-distillation enseignant/élève de la famille Sonata, avec
-les augmentations que le domaine impose : décimation en portée selon le modèle
-de balayage, retrait d'anneaux, occultation par secteur. L'invariant demandé à
-l'élève est que **la structure**, et non les coordonnées, soit préservée.
+Conserver une recette enseignant/élève de référence, avec décimation,
+retrait d'anneaux et occultation. **Ne pas imposer la même structure de fusion
+entre vues.** À K1, {0,1,2} fusionne au rayon 1/2, mais {0,2} au rayon 1.
+Un pont supprimé change correctement la tour.
+
+Le guidage compare les mêmes IDs sur le domaine commun observable. Pour les
+features régionales, agréger enseignant et élève avec les mêmes poids
+enseignants, dans la perte seulement. Le produit de deux matrices
+d'affectation douces fournit un mélange, pas une identité de tokens, même
+pour une vue inchangée. Les formules, réserves et contre-exemples sont dans
+le [contrat de guidage](GUIDAGE_FULL_ET_PREENTRAINEMENT_20260926.md).
+Conserver le mécanisme de diversité de la SSL de base : une cible dense
+n'interdit pas à elle seule une représentation constante.
 
 ### 7.5 Augmentations : ce qui commute, et ce que la quantification casse
 
@@ -543,25 +554,26 @@ Trois conséquences pratiques :
    augmentées** — rotations, décimations en portée, retraits d'anneaux,
    occultations — chacune avec sa tour. C'est un coût de préparation, pas une
    difficulté.
-2. **Mesurer l'écart, parce qu'il est informatif.** La dérive du condensé de la
-   tour sous rotation pure est une **mesure directe de la stabilité de l'objet
-   au niveau de quantification choisi**. Si elle est forte, la grille de 1 mm
-   est trop grossière pour la géométrie observée, et c'est un fait utile bien
-   au-delà de ce dossier. Porte 0.7 de [`MESURE.md`](MESURE.md).
+2. **Mesurer l'écart.** Rapporter changements de FULL, du condensé et des
+   affectations consommées. Si ces changements pénalisent le réseau,
+   comparer les précisions et leurs coûts. Une égalité exacte qui se scinde
+   peut modifier la combinatoire sans dégrader la représentation utile.
+   Porte 0.7 de [`MESURE.md`](MESURE.md).
 3. **La rotation devient une augmentation informative.** Puisqu'elle n'est pas
    gratuite, elle teste quelque chose : l'invariance du modèle à une
    perturbation de l'ordre du millimètre. C'est exactement le régime où les
    prédicats exacts peuvent basculer, donc le pire cas honnête.
 
-### 7.6 Le temps, et la meilleure cible d'apprentissage du projet
+### 7.6 Le temps : une extension avec information supplémentaire
 
-Un LiDAR automobile produit une séquence, pas une trame. La tour, elle, est
-définie par trame. Deux usages, et le second est le plus intéressant.
+La cible primaire reste le mono-scan sans historique. Le temporel est une
+extension distincte, même quand seule l'étape de pré-entraînement y accède.
+Deux usages peuvent être évalués.
 
 **Usage en ligne.** Une tour par trame, plus une attention temporelle entre
 nœuds de trames voisines, recalée par l'odométrie. Classique.
 
-**Usage en apprentissage, et c'est là que se trouve le vrai levier.** On
+**Usage en apprentissage.** On
 agrège $N$ trames consécutives en compensant le mouvement propre, et on calcule
 **une tour sur l'agrégat**. Le nuage agrégé apporte davantage de retours
 observés, avec ses propres erreurs d'alignement, occultations et objets
@@ -572,17 +584,15 @@ On tient alors une cible que le poster demandait sans pouvoir la produire :
 > **FM-6 — distillation d'agrégat.** Depuis une trame isolée, prédire la
 > structure de fusion que la tour de l'agrégat multi-trames possède.
 
-C'est l'hypothèse centrale du projet transformée en fonction de perte
-**supervisée par la géométrie elle-même**. Là où FM-5 demande seulement que
-deux vues s'accordent — ce qui peut être satisfait par une représentation
-triviale —, FM-6 propose une cible dense. Son calcul exige l'alignement,
-la tour de l'agrégat et un contrôle de visibilité ; mesurer ces coûts.
+La cible est plus informée, sans être identifiable depuis toute trame isolée.
+Comparer les variantes à même accès aux trames et à l'odométrie, avec fenêtres
+et frontières de corpus déclarées. La recette anti-effondrement reste
+nécessaire. Mesurer alignement, tour de l'agrégat et contrôle de visibilité.
 
-Deux précautions honnêtes. Les objets **mobiles** se traînent dans l'agrégat ;
-on se limite donc à des fenêtres courtes, et l'on rapporte séparément les
-classes dynamiques. Et l'agrégat n'est pas la vérité : c'est un meilleur
-échantillon, pas la surface. On ne doit donc jamais parler de « vérité
-géométrique » mais de **cible dense**.
+Les objets mobiles et erreurs de recalage déforment l'agrégat ; une fenêtre
+courte ne les supprime pas. Déclarer confiance, visibilité et pondération des
+observations répétées. L'agrégat est une cible plus dense, pas une surface
+physique vraie ni nécessairement un meilleur enseignant sur chaque région.
 
 ## 8. Variables de nœud
 
@@ -591,13 +601,11 @@ Le détail est dans [`JETON.md`](JETON.md). Le principe tient en une règle :
 canaux de filtration et les canaux d'acquisition gardent leurs unités, dans des
 canaux séparés et ablatables.
 
-Point de conception important pour le transfert inter-capteurs : on veut une
-**équivariance d'échelle, pas une invariance**. Une voiture mesure quatre
-mètres, et c'est une information réelle. On donne donc $\log r$ comme canal
-explicite, tandis que la *structure* (pooling, voisinage, biais) reste sans
-échelle. Le modèle peut ainsi utiliser l'échelle absolue là où elle aide et
-l'ignorer là où elle nuit — et l'ablation du canal $\log r$ dit lequel des deux
-régimes domine.
+Conserver la taille physique comme information, avec unité de référence
+explicite pour les logarithmes. Ce canal permet au modèle d'utiliser la
+métrique ; il ne rend pas le réseau équivariant par construction. Mesurer
+séparément covariance de l'objet, transformation des features et comportement
+appris sous homothétie, décimation et changement de capteur.
 
 ## 9. Ce que l'architecture n'est pas
 

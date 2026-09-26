@@ -3,11 +3,12 @@
 Ce qu'un nœud de l'échelle porte en entrée du réseau, comment on le normalise,
 et comment on décide expérimentalement de ce qui mérite d'y rester.
 
-Avertissement de cadrage, qui vient de l'architecture et non d'une intuition :
-dans HGP-UNet, **l'essentiel de l'apport est structurel** — l'échelle, le
-voisinage, le biais de position, l'axe des ordres. Les variables de nœud sont
-le levier le plus faible. Ce document propose donc un jeu riche **et** la
-procédure pour en retirer sans état d'âme tout ce qui ne se paie pas.
+L'hypothèse HGP-UNet privilégie l'apport structurel — échelle, voisinage,
+biais de position, axe des ordres — sans avoir encore mesuré son poids face
+aux variables de nœud. Ce document propose un jeu riche et la procédure pour
+en retirer ce qui ne se paie pas. Le [protocole de guidage FULL](GUIDAGE_FULL_ET_PREENTRAINEMENT_20260926.md)
+distingue ces entrées du tokenizer des variables enseignantes réservées à la
+perte de pré-entraînement.
 
 ## 1. Cinq familles, et la règle qui les sépare
 
@@ -17,6 +18,11 @@ C'est la règle de la présentation du 16 septembre, § « Ce que le code ne
 remplace pas ». L'hypothèse du poster porte sur la **forme** ; elle n'a jamais
 prétendu que la taille, la portée ou la rémission étaient sans intérêt. Les
 normaliser hors d'existence rendrait le modèle aveugle au monde métrique.
+
+Cette règle conserve l'information physique ; elle n'interdit pas une
+standardisation numérique réversible des canaux avec unités et constantes
+déclarées. Pour les logarithmes, utiliser un rapport à une unité fixe,
+par exemple $\log(r/r_0)$.
 
 | famille | normalisée ? | ce qu'elle capture |
 | --- | --- | --- |
@@ -28,12 +34,13 @@ normaliser hors d'existence rendrait le modèle aveugle au monde métrique.
 
 ### Équivariance plutôt qu'invariance
 
-Pour le transfert inter-capteurs on veut que la **structure** soit sans échelle
-mais que le **modèle** sache l'échelle : une voiture mesure quatre mètres, et
-c'est une information réelle. On donne donc $\log r$ comme canal explicite,
-tandis que le pooling, le voisinage et le biais de position restent sans
-échelle. L'ablation de ce canal dit lequel des deux régimes domine — c'est une
-mesure de la phase 2.
+Conserver la taille physique tout en normalisant la forme est le choix à
+tester. Donner $\log(r/r_0)$ permet au modèle d'utiliser la métrique ; cela ne
+rend pas à lui seul le réseau équivariant. Distinguer la covariance de la
+tour, la transformation déclarée des variables et le comportement appris.
+Un changement de capteur modifie aussi le balayage et la visibilité : il
+n'est pas une homothétie. Ablater le canal métrique à acquisition appariée,
+puis mesurer le transfert avec réglages gelés.
 
 ## 2. Famille 1 — forme
 
@@ -83,7 +90,11 @@ centre en repère capteur ; hauteur au-dessus du capteur ; **portée** et azimut
 nombre de retours couverts, séparé en intérieur et coquille.
 
 La portée doit être testée comme canal explicite : elle peut aider à séparer
-effet de l'acquisition et structure locale. Son apport propre est à ablater.
+effet de l'acquisition et structure locale. Son apport propre est à ablater
+avec profils de rayons K-NN, comptes multi-rayons et anisotropie. Le score
+$K/(n\omega_3r_K^3)$ est une concentration ambiante, pas automatiquement une
+densité physique de surface ; le témoin T2 de [MESURE](MESURE.md) explicite
+ces comparaisons conditionnelles.
 
 ## 4. Famille 3 — filtration
 
@@ -91,6 +102,11 @@ Ce que la tour donne et que rien d'autre ne donne. Ce sont aussi les cibles des
 tâches de pré-entraînement, ce qui impose une précaution : **une variable
 utilisée comme cible en pré-entraînement ne doit pas être donnée en entrée au
 même moment.**
+
+La restriction porte aussi sur les parents, degrés, choix des voisins et
+biais d'attention qui révèlent la réponse. Dans le bras tokenizer, ces objets
+viennent de la vue élève recalculée ; les objets de la tour enseignante restent
+dans la perte. Élaguer cette dernière après masquage ne suffit pas.
 
 Naissance, mort, persistance et écart logarithmique ; rang et quantile du
 niveau dans la trame — utile parce que la densité absolue dépend du capteur
@@ -103,7 +119,8 @@ identité, son niveau, sa taille ; excès de masse du nœud.
 Rattachée par identifiant de point, hors moteur : rémission (moyenne,
 écart-type, quantiles) ; anneaux couverts et couverture angulaire ; incidence
 estimée depuis les moments ; proxy d'occultation, part du secteur angulaire
-sans retour.
+sans retour. Un secteur sans retour n'établit ni absence de surface ni espace
+libre ; conserver cette incertitude dans les comparaisons entre vues.
 
 ## 6. Taille et format
 

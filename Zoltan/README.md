@@ -36,6 +36,9 @@ coupes consommées sont les hypothèses à mesurer.
 1. [`FoundationModel/AUDIT_V9_ET_ARCHITECTURE_20260926.md`](FoundationModel/AUDIT_V9_ET_ARCHITECTURE_20260926.md) — l'audit v9 et les décisions d'interface.
    Sa [suite constructive](FoundationModel/CONTRAT_COUPES_ET_MASSES_20260926.md)
    définit le contrat des coupes et ses fixtures rationnelles.
+   Le [contrat de guidage](FoundationModel/GUIDAGE_FULL_ET_PREENTRAINEMENT_20260926.md)
+   précise ensuite les pertes d'apprentissage, le rôle d'enseignant de FULL
+   et les correspondances entre vues.
 2. [`FoundationModel/README.md`](FoundationModel/README.md) — la thèse et le
    parcours d'entrée.
 3. [`FoundationModel/OBJET.md`](FoundationModel/OBJET.md) — ce que la tour est,
@@ -51,8 +54,8 @@ coupes consommées sont les hypothèses à mesurer.
 
 ## Ce que ce dossier n'est pas
 
-Le dossier contient un petit falsificateur exécutable de l'algèbre des coupes,
-avec son reçu. Il ne contient aucun résultat appris ni exporteur natif qualifié.
+Le dossier contient des falsificateurs exécutables des coupes et du guidage,
+avec leurs reçus. Il ne contient aucun résultat appris ni exporteur natif qualifié.
 Les chiffres de moteur proviennent des reçus `morsehgp3D_v9/receipts/` ;
 les fixtures abstraites de conception ont une portée distincte et explicite.
 

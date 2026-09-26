@@ -4,21 +4,26 @@ Ce qui peut faire échouer HGP-FM, comment on le détecte tôt, et ce qui est d�
 fermé. Document destiné à vieillir : chaque risque devient un fait ou
 disparaît.
 
+Le [protocole de guidage](GUIDAGE_FULL_ET_PREENTRAINEMENT_20260926.md) distingue
+les risques du tokenizer de ceux d'un enseignant FULL hors ligne. Le pilote
+primaire reste mono-scan ; FM-6 est une extension temporelle.
+
 ## 1. Les six risques majeurs
 
 ### R1 — la tour n'apporte rien qu'un canal de densité n'apporte déjà
 
-*Le risque.* Le gain espéré vient peut-être simplement de ce que le modèle voit
-la densité locale. Or il suffit de donner $\hat f_K(x)$ comme variable par
-point à un réseau inchangé pour lui donner la densité.
+*Le risque.* Le gain espéré peut venir de statistiques locales simples.
+$\hat f_K(x)$ donne une concentration ambiante, sans identifier à lui seul
+une densité physique de surface. Le témoin doit aussi tester rayons K-NN,
+comptes multi-rayons et anisotropie, à canaux d'acquisition appariés.
 
-*Détection.* Témoin **T2** de [`MESURE.md`](MESURE.md), préparé en phase 0
-et entraîné en phase 1. Une variable d'entrée supplémentaire sur une recette
-existante : c'est un témoin appris peu coûteux à définir et très discriminant.
+*Détection.* Témoin **T2** de [`MESURE.md`](MESURE.md), préparé avant
+l'apprentissage puis évalué sur la même recette. Ces variables locales
+forment un témoin appris peu coûteux à définir et discriminant.
 
-*Si le risque se réalise.* Arrêter la voie architecturale et publier le canal
-de densité comme résultat utile. Ce serait un résultat honnête et d'une réelle
-valeur pratique.
+*Si le risque se réalise.* Simplifier la variante architecturale concernée,
+puis tester séparément FULL enseignant. Une égalité dans ce bras et ce budget
+ne réfute pas tous les usages de la tour.
 
 ### R2 — c'est la hiérarchie en général qui aide, pas celle-ci
 
@@ -27,13 +32,14 @@ de SPT le montrent déjà, avec 212 k paramètres et des résultats de premier
 plan. Le fait que notre hiérarchie soit canonique et exacte n'y change peut-être
 rien.
 
-*Détection.* Témoin **T1**, tour brouillée : mêmes niveaux, mêmes tailles
-d'unités, points réaffectés au hasard dans une partition locale. Et la
-comparaison directe de pureté à nombre d'unités égal contre SPT, porte 0.2.
+*Détection.* Témoin **T1**, hiérarchie locale de budgets appariés, avec
+couverture, quotients et composition valides. Une réaffectation qui casse les
+parents n'est pas ce témoin. Ajouter la comparaison de pureté à nombre
+d'unités égal contre SPT, porte 0.2.
 
-*Si le risque se réalise.* La contribution se réduit à « une hiérarchie de plus,
-mais canonique et déterministe ». C'est encore quelque chose — reproductibilité,
-absence de réglage — mais ce n'est plus une thèse de modèle de fondation.
+*Si le risque se réalise.* Limiter la revendication de structure exacte dans
+le bras étudié ; comparer les rôles enseignant et tokenizer avant de conclure
+sur le projet entier. Canonicité ne signifie pas absence de réglage du réseau.
 
 ### R3 — les objets filiformes naissent trop tard
 
@@ -43,12 +49,13 @@ qu'à grand rayon, où elle a peut-être déjà fusionné avec le sol ou la
 végétation. Or c'est sur ces classes que se joue la marge de mIoU.
 
 *Détection.* Plafond d'oracle **par classe** et par taille d'objet, porte 0.1.
-Puis la prédiction P5 : le gain sur les classes filiformes doit dépendre du
-calendrier de $K$ et **disparaître si l'on retire $K = 1$**.
+Puis la prédiction P5 : comparer les branches K avec et sans K1, en publiant
+couverture et budget. L'oracle par nœud unique ne borne pas une sortie point
+avec connexion fine.
 
-*Parade.* $K = 1$ est le Single-Linkage, précoce sur les structures minces. Le
-calendrier de $K$ selon la profondeur — $K$ petit aux niveaux fins — est la
-parade naturelle, et elle doit être mesurée, pas supposée.
+*Parade.* Le pilote conserve des branches K autonomes, dont K1, et la
+connexion fine des retours. Mesurer leur apport ; un calendrier géométrique
+emboîtant inter-K ne garantit pas la composition des poids du réseau.
 
 ### R4 — la condensation réintroduit la constante, ou mange les objets minces
 
@@ -90,15 +97,15 @@ plafond d'oracle aux contacts avec le sol.
 classe, **stratifié par contact avec le sol**, en fonction de $K$, avec et sans
 retrait du sol.
 
-*Parades, d'inégale valeur.* L'**axe $K$** est la parade de principe : un
-contact ténu est un pont de bruit au sens du chapitre 7, et $K$ est exactement
-ce qui y résiste ; la question devient quantitative (porte 0.8). Le **retrait du
-sol** est la parade pratique, universelle dans le domaine — mais c'est un
-prétraitement à seuil posé à la main, donc exactement la constante que ce
-dossier prétend supprimer : on le garde comme repère, jamais comme solution. Le
-**relèvement métrique** en $(x, y, z, \lambda n)$ est séduisant mais endetté :
-le chantier `E-HGP/` a mesuré l'explosion des naissances avec la dimension, donc
-on compte les naissances en dimension 6 avant d'y croire (porte 0.10).
+*Parades à comparer.* L'**axe K** peut rompre certains ponts ; mesurer si
+l'objet reste représenté au rayon concerné. Le **sans-sol** est une variante
+légitime et prioritaire : comparer tour brute et tour non-sol avec branche
+sol/contexte, raccordées à tous les IDs. Le masque est géométrique, figé sur
+la trame entière avant les vues ; garder les unknown, payer son coût et ses
+erreurs, sans assimiler le sol à une classe sémantique. Ce régime ne remplace
+pas le contrat brut. Le **relèvement métrique** en $(x,y,z,\lambda n)$ reste
+exploratoire ; il exige un moteur distinct et une mesure des naissances
+(porte 0.10), sans héritage automatique de la spécification 3D.
 
 ### R6 — l'avantage se referme avec l'échelle
 
@@ -118,14 +125,16 @@ défendable, à condition de ne pas avoir promis l'autre.
 | risque | détection | parade |
 | --- | --- | --- |
 | Le recouvrement rend $P_\ell$ trop dense | porte 0.5, nombre de non-zéros par niveau | seuiller les poids $w_{x\tau}$ faibles ; mesurer la perte |
-| L'échelle n'est pas réellement adaptative (le rayon ne varie pas avec la portée) | porte 0.5, histogramme de $r$ par tranche de portée | changer de règle de contraction ; si aucune ne l'est, la thèse centrale tombe |
-| Le sol domine la hiérarchie en une composante géante | plafond d'oracle sur la classe « route », statistiques de niveau | l'axe $K$ ; mesurer aussi le régime sans sol, sans en faire le contrat |
+| L'adaptativité suit l'acquisition sans améliorer la représentation | porte 0.5, rayon, couverture et masse conservée par portée | comparer les règles de contraction et un témoin local fort |
+| Le sol domine la hiérarchie en une composante géante | plafond d'oracle sur la classe « route », statistiques de niveau | comparer au brut le régime non-sol avec branche sol/contexte et raccord vers tous les IDs |
 | Les lots de trames ont des hiérarchies de formes différentes | ingénierie | cibles de compte par niveau, comme tout réseau épars |
 | Le modèle apprend la portée plutôt que la forme | ablation du canal $\log r$, prédictions P1 et P2 | garder la portée explicite ; égaliser en augmentation |
-| **La quantification à 1 mm casse l'équivariance** : `tourner → quantifier → tour` ne commute pas, et un prédicat exact peut basculer sur une égalité | porte 0.7 | recalculer la tour par vue augmentée, ne jamais supposer la commutation ; si la dérive vaut le gain mesuré, affiner la grille avant toute conclusion |
-| Les objets mobiles se traînent dans l'agrégat multi-trames de FM-6 | courbes par classe dynamique | fenêtres courtes, classes dynamiques rapportées à part ; l'agrégat est une **cible dense**, jamais « la vérité géométrique » |
+| **La quantification à 1 mm casse l'équivariance** : `tourner → quantifier → tour` ne commute pas, et un prédicat exact peut basculer sur une égalité | porte 0.7, effets sur affectations et sorties utiles | recalculer par vue ; comparer les précisions si la dérive est pénalisante, avec coût publié |
+| FM-5 impose une structure incompatible avec l'occultation | contre-exemple K1 du protocole de guidage, contrôles des IDs/supports communs | ne pas imposer l'égalité des arbres recalculés ; déclarer la couverture et l'incertitude |
+| Les objets mobiles et erreurs de recalage altèrent l'agrégat de FM-6 | contrôles de visibilité et de mouvement, régime temporel séparé | déclarer fenêtres, causalité et pondération des observations ; apparier accès aux trames/odométrie |
+| Une représentation constante satisfait l'accord régional | variance/rang des features, distributions des prédictions et évaluation aval | conserver les mécanismes de diversité et les cibles relationnelles ; une cible dense ne suffit pas |
 | Payer $K \leq 10$ alors que $K \leq 6$ suffirait | porte 0.8 | fixer $K_{\max}$ sur la mesure, pas sur le domaine du moteur |
-| Le gain vient du budget de calcul | règle du budget apparié, prédiction P6 | comparaison à paramètres, époques et matériel égaux |
+| Le gain vient du budget de calcul | FLOPs, préparation/cache, mémoire et débit mesurés | comparer à exposition égale puis à coût total égal ; paramètres/époques seuls ne suffisent pas |
 | L'axe des ordres ne sert à rien | bras S5, témoin T4 | le retirer et simplifier ; résultat négatif net, à publier |
 | Une variable de filtration donnée en entrée fuit vers sa propre cible de pré-entraînement | revue de conception | ne jamais donner en entrée ce que l'on prédit au même moment |
 | La tête de sélection apprise ne bat pas l'excès de masse sur le même arbre | bras S7 et son témoin | garder la sélection statistique ; le coût appris ne se justifie pas |
@@ -167,7 +176,7 @@ soumission, qui reste à faire une fois, sérieusement.
 | Apprendre la partition (superpoints appris, $k$-moyennes différentiables) | on reperd la canonicité et le déterminisme, et l'ablation redevient ininterprétable |
 | Condenser avec un `min_cluster_size` en **nombre de points** | c'est réintroduire la constante métrique que tout le dossier supprime ; le seuil doit être un **rapport** de masse |
 | Binariser les multifusions pour réutiliser la condensation de HDBSCAN telle quelle | inventerait un ordre qui n'existe pas et détruirait la canonicité |
-| Construire l'échelle sur la forêt **brute** | à $K=1$, 39 796 fusions pour 39 885 sites : les premiers niveaux n'absorberaient que des singletons |
+| Choisir l'échelle en comptant aveuglément les fusions brutes | ce compte peut surpondérer les micro-fusions ; les coupes globales brutes restent la référence valide du pilote, puis la condensation se mesure contre elles |
 | Atlas de cartes appris par nœud | coutures et ancres changent sous décimation ; isole mal l'effet du tokenizer |
 | Champ implicite ajusté par polyèdre | coûteux et redondant, la surface est déjà explicite |
 | Versionner des scans bruts ou des nuages dérivés KITTI | licence non commerciale, dépôt public ; seuls les manifestes |
@@ -194,8 +203,9 @@ refasse.
    quantification à 1 mm change l'accrochage à la grille. Corrigé en § 7.5 ; on
    recalcule, et la dérive devient une mesure utile (porte 0.7).
 
-Une quatrième correction, de sens : le **calendrier de $K$** va de $K$ **élevé**
-aux niveaux fins à $K$ **faible** aux niveaux grossiers, et non l'inverse.
+Une quatrième correction, de sens : une trajectoire géométrique emboîtante
+autorise K décroissant et rayon croissant. Elle ne prouve pas la compatibilité
+des poids entre K ; le pilote garde donc des branches autonomes.
 
 ## 6. Ce qui n'est pas un risque
 
@@ -204,9 +214,10 @@ aux niveaux fins à $K$ **faible** aux niveaux grossiers, et non l'inverse.
   points et facettes. Ce point a été soulevé et tranché.
 - **Le déterminisme de FULL** : mesuré sur les cas qualifiés. La
   reproductibilité du tokenizer dérivé reste une porte à fermer.
-- **Le recouvrement au-dessus du premier étage** : il n'y en a pas. Deux
-  antichaînes emboîtées du même arbre donnent un pooling dur ; seul le passage
-  points → nœuds est doux, et c'est là que vit l'information d'ordre supérieur.
+- **Le pooling dur à K fixé, sous les conditions du contrat** : univers et
+  poids gelés, quotients valides, fibres complètes et réserves préservées.
+  Les naissances tardives et changements de K ne satisfont pas automatiquement
+  ces conditions ; les retours peuvent toujours recouvrir plusieurs tokens.
 - **La longueur de séquence envisagée** : un U-Net lirait $L$ coupes, pas les
   millions de nœuds de la tour. Le coût de FULL, des coupes et du graphe reste
   à mesurer séparément.

@@ -1,0 +1,301 @@
+{
+  "correspondence_scope": "intersection_of_declared_original_return_ids_only",
+  "engine_qualification": false,
+  "fixture_count": 6,
+  "fixtures": [
+    {
+      "incorrect_variants": {
+        "claim_two_view_specific_measures_have_one_conserved_coupling": "REJECTED",
+        "pair_rows_by_position_instead_of_original_id": "REJECTED"
+      },
+      "name": "shared_original_ids_and_one_comparison_measure",
+      "status": "PASS",
+      "values": {
+        "coupling": [
+          [
+            "1/2",
+            "0/1"
+          ],
+          [
+            "1/1",
+            "3/2"
+          ]
+        ],
+        "position_paired_coupling": [
+          [
+            "9/8",
+            "3/8"
+          ],
+          [
+            "1/8",
+            "11/8"
+          ]
+        ],
+        "row_conditionals": [
+          [
+            "1/1",
+            "0/1"
+          ],
+          [
+            "2/5",
+            "3/5"
+          ]
+        ],
+        "shared_ids": [
+          20,
+          30
+        ],
+        "source_mass": [
+          "1/2",
+          "5/2"
+        ],
+        "target_mass": [
+          "3/2",
+          "3/2"
+        ],
+        "target_mass_under_another_measure": [
+          "5/4",
+          "3/4"
+        ]
+      }
+    },
+    {
+      "incorrect_variants": {
+        "call_row_normalized_signal_full_coverage": "REJECTED",
+        "discard_partial_reserve_without_recording_lost_mass": "REJECTED",
+        "give_empty_overlap_a_uniform_or_zero_training_target": "REJECTED"
+      },
+      "name": "partial_coverage_and_no_target_are_explicit",
+      "status": "PASS",
+      "values": {
+        "conditional_despite_partial_coverage": [
+          [
+            "1/1"
+          ]
+        ],
+        "eligible_source_mass": [
+          "1/2"
+        ],
+        "empty_overlap": [
+          [
+            "0/1"
+          ]
+        ],
+        "empty_overlap_conditional": [
+          null
+        ],
+        "fabricated_uniform_target_loss": "4/1",
+        "fabricated_zero_target_loss": "9/1",
+        "masked_no_target_loss": "0/1",
+        "matched_fraction": [
+          "1/2"
+        ],
+        "matched_mass": [
+          "1/4"
+        ],
+        "signal_coupling": [
+          [
+            "1/4"
+          ]
+        ],
+        "unrepresented_target_conditional": [
+          null
+        ],
+        "with_reserve_channels": [
+          [
+            "1/4",
+            "1/4"
+          ],
+          [
+            "3/4",
+            "3/4"
+          ]
+        ]
+      }
+    },
+    {
+      "incorrect_variants": {
+        "require_round_trip_to_preserve_arbitrary_features": "REJECTED",
+        "treat_same_view_overlap_as_exact_token_identity": "REJECTED"
+      },
+      "name": "soft_overlap_transport_is_not_identity",
+      "status": "PASS",
+      "values": {
+        "assignment": [
+          [
+            "1/1",
+            "0/1"
+          ],
+          [
+            "1/2",
+            "1/2"
+          ],
+          [
+            "0/1",
+            "1/1"
+          ]
+        ],
+        "conditional": [
+          [
+            "5/6",
+            "1/6"
+          ],
+          [
+            "1/6",
+            "5/6"
+          ]
+        ],
+        "coupling": [
+          [
+            "5/4",
+            "1/4"
+          ],
+          [
+            "1/4",
+            "5/4"
+          ]
+        ],
+        "features": [
+          [
+            "0/1"
+          ],
+          [
+            "6/1"
+          ]
+        ],
+        "round_trip": [
+          [
+            "13/18",
+            "5/18"
+          ],
+          [
+            "5/18",
+            "13/18"
+          ]
+        ],
+        "transported_features": [
+          [
+            "1/1"
+          ],
+          [
+            "5/1"
+          ]
+        ]
+      }
+    },
+    {
+      "incorrect_variants": {
+        "call_full_mass_normalization_a_conditional_probability": "REJECTED",
+        "equate_full_context_completion_with_shared_id_invariance": "REJECTED"
+      },
+      "name": "restrict_ids_before_pooling_for_overlap_agreement",
+      "status": "PASS",
+      "values": {
+        "common_ids": [
+          1
+        ],
+        "conditional_on_shared_mass": [
+          [
+            "1/1"
+          ]
+        ],
+        "full_teacher_mass": [
+          "2/1"
+        ],
+        "full_teacher_mean": [
+          "5/1"
+        ],
+        "normalization_by_full_mass": [
+          [
+            "1/2"
+          ]
+        ],
+        "overlap_agreement_loss": "0/1",
+        "privileged_completion_loss": "25/1",
+        "shared_teacher_mass": [
+          "1/1"
+        ],
+        "shared_teacher_mean": [
+          "0/1"
+        ],
+        "student_mean": [
+          "0/1"
+        ]
+      }
+    },
+    {
+      "incorrect_variants": {
+        "claim_fixed_nonconstant_relation_targets_accept_constant_features_at_zero_loss": "REJECTED",
+        "claim_identical_pooling_or_stop_gradient_excludes_constant_representations": "REJECTED"
+      },
+      "name": "common_teacher_weights_align_aggregation_but_do_not_prevent_collapse",
+      "status": "PASS",
+      "values": {
+        "collapsed_consistency_loss": "0/1",
+        "collapsed_teacher_and_student": [
+          "7/1",
+          "7/1"
+        ],
+        "common_weight_pooled_features": [
+          "2/3",
+          "10/3"
+        ],
+        "constant_feature_relation_loss": "9/2",
+        "fixed_membership_squared_distance_targets": [
+          "1/2",
+          "2/1",
+          "1/2"
+        ],
+        "membership_feature_relation_loss": "0/1",
+        "scope": "one_fixed_assignment_three_pairs_not_a_semantic_or_training_guarantee"
+      }
+    },
+    {
+      "incorrect_variants": {
+        "infer_within_component_diversity_from_positive_global_variance": "REJECTED",
+        "interpret_all_overlap_edges_as_preserving_distinct_token_features": "REJECTED"
+      },
+      "name": "all_positive_overlap_edges_as_positives_encourage_component_collapse",
+      "status": "PASS",
+      "values": {
+        "component_constant_energy": "0/1",
+        "component_constant_global_variance": "9/1",
+        "constant_feature_energy": "0/1",
+        "disconnected_graph": [
+          [
+            "2/1",
+            "0/1"
+          ],
+          [
+            "0/1",
+            "3/1"
+          ]
+        ],
+        "identical_distinct_token_features": [
+          "0/1",
+          "6/1"
+        ],
+        "identity_feature_energy": "18/1",
+        "overlap_graph": [
+          [
+            "5/4",
+            "1/4"
+          ],
+          [
+            "1/4",
+            "5/4"
+          ]
+        ]
+      }
+    }
+  ],
+  "geometric_realizability_claimed": false,
+  "noncollapse_scope": "constant_representation_falsified_for_one_fixed_nonconstant_relation_target",
+  "rejected_variant_count": 13,
+  "schema": "zoltan.guidance_algebra.v1",
+  "scope": "abstract_rational_algebra_only",
+  "script_sha256": "c87e6d49fe59b2d2108d2a6eba1633c16c3a814f95e26f8651a89ec4e12338e5",
+  "status": "PASS",
+  "training_claimed": false,
+  "weight_scope": "supplied_rational_memberships_and_common_return_measure"
+}

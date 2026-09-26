@@ -1,0 +1,105 @@
+{
+  "engine_qualification": false,
+  "fixture_count": 4,
+  "fixtures": [
+    {
+      "incorrect_variants": {
+        "require_identical_connectivity_after_decimation": "REJECTED",
+        "reverse_the_subset_connectivity_inequality": "REJECTED",
+        "use_strict_contact_for_a_closed_cut": "REJECTED"
+      },
+      "name": "missing_bridge_changes_merge_but_preserves_inclusion",
+      "status": "PASS",
+      "values": {
+        "inclusion_query_count": 30,
+        "query_radius_squared": "9/16",
+        "teacher_label": true,
+        "teacher_merge_radius_squared": "1/4",
+        "visible_label": false,
+        "visible_merge_radius_squared": "1/1"
+      }
+    },
+    {
+      "incorrect_variants": {
+        "claim_a_richer_teacher_removes_conditional_ambiguity": "REJECTED",
+        "claim_exact_recovery_from_the_visible_cloud_alone": "REJECTED"
+      },
+      "name": "same_visible_cloud_allows_opposite_teacher_targets",
+      "status": "PASS",
+      "values": {
+        "conditional_target_for_equal_completion_probabilities": "1/2",
+        "deterministic_binary_brier": [
+          "1/2",
+          "1/2"
+        ],
+        "minimum_brier_for_equal_completion_probabilities": "1/4",
+        "teacher_labels": [
+          1,
+          0
+        ],
+        "teacher_site_counts": [
+          3,
+          3
+        ]
+      }
+    },
+    {
+      "incorrect_variants": {
+        "censor_a_merge_exactly_on_the_closed_horizon": "REJECTED",
+        "interpret_horizon_disconnection_as_never_connected": "REJECTED",
+        "replace_censoring_by_a_merge_at_the_horizon": "REJECTED"
+      },
+      "name": "finite_horizon_supports_queries_but_censors_merge_time",
+      "status": "PASS",
+      "values": {
+        "exhaustive_fixture_merge_radius_squared": "4/1",
+        "negative_query_labels": [
+          false,
+          false,
+          false
+        ],
+        "observation": {
+          "horizon_squared": "1/1",
+          "merge_radius_squared": null,
+          "status": "right_censored"
+        },
+        "observation_at_actual_merge": {
+          "horizon_squared": "4/1",
+          "merge_radius_squared": "4/1",
+          "status": "observed"
+        }
+      }
+    },
+    {
+      "incorrect_variants": {
+        "mask_hidden_coordinates_but_keep_teacher_graph_paths": "REJECTED",
+        "restrict_teacher_components_instead_of_recomputing_student_components": "REJECTED"
+      },
+      "name": "masked_features_do_not_remove_teacher_topology_paths",
+      "status": "PASS",
+      "values": {
+        "clean_student_signatures_identical": true,
+        "recomputed_student_labels": [
+          false,
+          false
+        ],
+        "retained_teacher_connectivity": [
+          true,
+          false
+        ],
+        "teacher_edges_restricted_to_visible_sites": [
+          [],
+          []
+        ]
+      }
+    }
+  ],
+  "geometry_scope": "one_dimensional_sites_embedded_in_three_dimensions",
+  "higher_order_weighted_relation_claimed": false,
+  "learned_model_evaluated": false,
+  "rejected_variant_count": 10,
+  "schema": "zoltan.guidance_k1.v1",
+  "scope": "tiny_rational_k1_closed_ball_connectivity_only",
+  "script_sha256": "54fd8c195c59908e480831aea25d5a24d3e7e97e9692364000dbab4883bc0ca5",
+  "status": "PASS"
+}
