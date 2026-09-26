@@ -258,6 +258,41 @@ exactement l'objet dont le moteur a besoin :
    modèle** : un modèle de densité quelconque ne la garantit pas. C'est une
    contrainte de conception à vérifier, pas un acquis.
 
+**Mesure décisive : la tour régularisée contre la tour empirique.** Mélange
+de 4 amas de dimension intrinsèque 2, $n=300$, séparation 8, trois graines,
+indice de Rand ajusté à la coupe au vrai nombre de classes
+(`bench/spectral_tower.py --dims 2,10,50,200 --intrinsic 2 --n 300 --orders 1,5 --noise-modes none,per_coordinate --seeds 3`,
+reçu `receipts/spectral_tower_20260926/`) :
+
+| bruit | $d$ | $k$ | ARI empirique | ARI spectral | écart |
+| --- | --- | --- | --- | --- | --- |
+| aucun | 2 | 1 | 1,000 | 0,667 | $-0{,}333$ |
+| aucun | 2 | 5 | 0,914 | 0,667 | $-0{,}248$ |
+| aucun | 10 | 5 | 0,914 | 0,997 | $+0{,}083$ |
+| aucun | 50 | 5 | 0,914 | 0,997 | $+0{,}083$ |
+| aucun | 200 | 5 | 0,914 | 1,000 | $+0{,}086$ |
+| ambiant | 10 | 1 | 0,907 | 0,997 | $+0{,}090$ |
+| ambiant | 10 | 5 | 0,105 | 0,997 | $+0{,}892$ |
+| ambiant | 50 | 1 | 0,166 | 0,994 | $+0{,}828$ |
+| ambiant | 50 | 5 | **0,000** | **0,994** | $+0{,}994$ |
+| ambiant | 200 | 1 | $-0{,}000$ | 0,362 | $+0{,}362$ |
+| ambiant | 200 | 5 | $-0{,}000$ | 0,362 | $+0{,}362$ |
+
+Trois lectures, dans cet ordre.
+
+1. **Sous bruit ambiant et en dimension moyenne, la voie régularisée fait
+   exactement ce qu'on lui demande** : la tour empirique s'effondre
+   ($0{,}105$ puis $0{,}000$ aux ordres élevés dès $d=10$), la tour du modèle
+   tient ($0{,}997$ puis $0{,}994$). L'écart atteint $+0{,}994$ à $(d=50,k=5)$.
+   C'est la justification applicative du changement d'objet.
+2. **En dimension 2 elle est moins bonne** ($-0{,}33$) : la régularisation
+   coûte de la résolution là où le comptage empirique de boules fonctionne. La
+   voie régularisée n'est donc pas un remplacement universel mais un régime.
+3. **À $d=200$ les deux tombent** ($0{,}362$ contre $0{,}000$) : mieux, pas
+   résolu. Avec des descripteurs fixes, l'effondrement annoncé par la théorie
+   finit par arriver ; c'est exactement la limite de l'apprentissage de
+   descripteurs annoncée ci-dessus.
+
 **Conclusion de conception, assumée.** La couche statistique de E-HGP n'est
 viable que sous une hypothèse explicite de **structure latente de faible
 dimension**. Cette hypothèse doit être énoncée, mesurée

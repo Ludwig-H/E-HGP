@@ -137,6 +137,23 @@ le biais d'approximation (le vrai `log dp/dq` n'est pas dans l'espace
 engendre par `phi`), ensuite par la variance statistique. AUCUN resultat
 de ce module n'est un certificat, et rien ici ne promeut un statut public.
 
+REGULARISATIONS DECLAREES, toutes comptees et publiees, jamais silencieuses :
+la TRONCATURE DE RANG de `Sigma_q` (`effective_rank`, paragraphe de
+`_decompose`), le PLANCHER sur les valeurs propres generalisees
+(`clamped_directions`) ou la troncature `rho_max < 1` qui le remplace
+proprement, le PLANCHER de covariance de la reference (`floored`,
+`GaussianReference`), et le `ridge` optionnel. Chacune change l'objet
+estime ; aucune n'est un detail numerique.
+
+EQUIVARIANCES. Le plongement et la reference travaillent dans les
+coordonnees CENTREES sur la moyenne de l'echantillon, donc le modele est
+equivariant par translation ; les observations sont triees par ordre
+lexicographique avant toute somme, donc le modele est invariant par
+permutation de facon EXACTE (bit a bit), et non a une tolerance pres. En
+flottant, l'equivariance par translation est limitee par l'amplification de
+la decomposition tronquee : ecart MESURE de l'ordre de `1 e-7` sur des
+log-densites de l'ordre de `3`.
+
 Role de la dimension `d` dans les garanties, honnetement. La VARIANCE est
 libre en dimension : elle se gouverne par `m` et `n` (regime `m/n` fixe),
 et le cout est `O(m^2 n + m^3)`, sans aucun `C(n, k)`. Le BIAIS ne l'est
@@ -169,9 +186,11 @@ Gram de `W L` ou `C = L L^T`. Aucun Monte-Carlo n'intervient.
 
 == 7. LA MESURE DE REFERENCE `q` ==
 
-Defaut : GAUSSIENNE AJUSTEE AUX MOMENTS de l'echantillon (moyenne et
-covariance empiriques, covariance eventuellement dilatee). Quatre raisons,
-toutes utilisees ailleurs dans le chantier :
+Defaut : GAUSSIENNE AJUSTEE AUX MOMENTS de l'echantillon, dans les
+coordonnees centrees (donc de moyenne nulle et de covariance la covariance
+empirique, eventuellement dilatee par `inflation` et relevee par
+`covariance_floor`). Quatre raisons, toutes utilisees ailleurs dans le
+chantier :
 
 1. c'est la loi d'entropie MAXIMALE a moments d'ordre deux donnes, donc
    `log(dp/dq)` est exactement la PART NON GAUSSIENNE de la log-densite :

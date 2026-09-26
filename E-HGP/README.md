@@ -152,4 +152,6 @@ Acquis, avec la commande qui le reproduit :
 | obstruction gouvernée par la dimension **intrinsèque**, pas l'ambiante ($\varphi_5$ constante de $d=2$ à $200$ à rang 2 fixé) | **mesuré** |
 | bruit ambiant sur une variété de rang 2 : exposant du compte de naissances $1{,}96$ (quadratique) | **mesuré** |
 | blanchiment interdit : en rang $d\geq n-1$ la tour devient celle d'un simplexe régulier, indépendante des données | **démontré** |
-| couche statistique utile en grande dimension sans structure latente | **non acquis, mesuré négatif** |
+| tour régularisée contre tour empirique sous bruit ambiant : ARI $0{,}994$ contre $0{,}000$ à $(d=50,k=5)$ | **mesuré** |
+| la voie régularisée est moins bonne en $d=2$ ($-0{,}33$ d'ARI) : c'est un régime, pas un remplacement | **mesuré** |
+| couche statistique utile à $d=200$ avec des descripteurs FIXES | **non acquis** ($0{,}362$ d'ARI) |
