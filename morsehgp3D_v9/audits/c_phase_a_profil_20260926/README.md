@@ -6,7 +6,7 @@
 - **Instrumentation :** [`phaseA_profile.diff`](../c_phase_a_20260926/phaseA_profile.diff),
   appliqué à une copie hors dépôt. Empreintes dans `BASE.txt`.
 - **Hôte :** le codespace, 8 cœurs, après redémarrage du conteneur.
-  Charge 12 à 22 pendant les mesures, `nice 5`, 148 à 159 % d'un cœur
+  Charge 12 à 20 pendant les mesures, `nice 5`, 148 à 159 % d'un cœur
   pour le processus.
 - **GCP :** non utilisé. Ce reçu donne des **parts et des compteurs**,
   jamais des temps de contrat.
@@ -43,12 +43,14 @@ R22 : 3 621 785 représentants et 140 036 lots groupés à 00/K5,
   Ce sont des temps muraux.
 
 **Surcoût de l'instrumentation, mesuré et retranché.** Chaque lot
-échantillonné porte 4 à 12 lectures `rdtsc` ; une lecture coûte 24 tics
-au minimum et 28 à 32 en moyenne (ligne `PROFA_CAL` de chaque
-exécution). Cela fait **13 à 17 %** du temps échantillonné au coût
-minimal, 17 à 21 % au coût moyen. Les parts du tableau ci-dessous sont
-données **après avoir retranché une lecture par intervalle**, au coût
-minimal ; c'est la correction conservatrice.
+échantillonné porte 11 à 25 lectures `rdtsc` (4 par lot, 3 par bloc,
+4 par lot singleton, 5 par lot groupé et 4 par groupe) ; une lecture
+coûte 24 tics au minimum et 28 à 32 en moyenne (ligne `PROFA_CAL`).
+Cela fait **12 à 17 %** du temps échantillonné au coût minimal, 16 à
+21 % au coût moyen. Le dénominateur du tableau ci-dessous retranche
+toutes les lectures internes, et chaque poste **une lecture par
+intervalle**, au coût minimal. Les lignes somment donc à 100 % par
+construction, et le reste absorbe les lectures non imputées.
 
 Sur l'ordre entier, ce surcoût ne porte que sur un lot sur seize, donc
 environ 1 %. Trois bras témoins, en deux passes entrelacées sur la même
@@ -63,8 +65,9 @@ trame, le confirment sur le CPU de la chaîne entière :
 Soit +0,8 à +1,5 % pour les compteurs, et rien de résoluble en plus pour
 l'échantillonnage. Les murs de ces mêmes bras, eux, vont de 2,1 à 5,9 s
 pour A(5) : ils ne mesurent que la contention. Par ordre, la différence
-de CPU de fil entre les deux bras instrumentés va de −13 % à +4 %, donc
-sous le bruit.
+de CPU de fil entre les deux bras instrumentés va de −13 % à +4 %
+(total −4,4 %) : de signe négatif, donc du bruit, et non un surcoût.
+Ces lignes sont dans `sorties/temoin_s0.err` et `temoin_s16.err`.
 
 **Rejets.** Un lot échantillonné dont la durée dépasse 1 000 000 tics
 (409 µs) est présumé préempté et annulé. Cela concerne 31 à 145 lots par
@@ -76,9 +79,11 @@ ne sont pas retirées.
 **Limite de méthode.** `profa_tsc()` est un `__rdtsc()` nu, sans
 `lfence` ni `__rdtscp`. Les frontières de postes ne sont donc pas une
 partition stricte : sur un cœur dans le désordre, une lecture longue
-émise avant une frontière peut retirer après. Les postes mesurés font
-110 à 690 tics, l'ordre de grandeur de la fenêtre de réordonnancement.
-Cette fuite croît avec le taux de défauts de cache, donc avec K.
+émise avant une frontière peut retirer après. Les intervalles mesurés
+font de 30 tics (écriture de l'ancre) à 1 150 (mise en place d'un lot
+groupé), l'ordre de grandeur de la fenêtre de réordonnancement. Cette
+fuite croît avec le taux de défauts de cache, donc avec K : c'est la
+lecture la plus probable du résidu par bloc.
 
 ## Répartition du temps échantillonné des lots
 
@@ -88,17 +93,20 @@ n'est ni A(K) entier, ni la boucle entière. Tous les ordres sont dans
 
 | poste | ce que le chronomètre couvre | 00/K5 | b00/K5 | 00/K10 |
 | --- | --- | ---: | ---: | ---: |
-| segment par facette | réinitialisation du bloc, compteurs, gardes, deux préchargements, lecture des cibles, `order_root`, `push_back` des racines | 39,5 % | 39,8 % | 41,5 % |
-| résidu par bloc | boucle et appel par bloc, plus une lecture `rdtsc` et cinq compteurs de l'instrumentation | 25,1 % | 21,4 % | 31,5 % |
-| brouillon plat | `open_batch` et `add_action` | 17,2 % | 15,9 % | 15,5 % |
-| tri et déduplication des racines | `sort` puis `unique` | 5,9 % | 5,7 % | 5,5 % |
-| création de nœud | `order_new_node` | 5,3 % | 5,1 % | 4,5 % |
-| lots groupés | mise en place, unions, actions, reste | 3,3 % | 7,1 % | 0,8 % |
-| découpe du lot | balayage du run de niveau, niveau du lot, préchargement | 3,5 % | 4,8 % | 2,2 % |
-| écriture de l'ancre | `anchors[ball] = cible` | 0,6 % | 0,5 % | 0,5 % |
-| reste | entrée et sortie de `order_lot`, frontières non couvertes | 0,0 % | 0,0 % | 0,0 % |
+| segment par facette | réinitialisation du bloc, compteurs, gardes, deux préchargements, lecture des cibles, `order_root`, `push_back` des racines | 38,8 % | 39,2 % | 40,8 % |
+| résidu par bloc | boucle et appel par bloc, plus une lecture `rdtsc` et cinq compteurs de l'instrumentation | 24,7 % | 21,1 % | 31,0 % |
+| brouillon plat | `open_batch` et `add_action` | 17,0 % | 15,7 % | 15,3 % |
+| tri et déduplication des racines | `sort` puis `unique` | 5,8 % | 5,7 % | 5,4 % |
+| création de nœud | `order_new_node` | 5,2 % | 5,1 % | 4,4 % |
+| lots groupés | mise en place, unions, actions, reste | 3,3 % | 7,0 % | 0,8 % |
+| découpe du lot | balayage du run de niveau, niveau du lot, préchargement | 3,4 % | 4,8 % | 2,1 % |
+| écriture de l'ancre | `anchors[ball] = cible` | 0,7 % | 0,7 % | 0,5 % |
+| reste | entrées et sorties non couvertes, lectures non imputées | 1,1 % | 0,7 % | −0,4 % |
 
-**Le segment par facette pèse environ 40 %.** Il ne s'agit pas de la
+Le reste devient légèrement négatif aux ordres hauts de K10 (−0,2 à
+−0,6 %) : le modèle de coût des lectures y sur-retranche un peu.
+
+**Le segment par facette pèse 39 à 41 %.** Il ne s'agit pas de la
 seule chasse : la ligne couvre tout le corps de `order_block_lean`
 jusqu'au tri. C'est donc une **borne supérieure** de ce qu'un levier
 ciblant la chasse peut retirer.
@@ -146,8 +154,8 @@ haut :
 La **seule mise en place** d'un lot groupé (le `vector` du DSU, le
 `vector` de propriétaires et son tri, le `vector<vector>` des groupes)
 coûte plus qu'un lot singleton entier. C'est l'argument mesuré du levier
-L5, et il porte surtout sur K1 à K4, où les lots groupés sont 13 à 61 %
-des blocs.
+L5, et il porte surtout sur K1 à K4, où les lots groupés portent 13 à
+61 % des blocs à 00 et **29 à 77 % à b00**.
 
 **3. `anchors.assign` : le volume est structurel, la dispersion ne
 prouve rien.** Le remplissage vaut 4 octets par boule **à chaque
@@ -182,13 +190,14 @@ jamais la fenêtre.
 | b00/K5 | 7 387 583 | 4 815 421 | 34,8 % |
 | 00/K10 | 17 389 031 | 9 927 413 | 42,9 % |
 
-Un tiers à deux cinquièmes des **appels** de chasse rendent une racine
-déjà obtenue par une autre facette du même bloc. Mais `order_root`
+De 34,8 à 42,9 % des **appels** de chasse rendent une racine déjà
+obtenue par une autre facette du même bloc. Mais `order_root`
 comprime le chemin : après la première chasse depuis une cible, une
 seconde chasse depuis la **même** cible ne coûte qu'un pas, au lieu des
-2,58 à 3,14 pas moyens. Les appels redondants sont donc déjà les moins
-chers. Dédupliquer les cibles avant la chasse ne retirerait qu'environ
-**12 à 14 % des pas**, plus les lectures fixes par appel. Avec 1,6 à 1,8
+2,58 à 2,91 pas moyens par cas (1,87 à 3,14 selon l'ordre). Les appels
+redondants sont donc déjà les moins chers. Dédupliquer les cibles avant
+la chasse ne retirerait qu'environ **12 à 15 % des pas** (12,0 % à
+b00/K5, 15,2 % à 00/K5), plus les lectures fixes par appel. Avec 1,6 à 1,8
 facette par bloc, cette déduplication est une comparaison à un ou deux
 éléments : peu coûteuse, mais son plafond l'est aussi.
 
@@ -234,6 +243,17 @@ Elle est corrigée ici, mais le reçu doit garder trace de ses erreurs :
   en temps était tu ;
 - la comparaison locale contre G4 mêlait temps CPU et mur.
 
+Une seconde vérification a corrigé la version suivante :
+- les lignes sommaient à 100,4 à 102 %, faute d'imputer une lecture à
+  chaque intervalle, y compris aux résidus ;
+- l'écriture de l'ancre du chemin groupé est comptée par **lot**, non
+  par groupe ;
+- « 4 à 12 lectures par lot » : c'est 11 à 25 ;
+- le plafond des chasses redondantes va jusqu'à 15,2 %, non 14 % ;
+- les lots groupés portent jusqu'à 77 % des blocs à b00, non 61 % ;
+- la durée des intervalles va de 30 à 1 150 tics, non de 110 à 690 ;
+- la somme de contrôle ne couvrait pas les sorties des témoins.
+
 ## Réserves
 
 - **Aucun temps absolu n'est exploitable** : hôte partagé à 8 cœurs,
@@ -255,5 +275,6 @@ Elle est corrigée ici, mais le reçu doit garder trace de ses erreurs :
   d'échantillonnage et le seuil de rejet.
 - `lire_profa.py` : lecture des lignes `PROFA` et calcul des parts,
   surcoût retranché.
-- `sorties/` : sorties brutes, témoins, et `tableaux.txt`.
+- `sorties/` : sorties brutes des trois mesures, les six sorties des
+  témoins (deux passes × trois bras) et `tableaux.txt`.
 - `SHA256SUMS`.
