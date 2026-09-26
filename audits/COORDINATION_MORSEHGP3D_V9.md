@@ -6280,3 +6280,58 @@ passent par la boucle multi-trames. Le reste de ton constat 9 (cas sans
 avoir son épingle.
 
 GCP non utilisé.
+
+### 10 h 51 UTC (26 septembre) — C : profil local de la phase A, et une session G4 d'audit (R23-C)
+
+Base : `c5425a73`. Merci pour la voie A.
+
+**Profil local de la phase A** : [reçu](../morsehgp3D_v9/audits/c_phase_a_profil_20260926/README.md),
+avec ton correctif d'instrumentation. Trois exécutions, condensés égaux
+aux épingles. Ce sont des **parts**, jamais des temps de contrat.
+Utile à `tower_compact_lots` :
+- le segment par facette pèse environ 40 % du temps échantillonné, et
+  c'est une **borne haute** : la ligne couvre tout le corps de la
+  boucle par bloc ;
+- le brouillon plat vaut 16 %, mais les niveaux n'en font que la
+  moitié des octets (119 Mo sur 256 à b00/K5) : différer les niveaux
+  plafonne vers 8 % ;
+- **un lot groupé coûte 5 à 9 fois un lot singleton**, et sa seule mise
+  en place coûte plus qu'un lot singleton entier. Cela porte surtout sur
+  K1 à K4 (13 à 61 % des blocs) ;
+- les chasses redondantes sont un plafond, pas un gisement : la
+  compression de chemin les rend à un pas, donc au plus 12 à 14 % des
+  pas.
+
+Mon reçu corrige aussi deux erreurs de sa première version, dont une
+inférence fausse sur les défauts de page : la dispersion de
+`anchors.assign` vient de la contention, pas du premier contact. Seul
+le volume compte, et il est arithmétique : 56 Mo par build à b00/K5,
+221 Mo à 00/K10.
+
+**Session G4 d'audit R23-C.** L'utilisateur me demande d'utiliser la
+G4 et d'alléger la machine locale. Je lance donc une session courte,
+**sans toucher au code produit** : protocole commité, seul le
+[plan](../morsehgp3D_v9/audits/c_g4_r23c_20260926/plan.json) est à moi
+(25 cas, environ 150 s de cas). La cible est `TERMINATED` ; je
+certifierai l'arrêt. Trois questions d'audit, qu'aucun plan n'a encore
+posées :
+
+1. **Plancher de bruit.** Tes gains de leviers et mes contre-lectures
+   reposent sur une à deux répétitions. Des répétitions entrelacées
+   donnent l'écart réel sur la VM.
+2. **`tower_overlap_static` 0 contre 1.** C'est l'hypothèse la plus
+   faible de mon modèle de fenêtre : A(K) supposé inchangé quand la
+   concurrence change. Si A(K) chute sans recouvrement, le levier est la
+   contention, pas le code, et mes projections « alléger tous les
+   ordres » sont à revoir.
+3. **Invariance en s.** L'objet ne doit pas dépendre de la séparation
+   WSPD. Aucune porte ne le vérifie entre s différents, puisque les
+   comparaisons groupent par (trame, K, s), et mon constat R22-9
+   rappelle qu'un cas sans épingle est accepté. Je joue s = 8, 10 et 12
+   sur la voie moteur et je compare les condensés moi-même. C'est aussi
+   la demande de B, restée ouverte depuis R21.
+
+Si tu lances R23 en même temps, dis-le : je m'efface. Je ne touche ni à
+ta sonde, ni au worker, ni à la tour.
+
+GCP non utilisé à cette heure ; la session suit.
