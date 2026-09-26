@@ -1,0 +1,6014 @@
+{
+  "GPU_cases": 28,
+  "case_count": 36,
+  "contract_certified": false,
+  "equal_cross_worker_comparisons": 28,
+  "host_receipt_sha256": "ae932e704d158d072398be6fb04c33f9abbabf37e5ce1a67c155f65dfb27b51f",
+  "host_status": "completed",
+  "package_sha256": "6b4b976ec265e6c528656e8adfdfe4d2221fc859dde8abaa0413cbe6f2eb6978",
+  "plan_sha256": "293c0202e58815131968f405808cdc49128faf1d00176c6ab6dbabd57ca22be8",
+  "public_status": "not_claimed",
+  "rows": [
+    {
+      "K": 5,
+      "arm": "A_full_overlap",
+      "backend": "gpu",
+      "balls": 1306696,
+      "catalogue_digest": "5ad1fe09354411ba",
+      "census_ms": 100.273,
+      "chain_ms": 916.304,
+      "digest_ms": 191.175,
+      "elapsed_s": 1.7259728230000064,
+      "generator": {
+        "q2_accepted_pairs": 456919,
+        "q2_candidate_pairs": 9159254,
+        "q2_front_rectangles": 960535,
+        "q34_cover_builds": 900377,
+        "q34_expanded_pairs": 23686751,
+        "q3_emitted": 691284,
+        "q4_emitted": 158496
+      },
+      "index": 0,
+      "presentation_digest": "a2aa4b20ca392dfe",
+      "q2_ms": 106.308,
+      "q34_ms": 481.87,
+      "repeat": 0,
+      "s": 8,
+      "scene": "00",
+      "sites": 39885,
+      "tower_detail": {
+        "declared_support_checks": 20413,
+        "hashed_orders": 4,
+        "helper_threads": 409,
+        "images_own_by_k": [
+          0.092,
+          7.187,
+          15.253,
+          19.397,
+          26.644
+        ],
+        "pipelined_orders": 5,
+        "pool_jobs": 45,
+        "pool_ms": 0.785,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.022,
+          4.261,
+          6.284,
+          8.342,
+          11.199
+        ],
+        "runner_threads": 5,
+        "seal_sampled_balls": 20418,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "67450c64611075b1",
+      "tower_ms": 282.724,
+      "tower_phases_ms": {
+        "bank": 0.84,
+        "encode": 31.087,
+        "encode_by_k": [
+          2.485,
+          7.786,
+          14.719,
+          30.277,
+          30.995
+        ],
+        "images": 15.488,
+        "images_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          15.436
+        ],
+        "lots": 103.032,
+        "lots_by_k": [
+          72.182,
+          47.786,
+          76.487,
+          108.821,
+          148.214
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 11.244,
+        "static": 84.019,
+        "static_by_k": [
+          0.0,
+          7.366,
+          14.45,
+          23.548,
+          38.654
+        ],
+        "static_collect_by_k": [
+          0.0,
+          2.65,
+          3.665,
+          4.918,
+          7.823
+        ],
+        "static_groups_by_k": [
+          0.0,
+          1.91,
+          2.358,
+          3.441,
+          4.847
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          2.413,
+          6.963,
+          14.139,
+          25.145
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.38,
+          1.449,
+          1.034,
+          0.825
+        ],
+        "validate": 35.631,
+        "validate_parts": [
+          1.364,
+          1.749,
+          4.434,
+          0.452,
+          1.365,
+          10.055,
+          4.482,
+          11.728
+        ]
+      }
+    },
+    {
+      "K": 5,
+      "arm": "B_no_tail",
+      "backend": "gpu",
+      "balls": 1306696,
+      "catalogue_digest": "5ad1fe09354411ba",
+      "census_ms": 102.546,
+      "chain_ms": 952.822,
+      "digest_ms": 192.08,
+      "elapsed_s": 1.777867280999999,
+      "generator": {
+        "q2_accepted_pairs": 456919,
+        "q2_candidate_pairs": 9159254,
+        "q2_front_rectangles": 960535,
+        "q34_cover_builds": 900377,
+        "q34_expanded_pairs": 23686751,
+        "q3_emitted": 691284,
+        "q4_emitted": 158496
+      },
+      "index": 1,
+      "presentation_digest": "a2aa4b20ca392dfe",
+      "q2_ms": 105.024,
+      "q34_ms": 500.205,
+      "repeat": 0,
+      "s": 8,
+      "scene": "00",
+      "sites": 39885,
+      "tower_detail": {
+        "declared_support_checks": 20413,
+        "hashed_orders": 4,
+        "helper_threads": 217,
+        "images_own_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pipelined_orders": 0,
+        "pool_jobs": 46,
+        "pool_ms": 0.77,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "runner_threads": 5,
+        "seal_sampled_balls": 20418,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "67450c64611075b1",
+      "tower_ms": 296.671,
+      "tower_phases_ms": {
+        "bank": 0.938,
+        "encode": 32.829,
+        "encode_by_k": [
+          2.752,
+          9.068,
+          16.658,
+          21.208,
+          32.734
+        ],
+        "images": 24.22,
+        "images_by_k": [
+          0.105,
+          6.469,
+          13.731,
+          19.445,
+          24.135
+        ],
+        "lots": 102.97,
+        "lots_by_k": [
+          68.715,
+          51.398,
+          74.432,
+          105.188,
+          147.688
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 18.354,
+        "static": 82.0,
+        "static_by_k": [
+          0.0,
+          7.332,
+          14.025,
+          23.567,
+          37.075
+        ],
+        "static_collect_by_k": [
+          0.0,
+          2.6,
+          3.489,
+          4.858,
+          7.685
+        ],
+        "static_groups_by_k": [
+          0.0,
+          1.69,
+          2.286,
+          3.439,
+          4.393
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          2.678,
+          6.792,
+          14.131,
+          24.164
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.353,
+          1.444,
+          1.124,
+          0.819
+        ],
+        "validate": 33.957,
+        "validate_parts": [
+          1.388,
+          1.604,
+          4.612,
+          0.466,
+          1.176,
+          9.273,
+          4.926,
+          10.507
+        ]
+      }
+    },
+    {
+      "K": 5,
+      "arm": "C_no_overlap",
+      "backend": "gpu",
+      "balls": 1306696,
+      "catalogue_digest": "5ad1fe09354411ba",
+      "census_ms": 102.04,
+      "chain_ms": 957.241,
+      "digest_ms": 191.994,
+      "elapsed_s": 1.7717869300000046,
+      "generator": {
+        "q2_accepted_pairs": 456919,
+        "q2_candidate_pairs": 9159254,
+        "q2_front_rectangles": 960535,
+        "q34_cover_builds": 900377,
+        "q34_expanded_pairs": 23686751,
+        "q3_emitted": 691284,
+        "q4_emitted": 158496
+      },
+      "index": 2,
+      "presentation_digest": "a2aa4b20ca392dfe",
+      "q2_ms": 105.237,
+      "q34_ms": 483.711,
+      "repeat": 0,
+      "s": 8,
+      "scene": "00",
+      "sites": 39885,
+      "tower_detail": {
+        "declared_support_checks": 20413,
+        "hashed_orders": 4,
+        "helper_threads": 217,
+        "images_own_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pipelined_orders": 0,
+        "pool_jobs": 47,
+        "pool_ms": 0.744,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "runner_threads": 0,
+        "seal_sampled_balls": 20418,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "67450c64611075b1",
+      "tower_ms": 322.485,
+      "tower_phases_ms": {
+        "bank": 0.944,
+        "encode": 25.562,
+        "encode_by_k": [
+          2.587,
+          6.242,
+          15.933,
+          23.168,
+          25.483
+        ],
+        "images": 26.27,
+        "images_by_k": [
+          0.099,
+          5.894,
+          13.271,
+          21.028,
+          26.16
+        ],
+        "lots": 133.476,
+        "lots_by_k": [
+          53.821,
+          52.447,
+          77.357,
+          98.655,
+          133.353
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 17.303,
+        "static": 80.718,
+        "static_by_k": [
+          0.0,
+          6.275,
+          12.634,
+          23.581,
+          38.227
+        ],
+        "static_collect_by_k": [
+          0.0,
+          2.298,
+          3.531,
+          5.965,
+          8.856
+        ],
+        "static_groups_by_k": [
+          0.0,
+          1.348,
+          2.11,
+          3.185,
+          4.387
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          2.234,
+          6.518,
+          13.767,
+          24.197
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.377,
+          0.462,
+          0.65,
+          0.771
+        ],
+        "validate": 33.464,
+        "validate_parts": [
+          1.427,
+          1.555,
+          4.207,
+          0.389,
+          1.157,
+          9.317,
+          5.349,
+          10.062
+        ]
+      }
+    },
+    {
+      "K": 5,
+      "arm": "C_no_overlap",
+      "backend": "gpu",
+      "balls": 1306696,
+      "catalogue_digest": "5ad1fe09354411ba",
+      "census_ms": 102.2,
+      "chain_ms": 967.422,
+      "digest_ms": 191.761,
+      "elapsed_s": 1.7714128070000044,
+      "generator": {
+        "q2_accepted_pairs": 456919,
+        "q2_candidate_pairs": 9159254,
+        "q2_front_rectangles": 960535,
+        "q34_cover_builds": 900377,
+        "q34_expanded_pairs": 23686751,
+        "q3_emitted": 691284,
+        "q4_emitted": 158496
+      },
+      "index": 3,
+      "presentation_digest": "a2aa4b20ca392dfe",
+      "q2_ms": 105.984,
+      "q34_ms": 482.239,
+      "repeat": 1,
+      "s": 8,
+      "scene": "00",
+      "sites": 39885,
+      "tower_detail": {
+        "declared_support_checks": 20413,
+        "hashed_orders": 4,
+        "helper_threads": 217,
+        "images_own_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pipelined_orders": 0,
+        "pool_jobs": 47,
+        "pool_ms": 0.782,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "runner_threads": 0,
+        "seal_sampled_balls": 20418,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "67450c64611075b1",
+      "tower_ms": 330.39,
+      "tower_phases_ms": {
+        "bank": 0.979,
+        "encode": 31.144,
+        "encode_by_k": [
+          3.898,
+          8.26,
+          15.61,
+          23.378,
+          31.069
+        ],
+        "images": 28.352,
+        "images_by_k": [
+          0.088,
+          5.961,
+          13.9,
+          18.264,
+          28.248
+        ],
+        "lots": 133.474,
+        "lots_by_k": [
+          42.739,
+          50.796,
+          75.123,
+          100.773,
+          133.345
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 17.797,
+        "static": 80.272,
+        "static_by_k": [
+          0.0,
+          6.631,
+          13.013,
+          23.22,
+          37.408
+        ],
+        "static_collect_by_k": [
+          0.0,
+          2.451,
+          3.662,
+          5.65,
+          8.386
+        ],
+        "static_groups_by_k": [
+          0.0,
+          1.404,
+          2.251,
+          3.191,
+          4.348
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          2.387,
+          6.603,
+          13.711,
+          23.865
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.37,
+          0.483,
+          0.653,
+          0.794
+        ],
+        "validate": 34.321,
+        "validate_parts": [
+          1.388,
+          1.841,
+          4.202,
+          0.481,
+          1.416,
+          9.679,
+          4.932,
+          10.381
+        ]
+      }
+    },
+    {
+      "K": 5,
+      "arm": "B_no_tail",
+      "backend": "gpu",
+      "balls": 1306696,
+      "catalogue_digest": "5ad1fe09354411ba",
+      "census_ms": 102.292,
+      "chain_ms": 932.351,
+      "digest_ms": 191.727,
+      "elapsed_s": 1.7207424589999931,
+      "generator": {
+        "q2_accepted_pairs": 456919,
+        "q2_candidate_pairs": 9159254,
+        "q2_front_rectangles": 960535,
+        "q34_cover_builds": 900377,
+        "q34_expanded_pairs": 23686751,
+        "q3_emitted": 691284,
+        "q4_emitted": 158496
+      },
+      "index": 4,
+      "presentation_digest": "a2aa4b20ca392dfe",
+      "q2_ms": 104.949,
+      "q34_ms": 484.498,
+      "repeat": 1,
+      "s": 8,
+      "scene": "00",
+      "sites": 39885,
+      "tower_detail": {
+        "declared_support_checks": 20413,
+        "hashed_orders": 4,
+        "helper_threads": 217,
+        "images_own_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pipelined_orders": 0,
+        "pool_jobs": 46,
+        "pool_ms": 0.785,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "runner_threads": 5,
+        "seal_sampled_balls": 20418,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "67450c64611075b1",
+      "tower_ms": 295.485,
+      "tower_phases_ms": {
+        "bank": 1.045,
+        "encode": 28.98,
+        "encode_by_k": [
+          1.628,
+          8.015,
+          16.597,
+          23.086,
+          28.897
+        ],
+        "images": 26.709,
+        "images_by_k": [
+          0.087,
+          6.108,
+          12.739,
+          17.955,
+          26.604
+        ],
+        "lots": 101.541,
+        "lots_by_k": [
+          68.171,
+          49.643,
+          70.696,
+          106.002,
+          146.58
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 18.64,
+        "static": 83.561,
+        "static_by_k": [
+          0.0,
+          7.225,
+          14.546,
+          23.485,
+          38.305
+        ],
+        "static_collect_by_k": [
+          0.0,
+          2.611,
+          3.5,
+          4.832,
+          7.643
+        ],
+        "static_groups_by_k": [
+          0.0,
+          1.823,
+          2.337,
+          3.573,
+          5.02
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          2.425,
+          7.045,
+          14.082,
+          24.816
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.349,
+          1.649,
+          0.984,
+          0.809
+        ],
+        "validate": 33.589,
+        "validate_parts": [
+          1.362,
+          1.739,
+          5.044,
+          0.413,
+          1.143,
+          9.611,
+          4.33,
+          9.945
+        ]
+      }
+    },
+    {
+      "K": 5,
+      "arm": "A_full_overlap",
+      "backend": "gpu",
+      "balls": 1306696,
+      "catalogue_digest": "5ad1fe09354411ba",
+      "census_ms": 102.307,
+      "chain_ms": 931.973,
+      "digest_ms": 191.971,
+      "elapsed_s": 1.7695405179999995,
+      "generator": {
+        "q2_accepted_pairs": 456919,
+        "q2_candidate_pairs": 9159254,
+        "q2_front_rectangles": 960535,
+        "q34_cover_builds": 900377,
+        "q34_expanded_pairs": 23686751,
+        "q3_emitted": 691284,
+        "q4_emitted": 158496
+      },
+      "index": 5,
+      "presentation_digest": "a2aa4b20ca392dfe",
+      "q2_ms": 104.581,
+      "q34_ms": 485.839,
+      "repeat": 1,
+      "s": 8,
+      "scene": "00",
+      "sites": 39885,
+      "tower_detail": {
+        "declared_support_checks": 20413,
+        "hashed_orders": 4,
+        "helper_threads": 409,
+        "images_own_by_k": [
+          0.082,
+          6.608,
+          12.988,
+          21.24,
+          27.148
+        ],
+        "pipelined_orders": 5,
+        "pool_jobs": 45,
+        "pool_ms": 0.762,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.022,
+          4.096,
+          5.984,
+          8.169,
+          10.511
+        ],
+        "runner_threads": 5,
+        "seal_sampled_balls": 20418,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "67450c64611075b1",
+      "tower_ms": 288.68,
+      "tower_phases_ms": {
+        "bank": 0.882,
+        "encode": 37.808,
+        "encode_by_k": [
+          2.9,
+          8.653,
+          14.591,
+          22.593,
+          37.728
+        ],
+        "images": 16.683,
+        "images_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          16.63
+        ],
+        "lots": 103.386,
+        "lots_by_k": [
+          77.238,
+          48.489,
+          77.352,
+          105.434,
+          149.307
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 10.559,
+        "static": 83.765,
+        "static_by_k": [
+          0.0,
+          7.289,
+          14.406,
+          24.445,
+          37.624
+        ],
+        "static_collect_by_k": [
+          0.0,
+          2.587,
+          3.69,
+          4.831,
+          7.662
+        ],
+        "static_groups_by_k": [
+          0.0,
+          1.535,
+          2.287,
+          3.413,
+          4.516
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          2.784,
+          6.935,
+          15.209,
+          24.613
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.366,
+          1.478,
+          0.977,
+          0.819
+        ],
+        "validate": 34.243,
+        "validate_parts": [
+          1.386,
+          1.524,
+          4.641,
+          0.426,
+          1.208,
+          9.25,
+          4.786,
+          11.02
+        ]
+      }
+    },
+    {
+      "K": 5,
+      "arm": "engine",
+      "backend": "engine",
+      "balls": 1306696,
+      "catalogue_digest": "5ad1fe09354411ba",
+      "census_ms": 105.291,
+      "chain_ms": 2744.327,
+      "digest_ms": 191.945,
+      "elapsed_s": 3.3204769860000027,
+      "generator": {
+        "q2_accepted_pairs": 456919,
+        "q2_candidate_pairs": 9159254,
+        "q2_front_rectangles": 960535,
+        "q34_cover_builds": 900377,
+        "q34_expanded_pairs": 23686751,
+        "q3_emitted": 691284,
+        "q4_emitted": 158496
+      },
+      "index": 6,
+      "presentation_digest": "a2aa4b20ca392dfe",
+      "q2_ms": 104.063,
+      "q34_ms": 2176.301,
+      "repeat": 0,
+      "s": 8,
+      "scene": "00",
+      "sites": 39885,
+      "tower_detail": {
+        "declared_support_checks": 20413,
+        "hashed_orders": 4,
+        "helper_threads": 409,
+        "images_own_by_k": [
+          0.15,
+          6.215,
+          13.78,
+          20.681,
+          28.405
+        ],
+        "pipelined_orders": 5,
+        "pool_jobs": 45,
+        "pool_ms": 0.769,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.022,
+          4.117,
+          5.973,
+          9.004,
+          10.676
+        ],
+        "runner_threads": 5,
+        "seal_sampled_balls": 20418,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "67450c64611075b1",
+      "tower_ms": 282.653,
+      "tower_phases_ms": {
+        "bank": 0.884,
+        "encode": 29.439,
+        "encode_by_k": [
+          2.249,
+          8.218,
+          14.717,
+          23.066,
+          29.358
+        ],
+        "images": 17.778,
+        "images_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          17.722
+        ],
+        "lots": 103.194,
+        "lots_by_k": [
+          71.159,
+          50.312,
+          75.237,
+          106.592,
+          148.746
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 10.724,
+        "static": 83.163,
+        "static_by_k": [
+          0.0,
+          7.624,
+          14.173,
+          23.948,
+          37.419
+        ],
+        "static_collect_by_k": [
+          0.0,
+          2.651,
+          3.579,
+          4.968,
+          7.51
+        ],
+        "static_groups_by_k": [
+          0.0,
+          1.992,
+          2.355,
+          3.49,
+          4.527
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          2.617,
+          6.872,
+          14.448,
+          24.544
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.352,
+          1.353,
+          1.025,
+          0.824
+        ],
+        "validate": 36.102,
+        "validate_parts": [
+          1.498,
+          1.668,
+          5.64,
+          0.392,
+          1.537,
+          9.045,
+          5.061,
+          11.255
+        ]
+      }
+    },
+    {
+      "K": 10,
+      "arm": "A_full_overlap",
+      "backend": "gpu",
+      "balls": 5512670,
+      "catalogue_digest": "a6e959d227f3dafa",
+      "census_ms": 500.532,
+      "chain_ms": 2968.445,
+      "digest_ms": 998.997,
+      "elapsed_s": 6.029918479000003,
+      "generator": {
+        "q2_accepted_pairs": 881908,
+        "q2_candidate_pairs": 12804414,
+        "q2_front_rectangles": 1567191,
+        "q34_cover_builds": 1934399,
+        "q34_expanded_pairs": 30777213,
+        "q3_emitted": 2898219,
+        "q4_emitted": 1732548
+      },
+      "index": 7,
+      "presentation_digest": "43ff64fb1c3846d9",
+      "q2_ms": 206.902,
+      "q34_ms": 1104.141,
+      "repeat": 0,
+      "s": 8,
+      "scene": "00",
+      "sites": 39885,
+      "tower_detail": {
+        "declared_support_checks": 86128,
+        "hashed_orders": 9,
+        "helper_threads": 889,
+        "images_own_by_k": [
+          0.166,
+          8.522,
+          20.147,
+          36.148,
+          47.754,
+          63.184,
+          71.726,
+          82.542,
+          97.763,
+          124.572
+        ],
+        "pipelined_orders": 10,
+        "pool_jobs": 80,
+        "pool_ms": 0.787,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.034,
+          4.653,
+          7.025,
+          21.775,
+          15.319,
+          35.331,
+          29.194,
+          33.716,
+          48.027,
+          44.671
+        ],
+        "runner_threads": 10,
+        "seal_sampled_balls": 86136,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "ac108f7f71096c3f",
+      "tower_ms": 1207.878,
+      "tower_phases_ms": {
+        "bank": 4.798,
+        "encode": 92.5,
+        "encode_by_k": [
+          1.632,
+          7.453,
+          13.225,
+          20.304,
+          31.656,
+          41.701,
+          54.414,
+          72.429,
+          79.833,
+          92.392
+        ],
+        "images": 57.775,
+        "images_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          24.245,
+          48.819,
+          57.719,
+          30.427
+        ],
+        "lots": 164.464,
+        "lots_by_k": [
+          98.264,
+          77.561,
+          90.216,
+          127.299,
+          171.635,
+          229.276,
+          297.114,
+          409.623,
+          479.169,
+          603.04
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 40.06,
+        "static": 732.97,
+        "static_by_k": [
+          0.0,
+          7.159,
+          15.611,
+          27.123,
+          42.674,
+          63.871,
+          89.023,
+          123.628,
+          159.347,
+          204.535
+        ],
+        "static_collect_by_k": [
+          0.0,
+          2.56,
+          3.844,
+          5.154,
+          7.345,
+          9.225,
+          12.085,
+          17.025,
+          17.169,
+          22.748
+        ],
+        "static_groups_by_k": [
+          0.0,
+          1.457,
+          2.303,
+          4.583,
+          6.135,
+          6.272,
+          9.039,
+          9.024,
+          12.811,
+          12.634
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          2.73,
+          8.913,
+          16.641,
+          28.31,
+          45.306,
+          66.607,
+          95.45,
+          126.259,
+          166.115
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.395,
+          0.537,
+          0.73,
+          0.868,
+          3.051,
+          1.275,
+          1.483,
+          2.085,
+          2.028
+        ],
+        "validate": 109.29,
+        "validate_parts": [
+          1.377,
+          4.539,
+          19.156,
+          1.339,
+          3.499,
+          38.876,
+          9.132,
+          30.468
+        ]
+      }
+    },
+    {
+      "K": 10,
+      "arm": "B_no_tail",
+      "backend": "gpu",
+      "balls": 5512670,
+      "catalogue_digest": "a6e959d227f3dafa",
+      "census_ms": 504.607,
+      "chain_ms": 3090.53,
+      "digest_ms": 998.854,
+      "elapsed_s": 6.131771148000013,
+      "generator": {
+        "q2_accepted_pairs": 881908,
+        "q2_candidate_pairs": 12804414,
+        "q2_front_rectangles": 1567191,
+        "q34_cover_builds": 1934399,
+        "q34_expanded_pairs": 30777213,
+        "q3_emitted": 2898219,
+        "q4_emitted": 1732548
+      },
+      "index": 8,
+      "presentation_digest": "43ff64fb1c3846d9",
+      "q2_ms": 206.571,
+      "q34_ms": 1113.185,
+      "repeat": 0,
+      "s": 8,
+      "scene": "00",
+      "sites": 39885,
+      "tower_detail": {
+        "declared_support_checks": 86128,
+        "hashed_orders": 9,
+        "helper_threads": 457,
+        "images_own_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pipelined_orders": 0,
+        "pool_jobs": 81,
+        "pool_ms": 0.815,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "runner_threads": 10,
+        "seal_sampled_balls": 86136,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "ac108f7f71096c3f",
+      "tower_ms": 1314.13,
+      "tower_phases_ms": {
+        "bank": 4.65,
+        "encode": 99.886,
+        "encode_by_k": [
+          2.091,
+          6.318,
+          15.19,
+          23.781,
+          49.043,
+          61.445,
+          53.668,
+          68.871,
+          73.026,
+          99.767
+        ],
+        "images": 106.954,
+        "images_by_k": [
+          0.284,
+          8.34,
+          16.726,
+          26.504,
+          36.254,
+          45.14,
+          61.074,
+          70.951,
+          96.87,
+          106.849
+        ],
+        "lots": 141.456,
+        "lots_by_k": [
+          77.528,
+          62.557,
+          90.939,
+          123.765,
+          166.305,
+          232.683,
+          292.156,
+          378.316,
+          449.983,
+          577.881
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 110.098,
+        "static": 740.153,
+        "static_by_k": [
+          0.0,
+          7.897,
+          15.449,
+          27.764,
+          43.333,
+          63.972,
+          96.003,
+          122.253,
+          158.62,
+          204.862
+        ],
+        "static_collect_by_k": [
+          0.0,
+          2.552,
+          3.885,
+          5.115,
+          7.265,
+          9.652,
+          11.903,
+          14.547,
+          19.419,
+          22.29
+        ],
+        "static_groups_by_k": [
+          0.0,
+          1.402,
+          2.368,
+          4.757,
+          5.035,
+          6.466,
+          8.191,
+          10.711,
+          10.656,
+          12.422
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          3.517,
+          8.636,
+          17.146,
+          30.145,
+          46.273,
+          72.534,
+          94.083,
+          126.097,
+          167.003
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.394,
+          0.538,
+          0.73,
+          0.872,
+          1.562,
+          3.359,
+          1.784,
+          1.712,
+          2.077
+        ],
+        "validate": 107.117,
+        "validate_parts": [
+          1.434,
+          4.983,
+          19.08,
+          1.545,
+          3.397,
+          38.393,
+          9.115,
+          28.073
+        ]
+      }
+    },
+    {
+      "K": 10,
+      "arm": "C_no_overlap",
+      "backend": "gpu",
+      "balls": 5512670,
+      "catalogue_digest": "a6e959d227f3dafa",
+      "census_ms": 503.196,
+      "chain_ms": 3324.774,
+      "digest_ms": 998.769,
+      "elapsed_s": 6.3381918970000015,
+      "generator": {
+        "q2_accepted_pairs": 881908,
+        "q2_candidate_pairs": 12804414,
+        "q2_front_rectangles": 1567191,
+        "q34_cover_builds": 1934399,
+        "q34_expanded_pairs": 30777213,
+        "q3_emitted": 2898219,
+        "q4_emitted": 1732548
+      },
+      "index": 9,
+      "presentation_digest": "43ff64fb1c3846d9",
+      "q2_ms": 205.885,
+      "q34_ms": 1108.003,
+      "repeat": 0,
+      "s": 8,
+      "scene": "00",
+      "sites": 39885,
+      "tower_detail": {
+        "declared_support_checks": 86128,
+        "hashed_orders": 9,
+        "helper_threads": 457,
+        "images_own_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pipelined_orders": 0,
+        "pool_jobs": 82,
+        "pool_ms": 0.791,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "runner_threads": 0,
+        "seal_sampled_balls": 86136,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "ac108f7f71096c3f",
+      "tower_ms": 1553.106,
+      "tower_phases_ms": {
+        "bank": 4.536,
+        "encode": 99.145,
+        "encode_by_k": [
+          1.674,
+          5.6,
+          16.065,
+          25.214,
+          30.453,
+          42.622,
+          57.649,
+          56.208,
+          82.33,
+          99.004
+        ],
+        "images": 122.259,
+        "images_by_k": [
+          0.097,
+          7.206,
+          16.174,
+          45.315,
+          59.536,
+          71.669,
+          68.556,
+          67.345,
+          100.138,
+          122.105
+        ],
+        "lots": 387.652,
+        "lots_by_k": [
+          65.403,
+          74.668,
+          101.17,
+          120.002,
+          162.012,
+          199.806,
+          248.105,
+          289.506,
+          340.152,
+          387.558
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 101.273,
+        "static": 719.193,
+        "static_by_k": [
+          0.0,
+          6.31,
+          13.087,
+          23.92,
+          39.271,
+          59.189,
+          87.691,
+          120.366,
+          158.256,
+          211.103
+        ],
+        "static_collect_by_k": [
+          0.0,
+          2.293,
+          3.772,
+          5.751,
+          8.582,
+          11.234,
+          16.714,
+          18.794,
+          21.225,
+          26.538
+        ],
+        "static_groups_by_k": [
+          0.0,
+          1.308,
+          2.059,
+          3.156,
+          4.293,
+          5.629,
+          7.295,
+          8.667,
+          10.611,
+          12.983
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          2.316,
+          6.761,
+          14.306,
+          25.55,
+          41.276,
+          62.476,
+          90.632,
+          123.507,
+          168.023
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.38,
+          0.48,
+          0.692,
+          0.83,
+          1.034,
+          1.189,
+          1.441,
+          1.705,
+          1.996
+        ],
+        "validate": 106.515,
+        "validate_parts": [
+          1.393,
+          4.506,
+          19.343,
+          1.336,
+          3.525,
+          37.92,
+          9.425,
+          27.895
+        ]
+      }
+    },
+    {
+      "K": 10,
+      "arm": "C_no_overlap",
+      "backend": "gpu",
+      "balls": 5512670,
+      "catalogue_digest": "a6e959d227f3dafa",
+      "census_ms": 501.3,
+      "chain_ms": 3314.822,
+      "digest_ms": 998.491,
+      "elapsed_s": 6.335632478000008,
+      "generator": {
+        "q2_accepted_pairs": 881908,
+        "q2_candidate_pairs": 12804414,
+        "q2_front_rectangles": 1567191,
+        "q34_cover_builds": 1934399,
+        "q34_expanded_pairs": 30777213,
+        "q3_emitted": 2898219,
+        "q4_emitted": 1732548
+      },
+      "index": 10,
+      "presentation_digest": "43ff64fb1c3846d9",
+      "q2_ms": 206.693,
+      "q34_ms": 1112.082,
+      "repeat": 1,
+      "s": 8,
+      "scene": "00",
+      "sites": 39885,
+      "tower_detail": {
+        "declared_support_checks": 86128,
+        "hashed_orders": 9,
+        "helper_threads": 457,
+        "images_own_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pipelined_orders": 0,
+        "pool_jobs": 82,
+        "pool_ms": 0.805,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "runner_threads": 0,
+        "seal_sampled_balls": 86136,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "ac108f7f71096c3f",
+      "tower_ms": 1544.288,
+      "tower_phases_ms": {
+        "bank": 4.553,
+        "encode": 84.453,
+        "encode_by_k": [
+          2.544,
+          8.837,
+          10.703,
+          15.203,
+          32.135,
+          42.815,
+          53.552,
+          63.615,
+          76.005,
+          84.347
+        ],
+        "images": 97.066,
+        "images_by_k": [
+          0.183,
+          8.006,
+          26.084,
+          30.323,
+          40.711,
+          53.047,
+          62.385,
+          77.409,
+          91.673,
+          96.939
+        ],
+        "lots": 417.267,
+        "lots_by_k": [
+          75.056,
+          73.186,
+          96.678,
+          122.643,
+          148.506,
+          208.87,
+          250.349,
+          285.845,
+          341.673,
+          417.169
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 102.682,
+        "static": 716.179,
+        "static_by_k": [
+          0.0,
+          6.219,
+          13.014,
+          24.12,
+          39.274,
+          59.007,
+          86.81,
+          119.049,
+          159.885,
+          208.8
+        ],
+        "static_collect_by_k": [
+          0.0,
+          2.294,
+          3.737,
+          5.855,
+          8.493,
+          10.954,
+          16.337,
+          18.468,
+          22.536,
+          27.174
+        ],
+        "static_groups_by_k": [
+          0.0,
+          1.266,
+          2.068,
+          3.192,
+          4.289,
+          5.529,
+          7.398,
+          8.453,
+          10.666,
+          13.111
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          2.292,
+          6.753,
+          14.425,
+          25.708,
+          41.507,
+          61.908,
+          89.473,
+          123.791,
+          164.866
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.352,
+          0.443,
+          0.634,
+          0.769,
+          1.001,
+          1.151,
+          1.66,
+          1.673,
+          1.986
+        ],
+        "validate": 109.832,
+        "validate_parts": [
+          1.43,
+          4.533,
+          20.841,
+          1.592,
+          3.501,
+          39.747,
+          9.354,
+          27.776
+        ]
+      }
+    },
+    {
+      "K": 10,
+      "arm": "B_no_tail",
+      "backend": "gpu",
+      "balls": 5512670,
+      "catalogue_digest": "a6e959d227f3dafa",
+      "census_ms": 506.64,
+      "chain_ms": 3086.359,
+      "digest_ms": 998.731,
+      "elapsed_s": 6.133877909000006,
+      "generator": {
+        "q2_accepted_pairs": 881908,
+        "q2_candidate_pairs": 12804414,
+        "q2_front_rectangles": 1567191,
+        "q34_cover_builds": 1934399,
+        "q34_expanded_pairs": 30777213,
+        "q3_emitted": 2898219,
+        "q4_emitted": 1732548
+      },
+      "index": 11,
+      "presentation_digest": "43ff64fb1c3846d9",
+      "q2_ms": 208.474,
+      "q34_ms": 1110.704,
+      "repeat": 1,
+      "s": 8,
+      "scene": "00",
+      "sites": 39885,
+      "tower_detail": {
+        "declared_support_checks": 86128,
+        "hashed_orders": 9,
+        "helper_threads": 457,
+        "images_own_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pipelined_orders": 0,
+        "pool_jobs": 81,
+        "pool_ms": 0.813,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "runner_threads": 10,
+        "seal_sampled_balls": 86136,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "ac108f7f71096c3f",
+      "tower_ms": 1300.9,
+      "tower_phases_ms": {
+        "bank": 4.727,
+        "encode": 99.499,
+        "encode_by_k": [
+          2.35,
+          7.637,
+          17.011,
+          15.439,
+          30.456,
+          45.266,
+          47.486,
+          68.216,
+          81.39,
+          99.373
+        ],
+        "images": 106.623,
+        "images_by_k": [
+          0.087,
+          7.268,
+          16.128,
+          24.872,
+          35.263,
+          50.278,
+          65.616,
+          83.002,
+          83.494,
+          106.487
+        ],
+        "lots": 140.2,
+        "lots_by_k": [
+          75.144,
+          62.33,
+          91.525,
+          123.422,
+          166.638,
+          219.724,
+          296.44,
+          374.659,
+          472.3,
+          593.714
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 109.231,
+        "static": 728.139,
+        "static_by_k": [
+          0.0,
+          7.166,
+          15.576,
+          28.862,
+          41.732,
+          63.508,
+          89.477,
+          120.279,
+          159.08,
+          202.457
+        ],
+        "static_collect_by_k": [
+          0.0,
+          2.547,
+          3.848,
+          5.199,
+          7.347,
+          8.901,
+          14.827,
+          14.528,
+          19.541,
+          22.339
+        ],
+        "static_groups_by_k": [
+          0.0,
+          1.424,
+          2.334,
+          4.622,
+          4.81,
+          7.471,
+          7.224,
+          9.01,
+          10.562,
+          12.124
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          2.808,
+          8.86,
+          18.316,
+          28.709,
+          46.047,
+          66.207,
+          92.868,
+          126.47,
+          164.033
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.367,
+          0.52,
+          0.697,
+          0.851,
+          1.072,
+          1.202,
+          3.159,
+          1.699,
+          2.032
+        ],
+        "validate": 108.408,
+        "validate_parts": [
+          1.41,
+          4.551,
+          19.847,
+          1.56,
+          3.455,
+          38.755,
+          9.294,
+          28.115
+        ]
+      }
+    },
+    {
+      "K": 10,
+      "arm": "A_full_overlap",
+      "backend": "gpu",
+      "balls": 5512670,
+      "catalogue_digest": "a6e959d227f3dafa",
+      "census_ms": 497.322,
+      "chain_ms": 2956.055,
+      "digest_ms": 997.486,
+      "elapsed_s": 5.987693999000015,
+      "generator": {
+        "q2_accepted_pairs": 881908,
+        "q2_candidate_pairs": 12804414,
+        "q2_front_rectangles": 1567191,
+        "q34_cover_builds": 1934399,
+        "q34_expanded_pairs": 30777213,
+        "q3_emitted": 2898219,
+        "q4_emitted": 1732548
+      },
+      "index": 12,
+      "presentation_digest": "43ff64fb1c3846d9",
+      "q2_ms": 206.727,
+      "q34_ms": 1110.893,
+      "repeat": 1,
+      "s": 8,
+      "scene": "00",
+      "sites": 39885,
+      "tower_detail": {
+        "declared_support_checks": 86128,
+        "hashed_orders": 9,
+        "helper_threads": 889,
+        "images_own_by_k": [
+          0.165,
+          8.52,
+          18.433,
+          29.759,
+          41.565,
+          66.122,
+          77.719,
+          82.35,
+          88.413,
+          122.465
+        ],
+        "pipelined_orders": 10,
+        "pool_jobs": 80,
+        "pool_ms": 0.791,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.025,
+          4.86,
+          22.248,
+          11.967,
+          16.654,
+          44.264,
+          37.502,
+          48.685,
+          39.109,
+          43.408
+        ],
+        "runner_threads": 10,
+        "seal_sampled_balls": 86136,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "ac108f7f71096c3f",
+      "tower_ms": 1184.736,
+      "tower_phases_ms": {
+        "bank": 4.783,
+        "encode": 94.301,
+        "encode_by_k": [
+          2.193,
+          7.304,
+          12.416,
+          17.278,
+          46.705,
+          42.24,
+          69.714,
+          64.819,
+          81.1,
+          94.189
+        ],
+        "images": 42.399,
+        "images_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          5.612,
+          23.164,
+          33.659,
+          37.012,
+          42.358
+        ],
+        "lots": 145.566,
+        "lots_by_k": [
+          69.787,
+          62.997,
+          92.34,
+          131.955,
+          168.588,
+          225.904,
+          297.795,
+          388.801,
+          482.844,
+          587.745
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 51.416,
+        "static": 730.763,
+        "static_by_k": [
+          0.0,
+          7.087,
+          15.27,
+          27.458,
+          43.499,
+          62.405,
+          87.835,
+          122.719,
+          158.364,
+          206.125
+        ],
+        "static_collect_by_k": [
+          0.0,
+          2.542,
+          3.825,
+          5.368,
+          7.296,
+          9.098,
+          12.241,
+          14.561,
+          19.336,
+          22.46
+        ],
+        "static_groups_by_k": [
+          0.0,
+          1.423,
+          2.303,
+          4.187,
+          5.945,
+          7.481,
+          8.684,
+          9.243,
+          10.087,
+          12.35
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          2.738,
+          8.623,
+          17.16,
+          29.391,
+          44.733,
+          65.665,
+          94.254,
+          126.426,
+          168.151
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.37,
+          0.505,
+          0.725,
+          0.843,
+          1.077,
+          1.229,
+          3.956,
+          1.713,
+          2.054
+        ],
+        "validate": 108.638,
+        "validate_parts": [
+          1.372,
+          4.621,
+          19.083,
+          1.317,
+          3.41,
+          37.847,
+          9.146,
+          30.68
+        ]
+      }
+    },
+    {
+      "K": 10,
+      "arm": "engine",
+      "backend": "engine",
+      "balls": 5512670,
+      "catalogue_digest": "a6e959d227f3dafa",
+      "census_ms": 510.999,
+      "chain_ms": 8379.956,
+      "digest_ms": 997.945,
+      "elapsed_s": 10.945959626000018,
+      "generator": {
+        "q2_accepted_pairs": 881908,
+        "q2_candidate_pairs": 12804414,
+        "q2_front_rectangles": 1567191,
+        "q34_cover_builds": 1934399,
+        "q34_expanded_pairs": 30777213,
+        "q3_emitted": 2898219,
+        "q4_emitted": 1732548
+      },
+      "index": 13,
+      "presentation_digest": "43ff64fb1c3846d9",
+      "q2_ms": 204.481,
+      "q34_ms": 6264.328,
+      "repeat": 0,
+      "s": 8,
+      "scene": "00",
+      "sites": 39885,
+      "tower_detail": {
+        "declared_support_checks": 86128,
+        "hashed_orders": 9,
+        "helper_threads": 889,
+        "images_own_by_k": [
+          0.164,
+          8.425,
+          20.916,
+          34.327,
+          40.85,
+          68.291,
+          67.608,
+          85.76,
+          106.437,
+          120.906
+        ],
+        "pipelined_orders": 10,
+        "pool_jobs": 80,
+        "pool_ms": 0.795,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.034,
+          4.859,
+          38.403,
+          18.871,
+          17.397,
+          39.404,
+          39.806,
+          48.834,
+          48.394,
+          47.881
+        ],
+        "runner_threads": 10,
+        "seal_sampled_balls": 86136,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "ac108f7f71096c3f",
+      "tower_ms": 1207.682,
+      "tower_phases_ms": {
+        "bank": 4.702,
+        "encode": 94.002,
+        "encode_by_k": [
+          3.03,
+          10.001,
+          15.921,
+          22.386,
+          32.516,
+          44.203,
+          59.797,
+          65.918,
+          83.411,
+          93.878
+        ],
+        "images": 45.189,
+        "images_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          6.08,
+          27.798,
+          43.007,
+          45.144,
+          35.687
+        ],
+        "lots": 160.497,
+        "lots_by_k": [
+          70.254,
+          66.87,
+          92.141,
+          125.257,
+          173.716,
+          234.625,
+          318.763,
+          389.797,
+          486.838,
+          601.454
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 42.766,
+        "static": 737.012,
+        "static_by_k": [
+          0.0,
+          7.42,
+          15.291,
+          27.801,
+          43.947,
+          64.166,
+          89.548,
+          120.942,
+          161.102,
+          206.796
+        ],
+        "static_collect_by_k": [
+          0.0,
+          2.537,
+          3.83,
+          5.124,
+          7.429,
+          9.168,
+          12.483,
+          14.711,
+          17.359,
+          22.685
+        ],
+        "static_groups_by_k": [
+          0.0,
+          1.413,
+          2.409,
+          4.796,
+          6.043,
+          6.589,
+          9.205,
+          11.223,
+          10.954,
+          12.189
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          3.068,
+          8.526,
+          17.131,
+          29.597,
+          45.39,
+          66.602,
+          92.357,
+          126.896,
+          168.396
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.381,
+          0.511,
+          0.734,
+          0.862,
+          3.002,
+          1.241,
+          1.49,
+          4.716,
+          2.065
+        ],
+        "validate": 117.315,
+        "validate_parts": [
+          1.5,
+          7.677,
+          19.108,
+          1.52,
+          3.475,
+          39.71,
+          9.131,
+          33.457
+        ]
+      }
+    },
+    {
+      "K": 5,
+      "arm": "A_full_overlap",
+      "backend": "gpu",
+      "balls": 2822052,
+      "catalogue_digest": "11f6a8e1a7f28127",
+      "census_ms": 210.547,
+      "chain_ms": 2036.57,
+      "digest_ms": 432.241,
+      "elapsed_s": 3.5311124129999882,
+      "generator": {
+        "q2_accepted_pairs": 1265445,
+        "q2_candidate_pairs": 9024581,
+        "q2_front_rectangles": 2110217,
+        "q34_cover_builds": 2179536,
+        "q34_expanded_pairs": 22034426,
+        "q3_emitted": 1370355,
+        "q4_emitted": 186257
+      },
+      "index": 14,
+      "presentation_digest": "7344e05fb52c6f50",
+      "q2_ms": 175.66,
+      "q34_ms": 1031.534,
+      "repeat": 0,
+      "s": 8,
+      "scene": "b00",
+      "sites": 123389,
+      "tower_detail": {
+        "declared_support_checks": 44071,
+        "hashed_orders": 4,
+        "helper_threads": 432,
+        "images_own_by_k": [
+          0.257,
+          20.954,
+          38.528,
+          55.069,
+          67.947
+        ],
+        "pipelined_orders": 5,
+        "pool_jobs": 45,
+        "pool_ms": 0.756,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.062,
+          7.72,
+          11.968,
+          18.279,
+          22.124
+        ],
+        "runner_threads": 5,
+        "seal_sampled_balls": 44095,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "cfb1634832c0384a",
+      "tower_ms": 669.031,
+      "tower_phases_ms": {
+        "bank": 1.951,
+        "encode": 76.937,
+        "encode_by_k": [
+          9.721,
+          18.985,
+          34.179,
+          50.856,
+          76.856
+        ],
+        "images": 45.9,
+        "images_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          45.8
+        ],
+        "lots": 278.523,
+        "lots_by_k": [
+          166.783,
+          117.419,
+          199.897,
+          251.656,
+          371.686
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 22.187,
+        "static": 165.558,
+        "static_by_k": [
+          0.0,
+          16.066,
+          30.03,
+          47.276,
+          72.186
+        ],
+        "static_collect_by_k": [
+          0.0,
+          4.148,
+          7.335,
+          10.534,
+          15.289
+        ],
+        "static_groups_by_k": [
+          0.0,
+          3.844,
+          4.605,
+          6.658,
+          8.692
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          7.423,
+          15.376,
+          28.759,
+          45.675
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.636,
+          2.698,
+          1.308,
+          1.552
+        ],
+        "validate": 72.326,
+        "validate_parts": [
+          5.029,
+          4.666,
+          9.964,
+          0.859,
+          3.787,
+          24.116,
+          10.174,
+          13.73
+        ]
+      }
+    },
+    {
+      "K": 5,
+      "arm": "B_no_tail",
+      "backend": "gpu",
+      "balls": 2822052,
+      "catalogue_digest": "11f6a8e1a7f28127",
+      "census_ms": 207.904,
+      "chain_ms": 2049.227,
+      "digest_ms": 433.675,
+      "elapsed_s": 3.5259940299999926,
+      "generator": {
+        "q2_accepted_pairs": 1265445,
+        "q2_candidate_pairs": 9024581,
+        "q2_front_rectangles": 2110217,
+        "q34_cover_builds": 2179536,
+        "q34_expanded_pairs": 22034426,
+        "q3_emitted": 1370355,
+        "q4_emitted": 186257
+      },
+      "index": 15,
+      "presentation_digest": "7344e05fb52c6f50",
+      "q2_ms": 175.137,
+      "q34_ms": 1043.239,
+      "repeat": 0,
+      "s": 8,
+      "scene": "b00",
+      "sites": 123389,
+      "tower_detail": {
+        "declared_support_checks": 44071,
+        "hashed_orders": 4,
+        "helper_threads": 240,
+        "images_own_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pipelined_orders": 0,
+        "pool_jobs": 46,
+        "pool_ms": 0.771,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "runner_threads": 5,
+        "seal_sampled_balls": 44095,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "cfb1634832c0384a",
+      "tower_ms": 674.049,
+      "tower_phases_ms": {
+        "bank": 1.806,
+        "encode": 70.25,
+        "encode_by_k": [
+          8.002,
+          19.648,
+          34.309,
+          50.874,
+          70.164
+        ],
+        "images": 66.587,
+        "images_by_k": [
+          0.302,
+          18.326,
+          37.585,
+          55.799,
+          66.493
+        ],
+        "lots": 255.317,
+        "lots_by_k": [
+          176.784,
+          120.96,
+          177.461,
+          248.288,
+          344.909
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 43.185,
+        "static": 162.886,
+        "static_by_k": [
+          0.0,
+          14.938,
+          29.8,
+          46.475,
+          71.673
+        ],
+        "static_collect_by_k": [
+          0.0,
+          4.131,
+          6.519,
+          9.232,
+          15.116
+        ],
+        "static_groups_by_k": [
+          0.0,
+          3.093,
+          4.58,
+          7.623,
+          8.395
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          7.058,
+          15.921,
+          28.415,
+          45.767
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.642,
+          2.765,
+          1.188,
+          1.498
+        ],
+        "validate": 71.521,
+        "validate_parts": [
+          5.024,
+          4.629,
+          11.49,
+          0.916,
+          3.84,
+          23.766,
+          10.359,
+          11.494
+        ]
+      }
+    },
+    {
+      "K": 5,
+      "arm": "C_no_overlap",
+      "backend": "gpu",
+      "balls": 2822052,
+      "catalogue_digest": "11f6a8e1a7f28127",
+      "census_ms": 207.094,
+      "chain_ms": 2072.656,
+      "digest_ms": 433.656,
+      "elapsed_s": 3.5314264130000197,
+      "generator": {
+        "q2_accepted_pairs": 1265445,
+        "q2_candidate_pairs": 9024581,
+        "q2_front_rectangles": 2110217,
+        "q34_cover_builds": 2179536,
+        "q34_expanded_pairs": 22034426,
+        "q3_emitted": 1370355,
+        "q4_emitted": 186257
+      },
+      "index": 16,
+      "presentation_digest": "7344e05fb52c6f50",
+      "q2_ms": 176.465,
+      "q34_ms": 1004.131,
+      "repeat": 0,
+      "s": 8,
+      "scene": "b00",
+      "sites": 123389,
+      "tower_detail": {
+        "declared_support_checks": 44071,
+        "hashed_orders": 4,
+        "helper_threads": 240,
+        "images_own_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pipelined_orders": 0,
+        "pool_jobs": 47,
+        "pool_ms": 0.805,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "runner_threads": 0,
+        "seal_sampled_balls": 44095,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "cfb1634832c0384a",
+      "tower_ms": 735.526,
+      "tower_phases_ms": {
+        "bank": 1.69,
+        "encode": 69.166,
+        "encode_by_k": [
+          7.137,
+          17.798,
+          30.248,
+          49.104,
+          69.07
+        ],
+        "images": 76.386,
+        "images_by_k": [
+          0.39,
+          18.962,
+          35.956,
+          56.532,
+          76.274
+        ],
+        "lots": 304.655,
+        "lots_by_k": [
+          129.025,
+          118.55,
+          173.585,
+          232.486,
+          304.562
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 41.489,
+        "static": 162.246,
+        "static_by_k": [
+          0.0,
+          13.249,
+          28.129,
+          46.88,
+          73.988
+        ],
+        "static_collect_by_k": [
+          0.0,
+          3.85,
+          8.23,
+          11.997,
+          18.865
+        ],
+        "static_groups_by_k": [
+          0.0,
+          2.665,
+          4.235,
+          6.299,
+          8.449
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          6.082,
+          14.78,
+          27.425,
+          44.027
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.638,
+          0.868,
+          1.145,
+          1.481
+        ],
+        "validate": 70.998,
+        "validate_parts": [
+          5.029,
+          4.458,
+          12.365,
+          0.821,
+          3.347,
+          23.145,
+          10.387,
+          11.444
+        ]
+      }
+    },
+    {
+      "K": 5,
+      "arm": "C_no_overlap",
+      "backend": "gpu",
+      "balls": 2822052,
+      "catalogue_digest": "11f6a8e1a7f28127",
+      "census_ms": 210.543,
+      "chain_ms": 2070.717,
+      "digest_ms": 433.805,
+      "elapsed_s": 3.5280452519999983,
+      "generator": {
+        "q2_accepted_pairs": 1265445,
+        "q2_candidate_pairs": 9024581,
+        "q2_front_rectangles": 2110217,
+        "q34_cover_builds": 2179536,
+        "q34_expanded_pairs": 22034426,
+        "q3_emitted": 1370355,
+        "q4_emitted": 186257
+      },
+      "index": 17,
+      "presentation_digest": "7344e05fb52c6f50",
+      "q2_ms": 178.751,
+      "q34_ms": 1008.243,
+      "repeat": 1,
+      "s": 8,
+      "scene": "b00",
+      "sites": 123389,
+      "tower_detail": {
+        "declared_support_checks": 44071,
+        "hashed_orders": 4,
+        "helper_threads": 240,
+        "images_own_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pipelined_orders": 0,
+        "pool_jobs": 47,
+        "pool_ms": 0.759,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "runner_threads": 0,
+        "seal_sampled_balls": 44095,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "cfb1634832c0384a",
+      "tower_ms": 725.507,
+      "tower_phases_ms": {
+        "bank": 1.688,
+        "encode": 68.556,
+        "encode_by_k": [
+          5.647,
+          20.611,
+          34.223,
+          51.253,
+          68.474
+        ],
+        "images": 67.882,
+        "images_by_k": [
+          0.259,
+          17.676,
+          35.981,
+          50.227,
+          67.787
+        ],
+        "lots": 305.288,
+        "lots_by_k": [
+          128.705,
+          117.733,
+          170.475,
+          231.718,
+          305.146
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 41.551,
+        "static": 161.666,
+        "static_by_k": [
+          0.0,
+          13.191,
+          27.772,
+          46.601,
+          74.102
+        ],
+        "static_collect_by_k": [
+          0.0,
+          3.834,
+          8.288,
+          11.931,
+          19.275
+        ],
+        "static_groups_by_k": [
+          0.0,
+          2.606,
+          4.059,
+          5.984,
+          7.904
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          6.068,
+          14.551,
+          27.522,
+          44.182
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.665,
+          0.857,
+          1.148,
+          1.502
+        ],
+        "validate": 70.043,
+        "validate_parts": [
+          5.007,
+          4.758,
+          10.937,
+          0.754,
+          3.416,
+          24.014,
+          9.797,
+          11.359
+        ]
+      }
+    },
+    {
+      "K": 5,
+      "arm": "B_no_tail",
+      "backend": "gpu",
+      "balls": 2822052,
+      "catalogue_digest": "11f6a8e1a7f28127",
+      "census_ms": 209.975,
+      "chain_ms": 2010.408,
+      "digest_ms": 432.094,
+      "elapsed_s": 3.480045512999993,
+      "generator": {
+        "q2_accepted_pairs": 1265445,
+        "q2_candidate_pairs": 9024581,
+        "q2_front_rectangles": 2110217,
+        "q34_cover_builds": 2179536,
+        "q34_expanded_pairs": 22034426,
+        "q3_emitted": 1370355,
+        "q4_emitted": 186257
+      },
+      "index": 18,
+      "presentation_digest": "7344e05fb52c6f50",
+      "q2_ms": 179.216,
+      "q34_ms": 1017.633,
+      "repeat": 1,
+      "s": 8,
+      "scene": "b00",
+      "sites": 123389,
+      "tower_detail": {
+        "declared_support_checks": 44071,
+        "hashed_orders": 4,
+        "helper_threads": 240,
+        "images_own_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pipelined_orders": 0,
+        "pool_jobs": 46,
+        "pool_ms": 0.774,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "runner_threads": 5,
+        "seal_sampled_balls": 44095,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "cfb1634832c0384a",
+      "tower_ms": 663.352,
+      "tower_phases_ms": {
+        "bank": 1.735,
+        "encode": 68.852,
+        "encode_by_k": [
+          12.18,
+          19.529,
+          39.315,
+          50.408,
+          68.768
+        ],
+        "images": 64.228,
+        "images_by_k": [
+          0.297,
+          33.941,
+          49.741,
+          53.522,
+          64.133
+        ],
+        "lots": 252.712,
+        "lots_by_k": [
+          176.64,
+          124.003,
+          178.293,
+          249.955,
+          342.106
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 42.396,
+        "static": 161.264,
+        "static_by_k": [
+          0.0,
+          15.014,
+          28.344,
+          46.294,
+          71.611
+        ],
+        "static_collect_by_k": [
+          0.0,
+          4.131,
+          6.419,
+          9.766,
+          15.241
+        ],
+        "static_groups_by_k": [
+          0.0,
+          3.223,
+          5.439,
+          6.622,
+          8.426
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          6.982,
+          15.594,
+          28.218,
+          45.488
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.663,
+          0.877,
+          1.673,
+          1.51
+        ],
+        "validate": 69.687,
+        "validate_parts": [
+          5.007,
+          4.66,
+          10.239,
+          0.867,
+          3.249,
+          24.344,
+          9.82,
+          11.495
+        ]
+      }
+    },
+    {
+      "K": 5,
+      "arm": "A_full_overlap",
+      "backend": "gpu",
+      "balls": 2822052,
+      "catalogue_digest": "11f6a8e1a7f28127",
+      "census_ms": 209.288,
+      "chain_ms": 1974.292,
+      "digest_ms": 433.303,
+      "elapsed_s": 3.4255317779999928,
+      "generator": {
+        "q2_accepted_pairs": 1265445,
+        "q2_candidate_pairs": 9024581,
+        "q2_front_rectangles": 2110217,
+        "q34_cover_builds": 2179536,
+        "q34_expanded_pairs": 22034426,
+        "q3_emitted": 1370355,
+        "q4_emitted": 186257
+      },
+      "index": 19,
+      "presentation_digest": "7344e05fb52c6f50",
+      "q2_ms": 177.61,
+      "q34_ms": 1010.304,
+      "repeat": 1,
+      "s": 8,
+      "scene": "b00",
+      "sites": 123389,
+      "tower_detail": {
+        "declared_support_checks": 44071,
+        "hashed_orders": 4,
+        "helper_threads": 432,
+        "images_own_by_k": [
+          0.26,
+          20.574,
+          37.162,
+          58.225,
+          69.273
+        ],
+        "pipelined_orders": 5,
+        "pool_jobs": 45,
+        "pool_ms": 0.782,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.062,
+          7.394,
+          11.377,
+          17.669,
+          23.268
+        ],
+        "runner_threads": 5,
+        "seal_sampled_balls": 44095,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "cfb1634832c0384a",
+      "tower_ms": 630.117,
+      "tower_phases_ms": {
+        "bank": 1.839,
+        "encode": 67.436,
+        "encode_by_k": [
+          8.943,
+          19.973,
+          33.61,
+          53.159,
+          67.336
+        ],
+        "images": 46.094,
+        "images_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          45.994
+        ],
+        "lots": 253.908,
+        "lots_by_k": [
+          174.155,
+          117.33,
+          175.008,
+          252.368,
+          345.195
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 23.328,
+        "static": 162.606,
+        "static_by_k": [
+          0.0,
+          15.322,
+          29.611,
+          46.559,
+          71.114
+        ],
+        "static_collect_by_k": [
+          0.0,
+          4.24,
+          6.618,
+          9.274,
+          14.864
+        ],
+        "static_groups_by_k": [
+          0.0,
+          3.187,
+          5.432,
+          8.218,
+          8.254
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          7.221,
+          16.654,
+          27.888,
+          45.535
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.661,
+          0.891,
+          1.162,
+          1.561
+        ],
+        "validate": 70.681,
+        "validate_parts": [
+          5.229,
+          5.067,
+          9.683,
+          0.724,
+          3.55,
+          22.867,
+          10.758,
+          12.8
+        ]
+      }
+    },
+    {
+      "K": 5,
+      "arm": "engine",
+      "backend": "engine",
+      "balls": 2822052,
+      "catalogue_digest": "11f6a8e1a7f28127",
+      "census_ms": 227.67,
+      "chain_ms": 5615.309,
+      "digest_ms": 432.017,
+      "elapsed_s": 6.785594951999997,
+      "generator": {
+        "q2_accepted_pairs": 1265445,
+        "q2_candidate_pairs": 9024581,
+        "q2_front_rectangles": 2110217,
+        "q34_cover_builds": 2179536,
+        "q34_expanded_pairs": 22034426,
+        "q3_emitted": 1370355,
+        "q4_emitted": 186257
+      },
+      "index": 20,
+      "presentation_digest": "7344e05fb52c6f50",
+      "q2_ms": 172.467,
+      "q34_ms": 4413.94,
+      "repeat": 0,
+      "s": 8,
+      "scene": "b00",
+      "sites": 123389,
+      "tower_detail": {
+        "declared_support_checks": 44071,
+        "hashed_orders": 4,
+        "helper_threads": 432,
+        "images_own_by_k": [
+          0.253,
+          22.691,
+          36.611,
+          52.954,
+          69.422
+        ],
+        "pipelined_orders": 5,
+        "pool_jobs": 45,
+        "pool_ms": 0.802,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.062,
+          7.641,
+          11.861,
+          16.633,
+          22.791
+        ],
+        "runner_threads": 5,
+        "seal_sampled_balls": 44095,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "cfb1634832c0384a",
+      "tower_ms": 632.32,
+      "tower_phases_ms": {
+        "bank": 1.915,
+        "encode": 74.952,
+        "encode_by_k": [
+          8.082,
+          19.895,
+          33.726,
+          50.286,
+          74.869
+        ],
+        "images": 46.74,
+        "images_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          46.621
+        ],
+        "lots": 246.661,
+        "lots_by_k": [
+          167.467,
+          121.078,
+          181.658,
+          253.586,
+          336.646
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 22.837,
+        "static": 162.228,
+        "static_by_k": [
+          0.0,
+          15.222,
+          28.44,
+          46.51,
+          72.056
+        ],
+        "static_collect_by_k": [
+          0.0,
+          4.124,
+          6.485,
+          10.226,
+          14.844
+        ],
+        "static_groups_by_k": [
+          0.0,
+          2.896,
+          5.643,
+          6.296,
+          8.653
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          7.539,
+          15.425,
+          28.59,
+          46.135
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.65,
+          0.87,
+          1.383,
+          1.53
+        ],
+        "validate": 71.988,
+        "validate_parts": [
+          5.026,
+          4.798,
+          11.159,
+          0.787,
+          3.038,
+          24.242,
+          10.268,
+          12.67
+        ]
+      }
+    },
+    {
+      "K": 10,
+      "arm": "A_full_overlap",
+      "backend": "gpu",
+      "balls": 11387391,
+      "catalogue_digest": "1a315a5241510296",
+      "census_ms": 1030.632,
+      "chain_ms": 6014.83,
+      "digest_ms": 2114.909,
+      "elapsed_s": 11.89347230300001,
+      "generator": {
+        "q2_accepted_pairs": 2598083,
+        "q2_candidate_pairs": 14591241,
+        "q2_front_rectangles": 3448852,
+        "q34_cover_builds": 4560470,
+        "q34_expanded_pairs": 37868819,
+        "q3_emitted": 6665122,
+        "q4_emitted": 2124194
+      },
+      "index": 21,
+      "presentation_digest": "3ef7dc7e40a7154c",
+      "q2_ms": 344.023,
+      "q34_ms": 2222.584,
+      "repeat": 0,
+      "s": 8,
+      "scene": "b00",
+      "sites": 123389,
+      "tower_detail": {
+        "declared_support_checks": 177893,
+        "hashed_orders": 9,
+        "helper_threads": 912,
+        "images_own_by_k": [
+          0.51,
+          25.648,
+          47.844,
+          66.953,
+          113.405,
+          192.11,
+          183.054,
+          205.634,
+          266.003,
+          282.18
+        ],
+        "pipelined_orders": 10,
+        "pool_jobs": 80,
+        "pool_ms": 0.813,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.099,
+          8.634,
+          12.544,
+          20.085,
+          26.709,
+          163.318,
+          150.079,
+          147.643,
+          78.306,
+          86.283
+        ],
+        "runner_threads": 10,
+        "seal_sampled_balls": 177928,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "dd90bda1e6569b79",
+      "tower_ms": 2405.582,
+      "tower_phases_ms": {
+        "bank": 9.025,
+        "encode": 199.688,
+        "encode_by_k": [
+          7.964,
+          17.765,
+          33.745,
+          56.405,
+          92.855,
+          110.062,
+          117.585,
+          143.156,
+          164.017,
+          199.568
+        ],
+        "images": 118.442,
+        "images_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          21.934,
+          24.94,
+          57.984,
+          118.336,
+          107.237
+        ],
+        "lots": 406.475,
+        "lots_by_k": [
+          174.349,
+          146.999,
+          218.572,
+          310.106,
+          414.441,
+          551.426,
+          684.231,
+          862.425,
+          1037.825,
+          1234.947
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 147.69,
+        "static": 1253.895,
+        "static_by_k": [
+          0.0,
+          17.172,
+          32.27,
+          54.8,
+          81.432,
+          113.784,
+          156.822,
+          202.742,
+          260.281,
+          334.593
+        ],
+        "static_collect_by_k": [
+          0.0,
+          4.678,
+          7.426,
+          10.539,
+          14.88,
+          18.443,
+          25.816,
+          32.118,
+          37.694,
+          43.41
+        ],
+        "static_groups_by_k": [
+          0.0,
+          2.943,
+          4.565,
+          9.349,
+          11.549,
+          14.395,
+          14.192,
+          16.952,
+          19.332,
+          21.856
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          8.815,
+          19.309,
+          33.673,
+          52.382,
+          77.704,
+          113.307,
+          149.607,
+          198.457,
+          262.262
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.72,
+          0.953,
+          1.223,
+          1.605,
+          1.984,
+          2.488,
+          2.862,
+          3.303,
+          3.999
+        ],
+        "validate": 248.496,
+        "validate_parts": [
+          4.565,
+          15.953,
+          40.186,
+          2.634,
+          9.052,
+          96.046,
+          16.89,
+          59.332
+        ]
+      }
+    },
+    {
+      "K": 10,
+      "arm": "B_no_tail",
+      "backend": "gpu",
+      "balls": 11387391,
+      "catalogue_digest": "1a315a5241510296",
+      "census_ms": 1034.567,
+      "chain_ms": 6223.926,
+      "digest_ms": 2114.377,
+      "elapsed_s": 12.102947677999992,
+      "generator": {
+        "q2_accepted_pairs": 2598083,
+        "q2_candidate_pairs": 14591241,
+        "q2_front_rectangles": 3448852,
+        "q34_cover_builds": 4560470,
+        "q34_expanded_pairs": 37868819,
+        "q3_emitted": 6665122,
+        "q4_emitted": 2124194
+      },
+      "index": 22,
+      "presentation_digest": "3ef7dc7e40a7154c",
+      "q2_ms": 343.998,
+      "q34_ms": 2261.177,
+      "repeat": 0,
+      "s": 8,
+      "scene": "b00",
+      "sites": 123389,
+      "tower_detail": {
+        "declared_support_checks": 177893,
+        "hashed_orders": 9,
+        "helper_threads": 480,
+        "images_own_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pipelined_orders": 0,
+        "pool_jobs": 81,
+        "pool_ms": 0.845,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "runner_threads": 10,
+        "seal_sampled_balls": 177928,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "dd90bda1e6569b79",
+      "tower_ms": 2600.381,
+      "tower_phases_ms": {
+        "bank": 9.307,
+        "encode": 195.598,
+        "encode_by_k": [
+          5.043,
+          22.777,
+          30.774,
+          55.384,
+          77.657,
+          96.708,
+          121.135,
+          151.027,
+          170.03,
+          195.485
+        ],
+        "images": 249.84,
+        "images_by_k": [
+          0.335,
+          29.45,
+          47.453,
+          62.371,
+          82.93,
+          116.042,
+          152.752,
+          199.303,
+          231.281,
+          249.708
+        ],
+        "lots": 389.045,
+        "lots_by_k": [
+          210.317,
+          156.458,
+          225.601,
+          294.454,
+          418.77,
+          530.749,
+          674.431,
+          830.063,
+          1006.8,
+          1302.584
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 239.115,
+        "static": 1243.943,
+        "static_by_k": [
+          0.0,
+          17.307,
+          31.752,
+          52.048,
+          81.326,
+          113.719,
+          155.478,
+          202.87,
+          259.331,
+          330.113
+        ],
+        "static_collect_by_k": [
+          0.0,
+          4.693,
+          7.222,
+          10.342,
+          14.45,
+          21.176,
+          25.94,
+          31.898,
+          37.471,
+          43.764
+        ],
+        "static_groups_by_k": [
+          0.0,
+          2.873,
+          4.674,
+          7.112,
+          11.574,
+          11.227,
+          13.626,
+          16.709,
+          18.852,
+          21.639
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          9.045,
+          18.896,
+          33.339,
+          52.535,
+          78.172,
+          112.437,
+          150.057,
+          197.226,
+          258.532
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.679,
+          0.944,
+          1.239,
+          1.599,
+          2.203,
+          2.354,
+          2.823,
+          3.263,
+          3.861
+        ],
+        "validate": 248.345,
+        "validate_parts": [
+          4.653,
+          16.819,
+          40.664,
+          3.139,
+          9.112,
+          97.141,
+          17.246,
+          55.871
+        ]
+      }
+    },
+    {
+      "K": 10,
+      "arm": "C_no_overlap",
+      "backend": "gpu",
+      "balls": 11387391,
+      "catalogue_digest": "1a315a5241510296",
+      "census_ms": 1048.133,
+      "chain_ms": 6745.017,
+      "digest_ms": 2106.404,
+      "elapsed_s": 12.609556623000003,
+      "generator": {
+        "q2_accepted_pairs": 2598083,
+        "q2_candidate_pairs": 14591241,
+        "q2_front_rectangles": 3448852,
+        "q34_cover_builds": 4560470,
+        "q34_expanded_pairs": 37868819,
+        "q3_emitted": 6665122,
+        "q4_emitted": 2124194
+      },
+      "index": 23,
+      "presentation_digest": "3ef7dc7e40a7154c",
+      "q2_ms": 344.231,
+      "q34_ms": 2245.703,
+      "repeat": 0,
+      "s": 8,
+      "scene": "b00",
+      "sites": 123389,
+      "tower_detail": {
+        "declared_support_checks": 177893,
+        "hashed_orders": 9,
+        "helper_threads": 480,
+        "images_own_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pipelined_orders": 0,
+        "pool_jobs": 82,
+        "pool_ms": 0.84,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "runner_threads": 0,
+        "seal_sampled_balls": 177928,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "dd90bda1e6569b79",
+      "tower_ms": 3098.404,
+      "tower_phases_ms": {
+        "bank": 9.04,
+        "encode": 210.087,
+        "encode_by_k": [
+          5.326,
+          13.097,
+          34.99,
+          53.573,
+          72.8,
+          104.312,
+          122.97,
+          118.44,
+          180.932,
+          209.94
+        ],
+        "images": 222.245,
+        "images_by_k": [
+          0.317,
+          25.027,
+          63.446,
+          85.163,
+          92.812,
+          125.173,
+          158.564,
+          184.155,
+          198.496,
+          222.15
+        ],
+        "lots": 892.294,
+        "lots_by_k": [
+          156.114,
+          152.628,
+          214.927,
+          296.298,
+          377.492,
+          487.552,
+          567.38,
+          680.516,
+          788.989,
+          892.155
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 218.744,
+        "static": 1254.021,
+        "static_by_k": [
+          0.0,
+          14.792,
+          30.002,
+          49.562,
+          78.957,
+          111.254,
+          159.622,
+          203.353,
+          265.24,
+          341.238
+        ],
+        "static_collect_by_k": [
+          0.0,
+          5.311,
+          9.831,
+          13.838,
+          21.301,
+          25.701,
+          37.486,
+          39.77,
+          46.975,
+          55.565
+        ],
+        "static_groups_by_k": [
+          0.0,
+          2.55,
+          4.024,
+          6.235,
+          7.832,
+          10.328,
+          12.716,
+          15.472,
+          18.452,
+          21.841
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          6.281,
+          15.271,
+          28.36,
+          46.725,
+          71.34,
+          104.363,
+          142.357,
+          193.198,
+          256.232
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.636,
+          0.86,
+          1.112,
+          1.47,
+          1.934,
+          2.226,
+          2.641,
+          3.14,
+          3.719
+        ],
+        "validate": 246.115,
+        "validate_parts": [
+          4.622,
+          16.63,
+          40.16,
+          2.992,
+          9.018,
+          97.184,
+          16.918,
+          53.667
+        ]
+      }
+    },
+    {
+      "K": 10,
+      "arm": "C_no_overlap",
+      "backend": "gpu",
+      "balls": 11387391,
+      "catalogue_digest": "1a315a5241510296",
+      "census_ms": 1039.185,
+      "chain_ms": 6708.891,
+      "digest_ms": 2106.337,
+      "elapsed_s": 12.551055042999991,
+      "generator": {
+        "q2_accepted_pairs": 2598083,
+        "q2_candidate_pairs": 14591241,
+        "q2_front_rectangles": 3448852,
+        "q34_cover_builds": 4560470,
+        "q34_expanded_pairs": 37868819,
+        "q3_emitted": 6665122,
+        "q4_emitted": 2124194
+      },
+      "index": 24,
+      "presentation_digest": "3ef7dc7e40a7154c",
+      "q2_ms": 341.489,
+      "q34_ms": 2233.891,
+      "repeat": 1,
+      "s": 8,
+      "scene": "b00",
+      "sites": 123389,
+      "tower_detail": {
+        "declared_support_checks": 177893,
+        "hashed_orders": 9,
+        "helper_threads": 480,
+        "images_own_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pipelined_orders": 0,
+        "pool_jobs": 82,
+        "pool_ms": 0.832,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "runner_threads": 0,
+        "seal_sampled_balls": 177928,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "dd90bda1e6569b79",
+      "tower_ms": 3088.954,
+      "tower_phases_ms": {
+        "bank": 8.965,
+        "encode": 207.144,
+        "encode_by_k": [
+          8.922,
+          13.783,
+          32.542,
+          51.741,
+          72.996,
+          97.835,
+          105.775,
+          138.495,
+          181.891,
+          207.007
+        ],
+        "images": 231.839,
+        "images_by_k": [
+          0.264,
+          26.79,
+          46.121,
+          69.471,
+          93.923,
+          135.74,
+          150.733,
+          190.655,
+          191.76,
+          231.694
+        ],
+        "lots": 864.092,
+        "lots_by_k": [
+          153.096,
+          175.458,
+          246.377,
+          291.94,
+          368.24,
+          486.572,
+          572.403,
+          683.795,
+          781.768,
+          863.956
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 215.152,
+        "static": 1269.52,
+        "static_by_k": [
+          0.0,
+          14.492,
+          30.7,
+          50.451,
+          80.45,
+          113.847,
+          158.592,
+          207.697,
+          268.833,
+          344.458
+        ],
+        "static_collect_by_k": [
+          0.0,
+          4.849,
+          10.373,
+          14.278,
+          21.748,
+          25.998,
+          36.436,
+          39.923,
+          47.387,
+          56.149
+        ],
+        "static_groups_by_k": [
+          0.0,
+          2.753,
+          4.196,
+          6.755,
+          8.438,
+          11.239,
+          13.972,
+          16.969,
+          20.63,
+          24.059
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          6.248,
+          15.259,
+          28.285,
+          47.111,
+          72.589,
+          103.479,
+          145.089,
+          193.645,
+          256.454
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.628,
+          0.855,
+          1.116,
+          1.474,
+          1.932,
+          2.265,
+          2.71,
+          3.175,
+          3.722
+        ],
+        "validate": 245.689,
+        "validate_parts": [
+          4.676,
+          15.855,
+          40.629,
+          3.139,
+          8.912,
+          97.516,
+          16.876,
+          53.161
+        ]
+      }
+    },
+    {
+      "K": 10,
+      "arm": "B_no_tail",
+      "backend": "gpu",
+      "balls": 11387391,
+      "catalogue_digest": "1a315a5241510296",
+      "census_ms": 1057.62,
+      "chain_ms": 6307.462,
+      "digest_ms": 2112.614,
+      "elapsed_s": 12.15397574100001,
+      "generator": {
+        "q2_accepted_pairs": 2598083,
+        "q2_candidate_pairs": 14591241,
+        "q2_front_rectangles": 3448852,
+        "q34_cover_builds": 4560470,
+        "q34_expanded_pairs": 37868819,
+        "q3_emitted": 6665122,
+        "q4_emitted": 2124194
+      },
+      "index": 25,
+      "presentation_digest": "3ef7dc7e40a7154c",
+      "q2_ms": 339.903,
+      "q34_ms": 2267.508,
+      "repeat": 1,
+      "s": 8,
+      "scene": "b00",
+      "sites": 123389,
+      "tower_detail": {
+        "declared_support_checks": 177893,
+        "hashed_orders": 9,
+        "helper_threads": 480,
+        "images_own_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "pipelined_orders": 0,
+        "pool_jobs": 81,
+        "pool_ms": 0.804,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "runner_threads": 10,
+        "seal_sampled_balls": 177928,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "dd90bda1e6569b79",
+      "tower_ms": 2612.987,
+      "tower_phases_ms": {
+        "bank": 9.378,
+        "encode": 196.023,
+        "encode_by_k": [
+          6.834,
+          14.173,
+          32.886,
+          53.897,
+          73.206,
+          103.564,
+          125.286,
+          148.248,
+          168.982,
+          195.912
+        ],
+        "images": 252.652,
+        "images_by_k": [
+          0.767,
+          46.35,
+          44.608,
+          86.921,
+          83.06,
+          131.822,
+          164.995,
+          194.853,
+          225.898,
+          252.528
+        ],
+        "lots": 401.869,
+        "lots_by_k": [
+          201.97,
+          160.594,
+          226.5,
+          321.639,
+          407.564,
+          550.015,
+          662.723,
+          853.862,
+          1029.411,
+          1249.944
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 228.576,
+        "static": 1249.202,
+        "static_by_k": [
+          0.0,
+          17.032,
+          31.325,
+          52.231,
+          80.617,
+          114.91,
+          156.246,
+          203.796,
+          264.05,
+          328.993
+        ],
+        "static_collect_by_k": [
+          0.0,
+          4.769,
+          7.296,
+          10.374,
+          14.509,
+          21.6,
+          23.49,
+          30.499,
+          37.317,
+          43.466
+        ],
+        "static_groups_by_k": [
+          0.0,
+          2.69,
+          4.465,
+          6.581,
+          11.035,
+          11.795,
+          16.419,
+          15.493,
+          18.275,
+          21.609
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          8.864,
+          18.593,
+          34.017,
+          52.703,
+          78.309,
+          112.56,
+          152.411,
+          201.723,
+          256.728
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.694,
+          0.947,
+          1.242,
+          1.599,
+          2.235,
+          2.404,
+          2.951,
+          3.386,
+          3.97
+        ],
+        "validate": 252.034,
+        "validate_parts": [
+          4.66,
+          16.507,
+          40.801,
+          2.83,
+          9.337,
+          100.878,
+          17.44,
+          55.666
+        ]
+      }
+    },
+    {
+      "K": 10,
+      "arm": "A_full_overlap",
+      "backend": "gpu",
+      "balls": 11387391,
+      "catalogue_digest": "1a315a5241510296",
+      "census_ms": 1052.337,
+      "chain_ms": 6083.494,
+      "digest_ms": 2106.92,
+      "elapsed_s": 11.953038245000016,
+      "generator": {
+        "q2_accepted_pairs": 2598083,
+        "q2_candidate_pairs": 14591241,
+        "q2_front_rectangles": 3448852,
+        "q34_cover_builds": 4560470,
+        "q34_expanded_pairs": 37868819,
+        "q3_emitted": 6665122,
+        "q4_emitted": 2124194
+      },
+      "index": 26,
+      "presentation_digest": "3ef7dc7e40a7154c",
+      "q2_ms": 340.115,
+      "q34_ms": 2248.52,
+      "repeat": 1,
+      "s": 8,
+      "scene": "b00",
+      "sites": 123389,
+      "tower_detail": {
+        "declared_support_checks": 177893,
+        "hashed_orders": 9,
+        "helper_threads": 912,
+        "images_own_by_k": [
+          0.51,
+          28.309,
+          45.689,
+          70.175,
+          96.54,
+          147.606,
+          177.272,
+          206.237,
+          236.288,
+          281.788
+        ],
+        "pipelined_orders": 10,
+        "pool_jobs": 80,
+        "pool_ms": 0.804,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.1,
+          9.276,
+          13.67,
+          21.179,
+          27.974,
+          84.066,
+          106.722,
+          158.965,
+          132.112,
+          96.801
+        ],
+        "runner_threads": 10,
+        "seal_sampled_balls": 177928,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "dd90bda1e6569b79",
+      "tower_ms": 2435.405,
+      "tower_phases_ms": {
+        "bank": 9.401,
+        "encode": 200.301,
+        "encode_by_k": [
+          7.776,
+          14.826,
+          45.218,
+          65.744,
+          72.934,
+          93.245,
+          120.17,
+          147.362,
+          182.674,
+          200.157
+        ],
+        "images": 116.252,
+        "images_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          27.968,
+          48.199,
+          77.3,
+          116.169
+        ],
+        "lots": 404.961,
+        "lots_by_k": [
+          183.969,
+          153.65,
+          241.861,
+          301.462,
+          394.093,
+          547.394,
+          705.892,
+          851.54,
+          1054.772,
+          1255.271
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 158.05,
+        "static": 1252.808,
+        "static_by_k": [
+          0.0,
+          17.141,
+          31.902,
+          53.986,
+          82.585,
+          115.619,
+          153.334,
+          203.113,
+          261.565,
+          333.564
+        ],
+        "static_collect_by_k": [
+          0.0,
+          4.65,
+          7.475,
+          10.499,
+          14.58,
+          18.456,
+          25.734,
+          32.299,
+          37.977,
+          43.95
+        ],
+        "static_groups_by_k": [
+          0.0,
+          2.828,
+          4.554,
+          9.735,
+          11.974,
+          14.546,
+          13.823,
+          16.32,
+          19.183,
+          22.603
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          8.985,
+          18.899,
+          32.517,
+          53.58,
+          79.517,
+          109.93,
+          150.263,
+          199.322,
+          260.469
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.659,
+          0.958,
+          1.218,
+          1.657,
+          2.068,
+          2.659,
+          2.764,
+          3.315,
+          4.009
+        ],
+        "validate": 264.988,
+        "validate_parts": [
+          4.802,
+          17.472,
+          42.399,
+          3.249,
+          8.931,
+          98.625,
+          17.448,
+          67.681
+        ]
+      }
+    },
+    {
+      "K": 10,
+      "arm": "engine",
+      "backend": "engine",
+      "balls": 11387391,
+      "catalogue_digest": "1a315a5241510296",
+      "census_ms": 1055.48,
+      "chain_ms": 14900.896,
+      "digest_ms": 2114.33,
+      "elapsed_s": 20.312233554999978,
+      "generator": {
+        "q2_accepted_pairs": 2598083,
+        "q2_candidate_pairs": 14591241,
+        "q2_front_rectangles": 3448852,
+        "q34_cover_builds": 4560470,
+        "q34_expanded_pairs": 37868819,
+        "q3_emitted": 6665122,
+        "q4_emitted": 2124194
+      },
+      "index": 27,
+      "presentation_digest": "3ef7dc7e40a7154c",
+      "q2_ms": 337.369,
+      "q34_ms": 10644.054,
+      "repeat": 0,
+      "s": 8,
+      "scene": "b00",
+      "sites": 123389,
+      "tower_detail": {
+        "declared_support_checks": 177893,
+        "hashed_orders": 9,
+        "helper_threads": 912,
+        "images_own_by_k": [
+          0.499,
+          25.064,
+          47.592,
+          67.209,
+          109.525,
+          126.393,
+          171.336,
+          200.528,
+          243.383,
+          287.37
+        ],
+        "pipelined_orders": 10,
+        "pool_jobs": 80,
+        "pool_ms": 0.873,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.064,
+          8.868,
+          13.64,
+          19.064,
+          27.927,
+          68.492,
+          132.991,
+          122.669,
+          101.354,
+          113.383
+        ],
+        "runner_threads": 10,
+        "seal_sampled_balls": 177928,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "dd90bda1e6569b79",
+      "tower_ms": 2429.242,
+      "tower_phases_ms": {
+        "bank": 9.23,
+        "encode": 211.739,
+        "encode_by_k": [
+          7.083,
+          20.28,
+          34.281,
+          52.343,
+          93.2,
+          115.858,
+          119.631,
+          143.261,
+          192.305,
+          211.603
+        ],
+        "images": 129.457,
+        "images_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          38.337,
+          77.372,
+          119.542,
+          129.399
+        ],
+        "lots": 411.919,
+        "lots_by_k": [
+          181.515,
+          157.852,
+          222.293,
+          299.315,
+          406.591,
+          542.904,
+          693.521,
+          866.327,
+          1038.012,
+          1245.425
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 123.854,
+        "static": 1259.552,
+        "static_by_k": [
+          0.0,
+          17.591,
+          32.665,
+          52.688,
+          79.77,
+          115.383,
+          156.614,
+          205.798,
+          264.624,
+          334.418
+        ],
+        "static_collect_by_k": [
+          0.0,
+          4.772,
+          7.44,
+          10.072,
+          14.702,
+          18.623,
+          23.611,
+          32.796,
+          37.965,
+          43.69
+        ],
+        "static_groups_by_k": [
+          0.0,
+          3.002,
+          4.686,
+          7.079,
+          11.013,
+          11.674,
+          17.379,
+          17.219,
+          19.322,
+          23.59
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          9.112,
+          19.602,
+          34.301,
+          51.613,
+          79.279,
+          111.874,
+          151.286,
+          201.455,
+          260.631
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.687,
+          0.919,
+          1.218,
+          1.618,
+          4.698,
+          2.355,
+          2.949,
+          3.31,
+          3.84
+        ],
+        "validate": 255.337,
+        "validate_parts": [
+          4.831,
+          16.277,
+          40.894,
+          2.682,
+          9.141,
+          98.255,
+          18.73,
+          60.647
+        ]
+      }
+    },
+    {
+      "K": 5,
+      "arm": "A_full_overlap",
+      "backend": "gpu",
+      "balls": 1306696,
+      "catalogue_digest": "5ad1fe09354411ba",
+      "census_ms": 108.233,
+      "chain_ms": 998.457,
+      "digest_ms": 191.782,
+      "elapsed_s": 1.8672209989999828,
+      "generator": {
+        "q2_accepted_pairs": 456919,
+        "q2_candidate_pairs": 11848904,
+        "q2_front_rectangles": 1046964,
+        "q34_cover_builds": 900377,
+        "q34_expanded_pairs": 18254639,
+        "q3_emitted": 691284,
+        "q4_emitted": 158496
+      },
+      "index": 28,
+      "presentation_digest": "a2aa4b20ca392dfe",
+      "q2_ms": 123.401,
+      "q34_ms": 514.895,
+      "repeat": 0,
+      "s": 10,
+      "scene": "00",
+      "sites": 39885,
+      "tower_detail": {
+        "declared_support_checks": 20413,
+        "hashed_orders": 4,
+        "helper_threads": 409,
+        "images_own_by_k": [
+          0.1,
+          7.204,
+          14.304,
+          20.423,
+          27.126
+        ],
+        "pipelined_orders": 5,
+        "pool_jobs": 45,
+        "pool_ms": 0.781,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.021,
+          4.289,
+          6.0,
+          8.732,
+          11.501
+        ],
+        "runner_threads": 5,
+        "seal_sampled_balls": 20418,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "67450c64611075b1",
+      "tower_ms": 312.968,
+      "tower_phases_ms": {
+        "bank": 0.864,
+        "encode": 54.378,
+        "encode_by_k": [
+          2.578,
+          8.489,
+          15.235,
+          48.172,
+          54.292
+        ],
+        "images": 15.66,
+        "images_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          15.614
+        ],
+        "lots": 110.072,
+        "lots_by_k": [
+          72.963,
+          50.566,
+          78.147,
+          106.837,
+          156.108
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 11.545,
+        "static": 84.561,
+        "static_by_k": [
+          0.0,
+          7.257,
+          14.188,
+          24.771,
+          38.344
+        ],
+        "static_collect_by_k": [
+          0.0,
+          2.58,
+          3.798,
+          4.563,
+          7.766
+        ],
+        "static_groups_by_k": [
+          0.0,
+          1.595,
+          2.958,
+          4.056,
+          4.513
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          2.712,
+          6.893,
+          15.452,
+          25.213
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.352,
+          0.525,
+          0.686,
+          0.839
+        ],
+        "validate": 34.49,
+        "validate_parts": [
+          1.381,
+          1.715,
+          4.499,
+          0.403,
+          1.26,
+          10.236,
+          4.688,
+          10.302
+        ]
+      }
+    },
+    {
+      "K": 5,
+      "arm": "engine",
+      "backend": "engine",
+      "balls": 1306696,
+      "catalogue_digest": "5ad1fe09354411ba",
+      "census_ms": 110.406,
+      "chain_ms": 2761.841,
+      "digest_ms": 191.333,
+      "elapsed_s": 3.319974481000031,
+      "generator": {
+        "q2_accepted_pairs": 456919,
+        "q2_candidate_pairs": 11848904,
+        "q2_front_rectangles": 1046964,
+        "q34_cover_builds": 900377,
+        "q34_expanded_pairs": 18254639,
+        "q3_emitted": 691284,
+        "q4_emitted": 158496
+      },
+      "index": 29,
+      "presentation_digest": "a2aa4b20ca392dfe",
+      "q2_ms": 121.613,
+      "q34_ms": 2168.513,
+      "repeat": 0,
+      "s": 10,
+      "scene": "00",
+      "sites": 39885,
+      "tower_detail": {
+        "declared_support_checks": 20413,
+        "hashed_orders": 4,
+        "helper_threads": 409,
+        "images_own_by_k": [
+          0.092,
+          8.538,
+          13.685,
+          23.375,
+          27.948
+        ],
+        "pipelined_orders": 5,
+        "pool_jobs": 45,
+        "pool_ms": 0.748,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.022,
+          4.118,
+          5.897,
+          8.596,
+          11.674
+        ],
+        "runner_threads": 5,
+        "seal_sampled_balls": 20418,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "67450c64611075b1",
+      "tower_ms": 283.439,
+      "tower_phases_ms": {
+        "bank": 0.847,
+        "encode": 32.442,
+        "encode_by_k": [
+          2.156,
+          7.904,
+          15.008,
+          30.542,
+          32.362
+        ],
+        "images": 16.311,
+        "images_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          16.268
+        ],
+        "lots": 99.262,
+        "lots_by_k": [
+          72.801,
+          50.24,
+          74.966,
+          107.025,
+          145.883
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 11.726,
+        "static": 84.919,
+        "static_by_k": [
+          0.0,
+          7.891,
+          14.87,
+          24.057,
+          38.101
+        ],
+        "static_collect_by_k": [
+          0.0,
+          2.674,
+          3.635,
+          4.839,
+          7.675
+        ],
+        "static_groups_by_k": [
+          0.0,
+          2.294,
+          2.318,
+          3.796,
+          4.737
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          2.539,
+          7.22,
+          14.458,
+          24.81
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.373,
+          1.681,
+          0.95,
+          0.863
+        ],
+        "validate": 36.579,
+        "validate_parts": [
+          1.489,
+          1.628,
+          5.432,
+          0.47,
+          1.202,
+          9.816,
+          4.977,
+          11.56
+        ]
+      }
+    },
+    {
+      "K": 5,
+      "arm": "A_full_overlap",
+      "backend": "gpu",
+      "balls": 1306696,
+      "catalogue_digest": "5ad1fe09354411ba",
+      "census_ms": 105.452,
+      "chain_ms": 1004.053,
+      "digest_ms": 191.345,
+      "elapsed_s": 1.8697194869999976,
+      "generator": {
+        "q2_accepted_pairs": 456919,
+        "q2_candidate_pairs": 14843076,
+        "q2_front_rectangles": 1123814,
+        "q34_cover_builds": 900377,
+        "q34_expanded_pairs": 14757258,
+        "q3_emitted": 691284,
+        "q4_emitted": 158496
+      },
+      "index": 30,
+      "presentation_digest": "a2aa4b20ca392dfe",
+      "q2_ms": 144.423,
+      "q34_ms": 544.543,
+      "repeat": 0,
+      "s": 12,
+      "scene": "00",
+      "sites": 39885,
+      "tower_detail": {
+        "declared_support_checks": 20413,
+        "hashed_orders": 4,
+        "helper_threads": 409,
+        "images_own_by_k": [
+          0.099,
+          7.743,
+          15.104,
+          21.832,
+          27.427
+        ],
+        "pipelined_orders": 5,
+        "pool_jobs": 45,
+        "pool_ms": 0.765,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.022,
+          4.193,
+          5.755,
+          8.093,
+          10.83
+        ],
+        "runner_threads": 5,
+        "seal_sampled_balls": 20418,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "67450c64611075b1",
+      "tower_ms": 296.912,
+      "tower_phases_ms": {
+        "bank": 0.925,
+        "encode": 37.456,
+        "encode_by_k": [
+          2.746,
+          7.785,
+          14.816,
+          24.404,
+          37.365
+        ],
+        "images": 16.638,
+        "images_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          16.587
+        ],
+        "lots": 108.895,
+        "lots_by_k": [
+          77.058,
+          51.749,
+          73.925,
+          107.289,
+          154.975
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 10.879,
+        "static": 84.452,
+        "static_by_k": [
+          0.0,
+          7.537,
+          14.545,
+          24.2,
+          38.171
+        ],
+        "static_collect_by_k": [
+          0.0,
+          2.566,
+          3.762,
+          4.736,
+          8.159
+        ],
+        "static_groups_by_k": [
+          0.0,
+          2.023,
+          2.361,
+          3.877,
+          4.809
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          2.575,
+          6.821,
+          14.743,
+          24.322
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.36,
+          1.582,
+          0.827,
+          0.865
+        ],
+        "validate": 36.302,
+        "validate_parts": [
+          1.382,
+          1.746,
+          4.595,
+          0.453,
+          1.239,
+          10.373,
+          5.082,
+          11.422
+        ]
+      }
+    },
+    {
+      "K": 5,
+      "arm": "engine",
+      "backend": "engine",
+      "balls": 1306696,
+      "catalogue_digest": "5ad1fe09354411ba",
+      "census_ms": 108.152,
+      "chain_ms": 2842.46,
+      "digest_ms": 192.06,
+      "elapsed_s": 3.420803999000043,
+      "generator": {
+        "q2_accepted_pairs": 456919,
+        "q2_candidate_pairs": 14843076,
+        "q2_front_rectangles": 1123814,
+        "q34_cover_builds": 900377,
+        "q34_expanded_pairs": 14757258,
+        "q3_emitted": 691284,
+        "q4_emitted": 158496
+      },
+      "index": 31,
+      "presentation_digest": "a2aa4b20ca392dfe",
+      "q2_ms": 142.872,
+      "q34_ms": 2232.551,
+      "repeat": 0,
+      "s": 12,
+      "scene": "00",
+      "sites": 39885,
+      "tower_detail": {
+        "declared_support_checks": 20413,
+        "hashed_orders": 4,
+        "helper_threads": 409,
+        "images_own_by_k": [
+          0.099,
+          7.338,
+          14.264,
+          23.937,
+          27.912
+        ],
+        "pipelined_orders": 5,
+        "pool_jobs": 45,
+        "pool_ms": 0.803,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.022,
+          5.209,
+          5.594,
+          8.89,
+          10.64
+        ],
+        "runner_threads": 5,
+        "seal_sampled_balls": 20418,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "67450c64611075b1",
+      "tower_ms": 280.83,
+      "tower_phases_ms": {
+        "bank": 0.871,
+        "encode": 28.283,
+        "encode_by_k": [
+          2.005,
+          8.29,
+          14.947,
+          22.494,
+          28.2
+        ],
+        "images": 17.331,
+        "images_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          17.264
+        ],
+        "lots": 104.289,
+        "lots_by_k": [
+          71.516,
+          53.207,
+          73.234,
+          107.416,
+          149.479
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 10.682,
+        "static": 82.935,
+        "static_by_k": [
+          0.0,
+          7.402,
+          14.494,
+          23.48,
+          37.559
+        ],
+        "static_collect_by_k": [
+          0.0,
+          2.667,
+          3.666,
+          4.633,
+          7.483
+        ],
+        "static_groups_by_k": [
+          0.0,
+          1.581,
+          2.202,
+          3.591,
+          4.477
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          2.798,
+          7.143,
+          14.219,
+          24.745
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.344,
+          1.469,
+          1.024,
+          0.825
+        ],
+        "validate": 35.016,
+        "validate_parts": [
+          1.429,
+          1.69,
+          5.541,
+          0.443,
+          1.482,
+          9.039,
+          4.076,
+          11.315
+        ]
+      }
+    },
+    {
+      "K": 5,
+      "arm": "A_full_overlap",
+      "backend": "gpu",
+      "balls": 2822052,
+      "catalogue_digest": "11f6a8e1a7f28127",
+      "census_ms": 214.937,
+      "chain_ms": 2063.437,
+      "digest_ms": 433.923,
+      "elapsed_s": 3.576265188999969,
+      "generator": {
+        "q2_accepted_pairs": 1265445,
+        "q2_candidate_pairs": 8439456,
+        "q2_front_rectangles": 2328562,
+        "q34_cover_builds": 2179536,
+        "q34_expanded_pairs": 14522113,
+        "q3_emitted": 1370355,
+        "q4_emitted": 186257
+      },
+      "index": 32,
+      "presentation_digest": "7344e05fb52c6f50",
+      "q2_ms": 176.573,
+      "q34_ms": 1089.313,
+      "repeat": 0,
+      "s": 10,
+      "scene": "b00",
+      "sites": 123389,
+      "tower_detail": {
+        "declared_support_checks": 44071,
+        "hashed_orders": 4,
+        "helper_threads": 432,
+        "images_own_by_k": [
+          0.303,
+          24.44,
+          39.578,
+          50.85,
+          67.877
+        ],
+        "pipelined_orders": 5,
+        "pool_jobs": 45,
+        "pool_ms": 0.802,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.064,
+          7.554,
+          11.245,
+          16.84,
+          23.415
+        ],
+        "runner_threads": 5,
+        "seal_sampled_balls": 44095,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "cfb1634832c0384a",
+      "tower_ms": 641.406,
+      "tower_phases_ms": {
+        "bank": 1.944,
+        "encode": 70.985,
+        "encode_by_k": [
+          7.558,
+          20.007,
+          34.542,
+          53.826,
+          70.879
+        ],
+        "images": 44.563,
+        "images_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          44.451
+        ],
+        "lots": 257.24,
+        "lots_by_k": [
+          184.949,
+          118.044,
+          177.915,
+          245.482,
+          348.694
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 23.472,
+        "static": 163.995,
+        "static_by_k": [
+          0.0,
+          15.172,
+          29.139,
+          47.346,
+          72.337
+        ],
+        "static_collect_by_k": [
+          0.0,
+          4.014,
+          6.583,
+          10.153,
+          14.805
+        ],
+        "static_groups_by_k": [
+          0.0,
+          3.053,
+          4.501,
+          6.711,
+          8.593
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          7.422,
+          15.177,
+          28.347,
+          45.96
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.669,
+          2.861,
+          2.119,
+          1.553
+        ],
+        "validate": 73.369,
+        "validate_parts": [
+          4.985,
+          4.435,
+          10.201,
+          0.844,
+          3.229,
+          25.484,
+          10.285,
+          13.905
+        ]
+      }
+    },
+    {
+      "K": 5,
+      "arm": "engine",
+      "backend": "engine",
+      "balls": 2822052,
+      "catalogue_digest": "11f6a8e1a7f28127",
+      "census_ms": 227.769,
+      "chain_ms": 5718.206,
+      "digest_ms": 432.315,
+      "elapsed_s": 6.934488730999988,
+      "generator": {
+        "q2_accepted_pairs": 1265445,
+        "q2_candidate_pairs": 8439456,
+        "q2_front_rectangles": 2328562,
+        "q34_cover_builds": 2179536,
+        "q34_expanded_pairs": 14522113,
+        "q3_emitted": 1370355,
+        "q4_emitted": 186257
+      },
+      "index": 33,
+      "presentation_digest": "7344e05fb52c6f50",
+      "q2_ms": 174.837,
+      "q34_ms": 4511.159,
+      "repeat": 0,
+      "s": 10,
+      "scene": "b00",
+      "sites": 123389,
+      "tower_detail": {
+        "declared_support_checks": 44071,
+        "hashed_orders": 4,
+        "helper_threads": 432,
+        "images_own_by_k": [
+          0.253,
+          22.068,
+          36.708,
+          59.765,
+          70.227
+        ],
+        "pipelined_orders": 5,
+        "pool_jobs": 45,
+        "pool_ms": 0.813,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.063,
+          7.348,
+          11.995,
+          17.137,
+          23.574
+        ],
+        "runner_threads": 5,
+        "seal_sampled_balls": 44095,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "cfb1634832c0384a",
+      "tower_ms": 638.7,
+      "tower_phases_ms": {
+        "bank": 1.913,
+        "encode": 69.108,
+        "encode_by_k": [
+          11.362,
+          25.198,
+          35.421,
+          51.516,
+          69.023
+        ],
+        "images": 46.736,
+        "images_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          46.643
+        ],
+        "lots": 253.157,
+        "lots_by_k": [
+          169.933,
+          119.631,
+          181.638,
+          248.901,
+          345.464
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 23.628,
+        "static": 166.084,
+        "static_by_k": [
+          0.0,
+          15.329,
+          29.361,
+          47.789,
+          73.605
+        ],
+        "static_collect_by_k": [
+          0.0,
+          4.122,
+          6.708,
+          11.629,
+          16.291
+        ],
+        "static_groups_by_k": [
+          0.0,
+          3.365,
+          4.792,
+          6.34,
+          8.965
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          7.149,
+          15.751,
+          28.62,
+          46.783
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.671,
+          2.092,
+          1.183,
+          1.551
+        ],
+        "validate": 72.799,
+        "validate_parts": [
+          4.823,
+          4.588,
+          10.785,
+          0.798,
+          3.095,
+          25.902,
+          9.842,
+          12.965
+        ]
+      }
+    },
+    {
+      "K": 5,
+      "arm": "A_full_overlap",
+      "backend": "gpu",
+      "balls": 2822052,
+      "catalogue_digest": "11f6a8e1a7f28127",
+      "census_ms": 207.395,
+      "chain_ms": 2107.157,
+      "digest_ms": 433.741,
+      "elapsed_s": 3.6287062790000277,
+      "generator": {
+        "q2_accepted_pairs": 1265445,
+        "q2_candidate_pairs": 8345826,
+        "q2_front_rectangles": 2510628,
+        "q34_cover_builds": 2179536,
+        "q34_expanded_pairs": 11262645,
+        "q3_emitted": 1370355,
+        "q4_emitted": 186257
+      },
+      "index": 34,
+      "presentation_digest": "7344e05fb52c6f50",
+      "q2_ms": 176.04,
+      "q34_ms": 1140.621,
+      "repeat": 0,
+      "s": 12,
+      "scene": "b00",
+      "sites": 123389,
+      "tower_detail": {
+        "declared_support_checks": 44071,
+        "hashed_orders": 4,
+        "helper_threads": 432,
+        "images_own_by_k": [
+          0.252,
+          22.247,
+          34.594,
+          57.674,
+          70.93
+        ],
+        "pipelined_orders": 5,
+        "pool_jobs": 45,
+        "pool_ms": 0.804,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.063,
+          7.798,
+          12.126,
+          17.613,
+          23.296
+        ],
+        "runner_threads": 5,
+        "seal_sampled_balls": 44095,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "cfb1634832c0384a",
+      "tower_ms": 633.617,
+      "tower_phases_ms": {
+        "bank": 1.915,
+        "encode": 73.788,
+        "encode_by_k": [
+          8.899,
+          17.998,
+          34.616,
+          49.864,
+          73.704
+        ],
+        "images": 47.73,
+        "images_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          47.625
+        ],
+        "lots": 250.318,
+        "lots_by_k": [
+          173.063,
+          118.599,
+          174.554,
+          246.632,
+          342.254
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 23.349,
+        "static": 163.194,
+        "static_by_k": [
+          0.0,
+          15.44,
+          29.376,
+          47.31,
+          71.069
+        ],
+        "static_collect_by_k": [
+          0.0,
+          4.354,
+          6.665,
+          10.48,
+          15.153
+        ],
+        "static_groups_by_k": [
+          0.0,
+          3.189,
+          6.008,
+          6.618,
+          8.685
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          7.202,
+          15.771,
+          28.964,
+          44.77
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.678,
+          0.916,
+          1.232,
+          1.557
+        ],
+        "validate": 68.012,
+        "validate_parts": [
+          4.582,
+          3.256,
+          10.021,
+          0.726,
+          3.414,
+          22.823,
+          10.33,
+          12.858
+        ]
+      }
+    },
+    {
+      "K": 5,
+      "arm": "engine",
+      "backend": "engine",
+      "balls": 2822052,
+      "catalogue_digest": "11f6a8e1a7f28127",
+      "census_ms": 227.66,
+      "chain_ms": 5920.296,
+      "digest_ms": 434.209,
+      "elapsed_s": 7.131364321000035,
+      "generator": {
+        "q2_accepted_pairs": 1265445,
+        "q2_candidate_pairs": 8345826,
+        "q2_front_rectangles": 2510628,
+        "q34_cover_builds": 2179536,
+        "q34_expanded_pairs": 11262645,
+        "q3_emitted": 1370355,
+        "q4_emitted": 186257
+      },
+      "index": 35,
+      "presentation_digest": "7344e05fb52c6f50",
+      "q2_ms": 174.019,
+      "q34_ms": 4733.909,
+      "repeat": 0,
+      "s": 12,
+      "scene": "b00",
+      "sites": 123389,
+      "tower_detail": {
+        "declared_support_checks": 44071,
+        "hashed_orders": 4,
+        "helper_threads": 432,
+        "images_own_by_k": [
+          0.26,
+          19.185,
+          39.888,
+          52.118,
+          69.923
+        ],
+        "pipelined_orders": 5,
+        "pool_jobs": 45,
+        "pool_ms": 0.805,
+        "pool_threads": 47,
+        "population_deferred_refs": 0,
+        "populations_by_k": [
+          0.062,
+          7.476,
+          12.069,
+          17.318,
+          24.435
+        ],
+        "runner_threads": 5,
+        "seal_sampled_balls": 44095,
+        "sealed_catalogues": 1
+      },
+      "tower_digest": "cfb1634832c0384a",
+      "tower_ms": 624.396,
+      "tower_phases_ms": {
+        "bank": 2.02,
+        "encode": 69.973,
+        "encode_by_k": [
+          9.08,
+          19.662,
+          34.347,
+          51.84,
+          69.883
+        ],
+        "images": 45.584,
+        "images_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          45.479
+        ],
+        "lots": 245.341,
+        "lots_by_k": [
+          163.94,
+          120.047,
+          181.454,
+          250.896,
+          336.692
+        ],
+        "order_by_k": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "populations": 24.491,
+        "static": 162.081,
+        "static_by_k": [
+          0.0,
+          15.728,
+          28.768,
+          47.045,
+          70.54
+        ],
+        "static_collect_by_k": [
+          0.0,
+          4.118,
+          6.692,
+          10.502,
+          14.653
+        ],
+        "static_groups_by_k": [
+          0.0,
+          4.08,
+          5.638,
+          6.31,
+          8.023
+        ],
+        "static_resolve_by_k": [
+          0.0,
+          6.831,
+          15.516,
+          29.004,
+          45.388
+        ],
+        "static_sort_by_k": [
+          0.0,
+          0.675,
+          0.898,
+          1.213,
+          1.568
+        ],
+        "validate": 69.94,
+        "validate_parts": [
+          4.901,
+          4.622,
+          9.803,
+          0.686,
+          3.048,
+          22.991,
+          10.524,
+          13.36
+        ]
+      }
+    }
+  ],
+  "s_comparison": [
+    {
+      "catalogue_digest": "5ad1fe09354411ba",
+      "engine_chain_ms": 2744.327,
+      "engine_tower_ms": 282.653,
+      "gpu_chain_ms": 916.304,
+      "gpu_tower_ms": 282.724,
+      "presentation_digest": "a2aa4b20ca392dfe",
+      "s": 8,
+      "scene": "00",
+      "tower_digest": "67450c64611075b1"
+    },
+    {
+      "catalogue_digest": "5ad1fe09354411ba",
+      "engine_chain_ms": 2761.841,
+      "engine_tower_ms": 283.439,
+      "gpu_chain_ms": 998.457,
+      "gpu_tower_ms": 312.968,
+      "presentation_digest": "a2aa4b20ca392dfe",
+      "s": 10,
+      "scene": "00",
+      "tower_digest": "67450c64611075b1"
+    },
+    {
+      "catalogue_digest": "5ad1fe09354411ba",
+      "engine_chain_ms": 2842.46,
+      "engine_tower_ms": 280.83,
+      "gpu_chain_ms": 1004.053,
+      "gpu_tower_ms": 296.912,
+      "presentation_digest": "a2aa4b20ca392dfe",
+      "s": 12,
+      "scene": "00",
+      "tower_digest": "67450c64611075b1"
+    },
+    {
+      "catalogue_digest": "11f6a8e1a7f28127",
+      "engine_chain_ms": 5615.309,
+      "engine_tower_ms": 632.32,
+      "gpu_chain_ms": 2036.57,
+      "gpu_tower_ms": 669.031,
+      "presentation_digest": "7344e05fb52c6f50",
+      "s": 8,
+      "scene": "b00",
+      "tower_digest": "cfb1634832c0384a"
+    },
+    {
+      "catalogue_digest": "11f6a8e1a7f28127",
+      "engine_chain_ms": 5718.206,
+      "engine_tower_ms": 638.7,
+      "gpu_chain_ms": 2063.437,
+      "gpu_tower_ms": 641.406,
+      "presentation_digest": "7344e05fb52c6f50",
+      "s": 10,
+      "scene": "b00",
+      "tower_digest": "cfb1634832c0384a"
+    },
+    {
+      "catalogue_digest": "11f6a8e1a7f28127",
+      "engine_chain_ms": 5920.296,
+      "engine_tower_ms": 624.396,
+      "gpu_chain_ms": 2107.157,
+      "gpu_tower_ms": 633.617,
+      "presentation_digest": "7344e05fb52c6f50",
+      "s": 12,
+      "scene": "b00",
+      "tower_digest": "cfb1634832c0384a"
+    }
+  ],
+  "schema": "mhgp9_g4_r24b_analysis_v1",
+  "scope": "whole_frame_u18_grid_1mm_two_masks_one_sequence",
+  "targeted_shutdown_certified": true,
+  "triplets": [
+    {
+      "K": 5,
+      "chain_ms": {
+        "A": [
+          916.304,
+          931.973
+        ],
+        "B": [
+          952.822,
+          932.351
+        ],
+        "C": [
+          957.241,
+          967.422
+        ]
+      },
+      "medians_ms": {
+        "A": 924.1385,
+        "B": 942.5865,
+        "C": 962.3315
+      },
+      "paired_delta_ms": {
+        "B_minus_A": [
+          36.51800000000003,
+          0.37800000000004275
+        ],
+        "C_minus_B": [
+          4.418999999999983,
+          35.071000000000026
+        ]
+      },
+      "scene": "00",
+      "tower_medians_ms": {
+        "A": 285.702,
+        "B": 296.078,
+        "C": 326.4375
+      }
+    },
+    {
+      "K": 10,
+      "chain_ms": {
+        "A": [
+          2968.445,
+          2956.055
+        ],
+        "B": [
+          3090.53,
+          3086.359
+        ],
+        "C": [
+          3324.774,
+          3314.822
+        ]
+      },
+      "medians_ms": {
+        "A": 2962.25,
+        "B": 3088.4445,
+        "C": 3319.798
+      },
+      "paired_delta_ms": {
+        "B_minus_A": [
+          122.08500000000004,
+          130.3040000000001
+        ],
+        "C_minus_B": [
+          234.2439999999997,
+          228.4630000000002
+        ]
+      },
+      "scene": "00",
+      "tower_medians_ms": {
+        "A": 1196.307,
+        "B": 1307.515,
+        "C": 1548.6970000000001
+      }
+    },
+    {
+      "K": 5,
+      "chain_ms": {
+        "A": [
+          2036.57,
+          1974.292
+        ],
+        "B": [
+          2049.227,
+          2010.408
+        ],
+        "C": [
+          2072.656,
+          2070.717
+        ]
+      },
+      "medians_ms": {
+        "A": 2005.431,
+        "B": 2029.8174999999999,
+        "C": 2071.6865
+      },
+      "paired_delta_ms": {
+        "B_minus_A": [
+          12.656999999999925,
+          36.115999999999985
+        ],
+        "C_minus_B": [
+          23.429000000000087,
+          60.3090000000002
+        ]
+      },
+      "scene": "b00",
+      "tower_medians_ms": {
+        "A": 649.574,
+        "B": 668.7004999999999,
+        "C": 730.5165
+      }
+    },
+    {
+      "K": 10,
+      "chain_ms": {
+        "A": [
+          6014.83,
+          6083.494
+        ],
+        "B": [
+          6223.926,
+          6307.462
+        ],
+        "C": [
+          6745.017,
+          6708.891
+        ]
+      },
+      "medians_ms": {
+        "A": 6049.162,
+        "B": 6265.694,
+        "C": 6726.954
+      },
+      "paired_delta_ms": {
+        "B_minus_A": [
+          209.09600000000046,
+          223.96800000000076
+        ],
+        "C_minus_B": [
+          521.0909999999994,
+          401.4289999999992
+        ]
+      },
+      "scene": "b00",
+      "tower_medians_ms": {
+        "A": 2420.4935,
+        "B": 2606.684,
+        "C": 3093.679
+      }
+    }
+  ],
+  "worker_receipt_sha256": "96d4dca5b2a41fc46219cc379559a0e30767711d9d6c65c7972b06943f02547a",
+  "worker_status": "completed"
+}

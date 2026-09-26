@@ -1,0 +1,15 @@
+{
+  "observation_utc": "2026-09-26 13:17:48 UTC",
+  "source": "gcloud compute instances describe ehgp-v7-4fa0e0789a7d5bb06b787d35 --project=devpod-gpu-exploration --zone=us-central1-b --format=json(name,status,lastStartTimestamp,lastStopTimestamp,scheduling.provisioningModel,scheduling.instanceTerminationAction,scheduling.maxRunDuration)",
+  "name": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+  "project": "devpod-gpu-exploration",
+  "zone": "us-central1-b",
+  "status": "TERMINATED",
+  "lastStartTimestamp": "2026-09-26T06:03:17.170-07:00",
+  "lastStopTimestamp": "2026-09-26T06:10:03.052-07:00",
+  "scheduling": {
+    "provisioningModel": "SPOT",
+    "instanceTerminationAction": "STOP",
+    "maxRunDuration": {"seconds": "3600", "nanos": 0}
+  }
+}

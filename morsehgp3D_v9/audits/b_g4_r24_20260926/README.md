@@ -1,8 +1,11 @@
 # G4 R24-B : compléments ciblés à la séance R23-C
 
 Plan d'audit seulement, protocole v28 commité inchangé. C a déjà exécuté
-25 cas sur G4 ; ne pas les refaire comme s'ils manquaient. Cette séance
-complète deux contrôles laissés ouverts :
+25 cas sur G4 ; ne pas les refaire comme s'ils manquaient. La séance est
+maintenant close : [reçu G4 R24-B](../../receipts/g4_tower_r24b_20260926/README.md)
+et [lecture critique](../AUDIT_B_R24B_G4_20260926.md). Le script
+`analyze_receipt.py` reconstruit `SUMMARY.json` depuis les sorties brutes.
+Elle complète deux contrôles laissés ouverts :
 
 1. Séparer `tower_overlap_static` et `tower_pipelined_tail` avec trois bras
    sur les trames entières 08/000000 sans sol (`00`, 39 885 sites) et brute

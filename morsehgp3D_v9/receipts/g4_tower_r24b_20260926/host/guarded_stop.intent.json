@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/tmp/mhgp9-r24b-session-ebf7c342d/tower_v9_host/stop_and_verify.sh",
+    "--yes",
+    "--expected-last-start-timestamp",
+    "2026-09-26T06:03:17.170-07:00"
+  ],
+  "name": "guarded_stop",
+  "started_epoch": 1790428141.5569024,
+  "timeout_seconds": null
+}

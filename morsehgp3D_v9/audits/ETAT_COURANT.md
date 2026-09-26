@@ -1,5 +1,19 @@
 # État courant des audits v9
 
+**Complément G4 R24-B du 26 septembre** : [reçu brut et lecture](../receipts/g4_tower_r24b_20260926/README.md),
+[plan et analyseur](b_g4_r24_20260926/README.md). Une session SPOT gardée,
+arrêt ciblé puis état GCE `TERMINATED` relu. Sur la seule trame
+08/000000, avec/sans masque de sol, 36/36 cas terminent, 28/28
+comparaisons croisées sont égales. Le séparateur recouvrement/E4 mesure
+un gain de chaîne médian de 18/24 ms à K5 et 126/217 ms à K10
+(sans sol/brut), mais deux répétitions ne fixent pas un plancher de bruit,
+surtout à K5. Les voies GPU K5 `s=8/10/12` donnent le même objet ; `s=8`
+est le plus rapide sur ces deux entrées, sans loi générale. La meilleure
+chaîne sans sol K5 vaut 916 ms, mur externe 1,726 s : **100 ms FULL non
+atteint**, contrat non certifié. Le travail q3/q4 (482 ms) et la tour
+(283 ms) dominent encore cette entrée ; une micro-optimisation de queue
+ne suffira pas.
+
 **Reprise transversale du 26 septembre** (base `c529c82bb`, avant les
 WIP v29/R23) : [audit géant](AUDIT_GEANT_REPRISE_20260926.md),
 [exactitude et juges](AUDIT_REPRISE_20260926_MATH_EXACTITUDE.md),
@@ -19,8 +33,8 @@ plusieurs séquences demandent des portes propres. Le modèle de fenêtre
 FULL corrige la priorité : alléger A(K) pour **tous les ordres**, pas
 A(Kmax) seule.
 
-Le [reçu R22](../receipts/g4_tower_r22_20260926/README.md) est le
-dernier chrono G4. Sans sol, K5 vaut 0,760 à 0,983 s et K10 2,27 à
+Le [reçu R22](../receipts/g4_tower_r22_20260926/README.md) précédait
+R24-B. Sans sol, K5 vaut 0,760 à 0,983 s et K10 2,27 à
 2,99 s. Avec sol, K5 vaut 1,81 à 2,03 s et K10 5,31 à 6,01 s. Les douze
 épingles sont reproduites, dont les 30 cas scellés. La [contre-lecture C
 de R22](CONTRE_AUDIT_C_R22_20260926.md) tient le reçu et les trois
