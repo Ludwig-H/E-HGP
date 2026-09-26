@@ -7,7 +7,8 @@ complète deux contrôles laissés ouverts :
 1. Séparer `tower_overlap_static` et `tower_pipelined_tail` avec trois bras
    sur les trames entières 08/000000 sans sol (`00`, 39 885 sites) et brute
    (`b00`, 123 389 sites), K5 et K10, s8 : (recouvrement, queue) = (1,1),
-   (1,0), (0,1). Deux répétitions entrelacées par triplet. Un jumeau moteur
+   (1,0), (0,1). Deux répétitions entrelacées par triplet, dans l'ordre
+   A–B–C puis C–B–A pour contenir une dérive monotone. Un jumeau moteur
    par trame/K contrôle l'identité de la tour et du catalogue.
 2. Tester directement la voie GPU complète à s10 et s12, K5, sur les deux
    mêmes trames, avec jumeau moteur correspondant. La séance C n'avait
