@@ -95,6 +95,13 @@ descente, non une limite structurelle : deux d'entre eux ont été réduits,
 puis fermés par l'ajout des triplets (19 égales et 9 majorées deviennent 28
 et 0 ; 24 et 4 deviennent 28 et 0).
 
+**Périmètre de ce chiffre, à ne pas élargir.** La campagne porte sur les
+familles `uniform` et `clusters`. Sur les **contre-familles** gravées du
+dépôt (deux droites, sept points colinéaires), une porte indépendante
+observe des paires strictement majorées à $d=20$ : l'égalité n'est donc pas
+universelle, et la phrase « la part d'égalité atteint 100 pour cent en
+$d=20$ » serait fausse si on l'étendait aux contre-familles.
+
 **L'égalité reste mesurée, jamais déclarée** : rien ne démontre que la
 descente trouve toujours les témoins nécessaires. Ce qui est démontré est la
 direction de l'inégalité (un chemin polygonal certifié majore le niveau vrai)

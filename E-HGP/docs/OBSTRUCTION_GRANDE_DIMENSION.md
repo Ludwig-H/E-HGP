@@ -76,19 +76,28 @@ $d=100$** — 499 500 paires sur 499 500, le graphe de Gabriel est complet.
 
 ### 1.3 L'énoncé asymptotique, démontré
 
-**Théorème (démontré par l'audit, sans hypothèse de loi).** Si toutes les
-distances au carré entre observations vérifient
+**Théorème (démontré par l'audit, constante corrigée par le contre-audit).**
+Si toutes les distances au carré entre observations vérifient
 $\left\lvert \mathrm{dist}^2/D-1\right\rvert\leq\epsilon$ pour un $D>0$,
 alors pour toute partie $F$ de cardinal $k\geq2$ et toute observation
 $x_j\notin F$,
 
-$$\left\Vert x_j-c_F\right\Vert^2-\beta(F)\geq\frac{D}{2}\left(\frac{2}{k}-6\epsilon\right).$$
+$$\left\Vert x_j-c_F\right\Vert^2-\beta(F)\geq D\left(\frac{1}{k}-2\epsilon+\frac{\epsilon}{k}\right).$$
 
-En particulier $\epsilon<1/(3k)$ suffit pour que **toutes** les parties de
-cardinal $k$ aient une boule fermée vide. Comme la concentration des
-distances donne $\epsilon\to0$ quand $d\to\infty$ à $n$ et $k$ fixés, la
+En particulier $\epsilon<\dfrac{1}{2k-1}$ suffit pour que **toutes** les
+parties de cardinal $k$ aient une boule fermée vide, et ce seuil est **serré
+en $\epsilon=0$** (le simplexe régulier l'atteint). Comme la concentration
+des distances donne $\epsilon\to0$ quand $d\to\infty$ à $n$ et $k$ fixés, la
 probabilité que toutes les parties de cardinal $k$ soient des naissances tend
 vers $1$.
+
+> **Correction à conserver.** La première version de ce théorème annonçait la
+> minoration $\frac{D}{2}\left(\frac{2}{k}-6\epsilon\right)$ et le seuil
+> $\epsilon<1/(3k)$, en présentant la constante $6$ comme le produit de la
+> technique. Elle ne l'est pas : la même technique donne le coefficient
+> $4-2/k$, donc le seuil $1/(2k-1)$, meilleur. La borne annoncée restait
+> valide (29 419 cas rationnels exacts, aucune violation), elle était
+> seulement sous-optimale.
 
 **Et il faut dire que cette preuve est loin d'être optimale** : la condition
 suffisante $\epsilon<1/(3k)$ n'est atteinte qu'à $d$ de l'ordre de $10^3$
@@ -106,8 +115,13 @@ Trois précautions, sans lesquelles l'obstruction serait surévaluée.
    compte est $499\,500$ naissances, et c'est cela qui est rédhibitoire.
 2. **L'énoncé « tend vers $\binom{n}{k}$ » est à $n$ et $k$ fixés quand
    $d\to\infty$.** Il ne vaut **pas** uniformément au point cible
-   $n=1000$, $K=10$ : à $k=10$ la fraction tombe à $0/120$ tirages dès
-   $n=176$, aussi bien en $d=50$ qu'en $d=100$. Les comptes estimés restent
+   $n=1000$, $K=10$ : à $k=10$ la fraction mesurée est de $0/120$ tirages dès
+   $n=176$, en $d=50$ comme en $d=100$. **Il ne faut pas écrire « la fraction
+   tombe »** : le test exact de Fisher unilatéral sur $[[4,116],[0,120]]$
+   donne $p=0{,}0609$, donc non significatif, et les bornes supérieures de
+   Clopper-Pearson à 95 pour cent des deux proportions se recouvrent. Ce qui
+   est établi est seulement que la fraction n'est pas proche de $1$ dans ce
+   régime. Les comptes estimés restent
    cependant astronomiques aux ordres intermédiaires : à $k=5$,
    $n=704$, la fraction mesurée vaut $0{,}058$ en $d=50$ et $0{,}655$ en
    $d=100$, soit environ $8{,}2\cdot10^{10}$ et $9{,}3\cdot10^{11}$
@@ -139,16 +153,24 @@ Trois précautions, sans lesquelles l'obstruction serait surévaluée.
    $\varphi_2=0{,}014$, la valeur d'un nuage plan. La taille de sortie se
    rachète par une projection, la vérité de l'objet non.
 
-**Pont avec la littérature.** Les feuilles de l'arbre de fusion d'ordre $k$
-s'injectent dans les sommets de la mosaïque de Delaunay d'ordre $k$ : si la
-boule fermée de $F$ est vide, son centre a pour $k$ plus proches exactement
-$F$, donc la cellule de Voronoï d'ordre $k$ de $F$ est non vide.
-L'obstruction mesurée est donc la face $H_0$ d'un fait connu : la Delaunay
-d'ordre $k$ dans $\mathbb{R}^d$ a une taille
-$O\!\left(k^{\lceil(d+1)/2\rceil}n^{\lfloor(d+1)/2\rfloor}\right)$ avec une
-constante doublement exponentielle en $d$ (Corbet–Kerber–Lesnick–Osang pour
-la bifiltration de multicouverture, Edelsbrunner–Osang pour le pavage
-rhomboïdal).
+**Pont avec la littérature, et une faute de logique à ne pas commettre.** Les
+feuilles de l'arbre de fusion d'ordre $k$ s'injectent dans les sommets de la
+mosaïque de Delaunay d'ordre $k$ : si la boule fermée de $F$ est vide, son
+centre a pour $k$ plus proches exactement $F$, donc la cellule de Voronoï
+d'ordre $k$ de $F$ est non vide. Cette injection donne un **majorant** du
+nombre de parties à boule fermée vide par le nombre de cellules d'ordre $k$.
+
+**Un majorant ne peut pas établir une obstruction.** La borne
+$O\!\left(k^{\lceil(d+1)/2\rceil}n^{\lfloor(d+1)/2\rfloor}\right)$
+d'Edelsbrunner et Osang pour la taille de la mosaïque d'ordre $k$ (minorant
+$\Omega(k^dn)$ seulement conjecturé) dit que la sortie *ne dépasse pas* une
+certaine taille ; elle ne dit pas qu'elle l'atteint. L'obstruction de ce
+document repose donc **uniquement** sur les comptes mesurés du § 1.2, et sur
+l'inégalité démontrée `parties à boule fermée vide` $\leq$ `naissances`. La
+littérature fournit le contexte — y compris le fait, confirmé ici, que le
+nombre d'arêtes de Gabriel croît comme $2^{d-1}n$ (Devroye, Gudmundsson,
+Morin ; degrés intérieurs mesurés $4{,}00$ en $d=2$ et $7{,}3$ en $d=3$) —
+mais pas la preuve.
 
 ## 2. Obstruction de signal : la filtration se vide
 

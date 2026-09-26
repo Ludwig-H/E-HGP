@@ -74,6 +74,20 @@ from ehgp.exact.tower import FullTower
 
 TINY = 1e-300
 
+# Compteurs du repli par enumeration. Le document publiait un taux de repli et
+# un cout par boule qu'aucune commande ne produisait : ils sont desormais
+# instrumentes ici et imprimes par toute execution, et la table `cout` les
+# detaille par cellule (d, k). Le temps retenu est le temps PROCESSEUR, le
+# seul qui ne depende pas de la charge de la machine.
+FALLBACK = {"balls": 0, "calls": 0, "cpu": 0.0}
+
+
+def reset_fallback():
+    """Remet les compteurs de repli a zero."""
+    FALLBACK["balls"] = 0
+    FALLBACK["calls"] = 0
+    FALLBACK["cpu"] = 0.0
+
 
 # ---------------------------------------------------------------------------
 # Boule englobante minimale certifiee (implementation independante)
@@ -147,6 +161,7 @@ def meb_certified(points, tol=1e-10, max_steps=None):
     """
     cloud = np.asarray(points, dtype=float)
     count = cloud.shape[0]
+    FALLBACK["balls"] += 1
     if count == 1:
         return cloud[0].copy(), 0.0, (0,), True, 0
     norms = np.einsum("ij,ij->i", cloud, cloud)
@@ -182,7 +197,13 @@ def meb_certified(points, tol=1e-10, max_steps=None):
             break
         support.append(worst)
         support.sort()
-    fallback = _meb_enumerate(cloud) if count <= 12 else None
+    if count <= 12:
+        FALLBACK["calls"] += 1
+        started = time.process_time()
+        fallback = _meb_enumerate(cloud)
+        FALLBACK["cpu"] += time.process_time() - started
+    else:
+        fallback = None
     if fallback is not None:
         return fallback[0], fallback[1], fallback[2], True, steps
     if centre is None:
@@ -469,10 +490,11 @@ def represent(points, kind, intrinsic, rng, epsilon):
 class Ledger:
     """Compteurs de couverture ; decide le code de sortie."""
 
-    def __init__(self, min_balls, min_selftest, max_undecided):
+    def __init__(self, min_balls, min_selftest, max_undecided, max_fallback=0.10):
         self.min_balls = min_balls
         self.min_selftest = min_selftest
         self.max_undecided = max_undecided
+        self.max_fallback = max_fallback
         self.balls = 0
         self.certified = 0
         self.decisions = 0
@@ -503,6 +525,17 @@ class Ledger:
             "validations exactes     : %d (plancher %d), echecs %d"
             % (self.selftest, self.min_selftest, self.selftest_failures)
         )
+        share_fallback = FALLBACK["calls"] / FALLBACK["balls"] if FALLBACK["balls"] else 0.0
+        lines.append(
+            "replis par enumeration  : %d / %d = %.6f (plafond %.2f), %.3f s processeur"
+            % (
+                FALLBACK["calls"],
+                FALLBACK["balls"],
+                share_fallback,
+                self.max_fallback,
+                FALLBACK["cpu"],
+            )
+        )
         if self.balls < self.min_balls:
             code = 3
             lines.append("PLANCHER MANQUE : trop peu de boules calculees")
@@ -518,6 +551,12 @@ class Ledger:
         if self.selftest_failures:
             code = 3
             lines.append("PLANCHER MANQUE : desaccord avec la boule rationnelle exacte")
+        if share_fallback > self.max_fallback:
+            code = 3
+            lines.append(
+                "PLANCHER MANQUE : l'ensemble actif a cede la main au repli "
+                "(l'instrument annonce n'est plus celui qui mesure)"
+            )
         for text in self.failures:
             code = 3
             lines.append("PLANCHER MANQUE : " + text)
@@ -899,8 +938,15 @@ def table_radius(options, ledger):
 
 
 def table_contrast(options, ledger):
-    """Mesure (c) : contraste de densite, brut et apres representation."""
+    """Mesure (c) : contraste de densite, brut et apres representation.
+
+    Deux portes contre le vert par vacuite. Un plancher de cellules, et
+    l'exigence que le comptage prenne au moins deux valeurs distinctes : un
+    comptage constant rendrait toutes les colonnes de dispersion nulles ou
+    indefinies sans rien signaler.
+    """
     rows = []
+    cells = 0
     count = options.n_list[0]
     for name, dimension, intrinsic in FAMILIES:
         for kind in options.representations:
@@ -922,6 +968,11 @@ def table_contrast(options, ledger):
                 iqrs.append(result["iqr_ratio"])
                 deciles.append(result["decile_ratio"])
                 entropies.append(result["entropy"])
+                if result["distinct"] < 2:
+                    ledger.failures.append(
+                        "contraste : comptage constant (%s, %s), la dispersion "
+                        "publiee ne mesure rien" % (name, label)
+                    )
             rows.append(
                 [
                     _cloud_label(name, dimension, intrinsic),
@@ -934,7 +985,11 @@ def table_contrast(options, ledger):
                     summarise(entropies),
                 ]
             )
-    del ledger
+            cells += 1
+    if cells < options.min_cells:
+        ledger.failures.append(
+            "contraste : %d cellules pour un plancher de %d" % (cells, options.min_cells)
+        )
     print_table(
         "(c) contraste du comptage dans B(x_i, r_ref), r_ref = mediane du %d-ieme voisin (n=%d) ; "
         "exces = cv * sqrt(moyenne), egal a 1 pour un bruit de Poisson pur"
@@ -955,11 +1010,21 @@ def table_contrast(options, ledger):
 
 
 def table_signal(options, ledger):
-    """Le comptage retrouve-t-il une densite CONNUE ? Correlation de Spearman."""
-    del ledger
+    """Le comptage retrouve-t-il une densite CONNUE ? Correlation de Spearman.
+
+    Trois portes, parce qu'une correlation est la mesure la plus facile a
+    rendre verte par vacuite. D'abord un plancher de cellules. Ensuite, sans
+    bruit, le comptage DOIT retrouver la densite latente : si le tuyau est
+    casse, la correlation tombe, donc on exige un plancher. Enfin un CONTROLE
+    PAR PERMUTATION : la meme correlation calculee contre la densite melangee
+    doit etre nulle. C'est le test qui attrape une verite terrain qui fuirait
+    dans la methode, car un tel accident survivrait aux deux premieres portes.
+    """
     from scipy import stats
 
     rows = []
+    control = []
+    cells = 0
     count = options.n_list[0]
     for dimension in options.signal_dims:
         for level in options.signal_noise:
@@ -982,6 +1047,10 @@ def table_signal(options, ledger):
                     reference2 = float(np.median(partitioned))
                     counts = np.count_nonzero(squared <= reference2, axis=1) - 1
                     spearmans.append(float(stats.spearmanr(counts, density).statistic))
+                    shuffled = rng.permutation(density)
+                    control.append(
+                        abs(float(stats.spearmanr(counts, shuffled).statistic))
+                    )
                     mean = float(counts.mean())
                     deviation = float(counts.std(ddof=0))
                     cvs.append(deviation / mean if mean > 0.0 else float("nan"))
@@ -1001,6 +1070,32 @@ def table_signal(options, ledger):
                         summarise(excess),
                     ]
                 )
+                cells += 1
+                if level == 0.0 and kind in ("raw", "pca"):
+                    weak = [value for value in spearmans if value < options.min_spearman]
+                    if weak:
+                        ledger.failures.append(
+                            "signal : sans bruit, le comptage ne retrouve plus la "
+                            "densite latente (d=%d, %s, minimum %.3f)"
+                            % (dimension, kind, min(spearmans))
+                        )
+    if cells < options.min_cells:
+        ledger.failures.append(
+            "signal : %d cellules pour un plancher de %d" % (cells, options.min_cells)
+        )
+    if control:
+        worst = max(control)
+        mean_control = sum(control) / len(control)
+        print("")
+        print(
+            "controle par permutation : |spearman| contre la densite melangee, "
+            "%d tirages, moyenne %.4f, maximum %.4f (plafond %.3f)"
+            % (len(control), mean_control, worst, options.max_control)
+        )
+        if worst > options.max_control:
+            ledger.failures.append(
+                "signal : la densite melangee correle encore (maximum %.4f)" % worst
+            )
     print_table(
         "(c bis) variete plate de rang r a densite latente connue (rapport exp(%.1f) = %.0f), "
         "n=%d : correlation de Spearman entre comptage et densite vraie"
@@ -1208,33 +1303,6 @@ def _kendall(left, right):
     return (concordant - discordant) / total, discordant
 
 
-def event_sequence(tower, order):
-    """Suite des evenements de l'ordre, NIVEAUX ABSOLUS EFFACES.
-
-    Le digest de `FullTower` contient la dimension ambiante et les niveaux
-    exacts : il ne peut jamais coincider entre deux representations, meme
-    quand celles-ci sont isometriques a une rotation pres. La comparaison
-    utile est la partie combinatoire du foncteur : la suite ordonnee des
-    niveaux critiques, avec a chaque niveau les sommets qui apparaissent et
-    les multifusions qui s'y produisent, les identifiants d'observations
-    etant conserves par la projection. Deux tours ont la meme suite si et
-    seulement si elles donnent le meme `pi_0(L_k(.))` a reparametrage
-    croissant de l'axe des echelles pres.
-    """
-    state = tower.states[order]
-    grouped = {}
-    for level, vertex in state.births:
-        grouped.setdefault(level, ([], []))[0].append(tuple(vertex))
-    for level, arity, _witnesses, representatives, _unions, result in state.merges:
-        grouped.setdefault(level, ([], []))[1].append(
-            (arity, tuple(sorted(representatives)), tuple(result))
-        )
-    return tuple(
-        (tuple(sorted(grouped[level][0])), tuple(sorted(grouped[level][1])))
-        for level in sorted(grouped)
-    )
-
-
 def free_count_strict(points, order):
     """Nombre de parties de cardinal `order` a boule englobante VIDE.
 
@@ -1293,8 +1361,15 @@ TOWER_FAMILIES = (
 
 
 def table_tower(options, ledger):
-    """La projection preserve-t-elle pi_0(L_k(a)) ? Tour exacte, n <= 9."""
-    del ledger
+    """La projection preserve-t-elle pi_0(L_k(a)) ? Tour exacte, n <= 9.
+
+    La table de contre-verification est une PORTE : la contre-mesure (a) de ce
+    fichier et les naissances de composantes de la tour exacte du chantier
+    doivent coincider sur chaque cellule. Sans cette porte, un desaccord entre
+    les deux chemins s'imprimerait et l'execution sortirait quand meme a zero,
+    c'est-a-dire que la confirmation independante la plus importante du
+    document ne serait qu'une ligne de texte.
+    """
     cross = []
     damage = []
     count = options.tower_n
@@ -1325,6 +1400,12 @@ def table_tower(options, ledger):
                         len(state.component_births) - mine,
                     ]
                 )
+                if len(state.component_births) != mine:
+                    ledger.failures.append(
+                        "tour : ma part libre et les naissances de la tour exacte "
+                        "ne coincident pas (%s, graine %d, k=%d, ecart %d)"
+                        % (name, index, order, len(state.component_births) - mine)
+                    )
             for kind in ("rot", "pca", "jl", "whiten"):
                 view, label = represent(points, kind, intrinsic, rng, options.jl_epsilon)
                 candidate = FullTower(quantise(view, options.tower_bits), options.tower_k)
@@ -1353,6 +1434,19 @@ def table_tower(options, ledger):
                             len(usable),
                         ]
                     )
+                    if kind == "rot" and len(
+                        candidate.states[order].component_births
+                    ) != len(reference.states[order].component_births):
+                        ledger.failures.append(
+                            "tour : la rotation de controle, isometrie exacte, a "
+                            "change le nombre de naissances (%s, graine %d, k=%d)"
+                            % (name, index, order)
+                        )
+    if len(cross) < options.min_cells:
+        ledger.failures.append(
+            "tour : %d cellules de contre-verification pour un plancher de %d"
+            % (len(cross), options.min_cells)
+        )
     print_table(
         "(a) contre-verification : ma part libre contre les naissances de composantes "
         "de la tour exacte (n=%d, grille 2^%d)" % (count, options.tower_bits),
@@ -1588,8 +1682,16 @@ def main(argv=None):
         % (options.seed, options.seeds, options.subsets)
     )
     wanted = options.table
-    if wanted in ("selftest", "all"):
-        table_selftest(options, ledger)
+    # Porte de l'instrument. Elle precede TOUTE table, y compris quand une
+    # seule table est demandee : c'est la seule maniere de rendre vraie la
+    # phrase « sans validation, aucune table n'est publiee ». Sa graine et son
+    # generateur lui sont propres, donc son execution ne deplace aucune mesure.
+    table_selftest(options, ledger)
+    if wanted != "selftest":
+        # Les scenarios degeneres de la porte (colineaires, dupliques) replient
+        # par construction : on repart de zero pour que le taux publie soit
+        # celui des tables de mesure.
+        reset_fallback()
     if wanted in ("theoremes", "all"):
         table_theoremes(options, ledger)
     if wanted in ("exhaustive", "all"):
@@ -1610,9 +1712,21 @@ def main(argv=None):
         table_repr(options, ledger)
     if wanted in ("tower", "all"):
         table_tower(options, ledger)
-    ball_tables = ("exhaustive", "free", "radius", "dimsweep", "noise", "repr", "all")
-    if wanted not in ("selftest", "all"):
-        ledger.min_selftest = 0
+    if wanted in ("exact2", "all"):
+        table_exact2(options, ledger)
+    if wanted in ("cout", "all"):
+        table_cout(options, ledger)
+    ball_tables = (
+        "exhaustive",
+        "free",
+        "radius",
+        "dimsweep",
+        "noise",
+        "repr",
+        "exact2",
+        "cout",
+        "all",
+    )
     if wanted not in ball_tables:
         ledger.min_balls = 0
     code, lines = ledger.verdict()
