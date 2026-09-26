@@ -39,16 +39,27 @@ Mutants causaux (option `--inject`) :
     ordre_precedent          la k-ieme plus petite devient la (k-1)-ieme
     croisements_extremites   seuls les croisements des deux extremites sont
                              retenus comme temps candidats
+    sans_extremites          les temps 0 et 1 sont retires du jeu de candidats
 
 Chaque mutant doit etre TUE (code 4) par une porte qui, sans mutant, sort 0.
 Les planchers sont verifies AVANT le verdict de mise a mort, pour qu'aucun
 mutant ne soit declare tue sur un corpus vide.
+
+Discipline des codes de sortie. Une exception non rattrapee ferait sortir
+Python avec le code 1, c'est-a-dire le code du DESACCORD DU JUGE : un
+plantage se lirait alors comme une contradiction du moteur. Le point d'entree
+rattrape donc toute exception, imprime sa trace et rend 3 (invariant de la
+porte viole). Le mutant `sans_extremites` peut par ailleurs vider le jeu de
+temps candidats (positions confondues : aucune droite ne se croise) et rendre
+un niveau `None` ; `poids_moteur` isole ces paires au lieu de les donner a
+trier, ou la comparaison `None < Fraction` leverait une `TypeError`.
 """
 
 import argparse
 import os
 import random
 import sys
+import traceback
 from fractions import Fraction
 from itertools import combinations
 
@@ -68,7 +79,13 @@ CODE_REFUS = 2
 CODE_PLANCHER = 3
 CODE_MUTANT_TUE = 4
 
-MUTANTS = ("aucun", "extremites", "ordre_precedent", "croisements_extremites")
+MUTANTS = (
+    "aucun",
+    "extremites",
+    "ordre_precedent",
+    "croisements_extremites",
+    "sans_extremites",
+)
 
 LIMITE_EXACTE_EFFECTIF = 9
 LIMITE_EXACTE_ORDRE = 4
@@ -142,19 +159,22 @@ def verites_et_potentiels(nuage, source, cible, ordre):
     """Verite du juge et valeurs qu'AURAIENT les trois mutants.
 
     Renvoie un dictionnaire : `vrai`, `extremites`, `ordre_precedent`
-    (`None` si l'ordre vaut 1, le mutant etant alors l'identite) et
-    `croisements_extremites`.
+    (`None` si l'ordre vaut 1, le mutant etant alors l'identite),
+    `croisements_extremites` et `sans_extremites` (`None` quand le segment n'a
+    aucun croisement interieur, cas des positions confondues).
     """
     dominant, parties = coefficients_extremites(nuage, source, cible)
     complet = temps_croisements(parties)
     extremites = [Fraction(0), Fraction(1)]
     restreints = temps_croisements(parties, (source, cible))
+    interieurs = [instant for instant in complet if 0 < instant < 1]
     resultat = {
         "vrai": maximum_sur_temps(dominant, parties, complet, ordre),
         "extremites": maximum_sur_temps(dominant, parties, extremites, ordre),
         "croisements_extremites": maximum_sur_temps(
             dominant, parties, restreints, ordre
         ),
+        "sans_extremites": maximum_sur_temps(dominant, parties, interieurs, ordre),
         "temps_candidats": len(complet),
     }
     if ordre >= 2:
@@ -237,6 +257,8 @@ def maximum_moteur(nuage, source, cible, ordre, mutant):
     dominant, parties = affine_parts(nuage, source, cible)
     if mutant == "extremites":
         temps = [Fraction(0), Fraction(1)]
+    elif mutant == "sans_extremites":
+        temps = [instant for instant in candidate_times(parties) if 0 < instant < 1]
     elif mutant == "croisements_extremites":
         temps = [Fraction(0), Fraction(1)]
         ecart = parties[source][0] - parties[cible][0]
@@ -259,13 +281,23 @@ def maximum_moteur(nuage, source, cible, ordre, mutant):
 
 
 def poids_moteur(nuage, ordre, mutant):
-    """Poids de segment de toutes les paires a un ordre donne."""
+    """`(poids, paires sans niveau)` de toutes les paires a un ordre donne.
+
+    Un mutant peut vider le jeu de temps candidats et rendre `None` : une
+    telle paire est ISOLEE et jamais donnee a trier, sans quoi la comparaison
+    `None < Fraction` leverait une `TypeError` et la porte sortirait avec le
+    code 1, celui du desaccord du juge.
+    """
     effectif = len(nuage)
     poids = {}
+    manquants = []
     for gauche, droite in combinations(range(effectif), 2):
         niveau, _temps = maximum_moteur(nuage, gauche, droite, ordre, mutant)
+        if niveau is None:
+            manquants.append((gauche, droite))
+            continue
         poids[(gauche, droite)] = niveau
-    return poids
+    return poids, manquants
 
 
 # ---------------------------------------------------------------------------
@@ -371,6 +403,8 @@ def etape_juge(corpus, options, rapport):
                     rapport["potentiel_extremites"] += 1
                 if verites["croisements_extremites"] != verites["vrai"]:
                     rapport["potentiel_croisements_extremites"] += 1
+                if verites["sans_extremites"] != verites["vrai"]:
+                    rapport["potentiel_sans_extremites"] += 1
                 if (
                     verites["ordre_precedent"] is not None
                     and verites["ordre_precedent"] != verites["vrai"]
@@ -404,7 +438,13 @@ def etape_ordre_un(corpus, options, rapport):
     desaccords = []
     for nom, nuage in corpus:
         effectif = len(nuage)
-        poids = poids_moteur(nuage, 1, options.inject)
+        poids, manquants = poids_moteur(nuage, 1, options.inject)
+        if manquants:
+            desaccords.append(
+                "ordre 1 %s : %d paires sans niveau de segment, ex. %s"
+                % (nom, len(manquants), manquants[0])
+            )
+            continue
         obtenue = ultrametrique_liaison_simple(poids, effectif)
         reference = ultrametrique_acm(nuage)
         rapport["paires_ordre_un"] += len(reference)
@@ -433,7 +473,13 @@ def etape_forets(corpus, options, rapport):
         ordre_maximal = min(options.k, effectif)
         moteur = PointTower(nuage, ordre_maximal)
         for ordre in range(1, ordre_maximal + 1):
-            poids = poids_moteur(nuage, ordre, "aucun")
+            poids, manquants = poids_moteur(nuage, ordre, "aucun")
+            if manquants:
+                desaccords.append(
+                    "foret %s ordre %d : %d paires sans niveau de segment"
+                    % (nom, ordre, len(manquants))
+                )
+                continue
             obtenue = ultrametrique_liaison_simple(poids, effectif)
             if obtenue != moteur.cophenetic(ordre):
                 desaccords.append(
@@ -456,7 +502,13 @@ def etape_exacte(corpus, options, rapport):
         tour = FullTower(nuage, ordre_maximal)
         for ordre in range(1, ordre_maximal + 1):
             exacte = projected_ultrametric(tour, ordre)
-            poids = poids_moteur(nuage, ordre, options.inject)
+            poids, manquants = poids_moteur(nuage, ordre, options.inject)
+            if manquants:
+                desaccords.append(
+                    "exact %s ordre %d : %d paires sans niveau de segment"
+                    % (nom, ordre, len(manquants))
+                )
+                continue
             candidate = ultrametrique_liaison_simple(poids, effectif)
             for paire, reference in exacte.items():
                 if reference is None:
@@ -497,6 +549,15 @@ def verifier_planchers(options, rapport):
         manques.append(
             "potentiel_croisements_extremites=%d < %d"
             % (rapport["potentiel_croisements_extremites"], options.min_cases)
+        )
+    if rapport["potentiel_sans_extremites"] < options.min_cases:
+        manques.append(
+            "potentiel_sans_extremites=%d < %d"
+            % (rapport["potentiel_sans_extremites"], options.min_cases)
+        )
+    if options.inject == "aucun" and rapport["paires_forets"] < options.min_cases:
+        manques.append(
+            "paires_forets=%d < %d" % (rapport["paires_forets"], options.min_cases)
         )
     if options.k >= 2 and rapport["potentiel_ordre_precedent"] < options.min_cases:
         manques.append(
@@ -581,6 +642,11 @@ def valider(options):
         )
     if options.n > 2 ** 14:
         refus.append("--n hors domaine de cette porte quadratique")
+    if options.exact == "on" and options.n > LIMITE_EXACTE_EFFECTIF:
+        refus.append(
+            "--exact=on exige --n <= %d (l'oracle de la tour FULL est borne) :"
+            " sinon l'etage exact ne verrait aucun nuage" % LIMITE_EXACTE_EFFECTIF
+        )
     return refus
 
 
@@ -607,6 +673,7 @@ def principale(arguments):
         "potentiel_extremites": 0,
         "potentiel_ordre_precedent": 0,
         "potentiel_croisements_extremites": 0,
+        "potentiel_sans_extremites": 0,
         "paires_ordre_un": 0,
         "paires_forets": 0,
         "paires_exactes": 0,
@@ -667,4 +734,10 @@ def principale(arguments):
 
 
 if __name__ == "__main__":
-    sys.exit(principale(sys.argv[1:]))
+    try:
+        _CODE = principale(sys.argv[1:])
+    except Exception:
+        traceback.print_exc()
+        print("verdict : exception inattendue (invariant de la porte viole)")
+        _CODE = CODE_PLANCHER
+    sys.exit(_CODE)

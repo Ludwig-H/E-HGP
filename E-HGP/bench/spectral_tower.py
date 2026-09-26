@@ -58,6 +58,72 @@ DEUX REGIMES DE BRUIT, parce qu'ils ne mesurent pas la meme chose :
   ce qui reste mesure est la degradation des ESTIMATEURS, pas celle du
   probleme. C'est le regime qui repond a la question posee.
 
+RESULTATS MESURES le 26 septembre 2026 (conteneur du depot, huit coeurs,
+`OPENBLAS_NUM_THREADS=1`). Commande de la campagne :
+
+    python3 bench/spectral_tower.py --dims 2,10,50,200 --intrinsic 2,5 \
+        --n 300,1000 --orders 1,5 \
+        --noise-modes none,isotropic_norm,per_coordinate --features 128 --seeds 1
+
+quatre-vingt-quatre cellules, `separation = 8`, `intrinsic_noise = 1`,
+`bandwidth_scale = 0.35`, `G = 4` amas. Moyennes d'ARI, empirique contre
+spectral :
+
+    regime            d=2      d=10     d=50     d=200
+    none        k=1  1,00/1,00  0,93/1,00  0,93/1,00  0,93/1,00
+    none        k=5  0,54/1,00  0,35/1,00  0,35/1,00  0,35/1,00
+    isotropic   k=1  1,00/1,00  0,92/1,00  0,86/1,00  0,93/1,00
+    isotropic   k=5  0,54/1,00  0,31/1,00  0,45/1,00  0,27/1,00
+    per_coord   k=1  1,00/1,00  0,54/1,00  0,00/0,90  0,00/0,12
+    per_coord   k=5  0,54/1,00  0,00/1,00  0,00/0,90  0,00/0,12
+
+Trois faits, et un seul est une victoire.
+
+1. TEMOIN. Dans le regime `none`, les colonnes `d = 10`, `50` et `200` sont
+   IDENTIQUES a la colonne intrinseque : les deux tours sont exactement
+   invariantes par plongement isometrique. Le reste du tableau mesure donc
+   bien le bruit ambiant, et non un artefact de dimension.
+2. LA TOUR EMPIRIQUE S'EFFONDRE ENTRE `d = 10` ET `d = 50` des que la norme
+   du bruit ambiant croit comme `sqrt(d)`, et l'effondrement est TOTAL
+   (ARI nul, c'est-a-dire le niveau du hasard). La tour spectrale tient
+   jusqu'a `d = 50` et s'effondre a `d = 200`.
+3. CE QUI CHANGE VRAIMENT DE NATURE. A `d = 50`, regime `per_coordinate`,
+   l'ARI spectral passe de 0,66 a `n = 300` a 0,99 a `n = 1000`, tandis que
+   l'ARI empirique reste nul aux deux tailles. Pour la tour spectrale la
+   barriere est une TAILLE D'ECHANTILLON ; pour la tour empirique c'est un
+   MUR : plus de donnees ne la sauve pas. C'est exactement le deplacement
+   annonce par `log_density.py` (variance libre en dimension, biais non), et
+   c'est le seul gain reel de la voie spectrale.
+
+LA CAUSE, mesuree par `--contrast`, et elle n'est pas dans les estimateurs.
+Le contraste des distances par paires `inter / intra - 1` vaut 4,28 dans le
+regime `none` a toute dimension, environ 3,02 en `isotropic_norm`, et en
+`per_coordinate` il tombe a 1,32 (`d = 10`), 0,36 (`d = 50`), 0,10
+(`d = 200`) : il decroit comme `1 / d`, conformement a
+`contraste ~ s^2 / (4 d sigma^2)`. En face de cela, la tour empirique exige
+un contraste d'environ 1,3 et la tour spectrale un contraste d'environ 0,36 :
+la voie spectrale achete un facteur 4 a 5 en dimension ambiante a geometrie
+egale, et rien de plus.
+
+DEUX CONTROLES NEGATIFS a `d = 200`, regime `per_coordinate`, qui interdisent
+d'expliquer l'effondrement par un budget insuffisant : avec `n = 3000`
+(`--dims 200 --n 3000`) la tour spectrale trouve encore UN SEUL mode et un
+ARI nul ; avec `m = 512` descripteurs et `--bandwidth-scale 0.2` egalement.
+Ce n'est donc ni une question de taille d'echantillon ni une question de
+nombre de descripteurs : c'est le contraste de la metrique qui a disparu, et
+aucun noyau isotrope ne le recree.
+
+Diagnostic sans verite terrain. L'effondrement spectral se LIT dans le
+spectre generalise sans connaitre les etiquettes : `[lam_min, lam_max]` passe
+de `[0 ; 5,3]` en `d = 2` a `[0,42 ; 1,85]` en `d = 200` avec bruit ambiant
+(et `[0,65 ; 1,45]` a `n = 3000`), et la divergence de Kullback-Leibler du
+modele tombe de 1,37 a 0,09 quand `d` va de 2 a 400. Quand le spectre s'est
+contracte autour de 1, le modele ne distingue plus `p` de `q` a travers le
+plongement, et la tour n'a plus qu'un mode. C'est l'obstruction de signal
+deja mesuree sur le rayon de boule englobante, revue dans la variable
+spectrale — et c'est un indicateur d'arret UTILISABLE, puisqu'il ne demande
+aucune etiquette.
+
 Usage :
 
     python3 bench/spectral_tower.py --quick
@@ -434,6 +500,42 @@ def self_test(seed=5, count=9, dimension=4, orders=(1, 2, 3), grids=(9, 17, 33, 
     return 0
 
 
+def contrast_table(dimensions, groups, intrinsic, separation, noise, count, seed):
+    """Contraste des distances par paires : la CAUSE, mesuree sans etiquettes.
+
+    Pour un melange de centres a distance `s` et de bruit d'ecart-type
+    `sigma` par coordonnee, la distance typique intra-classe vaut
+    `sqrt(2 d) sigma` et l'inter-classe `sqrt(s^2 + 2 d sigma^2)`, donc
+
+        contraste = inter / intra - 1 ~ s^2 / (4 d sigma^2)
+
+    decroit comme `1 / d` dans le regime `per_coordinate`. Ce nombre ne
+    depend d'aucune methode : c'est la quantite de signal que la METRIQUE
+    porte encore. Le tableau qu'il produit explique le reste de la sonde, et
+    il se calcule sans verite terrain a un facteur pres (il suffit de
+    remplacer les etiquettes par un seuil sur les distances).
+    """
+    print("regime            d  dist_intra  dist_inter  contraste")
+    for mode in ("none", "isotropic_norm", "per_coordinate"):
+        for dimension in dimensions:
+            if intrinsic > dimension:
+                continue
+            cloud, labels, _scale = gaussian_mixture(
+                count, dimension, groups, intrinsic, separation, noise, mode, seed
+            )
+            _gram, _diagonal, squared = gram_and_squared(cloud)
+            distance = np.sqrt(squared)
+            same = labels[:, None] == labels[None, :]
+            upper = np.triu_indices(count, 1)
+            intra = float(distance[upper][same[upper]].mean())
+            inter = float(distance[upper][~same[upper]].mean())
+            print(
+                "%-15s %4d %11.3f %11.3f %10.4f"
+                % (mode, dimension, intra, inter, (inter - intra) / intra)
+            )
+    return 0
+
+
 # -- campagne ----------------------------------------------------------
 
 
@@ -577,6 +679,7 @@ def main(argv=None):
     parser.add_argument("--full-graph", action="store_true")
     parser.add_argument("--quick", action="store_true")
     parser.add_argument("--self-test", action="store_true")
+    parser.add_argument("--contrast", action="store_true")
     parser.add_argument("--blas-threads", type=int, default=None)
     options = parser.parse_args(argv)
     if options.blas_threads is not None and options.blas_threads != int(
@@ -589,6 +692,16 @@ def main(argv=None):
         return 2
     if options.self_test:
         return self_test()
+    if options.contrast:
+        return contrast_table(
+            [int(item) for item in options.dims.split(",")],
+            options.groups,
+            int(options.intrinsic.split(",")[0]),
+            options.separation,
+            options.noise,
+            600,
+            1000,
+        )
     if options.quick:
         options.dims = "2,10,50"
         options.intrinsic = "2"

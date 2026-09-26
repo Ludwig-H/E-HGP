@@ -1,0 +1,251 @@
+cellule   1 gauss_iso    d=   2 bruit=0.0 graine=1 1.1s
+cellule   2 gauss_iso    d=   2 bruit=0.0 graine=2 1.0s
+cellule   3 gauss_iso    d=   2 bruit=0.3 graine=1 0.7s
+cellule   4 gauss_iso    d=   2 bruit=0.3 graine=2 1.0s
+cellule   5 gauss_iso    d=  50 bruit=0.0 graine=1 2.0s
+cellule   6 gauss_iso    d=  50 bruit=0.0 graine=2 2.1s
+cellule   7 gauss_iso    d=  50 bruit=0.3 graine=1 1.2s
+cellule   8 gauss_iso    d=  50 bruit=0.3 graine=2 1.0s
+cellule   9 gauss_iso    d=1000 bruit=0.0 graine=1 2.3s
+cellule  10 gauss_iso    d=1000 bruit=0.0 graine=2 1.5s
+cellule  11 gauss_iso    d=1000 bruit=0.3 graine=1 1.8s
+cellule  12 gauss_iso    d=1000 bruit=0.3 graine=2 2.1s
+cellule  13 gauss_aniso  d=   2 bruit=0.0 graine=1 1.0s
+cellule  14 gauss_aniso  d=   2 bruit=0.0 graine=2 1.1s
+cellule  15 gauss_aniso  d=   2 bruit=0.3 graine=1 1.2s
+cellule  16 gauss_aniso  d=   2 bruit=0.3 graine=2 1.4s
+cellule  17 gauss_aniso  d=  50 bruit=0.0 graine=1 2.6s
+cellule  18 gauss_aniso  d=  50 bruit=0.0 graine=2 1.2s
+cellule  19 gauss_aniso  d=  50 bruit=0.3 graine=1 1.0s
+cellule  20 gauss_aniso  d=  50 bruit=0.3 graine=2 1.4s
+cellule  21 gauss_aniso  d=1000 bruit=0.0 graine=1 2.2s
+cellule  22 gauss_aniso  d=1000 bruit=0.0 graine=2 3.1s
+cellule  23 gauss_aniso  d=1000 bruit=0.3 graine=1 1.8s
+cellule  24 gauss_aniso  d=1000 bruit=0.3 graine=2 2.1s
+cellule  25 manifold     d=   2 bruit=0.0 graine=1 1.2s
+cellule  26 manifold     d=   2 bruit=0.0 graine=2 0.9s
+cellule  27 manifold     d=   2 bruit=0.3 graine=1 1.5s
+cellule  28 manifold     d=   2 bruit=0.3 graine=2 1.0s
+cellule  29 manifold     d=  50 bruit=0.0 graine=1 1.5s
+cellule  30 manifold     d=  50 bruit=0.0 graine=2 1.4s
+cellule  31 manifold     d=  50 bruit=0.3 graine=1 2.0s
+cellule  32 manifold     d=  50 bruit=0.3 graine=2 2.7s
+cellule  33 manifold     d=1000 bruit=0.0 graine=1 2.5s
+cellule  34 manifold     d=1000 bruit=0.0 graine=2 3.0s
+cellule  35 manifold     d=1000 bruit=0.3 graine=1 2.6s
+cellule  36 manifold     d=1000 bruit=0.3 graine=2 2.1s
+cellule  37 filament     d=   2 bruit=0.0 graine=1 1.3s
+cellule  38 filament     d=   2 bruit=0.0 graine=2 1.1s
+cellule  39 filament     d=   2 bruit=0.3 graine=1 1.4s
+cellule  40 filament     d=   2 bruit=0.3 graine=2 1.4s
+cellule  41 filament     d=  50 bruit=0.0 graine=1 3.0s
+cellule  42 filament     d=  50 bruit=0.0 graine=2 2.2s
+cellule  43 filament     d=  50 bruit=0.3 graine=1 2.7s
+cellule  44 filament     d=  50 bruit=0.3 graine=2 2.3s
+cellule  45 filament     d=1000 bruit=0.0 graine=1 1.8s
+cellule  46 filament     d=1000 bruit=0.0 graine=2 1.4s
+cellule  47 filament     d=1000 bruit=0.3 graine=1 2.5s
+cellule  48 filament     d=1000 bruit=0.3 graine=2 2.5s
+verdict : ari(meilleur k>1) - ari(k=1), coupe fixed
+grandeur                        d=2            d=50           d=1000       
+---------------------------------------------------------------------------
+tour E-HGP, tous jeux                  -0.060         -0.110         -0.125
+tour E-HGP, jeux bruites               -0.100         +0.000         +0.000
+reach mutuelle, tous jeux              -0.082         -0.110         -0.250
+reach mutuelle, jeux bruites           -0.114         +0.000         +0.000
+
+verdict : ari(meilleur k>1) - ari(k=1), coupe peak
+grandeur                        d=2            d=50           d=1000       
+---------------------------------------------------------------------------
+tour E-HGP, tous jeux                  -0.032         -0.207         -0.154
+tour E-HGP, jeux bruites               +0.020         -0.192         -0.182
+reach mutuelle, tous jeux              -0.066         -0.259         -0.240
+reach mutuelle, jeux bruites           +0.009         -0.261         -0.302
+
+ari, coupe au vrai nombre de classes, toutes familles, tous bruits
+methode                 d=2            d=50           d=1000       
+-------------------------------------------------------------------
+single_linkage          0.543+-0.384   0.352+-0.475   0.366+-0.492 
+ehgp_k1                 0.543+-0.384   0.352+-0.475   0.366+-0.492 
+ehgp_k2                 0.482+-0.434   0.242+-0.438   0.241+-0.439 
+ehgp_k5                 0.437+-0.431   0.241+-0.438   0.232+-0.424 
+ehgp_min_k1             0.517+-0.408   0.352+-0.475   0.366+-0.492 
+ehgp_min_k2             0.440+-0.454   0.242+-0.438   0.162+-0.348 
+ehgp_min_k5             0.389+-0.459   0.241+-0.438   0.206+-0.398 
+reach_k1                0.543+-0.384   0.352+-0.475   0.366+-0.492 
+reach_k2                0.461+-0.435   0.242+-0.438   0.116+-0.335 
+reach_k5                0.373+-0.453   0.241+-0.438   0.116+-0.335 
+ward                    0.669+-0.299   0.791+-0.262   0.861+-0.151 
+kmeans                  0.665+-0.298   0.699+-0.279   0.749+-0.241 
+dbscan_oracle_k5        0.910+-0.168   0.818+-0.330   0.848+-0.282 
+hdbscan_k5                  -              -              -        
+
+ari, coupe au vrai nombre, SEULEMENT avec 30 pour cent de bruit de fond
+methode                 d=2            d=50           d=1000       
+-------------------------------------------------------------------
+single_linkage          0.183+-0.064   -0.025+-0.015   -0.023+-0.018 
+ehgp_k1                 0.183+-0.064   -0.025+-0.015   -0.023+-0.018 
+ehgp_k2                 0.083+-0.074   -0.025+-0.015   -0.023+-0.018 
+ehgp_k5                 0.046+-0.037   -0.025+-0.015   -0.023+-0.018 
+ehgp_min_k1             0.138+-0.087   -0.025+-0.015   -0.023+-0.018 
+ehgp_min_k2             0.027+-0.071   -0.025+-0.015   -0.023+-0.018 
+ehgp_min_k5             -0.036+-0.012   -0.025+-0.015   -0.023+-0.018 
+reach_k1                0.183+-0.064   -0.025+-0.015   -0.023+-0.018 
+reach_k2                0.069+-0.070   -0.025+-0.015   -0.023+-0.018 
+reach_k5                -0.025+-0.028   -0.025+-0.015   -0.023+-0.018 
+ward                    0.374+-0.041   0.597+-0.247   0.722+-0.083 
+kmeans                  0.376+-0.056   0.458+-0.159   0.581+-0.194 
+dbscan_oracle_k5        0.897+-0.194   0.810+-0.321   0.817+-0.319 
+hdbscan_k5                  -              -              -        
+
+ari, coupe SPONTANEE (regle commune), toutes familles, tous bruits
+methode                 d=2            d=50           d=1000       
+-------------------------------------------------------------------
+single_linkage          0.220+-0.189   0.337+-0.460   0.377+-0.483 
+ehgp_k1                 0.220+-0.189   0.337+-0.460   0.377+-0.483 
+ehgp_k2                 0.181+-0.212   0.244+-0.435   0.251+-0.432 
+ehgp_k5                 0.169+-0.218   0.229+-0.415   0.190+-0.389 
+ehgp_min_k1             0.203+-0.197   0.336+-0.461   0.376+-0.483 
+ehgp_min_k2             0.147+-0.216   0.246+-0.435   0.188+-0.388 
+ehgp_min_k5             0.147+-0.216   0.230+-0.416   0.185+-0.391 
+reach_k1                0.220+-0.189   0.337+-0.460   0.377+-0.483 
+reach_k2                0.158+-0.222   0.246+-0.435   0.127+-0.330 
+reach_k5                0.155+-0.224   0.230+-0.416   0.123+-0.332 
+ward                        -              -              -        
+kmeans                      -              -              -        
+dbscan_oracle_k5        0.912+-0.165   0.861+-0.246   0.874+-0.231 
+hdbscan_k5              0.753+-0.202   0.752+-0.289   0.805+-0.321 
+
+ari, coupe au PIC de groupes recevables (regle qui utilise les naissances)
+methode                 d=2            d=50           d=1000       
+-------------------------------------------------------------------
+single_linkage          0.446+-0.165   0.383+-0.228   0.331+-0.204 
+ehgp_k1                 0.446+-0.165   0.383+-0.228   0.331+-0.204 
+ehgp_k2                 0.399+-0.216   0.176+-0.166   0.176+-0.237 
+ehgp_k5                 0.414+-0.213   0.119+-0.129   0.167+-0.175 
+ehgp_min_k1             0.495+-0.220   0.404+-0.255   0.314+-0.211 
+ehgp_min_k2             0.396+-0.231   0.174+-0.196   0.144+-0.203 
+ehgp_min_k5             0.384+-0.231   0.104+-0.128   0.131+-0.148 
+reach_k1                0.446+-0.165   0.383+-0.228   0.331+-0.204 
+reach_k2                0.380+-0.240   0.107+-0.128   0.091+-0.129 
+reach_k5                0.373+-0.221   0.124+-0.156   0.065+-0.109 
+ward                        -              -              -        
+kmeans                      -              -              -        
+dbscan_oracle_k5        0.912+-0.165   0.861+-0.246   0.874+-0.231 
+hdbscan_k5              0.753+-0.202   0.752+-0.289   0.805+-0.321 
+
+part du bruit de fond rejete, coupe au pic, bruit 30 pour cent
+methode                 d=2            d=50           d=1000       
+-------------------------------------------------------------------
+single_linkage          0.868+-0.229   1.000+-0.000   1.000+-0.000 
+ehgp_k1                 0.868+-0.229   1.000+-0.000   1.000+-0.000 
+ehgp_k2                 0.938+-0.155   0.750+-0.433   0.500+-0.500 
+ehgp_k5                 0.938+-0.165   0.625+-0.484   0.750+-0.433 
+ehgp_min_k1             0.931+-0.173   1.000+-0.000   1.000+-0.000 
+ehgp_min_k2             0.951+-0.129   0.500+-0.500   0.500+-0.500 
+ehgp_min_k5             0.962+-0.101   0.625+-0.484   0.500+-0.500 
+reach_k1                0.868+-0.229   1.000+-0.000   1.000+-0.000 
+reach_k2                0.962+-0.101   0.500+-0.500   0.500+-0.500 
+reach_k5                0.962+-0.101   0.500+-0.500   0.375+-0.484 
+ward                        -              -              -        
+kmeans                      -              -              -        
+dbscan_oracle_k5        0.899+-0.235   1.000+-0.000   1.000+-0.000 
+hdbscan_k5              0.517+-0.132   0.885+-0.121   0.979+-0.039 
+
+part des vrais points conserves, coupe au pic, bruit 30 pour cent
+methode                 d=2            d=50           d=1000       
+-------------------------------------------------------------------
+single_linkage          0.814+-0.105   0.600+-0.247   0.621+-0.224 
+ehgp_k1                 0.814+-0.105   0.600+-0.247   0.621+-0.224 
+ehgp_k2                 0.790+-0.119   0.613+-0.291   0.844+-0.222 
+ehgp_k5                 0.753+-0.152   0.647+-0.305   0.589+-0.313 
+ehgp_min_k1             0.829+-0.093   0.610+-0.254   0.595+-0.232 
+ehgp_min_k2             0.732+-0.185   0.821+-0.189   0.807+-0.236 
+ehgp_min_k5             0.732+-0.153   0.631+-0.314   0.759+-0.255 
+reach_k1                0.814+-0.105   0.600+-0.247   0.621+-0.224 
+reach_k2                0.756+-0.162   0.765+-0.243   0.732+-0.295 
+reach_k5                0.723+-0.138   0.735+-0.275   0.777+-0.308 
+ward                        -              -              -        
+kmeans                      -              -              -        
+dbscan_oracle_k5        0.997+-0.008   0.924+-0.137   0.884+-0.201 
+hdbscan_k5              0.990+-0.023   0.802+-0.356   0.853+-0.257 
+
+ari, coupe au pic, SEULEMENT avec 30 pour cent de bruit de fond
+methode                 d=2            d=50           d=1000       
+-------------------------------------------------------------------
+single_linkage          0.528+-0.159   0.390+-0.263   0.412+-0.218 
+ehgp_k1                 0.528+-0.159   0.390+-0.263   0.412+-0.218 
+ehgp_k2                 0.548+-0.203   0.199+-0.173   0.230+-0.284 
+ehgp_k5                 0.507+-0.214   0.126+-0.135   0.178+-0.181 
+ehgp_min_k1             0.596+-0.188   0.409+-0.276   0.392+-0.238 
+ehgp_min_k2             0.506+-0.264   0.186+-0.202   0.191+-0.241 
+ehgp_min_k5             0.501+-0.224   0.118+-0.129   0.134+-0.158 
+reach_k1                0.528+-0.159   0.390+-0.263   0.412+-0.218 
+reach_k2                0.538+-0.243   0.130+-0.147   0.110+-0.154 
+reach_k5                0.486+-0.205   0.111+-0.129   0.067+-0.111 
+ward                        -              -              -        
+kmeans                      -              -              -        
+dbscan_oracle_k5        0.897+-0.194   0.823+-0.300   0.856+-0.253 
+hdbscan_k5              0.609+-0.117   0.684+-0.336   0.797+-0.300 
+
+ari, coupe au vrai nombre, par famille
+methode                 filament       gauss_aniso    gauss_iso      manifold     
+----------------------------------------------------------------------------------
+single_linkage          0.527+-0.479   0.132+-0.231   0.503+-0.469   0.519+-0.486 
+ehgp_k1                 0.527+-0.479   0.132+-0.231   0.503+-0.469   0.519+-0.486 
+ehgp_k2                 0.500+-0.501   0.092+-0.214   0.182+-0.372   0.512+-0.490 
+ehgp_k5                 0.484+-0.497   0.085+-0.205   0.170+-0.373   0.475+-0.473 
+ehgp_min_k1             0.509+-0.495   0.116+-0.224   0.502+-0.470   0.519+-0.486 
+ehgp_min_k2             0.494+-0.506   0.083+-0.206   0.170+-0.376   0.377+-0.449 
+ehgp_min_k5             0.477+-0.504   0.074+-0.209   0.149+-0.381   0.416+-0.461 
+reach_k1                0.527+-0.479   0.132+-0.231   0.503+-0.469   0.519+-0.486 
+reach_k2                0.494+-0.506   0.083+-0.206   0.178+-0.373   0.335+-0.452 
+reach_k5                0.484+-0.497   0.056+-0.205   0.138+-0.359   0.296+-0.446 
+ward                    0.828+-0.224   0.662+-0.296   0.792+-0.249   0.812+-0.223 
+kmeans                  0.797+-0.228   0.557+-0.253   0.714+-0.293   0.749+-0.264 
+dbscan_oracle_k5        0.998+-0.007   0.447+-0.261   0.994+-0.008   0.996+-0.010 
+hdbscan_k5                  -              -              -              -        
+
+ari, coupe au pic, par famille
+methode                 filament       gauss_aniso    gauss_iso      manifold     
+----------------------------------------------------------------------------------
+single_linkage          0.398+-0.155   0.270+-0.169   0.425+-0.267   0.453+-0.163 
+ehgp_k1                 0.398+-0.155   0.270+-0.169   0.425+-0.267   0.453+-0.163 
+ehgp_k2                 0.361+-0.141   0.139+-0.245   0.147+-0.196   0.355+-0.230 
+ehgp_k5                 0.349+-0.096   0.174+-0.285   0.150+-0.205   0.260+-0.181 
+ehgp_min_k1             0.456+-0.262   0.275+-0.222   0.415+-0.248   0.471+-0.172 
+ehgp_min_k2             0.404+-0.189   0.119+-0.239   0.136+-0.203   0.293+-0.199 
+ehgp_min_k5             0.290+-0.106   0.162+-0.284   0.127+-0.214   0.246+-0.177 
+reach_k1                0.398+-0.155   0.270+-0.169   0.425+-0.267   0.453+-0.163 
+reach_k2                0.317+-0.187   0.111+-0.237   0.141+-0.207   0.200+-0.180 
+reach_k5                0.314+-0.102   0.150+-0.266   0.122+-0.216   0.164+-0.188 
+ward                        -              -              -              -        
+kmeans                      -              -              -              -        
+dbscan_oracle_k5        0.998+-0.007   0.541+-0.187   0.994+-0.008   0.996+-0.010 
+hdbscan_k5              0.858+-0.142   0.401+-0.233   0.895+-0.185   0.928+-0.108 
+
+encadrement du maximum de segment (part prouvee exacte / ecart relatif moyen)
+ordre                   d=2            d=50           d=1000       
+-------------------------------------------------------------------
+k=1                     0.024 / 0.312  0.514 / 0.054  0.775 / 0.025
+k=2                     0.058 / 0.276  0.518 / 0.051  0.676 / 0.052
+k=5                     0.094 / 0.234  0.536 / 0.050  0.579 / 0.031
+accord maj/min (ari)            0.781          0.977          0.960
+
+temps mur moyen par cellule (secondes)
+methode                 d=2            d=50           d=1000       
+-------------------------------------------------------------------
+single_linkage                  0.044          0.038          0.048
+ehgp_k1                         0.469          0.510          0.594
+ehgp_k2                         0.468          0.502          0.578
+ehgp_k5                         0.463          0.500          0.576
+ehgp_min_k1                     0.463          0.499          0.577
+ehgp_min_k2                     0.461          0.486          0.569
+ehgp_min_k5                     0.462          0.489          0.567
+reach_k1                        0.045          0.042          0.045
+reach_k2                        0.030          0.035          0.039
+reach_k5                        0.038          0.035          0.045
+ward                            0.002          0.001          0.006
+kmeans                          0.175          0.139          0.190
+dbscan_oracle_k5                0.121          0.811          0.915
+hdbscan_k5                      0.006          0.008          0.053

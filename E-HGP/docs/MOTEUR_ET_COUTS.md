@@ -299,6 +299,57 @@ dimension**. Cette hypothèse doit être énoncée, mesurée
 ([`MESURES_CONCENTRATION_20260925.md`](MESURES_CONCENTRATION_20260925.md)),
 et jamais dissimulée dans un choix de descripteurs.
 
+## 5 bis. L'axe d'ordre ne paie pas sur des distances euclidiennes brutes
+
+C'est le résultat le plus dérangeant du chantier, et il est mesuré.
+
+`bench/clustering_compare.py run --profile quick --orders 1,2,5` balaye 48
+cellules (toutes les familles synthétiques, $d=2$, $50$, $1000$, bruit de fond
+$0$ et $30$ pour cent, deux graines) et compare la tour E-HGP projetée à la
+liaison simple, à la *reachability* mutuelle façon HDBSCAN, et à des témoins
+non densitaires. Reçu `receipts/clustering_20260926/`.
+
+**Contrôle de cohérence d'abord** : `ehgp_k1`, `single_linkage` et `reach_k1`
+donnent des chiffres **identiques** à toutes les dimensions, ce qui confirme
+par une troisième voie que l'ordre 1 de la tour EST la liaison simple.
+
+**Verdict, indice de Rand ajusté du meilleur $k>1$ moins celui de $k=1$ :**
+
+| coupe | $d=2$ | $d=50$ | $d=1000$ |
+| --- | --- | --- | --- |
+| au vrai nombre de classes | $-0{,}060$ | $-0{,}110$ | $-0{,}125$ |
+| spontanée | $-0{,}032$ | $-0{,}207$ | $-0{,}154$ |
+
+**L'axe d'ordre $k$ n'apporte rien et nuit**, à toutes les dimensions testées.
+Et la famille densitaire entière est dominée par des témoins qui ignorent la
+densité :
+
+| méthode | $d=2$ | $d=50$ | $d=1000$ |
+| --- | --- | --- | --- |
+| `ehgp_k1` = liaison simple | $0{,}543$ | $0{,}352$ | $0{,}366$ |
+| `ehgp_k2` | $0{,}482$ | $0{,}242$ | $0{,}241$ |
+| `ehgp_k5` | $0{,}437$ | $0{,}241$ | $0{,}232$ |
+| Ward | $0{,}669$ | $0{,}791$ | $\mathbf{0{,}861}$ |
+| $k$-moyennes | $0{,}665$ | $0{,}699$ | $0{,}749$ |
+| DBSCAN à rayon oracle | $\mathbf{0{,}910}$ | $0{,}818$ | $0{,}848$ |
+
+Avec 30 pour cent de bruit de fond et $d\geq50$, **toute** la famille de
+liaison tombe à un indice de Rand de $-0{,}02$, c'est-à-dire une partition
+dégénérée, tandis que Ward tient $0{,}597$ à $0{,}722$.
+
+Deux réserves honnêtes : le DBSCAN cité utilise un rayon **oracle**, donc il
+majore ce qu'une méthode réglable obtiendrait ; et ce profil n'a que deux
+graines, le profil à cinq graines étant en cours.
+
+**Conséquence, à mettre en face du § 5.** La valeur de la voie E-HGP n'est
+pas dans l'axe d'ordre appliqué à des distances euclidiennes brutes — mesuré
+négatif, deux fois, par deux bancs indépendants. Elle est dans la
+**régularisation de la densité** : c'est la même expérience, avec le modèle
+spectral à la place du comptage de boules, qui passe de $0{,}000$ à $0{,}994$
+d'indice de Rand sous bruit ambiant. L'ordre $k$ de HGP est un axe de
+robustesse **du comptage**, et en grande dimension le comptage n'a plus de
+contraste à offrir : c'est le noyau qu'il faut changer, pas $k$.
+
 ## 6. Ce qui reste ouvert
 
 1. Une garantie de couverture pour la descente MEB-Lloyd sous hypothèse de

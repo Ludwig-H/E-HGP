@@ -652,6 +652,16 @@ class Tower(unittest.TestCase):
         )
         self.assertGreaterEqual(armijo.maximum_count, quasi.maximum_count)
 
+    def test_regle_de_saut_est_bornee_et_declaree(self):
+        """La regle de saut de la tour est faible, et la porte le constate."""
+        cloud, _labels = mixture_sample(400, 41)
+        tower = T.SpectralTower(cloud, mixture_log_density, mixture_gradient)
+        for limit in (2, 3, 12):
+            classes = tower.gap_classes(limit)
+            self.assertGreaterEqual(classes, 1)
+            self.assertLessEqual(classes, min(limit, tower.maximum_count))
+        self.assertLessEqual(tower.gap_classes(1), 1)
+
     def test_optimiseur_inconnu_refuse(self):
         cloud, _labels = mixture_sample(60, 61)
         with self.assertRaises(ValueError):
