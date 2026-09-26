@@ -1024,6 +1024,16 @@ def table_contrast(options, ledger):
     return rows
 
 
+def _shuffle(rng, values):
+    """Permutation aleatoire, isolee pour qu'un mutant puisse l'annuler.
+
+    Le controle par permutation du paragraphe 5.2 n'a de valeur que si l'on peut
+    montrer qu'il echoue quand le melange n'en est plus un : c'est le mutant
+    « permutation inerte ».
+    """
+    return rng.permutation(values)
+
+
 def table_signal(options, ledger):
     """Le comptage retrouve-t-il une densite CONNUE ? Correlation de Spearman.
 
@@ -1062,7 +1072,7 @@ def table_signal(options, ledger):
                     reference2 = float(np.median(partitioned))
                     counts = np.count_nonzero(squared <= reference2, axis=1) - 1
                     spearmans.append(float(stats.spearmanr(counts, density).statistic))
-                    shuffled = rng.permutation(density)
+                    shuffled = _shuffle(rng, density)
                     control.append(
                         abs(float(stats.spearmanr(counts, shuffled).statistic))
                     )
@@ -1087,27 +1097,41 @@ def table_signal(options, ledger):
                 )
                 cells += 1
                 if level == 0.0 and kind in ("raw", "pca"):
-                    weak = [value for value in spearmans if value < options.min_spearman]
+                    # Un comptage constant donne un Spearman indefini, et
+                    # `nan < seuil` est faux : sans ce test le mutant du
+                    # comptage aveugle passerait la porte.
+                    weak = [
+                        value
+                        for value in spearmans
+                        if math.isnan(value) or value < options.min_spearman
+                    ]
                     if weak:
                         ledger.failures.append(
                             "signal : sans bruit, le comptage ne retrouve plus la "
-                            "densite latente (d=%d, %s, minimum %.3f)"
-                            % (dimension, kind, min(spearmans))
+                            "densite latente (d=%d, %s, %d cellule(s) sous %.2f ou "
+                            "indefinie(s))" % (dimension, kind, len(weak), options.min_spearman)
                         )
     if cells < options.min_cells:
         ledger.failures.append(
             "signal : %d cellules pour un plancher de %d" % (cells, options.min_cells)
         )
     if control:
-        worst = max(control)
-        mean_control = sum(control) / len(control)
+        undefined = sum(1 for value in control if math.isnan(value))
+        finite = [value for value in control if not math.isnan(value)]
+        worst = max(finite) if finite else float("nan")
+        mean_control = sum(finite) / len(finite) if finite else float("nan")
+        if undefined:
+            ledger.failures.append(
+                "signal : %d controles par permutation indefinis (comptage constant ?)"
+                % undefined
+            )
         print("")
         print(
             "controle par permutation : |spearman| contre la densite melangee, "
             "%d tirages, moyenne %.4f, maximum %.4f (plafond %.3f)"
             % (len(control), mean_control, worst, options.max_control)
         )
-        if worst > options.max_control:
+        if not math.isnan(worst) and worst > options.max_control:
             ledger.failures.append(
                 "signal : la densite melangee correle encore (maximum %.4f)" % worst
             )
@@ -1333,7 +1357,10 @@ def free_count_strict(points, order):
     for subset in combinations(range(len(cloud)), order):
         centre, radius2, _support, _ok, _steps = meb_certified(cloud[list(subset)])
         distances = norms - 2.0 * (cloud @ centre) + float(centre @ centre)
-        scale = max(radius2, 1.0)
+        # Meme echelle relative que `measure_order` : les deux comptages doivent
+        # etre le MEME predicat, sans quoi leur accord du paragraphe 3.6
+        # comparerait deux tolerances differentes.
+        scale = max(radius2, TINY)
         relative = (distances - radius2) / scale
         relative[list(subset)] = 1.0
         if int(np.count_nonzero(relative < 1e-9)) == 0:
@@ -1696,8 +1723,15 @@ def table_exact2(options, ledger):
     `n = 2000` et `k = 2`, une part de l'ordre de `10^{-3}` signifie moins d'un
     tirage libre sur `240`, c'est-a-dire une mesure sous sa propre resolution.
     Ici le compte est exact, donc l'exposant en `n` l'est aussi. Trois chemins
-    (arbre k-d, Gram, boule englobante certifiee) doivent donner le meme
+    (Gram, arbre k-d, boule englobante certifiee) doivent donner le meme
     entier : c'est la porte.
+
+    Le chemin de reference est celui de la matrice de Gram, parce que son cout
+    ne depend PAS de la dimension ambiante : `C(n, 2)` paires confrontees aux
+    `n` observations, la dimension n'entrant que dans le calcul du Gram. L'arbre
+    k-d est plus rapide quand les donnees ont une dimension intrinseque petite,
+    et degenere en balayage lineaire quand elles n'en ont pas : il sert donc de
+    controle sur les tailles ou il reste bon marche, pas de mesure.
     """
     rows = []
     cells = 0
@@ -1705,35 +1739,31 @@ def table_exact2(options, ledger):
     results = {}
     for name, dimension, intrinsic, noise in EXACT2_FAMILIES:
         for count in options.exact2_n:
-            kd_values = []
             gram_values = []
+            kd_values = []
             meb_values = []
             started = time.process_time()
             for index in range(options.seeds):
                 rng = np.random.default_rng(options.seed + 7919 * index + 13 * count)
                 points = make_cloud(name, count, dimension, intrinsic, noise, rng)
-                kd_values.append(_free_pairs_kdtree(points))
-                if count <= options.exact2_gram_max:
-                    gram_values.append(_free_pairs_gram(points))
+                gram_values.append(_free_pairs_gram(points))
+                if count <= options.exact2_kd_max:
+                    kd_values.append(_free_pairs_kdtree(points))
                 if count <= options.exact2_meb_max:
                     meb_values.append(free_count_strict(points, 2))
             elapsed = time.process_time() - started
-            for path, values in (("gram", gram_values), ("boule", meb_values)):
-                if values and values != kd_values:
+            for path, values in (("arbre k-d", kd_values), ("boule", meb_values)):
+                if values and values != gram_values:
                     ledger.failures.append(
-                        "exact2 : le chemin %s et l'arbre k-d ne donnent pas le meme "
-                        "entier (%s, n=%d)" % (path, name, count)
+                        "exact2 : le chemin %s et le chemin de Gram ne donnent pas le "
+                        "meme entier (%s, n=%d)" % (path, name, count)
                     )
             if meb_values:
                 ball_cells += 1
-                ledger.account(
-                    sum(math.comb(count, 2) for _ in meb_values),
-                    sum(math.comb(count, 2) for _ in meb_values),
-                    0,
-                    0,
-                )
+                balls = len(meb_values) * math.comb(count, 2)
+                ledger.account(balls, balls, 0, 0)
             total = math.comb(count, 2)
-            mean = sum(kd_values) / len(kd_values)
+            mean = sum(gram_values) / len(gram_values)
             results[(name, count)] = mean
             rows.append(
                 [
@@ -1743,7 +1773,7 @@ def table_exact2(options, ledger):
                     "%.1f" % mean,
                     "%.3e" % (mean / total),
                     "%.2f" % (mean / count),
-                    "%.1f" % (sum(gram_values) / len(gram_values)) if gram_values else "-",
+                    "%.1f" % (sum(kd_values) / len(kd_values)) if kd_values else "-",
                     "%.1f" % (sum(meb_values) / len(meb_values)) if meb_values else "-",
                     "%.1f" % elapsed,
                 ]
@@ -1768,7 +1798,7 @@ def table_exact2(options, ledger):
             "compte exact",
             "part libre",
             "par point",
-            "controle Gram",
+            "controle k-d",
             "controle boule",
             "s processeur",
         ],
@@ -1787,13 +1817,13 @@ def table_exact2(options, ledger):
                     _cloud_label(name, dimension, intrinsic),
                     "%d -> %d" % (first_n, last_n),
                     "%.3f" % (math.log(high / low) / math.log(last_n / first_n)),
-                    "%d" % (3 * last_n - 8),
+                    "%d" % (3 * last_n - 6),
                 ]
             )
         print_table(
-            "exposant EXACT du compte en n (la borne planaire vaut 3n-8 "
-            "des que la configuration est de rang 2)",
-            ["famille", "intervalle", "exposant", "borne planaire 3n-8"],
+            "exposant EXACT du compte en n (une configuration de rang 2 a au plus "
+            "3n-6 paires libres : Gabriel strict est inclus dans Delaunay)",
+            ["famille", "intervalle", "exposant", "borne planaire 3n-6"],
             exponents,
         )
     return rows, exponents
@@ -1937,7 +1967,7 @@ def build_parser():
     parser.add_argument("--tower-bits", type=int, default=9)
     parser.add_argument("--tower-seeds", type=int, default=2)
     parser.add_argument("--exact2-n", type=_int_list, default=[200, 800])
-    parser.add_argument("--exact2-gram-max", type=int, default=800)
+    parser.add_argument("--exact2-kd-max", type=int, default=800)
     parser.add_argument("--exact2-meb-max", type=int, default=200)
     parser.add_argument("--cout-dims", type=_int_list, default=[3, 20, 200])
     parser.add_argument("--cout-n", type=int, default=200)

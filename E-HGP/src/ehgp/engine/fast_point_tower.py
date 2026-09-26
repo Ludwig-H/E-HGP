@@ -56,7 +56,10 @@ temps `t_r`, de cardinal au moins `k`.
   `max(a_k(t_r), a_k(t_{r+1}))`, deja atteinte par le minorant. Donc
   `w_hi = w_lo` implique `w = w_lo` : l'egalite des deux bornes est une
   PREUVE d'exactitude, verifiable a posteriori couple par couple. Aucun
-  couple n'est declare exact sans elle.
+  couple n'est declare exact sans elle. En flottant cette egalite est une
+  egalite a quelques ULP pres : les couples ou l'arrondi inverse meme
+  l'encadrement sont comptes et publies (`inverted_pairs`), et l'inversion
+  RELATIVE maximale aussi (`order_violation_relative`).
 
 RESTRICTION PAR TUBE (ce qui rend le calcul abordable). Le maximum ne depend
 que des observations proches du segment, et la selection du bas-de-liste sur
@@ -356,9 +359,22 @@ def segment_brackets(
     # Les deux bornes sont valides en toute circonstance : le minorant vaut au
     # pire la borne d'extremites, le majorant est valide pour tout sous-nuage.
     # Leur egalite est donc a elle seule une preuve, sans certificat de tube.
+    #
+    # EN FLOTTANT, cette preuve est une egalite A QUELQUES ULP PRES, et il faut
+    # le dire : en arithmetique reelle `upper >= lower` toujours (chaque borne
+    # d'intervalle majore le `a_k` d'un temps d'echantillonnage), donc une
+    # inversion stricte `upper < lower` ne peut venir que de l'arrondi. Ces
+    # couples sont comptes et publies (`inverted_pairs`), et l'inversion
+    # relative maximale l'est aussi (`order_violation_relative`) : c'est elle,
+    # et non une borne absolue, qui est le bon garde-fou, puisque l'echelle des
+    # poids varie de `10^2` a `10^4` selon la dimension. Mesure du 26 septembre
+    # 2026 sur la famille variete, `n = 200`, mode complet : inversion relative
+    # au pire `1.0e-15`, et de `0.2` a `3.6` pour cent des couples declares
+    # exacts le sont par inversion stricte plutot que par egalite franche.
     exact = upper <= lower
     scale = np.maximum(np.abs(upper), 1e-300)
     gaps = (upper - lower) / scale
+    inverted = upper < lower
     return {
         "orders": wanted,
         "count": count,
@@ -377,6 +393,9 @@ def segment_brackets(
         "gap_max": tuple(float(row.max()) for row in gaps),
         "gap_mean": tuple(float(row.mean()) for row in gaps),
         "order_violation": float(np.min(upper - lower)),
+        "order_violation_relative": float(np.min(gaps)),
+        "inverted_pairs": int(inverted.sum()),
+        "inverted_exact_pairs": int(np.sum(inverted & exact)),
     }
 
 

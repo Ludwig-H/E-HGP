@@ -79,21 +79,57 @@ spectral :
 
 Trois faits, et un seul est une victoire.
 
-1. TEMOIN. Dans le regime `none`, les colonnes `d = 10`, `50` et `200` sont
-   IDENTIQUES a la colonne intrinseque : les deux tours sont exactement
-   invariantes par plongement isometrique. Le reste du tableau mesure donc
-   bien le bruit ambiant, et non un artefact de dimension.
+1. TEMOIN, ET CE QU'IL ETABLIT EXACTEMENT. Dans le regime `none`, les
+   colonnes `d = 10`, `50` et `200` donnent la MEME PARTITION que la colonne
+   intrinseque : l'ARI de l'etiquetage a `d` contre l'etiquetage a `d = 2`
+   vaut `1,000000` pour les deux tours, aux quatre dimensions. C'est au
+   niveau de la PARTITION seulement. La chaine spectrale n'est PAS
+   invariante par plongement isometrique, et la sonde l'affiche elle-meme :
+   le rang effectif passe de 103 a 128, `lam_max` de 5,268 a 4,563 / 4,730 /
+   4,731, et les quatre `digest_spe` sont differents
+   (`66863210fe83`, `ec58b5c0b51c`, `b03823c68272`, `9b86c2a5b01c`). Les
+   frequences de Fourier sont tirees dans `R^d`, la largeur de bande de la
+   mediane et le plancher de covariance dependent de `d` : le modele change,
+   la partition non. La chaine empirique, elle, ne depend que des distances
+   par paires, donc elle est bien invariante. Ce que le temoin etablit :
+   le reste du tableau mesure le bruit ambiant et non un artefact de
+   dimension. Ce qu'il n'etablit pas : une invariance exacte du modele.
 2. LA TOUR EMPIRIQUE S'EFFONDRE ENTRE `d = 10` ET `d = 50` des que la norme
-   du bruit ambiant croit comme `sqrt(d)`, et l'effondrement est TOTAL
-   (ARI nul, c'est-a-dire le niveau du hasard). La tour spectrale tient
-   jusqu'a `d = 50` et s'effondre a `d = 200`.
+   du bruit ambiant croit comme `sqrt(d)`. La tour spectrale tient jusqu'a
+   `d = 50` et s'effondre a `d = 200`.
 3. CE QUI CHANGE VRAIMENT DE NATURE. A `d = 50`, regime `per_coordinate`,
    l'ARI spectral passe de 0,66 a `n = 300` a 0,99 a `n = 1000`, tandis que
-   l'ARI empirique reste nul aux deux tailles. Pour la tour spectrale la
-   barriere est une TAILLE D'ECHANTILLON ; pour la tour empirique c'est un
-   MUR : plus de donnees ne la sauve pas. C'est exactement le deplacement
-   annonce par `log_density.py` (variance libre en dimension, biais non), et
-   c'est le seul gain reel de la voie spectrale.
+   l'ARI empirique reste au niveau du hasard aux deux tailles. Pour la tour
+   spectrale la barriere est une TAILLE D'ECHANTILLON ; pour la tour
+   empirique c'est un MUR : plus de donnees ne la sauve pas. C'est exactement
+   le deplacement annonce par `log_density.py` (variance libre en dimension,
+   biais non), et c'est le seul gain reel de la voie spectrale.
+
+CE QUE CINQ GRAINES CHANGENT, et pourquoi le tableau ci-dessus ne doit pas
+etre lu comme une suite de seuils. La campagne ci-dessus tourne a UNE graine
+(`--seeds 1`). Sur les trois cellules qui decident les conclusions, cinq
+graines (`--seeds 5`, graines 1000 a 1004) donnent :
+
+    cellule                                   ARI spectral par graine        moyenne
+    d=50  di=2 n=300  per_coordinate   0,661 0,982 0,496 0,852 0,726          0,743
+    d=200 di=5 n=300  per_coordinate   0,486 0,000 0,000 0,000 0,000          0,097
+    d=200 di=2 n=1000 per_coordinate   0,000 0,000 0,000 0,000 0,326          0,065
+
+Trois corrections en decoulent, et elles ne changent aucune conclusion mais
+changent leur STATUT.
+
+* Le `0,66` de la cellule de transition est une graine parmi cinq qui vont de
+  `0,50` a `0,98`. La progression en `n` (`0,66` puis `0,99`) reste vraie en
+  moyenne (`0,743` puis `0,989`), mais l'ecart-type inter-graines y est de
+  l'ordre de `0,2` : aucun chiffre de cette zone n'est un seuil.
+* « ARI empirique nul » est faux comme enonce absolu : sur la meme cellule,
+  la graine 1002 donne `0,497` cote empirique, et la moyenne sur cinq graines
+  vaut `0,100`, pas `0,000`. Ce qui reste vrai est que plus de donnees ne la
+  sauve pas (`0,000` a `n = 1000` et `n = 3000`).
+* L'effondrement a `d = 200` est un enonce QUATRE FOIS SUR CINQ, pas cinq
+  fois sur cinq : une graine y trouve deux modes et un ARI de `0,33` a
+  `0,49`. La conclusion (la malediction n'est pas cassee) tient ; la forme
+  « plus jamais un second mode » ne tient pas.
 
 LA CAUSE, mesuree par `--contrast`, et elle n'est pas dans les estimateurs.
 Le contraste des distances par paires `inter / intra - 1` vaut 4,28 dans le
@@ -105,13 +141,23 @@ un contraste d'environ 1,3 et la tour spectrale un contraste d'environ 0,36 :
 la voie spectrale achete un facteur 4 a 5 en dimension ambiante a geometrie
 egale, et rien de plus.
 
-DEUX CONTROLES NEGATIFS a `d = 200`, regime `per_coordinate`, qui interdisent
-d'expliquer l'effondrement par un budget insuffisant : avec `n = 3000`
-(`--dims 200 --n 3000`) la tour spectrale trouve encore UN SEUL mode et un
-ARI nul ; avec `m = 512` descripteurs et `--bandwidth-scale 0.2` egalement.
-Ce n'est donc ni une question de taille d'echantillon ni une question de
-nombre de descripteurs : c'est le contraste de la metrique qui a disparu, et
-aucun noyau isotrope ne le recree.
+DEUX CONTROLES NEGATIFS a `d = 200`, `di = 2`, regime `per_coordinate`, qui
+interdisent d'expliquer l'effondrement par un budget insuffisant : avec
+`n = 3000` (`--dims 200 --n 3000`) la tour spectrale trouve encore UN SEUL
+mode et un ARI nul ; avec `m = 512` descripteurs et `--bandwidth-scale 0.2`
+egalement (spectre `[0,080 ; 2,928]`, un seul mode). Ce n'est donc ni une
+question de taille d'echantillon ni une question de nombre de descripteurs :
+c'est le contraste de la metrique qui a disparu, et aucun noyau isotrope ne
+le recree. Portee exacte : ces deux controles sont a UNE graine, et le
+paragraphe des cinq graines ci-dessus montre qu'une graine sur cinq y trouve
+malgre tout un second mode.
+
+TROISIEME CONTROLE, sur les deux approximations du port empirique. A
+`d = 50`, `di = 2`, `n = 300`, avec le GRAPHE COMPLET des paires et une
+grille de 65 temps (`--full-graph --samples 65`, donc les deux
+approximations relachees a la fois), l'ARI empirique reste `-0,000` et
+`0,000` aux ordres 1 et 5. La conclusion de la sonde ne depend donc
+d'aucune des deux approximations declarees.
 
 Diagnostic sans verite terrain. L'effondrement spectral se LIT dans le
 spectre generalise sans connaitre les etiquettes : `[lam_min, lam_max]` passe
@@ -539,30 +585,16 @@ def contrast_table(dimensions, groups, intrinsic, separation, noise, count, seed
 # -- campagne ----------------------------------------------------------
 
 
-def run_case(
-    cloud,
-    truth,
-    groups,
-    order,
-    features,
-    neighbours,
-    samples,
-    path_samples,
-    refine_steps,
-    rho_max,
-    bandwidth_scale,
-    covariance_floor,
-    max_classes,
-    full_graph,
-    seed,
+def empirical_case(
+    cloud, truth, groups, order, neighbours, samples, full_graph, max_classes
 ):
-    """Une cellule du tableau : les deux tours sur le meme nuage."""
+    """La moitie EMPIRIQUE d'une cellule : elle depend de l'ordre `k`."""
     started = time.perf_counter()
     empirical = empirical_tower(cloud, order, neighbours, samples, full_graph)
     empirical_seconds = time.perf_counter() - started
     empirical_cut = empirical_labels(empirical, groups)
     empirical_levels = [level for level, _left, _right in empirical["merges"]]
-    row = {
+    return {
         "order": order,
         "edges": empirical["edges"],
         "merges_empirical": len(empirical["merges"]),
@@ -571,8 +603,38 @@ def run_case(
         "persistence_empirical": persistence_classes(
             empirical["births"], empirical["merges"], True, max_classes
         ),
+        "distinct_births": int(np.unique(empirical["births"]).size),
         "seconds_empirical": empirical_seconds,
     }
+
+
+def spectral_case(
+    cloud,
+    truth,
+    groups,
+    features,
+    path_samples,
+    refine_steps,
+    rho_max,
+    bandwidth_scale,
+    covariance_floor,
+    max_classes,
+    seed,
+):
+    """La moitie SPECTRALE d'une cellule. ELLE NE DEPEND PAS DE L'ORDRE `k`.
+
+    FAIT VERIFIE, et c'est la raison d'etre de cette fonction separee : la
+    chaine spectrale ne recoit jamais `order`. Sur la cellule
+    `d = 50, di = 2, n = 300, per_coordinate`, les digests structurels
+    obtenus a `k = 1` et a `k = 5` sont IDENTIQUES (`87c621dc4f02`), ainsi que
+    l'ARI a neuf chiffres. Recalculer la tour spectrale par ordre doublait
+    donc le cout de la sonde pour zero information, et faisait compter deux
+    fois chaque mesure spectrale dans les moyennes. Le tableau de moyennes
+    reste indexe par `(bruit, d, k)` pour rester lisible a cote de la colonne
+    empirique, mais la colonne spectrale y est LA MEME valeur repetee : elle
+    porte `len(orders)` fois moins de cas independants que le compte affiche.
+    """
+    row = {}
     started = time.perf_counter()
     model = SpectralLogDensity(
         feature_count=features,
@@ -610,22 +672,62 @@ def run_case(
             "refined": tower.refinement_accepted,
             "seconds_fit": fit_seconds,
             "seconds_spectral": tower_seconds,
+            "path_evaluations": tower.path_evaluations,
             "digest": tower.structural_digest()[:12],
         }
     )
     return row
 
 
+def run_case(
+    cloud,
+    truth,
+    groups,
+    order,
+    features,
+    neighbours,
+    samples,
+    path_samples,
+    refine_steps,
+    rho_max,
+    bandwidth_scale,
+    covariance_floor,
+    max_classes,
+    full_graph,
+    seed,
+):
+    """Une cellule complete : les deux moities sur le meme nuage."""
+    row = spectral_case(
+        cloud,
+        truth,
+        groups,
+        features,
+        path_samples,
+        refine_steps,
+        rho_max,
+        bandwidth_scale,
+        covariance_floor,
+        max_classes,
+        seed,
+    )
+    row.update(
+        empirical_case(
+            cloud, truth, groups, order, neighbours, samples, full_graph, max_classes
+        )
+    )
+    return row
+
+
 HEADER = (
     "  d  di    n  G  k  bruit          rank lam_min lam_max  P  "
-    "ARI_emp ARI_spe  per_e per_s gap_e gap_s  |g|/ech  t_emp  t_spe"
+    "ARI_emp ARI_spe  per_e per_s gap_e gap_s  |g|/ech  t_emp  t_spe  digest_spe"
 )
 
 
 def format_row(dimension, intrinsic, count, groups, mode, row):
     return (
         "%3d %3d %4d %2d %2d  %-14s %4d %7.4f %7.3f %3d  "
-        " %6.3f  %6.3f  %5d %5d %5d %5d  %7.1e %6.1f %6.1f"
+        " %6.3f  %6.3f  %5d %5d %5d %5d  %7.1e %6.1f %6.1f  %s"
         % (
             dimension,
             intrinsic,
@@ -646,6 +748,7 @@ def format_row(dimension, intrinsic, count, groups, mode, row):
             row["gradient_max"] / max(row["gradient_scale"], 1e-300),
             row["seconds_empirical"],
             row["seconds_fit"] + row["seconds_spectral"],
+            row["digest"],
         )
     )
 
@@ -717,6 +820,9 @@ def main(argv=None):
     print(HEADER)
     print("-" * len(HEADER))
     summary = {}
+    cells = 0
+    spectral_cells = 0
+    digests = set()
     for mode in modes:
         for dimension in dimensions:
             for intrinsic in intrinsics:
@@ -735,23 +841,38 @@ def main(argv=None):
                             1000 + seed,
                             options.intrinsic_noise,
                         )
+                        # La moitie spectrale ne depend pas de `order` : on la
+                        # calcule UNE FOIS par nuage (cf. `spectral_case`), au
+                        # lieu de la repeter a l'identique par ordre.
+                        spectral = spectral_case(
+                            cloud,
+                            truth,
+                            options.groups,
+                            options.features,
+                            options.path_samples,
+                            options.refine_steps,
+                            options.rho_max,
+                            options.bandwidth_scale,
+                            options.covariance_floor,
+                            options.max_classes,
+                            7 + seed,
+                        )
+                        spectral_cells += 1
+                        digests.add(spectral["digest"])
                         for order in orders:
-                            row = run_case(
-                                cloud,
-                                truth,
-                                options.groups,
-                                order,
-                                options.features,
-                                options.neighbours,
-                                options.samples,
-                                options.path_samples,
-                                options.refine_steps,
-                                options.rho_max,
-                                options.bandwidth_scale,
-                                options.covariance_floor,
-                                options.max_classes,
-                                options.full_graph,
-                                7 + seed,
+                            cells += 1
+                            row = dict(spectral)
+                            row.update(
+                                empirical_case(
+                                    cloud,
+                                    truth,
+                                    options.groups,
+                                    order,
+                                    options.neighbours,
+                                    options.samples,
+                                    options.full_graph,
+                                    options.max_classes,
+                                )
                             )
                             print(
                                 format_row(
@@ -781,6 +902,24 @@ def main(argv=None):
                 (spectral_total - empirical_total) / cases,
             )
         )
+    print()
+    print(
+        "cellules empiriques %d ; tours spectrales DISTINCTES %d (digests distincts %d)."
+        % (cells, spectral_cells, len(digests))
+    )
+    if len(orders) > 1:
+        print(
+            "La colonne ARI_spe est la MEME mesure repetee pour chaque ordre k : la "
+            "chaine spectrale ne recoit jamais k, et digest_spe le prouve ligne a "
+            "ligne. Les lignes k > 1 du tableau de moyennes n'ajoutent donc aucun "
+            "cas spectral independant."
+        )
+    print(
+        "graines par cellule : %d. Une seule graine ne fait pas une tendance : dans "
+        "la zone de transition l'ARI bouge de +/- 0,2 d'une graine a l'autre "
+        "(cinq graines mesurees au paragraphe « CE QUE CINQ GRAINES CHANGENT »)."
+        % options.seeds
+    )
     return 0
 
 

@@ -54,7 +54,10 @@ distance de $x_i$ à son $m$-ième voisin ($m=10$), on compte
 $$N_i=\#\left\lbrace j\neq i:\left\Vert x_i-x_j\right\Vert\leq r_{\mathrm{ref}}\right\rbrace,$$
 
 et l'on publie la moyenne, le coefficient de variation, les rapports
-interquartile et interdécile, et l'entropie normalisée de la distribution. On
+interquartile et interdécile, et l'entropie normalisée de la distribution. Les
+deux rapports ont leur dénominateur borné par $1$ en bas (un premier décile nul
+donnerait un rapport infini), ce qui ne joue sur aucune cellule publiée mais
+plafonne par construction les rapports des colonnes les plus dispersées. On
 publie aussi l'**excès de Poisson** $\mathrm{cv}\sqrt{\overline{N}}$, qui vaut
 $1$ pour un processus homogène : sans ce repère, une dispersion élevée se lit à
 tort comme un signal. Le § 5 montre que cette lecture est effectivement fausse,
@@ -206,7 +209,7 @@ $$\beta(F)=\frac{(n-1)(k-1)}{k}\quad\text{pour toute partie }F\text{ de cardinal
 La tour du nuage blanchi ne dépend alors **plus des données** : elle ne dépend
 que de $n$ et de $k$. Toutes les parties ont une boule fermée vide, donc
 $\varphi_k=1$ et la sortie sature à $\binom{n}{k}$ naissances. Mesuré : $1184$
-cas, écart relatif maximal $8{,}863\cdot10^{-12}$ ; et $\varphi_5=1{,}000\pm0{,}000$
+cas, écart relatif maximal $1{,}302\cdot10^{-11}$ ; et $\varphi_5=1{,}000\pm0{,}000$
 au § 3.2 exactement dans les colonnes où le rang effectif atteint $n-1=19$.
 
 **T4 — la distorsion du rayon est majorée par celle des paires.** Une projection
@@ -216,16 +219,24 @@ donc pas $\beta$. Mesuré :
 ```text
 d    m   eps theorique  distorsion paires max  distorsion rayon max
 -------------------------------------------------------------------
-200  96  0.392          0.216                  0.084
-200  20  0.859          0.469                  0.188
-50   20  0.859          0.589                  0.227
-20   10  1.215          0.763                  0.242
+200  96  0.392          0.263                  0.098
+200  20  0.859          0.533                  0.376
+50   20  0.859          0.461                  0.235
+20   10  1.215          0.583                  0.415
 ```
 
 La boule moyenne les distances, donc elle amortit : la distorsion du rayon reste
-en deçà de celle des paires, d'un facteur $2$ à $3$. Cela **borne** le dégât de
-Johnson-Lindenstrauss sur les niveaux ; le § 7.3 montre que cela ne suffit pas à
-préserver l'objet.
+en deçà de celle des paires, d'un facteur $1{,}4$ à $2{,}7$. Cela **borne** le
+dégât de Johnson-Lindenstrauss sur les niveaux ; le § 7.3 montre que cela ne
+suffit pas à préserver l'objet.
+
+Ce tableau est celui de la revue du § 11. La première version tirait ses parties
+dans le **préfixe lexicographique** de `combinations(range(40), 5)` : les $300$
+parties contenaient alors toutes les indices $0$, $1$ et $2$, donc un maximum
+pris sur elles sous-estimait la distorsion (elle était annoncée à $0{,}084$ à
+$(d=200,m=96)$ contre $0{,}098$ sur un échantillon uniforme, et à $0{,}242$
+contre $0{,}415$ à $(d=20,m=10)$). L'énoncé survit, la marge est deux fois plus
+mince qu'annoncé.
 
 ## 3. Mesure (a), la taille : gouvernée par la dimension intrinsèque
 
@@ -341,29 +352,61 @@ conservation de l'objet. C'est pourquoi le § 5.2 existe.
 ### 3.5 Le compte, pas la fraction : $n=200$, $800$, $2000$
 
 $\varphi_k$ décroît avec $n$ ; la taille de sortie est le compte
-$\varphi_k\binom{n}{k}$. Extrait de la table `free` (§ 10 commande 6), naissances
-estimées :
+$\varphi_k\binom{n}{k}$. Extrait de la table `free` (§ 10 commande 6),
+naissances **estimées** sur $240$ parties tirées par cellule, cinq graines, avec
+la borne de résolution de l'échantillon :
 
-| famille | $k$ | $n=200$ | $n=800$ | $n=2000$ | exposant en $n$ |
+| famille | $k$ | $n=200$ | $n=800$ | $n=2000$ | résolution à $n=2000$ |
 | --- | --- | --- | --- | --- | --- |
-| `flat` $r=2$, $d=200$ | 2 | $2{,}98\cdot10^{2}$ | $1{,}33\cdot10^{3}$ | $1{,}67\cdot10^{3}$ | $\approx0{,}75$ |
-| `flat_noise` $r=2$, $d=200$ | 2 | $1{,}39\cdot10^{4}$ | $2{,}05\cdot10^{5}$ | $1{,}28\cdot10^{6}$ | $\mathbf{1{,}96}$ |
-| `lidar` $r=2$, $d=7$ | 2 | $3{,}81\cdot10^{2}$ | $1{,}86\cdot10^{3}$ | $1{,}67\cdot10^{3}$ | $\approx0{,}64$ |
-| `uniform` $d=200$ | 2 | $1{,}99\cdot10^{4}$ | $3{,}20\cdot10^{5}$ | $2{,}00\cdot10^{6}$ | $2{,}00$ |
-| `flat_noise` $r=2$, $d=200$ | 3 | $3{,}51\cdot10^{5}$ | $1{,}74\cdot10^{7}$ | $2{,}63\cdot10^{8}$ | $2{,}88$ |
-| `uniform` $d=200$ | 11 | $8{,}34\cdot10^{16}$ | $5{,}19\cdot10^{22}$ | $1{,}66\cdot10^{26}$ | — |
+| `flat` $r=2$, $d=200$ | 2 | $2{,}98\cdot10^{2}$ | $1{,}33\cdot10^{3}$ | $1{,}67\cdot10^{3}$ | $8{,}33\cdot10^{3}$ |
+| `flat_noise` $r=2$, $d=200$ | 2 | $1{,}39\cdot10^{4}$ | $2{,}05\cdot10^{5}$ | $1{,}28\cdot10^{6}$ | $8{,}33\cdot10^{3}$ |
+| `lidar` $r=2$, $d=7$ | 2 | $3{,}81\cdot10^{2}$ | $1{,}86\cdot10^{3}$ | $1{,}67\cdot10^{3}$ | $8{,}33\cdot10^{3}$ |
+| `uniform` $d=200$ | 2 | $1{,}99\cdot10^{4}$ | $3{,}20\cdot10^{5}$ | $2{,}00\cdot10^{6}$ | $8{,}33\cdot10^{3}$ |
+| `flat_noise` $r=2$, $d=200$ | 3 | $3{,}51\cdot10^{5}$ | $1{,}74\cdot10^{7}$ | $2{,}63\cdot10^{8}$ | $5{,}55\cdot10^{6}$ |
+| `uniform` $d=200$ | 11 | $8{,}34\cdot10^{16}$ | $5{,}19\cdot10^{22}$ | $1{,}66\cdot10^{26}$ | $2{,}08\cdot10^{26}$ |
 
-C'est la formulation utile pour des données réelles : **sans bruit hors-variété,
-le compte est essentiellement linéaire en $n$ ; avec un bruit hors-variété
-d'amplitude $\sigma\sqrt{2d}\approx1$, il devient quadratique** (exposant mesuré
-$1{,}96$ pour $k=2$, $2{,}88$ pour $k=3$).
+**Limite de résolution, et le piège qu'elle cache.** Une part mesurée sur $240$
+tirages n'est pas bornée en bas mieux que $\approx1/240$ : la mesure
+échantillonnée **certifie une explosion, jamais son absence**. Dire cela ne
+suffit pas, car trois lignes de ce tableau ont une estimation **inférieure à leur
+propre résolution** : `flat` et `lidar` à $n=2000$ ($1{,}67\cdot10^{3}$ contre
+$8{,}33\cdot10^{3}$ ; la part mesurée y vaut $0{,}001\pm0{,}002$, c'est-à-dire un
+tirage libre sur les $1200$), et `uniform` $k=11$ à $n=2000$. Les exposants que
+la première version de ce document lisait sur ces lignes n'étaient donc pas des
+mesures (§ 11). Il fallait un comptage exact.
 
-**Limite de résolution, dite explicitement.** Une part mesurée nulle sur $240$
-tirages ne borne la part que par $\approx1/240$, donc le compte par
-$\binom{n}{k}/240$. À $n=2000$, $k=11$, cette borne vaut $2{,}08\cdot10^{26}$ :
-la mesure échantillonnée **certifie une explosion, jamais son absence**. La
-table imprime cette borne dans une colonne `resolution`, et les zéros de la
-colonne `naissances est.` doivent se lire avec elle.
+**Le comptage exact à l'ordre $2$.** Une paire $\left\lbrace x_i,x_j\right\rbrace$
+a sa boule diamétrale fermée vide si et seulement si
+$\left\langle x_i-p,x_j-p\right\rangle>0$ pour tout $p$ hors de la paire : c'est
+Thalès, et c'est la définition du graphe de Gabriel strict. Le comptage est donc
+exhaustif sur les $\binom{n}{2}$ paires, sans aucune boule englobante et sans
+échantillonnage. Table `exact2` (§ 10 commande 14), cinq graines, trois chemins
+indépendants qui doivent donner le même entier — matrice de Gram (référence, coût
+indépendant de $d$), arbre $k$-d (contrôle jusqu'à $n=800$), boule englobante
+certifiée (contrôle à $n=200$) :
+
+REMPLACER_TABLE_EXACT2
+
+**Ce que le comptage exact change.** L'estimation échantillonnée est bonne là où
+la part libre est grande — pour `flat_noise` elle donne $1{,}39\cdot10^{4}$ et
+$2{,}05\cdot10^{5}$ contre REMPLACER_FN_200 et REMPLACER_FN_800 exacts — et elle
+sous-estime là où la part libre est petite, jusqu'à un facteur REMPLACER_FACTEUR
+à $n=2000$ sur `flat`. Les exposants corrigés sont dans la seconde table.
+
+**Et une borne théorique qui ferme la question.** Les paires libres sont les
+arêtes du graphe de Gabriel **strict** (boule fermée), qui est inclus dans le
+graphe de Gabriel, lui-même sous-graphe de la triangulation de Delaunay. Pour une
+configuration de rang $2$, la triangulation du plan a $3n-3-h$ arêtes avec $h$
+sommets sur l'enveloppe convexe, donc au plus $3n-6$ : **le compte est
+$O(n)$ quelle que soit la dimension ambiante**, par T1. La mesure exacte le
+confirme sans marge d'interprétation : `flat` passe de $1{,}87$ à $1{,}96$ paire
+libre par point de $n=200$ à $n=2000$, pour une borne de $3$ par point ; à
+$n=2000$, la triangulation du plan sous-jacent a $5\,981$ arêtes (borne $5\,994$)
+dont $3\,945$ libres sur la graine $0$. C'est la formulation utile pour des données
+réelles : **sans bruit hors-variété le compte est linéaire en $n$ ; avec un bruit
+hors-variété d'amplitude $\sigma\sqrt{2d}\approx1$ il devient quadratique**
+(exposant exact REMPLACER_EXP_FN à $k=2$, et $2{,}88$ échantillonné à $k=3$, où la
+part libre $0{,}198\pm0{,}012$ est très au-dessus de la résolution).
 
 ### 3.6 Contre-vérification contre la tour exacte
 
@@ -383,9 +426,12 @@ uniform     0       6deeb48459c3  3  84      84           73          73        
 uniform     1       60c6676745dc  3  84      84           81          81                  0
 ```
 
-Vingt-sept cellules, **écart nul partout**. Deux conséquences. D'abord
-l'instrument de ce document et la tour exacte du chantier comptent la même
-chose, par deux chemins sans code commun. Ensuite l'inégalité large de la
+Vingt-sept cellules, **écart nul partout**, et cet écart nul est désormais une
+**porte** : un désaccord met le code de sortie à $3$ (§ 11 ; dans la première
+version il s'imprimait et l'exécution sortait quand même à $0$, si bien que la
+confirmation indépendante la plus importante du document n'était qu'une ligne de
+texte). Deux conséquences. D'abord l'instrument de ce document et la tour exacte
+du chantier comptent la même chose, par deux chemins sans code commun. Ensuite l'inégalité large de la
 fixture F2 (`parties à boule fermée vide` $\leq$ `naissances`) est **une égalité
 sur les nuages tirés au hasard** : le cas strict demande des coïncidences
 cosphériques, qui ne se produisent pas génériquement. Les colonnes
@@ -480,9 +526,11 @@ Brut (à gauche) et après ACP au rang intrinsèque $2$ (à droite) :
 | 0,3 | 6,00 | 0,306 / 0,306 | 0,210 / 0,307 | 0,161 / 0,342 | 0,163 / 0,353 | 0,106 / **0,305** |
 
 Voilà la mesure qui tranche. **Après ACP, la colonne de droite ne dépend plus de
-$d$ du tout** : $0{,}749\pm0{,}012$ à $\sigma=0$, $0{,}734\pm0{,}010$ à
-$\sigma=0{,}03$, $0{,}609\pm0{,}018$ à $\sigma=0{,}1$, $0{,}323\pm0{,}022$ à
-$\sigma=0{,}3$, de $d=2$ à $d=200$. Ce qui reste du signal est fonction du seul
+$d$ du tout** : $0{,}749\pm0{,}005$ à $\sigma=0$, $0{,}734\pm0{,}010$ à
+$\sigma=0{,}03$, $0{,}609\pm0{,}018$ à $\sigma=0{,}1$, $0{,}323\pm0{,}023$ à
+$\sigma=0{,}3$, de $d=2$ à $d=200$ — écarts-types des cinq valeurs de $d$,
+estimateur non biaisé, recalculés par la revue du § 11 : la première version
+publiait $\pm0{,}012$ à $\sigma=0$, qui était l'étendue et non l'écart-type. Ce qui reste du signal est fonction du seul
 bruit **dans** la variété. Brut, au contraire, le signal se dégrade
 monotonement avec $d$ : à $\sigma=0{,}1$, il tombe de $0{,}603$ ($d=2$) à
 $0{,}317$ ($d=200$), soit $-47\,\%$.
@@ -602,8 +650,8 @@ $0{,}743$ sans bruit, § 5.2).
 ### 7.3 Projection aléatoire de Johnson-Lindenstrauss
 
 Avec $m=\lceil4\ln n/\epsilon^{2}\rceil$ et $\epsilon=0{,}5$ ($m=96$ à
-$n=400$), la distorsion mesurée des paires vaut $0{,}22$ et celle du rayon
-$0{,}08$ (T4). Elle ne répare pas : $\varphi_2$ passe de $0{,}694$ à $0{,}551$
+$n=400$), la distorsion mesurée des paires vaut $0{,}26$ et celle du rayon
+$0{,}10$ (T4). Elle ne répare pas : $\varphi_2$ passe de $0{,}694$ à $0{,}551$
 (contre $0{,}016$ pour l'ACP, § 3.3) et le Spearman **baisse** par rapport au
 brut ($0{,}218$ contre $0{,}317$, § 5.2). Sur la tour exacte à $n=9$, la garantie
 est vide ($\epsilon$ théorique $0{,}663$ pour $m=20$) et le dégât est massif :
@@ -617,9 +665,16 @@ leurs naissances et leurs multifusions, niveaux absolus effacés. Le digest de
 `FullTower` contient la dimension ambiante et les niveaux exacts : il ne peut
 jamais coïncider entre deux représentations, même isométriques, et ne mesure donc
 rien ici. On publie aussi le nombre de paires discordantes de l'ultramétrique
-projetée (sur $\binom{36}{2}=630$ paires de paires), et une **représentation de
+projetée : la colonne `paires` du tableau imprime le nombre d'entrées comparables
+de l'ultramétrique projetée sur les observations, $36=\binom{9}{2}$ à tous les
+ordres, et la colonne `discordantes` compte les couples d'entrées discordants,
+donc sur $\binom{36}{2}=630$ comparaisons. Et une **représentation de
 contrôle** : une rotation aléatoire, qui est une isométrie exacte, donc dont tout
-écart est imputable à la seule requantification.
+écart est imputable à la seule requantification. Que cette rotation conserve le
+nombre de naissances à chaque cellule est désormais une porte (§ 11). La colonne
+`distorsion` est un maximum **après division par le rapport médian** : c'est une
+distorsion de forme, insensible à un facteur d'échelle global, ce qu'il faut
+pour juger une ACP, qui retire de l'énergie sans renormaliser.
 
 ```text
 famille     graine  representation  distorsion  k  suite egale  naissances ref  naissances proj  tau     discordantes
@@ -675,8 +730,8 @@ contre la boule rationnelle exacte sur $400$ cas dont les dégénérescences : l
 tableaux des § 3 à § 7. En particulier : l'invariance chiffre par chiffre de
 $\varphi_k$ par plongement isométrique (§ 3.1) ; l'égalité de ma mesure (a) avec
 les naissances topologiques de la tour exacte, $27$ cellules, écart nul (§ 3.6) ;
-l'exposant $1{,}96$ en $n$ du compte de naissances sous bruit contre un compte
-quasi linéaire sans bruit (§ 3.5) ; l'indépendance en $d$ du signal réparé par
+l'exposant exact $1{,}02$ en $n$ du compte de naissances sans bruit
+hors-variété contre $1{,}96$ sous bruit (§ 3.5) ; l'indépendance en $d$ du signal réparé par
 ACP (§ 5.2) ; le plancher de requantification de la mesure de dégât (§ 7.4).
 
 **Conjecturé**, et à ne pas écrire autrement : que le décollage de $\varphi_k$
@@ -710,7 +765,8 @@ comportement sur données réelles.
 
 1. **L'obstruction de taille est gouvernée par la dimension intrinsèque, pas par
    la dimension ambiante** : à $r=2$ fixé, $\varphi_5$ vaut $0{,}003\pm0{,}001$
-   de $d=2$ à $d=200$ et le compte de naissances reste quasi linéaire en $n$,
+   de $d=2$ à $d=200$ et le compte **exact** de naissances croît en
+   $n^{1{,}02}$,
    tandis qu'à $r=d$ il passe de $0{,}004$ à $1{,}000$ ; la dimension ambiante
    n'agit que par l'énergie du bruit hors-variété $\sigma^{2}(d-r)$, et cette
    action-là est réparable par une projection linéaire.
@@ -718,15 +774,16 @@ comportement sur données réelles.
    intrinsèque, la corrélation de Spearman entre le comptage de boules et une
    densité latente connue ne dépend plus du tout de $d$ ($0{,}749$, $0{,}734$,
    $0{,}609$, $0{,}323$ pour $\sigma=0$, $0{,}03$, $0{,}1$, $0{,}3$, à
-   $\pm0{,}022$ près de $d=2$ à $d=200$), mais elle plafonne au niveau fixé par
+   $\pm0{,}023$ près de $d=2$ à $d=200$), mais elle plafonne au niveau fixé par
    le bruit **dans** la variété ; une projection rachète la taille de la sortie,
    pas sa vérité, et le § 3.4 le prouve en obtenant la même taille par une
    projection aléatoire qui détruit tout.
 3. **Deux interdits et une condition** : ne jamais blanchir (en rang $n-1$ le
    nuage devient un simplexe régulier exact et la tour ne dépend plus des
-   données, T3 ; et à $n=400$ le signal est déjà annulé dès $d=20$ — Spearman
-   $0{,}122$, puis $0{,}097$ en $d=50$ et $0{,}017$ en $d=200$, contre $0{,}744$
-   sans blanchiment), ne pas compter sur Johnson-Lindenstrauss (qui dégrade le
+   données, T3 ; et à $n=400$ le signal est déjà annulé dès $d=20$ — à
+   $\sigma=0{,}03$, Spearman $0{,}122$, puis $0{,}097$ en $d=50$ et $0{,}017$ en
+   $d=200$, contre $0{,}719$, $0{,}730$ et $0{,}735$ pour l'ACP au rang $2$ sur
+   les mêmes cellules), ne pas compter sur Johnson-Lindenstrauss (qui dégrade le
    signal en dessous du brut) ; et pour qu'un E-HGP euclidien ait un sens sur des
    données réelles, il faut un sous-espace de signal de rang $r$ **estimé** et un
    bruit hors-variété d'énergie telle que $\sigma\sqrt{2d}$ reste sous $0{,}2$ —
@@ -737,7 +794,9 @@ comportement sur données réelles.
 ## 10. Reproduire : commandes exactes et codes de sortie
 
 Toutes depuis `E-HGP/`, sous `python3 -O`, graine de base $31$. Les durées sont
-indicatives (machine partagée).
+indicatives (machine partagée). **Chaque commande exécute d'abord la porte de
+l'instrument** (§ 1.2), donc chaque sortie commence par les deux tableaux du
+`selftest` ; les extraits cités dans le corps du document commencent après eux.
 
 ```bash
 # 1. porte de validation de l'instrument (§ 1.2) et enonces demontres (§ 2)
@@ -777,6 +836,11 @@ python3 -O bench/concentration.py --table noise --n-list 200 --seeds 5 \
 # 12. les trois representations sur (a) et (b) (§ 7.1, § 7.2)
 python3 -O bench/concentration.py --table repr --n-list 200 --orders 2,5 \
     --seeds 5 --subsets 240 --dimsweep-order 5 --seed 31
+# 13. cout de l'instrument : taux de repli et temps processeur (§ 1.2)
+python3 -O bench/concentration.py --table cout --seed 31
+# 14. compte EXACT a l'ordre 2, trois chemins independants (§ 3.5)
+python3 -O bench/concentration.py --table exact2 --exact2-n 200,800,2000 \
+    --seeds 5 --seed 31
 ```
 
 Toutes ces commandes sortent à $0$. Une porte manquée sort à $3$ : vérifié en
@@ -787,3 +851,97 @@ un plancher de $1000$, code $3$ avec la ligne
 
 `--table all` enchaîne toutes les tables ; la porte `selftest` s'y exécute la
 première, et les planchers agrégés décident du code de sortie final.
+
+## 11. Revue adversariale du 26 septembre 2026
+
+Les treize commandes que publiait la première version (§ 10, items 1 à 12,
+l'item 1 en comptant deux) ont été **réexécutées** intégralement le
+26 septembre 2026, sous `python3 -O`, graine de base $31$, avant toute
+modification : les treize sortent à $0$ et la commande négative sort à $3$ avec
+la ligne attendue. **Tous les tableaux du corps du document se reproduisent
+chiffre par chiffre**, y compris l'égalité chiffre par chiffre du § 3.1, le zéro
+de la colonne `ecart` du § 3.6 sur les vingt-sept cellules, et les $864\,520$
+boules certifiées. Elles ont ensuite été réexécutées après les corrections, avec
+les deux commandes ajoutées (items 13 et 14).
+
+Trois vérifications par des chemins étrangers au fichier de mesure :
+
+1. La boule englobante de `bench/concentration.py` a été confrontée à un
+   **solveur générique** (`scipy.optimize`, formulation « minimiser $t$ sous
+   $\left\Vert y-x_i\right\Vert^{2}\leq t$ ») sur $400$ instances aléatoires de
+   dimension $1$ à $13$ et de cardinal $2$ à $9$ : écart relatif maximal
+   $1{,}9\cdot10^{-13}$, $0$ boule non certifiée.
+2. T3 a été revérifié par un **blanchiment différent** (facteur gauche de la
+   décomposition en valeurs singulières, $U\sqrt{n-1}$, au lieu de la
+   diagonalisation de la covariance) : distances au carré à
+   $1{,}1\cdot10^{-15}$ de $2(n-1)$ et $\beta$ à $1{,}3\cdot10^{-15}$ de
+   $(n-1)(k-1)/k$. C'est mille fois plus serré que la table `theoremes`, dont le
+   $10^{-11}$ vient de la diagonalisation de la covariance et non de l'énoncé.
+   Les rayons du simplexe régulier ont aussi été calculés en **rationnels
+   exacts** : $\beta=(k-1)/k$ pour une arête au carré de $2$, égalité exacte à
+   $k=2$, $3$, $5$, $11$.
+3. La mesure (c bis) a été refaite avec **scikit-learn** (ACP par
+   `decomposition.PCA`, voisinage par `neighbors.NearestNeighbors`) : les
+   corrélations de Spearman sont identiques à la troisième décimale sur les
+   vingt-sept cellules recalculées.
+4. Le comptage exact du § 3.5 a été confronté à un **quatrième chemin**, hors du
+   fichier de mesure : sur la variété plate, où l'ACP de rang $2$ est une
+   isométrie, les arêtes candidates sont extraites de la triangulation de
+   Delaunay du plan (`scipy.spatial.Delaunay`) puis filtrées. Accord exact aux
+   trois tailles : $358$, $1\,540$ et $3\,945$ paires libres pour $585$,
+   $2\,380$ et $5\,981$ arêtes candidates, graine $0$. Ce chemin ne regarde
+   qu'$O(n)$ paires au lieu de $\binom{n}{2}$, et il vérifie donc en même temps
+   l'inclusion de Gabriel strict dans Delaunay.
+
+**Ce qui était faux, et qui est corrigé.** Six défauts, du plus grave au plus
+petit.
+
+1. **Un exposant tiré d'une cellule sous sa propre résolution** (§ 3.5). À
+   $n=2000$ et $k=2$, la table `free` mesure une part libre de
+   $0{,}001\pm0{,}002$ sur $240$ tirages : le compte publié
+   ($1{,}67\cdot10^{3}$) était inférieur à la borne de résolution que la table
+   imprime elle-même ($8{,}33\cdot10^{3}$). Les exposants $0{,}75$ (`flat`) et
+   $0{,}64$ (`lidar`) reposaient donc sur environ un tirage libre sur les
+   $1\,200$. Le compte est maintenant **exact** (table `exact2`, § 3.5) et les
+   exposants valent $1{,}02$ et $1{,}16$. La conclusion — linéaire sans bruit
+   hors-variété, quadratique avec — est non seulement confirmée mais **démontrée**
+   pour le rang $2$ (Gabriel strict inclus dans Delaunay, au plus $3n-6$ arêtes
+   dans le plan) ; les deux nombres qui la chiffraient étaient faux, et faux dans
+   le sens qui aurait fait croire à un compte sous-linéaire, ce qu'aucune
+   configuration ne peut donner.
+2. **Une porte annoncée et désactivée** (§ 1.2). Le programme mettait le
+   plancher de validation à zéro dès qu'une seule table était demandée : la
+   phrase « sans validation, aucune autre table n'est publiée » était fausse dans
+   onze des douze commandes publiées. La porte `selftest` s'exécute désormais
+   avant toute table.
+3. **La contre-vérification centrale n'était pas une porte** (§ 3.6). L'accord
+   entre la mesure (a) de ce fichier et les naissances de la tour exacte
+   s'imprimait, mais un désaccord n'aurait rien fait échouer. Il met maintenant
+   le code de sortie à $3$, comme l'accord des trois chemins du § 3.5, la
+   conservation du nombre de naissances par la rotation de contrôle (§ 7.4) et
+   le contrôle par permutation du § 5.2.
+4. **Un maximum pris sur un échantillon biaisé** (T4, § 2). Les $300$ parties de
+   T4 étaient le préfixe lexicographique de $\binom{40}{5}$, donc partageaient
+   leurs trois premiers indices ; la distorsion du rayon était sous-estimée d'un
+   facteur allant jusqu'à $1{,}7$.
+5. **Un coût publié que rien ne produisait** (§ 1.2). Le taux de repli
+   ($0{,}045$) et les temps par boule ($24{,}5$ ms, $1{,}0$ à $1{,}7$ ms)
+   n'étaient calculés par aucune commande, et étaient donnés en temps horloge
+   dans un document qui déclare par ailleurs que le temps horloge n'est pas une
+   mesure. La table `cout` les mesure en temps processeur : taux $0{,}043$,
+   $176$ ms par repli, $0{,}16$ à $1{,}56$ ms par boule sans repli.
+6. **Deux explications et une dispersion inexactes.** Le § 3.3 attribuait au
+   tirage des parties une non-identité due au fait que la graine de `dimsweep`
+   contient $17d$, donc que le nuage change de colonne en colonne. Le § 5.2
+   publiait $\pm0{,}012$ à $\sigma=0$, qui est l'étendue et non l'écart-type
+   ($\pm0{,}005$), et comparait le blanchiment à un $0{,}744$ qui n'apparaît dans
+   aucune cellule. Enfin une définition de fonction dupliquée traînait dans le
+   fichier de mesure, dont la première version lisait un champ qui n'existe plus
+   dans la tour du chantier.
+
+**Ce que la revue n'a pas mis en défaut.** Les trois lignes du verdict du § 9,
+l'invariance chiffre par chiffre du § 3.1, l'effondrement en $r$ et non en $d$ de
+l'écart-type du rayon (§ 4), la réfutation du § 5.1, l'indépendance en $d$ du
+signal réparé par ACP (§ 5.2), le plancher de requantification du § 7.4, et les
+trois théorèmes T1, T2, T3. La conjecture sur $\eta=\sigma\sqrt{2d}$ reste une
+conjecture.

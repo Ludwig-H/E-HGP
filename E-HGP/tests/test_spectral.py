@@ -64,6 +64,7 @@ FLOORS = {
     "tower_maxima": 3,
     "tower_merges": 2,
     "mutants": 3,
+    "path_refinements": 3,
 }
 
 RATIOS = (0.02, 0.2, 0.5, 1.0, 1.0, 3.0, 11.0)
@@ -279,6 +280,27 @@ class ClosedForms(unittest.TestCase):
             values, _clamped = L.spectral_filter(np.array([0.0]), rho_max, floor=0.0)
             self.assertAlmostEqual(float(values[0]), expected, places=7)
 
+    def test_les_deux_regularisations_ne_se_cumulent_pas(self):
+        """Le plancher ne s'applique QUE la ou `G` diverge (`rho_max >= 1`).
+
+        Sinon deux regularisations declarees comme alternatives se cumuleraient
+        en silence, et `clamped` compterait des directions qui n'ont pas ete
+        touchees.
+        """
+        spectrum = np.array([-1e-17, 0.0, 1e-14, 0.5, 1.0, 4.0])
+        values, clamped = L.spectral_filter(spectrum, 1.0, floor=1e-10)
+        self.assertEqual(clamped, 3)
+        self.assertTrue(bool(np.all(np.isfinite(values))))
+        for rho_max in (0.25, 0.9, 0.999):
+            values, clamped = L.spectral_filter(spectrum, rho_max, floor=1e-10)
+            # seule la valeur strictement negative est corrigee, et par une
+            # projection exacte sur le cone, pas par un plancher regle.
+            self.assertEqual(clamped, 1)
+            self.assertTrue(bool(np.all(np.isfinite(values))))
+            expected = -math.log(1.0 - rho_max)
+            self.assertAlmostEqual(float(values[1]), expected, places=9)
+            self.assertAlmostEqual(float(values[0]), expected, places=9)
+
     def test_divergence_contre_potentiels_quadratiques(self):
         """`D_rho = E_p[v] + E_q[w]` avec les `(M, N, c)` publies."""
         for rho in RHOS:
@@ -315,12 +337,37 @@ class ClosedForms(unittest.TestCase):
         self.assertGreaterEqual(second.size, FLOORS["moment_entries"])
 
     def test_cout_annonce_est_du_bon_ordre(self):
+        """Le compteur doit inclure les termes en `d`, pas seulement `m^2 n`.
+
+        Le raccourci `O(m^2 n + m^3)` omet `n d^2` (covariance empirique),
+        `n m d` (plongement) et `m^2 d` (moments analytiques). A `d = 400` ce
+        sont eux qui dominent : le temps CPU mesure croit alors comme `d^1,06`
+        par doublement. La porte exige donc que le compteur les contienne.
+        """
         cost = self.model.cost
         size = cost["feature_count"]
         count = cost["sample_count"]
-        self.assertGreaterEqual(cost["multiply_add"], size * size * count)
+        dimension = cost["dimension"]
+        floor = count * dimension * dimension + count * size * dimension + size * size * count
+        self.assertGreaterEqual(cost["multiply_add"], floor)
         self.assertEqual(cost["moments"], "analytic")
         self.assertEqual(cost["reference_sample"], 0)
+
+    def test_le_compteur_de_cout_voit_la_dimension(self):
+        """Doubler `d` a `n` et `m` fixes doit augmenter le cout compte."""
+        cloud, _labels = mixture_sample(200, 13)
+        counted = []
+        for dimension in (2, 4, 8):
+            padded = np.hstack(
+                [cloud, np.zeros((cloud.shape[0], dimension - 2))]
+            )
+            padded[:, 2:] = 1e-3 * np.arange(padded.shape[0])[:, None]
+            model = L.SpectralLogDensity(
+                feature_count=24, covariance_floor=1e-6, seed=1
+            ).fit(padded)
+            counted.append(model.cost["multiply_add"])
+        self.assertLess(counted[0], counted[1])
+        self.assertLess(counted[1], counted[2])
 
 
 class Gradients(unittest.TestCase):
@@ -573,7 +620,7 @@ class Tower(unittest.TestCase):
         checked = 0
         for left in range(tower.maximum_count):
             for right in range(left + 1, tower.maximum_count):
-                base, nodes = T.path_minimum(
+                base, nodes, _evaluations = T.path_minimum(
                     mixture_log_density, tower.maxima[left], tower.maxima[right], 33
                 )
                 raised, _nodes, accepted = T.raise_path(
@@ -583,6 +630,96 @@ class Tower(unittest.TestCase):
                 self.assertGreaterEqual(accepted, 0)
                 checked += 1
         self.assertGreaterEqual(checked, FLOORS["tower_merges"])
+
+    def test_echantillonner_le_chemin_pousse_vers_le_haut(self):
+        """Le minimum ECHANTILLONNE majore le minimum du chemin : mauvais sens.
+
+        Porte de sens, et non de valeur. Le niveau de col est un max-min, donc
+        le minimum d'un chemin CONTINU est un minorant. Le minimum sur un
+        echantillon fini du meme chemin est, lui, un MAJORANT de ce minorant :
+        echantillonner pousse la valeur publiee du cote non certifie. La porte
+        le mesure contre une minimisation unidimensionnelle bornee `scipy`
+        independante, puis verifie que le raffinement le long de l'axe du
+        chemin de `refine_along_path` REDESCEND la valeur.
+        """
+        cloud, _labels = mixture_sample(400, 41)
+        tower = T.SpectralTower(cloud, mixture_log_density, mixture_gradient)
+        checked = 0
+        for left in range(tower.maximum_count):
+            for right in range(left + 1, tower.maximum_count):
+                start, stop = tower.maxima[left], tower.maxima[right]
+
+                def along(time, start=start, stop=stop):
+                    point = start + time * (stop - start)
+                    return float(mixture_log_density(point[None, :])[0])
+
+                grid = np.linspace(0.0, 1.0, 4001)[1:-1]
+                sampled = np.array([along(time) for time in grid])
+                seed = float(grid[int(np.argmin(sampled))])
+                exact = float(
+                    scipy.optimize.minimize_scalar(
+                        along,
+                        bounds=(max(0.0, seed - 0.01), min(1.0, seed + 0.01)),
+                        method="bounded",
+                        options={"xatol": 1e-13},
+                    ).fun
+                )
+                raw, nodes, _calls = T.path_minimum(
+                    mixture_log_density, start, stop, 33, refine=0
+                )
+                refined, _position, _calls = T.refine_along_path(
+                    mixture_log_density, nodes, 1 + int(np.argmin(
+                        np.asarray(mixture_log_density(nodes), dtype=float)[1:-1]
+                    ))
+                )
+                # 1. le brut est AU-DESSUS du minimum reel du segment ;
+                self.assertGreaterEqual(raw, exact - 1e-12)
+                # 2. le raffinement ne remonte jamais ;
+                self.assertLessEqual(refined, raw + 1e-12)
+                # 3. et il reste au-dessus du minimum reel : c'est un
+                #    encadrement, pas une correction magique.
+                self.assertGreaterEqual(refined, exact - 1e-9)
+                # 4. il divise l'exces par au moins deux sur ce melange.
+                if raw - exact > 1e-6:
+                    self.assertLess(refined - exact, 0.5 * (raw - exact))
+                checked += 1
+        self.assertGreaterEqual(checked, FLOORS["path_refinements"])
+
+    def test_la_tour_publie_le_niveau_raffine(self):
+        """Le niveau publie est bien le raffine, pas le brut."""
+        cloud, _labels = mixture_sample(400, 41)
+        refined = T.SpectralTower(cloud, mixture_log_density, mixture_gradient)
+        raw = T.SpectralTower(
+            cloud, mixture_log_density, mixture_gradient, path_refine=0
+        )
+        self.assertEqual(refined.canonical_record()["path_refine"], 5)
+        self.assertEqual(raw.canonical_record()["path_refine"], 0)
+        lowered = 0
+        for pair, level in refined.saddle.items():
+            self.assertLessEqual(level, raw.saddle[pair] + 1e-12)
+            if level < raw.saddle[pair] - 1e-9:
+                lowered += 1
+        self.assertGreater(lowered, 0)
+        self.assertGreater(refined.path_evaluations, raw.path_evaluations)
+
+    def test_classes_obtenues_honnetes_quand_des_fusions_manquent(self):
+        """`achieved_classes` ne ment pas si le graphe des paires est troue."""
+        cloud, _labels = mixture_sample(400, 41)
+        tower = T.SpectralTower(cloud, mixture_log_density, mixture_gradient)
+        self.assertEqual(tower.achieved_classes(1), 1)
+        self.assertEqual(tower.achieved_classes(2), 2)
+        self.assertEqual(tower.achieved_classes(99), tower.maximum_count)
+        kept = tower.merges
+        try:
+            tower.merges = []
+            # sans aucune fusion, une coupe a une classe en rend `P`, et le
+            # compte doit le dire au lieu de repeter la demande.
+            self.assertEqual(tower.achieved_classes(1), tower.maximum_count)
+            self.assertEqual(
+                int(np.unique(tower.partition(1)).size), tower.achieved_classes(1)
+            )
+        finally:
+            tower.merges = kept
 
     def test_digest_invariant_par_permutation(self):
         cloud, _labels = mixture_sample(300, 47)
@@ -677,8 +814,11 @@ class Tower(unittest.TestCase):
         self.assertEqual(record["object"], "ehgp.spectral_tower.v1")
         self.assertEqual(len(record["basin"]), cloud.shape[0])
         self.assertEqual(len(tower.digest()), 64)
-        if tower.maximum_count >= 3:
-            self.assertGreater(rand_index(labels, tower.labels(3)), 0.6)
+        # Plancher, et non condition : une assertion sous `if` est un vert par
+        # vacuite si la branche n'est pas prise. Le nombre de maxima est
+        # MESURE ici a 3 (graine 67, m = 128, bs = 0,5), donc on l'exige.
+        self.assertGreaterEqual(tower.maximum_count, FLOORS["tower_maxima"])
+        self.assertGreater(rand_index(labels, tower.labels(3)), 0.6)
 
     def test_cible_inconnue_refusee(self):
         cloud, _labels = mixture_sample(60, 71)
@@ -724,11 +864,12 @@ class Mutants(unittest.TestCase):
         cloud, _labels = mixture_sample(400, 41)
         original = T.path_minimum
 
-        def mutated(value, left, right, samples):
+        def mutated(value, left, right, samples, refine=5, probes=8):
+            del refine, probes
             times = np.linspace(0.0, 1.0, samples)
             nodes = left[None, :] + times[:, None] * (right - left)[None, :]
             values = np.asarray(value(nodes), dtype=float)
-            return float(values.max()), nodes
+            return float(values.max()), nodes, int(samples)
 
         try:
             T.path_minimum = mutated

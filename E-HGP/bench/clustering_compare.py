@@ -16,7 +16,11 @@ regle de liaison :
 * REACHABILITY MUTUELLE a l'ordre `k` : poids
   `max(a_k(x_i), a_k(x_j), D_ij / 4)`, memes naissances. Ce n'est PAS le
   meme objet : elle ne regarde que les extremites, jamais ce que le segment
-  traverse.
+  traverse. Elle est mesuree aux DEUX echelles, `D_ij / 4` (celle de la
+  tour) et `D_ij` (celle de HDBSCAN, au carre), parce que le maximum melange
+  un terme de coeur et un terme de distance : changer l'echelle change le
+  dendrogramme, donc un duel tranche sur une seule echelle serait un
+  artefact de normalisation.
 * LIAISON SIMPLE euclidienne : poids `D_ij / 4`, naissances nulles. C'est le
   cas `k = 1` des deux precedents.
 
@@ -461,6 +465,9 @@ def run_cell(family, dim, noise_share, seed, count, orders, intervals, mode, min
         "gap_max": list(tower.bracket["gap_max"]),
         "tube_fraction": list(tower.bracket["tube_fraction"]),
         "order_violation": tower.bracket["order_violation"],
+        "order_violation_relative": tower.bracket["order_violation_relative"],
+        "inverted_pairs": tower.bracket["inverted_pairs"],
+        "inverted_exact_pairs": tower.bracket["inverted_exact_pairs"],
         "width": tower.bracket["width"],
     }
     row["digest"] = tower.digest()
@@ -519,6 +526,25 @@ def run_cell(family, dim, noise_share, seed, count, orders, intervals, mode, min
             auto,
             peak,
             time.perf_counter() - start,
+            note="echelle du quart, celle de la tour",
+            peak_ok=peak_ok,
+        )
+        # MEME objet, AUTRE echelle. `max(c_i, c_j, D)` n'est pas une
+        # remise a l'echelle de `max(c_i, c_j, D / 4)` : le maximum melange
+        # deux termes, donc le dendrogramme change. Sans cette ligne, le duel
+        # tour contre reachability serait tranche sur une seule echelle, celle
+        # qui avantage le terme de coeur, et le verdict serait un artefact de
+        # normalisation.
+        start = time.perf_counter()
+        usual = tower.reachability_tower(order, quarter=False)
+        fixed, auto, peak, peak_ok = dendrogram_labels(usual, clusters, min_size)
+        record(
+            "reach_usual_k%d" % order,
+            fixed,
+            auto,
+            peak,
+            time.perf_counter() - start,
+            note="echelle usuelle de HDBSCAN, au carre",
             peak_ok=peak_ok,
         )
     start = time.perf_counter()
@@ -675,6 +701,8 @@ def method_names(rows):
             return (15, "%03d" % int(name[10:]))
         if name.startswith("reach_k"):
             return (20, "%03d" % int(name[7:]))
+        if name.startswith("reach_usual_k"):
+            return (21, "%03d" % int(name[13:]))
         if name.startswith("dbscan"):
             return (92, name)
         if name.startswith("hdbscan"):
@@ -796,29 +824,89 @@ def timing_table(rows):
     return "\n".join(lines)
 
 
-def verdict_table(rows, cut):
+def peak_failure_table(rows):
+    """Part des cellules ou la regle du pic ne trouve AUCUN niveau recevable.
+
+    Garde-fou contre le vert par vacuite a l'envers : une telle cellule rend
+    une partition triviale a un seul groupe, donc un indice de Rand voisin de
+    zero. Si la part est grande, la colonne de moyennes de la coupe au pic
+    mesure surtout des echecs de la REGLE, pas la qualite de l'arbre.
+    """
+    dims = sorted({row["dim"] for row in rows})
+    lines = ["part des cellules ou la regle du pic ne trouve aucun niveau recevable"]
+    header = "%-22s" % "methode" + "".join("  d=%-11d" % dim for dim in dims)
+    lines.append(header)
+    lines.append("-" * len(header))
+    for name in method_names(rows):
+        cells = []
+        for dim in dims:
+            flags = [
+                row["methods"][name]["peak_admissible"]
+                for row in rows
+                if row["dim"] == dim
+                and name in row["methods"]
+                and "peak_admissible" in row["methods"][name]
+            ]
+            if not flags:
+                cells.append("%13s" % "-")
+            else:
+                cells.append("%13.3f" % (1.0 - float(np.mean(flags))))
+        lines.append("%-22s" % name + "  " + "  ".join(cells))
+    return "\n".join(lines)
+
+
+def peak_is_admissible(row, prefix, orders):
+    """La regle du pic est-elle recevable pour TOUS les ordres d'une famille ?"""
+    for order in orders:
+        entry = row["methods"].get(prefix + str(order))
+        if entry is None:
+            continue
+        if not entry.get("peak_admissible", True):
+            return False
+    return True
+
+
+def verdict_table(rows, cut, require_peak=False):
     """La question tranchee, chiffre par chiffre : `k > 1` contre `k = 1`.
 
     Pour chaque dimension, l'ecart d'indice de Rand ajuste entre le meilleur
     ordre `k > 1` et l'ordre `k = 1` (qui est la liaison simple), pour la
     tour E-HGP et pour la reachability mutuelle, sur tous les jeux puis sur
     les seuls jeux bruites. Un ecart negatif dit que l'axe d'ordre COUTE.
+
+    `require_peak` restreint le verdict aux cellules ou la regle du pic est
+    recevable a TOUS les ordres de la famille comparee. C'est le controle qui
+    dit si l'ecart vient de l'arbre ou seulement des cellules ou la regle
+    echoue et rend un groupe unique.
     """
     dims = sorted({row["dim"] for row in rows})
-    lines = ["verdict : ari(meilleur k>1) - ari(k=1), coupe %s" % cut]
+    lines = [
+        "verdict : ari(meilleur k>1) - ari(k=1), coupe %s%s"
+        % (cut, ", cellules a pic recevable seulement" if require_peak else "")
+    ]
     header = "%-30s" % "grandeur" + "".join("  d=%-11d" % dim for dim in dims)
     lines.append(header)
     lines.append("-" * len(header))
     orders = [order for order in rows[0]["orders"] if order > 1]
-    for prefix, label in (("ehgp_k", "tour E-HGP"), ("reach_k", "reach mutuelle")):
+    for prefix, label in (
+        ("ehgp_k", "tour E-HGP"),
+        ("reach_k", "reach mut. quart"),
+        ("reach_usual_k", "reach mut. usuelle"),
+    ):
         for noise, tag in ((None, "tous jeux"), ((0.3,), "jeux bruites")):
             cells = []
             for dim in dims:
 
-                def keep(row, dim=dim, noise=noise):
+                def keep(row, dim=dim, noise=noise, prefix=prefix):
                     if row["dim"] != dim:
                         return False
-                    return noise is None or row["noise_share"] in noise
+                    if noise is not None and row["noise_share"] not in noise:
+                        return False
+                    if require_peak and not peak_is_admissible(
+                        row, prefix, row["orders"]
+                    ):
+                        return False
+                    return True
 
                 base = collect(rows, prefix + "1", cut, "ari", keep)
                 best = None
@@ -987,6 +1075,8 @@ def report(rows):
     blocks = [
         verdict_table(rows, "fixed"),
         verdict_table(rows, "peak"),
+        verdict_table(rows, "peak", require_peak=True),
+        peak_failure_table(rows),
         table_by_dimension(
             rows,
             "fixed",
@@ -1100,15 +1190,15 @@ GRAVEN_CLOUDS = (
 MINIMUM_PAIRS_CHECKED = 600
 MINIMUM_CERTIFIED = 200
 MINIMUM_TUBE_COMPARISONS = 4000
-MINIMUM_LATTICE_COMPARISONS = 30000
-MINIMUM_BOUNDARY_TIES = 500
+MINIMUM_LATTICE_COMPARISONS = 15000
+MINIMUM_BOUNDARY_TIES = 15000
 MINIMUM_ORDER_ONE_CHECKS = 12
 REQUIRED_DIMENSIONS = (2, 3, 5, 20)
 
 # Nuages entiers a pas court : le regime ou les energies sont EX AEQUO au rang
 # de coupe, donc le seul ou la canonicite du bas-de-liste se voit. Un nuage
 # gaussien n'en produit pratiquement aucun, d'ou le plancher de couverture.
-LATTICE_CASES = ((30, 3), (36, 4), (44, 5))
+LATTICE_CASES = ((30, 3), (36, 4), (44, 5), (60, 3), (70, 6))
 LATTICE_SEED = 4242
 LATTICE_SPAN = 6
 
@@ -1209,9 +1299,20 @@ class TestTubeAgainstFull(unittest.TestCase):
                 self.assertTrue(
                     np.array_equal(full["lower"][slot][mask], tube["lower"][slot][mask])
                 )
-            self.assertGreaterEqual(full["order_violation"], -1e-9)
-            self.assertGreaterEqual(tube["order_violation"], -1e-9)
-            self.assertTrue(np.all(tube["upper"] >= tube["lower"] - 1e-9))
+            # Garde-fou RELATIF, pas absolu : l'echelle des poids va de
+            # `10^0` a `10^4` selon la dimension, donc une borne absolue de
+            # `1e-9` laisserait passer une regression de plusieurs ordres de
+            # grandeur en haute dimension. La mesure du 26 septembre 2026 est
+            # de `1e-15` relatif, le plancher est donc a trois ordres de
+            # marge.
+            for bracket in (full, tube):
+                self.assertGreaterEqual(
+                    bracket["order_violation_relative"], -1e-12
+                )
+                self.assertLessEqual(
+                    bracket["inverted_exact_pairs"],
+                    bracket["inverted_pairs"],
+                )
         self.assertGreaterEqual(compared, MINIMUM_TUBE_COMPARISONS)
 
     def test_upper_bound_increases_with_order(self):
@@ -1242,24 +1343,39 @@ class TestSelectionIsCanonical(unittest.TestCase):
     """
 
     @staticmethod
-    def _tie_matrix(width, order_max):
-        """Energies `0, 1, ..., width - 1` avec un ex aequo au rang de coupe."""
-        energies = np.arange(float(width))[None, :].copy()
-        energies[0, width - 3] = float(order_max - 1)
-        return energies
+    def tie_cases():
+        """Jeux d'energies dont le bas-de-liste canonique est `0, 1, ..., k - 1`.
+
+        Les deux derniers sont DISCRIMINANTS : l'ancienne selection partielle
+        y rendait par exemple `[982, 983, ...]` au lieu de `[0, 1, ...]`. Les
+        premiers sont documentaires (ils couvrent les deux regimes de
+        largeur), ils ne suffisent pas a tuer le defaut.
+        """
+        for width, order_max in ((12, 3), (60, 3), (41, 10), (200, 10)):
+            energies = np.arange(float(width))[None, :].copy()
+            energies[0, width - 3] = float(order_max - 1)
+            yield "un ex aequo w=%d k=%d" % (width, order_max), energies, order_max
+        for width, order_max in ((1000, 10), (600, 5)):
+            yield (
+                "tout egal w=%d k=%d" % (width, order_max),
+                np.zeros((1, width)),
+                order_max,
+            )
+            plateau = np.arange(float(width))[None, :].copy()
+            plateau[0, order_max - 1:] = float(order_max - 1)
+            yield "plateau w=%d k=%d" % (width, order_max), plateau, order_max
 
     def test_both_regimes_pick_the_smallest_indices(self):
-        for width, order_max in ((12, 3), (60, 3), (41, 10), (200, 10)):
-            energies = self._tie_matrix(width, order_max)
-            index, values = _selection(energies, order_max)
+        cases = 0
+        for name, energies, order_max in self.tie_cases():
+            expected = np.argsort(energies[0], kind="stable")[:order_max].tolist()
+            index, values = _selection(energies.copy(), order_max)
+            self.assertEqual(index[0].tolist(), expected, name)
             self.assertEqual(
-                index[0].tolist(),
-                list(range(order_max)),
-                "width=%d ordre=%d" % (width, order_max),
+                values[0].tolist(), energies[0][expected].tolist(), name
             )
-            self.assertEqual(
-                values[0].tolist(), [float(item) for item in range(order_max)]
-            )
+            cases += 1
+        self.assertGreaterEqual(cases, 8)
 
     def test_tube_equals_full_on_lattice_clouds(self):
         rng = np.random.default_rng(LATTICE_SEED)

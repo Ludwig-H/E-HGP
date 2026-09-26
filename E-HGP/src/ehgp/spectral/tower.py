@@ -28,21 +28,42 @@ Pour deux maxima locaux `c` et `c'`, le niveau de fusion vrai est
     lambda*(c, c') = max sur les chemins gamma de c a c'
                         de min sur gamma de f  ,
 
-le NIVEAU DE COL (theoreme du col de montagne). Tout chemin explicite donne
-donc un MINORANT de `lambda*` : un chemin est un certificat de connexite de
+le NIVEAU DE COL (theoreme du col de montagne). Un chemin CONTINU explicite
+donne donc un MINORANT de `lambda*` : c'est un certificat de connexite de
 `{ f >= min_gamma f }`, jamais de deconnexite. Consequence de sens :
 minorant sur l'axe `lambda` = MAJORANT sur l'axe `a` de HGP, exactement
 comme le maximum de `a_k` sur un segment dans `engine/segment.py` est un
 majorant du niveau de fusion. Les deux modules font la meme chose dans les
 deux echelles, et aucun des deux ne pretend a l'egalite.
 
-Le raffinement de chemin de ce module ne fait donc qu'une chose : AUGMENTER
-le minorant `min_gamma f`, c'est-a-dire ABAISSER le niveau `a` equivalent.
-Il est monotone par construction (tout pas qui n'ameliore pas est rejete),
-donc la suite des valeurs publiees est une suite croissante de minorants
-certifies du niveau de col du MODELE. Aucune borne superieure n'est
-produite : dire que la fusion n'a pas lieu au-dessus d'un niveau
-demanderait un argument global sur `f`, que ce module n'a pas.
+CE QUE LE CODE CALCULE N'EST PAS CE MINORANT, ET LE SENS DE L'ERREUR EST LE
+MAUVAIS. Le minimum sur un ECHANTILLON FINI du chemin MAJORE le minimum du
+chemin continu : echantillonner pousse la valeur publiee vers le HAUT, donc
+du cote non certifie. Le fait est MESURE, contre une minimisation
+unidimensionnelle bornee independante sur le meme segment, sur le melange de
+reference de `tests/test_spectral.py` : a 33 noeuds l'exces du minimum
+echantillonne sur le minimum reel du segment vaut `+2,0 e-2`, `+1,2 e-3` et
+`+2,3 e-4` selon la paire, et a 513 noeuds `+3,0 e-6`, `+7,3 e-5`,
+`+5,8 e-6`. Sur deux des trois paires, cet exces suffit a passer AU-DESSUS
+du niveau de col vrai, encadre independamment par etiquetage de composantes
+connexes sur une grille (`+1,1 e-3` et `+2,2 e-4` au-dessus). Le mot
+« certifie » serait donc faux, et c'est pourquoi il n'est pas employe.
+
+Ce que le module fait, et qui est exactement dans le bon sens : le minimum
+echantillonne est RAFFINE LE LONG DE L'AXE DU CHEMIN
+(`refine_along_path`), par grilles emboitees qui ne gardent que la plus
+petite valeur vue. La valeur renvoyee est donc DECROISSANTE en `path_refine`
+et converge vers le minimum reel du chemin, c'est-a-dire vers un vrai
+minorant. Le nombre de tours est publie dans l'enregistrement
+(`path_refine`), comme toute regularisation de ce chantier.
+
+Le raffinement TRANSVERSE (`raise_path`, hors defaut) fait l'autre moitie du
+travail : il cherche un MEILLEUR chemin, donc il AUGMENTE legitimement le
+minorant. Les deux se composent par un MAXIMUM sur les chemins essayes,
+puisque `lambda*` est un max sur les chemins : c'est ce que fait
+`_find_saddles`. Aucune borne superieure n'est produite : dire que la fusion
+n'a pas lieu au-dessus d'un niveau demanderait un argument global sur `f`,
+que ce module n'a pas.
 
 == 3. ARCHITECTURE, IDENTIQUE A CELLE DU NOYAU EXACT ==
 
@@ -281,27 +302,102 @@ def _agglomerate(positions, values, radius):
     return np.array(representatives), labels
 
 
-def path_minimum(value, left, right, samples):
-    """Minimum de `f` sur le segment droit, echantillonne a `samples` noeuds.
+def polyline_point(nodes, position):
+    """Point de la ligne brisee `nodes` au parametre `position`.
 
-    Renvoie `(niveau, noeuds)`. Les extremites sont exclues du minimum :
-    ce sont les maxima, et le niveau de col est un minimum INTERIEUR.
+    `position` parcourt `[0, len(nodes) - 1]` : l'entier `j` donne le noeud
+    `j`, et la partie fractionnaire interpole lineairement vers le suivant.
+    """
+    total = nodes.shape[0] - 1
+    clipped = min(max(float(position), 0.0), float(total))
+    lower = min(int(math.floor(clipped)), total - 1)
+    fraction = clipped - lower
+    return nodes[lower] + fraction * (nodes[lower + 1] - nodes[lower])
+
+
+def refine_along_path(value, nodes, start, rounds=5, probes=8):
+    """Descend le minimum ECHANTILLONNE vers le minimum REEL du chemin.
+
+    Pourquoi c'est necessaire, et pas cosmetique : le minimum sur un
+    echantillon fini d'un chemin MAJORE le minimum du chemin, donc il pousse
+    la valeur publiee du cote NON certifie (cf. paragraphe 2 du module). Le
+    raffinement se fait donc le long de l'AXE DU CHEMIN, par grilles
+    emboitees autour du noeud le plus faible : a chaque tour on sonde
+    `probes + 1` positions dans le bracket courant, on garde la plus petite
+    valeur vue, et on resserre le bracket d'un facteur `2 / probes`.
+
+    La valeur renvoyee est donc DECROISSANTE en `rounds` par construction (on
+    ne garde jamais une valeur plus grande), et elle converge vers le minimum
+    reel du chemin. Renvoie `(valeur, position)`.
+
+    Les extremites du chemin sont les maxima : ce sont les plus grandes
+    valeurs du chemin, donc le minimum ne peut pas s'y deplacer, et aucune
+    exclusion explicite n'est necessaire.
+    """
+    total = nodes.shape[0] - 1
+    best_position = min(max(float(start), 0.0), float(total))
+    best_value = float(
+        np.asarray(value(polyline_point(nodes, best_position)[None, :]), dtype=float)[0]
+    )
+    span = 1.0
+    calls = 1
+    for _round in range(int(rounds)):
+        offsets = np.linspace(-span, span, int(probes) + 1)
+        positions = best_position + offsets
+        positions = positions[(positions >= 0.0) & (positions <= float(total))]
+        if positions.size == 0:
+            break
+        points = np.array([polyline_point(nodes, position) for position in positions])
+        values = np.asarray(value(points), dtype=float)
+        calls += 1
+        slot = int(np.argmin(values))
+        if float(values[slot]) < best_value:
+            best_value = float(values[slot])
+            best_position = float(positions[slot])
+        span *= 2.0 / float(probes)
+    return best_value, best_position, calls
+
+
+def path_minimum(value, left, right, samples, refine=5, probes=8):
+    """Minimum de `f` sur le segment droit, echantillonne puis RAFFINE.
+
+    Renvoie `(niveau, noeuds, evaluations)`. Les extremites sont exclues du
+    minimum echantillonne : ce sont les maxima, et le niveau de col est un
+    minimum INTERIEUR. Le niveau renvoye est ensuite descendu par
+    `refine_along_path`, donc il est INFERIEUR OU EGAL au minimum
+    echantillonne : c'est le sens exige par le paragraphe 2 du module.
     """
     times = np.linspace(0.0, 1.0, samples)
     nodes = left[None, :] + times[:, None] * (right - left)[None, :]
     values = np.asarray(value(nodes), dtype=float)
-    interior = values[1:-1] if samples > 2 else values
-    return float(interior.min()), nodes
+    evaluations = int(samples)
+    if samples > 2:
+        weakest = 1 + int(np.argmin(values[1:-1]))
+    else:
+        weakest = int(np.argmin(values))
+    level = float(values[weakest])
+    if refine > 0 and samples > 2:
+        refined, _position, calls = refine_along_path(value, nodes, weakest, refine, probes)
+        level = min(level, refined)
+        evaluations += calls * (int(probes) + 1)
+    return level, nodes, evaluations
 
 
 def raise_path(value, gradient, nodes, steps, step, tolerance=1e-12):
-    """Relaxation monotone du chemin : n'accepte que ce qui MONTE le minimum.
+    """Relaxation TRANSVERSE du chemin : n'accepte que ce qui MONTE le minimum.
 
     A chaque iteration, le noeud interieur qui realise le minimum fait un
     pas de gradient ; le pas est accepte seulement si le minimum sur le
     chemin augmente strictement, sinon il est divise par deux. La valeur
-    renvoyee est donc superieure ou egale a celle du chemin initial : c'est
-    un minorant du niveau de col au moins aussi bon (paragraphe 2).
+    renvoyee est donc superieure ou egale au minimum ECHANTILLONNE du chemin
+    initial : c'est la recherche d'un MEILLEUR chemin, donc la moitie
+    legitime du travail (paragraphe 2).
+
+    Attention au sens : cette valeur est un minimum echantillonne, elle porte
+    donc le meme biais vers le haut que `path_minimum` avant raffinement.
+    C'est `_find_saddles` qui compose les deux en prenant le MAXIMUM des
+    minima RAFFINES des chemins essayes, ce qui est exactement la definition
+    de `lambda*` comme max sur les chemins.
     """
     nodes = np.array(nodes, dtype=float, copy=True)
     values = np.asarray(value(nodes), dtype=float).copy()
@@ -354,6 +450,7 @@ class SpectralTower:
         ascent_tolerance=1e-8,
         merge_radius=None,
         path_samples=33,
+        path_refine=5,
         refine_steps=0,
         refine_step=None,
         pair_limit=96,
@@ -379,6 +476,7 @@ class SpectralTower:
         self.ascent_tolerance = float(ascent_tolerance)
         self.merge_radius = 0.02 * self.spread if merge_radius is None else float(merge_radius)
         self.path_samples = int(path_samples)
+        self.path_refine = int(path_refine)
         self.refine_steps = int(refine_steps)
         self.refine_step = (
             0.10 * self.spread if refine_step is None else float(refine_step)
@@ -484,12 +582,16 @@ class SpectralTower:
     def _find_saddles(self):
         self.saddle = {}
         for left, right in self._candidate_pairs():
-            level, nodes = path_minimum(
-                self.value, self.maxima[left], self.maxima[right], self.path_samples
+            level, nodes, evaluations = path_minimum(
+                self.value,
+                self.maxima[left],
+                self.maxima[right],
+                self.path_samples,
+                self.path_refine,
             )
-            self.path_evaluations += self.path_samples
+            self.path_evaluations += evaluations
             if self.refine_steps > 0:
-                level, _nodes, accepted = raise_path(
+                raised, relaxed, accepted = raise_path(
                     self.value,
                     self.gradient,
                     nodes,
@@ -497,7 +599,21 @@ class SpectralTower:
                     self.refine_step,
                 )
                 self.refinement_accepted += accepted
-                self.path_evaluations += accepted + self.refine_steps
+                # Chaque iteration de `raise_path` evalue tout le jeu de
+                # noeuds : le compteur suit les evaluations REELLES, il n'est
+                # pas une annonce.
+                self.path_evaluations += (1 + self.refine_steps) * relaxed.shape[0]
+                if self.path_refine > 0 and relaxed.shape[0] > 2:
+                    values = np.asarray(self.value(relaxed), dtype=float)
+                    weakest = 1 + int(np.argmin(values[1:-1]))
+                    refined, _position, calls = refine_along_path(
+                        self.value, relaxed, weakest, self.path_refine
+                    )
+                    self.path_evaluations += relaxed.shape[0] + 9 * calls
+                    raised = min(float(values[weakest]), refined)
+                # `lambda*` est un MAX sur les chemins : on garde le meilleur
+                # minorant des deux chemins essayes, jamais le dernier calcule.
+                level = max(level, raised)
             self.saddle[(left, right)] = level
 
     # -- (c) liaison simple --------------------------------------------
@@ -545,8 +661,19 @@ class SpectralTower:
         return restored
 
     def achieved_classes(self, classes):
-        """Nombre de classes reellement obtenu (borne par le nombre de maxima)."""
-        return int(min(classes, self.maximum_count))
+        """Nombre de classes reellement obtenu par `partition(classes)`.
+
+        Ce n'est pas `min(classes, maximum_count)` : quand le graphe des
+        paires candidates n'est pas connexe (possible des que
+        `pairs_restricted` est vrai, donc au-dela de `pair_limit ** 2` paires),
+        il manque des fusions et la coupe rend PLUS de classes que demande.
+        Le compte honnete est donc le nombre de maxima moins le nombre de
+        fusions REELLEMENT disponibles. Dans le cas connexe
+        (`len(merges) == maximum_count - 1`) cette expression redonne
+        exactement `min(classes, maximum_count)`.
+        """
+        wanted = max(0, self.maximum_count - max(1, int(classes)))
+        return int(self.maximum_count - min(len(self.merges), wanted))
 
     def gap_classes(self, max_classes=12):
         """Nombre de classes propose spontanement par le plus grand saut.
@@ -565,6 +692,15 @@ class SpectralTower:
         maxima trouves (`maximum_count`) et la regle de persistance de la
         sonde sont de meilleurs indicateurs ; celle-ci reste comme temoin
         minimal, sans modele.
+
+        DOMAINE D'ARRIVEE, declare parce qu'il n'est pas `2 .. max_classes` :
+        le saut a `c` classes demande `levels[P - c]` ET `levels[P - c - 1]`,
+        donc `c = P` (aucune fusion appliquee, pas de niveau precedent) est
+        inatteignable, et avec exactement deux maxima la regle ne peut jamais
+        proposer 2. La valeur renvoyee vit donc dans `1 .. P - 1`, et le `1`
+        signifie « aucun saut exploitable », pas « une seule composante ».
+        C'est mesure dans la sonde : une cellule a `P = 2` y affiche
+        `gap_s = 1` a cote de `per_s = 2`.
         """
         levels = [level for level, _left, _right in self.merges]
         total = self.maximum_count
@@ -625,6 +761,7 @@ class SpectralTower:
             "dimension": self.dimension,
             "maximum_count": self.maximum_count,
             "path_samples": self.path_samples,
+            "path_refine": self.path_refine,
             "refine_steps": self.refine_steps,
             "pairs_restricted": bool(getattr(self, "pairs_restricted", False)),
             "unconverged": self.unconverged,

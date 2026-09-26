@@ -292,9 +292,18 @@ Trois lectures, dans cet ordre.
    ($0{,}105$ puis $0{,}000$ aux ordres élevés dès $d=10$), la tour du modèle
    tient ($0{,}997$ puis $0{,}994$). L'écart atteint $+0{,}994$ à $(d=50,k=5)$.
    C'est la justification applicative du changement d'objet.
-2. **En dimension 2 elle est moins bonne** ($-0{,}33$) : la régularisation
-   coûte de la résolution là où le comptage empirique de boules fonctionne. La
-   voie régularisée n'est donc pas un remplacement universel mais un régime.
+2. **CORRECTION.** J'ai d'abord lu un déficit en dimension 2 ($0{,}667$
+   contre $1{,}000$) comme « la régularisation coûte de la résolution là où le
+   comptage empirique fonctionne ». **C'était faux.** La campagne complète,
+   rejouée avec 128 descripteurs, donne $0{,}999$ en $d=2$, et un balayage du
+   nombre de descripteurs à $d=2$, ordre 5, trois graines, donne $0{,}997$
+   ($m=64$), $1{,}000$ ($m=128$), $\mathbf{0{,}667}$ ($m=256$), $0{,}997$
+   ($m=512$). Ce n'est donc pas un sur-paramétrage monotone mais une
+   **instabilité isolée** à une valeur de $m$ — à rapprocher du rang
+   déficient de $\Sigma_q$ en petite dimension (146 sur 256 en $d=2$). Le
+   fait à retenir n'est pas « moins bonne en $d=2$ » mais : **la qualité
+   n'est pas monotone en $m$, donc la méthode n'est pas encore calibrée**, et
+   publier sans balayer $m$ serait une faute.
 3. **À $d=200$ les deux tombent** ($0{,}362$ contre $0{,}000$) : mieux, pas
    résolu. Avec des descripteurs fixes, l'effondrement annoncé par la théorie
    finit par arriver ; c'est exactement la limite de l'apprentissage de

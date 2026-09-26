@@ -1,0 +1,6 @@
+m=64   : none 2 5 3 : ARI emp 0.914 / ARI spec 0.997
+m=128  : none 2 5 3 : ARI emp 0.914 / ARI spec 1.000
+m=256  : none 2 5 3 : ARI emp 0.914 / ARI spec 0.667
+m=512  : none 2 5 3 : ARI emp 0.914 / ARI spec 0.997
+
+commande : OPENBLAS_NUM_THREADS=1 python3 -O bench/spectral_tower.py --dims 2 --intrinsic 2 --n 300 --orders 5 --noise-modes none --features $m --seeds 3

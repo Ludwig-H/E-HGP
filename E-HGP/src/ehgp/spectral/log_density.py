@@ -155,14 +155,31 @@ la decomposition tronquee : ecart MESURE de l'ordre de `1 e-7` sur des
 log-densites de l'ordre de `3`.
 
 Role de la dimension `d` dans les garanties, honnetement. La VARIANCE est
-libre en dimension : elle se gouverne par `m` et `n` (regime `m/n` fixe),
-et le cout est `O(m^2 n + m^3)`, sans aucun `C(n, k)`. Le BIAIS ne l'est
-pas : approcher un element de la boule du RKHS gaussien a precision `eta`
-demande en general `m` de l'ordre de `eta^{-d}` descripteurs, et la
-largeur de bande de l'heuristique de la mediane croit comme `sqrt(d)`. La
-dimension n'entre donc plus dans le COUT ni dans la VARIANCE, elle reste
-entiere dans le BIAIS D'APPROXIMATION. C'est le deplacement exact que ce
-module opere ; c'est un deplacement, pas une victoire.
+libre en dimension : elle se gouverne par `m` et `n` (regime `m/n` fixe).
+Le COUT ne l'est pas, contrairement a ce qu'un raccourci en `O(m^2 n + m^3)`
+laisserait croire : l'ajustement compte
+
+    O(n d^2)      covariance empirique de l'echantillon ,
+    O(n m d)      plongement des observations ,
+    O(m^2 d)      moments analytiques de la reference (paragraphe 6) ,
+    O(m^2 n)      moments empiriques `Sigma_p` ,
+    O(m^3)        decomposition generalisee ,
+
+et c'est bien cette somme que publie `self.cost["multiply_add"]`. MESURE
+(temps CPU du processus, BLAS monofil, meilleur de trois) : a `m = 128`
+fixe et `n = 2000`, doubler `d` de 25 a 400 multiplie le temps par `2^1,06`
+au dernier doublement, donc le cout est LINEAIRE en `d` et non independant
+de `d` ; a `d = 50` et `m = 128`, doubler `n` de 500 a 8000 donne une pente
+`1,00` (lineaire en `n`) ; a `d = 50` et `n = 2000`, doubler `m` de 32 a 512
+donne une pente `1,86` (entre `m^2` et `m^3`, conforme a `m^2 n` dominant).
+
+Le BIAIS, lui, reste entierement dimensionnel : approcher un element de la
+boule du RKHS gaussien a precision `eta` demande en general `m` de l'ordre
+de `eta^{-d}` descripteurs, et la largeur de bande de l'heuristique de la
+mediane croit comme `sqrt(d)`. Ce que ce module obtient est donc precis :
+la dimension entre dans le cout POLYNOMIALEMENT (`n d^2 + n m d`) et jamais
+par un `C(n, k)`, elle sort de la VARIANCE, et elle reste entiere dans le
+BIAIS D'APPROXIMATION. C'est un deplacement, pas une victoire.
 
 == 6. MOMENTS ANALYTIQUES DE LA REFERENCE GAUSSIENNE ==
 
@@ -260,17 +277,31 @@ def spectral_filter(eigenvalues, rho_max=1.0, floor=1e-10):
 
     Renvoie `(valeurs, nombre_de_valeurs_plaquees)`. Les valeurs propres
     generalisees sont positives (les deux matrices sont semi-definies
-    positives) mais peuvent etre nulles : `G` diverge alors pour
-    `rho_max = 1`, ce qui est la divergence VRAIE de l'integrale de
-    Kullback-Leibler. Deux regularisations sont disponibles et declarees :
-    un plancher `floor` sur les valeurs propres, et la troncature
-    `rho_max < 1` de l'integrale en `rho`, qui est la plus honnete des deux
-    puisqu'elle reste une f-divergence exacte (un melange de chi-deux
-    ponderes sur `[0, rho_max]`).
+    positives) mais peuvent etre nulles, et l'arithmetique flottante en rend
+    de legerement NEGATIVES (mesure : 33 des 146 directions retenues en
+    dimension 2 avec `m = 256`). `G` diverge alors pour `rho_max = 1`, ce qui
+    est la divergence VRAIE de l'integrale de Kullback-Leibler.
+
+    Deux regularisations sont disponibles et declarees, et elles NE SE
+    CUMULENT PAS, ce qui serait une regularisation silencieuse :
+
+    * la projection exacte sur le cone semi-defini positif (`max(lambda, 0)`)
+      est toujours appliquee : ce n'est pas un reglage, c'est la correction du
+      seul artefact flottant ;
+    * le plancher `floor` n'est applique QUE pour `rho_max >= 1`, la ou `G`
+      diverge en zero. Pour `rho_max < 1` la troncature de l'integrale suffit
+      a rendre `G` finie en zero (`1 + rho_max (lambda - 1) >= 1 - rho_max`),
+      et c'est la plus honnete des deux puisqu'elle reste une f-divergence
+      exacte (un melange de chi-deux ponderes sur `[0, rho_max]`).
+
+    `clamped` compte les valeurs REELLEMENT modifiees, jamais les valeurs
+    simplement petites.
     """
     eigenvalues = np.asarray(eigenvalues, dtype=float)
-    clamped = int(np.count_nonzero(eigenvalues < floor))
-    safe = np.maximum(eigenvalues, floor)
+    safe = np.maximum(eigenvalues, 0.0)
+    if rho_max >= 1.0:
+        safe = np.maximum(safe, floor)
+    clamped = int(np.count_nonzero(safe != eigenvalues))
     shifted = 1.0 + rho_max * (safe - 1.0)
     if np.any(shifted <= 0.0):
         raise SingularReference(
@@ -531,7 +562,11 @@ class SpectralLogDensity:
     generalisee et le vecteur `Theta` de la forme close (C) ; `evaluate`
     et `gradient` repondent partout ; `log_density` ajoute `log q`.
 
-    Cout : `O(m^2 n + m^3)` par construction, compte dans `self.cost`.
+    Cout : `O(n d^2 + n m d + m^2 d + m^2 n + m^3)`, compte terme a terme
+    dans `self.cost["multiply_add"]` et MESURE au paragraphe 5 du module. Les
+    deux termes en `d` ne sont pas negligeables : a `d = 400` ils dominent.
+    Aucun terme en `C(n, k)` n'apparait, et c'est la seule affirmation de
+    cout que ce module fait.
     """
 
     def __init__(

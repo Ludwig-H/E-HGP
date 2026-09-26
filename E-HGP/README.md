@@ -153,7 +153,7 @@ Acquis, avec la commande qui le reproduit :
 | bruit ambiant sur une variété de rang 2 : exposant du compte de naissances $1{,}96$ (quadratique) | **mesuré** |
 | blanchiment interdit : en rang $d\geq n-1$ la tour devient celle d'un simplexe régulier, indépendante des données | **démontré** |
 | tour régularisée contre tour empirique sous bruit ambiant : ARI $0{,}994$ contre $0{,}000$ à $(d=50,k=5)$ | **mesuré** |
-| la voie régularisée est moins bonne en $d=2$ ($-0{,}33$ d'ARI) : c'est un régime, pas un remplacement | **mesuré** |
+| la qualité de la tour spectrale n'est pas monotone en nombre de descripteurs ($0{,}997$ / $1{,}000$ / $0{,}667$ / $0{,}997$ pour $m=64/128/256/512$ en $d=2$) | **mesuré** : méthode non calibrée, balayer $m$ est obligatoire |
 | couche statistique utile à $d=200$ avec des descripteurs FIXES | **non acquis** ($0{,}362$ d'ARI) |
 | l'axe d'ordre $k$ apporte quelque chose comme clusterer sur des distances euclidiennes brutes | **réfuté** : $-0{,}06$ à $-0{,}28$ d'ARI contre $k=1$ sur 200 cellules, et la famille densitaire est dominée par Ward et $k$-moyennes |
 | la tour E-HGP est un autre objet que la *reachability* mutuelle, et meilleur à ordre égal ($0{,}240$ contre $0{,}115$ en $d=1000$) | **mesuré** |
