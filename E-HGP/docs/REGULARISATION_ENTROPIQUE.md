@@ -136,11 +136,21 @@ est double, et il faut le dire exactement :
    associée est $w^2/2$, donc le noyau rampe. La forme close de Bach et la
    forme close du niveau de Fermi rampe (§ 4) sont deux faces de la même
    quadraticité ;
-2. **conjectural** : que le noyau logistique (entropie de Shannon) soit
-   l'intégrale en $\rho$ des noyaux rampe pondérés, comme la divergence de
-   Kullback–Leibler est l'intégrale des $f_{\rho}$, est une identité
-   plausible mais **non démontrée ici**. Elle est marquée comme question
-   ouverte, pas comme résultat.
+2. **résolu depuis** (et c'est mieux que ce que j'espérais) : la famille
+   $f_{\rho}$ n'est pas une simple température. L'intégrale en $\rho$ des
+   potentiels optimaux de la famille a une **forme close spectrale** : avec
+   $(\lambda_i,v_i)$ la décomposition généralisée du couple
+   $(\Sigma_p,\Sigma_q)$ et $\Delta\mu=\mu_p-\mu_q$,
+
+   $$\log\frac{dp}{dq}=\Theta^{\top}\varphi,\qquad \Theta=\sum_iG(\lambda_i)\left(v_i^{\top}\Delta\mu\right)v_i,\qquad G(\lambda)=\frac{\log\lambda}{\lambda-1}.$$
+
+   Le filtre $G$ est **exactement ce qui fait marcher l'estimateur** : le
+   réduire au seul membre $\rho=0$ (khi-deux de Pearson, donc $G\equiv1$,
+   aucun amortissement) fait passer l'erreur de log-densité de $0{,}13$–$0{,}33$
+   à $0{,}62$–$0{,}70$, et elle **cesse de décroître avec $n$**. C'est un
+   mutant tué, et c'est la justification quantitative de la famille de
+   $f$-divergences : la rampe seule ne suffit pas, c'est la pondération en
+   $\rho$ qui amortit les directions mal conditionnées.
 
 Ce que la famille $f_\rho$ apporte en propre est ailleurs, et c'est décisif
 pour la grande dimension : elle donne un estimateur **spectral** du
@@ -365,8 +375,10 @@ donc la métrique — et pas seulement l'axe des niveaux. C'est l'objet de
 
 ## 8. Questions ouvertes
 
-1. L'identité intégrale $\rho$ entre noyau logistique et noyaux rampe
-   pondérés (§ 2) : vraie ou fausse ?
+1. L'identité intégrale en $\rho$ est résolue du côté des POTENTIELS (§ 2,
+   filtre $G(\lambda)=\log\lambda/(\lambda-1)$). Reste ouvert le côté des
+   OCCUPATIONS : le noyau logistique est-il l'intégrale en $\rho$ des noyaux
+   rampe pondérés, au sens du programme de masse du § 1 ?
 2. Le théorème A2 rend l'exactitude certifiable, mais son hypothèse (H2)
    demande un certificat de chemin par composante trouvée : quel est le coût
    réel de ce certificat, et existe-t-il un test suffisant plus faible ?

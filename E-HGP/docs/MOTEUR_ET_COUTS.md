@@ -300,6 +300,46 @@ Trois lectures, dans cet ordre.
    finit par arriver ; c'est exactement la limite de l'apprentissage de
    descripteurs annoncée ci-dessus.
 
+**Campagne complète (84 cellules), et ce qu'elle change.** La sonde a été
+rejouée sur toute sa grille ($d=2,10,50,200$, dimension intrinsèque 2 et 5,
+$n=300$ et $1000$, ordres 1 et 5, trois régimes de bruit, 128 descripteurs).
+Quatre faits nouveaux, dans l'ordre de leur importance.
+
+1. **La nature de la barrière change.** Pour la tour empirique, la dimension
+   est un **mur** ; pour la tour spectrale, c'est une **taille
+   d'échantillon**. À $d=50$, régime `per_coordinate`, l'indice de Rand
+   spectral passe de $0{,}66$ ($n=300$) à $0{,}989$ ($n=1000$) et $0{,}983$
+   ($n=3000$), tandis que l'empirique reste nul aux trois tailles. C'est la
+   différence entre « il faut plus de données » et « il n'y a plus rien à
+   lire ».
+2. **La cause se mesure sans étiquettes.** Le contraste des distances
+   $\mathrm{inter}/\mathrm{intra}-1$ vaut $4{,}28$ sans bruit ambiant à
+   toutes les dimensions, et décroît en $1/d$ sous bruit par coordonnée :
+   $1{,}32$ ($d=10$), $0{,}361$ ($d=50$), $0{,}101$ ($d=200$). Les seuils de
+   survie mesurés sont $\approx1{,}3$ pour la tour empirique et
+   $\approx0{,}36$ pour la tour spectrale : **un facteur 4 en contraste
+   tolérable**, ce qui est exactement le gain observé en dimension ambiante.
+3. **L'effondrement est diagnosticable sans vérité terrain** : il se lit dans
+   la contraction du spectre généralisé vers $1$ et dans la chute de la
+   divergence de Kullback-Leibler du modèle ($1{,}369$ en $d=2$ ; $0{,}323$ en
+   $d=50$ ; $0{,}099$ en $d=200$). Une implémentation peut donc **refuser**
+   au lieu de publier une tour de bruit.
+4. **Réfutation de l'espoir maximal.** La régularisation par $f$-divergence
+   ne casse pas la malédiction de la dimension, elle la **déplace**. À
+   $d=200$, ni $n=3000$ ni $m=512$ descripteurs ne ramènent un seul mode
+   supplémentaire ni un indice de Rand non nul : la cause n'est ni
+   statistique ni algorithmique, c'est le contraste lui-même.
+
+**Deux pièges de méthode, mesurés, à ne pas reproduire.** Une ascension de
+gradient **non convergée fabrique des maxima** : en $d=50$ une montée à pas
+adaptatif annonce 53 points d'arrivée distincts après 160 itérations (gradient
+médian encore $0{,}27$) là où une ascension quasi-Newton convergée
+($\left\Vert g\right\Vert\leq3\cdot10^{-6}$) en trouve 3. Et
+$\Sigma_q$ est de rang **déficient en petite dimension** (146 sur 256 en
+$d=2$) et de rang plein dès $d=5$ : la classe engendrée par $m$ descripteurs
+de Fourier est plus petite que $m$ quand le noyau est trop lisse pour la
+dimension, ce qui est l'inverse de l'intuition.
+
 **Conclusion de conception, assumée.** La couche statistique de E-HGP n'est
 viable que sous une hypothèse explicite de **structure latente de faible
 dimension**. Cette hypothèse doit être énoncée, mesurée
@@ -360,6 +400,34 @@ toutes les familles) donne exactement la même conclusion :
 Une réserve honnête subsiste : le DBSCAN cité utilise un rayon **oracle**
 ($0{,}871$ et $0{,}821$), donc il majore ce qu'une méthode réglable
 obtiendrait.
+
+**Campagne complète (200 cellules, 5 graines, 4 familles, 5 dimensions).** Le
+verdict tient, et trois précisions s'ajoutent.
+
+* **Le verdict ne dépend pas de la largeur de l'encadrement** : la même tour
+  lue du côté minorant donne le même classement, $k=1$ devant, puis $k=2$,
+  puis $k=5$ et $k=10$.
+* **La tour E-HGP est bien un AUTRE objet que la *reachability* mutuelle, et
+  un objet meilleur** : à ordre égal elle domine systématiquement ($d=1000$,
+  coupe au vrai nombre, $k=2$ : $0{,}240$ contre $0{,}115$). La différence
+  vient de l'intérieur du segment. Contre-exemple utile à l'idée que la tour
+  dégénère toujours : sur mélange gaussien isotrope en $d=1000$ à $k=2$, la
+  part des couples où l'intérieur contraint tombe à $0{,}0002$ — la tour
+  **est** alors la *reachability* — mais sur les familles variété et filament
+  à la même dimension elle contraint encore.
+* **Aucun régime ne sauve l'axe d'ordre dans ce banc** : ni le bruit de fond
+  ($-0{,}148$ à $-0{,}275$ en $d\geq50$), ni les densités différentes, ni les
+  amas filiformes.
+
+**La conjecture de sortie, et c'est la piste la plus prometteuse du chantier.**
+Ce qui manque à la tour n'est peut-être pas l'axe d'ordre mais la **règle
+d'extraction**. À coupe égale et niveau unique la tour perd ; HDBSCAN gagne
+**avec le même graphe de base** et un excès de masse par branche ($0{,}821$
+contre $0{,}314$ en $d=1000$). Or la ligne enregistrée du dépôt possède déjà
+un rendu `select_excess_of_mass` (`morsehgp3d/include/morsehgp3d/morsehgp3d.hpp`).
+Brancher un extracteur par excès de masse sur la tour, au lieu d'une coupe à
+niveau unique, est un test à faire avant de conclure quoi que ce soit sur la
+valeur de l'objet comme clusterer.
 
 **Conséquence, à mettre en face du § 5.** La valeur de la voie E-HGP n'est
 pas dans l'axe d'ordre appliqué à des distances euclidiennes brutes — mesuré

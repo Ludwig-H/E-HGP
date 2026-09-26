@@ -66,6 +66,7 @@ import json
 import sys
 import time
 import unittest
+import zlib
 from pathlib import Path
 
 import numpy as np
@@ -77,8 +78,10 @@ if SOURCE_ROOT not in sys.path:
 from ehgp.engine.fast_point_tower import (  # noqa: E402
     FastPointTower,
     LinkageTower,
+    _selection,
     certify_against_exact,
     mutual_reachability,
+    sample_times,
     segment_brackets,
     squared_distances,
     upper_pairs,
@@ -338,13 +341,22 @@ def dendrogram_labels(tower, clusters, min_size, max_clusters=25):
     arbres du banc, plus le rejet des non-nes et des groupes trop petits.
     `peak` : niveau ou le nombre de groupes recevables est maximal, seule
     regle du banc qui utilise vraiment l'axe des naissances.
+
+    La quatrieme sortie dit si la regle du pic a trouve un niveau RECEVABLE
+    (entre `2` et `max_clusters` groupes d'au moins `min_size` observations
+    nees). Quand elle n'en trouve aucun, `peak_level` retombe sur le dernier
+    niveau, donc sur une partition triviale a un seul groupe : c'est un
+    ECHEC de la regle et il doit etre compte, pas noye dans une moyenne
+    d'indices de Rand. Sans ce drapeau, une colonne de moyennes peut etre
+    tiree vers le bas par des cellules ou rien n'a ete mesure.
     """
     level, _groups = tower.spontaneous_level(max_clusters=max_clusters)
-    summit, _peak = tower.peak_level(min_size=min_size, max_clusters=max_clusters)
+    summit, admissible = tower.peak_level(min_size=min_size, max_clusters=max_clusters)
     return (
         tower.labels_fixed(clusters),
         tower.labels_at(level, min_size=min_size),
         tower.labels_at(summit, min_size=min_size),
+        admissible >= 2,
     )
 
 
@@ -405,9 +417,24 @@ def hdbscan_labels(points, order, min_size):
 # ----------------------------------------------------------------------------
 
 
+def cell_seed(family, dim, noise_share, seed):
+    """Graine d'une cellule : fonction STABLE de ses coordonnees de grille.
+
+    `hash()` d'une chaine est randomise par processus (PYTHONHASHSEED), donc
+    l'employer ici rendait chaque relance d'une meme cellule differente : le
+    nuage, le nombre de classes vrai et le digest changeaient d'un processus
+    a l'autre, et aucun chiffre de campagne n'etait reproductible. `crc32`
+    est une fonction du contenu, pas de l'execution. Les valeurs attendues
+    sont gravees dans la porte.
+    """
+    family_key = zlib.crc32(family.encode("ascii")) % 997
+    noise_key = int(round(float(noise_share) * 1000.0))
+    return int(seed) * 1000003 + int(dim) * 101 + family_key + noise_key * 10007
+
+
 def run_cell(family, dim, noise_share, seed, count, orders, intervals, mode, min_size):
     """Execute toutes les methodes sur un jeu, renvoie une ligne de mesures."""
-    rng = np.random.default_rng(seed * 1000003 + dim * 101 + hash(family) % 997)
+    rng = np.random.default_rng(cell_seed(family, dim, noise_share, seed))
     points, truth, clusters = make_dataset(family, rng, count, dim, noise_share)
     row = {
         "family": family,
@@ -438,8 +465,10 @@ def run_cell(family, dim, noise_share, seed, count, orders, intervals, mode, min
     }
     row["digest"] = tower.digest()
 
-    def record(name, fixed, auto, peak, wall, note=""):
+    def record(name, fixed, auto, peak, wall, note="", peak_ok=None):
         entry = {"wall": wall, "note": note}
+        if peak_ok is not None:
+            entry["peak_admissible"] = bool(peak_ok)
         for key, labels in (("fixed", fixed), ("auto", auto), ("peak", peak)):
             if labels is not None:
                 entry[key] = score_labels(truth, labels)
@@ -449,11 +478,13 @@ def run_cell(family, dim, noise_share, seed, count, orders, intervals, mode, min
     for order in tower.orders:
         start = time.perf_counter()
         upper = tower.tower(order, "upper")
-        fixed, auto, peak = dendrogram_labels(upper, clusters, min_size)
+        fixed, auto, peak, peak_ok = dendrogram_labels(upper, clusters, min_size)
         wall = time.perf_counter() - start
         start = time.perf_counter()
         lower = tower.tower(order, "lower")
-        fixed_low, auto_low, peak_low = dendrogram_labels(lower, clusters, min_size)
+        fixed_low, auto_low, peak_low, peak_ok_low = dendrogram_labels(
+            lower, clusters, min_size
+        )
         wall_low = time.perf_counter() - start
         agreement = adjusted_rand_index(fixed, fixed_low)
         entry = record(
@@ -463,6 +494,7 @@ def run_cell(family, dim, noise_share, seed, count, orders, intervals, mode, min
             peak,
             tower_wall + wall,
             note="accord majorant/minorant ari=%.4f" % agreement,
+            peak_ok=peak_ok,
         )
         entry["bracket_agreement"] = agreement
         # La MEME tour lue du cote minorant. Elle n'est pas un objet publiable
@@ -476,15 +508,30 @@ def run_cell(family, dim, noise_share, seed, count, orders, intervals, mode, min
             peak_low,
             tower_wall + wall_low,
             note="lecture du MINORANT de l'encadrement, sensibilite seulement",
+            peak_ok=peak_ok_low,
         )
         start = time.perf_counter()
         reach = tower.reachability_tower(order, quarter=True)
-        fixed, auto, peak = dendrogram_labels(reach, clusters, min_size)
-        record("reach_k%d" % order, fixed, auto, peak, time.perf_counter() - start)
+        fixed, auto, peak, peak_ok = dendrogram_labels(reach, clusters, min_size)
+        record(
+            "reach_k%d" % order,
+            fixed,
+            auto,
+            peak,
+            time.perf_counter() - start,
+            peak_ok=peak_ok,
+        )
     start = time.perf_counter()
     simple = single_linkage_tower(tower.distances, tower.count)
-    fixed, auto, peak = dendrogram_labels(simple, clusters, min_size)
-    record("single_linkage", fixed, auto, peak, time.perf_counter() - start)
+    fixed, auto, peak, peak_ok = dendrogram_labels(simple, clusters, min_size)
+    record(
+        "single_linkage",
+        fixed,
+        auto,
+        peak,
+        time.perf_counter() - start,
+        peak_ok=peak_ok,
+    )
     start = time.perf_counter()
     fixed = ward_labels(points, clusters)
     record("ward", fixed, None, None, time.perf_counter() - start)
@@ -1053,8 +1100,42 @@ GRAVEN_CLOUDS = (
 MINIMUM_PAIRS_CHECKED = 600
 MINIMUM_CERTIFIED = 200
 MINIMUM_TUBE_COMPARISONS = 4000
+MINIMUM_LATTICE_COMPARISONS = 30000
+MINIMUM_BOUNDARY_TIES = 500
 MINIMUM_ORDER_ONE_CHECKS = 12
 REQUIRED_DIMENSIONS = (2, 3, 5, 20)
+
+# Nuages entiers a pas court : le regime ou les energies sont EX AEQUO au rang
+# de coupe, donc le seul ou la canonicite du bas-de-liste se voit. Un nuage
+# gaussien n'en produit pratiquement aucun, d'ou le plancher de couverture.
+LATTICE_CASES = ((30, 3), (36, 4), (44, 5))
+LATTICE_SEED = 4242
+LATTICE_SPAN = 6
+
+
+def lattice_cloud(rng, count, dim, span=LATTICE_SPAN):
+    """Nuage a coordonnees entieres dans `[0, span)`, donc riche en ex aequo."""
+    return rng.integers(0, span, size=(count, dim)).astype(np.float64)
+
+
+def boundary_tie_events(points, order, intervals=8):
+    """Instants ou l'energie du rang `order` egale celle du rang `order + 1`.
+
+    Compteur de couverture, jamais une mesure de qualite : sans ex aequo au
+    rang de coupe, la porte de canonicite du bas-de-liste serait verte par
+    vacuite.
+    """
+    distances = squared_distances(points)
+    rows, columns = upper_pairs(distances.shape[0])
+    leading = distances[rows, columns][:, None]
+    base = distances[rows, :]
+    slope = distances[columns, :] - base - leading
+    events = 0
+    for time_point in sample_times(intervals):
+        energies = base + time_point * slope + leading * (time_point * time_point)
+        window = np.partition(energies, order, axis=1)[:, order - 1:order + 1]
+        events += int(np.sum(window[:, 0] == window[:, 1]))
+    return events
 
 
 class TestBracketAgainstExact(unittest.TestCase):
@@ -1148,6 +1229,98 @@ class TestTubeAgainstFull(unittest.TestCase):
                 self.assertTrue(
                     np.all(bracket["entry"][:, slot] >= bracket["entry"][:, slot - 1])
                 )
+
+
+class TestSelectionIsCanonical(unittest.TestCase):
+    """Le bas-de-liste est le jeu CANONIQUE, ex aequo au rang de coupe compris.
+
+    Fixture permanente du defaut trouve le 26 septembre 2026 : la selection
+    partielle choisissait un jeu arbitraire parmi les colonnes ex aequo au
+    rang `order_max`, et les retrier apres coup ne reparait rien. Le mode
+    complet et le mode tube publiaient alors deux majorants differents (tous
+    deux valides) sur les nuages a coordonnees entieres.
+    """
+
+    @staticmethod
+    def _tie_matrix(width, order_max):
+        """Energies `0, 1, ..., width - 1` avec un ex aequo au rang de coupe."""
+        energies = np.arange(float(width))[None, :].copy()
+        energies[0, width - 3] = float(order_max - 1)
+        return energies
+
+    def test_both_regimes_pick_the_smallest_indices(self):
+        for width, order_max in ((12, 3), (60, 3), (41, 10), (200, 10)):
+            energies = self._tie_matrix(width, order_max)
+            index, values = _selection(energies, order_max)
+            self.assertEqual(
+                index[0].tolist(),
+                list(range(order_max)),
+                "width=%d ordre=%d" % (width, order_max),
+            )
+            self.assertEqual(
+                values[0].tolist(), [float(item) for item in range(order_max)]
+            )
+
+    def test_tube_equals_full_on_lattice_clouds(self):
+        rng = np.random.default_rng(LATTICE_SEED)
+        orders = (1, 2, 5, 10)
+        compared = 0
+        ties = 0
+        for count, dim in LATTICE_CASES:
+            cloud = lattice_cloud(rng, count, dim)
+            ties += boundary_tie_events(cloud, orders[-1])
+            full = segment_brackets(cloud, orders, intervals=8, mode="full")
+            tube = segment_brackets(cloud, orders, intervals=8, mode="tube")
+            for slot in range(len(orders)):
+                mask = tube["tube_certified"][slot]
+                compared += int(mask.sum())
+                self.assertTrue(
+                    np.array_equal(
+                        full["upper"][slot][mask], tube["upper"][slot][mask]
+                    ),
+                    "majorant n=%d d=%d ordre=%d" % (count, dim, orders[slot]),
+                )
+                self.assertTrue(
+                    np.array_equal(
+                        full["lower"][slot][mask], tube["lower"][slot][mask]
+                    ),
+                    "minorant n=%d d=%d ordre=%d" % (count, dim, orders[slot]),
+                )
+        self.assertGreaterEqual(compared, MINIMUM_LATTICE_COMPARISONS)
+        self.assertGreaterEqual(ties, MINIMUM_BOUNDARY_TIES)
+
+
+class TestCellSeedIsStable(unittest.TestCase):
+    """La graine d'une cellule ne depend pas du processus : valeurs gravees.
+
+    `hash()` d'une chaine est randomise par PYTHONHASHSEED : l'employer
+    rendait toute campagne irreproductible. Les valeurs ci-dessous sont des
+    fixtures : si elles changent, la campagne change de nuages.
+    """
+
+    GRAVEN_SEEDS = (
+        (("gauss_iso", 10, 0.0, 1), 1001701),
+        (("gauss_iso", 10, 0.3, 1), 4003801),
+        (("manifold", 1000, 0.0, 3), 3101350),
+        (("filament", 2, 0.3, 5), 8003033),
+    )
+
+    def test_graven_values(self):
+        for arguments, expected in self.GRAVEN_SEEDS:
+            self.assertEqual(cell_seed(*arguments), expected, str(arguments))
+
+    def test_distinct_grid_points_give_distinct_seeds(self):
+        seen = {}
+        for family in FAMILIES:
+            for dim in (2, 10, 50, 200, 1000):
+                for noise_share in (0.0, 0.1, 0.3):
+                    for seed in (1, 2, 3, 4, 5):
+                        key = cell_seed(family, dim, noise_share, seed)
+                        self.assertNotIn(
+                            key, seen, str((family, dim, noise_share, seed))
+                        )
+                        seen[key] = True
+        self.assertEqual(len(seen), 4 * 5 * 3 * 5)
 
 
 class TestOrderOneIsSingleLinkage(unittest.TestCase):
@@ -1259,6 +1432,8 @@ def run_gate():
         for case in (
             TestBracketAgainstExact,
             TestTubeAgainstFull,
+            TestSelectionIsCanonical,
+            TestCellSeedIsStable,
             TestOrderOneIsSingleLinkage,
             TestMetrics,
             TestDatasets,

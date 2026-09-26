@@ -34,13 +34,27 @@ La boule englobante est recalculee ici, independamment de
 loin, retrait d'un barycentrique negatif) avec CERTIFICAT KKT explicite,
 puis repli par enumeration des supports. Elle est validee contre la boule
 rationnelle exacte de `ehgp.exact.meb` par la table `selftest`, qui est une
-porte : sans validation, aucune autre table ne s'affiche.
+porte au sens strict : cette table s'execute AVANT toute autre, quelle que
+soit la table demandee, et son echec met le code de sortie a 3.
+
+Deux tables completent les trois mesures :
+
+* `exact2` : le compte EXACT des paires a boule diametrale vide, sans aucun
+  echantillonnage, par trois chemins independants (arbre k-d, matrice de
+  Gram, boule certifiee) qui doivent donner le meme entier. C'est elle qui
+  donne l'exposant en `n` du nombre de naissances a l'ordre 2, que la table
+  `free` ne peut pas mesurer des que la part libre tombe sous
+  `1 / --subsets`.
+* `cout` : le taux de repli par enumeration et le temps PROCESSEUR par
+  boule, par cellule `(d, k)`.
 
 Usage :
 
     python3 bench/concentration.py --table selftest
     python3 bench/concentration.py --table exhaustive --seeds 5
     python3 bench/concentration.py --table free --n-list 200,800
+    python3 bench/concentration.py --table exact2 --exact2-n 200,800,2000
+    python3 bench/concentration.py --table cout
     python3 bench/concentration.py --table dimsweep
     python3 bench/concentration.py --table noise
     python3 bench/concentration.py --table repr
@@ -50,7 +64,8 @@ Usage :
 
 Codes de sortie : 0 si tout a tourne, 3 si un plancher de couverture n'est
 pas atteint (validation de la boule, taux de certification, part de
-verdicts indecis, nombre de boules calculees).
+verdicts indecis, taux de repli, nombre de boules calculees, nombre de
+cellules, accord des chemins independants, controle par permutation).
 
 Aucun octet de SemanticKITTI n'est utilise : la famille `lidar` est un
 nuage synthetique fabrique dans ce fichier.
@@ -1353,6 +1368,17 @@ def event_sequence(tower, order):
     )
 
 
+# Familles du comptage exact a l'ordre 2. Deux familles de rang 2 (dont la
+# lidar synthetique, qui n'est pas plate), une famille bruitee et une famille de
+# plein rang comme temoin de saturation.
+EXACT2_FAMILIES = (
+    ("flat", 200, 2, 0.0),
+    ("lidar", 7, 2, 0.0),
+    ("flat_noise", 200, 2, 0.05),
+    ("uniform", 200, 200, 0.0),
+)
+
+
 TOWER_FAMILIES = (
     ("flat", 20, 2, 0.0),
     ("flat_noise", 20, 2, 0.05),
@@ -1547,7 +1573,12 @@ def table_theoremes(options, ledger):
                 worst = max(worst, abs(float(delta @ delta) / target_pair - 1.0))
             for order in (2, 3, 5):
                 target = (count - 1) * (order - 1) / order
-                for subset in list(combinations(range(count), order))[:40]:
+                # Un prefixe lexicographique de `combinations` partage ses
+                # premiers indices : ce n'est pas un echantillon. On tire donc
+                # les parties uniformement (et on evite de materialiser
+                # C(count, order) tuples pour en garder quarante).
+                sample, _complete = subset_sample(count, order, 40, rng)
+                for subset in sample:
                     _c, radius2, _s, _ok, _st = meb_certified(view[list(subset)])
                     worst = max(worst, abs(radius2 / target - 1.0))
                     cases += 1
@@ -1574,7 +1605,11 @@ def table_theoremes(options, ledger):
             right = float(np.linalg.norm(mapped[left_index] - mapped[right_index]))
             pair_worst = max(pair_worst, abs(right / left - 1.0))
         radius_worst = 0.0
-        for subset in list(combinations(range(count), order))[:300]:
+        # Meme raison qu'en T3 : un prefixe lexicographique de C(40, 5)
+        # contiendrait les indices 0, 1 et 2 dans chacune de ses 300 parties, et
+        # un maximum pris sur un tel prefixe sous-estime la distorsion.
+        sample, _complete = subset_sample(count, order, 300, rng)
+        for subset in sample:
             _c, left, _s, _ok, _st = meb_certified(points[list(subset)])
             _c2, right, _s2, _ok2, _st2 = meb_certified(mapped[list(subset)])
             radius_worst = max(radius_worst, abs(math.sqrt(right / left) - 1.0))
@@ -1594,6 +1629,244 @@ def table_theoremes(options, ledger):
     )
     return rows, jl_rows
 
+
+# ---------------------------------------------------------------------------
+# Comptage EXACT des paires libres (k = 2), par trois chemins independants
+# ---------------------------------------------------------------------------
+
+
+def _free_pairs_kdtree(points, block=200000):
+    """Paires a boule diametrale FERMEE vide, par arbre k-d, comptage exact.
+
+    Un point `p` appartient a la boule fermee de diametre `[x_i, x_j]` si et
+    seulement si `(x_i - p).(x_j - p) <= 0`, c'est-a-dire si `p` est a distance
+    au plus `r = ||x_i - x_j||/2` du milieu `m`. Or `x_i` et `x_j` sont eux
+    memes a distance exactement `r` de `m` : tout autre point de la boule est
+    donc a distance au plus celle de `x_i`, et il suffit d'interroger les TROIS
+    plus proches voisins de `m` pour le trouver s'il existe. Le comptage est
+    exhaustif sur les `C(n, 2)` paires, sans aucune boule englobante et sans
+    echantillonnage.
+    """
+    from scipy.spatial import cKDTree
+
+    tree = cKDTree(points)
+    count = len(points)
+    rows, cols = np.triu_indices(count, k=1)
+    free = 0
+    for start in range(0, len(rows), block):
+        left = rows[start:start + block]
+        right = cols[start:start + block]
+        middle = 0.5 * (points[left] + points[right])
+        radius = 0.5 * np.linalg.norm(points[left] - points[right], axis=1)
+        distances, indices = tree.query(middle, k=3, workers=-1)
+        tolerance = 1e-12 * np.maximum(radius, 1.0)
+        inside = distances <= (radius + tolerance)[:, None]
+        inside &= indices != left[:, None]
+        inside &= indices != right[:, None]
+        free += int(np.count_nonzero(~np.any(inside, axis=1)))
+    return free
+
+
+def _free_pairs_gram(points, block=2000):
+    """Meme comptage par la matrice de Gram : `G_ij - G_ip - G_jp + G_pp > 0`.
+
+    Deuxieme chemin, sans arbre ni requete spatiale, pour juger le premier.
+    """
+    gram = points @ points.T
+    diagonal = np.diag(gram).copy()
+    count = len(points)
+    rows, cols = np.triu_indices(count, k=1)
+    free = 0
+    for start in range(0, len(rows), block):
+        left = rows[start:start + block]
+        right = cols[start:start + block]
+        values = (
+            gram[left, right][:, None] - gram[left, :] - gram[right, :] + diagonal[None, :]
+        )
+        values[np.arange(len(left)), left] = np.inf
+        values[np.arange(len(left)), right] = np.inf
+        free += int(np.count_nonzero(np.min(values, axis=1) > 0.0))
+    return free
+
+
+def table_exact2(options, ledger):
+    """Le compte de naissances a l'ordre 2, EXACT, sans echantillonnage.
+
+    La table `free` estime la part libre sur `--subsets` parties tirees ; a
+    `n = 2000` et `k = 2`, une part de l'ordre de `10^{-3}` signifie moins d'un
+    tirage libre sur `240`, c'est-a-dire une mesure sous sa propre resolution.
+    Ici le compte est exact, donc l'exposant en `n` l'est aussi. Trois chemins
+    (arbre k-d, Gram, boule englobante certifiee) doivent donner le meme
+    entier : c'est la porte.
+    """
+    rows = []
+    cells = 0
+    ball_cells = 0
+    results = {}
+    for name, dimension, intrinsic, noise in EXACT2_FAMILIES:
+        for count in options.exact2_n:
+            kd_values = []
+            gram_values = []
+            meb_values = []
+            started = time.process_time()
+            for index in range(options.seeds):
+                rng = np.random.default_rng(options.seed + 7919 * index + 13 * count)
+                points = make_cloud(name, count, dimension, intrinsic, noise, rng)
+                kd_values.append(_free_pairs_kdtree(points))
+                if count <= options.exact2_gram_max:
+                    gram_values.append(_free_pairs_gram(points))
+                if count <= options.exact2_meb_max:
+                    meb_values.append(free_count_strict(points, 2))
+            elapsed = time.process_time() - started
+            for path, values in (("gram", gram_values), ("boule", meb_values)):
+                if values and values != kd_values:
+                    ledger.failures.append(
+                        "exact2 : le chemin %s et l'arbre k-d ne donnent pas le meme "
+                        "entier (%s, n=%d)" % (path, name, count)
+                    )
+            if meb_values:
+                ball_cells += 1
+                ledger.account(
+                    sum(math.comb(count, 2) for _ in meb_values),
+                    sum(math.comb(count, 2) for _ in meb_values),
+                    0,
+                    0,
+                )
+            total = math.comb(count, 2)
+            mean = sum(kd_values) / len(kd_values)
+            results[(name, count)] = mean
+            rows.append(
+                [
+                    _cloud_label(name, dimension, intrinsic),
+                    count,
+                    total,
+                    "%.1f" % mean,
+                    "%.3e" % (mean / total),
+                    "%.2f" % (mean / count),
+                    "%.1f" % (sum(gram_values) / len(gram_values)) if gram_values else "-",
+                    "%.1f" % (sum(meb_values) / len(meb_values)) if meb_values else "-",
+                    "%.1f" % elapsed,
+                ]
+            )
+            cells += 1
+    if cells < options.min_cells:
+        ledger.failures.append(
+            "exact2 : %d cellules pour un plancher de %d" % (cells, options.min_cells)
+        )
+    if ball_cells == 0:
+        ledger.failures.append(
+            "exact2 : aucune cellule confrontee a la boule certifiee "
+            "(augmenter --exact2-meb-max ou baisser le plus petit n)"
+        )
+    print_table(
+        "(a) compte EXACT des paires a boule diametrale fermee vide "
+        "(%d graines, aucun echantillonnage)" % options.seeds,
+        [
+            "famille",
+            "n",
+            "C(n,2)",
+            "compte exact",
+            "part libre",
+            "par point",
+            "controle Gram",
+            "controle boule",
+            "s processeur",
+        ],
+        rows,
+    )
+    exponents = []
+    if len(options.exact2_n) >= 2:
+        first_n, last_n = options.exact2_n[0], options.exact2_n[-1]
+        for name, dimension, intrinsic, _noise in EXACT2_FAMILIES:
+            low = results.get((name, first_n))
+            high = results.get((name, last_n))
+            if not low or not high or last_n == first_n:
+                continue
+            exponents.append(
+                [
+                    _cloud_label(name, dimension, intrinsic),
+                    "%d -> %d" % (first_n, last_n),
+                    "%.3f" % (math.log(high / low) / math.log(last_n / first_n)),
+                    "%d" % (3 * last_n - 8),
+                ]
+            )
+        print_table(
+            "exposant EXACT du compte en n (la borne planaire vaut 3n-8 "
+            "des que la configuration est de rang 2)",
+            ["famille", "intervalle", "exposant", "borne planaire 3n-8"],
+            exponents,
+        )
+    return rows, exponents
+
+
+# ---------------------------------------------------------------------------
+# Cout de l'instrument : taux de repli et temps processeur par boule
+# ---------------------------------------------------------------------------
+
+
+def table_cout(options, ledger):
+    """Cout de la boule certifiee : taux de repli et temps PROCESSEUR par boule.
+
+    Le document publiait un taux de repli et un cout par boule qu'aucune
+    commande ne produisait. Ils sont mesures ici, en temps processeur, seule
+    grandeur qui ne depende pas de la charge de la machine, et les cellules
+    sont exactement celles que le paragraphe 1.2 cite.
+    """
+    rows = []
+    cells = 0
+    for dimension in options.cout_dims:
+        for order in options.orders:
+            rng = np.random.default_rng(options.seed + 17 * dimension)
+            points = make_cloud("uniform", options.cout_n, dimension, dimension, 0.0, rng)
+            subsets, _complete = subset_sample(options.cout_n, order, options.cout_balls, rng)
+            before_calls = FALLBACK["calls"]
+            before_cpu = FALLBACK["cpu"]
+            certified = 0
+            started = time.process_time()
+            for subset in subsets:
+                _centre, _radius2, _support, ok, _steps = meb_certified(points[list(subset)])
+                if ok:
+                    certified += 1
+            elapsed = time.process_time() - started
+            calls = FALLBACK["calls"] - before_calls
+            cpu_fallback = FALLBACK["cpu"] - before_cpu
+            balls = len(subsets)
+            ledger.account(balls, certified, 0, 0)
+            rows.append(
+                [
+                    dimension,
+                    order,
+                    balls,
+                    calls,
+                    "%.3f" % (calls / balls),
+                    "%.3f" % (1000.0 * elapsed / balls),
+                    "%.1f" % (1000.0 * cpu_fallback / calls) if calls else "-",
+                    "%.3f" % (1000.0 * (elapsed - cpu_fallback) / (balls - calls))
+                    if balls > calls
+                    else "-",
+                ]
+            )
+            cells += 1
+    if cells < options.min_cells:
+        ledger.failures.append(
+            "cout : %d cellules pour un plancher de %d" % (cells, options.min_cells)
+        )
+    print_table(
+        "cout de la boule certifiee, famille uniform, n=%d, %d boules par cellule "
+        "(temps PROCESSEUR)" % (options.cout_n, options.cout_balls),
+        [
+            "d",
+            "k",
+            "boules",
+            "replis",
+            "taux de repli",
+            "ms/boule",
+            "ms par repli",
+            "ms/boule sans repli",
+        ],
+        rows,
+    )
+    return rows
 
 # ---------------------------------------------------------------------------
 # Interface
@@ -1622,6 +1895,8 @@ def build_parser():
             "selftest",
             "exhaustive",
             "free",
+            "exact2",
+            "cout",
             "radius",
             "contrast",
             "signal",
@@ -1661,6 +1936,16 @@ def build_parser():
     parser.add_argument("--tower-k", type=int, default=3)
     parser.add_argument("--tower-bits", type=int, default=9)
     parser.add_argument("--tower-seeds", type=int, default=2)
+    parser.add_argument("--exact2-n", type=_int_list, default=[200, 800])
+    parser.add_argument("--exact2-gram-max", type=int, default=800)
+    parser.add_argument("--exact2-meb-max", type=int, default=200)
+    parser.add_argument("--cout-dims", type=_int_list, default=[3, 20, 200])
+    parser.add_argument("--cout-n", type=int, default=200)
+    parser.add_argument("--cout-balls", type=int, default=400)
+    parser.add_argument("--min-cells", type=int, default=8)
+    parser.add_argument("--min-spearman", type=float, default=0.50)
+    parser.add_argument("--max-control", type=float, default=0.30)
+    parser.add_argument("--max-fallback", type=float, default=0.10)
     parser.add_argument("--min-balls", type=int, default=1000)
     parser.add_argument("--min-selftest", type=int, default=200)
     parser.add_argument("--max-undecided", type=float, default=1e-3)
@@ -1670,7 +1955,12 @@ def build_parser():
 def main(argv=None):
     """Point d'entree : imprime les tables demandees, renvoie le code."""
     options = build_parser().parse_args(argv)
-    ledger = Ledger(options.min_balls, options.min_selftest, options.max_undecided)
+    ledger = Ledger(
+        options.min_balls,
+        options.min_selftest,
+        options.max_undecided,
+        options.max_fallback,
+    )
     started = time.time()
     print("phase=exploration_ehgp_hors_registre")
     print("backend=python_reference")
@@ -1723,7 +2013,6 @@ def main(argv=None):
         "dimsweep",
         "noise",
         "repr",
-        "exact2",
         "cout",
         "all",
     )

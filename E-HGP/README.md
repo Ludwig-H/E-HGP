@@ -155,4 +155,9 @@ Acquis, avec la commande qui le reproduit :
 | tour régularisée contre tour empirique sous bruit ambiant : ARI $0{,}994$ contre $0{,}000$ à $(d=50,k=5)$ | **mesuré** |
 | la voie régularisée est moins bonne en $d=2$ ($-0{,}33$ d'ARI) : c'est un régime, pas un remplacement | **mesuré** |
 | couche statistique utile à $d=200$ avec des descripteurs FIXES | **non acquis** ($0{,}362$ d'ARI) |
-| l'axe d'ordre $k$ apporte quelque chose comme clusterer sur des distances euclidiennes brutes | **réfuté** : $-0{,}06$ à $-0{,}21$ d'ARI contre $k=1$, et la famille densitaire est dominée par Ward et $k$-moyennes |
+| l'axe d'ordre $k$ apporte quelque chose comme clusterer sur des distances euclidiennes brutes | **réfuté** : $-0{,}06$ à $-0{,}28$ d'ARI contre $k=1$ sur 200 cellules, et la famille densitaire est dominée par Ward et $k$-moyennes |
+| la tour E-HGP est un autre objet que la *reachability* mutuelle, et meilleur à ordre égal ($0{,}240$ contre $0{,}115$ en $d=1000$) | **mesuré** |
+| forme close spectrale de $\log(dp/dq)$ avec le filtre $G(\lambda)=\log\lambda/(\lambda-1)$ ; le réduire à $\rho=0$ double l'erreur et la fige | **démontré et mesuré** |
+| la barrière de la tour spectrale est une **taille d'échantillon**, celle de la tour empirique un **mur** ($0{,}66\to0{,}99$ avec $n$ contre $0$ partout) | **mesuré** |
+| la régularisation casse la malédiction de la dimension | **réfuté** : à $d=200$ ni $n=3000$ ni $m=512$ ne ramènent un mode ; elle la déplace |
+| l'effondrement est diagnosticable **sans vérité terrain** (spectre qui se contracte vers 1, divergence du modèle $1{,}37\to0{,}10$) | **mesuré** |

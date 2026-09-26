@@ -138,11 +138,14 @@ def nearest_table(distances, span):
     """
     count = distances.shape[0]
     reach = min(int(span), count)
-    picked = np.argpartition(distances, reach - 1, axis=1)[:, :reach]
-    values = np.take_along_axis(distances, picked, axis=1)
-    ranking = np.argsort(values, axis=1, kind="stable")
+    # Meme departage canonique que `_selection`, et pour la meme raison : a
+    # distance egale la colonne de plus petit indice gagne, sinon le tube
+    # `C_ij` depend du chemin de calcul.
+    keys = distances + 1j * np.arange(count, dtype=np.float64)
+    picked = np.argpartition(keys, reach - 1, axis=1)[:, :reach]
+    ranking = np.argsort(np.take_along_axis(keys, picked, axis=1), axis=1)
     index = np.take_along_axis(picked, ranking, axis=1)
-    return index, np.take_along_axis(values, ranking, axis=1)
+    return index, np.take_along_axis(distances, index, axis=1)
 
 
 def entry_levels(cloud, k_max):
@@ -182,19 +185,32 @@ def _selection(energies, order_max):
     extremites sont a EGALE distance, donc le bas-de-liste est ambigu, et
     deux ambiguites differentes donnent deux majorants differents (tous deux
     valides). Le departage rend la sortie independante du chemin de calcul,
-    donc identique en `mode="tube"` et en `mode="full"`. Le tri complet est
-    stable, donc deja canonique ; la selection partielle melange les egalites
-    et doit etre recousue par une cle lexicographique (partie reelle
-    l'energie, partie imaginaire l'indice : `numpy` trie les complexes
-    lexicographiquement).
+    donc identique en `mode="tube"` et en `mode="full"`.
+
+    Le departage doit porter sur la SELECTION elle-meme, pas seulement sur
+    l'ordre des colonnes retenues. Une selection partielle appliquee aux
+    energies choisit un jeu arbitraire parmi les colonnes ex aequo au rang
+    `order_max` ; les retrier ensuite ne repare rien, puisque la colonne
+    perdue n'est plus la. Fixture : nuage entier `d = 5`, `n = 44`, couple
+    `(1, 28)`, ordre `10`, ou deux colonnes portent l'energie `18` au temps
+    `t = 1` ; le mode complet publiait `18.4375` et le mode tube `19` (les
+    deux valides, le maximum exact etant `18.08`). La selection partielle
+    porte donc sur la CLE lexicographique `energie + i * indice`, qui est un
+    ordre total sans ex aequo : `numpy` trie et partitionne les complexes
+    lexicographiquement, donc le jeu retenu est le jeu canonique. Le tri
+    complet, lui, est stable, donc deja canonique sans cle.
     """
     width = energies.shape[1]
     if width <= 4 * order_max:
         index = np.argsort(energies, axis=1, kind="stable")[:, :order_max]
     else:
-        picked = np.argpartition(energies, order_max - 1, axis=1)[:, :order_max]
-        keys = np.take_along_axis(energies, picked, axis=1) + 1j * picked
-        index = np.take_along_axis(picked, np.argsort(keys, axis=1), axis=1)
+        keys = energies + 1j * np.arange(width, dtype=np.float64)
+        picked = np.argpartition(keys, order_max - 1, axis=1)[:, :order_max]
+        index = np.take_along_axis(
+            picked,
+            np.argsort(np.take_along_axis(keys, picked, axis=1), axis=1),
+            axis=1,
+        )
     return index, np.take_along_axis(energies, index, axis=1)
 
 

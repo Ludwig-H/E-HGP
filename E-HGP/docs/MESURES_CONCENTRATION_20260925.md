@@ -72,7 +72,12 @@ $\max_{w}\sum_i w_i\left\Vert x_i\right\Vert^{2}-\left\Vert \sum_i w_i x_i\right
 sur le simplexe. À défaut de certificat, un repli énumère les supports ; ce repli
 est lui aussi un certificat.
 
-La validation est une **porte** : sans elle, aucune autre table n'est publiée.
+La validation est une **porte** au sens strict : la table `selftest` s'exécute
+**avant** toute autre, quelle que soit la table demandée, et son échec met le
+code de sortie à $3$. C'est une correction de la revue du § 11 : la première
+version de ce document annonçait cette porte alors que le programme la
+désactivait dès qu'une seule table était demandée, c'est-à-dire dans toutes les
+commandes du § 10 sauf la première.
 
 ```text
 selftest (a) boule certifiee contre boule rationnelle exacte
@@ -101,11 +106,33 @@ cas dégénérés que la doctrine exige (cosphériques, colinéaires, dupliqués
 Sur l'ensemble des tableaux de ce document, le taux de certification vaut
 $1{,}000000$ (aucune boule publiée sans certificat) et la part de verdicts
 indécis vaut $0$ sur les $864\,520$ boules des huit exécutions qui en comptent
-(§ 10, commandes 2 à 6, 8 et 12). **Coût** : le repli par énumération ne
-se déclenche que sur les entrées affinement dépendantes ; mesuré à $0{,}045$ pour
-$(d=3,k=11)$ et à $0{,}000$ pour toutes les autres cellules de
-$(d,k)\in\left\lbrace3,20,200\right\rbrace\times\left\lbrace2,3,5,11\right\rbrace$,
-au prix de $24{,}5$ ms par boule contre $1{,}0$ à $1{,}7$ ms sans repli.
+(§ 10, commandes 2 à 6, 8, 11 et 12 : $145\,720+134\,400+134\,400+18\,000+201\,600+67\,200+28\,800+134\,400$).
+
+**Coût de l'instrument.** Le repli par énumération des supports ne se déclenche
+que sur les entrées affinement dépendantes. Le tableau ci-dessous est produit
+par la table `cout` (§ 10 commande 13) en temps **processeur**, seule grandeur
+qui ne dépende pas de la charge de la machine ; $400$ boules par cellule,
+famille `uniform`, $n=200$ :
+
+```text
+d    k   boules  replis  taux de repli  ms/boule  ms par repli  ms/boule sans repli
+3    2   400     0       0.000          0.156     -             0.156
+3    3   400     0       0.000          0.236     -             0.236
+3    5   400     0       0.000          0.296     -             0.296
+3    11  400     17      0.043          8.259     176.1         0.810
+20   11  400     0       0.000          0.898     -             0.898
+200  11  400     0       0.000          1.560     -             1.560
+```
+
+Une seule cellule replie, $(d=3,k=11)$, à un taux de $0{,}043$ : onze points de
+$\mathbb{R}^{3}$ sont affinement dépendants, donc le système du centre
+circonscrit est singulier pour presque tout support de taille $>4$. Le repli
+coûte $176$ ms, soit $8{,}3$ ms par boule amorti sur la cellule, contre
+$0{,}16$ à $1{,}56$ ms par boule partout ailleurs. Un plafond de $0{,}10$ sur le
+taux de repli est désormais une porte : si l'ensemble actif cédait la main à
+l'énumération, l'instrument annoncé ne serait plus celui qui mesure. La
+première version de ce document publiait ici un taux de $0{,}045$ et un coût de
+$24{,}5$ ms par boule qu'aucune commande ne produisait (§ 11).
 
 ### 1.3 Familles de nuages, et une construction appariée
 
@@ -133,10 +160,15 @@ table, moyenne et écart-type publiés. Les mesures exactes énumèrent toutes l
 parties ($n\in\left\lbrace8,11,14\right\rbrace$) ; les mesures échantillonnées
 tirent $240$ parties par cellule ($n\in\left\lbrace20,200,400,800,2000\right\rbrace$).
 Planchers : nombre minimal de boules, taux de certification $1{,}000$, part de
-verdicts indécis $\leq10^{-3}$, validation exacte $\geq200$ cas sans échec. Une
-porte manquée met le code de sortie à $3$ ; toutes les commandes du § 10 sortent
-à $0$. Aucune porte n'emploie `assert` : tout tient sous `python3 -O`, et c'est
-sous `-O` que tout a tourné.
+verdicts indécis $\leq10^{-3}$, validation exacte $\geq200$ cas sans échec,
+taux de repli $\leq0{,}10$, nombre minimal de cellules par table, et trois
+portes ajoutées par la revue du § 11 — l'accord **exact** entre la mesure (a) de
+ce fichier et les naissances de la tour du chantier (§ 3.6), l'accord exact
+entre les trois chemins du comptage à l'ordre $2$ (§ 3.5), et un **contrôle par
+permutation** sur la corrélation de Spearman (§ 5.2). Une porte manquée met le
+code de sortie à $3$ ; toutes les commandes du § 10 sortent à $0$. Aucune porte
+n'emploie `assert` : tout tient sous `python3 -O`, et c'est sous `-O` que tout a
+tourné.
 
 Les durées imprimées ne sont **pas** une mesure : la machine était partagée avec
 d'autres agents et le temps horloge dépasse le temps processeur d'un facteur qui
@@ -261,11 +293,20 @@ Même protocole, ordre $k=2$ (§ 10 commande 4) :
 | `roll_noise` brut | — | 0,032 | 0,030 | 0,118 | 0,262 | 0,768 |
 | `roll_noise` ACP$(2)$ | — | 0,022 | 0,017 | 0,015 | 0,017 | 0,013 |
 
-Ici les colonnes `flat` ne sont **pas** identiques chiffre par chiffre, et c'est
-attendu : en régime échantillonné, ce sont les $240$ parties tirées qui diffèrent
-(le tirage de la base de plongement consomme le générateur). L'écart observé
-($0{,}012$ à $0{,}024$) est exactement l'erreur d'échantillonnage
-$\sqrt{p(1-p)/240}\approx0{,}008$ à $p=0{,}015$.
+Ici les colonnes `flat` ne sont **pas** identiques chiffre par chiffre, et la
+raison est plus prosaïque que celle qu'annonçait la première version de ce
+document (§ 11) : dans la table `dimsweep` la graine vaut
+`--seed + 31337 * graine + 17 * d`, donc **le nuage latent change d'une colonne à
+l'autre**. L'appariement chiffre par chiffre n'existe que dans le régime
+exhaustif du § 3.1, dont la graine ne dépend pas de $d$. À $d$ fixé, en
+revanche, `flat` et `uniform` partagent bien le même nuage latent et ne
+diffèrent que par les $240$ parties tirées (le tirage de la base de plongement
+consomme le générateur) : à $d=2$, $0{,}013$ contre $0{,}022$, deux estimations
+du même nombre, ce qui donne la mesure directe du bruit d'échantillonnage,
+$\sqrt{p(1-p)/1200}\approx0{,}004$ par cellule de cinq graines. Les six colonnes
+`flat` ($0{,}012$ à $0{,}024$) sont donc six nuages différents mesurés chacun à
+$\pm0{,}004$ près : leur dispersion est compatible avec l'invariance exacte de
+T1, elle ne la démontre pas.
 
 Le blanchiment mérite une ligne à lui : à $d=50$, $n=200$, on est **loin** du
 régime dégénéré de T3 ($d<n-1=199$), et pourtant $\varphi_2=1{,}000$. Le
