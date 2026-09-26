@@ -68,6 +68,25 @@ Comparer la prédiction à : distance directe $d(i,j)/2$, statistiques locales e
 
 Rapporter séparément les requêtes avec $Y_V=1$, où l'inclusion donne déjà la réponse enseignante, et celles avec $Y_V=0$. Ajouter calibration/Brier et violations de monotonie en r aux scores de prédiction. Une tête sigmoïde libre n'est pas monotone par construction ; un contrôle mesuré ne devient pas une garantie.
 
+### Contrôle indispensable : le rayon seul peut résoudre le prétexte
+
+La présence de positifs et de négatifs dans E n'écarte pas une représentation constante : la tête reçoit r et peut apprendre $q_0(r)=\Pr(Y_T=1\mid r)$. Deux groupes de rayons ayant des prévalences 1/10 et 9/10 donnent 90 % de réponses correctes à un prédicteur sans aucune feature de point, alors que le corpus global est équilibré. Ajouter un témoin **encodeur constant + même tête**, puis un témoin de statistiques visibles de trame/portée/distance. Ajuster ces témoins sur l'entraînement seulement. Une diminution de BCE ou une variance non nulle des embeddings ne suffit pas à les dépasser.
+
+Sur le sous-ensemble $Y_V=0$, le problème informatif est la création d'un chemin par les retours cachés. Le prédicteur idéal se décompose en $Y_V+(1-Y_V)q(V,i,j,r)$. Cette identité sert à analyser la perte, sans ajouter FULL(V) au forward A0. Publier la fraction de chaque sous-ensemble, BCE/Brier par strate et l'amélioration par rapport au prior visible. Un Brier skill $1-\mathrm{BS}_{\mathrm{modele}}/\mathrm{BS}_{\mathrm{temoin}}$ n'est défini que si le dénominateur est positif ; un témoin parfait est une strate déjà résolue. L'apport de contexte se mesure sur des paires appariées en distance, rayon et statistiques locales, puis par retrait du contexte distant. Le gain aval reste le critère de décision.
+
+L'échantillonnage des cas $Y_V=0$ peut accélérer l'apprentissage, puisqu'il ne lit que la vue élève ; il change néanmoins la distribution des requêtes. Conserver une évaluation représentative de la loi E déclarée, en plus de ce diagnostic conditionnel. Les scores de calibration ne se calculent pas sur un lot artificiellement équilibré selon les labels sans correction de ses probabilités de sélection. Garder un support de probabilité non nul pour les strates sur lesquelles on revendique une performance.
+
+### Variante constructive : une CDF monotone avec queue censurée
+
+Dans cette variante, la tête reçoit les features de la paire/vue et produit
+**une distribution fixe pour cette paire/vue**. Le rayon interrogé choisit
+seulement le cumul ; il ne modifie pas la distribution prédite, contrairement
+à l'entrée rayon de la tête sigmoïde libre.
+
+Pour des seuils publics $0<b_1<\cdots<b_M=H$, une tête par paire peut sortir une distribution $(p_1,\ldots,p_M,p_{>H})$ via softmax, puis $\widehat Y(b_j)=\sum_{m\leq j}p_m$. Les bins sont $(0,b_1],(b_1,b_2],\ldots,(b_{M-1},H]$ ; la dernière masse représente une fusion au-delà de H. Les réponses sont monotones par construction aux seuils déclarés. Une fusion située dans un bin supervise sa masse ; une non-fusion à H supervise la queue. Un horizon exporté plus court utilise la probabilité de survie au seuil correspondant, jamais une fusion inventée à cet horizon. Une requête à rayon arbitraire demande une règle d'interpolation déclarée et ne devient pas exacte par cette paramétrisation. Comparer cette variante au sigmoid libre avec le même budget ; aucun réseau n'est implémenté ici.
+
+La monotonie en r ne rend pas les **probabilités conditionnelles** ultramétriques entre paires. À V et r fixes, un mélange équiprobable de partitions $\{i,j\}|\{k\}$ et $\{i\}|\{j,k\}$ donne $(p_{ij},p_{jk},p_{ik})=(1/2,1/2,0)$. Il est valide malgré $p_{ik}<\min(p_{ij},p_{jk})$. En revanche, la transitivité dans chaque réalisation impose $p_{ik}\geq p_{ij}+p_{jk}-1$ : $(9/10,9/10,1/10)$ est impossible. Ces inégalités nécessaires ne suffisent pas à certifier une loi jointe de partitions sur un grand ensemble. Ne pas forcer la tête conditionnelle à être une hiérarchie dure ; FULL enseignant demeure exact réalisation par réalisation.
+
 ### Horizon fini
 
 Si i,j n'ont pas fusionné avant H, les labels 0 pour $r\leq H$ sont valides. Le rayon de fusion est censuré au-delà de H ; il ne vaut ni H ni l'infini démontré. Préférer les requêtes binaires à une régression de $\log r_{\mathrm{fusion}}$ qui inventerait une valeur. À K supérieur, distinguer absence de naissance, absence de coappartenance et niveau non exporté.
@@ -108,6 +127,8 @@ $$a_i=\sum_{v\ \mathrm{reel}}P_{iv},\qquad \Gamma_{K,r}(i,j)=\sum_{v\ \mathrm{re
 
 Si l'on veut conditionner sur les incidences représentées, utiliser $\Gamma_{K,r}/(a_i a_j)$ seulement pour $a_i a_j>0$, en conservant $a_i,a_j$ et le masque de supervision. Cette cible conditionnelle est une variante déclarée ; elle ne récupère pas l'information absente. Pour la lecture non conditionnée, une petite valeur peut provenir d'un défaut de couverture et ne doit pas être interprétée automatiquement comme une séparation.
 
+Même à couverture complète, Γ dépend de la **concentration des incidences**. Deux distributions identiques uniformes sur m tokens ont Γ=1/m : passer de un à dix tokens communs fait baisser la cible de 1 à 1/10 sans désaccord des distributions. Déclarer le sens recherché avant la perte : collision de deux tirages pour Γ, ou ressemblance des distributions. Pour cette seconde question, une alternative bornée est $O(i,j)=\sum_v\min(\pi_{iv},\pi_{jv})=1-\|\pi_i-\pi_j\|_1/2$, avec $\pi_i=P_i/a_i$ sur les tokens réels et $a_i>0$. Elle vaut 1 pour des distributions identiques. O ne remplace pas Γ silencieusement et ne mesure pas davantage une identité sémantique. Comparer les deux cibles à couverture et concentration $\sum_v\pi_{iv}^2$ déclarées ; des matrices rationnelles arbitraires ne prouvent pas leur fréquence dans FULL.
+
 Le « profil en K » devient un vecteur de ces lectures pour **les mêmes IDs et rayons**, avec leur couverture, plutôt qu'un « ordre où le nœud disparaît » sans correspondance définie. Entre vues et entre K, garder les branches et leurs mesures autonomes. Les requêtes de paires évitent la matérialisation de $PP^\top$ ; elles ne suppriment pas le coût d'export des incidences.
 
 ## 6. Sort des six prétextes proposés
@@ -136,7 +157,7 @@ Le sans-sol est une variante d'architecture légitime et un régime prioritaire 
 ## 8. Ce qui permettra de décider
 
 1. **Avant apprentissage :** export K1 daté, requêtes positives/négatives et censurées ; mêmes IDs ; aucun accès élève aux objets enseignants ; stabilité des statistiques sous les augmentations déclarées.
-2. **Premier apprentissage :** A0G0/A0G1 avec λ=0 comme référence, tête auxiliaire identique pour comptabiliser son coût ; ensuite témoin local et cibles brouillées dans des strates distance/portée/rayon conservées. Le brouillage teste l'information des labels, pas une fausse tour à parents invalides.
+2. **Premier apprentissage :** A0G0/A0G1 avec λ=0 comme référence, tête auxiliaire identique pour comptabiliser son coût ; priors rayon seul et statistiques visibles, témoin local, puis cibles brouillées dans des strates distance/portée/rayon conservées. Mesurer le gain conditionnel sur $Y_V=0$ et le gain sur une loi de requêtes représentative. Le brouillage teste l'information des labels, pas une fausse tour à parents invalides.
 3. **Mesure aval :** sonde linéaire et peu d'étiquettes, puis transfert de capteur avec réglages gelés ; au moins trois graines, résultats par classe/portée et matrices de confusion agrégées. Ces expériences ne sont pas exécutées dans cette tranche.
 4. **Valeur propre des ordres :** K1 seul, plusieurs K avec budget de requêtes total identique, puis K répété avec mêmes têtes/capacité. La prédiction d'un profil K plus gros ne constitue pas à elle seule un gain de fondation.
 5. **Choix final :** guidage utile seul → conserver l'enseignant hors ligne ; architecture utile seule → garder la substitution ; complémentarité mesurée → combiner. Une perte prétexte excellente sans amélioration aval justifie de retirer ce prétexte.
@@ -146,5 +167,9 @@ Un `GuidanceBundle` peut stocker des tuples (IDs originaux i,j, K, rayon carré 
 ## 9. Appuis et portée des vérifications
 
 [Sonata](https://arxiv.org/html/2503.16429v1) motive le contrôle des raccourcis transmis par les opérateurs spatiaux et l'évaluation par sonde linéaire. [DOS](https://arxiv.org/html/2512.11465v1) fournit un précédent LiDAR de distillation sur points observables avec un traitement de la diversité des prototypes. Ces travaux n'établissent ni le gain de HGP ni la validité des nouvelles pertes ; ils servent à choisir des contrôles. Les formules de connexité ci-dessus viennent de Morse HGP à K1, et celles de masse du contrat du dossier.
+
+[Topological Autoencoders](https://proceedings.mlr.press/v119/moor20a.html) fournit un antécédent de régularisation latente par connexité multi-échelle, sans établir de résultat LiDAR pour ce projet. [GroupContrast](https://openaccess.thecvf.com/content/CVPR2024/html/Wang_GroupContrast_Semantic-aware_Self-supervised_Representation_Learning_for_3D_Understanding_CVPR_2024_paper.html) motive la séparation entre discrimination géométrique et similitude sémantique. Pour le LiDAR temporel, [BEVContrast](https://arxiv.org/abs/2310.17281) et [TARL](https://www.ipb.uni-bonn.de/pdfs/nunes2023cvpr.pdf) sont des comparateurs de regroupement régional ; leur accès aux scans et poses doit être apparié dans FM-6. Ces précédents complètent le contrôle local et K1/MST, qui reste le témoin exact du premier prétexte.
+
+La [référence de contrôle des cibles](reference/verify_guidance_controls.py) ajoute quatre contre-exemples rationnels : prior en rayon, concentration de Γ, marges de partitions et CDF censurée. Elle ne teste ni une tête entraînée ni la réalisabilité HGP de ses matrices abstraites. Les identités probabilistes sont des déductions du présent audit, pas des résultats importés de ces publications.
 
 Les [reçus de cette tranche](receipts/guidance_20260926/README.md) séparent les contre-exemples géométriques K1 des identités sur matrices rationnelles. Ils ne qualifient ni l'export v9, ni un modèle entraîné, ni la réalisabilité HGP de chaque matrice abstraite. Le [contrat des coupes](CONTRAT_COUPES_ET_MASSES_20260926.md) et ses propres reçus restent l'autorité de la tranche précédente.

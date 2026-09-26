@@ -1,112 +1,113 @@
-# Où est le verrou, et ce que la tour remplace
+# Comparer les primitives, les informations visibles et les coûts
 
-26 septembre 2026. Ce document répond à une seule question : **par rapport à
-quoi mesure-t-on l'apport ?** Il identifie le composant que les architectures
-actuelles fixent à la main, montre comment la littérature 2025–2026 en
-rattrape les conséquences, et dresse la table de substitution qui sert de plan
-de mesure.
+26 septembre 2026. Recherche ciblée, vérifiée sur publications et code officiels.
+La question est **quelle contribution propre de FULL subsiste à données,
+information visible et budget comparables ?** Le témoin principal conserve
+un encodeur existant ; FULL peut guider son apprentissage ou remplacer une
+primitive dans une expérience distincte.
 
-## 1. Le verrou : toute architecture 3D code en dur une échelle métrique
+## 1. Le problème d'échelle et ses différents mécanismes
 
-Deux choix d'échelle reviennent souvent dans un encodeur 3D :
+Voxels et rayons fixent des distances physiques. Le nombre de voisins, la
+taille des patches de sérialisation et le nombre de jetons fixent des
+**budgets cardinaux** : leur étendue métrique varie avec l'échantillonnage.
+Une partition de superpoints peut elle-même dépendre de la géométrie locale.
+Ces mécanismes ne sont donc pas tous des variantes d'un rayon fixe.
 
-- **l'échelle de sous-échantillonnage** — la taille de voxel et les pas
-  (MinkowskiNet, SparseConv), la liste de rayons et le $k$ (PointNet++,
-  KPConv), la **taille de grille du *grid pooling*** (Point Transformer V2 et
-  V3), le nombre de niveaux de la partition (Superpoint Transformer) ;
-- **le système de voisinage** — rayon fixe, $k$ plus proches voisins, ou une
-  **fenêtre de taille fixe sur une courbe remplissante** (PTv3 sérialise sur
-  Z-order et Hilbert, puis découpe en *patches* non recouvrants).
+HGP fournit une histoire à plusieurs ordres et rayons. Son interface réseau
+garde des choix : grille d'entrée, K maximal, horizon, coupes, masse,
+condensation, budget de jetons et d'arêtes. La contribution à mesurer est une
+**meilleure sélection et utilisation de l'échelle**, avec réglages gelés au
+transfert. Une suppression générale des hyperparamètres n'est pas revendiquée.
 
-Ces choix peuvent devoir être réaccordés quand le capteur, la portée ou le
-domaine changent ; la tour HGP propose d'en dériver une partie des retours.
-Dans un LiDAR automobile, la densité de retours dépend de la portée, de
-l'incidence et des occultations ; la loi $1/d^{2}$ n'en est qu'une approximation
-sur des surfaces favorables. **Un rayon fixe n'assure pas une population
-comparable à toutes les portées.**
+## 2. Antécédents et témoins utiles
 
-## 2. Comment la littérature récente rattrape le problème
-
-Chacune des trois références les plus proches ajoute un correctif *à côté* de
-l'architecture, sans toucher l'échelle elle-même.
-
-| travail | ce qu'il garde | le correctif ajouté |
+| travail | apport établi dans sa propre expérience | conséquence pour notre comparaison |
 | --- | --- | --- |
-| **Sonata** (CVPR 2025, *Highlight*) | PTv3, grid pooling, patch attention | identifie le **raccourci géométrique** — la SSL 3D s'effondre sur des indices spatiaux de bas niveau — et le *masque* : bruit gaussien sur les coordonnées masquées, ordonnanceur progressif de taille et de taux de masque, auto-distillation directement sur la sortie de l'encodeur, 140 k nuages |
-| **Vernata** (IROS 2026) | Sonata, donc PTv3 | **augmentation par vues éparses** pour la robustesse aux densités variables, bancs de mémoire, distillation intermodale depuis un modèle de fondation 2D |
-| **Utonia** (ICML 2026) | PTv3 | **Perceptual Granularity Rescale** — un rééchelonnage explicite de la granularité pour joindre télédétection, LiDAR extérieur, RGB-D intérieur, CAO et vidéo ; plus *Causal Modality Blinding* et un RoPE inter-domaines |
+| [PTv3, CVPR 2024](https://openaccess.thecvf.com/content/CVPR2024/papers/Wu_Point_Transformer_V3_Simpler_Faster_Stronger_CVPR_2024_paper.pdf) | sérialisation, grid pooling, champs réceptifs étendus à coût contenu | témoin efficace à reproduire ; payer toute conversion de représentation |
+| [Sonata, CVPR 2025](https://openaccess.thecvf.com/content/CVPR2025/papers/Wu_Sonata_Self-Supervised_Learning_of_Reliable_Point_Representations_CVPR_2025_paper.pdf) | auto-distillation et réduction du raccourci vers hauteur/normales, en obscurcissant l'information spatiale et en sollicitant les attributs | même recette SSL avec et sans enseignant FULL ; le raccourci n'est pas réductible à une erreur d'échelle |
+| [Vernata, arXiv v1, août 2026](https://arxiv.org/html/2608.06919v1) | vues raréfiées, banque mémoire et distillation depuis l'image, sur LiDAR extérieur | séparer raréfaction et apport multimodal ; les deux bras reçoivent la même information |
+| [Utonia, v2](https://arxiv.org/html/2603.03283v2) | rééchelonnage de granularité, masquage de modalités, RoPE et apprentissage inter-domaines | témoin de transfert ; publier réglages et coût du rééchelonnage |
+| [Superpoint Transformer, ICCV 2023](https://arxiv.org/html/2306.08045v1) | partition hiérarchique adaptative et attention entre régions | témoin prioritaire de structure, à budget de régions apparié |
+| [DOS, AAAI 2026](https://ojs.aaai.org/index.php/AAAI/article/view/39030) | distillation de softmaps sur points observables et prior de fréquence des prototypes | témoin SSL pour le contrôle des fuites et du déséquilibre |
 
-Le diagnostic se lit dans les noms mêmes : *rescale*, *sparse view
-augmentation*, *obscuring spatial information*. Les trois traitent le symptôme
-d'une échelle posée à la main. Aucun ne supprime la constante.
+**SPT** est un antécédent architectural direct, sans exclusivité revendiquée.
+Son ablation à un niveau perd 5,1 points de mIoU sur KITTI-360 validation ;
+cela justifie de tester une hiérarchie et ne prédit aucun gain HGP. Sa
+partition optimise une énergie régularisée à plusieurs niveaux ; ses gains
+dépendent aussi des attributs, des relations et du protocole. [SPT, tableau 4](https://arxiv.org/html/2306.08045v1).
 
-**Superpoint Transformer** (ICCV 2023) est le seul à attaquer la structure :
-il remplace les points par une **partition hiérarchique de superpoints** qui
-« s'adapte aux propriétés locales de l'acquisition à plusieurs échelles
-simultanément », puis fait de l'attention éparse entre superpoints. Avec
-212 k paramètres il atteint $76{,}0$ sur S3DIS, $63{,}5$ sur KITTI-360 et
-$79{,}6$ sur DALES, soit jusqu'à 200 fois plus compact que l'état de l'art.
-**C'est l'antécédent architectural le plus important du projet, et il faut le
-citer comme tel.** Sa partition reste cependant obtenue par une énergie de
-partition minimale réglée par un paramètre de régularisation par niveau : elle
-est adaptative mais non canonique, et c'est une partition à un paramètre, pas
-une filtration.
+**ALPINE** est un témoin pour la tête d'instances. Il reçoit des **prédictions
+sémantiques** et utilise des dimensions typiques par classe pour ses seuils
+et découpes. Son PQ 64,2 sur SemanticKITTI validation correspond notamment au
+bras MinkUNet sans TTA ; ce n'est pas un score de géométrie seule. Comparer
+ALPINE et la tête HGP avec les **mêmes prédictions sémantiques**, mêmes priors
+autorisés et même TTA. La tête d'instances n'est pas entraînée. [Article v2,
+§ 3 et tableau 1](https://arxiv.org/html/2503.13203v2).
 
-Enfin **ALPINE** (2025) montre qu'un simple regroupement géométrique, sans
-aucun apprentissage d'instance, atteint $\mathrm{PQ} = 64{,}2$ sur
-SemanticKITTI avec les seules étiquettes sémantiques. Autrement dit : une part
-substantielle de la structure d'instance est déjà dans la géométrie. C'est un
-argument fort pour le projet — et un témoin exigeant.
+**BPS** motive un encodage de distances à des sondes fixes. **PolyhedronNet**
+est une référence sur polyèdres avec faces et attributs déjà fournis :
+son gain ne certifie ni une reconstruction LiDAR ni l'adéquation des supports
+Gabriel à une surface physique. Les deux sont des témoins d'**encodage**,
+distincts d'un témoin de hiérarchie. [BPS](https://arxiv.org/abs/1908.09186),
+[PolyhedronNet](https://proceedings.iclr.cc/paper_files/paper/2025/hash/d551343f85fcf5e1a230fd393406306e-Abstract-Conference.html).
 
-## 3. Ce que la tour Morse HGP apporte, mathématiquement
+## 3. Le point de substitution exact dans PTv3
 
-Pour tout $(K,r)$, la tour donne les composantes de
-$L_K(r)=\lbrace y:|B(y,r)\cap\mathcal X|\geq K\rbrace$ selon la
-spécification Morse HGP 3D. Le Théorème 2 relie les K-polyèdres aux amas
-discrets de forte densité de l'estimateur K-NN ; les minima Gabriel et la
-mosaïque d'ordre K rendent leur histoire calculable. FULL publie événements,
-populations et cartes verticales, à niveaux exacts.
+Le papier nomme le pooling « Grid Pool ». L'implémentation officielle consultée
+utilise `SerializedPooling` et `SerializedUnpooling` :
+regroupement par codes sérialisés plus grossiers, puis restitution par indice
+inverse et skip projeté. Il ne s'agit pas d'un décodeur k-NN à remplacer.
+Quantification, CPE par convolution sparse et patches sérialisés sont des
+postes distincts. [Code officiel PTv3](https://github.com/Pointcept/PointTransformerV3/blob/main/model.py).
 
-L'architecture proposée lit plusieurs historiques K et plusieurs niveaux r.
-Ce choix préserve des alternatives de sensibilité et de robustesse que perdrait
-une coupe unique ; il ne prouve pas, à lui seul, que les coupes ou jetons
-choisis par le réseau soient stables ou utiles. C'est l'objet des substitutions
-et des témoins négatifs ci-dessous.
+| expérience | substitution précise | contrôle indispensable |
+| --- | --- | --- |
+| **Guidage** | ajouter une perte enseignante FULL, encodeur et sortie inchangés | mêmes vues et données ; objets enseignants réservés à la perte ; coût d'apprentissage publié |
+| **S1 — regroupement** | remplacer l'affectation aux cellules par une coupe HGP | même réduction de features ; scatter et restitution explicitement adaptés |
+| **S2 — pondération** | remplacer la réduction par la moyenne pondérée du contrat | comparer moyenne et max sur les deux regroupements |
+| **S3 — voisinage** | utiliser des arêtes dérivées des fusions | même budget d'arêtes et noyau d'attention ; la forêt n'impose pas seule un voisinage sparse |
+| **S4 — biais** | ajouter un biais de niveau de fusion | comparer zéro, biais métrique et biais HGP sur le même noyau et la même précision |
+| **S5 — ordres** | ajouter branches K et échanges verticaux | budget total fixé ; témoin avec plusieurs branches K1 |
+| **S6 — restitution** | remplacer le gather dur par la projection pondérée vers les retours | conserver le skip fin ; séparer probabilités mélangées et logits |
 
-## 4. La table de substitution
+**S4 n'est pas un branchement gratuit dans PTv3 par défaut.** Le code active
+FlashAttention, désactive le RPE et refuse le RPE sur la voie Flash. Un biais
+HGP demande un noyau compatible ou une autre voie. Publier une comparaison
+scientifique à noyau commun, puis une comparaison de systèmes avec leurs
+meilleurs noyaux, durées et mémoires. Remplacer seulement le pooling conserve
+les dépendances métriques de CPE et sérialisation.
+[Code officiel, `SerializedAttention` et `Block`](https://github.com/Pointcept/PointTransformerV3/blob/main/model.py).
 
-C'est le cœur du plan de mesure. La tour ne s'ajoute pas à une architecture :
-elle **remplace, un par un**, les composants qui portent la constante métrique.
-Chaque ligne est une expérience contrôlée à budget identique.
+Avant une exécution, épingler commit, configuration, checkpoint, bibliothèques
+et définition de l'entrée. Les liens `main` identifient ici le composant ;
+ils ne constituent pas un reçu reproductible. Un passage à des régions change
+aussi les positions sparsifiées : collisions de centres et reconstruction
+des codes font partie de l'adaptateur évalué.
 
-| primitive | ce que fait l'état de l'art | ce que fournit la tour | remplace |
-| --- | --- | --- | --- |
-| échelle de sous-échantillonnage | grid pooling (taille de voxel), FPS + rayon, niveaux de superpoints | une **échelle de recouvrements** lue dans la forêt de fusion | `GridPool` de PTv3 |
-| opérateur de regroupement | max ou moyenne sur une cellule | une **matrice d'affectation douce** aux poids du § 9.1, conservant la masse | *pooling* de cellule |
-| système de voisinage | fenêtre sur Z-order/Hilbert, $k$-NN, rayon fixe | le **graphe de fusion** : deux nœuds voisins s'ils fusionnent, pondérés par le rayon de fusion | *patch grouping* |
-| encodage de position relative | décalage $xyz$, RoPE | **biais ultramétrique** $\varphi(\log r_{uv})$, où $r_{uv}$ est le niveau de fusion | encodage relatif métrique |
-| axe de robustesse | aucun | l'**ordre $K$**, avec sa carte verticale dont la naturalité est vérifiée | *sans équivalent* |
-| retour aux points | interpolation trilinéaire ou $k$-NN | le **vote pondéré** du § 9.1, avec la Proposition 7 | décodeur d'interpolation |
-| tâche prétexte | masquage de coordonnées, auto-distillation | **modélisation de filtration** : cibles non locales exactes | prétexte sujet au raccourci géométrique |
+## 4. Ce que FULL permet de proposer
 
-La dernière ligne mérite un mot. Sonata a montré que la SSL 3D s'effondre parce
-que **la géométrie est l'entrée** : prédire une coordonnée masquée se résout
-par interpolation locale. Un rayon de fusion entre deux composantes est au
-contraire une grandeur de **percolation** — il dépend du goulot de densité
-entre elles, donc d'une intégration sur tout l'espace intermédiaire. Il peut
-porter une information non locale, mais certains cas simples se résolvent
-localement ; les prétextes HGP doivent battre un témoin géométrique local et
-masquer les variables qui révèlent déjà la cible.
+Sous conformité à Morse HGP 3D, FULL fournit historiques, événements,
+populations et cartes verticales à niveaux exacts. Les théorèmes justifient cet
+objet sur les retours acquis. Ils ne sélectionnent pas les coupes du réseau,
+ses poids ni sa fonction de perte.
 
-## 5. Ce qui reste à vérifier dans cette section
+La proposition est d'utiliser les historiques K/r comme **supervision
+structurelle contrôlable**, puis de comparer leur lecture directe dans le
+réseau. À K1, un niveau de fusion peut être une simple demi-distance ; une
+cible exacte n'est pas automatiquement non locale. Le
+[contrat de guidage](GUIDAGE_FULL_ET_PREENTRAINEMENT_20260926.md) impose un témoin
+local et sépare graphes élève et enseignant. Projection douce et transport
+entre coupes relèvent du [contrat de masses](CONTRAT_COUPES_ET_MASSES_20260926.md).
 
-- La recherche d'antériorité ci-dessus est **ciblée sur les décisions de
-  conception** ; elle ne remplace pas une recherche exhaustive au moment de la
-  soumission. Les chiffres cités proviennent des publications et n'ont pas été
-  reproduits ici.
-- Le raccord exact entre les objets FULL v9, les facettes projectables du
-  § 9.1 et les coupes consommées par HGP-UNet doit être spécifié et testé.
-  FULL seul ne livre pas encore les poids et matrices du tokenizer.
-- Les repères hérités sur SemanticKITTI ($73{,}1$ pour DOS, base reproductible
-  à $68{,}0$–$70{,}3$) n'ont jamais été reproduits dans ce dépôt et doivent
-  l'être avant de servir de cible.
+## 5. Les chiffres ne remplacent pas un protocole commun
+
+DOS rapporte **73,1 mIoU après fine-tuning**, contre **67,5 en sonde linéaire**,
+sur SemanticKITTI validation sans données additionnelles dans son tableau 1.
+Données de pré-entraînement, taux d'annotation, tête et augmentations doivent
+être alignés pour servir de cible. [DOS, tableau 1](https://ojs.aaai.org/index.php/AAAI/article/download/39030/42992).
+
+Les anciens repères « base 68,0–70,3 » ne désignent pas une baseline unique
+reproduite dans ce dépôt. Partir d'un commit et d'une configuration exécutables,
+puis consigner leur résultat. Aucun chiffre de littérature ni cette recherche
+ciblée ne constitue une expérience HGP ou une recherche d'antériorité exhaustive.

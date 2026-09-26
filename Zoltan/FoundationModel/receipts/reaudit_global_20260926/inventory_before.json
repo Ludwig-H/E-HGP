@@ -1,0 +1,266 @@
+{
+  "base_commit": "d0e711e23617a7fa2838cac9b370ff125d4be5fb",
+  "file_count": 52,
+  "files": [
+    {
+      "path": "Zoltan/FoundationModel/ARCHITECTURE.md",
+      "bytes": 36901,
+      "sha256": "f9bf2b661c36fca56afe2c9084909b1bc05638eb0f3ccc870bb341c3a561c6d4"
+    },
+    {
+      "path": "Zoltan/FoundationModel/AUDIT_V9_ET_ARCHITECTURE_20260926.md",
+      "bytes": 18179,
+      "sha256": "3d05e2c79b51a2b67c28be3160fc10fa4710af1d82cd9c674b4295bb9db8e1a0"
+    },
+    {
+      "path": "Zoltan/FoundationModel/CONTRAT_COUPES_ET_MASSES_20260926.md",
+      "bytes": 19594,
+      "sha256": "12aceae364977f1041df09f482d56923028d4d428fc9586063abe3a6483d55fa"
+    },
+    {
+      "path": "Zoltan/FoundationModel/ETAT_DE_LART.md",
+      "bytes": 7669,
+      "sha256": "e4212d927abef0303d47832877cd3d59b877b0b9532533a37e8312f9dd2cbc57"
+    },
+    {
+      "path": "Zoltan/FoundationModel/GLOSSAIRE.md",
+      "bytes": 8095,
+      "sha256": "692027d7430a8cf8e2afc8b43d909daea2caee4dd0cbc39654b00baae06f6149"
+    },
+    {
+      "path": "Zoltan/FoundationModel/GUIDAGE_FULL_ET_PREENTRAINEMENT_20260926.md",
+      "bytes": 19652,
+      "sha256": "0d89d27d109401aa81ebd55125baa0d0b4409fa9c1e34d3c4de419439b5e8d2f"
+    },
+    {
+      "path": "Zoltan/FoundationModel/JETON.md",
+      "bytes": 8642,
+      "sha256": "4450e23bb3137b7a352fe2e6a4aa5a33fc86e67cf0b564e78639ff8ca4248e2e"
+    },
+    {
+      "path": "Zoltan/FoundationModel/MESURE.md",
+      "bytes": 23363,
+      "sha256": "1c322d8fe75de24361fd8866154a11d19ff94b7edff53272824b490ef553d362"
+    },
+    {
+      "path": "Zoltan/FoundationModel/OBJET.md",
+      "bytes": 8309,
+      "sha256": "917cceed4ec2a00ca78e94c539b74abb74af71dea1c35a22e451426b17dfb0bf"
+    },
+    {
+      "path": "Zoltan/FoundationModel/PLAN.md",
+      "bytes": 10604,
+      "sha256": "063e64c845735a542f61c4c95473a0e20885dbbd9f6bbb37f9d97b43b0ceee9f"
+    },
+    {
+      "path": "Zoltan/FoundationModel/README.md",
+      "bytes": 9326,
+      "sha256": "37c02292b419f49e12148642a680753899c3f2f83ba87741307c929b2539aaca"
+    },
+    {
+      "path": "Zoltan/FoundationModel/RISQUES.md",
+      "bytes": 15029,
+      "sha256": "823dbd594c7482777480e6a11fb58dd94b9030ed2ef1f542f30b759917b6d075"
+    },
+    {
+      "path": "Zoltan/FoundationModel/SPECIFICATION.md",
+      "bytes": 15196,
+      "sha256": "c78b82c8f6d5ee57e1a189ad4e0ccfd1697b0bf8a9dcd8205e4b8f95cd45f66e"
+    },
+    {
+      "path": "Zoltan/FoundationModel/receipts/cut_algebra_20260926/README.md",
+      "bytes": 3877,
+      "sha256": "40e088756d974a80df0100e76685d0c1bc9cf3d7b2a35bc92167df45c2740411"
+    },
+    {
+      "path": "Zoltan/FoundationModel/receipts/cut_algebra_20260926/normal.json",
+      "bytes": 7926,
+      "sha256": "94770a1d9b57558eda78ad7fe964681af3b35a5a02f03f680cdd77c9be52573a"
+    },
+    {
+      "path": "Zoltan/FoundationModel/receipts/cut_algebra_20260926/optimized.json",
+      "bytes": 7926,
+      "sha256": "94770a1d9b57558eda78ad7fe964681af3b35a5a02f03f680cdd77c9be52573a"
+    },
+    {
+      "path": "Zoltan/FoundationModel/receipts/guidance_20260926/README.md",
+      "bytes": 6013,
+      "sha256": "9d202d7c01efde27fbae1d1a762ddb5b92d61ec5d0a1cc4652c27b4dc15b4ef4"
+    },
+    {
+      "path": "Zoltan/FoundationModel/receipts/guidance_20260926/guidance_algebra_normal.json",
+      "bytes": 7042,
+      "sha256": "410fefe48abd0857c616c16a080ac912b8db785118451e5eda67b4ec1fc30c6f"
+    },
+    {
+      "path": "Zoltan/FoundationModel/receipts/guidance_20260926/guidance_algebra_optimized.json",
+      "bytes": 7042,
+      "sha256": "410fefe48abd0857c616c16a080ac912b8db785118451e5eda67b4ec1fc30c6f"
+    },
+    {
+      "path": "Zoltan/FoundationModel/receipts/guidance_20260926/guidance_k1_normal.json",
+      "bytes": 3246,
+      "sha256": "e8e649aaeb2ba5af7566dbd0c81514122c21765fd14cf4b2b19e4cf24ea4905d"
+    },
+    {
+      "path": "Zoltan/FoundationModel/receipts/guidance_20260926/guidance_k1_optimized.json",
+      "bytes": 3246,
+      "sha256": "e8e649aaeb2ba5af7566dbd0c81514122c21765fd14cf4b2b19e4cf24ea4905d"
+    },
+    {
+      "path": "Zoltan/FoundationModel/reference/verify_cut_algebra.py",
+      "bytes": 19273,
+      "sha256": "8ca674dc1e440085a76937acdebee97dfe6fcc6e8a8fb57781bbe168dd277ac8"
+    },
+    {
+      "path": "Zoltan/FoundationModel/reference/verify_guidance_algebra.py",
+      "bytes": 15491,
+      "sha256": "c87e6d49fe59b2d2108d2a6eba1633c16c3a814f95e26f8651a89ec4e12338e5"
+    },
+    {
+      "path": "Zoltan/FoundationModel/reference/verify_guidance_k1.py",
+      "bytes": 12465,
+      "sha256": "54fd8c195c59908e480831aea25d5a24d3e7e97e9692364000dbab4883bc0ca5"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/.gitignore",
+      "bytes": 82,
+      "sha256": "9e490d9fe33aa85a45b4bd74b5490dca722e56146a838009062d7cf9dbdc1ed9"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/HGP_LiDAR_Inria_SZTE_2026-09-16.pdf",
+      "bytes": 225469,
+      "sha256": "c089e021f911e4f226dc4ff30776a58466dfe8efbb58457e164b2055d1163a63"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/Makefile",
+      "bytes": 345,
+      "sha256": "d6dfb6935fa7d2b8f47f9109846c006afbf8b6d21f2b0c2075584d4de781c622"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/README.md",
+      "bytes": 7149,
+      "sha256": "7060343e8bd87adfe0128f36432af80fffe480fe33ad5c9535da0edda9b46109"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/assets/szte.png",
+      "bytes": 14286,
+      "sha256": "8a10da68a86ca29f69cf61038f60e2cd8015af1cca93be549d7bf535716ebde3"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/assets/szte.png.b64",
+      "bytes": 19049,
+      "sha256": "c93de1d2da214ee74456adebba169345c8e9f002d090eb11227f45e7962585c8"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/encodage_polyedres.tex",
+      "bytes": 2372,
+      "sha256": "868074ba8438f5457ed2b27b5cb1fcc42ee8c42b8f8f74d3243794541b4df6c5"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/figs/alphabet_fondation.tex",
+      "bytes": 1926,
+      "sha256": "a0565e4fe6e894c1152cab91b935d424f3575434b15671c2149a15dce74ff687"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/figs/gabriel_supports.tex",
+      "bytes": 4916,
+      "sha256": "f1a0bf1d8d437eb1e8ade2e04f8b0f3915b2690f2c95f1bbbd23119da4ee25f3"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/figs/grille.tex",
+      "bytes": 628,
+      "sha256": "789649cba0d4d6c2f913796a48028612901b082eaa786aa9f4e5114fa4c47c09"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/figs/hierarchie_surfaces.tex",
+      "bytes": 5068,
+      "sha256": "485c82d25ec6905ab36723d65101ac7d21cb469dd2c459aa1a77b0b55d46d045"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/figs/plan_support.tex",
+      "bytes": 813,
+      "sha256": "1d68fe0afe5b53ad7dc894fabf7634b2661f1d43156f9689d5a0992ab6ba1032"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/figs/verrou_portee.tex",
+      "bytes": 5504,
+      "sha256": "04746af96004f814b3b87e01b26d217dec63305a6692f4800758dc72c99910d1"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/main.tex",
+      "bytes": 7446,
+      "sha256": "100fbff586a36712b5b09316d3db4ec490ebcf967e0bd3b3db72012950f8765f"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/points_encourageants.tex",
+      "bytes": 1291,
+      "sha256": "df2c66e09f52cf1b53d9579ce6a571e11096cfcd6c10f6606ad12630a8f82d61"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/prepare_assets.py",
+      "bytes": 1141,
+      "sha256": "a25d72efa579ab6618491ef7b7d023f33a6c800ce81f732c5d583f2b857e0eb7"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/references.tex",
+      "bytes": 3831,
+      "sha256": "273b556e38179e9bced0ffabe9a9adc181ae19984b1f4eb6f627b1fac5215f30"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/theme/beamercolorthemeinria.sty",
+      "bytes": 1023,
+      "sha256": "f41c2a4a59d24d2f0bee00c076607a398bed531234daae814d23990c7896cf74"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/theme/beamerinnerthemeinria.sty",
+      "bytes": 750,
+      "sha256": "07225d781859f8d581d3b9ffe720e9bbd7843d228f909352f0476a7ac2a282f4"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/theme/beamerouterthemeinria.sty",
+      "bytes": 449,
+      "sha256": "3270f02d41c7c6a649d5a660a3b64a7a393c477b7696f5ec47ab40d75c40b1d9"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/theme/beamerthemeinria.sty",
+      "bytes": 2263,
+      "sha256": "a5253e60603bcce56586eedd7fe39e74cc76bec0dfe7ee66d0a8cb807b514781"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/theme/imgs/Filet-7pt.png",
+      "bytes": 363,
+      "sha256": "2fea300abc1bb030cf8df7a522266d3e5022b86264558fd23c5ec1832b035cf9"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/theme/imgs/Filet-7pt.svg",
+      "bytes": 370,
+      "sha256": "b81a1decb98a8db26585e558c3396246bb5c6cbe12461420baa241ab79637d87"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/theme/imgs/Inria-logo-rouge.png",
+      "bytes": 16025,
+      "sha256": "bd3df7ba2192e23f988222ab057ebc8bd6ca8dce6c858c6f75d238afbf19f2ce"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/theme/imgs/Inria-logo-rouge.svg",
+      "bytes": 1577,
+      "sha256": "aa3b564d642bc89c9f2c3bc8017265cce76e811ff88ec9a480b516a5e877a7a6"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/theme/imgs/angle.png",
+      "bytes": 3086,
+      "sha256": "a0fe0b46d2660cc7056fd808801f331a3e7cce3fc8259bb7d8ebaaf4f5477596"
+    },
+    {
+      "path": "Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE/theme/imgs/coin_degrade.svg",
+      "bytes": 409,
+      "sha256": "26f0394d9307f3c8df7cc464ef7d38bdfc6d64c6079a6ceb970b4947ffe3aad5"
+    },
+    {
+      "path": "Zoltan/README.md",
+      "bytes": 3448,
+      "sha256": "16cf91d78ea77d918098a9efaa8687af04e1dfa7ac767ea961007e3a123bba40"
+    }
+  ]
+}

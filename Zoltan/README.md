@@ -33,23 +33,24 @@ coupes consommées sont les hypothèses à mesurer.
 
 ## Où commencer
 
-1. [`FoundationModel/AUDIT_V9_ET_ARCHITECTURE_20260926.md`](FoundationModel/AUDIT_V9_ET_ARCHITECTURE_20260926.md) — l'audit v9 et les décisions d'interface.
+1. [`FoundationModel/REAUDIT_GLOBAL_20260926.md`](FoundationModel/REAUDIT_GLOBAL_20260926.md) — la nouvelle revue complète, ses corrections et le pilote conseillé.
+2. [`FoundationModel/AUDIT_V9_ET_ARCHITECTURE_20260926.md`](FoundationModel/AUDIT_V9_ET_ARCHITECTURE_20260926.md) — l'audit v9 et les décisions d'interface.
    Sa [suite constructive](FoundationModel/CONTRAT_COUPES_ET_MASSES_20260926.md)
    définit le contrat des coupes et ses fixtures rationnelles.
    Le [contrat de guidage](FoundationModel/GUIDAGE_FULL_ET_PREENTRAINEMENT_20260926.md)
    précise ensuite les pertes d'apprentissage, le rôle d'enseignant de FULL
    et les correspondances entre vues.
-2. [`FoundationModel/README.md`](FoundationModel/README.md) — la thèse et le
+3. [`FoundationModel/README.md`](FoundationModel/README.md) — la thèse et le
    parcours d'entrée.
-3. [`FoundationModel/OBJET.md`](FoundationModel/OBJET.md) — ce que la tour est,
+4. [`FoundationModel/OBJET.md`](FoundationModel/OBJET.md) — ce que la tour est,
    et les six primitives qu'une architecture y lit.
-4. [`FoundationModel/ETAT_DE_LART.md`](FoundationModel/ETAT_DE_LART.md) — le
+5. [`FoundationModel/ETAT_DE_LART.md`](FoundationModel/ETAT_DE_LART.md) — le
    verrou, et la **table de substitution** qui sert de plan de mesure.
-5. [`FoundationModel/ARCHITECTURE.md`](FoundationModel/ARCHITECTURE.md) —
+6. [`FoundationModel/ARCHITECTURE.md`](FoundationModel/ARCHITECTURE.md) —
    HGP-UNet.
-6. [`FoundationModel/MESURE.md`](FoundationModel/MESURE.md) — comment établir
+7. [`FoundationModel/MESURE.md`](FoundationModel/MESURE.md) — comment établir
    l'apport, témoins négatifs compris.
-7. [`FoundationModel/PLAN.md`](FoundationModel/PLAN.md) — l'ordre de
+8. [`FoundationModel/PLAN.md`](FoundationModel/PLAN.md) — l'ordre de
    construction et les points de décision.
 
 ## Ce que ce dossier n'est pas

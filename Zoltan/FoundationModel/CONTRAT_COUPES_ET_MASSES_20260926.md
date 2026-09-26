@@ -1,5 +1,10 @@
 # Du FULL aux opérateurs du réseau : coupes, masses et composition
 
+Suite : le [réaudit global de tout Zoltan](REAUDIT_GLOBAL_20260926.md)
+précise la réalisation des tokens, les limites du seuil α local, le graphe
+et le coût des branches, les objectifs SEL et les contrôles du guidage.
+Les preuves et reçus de ce document conservent leur portée initiale.
+
 26 septembre 2026. Suite constructive de l'[audit v9](AUDIT_V9_ET_ARCHITECTURE_20260926.md), au commit de départ b44a16e1e. Morse HGP 3D est posé conforme à sa spécification. Le présent contrat porte sur les nouveaux opérateurs du réseau ; les résultats algébriques sont accompagnés de petites fixtures exécutables.
 
 Cadre : **phase=conception_modele_fondation_hors_registre**, **backend=python_reference**, **profile=synthetic_incidence_only**, **mode=contrat_coupes_et_oracle_borne**, **public_status=not_claimed**. GCP non utilisé ; aucune donnée SemanticKITTI, aucune expérience apprise. Le script ne consomme pas une sortie v9 et ne qualifie pas un exporteur natif.

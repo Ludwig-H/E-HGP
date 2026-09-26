@@ -1,0 +1,100 @@
+{
+  "cases": [
+    {
+      "incorrect_variants": {
+        "global_label_balance_excludes_a_query_only_shortcut": "REJECTED",
+        "label_rebalancing_preserves_calibration_distribution": "REJECTED",
+        "skill_against_flat_prior_demonstrates_context_use": "REJECTED"
+      },
+      "name": "radius_only_prior_and_evaluation_law",
+      "status": "PASS",
+      "values": {
+        "accuracy_without_point_features": "9/10",
+        "constant_point_features": true,
+        "corrected_brier": "9/100",
+        "flat_prior_brier": "1/4",
+        "global_positive_rate": "1/2",
+        "label_balanced_brier": "41/100",
+        "radius_brier": "9/100",
+        "skill_against_flat_prior": "16/25",
+        "skill_against_radius_prior": "0"
+      }
+    },
+    {
+      "incorrect_variants": {
+        "conditioning_coverage_removes_incidence_concentration": "REJECTED",
+        "identical_distributions_have_unit_collision": "REJECTED",
+        "lower_collision_proves_distribution_disagreement": "REJECTED"
+      },
+      "name": "collision_is_not_distribution_similarity",
+      "status": "PASS",
+      "values": {
+        "coverage_conditioned_collision": "1/2",
+        "identical_distribution_overlap": "1",
+        "identical_one_token_collision": "1",
+        "identical_two_token_collision": "1/2"
+      }
+    },
+    {
+      "incorrect_variants": {
+        "arbitrary_pair_probabilities_define_a_partition_law": "REJECTED",
+        "posterior_connection_probabilities_obey_min_transitivity": "REJECTED",
+        "thresholding_marginals_preserves_transitivity": "REJECTED"
+      },
+      "name": "posterior_marginals_are_not_a_hard_hierarchy",
+      "status": "PASS",
+      "values": {
+        "bounds_claimed_sufficient_for_arbitrary_size": false,
+        "impossible_pair_probabilities": [
+          "9/10",
+          "9/10",
+          "1/10"
+        ],
+        "necessary_lower_bound_for_third_impossible_pair": "4/5",
+        "thresholded_pairs": [
+          true,
+          true,
+          false
+        ],
+        "valid_mixture_pair_probabilities": [
+          "1/2",
+          "1/2",
+          "0"
+        ]
+      }
+    },
+    {
+      "incorrect_variants": {
+        "censoring_at_middle_threshold_is_a_middle_bin_event": "REJECTED",
+        "finite_horizon_forces_all_fusions_by_horizon": "REJECTED",
+        "independent_sigmoids_are_monotone_by_construction": "REJECTED"
+      },
+      "name": "monotone_bins_preserve_censored_mass",
+      "status": "PASS",
+      "values": {
+        "arbitrary_radius_interpolation_implemented": false,
+        "bin_masses_with_tail": [
+          "1/4",
+          "1/4",
+          "1/8",
+          "3/8"
+        ],
+        "cdf_at_declared_thresholds": [
+          "1/4",
+          "1/2",
+          "5/8"
+        ],
+        "survival_after_max_horizon": "3/8",
+        "survival_after_middle_threshold": "1/2"
+      }
+    }
+  ],
+  "engine_qualification": false,
+  "geometric_realizability_claimed": false,
+  "incorrect_variants_rejected": 12,
+  "scope": "abstract_rational_target_controls_only",
+  "source_sha256": "4075d02027fdf5b84bf582022aa01f5758edc89fc477fb8e339e247088cdcd8e",
+  "status": "PASS",
+  "tests_passed": 4,
+  "training_performed": false
+}

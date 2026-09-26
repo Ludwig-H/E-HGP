@@ -8,16 +8,19 @@ sépare FULL enseignant hors ligne et FULL dans le tokenizer. Le premier
 pilote compare des vues d'une seule trame ; l'agrégat temporel FM-6 reste
 un régime secondaire.
 
-## 1. La doctrine : substituer, ne pas comparer des systèmes
+## 1. La doctrine : attribuer les effets et comparer les systèmes
 
-Comparer « HGP-FM » à « Sonata » ou à « Utonia » ne prouve rien. Deux systèmes
-complets diffèrent par le squelette, les données, la recette, le budget de
-calcul, les augmentations et mille détails. Un écart entre eux n'est pas
-attribuable.
+Comparer « HGP-FM » à « Sonata » ou à « Utonia » mesure une performance de
+système. Ces comparaisons sont utiles, mais un écart ne s'attribue pas à HGP
+seul lorsque changent le squelette, les données, la recette ou le budget.
 
-La seule mesure qui attribue est la **substitution** : on fixe tout — famille
-de squelette, nombre de paramètres, recette d'entraînement, données,
-augmentations, budget de calcul, graines — et on remplace **un seul composant**.
+Pour attribuer un effet, le pilote utilise la **substitution** : même famille
+de squelette, recette, données, augmentations et graines appariées ; une
+intervention à la fois, puis les interactions. Apparier séparément exposition
+et coût : changer la structure peut changer les FLOPs malgré des largeurs
+identiques. Ajouter ensuite une comparaison des systèmes avec un budget de
+réglage identique, pour ne pas confondre ablation figée et meilleur compromis
+atteignable par chaque méthode.
 
 C'est pour cela que l'architecture est une modification de PTv3 et non un
 réseau neuf ([`ARCHITECTURE.md`](ARCHITECTURE.md) § 6). La table de
@@ -39,8 +42,15 @@ Sept règles s'appliquent partout.
 5. **Tendance, pas point.** Un modèle de fondation se juge sur une pente, pas
    sur une case (§ 6).
 6. **Comptabilité du coût** publiée avec chaque chiffre (§ 9).
-7. **Validation seule.** La séquence 08 pour SemanticKITTI ; le serveur de test
-   n'est touché qu'une fois, à la fin, et jamais pour régler quoi que ce soit.
+7. **Partitions explicites.** La séquence 08 sert à la validation SemanticKITTI ;
+   le serveur de test n'est touché qu'une fois, à la fin. Les scans 08 ne servent
+   ni au pré-entraînement, ni à l'ajustement des statistiques apprises sur le
+   corpus (normalisations, quantiles de référence, priors). Les statistiques
+   calculées sur chaque vue par une règle gelée restent autorisées.
+   Un régime transductif serait une expérience distincte.
+   Réserver des blocs des séquences d'entraînement pour sélectionner les
+   variantes ; figer ensuite la configuration avant le bilan sur 08. Une
+   fenêtre temporelle de pré-entraînement reste dans la partition de son ancre.
 
 ## 2. Axe 0 — sondes sans apprentissage
 
@@ -199,16 +209,18 @@ par A0G0/A0G1, qui gardent le tokenizer de référence.
 | S1 échelle | `GridPool` de PTv3 (taille de voxel) | échelle de la tour, règle `E-persistance` |
 | S2 regroupement | max ou moyenne sur cellule | affectation douce aux poids du § 9.1 |
 | S3 voisinage | *patch* sur sérialisation Z-order/Hilbert | *patch* du graphe de fusion |
-| S4 position | encodage relatif $xyz$ | biais ultramétrique $\varphi(\log r_{uv})$ |
-| S5 ordre | néant (un seul graphe) | mixage d'ordres, calendrier de $K$ puis attention croisée |
-| S6 décodeur | interpolation trilinéaire ou $k$-NN | vote pondéré § 9.1, Proposition 7 |
+| S4 position | sans biais ou biais XYZ sur noyau compatible | biais dérivé des rayons de fusion, sur le même noyau |
+| S5 ordre | K1 répété et capacité appariée | branches K autonomes et attention croisée ; calendrier seulement après compatibilité pondérée |
+| S6 décodeur | gather par indices inverses + skip de PTv3 | projection pondérée vers les retours, avec skip fin conservé |
 | S7 tête d'instance | propositions, suppression non maximale, appariement | sélection par programme dynamique à coût appris sur l'arbre condensé |
 
-S7 a deux témoins obligatoires, et ils sont plus exigeants qu'un détecteur :
-**l'excès de masse sur le même arbre condensé** — si le coût appris ne bat pas
-$-\widehat{E}(C)$, il n'apporte rien — et **ALPINE**, qui atteint
-$\mathrm{PQ} = 64{,}2$ par regroupement géométrique sans aucune étiquette
-d'instance.
+S7 a deux témoins obligatoires : **l'excès de masse sur le même arbre condensé**
+et **ALPINE**, appliqués aux mêmes prédictions sémantiques pour isoler la tête
+d'instance. Le $\mathrm{PQ}=64{,}2$ publié pour ALPINE + MinkUNet sans TTA sur
+la validation SemanticKITTI dépend de cette tête sémantique ; ce n'est pas un
+seuil universel à battre avec un autre backbone. Rapporter PQ, PQ des choses,
+RQ et SQ ainsi que mIoU, budget et recours aux labels d'instance. Voir la
+[table 1 d'ALPINE](https://arxiv.org/html/2503.13203v2#S4.T1).
 
 Deux mesures complémentaires : **une ligne à la fois** depuis la référence
 (effet propre), et **une ligne retirée à la fois** depuis le modèle complet
@@ -260,10 +272,16 @@ autre chaîne emboîtée à budget apparié. Ne pas inverser arbitrairement les
 opérateurs de pooling : une incompatibilité de dimensions ou de parents
 testerait une interface cassée.
 
-### T4 — ordre aléatoire
+### T4 — information des ordres et capacité
 
-Remplacer l'axe $K$ par une affectation d'ordre aléatoire dans le mixage. Teste
-si OM exploite la sémantique de $K$ ou seulement une capacité supplémentaire.
+Une permutation **globale fixe** des noms de K peut être absorbée par le
+réseau : elle ne teste pas la valeur géométrique des ordres. Le témoin
+principal répète K1 dans autant de branches que la variante multi-K, avec
+mêmes largeurs, têtes et budget total de requêtes/jetons. Comparer aussi K1
+unique à capacité totale appariée, puis multi-K sans son canal numérique K.
+Une permutation des canaux K entre trames, sans casser cartes ni affectations,
+diagnostique l'usage de l'étiquette K ; elle ne remplace pas ces contrôles de
+capacité. Publier le budget effectivement apparié et les différences restantes.
 
 ### T5 — diagnostic du raccourci géométrique
 
@@ -273,6 +291,17 @@ traiter toute information géométrique comme un échec : elle reste utile en
 distant pour voir ce qu'il apporte. Mesurer surtout la qualité aval : une
 prédiction FULL exacte à partir d'une distance locale ne démontre pas une
 représentation sémantique plus utile.
+
+Ajouter le témoin **encodeur constant + tête recevant r** du
+[contrat de guidage](GUIDAGE_FULL_ET_PREENTRAINEMENT_20260926.md), puis les
+priors ajustés sur statistiques visibles. Une majorité différente selon le
+rayon peut donner une bonne précision avec deux classes équilibrées au total.
+Pour K1, publier BCE/Brier et gain face au prior sur $Y_V=0$, séparément du
+cas $Y_V=1$ déjà résolu par inclusion. Garder un échantillon d'évaluation
+représentatif de la loi des requêtes ; une calibration sur positifs/négatifs
+rééquilibrés sans correction est celle d'une autre distribution. Le guidage
+multi-K compare collision Γ et, si retenu, recouvrement des distributions O,
+avec couverture et concentration des incidences publiées.
 
 ## 5. Axe 3 — prédictions pré-enregistrées
 
@@ -313,24 +342,34 @@ tendance de l'écart. Trois issues, toutes publiables :
   grande échelle. Il faut le dire, et probablement n'utiliser la tour qu'au
   pré-entraînement.
 
-## 7. Axe 5 — protocoles d'évaluation, ceux de la communauté
+## 7. Axe 5 — protocoles d'évaluation et unités de comparaison
 
-Pour être comparable, on utilise les protocoles établis, sans en inventer.
+Épingler le protocole, son code et les manifestes des sous-ensembles avant la
+comparaison. Les protocoles existants ne partagent pas tous la même unité de
+faible annotation ni le même accès aux données de pré-entraînement.
 
 - **Sonde linéaire** : squelette gelé, tête `BatchNorm` + linéaire. C'est
   l'évaluation qui a servi à établir le problème du raccourci géométrique ;
   elle mesure la qualité de la représentation, pas celle du réglage fin.
 - **Réglage fin complet.**
-- **Efficacité en étiquettes** : $0{,}1$, $1$, $10$, $50$, $100\,\%$ — les
-  points usuels sont $1\,\%$ sur SemanticKITTI, $1$ et $10\,\%$ sur nuScenes.
-- **Transfert inter-domaines** : sans réglage, puis avec.
+- **Efficacité en étiquettes** : $0{,}1$, $1$, $10$, $50$, $100\,\%$, en
+  déclarant l'unité. Le protocole SemanticKITTI de
+  [TARL §4.1](https://www.ipb.uni-bonn.de/pdfs/nunes2023cvpr.pdf) reprend les
+  sous-ensembles SegContrast de **scans annotés** ; ce n'est pas 1 % de points
+  étiquetés dans toutes les trames. Reprendre les manifestes et publier scans,
+  points annotés et classes présentes. Les scribbles constituent un autre
+  budget. Pour nuScenes, déclarer précisément le sous-ensemble adopté, sans
+  assimiler `mini`, pourcentage de scènes et pourcentage de points.
+- **Transfert inter-domaines** : sans réglage, puis avec ; publier la table de
+  classes communes et celles ignorées. Un changement de corpus mêle capteur,
+  environnement et taxonomie ; le diagnostic de raréfaction à scène fixe et
+  le transfert réel répondent à deux questions distinctes.
 - Métrique : mIoU sur validation, par classe et global ; PQ pour le panoptique.
 
 Suite de tâches, par ordre de priorité :
 
 1. **segmentation sémantique** — SemanticKITTI (val 08), nuScenes, Waymo ;
-2. **panoptique** — témoin exigeant : ALPINE atteint $\mathrm{PQ} = 64{,}2$
-   **sans étiquette d'instance**, par regroupement géométrique. Comparer sur
+2. **panoptique** — comparer ALPINE et SEL avec la même tête sémantique,
    le même protocole et budget ; une absence de gain limite cette tête
    d'instance, sans réfuter le guidage de représentations ;
 3. **transfert inter-capteurs** — c'est l'expérience décisive du projet ;
@@ -340,16 +379,18 @@ Suite de tâches, par ordre de priorité :
    sur-segmentation ne pénalise pas ;
 6. **détection** — les nœuds comme propositions.
 
-## 8. Axe 6 — ce que la tour permet et qu'on ne peut pas comparer
+## 8. Axe 6 — capacités structurelles à mesurer
 
-Certaines capacités n'ont pas d'équivalent chez les concurrents et se mesurent
-en valeur absolue, pas en écart :
+Les capacités suivantes ont aussi des antécédents ; mesurer leurs propriétés
+propres et leurs coûts, puis comparer les sorties réellement permises :
 
 - **propositions d'instance sans apprentissage** à tous les niveaux ;
 - **détection d'anomalies guidée par un modèle 3D**, par sélection de branche ;
-- **cohérence multi-échelle garantie** : la sortie est emboîtée par
-  construction, ce qu'aucune segmentation par points ne garantit ;
-- **déterminisme et reproductibilité bit à bit** de la tokenisation.
+- **cohérence multi-échelle** : les quotients retenus sont emboîtés sous les
+  conditions du contrat ; des argmax pondérés par point à plusieurs niveaux
+  ne deviennent pas automatiquement des partitions emboîtées ;
+- **déterminisme de la tokenisation**, avec environnement numérique épinglé
+  pour les poids et descripteurs, décisions exactes distinguées des arrondis.
 
 ## 9. Comptabilité du coût
 

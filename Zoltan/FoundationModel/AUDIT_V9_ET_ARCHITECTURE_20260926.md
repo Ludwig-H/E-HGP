@@ -1,5 +1,10 @@
 # Audit transversal — Morse HGP 3D v9 → HGP-FM
 
+Suite : le [réaudit global de tout Zoltan](REAUDIT_GLOBAL_20260926.md)
+précise la réalisation des tokens, les limites du seuil α local, le graphe
+et le coût des branches, les objectifs SEL et les contrôles du guidage.
+Les preuves et reçus de ce document conservent leur portée initiale.
+
 26 septembre 2026. Base lue : `origin/main` à `c529c82bb`. Cet audit **pose que la tour FULL est exactement conforme à sa spécification**. Il juge ce que l'on peut en déduire pour un modèle de fondation LiDAR automobile, et les interfaces à construire. Aucune expérience apprise, aucun essai GCP et aucune comparaison aux étiquettes n'ont été effectués ici.
 
 ```text

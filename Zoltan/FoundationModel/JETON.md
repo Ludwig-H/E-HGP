@@ -26,7 +26,7 @@ par exemple $\log(r/r_0)$.
 
 | famille | normalisée ? | ce qu'elle capture |
 | --- | --- | --- |
-| 1. forme | **oui** (translation, échelle) | ce qui doit rester stable quand le même objet est vu de plus loin |
+| 1. forme | **oui** (translation, échelle) | résumé géométrique dont la stabilité sous changement d'acquisition reste à mesurer |
 | 2. physique | non | dimensions, pose, position dans la scène |
 | 3. filtration | non | la trajectoire d'échelle : naissance, mort, fusion, ordre |
 | 4. acquisition | non | la qualité de la mesure |
@@ -44,24 +44,67 @@ puis mesurer le transfert avec réglages gelés.
 
 ## 2. Famille 1 — forme
 
-La géométrie d'un nœud est $P_v = \bigcup_b \mathrm{conv}(S_b)$, réunion des
-enveloppes convexes des supports des boules qui le composent. $P_v$ est
-**une union finie de supports convexes fermés de dimensions mêlées** : ce
-squelette de témoins n'est pas automatiquement une surface physique fermée,
-et on ne le remplace pas par $\mathrm{conv}(P_v)$.
+### La réalisation doit être choisie avant le descripteur
 
-**Signature d'arité** — les proportions de supports d'arité $2$, $3$ et $4$,
-brutes et pondérées par la mesure. C'est une **signature exacte des supports
-critiques**, pas une mesure automatique de la dimension physique de l'objet :
-arêtes, triangles et tétraèdres peuvent contribuer au même nœud. La tour publie les supports
-nécessaires à cette signature, sous réserve de leur export.
-Trois flottants : c'est le premier canal à tester.
+Le catalogue contient une boule canonique, son $q_{\min}$, ses intérieurs $I_b$
+et toute sa coquille $U_b$ ; **un support représentant n'est pas une géométrie
+canonique**. Pour quatre points aux coins d'un carré, chacune des deux
+diagonales est un support q2 de la même boule. Choisir la première selon les IDs
+modifie distances et moments, alors que FULL n'a pas changé.
 
-**Moments des supports par dimension** jusqu'à l'ordre 3 — longueurs des
-arêtes, aires des triangles et volume des tétraèdres en canaux distincts.
-Une aire de bord pour les tétraèdres exige de définir et calculer ce bord.
-Ces moments peuvent donner un repère propre. Comparer leur stabilité sous
-décimation à celle d'une boîte englobante, qui dépend des points extrêmes.
+Le premier pilote compare les mêmes snapshots avec trois encodages :
+
+1. **Retours observés** : statistiques des sites couverts, avec la mesure de
+   retours déclarée. C'est le socle peu coûteux, disponible aussi pour un
+   singleton K1.
+2. **Boules et supports** : d'abord histogramme de $q_{\min}$ **par boule
+   distincte**, puis, en option, réalisation de **tous les supports positifs
+   minimaux par inclusion**. Les arités de tous ces supports ne se déduisent
+   pas de $q_{\min}$ seul.
+3. **Surfels observés** : normales, incertitude et visibilité, calculées sur
+   les retours ; cette mesure physique estimée reste séparée des témoins HGP.
+
+Pour l'option 2, définir explicitement
+$\mathcal Q_b=\{Q\subset U_b:c_b\in\mathrm{relint}(\mathrm{conv}(Q)),
+Q\text{ affinement indépendant},2\leq |Q|\leq4\}$
+et $P_v^{\mathrm{supports}}=
+\bigcup_{b\in B_v}\bigcup_{Q\in\mathcal Q_b}\mathrm{conv}(Q)$.
+Les clés de boules de $B_v$ sont dédupliquées et rattachées au **snapshot daté**
+avec leur rôle d'événement déclaré. Les ensembles $\mathcal Q_b$ demandent
+un export ou une reconstruction ; ils ne sont pas déjà des champs de FULL.
+La [ShellTable native](../../morsehgp3D_v9/src/tower/forest/local_plateau.hpp)
+énumère ces supports dans son domaine de coquille.
+
+$P_v^{\mathrm{supports}}$ est un **squelette de témoins**, distinct des
+populations, des facettes pondérées du § 9.1 et d'une surface physique. Dans
+le carré, il forme les deux diagonales ; $\mathrm{conv}(U_b)$ forme le carré
+rempli : ce serait une autre réalisation, à tester sous un autre identifiant.
+Un point intérieur à une boule peut manquer au squelette. Un snapshot sans
+boule n'a aucun support : utiliser le canal retours et un masque
+`has_support_geometry=false`, sans fabriquer de distance finie à l'ensemble
+vide. La [fixture rationnelle](reference/verify_support_carrier.py) montre
+l'ambiguïté de choix et la différence avec le remplissage convexe.
+Dans les formules de distances ci-dessous, $P_v$ désigne la réalisation
+**non vide** explicitement retenue, avec son identifiant de construction.
+
+**Signature d'arité** — trois comptes de boules par $q_{\min}$ et leurs
+proportions. Cette signature canonique peu coûteuse n'est ni le nombre de
+supports positifs ni une estimation de dimension physique. Une signature des
+supports énumérés porte un autre nom, un autre dénominateur et son coût.
+
+**Moments par dimension** — pour chaque famille de primitives, choisir soit
+la mesure d'incidences $\nu_d=\sum_{Q:|Q|=d+1}a_Q
+\mathcal H^d|_{\mathrm{conv}(Q)}$, avec $a_Q$ déclaré, soit la mesure de leur
+union. La première compte les recouvrements avec multiplicité ; elle est
+additive et plus simple à calculer. La seconde exige de traiter les
+intersections. Elles ne donnent pas les mêmes moments. Une aire de bord de
+tétraèdres demande encore une autre construction.
+
+Jusqu'à l'ordre 3, une mesure a **19 monômes non constants** (3+6+10) plus
+sa masse ; trois dimensions séparées donnent jusqu'à 60 canaux. Garder les
+moments dans le repère capteur au premier pilote. Un repère de vecteurs propres
+devient ambigu aux valeurs propres multiples et peut changer de signe :
+aucune stabilité de la normalisation par PCA n'est acquise.
 
 **Histogramme sphéro-radial** des supports bidimensionnels ou des surfels
 observés, explicitement distingués, sur $\mathbb{S}^2 \times \mathbb{R}$.
@@ -81,11 +124,21 @@ des grilles de parents recentrées ou renormalisées ne se combinent pas case
 manquer un petit élément. Garder donc les primitives et les niveaux fins,
 et comparer la grille aux descripteurs moins coûteux.
 
+Pour deux réalisations dans le **même** cube normalisé $[-1,1]^3$ et les centres des
+$8^3$ cellules, poser $E=\max_j|D_P[j]-D_Q[j]|$. Le rayon de couverture
+des sondes est $\delta=\sqrt{3}/8$ ; les distances sont 1-Lipschitz, donc
+$E\leq d_H(P,Q)/s\leq E+2\delta$. Cette borne dérivée ici est grossière :
+l'incertitude maximale vaut environ $0{,}433s$ en mètres. Elle ne se
+transfère pas aux normalisations indépendantes. Mesurer la sensibilité aux
+éléments minces ; des sondes adaptatives près des primitives sont une option
+à comparer, avec leur coût.
+
 ## 3. Famille 2 — physique
 
 Rayon de naissance en mètres ; dimensions de la boîte ; aires des supports
-bidimensionnels ou des surfels observés, identifiées séparément ; épaisseur
-(plus petite valeur propre des moments d'ordre 2) ;
+bidimensionnels ou des surfels observés, identifiées séparément ; dispersion
+transverse (racine de la plus petite valeur propre de la covariance, en
+longueur, avec la mesure déclarée) ;
 centre en repère capteur ; hauteur au-dessus du capteur ; **portée** et azimut ;
 nombre de retours couverts, séparé en intérieur et coquille.
 
@@ -98,7 +151,7 @@ ces comparaisons conditionnelles.
 
 ## 4. Famille 3 — filtration
 
-Ce que la tour donne et que rien d'autre ne donne. Ce sont aussi les cibles des
+Les variables dérivées de l'histoire FULL sont aussi des cibles des
 tâches de pré-entraînement, ce qui impose une précaution : **une variable
 utilisée comme cible en pré-entraînement ne doit pas être donnée en entrée au
 même moment.**
@@ -109,8 +162,9 @@ viennent de la vue élève recalculée ; les objets de la tour enseignante reste
 dans la perte. Élaguer cette dernière après masquage ne suffit pas.
 
 Naissance, mort, persistance et écart logarithmique ; rang et quantile du
-niveau dans la trame — utile parce que la densité absolue dépend du capteur
-alors que le rang, moins ; gain de masse à la fusion ; **degré de multifusion** ;
+niveau dans la trame — une moindre dépendance au capteur est une hypothèse,
+car visibilité et composition de scène modifient aussi les rangs ; gain de
+masse à la fusion ; **degré de multifusion** ;
 nombre d'enfants dans l'arbre condensé ; **ordre $K$** et image verticale — son
 identité, son niveau, sa taille ; excès de masse du nœud.
 
@@ -127,17 +181,19 @@ libre ; conserver cette incertitude dans les comparaisons entre vues.
 | famille | dimensions |
 | --- | --- |
 | grille de distances $8^3$ | 512 |
-| moments jusqu'à l'ordre 3 | 19 |
+| moments jusqu'à l'ordre 3 | 20 par mesure, jusqu'à 60 pour trois dimensions |
 | histogramme sphéro-radial | 96 à 128 |
 | signature d'arité | 6 |
 | physique | ≈ 20 |
 | filtration | ≈ 20 |
 | acquisition | ≈ 15 |
-| **total** | **≈ 690 à 720** |
+| **total** | **≈ 690 à 760**, selon les mesures effectivement retenues |
 
-Stockage : float16 pour la famille 1, entiers exacts pour ce qui l'est déjà
-(arités, comptes, ordre $K$, rangs). Le flottant est une sortie du moteur,
-jamais un maillon de sa chaîne d'exactitude.
+Stockage envisagé : float16 pour la famille 1, entiers exacts pour ce qui
+l'est déjà (arités, comptes, ordre $K$, rangs). Les descripteurs flottants sont
+calculés approximativement **après l'export exact** ; leur erreur et leur
+saturation doivent être mesurées. Ils ne font pas partie de la chaîne de
+prédicats exacts du moteur.
 
 **La grille de distances à 512 dimensions est le poste à interroger en
 premier.** Elle vaut à elle seule les trois quarts du descripteur ; si la

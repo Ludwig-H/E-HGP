@@ -1,0 +1,79 @@
+{
+  "engine_qualification": false,
+  "fixture_count": 4,
+  "fixtures": [
+    {
+      "facts": {
+        "ball_center": [
+          0,
+          0
+        ],
+        "ball_count": 1,
+        "ball_radius_squared": 2,
+        "minimal_support_count": 2,
+        "permutations_checked": 24,
+        "probe": [
+          "1/1",
+          "1/1"
+        ],
+        "q_min": 2,
+        "representative_distances_squared": [
+          "0/1",
+          "2/1"
+        ]
+      },
+      "incorrect_variants": {
+        "one_representative_defines_the_geometry": "REJECTED",
+        "q_min_histogram_counts_all_supports": "REJECTED"
+      },
+      "name": "one_ball_two_supports",
+      "status": "PASS"
+    },
+    {
+      "facts": {
+        "all_supports_xy_moment": "0/1",
+        "normalized_xy_moments": [
+          "-1/3",
+          "1/3"
+        ]
+      },
+      "incorrect_variants": {
+        "one_support_gives_canonical_moments": "REJECTED"
+      },
+      "name": "representative_moments",
+      "status": "PASS"
+    },
+    {
+      "facts": {
+        "filled_square_distance_squared": "0/1",
+        "skeleton_distance_squared": "1/2",
+        "strict_interior_point_distance_squared": "1/8"
+      },
+      "incorrect_variants": {
+        "all_interior_points_lie_in_support_carrier": "REJECTED",
+        "union_equals_shell_convex_hull": "REJECTED"
+      },
+      "name": "carrier_not_hull_or_population",
+      "status": "PASS"
+    },
+    {
+      "facts": {
+        "empty_distance": "undefined_as_finite_feature",
+        "incidence_length": "3/1",
+        "union_length": "2/1"
+      },
+      "incorrect_variants": {
+        "empty_support_has_finite_zero_distance": "REJECTED",
+        "sum_of_primitive_masses_is_union_measure": "REJECTED"
+      },
+      "name": "measure_and_empty_domain",
+      "status": "PASS"
+    }
+  ],
+  "native_export_qualification": false,
+  "rejected_variant_count": 7,
+  "schema": "zoltan.support_carrier.v1",
+  "scope": "explicit_square_and_segment_geometry_only",
+  "script_sha256": "820540bfa9782673bd37c90cc9b68600047d81654efd2301090bb2a715f26e24",
+  "status": "PASS"
+}

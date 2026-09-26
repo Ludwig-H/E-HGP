@@ -27,9 +27,8 @@ ne réfute pas tous les usages de la tour.
 
 ### R2 — c'est la hiérarchie en général qui aide, pas celle-ci
 
-*Le risque.* Toute hiérarchie multi-échelle aide un réseau 3D ; les superpoints
-de SPT le montrent déjà, avec 212 k paramètres et des résultats de premier
-plan. Le fait que notre hiérarchie soit canonique et exacte n'y change peut-être
+*Le risque.* Le gain peut venir d'une hiérarchie multi-échelle générique.
+SPT fournit un précédent utile, sans démontrer que toute hiérarchie aide. Le fait que notre hiérarchie soit canonique et exacte n'y change peut-être
 rien.
 
 *Détection.* Témoin **T1**, hiérarchie locale de budgets appariés, avec
@@ -59,21 +58,19 @@ emboîtant inter-K ne garantit pas la composition des poids du réseau.
 
 ### R4 — la condensation réintroduit la constante, ou mange les objets minces
 
-*Le risque.* La condensation du §9.1 fournit squelette, stabilité et sorties
-par incidence pour la tête de sélection. Mais `min_cluster_size` est **exactement le genre de constante
-posée à la main** que tout ce dossier cherche à supprimer : un seuil en nombre
-de points ne transfère ni d'un capteur à l'autre, ni du champ proche au champ
-lointain. Et un seuil, quel qu'il soit, élague d'abord les branches de faible
-masse, c'est-à-dire les poteaux lointains.
+*Le risque.* Une condensation peut supprimer les faibles masses utiles ou
+ne rien compresser. Un seuil absolu dépend de la densité acquise ; α relatif
+au parent reste un hyperparamètre et filtre surtout le déséquilibre.
+Dans un arbre binaire équilibré, α≤1/2 conserve toutes les scissions ; α>1/2
+ne permet aucune bifurcation à deux branches lourdes.
 
-*Détection.* Porte 0.6 de [`MESURE.md`](MESURE.md) : plafond d'oracle **par
-classe, avant et après condensation**, en fonction du seuil relatif $\alpha$.
+*Détection.* Porte 0.6 : compression et profondeur, masse retenue,
+puis plafond d'oracle par classe avant/après condensation. Couvrir aussi les
+arbres équilibrés et les continuations de faible masse.
 
-*Parade à mesurer.* Tester un seuil relatif α et la règle 0/1/plusieurs
-branches lourdes définie par le [contrat](CONTRAT_COUPES_ET_MASSES_20260926.md).
-Le caractère sans dimension ne garantit pas le transfert. Comparer à une
-échelle brute, et conserver les réserves partielles ainsi que les sorties
-par incidence.
+*Parade à mesurer.* Comparer coupes brutes, seuil local, référence de masse
+gelée et critère de durée ; déclarer chacun séparément. Garder réserves et
+sorties par incidence. Une quantité sans dimension ne garantit pas le transfert.
 
 *Trois pièges d'implémentation propres à HGP.* Ne pas **binariser les
 multifusions** — la tour publie des événements à trois parents ou plus au même
@@ -124,7 +121,7 @@ défendable, à condition de ne pas avoir promis l'autre.
 
 | risque | détection | parade |
 | --- | --- | --- |
-| Le recouvrement rend $P_\ell$ trop dense | porte 0.5, nombre de non-zéros par niveau | seuiller les poids $w_{x\tau}$ faibles ; mesurer la perte |
+| Le recouvrement rend $P_\ell$ trop dense | porte 0.5, nombre de non-zéros par niveau | sparsification déclarée avant gel, masse retirée en réserve ; contrôler composition et perte |
 | L'adaptativité suit l'acquisition sans améliorer la représentation | porte 0.5, rayon, couverture et masse conservée par portée | comparer les règles de contraction et un témoin local fort |
 | Le sol domine la hiérarchie en une composante géante | plafond d'oracle sur la classe « route », statistiques de niveau | comparer au brut le régime non-sol avec branche sol/contexte et raccord vers tous les IDs |
 | Les lots de trames ont des hiérarchies de formes différentes | ingénierie | cibles de compte par niveau, comme tout réseau épars |
@@ -132,13 +129,24 @@ défendable, à condition de ne pas avoir promis l'autre.
 | **La quantification à 1 mm casse l'équivariance** : `tourner → quantifier → tour` ne commute pas, et un prédicat exact peut basculer sur une égalité | porte 0.7, effets sur affectations et sorties utiles | recalculer par vue ; comparer les précisions si la dérive est pénalisante, avec coût publié |
 | FM-5 impose une structure incompatible avec l'occultation | contre-exemple K1 du protocole de guidage, contrôles des IDs/supports communs | ne pas imposer l'égalité des arbres recalculés ; déclarer la couverture et l'incertitude |
 | Les objets mobiles et erreurs de recalage altèrent l'agrégat de FM-6 | contrôles de visibilité et de mouvement, régime temporel séparé | déclarer fenêtres, causalité et pondération des observations ; apparier accès aux trames/odométrie |
-| Une représentation constante satisfait l'accord régional | variance/rang des features, distributions des prédictions et évaluation aval | conserver les mécanismes de diversité et les cibles relationnelles ; une cible dense ne suffit pas |
+| Une représentation constante satisfait l'accord ou un prior dépendant du rayon résout les relations | témoin encodeur constant/rayon seul, Brier conditionnel Y_V=0, puis évaluation aval | conserver la diversité SSL ; mesurer le gain de contexte au-delà des statistiques visibles |
 | Payer $K \leq 10$ alors que $K \leq 6$ suffirait | porte 0.8 | fixer $K_{\max}$ sur la mesure, pas sur le domaine du moteur |
 | Le gain vient du budget de calcul | FLOPs, préparation/cache, mémoire et débit mesurés | comparer à exposition égale puis à coût total égal ; paramètres/époques seuls ne suffisent pas |
 | L'axe des ordres ne sert à rien | bras S5, témoin T4 | le retirer et simplifier ; résultat négatif net, à publier |
 | Une variable de filtration donnée en entrée fuit vers sa propre cible de pré-entraînement | revue de conception | ne jamais donner en entrée ce que l'on prédit au même moment |
 | La tête de sélection apprise ne bat pas l'excès de masse sur le même arbre | bras S7 et son témoin | garder la sélection statistique ; le coût appris ne se justifie pas |
-| Contamination du jeu de test | règle de découpage | val 08 seule ; le serveur n'est touché qu'une fois |
+| Contamination des partitions | manifestes SSL/enseignants/caches et blocs temporels | exclure 08 et test des ajustements du corpus primaire ; bilan sur 08 après choix sur blocs d'entraînement |
+
+### Risques révélés par le réaudit global
+
+| risque | conséquence | choix concret |
+| --- | --- | --- |
+| Un seul support minimal est pris comme géométrie du token | un réétiquetage peut changer les features d'une même boule | définir toutes les incidences de supports, les boules datées et la mesure ; garder les retours comme socle |
+| Γ est interprété comme similarité de distributions | des distributions identiques diffuses semblent dissemblables | déclarer coaffectation ou comparer une cible de recouvrement explicitement différente |
+| Le DP optimise une somme d'IoU locaux | fragmentation même avec des scores parfaits | objectif avec rejet/cardinalité ou apprentissage structuré ; contrôler le vote final |
+| La clique des frères est appelée éparse | coût quadratique aux multifusions | hubs O(m), avec effet du goulot et des sauts mesuré |
+| Un biais est ajouté au chemin FlashAttention standard | changement de noyau confondu avec gain HGP | mêmes noyaux pour S4, coût du changement publié |
+| Le budget de 160k tokens est réutilisé pour chaque K | coût réel multiplié par les branches | budget global, niveau point partagé, réserves et arêtes inclus |
 
 ## 3. Risques de revendication
 
@@ -162,28 +170,29 @@ La revue d'antériorité de ce dossier est **ciblée sur les décisions de
 conception**. Elle ne remplace pas une recherche exhaustive au moment de la
 soumission, qui reste à faire une fois, sérieusement.
 
-## 4. Pistes fermées, à ne pas rouvrir
+## 4. Choix du pilote et exclusions justifiées
 
-| piste | fermée par |
+Distinguer perte d'information démontrée et choix de priorité. La table
+précédente fermait trop de variantes pour des raisons non établies.
+
+| variante | décision |
 | --- | --- |
-| Sélectionner quelques milliers de jetons de la tour pour un Transformer plat | jette la hiérarchie, qui est la contribution ; et le cadrage du coût était faux ([`ARCHITECTURE.md`](ARCHITECTURE.md) § 2) |
-| Vectoriser la persistance en variables d'entrée d'un réseau standard | voie TDA classique, largement explorée, et elle jette la structure |
-| Écrire un réseau neuf de zéro plutôt qu'une modification de PTv3 | rend la substitution ininterprétable et le résultat invérifiable |
-| Représenter un nœud par sa seule fonction support | $h_P = h_{\mathrm{conv}(P)}$ : aveugle à la non-convexité et aux trous |
-| Représenter un nœud par une seule fonction radiale $\rho(u)$ | une direction peut ne rencontrer aucune couche ou plusieurs |
-| Remplacer $P_v$ par son enveloppe convexe | le polyèdre est ouvert, non convexe, partiellement occulté |
-| Forcer une partition stricte des points à l'entrée | pour $K \geq 2$ le recouvrement **est** l'information (§ 9.1) |
-| Apprendre la partition (superpoints appris, $k$-moyennes différentiables) | on reperd la canonicité et le déterminisme, et l'ablation redevient ininterprétable |
-| Condenser avec un `min_cluster_size` en **nombre de points** | c'est réintroduire la constante métrique que tout le dossier supprime ; le seuil doit être un **rapport** de masse |
-| Binariser les multifusions pour réutiliser la condensation de HDBSCAN telle quelle | inventerait un ordre qui n'existe pas et détruirait la canonicité |
-| Choisir l'échelle en comptant aveuglément les fusions brutes | ce compte peut surpondérer les micro-fusions ; les coupes globales brutes restent la référence valide du pilote, puis la condensation se mesure contre elles |
-| Atlas de cartes appris par nœud | coutures et ancres changent sous décimation ; isole mal l'effet du tokenizer |
-| Champ implicite ajusté par polyèdre | coûteux et redondant, la surface est déjà explicite |
-| Versionner des scans bruts ou des nuages dérivés KITTI | licence non commerciale, dépôt public ; seuls les manifestes |
+| Transformer plat sur quelques tokens | témoin possible ; le pilote conserve les événements et compare le coût |
+| Résumé vectoriel de filtration | témoin peu coûteux possible ; il mesure la valeur du résumé face au graphe |
+| Réseau entièrement neuf | différé pour faciliter reproduction et attribution des effets |
+| Fonction support seule | identique sur un ensemble et son enveloppe convexe ; ne distingue pas leurs trous |
+| Fonction radiale à une seule couche | perd les couches multiples ; représentation insuffisante sans autres canaux |
+| Enveloppe convexe | autre réalisation, à nommer ; elle n'est pas l'union des supports ni la surface physique |
+| Partition stricte des points | ne remplace pas silencieusement le recouvrement de K supérieur ; témoin déclaré possible |
+| Tokenizer appris | concurrent possible, déterministe une fois figé selon son exécution ; sa dépendance aux poids est différente |
+| Seuil absolu de masse | témoin à comparer au relatif, sans garantie de transfert pour aucun |
+| Binarisation des multifusions exactes | interdite si elle invente une priorité entre événements simultanés |
+| Comptage seul des fusions | diagnostic insuffisant de masse ou d'adaptativité ; coupes brutes restent la référence |
+| Atlas ou champ implicite appris | différé : coût et apport propre à établir ; les supports HGP ne donnent pas déjà une surface physique |
+| Scans bruts/nuages KITTI versionnés | rester aux manifestes autorisés dans ce dépôt |
 
-Une piste ne se rouvre qu'avec un **fait nouveau** : une preuve, une fixture ou
-une mesure épinglée qui contredit la raison de sa fermeture. Jamais sur un banc
-d'essai.
+Une variante se décide par contrat et comparaison utile. Une absence de
+nouveauté isolée n'interdit pas d'en faire un témoin.
 
 ## 5. Trois erreurs de conception déjà commises et corrigées
 
@@ -218,6 +227,6 @@ des poids entre K ; le pilote garde donc des branches autonomes.
   poids gelés, quotients valides, fibres complètes et réserves préservées.
   Les naissances tardives et changements de K ne satisfont pas automatiquement
   ces conditions ; les retours peuvent toujours recouvrir plusieurs tokens.
-- **La longueur de séquence envisagée** : un U-Net lirait $L$ coupes, pas les
-  millions de nœuds de la tour. Le coût de FULL, des coupes et du graphe reste
-  à mesurer séparément.
+- **La consommation de toute la tour par une attention dense** n'est pas
+  imposée par le projet. Les budgets des coupes, branches, réserves et arêtes
+  restent toutefois des risques à mesurer, en plus de FULL et de son export.

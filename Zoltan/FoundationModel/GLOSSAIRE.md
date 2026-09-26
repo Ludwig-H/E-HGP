@@ -34,9 +34,10 @@ populations et cartes verticales, avec les niveaux de naissance et de fusion
 spécifiés par le manuscrit. Une coupe consommée par le réseau est dérivée de
 cet objet et requiert sa propre vérification.
 
-**Ultramétrique** — la distance $r_{uv}$ à laquelle deux nœuds fusionnent.
-L'équivalence dendrogramme–ultramétrique est établie au chapitre 3 du
-manuscrit ; c'est elle qui fonde le biais d'attention ultramétrique.
+**Ultramétrique de fusion** — à K fixé, rayon de fusion entre deux éléments
+distincts d'une même frontière d'arbre, avec diagonale nulle. Le rayon d'une
+fusion hors horizon est censuré. Le biais appris à partir de ce rayon et de
+l'échelle propre d'un jeton n'est pas lui-même une ultramétrique.
 
 **Percolation** — l'outil d'analyse du chapitre 7. $K$ contrôle la résistance
 aux ponts de bruit ; le Théorème 3 chiffre la fraction récupérable avant fusion
@@ -84,10 +85,13 @@ horizontale ($r$ croît), verticale ($K$ décroît) ou anti-diagonale combinant
 les deux. L'iso-densité compare des branches latérales ; elle ne définit pas
 un pooling emboîtant.
 
-**Condensation** — l'élagage de HDBSCAN, prescrit par le § 9.1 du manuscrit :
+**Condensation** — l'élagage adapté aux masses du § 9.1 du manuscrit :
 dans l'adaptation aux multifusions, zéro branche lourde termine le segment,
 une seule poursuit son identité, plusieurs créent une scission simultanée.
-Le seuil relatif α reste à tester et les masses écartées restent en réserve.
+Le seuil relatif α est une variante à tester, distincte du seuil absolu du
+manuscrit, et les masses écartées restent en réserve. Un seuil relatif au
+parent n'impose pas une masse minimale globale : un arbre binaire équilibré
+peut rester intact jusqu'aux singletons.
 
 **Masse $m_\tau$** — $m_\tau = S_\tau \sum_{x \in \tau} 1/T_x$, le poids que le
 § 9.1 impose d'utiliser à la place d'un comptage de faces dans l'arbre
@@ -112,46 +116,62 @@ $P_g=P_fQ$. Une lecture indépendante de FULL à chaque rayon peut avoir un autr
 univers actif ; les deux opérateurs sont distingués dans le
 [contrat des coupes](CONTRAT_COUPES_ET_MASSES_20260926.md).
 
-**FP, pooling de filtration** — $h_\ell = \phi(P_\ell^\top h_{\ell-1} W_\ell)$
-avec $P_\ell$ l'affectation douce aux poids du § 9.1.
+**FP, pooling de filtration** — moyenne pondérée avec transport de la masse :
+$M_\ell=P_\ell^\top M_{\ell-1}$ et $h_\ell=\phi(D_{M_\ell}^{-1}P_\ell^\top D_{M_{\ell-1}}h_{\ell-1}W_\ell)$.
+Les inverses ne portent que sur les masses positives ; affectation douce à
+l'entrée et quotient dur entre niveaux compatibles. La somme brute est une
+variante distincte.
 
-**MGA, attention sur graphe de fusion** — attention restreinte aux nœuds qui
-fusionnent, avec **biais ultramétrique** $\varphi(\log r_{uv} - \log r_u)$.
+**MGA, attention sur graphe de fusion** — attention sur une relation choisie
+dans l'histoire des fusions, avec biais $\varphi(\log r_{uv}-\log r_u)$.
+Le candidat épars utilise des jetons auxiliaires d'événements ; sa diffusion
+en deux passages ne se confond pas avec une attention complète entre frères.
 
 **OM, mixage d'ordres** — fusion des représentations à plusieurs $K$ via les
 cartes verticales. Trois réalisations : calendrier de $K$ selon la profondeur,
 attention croisée au goulot, branches parallèles.
 
-**PUR, lecture par partition de l'unité** — le décodeur du § 9.1.
+**PUR, lecture par partition de l'unité** — mélange des probabilités des
+jetons avec P, suivi d'un argmax déterministe. Extension linéaire du vote
+de labels du § 9.1 ; ce n'est pas un inverse du pooling.
 
-**SEL, tête de sélection apprise** — le programme dynamique ascendant du § 5.2
-(« hacker HDBSCAN ») : conserver le père si
-$\mathrm{loss}(\text{père}) < \sum_i \mathrm{loss}(\text{fils}_i)$. Avec
-$\mathrm{loss} = -\widehat{E}$ c'est HDBSCAN ; avec $\mathrm{loss} = -g_\theta(h_C)$
-c'est une tête d'instance apprise qui rend une antichaîne par construction,
-sans suppression non maximale ni appariement.
+**SEL, sélection dans l'arbre** — programme dynamique à score additif :
+$V(C)=\max(g(C),\sum_i V(C_i))$, avec cas terminaux et départage déclarés.
+Comparer à l'optimum des sous-arbres, pas aux seuls scores bruts des enfants.
+Le choix $g=\widehat{E}$ retrouve le critère d'excès de masse sur le même
+arbre. Une antichaîne partitionne les atomes de facettes couverts ; elle ne
+garantit ni une instance par objet ni l'absence de fragments après le vote
+aux points. Apprendre le meilleur IoU isolé de chaque nœud ne suffit pas à
+définir un score additif de bonne segmentation.
 
-**FM, modélisation de filtration** — les cinq tâches de pré-entraînement aux
+**FM, modélisation de filtration** — les six tâches proposées aux
 cibles exactes : fusion, persistance, profil en $K$, rétablissement, accord
-inter-vues.
+inter-vues et distillation d'agrégat. Cette dernière est une extension
+temporelle, hors régime primaire mono-scan. La cible exacte sur l'enseignant
+peut rester incertaine depuis la seule vue élève.
 
 **Masquage par nœuds entiers** — masquer une pièce géométrique cohérente au
 lieu de points au hasard, comme le masquage de mots entiers en langage.
 
 **Raccourci géométrique** — l'effondrement de la SSL 3D sur des indices
-spatiaux de bas niveau, diagnostiqué par Sonata. Les cibles de filtration n'y
-sont pas sujettes parce qu'elles sont non locales.
+spatiaux de bas niveau, diagnostiqué par Sonata. Une cible FULL peut être
+locale ou révélée par le graphe fourni au modèle. Le contrôle du forward
+élève et les témoins locaux sont donc nécessaires, même avec une cible
+structurelle.
 
 ## Mesure
 
-**Substitution** — remplacer un seul composant, tout le reste fixé. La seule
-mesure qui attribue.
+**Substitution** — remplacer un composant à recette et données appariées
+pour attribuer son effet ; déclarer les différences de coût et mesurer ensuite
+les interactions.
 
-**Budget apparié** — mêmes paramètres, époques, augmentations et matériel.
+**Budget apparié** — comparer à exposition aux scans égale puis à coût total
+égal, en comptant préparation, export, cache et apprentissage. Paramètres,
+époques, augmentations et matériel identiques ne garantissent pas le même
+travail.
 
 **Témoin négatif** — expérience qui a le pouvoir d'annuler la conclusion :
-tour brouillée (T1), canal de densité seul (T2), niveaux permutés (T3), ordre
-aléatoire (T4), diagnostic du raccourci (T5).
+tour brouillée (T1), canal de densité seul (T2), niveaux permutés (T3), branches K1 répétées à budget égal (T4), diagnostic du raccourci (T5).
 
 **Prédiction pré-enregistrée** — où le mécanisme dit que l'on doit gagner, et
 surtout où il dit que l'on **ne doit pas** gagner (P6).

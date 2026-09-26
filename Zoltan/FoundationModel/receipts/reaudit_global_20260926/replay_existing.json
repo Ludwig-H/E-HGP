@@ -1,0 +1,103 @@
+{
+  "base_commit": "d0e711e23617a7fa2838cac9b370ff125d4be5fb",
+  "python_version": "3.12.1",
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "Zoltan/FoundationModel/reference/verify_cut_algebra.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "source_sha256": "8ca674dc1e440085a76937acdebee97dfe6fcc6e8a8fb57781bbe168dd277ac8",
+      "output_sha256": "94770a1d9b57558eda78ad7fe964681af3b35a5a02f03f680cdd77c9be52573a",
+      "fixture_count": 11,
+      "rejected_variant_count": 19,
+      "archived_output": "Zoltan/FoundationModel/receipts/cut_algebra_20260926/normal.json",
+      "byte_equal_to_archive": true,
+      "valid": true
+    },
+    {
+      "command": [
+        "python3",
+        "-O",
+        "Zoltan/FoundationModel/reference/verify_cut_algebra.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "source_sha256": "8ca674dc1e440085a76937acdebee97dfe6fcc6e8a8fb57781bbe168dd277ac8",
+      "output_sha256": "94770a1d9b57558eda78ad7fe964681af3b35a5a02f03f680cdd77c9be52573a",
+      "fixture_count": 11,
+      "rejected_variant_count": 19,
+      "archived_output": "Zoltan/FoundationModel/receipts/cut_algebra_20260926/optimized.json",
+      "byte_equal_to_archive": true,
+      "valid": true
+    },
+    {
+      "command": [
+        "python3",
+        "Zoltan/FoundationModel/reference/verify_guidance_k1.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "source_sha256": "54fd8c195c59908e480831aea25d5a24d3e7e97e9692364000dbab4883bc0ca5",
+      "output_sha256": "e8e649aaeb2ba5af7566dbd0c81514122c21765fd14cf4b2b19e4cf24ea4905d",
+      "fixture_count": 4,
+      "rejected_variant_count": 10,
+      "archived_output": "Zoltan/FoundationModel/receipts/guidance_20260926/guidance_k1_normal.json",
+      "byte_equal_to_archive": true,
+      "valid": true
+    },
+    {
+      "command": [
+        "python3",
+        "-O",
+        "Zoltan/FoundationModel/reference/verify_guidance_k1.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "source_sha256": "54fd8c195c59908e480831aea25d5a24d3e7e97e9692364000dbab4883bc0ca5",
+      "output_sha256": "e8e649aaeb2ba5af7566dbd0c81514122c21765fd14cf4b2b19e4cf24ea4905d",
+      "fixture_count": 4,
+      "rejected_variant_count": 10,
+      "archived_output": "Zoltan/FoundationModel/receipts/guidance_20260926/guidance_k1_optimized.json",
+      "byte_equal_to_archive": true,
+      "valid": true
+    },
+    {
+      "command": [
+        "python3",
+        "Zoltan/FoundationModel/reference/verify_guidance_algebra.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "source_sha256": "c87e6d49fe59b2d2108d2a6eba1633c16c3a814f95e26f8651a89ec4e12338e5",
+      "output_sha256": "410fefe48abd0857c616c16a080ac912b8db785118451e5eda67b4ec1fc30c6f",
+      "fixture_count": 6,
+      "rejected_variant_count": 13,
+      "archived_output": "Zoltan/FoundationModel/receipts/guidance_20260926/guidance_algebra_normal.json",
+      "byte_equal_to_archive": true,
+      "valid": true
+    },
+    {
+      "command": [
+        "python3",
+        "-O",
+        "Zoltan/FoundationModel/reference/verify_guidance_algebra.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "source_sha256": "c87e6d49fe59b2d2108d2a6eba1633c16c3a814f95e26f8651a89ec4e12338e5",
+      "output_sha256": "410fefe48abd0857c616c16a080ac912b8db785118451e5eda67b4ec1fc30c6f",
+      "fixture_count": 6,
+      "rejected_variant_count": 13,
+      "archived_output": "Zoltan/FoundationModel/receipts/guidance_20260926/guidance_algebra_optimized.json",
+      "byte_equal_to_archive": true,
+      "valid": true
+    }
+  ],
+  "presentation_png_matches_base64": true,
+  "engine_run": false,
+  "learning_run": false,
+  "gcp_used": false
+}

@@ -1,188 +1,173 @@
 # Plan d'exécution
 
-26 septembre 2026. Dans quel ordre construire, ce que chaque phase produit, et
-à quel moment décider. Les mesures sont définies dans [`MESURE.md`](MESURE.md).
+26 septembre 2026. Ordre révisé après le
+[réaudit global](REAUDIT_GLOBAL_20260926.md). Le
+[protocole de mesure](MESURE.md) fixe les comparaisons.
+Ce document définit les travaux suivants ; cette revue n'a lancé aucun
+apprentissage ni nouvelle mesure native.
 
-Principe d'ordonnancement : **ce qui peut annuler le projet se fait en premier
-et coûte le moins cher.** Les deux témoins les plus tranchants — le canal de
-densité seul, et la tour brouillée — ne demandent aucun développement
-d'architecture.
+## Principe — deux pilotes indépendants
 
-## Phase 0 — le raccord et les sondes avant HGP-UNet
+**FULL enseignant** demande des requêtes structurelles correctes et un élève
+sans fuite de cible. **FULL dans l'architecture** demande en plus des coupes,
+masses, réserves et opérateurs composables. Le premier peut commencer dès
+que son interface est prête ; les portes du second ne le bloquent pas.
 
-**Construire.**
+La conformité de Morse HGP 3D v9 est posée. Les décisions portent sur sa
+traduction en objets d'apprentissage et sur leur valeur pour le LiDAR.
 
-1. Un export **coverage_v1** : états FULL datés, cartes à la coupe, unions
-   de sites, permutation géométrie→site et table site→retours. Exercer les
-   coupes avant/au/après événement, notamment la continuation growth_ABCZ.
-   Cet export permet aussi de compiler les requêtes K1 d'un **GuidanceBundle** :
-   paires de retours, rayons, réponses enseignantes et censure. Il ouvre
-   le pilote enseignant seul sans attendre les poids de K supérieur.
-2. Le supplément **weighted_gabriel_v1** : fixer cofaces C, frontières F,
-   ψ et horizon ; comparer l'accumulation par flux d'incidences à un petit
-   oracle explicite. Résoudre chaque facette à sa naissance propre. Mesurer
-   coûts et volumes avant toute matérialisation globale. Le routage dur de
-   l'ancien réducteur ne sert pas d'oracle de la matrice douce.
-3. Le **constructeur d'échelle** : commencer à K1 en coupes globales, puis
-   branches K autonomes à univers/poids gelés, avec réserves persistantes.
-   Vérifier composition et moyennes pondérées. Ajouter ensuite condensation
-   relative et les quatre règles d'échelle ; conserver les sorties par
-   incidence. Les changements de K exigent deux contrôles distincts,
-   géométrique et pondéré ; OM reste latéral par défaut.
-4. Le **cache CutBundle** : coupes, masses et provenance de chaque vue,
-   dimensionnées avant le corpus complet ; conserver les tours/reçus
-   scientifiques séparément. Chaque vue augmentée est re-quantifiée et sa tour
-   recalculée.
+## Phase 0A — couverture et compilation des cibles K1
 
-Le [contrat détaillé](CONTRAT_COUPES_ET_MASSES_20260926.md) rend cet ordre
-implémentable. Les [11 fixtures rationnelles](receipts/cut_algebra_20260926/README.md)
-vérifient l'algèbre ; elles ne ferment pas les portes de l'export natif.
+1. Exporter **coverage_v1** : états datés, cartes à la coupe, unions de sites,
+   permutation géométrie→site, table site→retours. Tester avant/au/après
+   événement, dont la continuation growth_ABCZ.
+2. Compiler un **GuidanceBundle** K1 : IDs de paires, rayons, connexité,
+   horizon et censure, provenance de la vue enseignante.
+3. Recalculer l'entrée depuis la seule vue élève. Modifier la partie cachée
+   de l'enseignant à vue élève fixée doit laisser le forward élève inchangé.
+4. Définir la loi de requêtes et le diagnostic conditionnel **Y_V=0**.
+   Calculer sur les mêmes requêtes les références rayon seul, distance,
+   statistiques locales et connexité/MST de la vue élève.
+5. Dimensionner cache et banque de vues sur plusieurs scènes, avec coût
+   de FULL, compilation, lecture, réutilisation et stockage séparés.
 
-Le [contrat de guidage](GUIDAGE_FULL_ET_PREENTRAINEMENT_20260926.md) ouvre une
-voie complémentaire : FULL enseignant dans la perte, avec encodeur ordinaire
-à l'inférence. Ses fixtures testent suppression de ponts, censure, masse
-commune et lissage par transport doux. L'export K1 suffit à préparer ce bras ;
-les portes des matrices pondérées restent nécessaires au bras HGP-UNet.
+**Sortie attendue.** Contrat de couverture et de censure vérifié sur
+l'export natif ; aucun poids de Gabriel requis pour ce premier pilote.
 
-**Mesurer.** D'abord les sondes sans étiquette de l'axe 0 : couverture
-des retours, coût des incidences, stabilité sous décimation et rotation,
-adaptativité, compression et naturalité de la condensation. Les oracles
-d'instances, la pureté et XGBoost utilisent des étiquettes ou un ajustement
-appris : leur protocole est défini dans [`MESURE.md`](MESURE.md), mais leur
-exécution attend l'ouverture de cette évaluation. La perte des classes
-filiformes après condensation restera alors une porte de décision.
+Les fixtures K1 existantes et les
+[nouveaux contrôles](receipts/reaudit_global_20260926/README.md)
+éprouvent des cas abstraits ; elles ne qualifient pas cet export.
 
-**Préparer le témoin T2 dès cette phase.** Il demande toutefois l'entraînement
-d'un PTv3 et sera exécuté avec la phase 1, lorsque les comparaisons apprises
-seront ouvertes. La phase 0 ferme d'abord l'interface FULL → coupes et ses
-portes sans apprentissage.
+## Phase 0B — coupes et matrices pour HGP-UNet
 
-Le protocole comprend aussi quatre portes issues de l'audit de conception : **0.7** dérive de
-la tour sous rotation pure et son effet sur les affectations consommées ;
-**0.8** quels ordres $K$
-servent et à quel $K$ casse un pont de bruit ; **0.9** plafond d'oracle
-**stratifié par contact avec le sol**, avec et sans retrait du sol ; **0.10**
-nombre de naissances d'une trame relevée en dimension 6, avant de croire au
-relèvement métrique. Les portes 0.8 et 0.9 qui exploitent les étiquettes
-restent définies ici et seront exécutées avec l'évaluation correspondante.
+1. Définir **weighted_gabriel_v1** : cofaces, frontières, ψ, horizon,
+   univers gelé et naissance propre des facettes. Comparer au petit oracle
+   explicite, avec coût des incidences. Le réducteur dur historique ne
+   vérifie pas le vote doux.
+2. Commencer à K1 en coupes globales. Ajouter les branches K autonomes,
+   réserves persistantes, conservation des masses et moyennes pondérées.
+   La compatibilité géométrique entre K et celle des poids sont deux portes.
+3. Comparer coupes brutes, condensation **α relative au parent**, seuil
+   rapporté à une masse de référence gelée et ordre de contraction par
+   persistance. α local filtre le déséquilibre ; il ne garantit pas la
+   compression. N'en retenir aucun par principe avant mesure.
+4. Exporter un **CutBundle** par vue et identifier la réalisation géométrique
+   optionnelle : retours, union de tous les supports minimaux, ou surfels.
+   Fixer quelles boules datées alimentent un snapshot et quelle mesure
+   définit ses moments. Commencer avec les retours et statistiques simples.
+5. Mesurer jetons, réserves, incidences et arêtes **sur toutes les branches**.
+   Un ratio de réduction souhaité n'est pas une coupe garantie ; tracer
+   explicitement les refus de domaine ou de budget.
 
-Les onze **portes du tokenizer** de [`SPECIFICATION.md`](SPECIFICATION.md) § 9
-doivent être fermées dans cette phase, notamment couverture des retours, composition des coupes,
-naturalité entre K, budget et traçabilité.
+**Portes.** Les onze portes de
+[SPECIFICATION §9](SPECIFICATION.md#9-portes-du-tokenizer)
+s'appliquent aux opérateurs activés. La naturalité inter-K devient nécessaire
+lorsqu'une carte inter-K est consommée, pas pour le bras enseignant K1.
+La réalisation par supports et ses 512 sondes restent une ablation optionnelle.
 
-**Décision.** Si l'export des incidences, la couverture des retours ou les
-cartes entre coupes échouent, corriger ce raccord avant la phase 1. Les sondes de pureté,
-d'adaptativité et de stabilité restent des diagnostics de la valeur du
-tokenizer, et non une preuve de valeur apprise. Si la dérive de la porte 0.7
-dégrade les opérateurs utiles, comparer les précisions avec leur coût.
-Une modification combinatoire de FULL ne suffit pas à conclure à une perte
-de performance du réseau.
+Les sondes sans étiquette mesurent couverture, compression et dérive sous
+rotation/décimation. Pureté, oracle d'instance et XGBoost demandent des labels
+ou un ajustement ; leur protocole est défini, leur exécution reste distincte.
+Le relèvement en dimension 6 sort de la spécification Morse HGP 3D et n'est
+pas un prérequis du pilote.
 
-## Phase 1 — HGP-UNet supervisé, et la substitution de l'échelle
+## Phase 1 — sémantique supervisée par substitutions
 
-**Construire.** La référence PTv3 et T2, puis les substitutions FP/PUR dont
-les interfaces sont vérifiées. Séparer l'effet de la coupe, de l'agrégation
-et du retour aux points par les bras S1/S2/S6 ; garder la connexion fine.
+**Construire.** Référence PTv3 épinglée, témoin T2 fort (densité, rayons K-NN,
+anisotropie, mêmes canaux d'acquisition), puis FP/PUR avec connexion fine.
+Le décodeur PTv3 utilise une remontée par indices inverses et un skip.
 
-**Mesurer.** D'abord T2 (canal de densité seul) à réseau inchangé, puis les
-bras S1, S2 et S6 de l'étude de substitution ; les quatre
-règles d'échelle ; les trois chemins emboîtants, avec l'iso-densité
-comme lecture latérale ; le témoin T1 (tour brouillée) et T3
-(niveaux permutés). Stratification par portée, par taille d'objet et par
-classe. SemanticKITTI val 08, trois graines.
+**Mesurer.** S1/S2/S6, puis règles de coupe ; témoin T1 avec budgets,
+couverture et quotients valides ; T3 avec son domaine déclaré. Trois graines,
+validation 08, résultats par portée, classe, taille et contact avec le sol.
+Comparer brut et non-sol avec raccord à tous les retours et branche contexte.
 
-**Ce que la phase produit.** Une mesure de l'effet du pooling HGP, stratifiée
-par portée et à budget apparié. L'intérêt scientifique dépendra du résultat,
-y compris s'il est nul ; cette comparaison ne dépend pas d'un
-pré-entraînement HGP.
+**Décision.** Un gain expliqué par T2 ou T1 limite l'apport propre dans ce
+bras. Il n'annule ni le bras enseignant ni toutes les utilisations de FULL.
+Publier aussi les comparaisons de systèmes complets et la frontière qualité/coût.
 
-**Décision.** Si S1 ne paie pas mais que la stratification par portée montre
-quand même l'adaptativité attendue, chercher du côté du voisinage (phase 2)
-avant de conclure.
+## Phase 2 — graphe, biais et ordres
 
-## Phase 2 — le voisinage, la position et les ordres
+**Construire.** Graphe réduit d'événements avec messages en deux passages,
+puis biais relationnel et OM séparément. Une étoile à m branches coûte O(m)
+incidences ; elle n'est pas équivalente à une attention complète entre frères.
+Garder un canal local pour les détails et mesurer les sauts nécessaires.
 
-**Construire.** Les *patches* du graphe de fusion (S3), le biais ultramétrique
-(S4), le mixage d'ordres dans ses trois réalisations par coût croissant (S5).
+**Mesurer.** S3/S4/S5, seuls et en interaction. Pour S4, même noyau
+d'attention pour sans biais, XYZ et HGP ; publier séparément le prix de la
+sortie du chemin FlashAttention. Comparer K distincts à **des branches K1
+répétées** à budget total égal ; renommer K par une permutation fixe ne
+constitue pas ce témoin. Ablater le canal métrique sans confondre changement
+d'échelle et changement de capteur.
 
-**Mesurer.** S3, S4, S5 en effet propre et en effet marginal ; le témoin T4
-(ordre aléatoire) ; l'ablation du canal métrique et les transformations
-d'échelle, qui mesurent le comportement appris du réseau.
+**Décision.** Conserver les branches et opérateurs qui améliorent la frontière
+qualité/coût dans les régimes visés. Un bras K1 utile reste un résultat du
+projet, même si OM n'apporte rien.
 
-**Ce que la phase produit.** La réponse à la question la plus spécifique du
-projet : **l'axe des ordres vaut-il quelque chose ?** C'est une hypothèse
-propre à l'usage de la tour, à simplifier si elle ne se paie pas.
+## Phase 3 — guidage du pré-entraînement
 
-## Phase 3 — pré-entraînement
+Cette phase peut partir de **0A**, en parallèle de 0B/1/2.
 
-**Construire.** D'abord le bras **A0G1**, encodeur ordinaire et une seule
-perte de relations FULL K1, contre A0G0 (SSL de référence). Ce pilote peut
-commencer dès que coverage_v1 est prêt, en parallèle de FP/PUR.
-Conserver le mécanisme de diversité de la recette de référence ; recomposer
-entièrement l'entrée élève depuis sa vue. Comparer ensuite A1G0/A1G1 pour
-mesurer l'interaction avec le tokenizer HGP.
+**Construire.** A0G0, recette SSL ordinaire ; A0G1, même recette avec une
+perte FULL K1. Conserver les mécanismes de diversité de la référence.
+Comparer une tête conditionnelle au rayon à une **CDF par paire/vue** :
+une distribution de rayons de fusion, plus une queue au-delà de l'horizon,
+dont le rayon demandé choisit seulement le cumul.
 
-Ajouter séparément K supérieur, FM-2/3, accord régional sur IDs communs et
-masques structurels, selon le [contrat](GUIDAGE_FULL_ET_PREENTRAINEMENT_20260926.md).
-**FM-6 reste une extension temporelle secondaire** : elle demande un accès
-identique aux trames/poses dans ses comparaisons et ne fait pas partie du
-régime primaire mono-scan sans historique.
+**Mesurer.** Gain au-delà des témoins rayon seul/encodeur constant et géométrie
+locale ; Brier/calibration sur une loi de requêtes commune ; performance
+conditionnelle sur Y_V=0 ; variance/rang des représentations. Puis sonde
+linéaire et réglage fin. Une bonne perte structurelle ne suffit pas.
 
-**Mesurer.** Sonde linéaire, réglage fin, efficacité en étiquettes à
-$0{,}1 / 1 / 10 / 50 / 100\,\%$. Le témoin T5, diagnostic du raccourci
-géométrique. L'ablation décisive : **le même pré-entraînement sans les tâches
-de filtration**, auto-distillation seule. Si l'écart est nul, aucun apport
-de ce prétexte n'est établi dans le régime mesuré ; l'effet architectural
-reste une question distincte.
+Déclarer l'unité d'annotation : pourcentages de scans ou de points sont des
+protocoles différents. Geler listes de scans et blocs temporels ; exclure
+validation 08/test du corpus SSL primaire, des enseignants, caches et
+statistiques apprises sur le corpus. Les statistiques par vue d'une règle
+gelée restent disponibles à l'inférence.
 
-**Prédiction à vérifier.** P3 : le gain croîtrait quand les étiquettes se
-raréfient. Une autre tendance impose de revoir ce mécanisme proposé, sans
-invalider un gain mesuré à budget apparié.
+Ajouter ensuite A1G0/A1G1 pour l'interaction avec le tokenizer, puis K
+supérieur, persistance et accord régional. À K supérieur, Γ est une masse
+de coaffectation ; le recouvrement de distributions est une autre cible,
+à nommer et comparer. FM-6 reste une extension temporelle avec accès aux
+trames/poses apparié, distincte du primaire mono-scan.
 
-**Ce que la phase produit.** Une mesure de la qualité des représentations et
-du rôle de FULL. Comparer aux recettes pertinentes, notamment DOS pour le
-LiDAR, à données/modalités appariées ; aucune revendication de fondation ne
-découle de la seule baisse de la perte structurelle.
+## Phase 4 — transfert et changement d'échelle
 
-## Phase 4 — transfert et échelle
+**Mesurer.** D'abord transfert extérieur inter-capteurs et inter-scènes,
+hyperparamètres gelés. Le retrait simulé d'anneaux est un stress test ;
+il ne remplace pas un vrai capteur différent. Ensuite autres tâches et
+domaines, puis plusieurs tailles de modèle et de corpus lorsque le pilote
+a justifié ce coût.
 
-**Mesurer.** L'expérience décisive : transfert inter-capteurs, 64 nappes vers
-32 et retour, **avec les hyperparamètres du tokenizer gelés**. Leur transfert sans
-réaccord est une hypothèse à tester.
-Puis le transfert vers l'intérieur, terrain d'Utonia. Puis les lois d'échelle,
-trois tailles de modèle par trois tailles de corpus, avec la tendance de
-l'écart publiée quelle qu'elle soit.
+**Sortie attendue.** Une mesure de réutilisation des représentations.
+Une seule progression sur SemanticKITTI ne suffit pas à établir un modèle
+de fondation. Une efficacité accrue avec peu de labels reste un résultat
+utile en l'absence de gain à plus grande échelle.
 
-**Ce que la phase produit.** La revendication de fondation, ou sa
-requalification honnête en efficacité d'échantillons et transfert.
+## Phase 5 — sélection d'instances
 
-## Phase 5 — les capacités propres et la tête de sélection
+SEL reste séparé du chemin de segmentation sémantique. Définir d'abord
+l'objectif : V(C)=max(g(C), somme des V(enfants)), avec fond/rejet et
+couverture explicites. Comparer le DP à l'énumération sur petits arbres.
 
-La tête SEL — programme dynamique du § 5.2 à coût appris — se mesure ici, avec
-son vrai témoin : **l'excès de masse sur le même arbre condensé**. Si le coût
-appris ne bat pas $-\widehat{E}(C)$, il ne se justifie pas. Son plafond est
-celui de l'oracle de la porte 0.1.
+**Abandonner la somme naïve des meilleurs IoU locaux.** Même des scores
+parfaits favorisent les fragments au départage. Comparer coût par objet
+avec cardinalité et apprentissage structuré ; publier fusion/fragmentation,
+puis le vote final aux retours. À K supérieur, ce vote couple les nœuds :
+un coût après vote n'est pas automatiquement additif.
 
-Panoptique contre ALPINE, propositions d'instance sans apprentissage,
-anomalies guidées par un modèle 3D, cohérence multi-échelle garantie. Ces
-tâches ont une valeur propre et restent publiables même si les phases 3 et 4
-déçoivent.
-
-## Ce qui peut être fait en parallèle, sans attendre
-
-- le contrat mathématique et logiciel des coupes et cartes entre K réellement
-  consommées, depuis FULL jusqu'aux matrices du tokenizer ;
-- la reproduction de la base de référence SemanticKITTI, qui conditionne toute
-  comparaison chiffrée ;
-- la recherche d'antériorité exhaustive, à faire une fois, sérieusement.
+Comparer à l'excès de masse sur le même arbre, puis à ALPINE sur **les mêmes
+prédictions sémantiques**, avec priors et budget publiés. L'oracle isolé par
+nœud reste un diagnostic ; l'oracle de SEL doit considérer sélection et vote.
 
 ## Vue d'ensemble
 
-| phase | apprentissage | ce qui la termine | ce qui l'annule |
-| --- | --- | --- | --- |
-| 0 raccord et sondes | aucun HGP-UNet | export/coupes vérifiés, sondes sans étiquette publiées | incidences ou cartes incompatibles, coût hors budget |
-| 1 échelle | supervisé | T2 puis S1, S2, S6 mesurés, T1 et T3 passés | T2 ou T1 explique le gain |
-| 2 voisinage et ordres | supervisé | S3, S4, S5 mesurés, T4 passé | S5 nul, donc OM retiré |
-| 3 pré-entraînement | SSL | sonde linéaire et efficacité en étiquettes | filtration sans effet contre auto-distillation seule |
-| 4 transfert et échelle | SSL | transfert inter-capteurs, lois d'échelle | écart qui s'inverse à l'échelle |
-| 5 capacités propres | mixte | panoptique, anomalie, instance | ALPINE non battu |
+| étape | prérequis | résultat qui permet de poursuivre |
+| --- | --- | --- |
+| 0A couverture/enseignant | FULL conforme | requêtes natives vérifiées et coût de cache borné sur le pilote |
+| 0B coupes/tokenizer | FULL et incidences | composition, réserves, réalisation et budgets vérifiés |
+| 1 sémantique | 0B, référence reproduite | effet attribuable de FP/PUR ou simplification documentée |
+| 2 graphe et K | opérateurs du bras concerné vérifiés | apport mesuré à budget total égal |
+| 3 guidage SSL | 0A ; 0B seulement pour A1 | représentations utiles au-delà des raccourcis |
+| 4 transfert | représentation justifiée | réutilisation mesurée, réglages gelés |
+| 5 instances | objectif et lecture après vote définis | gain à même prédiction sémantique et coût déclaré |

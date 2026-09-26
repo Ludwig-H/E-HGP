@@ -6,7 +6,7 @@ spécification et qu'il est assez rapide pour des dizaines ou des centaines de
 milliers de trames, avec ou sans sol. L'audit du moteur appartient aux
 auditeurs indépendants de `morsehgp3D_v9/audits/` et n'est pas le sujet.
 
-## 1. L'objet est fixé par des théorèmes, pas par un réglage
+## 1. Un objet mathématique fixé, une interface réseau à choisir
 
 - **Def. 20–21** — le complexe de Čech, le graphe $\Gamma_K(\mathcal{X}, r)$
   dont les sommets sont les $(K-1)$-simplexes, et le **$K$-polyèdre** comme
@@ -15,8 +15,10 @@ auditeurs indépendants de `morsehgp3D_v9/audits/` et n'est pas le sujet.
   forte densité de l'estimateur $K$-NN, **niveau par niveau**. Ce n'est pas un
   regroupement heuristique : c'est l'estimation exacte d'un modèle statistique,
   celui de Hartigan.
-- **Théorème 4** — tout simplexe qui change réellement la connectivité est de
-  **Gabriel** : l'intérieur de sa plus petite boule englobante est vide.
+- **Théorème 4** — les événements qui changent la connectivité sont portés
+  par les simplexes de **Gabriel**, au sens du manuscrit. Cela ne signifie
+  pas que toutes les boules du catalogue ont un intérieur vide : aux ordres
+  supérieurs, leurs points intérieurs contribuent à la population.
 - **Théorème 6** — ces simplexes sont portés par la **mosaïque de Delaunay
   d'ordre $K$**. C'est ce qui rend l'objet calculable sans énumérer
   $\binom{n}{K}$ candidats.
@@ -31,9 +33,11 @@ Deux conséquences qui contraignent toute architecture :
 
 1. **le recouvrement n'est pas un défaut à réparer.** Qu'un point appartienne à
    plusieurs $K$-polyèdres est l'information d'ordre supérieur elle-même ;
-2. **la laminarité existe, mais sur les facettes.** Une hiérarchie stricte est
-   donc disponible, et le passage aux points est déjà démontré. Rien n'est à
-   inventer de ce côté.
+2. **la laminarité existe sur les facettes.** Pour une lecture finie, il reste
+   à fixer leur univers, leurs poids, les naissances et les résidus. La
+   Proposition 7 porte sur le vote d'étiquettes ; son extension aux sorties
+   probabilistes et aux matrices de pooling demande le
+   [contrat explicite](CONTRAT_COUPES_ET_MASSES_20260926.md).
 
 ## 2. Ce que l'objet Morse HGP rend calculable
 
@@ -68,15 +72,20 @@ Pour chaque ordre $K = 1 \ldots K_{\max}$ :
 En amont, le **catalogue** des boules minimales : clé primitive exacte de la
 forme quadratique, niveau exact, **arité** $q_{\min} \in \lbrace 2, 3, 4 \rbrace$
 — arête diamétrale, triangle aigu, tétraèdre —, intérieurs stricts et coquille.
-C'est l'alphabet géométrique de la présentation du 16 septembre :
-$P = \bigcup_i \mathrm{conv}(Q_i)$.
+Il ne publie pas un support géométrique unique $Q_i$. Plusieurs supports
+minimaux peuvent définir la même boule : les diagonales d'un carré en sont
+un exemple. L'alphabet illustré dans la présentation est un choix de
+réalisation à compléter par une règle canonique ; [JETON](JETON.md) distingue
+les populations, les statistiques de boules et l'union de **tous** les
+supports minimaux, reconstruite en supplément.
 
 **La carte verticale est vérifiée naturelle** (invariant
 `full_ball_vertical_naturality`) : l'image d'une fusion est la fusion des
 images, le carré commute. La bifiltration n'est donc pas deux empilements posés
 côte à côte, c'est un morphisme de filtrations vérifié à chaque construction.
-Un biais d'attention le long de l'axe des ordres a un sens mathématique, pas
-seulement une justification d'ingénieur.
+La compatibilité des **cartes géométriques** n'impose cependant ni
+$P_K V=P_{K-1}$ pour les poids ni l'utilité d'un biais d'attention. Les
+branches K et leur échange sont des choix de réseau à comparer.
 
 ## 4. Les six primitives qu'une architecture peut y lire
 
@@ -85,11 +94,11 @@ C'est la lecture utile de la section précédente.
 | primitive | lue dans | ce qu'elle remplace |
 | --- | --- | --- |
 | une **échelle de recouvrements** emboîtés | les coupes de la forêt de fusion | taille de voxel, FPS, niveaux de superpoints |
-| des **matrices d'affectation douces** | populations et poids du § 9.1 | *pooling* de cellule |
+| des **matrices d'affectation douces** | supplément de cofaces/facettes, poids et propriétaires aux coupes | *pooling* de cellule, après export pondéré |
 | un **graphe de fusion** pondéré par le rayon de fusion | les événements de fusion | graphe $k$-NN, fenêtre sur sérialisation |
-| une **ultramétrique** sur les nœuds | le niveau de fusion, via l'équivalence dendrogramme–ultramétrique | encodage de position relative métrique |
-| un **axe d'ordre** $K$ à cartes naturelles | les verticales | *rien d'équivalent* |
-| des **scalaires structurels exacts** | niveaux, arités, degrés de fusion | variables et cibles à exporter |
+| des **niveaux de fusion** | ancêtres communs sur une même coupe, avec convention de diagonale et composantes sans fusion observée | candidat pour un biais de position |
+| un **axe d'ordre** $K$ à cartes naturelles | les verticales | échanges entre branches, dont le gain propre reste à mesurer |
+| des **scalaires structurels** | niveaux et comptes exacts ; logarithmes, poids et normalisations calculés en supplément | variables et cibles à exporter |
 
 ## 5. Les ordres de grandeur, pour dimensionner
 
@@ -120,18 +129,18 @@ reste toutefois matérialisée avant ces coupes et a son propre coût. Voir
 
 ## 6. Ce que la tour ne fournit pas encore
 
-Chacun de ces points est un poste de travail de la phase 0, pas une lacune de
-conception :
+Ces interfaces de phase 0 restent à construire et à qualifier :
 
-- **aucune sérialisation consommable** : la sortie publiée est un JSON de
-  compteurs et un condensé. Un pilote peut viser un adaptateur expérimental
-  vers `CertifiedTowerInput` de
-  `morsehgp3d/`, dont le réducteur exact — vote pondéré du § 9.1 par
-  `SimplexPointWeighting::inverse_radius`, sélections par excès de masse,
-  coupe $\lambda$ et rayon DBSCAN — **attend déjà un producteur** ;
+- **aucune sérialisation native qualifiée pour le réseau** : le pilote vise
+  d'abord `coverage_v1`, puis le supplément `weighted_gabriel_v1`
+  du contrat de coupes. Le réducteur historique `CertifiedTowerInput`
+  réalise un routage dur irréversible : il ne sert pas d'oracle à la matrice
+  douce ni au vote sur une antichaîne arbitraire. La référence doit accéder
+  aux incidences **avant** ce routage ;
 - **aucune géométrie explicite** : les nœuds portent des identifiants de
-  points, pas des coordonnées. La réalisation $P_v = \bigcup_b \mathrm{conv}(S_b)$
-  se reconstruit depuis le catalogue ;
+  points, pas des coordonnées. Une réalisation de supports nécessite une
+  règle de sélection des boules, une énumération canonique de leurs supports
+  et un traitement des snapshots sans support. Ses coûts sont distincts ;
 - **aucun constructeur d'échelle** : les coupes, les règles de contraction et
   les chemins dans le treillis sont à écrire ;
 - **aucun attribut capteur** : la quantification ne transporte ni rémission, ni
@@ -141,10 +150,12 @@ conception :
 
 ## 7. Deux propriétés à ne pas perdre de vue en concevant
 
-**Le déterminisme.** La tour est une fonction pure de la trame quantifiée, à
-condensé reproductible. Elle se calcule une fois et se met en cache. Aucun
-tokenizer appris n'a cette propriété, et c'est ce qui rend l'étude de
-substitution exactement reproductible.
+**Le déterminisme.** La tour est une fonction de l'entrée géométrique déclarée,
+à condensé reproductible dans son contrat. Elle se met en cache avec profil,
+quantification, K maximal et version du producteur. Un tokenizer appris,
+figé et exécuté de manière déterministe, peut aussi se mettre en cache. La
+particularité utile de FULL est sa définition géométrique indépendante des
+poids entraînés ; les coupes et suppléments ont leur propre clé de cache.
 
 **L'équivariance géométrique et la quantification.** L'objet mathématique
 suit isométries et homothéties avec reparamétrage des rayons. La v9 travaille

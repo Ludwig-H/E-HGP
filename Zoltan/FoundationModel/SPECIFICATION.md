@@ -13,7 +13,8 @@ Son petit oracle est un falsificateur d'algèbre ; l'export natif reste à faire
 
 ## 0. Portée et invariants
 
-Entrée : une trame LiDAR et son odométrie. Sortie : $L$ matrices de pooling,
+Entrée primaire : une trame LiDAR ; l'odométrie n'est requise que pour
+l'extension temporelle. Sortie : les matrices de pooling demandées,
 un graphe de fusion par niveau, des variables par nœud, et les cibles de
 pré-entraînement. **Aucun apprentissage n'intervient dans ce document.**
 
@@ -21,9 +22,9 @@ Quatre invariants doivent tenir, et chacun mérite sa porte :
 
 | invariant | pourquoi |
 | --- | --- |
-| **Déterminisme bit à bit** — deux exécutions sur la même entrée donnent le même condensé | c'est ce qui rend l'étude de substitution reproductible |
-| **Invariance au réétiquetage** — permuter les `PointId` ne change rien | les `PointId` sont arbitraires en v9, et le moteur a déjà une porte pour cela |
-| **Totalité** — aucune trame ne sort sans jeu de niveaux | une trame rejetée en silence biaise le corpus |
+| **Déterminisme** — même entrée, configuration et environnement numérique épinglé donnent le même condensé | les décisions exactes et les matrices numériques ont des contrats distincts ; les poids p3 ne promettent pas une identité binaire entre matériels |
+| **Invariance au réétiquetage** — même structure après application inverse de la permutation des `PointId` | les identifiants exportés se transforment, la géométrie et les décisions restent identiques |
+| **Totalité du protocole** — chaque trame donne un résultat ou un refus motivé et comptabilisé | une entrée hors domaine ou un budget impossible ne doivent produire ni fausse tour ni omission silencieuse |
 | **Traçabilité** — chaque sortie porte le condensé de la tour dont elle vient | sinon aucun reçu n'est vérifiable |
 
 ## 1. Niveau 0 — les points
@@ -72,7 +73,17 @@ incidence. La masse directement attachée à l'événement est traitée à part.
 
 $\alpha$ est un **rapport** sans dimension ; sa transférabilité reste à
 tester. Un seuil en nombre de points dépend directement de la densité des
-retours et ne convient pas comme défaut inter-capteurs.
+retours ; il reste un témoin à comparer aux seuils relatifs, sans exclure
+une variante par sa seule unité.
+
+Le seuil relatif au parent filtre les **déséquilibres de branches**. Il ne
+fixe aucune masse minimale à l'échelle du nuage : un arbre binaire équilibré
+conserve toutes ses scissions jusqu'aux singletons pour α ≤ 1/2 ; au-delà de
+1/2, aucune bifurcation ne peut conserver deux branches lourdes. Publier les
+masses retenues et la profondeur, pas seulement le taux de compression.
+Comparer cette variante à la forêt brute et, si nécessaire, à un seuil
+relatif à une masse de référence gelée ou à un critère de durée. Ces variantes
+restent des expériences distinctes, sans garantie de transfert acquise.
 
 ### 2.3 Multifusions
 
@@ -82,8 +93,9 @@ La règle 0/1/plusieurs branches lourdes s'y applique en une seule fois.
 
 Conséquence : un nœud condensé peut avoir trois enfants ou plus, et le
 programme dynamique de sélection (SEL) doit l'admettre — la forme du § 5.2 du
-manuscrit, $\mathrm{loss}(\text{père})$ contre $\sum_i \mathrm{loss}(\text{fils}_i)$,
-le fait déjà.
+manuscrit compare le coût propre du parent à la somme des **optima des
+sous-arbres**. Avec des scores à maximiser, V(C)=max(g(C), somme V(enfants)),
+pas somme des scores bruts des enfants.
 
 ### 2.4 Stabilité
 
@@ -130,7 +142,24 @@ condensés, avec univers et masses déclarés :
 | `E-persistance` (défaut) | persistance croissante |
 | `E-relative` | niveau normalisé $r / r_K(x)$ |
 
-Pour `E-relative`, définir $r_K(x)$ sur les sites uniques et imposer un
+Ces clés ne suffisent pas à définir une contraction. À K fixé, garder une
+frontière couvrante de l'univers gelé. Une contraction est admissible
+seulement si elle remplace **tous** les blocs représentés sous un même
+événement par leur union, sans partager un bloc ni absorber une branche
+extérieure. Les multifusions restent atomiques et les réserves persistantes
+suivent leur propre quotient. Une priorité faible sur un descendant ne
+permet pas de sélectionner simultanément son ancêtre.
+
+Pour `E-persistance`, déclarer la durée utilisée (en r, en log-r ou dans la
+coordonnée de densité) et l'agrégation des coûts des branches supprimées.
+Un événement n'a pas une unique durée implicite : une multifusion peut
+joindre des branches d'âges différents. Recalculer la priorité après chaque
+contraction et comparer uniquement les contractions admissibles. La version
+précise de cette règle reste à choisir ; elle n'est pas un algorithme livré.
+
+Pour `E-relative`, déclarer aussi l'agrégation des $r_K(x)$ des sites d'un
+jeton (par exemple une médiane pondérée gelée), puis définir $r_K(x)$ sur les
+sites uniques et imposer un
 dénominateur positif : si la convention des voisins inclut $x$ et donne
 $r_1(x)=0$, utiliser la distance au plus proche site **distinct** ; pour une
 trame à un seul site, déclarer cette règle indisponible et employer `E-global`.
@@ -216,22 +245,54 @@ La composition moyenne puis prolongation conserve les constantes mais ne
 reconstruit généralement pas les points ; les connexions de saut restent
 nécessaires à une représentation fine.
 
-## 5. Graphe de fusion et biais ultramétrique
+## 5. Graphe de fusion et biais dérivé des rayons
 
-Par niveau : sommets = nœuds du niveau. Définir une **relation éparse** liée
-au prochain événement de fusion, avec traitement atomique des multifusions,
-identité et budget des arêtes publiés. La relation « fusionnent un jour »
-formerait un clique dans chaque arbre et ne suffit pas comme spécification.
+Par niveau : les états de la coupe sont les jetons de données. La relation
+« fusionnent un jour » formerait une clique dans chaque arbre. Même ne
+relier que les frères d'une multifusion d'arité m produit m(m−1) arêtes
+orientées ; une grande multifusion suffit donc à rendre ce choix quadratique.
 
-Le voisinage d'attention est borné par un budget déclaré. Le biais
+**Premier candidat concret : une incidence états–événements.** À K fixé,
+restreindre la forêt aux jetons représentés, garder les événements qui
+relient au moins deux branches représentées et contracter les chaînes
+unaires. Chaque événement est un jeton auxiliaire, connecté aux branches
+qu'il fusionne. Avec n jetons initiaux, cette forêt réduite a au plus n−1
+événements de branchement et O(n) incidences ; les métadonnées des chaînes
+contractées et le coût de restriction restent comptés. Les réserves sont
+traitées séparément. Choisir ensuite les événements consultés à chaque
+couche, publier le nombre réel de sauts et les budgets réalisés.
+
+Un rassemblement vers un événement puis une diffusion vers ses branches
+demande deux passages. Une représentation commune de dimension fixée peut
+former un goulot ; elle n'est pas équivalente à une attention entre toutes
+les paires, où chaque requête possède ses propres poids. Comparer cette
+variante à des fenêtres métriques et à la clique complète sur petits cas.
+Un plafonnement par voisinage constitue une autre approximation : publier
+la sélection et les liens écartés. Ne pas binariser un événement pour
+fabriquer un ordre de frères. La clé canonique préserve le réétiquetage,
+sans garantir l'équivariance par rotation d'un départage géométrique.
+
+Le voisinage d'attention est borné par un budget déclaré et les échecs de
+budget sont explicites. Le biais
 $b_{uv}=\varphi(\log r_{uv}-\log r_u)$ garde un sens relatif sous
 homothétie commune des rayons positifs ; l'invariance à une raréfaction des
 retours avec la portée reste à mesurer. Définir séparément le code des niveaux
 à rayon zéro, notamment à K=1.
 
-$r_{uv}$ est une **ultramétrique** (équivalence dendrogramme–ultramétrique,
-chapitre 3 du manuscrit) : $r_{uw} \leq \max(r_{uv}, r_{vw})$. L'implémentation
-peut s'en servir pour élaguer.
+À K fixé, sur une antichaîne de composantes datées effectivement coexistantes
+ou sur une frontière d'un même univers figé, poser $r_{uu}=0$ et, pour u ≠ v,
+prendre le rayon de leur fusion. Dans un arbre complet, cela définit une
+ultramétrique : $r_{uw}\leq\max(r_{uv},r_{vw})$. Une forêt tronquée à H ne
+connaît pas les fusions au-delà de H : publier « non fusionné avant H »,
+sans transformer H en rayon exact ni confondre cette censure avec une
+absence définitive de fusion. Les états de plusieurs K ou un ancêtre et son
+descendant ne sont pas le domaine de cette même ultramétrique.
+
+Le rapport $r_{uv}/r_u$, puis le biais appris φ, ne sont en général ni
+symétriques ni ultramétriques. Toute règle d'élagage doit donc utiliser les
+niveaux bruts avec une justification de l'approximation d'attention choisie ;
+l'inégalité ultramétrique seule ne borne pas les scores appris. Les cas
+rayon propre nul, auto-arête et fusion censurée reçoivent des codes distincts.
 
 ## 6. Ordres
 
@@ -267,8 +328,11 @@ les retours retirés par un éventuel masque de sol, la provenance de la vue et
 les condensés du brut, de la préparation, de FULL et de l'export.
 
 Mise en lots : concaténation avec décalages et matrices diagonales par blocs,
-comme tout réseau épars. Les comptes par niveau étant des bornes supérieures,
-les formes sont proches d'une trame à l'autre ; on complète et on masque.
+comme tout réseau épars. Les budgets réalisables, les multifusions et les
+réserves peuvent donner des tailles très différentes ; mesurer les comptes,
+regrouper les tailles compatibles, compléter et masquer selon la politique
+annoncée. Une trame hors budget porte un statut explicite et reste dans les
+comptes du corpus.
 
 Stockage : entiers exacts pour ce qui l'est (arités, comptes, ordre, rangs),
 `float16` pour les variables de forme. Le flottant est une sortie, jamais un
@@ -276,11 +340,14 @@ maillon de la chaîne d'exactitude.
 
 ## 9. Portes du tokenizer
 
-Avant tout apprentissage, et chacune à code de sortie exact, dans la discipline
-du dépôt :
+Avant l'apprentissage qui consomme l'opérateur concerné, avec code de sortie
+exact dans la discipline du dépôt. Les portes des matrices pondérées ou
+inter-K ne bloquent pas le bras enseignant K1 qui ne les utilise pas :
 
-1. **Déterminisme** : deux exécutions, même condensé.
-2. **Réétiquetage** : permuter les `PointId`, même sortie — la porte qui
+1. **Déterminisme** : deux exécutions dans l'environnement épinglé, même
+   condensé ; décision exacte et résidu numérique des poids rapportés séparément.
+2. **Réétiquetage** : permuter les `PointId`, même sortie canonique après
+   raccord des identifiants — la porte qui
    attrape un départage illicite.
 3. **Couverture et partition de l'unité** : pour chaque retour, affectations
    et réserves **partielles** totalisent 1 ; aucun orphelin.
@@ -288,7 +355,8 @@ du dépôt :
    niveau $\ell+1$.
 5. **Naturalité après condensation** : factorisation des cartes sur les
    états datés retenus ; contrôle pondéré distinct entre K.
-6. **Totalité** : aucune trame du corpus ne sort sans jeu de niveaux.
+6. **Totalité** : chaque trame du corpus reçoit des niveaux valides ou un
+   refus explicite de domaine/budget ; aucun rejet n'est retiré du dénominateur.
 7. **Traçabilité** : chaque sortie porte le condensé de la tour dont elle vient.
 8. **Morphismes des coupes** : composition des matrices entre niveaux et
    commutation des quotients inter-K avec les verticales FULL, ou incidence
@@ -298,8 +366,13 @@ du dépôt :
 10. **Stabilité du tokenizer** : comparer affectations sous décimation,
     rotation suivie d'une nouvelle quantification et changement de capteur.
 11. **Mutants** : au moins un mutant causal par porte — départage par `PointId`,
-   binarisation d'une multifusion, seuil absolu au lieu de relatif — compilé et
+   binarisation d'une multifusion, oubli d'une réserve partielle — compilé et
    tué.
+
+Les [contre-exemples d'architecture](reference/verify_architecture_choices.py)
+exercent les limites du score local IoU, de la condensation relative, du
+biais normalisé et d'une diffusion par événement. Ce sont des fixtures
+abstraites, pas une qualification du tokenizer natif.
 
 ## 10. Ce que ce document ne couvre pas
 

@@ -1,0 +1,97 @@
+{
+  "base_commit": "d0e711e23617a7fa2838cac9b370ff125d4be5fb",
+  "python_version": "3.12.1",
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "Zoltan/FoundationModel/reference/verify_architecture_choices.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "source_sha256": "dd781987419218e3d4e673239331d0054b75ccd2e0d38bbc790ce9efdfa349d6",
+      "output_sha256": "65d947a430614349448d76397a82eeab852ce3781b983cc87174d824e95d09df",
+      "output": "Zoltan/FoundationModel/receipts/reaudit_global_20260926/architecture_choices_normal.json",
+      "fixture_count": 4,
+      "rejected_variant_count": 8,
+      "valid": true
+    },
+    {
+      "command": [
+        "python3",
+        "-O",
+        "Zoltan/FoundationModel/reference/verify_architecture_choices.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "source_sha256": "dd781987419218e3d4e673239331d0054b75ccd2e0d38bbc790ce9efdfa349d6",
+      "output_sha256": "65d947a430614349448d76397a82eeab852ce3781b983cc87174d824e95d09df",
+      "output": "Zoltan/FoundationModel/receipts/reaudit_global_20260926/architecture_choices_optimized.json",
+      "fixture_count": 4,
+      "rejected_variant_count": 8,
+      "valid": true
+    },
+    {
+      "command": [
+        "python3",
+        "Zoltan/FoundationModel/reference/verify_guidance_controls.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "source_sha256": "4075d02027fdf5b84bf582022aa01f5758edc89fc477fb8e339e247088cdcd8e",
+      "output_sha256": "b2b9c7be64b171beaf15453d46b9161a61d55d5b9c731de883bec568e4b2c686",
+      "output": "Zoltan/FoundationModel/receipts/reaudit_global_20260926/guidance_controls_normal.json",
+      "fixture_count": 4,
+      "rejected_variant_count": 12,
+      "valid": true
+    },
+    {
+      "command": [
+        "python3",
+        "-O",
+        "Zoltan/FoundationModel/reference/verify_guidance_controls.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "source_sha256": "4075d02027fdf5b84bf582022aa01f5758edc89fc477fb8e339e247088cdcd8e",
+      "output_sha256": "b2b9c7be64b171beaf15453d46b9161a61d55d5b9c731de883bec568e4b2c686",
+      "output": "Zoltan/FoundationModel/receipts/reaudit_global_20260926/guidance_controls_optimized.json",
+      "fixture_count": 4,
+      "rejected_variant_count": 12,
+      "valid": true
+    },
+    {
+      "command": [
+        "python3",
+        "Zoltan/FoundationModel/reference/verify_support_carrier.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "source_sha256": "820540bfa9782673bd37c90cc9b68600047d81654efd2301090bb2a715f26e24",
+      "output_sha256": "02381c6d3b0878d26d4a57eca954a7ca7d2ec3b9c73295bda7ce89f96366f393",
+      "output": "Zoltan/FoundationModel/receipts/reaudit_global_20260926/support_carrier_normal.json",
+      "fixture_count": 4,
+      "rejected_variant_count": 7,
+      "valid": true
+    },
+    {
+      "command": [
+        "python3",
+        "-O",
+        "Zoltan/FoundationModel/reference/verify_support_carrier.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "source_sha256": "820540bfa9782673bd37c90cc9b68600047d81654efd2301090bb2a715f26e24",
+      "output_sha256": "02381c6d3b0878d26d4a57eca954a7ca7d2ec3b9c73295bda7ce89f96366f393",
+      "output": "Zoltan/FoundationModel/receipts/reaudit_global_20260926/support_carrier_optimized.json",
+      "fixture_count": 4,
+      "rejected_variant_count": 7,
+      "valid": true
+    }
+  ],
+  "normal_optimized_byte_equal": true,
+  "engine_run": false,
+  "learning_run": false,
+  "gcp_used": false
+}

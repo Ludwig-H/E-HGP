@@ -1,0 +1,125 @@
+{
+  "engine_qualification": false,
+  "fixture_count": 4,
+  "fixtures": [
+    {
+      "incorrect_variants": {
+        "perfect_local_iou_prevents_fragmentation": "REJECTED",
+        "raw_child_scores_equal_optimal_subtree_scores": "REJECTED"
+      },
+      "name": "selection_score_and_recurrence",
+      "status": "PASS",
+      "values": {
+        "covering_frontiers": 5,
+        "exhaustive_optimum": "12",
+        "objects": 1,
+        "perfect_local_iou_all_frontier_scores": [
+          "1",
+          "1",
+          "1",
+          "1",
+          "1"
+        ],
+        "raw_child_choice_score": "9",
+        "selected_fragments": 4
+      }
+    },
+    {
+      "incorrect_variants": {
+        "local_alpha_guarantees_compression": "REJECTED",
+        "local_alpha_is_global_minimum_mass": "REJECTED"
+      },
+      "name": "local_relative_mass",
+      "status": "PASS",
+      "values": {
+        "kept_local_alpha_half": 15,
+        "kept_local_alpha_quarter": 15,
+        "kept_local_alpha_three_fifths": 1,
+        "kept_root_relative_alpha_quarter": 7,
+        "raw_nodes": 15,
+        "smallest_retained_root_mass": "1/8"
+      }
+    },
+    {
+      "incorrect_variants": {
+        "per_source_normalization_preserves_symmetry": "REJECTED",
+        "per_source_normalization_preserves_ultrametric_inequality": "REJECTED"
+      },
+      "name": "relative_bias_is_not_ultrametric",
+      "status": "PASS",
+      "values": {
+        "birth_radii": [
+          "1",
+          "3/2",
+          "1"
+        ],
+        "coexisting_cut": "7/4",
+        "logarithm_used": false,
+        "normalized_ratios": [
+          [
+            "0",
+            "2",
+            "4"
+          ],
+          [
+            "4/3",
+            "0",
+            "8/3"
+          ],
+          [
+            "4",
+            "4",
+            "0"
+          ]
+        ],
+        "raw_merge_radii": [
+          [
+            "0",
+            "2",
+            "4"
+          ],
+          [
+            "2",
+            "0",
+            "4"
+          ],
+          [
+            "4",
+            "4",
+            "0"
+          ]
+        ]
+      }
+    },
+    {
+      "incorrect_variants": {
+        "shared_aggregation_equals_general_pairwise_attention": "REJECTED",
+        "sibling_clique_fits_two_edges_per_branch": "REJECTED"
+      },
+      "name": "shared_event_is_not_clique_attention",
+      "status": "PASS",
+      "values": {
+        "directed_clique_edges_without_self": 132,
+        "directed_event_incidence_edges": 24,
+        "linear_pairwise_outputs": [
+          "1",
+          "5/4",
+          "7/4"
+        ],
+        "multifusion_arity_for_count": 12,
+        "scope": "one_scalar_shared_aggregation_then_broadcast",
+        "shared_mean_broadcast": [
+          "4/3",
+          "4/3",
+          "4/3"
+        ]
+      }
+    }
+  ],
+  "geometric_realizability_claimed": false,
+  "rejected_variant_count": 8,
+  "schema": "zoltan.architecture_choices.v1",
+  "scope": "synthetic_trees_and_rational_linear_operators_only",
+  "script_sha256": "dd781987419218e3d4e673239331d0054b75ccd2e0d38bbc790ce9efdfa349d6",
+  "status": "PASS"
+}

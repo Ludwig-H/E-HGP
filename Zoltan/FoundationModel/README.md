@@ -13,9 +13,9 @@ public_status=not_claimed
 
 ## La thèse, en un paragraphe
 
-De nombreux encodeurs 3D fixent une **échelle métrique** : taille de voxel du
-*grid pooling*, liste de rayons, $k$, taille de *patch* sur une courbe
-remplissante ou nombre de niveaux de superpoints. Ces choix peuvent demander
+Les encodeurs 3D fixent une **granularité métrique ou cardinale** : taille de
+voxel, liste de rayons, $k$ voisins, taille de fenêtre sérialisée ou nombre de
+niveaux de superpoints. Ces choix peuvent demander
 un réaccord quand changent le capteur, la portée ou le domaine. La densité des
 retours LiDAR varie avec la portée, l'incidence et l'occultation ; un rayon
 fixe n'assure donc pas une population comparable partout. Des modèles de
@@ -43,8 +43,9 @@ utiliser. L'intérêt de plusieurs K et la stabilité des coupes retenues sont
 
 **3. Les cibles de la tour sont structurelles.** Rayons de fusion,
 persistance et profils en K sont des cibles exactes issues de FULL. Certaines
-restent prédictibles localement — à K=1, la fusion de deux points a pour rayon
-la moitié de leur distance. Le protocole contrôle donc les raccourcis et les
+restent prédictibles localement. À K1, dans un nuage limité à deux points,
+leur fusion a pour rayon la moitié de leur distance ; dans un nuage général,
+un chemin de points intermédiaires peut les connecter plus tôt. Le protocole contrôle donc les raccourcis et les
 variables qui révèlent déjà la cible.
 
 ## L'architecture, en une phrase
@@ -61,22 +62,24 @@ tokenizer HGP. Le premier prétexte interroge la connexité K1 ; les ordres
 supérieurs sont ajoutés ensuite à budget identique.
 
 ```text
-      points
-        | CONDENSATION  seuil RELATIF sur la masse m_tau du 9.1
-        | FP   pooling de filtration : l'echelle remplace le grid pooling
-      niveau 1 .. L  (~160 000 unites en tout, l'ordre d'un U-Net 3D)
-        | MGA  attention sur le graphe de fusion, biais ULTRAMETRIQUE
-        | OM   mixage des ordres K : le bouton sensibilite / robustesse
+      points + connexion fine
+        | FP   coupes et pooling de filtration ; condensation comparee au brut
+      niveau 1 .. L  (budget TOTAL partage entre branches K et reserves)
+        | MGA  graphe d'evenements ; biais derive des rayons de fusion
+        | OM   mixage des ordres K, si son apport est mesure
       goulot
-        | SEL  programme dynamique du 5.2, cout appris : instances
-        | PUR  vote pondere du 9.1, Proposition 7 a l'inference
+        | PUR  lecture ponderee vers les retours, avec connexion fine
       points etiquetes
+
+      SEL : extension instance separee, objectif structure a definir
 ```
+
 
 ## Les documents
 
 | document | ce qu'on y trouve |
 | --- | --- |
+| [`REAUDIT_GLOBAL_20260926.md`](REAUDIT_GLOBAL_20260926.md) | nouvelle revue de tout Zoltan, décisions prioritaires, contre-exemples et portée des vérifications |
 | [`AUDIT_V9_ET_ARCHITECTURE_20260926.md`](AUDIT_V9_ET_ARCHITECTURE_20260926.md) | audit transversal v9 → modèle : contrat d'export, jetons, cartes entre K, coût et portes de décision |
 | [`CONTRAT_COUPES_ET_MASSES_20260926.md`](CONTRAT_COUPES_ET_MASSES_20260926.md) | suite constructive : flux d'incidences, snapshots, composition pondérée, réserves et 11 fixtures rationnelles |
 | [`GUIDAGE_FULL_ET_PREENTRAINEMENT_20260926.md`](GUIDAGE_FULL_ET_PREENTRAINEMENT_20260926.md) | FULL enseignant ou tokenizer, perte de connexité, visibilité, transport inter-vues et contre-exemples exécutables |
@@ -92,11 +95,11 @@ supérieurs sont ajoutés ensuite à budget identique.
 
 ## Comment on mesurera l'apport
 
-Pas en comparant « HGP-FM » à « Sonata » : deux systèmes complets diffèrent par
-mille choses et un écart entre eux n'est pas attribuable. **Par substitution** :
-on fixe le squelette, les paramètres, la recette, les données et le budget, et
-on remplace un seul composant à la fois — l'échelle, le regroupement, le
-voisinage, l'encodage de position, l'axe des ordres, le décodeur.
+**Par substitution**, pour attribuer un gain : squelette, recette, données
+et budget appariés, puis un seul composant remplacé. **Par comparaison de
+systèmes complets**, pour établir l'utilité finale : même accès aux données,
+budget de réglage déclaré et frontière qualité/coût. Les deux expériences
+répondent à des questions différentes.
 
 Et avec des **témoins négatifs** :
 
@@ -139,19 +142,19 @@ normales et de visibilité disponibles au réseau.
 
 Aucune brique n'est nouvelle isolément. Ce qui peut l'être :
 
-1. remplacer l'échelle métrique posée à la main par une **échelle canonique
-   dérivée des données**, et montrer par substitution ce que cela vaut ;
+1. dériver des coupes de la tour exacte, avec règles et budgets déclarés,
+   puis mesurer leur transfert ;
 2. utiliser les **forêts exactes et leurs cartes entre K** comme structure
    de calcul, puis mesurer si le mixage des ordres sert la perception ;
-3. un **encodage de position relative ultramétrique**, invariant sous
-   homothétie commune des rayons positifs, à tester sous raréfaction LiDAR ;
+3. un **biais dérivé des rayons de fusion** ; leur normalisation peut
+   préserver l'invariance d'échelle sans préserver une ultramétrique ;
 4. une famille de **prétextes structurels exacts**, avec raccourcis et
    coût de préparation mesurés ;
 5. un **décodeur fondé sur le vote démontré** (Proposition 7), après export
    des incidences et poids nécessaires ;
-6. une **tête d'instance qui rend une antichaîne par construction** — le
-   programme dynamique du § 5.2 à coût appris — donc sans suppression non
-   maximale, sans appariement et sans seuil de recouvrement.
+6. une **sélection d'antichaîne**, exacte pour un coût additif défini ;
+   son objectif d'instance et le vote après sélection restent à établir.
+   L'antichaîne de facettes ne suffit pas à éviter les fragments aux points.
 
 ## Sources
 
