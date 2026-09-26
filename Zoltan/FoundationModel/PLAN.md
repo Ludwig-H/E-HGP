@@ -8,68 +8,72 @@ et coûte le moins cher.** Les deux témoins les plus tranchants — le canal de
 densité seul, et la tour brouillée — ne demandent aucun développement
 d'architecture.
 
-## Phase 0 — le raccord et les sondes (aucun apprentissage)
+## Phase 0 — le raccord et les sondes avant HGP-UNet
 
 **Construire.**
 
 1. Un **exportateur** de la tour vers un format consommable : forêt tous
    ordres, cartes verticales, populations, et pour chaque facette les rayons
-   au carré de ses cofaces. Cible naturelle : le `CertifiedTowerInput` de
-   `morsehgp3d/`, dont le réducteur exact (vote pondéré du § 9.1, excès de
-   masse) attend déjà un producteur.
+   au carré de ses cofaces. Un adaptateur expérimental pourra préparer
+   `CertifiedTowerInput` de `morsehgp3d/`, dont le réducteur exact (vote
+   pondéré du § 9.1, excès de masse) attend déjà un producteur. Ne pas
+   fabriquer les reçus de certification que la v9 ne publie pas.
 2. La **condensation** : élagage à seuil **relatif** $\alpha$ sur la masse
    $m_\tau$ du § 9.1, généralisé aux multifusions (jamais binariser), couplé
    entre les ordres, avec revérification de la naturalité des cartes
    verticales. Sortie : arbre condensé, stabilité par nœud, niveau de sortie
    $\hat\lambda_x$ par point.
 3. Le **constructeur d'échelle**, sur l'arbre condensé : les quatre règles
-   `E-global`, `E-rang`, `E-persistance`, `E-relative`, et les trois chemins
-   horizontal, vertical, diagonal iso-densité. Sortie : $L$ matrices
-   d'affectation creuses par trame.
+   `E-global`, `E-rang`, `E-persistance`, `E-relative`, et les chemins de pooling
+   emboîtants : horizontal, vertical et anti-diagonal ($r$ croissant, $K$
+   décroissant). L'iso-densité est réservée aux comparaisons latérales entre
+   ordres. Sortie : $L$ matrices d'affectation creuses par trame.
 4. Le **cache** : tours pré-calculées sur le corpus, plus une banque de vues
-   décimées par trame pour FM-5. Les augmentations rigides et d'échelle ne
-   demandent aucun recalcul.
+   décimées par trame pour FM-5. Chaque vue augmentée est re-quantifiée et sa tour
+   recalculée ; le cache conserve la provenance de la vue.
 
-**Mesurer.** Tout l'axe 0 de [`MESURE.md`](MESURE.md) : plafonds d'oracle
-stratifiés contre voxels, superpoints et HDBSCAN ; pureté des nœuds à nombre
-d'unités égal ; stabilité sous décimation avec ses quatre témoins ; sonde
-XGBoost et ses ablations ; statistiques de recouvrement et d'adaptativité ; et
-la porte 0.6, **compression, perte et stabilité de la condensation** — dont la
-courbe du plafond d'oracle par classe en fonction de $\alpha$, qui dit ce que
-la condensation coûte aux objets minces, et la prédiction P7, que l'arbre
-condensé est plus stable sous décimation que l'arbre brut.
+**Mesurer.** D'abord les sondes sans étiquette de l'axe 0 : couverture
+des retours, coût des incidences, stabilité sous décimation et rotation,
+adaptativité, compression et naturalité de la condensation. Les oracles
+d'instances, la pureté et XGBoost utilisent des étiquettes ou un ajustement
+appris : leur protocole est défini dans [`MESURE.md`](MESURE.md), mais leur
+exécution attend l'ouverture de cette évaluation. La perte des classes
+filiformes après condensation restera alors une porte de décision.
 
-**Et surtout : le témoin T2.** Donner $\hat f_K(x)$ comme variable par point à
-un PTv3 inchangé. Il ne demande qu'un canal d'entrée supplémentaire et une
-recette existante. S'il capte l'essentiel du gain que l'on espère, il vaut
-mieux le savoir maintenant.
+**Préparer le témoin T2 dès cette phase.** Il demande toutefois l'entraînement
+d'un PTv3 et sera exécuté avec la phase 1, lorsque les comparaisons apprises
+seront ouvertes. La phase 0 ferme d'abord l'interface FULL → coupes et ses
+portes sans apprentissage.
 
-S'y ajoutent quatre portes issues de l'audit de conception : **0.7** dérive de
+Le protocole comprend aussi quatre portes issues de l'audit de conception : **0.7** dérive de
 la tour sous rotation pure, qui dit si la grille de 1 mm est assez fine pour
 que le moindre écart de modèle soit interprétable ; **0.8** quels ordres $K$
 servent et à quel $K$ casse un pont de bruit ; **0.9** plafond d'oracle
 **stratifié par contact avec le sol**, avec et sans retrait du sol ; **0.10**
 nombre de naissances d'une trame relevée en dimension 6, avant de croire au
-relèvement métrique.
+relèvement métrique. Les portes 0.8 et 0.9 qui exploitent les étiquettes
+restent définies ici et seront exécutées avec l'évaluation correspondante.
 
-Les huit **portes du tokenizer** de [`SPECIFICATION.md`](SPECIFICATION.md) § 9
-se ferment ici : déterminisme, réétiquetage, partition de l'unité,
-emboîtement, naturalité après condensation, totalité, traçabilité, mutants.
+Les onze **portes du tokenizer** de [`SPECIFICATION.md`](SPECIFICATION.md) § 9
+se ferment ici, notamment couverture des retours, composition des coupes,
+naturalité entre K, budget et traçabilité.
 
-**Décision.** Si le plafond d'oracle n'est pas meilleur que celui des
-superpoints à nombre d'unités égal, et si l'adaptativité du rayon avec la
-portée n'est pas visible, la thèse de l'échelle canonique est fausse et la
-phase 1 n'a pas lieu d'être. Si la dérive de la porte 0.7 est du même ordre
-que les écarts que l'on espère mesurer, rien n'est interprétable avant
-d'affiner la grille.
+**Décision.** Si l'export des incidences, la couverture des retours ou les
+cartes entre coupes échouent, corriger ce raccord avant la phase 1. Les sondes de pureté,
+d'adaptativité et de stabilité restent des diagnostics de la valeur du
+tokenizer, et non une preuve de valeur apprise. Si la dérive de la porte 0.7
+est du même ordre que les écarts que l'on espère mesurer, il faut affiner la
+grille avant d'interpréter ces écarts.
 
 ## Phase 1 — HGP-UNet supervisé, et la substitution de l'échelle
 
 **Construire.** HGP-UNet **dans** la base PTv3 : `GridPool` remplacé par
 `FiltrationPool`, décodeur remplacé par PUR. Rien d'autre ne bouge.
 
-**Mesurer.** Les bras S1, S2 et S6 de l'étude de substitution ; les quatre
-règles d'échelle ; les trois chemins ; le témoin T1 (tour brouillée) et T3
+**Mesurer.** D'abord T2 (canal de densité seul) à réseau inchangé, puis les
+bras S1, S2 et S6 de l'étude de substitution ; les quatre
+règles d'échelle ; les trois chemins emboîtants, avec l'iso-densité
+comme lecture latérale ; le témoin T1 (tour brouillée) et T3
 (niveaux permutés). Stratification par portée, par taille d'objet et par
 classe. SemanticKITTI val 08, trois graines.
 
@@ -121,7 +125,8 @@ protocoles.
 ## Phase 4 — transfert et échelle
 
 **Mesurer.** L'expérience décisive : transfert inter-capteurs, 64 nappes vers
-32 et retour, **sans réaccorder aucune constante** — puisqu'il n'y en a pas.
+32 et retour, **avec les hyperparamètres du tokenizer gelés**. Leur transfert sans
+réaccord est une hypothèse à tester.
 Puis le transfert vers l'intérieur, terrain d'Utonia. Puis les lois d'échelle,
 trois tailles de modèle par trois tailles de corpus, avec la tendance de
 l'écart publiée quelle qu'elle soit.
@@ -143,9 +148,8 @@ déçoivent.
 
 ## Ce qui peut être fait en parallèle, sans attendre
 
-- la rédaction mathématique du lien entre la construction de Gabriel du
-  manuscrit et la définition degré-Rips, qui conditionne l'argument de
-  stabilité de [`ETAT_DE_LART.md`](ETAT_DE_LART.md) § 3 ;
+- le contrat mathématique et logiciel des coupes et cartes entre K réellement
+  consommées, depuis FULL jusqu'aux matrices du tokenizer ;
 - la reproduction de la base de référence SemanticKITTI, qui conditionne toute
   comparaison chiffrée ;
 - la recherche d'antériorité exhaustive, à faire une fois, sérieusement.
@@ -154,8 +158,8 @@ déçoivent.
 
 | phase | apprentissage | ce qui la termine | ce qui l'annule |
 | --- | --- | --- | --- |
-| 0 raccord et sondes | non | échelle construite, axe 0 publié | plafond d'oracle sous les superpoints ; T2 capte tout |
-| 1 échelle | supervisé | S1, S2, S6 mesurés, T1 et T3 passés | T1 égale la tour |
+| 0 raccord et sondes | aucun HGP-UNet | export/coupes vérifiés, sondes sans étiquette publiées | incidences ou cartes incompatibles, coût hors budget |
+| 1 échelle | supervisé | T2 puis S1, S2, S6 mesurés, T1 et T3 passés | T2 ou T1 explique le gain |
 | 2 voisinage et ordres | supervisé | S3, S4, S5 mesurés, T4 passé | S5 nul, donc OM retiré |
 | 3 pré-entraînement | SSL | sonde linéaire et efficacité en étiquettes | filtration sans effet contre auto-distillation seule |
 | 4 transfert et échelle | SSL | transfert inter-capteurs, lois d'échelle | écart qui s'inverse à l'échelle |

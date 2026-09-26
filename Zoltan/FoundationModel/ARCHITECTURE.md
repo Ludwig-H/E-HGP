@@ -12,9 +12,10 @@ voxel, liste de rayons, $k$, taille de *patch* sur une courbe remplissante — e
 c'est exactement ce qui casse quand le capteur, la portée ou le domaine
 changent. Les modèles de fondation 3D de 2025–2026 ne suppriment pas cette
 constante : ils en rattrapent les effets par du rééchelonnage, de l'augmentation
-et du brouillage. La tour HGP fournit à la place une **échelle canonique,
-dérivée des données, et prouvée stable en tant qu'objet multiparamètre**. On ne
-l'ajoute donc pas à une architecture : **on la substitue aux composants qui
+et du brouillage. La tour HGP fournit à la place une **structure exacte à
+deux paramètres, dérivée des données**. La stabilité des coupes et affectations
+choisies par le réseau est une propriété distincte à mesurer. On ne l'ajoute
+donc pas à une architecture : **on la substitue aux composants qui
 portent la constante.**
 
 Le modèle qui en découle n'est pas un nouveau réseau exotique. C'est un U-Net /
@@ -42,11 +43,12 @@ rapport de $4$ par niveau sur une trame brute :
   total    ~160 000 unités, tous niveaux confondus
 ```
 
-C'est **le même ordre de grandeur que PTv3 sur la même trame**. Les 16 M nœuds
-de la tour ne sont jamais matérialisés : ils sont l'espace dans lequel on lit
-$L$ partitions. Le coût de l'architecture est donc celui d'un U-Net 3D
-ordinaire, et la question n'est pas « combien de jetons » mais **« quel chemin
-prendre dans le treillis $(K, r)$ »**.
+C'est **le même ordre de grandeur de jetons que PTv3 sur la même trame**.
+La v9 matérialise cependant FULL avant que le réseau n'en lise $L$ coupes ;
+leur export et leur mise en cache ont aussi un coût. Distinguer donc jetons
+consommés, octets de FULL, compilation des coupes et latence totale. La
+question architecturale devient **« quel chemin et quelles coupes lire dans
+$(K,r)$, à quel coût ? »** ; voir l'[audit transversal](AUDIT_V9_ET_ARCHITECTURE_20260926.md).
 
 ## 3. Les six primitives
 
@@ -56,10 +58,11 @@ qu'elle se procure aujourd'hui par des constantes.
 1. **Une échelle de recouvrements** $A_1 \succ A_2 \succ \cdots \succ A_L$ :
    remplace le *grid pooling*, le FPS et les niveaux de superpoints.
 2. **Des matrices d'affectation douces** $P_\ell$, aux poids du § 9.1 :
-   remplacent le *pooling* de cellule, sont différentiables et conservent la
-   masse.
-3. **Un graphe de fusion** par niveau : deux nœuds sont voisins s'ils
-   fusionnent, et l'arête porte le **rayon de fusion**. Remplace le graphe
+   remplacent le *pooling* de cellule et conservent la masse. Elles sont
+   linéaires dans les activations ; leurs incidences discrètes ne sont pas
+   apprises par rétropropagation.
+3. **Un graphe épars dérivé des événements de fusion** par niveau, avec
+   budget d'arêtes et rayon de fusion. Remplace le graphe
    $k$-NN et la fenêtre sur la sérialisation.
 4. **Un axe d'ordre $K$**, avec une carte verticale dont la v9 vérifie la
    naturalité. **Sans équivalent dans aucune architecture existante.**
@@ -71,19 +74,16 @@ qu'elle se procure aujourd'hui par des constantes.
 
 ## 4. Ce que le treillis permet, et ce qu'il ne permettra jamais
 
-### 4.1 Pourquoi une coupe horizontale est le mauvais objet
+### 4.1 Pourquoi mesurer les limites d'un rayon global
 
-La densité LiDAR décroît en $1/d^{2}$. À un rayon global $r$, le champ proche
-est déjà un bloc unique alors que le champ lointain est encore de la poussière.
-Une coupe horizontale est donc empiriquement mauvaise — et, ce qui est plus
-grave, **théoriquement mauvaise** : Rolle et Scoccola montrent que les tranches
-à un paramètre de la bifiltration par degré redonnent les méthodes connues de
-regroupement par densité mais **sont instables**, tandis que l'objet
-multiparamètre est stable.
-
-Conséquence directe sur l'architecture : **l'échelle ne doit jamais être un
-rayon global, et le modèle doit voir plusieurs ordres.** Ce n'est pas une
-préférence de conception, c'est une conséquence d'un théorème de stabilité.
+Dans un scan automobile, la densité des retours varie avec la portée,
+l'incidence et l'occultation. À rayon global égal, des régions proches et
+lointaines peuvent donc être regroupées à des granularités très différentes.
+La tour Morse HGP donne les historiques exacts à plusieurs K et r ; elle
+permet de comparer une coupe globale à des antichaînes adaptatives sur le
+**même** nuage. La valeur d'une échelle adaptative et de plusieurs ordres est
+l'hypothèse centrale à tester, pas une conclusion acquise par l'exactitude
+de FULL.
 
 ### 4.2 Quels chemins sont des échelles, et lesquels n'en sont pas
 
@@ -114,9 +114,10 @@ Trois familles de chemins sont donc des échelles valides :
 Et une famille n'en est **pas** une : le chemin **iso-densité**
 $\hat f_K \propto K/r^{3}$ constant, qui fait croître $K$ avec $r$. Il est
 séduisant — « grossir en espace à densité constante » — mais il est
-**anti-monotone** : ses ensembles ne s'emboîtent pas, donc il n'existe aucune
-application de pooling entre ses niveaux. Ce n'est pas un défaut de réglage,
-c'est une impossibilité.
+**sans garantie de monotonie** : ses ensembles peuvent ne pas s'emboîter,
+donc aucune application de pooling dure n'est garantie entre ses niveaux.
+Une trame particulière peut présenter un emboîtement fortuit, sans fournir
+un contrat valable pour le tokenizer.
 
 **Ce que l'iso-densité est vraiment, et où il sert.** C'est une famille
 **latérale** : plusieurs lectures de la même scène au même niveau de densité et
@@ -140,16 +141,16 @@ aux niveaux fins elle est à $K$ élevé, où le poteau n'existe pas encore ; au
 niveaux grossiers elle est à $K$ faible, où il a déjà fusionné avec le sol ou la
 végétation.
 
-**Aucun chemin monotone unique ne voit cet objet.** La seule issue est de faire
-tourner **plusieurs branches à des $K$ différents** et de les fuser
-latéralement. C'est OM, et cela cesse d'être un enrichissement : c'est la
-condition pour que les classes filiformes soient visibles du modèle. La
-prédiction P5 devient donc un test du dispositif entier, pas d'un module.
+**Un chemin monotone unique peut manquer cet objet à ses niveaux retenus.**
+Faire tourner **plusieurs branches à des $K$ différents** et les fusionner
+latéralement est l'hypothèse OM à comparer à un calendrier unique, notamment
+sur les classes filiformes. La prédiction P5 devient donc un test du dispositif
+entier, pas d'un module.
 
 Bonne nouvelle d'ingénierie : les cartes verticales de la v9 vont de $K$ vers
 $K-1$, c'est-à-dire **exactement dans le sens du grossissement**. Le moteur
-publie déjà la seule application dont l'architecture a besoin pour changer
-d'ordre.
+publie une application de référence pour changer d'ordre ; le quotient sur
+les antichaînes effectivement retenues reste à construire et à vérifier.
 
 ### 4.3 La condensation : l'étape que le manuscrit prescrit déjà
 
@@ -200,8 +201,9 @@ ne transfère ni d'un capteur à l'autre, ni du champ proche au champ lointain.
 **La règle qui résout la tension : un rapport transfère, une longueur non.**
 Le seuil doit être **relatif** — une scission n'est validée que si chaque
 branche conserve au moins une fraction $\alpha$ de la masse $m_\tau$ du parent.
-$\alpha$ est sans dimension, donc canonique et transférable ; un compte absolu
-ne l'est pas. C'est la seule forme de condensation admissible ici.
+$\alpha$ est sans dimension, mais reste un hyperparamètre dont le transfert
+doit être vérifié ; un compte absolu est plus sensible à la densité acquise.
+C'est la première forme de condensation à évaluer ici.
 
 Deux garde-fous s'y ajoutent :
 
@@ -224,17 +226,16 @@ Le chemin fixe la direction ; il reste à fixer **comment on contracte**.
 | --- | --- | --- |
 | **E-global** | couper à des rayons globaux $r_1 < \cdots < r_L$ | témoin, doit échouer sur la variation de portée |
 | **E-rang** | contracter les fusions dans l'ordre de $r$ jusqu'à une cible de compte | équilibré, mais encore globalement ordonné |
-| **E-persistance** | contracter d'abord les fusions de plus faible persistance | **défaut recommandé** : localement adaptatif, dense et clairsemé contractés au même niveau |
-| **E-relative** | contracter dans l'échelle normalisée $r / r_K(x)$ | invariance de portée par construction ; rival principal |
+| **E-persistance** | contracter d'abord les fusions de plus faible persistance | **défaut à tester** : contracte selon la persistance, avec rayons locaux variables |
+| **E-relative** | contracter dans l'échelle normalisée $r / r_K(x)$, avec convention explicite si $r_K(x)=0$ | invariance sous homothétie commune ; robustesse en portée à tester |
 
 Les quatre règles s'appliquent **sur l'arbre condensé**, jamais sur la forêt
-brute. `E-persistance` est recommandé parce qu'il est exactement la réponse que
-HDBSCAN apporte au problème de densité variable — un $\varepsilon$ global ne
-marche pas, l'arbre condensé si — et parce qu'il donne des niveaux dont le
-nombre d'unités est contrôlé, donc une architecture de forme fixe et des lots
-faciles à former. Dit autrement : `E-persistance` **est** une condensation à
-seuil mobile ; la rendre explicite ne change pas le calcul, mais nomme le
-critère et rend gratuitement la stabilité et les $\hat\lambda_x$.
+brute. `E-persistance` est un défaut **à éprouver** : il ordonne les contractions
+par une quantité structurale et contrôle le nombre d'unités, ce qui aide à
+former les lots. Il produit des rayons locaux variables, mais la stabilité
+des antichaînes ainsi choisies reste à mesurer sous perturbation du scan. La
+condensation et les niveaux de sortie $\hat\lambda_x$ ont aussi un coût
+de construction distinct de FULL.
 
 Le rayon effectif de chaque nœud varie alors d'un bout à l'autre d'un même
 niveau. **C'est le but** : c'est précisément ce qu'un voxel ne peut pas faire,
@@ -249,10 +250,10 @@ Cette section manquait, et c'est la limitation la plus importante du projet.
 **L'énoncé.** La tour sépare par la **densité**, jamais par la géométrie
 différentielle. Deux objets dont les retours forment un continuum — une voiture
 posée sur l'asphalte, un poteau dans l'herbe, un piéton sur la chaussée — sont
-density-connectés. Il n'existe alors **aucun couple $(K, r)$** qui les sépare.
-Un superpoint de SPT, lui, y parvient : il regarde les normales, la planéité,
-l'élévation, et une portière n'a pas la normale du sol même là où elle le
-touche.
+reliés dans certaines coupes. Il faut mesurer si **l'un des ordres et
+rayons disponibles** rompt ce pont avant que l'objet disparaisse ; FULL ne le
+garantit pas pour un scan donné. Un superpoint muni de normales, de planéité
+ou d'élévation dispose de signaux supplémentaires au contact entre surfaces.
 
 C'est une différence de nature et il faut la dire avant qu'un relecteur ne la
 trouve. Elle borne directement le plafond d'oracle de la porte 0.1, et elle le
@@ -317,20 +318,23 @@ confondait.
   **facettes** ; une antichaîne de cet arbre **partitionne** les facettes ; et
   les poids du § 9.1 poussent cette partition en une **partition de l'unité sur
   les points** : $w_{xv} = \sum_{\tau \in v} S_\tau / T_x$, de somme $1$ sur
-  l'antichaîne. C'est ici, et seulement ici, que le recouvrement pour
-  $K \geq 2$ se manifeste. Le nombre de non-zéros de $P_1$ est donc la seule
-  statistique de coût à surveiller (porte 0.5).
+  l'antichaîne, sous réserve de couvrir tous les retours, y compris ceux sans
+  facette après condensation. C'est ici que le recouvrement pour $K \geq 2$
+  se manifeste. Compter non-zéros, lignes orphelines et coût de fabrication
+  de $P_1$ (porte 0.5).
 - **Niveau $\ell$ vers niveau $\ell+1$ : dur.** Deux antichaînes emboîtées du
   même arbre condensé donnent à chaque nœud du niveau fin **exactement un**
   ancêtre au niveau grossier. $P_{\ell+1}$ est une matrice $0/1$ à une entrée
   par ligne : un pooling ordinaire, creux, sans recouvrement.
-- **Changement d'ordre, $K$ vers $K-1$ : dur aussi.** La carte verticale envoie
-  un nœud d'ordre $K$ sur un unique nœud d'ordre $K-1$, et elle est orientée
-  dans le sens du grossissement (§ 4.2 bis).
+- **Changement d'ordre, $K$ vers $K-1$ : conditionnel.** La carte verticale
+  envoie un nœud FULL à son niveau de création, mais son quotient entre les
+  antichaînes retenues doit être construit et vérifié. Si les coupes sont
+  incompatibles, OM consomme une incidence éparse entre branches.
 
 Autrement dit, la crainte d'un $P_\ell$ dense à tous les étages était infondée :
-**le recouvrement ne coûte qu'à l'entrée**, et au-dessus l'échelle est une
-contraction d'arbre ordinaire.
+**le recouvrement des retours coûte à l'entrée** ; à K fixé, les étages
+emboîtés deviennent des contractions d'arbre. Les croisements entre K ont
+un coût distinct à publier.
 
 ### MGA — Attention sur le graphe de fusion, à biais ultramétrique
 
@@ -346,9 +350,11 @@ pose donc le biais d'attention
 $b_{uv} = \varphi\!\left(\log r_{uv} - \log r_u\right)$,
 
 normalisé par l'échelle propre du nœud. C'est un **encodage de position
-relative par la hiérarchie et non par la métrique**, et il est invariant de
-portée par construction : $r_{uv}$ grandit tout seul là où le nuage
-s'appauvrit, exactement dans la proportion où le voisinage s'élargit.
+relative par la hiérarchie et non par la métrique**. Sous une homothétie
+commune des rayons positifs, le rapport est invariant. Une raréfaction des
+retours avec la portée peut modifier différemment
+$r_{uv}$ et $r_u$ : cette robustesse doit être mesurée. Définir un code
+séparé si $r_u=0$.
 
 L'encodage relatif $xyz$ ordinaire reste disponible comme **canal séparé, à
 ablater** : on veut savoir lequel des deux porte l'information.
@@ -426,9 +432,10 @@ Quatre propriétés font de cette tête un bon objet, et non un gadget :
    concurrencer : le coût guidé par un modèle 3D de la détection d'anomalies
    devient un cas particulier à coût figé.
 
-Deux limites à énoncer tout de suite. Le plafond de cette tête est le **plafond
-d'oracle** de la porte 0.1 : si l'instance annotée n'est pas un nœud de l'arbre
-condensé, aucun coût appris ne la trouvera. Et le témoin qui compte n'est pas
+Deux limites à énoncer tout de suite. Le meilleur IoU d'un nœud isolé de la porte 0.1 mesure la qualité des
+propositions, mais ne borne pas à lui seul une antichaîne suivie du vote § 9.1
+ni une sortie par point. Le plafond propre à SEL doit exécuter la sélection
+et le vote réellement permis. Et le témoin qui compte n'est pas
 un détecteur à boîtes, c'est **l'excès de masse sur le même arbre** : si le
 coût appris ne bat pas $-\widehat{E}(C)$, il n'apporte rien. À quoi s'ajoute
 ALPINE, qui atteint $\mathrm{PQ} = 64{,}2$ par regroupement géométrique sans
@@ -470,13 +477,12 @@ est l'entrée**. Prédire une coordonnée masquée se résout par interpolation
 locale. Sonata *atténue* : bruit gaussien sur les coordonnées masquées,
 ordonnanceur de masque, suppression du décodeur hiérarchique.
 
-Les cibles de la tour n'ont pas ce défaut. Le rayon auquel deux composantes
-fusionnent est une grandeur de **percolation** : il dépend du goulot de densité
-entre elles, donc d'une intégration sur tout l'espace intermédiaire. Il n'est
-pas lisible sur les coordonnées locales. **Là où Sonata masque le raccourci, la
-tour fournit une tâche où il n'existe pas.** C'est, à ma connaissance, la
-première famille de prétextes 3D dont on peut argumenter cela par construction
-et non par expérience.
+Les cibles de la tour permettent des prétextes structurels exacts, mais
+l'absence de raccourci géométrique reste à établir. À K=1, deux points
+fusionnent au rayon égal à la moitié de leur distance : une cible FM-1 peut
+être locale. Pour chaque tâche, masquer les variables qui révèlent la cible,
+puis comparer à un prédicteur fondé sur la géométrie locale et à un contexte
+plus large.
 
 ### 7.2 Les six tâches
 
@@ -489,15 +495,16 @@ et non par expérience.
 | **FM-5 accord inter-vues** | même structure de fusion sous décimation en portée et occultation | c'est l'hypothèse d'invariance, posée en fonction de perte |
 | **FM-6 distillation d'agrégat** | depuis une trame isolée, la structure de fusion de la tour de l'agrégat multi-trames | § 7.6 : une **cible dense** au lieu d'un simple accord entre deux vues pauvres |
 
-Toutes ces cibles sont **exactes et gratuites** : elles sortent du moteur, sans
-annotation.
+Ces cibles sont **exactes une fois la tour et les incidences nécessaires
+calculées**, sans annotation ; leur préparation, stockage et alignement entre
+vues doivent entrer dans le coût total.
 
 ### 7.3 Masquage par nœuds entiers
 
 En traitement du langage, masquer un mot entier bat le masquage de sous-mots.
 La tour donne l'unité correspondante en 3D : **on masque un nœud entier, pas
-des points au hasard.** Un nœud est une pièce géométriquement cohérente, donc
-le masque n'est plus rattrapable par interpolation. C'est le levier le plus
+des points au hasard.** Un nœud fournit un masque structurel cohérent ;
+vérifier par témoin local si son contenu reste prévisible par interpolation. C'est le levier le plus
 simple à essayer, et il se greffe sur n'importe quelle recette d'auto-
 distillation existante sans changer le reste.
 
@@ -551,9 +558,9 @@ nœuds de trames voisines, recalée par l'odométrie. Classique.
 
 **Usage en apprentissage, et c'est là que se trouve le vrai levier.** On
 agrège $N$ trames consécutives en compensant le mouvement propre, et on calcule
-**une tour sur l'agrégat**. Le nuage agrégé est dense : c'est, autant qu'on
-puisse l'obtenir, la **géométrie réelle** de la scène. La trame isolée en est un
-échantillon clairsemé.
+**une tour sur l'agrégat**. Le nuage agrégé apporte davantage de retours
+observés, avec ses propres erreurs d'alignement, occultations et objets
+mobiles. La trame isolée en est un échantillon plus clairsemé.
 
 On tient alors une cible que le poster demandait sans pouvoir la produire :
 
@@ -563,8 +570,8 @@ On tient alors une cible que le poster demandait sans pouvoir la produire :
 C'est l'hypothèse centrale du projet transformée en fonction de perte
 **supervisée par la géométrie elle-même**. Là où FM-5 demande seulement que
 deux vues s'accordent — ce qui peut être satisfait par une représentation
-triviale —, FM-6 donne la bonne réponse. Et elle est gratuite : l'odométrie est
-disponible.
+triviale —, FM-6 propose une cible dense. Son calcul exige l'alignement,
+la tour de l'agrégat et un contrôle de visibilité ; mesurer ces coûts.
 
 Deux précautions honnêtes. Les objets **mobiles** se traînent dans l'agrégat ;
 on se limite donc à des fenêtres courtes, et l'on rapporte séparément les
@@ -593,7 +600,7 @@ régimes domine.
 | --- | --- |
 | Sélectionner quelques milliers de jetons dans la tour et les donner à un Transformer plat | perd la hiérarchie, qui est la contribution ; et c'était un mauvais cadrage du coût (§ 2) |
 | Vectoriser la persistance (code-barres, paysages, images de persistance) en variables d'entrée d'un réseau standard | c'est la voie TDA classique : elle jette la structure pour n'en garder qu'un résumé, et elle est largement explorée |
-| Consommer une seule tranche $\lambda$ ou un seul $K$ | instable, par le résultat de Rolle et Scoccola ; l'architecture hériterait de cette instabilité |
+| Une seule tranche ou un seul K comme architecture finale | perd les événements et alternatives entre ordres que FULL publie ; garder comme témoin d'ablation |
 | Apprendre la partition (superpoints appris, $k$-moyennes différentiables) | on reperd la canonicité et le déterminisme, et l'ablation redevient inintelligible |
 | Écrire un réseau nouveau de zéro | rend la substitution impossible à interpréter et le résultat invérifiable |
 | Forcer une partition stricte des points à l'entrée | pour $K \geq 2$, le recouvrement **est** l'information d'ordre supérieur (§ 9.1) |
@@ -607,15 +614,14 @@ multiparamètre. Ce qui peut l'être :
 
 1. **remplacer l'échelle métrique posée à la main par une échelle canonique
    dérivée des données**, et montrer par substitution ce que cela vaut ;
-2. **utiliser un objet multiparamètre prouvé stable** là où l'état de l'art
-   utilise une tranche instable, avec l'axe $K$ comme bouton
-   sensibilité/robustesse apprenable ;
-3. **un encodage de position relative ultramétrique**, invariant de portée par
-   construction ;
-4. **une famille de prétextes sans raccourci géométrique**, aux cibles exactes
-   et gratuites ;
-5. **un décodeur démontré** (Proposition 7) au lieu d'une interpolation choisie
-   à la main.
+2. **utiliser les forêts exactes et les cartes entre K** comme structure de
+   calcul, et établir expérimentalement la valeur de l'axe K ;
+3. **un encodage de position relative ultramétrique**, dont la robustesse
+   à la raréfaction des retours se mesure ;
+4. **une famille de prétextes structurels exacts**, avec raccourcis
+   et coût de préparation mesurés ;
+5. **un décodeur fondé sur le vote démontré** (Proposition 7), sous réserve
+   d'exporter les incidences et poids nécessaires.
 
 Chacun de ces cinq points correspond à une ligne de la table de substitution de
 [`ETAT_DE_LART.md`](ETAT_DE_LART.md) § 4, donc à une expérience contrôlée. Si

@@ -4,7 +4,7 @@ Ce qui peut faire échouer HGP-FM, comment on le détecte tôt, et ce qui est d�
 fermé. Document destiné à vieillir : chaque risque devient un fait ou
 disparaît.
 
-## 1. Les quatre risques majeurs
+## 1. Les six risques majeurs
 
 ### R1 — la tour n'apporte rien qu'un canal de densité n'apporte déjà
 
@@ -12,9 +12,9 @@ disparaît.
 la densité locale. Or il suffit de donner $\hat f_K(x)$ comme variable par
 point à un réseau inchangé pour lui donner la densité.
 
-*Détection.* Témoin **T2** de [`MESURE.md`](MESURE.md), phase 0. Une variable
-d'entrée supplémentaire sur une recette existante : c'est le témoin le moins
-cher et le plus tranchant du protocole.
+*Détection.* Témoin **T2** de [`MESURE.md`](MESURE.md), préparé en phase 0
+et entraîné en phase 1. Une variable d'entrée supplémentaire sur une recette
+existante : c'est un témoin appris peu coûteux à définir et très discriminant.
 
 *Si le risque se réalise.* Arrêter la voie architecturale et publier le canal
 de densité comme résultat utile. Ce serait un résultat honnête et d'une réelle
@@ -80,12 +80,12 @@ la masse $m_\tau$ du § 9.1 qui le gère, pas un comptage.
 
 ### R5 — la densité ne sépare pas ce qui se touche
 
-*Le risque, et c'est le plus fondamental.* La tour sépare par la densité, jamais
-par la géométrie différentielle. Une voiture posée sur l'asphalte, un poteau
-dans l'herbe, un piéton sur la chaussée forment un continuum de retours :
-**aucun couple $(K, r)$ ne les sépare**. Un superpoint de SPT y parvient, parce
-qu'il regarde les normales. C'est une différence de nature, et elle borne le
-plafond d'oracle là où sont les classes qui comptent.
+*Le risque, et c'est le plus fondamental.* La tour sépare par la densité, sans
+normale ni géométrie différentielle. Une voiture posée sur l'asphalte, un
+poteau dans l'herbe, un piéton sur la chaussée peuvent former des ponts de
+retours. Un ordre $K$ peut les rompre ou non selon le scan ; aucun résultat
+général ne garantit une séparation avant disparition de l'objet. Mesurer le
+plafond d'oracle aux contacts avec le sol.
 
 *Détection.* Porte 0.9 de [`MESURE.md`](MESURE.md) : plafond d'oracle par
 classe, **stratifié par contact avec le sol**, en fonction de $K$, avec et sans
@@ -140,16 +140,15 @@ persistance multiparamètre, descripteurs radiaux ou sphériques, grilles de
 distances à sondes fixes. Revendiquer l'une d'elles est une erreur qu'un
 relecteur sanctionnera immédiatement.
 
-Deux antériorités doivent être citées franchement et tôt :
+Deux filiations doivent être explicites :
 
 - **Superpoint Transformer** (ICCV 2023) pour l'idée d'une partition
   hiérarchique adaptative consommée par une attention éparse. C'est
   l'antécédent architectural le plus proche ;
-- **la bifiltration degré-Rips** (Lesnick et Wright 2015 ; Rolle et Scoccola,
-  JMLR 2024) pour l'objet lui-même et pour son théorème de stabilité. Le
-  projet ne découvre pas cet objet : il le calcule exactement à une échelle où
-  la littérature ne le calculait pas, et il l'utilise comme squelette de calcul
-  plutôt que comme invariant à vectoriser.
+- **Morse HGP 3D** pour l'objet mathématique, ses supports critiques et
+  l'algorithme FULL. La contribution du présent projet est de transformer
+  cette sortie exacte en opérateurs de réseau vérifiables, puis de mesurer leur
+  apport propre.
 
 La revue d'antériorité de ce dossier est **ciblée sur les décisions de
 conception**. Elle ne remplace pas une recherche exhaustive au moment de la
@@ -159,7 +158,6 @@ soumission, qui reste à faire une fois, sérieusement.
 
 | piste | fermée par |
 | --- | --- |
-| Consommer une seule tranche $\lambda$, un seul $r$ ou un seul $K$ | instable par Rolle–Scoccola ; l'architecture hériterait de l'instabilité |
 | Sélectionner quelques milliers de jetons de la tour pour un Transformer plat | jette la hiérarchie, qui est la contribution ; et le cadrage du coût était faux ([`ARCHITECTURE.md`](ARCHITECTURE.md) § 2) |
 | Vectoriser la persistance en variables d'entrée d'un réseau standard | voie TDA classique, largement explorée, et elle jette la structure |
 | Écrire un réseau neuf de zéro plutôt qu'une modification de PTv3 | rend la substitution ininterprétable et le résultat invérifiable |
@@ -187,11 +185,11 @@ refasse.
 1. **« Il faut sélectionner quelques milliers de jetons parmi 16 M nœuds. »**
    Faux cadrage : un U-Net lit $L$ coupes, soit l'ordre de grandeur d'un U-Net
    3D ordinaire. Corrigé en [`ARCHITECTURE.md`](ARCHITECTURE.md) § 2.
-2. **« Le chemin diagonal iso-densité est le bon défaut. »** Faux : faire
-   croître $K$ avec $r$ est **anti-monotone**, les ensembles ne s'emboîtent pas,
-   donc il n'existe aucune application de pooling. Grossir, c'est $r \uparrow$
-   et $K \downarrow$. L'iso-densité est une famille **latérale**, que consomme
-   OM. Corrigé en § 4.2, et c'est cette correction qui a rendu OM structurel.
+2. **« Le chemin diagonal iso-densité est le bon défaut. »** Faux comme
+   contrat général : faire croître $K$ avec $r$ ne garantit pas l'emboîtement,
+   donc aucune application de pooling dure n'est garantie. Grossir avec
+   garantie, c'est $r \uparrow$ et $K \downarrow$. L'iso-densité reste une
+   famille **latérale** à comparer par OM.
 3. **« Rotations, translations et homothéties commutent avec la tour, donc ces
    augmentations sont gratuites. »** Vrai de l'objet, faux du moteur : la
    quantification à 1 mm change l'accrochage à la grille. Corrigé en § 7.5 ; on
@@ -205,9 +203,11 @@ aux niveaux fins à $K$ **faible** aux niveaux grossiers, et non l'inverse.
 - **La laminarité.** § 9.1 démontre que l'arbre est une partition des
   $(K-1)$-simplexes ; la partition de l'unité $w_{x\tau} = S_\tau/T_x$ relie
   points et facettes. Ce point a été soulevé et tranché.
-- **Le déterminisme et la reproductibilité** de la tokenisation : mesurés.
+- **Le déterminisme de FULL** : mesuré sur les cas qualifiés. La
+  reproductibilité du tokenizer dérivé reste une porte à fermer.
 - **Le recouvrement au-dessus du premier étage** : il n'y en a pas. Deux
   antichaînes emboîtées du même arbre donnent un pooling dur ; seul le passage
   points → nœuds est doux, et c'est là que vit l'information d'ordre supérieur.
-- **Le coût de séquence** : un U-Net lit $L$ coupes, pas les millions de nœuds
-  de la tour.
+- **La longueur de séquence envisagée** : un U-Net lirait $L$ coupes, pas les
+  millions de nœuds de la tour. Le coût de FULL, des coupes et du graphe reste
+  à mesurer séparément.

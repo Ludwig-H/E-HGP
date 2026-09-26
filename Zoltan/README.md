@@ -24,26 +24,27 @@ public_status=not_claimed
 
 ## L'idée, en une phrase
 
-Le nuage de points est un artefact du capteur ; la surface, elle, varierait
-beaucoup moins. Tout encodeur 3D code pourtant en dur une **échelle métrique** —
-taille de voxel, liste de rayons, taille de *patch* — et c'est elle qui casse
-quand la portée, le capteur ou le domaine changent. La hiérarchie $K$-NN de
-Morse HGP 3D fournit à la place une échelle **canonique, dérivée des données et
-prouvée stable** : on la substitue aux composants qui portent la constante.
+Le nuage de points reflète le capteur et la scène observée. Une partie des
+encodeurs 3D fixe une **échelle métrique** — taille de voxel, liste de rayons,
+taille de *patch* — dont le transfert peut demander un réaccord. La tour FULL
+de Morse HGP 3D fournit une structure **exacte sur les retours acquis**, à
+plusieurs ordres et rayons. Son intérêt pour un réseau et la stabilité des
+coupes consommées sont les hypothèses à mesurer.
 
 ## Où commencer
 
-1. [`FoundationModel/README.md`](FoundationModel/README.md) — la thèse et le
+1. [`FoundationModel/AUDIT_V9_ET_ARCHITECTURE_20260926.md`](FoundationModel/AUDIT_V9_ET_ARCHITECTURE_20260926.md) — l'audit v9 et les décisions d'interface.
+2. [`FoundationModel/README.md`](FoundationModel/README.md) — la thèse et le
    parcours d'entrée.
-2. [`FoundationModel/OBJET.md`](FoundationModel/OBJET.md) — ce que la tour est,
+3. [`FoundationModel/OBJET.md`](FoundationModel/OBJET.md) — ce que la tour est,
    et les six primitives qu'une architecture y lit.
-3. [`FoundationModel/ETAT_DE_LART.md`](FoundationModel/ETAT_DE_LART.md) — le
+4. [`FoundationModel/ETAT_DE_LART.md`](FoundationModel/ETAT_DE_LART.md) — le
    verrou, et la **table de substitution** qui sert de plan de mesure.
-4. [`FoundationModel/ARCHITECTURE.md`](FoundationModel/ARCHITECTURE.md) —
+5. [`FoundationModel/ARCHITECTURE.md`](FoundationModel/ARCHITECTURE.md) —
    HGP-UNet.
-5. [`FoundationModel/MESURE.md`](FoundationModel/MESURE.md) — comment établir
+6. [`FoundationModel/MESURE.md`](FoundationModel/MESURE.md) — comment établir
    l'apport, témoins négatifs compris.
-6. [`FoundationModel/PLAN.md`](FoundationModel/PLAN.md) — l'ordre de
+7. [`FoundationModel/PLAN.md`](FoundationModel/PLAN.md) — l'ordre de
    construction et les points de décision.
 
 ## Ce que ce dossier n'est pas

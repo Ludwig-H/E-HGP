@@ -29,10 +29,10 @@ niveau exact.
 décroît en $K$. À $K$ fixé on lit un arbre de fusion ; à $r$ fixé, une chaîne
 emboîtée en $K$.
 
-**Degré-Rips** — le nom de cet objet en analyse topologique des données
-(Lesnick et Wright, 2015), décrit comme *parameter-free and density-sensitive*.
-Rolle et Scoccola (JMLR 2024) : ses tranches à un paramètre sont **instables**,
-l'objet multiparamètre est **stable**.
+**Tour Morse HGP FULL** — forêts de fusion exactes pour les ordres K,
+populations et cartes verticales, avec les niveaux de naissance et de fusion
+spécifiés par le manuscrit. Une coupe consommée par le réseau est dérivée de
+cet objet et requiert sa propre vérification.
 
 **Ultramétrique** — la distance $r_{uv}$ à laquelle deux nœuds fusionnent.
 L'équivalence dendrogramme–ultramétrique est établie au chapitre 3 du
@@ -56,8 +56,8 @@ cartes verticales.
 arité, intérieurs, coquille.
 
 **Arité $q_{\min}$** — taille du support minimal : $2$ arête diamétrale, $3$
-triangle aigu, $4$ tétraèdre. L'alphabet géométrique, et une signature de
-dimension locale gratuite.
+triangle aigu, $4$ tétraèdre. L'alphabet géométrique fournit une signature
+d'arité des supports, à exporter ; ce n'est pas la dimension de l'objet vu.
 
 **Carte verticale** — l'image d'un nœud d'ordre $K$ dans l'histoire d'ordre
 $K-1$. **Naturelle** : l'image d'une fusion est la fusion des images.
@@ -79,8 +79,10 @@ coupes emboîtées lue dans la forêt. Remplace le *grid pooling*.
 **Règle de contraction** — comment on passe d'un niveau au suivant :
 `E-global`, `E-rang`, `E-persistance` (défaut), `E-relative`.
 
-**Chemin dans le treillis** — la direction de grossissement : horizontal ($r$),
-vertical ($K$), ou **diagonal iso-densité** ($K/r^3$ constant).
+**Chemin dans le treillis** — la direction de grossissement emboîtante :
+horizontale ($r$ croît), verticale ($K$ décroît) ou anti-diagonale combinant
+les deux. L'iso-densité compare des branches latérales ; elle ne définit pas
+un pooling emboîtant.
 
 **Condensation** — l'élagage de HDBSCAN, prescrit par le § 9.1 du manuscrit :
 une scission n'est une vraie scission que si les deux branches gardent assez de

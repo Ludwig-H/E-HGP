@@ -35,30 +35,22 @@ Deux conséquences qui contraignent toute architecture :
    donc disponible, et le passage aux points est déjà démontré. Rien n'est à
    inventer de ce côté.
 
-## 2. Ce que l'objet est, vu de l'analyse topologique des données
+## 2. Ce que l'objet Morse HGP rend calculable
 
-Pour tout $(K, r)$, la tour donne le $\pi_0$ de
-$L_K(r) = \lbrace y : |B(y, r) \cap \mathcal{X}| \geq K \rbrace$. C'est le
-degré zéro d'une **bifiltration par degré**, connue sous le nom de
-**degré-Rips** (Lesnick et Wright, 2015) et décrite comme *parameter-free and
-density-sensitive*.
+Pour tout $(K,r)$, la tour encode les composantes de
+$L_K(r)=\lbrace y:|B(y,r)\cap\mathcal X|\geq K\rbrace$ au sens du
+manuscrit. Le graphe $\Gamma_K$ donne une représentation discrète de ces
+composantes ; les minima Gabriel déterminent les événements qui changent la
+connectivité. Les historiques à K fixé et les cartes verticales forment
+l'objet FULL réellement consommable par le projet.
 
-Le résultat qui gouverne l'architecture est celui de Rolle et Scoccola
-(JMLR 2024) : les **tranches à un paramètre** de cet objet redonnent les
-méthodes connues de regroupement par densité **mais sont instables**, alors que
-l'objet **multiparamètre est stable** pour la distance d'entrelacement par
-correspondance.
-
-Autrement dit : **choisir un $\lambda$, un $r$ ou un $K$ est le mauvais objet,
-pas seulement un mauvais réglage.** Une architecture doit consommer le treillis,
-pas une coupe. C'est un argument de preuve, pas de banc d'essai, et c'est la
-raison de fond du mixage d'ordres.
-
-Ce que le projet ajoute à cette littérature : l'objet y est le plus souvent
-approché, calculé sur quelques milliers de points, et sert à produire un
-**invariant** que l'on vectorise (code-barres, paysages, images de
-persistance). Ici il est exact, à $10^{5}$ points par trame, et il n'est pas
-vectorisé : **il sert de squelette de calcul à un réseau.**
+Le réseau ne lira qu'un nombre fini de coupes et de cartes. Leur condensation,
+leur sélection et leur projection vers les retours sont **de nouveaux
+opérateurs** : il faut définir leurs domaines, leurs coûts et leur comportement
+sous décimation ou re-quantification. La justification de plusieurs K vient
+des compromis sensibilité aux structures minces / résistance aux ponts de
+retours décrits par Morse HGP ; leur valeur pour l'apprentissage reste une
+question expérimentale.
 
 ## 3. Ce que la tour publie, champ par champ
 
@@ -68,8 +60,8 @@ Pour chaque ordre $K = 1 \ldots K_{\max}$ :
   en fraction entière), parents en CSR — zéro parent est une naissance, un est
   une continuation, **deux ou plus une multifusion** —, successeurs et
   contributions datées ;
-- les **populations** : par nœud, l'ensemble des points couverts, séparé en
-  intérieur strict et coquille ;
+- les **populations** : contributions par boule, séparées en intérieur strict
+  et coquille ; l'ensemble couvert par un nœud à une coupe se reconstruit ;
 - la **carte verticale** : l'image du nœud d'ordre $K$ dans l'histoire d'ordre
   $K-1$, au niveau de création fermé du nœud.
 
@@ -97,7 +89,7 @@ C'est la lecture utile de la section précédente.
 | un **graphe de fusion** pondéré par le rayon de fusion | les événements de fusion | graphe $k$-NN, fenêtre sur sérialisation |
 | une **ultramétrique** sur les nœuds | le niveau de fusion, via l'équivalence dendrogramme–ultramétrique | encodage de position relative métrique |
 | un **axe d'ordre** $K$ à cartes naturelles | les verticales | *rien d'équivalent* |
-| des **scalaires structurels exacts** | niveaux, arités, degrés de fusion | variables et cibles gratuites |
+| des **scalaires structurels exacts** | niveaux, arités, degrés de fusion | variables et cibles à exporter |
 
 ## 5. Les ordres de grandeur, pour dimensionner
 
@@ -121,10 +113,10 @@ Ventilation pour une trame sans sol de 39 885 sites, $K \leq 5$ :
 | 5 | 576 371 | 341 081 | 235 290 |
 
 Ces nombres ne sont **pas** une contrainte de séquence. Un U-Net ne consomme
-pas tous les nœuds : il consomme $L$ coupes, soit environ $160\,000$ unités
-tous niveaux confondus sur une trame brute — l'ordre de grandeur d'un U-Net 3D
-ordinaire. Voir [`ARCHITECTURE.md`](ARCHITECTURE.md) § 2, qui corrige
-explicitement le cadrage contraire.
+pas tous les nœuds : le budget illustratif de $L$ coupes est d'environ
+$160\,000$ unités tous niveaux confondus sur une trame brute. La tour FULL
+reste toutefois matérialisée avant ces coupes et a son propre coût. Voir
+[`ARCHITECTURE.md`](ARCHITECTURE.md) § 2.
 
 ## 6. Ce que la tour ne fournit pas encore
 
@@ -132,7 +124,8 @@ Chacun de ces points est un poste de travail de la phase 0, pas une lacune de
 conception :
 
 - **aucune sérialisation consommable** : la sortie publiée est un JSON de
-  compteurs et un condensé. Le raccord naturel est le `CertifiedTowerInput` de
+  compteurs et un condensé. Un pilote peut viser un adaptateur expérimental
+  vers `CertifiedTowerInput` de
   `morsehgp3d/`, dont le réducteur exact — vote pondéré du § 9.1 par
   `SimplexPointWeighting::inverse_radius`, sélections par excès de masse,
   coupe $\lambda$ et rayon DBSCAN — **attend déjà un producteur** ;
@@ -153,8 +146,8 @@ condensé reproductible. Elle se calcule une fois et se met en cache. Aucun
 tokenizer appris n'a cette propriété, et c'est ce qui rend l'étude de
 substitution exactement reproductible.
 
-**L'équivariance.** Rotations, translations et changements d'échelle uniformes
-**commutent** avec la tour : elle les suit sans recalcul. Seules les
-augmentations de densité et d'occultation la changent — et ce sont précisément
-celles dont le pré-entraînement a besoin, donc on pré-calcule une banque de
-vues décimées par trame.
+**L'équivariance géométrique et la quantification.** L'objet mathématique
+suit isométries et homothéties avec reparamétrage des rayons. La v9 travaille
+sur une grille u18 à 1 mm : une rotation ou une homothétie suivie d'une
+nouvelle quantification peut modifier les événements. On recalcule donc la
+tour des vues augmentées et on mesure leur dérive.

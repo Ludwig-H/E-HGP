@@ -39,47 +39,51 @@ mesure de la phase 2.
 
 La géométrie d'un nœud est $P_v = \bigcup_b \mathrm{conv}(S_b)$, réunion des
 enveloppes convexes des supports des boules qui le composent. $P_v$ est
-**ouvert, non convexe et possiblement multicouche** : on ne le remplace jamais
-par $\mathrm{conv}(P_v)$.
+**une union finie de supports convexes fermés de dimensions mêlées** : ce
+squelette de témoins n'est pas automatiquement une surface physique fermée,
+et on ne le remplace pas par $\mathrm{conv}(P_v)$.
 
 **Signature d'arité** — les proportions de supports d'arité $2$, $3$ et $4$,
-brutes et pondérées par la mesure. C'est une **signature de dimension locale,
-exacte et gratuite** : une structure filiforme est portée surtout par des
-arêtes diamétrales, une surface par des triangles aigus, un volume par des
-tétraèdres. Aucun modèle par points n'y a accès et la tour la publie déjà.
+brutes et pondérées par la mesure. C'est une **signature exacte des supports
+critiques**, pas une mesure automatique de la dimension physique de l'objet :
+arêtes, triangles et tétraèdres peuvent contribuer au même nœud. La tour publie les supports
+nécessaires à cette signature, sous réserve de leur export.
 Trois flottants : c'est le premier canal à tester.
 
-**Moments de la mesure surfacique** jusqu'à l'ordre 3 — longueurs pour les
-arités 2, aires pour 3 et 4, en forme close par simplexe. Donne aussi un repère
-propre plus stable sous décimation qu'une boîte englobante, laquelle dépend de
-deux points extrêmes et donc du hasard de l'échantillonnage.
+**Moments des supports par dimension** jusqu'à l'ordre 3 — longueurs des
+arêtes, aires des triangles et volume des tétraèdres en canaux distincts.
+Une aire de bord pour les tétraèdres exige de définir et calculer ce bord.
+Ces moments peuvent donner un repère propre. Comparer leur stabilité sous
+décimation à celle d'une boîte englobante, qui dépend des points extrêmes.
 
-**Histogramme sphéro-radial** de la mesure surfacique sur
-$\mathbb{S}^2 \times \mathbb{R}$ — conserve toute la surface sans sélectionner
-une couche par direction, donc accepte les trous et les intersections
-multiples. C'est ce qu'une fonction radiale $\rho(u)$ ne sait pas faire : depuis
-un centre, une direction peut ne rencontrer aucune couche, ou plusieurs.
+**Histogramme sphéro-radial** des supports bidimensionnels ou des surfels
+observés, explicitement distingués, sur $\mathbb{S}^2 \times \mathbb{R}$.
+Il résume les couches présentes dans la mesure choisie, y compris plusieurs
+intersections par direction. Il ne reconstitue pas la surface physique cachée.
 
 **Grille de distances à sondes fixes** — $8^3 = 512$ sondes,
 $D_P[j] = d(c + s\,b_j, P_v)/s$, la distance étant prise aux primitives
-entières. Deux propriétés la recommandent : la **stabilité**,
-$\left\Vert d_P - d_Q \right\Vert_\infty = d_H(P, Q)$, et l'**union**,
-$d_{P \cup Q} = \min(d_P, d_Q)$, qui permet de calculer le code d'une fusion
-depuis ceux des parents. Son défaut est connu et documenté par la présentation
-elle-même : une grille peut manquer un petit élément. D'où les deux
-descripteurs précédents, et la règle de garder les primitives et les niveaux
-fins.
+entières. La distance continue vérifie
+$\left\Vert d_P-d_Q\right\Vert_\infty=d_H(P,Q)$ ; pour un repère
+$(c,s)$ **commun**, 512 sondes ne donnent que
+$\max_j|D_P[j]-D_Q[j]|\le d_H(P,Q)/s$,
+avec des collisions possibles. L'identité d'union
+$d_{P\cup Q}=\min(d_P,d_Q)$ s'applique aux **mêmes requêtes physiques** :
+des grilles de parents recentrées ou renormalisées ne se combinent pas case
+à case, et une fusion peut ajouter de nouveaux supports. Une grille finie peut
+manquer un petit élément. Garder donc les primitives et les niveaux fins,
+et comparer la grille aux descripteurs moins coûteux.
 
 ## 3. Famille 2 — physique
 
-Rayon de naissance en mètres ; dimensions de la boîte ; aire de la mesure
-surfacique ; épaisseur (plus petite valeur propre des moments d'ordre 2) ;
+Rayon de naissance en mètres ; dimensions de la boîte ; aires des supports
+bidimensionnels ou des surfels observés, identifiées séparément ; épaisseur
+(plus petite valeur propre des moments d'ordre 2) ;
 centre en repère capteur ; hauteur au-dessus du capteur ; **portée** et azimut ;
 nombre de retours couverts, séparé en intérieur et coquille.
 
-La portée doit être un canal explicite : c'est le paramètre de nuisance de
-l'hypothèse d'invariance, et un modèle qui ne l'a pas ne peut pas apprendre à
-s'en défaire.
+La portée doit être testée comme canal explicite : elle peut aider à séparer
+effet de l'acquisition et structure locale. Son apport propre est à ablater.
 
 ## 4. Famille 3 — filtration
 

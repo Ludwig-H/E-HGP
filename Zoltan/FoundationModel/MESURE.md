@@ -36,22 +36,26 @@ Sept règles s'appliquent partout.
 
 ## 2. Axe 0 — sondes sans apprentissage
 
-Rapides, sur CPU, à faire avant toute chose. Elles disent si l'information est
-**présente**, indépendamment de tout modèle.
+Sondes à réaliser avant HGP-UNet. Certaines sont sans étiquette ; l'oracle
+d'instance, la pureté et XGBoost utilisent des étiquettes ou un ajustement
+appris. Leur protocole est défini ici, sans exécution dans l'audit présent.
 
 ### 0.1 Plafond d'oracle, stratifié
 
 Pour chaque instance annotée $G$ : $\max_v \mathrm{IoU}(S_v, G)$ sur les nœuds
-de la tour. À publier **par classe, par tranche de portée et par taille
-d'objet**.
+de la tour. C'est le **diagnostic de proposition par nœud unique**, à publier
+par classe, portée et taille. Il ne borne ni une sortie point avec connexion
+de saut, ni la sélection de plusieurs nœuds suivie du vote pondéré. Ajouter
+un oracle soumis à la vraie antichaîne, aux mêmes poids § 9.1 et au même
+budget de jetons, puis un oracle du décodeur point avec les mêmes matrices.
 
 Témoins sur exactement le même oracle : partition en voxels à plusieurs tailles,
 superpoints de SPT, HDBSCAN, DBSCAN. C'est la seule façon de dire ce que la
 tour ajoute *en tant que partition*, avant tout apprentissage.
 
-C'est une **porte de réfutation, jamais de promotion** : un plafond haut ne
-prouve rien sur le modèle appris ; un plafond bas prouve que le modèle appris
-ne pourra pas.
+**C'est une porte de réfutation pour une tête qui rend un seul nœud par
+instance** : un plafond haut ne prouve rien sur le modèle appris ; un plafond
+bas n'écarte pas les décodeurs plus expressifs ci-dessus.
 
 ### 0.2 Pureté des nœuds
 
@@ -196,8 +200,9 @@ sont souvent la vraie information.
 
 À cela s'ajoutent deux comparaisons de chemin, propres à l'objet :
 **E-global / E-rang / E-persistance / E-relative** pour la règle de
-contraction, et **horizontal / vertical / diagonal iso-densité** pour la
-direction dans le treillis.
+contraction, et **horizontal / vertical / anti-diagonal emboîtant** pour le
+pooling. L'iso-densité est une comparaison latérale entre ordres, pas un
+chemin de pooling.
 
 ## 4. Axe 2 — témoins négatifs
 
@@ -216,7 +221,8 @@ publier.
 ### T2 — canal de densité seul
 
 Donner $\hat f_K(x) = K / (n \omega_3 r_K(x)^{3})$ comme simple variable par
-point à un PTv3 **inchangé**, pour quelques $K$. Si cela capte l'essentiel du
+point à un PTv3 **inchangé**, pour quelques $K$ avec $r_K(x)>0$ ; publier la
+convention des voisins distincts et traiter les zéros séparément. Si cela capte l'essentiel du
 gain, alors la tour n'apporte rien au-delà d'un canal de densité, et il faut le
 dire. **C'est le témoin le plus tranchant et le moins cher du protocole ; il
 doit être fait en premier.**
@@ -246,14 +252,14 @@ avant de mesurer est ce qui transforme un écart en explication.
 | # | prédiction | pourquoi |
 | --- | --- | --- |
 | P1 | le gain **croît avec la portée** | c'est là que l'échelle métrique fixe est la plus fausse |
-| P2 | le gain **croît en transfert inter-capteurs** (64 nappes $\to$ 32, et retour) | il n'y a aucune constante à réaccorder |
+| P2 | le gain **croît en transfert inter-capteurs** (64 nappes $\to$ 32, et retour) | les hyperparamètres HGP sont gelés ; vérifier que la structure transfère sans réaccord |
 | P3 | le gain **croît quand les étiquettes se raréfient** ($100 \to 10 \to 1\,\%$) | un a priori structurel vaut le plus quand les données manquent |
 | P4 | le gain **croît sous corruption** (pluie, brouillard, neige) | le Théorème 3 chiffre la résistance aux ponts de bruit en fonction de $K$ |
 | P5 | le gain sur les classes **filiformes** dépend du calendrier de $K$, et **disparaît si l'on retire $K = 1$** | HGP retarde la naissance des structures minces à $K$ élevé |
 | P6 | le gain est **faible ou nul** en champ proche, dense, uniforme, à étiquetage complet | il n'y a là aucune variation d'échelle à absorber |
 | P7 | l'arbre **condensé** est nettement plus stable sous décimation que l'arbre brut | il ne garde que les événements qui ont de la masse, donc ceux qui survivent à une perte de points |
 | P8 | **FM-6 bat FM-5** : une cible dense d'agrégat multi-trames apprend mieux qu'un simple accord entre deux vues pauvres | un accord entre deux vues peut être satisfait par une représentation triviale, une cible dense non |
-| P9 | le plus petit $K$ qui sépare un objet de son support **croît avec la portée** | le contact se fait par moins de retours quand la densité tombe |
+| P9 | le plus petit $K$ qui sépare un objet de son support **varie avec la portée**, sans signe imposé | raréfaction du contact et perte de l'objet agissent en sens opposés ; mesurer les deux |
 
 **P6 est la plus importante.** Si l'on gagne uniformément, y compris là où la
 théorie ne prédit rien, le gain vient probablement du budget de calcul ou d'un

@@ -8,8 +8,7 @@ de mesure.
 
 ## 1. Le verrou : toute architecture 3D code en dur une échelle métrique
 
-Un encodeur 3D contient exactement deux endroits où une constante métrique
-entre :
+Deux choix d'échelle reviennent souvent dans un encodeur 3D :
 
 - **l'échelle de sous-échantillonnage** — la taille de voxel et les pas
   (MinkowskiNet, SparseConv), la liste de rayons et le $k$ (PointNet++,
@@ -19,12 +18,12 @@ entre :
   **fenêtre de taille fixe sur une courbe remplissante** (PTv3 sérialise sur
   Z-order et Hilbert, puis découpe en *patches* non recouvrants).
 
-Ces deux constantes sont les seules choses qu'un modèle 3D ne peut pas
-apprendre et qu'il faut réaccorder à chaque changement de capteur, de portée ou
-de domaine. Elles sont aussi la raison pour laquelle un LiDAR automobile est
-difficile : la densité décroît en $1/d^{2}$, donc une boule de rayon fixe
-contient une centaine de retours à $5$ m et trois à $50$ m. **Un rayon fixe
-n'est pas une échelle fixe.**
+Ces choix peuvent devoir être réaccordés quand le capteur, la portée ou le
+domaine changent ; la tour HGP propose d'en dériver une partie des retours.
+Dans un LiDAR automobile, la densité de retours dépend de la portée, de
+l'incidence et des occultations ; la loi $1/d^{2}$ n'en est qu'une approximation
+sur des surfaces favorables. **Un rayon fixe n'assure pas une population
+comparable à toutes les portées.**
 
 ## 2. Comment la littérature récente rattrape le problème
 
@@ -59,41 +58,20 @@ SemanticKITTI avec les seules étiquettes sémantiques. Autrement dit : une part
 substantielle de la structure d'instance est déjà dans la géométrie. C'est un
 argument fort pour le projet — et un témoin exigeant.
 
-## 3. Ce que la tour est, mathématiquement
+## 3. Ce que la tour Morse HGP apporte, mathématiquement
 
-La tour n'est pas un heuristique de regroupement de plus. Pour tout
-$(K, r)$ elle donne les composantes connexes de
-$L_K(r) = \lbrace y : |B(y, r) \cap \mathcal{X}| \geq K \rbrace$,
-c'est-à-dire **le $\pi_0$ exact d'une bifiltration par degré**. Le
-Théorème 2 du manuscrit identifie ces composantes aux amas discrets de forte
-densité de l'estimateur $K$-NN, niveau par niveau, et le Théorème 6 les porte
-sur la mosaïque de Delaunay d'ordre $K$, ce qui les rend calculables.
+Pour tout $(K,r)$, la tour donne les composantes de
+$L_K(r)=\lbrace y:|B(y,r)\cap\mathcal X|\geq K\rbrace$ selon la
+spécification Morse HGP 3D. Le Théorème 2 relie les K-polyèdres aux amas
+discrets de forte densité de l'estimateur K-NN ; les minima Gabriel et la
+mosaïque d'ordre K rendent leur histoire calculable. FULL publie événements,
+populations et cartes verticales, à niveaux exacts.
 
-Cet objet est connu en analyse topologique des données sous le nom de
-**bifiltration degré-Rips** (Lesnick et Wright, 2015), décrite comme
-*parameter-free and density-sensitive*. Le résultat qui compte ici est celui de
-Rolle et Scoccola (JMLR 2024) :
-
-> Prendre certaines **tranches à un paramètre** de degré-Rips redonne les
-> méthodes connues de regroupement par densité, **mais ces méthodes sont
-> instables** ; l'objet **multiparamètre**, lui, est stable pour la distance
-> d'entrelacement par correspondance.
-
-C'est décisif pour l'architecture, et c'est un argument de preuve et non de
-banc d'essai :
-
-1. **choisir une coupe $\lambda$ ou un rayon $r$ est le mauvais objet**, pas
-   seulement un mauvais réglage. Une architecture qui consomme une tranche
-   hérite de son instabilité ;
-2. **la stabilité est du côté du treillis entier.** Donner au modèle plusieurs
-   ordres $K$ n'est pas un enrichissement facultatif, c'est la condition pour
-   que l'entrée soit stable.
-
-Ce que le projet ajoute à cette littérature : l'objet y est en général
-approché, ou calculé sur des nuages de quelques milliers de points, et sert à
-produire un **invariant** (code-barres, paysage, image de persistance) que l'on
-vectorise. Ici il est calculé **exactement** sur des trames de $10^{5}$ points,
-et il n'est pas vectorisé : il sert de **squelette de calcul** à un réseau.
+L'architecture proposée lit plusieurs historiques K et plusieurs niveaux r.
+Ce choix préserve des alternatives de sensibilité et de robustesse que perdrait
+une coupe unique ; il ne prouve pas, à lui seul, que les coupes ou jetons
+choisis par le réseau soient stables ou utiles. C'est l'objet des substitutions
+et des témoins négatifs ci-dessous.
 
 ## 4. La table de substitution
 
@@ -115,9 +93,10 @@ La dernière ligne mérite un mot. Sonata a montré que la SSL 3D s'effondre par
 que **la géométrie est l'entrée** : prédire une coordonnée masquée se résout
 par interpolation locale. Un rayon de fusion entre deux composantes est au
 contraire une grandeur de **percolation** — il dépend du goulot de densité
-entre elles, donc d'une intégration sur tout l'espace intermédiaire. Il n'est
-pas lisible localement. Là où Sonata *atténue* le raccourci en brouillant
-l'information spatiale, la tour fournit des cibles où il **n'existe pas**.
+entre elles, donc d'une intégration sur tout l'espace intermédiaire. Il peut
+porter une information non locale, mais certains cas simples se résolvent
+localement ; les prétextes HGP doivent battre un témoin géométrique local et
+masquer les variables qui révèlent déjà la cible.
 
 ## 5. Ce qui reste à vérifier dans cette section
 
@@ -125,11 +104,9 @@ l'information spatiale, la tour fournit des cibles où il **n'existe pas**.
   conception** ; elle ne remplace pas une recherche exhaustive au moment de la
   soumission. Les chiffres cités proviennent des publications et n'ont pas été
   reproduits ici.
-- Le lien « tour HGP $=$ $\pi_0$ exact d'une bifiltration de type degré-Čech »
-  est une lecture, pas un théorème publié du manuscrit. Il doit être écrit
-  proprement, avec la correspondance entre la construction de Gabriel et la
-  définition degré-Rips, avant toute revendication. C'est un travail de
-  rédaction mathématique, pas une expérience.
+- Le raccord exact entre les objets FULL v9, les facettes projectables du
+  § 9.1 et les coupes consommées par HGP-UNet doit être spécifié et testé.
+  FULL seul ne livre pas encore les poids et matrices du tokenizer.
 - Les repères hérités sur SemanticKITTI ($73{,}1$ pour DOS, base reproductible
   à $68{,}0$–$70{,}3$) n'ont jamais été reproduits dans ce dépôt et doivent
   l'être avant de servir de cible.

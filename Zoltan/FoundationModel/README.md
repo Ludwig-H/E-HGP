@@ -13,42 +13,39 @@ public_status=not_claimed
 
 ## La thèse, en un paragraphe
 
-Tout encodeur 3D contient une **échelle métrique posée à la main** : la taille
-de voxel du *grid pooling*, la liste de rayons, le $k$, la taille de *patch*
-sur une courbe remplissante, le nombre de niveaux de superpoints. C'est la
-seule chose qu'un modèle 3D ne peut pas apprendre, et c'est exactement ce qui
-casse quand le capteur, la portée ou le domaine changent — la densité LiDAR
-décroît en $1/d^2$, donc une boule de rayon fixe contient cent retours à $5$ m
-et trois à $50$ m. Les modèles de fondation 3D de 2025–2026 ne suppriment pas
-cette constante : ils en rattrapent les effets par du rééchelonnage
+De nombreux encodeurs 3D fixent une **échelle métrique** : taille de voxel du
+*grid pooling*, liste de rayons, $k$, taille de *patch* sur une courbe
+remplissante ou nombre de niveaux de superpoints. Ces choix peuvent demander
+un réaccord quand changent le capteur, la portée ou le domaine. La densité des
+retours LiDAR varie avec la portée, l'incidence et l'occultation ; un rayon
+fixe n'assure donc pas une population comparable partout. Des modèles de
+fondation 3D de 2025–2026 traitent cette difficulté par du rééchelonnage
 (*Perceptual Granularity Rescale*, Utonia), de l'augmentation par vues éparses
 (Vernata) et du brouillage de l'information spatiale (Sonata).
 
-**La tour HGP fournit à la place une échelle canonique, dérivée des données,
-et prouvée stable en tant qu'objet multiparamètre.** On ne l'ajoute donc pas à
-une architecture : **on la substitue, un par un, aux composants qui portent la
-constante.**
+**La tour HGP fournit une structure exacte à deux paramètres, dérivée des
+retours observés.** Sa traduction en coupes et jetons stables est un objectif
+de conception à vérifier. Le protocole la substitue, un composant à la fois,
+aux choix d'échelle du réseau de référence.
 
-## Les trois faits qui portent la conception
+## Les trois points de départ de la conception
 
 **1. L'objet est exact et théorémique.** Le Théorème 2 du manuscrit identifie
 les $K$-polyèdres aux amas discrets de forte densité de l'estimateur $K$-NN,
 niveau par niveau. Ce n'est pas un regroupement de plus : c'est l'estimation
 exacte d'un modèle statistique.
 
-**2. Une coupe est le mauvais objet, pas un mauvais réglage.** La tour est le
-$\pi_0$ d'une bifiltration par degré. Rolle et Scoccola (JMLR 2024) montrent
-que ses **tranches à un paramètre sont instables**, alors que l'objet
-**multiparamètre est stable**. Donner plusieurs ordres $K$ au modèle n'est donc
-pas un enrichissement facultatif : c'est la condition pour que l'entrée soit
-stable. C'est un argument de preuve, pas de banc d'essai.
+**2. La tour est plus riche qu'une coupe.** Morse HGP 3D publie pour
+chaque K la forêt complète en r, puis des cartes entre ordres. Une seule
+coupe perd les naissances, fusions et alternatives en K que le réseau pourrait
+utiliser. L'intérêt de plusieurs K et la stabilité des coupes retenues sont
+à mesurer dans le tokenizer proposé.
 
-**3. Les cibles de la tour échappent au raccourci géométrique.** Sonata a
-établi que la SSL 3D s'effondre sur des indices spatiaux de bas niveau, parce
-que la géométrie est l'entrée. Le rayon auquel deux composantes fusionnent est
-une grandeur de **percolation** : il dépend du goulot de densité entre elles,
-donc il n'est pas lisible localement. Là où Sonata *atténue* le raccourci, la
-tour fournit des tâches où il **n'existe pas**.
+**3. Les cibles de la tour sont structurelles.** Rayons de fusion,
+persistance et profils en K sont des cibles exactes issues de FULL. Certaines
+restent prédictibles localement — à K=1, la fusion de deux points a pour rayon
+la moitié de leur distance. Le protocole contrôle donc les raccourcis et les
+variables qui révèlent déjà la cible.
 
 ## L'architecture, en une phrase
 
@@ -70,10 +67,11 @@ prétextes dérivés de la filtration.
       points etiquetes
 ```
 
-## Les six documents
+## Les documents
 
 | document | ce qu'on y trouve |
 | --- | --- |
+| [`AUDIT_V9_ET_ARCHITECTURE_20260926.md`](AUDIT_V9_ET_ARCHITECTURE_20260926.md) | audit transversal v9 → modèle : contrat d'export, jetons, cartes entre K, coût et portes de décision |
 | [`OBJET.md`](OBJET.md) | ce que la tour est et publie ; les six primitives qu'une architecture y lit |
 | [`ETAT_DE_LART.md`](ETAT_DE_LART.md) | le verrou, comment la littérature le rattrape, et **la table de substitution** |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | HGP-UNet : la condensation, le chemin dans le treillis, les six composants, les conceptions écartées |
@@ -81,7 +79,7 @@ prétextes dérivés de la filtration.
 | [`JETON.md`](JETON.md) | les variables de nœud, cinq familles, une seule normalisée |
 | [`MESURE.md`](MESURE.md) | la doctrine de substitution, les **témoins négatifs**, les prédictions pré-enregistrées, les lois d'échelle |
 | [`PLAN.md`](PLAN.md) | six phases, ce que chacune produit, ce qui l'annule |
-| [`RISQUES.md`](RISQUES.md) | quatre risques majeurs, pistes fermées |
+| [`RISQUES.md`](RISQUES.md) | six risques majeurs, pistes fermées |
 | [`GLOSSAIRE.md`](GLOSSAIRE.md) | les termes |
 
 ## Comment on mesurera l'apport
@@ -114,22 +112,20 @@ corrections valent mieux que les erreurs :
 
 1. **« Sélectionner quelques milliers de jetons parmi 16 M nœuds. »** Faux
    cadrage : un U-Net lit $L$ coupes, soit l'ordre d'un U-Net 3D ordinaire.
-2. **« Le chemin diagonal iso-densité est le bon défaut. »** Faux : faire
-   croître $K$ avec $r$ est **anti-monotone**, les ensembles ne s'emboîtent
-   pas, donc aucun pooling n'existe entre ses niveaux. Grossir, c'est
-   $r \uparrow$ et $K \downarrow$. Cette correction est ce qui a rendu OM
-   **structurel** : aucun chemin monotone unique ne voit un objet mince et
-   lointain.
+2. **« Le chemin diagonal iso-densité est le bon défaut. »** Faux comme
+   contrat général de pooling : faire croître $K$ avec $r$ ne garantit pas
+   l'emboîtement. Les chemins garantis grossissent par $r \uparrow$ et
+   $K \downarrow$. OM permet de comparer des lectures latérales, en
+   particulier pour les objets minces et lointains.
 3. **« Les augmentations rigides sont gratuites. »** Vrai de l'objet, faux du
    moteur : la quantification à 1 mm casse la commutation. On recalcule, et la
    dérive devient une mesure utile.
 
-Et une limite de fond, qui manquait : **la densité ne sépare pas ce qui se
-touche.** Une voiture posée sur l'asphalte est density-connectée au sol ; aucun
-$(K, r)$ ne les sépare, là où un superpoint de SPT y parvient par les normales.
-La parade de principe est l'axe $K$ — un contact ténu est un pont de bruit, et
-le chapitre 7 du manuscrit dit que $K$ y résiste — mais elle doit être
-**mesurée**, pas supposée.
+Et une limite de fond, qui manquait : **un contact dense peut relier deux
+objets dans la tour**. Selon les retours, certains ordres $K$ peuvent rompre
+ce pont avant disparition de l'objet, ou aucun ordre mesuré ne le peut. Il
+faut mesurer ce cas aux contacts avec le sol et comparer les signaux de
+normales et de visibilité disponibles au réseau.
 
 ## Ce qui est revendicable
 
@@ -137,15 +133,14 @@ Aucune brique n'est nouvelle isolément. Ce qui peut l'être :
 
 1. remplacer l'échelle métrique posée à la main par une **échelle canonique
    dérivée des données**, et montrer par substitution ce que cela vaut ;
-2. utiliser un **objet multiparamètre prouvé stable** là où l'état de l'art
-   utilise une tranche instable, avec $K$ comme bouton sensibilité/robustesse
-   apprenable ;
-3. un **encodage de position relative ultramétrique**, invariant de portée par
-   construction ;
-4. une famille de **prétextes sans raccourci géométrique**, aux cibles exactes
-   et gratuites ;
-5. un **décodeur démontré** (Proposition 7) au lieu d'une interpolation choisie
-   à la main ;
+2. utiliser les **forêts exactes et leurs cartes entre K** comme structure
+   de calcul, puis mesurer si le mixage des ordres sert la perception ;
+3. un **encodage de position relative ultramétrique**, invariant sous
+   homothétie commune des rayons positifs, à tester sous raréfaction LiDAR ;
+4. une famille de **prétextes structurels exacts**, avec raccourcis et
+   coût de préparation mesurés ;
+5. un **décodeur fondé sur le vote démontré** (Proposition 7), après export
+   des incidences et poids nécessaires ;
 6. une **tête d'instance qui rend une antichaîne par construction** — le
    programme dynamique du § 5.2 à coût appris — donc sans suppression non
    maximale, sans appariement et sans seuil de recouvrement.

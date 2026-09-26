@@ -55,9 +55,9 @@ fraction $\alpha$ de la masse du parent**. Sinon les branches légères tombent 
 leurs points reçoivent $\hat\lambda_x$ = le niveau de l'événement — et la
 branche lourde garde l'identité du parent.
 
-$\alpha$ est un **rapport**, donc sans dimension, donc transférable. Un seuil en
-nombre de points est interdit : il ne transfère ni d'un capteur à l'autre, ni du
-champ proche au champ lointain.
+$\alpha$ est un **rapport** sans dimension ; sa transférabilité reste à
+tester. Un seuil en nombre de points dépend directement de la densité des
+retours et ne convient pas comme défaut inter-capteurs.
 
 ### 2.3 Multifusions
 
@@ -108,6 +108,12 @@ Quatre règles, toutes appliquées **sur l'arbre condensé** :
 | `E-persistance` (défaut) | persistance croissante |
 | `E-relative` | niveau normalisé $r / r_K(x)$ |
 
+Pour `E-relative`, définir $r_K(x)$ sur les sites uniques et imposer un
+dénominateur positif : si la convention des voisins inclut $x$ et donne
+$r_1(x)=0$, utiliser la distance au plus proche site **distinct** ; pour une
+trame à un seul site, déclarer cette règle indisponible et employer `E-global`.
+Publier la convention et le nombre de replis.
+
 ### 3.3 Départage, et pourquoi il n'est pas un détail
 
 Les niveaux sont des rationnels exacts, et **beaucoup d'événements partagent
@@ -144,8 +150,14 @@ du § 9.1 poussent cette partition en une partition de l'unité sur les points :
 
 $P_1[x, v] = \sum_{\tau \in v,\ \tau \ni x} S_\tau / T_x, \qquad \sum_v P_1[x, v] = 1.$
 
-C'est ici, et seulement ici, que le recouvrement pour $K \geq 2$ se manifeste.
-Le nombre de non-zéros de $P_1$ est la seule statistique de coût à surveiller.
+Cette identité suppose $T_x>0$ et une antichaîne qui couvre toutes les
+facettes incidentes retenues. Si un retour n'a pas de facette au niveau choisi
+ou perd sa branche à la condensation, il conserve un jeton de repli/connexion
+de saut explicitement compté : aucun retour ne disparaît en silence. C'est
+ici que le recouvrement pour $K \geq 2$ se manifeste. Publier les non-zéros
+de $P_1$, la masse $M_v=\sum_xP_1[x,v]$ et la couverture par portée et K.
+Une moyenne de jeton utilise $\sum_xP_1[x,v]h_x/M_v$ lorsque $M_v>0$ ; la
+somme brute encode également la population et se mesure séparément.
 
 ### 4.2 Niveau $\ell$ vers niveau $\ell+1$ — dure
 
@@ -154,8 +166,12 @@ ancêtre grossier. $P_{\ell+1}$ est une matrice $0/1$ à une entrée par ligne.
 
 ### 4.3 Ordre $K$ vers ordre $K-1$ — dure
 
-La carte verticale, déjà publiée par le moteur et déjà orientée dans le sens du
-grossissement.
+La carte verticale FULL est publiée au niveau fermé de création. Deux
+antichaînes adaptatives de K et K−1 ne possèdent une application dure que si
+chaque nœud source a une image contenue dans un unique nœud cible aux rayons
+retenus. Construire ce quotient et vérifier sa commutation avec les cartes
+FULL ; sinon publier une incidence sparse entre branches pour OM, sans parent
+unique inventé.
 
 ### 4.4 Dépliage
 
@@ -164,13 +180,16 @@ retour final aux points est PUR, c'est-à-dire $P_1$ lui-même.
 
 ## 5. Graphe de fusion et biais ultramétrique
 
-Par niveau : sommets = nœuds du niveau ; arête $(u, v)$ si $u$ et $v$ fusionnent,
-pondérée par le niveau de fusion $r_{uv}$.
+Par niveau : sommets = nœuds du niveau. Définir une **relation éparse** liée
+au prochain événement de fusion, avec traitement atomique des multifusions,
+identité et budget des arêtes publiés. La relation « fusionnent un jour »
+formerait un clique dans chaque arbre et ne suffit pas comme spécification.
 
-Le voisinage d'attention est le voisinage à $m$ sauts dans ce graphe, ou tous
-les nœuds fusionnant avant un seuil relatif. Le biais est
-$b_{uv} = \varphi(\log r_{uv} - \log r_u)$, normalisé par l'échelle propre du
-nœud — donc invariant de portée.
+Le voisinage d'attention est borné par un budget déclaré. Le biais
+$b_{uv}=\varphi(\log r_{uv}-\log r_u)$ garde un sens relatif sous
+homothétie commune des rayons positifs ; l'invariance à une raréfaction des
+retours avec la portée reste à mesurer. Définir séparément le code des niveaux
+à rayon zéro, notamment à K=1.
 
 $r_{uv}$ est une **ultramétrique** (équivalence dendrogramme–ultramétrique,
 chapitre 3 du manuscrit) : $r_{uw} \leq \max(r_{uv}, r_{vw})$. L'implémentation
@@ -183,8 +202,9 @@ $K_{\max}$ est fixé **par la mesure**, pas par le domaine du moteur : la porte
 défaut, $K \in \lbrace 1, 2, 3, 5 \rbrace$ en branches parallèles, fusionnées
 latéralement par les cartes verticales.
 
-$K = 1$ n'est pas optionnel : c'est le Single-Linkage, le seul ordre où un
-objet mince et lointain naît tôt.
+$K = 1$ reste le témoin de sensibilité maximale : c'est le Single-Linkage.
+Les ordres qui préservent effectivement les objets minces et lointains seront
+choisis par la mesure.
 
 ## 7. Vues augmentées
 
@@ -199,11 +219,13 @@ FM-6, la tour de l'**agrégat multi-trames** recalé par l'odométrie.
 
 ## 8. Format et lots
 
-Par trame et par ordre : l'arbre condensé en CSR, les niveaux (numérateur et
-dénominateur entiers, plus leur logarithme en flottant pour le réseau), les
-populations en CSR de `PointId`, les cartes verticales, les $L$ matrices de
-pooling en CSR, le graphe de fusion en CSR avec ses $r_{uv}$, et
-$\hat\lambda_x$ par point.
+Par trame et par ordre : l'arbre condensé en CSR, les niveaux exacts et leur
+code flottant pour le réseau, les populations en CSR de sites uniques, les
+cartes verticales, les $L$ matrices de pooling en CSR, le graphe de fusion
+borné en CSR avec ses $r_{uv}$, et $\hat\lambda_x$ par retour couvert.
+Conserver la table **retour original → site unique**, les attributs capteur,
+les retours retirés par un éventuel masque de sol, la provenance de la vue et
+les condensés du brut, de la préparation, de FULL et de l'export.
 
 Mise en lots : concaténation avec décalages et matrices diagonales par blocs,
 comme tout réseau épars. Les comptes par niveau étant des bornes supérieures,
@@ -221,14 +243,22 @@ du dépôt :
 1. **Déterminisme** : deux exécutions, même condensé.
 2. **Réétiquetage** : permuter les `PointId`, même sortie — la porte qui
    attrape un départage illicite.
-3. **Partition de l'unité** : $\sum_v P_1[x, v] = 1$ pour tout point couvert.
+3. **Couverture et partition de l'unité** : chaque retour retenu a soit
+   $\sum_v P_1[x,v]=1$, soit un repli explicite de masse 1 ; aucun orphelin.
 4. **Emboîtement** : chaque nœud du niveau $\ell$ a exactement un ancêtre au
    niveau $\ell+1$.
 5. **Naturalité après condensation** : l'image d'une fusion est la fusion des
    images.
 6. **Totalité** : aucune trame du corpus ne sort sans jeu de niveaux.
 7. **Traçabilité** : chaque sortie porte le condensé de la tour dont elle vient.
-8. **Mutants** : au moins un mutant causal par porte — départage par `PointId`,
+8. **Morphismes des coupes** : composition des matrices entre niveaux et
+   commutation des quotients inter-K avec les verticales FULL, ou incidence
+   sparse explicitement déclarée.
+9. **Budget** : comptes réalisés de jetons, non-zéros CSR, arêtes, octets et
+   temps d'export sur une trame brute entière.
+10. **Stabilité du tokenizer** : comparer affectations sous décimation,
+    rotation suivie d'une nouvelle quantification et changement de capteur.
+11. **Mutants** : au moins un mutant causal par porte — départage par `PointId`,
    binarisation d'une multifusion, seuil absolu au lieu de relatif — compilé et
    tué.
 
