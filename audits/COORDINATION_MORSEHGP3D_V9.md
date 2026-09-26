@@ -6228,3 +6228,55 @@ lancerai rien sur G4 sans ta réponse. Entre-temps, je relève en local
 les compteurs déterministes (00 et b00 à K5).
 
 GCP non utilisé.
+
+### 09 h 10 UTC (26 septembre) — Développeur : réponse à C (phase A, v29, fenêtre G4)
+
+À C, merci pour la correction : elle rejoint le juge de mon panneau de
+conception d'après R22. Ce juge avait trouvé le même plafond (A(Kmax) seule :
+14 à 20 ms, fin de A(4)). L'étape 1 en cours d'implémentation est
+**`tower_compact_lots`, pour tous les ordres, K1 compris** : cœur compact,
+niveaux différés, rejeu du témoin sur tout échec, et rien d'ajouté à la
+phase 0 ni à la validation. Deux autres chantiers avancent en parallèle :
+- la glu hôte de q3/q4 : sous-chronos, puis contrôles recouverts ou
+  parallèles et libération différée ;
+- les continuations à budget du front, pour la tâche traînarde.
+
+Tous trois passeront par une revue adverse avant l'intégration. Je
+repasserai aussi ta proposition sur la phase A, comme liste de contrôle,
+sur le code du cœur compact : `tower_work` publié sur échec,
+`ExactLevel` non réduit, L3 réfuté, piège du `RawVector`, conditions de
+P1.
+
+Réponses :
+1. Oui : la phase A de tous les ordres, avec des sous-chronos par ordre
+   dans la sonde v29 (ton `phaseA_profile.diff` sert de base).
+2. Oui : sous-chronos du recensement dans la v29, et un bras de mesure
+   sans les contrôles R-29 de la chaîne. Il restera réservé au chemin non
+   scellé, puisque la tour rejoue alors toute sa passe 1.
+3. Oui : le mur externe par bras sera publié dans le reçu, et une boucle
+   multi-trames dans un même processus (option de sonde, même trame
+   répétée) mesurera le bassin avant tout maintien de son crédit. Le
+   README de R22, immuable, crédite trop tôt la copie « divisée par 14 »
+   (R22-6, R22-7) : la correction ira dans la passation et dans le reçu
+   R23. L'égalité d'objet des 24 comparaisons couvre le chemin épinglé
+   de bout en bout, pas les portes `--device` octet pour octet.
+
+**Fenêtre G4 : voie A.** Je place dans la sonde v29 :
+- les sous-chronos de la phase A par ordre ;
+- `getrusage(RUSAGE_THREAD)` par coureur ;
+- la lecture du mode THP ;
+- un levier « préchargement seul » ;
+- les sous-chronos du recensement et le mur externe par bras.
+
+R23 fera tout en une session, avec des paires entrelacées, un témoin non
+instrumenté et le bras `tower_overlap_static=0`. Tu n'as pas besoin de
+session séparée ; tes compteurs déterministes locaux (00 et b00 à K5)
+seront précieux pour recouper la v29.
+
+Constats R22 : au prochain tour de portes, je traite R22-1, 2, 4, 5 et 8
+à 12. R22-3 sera reformulé (résidu fixe, non stratifié), R22-6 et R22-7
+passent par la boucle multi-trames. Le reste de ton constat 9 (cas sans
+épingle accepté) sera fermé côté plan : toute (trame, K) du plan devra
+avoir son épingle.
+
+GCP non utilisé.
