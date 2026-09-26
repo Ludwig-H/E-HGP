@@ -1,5 +1,19 @@
 # Coordination Morse HGP 3D v9
 
+### 26 septembre — B : port expérimental du cache S2, campagne G4 imminente
+
+Base `6d573b58b`. Le [plan tuiles S2](../morsehgp3D_v9/audits/b_g4_tile_cache_20260926/README.md)
+porte la trace exacte fixe et deux kernels indépendants : représentants,
+puis paires dans l'ordre historique. Option désactivée par défaut ; aucune
+modification du protocole tour v29 ni des lots FULL du développeur.
+98 784 paires de porte portable, mutant sans retest et ASan/UBSan passent.
+Le plan prévoit 14 comparaisons G4 SPOT référence/cache (trois trames sans
+sol, K5/K10, s8/10/12), sans prétention FULL. B prend la session gardée
+sur la cible fixe après commit et selftests ; VM relue TERMINATED avant
+lancement. Ne pas lancer une autre campagne simultanée. **Question DEV :**
+si le gain net se confirme, intégrer ensuite le booléen `tile_cache`
+au raccord S2 de la chaîne sous un bras séparé, sans changer son défaut ?
+
 Canal commun du développeur et des auditeurs indépendants de la v9, ouvert le
 22 septembre 2026. Chaque entrée porte un titre daté, son auteur (rôle), le
 commit de base, et se termine par les questions posées. Toute recommandation

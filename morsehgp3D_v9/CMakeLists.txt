@@ -574,6 +574,17 @@ mhgp9_gate(mhgp9_gpu_witness_filter_port_scale8000 0 mhgp9_gpu_witness_filter_po
            EXPECT_PREFIX "witness_filter_port_gate n=8000" LABELS "scale8000;gpu;oracle" TIMEOUT 1800)
 mhgp9_gate(mhgp9_gpu_witness_filter_port_bad_argument 2 mhgp9_gpu_witness_filter_port_gate ARGS --n=abc
            LABELS "gate;gpu" TIMEOUT 60)
+mhgp9_product_executable(mhgp9_gpu_witness_cache_port_gate tests/gpu/witness_cache_port_gate.cpp)
+target_link_libraries(mhgp9_gpu_witness_cache_port_gate PRIVATE mhgp9_gen)
+mhgp9_gate(mhgp9_gpu_witness_cache_port 0 mhgp9_gpu_witness_cache_port_gate
+           EXPECT_PREFIX "witness_cache_port_gate queries=" LABELS "gate;gpu;oracle" TIMEOUT 180)
+mhgp9_gate(mhgp9_gpu_witness_cache_port_bad_argument 2 mhgp9_gpu_witness_cache_port_gate
+           ARGS --bad LABELS "gate;gpu" TIMEOUT 60)
+mhgp9_product_executable(mhgp9_gpu_witness_cache_no_retest_mutant_gate tests/gpu/witness_cache_port_gate.cpp)
+target_link_libraries(mhgp9_gpu_witness_cache_no_retest_mutant_gate PRIVATE mhgp9_gen)
+target_compile_definitions(mhgp9_gpu_witness_cache_no_retest_mutant_gate PRIVATE MHGP9_WITNESS_CACHE_MUTANT_NO_RETEST=1)
+mhgp9_gate(mhgp9_gpu_witness_cache_no_retest_mutant 1 mhgp9_gpu_witness_cache_no_retest_mutant_gate
+           EXPECT_PREFIX "cause=witness_cache.endpoint_retest" LABELS "gate;gpu;mutant" TIMEOUT 60)
 mhgp9_product_executable(mhgp9_gpu_certificate_port_gate tests/gpu/certificate_port_gate.cpp)
 target_link_libraries(mhgp9_gpu_certificate_port_gate PRIVATE mhgp9_gen mhgp9_gpu)
 target_include_directories(mhgp9_gpu_certificate_port_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")

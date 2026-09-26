@@ -59,14 +59,19 @@ def fnv_u32le(raw):
     return '%016x' % h
 
 
-def probe_value(n, fnv, k, workers, repeats, mismatch=False, inject=''):
+def probe_value(n, fnv, k, workers, repeats, mismatch=False, inject='', tile_cache=False, s=8):
     rect_visits, pair_visits = 1000 + k, 5000 + 7 * k
     gpu = dict(available=True, device=DEVICE, error='', stack_failure=False, pairs=400, rect_visits=rect_visits,
-               pair_visits=pair_visits, upload_ms=1.25, rect_ms=2.5, scan_ms=0.25, pair_ms=10.0, download_ms=0.5,
-               total_ms=14.5, first_total_ms=90.0, rect_mismatches=0,
-               pair_mismatches=3 if mismatch else 1 if inject else 0, visits_equal=True)
-    return dict(schema='mhgp9_gpu_filter_probe_v2', input=dict(sites=n, hash=fnv),
-                options=dict(K=k, s=8, workers=workers, repeats=repeats, cpu_only=False, inject=inject),
+               pair_visits=pair_visits - (1000 if tile_cache else 0), upload_ms=1.25, rect_ms=2.5, scan_ms=0.25,
+               pair_ms=10.0, download_ms=0.5, total_ms=14.5, first_total_ms=14.5, rect_mismatches=0,
+               pair_mismatches=3 if mismatch else 1 if inject else 0, visits_equal=not tile_cache,
+               cache_node_tests=900 if tile_cache else 0, trace_node_tests=700 if tile_cache else 0,
+               representatives=20 if tile_cache else 0, tiles=20 if tile_cache else 0, repeat_mismatches=0,
+               passes=[dict(upload_ms=1.25, rect_ms=2.5, scan_ms=0.25, pair_ms=10.0, download_ms=0.5,
+                            total_ms=14.5) for _ in range(repeats)])
+    return dict(schema='mhgp9_gpu_filter_probe_v3', input=dict(sites=n, hash=fnv),
+                options=dict(K=k, s=s, workers=workers, repeats=repeats, cpu_only=False, inject=inject,
+                             tile_cache=tile_cache),
                 population=dict(rectangles=100, rectangle_survivors=40, pairs=400, pair_survivors=30,
                                 q3_rejected=300, q3_open=50, q4_rejected=320, q4_open=40, front_product_visits=900),
                 cpu=dict(index_ms=1.0, front_ms=2.0, rect_ms=3.0, pair_nocache_ms=4.0, pair_cache_ms=2.0,
@@ -79,11 +84,15 @@ def main():
     path, k, workers = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
     options = sys.argv[4:]
     inject = ''
-    if len(options) == 3 and options[2] == '--inject=pair_mask' and not config.get('mutant_survives'):
+    if (options and options[-1] == '--inject=pair_mask' and not config.get('mutant_survives') and
+            not ('--tile-cache' in options and config.get('tile_mutant_survives'))):
         inject = 'pair_mask'
-    elif len(options) == 3 and options[2] == '--inject=pair_mask':
-        options = options[:2]   # a broken judge that ignores the injection
-    if len(options) not in (2, 3) or options[0] != '--s=8' or not options[1].startswith('--repeats='):
+    if options and options[-1] == '--inject=pair_mask':
+        options = options[:-1]
+    tile_cache = bool(options and options[-1] == '--tile-cache')
+    if tile_cache:
+        options = options[:-1]
+    if len(options) != 2 or options[0] not in ('--s=8', '--s=10', '--s=12') or not options[1].startswith('--repeats='):
         print('argument refusal: selftest', file=sys.stderr)
         return 2
     repeats = int(options[1][len('--repeats='):])
@@ -94,7 +103,8 @@ def main():
         print('input refusal: selftest', file=sys.stderr)
         return 2
     mismatch = any(rule['scene'] == scene and rule['k'] == k for rule in config.get('mismatch', []))
-    value = probe_value(len(raw) // 12, fnv_u32le(raw), k, workers, repeats, mismatch, inject)
+    value = probe_value(len(raw) // 12, fnv_u32le(raw), k, workers, repeats, mismatch, inject, tile_cache,
+                        int(options[0][len('--s='):]))
     for kind in ('unavailable', 'fault'):
         if any(rule['scene'] == scene and rule['k'] == k for rule in config.get(kind, [])):
             value['gpu'].update(available=kind == 'fault', error='cudaErrorIllegalAddress' if kind == 'fault' else
@@ -180,10 +190,10 @@ print('NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.126.09, 97887 MiB, 12.0
 '''
 
 
-def fake_probe_value(n, fnv, k, workers=48, repeats=3, mismatch=False, inject=''):
+def fake_probe_value(n, fnv, k, workers=48, repeats=3, mismatch=False, inject='', tile_cache=False, s=8):
     namespace = {'__name__': 'mhgp9_fake_gpu_probe', 'DEVICE': DEVICE, 'CONFIG': ''}
     exec(compile(FAKE_PROBE, 'mhgp9_fake_gpu_probe', 'exec'), namespace)
-    return namespace['probe_value'](n, fnv, k, workers, repeats, mismatch, inject)
+    return namespace['probe_value'](n, fnv, k, workers, repeats, mismatch, inject, tile_cache, s)
 
 
 def fake_tools(directory, **config):
@@ -255,27 +265,35 @@ def protocol_committed():
     return all(blobs[entries[name]] == (ROOT / name).read_bytes() for name in worker.PROTOCOL_NAMES)
 
 
-def package():
-    if not _PACKAGE:
+def package(tile_cache=False):
+    if tile_cache not in _PACKAGE:
         directory = Path(tempfile.mkdtemp(prefix='mhgp9-gpu-selftest-'))
         atexit.register(shutil.rmtree, directory, True)
         committed = protocol_committed()
-        record = snapshot.build('HEAD', directory / 'package', allow_uncommitted_protocol=not committed)
+        plan_path = None
+        if tile_cache:
+            plan = snapshot.default_plan()
+            plan['cases'][0]['tile_cache'] = True
+            plan['cases'][1]['s'] = 10
+            plan['cases'][2]['s'] = 12
+            plan_path = directory / 'plan.json'
+            worker.save(plan_path, plan)
+        record = snapshot.build('HEAD', directory / 'package', plan_path, allow_uncommitted_protocol=not committed)
         manifest_path = directory / 'package/source_manifest.json'
-        _PACKAGE.update(directory=directory, record=record, committed=committed,
-                        archive=directory / 'package/snapshot.tar.gz', manifest_path=manifest_path,
-                        manifest=worker.strict_json(manifest_path.read_bytes()))
-    return _PACKAGE
+        _PACKAGE[tile_cache] = dict(directory=directory, record=record, committed=committed,
+                                   archive=directory / 'package/snapshot.tar.gz', manifest_path=manifest_path,
+                                   manifest=worker.strict_json(manifest_path.read_bytes()))
+    return _PACKAGE[tile_cache]
 
 
-def session_args(directory):
+def session_args(directory, tile_cache=False):
     private = directory / 'session'
     private.mkdir(mode=0o700)
     key = directory / 'key'
     key.write_text('fixture-key-never-used')
     key.chmod(0o600)
     Path(str(key) + '.pub').write_text('fixture-public-key')
-    pkg = package()
+    pkg = package(tile_cache)
     return SimpleNamespace(session_dir=private, ssh_key=key, expected_controller_sha256=worker.sha(session.__file__),
                            worker=Path(worker.__file__), worker_sha256=worker.sha(worker.__file__),
                            snapshot=pkg['archive'], snapshot_sha256=worker.sha(pkg['archive']),
@@ -283,10 +301,10 @@ def session_args(directory):
                            gcloud=NEVER_RUN_GCLOUD)
 
 
-def run_scenario(directory, tools=None, patches=()):
+def run_scenario(directory, tools=None, patches=(), tile_cache=False):
     fakebin = fake_tools(directory, **(tools or {}))
     fake = FakeCloud(directory, fakebin)
-    args = session_args(directory)
+    args = session_args(directory, tile_cache)
     with ExitStack() as stack:
         stack.enter_context(patch.object(session, 'Commands', fake.commands_class()))
         # The host reception checks the recorded nvcc against CUDA_PATHS too.
@@ -361,8 +379,10 @@ class Protocol(unittest.TestCase):
             ('extra key', lambda v: v.update(extra=1)),
             ('hash', lambda v: v['input'].update(hash='0' * 16)),
             ('sites', lambda v: v['input'].update(sites=v['input']['sites'] - 1)),
+            ('floating sites', lambda v: v['input'].update(sites=float(v['input']['sites']))),
             ('K', lambda v: v['options'].update(K=10)),
             ('workers', lambda v: v['options'].update(workers=24)),
+            ('floating workers', lambda v: v['options'].update(workers=48.0)),
             ('repeats', lambda v: v['options'].update(repeats=1)),
             ('cpu only', lambda v: v['options'].update(cpu_only=True)),
             ('negative count', lambda v: v['population'].update(pairs=-1)),
@@ -398,7 +418,8 @@ class Protocol(unittest.TestCase):
         need(worker.PROBE_SOURCE in manifest and worker.RUNNER_SOURCE in manifest and
              worker.BASE_WORKER in manifest, 'GPU sources and library transported')
         plan = snapshot.default_plan()
-        for key, value in [('k', 7), ('s', 10), ('workers', 0), ('repeats', 0), ('repeats', 11), ('n', 39884),
+        for key, value in [('k', 7), ('s', 9), ('workers', 0), ('repeats', 0), ('repeats', 11), ('n', 39884),
+                           ('tile_cache', 1),
                            ('scene', '03'), ('file', 'data/scene_01.u32le'), ('extra', 1)]:
             bad = deepcopy(plan)
             bad['cases'][0][key] = value
@@ -419,6 +440,84 @@ class Protocol(unittest.TestCase):
                                      '--expected-controller-sha256', 'x', '--gcloud', str(NEVER_RUN_GCLOUD)])
             need(code == 2 and json.loads(stream.getvalue())['status'] == 'refused', 'real session refused')
         del provenance
+
+    def test_tiled_probe_reader_and_legacy(self):
+        data = worker.INPUTS['00']
+        case = dict(scene='00', file=data['file'], n=data['n'], k=5, s=8, workers=48, repeats=3, repeat=0,
+                    tile_cache=True)
+        good = fake_probe_value(data['n'], data['fnv'], 5, tile_cache=True)
+        need(worker.validate_probe(good, case, 0) == 'complete', 'tile masks agree despite different visits')
+        mutant = fake_probe_value(data['n'], data['fnv'], 5, inject='pair_mask', tile_cache=True)
+        need(worker.validate_probe(mutant, case, 1, inject='pair_mask') == 'gpu_mismatch', 'tile mutant killed')
+        for label, mutate in [
+            ('flag', lambda v: v['options'].update(tile_cache=False)),
+            ('boolean', lambda v: v['options'].update(tile_cache=1)),
+            ('false equality', lambda v: v['gpu'].update(visits_equal=True)),
+            ('negative work', lambda v: v['gpu'].update(cache_node_tests=-1)),
+            ('representatives', lambda v: v['gpu'].update(representatives=19)),
+            ('trace work', lambda v: v['gpu'].update(trace_node_tests=v['gpu']['pair_visits'] + 1)),
+            ('repeat omission', lambda v: v['gpu']['passes'].pop()),
+            ('repeat nan', lambda v: v['gpu']['passes'][0].update(total_ms=float('nan'))),
+            ('repeat partial total', lambda v: v['gpu']['passes'][0].update(pair_ms=11.0)),
+            ('repeat disagreement', lambda v: v['gpu'].update(repeat_mismatches=1)),
+            ('minimum graft', lambda v: v['gpu'].update(upload_ms=1.0, download_ms=0.75)),
+            ('first graft', lambda v: v['gpu'].update(first_total_ms=20.0)),
+        ]:
+            bad = deepcopy(good)
+            mutate(bad)
+            need(refused(worker.validate_probe, bad, case, 0), 'tile reader mutation ' + label)
+        divergent = deepcopy(good)
+        divergent['gpu']['repeat_mismatches'] = 1
+        need(worker.validate_probe(divergent, case, 1) == 'gpu_mismatch', 'repeat divergence classified')
+        empty = deepcopy(good)
+        empty['gpu'].update(tiles=0, representatives=0, trace_node_tests=0, cache_node_tests=0)
+        need(refused(worker.validate_probe, empty, case, 0), 'whole-frame vacuous cache refused')
+        legacy = fake_probe_value(data['n'], data['fnv'], 5)
+        legacy['schema'] = worker.LEGACY_PROBE_SCHEMA
+        del legacy['options']['tile_cache']
+        for field in worker.GPU_V3_COUNTS + ('passes',):
+            del legacy['gpu'][field]
+        base_case = dict(case, tile_cache=False)
+        need(worker.validate_probe(legacy, base_case, 0) == 'complete', 'legacy probe v2 remains readable')
+        need(refused(worker.validate_probe, legacy, case, 0), 'legacy probe cannot attest tile cache')
+        legacy_plan = snapshot.default_plan()
+        legacy_plan['schema'] = worker.LEGACY_PLAN_SCHEMA
+        for row in legacy_plan['cases']:
+            del row['tile_cache']
+        need(len(worker.validate_plan(legacy_plan, package()['manifest'])) == 6, 'legacy plan v1 remains readable')
+        legacy_plan['cases'][0]['s'] = 10
+        need(refused(worker.validate_plan, legacy_plan, package()['manifest']), 'legacy domain unchanged')
+
+    def test_completed_tiled_session(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            code, receipt, fake, host = run_scenario(Path(tmp), tile_cache=True)
+            need(code == 0 and receipt['status'] == 'completed' and receipt['GPU_executed'] is True,
+                 'tile session completion')
+            expect_certified_stop(receipt, fake)
+            output = host / 'received/output'
+            value = worker.strict_json((output / 'receipt.json').read_bytes())
+            need('preflight_tile' in value and (output / 'preflight_tile_mutant.command.json').is_file(),
+                 'both tile preflight and causal mutant ran')
+            for index in (0, 1, 2):
+                probe = worker.strict_json((output / ('probe_' + str(index) + '.stdout')).read_bytes())
+                need(len(probe['gpu']['passes']) == 3, 'all repetitions retained')
+
+    def test_tile_failure_still_stops(self):
+        for tools in (dict(mismatch=[dict(scene='00', k=5)]), dict(tile_mutant_survives=True)):
+            with tempfile.TemporaryDirectory() as tmp:
+                code, receipt, fake, host = run_scenario(Path(tmp), tile_cache=True, tools=tools)
+                expect_certified_stop(receipt, fake)
+                output = host / 'received/output'
+                value = worker.strict_json((output / 'receipt.json').read_bytes())
+                if tools.get('tile_mutant_survives'):
+                    need(code == 1 and receipt['status'] == 'worker_failed' and
+                         value['status'] == 'preflight_failed' and not (output / 'probe_0.command.json').exists(),
+                         'surviving tile mutant stops before real cases')
+                else:
+                    need(code == 0 and receipt['status'] == 'gpu_mismatch', 'tile failure received')
+                    need(value['case_outcomes'][0]['outcome'] == 'gpu_mismatch' and
+                         all(row['outcome'] == 'skipped_s1_gate' for row in value['case_outcomes'][1:]) and
+                         not (output / 'probe_1.command.json').exists(), 'tile failure closes first-case gate')
 
     def test_completed_session(self):
         with tempfile.TemporaryDirectory() as tmp:

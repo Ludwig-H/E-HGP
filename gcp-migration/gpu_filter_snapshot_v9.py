@@ -6,7 +6,7 @@ ls-tree, cat-file), le controle d'identite des objets et l'archive
 deterministe sont reutilises tels quels : sources morsehgp3D_v9 (CMake,
 cmake/, src/, bench/, tests/, oracle/), helper v7 epingle, trois trames LiDAR
 sans sol epinglees, protocole GPU (et les modules v9 qu'il importe) pris au
-commit, plan data/session_plan.json (schema mhgp9_gpu_filter_plan_v1) et
+commit, plan data/session_plan.json (schema mhgp9_gpu_filter_plan_v2, v1 historique lu) et
 provenance. Un protocole non committe n'est transporte qu'avec
 --allow-uncommitted-protocol (preflight/selftest) et le controleur refuse
 alors une vraie session.
@@ -26,7 +26,7 @@ need = worker.need
 def default_plan():
     def case(scene, k):
         return dict(scene=scene, file=worker.INPUTS[scene]['file'], n=worker.INPUTS[scene]['n'], k=k, s=8,
-                    workers=48, repeats=3, repeat=0)
+                    workers=48, repeats=3, repeat=0, tile_cache=False)
     # 08/000000 (scene 00) a K5 d'abord : c'est le cas du seuil S1.
     return dict(schema=worker.PLAN_SCHEMA, cases=[case(scene, k) for scene in ('00', '01', '02') for k in (5, 10)])
 
@@ -69,6 +69,7 @@ def validate_files(files):
     read = files.__getitem__
     worker.validate_sources(read)
     cases = worker.validate_plan(worker.strict_json(read(worker.PLAN)), manifest)
+    worker.validate_sources(read, tile_cache=any(case.get('tile_cache', False) for case in cases))
     worker.base.validate_data(read)
     worker.base.validate_provenance(worker.strict_json(read(worker.PROVENANCE)), manifest)
     return manifest, cases
@@ -111,7 +112,7 @@ def build(commit, output, plan_path=None, allow_uncommitted_protocol=False):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--commit', required=True, help='commit dont les objets git forment le paquet')
-    parser.add_argument('--plan', type=Path, help='plan mhgp9_gpu_filter_plan_v1 ; defaut : plan par defaut')
+    parser.add_argument('--plan', type=Path, help='plan mhgp9_gpu_filter_plan_v2 (v1 historique lu) ; defaut : sans cache')
     parser.add_argument('--output', type=Path, required=True, help='repertoire neuf')
     parser.add_argument('--allow-uncommitted-protocol', action='store_true',
                         help='preflight/selftest seulement ; le controleur refuse ce paquet avec --execute')

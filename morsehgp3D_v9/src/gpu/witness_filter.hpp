@@ -4,8 +4,9 @@
 // of the exact q3/q4 witness filter of lanes/q34_witness_search.cpp
 // (filter_impl with Exclusion bounds: the affine pair specialization and the
 // general box one used for WSPD rectangles). Same integer arithmetic, same
-// DFS order, same credits; no work ledger except node visits, no cache
-// trace. A flat node array replaces the index spans.
+// DFS order, same credits; no work ledger except node visits. Optional
+// fixed witness traces do not change traversal or credits. A flat node
+// array replaces the index spans.
 //
 // Exactness is judged, not assumed: the host compilation of this header is
 // compared query by query with filter_q34_witnesses on real rectangles and
@@ -48,6 +49,21 @@ struct FlatNode {
   u32 left, right;
   u32 first, last;  // spatial rank range [first, last)
 };
+
+// A traced query admits an antichain per lane. Every recorded node pays
+// at least one effective credit, so size <= (K-1)+(K-2) <= 17 for K3..10
+// (K1: no active lane, K2: at most one node).
+// The arrays are split to keep the host/device transfer at 88 bytes rather
+// than 17 padded pairs. The trace belongs to the SAME immutable FlatNode
+// array as its producer; no pointer, rank permutation or partial count is
+// carried to another query. Only entries below size are initialized/read.
+inline constexpr unsigned witness_trace_capacity = 17;
+struct FixedWitnessTrace {
+  u32 nodes[witness_trace_capacity];
+  u8 lanes[witness_trace_capacity];
+  u8 size = 0;
+};
+static_assert(sizeof(FixedWitnessTrace) == 88);
 
 struct Bounds4 {
   i64 minimum4, maximum4;
@@ -198,9 +214,13 @@ MHGP9_HD inline i64 midpoint_distance16(const i64 center4[3], const FlatBox& box
 // a validated index: K in 1..10, lane_mask a subset of 6, valid boxes (and
 // singleton boxes when Affine). Returns the surviving lanes, or
 // stack_failure if the proved DFS bound is violated.
-template <bool Affine>
+template <bool Affine, bool Trace = false>
 MHGP9_HD inline u8 filter(const FlatNode* nodes, const FlatBox& a, const FlatBox& b, unsigned kmax,
-                          u8 lane_mask, std::uint64_t& visits) {
+                          u8 lane_mask, std::uint64_t& visits, FixedWitnessTrace* trace = nullptr) {
+  if constexpr (Trace) {
+    if (trace == nullptr) return stack_failure;
+    trace->size = 0;
+  }
   const u8 available = kmax >= 3 ? 6 : kmax == 2 ? 2 : 0;
   u8 remaining = static_cast<u8>(lane_mask & available);
   if (remaining == 0) return 0;
@@ -230,6 +250,7 @@ MHGP9_HD inline u8 filter(const FlatNode* nodes, const FlatBox& a, const FlatBox
     const Xi xi = Affine ? pair_xi(pair, node.box) : box_xi(a, b, node.box);
     const i128 xi16 = static_cast<i128>(16) * xi.high;
     const i128 h4_squared = h.minimum4 > 0 ? static_cast<i128>(h.minimum4) * h.minimum4 : i128{0};
+    u8 admitted_mask = 0;
     for (unsigned lane = 0; lane < 2; ++lane) {
       const u8 bit = static_cast<u8>(2U << lane);
       if ((mask & bit) == 0) continue;
@@ -244,8 +265,18 @@ MHGP9_HD inline u8 filter(const FlatNode* nodes, const FlatBox& a, const FlatBox
       const u32 population = node.last - node.first;
       const unsigned room = threshold[lane] - count[lane];
       count[lane] += room < population ? room : population;
+      if constexpr (Trace) admitted_mask = static_cast<u8>(admitted_mask | bit);
       mask = static_cast<u8>(mask & ~bit);
       if (count[lane] == threshold[lane]) remaining = static_cast<u8>(remaining & ~bit);
+    }
+    if constexpr (Trace) {
+      if (admitted_mask != 0) {
+        // Fail closed if an invalid index/query breaks the proved bound;
+        // never turn a truncated trace into a successful filter result.
+        if (trace->size == witness_trace_capacity) return stack_failure;
+        trace->nodes[trace->size] = stack_node[size];
+        trace->lanes[trace->size++] = admitted_mask;
+      }
     }
     if (mask == 0 || leaf) continue;
     if (size + 2 > stack_frames) return stack_failure;

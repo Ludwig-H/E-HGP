@@ -15,6 +15,7 @@
 #include "../common/raw_vector.hpp"
 
 #include <cstdint>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -31,6 +32,11 @@ struct FilterInput {
   std::size_t rect_count = 0;
   unsigned kmax = 0;
   unsigned repeats = 1;  // timed repetitions of the whole device pass
+  bool tile_cache = false;  // optional independent 32-column witness tiles (S2)
+};
+
+struct FilterPassTiming {
+  double upload_ms = 0, rect_ms = 0, scan_ms = 0, pair_ms = 0, download_ms = 0, total_ms = 0;
 };
 
 struct FilterOutput {
@@ -41,10 +47,21 @@ struct FilterOutput {
   std::vector<u8> rect_masks;
   std::vector<u8> pair_masks;  // surviving rectangles only, row-major
   std::uint64_t pairs = 0, rect_visits = 0, pair_visits = 0;
+  std::uint64_t cache_node_tests = 0, trace_node_tests = 0, representatives = 0, tiles = 0;
+  std::uint64_t repeat_mismatches = 0;
+  std::vector<FilterPassTiming> passes;  // every pass, not independently selected minima
   // Best of `repeats` device passes (ms), cudaEvent timings.
   double upload_ms = 0, rect_ms = 0, scan_ms = 0, pair_ms = 0, download_ms = 0, total_ms = 0;
   double first_total_ms = 0;  // the first pass, cold
 };
+
+// Also needed for repeated/overlapping public rectangles: unlike a WSPD,
+// their combined mass need not be bounded by choose(n,2).
+inline bool add_filter_mass(std::uint64_t& total, std::uint64_t mass) {
+  if (mass > std::numeric_limits<std::uint64_t>::max() - total) return false;
+  total += mass;
+  return true;
+}
 
 // Host-side refusal of a raw input before any device call (contre-audits B
 // 13 h 05 and A « domaine u18 ») ; empty string when accepted. The device
@@ -90,9 +107,16 @@ inline std::string validate_filter_input(const FilterInput& input) {
         if (c < node.box.low[axis] || c > node.box.high[axis]) return "node box misses a point of its ranks";
       }
   }
-  for (std::size_t i = 0; i < input.rect_count; ++i)
+  std::uint64_t raw_mass = 0;
+  for (std::size_t i = 0; i < input.rect_count; ++i) {
     if (input.rect_a[i] >= input.node_count || input.rect_b[i] >= input.node_count || (input.rect_mask[i] & ~6U) != 0)
       return "rectangle node id or lane mask outside the domain";
+    const auto& a = input.nodes[input.rect_a[i]];
+    const auto& b = input.nodes[input.rect_b[i]];
+    if (input.rect_mask[i] != 0 &&
+        !add_filter_mass(raw_mass, static_cast<std::uint64_t>(a.last - a.first) * (b.last - b.first)))
+      return "combined rectangle mass exceeds uint64";
+  }
   return {};
 }
 
@@ -122,6 +146,7 @@ struct BatchOutput {
   std::vector<u8> survivor_mask;
   std::uint64_t pairs = 0, pair_q3_rejected = 0, pair_q4_rejected = 0;
   std::uint64_t rect_visits = 0, pair_visits = 0;
+  std::uint64_t cache_node_tests = 0, trace_node_tests = 0, representatives = 0, tiles = 0;
   // cudaEvent timings of the pass (ms): upload, rectangle kernel, mass scan,
   // pair kernel, survivor compaction, download of masks and survivors.
   double upload_ms = 0, rect_ms = 0, scan_ms = 0, pair_ms = 0, select_ms = 0, download_ms = 0, total_ms = 0;

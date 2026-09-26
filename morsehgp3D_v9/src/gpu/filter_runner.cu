@@ -2,6 +2,7 @@
 // filter on a WSPD rectangle population (see filter_runner.hpp).
 
 #include "filter_runner.hpp"
+#include "witness_cache.hpp"
 
 #include <cub/device/device_scan.cuh>
 #include <cuda_runtime.h>
@@ -53,6 +54,8 @@ class DeviceBuffer {
     if (pointer_ != nullptr) cudaFree(pointer_);
   }
   void allocate(std::size_t count) {
+    if (count > std::numeric_limits<std::size_t>::max() / sizeof(T))
+      throw CudaFailure{"device allocation size overflow", true};
     if (pointer_ != nullptr) cudaFree(pointer_);
     pointer_ = nullptr;
     count_ = capacity_ = 0;
@@ -131,11 +134,100 @@ __global__ void rectangle_kernel(const FlatNode* nodes, const u32* rect_a, const
   add_visits(visits, local);
 }
 
+// A tile never crosses a row. Small factors retain the uncached path;
+// this is a scheduling choice, not a search/candidate limit.
+constexpr unsigned tile_width = 32, tile_min_columns = 16;
+
+__global__ void tile_mass_kernel(const FlatNode* nodes, const u32* rect_a, const u32* rect_b,
+                                 const u8* masks, std::size_t count, unsigned long long* mass) {
+  const std::size_t stride = static_cast<std::size_t>(gridDim.x) * blockDim.x;
+  for (std::size_t i = static_cast<std::size_t>(blockIdx.x) * blockDim.x + threadIdx.x; i < count; i += stride) {
+    const auto columns = nodes[rect_b[i]].last - nodes[rect_b[i]].first;
+    mass[i] = masks[i] != 0 && columns >= tile_min_columns
+        ? static_cast<unsigned long long>(nodes[rect_a[i]].last - nodes[rect_a[i]].first) *
+              ((columns - 1) / tile_width + 1) : 0ULL;
+  }
+}
+
+class TileCacheBuffers {
+ public:
+  DeviceBuffer<unsigned long long> mass, offsets;
+  DeviceBuffer<FixedWitnessTrace> traces;
+  DeviceBuffer<u8> representative_masks;
+  DeviceBuffer<unsigned char> scan_storage;
+  unsigned long long count = 0;
+
+  void prepare(const FlatNode* nodes, const u32* a, const u32* b, const u8* masks,
+               std::size_t rectangles, int blocks, int threads) {
+    count = 0;
+    if (rectangles == 0) return;
+    mass.reserve(rectangles);
+    offsets.reserve(rectangles);
+    tile_mass_kernel<<<blocks, threads>>>(nodes, a, b, masks, rectangles, mass.get());
+    MHGP9_CUDA(cudaGetLastError());
+    std::size_t bytes = 0;
+    MHGP9_CUDA(cub::DeviceScan::ExclusiveSum(nullptr, bytes, mass.get(), offsets.get(), static_cast<int>(rectangles)));
+    scan_storage.reserve(std::max<std::size_t>(bytes, 1));
+    MHGP9_CUDA(cub::DeviceScan::ExclusiveSum(scan_storage.get(), bytes, mass.get(), offsets.get(), static_cast<int>(rectangles)));
+    unsigned long long tail[2]{};
+    MHGP9_CUDA(cudaMemcpy(tail, offsets.get() + rectangles - 1, sizeof(*tail), cudaMemcpyDeviceToHost));
+    MHGP9_CUDA(cudaMemcpy(tail + 1, mass.get() + rectangles - 1, sizeof(*tail), cudaMemcpyDeviceToHost));
+    count = tail[0] + tail[1];  // bounded by the checked raw pair mass
+    if (count > std::numeric_limits<std::size_t>::max() / sizeof(FixedWitnessTrace))
+      throw CudaFailure{"tile trace size overflow", true};
+    traces.reserve(static_cast<std::size_t>(count));
+    representative_masks.reserve(static_cast<std::size_t>(count));
+  }
+};
+
+__global__ void representative_kernel(const FlatNode* nodes, const std::int32_t* points,
+    const u32* rect_a, const u32* rect_b, const u8* filtered, const unsigned long long* offsets,
+    std::size_t rect_count, unsigned long long tiles, unsigned kmax, FixedWitnessTrace* traces,
+    u8* masks, unsigned long long* visits, int* failure) {
+  unsigned long long local = 0;
+  const unsigned long long stride = static_cast<unsigned long long>(gridDim.x) * blockDim.x;
+  const unsigned long long rounded = (tiles + stride - 1) / stride * stride;
+  for (unsigned long long t = static_cast<unsigned long long>(blockIdx.x) * blockDim.x + threadIdx.x;
+       t < rounded; t += stride) {
+    if (t >= tiles) continue;
+    std::size_t low = 0, high = rect_count;
+    while (high - low > 1) {
+      const std::size_t middle = low + (high - low) / 2;
+      if (offsets[middle] <= t) low = middle;
+      else high = middle;
+    }
+    const auto& a = nodes[rect_a[low]];
+    const auto& b = nodes[rect_b[low]];
+    const unsigned long long tiles_per_row = (b.last - b.first - 1) / tile_width + 1;
+    const auto index = t - offsets[low];
+    const u32 ai = a.first + static_cast<u32>(index / tiles_per_row);
+    const u32 bi = b.first + static_cast<u32>((index % tiles_per_row) * tile_width);
+    FlatBox pa, pb;
+    for (int axis = 0; axis < 3; ++axis) {
+      pa.low[axis] = pa.high[axis] = points[3 * static_cast<std::size_t>(ai) + axis];
+      pb.low[axis] = pb.high[axis] = points[3 * static_cast<std::size_t>(bi) + axis];
+    }
+    std::uint64_t v = 0;
+    u8 mask = filter<true, true>(nodes, pa, pb, kmax, filtered[low], v, &traces[t]);
+    local += v;
+    if (mask == stack_failure) {
+      atomicExch(failure, 1);
+      mask = 0;
+    }
+    masks[t] = mask;
+  }
+  add_visits(visits, local);
+}
+
+template <bool Cache>
 __global__ void pair_kernel(const FlatNode* nodes, const std::int32_t* rank_points, const u32* rect_a,
                             const u32* rect_b, const u8* filtered, const unsigned long long* offsets,
                             std::size_t rect_count, unsigned long long pairs, unsigned kmax, u8* out_mask,
-                            unsigned long long* visits, unsigned long long* lane_rejections, int* failure) {
-  unsigned long long local = 0, q3 = 0, q4 = 0;
+                            unsigned long long* visits, unsigned long long* lane_rejections, int* failure,
+                            const unsigned long long* tile_offsets = nullptr,
+                            const FixedWitnessTrace* traces = nullptr, const u8* representatives = nullptr,
+                            unsigned long long* cache_tests = nullptr) {
+  unsigned long long local = 0, q3 = 0, q4 = 0, local_cache_tests = 0;
   const unsigned long long stride = static_cast<unsigned long long>(gridDim.x) * blockDim.x;
   const unsigned long long rounded = (pairs + stride - 1) / stride * stride;
   for (unsigned long long p = static_cast<unsigned long long>(blockIdx.x) * blockDim.x + threadIdx.x; p < rounded;
@@ -161,7 +253,21 @@ __global__ void pair_kernel(const FlatNode* nodes, const std::int32_t* rank_poin
     }
     std::uint64_t v = 0;
     const u8 lanes = filtered[low];
-    u8 mask = filter<true>(nodes, pa, pb, kmax, lanes, v);
+    u8 mask = lanes;
+    if constexpr (Cache) {
+      if (columns >= tile_min_columns) {
+        const auto row = local_index / columns, column = local_index % columns;
+        const auto tile = tile_offsets[low] + row * ((columns - 1) / tile_width + 1) + column / tile_width;
+        if (column % tile_width == 0) mask = representatives[tile];
+        else {
+          std::uint64_t tests = 0;
+          const u8 dead = cached_witness_rejections(nodes, pa, pb, kmax, lanes, traces[tile], tests);
+          local_cache_tests += tests;
+          mask = static_cast<u8>(lanes & ~dead);
+          if (mask != 0) mask = filter<true>(nodes, pa, pb, kmax, mask, v);
+        }
+      } else mask = filter<true>(nodes, pa, pb, kmax, lanes, v);
+    } else mask = filter<true>(nodes, pa, pb, kmax, lanes, v);
     local += v;
     if (mask == stack_failure) {
       atomicExch(failure, 1);
@@ -174,6 +280,31 @@ __global__ void pair_kernel(const FlatNode* nodes, const std::int32_t* rank_poin
   add_visits(visits, local);
   add_visits(lane_rejections, q3);
   add_visits(lane_rejections + 1, q4);
+  if constexpr (Cache) add_visits(cache_tests, local_cache_tests);
+}
+
+void launch_pair_filter(const FlatNode* nodes, const std::int32_t* points, const u32* a, const u32* b,
+    const u8* filtered, const unsigned long long* offsets, std::size_t rectangles,
+    unsigned long long pairs, unsigned kmax, u8* masks, unsigned long long* counters,
+    int* failure, TileCacheBuffers* cache, int sms, int threads) {
+  const auto blocks = [&](unsigned long long n) {
+    return static_cast<int>(std::max<unsigned long long>(1, std::min<unsigned long long>(
+        (n + threads - 1) / threads, static_cast<unsigned long long>(sms) * 64)));
+  };
+  if (cache != nullptr && cache->count != 0) {
+    representative_kernel<<<blocks(cache->count), threads>>>(nodes, points, a, b, filtered, cache->offsets.get(),
+        rectangles, cache->count, kmax, cache->traces.get(), cache->representative_masks.get(), counters + 4, failure);
+    MHGP9_CUDA(cudaGetLastError());
+  }
+  if (pairs == 0) return;
+  if (cache != nullptr)
+    pair_kernel<true><<<blocks(pairs), threads>>>(nodes, points, a, b, filtered, offsets, rectangles, pairs,
+        kmax, masks, counters + 1, counters + 2, failure, cache->offsets.get(), cache->traces.get(),
+        cache->representative_masks.get(), counters + 5);
+  else
+    pair_kernel<false><<<blocks(pairs), threads>>>(nodes, points, a, b, filtered, offsets, rectangles, pairs,
+        kmax, masks, counters + 1, counters + 2, failure);
+  MHGP9_CUDA(cudaGetLastError());
 }
 
 __global__ void flag_kernel(const u8* masks, unsigned long long pairs, u32* flags) {
@@ -242,6 +373,9 @@ FilterOutput run_filters(const FilterInput& input) {
     DeviceBuffer<unsigned long long> mass, offsets, counters;
     DeviceBuffer<int> failure;
     DeviceBuffer<unsigned char> scan_storage;
+    TileCacheBuffers cache;
+    std::vector<u8> first_rect_masks, first_pair_masks;
+    unsigned long long first_counts[6]{};
     nodes.allocate(input.node_count);
     rank_points.allocate(3 * input.rank_count);
     rect_a.allocate(input.rect_count);
@@ -250,7 +384,7 @@ FilterOutput run_filters(const FilterInput& input) {
     filtered.allocate(input.rect_count);
     mass.allocate(input.rect_count);
     offsets.allocate(input.rect_count);
-    counters.allocate(4);
+    counters.allocate(6);
     failure.allocate(1);
     std::size_t scan_bytes = 0;
     MHGP9_CUDA(cub::DeviceScan::ExclusiveSum(nullptr, scan_bytes, mass.get(), offsets.get(),
@@ -271,7 +405,7 @@ FilterOutput run_filters(const FilterInput& input) {
       MHGP9_CUDA(cudaMemcpy(rect_a.get(), input.rect_a, input.rect_count * sizeof(u32), cudaMemcpyHostToDevice));
       MHGP9_CUDA(cudaMemcpy(rect_b.get(), input.rect_b, input.rect_count * sizeof(u32), cudaMemcpyHostToDevice));
       MHGP9_CUDA(cudaMemcpy(rect_mask.get(), input.rect_mask, input.rect_count, cudaMemcpyHostToDevice));
-      MHGP9_CUDA(cudaMemset(counters.get(), 0, 4 * sizeof(unsigned long long)));
+      MHGP9_CUDA(cudaMemset(counters.get(), 0, 6 * sizeof(unsigned long long)));
       MHGP9_CUDA(cudaMemset(failure.get(), 0, sizeof(int)));
       MHGP9_CUDA(cudaEventRecord(e[1]));
       const int rect_blocks = static_cast<int>(std::min<std::size_t>((input.rect_count + threads - 1) / threads,
@@ -297,22 +431,20 @@ FilterOutput run_filters(const FilterInput& input) {
         if (pairs > free_bytes / 2) throw CudaFailure{"pair masks exceed half of the free device memory"};
         pair_mask.allocate(pairs);
       }
+      if (input.tile_cache)
+        cache.prepare(nodes.get(), rect_a.get(), rect_b.get(), filtered.get(), input.rect_count,
+                      std::max(rect_blocks, 1), threads);
       MHGP9_CUDA(cudaEventRecord(e[3]));
-      if (pairs != 0) {
-        const int pair_blocks = static_cast<int>(std::min<unsigned long long>((pairs + threads - 1) / threads,
-                                                                             static_cast<unsigned long long>(sms) * 64));
-        pair_kernel<<<std::max(pair_blocks, 1), threads>>>(nodes.get(), rank_points.get(), rect_a.get(),
-            rect_b.get(), filtered.get(), offsets.get(), input.rect_count, pairs, input.kmax, pair_mask.get(),
-            counters.get() + 1, counters.get() + 2, failure.get());
-        MHGP9_CUDA(cudaGetLastError());
-      }
+      launch_pair_filter(nodes.get(), rank_points.get(), rect_a.get(), rect_b.get(), filtered.get(), offsets.get(),
+          input.rect_count, pairs, input.kmax, pair_mask.get(), counters.get(), failure.get(),
+          input.tile_cache ? &cache : nullptr, sms, threads);
       MHGP9_CUDA(cudaEventRecord(e[4]));
       out.rect_masks.resize(input.rect_count);
       out.pair_masks.resize(pairs);
       MHGP9_CUDA(cudaMemcpy(out.rect_masks.data(), filtered.get(), input.rect_count, cudaMemcpyDeviceToHost));
       if (pairs != 0)
         MHGP9_CUDA(cudaMemcpy(out.pair_masks.data(), pair_mask.get(), pairs, cudaMemcpyDeviceToHost));
-      unsigned long long visit_counts[2] = {0, 0};
+      unsigned long long visit_counts[6]{};
       int failed = 0;
       MHGP9_CUDA(cudaMemcpy(visit_counts, counters.get(), sizeof(visit_counts), cudaMemcpyDeviceToHost));
       MHGP9_CUDA(cudaMemcpy(&failed, failure.get(), sizeof(int), cudaMemcpyDeviceToHost));
@@ -321,6 +453,7 @@ FilterOutput run_filters(const FilterInput& input) {
       const double upload = elapsed(e[0], e[1]), rect = elapsed(e[1], e[2]), scan = elapsed(e[2], e[3]),
                    pair = elapsed(e[3], e[4]), download = elapsed(e[4], e[5]), total = elapsed(e[0], e[5]);
       if (pass == 0) out.first_total_ms = total;
+      out.passes.push_back({upload, rect, scan, pair, download, total});
       if (pass == 0 || total < out.total_ms) {
         out.upload_ms = upload;
         out.rect_ms = rect;
@@ -331,8 +464,22 @@ FilterOutput run_filters(const FilterInput& input) {
       }
       out.pairs = pairs;
       out.rect_visits = visit_counts[0];
-      out.pair_visits = visit_counts[1];
+      out.pair_visits = visit_counts[1] + visit_counts[4];
+      out.trace_node_tests = visit_counts[4];
+      out.cache_node_tests = visit_counts[5];
+      out.representatives = out.tiles = cache.count;
       out.stack_failure = out.stack_failure || failed != 0;
+      // Independent replay check, outside CUDA-event timings. The host
+      // oracle in the probe still judges every final rectangle/pair mask.
+      if (pass == 0) {
+        first_rect_masks = out.rect_masks;
+        first_pair_masks = out.pair_masks;
+        std::copy(visit_counts, visit_counts + 6, first_counts);
+      } else {
+        out.repeat_mismatches += first_rect_masks != out.rect_masks;
+        out.repeat_mismatches += first_pair_masks != out.pair_masks;
+        for (int i = 0; i < 6; ++i) out.repeat_mismatches += first_counts[i] != visit_counts[i];
+      }
     }
   } catch (const CudaFailure& failure) {
     out.error = failure.what;
@@ -378,6 +525,7 @@ BatchOutput run_filter_batch(const FilterInput& input) {
     DeviceBuffer<unsigned long long> mass, offsets, counters;
     DeviceBuffer<int> failure;
     DeviceBuffer<unsigned char> scan_storage, flag_storage;
+    TileCacheBuffers cache;
     MHGP9_CUDA(cudaEventRecord(e[0]));
     nodes.allocate(input.node_count);
     rank_points.allocate(3 * input.rank_count);
@@ -387,7 +535,7 @@ BatchOutput run_filter_batch(const FilterInput& input) {
     filtered.allocate(input.rect_count);
     mass.allocate(input.rect_count);
     offsets.allocate(input.rect_count);
-    counters.allocate(4);
+    counters.allocate(6);
     failure.allocate(1);
     MHGP9_CUDA(cudaMemcpy(nodes.get(), input.nodes, input.node_count * sizeof(FlatNode), cudaMemcpyHostToDevice));
     MHGP9_CUDA(cudaMemcpy(rank_points.get(), input.rank_points, 3 * input.rank_count * sizeof(std::int32_t),
@@ -397,7 +545,7 @@ BatchOutput run_filter_batch(const FilterInput& input) {
       MHGP9_CUDA(cudaMemcpy(rect_b.get(), input.rect_b, input.rect_count * sizeof(u32), cudaMemcpyHostToDevice));
       MHGP9_CUDA(cudaMemcpy(rect_mask.get(), input.rect_mask, input.rect_count, cudaMemcpyHostToDevice));
     }
-    MHGP9_CUDA(cudaMemset(counters.get(), 0, 4 * sizeof(unsigned long long)));
+    MHGP9_CUDA(cudaMemset(counters.get(), 0, 6 * sizeof(unsigned long long)));
     MHGP9_CUDA(cudaMemset(failure.get(), 0, sizeof(int)));
     MHGP9_CUDA(cudaEventRecord(e[1]));
     if (input.rect_count != 0) {
@@ -426,14 +574,16 @@ BatchOutput run_filter_batch(const FilterInput& input) {
     std::size_t free_bytes = 0, total_bytes = 0;
     MHGP9_CUDA(cudaMemGetInfo(&free_bytes, &total_bytes));
     if (pairs * 10 > free_bytes / 2) throw CudaFailure{"pair buffers exceed half of the free device memory", true};
+    if (input.tile_cache)
+      cache.prepare(nodes.get(), rect_a.get(), rect_b.get(), filtered.get(), input.rect_count,
+                    blocks_for(input.rect_count), threads);
     MHGP9_CUDA(cudaEventRecord(e[3]));
     unsigned long long survivors = 0;
     if (pairs != 0) {
       pair_mask.allocate(pairs);
-      pair_kernel<<<blocks_for(pairs), threads>>>(nodes.get(), rank_points.get(), rect_a.get(), rect_b.get(),
-          filtered.get(), offsets.get(), input.rect_count, pairs, input.kmax, pair_mask.get(), counters.get() + 1,
-          counters.get() + 2, failure.get());
-      MHGP9_CUDA(cudaGetLastError());
+      launch_pair_filter(nodes.get(), rank_points.get(), rect_a.get(), rect_b.get(), filtered.get(), offsets.get(),
+          input.rect_count, pairs, input.kmax, pair_mask.get(), counters.get(), failure.get(),
+          input.tile_cache ? &cache : nullptr, sms, threads);
     }
     MHGP9_CUDA(cudaEventRecord(e[4]));
     if (pairs != 0) {
@@ -472,7 +622,7 @@ BatchOutput run_filter_batch(const FilterInput& input) {
       MHGP9_CUDA(cudaMemcpy(out.survivor_b.data(), out_b.get(), survivors * sizeof(u32), cudaMemcpyDeviceToHost));
       MHGP9_CUDA(cudaMemcpy(out.survivor_mask.data(), out_mask.get(), survivors, cudaMemcpyDeviceToHost));
     }
-    unsigned long long counts[4] = {0, 0, 0, 0};
+    unsigned long long counts[6]{};
     int failed = 0;
     MHGP9_CUDA(cudaMemcpy(counts, counters.get(), sizeof(counts), cudaMemcpyDeviceToHost));
     MHGP9_CUDA(cudaMemcpy(&failed, failure.get(), sizeof(int), cudaMemcpyDeviceToHost));
@@ -487,7 +637,10 @@ BatchOutput run_filter_batch(const FilterInput& input) {
     out.total_ms = elapsed(e[0], e[6]);
     out.pairs = pairs;
     out.rect_visits = counts[0];
-    out.pair_visits = counts[1];
+    out.pair_visits = counts[1] + counts[4];
+    out.trace_node_tests = counts[4];
+    out.cache_node_tests = counts[5];
+    out.representatives = out.tiles = cache.count;
     out.pair_q3_rejected = counts[2];
     out.pair_q4_rejected = counts[3];
     out.stack_failure = failed != 0;

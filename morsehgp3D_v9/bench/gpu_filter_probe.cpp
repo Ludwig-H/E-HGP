@@ -2,7 +2,7 @@
 // (23 septembre 2026).
 //
 //   mhgp9_gpu_filter_probe <fichier .u32le|.u16le> K workers [--s=8]
-//                          [--repeats=3] [--cpu-only] [--inject=pair_mask]
+//                          [--repeats=3] [--tile-cache] [--cpu-only] [--inject=pair_mask]
 //
 // Meme population que la chaine : front WSPD q3/q4 (MidpointSamples, voies
 // 6, s), rectangles filtres (bornes Affine), rectangles survivants developpes
@@ -16,7 +16,7 @@
 // apres le transfert : la sonde doit alors signaler exactement une paire
 // differente et sortir en code 1.
 //
-// Sortie : un objet JSON (schema mhgp9_gpu_filter_probe_v2) sur stdout.
+// Sortie : un objet JSON (schema mhgp9_gpu_filter_probe_v3) sur stdout.
 // Code 0 conforme ; 1 desaccord : masque ou total de visites different, ou
 // borne de pile violee sur le GPU alors que le CPU a passe les memes
 // requetes ; 2 argument ou entree (nuage vide, sites dupliques) ; 3 GPU
@@ -163,7 +163,7 @@ int probe_main(int argc, char** argv) {
     return 2;
   }
   unsigned long long kmax = 0, workers = 0, s = 8, repeats = 3;
-  bool cpu_only = false, inject_pair_mask = false;
+  bool cpu_only = false, inject_pair_mask = false, tile_cache = false;
   if (!parse_u(argv[2], kmax) || kmax < 3 || kmax > 10 || !parse_u(argv[3], workers) || workers == 0 ||
       workers > 256)
     return 2;
@@ -173,7 +173,8 @@ int probe_main(int argc, char** argv) {
       if (!parse_u(arg.substr(4), s) || s < 8 || s > 64) return 2;
     } else if (arg.starts_with("--repeats=")) {
       if (!parse_u(arg.substr(10), repeats) || repeats == 0 || repeats > 20) return 2;
-    } else if (arg == "--cpu-only") cpu_only = true;
+    } else if (arg == "--tile-cache") tile_cache = true;
+    else if (arg == "--cpu-only") cpu_only = true;
     else if (arg == "--inject=pair_mask") inject_pair_mask = true;
     else return 2;
   }
@@ -337,6 +338,7 @@ int probe_main(int argc, char** argv) {
     in.rect_count = R;
     in.kmax = k;
     in.repeats = static_cast<unsigned>(repeats);
+    in.tile_cache = tile_cache;
     g = gpu::run_filters(in);
     if (inject_pair_mask && g.error.empty() && !g.pair_masks.empty())
       g.pair_masks[g.pair_masks.size() / 2] ^= 2U;  // one flipped q3 bit: exactly one pair must differ
@@ -348,8 +350,8 @@ int probe_main(int argc, char** argv) {
     }
   }
 
-  std::printf("{\"schema\":\"mhgp9_gpu_filter_probe_v2\",\"input\":{\"sites\":%zu,\"hash\":\"%016llx\"},"
-              "\"options\":{\"K\":%u,\"s\":%llu,\"workers\":%zu,\"repeats\":%llu,\"cpu_only\":%s,\"inject\":\"%s\"},"
+  std::printf("{\"schema\":\"mhgp9_gpu_filter_probe_v3\",\"input\":{\"sites\":%zu,\"hash\":\"%016llx\"},"
+              "\"options\":{\"K\":%u,\"s\":%llu,\"workers\":%zu,\"repeats\":%llu,\"cpu_only\":%s,\"inject\":\"%s\",\"tile_cache\":%s},"
               "\"population\":{\"rectangles\":%zu,\"rectangle_survivors\":%llu,\"pairs\":%llu,"
               "\"pair_survivors\":%llu,\"q3_rejected\":%llu,\"q3_open\":%llu,\"q4_rejected\":%llu,\"q4_open\":%llu,"
               "\"front_product_visits\":%llu},"
@@ -357,7 +359,8 @@ int probe_main(int argc, char** argv) {
               "\"pair_cache_ms\":%.3f,\"rect_visits\":%llu,\"pair_visits\":%llu,\"cache_searches\":%llu,"
               "\"cache_mismatches\":%llu},",
               input.points.size(), static_cast<unsigned long long>(input.hash), k, s, W, repeats,
-              cpu_only ? "true" : "false", inject_pair_mask ? "pair_mask" : "", R, static_cast<unsigned long long>(rect_survivors),
+              cpu_only ? "true" : "false", inject_pair_mask ? "pair_mask" : "", tile_cache ? "true" : "false",
+              R, static_cast<unsigned long long>(rect_survivors),
               static_cast<unsigned long long>(P), static_cast<unsigned long long>(pair_survivors),
               static_cast<unsigned long long>(lanes_rejected[0]), static_cast<unsigned long long>(lanes_open[0]),
               static_cast<unsigned long long>(lanes_rejected[1]), static_cast<unsigned long long>(lanes_open[1]),
@@ -368,17 +371,29 @@ int probe_main(int argc, char** argv) {
   std::printf("\"gpu\":{\"available\":%s,\"device\":\"%s\",\"error\":\"%s\",\"stack_failure\":%s,\"pairs\":%llu,"
               "\"rect_visits\":%llu,\"pair_visits\":%llu,\"upload_ms\":%.3f,\"rect_ms\":%.3f,\"scan_ms\":%.3f,"
               "\"pair_ms\":%.3f,\"download_ms\":%.3f,\"total_ms\":%.3f,\"first_total_ms\":%.3f,"
-              "\"rect_mismatches\":%llu,\"pair_mismatches\":%llu,\"visits_equal\":%s},\"peak_rss_kb\":%ld}\n",
+              "\"rect_mismatches\":%llu,\"pair_mismatches\":%llu,\"visits_equal\":%s,"
+              "\"cache_node_tests\":%llu,\"trace_node_tests\":%llu,\"representatives\":%llu,\"tiles\":%llu,"
+              "\"repeat_mismatches\":%llu,\"passes\":[",
               g.available ? "true" : "false", json_text(g.device).c_str(), json_text(g.error).c_str(),
               g.stack_failure ? "true" : "false",
               static_cast<unsigned long long>(g.pairs), static_cast<unsigned long long>(g.rect_visits),
               static_cast<unsigned long long>(g.pair_visits), g.upload_ms, g.rect_ms, g.scan_ms, g.pair_ms,
               g.download_ms, g.total_ms, g.first_total_ms, static_cast<unsigned long long>(rect_mismatches),
-              static_cast<unsigned long long>(pair_mismatches), visits_equal ? "true" : "false", peak_rss_kb());
+              static_cast<unsigned long long>(pair_mismatches), visits_equal ? "true" : "false",
+              static_cast<unsigned long long>(g.cache_node_tests), static_cast<unsigned long long>(g.trace_node_tests),
+              static_cast<unsigned long long>(g.representatives), static_cast<unsigned long long>(g.tiles),
+              static_cast<unsigned long long>(g.repeat_mismatches));
+  for (std::size_t i = 0; i < g.passes.size(); ++i) {
+    const auto& p = g.passes[i];
+    std::printf("%s{\"upload_ms\":%.3f,\"rect_ms\":%.3f,\"scan_ms\":%.3f,\"pair_ms\":%.3f,\"download_ms\":%.3f,\"total_ms\":%.3f}",
+        i == 0 ? "" : ",", p.upload_ms, p.rect_ms, p.scan_ms, p.pair_ms, p.download_ms, p.total_ms);
+  }
+  std::printf("]},\"peak_rss_kb\":%ld}\n", peak_rss_kb());
   if (cache_mismatches != 0) return 1;
   if (cpu_only) return 0;
   if (!g.available || !g.error.empty()) return 3;
-  if (g.stack_failure || rect_mismatches != 0 || pair_mismatches != 0 || !visits_equal) return 1;
+  if (g.stack_failure || rect_mismatches != 0 || pair_mismatches != 0 || g.repeat_mismatches != 0 ||
+      g.rect_visits != cpu_rect_visits || (!tile_cache && !visits_equal)) return 1;
   return 0;
 }
 

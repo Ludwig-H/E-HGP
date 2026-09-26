@@ -9,9 +9,10 @@ Ce qui change :
   nvidia-smi existants, aucune installation), cible unique
   mhgp9_gpu_filter_probe ; les unites C++ gardent -Werror ;
 - chaque cas lance la sonde S1 (front WSPD q3/q4, rectangles, paires, CPU
-  puis GPU) ; sa sortie (schema mhgp9_gpu_filter_probe_v1) n'est acceptee
-  que si chaque masque GPU egale le masque CPU, les totaux de visites sont
-  egaux et le cache de ligne CPU donne les memes masques ;
+  puis GPU) ; sa sortie n'est acceptee que si chaque masque GPU egale le
+  masque CPU exhaustif et le cache de ligne CPU donne les memes masques.
+  Sans cache GPU, les totaux de visites sont egaux ; avec cache tuile, les
+  visites globales et les tests de cache/trace sont publies separement ;
 - backend=cuda_g4, GPU_executed vrai des qu'un cas a tourne ; aucune tour
   FULL n'est calculee.
 
@@ -36,8 +37,10 @@ TARGET = base.TARGET
 HELPER, HELPER_SHA = base.HELPER, base.HELPER_SHA
 PLAN, PROVENANCE = base.PLAN, base.PROVENANCE
 PROVENANCE_SCHEMA = base.PROVENANCE_SCHEMA
-PLAN_SCHEMA = 'mhgp9_gpu_filter_plan_v1'
-PROBE_SCHEMA = 'mhgp9_gpu_filter_probe_v2'
+PLAN_SCHEMA = 'mhgp9_gpu_filter_plan_v2'
+LEGACY_PLAN_SCHEMA = 'mhgp9_gpu_filter_plan_v1'
+PROBE_SCHEMA = 'mhgp9_gpu_filter_probe_v3'
+LEGACY_PROBE_SCHEMA = 'mhgp9_gpu_filter_probe_v2'
 # Le protocole GPU et les modules v9 qu'il importe comme bibliotheques.
 PROTOCOL_NAMES = frozenset('gcp-migration/' + name for name in (
     'gpu_filter_worker_v9.py', 'gpu_filter_session_v9.py', 'gpu_filter_snapshot_v9.py',
@@ -73,6 +76,7 @@ RECEIVED_STATUSES = ('completed', 'partial', 'gpu_mismatch', 'gpu_fault', 's1_ga
 # les ordres K10 et les autres trames disent quel morceau porter ensuite.
 GATE_CASE = dict(scene='00', k=5)
 CASE_KEYS = frozenset({'scene', 'file', 'n', 'k', 's', 'workers', 'repeats', 'repeat'})
+TILE_CASE_KEYS = CASE_KEYS | {'tile_cache'}
 SCOPE = 'S1_exact_q34_witness_filter_cpu_vs_gpu'
 # Seuil fixe d'avance (coordination du 23 septembre, 13 h 00 UTC) : toute la
 # population de filtrage de 08/000000 a K5, sans cache, en 0,1 s au plus sur
@@ -83,6 +87,7 @@ PREFLIGHT_FILE = base.PREFLIGHT_FILE
 TOP_KEYS = frozenset({'schema', 'input', 'options', 'population', 'cpu', 'gpu', 'peak_rss_kb'})
 INPUT_KEYS = frozenset({'sites', 'hash'})
 OPTION_KEYS = frozenset({'K', 's', 'workers', 'repeats', 'cpu_only', 'inject'})
+TILE_OPTION_KEYS = OPTION_KEYS | {'tile_cache'}
 INJECT = 'pair_mask'  # mutant causal du juge de la sonde (preflight_mutant)
 POPULATION_KEYS = ('rectangles', 'rectangle_survivors', 'pairs', 'pair_survivors', 'q3_rejected', 'q3_open',
                    'q4_rejected', 'q4_open', 'front_product_visits')
@@ -90,6 +95,9 @@ CPU_TIMES = ('index_ms', 'front_ms', 'rect_ms', 'pair_nocache_ms', 'pair_cache_m
 CPU_COUNTS = ('rect_visits', 'pair_visits', 'cache_searches', 'cache_mismatches')
 GPU_TIMES = ('upload_ms', 'rect_ms', 'scan_ms', 'pair_ms', 'download_ms', 'total_ms', 'first_total_ms')
 GPU_COUNTS = ('pairs', 'rect_visits', 'pair_visits', 'rect_mismatches', 'pair_mismatches')
+GPU_TILE_COUNTS = ('cache_node_tests', 'trace_node_tests', 'representatives', 'tiles')
+GPU_V3_COUNTS = GPU_TILE_COUNTS + ('repeat_mismatches',)
+GPU_PASS_TIMES = tuple(key for key in GPU_TIMES if key != 'first_total_ms')
 GPU_OTHER = ('available', 'device', 'error', 'stack_failure', 'visits_equal')
 # Rapprochement des chronos d'evenements CUDA (resolution ~0,5 us).
 EVENT_TOLERANCE_MS = 0.05
@@ -119,15 +127,19 @@ def validate_manifest(manifest):
     need(all(manifest[data['file']] == data['sha256'] for data in INPUTS.values()), 'pinned LiDAR frame hash')
 
 
-def validate_sources(read_bytes):
+def validate_sources(read_bytes, tile_cache=False):
     cmake = read_bytes(CMAKE_LISTS)
     probe = read_bytes(PROBE_SOURCE)
     need(b'mhgp9_product_executable(' + PROBE_TARGET.encode() + b' bench/gpu_filter_probe.cpp)' in cmake and
          b'option(MHGP9_ENABLE_CUDA' in cmake and b'src/gpu/filter_runner.cu' in cmake,
          'CMake GPU probe target/option absent')
-    need(all(token in probe for token in (PROBE_SCHEMA.encode(), b'"--s="', b'"--repeats="', b'"--cpu-only"',
+    need(any(schema.encode() in probe for schema in (PROBE_SCHEMA, LEGACY_PROBE_SCHEMA)) and
+         all(token in probe for token in (b'"--s="', b'"--repeats="', b'"--cpu-only"',
                                           b'"--inject=' + INJECT.encode() + b'"', b'\\"inject\\"')),
          'GPU probe schema/CLI differs from the S1 protocol')
+    need(not tile_cache or all(token in probe for token in (PROBE_SCHEMA.encode(), b'"--tile-cache"',
+                                                           b'\\"tile_cache\\"')),
+         'tile plan requires the v3 probe and its explicit tile-cache option')
 
 
 def _integer(value, low, high):
@@ -135,20 +147,24 @@ def _integer(value, low, high):
 
 
 def validate_plan(plan, manifest):
-    need(type(plan) is dict and set(plan) == {'schema', 'cases'} and plan['schema'] == PLAN_SCHEMA and
+    need(type(plan) is dict and set(plan) == {'schema', 'cases'} and
+         plan['schema'] in (PLAN_SCHEMA, LEGACY_PLAN_SCHEMA) and
          type(plan['cases']) is list and 0 < len(plan['cases']) <= 16, 'GPU plan schema')
+    tile_plan = plan['schema'] == PLAN_SCHEMA
     need(type(plan['cases'][0]) is dict and all(plan['cases'][0].get(key) == value for key, value in GATE_CASE.items()),
          'the first case is the S1 gate case 08/000000 (scene 00) at K5')
     seen = set()
     for case in plan['cases']:
-        need(type(case) is dict and set(case) == CASE_KEYS, 'GPU case fields')
+        need(type(case) is dict and set(case) == (TILE_CASE_KEYS if tile_plan else CASE_KEYS), 'GPU case fields')
+        need(not tile_plan or type(case['tile_cache']) is bool, 'GPU tile_cache flag')
         need(type(case['scene']) is str and case['scene'] in INPUTS and
              case['file'] == INPUTS[case['scene']]['file'] and case['file'] in manifest, 'GPU scene/file identity')
         need(case['n'] == INPUTS[case['scene']]['n'] and type(case['n']) is int, 'whole-frame size; prefixes forbidden')
-        need(type(case['k']) is int and case['k'] in (5, 10) and type(case['s']) is int and case['s'] == 8 and
+        need(type(case['k']) is int and case['k'] in (5, 10) and type(case['s']) is int and
+             case['s'] in ((8, 10, 12) if tile_plan else (8,)) and
              _integer(case['workers'], 1, 48) and _integer(case['repeats'], 1, 10) and
              _integer(case['repeat'], 0, (1 << 32) - 1), 'GPU case domain')
-        identity = tuple(case[key] for key in ('scene', 'k', 's', 'workers', 'repeats', 'repeat'))
+        identity = tuple(case[key] for key in ('scene', 'k', 's', 'workers', 'repeats', 'repeat')) + (case.get('tile_cache', False),)
         need(identity not in seen, 'duplicate case needs an explicit distinct repetition')
         seen.add(identity)
     return plan['cases']
@@ -167,12 +183,15 @@ def probe_command(build, root, case, inject=''):
 
 def expected_probe_tail(case, inject=''):
     tail = [str(case['k']), str(case['workers']), '--s=' + str(case['s']), '--repeats=' + str(case['repeats'])]
+    if case.get('tile_cache', False):
+        tail.append('--tile-cache')
     return tail + (['--inject=' + inject] if inject else [])
 
 
-def preflight_case(raw):
+def preflight_case(raw, tile_cache=False):
     """Preflight : la sonde reelle, CPU puis GPU, nuage deterministe, K5, deux fils, un passage."""
-    return dict(scene='preflight', file=PREFLIGHT_FILE, n=len(raw) // 12, k=5, s=8, workers=2, repeats=1, repeat=0)
+    return dict(scene='preflight', file=PREFLIGHT_FILE, n=len(raw) // 12, k=5, s=8, workers=2, repeats=1, repeat=0,
+                tile_cache=tile_cache)
 
 
 def _count(value):
@@ -189,15 +208,24 @@ def validate_probe(value, case, exit_code, inputs=None, inject=''):
     Toute sortie malformee, incoherente ou d'un domaine different est
     refusee (ValueError) : c'est un defaut de protocole, pas une mesure."""
     inputs = INPUTS if inputs is None else inputs
-    need(type(value) is dict and set(value) == TOP_KEYS and value['schema'] == PROBE_SCHEMA, 'S1 probe top-level schema')
+    need(type(value) is dict and set(value) == TOP_KEYS and
+         value['schema'] in (PROBE_SCHEMA, LEGACY_PROBE_SCHEMA), 'S1 probe top-level schema')
+    tile_schema = value['schema'] == PROBE_SCHEMA
+    tile_cache = case.get('tile_cache', False)
+    need(not tile_cache or tile_schema, 'tile cache requires probe v3')
     need(type(value['input']) is dict and set(value['input']) == INPUT_KEYS and
-         value['input']['sites'] == case['n'] and value['input']['hash'] == inputs[case['scene']]['fnv'],
+         type(value['input']['sites']) is int and value['input']['sites'] == case['n'] and
+         value['input']['hash'] == inputs[case['scene']]['fnv'],
          'S1 probe input identity')
     options = value['options']
-    need(type(options) is dict and set(options) == OPTION_KEYS and options['K'] == case['k'] and
+    need(type(options) is dict and set(options) == (TILE_OPTION_KEYS if tile_schema else OPTION_KEYS) and
+         all(type(options[key]) is int for key in ('K', 's', 'workers', 'repeats')) and
+         options['K'] == case['k'] and
          options['s'] == case['s'] and options['workers'] == case['workers'] and
          options['repeats'] == case['repeats'] and options['cpu_only'] is False and options['inject'] == inject,
          'S1 probe options')
+    need(not tile_schema or type(options['tile_cache']) is bool and options['tile_cache'] is tile_cache,
+         'S1 tile cache option identity')
     population = value['population']
     need(type(population) is dict and set(population) == set(POPULATION_KEYS) and
          all(_count(population[key]) for key in POPULATION_KEYS), 'S1 population fields')
@@ -212,10 +240,13 @@ def validate_probe(value, case, exit_code, inputs=None, inject=''):
     need(cpu['cache_mismatches'] == 0 and cpu['cache_searches'] <= population['pairs'] and
          cpu['pair_visits'] >= population['pairs'], 'S1 CPU reference consistency')
     gpu = value['gpu']
-    need(type(gpu) is dict and set(gpu) == set(GPU_TIMES) | set(GPU_COUNTS) | set(GPU_OTHER) and
-         all(_number(gpu[key]) for key in GPU_TIMES) and all(_count(gpu[key]) for key in GPU_COUNTS) and
+    counts = GPU_COUNTS + (GPU_V3_COUNTS if tile_schema else ())
+    other = set(GPU_OTHER) | ({'passes'} if tile_schema else set())
+    need(type(gpu) is dict and set(gpu) == set(GPU_TIMES) | set(counts) | other and
+         all(_number(gpu[key]) for key in GPU_TIMES) and all(_count(gpu[key]) for key in counts) and
          type(gpu['available']) is bool and type(gpu['device']) is str and type(gpu['error']) is str and
          type(gpu['stack_failure']) is bool and type(gpu['visits_equal']) is bool, 'S1 GPU fields')
+    need(not tile_schema or type(gpu['passes']) is list, 'S1 GPU passes array')
     need(_count(value['peak_rss_kb']) and value['peak_rss_kb'] > 0, 'S1 peak RSS')
     if exit_code == 3:
         # No device at all is unavailability; a CUDA or host error on a
@@ -223,26 +254,46 @@ def validate_probe(value, case, exit_code, inputs=None, inject=''):
         need(not gpu['available'] or gpu['error'] != '', 'exit 3 without a GPU failure')
         return 'gpu_unavailable' if not gpu['available'] else 'gpu_fault'
     need(gpu['available'] and gpu['error'] == '' and gpu['device'] == DEVICE_NAME, 'S1 GPU identity/availability')
+    if tile_schema:
+        need((tile_cache or all(gpu[key] == 0 for key in GPU_TILE_COUNTS)) and
+             gpu['representatives'] == gpu['tiles'] <= gpu['pairs'] and
+             gpu['representatives'] <= gpu['trace_node_tests'] <= gpu['pair_visits'], 'S1 tile work counters')
+        need(not tile_cache or case['scene'] == 'preflight' or gpu['tiles'] > 0,
+             'whole-frame tile cache experiment must be non-vacuous')
+    visits_equal = gpu['rect_visits'] == cpu['rect_visits'] and gpu['pair_visits'] == cpu['pair_visits']
+    need(gpu['visits_equal'] is visits_equal, 'S1 visits_equal must report actual equality')
     parts = gpu['upload_ms'] + gpu['rect_ms'] + gpu['scan_ms'] + gpu['pair_ms'] + gpu['download_ms']
     need(abs(parts - gpu['total_ms']) <= EVENT_TOLERANCE_MS and gpu['total_ms'] <= gpu['first_total_ms'] + 1e-9 and
          gpu['total_ms'] > 0, 'S1 GPU event timings')
+    if tile_schema:
+        need(len(gpu['passes']) == case['repeats'], 'S1 all GPU repetitions must be recorded')
+        for row in gpu['passes']:
+            need(type(row) is dict and set(row) == set(GPU_PASS_TIMES) and
+                 all(_number(row[key]) for key in GPU_PASS_TIMES) and row['total_ms'] > 0 and
+                 abs(sum(row[key] for key in GPU_PASS_TIMES if key != 'total_ms') - row['total_ms']) <=
+                 EVENT_TOLERANCE_MS, 'S1 pass event timings')
+        need(gpu['first_total_ms'] == gpu['passes'][0]['total_ms'] and
+             gpu['total_ms'] == min(row['total_ms'] for row in gpu['passes']) and
+             any(all(gpu[key] == row[key] for key in GPU_PASS_TIMES) for row in gpu['passes']),
+             'S1 selected timing must be one actual minimum-total pass')
     # A stack-bound violation on the device is a divergence: the CPU passed
     # the same queries under the same proved bound.
     agree = (not gpu['stack_failure'] and gpu['pairs'] == population['pairs'] and gpu['rect_mismatches'] == 0 and
              gpu['pair_mismatches'] == 0 and
-             gpu['visits_equal'] and gpu['rect_visits'] == cpu['rect_visits'] and
-             gpu['pair_visits'] == cpu['pair_visits'])
+             gpu['rect_visits'] == cpu['rect_visits'] and (tile_cache or visits_equal) and
+             (not tile_schema or gpu['repeat_mismatches'] == 0))
     if inject:
         # The flipped mask of the causal mutant: exactly one pair differs.
         need(exit_code == 1 and not gpu['stack_failure'] and gpu['pairs'] == population['pairs'] and
              gpu['rect_mismatches'] == 0 and
-             gpu['pair_mismatches'] == 1 and gpu['visits_equal'] and gpu['rect_visits'] == cpu['rect_visits'] and
-             gpu['pair_visits'] == cpu['pair_visits'], 'the pair_mask mutant was not detected exactly once')
+             gpu['pair_mismatches'] == 1 and gpu['rect_visits'] == cpu['rect_visits'] and
+             (tile_cache or visits_equal) and (not tile_schema or gpu['repeat_mismatches'] == 0),
+             'the pair_mask mutant was not detected exactly once')
         return 'gpu_mismatch'
     if exit_code == 1:
-        need(not agree, 'exit 1 while every mask and visit total agrees')
+        need(not agree, 'exit 1 while masks and required counters agree')
         return 'gpu_mismatch'
-    need(exit_code == 0 and agree, 'S1 exit 0 requires identical masks and visit totals')
+    need(exit_code == 0 and agree, 'S1 exit 0 requires identical masks and required counters')
     return 'complete'
 
 
@@ -312,10 +363,12 @@ def execute(args):
         save(output / 'sources_before.json', before)
         read = lambda name: (root / name).read_bytes()
         validate_sources(read)
-        cases = validate_plan(strict_json(read(PLAN)), manifest)
+        plan = strict_json(read(PLAN))
+        cases = validate_plan(plan, manifest)
+        validate_sources(read, tile_cache=any(case.get('tile_cache', False) for case in cases))
         base.validate_data(read)
         result['provenance'] = base.validate_provenance(strict_json(read(PROVENANCE)), manifest)
-        result.update(plan_schema=PLAN_SCHEMA, cases=cases, case_outcomes=[], completed_case_indices=[])
+        result.update(plan_schema=plan['schema'], cases=cases, case_outcomes=[], completed_case_indices=[])
         nvcc = next((p for p in CUDA_PATHS if Path(p).is_file() and os.access(p, os.X_OK)), None)
         tools = {'g++': shutil.which('g++'), 'cmake': shutil.which('cmake'), 'nvcc': nvcc,
                  'nvidia-smi': shutil.which('nvidia-smi')}
@@ -374,6 +427,29 @@ def execute(args):
         result['GPU_executed'] = True
         result['preflight'] = dict(sites=pre_case['n'], pairs=pre_value['population']['pairs'],
                                    gpu_total_ms=pre_value['gpu']['total_ms'])
+        if any(case.get('tile_cache', False) for case in cases):
+            tile_case = preflight_case(pre_raw, tile_cache=True)
+            tile_row = worker.command('preflight_tile', [TIME, '-v', str(binary), str(output / PREFLIGHT_FILE),
+                                                         *expected_probe_tail(tile_case)])
+            tile_mutant_row = worker.command('preflight_tile_mutant',
+                                            [TIME, '-v', str(binary), str(output / PREFLIGHT_FILE),
+                                             *expected_probe_tail(tile_case, INJECT)])
+            try:
+                tile_value = strict_json((output / 'preflight_tile.stdout').read_bytes())
+                need(validate_probe(tile_value, tile_case, tile_row['exit_code'],
+                                    inputs=base.preflight_inputs(pre_raw)) == 'complete',
+                     'tile preflight probe not complete')
+                base.validate_gnu_time((output / 'preflight_tile.stderr').read_text(errors='replace'), 0)
+                tile_mutant = strict_json((output / 'preflight_tile_mutant.stdout').read_bytes())
+                need(validate_probe(tile_mutant, tile_case, tile_mutant_row['exit_code'],
+                                    inputs=base.preflight_inputs(pre_raw), inject=INJECT) == 'gpu_mismatch',
+                     'tile causal mutant not killed')
+                base.validate_gnu_time((output / 'preflight_tile_mutant.stderr').read_text(errors='replace'), 1)
+                need(tile_value['population'] == pre_value['population'], 'preflight tile population differs')
+            except (ValueError, KeyError, TypeError, UnicodeError) as error:
+                raise PreflightFailed(type(error).__name__ + ': ' + str(error)) from error
+            result['preflight_tile'] = dict(sites=tile_case['n'], pairs=tile_value['population']['pairs'],
+                                            gpu_total_ms=tile_value['gpu']['total_ms'])
 
         def left():
             try:

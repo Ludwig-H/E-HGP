@@ -13,7 +13,7 @@ finally, meme apres echec, interruption ou recuperation impossible.
 
 Differences : worker gpu_filter_worker_v9.py (bibliotheque tower_worker_v9.py
 prise dans l'arbre source extrait et rehache, PYTHONPATH), reception propre
-au schema mhgp9_gpu_filter_probe_v2, backend=cuda_g4, GPU_executed vrai
+aux schemas mhgp9_gpu_filter_probe_v3 (v2 historique relisible), backend=cuda_g4, GPU_executed vrai
 seulement apres une reception validee, FULL jamais execute ;
 public_status=not_claimed.
 """
@@ -69,6 +69,7 @@ def validate_snapshot(path, manifest):
         read = lambda name: archive.extractfile(name).read()
         payload.validate_sources(read)
         cases = payload.validate_plan(payload.strict_json(read(payload.PLAN)), manifest)
+        payload.validate_sources(read, tile_cache=any(case.get('tile_cache', False) for case in cases))
         payload.base.validate_data(read)
         provenance = payload.base.validate_provenance(payload.strict_json(read(payload.PROVENANCE)), manifest)
     return cases, provenance
@@ -141,14 +142,17 @@ def validate_received(output, manifest, worker_pin, expected_cases, generation, 
     canonical = lambda items: sorted(json.dumps(item, sort_keys=True) for item in items)
     need(type(value.get('commands')) is list and canonical(rows.values()) == canonical(value['commands']),
          'worker command list/raw receipts mismatch')
-    need(set(FIXED_COMMANDS) <= set(rows), 'environment/build commands absent')
+    tile_plan = any(case.get('tile_cache', False) for case in expected_cases)
+    fixed_commands = set(FIXED_COMMANDS) | ({'preflight_tile', 'preflight_tile_mutant'} if tile_plan else set())
+    need(fixed_commands <= set(rows), 'environment/build commands absent')
     for stem, row in rows.items():
         match = CASE_COMMAND.fullmatch(stem)
-        need(stem in FIXED_COMMANDS or (match is not None and int(match.group(2)) < len(expected_cases)),
+        need(stem in fixed_commands or (match is not None and int(match.group(2)) < len(expected_cases)),
              'unexpected worker command: ' + stem)
         if match is None or match.group(1) != 'probe':
             # The causal mutant of the preflight must exit 1 (mismatch found).
-            need(row.get('exit_code') == (1 if stem == 'preflight_mutant' else 0) and row.get('group_closed') is True and
+            need(row.get('exit_code') == (1 if stem in ('preflight_mutant', 'preflight_tile_mutant') else 0) and
+                 row.get('group_closed') is True and
                  not row.get('residual_or_interrupted_group_killed'), 'worker command closure: ' + stem)
     need(payload.DEVICE_NAME in (output / 'gpu_inventory.stdout').read_text(), 'G4 GPU inventory')
     tools = dict(cmake=rows['cmake_version']['argv'][0], nvcc=rows['nvcc_version']['argv'][0],
@@ -184,6 +188,25 @@ def validate_received(output, manifest, worker_pin, expected_cases, generation, 
                                 inputs=payload.base.preflight_inputs(pre_raw), inject=payload.INJECT) == 'gpu_mismatch',
          'causal mutant recomputation')
     payload.base.validate_gnu_time((output / 'preflight_mutant.stderr').read_text(errors='replace'), 1)
+    if tile_plan:
+        tile_case = payload.preflight_case(pre_raw, tile_cache=True)
+        for stem, inject, exit_code, outcome in (('preflight_tile', '', 0, 'complete'),
+                                                ('preflight_tile_mutant', payload.INJECT, 1, 'gpu_mismatch')):
+            need(rows[stem]['argv'][:4] == pre_argv[:4] and
+                 rows[stem]['argv'][4:] == payload.expected_probe_tail(tile_case, inject),
+                 'exact tile preflight invocation')
+            probe = payload.strict_json((output / (stem + '.stdout')).read_bytes())
+            need(payload.validate_probe(probe, tile_case, rows[stem]['exit_code'],
+                                        inputs=payload.base.preflight_inputs(pre_raw), inject=inject) == outcome,
+                 'tile preflight recomputation')
+            payload.base.validate_gnu_time((output / (stem + '.stderr')).read_text(errors='replace'), exit_code)
+            need(probe['population'] == pre_value['population'], 'tile preflight population differs')
+            if not inject:
+                need(value.get('preflight_tile') == dict(sites=tile_case['n'], pairs=probe['population']['pairs'],
+                                                         gpu_total_ms=probe['gpu']['total_ms']),
+                     'tile preflight summary recomputation')
+    else:
+        need('preflight_tile' not in value, 'unexpected tile preflight summary')
     outcomes = value.get('case_outcomes')
     need(type(outcomes) is list and len(outcomes) == len(cases), 'case outcome list')
     exhausted = False
