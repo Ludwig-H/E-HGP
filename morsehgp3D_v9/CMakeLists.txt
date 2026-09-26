@@ -759,9 +759,12 @@ endforeach()
 # (chain_nonpositive_regular_support, sous le sceau et sans ; refus types
 # d'arite et d'ID), faute systematique prise par l'echantillon, residu isole
 # declare, egalite scelle / non scelle (condenses, tower_work, ordres) a K3,
-# K5, K10, 1 et 4 fils et voie CPU par lots. Trois mutants tues (code 1) :
-# chaine sans positivite, tour sans positivite du support declare,
-# echantillon declare mais jamais execute.
+# K5, K10, 1 et 4 fils et voie CPU par lots (tower_work entier, echantillon
+# compte a chaque controle), ordre des refus du recensement (plus petit
+# indice de cle a 1, 2, 4 et 8 fils). Quatre mutants tues (code 1) : chaine
+# sans positivite, tour sans positivite du support declare, echantillon
+# jamais execute (tue par la section 3, et par la section 4 seule), premier
+# refus du recensement dans le temps.
 function(mhgp9_sealed_catalogue_executable name)
   mhgp9_product_executable(${name} tests/chain/sealed_catalogue_gate.cpp src/chain/tower_chain.cpp)
   target_include_directories(${name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/gen")
@@ -776,7 +779,8 @@ mhgp9_gate(mhgp9_chain_sealed_catalogue_bad_argument 2 mhgp9_chain_sealed_catalo
            LABELS "gate;chain" TIMEOUT 60)
 foreach(pair IN ITEMS CHAIN_MUTANT_NO_POSITIVITY:forged.q3+sealed=1+W=1
                       TOWER_MUTANT_SUPPORT_NO_POSITIVITY:tower_direct.q3+threads=0
-                      TOWER_MUTANT_SEAL_NO_SAMPLE:fault.systematic+sealed=1+W=4)
+                      TOWER_MUTANT_SEAL_NO_SAMPLE:fault.systematic+sealed=1+W=4
+                      CHAIN_MUTANT_CENSUS_FIRST_IN_TIME:census_order.delayed+W=2)
   string(REPLACE ":" ";" parts ${pair})
   list(GET parts 0 mutant)
   list(GET parts 1 cause)
@@ -788,6 +792,9 @@ foreach(pair IN ITEMS CHAIN_MUTANT_NO_POSITIVITY:forged.q3+sealed=1+W=1
   mhgp9_gate(mhgp9_chain_sealed_catalogue_mutant_${lower} 1 mhgp9_chain_sealed_catalogue_${lower}_mutant_gate
              ARGS --selftest EXPECT_PREFIX "cause=${cause_words}" LABELS "gate;chain;tower;mutant" TIMEOUT 900)
 endforeach()
+mhgp9_gate(mhgp9_chain_sealed_catalogue_mutant_seal_no_sample_equality 1
+           mhgp9_chain_sealed_catalogue_seal_no_sample_mutant_gate ARGS --selftest --only=equality
+           EXPECT_PREFIX "cause=equality.seal_path fixture K5 W1 sealed=1" LABELS "gate;chain;tower;mutant" TIMEOUT 900)
 # Regroupement de la phase 0 sans tri des requetes de 56 o (classes de hachage
 # exactes, tests/tower/static_grouping_gate.cpp) : temoin trie contre voie
 # hachee, cibles statiques et premieres requetes octet pour octet a chaque

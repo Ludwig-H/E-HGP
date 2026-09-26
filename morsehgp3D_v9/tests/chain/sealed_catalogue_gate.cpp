@@ -20,24 +20,36 @@
 //      interieur de chaque boule reguliere remplace (faute systematique) est
 //      refuse par l'echantillon de la passe 1 sous le sceau
 //      (tower: full_ball_census_power), comme sans sceau ; une seule boule
-//      reguliere alteree hors de l'echantillon est refusee sans sceau et
-//      publiee sous le sceau (residu declare, ligne residual=) ;
+//      reguliere alteree hors de l'echantillon est refusee sans sceau, et
+//      son refus sous le sceau n'est pas garanti (residu declare, issue
+//      imprimee sur la ligne residual=, jamais jugee) ;
 //   4. egalite scelle / non scelle : memes condenses (tour, catalogue,
-//      presentations), meme tower_work, memes ordres, sur le nuage de la
-//      queue (1 500 sites, six carres plantes) a K3, K5 et K10 et sur la
-//      fixture a K5, 1 et 4 fils, et sur la voie CPU par lots avec voies
-//      q3/q4 a K5 ; planchers : sceau pris (sealed_catalogues, echantillon
-//      = ceil(n/64)), supports reguliers certifies q3 et q4 (somme = boules
-//      regulieres), coquilles etendues, controles de la passe 1 reduits.
+//      presentations), meme tower_work (tous les champs de la sonde, travail
+//      de resolution compris), memes ordres, sur le nuage de la queue
+//      (1 500 sites, six carres plantes) a K3, K5 et K10 et sur la fixture
+//      a K5, 1 et 4 fils, et sur la voie CPU par lots avec voies q3/q4 a
+//      K5 ; planchers : sceau pris (sealed_catalogues ; boules controlees
+//      par la passe 1, COMPTEES a chaque controle, = ceil(n/64) ; supports
+//      declares certifies > 0 sous le sceau), supports reguliers certifies
+//      q3 et q4 (somme = boules regulieres), coquilles etendues, controles
+//      de la passe 1 reduits ;
+//   5. ordre des refus du recensement : deux refus plantes a des cles de
+//      tranches differentes (indices 10 et 600, le fil de la plus petite
+//      arrete 1 s avant elle, puis sans arret), et un refus plante a la
+//      cle 0 avec le triangle obtus forge (chain_nonpositive_regular_support
+//      plus loin) : a 1, 2, 4 et 8 fils, le refus publie est celui du plus
+//      petit indice de cle, celui de la boucle sequentielle.
 //
-//   mhgp9_chain_sealed_catalogue_gate --selftest
+//   mhgp9_chain_sealed_catalogue_gate --selftest [--only=equality]
 //
-// Code 0 conforme, 1 desaccord (ligne cause=), 2 argument, 3 plancher ou
-// fixture. Mutants compiles (code 1 attendu) :
-// MHGP9_TOWER_MUTANT_SUPPORT_NO_POSITIVITY (section 1),
-// MHGP9_CHAIN_MUTANT_NO_POSITIVITY (section 2 : sous le sceau, le triangle
-// obtus est publie ou pris par l'echantillon, jamais refuse par la chaine),
-// MHGP9_TOWER_MUTANT_SEAL_NO_SAMPLE (section 3).
+// --only=equality : section 4 seule (et ses planchers). Code 0 conforme,
+// 1 desaccord (ligne cause=), 2 argument, 3 plancher ou fixture. Mutants
+// compiles (code 1 attendu) : MHGP9_TOWER_MUTANT_SUPPORT_NO_POSITIVITY
+// (section 1), MHGP9_CHAIN_MUTANT_NO_POSITIVITY (section 2 : sous le
+// sceau, le triangle obtus est publie ou pris par l'echantillon, jamais
+// refuse par la chaine), MHGP9_TOWER_MUTANT_SEAL_NO_SAMPLE (section 3, et
+// section 4 seule : echantillon compte nul), MHGP9_CHAIN_MUTANT_CENSUS_
+// FIRST_IN_TIME (section 5 : le premier refus dans le temps).
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -69,7 +81,7 @@ static_assert(!std::is_move_constructible_v<tw::SealedCatalogue>);
 struct Floors {
   u64 direct_refusals = 0, forged_refusals = 0, typed_refusals = 0, fault_refusals = 0;
   u64 sealed_runs = 0, unsealed_runs = 0, sampled = 0, q3_regular = 0, q4_regular = 0, extended = 0;
-  u64 lanes_sealed_runs = 0, reduced_pass1 = 0;
+  u64 lanes_sealed_runs = 0, reduced_pass1 = 0, order_runs = 0;
 } floors;
 
 bool fail(const std::string& cause) {
@@ -284,15 +296,15 @@ bool faults(const std::vector<Point>& points) {
   if (unsealed.status != mhgp9::ChainStatus::kInvalidInput || unsealed.reason != "tower: full_ball_census_power")
     return fail("fault.single sealed=0 W=4 " + outcome(unsealed));
   ++floors.fault_refusals;
-  // Declared residual (R-29): an isolated fault outside the sample of a
-  // regular ball is not caught under the seal.
+  // Declared residual (R-29): the refusal of an isolated fault outside the
+  // sample is not guaranteed under the seal (printed, never judged).
   std::printf("residual=single_fault_sealed ball=%zu %s digest_differs=%d\n", single, outcome(sealed).c_str(),
               sealed.status == mhgp9::ChainStatus::kComplete && sealed.tower_digest != clean.tower_digest ? 1 : 0);
   return true;
 }
 
 bool same_work(const tw::FullBallStats& x, const tw::FullBallStats& y) {
-  // The probe's tower_work fields (tower_tail_gate.cpp).
+  // Every tower_work field of the probe (bench/tower_probe.cpp).
   return x.records == y.records && x.extra_records == y.extra_records && x.representatives == y.representatives &&
          x.anchor_hits == y.anchor_hits && x.key_lookups == y.key_lookups &&
          x.intruder_queries == y.intruder_queries && x.intruder_nodes == y.intruder_nodes &&
@@ -303,7 +315,61 @@ bool same_work(const tw::FullBallStats& x, const tw::FullBallStats& y) {
          x.resolve_work.materializations == y.resolve_work.materializations &&
          x.resolve_work.supports_by_size == y.resolve_work.supports_by_size &&
          x.resolve_work.proposals == y.resolve_work.proposals &&
-         x.resolve_work.verified_proposals == y.resolve_work.verified_proposals;
+         x.resolve_work.verified_proposals == y.resolve_work.verified_proposals &&
+         x.resolve_work.boundary_canonicalizations == y.resolve_work.boundary_canonicalizations &&
+         x.resolve_work.proposal_fallbacks == y.resolve_work.proposal_fallbacks;
+}
+
+// Section 5: the census's refusal is the one of the smallest key index at
+// 1, 2, 4 and 8 workers. `delay`: the worker holding that key stalls before
+// it, so that another refusal is raised first in wall time.
+bool census_order(const std::vector<Point>& tail, const Fixture& f) {
+  auto& seam = mhgp9::chain_test::seam;
+  const auto unique_keys = [](const std::vector<Point>& points) {
+    auto o = options_for(5, 1, false);
+    o.run_tower = false;
+    const auto r = mhgp9::run_tower_chain(points, o);
+    return r.status == mhgp9::ChainStatus::kComplete ? r.catalogue.unique_keys : 0;
+  };
+  const std::size_t tail_keys = unique_keys(tail), fixture_keys = unique_keys(f.points);
+  // Every worker takes a grain (256 keys) and the two planted keys lie in
+  // different grains.
+  if (tail_keys < 8 * 256 || fixture_keys < 2 * 256) return fail("census_order.keys");
+  struct Case {
+    const char* name;
+    const std::vector<Point>* points;
+    std::vector<mhgp9::chain_test::PlantedCensusFault> planted;
+    bool forged_triangle;
+    std::size_t delay_group;
+    const char* expected;
+  };
+  const std::size_t none = static_cast<std::size_t>(-1);
+  const std::vector<mhgp9::chain_test::PlantedCensusFault> two = {{600, "chain_test_census_fault_high"},
+                                                                  {10, "chain_test_census_fault_low"}};
+  const Case cases[] = {
+      {"delayed", &tail, two, false, 10, "chain_test_census_fault_low"},
+      {"undelayed", &tail, two, false, none, "chain_test_census_fault_low"},
+      {"forged_q3", &f.points, {{0, "chain_test_census_fault_first"}}, true, 0, "chain_test_census_fault_first"}};
+  for (const auto& c : cases)
+    for (std::size_t workers : {1u, 2u, 4u, 8u}) {
+      seam.census_faults = c.planted;
+      seam.census_delay_group = c.delay_group;
+      seam.census_delay_ms = 1000;
+      if (c.forged_triangle) seam.forged = {{3, f.q3}};
+      const auto r = mhgp9::run_tower_chain(*c.points, options_for(5, workers, true));
+      seam = mhgp9::chain_test::Seam{};
+      if (r.status != mhgp9::ChainStatus::kInvariantViolated || r.reason != c.expected)
+        return fail(std::string("census_order.") + c.name + " W=" + std::to_string(workers) + " " + outcome(r));
+      ++floors.order_runs;
+    }
+  // The forged triangle alone is refused by the census (the second refusal
+  // of the forged_q3 case is real).
+  seam.forged = {{3, f.q3}};
+  const auto alone = mhgp9::run_tower_chain(f.points, options_for(5, 8, true));
+  seam = mhgp9::chain_test::Seam{};
+  if (alone.reason != "chain_nonpositive_regular_support") return fail("census_order.forged_alone " + outcome(alone));
+  ++floors.order_runs;
+  return true;
 }
 
 bool same_orders(const mhgp9::ChainResult& x, const mhgp9::ChainResult& y) {
@@ -343,9 +409,11 @@ bool equality(const std::vector<Point>& points, const char* name, unsigned kmax,
         return fail("equality.status " + where + " " + outcome(r));
       const auto& c = r.catalogue;
       const auto& s = r.tower_stats;
+      // The sample is counted at each check of pass 1, never declared.
       if (s.sealed_catalogues != (sealed ? 1u : 0u) ||
           s.seal_sampled_balls != (sealed ? (c.balls + tw::kSealSampleStride - 1) / tw::kSealSampleStride : 0u))
         return fail("equality.seal_path " + where);
+      if (sealed && s.declared_support_checks == 0) return fail("equality.seal_sample_checks " + where);
       u64 regular = 0;
       for (const auto v : c.regular_supports_by_arity) regular += v;
       if (regular != c.balls - c.extra_shell_balls || c.regular_supports_by_arity[0] != 0 ||
@@ -387,35 +455,45 @@ bool equality(const std::vector<Point>& points, const char* name, unsigned kmax,
 }  // namespace
 
 int main(int argc, char** argv) {
-  if (argc != 2 || std::string_view(argv[1]) != "--selftest") {
-    std::fprintf(stderr, "usage: mhgp9_chain_sealed_catalogue_gate --selftest\n");
+  const bool only_equality = argc == 3 && std::string_view(argv[2]) == "--only=equality";
+  if ((argc != 2 && !only_equality) || std::string_view(argv[1]) != "--selftest") {
+    std::fprintf(stderr, "usage: mhgp9_chain_sealed_catalogue_gate --selftest [--only=equality]\n");
     return 2;
   }
   const auto f = fixture();
   const auto ix = index_of(f.points);
   if (!check_fixture(f, ix, 5)) return 3;
-  if (!direct_tower(f, ix)) return 1;
-  if (!forged(f)) return 1;
   const auto tail = tail_cloud();
-  if (!faults(tail)) return 1;
+  if (!only_equality) {
+    if (!direct_tower(f, ix)) return 1;
+    if (!forged(f)) return 1;
+    if (!faults(tail)) return 1;
+  }
   std::array<u64, 3> engine_k5{};
   if (!equality(f.points, "fixture", 5, false, nullptr)) return 1;
   for (unsigned kmax : {3u, 5u, 10u})
     if (!equality(tail, "tail", kmax, false, kmax == 5 ? &engine_k5 : nullptr)) return 1;
   if (!equality(tail, "tail", 5, true, &engine_k5)) return 1;
-  const bool floors_hold = floors.direct_refusals == 4 && floors.forged_refusals == 8 && floors.typed_refusals == 3 &&
-                           floors.fault_refusals == 3 && floors.sealed_runs == 10 && floors.unsealed_runs == 10 &&
-                           floors.lanes_sealed_runs == 2 && floors.reduced_pass1 == 10 && floors.sampled >= 100 &&
-                           floors.q3_regular >= 1000 && floors.q4_regular >= 1000 && floors.extended >= 20;
-  std::printf("sealed_catalogue_gate direct=%llu forged=%llu typed=%llu faults=%llu sealed_runs=%llu sampled=%llu "
-              "q3_regular=%llu q4_regular=%llu extended=%llu reduced_pass1=%llu\n",
+  if (!only_equality && !census_order(tail, f)) return 1;
+  const bool equality_floors = floors.sealed_runs == 10 && floors.unsealed_runs == 10 &&
+                               floors.lanes_sealed_runs == 2 && floors.reduced_pass1 == 10 &&
+                               floors.sampled >= 100 && floors.q3_regular >= 1000 && floors.q4_regular >= 1000 &&
+                               floors.extended >= 20;
+  const bool floors_hold =
+      equality_floors && (only_equality || (floors.direct_refusals == 4 && floors.forged_refusals == 8 &&
+                                            floors.typed_refusals == 3 && floors.fault_refusals == 3 &&
+                                            floors.order_runs == 13));
+  std::printf("sealed_catalogue_gate%s direct=%llu forged=%llu typed=%llu faults=%llu sealed_runs=%llu sampled=%llu "
+              "q3_regular=%llu q4_regular=%llu extended=%llu reduced_pass1=%llu order=%llu\n",
+              only_equality ? "_equality" : "",
               static_cast<unsigned long long>(floors.direct_refusals),
               static_cast<unsigned long long>(floors.forged_refusals),
               static_cast<unsigned long long>(floors.typed_refusals),
               static_cast<unsigned long long>(floors.fault_refusals),
               static_cast<unsigned long long>(floors.sealed_runs), static_cast<unsigned long long>(floors.sampled),
               static_cast<unsigned long long>(floors.q3_regular), static_cast<unsigned long long>(floors.q4_regular),
-              static_cast<unsigned long long>(floors.extended), static_cast<unsigned long long>(floors.reduced_pass1));
+              static_cast<unsigned long long>(floors.extended), static_cast<unsigned long long>(floors.reduced_pass1),
+              static_cast<unsigned long long>(floors.order_runs));
   if (!floors_hold) {
     std::printf("cause=floors\n");
     return 3;

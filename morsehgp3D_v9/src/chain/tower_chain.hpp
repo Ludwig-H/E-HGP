@@ -388,17 +388,30 @@ std::uint64_t catalogue_digest(std::span<const tower::BallData> balls);
 // le premier interieur de chaque boule REGULIERE a interieurs (systematique)
 // ou de la seule boule `fault_ball` (isolee, si reguliere a interieurs)
 // remplace par le plus petit site hors de la boule. Les coquilles etendues
-// sont exclues : la passe 2, inchangee sous le sceau, les revalide deja.
+// sont exclues de cette faute : la passe 2, inchangee sous le sceau, rejoue
+// les puissances, le domaine de cle et la table de plateau d'une coquille
+// etendue dont les IDs de sites sont dans l'index (un ID hors de l'index ou
+// n_interior > 9 y est une lecture hors bornes, jamais un refus : residu
+// declare, PROVENANCE R-29). `census_faults` : refus plantes au recensement
+// (indice de cle, raison), `census_delay_group` / `census_delay_ms` : un
+// arret avant une cle (ordre des refus quel que soit le nombre de fils).
 namespace chain_test {
 struct ForgedSupport {
   unsigned arity = 0;
   std::array<std::uint32_t, 4> ids{};
 };
 enum class CatalogueFault { kNone, kSystematicInterior, kSingleInterior };
+struct PlantedCensusFault {
+  std::size_t group = 0;
+  std::string reason;
+};
 struct Seam {
   std::vector<ForgedSupport> forged;
   CatalogueFault fault = CatalogueFault::kNone;
   std::size_t fault_ball = 0;
+  std::vector<PlantedCensusFault> census_faults;
+  std::size_t census_delay_group = static_cast<std::size_t>(-1);
+  unsigned census_delay_ms = 0;
 };
 inline Seam seam;
 }  // namespace chain_test

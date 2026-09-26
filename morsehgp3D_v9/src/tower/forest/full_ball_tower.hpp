@@ -90,8 +90,9 @@ struct FullBallStats {
   // sorted witness otherwise). Path metadata, never part of tower_work.
   u64 hashed_orders = 0;
   // R-29: 1 when the catalogue came under a SealedCatalogue (validation
-  // pass 1 reduced to its fixed-stride sample), and the balls that sample
-  // checked (ceil(n / kSealSampleStride)). Path metadata, never tower_work.
+  // pass 1 reduced to its fixed-stride sample), and the balls pass 1 did
+  // check under the seal, counted at each check (ceil(n / kSealSampleStride)
+  // on a catalogue it accepts). Path metadata, never tower_work.
   u64 sealed_catalogues = 0, seal_sampled_balls = 0;
   // False after a backend failure whose paid work could not be recovered.
   bool static_batch_work_known = true;
@@ -197,8 +198,12 @@ inline bool ball_key_in_u18_domain(const BallKey& key) {
 // overload). It owns the catalogue (moved in, const from then on) and binds
 // the index it was censused on. Under a seal the tower runs pass 1 on the
 // fixed-stride sample only (one ball in kSealSampleStride, index 0 mod the
-// stride, every run: a systematic plumbing fault is caught, an isolated one
-// is a declared residual); pass 2 and everything after it are unchanged.
+// stride, every run: a systematic plumbing fault is caught); pass 2 and
+// everything after it are unchanged. Declared residual: an isolated
+// in-process corruption of an unsampled ball, regular or extended, is
+// neither guaranteed to be refused nor memory-safe (a site ID outside the
+// index or n_interior above 9 is an out-of-bounds read: pass 2 reads the
+// sites of extended shells before checking them, point_id has no bound).
 class SealedCatalogue {
  public:
   SealedCatalogue(const SealedCatalogue&) = delete;
@@ -1797,17 +1802,15 @@ class Builder {
       const size_t step = sealed ? kSealSampleStride : 1;
       std::vector<size_t> failed_at(blocks, absent_index);
       std::vector<Failure> failures(blocks, local_failure);
-      std::vector<u64> checks(blocks, 0);
-      if (sealed) {
-        st.sealed_catalogues = 1;
-        st.seal_sampled_balls = (balls.size() + kSealSampleStride - 1) / kSealSampleStride;
-      }
+      std::vector<u64> checks(blocks, 0), checked(blocks, 0);
+      if (sealed) st.sealed_catalogues = 1;
       parallel_items(blocks, geometry_threads, [&](size_t chunk, size_t) {
 #if defined(MHGP9_TOWER_MUTANT_SEAL_NO_SAMPLE)
-        if (sealed) return;  // mutant: a sample declared (counted) but never run
+        if (sealed) return;  // mutant: a sample declared but never run
 #endif
         for (size_t j = chunk * block; j < std::min(balls.size(), (chunk + 1) * block); j += step) {
           try {
+            ++checked[chunk];  // counted, never declared: the balls pass 1 did check
             check_ball_locally(balls[j], checks[chunk]);
           } catch (const Failure& failure) {
             failed_at[chunk] = j; failures[chunk] = failure;
@@ -1817,6 +1820,7 @@ class Builder {
       });
       for (size_t c = 0; c < blocks; ++c) {
         add(st.declared_support_checks, checks[c]);
+        if (sealed) add(st.seal_sampled_balls, checked[c]);
         if (failed_at[c] != absent_index && first_local_failure == absent_index) {
           first_local_failure = failed_at[c]; local_failure = failures[c];
         }

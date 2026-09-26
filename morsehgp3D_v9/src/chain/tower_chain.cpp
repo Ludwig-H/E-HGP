@@ -660,8 +660,14 @@ bool regular_support_positive(const SupportForm& f, unsigned arity) {
   return f.four.det > 0 && q4_center_strictly_inside(f.four, a, b, c, f.p[3]);
 }
 
-// Execute job(i) pour i dans [0, count) sur au plus `workers` fils ; la
-// premiere exception arrete la distribution et est relancee apres jointure.
+// Execute job(i) pour i dans [0, count) sur au plus `workers` fils ; une
+// exception arrete la distribution et, apres jointure, celle du plus petit
+// indice est relancee : celle de la boucle sequentielle, quel que soit le
+// nombre de fils (R-29, audit du sceau). Les tranches sont distribuees par
+// indices croissants et une tranche prise est executee jusqu'a sa premiere
+// exception : toute tranche d'indices inferieurs a une exception levee a ete
+// prise, donc le plus petit indice fautif est toujours atteint. Le job ne
+// doit lever que selon ses donnees (jamais selon l'ordre des fils).
 template <class Job>
 void parallel_for(std::size_t count, std::size_t workers, Job&& job) {
   workers = std::max<std::size_t>(1, std::min(workers, count));
@@ -672,20 +678,30 @@ void parallel_for(std::size_t count, std::size_t workers, Job&& job) {
   std::atomic<std::size_t> next{0};
   std::atomic<bool> stop{false};
   std::exception_ptr error;
+  std::size_t error_index = std::numeric_limits<std::size_t>::max();
   std::mutex error_mutex;
   constexpr std::size_t grain = 256;
   const auto body = [&](std::size_t worker) {
+    std::size_t i = 0;
     try {
       while (!stop.load(std::memory_order_relaxed)) {
         const std::size_t begin = next.fetch_add(grain);
         if (begin >= count) break;
         const std::size_t end = std::min(count, begin + grain);
-        for (std::size_t i = begin; i < end; ++i) job(i, worker);
+        for (i = begin; i < end; ++i) job(i, worker);
       }
     } catch (...) {
       stop.store(true);
       std::lock_guard<std::mutex> lock(error_mutex);
-      if (!error) error = std::current_exception();
+#if defined(MHGP9_CHAIN_MUTANT_CENSUS_FIRST_IN_TIME)
+      const bool first = !error;  // mutant: the first exception in wall time wins
+#else
+      const bool first = i < error_index;
+#endif
+      if (first) {
+        error = std::current_exception();
+        error_index = i;
+      }
     }
   };
   std::vector<std::thread> threads;
@@ -1341,7 +1357,18 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     };
     const std::size_t census_workers = std::max<std::size_t>(1, std::min(W, unique / 256 + 1));
     std::vector<WorkerState> states(census_workers);
+    // A key's refusal depends on its data alone; parallel_for rethrows the
+    // one of the smallest key index (the serial loop's) at any W. A shell
+    // above 12 never stops the loop: counted over every key, it is refused
+    // after it only when no key threw (at any W as well).
     parallel_for(unique, census_workers, [&](std::size_t g, std::size_t w) {
+#if defined(MHGP9_CHAIN_TEST_SEAM)
+      // Gates only: a stall before one key, planted refusals at chosen keys.
+      if (g == chain_test::seam.census_delay_group)
+        std::this_thread::sleep_for(std::chrono::milliseconds(chain_test::seam.census_delay_ms));
+      for (const auto& planted : chain_test::seam.census_faults)
+        if (planted.group == g) fail(ChainStatus::kInvariantViolated, planted.reason);
+#endif
       auto& st = states[w];
       const Presentation& rep = *groups[g];  // plus petite arite presentee
       tower::BallKey key;

@@ -219,7 +219,10 @@ void large_case(const Fixture& fixture, unsigned variant) {
         std::fprintf(stderr, "chain refusal=%s\n", chain.reason.c_str());
       need(chain.status == mhgp9::ChainStatus::kComplete && chain.tower.orders.size() == 10 &&
            chain.tower_digest == mhgp9::tower_digest(chain.tower), "T2.chain.published_tower");
-      need(chain.tower_stats.sealed_catalogues == (sealed ? 1u : 0u), "T2.chain.seal_path");
+      need(chain.tower_stats.sealed_catalogues == (sealed ? 1u : 0u) &&
+           chain.tower_stats.seal_sampled_balls ==
+               (sealed ? (chain.catalogue.balls + kSealSampleStride - 1) / kSealSampleStride : 0u),
+           "T2.chain.seal_path");  // the sample counted at each check of pass 1
       sealed_runs += sealed ? 1 : 0;
       if (!sealed && workers == 1) {
         check_large_cuts(chain.tower, in_rank, model);
