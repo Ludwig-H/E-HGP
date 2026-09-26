@@ -1,0 +1,374 @@
+--- a/morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp	2026-09-26 04:26:00.245012618 +0000
++++ b/morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp	2026-09-26 06:40:37.918387080 +0000
+@@ -13,6 +13,10 @@
+ #include <thread>
+ #include <numeric>
+ #include <unordered_map>
++#include <x86intrin.h>
++#include <time.h>
++#include <cstdio>
++#include <cstdlib>
+ 
+ #include "anchor_meb.hpp"
+ #include "full_coverage_certificate.hpp"
+@@ -483,6 +487,37 @@
+   bool flat_form = false;
+   std::vector<u64> lower_nodes;
+ };
++// PROFA (auditor C lane profile, scratch copy only): phase A timers/counters.
++inline u64 profa_tsc() { return __rdtsc(); }
++inline u64 profa_ns(clockid_t c) { timespec t{}; clock_gettime(c, &t); return u64(t.tv_sec) * 1000000000ull + u64(t.tv_nsec); }
++inline u64 profa_stride() {
++  static const u64 v = [] { const char* e = std::getenv("MHGP9_PROFA_STRIDE"); return e ? std::strtoull(e, nullptr, 10) : 16ull; }();
++  return v;
++}
++inline u64 profa_discard() {
++  static const u64 v = [] { const char* e = std::getenv("MHGP9_PROFA_DISCARD"); return e ? std::strtoull(e, nullptr, 10) : 1000000ull; }();
++  return v;
++}
++struct ProfA {
++  u64 t_anchors = 0, t_k1_setup = 0, t_prepare = 0, t_prepare_par = 0, t_reserve = 0, t_loop = 0, t_cleanup = 0,
++      t_live = 0, t_total = 0;
++  u64 start_ns = 0, end_ns = 0, wall_ns = 0, cpu_ns = 0, wall_loop_ns = 0, cpu_loop_ns = 0, wall_prep_ns = 0, cpu_prep_ns = 0;
++  // sampled lots (every stride-th lot); a sampled lot longer than the discard
++  // threshold (a preemption) is rolled back and counted apart.
++  struct S {
++    u64 s_lots = 0, s_blocks = 0, s_singleton = 0, s_grouped = 0, s_groups = 0, s_rdtsc = 0, s_total = 0;
++    u64 s_disc = 0, s_blk_total = 0, s_blk_facets = 0, s_blk_sort = 0, s_lot_total = 0;
++    u64 s1_total = 0, s1_node = 0, s1_draft = 0, s1_anchor = 0;
++    u64 sg_total = 0, sg_setup = 0, sg_union = 0, sg_action = 0, sg_node = 0, sg_draft = 0, sg_anchor = 0;
++    u64 s_facets = 0;
++  } s;
++  u64 s_discarded = 0, s_discarded_ticks = 0;
++  // counts (all lots)
++  u64 lots = 0, max_lot = 0, root_calls = 0, root_steps = 0, root_zero = 0, roots_raw = 0, roots_unique = 0;
++  u64 links = 0, owners = 0, dsu_unions = 0, dsu_find_steps = 0, groups = 0, gparents_raw = 0, gparents_unique = 0;
++  u64 block_nodes = 0, singleton_nodes = 0, grouped_nodes = 0, singleton_draft = 0, grouped_draft = 0;
++};
++
+ struct Block {
+   BallId ball;
+   std::vector<u64> roots;
+@@ -779,6 +814,9 @@
+     // v9 E4 (pipelined tail): positions of the draft's contributions naming a
+     // ball whose first contributing order is lower (named after the join).
+     std::vector<size_t> deferred;
++    ProfA prof;
++    ProfA::S prof_saved;
++    bool prof_sample = false;
+   };
+   // Node IDs of one order in u32: an order with 2^32-1 nodes or more is an
+   // explicit resource refusal on this path (never a truncation). At 30 M
+@@ -1148,8 +1186,10 @@
+ 
+   u64 order_root(OrderState& o, u64 token, u64 prior_count) {
+     require(token < prior_count, "full_ball_anchor_not_prior");
++    ++o.prof.root_calls;
+     u64 r = token;
+-    while (o.compressed[r] != r) r = o.compressed[r];
++    if (o.compressed[r] == r) ++o.prof.root_zero;
++    while (o.compressed[r] != r) { r = o.compressed[r]; ++o.prof.root_steps; }
+     while (o.compressed[token] != token) {
+       const auto next = o.compressed[token]; o.compressed[token] = r; token = next;
+     }
+@@ -1165,6 +1205,7 @@
+     require(id < kAbsent32, "full_ball_node_representation", FullBallStatus::kResourceExhausted);
+     o.current.next.push_back(absent); o.compressed.push_back(id);
+     for (u64 parent : parents) { o.current.next[parent] = id; o.compressed[parent] = id; }
++    o.prof.links += parents.size();
+     o.birth_ball.push_back(birth);
+     o.runs.push_back(o.lot_run);
+     if (parents.empty()) add(o.st.births); else add(o.st.merges);
+@@ -1204,6 +1245,7 @@
+     });
+     for (size_t c = 0; c < chunks; ++c)
+       if (failed_at[c] != none) { o.lean_failed = failed_at[c]; o.lean_failure = failures[c]; break; }
++    o.prof.t_prepare_par = profa_tsc();
+     if (o.k != 1) return;
+     // K1: the facets are single sites; their domain indices in visit order
+     // (up to the first failing block, which the loop never passes).
+@@ -1239,6 +1281,8 @@
+   // order_block in the same order, without building the facets.
+   void order_block_lean(OrderState& o, Block& block, size_t position, BallId id, u64 prior_count,
+                         size_t& k1_cursor) {
++    const bool smp = o.prof_sample;
++    const u64 tb0 = smp ? profa_tsc() : 0;
+     block.ball = id; block.roots.clear(); block.contribution = 0; block.interior = false;
+     add(o.st.anchor_blocks);
+     if (balls[id].n_shell == balls[id].arity) add(o.st.regular_blocks); else add(o.st.extra_blocks);
+@@ -1270,8 +1314,16 @@
+     }
+     block.contribution = o.lean_contribution[position];
+     block.interior = o.lean_interior[position] != 0;
++    const u64 tb1 = smp ? profa_tsc() : 0;
++    o.prof.roots_raw += block.roots.size();
+     std::sort(block.roots.begin(), block.roots.end());
+     block.roots.erase(std::unique(block.roots.begin(), block.roots.end()), block.roots.end());
++    o.prof.roots_unique += block.roots.size();
++    if (smp) {
++      const u64 tb2 = profa_tsc();
++      o.prof.s.s_blk_facets += tb1 - tb0; o.prof.s.s_blk_sort += tb2 - tb1; o.prof.s.s_rdtsc += 3; ++o.prof.s.s_blocks;
++      o.prof.s.s_facets += facets;
++    }
+   }
+ 
+   void order_lot(OrderState& o, std::span<Block> blocks, const ExactLevel& level) {
+@@ -1282,6 +1334,8 @@
+       // Same action as the grouped path, built only when it is published: an
+       // inert block (one parent, no contribution) allocates nothing, and the
+       // block keeps its roots buffer for the next lot (no steal, no regrowth).
++      const bool smp = o.prof_sample;
++      const u64 a0 = smp ? profa_tsc() : 0;
+       add(o.st.singleton_lots);
+       const auto& block = blocks.front();
+       const bool contributes = block.contribution || block.interior;
+@@ -1291,33 +1345,51 @@
+       else {
+         if (block.roots.empty()) require(contributes, "full_ball_distinct_births");
+         target = order_new_node(o, level, block.roots, birth_of(block.roots, block.ball));
++        ++o.prof.singleton_nodes;
+       }
++      const u64 a1 = smp ? profa_tsc() : 0;
+       if (block.roots.size() != 1 || contributes) {
+         const FullCoverageRef ref{kBallTag | block.ball, block.contribution, block.interior};
+         o.draft.flat.open_batch(level);
+         o.draft.flat.add_action(block.roots, std::span<const FullCoverageRef>(&ref, contributes ? 1 : 0));
++        ++o.prof.singleton_draft;
+       } else add(o.st.inert_blocks);
++      const u64 a2 = smp ? profa_tsc() : 0;
+       require(o.anchors[block.ball] == kAbsent32 && target != absent, "full_ball_anchor_duplicate");
+       o.anchors[block.ball] = static_cast<u32>(target);
++      if (smp) {
++        const u64 a3 = profa_tsc();
++        o.prof.s.s1_node += a1 - a0; o.prof.s.s1_draft += a2 - a1; o.prof.s.s1_anchor += a3 - a2; o.prof.s.s1_total += a3 - a0;
++        o.prof.s.s_rdtsc += 4; ++o.prof.s.s_singleton;
++      }
+       return;
+     }
++    const bool smp = o.prof_sample;
++    const u64 g0 = smp ? profa_tsc() : 0;
+     add(o.st.grouped_lots);
+     add(o.st.lot_dsu_slots, blocks.size());
+     std::vector<size_t> dsu(blocks.size()); std::iota(dsu.begin(), dsu.end(), size_t{0});
+-    const auto find = [&](size_t a) { while (dsu[a] != a) { dsu[a] = dsu[dsu[a]]; a = dsu[a]; } return a; };
++    const auto find = [&](size_t a) { while (dsu[a] != a) { dsu[a] = dsu[dsu[a]]; a = dsu[a]; ++o.prof.dsu_find_steps; } return a; };
+     std::vector<std::pair<u64,size_t>> owners;
+     for (size_t b = 0; b < blocks.size(); ++b) for (u64 p : blocks[b].roots) owners.emplace_back(p,b);
+     std::sort(owners.begin(), owners.end());
++    o.prof.owners += owners.size();
++    const u64 g1 = smp ? profa_tsc() : 0;
+     for (size_t j = 1; j < owners.size(); ++j) if (owners[j - 1].first == owners[j].first) {
+       const auto a = find(owners[j - 1].second), b = find(owners[j].second);
++      if (a != b) ++o.prof.dsu_unions;
+       dsu[std::max(a,b)] = std::min(a,b);
+     }
+     std::vector<std::vector<size_t>> groups(blocks.size());
+     for (size_t b = 0; b < blocks.size(); ++b) groups[find(b)].push_back(b);
++    const u64 g2 = smp ? profa_tsc() : 0;
++    u64 gt_action = 0, gt_node = 0, gt_draft = 0;
+     bool opened = false;
+     std::vector<u64> targets(blocks.size(), absent);
+     for (const auto& group : groups) {
+       if (group.empty()) continue;
++      ++o.prof.groups;
++      const u64 ga0 = smp ? profa_tsc() : 0;
+       FullCoverageAction action;
+       for (size_t b : group) {
+         const auto& block = blocks[b];
+@@ -1327,32 +1399,53 @@
+           add(o.st.contributions);
+         }
+       }
++      o.prof.gparents_raw += action.parents.size();
+       std::sort(action.parents.begin(), action.parents.end());
+       action.parents.erase(std::unique(action.parents.begin(), action.parents.end()), action.parents.end());
++      o.prof.gparents_unique += action.parents.size();
++      const u64 ga1 = smp ? profa_tsc() : 0;
+       u64 target;
+       if (action.parents.size() == 1) target = action.parents.front();
+       else {
+         if (action.parents.empty())
+           require(group.size() == 1 && action.contributions.size() == 1, "full_ball_distinct_births");
+         target = order_new_node(o, level, action.parents, birth_of(action.parents, blocks[group.front()].ball));
++        ++o.prof.grouped_nodes;
+       }
+       for (size_t b : group) targets[b] = target;
++      const u64 ga2 = smp ? profa_tsc() : 0;
+       if (action.parents.size() != 1 || !action.contributions.empty()) {
+         if (!opened) {
+           o.draft.flat.open_batch(level);
+           opened = true;
+         }
+         o.draft.flat.add_action(action.parents, action.contributions);
++        ++o.prof.grouped_draft;
+       } else add(o.st.inert_blocks, group.size());
++      if (smp) {
++        const u64 ga3 = profa_tsc();
++        gt_action += ga1 - ga0; gt_node += ga2 - ga1; gt_draft += ga3 - ga2; o.prof.s.s_rdtsc += 4; ++o.prof.s.s_groups;
++      }
+     }
++    const u64 g3 = smp ? profa_tsc() : 0;
+     for (size_t b = 0; b < blocks.size(); ++b) {
+       require(o.anchors[blocks[b].ball] == kAbsent32 && targets[b] != absent, "full_ball_anchor_duplicate");
+       o.anchors[blocks[b].ball] = static_cast<u32>(targets[b]);
+     }
++    if (smp) {
++      const u64 g4 = profa_tsc();
++      o.prof.s.sg_setup += g1 - g0; o.prof.s.sg_union += g2 - g1; o.prof.s.sg_action += gt_action; o.prof.s.sg_node += gt_node;
++      o.prof.s.sg_draft += gt_draft; o.prof.s.sg_anchor += g4 - g3; o.prof.s.sg_total += g4 - g0;
++      o.prof.s.s_rdtsc += 5; ++o.prof.s.s_grouped;
++    }
+   }
+ 
+   void order_lots(OrderState& o) {
++    auto& P = o.prof;
++    const u64 w0 = profa_ns(CLOCK_MONOTONIC), c0 = profa_ns(CLOCK_THREAD_CPUTIME_ID), T0 = profa_tsc();
++    P.start_ns = w0;
+     o.anchors.assign(balls.size(), kAbsent32);
++    const u64 T1 = profa_tsc(); P.t_anchors = T1 - T0;
+     o.draft.flat_form = true;
+     if (o.k == 1) {
+       const ExactLevel zero{{0, 0, 0}, 1};
+@@ -1370,10 +1463,23 @@
+       }
+     }
+     const auto& program = programs[o.k];
++    const u64 T2 = profa_tsc(); P.t_k1_setup = T2 - T1;
++    const u64 wp0 = profa_ns(CLOCK_MONOTONIC), cp0 = profa_ns(CLOCK_THREAD_CPUTIME_ID);
+     order_prepare_lean(o);
++    const u64 T3 = profa_tsc(); P.t_prepare = T3 - T2; P.t_prepare_par -= T2;
++    P.wall_prep_ns = profa_ns(CLOCK_MONOTONIC) - wp0; P.cpu_prep_ns = profa_ns(CLOCK_THREAD_CPUTIME_ID) - cp0;
+     reserve_lean(o);
++    const u64 T4 = profa_tsc(); P.t_reserve = T4 - T3;
++    const u64 wl0 = profa_ns(CLOCK_MONOTONIC), cl0 = profa_ns(CLOCK_THREAD_CPUTIME_ID);
++    const u64 stride = profa_stride(), discard = profa_discard();
++    u64 lot_index = 0;
+     size_t k1_cursor = 0;
+     for (size_t begin = 0; begin < program.size();) {
++      const bool smp = stride && (lot_index % stride) == 0;
++      ++lot_index;
++      o.prof_sample = smp;
++      if (smp) o.prof_saved = P.s;
++      const u64 L0 = smp ? profa_tsc() : 0;
+       size_t end = begin + 1;
+       const auto& level = balls[program[begin]].level;
+       const u32 run = level_run[program[begin]];
+@@ -1385,11 +1491,23 @@
+       o.lot_run = run + 1;
+       // The anchor written by a later lot's block: prefetched for writing.
+       if (begin + kLeanBlockAhead < program.size()) __builtin_prefetch(&o.anchors[program[begin + kLeanBlockAhead]], 1);
++      const u64 L1 = smp ? profa_tsc() : 0;
+       for (size_t j = begin; j < end; ++j)
+         order_block_lean(o, blocks[j - begin], j, program[j], prior_count, k1_cursor);
++      const u64 L2 = smp ? profa_tsc() : 0;
+       order_lot(o, blocks, level);
++      if (smp) {
++        const u64 L3 = profa_tsc();
++        P.s.s_disc += L1 - L0; P.s.s_blk_total += L2 - L1; P.s.s_lot_total += L3 - L2; P.s.s_total += L3 - L0;
++        P.s.s_rdtsc += 4; ++P.s.s_lots;
++        if (L3 - L0 > discard) { P.s = o.prof_saved; ++P.s_discarded; P.s_discarded_ticks += L3 - L0; }
++      }
++      ++P.lots; if (end - begin > P.max_lot) P.max_lot = end - begin;
+       begin = end;
+     }
++    o.prof_sample = false;
++    const u64 T5 = profa_tsc(); P.t_loop = T5 - T4;
++    P.wall_loop_ns = profa_ns(CLOCK_MONOTONIC) - wl0; P.cpu_loop_ns = profa_ns(CLOCK_THREAD_CPUTIME_ID) - cl0;
+     require(o.k != 1 || k1_cursor == o.lean_k1.size(), "full_ball_k1_facets_unconsumed");
+     decltype(o.lean_count)().swap(o.lean_count);
+     decltype(o.lean_contribution)().swap(o.lean_contribution);
+@@ -1399,9 +1517,68 @@
+     RawVector<BallId>().swap(o.static_targets);
+     decltype(o.lot_blocks)().swap(o.lot_blocks);
+     decltype(o.compressed)().swap(o.compressed);
++    const u64 T6 = profa_tsc(); P.t_cleanup = T6 - T5;
+     u64 live = 0;
+     for (u64 next : o.current.next) if (next == absent) ++live;
+     require(live == 1, "full_ball_final_component_count");
++    const u64 T7 = profa_tsc(); P.t_live = T7 - T6; P.t_total = T7 - T0;
++    P.end_ns = profa_ns(CLOCK_MONOTONIC); P.wall_ns = P.end_ns - w0; P.cpu_ns = profa_ns(CLOCK_THREAD_CPUTIME_ID) - c0;
++    {
++      const auto& d = o.draft.flat;
++      std::fprintf(stderr,
++          "PROFA {\"K\":%u,\"stride\":%llu,\"start_ns\":%llu,\"end_ns\":%llu,\"wall_ns\":%llu,\"cpu_ns\":%llu,"
++          "\"wall_prep_ns\":%llu,\"cpu_prep_ns\":%llu,\"wall_loop_ns\":%llu,\"cpu_loop_ns\":%llu,"
++          "\"t_total\":%llu,\"t_anchors\":%llu,\"t_k1_setup\":%llu,\"t_prepare\":%llu,\"t_prepare_par\":%llu,"
++          "\"t_reserve\":%llu,\"t_loop\":%llu,\"t_cleanup\":%llu,\"t_live\":%llu,"
++          "\"s_lots\":%llu,\"s_blocks\":%llu,\"s_singleton\":%llu,\"s_grouped\":%llu,\"s_groups\":%llu,"
++          "\"s_rdtsc\":%llu,\"s_total\":%llu,\"s_disc\":%llu,\"s_blk_total\":%llu,\"s_blk_facets\":%llu,"
++          "\"s_blk_sort\":%llu,\"s_lot_total\":%llu,\"s1_total\":%llu,\"s1_node\":%llu,\"s1_draft\":%llu,"
++          "\"s1_anchor\":%llu,\"sg_total\":%llu,\"sg_setup\":%llu,\"sg_union\":%llu,\"sg_action\":%llu,"
++          "\"sg_node\":%llu,\"sg_draft\":%llu,\"sg_anchor\":%llu,\"s_facets\":%llu,"
++          "\"program\":%llu,\"lots\":%llu,\"singleton_lots\":%llu,\"grouped_lots\":%llu,\"grouped_blocks\":%llu,"
++          "\"max_lot\":%llu,\"facets\":%llu,\"root_calls\":%llu,\"root_steps\":%llu,\"root_zero\":%llu,"
++          "\"roots_raw\":%llu,\"roots_unique\":%llu,\"nodes\":%llu,\"births\":%llu,\"merges\":%llu,"
++          "\"links\":%llu,\"singleton_nodes\":%llu,\"grouped_nodes\":%llu,\"contributions\":%llu,"
++          "\"actions\":%llu,\"batches\":%llu,\"parent_entries\":%llu,\"inert\":%llu,"
++          "\"singleton_draft\":%llu,\"grouped_draft\":%llu,\"owners\":%llu,\"dsu_unions\":%llu,"
++          "\"dsu_find_steps\":%llu,\"groups\":%llu,\"gparents_raw\":%llu,\"gparents_unique\":%llu,"
++          "\"balls\":%llu,\"domain\":%llu,\"anchors_bytes\":%llu,\"s_discarded\":%llu,\"s_discarded_ticks\":%llu}\n",
++          o.k, (unsigned long long)stride, (unsigned long long)P.start_ns, (unsigned long long)P.end_ns,
++          (unsigned long long)P.wall_ns, (unsigned long long)P.cpu_ns, (unsigned long long)P.wall_prep_ns,
++          (unsigned long long)P.cpu_prep_ns, (unsigned long long)P.wall_loop_ns, (unsigned long long)P.cpu_loop_ns,
++          (unsigned long long)P.t_total, (unsigned long long)P.t_anchors, (unsigned long long)P.t_k1_setup,
++          (unsigned long long)P.t_prepare, (unsigned long long)P.t_prepare_par, (unsigned long long)P.t_reserve,
++          (unsigned long long)P.t_loop, (unsigned long long)P.t_cleanup, (unsigned long long)P.t_live,
++          (unsigned long long)P.s.s_lots, (unsigned long long)P.s.s_blocks, (unsigned long long)P.s.s_singleton,
++          (unsigned long long)P.s.s_grouped, (unsigned long long)P.s.s_groups, (unsigned long long)P.s.s_rdtsc,
++          (unsigned long long)P.s.s_total, (unsigned long long)P.s.s_disc, (unsigned long long)P.s.s_blk_total,
++          (unsigned long long)P.s.s_blk_facets, (unsigned long long)P.s.s_blk_sort, (unsigned long long)P.s.s_lot_total,
++          (unsigned long long)P.s.s1_total, (unsigned long long)P.s.s1_node, (unsigned long long)P.s.s1_draft,
++          (unsigned long long)P.s.s1_anchor, (unsigned long long)P.s.sg_total, (unsigned long long)P.s.sg_setup,
++          (unsigned long long)P.s.sg_union, (unsigned long long)P.s.sg_action, (unsigned long long)P.s.sg_node,
++          (unsigned long long)P.s.sg_draft, (unsigned long long)P.s.sg_anchor, (unsigned long long)P.s.s_facets,
++          (unsigned long long)program.size(), (unsigned long long)P.lots, (unsigned long long)o.st.singleton_lots,
++          (unsigned long long)o.st.grouped_lots, (unsigned long long)o.st.lot_dsu_slots, (unsigned long long)P.max_lot,
++          (unsigned long long)o.st.representatives, (unsigned long long)P.root_calls, (unsigned long long)P.root_steps,
++          (unsigned long long)P.root_zero, (unsigned long long)P.roots_raw, (unsigned long long)P.roots_unique,
++          (unsigned long long)o.current.next.size(), (unsigned long long)o.st.births, (unsigned long long)o.st.merges,
++          (unsigned long long)P.links, (unsigned long long)P.singleton_nodes, (unsigned long long)P.grouped_nodes,
++          (unsigned long long)o.st.contributions, (unsigned long long)d.actions(), (unsigned long long)d.level.size(),
++          (unsigned long long)d.parent.size(), (unsigned long long)o.st.inert_blocks,
++          (unsigned long long)P.singleton_draft, (unsigned long long)P.grouped_draft, (unsigned long long)P.owners,
++          (unsigned long long)P.dsu_unions, (unsigned long long)P.dsu_find_steps, (unsigned long long)P.groups,
++          (unsigned long long)P.gparents_raw, (unsigned long long)P.gparents_unique,
++          (unsigned long long)balls.size(), (unsigned long long)domain.size(),
++          (unsigned long long)(balls.size() * sizeof(u32)), (unsigned long long)P.s_discarded,
++          (unsigned long long)P.s_discarded_ticks);
++    }
++    if (o.k == 1) {
++      // rdtsc pair cost and TSC frequency calibration (once per process).
++      u64 mn = ~0ull, sum = 0;
++      for (int i = 0; i < 20000; ++i) { const u64 a = profa_tsc(); const u64 b = profa_tsc(); mn = std::min(mn, b - a); sum += b - a; }
++      std::fprintf(stderr, "PROFA_CAL {\"rdtsc_pair_min\":%llu,\"rdtsc_pair_mean\":%.2f}\n",
++          (unsigned long long)mn, double(sum) / 20000.0);
++    }
+     failpoint_after_lots(o.k);
+   }
+ 
+--- a/morsehgp3D_v9/bench/tower_probe.cpp	2026-09-26 04:25:59.859012601 +0000
++++ b/morsehgp3D_v9/bench/tower_probe.cpp	2026-09-26 06:38:22.207380789 +0000
+@@ -33,6 +33,7 @@
+ // Code 0 conforme, 2 refus
+ // d'arguments ou d'entree, 3 statut de chaine non complet.
+ #include <sys/resource.h>
++#include <x86intrin.h>
+ 
+ #include <chrono>
+ #include <cinttypes>
+@@ -439,5 +440,15 @@
+     std::printf("]");
+   }
+   std::printf("}}\n");
++  {
++    // PROFA: TSC frequency calibration after the chain (scratch copy only).
++    const auto cw0 = std::chrono::steady_clock::now();
++    const unsigned long long ct0 = __rdtsc();
++    while (std::chrono::steady_clock::now() - cw0 < std::chrono::milliseconds(300)) {}
++    const auto cw1 = std::chrono::steady_clock::now();
++    const unsigned long long ct1 = __rdtsc();
++    std::fprintf(stderr, "PROFA_TSC {\"tsc_per_ns\":%.6f}\n",
++                 double(ct1 - ct0) / std::chrono::duration<double, std::nano>(cw1 - cw0).count());
++  }
+   return r.status == mhgp9::ChainStatus::kComplete ? 0 : 3;
+ }

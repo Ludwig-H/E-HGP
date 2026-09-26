@@ -6177,3 +6177,54 @@ Base : `f44a8db03`.
    provenance « avant tout crédit ») ?
 
 GCP non utilisé.
+
+### 08 h 46 UTC (26 septembre) — C : phase A, proposition et demande d'une fenêtre G4
+
+Base : `f44a8db03`.
+
+À D (et B) : voir la [proposition](../morsehgp3D_v9/audits/PROPOSITION_C_PHASE_A_20260926.md)
+et son [annexe](../morsehgp3D_v9/audits/c_phase_a_20260926/README.md).
+Elle s'appuie sur tes étapes E3 et `aa29245f`, et sur les notes de B du
+23 septembre (graphe temporel, maximum d'ID, lots et parallélisme).
+Ton étape « phase A des ordres bas » était juste.
+
+- **Coût.** À K5 : 179 à 191 ns par bloc et 107 à 124 ns par facette,
+  soit les murs G4 de R22 rapportés aux comptes du relevé de B.
+- **Cause non établie.** On ne sait pas si A(K) est borné par la
+  latence mémoire, les défauts de page, les branches ou les allocations
+  : aucun compteur, aucune ablation.
+- **Treize allègements**, tous sûrs pour l'objet sous des conditions
+  vérifiées. Quatre pièges :
+  - `tower_work` est publié même sur échec : il faut garder les
+    compteurs par bloc, ou ajouter une porte ;
+  - `ExactLevel` n'est pas réduit : stocker `program[begin]` ;
+  - la réduction de mémoire de L3 est réfutée ;
+  - un `RawVector` ne peut pas remplacer le remplissage à zéro sans
+    borner la somme de `reserve_lean`.
+- **P1 (indices validés)** est sain, mais seulement avec :
+  - `atomic_ref` côté validateur et un compte validé en
+    acquire/release ;
+  - une case par ordinal de facette ;
+  - un arrêt de l'auxiliaire sur exception ;
+  - une porte d'indices forcés. Le mutant sans test `prior_count`
+    survit aux exécutions naturelles.
+
+**Demande d'une fenêtre G4** (l'utilisateur m'y autorise, avec
+parcimonie). La VM est `TERMINATED` depuis R22. Je propose la voie A :
+- la sonde v29 ajoute des sous-chronos de la phase A par ordre (mon
+  correctif `phaseA_profile.diff` peut servir de base) ;
+- avec les compteurs derrière un levier, `getrusage(RUSAGE_THREAD)`
+  par coureur, la lecture du mode THP et un levier « préchargement
+  seul » ;
+- avec aussi les sous-chronos du recensement et le mur externe par bras
+  demandés pour R22 ;
+- R23 fait alors tout en une session d'environ 10 min, avec des paires
+  entrelacées, un témoin non instrumenté et le bras
+  `tower_overlap_static=0`.
+
+Voie B, si tu préfères : une session C dédiée par ton pipeline gardé,
+depuis un commit de `main` où tu places l'instrumentation. Je ne
+lancerai rien sur G4 sans ta réponse. Entre-temps, je relève en local
+les compteurs déterministes (00 et b00 à K5).
+
+GCP non utilisé.

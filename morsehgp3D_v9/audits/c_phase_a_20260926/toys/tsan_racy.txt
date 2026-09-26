@@ -1,0 +1,125 @@
+==================
+WARNING: ThreadSanitizer: data race (pid=1228261)
+  Write of size 8 at 0x7298000090f0 by main thread:
+    #0 Order::store(unsigned long, unsigned long) /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:106 (p1_toy_tsan+0xce18) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+    #1 Order::new_node(std::vector<unsigned long, std::allocator<unsigned long> > const&, unsigned int, unsigned int) /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:127 (p1_toy_tsan+0xce18)
+    #2 Order::run(std::function<void ()> const&) /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:206 (p1_toy_tsan+0xce18)
+    #3 main /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:306 (p1_toy_tsan+0x5180) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+
+  Previous atomic read of size 8 at 0x7298000090f0 by thread T1:
+    #0 std::remove_volatile<unsigned long>::type std::__atomic_impl::load<unsigned long>(unsigned long const*, std::memory_order) /usr/include/c++/13/bits/atomic_base.h:1051 (p1_toy_tsan+0x2b59) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+    #1 std::__atomic_ref<unsigned long, true, false>::load(std::memory_order) const /usr/include/c++/13/bits/atomic_base.h:1593 (p1_toy_tsan+0x2b59)
+    #2 helper /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:259 (p1_toy_tsan+0x2b59)
+    #3 operator() /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:306 (p1_toy_tsan+0x2b59)
+    #4 __invoke_impl<void, main(int, char**)::<lambda()>::<lambda()> > /usr/include/c++/13/bits/invoke.h:61 (p1_toy_tsan+0x2b59)
+    #5 __invoke<main(int, char**)::<lambda()>::<lambda()> > /usr/include/c++/13/bits/invoke.h:96 (p1_toy_tsan+0x2b59)
+    #6 _M_invoke<0> /usr/include/c++/13/bits/std_thread.h:292 (p1_toy_tsan+0x2b59)
+    #7 operator() /usr/include/c++/13/bits/std_thread.h:299 (p1_toy_tsan+0x2b59)
+    #8 _M_run /usr/include/c++/13/bits/std_thread.h:244 (p1_toy_tsan+0x2b59)
+    #9 <null> <null> (libstdc++.so.6+0xecdb3) (BuildId: 753c6c8608b61d4e67be8f0c890e03e0aa046b8b)
+
+  Location is heap block of size 10336 at 0x729800009000 allocated by main thread:
+    #0 operator new(unsigned long) ../../../../src/libsanitizer/tsan/tsan_new_delete.cpp:64 (libtsan.so.2+0xa6fae) (BuildId: 2a13a7710e361d06f7babbea53065ca2be93f738)
+    #1 std::__new_allocator<unsigned long>::allocate(unsigned long, void const*) /usr/include/c++/13/bits/new_allocator.h:151 (p1_toy_tsan+0x9ade) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+    #2 std::allocator<unsigned long>::allocate(unsigned long) /usr/include/c++/13/bits/allocator.h:198 (p1_toy_tsan+0x9ade)
+    #3 std::allocator_traits<std::allocator<unsigned long> >::allocate(std::allocator<unsigned long>&, unsigned long) /usr/include/c++/13/bits/alloc_traits.h:482 (p1_toy_tsan+0x9ade)
+    #4 std::_Vector_base<unsigned long, std::allocator<unsigned long> >::_M_allocate(unsigned long) /usr/include/c++/13/bits/stl_vector.h:381 (p1_toy_tsan+0x9ade)
+    #5 std::vector<unsigned long, std::allocator<unsigned long> >::reserve(unsigned long) /usr/include/c++/13/bits/vector.tcc:79 (p1_toy_tsan+0x9ade)
+    #6 Order::run(std::function<void ()> const&) /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:137 (p1_toy_tsan+0x9ade)
+    #7 main /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:306 (p1_toy_tsan+0x5180) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+
+  Thread T1 (tid=1228463, running) created by main thread at:
+    #0 pthread_create ../../../../src/libsanitizer/tsan/tsan_interceptors_posix.cpp:1022 (libtsan.so.2+0x5ac1a) (BuildId: 2a13a7710e361d06f7babbea53065ca2be93f738)
+    #1 std::thread::_M_start_thread(std::unique_ptr<std::thread::_State, std::default_delete<std::thread::_State> >, void (*)()) <null> (libstdc++.so.6+0xeceb0) (BuildId: 753c6c8608b61d4e67be8f0c890e03e0aa046b8b)
+    #2 std::function<void ()>::operator()() const /usr/include/c++/13/bits/std_function.h:591 (p1_toy_tsan+0x9990) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+    #3 Order::run(std::function<void ()> const&) /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:140 (p1_toy_tsan+0x9990)
+    #4 main /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:306 (p1_toy_tsan+0x5180) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+
+SUMMARY: ThreadSanitizer: data race /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:106 in Order::store(unsigned long, unsigned long)
+==================
+==================
+WARNING: ThreadSanitizer: data race (pid=1228261)
+  Write of size 8 at 0x729800009908 by main thread:
+    #0 Order::store(unsigned long, unsigned long) /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:106 (p1_toy_tsan+0x637d) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+    #1 Order::root(unsigned long, unsigned long) /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:119 (p1_toy_tsan+0x637d)
+    #2 Order::run(std::function<void ()> const&) /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:166 (p1_toy_tsan+0xac7e) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+    #3 main /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:306 (p1_toy_tsan+0x5180) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+
+  Previous atomic read of size 8 at 0x729800009908 by thread T1:
+    #0 std::remove_volatile<unsigned long>::type std::__atomic_impl::load<unsigned long>(unsigned long const*, std::memory_order) /usr/include/c++/13/bits/atomic_base.h:1051 (p1_toy_tsan+0x2b59) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+    #1 std::__atomic_ref<unsigned long, true, false>::load(std::memory_order) const /usr/include/c++/13/bits/atomic_base.h:1593 (p1_toy_tsan+0x2b59)
+    #2 helper /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:259 (p1_toy_tsan+0x2b59)
+    #3 operator() /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:306 (p1_toy_tsan+0x2b59)
+    #4 __invoke_impl<void, main(int, char**)::<lambda()>::<lambda()> > /usr/include/c++/13/bits/invoke.h:61 (p1_toy_tsan+0x2b59)
+    #5 __invoke<main(int, char**)::<lambda()>::<lambda()> > /usr/include/c++/13/bits/invoke.h:96 (p1_toy_tsan+0x2b59)
+    #6 _M_invoke<0> /usr/include/c++/13/bits/std_thread.h:292 (p1_toy_tsan+0x2b59)
+    #7 operator() /usr/include/c++/13/bits/std_thread.h:299 (p1_toy_tsan+0x2b59)
+    #8 _M_run /usr/include/c++/13/bits/std_thread.h:244 (p1_toy_tsan+0x2b59)
+    #9 <null> <null> (libstdc++.so.6+0xecdb3) (BuildId: 753c6c8608b61d4e67be8f0c890e03e0aa046b8b)
+
+  Location is heap block of size 10336 at 0x729800009000 allocated by main thread:
+    #0 operator new(unsigned long) ../../../../src/libsanitizer/tsan/tsan_new_delete.cpp:64 (libtsan.so.2+0xa6fae) (BuildId: 2a13a7710e361d06f7babbea53065ca2be93f738)
+    #1 std::__new_allocator<unsigned long>::allocate(unsigned long, void const*) /usr/include/c++/13/bits/new_allocator.h:151 (p1_toy_tsan+0x9ade) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+    #2 std::allocator<unsigned long>::allocate(unsigned long) /usr/include/c++/13/bits/allocator.h:198 (p1_toy_tsan+0x9ade)
+    #3 std::allocator_traits<std::allocator<unsigned long> >::allocate(std::allocator<unsigned long>&, unsigned long) /usr/include/c++/13/bits/alloc_traits.h:482 (p1_toy_tsan+0x9ade)
+    #4 std::_Vector_base<unsigned long, std::allocator<unsigned long> >::_M_allocate(unsigned long) /usr/include/c++/13/bits/stl_vector.h:381 (p1_toy_tsan+0x9ade)
+    #5 std::vector<unsigned long, std::allocator<unsigned long> >::reserve(unsigned long) /usr/include/c++/13/bits/vector.tcc:79 (p1_toy_tsan+0x9ade)
+    #6 Order::run(std::function<void ()> const&) /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:137 (p1_toy_tsan+0x9ade)
+    #7 main /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:306 (p1_toy_tsan+0x5180) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+
+  Thread T1 (tid=1228463, running) created by main thread at:
+    #0 pthread_create ../../../../src/libsanitizer/tsan/tsan_interceptors_posix.cpp:1022 (libtsan.so.2+0x5ac1a) (BuildId: 2a13a7710e361d06f7babbea53065ca2be93f738)
+    #1 std::thread::_M_start_thread(std::unique_ptr<std::thread::_State, std::default_delete<std::thread::_State> >, void (*)()) <null> (libstdc++.so.6+0xeceb0) (BuildId: 753c6c8608b61d4e67be8f0c890e03e0aa046b8b)
+    #2 std::function<void ()>::operator()() const /usr/include/c++/13/bits/std_function.h:591 (p1_toy_tsan+0x9990) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+    #3 Order::run(std::function<void ()> const&) /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:140 (p1_toy_tsan+0x9990)
+    #4 main /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:306 (p1_toy_tsan+0x5180) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+
+SUMMARY: ThreadSanitizer: data race /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:106 in Order::store(unsigned long, unsigned long)
+==================
+==================
+WARNING: ThreadSanitizer: data race (pid=1228261)
+  Write of size 4 at 0x728400001fe4 by main thread:
+    #0 Order::anchor_store(unsigned int, unsigned int) /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:113 (p1_toy_tsan+0xd4b1) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+    #1 Order::run(std::function<void ()> const&) /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:217 (p1_toy_tsan+0xd4b1)
+    #2 main /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:306 (p1_toy_tsan+0x5180) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+
+  Previous atomic read of size 4 at 0x728400001fe4 by thread T1:
+    #0 std::remove_volatile<unsigned int>::type std::__atomic_impl::load<unsigned int>(unsigned int const*, std::memory_order) /usr/include/c++/13/bits/atomic_base.h:1051 (p1_toy_tsan+0x2aec) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+    #1 std::__atomic_ref<unsigned int, true, false>::load(std::memory_order) const /usr/include/c++/13/bits/atomic_base.h:1593 (p1_toy_tsan+0x2aec)
+    #2 helper /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:244 (p1_toy_tsan+0x2aec)
+    #3 operator() /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:306 (p1_toy_tsan+0x2aec)
+    #4 __invoke_impl<void, main(int, char**)::<lambda()>::<lambda()> > /usr/include/c++/13/bits/invoke.h:61 (p1_toy_tsan+0x2aec)
+    #5 __invoke<main(int, char**)::<lambda()>::<lambda()> > /usr/include/c++/13/bits/invoke.h:96 (p1_toy_tsan+0x2aec)
+    #6 _M_invoke<0> /usr/include/c++/13/bits/std_thread.h:292 (p1_toy_tsan+0x2aec)
+    #7 operator() /usr/include/c++/13/bits/std_thread.h:299 (p1_toy_tsan+0x2aec)
+    #8 _M_run /usr/include/c++/13/bits/std_thread.h:244 (p1_toy_tsan+0x2aec)
+    #9 <null> <null> (libstdc++.so.6+0xecdb3) (BuildId: 753c6c8608b61d4e67be8f0c890e03e0aa046b8b)
+
+  Location is heap block of size 4932 at 0x728400001400 allocated by main thread:
+    #0 operator new(unsigned long) ../../../../src/libsanitizer/tsan/tsan_new_delete.cpp:64 (libtsan.so.2+0xa6fae) (BuildId: 2a13a7710e361d06f7babbea53065ca2be93f738)
+    #1 std::__new_allocator<unsigned int>::allocate(unsigned long, void const*) /usr/include/c++/13/bits/new_allocator.h:151 (p1_toy_tsan+0x780d) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+    #2 std::allocator<unsigned int>::allocate(unsigned long) /usr/include/c++/13/bits/allocator.h:198 (p1_toy_tsan+0x780d)
+    #3 std::allocator_traits<std::allocator<unsigned int> >::allocate(std::allocator<unsigned int>&, unsigned long) /usr/include/c++/13/bits/alloc_traits.h:482 (p1_toy_tsan+0x780d)
+    #4 std::_Vector_base<unsigned int, std::allocator<unsigned int> >::_M_allocate(unsigned long) /usr/include/c++/13/bits/stl_vector.h:381 (p1_toy_tsan+0x780d)
+    #5 std::_Vector_base<unsigned int, std::allocator<unsigned int> >::_M_create_storage(unsigned long) /usr/include/c++/13/bits/stl_vector.h:398 (p1_toy_tsan+0x780d)
+    #6 std::_Vector_base<unsigned int, std::allocator<unsigned int> >::_Vector_base(unsigned long, std::allocator<unsigned int> const&) /usr/include/c++/13/bits/stl_vector.h:335 (p1_toy_tsan+0x780d)
+    #7 std::vector<unsigned int, std::allocator<unsigned int> >::vector(unsigned long, unsigned int const&, std::allocator<unsigned int> const&) /usr/include/c++/13/bits/stl_vector.h:571 (p1_toy_tsan+0x780d)
+    #8 std::vector<unsigned int, std::allocator<unsigned int> >::_M_fill_assign(unsigned long, unsigned int const&) /usr/include/c++/13/bits/vector.tcc:275 (p1_toy_tsan+0x780d)
+    #9 std::vector<unsigned int, std::allocator<unsigned int> >::assign(unsigned long, unsigned int const&) /usr/include/c++/13/bits/stl_vector.h:809 (p1_toy_tsan+0x9725) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+    #10 Order::run(std::function<void ()> const&) /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:135 (p1_toy_tsan+0x9725)
+    #11 main /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:306 (p1_toy_tsan+0x5180) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+
+  Thread T1 (tid=1228463, running) created by main thread at:
+    #0 pthread_create ../../../../src/libsanitizer/tsan/tsan_interceptors_posix.cpp:1022 (libtsan.so.2+0x5ac1a) (BuildId: 2a13a7710e361d06f7babbea53065ca2be93f738)
+    #1 std::thread::_M_start_thread(std::unique_ptr<std::thread::_State, std::default_delete<std::thread::_State> >, void (*)()) <null> (libstdc++.so.6+0xeceb0) (BuildId: 753c6c8608b61d4e67be8f0c890e03e0aa046b8b)
+    #2 std::function<void ()>::operator()() const /usr/include/c++/13/bits/std_function.h:591 (p1_toy_tsan+0x9990) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+    #3 Order::run(std::function<void ()> const&) /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:140 (p1_toy_tsan+0x9990)
+    #4 main /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:306 (p1_toy_tsan+0x5180) (BuildId: aa5edce80e7b0c479b14989de763378b7ee5aafd)
+
+SUMMARY: ThreadSanitizer: data race /tmp/claude-1000/-workspaces-E-HGP/71988aca-a49a-4d33-96db-f05468331005/scratchpad/phaseA/verify_p1/p1_toy.cpp:113 in Order::anchor_store(unsigned int, unsigned int)
+==================
+mode=racy count=4 facets=11254 same=4 diff=0 fails=0 first_fail=
+hints: published=108 accepted=92 rejected=0 missing=11162 helper_waits=83
+committer find hops: plain=21241 hinted=21162 (not a tower_work counter)
+ThreadSanitizer: reported 3 warnings
+exit=66

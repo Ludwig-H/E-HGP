@@ -1,0 +1,37 @@
+seed 20260926 count 2000
+  instances = 2000
+  plain_fail = 0
+  k1 = 1000
+  k = 1000
+  grouped = 1936
+  facets = 129479
+  max_hops_path = 0
+  inv_viol_plain = 0
+  inv_viol_hinted = 0
+  il_ok = 6000
+  il_mismatch = 0
+  il_fail = 0
+  il_used = 95360
+  il_rejected = 0
+  il_published = 155545
+  il_sc_hint_ge_prior = 0
+  il_non_ancestor = 0
+  il_nosync_mismatch_or_fail = 293
+  il_nosync_runs = 2000
+  il_nosync_non_ancestor = 932
+  il_ring_mismatch_or_fail = 1491
+  il_ring_runs = 2000
+  adv_chain_ok = 2000
+  adv_chain_bad = 0
+  adv_hint_ge_prior = 61237
+  adv_hint_used = 68242
+  adv_mono_ok = 2000
+  adv_mono_bad = 0
+  max nodes/capacity = 1.000
+  mutant chain_noprior: {'runs': 2000, 'same': 206, 'fail': 1794, 'mismatch': 0, 'reasons': {'out_of_bounds': 1794}}
+  mutant chain_nochase: {'runs': 2000, 'same': 345, 'fail': 1623, 'mismatch': 32, 'reasons': {'next_written_twice': 1623}}
+  mutant zero: {'runs': 2000, 'same': 548, 'fail': 0, 'mismatch': 1452, 'reasons': {}}
+  mutant garbage_lt_prior: {'runs': 2000, 'same': 308, 'fail': 0, 'mismatch': 1692, 'reasons': {}}
+  mutant other_facet: {'runs': 2000, 'same': 878, 'fail': 0, 'mismatch': 1122, 'reasons': {}}
+VERDICT ok
+exit=0

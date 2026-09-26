@@ -1,0 +1,4 @@
+L3 ok {'equal': 20000, 'failing': 19619, 'not_strict': 18652, 'anchor_missing': 967, 'ok_runs': 381}
+L5 ok 20000
+L12 ok 4000 (fused = births + merges - sum|parents| of merges); literal n0 + births + merges - sum|parents| differs on 2000 instances (all K1)
+L10 failure at block 3 facet 1 : per-facet representatives = 5 ; batched sum = 8 ; batched-at-end (not reached) = 0

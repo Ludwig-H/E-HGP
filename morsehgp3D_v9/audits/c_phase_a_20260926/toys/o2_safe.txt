@@ -1,0 +1,4 @@
+mode=safe count=400 facets=6638749 same=400 diff=0 fails=0 first_fail=
+hints: published=24909 accepted=24230 rejected=0 missing=6614519 helper_waits=140673
+committer find hops: plain=14025682 hinted=13992717 (not a tower_work counter)
+exit=0
