@@ -1,5 +1,28 @@
 # État courant des audits v9
 
+**Transport q3/q4 et FULL parallèle, 26 septembre 19 h 56** :
+[plan de raccord et priorités](AUDIT_B_RACCORD_PAYLOAD_CATALOGUE_20260926.md).
+Le [producteur q3 audit-only](b_q3_payload_producer_20260926/README.md)
+recueille les IDs pendant le census existant : 484 comparaisons,
+233 records exacts, 227 `BallData` régulières égales au recensus ;
+Release/ASan/UBSan et deux mutants causaux passent. Surcoût du producteur
+CPU émulé **12–15 %** sur les échantillons ; aucune économie FULL encore
+mesurée. Les diagnostics 8k/16k/32k traitent 128 arêtes, pas le générateur.
+Pour q4, [T1 fournit déjà les masques nécessaires](AUDIT_B_TRANSPORT_INTERIEURS_Q4_20260926.md) :
+conserver aussi les IDs des lentilles vivantes évite une seconde collecte
+globale. L'oracle Fraction couvre 805 groupes et 29 retours profond→peu
+profond. Une [voie native triée](b_q4_sorted_events_20260926/README.md)
+valide les fenêtres entrée/sortie en O(m log m) par famille, mais perd
+face au rejet précoce sur le cas synthétique dense ; pas de port aveugle.
+R24-B K5 lit déjà 1,010 chunk T1 par passage de classe en moyenne.
+La [proposition FULL tous ordres](b_full_phase_a_work_20260926/README.md)
+précise MSF, ancêtres pondérés, prédécesseurs et sauts de pointeurs :
+6 008 comparaisons combinatoires, quatre mutants, puis 8 370 contre-épreuves
+exhaustives ; aucune implémentation GPU/FULL qualifiée par ces modèles.
+Code moteur inchangé, pas de nouvelle session GCP. À porter en priorité :
+IDs vers catalogue, front GPU compact, construction événementielle FULL.
+100 ms et sous-quadratique LiDAR global restent non acquis.
+
 **Cache S2 mesuré sur G4, 26 septembre** : [rapport et décisions](AUDIT_B_CACHE_S2_G4_20260926.md),
 [reçu](../receipts/g4_tile_cache_20260926/README.md). Le port opt-in
 `d0e711e23` passe 14 cas sur trois trames sans sol de la séquence 08,

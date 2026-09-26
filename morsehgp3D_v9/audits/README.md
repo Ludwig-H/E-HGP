@@ -9,6 +9,13 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 
 ## Par où commencer
 
+Dernier lot local : [IDs q3/q4 vers catalogue et priorités 100 ms](AUDIT_B_RACCORD_PAYLOAD_CATALOGUE_20260926.md),
+[producteur q3 éprouvé](b_q3_payload_producer_20260926/README.md),
+[preuve q4 et fenêtres triées](AUDIT_B_TRANSPORT_INTERIEURS_Q4_20260926.md),
+[prototype natif et contre-régime du tri](b_q4_sorted_events_20260926/README.md),
+[FULL événementiel tous ordres](b_full_phase_a_work_20260926/README.md).
+Ce sont des prototypes/audits CPU, pas un nouveau gain de chaîne G4.
+
 Dernier complément concret : [cache S2 sur G4](AUDIT_B_CACHE_S2_G4_20260926.md).
 14 comparaisons terminées, réponses identiques ; gain net de 1–4 ms sur
 le filtre, pas un nouveau temps FULL. [Preuves et lecteurs](b_g4_tile_cache_20260926/README.md).

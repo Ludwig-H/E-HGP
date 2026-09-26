@@ -1,0 +1,194 @@
+{
+  "schema": "audit_q4_sorted_events_v1",
+  "scope": "one_synthetic_family_not_product_T1",
+  "base_commit": "52ff41802a9c77e8495aee57ab732da34d1a225e",
+  "build": "/tmp/mhgp9-q4-sorted-events-_baktu55",
+  "source_hashes_before": {
+    "morsehgp3D_v9/audits/b_q4_sorted_events_20260926/sorted_probe.cpp": "27554f077852332538df8de4571034df39204f86a64918eb08296246978a8409",
+    "morsehgp3D_v9/src/gpu/q4_lanes.hpp": "86620bda4f84816fcbac6da6b6b791e2bd66910d75a5d0b2ccf867a8019d9fe0",
+    "morsehgp3D_v9/src/gpu/lanes.hpp": "3bdccc006d603396da045db09f1c497d6a7c8a47060dd3cbf3c88a35207322bd",
+    "morsehgp3D_v9/src/gpu/certificate.hpp": "d0f25698b80845d9e5aa1ab21f6c854818caa28e7b80911aa6521afe4b4a74f5",
+    "morsehgp3D_v9/src/gpu/witness_filter.hpp": "0ab8b3e38205845b39db08cb7245e472042a3ab2aab663492383ce0729c98d1f",
+    "morsehgp3D_v9/audits/b_q4_sorted_events_20260926/capture.py": "7186131bb6932d2faa9437b1ce282e477291ac89ab3ccedcfd43f684c5e4cec3"
+  },
+  "machine": [
+    "Linux",
+    "codespaces-0bcb78",
+    "6.8.0-1064-azure",
+    "#72~22.04.1-Ubuntu SMP Wed Jul 22 23:39:45 UTC 2026",
+    "x86_64"
+  ],
+  "gcp_used": false,
+  "commands": [
+    {
+      "label": "gxx",
+      "argv": [
+        "g++",
+        "--version"
+      ],
+      "expected": 0,
+      "returncode": 0,
+      "wall_seconds": 0.0023041410004225327,
+      "stdout_sha256": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "clangxx",
+      "argv": [
+        "clang++",
+        "--version"
+      ],
+      "expected": 0,
+      "returncode": 0,
+      "wall_seconds": 1.6114549590001843,
+      "stdout_sha256": "3635b8631d4ebcd8ed7586f4e01e7a6b44407de9d38db6e01daca9c242ed7a53",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "compile_release",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-O3",
+        "-DNDEBUG",
+        "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q4_sorted_events_20260926/sorted_probe.cpp",
+        "-o",
+        "/tmp/mhgp9-q4-sorted-events-_baktu55/sorted_release"
+      ],
+      "expected": 0,
+      "returncode": 0,
+      "wall_seconds": 2.6534430100000463,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "compile_sanitize",
+      "argv": [
+        "clang++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-O1",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-fno-omit-frame-pointer",
+        "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q4_sorted_events_20260926/sorted_probe.cpp",
+        "-o",
+        "/tmp/mhgp9-q4-sorted-events-_baktu55/sorted_sanitize"
+      ],
+      "expected": 0,
+      "returncode": 0,
+      "wall_seconds": 5.01439054399998,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "selftest_release",
+      "argv": [
+        "/tmp/mhgp9-q4-sorted-events-_baktu55/sorted_release",
+        "--selftest"
+      ],
+      "expected": 0,
+      "returncode": 0,
+      "wall_seconds": 0.008733411999855889,
+      "stdout_sha256": "7c538e9624c5849b26c5b26788665a84918bf187b4a3d81045afdee7aa367151",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "selftest_sanitize",
+      "argv": [
+        "/tmp/mhgp9-q4-sorted-events-_baktu55/sorted_sanitize",
+        "--selftest"
+      ],
+      "expected": 0,
+      "returncode": 0,
+      "wall_seconds": 0.05287971199959429,
+      "stdout_sha256": "7c538e9624c5849b26c5b26788665a84918bf187b4a3d81045afdee7aa367151",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "bad_option",
+      "argv": [
+        "/tmp/mhgp9-q4-sorted-events-_baktu55/sorted_release",
+        "--unknown"
+      ],
+      "expected": 2,
+      "returncode": 2,
+      "wall_seconds": 0.0018335229997319402,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "ea4cca8e31e5239104a5fb98cc691b3dabdbe17f89d79b3483eef3f5616a4668"
+    },
+    {
+      "label": "bad_size",
+      "argv": [
+        "/tmp/mhgp9-q4-sorted-events-_baktu55/sorted_release",
+        "--bench",
+        "12"
+      ],
+      "expected": 1,
+      "returncode": 1,
+      "wall_seconds": 0.0017018270000335178,
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e8f6df09dfe0dd7f4c765122bb60e75be59704076afb566db6ade252484ae7c3"
+    },
+    {
+      "label": "bench_8000",
+      "argv": [
+        "/tmp/mhgp9-q4-sorted-events-_baktu55/sorted_release",
+        "--bench",
+        "8000"
+      ],
+      "expected": 0,
+      "returncode": 0,
+      "wall_seconds": 0.011299701000098139,
+      "stdout_sha256": "23a2d02830ddea715e8412da0b2744bb269c6d183ea305d8595ef6f92f3e12fa",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "bench_16000",
+      "argv": [
+        "/tmp/mhgp9-q4-sorted-events-_baktu55/sorted_release",
+        "--bench",
+        "16000"
+      ],
+      "expected": 0,
+      "returncode": 0,
+      "wall_seconds": 0.023948521000420442,
+      "stdout_sha256": "af58296b450e39c8c90a77c0b992439f3e4559491e1d2044ba60a01c0d122e01",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "label": "bench_32000",
+      "argv": [
+        "/tmp/mhgp9-q4-sorted-events-_baktu55/sorted_release",
+        "--bench",
+        "32000"
+      ],
+      "expected": 0,
+      "returncode": 0,
+      "wall_seconds": 0.04899168500014639,
+      "stdout_sha256": "e2293c501329dd56d355ba7d0c74696b4f1310ed1909fda9502197e6420d7472",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "source_hashes_after": {
+    "morsehgp3D_v9/audits/b_q4_sorted_events_20260926/sorted_probe.cpp": "27554f077852332538df8de4571034df39204f86a64918eb08296246978a8409",
+    "morsehgp3D_v9/src/gpu/q4_lanes.hpp": "86620bda4f84816fcbac6da6b6b791e2bd66910d75a5d0b2ccf867a8019d9fe0",
+    "morsehgp3D_v9/src/gpu/lanes.hpp": "3bdccc006d603396da045db09f1c497d6a7c8a47060dd3cbf3c88a35207322bd",
+    "morsehgp3D_v9/src/gpu/certificate.hpp": "d0f25698b80845d9e5aa1ab21f6c854818caa28e7b80911aa6521afe4b4a74f5",
+    "morsehgp3D_v9/src/gpu/witness_filter.hpp": "0ab8b3e38205845b39db08cb7245e472042a3ab2aab663492383ce0729c98d1f",
+    "morsehgp3D_v9/audits/b_q4_sorted_events_20260926/capture.py": "7186131bb6932d2faa9437b1ce282e477291ac89ab3ccedcfd43f684c5e4cec3"
+  },
+  "binary_hashes": {
+    "/tmp/mhgp9-q4-sorted-events-_baktu55/sorted_release": "f072e58f43a0b00cab3bce8215ebaf7f13ab116d548b7d7f38227d4405747748",
+    "/tmp/mhgp9-q4-sorted-events-_baktu55/sorted_sanitize": "aa369ee637aaddd5ae68b31e812bcd8996f4bb9834cc1f305c4c6e9ac018c6b8"
+  },
+  "status": "completed"
+}

@@ -1,0 +1,3 @@
+{"n":32000,"repeat":0,"events":31996,"groups":31994,"sort_comparisons":601341,"scan_events":31996,"shallow_queries":0,"payload_ids":0,"early_point_tests":196248,"early_rejected":31994,"sorted_ms":10.3721,"payload_ms":0.012493,"early_stop_ms":1.81574}
+{"n":32000,"repeat":1,"events":31996,"groups":31994,"sort_comparisons":601341,"scan_events":31996,"shallow_queries":0,"payload_ids":0,"early_point_tests":196248,"early_rejected":31994,"sorted_ms":10.285,"payload_ms":0.011402,"early_stop_ms":1.82031}
+{"n":32000,"repeat":2,"events":31996,"groups":31994,"sort_comparisons":601341,"scan_events":31996,"shallow_queries":0,"payload_ids":0,"early_point_tests":196248,"early_rejected":31994,"sorted_ms":10.307,"payload_ms":0.011492,"early_stop_ms":1.80885}

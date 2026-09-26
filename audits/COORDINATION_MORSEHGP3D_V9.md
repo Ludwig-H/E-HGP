@@ -6448,3 +6448,41 @@ Le résidu S2 des amas 8k/16k/32k est toujours quasiquadratique
 (×3,977/×3,987), fait négatif publié. Aucun appel GCP pour ce lot ; les
 quatre sous-dossiers et la synthèse donnent les preuves, coûts exclus et
 commandes. Pas de nouveau chrono de contrat FULL.
+
+### 19 h 56 UTC (26 septembre) — B : IDs sans recensus, q4 trié et FULL événementiel
+
+À D/C : le [plan de raccord](../morsehgp3D_v9/audits/AUDIT_B_RACCORD_PAYLOAD_CATALOGUE_20260926.md)
+précise maintenant chaque déplacement des IDs jusqu'au catalogue. Le
+producteur q3 portable est implémenté **dans l'audit seulement** : 484
+censuses égaux, 233 records, 227 `BallData` régulières égales au recensus,
+deux mutants compilés causaux. Il coûte 12–15 % de plus sur les échantillons
+CPU ; mesurer collecte+transfert+import sur G4 avant de parler de gain net.
+Il n'est pas raccordé à L15, au staging/gather ni aux tris de présentation.
+
+Correction utile pour q4 : T1 possède déjà les masques `inside` complets
+des classes acceptées. Conserver aussi au plus K−3 IDs de lentille par
+intervalle vivant permet l'export sans nouveau scan par émission.
+La [preuve et l'oracle Fraction](../morsehgp3D_v9/audits/AUDIT_B_TRANSPORT_INTERIEURS_Q4_20260926.md)
+traitent contacts et retours profond→superficiel. Une autre voie, par tri
+exact puis préfixe d'entrées/suffixe de sorties, évite le réservoir actif
+tronqué et borne le travail d'une liste par O(m log m+K·sorties).
+Le [prototype natif](../morsehgp3D_v9/audits/b_q4_sorted_events_20260926/README.md)
+passe ses tests mais le tri perd contre le rejet précoce sur notre famille
+dense. R24-B K5 a déjà 1,010 chunk T1 par passage de classe en moyenne,
+contre 11,68 M chunks de passage lentille au total : instrumenter les
+segments difficiles avant un remplacement général. Aucun gain GPU déduit.
+
+Pour la tour, le [sidecar tous ordres](../morsehgp3D_v9/audits/b_full_phase_a_work_20260926/README.md)
+rend concret le sous-problème encore ouvert de l'ancien graphe temporel :
+MSF, ancêtres pondérés, prédécesseurs d'événements par label, puis saut de
+pointeurs pour les continuations. 6 008 comparaisons combinatoires et
+8 370 contre-épreuves exhaustives passent. Les événements silencieux,
+plateaux et niveaux exacts restent indispensables. Phase 0, géométrie,
+populations et verticales ne sont pas éliminées par cette preuve.
+
+Priorité au port IDs→catalogue, au front GPU compact et à la phase A de
+tous les K, pas à un nouveau réglage du cache S2. Celui-ci a son reçu G4
+clos (`52ff41802`) : gain net du filtre d'environ 1–4 ms seulement,
+14 cas et 42 passages sans divergence, VM arrêtée et relue TERMINATED.
+Ce nouveau lot est CPU/audit-only, sans dépense GCP ni changement moteur.
+Tous les reçus et lecteurs normal/−O restent séparés des qualifications FULL.

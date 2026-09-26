@@ -1,0 +1,498 @@
+{
+  "schema": "audit_q3_payload_producer_v1",
+  "scope": "cpu_portable_q3_range_not_L15_not_full",
+  "gcp_used": false,
+  "base_commit": "52ff41802a9c77e8495aee57ab732da34d1a225e",
+  "source_before": {
+    "morsehgp3D_v9/audits/b_q3_payload_producer_20260926/probe.cpp": "aa11eea6fd9fa72a4da29c7d473d52280ae8ba470967307de6b13bb12ee27c1a",
+    "morsehgp3D_v9/audits/b_q3_payload_producer_20260926/producer.hpp": "bdec8112adbde54a4c45035b0289e27e376fb4f7031c02940b4070f6e89484a8",
+    "morsehgp3D_v9/audits/b_q3_payload_producer_20260926/readback.py": "4b6f838bee931ea0067d0f1c38ed2db2c117e018b3791f95f77946bef6e4115f",
+    "morsehgp3D_v9/audits/b_q3_payload_producer_20260926/run.py": "2d22977e4887fd4ab2fad575bf882a1348e2867eff2a5242c98be7f43fe5fcdf",
+    "morsehgp3D_v9/src/gen/core/types.hpp": "e10ae7eba705440ee43e2d27d81dcea0cce0e5b5fb7935532ee7dff08a889547",
+    "morsehgp3D_v9/src/gen/lanes/exact_ball.cpp": "857f66ff7c07693295d4503955b4bba54b6768fe577a2b670a1621267695f765",
+    "morsehgp3D_v9/src/gen/lanes/exact_ball.hpp": "dd98bad923e25545c55d6a42959612a4df728cbbb7ef0fbe3cb91b1b21053659",
+    "morsehgp3D_v9/src/gpu/certificate.hpp": "d0f25698b80845d9e5aa1ab21f6c854818caa28e7b80911aa6521afe4b4a74f5",
+    "morsehgp3D_v9/src/gpu/lanes.hpp": "3bdccc006d603396da045db09f1c497d6a7c8a47060dd3cbf3c88a35207322bd",
+    "morsehgp3D_v9/src/gpu/witness_filter.hpp": "0ab8b3e38205845b39db08cb7245e472042a3ab2aab663492383ce0729c98d1f",
+    "morsehgp3D_v9/src/tower/core/device.hpp": "741377a5f8c0599754116a2426b71daf0a355eb89cae1403cdc08544ac0ae46e",
+    "morsehgp3D_v9/src/tower/core/intmath.hpp": "28a1fc6279e3b449c4bb6e47a1e6168a4dcf19a16210ab27f564723ba900e52e",
+    "morsehgp3D_v9/src/tower/core/morton.hpp": "8ad508002ac68264a9985bac21d5e5934d843066f5804119149995dae1b4652d",
+    "morsehgp3D_v9/src/tower/core/mutants.hpp": "50c7c50e36f401ef323917df0ba1d0546f9ce09bb4138fb8051ca45ceadcab9a",
+    "morsehgp3D_v9/src/tower/core/types.hpp": "3ab5e0378b8b2bf5a24a3594ae64f37e7f5fa29a72abf335225b2c2ff4c97d6d",
+    "morsehgp3D_v9/src/tower/core/wide.hpp": "877ba8c4bd045c023f3cd64e8f7fc5edf0d074bfd0c5fac9510306e06f5f387e",
+    "morsehgp3D_v9/src/tower/forest/ball_data.hpp": "cb53d281765a984096b775521db1e6b42893684840f7adca89bc69e52ca92b8a",
+    "morsehgp3D_v9/src/tower/lanes/keys.hpp": "919f9713ba08a2f061a90b87f6b38228fb97575f3419793046fbe3c04ce933fa",
+    "morsehgp3D_v9/src/tower/lanes/level.hpp": "4acd8df236721d4158527421400c1a44a37687807be15b66e17d2bf689c5f980",
+    "morsehgp3D_v9/src/tower/lanes/q3.hpp": "5b443889ddde4906a28bc921e3473d2dd9c4cd4f677a67b87903bc4b5b7ac588",
+    "morsehgp3D_v9/src/tower/pipeline/census.hpp": "f35bdf0d87a2e667fb54743790a83f329428c5e3f7a12f61ca1f0012a361352c",
+    "morsehgp3D_v9/src/tower/tree/cloud_index.hpp": "2426a0cfa42689aed25b8a9c6630d92c54aa3cf4704273d58173ccad29275c5f",
+    "morsehgp3D_v9/tests/gen/front_fixtures.hpp": "d5532618b5b2067b09491694ef800eeb661186b93ff57c45b68e44fbc9840e16"
+  },
+  "build": "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926",
+  "commands": [
+    {
+      "label": "compiler_release",
+      "argv": [
+        "g++",
+        "--version"
+      ],
+      "expected": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 0.0025834320003923494
+    },
+    {
+      "label": "compiler_sanitize",
+      "argv": [
+        "clang++",
+        "--version"
+      ],
+      "expected": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 0.022808242999417416
+    },
+    {
+      "label": "compile_release",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-I",
+        "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/src/gen",
+        "-I",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O3",
+        "-DNDEBUG",
+        "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q3_payload_producer_20260926/probe.cpp",
+        "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/src/gen/lanes/exact_ball.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/producer_release"
+      ],
+      "expected": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 4.429423292999672
+    },
+    {
+      "label": "compile_sanitize",
+      "argv": [
+        "clang++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-I",
+        "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/src/gen",
+        "-I",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O1",
+        "-g",
+        "-fsanitize=address,undefined",
+        "-fno-sanitize-recover=all",
+        "-fno-omit-frame-pointer",
+        "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q3_payload_producer_20260926/probe.cpp",
+        "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/src/gen/lanes/exact_ball.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/producer_sanitize"
+      ],
+      "expected": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 7.624133665000045
+    },
+    {
+      "label": "selftest_release",
+      "argv": [
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/producer_release",
+        "--selftest"
+      ],
+      "expected": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 0.0099777740006175
+    },
+    {
+      "label": "selftest_sanitize",
+      "argv": [
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/producer_sanitize",
+        "--selftest"
+      ],
+      "expected": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 0.06744186299965804
+    },
+    {
+      "label": "compile_omit_last",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-I",
+        "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/src/gen",
+        "-I",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O3",
+        "-DAUDIT_Q3_PAYLOAD_MUTANT_OMIT_LAST",
+        "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q3_payload_producer_20260926/probe.cpp",
+        "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/src/gen/lanes/exact_ball.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/mutant_omit_last"
+      ],
+      "expected": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 4.394382739000321
+    },
+    {
+      "label": "kill_omit_last",
+      "argv": [
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/mutant_omit_last",
+        "--selftest"
+      ],
+      "expected": 1,
+      "status": "completed",
+      "exit_code": 1,
+      "wall_seconds": 0.002232316000117862
+    },
+    {
+      "label": "compile_rank_as_id",
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-I",
+        "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/src/gen",
+        "-I",
+        "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+        "-O3",
+        "-DAUDIT_Q3_PAYLOAD_MUTANT_RANK_AS_ID",
+        "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q3_payload_producer_20260926/probe.cpp",
+        "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/src/gen/lanes/exact_ball.cpp",
+        "-o",
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/mutant_rank_as_id"
+      ],
+      "expected": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 4.341151521000029
+    },
+    {
+      "label": "kill_rank_as_id",
+      "argv": [
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/mutant_rank_as_id",
+        "--selftest"
+      ],
+      "expected": 1,
+      "status": "completed",
+      "exit_code": 1,
+      "wall_seconds": 0.002315802999873995
+    },
+    {
+      "label": "bad_arguments",
+      "argv": [
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/producer_release",
+        "--unknown"
+      ],
+      "expected": 2,
+      "status": "completed",
+      "exit_code": 2,
+      "wall_seconds": 0.001848200000495126
+    },
+    {
+      "label": "bad_k",
+      "argv": [
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/producer_release",
+        "--file",
+        "absent.u32le",
+        "11"
+      ],
+      "expected": 1,
+      "status": "completed",
+      "exit_code": 1,
+      "wall_seconds": 0.0018807999995260616
+    },
+    {
+      "label": "synthetic_uniform_8000",
+      "argv": [
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/producer_release",
+        "--synthetic",
+        "8000",
+        "uniform"
+      ],
+      "expected": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 0.8997127180000462
+    },
+    {
+      "label": "synthetic_uniform_16000",
+      "argv": [
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/producer_release",
+        "--synthetic",
+        "16000",
+        "uniform"
+      ],
+      "expected": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 1.8875141070002428
+    },
+    {
+      "label": "synthetic_uniform_32000",
+      "argv": [
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/producer_release",
+        "--synthetic",
+        "32000",
+        "uniform"
+      ],
+      "expected": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 3.8822315639999943
+    },
+    {
+      "label": "synthetic_terrain_8000",
+      "argv": [
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/producer_release",
+        "--synthetic",
+        "8000",
+        "terrain"
+      ],
+      "expected": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 0.8968195170000399
+    },
+    {
+      "label": "synthetic_terrain_16000",
+      "argv": [
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/producer_release",
+        "--synthetic",
+        "16000",
+        "terrain"
+      ],
+      "expected": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 1.844520626999838
+    },
+    {
+      "label": "synthetic_terrain_32000",
+      "argv": [
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/producer_release",
+        "--synthetic",
+        "32000",
+        "terrain"
+      ],
+      "expected": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 3.801076243999887
+    },
+    {
+      "label": "synthetic_clusters_8000",
+      "argv": [
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/producer_release",
+        "--synthetic",
+        "8000",
+        "clusters"
+      ],
+      "expected": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 0.875667966999572
+    },
+    {
+      "label": "synthetic_clusters_16000",
+      "argv": [
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/producer_release",
+        "--synthetic",
+        "16000",
+        "clusters"
+      ],
+      "expected": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 1.7552864569997837
+    },
+    {
+      "label": "synthetic_clusters_32000",
+      "argv": [
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/producer_release",
+        "--synthetic",
+        "32000",
+        "clusters"
+      ],
+      "expected": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 3.5805617619998884
+    },
+    {
+      "label": "lidar_00_K5",
+      "argv": [
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/producer_release",
+        "--file",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le",
+        "5"
+      ],
+      "expected": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 4.080032308000227
+    },
+    {
+      "label": "lidar_01_K5",
+      "argv": [
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/producer_release",
+        "--file",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/full.u32le",
+        "5"
+      ],
+      "expected": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 3.8427329470005134
+    },
+    {
+      "label": "lidar_02_K5",
+      "argv": [
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/producer_release",
+        "--file",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/full.u32le",
+        "5"
+      ],
+      "expected": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 4.796292332999656
+    },
+    {
+      "label": "lidar_00_K10",
+      "argv": [
+        "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/producer_release",
+        "--file",
+        "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le",
+        "10"
+      ],
+      "expected": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_seconds": 4.170659667999644
+    }
+  ],
+  "input_files": {
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/full.u32le": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/full.u32le": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af"
+  },
+  "status": "completed",
+  "source_after": {
+    "morsehgp3D_v9/audits/b_q3_payload_producer_20260926/probe.cpp": "aa11eea6fd9fa72a4da29c7d473d52280ae8ba470967307de6b13bb12ee27c1a",
+    "morsehgp3D_v9/audits/b_q3_payload_producer_20260926/producer.hpp": "bdec8112adbde54a4c45035b0289e27e376fb4f7031c02940b4070f6e89484a8",
+    "morsehgp3D_v9/audits/b_q3_payload_producer_20260926/readback.py": "4b6f838bee931ea0067d0f1c38ed2db2c117e018b3791f95f77946bef6e4115f",
+    "morsehgp3D_v9/audits/b_q3_payload_producer_20260926/run.py": "2d22977e4887fd4ab2fad575bf882a1348e2867eff2a5242c98be7f43fe5fcdf",
+    "morsehgp3D_v9/src/gen/core/types.hpp": "e10ae7eba705440ee43e2d27d81dcea0cce0e5b5fb7935532ee7dff08a889547",
+    "morsehgp3D_v9/src/gen/lanes/exact_ball.cpp": "857f66ff7c07693295d4503955b4bba54b6768fe577a2b670a1621267695f765",
+    "morsehgp3D_v9/src/gen/lanes/exact_ball.hpp": "dd98bad923e25545c55d6a42959612a4df728cbbb7ef0fbe3cb91b1b21053659",
+    "morsehgp3D_v9/src/gpu/certificate.hpp": "d0f25698b80845d9e5aa1ab21f6c854818caa28e7b80911aa6521afe4b4a74f5",
+    "morsehgp3D_v9/src/gpu/lanes.hpp": "3bdccc006d603396da045db09f1c497d6a7c8a47060dd3cbf3c88a35207322bd",
+    "morsehgp3D_v9/src/gpu/witness_filter.hpp": "0ab8b3e38205845b39db08cb7245e472042a3ab2aab663492383ce0729c98d1f",
+    "morsehgp3D_v9/src/tower/core/device.hpp": "741377a5f8c0599754116a2426b71daf0a355eb89cae1403cdc08544ac0ae46e",
+    "morsehgp3D_v9/src/tower/core/intmath.hpp": "28a1fc6279e3b449c4bb6e47a1e6168a4dcf19a16210ab27f564723ba900e52e",
+    "morsehgp3D_v9/src/tower/core/morton.hpp": "8ad508002ac68264a9985bac21d5e5934d843066f5804119149995dae1b4652d",
+    "morsehgp3D_v9/src/tower/core/mutants.hpp": "50c7c50e36f401ef323917df0ba1d0546f9ce09bb4138fb8051ca45ceadcab9a",
+    "morsehgp3D_v9/src/tower/core/types.hpp": "3ab5e0378b8b2bf5a24a3594ae64f37e7f5fa29a72abf335225b2c2ff4c97d6d",
+    "morsehgp3D_v9/src/tower/core/wide.hpp": "877ba8c4bd045c023f3cd64e8f7fc5edf0d074bfd0c5fac9510306e06f5f387e",
+    "morsehgp3D_v9/src/tower/forest/ball_data.hpp": "cb53d281765a984096b775521db1e6b42893684840f7adca89bc69e52ca92b8a",
+    "morsehgp3D_v9/src/tower/lanes/keys.hpp": "919f9713ba08a2f061a90b87f6b38228fb97575f3419793046fbe3c04ce933fa",
+    "morsehgp3D_v9/src/tower/lanes/level.hpp": "4acd8df236721d4158527421400c1a44a37687807be15b66e17d2bf689c5f980",
+    "morsehgp3D_v9/src/tower/lanes/q3.hpp": "5b443889ddde4906a28bc921e3473d2dd9c4cd4f677a67b87903bc4b5b7ac588",
+    "morsehgp3D_v9/src/tower/pipeline/census.hpp": "f35bdf0d87a2e667fb54743790a83f329428c5e3f7a12f61ca1f0012a361352c",
+    "morsehgp3D_v9/src/tower/tree/cloud_index.hpp": "2426a0cfa42689aed25b8a9c6630d92c54aa3cf4704273d58173ccad29275c5f",
+    "morsehgp3D_v9/tests/gen/front_fixtures.hpp": "d5532618b5b2067b09491694ef800eeb661186b93ff57c45b68e44fbc9840e16"
+  },
+  "binaries": {
+    "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/producer_release": "07d465c277a571ccfc5a87830697689065f7000f2b21ce99d9342ada0c87f537",
+    "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/producer_sanitize": "effbb78efdf335ed64d4f3cee114546ea599f4bec8541695e1d785d3f0161916"
+  },
+  "mutants": [
+    {
+      "name": "omit_last",
+      "binary": "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/mutant_omit_last",
+      "sha256": "572c0b391cc879df0c33bfdc02cee8c38cd4fdc5c12f9f2f9d548a924a570d9c",
+      "cause": "cause=interior_ids_differ"
+    },
+    {
+      "name": "rank_as_id",
+      "binary": "/workspaces/E-HGP/build/v9-q3-payload-producer-audit-20260926/mutant_rank_as_id",
+      "sha256": "9fc987ca2c2dc965dd3168182c8e6fd9cfa93ce74c299cb4a2baf1ae1d94cab0",
+      "cause": "cause=interior_ids_differ"
+    }
+  ],
+  "outputs": {
+    "RESULTS.json": "028208c7ef0fd17c9bd2e8b9741829cbc57de768bc8e355470edf082bb2fb500",
+    "bad_arguments.stderr": "9affae7c0241bc73da4db15edf09a005a382d5257abc49ef4fa58048e6580828",
+    "bad_arguments.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bad_k.stderr": "254813110375c72f88f3890d70afcefa88ca906a3749002e9c79e88f42426f8c",
+    "bad_k.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compile_omit_last.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compile_omit_last.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compile_rank_as_id.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compile_rank_as_id.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compile_release.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compile_release.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compile_sanitize.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compile_sanitize.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compiler_release.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compiler_release.stdout": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8",
+    "compiler_sanitize.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "compiler_sanitize.stdout": "3635b8631d4ebcd8ed7586f4e01e7a6b44407de9d38db6e01daca9c242ed7a53",
+    "kill_omit_last.stderr": "71a29ea3c42dab7f907f63c7c9e71bf7fd1a843ef887de6572a5559b2aaa1ce2",
+    "kill_omit_last.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "kill_rank_as_id.stderr": "71a29ea3c42dab7f907f63c7c9e71bf7fd1a843ef887de6572a5559b2aaa1ce2",
+    "kill_rank_as_id.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lidar_00_K10.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lidar_00_K10.stdout": "4ccd1f366abb49e123f7538ad8b5de0937c5c209a3703874ba726bc02ce174d5",
+    "lidar_00_K5.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lidar_00_K5.stdout": "5d477ced5f3cf63d7f3967548a7703f52a95166817a5f79f970b1feb5b00b301",
+    "lidar_01_K5.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lidar_01_K5.stdout": "a7a2d69bb64d57e006d5ade720c9c9b2c505d21bfacd4007de133ae781a05dab",
+    "lidar_02_K5.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lidar_02_K5.stdout": "b06c3a9d49c4c27ece124126f316404baafaa248087e7c788085038a11fdb9de",
+    "selftest_release.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "selftest_release.stdout": "c50ab14476b6a21617797b8309d5cbb52c646c132257dee78f83135c365c32b3",
+    "selftest_sanitize.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "selftest_sanitize.stdout": "c50ab14476b6a21617797b8309d5cbb52c646c132257dee78f83135c365c32b3",
+    "synthetic_clusters_16000.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "synthetic_clusters_16000.stdout": "d4f3affdf408f10a033934860674a9492ac51eacb47472b89129ea491be1f2d3",
+    "synthetic_clusters_32000.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "synthetic_clusters_32000.stdout": "67d248edd3220d466836437902508cc1a20cb5e0a99cb3a4764930907fccfab4",
+    "synthetic_clusters_8000.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "synthetic_clusters_8000.stdout": "1f41cb63fde0b0b602560c3b0a5e472212bb5e97994d6ed6bec7cbc11afa1268",
+    "synthetic_terrain_16000.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "synthetic_terrain_16000.stdout": "d7bd1b8a424ceddc2dce67e10f9df025ba726203bd996bf5d3be055d79faf960",
+    "synthetic_terrain_32000.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "synthetic_terrain_32000.stdout": "53171795dcfa1b3b3ed3302238c3192a6876f9093655a4364b9a70e194a74c20",
+    "synthetic_terrain_8000.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "synthetic_terrain_8000.stdout": "961cb5b3d63513f87eed7202c9f83a75178fe82dfcc91e8df79ef8f79910481f",
+    "synthetic_uniform_16000.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "synthetic_uniform_16000.stdout": "48de04c5d087211a25495b6deac82389dd2eb0fb1981b1dadebb29b2af5b6b01",
+    "synthetic_uniform_32000.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "synthetic_uniform_32000.stdout": "b8674ad5af71739a282d571e1ac2faeecf003242b281d07c4f28b6d67f566c9f",
+    "synthetic_uniform_8000.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "synthetic_uniform_8000.stdout": "cc0fad560df744a7c88055467b00d8622d7a1c11c160f56ba43ef2e929a91a34"
+  }
+}

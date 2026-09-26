@@ -111,6 +111,13 @@ courts et l’hôte partagé ne permettent pas de transférer ces rapports à G4
 
 ## Relecture et suite
 
+Mise à jour du même jour : le [producteur q3](../b_q3_payload_producer_20260926/README.md)
+collecte maintenant ces IDs pendant le census portable et les compare
+directement au recensus. Pour q4, l'[audit T1](../AUDIT_B_TRANSPORT_INTERIEURS_Q4_20260926.md)
+montre que les masques déjà calculés suffisent, avec stockage des intérieurs
+de lentille : la collecte supplémentaire envisagée ci-dessous n'est donc
+pas nécessaire. Aucun de ces compléments ne qualifie encore le raccord CUDA.
+
 [`readback.py`](readback.py) recalcule les tableaux depuis les sorties brutes,
 vérifie les sources et binaires locaux ainsi que les limites exercées. C’est
 un lecteur **LIVE** dépendant de la construction locale, pas une archive
@@ -125,7 +132,7 @@ python3 -B -O morsehgp3D_v9/audits/b_census_payload_20260926/readback.py
 une copie de ce dossier sans ses résultats ou adapter explicitement le
 répertoire de sortie. Le prochain jalon utile est un producteur q3 qui
 conserve les IDs des masques intérieurs existants, puis le raccord avec un
-oracle global activable. Pour q4, payer et mesurer une collecte sur les
-émissions avant d’optimiser sa combinaison lentille + événements. Mesurer
+oracle global activable. La première proposition q4 était une collecte
+supplémentaire par émission ; la mise à jour ci-dessus la remplace. Mesurer
 copies, transferts, réordonnancement des records et stockage des paquets ;
 conserver toutes les associations pendant le tri q4 et la déduplication.

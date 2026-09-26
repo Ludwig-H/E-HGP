@@ -1,0 +1,3 @@
+{"n":8000,"repeat":0,"events":7996,"groups":7994,"sort_comparisons":134799,"scan_events":7996,"shallow_queries":0,"payload_ids":0,"early_point_tests":49066,"early_rejected":7994,"sorted_ms":2.07731,"payload_ms":0.02646,"early_stop_ms":0.429662}
+{"n":8000,"repeat":1,"events":7996,"groups":7994,"sort_comparisons":134799,"scan_events":7996,"shallow_queries":0,"payload_ids":0,"early_point_tests":49066,"early_rejected":7994,"sorted_ms":2.03302,"payload_ms":0.002926,"early_stop_ms":0.407971}
+{"n":8000,"repeat":2,"events":7996,"groups":7994,"sort_comparisons":134799,"scan_events":7996,"shallow_queries":0,"payload_ids":0,"early_point_tests":49066,"early_rejected":7994,"sorted_ms":1.9867,"payload_ms":0.002915,"early_stop_ms":0.451854}

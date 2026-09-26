@@ -1,0 +1,23 @@
+{
+  "schema": "mhgp9_audit_q4_payload_math_v1",
+  "scope": "exact_affine_identities_not_engine_or_gpu",
+  "status": "pass",
+  "script_sha256": "e8871cdc7a1ea98f9e8adb5797036bb18d4eae626677e339de9799eda674f0d7",
+  "counters": {
+    "accepted_groups_k3": 2,
+    "accepted_groups_k4": 5,
+    "accepted_groups_k5": 7,
+    "accepted_groups_k6": 8,
+    "accepted_groups_k7": 104,
+    "accepted_groups_k8": 183,
+    "accepted_groups_k9": 246,
+    "accepted_groups_k10": 311,
+    "boundary_groups": 250,
+    "causal_mutants": 7,
+    "deep_to_shallow_transitions": 29,
+    "fixtures": 126,
+    "interior_ids": 7664,
+    "root_groups": 805,
+    "tied_groups": 257
+  }
+}
