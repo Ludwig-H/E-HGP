@@ -25,19 +25,26 @@ public_status=not_claimed
 ## L'idée, en une phrase
 
 Le nuage de points est un artefact du capteur ; la surface, elle, varierait
-beaucoup moins. On remplace donc le point par une **pièce géométrique
-polyédrique** issue de la hiérarchie HGP, et on donne au modèle le contexte
-multi-échelle que fournit l'arbre de fusion de ces pièces — exactement
-l'hypothèse de recherche du poster 3IA 2026.
+beaucoup moins. Tout encodeur 3D code pourtant en dur une **échelle métrique** —
+taille de voxel, liste de rayons, taille de *patch* — et c'est elle qui casse
+quand la portée, le capteur ou le domaine changent. La hiérarchie $K$-NN de
+Morse HGP 3D fournit à la place une échelle **canonique, dérivée des données et
+prouvée stable** : on la substitue aux composants qui portent la constante.
 
 ## Où commencer
 
-1. [`FoundationModel/README.md`](FoundationModel/README.md) — parcours d'entrée.
-2. [`FoundationModel/OBJET.md`](FoundationModel/OBJET.md) — ce que la tour v9
-   fournit vraiment, avec ses chiffres mesurés.
-3. [`FoundationModel/ARCHITECTURE.md`](FoundationModel/ARCHITECTURE.md) — le modèle.
-4. [`FoundationModel/PROTOCOLE.md`](FoundationModel/PROTOCOLE.md) — comment le tester
-   en cours de route.
+1. [`FoundationModel/README.md`](FoundationModel/README.md) — la thèse et le
+   parcours d'entrée.
+2. [`FoundationModel/OBJET.md`](FoundationModel/OBJET.md) — ce que la tour est,
+   et les six primitives qu'une architecture y lit.
+3. [`FoundationModel/ETAT_DE_LART.md`](FoundationModel/ETAT_DE_LART.md) — le
+   verrou, et la **table de substitution** qui sert de plan de mesure.
+4. [`FoundationModel/ARCHITECTURE.md`](FoundationModel/ARCHITECTURE.md) —
+   HGP-UNet.
+5. [`FoundationModel/MESURE.md`](FoundationModel/MESURE.md) — comment établir
+   l'apport, témoins négatifs compris.
+6. [`FoundationModel/PLAN.md`](FoundationModel/PLAN.md) — l'ordre de
+   construction et les points de décision.
 
 ## Ce que ce dossier n'est pas
 

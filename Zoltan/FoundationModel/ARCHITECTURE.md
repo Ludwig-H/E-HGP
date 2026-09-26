@@ -1,315 +1,328 @@
-# HGP-FM — architecture proposée
+# HGP-UNet — l'architecture
 
-26 septembre 2026. Proposition d'architecture pour un modèle de fondation 3D
-du LiDAR extérieur automobile, construit sur la tour FULL Morse HGP 3D
-(`morsehgp3D_v9`). Conception seulement : aucune expérience apprise n'est
-rapportée, aucun chiffre d'apprentissage n'est revendiqué.
+26 septembre 2026. Conception. Aucune expérience apprise n'est rapportée.
 
-Prérequis de lecture : [`OBJET.md`](OBJET.md), dont les chiffres mesurés
-contraignent tout ce qui suit.
+Prérequis : [`ETAT_DE_LART.md`](ETAT_DE_LART.md), qui établit ce que la tour
+remplace, et [`OBJET.md`](OBJET.md), qui dit ce qu'elle fournit.
 
-## 1. Le principe directeur
+## 1. La thèse, en un paragraphe
 
-> **Le tokenizer est exact et n'est pas appris. Le backbone est appris et reste
-> ordinaire.**
+Tout encodeur 3D contient une **échelle métrique posée à la main** — taille de
+voxel, liste de rayons, $k$, taille de *patch* sur une courbe remplissante — et
+c'est exactement ce qui casse quand le capteur, la portée ou le domaine
+changent. Les modèles de fondation 3D de 2025–2026 ne suppriment pas cette
+constante : ils en rattrapent les effets par du rééchelonnage, de l'augmentation
+et du brouillage. La tour HGP fournit à la place une **échelle canonique,
+dérivée des données, et prouvée stable en tant qu'objet multiparamètre**. On ne
+l'ajoute donc pas à une architecture : **on la substitue aux composants qui
+portent la constante.**
 
-C'est le seul découpage qui rende la contribution mesurable. Si l'on apprend la
-tokenisation en même temps que le reste, on ne saura jamais dire si le gain
-vient de la géométrie HGP ou du budget de calcul. En figeant le tokenizer sur
-un objet mathématique défini par le manuscrit et calculé exactement, chaque
-ablation devient une question à une seule variable : *même backbone, même
-budget, autre tokenizer*.
+Le modèle qui en découle n'est pas un nouveau réseau exotique. C'est un U-Net /
+Transformer ordinaire dont **le pooling, le voisinage, l'encodage de position
+relative et le décodeur** sont tous lus dans la bifiltration $(K, r)$. La
+nouveauté est dans ce qui structure le calcul, pas dans les couches.
 
-Trois propriétés rendent ce choix tenable, et elles sont des faits mesurés, pas
-des espoirs :
+## 2. Correction d'une erreur de cadrage
 
-1. **Déterminisme.** La tour est une fonction pure de la trame quantifiée ; son
-   condensé `tower_digest` est reproductible bit à bit (R22 : 24 comparaisons
-   appariées égales). Donc elle se calcule une fois et se met en cache.
-2. **Exactitude.** Tout prédicat est entier ; les dégénérescences donnent un
-   refus explicite. Le jeton n'hérite d'aucun bruit numérique.
-3. **Richesse propre.** La tour porte des grandeurs qu'aucun modèle point à
-   point ne voit : niveau de naissance, niveau de mort, degré de multifusion,
-   arité du support, image verticale d'un ordre à l'autre. Ce sont des
-   étiquettes gratuites et exactes — on y revient en § 7.
+Une première lecture des chiffres de la tour (1,3 M à 16,3 M nœuds par trame)
+conduit naturellement à dire : « il faut sélectionner quelques milliers de
+jetons ». **C'est le mauvais cadre, et il faut l'abandonner.**
 
-## 2. La pile
+Un U-Net ne consomme pas l'ensemble des nœuds : il consomme **$L$ coupes**,
+c'est-à-dire $L$ recouvrements emboîtés de l'ensemble des points. Avec un
+rapport de $4$ par niveau sur une trame brute :
 
 ```text
-  L0  trame LiDAR brute (x, y, z, rémission, anneau, horodatage)
-        | quantification 1 mm u18, PointId, table d'attributs hors moteur
-        v
-  L1  TOUR FULL exacte  (morsehgp3D_v9)          1,3 M a 16,3 M noeuds
-        | condensation §9.1 (masses m_tau) + selection par exces de masse
-        v
-      JETONS POLYEDRIQUES                        cible 2 k a 8 k par trame
-        | realisation geometrique P_v = union conv(S_b) + cinq canaux
-        v
-  L2  encodeur de jeton (petit, partage)         descripteur -> R^d
-        v
-  L3  backbone contextuel a trois canaux d'attention
-        laterale (voisinage spatial) | verticale (parents/enfants)
-                                     | d'ordre (cartes K <-> K-1)
-        v
-  L4  lecture au point : vote pondere §9.1, w_{x tau} = S_tau / T_x
-        v
-  L5  tetes : pre-entrainement (filtration + auto-distillation),
-      segmentation semantique, instance, anomalie
+  points   120 000
+  niveau 1  30 000
+  niveau 2   7 500
+  niveau 3   1 900
+  niveau 4     470
+  niveau 5     120
+  total    ~160 000 unités, tous niveaux confondus
 ```
 
-## 3. L1 — HGP-Tok, le tokenizer exact
+C'est **le même ordre de grandeur que PTv3 sur la même trame**. Les 16 M nœuds
+de la tour ne sont jamais matérialisés : ils sont l'espace dans lequel on lit
+$L$ partitions. Le coût de l'architecture est donc celui d'un U-Net 3D
+ordinaire, et la question n'est pas « combien de jetons » mais **« quel chemin
+prendre dans le treillis $(K, r)$ »**.
 
-### 3.1 Le problème à résoudre en premier
+## 3. Les six primitives
 
-`OBJET.md` § 4 le chiffre : une trame brute à $K \leq 10$ produit jusqu'à
-16 274 683 nœuds. Pour 4 096 jetons il faut un facteur **3 973**. C'est *le*
-problème d'architecture, et il a une réponse déjà écrite dans la thèse et déjà
-implémentée, exactement, dans `morsehgp3d/`.
+La tour fournit exactement six objets dont une architecture 3D a besoin et
+qu'elle se procure aujourd'hui par des constantes.
 
-### 3.2 La réponse : condenser, puis sélectionner
+1. **Une échelle de recouvrements** $A_1 \succ A_2 \succ \cdots \succ A_L$ :
+   remplace le *grid pooling*, le FPS et les niveaux de superpoints.
+2. **Des matrices d'affectation douces** $P_\ell$, aux poids du § 9.1 :
+   remplacent le *pooling* de cellule, sont différentiables et conservent la
+   masse.
+3. **Un graphe de fusion** par niveau : deux nœuds sont voisins s'ils
+   fusionnent, et l'arête porte le **rayon de fusion**. Remplace le graphe
+   $k$-NN et la fenêtre sur la sérialisation.
+4. **Un axe d'ordre $K$**, avec une carte verticale dont la v9 vérifie la
+   naturalité. **Sans équivalent dans aucune architecture existante.**
+5. **Des scalaires structurels exacts** par nœud : naissance, mort,
+   persistance, mélange d'arités, degré de multifusion, population. Gratuits, à
+   la fois comme variables d'entrée et comme cibles de pré-entraînement.
+6. **Une lecture exacte vers les points** (§ 9.1 et Proposition 7) : remplace
+   l'interpolation trilinéaire ou $k$-NN du décodeur.
 
-**Étape 1 — condensation.** On retire les continuations et on pèse chaque
-facette par la masse de § 9.1 :
-$m_\tau = S_\tau \sum_{x \in \tau} 1/T_x$, avec
-$S_\tau = \sum_{\sigma \supset \tau} \rho(\sigma)^{-3}$ et
-$T_x = \sum_{\tau \ni x} S_\tau$. C'est exactement la masse que
-`min_cluster_size` consomme dans l'arbre condensé, et c'est le seul poids qui
-évite qu'un point incident à beaucoup de facettes soit surpondéré : chaque
-point distribue une masse totale de 1.
+## 4. Le vrai problème de conception : le chemin dans le treillis
 
-**Étape 2 — sélection.** `select_excess_of_mass` sur l'arbre condensé
-multi-ordres donne une antichaîne de nœuds saillants, exacte. Deux variantes à
-comparer (porte G0.3) :
+### 4.1 Pourquoi une coupe horizontale est le mauvais objet
 
-- **antichaîne pure** : un nœud par branche, comme HDBSCAN. Peu de jetons, mais
-  le modèle perd le contexte multi-échelle que le poster revendique.
-- **bande** : l'antichaîne d'excès de masse **plus** ses $L$ ancêtres et $L$
-  descendants condensés. On garde la trajectoire d'échelle autour de chaque
-  objet, à budget contrôlé.
+La densité LiDAR décroît en $1/d^{2}$. À un rayon global $r$, le champ proche
+est déjà un bloc unique alors que le champ lointain est encore de la poussière.
+Une coupe horizontale est donc empiriquement mauvaise — et, ce qui est plus
+grave, **théoriquement mauvaise** : Rolle et Scoccola montrent que les tranches
+à un paramètre de la bifiltration par degré redonnent les méthodes connues de
+regroupement par densité mais **sont instables**, tandis que l'objet
+multiparamètre est stable.
 
-Je recommande la **bande avec $L = 2$**, parce que la contribution annoncée
-n'est pas « des régions » (SPT le fait déjà) mais « des régions **et leur
-hiérarchie de fusion** ». Une antichaîne pure jetterait l'argument.
+Conséquence directe sur l'architecture : **l'échelle ne doit jamais être un
+rayon global, et le modèle doit voir plusieurs ordres.** Ce n'est pas une
+préférence de conception, c'est une conséquence d'un théorème de stabilité.
 
-**Étape 3 — budget.** Un plafond dur par trame, réparti par ordre
-proportionnellement à la masse, avec repli déterministe (les plus fortes
-persistances d'abord, départage par clé canonique). Le tokenizer doit être
-**total** : aucune trame ne doit échouer faute de budget, sinon les statistiques
-d'entraînement se biaisent silencieusement.
+### 4.2 Deux axes indépendants, donc trois familles de chemins
 
-### 3.3 Les trois granularités, et l'analogie du poster
+La bifiltration offre ce qu'aucune architecture n'a : **deux axes de
+grossissement indépendants**.
 
-Le poster dit : GPT découpe le texte en jetons, souvent des morceaux de mots.
-L'analogie est exacte et utile si on nomme les trois niveaux :
+- horizontal, $r$ croissant à $K$ fixé : **grossir en espace à densité
+  décroissante** ;
+- vertical, $K$ croissant à $r$ fixé : **grossir en exigence de densité à
+  échelle fixée** ;
+- diagonal, $K$ et $r$ croissant ensemble à $\hat f_K \propto K/r^{3}$ constant :
+  **grossir en espace à densité constante** — un véritable espace d'échelle
+  iso-densité.
 
-| texte | HGP | objet v9 |
+Le chemin diagonal est à mon avis le bon défaut, et c'est un choix de fond : il
+sépare proprement « je regarde plus grand » de « je regarde plus dense », ce
+qu'aucun voxel ne sait faire. Il doit être mesuré contre les deux autres.
+
+### 4.3 Quatre règles de construction de l'échelle
+
+Le chemin fixe la direction ; il reste à fixer **comment on contracte**.
+
+| règle | définition | attendu |
 | --- | --- | --- |
-| caractère | boule minimale de Gabriel, support de 2, 3 ou 4 points | `BallData` |
-| sous-mot | nœud condensé de la tour | nœud de `FullCoverageCertificate` |
-| mot | nœud sélectionné par excès de masse | sortie de `select_excess_of_mass` |
+| **E-global** | couper à des rayons globaux $r_1 < \cdots < r_L$ | témoin, doit échouer sur la variation de portée |
+| **E-rang** | contracter les fusions dans l'ordre de $r$ jusqu'à une cible de compte | équilibré, mais encore globalement ordonné |
+| **E-persistance** | contracter d'abord les fusions de plus faible persistance | **défaut recommandé** : localement adaptatif, dense et clairsemé contractés au même niveau |
+| **E-relative** | contracter dans l'échelle normalisée $r / r_K(x)$ | invariance de portée par construction ; rival principal |
 
-Le modèle travaille au niveau **sous-mot et mot** ; le niveau caractère sert à
-construire le descripteur. C'est l'exacte structure d'un tokenizer BPE, avec
-une différence de taille : ici le vocabulaire n'est pas appris sur un corpus,
-il est **dérivé de la géométrie de chaque scène**. Il n'y a donc pas de
-vocabulaire fixe, et c'est voulu : un objet jamais vu produit quand même ses
-jetons.
+`E-persistance` est recommandé parce qu'il est exactement la réponse que
+HDBSCAN apporte au problème de densité variable — un $\varepsilon$ global ne
+marche pas, l'arbre condensé si — et parce qu'il donne des niveaux dont le
+nombre d'unités est contrôlé, donc une architecture de forme fixe et des lots
+faciles à former.
 
-### 3.4 Réalisation géométrique
+Le rayon effectif de chaque nœud varie alors d'un bout à l'autre d'un même
+niveau. **C'est le but** : c'est précisément ce qu'un voxel ne peut pas faire,
+et c'est la mesure de l'adaptativité. Il faut le publier (histogramme de $r$
+par niveau et par tranche de portée), car c'est l'observable qui montre que
+l'architecture fait ce qu'elle prétend.
 
-Pour un nœud $v$, la géométrie est
-$P_v = \bigcup_b \mathrm{conv}(S_b)$, où $b$ parcourt les boules du catalogue qui
-contribuent à $v$ et $S_b$ est leur support ($2$, $3$ ou $4$ points : arête
-diamétrale, triangle aigu, tétraèdre). C'est la définition de la diapositive 11
-de la présentation, et elle est ouverte, non convexe et potentiellement
-multicouche — on ne la remplace jamais par son enveloppe convexe.
+## 5. Les cinq composants
 
-Le descripteur est traité à part, dans [`JETON.md`](JETON.md).
+### FP — Pooling de filtration
 
-## 4. L2 — encodeur de jeton
+$h_\ell = \phi\!\left(P_\ell^{\top} h_{\ell-1} W_\ell\right)$, où $P_\ell$ est
+l'affectation du niveau $\ell-1$ vers le niveau $\ell$, normalisée en lignes
+par les poids $w_{x\tau} = S_\tau / T_x$ du § 9.1. Le dépliage est $P_\ell$
+appliqué en sens inverse, avec connexion de saut, comme dans tout U-Net.
 
-Un MLP partagé sur le descripteur figé suffit pour démarrer, et c'est
-délibéré : au premier palier on veut savoir ce que porte le descripteur, pas ce
-qu'un encodeur sait en tirer.
+Trois propriétés qu'un *grid pooling* n'a pas : l'affectation est **douce**
+(un point appartenant à plusieurs nœuds répartit une masse totale de $1$),
+**canonique** (aucune grille, aucune graine), et **conservative** (la masse est
+préservée sur toute antichaîne).
 
-Variante à évaluer ensuite, si et seulement si G3 montre que le descripteur
-figé plafonne : un petit encodeur d'ensemble (type Set Transformer) sur les
-supports $S_b$ du nœud, avec leur arité et leur rayon comme attributs d'entrée.
-Il lit la structure exacte au lieu d'une grille, donc il ne perd pas les
-détails fins — c'est le remède documenté au défaut connu des grilles de
-distances.
+Le recouvrement se paie en nombre de non-zéros de $P_\ell$. C'est une
+statistique à mesurer avant tout entraînement — elle décide du coût réel.
 
-## 5. L3 — backbone contextuel
+### MGA — Attention sur le graphe de fusion, à biais ultramétrique
 
-Un Transformer sur les jetons, avec **trois canaux d'attention** qui
-correspondent aux trois relations que la tour fournit et qu'un modèle point à
-point ne possède pas :
+À chaque niveau, l'attention est restreinte au **graphe de fusion** : les nœuds
+voisins sont ceux qui fusionneront, et la distance naturelle entre deux nœuds
+$u$ et $v$ est le niveau $r_{uv}$ auquel ils se rejoignent.
 
-- **latérale** — voisinage spatial à échelle comparable. On sérialise les
-  jetons par clé de Morton sur le centre (la v9 calcule déjà des clés de Morton
-  sur les positions uniques) et on attend par fenêtres, à la manière des
-  Transformers de points sérialisés. Coût linéaire, pas de graphe à construire.
-- **verticale** — parent et enfants dans l'arbre condensé du même ordre. C'est
-  le contexte multi-échelle du poster. La laminarité requise existe : § 9.1
-  démontre que l'arbre est une partition des $(K-1)$-simplexes.
-- **d'ordre** — les cartes verticales `lower_nodes` relient un nœud d'ordre $K$
-  à son image d'ordre $K-1$. C'est **l'axe le plus spécifique du projet** :
-  aucun concurrent n'a de second paramètre de filtration.
+Ce $r_{uv}$ n'est pas une distance quelconque : c'est une **ultramétrique**.
+Le chapitre 3 du manuscrit établit l'équivalence entre dendrogrammes et
+ultramétriques ; la hiérarchie *est* une ultramétrique sur ses feuilles. On
+pose donc le biais d'attention
 
-Le biais d'attention encode la relation et sa mesure : écart de niveau
-logarithmique pour la verticale, écart d'ordre pour la troisième, distance
-métrique normalisée pour la latérale.
+$b_{uv} = \varphi\!\left(\log r_{uv} - \log r_u\right)$,
 
-### 5.1 Pourquoi l'axe des ordres compte vraiment
+normalisé par l'échelle propre du nœud. C'est un **encodage de position
+relative par la hiérarchie et non par la métrique**, et il est invariant de
+portée par construction : $r_{uv}$ grandit tout seul là où le nuage
+s'appauvrit, exactement dans la proportion où le voisinage s'élargit.
 
-Un risque connu et sérieux : **HGP retarde la naissance des objets
-filiformes**. Un poteau, un tronc, une barrière sont minces ; à $K \geq 2$ il
-faut $K$ boules qui s'intersectent, donc la pièce naît à un rayon plus grand,
-où elle peut avoir déjà fusionné avec son environnement. Or c'est justement sur
-les petites classes filiformes que se joue le mIoU.
+L'encodage relatif $xyz$ ordinaire reste disponible comme **canal séparé, à
+ablater** : on veut savoir lequel des deux porte l'information.
 
-La tour donne la parade sans invention : **$K = 1$ est le Single-Linkage**, et
-il est précoce sur les structures minces. En gardant $K = 1 \ldots K_{\max}$
-dans le jeu de jetons et en laissant l'attention d'ordre choisir, on obtient un
-choix d'ordre **par région**, appris. C'est un avantage architectural réel, pas
-une figure de style : aucun modèle à un seul graphe de voisinage ne peut
-l'offrir.
+### OM — Mixage d'ordres
 
-La porte G2 mesure ce risque par classe avant tout apprentissage.
+À un niveau donné, la même région possède une représentation pour chaque $K$,
+et les cartes verticales fournissent la correspondance. On fusionne par
+attention croisée ou par porte apprise.
 
-## 6. L4 — retour aux points
+Ce n'est pas un enrichissement décoratif. Le chapitre 7 du manuscrit fait de
+$K$ le paramètre de **résistance à la percolation du bruit** : $K = 1$ est le
+Single-Linkage, sensible et sujet au chaînage ; $K$ grand résiste aux ponts de
+bruit mais retarde la naissance des structures minces. Le Théorème 3 chiffre la
+fraction récupérable avant fusion parasite. **$K$ est donc littéralement un
+bouton sensibilité/robustesse, et OM le rend apprenable par région.**
 
-On n'invente aucune interpolation. Le vote pondéré de § 9.1 donne, pour chaque
-point $x$ et chaque classe $c$,
-$V_x(c) = \sum_{\tau \ni x,\ \ell(\tau) = c} S_\tau / T_x$, et l'étiquette est
-l'argmax, avec une règle de départage déterministe. La Proposition 7 garantit
-que cela définit une partition stricte des points, $C_{-1}$ compris (non
-classés).
+Un poteau veut $K$ petit ; séparer une voiture du sol qui la touche veut $K$
+grand. Aucune architecture à un seul graphe de voisinage ne peut offrir ce
+choix.
 
-Trois raisons d'en faire le décodeur officiel :
+Trois réalisations, par coût croissant : **calendrier de $K$ selon la
+profondeur** (défaut, gratuit : $K$ petit aux niveaux fins, grand aux niveaux
+grossiers), **attention croisée entre ordres au goulot**, **branches parallèles
+par $K$** (borne supérieure coûteuse, à mesurer une fois).
 
-1. c'est **exact** et déjà implémenté dans `morsehgp3d/`
-   (`SimplexPointWeighting::inverse_radius`, $p = 3$) ;
-2. les poids $w_{x\tau} = S_\tau/T_x$ forment une **partition de l'unité** :
-   c'est un adoucissement propre pour la rétropropagation vers les jetons ;
-3. cela garde la propriété qui justifie tout l'édifice : les points peuvent
-   appartenir à plusieurs polyèdres **jusqu'à la toute dernière étape**.
+### PUR — Lecture par partition de l'unité
 
-Pour l'entraînement, on utilise la version douce (les $w_{x\tau}$ comme poids
-d'un mélange de logits de jetons) ; pour l'évaluation en partition, la version
-dure de la Proposition 7.
+Le décodeur ne réinvente aucune interpolation : $p(x) = \sum_{\tau \ni x} w_{x\tau} \, p_\tau$
+en entraînement, argmax de la Proposition 7 en inférence, qui garantit une
+partition stricte des points. Les $w_{x\tau}$ somment à $1$, donc c'est une
+relaxation différentiable propre et la masse est conservée.
 
-## 7. L5 — objectifs de pré-entraînement
+### FM — Modélisation de filtration
 
-### 7.1 Modélisation de filtration (spécifique au projet)
+Voir § 7.
 
-La tour fabrique gratuitement des cibles exactes que nul autre tokenizer ne
-possède. On masque une partie de la structure et on la fait prédire :
+## 6. Réalisation : une modification de PTv3, pas un nouveau réseau
 
-- **niveau de mort** — à quel rayon ce nœud fusionne-t-il ? (régression sur
-  $\log r$) ;
-- **partenaire de fusion** — parmi $m$ candidats, lequel fusionne le premier
-  avec ce nœud ? (classement) ;
-- **ordre d'apparition** — à quel $K$ ce nœud apparaît-il pour la première
-  fois ? ;
-- **arité du support** — la pièce est-elle portée par des arêtes diamétrales,
-  des triangles aigus ou des tétraèdres ? ;
-- **degré de multifusion** — combien de parents à l'événement ?
+**C'est la décision d'ingénierie la plus importante du projet.** HGP-UNet doit
+être écrit *dans* la base de code PTv3, en remplaçant :
 
-C'est l'analogue direct du *masked language modelling*, avec un avantage :
-les cibles ne sont pas des jetons arbitraires mais des **grandeurs
-géométriques exactes**. Un modèle qui les prédit bien a nécessairement appris
-la trajectoire d'échelle locale — c'est-à-dire ce que le poster appelle
-« multiscale context from their merging hierarchy ».
+- `GridPool` par `FiltrationPool` ;
+- le regroupement en *patches* sur la sérialisation par les *patches* du graphe
+  de fusion (en conservant la sérialisation **à l'intérieur** d'un nœud, ce qui
+  garde l'attention par fenêtre efficace) ;
+- l'encodage relatif par le biais ultramétrique ;
+- le décodeur d'interpolation par PUR ;
 
-### 7.2 Auto-distillation et invariance de capteur (au niveau de l'état de l'art)
+**et rien d'autre.** Même nombre de couches, mêmes largeurs, même optimiseur,
+même recette.
+
+Deux raisons, et elles pèsent plus que l'élégance :
+
+1. **la substitution devient exacte.** Chaque composant se mesure contre son
+   équivalent standard, toutes choses égales par ailleurs. Un réseau écrit de
+   zéro rendrait tout écart inintelligible ;
+2. **le résultat devient lisible par la communauté.** « Nous remplaçons le
+   *grid pooling* de PTv3 par une échelle de densité canonique et nous gagnons
+   $x$ points » est une phrase vérifiable. « Nous proposons une nouvelle
+   architecture » ne l'est pas.
+
+## 7. Pré-entraînement
+
+### 7.1 Pourquoi la tour répond au raccourci géométrique
+
+Sonata a établi le diagnostic central de la SSL 3D : les représentations
+s'effondrent sur des indices spatiaux de bas niveau, **parce que la géométrie
+est l'entrée**. Prédire une coordonnée masquée se résout par interpolation
+locale. Sonata *atténue* : bruit gaussien sur les coordonnées masquées,
+ordonnanceur de masque, suppression du décodeur hiérarchique.
+
+Les cibles de la tour n'ont pas ce défaut. Le rayon auquel deux composantes
+fusionnent est une grandeur de **percolation** : il dépend du goulot de densité
+entre elles, donc d'une intégration sur tout l'espace intermédiaire. Il n'est
+pas lisible sur les coordonnées locales. **Là où Sonata masque le raccourci, la
+tour fournit une tâche où il n'existe pas.** C'est, à ma connaissance, la
+première famille de prétextes 3D dont on peut argumenter cela par construction
+et non par expérience.
+
+### 7.2 Les cinq tâches
+
+| tâche | cible | pourquoi elle n'est pas locale |
+| --- | --- | --- |
+| **FM-1 fusion** | $\log r_{uv}$ pour deux nœuds adjacents | goulot de densité entre eux |
+| **FM-2 persistance** | mort $-$ naissance d'un nœud | dépend de tout le voisinage jusqu'à la fusion |
+| **FM-3 profil en $K$** | l'ordre auquel un nœud cesse d'exister | mesure la densité locale relative au reste |
+| **FM-4 rétablissement** | masquer une région, prédire la **structure de fusion** qu'elle aurait | reconstruction topologique, pas géométrique |
+| **FM-5 accord inter-vues** | même structure de fusion sous décimation en portée et occultation | c'est l'hypothèse d'invariance, posée en fonction de perte |
+
+Toutes ces cibles sont **exactes et gratuites** : elles sortent du moteur, sans
+annotation.
+
+### 7.3 Masquage par nœuds entiers
+
+En traitement du langage, masquer un mot entier bat le masquage de sous-mots.
+La tour donne l'unité correspondante en 3D : **on masque un nœud entier, pas
+des points au hasard.** Un nœud est une pièce géométriquement cohérente, donc
+le masque n'est plus rattrapable par interpolation. C'est le levier le plus
+simple à essayer, et il se greffe sur n'importe quelle recette d'auto-
+distillation existante sans changer le reste.
+
+### 7.4 Auto-distillation
 
 En parallèle, une auto-distillation enseignant/élève de la famille Sonata, avec
-les augmentations qui comptent ici :
+les augmentations que le domaine impose : décimation en portée selon le modèle
+de balayage, retrait d'anneaux, occultation par secteur. L'invariant demandé à
+l'élève est que **la structure**, et non les coordonnées, soit préservée.
 
-- **décimation en portée** : simuler un objet plus lointain en réduisant la
-  densité selon le modèle de balayage, pas uniformément ;
-- **retrait d'anneaux** : simuler un capteur à moins de nappes ;
-- **occultation** : masquer un secteur angulaire.
+### 7.5 Un cadeau pratique : les augmentations qui ne coûtent rien
 
-L'invariant demandé à l'élève est que le **code de forme** ne bouge pas, tandis
-que les canaux physiques et d'acquisition, eux, bougent. C'est l'hypothèse
-centrale du poster traduite en fonction de perte — et la porte G1 la teste
-**avant** tout apprentissage, sans quoi on entraînerait un modèle sur une
-hypothèse fausse.
+Les rotations, translations et changements d'échelle uniformes **commutent
+exactement** avec la tour : le nuage tourne, la tour tourne avec lui, sans
+recalcul. Seules les augmentations de densité et d'occultation la changent —
+et ce sont précisément celles que l'on veut pour FM-5. Il suffit donc de
+**pré-calculer une banque de quelques vues décimées par trame**. Le
+pré-entraînement n'a jamais besoin de recalculer une tour en ligne.
 
-## 8. Ce que l'on écarte, et pourquoi
+## 8. Variables de nœud
+
+Le détail est dans [`JETON.md`](JETON.md). Le principe tient en une règle :
+**une seule famille est normalisée**, la forme ; les grandeurs physiques, les
+canaux de filtration et les canaux d'acquisition gardent leurs unités, dans des
+canaux séparés et ablatables.
+
+Point de conception important pour le transfert inter-capteurs : on veut une
+**équivariance d'échelle, pas une invariance**. Une voiture mesure quatre
+mètres, et c'est une information réelle. On donne donc $\log r$ comme canal
+explicite, tandis que la *structure* (pooling, voisinage, biais) reste sans
+échelle. Le modèle peut ainsi utiliser l'échelle absolue là où elle aide et
+l'ignorer là où elle nuit — et l'ablation du canal $\log r$ dit lequel des deux
+régimes domine.
+
+## 9. Ce que l'architecture n'est pas
 
 | conception écartée | raison |
 | --- | --- |
-| Donner tous les nœuds de la tour au Transformer | 1,3 M à 16,3 M nœuds par trame (mesuré, R22). Sans objet. |
-| Apprendre la tokenisation (FPS, k-moyennes, superpoints appris) | On perd l'exactitude, le déterminisme et la bifiltration — c'est-à-dire tout ce qui distingue le projet. Et l'ablation devient inintelligible. |
-| Forcer une partition des points dès l'entrée | Le recouvrement pour $K \geq 2$ **est** la contribution (manuscrit § 9.1). Le partitionner d'emblée jette l'information d'ordre supérieur. |
-| Faire du backbone une attention hiérarchique sur arbre, seule | La laminarité vaut sur les facettes, pas sur les points ; et un arbre seul supprime le voisinage latéral, dont les scènes de rue ont besoin. On garde l'arbre comme **un** canal sur trois. |
-| Représenter chaque nœud par une fonction radiale $\rho(u)$ | Une direction peut ne rencontrer aucune couche, ou plusieurs. C'est une bonne base de comparaison, pas une représentation universelle (présentation, § IV). |
-| Représenter le nœud par $\mathrm{conv}(P_v)$ ou par sa fonction support $h_P$ | $h_P = h_{\mathrm{conv}(P)}$ : la fonction support est **aveugle** à la non-convexité et aux trous, qui sont l'essentiel d'une surface LiDAR partielle. |
-| Un atlas de cartes appris par nœud | Coutures et ancres changent sous décimation ; apprendre l'atlas en même temps que le backbone rend l'effet du tokenizer impossible à isoler. |
-| Ajuster un champ implicite (UDF) par polyèdre | Coûteux et redondant : la surface est déjà explicite. Pertinent comme décodeur de complétion, pas comme entrée. |
+| Sélectionner quelques milliers de jetons dans la tour et les donner à un Transformer plat | perd la hiérarchie, qui est la contribution ; et c'était un mauvais cadrage du coût (§ 2) |
+| Vectoriser la persistance (code-barres, paysages, images de persistance) en variables d'entrée d'un réseau standard | c'est la voie TDA classique : elle jette la structure pour n'en garder qu'un résumé, et elle est largement explorée |
+| Consommer une seule tranche $\lambda$ ou un seul $K$ | instable, par le résultat de Rolle et Scoccola ; l'architecture hériterait de cette instabilité |
+| Apprendre la partition (superpoints appris, $k$-moyennes différentiables) | on reperd la canonicité et le déterminisme, et l'ablation redevient inintelligible |
+| Écrire un réseau nouveau de zéro | rend la substitution impossible à interpréter et le résultat invérifiable |
+| Forcer une partition stricte des points à l'entrée | pour $K \geq 2$, le recouvrement **est** l'information d'ordre supérieur (§ 9.1) |
+| Remplacer un nœud par l'enveloppe convexe de sa géométrie, ou par sa seule fonction support | $h_P = h_{\mathrm{conv}(P)}$ : aveugle à la non-convexité et aux trous, qui sont l'essentiel d'une surface LiDAR |
 
-## 9. Dimensionnement
+## 10. Ce qui est revendicable
 
-Avec une bande $L = 2$ et un budget de 4 096 jetons par trame :
+Aucune brique n'est nouvelle isolément : U-Net 3D, attention éparse
+hiérarchique, partitions multi-échelles, auto-distillation, persistance
+multiparamètre. Ce qui peut l'être :
 
-| poste | ordre de grandeur | source |
-| --- | --- | --- |
-| tour par trame, $K \leq 5$, sans sol | 0,76–0,98 s | reçu R22 |
-| tour par trame, $K \leq 5$, brut | 1,81–2,03 s | reçu R22 |
-| tokenisation des 19 130 trames d'entraînement (00–07, 09, 10) | ≈ 10 h sur une G4, une fois | produit des deux précédents |
-| RSS de la tour | 1,2–6,4 Go | reçu R22 |
-| cache de jetons, 4 096 jetons × ~700 flottants | ≈ 11 Mo par trame en float32, ≈ 5,6 Mo en float16 | à confirmer, porte G0.5 |
-| cache des 23 201 trames annotées (00–10) | ≈ 130 Go | idem |
-| cache des 43 552 trames des 22 séquences, pour le pré-entraînement | ≈ 250 Go | idem |
+1. **remplacer l'échelle métrique posée à la main par une échelle canonique
+   dérivée des données**, et montrer par substitution ce que cela vaut ;
+2. **utiliser un objet multiparamètre prouvé stable** là où l'état de l'art
+   utilise une tranche instable, avec l'axe $K$ comme bouton
+   sensibilité/robustesse apprenable ;
+3. **un encodage de position relative ultramétrique**, invariant de portée par
+   construction ;
+4. **une famille de prétextes sans raccourci géométrique**, aux cibles exactes
+   et gratuites ;
+5. **un décodeur démontré** (Proposition 7) au lieu d'une interpolation choisie
+   à la main.
 
-Le cache est le vrai poste dimensionnant, pas le calcul. Il impose une décision
-explicite : **quantifier le descripteur en float16 et stocker les canaux exacts
-en entiers**, ce qui est cohérent avec la doctrine du dépôt (le flottant est
-une sortie, jamais un maillon de la chaîne d'exactitude).
-
-## 10. Ce qui est nouveau, et ce qui ne l'est pas
-
-À dire soi-même avant qu'un relecteur ne le dise. Aucune des briques suivantes
-n'est revendicable isolément : descripteur radial ou sphérique, grille de
-distances à sondes fixes, apprentissage sur polyèdres et maillages, Transformer
-hiérarchique, auto-distillation LiDAR, pré-entraînement multi-capteurs.
-
-Ce qui peut l'être, et seulement cela :
-
-1. un **tokenizer exact, déterministe et non appris** défini par un théorème
-   (Théorème 2 : les jetons sont les amas de forte densité $K$-NN, niveau par
-   niveau) ;
-2. une **bifiltration $(K, r)$** comme structure de contexte, avec un axe des
-   ordres qu'aucun concurrent ne possède ;
-3. des **objectifs de pré-entraînement dérivés de la filtration**, aux cibles
-   géométriques exactes et gratuites ;
-4. un **retour aux points démontré** (Proposition 7) plutôt qu'une
-   interpolation choisie à la main.
-
-Si les portes G1 et G2 du [protocole](PROTOCOLE.md) échouent, les quatre points
-ci-dessus restent vrais mathématiquement et sans intérêt pratique. C'est
-exactement ce qu'il faut savoir tôt.
-
-## 11. Ordre de construction
-
-Chaque étape est terminée par une porte du [protocole](PROTOCOLE.md), et
-produit un reçu épinglé.
-
-1. **Exportateur** `mhgp9_tower_export` : `ChainResult` → `CertifiedTowerInput`
-   (forêt, verticales, simplexes projetables en plateaux). Portes G0.1 à G0.4.
-2. **Raccord au réducteur** `morsehgp3d::build_exact_point_hierarchy`, puis
-   `select_excess_of_mass`. Première mesure du budget de jetons. Porte G0.3.
-3. **Descripteur** et cache sur disque, sans aucun apprentissage. Porte G0.5.
-4. **G1** : invariance en portée. C'est la porte qui décide si le projet a un
-   fondement.
-5. **G2** : plafond d'oracle d'instances, par classe.
-6. **G3** : sonde XGBoost sur les descripteurs. Ablation par famille de canaux.
-7. **G4** : mIoU sans apprentissage profond (XGBoost → points par § 9.1).
-8. **G5** à **G7** : supervision, pré-entraînement, transfert inter-capteurs.
-
-Rien avant l'étape 4 ne demande un GPU d'entraînement. C'est délibéré : les
-deux questions qui peuvent tuer le projet se répondent sur CPU, en quelques
-jours, pour un coût négligeable.
+Chacun de ces cinq points correspond à une ligne de la table de substitution de
+[`ETAT_DE_LART.md`](ETAT_DE_LART.md) § 4, donc à une expérience contrôlée. Si
+une ligne ne se paie pas, on la retire et on le dit. C'est l'objet de
+[`MESURE.md`](MESURE.md).

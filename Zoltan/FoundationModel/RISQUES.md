@@ -1,123 +1,134 @@
 # Risques et réfutations
 
-Ce qui peut tuer le projet, comment on le détecte tôt, et ce qui a déjà été
-fermé. Ce document est destiné à vieillir : chaque risque devient un fait ou
+Ce qui peut faire échouer HGP-FM, comment on le détecte tôt, et ce qui est déjà
+fermé. Document destiné à vieillir : chaque risque devient un fait ou
 disparaît.
 
-## 1. Les trois risques majeurs
+## 1. Les quatre risques majeurs
 
-### R1 — l'hypothèse d'invariance est fausse
+### R1 — la tour n'apporte rien qu'un canal de densité n'apporte déjà
 
-*Le risque.* Le poster affirme que la géométrie varie moins que
-l'échantillonnage quand la portée augmente. C'est présenté comme une
-**hypothèse**, et elle n'a jamais été mesurée. À grande portée un véhicule
-donne quelques dizaines de retours sur deux ou trois nappes : la « surface »
-reconstruite pourrait n'être qu'une autre lecture du motif de balayage.
+*Le risque.* Le gain espéré vient peut-être simplement de ce que le modèle voit
+la densité locale. Or il suffit de donner $\hat f_K(x)$ comme variable par
+point à un réseau inchangé pour lui donner la densité.
 
-*Détection.* Porte [G1](PROTOCOLE.md), sans apprentissage, quelques jours CPU.
+*Détection.* Témoin **T2** de [`MESURE.md`](MESURE.md), phase 0. Une variable
+d'entrée supplémentaire sur une recette existante : c'est le témoin le moins
+cher et le plus tranchant du protocole.
 
-*Si le risque se réalise.* L'argument « modèle de fondation » tombe, mais pas
-la tour : l'exactitude, la hiérarchie et le plafond d'instances gardent leur
-valeur pour l'anomalie et l'instance 4D (portes G-A et G-I). Il faut alors
-réécrire la promesse, pas continuer en espérant.
+*Si le risque se réalise.* Arrêter la voie architecturale et publier le canal
+de densité comme résultat utile. Ce serait un résultat honnête et d'une réelle
+valeur pratique.
 
-### R2 — les objets filiformes naissent trop tard
+### R2 — c'est la hiérarchie en général qui aide, pas celle-ci
 
-*Le risque.* À $K \geq 2$, il faut $K$ boules qui s'intersectent
-simultanément. Une structure mince — poteau, tronc, panneau, barrière,
-cycliste — n'y parvient qu'à grand rayon, où elle a peut-être déjà fusionné
-avec le sol ou la végétation. Or c'est exactement sur ces classes que se joue
-la marge de mIoU.
+*Le risque.* Toute hiérarchie multi-échelle aide un réseau 3D ; les superpoints
+de SPT le montrent déjà, avec 212 k paramètres et des résultats de premier
+plan. Le fait que notre hiérarchie soit canonique et exacte n'y change peut-être
+rien.
 
-*Détection.* Porte [G2](PROTOCOLE.md), plafond d'oracle **par classe**, avec
-une attention particulière aux classes filiformes.
+*Détection.* Témoin **T1**, tour brouillée : mêmes niveaux, mêmes tailles
+d'unités, points réaffectés au hasard dans une partition locale. Et la
+comparaison directe de pureté à nombre d'unités égal contre SPT, porte 0.2.
 
-*Parade disponible.* $K = 1$ est le Single-Linkage, précoce sur les structures
-minces. Garder $K = 1 \ldots K_{\max}$ dans le jeu de jetons et laisser
-l'attention d'ordre choisir par région. La parade doit être **mesurée** : le
-plafond par classe doit remonter quand on ajoute $K = 1$, sinon elle est
-fausse.
+*Si le risque se réalise.* La contribution se réduit à « une hiérarchie de plus,
+mais canonique et déterministe ». C'est encore quelque chose — reproductibilité,
+absence de réglage — mais ce n'est plus une thèse de modèle de fondation.
 
-### R3 — le descripteur est le levier le plus faible
+### R3 — les objets filiformes naissent trop tard
 
-*Le risque.* Hérité du corpus précédent, et probablement juste : le gain vient
-de la tokenisation et de la hiérarchie, pas du codage de forme. On peut donc
-dépenser beaucoup d'effort sur un descripteur raffiné pour un gain nul.
+*Le risque.* À $K \geq 2$ il faut $K$ boules qui s'intersectent simultanément.
+Une structure mince — poteau, tronc, panneau, barrière, cycliste — n'y parvient
+qu'à grand rayon, où elle a peut-être déjà fusionné avec le sol ou la
+végétation. Or c'est sur ces classes que se joue la marge de mIoU.
 
-*Détection.* Porte [G3](PROTOCOLE.md), ablation XGBoost par famille de canaux,
-heures de CPU.
+*Détection.* Plafond d'oracle **par classe** et par taille d'objet, porte 0.1.
+Puis la prédiction P5 : le gain sur les classes filiformes doit dépendre du
+calendrier de $K$ et **disparaître si l'on retire $K = 1$**.
 
-*Parade.* Commencer par le descripteur le plus bête qui marche, et ne
-l'enrichir que quand G3 montre un plafond. Ne jamais remplacer un descripteur
-mesuré par un descripteur élégant non mesuré.
+*Parade.* $K = 1$ est le Single-Linkage, précoce sur les structures minces. Le
+calendrier de $K$ selon la profondeur — $K$ petit aux niveaux fins — est la
+parade naturelle, et elle doit être mesurée, pas supposée.
+
+### R4 — l'avantage se referme avec l'échelle
+
+*Le risque.* Un a priori structurel aide le plus quand les données manquent. Un
+modèle de fondation est entraîné sur beaucoup de données. L'écart peut donc se
+resserrer, voire s'inverser si la contrainte devient un carcan.
+
+*Détection.* Axe 4 de [`MESURE.md`](MESURE.md) : trois tailles de modèle par
+trois tailles de corpus, tendance publiée.
+
+*Si le risque se réalise.* La revendication honnête devient **efficacité en
+échantillons et transfert**, pas plafond asymptotique. C'est une revendication
+défendable, à condition de ne pas avoir promis l'autre.
 
 ## 2. Risques de second rang
 
 | risque | détection | parade |
 | --- | --- | --- |
-| Le budget de jetons explose : la sélection par excès de masse ne réduit pas assez | G0.3 | autre critère de sélection, ou bande plus étroite ; publier l'échec comme fausse piste |
-| Les incidences facette–coface dépassent le plafond du réducteur (64 M) | G0.4 | publier des **plateaux** et non des simplexes énumérés ; sinon changer de poids |
-| Le taux de refus de la tour biaise le corpus (coquille > 12 sites, dégénérescence) | G0.2 | corriger le moteur avant d'apprendre ; ne jamais remplacer une trame refusée en silence |
-| Le cache de jetons ne tient pas sur disque | G0.5 | float16 sur la famille de forme, entiers sur le reste ; recalcul à la volée en dernier recours |
-| Le sol domine la hiérarchie : une immense composante qui fusionne tôt | G2 et G3 (classe « route ») | garder le régime brut comme contrat, mais mesurer aussi les trames sans sol ; laisser l'axe des ordres séparer |
-| Le modèle apprend la portée plutôt que la forme | G1 témoins, G5bis | garder la portée comme canal explicite ; tester l'égalisation de portée en augmentation |
-| Le gain vient du budget de calcul, pas de la géométrie | G5, témoin apparié | ablation à paramètres, époques et matériel égaux ; aucune comparaison hors budget |
-| L'axe des ordres ne sert à rien | G5bis | le retirer et simplifier ; ce serait un résultat négatif net, à publier |
-| Latence du tokenizer, 1 à 2 s par trame | reçus R22 | acceptable pour le pré-entraînement (cache) ; **rédhibitoire pour l'embarqué**, qui n'est pas la cible de ce dossier |
-| Contamination du jeu de test | règle de découpage | la séquence 08 est la seule validation ; le serveur en ligne n'est touché qu'une fois |
+| Le recouvrement rend $P_\ell$ trop dense | porte 0.5, nombre de non-zéros par niveau | seuiller les poids $w_{x\tau}$ faibles ; mesurer la perte |
+| L'échelle n'est pas réellement adaptative (le rayon ne varie pas avec la portée) | porte 0.5, histogramme de $r$ par tranche de portée | changer de règle de contraction ; si aucune ne l'est, la thèse centrale tombe |
+| Le sol domine la hiérarchie en une composante géante | plafond d'oracle sur la classe « route », statistiques de niveau | l'axe $K$ ; mesurer aussi le régime sans sol, sans en faire le contrat |
+| Les lots de trames ont des hiérarchies de formes différentes | ingénierie | cibles de compte par niveau, comme tout réseau épars |
+| Le modèle apprend la portée plutôt que la forme | ablation du canal $\log r$, prédictions P1 et P2 | garder la portée explicite ; égaliser en augmentation |
+| Le gain vient du budget de calcul | règle du budget apparié, prédiction P6 | comparaison à paramètres, époques et matériel égaux |
+| L'axe des ordres ne sert à rien | bras S5, témoin T4 | le retirer et simplifier ; résultat négatif net, à publier |
+| Une variable de filtration donnée en entrée fuit vers sa propre cible de pré-entraînement | revue de conception | ne jamais donner en entrée ce que l'on prédit au même moment |
+| Contamination du jeu de test | règle de découpage | val 08 seule ; le serveur n'est touché qu'une fois |
 
 ## 3. Risques de revendication
 
-Aucune des briques suivantes n'est nouvelle : descripteur radial ou sphérique,
-grille de distances à sondes fixes, apprentissage sur polyèdres et maillages,
-Transformer hiérarchique, JEPA 3D, distillation LiDAR–image, pré-entraînement
-multi-capteurs. Revendiquer l'une d'elles isolément est une erreur qu'un
+Aucune brique n'est nouvelle isolément : U-Net 3D, attention éparse
+hiérarchique, partitions multi-échelles adaptatives, auto-distillation,
+persistance multiparamètre, descripteurs radiaux ou sphériques, grilles de
+distances à sondes fixes. Revendiquer l'une d'elles est une erreur qu'un
 relecteur sanctionnera immédiatement.
 
-Ce qui reste revendicable est étroit, et c'est bien ainsi : un tokenizer exact
-défini par un théorème, une bifiltration $(K, r)$ comme contexte, des objectifs
-de pré-entraînement aux cibles géométriques exactes, et un retour aux points
-démontré. Voir [`ARCHITECTURE.md`](ARCHITECTURE.md) § 10.
+Deux antériorités doivent être citées franchement et tôt :
+
+- **Superpoint Transformer** (ICCV 2023) pour l'idée d'une partition
+  hiérarchique adaptative consommée par une attention éparse. C'est
+  l'antécédent architectural le plus proche ;
+- **la bifiltration degré-Rips** (Lesnick et Wright 2015 ; Rolle et Scoccola,
+  JMLR 2024) pour l'objet lui-même et pour son théorème de stabilité. Le
+  projet ne découvre pas cet objet : il le calcule exactement à une échelle où
+  la littérature ne le calculait pas, et il l'utilise comme squelette de calcul
+  plutôt que comme invariant à vectoriser.
 
 La revue d'antériorité de ce dossier est **ciblée sur les décisions de
-conception**. Elle ne remplace pas une recherche d'antériorité exhaustive au
-moment de la soumission.
+conception**. Elle ne remplace pas une recherche exhaustive au moment de la
+soumission, qui reste à faire une fois, sérieusement.
 
-## 4. Pistes déjà fermées, à ne pas rouvrir
-
-Côté représentation :
+## 4. Pistes fermées, à ne pas rouvrir
 
 | piste | fermée par |
 | --- | --- |
-| Représenter $P_v$ par sa fonction support $h_P$ seule | $h_P = h_{\mathrm{conv}(P)}$ : aveugle à la non-convexité et aux trous, qui sont l'essentiel d'une surface LiDAR partielle |
-| Représenter $P_v$ par une fonction radiale $\rho(u)$ seule | une direction peut ne rencontrer aucune couche ou plusieurs ; bonne base de comparaison, pas une représentation |
-| Remplacer $P_v$ par son enveloppe convexe | le polyèdre peut être ouvert, non convexe et partiellement occulté ; rien ne l'autorise |
-| Forcer une partition des points à l'entrée du modèle | pour $K \geq 2$ le recouvrement **est** la contribution (manuscrit § 9.1) |
-| Atlas de cartes appris par nœud | coutures et ancres changent sous décimation ; rend l'effet du tokenizer impossible à isoler |
-| Champ implicite (UDF) ajusté par polyèdre | coûteux et redondant, la surface est déjà explicite ; pertinent en décodeur de complétion seulement |
+| Consommer une seule tranche $\lambda$, un seul $r$ ou un seul $K$ | instable par Rolle–Scoccola ; l'architecture hériterait de l'instabilité |
+| Sélectionner quelques milliers de jetons de la tour pour un Transformer plat | jette la hiérarchie, qui est la contribution ; et le cadrage du coût était faux ([`ARCHITECTURE.md`](ARCHITECTURE.md) § 2) |
+| Vectoriser la persistance en variables d'entrée d'un réseau standard | voie TDA classique, largement explorée, et elle jette la structure |
+| Écrire un réseau neuf de zéro plutôt qu'une modification de PTv3 | rend la substitution ininterprétable et le résultat invérifiable |
+| Représenter un nœud par sa seule fonction support | $h_P = h_{\mathrm{conv}(P)}$ : aveugle à la non-convexité et aux trous |
+| Représenter un nœud par une seule fonction radiale $\rho(u)$ | une direction peut ne rencontrer aucune couche ou plusieurs |
+| Remplacer $P_v$ par son enveloppe convexe | le polyèdre est ouvert, non convexe, partiellement occulté |
+| Forcer une partition stricte des points à l'entrée | pour $K \geq 2$ le recouvrement **est** l'information (§ 9.1) |
+| Apprendre la partition (superpoints appris, $k$-moyennes différentiables) | on reperd la canonicité et le déterminisme, et l'ablation redevient ininterprétable |
+| Atlas de cartes appris par nœud | coutures et ancres changent sous décimation ; isole mal l'effet du tokenizer |
+| Champ implicite ajusté par polyèdre | coûteux et redondant, la surface est déjà explicite |
+| Versionner des scans bruts ou des nuages dérivés KITTI | licence non commerciale, dépôt public ; seuls les manifestes |
 
-Côté moteur, la liste faisant foi est
-[`morsehgp3D_v9/docs/FAUSSES_PISTES.md`](../../morsehgp3D_v9/docs/FAUSSES_PISTES.md)
-et les listes v7 et v8 qu'elle cite. Deux entrées concernent directement ce
-dossier :
-
-- **versionner des scans bruts ou des nuages dérivés KITTI** : fermé pour
-  licence non commerciale et dépôt public. Seuls les manifestes sont versionnés ;
-- **retrait du sol par seuil $z$ constant** : rejeté par le protocole sans sol.
-
-Une piste de ces listes ne se rouvre qu'avec un **fait nouveau** : une preuve,
-une fixture ou une mesure épinglée qui contredit la raison de sa fermeture.
-Jamais sur un banc d'essai.
+Une piste ne se rouvre qu'avec un **fait nouveau** : une preuve, une fixture ou
+une mesure épinglée qui contredit la raison de sa fermeture. Jamais sur un banc
+d'essai.
 
 ## 5. Ce qui n'est pas un risque
 
-- **La laminarité.** Une attention sur arbre est possible : § 9.1 démontre que
-  l'arbre est une partition des $(K-1)$-simplexes, donc laminaire sur les
-  facettes, et la partition de l'unité $w_{x\tau} = S_\tau/T_x$ qui relie points
-  et facettes y est fournie. Ce point a été soulevé et tranché ; il n'a pas à
-  être rediscuté.
-- **L'exactitude du réducteur aval.** `morsehgp3d/` calcule déjà le vote pondéré
-  et les sélections en arithmétique exacte. Le risque n'est pas là ; il est
-  dans le raccord amont (G0.1 à G0.4).
-- **Le déterminisme du tokenizer.** Mesuré : 24 comparaisons appariées égales
-  au reçu R22, condensés reproduits sur trois trames.
+- **La laminarité.** § 9.1 démontre que l'arbre est une partition des
+  $(K-1)$-simplexes ; la partition de l'unité $w_{x\tau} = S_\tau/T_x$ relie
+  points et facettes. Ce point a été soulevé et tranché.
+- **Le déterminisme et la reproductibilité** de la tokenisation : mesurés.
+- **L'équivariance rigide et d'échelle** : rotations, translations et
+  homothéties commutent avec la tour, donc les augmentations correspondantes
+  sont gratuites.
+- **Le coût de séquence** : un U-Net lit $L$ coupes, pas les millions de nœuds
+  de la tour.
