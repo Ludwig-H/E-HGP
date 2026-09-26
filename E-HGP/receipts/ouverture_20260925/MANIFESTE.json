@@ -1,0 +1,80 @@
+{
+ "benches": {
+  "births_vs_dimension.py": "4c11c536986627263214f00f7d05452713112767fb9c6a78e8da6be5c3b5ced5",
+  "clustering_compare.py": "aec6269539353f59a4dbaace77159d3db4858a6f1b9990342f43656d15ded6fe",
+  "concentration.py": "38e95be4358a6cb2ab2afc47a8e4603674cd3a0b3497029ad1fb5fb4903f1630",
+  "empty_ball_fraction.py": "0fd0999f1333770e81667810faa59fbf75af6cfbe8f7fa2d83a4c83e338bbac3",
+  "gate_engine.py": "99422082c0e707149475c14e72ccd001fab6968e4ced53229e60421997b58ccf",
+  "make_receipt.py": "2b3bf5a55cf1cfa7a9d01bd0bf2652b39fa7071c04e6802187960e0d7a82a4d1",
+  "scale_space.py": "ac8b055cf550d2311cc19df040fb692a0fae77fb5690cfb0d564d033f2854b13",
+  "spectral_tower.py": "2fc982dda3b3832077d2b888525c130b75b58b49353b5dae15714c91ebc60513",
+  "witness_campaign.py": "b88025ab83f8dfe0919d4cb50d2cb18793438b6d2582f167af64536c271641be"
+ },
+ "commit": "a74e90f22167105cdba90b6850f0597f1a01a329",
+ "commit_subject": "v8: widen the integer engine to 18-bit coordinates (1 mm grid)",
+ "docs": {
+  "JOURNAL_20260925.md": "4c964405455e6f622899cc2badeee7b992f729c54ec34cbdd3f09057f669be82",
+  "MOTEUR_ET_COUTS.md": "6e26798b65e6ae27aa5905a285630d76d16bc3046fe0361ea143838422636442",
+  "OBJET_ET_DIMENSION.md": "b3e71fd3c941b18badc82a9da5626371d2c2c6fdfa32f4a6fecd99774cd51948",
+  "OBSTRUCTION_GRANDE_DIMENSION.md": "e5a2ac6658d2bde35d694f1eb08ab2d6e35346c0efbcbeca3c50406df174262f",
+  "REGULARISATION_ENTROPIQUE.md": "8a77dc16f8488b2410b28251f2631f113ef4958770c6ffde2e632fc674ed9e1f"
+ },
+ "label": "ouverture E-HGP, socle exact et certificats, ancre sur origin/main 273c33f7c",
+ "modules": {
+  "numpy": "2.5.3",
+  "scipy": "1.18.1"
+ },
+ "object": "ehgp.receipt.v1",
+ "python": "3.12.1",
+ "runs": [
+  {
+   "command": "python3 -m unittest tests.test_tour_exacte tests.test_separation",
+   "exit_code": 0,
+   "stderr": "...................\n----------------------------------------------------------------------\nRan 19 tests in 45.607s\n\nOK\n",
+   "stdout": ""
+  },
+  {
+   "command": "python3 -O -m unittest tests.test_tour_exacte tests.test_separation",
+   "exit_code": 0,
+   "stderr": "...................\n----------------------------------------------------------------------\nRan 19 tests in 33.067s\n\nOK\n",
+   "stdout": ""
+  },
+  {
+   "command": "python3 bench/births_vs_dimension.py --n 7 --k-max 3 --dims 2,3,20,50 --seeds 5,17",
+   "exit_code": 0,
+   "stderr": "",
+   "stdout": "n=7 graines=5,17 : naissances topologiques (taille de sortie) / C(n,k)\n    d | k=1            | k=2            | k=3           \n      | / 7            | / 21           | / 35          \n    2 | 7.0 (7-7)      | 9.5 (8-11)     | 7.0 (7-7)     \n    3 | 7.0 (7-7)      | 12.0 (12-12)   | 12.5 (12-13)  \n   20 | 7.0 (7-7)      | 20.5 (20-21)   | 30.0 (27-33)  \n   50 | 7.0 (7-7)      | 21.0 (21-21)   | 35.0 (35-35)  \n"
+  },
+  {
+   "command": "python3 bench/scale_space.py --n 10 --k 3 --dims 2,20 --seed 31",
+   "exit_code": 0,
+   "stderr": "",
+   "stdout": "n=10 k=3 graine=31 famille=ramp\n   d  epsilon/var    exact   minima     niveau min      exact min\n   2        1e-04       12       22         4455.9         4450.0\n   2        1e-03       12       17         4508.9         4450.0\n   2        1e-02       12       17         5039.2         4450.0\n   2        1e-01       12       17        10342.5         4450.0\n   2        1e+00       12        7        50515.2         4450.0\n  20        1e-04      101       46       709190.7       709054.7\n  20        1e-03      101       46       709114.8       709054.7\n  20        1e-02      101       43       709643.0       709054.7\n  20        1e-01      101       43       714960.7       709054.7\n  20        1e+00      101       40       768243.7       709054.7\n"
+  }
+ ],
+ "sources": {
+  "ehgp/__init__.py": "41b37e35c0bbafcbb0eddccac1921196da432536b7d70f1d3fae2eca550fbfc9",
+  "ehgp/bracket/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "ehgp/engine/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "ehgp/engine/critical.py": "15cbcbc809b329b1058d88bc881bed265ee8fb213163e623d17c16d3efce72d6",
+  "ehgp/engine/fast_point_tower.py": "3935b5f991ed82f3bac54dd94b37ff96045108fbca20d1b758d19031212a15f2",
+  "ehgp/engine/point_tower.py": "206f4128e282db1d617bc0c0e7aa6a57e0012cd57872d79f2047a3cf0e3c6f2d",
+  "ehgp/engine/segment.py": "d40bd7f6a787dc2b27ff6544e77f046779e878ca1b9c2a1f89ba369a24cdd81b",
+  "ehgp/engine/separation.py": "ea0009c6289b844f2e81217512d4786b6485ad0b53ca5e0497d9e795b5b19569",
+  "ehgp/engine/witness_tower.py": "99cd45d935d0fb0fa769317067945d8103037d0ae88d45cc0dd8408d577cbb3e",
+  "ehgp/exact/__init__.py": "43852d9a22746479ff81d4f4fc8cb3f3f723b88d6a39e40b158a4898284404e0",
+  "ehgp/exact/grid_judge.py": "268896a450f167fe898397697cd7d333b22933e77a24dca779775d933a5c1216",
+  "ehgp/exact/meb.py": "b44ec4533b4bcb1113589af0a79e9d928aa8c579523fa897edad20fecd9dac97",
+  "ehgp/exact/projection.py": "21b5a73e6df17e99d25bab2798f040b203d65d73160d19c93994ed130e495ede",
+  "ehgp/exact/tower.py": "0bda4b11f723b1d65871e6b6e90883ed02b9b847fa16b00ff64854724a940307",
+  "ehgp/judge/__init__.py": "5e55d4083b29d74447efe311eeb8f581959fe3bf48417e245af76b68ad9c4f6f",
+  "ehgp/judge/gamma_bfs.py": "89ab9f4664e45c2c24873bd39f00a6fdc2803ef28bdcbddaa766840a0c8e4a76",
+  "ehgp/soft/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "ehgp/soft/families.py": "c0258e2f58c5811b1a606542450b1df83412fe629f8b16b3705db2462b228d5a",
+  "ehgp/soft/fermi.py": "ad105f319fa5af9b44188239e81cc8681f440d8ea4aa0ba6b305664b45de9dd1",
+  "ehgp/soft/ramp_exact.py": "c775332edb5dae51959bf62110008c12da2a5a90581b361e981f00c7af38764b",
+  "ehgp/spectral/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "ehgp/spectral/log_density.py": "69e4406cc5eb0b887c3e7dc6cfcac7b2cf9a8f3d1dfc22881162db072b6f643b",
+  "ehgp/spectral/tower.py": "d8a884110b155a718fd7aaeb2235865abe81783bd019249a9e9ce318ae3eab08"
+ }
+}

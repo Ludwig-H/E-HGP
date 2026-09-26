@@ -35,6 +35,10 @@ Le chemin produit amont vise une source sparse exacte : catalogue multi-ordre de
 
 Le nouveau module de points ne remplace pas cette source. Il consomme une tour sous autorité externe et n'invente aucune complétude au moyen d'un MST de points, d'un graphe de voisinage ou d'une approximation numérique.
 
+### Exploration E-HGP en grande dimension, hors registre
+
+Le dossier [`E-HGP/`](E-HGP/README.md) pose la question du même objet HGP pour des nuages de grande dimension, avec un budget quadratique ou cubique et une piste entropique. Il est explicitement `public_status=not_claimed`, ne touche ni le registre, ni le contrat public v2 (verrouillé à trois coordonnées), ni la ligne enregistrée. Ses deux résultats d'ouverture sont négatifs et mesurés : la taille de sortie de la tour passe de linéaire en dimension 2 à $\binom{n}{k}$ en dimension 100, et les niveaux se concentrent au point de ne plus porter de signal de densité. Son résultat positif est méthodologique : les sphères critiques s'atteignent par descente au lieu d'être énumérées, et chaque décision reste rationnelle exacte.
+
 ## Exactitude, tests et performances
 
 - La [présentation mathématique](docs/math/HIERARCHIE_DE_POINTS_MULTI_ORDRES.md) définit les niveaux multi-ordres, les poids, le canal `stay`, la laminarité et les trois rendus.

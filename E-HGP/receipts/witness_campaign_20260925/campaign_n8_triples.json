@@ -1,0 +1,7328 @@
+{
+ "cases": [
+  {
+   "cloud": [
+    [
+     199,
+     140
+    ],
+    [
+     5,
+     132
+    ],
+    [
+     102,
+     48
+    ],
+    [
+     79,
+     36
+    ],
+    [
+     192,
+     81
+    ],
+    [
+     45,
+     81
+    ],
+    [
+     178,
+     42
+    ],
+    [
+     102,
+     185
+    ]
+   ],
+   "count": 8,
+   "dimension": 2,
+   "family": "uniform",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.137,
+      "segment": 0.431,
+      "witness": 1.066
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 17,
+      "violations": 0,
+      "witnesses": 9
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.137,
+      "segment": 0.431,
+      "witness": 1.944
+     },
+     "segment": {
+      "above": 4,
+      "equal": 24,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 26,
+      "violations": 0,
+      "witnesses": 18
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.137,
+      "segment": 0.431,
+      "witness": 3.491
+     },
+     "segment": {
+      "above": 4,
+      "equal": 24,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 25,
+      "violations": 0,
+      "witnesses": 17
+     }
+    }
+   ],
+   "seed": 17
+  },
+  {
+   "cloud": [
+    [
+     180,
+     101
+    ],
+    [
+     24,
+     190
+    ],
+    [
+     45,
+     188
+    ],
+    [
+     113,
+     77
+    ],
+    [
+     31,
+     109
+    ],
+    [
+     156,
+     29
+    ],
+    [
+     170,
+     69
+    ],
+    [
+     116,
+     152
+    ]
+   ],
+   "count": 8,
+   "dimension": 2,
+   "family": "uniform",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.036,
+      "segment": 0.264,
+      "witness": 1.264
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 20,
+      "violations": 0,
+      "witnesses": 12
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.036,
+      "segment": 0.264,
+      "witness": 2.483
+     },
+     "segment": {
+      "above": 8,
+      "equal": 20,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 29,
+      "violations": 0,
+      "witnesses": 21
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.036,
+      "segment": 0.264,
+      "witness": 3.189
+     },
+     "segment": {
+      "above": 5,
+      "equal": 23,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 24,
+      "violations": 0,
+      "witnesses": 16
+     }
+    }
+   ],
+   "seed": 23
+  },
+  {
+   "cloud": [
+    [
+     185,
+     38
+    ],
+    [
+     106,
+     149
+    ],
+    [
+     143,
+     154
+    ],
+    [
+     39,
+     155
+    ],
+    [
+     83,
+     107
+    ],
+    [
+     34,
+     159
+    ],
+    [
+     86,
+     55
+    ],
+    [
+     183,
+     134
+    ]
+   ],
+   "count": 8,
+   "dimension": 2,
+   "family": "uniform",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.124,
+      "segment": 0.523,
+      "witness": 1.431
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 17,
+      "violations": 0,
+      "witnesses": 9
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.124,
+      "segment": 0.523,
+      "witness": 2.615
+     },
+     "segment": {
+      "above": 4,
+      "equal": 24,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 26,
+      "violations": 0,
+      "witnesses": 18
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.124,
+      "segment": 0.523,
+      "witness": 2.877
+     },
+     "segment": {
+      "above": 3,
+      "equal": 25,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 25,
+      "violations": 0,
+      "witnesses": 17
+     }
+    }
+   ],
+   "seed": 31
+  },
+  {
+   "cloud": [
+    [
+     200,
+     166,
+     69
+    ],
+    [
+     36,
+     101,
+     130
+    ],
+    [
+     194,
+     167,
+     139
+    ],
+    [
+     96,
+     49,
+     128
+    ],
+    [
+     119,
+     107,
+     16
+    ],
+    [
+     108,
+     48,
+     117
+    ],
+    [
+     64,
+     94,
+     91
+    ],
+    [
+     118,
+     188,
+     73
+    ]
+   ],
+   "count": 8,
+   "dimension": 3,
+   "family": "uniform",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.221,
+      "segment": 0.576,
+      "witness": 1.811
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 21,
+      "violations": 0,
+      "witnesses": 13
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.221,
+      "segment": 0.576,
+      "witness": 3.113
+     },
+     "segment": {
+      "above": 8,
+      "equal": 20,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 34,
+      "violations": 0,
+      "witnesses": 26
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.221,
+      "segment": 0.576,
+      "witness": 6.301
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 37,
+      "violations": 0,
+      "witnesses": 29
+     }
+    }
+   ],
+   "seed": 17
+  },
+  {
+   "cloud": [
+    [
+     175,
+     130,
+     92
+    ],
+    [
+     123,
+     177,
+     84
+    ],
+    [
+     69,
+     144,
+     68
+    ],
+    [
+     21,
+     14,
+     180
+    ],
+    [
+     95,
+     33,
+     27
+    ],
+    [
+     70,
+     167,
+     66
+    ],
+    [
+     109,
+     26,
+     55
+    ],
+    [
+     73,
+     31,
+     15
+    ]
+   ],
+   "count": 8,
+   "dimension": 3,
+   "family": "uniform",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.269,
+      "segment": 0.539,
+      "witness": 1.964
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 18,
+      "violations": 0,
+      "witnesses": 10
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.269,
+      "segment": 0.539,
+      "witness": 4.418
+     },
+     "segment": {
+      "above": 12,
+      "equal": 16,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 29,
+      "violations": 0,
+      "witnesses": 21
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.269,
+      "segment": 0.539,
+      "witness": 4.48
+     },
+     "segment": {
+      "above": 9,
+      "equal": 19,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 32,
+      "violations": 0,
+      "witnesses": 24
+     }
+    }
+   ],
+   "seed": 23
+  },
+  {
+   "cloud": [
+    [
+     117,
+     9,
+     198
+    ],
+    [
+     181,
+     187,
+     91
+    ],
+    [
+     117,
+     178,
+     60
+    ],
+    [
+     88,
+     109,
+     75
+    ],
+    [
+     88,
+     46,
+     163
+    ],
+    [
+     142,
+     111,
+     56
+    ],
+    [
+     96,
+     36,
+     196
+    ],
+    [
+     119,
+     128,
+     184
+    ]
+   ],
+   "count": 8,
+   "dimension": 3,
+   "family": "uniform",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.051,
+      "segment": 0.278,
+      "witness": 0.894
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 21,
+      "violations": 0,
+      "witnesses": 13
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.051,
+      "segment": 0.278,
+      "witness": 3.58
+     },
+     "segment": {
+      "above": 6,
+      "equal": 22,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 31,
+      "violations": 0,
+      "witnesses": 23
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.051,
+      "segment": 0.278,
+      "witness": 3.971
+     },
+     "segment": {
+      "above": 6,
+      "equal": 22,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 25,
+      "violations": 0,
+      "witnesses": 17
+     }
+    }
+   ],
+   "seed": 31
+  },
+  {
+   "cloud": [
+    [
+     98,
+     146,
+     122,
+     19,
+     190
+    ],
+    [
+     145,
+     16,
+     0,
+     187,
+     134
+    ],
+    [
+     2,
+     30,
+     179,
+     87,
+     151
+    ],
+    [
+     129,
+     53,
+     0,
+     143,
+     67
+    ],
+    [
+     185,
+     184,
+     182,
+     115,
+     12
+    ],
+    [
+     53,
+     114,
+     179,
+     69,
+     6
+    ],
+    [
+     28,
+     36,
+     98,
+     139,
+     152
+    ],
+    [
+     131,
+     169,
+     120,
+     186,
+     200
+    ]
+   ],
+   "count": 8,
+   "dimension": 5,
+   "family": "uniform",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.369,
+      "segment": 0.53,
+      "witness": 2.049
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 28,
+      "violations": 0,
+      "witnesses": 20
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.369,
+      "segment": 0.53,
+      "witness": 11.141
+     },
+     "segment": {
+      "above": 4,
+      "equal": 24,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 51,
+      "violations": 0,
+      "witnesses": 43
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.369,
+      "segment": 0.53,
+      "witness": 12.756
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 53,
+      "violations": 0,
+      "witnesses": 45
+     }
+    }
+   ],
+   "seed": 17
+  },
+  {
+   "cloud": [
+    [
+     73,
+     118,
+     186,
+     55,
+     23
+    ],
+    [
+     181,
+     82,
+     95,
+     160,
+     85
+    ],
+    [
+     184,
+     181,
+     43,
+     13,
+     91
+    ],
+    [
+     122,
+     172,
+     88,
+     179,
+     79
+    ],
+    [
+     200,
+     137,
+     107,
+     23,
+     82
+    ],
+    [
+     120,
+     89,
+     43,
+     23,
+     89
+    ],
+    [
+     70,
+     166,
+     13,
+     39,
+     184
+    ],
+    [
+     54,
+     191,
+     18,
+     137,
+     107
+    ]
+   ],
+   "count": 8,
+   "dimension": 5,
+   "family": "uniform",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.072,
+      "segment": 0.114,
+      "witness": 2.921
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 27,
+      "violations": 0,
+      "witnesses": 19
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.072,
+      "segment": 0.114,
+      "witness": 13.783
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 50,
+      "violations": 0,
+      "witnesses": 42
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.072,
+      "segment": 0.114,
+      "witness": 18.01
+     },
+     "segment": {
+      "above": 1,
+      "equal": 27,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 48,
+      "violations": 0,
+      "witnesses": 40
+     }
+    }
+   ],
+   "seed": 23
+  },
+  {
+   "cloud": [
+    [
+     65,
+     82,
+     59,
+     108,
+     114
+    ],
+    [
+     62,
+     32,
+     181,
+     37,
+     19
+    ],
+    [
+     193,
+     113,
+     25,
+     115,
+     4
+    ],
+    [
+     57,
+     35,
+     77,
+     167,
+     121
+    ],
+    [
+     175,
+     194,
+     189,
+     111,
+     43
+    ],
+    [
+     108,
+     118,
+     183,
+     46,
+     126
+    ],
+    [
+     168,
+     59,
+     50,
+     168,
+     197
+    ],
+    [
+     90,
+     5,
+     0,
+     13,
+     144
+    ]
+   ],
+   "count": 8,
+   "dimension": 5,
+   "family": "uniform",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.427,
+      "segment": 0.907,
+      "witness": 2.626
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 24,
+      "violations": 0,
+      "witnesses": 16
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.427,
+      "segment": 0.907,
+      "witness": 9.029
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 43,
+      "violations": 0,
+      "witnesses": 35
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.427,
+      "segment": 0.907,
+      "witness": 14.384
+     },
+     "segment": {
+      "above": 3,
+      "equal": 25,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 48,
+      "violations": 0,
+      "witnesses": 40
+     }
+    }
+   ],
+   "seed": 31
+  },
+  {
+   "cloud": [
+    [
+     164,
+     120,
+     83,
+     70,
+     157,
+     174,
+     26,
+     166,
+     62,
+     111
+    ],
+    [
+     195,
+     103,
+     0,
+     149,
+     99,
+     96,
+     80,
+     116,
+     5,
+     195
+    ],
+    [
+     40,
+     160,
+     7,
+     77,
+     37,
+     153,
+     20,
+     94,
+     106,
+     5
+    ],
+    [
+     8,
+     63,
+     155,
+     54,
+     69,
+     71,
+     124,
+     41,
+     19,
+     164
+    ],
+    [
+     149,
+     20,
+     111,
+     49,
+     139,
+     113,
+     52,
+     4,
+     67,
+     24
+    ],
+    [
+     73,
+     128,
+     121,
+     36,
+     149,
+     129,
+     196,
+     2,
+     86,
+     130
+    ],
+    [
+     83,
+     105,
+     192,
+     142,
+     200,
+     144,
+     177,
+     161,
+     188,
+     49
+    ],
+    [
+     61,
+     74,
+     45,
+     23,
+     153,
+     127,
+     68,
+     3,
+     120,
+     105
+    ]
+   ],
+   "count": 8,
+   "dimension": 10,
+   "family": "uniform",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.847,
+      "segment": 0.839,
+      "witness": 6.217
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 33,
+      "violations": 0,
+      "witnesses": 25
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.847,
+      "segment": 0.839,
+      "witness": 18.754
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 60,
+      "violations": 0,
+      "witnesses": 52
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.847,
+      "segment": 0.839,
+      "witness": 21.464
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 58,
+      "violations": 0,
+      "witnesses": 50
+     }
+    }
+   ],
+   "seed": 17
+  },
+  {
+   "cloud": [
+    [
+     191,
+     190,
+     169,
+     187,
+     126,
+     166,
+     181,
+     61,
+     58,
+     75
+    ],
+    [
+     3,
+     132,
+     18,
+     129,
+     183,
+     181,
+     97,
+     196,
+     12,
+     193
+    ],
+    [
+     6,
+     10,
+     45,
+     96,
+     149,
+     13,
+     70,
+     54,
+     150,
+     35
+    ],
+    [
+     91,
+     79,
+     182,
+     104,
+     38,
+     118,
+     129,
+     70,
+     60,
+     166
+    ],
+    [
+     43,
+     94,
+     175,
+     72,
+     126,
+     112,
+     26,
+     168,
+     56,
+     159
+    ],
+    [
+     119,
+     101,
+     6,
+     148,
+     81,
+     80,
+     29,
+     98,
+     81,
+     75
+    ],
+    [
+     135,
+     57,
+     59,
+     152,
+     8,
+     37,
+     69,
+     159,
+     192,
+     6
+    ],
+    [
+     32,
+     195,
+     126,
+     88,
+     105,
+     160,
+     97,
+     191,
+     4,
+     151
+    ]
+   ],
+   "count": 8,
+   "dimension": 10,
+   "family": "uniform",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.741,
+      "segment": 0.756,
+      "witness": 5.327
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 28,
+      "violations": 0,
+      "witnesses": 20
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.741,
+      "segment": 0.756,
+      "witness": 14.739
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 47,
+      "violations": 0,
+      "witnesses": 39
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.741,
+      "segment": 0.756,
+      "witness": 17.577
+     },
+     "segment": {
+      "above": 1,
+      "equal": 27,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 45,
+      "violations": 0,
+      "witnesses": 37
+     }
+    }
+   ],
+   "seed": 23
+  },
+  {
+   "cloud": [
+    [
+     122,
+     35,
+     146,
+     130,
+     37,
+     103,
+     123,
+     155,
+     11,
+     173
+    ],
+    [
+     164,
+     27,
+     63,
+     94,
+     46,
+     165,
+     66,
+     164,
+     18,
+     196
+    ],
+    [
+     86,
+     120,
+     112,
+     192,
+     38,
+     178,
+     60,
+     20,
+     15,
+     106
+    ],
+    [
+     86,
+     26,
+     62,
+     79,
+     184,
+     165,
+     2,
+     49,
+     101,
+     9
+    ],
+    [
+     42,
+     78,
+     76,
+     55,
+     148,
+     43,
+     95,
+     130,
+     174,
+     113
+    ],
+    [
+     58,
+     71,
+     171,
+     168,
+     3,
+     198,
+     59,
+     171,
+     137,
+     52
+    ],
+    [
+     164,
+     98,
+     103,
+     75,
+     182,
+     157,
+     129,
+     43,
+     159,
+     114
+    ],
+    [
+     57,
+     49,
+     118,
+     200,
+     87,
+     179,
+     21,
+     87,
+     165,
+     26
+    ]
+   ],
+   "count": 8,
+   "dimension": 10,
+   "family": "uniform",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.838,
+      "segment": 0.749,
+      "witness": 5.382
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 33,
+      "violations": 0,
+      "witnesses": 25
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.838,
+      "segment": 0.749,
+      "witness": 20.607
+     },
+     "segment": {
+      "above": 4,
+      "equal": 24,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 63,
+      "violations": 0,
+      "witnesses": 55
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.838,
+      "segment": 0.749,
+      "witness": 21.001
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 67,
+      "violations": 0,
+      "witnesses": 59
+     }
+    }
+   ],
+   "seed": 31
+  },
+  {
+   "cloud": [
+    [
+     171,
+     29,
+     189,
+     99,
+     182,
+     57,
+     67,
+     113,
+     27,
+     125,
+     113,
+     109,
+     32,
+     45,
+     14,
+     18,
+     36,
+     43,
+     30,
+     44
+    ],
+    [
+     124,
+     134,
+     47,
+     187,
+     138,
+     122,
+     17,
+     191,
+     82,
+     195,
+     104,
+     101,
+     6,
+     90,
+     142,
+     21,
+     21,
+     133,
+     51,
+     50
+    ],
+    [
+     121,
+     65,
+     178,
+     41,
+     2,
+     164,
+     121,
+     169,
+     26,
+     107,
+     130,
+     72,
+     177,
+     129,
+     38,
+     141,
+     184,
+     127,
+     185,
+     181
+    ],
+    [
+     57,
+     114,
+     164,
+     178,
+     17,
+     182,
+     101,
+     127,
+     194,
+     42,
+     113,
+     34,
+     88,
+     32,
+     98,
+     161,
+     117,
+     173,
+     54,
+     70
+    ],
+    [
+     80,
+     138,
+     30,
+     83,
+     78,
+     136,
+     193,
+     186,
+     1,
+     128,
+     17,
+     136,
+     77,
+     120,
+     188,
+     40,
+     44,
+     112,
+     199,
+     118
+    ],
+    [
+     21,
+     133,
+     127,
+     112,
+     152,
+     35,
+     177,
+     199,
+     181,
+     85,
+     100,
+     184,
+     183,
+     142,
+     111,
+     162,
+     89,
+     112,
+     33,
+     70
+    ],
+    [
+     142,
+     39,
+     183,
+     69,
+     65,
+     166,
+     30,
+     17,
+     59,
+     138,
+     30,
+     159,
+     177,
+     192,
+     193,
+     169,
+     177,
+     84,
+     108,
+     7
+    ],
+    [
+     2,
+     184,
+     6,
+     168,
+     163,
+     69,
+     39,
+     123,
+     87,
+     27,
+     23,
+     24,
+     151,
+     50,
+     114,
+     32,
+     73,
+     146,
+     120,
+     13
+    ]
+   ],
+   "count": 8,
+   "dimension": 20,
+   "family": "uniform",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.952,
+      "segment": 0.729,
+      "witness": 9.208
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 36,
+      "violations": 0,
+      "witnesses": 28
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.952,
+      "segment": 0.729,
+      "witness": 38.717
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 86,
+      "violations": 0,
+      "witnesses": 78
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.952,
+      "segment": 0.729,
+      "witness": 49.868
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 92,
+      "violations": 0,
+      "witnesses": 84
+     }
+    }
+   ],
+   "seed": 17
+  },
+  {
+   "cloud": [
+    [
+     75,
+     83,
+     106,
+     145,
+     81,
+     39,
+     123,
+     191,
+     46,
+     101,
+     41,
+     67,
+     81,
+     128,
+     47,
+     79,
+     8,
+     118,
+     39,
+     43
+    ],
+    [
+     140,
+     80,
+     2,
+     128,
+     166,
+     154,
+     74,
+     68,
+     58,
+     53,
+     27,
+     164,
+     23,
+     149,
+     167,
+     165,
+     60,
+     27,
+     139,
+     115
+    ],
+    [
+     143,
+     130,
+     158,
+     27,
+     171,
+     176,
+     111,
+     155,
+     77,
+     34,
+     90,
+     133,
+     18,
+     136,
+     20,
+     136,
+     125,
+     159,
+     73,
+     136
+    ],
+    [
+     70,
+     127,
+     196,
+     151,
+     140,
+     166,
+     55,
+     170,
+     166,
+     98,
+     129,
+     96,
+     80,
+     62,
+     163,
+     114,
+     76,
+     128,
+     97,
+     16
+    ],
+    [
+     150,
+     69,
+     123,
+     20,
+     126,
+     182,
+     3,
+     141,
+     82,
+     69,
+     94,
+     138,
+     146,
+     84,
+     43,
+     2,
+     22,
+     70,
+     175,
+     10
+    ],
+    [
+     79,
+     64,
+     84,
+     188,
+     200,
+     29,
+     114,
+     152,
+     149,
+     86,
+     82,
+     49,
+     66,
+     174,
+     146,
+     62,
+     8,
+     196,
+     183,
+     138
+    ],
+    [
+     147,
+     189,
+     110,
+     146,
+     139,
+     48,
+     137,
+     171,
+     11,
+     92,
+     56,
+     166,
+     100,
+     183,
+     51,
+     91,
+     22,
+     184,
+     126,
+     177
+    ],
+    [
+     86,
+     36,
+     72,
+     32,
+     19,
+     179,
+     75,
+     162,
+     148,
+     23,
+     149,
+     191,
+     67,
+     157,
+     26,
+     151,
+     85,
+     78,
+     92,
+     3
+    ]
+   ],
+   "count": 8,
+   "dimension": 20,
+   "family": "uniform",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.548,
+      "segment": 0.335,
+      "witness": 4.988
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 35,
+      "violations": 0,
+      "witnesses": 27
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.548,
+      "segment": 0.335,
+      "witness": 25.348
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 79,
+      "violations": 0,
+      "witnesses": 71
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.548,
+      "segment": 0.335,
+      "witness": 30.446
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 82,
+      "violations": 0,
+      "witnesses": 74
+     }
+    }
+   ],
+   "seed": 23
+  },
+  {
+   "cloud": [
+    [
+     47,
+     138,
+     60,
+     35,
+     104,
+     34,
+     103,
+     76,
+     64,
+     137,
+     76,
+     189,
+     103,
+     139,
+     174,
+     55,
+     104,
+     146,
+     76,
+     135
+    ],
+    [
+     83,
+     72,
+     152,
+     144,
+     64,
+     63,
+     180,
+     121,
+     197,
+     7,
+     139,
+     175,
+     18,
+     10,
+     151,
+     133,
+     155,
+     187,
+     150,
+     152
+    ],
+    [
+     150,
+     24,
+     165,
+     176,
+     103,
+     179,
+     53,
+     37,
+     105,
+     143,
+     188,
+     2,
+     117,
+     50,
+     135,
+     38,
+     7,
+     151,
+     97,
+     122
+    ],
+    [
+     5,
+     80,
+     161,
+     141,
+     15,
+     33,
+     42,
+     96,
+     32,
+     83,
+     44,
+     130,
+     138,
+     87,
+     174,
+     37,
+     95,
+     39,
+     89,
+     95
+    ],
+    [
+     145,
+     190,
+     54,
+     25,
+     16,
+     116,
+     119,
+     129,
+     127,
+     176,
+     174,
+     172,
+     9,
+     103,
+     155,
+     50,
+     22,
+     138,
+     181,
+     68
+    ],
+    [
+     126,
+     10,
+     19,
+     63,
+     35,
+     3,
+     63,
+     35,
+     164,
+     75,
+     33,
+     38,
+     95,
+     81,
+     153,
+     143,
+     147,
+     121,
+     196,
+     76
+    ],
+    [
+     81,
+     66,
+     170,
+     29,
+     169,
+     72,
+     45,
+     40,
+     138,
+     69,
+     174,
+     92,
+     176,
+     8,
+     12,
+     66,
+     110,
+     93,
+     17,
+     90
+    ],
+    [
+     78,
+     188,
+     120,
+     120,
+     196,
+     14,
+     93,
+     97,
+     118,
+     185,
+     193,
+     184,
+     18,
+     179,
+     108,
+     102,
+     181,
+     11,
+     98,
+     137
+    ]
+   ],
+   "count": 8,
+   "dimension": 20,
+   "family": "uniform",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.477,
+      "segment": 0.46,
+      "witness": 5.789
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 35,
+      "violations": 0,
+      "witnesses": 27
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.477,
+      "segment": 0.46,
+      "witness": 19.014
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 72,
+      "violations": 0,
+      "witnesses": 64
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.477,
+      "segment": 0.46,
+      "witness": 22.829
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 80,
+      "violations": 0,
+      "witnesses": 72
+     }
+    }
+   ],
+   "seed": 31
+  },
+  {
+   "cloud": [
+    [
+     60,
+     188,
+     16,
+     87,
+     110,
+     176,
+     14,
+     137,
+     185,
+     77,
+     129,
+     50,
+     116,
+     114,
+     28,
+     127,
+     180,
+     58,
+     56,
+     171,
+     163,
+     171,
+     2,
+     10,
+     96,
+     64,
+     109,
+     43,
+     14,
+     197,
+     52,
+     182,
+     69,
+     138,
+     146,
+     165,
+     24,
+     108,
+     96,
+     143,
+     114,
+     50,
+     194,
+     50,
+     165,
+     135,
+     135,
+     15,
+     136,
+     3
+    ],
+    [
+     96,
+     161,
+     145,
+     71,
+     127,
+     11,
+     178,
+     198,
+     33,
+     171,
+     139,
+     57,
+     151,
+     183,
+     49,
+     53,
+     31,
+     34,
+     5,
+     136,
+     66,
+     120,
+     176,
+     148,
+     183,
+     132,
+     128,
+     101,
+     104,
+     89,
+     18,
+     180,
+     76,
+     189,
+     78,
+     177,
+     65,
+     105,
+     135,
+     141,
+     78,
+     116,
+     126,
+     183,
+     81,
+     173,
+     38,
+     144,
+     117,
+     106
+    ],
+    [
+     18,
+     25,
+     74,
+     74,
+     61,
+     72,
+     74,
+     142,
+     89,
+     152,
+     139,
+     22,
+     50,
+     90,
+     10,
+     49,
+     26,
+     173,
+     14,
+     119,
+     176,
+     57,
+     63,
+     41,
+     44,
+     120,
+     54,
+     187,
+     12,
+     185,
+     114,
+     52,
+     37,
+     154,
+     183,
+     9,
+     26,
+     85,
+     60,
+     32,
+     142,
+     177,
+     67,
+     160,
+     183,
+     127,
+     63,
+     69,
+     71,
+     198
+    ],
+    [
+     144,
+     84,
+     21,
+     194,
+     138,
+     83,
+     62,
+     5,
+     135,
+     145,
+     27,
+     125,
+     121,
+     78,
+     146,
+     181,
+     108,
+     126,
+     17,
+     47,
+     87,
+     64,
+     194,
+     57,
+     108,
+     74,
+     59,
+     194,
+     79,
+     90,
+     10,
+     63,
+     182,
+     50,
+     171,
+     124,
+     79,
+     140,
+     186,
+     39,
+     120,
+     91,
+     123,
+     55,
+     160,
+     60,
+     168,
+     120,
+     120,
+     188
+    ],
+    [
+     75,
+     172,
+     168,
+     0,
+     4,
+     92,
+     186,
+     88,
+     25,
+     60,
+     54,
+     73,
+     142,
+     160,
+     11,
+     170,
+     98,
+     12,
+     113,
+     191,
+     117,
+     128,
+     160,
+     195,
+     7,
+     54,
+     129,
+     110,
+     117,
+     178,
+     61,
+     40,
+     58,
+     40,
+     61,
+     134,
+     160,
+     58,
+     150,
+     102,
+     186,
+     107,
+     2,
+     34,
+     50,
+     189,
+     171,
+     28,
+     120,
+     48
+    ],
+    [
+     130,
+     6,
+     22,
+     10,
+     186,
+     198,
+     76,
+     13,
+     47,
+     113,
+     46,
+     6,
+     0,
+     185,
+     25,
+     3,
+     174,
+     62,
+     196,
+     173,
+     27,
+     153,
+     148,
+     74,
+     183,
+     38,
+     150,
+     39,
+     69,
+     91,
+     21,
+     24,
+     47,
+     73,
+     86,
+     92,
+     40,
+     90,
+     189,
+     116,
+     165,
+     98,
+     54,
+     135,
+     136,
+     198,
+     173,
+     132,
+     5,
+     53
+    ],
+    [
+     136,
+     88,
+     132,
+     70,
+     96,
+     160,
+     56,
+     131,
+     81,
+     66,
+     72,
+     199,
+     159,
+     53,
+     91,
+     34,
+     16,
+     190,
+     27,
+     31,
+     92,
+     54,
+     180,
+     83,
+     168,
+     194,
+     36,
+     155,
+     139,
+     93,
+     25,
+     188,
+     194,
+     45,
+     165,
+     119,
+     2,
+     155,
+     185,
+     142,
+     28,
+     196,
+     105,
+     198,
+     111,
+     95,
+     26,
+     2,
+     52,
+     112
+    ],
+    [
+     20,
+     60,
+     76,
+     159,
+     18,
+     17,
+     66,
+     179,
+     190,
+     59,
+     162,
+     116,
+     160,
+     29,
+     82,
+     155,
+     5,
+     99,
+     144,
+     161,
+     66,
+     40,
+     45,
+     4,
+     165,
+     138,
+     33,
+     32,
+     57,
+     29,
+     33,
+     38,
+     175,
+     197,
+     166,
+     162,
+     41,
+     131,
+     73,
+     39,
+     159,
+     173,
+     172,
+     125,
+     96,
+     92,
+     71,
+     15,
+     152,
+     98
+    ]
+   ],
+   "count": 8,
+   "dimension": 50,
+   "family": "uniform",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 1.049,
+      "segment": 0.57,
+      "witness": 6.448
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 36,
+      "violations": 0,
+      "witnesses": 28
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 1.049,
+      "segment": 0.57,
+      "witness": 37.331
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 89,
+      "violations": 0,
+      "witnesses": 81
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 1.049,
+      "segment": 0.57,
+      "witness": 59.754
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 95,
+      "violations": 0,
+      "witnesses": 87
+     }
+    }
+   ],
+   "seed": 17
+  },
+  {
+   "cloud": [
+    [
+     39,
+     56,
+     199,
+     109,
+     101,
+     63,
+     103,
+     55,
+     165,
+     161,
+     77,
+     20,
+     6,
+     25,
+     29,
+     91,
+     66,
+     28,
+     3,
+     97,
+     106,
+     189,
+     22,
+     150,
+     197,
+     168,
+     81,
+     151,
+     150,
+     30,
+     63,
+     185,
+     104,
+     116,
+     175,
+     135,
+     63,
+     62,
+     70,
+     106,
+     135,
+     76,
+     194,
+     190,
+     22,
+     138,
+     115,
+     55,
+     109,
+     119
+    ],
+    [
+     200,
+     183,
+     14,
+     68,
+     88,
+     49,
+     17,
+     0,
+     72,
+     195,
+     34,
+     130,
+     106,
+     31,
+     77,
+     87,
+     194,
+     84,
+     72,
+     185,
+     174,
+     131,
+     18,
+     171,
+     126,
+     110,
+     177,
+     60,
+     68,
+     159,
+     194,
+     173,
+     105,
+     141,
+     38,
+     45,
+     181,
+     141,
+     184,
+     130,
+     133,
+     137,
+     8,
+     7,
+     128,
+     94,
+     21,
+     32,
+     175,
+     191
+    ],
+    [
+     182,
+     82,
+     74,
+     146,
+     37,
+     98,
+     86,
+     4,
+     30,
+     122,
+     15,
+     75,
+     142,
+     1,
+     165,
+     42,
+     62,
+     152,
+     78,
+     199,
+     100,
+     87,
+     87,
+     65,
+     2,
+     41,
+     32,
+     0,
+     155,
+     110,
+     114,
+     195,
+     22,
+     49,
+     111,
+     105,
+     67,
+     52,
+     48,
+     67,
+     188,
+     191,
+     16,
+     113,
+     37,
+     150,
+     170,
+     85,
+     12,
+     199
+    ],
+    [
+     89,
+     135,
+     147,
+     14,
+     114,
+     169,
+     160,
+     4,
+     151,
+     183,
+     2,
+     151,
+     25,
+     142,
+     16,
+     109,
+     183,
+     8,
+     166,
+     78,
+     64,
+     59,
+     132,
+     61,
+     23,
+     197,
+     198,
+     159,
+     195,
+     19,
+     132,
+     38,
+     55,
+     27,
+     49,
+     192,
+     18,
+     130,
+     72,
+     90,
+     80,
+     62,
+     81,
+     92,
+     152,
+     93,
+     62,
+     142,
+     43,
+     38
+    ],
+    [
+     180,
+     57,
+     36,
+     25,
+     115,
+     25,
+     55,
+     35,
+     189,
+     25,
+     25,
+     136,
+     148,
+     41,
+     108,
+     99,
+     134,
+     35,
+     128,
+     186,
+     5,
+     155,
+     149,
+     152,
+     41,
+     36,
+     37,
+     45,
+     96,
+     16,
+     183,
+     129,
+     77,
+     74,
+     43,
+     108,
+     159,
+     85,
+     8,
+     20,
+     119,
+     18,
+     143,
+     97,
+     134,
+     47,
+     151,
+     173,
+     18,
+     86
+    ],
+    [
+     166,
+     175,
+     142,
+     48,
+     82,
+     23,
+     32,
+     43,
+     148,
+     133,
+     133,
+     158,
+     17,
+     40,
+     173,
+     199,
+     67,
+     168,
+     157,
+     196,
+     44,
+     188,
+     4,
+     174,
+     106,
+     50,
+     190,
+     146,
+     93,
+     78,
+     169,
+     156,
+     153,
+     2,
+     114,
+     154,
+     92,
+     102,
+     31,
+     181,
+     117,
+     25,
+     88,
+     153,
+     122,
+     136,
+     128,
+     78,
+     102,
+     199
+    ],
+    [
+     124,
+     43,
+     169,
+     48,
+     107,
+     75,
+     80,
+     114,
+     143,
+     76,
+     64,
+     77,
+     83,
+     37,
+     103,
+     64,
+     45,
+     74,
+     152,
+     103,
+     28,
+     198,
+     130,
+     133,
+     162,
+     182,
+     130,
+     130,
+     36,
+     156,
+     0,
+     131,
+     43,
+     185,
+     69,
+     142,
+     0,
+     166,
+     54,
+     183,
+     64,
+     135,
+     64,
+     91,
+     2,
+     20,
+     14,
+     25,
+     45,
+     187
+    ],
+    [
+     162,
+     146,
+     138,
+     15,
+     80,
+     37,
+     42,
+     67,
+     180,
+     151,
+     180,
+     151,
+     15,
+     158,
+     65,
+     106,
+     151,
+     1,
+     31,
+     115,
+     148,
+     183,
+     40,
+     160,
+     66,
+     69,
+     5,
+     173,
+     76,
+     158,
+     194,
+     132,
+     131,
+     42,
+     21,
+     135,
+     18,
+     171,
+     190,
+     4,
+     8,
+     67,
+     158,
+     125,
+     89,
+     60,
+     58,
+     199,
+     125,
+     171
+    ]
+   ],
+   "count": 8,
+   "dimension": 50,
+   "family": "uniform",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 1.357,
+      "segment": 0.75,
+      "witness": 8.334
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 36,
+      "violations": 0,
+      "witnesses": 28
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 1.357,
+      "segment": 0.75,
+      "witness": 53.037
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 91,
+      "violations": 0,
+      "witnesses": 83
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 1.357,
+      "segment": 0.75,
+      "witness": 69.472
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 99,
+      "violations": 0,
+      "witnesses": 91
+     }
+    }
+   ],
+   "seed": 23
+  },
+  {
+   "cloud": [
+    [
+     93,
+     1,
+     60,
+     78,
+     91,
+     113,
+     60,
+     173,
+     43,
+     134,
+     117,
+     169,
+     118,
+     54,
+     167,
+     174,
+     128,
+     20,
+     158,
+     108,
+     57,
+     118,
+     136,
+     49,
+     29,
+     116,
+     60,
+     110,
+     93,
+     47,
+     147,
+     194,
+     54,
+     188,
+     173,
+     126,
+     158,
+     124,
+     83,
+     21,
+     173,
+     16,
+     92,
+     15,
+     102,
+     196,
+     79,
+     8,
+     28,
+     200
+    ],
+    [
+     28,
+     73,
+     71,
+     188,
+     108,
+     51,
+     0,
+     124,
+     141,
+     84,
+     92,
+     80,
+     130,
+     157,
+     96,
+     86,
+     173,
+     29,
+     160,
+     192,
+     25,
+     156,
+     143,
+     44,
+     11,
+     9,
+     102,
+     55,
+     101,
+     2,
+     29,
+     174,
+     51,
+     72,
+     109,
+     111,
+     34,
+     166,
+     18,
+     104,
+     116,
+     195,
+     132,
+     194,
+     100,
+     102,
+     96,
+     81,
+     93,
+     133
+    ],
+    [
+     12,
+     24,
+     155,
+     91,
+     35,
+     101,
+     190,
+     152,
+     58,
+     100,
+     194,
+     86,
+     194,
+     197,
+     67,
+     171,
+     95,
+     32,
+     72,
+     120,
+     56,
+     122,
+     132,
+     165,
+     164,
+     139,
+     138,
+     29,
+     110,
+     32,
+     149,
+     166,
+     39,
+     192,
+     55,
+     41,
+     103,
+     183,
+     128,
+     55,
+     131,
+     180,
+     128,
+     152,
+     101,
+     45,
+     50,
+     139,
+     160,
+     72
+    ],
+    [
+     170,
+     42,
+     114,
+     163,
+     168,
+     137,
+     95,
+     33,
+     61,
+     164,
+     136,
+     88,
+     20,
+     24,
+     112,
+     42,
+     20,
+     166,
+     19,
+     108,
+     133,
+     40,
+     55,
+     120,
+     20,
+     79,
+     196,
+     71,
+     192,
+     28,
+     32,
+     6,
+     17,
+     66,
+     2,
+     120,
+     52,
+     54,
+     0,
+     81,
+     118,
+     59,
+     125,
+     27,
+     44,
+     60,
+     38,
+     171,
+     33,
+     4
+    ],
+    [
+     8,
+     171,
+     120,
+     73,
+     79,
+     183,
+     108,
+     186,
+     111,
+     123,
+     93,
+     162,
+     199,
+     10,
+     200,
+     90,
+     122,
+     179,
+     39,
+     4,
+     110,
+     156,
+     49,
+     14,
+     23,
+     197,
+     37,
+     66,
+     142,
+     76,
+     119,
+     134,
+     189,
+     189,
+     191,
+     165,
+     17,
+     138,
+     20,
+     48,
+     147,
+     81,
+     14,
+     50,
+     199,
+     194,
+     143,
+     156,
+     139,
+     193
+    ],
+    [
+     82,
+     125,
+     41,
+     195,
+     17,
+     0,
+     52,
+     1,
+     112,
+     173,
+     4,
+     159,
+     84,
+     108,
+     178,
+     117,
+     51,
+     7,
+     119,
+     120,
+     58,
+     132,
+     107,
+     15,
+     5,
+     77,
+     200,
+     165,
+     190,
+     63,
+     173,
+     55,
+     79,
+     81,
+     4,
+     153,
+     76,
+     124,
+     52,
+     125,
+     120,
+     198,
+     29,
+     34,
+     80,
+     151,
+     91,
+     133,
+     171,
+     128
+    ],
+    [
+     29,
+     4,
+     131,
+     138,
+     198,
+     15,
+     28,
+     22,
+     144,
+     100,
+     26,
+     0,
+     165,
+     20,
+     89,
+     52,
+     27,
+     73,
+     59,
+     147,
+     171,
+     81,
+     3,
+     128,
+     35,
+     92,
+     189,
+     19,
+     6,
+     186,
+     184,
+     36,
+     145,
+     112,
+     57,
+     147,
+     179,
+     76,
+     164,
+     62,
+     132,
+     93,
+     73,
+     81,
+     11,
+     48,
+     123,
+     1,
+     101,
+     72
+    ],
+    [
+     193,
+     71,
+     105,
+     110,
+     95,
+     163,
+     160,
+     179,
+     95,
+     91,
+     72,
+     155,
+     140,
+     58,
+     183,
+     183,
+     110,
+     118,
+     22,
+     75,
+     183,
+     1,
+     46,
+     184,
+     10,
+     46,
+     188,
+     57,
+     57,
+     58,
+     136,
+     166,
+     186,
+     129,
+     35,
+     88,
+     47,
+     71,
+     51,
+     121,
+     24,
+     113,
+     22,
+     121,
+     114,
+     151,
+     79,
+     22,
+     139,
+     56
+    ]
+   ],
+   "count": 8,
+   "dimension": 50,
+   "family": "uniform",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.951,
+      "segment": 0.446,
+      "witness": 10.032
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 36,
+      "violations": 0,
+      "witnesses": 28
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.951,
+      "segment": 0.446,
+      "witness": 64.829
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 91,
+      "violations": 0,
+      "witnesses": 83
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.951,
+      "segment": 0.446,
+      "witness": 110.137
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 99,
+      "violations": 0,
+      "witnesses": 91
+     }
+    }
+   ],
+   "seed": 31
+  },
+  {
+   "cloud": [
+    [
+     201,
+     136
+    ],
+    [
+     4,
+     126
+    ],
+    [
+     199,
+     135
+    ],
+    [
+     5,
+     127
+    ],
+    [
+     201,
+     133
+    ],
+    [
+     9,
+     128
+    ],
+    [
+     203,
+     141
+    ],
+    [
+     -1,
+     125
+    ]
+   ],
+   "count": 8,
+   "dimension": 2,
+   "family": "clusters",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.079,
+      "segment": 0.22,
+      "witness": 0.238
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 16,
+      "violations": 0,
+      "witnesses": 8
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.079,
+      "segment": 0.22,
+      "witness": 0.56
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 22,
+      "violations": 0,
+      "witnesses": 14
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.079,
+      "segment": 0.22,
+      "witness": 2.547
+     },
+     "segment": {
+      "above": 1,
+      "equal": 27,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 19,
+      "violations": 0,
+      "witnesses": 11
+     }
+    }
+   ],
+   "seed": 17
+  },
+  {
+   "cloud": [
+    [
+     210,
+     173,
+     71
+    ],
+    [
+     32,
+     107,
+     134
+    ],
+    [
+     203,
+     158,
+     72
+    ],
+    [
+     32,
+     105,
+     128
+    ],
+    [
+     201,
+     167,
+     73
+    ],
+    [
+     35,
+     105,
+     136
+    ],
+    [
+     208,
+     164,
+     73
+    ],
+    [
+     33,
+     105,
+     121
+    ]
+   ],
+   "count": 8,
+   "dimension": 3,
+   "family": "clusters",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.051,
+      "segment": 0.117,
+      "witness": 0.755
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 17,
+      "violations": 0,
+      "witnesses": 9
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.051,
+      "segment": 0.117,
+      "witness": 2.621
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 24,
+      "violations": 0,
+      "witnesses": 16
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.051,
+      "segment": 0.117,
+      "witness": 2.267
+     },
+     "segment": {
+      "above": 1,
+      "equal": 27,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 21,
+      "violations": 0,
+      "witnesses": 13
+     }
+    }
+   ],
+   "seed": 17
+  },
+  {
+   "cloud": [
+    [
+     173,
+     138,
+     90
+    ],
+    [
+     115,
+     168,
+     85
+    ],
+    [
+     169,
+     123,
+     90
+    ],
+    [
+     133,
+     175,
+     87
+    ],
+    [
+     168,
+     126,
+     91
+    ],
+    [
+     116,
+     168,
+     92
+    ],
+    [
+     177,
+     122,
+     101
+    ],
+    [
+     120,
+     184,
+     93
+    ]
+   ],
+   "count": 8,
+   "dimension": 3,
+   "family": "clusters",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.087,
+      "segment": 0.336,
+      "witness": 0.761
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 17,
+      "violations": 0,
+      "witnesses": 9
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.087,
+      "segment": 0.336,
+      "witness": 1.155
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 25,
+      "violations": 0,
+      "witnesses": 17
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.087,
+      "segment": 0.336,
+      "witness": 1.687
+     },
+     "segment": {
+      "above": 17,
+      "equal": 11,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 21,
+      "violations": 0,
+      "witnesses": 13
+     }
+    }
+   ],
+   "seed": 23
+  },
+  {
+   "cloud": [
+    [
+     121,
+     6,
+     199
+    ],
+    [
+     184,
+     186,
+     92
+    ],
+    [
+     112,
+     19,
+     205
+    ],
+    [
+     184,
+     184,
+     93
+    ],
+    [
+     111,
+     13,
+     204
+    ],
+    [
+     174,
+     181,
+     91
+    ],
+    [
+     112,
+     4,
+     196
+    ],
+    [
+     174,
+     191,
+     91
+    ]
+   ],
+   "count": 8,
+   "dimension": 3,
+   "family": "clusters",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.078,
+      "segment": 0.217,
+      "witness": 0.628
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 17,
+      "violations": 0,
+      "witnesses": 9
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.078,
+      "segment": 0.217,
+      "witness": 1.104
+     },
+     "segment": {
+      "above": 16,
+      "equal": 12,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 26,
+      "violations": 0,
+      "witnesses": 18
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.078,
+      "segment": 0.217,
+      "witness": 1.93
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 23,
+      "violations": 0,
+      "witnesses": 15
+     }
+    }
+   ],
+   "seed": 31
+  },
+  {
+   "cloud": [
+    [
+     88,
+     139,
+     122,
+     27,
+     196
+    ],
+    [
+     141,
+     6,
+     7,
+     185,
+     138
+    ],
+    [
+     89,
+     142,
+     126,
+     17,
+     180
+    ],
+    [
+     138,
+     10,
+     2,
+     194,
+     143
+    ],
+    [
+     104,
+     151,
+     132,
+     23,
+     185
+    ],
+    [
+     135,
+     25,
+     -3,
+     193,
+     129
+    ],
+    [
+     101,
+     146,
+     120,
+     21,
+     185
+    ],
+    [
+     144,
+     26,
+     10,
+     189,
+     140
+    ]
+   ],
+   "count": 8,
+   "dimension": 5,
+   "family": "clusters",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.134,
+      "segment": 0.249,
+      "witness": 1.272
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 19,
+      "violations": 0,
+      "witnesses": 11
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.134,
+      "segment": 0.249,
+      "witness": 2.261
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 27,
+      "violations": 0,
+      "witnesses": 19
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.134,
+      "segment": 0.249,
+      "witness": 1.986
+     },
+     "segment": {
+      "above": 16,
+      "equal": 12,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 22,
+      "violations": 0,
+      "witnesses": 14
+     }
+    }
+   ],
+   "seed": 17
+  },
+  {
+   "cloud": [
+    [
+     68,
+     109,
+     187,
+     60,
+     24
+    ],
+    [
+     180,
+     89,
+     98,
+     152,
+     85
+    ],
+    [
+     78,
+     119,
+     181,
+     47,
+     24
+    ],
+    [
+     179,
+     92,
+     86,
+     154,
+     81
+    ],
+    [
+     65,
+     125,
+     189,
+     46,
+     29
+    ],
+    [
+     172,
+     81,
+     89,
+     169,
+     80
+    ],
+    [
+     74,
+     111,
+     185,
+     57,
+     23
+    ],
+    [
+     175,
+     87,
+     103,
+     160,
+     94
+    ]
+   ],
+   "count": 8,
+   "dimension": 5,
+   "family": "clusters",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.053,
+      "segment": 0.255,
+      "witness": 0.678
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 19,
+      "violations": 0,
+      "witnesses": 11
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.053,
+      "segment": 0.255,
+      "witness": 0.948
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 28,
+      "violations": 0,
+      "witnesses": 20
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.053,
+      "segment": 0.255,
+      "witness": 2.46
+     },
+     "segment": {
+      "above": 17,
+      "equal": 11,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 24,
+      "violations": 0,
+      "witnesses": 16
+     }
+    }
+   ],
+   "seed": 23
+  },
+  {
+   "cloud": [
+    [
+     69,
+     75,
+     63,
+     98,
+     111
+    ],
+    [
+     56,
+     31,
+     191,
+     42,
+     22
+    ],
+    [
+     60,
+     85,
+     63,
+     103,
+     119
+    ],
+    [
+     59,
+     28,
+     182,
+     27,
+     9
+    ],
+    [
+     56,
+     90,
+     67,
+     117,
+     105
+    ],
+    [
+     61,
+     28,
+     179,
+     29,
+     21
+    ],
+    [
+     67,
+     83,
+     49,
+     118,
+     121
+    ],
+    [
+     64,
+     29,
+     177,
+     27,
+     18
+    ]
+   ],
+   "count": 8,
+   "dimension": 5,
+   "family": "clusters",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.052,
+      "segment": 0.118,
+      "witness": 1.224
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 17,
+      "violations": 0,
+      "witnesses": 9
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.052,
+      "segment": 0.118,
+      "witness": 1.175
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 26,
+      "violations": 0,
+      "witnesses": 18
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.052,
+      "segment": 0.118,
+      "witness": 3.439
+     },
+     "segment": {
+      "above": 16,
+      "equal": 12,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 23,
+      "violations": 0,
+      "witnesses": 15
+     }
+    }
+   ],
+   "seed": 31
+  },
+  {
+   "cloud": [
+    [
+     159,
+     130,
+     73,
+     69,
+     151,
+     183,
+     18,
+     167,
+     65,
+     101
+    ],
+    [
+     186,
+     100,
+     9,
+     145,
+     97,
+     94,
+     85,
+     111,
+     -3,
+     205
+    ],
+    [
+     172,
+     112,
+     86,
+     66,
+     164,
+     178,
+     22,
+     156,
+     60,
+     104
+    ],
+    [
+     194,
+     109,
+     5,
+     143,
+     107,
+     102,
+     70,
+     116,
+     11,
+     195
+    ],
+    [
+     167,
+     127,
+     91,
+     80,
+     153,
+     171,
+     25,
+     161,
+     54,
+     120
+    ],
+    [
+     200,
+     101,
+     -10,
+     154,
+     102,
+     93,
+     79,
+     117,
+     13,
+     191
+    ],
+    [
+     165,
+     128,
+     82,
+     62,
+     154,
+     176,
+     17,
+     163,
+     54,
+     121
+    ],
+    [
+     202,
+     95,
+     8,
+     156,
+     105,
+     102,
+     76,
+     114,
+     13,
+     203
+    ]
+   ],
+   "count": 8,
+   "dimension": 10,
+   "family": "clusters",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.319,
+      "segment": 0.536,
+      "witness": 1.865
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 21,
+      "violations": 0,
+      "witnesses": 13
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.319,
+      "segment": 0.536,
+      "witness": 3.763
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 29,
+      "violations": 0,
+      "witnesses": 21
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.319,
+      "segment": 0.536,
+      "witness": 3.463
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 23,
+      "violations": 0,
+      "witnesses": 15
+     }
+    }
+   ],
+   "seed": 17
+  },
+  {
+   "cloud": [
+    [
+     181,
+     181,
+     164,
+     189,
+     134,
+     157,
+     179,
+     57,
+     66,
+     69
+    ],
+    [
+     4,
+     131,
+     21,
+     123,
+     187,
+     187,
+     95,
+     193,
+     22,
+     188
+    ],
+    [
+     192,
+     189,
+     174,
+     191,
+     119,
+     163,
+     190,
+     65,
+     60,
+     65
+    ],
+    [
+     11,
+     132,
+     18,
+     122,
+     185,
+     181,
+     96,
+     202,
+     9,
+     190
+    ],
+    [
+     200,
+     181,
+     163,
+     185,
+     135,
+     156,
+     175,
+     66,
+     59,
+     78
+    ],
+    [
+     13,
+     134,
+     8,
+     137,
+     188,
+     173,
+     98,
+     187,
+     18,
+     191
+    ],
+    [
+     186,
+     200,
+     170,
+     197,
+     126,
+     170,
+     173,
+     64,
+     51,
+     65
+    ],
+    [
+     3,
+     132,
+     28,
+     137,
+     189,
+     187,
+     96,
+     205,
+     2,
+     202
+    ]
+   ],
+   "count": 8,
+   "dimension": 10,
+   "family": "clusters",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.239,
+      "segment": 0.441,
+      "witness": 2.142
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 21,
+      "violations": 0,
+      "witnesses": 13
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.239,
+      "segment": 0.441,
+      "witness": 2.871
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 31,
+      "violations": 0,
+      "witnesses": 23
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.239,
+      "segment": 0.441,
+      "witness": 3.674
+     },
+     "segment": {
+      "above": 16,
+      "equal": 12,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 24,
+      "violations": 0,
+      "witnesses": 16
+     }
+    }
+   ],
+   "seed": 23
+  },
+  {
+   "cloud": [
+    [
+     122,
+     40,
+     150,
+     124,
+     34,
+     95,
+     114,
+     158,
+     11,
+     166
+    ],
+    [
+     161,
+     26,
+     73,
+     84,
+     42,
+     167,
+     57,
+     159,
+     17,
+     195
+    ],
+    [
+     118,
+     43,
+     141,
+     131,
+     43,
+     107,
+     120,
+     153,
+     1,
+     170
+    ],
+    [
+     171,
+     23,
+     73,
+     96,
+     48,
+     164,
+     75,
+     170,
+     13,
+     205
+    ],
+    [
+     126,
+     32,
+     142,
+     134,
+     37,
+     95,
+     123,
+     165,
+     4,
+     173
+    ],
+    [
+     170,
+     21,
+     57,
+     86,
+     38,
+     164,
+     57,
+     159,
+     10,
+     200
+    ],
+    [
+     126,
+     29,
+     142,
+     125,
+     28,
+     94,
+     129,
+     150,
+     6,
+     163
+    ],
+    [
+     158,
+     30,
+     58,
+     97,
+     54,
+     163,
+     69,
+     174,
+     9,
+     189
+    ]
+   ],
+   "count": 8,
+   "dimension": 10,
+   "family": "clusters",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.454,
+      "segment": 0.524,
+      "witness": 2.121
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 22,
+      "violations": 0,
+      "witnesses": 14
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.454,
+      "segment": 0.524,
+      "witness": 5.23
+     },
+     "segment": {
+      "above": 16,
+      "equal": 12,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 33,
+      "violations": 0,
+      "witnesses": 25
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.454,
+      "segment": 0.524,
+      "witness": 7.43
+     },
+     "segment": {
+      "above": 16,
+      "equal": 12,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 26,
+      "violations": 0,
+      "witnesses": 18
+     }
+    }
+   ],
+   "seed": 31
+  },
+  {
+   "cloud": [
+    [
+     176,
+     27,
+     184,
+     89,
+     192,
+     62,
+     60,
+     116,
+     33,
+     124,
+     119,
+     103,
+     39,
+     50,
+     11,
+     22,
+     46,
+     35,
+     32,
+     49
+    ],
+    [
+     119,
+     138,
+     41,
+     188,
+     132,
+     124,
+     27,
+     195,
+     78,
+     193,
+     104,
+     108,
+     -1,
+     90,
+     141,
+     28,
+     11,
+     139,
+     43,
+     57
+    ],
+    [
+     170,
+     34,
+     184,
+     94,
+     186,
+     61,
+     59,
+     119,
+     32,
+     129,
+     122,
+     103,
+     32,
+     47,
+     21,
+     21,
+     46,
+     44,
+     34,
+     38
+    ],
+    [
+     122,
+     141,
+     41,
+     185,
+     136,
+     132,
+     10,
+     183,
+     79,
+     202,
+     97,
+     110,
+     6,
+     93,
+     132,
+     11,
+     11,
+     143,
+     49,
+     44
+    ],
+    [
+     176,
+     29,
+     182,
+     91,
+     175,
+     65,
+     63,
+     117,
+     21,
+     124,
+     121,
+     114,
+     23,
+     35,
+     15,
+     10,
+     35,
+     49,
+     29,
+     39
+    ],
+    [
+     116,
+     129,
+     43,
+     182,
+     135,
+     131,
+     11,
+     186,
+     81,
+     191,
+     108,
+     100,
+     1,
+     81,
+     146,
+     21,
+     19,
+     133,
+     58,
+     40
+    ],
+    [
+     169,
+     20,
+     181,
+     103,
+     172,
+     47,
+     57,
+     119,
+     36,
+     133,
+     109,
+     100,
+     24,
+     38,
+     9,
+     24,
+     37,
+     51,
+     33,
+     54
+    ],
+    [
+     117,
+     132,
+     47,
+     194,
+     143,
+     129,
+     12,
+     188,
+     87,
+     185,
+     94,
+     92,
+     -3,
+     94,
+     150,
+     11,
+     29,
+     125,
+     47,
+     42
+    ]
+   ],
+   "count": 8,
+   "dimension": 20,
+   "family": "clusters",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.762,
+      "segment": 0.561,
+      "witness": 2.984
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 20,
+      "violations": 0,
+      "witnesses": 12
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.762,
+      "segment": 0.561,
+      "witness": 6.917
+     },
+     "segment": {
+      "above": 16,
+      "equal": 12,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 31,
+      "violations": 0,
+      "witnesses": 23
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.762,
+      "segment": 0.561,
+      "witness": 12.112
+     },
+     "segment": {
+      "above": 16,
+      "equal": 12,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 28,
+      "violations": 0,
+      "witnesses": 20
+     }
+    }
+   ],
+   "seed": 17
+  },
+  {
+   "cloud": [
+    [
+     82,
+     89,
+     115,
+     138,
+     84,
+     48,
+     122,
+     185,
+     47,
+     107,
+     33,
+     74,
+     73,
+     135,
+     52,
+     88,
+     7,
+     125,
+     37,
+     48
+    ],
+    [
+     148,
+     87,
+     12,
+     124,
+     176,
+     156,
+     80,
+     70,
+     58,
+     50,
+     37,
+     168,
+     22,
+     155,
+     169,
+     157,
+     68,
+     25,
+     144,
+     107
+    ],
+    [
+     80,
+     73,
+     113,
+     145,
+     79,
+     40,
+     130,
+     199,
+     46,
+     96,
+     31,
+     59,
+     79,
+     119,
+     46,
+     77,
+     8,
+     111,
+     43,
+     52
+    ],
+    [
+     148,
+     80,
+     2,
+     124,
+     164,
+     162,
+     71,
+     59,
+     65,
+     61,
+     30,
+     172,
+     30,
+     145,
+     174,
+     156,
+     61,
+     24,
+     149,
+     117
+    ],
+    [
+     71,
+     84,
+     98,
+     150,
+     81,
+     33,
+     122,
+     185,
+     38,
+     100,
+     51,
+     75,
+     73,
+     136,
+     45,
+     88,
+     1,
+     126,
+     39,
+     42
+    ],
+    [
+     141,
+     70,
+     5,
+     123,
+     176,
+     152,
+     65,
+     60,
+     68,
+     50,
+     30,
+     170,
+     22,
+     156,
+     176,
+     157,
+     66,
+     29,
+     136,
+     125
+    ],
+    [
+     70,
+     86,
+     104,
+     149,
+     73,
+     29,
+     133,
+     190,
+     40,
+     99,
+     45,
+     75,
+     80,
+     121,
+     50,
+     85,
+     9,
+     117,
+     45,
+     48
+    ],
+    [
+     130,
+     73,
+     -4,
+     127,
+     173,
+     152,
+     71,
+     77,
+     61,
+     50,
+     36,
+     158,
+     28,
+     159,
+     170,
+     166,
+     59,
+     34,
+     138,
+     121
+    ]
+   ],
+   "count": 8,
+   "dimension": 20,
+   "family": "clusters",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.211,
+      "segment": 0.449,
+      "witness": 3.776
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 20,
+      "violations": 0,
+      "witnesses": 12
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.211,
+      "segment": 0.449,
+      "witness": 6.949
+     },
+     "segment": {
+      "above": 16,
+      "equal": 12,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 29,
+      "violations": 0,
+      "witnesses": 21
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.211,
+      "segment": 0.449,
+      "witness": 9.996
+     },
+     "segment": {
+      "above": 17,
+      "equal": 11,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 23,
+      "violations": 0,
+      "witnesses": 15
+     }
+    }
+   ],
+   "seed": 23
+  },
+  {
+   "cloud": [
+    [
+     55,
+     131,
+     70,
+     37,
+     100,
+     28,
+     106,
+     83,
+     54,
+     141,
+     72,
+     195,
+     97,
+     129,
+     182,
+     57,
+     109,
+     136,
+     76,
+     145
+    ],
+    [
+     90,
+     63,
+     146,
+     139,
+     66,
+     57,
+     180,
+     116,
+     203,
+     14,
+     139,
+     169,
+     19,
+     4,
+     152,
+     134,
+     163,
+     183,
+     143,
+     144
+    ],
+    [
+     51,
+     142,
+     66,
+     40,
+     95,
+     36,
+     112,
+     72,
+     56,
+     144,
+     74,
+     194,
+     94,
+     131,
+     171,
+     49,
+     94,
+     143,
+     70,
+     145
+    ],
+    [
+     82,
+     66,
+     146,
+     145,
+     64,
+     72,
+     187,
+     129,
+     202,
+     6,
+     139,
+     173,
+     11,
+     9,
+     146,
+     128,
+     162,
+     185,
+     151,
+     143
+    ],
+    [
+     38,
+     136,
+     63,
+     36,
+     96,
+     35,
+     102,
+     81,
+     69,
+     128,
+     77,
+     191,
+     107,
+     131,
+     177,
+     57,
+     95,
+     148,
+     83,
+     136
+    ],
+    [
+     78,
+     68,
+     151,
+     143,
+     57,
+     57,
+     185,
+     113,
+     189,
+     10,
+     130,
+     181,
+     12,
+     5,
+     156,
+     132,
+     165,
+     184,
+     159,
+     143
+    ],
+    [
+     38,
+     131,
+     60,
+     34,
+     104,
+     39,
+     108,
+     66,
+     57,
+     137,
+     74,
+     191,
+     100,
+     140,
+     174,
+     48,
+     95,
+     149,
+     78,
+     139
+    ],
+    [
+     92,
+     72,
+     158,
+     134,
+     65,
+     72,
+     188,
+     122,
+     202,
+     -1,
+     136,
+     166,
+     21,
+     4,
+     143,
+     123,
+     150,
+     194,
+     150,
+     152
+    ]
+   ],
+   "count": 8,
+   "dimension": 20,
+   "family": "clusters",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.53,
+      "segment": 0.728,
+      "witness": 3.088
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 22,
+      "violations": 0,
+      "witnesses": 14
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.53,
+      "segment": 0.728,
+      "witness": 6.556
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 32,
+      "violations": 0,
+      "witnesses": 24
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.53,
+      "segment": 0.728,
+      "witness": 9.81
+     },
+     "segment": {
+      "above": 17,
+      "equal": 11,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 25,
+      "violations": 0,
+      "witnesses": 17
+     }
+    }
+   ],
+   "seed": 31
+  },
+  {
+   "cloud": [
+    [
+     52,
+     181,
+     15,
+     86,
+     107,
+     175,
+     13,
+     144,
+     186,
+     86,
+     136,
+     42,
+     112,
+     115,
+     19,
+     123,
+     173,
+     49,
+     60,
+     168,
+     160,
+     166,
+     -3,
+     15,
+     92,
+     55,
+     113,
+     39,
+     8,
+     206,
+     43,
+     175,
+     69,
+     135,
+     140,
+     172,
+     22,
+     118,
+     101,
+     140,
+     112,
+     48,
+     202,
+     50,
+     157,
+     142,
+     135,
+     12,
+     126,
+     9
+    ],
+    [
+     104,
+     154,
+     150,
+     76,
+     126,
+     19,
+     181,
+     203,
+     25,
+     166,
+     139,
+     55,
+     148,
+     186,
+     48,
+     50,
+     30,
+     35,
+     -4,
+     133,
+     62,
+     125,
+     175,
+     155,
+     177,
+     137,
+     129,
+     106,
+     100,
+     99,
+     15,
+     185,
+     81,
+     188,
+     68,
+     167,
+     66,
+     106,
+     128,
+     138,
+     74,
+     115,
+     133,
+     193,
+     72,
+     175,
+     29,
+     148,
+     121,
+     112
+    ],
+    [
+     70,
+     178,
+     12,
+     93,
+     113,
+     180,
+     11,
+     132,
+     182,
+     72,
+     126,
+     56,
+     126,
+     111,
+     36,
+     129,
+     183,
+     48,
+     50,
+     167,
+     156,
+     176,
+     -2,
+     16,
+     86,
+     56,
+     100,
+     42,
+     5,
+     192,
+     56,
+     177,
+     59,
+     128,
+     139,
+     155,
+     21,
+     101,
+     105,
+     151,
+     113,
+     44,
+     202,
+     44,
+     163,
+     136,
+     127,
+     8,
+     131,
+     2
+    ],
+    [
+     96,
+     162,
+     140,
+     72,
+     131,
+     21,
+     180,
+     194,
+     39,
+     178,
+     145,
+     47,
+     147,
+     190,
+     50,
+     59,
+     29,
+     36,
+     15,
+     133,
+     72,
+     120,
+     174,
+     147,
+     192,
+     128,
+     129,
+     95,
+     96,
+     82,
+     11,
+     181,
+     72,
+     189,
+     72,
+     186,
+     72,
+     106,
+     128,
+     136,
+     88,
+     120,
+     116,
+     192,
+     88,
+     166,
+     41,
+     147,
+     118,
+     99
+    ],
+    [
+     50,
+     184,
+     20,
+     79,
+     107,
+     175,
+     23,
+     129,
+     177,
+     75,
+     126,
+     60,
+     120,
+     124,
+     21,
+     127,
+     189,
+     48,
+     58,
+     179,
+     173,
+     169,
+     -3,
+     5,
+     86,
+     74,
+     116,
+     37,
+     8,
+     194,
+     45,
+     176,
+     63,
+     148,
+     156,
+     160,
+     30,
+     107,
+     90,
+     152,
+     119,
+     52,
+     195,
+     48,
+     156,
+     144,
+     137,
+     12,
+     140,
+     0
+    ],
+    [
+     86,
+     165,
+     137,
+     64,
+     128,
+     19,
+     176,
+     192,
+     31,
+     170,
+     137,
+     49,
+     161,
+     184,
+     58,
+     57,
+     39,
+     34,
+     15,
+     129,
+     66,
+     122,
+     167,
+     149,
+     173,
+     139,
+     123,
+     94,
+     108,
+     96,
+     19,
+     186,
+     70,
+     183,
+     74,
+     170,
+     73,
+     97,
+     143,
+     148,
+     69,
+     117,
+     136,
+     177,
+     83,
+     169,
+     30,
+     138,
+     113,
+     110
+    ],
+    [
+     62,
+     183,
+     24,
+     89,
+     101,
+     171,
+     14,
+     140,
+     176,
+     72,
+     122,
+     51,
+     110,
+     104,
+     38,
+     123,
+     173,
+     61,
+     51,
+     176,
+     166,
+     161,
+     12,
+     13,
+     89,
+     71,
+     106,
+     40,
+     22,
+     198,
+     55,
+     191,
+     73,
+     128,
+     145,
+     171,
+     28,
+     115,
+     91,
+     133,
+     114,
+     54,
+     204,
+     46,
+     174,
+     140,
+     132,
+     17,
+     126,
+     12
+    ],
+    [
+     102,
+     165,
+     151,
+     75,
+     126,
+     9,
+     170,
+     200,
+     40,
+     163,
+     129,
+     61,
+     150,
+     178,
+     44,
+     58,
+     21,
+     33,
+     9,
+     140,
+     63,
+     127,
+     182,
+     155,
+     183,
+     140,
+     138,
+     102,
+     104,
+     98,
+     13,
+     174,
+     67,
+     180,
+     82,
+     177,
+     62,
+     99,
+     133,
+     145,
+     68,
+     121,
+     126,
+     187,
+     77,
+     182,
+     42,
+     142,
+     107,
+     113
+    ]
+   ],
+   "count": 8,
+   "dimension": 50,
+   "family": "clusters",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 1.205,
+      "segment": 1.173,
+      "witness": 7.418
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 21,
+      "violations": 0,
+      "witnesses": 13
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 1.205,
+      "segment": 1.173,
+      "witness": 14.22
+     },
+     "segment": {
+      "above": 16,
+      "equal": 12,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 31,
+      "violations": 0,
+      "witnesses": 23
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 1.205,
+      "segment": 1.173,
+      "witness": 20.64
+     },
+     "segment": {
+      "above": 16,
+      "equal": 12,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 24,
+      "violations": 0,
+      "witnesses": 16
+     }
+    }
+   ],
+   "seed": 17
+  },
+  {
+   "cloud": [
+    [
+     39,
+     55,
+     207,
+     103,
+     103,
+     63,
+     93,
+     48,
+     170,
+     152,
+     76,
+     27,
+     -4,
+     35,
+     24,
+     88,
+     75,
+     27,
+     5,
+     97,
+     106,
+     187,
+     12,
+     145,
+     191,
+     158,
+     90,
+     154,
+     154,
+     22,
+     59,
+     188,
+     107,
+     114,
+     171,
+     131,
+     61,
+     54,
+     74,
+     100,
+     143,
+     76,
+     185,
+     191,
+     28,
+     146,
+     106,
+     59,
+     119,
+     109
+    ],
+    [
+     208,
+     173,
+     22,
+     61,
+     95,
+     41,
+     20,
+     -9,
+     82,
+     194,
+     32,
+     127,
+     112,
+     28,
+     69,
+     96,
+     186,
+     90,
+     66,
+     181,
+     167,
+     127,
+     10,
+     177,
+     125,
+     111,
+     177,
+     57,
+     68,
+     160,
+     203,
+     174,
+     102,
+     148,
+     33,
+     39,
+     178,
+     135,
+     177,
+     134,
+     126,
+     133,
+     2,
+     0,
+     121,
+     101,
+     29,
+     27,
+     178,
+     193
+    ],
+    [
+     45,
+     50,
+     205,
+     99,
+     110,
+     71,
+     112,
+     50,
+     159,
+     155,
+     72,
+     22,
+     -2,
+     31,
+     28,
+     90,
+     61,
+     31,
+     12,
+     97,
+     97,
+     181,
+     26,
+     142,
+     204,
+     170,
+     87,
+     146,
+     158,
+     22,
+     63,
+     195,
+     111,
+     112,
+     175,
+     127,
+     57,
+     57,
+     78,
+     112,
+     141,
+     85,
+     186,
+     185,
+     20,
+     147,
+     110,
+     45,
+     112,
+     115
+    ],
+    [
+     208,
+     184,
+     13,
+     77,
+     97,
+     39,
+     21,
+     9,
+     73,
+     197,
+     27,
+     134,
+     99,
+     32,
+     86,
+     92,
+     201,
+     90,
+     71,
+     187,
+     179,
+     126,
+     14,
+     174,
+     125,
+     110,
+     181,
+     67,
+     67,
+     157,
+     193,
+     173,
+     99,
+     143,
+     36,
+     40,
+     180,
+     150,
+     186,
+     123,
+     139,
+     143,
+     18,
+     13,
+     134,
+     88,
+     30,
+     22,
+     181,
+     186
+    ],
+    [
+     37,
+     63,
+     189,
+     119,
+     97,
+     61,
+     109,
+     53,
+     166,
+     151,
+     69,
+     11,
+     -1,
+     20,
+     39,
+     99,
+     73,
+     19,
+     3,
+     91,
+     101,
+     187,
+     30,
+     158,
+     188,
+     177,
+     79,
+     154,
+     158,
+     20,
+     56,
+     189,
+     112,
+     111,
+     185,
+     133,
+     61,
+     52,
+     69,
+     115,
+     141,
+     82,
+     189,
+     182,
+     28,
+     130,
+     105,
+     46,
+     107,
+     128
+    ],
+    [
+     205,
+     184,
+     11,
+     65,
+     93,
+     56,
+     10,
+     -10,
+     68,
+     202,
+     30,
+     130,
+     107,
+     36,
+     70,
+     83,
+     203,
+     89,
+     71,
+     179,
+     169,
+     134,
+     11,
+     179,
+     129,
+     102,
+     187,
+     68,
+     69,
+     162,
+     202,
+     175,
+     115,
+     147,
+     42,
+     50,
+     175,
+     151,
+     183,
+     139,
+     133,
+     130,
+     4,
+     11,
+     130,
+     88,
+     13,
+     41,
+     167,
+     185
+    ],
+    [
+     39,
+     60,
+     205,
+     112,
+     101,
+     71,
+     101,
+     55,
+     169,
+     163,
+     72,
+     15,
+     5,
+     18,
+     37,
+     85,
+     73,
+     24,
+     9,
+     90,
+     107,
+     189,
+     12,
+     157,
+     189,
+     166,
+     81,
+     152,
+     141,
+     24,
+     66,
+     179,
+     103,
+     124,
+     184,
+     132,
+     54,
+     56,
+     61,
+     112,
+     144,
+     71,
+     184,
+     189,
+     24,
+     147,
+     107,
+     61,
+     117,
+     114
+    ],
+    [
+     210,
+     186,
+     8,
+     58,
+     95,
+     39,
+     23,
+     -8,
+     77,
+     200,
+     30,
+     130,
+     105,
+     25,
+     81,
+     87,
+     187,
+     78,
+     65,
+     193,
+     182,
+     137,
+     10,
+     172,
+     124,
+     117,
+     183,
+     70,
+     71,
+     157,
+     186,
+     179,
+     109,
+     131,
+     29,
+     45,
+     191,
+     141,
+     184,
+     126,
+     140,
+     138,
+     7,
+     5,
+     129,
+     95,
+     16,
+     29,
+     180,
+     187
+    ]
+   ],
+   "count": 8,
+   "dimension": 50,
+   "family": "clusters",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.954,
+      "segment": 0.898,
+      "witness": 5.394
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 21,
+      "violations": 0,
+      "witnesses": 13
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.954,
+      "segment": 0.898,
+      "witness": 9.074
+     },
+     "segment": {
+      "above": 16,
+      "equal": 12,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 33,
+      "violations": 0,
+      "witnesses": 25
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.954,
+      "segment": 0.898,
+      "witness": 14.557
+     },
+     "segment": {
+      "above": 16,
+      "equal": 12,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 29,
+      "violations": 0,
+      "witnesses": 21
+     }
+    }
+   ],
+   "seed": 23
+  },
+  {
+   "cloud": [
+    [
+     84,
+     -6,
+     69,
+     79,
+     85,
+     115,
+     69,
+     170,
+     45,
+     134,
+     115,
+     170,
+     112,
+     53,
+     172,
+     171,
+     133,
+     26,
+     168,
+     118,
+     64,
+     125,
+     129,
+     52,
+     23,
+     124,
+     70,
+     104,
+     89,
+     42,
+     149,
+     200,
+     50,
+     194,
+     179,
+     135,
+     160,
+     119,
+     79,
+     28,
+     183,
+     15,
+     87,
+     19,
+     112,
+     203,
+     80,
+     2,
+     25,
+     210
+    ],
+    [
+     35,
+     74,
+     63,
+     181,
+     112,
+     46,
+     -8,
+     134,
+     133,
+     87,
+     98,
+     75,
+     126,
+     162,
+     88,
+     85,
+     171,
+     22,
+     154,
+     182,
+     17,
+     154,
+     133,
+     49,
+     7,
+     5,
+     92,
+     55,
+     105,
+     -1,
+     34,
+     167,
+     46,
+     69,
+     103,
+     105,
+     24,
+     157,
+     23,
+     103,
+     115,
+     198,
+     135,
+     199,
+     101,
+     112,
+     87,
+     82,
+     98,
+     127
+    ],
+    [
+     83,
+     4,
+     69,
+     74,
+     82,
+     105,
+     54,
+     171,
+     50,
+     133,
+     121,
+     175,
+     128,
+     46,
+     174,
+     166,
+     124,
+     28,
+     158,
+     99,
+     53,
+     125,
+     145,
+     56,
+     29,
+     121,
+     55,
+     102,
+     83,
+     43,
+     137,
+     198,
+     44,
+     197,
+     173,
+     129,
+     162,
+     120,
+     73,
+     25,
+     178,
+     13,
+     98,
+     18,
+     93,
+     186,
+     78,
+     18,
+     25,
+     196
+    ],
+    [
+     27,
+     73,
+     61,
+     197,
+     107,
+     56,
+     -4,
+     129,
+     146,
+     77,
+     86,
+     80,
+     138,
+     158,
+     102,
+     92,
+     166,
+     19,
+     166,
+     199,
+     16,
+     149,
+     135,
+     52,
+     13,
+     2,
+     92,
+     65,
+     93,
+     3,
+     25,
+     167,
+     50,
+     69,
+     117,
+     111,
+     24,
+     172,
+     12,
+     105,
+     108,
+     185,
+     126,
+     202,
+     104,
+     99,
+     104,
+     80,
+     103,
+     130
+    ],
+    [
+     99,
+     2,
+     59,
+     78,
+     82,
+     109,
+     65,
+     163,
+     45,
+     133,
+     115,
+     172,
+     121,
+     55,
+     177,
+     184,
+     129,
+     21,
+     157,
+     117,
+     64,
+     115,
+     139,
+     53,
+     21,
+     115,
+     50,
+     105,
+     84,
+     42,
+     144,
+     191,
+     51,
+     195,
+     183,
+     132,
+     152,
+     125,
+     78,
+     19,
+     169,
+     21,
+     85,
+     19,
+     94,
+     201,
+     83,
+     16,
+     27,
+     192
+    ],
+    [
+     35,
+     70,
+     76,
+     188,
+     112,
+     45,
+     6,
+     122,
+     145,
+     89,
+     101,
+     73,
+     125,
+     152,
+     89,
+     95,
+     175,
+     34,
+     163,
+     193,
+     35,
+     150,
+     136,
+     51,
+     5,
+     0,
+     111,
+     57,
+     94,
+     3,
+     30,
+     177,
+     44,
+     74,
+     119,
+     107,
+     25,
+     159,
+     11,
+     99,
+     126,
+     202,
+     142,
+     198,
+     101,
+     98,
+     101,
+     71,
+     84,
+     139
+    ],
+    [
+     91,
+     3,
+     51,
+     85,
+     93,
+     107,
+     56,
+     167,
+     35,
+     140,
+     124,
+     167,
+     118,
+     53,
+     163,
+     175,
+     119,
+     28,
+     163,
+     99,
+     65,
+     124,
+     146,
+     54,
+     21,
+     114,
+     69,
+     117,
+     101,
+     53,
+     152,
+     203,
+     62,
+     187,
+     171,
+     131,
+     152,
+     131,
+     84,
+     14,
+     177,
+     12,
+     98,
+     5,
+     95,
+     194,
+     86,
+     -1,
+     20,
+     207
+    ],
+    [
+     23,
+     72,
+     68,
+     187,
+     118,
+     46,
+     -9,
+     120,
+     145,
+     83,
+     100,
+     76,
+     135,
+     148,
+     90,
+     78,
+     183,
+     32,
+     165,
+     191,
+     26,
+     147,
+     152,
+     53,
+     2,
+     6,
+     106,
+     63,
+     97,
+     6,
+     22,
+     169,
+     47,
+     67,
+     114,
+     114,
+     27,
+     165,
+     17,
+     113,
+     119,
+     204,
+     133,
+     195,
+     99,
+     105,
+     94,
+     72,
+     84,
+     130
+    ]
+   ],
+   "count": 8,
+   "dimension": 50,
+   "family": "clusters",
+   "rows": [
+    {
+     "order": 1,
+     "seconds": {
+      "oracle": 0.519,
+      "segment": 0.465,
+      "witness": 3.715
+     },
+     "segment": {
+      "above": 0,
+      "equal": 28,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 24,
+      "violations": 0,
+      "witnesses": 16
+     }
+    },
+    {
+     "order": 2,
+     "seconds": {
+      "oracle": 0.519,
+      "segment": 0.465,
+      "witness": 8.37
+     },
+     "segment": {
+      "above": 16,
+      "equal": 12,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 36,
+      "violations": 0,
+      "witnesses": 28
+     }
+    },
+    {
+     "order": 3,
+     "seconds": {
+      "oracle": 0.519,
+      "segment": 0.465,
+      "witness": 14.009
+     },
+     "segment": {
+      "above": 16,
+      "equal": 12,
+      "violations": 0
+     },
+     "violation_samples": [],
+     "witness": {
+      "above": 0,
+      "equal": 28,
+      "nodes": 31,
+      "violations": 0,
+      "witnesses": 23
+     }
+    }
+   ],
+   "seed": 31
+  }
+ ],
+ "k_max": 3,
+ "object": "ehgp.witness_campaign.v1",
+ "totals": {
+  "cases": 34,
+  "pairs": 2856,
+  "violations": 0,
+  "witness_above": 0,
+  "witness_equal": 2856
+ },
+ "triples": true
+}
