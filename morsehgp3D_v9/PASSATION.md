@@ -480,16 +480,28 @@ v27, trames brutes avec sol.
   (phase 0 de 209 à 83 ms) ; à K10, 1,27 s contre 1,89 à 1,94 s.
 - 34 cas complets, 22 comparaisons égales, douze épingles reproduites.
 
-Suite, pour le contrat de 1 s à K5 (il reste 1,026 s à 000200 après R21 ;
-avec sol, 1,91 à 2,18 s) :
-- invariant de positivité côté chaîne, puis catalogue scellé (R-29 de C) ;
-- recensement des boules q2 pendant les appels de l'appareil ;
-- tampon hôte épinglé résident pour les enregistrements des voies, avec
-  son ablation ;
-- tour : phase A des ordres bas (104 ms à K5 après la phase 0), phase 0
-  sur l'appareil (E6), encodage scindé (E5) ;
-- front, filtre, certificats ; les trames avec sol demandent la tour sur
-  l'appareil (C).
+Session G4 R22 ([reçu](receipts/g4_tower_r22_20260926/README.md), paquet
+`43c5ad25`, **`completed`**, `TERMINATED` certifié). Contenu : catalogue scellé
+(R-29 de C), recensement des clés q2 côté q2, bassin hôte épinglé des voies,
+sonde v28 ; constats 2, 3 et 8 à 12 de C corrigés.
+- **K5 0,93 / 0,76 / 0,98 s** sans sol (08/000000, 000100, 000200) : **sous
+  la seconde sur les trois trames** ; **K10 2,96 / 2,27 / 2,89 s**.
+- Trames brutes avec sol : K5 1,81 à 2,03 s, K10 5,31 à 6,01 s.
+- Les trois leviers retirent 62 à 82 ms à K5 et 224 à 266 ms à K10 (paires
+  avec `gpu_r21`) ; copie des enregistrements des voies divisée par 14.
+- 36 cas complets, 24 comparaisons égales, douze épingles reproduites.
+
+Suite, après le seuil d'une seconde à K5 sans sol (trames avec sol : 1,81 à
+2,03 s à K5 ; 100 ms restent l'objectif) :
+- tour : A(Kmax) (148 ms à K5), l'allègement d'abord puis la
+  parallélisation après preuve ; phase 0 sur l'appareil (E6) ;
+- glu hôte de q3/q4 (environ 300 ms au brut K5) et tâche traînarde du front
+  (C) ;
+- K10 ; TSan sur la porte des huit combinaisons et sur `--unwind`.
+- (fait en R22 : positivité côté chaîne et catalogue scellé, recensement
+  q2 précoce, bassin épinglé) ;
+- encodage scindé (E5) ; front, filtre, certificats ; les trames avec sol
+  demandent la tour sur l'appareil (C).
 
 Suite : tour maigre (D5 de l'auditeur C :
 index des selles, saut au centre, images de naissance directes), puis

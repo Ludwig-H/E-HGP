@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "/usr/bin/nvidia-smi",
+    "--query-gpu=name,driver_version,memory.total,compute_cap",
+    "--format=csv,noheader"
+  ],
+  "cwd": "/tmp/ehgp-tower-v9-01a3dd8e8da35d55.TuXMAWIgnv/output",
+  "exit_code": null,
+  "group_closed": false,
+  "per_command_watchdog": null,
+  "pid": null,
+  "session_work_deadline_epoch": 1790396784.3797584,
+  "started_utc": "2026-09-26T04:01:25.164262+00:00"
+}

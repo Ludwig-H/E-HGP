@@ -1,0 +1,23 @@
+	Command being timed: "/tmp/ehgp-tower-v9-01a3dd8e8da35d55.TuXMAWIgnv/output/build/mhgp9_tower_probe /tmp/ehgp-tower-v9-01a3dd8e8da35d55.TuXMAWIgnv/source/data/scene_01.u32le 10 48 --s=8 --static=48 --grid=1mm --catalogue-digest --lever=atlas_saturate_deep=1 --lever=q3_leaf_census=1 --lever=q34_dead_lanes=1 --lever=q34_witness_cache=1 --lever=q34_dead_core=1 --lever=tower_meb_proposal=1 --lever=q34_jobs_by_mass=1 --lever=q34_fine_jobs=1 --lever=tower_overlap_static=1 --lever=q2_jobs_by_mass=1 --lever=q34_batch_filter=1 --lever=q34_gpu_filter=1 --lever=q34_batch_certificates=1 --lever=q34_gpu_certificates=1 --lever=q34_batch_q3=1 --lever=q34_gpu_q3=1 --lever=q34_batch_q4=1 --lever=q2_during_device=1 --lever=q34_lanes_fused=0 --lever=device_session=1 --lever=tower_pipelined_tail=1 --lever=tower_hash_grouping=1 --lever=tower_persistent_pool=1 --lever=tower_sealed_catalogue=1 --lever=q2_early_census=1 --lever=q34_lanes_pinned=1"
+	User time (seconds): 55.67
+	System time (seconds): 3.72
+	Percent of CPU this job got: 1246%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:04.76
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 5444436
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 1754194
+	Voluntary context switches: 9660
+	Involuntary context switches: 2887
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 24
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

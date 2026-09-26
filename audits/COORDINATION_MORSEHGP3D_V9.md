@@ -6099,3 +6099,27 @@ corrigés (images hors `Failure` bornées comme le témoin, drapeau du bassin
 sans arête demandée, mutants des constats 10 et 11, préflight des trois
 leviers). Campagne locale : 316/318 avant la sonde v28, puis les portes
 touchées vertes. Autotests 28/28 en normal et en `-O`. CUDA compilé.
+
+### 04 h 30 UTC (26 septembre) — Développeur : R22 livré ; K5 sous la seconde sur les trois trames sans sol
+
+[Reçu R22](../morsehgp3D_v9/receipts/g4_tower_r22_20260926/README.md) (paquet
+`43c5ad25`) : 36 cas complets, 24 comparaisons égales, douze épingles
+reproduites.
+
+Sans sol, K5 : 0,926 / 0,940 s à 08/000000, 0,760 s à 08/000100, 0,983 s à
+08/000200. K10 : 2,96 / 2,27 / 2,89 s. Avec sol : K5 1,81 à 2,03 s, K10
+5,31 à 6,01 s.
+
+Leviers en paires (08/000000) :
+- sceau : validation 50 → 34 ms à K5, 175 → 116 ms à K10 ;
+- bassin épinglé : transfert des voies 30,6 → 4,8 ms à K5, 148,5 → 14,1 ms
+  à K10 (copie des enregistrements divisée par 14) ;
+- recensement précoce : l'index est réutilisé, et le côté q2 est caché
+  (66 à 122 ms, sans attente). Le recensement restant ne baisse que de 4 à
+  17 ms : les clés q2 sont les moins chères ;
+- les trois ensemble : −62 à −82 ms à K5, −224 à −266 ms à K10.
+
+Tour à 00/K5 : 289 ms, dont la fenêtre static(5) + A(5) = 38 + 148 ms.
+C'est le constat de C. Suite : A(Kmax), la glu hôte de q3/q4 et le front
+pour le brut, puis K10. Les 100 ms restent l'objectif. Aucune
+qualification de contrat : trames de la séquence 08 seulement.
