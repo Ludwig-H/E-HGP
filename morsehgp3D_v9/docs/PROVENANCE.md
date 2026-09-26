@@ -1901,6 +1901,14 @@ clé distincte, dans la boucle de recensement, en O(1) et en entiers exacts :
 - coquille étendue : `q_min` au plus la taille de la coquille.
 
 Toutes les voies passent par ces contrôles : moteur, voies GPU et q2.
+Ordre des refus : le refus d'une clé ne dépend que de ses données, et
+`parallel_for` relance, après jointure, celui du plus petit indice de clé,
+celui de la boucle séquentielle, à tout nombre de fils. Il relançait avant
+le premier dans le temps : un catalogue doublement fautif pouvait changer de
+raison avec W, ce que la positivité rendue côté chaîne exposait. Une coquille
+de plus de 12 sites n'arrête jamais la boucle : comptée sur toutes les clés,
+elle n'est refusée (`chain_shell_above_12`) qu'après la boucle et seulement
+si aucune clé n'a levé, à tout W aussi.
 Compteur : `CatalogueStats::regular_supports_by_arity`, dont la somme vaut le
 nombre de boules régulières. Quatre de ces refus ne sont pas atteignables
 avec des formules exactes sur des entrées u18 : coquille différente du
@@ -1931,16 +1939,26 @@ défensives.
   que sur un échantillon à pas fixe : une boule sur 64, d'indice
   0 mod 64, à chaque exécution, quel que soit le nombre de fils.
 - La passe 2 est inchangée : tables de plateau, témoins MEB des coquilles
-  étendues (qui revérifient puissances et domaine), fenêtres de rang.
+  étendues, fenêtres de rang. Elle revérifie les puissances, le domaine de
+  la clé et la table de plateau d'une coquille étendue **dont les IDs de
+  sites sont dans l'index** : elle lit `point_id` et `upos` de chaque site
+  avant tout contrôle.
 - L'API publique et les tours de l'oracle T2 gardent la validation complète.
   Une copie gardée par `keep_catalogue` repasse par la surcharge publique.
 - Raison publiée : `complete_relative_to_cross_checked_catalogue_sealed_in_process_census`.
   Statut inchangé : `complete_relative`, sans changement de statut public.
 - Chemin : `FullBallStats::sealed_catalogues` et `seal_sampled_balls`
-  (métadonnées, jamais `tower_work`).
-- **Résidu déclaré** : une faute isolée d'une boule **régulière** hors de
-  l'échantillon n'est pas garantie sous le sceau. Une faute systématique est
-  prise par l'échantillon.
+  (métadonnées, jamais `tower_work`). `seal_sampled_balls` est **compté** à
+  chaque contrôle de la passe 1, jamais déclaré : il vaut ⌈n/64⌉ sur un
+  catalogue accepté, 0 si l'échantillon ne tourne pas.
+- **Résidu déclaré** : toute corruption isolée, en processus, d'une boule
+  hors de l'échantillon, **régulière ou étendue**, n'est ni garantie refusée
+  ni sûre en mémoire. Un ID de site hors de l'index ou plus de 9 intérieurs
+  y est une lecture hors bornes, pas un refus : `CloudIndex::point_id`
+  n'a pas de borne, et la passe 2 lit les sites des coquilles étendues avant
+  tout contrôle. Exposition pratique nulle : aucun code n'écrit le catalogue
+  entre le recensement de la chaîne et la tour (il est déplacé dans le sceau,
+  const). Une faute systématique est prise par l'échantillon.
 
 **Portes.**
 - `mhgp9_chain_sealed_catalogue` (`tests/chain/sealed_catalogue_gate.cpp`,
@@ -1953,17 +1971,28 @@ défensives.
     et un ID hors du nuage (refus typés) ;
   - une faute systématique de plomberie est refusée sous le sceau par
     l'échantillon (`tower: full_ball_census_power`) ; une faute isolée est
-    refusée sans sceau, et le résidu est imprimé ;
+    refusée sans sceau ; sous le sceau, son refus n'est pas garanti
+    (issue imprimée sur la ligne `residual=`, jamais jugée) ;
   - tour scellée et non scellée : mêmes condensés (tour, catalogue,
-    présentations), mêmes ordres, même `tower_work` à W égal ; à K3, K5 et
-    K10, à 1 et 4 fils, et sur la voie CPU par lots avec voies q3/q4 ;
-  - planchers : chemin du sceau pris, taille de l'échantillon, supports
-    q3 et q4 certifiés, coquilles étendues.
-- Trois mutants tués (code 1) :
+    présentations), mêmes ordres, même `tower_work` à W égal, tous les
+    champs de la sonde (`resolve_work` compris) ; à K3, K5 et K10, à 1 et
+    4 fils, et sur la voie CPU par lots avec voies q3/q4 ;
+  - planchers : chemin du sceau pris, échantillon compté égal à ⌈n/64⌉,
+    supports déclarés certifiés > 0 sous le sceau, supports q3 et q4
+    certifiés, coquilles étendues ;
+  - ordre des refus du recensement : deux refus plantés aux clés 10 et 600
+    (tranches différentes ; le fil de la clé 10 s'arrête 1 s avant elle,
+    puis sans arrêt), et un refus planté à la clé 0 avec le triangle obtus
+    forgé : à 1, 2, 4 et 8 fils, le refus publié est celui du plus petit
+    indice. Plancher : 13 exécutions.
+- Quatre mutants tués (code 1) :
   - chaîne sans positivité : sous le sceau, le triangle obtus forgé est
     **publié** `complete_relative` ;
   - tour sans positivité du support déclaré ;
-  - échantillon compté mais jamais exécuté.
+  - échantillon jamais exécuté : tué par la faute systématique, et par la
+    section d'égalité seule (`--only=equality`, échantillon compté nul) ;
+  - premier refus du recensement dans le temps (`MHGP9_CHAIN_MUTANT_CENSUS_FIRST_IN_TIME`) :
+    à 2 fils, le refus de la clé 600 l'emporte.
 - La porte T2 (`chain_census_tower_gate`) compare en plus les tours scellées
   à 1 et 4 fils à la tour jugée contre le modèle Γ. Ses planchers passent de
   18 à 22 paires et de 220 à 260 ordres.
@@ -2003,6 +2032,21 @@ compteurs sont exacts).
   environ 6 ms de mur à W8 et 1 ms à W48. Le temps de recensement de la sonde
   ne tranche pas : il varie du simple au double d'une ronde à l'autre sous
   cette charge.
+
+Après la revue du sceau (échantillon compté, `tower_work` entier, ordre des
+refus du recensement), trois paires entrelacées levier coupé / actif, même
+binaire, K5, W8, charge de 18 à 23 (**indicatif**) :
+- compteurs exacts et identiques aux mesures ci-dessus : 20 418 boules
+  **comptées** par la passe 1 sous le sceau, 20 413 supports déclarés contre
+  1 306 469, supports réguliers 456 695 / 691 282 / 158 492 ; épingles
+  `67450c64611075b1` / `5ad1fe09354411ba` / `a2aa4b20ca392dfe` et
+  `tower_work` identique dans les six exécutions ;
+- passe 1 : 240 / 175 / 215 ms → 8 / 16 / 5 ms ; validation : 719 / 596 /
+  650 → 400 / 402 / 387 ms ; chaîne 44 à 60 s, dominée par q3/q4 ;
+- harnais de la tour seule, trois paires : passe 1 155 / 187 / 159 →
+  7 / 8 / 4 ms, validation 449 / 574 / 463 → 344 / 325 / 339 ms.
+Le compteur par bloc et le suivi de l'indice fautif dans `parallel_for`
+n'ajoutent rien de mesurable.
 
 Sur G4 (48 fils), la passe 1 valait 15 à 26 ms à K5 et 60 à 82 ms à K10
 (R19, R20, relevé de C). Le gain attendu en est proche, moins l'échantillon
