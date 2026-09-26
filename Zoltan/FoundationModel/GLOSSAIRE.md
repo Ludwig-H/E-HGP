@@ -82,6 +82,25 @@ coupes emboîtées lue dans la forêt. Remplace le *grid pooling*.
 **Chemin dans le treillis** — la direction de grossissement : horizontal ($r$),
 vertical ($K$), ou **diagonal iso-densité** ($K/r^3$ constant).
 
+**Condensation** — l'élagage de HDBSCAN, prescrit par le § 9.1 du manuscrit :
+une scission n'est une vraie scission que si les deux branches gardent assez de
+masse ; sinon la branche survivante garde l'identité du parent. Le § 4.4.3
+observe que c'est en réalité un **seuil de percolation**. Ici le seuil doit être
+**relatif** (une fraction $\alpha$ de la masse du parent), jamais un nombre de
+points.
+
+**Masse $m_\tau$** — $m_\tau = S_\tau \sum_{x \in \tau} 1/T_x$, le poids que le
+§ 9.1 impose d'utiliser à la place d'un comptage de faces dans l'arbre
+condensé. Chaque point distribue une masse totale de $1$.
+
+**Stabilité, excès de masse** — $\widehat{E}(C) \propto \sum_{x \in C} (\hat\lambda_x - \hat\lambda_{\min})$,
+Def. 19 du manuscrit. Sert d'ordre de contraction pour l'échelle, et de coût de
+référence pour la tête de sélection.
+
+**Niveau de sortie $\hat\lambda_x$** — la densité à laquelle un point quitte son
+nœud condensé. Ce que la condensation retire de la structure, elle le rend sous
+cette forme : c'est un changement de représentation, pas une perte.
+
 **FP, pooling de filtration** — $h_\ell = \phi(P_\ell^\top h_{\ell-1} W_\ell)$
 avec $P_\ell$ l'affectation douce aux poids du § 9.1.
 
@@ -93,6 +112,13 @@ cartes verticales. Trois réalisations : calendrier de $K$ selon la profondeur,
 attention croisée au goulot, branches parallèles.
 
 **PUR, lecture par partition de l'unité** — le décodeur du § 9.1.
+
+**SEL, tête de sélection apprise** — le programme dynamique ascendant du § 5.2
+(« hacker HDBSCAN ») : conserver le père si
+$\mathrm{loss}(\text{père}) < \sum_i \mathrm{loss}(\text{fils}_i)$. Avec
+$\mathrm{loss} = -\widehat{E}$ c'est HDBSCAN ; avec $\mathrm{loss} = -g_\theta(h_C)$
+c'est une tête d'instance apprise qui rend une antichaîne par construction,
+sans suppression non maximale ni appariement.
 
 **FM, modélisation de filtration** — les cinq tâches de pré-entraînement aux
 cibles exactes : fusion, persistance, profil en $K$, rétablissement, accord

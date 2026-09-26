@@ -50,7 +50,35 @@ calendrier de $K$ et **disparaître si l'on retire $K = 1$**.
 calendrier de $K$ selon la profondeur — $K$ petit aux niveaux fins — est la
 parade naturelle, et elle doit être mesurée, pas supposée.
 
-### R4 — l'avantage se referme avec l'échelle
+### R4 — la condensation réintroduit la constante, ou mange les objets minces
+
+*Le risque.* La condensation est nécessaire (le § 9.1 la prescrit, et elle
+fournit le squelette, la stabilité, les $\hat\lambda_x$ et la tête de
+sélection). Mais `min_cluster_size` est **exactement le genre de constante
+posée à la main** que tout ce dossier cherche à supprimer : un seuil en nombre
+de points ne transfère ni d'un capteur à l'autre, ni du champ proche au champ
+lointain. Et un seuil, quel qu'il soit, élague d'abord les branches de faible
+masse, c'est-à-dire les poteaux lointains.
+
+*Détection.* Porte 0.6 de [`MESURE.md`](MESURE.md) : plafond d'oracle **par
+classe, avant et après condensation**, en fonction du seuil relatif $\alpha$.
+
+*Parade.* **Un rapport transfère, une longueur non.** Le seuil doit être
+relatif — une scission n'est validée que si chaque branche conserve au moins
+une fraction $\alpha$ de la masse $m_\tau$ du parent. Si le plafond chute quand
+même, garder deux échelles : une condensée pour le contexte, une brute pour les
+niveaux fins.
+
+*Trois pièges d'implémentation propres à HGP.* Ne pas **binariser les
+multifusions** — la tour publie des événements à trois parents ou plus au même
+niveau exact, et les binariser inventerait un ordre inexistant. **Coupler
+$\alpha$ entre les ordres** et **revérifier la naturalité des cartes verticales
+après condensation** : si une fusion est retirée à $K$ mais gardée à $K-1$, le
+carré peut cesser de commuter. Enfin, pour $K \geq 2$ un point appartient à
+plusieurs branches : le « niveau de sortie » est un événement partiel, et c'est
+la masse $m_\tau$ du § 9.1 qui le gère, pas un comptage.
+
+### R5 — l'avantage se referme avec l'échelle
 
 *Le risque.* Un a priori structurel aide le plus quand les données manquent. Un
 modèle de fondation est entraîné sur beaucoup de données. L'écart peut donc se
@@ -75,6 +103,7 @@ défendable, à condition de ne pas avoir promis l'autre.
 | Le gain vient du budget de calcul | règle du budget apparié, prédiction P6 | comparaison à paramètres, époques et matériel égaux |
 | L'axe des ordres ne sert à rien | bras S5, témoin T4 | le retirer et simplifier ; résultat négatif net, à publier |
 | Une variable de filtration donnée en entrée fuit vers sa propre cible de pré-entraînement | revue de conception | ne jamais donner en entrée ce que l'on prédit au même moment |
+| La tête de sélection apprise ne bat pas l'excès de masse sur le même arbre | bras S7 et son témoin | garder la sélection statistique ; le coût appris ne se justifie pas |
 | Contamination du jeu de test | règle de découpage | val 08 seule ; le serveur n'est touché qu'une fois |
 
 ## 3. Risques de revendication
@@ -113,6 +142,9 @@ soumission, qui reste à faire une fois, sérieusement.
 | Remplacer $P_v$ par son enveloppe convexe | le polyèdre est ouvert, non convexe, partiellement occulté |
 | Forcer une partition stricte des points à l'entrée | pour $K \geq 2$ le recouvrement **est** l'information (§ 9.1) |
 | Apprendre la partition (superpoints appris, $k$-moyennes différentiables) | on reperd la canonicité et le déterminisme, et l'ablation redevient ininterprétable |
+| Condenser avec un `min_cluster_size` en **nombre de points** | c'est réintroduire la constante métrique que tout le dossier supprime ; le seuil doit être un **rapport** de masse |
+| Binariser les multifusions pour réutiliser la condensation de HDBSCAN telle quelle | inventerait un ordre qui n'existe pas et détruirait la canonicité |
+| Construire l'échelle sur la forêt **brute** | à $K=1$, 39 796 fusions pour 39 885 sites : les premiers niveaux n'absorberaient que des singletons |
 | Atlas de cartes appris par nœud | coutures et ancres changent sous décimation ; isole mal l'effet du tokenizer |
 | Champ implicite ajusté par polyèdre | coûteux et redondant, la surface est déjà explicite |
 | Versionner des scans bruts ou des nuages dérivés KITTI | licence non commerciale, dépôt public ; seuls les manifestes |

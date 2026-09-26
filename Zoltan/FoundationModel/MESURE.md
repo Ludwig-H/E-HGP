@@ -99,6 +99,22 @@ Trois observables qui décident du coût réel et de la crédibilité du discour
   adaptative et l'argument central tombe ;
 - **forme** : nombre d'unités par niveau, et sa variance entre trames.
 
+### 0.6 Condensation : compression, perte et stabilité
+
+Trois mesures, aucune ne demandant d'apprentissage, à faire dès que l'arbre
+condensé existe.
+
+- **Compression** : nombre de nœuds condensés contre nœuds bruts, par ordre et
+  par valeur du seuil relatif $\alpha$. Sur une trame sans sol à $K = 1$, la
+  forêt brute compte 39 796 fusions pour 39 885 sites : on attend deux ordres
+  de grandeur.
+- **Perte** : le **plafond d'oracle par classe, avant et après condensation**.
+  C'est le vrai coût, et il se paie d'abord sur les classes filiformes — un
+  poteau à quarante mètres est une branche de faible masse, donc exactement ce
+  qu'un seuil élague. Courbe du plafond en fonction de $\alpha$, par classe.
+- **Naturalité** : après condensation couplée entre ordres, revérifier que
+  l'image d'une fusion est la fusion des images. Ce n'est pas automatique.
+
 ## 3. Axe 1 — l'étude de substitution
 
 Six bras, un par ligne de la table de substitution. Tout est fixé sauf la ligne
@@ -112,6 +128,13 @@ testée.
 | S4 position | encodage relatif $xyz$ | biais ultramétrique $\varphi(\log r_{uv})$ |
 | S5 ordre | néant (un seul graphe) | mixage d'ordres, calendrier de $K$ puis attention croisée |
 | S6 décodeur | interpolation trilinéaire ou $k$-NN | vote pondéré § 9.1, Proposition 7 |
+| S7 tête d'instance | propositions, suppression non maximale, appariement | sélection par programme dynamique à coût appris sur l'arbre condensé |
+
+S7 a deux témoins obligatoires, et ils sont plus exigeants qu'un détecteur :
+**l'excès de masse sur le même arbre condensé** — si le coût appris ne bat pas
+$-\widehat{E}(C)$, il n'apporte rien — et **ALPINE**, qui atteint
+$\mathrm{PQ} = 64{,}2$ par regroupement géométrique sans aucune étiquette
+d'instance.
 
 Deux mesures complémentaires : **une ligne à la fois** depuis la référence
 (effet propre), et **une ligne retirée à la fois** depuis le modèle complet
@@ -175,6 +198,7 @@ avant de mesurer est ce qui transforme un écart en explication.
 | P4 | le gain **croît sous corruption** (pluie, brouillard, neige) | le Théorème 3 chiffre la résistance aux ponts de bruit en fonction de $K$ |
 | P5 | le gain sur les classes **filiformes** dépend du calendrier de $K$, et **disparaît si l'on retire $K = 1$** | HGP retarde la naissance des structures minces à $K$ élevé |
 | P6 | le gain est **faible ou nul** en champ proche, dense, uniforme, à étiquetage complet | il n'y a là aucune variation d'échelle à absorber |
+| P7 | l'arbre **condensé** est nettement plus stable sous décimation que l'arbre brut | il ne garde que les événements qui ont de la masse, donc ceux qui survivent à une perte de points |
 
 **P6 est la plus importante.** Si l'on gagne uniformément, y compris là où la
 théorie ne prédit rien, le gain vient probablement du budget de calcul ou d'un
@@ -254,6 +278,8 @@ quand c'est défavorable.
 | T1 (tour brouillée) égale la tour | ce n'est pas la structure qui aide ; revenir aux sondes de l'axe 0 et comprendre pourquoi |
 | S1 seul ne paie pas, mais S3 et S4 paient | la valeur est dans le voisinage et l'encodage de position, pas dans le pooling ; simplifier |
 | S5 (axe des ordres) ne paie pas | retirer OM ; le projet perd sa contribution la plus spécifique et il faut le reconnaître |
+| S7 à coût appris ne bat pas l'excès de masse sur le même arbre | garder la sélection statistique ; la tête apprise ne se justifie pas |
+| Le plafond d'oracle chute fortement à la condensation, quel que soit $\alpha$ | condenser plus tard dans la chaîne, ou garder deux échelles, une condensée pour le contexte et une brute pour les niveaux fins |
 | Le plafond d'oracle est bas sur les classes filiformes même avec $K = 1$ | la tour perd ces classes ; se replier sur l'instance et l'anomalie |
 | P1 à P4 se vérifient, P6 aussi | le mécanisme est établi ; passer à l'échelle |
 | Gain uniforme, y compris là où P6 prédit rien | chercher le confondant avant de publier |

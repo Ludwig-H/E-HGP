@@ -59,12 +59,14 @@ prétextes dérivés de la filtration.
 
 ```text
       points
-        | FP  pooling de filtration : l'echelle remplace le grid pooling
+        | CONDENSATION  seuil RELATIF sur la masse m_tau du 9.1
+        | FP   pooling de filtration : l'echelle remplace le grid pooling
       niveau 1 .. L  (~160 000 unites en tout, l'ordre d'un U-Net 3D)
-        | MGA attention sur le graphe de fusion, biais ULTRAMETRIQUE
-        | OM  mixage des ordres K : le bouton sensibilite / robustesse
+        | MGA  attention sur le graphe de fusion, biais ULTRAMETRIQUE
+        | OM   mixage des ordres K : le bouton sensibilite / robustesse
       goulot
-        | PUR vote pondere du 9.1, Proposition 7 a l'inference
+        | SEL  programme dynamique du 5.2, cout appris : instances
+        | PUR  vote pondere du 9.1, Proposition 7 a l'inference
       points etiquetes
 ```
 
@@ -74,7 +76,7 @@ prétextes dérivés de la filtration.
 | --- | --- |
 | [`OBJET.md`](OBJET.md) | ce que la tour est et publie ; les six primitives qu'une architecture y lit |
 | [`ETAT_DE_LART.md`](ETAT_DE_LART.md) | le verrou, comment la littérature le rattrape, et **la table de substitution** |
-| [`ARCHITECTURE.md`](ARCHITECTURE.md) | HGP-UNet : le chemin dans le treillis, les cinq composants, sept conceptions écartées |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | HGP-UNet : la condensation, le chemin dans le treillis, les six composants, les conceptions écartées |
 | [`JETON.md`](JETON.md) | les variables de nœud, cinq familles, une seule normalisée |
 | [`MESURE.md`](MESURE.md) | la doctrine de substitution, les **témoins négatifs**, les prédictions pré-enregistrées, les lois d'échelle |
 | [`PLAN.md`](PLAN.md) | six phases, ce que chacune produit, ce qui l'annule |
@@ -118,7 +120,10 @@ Aucune brique n'est nouvelle isolément. Ce qui peut l'être :
 4. une famille de **prétextes sans raccourci géométrique**, aux cibles exactes
    et gratuites ;
 5. un **décodeur démontré** (Proposition 7) au lieu d'une interpolation choisie
-   à la main.
+   à la main ;
+6. une **tête d'instance qui rend une antichaîne par construction** — le
+   programme dynamique du § 5.2 à coût appris — donc sans suppression non
+   maximale, sans appariement et sans seuil de recouvrement.
 
 ## Sources
 

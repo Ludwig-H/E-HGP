@@ -102,7 +102,72 @@ Le chemin diagonal est à mon avis le bon défaut, et c'est un choix de fond : i
 sépare proprement « je regarde plus grand » de « je regarde plus dense », ce
 qu'aucun voxel ne sait faire. Il doit être mesuré contre les deux autres.
 
-### 4.3 Quatre règles de construction de l'échelle
+### 4.3 La condensation : l'étape que le manuscrit prescrit déjà
+
+Avant de contracter, il faut **condenser**, au sens exact de HDBSCAN. Ce n'est
+pas un ajout emprunté à l'extérieur : le § 9.1 du manuscrit le prescrit, avec
+le poids qu'il faut.
+
+> « La masse d'une face dans l'arbre condensé est alors
+> $m_\tau = S_\tau \sum_{x \in \tau} 1/T_x$ […] C'est ce poids $m_\tau$, et non
+> le simple comptage des faces, qui est utilisé par le seuil
+> `min_cluster_size` dans l'arbre condensé (mêmes idées algorithmiques que
+> HDBSCAN). »
+
+**Pourquoi c'est nécessaire et non optionnel.** La forêt brute est dominée par
+des événements triviaux. À $K = 1$ sur une trame sans sol de 39 885 sites, il y
+a 39 796 fusions, c'est-à-dire le dendrogramme complet du Single-Linkage : la
+quasi-totalité sont des « un point rejoint une grosse composante ». Le § 4.4.3
+du manuscrit les nomme pour ce qu'ils sont — du bruit de micro-composantes —
+et note que l'élagage de HDBSCAN est en réalité **un seuil de percolation** non
+formulé comme tel. Une échelle construite en comptant les fusions brutes
+dépenserait ses premiers niveaux à absorber des singletons.
+
+**Ce que la condensation rend.** Quatre choses, dont trois sont des entrées
+directes de l'architecture :
+
+1. le **squelette** : les vraies scissions, sans les continuations ;
+2. la **stabilité** de chaque nœud, $\widehat{E}(C) \propto \sum_{x \in C} (\hat\lambda_x - \hat\lambda_{\min})$,
+   c'est-à-dire l'ordre dans lequel contracter ;
+3. le niveau de sortie $\hat\lambda_x$ de chaque point, **rendu comme variable
+   par point**. La condensation est donc un *changement de représentation* et
+   non une perte : ce qu'elle retire de la structure, elle le rend en scalaire ;
+4. la **tête de sélection** du modèle, par le mécanisme du § 5.2 (voir § 5 bis).
+
+**Ce qu'elle doit rendre stable, et c'est une prédiction.** L'arbre brut bouge
+beaucoup sous décimation : chaque micro-fusion se déplace. L'arbre condensé ne
+garde que les événements qui ont de la masse, donc précisément ceux qui
+survivent à une perte de points. **La condensation devrait donc améliorer
+l'invariance en portée**, et c'est mesurable sans apprentissage (prédiction P7
+de [`MESURE.md`](MESURE.md)).
+
+### 4.4 Le piège : `min_cluster_size` est exactement la constante que l'on voulait supprimer
+
+Il faut nommer la tension au lieu de la contourner. Toute la thèse de ce
+dossier est de retirer les constantes posées à la main ; or la condensation de
+HDBSCAN en introduit une, `min_cluster_size`, et un seuil en *nombre de points*
+ne transfère ni d'un capteur à l'autre, ni du champ proche au champ lointain.
+
+**La règle qui résout la tension : un rapport transfère, une longueur non.**
+Le seuil doit être **relatif** — une scission n'est validée que si chaque
+branche conserve au moins une fraction $\alpha$ de la masse $m_\tau$ du parent.
+$\alpha$ est sans dimension, donc canonique et transférable ; un compte absolu
+ne l'est pas. C'est la seule forme de condensation admissible ici.
+
+Deux garde-fous s'y ajoutent :
+
+- **coupler $\alpha$ entre les ordres.** Condenser chaque $K$ avec le même
+  $\alpha$, et **revérifier la naturalité des cartes verticales après
+  condensation** : si une fusion est retirée à l'ordre $K$ mais conservée à
+  $K-1$, le carré peut cesser de commuter. Ce n'est pas automatique, c'est
+  vérifiable, et il faut le vérifier ;
+- **ne jamais binariser les multifusions.** La condensation de HDBSCAN parcourt
+  des scissions binaires ; la tour publie des événements à trois parents ou
+  plus au même niveau exact. Binariser inventerait un ordre qui n'existe pas et
+  détruirait la canonicité. La règle doit être généralisée aux événements
+  $k$-aires : à une multifusion, plusieurs branches peuvent tomber à la fois.
+
+### 4.5 Quatre règles de construction de l'échelle
 
 Le chemin fixe la direction ; il reste à fixer **comment on contracte**.
 
@@ -113,11 +178,14 @@ Le chemin fixe la direction ; il reste à fixer **comment on contracte**.
 | **E-persistance** | contracter d'abord les fusions de plus faible persistance | **défaut recommandé** : localement adaptatif, dense et clairsemé contractés au même niveau |
 | **E-relative** | contracter dans l'échelle normalisée $r / r_K(x)$ | invariance de portée par construction ; rival principal |
 
-`E-persistance` est recommandé parce qu'il est exactement la réponse que
+Les quatre règles s'appliquent **sur l'arbre condensé**, jamais sur la forêt
+brute. `E-persistance` est recommandé parce qu'il est exactement la réponse que
 HDBSCAN apporte au problème de densité variable — un $\varepsilon$ global ne
 marche pas, l'arbre condensé si — et parce qu'il donne des niveaux dont le
 nombre d'unités est contrôlé, donc une architecture de forme fixe et des lots
-faciles à former.
+faciles à former. Dit autrement : `E-persistance` **est** une condensation à
+seuil mobile ; la rendre explicite ne change pas le calcul, mais nomme le
+critère et rend gratuitement la stabilité et les $\hat\lambda_x$.
 
 Le rayon effectif de chaque nœud varie alors d'un bout à l'autre d'un même
 niveau. **C'est le but** : c'est précisément ce qu'un voxel ne peut pas faire,
@@ -125,7 +193,7 @@ et c'est la mesure de l'adaptativité. Il faut le publier (histogramme de $r$
 par niveau et par tranche de portée), car c'est l'observable qui montre que
 l'architecture fait ce qu'elle prétend.
 
-## 5. Les cinq composants
+## 5. Les six composants
 
 ### FP — Pooling de filtration
 
@@ -195,6 +263,52 @@ relaxation différentiable propre et la masse est conservée.
 ### FM — Modélisation de filtration
 
 Voir § 7.
+
+### SEL — Tête de sélection apprise, ou « hacker HDBSCAN »
+
+C'est la conséquence la plus productive de la condensation, et elle vient
+encore du manuscrit. Le § 5.2 observe que l'extraction d'un partitionnement à
+plat depuis l'arbre condensé est un **programme dynamique ascendant** à
+fonction de coût **remplaçable** :
+
+$\text{si } \mathrm{loss}(C_{\text{père}}) < \sum_i \mathrm{loss}(C_{\text{fils},i}) \implies \text{conserver le père, sinon continuer d'explorer.}$
+
+Avec $\mathrm{loss}(C) = -\widehat{E}(C)$ on retrouve exactement l'excès de
+masse de HDBSCAN. Et le manuscrit en tire la remarque décisive : **« L'excès de
+masse est un critère purement statistique, aveugle à la géométrie »** ; en
+substituant une évaluation propre au problème — alignement d'une structure,
+volume attendu, conformité à un modèle 3D — « l'algorithme se transforme en un
+extracteur guidé géométriquement ». C'est ce que font les deux applications du
+§ 5.3 et du § 5.4, avec des coûts écrits à la main.
+
+**Le mouvement du modèle de fondation est donc évident : apprendre ce coût.**
+On pose $\mathrm{loss}(C) = -g_\theta(h_C)$, où $h_C$ est l'état du nœud produit
+par HGP-UNet, et l'on garde le programme dynamique tel quel.
+
+Quatre propriétés font de cette tête un bon objet, et non un gadget :
+
+1. **le programme dynamique est exact et coûte une passe ascendante** sur
+   l'arbre condensé, soit quelques milliers de nœuds ;
+2. **il rend une antichaîne par construction.** Les nœuds choisis ne se
+   recouvrent donc jamais dans l'arbre : ni suppression non maximale, ni
+   appariement hongrois, ni seuil de recouvrement à régler. La Proposition 7
+   convertit ensuite en partition stricte des points. Une tête d'instance sans
+   aucune machinerie de propositions, c'est rare ;
+3. **il se supervise simplement** : cible de $g_\theta$ = l'IoU du nœud avec la
+   meilleure instance annotée, programme dynamique exact à l'inférence. Une
+   relaxation continue n'est utile qu'ensuite, si la discrétisation coûte ;
+4. **il généralise les deux applications du manuscrit** au lieu de les
+   concurrencer : le coût guidé par un modèle 3D de la détection d'anomalies
+   devient un cas particulier à coût figé.
+
+Deux limites à énoncer tout de suite. Le plafond de cette tête est le **plafond
+d'oracle** de la porte 0.1 : si l'instance annotée n'est pas un nœud de l'arbre
+condensé, aucun coût appris ne la trouvera. Et le témoin qui compte n'est pas
+un détecteur à boîtes, c'est **l'excès de masse sur le même arbre** : si le
+coût appris ne bat pas $-\widehat{E}(C)$, il n'apporte rien. À quoi s'ajoute
+ALPINE, qui atteint $\mathrm{PQ} = 64{,}2$ par regroupement géométrique sans
+aucune étiquette d'instance.
+
 
 ## 6. Réalisation : une modification de PTv3, pas un nouveau réseau
 

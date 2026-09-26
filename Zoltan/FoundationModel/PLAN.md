@@ -17,17 +17,27 @@ d'architecture.
    au carré de ses cofaces. Cible naturelle : le `CertifiedTowerInput` de
    `morsehgp3d/`, dont le réducteur exact (vote pondéré du § 9.1, excès de
    masse) attend déjà un producteur.
-2. Le **constructeur d'échelle** : les quatre règles `E-global`, `E-rang`,
-   `E-persistance`, `E-relative`, et les trois chemins horizontal, vertical,
-   diagonal iso-densité. Sortie : $L$ matrices d'affectation creuses par trame.
-3. Le **cache** : tours pré-calculées sur le corpus, plus une banque de vues
+2. La **condensation** : élagage à seuil **relatif** $\alpha$ sur la masse
+   $m_\tau$ du § 9.1, généralisé aux multifusions (jamais binariser), couplé
+   entre les ordres, avec revérification de la naturalité des cartes
+   verticales. Sortie : arbre condensé, stabilité par nœud, niveau de sortie
+   $\hat\lambda_x$ par point.
+3. Le **constructeur d'échelle**, sur l'arbre condensé : les quatre règles
+   `E-global`, `E-rang`, `E-persistance`, `E-relative`, et les trois chemins
+   horizontal, vertical, diagonal iso-densité. Sortie : $L$ matrices
+   d'affectation creuses par trame.
+4. Le **cache** : tours pré-calculées sur le corpus, plus une banque de vues
    décimées par trame pour FM-5. Les augmentations rigides et d'échelle ne
    demandent aucun recalcul.
 
 **Mesurer.** Tout l'axe 0 de [`MESURE.md`](MESURE.md) : plafonds d'oracle
 stratifiés contre voxels, superpoints et HDBSCAN ; pureté des nœuds à nombre
 d'unités égal ; stabilité sous décimation avec ses quatre témoins ; sonde
-XGBoost et ses ablations ; statistiques de recouvrement et d'adaptativité.
+XGBoost et ses ablations ; statistiques de recouvrement et d'adaptativité ; et
+la porte 0.6, **compression, perte et stabilité de la condensation** — dont la
+courbe du plafond d'oracle par classe en fonction de $\alpha$, qui dit ce que
+la condensation coûte aux objets minces, et la prédiction P7, que l'arbre
+condensé est plus stable sous décimation que l'arbre brut.
 
 **Et surtout : le témoin T2.** Donner $\hat f_K(x)$ comme variable par point à
 un PTv3 inchangé. Il ne demande qu'un canal d'entrée supplémentaire et une
@@ -103,7 +113,12 @@ l'écart publiée quelle qu'elle soit.
 **Ce que la phase produit.** La revendication de fondation, ou sa
 requalification honnête en efficacité d'échantillons et transfert.
 
-## Phase 5 — les capacités propres
+## Phase 5 — les capacités propres et la tête de sélection
+
+La tête SEL — programme dynamique du § 5.2 à coût appris — se mesure ici, avec
+son vrai témoin : **l'excès de masse sur le même arbre condensé**. Si le coût
+appris ne bat pas $-\widehat{E}(C)$, il ne se justifie pas. Son plafond est
+celui de l'oracle de la porte 0.1.
 
 Panoptique contre ALPINE, propositions d'instance sans apprentissage,
 anomalies guidées par un modèle 3D, cohérence multi-échelle garantie. Ces
