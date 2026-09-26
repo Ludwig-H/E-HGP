@@ -45,7 +45,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[2]
 V8 = ROOT / 'morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v27'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v28'
 # Schemas relus lors d'une revalidation d'archive (v12 : reçu du 23 septembre).
 KNOWN_SCHEMAS = ('mhgp9_tower_probe_v12', PROBE_SCHEMA)
 # Le schema de sonde d'une campagne est fixe par son RESUME, jamais par le JSON
@@ -68,7 +68,9 @@ DEFAULT_LEVERS = dict(atlas_saturate_deep=True, q3_leaf_census=True, q34_dead_la
                       q34_gpu_certificates=False, q34_batch_q3=False, q34_gpu_q3=False, q34_batch_q4=False,
                       q2_during_device=False, q34_lanes_fused=False, device_session=False,
                       # v27: the tower's three sibling levers, on as in the chain.
-                      tower_pipelined_tail=True, tower_hash_grouping=True, tower_persistent_pool=True)
+                      tower_pipelined_tail=True, tower_hash_grouping=True, tower_persistent_pool=True,
+                      # v28: sealed catalogue, q2 early census, pinned lanes (off here).
+                      tower_sealed_catalogue=False, q2_early_census=False, q34_lanes_pinned=False)
 # Leviers publies par schema de sonde (les archives v12 en ont six).
 LEVERS_V12 = {name: True for name in ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_witness_cache',
                                       'q34_dead_core', 'tower_meb_proposal')}
@@ -427,7 +429,10 @@ def selftest(case_path):
                             lanes_plan_ms=0.0, lanes_task_ms=0.0, lanes_compact_ms=0.0,
                             gpu_prepare_ms=0.0, gpu_prepare_wait_ms=0.0, lanes_fused_seeds=0,
                             lanes_fused_chunks=0, lanes_fused_q3_chunks=0, lanes_fused_census_chunks=0,
-                            lanes_fused_fallbacks=0)
+                            lanes_fused_fallbacks=0, lanes_upload_ms=0.0, lanes_download_ms=0.0,
+                            lanes_download_copy_ms=0.0, lanes_host_alloc_ms=0.0, lanes_pinned=False,
+                            lanes_pinned_allocations=0, lanes_pinned_bytes=0, gpu_stage_b_ms=0.0,
+                            lanes_pinned_reserve_ms=0.0, lanes_pinned_reserve_records=0)
     # v20: the declared q3 lanes ledger, zero on the engine path.
     for name in ('lanes_edges', 'lanes_cover_sites', 'lanes_cover_node_visits', 'lanes_seed_tests',
                  'lanes_acute_sites', 'lanes_owner_rejections', 'lanes_seeds', 'lanes_census_point_tests',
@@ -440,10 +445,12 @@ def selftest(case_path):
     v13['catalogue_digest'] = '0123456789abcdef'
     v13['presentation_digest'] = 'fedcba9876543210'
     # v26: the device session, closed on the local engine path.
-    v13['device_session'] = dict(opened=False, context_ms=0.0, reserve_ms=0.0)
+    v13['device_session'] = dict(opened=False, context_ms=0.0, reserve_ms=0.0, pinned_ms=0.0, pinned_bytes=0)
     # v27: the tower's paths under its sibling levers (static path above one thread).
     on_static = expected['static_threads'] > 1 and min(k, expected['sites']) > 1
-    v13['tower_detail'] = dict(pipelined_orders=k if on_static else 0, population_deferred_refs=0,
+    v13['tower_detail'] = dict(sealed_catalogues=0, seal_sampled_balls=0,
+                               declared_support_checks=v13['catalogue']['balls'] - v13['catalogue']['extra_shell_balls'],
+                               pipelined_orders=k if on_static else 0, population_deferred_refs=0,
                                hashed_orders=k - 1 if expected['static_threads'] >= 1 and k > 1 else 0,
                                pool_threads=expected['static_threads'] - 1 if on_static else 0,
                                pool_jobs=3 if on_static else 0, helper_threads=0, runner_threads=k if on_static else 0,
@@ -451,6 +458,14 @@ def selftest(case_path):
                                images_own_by_k=[0.0] * k)
     v13['times_ms']['catalogue_digest'] = 0.0
     v13['times_ms']['q2_wait'] = 0.0
+    v13['times_ms'].update(q2_census=0.0, q2_census_index=0.0, q2_census_wait=0.0)
+    # v28 (R-29): every regular support certified by the chain, by arity.
+    regular, extra = list(v13['catalogue']['by_qmin']), v13['catalogue']['extra_shell_balls']
+    for i in range(3):  # extended shells are not regular supports: taken from the q_min classes
+        taken = min(extra, regular[i])
+        regular[i] -= taken
+        extra -= taken
+    v13['catalogue'].update(regular_supports=regular, early_census_keys=0, early_census_extra_shell_balls=0)
     v13['options']['certificate_capacity'] = 0
     v13['options']['certificate_judge'] = False
     v13['options']['lanes_capacity'] = 0

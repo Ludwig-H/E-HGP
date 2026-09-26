@@ -1563,6 +1563,74 @@ Deux constats, corrigés.
     copie. Aucun gain CPU n'est revendiqué ; le levier ne vise que
     l'appareil.
 
+### Intégration R22 et sonde v28 (26 septembre 2026)
+
+Trois séries écrites en parallèle sur `273c33f7` sont intégrées : le catalogue
+scellé (R-29 de C), le recensement des clés q2 côté q2 et le bassin épinglé
+des voies. Chacune a été revue par un sceptique, puis corrigée.
+- **Fusion.** Le recensement précoce avait factorisé le recensement par clé
+  (`census_key`, `parallel_for_first_error`) ; le sceau avait ajouté ses
+  contrôles dans la même boucle. Les contrôles R-29 (arité, IDs, domaine u18
+  de la clé, dénominateur du niveau, coquille régulière égale au support
+  déclaré, positivité, `q_min` dans la coquille, supports réguliers par
+  arité) vivent désormais dans `census_key`, donc des deux côtés du
+  recensement précoce. L'égalité coquille/support se compare sur les ID
+  d'entrée (`ix.point_id`), sans table globale. Le mutant « premier dans le
+  temps » du sceau passe dans `parallel_for_first_error`.
+- **Sonde v28.**
+  - Leviers `tower_sealed_catalogue`, `q2_early_census` (exige
+    `q2_during_device`) et `q34_lanes_pinned` (exige `q34_batch_q3`).
+  - Temps `q2_census`, `q2_census_index` et `q2_census_wait` ; seule
+    l'attente entre dans la somme des étapes.
+  - Catalogue : `regular_supports` (q2, q3, q4), `early_census_keys` et
+    `early_census_extra_shell_balls`.
+  - Chemins de la tour : `sealed_catalogues`, `seal_sampled_balls` et
+    `declared_support_checks`.
+  - Voies : fenêtres d'envoi et de réception, copie des enregistrements
+    seule, préparation hôte, bassin épinglé (drapeau, allocations,
+    capacité), étape B et réservation du bassin.
+  - Session : `pinned_ms` et `pinned_bytes` ; le mur externe borne aussi
+    `pinned_ms`.
+- **Lecteur.**
+  - La somme des supports réguliers vaut les boules moins les coquilles
+    étendues.
+  - Les clés q2 recensées côté q2 sont toutes les clés q2, ou aucune (voie
+    de repli). L'index est alors réutilisé (`tower_index` nul).
+  - Sous le sceau, l'échantillon compté vaut une boule sur 64, arrondi au
+    supérieur, et les certifications de la passe 1 restent dans
+    l'échantillon ; sans le sceau, une par boule régulière.
+  - Le bassin épinglé sert l'appel sous son seul levier.
+  - Sur l'appareil, envoi et réception font le transfert, et la copie et la
+    préparation hôte restent dans la réception.
+- **Constats de C (contre-lecture de R21).**
+  - 2 et 3 : une erreur hors `Failure` des pas B ou C garde la priorité du
+    témoin. Elle est ignorée si le témoin n'aurait pas exécuté ce pas
+    (populations seulement après toutes les phases A, images sous la
+    première panne de population), et rapportée sinon avant les pannes.
+    L'échec du dimensionnement des lignes devient une erreur de population
+    de l'ordre 1, et le coureur 1 poursuit sa phase A : plus aucun coureur
+    n'attend une phase A qui n'aura pas lieu. `failpoint_rows_alloc` touche
+    les deux queues. Le mode `--unwind` ajoute dix-huit contrôles (seul,
+    avec une panne des lots K3, avec une panne des images K2 ; trois voies ;
+    4 et 8 fils). Le mutant `ROWS_ERROR_FIRST` est tué. Résidu déclaré : une
+    triple panne (dimensionnement, lots, populations) peut encore différer
+    du témoin.
+  - 8 : la fixture de frontière des supports prend un ID égal à `n`, ce qui
+    tue un `>` mis à la place de `>=`.
+  - 9 : les épingles sont indexées par (trame, K) ; un cas à `s = 10` ou
+    `12` est épinglé aussi.
+  - 10 : `pool_ms` est borné par la tour et entre dans la somme des phases.
+  - 11 : les ordres hachés valent exactement K − 1 sous le levier, les fils
+    de phase A valent K sur la voie recouverte, et les références différées
+    sont bornées par les contributions.
+  - 12 : l'autotest lit les leviers de la tour coupés un à un.
+- **Plan R22 (36 cas).**
+  - Trames sans sol : bras GPU (les trois nouveaux leviers actifs) et
+    jumeau moteur (scellé), à K5 et K10.
+  - À 00 : paires répétées et entrelacées avec `gpu_r21` (les trois coupés),
+    puis chaque levier coupé seul, à K5 et K10.
+  - Trames brutes avec sol, GPU et moteur.
+
 ## Voie GPU S1 : `src/gpu/` (espace `mhgp9::gpu`, code neuf)
 
 23 septembre 2026. Première brique GPU de la v9, pour une expérience de

@@ -192,6 +192,9 @@ int main(int argc, char** argv) {
         else if (name == "tower_pipelined_tail") options.tower_pipelined_tail = on;
         else if (name == "tower_hash_grouping") options.tower_hash_grouping = on;
         else if (name == "tower_persistent_pool") options.tower_persistent_pool = on;
+        else if (name == "tower_sealed_catalogue") options.tower_sealed_catalogue = on;
+        else if (name == "q2_early_census") options.q2_early_census = on;
+        else if (name == "q34_lanes_pinned") options.q34_lanes_pinned = on;
         else throw std::invalid_argument("unknown lever");
       }
       else if (arg.starts_with("--n=")) prefix = static_cast<std::size_t>(parse_u(arg.substr(4)));
@@ -221,11 +224,16 @@ int main(int argc, char** argv) {
   // v26: context and lanes slabs before the chain; a failure is left to the
   // chain's device calls, which refuse explicitly.
   mhgp9::gpu::DeviceSession session;
-  if (device_session) session = mhgp9::gpu::open_device_session(options.q34_lanes_capacity, options.q34_lanes_events);
+  // v28: with the pinned lanes records, the session also reserves the pinned
+  // pool the chain's stage B then finds (sized by the order).
+  if (device_session)
+    session = mhgp9::gpu::open_device_session(
+        options.q34_lanes_capacity, options.q34_lanes_events,
+        options.q34_lanes_pinned && options.q34_gpu_q3 ? mhgp9::gpu::pinned_records_for_order(options.kmax) : 0);
   const auto r = mhgp9::run_tower_chain(input.points, options);
   const auto& t = r.times;
   const auto& c = r.catalogue;
-  std::printf("{\"schema\":\"mhgp9_tower_probe_v27\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
+  std::printf("{\"schema\":\"mhgp9_tower_probe_v28\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
               r.reason.c_str());
   std::printf("\"input\":{\"format\":\"%s\",\"grid\":\"%s\",\"sites\":%zu,\"hash\":\"%016" PRIx64 "\"},", input.format.c_str(),
               grid.c_str(), input.points.size(), input.hash);
@@ -237,7 +245,8 @@ int main(int argc, char** argv) {
               "\"q34_batch_filter\":%s,\"q34_gpu_filter\":%s,\"q34_batch_certificates\":%s,"
               "\"q34_gpu_certificates\":%s,\"q34_batch_q3\":%s,\"q34_gpu_q3\":%s,\"q34_batch_q4\":%s,"
               "\"q2_during_device\":%s,\"q34_lanes_fused\":%s,\"device_session\":%s,"
-              "\"tower_pipelined_tail\":%s,\"tower_hash_grouping\":%s,\"tower_persistent_pool\":%s}},",
+              "\"tower_pipelined_tail\":%s,\"tower_hash_grouping\":%s,\"tower_persistent_pool\":%s,"
+              "\"tower_sealed_catalogue\":%s,\"q2_early_census\":%s,\"q34_lanes_pinned\":%s}},",
               options.kmax, r.kmax_effective, options.separation_s, options.workers,
               options.tower_static_threads >= 0 ? options.tower_static_threads : r.tower_static_threads,
               options.run_tower ? "true" : "false", options.q34_certificate_capacity,
@@ -254,15 +263,18 @@ int main(int argc, char** argv) {
               options.q34_gpu_q3 ? "true" : "false", options.q34_batch_q4 ? "true" : "false",
               options.q2_during_device ? "true" : "false", options.q34_lanes_fused ? "true" : "false",
               device_session ? "true" : "false", options.tower_pipelined_tail ? "true" : "false",
-              options.tower_hash_grouping ? "true" : "false", options.tower_persistent_pool ? "true" : "false");
+              options.tower_hash_grouping ? "true" : "false", options.tower_persistent_pool ? "true" : "false",
+              options.tower_sealed_catalogue ? "true" : "false", options.q2_early_census ? "true" : "false",
+              options.q34_lanes_pinned ? "true" : "false");
   std::printf("\"times_ms\":{\"read\":%.3f,\"prepare\":%.3f,\"gen_index\":%.3f,\"q2\":%.3f,\"q2_wait\":%.3f,"
               "\"q34\":%.3f,\"merge\":%.3f,"
               "\"tower_index\":%.3f,\"census\":%.3f,\"tower\":%.3f,\"chain_total\":%.3f,\"digest\":%.3f,"
-              "\"catalogue_digest\":%.3f},"
+              "\"catalogue_digest\":%.3f,\"q2_census\":%.3f,\"q2_census_index\":%.3f,\"q2_census_wait\":%.3f},"
               "\"chain_cpu_s\":%.3f,",
               read_ms, t.prepare_ms, t.gen_index_ms, t.q2_ms, t.q2_wait_ms, t.q34_ms, t.merge_ms, t.tower_index_ms,
               t.census_ms, t.tower_ms,
-              t.total_ms, t.digest_ms, t.catalogue_digest_ms, t.cpu_s);
+              t.total_ms, t.digest_ms, t.catalogue_digest_ms, t.q2_census_ms, t.q2_census_index_ms,
+              t.q2_census_wait_ms, t.cpu_s);
   std::printf("\"generator\":{\"q2_front_rectangles\":%" PRIu64 ",\"q2_candidate_pairs\":%" PRIu64 ",\"q2_accepted_pairs\":%" PRIu64
               ",\"q34_expanded_pairs\":%" PRIu64 ",\"q34_cover_builds\":%" PRIu64 ",\"q3_emitted\":%" PRIu64 ",\"q4_emitted\":%" PRIu64 "},",
               r.q2_front_rectangles, r.q2_candidate_pairs, r.q2_accepted_pairs, r.q34_expanded_pairs, r.q34_cover_builds,
@@ -270,9 +282,13 @@ int main(int argc, char** argv) {
   std::printf("\"catalogue\":{\"q2_presentations\":%" PRIu64 ",\"q3_presentations\":%" PRIu64 ",\"q4_presentations\":%" PRIu64
               ",\"unique_keys\":%" PRIu64 ",\"balls\":%" PRIu64 ",\"extra_shell_balls\":%" PRIu64 ",\"shell_over_12\":%" PRIu64
               ",\"max_shell\":%" PRIu64 ",\"max_interior\":%" PRIu64 ",\"census_nodes\":%" PRIu64 ",\"census_leaf_tests\":%" PRIu64
-              ",\"bytes\":%" PRIu64 ",\"by_qmin\":[%" PRIu64 ",%" PRIu64 ",%" PRIu64 "],\"by_shell\":[",
+              ",\"bytes\":%" PRIu64 ",\"regular_supports\":[%" PRIu64 ",%" PRIu64 ",%" PRIu64 "]"
+              ",\"early_census_keys\":%" PRIu64 ",\"early_census_extra_shell_balls\":%" PRIu64
+              ",\"by_qmin\":[%" PRIu64 ",%" PRIu64 ",%" PRIu64 "],\"by_shell\":[",
               c.q2_presentations, c.q3_presentations, c.q4_presentations, c.unique_keys, c.balls, c.extra_shell_balls,
-              c.shell_over_cap, c.max_shell, c.max_interior, c.census_nodes, c.census_leaf_tests, c.bytes, c.balls_by_qmin[2],
+              c.shell_over_cap, c.max_shell, c.max_interior, c.census_nodes, c.census_leaf_tests, c.bytes,
+              c.regular_supports_by_arity[2], c.regular_supports_by_arity[3], c.regular_supports_by_arity[4],
+              c.early_census_keys, c.early_census_extra_shell_balls, c.balls_by_qmin[2],
               c.balls_by_qmin[3], c.balls_by_qmin[4]);
   for (std::size_t s = 0; s < c.balls_by_shell.size(); ++s) std::printf("%s%" PRIu64, s ? "," : "", c.balls_by_shell[s]);
   // Invariant d'Euler (condition necessaire de completude du catalogue) :
@@ -317,7 +333,11 @@ int main(int argc, char** argv) {
                 ",\"lanes_compact_ms\":%.3f,\"gpu_prepare_ms\":%.3f,\"gpu_prepare_wait_ms\":%.3f"
                 ",\"lanes_fused_seeds\":%" PRIu64 ",\"lanes_fused_chunks\":%" PRIu64
                 ",\"lanes_fused_q3_chunks\":%" PRIu64 ",\"lanes_fused_census_chunks\":%" PRIu64
-                ",\"lanes_fused_fallbacks\":%" PRIu64 "},",
+                ",\"lanes_fused_fallbacks\":%" PRIu64
+                ",\"lanes_upload_ms\":%.3f,\"lanes_download_ms\":%.3f,\"lanes_download_copy_ms\":%.3f"
+                ",\"lanes_host_alloc_ms\":%.3f,\"lanes_pinned\":%s,\"lanes_pinned_allocations\":%" PRIu64
+                ",\"lanes_pinned_bytes\":%" PRIu64 ",\"gpu_stage_b_ms\":%.3f,\"lanes_pinned_reserve_ms\":%.3f"
+                ",\"lanes_pinned_reserve_records\":%" PRIu64 "},",
                 b.used ? "true" : "false", backend.c_str(), b.front_ms, b.filter_ms, b.edges_ms, b.device_ms,
                 b.rectangles, b.survivors, certificate_backend.c_str(), b.certificate_ms, b.certificate_device_ms,
                 b.deferred, b.judged_edges, b.rebuilt_covers, b.certificate_warps, b.filter_kernel_ms,
@@ -327,7 +347,9 @@ int main(int argc, char** argv) {
                 b.lanes_setup_ms, b.lanes_finish_ms, b.lanes_convert_ms, b.lanes_tasks, b.lanes_max_task_steps,
                 b.lanes_plan_ms, b.lanes_task_ms, b.lanes_compact_ms, b.gpu_prepare_ms, b.gpu_prepare_wait_ms,
                 b.lanes_fused_seeds, b.lanes_fused_chunks, b.lanes_fused_q3_chunks, b.lanes_fused_census_chunks,
-                b.lanes_fused_fallbacks);
+                b.lanes_fused_fallbacks, b.lanes_upload_ms, b.lanes_download_ms, b.lanes_download_copy_ms,
+                b.lanes_host_alloc_ms, b.lanes_pinned ? "true" : "false", b.lanes_pinned_allocations,
+                b.lanes_pinned_bytes, b.gpu_stage_b_ms, b.lanes_pinned_reserve_ms, b.lanes_pinned_reserve_records);
     const auto& tt = r.tower_times;
     std::printf("\"tower_phases_ms\":{\"validate\":%.3f,\"static\":%.3f,\"lots\":%.3f,\"populations\":%.3f,"
                 "\"images\":%.3f,\"bank\":%.3f,\"encode\":%.3f",
@@ -395,15 +417,20 @@ int main(int argc, char** argv) {
               "\"peak_rss_kb\":%ld,", r.tower_digest, catalogue, presentations, peak_rss_kb());
   // v26: the device session opened before the chain (not in chain_total).
   const bool opened = device_session && session.error.empty();
-  std::printf("\"device_session\":{\"opened\":%s,\"context_ms\":%.3f,\"reserve_ms\":%.3f},",
+  std::printf("\"device_session\":{\"opened\":%s,\"context_ms\":%.3f,\"reserve_ms\":%.3f,\"pinned_ms\":%.3f,"
+              "\"pinned_bytes\":%" PRIu64 "},",
               opened ? "true" : "false", device_session ? session.context_ms : 0.0,
-              opened ? session.reserve_ms : 0.0);
+              opened ? session.reserve_ms : 0.0, opened ? session.pinned_ms : 0.0,
+              opened ? session.pinned_bytes : std::uint64_t{0});
   // v27: paths of the tower under its three sibling levers (never tower_work).
   std::printf("\"tower_detail\":{\"pipelined_orders\":%" PRIu64 ",\"population_deferred_refs\":%" PRIu64
               ",\"hashed_orders\":%" PRIu64 ",\"pool_threads\":%" PRIu64 ",\"pool_jobs\":%" PRIu64
-              ",\"helper_threads\":%" PRIu64 ",\"runner_threads\":%" PRIu64 ",\"pool_ms\":%.3f",
+              ",\"helper_threads\":%" PRIu64 ",\"runner_threads\":%" PRIu64 ",\"pool_ms\":%.3f"
+              ",\"sealed_catalogues\":%" PRIu64 ",\"seal_sampled_balls\":%" PRIu64
+              ",\"declared_support_checks\":%" PRIu64,
               ts.pipelined_orders, ts.population_deferred_refs, ts.hashed_orders, ts.pool_threads, ts.pool_jobs,
-              ts.helper_threads, ts.runner_threads, r.tower_times.pool_ms);
+              ts.helper_threads, ts.runner_threads, r.tower_times.pool_ms, ts.sealed_catalogues, ts.seal_sampled_balls,
+              ts.declared_support_checks);
   const std::pair<const char*, const std::array<double, 11>*> detail_by_k[] = {
       {"populations_by_k", &r.tower_times.populations_by_k}, {"images_own_by_k", &r.tower_times.images_own_by_k}};
   for (const auto& [name, values] : detail_by_k) {

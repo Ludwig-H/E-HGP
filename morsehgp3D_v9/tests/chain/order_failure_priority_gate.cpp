@@ -108,6 +108,42 @@ int unwind_gate(const std::vector<mhgp9::gen::Point3>& points) {
             r.tower_stats.overlapped_orders == 5 && r.tower_stats.pipelined_orders == (mode.pipelined ? 5U : 0U))
           ++live_runner_cases;
       }
+  // v28 (C, findings 2 and 3): the sizing of the population rows fails (an
+  // exception other than a Failure). Alone, or beside image failures, it is
+  // the refusal (the witness sizes the rows after every phase A, before the
+  // images); beside a lot failure, the lot failure is reported (the witness
+  // never sizes the rows then). The same on the three paths with 4 and 8
+  // threads (the sequential loop, one thread, pushes its rows one by one and
+  // sizes none); no runner waits forever on the pipelined path.
+  struct RowsCase {
+    unsigned lots, images;
+    mhgp9::ChainStatus status;
+    const char* expected;
+  };
+  const RowsCase rows_cases[] = {
+      {0, 0, mhgp9::ChainStatus::kResourceExhausted, "tower: full_ball_allocation_failed"},
+      {bit(3), 0, mhgp9::ChainStatus::kInvariantViolated, "tower: failpoint_lots_k3"},
+      {0, bit(2), mhgp9::ChainStatus::kResourceExhausted, "tower: full_ball_allocation_failed"}};
+  std::uint64_t rows_checks = 0;
+  for (const auto& mode : modes)
+    for (const auto& c : rows_cases)
+      for (const int statics : {4, 8}) {
+        detail::failpoint_rows_alloc = true;
+        detail::failpoint_lots = c.lots;
+        detail::failpoint_images = c.images;
+        const auto r = run(mode, statics);
+        detail::failpoint_rows_alloc = false;
+        detail::failpoint_lots = 0;
+        detail::failpoint_images = 0;
+        ++checks;
+        ++rows_checks;
+        if (r.status != c.status || r.reason != c.expected) {
+          std::printf("cause=unwind.rows static=%d overlap=%d pipelined=%d expected=%s status=%d reason=%s\n",
+                      statics, mode.overlap ? 1 : 0, mode.pipelined ? 1 : 0, c.expected,
+                      static_cast<int>(r.status), r.reason.c_str());
+          return 1;
+        }
+      }
   // The pause changes no object: same tower digest as without it.
   const auto paused = run({true, true}, 4);
   detail::failpoint_runner_pause_ms = 0;
@@ -122,8 +158,9 @@ int unwind_gate(const std::vector<mhgp9::gen::Point3>& points) {
               static_cast<unsigned long long>(checks), static_cast<unsigned long long>(live_runner_cases),
               static_cast<unsigned long long>(expected_live), static_cast<unsigned long long>(plain.tower_digest));
   // 3 modes x 2 allocation cases x 3 thread counts + 2 overlapped modes x 2
-  // launch cases x 2 thread counts, then the paired complete runs.
-  if (checks != 18 + 8 + 2 || expected_live != 12 || live_runner_cases != expected_live) {
+  // launch cases x 2 thread counts, 3 modes x 3 rows cases x 2 thread counts,
+  // then the paired complete runs.
+  if (checks != 18 + 8 + 18 + 2 || rows_checks != 18 || expected_live != 12 || live_runner_cases != expected_live) {
     std::printf("cause=floor.unwind\n");
     return 3;
   }

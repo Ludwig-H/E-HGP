@@ -1123,7 +1123,7 @@ int main(int argc, char** argv) {
           const auto idb = static_cast<std::uint32_t>(order[survivors[target].b_rank]);
           for (unsigned k = 0; k < record.arity; ++k)
             if (record.support[k] != ida && record.support[k] != idb) {
-              record.support[k] = static_cast<std::uint32_t>(order.size() + 7);
+              record.support[k] = static_cast<std::uint32_t>(order.size());  // exactly n: kills a > for >= (C)
               break;
             }
           std::sort(record.support.begin(), record.support.begin() + record.arity);

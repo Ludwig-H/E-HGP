@@ -48,7 +48,7 @@ PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
 PLAN_SCHEMA = 'mhgp9_tower_plan_v6'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v27'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v28'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -121,7 +121,11 @@ LEVER_NAMES = ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_w
                # v27 : les trois leviers freres de la tour (queue en pipeline
                # E4, regroupement hache de la phase 0, pool persistant E2) ;
                # meme objet, actifs par defaut dans la chaine.
-               'tower_pipelined_tail', 'tower_hash_grouping', 'tower_persistent_pool')
+               'tower_pipelined_tail', 'tower_hash_grouping', 'tower_persistent_pool',
+               # v28 : catalogue scelle (R-29 de C), recensement des cles q2
+               # cote q2 (exige q2_during_device), enregistrements des voies
+               # dans un bassin epingle (exige q34_batch_q3). Meme objet.
+               'tower_sealed_catalogue', 'q2_early_census', 'q34_lanes_pinned')
 # v17 (S2) : filtre q3/q4 par lots, puis sur GPU. Le build G4 active CUDA
 # (nvcc et nvidia-smi existants, aucune installation) ; l'appareil attendu :
 DEVICE_NAME = 'NVIDIA RTX PRO 6000 Blackwell Server Edition'
@@ -136,7 +140,14 @@ BATCH_KEYS = frozenset({'used', 'backend', 'front_ms', 'filter_ms', 'edges_ms', 
                         'lanes_max_task_steps', 'lanes_plan_ms', 'lanes_task_ms', 'lanes_compact_ms',
                         'gpu_prepare_ms', 'gpu_prepare_wait_ms',
                         'lanes_fused_seeds', 'lanes_fused_chunks', 'lanes_fused_q3_chunks',
-                        'lanes_fused_census_chunks', 'lanes_fused_fallbacks'})
+                        'lanes_fused_census_chunks', 'lanes_fused_fallbacks',
+                        # v28 : fenetres de l'appel des voies et bassin epingle.
+                        'lanes_upload_ms', 'lanes_download_ms', 'lanes_download_copy_ms', 'lanes_host_alloc_ms',
+                        'lanes_pinned', 'lanes_pinned_allocations', 'lanes_pinned_bytes', 'gpu_stage_b_ms',
+                        'lanes_pinned_reserve_ms', 'lanes_pinned_reserve_records'})
+LANES_WINDOW_TIMES = ('lanes_upload_ms', 'lanes_download_ms', 'lanes_download_copy_ms', 'lanes_host_alloc_ms',
+                      'gpu_stage_b_ms', 'lanes_pinned_reserve_ms')
+LANES_PINNED_COUNTS = ('lanes_pinned_allocations', 'lanes_pinned_bytes', 'lanes_pinned_reserve_records')
 # v20 (S4a) : voie q3 des survivants certifies par lots, sans atlas (CPU ou
 # GPU). Chronos et comptes de l'appel, registre declare lanes_* du mode.
 LANES_TIMES = ('lanes_ms', 'lanes_device_ms', 'lanes_kernel_ms', 'lanes_transfer_ms', 'lanes_wait_ms', 'tail_ms',
@@ -188,10 +199,11 @@ TOP_KEYS = frozenset({'schema', 'status', 'reason', 'input', 'options', 'times_m
                       'device_session',
                       # v27 : chemins et sous-chronos de la tour hors tower_work.
                       'tower_detail'})
-TOWER_DETAIL_COUNTS = ('pipelined_orders', 'population_deferred_refs', 'hashed_orders', 'pool_threads', 'pool_jobs',
+TOWER_DETAIL_COUNTS = ('sealed_catalogues', 'seal_sampled_balls', 'declared_support_checks',
+                       'pipelined_orders', 'population_deferred_refs', 'hashed_orders', 'pool_threads', 'pool_jobs',
                        'helper_threads', 'runner_threads')
 TOWER_DETAIL_BY_K = ('populations_by_k', 'images_own_by_k')
-DEVICE_SESSION_KEYS = frozenset({'opened', 'context_ms', 'reserve_ms'})
+DEVICE_SESSION_KEYS = frozenset({'opened', 'context_ms', 'reserve_ms', 'pinned_ms', 'pinned_bytes'})
 INPUT_KEYS = frozenset({'format', 'grid', 'sites', 'hash'})
 OPTION_KEYS = frozenset({'K', 'K_effective', 's', 'workers', 'tower_static_threads', 'run_tower', 'certificate_capacity',
                          'certificate_judge', 'lanes_capacity', 'lanes_judge', 'lanes_events', 'levers'})
@@ -209,23 +221,23 @@ LANES_DEFERRAL_CAPACITY = 24
 # a R12) et du catalogue des trois trames a s = 8, identiques sur le moteur,
 # le lot CPU et les certificats S3 CPU. Tout cas de ces (scene, K, s), GPU ou
 # non, doit les reproduire : une erreur commune aux deux jumeaux se voit.
-PINNED_DIGESTS = {('00', 5, 8): ('67450c64611075b1', '5ad1fe09354411ba'),
-                  ('00', 10, 8): ('ac108f7f71096c3f', 'a6e959d227f3dafa'),
-                  ('01', 5, 8): ('dbf799c8ed83f53f', 'a4a5149c15b4122e'),
-                  ('01', 10, 8): ('9ddbf7430c9086cc', 'c5cddc5b0baefcf1'),
-                  ('02', 5, 8): ('8240af3d4dce3d45', '143a367b4f27ef02'),
-                  ('02', 10, 8): ('ba973af0c8da95bd', '5c8cc01b1e45b461'),
+PINNED_DIGESTS = {('00', 5): ('67450c64611075b1', '5ad1fe09354411ba'),
+                  ('00', 10): ('ac108f7f71096c3f', 'a6e959d227f3dafa'),
+                  ('01', 5): ('dbf799c8ed83f53f', 'a4a5149c15b4122e'),
+                  ('01', 10): ('9ddbf7430c9086cc', 'c5cddc5b0baefcf1'),
+                  ('02', 5): ('8240af3d4dce3d45', '143a367b4f27ef02'),
+                  ('02', 10): ('ba973af0c8da95bd', '5c8cc01b1e45b461'),
                   # v27 (R21) : epingles CPU des trames brutes avec sol,
                   # calculees par C a 093d943c (moteur et lots CPU egaux,
                   # audits/c_raw_pins_20260924), relues par B.
-                  ('b00', 5, 8): ('cfb1634832c0384a', '11f6a8e1a7f28127'),
-                  ('b00', 10, 8): ('dd90bda1e6569b79', '1a315a5241510296'),
-                  ('b01', 5, 8): ('15015e5a5c29beac', '7d385c14e5870263'),
-                  ('b01', 10, 8): ('2816dd6bcdb92ad6', 'dbbfc30b411e11ea'),
-                  ('b02', 5, 8): ('8096d4c6e269b254', 'f0206be1c838c4bd'),
-                  ('b02', 10, 8): ('f6e2e996224328f2', '8c39ed9e85d7c0fd')}
+                  ('b00', 5): ('cfb1634832c0384a', '11f6a8e1a7f28127'),
+                  ('b00', 10): ('dd90bda1e6569b79', '1a315a5241510296'),
+                  ('b01', 5): ('15015e5a5c29beac', '7d385c14e5870263'),
+                  ('b01', 10): ('2816dd6bcdb92ad6', 'dbbfc30b411e11ea'),
+                  ('b02', 5): ('8096d4c6e269b254', 'f0206be1c838c4bd'),
+                  ('b02', 10): ('f6e2e996224328f2', '8c39ed9e85d7c0fd')}
 TIME_KEYS = frozenset({'read', 'prepare', 'gen_index', 'q2', 'q2_wait', 'q34', 'merge', 'tower_index', 'census',
-                       'tower', 'chain_total', 'digest', 'catalogue_digest'})
+                       'tower', 'chain_total', 'digest', 'catalogue_digest', 'q2_census', 'q2_census_index', 'q2_census_wait'})
 ORDER_KEYS = frozenset({'K', 'nodes', 'births', 'merges', 'parents', 'contributions'})
 # tower_work : compteurs entiers, sauf ces deux champs types du noyau MEB
 # (libelle de comptabilite epingle, histogramme des tailles de supports).
@@ -259,10 +271,11 @@ LEDGER_KEYS = frozenset((
     'lanes_owner_rejections lanes_seeds lanes_census_point_tests lanes_census_inside_sites '
     'lanes_census_shell_sites lanes_census_outside_sites lanes_depth_rejections lanes_emitted '
     'lanes_shell_ids lanes_q3_edges lanes_census_seeds lanes_pruned_sites').split()) | frozenset(LANES4_LEDGER)
-CATALOGUE_LISTS = dict(by_qmin=3, by_shell=17)
+CATALOGUE_LISTS = dict(by_qmin=3, by_shell=17, regular_supports=3)
 CATALOGUE_KEYS = frozenset(('q2_presentations q3_presentations q4_presentations unique_keys balls '
                             'extra_shell_balls shell_over_12 max_shell max_interior census_nodes census_leaf_tests '
-                            'bytes by_qmin by_shell euler').split())
+                            'bytes by_qmin by_shell euler regular_supports early_census_keys '
+                            'early_census_extra_shell_balls').split())
 # Invariant d'Euler du catalogue (v13) : condition NECESSAIRE de completude.
 EULER_KEYS = frozenset({'status', 'checkable_max_k', 'by_k'})
 EULER_STATUSES = ('holds', 'fails', 'not_checkable')
@@ -293,7 +306,9 @@ EXTERNAL_WALL_TOLERANCE_SECONDS = 0.05
 # deterministe, jugee par validate_probe, avant tout cas LiDAR.
 PREFLIGHT_FILE = 'preflight.u32le'
 PREFLIGHT_SITES = 1500
-STAGE_TIME_KEYS = ('prepare', 'gen_index', 'q2', 'q34', 'merge', 'tower_index', 'census', 'tower')
+STAGE_TIME_KEYS = ('prepare', 'gen_index', 'q2', 'q34', 'merge', 'tower_index', 'census', 'tower',
+                   # v28 : attente du recensement cote q2 (nulle sans le levier).
+                   'q2_census_wait')
 SCOPE = 'FULL_tower_chain_relative_to_cross_checked_catalogue'
 
 
@@ -385,7 +400,9 @@ def _levers(value):
             (value['q34_batch_filter'] or not value['q2_during_device']) and
             (value['q34_batch_q4'] or not value['q34_lanes_fused']) and
             (value['q34_gpu_filter'] or value['q34_gpu_certificates'] or value['q34_gpu_q3'] or
-             not value['device_session']))
+             not value['device_session']) and
+            (value['q2_during_device'] or not value['q2_early_census']) and
+            (value['q34_batch_q3'] or not value['q34_lanes_pinned']))
 
 
 def uses_device(levers):
@@ -400,7 +417,8 @@ def engine_levers(levers):
     """The same levers on the engine path (no batch call, no device)."""
     return dict(levers, q34_batch_filter=False, q34_gpu_filter=False, q34_batch_certificates=False,
                 q34_gpu_certificates=False, q34_batch_q3=False, q34_gpu_q3=False, q34_batch_q4=False,
-                q2_during_device=False, q34_lanes_fused=False, device_session=False)
+                q2_during_device=False, q34_lanes_fused=False, device_session=False, q2_early_census=False,
+                q34_lanes_pinned=False)
 
 
 def lever_arguments(case):
@@ -708,10 +726,34 @@ def validate_lanes(value, case, lanes_capacity=0, judge=False):
     # v25 : sans q34_lanes_fused, les taches gardent les phases separees.
     need(levers['q34_lanes_fused'] or all(batch[key] == 0 for key in LANES_FUSED),
          'q3/q4 lanes fused pass without the lever')
+    # v28 : fenetres de l'appel et bassin epingle (types).
+    need(type(batch['lanes_pinned']) is bool and all(_number(batch[key]) for key in LANES_WINDOW_TIMES) and
+         all(_count(batch[key]) for key in LANES_PINNED_COUNTS), 'q3 lanes window and pinned fields')
     if not levers['q34_batch_q3']:
         need(batch['lanes_backend'] == '' and all(batch[key] == 0 for key in LANES_TIMES + LANES_COUNTS) and
-             all(ledger[key] == 0 for key in LANES_LEDGER), 'q3 lanes filled without the lever')
+             all(ledger[key] == 0 for key in LANES_LEDGER) and batch['lanes_pinned'] is False and
+             all(batch[key] == 0 for key in LANES_WINDOW_TIMES + LANES_PINNED_COUNTS),
+             'q3 lanes filled without the lever')
         return
+    # v28 : le bassin epingle sert l'appel sous son seul levier (l'hote aussi) ;
+    # sans lui, ni allocation ni capacite. Les fenetres n'existent que sur
+    # l'appareil : envoi + reception = transfert, la copie des enregistrements
+    # et la preparation hote sont dans la reception. L'etape B (ardoises et
+    # bassin reserves en arriere-plan) n'existe qu'avec la voie GPU.
+    ran_call = batch['lanes_asked'] > 0
+    need(batch['lanes_pinned'] == (levers['q34_lanes_pinned'] and ran_call) and
+         (batch['lanes_pinned'] or (batch['lanes_pinned_allocations'] == 0 and batch['lanes_pinned_bytes'] == 0)) and
+         ((levers['q34_lanes_pinned'] and levers['q34_gpu_q3']) or
+          (batch['lanes_pinned_reserve_records'] == 0 and batch['lanes_pinned_reserve_ms'] == 0)) and
+         (levers['q34_gpu_q3'] or batch['gpu_stage_b_ms'] == 0),
+         'q3 lanes pinned pool under its lever')
+    if levers['q34_gpu_q3'] and ran_call:
+        need(abs(batch['lanes_upload_ms'] + batch['lanes_download_ms'] - batch['lanes_transfer_ms']) <= 0.05 and
+             batch['lanes_download_copy_ms'] + batch['lanes_host_alloc_ms'] <= batch['lanes_download_ms'] + 0.05,
+             'q3 lanes download split')
+    else:
+        need(all(batch[key] == 0 for key in ('lanes_upload_ms', 'lanes_download_ms', 'lanes_download_copy_ms',
+                                             'lanes_host_alloc_ms')), 'q3 lanes download split off the device')
     q4 = levers['q34_batch_q4'] and value['options']['K'] >= 3
     gpu = levers['q34_gpu_q3']
     ran = gpu and batch['lanes_asked'] > 0
@@ -854,13 +896,28 @@ def validate_tower_detail(value, case):
     pooled = static_path and levers['tower_persistent_pool']
     # La queue en pipeline couvre chaque ordre ; le regroupement hache, chaque
     # phase 0 (K >= 2) ; le pool a W - 1 fils et sert au moins un appel.
+    # v28 (constats 10 et 11 de C) : ordres haches = K - 1 exactement, fils
+    # de phase A = K sur la voie recouverte, references differees bornees par
+    # les contributions, creation du pool bornee par la tour.
+    contributions = sum(order['contributions'] for order in value['orders'])
     need(detail['pipelined_orders'] == (effective if pipelined else 0) and
          (detail['population_deferred_refs'] == 0 or pipelined) and
-         (0 < detail['hashed_orders'] <= effective - 1 if hashed else detail['hashed_orders'] == 0) and
+         detail['population_deferred_refs'] <= contributions and
+         detail['hashed_orders'] == (effective - 1 if hashed else 0) and
+         (not (static_path and levers['tower_overlap_static']) or detail['runner_threads'] == effective) and
          detail['pool_threads'] == (case['static_threads'] - 1 if pooled else 0) and
          (detail['pool_jobs'] > 0) == pooled and (pooled or detail['pool_ms'] == 0) and
+         detail['pool_ms'] <= value['times_ms']['tower'] + PHASE_TOLERANCE_MS and
          (pipelined or all(x == 0 for key in TOWER_DETAIL_BY_K for x in detail[key])),
          'tower detail paths under their levers')
+    # v28 (R-29) : sous le sceau, la passe 1 ne rejoue qu'une boule sur 64
+    # (echantillon compte), sinon chaque support regulier.
+    balls, regular = value['catalogue']['balls'], sum(value['catalogue']['regular_supports'])
+    sealed = levers['tower_sealed_catalogue']
+    need(detail['sealed_catalogues'] == (1 if sealed else 0) and
+         detail['seal_sampled_balls'] == (-(-balls // 64) if sealed else 0) and
+         (detail['declared_support_checks'] <= detail['seal_sampled_balls'] if sealed else
+          detail['declared_support_checks'] == regular), 'tower sealed catalogue')
 
 
 def validate_tower_phases(value, case):
@@ -881,8 +938,8 @@ def validate_tower_phases(value, case):
          all(sum(phases[key][k] for key in TOWER_STATIC_PARTS) <=
              phases['static_by_k'][k] + phases['order_by_k'][k] + PHASE_TOLERANCE_MS * len(TOWER_STATIC_PARTS)
              for k in range(case['k'])), 'tower sub-timers outside their phase')
-    total = sum(phases[key] for key in TOWER_PHASES) + sum(phases['order_by_k'])
-    need(total <= value['times_ms']['tower'] + PHASE_TOLERANCE_MS * (len(TOWER_PHASES) + case['k']),
+    total = sum(phases[key] for key in TOWER_PHASES) + sum(phases['order_by_k']) + value['tower_detail']['pool_ms']
+    need(total <= value['times_ms']['tower'] + PHASE_TOLERANCE_MS * (len(TOWER_PHASES) + case['k'] + 1),
          'tower phases exceed the tower time')
     static_path = case['static_threads'] > 1 and min(case['k'], case['n']) > 1
     if static_path:
@@ -929,6 +986,18 @@ def validate_ledger_identities(value, levers):
     need(catalogue['balls'] == catalogue['unique_keys'] == sum(catalogue['by_qmin']) == sum(catalogue['by_shell']) and
          catalogue['q2_presentations'] + catalogue['q3_presentations'] + catalogue['q4_presentations'] >=
          catalogue['unique_keys'], 'catalogue identity')
+    # v28 (R-29) : chaque boule reguliere a son support certifie par la chaine
+    # (coquille = support, positivite) ; les cles q2 recensees cote q2 sont
+    # toutes les cles q2, ou aucune (voie de repli), sous le seul levier.
+    early = levers['q2_early_census'] and value['options']['K_effective'] >= 2
+    need(sum(catalogue['regular_supports']) == catalogue['balls'] - catalogue['extra_shell_balls'] and
+         all(catalogue['regular_supports'][i] <= catalogue['by_qmin'][i] for i in range(3)) and
+         catalogue['early_census_keys'] in ((0, catalogue['by_qmin'][0]) if early else (0,)) and
+         catalogue['early_census_extra_shell_balls'] <= min(catalogue['extra_shell_balls'],
+                                                            catalogue['early_census_keys']) and
+         (catalogue['early_census_keys'] == 0 or
+          (value['times_ms']['tower_index'] == 0 and value['times_ms']['q2_census'] > 0)),
+         'catalogue regular supports and q2 early census')
     # La chaine refuse toute coquille de plus de 12 sites avant complete_relative.
     need(catalogue['shell_over_12'] == 0 and catalogue['max_shell'] <= 12 and
          all(count == 0 for count in catalogue['by_shell'][13:]), 'complete catalogue with a shell above 12')
@@ -1102,14 +1171,21 @@ def validate_probe(value, case, exit_code, inputs=None, capacity=0, judge=False,
     need(sum(times[key] for key in stages) <= times['chain_total'] + 0.01 * len(stages) and
          (times['q2_wait'] <= times['q2'] + 0.05 if overlapped else times['q2_wait'] == 0),
          'probe stage times exceed the chain total')
+    # v28 : le recensement cote q2 recouvre q34 ; seule son attente entre dans
+    # la somme et elle ne depasse pas son mur ; rien sans le levier.
+    early = case['levers']['q2_early_census'] and value['options']['K_effective'] >= 2
+    need((times['q2_census_index'] <= times['q2_census'] + 0.05 and
+          times['q2_census_wait'] <= times['q2_census'] + 0.05) if early else
+         times['q2_census'] == times['q2_census_index'] == times['q2_census_wait'] == 0,
+         'probe q2 early census times')
     need(_counters(value['generator'], GENERATOR_KEYS), 'probe counters generator')
     need(_tower_work(value['tower_work']), 'probe counters tower_work')
     need(_catalogue(value['catalogue']), 'probe catalogue')
     validate_euler(value, case)
     validate_occupancy(value, case)
     validate_batch(value, case, capacity, judge, lanes_capacity)
-    validate_tower_phases(value, case)
     validate_tower_detail(value, case)
+    validate_tower_phases(value, case)
     orders = value['orders']
     need(type(orders) is list and all(type(order) is dict and set(order) == ORDER_KEYS and
                                       all(_count(item) for item in order.values()) for order in orders), 'probe orders')
@@ -1121,19 +1197,29 @@ def validate_probe(value, case, exit_code, inputs=None, capacity=0, judge=False,
     # par le processus avant l'horloge de la chaine, sous le seul levier
     # device_session ; son cout est publie a part, jamais dans chain_total.
     session, requested = value['device_session'], case['levers']['device_session']
+    pinned_session = requested and case['levers']['q34_lanes_pinned'] and case['levers']['q34_gpu_q3']
     need(type(session) is dict and set(session) == DEVICE_SESSION_KEYS and type(session['opened']) is bool and
-         _number(session['context_ms']) and _number(session['reserve_ms']) and
+         _number(session['context_ms']) and _number(session['reserve_ms']) and _number(session['pinned_ms']) and
+         _count(session['pinned_bytes']) and
          (session['opened'] is False or requested) and
          (requested or (session['context_ms'] == 0 and session['reserve_ms'] == 0)) and
-         (session['opened'] or session['reserve_ms'] == 0), 'probe device session')
+         (session['opened'] or session['reserve_ms'] == 0) and
+         # v28 : le bassin epingle n'est reserve par la session que sous
+         # q34_lanes_pinned avec la voie GPU.
+         ((session['opened'] and pinned_session) or (session['pinned_ms'] == 0 and session['pinned_bytes'] == 0)),
+         'probe device session')
     effective = min(case['k'], case['n'])
     if value['status'] == 'complete_relative':
         need(exit_code == 0 and options['K_effective'] == effective and
              [order['K'] for order in orders] == list(range(1, effective + 1)), 'complete tower: code 0, orders 1..K')
         validate_ledger_identities(value, case['levers'])
-        need(not requested or (session['opened'] and session['context_ms'] > 0),
+        need(not requested or (session['opened'] and session['context_ms'] > 0 and
+                               (not pinned_session or session['pinned_bytes'] > 0)),
              'complete device case without its requested session')
-        pin = PINNED_DIGESTS.get((case['scene'], case['k'], case['s'])) if inputs is None else None
+        # v28 (constat 9 de C) : l'objet ne depend pas de s ; les epingles sont
+        # indexees par (trame, K), donc un cas a s = 10 ou 12 est epingle aussi
+        # (chaque trame reelle a ses deux epingles, K5 et K10).
+        pin = PINNED_DIGESTS.get((case['scene'], case['k'])) if inputs is None else None
         need(pin is None or (value['tower_digest'], value['catalogue_digest']) == pin,
              'tower or catalogue digest differs from the pinned CPU value')
         return 'complete_relative'
@@ -1152,7 +1238,7 @@ def validate_external_wall(value, elapsed_seconds):
     times, session = value['times_ms'], value['device_session']
     need(_number(elapsed_seconds) and
          (times['read'] + times['chain_total'] + times['digest'] + times['catalogue_digest'] +
-          session['context_ms'] + session['reserve_ms']) / 1000.0 <=
+          session['context_ms'] + session['reserve_ms'] + session['pinned_ms']) / 1000.0 <=
          elapsed_seconds + EXTERNAL_WALL_TOLERANCE_SECONDS,
          'read, device session, chain total and digest exceed the external wall time of the case')
 

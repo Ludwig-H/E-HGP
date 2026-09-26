@@ -319,6 +319,13 @@ inline void failpoint_after_static(unsigned k) {
 // an exception has left its scope first; runner_pauses counts the delays.
 inline std::atomic<u32> failpoint_static_alloc{0}, failpoint_launch{0}, failpoint_runner_pause_ms{0};
 inline std::atomic<u64> runner_pauses{0};
+// v28 (C, findings 2 and 3): failpoint_rows_alloc makes the sizing of the
+// population rows throw std::bad_alloc, on the witness tail
+// (assign_populations) as on the pipelined one (prepare_population_rows).
+inline std::atomic<bool> failpoint_rows_alloc{false};
+inline void failpoint_rows_allocation() {
+  if (failpoint_rows_alloc.load()) throw std::bad_alloc();
+}
 inline void failpoint_static_allocation(unsigned k) {
   if (k >= 1 && k <= 10 && ((failpoint_static_alloc.load() >> (k - 1)) & 1U)) throw std::bad_alloc();
 }
@@ -340,6 +347,7 @@ inline void failpoint_after_static(unsigned) {}
 inline void failpoint_static_allocation(unsigned) {}
 inline void failpoint_runner_launch(unsigned) {}
 inline void failpoint_runner_pause() {}
+inline void failpoint_rows_allocation() {}
 #endif
 inline void add(u64& count, u64 amount = 1) {
   require(amount <= std::numeric_limits<u64>::max() - count, "full_ball_counter_overflow",
@@ -941,12 +949,18 @@ class Builder {
             }
             if (pipelined && i == 0) {
               // The rows array is sized once, before any runner writes a row.
+              // A failed sizing is a population error of order 1 (v28, C
+              // finding 2): the witness sizes the rows in assign_populations,
+              // after every phase A; phase A of order 1 still runs (C finding
+              // 3: no runner waits on a phase A that never ran).
               try { prepare_population_rows(); publish(rows_state, 1); }
               catch (...) {
-                errors[i] = std::current_exception();
+#if defined(MHGP9_FULL_ORDERS_MUTANT_ROWS_ERROR_FIRST)
+                errors[i] = std::current_exception();  // mutant: a phase-A error, reported first
+#else
+                population_errors[i] = std::current_exception();
+#endif
                 publish(rows_state, 2);
-                publish(lots_state[i], 2);
-                return;
               }
             }
             const auto start = PhaseClock::now();
@@ -1037,9 +1051,24 @@ class Builder {
       }
       if (static_failure) throw *static_failure;
       for (size_t i = 0; i < kmax; ++i)
-        for (const auto* slot : {&errors, &population_errors, &image_errors})
-          if ((*slot)[i]) std::rethrow_exception((*slot)[i]);
+        if (errors[i]) std::rethrow_exception(errors[i]);  // phase A (and launches), as the witness
       if (pipelined) {
+        // v28 (C, finding 2): an exception other than a Failure in phase B or
+        // C keeps the witness's priority. The witness sizes and names the
+        // populations only after every phase A succeeded, and runs the images
+        // of K only below the first population failure: an exception of a
+        // step it would not have run is dropped, the others are reported
+        // before the Failures (the witness rethrows them at once).
+        size_t lots_done = 0;
+        while (lots_done < kmax && !failures[lots_done]) ++lots_done;
+        if (lots_done == kmax)
+          for (size_t i = 0; i < kmax; ++i)
+            if (population_errors[i]) std::rethrow_exception(population_errors[i]);
+        size_t imaged = lots_done;
+        for (size_t i = 0; i < lots_done; ++i)
+          if (population_failures[i]) { imaged = i; break; }
+        for (size_t i = 0; i < imaged; ++i)
+          if (image_errors[i]) std::rethrow_exception(image_errors[i]);
         // Everything computable was computed; the reported failure is the
         // sequential loop's: the smallest K, and in order K its lots, then
         // its populations, then its images.
@@ -1377,6 +1406,7 @@ class Builder {
         ref.population = population_ids[ball];
       }
     }
+    failpoint_rows_allocation();
     populations.resize(next);
     for (size_t j = 0; j < domain.size(); ++j) populations[j] = {{}, {domain[j]}};
     parallel_ranges(first_seen.size(), geometry_threads, [&](size_t begin, size_t end, size_t) {
@@ -1456,6 +1486,7 @@ class Builder {
   // The rows array (domain singletons first, then n + offset(Kmax+1) balls),
   // sized once on the runner of order 1 before any other runner writes a row.
   void prepare_population_rows() {
+    failpoint_rows_allocation();
     populations.resize(domain.size() + population_offset[kmax + 1]);
     for (size_t j = 0; j < domain.size(); ++j) populations[j] = {{}, {domain[j]}};
   }

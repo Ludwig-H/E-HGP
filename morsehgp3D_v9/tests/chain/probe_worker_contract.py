@@ -126,6 +126,13 @@ def main(argv):
                         # v27: the tower without its three sibling levers, on
                         # the static path (two threads): no pipelined, hashed
                         # or pooled order, same object as pinned_on.
+                        # v28: the sealed catalogue (R-29), the q2 early census
+                        # and the pinned lanes pool on the host batch path.
+                        ('r22_on', dict(base, levers=dict(engine_levers, q34_batch_filter=True,
+                                                          q34_batch_certificates=True, q34_batch_q3=True,
+                                                          q34_batch_q4=True, q2_during_device=True,
+                                                          tower_sealed_catalogue=True, q2_early_census=True,
+                                                          q34_lanes_pinned=True))),
                         ('tower_witness', dict(base, levers=dict(engine_levers, tower_pipelined_tail=False,
                                                                  tower_hash_grouping=False,
                                                                  tower_persistent_pool=False))),
@@ -151,6 +158,29 @@ def main(argv):
               sequential['times_ms']['q2_wait'] == 0, 'q2 overlap: object or times differ from the sequential case')
     else:
         check(False, 'q2 overlap case absent')
+    # v28: the three levers take their paths on the real probe, with the
+    # same object as the q4 case.
+    if 'r22_on' in results and 'q4_on' in results:
+        r22, q4 = results['r22_on'][1], results['q4_on'][1]
+        catalogue, detail = r22['catalogue'], r22['tower_detail']
+        check(worker.logical_result(r22) == worker.logical_result(q4) and detail['sealed_catalogues'] == 1 and
+              detail['seal_sampled_balls'] == -(-catalogue['balls'] // 64) > 0 and
+              detail['declared_support_checks'] <= detail['seal_sampled_balls'] and
+              catalogue['early_census_keys'] == catalogue['by_qmin'][0] > 0 and
+              r22['times_ms']['q2_census'] > 0 and r22['q34_batch']['lanes_pinned'] is True and
+              r22['q34_batch']['lanes_pinned_bytes'] > 0 and
+              q4['catalogue']['early_census_keys'] == 0 and q4['q34_batch']['lanes_pinned'] is False,
+              'r22 levers: paths or object differ from the q4 case')
+    else:
+        check(False, 'r22 levers case absent')
+    # The engine levers keep the seal (every lever on but the batch and
+    # device ones); the unsealed pass 1 is the all-off case's: one declared
+    # support check per regular ball, no sample.
+    if 'pinned_off' in results:
+        off = results['pinned_off'][1]
+        check(off['tower_detail']['sealed_catalogues'] == 0 and off['tower_detail']['seal_sampled_balls'] == 0 and
+              off['tower_detail']['declared_support_checks'] == sum(off['catalogue']['regular_supports']) > 0,
+              'unsealed pass 1 not exercised on the all-off case')
     # v27: the tower's three sibling levers take their paths on the real
     # probe, and the witness arm none of them, with the same object.
     if 'tower_witness' in results and 'pinned_on' in results:

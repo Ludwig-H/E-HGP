@@ -103,26 +103,27 @@ def default_plan():
     # de l'appareil (q2_during_device), pour attribuer le recouvrement. v25
     # (R20) : voies sans la passe fusionnee (q34_lanes_fused, L15) / avec.
     # v26 (R21) : L15, mesuree plus lente en R20, reste desactivee dans tout
-    # le plan ; le bras GPU ouvre la session d'appareil avant la chaine
-    # (device_session, regime d'un flux) et le bras gpu_cold ne l'ouvre pas.
+    # le plan ; le bras GPU ouvre la session d'appareil avant la chaine.
+    # v28 (R22) : le bras GPU prend aussi le catalogue scelle (R-29), le
+    # recensement des cles q2 cote q2 et le bassin epingle des voies ; le bras
+    # gpu_r21 les coupe tous les trois (paires repetees et entrelacees a 00),
+    # et chacun est coupe seul une fois a 00, a K5 et a K10.
+    new_levers = ('tower_sealed_catalogue', 'q2_early_census', 'q34_lanes_pinned')
     def case(scene, k, arm, repeat=0):
         levers = {name: True for name in worker.LEVER_NAMES}
         levers.update(q34_lanes_fused=False)
         if arm == 'engine':
             levers = worker.engine_levers(levers)
-        elif arm == 'gpu_cold':
-            levers.update(device_session=False)
-        elif arm == 'gpu_tower_witness':
-            # v27 (R21, auditeur B) : la tour sans ses trois leviers freres
-            # (queue en pipeline, regroupement hache, pool persistant).
-            levers.update(tower_pipelined_tail=False, tower_hash_grouping=False, tower_persistent_pool=False)
+        elif arm == 'gpu_r21':
+            levers.update({name: False for name in new_levers})
+        elif arm.startswith('gpu_no_'):
+            levers.update({arm[len('gpu_no_'):]: False})
         return dict(scene=scene, file=worker.INPUTS[scene]['file'], n=worker.INPUTS[scene]['n'], k=k, s=8,
                     workers=48, static_threads=48, levers=levers, repeat=repeat)
     cases = [case(scene, k, arm) for scene in ('00', '01', '02') for k in (5, 10) for arm in ('gpu', 'engine')]
-    cases += [case('00', 5, 'gpu_cold'), case('00', 5, 'gpu', 1), case('00', 10, 'gpu_cold'),
-              case('00', 10, 'gpu', 1), case('00', 5, 'gpu_cold', 1), case('00', 10, 'gpu_cold', 1)]
-    cases += [case('00', 5, 'gpu_tower_witness'), case('00', 10, 'gpu_tower_witness'),
-              case('00', 5, 'gpu_tower_witness', 1), case('00', 10, 'gpu_tower_witness', 1)]
+    cases += [case('00', 5, 'gpu_r21'), case('00', 5, 'gpu', 1), case('00', 10, 'gpu_r21'),
+              case('00', 10, 'gpu', 1), case('00', 5, 'gpu_r21', 1), case('00', 10, 'gpu_r21', 1)]
+    cases += [case('00', k, 'gpu_no_' + name) for name in new_levers for k in (5, 10)]
     # v26 (R21) : les trames brutes, sol compris (123 a 126 k sites), apres
     # les trames sans sol pour ne pas les exposer au budget ; bras GPU et
     # jumeau moteur a K5 et K10. Elles se qualifient a part : aucun succes

@@ -143,7 +143,11 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                  lanes_max_task_steps=0, lanes_plan_ms=0.0, lanes_task_ms=0.0, lanes_compact_ms=0.0,
                  gpu_prepare_ms=0.0, gpu_prepare_wait_ms=0.0,
                  lanes_fused_seeds=0, lanes_fused_chunks=0, lanes_fused_q3_chunks=0, lanes_fused_census_chunks=0,
-                 lanes_fused_fallbacks=0)
+                 lanes_fused_fallbacks=0,
+                 # v28: the lanes call's windows and the pinned pool.
+                 lanes_upload_ms=0.0, lanes_download_ms=0.0, lanes_download_copy_ms=0.0, lanes_host_alloc_ms=0.0,
+                 lanes_pinned=False, lanes_pinned_allocations=0, lanes_pinned_bytes=0, gpu_stage_b_ms=0.0,
+                 lanes_pinned_reserve_ms=0.0, lanes_pinned_reserve_records=0)
     ledger.update({name: 0 for name in schema['ledger'] if name.startswith(('lanes_', 'lanes4_'))})
     device = 'NVIDIA RTX PRO 6000 Blackwell Server Edition'
     if complete and levers.get('q34_batch_filter'):
@@ -181,6 +185,16 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                          # v23: two tasks (one per seed), P/T/C inside the kernel.
                          lanes_tasks=2, lanes_max_task_steps=3, lanes_plan_ms=0.0003 if gpu_q3 else 0.0,
                          lanes_task_ms=0.0003 if gpu_q3 else 0.0, lanes_compact_ms=0.0002 if gpu_q3 else 0.0)
+            # v28: the download split on the device, the pinned pool under its
+            # lever (the host twin leases it too), stage B with the GPU lanes.
+            pinned = bool(levers.get('q34_lanes_pinned'))
+            batch.update(lanes_upload_ms=0.0001 if gpu_q3 else 0.0, lanes_download_ms=0.0002 if gpu_q3 else 0.0,
+                         lanes_download_copy_ms=0.0001 if gpu_q3 else 0.0,
+                         lanes_host_alloc_ms=0.00005 if gpu_q3 else 0.0, lanes_pinned=pinned,
+                         lanes_pinned_allocations=1 if pinned else 0, lanes_pinned_bytes=256 if pinned else 0,
+                         gpu_stage_b_ms=0.001 if gpu_q3 else 0.0,
+                         lanes_pinned_reserve_ms=0.001 if pinned and gpu_q3 else 0.0,
+                         lanes_pinned_reserve_records=100 if pinned and gpu_q3 else 0)
             # The engine's atlas q3 lane never runs under the lever (as the
             # real chain): no leaf census, and the preflight must accept it.
             ledger.update(q3_leaf_censuses=0, q3_leaf_point_tests=0)
@@ -209,7 +223,9 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                     # v25: the two seeds of the edge with both lanes fused (L15).
                     batch.update(lanes_fused_seeds=2, lanes_fused_chunks=4, lanes_fused_q3_chunks=1,
                                  lanes_fused_census_chunks=2, lanes_fused_fallbacks=0)
-    return dict(schema='mhgp9_tower_probe_v27', status=status,
+    early = bool(complete and levers.get('q2_early_census') and effective >= 2)
+    pinned_session = bool(levers.get('device_session') and levers.get('q34_lanes_pinned') and levers.get('q34_gpu_q3'))
+    return dict(schema='mhgp9_tower_probe_v28', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
@@ -218,7 +234,10 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                              lanes_events=0,
                              levers=levers),
                 times_ms=dict({key: 0.125 for key in TIMES}, chain_total=1.5,
-                              q2_wait=0.05 if levers.get('q2_during_device') and effective >= 2 else 0.0),
+                              q2_wait=0.05 if levers.get('q2_during_device') and effective >= 2 else 0.0,
+                              # v28: the q2 side's census overlaps q34 and reuses its index.
+                              tower_index=0.0 if early else 0.125, q2_census=0.1 if early else 0.0,
+                              q2_census_index=0.02 if early else 0.0, q2_census_wait=0.0),
                 chain_cpu_s=0.25,
                 generator=dict(q2_front_rectangles=3, q2_candidate_pairs=2, q2_accepted_pairs=1,
                                q34_expanded_pairs=ledger['expanded_pairs'], q34_cover_builds=ledger['cover_builds'],
@@ -228,7 +247,11 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                 catalogue=dict(q2_presentations=1, q3_presentations=2, q4_presentations=1, unique_keys=4, balls=4,
                                extra_shell_balls=0, shell_over_12=0, max_shell=4, max_interior=3, census_nodes=9,
                                census_leaf_tests=5, bytes=64, by_qmin=[1, 2, 1],
-                               by_shell=[0, 0, 1, 2, 1] + [0] * 12, euler=euler),
+                               by_shell=[0, 0, 1, 2, 1] + [0] * 12, euler=euler,
+                               # v28 (R-29): every regular support certified by
+                               # the chain; the q2 keys censused on the q2 side.
+                               regular_supports=[1, 2, 1], early_census_keys=1 if early else 0,
+                               early_census_extra_shell_balls=0),
                 q34_occupancy=occupancy, q34_batch=batch, tower_phases_ms=phases,
                 tower_work=dict(records=4, extra_records=0, representatives=5, anchor_hits=1, key_lookups=4,
                                 intruder_queries=2, intruder_nodes=7, meb_calls=4, meb_power_tests=9, births=3,
@@ -248,7 +271,9 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                 # v26: the device session opened before the chain under its lever.
                 device_session=dict(opened=bool(levers.get('device_session')),
                                     context_ms=0.1 if levers.get('device_session') else 0.0,
-                                    reserve_ms=0.05 if levers.get('device_session') else 0.0),
+                                    reserve_ms=0.05 if levers.get('device_session') else 0.0,
+                                    pinned_ms=0.02 if pinned_session else 0.0,
+                                    pinned_bytes=1024 if pinned_session else 0),
                 tower_detail=tower_detail(levers, effective, k, static, complete))
 
 
@@ -258,7 +283,10 @@ def tower_detail(levers, effective, k, static, complete):
     pipelined = static_path and levers.get('tower_overlap_static') and levers.get('tower_pipelined_tail')
     hashed = complete and static >= 1 and effective > 1 and levers.get('tower_hash_grouping')
     pooled = static_path and levers.get('tower_persistent_pool')
-    return dict(pipelined_orders=effective if pipelined else 0, population_deferred_refs=0,
+    sealed = complete and levers.get('tower_sealed_catalogue')
+    return dict(sealed_catalogues=1 if sealed else 0, seal_sampled_balls=1 if sealed else 0,
+                declared_support_checks=(1 if sealed else 4) if complete else 0,
+                pipelined_orders=effective if pipelined else 0, population_deferred_refs=0,
                 hashed_orders=effective - 1 if hashed else 0, pool_threads=static - 1 if pooled else 0,
                 pool_jobs=3 if pooled else 0, helper_threads=5, runner_threads=effective if static_path else 0,
                 pool_ms=0.01 if pooled else 0.0, populations_by_k=[0.01 if pipelined else 0.0] * k,
@@ -323,7 +351,9 @@ def main():
                 rule.get('q4', levers.get('q34_batch_q4')) == levers.get('q34_batch_q4') and
                 rule.get('q2_overlap', levers.get('q2_during_device')) == levers.get('q2_during_device') and
                 rule.get('fused', levers.get('q34_lanes_fused')) == levers.get('q34_lanes_fused') and
-                rule.get('session', levers.get('device_session')) == levers.get('device_session')):
+                rule.get('session', levers.get('device_session')) == levers.get('device_session') and
+                rule.get('sealed', levers.get('tower_sealed_catalogue')) == levers.get('tower_sealed_catalogue') and
+                rule.get('early', levers.get('q2_early_census')) == levers.get('q2_early_census')):
             time.sleep(rule['seconds'])
     status = 'complete_relative'
     for rule in config.get('refuse', []):
@@ -718,7 +748,7 @@ class Protocol(unittest.TestCase):
         gpu_case = snapshot.default_plan()['cases'][0]
         value = probe_value(data['n'], data['fnv'], 5, 8, 48, 48, levers=gpu_case['levers'])
         pin = (value['tower_digest'], value['catalogue_digest'])
-        with patch.object(worker, 'PINNED_DIGESTS', {('00', 5, 8): pin}):
+        with patch.object(worker, 'PINNED_DIGESTS', {('00', 5): pin}):
             need(worker.validate_probe(worker.strict_json(json.dumps(value)), gpu_case, 0) == 'complete_relative',
                  'pinned digests reproduced')
             for field in ('tower_digest', 'catalogue_digest'):
@@ -727,7 +757,7 @@ class Protocol(unittest.TestCase):
         # v27: twelve pins, the six ground-free LiDAR frames and C's six raw
         # frames with ground (every scene of the inputs, at K5 and K10).
         need(worker.PINNED_DIGESTS == {} and len(PINNED_REAL) == 12 and
-             {(scene, k, 8) for scene in worker.INPUTS for k in (5, 10)} == set(PINNED_REAL) and
+             {(scene, k) for scene in worker.INPUTS for k in (5, 10)} == set(PINNED_REAL) and
              all(re.fullmatch('[0-9a-f]{16}', d) for pair in PINNED_REAL.values() for d in pair),
              'twelve pinned LiDAR values')
 
@@ -835,19 +865,20 @@ class Protocol(unittest.TestCase):
         # at 00 (auditor C, R-27).
         # v26 (R21): L15 off in the whole plan; the GPU arm opens the device
         # session, gpu_cold does not.
+        # v28 (R22): the GPU arm with the sealed catalogue, the q2 early
+        # census and the pinned lanes pool; gpu_r21 without the three,
+        # repeated and interleaved at 00; then each one off alone at 00.
         gpu = dict(on, q34_lanes_fused=False)
-        arms = dict(gpu=gpu, engine=worker.engine_levers(gpu), gpu_cold=dict(gpu, device_session=False),
-                    gpu_tower_witness=dict(gpu, tower_pipelined_tail=False, tower_hash_grouping=False,
-                                           tower_persistent_pool=False))
+        new = ('tower_sealed_catalogue', 'q2_early_census', 'q34_lanes_pinned')
+        arms = dict(gpu=gpu, engine=worker.engine_levers(gpu), gpu_r21=dict(gpu, **{name: False for name in new}),
+                    **{'gpu_no_' + name: dict(gpu, **{name: False}) for name in new})
         expected = [(scene, k, arm, 0) for scene in ('00', '01', '02') for k in (5, 10) for arm in ('gpu', 'engine')]
-        expected += [('00', 5, 'gpu_cold', 0), ('00', 5, 'gpu', 1), ('00', 10, 'gpu_cold', 0),
-                     ('00', 10, 'gpu', 1), ('00', 5, 'gpu_cold', 1), ('00', 10, 'gpu_cold', 1)]
-        # v27 (R21): the tower without its three sibling levers, at 00.
-        expected += [('00', 5, 'gpu_tower_witness', 0), ('00', 10, 'gpu_tower_witness', 0),
-                     ('00', 5, 'gpu_tower_witness', 1), ('00', 10, 'gpu_tower_witness', 1)]
+        expected += [('00', 5, 'gpu_r21', 0), ('00', 5, 'gpu', 1), ('00', 10, 'gpu_r21', 0),
+                     ('00', 10, 'gpu', 1), ('00', 5, 'gpu_r21', 1), ('00', 10, 'gpu_r21', 1)]
+        expected += [('00', k, 'gpu_no_' + name, 0) for name in new for k in (5, 10)]
         # v26 (R21): the raw frames with ground, after the ground-free ones.
         expected += [(scene, k, arm, 0) for scene in ('b00', 'b01', 'b02') for k in (5, 10) for arm in ('gpu', 'engine')]
-        need(provenance['commit'] == head and len(cases) == len(expected) == 34 and all(
+        need(provenance['commit'] == head and len(cases) == len(expected) == 36 and all(
                 (c['scene'], c['k'], c['repeat']) == (scene, k, repeat) and c['levers'] == arms[arm] and
                 c['s'] == 8 and c['workers'] == 48 and c['static_threads'] == 48
                 for c, (scene, k, arm, repeat) in zip(cases, expected)),
@@ -1088,7 +1119,31 @@ class Protocol(unittest.TestCase):
                                lambda v: v['tower_detail'].update(pool_threads=46)),
                               ('tower detail pool without jobs', lambda v: v['tower_detail'].update(pool_jobs=0)),
                               ('tower detail by-k short', lambda v: v['tower_detail']['populations_by_k'].pop()),
-                              ('tower detail absent', lambda v: v.pop('tower_detail'))):
+                              ('tower detail absent', lambda v: v.pop('tower_detail')),
+                              # v28: the sealed catalogue (R-29), the q2 early
+                              # census, the pinned lanes pool and its session.
+                              ('sealed catalogue flag dropped',
+                               lambda v: v['tower_detail'].update(sealed_catalogues=0)),
+                              ('seal sample shifted', lambda v: v['tower_detail'].update(seal_sampled_balls=2)),
+                              ('declared checks beyond the sample',
+                               lambda v: v['tower_detail'].update(declared_support_checks=5)),
+                              ('regular supports short', lambda v: v['catalogue'].update(regular_supports=[1, 2, 0])),
+                              ('regular supports above their arity',
+                               lambda v: v['catalogue'].update(regular_supports=[2, 1, 1])),
+                              ('early census keys shifted', lambda v: v['catalogue'].update(early_census_keys=2)),
+                              ('early census without the index reuse',
+                               lambda v: v['times_ms'].update(tower_index=0.1)),
+                              ('early census wait beyond its wall',
+                               lambda v: v['times_ms'].update(q2_census_wait=0.2)),
+                              ('early census index beyond its wall',
+                               lambda v: v['times_ms'].update(q2_census_index=0.2)),
+                              ('pinned lanes flag dropped', lambda v: v['q34_batch'].update(lanes_pinned=False)),
+                              ('lanes download split beyond the transfer',
+                               lambda v: v['q34_batch'].update(lanes_upload_ms=1.0)),
+                              ('lanes record copy beyond the download',
+                               lambda v: v['q34_batch'].update(lanes_download_copy_ms=1.0)),
+                              ('pinned session without its pool',
+                               lambda v: v['device_session'].update(pinned_bytes=0))):
             bad = deepcopy(gpu_good)
             mutate(bad)
             need(refused(worker.validate_probe, bad, gpu_case, 0), 'batch/GPU probe mutation ' + label)
@@ -1128,6 +1183,18 @@ class Protocol(unittest.TestCase):
             bad = deepcopy(witness)
             mutate(bad)
             need(refused(worker.validate_probe, bad, witness_case, 0), 'tower witness mutation ' + label)
+        # v28 (C, finding 12): mixed tower levers, each alone off, are read on
+        # their own paths (the reader was only tested all on or all off).
+        for off in ('tower_pipelined_tail', 'tower_hash_grouping', 'tower_persistent_pool', 'tower_sealed_catalogue'):
+            mixed_case = dict(gpu_case, levers=dict(gpu_case['levers'], **{off: False}))
+            mixed = probe_value(data['n'], data['fnv'], 5, 8, 48, 48, levers=mixed_case['levers'])
+            need(worker.validate_probe(worker.strict_json(json.dumps(mixed)), mixed_case, 0) == 'complete_relative',
+                 'valid GPU probe with ' + off + ' off alone')
+            swapped = deepcopy(mixed)
+            key = dict(tower_pipelined_tail='pipelined_orders', tower_hash_grouping='hashed_orders',
+                       tower_persistent_pool='pool_threads', tower_sealed_catalogue='sealed_catalogues')[off]
+            swapped['tower_detail'][key] = gpu_good['tower_detail'][key]
+            need(refused(worker.validate_probe, swapped, mixed_case, 0), 'path of ' + off + ' taken without it')
         # v20: a q3 lane deferred below the site slab (record slab or arena
         # overflow) is a legitimate memory decision: accepted.
         deferred_lane = deepcopy(gpu_good)
@@ -1165,7 +1232,7 @@ class Protocol(unittest.TestCase):
         huge['device_session'].update(context_ms=1e6, reserve_ms=1e6)
         need(refused(worker.validate_external_wall, huge, session_wall / 1000.0),
              'device session bounded by the external wall')
-        for field in ('context_ms', 'reserve_ms'):  # each term alone (review before R21)
+        for field in ('context_ms', 'reserve_ms', 'pinned_ms'):  # each term alone (reviews before R21, R22)
             one = deepcopy(gpu_good)
             one['device_session'][field] = 1e6
             need(refused(worker.validate_external_wall, one, session_wall / 1000.0),
@@ -1248,6 +1315,10 @@ class Protocol(unittest.TestCase):
                      ('lanes_pruned_on_engine', lambda v: v['ledger'].update(lanes_pruned_sites=1)),
                      ('device_session_on_engine', lambda v: v['device_session'].update(opened=True, context_ms=1.0)),
                      ('device_session_time_on_engine', lambda v: v['device_session'].update(context_ms=1.0)),
+                     ('early_census_on_engine', lambda v: v['catalogue'].update(early_census_keys=1)),
+                     ('early_census_time_on_engine', lambda v: v['times_ms'].update(q2_census=0.1)),
+                     ('pinned_lanes_on_engine', lambda v: v['q34_batch'].update(lanes_pinned=True)),
+                     ('pinned_pool_on_engine', lambda v: v['q34_batch'].update(lanes_pinned_bytes=256)),
                      ('core_closed_shifted', lambda v: v['ledger'].update(core_closed_edges=2)),
                      ('rect_queries_shifted', lambda v: v['ledger'].update(witness_rect_queries=8)),
                      ('q3_seed_visits_split', lambda v: v['ledger'].update(q3_seed_node_visits=6)),
@@ -1342,17 +1413,18 @@ class Protocol(unittest.TestCase):
                  value['preflight']['engine_tower_digest'] == value['preflight']['tower_digest'],
                  'deferral preflight run and recorded')
             need(value['GPU_preflight_executed'] is True and
-                 value['GPU_completed_cases'] == [0, 2, 4, 6, 8, 10] + list(range(12, 22)) + list(range(22, 34, 2)) and
+                 value['GPU_completed_cases'] == [0, 2, 4, 6, 8, 10] + list(range(12, 24)) + list(range(24, 36, 2)) and
                  receipt['GPU_completed_cases'] == value['GPU_completed_cases'], 'GPU labels from complete LiDAR towers')
             # v21 plan: GPU/engine pairs per (frame, K), then repeated and
             # interleaved S4a / S4a + S4b pairs at 00, K5 and K10.
             # v27 (R21): then the tower witness arm at 00 and the raw frames.
-            need(value['completed_case_indices'] == list(range(34)) and value['cross_worker_comparisons'] == [
+            # v28 (R22): the pairs and single ablations at 00, then the raw frames.
+            need(value['completed_case_indices'] == list(range(36)) and value['cross_worker_comparisons'] == [
                 dict(reference=r, other=r + 1, equal=True) for r in range(0, 12, 2)] + [
                 dict(reference=reference, other=other, equal=True)
-                for reference, other in ((0, 12), (0, 13), (2, 14), (2, 15), (0, 16), (2, 17), (0, 18), (2, 19),
-                                         (0, 20), (2, 21))] + [
-                dict(reference=r, other=r + 1, equal=True) for r in range(22, 34, 2)] and
+                for other, reference in ((12, 0), (13, 0), (14, 2), (15, 2), (16, 0), (17, 2), (18, 0), (19, 2),
+                                         (20, 0), (21, 2), (22, 0), (23, 2))] + [
+                dict(reference=r, other=r + 1, equal=True) for r in range(24, 36, 2)] and
                  value['FULL_executed'] is True and value['provenance'] == receipt['provenance'], 'worker receipt')
             need(not (output / 'build').exists() and (output / 'configure.stdout').is_file(), 'capture excludes build')
             pkg = package()
@@ -1409,8 +1481,8 @@ class Protocol(unittest.TestCase):
     def test_partial_session_case_cap_and_refusal(self):
         with tempfile.TemporaryDirectory() as temporary:
             code, receipt, fake, host = run_scenario(
-                Path(temporary), tools=dict(sleep=[dict(workers=48, k=10, scene='00', batch=True, session=False,
-                                                        seconds=60)], refuse=[dict(scene='02', k=10)]),
+                Path(temporary), tools=dict(sleep=[dict(workers=48, k=10, scene='00', batch=True, sealed=False,
+                                                        early=False, seconds=60)], refuse=[dict(scene='02', k=10)]),
                 patches=[(worker, 'CASE_CAP_SECONDS', 4)])
             need(code == 0 and receipt['status'] == 'partial', 'partial host receipt: ' + json.dumps(receipt)[:600])
             expect_certified_stop(receipt, fake)
@@ -1418,7 +1490,7 @@ class Protocol(unittest.TestCase):
             outcomes = [entry['outcome'] for entry in value['case_outcomes']]
             need(outcomes == ['complete_relative'] * 10 + ['explicit_refusal'] * 2 + ['complete_relative'] * 2 +
                  ['killed_case_cap'] + ['complete_relative'] * 2 + ['killed_case_cap'] +
-                 ['complete_relative'] * 16,  # v27: tower witness arm (4), raw frames with ground (12)
+                 ['complete_relative'] * 18,  # v28: single ablations (6), raw frames with ground (12)
                  'cap kill and explicit refusal: ' + repr(outcomes))
             killed = worker.strict_json((host / 'received/output/probe_17.command.json').read_bytes())
             need(killed['residual_or_interrupted_group_killed'] is True and 3.0 <= killed['elapsed_seconds'] < 30,
@@ -1456,9 +1528,9 @@ class Protocol(unittest.TestCase):
             output = host / 'received/output'
             value = worker.strict_json((output / 'receipt.json').read_bytes())
             outcomes = [entry['outcome'] for entry in value['case_outcomes']]
-            need(outcomes == ['complete_relative'] * 2 + ['killed_budget'] + ['skipped_budget'] * 31,
+            need(outcomes == ['complete_relative'] * 2 + ['killed_budget'] + ['skipped_budget'] * 33,
                  'budget exhaustion: ' + repr(outcomes))
-            need(not any((output / ('probe_' + str(i) + '.command.json')).exists() for i in range(3, 34)),
+            need(not any((output / ('probe_' + str(i) + '.command.json')).exists() for i in range(3, 36)),
                  'skipped cases never launched')
 
     def test_unpaired_gpu_case_is_marked(self):
@@ -1469,11 +1541,11 @@ class Protocol(unittest.TestCase):
                 Path(temporary), tools=dict(sleep=[dict(workers=48, k=5, scene='00', batch=False, seconds=60)]),
                 patches=[(worker, 'CASE_CAP_SECONDS', 4)])
             need(code == 0 and receipt['status'] == 'partial' and
-                 receipt['unpaired_batch_cases'] == [0, 12, 13, 16, 18, 20],
+                 receipt['unpaired_batch_cases'] == [0, 12, 13, 16, 18, 20, 22],
                  'unpaired GPU cases: ' + json.dumps(receipt)[:600])
             expect_certified_stop(receipt, fake)
             value = worker.strict_json((host / 'received/output/receipt.json').read_bytes())
-            need(value['unpaired_batch_cases'] == [0, 12, 13, 16, 18, 20] and
+            need(value['unpaired_batch_cases'] == [0, 12, 13, 16, 18, 20, 22] and
                  [value['case_outcomes'][i]['outcome'] for i in (0, 1, 12, 13)] ==
                  ['complete_relative', 'killed_case_cap', 'complete_relative', 'complete_relative'],
                  'worker unpaired list and outcomes')
@@ -1507,7 +1579,7 @@ class Protocol(unittest.TestCase):
             need(value['GPU_preflight_executed'] is True and value['GPU_attempted'] is True and
                  value['GPU_executed'] is False and
                  [entry['outcome'] for entry in value['case_outcomes']] ==
-                 ['killed_case_cap', 'complete_relative'] * 6 + ['killed_case_cap'] * 10 +
+                 ['killed_case_cap', 'complete_relative'] * 6 + ['killed_case_cap'] * 12 +
                  ['killed_case_cap', 'complete_relative'] * 6,
                  'worker GPU labels and outcomes')
             pkg = package()
@@ -1562,10 +1634,10 @@ class Protocol(unittest.TestCase):
             output = host / 'received/output'
             value = worker.strict_json((output / 'receipt.json').read_bytes())
             outcomes = [entry['outcome'] for entry in value['case_outcomes']]
-            need(outcomes == ['complete_relative'] * 2 + ['probe_failed'] + ['skipped_protocol_defect'] * 31,
+            need(outcomes == ['complete_relative'] * 2 + ['probe_failed'] + ['skipped_protocol_defect'] * 33,
                  'protocol defect skips the following cases: ' + repr(outcomes))
             need('probe counters tower_work' in value['case_outcomes'][2]['reason'] and
-                 not any((output / ('probe_' + str(i) + '.command.json')).exists() for i in range(3, 34)),
+                 not any((output / ('probe_' + str(i) + '.command.json')).exists() for i in range(3, 36)),
                  'skipped cases never launched after a protocol defect')
 
     def test_preflight_failure_runs_no_case(self):
