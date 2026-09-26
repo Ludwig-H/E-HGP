@@ -263,3 +263,142 @@ Il faudra aussi des mutants compilés omission/ID dupliqué/compte forgé,
 un rejeu différentiel GPU de FULL explicite et la mesure du coût total
 collecte+transport+import. Cette note ne qualifie ni ce port absent,
 ni G4, ni le contrat 100 ms.
+
+## 7. Raccord produit après le port q3 — reprise sur `f9f273bb0`
+
+Lecture seule du produit, le 26 septembre ; **q4 reste une proposition**.
+Le port q3 dispose maintenant d'un sidecar possédé de stride K−2, des
+permutations L15/compactage et d'un import régulier dans `census_key`.
+Cela fournit le transport, mais ne qualifie pas automatiquement q4 : la
+porte `tests/gpu/interior_payload_gate.cpp:73` exige actuellement des
+sentinelles dans tous les slots q4. Ses compteurs q4 ne prouvent donc pas
+un transport d'intérieurs q4.
+
+### Chemin minimal, sans nouveau census
+
+1. `q4_lanes.hpp:309` (`q4_pass_chunk`) : recueillir les IDs de lentille
+   pendant les calculs de signes existants. Pour un bucket j, écrire
+   seulement si le **nouveau** compte reste `< K−2` ; s'il atteint ce
+   seuil, aucune écriture hors capacité et aucune publication ultérieure.
+   Le compte ne diminue jamais. Un bucket finalement vivant conserve donc
+   tous ses IDs, au plus K−3, sans réservoir d'ensemble actif.
+2. `q4_lanes.hpp:515` (T1) : initialiser le scratch de classe avec cette
+   lentille, puis compacter les bits `inside` déjà obtenus. Tester le
+   nouveau compte avant toute écriture. Une classe rejetée, inachevée ou
+   sans représentant positif ne publie rien. Les témoins non candidats
+   restent inclus. Repartir d'un scratch neuf pour **chaque** classe,
+   y compris après un arrêt anticipé d'une classe profonde.
+3. `q4_lanes.hpp:621` : écrire au même slot physique que le record accepté,
+   IDs originaux via `index.rank_ids`, puis sentinelles jusqu'au stride.
+   `q4_lanes.hpp:646` : le tri local par représentant doit échanger le
+   **sidecar entier avec son record**. Cette permutation précède L15 et
+   n'est pas couverte par le gather final.
+4. `lanes_tasks.hpp:269,352,431` : transmettre le scratch aux chemins
+   fusionné et séparé. Pendant le passage fusionné, lentilles et scratch
+   q3 coexistent ; après publication de q3, son scratch K−2 peut servir à
+   T1. Préserver les deux conditions d'arrêt, les emplacements q3 en haut
+   et q4 en bas, et les reprises propres lorsque L15 déborde.
+5. `lanes_host.hpp:307` et `filter_runner.cu:1078` remplissent aujourd'hui
+   explicitement q4 de sentinelles : copier aussi les paquets q4 activés.
+   `lanes_task_slab_index`, staging, gather et transfert conservent ensuite
+   la même association record/paquet. Un essai différé/fautif ne publie
+   aucun paquet survivant d'un scratch antérieur.
+
+Pour éviter huit nouveaux calculs de puissance par chunk, conserver les
+neuf bits `neg` déjà calculés dans les bits hauts d'un mot par lane, avec
+les deux bits q3 actuels dans les bits bas. `HostGroup::ballot2` et
+`WarpGroup::ballot2` ne lisent que ces deux bits bas. Après le vote compact
+existant, les buckets dont le compte final du chunk est encore vivant et
+a augmenté extraient leurs masques de lentille depuis ce mot, puis leurs
+IDs. Les votes supplémentaires restent un coût réel à mesurer ; aucun
+nouveau parcours géométrique n'est nécessaire. Ne pas lire les lanes
+hors du chunk final partiel.
+
+### Mémoire et aval
+
+Scratch additionnel de lentilles : `8·max(K−3,0)` mots par **warp actif**
+(64 octets à K5, 224 à K10), plus un mot de signes par lane si nécessaire.
+Le scratch de classe réutilise les huit mots q3 après son émission.
+Le sidecar K−2 existant suffit pour q4 (maximum K−3), donc `LaneRecord`
+reste à 128 octets et aucun stride supplémentaire par record n'est requis
+si q3 est déjà activé. En activation q4 seule, ce sidecar reste un coût
+à payer. Requalifier occupation, mémoire partagée et politique de nombre
+de warps ; ne pas transposer l'occupation mesurée du kernel q3.
+
+L'import actuel `tower_chain.cpp:897` est réservé à `arity==3 && shell==3`,
+et l'association `:1586` aux présentations q3. Étendre explicitement le
+chemin à q4 **régulier** (`arity==4 && shell==4`), avec source interne
+certifiée, profondeur `< K−2`, IDs distincts et puissances strictement
+négatives. Garder le census global pour les coquilles étendues et le tail
+sans paquet. Ne pas réinterpréter silencieusement les compteurs q3 du
+protocole v30 comme des compteurs q3+q4 ; option séparée désactivée et
+schéma explicite lors du port. Aucun mélange des IDs de plusieurs
+présentations d'une même clé.
+
+### Qualification prioritaire avant tout chrono GPU
+
+Le juge doit comparer **tous les IDs** à une puissance directe et le
+`BallData` importé au census indépendant, pas seulement les empreintes.
+Exiger des occurrences non nulles : lentille seule, événements seuls et
+mélange des deux ; deux signes ; contacts/constants ; racines communes et
+bornes de buckets ; K3/K5/K10 dont profondeur K−3 ; passage rejeté puis
+accepté ; bucket mort au milieu d'un chunk ; plusieurs émissions par
+graine avec permutation effective ; q3 rejeté mais q4 accepté en L15 ;
+fusion ON/OFF, pinned/pageable, slab trop petite puis reprise et tail.
+Mutants prioritaires : `<=` au contact, omission de lentille, rang pris
+pour ID, scratch stale après rejet, sidecar non permuté et q4 remplacé
+par sentinelles au staging. Géométrie et ledger T1 doivent rester
+identiques entre ON/OFF ; seuls collecte/transport et census aval varient.
+
+Cette tranche supprimerait le **recensus régulier q4**, pas les passages
+T1 potentiellement quadratiques. La voie triée de la section 3 demeure
+une refonte séparée à comparer au T1 avec arrêt anticipé, par familles
+et sur les partitions LiDAR entières/moitiés/quarts. Aucun gain GPU,
+borne globale ou contrat 100 ms n'est revendiqué ici.
+
+## 8. Décision de priorité : q4 seul ne constitue pas le saut vers 100 ms
+
+Relecture directe des sorties historiques R24-B (indices 0/7/14/21),
+après le port q3 `9751bae69`/`f9f273bb0`, sans nouvelle mesure GCP :
+
+| Entrée / K | FULL interne | Census tardif entier | Tour explicite | Clés q4 régulières / clés tardives | Scénario proportionnel q4 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| sans sol 00 / 5 | 916,304 ms | 100,273 ms | 282,724 ms | 158 492 / 849 777 | 18,702 ms |
+| sans sol 00 / 10 | 2 968,445 ms | 500,532 ms | 1 207,878 ms | 1 732 538 / 4 630 762 | 187,267 ms |
+| brute b00 / 5 | 2 036,570 ms | 210,547 ms | 669,031 ms | 186 253 / 1 556 607 | 25,193 ms |
+| brute b00 / 10 | 6 014,830 ms | 1 030,632 ms | 2 405,582 ms | 2 124 184 / 8 789 308 | 249,081 ms |
+
+Dernière colonne = census × part des clés q4 régulières : **hypothèse de
+coût uniforme par clé, ni mesure q4 ni borne**. Ces reçus ne séparent pas
+le census par arité. Seul plafond contrefactuel large disponible à phases
+inchangées : même supprimer **tout** le census tardif du premier cas
+laisserait 816,031 ms. Le vrai import garde clé/niveau/positivité/Euler,
+collecte et copies ; une accélération q4 peut donc être faible ou négative.
+R22 confirme les volumes : le scénario proportionnel donne 14,9–19,0 ms
+sur ses trois trames sans sol K5, 22,2–27,3 ms sur les trois brutes K5.
+Ces six cas viennent toujours de la seule séquence 08.
+
+Le premier cas R24-B contient par ailleurs un front à **98,598 ms** et
+trois kernels successifs S2/S3/S4 à **64,500 / 91,449 / 55,673 ms**, soit
+211,622 ms. Front, kernels et tour portent chacun un obstacle majeur au
+budget de 100 ms. Ne pas additionner aveuglément les sous-temps imbriqués
+ou superposés, ni transformer ce découpage historique en prédiction v30.
+
+Le coût du producteur q4 mérite une vraie décision : 7 126 317 graines,
+11 680 121 chunks de lentilles, mais seulement 130 814 graines émettrices
+(1,84 %) pour 158 496 records. Huit votes systématiques par chunk
+ajouteraient jusqu'à 93 440 968 votes ; le schéma conditionnel de §7 en
+fait moins, sans que le compte actuel permette de dire combien. Les
+comparaisons T1 ne portent que sur 475 299 chunks : remplacer d'emblée T1
+par du tri n'attaque pas le gros travail observé. Le sidecar q3 déjà
+présent réserve aussi les slots q4 ; le remplir n'augmente pas sa largeur,
+mais ne rend pas gratuite la récupération des lentilles.
+
+**Priorité mise à jour :** juger d'abord le coût net q3 sur G4 ; poursuivre
+front GPU et FULL événementiel **sur tous les ordres**, puis réduire le
+travail de certificats/covers S3. Le port q4 reste utile mais n'est pas une
+étape obligatoire avant ces chantiers. Avant de le sélectionner, mesurer
+le census résiduel par arité et les votes/écritures supplémentaires sur
+un bras apparié ; le temps total ON après q3 inclut encore les imports q3
+et n'est donc pas un « temps q4 ». L'ancien résultat local W4 q3
+746,509→447,227 ms n'est pas transférable aux 48 CPU/GPU de G4.

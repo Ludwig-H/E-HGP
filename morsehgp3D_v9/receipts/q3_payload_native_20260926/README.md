@@ -46,3 +46,10 @@ Le faux reçu de déferral modifiait le condensé catalogue du corps mais
 pas celui de `frames.results` ajouté en v30 ; il était donc rejeté avant
 la comparaison ciblée. Le correctif modifie les deux ensemble, sans
 affaiblir le lecteur ni toucher au moteur. Le replay corrigé est distinct.
+
+Reprise corrigée au commit `f9f273bb0` : **31/31 tests** en Python normal
+et **31/31 sous `-O`**, respectivement 257,272 et 257,133 s, dans
+`protocol_normal.log` et `protocol_optimized.log`. Le protocole, son
+paquet construit depuis Git et ses comparaisons de passages sont ainsi
+rejoués avant la session G4. Ces tests simulés ne sont pas des exécutions
+cloud ; la gate CUDA réelle appartient au reçu G4 séparé.
