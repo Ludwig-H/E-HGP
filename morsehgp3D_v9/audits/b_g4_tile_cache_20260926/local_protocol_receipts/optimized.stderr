@@ -1,0 +1,18 @@
+test_closed_gate_and_faults_are_received (__main__.Protocol.test_closed_gate_and_faults_are_received) ... ok
+test_completed_session (__main__.Protocol.test_completed_session) ... ok
+test_completed_tiled_session (__main__.Protocol.test_completed_tiled_session) ... ok
+test_failures_still_stop (__main__.Protocol.test_failures_still_stop) ... ok
+test_gate_case_stops_the_plan (__main__.Protocol.test_gate_case_stops_the_plan) ... ok
+test_inert_without_cloud (__main__.Protocol.test_inert_without_cloud) ... ok
+test_mismatch_is_received (__main__.Protocol.test_mismatch_is_received) ... ok
+test_nothing_measured_is_a_failure (__main__.Protocol.test_nothing_measured_is_a_failure) ... ok
+test_pins_and_shared_lifecycle (__main__.Protocol.test_pins_and_shared_lifecycle) ... ok
+test_plan_and_snapshot (__main__.Protocol.test_plan_and_snapshot) ... ok
+test_probe_reader (__main__.Protocol.test_probe_reader) ... ok
+test_tile_failure_still_stops (__main__.Protocol.test_tile_failure_still_stops) ... ok
+test_tiled_probe_reader_and_legacy (__main__.Protocol.test_tiled_probe_reader_and_legacy) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 57.428s
+
+OK

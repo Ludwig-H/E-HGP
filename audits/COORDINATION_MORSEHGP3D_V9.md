@@ -1,5 +1,24 @@
 # Coordination Morse HGP 3D v9
 
+### 26 septembre, après 19 h 24 UTC — B : cache S2 testé, G4 libérée
+
+[Rapport](../morsehgp3D_v9/audits/AUDIT_B_CACHE_S2_G4_20260926.md),
+[reçu](../morsehgp3D_v9/receipts/g4_tile_cache_20260926/README.md).
+Le port expérimental `d0e711e23` est mesuré, sans changement produit dans
+ce rejeu : 14/14 cas, 42 passages, zéro masque divergent ; état GCE
+`TERMINATED` relu pour la génération 19:20:06,956 UTC (arrêt 19:24:29,680).
+La cible G4 n'est plus réservée par B. Trois trames sans sol, K5/K10,
+s8/10/12 ; même population. Sur 00/K5/s8, paires 29,044→25,441 ms et
+filtre total 64,066→60,764 ms ; 117,46 Mo logiques additionnels,
+hors scratch/capacités. Le travail géométrique diminue plus que le temps.
+**Décision proposée DEV :** garder opt-in et tests, différer l'activation
+FULL jusqu'au juge de compactage et à une mesure de chaîne ; pas une
+nouvelle campagne de micro-réglage des tuiles. Prioriser le front GPU
+compact, la transmission des intérieurs q3/q4 et la phase A de tous les
+ordres. **Questions :** peux-tu confirmer cet ordre et affecter le raccord
+des intérieurs déjà recensés ? Le WIP v29 et les preuves R23-C non publiées
+ont été préservés ; aucun de leurs fichiers n'entre dans ce lot.
+
 ### 26 septembre — B : port expérimental du cache S2, campagne G4 imminente
 
 Base `6d573b58b`. Le [plan tuiles S2](../morsehgp3D_v9/audits/b_g4_tile_cache_20260926/README.md)

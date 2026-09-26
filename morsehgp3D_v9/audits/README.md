@@ -9,6 +9,10 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 
 ## Par où commencer
 
+Dernier complément concret : [cache S2 sur G4](AUDIT_B_CACHE_S2_G4_20260926.md).
+14 comparaisons terminées, réponses identiques ; gain net de 1–4 ms sur
+le filtre, pas un nouveau temps FULL. [Preuves et lecteurs](b_g4_tile_cache_20260926/README.md).
+
 1. [`ETAT_COURANT.md`](ETAT_COURANT.md) : verdict synthétique et mutable.
    La [reprise transversale du 26 septembre](AUDIT_GEANT_REPRISE_20260926.md)
    couvre les 67 commits `a22dc9657..c529c82bb`, les reçus R21/R22,

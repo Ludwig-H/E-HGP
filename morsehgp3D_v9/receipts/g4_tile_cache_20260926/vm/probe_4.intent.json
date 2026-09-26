@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/usr/bin/time",
+    "-v",
+    "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/build/mhgp9_gpu_filter_probe",
+    "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/source/data/scene_00.u32le",
+    "10",
+    "48",
+    "--s=8",
+    "--repeats=3"
+  ],
+  "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+  "exit_code": null,
+  "group_closed": false,
+  "per_command_watchdog": null,
+  "pid": null,
+  "session_work_deadline_epoch": 1790451134.6489697,
+  "started_utc": "2026-09-26T19:22:14.649002+00:00"
+}

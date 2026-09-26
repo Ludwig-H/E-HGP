@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/home/codespace/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "os-login",
+    "ssh-keys",
+    "add",
+    "--project=devpod-gpu-exploration",
+    "--key-file=/workspaces/E-HGP/build/v9-tile-session-d0e711e23-resume/id_ed25519.pub",
+    "--ttl=70m",
+    "--format=json",
+    "--quiet"
+  ],
+  "ended_epoch": 1790450377.0637686,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "oslogin_add",
+  "pid": 18855,
+  "started_epoch": 1790450375.511942,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "6c5c63c3703bd624b09c1524debd7588373860fca8542af67acfe5fd9c23ae5f",
+  "timeout_seconds": 90
+}

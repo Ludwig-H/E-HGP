@@ -3,6 +3,11 @@
 Base lue : `6d573b58b`. Revue de conception pendant le port, pas encore
 validation du CUDA ni nouveau résultat G4. Cadre `not_claimed`.
 
+Cette note est la revue **avant exécution**, conservée comme telle.
+Le [rapport après G4](../AUDIT_B_CACHE_S2_G4_20260926.md) et le
+[reçu](../../receipts/g4_tile_cache_20260926/README.md) donnent désormais
+les résultats du port mesuré ; ils ne qualifient toujours pas FULL.
+
 ## Invariants à conserver
 
 Pour un rectangle survivant de facteurs A et B, une tuile couvre une

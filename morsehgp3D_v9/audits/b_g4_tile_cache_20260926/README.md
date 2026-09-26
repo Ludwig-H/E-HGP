@@ -1,5 +1,11 @@
 # Cache de témoins S2 par tuiles — plan G4 du 26 septembre 2026
 
+**Campagne maintenant close** : [reçu brut](../../receipts/g4_tile_cache_20260926/README.md),
+[analyse et décisions](../AUDIT_B_CACHE_S2_G4_20260926.md). 14 cas,
+42 passages, réponses identiques, gain net du filtre d'environ 1–4 ms.
+G4 SPOT arrêtée et `TERMINATED` relu. Le plan ci-dessous est celui fixé
+avant la mesure ; il n'est plus une campagne en attente.
+
 Ce plan prépare une expérience du filtre de paires q3/q4. Il ne mesure ni
 le générateur complet, ni le catalogue, ni la tour FULL. Aucun gain GPU ne
 résulte du seul ajout du plan. Le cache reste opt-in (`--tile-cache`).
@@ -87,3 +93,50 @@ Les tests hors ligne `gpu_filter_selftest_v9.py` tournent en Python normal
 et `-O` avant la campagne. Ils doivent couvrir succès référence/cache,
 refus de schéma/options/compteurs/temps incohérents, lecture historique,
 mutants, fermeture après panne et détection des captures modifiées.
+
+## Publication de la capture close
+
+`publish_closed.py` ne fait aucun appel GCP. Il exige le reçu hôte final
+`targeted_shutdown_certified=true`, une réception `completed` rejugée et
+une relecture GCE `TERMINATED` de la même génération. Il copie les seuls
+octets de `received/output` vers `vm/`, vérifie leurs empreintes, puis
+publie une liste fermée de preuves hôte. Les sorties des gardes sont
+explicitement expurgées des comptes et clés publiques ; leurs empreintes
+originales et publiées restent distinctes. Le répertoire parent contenant
+la clé privée n'est jamais parcouru. Le paquet binaire n'est pas publié :
+il contient des coordonnées LiDAR et la v9 n'accueille pas de nouveaux
+octets KITTI.
+
+Exécution seulement **après** fermeture et relecture de la cible :
+
+```bash
+python3 -B morsehgp3D_v9/audits/b_g4_tile_cache_20260926/publish_closed.py \
+  --host /chemin/session/gpu_filter_v9_host \
+  --package /chemin/paquet/PACKAGE.json \
+  --after-stop /chemin/relecture_gce_apres_arret.json \
+  --output morsehgp3D_v9/receipts/g4_tile_cache_20260926
+```
+
+`PACKAGE.json`, le manifeste, le plan et l'empreinte du snapshot permettent
+de reconstruire celui-ci depuis son commit d'origine. Le lecteur
+`analyze_receipt.py <reçu> --snapshot <paquet-local>/snapshot.tar.gz`
+rejoue le validateur intégral épinglé et recalcule les tableaux depuis les
+sorties brutes. Le snapshot original est requis : pour le dossier publié,
+son absence entraîne un refus, pas une relecture de portée réduite.
+Le lecteur annonce séparément si les journaux bruts d'arrêt sont présents
+et rehachés ; la publication n'en donne que les copies expurgées.
+`sha256sum --check SHA256SUMS`, exécuté dans le dossier du reçu, contrôle
+l'inventaire publié. Celui-ci couvre tous les fichiers à sa création :
+tout ajout ultérieur requiert sa fermeture à nouveau, sans réécrire les
+sorties brutes.
+
+Le helper de publication possède quatre tests locaux, passés en Python
+normal et `-O` : refus d'un reçu non clos, refus du répertoire parent de
+session, expurgation des comptes et clés publiques sans toucher à la
+génération ni à l'état final, refus d'un marqueur de clé privée. Ce ne
+sont ni des opérations GCP ni des mesures supplémentaires.
+
+Incident préalable déclaré par l'opérateur : le premier lancement du
+contrôleur a été refusé pour une clé privée de mode `0644`, corrigé en
+`0600`. Ce contrôle a précédé tout appel GCP ; ce n'est ni une panne du
+benchmark ni une mesure GPU.

@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-tile-session-d0e711e23-resume/gpu_filter_v9_host/stop_and_verify.sh",
+    "--yes",
+    "--expected-last-start-timestamp",
+    "2026-09-26T12:20:06.956-07:00"
+  ],
+  "ended_epoch": 1790450676.2273614,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "guarded_stop",
+  "pid": 24066,
+  "started_epoch": 1790450606.770314,
+  "stderr_sha256": "a14ba5b06f4b2c40bfa7a2f21ba0a1e5778abe8b3f3fd5189ffefdbdf26af6f1",
+  "stdout_sha256": "8237101459ad3fd3b178090dc01ee238c1558b1e6f7658c0954b25af6b58c3ee",
+  "timeout_seconds": null
+}

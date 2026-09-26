@@ -1,0 +1,80 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v9-tile-audit-resume-20260926
+UpdateCTestConfiguration  from :/workspaces/E-HGP/build/v9-tile-audit-resume-20260926/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/workspaces/E-HGP/build/v9-tile-audit-resume-20260926/DartConfiguration.tcl
+Test project /workspaces/E-HGP/build/v9-tile-audit-resume-20260926
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 139
+    Start 139: mhgp9_gpu_witness_filter_port
+
+139: Test command: /usr/bin/cmake "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v9-tile-audit-resume-20260926/mhgp9_gpu_witness_filter_port_gate" "-DARGS=--n=2000 --pair-stride=5" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=witness_filter_port_gate n=2000" "-P" "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/cmake/run_expect.cmake"
+139: Working Directory: /workspaces/E-HGP/build/v9-tile-audit-resume-20260926
+139: Test timeout computed to be: 600
+139: port family=uniform kmax=3 rectangles=116304 affine=95639 general=20665 survivors=44156 pairs=9505 pair_survivors=8912 lanes_rejected=937 lanes_open=14255 sensitivity=44156 visits=4589438
+139: port family=uniform kmax=5 rectangles=320159 affine=215444 general=104715 survivors=85432 pairs=19207 pair_survivors=17560 lanes_rejected=2868 lanes_open=32194 sensitivity=34377 visits=12513195
+139: port family=uniform kmax=10 rectangles=652601 affine=351101 general=301500 survivors=180146 pairs=44234 pair_survivors=38325 lanes_rejected=10208 lanes_open=72121 sensitivity=29037 visits=36602948
+139: port family=terrain kmax=3 rectangles=25333 affine=19488 general=5845 survivors=14331 pairs=3317 pair_survivors=3013 lanes_rejected=467 lanes_open=4700 sensitivity=14331 visits=838465
+139: port family=terrain kmax=5 rectangles=63825 affine=37776 general=26049 survivors=26635 pairs=6671 pair_survivors=5877 lanes_rejected=1402 lanes_open=10691 sensitivity=10980 visits=2050029
+139: port family=terrain kmax=10 rectangles=129689 affine=55041 general=74648 survivors=52901 pairs=15553 pair_survivors=13162 lanes_rejected=4430 lanes_open=25301 sensitivity=7862 visits=5335445
+139: port family=clusters kmax=3 rectangles=72969 affine=62497 general=10472 survivors=34124 pairs=356987 pair_survivors=10221 lanes_rejected=694424 lanes_open=16792 sensitivity=34124 visits=7002352
+139: port family=clusters kmax=5 rectangles=141241 affine=111530 general=29711 survivors=61541 pairs=363400 pair_survivors=19052 lanes_rejected=689650 lanes_open=35053 sensitivity=22727 visits=11413394
+139: port family=clusters kmax=10 rectangles=186620 affine=141743 general=44877 survivors=110966 pairs=376200 pair_survivors=38849 lanes_rejected=677439 lanes_open=72294 sensitivity=13376 visits=21257530
+139: witness_filter_port_gate guard_checks=13
+139: witness_filter_port_gate n=2000 rectangles=1708741 survivors=610232 pairs=1195074 lanes_rejected=2081825 lanes_open=283401 affine=1090259 general=618482 sensitivity=210970
+139: 
+1/5 Test #139: mhgp9_gpu_witness_filter_port ................   Passed   14.53 sec
+test 141
+    Start 141: mhgp9_gpu_witness_filter_port_bad_argument
+
+141: Test command: /usr/bin/cmake "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v9-tile-audit-resume-20260926/mhgp9_gpu_witness_filter_port_gate" "-DARGS=--n=abc" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/cmake/run_expect.cmake"
+141: Working Directory: /workspaces/E-HGP/build/v9-tile-audit-resume-20260926
+141: Test timeout computed to be: 60
+141: 
+2/5 Test #141: mhgp9_gpu_witness_filter_port_bad_argument ...   Passed    0.01 sec
+test 142
+    Start 142: mhgp9_gpu_witness_cache_port
+
+142: Test command: /usr/bin/cmake "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v9-tile-audit-resume-20260926/mhgp9_gpu_witness_cache_port_gate" "-DARGS=" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=witness_cache_port_gate queries=" "-P" "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/cmake/run_expect.cmake"
+142: Working Directory: /workspaces/E-HGP/build/v9-tile-audit-resume-20260926
+142: Test timeout computed to be: 180
+142: witness_cache_port_gate queries=98784 traces=3176 full=5776 partial=3298 open=86534 contacts=198032 checks=22 baseline_visits=2343212 representative_and_fallback_visits=2289970 cache_tests=264924
+142: 
+3/5 Test #142: mhgp9_gpu_witness_cache_port .................   Passed    0.31 sec
+test 143
+    Start 143: mhgp9_gpu_witness_cache_port_bad_argument
+
+143: Test command: /usr/bin/cmake "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v9-tile-audit-resume-20260926/mhgp9_gpu_witness_cache_port_gate" "-DARGS=--bad" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/cmake/run_expect.cmake"
+143: Working Directory: /workspaces/E-HGP/build/v9-tile-audit-resume-20260926
+143: Test timeout computed to be: 60
+143: 
+4/5 Test #143: mhgp9_gpu_witness_cache_port_bad_argument ....   Passed    0.01 sec
+test 144
+    Start 144: mhgp9_gpu_witness_cache_no_retest_mutant
+
+144: Test command: /usr/bin/cmake "-DEXPECTED=1" "-DCMD=/workspaces/E-HGP/build/v9-tile-audit-resume-20260926/mhgp9_gpu_witness_cache_no_retest_mutant_gate" "-DARGS=" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=cause=witness_cache.endpoint_retest" "-P" "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/cmake/run_expect.cmake"
+144: Working Directory: /workspaces/E-HGP/build/v9-tile-audit-resume-20260926
+144: Test timeout computed to be: 60
+144: cause=witness_cache.endpoint_retest
+144: 
+5/5 Test #144: mhgp9_gpu_witness_cache_no_retest_mutant .....   Passed    0.01 sec
+
+The following tests passed:
+	mhgp9_gpu_witness_filter_port
+	mhgp9_gpu_witness_filter_port_bad_argument
+	mhgp9_gpu_witness_cache_port
+	mhgp9_gpu_witness_cache_port_bad_argument
+	mhgp9_gpu_witness_cache_no_retest_mutant
+
+100% tests passed, 0 tests failed out of 5
+
+Label Time Summary:
+gate      =  14.88 sec*proc (5 tests)
+gpu       =  14.88 sec*proc (5 tests)
+mutant    =   0.01 sec*proc (1 test)
+oracle    =  14.85 sec*proc (2 tests)
+
+Total Test time (real) =  14.95 sec

@@ -1,0 +1,22 @@
+{
+  "case": {
+    "file": "data/scene_01.u32le",
+    "k": 5,
+    "n": 35551,
+    "repeat": 0,
+    "repeats": 3,
+    "s": 8,
+    "scene": "01",
+    "tile_cache": true,
+    "workers": 48
+  },
+  "cpu_filter_cache_ms": 805.301,
+  "elapsed_seconds": 3.7709363950000068,
+  "exit_code": 0,
+  "gnu_time_max_rss_kb": 210720,
+  "gpu_total_ms": 42.369,
+  "index": 7,
+  "input_file_sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f",
+  "outcome": "complete",
+  "pairs": 11960420
+}

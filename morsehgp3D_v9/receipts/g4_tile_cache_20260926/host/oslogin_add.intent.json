@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/home/codespace/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "os-login",
+    "ssh-keys",
+    "add",
+    "--project=devpod-gpu-exploration",
+    "--key-file=/workspaces/E-HGP/build/v9-tile-session-d0e711e23-resume/id_ed25519.pub",
+    "--ttl=70m",
+    "--format=json",
+    "--quiet"
+  ],
+  "name": "oslogin_add",
+  "started_epoch": 1790450375.511942,
+  "timeout_seconds": 90
+}

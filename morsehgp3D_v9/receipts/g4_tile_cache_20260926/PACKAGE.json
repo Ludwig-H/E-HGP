@@ -1,0 +1,205 @@
+{
+  "FULL_executed": false,
+  "GCP_used": false,
+  "GPU_executed": false,
+  "base_worker_sha256": "b1d9c65da72ec3e0bd4232ae6e4b909ec20a0df82422eec121d8e142d48a3471",
+  "cases": [
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "n": 39885,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 8,
+      "scene": "00",
+      "tile_cache": false,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "n": 39885,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 8,
+      "scene": "00",
+      "tile_cache": true,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "n": 39885,
+      "repeat": 1,
+      "repeats": 3,
+      "s": 8,
+      "scene": "00",
+      "tile_cache": true,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "n": 39885,
+      "repeat": 1,
+      "repeats": 3,
+      "s": 8,
+      "scene": "00",
+      "tile_cache": false,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 10,
+      "n": 39885,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 8,
+      "scene": "00",
+      "tile_cache": false,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 10,
+      "n": 39885,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 8,
+      "scene": "00",
+      "tile_cache": true,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_01.u32le",
+      "k": 5,
+      "n": 35551,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 8,
+      "scene": "01",
+      "tile_cache": false,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_01.u32le",
+      "k": 5,
+      "n": 35551,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 8,
+      "scene": "01",
+      "tile_cache": true,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_02.u32le",
+      "k": 5,
+      "n": 45845,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 8,
+      "scene": "02",
+      "tile_cache": false,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_02.u32le",
+      "k": 5,
+      "n": 45845,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 8,
+      "scene": "02",
+      "tile_cache": true,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "n": 39885,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 10,
+      "scene": "00",
+      "tile_cache": false,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "n": 39885,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 10,
+      "scene": "00",
+      "tile_cache": true,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "n": 39885,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 12,
+      "scene": "00",
+      "tile_cache": false,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "n": 39885,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 12,
+      "scene": "00",
+      "tile_cache": true,
+      "workers": 48
+    }
+  ],
+  "commit": "d0e711e23617a7fa2838cac9b370ff125d4be5fb",
+  "controller_sha256": "550fd170b35b0c5ec488efe7adad4868ab081bd4d2e6b964fff3f57ab4418ee8",
+  "inputs": {
+    "data/scene_00.u32le": {
+      "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le",
+      "n": 39885,
+      "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf"
+    },
+    "data/scene_01.u32le": {
+      "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/full.u32le",
+      "n": 35551,
+      "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f"
+    },
+    "data/scene_02.u32le": {
+      "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/full.u32le",
+      "n": 45845,
+      "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af"
+    },
+    "data/scene_b00.u32le": {
+      "commit_path": "morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_grid/full.u32le",
+      "n": 123389,
+      "sha256": "233cc4ea8cac6e0b1155ea845af57b32e5236764bf2e119557aeab5bac76c172"
+    },
+    "data/scene_b01.u32le": {
+      "commit_path": "morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_01_000100_grid/full.u32le",
+      "n": 124479,
+      "sha256": "de45e8dcaf5610cd71a369b613f16914d5713e77cbe1532122ec2e823bc0b4ad"
+    },
+    "data/scene_b02.u32le": {
+      "commit_path": "morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_02_000200_grid/full.u32le",
+      "n": 125526,
+      "sha256": "37a7be399fae909a1291cddfc3ca5b972d3effdfa8dc8cd87a41accd5fa0f5f7"
+    }
+  },
+  "manifest_sha256": "547cb0d086cb09731a2ae0970bdea5f69fc86532cabf36c9fd4ddd8a318af69a",
+  "protocol_source": "commit",
+  "public_status": "not_claimed",
+  "real_session_allowed": true,
+  "snapshot_sha256": "946eb959f6410657154806411913fdf02ce628081892b94a55b186c925ba70af",
+  "source_files": 185,
+  "status": "prepared_not_executed",
+  "tree": "83d310aa1d11a67e9c82af6a48c3d7e6c08ae813",
+  "worker_sha256": "8159491017fcfd524858c5e17924e5c2350d2f9930f58ffd56e052fd990d4ff3"
+}

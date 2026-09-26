@@ -1,0 +1,14 @@
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Found Python3: /home/codespace/.python/current/bin/python3 (found version "3.12.1") found components: Interpreter 
+-- mhgp9: mhgp9_gen_mutant_q34_indexed_witness_admitted_lane_recounted_in_children DISABLED (site de mutation non unique dans lanes/q34_witness_search.cpp depuis 2629a536 (bornes affines) ; DISABLED en v8 (CMakeLists v8, mhgp8_q34_indexed_witness_mutations))
+-- Configuring done (3.6s)
+-- Generating done (0.4s)
+-- Build files have been written to: /workspaces/E-HGP/build/v9-tile-audit-resume-20260926

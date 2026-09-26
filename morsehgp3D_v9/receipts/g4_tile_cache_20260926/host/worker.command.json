@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "/home/codespace/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "ssh",
+    "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-b",
+    "--quiet",
+    "--ssh-key-file=/workspaces/E-HGP/build/v9-tile-session-d0e711e23-resume/id_ed25519",
+    "--ssh-key-expiration=2026-09-26T20:29:36.057316Z",
+    "--ssh-flag=-n",
+    "--ssh-flag=-o BatchMode=yes",
+    "--ssh-flag=-o ConnectTimeout=15",
+    "--command=exec env PYTHONPATH=/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/source/gcp-migration python3 /tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/worker.py --source-root /tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/source --source-manifest /tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/source_manifest.json --source-manifest-sha256 547cb0d086cb09731a2ae0970bdea5f69fc86532cabf36c9fd4ddd8a318af69a --guard-mark /tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/double_guard_verified --guard-mark-sha256 f7ce87cab68c0e17addd06e6f13dcd919c6a6de6efc879903c256fce06af9e3c --generation 2026-09-26T12:20:06.956-07:00 --session-deadline-epoch 1790452849 --closing-margin-seconds 300 --output /tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output --project devpod-gpu-exploration --zone us-central1-b --instance ehgp-v7-4fa0e0789a7d5bb06b787d35 --execute --useful-budget-seconds 1500 --case-cap-seconds 600"
+  ],
+  "ended_epoch": 1790450594.4863563,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "worker",
+  "pid": 22390,
+  "started_epoch": 1790450490.7805493,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "d0f70b6fe834122c83d8e23f1ff176a1964ecab03402a7abaf454321cd18d93f",
+  "timeout_seconds": 1560
+}

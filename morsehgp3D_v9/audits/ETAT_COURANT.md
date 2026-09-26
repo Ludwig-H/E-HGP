@@ -1,5 +1,21 @@
 # État courant des audits v9
 
+**Cache S2 mesuré sur G4, 26 septembre** : [rapport et décisions](AUDIT_B_CACHE_S2_G4_20260926.md),
+[reçu](../receipts/g4_tile_cache_20260926/README.md). Le port opt-in
+`d0e711e23` passe 14 cas sur trois trames sans sol de la séquence 08,
+K5/K10 et s8/10/12 ; 42 passages, aucun masque divergent. Sur
+08/000000 K5/s8, médianes chaudes : paires GPU 29,044→25,441 ms,
+filtre complet 64,066→60,764 ms, travail géométrique ÷1,592.
+Sur les six configurations, le gain net du filtre vaut environ 1–4 ms,
+avec 66–158 Mo logiques supplémentaires hors scratch/capacités. Gain
+mesuré mais modeste : ne pas en faire la priorité 100 ms, ni activer
+le défaut FULL avant qualification du compactage et mesure de chaîne.
+P inchangé, aucune borne sous-quadratique acquise ; ce reçu n'exécute
+pas FULL. Priorités maintenues : front GPU compact, intérieurs déjà
+recensés transportés jusqu'au catalogue, phase A de tous les ordres FULL.
+Une session SPOT close, génération 19:20:06,956 UTC, arrêt 19:24:29,680 UTC,
+état `TERMINATED` relu. Le code moteur est resté inchangé pendant ce rejeu.
+
 **Nouvelles pistes 100 ms, 26 septembre** : [synthèse et décisions de port](AUDIT_B_GAINS_STRUCTURELS_100MS_20260926.md).
 Quatre prototypes locaux isolés, sans changement du moteur : import des
 intérieurs déjà comptés (consommateur synthétique ×3,52–3,69, pas gain FULL),

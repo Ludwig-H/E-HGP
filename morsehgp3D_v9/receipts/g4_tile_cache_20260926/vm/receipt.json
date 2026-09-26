@@ -1,0 +1,1534 @@
+{
+  "CUDA_installation_attempted": false,
+  "FULL_executed": false,
+  "GPU_attempted": true,
+  "GPU_executed": true,
+  "available_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47
+  ],
+  "backend": "cuda_g4",
+  "base_worker_sha256": "b1d9c65da72ec3e0bd4232ae6e4b909ec20a0df82422eec121d8e142d48a3471",
+  "binary_sha256": "a6137cf8a857cb1177287f22fc8e14debaa1d9088be93447c4325d51012d4f6f",
+  "binary_stable": true,
+  "case_cap_seconds": 600,
+  "case_outcomes": [
+    {
+      "cpu_filter_cache_ms": 1184.31,
+      "elapsed_seconds": 6.028015366000005,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 260808,
+      "gpu_total_ms": 63.593,
+      "index": 0,
+      "outcome": "complete",
+      "pairs": 23686751
+    },
+    {
+      "cpu_filter_cache_ms": 1167.34,
+      "elapsed_seconds": 5.975388765999995,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 260436,
+      "gpu_total_ms": 60.595,
+      "index": 1,
+      "outcome": "complete",
+      "pairs": 23686751
+    },
+    {
+      "cpu_filter_cache_ms": 1163.854,
+      "elapsed_seconds": 5.977714879000004,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 260172,
+      "gpu_total_ms": 60.265,
+      "index": 2,
+      "outcome": "complete",
+      "pairs": 23686751
+    },
+    {
+      "cpu_filter_cache_ms": 1164.681,
+      "elapsed_seconds": 6.025560019999986,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 260820,
+      "gpu_total_ms": 63.538,
+      "index": 3,
+      "outcome": "complete",
+      "pairs": 23686751
+    },
+    {
+      "cpu_filter_cache_ms": 2188.599,
+      "elapsed_seconds": 10.283073383000016,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 314560,
+      "gpu_total_ms": 104.414,
+      "index": 4,
+      "outcome": "complete",
+      "pairs": 30777213
+    },
+    {
+      "cpu_filter_cache_ms": 2207.201,
+      "elapsed_seconds": 10.282822780000004,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 314180,
+      "gpu_total_ms": 100.412,
+      "index": 5,
+      "outcome": "complete",
+      "pairs": 30777213
+    },
+    {
+      "cpu_filter_cache_ms": 805.4749999999999,
+      "elapsed_seconds": 3.769960166000004,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 210336,
+      "gpu_total_ms": 43.548,
+      "index": 6,
+      "outcome": "complete",
+      "pairs": 11960420
+    },
+    {
+      "cpu_filter_cache_ms": 805.301,
+      "elapsed_seconds": 3.7709363950000068,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 210720,
+      "gpu_total_ms": 42.369,
+      "index": 7,
+      "outcome": "complete",
+      "pairs": 11960420
+    },
+    {
+      "cpu_filter_cache_ms": 1144.054,
+      "elapsed_seconds": 5.526920202000014,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 256080,
+      "gpu_total_ms": 64.573,
+      "index": 8,
+      "outcome": "complete",
+      "pairs": 22722345
+    },
+    {
+      "cpu_filter_cache_ms": 1150.341,
+      "elapsed_seconds": 5.574944235000004,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 256464,
+      "gpu_total_ms": 62.163,
+      "index": 9,
+      "outcome": "complete",
+      "pairs": 22722345
+    },
+    {
+      "cpu_filter_cache_ms": 878.4159999999999,
+      "elapsed_seconds": 5.07380615400001,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 255440,
+      "gpu_total_ms": 55.927,
+      "index": 10,
+      "outcome": "complete",
+      "pairs": 18254639
+    },
+    {
+      "cpu_filter_cache_ms": 886.713,
+      "elapsed_seconds": 5.072840092999996,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 255440,
+      "gpu_total_ms": 53.61,
+      "index": 11,
+      "outcome": "complete",
+      "pairs": 18254639
+    },
+    {
+      "cpu_filter_cache_ms": 826.5889999999999,
+      "elapsed_seconds": 5.0754715129999965,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 257324,
+      "gpu_total_ms": 52.883,
+      "index": 12,
+      "outcome": "complete",
+      "pairs": 14757258
+    },
+    {
+      "cpu_filter_cache_ms": 826.698,
+      "elapsed_seconds": 5.073880813000017,
+      "exit_code": 0,
+      "gnu_time_max_rss_kb": 257664,
+      "gpu_total_ms": 51.328,
+      "index": 13,
+      "outcome": "complete",
+      "pairs": 14757258
+    }
+  ],
+  "cases": [
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "n": 39885,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 8,
+      "scene": "00",
+      "tile_cache": false,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "n": 39885,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 8,
+      "scene": "00",
+      "tile_cache": true,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "n": 39885,
+      "repeat": 1,
+      "repeats": 3,
+      "s": 8,
+      "scene": "00",
+      "tile_cache": true,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "n": 39885,
+      "repeat": 1,
+      "repeats": 3,
+      "s": 8,
+      "scene": "00",
+      "tile_cache": false,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 10,
+      "n": 39885,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 8,
+      "scene": "00",
+      "tile_cache": false,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 10,
+      "n": 39885,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 8,
+      "scene": "00",
+      "tile_cache": true,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_01.u32le",
+      "k": 5,
+      "n": 35551,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 8,
+      "scene": "01",
+      "tile_cache": false,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_01.u32le",
+      "k": 5,
+      "n": 35551,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 8,
+      "scene": "01",
+      "tile_cache": true,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_02.u32le",
+      "k": 5,
+      "n": 45845,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 8,
+      "scene": "02",
+      "tile_cache": false,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_02.u32le",
+      "k": 5,
+      "n": 45845,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 8,
+      "scene": "02",
+      "tile_cache": true,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "n": 39885,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 10,
+      "scene": "00",
+      "tile_cache": false,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "n": 39885,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 10,
+      "scene": "00",
+      "tile_cache": true,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "n": 39885,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 12,
+      "scene": "00",
+      "tile_cache": false,
+      "workers": 48
+    },
+    {
+      "file": "data/scene_00.u32le",
+      "k": 5,
+      "n": 39885,
+      "repeat": 0,
+      "repeats": 3,
+      "s": 12,
+      "scene": "00",
+      "tile_cache": true,
+      "workers": 48
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "/usr/bin/g++",
+        "--version"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.007525056000005748,
+      "ended_utc": "2026-09-26T19:21:35.702252+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 1808,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:21:35.694603+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "9eaf9b7f4b11c2e84e2478c2ceb0e4f48f4ba88565bcfc832b3bce49847dda6d"
+    },
+    {
+      "argv": [
+        "/usr/bin/cmake",
+        "--version"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.031476725000004535,
+      "ended_utc": "2026-09-26T19:21:35.733891+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 1809,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:21:35.702379+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "6c08f840b67782da73a6fe113b64712615441722b15cd2723062dd4cc00a10d8"
+    },
+    {
+      "argv": [
+        "/usr/local/cuda/bin/nvcc",
+        "--version"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0012880219999971132,
+      "ended_utc": "2026-09-26T19:21:35.735309+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 1810,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:21:35.733991+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "28acf7c60a358550618607525561537e387a326bd4e453cb9cc6c261b96ec3b7"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "--version"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0018276300000081847,
+      "ended_utc": "2026-09-26T19:21:35.737261+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 1811,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:21:35.735405+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a3b64288a651d40a18a243c43c871f7ae2886baa58b7e3c64a1061bfd651245f"
+    },
+    {
+      "argv": [
+        "/usr/bin/nvidia-smi",
+        "--query-gpu=name,driver_version,memory.total,compute_cap",
+        "--format=csv,noheader"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.015407594999999219,
+      "ended_utc": "2026-09-26T19:21:35.752782+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 1812,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:21:35.737344+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "ac1b3b666aad84f98dfd71604498472d27f447c8b5df15273d9c7236f9311fe0"
+    },
+    {
+      "argv": [
+        "lscpu"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.008058104999989268,
+      "ended_utc": "2026-09-26T19:21:35.760961+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 1814,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:21:35.752876+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "2efda043bcd879a936a13bdaddc2667f9e4e6dc97ad64164c1ed5e1a54a6cf71"
+    },
+    {
+      "argv": [
+        "nproc"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.001260423000005062,
+      "ended_utc": "2026-09-26T19:21:35.762345+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 1815,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:21:35.761055+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "654ee9da442fa353f59f11beb688fc7f76c8de62a6c18b2a181fdde2a27cc3ef"
+    },
+    {
+      "argv": [
+        "/usr/bin/cmake",
+        "-S",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/source/morsehgp3D_v9",
+        "-B",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/build",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBOOST_ROOT=/usr",
+        "-DCMAKE_CXX_COMPILER=/usr/bin/g++",
+        "-DMHGP9_ENABLE_CUDA=ON",
+        "-DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 2.3169761319999935,
+      "ended_utc": "2026-09-26T19:21:38.079524+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 1816,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:21:35.762529+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "3e50f7b1028b9691d773e2b8b3edc6698bac0c35d8917774d3ecd1c55f1c82ff"
+    },
+    {
+      "argv": [
+        "/usr/bin/cmake",
+        "--build",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/build",
+        "--target",
+        "mhgp9_gpu_filter_probe",
+        "--parallel",
+        "48"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 9.579641850000002,
+      "ended_utc": "2026-09-26T19:21:47.659489+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 1945,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:21:38.079816+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "0f45dd3669eb4cefb0e5b7cc9d451aa837ca3427e97914aeaf89375d0a01194c"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/build/mhgp9_gpu_filter_probe",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/preflight.u32le",
+        "5",
+        "2",
+        "--s=8",
+        "--repeats=1"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.8148214950000039,
+      "ended_utc": "2026-09-26T19:21:48.916147+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2143,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:21:48.101272+00:00",
+      "stderr_sha256": "28b9f8dfa763f7dd93b7ce1b35e17463ec67f438812564f648c9ff90fbe68d5e",
+      "stdout_sha256": "fbb73e4d80bb70674bd168f100a49c7e4ae9e07882e10317158cc5b0b473e4c7"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/build/mhgp9_gpu_filter_probe",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/preflight.u32le",
+        "5",
+        "2",
+        "--s=8",
+        "--repeats=1",
+        "--inject=pair_mask"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.5644820069999952,
+      "ended_utc": "2026-09-26T19:21:49.480817+00:00",
+      "exit_code": 1,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2153,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:21:48.916310+00:00",
+      "stderr_sha256": "314d1ab081fa5832301adc6c560341617cdb88b2f0edba2d8097455f5844ea94",
+      "stdout_sha256": "30faec35506406cd2925b1fc1e7106b3afa6e4c8ce7892b6ca169ba3680090b6"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/build/mhgp9_gpu_filter_probe",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/preflight.u32le",
+        "5",
+        "2",
+        "--s=8",
+        "--repeats=1",
+        "--tile-cache"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.5643892769999894,
+      "ended_utc": "2026-09-26T19:21:50.049476+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2163,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:21:49.485033+00:00",
+      "stderr_sha256": "7ffccd44c7521e0bc5a3cb409dd81efe1a62cbfc7ec1b0b0ec937b4e4035a02d",
+      "stdout_sha256": "fe5abcf375b8f9b96627cb399a10d0822814e523532fc097cbeafd7c4d90e676"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/build/mhgp9_gpu_filter_probe",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/preflight.u32le",
+        "5",
+        "2",
+        "--s=8",
+        "--repeats=1",
+        "--tile-cache",
+        "--inject=pair_mask"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.5645624069999968,
+      "ended_utc": "2026-09-26T19:21:50.614256+00:00",
+      "exit_code": 1,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2173,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:21:50.049661+00:00",
+      "stderr_sha256": "bab9a4166a1f89c1e1924483cf70d9acf6d5dcda47b233ace609f2cafa7a097b",
+      "stdout_sha256": "560577eca05e2ee661d3c5eaf907f7fef54d392ba45d62c22c816712d0a360bd"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0020765619999991713,
+      "ended_utc": "2026-09-26T19:21:50.619900+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2183,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:21:50.617775+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "27fc40fb8532ff88ec1159b7f0a863b0a3086ecba02a5ebf76f257c178312423"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/build/mhgp9_gpu_filter_probe",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/source/data/scene_00.u32le",
+        "5",
+        "48",
+        "--s=8",
+        "--repeats=3"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 6.028015366000005,
+      "ended_utc": "2026-09-26T19:21:56.648057+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2184,
+      "session_work_deadline_epoch": 1790451110.6199884,
+      "started_utc": "2026-09-26T19:21:50.620021+00:00",
+      "stderr_sha256": "eaf0d3d6c772d8b5659e3fbf2d32ff432c043302829bff912e2f8d43209415fb",
+      "stdout_sha256": "0d1d137452033a3015bb96be8bb2721995e36c4c5c2257fd151f9a59dee047b5"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0014052909999975327,
+      "ended_utc": "2026-09-26T19:21:56.651979+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2332,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:21:56.650533+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "fc006804be937aa2f97873b39e5008860ea3da1329f02ce5142761bd4ca8b3bf"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0013539910000019972,
+      "ended_utc": "2026-09-26T19:21:56.653481+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2333,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:21:56.652084+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "fc006804be937aa2f97873b39e5008860ea3da1329f02ce5142761bd4ca8b3bf"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/build/mhgp9_gpu_filter_probe",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/source/data/scene_00.u32le",
+        "5",
+        "48",
+        "--s=8",
+        "--repeats=3",
+        "--tile-cache"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 5.975388765999995,
+      "ended_utc": "2026-09-26T19:22:02.628992+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2334,
+      "session_work_deadline_epoch": 1790451116.653559,
+      "started_utc": "2026-09-26T19:21:56.653588+00:00",
+      "stderr_sha256": "26817c25ab732b4386a21bfb5e3c02406f95fefc4f1ff237a1b7942ef4a6e63d",
+      "stdout_sha256": "eea7b439022ee3edefbf16d9ec04f6d763f9a62d2e5c55df8d992c5d622c05df"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0014140910000008944,
+      "ended_utc": "2026-09-26T19:22:02.632692+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2482,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:22:02.631236+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "27ae19e9c480cd246f731640dbfb53618c03bf72efe069b4b959920afbddedf6"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0013509719999973413,
+      "ended_utc": "2026-09-26T19:22:02.634189+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2483,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:22:02.632803+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "27ae19e9c480cd246f731640dbfb53618c03bf72efe069b4b959920afbddedf6"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/build/mhgp9_gpu_filter_probe",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/source/data/scene_00.u32le",
+        "5",
+        "48",
+        "--s=8",
+        "--repeats=3",
+        "--tile-cache"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 5.977714879000004,
+      "ended_utc": "2026-09-26T19:22:08.612027+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2484,
+      "session_work_deadline_epoch": 1790451122.6342657,
+      "started_utc": "2026-09-26T19:22:02.634296+00:00",
+      "stderr_sha256": "c0f5d96d0ffa574278faa343252889ea0cb5d21d8cffa52bef90f36b1022410c",
+      "stdout_sha256": "e06e1552e9044aad222f243dbf99c497caa117032133e42ad4901ac4d41f2283"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0014336509999992586,
+      "ended_utc": "2026-09-26T19:22:08.615905+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2632,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:22:08.614426+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "b1641f89ef39f2d9044c9b272dca25ea3d33b24497ab7e3ae60af63d9f2901ad"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0013593019999973421,
+      "ended_utc": "2026-09-26T19:22:08.617421+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2633,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:22:08.616023+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "b1641f89ef39f2d9044c9b272dca25ea3d33b24497ab7e3ae60af63d9f2901ad"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/build/mhgp9_gpu_filter_probe",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/source/data/scene_00.u32le",
+        "5",
+        "48",
+        "--s=8",
+        "--repeats=3"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 6.025560019999986,
+      "ended_utc": "2026-09-26T19:22:14.643117+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2634,
+      "session_work_deadline_epoch": 1790451128.6175034,
+      "started_utc": "2026-09-26T19:22:08.617536+00:00",
+      "stderr_sha256": "b27acf04a99524422436c7924fb0299993d03eff50504e3aa1fc6e9afd9bd8cb",
+      "stdout_sha256": "bc5c195bdd267a1155f9e4996ecdca40f306183d626a6e63549379f2e1efee9f"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0014823619999901894,
+      "ended_utc": "2026-09-26T19:22:14.647342+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2782,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:22:14.645714+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a61a8990915469252880b9212ba66c3d0c005d82ce301e2870d0a806f3b2de88"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0013724420000045257,
+      "ended_utc": "2026-09-26T19:22:14.648878+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2783,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:22:14.647466+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a61a8990915469252880b9212ba66c3d0c005d82ce301e2870d0a806f3b2de88"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/build/mhgp9_gpu_filter_probe",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/source/data/scene_00.u32le",
+        "10",
+        "48",
+        "--s=8",
+        "--repeats=3"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 10.283073383000016,
+      "ended_utc": "2026-09-26T19:22:24.932085+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2784,
+      "session_work_deadline_epoch": 1790451134.6489697,
+      "started_utc": "2026-09-26T19:22:14.649002+00:00",
+      "stderr_sha256": "2749c2fe3d9d3886145d9a89124e8139620c672c10f48606ecf447bb9242848f",
+      "stdout_sha256": "1a0bf1f397f9ce54b92e2b6dd353c5a9a76b1137205382b0727dfb115da34537"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.001440161999994416,
+      "ended_utc": "2026-09-26T19:22:24.935773+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2991,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:22:24.934293+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "79bbd56410522e28a1ecc3e66873c73a5e389d3d2b236c04dbb9fa77c12564e5"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0013364609999939603,
+      "ended_utc": "2026-09-26T19:22:24.937251+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2992,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:22:24.935881+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "79bbd56410522e28a1ecc3e66873c73a5e389d3d2b236c04dbb9fa77c12564e5"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/build/mhgp9_gpu_filter_probe",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/source/data/scene_00.u32le",
+        "10",
+        "48",
+        "--s=8",
+        "--repeats=3",
+        "--tile-cache"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 10.282822780000004,
+      "ended_utc": "2026-09-26T19:22:35.220202+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 2993,
+      "session_work_deadline_epoch": 1790451144.9373305,
+      "started_utc": "2026-09-26T19:22:24.937362+00:00",
+      "stderr_sha256": "50320aa77446b0555b076c4dcad5467a272afaaf92a15e27da5283439dc2b48e",
+      "stdout_sha256": "6009d74ccdee0397b9cae0c82a6e9608d5c2770758114183dc6580bae922b533"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.001451591000005692,
+      "ended_utc": "2026-09-26T19:22:35.223900+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 3141,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:22:35.222408+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a9f9df66c5cae583c8435fe7c0bc44df2b8a70b75ce17e100d421b3f823b2d35"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0013519519999931617,
+      "ended_utc": "2026-09-26T19:22:35.225396+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 3142,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:22:35.224010+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a9f9df66c5cae583c8435fe7c0bc44df2b8a70b75ce17e100d421b3f823b2d35"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/build/mhgp9_gpu_filter_probe",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/source/data/scene_01.u32le",
+        "5",
+        "48",
+        "--s=8",
+        "--repeats=3"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 3.769960166000004,
+      "ended_utc": "2026-09-26T19:22:38.995483+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 3143,
+      "session_work_deadline_epoch": 1790451155.225474,
+      "started_utc": "2026-09-26T19:22:35.225506+00:00",
+      "stderr_sha256": "4fc51866f15cff77dda1ffe59c02a414355f2a0b99196945160bdb9ba363a655",
+      "stdout_sha256": "aacef406c1dfdced196b9a4f4ac2ae9ef7138645b70c0edd775d6d543c9a7962"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.00136985099999265,
+      "ended_utc": "2026-09-26T19:22:38.999128+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 3291,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:22:38.997715+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "1b216bb266b641b935878b13f5962c79968868763794e3bc676ed380facbfeb7"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0012565440000003036,
+      "ended_utc": "2026-09-26T19:22:39.000614+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 3292,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:22:38.999235+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "1b216bb266b641b935878b13f5962c79968868763794e3bc676ed380facbfeb7"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/build/mhgp9_gpu_filter_probe",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/source/data/scene_01.u32le",
+        "5",
+        "48",
+        "--s=8",
+        "--repeats=3",
+        "--tile-cache"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 3.7709363950000068,
+      "ended_utc": "2026-09-26T19:22:42.771678+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 3293,
+      "session_work_deadline_epoch": 1790451159.0006921,
+      "started_utc": "2026-09-26T19:22:39.000722+00:00",
+      "stderr_sha256": "1157aedb38e37b94ffccc14ae63584106f12f5ebb0e86fc52cc2d8579cac1e1b",
+      "stdout_sha256": "8d1f36c90673291c121eef369d3581587df1071fe19007d85517a3f986fb98c1"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0014253800000005867,
+      "ended_utc": "2026-09-26T19:22:42.775375+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 3441,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:22:42.773908+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "f24019b812c47c5b1808e80edef1bcc25dd47bb255529ce0d6df185fe322876c"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0013244499999984782,
+      "ended_utc": "2026-09-26T19:22:42.776839+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 3442,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:22:42.775481+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "f24019b812c47c5b1808e80edef1bcc25dd47bb255529ce0d6df185fe322876c"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/build/mhgp9_gpu_filter_probe",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/source/data/scene_02.u32le",
+        "5",
+        "48",
+        "--s=8",
+        "--repeats=3"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 5.526920202000014,
+      "ended_utc": "2026-09-26T19:22:48.303888+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 3443,
+      "session_work_deadline_epoch": 1790451162.7769144,
+      "started_utc": "2026-09-26T19:22:42.776944+00:00",
+      "stderr_sha256": "aa5dda93cea0b92b6d59235e754fdbc4045b3b9815b7638f1fe3ddaf01678c6d",
+      "stdout_sha256": "1ea699b9ba1f48e5ceaf1dbeebc626ce87abc568c3dcb2b19023509d6ad4827e"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0013973099999873284,
+      "ended_utc": "2026-09-26T19:22:48.307486+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 3591,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:22:48.306049+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "d4443d925548d5c3a07d3ada0d371965f13a2ca747a5a67e0f4ce5124ba878a1"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0013555399999916062,
+      "ended_utc": "2026-09-26T19:22:48.308980+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 3592,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:22:48.307592+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "d4443d925548d5c3a07d3ada0d371965f13a2ca747a5a67e0f4ce5124ba878a1"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/build/mhgp9_gpu_filter_probe",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/source/data/scene_02.u32le",
+        "5",
+        "48",
+        "--s=8",
+        "--repeats=3",
+        "--tile-cache"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 5.574944235000004,
+      "ended_utc": "2026-09-26T19:22:53.884058+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 3593,
+      "session_work_deadline_epoch": 1790451168.309058,
+      "started_utc": "2026-09-26T19:22:48.309087+00:00",
+      "stderr_sha256": "4c556e812f8d89b286dd2653f386cd5e04a77a97e0b8205c453d9bf3256836ec",
+      "stdout_sha256": "131722a5314ce2b979c1efec7b43977b4e91687fbf1ede3d37c44ce196f25c30"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0014652700000112873,
+      "ended_utc": "2026-09-26T19:22:53.888049+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 3741,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:22:53.886537+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e984648529c2b200da52b29325e9a34843873b26ac3cea2fb711c9a5488093ff"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0013574800000242249,
+      "ended_utc": "2026-09-26T19:22:53.889570+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 3742,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:22:53.888172+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e984648529c2b200da52b29325e9a34843873b26ac3cea2fb711c9a5488093ff"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/build/mhgp9_gpu_filter_probe",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/source/data/scene_00.u32le",
+        "5",
+        "48",
+        "--s=10",
+        "--repeats=3"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 5.07380615400001,
+      "ended_utc": "2026-09-26T19:22:58.963595+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 3743,
+      "session_work_deadline_epoch": 1790451173.8896527,
+      "started_utc": "2026-09-26T19:22:53.889684+00:00",
+      "stderr_sha256": "0e580b68298e337ea7272627a5551250044acfb8d3c239e9db4f836a3e4254cc",
+      "stdout_sha256": "a485b8edc943dd2875fa330dfbcc9b6005063894f9f657df6c4734d150f5b3a8"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0014115300000128173,
+      "ended_utc": "2026-09-26T19:22:58.967253+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 3891,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:22:58.965800+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "d14a2c7ec0db5da6e11bf6379174c8fbff9e23cbe2e99973534224fc14860692"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.001254910000000109,
+      "ended_utc": "2026-09-26T19:22:58.968648+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 3892,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:22:58.967357+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "d14a2c7ec0db5da6e11bf6379174c8fbff9e23cbe2e99973534224fc14860692"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/build/mhgp9_gpu_filter_probe",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/source/data/scene_00.u32le",
+        "5",
+        "48",
+        "--s=10",
+        "--repeats=3",
+        "--tile-cache"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 5.072840092999996,
+      "ended_utc": "2026-09-26T19:23:04.041608+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 3893,
+      "session_work_deadline_epoch": 1790451178.9687212,
+      "started_utc": "2026-09-26T19:22:58.968751+00:00",
+      "stderr_sha256": "fdee41f6cb42ab356b3411685698d6d0134cbdc3602e663848a4787e09ed52bf",
+      "stdout_sha256": "3e7332237db0e5e8f9455a271461ae691a2b3e07ac14fd6f95b175574d8968c1"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.001422399999995605,
+      "ended_utc": "2026-09-26T19:23:04.045266+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 4041,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:23:04.043803+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a6320b49ce8dda12015f046f1b686d651382bdc16695750688ebd9c53c280e19"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0013313500000151635,
+      "ended_utc": "2026-09-26T19:23:04.046736+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 4042,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:23:04.045370+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a6320b49ce8dda12015f046f1b686d651382bdc16695750688ebd9c53c280e19"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/build/mhgp9_gpu_filter_probe",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/source/data/scene_00.u32le",
+        "5",
+        "48",
+        "--s=12",
+        "--repeats=3"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 5.0754715129999965,
+      "ended_utc": "2026-09-26T19:23:09.122337+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 4043,
+      "session_work_deadline_epoch": 1790451184.046815,
+      "started_utc": "2026-09-26T19:23:04.046845+00:00",
+      "stderr_sha256": "05f874710bfbed9172ed08a772984fdba5900546df8075abc43cceaf25c1dae1",
+      "stdout_sha256": "5da4ca6a96918856de9e7166471efcb408bf6b2add87d7781bcec4b850e8915a"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0014271199999882356,
+      "ended_utc": "2026-09-26T19:23:09.125982+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 4191,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:23:09.124516+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "ff2b01e971e718e74d3b71e21b63454eda9825e08aee36838c2f9042849e6243"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0012699000000111482,
+      "ended_utc": "2026-09-26T19:23:09.127397+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 4192,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:23:09.126084+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "ff2b01e971e718e74d3b71e21b63454eda9825e08aee36838c2f9042849e6243"
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output/build/mhgp9_gpu_filter_probe",
+        "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/source/data/scene_00.u32le",
+        "5",
+        "48",
+        "--s=12",
+        "--repeats=3",
+        "--tile-cache"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 5.073880813000017,
+      "ended_utc": "2026-09-26T19:23:14.201402+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 4193,
+      "session_work_deadline_epoch": 1790451189.1274726,
+      "started_utc": "2026-09-26T19:23:09.127502+00:00",
+      "stderr_sha256": "dcf8f3099c45f1b3c152cc368928a9f57ca11a4247c93e71d9ade722785600b8",
+      "stdout_sha256": "400f97a1c1e2acebc25009e016a31052b565a218d1f2bc961069d1be92da179b"
+    },
+    {
+      "argv": [
+        "uptime"
+      ],
+      "cwd": "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+      "elapsed_seconds": 0.0013972499999965748,
+      "ended_utc": "2026-09-26T19:23:14.205129+00:00",
+      "exit_code": 0,
+      "group_closed": true,
+      "per_command_watchdog": null,
+      "pid": 4341,
+      "session_work_deadline_epoch": 1790451995.0224562,
+      "started_utc": "2026-09-26T19:23:14.203688+00:00",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "b1acaf10a6474788570ea45d0f30ecefdb08ab61bc5f726c5af1c8b44b6dc1b7"
+    }
+  ],
+  "compiled_dependencies_stable": true,
+  "compiled_dependency_manifest_sha256": "91872515b678ef8d1efa1db585dcf962b50b62a81dd576b8079902e76a409a8b",
+  "completed_case_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13
+  ],
+  "contract_certified": false,
+  "elapsed_before_closure_seconds": 99.18277716636658,
+  "generation": "2026-09-26T12:20:06.956-07:00",
+  "guards": {
+    "closing_margin_seconds": 300,
+    "guest_deadline_epoch": 1790452849.576434,
+    "safe_gce_deadline_epoch": 1790453706.956,
+    "work_deadline_epoch": 1790452549
+  },
+  "plan_schema": "mhgp9_gpu_filter_plan_v2",
+  "preflight": {
+    "gpu_total_ms": 4.208,
+    "pairs": 431037,
+    "sites": 1500
+  },
+  "preflight_tile": {
+    "gpu_total_ms": 3.737,
+    "pairs": 431037,
+    "sites": 1500
+  },
+  "provenance": {
+    "commit": "d0e711e23617a7fa2838cac9b370ff125d4be5fb",
+    "helper": {
+      "path": "gcp-migration/full_probe_worker_v7.py",
+      "sha256": "da967163bdb7247bc6aad4df0c294cda1071076a0127cd5bd9f59bc0e4788439"
+    },
+    "inputs": {
+      "data/scene_00.u32le": {
+        "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le",
+        "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf"
+      },
+      "data/scene_01.u32le": {
+        "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/full.u32le",
+        "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f"
+      },
+      "data/scene_02.u32le": {
+        "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/full.u32le",
+        "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af"
+      },
+      "data/scene_b00.u32le": {
+        "commit_path": "morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_grid/full.u32le",
+        "sha256": "233cc4ea8cac6e0b1155ea845af57b32e5236764bf2e119557aeab5bac76c172"
+      },
+      "data/scene_b01.u32le": {
+        "commit_path": "morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_01_000100_grid/full.u32le",
+        "sha256": "de45e8dcaf5610cd71a369b613f16914d5713e77cbe1532122ec2e823bc0b4ad"
+      },
+      "data/scene_b02.u32le": {
+        "commit_path": "morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_02_000200_grid/full.u32le",
+        "sha256": "37a7be399fae909a1291cddfc3ca5b972d3effdfa8dc8cd87a41accd5fa0f5f7"
+      }
+    },
+    "protocol_source": "commit",
+    "schema": "mhgp9_tower_provenance_v1",
+    "tree": "83d310aa1d11a67e9c82af6a48c3d7e6c08ae813"
+  },
+  "public_status": "not_claimed",
+  "s1_threshold_ms": 100.0,
+  "scope": "S1_exact_q34_witness_filter_cpu_vs_gpu",
+  "source_manifest_sha256": "547cb0d086cb09731a2ae0970bdea5f69fc86532cabf36c9fd4ddd8a318af69a",
+  "sources_stable": true,
+  "status": "completed",
+  "target": {
+    "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-b"
+  },
+  "targeted_GCP_stop_required_by_ROOT": true,
+  "tool_paths": {
+    "boost_header": "/usr/include/boost/multiprecision/cpp_int.hpp",
+    "cmake": "/usr/bin/cmake",
+    "g++": "/usr/bin/g++",
+    "nvcc": "/usr/local/cuda/bin/nvcc",
+    "nvidia-smi": "/usr/bin/nvidia-smi",
+    "time": "/usr/bin/time"
+  },
+  "tool_sha256": {
+    "cmake": "fd22547781b64bb2db04370970b93db1f3fada1e41e60873b015ee0747009fc0",
+    "g++": "2360901d864cf10bfd6296e261cb2c14053552a80377761ab07146ec9ec9a2c0",
+    "nvcc": "e4d89fec9260c0162c5afb820d5e7bfaea971f96d4eef94d47e0d08ec8bc85e7",
+    "nvidia-smi": "22964713c1701fb62b4dd10b26b0dd25d174e100af5bda20c65e0b0fcc32b3be"
+  },
+  "useful_budget_seconds": 1500,
+  "useful_deadline_epoch": 1790451995.0224562,
+  "worker_argv": [
+    "worker.py",
+    "--source-root",
+    "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/source",
+    "--source-manifest",
+    "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/source_manifest.json",
+    "--source-manifest-sha256",
+    "547cb0d086cb09731a2ae0970bdea5f69fc86532cabf36c9fd4ddd8a318af69a",
+    "--guard-mark",
+    "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/double_guard_verified",
+    "--guard-mark-sha256",
+    "f7ce87cab68c0e17addd06e6f13dcd919c6a6de6efc879903c256fce06af9e3c",
+    "--generation",
+    "2026-09-26T12:20:06.956-07:00",
+    "--session-deadline-epoch",
+    "1790452849",
+    "--closing-margin-seconds",
+    "300",
+    "--output",
+    "/tmp/ehgp-gpu-v9-f94f746067a12722.23I2LKZzLU/output",
+    "--project",
+    "devpod-gpu-exploration",
+    "--zone",
+    "us-central1-b",
+    "--instance",
+    "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "--execute",
+    "--useful-budget-seconds",
+    "1500",
+    "--case-cap-seconds",
+    "600"
+  ],
+  "worker_sha256": "8159491017fcfd524858c5e17924e5c2350d2f9930f58ffd56e052fd990d4ff3"
+}

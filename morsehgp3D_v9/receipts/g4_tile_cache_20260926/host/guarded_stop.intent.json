@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-tile-session-d0e711e23-resume/gpu_filter_v9_host/stop_and_verify.sh",
+    "--yes",
+    "--expected-last-start-timestamp",
+    "2026-09-26T12:20:06.956-07:00"
+  ],
+  "name": "guarded_stop",
+  "started_epoch": 1790450606.770314,
+  "timeout_seconds": null
+}

@@ -1,0 +1,40 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v9-tile-audit-resume-20260926
+UpdateCTestConfiguration  from :/workspaces/E-HGP/build/v9-tile-audit-resume-20260926/DartConfiguration.tcl
+UpdateCTestConfiguration  from :/workspaces/E-HGP/build/v9-tile-audit-resume-20260926/DartConfiguration.tcl
+Test project /workspaces/E-HGP/build/v9-tile-audit-resume-20260926
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 192
+    Start 192: mhgp9_gpu_filter_probe_bad_argument
+
+192: Test command: /usr/bin/cmake "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v9-tile-audit-resume-20260926/mhgp9_gpu_filter_probe" "-DARGS=missing.u32le 5 1" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/cmake/run_expect.cmake"
+192: Working Directory: /workspaces/E-HGP/build/v9-tile-audit-resume-20260926
+192: Test timeout computed to be: 60
+192: input: cannot open input
+192: 
+1/2 Test #192: mhgp9_gpu_filter_probe_bad_argument ...   Passed    0.01 sec
+test 193
+    Start 193: mhgp9_gpu_filter_probe_empty_input
+
+193: Test command: /usr/bin/cmake "-DEXPECTED=2" "-DCMD=/workspaces/E-HGP/build/v9-tile-audit-resume-20260926/mhgp9_gpu_filter_probe" "-DARGS=/workspaces/E-HGP/build/v9-tile-audit-resume-20260926/gpu_probe_empty.u32le 5 1 --cpu-only" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=" "-P" "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/cmake/run_expect.cmake"
+193: Working Directory: /workspaces/E-HGP/build/v9-tile-audit-resume-20260926
+193: Test timeout computed to be: 60
+193: input: mhgp9 gen cloud requires at least one site
+193: 
+2/2 Test #193: mhgp9_gpu_filter_probe_empty_input ....   Passed    0.01 sec
+
+The following tests passed:
+	mhgp9_gpu_filter_probe_bad_argument
+	mhgp9_gpu_filter_probe_empty_input
+
+100% tests passed, 0 tests failed out of 2
+
+Label Time Summary:
+gate    =   0.02 sec*proc (2 tests)
+gpu     =   0.02 sec*proc (2 tests)
+
+Total Test time (real) =   0.03 sec

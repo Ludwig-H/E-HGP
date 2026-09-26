@@ -1,0 +1,45 @@
+[ 14%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/pipeline/axis_q2.cpp.o
+[ 14%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/pipeline/local_credits.cpp.o
+[ 14%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/pipeline/q2_census.cpp.o
+[ 14%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/pipeline/q2_census_parallel.cpp.o
+[ 28%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/pipeline/prepared_cloud.cpp.o
+[ 28%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/wspd/front.cpp.o
+[ 28%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/lanes/q4_family.cpp.o
+[ 28%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/lanes/exact_ball.cpp.o
+[ 42%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/lanes/q34_seed.cpp.o
+[ 42%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/lanes/edge_cover.cpp.o
+[ 42%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/lanes/q34_cover.cpp.o
+[ 57%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/lanes/family_certificate.cpp.o
+[ 57%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/lanes/q34_pruning.cpp.o
+[ 57%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/lanes/q34_collective.cpp.o
+[ 57%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/lanes/q4_positive_domain.cpp.o
+[ 71%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/lanes/q4_center_map.cpp.o
+[ 71%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/lanes/q4_local_partition.cpp.o
+[ 71%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/lanes/q4_local.cpp.o
+[ 71%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/lanes/q4_shallow_set.cpp.o
+[ 85%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/lanes/q4_shallow.cpp.o
+[ 85%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/lanes/q4_window.cpp.o
+[ 85%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/pipeline/wspd_q34.cpp.o
+[ 85%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/lanes/q34_witness_search.cpp.o
+[100%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/lanes/q3_ball_census.cpp.o
+[100%] Building CXX object CMakeFiles/mhgp9_gen.dir/src/gen/lanes/q34_dead_lanes.cpp.o
+[100%] Linking CXX static library libmhgp9_gen.a
+[100%] Built target mhgp9_gen
+[100%] Building CXX object CMakeFiles/mhgp9_gpu_witness_filter_port_gate.dir/tests/gpu/witness_filter_port_gate.cpp.o
+[100%] Linking CXX executable mhgp9_gpu_witness_filter_port_gate
+[100%] Built target mhgp9_gpu_witness_filter_port_gate
+[ 87%] Built target mhgp9_gen
+[100%] Building CXX object CMakeFiles/mhgp9_gpu_witness_cache_port_gate.dir/tests/gpu/witness_cache_port_gate.cpp.o
+[100%] Linking CXX executable mhgp9_gpu_witness_cache_port_gate
+[100%] Built target mhgp9_gpu_witness_cache_port_gate
+[100%] Built target mhgp9_gen
+[100%] Building CXX object CMakeFiles/mhgp9_gpu_witness_cache_no_retest_mutant_gate.dir/tests/gpu/witness_cache_port_gate.cpp.o
+[100%] Linking CXX executable mhgp9_gpu_witness_cache_no_retest_mutant_gate
+[100%] Built target mhgp9_gpu_witness_cache_no_retest_mutant_gate
+[  0%] Building CXX object CMakeFiles/mhgp9_gpu.dir/src/gpu/filter_runner_stub.cpp.o
+[100%] Built target mhgp9_gen
+[100%] Linking CXX static library libmhgp9_gpu.a
+[100%] Built target mhgp9_gpu
+[100%] Building CXX object CMakeFiles/mhgp9_gpu_filter_probe.dir/bench/gpu_filter_probe.cpp.o
+[100%] Linking CXX executable mhgp9_gpu_filter_probe
+[100%] Built target mhgp9_gpu_filter_probe
