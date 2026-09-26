@@ -10,6 +10,14 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 ## Par où commencer
 
 1. [`ETAT_COURANT.md`](ETAT_COURANT.md) : verdict synthétique et mutable.
+   La [reprise transversale du 26 septembre](AUDIT_GEANT_REPRISE_20260926.md)
+   couvre les 67 commits `a22dc9657..c529c82bb`, les reçus R21/R22,
+   l'objet, les coûts et les portes ouvertes. Ses volets
+   [mathématique](AUDIT_REPRISE_20260926_MATH_EXACTITUDE.md),
+   [q2/q3/q4–G4](AUDIT_REPRISE_20260926_Q234_GPU.md) et
+   [FULL/phase A](AUDIT_REPRISE_20260926_FULL.md) séparent les
+   contre-vérifications fraîches. Aucun résultat v29/R23 n'est
+   transféré à cette base gelée.
 2. [`AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md`](AUDIT_C_OBJET_ET_RECONSTRUCTION_TOUR_20260923.md) :
    à quoi sert l'algorithme et comment la tour est reconstruite, pas à pas.
 3. [`CONTRAT_COUTS_ET_PARALLELISATION.md`](CONTRAT_COUTS_ET_PARALLELISATION.md) et
@@ -34,7 +42,9 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
    populations et images, avec attribution temporelle et ressources à
    mesurer ; sa [reprise contre-auditée](CONTRE_AUDIT_E4_TAIL_REPRISE_20260924.md)
    revient au dimensionnement initial et ne montre pas de défaut de
-   résultat avéré. Ces trois WIP frères ne sont pas encore un moteur combiné.
+   résultat avéré. Ces notes décrivent leur **état WIP du 24 septembre** ;
+   E2, E4 et le groupement haché ont depuis été intégrés et mesurés
+   ensemble en R21, puis avec les leviers R22.
    Les [épingles brutes CPU de C](CONTRE_AUDIT_B_EPINGLES_BRUTES_C_PREFLIGHT_20260924.md)
    ont un [lecteur indépendant normal/`-O` et mutants](b_raw_pin_reader_20260924/README.md) ;
    leur intégration et le préflight R21 restent ouverts. Le

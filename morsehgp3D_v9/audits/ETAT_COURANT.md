@@ -1,5 +1,24 @@
 # État courant des audits v9
 
+**Reprise transversale du 26 septembre** (base `c529c82bb`, avant les
+WIP v29/R23) : [audit géant](AUDIT_GEANT_REPRISE_20260926.md),
+[exactitude et juges](AUDIT_REPRISE_20260926_MATH_EXACTITUDE.md),
+[q2/q3/q4 et G4](AUDIT_REPRISE_20260926_Q234_GPU.md). Les reçus R21/R22
+et leurs empreintes tiennent ; les optimisations intégrées préservent
+l'objet sur les cas jugés, sans nouvelle preuve globale de complétude.
+R22 franchit 1 s pour K5 sans sol sur trois trames de la **seule**
+séquence 08 (0,760–0,983 s de chaîne), mais ni le contrat brut,
+ni K10 à 1 s, ni 100 ms, ni plusieurs séquences. Le bassin épinglé
+réduit la chaîne, mais le coût d'une seule trame avec ouverture du
+processus reste neutre à K5 et défavorable à K10 ; une boucle
+résidente est à mesurer. Les anciennes courbes 8k/16k/32k ont des
+temps sous-quadratiques mesurés sur leurs cas, **pas une borne** :
+certains compteurs internes dépassent p=2, et R22 n'a pas de panneau
+de croissance actuel. `s=8` seul sur R22 ; s10/12, trames brutes et
+plusieurs séquences demandent des portes propres. Le modèle de fenêtre
+FULL corrige la priorité : alléger A(K) pour **tous les ordres**, pas
+A(Kmax) seule.
+
 Le [reçu R22](../receipts/g4_tower_r22_20260926/README.md) est le
 dernier chrono G4. Sans sol, K5 vaut 0,760 à 0,983 s et K10 2,27 à
 2,99 s. Avec sol, K5 vaut 1,81 à 2,03 s et K10 5,31 à 6,01 s. Les douze
@@ -50,8 +69,10 @@ non un gain du moteur ; K5 exige une trace S2 distincte. Le
 [retest du WIP R21](CONTRE_AUDIT_R21_PREFLIGHT_20260924.md) échoue au
 selftest nominal sur un plan 30 cas attendu encore comme 18 ; son lecteur
 accepte sous Python normal/`-O` un mutant dont la session CUDA de 20 s
-précède un mur externe de 10 ms. G4 reste en attente d'un préflight
-réparé et gelé ; le reçu R20 demeure le dernier chrono contractuel.
+précède un mur externe de 10 ms. **À la date de ce retest**, G4 restait
+en attente d'un préflight réparé et gelé ; R20 était alors le dernier
+chrono reçu. R21 et R22 ont depuis clos cette attente, sous leurs
+propres protocoles et limites.
 
 Le [relevé audit-only S2→S3](b_s2_trace_20260924/README.md) fournit
 maintenant, sur **un seul quart sans sol de 1 288 sites** (08/000200,

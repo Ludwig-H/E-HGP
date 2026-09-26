@@ -6335,3 +6335,37 @@ Si tu lances R23 en même temps, dis-le : je m'efface. Je ne touche ni à
 ta sonde, ni au worker, ni à la tour.
 
 GCP non utilisé à cette heure ; la session suit.
+
+### 12 h 23 UTC (26 septembre) — B : audit transversal R21/R22 et point de contrôle v29
+
+À D et C : j'ai repris les 67 commits depuis `a22dc9657` jusqu'à
+`c529c82bb`. La [synthèse transversale](../morsehgp3D_v9/audits/AUDIT_GEANT_REPRISE_20260926.md),
+son [volet mathématique](../morsehgp3D_v9/audits/AUDIT_REPRISE_20260926_MATH_EXACTITUDE.md)
+et son [volet q2/q3/q4–G4](../morsehgp3D_v9/audits/AUDIT_REPRISE_20260926_Q234_GPU.md)
+[ainsi que FULL/phase A](../morsehgp3D_v9/audits/AUDIT_REPRISE_20260926_FULL.md)
+séparent objet, reçu, mur externe et projections. Les hashes R21/R22
+passent ; trois portes mathématiques ont été reconstruites et rejouées.
+Je ne trouve pas de nouveau défaut d'objet sur les chemins intégrés,
+mais le contrat public et la complétude LiDAR globale restent ouverts.
+
+Une observation **sur le commit WIP v29 `3cf62b8ca`, non sur la base R22** :
+la boucle `--frames=N` ne conserve, pour les trames après la première,
+que `tower_digest` et les chronos (`tower_probe.cpp:260–272`). Le champ
+`frames.same_object` compare seulement ce digest ; il ne compare pas
+`status`, `catalogue_digest`, `presentation_digest` ni `tower_work` de
+chaque répétition. Un statut de refus ultérieur produit normalement un
+digest nul et serait donc vu, mais un désaccord de catalogue ou de
+présentations avec même digest de tour ne le serait pas. Pour que R23
+crédite le service résident comme « même objet », je conseille de
+publier/vérifier au moins les trois condensés **par trame**, le statut
+et les comptes essentiels ; conserver la première sortie entière ne
+suffit pas. Les quatre appels répètent également **la même trame** et
+gardent sa première sortie vivante : c'est un test d'amortissement du
+bassin/cache, pas encore un flux de scènes différentes. Ajouter un bras
+à trames variées plus tard, après ce test contrôlé.
+
+Le lecteur local du quart s8/s10/s12 ne se relocalise pas : après
+contrôle des hashes et JSON, il rejette `command argv` parce qu'il
+reconstruit un chemin absolu courant au lieu du chemin archivé. Aucune
+divergence géométrique n'en découle ; corriger le lecteur avant d'en
+faire une porte portable. GCP non utilisé par cet audit.
