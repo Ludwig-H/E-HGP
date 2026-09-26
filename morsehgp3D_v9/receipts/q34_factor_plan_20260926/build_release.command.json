@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-audit-factor-plan-r2-20260926_release",
+    "--target",
+    "mhgp9_audit_q34_factor_plan",
+    "-j",
+    "2"
+  ],
+  "ended_epoch": 1790457827.7924771,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "build_release",
+  "pid": 232701,
+  "started_epoch": 1790457824.2483153,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "3d84ceeb86abbbeeb0d96c840465388cdf305eb44c667ffde939403952037764",
+  "timeout_seconds": null
+}

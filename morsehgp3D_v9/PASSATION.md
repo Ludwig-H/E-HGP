@@ -1,5 +1,34 @@
 # Passation v9
 
+## Plans q34 éprouvés — 26 septembre, après la campagne q3
+
+Le [prototype par facteurs](audits/b_q34_factor_plan_20260926/README.md)
+est implémenté séparément du moteur, avec [42 commandes/24 mesures closes](receipts/q34_factor_plan_20260926/README.md).
+Il applique le Pool aux vrais nœuds du même index après le filtre rectangle,
+puis garde des classes conjointes q3/q4 avant toute expansion en paires.
+Les trois trames sans sol K5 perdent 52,7–61,5 % de leurs paires ; 00
+passe de 23,687 à 9,123 millions. Mais le plan mono local coûte 676 ms et
+ses capacités cumulées 125 Mo : **ne pas le brancher tel quel sur G4**.
+Sur amas 8k/16k/32k, E=2,09/7,79/30,70 M, dernier ratio ×3,942 ; le
+problème de croissance n'est pas fermé. Les six coupes LiDAR ont des
+pentes de résidu 1,004–1,820, mais un compteur de préparation atteint 2,230.
+
+Les [propositions de port](audits/b_q34_factor_plan_20260926/NEXT.md)
+précisent arène collective/bandes sans doublons, masques exacts et tubes
+adaptatifs à éprouver ; ce ne sont pas des noyaux GPU qualifiés. Ce plan
+ne peut économiser que S2 et son transport, pas supprimer le travail des
+lanes survivantes ni FULL. Garder en parallèle les priorités front GPU
+compact et [A→images→écriture explicite FULL](audits/FULL_PARTAGE_INTER_ORDRES_20260926.md).
+Un encodeur parallèle sur le draft actuel est isolable avant le nouveau
+graphe événementiel ; le contrôle des parents vivants doit être conservé.
+
+Le [contre-audit q3](audits/AUDIT_CROISE_PORT_Q3_20260926.md) ne démontre
+aucun nouveau défaut fonctionnel. Deux limites : capacité GPU payload
+sous pression, ledgers détaillés seulement du premier passage chaud.
+Moteur inchangé, GCP non utilisé dans cette nouvelle tranche. Les builds
+r2 du prototype et les captures sont désormais épinglés ; ne pas les
+reconstruire pour continuer. Le prochain build doit être neuf.
+
 ## Reprise active du 26 septembre
 
 À la demande de l'utilisateur, l'auditeur B reprend le développement.

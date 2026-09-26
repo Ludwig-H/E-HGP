@@ -1,5 +1,22 @@
 # État courant des audits v9
 
+**Plans par facteurs et FULL, 26 septembre après 21 h UTC** :
+[preuve et prototype](b_q34_factor_plan_20260926/README.md),
+[capture locale](../receipts/q34_factor_plan_20260926/README.md),
+[raccord FULL](FULL_PARTAGE_INTER_ORDRES_20260926.md).
+42 commandes/24 mesures, Release/ASan/UBSan, six mutants causaux,
+oracles Fraction et lectures normal/−O passent. Le plan q34 réduit les
+paires de 53–61 % sur trois trames sans sol K5, avant leur expansion.
+Mais ni gain net FULL/GPU ni sous-quadratique global : résidu amas
+×3,724/×3,942 ; six pentes spatiales LiDAR E≤1,820, un compteur de coins
+à 2,230. Préparation et mémoire ne sont pas gratuites (00/K5 : 676 ms
+CPU mono local ; capacités des plans 125 Mo si conservées simultanément).
+Ne pas porter le format à vecteurs par rectangle tel quel. Voir
+[bandes/arène et sélection adaptative](b_q34_factor_plan_20260926/NEXT.md).
+Le [contre-audit du port q3](AUDIT_CROISE_PORT_Q3_20260926.md) ne trouve
+pas de nouveau défaut, mais borne les preuves sous pression mémoire et
+pour futurs passages chauds. Aucun moteur changé ni GCP utilisé ici.
+
 **Reprise développeur et port q3 clos, 26 septembre, 21 h UTC** :
 [implémentation et priorités](../docs/REPRISE_DEVELOPPEUR_IDS_Q3_20260926.md),
 [reçu G4](../receipts/g4_q3_payload_20260926/README.md),

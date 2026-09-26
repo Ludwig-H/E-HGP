@@ -2,6 +2,16 @@
 
 Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 
+Dernière tranche du 26 septembre : [plans q3/q4 par facteurs](receipts/q34_factor_plan_20260926/README.md).
+Le prototype enlève 53–61 % des paires sur trois trames sans sol K5,
+avant leur développement, sans produire la tour. 24 mesures locales,
+gates Release/sanitizer et oracles passent. Les coûts de préparation et
+de mémoire restent importants ; pas de port moteur aveugle ni de nouveau
+gain G4 annoncé. Les amas gardent une croissance presque quadratique.
+Le [raccord FULL proposé](audits/FULL_PARTAGE_INTER_ORDRES_20260926.md)
+vise aussi l'écriture parallèle de la sortie explicite, sans la reconstruire
+deux fois. Moteur et défauts inchangés depuis la tranche ci-dessous.
+
 Reprise du développement le 26 septembre :
 [transport des intérieurs q3 vers le catalogue](docs/REPRISE_DEVELOPPEUR_IDS_Q3_20260926.md)
 et [protocole v30](docs/DEVELOPPEMENT_IDS_Q3_20260926.md).

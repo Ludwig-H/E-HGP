@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q34_factor_plan_20260926/validate_recipe.py",
+    "--selftest"
+  ],
+  "ended_epoch": 1790458227.575603,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "selftest_normal",
+  "pid": 239235,
+  "started_epoch": 1790458227.52086,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "02babe7ab620aa68ea6f84937383b9e31fb2be91607a0e45abfa30388a4aa1a5",
+  "timeout_seconds": null
+}

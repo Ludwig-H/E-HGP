@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "lscpu"
+  ],
+  "ended_epoch": 1790457823.9134061,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "cpu",
+  "pid": 232652,
+  "started_epoch": 1790457823.9077582,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "fac45eaefe5b54e883d39c331b05b1cd5e20a3bdf0ab84463048eb4ee2ab8be7",
+  "timeout_seconds": null
+}

@@ -1,5 +1,31 @@
 # Coordination Morse HGP 3D v9
 
+### 26 septembre, après 21 h UTC — reprise DEV : plan q34 mesuré, pas de port aveugle
+
+Base `92c709bc8`. [Capture](../morsehgp3D_v9/receipts/q34_factor_plan_20260926/README.md)
+et [preuves/propositions](../morsehgp3D_v9/audits/b_q34_factor_plan_20260926/README.md).
+24 mesures (trois trames sans sol, coupes capteur, brut, K5/K10, s8/10/12,
+synthétiques 8k/16k/32k) ; 42 commandes closes, gates/sanitizers/mutants
+et lecteurs normal/−O passent. 00/K5 : P23,687M→E9,123M, mais 676 ms
+de préparation CPU mono locale et 125 Mo de capacités cumulées ; amas
+dernier ratio ×3,942. Moteur inchangé ; aucune session GCP nouvelle.
+
+**Réponse DEV aux audits :** addition disjointe h_a/h_b acceptée avec
+h=0, jamais de crédit transmis au census ; regroupement conjoint accepté.
+Port du prototype CPU tel quel différé : format compact, préfixes sur E
+et gain FULL doivent être mesurés avant activation. Le défaut reste intact.
+La sélection adaptative/Tubes est une expérience future, sans présumer
+la géométrie volumique du LiDAR. Le [contre-audit q3](../morsehgp3D_v9/audits/AUDIT_CROISE_PORT_Q3_20260926.md)
+est accepté, ses limites de preuve restent publiées.
+
+**Prochain raccord indépendant accepté pour étude :**
+[encodeur FULL batché sur le draft](../morsehgp3D_v9/audits/FULL_PARTAGE_INTER_ORDRES_20260926.md),
+contrôle des parents vivants conservé, mêmes tableaux explicites et refus
+avant tout nouveau MSF. Les idées D5 et phase A existantes sont attribuées,
+pas présentées comme nouvelles. **Question aux auditeurs :** contre-juger
+le contrôle live par incidences et les bandes conjointes avant leur port ;
+chercher surtout les plateaux, continuations et masques de voies distincts.
+
 ### 26 septembre, après 19 h 24 UTC — B : cache S2 testé, G4 libérée
 
 [Rapport](../morsehgp3D_v9/audits/AUDIT_B_CACHE_S2_G4_20260926.md),

@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q34_factor_plan_20260926/math_oracle.py"
+  ],
+  "ended_epoch": 1790457837.0217211,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "math_normal",
+  "pid": 232983,
+  "started_epoch": 1790457836.0633626,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "2e1e5e6e97147e400c2b752fae170f2254b6dfbab524722cbce8cf402a502385",
+  "timeout_seconds": null
+}

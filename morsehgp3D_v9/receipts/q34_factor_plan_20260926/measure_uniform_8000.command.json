@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-factor-plan-r2-20260926_release/mhgp9_audit_q34_factor_plan",
+    "--synthetic",
+    "uniform",
+    "8000",
+    "5",
+    "8",
+    "--min-factor=2"
+  ],
+  "ended_epoch": 1790457844.365996,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "measure_uniform_8000",
+  "pid": 233080,
+  "started_epoch": 1790457838.0046995,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "5cb64116f450b47ac26f1606aea3b9ccbffff01949df1828ae7bafc40f0cc52d",
+  "timeout_seconds": null
+}

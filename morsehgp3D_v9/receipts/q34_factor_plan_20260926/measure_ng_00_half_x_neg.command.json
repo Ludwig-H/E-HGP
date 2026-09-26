@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-factor-plan-r2-20260926_release/mhgp9_audit_q34_factor_plan",
+    "--frame",
+    "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/half_x_neg.u32le",
+    "5",
+    "8",
+    "--min-factor=2"
+  ],
+  "ended_epoch": 1790457965.1485615,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "measure_ng_00_half_x_neg",
+  "pid": 234648,
+  "started_epoch": 1790457951.3920941,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "cd423cb89685302ba1ed2177b5fecb5070a8cb3c2a862fc1a8e522be851e211d",
+  "timeout_seconds": null
+}

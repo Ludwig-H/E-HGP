@@ -1,0 +1,94 @@
+{
+  "GCP_used": false,
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q34_factor_plan_20260926/validate_recipe.py",
+        "--selftest"
+      ],
+      "ended_epoch": 1790458227.575603,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "selftest_normal",
+      "pid": 239235,
+      "started_epoch": 1790458227.52086,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "02babe7ab620aa68ea6f84937383b9e31fb2be91607a0e45abfa30388a4aa1a5",
+      "timeout_seconds": null
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q34_factor_plan_20260926/validate_recipe.py",
+        "--readback",
+        "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/receipts/q34_factor_plan_20260926"
+      ],
+      "ended_epoch": 1790458229.7662497,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "readback_normal",
+      "pid": 239236,
+      "started_epoch": 1790458227.5761435,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e22942d574b3d3822b52b48ac9ac5080c9440e0228ea8847a1b50a64300dfa77",
+      "timeout_seconds": null
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-O",
+        "-B",
+        "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q34_factor_plan_20260926/validate_recipe.py",
+        "--selftest"
+      ],
+      "ended_epoch": 1790458229.820823,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "selftest_optimized",
+      "pid": 239246,
+      "started_epoch": 1790458229.7667031,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "02babe7ab620aa68ea6f84937383b9e31fb2be91607a0e45abfa30388a4aa1a5",
+      "timeout_seconds": null
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-O",
+        "-B",
+        "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q34_factor_plan_20260926/validate_recipe.py",
+        "--readback",
+        "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/receipts/q34_factor_plan_20260926"
+      ],
+      "ended_epoch": 1790458231.9562154,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "readback_optimized",
+      "pid": 239247,
+      "started_epoch": 1790458229.8212023,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e22942d574b3d3822b52b48ac9ac5080c9440e0228ea8847a1b50a64300dfa77",
+      "timeout_seconds": null
+    }
+  ],
+  "pins_after": {
+    "/tmp/mhgp9-audit-resume-20260926/gcp-migration/full_probe_session_v7.py": "177b25a0d72150dc331661fdf8da1ccde77ea17fb694d9c6af5b0929755160d8",
+    "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q34_factor_plan_20260926/check_capture.py": "da750868342e630c8ea50e1f7b7448c41b71a4266c1b7a7e85e2804717d329df",
+    "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q34_factor_plan_20260926/inputs.py": "3626e3bb34beb0c209d92ccae6907d2040219da1a550333d921417253aca308c",
+    "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q34_factor_plan_20260926/run.py": "50aa7f95e2939dbdeb52a835330ad884d87b5b85324cc404312ccf33b218492b",
+    "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q34_factor_plan_20260926/validate_recipe.py": "d3ed88b216226cb3b4e47d6bbf6aec0ac5b618ec3eba62251204ce83b213c255",
+    "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/receipts/q34_factor_plan_20260926/capture.json": "2296f774f43972306e11d2ff1a69b0204e27b216ded7c44b3766880a81193220"
+  },
+  "pins_before": {
+    "/tmp/mhgp9-audit-resume-20260926/gcp-migration/full_probe_session_v7.py": "177b25a0d72150dc331661fdf8da1ccde77ea17fb694d9c6af5b0929755160d8",
+    "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q34_factor_plan_20260926/check_capture.py": "da750868342e630c8ea50e1f7b7448c41b71a4266c1b7a7e85e2804717d329df",
+    "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q34_factor_plan_20260926/inputs.py": "3626e3bb34beb0c209d92ccae6907d2040219da1a550333d921417253aca308c",
+    "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q34_factor_plan_20260926/run.py": "50aa7f95e2939dbdeb52a835330ad884d87b5b85324cc404312ccf33b218492b",
+    "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q34_factor_plan_20260926/validate_recipe.py": "d3ed88b216226cb3b4e47d6bbf6aec0ac5b618ec3eba62251204ce83b213c255",
+    "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/receipts/q34_factor_plan_20260926/capture.json": "2296f774f43972306e11d2ff1a69b0204e27b216ded7c44b3766880a81193220"
+  },
+  "status": "completed"
+}

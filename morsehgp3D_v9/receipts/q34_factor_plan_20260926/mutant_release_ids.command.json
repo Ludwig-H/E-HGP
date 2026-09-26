@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-factor-plan-r2-20260926_release/mhgp9_audit_q34_factor_plan",
+    "--mutant",
+    "ids"
+  ],
+  "ended_epoch": 1790457827.8566134,
+  "exit_code": 1,
+  "group_closed": true,
+  "name": "mutant_release_ids",
+  "pid": 232741,
+  "started_epoch": 1790457827.8547273,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "2ff86e87fd21111d001d60fb5b8e44ed2c333da98ee6dad1c717ef7695fb301f",
+  "timeout_seconds": null
+}

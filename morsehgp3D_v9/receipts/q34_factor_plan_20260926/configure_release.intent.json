@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "cmake",
+    "-S",
+    "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q34_factor_plan_20260926",
+    "-B",
+    "/workspaces/E-HGP/build/v9-audit-factor-plan-r2-20260926_release",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_CXX_COMPILER=c++",
+    "-DCMAKE_CXX_FLAGS=-Wall -Wextra -Wpedantic -Werror",
+    "-DMHGP9_SOURCE_ROOT=/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9",
+    "-DMHGP9_GEN_LIBRARY=/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/libmhgp9_gen.a"
+  ],
+  "name": "configure_release",
+  "started_epoch": 1790457823.9168627,
+  "timeout_seconds": null
+}

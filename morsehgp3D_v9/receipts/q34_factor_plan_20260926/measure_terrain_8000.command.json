@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-factor-plan-r2-20260926_release/mhgp9_audit_q34_factor_plan",
+    "--synthetic",
+    "terrain",
+    "8000",
+    "5",
+    "8",
+    "--min-factor=2"
+  ],
+  "ended_epoch": 1790457891.9631758,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "measure_terrain_8000",
+  "pid": 233957,
+  "started_epoch": 1790457891.1257915,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "efca78bf711f0c6d7b886858db839d5e615d6b3df2f1be7cfe7b6644ccc072ee",
+  "timeout_seconds": null
+}

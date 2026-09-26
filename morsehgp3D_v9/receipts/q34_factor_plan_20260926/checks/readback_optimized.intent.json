@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-O",
+    "-B",
+    "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q34_factor_plan_20260926/validate_recipe.py",
+    "--readback",
+    "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/receipts/q34_factor_plan_20260926"
+  ],
+  "name": "readback_optimized",
+  "started_epoch": 1790458229.8212023,
+  "timeout_seconds": null
+}

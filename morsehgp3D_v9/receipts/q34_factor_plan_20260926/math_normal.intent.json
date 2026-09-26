@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/audits/b_q34_factor_plan_20260926/math_oracle.py"
+  ],
+  "name": "math_normal",
+  "started_epoch": 1790457836.0633626,
+  "timeout_seconds": null
+}

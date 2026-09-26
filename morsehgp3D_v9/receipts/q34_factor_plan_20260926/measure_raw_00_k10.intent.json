@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-factor-plan-r2-20260926_release/mhgp9_audit_q34_factor_plan",
+    "--frame",
+    "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_grid/full.u32le",
+    "10",
+    "8",
+    "--min-factor=2"
+  ],
+  "name": "measure_raw_00_k10",
+  "started_epoch": 1790458150.2798533,
+  "timeout_seconds": null
+}

@@ -86,6 +86,17 @@ GPU, mais ne donne pas de gain mono sur les cas testés.
 
 ## Voies q3/q4
 
+Contre-épreuve du 26 septembre : le [Pool par facteurs sur vrais rectangles](../receipts/q34_factor_plan_20260926/README.md)
+retire beaucoup de paires mais ne résout pas à lui seul le carré : sur
+amas 8k/16k/32k, E=2,09/7,79/30,70 M (dernier ×3,942). Sur LiDAR il reste
+utile expérimentalement (53–61 % retirés K5), sans gain net FULL mesuré.
+Ne pas en déduire un port rentable d'objets à vecteurs par rectangle
+(125 Mo cumulés et 676 ms CPU local pour 00/K5), ni appliquer son pourcentage
+de rejet au temps FULL : le travail évité est celui du filtre S2.
+Le réglage min-factor1 ajoute 120k sites préparés pour 16 693 paires
+supprimées de plus ; pas une priorité. Les arènes/bandes compactes et
+autres sélections restent ouvertes, pas fermées par cet essai.
+
 | piste | fermée par |
 | --- | --- |
 | Census q3 scalaire sur le cover | 361 G tests ponctuels à 8k, 99,1 % extérieurs, ×10,8 de 4k à 8k |

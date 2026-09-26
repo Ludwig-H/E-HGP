@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-factor-plan-r2-20260926_release/mhgp9_audit_q34_factor_plan",
+    "--synthetic",
+    "clusters",
+    "32000",
+    "5",
+    "8",
+    "--min-factor=2"
+  ],
+  "ended_epoch": 1790457933.1622236,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "measure_clusters_32000",
+  "pid": 234097,
+  "started_epoch": 1790457910.57914,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "1c4a1dd68334a8ac2563eb379ac14ce2e7bab219837259e6da8f17d66a7a46df",
+  "timeout_seconds": null
+}
