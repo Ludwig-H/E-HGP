@@ -326,6 +326,12 @@ inline std::atomic<bool> failpoint_rows_alloc{false};
 inline void failpoint_rows_allocation() {
   if (failpoint_rows_alloc.load()) throw std::bad_alloc();
 }
+// Review before R22: bit K-1 of failpoint_images_alloc makes the vertical
+// images of order K throw std::bad_alloc once computed (phase C).
+inline std::atomic<u32> failpoint_images_alloc{0};
+inline void failpoint_images_allocation(unsigned k) {
+  if (k >= 1 && k <= 10 && ((failpoint_images_alloc.load() >> (k - 1)) & 1U)) throw std::bad_alloc();
+}
 inline void failpoint_static_allocation(unsigned k) {
   if (k >= 1 && k <= 10 && ((failpoint_static_alloc.load() >> (k - 1)) & 1U)) throw std::bad_alloc();
 }
@@ -348,6 +354,7 @@ inline void failpoint_static_allocation(unsigned) {}
 inline void failpoint_runner_launch(unsigned) {}
 inline void failpoint_runner_pause() {}
 inline void failpoint_rows_allocation() {}
+inline void failpoint_images_allocation(unsigned) {}
 #endif
 inline void add(u64& count, u64 amount = 1) {
   require(amount <= std::numeric_limits<u64>::max() - count, "full_ball_counter_overflow",
@@ -993,7 +1000,12 @@ class Builder {
                 times->populations_by_k[i + 1] = ms_since(populations_start);
                 populations_end[i] = PhaseClock::now();
               });
-            } catch (...) { population_errors[i] = std::current_exception(); return; }
+            } catch (...) {
+              // Review before R22: a helper that cannot be launched is a
+              // population error of order K; phase C of K still runs (the
+              // witness would run the images below any lower failure).
+              population_errors[i] = std::current_exception();
+            }
             bool lower_done = true;
             if (i > 0) {
               std::unique_lock<std::mutex> lock(mu);
@@ -1067,6 +1079,9 @@ class Builder {
         size_t imaged = lots_done;
         for (size_t i = 0; i < lots_done; ++i)
           if (population_failures[i]) { imaged = i; break; }
+#if defined(MHGP9_FULL_ORDERS_MUTANT_IMAGE_ERRORS_UNBOUNDED)
+        imaged = kmax;  // mutant: image errors of steps the witness never runs are reported
+#endif
         for (size_t i = 0; i < imaged; ++i)
           if (image_errors[i]) std::rethrow_exception(image_errors[i]);
         // Everything computable was computed; the reported failure is the
@@ -1571,6 +1586,7 @@ class Builder {
     }
     require(node == o.current.next.size(), "full_ball_image_node_count");
     failpoint_after_images(o.k);
+    failpoint_images_allocation(o.k);
   }
 
  private:

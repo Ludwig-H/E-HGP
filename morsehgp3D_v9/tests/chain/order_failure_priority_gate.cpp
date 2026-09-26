@@ -144,6 +144,39 @@ int unwind_gate(const std::vector<mhgp9::gen::Point3>& points) {
           return 1;
         }
       }
+  // Review before R22: the vertical images of K fail by an exception other
+  // than a Failure. Below a lot or population failure of a lower order, the
+  // witness never runs them: the lower failure is reported; alone, the
+  // refusal. The three paths, 4 and 8 threads.
+  struct ImagesCase {
+    unsigned lots, populations, images_alloc;
+    mhgp9::ChainStatus status;
+    const char* expected;
+  };
+  const ImagesCase images_cases[] = {
+      {bit(2), 0, bit(4), mhgp9::ChainStatus::kInvariantViolated, "tower: failpoint_lots_k2"},
+      {0, bit(2), bit(4), mhgp9::ChainStatus::kInvariantViolated, "tower: failpoint_populations_k2"},
+      {0, 0, bit(2), mhgp9::ChainStatus::kResourceExhausted, "tower: full_ball_allocation_failed"}};
+  std::uint64_t images_checks = 0;
+  for (const auto& mode : modes)
+    for (const auto& c : images_cases)
+      for (const int statics : {4, 8}) {
+        detail::failpoint_lots = c.lots;
+        detail::failpoint_populations = c.populations;
+        detail::failpoint_images_alloc = c.images_alloc;
+        const auto r = run(mode, statics);
+        detail::failpoint_lots = 0;
+        detail::failpoint_populations = 0;
+        detail::failpoint_images_alloc = 0;
+        ++checks;
+        ++images_checks;
+        if (r.status != c.status || r.reason != c.expected) {
+          std::printf("cause=unwind.images static=%d overlap=%d pipelined=%d expected=%s status=%d reason=%s\n",
+                      statics, mode.overlap ? 1 : 0, mode.pipelined ? 1 : 0, c.expected,
+                      static_cast<int>(r.status), r.reason.c_str());
+          return 1;
+        }
+      }
   // The pause changes no object: same tower digest as without it.
   const auto paused = run({true, true}, 4);
   detail::failpoint_runner_pause_ms = 0;
@@ -159,8 +192,9 @@ int unwind_gate(const std::vector<mhgp9::gen::Point3>& points) {
               static_cast<unsigned long long>(expected_live), static_cast<unsigned long long>(plain.tower_digest));
   // 3 modes x 2 allocation cases x 3 thread counts + 2 overlapped modes x 2
   // launch cases x 2 thread counts, 3 modes x 3 rows cases x 2 thread counts,
-  // then the paired complete runs.
-  if (checks != 18 + 8 + 18 + 2 || rows_checks != 18 || expected_live != 12 || live_runner_cases != expected_live) {
+  // 3 modes x 3 images cases x 2 thread counts, then the paired complete runs.
+  if (checks != 18 + 8 + 18 + 18 + 2 || rows_checks != 18 || images_checks != 18 || expected_live != 12 ||
+      live_runner_cases != expected_live) {
     std::printf("cause=floor.unwind\n");
     return 3;
   }

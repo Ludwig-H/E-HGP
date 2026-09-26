@@ -1107,7 +1107,13 @@ def validate_preflight_work(value, levers):
          (not levers['q34_batch_q4'] or ledger['lanes4_emitted'] > 0) and
          (not levers['q34_dead_core'] or ledger['core_closed_edges'] > 0) and
          (not levers['tower_meb_proposal'] or (value['tower_work']['meb_proposals'] > 0 and
-                                               value['tower_work']['meb_verified_proposals'] > 0)),
+                                               value['tower_work']['meb_verified_proposals'] > 0)) and
+         # v28 (review before R22): the preflight exercises the q2 early census
+         # (no fallback), the seal and the pinned pool when they are pinned on.
+         (not levers['q2_early_census'] or
+          value['catalogue']['early_census_keys'] == value['catalogue']['by_qmin'][0] > 0) and
+         (not levers['tower_sealed_catalogue'] or value['tower_detail']['sealed_catalogues'] == 1) and
+         (not levers['q34_lanes_pinned'] or value['q34_batch']['lanes_pinned'] is True),
          'preflight did not exercise an active lever')
 
 

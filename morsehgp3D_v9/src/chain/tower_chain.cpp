@@ -530,7 +530,9 @@ gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::spa
   steps.download_ms = out.download_ms;
   steps.download_copy_ms = out.download_copy_ms;
   steps.host_alloc_ms = out.host_alloc_ms;
-  steps.pinned = out.pinned_records;
+  // Review before R22: the flag published means "the call ran on at least one
+  // edge under the lever" (lanes_asked > 0), as the reader reads it.
+  steps.pinned = out.pinned_records && !where.empty();
   steps.pinned_allocations = out.pinned_allocations;
   steps.pinned_bytes = out.pinned_bytes;
   convert_ms = ms_since(convert_start);

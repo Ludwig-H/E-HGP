@@ -1143,7 +1143,16 @@ class Protocol(unittest.TestCase):
                               ('lanes record copy beyond the download',
                                lambda v: v['q34_batch'].update(lanes_download_copy_ms=1.0)),
                               ('pinned session without its pool',
-                               lambda v: v['device_session'].update(pinned_bytes=0))):
+                               lambda v: v['device_session'].update(pinned_bytes=0)),
+                              # Review before R22: the rules closing C's findings 10 and 11.
+                              ('tower detail partial hash fallback',
+                               lambda v: v['tower_detail'].update(hashed_orders=3)),
+                              ('tower detail no phase-A runner', lambda v: v['tower_detail'].update(runner_threads=0)),
+                              ('tower detail deferred refs beyond the contributions',
+                               lambda v: v['tower_detail'].update(population_deferred_refs=sum(
+                                   o['contributions'] for o in v['orders']) + 1)),
+                              ('tower detail pool time beyond the tower',
+                               lambda v: v['tower_detail'].update(pool_ms=1e6))):
             bad = deepcopy(gpu_good)
             mutate(bad)
             need(refused(worker.validate_probe, bad, gpu_case, 0), 'batch/GPU probe mutation ' + label)

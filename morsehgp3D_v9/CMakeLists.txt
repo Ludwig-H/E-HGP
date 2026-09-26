@@ -249,7 +249,7 @@ mhgp9_gate(mhgp9_chain_order_failure_mutant_drop_failed_stats 1 mhgp9_chain_orde
 # ASan (-DMHGP9_SANITIZE=ON), rapport sur stdout. Duree locale : 25 s en
 # Release, 300 s sous ASan.
 mhgp9_gate(mhgp9_chain_order_failure_unwind 0 mhgp9_chain_order_failure_priority_gate
-           ARGS --unwind EXPECT_PREFIX "order_failure_unwind_gate checks=46" LABELS "gate;chain;tower" TIMEOUT 900)
+           ARGS --unwind EXPECT_PREFIX "order_failure_unwind_gate checks=64" LABELS "gate;chain;tower" TIMEOUT 900)
 # v28 (C, constats 2 et 3) : le dimensionnement des lignes rate sur la queue
 # en pipeline ; le mutant le rapporte comme une erreur de phase A (avant la
 # panne des lots K3 que le temoin rapporte) et meurt sur le cas croise.
@@ -260,6 +260,17 @@ target_compile_definitions(mhgp9_chain_order_failure_rows_error_first_mutant_gat
                            PRIVATE MHGP9_FULL_ORDERS_MUTANT_ROWS_ERROR_FIRST=1)
 mhgp9_gate(mhgp9_chain_order_failure_mutant_rows_error_first 1 mhgp9_chain_order_failure_rows_error_first_mutant_gate
            ARGS --unwind EXPECT_PREFIX "cause=unwind.rows" LABELS "gate;chain;tower;mutant" TIMEOUT 900)
+# Revue avant R22 : une erreur hors panne des images d'un pas que le temoin
+# n'execute pas (sous une panne plus basse) est ecartee ; le mutant la
+# rapporte et meurt sur le cas « lots K2 + images K4 ».
+mhgp9_test_executable(mhgp9_chain_order_failure_image_errors_unbounded_mutant_gate
+                      tests/chain/order_failure_priority_gate.cpp src/chain/tower_chain.cpp)
+target_link_libraries(mhgp9_chain_order_failure_image_errors_unbounded_mutant_gate PRIVATE mhgp9_gen mhgp9_gpu)
+target_compile_definitions(mhgp9_chain_order_failure_image_errors_unbounded_mutant_gate
+                           PRIVATE MHGP9_FULL_ORDERS_MUTANT_IMAGE_ERRORS_UNBOUNDED=1)
+mhgp9_gate(mhgp9_chain_order_failure_mutant_image_errors_unbounded 1
+           mhgp9_chain_order_failure_image_errors_unbounded_mutant_gate
+           ARGS --unwind EXPECT_PREFIX "cause=unwind.images" LABELS "gate;chain;tower;mutant" TIMEOUT 900)
 if(MHGP9_SANITIZE)
   mhgp9_test_executable(mhgp9_chain_order_failure_timers_after_join_mutant_gate
                         tests/chain/order_failure_priority_gate.cpp src/chain/tower_chain.cpp)
