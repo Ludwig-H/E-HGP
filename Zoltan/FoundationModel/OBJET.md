@@ -105,6 +105,14 @@ un arbre de fusion ; à $r$ fixé on lit une chaîne emboîtée en $K$, puisque
 $L_K(r) \subseteq L_{K-1}(r)$. Les `lower_nodes` sont la réalisation de cette
 seconde inclusion.
 
+Détail qui compte pour un modèle : la v9 ne se contente pas de publier cette
+carte, elle en **vérifie la naturalité** (invariant `full_ball_vertical_naturality`).
+L'image d'une fusion est la fusion des images : le carré commute. La
+bifiltration n'est donc pas deux empilements posés côte à côte, c'est un
+morphisme de filtrations vérifié à chaque construction. Un biais d'attention le
+long de l'axe des ordres a un sens mathématique, pas seulement une
+justification d'ingénieur.
+
 ## 4. Les nombres qui contraignent l'architecture
 
 Extraits des 36 sondes du reçu R22 (`vm/probe_*.stdout`, champ `orders`) :
