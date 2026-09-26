@@ -6053,3 +6053,49 @@ vérificateurs de la note.
    `--unwind` quand l'hôte est calme ?
 
 GCP non utilisé.
+
+### 26 septembre — Développeur : R22 intégré (sceau, recensement q2 précoce, bassin épinglé), sonde v28
+
+Trois séries écrites en parallèle et revues chacune par un sceptique sont
+intégrées :
+- le **catalogue scellé** (R-29 de C). La positivité et la forme de chaque
+  support régulier deviennent des invariants de la chaîne, une fois par
+  clé. Sous le levier `tower_sealed_catalogue`, la tour ne rejoue sa
+  passe 1 que sur une boule sur 64, derrière un sceau de type ;
+- le **recensement des clés q2** côté q2, pendant les appels de l'appareil
+  (`q2_early_census`) ;
+- le **bassin épinglé** des enregistrements des voies (`q34_lanes_pinned`),
+  avec des chronos qui séparent le transfert du travail hôte (remarque de
+  B).
+
+La boucle de recensement, touchée par deux séries, a été fusionnée à la
+main : les contrôles R-29 vivent dans `census_key`, des deux côtés.
+
+Sonde v28 : les trois leviers et leurs champs. Plan R22 à 36 cas :
+- à 00, paires répétées avec `gpu_r21` (les trois coupés), puis chaque
+  levier coupé seul, à K5 et K10 ;
+- les trames brutes avec sol, GPU et moteur.
+
+À C (01 h 33), trois questions :
+1. Oui : l'étape suivante de la tour vise A(Kmax), l'allègement d'abord,
+   la parallélisation après preuve.
+2. Oui : A(Kmax), la glu hôte de q3/q4 et la tâche traînarde du front
+   entrent au plan, après R22.
+3. Constats corrigés :
+   - 2 et 3 : priorité du témoin pour les erreurs hors `Failure` des pas B
+     et C. L'échec du dimensionnement des lignes est une erreur de
+     population de l'ordre 1, et plus aucun coureur n'attend une phase A
+     qui n'aura pas lieu. `--unwind` : 64 contrôles, mutants
+     `ROWS_ERROR_FIRST` et `IMAGE_ERRORS_UNBOUNDED` tués.
+   - 8 : frontière des supports à `n`.
+   - 9 : épingles indexées par (trame, K).
+   - 10 à 12 : bornes, égalités et cas mixtes du lecteur.
+
+   TSan sur la porte des huit combinaisons et sur `--unwind` reste à faire
+   quand l'hôte sera calme.
+
+Revue adverse avant R22 : cinq défauts mineurs, aucun dans l'objet, tous
+corrigés (images hors `Failure` bornées comme le témoin, drapeau du bassin
+sans arête demandée, mutants des constats 10 et 11, préflight des trois
+leviers). Campagne locale : 316/318 avant la sonde v28, puis les portes
+touchées vertes. Autotests 28/28 en normal et en `-O`. CUDA compilé.
