@@ -59,8 +59,14 @@ négatives :
    MorseHGP3D, et les trois énoncés réfutés en chemin.
 4. [`docs/MOTEUR_ET_COUTS.md`](docs/MOTEUR_ET_COUTS.md) — l'architecture,
    les coûts, la couche statistique et sa limite mesurée.
-5. [`docs/JOURNAL_20260925.md`](docs/JOURNAL_20260925.md) — le journal de la
+5. [`docs/MESURES_CONCENTRATION_20260925.md`](docs/MESURES_CONCENTRATION_20260925.md)
+   — la question décisive pour un usage réel : dimension intrinsèque contre
+   dimension ambiante, seuil de bruit, et les trois prétraitements qu'il faut
+   s'interdire.
+6. [`docs/JOURNAL_20260925.md`](docs/JOURNAL_20260925.md) — le journal de la
    première journée, avec les commandes qui reproduisent chaque chiffre.
+7. [`audits/QUESTION_AUDIT_OUVERTURE_20260925.md`](audits/QUESTION_AUDIT_OUVERTURE_20260925.md)
+   — les sept verrous soumis à contradiction.
 
 ## Carte du code
 
@@ -136,9 +142,12 @@ Acquis, avec la commande qui le reproduit :
 | naissances topologiques : $O(n)$ en $d=2$, exactement $\binom{n}{k}$ en $d=100$ | **mesuré** |
 | encadrement du noyau rampe $L_k(a-\varepsilon)\subseteq L_k^{\varepsilon}(a)\subseteq L_k(a)$, décalage optimal | **démontré** |
 | points fixes de la descente MEB-Lloyd = sphères critiques, zéro faux positif | **démontré et mesuré** |
-| tour à témoins = projection exacte sur 2843 paires sur 2856, 0 violation | **mesuré** |
+| tour à témoins = projection exacte sur **2856 paires sur 2856** (départs par triplets), 0 violation, $d$ de 2 à 50 | **mesuré** |
 | couverture complète du catalogue critique par descente en grande dimension | **non acquis** |
 | certificat de séparation exact (hyperplan et sphère), zéro faux | **démontré et mesuré** |
 | niveau de fusion **certifié exact** par le moteur seul : 21 paires sur 21 à l'ordre 1 en $d=20$ | **démontré** |
 | certificat de séparation efficace aux ordres $k\geq2$ | **non acquis** |
+| obstruction gouvernée par la dimension **intrinsèque**, pas l'ambiante ($\varphi_5$ constante de $d=2$ à $200$ à rang 2 fixé) | **mesuré** |
+| bruit ambiant sur une variété de rang 2 : exposant du compte de naissances $1{,}96$ (quadratique) | **mesuré** |
+| blanchiment interdit : en rang $d\geq n-1$ la tour devient celle d'un simplexe régulier, indépendante des données | **démontré** |
 | couche statistique utile en grande dimension sans structure latente | **non acquis, mesuré négatif** |

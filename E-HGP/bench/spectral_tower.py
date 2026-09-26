@@ -517,7 +517,12 @@ def main(argv=None):
     parser.add_argument("--separation", type=float, default=8.0)
     parser.add_argument("--noise", type=float, default=1.0)
     parser.add_argument("--features", type=int, default=256)
-    parser.add_argument("--bandwidth-scale", type=float, default=1.0)
+    # Defaut MESURE, pas devine : dans le regime temoin `none` (probleme
+    # intrinseque plonge sans bruit ambiant), les echelles 0,20 / 0,35 / 0,50
+    # / 1,00 donnent toutes un ARI spectral de 0,99 a 1,00 en d = 2 et d = 50.
+    # 0,35 est pris au milieu de ce plateau, une fois pour toute la campagne :
+    # aucune ligne du tableau n'a sa propre largeur de bande.
+    parser.add_argument("--bandwidth-scale", type=float, default=0.35)
     parser.add_argument("--rho-max", type=float, default=1.0)
     parser.add_argument("--covariance-floor", type=float, default=1e-6)
     parser.add_argument("--neighbours", type=int, default=15)

@@ -1547,7 +1547,9 @@ def build_parser():
     parser.add_argument("--subsets", type=int, default=240)
     parser.add_argument("--neighbours", type=int, default=10)
     parser.add_argument("--noise", type=float, default=0.05)
-    parser.add_argument("--noise-levels", type=_float_list, default=[0.0, 0.01, 0.03, 0.1, 0.3, 1.0])
+    parser.add_argument(
+        "--noise-levels", type=_float_list, default=[0.0, 0.01, 0.03, 0.1, 0.3, 1.0]
+    )
     parser.add_argument("--noise-dims", type=_int_list, default=[20, 200])
     parser.add_argument("--dimsweep-dims", type=_int_list, default=[2, 3, 5, 20, 50, 200])
     parser.add_argument("--dimsweep-order", type=int, default=2)
@@ -1581,7 +1583,10 @@ def main(argv=None):
     print("profile=any_dimension_rational_exact")
     print("mode=audit_independant_math_and_architecture")
     print("public_status=not_claimed")
-    print("graine de base=%d graines=%d parties tirees=%d" % (options.seed, options.seeds, options.subsets))
+    print(
+        "graine de base=%d graines=%d parties tirees=%d"
+        % (options.seed, options.seeds, options.subsets)
+    )
     wanted = options.table
     if wanted in ("selftest", "all"):
         table_selftest(options, ledger)

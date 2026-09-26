@@ -258,7 +258,8 @@ def spectral_filter(eigenvalues, rho_max=1.0, floor=1e-10):
             "filtre spectral non defini : 1 + rho_max (lambda - 1) <= 0"
         )
     gap = safe - 1.0
-    values = np.where(np.abs(gap) < 1e-12, rho_max, np.log(shifted) / np.where(gap == 0.0, 1.0, gap))
+    ratio = np.log(shifted) / np.where(gap == 0.0, 1.0, gap)
+    values = np.where(np.abs(gap) < 1e-12, rho_max, ratio)
     return values, clamped
 
 
@@ -332,25 +333,40 @@ class NystromFeatures:
     remise. Le produit `phi(x)^T phi(y)` est l'approximation de Nystrom de
     `k(x, y)`. Les moments de la reference se calculent par Monte-Carlo :
     aucune forme close n'est disponible ici, et c'est declare.
+
+    Le spectre de `K_ZZ` decroit geometriquement pour un noyau lisse, donc
+    l'inverse de sa racine est catastrophiquement mal conditionne. Les
+    directions sous `rank_tolerance` fois la plus grande valeur propre sont
+    donc SUPPRIMEES, pas inversees avec un plancher : le nombre de
+    descripteurs effectifs `count` est le rang retenu, et il peut etre
+    strictement inferieur au nombre de points de reference. C'est la meme
+    decision que la troncature de `SpectralLogDensity._decompose`, prise au
+    meme endroit conceptuel : la classe de fonctions, pas l'axe des niveaux.
     """
 
     name = "nystrom"
 
-    def __init__(self, landmarks, bandwidth, ridge=1e-10):
+    def __init__(self, landmarks, bandwidth, ridge=0.0, rank_tolerance=1e-8):
         landmarks = np.asarray(landmarks, dtype=float)
         if landmarks.ndim != 2:
             raise ValueError("les points de reference forment une matrice (m, d)")
         self.landmarks = landmarks
         self.dimension = landmarks.shape[1]
-        self.count = landmarks.shape[0]
+        self.landmark_count = landmarks.shape[0]
         self.bandwidth = float(bandwidth)
         gram = self._kernel(landmarks)
-        gram = gram + ridge * np.trace(gram) / max(1, self.count) * np.eye(self.count)
-        values, vectors = np.linalg.eigh(gram)
-        floor = max(values.max(), 0.0) * 1e-12
-        if values.min() <= floor:
-            values = np.maximum(values, max(floor, 1e-300))
-        self.whitener = vectors @ np.diag(values ** -0.5) @ vectors.T
+        if ridge > 0.0:
+            scale = float(np.trace(gram)) / max(1, self.landmark_count)
+            gram = gram + ridge * scale * np.eye(self.landmark_count)
+        values, vectors = np.linalg.eigh(0.5 * (gram + gram.T))
+        largest = float(values.max())
+        if largest <= 0.0:
+            raise DegenerateSample("matrice de Gram des points de reference nulle")
+        kept = values > rank_tolerance * largest
+        self.count = int(np.count_nonzero(kept))
+        if self.count == 0:
+            raise DegenerateSample("aucune direction de Nystrom au-dessus du seuil")
+        self.whitener = (vectors[:, kept] / np.sqrt(values[kept])).T
 
     def _kernel(self, points):
         points = np.asarray(points, dtype=float)
@@ -367,7 +383,7 @@ class NystromFeatures:
         """Gradient de `weights^T phi(x)` : chaine sur le noyau gaussien."""
         points = np.asarray(points, dtype=float)
         kernel = self._kernel(points)
-        coefficients = self.whitener @ weights
+        coefficients = self.whitener.T @ weights
         scaled = kernel * coefficients[:, None]
         total = scaled.sum(axis=0)
         return (scaled.T @ self.landmarks - total[:, None] * points) / (self.bandwidth ** 2)
@@ -735,11 +751,13 @@ class SpectralLogDensity:
 
     def evaluate(self, points):
         """Estimation de `log (dp/dq)` aux points donnes, forme `(N,)`."""
-        return self.features.transform(self.centred(points)) @ self.theta
+        centred = self.centred(points)
+        return self.features.transform(centred) @ self.theta
 
     def gradient(self, points):
         """Gradient analytique de l'estimation de `log (dp/dq)`, `(N, d)`."""
-        return self.features.directional(self.centred(points), self.theta)
+        centred = self.centred(points)
+        return self.features.directional(centred, self.theta)
 
     def log_density(self, points):
         """Estimation de `log p = log(dp/dq) + log q`."""
@@ -768,7 +786,8 @@ class SpectralLogDensity:
 
     def potential_at(self, rho, points):
         """Valeur du potentiel `u(rho, x) = theta(rho)^T phi(x)`."""
-        return self.features.transform(self.centred(points)) @ self.theta_at(rho)
+        centred = self.centred(points)
+        return self.features.transform(centred) @ self.theta_at(rho)
 
     def quadratic_potentials(self, rho):
         """Triplet `(M, N, c)` des potentiels quadratiques du paragraphe 4."""

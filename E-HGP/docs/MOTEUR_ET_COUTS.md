@@ -80,13 +80,26 @@ observations seules) à **100**, qui est la valeur exacte — le chemin qui
 réalise 100 passe par le centre du carré, qui est précisément une sphère
 critique. Campagne appariée complète
 (`bench/witness_campaign.py --ns 8 --dims 2,3,5,10,20,50 --k-max 3 --seeds 17,23,31 --families uniform,clusters`,
-reçu `receipts/witness_campaign_20260925/campaign_n8.json`) : **34 cas,
-2856 paires, 2843 paires exactement égales à la valeur exacte, 13 paires
-strictement majorées, 0 violation**. Le majorant à témoins est donc égal à
-la projection exacte sur $99{,}5$ pour cent des paires mesurées, et jamais en
-dessous. **L'égalité est mesurée, jamais déclarée** : les 13 cas résiduels
-sont des chemins que les témoins courants ne réalisent pas, et ils sont
-conservés dans le reçu.
+reçus dans `receipts/witness_campaign_20260925/`) :
+
+| départs de descente | cas | paires | égales à l'exact | strictement majorées | violations |
+| --- | --- | --- | --- | --- | --- |
+| observations et milieux de paires | 34 | 2856 | 2843 | 13 | **0** |
+| plus les barycentres de triplets | 34 | 2856 | **2856** | **0** | **0** |
+
+Avec les barycentres de triplets comme départs supplémentaires, le majorant
+certifié **coïncide avec la projection exacte sur la totalité des paires
+mesurées**, en dimension 2, 3, 5, 10, 20 et 50, et jamais en dessous. Les 13
+cas résiduels de la première ligne étaient donc un manque de **départs** de
+descente, non une limite structurelle : deux d'entre eux ont été réduits,
+puis fermés par l'ajout des triplets (19 égales et 9 majorées deviennent 28
+et 0 ; 24 et 4 deviennent 28 et 0).
+
+**L'égalité reste mesurée, jamais déclarée** : rien ne démontre que la
+descente trouve toujours les témoins nécessaires. Ce qui est démontré est la
+direction de l'inégalité (un chemin polygonal certifié majore le niveau vrai)
+et, pour les paires couvertes par un certificat de séparation (§ 2.4),
+l'égalité elle-même.
 
 ### 2.4 Certificat de separation : la borne inferieure
 

@@ -112,15 +112,32 @@ Trois précautions, sans lesquelles l'obstruction serait surévaluée.
    $n=704$, la fraction mesurée vaut $0{,}058$ en $d=50$ et $0{,}655$ en
    $d=100$, soit environ $8{,}2\cdot10^{10}$ et $9{,}3\cdot10^{11}$
    naissances.
-3. **C'est la dimension EFFECTIVE À L'ÉCHELLE DES ÉVÉNEMENTS qui gouverne,
-   pas la dimension ambiante.** Un nuage de dimension intrinsèque 2 plongé
-   par une **similitude exacte** dans $\mathbb{R}^{50}$ donne exactement les
-   comptes de la dimension 2 : l'obstruction ne vient pas du nombre de
-   colonnes. Mais elle **revient sous l'échelle du bruit** : à bruit ambiant
-   fixé sur une variété de dimension 2 dans $\mathbb{R}^{50}$, le compte
-   d'arêtes de Gabriel passe de linéaire à quasi quadratique quand $n$ croît,
-   parce que l'espacement local décroît en $(k/n)^{1/2}$ tandis que l'énergie
-   du bruit reste fixe. C'est la formulation utile pour des données réelles.
+3. **C'est la dimension INTRINSÈQUE qui gouverne, pas l'ambiante**, et la
+   dimension ambiante n'agit que par l'énergie du bruit hors-variété
+   $\sigma^2(d-r)$. Mesuré sur douze familles synthétiques, cinq graines au
+   moins, $864\,520$ boules toutes certifiées
+   ([`MESURES_CONCENTRATION_20260925.md`](MESURES_CONCENTRATION_20260925.md)) :
+   à rang intrinsèque $r=2$ fixé, la part libre $\varphi_5$ vaut
+   $0{,}003\pm0{,}001$ de $d=2$ à $d=200$ et le compte de naissances reste
+   quasi linéaire en $n$ (exposant $\approx0{,}75$), tandis qu'à $r=d$ elle
+   passe de $0{,}004$ à $1{,}000$. Un plongement isométrique exact laisse la
+   mesure inchangée **chiffre par chiffre**.
+4. **Mais le bruit ambiant ramène l'obstruction**, et c'est le régime des
+   données réelles : sur une variété de dimension 2 dans $\mathbb{R}^{200}$
+   avec bruit gaussien ambiant, l'exposant du compte de naissances en $n$
+   passe de $0{,}75$ à $\mathbf{1{,}96}$, soit un régime quadratique
+   ($1{,}39\cdot10^{4}$ naissances à $n=200$, $1{,}28\cdot10^{6}$ à
+   $n=2000$).
+5. **Deux interdits mesurés, et un piège.** Le blanchiment est à proscrire :
+   en rang $d\geq n-1$ il transforme le nuage en **simplexe régulier exact**,
+   toutes distances au carré égales à $2(n-1)$ et niveaux
+   $\beta(F)=(n-1)(k-1)/k$, donc une tour qui **ne dépend plus des
+   données** ; et dès $d/n\sim1/4$ le signal est annulé. Johnson-Lindenstrauss
+   dégrade le signal en dessous du brut. Le piège : **la part libre qui
+   redescend après projection ne prouve rien** — une projection sur un plan
+   *aléatoire* d'un nuage authentiquement de dimension 200 donne
+   $\varphi_2=0{,}014$, la valeur d'un nuage plan. La taille de sortie se
+   rachète par une projection, la vérité de l'objet non.
 
 **Pont avec la littérature.** Les feuilles de l'arbre de fusion d'ordre $k$
 s'injectent dans les sommets de la mosaïque de Delaunay d'ordre $k$ : si la
@@ -215,10 +232,28 @@ $k$ fixés » ; « la fraction croît avec $n$ » (elle décroît) ; « l'intér
 strict suffit comme critère de naissance » (fixture F1).
 
 Ce qui reste **ouvert** : le seuil réel en $d$ (la preuve du § 1.3 donne
-$10^3$ à $10^4$, la mesure donne 50) ; et surtout la portée sur données
-réelles, qui dépend du rapport entre l'espacement local et l'amplitude du
-bruit ambiant, mesuré dans
-[`MESURES_CONCENTRATION_20260925.md`](MESURES_CONCENTRATION_20260925.md).
+$10^3$ à $10^4$, la mesure donne 50) ; l'estimation du rang de signal $r$ et
+du sous-espace sans les connaître d'avance, que toutes les mesures d'analyse
+en composantes principales supposent donnés ; et le comportement sur données
+réelles, qu'aucune mesure de ce chantier n'établit.
+
+**Réfuté par la mesure, et à ne plus écrire** : « la dispersion du comptage de
+boules mesure le signal de densité » (un nuage uniforme en $d=200$, sans
+aucune variation de densité, a un excès de Poisson supérieur à celui d'un
+nuage à huit amas) ; « si la part libre redescend après projection, l'objet
+est préservé » ; « le blanchiment est un prétraitement neutre » ; « la
+dimension ambiante gouverne l'obstruction ».
+
+**La condition d'utilité, énoncée une fois pour toutes.** Pour qu'un E-HGP
+euclidien ait un sens sur des données réelles, il faut un sous-espace de
+signal de rang $r$ **estimé** et une énergie de bruit hors-variété sous le
+seuil du § 6 de
+[`MESURES_CONCENTRATION_20260925.md`](MESURES_CONCENTRATION_20260925.md). Une
+projection rachète la taille de la sortie, jamais sa vérité : après analyse en
+composantes principales au rang intrinsèque, la corrélation de rang entre le
+comptage de boules et une densité latente connue ne dépend plus de $d$, mais
+elle plafonne au niveau fixé par le bruit **dans** la variété ($0{,}749$ à
+$\sigma=0$, $0{,}323$ à $\sigma=0{,}3$).
 
 ## 6. Conséquence pour le chantier
 
