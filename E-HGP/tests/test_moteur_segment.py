@@ -24,6 +24,19 @@ independants du code teste sont ecrits dans ce module.
    la valeur est evaluee en ENTIERS apres mise a l'echelle par `N^2`. C'est
    un MINORANT certifie du maximum : une porte contre un maximum
    sous-estime, jamais une preuve d'exactitude.
+4. Juge par REGIONS de statistique d'ordre. Les juges 1 a 3 partagent avec le
+   moteur l'idee que le maximum se lit sur un CROISEMENT de droites : un
+   defaut de cette theorie ne serait donc pas vu par le juge 1. Le juge 4
+   n'en suppose rien. Pour chaque observation pivot `l` et chaque partie `S`
+   de cardinal `k - 1` des autres, la region ou `e_l` est la k-ieme plus
+   petite est decrite par les inegalites `e_m <= e_l` (`m` dans `S`) et
+   `e_m >= e_l` (`m` hors `S`), chacune AFFINE en `t` puisque le terme
+   `A t^2` se simplifie dans une difference : la region est donc un
+   intervalle. Ces regions RECOUVRENT `[0, 1]` (pour tout `t`, prendre pour
+   pivot le rang `k` et pour `S` les `k - 1` rangs precedents), et sur
+   chacune `e_l` est convexe, donc maximale a une extremite de l'intervalle.
+   Le jeu de temps utiles est ainsi DEMONTRE par un recouvrement de signes,
+   au lieu d'etre postule.
 
 Ce que ces portes etablissent, et ce qu'elles n'etablissent pas. L'egalite
 avec les juges est une verification d'IMPLEMENTATION. La majoration de
@@ -72,6 +85,9 @@ PLANCHER_DIMENSIONS_JUGE = 5
 PLANCHER_TIRAGES_JUGE = 15
 PLANCHER_COMPARAISONS_JUGE = 600
 PLANCHER_ECHANTILLONS = 2000
+PLANCHER_COMPARAISONS_REGIONS = 500
+PLANCHER_DIMENSIONS_REGIONS = 6
+PLANCHER_NIVEAUX_GRAVES = 200
 PLANCHER_MAXIMA_INTERIEURS = 120
 PLANCHER_FIXTURES_SEGMENT = 14
 PLANCHER_TIRAGES_ORDRE_UN = 15
@@ -158,6 +174,65 @@ def _maximum_juge(nuage, source, cible, ordre):
         if meilleur is None or valeur > meilleur:
             meilleur = valeur
     return meilleur, len(temps)
+
+
+def _maximum_par_regions(nuage, source, cible, ordre):
+    """Maximum exact de `a_ordre` par REGIONS de statistique d'ordre.
+
+    Aucune hypothese n'est faite sur l'endroit ou le maximum est atteint : les
+    regions de signe recouvrent `[0, 1]` (voir le point 4 de l'en-tete du
+    module) et sur chacune le maximum d'une fonction convexe est a une
+    extremite. Cette route est structurellement DIFFERENTE de celle du moteur,
+    qui enumere des croisements ; elle n'emprunte a `engine/segment.py` ni ses
+    coefficients, ni son jeu de temps candidats.
+    """
+    dominant, parties = _coefficients_extremites(nuage, source, cible)
+    nombre = len(parties)
+    meilleur = None
+    for pivot in range(nombre):
+        autres = [index for index in range(nombre) if index != pivot]
+        pente_pivot, constante_pivot = parties[pivot]
+        for bas in combinations(autres, ordre - 1):
+            ensemble_bas = set(bas)
+            borne_basse = Fraction(0)
+            borne_haute = Fraction(1)
+            vide = False
+            for index in autres:
+                pente, constante = parties[index]
+                alpha = pente - pente_pivot
+                beta = constante_pivot - constante
+                # `index` dans `ensemble_bas` demande `alpha t <= beta`, sinon
+                # `alpha t >= beta`.
+                if index in ensemble_bas:
+                    if alpha == 0:
+                        if beta < 0:
+                            vide = True
+                    elif alpha > 0:
+                        borne_haute = min(borne_haute, Fraction(beta, alpha))
+                    else:
+                        borne_basse = max(borne_basse, Fraction(beta, alpha))
+                else:
+                    if alpha == 0:
+                        if beta > 0:
+                            vide = True
+                    elif alpha > 0:
+                        borne_basse = max(borne_basse, Fraction(beta, alpha))
+                    else:
+                        borne_haute = min(borne_haute, Fraction(beta, alpha))
+                if vide or borne_basse > borne_haute:
+                    vide = True
+                    break
+            if vide:
+                continue
+            for instant in (borne_basse, borne_haute):
+                valeur = (
+                    dominant * instant * instant
+                    + pente_pivot * instant
+                    + constante_pivot
+                )
+                if meilleur is None or valeur > meilleur:
+                    meilleur = valeur
+    return meilleur
 
 
 def _valeur_geometrique(nuage, source, cible, ordre, instant):
@@ -588,6 +663,62 @@ class TestAMaximumSegment(unittest.TestCase):
         self.assertGreaterEqual(NOMBRE_ECHANTILLONS, PLANCHER_ECHANTILLONS)
         self.assertGreaterEqual(interieurs, PLANCHER_MAXIMA_INTERIEURS)
 
+    def test_maximum_contre_le_juge_par_regions(self):
+        """Juge 4 : le jeu de temps utiles est demontre, pas postule.
+
+        Les juges 1 a 3 partagent avec le moteur la theorie des croisements.
+        Ce test confronte le moteur a un juge qui recouvre `[0, 1]` par
+        regions de signe : une theorie des temps candidats incomplete serait
+        vue ici, et par aucun des trois autres juges.
+        """
+        tirage = random.Random(67)
+        dimensions = (1, 2, 3, 5, 20, 50)
+        effectif = 6
+        comparaisons = 0
+        for dimension in dimensions:
+            for _ in range(2):
+                nuage = _nuage_entier_alea(tirage, effectif, dimension, 4 * effectif)
+                for source, cible in combinations(range(effectif), 2):
+                    for ordre in (1, 2, 3):
+                        niveau, _temps = segment_maximum(nuage, source, cible, ordre)
+                        regions = _maximum_par_regions(nuage, source, cible, ordre)
+                        comparaisons += 1
+                        self.assertEqual(
+                            niveau,
+                            regions,
+                            "desaccord du juge par regions : d=%d nuage=%s"
+                            " paire=(%d,%d) k=%d"
+                            % (dimension, nuage, source, cible, ordre),
+                        )
+        for nom, nuage in (
+            ("colineaire", _nuage_colineaire(6, 3)),
+            ("deux_lignes", _nuage_deux_lignes(6, 4)),
+            ("cocyclique", list(_CARRE_COCYCLIQUE)),
+            ("duplique", [(0, 0), (0, 0), (5, 0), (5, 0), (2, 7)]),
+        ):
+            effectif_famille = len(nuage)
+            for source, cible in combinations(range(effectif_famille), 2):
+                for ordre in (1, 2, 3):
+                    niveau, _temps = segment_maximum(nuage, source, cible, ordre)
+                    comparaisons += 1
+                    self.assertEqual(
+                        niveau,
+                        _maximum_par_regions(nuage, source, cible, ordre),
+                        "desaccord du juge par regions sur la famille %s" % nom,
+                    )
+        for nom, nuage, paire, ordre, niveau, _instant in FIXTURES_SEGMENT:
+            source, cible = paire
+            comparaisons += 1
+            self.assertEqual(
+                _maximum_par_regions(list(nuage), source, cible, ordre),
+                niveau,
+                "fixture %s : juge par regions" % nom,
+            )
+        _compter("regions_comparaisons", comparaisons)
+        _compter("regions_dimensions", len(dimensions))
+        self.assertGreaterEqual(comparaisons, PLANCHER_COMPARAISONS_REGIONS)
+        self.assertGreaterEqual(len(dimensions), PLANCHER_DIMENSIONS_REGIONS)
+
     def test_maximum_sur_contre_familles(self):
         tirage = random.Random(17)
         familles = (
@@ -983,6 +1114,13 @@ class TestDEquivariance(unittest.TestCase):
                 )
         if not niveaux:
             self.fail("aucune rubrique de niveaux dans l'enregistrement canonique")
+        graves = sum(len(valeurs) for valeurs in niveaux.values())
+        if graves == 0:
+            self.fail(
+                "toutes les rubriques de niveaux sont vides : la comparaison"
+                " d'equivariance ne comparerait rien"
+            )
+        _compter("equivariance_niveaux_graves", graves)
         return (
             list(tour.levels),
             {ordre: tour.merge_levels(ordre) for ordre in range(1, tour.effective + 1)},
@@ -1343,6 +1481,9 @@ class TestZPlanchersCouverture(unittest.TestCase):
         ("majoration_paires", PLANCHER_PAIRES_MAJORATION),
         ("majoration_strictes", PLANCHER_MAJORATIONS_STRICTES),
         ("majoration_dimensions", PLANCHER_DIMENSIONS_MAJORATION),
+        ("regions_comparaisons", PLANCHER_COMPARAISONS_REGIONS),
+        ("regions_dimensions", PLANCHER_DIMENSIONS_REGIONS),
+        ("equivariance_niveaux_graves", PLANCHER_NIVEAUX_GRAVES),
         ("permutation_cas", PLANCHER_CAS_EQUIVARIANCE),
         ("degenerescences", PLANCHER_DEGENERESCENCES),
     )

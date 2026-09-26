@@ -52,8 +52,10 @@ Usage :
 
     python3 bench/clustering_compare.py gate
     python3 bench/clustering_compare.py run --profile quick
-    python3 bench/clustering_compare.py run --profile full --out receipts/x.jsonl
-    python3 bench/clustering_compare.py table --input receipts/x.jsonl
+    python3 bench/clustering_compare.py run --profile full --out campagne.jsonl
+    python3 bench/clustering_compare.py table --input campagne.jsonl
+    python3 bench/clustering_compare.py divergence --count 200
+    python3 bench/clustering_compare.py scale --counts 250,500,1000,2000 --dim 50
 
 Aucune porte ne repose sur le mot-cle `assert` : seules les methodes
 `self.assert*` de `unittest` decident, donc tout tient sous `python3 -O`.
@@ -988,6 +990,24 @@ def report(rows):
             rows, "fixed", "ari", title="ari, coupe au vrai nombre, par famille"
         ),
         table_by_family(rows, "peak", "ari", title="ari, coupe au pic, par famille"),
+        table_by_dimension(
+            rows,
+            "fixed",
+            "nmi",
+            title="information mutuelle normalisee, coupe au vrai nombre de classes",
+        ),
+        table_by_dimension(
+            rows,
+            "peak",
+            "nmi",
+            title="information mutuelle normalisee, coupe au pic",
+        ),
+        table_by_dimension(
+            rows,
+            "peak",
+            "groups",
+            title="nombre de groupes rendus, coupe au pic (verite : 3 a 10)",
+        ),
         bracket_table(rows),
         timing_table(rows),
     ]

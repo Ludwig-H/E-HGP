@@ -337,9 +337,22 @@ Avec 30 pour cent de bruit de fond et $d\geq50$, **toute** la famille de
 liaison tombe à un indice de Rand de $-0{,}02$, c'est-à-dire une partition
 dégénérée, tandis que Ward tient $0{,}597$ à $0{,}722$.
 
-Deux réserves honnêtes : le DBSCAN cité utilise un rayon **oracle**, donc il
-majore ce qu'une méthode réglable obtiendrait ; et ce profil n'a que deux
-graines, le profil à cinq graines étant en cours.
+**Confirmation à cinq graines.** Le profil `noise`
+(`bench/clustering_compare.py run --profile noise --orders 1,2,5`, 180
+cellules, $d=10$ et $200$, trois niveaux de bruit de fond, cinq graines,
+toutes les familles) donne exactement la même conclusion :
+
+| grandeur | $d=10$ | $d=200$ |
+| --- | --- | --- |
+| ARI(meilleur $k>1$) moins ARI($k=1$), coupe vraie | $-0{,}083$ | $-0{,}108$ |
+| idem, coupe spontanée | $-0{,}126$ | $-0{,}156$ |
+| `ehgp_k1` = liaison simple | $0{,}272$ | $0{,}271$ |
+| Ward | $0{,}776$ | $\mathbf{0{,}886}$ |
+| $k$-moyennes | $0{,}758$ | $0{,}810$ |
+
+Une réserve honnête subsiste : le DBSCAN cité utilise un rayon **oracle**
+($0{,}871$ et $0{,}821$), donc il majore ce qu'une méthode réglable
+obtiendrait.
 
 **Conséquence, à mettre en face du § 5.** La valeur de la voie E-HGP n'est
 pas dans l'axe d'ordre appliqué à des distances euclidiennes brutes — mesuré
