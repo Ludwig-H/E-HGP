@@ -72,6 +72,7 @@ prétextes dérivés de la filtration.
 | document | ce qu'on y trouve |
 | --- | --- |
 | [`AUDIT_V9_ET_ARCHITECTURE_20260926.md`](AUDIT_V9_ET_ARCHITECTURE_20260926.md) | audit transversal v9 → modèle : contrat d'export, jetons, cartes entre K, coût et portes de décision |
+| [`CONTRAT_COUPES_ET_MASSES_20260926.md`](CONTRAT_COUPES_ET_MASSES_20260926.md) | suite constructive : flux d'incidences, snapshots, composition pondérée, réserves et 11 fixtures rationnelles |
 | [`OBJET.md`](OBJET.md) | ce que la tour est et publie ; les six primitives qu'une architecture y lit |
 | [`ETAT_DE_LART.md`](ETAT_DE_LART.md) | le verrou, comment la littérature le rattrape, et **la table de substitution** |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | HGP-UNet : la condensation, le chemin dans le treillis, les six composants, les conceptions écartées |

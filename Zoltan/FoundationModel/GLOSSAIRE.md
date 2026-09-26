@@ -85,23 +85,32 @@ les deux. L'iso-densité compare des branches latérales ; elle ne définit pas
 un pooling emboîtant.
 
 **Condensation** — l'élagage de HDBSCAN, prescrit par le § 9.1 du manuscrit :
-une scission n'est une vraie scission que si les deux branches gardent assez de
-masse ; sinon la branche survivante garde l'identité du parent. Le § 4.4.3
-observe que c'est en réalité un **seuil de percolation**. Ici le seuil doit être
-**relatif** (une fraction $\alpha$ de la masse du parent), jamais un nombre de
-points.
+dans l'adaptation aux multifusions, zéro branche lourde termine le segment,
+une seule poursuit son identité, plusieurs créent une scission simultanée.
+Le seuil relatif α reste à tester et les masses écartées restent en réserve.
 
 **Masse $m_\tau$** — $m_\tau = S_\tau \sum_{x \in \tau} 1/T_x$, le poids que le
 § 9.1 impose d'utiliser à la place d'un comptage de faces dans l'arbre
 condensé. Chaque point distribue une masse totale de $1$.
 
-**Stabilité, excès de masse** — $\widehat{E}(C) \propto \sum_{x \in C} (\hat\lambda_x - \hat\lambda_{\min})$,
-Def. 19 du manuscrit. Sert d'ordre de contraction pour l'échelle, et de coût de
-référence pour la tête de sélection.
+**Stabilité, excès de masse** — intégrale de la masse du segment dans la
+coordonnée de densité, calculée par durées de présence des incidences à poids
+gelés. Sert de variante d'ordre de contraction et de coût de référence pour SEL.
 
-**Niveau de sortie $\hat\lambda_x$** — la densité à laquelle un point quitte son
-nœud condensé. Ce que la condensation retire de la structure, elle le rend sous
-cette forme : c'est un changement de représentation, pas une perte.
+**Niveau de sortie** — coordonnée de densité à laquelle une incidence ou une
+branche quitte son segment condensé. Un point peut participer à plusieurs
+branches avec des sorties différentes ; un scalaire par point est une
+agrégation déclarée, qui ne reconstitue pas la structure retirée.
+
+**État de coupe** — segment FULL avec niveau carré exact et côté ouvert/fermé.
+Une continuation peut changer la population sans changer l'identifiant du
+segment.
+
+**Univers pondéré figé** — atomes représentés, poids et réserves conservés
+entre les niveaux d'une branche. Le quotient atomique permet alors de vérifier
+$P_g=P_fQ$. Une lecture indépendante de FULL à chaque rayon peut avoir un autre
+univers actif ; les deux opérateurs sont distingués dans le
+[contrat des coupes](CONTRAT_COUPES_ET_MASSES_20260926.md).
 
 **FP, pooling de filtration** — $h_\ell = \phi(P_\ell^\top h_{\ell-1} W_\ell)$
 avec $P_\ell$ l'affectation douce aux poids du § 9.1.

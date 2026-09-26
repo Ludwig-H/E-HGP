@@ -9,6 +9,8 @@ modèle : phase=conception_modele_fondation_hors_registre ; mode=conception_et_f
 
 ## Verdict
 
+**Suite constructive :** le [contrat des coupes et masses](CONTRAT_COUPES_ET_MASSES_20260926.md) précise depuis cet audit le flux de cofaces à exporter, la composition des poids et le traitement des réserves. Il établit aussi que le routage dur du réducteur historique ne sert pas d'oracle du vote souple : comparer les incidences avant ce routage.
+
 La piste la plus forte est **d'utiliser la bifiltration exacte comme structure de calcul**, avec des lectures complémentaires à plusieurs ordres, puis de mesurer chaque substitution dans un même réseau. La v9 donne déjà un objet FULL substantiel ; le [reçu R22](../../morsehgp3D_v9/receipts/g4_tower_r22_20260926/README.md) et ses contrôles permettent de dimensionner une première interface. Le [poster 3IA 2026](https://github.com/Ludwig-H/Percolia/blob/main/Pr%C3%A9sentations/Posters/3IA_Days_2026/Poster_3IA_2026_Hauseux_A0.png) distingue d'ailleurs une application d'anomalie guidée par modèle 3D sur données synthétiques de **l'hypothèse de recherche** des jetons géométriques pour l'apprentissage. Le premier cas ne valide pas le second.
 
 Trois décisions précèdent le réseau : **définir les coupes et cartes réellement consommées à partir de FULL**, **exporter en lot des affectations point–facette avec leur provenance**, et **choisir ce qu'un jeton représente face à un capteur qui ne voit qu'une partie de la scène**. La suite du dossier propose un protocole expérimental sérieux ; ses conclusions devront rester conditionnelles à ces trois décisions.

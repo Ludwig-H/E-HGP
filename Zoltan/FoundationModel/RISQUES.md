@@ -52,9 +52,8 @@ parade naturelle, et elle doit être mesurée, pas supposée.
 
 ### R4 — la condensation réintroduit la constante, ou mange les objets minces
 
-*Le risque.* La condensation est nécessaire (le § 9.1 la prescrit, et elle
-fournit le squelette, la stabilité, les $\hat\lambda_x$ et la tête de
-sélection). Mais `min_cluster_size` est **exactement le genre de constante
+*Le risque.* La condensation du §9.1 fournit squelette, stabilité et sorties
+par incidence pour la tête de sélection. Mais `min_cluster_size` est **exactement le genre de constante
 posée à la main** que tout ce dossier cherche à supprimer : un seuil en nombre
 de points ne transfère ni d'un capteur à l'autre, ni du champ proche au champ
 lointain. Et un seuil, quel qu'il soit, élague d'abord les branches de faible
@@ -63,11 +62,11 @@ masse, c'est-à-dire les poteaux lointains.
 *Détection.* Porte 0.6 de [`MESURE.md`](MESURE.md) : plafond d'oracle **par
 classe, avant et après condensation**, en fonction du seuil relatif $\alpha$.
 
-*Parade.* **Un rapport transfère, une longueur non.** Le seuil doit être
-relatif — une scission n'est validée que si chaque branche conserve au moins
-une fraction $\alpha$ de la masse $m_\tau$ du parent. Si le plafond chute quand
-même, garder deux échelles : une condensée pour le contexte, une brute pour les
-niveaux fins.
+*Parade à mesurer.* Tester un seuil relatif α et la règle 0/1/plusieurs
+branches lourdes définie par le [contrat](CONTRAT_COUPES_ET_MASSES_20260926.md).
+Le caractère sans dimension ne garantit pas le transfert. Comparer à une
+échelle brute, et conserver les réserves partielles ainsi que les sorties
+par incidence.
 
 *Trois pièges d'implémentation propres à HGP.* Ne pas **binariser les
 multifusions** — la tour publie des événements à trois parents ou plus au même

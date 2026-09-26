@@ -5,6 +5,10 @@
 Prérequis : [`ETAT_DE_LART.md`](ETAT_DE_LART.md), qui établit ce que la tour
 remplace, et [`OBJET.md`](OBJET.md), qui dit ce qu'elle fournit.
 
+Le [contrat des coupes et masses](CONTRAT_COUPES_ET_MASSES_20260926.md)
+fixe les interfaces du pilote : états datés, branches K autonomes, univers
+pondéré gelé, réserves et composition vérifiée.
+
 ## 1. La thèse, en un paragraphe
 
 Tout encodeur 3D contient une **échelle métrique posée à la main** — taille de
@@ -154,9 +158,10 @@ les antichaînes effectivement retenues reste à construire et à vérifier.
 
 ### 4.3 La condensation : l'étape que le manuscrit prescrit déjà
 
-Avant de contracter, il faut **condenser**, au sens exact de HDBSCAN. Ce n'est
-pas un ajout emprunté à l'extérieur : le § 9.1 du manuscrit le prescrit, avec
-le poids qu'il faut.
+La condensation est une variante structurante prescrite dans l'Algorithme 1
+du manuscrit, avec une masse adaptée au recouvrement. Le pilote de raccord
+vérifie d'abord les coupes globales brutes ; la condensation se compare ensuite
+à cette référence, avec le poids prévu par le §9.1.
 
 > « La masse d'une face dans l'arbre condensé est alors
 > $m_\tau = S_\tau \sum_{x \in \tau} 1/T_x$ […] C'est ce poids $m_\tau$, et non
@@ -164,7 +169,7 @@ le poids qu'il faut.
 > `min_cluster_size` dans l'arbre condensé (mêmes idées algorithmiques que
 > HDBSCAN). »
 
-**Pourquoi c'est nécessaire et non optionnel.** La forêt brute est dominée par
+**Pourquoi la mesurer.** La forêt brute est dominée par
 des événements triviaux. À $K = 1$ sur une trame sans sol de 39 885 sites, il y
 a 39 796 fusions, c'est-à-dire le dendrogramme complet du Single-Linkage : la
 quasi-totalité sont des « un point rejoint une grosse composante ». Le § 4.4.3
@@ -177,11 +182,11 @@ dépenserait ses premiers niveaux à absorber des singletons.
 directes de l'architecture :
 
 1. le **squelette** : les vraies scissions, sans les continuations ;
-2. la **stabilité** de chaque nœud, $\widehat{E}(C) \propto \sum_{x \in C} (\hat\lambda_x - \hat\lambda_{\min})$,
-   c'est-à-dire l'ordre dans lequel contracter ;
-3. le niveau de sortie $\hat\lambda_x$ de chaque point, **rendu comme variable
-   par point**. La condensation est donc un *changement de représentation* et
-   non une perte : ce qu'elle retire de la structure, elle le rend en scalaire ;
+2. la **stabilité** de chaque nœud, calculée par durées de présence des
+   incidences avec poids gelés, comme variante d'ordre de contraction ;
+3. les niveaux de sortie **par incidence ou branche**, éventuellement résumés
+   en variable par point. Un point peut avoir plusieurs sorties ; le scalaire
+   agrégé ne reconstitue pas la structure retirée ;
 4. la **tête de sélection** du modèle, par le mécanisme du § 5.2 du manuscrit (voir le composant SEL, § 5).
 
 **Ce qu'elle doit rendre stable, et c'est une prédiction.** L'arbre brut bouge
@@ -198,9 +203,10 @@ dossier est de retirer les constantes posées à la main ; or la condensation de
 HDBSCAN en introduit une, `min_cluster_size`, et un seuil en *nombre de points*
 ne transfère ni d'un capteur à l'autre, ni du champ proche au champ lointain.
 
-**La règle qui résout la tension : un rapport transfère, une longueur non.**
-Le seuil doit être **relatif** — une scission n'est validée que si chaque
-branche conserve au moins une fraction $\alpha$ de la masse $m_\tau$ du parent.
+**La règle relative à tester.** Une branche est lourde si elle conserve au
+moins une fraction α de la masse du parent. Zéro branche lourde termine
+le segment, une seule poursuit son identité, plusieurs créent une scission
+simultanée ; les autres masses restent en réserve.
 $\alpha$ est sans dimension, mais reste un hyperparamètre dont le transfert
 doit être vérifié ; un compte absolu est plus sensible à la densité acquise.
 C'est la première forme de condensation à évaluer ici.
@@ -229,8 +235,8 @@ Le chemin fixe la direction ; il reste à fixer **comment on contracte**.
 | **E-persistance** | contracter d'abord les fusions de plus faible persistance | **défaut à tester** : contracte selon la persistance, avec rayons locaux variables |
 | **E-relative** | contracter dans l'échelle normalisée $r / r_K(x)$, avec convention explicite si $r_K(x)=0$ | invariance sous homothétie commune ; robustesse en portée à tester |
 
-Les quatre règles s'appliquent **sur l'arbre condensé**, jamais sur la forêt
-brute. `E-persistance` est un défaut **à éprouver** : il ordonne les contractions
+Les quatre règles se compareront sur l'arbre condensé, après validation des
+coupes globales brutes du pilote. `E-persistance` est un défaut **à éprouver** : il ordonne les contractions
 par une quantité structurale et contrôle le nombre d'unités, ce qui aide à
 former les lots. Il produit des rayons locaux variables, mais la stabilité
 des antichaînes ainsi choisies reste à mesurer sous perturbation du scan. La
@@ -301,35 +307,32 @@ la spéculation.
 
 ### FP — Pooling de filtration
 
-$h_\ell = \phi\!\left(P_\ell^{\top} h_{\ell-1} W_\ell\right)$, où $P_\ell$ est
-l'affectation du niveau $\ell-1$ vers le niveau $\ell$, normalisée en lignes
-par les poids $w_{x\tau} = S_\tau / T_x$ du § 9.1. Le dépliage est $P_\ell$
-appliqué en sens inverse, avec connexion de saut, comme dans tout U-Net.
+$M_\ell=P_\ell^\top M_{\ell-1}$ et $h_\ell=\phi(D_{M_\ell}^{-1}P_\ell^\top D_{M_{\ell-1}}h_{\ell-1}W_\ell)$.
 
-Trois propriétés qu'un *grid pooling* n'a pas : l'affectation est **canonique**
-(aucune grille, aucune graine), **conservative** (la masse est préservée sur
-toute antichaîne), et douce là où il le faut — voir ci-dessous.
+P est normalisée en lignes, les colonnes de masse nulle sont masquées et la
+mesure initiale est déclarée par site ou par retour. Les moyennes transportent
+leurs masses à chaque étage. La conservation porte sur le transport linéaire
+avant φ ; la somme brute est une autre agrégation à ablater.
 
-**Un seul étage est doux, et c'est une simplification importante.** Il faut
-distinguer deux interfaces, ce qu'une première version de ce document
-confondait.
+**Trois interfaces distinctes** doivent être définies.
 
 - **Niveau 0 vers niveau 1, points vers nœuds : doux.** L'arbre est un arbre de
-  **facettes** ; une antichaîne de cet arbre **partitionne** les facettes ; et
+  **facettes** ; une frontière couvrante partitionne les atomes retenus ; et
   les poids du § 9.1 poussent cette partition en une **partition de l'unité sur
-  les points** : $w_{xv} = \sum_{\tau \in v} S_\tau / T_x$, de somme $1$ sur
-  l'antichaîne, sous réserve de couvrir tous les retours, y compris ceux sans
-  facette après condensation. C'est ici que le recouvrement pour $K \geq 2$
+  les points** : $w_{xv} = \sum_{\tau \in v,\ x\in\tau} S_\tau / T_x$, de somme 1
+  lorsque les réserves **partielles** sont incluses. C'est ici que le recouvrement pour $K \geq 2$
   se manifeste. Compter non-zéros, lignes orphelines et coût de fabrication
   de $P_1$ (porte 0.5).
 - **Niveau $\ell$ vers niveau $\ell+1$ : dur.** Deux antichaînes emboîtées du
-  même arbre condensé donnent à chaque nœud du niveau fin **exactement un**
-  ancêtre au niveau grossier. $P_{\ell+1}$ est une matrice $0/1$ à une entrée
-  par ligne : un pooling ordinaire, creux, sans recouvrement.
+  même univers pondéré gelé donnent à chaque bloc fin une image grossière
+  unique. Vérifier $P_g=P_fQ$ et le quotient sur les atomes ; les naissances
+  ultérieures sont lues latéralement, avec les réserves persistantes.
 - **Changement d'ordre, $K$ vers $K-1$ : conditionnel.** La carte verticale
   envoie un nœud FULL à son niveau de création, mais son quotient entre les
   antichaînes retenues doit être construit et vérifié. Si les coupes sont
-  incompatibles, OM consomme une incidence éparse entre branches.
+  incompatibles, OM consomme une incidence éparse entre branches. Même un
+  quotient géométrique valide ne prouve pas la commutation des poids entre K ;
+  les branches autonomes constituent le pilote.
 
 Autrement dit, la crainte d'un $P_\ell$ dense à tous les étages était infondée :
 **le recouvrement des retours coûte à l'entrée** ; à K fixé, les étages
@@ -379,17 +382,19 @@ choix.
 Trois réalisations, par coût croissant : **calendrier de $K$ selon la
 profondeur** — et le sens est imposé par la monotonie du § 4.2, $K$ **élevé aux
 niveaux fins**, **faible aux niveaux grossiers** —, **attention croisée entre
-ordres au goulot**, et **branches parallèles par $K$**. Le § 4.2 bis montre que
-la troisième n'est pas la borne supérieure coûteuse qu'on croyait mais la
-**seule** qui rende visibles les objets minces et lointains : c'est donc elle
-qu'il faut mesurer en premier, pas en dernier.
+ordres au goulot**, et **branches parallèles par $K$**. Le pilote retient les
+branches autonomes, qui gardent les mesures de chaque K explicites. Les
+calendriers changeant K exigent en plus la compatibilité pondérée ; la valeur
+relative des trois options sera mesurée sur les classes filiformes.
 
 ### PUR — Lecture par partition de l'unité
 
-Le décodeur ne réinvente aucune interpolation : $p(x) = \sum_{\tau \ni x} w_{x\tau} \, p_\tau$
-en entraînement, argmax de la Proposition 7 en inférence, qui garantit une
-partition stricte des points. Les $w_{x\tau}$ somment à $1$, donc c'est une
-relaxation différentiable propre et la masse est conservée.
+PUR étend linéairement le vote de labels du §9.1 : il mélange les
+**probabilités** des jetons avec P, puis applique l'argmax. Il retrouve le
+vote de la Proposition 7 lorsque les jetons portent des labels certains.
+Softmax après mélange de logits définit un autre opérateur. La lecture
+conserve les constantes, mais n'inverse pas le pooling ; les connexions de
+saut maintiennent une représentation fine.
 
 ### FM — Modélisation de filtration
 

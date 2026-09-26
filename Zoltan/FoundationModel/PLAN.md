@@ -12,25 +12,28 @@ d'architecture.
 
 **Construire.**
 
-1. Un **exportateur** de la tour vers un format consommable : forêt tous
-   ordres, cartes verticales, populations, et pour chaque facette les rayons
-   au carré de ses cofaces. Un adaptateur expérimental pourra préparer
-   `CertifiedTowerInput` de `morsehgp3d/`, dont le réducteur exact (vote
-   pondéré du § 9.1, excès de masse) attend déjà un producteur. Ne pas
-   fabriquer les reçus de certification que la v9 ne publie pas.
-2. La **condensation** : élagage à seuil **relatif** $\alpha$ sur la masse
-   $m_\tau$ du § 9.1, généralisé aux multifusions (jamais binariser), couplé
-   entre les ordres, avec revérification de la naturalité des cartes
-   verticales. Sortie : arbre condensé, stabilité par nœud, niveau de sortie
-   $\hat\lambda_x$ par point.
-3. Le **constructeur d'échelle**, sur l'arbre condensé : les quatre règles
-   `E-global`, `E-rang`, `E-persistance`, `E-relative`, et les chemins de pooling
-   emboîtants : horizontal, vertical et anti-diagonal ($r$ croissant, $K$
-   décroissant). L'iso-densité est réservée aux comparaisons latérales entre
-   ordres. Sortie : $L$ matrices d'affectation creuses par trame.
-4. Le **cache** : tours pré-calculées sur le corpus, plus une banque de vues
-   décimées par trame pour FM-5. Chaque vue augmentée est re-quantifiée et sa tour
-   recalculée ; le cache conserve la provenance de la vue.
+1. Un export **coverage_v1** : états FULL datés, cartes à la coupe, unions
+   de sites, permutation géométrie→site et table site→retours. Exercer les
+   coupes avant/au/après événement, notamment la continuation growth_ABCZ.
+2. Le supplément **weighted_gabriel_v1** : fixer cofaces C, frontières F,
+   ψ et horizon ; comparer l'accumulation par flux d'incidences à un petit
+   oracle explicite. Résoudre chaque facette à sa naissance propre. Mesurer
+   coûts et volumes avant toute matérialisation globale. Le routage dur de
+   l'ancien réducteur ne sert pas d'oracle de la matrice douce.
+3. Le **constructeur d'échelle** : commencer à K1 en coupes globales, puis
+   branches K autonomes à univers/poids gelés, avec réserves persistantes.
+   Vérifier composition et moyennes pondérées. Ajouter ensuite condensation
+   relative et les quatre règles d'échelle ; conserver les sorties par
+   incidence. Les changements de K exigent deux contrôles distincts,
+   géométrique et pondéré ; OM reste latéral par défaut.
+4. Le **cache CutBundle** : coupes, masses et provenance de chaque vue,
+   dimensionnées avant le corpus complet ; conserver les tours/reçus
+   scientifiques séparément. Chaque vue augmentée est re-quantifiée et sa tour
+   recalculée.
+
+Le [contrat détaillé](CONTRAT_COUPES_ET_MASSES_20260926.md) rend cet ordre
+implémentable. Les [11 fixtures rationnelles](receipts/cut_algebra_20260926/README.md)
+vérifient l'algèbre ; elles ne ferment pas les portes de l'export natif.
 
 **Mesurer.** D'abord les sondes sans étiquette de l'axe 0 : couverture
 des retours, coût des incidences, stabilité sous décimation et rotation,
@@ -55,7 +58,7 @@ relèvement métrique. Les portes 0.8 et 0.9 qui exploitent les étiquettes
 restent définies ici et seront exécutées avec l'évaluation correspondante.
 
 Les onze **portes du tokenizer** de [`SPECIFICATION.md`](SPECIFICATION.md) § 9
-se ferment ici, notamment couverture des retours, composition des coupes,
+doivent être fermées dans cette phase, notamment couverture des retours, composition des coupes,
 naturalité entre K, budget et traçabilité.
 
 **Décision.** Si l'export des incidences, la couverture des retours ou les
