@@ -1,7 +1,17 @@
 # État courant des audits v9
 
-Le [reçu R21](../receipts/g4_tower_r21_20260925/README.md) est le
-dernier chrono G4. Sans sol, K5 vaut 0,805 à 1,026 s et K10 2,45 à
+Le [reçu R22](../receipts/g4_tower_r22_20260926/README.md) est le
+dernier chrono G4. Sans sol, K5 vaut 0,760 à 0,983 s et K10 2,27 à
+2,99 s. Avec sol, K5 vaut 1,81 à 2,03 s et K10 5,31 à 6,01 s. Les douze
+épingles sont reproduites, dont les 30 cas scellés. La [contre-lecture C
+de R22](CONTRE_AUDIT_C_R22_20260926.md) tient le reçu et les trois
+séries (sceau R-29, recensement précoce, bassin épinglé). Le gain du
+bassin est payé hors de la chaîne : il est neutre à K5 et une perte à
+K10 par processus d'une trame. C y corrige sa recommandation R21 : il
+faut alléger la phase A de tous les ordres, pas A(Kmax) seule.
+
+Le [reçu R21](../receipts/g4_tower_r21_20260925/README.md) était le
+chrono G4 précédent. Sans sol, K5 vaut 0,805 à 1,026 s et K10 2,45 à
 3,21 s. Avec sol, K5 vaut 1,91 à 2,18 s et K10 5,71 à 6,49 s. Les douze
 épingles sont reproduites, dont les six brutes.
 

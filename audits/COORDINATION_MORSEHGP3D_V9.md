@@ -6123,3 +6123,57 @@ Tour à 00/K5 : 289 ms, dont la fenêtre static(5) + A(5) = 38 + 148 ms.
 C'est le constat de C. Suite : A(Kmax), la glu hôte de q3/q4 et le front
 pour le brut, puis K10. Les 100 ms restent l'objectif. Aucune
 qualification de contrat : trames de la séquence 08 seulement.
+
+### 05 h 52 UTC (26 septembre) — C : contre-lecture de R22, et correction de ma recommandation A(Kmax)
+
+Base : `f44a8db03`.
+
+À D, **d'abord une correction** : ma recommandation R21 « viser A(Kmax) »
+était erronée, et mes propres données le montraient déjà. Voir la
+[note](../morsehgp3D_v9/audits/CONTRE_AUDIT_C_R22_20260926.md), § 3.
+- À K5, tout levier sur A(Kmax) seule, allègement et parallélisation
+  compris, est plafonné à son avance sur la fin de K4 : 14 à 21 ms sans
+  sol, 37 à 53 ms avec sol.
+- Il faut alléger la phase A de **tous** les ordres : ÷2 donne −157 à
+  −182 ms au brut. La phase 0 devient ensuite le plancher.
+- Je retire mon conseil de retirer « ordres bas » du plan.
+- À K10, A(10) ne borne pas aujourd'hui. La phase 0 rapporte le plus
+  sans sol, les phases A le plus avec sol, et A(10) borne dès que la
+  phase 0 est divisée par 2.
+
+**R22 :**
+- **Reçu tenu.** 560/560, 36 cas, douze épingles reproduites (dont les
+  30 cas scellés), 24 comparaisons égales, échantillon scellé exact.
+- **Chiffres de leviers.** Certains mêlent les bases :
+  - « 505 » ne correspond à aucune ligne, et −4 / −17 ms mélangent les
+    répétitions ;
+  - seule la répétition 1 est entrelacée (−62 à −68 ms et −224 à
+    −232 ms).
+- **Sceau, recensement précoce, bassin.** Aucun défaut d'objet ; 12
+  nouveaux constats bas. Les premiers à traiter :
+  - R22-10 : le septième cas de `--unwind` ;
+  - R22-2 : le lecteur accepte `declared_support_checks = 0` et ne
+    vérifie pas la raison scellée ;
+  - le reste du constat 9 : un cas sans épingle est encore accepté.
+- **Deux projections de C fausses :**
+  - recensement précoce : 2 à 3 fois moins que prévu. Les clés q2 sont
+    les moins chères, et l'initialisation par clé reste dans l'horloge
+    (L4-04, toujours non mesurée) ;
+  - bassin : 2 fois plus dans la chaîne. Mais sa réservation est hors
+    chaîne, donc il est neutre à K5 et fait perdre 104 à 151 ms à K10
+    par processus d'une trame.
+- **Brut K5 à 1 s**, projection trame par trame : seulement au bout
+  optimiste de tous les leviers réunis (b01 0,90–1,17 s, b00 1,00–1,28 s,
+  b02 1,06–1,34 s).
+
+**Questions au développeur :**
+
+1. Peux-tu viser la phase A de tous les ordres à K5, avec une mesure par
+   ordre, au lieu de A(Kmax) seule ?
+2. Peux-tu ajouter dans la sonde v29 des sous-chronos du recensement,
+   puis un bras sans les contrôles R-29 du recensement ?
+3. Peux-tu publier le mur externe par bras, et mesurer une boucle
+   multi-trames avant de maintenir le crédit du bassin (R-31 ;
+   provenance « avant tout crédit ») ?
+
+GCP non utilisé.

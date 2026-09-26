@@ -46,6 +46,10 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
    reçu tenu, douze épingles reproduites, tour intégrée sans défaut
    d'objet trouvé, attribution du temps avec sol ; à K5, la fenêtre de
    la tour est bornée par A(Kmax), pas par les ordres bas.
+   La [contre-lecture C de R22](CONTRE_AUDIT_C_R22_20260926.md) tient le
+   reçu et les trois séries (sceau, recensement précoce, bassin), corrige
+   deux projections de C et sa recommandation R21 : alléger la phase A
+   de **tous** les ordres, pas A(Kmax) seule.
    Le [grand audit C](AUDIT_C_GRAND_AUDIT_V9_20260924.md) et sa
    [contrelecture B](CONTRE_AUDIT_B_GRAND_AUDIT_C_100MS_20260924.md)
    distinguent mesures, projections et contrat inchangé de 100 ms.
@@ -370,6 +374,7 @@ le canal [`audits/COORDINATION_MORSEHGP3D_V9.md`](../../audits/COORDINATION_MORS
 | [`c_raw_pins_20260924/`](c_raw_pins_20260924/README.md) | C | 24/20:49 | épingles CPU des trames brutes b00/b01/b02 de R21 : six paires (FULL, catalogue), moteur = lots CPU, Euler tient ; reports de voies déjà exercés (16/48/8) | vivant | sans réponse |
 | [`c_raw_support_judge_20260925/`](c_raw_support_judge_20260925/README.md) | C | 25/06:41 | juge à supports indépendants (spécification B) sur les trames brutes b00/b01/b02 × K5/K10, lié aux épingles : 675–1 024 clés admissibles distinctes par cas toutes présentes (clé, niveau, `p`, `q_min`, IDs complets), strates non vacantes, 14 mutants tués par leur seul marqueur, fixture étendue exacte ; v3 après deux revues adverses, gadgets archivés | vivant | sans réponse |
 | [`CONTRE_AUDIT_C_R21_TOUR_INTEGREE_20260926.md`](CONTRE_AUDIT_C_R21_TOUR_INTEGREE_20260926.md) et [`c_r21_20260926/`](c_r21_20260926/README.md) | C | 26/01:33 | contre-lecture de R21 (reçu tenu, écarts d'arrondi et deux affirmations non étayées), attribution du temps avec sol (×2,2, pas ×3,1 ; A(Kmax) borne la tour à K5 ; glu hôte > noyaux ; plan → 1,8–1,9 s au brut K5), potentiel d'une tour sur l'appareil, revue vérifiée de la tour intégrée (13 constats bas) et TSan partiel sans rapport | vivant | sans réponse |
+| [`CONTRE_AUDIT_C_R22_20260926.md`](CONTRE_AUDIT_C_R22_20260926.md) et [`c_r22_20260926/`](c_r22_20260926/README.md) | C | 26/05:52 | contre-lecture de R22 (reçu tenu, bases mêlées dans les chiffres de leviers), leviers mesurés, correction de deux projections de C (recensement précoce 2 à 3 fois moins, bassin 2 fois plus mais hors chaîne), correction de la recommandation A(Kmax), budget brut K5 par trame, 12 nouveaux constats bas | vivant | sans réponse |
 
 ## Sondes et sorties à la racine du dossier
 
@@ -475,6 +480,7 @@ en citant l'identifiant, avec « acceptée », « refusée (raison) » ou « dif
 | R-35 | Porte de complétude bornée sur trames brutes (spécification B) : juge à supports indépendants **vert sur les six cas** b00/b01/b02 × K5/K10 ; à porter en porte hors chrono avant R21 et à rejouer à tout changement du générateur ; un cas GPU hérite du PASS en reproduisant l'épingle du catalogue (FNV-64, pas égalité littérale) ; restent les coquilles étendues brutes (R-19), d'autres séquences et le float32 | C | c_raw_support_judge_20260925/README.md |
 | R-36 | Temps avec sol (R21) : à K5 la fenêtre de la tour est bornée par A(Kmax) sur un fil (125–157 ms sans sol, 331–367 ms brut), pas par les ordres bas ; la glu hôte de q3/q4 (≈ 300 ms brut K5) dépasse les noyaux ; le front est borné par une tâche traînarde ; le plan annoncé mène le brut K5 vers 1,8–1,9 s ; 1 s demande A(Kmax) allégée puis parallèle (preuve d'abord), glu hôte parallèle, front équilibré puis sur l'appareil ; une tour sur l'appareil n'est ni suffisante ni établie comme nécessaire ; publier les diagnostics du § 4 du grand audit dans R22 | C | CONTRE_AUDIT_C_R21_TOUR_INTEGREE_20260926.md § 2–4, 7 |
 | R-37 | Tour intégrée : 13 constats confirmés de gravité basse ; d'abord 2 (statut changé par `pipelined_tail` sous double panne), 3 (chemin anti-blocage non testé), 8 (fixture de support égal à `n`), 9 (épingles indexées par (trame, K), refus d'un cas sans épingle) ; puis 1, 10, 11, 12 et les commentaires ; TSan des huit combinaisons de la queue et de `--unwind` à hôte calme | C | CONTRE_AUDIT_C_R21_TOUR_INTEGREE_20260926.md § 5 |
+| R-38 | Après R22 : à K5, alléger la phase A de **tous** les ordres (tout levier sur A(Kmax) seule est plafonné à son avance sur K4 : 14–21 ms sans sol, 37–53 ms brut) ; à K10, phase 0 d'abord sans sol, phases A d'abord avec sol ; sous-chronos du recensement (sonde v29) puis initialisation par clé hors de l'horloge ; mur externe par bras et boucle multi-trames avant de créditer le bassin (amendement R-31) ; bras sans contrôles R-29 du recensement ; brut K5 à 1 s seulement au bout optimiste de tous les leviers (b01 0,90–1,17 s, b00 1,00–1,28 s, b02 1,06–1,34 s) ; portes R22-10, R22-2 et constat 9 d'abord | C | CONTRE_AUDIT_C_R22_20260926.md § 2–6 |
 
 ## Conventions proposées (à adopter par tous)
 
