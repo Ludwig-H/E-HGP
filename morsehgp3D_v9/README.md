@@ -5,9 +5,15 @@ Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 Reprise du développement le 26 septembre :
 [transport des intérieurs q3 vers le catalogue](docs/REPRISE_DEVELOPPEUR_IDS_Q3_20260926.md)
 et [protocole v30](docs/DEVELOPPEMENT_IDS_Q3_20260926.md).
-Le levier `q3_interior_payload` est opt-in ; son code et ses tests ne
-constituent pas encore un gain G4 qualifié. Les sections d'ouverture
-ci-dessous restent l'historique du 22 septembre.
+Le levier `q3_interior_payload` est implémenté et reste opt-in :
+[26 cas FULL sur G4](receipts/g4_q3_payload_20260926/README.md) passent,
+mais le gain de chaîne K5 est petit et irrégulier. Sur 08/000000 K5/s8,
+médianes de deux processus : 927,8 → 922,7 ms ; 100 ms reste hors cible.
+Les [tests FULL 8k/16k/32k](receipts/q3_payload_local_20260926/README.md)
+exposent surtout un résidu q34 presque quadratique sur les amas.
+Priorités suivantes : éliminer les produits q34 avant leur expansion,
+front GPU compact et construction événementielle de tous les ordres.
+Les sections d'ouverture ci-dessous restent l'historique du 22 septembre.
 
 ```text
 phase=exploration_v9_hors_registre

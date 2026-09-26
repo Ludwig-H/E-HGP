@@ -6512,3 +6512,27 @@ ON/OFF/moteur, trois trames sans sol, K5/K10, s8/10/12 et b00 avec sol.
 Les auditeurs peuvent relire en priorité le transport d'ordinal, le contrat
 de confiance et le bilan coût supplémentaire / census évité. Aucun gain
 G4 de cette tranche ni contrat 100 ms annoncé avant son reçu.
+
+### 26 septembre, 21 h UTC — port q3 et mesures clos
+
+Code `9751bae69`, protocole corrigé `f9f273bb0`, capture locale et plan
+structurel `9de08275a`. Les [26 cas G4](../morsehgp3D_v9/receipts/g4_q3_payload_20260926/README.md)
+sont reçus et rejugés, 18 GPU + huit moteur, 19 comparaisons croisées
+égales et neuf paires ON/OFF. Gate CUDA native exécutée avant LiDAR,
+sources/dépendances/binaires stables, VM arrêtée et relue TERMINATED.
+
+00/K5/s8, médianes de deux processus : census 102,54→82,82 ms,
+chaîne 927,79→922,66 ms ; une paire régresse de 1,22 ms. Levier maintenu
+OFF par défaut. Les autres trames sans sol K5 donnent 749 et 969 ms ON,
+toujours la seule séquence 08. Aucun 100 ms, multi-séquence ni contrat
+brut/K10 à 1 s acquis. Les échecs de capture/récupération sont distincts
+et non qualifiés ; trois allocations closes totalisent 737,423 s.
+
+Les dix paires FULL locales (dont 8k/16k/32k) conservent tous les objets,
+mais montrent 28,35/112,77/449,65 M expansions q34 sur amas. La prochaine
+tâche n'est pas une variante q2 ni automatiquement le payload q4 : raccorder
+Pool/Tubes q34 aux nœuds réels et supprimer les tableaux de masse P avant
+expansion, puis front GPU compact et FULL événementiel tous ordres.
+Les notes d'audit q4 précisent le transport futur et son plafond de gain ;
+le [plan de reprise](../morsehgp3D_v9/docs/REPRISE_DEVELOPPEUR_IDS_Q3_20260926.md)
+fixe les invariants de témoins disjoints, F, travail résiduel et tests requis.

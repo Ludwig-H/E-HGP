@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "/home/codespace/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "ssh",
+    "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-b",
+    "--quiet",
+    "--ssh-key-file=/workspaces/E-HGP/build/v9-q3-payload-recovery-key-f9f273bb0/session_key",
+    "--ssh-key-expiration=2026-09-26T22:00:03.282898Z",
+    "--ssh-flag=-n",
+    "--ssh-flag=-o BatchMode=yes",
+    "--ssh-flag=-o ConnectTimeout=15",
+    "--command=set -eu; umask 077; test -d /tmp/ehgp-tower-v9-8023dfb7ea5a8ef9.Ok4TF329uj; test ! -L /tmp/ehgp-tower-v9-8023dfb7ea5a8ef9.Ok4TF329uj; test -O /tmp/ehgp-tower-v9-8023dfb7ea5a8ef9.Ok4TF329uj; test \"$(stat -c %a /tmp/ehgp-tower-v9-8023dfb7ea5a8ef9.Ok4TF329uj)\" = 700; test -d /tmp/ehgp-tower-v9-8023dfb7ea5a8ef9.Ok4TF329uj/output; test ! -L /tmp/ehgp-tower-v9-8023dfb7ea5a8ef9.Ok4TF329uj/output; test ! -e /tmp/ehgp-tower-v9-8023dfb7ea5a8ef9.Ok4TF329uj/capture_recovered_f9f273bb0.tar.gz; test ! -L /tmp/ehgp-tower-v9-8023dfb7ea5a8ef9.Ok4TF329uj/capture_recovered_f9f273bb0.tar.gz; tar -czf /tmp/ehgp-tower-v9-8023dfb7ea5a8ef9.Ok4TF329uj/capture_recovered_f9f273bb0.tar.gz --exclude=output/build -C /tmp/ehgp-tower-v9-8023dfb7ea5a8ef9.Ok4TF329uj output; sha256sum /tmp/ehgp-tower-v9-8023dfb7ea5a8ef9.Ok4TF329uj/capture_recovered_f9f273bb0.tar.gz"
+  ],
+  "name": "pack_capture",
+  "started_epoch": 1790455887.105055,
+  "timeout_seconds": 90
+}

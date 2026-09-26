@@ -1,0 +1,2 @@
+durée OS Login restante hors borne: 3278s, attendu 3600..4260s
+[ERREUR] La clé SSH de session n'est pas inscrite une seule fois dans OS Login avec une expiration restante comprise entre maxRunDuration et maxRunDuration + 660 secondes; démarrage refusé.

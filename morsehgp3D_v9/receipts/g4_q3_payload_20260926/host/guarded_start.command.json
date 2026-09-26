@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-q3-payload-rerun-20260926.Is4XsY/tower_v9_host/start_and_verify.sh",
+    "--yes",
+    "--guest-shutdown-minutes",
+    "40",
+    "--handoff-file",
+    "/workspaces/E-HGP/build/v9-q3-payload-rerun-20260926.Is4XsY/tower_v9_host/handoff.json",
+    "--lifecycle-state-file",
+    "/workspaces/E-HGP/build/v9-q3-payload-rerun-20260926.Is4XsY/tower_v9_host/lifecycle.txt",
+    "--guard-mark-dir",
+    "/workspaces/E-HGP/build/v9-q3-payload-rerun-20260926.Is4XsY/tower_v9_host/guardmarks"
+  ],
+  "ended_epoch": 1790456107.4240017,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "guarded_start",
+  "pid": 191467,
+  "started_epoch": 1790456029.2473776,
+  "stderr_sha256": "1927c888e6a23c7e4c05463d0842c3e5da8489896a638710623279ddfd45af80",
+  "stdout_sha256": "3b144be3c94ac63923a2b41de3de8e62993cb974e280713e3a4bf96046e314b0",
+  "timeout_seconds": null
+}

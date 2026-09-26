@@ -62,12 +62,12 @@ d'IDs que d'intérieurs suffit alors. Les paquets q4 ne sont pas importés.
   trame résidente publie statut et trois condensés, pas seulement celui
   de la tour.
 
-La prochaine séance compare le levier ON/OFF sur trames entières et au
-témoin moteur, en alternant les bras et en publiant aussi les régressions.
-Elle utilise le contrôleur existant, les arrêts ciblés et la relecture
-TERMINATED de la génération exacte. L'autorisation G4 n'implique ni
-lancement avant ces contrôles, ni campagne complète sur tous les anciens
-leviers. La VM fixe a été relue TERMINATED au début de cette reprise.
+La [séance G4 close](../receipts/g4_q3_payload_20260926/README.md) compare
+le levier ON/OFF sur trames entières et au témoin moteur, avec les bras
+alternés de 00/K5 et toutes les régressions conservées. Elle utilise le
+contrôleur existant, l'arrêt ciblé et la relecture TERMINATED de la
+génération exacte. Le paquet est construit depuis `f9f273bb0` ; ce n'est
+pas une campagne supplémentaire sur tous les anciens leviers.
 
 ## Résultats locaux clos
 
@@ -91,6 +91,34 @@ croissance pratiquement quadratique, malgré un mur un peu moins croissant.
 Certains replis q3/q4 dépassent également ×4 au dernier doublement.
 Ce port supprime du travail de catalogue ; il ne résout pas ce verrou
 du générateur et ne prouve pas une croissance sous-quadratique LiDAR.
+
+## Résultats G4 clos et décision
+
+26/26 cas terminent : 18 GPU et huit témoins moteur, 19 comparaisons
+croisées égales et neuf paires ON/OFF. La gate CUDA réelle exerce aussi
+les transports fusionnés/non fusionnés, permutations et reports. Les
+sources, dépendances et binaires sont stables ; lecteurs normal/−O passent.
+Il s'agit toujours d'exactitude relative aux témoins, `not_claimed`.
+
+Sur 00/K5/s8, deux processus par bras : chaîne médiane 927,789→922,663 ms,
+census 102,542→82,825 ms, q34 488,485→496,856 ms et tour
+284,341→291,079 ms. Les différences de tour, dont le travail est inchangé,
+illustrent le bruit et ne s'attribuent pas mécaniquement au payload.
+Les deux différences appariées de chaîne sont −11,474 et +1,222 ms.
+Sur 02/K5, ON est aussi plus lent de 4,533 ms. **Le défaut reste OFF.**
+
+La collecte supprime pourtant un vrai travail : sur 00/K5, 691 282 clés
+et 1 351 657 IDs sont importés, une seule clé q3 se replie ; visites
+globales 100 689 614→45 695 806. Le gain net modeste indique que le port
+ne suffit pas à lui seul. Les autres bras, s10/s12, K10 et brut sont tous
+dans le reçu, sans ne retenir que leurs meilleurs temps.
+
+Les trois trames sans sol K5 restent sous une seconde de chaîne dans cette
+séance ; seulement la séquence 08, entrées 1 mm et masques figés. Ni 100 ms,
+ni plusieurs séquences, ni segmentation/lecture comprise ne sont qualifiés.
+Les échecs initiaux de transport sont archivés séparément, jamais promus en
+réussites. Une unique campagne identique a été relancée ; trois générations
+SPOT sont closes, allocation cumulée 737,423 s, sans facture estimée.
 
 ## Suite structurelle
 

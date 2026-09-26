@@ -1,5 +1,25 @@
 # État courant des audits v9
 
+**Reprise développeur et port q3 clos, 26 septembre, 21 h UTC** :
+[implémentation et priorités](../docs/REPRISE_DEVELOPPEUR_IDS_Q3_20260926.md),
+[reçu G4](../receipts/g4_q3_payload_20260926/README.md),
+[croissance FULL locale](../receipts/q3_payload_local_20260926/README.md).
+Le prototype ci-dessous est désormais porté explicitement dans le moteur,
+avec portes Release/ASan/UBSan/LSan, mutants, protocole normal/−O et gate
+CUDA réelle. Les 26 cas G4 terminent ; 19 comparaisons croisées égales,
+neuf paires ON/OFF contrôlées. Sur 00/K5/s8 : census médian 102,5→82,8 ms,
+chaîne 927,8→922,7 ms seulement, une paire légèrement défavorable.
+L'option reste OFF par défaut. Trois trames sans sol K5 sous 1 s de chaîne
+dans cette séance, pas un contrat multi-séquence/100 ms ni un chrono
+lecture/segmentation incluse. K10 sans sol et brut restent au-dessus de 1 s.
+Les amas 8k/16k/32k produisent 28,35/112,77/449,65 M paires : croissance
+presque quadratique, certains replis >×4, aucune borne globale acquise.
+Prochain verrou : plans de crédits q34 sur vrais rectangles **avant**
+préfixes/allocation par paire, front GPU et FULL événementiel tous ordres.
+q4 payload seul ne peut apporter le facteur neuf manquant.
+Les incidents de capture/récupération sont publiés à part ; aucune preuve
+réécrite ni chiffre non reçu promu. Toutes les générations G4 sont closes.
+
 **Transport q3/q4 et FULL parallèle, 26 septembre 19 h 56** :
 [plan de raccord et priorités](AUDIT_B_RACCORD_PAYLOAD_CATALOGUE_20260926.md).
 Le [producteur q3 audit-only](b_q3_payload_producer_20260926/README.md)

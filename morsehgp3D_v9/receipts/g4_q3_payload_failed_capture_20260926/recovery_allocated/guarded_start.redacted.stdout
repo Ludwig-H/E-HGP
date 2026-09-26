@@ -1,0 +1,18 @@
+[GARDE SSH] Clé de session <public SSH key redacted>
+[GARDE SSH] Clé OS Login unique, expiration fixe=2026-09-26T22:00:03.282898Z, durée restante=4185s.
+[START] Démarrage protégé demandé :
+  compte                 : <account redacted>
+  projet                 : devpod-gpu-exploration
+  instance               : ehgp-v7-4fa0e0789a7d5bb06b787d35
+  zone                   : us-central1-b
+  machine/provisioning   : g4-standard-48 / SPOT
+  maxRunDuration GCE     : 3600 s
+  arrêt invité secondaire : 10 min
+[GARDE-FOU GCE] action=STOP, maxRunDuration=3600s, échéance calculée=1790459430, échéance sûre=1790459130, terminationTimestamp=2026-09-26T21:50:21.096376Z
+[GARDE-FOU INVITÉ] Armement de shutdown -P +10 via SSH.
+Shutdown scheduled for Sat 2026-09-26 21:01:07 UTC, use 'shutdown -c' to cancel.
+MODE=poweroff
+USEC=1790456467855485
+
+[GARDE-FOU GCE] action=STOP, maxRunDuration=3600s, échéance calculée=1790459430, échéance sûre=1790459130, terminationTimestamp=2026-09-26T21:50:21.096376Z
+[SUCCÈS] VM démarrée avec deux coupe-circuits vérifiés. Fermez la session avec stop_and_verify.sh.

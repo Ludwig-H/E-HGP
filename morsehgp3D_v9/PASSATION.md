@@ -6,10 +6,35 @@
 Voir [la tranche q3 → catalogue](docs/REPRISE_DEVELOPPEUR_IDS_Q3_20260926.md)
 et [l'interface de mesure v30](docs/DEVELOPPEMENT_IDS_Q3_20260926.md).
 La sonde multitrames v29 du précédent développeur est reprise explicitement,
-sans modifier son worktree. Le nouveau transport des IDs reste désactivé
-par défaut, en attente de comparaison ON/OFF sur tour entière. Les mesures
-G4 antérieures restent dans leurs reçus propres ; aucun contrat 100 ms
-n'est acquis par ce port. Les paragraphes suivants sont datés et historiques.
+sans modifier son worktree. Le transport exact des IDs q3 est maintenant
+implémenté (`9751bae69`, protocole corrigé `f9f273bb0`) et testé : six
+portes Release, deux ASan/UBSan/LSan, trois non-régressions et protocole
+31/31 normal/−O. La [capture locale](receipts/q3_payload_local_20260926/README.md)
+ferme dix paires FULL ON/OFF et montre le verrou quasi quadratique des
+amas ; ne pas confondre baisse du census et croissance du générateur.
+
+La [campagne G4 close](receipts/g4_q3_payload_20260926/README.md) compare
+26 cas, dont 18 GPU et huit témoins moteur, sans divergence des objets.
+K5/s8 sans sol ON : 918–927 ms sur 00, 749 ms sur 01 et 969 ms sur 02,
+trois trames de la seule séquence 08. Sur 00, le gain médian ON/OFF de
+5,1 ms n'est pas robuste : une des deux paires régresse de 1,2 ms.
+Le levier reste **désactivé par défaut**. K10 sans sol vaut 2,951 s,
+brut K5 1,943 s, brut K10 5,938 s ; aucun contrat 100 ms ni résultat
+multi-séquence acquis. Lecture, segmentation et condensés sont hors
+chrono de chaîne, mur externe publié séparément.
+
+La première capture avait échoué au rapatriement SSH ; une récupération
+refusée avant démarrage puis une récupération allouée infructueuse sont
+[conservées séparément](receipts/g4_q3_payload_failed_capture_20260926/README.md),
+sans chiffres FULL qualifiés. Une seule campagne identique a été relancée.
+Trois allocations SPOT, toutes arrêtées et relues `TERMINATED`, totalisent
+737,423 s (12 min 17 s) ; ce n'est pas une facture. Aucune VM laissée active.
+
+Priorité de développement : plans q34 avant expansion (sans tableau de
+masse P caché), front GPU compact, puis FULL événementiel sur tous les K.
+Le port q4 des IDs est spécifié mais secondaire tant que son gain net est
+inconnu. Voir le plan de reprise ; ne pas continuer les micro-variantes q2.
+Les paragraphes suivants sont datés et historiques.
 
 22 septembre 2026. Cadre : `exploration_v9_hors_registre`,
 `backend=reference_cpu`, `quantized_u18_input_only`, `not_claimed`. Aucun

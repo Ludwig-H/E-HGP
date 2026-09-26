@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/tmp/mhgp9-audit-resume-20260926/gcp-migration/start_and_verify.sh",
+    "--yes",
+    "--guest-shutdown-minutes",
+    "10",
+    "--handoff-file",
+    "/workspaces/E-HGP/build/v9-q3-payload-recovery-f9f273bb0/handoff.json",
+    "--lifecycle-state-file",
+    "/workspaces/E-HGP/build/v9-q3-payload-recovery-f9f273bb0/lifecycle.txt",
+    "--guard-mark-dir",
+    "/workspaces/E-HGP/build/v9-q3-payload-recovery-f9f273bb0/guardmarks"
+  ],
+  "ended_epoch": 1790455759.4581332,
+  "exit_code": 1,
+  "group_closed": true,
+  "name": "guarded_start",
+  "pid": 185251,
+  "started_epoch": 1790455745.0909784,
+  "stderr_sha256": "6e6ff5c1ee4fed44a3fcdc59d38450facbe520e9aec15c1d3864d41b0bd161a5",
+  "stdout_sha256": "09e60f80a464c9d4a54fd7c156b378079f1c55848aaf67efba517c6f3f1a3a0f",
+  "timeout_seconds": null
+}

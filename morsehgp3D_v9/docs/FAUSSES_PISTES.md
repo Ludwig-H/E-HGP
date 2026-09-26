@@ -120,6 +120,8 @@ GPU, mais ne donne pas de gain mono sur les cas testés.
 | Welzl à base non bornée ; comptabilité de supports incomplète | ×2,2 en candidats ; rapport annoncé 14,75 ramené à 3,25 |
 | Déclarer un parallélisme ×20 sous découplage des ordres | plafond réel 11,4× ; le découplage échoue trois contrôles physiques |
 | Juger un terminal par la seule composante finale | deux mutants survivants |
+| Activer le payload q3 par défaut à partir du seul gain de son consommateur | port exact validé, mais sur G4 K5/s8 le census gagne 19,7 ms et la chaîne seulement 5,1 ms en médiane de deux processus ; une paire régresse. Option conservée OFF, pas une réfutation du transport ([reçu](../receipts/g4_q3_payload_20260926/README.md)) |
+| Attendre 100 ms du seul transport q4 des intérieurs | à phases figées, supprimer **tout** le census tardif de R24-B laisserait 816 ms de chaîne ; front, noyaux q34 et construction de tous les ordres restent prioritaires ([analyse](../audits/AUDIT_B_TRANSPORT_INTERIEURS_Q4_20260926.md)) |
 
 ## Processus
 
@@ -133,3 +135,4 @@ GPU, mais ne donne pas de gain mono sur les cas testés.
 | Mutations par réécriture de texte liées à un arbre de build canonique | cinq tests désactivés hors de cet arbre, trois sans condition |
 | Autorité de porte liée à un chemin de build épinglé | porte spatiale inexécutable là où `ctest` est permis |
 | Chaîne de validateurs à inventaires cumulés et comptes figés | captures vertes refusées par leur propre lecteur |
+| Superposer des diagnostics SSH à la collecte G4 | erreur `ABORTED / Multiple concurrent mutations` pendant le rapatriement ; reçu initial non qualifié conservé, collecte suivante sérialisée réussie ([incidents](../receipts/g4_q3_payload_failed_capture_20260926/README.md)) |

@@ -1,0 +1,18 @@
+{
+  "original_after_stop_source_sha256": "fbef637416e91ac3a809ca95568ae9e3cbf86a2f1a08e45cbb9d6a48684e853c",
+  "policy": "Selected guard/incident stdout/stderr redacted; other host stdout/stderr, OS Login replies, session parent, keys and archives omitted",
+  "redactions": [
+    {
+      "published_name": "guarded_start.redacted.stdout",
+      "published_sha256": "41ba058203e0a180ef83d052ed0dc735ec207b16a7acc8f7ae3468cb12aa1776",
+      "source_name": "guarded_start.stdout",
+      "source_sha256": "09e60f80a464c9d4a54fd7c156b378079f1c55848aaf67efba517c6f3f1a3a0f"
+    },
+    {
+      "published_name": "guarded_start.redacted.stderr",
+      "published_sha256": "6e6ff5c1ee4fed44a3fcdc59d38450facbe520e9aec15c1d3864d41b0bd161a5",
+      "source_name": "guarded_start.stderr",
+      "source_sha256": "6e6ff5c1ee4fed44a3fcdc59d38450facbe520e9aec15c1d3864d41b0bd161a5"
+    }
+  ]
+}

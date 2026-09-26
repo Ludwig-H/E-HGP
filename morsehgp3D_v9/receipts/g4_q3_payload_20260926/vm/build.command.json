@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/usr/bin/cmake",
+    "--build",
+    "/tmp/ehgp-tower-v9-0fc291c1623cedb0.gFtJEaCkuh/output/build",
+    "--target",
+    "mhgp9_tower_probe",
+    "mhgp9_gpu_interior_payload_gate",
+    "--parallel",
+    "48"
+  ],
+  "cwd": "/tmp/ehgp-tower-v9-0fc291c1623cedb0.gFtJEaCkuh/output",
+  "elapsed_seconds": 30.908273207999997,
+  "ended_utc": "2026-09-26T20:56:08.543626+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 1942,
+  "session_work_deadline_epoch": 1790457634.58752,
+  "started_utc": "2026-09-26T20:55:37.635315+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "2f14aabe751b2f7a2d7a6824cf23a46ea6569046db2818d635af6e98124b322d"
+}

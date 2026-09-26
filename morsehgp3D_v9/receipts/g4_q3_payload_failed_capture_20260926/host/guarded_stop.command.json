@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-q3-payload-session-20260926-BatCh2/tower_v9_host/stop_and_verify.sh",
+    "--yes",
+    "--expected-last-start-timestamp",
+    "2026-09-26T13:34:29.327-07:00"
+  ],
+  "ended_epoch": 1790455185.4677494,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "guarded_stop",
+  "pid": 175429,
+  "started_epoch": 1790455118.9257936,
+  "stderr_sha256": "616dbe8dca26439df528e1a17076f88507ba2c99dfdc8c9b2058366defaa0f31",
+  "stdout_sha256": "8237101459ad3fd3b178090dc01ee238c1558b1e6f7658c0954b25af6b58c3ee",
+  "timeout_seconds": null
+}

@@ -1,0 +1,87 @@
+{
+  "benchmark_executed": false,
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "instances",
+        "describe",
+        "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+        "--project=devpod-gpu-exploration",
+        "--zone=us-central1-b",
+        "--format=json"
+      ],
+      "ended_epoch": 1790455744.4163342,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "original_after_stop",
+      "pid": 185217,
+      "started_epoch": 1790455743.2738833,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "fbef637416e91ac3a809ca95568ae9e3cbf86a2f1a08e45cbb9d6a48684e853c",
+      "timeout_seconds": 60
+    },
+    {
+      "argv": [
+        "/home/codespace/google-cloud-sdk/bin/gcloud",
+        "compute",
+        "os-login",
+        "ssh-keys",
+        "add",
+        "--project=devpod-gpu-exploration",
+        "--key-file=/workspaces/E-HGP/build/v9-q3-payload-session-20260926-BatCh2/session_key.pub",
+        "--ttl=70m",
+        "--format=json",
+        "--quiet"
+      ],
+      "ended_epoch": 1790455745.0902247,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "oslogin_add",
+      "pid": 185240,
+      "started_epoch": 1790455744.417466,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "ddcc9dd80001dcd2fabddee7aa4e1d4a3e49ff5d3c4d310201aa10cae185a4f0",
+      "timeout_seconds": 90
+    },
+    {
+      "argv": [
+        "/tmp/mhgp9-audit-resume-20260926/gcp-migration/start_and_verify.sh",
+        "--yes",
+        "--guest-shutdown-minutes",
+        "10",
+        "--handoff-file",
+        "/workspaces/E-HGP/build/v9-q3-payload-recovery-f9f273bb0/handoff.json",
+        "--lifecycle-state-file",
+        "/workspaces/E-HGP/build/v9-q3-payload-recovery-f9f273bb0/lifecycle.txt",
+        "--guard-mark-dir",
+        "/workspaces/E-HGP/build/v9-q3-payload-recovery-f9f273bb0/guardmarks"
+      ],
+      "ended_epoch": 1790455759.4581332,
+      "exit_code": 1,
+      "group_closed": true,
+      "name": "guarded_start",
+      "pid": 185251,
+      "started_epoch": 1790455745.0909784,
+      "stderr_sha256": "6e6ff5c1ee4fed44a3fcdc59d38450facbe520e9aec15c1d3864d41b0bd161a5",
+      "stdout_sha256": "09e60f80a464c9d4a54fd7c156b378079f1c55848aaf67efba517c6f3f1a3a0f",
+      "timeout_seconds": null
+    }
+  ],
+  "error": "ValueError: guarded recovery start",
+  "no_start_lifecycle_created": true,
+  "original_after_stop_observed_at": "2026-09-26T20:49:04.417446+00:00",
+  "original_after_stop_sha256": "fbef637416e91ac3a809ca95568ae9e3cbf86a2f1a08e45cbb9d6a48684e853c",
+  "original_generation": "2026-09-26T13:34:29.327-07:00",
+  "original_host_receipt_sha256": "be162e8e4a1e2b8bef78e42a61b93a83635078df9302ab5984d2c0f3d664d51e",
+  "original_worker_receipt_hash_pinned_before_stop": false,
+  "schema": "mhgp9_capture_recovery_v1",
+  "status": "failed",
+  "target": {
+    "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-b"
+  },
+  "targeted_shutdown_certified": false
+}
