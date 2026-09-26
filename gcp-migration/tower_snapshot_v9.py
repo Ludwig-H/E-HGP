@@ -109,7 +109,7 @@ def default_plan():
     # gpu_r21 les coupe tous les trois (paires repetees et entrelacees a 00),
     # et chacun est coupe seul une fois a 00, a K5 et a K10.
     new_levers = ('tower_sealed_catalogue', 'q2_early_census', 'q34_lanes_pinned')
-    def case(scene, k, arm, repeat=0):
+    def case(scene, k, arm, repeat=0, frames=1):
         levers = {name: True for name in worker.LEVER_NAMES}
         levers.update(q34_lanes_fused=False)
         if arm == 'engine':
@@ -119,7 +119,7 @@ def default_plan():
         elif arm.startswith('gpu_no_'):
             levers.update({arm[len('gpu_no_'):]: False})
         return dict(scene=scene, file=worker.INPUTS[scene]['file'], n=worker.INPUTS[scene]['n'], k=k, s=8,
-                    workers=48, static_threads=48, levers=levers, repeat=repeat)
+                    workers=48, static_threads=48, levers=levers, repeat=repeat, frames=frames)
     cases = [case(scene, k, arm) for scene in ('00', '01', '02') for k in (5, 10) for arm in ('gpu', 'engine')]
     cases += [case('00', 5, 'gpu_r21'), case('00', 5, 'gpu', 1), case('00', 10, 'gpu_r21'),
               case('00', 10, 'gpu', 1), case('00', 5, 'gpu_r21', 1), case('00', 10, 'gpu_r21', 1)]
@@ -129,6 +129,10 @@ def default_plan():
     # jumeau moteur a K5 et K10. Elles se qualifient a part : aucun succes
     # sans sol ne leur est transfere.
     cases += [case(scene, k, arm) for scene in ('b00', 'b01', 'b02') for k in (5, 10) for arm in ('gpu', 'engine')]
+    # v29 (auditeur C, R22-6/R22-7) : le regime d'un flux, quatre trames dans
+    # le meme processus : la session d'appareil et le bassin epingle sont
+    # payes une fois, et le cout par trame se lit dans `frames`.
+    cases += [case(scene, k, 'gpu', frames=4) for scene in ('00', 'b00') for k in (5, 10)]
     return dict(schema=worker.PLAN_SCHEMA, cases=cases)
 
 

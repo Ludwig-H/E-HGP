@@ -48,7 +48,7 @@ PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
 PLAN_SCHEMA = 'mhgp9_tower_plan_v6'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v28'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v29'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -106,7 +106,12 @@ PROBE_STATUSES = ('complete_relative', 'unsupported_degeneracy', 'invalid_input'
                   'resource_exhausted', 'invariant_violated')
 OUTCOMES = ('complete_relative', 'explicit_refusal', 'killed_case_cap', 'killed_budget',
             'skipped_budget', 'probe_failed', 'skipped_protocol_defect')
-CASE_KEYS = frozenset({'scene', 'file', 'n', 'k', 's', 'workers', 'static_threads', 'levers', 'repeat'})
+# v29 (auditeur C, R22-6/R22-7) : `frames` trames dans le meme processus (la
+# session et le bassin epingle payes une fois), regime d'un flux.
+CASE_KEYS = frozenset({'scene', 'file', 'n', 'k', 's', 'workers', 'static_threads', 'levers', 'repeat', 'frames'})
+FRAME_LISTS = ('chain_total_ms', 'tower_ms', 'q34_ms', 'census_ms', 'lanes_transfer_ms')
+FRAMES_KEYS = frozenset({'count', 'same_object'}) | frozenset(FRAME_LISTS)
+HOST_KEYS = frozenset({'thp'})
 LEVER_NAMES = ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_witness_cache', 'q34_dead_core',
                'tower_meb_proposal', 'q34_jobs_by_mass', 'q34_fine_jobs', 'tower_overlap_static',
                'q2_jobs_by_mass', 'q34_batch_filter', 'q34_gpu_filter', 'q34_batch_certificates',
@@ -198,7 +203,9 @@ TOP_KEYS = frozenset({'schema', 'status', 'reason', 'input', 'options', 'times_m
                       # v26 : session d'appareil ouverte avant la chaine.
                       'device_session',
                       # v27 : chemins et sous-chronos de la tour hors tower_work.
-                      'tower_detail'})
+                      'tower_detail',
+                      # v29 : trames du processus et faits de la machine.
+                      'frames', 'host'})
 TOWER_DETAIL_COUNTS = ('sealed_catalogues', 'seal_sampled_balls', 'declared_support_checks',
                        'pipelined_orders', 'population_deferred_refs', 'hashed_orders', 'pool_threads', 'pool_jobs',
                        'helper_threads', 'runner_threads')
@@ -376,7 +383,7 @@ def validate_sources(read_bytes):
     need(b'mhgp9_product_executable(' + PROBE_TARGET.encode() + b' bench/tower_probe.cpp)' in cmake,
          'CMake target mhgp9_tower_probe absent')
     need(all(token in probe for token in (PROBE_SCHEMA.encode(), b'"--s="', b'"--static="', b'"--grid="', b'"--catalogue-digest"',
-                                          b'"--lever="', *(b'"' + name.encode() + b'"' for name in LEVER_NAMES))),
+                                          b'"--lever="', b'"--frames="', *(b'"' + name.encode() + b'"' for name in LEVER_NAMES))),
          'tower probe schema/CLI differs from the v9 protocol')
 
 
@@ -437,8 +444,9 @@ def validate_plan(plan, manifest):
         need(type(case['k']) is int and case['k'] in (5, 10) and type(case['s']) is int and case['s'] in (8, 10, 12) and
              _integer(case['workers'], 1, 48) and _integer(case['static_threads'], 0, 48) and
              _levers(case['levers']) and
-             _integer(case['repeat'], 0, (1 << 32) - 1), 'tower case domain')
-        identity = tuple(case[key] for key in ('scene', 'k', 's', 'workers', 'static_threads', 'repeat')) + tuple(
+             _integer(case['repeat'], 0, (1 << 32) - 1) and _integer(case['frames'], 1, 16), 'tower case domain')
+        identity = tuple(case[key] for key in ('scene', 'k', 's', 'workers', 'static_threads', 'repeat',
+                                               'frames')) + tuple(
             case['levers'][name] for name in LEVER_NAMES)
         need(identity not in seen, 'duplicate case needs an explicit distinct repetition')
         seen.add(identity)
@@ -539,7 +547,8 @@ def boot_epoch():
 def probe_command(build, root, case):
     return [str(build / PROBE_TARGET), str(root / case['file']), str(case['k']), str(case['workers']),
             '--s=' + str(case['s']), '--static=' + str(case['static_threads']), '--grid=1mm',
-            '--catalogue-digest', *lever_arguments(case)]
+            '--catalogue-digest', *(['--frames=' + str(case['frames'])] if case['frames'] != 1 else []),
+            *lever_arguments(case)]
 
 
 def expected_probe_tail(case, capacity=0, judge=False, lanes_capacity=0):
@@ -550,7 +559,8 @@ def expected_probe_tail(case, capacity=0, judge=False, lanes_capacity=0):
             *(['--certificate-capacity=' + str(capacity)] if capacity else []),
             *(['--certificate-judge'] if judge else []),
             *(['--lanes-capacity=' + str(lanes_capacity)] if lanes_capacity else []),
-            *(['--lanes-judge'] if judge and case['levers']['q34_batch_q3'] else []), *lever_arguments(case)]
+            *(['--lanes-judge'] if judge and case['levers']['q34_batch_q3'] else []),
+            *(['--frames=' + str(case['frames'])] if case['frames'] != 1 else []), *lever_arguments(case)]
 
 
 def deferral_capacities(levers):
@@ -1195,6 +1205,15 @@ def validate_probe(value, case, exit_code, inputs=None, capacity=0, judge=False,
     orders = value['orders']
     need(type(orders) is list and all(type(order) is dict and set(order) == ORDER_KEYS and
                                       all(_count(item) for item in order.values()) for order in orders), 'probe orders')
+    # v29 : les trames de ce processus (la premiere est le corps publie) et
+    # le mode des pages de l'hote. Toutes rendent le meme objet.
+    frames, host = value['frames'], value['host']
+    need(type(frames) is dict and set(frames) == FRAMES_KEYS and frames['count'] == case['frames'] and
+         type(frames['same_object']) is bool and
+         all(type(frames[key]) is list and len(frames[key]) == case['frames'] and
+             all(_number(x) for x in frames[key]) for key in FRAME_LISTS) and
+         type(host) is dict and set(host) == HOST_KEYS and type(host['thp']) is str and
+         re.fullmatch('[a-z_]{1,32}', host['thp']), 'probe frames and host facts')
     need(type(value['tower_digest']) is str and re.fullmatch('[0-9a-f]{16}', value['tower_digest']) and
          type(value['catalogue_digest']) is str and re.fullmatch('[0-9a-f]{16}', value['catalogue_digest']) and
          type(value['presentation_digest']) is str and re.fullmatch('[0-9a-f]{16}', value['presentation_digest']) and
@@ -1219,6 +1238,15 @@ def validate_probe(value, case, exit_code, inputs=None, capacity=0, judge=False,
         need(exit_code == 0 and options['K_effective'] == effective and
              [order['K'] for order in orders] == list(range(1, effective + 1)), 'complete tower: code 0, orders 1..K')
         validate_ledger_identities(value, case['levers'])
+        # v29 : le corps publie est la premiere trame du processus ; toutes
+        # rendent le meme objet, et la premiere vaut le chrono publie.
+        need(frames['same_object'] is True and
+             abs(frames['chain_total_ms'][0] - times['chain_total']) <= 0.05 and
+             abs(frames['tower_ms'][0] - times['tower']) <= 0.05 and
+             abs(frames['q34_ms'][0] - times['q34']) <= 0.05 and
+             abs(frames['census_ms'][0] - times['census']) <= 0.05 and
+             abs(frames['lanes_transfer_ms'][0] - value['q34_batch']['lanes_transfer_ms']) <= 0.05,
+             'probe frames: the published body is the first frame of the process')
         need(not requested or (session['opened'] and session['context_ms'] > 0 and
                                (not pinned_session or session['pinned_bytes'] > 0)),
              'complete device case without its requested session')
@@ -1241,9 +1269,12 @@ def validate_external_wall(value, elapsed_seconds):
     # v27 (auditeur B, avant R21) : la session d'appareil (contexte puis
     # reservations) est ouverte sequentiellement avant la chaine ; elle entre
     # dans la borne externe, jamais dans chain_total.
+    # v29 : avec plusieurs trames dans le processus, le mur externe borne la
+    # somme de leurs chaines (les condenses des trames suivantes sont en plus,
+    # non publies : la borne reste sure).
     times, session = value['times_ms'], value['device_session']
     need(_number(elapsed_seconds) and
-         (times['read'] + times['chain_total'] + times['digest'] + times['catalogue_digest'] +
+         (times['read'] + sum(value['frames']['chain_total_ms']) + times['digest'] + times['catalogue_digest'] +
           session['context_ms'] + session['reserve_ms'] + session['pinned_ms']) / 1000.0 <=
          elapsed_seconds + EXTERNAL_WALL_TOLERANCE_SECONDS,
          'read, device session, chain total and digest exceed the external wall time of the case')

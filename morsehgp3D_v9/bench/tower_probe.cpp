@@ -34,12 +34,14 @@
 // d'arguments ou d'entree, 3 statut de chaine non complet.
 #include <sys/resource.h>
 
+#include <algorithm>
 #include <chrono>
 #include <cinttypes>
 #include <cstdio>
 #include <cstring>
 #include <fstream>
 #include <iterator>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -108,6 +110,18 @@ unsigned long long parse_u(std::string_view s) {
   return v;
 }
 
+// v29 (auditeur C, R-31) : mode des pages transparentes de l'hote, lu une
+// fois. Fait de machine, jamais une decision du calcul.
+std::string thp_mode() {
+  std::ifstream in("/sys/kernel/mm/transparent_hugepage/enabled");
+  std::string line;
+  if (!in || !std::getline(in, line)) return "unreadable";
+  const auto open = line.find('['), close = line.find(']');
+  if (open == std::string::npos || close == std::string::npos || close <= open + 1) return "unparsed";
+  const auto mode = line.substr(open + 1, close - open - 1);
+  return mode.find_first_not_of("abcdefghijklmnopqrstuvwxyz_") == std::string::npos ? mode : "unparsed";
+}
+
 long peak_rss_kb() {
   rusage usage{};
   if (getrusage(RUSAGE_SELF, &usage) != 0) return -1;
@@ -121,6 +135,11 @@ int main(int argc, char** argv) {
   // v26: the device session is opened by the process before the chain's
   // clock (a LiDAR stream opens it once), published apart.
   bool device_session = false;
+  // v29 (auditeur C, R22-6/R22-7) : plusieurs trames dans le meme processus,
+  // le regime d'un flux. La session et le bassin epingle sont payes une fois ;
+  // le corps publie reste celui de la PREMIERE trame, les suivantes sont
+  // publiees dans `frames`.
+  unsigned frames = 1;
   std::string path, grid = "unspecified";
   std::size_t prefix = 0;
   try {
@@ -197,6 +216,11 @@ int main(int argc, char** argv) {
         else if (name == "q34_lanes_pinned") options.q34_lanes_pinned = on;
         else throw std::invalid_argument("unknown lever");
       }
+      else if (arg.starts_with("--frames=")) {
+        const auto value = parse_u(arg.substr(9));
+        if (value < 1 || value > 16) throw std::invalid_argument("frames must be in 1..16");
+        frames = static_cast<unsigned>(value);
+      }
       else if (arg.starts_with("--n=")) prefix = static_cast<std::size_t>(parse_u(arg.substr(4)));
       else if (arg.starts_with("--grid=")) {
         grid = std::string(arg.substr(7));
@@ -230,10 +254,26 @@ int main(int argc, char** argv) {
     session = mhgp9::gpu::open_device_session(
         options.q34_lanes_capacity, options.q34_lanes_events,
         options.q34_lanes_pinned && options.q34_gpu_q3 ? mhgp9::gpu::pinned_records_for_order(options.kmax) : 0);
-  const auto r = mhgp9::run_tower_chain(input.points, options);
+  // v29: the same chain, `frames` times in this process (same points, same
+  // options): the session and the pinned pool are paid once, before the
+  // first. Every run must give the same object.
+  struct FrameTimes {
+    double chain_total, tower, q34, census, lanes_transfer;
+    std::uint64_t digest;
+  };
+  std::vector<FrameTimes> runs;
+  runs.reserve(frames);
+  std::optional<mhgp9::ChainResult> first;
+  for (unsigned f = 0; f < frames; ++f) {
+    auto run = mhgp9::run_tower_chain(input.points, options);
+    runs.push_back({run.times.total_ms, run.times.tower_ms, run.times.q34_ms, run.times.census_ms,
+                    run.q34_batch.lanes_transfer_ms, run.tower_digest});
+    if (f == 0) first = std::move(run);
+  }
+  const auto& r = *first;
   const auto& t = r.times;
   const auto& c = r.catalogue;
-  std::printf("{\"schema\":\"mhgp9_tower_probe_v28\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
+  std::printf("{\"schema\":\"mhgp9_tower_probe_v29\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
               r.reason.c_str());
   std::printf("\"input\":{\"format\":\"%s\",\"grid\":\"%s\",\"sites\":%zu,\"hash\":\"%016" PRIx64 "\"},", input.format.c_str(),
               grid.c_str(), input.points.size(), input.hash);
@@ -417,6 +457,21 @@ int main(int argc, char** argv) {
               "\"peak_rss_kb\":%ld,", r.tower_digest, catalogue, presentations, peak_rss_kb());
   // v26: the device session opened before the chain (not in chain_total).
   const bool opened = device_session && session.error.empty();
+  // v29: the frames of this process (the first is the body above) and the
+  // host's transparent-page mode.
+  std::printf("\"frames\":{\"count\":%u,\"same_object\":%s,\"chain_total_ms\":[", frames,
+              std::all_of(runs.begin(), runs.end(),
+                          [&](const FrameTimes& f) { return f.digest == runs.front().digest; })
+                  ? "true" : "false");
+  const std::pair<const char*, double FrameTimes::*> frame_fields[] = {
+      {"tower_ms", &FrameTimes::tower}, {"q34_ms", &FrameTimes::q34}, {"census_ms", &FrameTimes::census},
+      {"lanes_transfer_ms", &FrameTimes::lanes_transfer}};
+  for (std::size_t f = 0; f < runs.size(); ++f) std::printf("%s%.3f", f ? "," : "", runs[f].chain_total);
+  for (const auto& [name, field] : frame_fields) {
+    std::printf("],\"%s\":[", name);
+    for (std::size_t f = 0; f < runs.size(); ++f) std::printf("%s%.3f", f ? "," : "", runs[f].*field);
+  }
+  std::printf("]},\"host\":{\"thp\":\"%s\"},", thp_mode().c_str());
   std::printf("\"device_session\":{\"opened\":%s,\"context_ms\":%.3f,\"reserve_ms\":%.3f,\"pinned_ms\":%.3f,"
               "\"pinned_bytes\":%" PRIu64 "},",
               opened ? "true" : "false", device_session ? session.context_ms : 0.0,

@@ -70,7 +70,7 @@ def fnv_u32le(raw):
 
 
 def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt='', levers=None, schema=None,
-                capacity=0, judge=False, lanes_capacity=0):
+                capacity=0, judge=False, lanes_capacity=0, frames=1):
     effective = min(k, n)
     complete = status == 'complete_relative'
     orders = [dict(K=q, nodes=2 * n * q, births=n * q, merges=n * q - 1, parents=2 * n * q - 1, contributions=n * q)
@@ -225,7 +225,7 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                                  lanes_fused_census_chunks=2, lanes_fused_fallbacks=0)
     early = bool(complete and levers.get('q2_early_census') and effective >= 2)
     pinned_session = bool(levers.get('device_session') and levers.get('q34_lanes_pinned') and levers.get('q34_gpu_q3'))
-    return dict(schema='mhgp9_tower_probe_v28', status=status,
+    return dict(schema='mhgp9_tower_probe_v29', status=status,
                 reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
@@ -274,7 +274,13 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                                     reserve_ms=0.05 if levers.get('device_session') else 0.0,
                                     pinned_ms=0.02 if pinned_session else 0.0,
                                     pinned_bytes=1024 if pinned_session else 0),
-                tower_detail=tower_detail(levers, effective, k, static, complete))
+                tower_detail=tower_detail(levers, effective, k, static, complete),
+                # v29: the frames of this process (the body is the first) and
+                # the host's transparent-page mode.
+                frames=dict(count=frames, same_object=True,
+                            chain_total_ms=[1.5] * frames, tower_ms=[0.125] * frames, q34_ms=[0.125] * frames,
+                            census_ms=[0.125] * frames, lanes_transfer_ms=[batch['lanes_transfer_ms']] * frames),
+                host=dict(thp='madvise'))
 
 
 def tower_detail(levers, effective, k, static, complete):
@@ -309,6 +315,10 @@ def main():
             options[argument] = None
     capacity = int(options.pop('certificate-capacity', 0))
     lanes_capacity = int(options.pop('lanes-capacity', 0))
+    frames = int(options.pop('frames', 1))
+    if frames < 1 or frames > 16:
+        print('argument refusal: selftest frames', file=sys.stderr)
+        return 2
     if options.pop('lanes-events', None) is not None:
         print('argument refusal: selftest lanes events', file=sys.stderr)
         return 2
@@ -327,7 +337,8 @@ def main():
     if pathlib.Path(path).name == 'preflight.u32le':
         salt = 'batch' if config.get('preflight_batch_differs') and levers.get('q34_batch_filter') else ''
         value = probe_value(len(raw) // 12, fnv_u32le(raw), k, int(options['s']), workers, int(options['static']),
-                            'complete_relative', salt, levers, config['schema'], capacity, judge, lanes_capacity)
+                            'complete_relative', salt, levers, config['schema'], capacity, judge, lanes_capacity,
+                            frames)
         if config.get('deferral_differs') and (capacity or lanes_capacity):
             value['catalogue_digest'] = '0' * 15 + '1'
         if config.get('fail_preflight'):
@@ -363,7 +374,7 @@ def main():
     if config.get('salt_by_certificates') and levers.get('q34_batch_certificates'):
         salt += 'certificates'  # a GPU case whose object differs from its engine twin
     value = probe_value(len(raw) // 12, config['fnv'][scene], k, int(options['s']), workers, int(options['static']),
-                        status, salt, levers, config['schema'])
+                        status, salt, levers, config['schema'], frames=frames)
     for rule in config.get('malform', []):
         if rule['scene'] == scene and rule['k'] == k:
             value['tower_work']['meb_accounting'] = 'selftest_unpinned_accounting'
@@ -878,10 +889,13 @@ class Protocol(unittest.TestCase):
         expected += [('00', k, 'gpu_no_' + name, 0) for name in new for k in (5, 10)]
         # v26 (R21): the raw frames with ground, after the ground-free ones.
         expected += [(scene, k, arm, 0) for scene in ('b00', 'b01', 'b02') for k in (5, 10) for arm in ('gpu', 'engine')]
-        need(provenance['commit'] == head and len(cases) == len(expected) == 36 and all(
+        # v29 (R23): the streaming regime, four frames in one process.
+        expected += [(scene, k, 'gpu', 0) for scene in ('00', 'b00') for k in (5, 10)]
+        need(provenance['commit'] == head and len(cases) == len(expected) == 40 and all(
                 (c['scene'], c['k'], c['repeat']) == (scene, k, repeat) and c['levers'] == arms[arm] and
+                c['frames'] == (4 if index >= 36 else 1) and
                 c['s'] == 8 and c['workers'] == 48 and c['static_threads'] == 48
-                for c, (scene, k, arm, repeat) in zip(cases, expected)),
+                for index, (c, (scene, k, arm, repeat)) in enumerate(zip(cases, expected))),
              'default plan order and parameters')
         # Temoin independant : git archive du meme commit, jamais le worktree.
         exported = subprocess.run(['git', '-C', str(ROOT), 'archive', '--format=tar', 'HEAD', worker.SOURCE_ROOT],
@@ -1230,8 +1244,9 @@ class Protocol(unittest.TestCase):
         pre_raw = worker.preflight_cloud()
         need(fnv_u32le_host(pre_raw) == worker.input_fnv(pre_raw), 'fake FNV matches the worker FNV')
         need(refused(worker.validate_external_wall, good, -1.0) and
-             refused(worker.validate_external_wall, dict(good, times_ms=dict(good['times_ms'], chain_total=9000.0)),
-                     5.0), 'chain total bounded by the external wall')
+             refused(worker.validate_external_wall,
+                     dict(good, frames=dict(good['frames'], chain_total_ms=[9000.0])), 5.0),
+             'chain total bounded by the external wall')
         # v27 (auditor B before R21): the device session opened before the
         # chain is inside the external wall bound, never in chain_total.
         session_wall = sum(gpu_good['times_ms'][key] for key in ('read', 'chain_total', 'digest', 'catalogue_digest'))
@@ -1422,18 +1437,21 @@ class Protocol(unittest.TestCase):
                  value['preflight']['engine_tower_digest'] == value['preflight']['tower_digest'],
                  'deferral preflight run and recorded')
             need(value['GPU_preflight_executed'] is True and
-                 value['GPU_completed_cases'] == [0, 2, 4, 6, 8, 10] + list(range(12, 24)) + list(range(24, 36, 2)) and
+                 value['GPU_completed_cases'] == [0, 2, 4, 6, 8, 10] + list(range(12, 24)) +
+                 list(range(24, 36, 2)) + list(range(36, 40)) and
                  receipt['GPU_completed_cases'] == value['GPU_completed_cases'], 'GPU labels from complete LiDAR towers')
             # v21 plan: GPU/engine pairs per (frame, K), then repeated and
             # interleaved S4a / S4a + S4b pairs at 00, K5 and K10.
             # v27 (R21): then the tower witness arm at 00 and the raw frames.
             # v28 (R22): the pairs and single ablations at 00, then the raw frames.
-            need(value['completed_case_indices'] == list(range(36)) and value['cross_worker_comparisons'] == [
+            need(value['completed_case_indices'] == list(range(40)) and value['cross_worker_comparisons'] == [
                 dict(reference=r, other=r + 1, equal=True) for r in range(0, 12, 2)] + [
                 dict(reference=reference, other=other, equal=True)
                 for other, reference in ((12, 0), (13, 0), (14, 2), (15, 2), (16, 0), (17, 2), (18, 0), (19, 2),
                                          (20, 0), (21, 2), (22, 0), (23, 2))] + [
-                dict(reference=r, other=r + 1, equal=True) for r in range(24, 36, 2)] and
+                dict(reference=r, other=r + 1, equal=True) for r in range(24, 36, 2)] + [
+                dict(reference=reference, other=other, equal=True)
+                for other, reference in ((36, 0), (37, 2), (38, 24), (39, 26))] and
                  value['FULL_executed'] is True and value['provenance'] == receipt['provenance'], 'worker receipt')
             need(not (output / 'build').exists() and (output / 'configure.stdout').is_file(), 'capture excludes build')
             pkg = package()
@@ -1499,7 +1517,7 @@ class Protocol(unittest.TestCase):
             outcomes = [entry['outcome'] for entry in value['case_outcomes']]
             need(outcomes == ['complete_relative'] * 10 + ['explicit_refusal'] * 2 + ['complete_relative'] * 2 +
                  ['killed_case_cap'] + ['complete_relative'] * 2 + ['killed_case_cap'] +
-                 ['complete_relative'] * 18,  # v28: single ablations (6), raw frames with ground (12)
+                 ['complete_relative'] * 22,  # v28/v29: ablations (6), raw frames (12), streaming (4)
                  'cap kill and explicit refusal: ' + repr(outcomes))
             killed = worker.strict_json((host / 'received/output/probe_17.command.json').read_bytes())
             need(killed['residual_or_interrupted_group_killed'] is True and 3.0 <= killed['elapsed_seconds'] < 30,
@@ -1537,9 +1555,9 @@ class Protocol(unittest.TestCase):
             output = host / 'received/output'
             value = worker.strict_json((output / 'receipt.json').read_bytes())
             outcomes = [entry['outcome'] for entry in value['case_outcomes']]
-            need(outcomes == ['complete_relative'] * 2 + ['killed_budget'] + ['skipped_budget'] * 33,
+            need(outcomes == ['complete_relative'] * 2 + ['killed_budget'] + ['skipped_budget'] * 37,
                  'budget exhaustion: ' + repr(outcomes))
-            need(not any((output / ('probe_' + str(i) + '.command.json')).exists() for i in range(3, 36)),
+            need(not any((output / ('probe_' + str(i) + '.command.json')).exists() for i in range(3, 40)),
                  'skipped cases never launched')
 
     def test_unpaired_gpu_case_is_marked(self):
@@ -1550,11 +1568,11 @@ class Protocol(unittest.TestCase):
                 Path(temporary), tools=dict(sleep=[dict(workers=48, k=5, scene='00', batch=False, seconds=60)]),
                 patches=[(worker, 'CASE_CAP_SECONDS', 4)])
             need(code == 0 and receipt['status'] == 'partial' and
-                 receipt['unpaired_batch_cases'] == [0, 12, 13, 16, 18, 20, 22],
+                 receipt['unpaired_batch_cases'] == [0, 12, 13, 16, 18, 20, 22, 36],
                  'unpaired GPU cases: ' + json.dumps(receipt)[:600])
             expect_certified_stop(receipt, fake)
             value = worker.strict_json((host / 'received/output/receipt.json').read_bytes())
-            need(value['unpaired_batch_cases'] == [0, 12, 13, 16, 18, 20, 22] and
+            need(value['unpaired_batch_cases'] == [0, 12, 13, 16, 18, 20, 22, 36] and
                  [value['case_outcomes'][i]['outcome'] for i in (0, 1, 12, 13)] ==
                  ['complete_relative', 'killed_case_cap', 'complete_relative', 'complete_relative'],
                  'worker unpaired list and outcomes')
@@ -1589,7 +1607,7 @@ class Protocol(unittest.TestCase):
                  value['GPU_executed'] is False and
                  [entry['outcome'] for entry in value['case_outcomes']] ==
                  ['killed_case_cap', 'complete_relative'] * 6 + ['killed_case_cap'] * 12 +
-                 ['killed_case_cap', 'complete_relative'] * 6,
+                 ['killed_case_cap', 'complete_relative'] * 6 + ['killed_case_cap'] * 4,
                  'worker GPU labels and outcomes')
             pkg = package()
             expected = session.validate_snapshot(pkg['archive'], pkg['manifest'])[0]
@@ -1643,10 +1661,10 @@ class Protocol(unittest.TestCase):
             output = host / 'received/output'
             value = worker.strict_json((output / 'receipt.json').read_bytes())
             outcomes = [entry['outcome'] for entry in value['case_outcomes']]
-            need(outcomes == ['complete_relative'] * 2 + ['probe_failed'] + ['skipped_protocol_defect'] * 33,
+            need(outcomes == ['complete_relative'] * 2 + ['probe_failed'] + ['skipped_protocol_defect'] * 37,
                  'protocol defect skips the following cases: ' + repr(outcomes))
             need('probe counters tower_work' in value['case_outcomes'][2]['reason'] and
-                 not any((output / ('probe_' + str(i) + '.command.json')).exists() for i in range(3, 36)),
+                 not any((output / ('probe_' + str(i) + '.command.json')).exists() for i in range(3, 40)),
                  'skipped cases never launched after a protocol defect')
 
     def test_preflight_failure_runs_no_case(self):
