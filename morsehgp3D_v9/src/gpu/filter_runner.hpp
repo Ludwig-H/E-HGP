@@ -10,6 +10,7 @@
 #include "certificate.hpp"
 #include "lanes_tasks.hpp"
 #include "q4_lanes.hpp"
+#include "record_pool.hpp"
 #include "witness_filter.hpp"
 #include "../common/raw_vector.hpp"
 
@@ -244,7 +245,34 @@ struct LanesInput {
   // (the port gate's --unfused, for a paired device measurement) keeps the
   // separate phases.
   bool fused_pass = true;
+  // v28 (pinned records, default false): the records come back in a leased
+  // block of a RESIDENT pool (gpu/record_pool.hpp) instead of a fresh
+  // pageable vector: on the device, pinned host memory (cudaHostAlloc,
+  // grown on demand, never shrunk; the copy is a direct DMA, no driver
+  // staging, no first touch of new pages); on the host twin, plain memory
+  // (the records are computed as before, then moved into the lease: the
+  // witness of the path, byte for byte). LanesOutput::records stays empty,
+  // LanesOutput::pinned holds the lease, record_data()/record_total() read
+  // either. The same bytes either way.
+  bool pinned_records = false;
 };
+
+// v28: the lanes records' pool reservation of the chain's device
+// preparation (stage B, lever q34_lanes_pinned) and of the probe's device
+// session, by the tower's order: 2 M records (256 MB at 128 bytes a record)
+// up to K5, 10 M (1.28 GB) above. R21 downloads 0.70 to 0.89 M records at
+// K5 and 3.63 to 4.63 M at K10 on the frames without ground, 1.49 to 1.75 M
+// at K5 and 8.10 to 9.06 M at K10 on the raw frames: each bound holds every
+// R21 frame of its order. A larger call grows the block in its download
+// window (a cudaHostAlloc, counted in LanesOutput::pinned_allocations).
+// (Review of v28: a fixed 5 M pinned 640 MB at K5 for at most 0.9 M records
+// without ground, and did not hold the raw frames at K10.)
+inline constexpr std::size_t pinned_records_for_order(unsigned kmax) {
+  return kmax <= 5 ? std::size_t{2000000} : std::size_t{10000000};
+}
+
+using RecordPool = ResidentBlockPool<LaneRecord>;
+using RecordLease = RecordPool::Lease;
 
 inline constexpr u32 default_lanes_capacity = 1U << 16;
 inline constexpr u32 default_record_capacity = 1U << 12;
@@ -302,12 +330,48 @@ struct LanesOutput {
   Q4Work work4{};                               // decided edges only (S4b q4 lanes)
   std::uint64_t deferred = 0, faults = 0;
   std::uint32_t capacity = 0, record_capacity = 0, warps = 0;
-  // cudaEvent timings (ms): upload, kernel, download, whole pass.
-  double upload_ms = 0, kernel_ms = 0, download_ms = 0, total_ms = 0;
+  // cudaEvent timings (ms) of the device call; the host twin sets kernel_ms
+  // and total_ms to its wall, plan_ms/task_ms/compact_ms to its phases'
+  // walls, and the upload, download, copy, allocation, setup and finish
+  // timers to zero. The windows (v28, events e0..e6 of run_lanes_batch):
+  // - upload_ms (e0..e1): the grow-only reservations of the resident device
+  //   buffers (a growth is a cudaMalloc in the window), the host-to-device
+  //   copies of the index and of the edges (pageable sources), the counters'
+  //   reset;
+  // - kernel_ms (e1..e4): steps P, T and C with their scans, the task
+  //   table's reservation and two small reads (cover sites used, tasks);
+  // - download_ms (e4..e6): the WHOLE window after the kernels: the small
+  //   copies (counters, statuses, slices, per-warp ledgers, into pageable
+  //   memory), the host allocation of the ledgers' vectors, the preparation
+  //   of the records' destination (host_alloc_ms) and the records' copy
+  //   (download_copy_ms). The GPU is idle, so host work inside the window is
+  //   timed too;
+  // - download_copy_ms (e5..e6): the device-to-host copy of the records
+  //   alone. Into a pageable vector it includes the driver's staging and
+  //   the first touch of the vector's new pages (the copy writes them);
+  //   into a pinned block it is a direct DMA;
+  // - total_ms (e0..e6).
+  double upload_ms = 0, kernel_ms = 0, download_ms = 0, download_copy_ms = 0, total_ms = 0;
+  // v28: host wall (steady clock, not an event) of the preparation of the
+  // records' destination inside the download window: the resize of the
+  // pageable vector (default-initialised: no page is touched), or the lease
+  // of a pinned block (with its growth, a cudaHostAlloc, if any). Zero on
+  // the host twin.
+  double host_alloc_ms = 0;
   // v9 H1: host sub-timers outside the events: setup (entry to the first
-  // event: guards, probe, sizing) and finish (last event to return: ledger
-  // reduction, statuses).
+  // event: the resident mutex, guards, probe, sizing) and finish (last
+  // event to return: ledger reduction, statuses).
   double setup_ms = 0, finish_ms = 0;
+  // v28 (LanesInput::pinned_records): the leased block holding the records
+  // (records stays empty; an empty lease when no record came back), the
+  // path's echo, the pool's allocations made by this call (0 when the
+  // resident block held the records) and the pool's capacity after it.
+  RecordLease pinned;
+  bool pinned_records = false;
+  std::uint64_t pinned_allocations = 0, pinned_bytes = 0;
+  // The records, from the lease or from the vector.
+  const LaneRecord* record_data() const { return pinned ? pinned.data() : records.data(); }
+  std::size_t record_total() const { return pinned ? pinned.size() : records.size(); }
   // S4b tasks: the tasks of the call and the largest declared work of one
   // task (lanes_task_steps), both functions of the input and B; the three
   // steps' times (device: events, P with its scan, T with its table, C with
@@ -321,8 +385,18 @@ struct LanesOutput {
 LanesOutput run_lanes_batch(const LanesInput& input);
 // Reserves the lanes call's resident per-warp slabs (v9 H1), to be called
 // during q2; empty string on success. Any error is classified again by the
-// batch call.
-std::string warm_up_lanes(u32 capacity, u32 record_capacity, u32 event_capacity);
+// batch call. v28: pinned_records != 0 also reserves the pinned records
+// pool for that many records (as warm_up_pinned_records), after the slabs
+// and under the same hold of the resident mutex (a lanes call never runs
+// between the two); pinned_ms, when given, receives the host wall of that
+// reservation alone (0 when pinned_records == 0 or on an earlier error).
+std::string warm_up_lanes(u32 capacity, u32 record_capacity, u32 event_capacity, std::size_t pinned_records = 0,
+                          double* pinned_ms = nullptr);
+// v28: makes a free block of the device's pinned records pool hold
+// `records` records (cudaHostAlloc on a growth; nothing leased), under the
+// lanes call's resident mutex; empty string on success. Any error is
+// classified again by the batch call.
+std::string warm_up_pinned_records(std::size_t records);
 
 // Opens the device's primary context (process-wide), so that the first
 // batch call does not pay it; empty string on success. Any error is left to
@@ -334,11 +408,16 @@ std::string warm_up();
 // the lanes call's resident slabs (warm_up_lanes with the call's capacities).
 // The chain never opens it; its device preparation then finds the context
 // ready. Walls in milliseconds; error empty on success (any error is left to
-// the batch calls, which classify it).
+// the batch calls, which classify it). v28: pinned_records != 0 (with the
+// chain's q34_lanes_pinned: pinned_records_for_order(kmax), the count the
+// chain's stage B then finds reserved) also reserves the pinned records pool
+// for that many records (warm_up_pinned_records), timed apart (pinned_ms),
+// with the pool's capacity after it (pinned_bytes).
 struct DeviceSession {
   std::string error;
-  double context_ms = 0, reserve_ms = 0;
+  double context_ms = 0, reserve_ms = 0, pinned_ms = 0;
+  std::uint64_t pinned_bytes = 0;
 };
-DeviceSession open_device_session(u32 lanes_capacity, u32 lanes_events);
+DeviceSession open_device_session(u32 lanes_capacity, u32 lanes_events, std::size_t pinned_records = 0);
 
 }  // namespace mhgp9::gpu

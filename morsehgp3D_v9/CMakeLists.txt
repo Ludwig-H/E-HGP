@@ -502,6 +502,23 @@ mhgp9_gate(mhgp9_chain_q2_early_census_lidar_k5 0 mhgp9_chain_q2_early_census_ga
            ARGS --frame=${CMAKE_CURRENT_SOURCE_DIR}/../morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le
                 --k=5 --tower=67450c64611075b1 --catalogue=5ad1fe09354411ba --pairs=1
            EXPECT_PREFIX "chain_q2_early_census_gate frame n=39885 K=5 pairs=1 arm=-1" LABELS "lidar;chain" TIMEOUT 3600)
+# v28 (revue) : le chemin de la chaine sous q34_lanes_pinned sur le CPU (bail
+# du bassin resident du jumeau hote) contre le temoin pageable ; le mutant
+# PINNED_READS_VECTOR (conversion lisant le vecteur vide au lieu du bail) est
+# tue des la premiere trame qui a des enregistrements.
+mhgp9_gate(mhgp9_chain_batch_q3_pinned 0 mhgp9_chain_batch_q3_gate ARGS --n=1000 --pinned
+           EXPECT_PREFIX "chain_batch_q3_pinned n=1000 cases=32" LABELS "gate;chain;oracle" TIMEOUT 1200)
+mhgp9_gate(mhgp9_chain_batch_q3_pinned_bad_argument 2 mhgp9_chain_batch_q3_gate ARGS --pinned --n=abc
+           LABELS "gate;chain" TIMEOUT 60)
+mhgp9_product_executable(mhgp9_chain_pinned_reads_vector_mutant_gate tests/chain/chain_batch_q3_gate.cpp
+                         src/chain/tower_chain.cpp)
+target_include_directories(mhgp9_chain_pinned_reads_vector_mutant_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/gen"
+                           "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+target_link_libraries(mhgp9_chain_pinned_reads_vector_mutant_gate PRIVATE mhgp9_gen mhgp9_gpu)
+target_compile_definitions(mhgp9_chain_pinned_reads_vector_mutant_gate PRIVATE MHGP9_CHAIN_MUTANT_PINNED_READS_VECTOR=1)
+mhgp9_gate(mhgp9_chain_batch_q3_pinned_mutant_reads_vector 1 mhgp9_chain_pinned_reads_vector_mutant_gate
+           ARGS --n=1000 --pinned EXPECT_PREFIX "cause=pinned.status uniform/K2/W1"
+           LABELS "gate;chain;mutant" TIMEOUT 600)
 foreach(mutant IN ITEMS REGULAR_SHELLS_ONLY NO_SITE_TERM)
   string(TOLOWER ${mutant} lower)
   mhgp9_product_executable(mhgp9_chain_euler_${lower}_mutant_gate tests/chain/chain_euler_gate.cpp src/chain/tower_chain.cpp)
@@ -601,6 +618,37 @@ mhgp9_gate(mhgp9_gpu_lanes_port_scale8000 0 mhgp9_gpu_lanes_port_gate ARGS --n=8
            EXPECT_PREFIX "lanes_port_gate n=8000" LABELS "scale8000;gpu;oracle" TIMEOUT 2400)
 mhgp9_gate(mhgp9_gpu_lanes_port_bad_argument 2 mhgp9_gpu_lanes_port_gate ARGS --k=11
            LABELS "gate;gpu" TIMEOUT 60)
+# v28 : bassin de blocs residents des enregistrements des voies
+# (gpu/record_pool.hpp, levier pinned_records) sur une memoire de test :
+# croissance a la demande, exclusivite des baux, retour a la destruction,
+# baux concurrents, surete aux exceptions, chemin du jumeau hote octet pour
+# octet. Quatre mutants tues (code 1).
+mhgp9_product_executable(mhgp9_gpu_record_pool_gate tests/gpu/record_pool_gate.cpp)
+mhgp9_gate(mhgp9_gpu_record_pool 0 mhgp9_gpu_record_pool_gate ARGS --rounds=64
+           EXPECT_PREFIX "record_pool_gate cases=31" LABELS "gate;gpu" TIMEOUT 120)
+mhgp9_gate(mhgp9_gpu_record_pool_bad_argument 2 mhgp9_gpu_record_pool_gate ARGS --rounds=abc
+           LABELS "gate;gpu" TIMEOUT 60)
+foreach(mutant IN ITEMS RECORD_POOL_MUTANT_TAKE_LEASED RECORD_POOL_MUTANT_NO_RETURN
+                        RECORD_POOL_MUTANT_KEEP_TAKEN_ON_THROW LANES_MUTANT_PINNED_SHORT_COPY)
+  string(TOLOWER ${mutant} lower)
+  mhgp9_product_executable(mhgp9_gpu_${lower}_gate tests/gpu/record_pool_gate.cpp)
+  target_compile_definitions(mhgp9_gpu_${lower}_gate PRIVATE MHGP9_${mutant}=1)
+endforeach()
+mhgp9_gate(mhgp9_gpu_record_pool_mutant_take_leased 1 mhgp9_gpu_record_pool_mutant_take_leased_gate
+           EXPECT_LINE "cause=exclusive.same_block" LABELS "gate;gpu;mutant" TIMEOUT 120)
+mhgp9_gate(mhgp9_gpu_record_pool_mutant_no_return 1 mhgp9_gpu_record_pool_mutant_no_return_gate
+           EXPECT_LINE "cause=grow.returned" LABELS "gate;gpu;mutant" TIMEOUT 120)
+mhgp9_gate(mhgp9_gpu_record_pool_mutant_keep_taken_on_throw 1 mhgp9_gpu_record_pool_mutant_keep_taken_on_throw_gate
+           EXPECT_LINE "cause=throw.growth" LABELS "gate;gpu;mutant" TIMEOUT 120)
+mhgp9_gate(mhgp9_gpu_lanes_mutant_pinned_short_copy 1 mhgp9_gpu_lanes_mutant_pinned_short_copy_gate
+           EXPECT_LINE "cause=twin.bytes n=1" LABELS "gate;gpu;mutant" TIMEOUT 120)
+# Ablation hote du telechargement (mesure indicative, sans GPU) : pageable
+# neuf contre bloc resident, paires entrelacees.
+mhgp9_product_executable(mhgp9_lanes_download_ablation bench/lanes_download_ablation.cpp)
+mhgp9_gate(mhgp9_lanes_download_ablation_bad_argument 2 mhgp9_lanes_download_ablation ARGS 0 3
+           LABELS "gate;gpu" TIMEOUT 60)
+mhgp9_gate(mhgp9_lanes_download_ablation_small 0 mhgp9_lanes_download_ablation ARGS 1000 2
+           EXPECT_PREFIX "lanes_download_ablation records=1000" LABELS "gate;gpu" TIMEOUT 60)
 # T1 (etape 1 des voies) : un mutant qui arrete la passe d'une classe un
 # site interieur trop tot rejette des classes de profondeur T-1 ; la porte
 # de port (voies q4 contre le moteur) le tue a K3.

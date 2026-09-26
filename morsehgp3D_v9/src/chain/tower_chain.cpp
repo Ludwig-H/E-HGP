@@ -137,10 +137,14 @@ class GpuPreparation {
     wake_.notify_all();
     join();
   }
-  // lanes: stage B reserves the lanes call's resident slabs (v9 H1).
-  void start(bool lanes, std::uint32_t lanes_capacity, std::uint32_t lanes_events) {
+  // lanes: stage B reserves the lanes call's resident slabs (v9 H1);
+  // pinned_records != 0 (v28, q34_lanes_pinned: pinned_records_for_order):
+  // then, under the same hold of the runner's resident mutex, the pinned
+  // records pool. Stage B's wall and its pinned reservation's wall are
+  // recorded (stage_b), a stage never waited for (review of v28).
+  void start(bool lanes, std::uint32_t lanes_capacity, std::uint32_t lanes_events, std::size_t pinned_records) {
     started_ = true;
-    thread_ = std::thread([this, lanes, lanes_capacity, lanes_events] {
+    thread_ = std::thread([this, lanes, lanes_capacity, lanes_events, pinned_records] {
       const auto begin = Clock::now();
       try {
         static_cast<void>(gpu::warm_up());  // errors are classified by the batch call
@@ -165,10 +169,22 @@ class GpuPreparation {
         std::lock_guard<std::mutex> lock(mu_);
         stage_b = lanes && !failure_ && prepared_ && !released_;  // never for a chain already ending
       }
-      try {
-        if (stage_b) static_cast<void>(gpu::warm_up_lanes(lanes_capacity, 0, lanes_events));
-      } catch (...) {
-        // The lanes call reserves and classifies again.
+      double stage_b_ms = 0, pinned_ms = 0;
+      if (stage_b) {
+        const auto stage_b_begin = Clock::now();
+        try {
+          static_cast<void>(gpu::warm_up_lanes(lanes_capacity, 0, lanes_events, pinned_records, &pinned_ms));
+        } catch (...) {
+          // The lanes call reserves and classifies again.
+        }
+        stage_b_ms = ms_since(stage_b_begin);
+      }
+      {
+        std::lock_guard<std::mutex> lock(mu_);
+        stage_b_done_ = stage_b;
+        stage_b_ms_ = stage_b_ms;
+        pinned_reserve_ms_ = pinned_ms;
+        pinned_reserve_records_ = stage_b ? pinned_records : 0;
       }
     });
   }
@@ -196,6 +212,18 @@ class GpuPreparation {
   }
   double prepare_ms() const { return prepare_ms_; }
   double wait_ms() const { return wait_ms_; }
+  // v28 (review): stage B's wall, its pinned reservation's wall and the
+  // records it reserved; zero when stage B did not run, or has not finished
+  // when the chain publishes (it is never waited for).
+  struct StageB {
+    double ms = 0, pinned_ms = 0;
+    std::size_t pinned_records = 0;
+  };
+  StageB stage_b() {
+    std::lock_guard<std::mutex> lock(mu_);
+    if (!stage_b_done_) return {};
+    return {stage_b_ms_, pinned_reserve_ms_, pinned_reserve_records_};
+  }
 
  private:
   void join() {
@@ -205,10 +233,11 @@ class GpuPreparation {
   std::mutex mu_;
   std::condition_variable wake_;
   gen::Q2CensusIndexPtr index_;
-  bool released_ = false, stage_a_done_ = false, started_ = false, waited_ = false;
+  bool released_ = false, stage_a_done_ = false, started_ = false, waited_ = false, stage_b_done_ = false;
   std::optional<GpuIndex> prepared_;
   std::exception_ptr failure_;
-  double prepare_ms_ = 0, wait_ms_ = 0;
+  double prepare_ms_ = 0, wait_ms_ = 0, stage_b_ms_ = 0, pinned_reserve_ms_ = 0;
+  std::size_t pinned_reserve_records_ = 0;
 };
 
 gen::Q34FilterBatch gpu_filter_batch(const GpuIndex& prepared, std::span<const gen::WspdRectangle> rectangles,
@@ -357,11 +386,16 @@ struct LanesCallSteps {
   std::uint64_t tasks = 0, max_task_steps = 0;
   double plan_ms = 0, task_ms = 0, compact_ms = 0;
   gpu::LanesFusedWork fused{0, 0, 0, 0, 0};  // v25 (L15)
+  // v28: the download split and the pinned records' pool (LanesOutput).
+  double upload_ms = 0, download_ms = 0, download_copy_ms = 0, host_alloc_ms = 0;
+  bool pinned = false;
+  std::uint64_t pinned_allocations = 0, pinned_bytes = 0;
 };
 
 gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::span<const gen::Q34SurvivingEdge> survivors,
                                std::span<const std::uint8_t> asked, bool device, std::uint32_t capacity,
-                               std::uint32_t events, bool fused, std::size_t workers, double& device_ms, double& kernel_ms,
+                               std::uint32_t events, bool fused, bool pinned, std::size_t workers, double& device_ms,
+                               double& kernel_ms,
                                double& transfer_ms, std::uint32_t& warps, double& setup_ms, double& finish_ms,
                                double& convert_ms, LanesCallSteps& steps) {
   std::vector<std::size_t> where;
@@ -389,6 +423,7 @@ gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::spa
   in.capacity = capacity;
   in.event_capacity = events;
   in.fused_pass = fused;
+  in.pinned_records = pinned;  // v28: records read in place from a leased block
   auto out = device ? gpu::run_lanes_batch(in) : gpu::run_lanes_batch_host(in, workers);
   const auto convert_start = Clock::now();
   switch (out.error_kind) {
@@ -419,12 +454,24 @@ gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::spa
     batch.record_begin[where[i]] = out.record_begin[i];
     batch.record_count[where[i]] = out.record_count[i];
   }
-  batch.records.resize(out.records.size());  // default-initialised: every record written below
+  // v28: the records are read where the call left them, the pageable
+  // vector or the leased pinned block (released when `out` dies, after the
+  // conversion), without another full host copy.
+#if defined(MHGP9_CHAIN_MUTANT_PINNED_READS_VECTOR)
+  const gpu::LaneRecord* const records = out.records.data();  // mutant: the lease is ignored
+  const std::size_t record_total = out.records.size();
+#else
+  const gpu::LaneRecord* const records = out.record_data();
+  const std::size_t record_total = out.record_total();
+#endif
+  if (out.pinned_records != pinned || (pinned && !out.records.empty()))
+    throw std::logic_error("chain_q34_lanes_pinned_path_differs");
+  batch.records.resize(record_total);  // default-initialised: every record written below
   poison_unwritten(batch.records, 0);
-  tower::parallel_ranges(out.records.size(), static_cast<int>(std::max<std::size_t>(1, workers)),
+  tower::parallel_ranges(record_total, static_cast<int>(std::max<std::size_t>(1, workers)),
                          [&](std::size_t first, std::size_t last, std::size_t) {
     for (std::size_t r = first; r < last; ++r) {
-      const auto& from = out.records[r];
+      const auto& from = records[r];
       auto& to = batch.records[r];
       for (int c = 0; c < 5; ++c) to.key[c] = from.key[c];
       for (int c = 0; c < 4; ++c) to.support[c] = from.support[c];
@@ -479,6 +526,13 @@ gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::spa
   steps.task_ms = out.task_ms;
   steps.compact_ms = out.compact_ms;
   steps.fused = out.fused;
+  steps.upload_ms = out.upload_ms;
+  steps.download_ms = out.download_ms;
+  steps.download_copy_ms = out.download_copy_ms;
+  steps.host_alloc_ms = out.host_alloc_ms;
+  steps.pinned = out.pinned_records;
+  steps.pinned_allocations = out.pinned_allocations;
+  steps.pinned_bytes = out.pinned_bytes;
   convert_ms = ms_since(convert_start);
   return batch;
 }
@@ -1218,6 +1272,8 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       fail(ChainStatus::kInvalidInput, "chain_q34_lanes_fused_requires_batch_q4");
     if (options.q2_early_census && !options.q2_during_device)
       fail(ChainStatus::kInvalidInput, "chain_q2_early_census_requires_q2_during_device");
+    if (options.q34_lanes_pinned && !options.q34_batch_q3)
+      fail(ChainStatus::kInvalidInput, "chain_q34_lanes_pinned_requires_batch_q3");
     if (points.size() < 2) fail(ChainStatus::kInvalidInput, "chain_requires_two_sites");
     if (points.size() > static_cast<std::size_t>(std::numeric_limits<std::int32_t>::max()))
       fail(ChainStatus::kInvalidInput, "chain_too_many_sites");
@@ -1232,7 +1288,8 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     if (options.q34_batch_filter && (options.q34_gpu_filter || options.q34_gpu_certificates || options.q34_gpu_q3) &&
         kmax >= 2 && points.size() >= 2)
       gpu_preparation.start(options.q34_batch_q3 && options.q34_gpu_q3, options.q34_lanes_capacity,
-                            options.q34_lanes_events);
+                            options.q34_lanes_events,
+                            options.q34_lanes_pinned ? gpu::pinned_records_for_order(kmax) : 0);
 
     // ---- Generateur (configuration mesuree des recus v8).
     auto t = Clock::now();
@@ -1407,13 +1464,13 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         if (options.q34_batch_q3 && kmax >= 2) {
           const bool device = options.q34_gpu_q3;
           const std::uint32_t capacity = options.q34_lanes_capacity, events = options.q34_lanes_events;
-          const bool fused = options.q34_lanes_fused;
+          const bool fused = options.q34_lanes_fused, pinned = options.q34_lanes_pinned;
           lanes.filter = [&gpu_preparation, &lanes_device_ms, &lanes_kernel_ms, &lanes_transfer_ms, &lanes_warps,
                           &lanes_setup_ms, &lanes_finish_ms, &lanes_convert_ms, &lanes_steps,
-                          device, capacity, events, fused, W](const gen::Q2CensusIndexPtr& ix, unsigned k,
-                                                              std::span<const gen::Q34SurvivingEdge> edges,
-                                                              std::span<const std::uint8_t> asked) {
-            return lanes_batch(gpu_preparation.get(*ix), k, edges, asked, device, capacity, events, fused, W,
+                          device, capacity, events, fused, pinned, W](const gen::Q2CensusIndexPtr& ix, unsigned k,
+                                                                      std::span<const gen::Q34SurvivingEdge> edges,
+                                                                      std::span<const std::uint8_t> asked) {
+            return lanes_batch(gpu_preparation.get(*ix), k, edges, asked, device, capacity, events, fused, pinned, W,
                                lanes_device_ms, lanes_kernel_ms, lanes_transfer_ms, lanes_warps, lanes_setup_ms,
                                lanes_finish_ms, lanes_convert_ms, lanes_steps);
           };
@@ -1483,6 +1540,12 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         // (joined by the first device call; zero on the CPU batch path).
         b.gpu_prepare_ms = gpu_preparation.prepare_ms();
         b.gpu_prepare_wait_ms = gpu_preparation.wait_ms();
+        // v28 (review): stage B (resident slabs, then the pinned pool under
+        // q34_lanes_pinned), zero if it did not run or has not finished.
+        const auto stage_b = gpu_preparation.stage_b();
+        b.gpu_stage_b_ms = stage_b.ms;
+        b.lanes_pinned_reserve_ms = stage_b.pinned_ms;
+        b.lanes_pinned_reserve_records = stage_b.pinned_records;
         b.lanes_wait_ms = static_cast<double>(timing.lanes_wait_ns) / 1e6;
         b.tail_ms = static_cast<double>(timing.tail_ns) / 1e6;
         b.lanes_asked = timing.lanes_asked;
@@ -1501,6 +1564,14 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         b.lanes_fused_q3_chunks = lanes_steps.fused.q3_chunks;
         b.lanes_fused_census_chunks = lanes_steps.fused.census_chunks;
         b.lanes_fused_fallbacks = lanes_steps.fused.fallbacks;
+        // v28: the download split (device only) and the pinned pool.
+        b.lanes_upload_ms = options.q34_gpu_q3 ? lanes_steps.upload_ms : 0.0;
+        b.lanes_download_ms = options.q34_gpu_q3 ? lanes_steps.download_ms : 0.0;
+        b.lanes_download_copy_ms = options.q34_gpu_q3 ? lanes_steps.download_copy_ms : 0.0;
+        b.lanes_host_alloc_ms = options.q34_gpu_q3 ? lanes_steps.host_alloc_ms : 0.0;
+        b.lanes_pinned = lanes_steps.pinned;
+        b.lanes_pinned_allocations = lanes_steps.pinned_allocations;
+        b.lanes_pinned_bytes = lanes_steps.pinned_bytes;
       }
       result.q34_expanded_pairs = r34.pipeline.work.expanded_pairs;
       result.q34_cover_builds = r34.pipeline.work.cover_builds;

@@ -22,6 +22,7 @@
 #include <atomic>
 #include <chrono>
 #include <condition_variable>
+#include <cstring>
 #include <exception>
 #include <mutex>
 #include <stdexcept>
@@ -71,6 +72,36 @@ class PhaseBarrier {
 
 inline constexpr std::size_t lanes_host_window = 16384;  // edges whose covers live at once on the host
 
+// v28 (LanesInput::pinned_records): the host twin's resident records pool,
+// plain aligned memory, leaked on purpose like the device's pinned pool.
+inline RecordPool& host_record_pool() {
+  static auto* memory = new AlignedHostMemory;
+  static auto* pool = new RecordPool(*memory);
+  return *pool;
+}
+
+// The host twin's pinned path: the records of `out` moved into a lease of
+// `pool` (one copy; the vector released), byte for byte, so that the
+// callers read the lease exactly as the device's (record_data/record_total).
+// An allocation failure propagates (the pool is left unchanged).
+inline void lease_records(LanesOutput& out, RecordPool& pool) {
+  const std::uint64_t before = pool.stats().allocations;
+  const std::size_t n = out.records.size();
+  RecordLease lease = pool.acquire(n);
+#if defined(MHGP9_LANES_MUTANT_PINNED_SHORT_COPY)
+  const std::size_t copied = n == 0 ? 0 : n - 1;  // mutant: the last record is not copied
+#else
+  const std::size_t copied = n;
+#endif
+  if (copied != 0) std::memcpy(static_cast<void*>(lease.data()), out.records.data(), copied * sizeof(LaneRecord));
+  out.pinned = std::move(lease);
+  RawVector<LaneRecord>().swap(out.records);
+  out.pinned_records = true;
+  const auto stats = pool.stats();
+  out.pinned_allocations = stats.allocations - before;
+  out.pinned_bytes = stats.bytes;
+}
+
 // The three steps over windows of `window` edges (>= 1). run_lanes_batch_host
 // is this with lanes_host_window; the gates vary the window.
 inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t workers, std::size_t window) {
@@ -100,6 +131,7 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
   const LanesIndex index{CertificateIndex{input.index.nodes, input.escapes, static_cast<u32>(input.index.node_count),
                                           input.index.rank_points},
                          input.rank_ids};
+  out.pinned_records = input.pinned_records;  // v28: the path's echo (no record: an empty lease)
   if (edges == 0) return out;  // no slab: nothing to decide
   if (window == 0) window = 1;
   const std::size_t windows = (edges + window - 1) / window;
@@ -403,6 +435,9 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
       if (status == static_cast<u8>(CertificateStatus::deferred)) ++out.deferred;
       else ++out.faults;
   }
+  // v28: the pinned path moves the records into a lease of the host pool
+  // (inside the twin's wall).
+  if (input.pinned_records) lease_records(out, host_record_pool());
   const double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
   out.kernel_ms = ms;
   out.total_ms = ms;

@@ -247,7 +247,10 @@ gen::Q34LanesBatch batch_of(const gpu::LanesOutput& out, const std::vector<std::
       batch.record_begin[where[i]] = out.record_begin[i];
       batch.record_count[where[i]] = out.record_count[i];
     }
-  for (const auto& r : out.records) batch.records.push_back(record_of(r, static_cast<std::uint32_t>(where[r.edge])));
+  for (std::size_t r = 0; r < out.record_total(); ++r) {
+    const auto& record = out.record_data()[r];
+    batch.records.push_back(record_of(record, static_cast<std::uint32_t>(where[record.edge])));
+  }
   batch.work = work_of(out.work);
   return batch;
 }
@@ -337,18 +340,22 @@ gpu::LanesOutput single_task_batch(const gpu::LanesInput& in, std::size_t worker
   return out;
 }
 
-// The whole output, byte for byte: statuses, slices, records, both ledgers
-// and the deferral counts.
+// The whole output, byte for byte: statuses, slices, records (v28: read
+// through record_data/record_total, from the vector or the pinned lease),
+// both ledgers and the deferral counts.
 bool same_output(const gpu::LanesOutput& a, const gpu::LanesOutput& b, std::string& why) {
   const auto bytes = [](const auto& x, const auto& y) {
     return x.size() == y.size() &&
            (x.empty() || std::memcmp(x.data(), y.data(), x.size() * sizeof(*x.data())) == 0);
   };
+  const bool records = a.record_total() == b.record_total() &&
+                       (a.record_total() == 0 || std::memcmp(a.record_data(), b.record_data(),
+                                                             a.record_total() * sizeof(gpu::LaneRecord)) == 0);
   if (!a.error.empty() || !b.error.empty()) why = "error " + a.error + "|" + b.error;
   else if (!bytes(a.status, b.status)) why = "status";
   else if (!bytes(a.record_begin, b.record_begin)) why = "record_begin";
   else if (!bytes(a.record_count, b.record_count)) why = "record_count";
-  else if (!bytes(a.records, b.records)) why = "records";
+  else if (!records) why = "records";
   else if (std::memcmp(&a.work, &b.work, sizeof(a.work)) != 0) why = "work";
   else if (std::memcmp(&a.work4, &b.work4, sizeof(a.work4)) != 0) why = "work4";
   else if (a.deferred != b.deferred || a.faults != b.faults) why = "counts";
@@ -513,6 +520,8 @@ struct TaskTally {
   unsigned long long runs = 0, tasks_one = 0, tasks_default = 0, tasks_single = 0, extra_tasks = 0;
   unsigned long long max_steps_default = 0, max_steps_single = 0;
   unsigned long long fused_seeds = 0, fused_q3_chunks = 0, fused_fallbacks = 0;  // L15
+  unsigned long long pinned_runs = 0, pinned_records = 0;  // v28: host twin through the lease
+  unsigned long long comparisons = 0, pinned_small = 0;    // tasks_against_reference calls, small pinned runs
 };
 
 std::string budget_name(gpu::u64 budget) {
@@ -526,6 +535,7 @@ std::string budget_name(gpu::u64 budget) {
 // seed.
 int tasks_against_reference(const gpu::LanesInput& in, std::size_t workers, const std::string& name, bool clean,
                             TaskTally& tally) {
+  ++tally.comparisons;
   std::size_t with_seeds = 0;
   const auto reference = single_task_batch(in, workers, &with_seeds);
   if (!reference.error.empty() || reference.faults != 0 || (clean && reference.deferred != 0))
@@ -534,24 +544,38 @@ int tasks_against_reference(const gpu::LanesInput& in, std::size_t workers, cons
     gpu::u64 budget;
     std::size_t threads, window;
     bool fused;
+    bool pinned;
   };
   // Threads 1, 3, 8 and the gate's own count; windows 97 and the default;
-  // the default B without the fused pass (L15: the same bytes either way).
-  const Run runs[] = {{1, workers, gpu::lanes_host_window, true},
-                      {0, 1, 97, true},
-                      {0, 8, gpu::lanes_host_window, true},
-                      {gpu::single_task_budget, 3, gpu::lanes_host_window, true},
-                      {0, workers, gpu::lanes_host_window, false}};
+  // the default B without the fused pass (L15: the same bytes either way);
+  // v28: the default B with the records through the host pool's lease.
+  const Run runs[] = {{1, workers, gpu::lanes_host_window, true, false},
+                      {0, 1, 97, true, false},
+                      {0, 8, gpu::lanes_host_window, true, false},
+                      {gpu::single_task_budget, 3, gpu::lanes_host_window, true, false},
+                      {0, workers, gpu::lanes_host_window, false, false},
+                      {0, 3, 97, true, true}};
   unsigned long long tasks[3] = {0, 0, 0};
   for (const auto& run : runs) {
     auto x = in;
     x.task_budget = run.budget;
     x.fused_pass = run.fused;
+    x.pinned_records = run.pinned;
     const auto out = gpu::run_lanes_tasks_host(x, run.threads, run.window);
     std::string why;
     if (!same_output(out, reference, why))
       return fail("tasks.bytes " + name + " B=" + budget_name(run.budget) + " threads=" + std::to_string(run.threads) +
-                  " window=" + std::to_string(run.window) + (run.fused ? "" : " unfused") + " " + why);
+                  " window=" + std::to_string(run.window) + (run.fused ? "" : " unfused") +
+                  (run.pinned ? " pinned" : "") + " " + why);
+    // v28: the pinned path leaves the vector empty and echoes itself; the
+    // pageable path never leases.
+    if (out.pinned_records != run.pinned || static_cast<bool>(out.pinned) != (run.pinned && out.record_total() != 0) ||
+        (run.pinned && !out.records.empty()))
+      return fail("tasks.pinned_path " + name);
+    if (run.pinned) {
+      ++tally.pinned_runs;
+      tally.pinned_records += out.record_total();
+    }
     if (!run.fused && (out.fused.seeds != 0 || out.fused.chunks != 0 || out.fused.fallbacks != 0))
       return fail("tasks.unfused_counters " + name);
     ++tally.runs;
@@ -750,6 +774,26 @@ int file_compare(const gen::Q2CensusIndexPtr& index, const Certified& certified,
                   kmax, device.device.c_str(), static_cast<unsigned long long>(device.tasks),
                   static_cast<unsigned long long>(device.max_task_steps), device.warps, device.kernel_ms,
                   device.plan_ms, device.task_ms, device.compact_ms, device.total_ms);
+      // v28: the same call with the records in the resident pinned pool,
+      // byte for byte, then the pageable witness again (its download window
+      // split published for the paired reading).
+      auto pinned_in = in;
+      pinned_in.pinned_records = true;
+      const auto pinned = gpu::run_lanes_batch(pinned_in);
+      if (!same_output(pinned, reference, why)) return fail("compare.device_pinned " + why);
+      if (!pinned.pinned_records || !pinned.records.empty() ||
+          static_cast<bool>(pinned.pinned) != (pinned.record_total() != 0))
+        return fail("compare.device_pinned_path");
+      const auto pageable = gpu::run_lanes_batch(in);
+      if (!same_output(pageable, reference, why) || pageable.pinned_records || static_cast<bool>(pageable.pinned))
+        return fail("compare.device_pageable " + why);
+      std::printf("lanes_device_pinned K=%u records=%zu pinned_download_ms=%.3f pinned_copy_ms=%.3f "
+                  "pinned_host_alloc_ms=%.3f pinned_allocations=%llu pinned_bytes=%llu pageable_download_ms=%.3f "
+                  "pageable_copy_ms=%.3f pageable_host_alloc_ms=%.3f identical=1\n",
+                  kmax, pinned.record_total(), pinned.download_ms, pinned.download_copy_ms, pinned.host_alloc_ms,
+                  static_cast<unsigned long long>(pinned.pinned_allocations),
+                  static_cast<unsigned long long>(pinned.pinned_bytes), pageable.download_ms,
+                  pageable.download_copy_ms, pageable.host_alloc_ms);
     }
   }
   const bool all = certificate_deferred == 0 && lanes_deferred == 0;
@@ -1272,15 +1316,27 @@ int main(int argc, char** argv) {
             const auto ref = single_task_batch(v.in, workers);
             if (!ref.error.empty() || ref.faults != 0) return fail("tasks.small_reference " + where_name + " " + v.name);
             *v.deferred += ref.deferred;
-            for (const gpu::u64 budget : {gpu::u64{1}, gpu::u64{0}}) {
+            // v28: the default B also through the host pool's lease (the
+            // deferrals and arena rule unchanged, byte for byte).
+            for (const int pass : {0, 1, 2}) {
+              const gpu::u64 budget = pass == 0 ? 1 : 0;
               auto x = v.in;
               x.task_budget = budget;
+              x.pinned_records = pass == 2;
               const auto out = gpu::run_lanes_batch_host(x, workers);
               std::string why;
               if (!same_output(out, ref, why))
-                return fail("tasks.small_bytes " + where_name + " " + v.name + " B=" + budget_name(budget) + " " + why);
+                return fail("tasks.small_bytes " + where_name + " " + v.name + " B=" + budget_name(budget) +
+                            (pass == 2 ? " pinned " : " ") + why);
+              if (out.pinned_records != (pass == 2) || (pass == 2 && !out.records.empty()))
+                return fail("tasks.small_pinned_path " + where_name + " " + v.name);
               ++tally.runs;
               tally.fused_fallbacks += out.fused.fallbacks;
+              if (pass == 2) {
+                ++tally.pinned_runs;
+                ++tally.pinned_small;
+                tally.pinned_records += out.record_total();
+              }
             }
           }
           // The arenas: exactly full is accepted; one site short of the cover
@@ -1568,16 +1624,19 @@ int main(int argc, char** argv) {
   std::printf("lanes_tasks runs=%llu tasks_b1=%llu tasks_default=%llu tasks_single=%llu extra_tasks=%llu "
               "max_steps_default=%llu max_steps_single=%llu deferred_cover=%llu deferred_records=%llu "
               "deferred_events=%llu deferred_arena=%llu refusals=%llu replay_cases=%llu pruned_sites=%llu "
-              "cover_sites=%llu fused_seeds=%llu fused_q3_chunks=%llu fused_fallbacks=%llu\n",
+              "cover_sites=%llu fused_seeds=%llu fused_q3_chunks=%llu fused_fallbacks=%llu pinned_runs=%llu "
+              "pinned_records=%llu\n",
               tally.runs, tally.tasks_one, tally.tasks_default, tally.tasks_single, tally.extra_tasks,
               tally.max_steps_default, tally.max_steps_single, tasks_deferred_cover, tasks_deferred_records,
               tasks_deferred_events, tasks_deferred_arena, tasks_refusals, replay_cases, pruned_sites,
-              pruned_cover_sites, tally.fused_seeds, tally.fused_q3_chunks, tally.fused_fallbacks);
+              pruned_cover_sites, tally.fused_seeds, tally.fused_q3_chunks, tally.fused_fallbacks, tally.pinned_runs,
+              tally.pinned_records);
   if (tally.runs == 0 || tally.extra_tasks == 0 || tally.tasks_one <= tally.tasks_default ||
       tasks_deferred_cover == 0 || tasks_deferred_records == 0 || (any_q4 && tasks_deferred_events == 0) ||
       tasks_deferred_arena == 0 || tasks_refusals == 0 || replay_cases != 20015 || pruned_sites == 0 ||
       (any_q4 && (tally.fused_seeds == 0 || tally.fused_q3_chunks == 0 || tally.fused_fallbacks == 0)) ||
-      tally.max_steps_default > tally.max_steps_single)
+      tally.max_steps_default > tally.max_steps_single || tally.pinned_runs == 0 || tally.pinned_records == 0 ||
+      tally.pinned_runs != tally.comparisons + tally.pinned_small)
     return 3;
   if (edges == 0 || q3_only == 0 || rejections == 0 || emitted == 0 || wide_shells == 0 || deferred == 0 ||
       judged == 0 || guards == 0 || mutants == 0 || faults == 0 || arena_deferred != 1 || q4_total.edges == 0 ||

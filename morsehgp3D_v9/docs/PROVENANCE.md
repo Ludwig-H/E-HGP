@@ -1379,6 +1379,190 @@ puis revues séparément par un sceptique et par l'auditeur B.
     K5 et à K10.
   - Enfin, les trois trames brutes avec sol, GPU et moteur, à K5 et K10.
 
+### Enregistrements des voies en mémoire épinglée résidente (levier `q34_lanes_pinned`, 25 septembre 2026, après R21)
+
+R20 et R21 publient 30 ms (K5) et 150 ms (K10) de « transfert des voies »
+à 08/000000 sans sol : 849 780 et 4 630 767 enregistrements de 128 o
+téléchargés dans un vecteur pageable neuf. L'auditeur B
+([contre-audit R20](../audits/CONTRE_AUDIT_B_R20_ET_TRAJECTOIRE_100MS_20260924.md))
+note que la fenêtre e4..e5 contient aussi du travail hôte : allocation et
+premier contact des pages. Aucun gain ne peut être crédité à l'épinglage
+sans ablation.
+- **Minuteries séparées** (`LanesOutput`, `src/gpu/filter_runner.hpp`),
+  sept événements e0..e6 :
+  - `upload_ms` (e0..e1) : réservations résidentes (un `cudaMalloc` en cas
+    de croissance), copies de l'index et des arêtes vers l'appareil ;
+  - `kernel_ms` (e1..e4) : étapes P, T et C avec leurs balayages ;
+  - `download_ms` (e4..e6) : toute la fenêtre après les noyaux, même
+    étendue qu'avant : petites copies (compteurs, statuts, tranches,
+    registres), allocations hôte, préparation de la destination, copie des
+    enregistrements ;
+  - `download_copy_ms` (e5..e6, nouveau) : la copie des enregistrements
+    seule. En mémoire pageable, elle contient encore le transit du pilote et
+    le premier contact des pages neuves : c'est le coût réel du témoin, pas
+    un débit PCIe ;
+  - `host_alloc_ms` (nouveau, horloge hôte) : préparation de la
+    destination, soit le redimensionnement du vecteur pageable (sans remise
+    à zéro), soit le bail d'un bloc épinglé avec sa croissance éventuelle ;
+  - `total_ms` (e0..e6).
+
+  Le jumeau hôte met ces minuteries à zéro. `lanes_transfer_ms` reste
+  `upload_ms + download_ms`, comparable à R20 et R21.
+- **Bassin résident** (`src/gpu/record_pool.hpp`, C++17, testable sur
+  l'hôte) :
+  - blocs alloués une fois, agrandis à la demande (requête + 1/8 par
+    `acquire`, exactement la requête par `reserve`), jamais rétrécis ;
+  - bail exclusif et déplaçable, qui rend son bloc à sa destruction ;
+  - une seconde location pendant un bail prend un autre bloc libre ou en
+    crée un : jamais d'attente (pas d'interblocage si un fil garde un bail
+    et rappelle), jamais d'écrasement ;
+  - garantie forte aux exceptions : l'allocation se fait hors du mutex du
+    bassin, sur un bloc marqué pris ; un échec laisse le bassin inchangé.
+
+  Côté appareil, `cudaHostAlloc` (`cudaHostAllocDefault`, jamais
+  write-combined, car l'hôte relit les enregistrements), membre de
+  `LanesResident`, acquis ou agrandi seulement sous le mutex résident ; un
+  bail se rend depuis n'importe quel fil. Côté jumeau hôte, mémoire alignée
+  ordinaire. Les deux bassins sont volontairement fuis, comme les tampons
+  résidents.
+- **Réservation.** `pinned_records_for_order(kmax)` vaut 2 M
+  enregistrements (256 Mo) jusqu'à K5 et 10 M (1,28 Go) au-delà (revue ci-
+  dessous ; la première version réservait 5 M, soit 640 Mo, à tout ordre).
+  Elle est faite par l'étape B de la préparation de l'appareil de la
+  chaîne, sous le levier, en arrière-plan. `warm_up_lanes(…,
+  pinned_records)`, `warm_up_pinned_records(n)` et
+  `open_device_session(capacity, events, pinned_records)` réservent `n`
+  enregistrements. La session publie `pinned_ms` et `pinned_bytes` à part.
+  Taille lue dans R21 : 0,70 à 0,89 M à K5 et 3,63 à 4,63 M à K10 sans sol ;
+  1,49 à 1,75 M à K5 et 8,10 à 9,06 M à K10 sur les trames brutes. Chaque
+  borne tient toutes les trames R21 de son ordre ; un appel plus grand
+  agrandit le bloc dans sa fenêtre (un `cudaHostAlloc`, compté dans
+  `pinned_allocations`).
+- **Lecture sans copie.** Sous le levier, `LanesOutput::records` reste vide
+  et `LanesOutput::pinned` porte le bail. `record_data()` et
+  `record_total()` lisent l'un ou l'autre. La conversion de la chaîne lit
+  les enregistrements en place ; le bail revient au bassin quand la sortie
+  de l'appel meurt, après la conversion. Le chemin pageable reste le témoin.
+- **Leviers.**
+  - `LanesInput::pinned_records` : faux par défaut.
+  - `ChainOptions::q34_lanes_pinned` : faux par défaut ; exige
+    `q34_batch_q3`, sinon refus `chain_q34_lanes_pinned_requires_batch_q3`
+    (revue ci-dessous ; la première version exigeait `q34_gpu_q3`). Avec
+    `q34_gpu_q3` sans GPU, c'est le refus de l'appareil
+    (`chain_q34_gpu_unavailable`), jamais un repli pageable ni hôte.
+  - `Q34BatchTimes` publie `lanes_upload_ms`, `lanes_download_ms`,
+    `lanes_download_copy_ms`, `lanes_host_alloc_ms`, `lanes_pinned`,
+    `lanes_pinned_allocations`, `lanes_pinned_bytes`, et depuis la revue
+    `gpu_stage_b_ms`, `lanes_pinned_reserve_ms` et
+    `lanes_pinned_reserve_records`.
+- **Portes du build CPU.**
+  - `mhgp9_gpu_record_pool` : bassin sur une mémoire de test qui compte et
+    sait échouer. Elle juge la croissance à la demande, l'exclusivité des
+    baux, le retour à la destruction, huit baux simultanés sur 64 tours, la
+    sûreté aux exceptions (croissance, création, réserve) et le chemin du
+    jumeau hôte octet pour octet. Quatre mutants tués : bloc loué pris pour
+    libre, bail qui ne rend pas son bloc, bloc gardé pris après un échec,
+    copie courte d'un enregistrement.
+  - `mhgp9_gpu_lanes_port` : chaque comparaison des tâches ajoute un passage
+    du jumeau hôte par le bail, comparé octet pour octet à la référence à
+    une tâche, y compris les ardoises réduites (mises en attente, arène). Sous
+    `--device` (G4), l'appel de l'appareil épinglé est comparé octet pour
+    octet, puis le témoin pageable ; la ligne `lanes_device_pinned` publie
+    les deux fenêtres.
+  - `mhgp9_chain_batch_q3` : 14 refus au lieu de 12, dont le levier sans
+    `q34_batch_q3` et le levier avec `q34_gpu_q3` sans GPU. Sur un
+    appareil, les condensés de tour, de catalogue et de présentations sont
+    égaux au témoin pageable, et l'étape B publie sa réservation. Le chemin
+    CPU sans le levier publie des fenêtres, un bassin et une étape B nuls.
+- **Ablation hôte locale** (`bench/lanes_download_ablation.cpp`, sans GPU,
+  25 septembre 2026, charge moyenne de 42 à 60 sur 8 cœurs partagés) : cinq
+  paires entrelacées dans le même binaire, avec le nombre d'enregistrements
+  de 08/000000.
+  - Chemin pageable : vecteur neuf, copie `memcpy` (la part hôte du transit
+    du pilote), libération.
+  - Chemin résident : bail d'un bloc déjà touché, même copie.
+  - Compteur indépendant de la charge : 26 556 fautes de page mineures par
+    appel pageable à K5 et 144 712 à K10 (une par page de 4 Kio de 108,8 et
+    592,7 Mo), 0 sur le bloc résident.
+  - Murs médians, très gonflés par la charge : copie 309 contre 100 ms à K5
+    (×3,1), 1 928 contre 703 ms à K10 (×2,7), plus 44 et 309 ms de
+    libération pageable, 0 pour le bail. Les premiers contacts dominent donc
+    la part hôte du témoin. Sur le chemin épinglé réel, la DMA écrit le bloc
+    sans copie hôte. Seul l'ordre de grandeur relatif est lisible ici.
+- **Chaîne locale** (même charge), bras CPU par lots (`q34_batch_filter`,
+  `q34_batch_certificates`, `q34_batch_q3`, `q34_batch_q4`), W8, trois
+  paires entrelacées base `273c33f7` contre ce commit : les condensés
+  épinglés de tour, de catalogue et de présentations sont reproduits
+  (K5 `67450c64611075b1` / `5ad1fe09354411ba` / `a2aa4b20ca392dfe` ; K10,
+  une fois, `ac108f7f71096c3f` / `a6e959d227f3dafa` / `43ff64fb1c3846d9`)
+  avec 849 780 et 4 630 767 enregistrements. La conversion vaut 157 à
+  217 ms (base) et 143 à 192 ms (nouveau) : aucun écart lisible sous cette
+  charge. (Le levier sur le CPU : voir la revue ci-dessous.)
+- **Non vérifié avant G4** : le débit de la DMA vers le bloc épinglé, le coût
+  de `cudaHostAlloc` (256 Mo à K5, 1,28 Go à K10 ; session ou étape B, qui
+  tient le mutex résident : un appel des voies qui arrive avant la fin
+  l'attend), une contention possible sur le verrou du pilote avec les
+  appels du filtre et des certificats qui tournent pendant l'étape B,
+  l'effet sur `lanes_ms` et sur la chaîne, et l'absence de synchronisation
+  implicite gênante. `cudaFreeHost`, lors d'une croissance, synchronise
+  l'appareil. Seul un reçu G4 avec paires entrelacées levier coupé / levier
+  actif (`download_copy_ms`, `host_alloc_ms`, `gpu_stage_b_ms`,
+  `lanes_pinned_reserve_ms`) peut créditer un gain.
+
+#### Revue de v28 (26 septembre 2026)
+
+Deux constats, corrigés.
+
+- **Chemin de la chaîne sans porte CPU.** Le levier exigeait `q34_gpu_q3` :
+  sans GPU, le bail, la conversion par `record_data()`/`record_total()` et
+  le contrôle `chain_q34_lanes_pinned_path_differs` ne tournaient jamais, et
+  les quatre mutants visaient le bassin, pas la chaîne. Le levier exige
+  désormais `q34_batch_q3` : sur le CPU, le jumeau hôte loue son bassin
+  résident en mémoire ordinaire (une copie de plus : c'est le témoin du
+  chemin, pas un gain CPU).
+  - Porte `mhgp9_chain_batch_q3_pinned` (`--pinned`) : trois familles et la
+    fixture cosphérique, K2, K3, K5, K10, un et quatre fils, voies q3 + q4
+    et ardoise réduite (traîne). Elle exige les condensés de tour, de
+    catalogue et de présentations du témoin pageable, les mêmes
+    enregistrements (émissions q3 + q4) et le même registre, les mêmes
+    condensés à un et quatre fils, et qu'à quatre fils le bloc rendu par
+    l'appel à un fil suffise (aucune allocation). Planchers :
+    enregistrements, blocs réutilisés, croissances, traîne.
+  - Mutant `MHGP9_CHAIN_MUTANT_PINNED_READS_VECTOR` (la conversion lit le
+    vecteur vide au lieu du bail) : tué dès `uniform/K2/W1`, le générateur
+    refusant une tranche hors des enregistrements.
+  - Reste à lancer sur G4 avant tout crédit : `mhgp9_chain_batch_q3` (bloc
+    de l'appareil) et `mhgp9_gpu_lanes_port --device`.
+- **Réservation de l'étape B non chronométrée.** `warm_up_lanes` garde la
+  réservation épinglée sous la même prise du mutex résident que les
+  ardoises (aucun appel des voies ne s'intercale) et la chronomètre seule.
+  `Q34BatchTimes` publie `gpu_stage_b_ms` (mur de l'étape B),
+  `lanes_pinned_reserve_ms` (la réservation seule) et
+  `lanes_pinned_reserve_records`, nuls si l'étape B n'a pas tourné ou
+  n'était pas finie à la publication (elle n'est jamais attendue). La
+  taille dépend de l'ordre (`pinned_records_for_order`). La sonde doit
+  ouvrir sa session avec `open_device_session(capacité, événements,
+  levier ? pinned_records_for_order(K) : 0)` : la réservation sort alors de
+  la chaîne, l'étape B trouve le bloc prêt, et `pinned_ms` / `pinned_bytes`
+  de la session la publient.
+- **Mesures locales, indicatives** (même binaire `853696d7`, un processus
+  par exécution, bras CPU par lots avec voies q3 + q4, 08/000000 sans sol,
+  W8, charge moyenne de 24 à 37 sur 8 cœurs partagés) : trois paires
+  entrelacées levier coupé / actif à K5, une paire à K10.
+  - Même objet sur les deux bras : tour `67450c64611075b1`, catalogue
+    `5ad1fe09354411ba`, présentations `a2aa4b20ca392dfe` à K5 ;
+    `ac108f7f71096c3f`, `a6e959d227f3dafa`, `43ff64fb1c3846d9` à K10 ;
+    mêmes `tower_work` et mêmes enregistrements (849 780 et 4 630 767).
+  - Compteurs sous le levier : une allocation du bassin hôte par processus,
+    requête plus un huitième (122 368 256 o à K5, 666 830 336 o à K10) ;
+    champs de l'étape B nuls (pas d'appareil).
+  - Murs : conversion 99, 99 et 73 ms (coupé) contre 83, 75 et 61 ms
+    (actif) à K5, 248 contre 195 ms à K10 ; mur de la chaîne dominé par le
+    bruit (59 à 90 s). Pic de RSS plus haut sous le levier (+0,1 Go à K5,
+    +0,7 Go à K10) : le jumeau garde le vecteur et le bail pendant sa
+    copie. Aucun gain CPU n'est revendiqué ; le levier ne vise que
+    l'appareil.
+
 ## Voie GPU S1 : `src/gpu/` (espace `mhgp9::gpu`, code neuf)
 
 23 septembre 2026. Première brique GPU de la v9, pour une expérience de

@@ -44,7 +44,12 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
 }
 
 std::string warm_up() { return "built without MHGP9_ENABLE_CUDA"; }
-std::string warm_up_lanes(u32, u32, u32) { return "built without MHGP9_ENABLE_CUDA"; }
-DeviceSession open_device_session(u32, u32) { return {"built without MHGP9_ENABLE_CUDA", 0, 0}; }
+std::string warm_up_lanes(u32, u32, u32, std::size_t, double*) { return "built without MHGP9_ENABLE_CUDA"; }
+std::string warm_up_pinned_records(std::size_t) { return "built without MHGP9_ENABLE_CUDA"; }
+DeviceSession open_device_session(u32, u32, std::size_t) {
+  DeviceSession out;
+  out.error = "built without MHGP9_ENABLE_CUDA";
+  return out;
+}
 
 }  // namespace mhgp9::gpu

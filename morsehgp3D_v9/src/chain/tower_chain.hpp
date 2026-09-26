@@ -189,6 +189,19 @@ struct ChainOptions {
   // (boules dans l'ordre des groupes, statistiques, refus, erreur de plus
   // petite cle) ; exige q2_during_device ; desactive par defaut.
   bool q2_early_census = false;
+  // v28 : les enregistrements des voies reviennent dans un bloc RESIDENT
+  // d'un bassin (gpu/record_pool.hpp), loue par l'appel et lu sur place par
+  // la conversion de la chaine (record_data/record_total) ; sans le levier,
+  // le vecteur pageable temoin. Sur l'appareil (q34_gpu_q3) : memoire hote
+  // epinglee (cudaHostAlloc) reservee par l'etape B de la preparation de
+  // l'appareil (gpu::pinned_records_for_order(kmax) enregistrements, ou
+  // deja par open_device_session), agrandie a la demande, jamais retrecie,
+  // sans copie hote supplementaire. Sur le CPU (jumeau hote) : le bassin
+  // resident du jumeau en memoire ordinaire, une copie de plus : le temoin
+  // du chemin de la chaine, execute par les portes CPU, pas un gain.
+  // Memes octets, meme objet ; exige q34_batch_q3 (refus explicite sinon) ;
+  // desactive par defaut.
+  bool q34_lanes_pinned = false;
 };
 
 // Temps de mur en millisecondes, CPU du processus en secondes.
@@ -331,6 +344,15 @@ struct Q34BatchTimes {
   // residentes) sur son fil : son mur, et l'attente du premier appel qui la
   // rejoint (0 si elle etait finie).
   double gpu_prepare_ms = 0, gpu_prepare_wait_ms = 0;
+  // v28 (revue) : l'etape B de la preparation (ardoises residentes des
+  // voies, puis, sous q34_lanes_pinned, le bassin epingle, sous la meme
+  // prise du verrou resident) : son mur, le mur de la reservation epinglee
+  // seule et le nombre d'enregistrements reserves
+  // (gpu::pinned_records_for_order(kmax)) ; zero si l'etape B n'a pas
+  // tourne (CPU, levier des voies coupe) ou n'etait pas finie a la
+  // publication (elle n'est jamais attendue).
+  double gpu_stage_b_ms = 0, lanes_pinned_reserve_ms = 0;
+  std::uint64_t lanes_pinned_reserve_records = 0;
   std::uint64_t lanes_asked = 0, lanes_decided = 0, lanes_deferred = 0, lanes_records = 0, lanes_judged = 0;
   std::uint32_t lanes_warps = 0;
   // v23 (S4b tasks, lanes plan step 2): the (edge, seed range) tasks of the
@@ -345,6 +367,24 @@ struct Q34BatchTimes {
   // consumed, tasks rerun unfused.
   std::uint64_t lanes_fused_seeds = 0, lanes_fused_chunks = 0, lanes_fused_q3_chunks = 0,
                 lanes_fused_census_chunks = 0, lanes_fused_fallbacks = 0;
+  // v28 (download split, levier q34_lanes_pinned) : les fenetres de l'appel
+  // des voies sur l'appareil (zero sur CPU ; definitions exactes dans
+  // gpu/filter_runner.hpp, LanesOutput). lanes_transfer_ms reste
+  // upload + download. lanes_upload_ms : reservations residentes et copies
+  // vers l'appareil ; lanes_download_ms : TOUTE la fenetre apres les noyaux
+  // (petites copies, allocation hote, destination, copie des
+  // enregistrements) ; lanes_download_copy_ms : la copie des enregistrements
+  // seule, par evenements ; lanes_host_alloc_ms : le mur hote de la
+  // preparation de leur destination (vecteur pageable, ou bail d'un bloc
+  // epingle avec sa croissance eventuelle). lanes_pinned : les
+  // enregistrements ont ete lus dans un bloc loue du bassin (epingle sur
+  // l'appareil ; sur CPU, le bassin du jumeau hote en memoire ordinaire) ;
+  // lanes_pinned_allocations : allocations du bassin pendant l'appel (0 si
+  // le bloc residant suffisait) ; lanes_pinned_bytes : capacite du bassin
+  // apres l'appel.
+  double lanes_upload_ms = 0, lanes_download_ms = 0, lanes_download_copy_ms = 0, lanes_host_alloc_ms = 0;
+  bool lanes_pinned = false;
+  std::uint64_t lanes_pinned_allocations = 0, lanes_pinned_bytes = 0;
 };
 
 struct OrderSummary {

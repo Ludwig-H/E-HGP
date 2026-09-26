@@ -29,6 +29,20 @@ void check(cudaError_t code, const char* expression) {
 }
 #define MHGP9_CUDA(expression) check((expression), #expression)
 
+// v28: pinned host memory of the lanes records pool (gpu/record_pool.hpp).
+// cudaHostAllocDefault, never write-combined: the chain reads the records
+// on the host. A failure is a capacity refusal (CudaFailure, the pool left
+// unchanged).
+class PinnedMemory final : public BlockMemory {
+ public:
+  void* allocate(std::size_t bytes) override {
+    void* pointer = nullptr;
+    MHGP9_CUDA(cudaHostAlloc(&pointer, bytes, cudaHostAllocDefault));
+    return pointer;
+  }
+  void release(void* pointer) noexcept override { cudaFreeHost(pointer); }
+};
+
 template <class T>
 class DeviceBuffer {
  public:
@@ -1053,8 +1067,15 @@ namespace {
 // (97 887 MiB on G4: about 855 M sites, 2.25 times the largest call measured,
 // 08/000200 K10 with 379 M). Per edge about 470 bytes (plan, prologue
 // ledger, task slot, scans, answer), per task 32 bytes.
+//
+// v28: the pinned records pool (LanesInput::pinned_records) is resident
+// too: acquired or grown only under mu (the batch call, warm_up_lanes,
+// warm_up_pinned_records); a lease is returned from any thread by the
+// pool's own mutex, and a leased block is never reused, grown or freed.
 struct LanesResident {
   std::mutex mu;
+  PinnedMemory pinned_memory;
+  RecordPool pinned{pinned_memory};
   bool probed = false;
   std::string name;
   int sms = 0, plan_blocks = 0, task_blocks = 0, gather_blocks = 0;
@@ -1212,6 +1233,7 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     out.available = true;
     MHGP9_CUDA(cudaFree(nullptr));
     const std::size_t edges = input.edge_count;
+    out.pinned_records = input.pinned_records;  // v28: the path's echo (no record: an empty lease)
     if (edges == 0) return out;  // no kernel: warps stays 0 (the edge arrays may be null)
     const u32 capacity = input.capacity == 0 ? default_lanes_capacity : input.capacity;
     const u32 record_capacity = input.record_capacity == 0 ? default_record_capacity : input.record_capacity;
@@ -1253,7 +1275,7 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
       throw CudaFailure{"no lanes slab fits in an eighth of the free device memory", true};
     out.capacity = capacity;
     out.record_capacity = record_capacity;
-    EventSet<6> e;
+    EventSet<7> e;
     e.create();
     out.setup_ms = host_ms_since(entry);
     MHGP9_CUDA(cudaEventRecord(e[0]));
@@ -1374,11 +1396,29 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
       throw CudaFailure{"lanes staging overflow with gathered records", false};
     const std::size_t used = static_cast<std::size_t>(counts[4]);
     if (used > arena_capacity) throw CudaFailure{"lanes decided records exceed the arena", false};
-    out.records.resize(used);  // written whole by the copy below (no zero fill)
-    if (used != 0)
-      MHGP9_CUDA(cudaMemcpy(out.records.data(), res.arena.get(), used * sizeof(LaneRecord), cudaMemcpyDeviceToHost));
+    // v28: the records' destination (host wall, host_alloc_ms), then their
+    // copy alone between e5 and e6 (download_copy_ms): a pageable vector
+    // (default-initialised, written whole by the copy), or a leased block
+    // of the resident pinned pool (a growth is a cudaHostAlloc, counted).
+    const auto alloc_start = std::chrono::steady_clock::now();
+    LaneRecord* destination = nullptr;
+    if (input.pinned_records) {
+      const std::uint64_t allocations = res.pinned.stats().allocations;
+      out.pinned = res.pinned.acquire(used);
+      destination = out.pinned.data();
+      const auto stats = res.pinned.stats();
+      out.pinned_allocations = stats.allocations - allocations;
+      out.pinned_bytes = stats.bytes;
+    } else {
+      out.records.resize(used);
+      destination = out.records.data();
+    }
+    out.host_alloc_ms = host_ms_since(alloc_start);
     MHGP9_CUDA(cudaEventRecord(e[5]));
-    MHGP9_CUDA(cudaEventSynchronize(e[5]));
+    if (used != 0)
+      MHGP9_CUDA(cudaMemcpy(destination, res.arena.get(), used * sizeof(LaneRecord), cudaMemcpyDeviceToHost));
+    MHGP9_CUDA(cudaEventRecord(e[6]));
+    MHGP9_CUDA(cudaEventSynchronize(e[6]));
     const auto finish = std::chrono::steady_clock::now();
     for (const auto& w : works) add_q3(out.work, w);
     for (const auto& w : works4) add_q4(out.work4, w);
@@ -1395,8 +1435,9 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     out.task_ms = elapsed(e[2], e[3]);
     out.compact_ms = elapsed(e[3], e[4]);
     out.kernel_ms = elapsed(e[1], e[4]);
-    out.download_ms = elapsed(e[4], e[5]);
-    out.total_ms = elapsed(e[0], e[5]);
+    out.download_ms = elapsed(e[4], e[6]);
+    out.download_copy_ms = elapsed(e[5], e[6]);
+    out.total_ms = elapsed(e[0], e[6]);
     out.finish_ms = host_ms_since(finish);
   } catch (const CudaFailure& failure) {
     return refused(out, failure.what, failure.capacity ? BatchError::capacity : BatchError::device_fault);
@@ -1410,7 +1451,9 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
   return out;
 }
 
-std::string warm_up_lanes(u32 capacity, u32 record_capacity, u32 event_capacity) {
+std::string warm_up_lanes(u32 capacity, u32 record_capacity, u32 event_capacity, std::size_t pinned_records,
+                          double* pinned_ms) {
+  if (pinned_ms != nullptr) *pinned_ms = 0;
   try {
     MHGP9_CUDA(cudaSetDevice(0));
     auto& res = lanes_resident();
@@ -1426,9 +1469,30 @@ std::string warm_up_lanes(u32 capacity, u32 record_capacity, u32 event_capacity)
     free_bytes += res.device_bytes();
     const std::size_t pw = res.plan_warps(free_bytes, cap), tw = res.task_warps(free_bytes, rec, evt);
     if (pw != 0 && tw != 0) res.reserve_slabs(pw, tw, cap, rec, evt, res.default_cover_capacity());
+    if (pinned_records != 0) {  // v28: under the same hold of res.mu, timed alone
+      const auto pinned = std::chrono::steady_clock::now();
+      res.pinned.reserve(pinned_records);
+      if (pinned_ms != nullptr) *pinned_ms = host_ms_since(pinned);
+    }
     return {};
   } catch (const CudaFailure& failure) {
     return failure.what;  // the batch call classifies any error again
+  } catch (const std::bad_alloc& failure) {
+    return std::string("host: ") + failure.what();
+  }
+}
+
+std::string warm_up_pinned_records(std::size_t records) {
+  try {
+    MHGP9_CUDA(cudaSetDevice(0));
+    auto& res = lanes_resident();
+    std::lock_guard<std::mutex> lock(res.mu);
+    res.pinned.reserve(records);
+    return {};
+  } catch (const CudaFailure& failure) {
+    return failure.what;  // the batch call classifies any error again
+  } catch (const std::bad_alloc& failure) {
+    return std::string("host: ") + failure.what();
   }
 }
 
@@ -1440,7 +1504,7 @@ std::string warm_up() {
   return {};
 }
 
-DeviceSession open_device_session(u32 lanes_capacity, u32 lanes_events) {
+DeviceSession open_device_session(u32 lanes_capacity, u32 lanes_events, std::size_t pinned_records) {
   DeviceSession out;
   const auto start = std::chrono::steady_clock::now();
   out.error = warm_up();
@@ -1449,6 +1513,12 @@ DeviceSession open_device_session(u32 lanes_capacity, u32 lanes_events) {
   if (!out.error.empty()) return out;
   out.error = warm_up_lanes(lanes_capacity, 0, lanes_events);
   out.reserve_ms = host_ms_since(opened);
+  if (!out.error.empty() || pinned_records == 0) return out;
+  // v28: the pinned records pool, timed apart.
+  const auto pinned = std::chrono::steady_clock::now();
+  out.error = warm_up_pinned_records(pinned_records);
+  out.pinned_ms = host_ms_since(pinned);
+  out.pinned_bytes = lanes_resident().pinned.stats().bytes;
   return out;
 }
 
