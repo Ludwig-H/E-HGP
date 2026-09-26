@@ -46,9 +46,9 @@ HELPER = 'gcp-migration/full_probe_worker_v7.py'
 HELPER_SHA = 'da967163bdb7247bc6aad4df0c294cda1071076a0127cd5bd9f59bc0e4788439'
 PLAN = 'data/session_plan.json'
 PROVENANCE = 'data/provenance.json'
-PLAN_SCHEMA = 'mhgp9_tower_plan_v6'
+PLAN_SCHEMA = 'mhgp9_tower_plan_v7'
 PROVENANCE_SCHEMA = 'mhgp9_tower_provenance_v1'
-PROBE_SCHEMA = 'mhgp9_tower_probe_v29'
+PROBE_SCHEMA = 'mhgp9_tower_probe_v30'
 PROTOCOL_NAMES = frozenset('gcp-migration/tower_' + name + '_v9.py' for name in
                            ('worker', 'session', 'snapshot', 'selftest'))
 SOURCE_ROOT = 'morsehgp3D_v9'
@@ -61,6 +61,10 @@ SOURCE_PREFIXES = tuple(SOURCE_ROOT + '/' + name + '/' for name in ('cmake', 'sr
 REQUIRED_SOURCES = frozenset({CMAKE_LISTS, SOURCE_ROOT + '/cmake/run_expect.cmake', PROBE_SOURCE,
                               CHAIN_SOURCE, SOURCE_ROOT + '/src/chain/tower_chain.hpp'})
 PROBE_TARGET = 'mhgp9_tower_probe'
+PAYLOAD_GATE_TARGET = 'mhgp9_gpu_interior_payload_gate'
+PAYLOAD_GATE_SOURCE = SOURCE_ROOT + '/tests/gpu/interior_payload_gate.cpp'
+PAYLOAD_GATE_COUNTS = ('calls', 'q3', 'q4', 'ids', 'extra_shell', 'deferred', 'permuted', 'fused_fallbacks',
+                       'device_calls', 'direct_chunks', 'max_depth')
 INPUT_ROOT = 'morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6'
 RAW_INPUT_ROOT = 'morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i'
 # Trames entieres (jamais un prefixe). fnv = empreinte FNV-1a 64 imprimee par
@@ -110,7 +114,10 @@ OUTCOMES = ('complete_relative', 'explicit_refusal', 'killed_case_cap', 'killed_
 # session et le bassin epingle payes une fois), regime d'un flux.
 CASE_KEYS = frozenset({'scene', 'file', 'n', 'k', 's', 'workers', 'static_threads', 'levers', 'repeat', 'frames'})
 FRAME_LISTS = ('chain_total_ms', 'tower_ms', 'q34_ms', 'census_ms', 'lanes_transfer_ms')
-FRAMES_KEYS = frozenset({'count', 'same_object'}) | frozenset(FRAME_LISTS)
+FRAMES_KEYS = frozenset({'count', 'same_object', 'results'}) | frozenset(FRAME_LISTS)
+FRAME_COUNTS = ('q2_presentations', 'q3_presentations', 'q4_presentations', 'unique_keys', 'balls', 'extra_shell_balls')
+FRAME_RESULT_KEYS = frozenset({'status', 'reason', 'K_effective', 'tower_digest', 'catalogue_digest',
+                               'presentation_digest', 'counts', 'orders'})
 HOST_KEYS = frozenset({'thp'})
 LEVER_NAMES = ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_witness_cache', 'q34_dead_core',
                'tower_meb_proposal', 'q34_jobs_by_mass', 'q34_fine_jobs', 'tower_overlap_static',
@@ -130,7 +137,9 @@ LEVER_NAMES = ('atlas_saturate_deep', 'q3_leaf_census', 'q34_dead_lanes', 'q34_w
                # v28 : catalogue scelle (R-29 de C), recensement des cles q2
                # cote q2 (exige q2_during_device), enregistrements des voies
                # dans un bassin epingle (exige q34_batch_q3). Meme objet.
-               'tower_sealed_catalogue', 'q2_early_census', 'q34_lanes_pinned')
+               'tower_sealed_catalogue', 'q2_early_census', 'q34_lanes_pinned',
+               # v30: exact q3 interior IDs carried to catalogue import.
+               'q3_interior_payload')
 # v17 (S2) : filtre q3/q4 par lots, puis sur GPU. Le build G4 active CUDA
 # (nvcc et nvidia-smi existants, aucune installation) ; l'appareil attendu :
 DEVICE_NAME = 'NVIDIA RTX PRO 6000 Blackwell Server Edition'
@@ -282,7 +291,7 @@ CATALOGUE_LISTS = dict(by_qmin=3, by_shell=17, regular_supports=3)
 CATALOGUE_KEYS = frozenset(('q2_presentations q3_presentations q4_presentations unique_keys balls '
                             'extra_shell_balls shell_over_12 max_shell max_interior census_nodes census_leaf_tests '
                             'bytes by_qmin by_shell euler regular_supports early_census_keys '
-                            'early_census_extra_shell_balls').split())
+                            'early_census_extra_shell_balls payload_keys payload_ids payload_fallback_keys').split())
 # Invariant d'Euler du catalogue (v13) : condition NECESSAIRE de completude.
 EULER_KEYS = frozenset({'status', 'checkable_max_k', 'by_k'})
 EULER_STATUSES = ('holds', 'fails', 'not_checkable')
@@ -409,7 +418,8 @@ def _levers(value):
             (value['q34_gpu_filter'] or value['q34_gpu_certificates'] or value['q34_gpu_q3'] or
              not value['device_session']) and
             (value['q2_during_device'] or not value['q2_early_census']) and
-            (value['q34_batch_q3'] or not value['q34_lanes_pinned']))
+            (value['q34_batch_q3'] or not value['q34_lanes_pinned']) and
+            (value['q34_batch_q3'] or not value['q3_interior_payload']))
 
 
 def uses_device(levers):
@@ -425,11 +435,16 @@ def engine_levers(levers):
     return dict(levers, q34_batch_filter=False, q34_gpu_filter=False, q34_batch_certificates=False,
                 q34_gpu_certificates=False, q34_batch_q3=False, q34_gpu_q3=False, q34_batch_q4=False,
                 q2_during_device=False, q34_lanes_fused=False, device_session=False, q2_early_census=False,
-                q34_lanes_pinned=False)
+                q34_lanes_pinned=False, q3_interior_payload=False)
 
 
 def lever_arguments(case):
     return ['--lever=' + name + '=' + ('1' if case['levers'][name] else '0') for name in LEVER_NAMES]
+
+
+def payload_case_identity(case):
+    return tuple(case[name] for name in ('scene', 'k', 's', 'workers', 'static_threads', 'frames')) + tuple(
+        case['levers'][name] for name in LEVER_NAMES if name != 'q3_interior_payload')
 
 
 def validate_plan(plan, manifest):
@@ -457,6 +472,9 @@ def validate_plan(plan, manifest):
     need(all(plan['cases'][0]['levers'][name] for name in LEVER_NAMES
              if any(c['levers'][name] for c in plan['cases'])),
          'the first case sets the preflight levers and must pin ON every lever the plan enables')
+    # Unchanged v29 developer fix: every real case needs its frame/K pin.
+    need(not PINNED_DIGESTS or all((case['scene'], case['k']) in PINNED_DIGESTS for case in plan['cases']),
+         'a plan case without a pinned digest')
     # v17: every (frame, K, s) run on the batch path has an engine-path twin,
     # so that the cross-case object comparison judges the batch/GPU tower.
     # v18: with the same certificate levers, so that its certificate work is
@@ -465,6 +483,9 @@ def validate_plan(plan, manifest):
     engine = {twin(c) for c in plan['cases'] if not c['levers']['q34_batch_filter']}
     need(all(twin(c) in engine for c in plan['cases'] if c['levers']['q34_batch_filter']),
          'a batch/GPU case without an engine-path twin on the same frame, K, s and certificate levers')
+    payload_off = {payload_case_identity(c) for c in plan['cases'] if not c['levers']['q3_interior_payload']}
+    need(all(payload_case_identity(c) in payload_off for c in plan['cases'] if c['levers']['q3_interior_payload']),
+         'a payload case without an otherwise identical OFF twin')
     return plan['cases']
 
 
@@ -618,6 +639,49 @@ def _catalogue(value):
         elif not _count(item):
             return False
     return True
+
+
+def complete_reason(levers):
+    if levers['q3_interior_payload']:
+        return ('complete_relative_to_cross_checked_catalogue_sealed_in_process_payload'
+                if levers['tower_sealed_catalogue'] else 'complete_relative_to_cross_checked_catalogue_payload')
+    return ('complete_relative_to_cross_checked_catalogue_sealed_in_process_census'
+            if levers['tower_sealed_catalogue'] else 'complete_relative_to_cross_checked_catalogue')
+
+
+def frame_identity(value):
+    """The first frame's deterministic evidence, independently read from its body."""
+    return dict(status=value['status'], reason=value['reason'], K_effective=value['options']['K_effective'],
+                tower_digest=value['tower_digest'], catalogue_digest=value['catalogue_digest'],
+                presentation_digest=value['presentation_digest'],
+                counts={name: value['catalogue'][name] for name in FRAME_COUNTS}, orders=value['orders'])
+
+
+def validate_frames(value, case):
+    frames = value['frames']
+    need(type(frames['results']) is list and len(frames['results']) == case['frames'], 'frame evidence count')
+    for row in frames['results']:
+        need(type(row) is dict and set(row) == FRAME_RESULT_KEYS and row['status'] in PROBE_STATUSES and
+             type(row['reason']) is str and _integer(row['K_effective'], 0, case['k']) and
+             all(type(row[name]) is str and re.fullmatch('[0-9a-f]{16}', row[name])
+                 for name in ('tower_digest', 'catalogue_digest', 'presentation_digest')) and
+             _counters(row['counts'], frozenset(FRAME_COUNTS)) and type(row['orders']) is list and
+             all(_counters(order, ORDER_KEYS) for order in row['orders']), 'frame evidence schema')
+        if row['status'] == 'complete_relative':
+            need(row['K_effective'] == min(case['k'], case['n']) and
+                 [order['K'] for order in row['orders']] == list(range(1, row['K_effective'] + 1)) and
+                 row['reason'] == complete_reason(case['levers']) and
+                 row['counts']['balls'] == row['counts']['unique_keys'] and
+                 row['counts']['extra_shell_balls'] <= row['counts']['balls'] and
+                 sum(row['counts'][name] for name in FRAME_COUNTS[:3]) >= row['counts']['unique_keys'],
+                 'complete frame evidence incoherent')
+    expected = frame_identity(value)
+    need(frames['results'][0] == expected, 'first frame evidence differs from published body')
+    same = all(row == expected for row in frames['results'])
+    need(frames['same_object'] is same, 'frame same_object disagrees with per-frame evidence')
+    if value['status'] == 'complete_relative':
+        need(same and all(row['status'] == 'complete_relative' for row in frames['results']),
+             'later frame failed or changed its object')
 
 
 def validate_euler(value, case):
@@ -926,7 +990,8 @@ def validate_tower_detail(value, case):
     sealed = levers['tower_sealed_catalogue']
     need(detail['sealed_catalogues'] == (1 if sealed else 0) and
          detail['seal_sampled_balls'] == (-(-balls // 64) if sealed else 0) and
-         (detail['declared_support_checks'] <= detail['seal_sampled_balls'] if sealed else
+         (detail['seal_sampled_balls'] - value['catalogue']['extra_shell_balls'] <=
+          detail['declared_support_checks'] <= detail['seal_sampled_balls'] if sealed else
           detail['declared_support_checks'] == regular), 'tower sealed catalogue')
 
 
@@ -1008,6 +1073,13 @@ def validate_ledger_identities(value, levers):
          (catalogue['early_census_keys'] == 0 or
           (value['times_ms']['tower_index'] == 0 and value['times_ms']['q2_census'] > 0)),
          'catalogue regular supports and q2 early census')
+    payload_keys, payload_ids, payload_fallback = (catalogue[name] for name in
+                                                   ('payload_keys', 'payload_ids', 'payload_fallback_keys'))
+    need((payload_keys + payload_fallback == catalogue['by_qmin'][1] and
+          payload_keys <= catalogue['regular_supports'][1] and
+          payload_ids <= max(0, value['options']['K_effective'] - 2) * payload_keys)
+         if levers['q3_interior_payload'] else payload_keys == payload_ids == payload_fallback == 0,
+         'catalogue q3 payload accounting')
     # La chaine refuse toute coquille de plus de 12 sites avant complete_relative.
     need(catalogue['shell_over_12'] == 0 and catalogue['max_shell'] <= 12 and
          all(count == 0 for count in catalogue['by_shell'][13:]), 'complete catalogue with a shell above 12')
@@ -1122,6 +1194,8 @@ def validate_preflight_work(value, levers):
          # (no fallback), the seal and the pinned pool when they are pinned on.
          (not levers['q2_early_census'] or
           value['catalogue']['early_census_keys'] == value['catalogue']['by_qmin'][0] > 0) and
+         (not levers['q3_interior_payload'] or
+          (value['catalogue']['payload_keys'] > 0 and value['catalogue']['payload_ids'] > 0)) and
          (not levers['tower_sealed_catalogue'] or value['tower_detail']['sealed_catalogues'] == 1) and
          (not levers['q34_lanes_pinned'] or value['q34_batch']['lanes_pinned'] is True),
          'preflight did not exercise an active lever')
@@ -1208,7 +1282,8 @@ def validate_probe(value, case, exit_code, inputs=None, capacity=0, judge=False,
     # v29 : les trames de ce processus (la premiere est le corps publie) et
     # le mode des pages de l'hote. Toutes rendent le meme objet.
     frames, host = value['frames'], value['host']
-    need(type(frames) is dict and set(frames) == FRAMES_KEYS and frames['count'] == case['frames'] and
+    need(type(frames) is dict and set(frames) == FRAMES_KEYS and type(frames['count']) is int and
+         frames['count'] == case['frames'] and
          type(frames['same_object']) is bool and
          all(type(frames[key]) is list and len(frames[key]) == case['frames'] and
              all(_number(x) for x in frames[key]) for key in FRAME_LISTS) and
@@ -1218,6 +1293,7 @@ def validate_probe(value, case, exit_code, inputs=None, capacity=0, judge=False,
          type(value['catalogue_digest']) is str and re.fullmatch('[0-9a-f]{16}', value['catalogue_digest']) and
          type(value['presentation_digest']) is str and re.fullmatch('[0-9a-f]{16}', value['presentation_digest']) and
          type(value['peak_rss_kb']) is int and value['peak_rss_kb'] >= -1, 'probe digest/RSS')
+    validate_frames(value, case)
     # v26 : la session d'appareil (contexte, ardoises des voies) est ouverte
     # par le processus avant l'horloge de la chaine, sous le seul levier
     # device_session ; son cout est publie a part, jamais dans chain_total.
@@ -1238,6 +1314,7 @@ def validate_probe(value, case, exit_code, inputs=None, capacity=0, judge=False,
         need(exit_code == 0 and options['K_effective'] == effective and
              [order['K'] for order in orders] == list(range(1, effective + 1)), 'complete tower: code 0, orders 1..K')
         validate_ledger_identities(value, case['levers'])
+        need(value['reason'] == complete_reason(case['levers']), 'complete reason differs from seal/payload levers')
         # v29 : le corps publie est la premiere trame du processus ; toutes
         # rendent le meme objet, et la premiere vaut le chrono publie.
         need(frames['same_object'] is True and
@@ -1309,6 +1386,19 @@ def certificate_work(value):
     return {name: value['ledger'][name] for name in CERTIFICATE_WORK_KEYS}
 
 
+def payload_pair_equal(on, off, require_reduced_census=True):
+    """Same geometry/object; only the consumer census work may decrease.
+
+    Judge-enabled preflights may re-census imported packets independently,
+    so their judged counters are not a claim of reduced production work.
+    """
+    return (logical_result(on) == logical_result(off) and on['generator'] == off['generator'] and
+            on['ledger'] == off['ledger'] and
+            all((on['catalogue'][name] <= off['catalogue'][name] if require_reduced_census else
+                 on['catalogue'][name] == off['catalogue'][name])
+                for name in ('census_nodes', 'census_leaf_tests')))
+
+
 def compare_cases(cases, outcomes, values):
     groups, out = {}, []
     for index, (case, entry) in enumerate(zip(cases, outcomes)):
@@ -1321,9 +1411,34 @@ def compare_cases(cases, outcomes, values):
             levers = [cases[i]['levers'] for i in (reference, index)]
             if all(levers[0][name] == levers[1][name] for name in ('q34_dead_lanes', 'q34_dead_core')):
                 same = same and certificate_work(values[reference]) == certificate_work(values[index])
+            if (levers[0]['q3_interior_payload'] != levers[1]['q3_interior_payload'] and
+                    all(levers[0][name] == levers[1][name] for name in LEVER_NAMES
+                        if name != 'q3_interior_payload')):
+                on, off = ((reference, index) if levers[0]['q3_interior_payload'] else (index, reference))
+                same = same and payload_pair_equal(values[on], values[off])
             out.append(dict(reference=reference, other=index, equal=same))
         else:
             groups[key] = index
+    # An engine-first configuration still needs a direct ON/OFF comparison;
+    # comparing both only to the engine would not compare their census work.
+    compared = {tuple(sorted((row['reference'], row['other']))): row for row in out}
+    for on, (case, entry) in enumerate(zip(cases, outcomes)):
+        if entry.get('outcome') != 'complete_relative' or not case['levers']['q3_interior_payload']:
+            continue
+        off = next((i for i, (other, result) in enumerate(zip(cases, outcomes))
+                    if result.get('outcome') == 'complete_relative' and
+                    not other['levers']['q3_interior_payload'] and
+                    payload_case_identity(other) == payload_case_identity(case)), None)
+        if off is None:
+            continue  # separately published as an unpaired payload case
+        pair = tuple(sorted((on, off)))
+        same = payload_pair_equal(values[on], values[off])
+        if pair in compared:
+            compared[pair]['equal'] = compared[pair]['equal'] and same
+        else:
+            row = dict(reference=off, other=on, equal=same)
+            out.append(row)
+            compared[pair] = row
     return out
 
 
@@ -1334,6 +1449,22 @@ def configure_command(tools, root, build):
             '-DCMAKE_CUDA_COMPILER=' + tools['nvcc']]
 
 
+def build_command(tools, build, payload_gate):
+    return [tools['cmake'], '--build', str(build), '--target', PROBE_TARGET,
+            *([PAYLOAD_GATE_TARGET] if payload_gate else []), '--parallel', BUILD_PARALLEL]
+
+
+def validate_payload_gate(text):
+    pattern = 'payload PASS ' + ' '.join(name + r'=(0|[1-9][0-9]*)' for name in PAYLOAD_GATE_COUNTS)
+    found = re.fullmatch(pattern + r'\n?', text)
+    need(found is not None, 'payload device gate output schema')
+    counters = {name: int(value) for name, value in zip(PAYLOAD_GATE_COUNTS, found.groups())}
+    need(all(_count(value) for value in counters.values()) and all(counters[name] > 0 for name in PAYLOAD_GATE_COUNTS) and
+         counters['calls'] > counters['device_calls'] and counters['max_depth'] == 8 and
+         counters['direct_chunks'] == 28, 'payload device gate vacuous or incomplete boundary fixtures')
+    return counters
+
+
 def unpaired_batch_cases(cases, outcomes):
     """Complete batch/GPU cases without a complete engine-path twin (same file,
     K, s): their tower was never compared on LiDAR (auditor A, S2 partial)."""
@@ -1342,6 +1473,14 @@ def unpaired_batch_cases(cases, outcomes):
     return [index for index, (case, entry) in enumerate(zip(cases, outcomes))
             if entry.get('outcome') == 'complete_relative' and case['levers']['q34_batch_filter'] and
             (case['file'], case['k'], case['s']) not in engine]
+
+
+def unpaired_payload_cases(cases, outcomes):
+    off = {payload_case_identity(case) for case, entry in zip(cases, outcomes)
+           if entry.get('outcome') == 'complete_relative' and not case['levers']['q3_interior_payload']}
+    return [index for index, (case, entry) in enumerate(zip(cases, outcomes))
+            if entry.get('outcome') == 'complete_relative' and case['levers']['q3_interior_payload'] and
+            payload_case_identity(case) not in off]
 
 
 def device_ran(case, value):
@@ -1362,7 +1501,7 @@ def gpu_completed_cases(cases, outcomes, values):
             if entry.get('outcome') == 'complete_relative' and device_ran(case, values[index])]
 
 
-def compiled_dependencies(build, root, before):
+def compiled_dependencies(build, root, before, payload_gate=False):
     consumed, relative_seen = {}, set()
     depfiles = sorted(build.glob('CMakeFiles/*.dir/**/*.o.d'))
     need(depfiles, 'no compiler depfile under the CMake build')
@@ -1378,6 +1517,7 @@ def compiled_dependencies(build, root, before):
                 relative_seen.add(relative)
             consumed[str(path)] = sha(path)
     need({PROBE_SOURCE, CHAIN_SOURCE} <= relative_seen, 'depfiles lack the probe/chain sources')
+    need(not payload_gate or PAYLOAD_GATE_SOURCE in relative_seen, 'depfiles lack the payload gate source')
     return consumed
 
 
@@ -1403,6 +1543,7 @@ def execute(args):
                   useful_budget_seconds=args.useful_budget_seconds, case_cap_seconds=args.case_cap_seconds)
     worker, manifest, before, consumed = None, None, None, {}
     tools, binary, binary_sha = {}, None, None
+    payload_binary, payload_sha = None, None
     began = time.time()
 
     def interrupted(signum, _frame):
@@ -1471,17 +1612,30 @@ def execute(args):
         configure = worker.command('configure', configure_command(tools, root, build))
         if configure['exit_code'] != 0:
             raise BuildFailed('cmake configure failed; logs in configure.stdout/stderr')
-        compiled = worker.command('build', [tools['cmake'], '--build', str(build), '--target', PROBE_TARGET,
-                                            '--parallel', BUILD_PARALLEL])
+        payload_enabled = cases[0]['levers']['q3_interior_payload']
+        compiled = worker.command('build', build_command(tools, build, payload_enabled))
         if compiled['exit_code'] != 0:
             raise BuildFailed('strict build of mhgp9_tower_probe failed; logs in build.stdout/stderr')
         binary = build / PROBE_TARGET
         need(binary.is_file() and not binary.is_symlink(), 'probe binary absent after build')
         binary_sha = sha(binary)
-        consumed = compiled_dependencies(build, root, before)
+        consumed = compiled_dependencies(build, root, before, payload_enabled)
         save(output / 'compiled_dependencies.json', consumed)
         result.update(binary_sha256=binary_sha,
                       compiled_dependency_manifest_sha256=sha(output / 'compiled_dependencies.json'))
+        if payload_enabled:
+            payload_binary = build / PAYLOAD_GATE_TARGET
+            need(payload_binary.is_file() and not payload_binary.is_symlink(), 'payload gate binary absent')
+            payload_sha = sha(payload_binary)
+            result['GPU_attempted'] = True
+            gate_row = worker.command('payload_device_gate', [TIME, '-v', str(payload_binary), '--device'])
+            try:
+                need(gate_row['exit_code'] == 0, 'payload device gate exit code')
+                gate_counts = validate_payload_gate((output / 'payload_device_gate.stdout').read_text())
+                validate_gnu_time((output / 'payload_device_gate.stderr').read_text(errors='replace'), 0)
+            except (ValueError, KeyError, TypeError, UnicodeError) as error:
+                raise PreflightFailed(type(error).__name__ + ': ' + str(error)) from error
+            result['payload_gate'] = dict(binary_sha256=payload_sha, counters=gate_counts, backend='cuda_g4')
         # Preflight natif avant tout cas LiDAR : la sonde reelle, les voies du
         # premier cas, jugee par le meme validate_probe. Echec = aucun cas.
         pre_raw = preflight_cloud()
@@ -1526,6 +1680,25 @@ def execute(args):
             except (ValueError, KeyError, TypeError, UnicodeError) as error:
                 raise PreflightFailed(type(error).__name__ + ': ' + str(error)) from error
             result['preflight']['engine_tower_digest'] = engine_value['tower_digest']
+        if pre_case['levers']['q3_interior_payload']:
+            off_case = dict(pre_case, levers=dict(pre_case['levers'], q3_interior_payload=False))
+            off_row = worker.command('preflight_payload_off', [TIME, '-v', str(binary), str(output / PREFLIGHT_FILE),
+                                                                *expected_probe_tail(off_case, judge=pre_judge)])
+            try:
+                need(off_row['exit_code'] == 0, 'payload OFF preflight exit code')
+                off_value = strict_json((output / 'preflight_payload_off.stdout').read_bytes())
+                need(validate_probe(off_value, off_case, 0, inputs=preflight_inputs(pre_raw), judge=pre_judge) ==
+                     'complete_relative', 'payload OFF preflight incomplete')
+                validate_external_wall(off_value, off_row['elapsed_seconds'])
+                validate_preflight_work(off_value, off_case['levers'])
+                validate_gnu_time((output / 'preflight_payload_off.stderr').read_text(errors='replace'), 0)
+                need(payload_pair_equal(pre_value, off_value, require_reduced_census=False),
+                     'payload ON/OFF preflight object or geometry differs')
+            except (ValueError, KeyError, TypeError, UnicodeError) as error:
+                raise PreflightFailed(type(error).__name__ + ': ' + str(error)) from error
+            result['preflight']['payload_off_tower_digest'] = off_value['tower_digest']
+            result['preflight']['payload_keys'] = pre_value['catalogue']['payload_keys']
+            result['preflight']['payload_ids'] = pre_value['catalogue']['payload_ids']
         if pre_case['levers']['q34_gpu_certificates'] or pre_case['levers']['q34_gpu_q3']:
             # v18: the device deferral path on real hardware, before any LiDAR
             # case: a 64-site slab must defer some edges to the engine path and
@@ -1621,6 +1794,7 @@ def execute(args):
         result['cross_worker_comparisons'] = compare_cases(cases, outcomes, values)
         # A batch/GPU tower counts as verified on LiDAR only with its twin.
         result['unpaired_batch_cases'] = unpaired_batch_cases(cases, outcomes)
+        result['unpaired_payload_cases'] = unpaired_payload_cases(cases, outcomes)
         result['GPU_completed_cases'] = gpu_completed_cases(cases, outcomes, values)
         result['GPU_executed'] = bool(result['GPU_completed_cases'])
         if any(e['outcome'] == 'probe_failed' for e in outcomes):
@@ -1648,6 +1822,9 @@ def execute(args):
             if binary_sha is not None:
                 result['binary_stable'] = sha(binary) == binary_sha
                 need(result['binary_stable'], 'binary changed at closure')
+            if payload_sha is not None:
+                result['payload_gate_binary_stable'] = sha(payload_binary) == payload_sha
+                need(result['payload_gate_binary_stable'], 'payload gate binary changed at closure')
             for name, pin in result.get('tool_sha256', {}).items():
                 need(sha(tools[name]) == pin, 'tool changed: ' + name)
             for name, pin in consumed.items():

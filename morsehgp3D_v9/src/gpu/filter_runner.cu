@@ -1019,13 +1019,15 @@ __global__ void lanes_fill_kernel(const LanesPlan* plans, const unsigned long lo
 // (counter always advanced; beyond the arena the host refuses the call) and
 // copies them. Lane 0 writes the task back and adds its work to the edge's
 // slot (integer sums and maxima: order-free).
+template <bool InteriorPayload = false>
 __global__ void __launch_bounds__(lanes_threads, 4) lanes_task_kernel(LanesIndex index, const u32* edge_a,
     const u32* edge_b, unsigned kmax, u32 capacity, u32 record_capacity, u32 event_capacity, const LanesPlan* plans,
     std::int32_t* cover_points, u32* cover_ranks, u32* cover_seeds, LanesTask* tasks,
     unsigned long long task_count, LaneRecord* slab_records, u32* events, LaneRecord* staging,
     unsigned long long staging_capacity, unsigned long long* next_task, unsigned long long* staged,
     unsigned long long* max_steps, LanesTaskWork* slots, LanesTaskRecords* task_records,
-    unsigned long long* fused_counters, bool fused_pass, u32 warps) {
+    unsigned long long* fused_counters, bool fused_pass, u32 warps,
+    u32* slab_interiors, u32* staging_interiors, u32 interior_stride) {
   const u32 warp = (blockIdx.x * blockDim.x + threadIdx.x) / 32;
   __shared__ Q4Work task4[lanes_warps_per_block];  // the current task's q4 work (leader lane)
   Q4Work& w4 = task4[threadIdx.x / 32];
@@ -1034,6 +1036,14 @@ __global__ void __launch_bounds__(lanes_threads, 4) lanes_task_kernel(LanesIndex
   const std::size_t e = event_capacity;
   const Q4Slab q4{events + 3 * e * warp, events + 3 * e * warp + e, events + 3 * e * warp + 2 * e, event_capacity};
   LaneRecord* records = slab_records + static_cast<std::size_t>(record_capacity) * warp;
+  Q3InteriorSlab payload{};
+  if constexpr (InteriorPayload) {
+    __shared__ u32 interior_scratch[8 * lanes_warps_per_block];
+    payload.scratch = interior_scratch + 8 * (threadIdx.x / 32);
+    payload.records = interior_stride == 0 ? nullptr
+        : slab_interiors + static_cast<std::size_t>(record_capacity) * warp * interior_stride;
+    payload.stride = interior_stride;
+  }
   LanesFusedWork fused{0, 0, 0, 0, 0};  // the leader's sums, one atomic per field at the end
   unsigned long long warp_max_steps = 0;
   for (;;) {
@@ -1045,8 +1055,8 @@ __global__ void __launch_bounds__(lanes_threads, 4) lanes_task_kernel(LanesIndex
     const LanesPlan plan = plans[task.edge];
     const LanesSlab slab{nullptr, cover_points + 3 * plan.offset, cover_ranks + plan.offset,
                          cover_seeds + plan.offset, nullptr, records, capacity, record_capacity};
-    const u64 steps = lanes_task(group, index, edge_a[task.edge], edge_b[task.edge], plan.lanes, kmax, slab,
-                                 plan.sites, task.first, task.last, q4, task, w4, slots[task.edge], fused, fused_pass);
+    const u64 steps = lanes_task<InteriorPayload>(group, index, edge_a[task.edge], edge_b[task.edge], plan.lanes, kmax, slab,
+                                 plan.sites, task.first, task.last, q4, task, w4, slots[task.edge], fused, fused_pass, payload);
     unsigned long long begin = 0;
     const u32 n = task.q3 + task.q4;
     if (task.fail_phase == 0 && n != 0) {
@@ -1062,6 +1072,14 @@ __global__ void __launch_bounds__(lanes_threads, 4) lanes_task_kernel(LanesIndex
           const u64* from = reinterpret_cast<const u64*>(records + lanes_task_slab_index(task, record_capacity, i / words));
           to[i] = from[i % words];
         });
+        if constexpr (InteriorPayload) {
+          group.for_each(n, [&](u32 r) {
+            const u32 physical = lanes_task_slab_index(task, record_capacity, r);
+            for (u32 j = 0; j < interior_stride; ++j)
+              staging_interiors[(begin + r) * interior_stride + j] = r < task.q3
+                  ? payload.records[static_cast<std::size_t>(physical) * interior_stride + j] : absent32;
+          });
+        }
       }
     }
     if (group.leader()) {
@@ -1154,11 +1172,13 @@ __global__ void __launch_bounds__(lanes_threads) lanes_answer_kernel(const Lanes
   }
 }
 
+template <bool InteriorPayload = false>
 __global__ void __launch_bounds__(lanes_threads) lanes_gather_kernel(const LanesPlan* plans,
     const unsigned long long* task_first, const LanesTask* tasks, const LanesTaskRecords* scan, const u8* pre_status,
     const unsigned long long* counts, const unsigned long long* prefix, unsigned long long task_count,
     unsigned long long arena_capacity, const unsigned long long* staged, unsigned long long staging_capacity,
-    const LaneRecord* staging, LaneRecord* arena) {
+    const LaneRecord* staging, LaneRecord* arena,
+    const u32* staging_interiors, u32* arena_interiors, u32 interior_stride) {
   if (*staged > staging_capacity) return;  // overflow: nothing is gathered
   static_assert(sizeof(LaneRecord) % sizeof(uint4) == 0 && alignof(LaneRecord) >= alignof(uint4),
                 "a record is a whole number of aligned 16-byte parts");
@@ -1196,6 +1216,12 @@ __global__ void __launch_bounds__(lanes_threads) lanes_gather_kernel(const Lanes
         if (part == edge_part) v.x = e;
         reinterpret_cast<uint4*>(arena + (r < m3 ? d3 + r : d4 + (r - m3)))[part] = v;
       }
+      if constexpr (InteriorPayload) {
+        for (u32 r = lane; r < m3 + m4; r += 32)
+          for (u32 k = 0; k < interior_stride; ++k)
+            arena_interiors[(r < m3 ? d3 + r : d4 + (r - m3)) * interior_stride + k] =
+                staging_interiors[(src + r) * interior_stride + k];
+      }
     }
   }
 }
@@ -1232,10 +1258,12 @@ struct LanesResident {
   bool probed = false;
   std::string name;
   int sms = 0, plan_blocks = 0, task_blocks = 0, gather_blocks = 0;
+  int payload_task_blocks = 0;
   std::size_t total_memory = 0;
   DeviceBuffer<FlatNode> nodes;
   DeviceBuffer<u32> escapes, rank_ids, edge_a, edge_b, ranges, scratch, events, out_begin, out_count;
   DeviceBuffer<u32> cover_ranks, cover_seeds;
+  DeviceBuffer<u32> slab_interiors, staging_interiors, arena_interiors;
   DeviceBuffer<u8> lanes_in, out_status, pre_status;
   DeviceBuffer<Q4Work> warp_work4;
   DeviceBuffer<std::int32_t> rank_points, cover_points;
@@ -1259,7 +1287,8 @@ struct LanesResident {
            task_first.capacity_bytes() + record_counts.capacity_bytes() + record_prefix.capacity_bytes() +
            warp_work.capacity_bytes() + plans.capacity_bytes() + plan_work.capacity_bytes() +
            slots.capacity_bytes() + tasks.capacity_bytes() + task_scan.capacity_bytes() +
-           scan_storage.capacity_bytes();
+           scan_storage.capacity_bytes() + slab_interiors.capacity_bytes() +
+           staging_interiors.capacity_bytes() + arena_interiors.capacity_bytes();
   }
   // Device name, SM count, total memory and occupancies, once (the caller
   // holds mu).
@@ -1269,7 +1298,7 @@ struct LanesResident {
     MHGP9_CUDA(cudaGetDeviceProperties(&properties, 0));
     MHGP9_CUDA(cudaDeviceGetAttribute(&sms, cudaDevAttrMultiProcessorCount, 0));
     MHGP9_CUDA(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&plan_blocks, lanes_plan_kernel, lanes_threads, 0));
-    MHGP9_CUDA(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&task_blocks, lanes_task_kernel, lanes_threads, 0));
+    MHGP9_CUDA(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&task_blocks, lanes_task_kernel<false>, lanes_threads, 0));
     MHGP9_CUDA(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&gather_blocks, lanes_answer_kernel, lanes_threads, 0));
     if (plan_blocks <= 0 || task_blocks <= 0 || gather_blocks <= 0)
       throw CudaFailure{"lanes kernels cannot be resident on this device", true};
@@ -1278,13 +1307,18 @@ struct LanesResident {
     name = properties.name;
     probed = true;
   }
+  void probe_payload() {
+    if (payload_task_blocks != 0) return;
+    MHGP9_CUDA(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&payload_task_blocks, lanes_task_kernel<true>, lanes_threads, 0));
+    if (payload_task_blocks <= 0) throw CudaFailure{"lanes payload kernel cannot be resident on this device", true};
+  }
   std::size_t max_warps(int blocks_per_sm) const {
     return static_cast<std::size_t>(sms) * static_cast<std::size_t>(blocks_per_sm) * (lanes_threads / 32);
   }
   // Bytes of one warp's slabs: the walk (P) and the records and events (T).
   static std::size_t walk_bytes(u32 capacity) { return static_cast<std::size_t>(capacity) * 3 * sizeof(u32); }
-  static std::size_t task_slab_bytes(u32 record_capacity, u32 event_capacity) {
-    return static_cast<std::size_t>(record_capacity) * sizeof(LaneRecord) +
+  static std::size_t task_slab_bytes(u32 record_capacity, u32 event_capacity, u32 interior_stride = 0) {
+    return static_cast<std::size_t>(record_capacity) * (sizeof(LaneRecord) + interior_stride * sizeof(u32)) +
            3 * static_cast<std::size_t>(event_capacity) * sizeof(u32);
   }
   static constexpr std::size_t cover_site_bytes = 3 * sizeof(std::int32_t) + 2 * sizeof(u32);
@@ -1295,17 +1329,20 @@ struct LanesResident {
   std::size_t plan_warps(std::size_t free_bytes, u32 capacity) const {
     return std::min(max_warps(plan_blocks), (free_bytes / 8) / walk_bytes(capacity));
   }
-  std::size_t task_warps(std::size_t free_bytes, u32 record_capacity, u32 event_capacity) const {
-    return std::min(max_warps(task_blocks), (free_bytes / 8) / task_slab_bytes(record_capacity, event_capacity));
+  std::size_t task_warps(std::size_t free_bytes, u32 record_capacity, u32 event_capacity,
+                       bool interior_payload = false, u32 interior_stride = 0) const {
+    return std::min(max_warps(interior_payload ? payload_task_blocks : task_blocks),
+                    (free_bytes / 8) / task_slab_bytes(record_capacity, event_capacity, interior_stride));
   }
   // Slabs for `pw` P warps and `tw` T warps, the cover arena (grow-only).
   void reserve_slabs(std::size_t pw, std::size_t tw, u32 capacity, u32 record_capacity, u32 event_capacity,
-                     std::size_t cover_sites) {
+                     std::size_t cover_sites, u32 interior_stride = 0) {
     const std::size_t cap = capacity;
     ranges.reserve(2 * cap * pw);
     scratch.reserve(cap * pw);
     events.reserve(3 * static_cast<std::size_t>(event_capacity) * tw);
     slab_records.reserve(static_cast<std::size_t>(record_capacity) * tw);
+    if (interior_stride != 0) slab_interiors.reserve(static_cast<std::size_t>(record_capacity) * tw * interior_stride);
     cover_points.reserve(3 * cover_sites);
     cover_ranks.reserve(cover_sites);
     cover_seeds.reserve(cover_sites);
@@ -1387,6 +1424,9 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     MHGP9_CUDA(cudaFree(nullptr));
     const std::size_t edges = input.edge_count;
     out.pinned_records = input.pinned_records;  // v28: the path's echo (no record: an empty lease)
+    out.interior_payload = input.interior_payload;
+    out.interior_stride = input.interior_payload ? input.index.kmax - 2 : 0;
+    if (input.interior_payload) res.probe_payload();
     if (edges == 0) return out;  // no kernel: warps stays 0 (the edge arrays may be null)
     const u32 capacity = input.capacity == 0 ? default_lanes_capacity : input.capacity;
     const u32 record_capacity = input.record_capacity == 0 ? default_record_capacity : input.record_capacity;
@@ -1403,7 +1443,8 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     // neither refuses the call. A failed allocation of the buffers
     // themselves is still a capacity refusal (auditor,
     // AUDIT_S4A_VALIDATION_ET_ARENE). An explicit capacity is taken as given.
-    const std::size_t clamp = std::max<std::size_t>(1, free_bytes / 8 / sizeof(LaneRecord));
+    const std::size_t bytes_per_record = sizeof(LaneRecord) + out.interior_stride * sizeof(u32);
+    const std::size_t clamp = std::max<std::size_t>(1, free_bytes / 8 / bytes_per_record);
     const std::size_t arena_capacity = input.arena_capacity != 0
         ? input.arena_capacity
         : std::max<std::size_t>(1, std::min(default_arena_capacity(edges), clamp / 2));
@@ -1415,14 +1456,15 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     out.status.assign(edges, 0);
     out.record_begin.assign(edges, 0);
     out.record_count.assign(edges, 0);
-    if (arena_capacity * sizeof(LaneRecord) > free_bytes / 4)
+    if (arena_capacity > (free_bytes / 4) / bytes_per_record)
       throw CudaFailure{"record arena exceeds a quarter of the free device memory", true};
-    if (staging_capacity * sizeof(LaneRecord) > free_bytes / 4)
+    if (staging_capacity > (free_bytes / 4) / bytes_per_record)
       throw CudaFailure{"staging arena exceeds a quarter of the free device memory", true};
     if (cover_capacity * LanesResident::cover_site_bytes > free_bytes / 2)
       throw CudaFailure{"cover arena exceeds half of the free device memory", true};
     const std::size_t plan_warps = std::min(res.plan_warps(free_bytes, capacity), edges);
-    const std::size_t task_warps_max = res.task_warps(free_bytes, record_capacity, event_capacity);
+    const std::size_t task_warps_max = res.task_warps(free_bytes, record_capacity, event_capacity,
+                                                   input.interior_payload, out.interior_stride);
     const std::size_t gather_warps = std::min(res.max_warps(res.gather_blocks), edges);
     if (plan_warps == 0 || task_warps_max == 0)
       throw CudaFailure{"no lanes slab fits in an eighth of the free device memory", true};
@@ -1449,10 +1491,14 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     res.task_first.reserve(edges);
     res.record_counts.reserve(edges);
     res.record_prefix.reserve(edges);
-    res.reserve_slabs(plan_warps, task_warps_max, capacity, record_capacity, event_capacity, cover_capacity);
+    res.reserve_slabs(plan_warps, task_warps_max, capacity, record_capacity, event_capacity, cover_capacity, out.interior_stride);
     if (input.edge_lanes != nullptr) res.lanes_in.reserve(edges);
     res.arena.reserve(arena_capacity);
     res.staging.reserve(staging_capacity);
+    if (out.interior_stride != 0) {
+      res.arena_interiors.reserve(arena_capacity * out.interior_stride);
+      res.staging_interiors.reserve(staging_capacity * out.interior_stride);
+    }
     res.warp_work.reserve(gather_warps);
     res.warp_work4.reserve(gather_warps);
     MHGP9_CUDA(cudaMemcpy(res.nodes.get(), input.index.nodes, input.index.node_count * sizeof(FlatNode),
@@ -1500,12 +1546,19 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
       lanes_fill_kernel<<<fill_blocks, threads>>>(res.plans.get(), res.task_first.get(), static_cast<u32>(edges),
                                                   budget, res.tasks.get());
       MHGP9_CUDA(cudaGetLastError());
-      lanes_task_kernel<<<static_cast<int>((task_warps * 32 + threads - 1) / threads), threads>>>(index,
+      if (input.interior_payload)
+        lanes_task_kernel<true><<<static_cast<int>((task_warps * 32 + threads - 1) / threads), threads>>>(index,
           res.edge_a.get(), res.edge_b.get(), input.index.kmax, capacity, record_capacity, event_capacity,
           res.plans.get(), res.cover_points.get(), res.cover_ranks.get(), res.cover_seeds.get(), res.tasks.get(),
           task_count, res.slab_records.get(), res.events.get(), res.staging.get(), staging_capacity, counter + 2,
           counter + 3, counter + 5, res.slots.get(), res.task_scan.get(), counter + 8, input.fused_pass,
-          static_cast<u32>(task_warps));
+          static_cast<u32>(task_warps), res.slab_interiors.get(), res.staging_interiors.get(), out.interior_stride);
+      else lanes_task_kernel<false><<<static_cast<int>((task_warps * 32 + threads - 1) / threads), threads>>>(index,
+          res.edge_a.get(), res.edge_b.get(), input.index.kmax, capacity, record_capacity, event_capacity,
+          res.plans.get(), res.cover_points.get(), res.cover_ranks.get(), res.cover_seeds.get(), res.tasks.get(),
+          task_count, res.slab_records.get(), res.events.get(), res.staging.get(), staging_capacity, counter + 2,
+          counter + 3, counter + 5, res.slots.get(), res.task_scan.get(), counter + 8, input.fused_pass,
+          static_cast<u32>(task_warps), nullptr, nullptr, 0);
       MHGP9_CUDA(cudaGetLastError());
     }
     MHGP9_CUDA(cudaEventRecord(e[3]));
@@ -1530,9 +1583,14 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
     if (task_count != 0) {
       const int copy_blocks = static_cast<int>(std::min<unsigned long long>(
           (task_count + threads - 1) / threads, static_cast<unsigned long long>(res.sms) * 64));
-      lanes_gather_kernel<<<copy_blocks, threads>>>(res.plans.get(), res.task_first.get(), res.tasks.get(),
+      if (input.interior_payload)
+        lanes_gather_kernel<true><<<copy_blocks, threads>>>(res.plans.get(), res.task_first.get(), res.tasks.get(),
           res.task_scan.get(), res.pre_status.get(), res.record_counts.get(), res.record_prefix.get(), task_count,
-          arena_capacity, counter + 3, staging_capacity, res.staging.get(), res.arena.get());
+          arena_capacity, counter + 3, staging_capacity, res.staging.get(), res.arena.get(),
+          res.staging_interiors.get(), res.arena_interiors.get(), out.interior_stride);
+      else lanes_gather_kernel<false><<<copy_blocks, threads>>>(res.plans.get(), res.task_first.get(), res.tasks.get(),
+          res.task_scan.get(), res.pre_status.get(), res.record_counts.get(), res.record_prefix.get(), task_count,
+          arena_capacity, counter + 3, staging_capacity, res.staging.get(), res.arena.get(), nullptr, nullptr, 0);
       MHGP9_CUDA(cudaGetLastError());
     }
     MHGP9_CUDA(cudaEventRecord(e[4]));
@@ -1566,10 +1624,14 @@ LanesOutput run_lanes_batch(const LanesInput& input) {
       out.records.resize(used);
       destination = out.records.data();
     }
+    if (input.interior_payload) out.interior_ids.resize(used * out.interior_stride);
     out.host_alloc_ms = host_ms_since(alloc_start);
     MHGP9_CUDA(cudaEventRecord(e[5]));
     if (used != 0)
       MHGP9_CUDA(cudaMemcpy(destination, res.arena.get(), used * sizeof(LaneRecord), cudaMemcpyDeviceToHost));
+    if (!out.interior_ids.empty())
+      MHGP9_CUDA(cudaMemcpy(out.interior_ids.data(), res.arena_interiors.get(),
+                            out.interior_ids.size() * sizeof(u32), cudaMemcpyDeviceToHost));
     MHGP9_CUDA(cudaEventRecord(e[6]));
     MHGP9_CUDA(cudaEventSynchronize(e[6]));
     const auto finish = std::chrono::steady_clock::now();

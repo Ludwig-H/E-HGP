@@ -1270,11 +1270,21 @@ void check_lanes_batch(const Q34LanesBatch& batch, const Q2CensusIndex& index, u
   if (asked.size() != n || batch.decided.size() != n || batch.record_begin.size() != n ||
       batch.record_count.size() != n)
     throw std::logic_error("mhgp9 gen batched q34 lanes call returned a count different from its survivors");
+  constexpr auto none = std::numeric_limits<std::uint32_t>::max();
+  if (batch.records.size() > none)
+    throw std::logic_error("mhgp9 gen batched q34 record ordinal overflow");
+  if (batch.interior_payload) {
+    if (kmax < 2 || kmax > 10 || batch.interior_stride != kmax - 2 || !batch.interior_ids ||
+        batch.records.size() > std::numeric_limits<std::size_t>::max() / std::max(1U, batch.interior_stride) ||
+        batch.interior_ids->size() != batch.records.size() * batch.interior_stride)
+      throw std::logic_error("mhgp9 gen batched q34 interior payload shape");
+  } else if (batch.interior_stride != 0 || batch.interior_ids) {
+    throw std::logic_error("mhgp9 gen batched q34 disabled interior payload");
+  }
   const auto order = index.spatial_order();
   const auto& w = batch.work;
   const auto& w4 = batch.work4;
   u64 decided = 0, decided3 = 0, decided4 = 0, records3 = 0, records4 = 0, shells3 = 0, shells4 = 0;
-  constexpr auto none = std::numeric_limits<std::uint32_t>::max();
   for (std::size_t j = 0; j < n; ++j) {
     const auto lanes = batch.decided[j];
     // A call decides all of an edge's asked lanes or none of them.
@@ -1310,6 +1320,22 @@ void check_lanes_batch(const Q34LanesBatch& batch, const Q2CensusIndex& index, u
       // chain dereferences it (the supports are sorted: the last is the max).
       if (s[arity - 1] >= order.size())
         throw std::logic_error("mhgp9 gen batched q34 lanes call returned a support outside the cloud");
+      if (batch.interior_payload) {
+        const std::size_t offset = static_cast<std::size_t>(r) * batch.interior_stride;
+        const auto& ids = *batch.interior_ids;
+        for (std::uint32_t h = 0; h < batch.interior_stride; ++h) {
+          const auto id = ids[offset + h];
+          if (arity == 3 && h < record.depth) {
+            if (id >= order.size())
+              throw std::logic_error("mhgp9 gen batched q34 interior ID outside cloud");
+            for (std::uint32_t z = 0; z < h; ++z)
+              if (ids[offset + z] == id)
+                throw std::logic_error("mhgp9 gen batched q34 duplicate interior ID");
+          } else if (id != none) {
+            throw std::logic_error("mhgp9 gen batched q34 nonempty unused interior slot");
+          }
+        }
+      }
       if (arity == 3) {
         ++records3;
         counter_add(shells3, static_cast<u64>(record.shell));
@@ -1381,8 +1407,29 @@ Q34LanesFilter judge_lanes_filter(Q34LanesFilter inner, WspdQ34Options options, 
               counter_add(parts[slot].emitted4, static_cast<u64>(reference.size()));
             }
             mine.clear();
-            for (std::size_t r = answer.record_begin[j]; r < answer.record_begin[j] + answer.record_count[j]; ++r)
-              if (answer.records[r].arity == arity) mine.push_back(answer.records[r]);
+            for (std::size_t r = answer.record_begin[j]; r < answer.record_begin[j] + answer.record_count[j]; ++r) {
+              if (answer.records[r].arity != arity) continue;
+              const auto& record = answer.records[r];
+              mine.push_back(record);
+              if (answer.interior_payload && arity == 3) {
+                // Judge BEFORE sorting records: the original ordinal owns
+                // this packet. A global scan is deliberately independent
+                // of the cover traversal producing its complete interiors.
+                const auto points = index->cloud().points();
+                const auto ball = ExactBall::make_q3({points[record.support[0]], points[record.support[1]],
+                                                     points[record.support[2]]});
+                if (!ball || ball->coefficients() != record.key)
+                  throw std::logic_error("mhgp9 gen lanes judge: interior payload ball differs");
+                std::vector<std::uint32_t> expected, actual;
+                for (std::size_t id = 0; id < points.size(); ++id)
+                  if (ball->power(points[id]) < 0) expected.push_back(static_cast<std::uint32_t>(id));
+                for (std::uint32_t h = 0; h < record.depth; ++h)
+                  actual.push_back((*answer.interior_ids)[r * answer.interior_stride + h]);
+                std::sort(actual.begin(), actual.end());
+                if (actual != expected)
+                  throw std::logic_error("mhgp9 gen lanes judge: complete interior IDs differ");
+              }
+            }
             std::sort(mine.begin(), mine.end(), record_less);
             std::sort(reference.begin(), reference.end(), record_less);
             if (mine.size() != reference.size() ||
@@ -1818,7 +1865,8 @@ WspdQ34ParallelResult run_wspd_q34_batched(Q2CensusIndexPtr index, unsigned kmax
         if (cancel.load(std::memory_order_relaxed)) break;
         const std::size_t c = next_chunk.fetch_add(1);
         if (c >= chunks) break;
-        lanes->sink(slot, records.subspan(c * chunk, std::min(chunk, records.size() - c * chunk)));
+        lanes->sink(slot, records.subspan(c * chunk, std::min(chunk, records.size() - c * chunk)),
+                    static_cast<std::uint32_t>(c * chunk));
       }
       rebuilt.fetch_add(rebuilt_here, std::memory_order_relaxed);
       counter_add(state.timing.wall_ns, wall_ns() - wall_start);

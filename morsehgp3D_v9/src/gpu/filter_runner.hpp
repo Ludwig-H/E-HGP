@@ -280,6 +280,9 @@ struct LanesInput {
   // LanesOutput::pinned holds the lease, record_data()/record_total() read
   // either. The same bytes either way.
   bool pinned_records = false;
+  // Opt-in complete strict-interior IDs for accepted q3 records, collected
+  // during the existing census. No complete q4 payload is claimed.
+  bool interior_payload = false;
 };
 
 // v28: the lanes records' pool reservation of the chain's device
@@ -351,6 +354,13 @@ struct LanesOutput {
   std::vector<u8> status;                       // per edge: CertificateStatus
   std::vector<u32> record_begin, record_count;  // per edge (decided): its slice of records
   RawVector<LaneRecord> records;                // slices in edge order; edge = input edge index
+  // Owned pageable sidecar, aligned by RECORD INDEX even with pinned
+  // records. Active stride is K-2 (K2: active with stride=0 and empty IDs).
+  // Accepted q3: depth original IDs, then absent32. Every q4 word absent32.
+  // Meaningful only on successful output, never on a refusal/deferred edge.
+  bool interior_payload = false;
+  u32 interior_stride = 0;
+  RawVector<u32> interior_ids;
   Q3Work work{};                                // decided edges only (prologue and q3 lanes)
   Q4Work work4{};                               // decided edges only (S4b q4 lanes)
   std::uint64_t deferred = 0, faults = 0;
@@ -374,14 +384,15 @@ struct LanesOutput {
   // - download_copy_ms (e5..e6): the device-to-host copy of the records
   //   alone. Into a pageable vector it includes the driver's staging and
   //   the first touch of the vector's new pages (the copy writes them);
-  //   into a pinned block it is a direct DMA;
+  //   into a pinned block it is a direct DMA. With interior_payload active,
+  //   this SAME window also includes the owned pageable sidecar's copy;
   // - total_ms (e0..e6).
   double upload_ms = 0, kernel_ms = 0, download_ms = 0, download_copy_ms = 0, total_ms = 0;
   // v28: host wall (steady clock, not an event) of the preparation of the
   // records' destination inside the download window: the resize of the
   // pageable vector (default-initialised: no page is touched), or the lease
-  // of a pinned block (with its growth, a cudaHostAlloc, if any). Zero on
-  // the host twin.
+  // of a pinned block (with its growth, a cudaHostAlloc, if any), plus the
+  // optional pageable interior sidecar. Zero on the host twin.
   double host_alloc_ms = 0;
   // v9 H1: host sub-timers outside the events: setup (entry to the first
   // event: the resident mutex, guards, probe, sizing) and finish (last

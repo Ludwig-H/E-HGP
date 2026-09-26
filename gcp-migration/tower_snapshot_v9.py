@@ -111,7 +111,7 @@ def default_plan():
     new_levers = ('tower_sealed_catalogue', 'q2_early_census', 'q34_lanes_pinned')
     def case(scene, k, arm, repeat=0, frames=1):
         levers = {name: True for name in worker.LEVER_NAMES}
-        levers.update(q34_lanes_fused=False)
+        levers.update(q34_lanes_fused=False, q3_interior_payload=False)
         if arm == 'engine':
             levers = worker.engine_levers(levers)
         elif arm == 'gpu_r21':
@@ -133,6 +133,29 @@ def default_plan():
     # le meme processus : la session d'appareil et le bassin epingle sont
     # payes une fois, et le cout par trame se lit dans `frames`.
     cases += [case(scene, k, 'gpu', frames=4) for scene in ('00', 'b00') for k in (5, 10)]
+    return dict(schema=worker.PLAN_SCHEMA, cases=cases)
+
+
+def payload_plan():
+    """v30 focused payload campaign: paired ON/OFF, independent engine twin.
+
+    No change to the historical default ablation plan. Frames=1 throughout:
+    this does not launch another resident-stream benchmark campaign.
+    """
+    gpu = dict(default_plan()['cases'][0]['levers'], q3_interior_payload=True)
+    def case(scene, k, s, arm, repeat=0):
+        levers = dict(gpu)
+        if arm == 'off':
+            levers['q3_interior_payload'] = False
+        elif arm == 'engine':
+            levers = worker.engine_levers(levers)
+        return dict(scene=scene, file=worker.INPUTS[scene]['file'], n=worker.INPUTS[scene]['n'],
+                    k=k, s=s, workers=48, static_threads=48, levers=levers, repeat=repeat, frames=1)
+    cases = [case('00', 5, 8, arm, repeat) for arm, repeat in
+             (('on', 0), ('off', 0), ('off', 1), ('on', 1), ('engine', 0))]
+    for scene, k, s in (('00', 10, 8), ('01', 5, 8), ('02', 5, 8), ('00', 5, 10),
+                        ('00', 5, 12), ('b00', 5, 8), ('b00', 10, 8)):
+        cases.extend(case(scene, k, s, arm) for arm in ('on', 'off', 'engine'))
     return dict(schema=worker.PLAN_SCHEMA, cases=cases)
 
 
@@ -193,10 +216,12 @@ def write_archive(path, files):
                     archive.addfile(member, io.BytesIO(raw))
 
 
-def build(commit, output, plan_path=None, allow_uncommitted_protocol=False):
+def build(commit, output, plan_path=None, allow_uncommitted_protocol=False, use_payload_plan=False):
     output = Path(output).absolute()
     need(not output.exists() and not output.is_symlink(), 'fresh output directory')
-    plan_raw = Path(plan_path).read_bytes() if plan_path is not None else None
+    need(not (plan_path is not None and use_payload_plan), 'choose a plan file or the payload plan')
+    plan_raw = (worker.canonical_json(payload_plan()) if use_payload_plan else
+                Path(plan_path).read_bytes() if plan_path is not None else None)
     files, provenance = collect(commit, plan_raw, allow_uncommitted_protocol)
     manifest, cases = validate_files(files)
     output.mkdir(parents=True, mode=0o700)
@@ -228,12 +253,14 @@ def build(commit, output, plan_path=None, allow_uncommitted_protocol=False):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--commit', required=True, help='commit dont les objets git forment le paquet')
-    parser.add_argument('--plan', type=Path, help='plan mhgp9_tower_plan_v1 ; defaut : plan par defaut')
+    plans = parser.add_mutually_exclusive_group()
+    plans.add_argument('--plan', type=Path, help='plan mhgp9_tower_plan_v7 ; defaut : plan historique')
+    plans.add_argument('--payload-plan', action='store_true', help='26 cas v30 ON/OFF/moteur, frames=1')
     parser.add_argument('--output', type=Path, required=True, help='repertoire neuf')
     parser.add_argument('--allow-uncommitted-protocol', action='store_true',
                         help='preflight/selftest seulement ; le controleur refuse ce paquet avec --execute')
     args = parser.parse_args(argv)
-    print(json.dumps(build(args.commit, args.output, args.plan, args.allow_uncommitted_protocol),
+    print(json.dumps(build(args.commit, args.output, args.plan, args.allow_uncommitted_protocol, args.payload_plan),
                      sort_keys=True, allow_nan=False))
     return 0
 

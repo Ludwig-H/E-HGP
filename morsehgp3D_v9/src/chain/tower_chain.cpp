@@ -394,7 +394,8 @@ struct LanesCallSteps {
 
 gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::span<const gen::Q34SurvivingEdge> survivors,
                                std::span<const std::uint8_t> asked, bool device, std::uint32_t capacity,
-                               std::uint32_t events, bool fused, bool pinned, std::size_t workers, double& device_ms,
+                               std::uint32_t events, bool fused, bool pinned, bool interior_payload,
+                               std::size_t workers, double& device_ms,
                                double& kernel_ms,
                                double& transfer_ms, std::uint32_t& warps, double& setup_ms, double& finish_ms,
                                double& convert_ms, LanesCallSteps& steps) {
@@ -424,6 +425,7 @@ gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::spa
   in.event_capacity = events;
   in.fused_pass = fused;
   in.pinned_records = pinned;  // v28: records read in place from a leased block
+  in.interior_payload = interior_payload;
   auto out = device ? gpu::run_lanes_batch(in) : gpu::run_lanes_batch_host(in, workers);
   const auto convert_start = Clock::now();
   switch (out.error_kind) {
@@ -466,6 +468,15 @@ gen::Q34LanesBatch lanes_batch(const GpuIndex& prepared, unsigned kmax, std::spa
 #endif
   if (out.pinned_records != pinned || (pinned && !out.records.empty()))
     throw std::logic_error("chain_q34_lanes_pinned_path_differs");
+  if (out.interior_payload != interior_payload ||
+      out.interior_stride != (interior_payload ? kmax - 2 : 0) ||
+      record_total > std::numeric_limits<std::size_t>::max() / std::max(1U, out.interior_stride) ||
+      out.interior_ids.size() != record_total * out.interior_stride)
+    throw std::logic_error("chain_q34_lanes_interior_payload_shape");
+  batch.interior_payload = out.interior_payload;
+  batch.interior_stride = out.interior_stride;
+  if (interior_payload)
+    batch.interior_ids = std::make_shared<const RawVector<std::uint32_t>>(std::move(out.interior_ids));
   batch.records.resize(record_total);  // default-initialised: every record written below
   poison_unwritten(batch.records, 0);
   tower::parallel_ranges(record_total, static_cast<int>(std::max<std::size_t>(1, workers)),
@@ -547,6 +558,20 @@ struct Presentation {
   std::array<std::uint32_t, 4> support{};
   std::uint32_t depth = 0;
   std::uint32_t shell = 0;
+  // An ordinal in the chain-owned immutable payload arena, never a pointer
+  // into a reusable GPU slab. It follows every copy/sort of this value and
+  // uses the old four bytes of padding (no additional sort traffic).
+  std::uint32_t payload_record = std::numeric_limits<std::uint32_t>::max();
+};
+static_assert(sizeof(Presentation) == 112);
+
+struct InteriorPayloadArena {
+  std::shared_ptr<const RawVector<std::uint32_t>> ids;
+  std::uint32_t stride = 0;
+  std::size_t records = 0;
+  // Built once from the exact tower index after its construction/early-q2
+  // handoff. Original IDs and Morton ranks must never be interchanged.
+  std::vector<tower::i32> rank_by_id;
 };
 
 bool presentation_less(const Presentation& a, const Presentation& b) {
@@ -830,6 +855,7 @@ struct CensusState {
   std::vector<tower::NodeRef> scratch;
   tower::DepthStats depth;
   std::uint64_t extra = 0, max_shell = 0, max_interior = 0, over_cap = 0;
+  std::uint64_t payload_keys = 0, payload_ids = 0, payload_fallback_keys = 0;
   std::array<std::uint64_t, 5> by_q{};
   std::array<std::uint64_t, 17> by_shell{};
   std::array<std::int64_t, 11> euler{};  // contributions d'Euler par ordre K (indice K)
@@ -853,7 +879,8 @@ void euler_add(unsigned kmax, std::array<std::int64_t, 11>& e, std::size_t p, st
 // cle (false). Fonction de l'index, de Kmax et du representant seuls : le
 // meme resultat cote q2 (early) ou apres la fusion.
 bool census_key(std::span<const gen::Point3> points, const tower::CloudIndex& ix, unsigned kmax,
-                const Presentation& rep, CensusState& st, tower::BallData& b, [[maybe_unused]] bool early) {
+                const Presentation& rep, CensusState& st, tower::BallData& b, [[maybe_unused]] bool early,
+                const InteriorPayloadArena* payload = nullptr, bool judge_payload = false) {
 #if defined(MHGP9_TESTING)
   failpoints::census(rep.key, early);
 #endif
@@ -867,9 +894,45 @@ bool census_key(std::span<const gen::Point3> points, const tower::CloudIndex& ix
   require(tower::ball_key_in_u18_domain(key), "chain_ball_key_domain");
   require(level.den > 0, "chain_ball_level_denominator");
   b.key = key;
-  const auto status = tower::ball_census(ix, key, rep.depth, std::numeric_limits<std::size_t>::max(), &st.in,
-                                         &st.sh, &st.depth, &st.scratch);
-  require(status == tower::CensusStatus::kOk, "chain_census_interior_overflow");
+  const bool imported = payload != nullptr && rep.arity == 3 && rep.shell == 3 &&
+      rep.payload_record != std::numeric_limits<std::uint32_t>::max();
+  if (imported) {
+    require(payload->ids && rep.payload_record < payload->records && payload->stride == kmax - 2 &&
+                payload->rank_by_id.size() == points.size() && rep.depth <= payload->stride,
+            "chain_payload_shape");
+    const std::size_t offset = static_cast<std::size_t>(rep.payload_record) * payload->stride;
+    require(offset <= payload->ids->size() && rep.depth <= payload->ids->size() - offset,
+            "chain_payload_outside_arena");
+    st.in.clear();
+    st.sh.clear();
+    for (std::uint32_t j = 0; j < rep.depth; ++j) {
+      const auto id = (*payload->ids)[offset + j];
+      require(id < points.size(), "chain_payload_id_outside_cloud");
+#if defined(MHGP9_CHAIN_MUTANT_PAYLOAD_RANK_AS_ID)
+      const auto rank = static_cast<tower::i32>(id);  // mutant: original ID mistaken for Morton rank
+#else
+      const auto rank = payload->rank_by_id[id];
+#endif
+      require(key.power(ix.upos[static_cast<std::size_t>(rank)]) < 0, "chain_payload_noninterior_id");
+      st.in.push_back(rank);
+    }
+    std::sort(st.in.begin(), st.in.end());
+    require(std::adjacent_find(st.in.begin(), st.in.end()) == st.in.end(), "chain_payload_duplicate_id");
+    for (unsigned j = 0; j < rep.arity; ++j) {
+      const auto rank = payload->rank_by_id[rep.support[j]];
+      require(key.power(ix.upos[static_cast<std::size_t>(rank)]) == 0, "chain_payload_nonshell_support");
+      st.sh.push_back(rank);
+    }
+    std::sort(st.sh.begin(), st.sh.end());
+    require(std::adjacent_find(st.sh.begin(), st.sh.end()) == st.sh.end(), "chain_payload_duplicate_support");
+    ++st.payload_keys;
+    st.payload_ids += rep.depth;
+  } else {
+    if (payload != nullptr && rep.arity == 3) ++st.payload_fallback_keys;
+    const auto status = tower::ball_census(ix, key, rep.depth, std::numeric_limits<std::size_t>::max(), &st.in,
+                                           &st.sh, &st.depth, &st.scratch);
+    require(status == tower::CensusStatus::kOk, "chain_census_interior_overflow");
+  }
   require(st.in.size() == rep.depth, "chain_census_depth_mismatch");
   require(st.sh.size() == rep.shell, "chain_census_shell_mismatch");
   st.by_shell[std::min<std::size_t>(st.sh.size(), 16)]++;
@@ -932,6 +995,24 @@ bool census_key(std::span<const gen::Point3> points, const tower::CloudIndex& ix
   b.n_shell = static_cast<tower::u8>(st.sh.size());
   std::copy(st.in.begin(), st.in.end(), b.interior_ids);
   std::copy(st.sh.begin(), st.sh.end(), b.shell_ids);
+  if (imported && judge_payload) {
+    // Full BallData differential, not merely a count/fingerprint. The
+    // recursive reference disables payload and uses the independent tower
+    // census; its geometric work is paid in the published census ledger.
+    CensusState reference_state;
+    tower::BallData reference;
+    require(census_key(points, ix, kmax, rep, reference_state, reference, false),
+            "chain_payload_judge_reference_rejected");
+    require(b.key == reference.key && b.level == reference.level && b.arity == reference.arity &&
+                b.n_interior == reference.n_interior && b.n_shell == reference.n_shell &&
+                std::equal(b.interior().begin(), b.interior().end(), reference.interior().begin()) &&
+                std::equal(b.shell().begin(), b.shell().end(), reference.shell().begin()),
+            "chain_payload_judge_ball_differs");
+    st.depth.nodes += reference_state.depth.nodes;
+    st.depth.leaf_tests += reference_state.depth.leaf_tests;
+    st.depth.range_add_mass += reference_state.depth.range_add_mass;
+    st.depth.owned_stacks += reference_state.depth.owned_stacks;
+  }
   return true;
 }
 
@@ -1256,6 +1337,8 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       fail(ChainStatus::kInvalidInput, "chain_q34_certificate_judge_requires_batch_certificates");
     if (options.q34_batch_q3 && !options.q34_batch_certificates)
       fail(ChainStatus::kInvalidInput, "chain_q34_batch_q3_requires_batch_certificates");
+    if (options.q3_interior_payload && !options.q34_batch_q3)
+      fail(ChainStatus::kInvalidInput, "chain_q3_interior_payload_requires_batch_q3");
     if (options.q34_gpu_q3 && !options.q34_batch_q3)
       fail(ChainStatus::kInvalidInput, "chain_q34_gpu_q3_requires_batch_q3");
     if (options.q34_lanes_judge && !options.q34_batch_q3)
@@ -1308,6 +1391,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     gpu_preparation.provide_index(index);
 
     std::vector<std::vector<Presentation>> slots(W);
+    InteriorPayloadArena payload_arena;
     // q2 into its own slots (v24: possibly on a thread during the device
     // calls of q34); the slots are appended to q34's before the merge.
     std::vector<std::vector<Presentation>> q2_slots(W);
@@ -1467,19 +1551,31 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
           const bool device = options.q34_gpu_q3;
           const std::uint32_t capacity = options.q34_lanes_capacity, events = options.q34_lanes_events;
           const bool fused = options.q34_lanes_fused, pinned = options.q34_lanes_pinned;
+          const bool interior_payload = options.q3_interior_payload;
           lanes.filter = [&gpu_preparation, &lanes_device_ms, &lanes_kernel_ms, &lanes_transfer_ms, &lanes_warps,
-                          &lanes_setup_ms, &lanes_finish_ms, &lanes_convert_ms, &lanes_steps,
-                          device, capacity, events, fused, pinned, W](const gen::Q2CensusIndexPtr& ix, unsigned k,
+                          &lanes_setup_ms, &lanes_finish_ms, &lanes_convert_ms, &lanes_steps, &payload_arena,
+                          device, capacity, events, fused, pinned, interior_payload, W](const gen::Q2CensusIndexPtr& ix, unsigned k,
                                                                       std::span<const gen::Q34SurvivingEdge> edges,
                                                                       std::span<const std::uint8_t> asked) {
-            return lanes_batch(gpu_preparation.get(*ix), k, edges, asked, device, capacity, events, fused, pinned, W,
+            auto batch = lanes_batch(gpu_preparation.get(*ix), k, edges, asked, device, capacity, events, fused, pinned,
+                               interior_payload, W,
                                lanes_device_ms, lanes_kernel_ms, lanes_transfer_ms, lanes_warps, lanes_setup_ms,
                                lanes_finish_ms, lanes_convert_ms, lanes_steps);
+            // The same immutable owner is kept once by the chain, before
+            // any sink runs (the concurrent producer is joined first).
+            payload_arena.ids = batch.interior_ids;
+            payload_arena.stride = batch.interior_stride;
+            payload_arena.records = batch.records.size();
+            return batch;
           };
           lanes.lanes = options.q34_batch_q4 && kmax >= 3 ? 6 : 2;
           if (options.q34_lanes_judge) lanes.filter = gen::judge_lanes_filter(std::move(lanes.filter), o, W, &lanes_judge);
-          lanes.sink = [&slots](std::size_t slot, std::span<const gen::Q34LaneRecord> records) {
+          lanes.sink = [&slots, &payload_arena](std::size_t slot, std::span<const gen::Q34LaneRecord> records,
+                                                std::uint32_t first_record) {
             auto& out = slots[slot];
+            require(first_record <= payload_arena.records && records.size() <= payload_arena.records - first_record,
+                    "chain_payload_sink_ordinal");
+            std::uint32_t ordinal = first_record;
             for (const auto& r : records) {
               Presentation p;
               p.arity = r.arity;
@@ -1487,7 +1583,15 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
               p.key = r.key;
               p.depth = r.depth;
               p.shell = r.shell;
+              if (payload_arena.ids && r.arity == 3) {
+#if defined(MHGP9_CHAIN_MUTANT_PAYLOAD_ORDINAL)
+                p.payload_record = first_record;  // mutant: every record takes the chunk's first packet
+#else
+                p.payload_record = ordinal;
+#endif
+              }
               out.push_back(p);
+              ++ordinal;
             }
           };
           lanes.concurrent = device;
@@ -1802,6 +1906,18 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     // L'erreur rendue est celle de la plus petite cle en echec (quel que soit
     // W) ; sans erreur, les statistiques sont sommees sur tous les fils.
     PhaseClock census_clock{result.times.census_ms};
+    if (options.q3_interior_payload && payload_arena.ids) {
+      payload_arena.rank_by_id.resize(points.size());
+      tower::parallel_ranges(points.size(), static_cast<int>(W),
+                             [&](std::size_t first, std::size_t last, std::size_t) {
+        for (std::size_t rank = first; rank < last; ++rank) {
+          const auto id = ix.point_id(static_cast<tower::i32>(rank));
+          require(id < points.size(), "chain_payload_index_id_outside_cloud");
+          payload_arena.rank_by_id[static_cast<std::size_t>(id)] = static_cast<tower::i32>(rank);
+        }
+      });
+    }
+    const InteriorPayloadArena* const payload = options.q3_interior_payload ? &payload_arena : nullptr;
     std::vector<tower::BallData> balls(unique);
     std::vector<std::uint8_t> keep(unique, 0);
     std::vector<CensusState> states;
@@ -1821,7 +1937,8 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         for (const auto& planted : chain_test::seam.census_faults)
           if (planted.group == g) fail(ChainStatus::kInvariantViolated, planted.reason);
 #endif
-        keep[g] = census_key(points, ix, kmax, *groups[g], states[w], balls[g], false) ? 1 : 0;
+        keep[g] = census_key(points, ix, kmax, *groups[g], states[w], balls[g], false,
+                              payload, options.q34_lanes_judge) ? 1 : 0;
       });
     } else {
       // v28: the q2-represented groups are the q2 side's keys, in the same
@@ -1858,7 +1975,8 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         for (const auto& planted : chain_test::seam.census_faults)
           if (planted.group == g) fail(ChainStatus::kInvariantViolated, planted.reason);
 #endif
-        keep[g] = census_key(points, ix, kmax, *groups[g], states[w], balls[g], false) ? 1 : 0;
+        keep[g] = census_key(points, ix, kmax, *groups[g], states[w], balls[g], false,
+                              payload, options.q34_lanes_judge) ? 1 : 0;
       });
       if (late_error.error) census_error = {late_groups[late_error.index], late_error.error};
       if (early.error.error && early_failed < census_error.index) census_error = {early_failed, early.error.error};
@@ -1877,6 +1995,9 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         result.catalogue.max_interior = std::max(result.catalogue.max_interior, st.max_interior);
         result.catalogue.census_nodes += st.depth.nodes;
         result.catalogue.census_leaf_tests += st.depth.leaf_tests;
+        result.catalogue.payload_keys += st.payload_keys;
+        result.catalogue.payload_ids += st.payload_ids;
+        result.catalogue.payload_fallback_keys += st.payload_fallback_keys;
         for (std::size_t q = 0; q < 5; ++q) result.catalogue.balls_by_qmin[q] += st.by_q[q];
         for (std::size_t s = 0; s < 17; ++s) result.catalogue.balls_by_shell[s] += st.by_shell[s];
         for (std::size_t k = 1; k <= 10; ++k) result.catalogue.euler_by_k[k] += st.euler[k];
@@ -1892,6 +2013,7 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     }
     early = EarlyCensus{};  // the q2 side's results are not read past this point
     gathered = GatheredPresentations{};  // groups is not read past this point
+    payload_arena = InteriorPayloadArena{};  // handles die with the gathered presentations
     result.catalogue.shell_over_cap = over_cap;
     if (result.catalogue.shell_over_cap > 0) {
       census_clock.stop();
@@ -1989,8 +2111,11 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       if (digest_cpu >= 0 && digest_cpu_end >= 0) catalogue_cpu += digest_cpu_end - digest_cpu;
     }
     result.status = ChainStatus::kComplete;
-    result.reason = sealed ? "complete_relative_to_cross_checked_catalogue_sealed_in_process_census"
-                           : "complete_relative_to_cross_checked_catalogue";
+    result.reason = options.q3_interior_payload
+        ? (sealed ? "complete_relative_to_cross_checked_catalogue_sealed_in_process_payload"
+                  : "complete_relative_to_cross_checked_catalogue_payload")
+        : (sealed ? "complete_relative_to_cross_checked_catalogue_sealed_in_process_census"
+                  : "complete_relative_to_cross_checked_catalogue");
   } catch (const Failure& f) {
     result.status = f.status;
     result.reason = f.reason;

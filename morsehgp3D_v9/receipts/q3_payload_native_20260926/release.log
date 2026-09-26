@@ -1,0 +1,141 @@
+[OUTPUT] 
+Internal ctest changing into directory: /workspaces/E-HGP/build/v9-q3-payload-integration-20260926
+
+[HANDLER_VERBOSE_OUTPUT] 
+UpdateCTestConfiguration  from :/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/DartConfiguration.tcl
+
+UpdateCTestConfiguration  from :/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/DartConfiguration.tcl
+[HANDLER_OUTPUT] 
+Test project /workspaces/E-HGP/build/v9-q3-payload-integration-20260926
+
+[HANDLER_VERBOSE_OUTPUT] 
+Constructing a list of tests
+
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 120
+[HANDLER_OUTPUT] 
+    Start 120: mhgp9_chain_q3_payload
+
+[HANDLER_VERBOSE_OUTPUT] 
+
+120: Test command: /usr/bin/cmake "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/mhgp9_chain_q3_payload_gate" "-DARGS=" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=chain_q3_payload_gate n=64" "-P" "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/cmake/run_expect.cmake"
+
+120: Working Directory: /workspaces/E-HGP/build/v9-q3-payload-integration-20260926
+120: Test timeout computed to be: 600
+120: chain_q3_payload_gate n=64 cases=192 imports=90862 ids=351828 fallbacks=40898 tails=24952 extra=144 judged=16 shape_refusals=8 multi_chunk_records=85363 multi_chunk_imports=45421 merge_ranges=16 presentation_bytes=112
+120: 
+[HANDLER_OUTPUT] 
+1/6 Test #120: mhgp9_chain_q3_payload ..................
+   Passed    8.84 sec
+[HANDLER_VERBOSE_OUTPUT] 
+test 121
+
+[HANDLER_OUTPUT] 
+    Start 121: mhgp9_chain_payload_ordinal_mutant
+
+[HANDLER_VERBOSE_OUTPUT] 
+
+121: Test command: /usr/bin/cmake "-DEXPECTED=1" "-DCMD=/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/mhgp9_chain_payload_ordinal_mutant_gate" "-DARGS=" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=cause=status" "-P" "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/cmake/run_expect.cmake"
+
+121: Working Directory: /workspaces/E-HGP/build/v9-q3-payload-integration-20260926
+121: Test timeout computed to be: 300
+121: cause=status uniform/K3/W1/mode0 complete_relative_to_cross_checked_catalogue chain_payload_id_outside_cloud
+121: 
+[HANDLER_OUTPUT] 
+2/6 Test #121: mhgp9_chain_payload_ordinal_mutant ......
+   Passed    0.22 sec
+[HANDLER_VERBOSE_OUTPUT] 
+test 122
+
+[HANDLER_OUTPUT] 
+    Start 122: mhgp9_chain_payload_rank_as_id_mutant
+
+[HANDLER_VERBOSE_OUTPUT] 
+
+122: Test command: /usr/bin/cmake "-DEXPECTED=1" "-DCMD=/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/mhgp9_chain_payload_rank_as_id_mutant_gate" "-DARGS=" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=cause=status" "-P" "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/cmake/run_expect.cmake"
+
+122: Working Directory: /workspaces/E-HGP/build/v9-q3-payload-integration-20260926
+122: Test timeout computed to be: 300
+122: cause=status uniform/K3/W1/mode0 complete_relative_to_cross_checked_catalogue chain_payload_noninterior_id
+122: 
+[HANDLER_OUTPUT] 
+3/6 Test #122: mhgp9_chain_payload_rank_as_id_mutant ...
+   Passed    0.21 sec
+[HANDLER_VERBOSE_OUTPUT] 
+test 150
+
+[HANDLER_OUTPUT] 
+    Start 150: mhgp9_gpu_interior_payload
+
+[HANDLER_VERBOSE_OUTPUT] 
+
+150: Test command: /usr/bin/cmake "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/mhgp9_gpu_interior_payload_gate" "-DARGS=" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=payload PASS" "-P" "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/cmake/run_expect.cmake"
+
+150: Working Directory: /workspaces/E-HGP/build/v9-q3-payload-integration-20260926
+150: Test timeout computed to be: 300
+150: payload PASS calls=140 q3=9602 q4=1648 ids=18873 extra_shell=203 deferred=3768 permuted=121 fused_fallbacks=68 device_calls=0 direct_chunks=28 max_depth=8
+150: 
+[HANDLER_OUTPUT] 
+4/6 Test #150: mhgp9_gpu_interior_payload ..............
+   Passed    2.05 sec
+[HANDLER_VERBOSE_OUTPUT] 
+test 151
+
+[HANDLER_OUTPUT] 
+    Start 151: mhgp9_gpu_interior_rank_as_id_mutant
+
+[HANDLER_VERBOSE_OUTPUT] 
+
+151: Test command: /usr/bin/cmake "-DEXPECTED=1" "-DCMD=/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/mhgp9_gpu_interior_rank_as_id_mutant_gate" "-DARGS=" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=cause=interior_ids_differ" "-P" "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/cmake/run_expect.cmake"
+
+151: Working Directory: /workspaces/E-HGP/build/v9-q3-payload-integration-20260926
+151: Test timeout computed to be: 300
+151: cause=interior_ids_differ
+151: 
+[HANDLER_OUTPUT] 
+5/6 Test #151: mhgp9_gpu_interior_rank_as_id_mutant ....
+   Passed    0.01 sec
+[HANDLER_VERBOSE_OUTPUT] 
+test 152
+
+[HANDLER_OUTPUT] 
+    Start 152: mhgp9_gpu_interior_omit_last_mutant
+
+[HANDLER_VERBOSE_OUTPUT] 
+
+152: Test command: /usr/bin/cmake "-DEXPECTED=1" "-DCMD=/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/mhgp9_gpu_interior_omit_last_mutant_gate" "-DARGS=" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=cause=interior_ids_differ" "-P" "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/cmake/run_expect.cmake"
+
+152: Working Directory: /workspaces/E-HGP/build/v9-q3-payload-integration-20260926
+152: Test timeout computed to be: 300
+152: cause=interior_ids_differ
+152: 
+[HANDLER_OUTPUT] 
+6/6 Test #152: mhgp9_gpu_interior_omit_last_mutant .....
+   Passed    0.01 sec
+[HANDLER_VERBOSE_OUTPUT] 
+
+The following tests passed:
+
+	mhgp9_chain_q3_payload
+	mhgp9_chain_payload_ordinal_mutant
+	mhgp9_chain_payload_rank_as_id_mutant
+	mhgp9_gpu_interior_payload
+	mhgp9_gpu_interior_rank_as_id_mutant
+	mhgp9_gpu_interior_omit_last_mutant
+[HANDLER_OUTPUT] 
+
+100% tests passed, 0 tests failed out of 6
+
+
+Label Time Summary:
+chain      =   9.27 sec*proc (3 tests)
+gate       =  11.34 sec*proc (6 tests)
+gpu        =   2.07 sec*proc (3 tests)
+mutant     =   0.45 sec*proc (4 tests)
+payload    =  11.34 sec*proc (6 tests)
+
+Total Test time (real) =  11.35 sec

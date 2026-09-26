@@ -225,8 +225,13 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                                  lanes_fused_census_chunks=2, lanes_fused_fallbacks=0)
     early = bool(complete and levers.get('q2_early_census') and effective >= 2)
     pinned_session = bool(levers.get('device_session') and levers.get('q34_lanes_pinned') and levers.get('q34_gpu_q3'))
-    return dict(schema='mhgp9_tower_probe_v29', status=status,
-                reason='complete_relative_to_cross_checked_catalogue' if complete else 'selftest_explicit_refusal',
+    reason = ('complete_relative_to_cross_checked_catalogue_sealed_in_process_payload'
+              if levers.get('tower_sealed_catalogue') else 'complete_relative_to_cross_checked_catalogue_payload')
+    if not levers.get('q3_interior_payload'):
+        reason = ('complete_relative_to_cross_checked_catalogue_sealed_in_process_census'
+                  if levers.get('tower_sealed_catalogue') else 'complete_relative_to_cross_checked_catalogue')
+    value = dict(schema='mhgp9_tower_probe_v30', status=status,
+                reason=reason if complete else 'selftest_explicit_refusal',
                 input=dict(format='u32le', grid='1mm', sites=n, hash=fnv),
                 options=dict(K=k, K_effective=effective, s=s, workers=workers, tower_static_threads=static,
                              run_tower=True, certificate_capacity=capacity, certificate_judge=judge,
@@ -251,7 +256,10 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                                # v28 (R-29): every regular support certified by
                                # the chain; the q2 keys censused on the q2 side.
                                regular_supports=[1, 2, 1], early_census_keys=1 if early else 0,
-                               early_census_extra_shell_balls=0),
+                               early_census_extra_shell_balls=0,
+                               payload_keys=1 if complete and levers.get('q3_interior_payload') else 0,
+                               payload_ids=1 if complete and levers.get('q3_interior_payload') else 0,
+                               payload_fallback_keys=1 if complete and levers.get('q3_interior_payload') else 0),
                 q34_occupancy=occupancy, q34_batch=batch, tower_phases_ms=phases,
                 tower_work=dict(records=4, extra_records=0, representatives=5, anchor_hits=1, key_lookups=4,
                                 intruder_queries=2, intruder_nodes=7, meb_calls=4, meb_power_tests=9, births=3,
@@ -281,6 +289,13 @@ def probe_value(n, fnv, k, s, workers, static, status='complete_relative', salt=
                             chain_total_ms=[1.5] * frames, tower_ms=[0.125] * frames, q34_ms=[0.125] * frames,
                             census_ms=[0.125] * frames, lanes_transfer_ms=[batch['lanes_transfer_ms']] * frames),
                 host=dict(thp='madvise'))
+    identity = dict(status=value['status'], reason=value['reason'], K_effective=effective,
+                    tower_digest=value['tower_digest'], catalogue_digest=value['catalogue_digest'],
+                    presentation_digest=value['presentation_digest'], orders=value['orders'],
+                    counts={key: value['catalogue'][key] for key in ('q2_presentations', 'q3_presentations',
+                            'q4_presentations', 'unique_keys', 'balls', 'extra_shell_balls')})
+    value['frames']['results'] = [json.loads(json.dumps(identity)) for _ in range(frames)]
+    return value
 
 
 def tower_detail(levers, effective, k, static, complete):
@@ -414,7 +429,9 @@ def main():
         (build / 'source.txt').write_text(str(source))
         print('-- Build files have been written to: ' + str(build))
         return 0
-    if len(args) == 6 and args[0] == '--build' and args[2:] == ['--target', 'mhgp9_tower_probe', '--parallel', '48']:
+    allowed_builds = (['--target', 'mhgp9_tower_probe', '--parallel', '48'],
+                      ['--target', 'mhgp9_tower_probe', 'mhgp9_gpu_interior_payload_gate', '--parallel', '48'])
+    if len(args) in (6, 7) and args[0] == '--build' and args[2:] in allowed_builds:
         build = pathlib.Path(args[1])
         source = pathlib.Path((build / 'source.txt').read_text())
         if config.get('fail_build'):
@@ -423,8 +440,13 @@ def main():
         probe = build / 'mhgp9_tower_probe'
         shutil.copyfile(HERE / 'fake_probe.py', probe)
         probe.chmod(0o755)
-        for target, relative in (('mhgp9_tower_probe', 'bench/tower_probe.cpp'),
-                                 ('mhgp9_chain', 'src/chain/tower_chain.cpp')):
+        dependencies = [('mhgp9_tower_probe', 'bench/tower_probe.cpp'), ('mhgp9_chain', 'src/chain/tower_chain.cpp')]
+        if 'mhgp9_gpu_interior_payload_gate' in args:
+            gate = build / 'mhgp9_gpu_interior_payload_gate'
+            shutil.copyfile(HERE / 'fake_payload_gate.py', gate)
+            gate.chmod(0o755)
+            dependencies.append(('mhgp9_gpu_interior_payload_gate', 'tests/gpu/interior_payload_gate.cpp'))
+        for target, relative in dependencies:
             depfile = build / 'CMakeFiles' / (target + '.dir') / (relative + '.o.d')
             depfile.parent.mkdir(parents=True, exist_ok=True)
             names = [source / relative, source / 'src/chain/tower_chain.hpp', HERE / 'system_header.hpp']
@@ -444,6 +466,14 @@ import sys
 if sys.argv[1:] != ['--version']:
     raise SystemExit(64)
 print('g++ (selftest fake) 11.4.0')
+'''
+
+FAKE_PAYLOAD_GATE = r'''
+import sys
+if sys.argv[1:] != ['--device']:
+    raise SystemExit(64)
+print('payload PASS calls=2 q3=1 q4=1 ids=1 extra_shell=1 deferred=1 permuted=1 fused_fallbacks=1 '
+      'device_calls=1 direct_chunks=28 max_depth=8')
 '''
 
 FAKE_NVCC = r'''
@@ -579,7 +609,7 @@ def fake_tools(directory, **config):
     shebang = '#!' + sys.executable + ' -B\n'
     probe = 'CONFIG = ' + repr(str(fakebin / 'config.json')) + '\n' + FAKE_PROBE
     for name, text in (('cmake', FAKE_CMAKE), ('g++', FAKE_GXX), ('nvcc', FAKE_NVCC), ('nvidia-smi', FAKE_SMI),
-                       ('fake_probe.py', probe)):
+                       ('fake_probe.py', probe), ('fake_payload_gate.py', FAKE_PAYLOAD_GATE)):
         (fakebin / name).write_text(shebang + text)
         (fakebin / name).chmod(0o755)
     return fakebin
@@ -740,6 +770,94 @@ class Protocol(unittest.TestCase):
         # are judged apart (test_pinned_digests).
         self.enterContext(patch.object(worker, 'PINNED_DIGESTS', {}))
 
+    def test_payload_plan_and_pairs(self):
+        plan = snapshot.payload_plan()
+        manifest = {data['file']: data['sha256'] for data in worker.INPUTS.values()}
+        cases = worker.validate_plan(plan, manifest)
+        need(len(cases) == 26 and all(c['frames'] == 1 for c in cases), 'focused payload plan')
+        need([(c['levers']['q3_interior_payload'], c['repeat']) for c in cases[:4]] ==
+             [(True, 0), (False, 0), (False, 1), (True, 1)], 'payload ABBA order')
+        need(not cases[4]['levers']['q34_batch_filter'], 'payload ABBA engine twin')
+        need(all(not c['levers']['q3_interior_payload'] for c in snapshot.default_plan()['cases']),
+             'historical plan silently enables payload')
+        without_off = [c for c in cases if not (c['scene'] == '00' and c['k'] == 5 and c['s'] == 8 and
+                                               c['levers']['q34_batch_filter'] and
+                                               not c['levers']['q3_interior_payload'])]
+        need(refused(worker.validate_plan, dict(plan, cases=without_off), manifest), 'payload without OFF twin')
+        wrong = deepcopy(plan)
+        for c in wrong['cases']:
+            if not c['levers']['q3_interior_payload'] and c['levers']['q34_batch_filter']:
+                c['workers'] = 24
+        need(refused(worker.validate_plan, wrong, manifest), 'OFF twin changed worker count')
+        levers = dict(cases[0]['levers'], q34_batch_q3=False, q34_gpu_q3=False,
+                      q34_batch_q4=False, q34_lanes_fused=False, q34_lanes_pinned=False)
+        need(not worker._levers(levers), 'payload without q3 batch dependency')
+        on_case, off_case = cases[:2]
+        data = worker.INPUTS['00']
+        on = probe_value(data['n'], data['fnv'], 5, 8, 48, 48, levers=on_case['levers'])
+        off = probe_value(data['n'], data['fnv'], 5, 8, 48, 48, levers=off_case['levers'])
+        need(worker.validate_probe(on, on_case, 0) == worker.validate_probe(off, off_case, 0) == 'complete_relative',
+             'valid payload ON/OFF')
+        need(worker.payload_pair_equal(on, off), 'valid payload pair')
+        engine_case = cases[4]
+        engine = probe_value(data['n'], data['fnv'], 5, 8, 48, 48, levers=engine_case['levers'])
+        rows = [dict(outcome='complete_relative')] * 3
+        paired = worker.compare_cases([engine_case, on_case, off_case], rows, {0: engine, 1: on, 2: off})
+        need(any(row['reference'] == 2 and row['other'] == 1 and row['equal'] for row in paired),
+             'engine-first ordering still compares ON/OFF directly')
+        need(worker.unpaired_payload_cases([on_case, off_case],
+              [dict(outcome='complete_relative'), dict(outcome='killed_case_cap')]) == [0],
+             'completed ON without completed OFF is unpaired')
+        for mutate in (lambda v: v['ledger'].update(q3_leaf_censuses=1),
+                       lambda v: v['catalogue'].update(census_nodes=off['catalogue']['census_nodes']+1),
+                       lambda v: v.update(presentation_digest='f'*16)):
+            bad = deepcopy(on)
+            mutate(bad)
+            need(not worker.payload_pair_equal(bad, off), 'payload paired work/object drift')
+        bad = deepcopy(off)
+        bad['catalogue']['payload_keys'] = 1
+        need(refused(worker.validate_probe, bad, off_case, 0), 'payload work without opt-in')
+        deferred = probe_value(data['n'], data['fnv'], 5, 8, 48, 48, levers=on_case['levers'],
+                               capacity=worker.DEFERRAL_CAPACITY, judge=True,
+                               lanes_capacity=worker.LANES_DEFERRAL_CAPACITY)
+        deferred['catalogue'].update(payload_keys=0, payload_ids=0, payload_fallback_keys=2)
+        need(worker.validate_probe(deferred, on_case, 0, capacity=worker.DEFERRAL_CAPACITY, judge=True,
+                                   lanes_capacity=worker.LANES_DEFERRAL_CAPACITY) == 'complete_relative',
+             'capacity deferral may send every q3 key through the global census')
+        raw = ('payload PASS calls=2 q3=1 q4=1 ids=1 extra_shell=1 deferred=1 permuted=1 fused_fallbacks=1 '
+               'device_calls=1 direct_chunks=28 max_depth=8\n')
+        need(worker.validate_payload_gate(raw)['device_calls'] == 1, 'payload device gate output')
+        for malformed in (raw.replace('device_calls=1', 'device_calls=0'), raw.replace('ids=1', 'ids=0'),
+                          raw.replace('calls=2 ', 'calls=1 '), raw + 'extra=1', raw.replace('PASS', 'FAIL'),
+                          raw.replace('max_depth=8', 'max_depth=7'), raw.replace('direct_chunks=28', 'direct_chunks=27'),
+                          raw.replace('fused_fallbacks=1', 'fused_fallbacks=0')):
+            need(refused(worker.validate_payload_gate, malformed), 'payload device gate malformed/vacuous')
+
+    def test_each_frame_identity_is_checked(self):
+        case = dict(snapshot.payload_plan()['cases'][0], frames=2)
+        data = worker.INPUTS['00']
+        good = probe_value(data['n'], data['fnv'], 5, 8, 48, 48, levers=case['levers'], frames=2)
+        need(worker.validate_probe(good, case, 0) == 'complete_relative', 'two complete equal frames')
+        mutations = [lambda row: row.update(status='resource_exhausted'),
+                     lambda row: row.update(reason='complete_relative_to_cross_checked_catalogue'),
+                     lambda row: row.update(K_effective=4),
+                     lambda row: row['counts'].update(q3_presentations=3),
+                     lambda row: row['orders'][0].update(nodes=1)]
+        mutations += [lambda row, name=name: row.update({name: 'f'*16})
+                      for name in ('tower_digest', 'catalogue_digest', 'presentation_digest')]
+        for mutate in mutations:
+            bad = deepcopy(good)
+            mutate(bad['frames']['results'][1])
+            need(refused(worker.validate_probe, bad, case, 0), 'later frame changed despite same tower claim')
+            bad['frames']['same_object'] = False
+            need(refused(worker.validate_probe, bad, case, 0), 'later divergent frame cannot claim complete')
+        for mutate in (lambda v: v['frames']['results'].pop(),
+                       lambda v: v['frames']['results'][0]['counts'].update(balls=99),
+                       lambda v: v['frames']['results'][1].update(extra=True)):
+            bad = deepcopy(good)
+            mutate(bad)
+            need(refused(worker.validate_probe, bad, case, 0), 'frame evidence malformed')
+
     def test_gpu_execution_is_observed(self):
         # Auditor B: a GPU-certificate case without survivors launches no
         # kernel and is no GPU execution, whatever its levers.
@@ -879,7 +997,7 @@ class Protocol(unittest.TestCase):
         # v28 (R22): the GPU arm with the sealed catalogue, the q2 early
         # census and the pinned lanes pool; gpu_r21 without the three,
         # repeated and interleaved at 00; then each one off alone at 00.
-        gpu = dict(on, q34_lanes_fused=False)
+        gpu = dict(on, q34_lanes_fused=False, q3_interior_payload=False)
         new = ('tower_sealed_catalogue', 'q2_early_census', 'q34_lanes_pinned')
         arms = dict(gpu=gpu, engine=worker.engine_levers(gpu), gpu_r21=dict(gpu, **{name: False for name in new}),
                     **{'gpu_no_' + name: dict(gpu, **{name: False}) for name in new})
@@ -943,6 +1061,10 @@ class Protocol(unittest.TestCase):
         bad = deepcopy(plan)
         bad['cases'].append(deepcopy(bad['cases'][0]))
         need(refused(worker.validate_plan, bad, manifest), 'duplicate case')
+        unpinned = deepcopy(plan)
+        unpinned['cases'] = [dict(c, k=5 if c['k'] == 10 else 10) for c in plan['cases']]
+        with patch.object(worker, 'PINNED_DIGESTS', {('00', 5): ('0' * 16, '0' * 16)}):
+            need(refused(worker.validate_plan, unpinned, manifest), 'plan case without a pin')
         bad['cases'][-1]['repeat'] = 2  # repeat 1 of case 0 is already in the R14 plan
         worker.validate_plan(bad, manifest)   # distinct repetition accepted
         # Ablation plans: ON first (preflight levers), then OFF, accepted;
@@ -1166,7 +1288,20 @@ class Protocol(unittest.TestCase):
                                lambda v: v['tower_detail'].update(population_deferred_refs=sum(
                                    o['contributions'] for o in v['orders']) + 1)),
                               ('tower detail pool time beyond the tower',
-                               lambda v: v['tower_detail'].update(pool_ms=1e6))):
+                               lambda v: v['tower_detail'].update(pool_ms=1e6)),
+                              ('sealed pass 1 checked nothing',
+                               lambda v: v['tower_detail'].update(declared_support_checks=0)),
+                              ('sealed reason not published',
+                               lambda v: v.update(reason='complete_relative_to_cross_checked_catalogue')),
+                              ('frames body is not the first frame',
+                               lambda v: v['frames']['chain_total_ms'].__setitem__(0, 9.0)),
+                              ('frames objects differ', lambda v: v['frames'].update(same_object=False)),
+                              ('frames count shifted', lambda v: v['frames'].update(count=2)),
+                              ('host page mode absent', lambda v: v.pop('host')),
+                              ('q3 payload total keys shifted', lambda v: v['catalogue'].update(payload_keys=0)),
+                              ('q3 payload ids above rank window', lambda v: v['catalogue'].update(payload_ids=999)),
+                              ('q3 payload fallback includes non-q3 keys',
+                               lambda v: v['catalogue'].update(payload_fallback_keys=4))):
             bad = deepcopy(gpu_good)
             mutate(bad)
             need(refused(worker.validate_probe, bad, gpu_case, 0), 'batch/GPU probe mutation ' + label)
@@ -1504,6 +1639,49 @@ class Protocol(unittest.TestCase):
                      'tamper ' + label)
                 shutil.rmtree(tampered)
             need(refused(session.validate_received, output, pkg['manifest'], '0' * 64, expected, *bound), 'worker pin')
+
+    def test_payload_session_preflight_and_reception(self):
+        # Fake cloud only. This new protocol path has its own archived
+        # three-case plan, so the historical campaign tests remain unchanged.
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            plan = snapshot.payload_plan()
+            plan['cases'] = [plan['cases'][i] for i in (0, 1, 4)]
+            plan_path = directory / 'payload_plan.json'
+            plan_path.write_bytes(worker.canonical_json(plan))
+            committed = protocol_committed()
+            record = snapshot.build('HEAD', directory / 'package', plan_path,
+                                    allow_uncommitted_protocol=not committed)
+            manifest_path = directory / 'package/source_manifest.json'
+            pkg = dict(directory=directory, record=record, committed=committed,
+                       archive=directory / 'package/snapshot.tar.gz', manifest_path=manifest_path,
+                       manifest=worker.strict_json(manifest_path.read_bytes()))
+            with patch.dict(_PACKAGE, pkg, clear=True):
+                code, receipt, fake, host = run_scenario(directory)
+                need(code == 0 and receipt['status'] == 'completed', 'payload simulated session completed')
+                expect_certified_stop(receipt, fake)
+                output = host / 'received/output'
+                value = worker.strict_json((output / 'receipt.json').read_bytes())
+                need(value['preflight']['payload_keys'] == value['preflight']['payload_ids'] == 1 and
+                     value['preflight']['payload_off_tower_digest'] == value['preflight']['tower_digest'] and
+                     (output / 'preflight_payload_off.command.json').is_file(), 'payload preflight recorded')
+                need(value['payload_gate']['counters']['device_calls'] == 1 and
+                     value['payload_gate_binary_stable'] is True and
+                     (output / 'payload_device_gate.command.json').is_file(), 'payload CUDA gate recorded')
+                need(value['completed_case_indices'] == [0, 1, 2] and
+                     all(row['equal'] for row in value['cross_worker_comparisons']) and
+                     value['unpaired_payload_cases'] == [], 'payload measured twins')
+                expected = session.validate_snapshot(pkg['archive'], pkg['manifest'])[0]
+                bound = (receipt['generation'], receipt['provenance'], receipt['verified_guard'])
+                with patch.object(worker, 'CUDA_PATHS', (str(directory / 'fakebin/nvcc'),)):
+                    need(session.validate_received(output, pkg['manifest'], worker.sha(worker.__file__),
+                                                   expected, *bound) == 'completed', 'payload host reread')
+                    original = (output / 'receipt.json').read_bytes()
+                    changed = worker.strict_json(original)
+                    changed['preflight']['payload_ids'] = 0
+                    (output / 'receipt.json').write_bytes(worker.canonical_json(changed))
+                    need(refused(session.validate_received, output, pkg['manifest'], worker.sha(worker.__file__),
+                                 expected, *bound), 'payload preflight summary forged')
 
     def test_partial_session_case_cap_and_refusal(self):
         with tempfile.TemporaryDirectory() as temporary:

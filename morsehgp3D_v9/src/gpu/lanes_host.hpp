@@ -132,6 +132,8 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
                                           input.index.rank_points},
                          input.rank_ids};
   out.pinned_records = input.pinned_records;  // v28: the path's echo (no record: an empty lease)
+  out.interior_payload = input.interior_payload;
+  out.interior_stride = input.interior_payload ? input.index.kmax - 2 : 0;
   if (edges == 0) return out;  // no slab: nothing to decide
   if (window == 0) window = 1;
   const std::size_t windows = (edges + window - 1) / window;
@@ -154,6 +156,7 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
   std::vector<std::vector<std::int32_t>> cover_points(threads);
   std::vector<std::vector<u32>> cover_ranks(threads), cover_seeds(threads);
   std::vector<RawVector<LaneRecord>> staging(threads);
+  std::vector<RawVector<u32>> staging_interiors(input.interior_payload ? threads : 0);
   std::vector<Q3Work> work3(threads);
   std::vector<Q4Work> work4(threads);
   std::vector<u64> cover_total(threads, 0), staged_total(threads, 0), task_steps(threads, 0);
@@ -176,6 +179,9 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
     try {
       std::vector<u32> ranges(2 * static_cast<std::size_t>(capacity)), scratch(capacity);
       std::vector<LaneRecord> slab_records(record_capacity);
+      std::vector<u32> slab_interiors(static_cast<std::size_t>(record_capacity) * out.interior_stride);
+      u32 interior_scratch[8];
+      const Q3InteriorSlab payload{interior_scratch, slab_interiors.data(), out.interior_stride};
       std::vector<u32> positions(event_capacity), bits(event_capacity), list(event_capacity);
       const Q4Slab q4{positions.data(), bits.data(), list.data(), event_capacity};
       const LanesSlab walk{ranges.data(), nullptr, nullptr, nullptr, scratch.data(), nullptr, capacity, 0};
@@ -203,6 +209,7 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
         cover_ranks[self].clear();
         cover_seeds[self].clear();
         staging[self].clear();
+        if (input.interior_payload) staging_interiors[self].clear();
         if (!barrier.arrive_and_wait()) return;
         if (self == 0) mark = std::chrono::steady_clock::now();
         // ---- P: one per edge of the window.
@@ -281,7 +288,11 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
                                capacity,
                                record_capacity};
           Q4Work w4{};
-          const u64 steps = lanes_task(HostGroup{}, index, input.edge_a[e], input.edge_b[e], plan.lanes,
+          const u64 steps = input.interior_payload
+              ? lanes_task<true>(HostGroup{}, index, input.edge_a[e], input.edge_b[e], plan.lanes,
+                                       input.index.kmax, slab, plan.sites, task.first, task.last, q4, task, w4,
+                                       slots[i], fused_work[self], input.fused_pass, payload)
+              : lanes_task(HostGroup{}, index, input.edge_a[e], input.edge_b[e], plan.lanes,
                                        input.index.kmax, slab, plan.sites, task.first, task.last, q4, task, w4,
                                        slots[i], fused_work[self], input.fused_pass);
           task_steps[self] = std::max<u64>(task_steps[self], steps);
@@ -290,8 +301,14 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
             const u32 n = task.q3 + task.q4;
             task.begin = staging[self].size();
             task_owner[t] = static_cast<u32>(self);
-            for (u32 r = 0; r < n; ++r)
-              staging[self].push_back(slab_records[lanes_task_slab_index(task, record_capacity, r)]);
+            for (u32 r = 0; r < n; ++r) {
+              const u32 physical = lanes_task_slab_index(task, record_capacity, r);
+              staging[self].push_back(slab_records[physical]);
+              if (input.interior_payload)
+                for (u32 j = 0; j < out.interior_stride; ++j)
+                  staging_interiors[self].push_back(r < task.q3
+                      ? slab_interiors[static_cast<std::size_t>(physical) * out.interior_stride + j] : absent32);
+            }
             staged_total[self] += n;
           }
         }
@@ -340,6 +357,7 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
           }
           const std::size_t from = out.records.size();
           out.records.resize(begin);
+          if (input.interior_payload) out.interior_ids.resize(begin * out.interior_stride);
           poison_unwritten(out.records, from);
           next_gather.store(0);
           next_task.store(0);
@@ -371,9 +389,14 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
           lanes_task_destinations(scan.data(), task, task_first[i], plans[i].tasks, t, out.record_begin[e], to3, to4);
           const LaneRecord* from = staging[task_owner[t]].data() + task.begin;
           for (u32 r = 0; r < task.q3 + task.q4; ++r) {
-            LaneRecord& to = out.records[r < task.q3 ? to3 + r : to4 + (r - task.q3)];
+            const auto destination = r < task.q3 ? to3 + r : to4 + (r - task.q3);
+            LaneRecord& to = out.records[destination];
             to = from[r];
             to.edge = static_cast<u32>(e);
+            if (input.interior_payload)
+              for (u32 j = 0; j < out.interior_stride; ++j)
+                out.interior_ids[destination * out.interior_stride + j] =
+                    staging_interiors[task_owner[t]][(task.begin + r) * out.interior_stride + j];
           }
         }
         if (!barrier.arrive_and_wait()) return;
@@ -428,6 +451,7 @@ inline LanesOutput run_lanes_tasks_host(const LanesInput& input, std::size_t wor
       out.record_count[e] = 0;
     }
     out.records.clear();
+    out.interior_ids.clear();
     out.work = Q3Work{};
     out.work4 = Q4Work{};
     out.deferred = out.faults = 0;

@@ -546,6 +546,54 @@ struct Q3Census {
   bool rejected;
 };
 
+// Opt-in q3 payload, separate from LaneRecord's stable 128-byte layout.
+// scratch: eight SHARED words per group (not per lane). records: the
+// record slab's sidecar, stride words per physical record slot, stride=K-2.
+// Only accepted q3 slots are written; q4 payloads are sentinel-filled at
+// staging. A rejected prefix is never published. K2 has stride zero.
+struct Q3InteriorSlab {
+  u32* scratch = nullptr;
+  u32* records = nullptr;
+  u32 stride = 0;
+};
+
+MHGP9_HD inline bool q3_interior_valid(unsigned kmax, const Q3InteriorSlab& payload) {
+  return kmax >= 2 && kmax <= 10 && payload.stride == kmax - 2 &&
+         (payload.stride == 0 || (payload.scratch != nullptr && payload.records != nullptr));
+}
+
+// Called AFTER q3_census_chunk: reuse its depth delta, no extra power or
+// population count. Every completed non-saturating chunk has depth<=K-2.
+template <class Group>
+MHGP9_HD void q3_interior_chunk(const Group& group, [[maybe_unused]] const LanesIndex& index, const LanesSlab& slab,
+                                 const Q3InteriorSlab& payload, u32 base, u32 inside, u32 before,
+                                 const Q3Census& c) {
+  if (c.rejected || c.depth == before) return;
+  group.for_set(inside, [&](u32 lane, u32 order) {
+    const u32 rank = slab.ranks[base + lane];
+#if defined(MHGP9_LANES_MUTANT_INTERIOR_RANK_AS_ID)
+    payload.scratch[before + order] = rank;
+#else
+    payload.scratch[before + order] = index.rank_ids[rank];
+#endif
+  });
+  group.sync();  // shared writes complete before publication or reuse
+}
+
+template <class Group>
+MHGP9_HD void q3_interior_record(const Group& group, const Q3InteriorSlab& payload, u32 record, u32 depth) {
+  group.for_each(payload.stride, [&](u32 j) {
+#if defined(MHGP9_LANES_MUTANT_INTERIOR_OMIT_LAST)
+    const bool present = j + 1 < depth;
+#else
+    const bool present = j < depth;
+#endif
+    payload.records[static_cast<std::size_t>(record) * payload.stride + j] =
+        present ? payload.scratch[j] : absent32;
+  });
+  group.sync();  // all readers finish before the next seed overwrites scratch
+}
+
 // One chunk of a census at `base` from its ballots (bit l: site base + l
 // of negative power in `inside`, of zero power in `zero`): the sequential
 // census stops at the need-th site of negative power (its exact stopping
@@ -608,11 +656,14 @@ MHGP9_HD inline void q3_record(const Q3Form& form, const std::int32_t a[3], u32 
 // accepted seed defers, a seed without its ball is a fault (the records
 // before either stay valid). `local` receives the census counters only.
 // Uniform result.
-template <class Group>
+template <bool InteriorPayload = false, class Group>
 MHGP9_HD CertificateStatus q3_census_range(const Group& group, const LanesIndex& index, u32 a_rank, u32 b_rank,
                                            unsigned kmax, const LanesSlab& slab, u32 sites, u32 first, u32 last,
-                                           u32& record_count, EdgeQ3Work& local) {
+                                           u32& record_count, EdgeQ3Work& local,
+                                           const Q3InteriorSlab& payload = {}) {
   if (kmax < 2) return CertificateStatus::fault;  // no q3 lane below K2
+  if constexpr (InteriorPayload)
+    if (!q3_interior_valid(kmax, payload)) return CertificateStatus::fault;
   const std::int32_t* a = index.tree.rank_points + 3 * static_cast<std::size_t>(a_rank);
   const u32 id_a = index.rank_ids[a_rank], id_b = index.rank_ids[b_rank];
   const std::int32_t* b = index.tree.rank_points + 3 * static_cast<std::size_t>(b_rank);
@@ -629,7 +680,9 @@ MHGP9_HD CertificateStatus q3_census_range(const Group& group, const LanesIndex&
         const i128 power = q3_power(form, a, slab.points + 3 * static_cast<std::size_t>(t));
         return (power < 0 ? 1U : 0U) | (power == 0 ? 2U : 0U);
       }, inside, zero);
+      const u32 before = c.depth;
       q3_census_chunk(group, index, slab, sites, threshold, base, inside, zero, c);
+      if constexpr (InteriorPayload) q3_interior_chunk(group, index, slab, payload, base, inside, before, c);
     }
     q3_census_count(c, local);
     if (c.rejected) {
@@ -639,6 +692,7 @@ MHGP9_HD CertificateStatus q3_census_range(const Group& group, const LanesIndex&
     if (record_count == slab.record_capacity) return CertificateStatus::deferred;
     if (group.leader())
       q3_record(form, a, id_a, id_b, index.rank_ids[slab.ranks[slab.seeds[i]]], c, slab.records[record_count]);
+    if constexpr (InteriorPayload) q3_interior_record(group, payload, record_count, c.depth);
     ++record_count;
     ++local.emitted;
     local.shell_ids += c.shell;

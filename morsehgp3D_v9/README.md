@@ -2,6 +2,13 @@
 
 Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 
+Reprise du développement le 26 septembre :
+[transport des intérieurs q3 vers le catalogue](docs/REPRISE_DEVELOPPEUR_IDS_Q3_20260926.md)
+et [protocole v30](docs/DEVELOPPEMENT_IDS_Q3_20260926.md).
+Le levier `q3_interior_payload` est opt-in ; son code et ses tests ne
+constituent pas encore un gain G4 qualifié. Les sections d'ouverture
+ci-dessous restent l'historique du 22 septembre.
+
 ```text
 phase=exploration_v9_hors_registre
 backend=reference_cpu (premier moteur v9 : generateur v8 + tour v7, 18 bits)

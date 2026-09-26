@@ -11,6 +11,9 @@
 //     de la tour v7 ;
 //   - le compte d'interieurs et la taille de coquille emis par le generateur
 //     sont recalcules par un census exact sur l'index de la tour ;
+//     exception explicite opt-in q3_interior_payload : les boules q3
+//     regulieres importent les IDs complets du producteur certifie, avec
+//     controles exacts locaux ; le juge activable rejoue le census global ;
 //   - q_min recalcule sur la coquille (quotient local) doit egaler la plus
 //     petite arite presentee (sinon une voie du generateur est incomplete) ;
 //   - R-29 (auditeur C) : par cle distincte, en O(1) et en entiers exacts,
@@ -150,6 +153,14 @@ struct ChainOptions {
   // arete decidee par la voie q3 du moteur (preflights). Meme objet ;
   // desactives par defaut.
   bool q34_batch_q3 = false;
+  // Complete original-ID interiors from decided batch q3 records. Regular
+  // q3 balls are imported with exact local checks; extra shells and CPU
+  // tail emissions retain the global census. Requires q34_batch_q3. The
+  // judge also compares imported BallData with an independent global census.
+  // Off by default; success provenance explicitly says payload, not census.
+  // This suffix describes the mechanism enabled, not a positive number of
+  // imports (K1/empty/all-fallback may have payload_keys == 0).
+  bool q3_interior_payload = false;
   bool q34_gpu_q3 = false;
   bool q34_lanes_judge = false;
   std::uint32_t q34_lanes_capacity = 0;
@@ -238,6 +249,10 @@ struct CatalogueStats {
   std::uint64_t unique_keys = 0, balls = 0, extra_shell_balls = 0;
   std::uint64_t shell_over_cap = 0, max_shell = 0, max_interior = 0;
   std::uint64_t census_nodes = 0, census_leaf_tests = 0;
+  // Distinct regular q3 keys imported, their interior IDs, and canonical
+  // q3 keys using global census (extra shell or CPU tail). All zero off;
+  // q2/q4 keys are not payload fallbacks. Import time is in census_ms.
+  std::uint64_t payload_keys = 0, payload_ids = 0, payload_fallback_keys = 0;
   // v28 (q2_early_census) : cles recensees cote q2 (publie des la reprise
   // apres la fusion) et, parmi elles, coquilles etendues (publie avec les
   // autres statistiques) ; nuls sans le levier ou si la partie q2 a echoue

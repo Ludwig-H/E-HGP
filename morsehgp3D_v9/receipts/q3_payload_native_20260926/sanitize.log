@@ -1,0 +1,68 @@
+[OUTPUT] 
+Internal ctest changing into directory: /workspaces/E-HGP/build/v9-q3-payload-sanitize-20260926
+
+[HANDLER_VERBOSE_OUTPUT] 
+UpdateCTestConfiguration  from :/workspaces/E-HGP/build/v9-q3-payload-sanitize-20260926/DartConfiguration.tcl
+
+UpdateCTestConfiguration  from :/workspaces/E-HGP/build/v9-q3-payload-sanitize-20260926/DartConfiguration.tcl
+[HANDLER_OUTPUT] 
+Test project /workspaces/E-HGP/build/v9-q3-payload-sanitize-20260926
+
+[HANDLER_VERBOSE_OUTPUT] 
+Constructing a list of tests
+
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 121
+[HANDLER_OUTPUT] 
+    Start 121: mhgp9_chain_q3_payload
+
+[HANDLER_VERBOSE_OUTPUT] 
+
+121: Test command: /usr/bin/cmake "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v9-q3-payload-sanitize-20260926/mhgp9_chain_q3_payload_gate" "-DARGS=" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=chain_q3_payload_gate n=64" "-P" "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/cmake/run_expect.cmake"
+
+121: Working Directory: /workspaces/E-HGP/build/v9-q3-payload-sanitize-20260926
+121: Test timeout computed to be: 600
+121: chain_q3_payload_gate n=64 cases=192 imports=90862 ids=351828 fallbacks=40898 tails=24952 extra=144 judged=16 shape_refusals=8 multi_chunk_records=85363 multi_chunk_imports=45421 merge_ranges=16 presentation_bytes=112
+121: 
+[HANDLER_OUTPUT] 
+1/2 Test #121: mhgp9_chain_q3_payload ...........
+   Passed   43.06 sec
+[HANDLER_VERBOSE_OUTPUT] 
+test 151
+
+[HANDLER_OUTPUT] 
+    Start 151: mhgp9_gpu_interior_payload
+
+[HANDLER_VERBOSE_OUTPUT] 
+
+151: Test command: /usr/bin/cmake "-DEXPECTED=0" "-DCMD=/workspaces/E-HGP/build/v9-q3-payload-sanitize-20260926/mhgp9_gpu_interior_payload_gate" "-DARGS=" "-DEXPECT_LINE=" "-DEXPECT_PREFIX=payload PASS" "-P" "/tmp/mhgp9-audit-resume-20260926/morsehgp3D_v9/cmake/run_expect.cmake"
+
+151: Working Directory: /workspaces/E-HGP/build/v9-q3-payload-sanitize-20260926
+151: Test timeout computed to be: 300
+151: payload PASS calls=140 q3=9602 q4=1648 ids=18873 extra_shell=203 deferred=3768 permuted=121 fused_fallbacks=68 device_calls=0 direct_chunks=28 max_depth=8
+151: 
+[HANDLER_OUTPUT] 
+2/2 Test #151: mhgp9_gpu_interior_payload .......
+   Passed    2.38 sec
+[HANDLER_VERBOSE_OUTPUT] 
+
+The following tests passed:
+
+	mhgp9_chain_q3_payload
+	mhgp9_gpu_interior_payload
+[HANDLER_OUTPUT] 
+
+100% tests passed, 0 tests failed out of 2
+
+
+Label Time Summary:
+chain      =  43.06 sec*proc (1 test)
+gate       =  45.44 sec*proc (2 tests)
+gpu        =   2.38 sec*proc (1 test)
+payload    =  45.44 sec*proc (2 tests)
+
+Total Test time (real) =  45.45 sec

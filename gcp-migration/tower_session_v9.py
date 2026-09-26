@@ -196,8 +196,10 @@ def validate_received(output, manifest, worker_pin, expected_cases, generation, 
     batch_plan = expected_cases[0]['levers']['q34_batch_filter']
     # v18: and the reduced-slab (deferral) preflight of device certificates.
     deferral_plan = expected_cases[0]['levers']['q34_gpu_certificates'] or expected_cases[0]['levers']['q34_gpu_q3']
+    payload_plan = expected_cases[0]['levers']['q3_interior_payload']
     fixed = (FIXED_COMMANDS + (('preflight_engine',) if batch_plan else ()) +
-             (('preflight_deferral',) if deferral_plan else ()))
+             (('preflight_deferral',) if deferral_plan else ()) +
+             (('preflight_payload_off', 'payload_device_gate') if payload_plan else ()))
     need(set(fixed) <= set(rows), 'environment/build commands absent')
     for stem, row in rows.items():
         match = CASE_COMMAND.fullmatch(stem)
@@ -213,10 +215,25 @@ def validate_received(output, manifest, worker_pin, expected_cases, generation, 
          configure[3] == '-B' and tools['nvcc'] in payload.CUDA_PATHS and
          configure == payload.configure_command(tools, Path(configure[2][:-len('/' + payload.SOURCE_ROOT)]),
                                                 Path(configure[4])) and
-         build == [tools['cmake'], '--build', configure[4], '--target', payload.PROBE_TARGET, '--parallel',
-                   payload.BUILD_PARALLEL],
+         build == payload.build_command(tools, Path(configure[4]), payload_plan),
          'strict CMake configure/build invocation (CUDA on, no -Wno-error)')
     need(payload.DEVICE_NAME in (output / 'gpu_inventory.stdout').read_text(), 'G4 GPU inventory')
+    if payload_plan:
+        gate_argv = rows['payload_device_gate']['argv']
+        need(gate_argv == [payload.TIME, '-v', configure[4] + '/' + payload.PAYLOAD_GATE_TARGET, '--device'],
+             'exact payload device gate invocation')
+        gate_counts = payload.validate_payload_gate((output / 'payload_device_gate.stdout').read_text())
+        payload.validate_gnu_time((output / 'payload_device_gate.stderr').read_text(errors='replace'), 0)
+        gate = value.get('payload_gate')
+        need(type(gate) is dict and set(gate) == {'binary_sha256', 'counters', 'backend'} and
+             type(gate['binary_sha256']) is str and re.fullmatch('[0-9a-f]{64}', gate['binary_sha256']) and
+             gate['counters'] == gate_counts and gate['backend'] == 'cuda_g4' and
+             value.get('payload_gate_binary_stable') is True and
+             any(name.endswith('/' + payload.PAYLOAD_GATE_SOURCE) for name in dependencies),
+             'payload device gate evidence or binary closure')
+    else:
+        need('payload_gate' not in value and 'payload_gate_binary_stable' not in value,
+             'unexpected payload device gate evidence')
     cases = payload.validate_plan(dict(schema=value.get('plan_schema'), cases=value.get('cases')), manifest)
     need(cases == expected_cases, 'worker case plan differs from transported plan')
     # Preflight natif rejuge a la reception : memes octets de nuage, meme
@@ -245,6 +262,22 @@ def validate_received(output, manifest, worker_pin, expected_cases, generation, 
         payload.validate_preflight_work(engine_value, engine_case['levers'])
         payload.validate_gnu_time((output / 'preflight_engine.stderr').read_text(errors='replace'), 0)
         expected_preflight['engine_tower_digest'] = engine_value['tower_digest']
+    if payload_plan:
+        off_case = dict(pre_case, levers=dict(pre_case['levers'], q3_interior_payload=False))
+        off_argv = rows['preflight_payload_off']['argv']
+        need(off_argv[:4] == pre_argv[:4] and off_argv[4:] == payload.expected_probe_tail(off_case, judge=pre_judge),
+             'exact payload OFF preflight invocation')
+        off_value = payload.strict_json((output / 'preflight_payload_off.stdout').read_bytes())
+        need(payload.validate_probe(off_value, off_case, 0, inputs=payload.preflight_inputs(pre_raw),
+                                    judge=pre_judge) == 'complete_relative' and
+             payload.payload_pair_equal(pre_value, off_value, require_reduced_census=False),
+             'payload ON/OFF preflight object or geometry differs')
+        payload.validate_external_wall(off_value, rows['preflight_payload_off'].get('elapsed_seconds'))
+        payload.validate_preflight_work(off_value, off_case['levers'])
+        payload.validate_gnu_time((output / 'preflight_payload_off.stderr').read_text(errors='replace'), 0)
+        expected_preflight.update(payload_off_tower_digest=off_value['tower_digest'],
+                                  payload_keys=pre_value['catalogue']['payload_keys'],
+                                  payload_ids=pre_value['catalogue']['payload_ids'])
     if deferral_plan:
         deferral_argv = rows['preflight_deferral']['argv']
         capacity, lanes_capacity = payload.deferral_capacities(pre_case['levers'])
@@ -324,6 +357,8 @@ def validate_received(output, manifest, worker_pin, expected_cases, generation, 
          'cross-worker object comparison')
     need(value.get('unpaired_batch_cases') == payload.unpaired_batch_cases(cases, outcomes),
          'unpaired batch/GPU cases recomputation')
+    need(value.get('unpaired_payload_cases') == payload.unpaired_payload_cases(cases, outcomes),
+         'unpaired payload ON cases recomputation')
     # GPU_executed: at least one complete LiDAR tower on the device, never
     # the preflight alone (auditor B, mixed plan).
     gpu_completed = payload.gpu_completed_cases(cases, outcomes, values)

@@ -12,6 +12,7 @@
 #include <array>
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <span>
 #include <string>
 #include <type_traits>
@@ -443,6 +444,13 @@ struct Q34LanesBatch {
   std::vector<std::uint32_t> record_begin;  // per survivor: first record of its slice
   std::vector<std::uint32_t> record_count;  // per survivor: its records (0 unless decided)
   RawVector<Q34LaneRecord> records;         // the slices, in any order of the edges (q3 and q4)
+  // Optional complete q3 strict interiors, original IDs at r*stride+j.
+  // Shared once with the chain, never once per record: the immutable owner
+  // survives this batch and all presentation sorts. q4 slots are absent32.
+  // K2 is enabled with stride zero and an owned empty vector.
+  bool interior_payload = false;
+  std::uint32_t interior_stride = 0;
+  std::shared_ptr<const RawVector<std::uint32_t>> interior_ids;
   Q34LanesWork work;                        // decided edges only (prologue and q3 lanes)
   Q34Lanes4Work work4;                      // decided edges only (S4b q4 lanes)
   std::string backend;                      // "cpu" or the device name
@@ -455,7 +463,11 @@ using Q34LanesFilter = std::function<Q34LanesBatch(const Q2CensusIndexPtr& index
     std::span<const Q34SurvivingEdge> survivors, std::span<const std::uint8_t> asked)>;
 // Receives checked records, one chunk per call; concurrent calls come from
 // distinct worker slots.
-using Q34RecordSink = std::function<void(std::size_t slot, std::span<const Q34LaneRecord> records)>;
+// first_record is the ordinal in the owned batch, not a new chunk-local ID.
+// The owner is borrowed for this synchronous call; retain it explicitly if
+// the payload will be read after the batch returns.
+using Q34RecordSink = std::function<void(std::size_t slot, std::span<const Q34LaneRecord> records,
+                                        std::uint32_t first_record)>;
 
 struct Q34LanesStage {
   Q34LanesFilter filter;

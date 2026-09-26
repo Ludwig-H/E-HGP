@@ -262,11 +262,19 @@ MHGP9_HD u32 lanes_plan_order(const Group& group, const LanesIndex& index, u32 a
 // task unfused (the separate phases' own slab rule then decides).
 enum class LanesFused : u8 { done, q3_failed, fallback };
 
-template <class Group>
+template <bool InteriorPayload = false, class Group>
 MHGP9_HD LanesFused lanes_task_fused(const Group& group, const LanesIndex& index, u32 a_rank, u32 b_rank,
                                      unsigned kmax, const LanesSlab& slab, u32 sites, u32 first, u32 last,
                                      const Q4Slab& q4, LanesTask& task, Q4Work& w4, EdgeQ3Work& census,
-                                     LanesFusedWork& fused) {
+                                     LanesFusedWork& fused, const Q3InteriorSlab& payload = {}) {
+  if constexpr (InteriorPayload) {
+    if (!q3_interior_valid(kmax, payload)) {
+      task.q3 = task.q4 = 0;
+      task.fail_phase = 2;
+      task.fail_kind = static_cast<u8>(CertificateStatus::fault);
+      return LanesFused::q3_failed;
+    }
+  }
   const std::int32_t* a = index.tree.rank_points + 3 * static_cast<std::size_t>(a_rank);
   const std::int32_t* b = index.tree.rank_points + 3 * static_cast<std::size_t>(b_rank);
   const u32 id_a = index.rank_ids[a_rank], id_b = index.rank_ids[b_rank];
@@ -320,7 +328,9 @@ MHGP9_HD LanesFused lanes_task_fused(const Group& group, const LanesIndex& index
       }
       if (!c.rejected) {
         ++census_chunks;
+        const u32 before = c.depth;
         q3_census_chunk(group, index, slab, sites, threshold3, base, inside, zero, c);
+        if constexpr (InteriorPayload) q3_interior_chunk(group, index, slab, payload, base, inside, before, c);
       }
     }
     ++seeds;
@@ -331,6 +341,7 @@ MHGP9_HD LanesFused lanes_task_fused(const Group& group, const LanesIndex& index
       if (c3 + c4 == capacity) return LanesFused::fallback;
       if (group.leader())
         q3_record(p.f.form, a, id_a, id_b, index.rank_ids[slab.ranks[seed]], c, slab.records[capacity - 1 - c3]);
+      if constexpr (InteriorPayload) q3_interior_record(group, payload, capacity - 1 - c3, c.depth);
       ++c3;
       ++census.emitted;
       census.shell_ids += c.shell;
@@ -364,11 +375,11 @@ MHGP9_HD LanesFused lanes_task_fused(const Group& group, const LanesIndex& index
 // leader adds the task's work to its edge's `slot` and returns its declared
 // steps (lanes_census_steps + lanes_q4_steps); `w4` is the group's q4
 // scratch (leader lane). Uniform result.
-template <class Group>
+template <bool InteriorPayload = false, class Group>
 MHGP9_HD u64 lanes_task(const Group& group, const LanesIndex& index, u32 a_rank, u32 b_rank, u8 lanes,
                         unsigned kmax, const LanesSlab& slab, u32 sites, u32 first, u32 last, const Q4Slab& q4,
                         LanesTask& task, Q4Work& w4, LanesTaskWork& slot, LanesFusedWork& fused,
-                        bool fused_pass = true) {
+                        bool fused_pass = true, const Q3InteriorSlab& payload = {}) {
   task.q3 = task.q4 = 0;
   task.fail_phase = task.fail_kind = task.layout = 0;
   if (group.leader()) w4 = Q4Work{};
@@ -378,7 +389,7 @@ MHGP9_HD u64 lanes_task(const Group& group, const LanesIndex& index, u32 a_rank,
   if (fused_pass && lanes == 6) {  // L15: both lanes in one scan per seed
     EdgeQ3Work census{};
     const LanesFused outcome =
-        lanes_task_fused(group, index, a_rank, b_rank, kmax, slab, sites, first, last, q4, task, w4, census, fused);
+        lanes_task_fused<InteriorPayload>(group, index, a_rank, b_rank, kmax, slab, sites, first, last, q4, task, w4, census, fused, payload);
     if (outcome != LanesFused::fallback) {
       steps = lanes_census_steps(census);
       if (group.leader()) lanes_add_census_work(slot, census);
@@ -401,7 +412,7 @@ MHGP9_HD u64 lanes_task(const Group& group, const LanesIndex& index, u32 a_rank,
   }
   if ((lanes & 2U) != 0) {
     EdgeQ3Work census{};
-    const auto status = q3_census_range(group, index, a_rank, b_rank, kmax, slab, sites, first, last, count, census);
+    const auto status = q3_census_range<InteriorPayload>(group, index, a_rank, b_rank, kmax, slab, sites, first, last, count, census, payload);
     task.q3 = count;
     steps = lanes_census_steps(census);
     if (group.leader()) lanes_add_census_work(slot, census);

@@ -1,5 +1,16 @@
 # Passation v9
 
+## Reprise active du 26 septembre
+
+À la demande de l'utilisateur, l'auditeur B reprend le développement.
+Voir [la tranche q3 → catalogue](docs/REPRISE_DEVELOPPEUR_IDS_Q3_20260926.md)
+et [l'interface de mesure v30](docs/DEVELOPPEMENT_IDS_Q3_20260926.md).
+La sonde multitrames v29 du précédent développeur est reprise explicitement,
+sans modifier son worktree. Le nouveau transport des IDs reste désactivé
+par défaut, en attente de comparaison ON/OFF sur tour entière. Les mesures
+G4 antérieures restent dans leurs reçus propres ; aucun contrat 100 ms
+n'est acquis par ce port. Les paragraphes suivants sont datés et historiques.
+
 22 septembre 2026. Cadre : `exploration_v9_hors_registre`,
 `backend=reference_cpu`, `quantized_u18_input_only`, `not_claimed`. Aucun
 statut formel modifié ; `docs/implementation_status.toml` n'est pas touché par

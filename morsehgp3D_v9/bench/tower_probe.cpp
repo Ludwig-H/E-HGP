@@ -35,6 +35,7 @@
 #include <sys/resource.h>
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <cinttypes>
 #include <cstdio>
@@ -214,6 +215,7 @@ int main(int argc, char** argv) {
         else if (name == "tower_sealed_catalogue") options.tower_sealed_catalogue = on;
         else if (name == "q2_early_census") options.q2_early_census = on;
         else if (name == "q34_lanes_pinned") options.q34_lanes_pinned = on;
+        else if (name == "q3_interior_payload") options.q3_interior_payload = on;
         else throw std::invalid_argument("unknown lever");
       }
       else if (arg.starts_with("--frames=")) {
@@ -259,21 +261,30 @@ int main(int argc, char** argv) {
   // first. Every run must give the same object.
   struct FrameTimes {
     double chain_total, tower, q34, census, lanes_transfer;
-    std::uint64_t digest;
+    mhgp9::ChainStatus status;
+    std::string reason;
+    unsigned effective;
+    std::uint64_t digest, catalogue_digest, presentation_digest;
+    std::array<std::uint64_t, 6> counts;
+    std::vector<mhgp9::OrderSummary> orders;
   };
   std::vector<FrameTimes> runs;
   runs.reserve(frames);
   std::optional<mhgp9::ChainResult> first;
   for (unsigned f = 0; f < frames; ++f) {
     auto run = mhgp9::run_tower_chain(input.points, options);
+    const auto& cat = run.catalogue;
     runs.push_back({run.times.total_ms, run.times.tower_ms, run.times.q34_ms, run.times.census_ms,
-                    run.q34_batch.lanes_transfer_ms, run.tower_digest});
+                    run.q34_batch.lanes_transfer_ms, run.status, run.reason, run.kmax_effective,
+                    run.tower_digest, run.catalogue_digest, run.presentation_digest,
+                    {cat.q2_presentations, cat.q3_presentations, cat.q4_presentations, cat.unique_keys,
+                     cat.balls, cat.extra_shell_balls}, run.orders});
     if (f == 0) first = std::move(run);
   }
   const auto& r = *first;
   const auto& t = r.times;
   const auto& c = r.catalogue;
-  std::printf("{\"schema\":\"mhgp9_tower_probe_v29\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
+  std::printf("{\"schema\":\"mhgp9_tower_probe_v30\",\"status\":\"%s\",\"reason\":\"%s\",", mhgp9::chain_status_name(r.status),
               r.reason.c_str());
   std::printf("\"input\":{\"format\":\"%s\",\"grid\":\"%s\",\"sites\":%zu,\"hash\":\"%016" PRIx64 "\"},", input.format.c_str(),
               grid.c_str(), input.points.size(), input.hash);
@@ -286,7 +297,7 @@ int main(int argc, char** argv) {
               "\"q34_gpu_certificates\":%s,\"q34_batch_q3\":%s,\"q34_gpu_q3\":%s,\"q34_batch_q4\":%s,"
               "\"q2_during_device\":%s,\"q34_lanes_fused\":%s,\"device_session\":%s,"
               "\"tower_pipelined_tail\":%s,\"tower_hash_grouping\":%s,\"tower_persistent_pool\":%s,"
-              "\"tower_sealed_catalogue\":%s,\"q2_early_census\":%s,\"q34_lanes_pinned\":%s}},",
+              "\"tower_sealed_catalogue\":%s,\"q2_early_census\":%s,\"q34_lanes_pinned\":%s,\"q3_interior_payload\":%s}},",
               options.kmax, r.kmax_effective, options.separation_s, options.workers,
               options.tower_static_threads >= 0 ? options.tower_static_threads : r.tower_static_threads,
               options.run_tower ? "true" : "false", options.q34_certificate_capacity,
@@ -305,7 +316,7 @@ int main(int argc, char** argv) {
               device_session ? "true" : "false", options.tower_pipelined_tail ? "true" : "false",
               options.tower_hash_grouping ? "true" : "false", options.tower_persistent_pool ? "true" : "false",
               options.tower_sealed_catalogue ? "true" : "false", options.q2_early_census ? "true" : "false",
-              options.q34_lanes_pinned ? "true" : "false");
+              options.q34_lanes_pinned ? "true" : "false", options.q3_interior_payload ? "true" : "false");
   std::printf("\"times_ms\":{\"read\":%.3f,\"prepare\":%.3f,\"gen_index\":%.3f,\"q2\":%.3f,\"q2_wait\":%.3f,"
               "\"q34\":%.3f,\"merge\":%.3f,"
               "\"tower_index\":%.3f,\"census\":%.3f,\"tower\":%.3f,\"chain_total\":%.3f,\"digest\":%.3f,"
@@ -324,11 +335,13 @@ int main(int argc, char** argv) {
               ",\"max_shell\":%" PRIu64 ",\"max_interior\":%" PRIu64 ",\"census_nodes\":%" PRIu64 ",\"census_leaf_tests\":%" PRIu64
               ",\"bytes\":%" PRIu64 ",\"regular_supports\":[%" PRIu64 ",%" PRIu64 ",%" PRIu64 "]"
               ",\"early_census_keys\":%" PRIu64 ",\"early_census_extra_shell_balls\":%" PRIu64
+              ",\"payload_keys\":%" PRIu64 ",\"payload_ids\":%" PRIu64 ",\"payload_fallback_keys\":%" PRIu64
               ",\"by_qmin\":[%" PRIu64 ",%" PRIu64 ",%" PRIu64 "],\"by_shell\":[",
               c.q2_presentations, c.q3_presentations, c.q4_presentations, c.unique_keys, c.balls, c.extra_shell_balls,
               c.shell_over_cap, c.max_shell, c.max_interior, c.census_nodes, c.census_leaf_tests, c.bytes,
               c.regular_supports_by_arity[2], c.regular_supports_by_arity[3], c.regular_supports_by_arity[4],
-              c.early_census_keys, c.early_census_extra_shell_balls, c.balls_by_qmin[2],
+              c.early_census_keys, c.early_census_extra_shell_balls, c.payload_keys, c.payload_ids,
+              c.payload_fallback_keys, c.balls_by_qmin[2],
               c.balls_by_qmin[3], c.balls_by_qmin[4]);
   for (std::size_t s = 0; s < c.balls_by_shell.size(); ++s) std::printf("%s%" PRIu64, s ? "," : "", c.balls_by_shell[s]);
   // Invariant d'Euler (condition necessaire de completude du catalogue) :
@@ -457,11 +470,23 @@ int main(int argc, char** argv) {
               "\"peak_rss_kb\":%ld,", r.tower_digest, catalogue, presentations, peak_rss_kb());
   // v26: the device session opened before the chain (not in chain_total).
   const bool opened = device_session && session.error.empty();
-  // v29: the frames of this process (the first is the body above) and the
-  // host's transparent-page mode.
+  // v30: all frames carry their status, all three digests, deterministic
+  // catalogue counts and every order's counts. A repeated tower digest
+  // alone must not hide a failed or divergent later frame.
+  const auto same_frame = [&](const FrameTimes& f) {
+    const auto& first_frame = runs.front();
+    return f.status == first_frame.status && f.reason == first_frame.reason && f.effective == first_frame.effective &&
+           f.digest == first_frame.digest && f.catalogue_digest == first_frame.catalogue_digest &&
+           f.presentation_digest == first_frame.presentation_digest && f.counts == first_frame.counts &&
+           f.orders.size() == first_frame.orders.size() &&
+           std::equal(f.orders.begin(), f.orders.end(), first_frame.orders.begin(),
+                      [](const mhgp9::OrderSummary& a, const mhgp9::OrderSummary& b) {
+                        return a.k == b.k && a.nodes == b.nodes && a.births == b.births && a.merges == b.merges &&
+                               a.parents == b.parents && a.contributions == b.contributions;
+                      });
+  };
   std::printf("\"frames\":{\"count\":%u,\"same_object\":%s,\"chain_total_ms\":[", frames,
-              std::all_of(runs.begin(), runs.end(),
-                          [&](const FrameTimes& f) { return f.digest == runs.front().digest; })
+              std::all_of(runs.begin(), runs.end(), same_frame)
                   ? "true" : "false");
   const std::pair<const char*, double FrameTimes::*> frame_fields[] = {
       {"tower_ms", &FrameTimes::tower}, {"q34_ms", &FrameTimes::q34}, {"census_ms", &FrameTimes::census},
@@ -470,6 +495,31 @@ int main(int argc, char** argv) {
   for (const auto& [name, field] : frame_fields) {
     std::printf("],\"%s\":[", name);
     for (std::size_t f = 0; f < runs.size(); ++f) std::printf("%s%.3f", f ? "," : "", runs[f].*field);
+  }
+  std::printf("],\"results\":[");
+  const char* frame_count_names[] = {"q2_presentations", "q3_presentations", "q4_presentations", "unique_keys",
+                                   "balls", "extra_shell_balls"};
+  for (std::size_t f = 0; f < runs.size(); ++f) {
+    const auto& run = runs[f];
+    std::printf("%s{\"status\":\"%s\",\"reason\":\"%s\",\"K_effective\":%u,\"tower_digest\":\"%016" PRIx64
+                "\",\"catalogue_digest\":", f ? "," : "", mhgp9::chain_status_name(run.status), run.reason.c_str(),
+                run.effective, run.digest);
+    if (options.catalogue_digest) std::printf("\"%016" PRIx64 "\"", run.catalogue_digest);
+    else std::printf("null");
+    std::printf(",\"presentation_digest\":");
+    if (options.catalogue_digest) std::printf("\"%016" PRIx64 "\"", run.presentation_digest);
+    else std::printf("null");
+    std::printf(",\"counts\":{");
+    for (std::size_t j = 0; j < run.counts.size(); ++j)
+      std::printf("%s\"%s\":%" PRIu64, j ? "," : "", frame_count_names[j], run.counts[j]);
+    std::printf("},\"orders\":[");
+    for (std::size_t j = 0; j < run.orders.size(); ++j) {
+      const auto& order = run.orders[j];
+      std::printf("%s{\"K\":%u,\"nodes\":%" PRIu64 ",\"births\":%" PRIu64 ",\"merges\":%" PRIu64
+                  ",\"parents\":%" PRIu64 ",\"contributions\":%" PRIu64 "}", j ? "," : "", order.k,
+                  order.nodes, order.births, order.merges, order.parents, order.contributions);
+    }
+    std::printf("]}");
   }
   std::printf("]},\"host\":{\"thp\":\"%s\"},", thp_mode().c_str());
   std::printf("\"device_session\":{\"opened\":%s,\"context_ms\":%.3f,\"reserve_ms\":%.3f,\"pinned_ms\":%.3f,"

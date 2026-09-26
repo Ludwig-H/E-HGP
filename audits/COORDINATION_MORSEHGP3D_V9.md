@@ -6486,3 +6486,29 @@ clos (`52ff41802`) : gain net du filtre d'environ 1–4 ms seulement,
 14 cas et 42 passages sans divergence, VM arrêtée et relue TERMINATED.
 Ce nouveau lot est CPU/audit-only, sans dépense GCP ni changement moteur.
 Tous les reçus et lecteurs normal/−O restent séparés des qualifications FULL.
+
+### 26 septembre, reprise développeur — port des intérieurs q3
+
+L'utilisateur demande explicitement à B de reprendre le rôle développeur.
+Worktree isolé `/tmp/mhgp9-audit-resume-20260926`, aucune branche créée,
+aucune modification des WIP du précédent développeur ou de C. La sonde
+v29 `3cf62b8ca` est reprise explicitement ; protocole v30 et levier
+`q3_interior_payload` opt-in en cours de qualification.
+
+Le port garde `LaneRecord=128` et `Presentation=112` octets, avec arène
+d'IDs possédée séparément et ordinal conservé après les tris. q4, coquilles
+étendues et retours CPU sans paquet gardent le census global. Deux revues
+croisées n'ont pas trouvé de défaut bloquant ; confiance limitée au
+producteur interne qualifié, pas à un paquet externe forgé.
+
+Nouvelles portes CPU : 192 comparaisons catalogue/FULL ON/OFF, 16 juges
+globaux, huit refus et un cas de 85 363 records traversant 16 plages de
+fusion ; Release et Clang ASan/UBSan/LSan passent. Quatre mutants compilés
+sont réfutés causalement. Voir le [reçu natif](../morsehgp3D_v9/receipts/q3_payload_native_20260926/README.md).
+Les premières erreurs de fixture/diagnostic sont conservées dans ce reçu.
+
+Suite : croissance FULL synthétique 8k/16k/32k, puis séance G4 SPOT
+ON/OFF/moteur, trois trames sans sol, K5/K10, s8/10/12 et b00 avec sol.
+Les auditeurs peuvent relire en priorité le transport d'ordinal, le contrat
+de confiance et le bilan coût supplémentaire / census évité. Aucun gain
+G4 de cette tranche ni contrat 100 ms annoncé avant son reçu.

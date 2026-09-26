@@ -51,6 +51,11 @@ function(mhgp9_test_executable name)
   target_compile_definitions(${name} PRIVATE MHGP9_TESTING=1)
 endfunction()
 
+# Explicit synthetic u32le inputs, using the existing engraved u16 recipes.
+# Input preparation is not charged as an algorithm's timed execution.
+mhgp9_product_executable(mhgp9_front_fixture_export bench/front_fixture_export.cpp)
+target_include_directories(mhgp9_front_fixture_export PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src/gen")
+
 # Porte a code de sortie exact : 0 conforme, 1 juge, 2 refus, 3 plancher ou
 # invariant, 4 mutant tue. Un crash par signal n'est jamais un succes.
 function(mhgp9_gate name expected target)
@@ -472,6 +477,26 @@ target_link_libraries(mhgp9_chain_batch_q3_gate PRIVATE mhgp9_chain)
 target_include_directories(mhgp9_chain_batch_q3_gate PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests")
 mhgp9_gate(mhgp9_chain_batch_q3 0 mhgp9_chain_batch_q3_gate ARGS --n=1000
            EXPECT_PREFIX "chain_batch_q3_gate n=1000" LABELS "gate;chain;oracle" TIMEOUT 1200)
+foreach(variant IN ITEMS "" PAYLOAD_ORDINAL PAYLOAD_RANK_AS_ID)
+  if(variant STREQUAL "")
+    set(target mhgp9_chain_q3_payload_gate)
+  else()
+    string(TOLOWER ${variant} lower)
+    set(target mhgp9_chain_${lower}_mutant_gate)
+  endif()
+  mhgp9_test_executable(${target} tests/chain_q3_payload_gate.cpp src/chain/tower_chain.cpp)
+  target_include_directories(${target} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests"
+                             "${CMAKE_CURRENT_SOURCE_DIR}/src/gen")
+  target_link_libraries(${target} PRIVATE mhgp9_gen mhgp9_gpu)
+  if(variant STREQUAL "")
+    mhgp9_gate(mhgp9_chain_q3_payload 0 ${target} EXPECT_PREFIX "chain_q3_payload_gate n=64"
+               LABELS "gate;chain;payload" TIMEOUT 600)
+  else()
+    target_compile_definitions(${target} PRIVATE MHGP9_CHAIN_MUTANT_${variant}=1)
+    mhgp9_gate(mhgp9_chain_${lower}_mutant 1 ${target} EXPECT_PREFIX "cause=status"
+               LABELS "gate;chain;payload;mutant" TIMEOUT 300)
+  endif()
+endforeach()
 mhgp9_gate(mhgp9_chain_batch_q3_bad_argument 2 mhgp9_chain_batch_q3_gate ARGS --n=abc
            LABELS "gate;chain" TIMEOUT 60)
 # v28 : recensement des cles q2 cote q2 (levier q2_early_census, pendant les
@@ -592,6 +617,18 @@ mhgp9_gate(mhgp9_gpu_certificate_port 0 mhgp9_gpu_certificate_port_gate ARGS --n
            EXPECT_PREFIX "gpu_certificate_port_gate n=2000" LABELS "gate;gpu;oracle" TIMEOUT 900)
 mhgp9_gate(mhgp9_gpu_certificate_port_scale8000 0 mhgp9_gpu_certificate_port_gate ARGS --n=8000 --k=5
            EXPECT_PREFIX "gpu_certificate_port_gate n=8000" LABELS "scale8000;gpu;oracle" TIMEOUT 2400)
+mhgp9_product_executable(mhgp9_gpu_interior_payload_gate tests/gpu/interior_payload_gate.cpp)
+target_link_libraries(mhgp9_gpu_interior_payload_gate PRIVATE mhgp9_gen mhgp9_gpu)
+mhgp9_gate(mhgp9_gpu_interior_payload 0 mhgp9_gpu_interior_payload_gate
+           EXPECT_PREFIX "payload PASS" LABELS "gate;gpu;payload" TIMEOUT 300)
+foreach(mutant IN ITEMS INTERIOR_RANK_AS_ID INTERIOR_OMIT_LAST)
+  string(TOLOWER ${mutant} lower)
+  mhgp9_product_executable(mhgp9_gpu_${lower}_mutant_gate tests/gpu/interior_payload_gate.cpp)
+  target_link_libraries(mhgp9_gpu_${lower}_mutant_gate PRIVATE mhgp9_gen mhgp9_gpu)
+  target_compile_definitions(mhgp9_gpu_${lower}_mutant_gate PRIVATE MHGP9_LANES_MUTANT_${mutant}=1)
+  mhgp9_gate(mhgp9_gpu_${lower}_mutant 1 mhgp9_gpu_${lower}_mutant_gate
+             EXPECT_PREFIX "cause=interior_ids_differ" LABELS "gate;gpu;payload;mutant" TIMEOUT 300)
+endforeach()
 mhgp9_gate(mhgp9_gpu_certificate_port_bad_argument 2 mhgp9_gpu_certificate_port_gate ARGS --k=11
            LABELS "gate;gpu" TIMEOUT 60)
 # Mode fichier (24 septembre 2026) : --workers, --min-edges et --device
