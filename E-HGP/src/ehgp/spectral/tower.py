@@ -548,23 +548,35 @@ class SpectralTower:
         """Nombre de classes reellement obtenu (borne par le nombre de maxima)."""
         return int(min(classes, self.maximum_count))
 
-    def gap_classes(self, floor=1):
+    def gap_classes(self, max_classes=12):
         """Nombre de classes propose spontanement par le plus grand saut.
 
-        Regle declaree, identique pour toute methode a laquelle on la
-        compare : dans la suite DECROISSANTE des niveaux de fusion, on
-        coupe au plus grand ecart entre deux niveaux consecutifs. Avec
-        `floor` fusions au moins conservees.
+        Regle declaree, ecrite pour etre applicable TELLE QUELLE a une tour
+        dont l'axe va dans l'autre sens (c'est la condition pour que la
+        comparaison de `bench/spectral_tower.py` soit juste) : appliquer les
+        `j` premieres fusions laisse `P - j` composantes, et le saut qui
+        justifie de s'arreter a `j` est `|niveau[j] - niveau[j-1]|`. On
+        maximise ce saut sur un nombre de classes compris entre 2 et
+        `max_classes`.
+
+        Cette regle est FAIBLE, et c'est mesure : sur un reseau de centres
+        equidistants elle propose 2 classes quand la verite est 4, parce que
+        les dernieres fusions sont a des niveaux voisins. Le nombre de
+        maxima trouves (`maximum_count`) et la regle de persistance de la
+        sonde sont de meilleurs indicateurs ; celle-ci reste comme temoin
+        minimal, sans modele.
         """
         levels = [level for level, _left, _right in self.merges]
-        if len(levels) <= floor:
-            return self.maximum_count
-        best_index, best_gap = len(levels), 0.0
-        for index in range(floor, len(levels)):
-            gap = levels[index - 1] - levels[index]
+        total = self.maximum_count
+        best_classes, best_gap = 1, -1.0
+        for classes in range(2, min(max_classes, total - 1) + 1):
+            index = total - classes
+            if index < 1 or index > len(levels) - 1:
+                continue
+            gap = abs(float(levels[index]) - float(levels[index - 1]))
             if gap > best_gap:
-                best_gap, best_index = gap, index
-        return self.maximum_count - best_index
+                best_gap, best_classes = gap, classes
+        return best_classes
 
     def equivalent_order(self, level, radius_squared):
         """Ordre `k` de HGP equivalent a un niveau `lambda`, a rayon donne.

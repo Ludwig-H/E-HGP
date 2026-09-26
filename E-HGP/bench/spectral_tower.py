@@ -85,11 +85,12 @@ from pathlib import Path
 for _variable in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS"):
     os.environ.setdefault(_variable, os.environ.get("EHGP_BLAS_THREADS", "1"))
 
-import numpy as np
-from scipy.sparse.csgraph import minimum_spanning_tree
+import numpy as np  # noqa: E402
+from scipy.sparse.csgraph import minimum_spanning_tree  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
+from ehgp.engine.segment import rational_cloud, segment_maximum  # noqa: E402
 from ehgp.spectral.log_density import SpectralLogDensity  # noqa: E402
 from ehgp.spectral.tower import SpectralTower  # noqa: E402
 
@@ -300,7 +301,7 @@ def candidate_edges(squared, neighbours, full_graph):
     keep = min(neighbours, count - 1)
     masked = squared.copy()
     np.fill_diagonal(masked, np.inf)
-    nearest = np.argsort(masked, axis=1)[:, :keep]
+    nearest = np.argpartition(masked, keep - 1, axis=1)[:, :keep]
     edges = set()
     for left in range(count):
         for right in nearest[left]:
@@ -311,13 +312,17 @@ def candidate_edges(squared, neighbours, full_graph):
     return sorted(edges)
 
 
-def segment_weights(cloud, order, edges, samples, chunk=256):
-    """Poids de segment approches `max_t a_order` sur une grille de `t`."""
+def gram_and_squared(cloud):
+    """Matrice de Gram et matrice des distances au carre, calculees une fois."""
     cloud = np.asarray(cloud, dtype=float)
-    count = cloud.shape[0]
     gram = cloud @ cloud.T
     diagonal = np.diag(gram).copy()
     squared = np.maximum(diagonal[:, None] + diagonal[None, :] - 2.0 * gram, 0.0)
+    return gram, diagonal, squared
+
+
+def segment_weights(gram, diagonal, squared, order, edges, samples, chunk=256):
+    """Poids de segment approches `max_t a_order` sur une grille de `t`."""
     times = np.linspace(0.0, 1.0, samples)
     left_index = np.array([pair[0] for pair in edges])
     right_index = np.array([pair[1] for pair in edges])
@@ -338,7 +343,7 @@ def segment_weights(cloud, order, edges, samples, chunk=256):
         statistic = np.partition(values, order - 1, axis=-1)[..., order - 1]
         statistic = statistic + leading[:, None] * (times ** 2)[None, :]
         weights[start:stop] = statistic.max(axis=1)
-    return weights, squared
+    return weights
 
 
 def empirical_tower(cloud, order, neighbours=15, samples=17, full_graph=False):
@@ -349,12 +354,9 @@ def empirical_tower(cloud, order, neighbours=15, samples=17, full_graph=False):
     """
     cloud = np.asarray(cloud, dtype=float)
     count = cloud.shape[0]
-    squared = None
-    gram = cloud @ cloud.T
-    diagonal = np.diag(gram).copy()
-    squared = np.maximum(diagonal[:, None] + diagonal[None, :] - 2.0 * gram, 0.0)
+    gram, diagonal, squared = gram_and_squared(cloud)
     edges = candidate_edges(squared, neighbours, full_graph)
-    weights, squared = segment_weights(cloud, order, edges, samples)
+    weights = segment_weights(gram, diagonal, squared, order, edges, samples)
     births = np.partition(squared, order - 1, axis=1)[:, order - 1]
     ordering = np.argsort(weights, kind="stable")
     forest = _Forest(count)
@@ -389,6 +391,47 @@ def empirical_labels(tower, classes):
             codes[root] = len(codes)
         labels[index] = codes[root]
     return labels
+
+
+def self_test(seed=5, count=9, dimension=4, orders=(1, 2, 3), grids=(9, 17, 33, 129)):
+    """Confrontation du port FLOTTANT a l'implementation RATIONNELLE exacte.
+
+    Le poids de segment exact de `ehgp.engine.segment.segment_maximum` est le
+    maximum de `a_k` sur les croisements des `n` droites ; le poids flottant
+    de cette sonde est le maximum sur une grille de `samples` temps. Le second
+    est donc un MINORANT du premier, et l'ecart mesure ici dit ce que coute la
+    grille. La porte verifie les deux faits : le minorant ne depasse jamais la
+    valeur exacte, et l'ecart relatif reste sous un seuil affiche.
+    """
+    generator = np.random.default_rng(seed)
+    cloud = np.round(6.0 * generator.standard_normal((count, dimension)), 3)
+    exact_cloud = rational_cloud(cloud)
+    gram, diagonal, squared = gram_and_squared(cloud)
+    edges = [(left, right) for left in range(count) for right in range(left + 1, count)]
+    print("auto-test : port flottant contre segment rationnel exact")
+    print("  n=%d  d=%d  paires=%d" % (count, dimension, len(edges)))
+    worst = 0.0
+    for order in orders:
+        exact = []
+        for left, right in edges:
+            level, _time = segment_maximum(exact_cloud, left, right, order)
+            exact.append(float(level))
+        exact = np.array(exact)
+        for samples in grids:
+            weights = segment_weights(gram, diagonal, squared, order, edges, samples)
+            above = int(
+                np.count_nonzero(weights > exact + 1e-9 * np.maximum(1.0, np.abs(exact)))
+            )
+            gaps = (exact - weights) / np.maximum(1e-12, np.abs(exact))
+            worst = max(worst, float(gaps.max()))
+            print(
+                "  k=%d grille=%3d depassements=%d ecart_relatif_max=%.3e"
+                % (order, samples, above, float(gaps.max()))
+            )
+            if above:
+                return 1
+    print("  minorant respecte partout ; ecart relatif maximal %.3e" % worst)
+    return 0
 
 
 # -- campagne ----------------------------------------------------------
@@ -533,6 +576,7 @@ def main(argv=None):
     parser.add_argument("--seeds", type=int, default=1)
     parser.add_argument("--full-graph", action="store_true")
     parser.add_argument("--quick", action="store_true")
+    parser.add_argument("--self-test", action="store_true")
     parser.add_argument("--blas-threads", type=int, default=None)
     options = parser.parse_args(argv)
     if options.blas_threads is not None and options.blas_threads != int(
@@ -543,6 +587,8 @@ def main(argv=None):
             "avant l'importation de numpy" % options.blas_threads
         )
         return 2
+    if options.self_test:
+        return self_test()
     if options.quick:
         options.dims = "2,10,50"
         options.intrinsic = "2"

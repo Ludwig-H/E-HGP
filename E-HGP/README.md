@@ -100,8 +100,10 @@ python3 bench/births_vs_dimension.py --n 8 --k-max 4 --dims 2,3,5,10,20,50,100 -
 python3 bench/empty_ball_fraction.py --n 11 --ks 2,3,4,5 --dims 2,3,5,10,20,50,100 --seed 5
 python3 bench/scale_space.py --n 11 --k 3 --dims 2,3,20 --seed 31
 python3 bench/witness_campaign.py --ns 8 --dims 2,3,5,10,20,50 --k-max 3 --seeds 17,23,31 \
-    --families uniform,clusters --min-cases 30 --min-pairs 2000 \
-    --out receipts/witness_campaign_20260925/campaign_n8.json
+    --families uniform,clusters --triples --min-cases 30 --min-pairs 2000 \
+    --out receipts/relecture/campagne.json      # 2856 paires sur 2856, 0 violation
+python3 bench/gate_engine.py --n 7 --d 3 --k 2 --seed 3 --min-cases 5   # porte, code 0
+python3 bench/gate_engine.py --n 7 --d 3 --k 2 --seed 3 --min-cases 5 --inject extremites  # code 4
 ```
 
 Codes de sortie des portes, comme dans le reste du dépôt : `0` conforme,
