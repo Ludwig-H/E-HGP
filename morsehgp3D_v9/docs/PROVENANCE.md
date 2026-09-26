@@ -1980,6 +1980,9 @@ compteurs sont exacts).
   K5 `67450c64611075b1` / `5ad1fe09354411ba`, K10 `ac108f7f71096c3f` /
   `a6e959d227f3dafa`. Trame brute avec sol b00 à K5 (2 822 052 boules,
   44 095 échantillonnées) : `cfb1634832c0384a` / `11f6a8e1a7f28127`.
+  Par la chaîne elle-même sous le sceau (sonde locale), K5, K10 et brut b00
+  à K5 reproduisent aussi les condensés des présentations des reçus R19 et
+  R21 (`a2aa4b20ca392dfe`, `43ff64fb1c3846d9`, `7344e05fb52c6f50`).
 - Sonde (copie locale avec le levier, hors dépôt), quatre rondes entrelacées
   base `273c33f7c` / levier coupé / levier actif, ordre tournant, K5.
   - Passe 1 : 194 / 576 / 308 / 411 ms (coupé) → 9 / 11 / 38 / 29 ms (actif).
