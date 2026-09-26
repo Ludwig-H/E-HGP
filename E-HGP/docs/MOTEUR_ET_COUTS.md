@@ -338,8 +338,8 @@ liaison tombe à un indice de Rand de $-0{,}02$, c'est-à-dire une partition
 dégénérée, tandis que Ward tient $0{,}597$ à $0{,}722$.
 
 **Confirmation à cinq graines.** Le profil `noise`
-(`bench/clustering_compare.py run --profile noise --orders 1,2,5`, 180
-cellules, $d=10$ et $200$, trois niveaux de bruit de fond, cinq graines,
+(`bench/clustering_compare.py run --profile noise --orders 1,2,5`, **120**
+cellules comptées dans le reçu, $d=10$ et $200$, trois niveaux de bruit de fond, cinq graines,
 toutes les familles) donne exactement la même conclusion :
 
 | grandeur | $d=10$ | $d=200$ |
