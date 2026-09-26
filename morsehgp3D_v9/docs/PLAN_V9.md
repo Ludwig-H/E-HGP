@@ -126,7 +126,7 @@ Porte d'entrée : V9-0 close.
   nœuds (ordre, rayon carré exact), arêtes horizontales et verticales datées,
   (K−1)-simplexes projetables avec leurs identifiants de points et les rayons
   carrés de leurs cofaces, et reçus liés par `tower_payload_id`. La piste
-  SemanticKITTI (`tests/SemanticKITTI/Zoltan/HierarchicalSelfAttention/GUIDE.md`)
+  SemanticKITTI (`Zoltan/FoundationModel/OBJET.md`)
   lit la tour comme une partition des (K−1)-simplexes, avec les poids
   $w_{x\tau}=S_{\tau}/T_{x}$ qui relient points et facettes. Les feuilles FULL
   ne suffisent pas à ces poids (facettes contributrices plus nombreuses) : le

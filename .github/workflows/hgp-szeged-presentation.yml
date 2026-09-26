@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'tests/SemanticKITTI/Zoltan/PolyhedralEncoding/**'
+      - 'Zoltan/PolyhedralEncoding/**'
 permissions:
   contents: write
 concurrency:
@@ -15,14 +15,14 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
-      ROOT: tests/SemanticKITTI/Zoltan/PolyhedralEncoding
-      DECK: tests/SemanticKITTI/Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE
+      ROOT: Zoltan/PolyhedralEncoding
+      DECK: Zoltan/PolyhedralEncoding/Presentation_2026-09-16_Inria_SZTE
     steps:
       - uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 0
-          sparse-checkout: tests/SemanticKITTI/Zoltan/PolyhedralEncoding
+          sparse-checkout: Zoltan/PolyhedralEncoding
       - name: Unpack the checked source transfer, when present
         run: |
           python3 - <<'PY'
