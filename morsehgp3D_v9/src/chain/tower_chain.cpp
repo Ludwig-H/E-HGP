@@ -499,6 +499,15 @@ bool presentation_less(const Presentation& a, const Presentation& b) {
   return a.support < b.support;
 }
 
+// A slot in presentation order. v28: a slot already sorted (q2's slots,
+// sorted in place by the q2 side's census under q2_early_census) is left as
+// it is: the same sequence std::sort would give, up to presentations equal
+// under the order (a duplicate, refused by the merge whatever their order).
+void sort_presentations(std::vector<Presentation>& slot) {
+  if (!std::is_sorted(slot.begin(), slot.end(), presentation_less))
+    std::sort(slot.begin(), slot.end(), presentation_less);
+}
+
 // The presentations of every worker slot, one representative per key (its
 // smallest arity, then support) in increasing key order, after the checks of
 // a sorted scan: equal depth and shell within a key, no presentation twice.
@@ -515,9 +524,7 @@ struct GatheredPresentations {
 GatheredPresentations gather_presentations(std::vector<std::vector<Presentation>>& slots, std::size_t workers) {
   const int threads = static_cast<int>(std::max<std::size_t>(1, workers));
   const std::size_t S = slots.size();
-  tower::parallel_items(S, threads, [&](std::size_t s, std::size_t) {
-    std::sort(slots[s].begin(), slots[s].end(), presentation_less);
-  });
+  tower::parallel_items(S, threads, [&](std::size_t s, std::size_t) { sort_presentations(slots[s]); });
   std::size_t total = 0;
   for (const auto& slot : slots) total += slot.size();
   const std::size_t wanted = total < 4096 ? 1 : 4 * std::max<std::size_t>(1, workers);
@@ -660,62 +667,393 @@ bool regular_support_positive(const SupportForm& f, unsigned arity) {
   return f.four.det > 0 && q4_center_strictly_inside(f.four, a, b, c, f.p[3]);
 }
 
-// Execute job(i) pour i dans [0, count) sur au plus `workers` fils ; une
-// exception arrete la distribution et, apres jointure, celle du plus petit
-// indice est relancee : celle de la boucle sequentielle, quel que soit le
-// nombre de fils (R-29, audit du sceau). Les tranches sont distribuees par
-// indices croissants et une tranche prise est executee jusqu'a sa premiere
-// exception : toute tranche d'indices inferieurs a une exception levee a ete
-// prise, donc le plus petit indice fautif est toujours atteint. Le job ne
-// doit lever que selon ses donnees (jamais selon l'ordre des fils).
-template <class Job>
-void parallel_for(std::size_t count, std::size_t workers, Job&& job) {
-  workers = std::max<std::size_t>(1, std::min(workers, count));
-  if (workers <= 1) {
-    for (std::size_t i = 0; i < count; ++i) job(i, std::size_t{0});
-    return;
-  }
-  std::atomic<std::size_t> next{0};
-  std::atomic<bool> stop{false};
+// Runs job(i, worker) for i in [0, count) on at most `workers` threads and
+// returns the exception thrown at the SMALLEST index (index = count and no
+// exception if none): chunks are handed out in increasing order and none is
+// taken from the smallest failed index seen so far on, so every index below
+// the returned one was processed and the answer does not depend on the
+// number of threads (v28: the census reason is the smallest key's, whatever
+// W, on both sides of q2_early_census). A thread that cannot be launched is
+// rethrown after the join. `cancel` (optional) stops the handing out; the
+// caller then discards the results.
+struct FirstError {
+  std::size_t index = 0;
   std::exception_ptr error;
-  std::size_t error_index = std::numeric_limits<std::size_t>::max();
-  std::mutex error_mutex;
+};
+
+template <class Job>
+FirstError parallel_for_first_error(std::size_t count, std::size_t workers, Job&& job,
+                                    const std::atomic<bool>* cancel = nullptr) {
+  FirstError first{count, nullptr};
+  std::mutex first_mutex;
+  std::atomic<std::size_t> bound{count};  // smallest failed index so far
+  std::atomic<std::size_t> next{0};
   constexpr std::size_t grain = 256;
   const auto body = [&](std::size_t worker) {
-    std::size_t i = 0;
-    try {
-      while (!stop.load(std::memory_order_relaxed)) {
-        const std::size_t begin = next.fetch_add(grain);
-        if (begin >= count) break;
-        const std::size_t end = std::min(count, begin + grain);
-        for (i = begin; i < end; ++i) job(i, worker);
-      }
-    } catch (...) {
-      stop.store(true);
-      std::lock_guard<std::mutex> lock(error_mutex);
+    for (;;) {
+      if (cancel != nullptr && cancel->load(std::memory_order_relaxed)) break;
+      const std::size_t begin = next.fetch_add(grain);
+      if (begin >= bound.load()) break;  // also past count
+      const std::size_t end = std::min(count, begin + grain);
+      for (std::size_t i = begin; i < end; ++i) {
+        try {
+          job(i, worker);
+        } catch (...) {
+          std::lock_guard<std::mutex> lock(first_mutex);
 #if defined(MHGP9_CHAIN_MUTANT_CENSUS_FIRST_IN_TIME)
-      const bool first = !error;  // mutant: the first exception in wall time wins
+          const bool earlier = !first.error;  // mutant: the first exception in wall time wins
 #else
-      const bool first = i < error_index;
+          const bool earlier = i < first.index;
 #endif
-      if (first) {
-        error = std::current_exception();
-        error_index = i;
+          if (earlier) {
+            first.index = i;
+            first.error = std::current_exception();
+            bound.store(i);
+          }
+          break;
+        }
       }
     }
   };
+  workers = std::max<std::size_t>(1, std::min(workers, count));
+  if (workers <= 1) {
+    body(0);
+    return first;
+  }
   std::vector<std::thread> threads;
   threads.reserve(workers - 1);
   try {
     for (std::size_t w = 1; w < workers; ++w) threads.emplace_back(body, w);
   } catch (...) {
-    stop.store(true);
+    bound.store(0);
     for (auto& t : threads) t.join();
     throw;
   }
   body(0);
   for (auto& t : threads) t.join();
-  if (error) std::rethrow_exception(error);
+  return first;
+}
+
+#if defined(MHGP9_TESTING)
+// Test failpoints (chain_testing in the header), read-only during a chain.
+namespace failpoints {
+std::vector<Key5> census_keys;
+std::atomic<std::uint64_t> early_hits{0};
+std::atomic<bool> q2{false}, q34{false}, merge{false};
+void census(const Key5& key, bool early) {
+  for (std::size_t i = 0; i < census_keys.size(); ++i)
+    if (census_keys[i] == key) {
+      if (early) early_hits.fetch_add(1);
+      fail(ChainStatus::kInvariantViolated, "failpoint_census_" + std::to_string(i));
+    }
+}
+// The q2 side of q2_early_census (fallback path): a throw outside the per-key
+// census, a hold until the cancel, and what the q2 side ended with.
+std::atomic<int> early_throw{chain_testing::kEarlyNoThrow};
+std::atomic<bool> early_hold{false};
+std::atomic<std::uint64_t> early_fallbacks{0}, early_cancels{0}, early_hold_timeouts{0}, early_thrown_keys{0};
+void early_hold_until(const std::atomic<bool>& cancel) {
+  if (!early_hold.load()) return;
+  const auto until = Clock::now() + std::chrono::seconds(10);
+  while (!cancel.load()) {
+    if (Clock::now() > until) {
+      early_hold_timeouts.fetch_add(1);
+      return;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  }
+}
+}  // namespace failpoints
+#endif
+
+// Census state of one thread: scratch vectors and the catalogue's counters,
+// summed (or maximised) over the threads and over both sides of
+// q2_early_census, so the published totals do not depend on the partition.
+struct CensusState {
+  std::vector<tower::i32> in, sh;
+  std::vector<tower::NodeRef> scratch;
+  tower::DepthStats depth;
+  std::uint64_t extra = 0, max_shell = 0, max_interior = 0, over_cap = 0;
+  std::array<std::uint64_t, 5> by_q{};
+  std::array<std::uint64_t, 17> by_shell{};
+  std::array<std::int64_t, 11> euler{};  // contributions d'Euler par ordre K (indice K)
+  std::array<std::uint64_t, 5> regular{};  // R-29: certified regular supports by arity
+};
+
+// Coefficient de t^{K-1} dans t^p (t-1)^{j-1} : (-1)^{j-1-i} C(j-1, i), i = K-1-p.
+void euler_add(unsigned kmax, std::array<std::int64_t, 11>& e, std::size_t p, std::size_t j, std::int64_t count) {
+  static constexpr std::int64_t binom[12][12] = {
+      {1}, {1, 1}, {1, 2, 1}, {1, 3, 3, 1}, {1, 4, 6, 4, 1}, {1, 5, 10, 10, 5, 1}, {1, 6, 15, 20, 15, 6, 1},
+      {1, 7, 21, 35, 35, 21, 7, 1}, {1, 8, 28, 56, 70, 56, 28, 8, 1}, {1, 9, 36, 84, 126, 126, 84, 36, 9, 1},
+      {1, 10, 45, 120, 210, 252, 210, 120, 45, 10, 1}, {1, 11, 55, 165, 330, 462, 462, 330, 165, 55, 11, 1}};
+  for (std::size_t i = 0; i < j && p + i + 1 <= kmax; ++i)
+    e[p + i + 1] += (((j - 1 - i) % 2) ? -1 : 1) * binom[j - 1][i] * count;
+}
+
+// Census exact d'une cle distincte depuis son representant (plus petite arite
+// presentee, puis support) sur l'index de la tour : la boule est ecrite et la
+// fonction rend true ; une coquille de plus de 12 sites est comptee (refus de
+// domaine explicite, jamais une troncature) et la boule ne porte alors que sa
+// cle (false). Fonction de l'index, de Kmax et du representant seuls : le
+// meme resultat cote q2 (early) ou apres la fusion.
+bool census_key(std::span<const gen::Point3> points, const tower::CloudIndex& ix, unsigned kmax,
+                const Presentation& rep, CensusState& st, tower::BallData& b, [[maybe_unused]] bool early) {
+#if defined(MHGP9_TESTING)
+  failpoints::census(rep.key, early);
+#endif
+  tower::BallKey key;
+  tower::ExactLevel level;
+  SupportForm form;
+  key_and_level(points, rep, &key, &level, &form);  // arity 2..4 and IDs checked there (R-29)
+  require(to_key5(key) == rep.key, "chain_key_mismatch_v8_v7");
+  // R-29: the key's u18 domain before any census arithmetic, and a positive
+  // level denominator (the tower's pass-1 shape and domain).
+  require(tower::ball_key_in_u18_domain(key), "chain_ball_key_domain");
+  require(level.den > 0, "chain_ball_level_denominator");
+  b.key = key;
+  const auto status = tower::ball_census(ix, key, rep.depth, std::numeric_limits<std::size_t>::max(), &st.in,
+                                         &st.sh, &st.depth, &st.scratch);
+  require(status == tower::CensusStatus::kOk, "chain_census_interior_overflow");
+  require(st.in.size() == rep.depth, "chain_census_depth_mismatch");
+  require(st.sh.size() == rep.shell, "chain_census_shell_mismatch");
+  st.by_shell[std::min<std::size_t>(st.sh.size(), 16)]++;
+  st.max_shell = std::max<std::uint64_t>(st.max_shell, st.sh.size());
+  st.max_interior = std::max<std::uint64_t>(st.max_interior, st.in.size());
+  if (st.sh.size() > tower::kBallShellMax) {
+    ++st.over_cap;
+    return false;  // refus de domaine explicite, jamais une troncature
+  }
+  require(st.in.size() <= tower::kBallInteriorMax, "chain_interior_above_representation");
+  std::sort(st.in.begin(), st.in.end());
+  std::sort(st.sh.begin(), st.sh.end());
+  unsigned q = rep.arity;
+  if (st.sh.size() == rep.arity) {
+    // R-29: a regular shell IS the declared support (the input IDs of its
+    // sites and the presented input IDs, as sets) and that support is
+    // positive: with the key and level recomputed from it above, the tower's
+    // pass-1 declared-support check holds for this ball.
+    std::array<std::uint32_t, 4> shell_ids, support;  // unused slots sort last
+    shell_ids.fill(std::numeric_limits<std::uint32_t>::max());
+    support.fill(std::numeric_limits<std::uint32_t>::max());
+    for (unsigned j = 0; j < rep.arity; ++j) {
+      shell_ids[j] = static_cast<std::uint32_t>(ix.point_id(st.sh[j]));
+      support[j] = rep.support[j];
+    }
+    std::sort(shell_ids.begin(), shell_ids.end());
+    std::sort(support.begin(), support.end());
+    require(shell_ids == support, "chain_regular_shell_differs_from_support");
+    require(regular_support_positive(form, rep.arity), "chain_nonpositive_regular_support");
+    ++st.regular[rep.arity];
+    // Coquille reguliere : T = U seule (centre interieur au support positif).
+    euler_add(kmax, st.euler, st.in.size(), q, 1);
+  } else {
+    ++st.extra;
+    tower::local_plateau::LocalCensus local{key, {}, {}};
+    for (auto u : st.in) local.interior.push_back({ix.point_id(u), ix.upos[(std::size_t)u]});
+    for (auto u : st.sh) local.shell.push_back({ix.point_id(u), ix.upos[(std::size_t)u]});
+    const auto table = tower::local_plateau::ShellTable::prepare(std::move(local));
+    q = table.q_min();
+    require(q == rep.arity, "chain_qmin_differs_from_min_presented_arity");
+    require(q <= st.sh.size(), "chain_qmin_above_shell");
+    // Euler d'une coquille etendue : sous-coquilles T (|T| >= 2) dont
+    // l'enveloppe convexe contient le centre, comptees par taille.
+    std::array<std::int64_t, 13> by_size{};
+    const auto& contains = table.contains_center();
+    for (std::size_t mask = 1; mask < contains.size(); ++mask)
+      if (contains[mask]) ++by_size[static_cast<std::size_t>(std::popcount(static_cast<unsigned>(mask)))];
+#if defined(MHGP9_EULER_MUTANT_REGULAR_SHELLS_ONLY)
+    by_size = {};
+    by_size[st.sh.size()] = 1;  // mutant : coquille etendue traitee comme T = U seule
+#endif
+    for (std::size_t j = 2; j <= st.sh.size(); ++j)
+      if (by_size[j]) euler_add(kmax, st.euler, st.in.size(), j, by_size[j]);
+  }
+  require(st.in.size() + q <= std::min<std::size_t>(kmax + 1, points.size()), "chain_ball_outside_rank_window");
+  st.by_q[q]++;
+  b.level = level;
+  b.arity = static_cast<tower::u8>(q);
+  b.n_interior = static_cast<tower::u8>(st.in.size());
+  b.n_shell = static_cast<tower::u8>(st.sh.size());
+  std::copy(st.in.begin(), st.in.end(), b.interior_ids);
+  std::copy(st.sh.begin(), st.sh.end(), b.shell_ids);
+  return true;
+}
+
+// Index de la tour (PointId = rang d'entree) : fonction des seuls sites.
+tower::CloudIndex build_tower_index(std::span<const gen::Point3> points) {
+  tower::CloudIndex ix;
+  {
+    std::vector<tower::InputPoint> input(points.size());
+    for (std::size_t i = 0; i < points.size(); ++i)
+      input[i] = tower::InputPoint{static_cast<tower::PointId>(i), to_p3(points[i])};
+    ix = tower::build_cloud_index(input);
+  }
+  require(ix.valid && !ix.has_duplicate_positions() && ix.upos.size() == points.size(),
+          "chain_tower_index_invalid");
+  return ix;
+}
+
+// v28 (q2_early_census): the q2 side's representatives, one per distinct q2
+// key (its smallest support: the merge's representative too, arity 2 being
+// the smallest), in increasing key order. Every slot is sorted in place (the
+// merge then finds it sorted); the first presentation of every key run of
+// every slot is gathered by key ranges (sample split as the merge's) and the
+// smallest per key kept. No check here: the merge checks every presentation.
+std::vector<const Presentation*> q2_representatives(std::vector<std::vector<Presentation>>& slots,
+                                                    std::size_t workers) {
+  const int threads = static_cast<int>(std::max<std::size_t>(1, workers));
+  const std::size_t S = slots.size();
+  tower::parallel_items(S, threads, [&](std::size_t s, std::size_t) { sort_presentations(slots[s]); });
+  std::vector<std::vector<const Presentation*>> runs(S);
+  tower::parallel_items(S, threads, [&](std::size_t s, std::size_t) {
+    const auto& slot = slots[s];
+    for (std::size_t i = 0; i < slot.size(); ++i)
+      if (i == 0 || slot[i].key != slot[i - 1].key) runs[s].push_back(&slot[i]);
+  });
+  std::size_t total = 0;
+  for (const auto& run : runs) total += run.size();
+  const std::size_t wanted = total < 4096 ? 1 : 4 * std::max<std::size_t>(1, workers);
+  std::vector<Key5> sample;
+  const std::size_t budget = 16 * wanted * std::max<std::size_t>(1, workers);
+  for (const auto& run : runs) {
+    if (run.empty()) continue;
+    const std::size_t k = std::min(run.size(), std::max<std::size_t>(1, budget * run.size() / total));
+    for (std::size_t i = 1; i <= k; ++i) sample.push_back(run[(run.size() * i) / (k + 1)]->key);
+  }
+  std::sort(sample.begin(), sample.end());
+  sample.erase(std::unique(sample.begin(), sample.end()), sample.end());
+  std::vector<Key5> splitters;  // strictly increasing
+  for (std::size_t b = 1; b < wanted && !sample.empty(); ++b) {
+    const auto& key = sample[(sample.size() * b) / wanted];
+    if (splitters.empty() || splitters.back() < key) splitters.push_back(key);
+  }
+  const std::size_t B = splitters.size() + 1;
+  std::vector<std::vector<std::size_t>> cut(S, std::vector<std::size_t>(B + 1, 0));
+  tower::parallel_items(S, threads, [&](std::size_t s, std::size_t) {
+    const auto& run = runs[s];
+    for (std::size_t b = 1; b < B; ++b)
+      cut[s][b] = static_cast<std::size_t>(std::lower_bound(run.begin(), run.end(), splitters[b - 1],
+          [](const Presentation* p, const Key5& key) { return p->key < key; }) - run.begin());
+    cut[s][B] = run.size();
+  });
+  std::vector<std::vector<const Presentation*>> ranges(B);
+  tower::parallel_items(B, threads, [&](std::size_t b, std::size_t) {
+    std::vector<const Presentation*> range;
+    for (std::size_t s = 0; s < S; ++s)
+      range.insert(range.end(), runs[s].begin() + static_cast<std::ptrdiff_t>(cut[s][b]),
+                   runs[s].begin() + static_cast<std::ptrdiff_t>(cut[s][b + 1]));
+    std::sort(range.begin(), range.end(),
+              [](const Presentation* x, const Presentation* y) { return presentation_less(*x, *y); });
+    auto& out = ranges[b];
+    for (std::size_t i = 0; i < range.size(); ++i)
+      if (i == 0 || range[i]->key != range[i - 1]->key) out.push_back(range[i]);
+  });
+  std::vector<const Presentation*> representatives;
+  representatives.reserve(total);
+  for (const auto& range : ranges) representatives.insert(representatives.end(), range.begin(), range.end());
+  return representatives;
+}
+
+// v28 (q2_early_census): the q2 side's part of the census, on q2's thread
+// once q2 is done (during the device calls of q34): the tower's index, then
+// the census of every distinct q2 key (census_key, first error by key rank).
+// `ready` is set only if the part completed outside the per-key census (a
+// census failure is kept with its rank for the merge); any other exception
+// leaves it unset and the census after the merge redoes everything
+// (fallback), meeting the same failure at its own place in the chain.
+struct EarlyCensus {
+  bool ready = false;
+  tower::CloudIndex ix;
+  std::vector<tower::BallData> balls;  // one per q2 key, key order; the key is always set
+  std::vector<std::uint8_t> keep;
+  std::vector<CensusState> states;
+  FirstError error;  // smallest failed q2 key rank (error null: none, index = balls.size())
+  double ms = 0, index_ms = 0;
+};
+
+void run_early_census(std::span<const gen::Point3> points, unsigned kmax, std::size_t W,
+                      std::vector<std::vector<Presentation>>& q2_slots, const std::atomic<bool>& cancel,
+                      EarlyCensus& early) {
+  const auto start = Clock::now();
+  try {
+#if defined(MHGP9_TESTING)
+    failpoints::early_hold_until(cancel);
+#endif
+    early.ix = build_tower_index(points);
+    early.index_ms = ms_since(start);
+#if defined(MHGP9_TESTING)
+    if (failpoints::early_throw.load() == chain_testing::kEarlyAfterIndex)
+      throw std::runtime_error("failpoint_early_after_index");
+#endif
+    const auto reps = q2_representatives(q2_slots, W);
+    early.balls.resize(reps.size());
+    early.keep.assign(reps.size(), 0);
+    const std::size_t workers = std::max<std::size_t>(1, std::min(W, reps.size() / 256 + 1));
+    early.states.resize(workers);
+    early.error = parallel_for_first_error(
+        reps.size(), workers,
+        [&](std::size_t j, std::size_t w) {
+          early.keep[j] = census_key(points, early.ix, kmax, *reps[j], early.states[w], early.balls[j], true) ? 1 : 0;
+        },
+        &cancel);
+#if defined(MHGP9_TESTING)
+    if (failpoints::early_throw.load() == chain_testing::kEarlyAfterCensus) {
+      failpoints::early_thrown_keys.fetch_add(early.error.error ? early.error.index : early.balls.size());
+      throw std::bad_alloc();
+    }
+#endif
+    early.ready = !cancel.load();
+  } catch (...) {
+#if defined(MHGP9_Q2_EARLY_CENSUS_MUTANT_IGNORE_FAILURE)
+    // Mutant: a failure outside the per-key census does not void the q2 side.
+    early.ready = !cancel.load();
+#else
+    early.ready = false;
+#endif
+  }
+#if defined(MHGP9_TESTING)
+  if (!early.ready) {
+    failpoints::early_fallbacks.fetch_add(1);
+    if (cancel.load()) failpoints::early_cancels.fetch_add(1);
+  }
+#endif
+  if (!early.ready) {
+    early.ix = tower::CloudIndex{};
+    std::vector<tower::BallData>().swap(early.balls);
+    std::vector<std::uint8_t>().swap(early.keep);
+    early.states.clear();
+    early.error = FirstError{};
+  }
+  early.ms = ms_since(start);
+}
+
+// v28: the groups (one representative per key, key order) split into the
+// q2-represented ones (arity 2: exactly the q2 side's keys, same order) and
+// the others, each in increasing group order.
+void split_groups(const std::vector<const Presentation*>& groups, std::size_t W, std::vector<std::uint32_t>& q2,
+                  std::vector<std::uint32_t>& rest) {
+  const std::size_t n = groups.size();
+  if (n > std::numeric_limits<std::uint32_t>::max()) fail(ChainStatus::kResourceExhausted, "chain_too_many_keys");
+  const int threads = static_cast<int>(std::max<std::size_t>(1, W));
+  const std::size_t chunks = std::max<std::size_t>(1, std::min<std::size_t>(8 * std::max<std::size_t>(1, W),
+                                                                              n / 4096 + 1));
+  const std::size_t per = (n + chunks - 1) / chunks;
+  std::vector<std::size_t> twos(chunks + 1, 0);
+  tower::parallel_items(chunks, threads, [&](std::size_t c, std::size_t) {
+    std::size_t count = 0;
+    for (std::size_t g = c * per; g < std::min(n, (c + 1) * per); ++g) count += groups[g]->arity == 2 ? 1 : 0;
+    twos[c + 1] = count;
+  });
+  for (std::size_t c = 0; c < chunks; ++c) twos[c + 1] += twos[c];
+  q2.resize(twos[chunks]);
+  rest.resize(n - twos[chunks]);
+  tower::parallel_items(chunks, threads, [&](std::size_t c, std::size_t) {
+    std::size_t a = twos[c], o = c * per - twos[c];
+    for (std::size_t g = c * per; g < std::min(n, (c + 1) * per); ++g) {
+      if (groups[g]->arity == 2) q2[a++] = static_cast<std::uint32_t>(g);
+      else rest[o++] = static_cast<std::uint32_t>(g);
+    }
+  });
 }
 
 void fnv(std::uint64_t& h, std::uint64_t word) {
@@ -743,6 +1081,33 @@ class ChainCatalogueSealer {
     return std::unique_ptr<const tower::SealedCatalogue>(new tower::SealedCatalogue(ix, std::move(balls)));
   }
 };
+
+#if defined(MHGP9_TESTING)
+namespace chain_testing {
+void set_census_failpoints(std::vector<std::array<gen::i128, 5>> keys) {
+  failpoints::census_keys = std::move(keys);
+  failpoints::early_hits.store(0);
+}
+std::uint64_t early_census_failpoint_hits() { return failpoints::early_hits.load(); }
+void set_stage_failpoints(bool q2, bool q34, bool merge) {
+  failpoints::q2.store(q2);
+  failpoints::q34.store(q34);
+  failpoints::merge.store(merge);
+}
+void set_early_failpoints(int early_throw, bool early_hold) {
+  failpoints::early_throw.store(early_throw);
+  failpoints::early_hold.store(early_hold);
+  failpoints::early_fallbacks.store(0);
+  failpoints::early_cancels.store(0);
+  failpoints::early_hold_timeouts.store(0);
+  failpoints::early_thrown_keys.store(0);
+}
+EarlyFailpointCounts early_failpoint_counts() {
+  return {failpoints::early_fallbacks.load(), failpoints::early_cancels.load(), failpoints::early_hold_timeouts.load(),
+          failpoints::early_thrown_keys.load()};
+}
+}  // namespace chain_testing
+#endif
 
 std::uint64_t tower_digest(const tower::FullBallTowerResult& result) {
   std::uint64_t h = 14695981039346656037ull;
@@ -851,6 +1216,8 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       fail(ChainStatus::kInvalidInput, "chain_q2_during_device_requires_batch_filter");
     if (options.q34_lanes_fused && !options.q34_batch_q4)
       fail(ChainStatus::kInvalidInput, "chain_q34_lanes_fused_requires_batch_q4");
+    if (options.q2_early_census && !options.q2_during_device)
+      fail(ChainStatus::kInvalidInput, "chain_q2_early_census_requires_q2_during_device");
     if (points.size() < 2) fail(ChainStatus::kInvalidInput, "chain_requires_two_sites");
     if (points.size() > static_cast<std::size_t>(std::numeric_limits<std::int32_t>::max()))
       fail(ChainStatus::kInvalidInput, "chain_too_many_sites");
@@ -912,6 +1279,9 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
       result.q2_front_rectangles = r2.input_rectangles;
       result.q2_candidate_pairs = r2.candidate_pairs;
       result.q2_accepted_pairs = r2.accepted_pairs;
+#if defined(MHGP9_TESTING)
+      if (failpoints::q2.load()) fail(ChainStatus::kInvariantViolated, "failpoint_q2");
+#endif
     };
     // v24: under q2_during_device (batch path, K >= 2) q2 runs on its own
     // thread, launched once the q34 front is built (the device calls then
@@ -919,28 +1289,38 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     // reported before a q34 one, as in the sequential order. If the hook
     // never fires (q34 refused before its front), q2 runs after q34.
     const bool q2_overlapped = options.q2_during_device && kmax >= 2;
+    // v28: under q2_early_census, q2's side then runs the census of the q2
+    // keys (run_early_census) before its end; its failures stay in `early`
+    // (never q2_failure) and are only read by the census after the merge.
+    const bool early_census = options.q2_early_census && q2_overlapped;
+    EarlyCensus early;
+    std::atomic<bool> early_cancel{false};  // q34 failed: the early results are never read
     std::thread q2_thread;
     std::exception_ptr q2_failure;
     // q2's wall runs from its launch to its end (thread start included), and
     // the main thread's wait is max(0, q2's end - q34's end): the wait never
-    // exceeds q2's wall, by construction.
-    Clock::time_point q2_launch{}, q2_end{};
+    // exceeds q2's wall, by construction. v28: the early census runs from
+    // q2's end to early_end (= q2_end without it).
+    Clock::time_point q2_launch{}, q2_end{}, early_end{};
     struct Q2Joiner {
       std::thread& thread;
       ~Q2Joiner() {
         if (thread.joinable()) thread.join();
       }
     } q2_joiner{q2_thread};
+    const auto run_q2_side = [&] {
+      try {
+        run_q2();
+      } catch (...) {
+        q2_failure = std::current_exception();
+      }
+      q2_end = Clock::now();
+      if (early_census && !q2_failure) run_early_census(points, kmax, W, q2_slots, early_cancel, early);
+      early_end = Clock::now();
+    };
     const std::function<void()> launch_q2 = [&] {
       q2_launch = Clock::now();
-      q2_thread = std::thread([&] {
-        try {
-          run_q2();
-        } catch (...) {
-          q2_failure = std::current_exception();
-        }
-        q2_end = Clock::now();
-      });
+      q2_thread = std::thread(run_q2_side);
     };
     if (!q2_overlapped) {
       t = Clock::now();
@@ -990,6 +1370,9 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
           };
         } else {
           filter = [W](const gen::Q2CensusIndex& ix, unsigned k, std::span<const gen::WspdRectangle> rects) {
+#if defined(MHGP9_TESTING)
+            if (failpoints::q34.load()) fail(ChainStatus::kInvariantViolated, "failpoint_q34");
+#endif
             return gen::run_q34_filter_batch_cpu(ix, k, rects, W);
           };
         }
@@ -1056,10 +1439,14 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
                                           filter, &timing, certificates ? &certificates : nullptr,
                                           lanes.filter ? &lanes : nullptr, q2_overlapped ? &launch_q2 : nullptr);
         } catch (const GpuRefusal& e) {
+          early_cancel.store(true);
           if (q2_thread.joinable()) q2_thread.join();
           if (q2_failure) std::rethrow_exception(q2_failure);  // q2 first, as sequentially
           fail(e.status, e.what());
         } catch (...) {
+#if !defined(MHGP9_Q2_EARLY_CENSUS_MUTANT_NO_CANCEL)
+          early_cancel.store(true);
+#endif
           if (q2_thread.joinable()) q2_thread.join();
           if (q2_failure) std::rethrow_exception(q2_failure);
           throw;
@@ -1224,17 +1611,24 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
         q2_thread.join();
       } else {
         q2_launch = q34_end;
-        try {
-          run_q2();
-        } catch (...) {
-          q2_failure = std::current_exception();
-        }
-        q2_end = Clock::now();
+        run_q2_side();
       }
       const auto millis = [](Clock::duration d) { return std::chrono::duration<double, std::milli>(d).count(); };
       result.times.q2_ms = millis(q2_end - q2_launch);
       result.times.q2_wait_ms = q2_end > q34_end ? millis(q2_end - q34_end) : 0.0;
+      if (early_census) {
+        // v28: the early census's wall (overlapped, out of the stage sum)
+        // and the main thread's wait beyond q2's end (in the sum).
+        const auto from = std::max(q2_end, q34_end);
+        result.times.q2_census_ms = early.ms;
+        result.times.q2_census_index_ms = early.index_ms;
+        result.times.q2_census_wait_ms = early_end > from ? millis(early_end - from) : 0.0;
+      }
       if (q2_failure) std::rethrow_exception(q2_failure);
+#if defined(MHGP9_Q2_EARLY_CENSUS_MUTANT_ERROR_AT_JOIN)
+      // Mutant: the early census's failure reported at the join, as q2's.
+      if (early.error.error) std::rethrow_exception(early.error.error);
+#endif
     }
     // q2's slots join q34's (moved, not copied): the merge sorts them all.
     slots.insert(slots.end(), std::make_move_iterator(q2_slots.begin()), std::make_move_iterator(q2_slots.end()));
@@ -1268,6 +1662,9 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
 
     // ---- Fusion : une boule par cle (union q2 u q3 u q4).
     PhaseClock merge_clock{result.times.merge_ms};
+#if defined(MHGP9_TESTING)
+    if (failpoints::merge.load()) fail(ChainStatus::kInvariantViolated, "failpoint_merge");
+#endif
     auto gathered = gather_presentations(slots, W);
     result.catalogue.q2_presentations = gathered.by_arity[2];
     result.catalogue.q3_presentations = gathered.by_arity[3];
@@ -1316,148 +1713,113 @@ ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOpti
     result.catalogue.unique_keys = unique;
     merge_clock.stop();
 
-    // ---- Index de la tour (PointId = rang d'entree).
-    t = Clock::now();
+    // ---- Index de la tour (PointId = rang d'entree). v28 : construit cote q2
+    // sous q2_early_census (q2_census_index_ms ; tower_index_ms reste nul).
+    const bool early_ready = early_census && early.ready;
     tower::CloudIndex ix;
-    {
-      std::vector<tower::InputPoint> input(points.size());
-      for (std::size_t i = 0; i < points.size(); ++i)
-        input[i] = tower::InputPoint{static_cast<tower::PointId>(i), to_p3(points[i])};
-      ix = tower::build_cloud_index(input);
+    if (early_ready) {
+      ix = std::move(early.ix);
+    } else {
+      t = Clock::now();
+      ix = build_tower_index(points);
+      result.times.tower_index_ms = ms_since(t);
     }
-    require(ix.valid && !ix.has_duplicate_positions() && ix.upos.size() == points.size(),
-            "chain_tower_index_invalid");
-    std::vector<tower::i32> geo_of_id(points.size(), -1);
-    for (tower::i32 u = 0; u < ix.unique_count(); ++u) geo_of_id[ix.point_id(u)] = u;
-    result.times.tower_index_ms = ms_since(t);
 
     // ---- Census exact de chaque cle distincte sur l'index de la tour.
+    // L'erreur rendue est celle de la plus petite cle en echec (quel que soit
+    // W) ; sans erreur, les statistiques sont sommees sur tous les fils.
     PhaseClock census_clock{result.times.census_ms};
     std::vector<tower::BallData> balls(unique);
     std::vector<std::uint8_t> keep(unique, 0);
-    std::atomic<std::uint64_t> over_cap{0};
-    struct WorkerState {
-      std::vector<tower::i32> in, sh;
-      std::vector<tower::NodeRef> scratch;
-      tower::DepthStats depth;
-      std::uint64_t extra = 0, max_shell = 0, max_interior = 0;
-      std::array<std::uint64_t, 5> by_q{};
-      std::array<std::uint64_t, 17> by_shell{};
-      std::array<std::int64_t, 11> euler{};  // contributions d'Euler par ordre K (indice K)
-      std::array<std::uint64_t, 5> regular{};  // R-29: certified regular supports by arity
-    };
-    // Coefficient de t^{K-1} dans t^p (t-1)^{j-1} : (-1)^{j-1-i} C(j-1, i), i = K-1-p.
-    const auto euler_add = [kmax](std::array<std::int64_t, 11>& e, std::size_t p, std::size_t j, std::int64_t count) {
-      static constexpr std::int64_t binom[12][12] = {
-          {1}, {1, 1}, {1, 2, 1}, {1, 3, 3, 1}, {1, 4, 6, 4, 1}, {1, 5, 10, 10, 5, 1}, {1, 6, 15, 20, 15, 6, 1},
-          {1, 7, 21, 35, 35, 21, 7, 1}, {1, 8, 28, 56, 70, 56, 28, 8, 1}, {1, 9, 36, 84, 126, 126, 84, 36, 9, 1},
-          {1, 10, 45, 120, 210, 252, 210, 120, 45, 10, 1}, {1, 11, 55, 165, 330, 462, 462, 330, 165, 55, 11, 1}};
-      for (std::size_t i = 0; i < j && p + i + 1 <= kmax; ++i)
-        e[p + i + 1] += (((j - 1 - i) % 2) ? -1 : 1) * binom[j - 1][i] * count;
-    };
-    const std::size_t census_workers = std::max<std::size_t>(1, std::min(W, unique / 256 + 1));
-    std::vector<WorkerState> states(census_workers);
-    // A key's refusal depends on its data alone; parallel_for rethrows the
-    // one of the smallest key index (the serial loop's) at any W. A shell
-    // above 12 never stops the loop: counted over every key, it is refused
-    // after it only when no key threw (at any W as well).
-    parallel_for(unique, census_workers, [&](std::size_t g, std::size_t w) {
+    std::vector<CensusState> states;
+    FirstError census_error{unique, nullptr};  // index = group
+    if (!early_ready) {
+      const std::size_t census_workers = std::max<std::size_t>(1, std::min(W, unique / 256 + 1));
+      states.resize(census_workers);
+      // A key's refusal depends on its data alone: the one of the smallest
+      // key index (the serial loop's) is kept at any W (R-29, audit of the
+      // seal). A shell above 12 never stops the loop: counted over every key,
+      // it is refused after it only when no key threw (at any W as well).
+      census_error = parallel_for_first_error(unique, census_workers, [&](std::size_t g, std::size_t w) {
 #if defined(MHGP9_CHAIN_TEST_SEAM)
-      // Gates only: a stall before one key, planted refusals at chosen keys.
-      if (g == chain_test::seam.census_delay_group)
-        std::this_thread::sleep_for(std::chrono::milliseconds(chain_test::seam.census_delay_ms));
-      for (const auto& planted : chain_test::seam.census_faults)
-        if (planted.group == g) fail(ChainStatus::kInvariantViolated, planted.reason);
+        // Gates only: a stall before one key, planted refusals at chosen keys.
+        if (g == chain_test::seam.census_delay_group)
+          std::this_thread::sleep_for(std::chrono::milliseconds(chain_test::seam.census_delay_ms));
+        for (const auto& planted : chain_test::seam.census_faults)
+          if (planted.group == g) fail(ChainStatus::kInvariantViolated, planted.reason);
 #endif
-      auto& st = states[w];
-      const Presentation& rep = *groups[g];  // plus petite arite presentee
-      tower::BallKey key;
-      tower::ExactLevel level;
-      SupportForm form;
-      key_and_level(points, rep, &key, &level, &form);  // arity 2..4 and IDs checked there (R-29)
-      require(to_key5(key) == rep.key, "chain_key_mismatch_v8_v7");
-      // R-29: the key's u18 domain before any census arithmetic, and a
-      // positive level denominator (the tower's pass-1 shape and domain).
-      require(tower::ball_key_in_u18_domain(key), "chain_ball_key_domain");
-      require(level.den > 0, "chain_ball_level_denominator");
-      const auto status = tower::ball_census(ix, key, rep.depth, std::numeric_limits<std::size_t>::max(),
-                                             &st.in, &st.sh, &st.depth, &st.scratch);
-      require(status == tower::CensusStatus::kOk, "chain_census_interior_overflow");
-      require(st.in.size() == rep.depth, "chain_census_depth_mismatch");
-      require(st.sh.size() == rep.shell, "chain_census_shell_mismatch");
-      st.by_shell[std::min<std::size_t>(st.sh.size(), 16)]++;
-      st.max_shell = std::max<std::uint64_t>(st.max_shell, st.sh.size());
-      st.max_interior = std::max<std::uint64_t>(st.max_interior, st.in.size());
-      if (st.sh.size() > tower::kBallShellMax) {
-        over_cap.fetch_add(1, std::memory_order_relaxed);
-        return;  // refus de domaine explicite, jamais une troncature
-      }
-      require(st.in.size() <= tower::kBallInteriorMax, "chain_interior_above_representation");
-      std::sort(st.in.begin(), st.in.end());
-      std::sort(st.sh.begin(), st.sh.end());
-      unsigned q = rep.arity;
-      if (st.sh.size() == rep.arity) {
-        // R-29: a regular shell IS the declared support (geometry IDs of the
-        // presented input IDs, as sets) and that support is positive: with
-        // the key and level recomputed from it above, the tower's pass-1
-        // declared-support check holds for this ball.
-        std::array<tower::i32, 4> support;  // unused slots sort last
-        support.fill(std::numeric_limits<tower::i32>::max());
-        for (unsigned j = 0; j < rep.arity; ++j) support[j] = geo_of_id[rep.support[j]];
-        std::sort(support.begin(), support.end());
-        require(std::equal(st.sh.begin(), st.sh.end(), support.begin()), "chain_regular_shell_differs_from_support");
-        require(regular_support_positive(form, rep.arity), "chain_nonpositive_regular_support");
-        ++st.regular[rep.arity];
-        // Coquille reguliere : T = U seule (centre interieur au support positif).
-        euler_add(st.euler, st.in.size(), q, 1);
-      } else {
-        ++st.extra;
-        tower::local_plateau::LocalCensus local{key, {}, {}};
-        for (auto u : st.in) local.interior.push_back({ix.point_id(u), ix.upos[(std::size_t)u]});
-        for (auto u : st.sh) local.shell.push_back({ix.point_id(u), ix.upos[(std::size_t)u]});
-        const auto table = tower::local_plateau::ShellTable::prepare(std::move(local));
-        q = table.q_min();
-        require(q == rep.arity, "chain_qmin_differs_from_min_presented_arity");
-        require(q <= st.sh.size(), "chain_qmin_above_shell");
-        // Euler d'une coquille etendue : sous-coquilles T (|T| >= 2) dont
-        // l'enveloppe convexe contient le centre, comptees par taille.
-        std::array<std::int64_t, 13> by_size{};
-        const auto& contains = table.contains_center();
-        for (std::size_t mask = 1; mask < contains.size(); ++mask)
-          if (contains[mask]) ++by_size[static_cast<std::size_t>(std::popcount(static_cast<unsigned>(mask)))];
-#if defined(MHGP9_EULER_MUTANT_REGULAR_SHELLS_ONLY)
-        by_size = {};
-        by_size[st.sh.size()] = 1;  // mutant : coquille etendue traitee comme T = U seule
+        keep[g] = census_key(points, ix, kmax, *groups[g], states[w], balls[g], false) ? 1 : 0;
+      });
+    } else {
+      // v28: the q2-represented groups are the q2 side's keys, in the same
+      // (key) order: their results are taken (checked key by key), the
+      // other groups censused here, below the q2 side's first failure only.
+      std::vector<std::uint32_t> q2_groups, late_groups;
+      split_groups(groups, W, q2_groups, late_groups);
+      result.catalogue.early_census_keys = early.balls.size();
+      require(q2_groups.size() == early.balls.size(), "chain_q2_early_census_keys_differ");
+      const std::size_t early_failed = early.error.error ? q2_groups[early.error.index] : unique;
+      const std::size_t taken = early.error.error ? early.error.index : early.balls.size();
+      std::atomic<bool> mismatch{false};
+      tower::parallel_ranges(taken, static_cast<int>(W), [&](std::size_t first, std::size_t last, std::size_t) {
+        for (std::size_t j = first; j < last; ++j) {
+          const std::size_t g = q2_groups[j];
+          if (to_key5(early.balls[j].key) != groups[g]->key) mismatch.store(true);
+          if (early.keep[j] != 0) balls[g] = early.balls[j];
+          keep[g] = early.keep[j];
+        }
+      });
+      require(!mismatch.load(), "chain_q2_early_census_key_mismatch");
+      std::vector<tower::BallData>().swap(early.balls);  // taken: released before the other keys' census
+      std::vector<std::uint8_t>().swap(early.keep);
+      const std::size_t late = static_cast<std::size_t>(
+          std::lower_bound(late_groups.begin(), late_groups.end(), early_failed) - late_groups.begin());
+      const std::size_t census_workers = std::max<std::size_t>(1, std::min(W, late / 256 + 1));
+      states.resize(census_workers);
+      const auto late_error = parallel_for_first_error(late, census_workers, [&](std::size_t i, std::size_t w) {
+        const std::size_t g = late_groups[i];
+#if defined(MHGP9_CHAIN_TEST_SEAM)
+        // Gates only: a stall before one key, planted refusals at chosen keys.
+        if (g == chain_test::seam.census_delay_group)
+          std::this_thread::sleep_for(std::chrono::milliseconds(chain_test::seam.census_delay_ms));
+        for (const auto& planted : chain_test::seam.census_faults)
+          if (planted.group == g) fail(ChainStatus::kInvariantViolated, planted.reason);
 #endif
-        for (std::size_t j = 2; j <= st.sh.size(); ++j)
-          if (by_size[j]) euler_add(st.euler, st.in.size(), j, by_size[j]);
-      }
-      require(st.in.size() + q <= std::min<std::size_t>(kmax + 1, points.size()),
-              "chain_ball_outside_rank_window");
-      st.by_q[q]++;
-      auto& b = balls[g];
-      b.key = key;
-      b.level = level;
-      b.arity = static_cast<tower::u8>(q);
-      b.n_interior = static_cast<tower::u8>(st.in.size());
-      b.n_shell = static_cast<tower::u8>(st.sh.size());
-      std::copy(st.in.begin(), st.in.end(), b.interior_ids);
-      std::copy(st.sh.begin(), st.sh.end(), b.shell_ids);
-      keep[g] = 1;
-    });
-    for (const auto& st : states) {
-      result.catalogue.extra_shell_balls += st.extra;
-      result.catalogue.max_shell = std::max(result.catalogue.max_shell, st.max_shell);
-      result.catalogue.max_interior = std::max(result.catalogue.max_interior, st.max_interior);
-      result.catalogue.census_nodes += st.depth.nodes;
-      result.catalogue.census_leaf_tests += st.depth.leaf_tests;
-      for (std::size_t q = 0; q < 5; ++q) result.catalogue.balls_by_qmin[q] += st.by_q[q];
-      for (std::size_t s = 0; s < 17; ++s) result.catalogue.balls_by_shell[s] += st.by_shell[s];
-      for (std::size_t k = 1; k <= 10; ++k) result.catalogue.euler_by_k[k] += st.euler[k];
-      for (std::size_t q = 0; q < 5; ++q) result.catalogue.regular_supports_by_arity[q] += st.regular[q];
+        keep[g] = census_key(points, ix, kmax, *groups[g], states[w], balls[g], false) ? 1 : 0;
+      });
+      if (late_error.error) census_error = {late_groups[late_error.index], late_error.error};
+      if (early.error.error && early_failed < census_error.index) census_error = {early_failed, early.error.error};
+#if defined(MHGP9_Q2_EARLY_CENSUS_MUTANT_EARLY_ERROR_FIRST)
+      // Mutant: the q2 side's failure wins over a smaller key's.
+      if (early.error.error) census_error = {early_failed, early.error.error};
+#endif
     }
+    if (census_error.error) std::rethrow_exception(census_error.error);
+    std::uint64_t over_cap = 0;
+    const auto add_states = [&](const std::vector<CensusState>& part) {
+      for (const auto& st : part) {
+        over_cap += st.over_cap;
+        result.catalogue.extra_shell_balls += st.extra;
+        result.catalogue.max_shell = std::max(result.catalogue.max_shell, st.max_shell);
+        result.catalogue.max_interior = std::max(result.catalogue.max_interior, st.max_interior);
+        result.catalogue.census_nodes += st.depth.nodes;
+        result.catalogue.census_leaf_tests += st.depth.leaf_tests;
+        for (std::size_t q = 0; q < 5; ++q) result.catalogue.balls_by_qmin[q] += st.by_q[q];
+        for (std::size_t s = 0; s < 17; ++s) result.catalogue.balls_by_shell[s] += st.by_shell[s];
+        for (std::size_t k = 1; k <= 10; ++k) result.catalogue.euler_by_k[k] += st.euler[k];
+        for (std::size_t q = 0; q < 5; ++q) result.catalogue.regular_supports_by_arity[q] += st.regular[q];
+      }
+    };
+    add_states(states);
+    if (early_ready) {
+#if !defined(MHGP9_Q2_EARLY_CENSUS_MUTANT_DROP_STATS)
+      add_states(early.states);
+#endif
+      for (const auto& st : early.states) result.catalogue.early_census_extra_shell_balls += st.extra;
+    }
+    early = EarlyCensus{};  // the q2 side's results are not read past this point
     gathered = GatheredPresentations{};  // groups is not read past this point
-    result.catalogue.shell_over_cap = over_cap.load();
+    result.catalogue.shell_over_cap = over_cap;
     if (result.catalogue.shell_over_cap > 0) {
       census_clock.stop();
       fail(ChainStatus::kUnsupportedDegeneracy, "chain_shell_above_12");

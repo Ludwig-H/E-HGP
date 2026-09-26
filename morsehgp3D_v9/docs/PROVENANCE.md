@@ -882,6 +882,132 @@ le front q34 est construit (crochet `after_front` de
   pas dans l'étape A. La porte `mhgp9_chain_batch_q3` ajoute ce refus
   (cœur mort sans son certificat, levier GPU du filtre, q2 recouvert) ; elle
   passe sous ASan.
+### Recensement des clés q2 côté q2 (levier `q2_early_census`, 25 septembre 2026)
+
+À 08/000000/K5, sur G4, q2 (104 ms) finit bien avant les appels de l'appareil
+(q34 : 509 ms), puis la chaîne construit l'index de la tour (10 ms) et
+recense toutes les clés (99 ms). 35 % des clés sont des clés q2 (456 919 sur
+1 306 696). Le représentant d'une clé q2 est sa présentation q2 de plus petit
+support, l'arité 2 étant la plus petite : son census ne dépend que des sites
+et de q2.
+- **Levier** `ChainOptions::q2_early_census` : faux par défaut ; il exige
+  `q2_during_device`, sinon `invalid_input`
+  (`chain_q2_early_census_requires_q2_during_device`). Sans effet à K1, où q2
+  n'est pas recouvert.
+- **Côté q2** (`run_early_census`, sur le fil de q2, une fois q2 fini) :
+  - index de la tour ;
+  - tri en place des ardoises q2 : la fusion trouve ces ardoises triées et
+    ne les retrie pas ;
+  - un représentant par clé q2 distincte (plus petit support, par plages de
+    clés) ;
+  - census de ces clés (`census_key`, la même fonction qu'après la fusion).
+- **Après la fusion** : les groupes représentés en arité 2 sont exactement
+  les clés du côté q2, dans le même ordre de clés, y compris quand des clés
+  q3/q4 s'intercalent. Leurs boules sont reprises après un contrôle clé par
+  clé (`chain_q2_early_census_keys_differ`, `…_key_mismatch`). Le census ne
+  calcule que les autres clés. Une clé aussi présentée par q3/q4 garde son
+  représentant q2.
+- **Mêmes octets** : boules dans l'ordre des groupes, drapeaux, coquilles,
+  Euler, arités minimales, nœuds et tests du census, refus de coquille. Les
+  statistiques sont sommées sur les deux parties.
+- **Échecs** :
+  - l'erreur du census est désormais celle de la **plus petite clé** en
+    échec, sur les deux voies et pour tout W
+    (`parallel_for_first_error`) ; avant, c'était la première levée, une
+    course ;
+  - un échec du census côté q2 garde son rang de clé et ne passe jamais
+    devant un échec de q2, de q34 ou de la fusion ;
+  - un échec de q34 annule le census côté q2 ;
+  - tout autre échec du côté q2 (index, tri, allocation) laisse le census
+    complet se refaire après la fusion : il rencontre alors le même échec, à
+    sa place dans la chaîne ; `q2_census_index_ms` et `tower_index_ms` sont
+    alors tous deux non nuls (l'index est construit deux fois).
+- **Temps** (`ChainTimes`) :
+  - `q2_census_ms` : mur du côté q2, recouvert par q34, hors de la somme des
+    étapes ; `q2_census_index_ms` en est la part de l'index ;
+  - `q2_census_wait_ms` : attente du fil principal au-delà de la fin de q2,
+    dans la somme (`q2_wait_ms + q2_census_wait_ms` = attente totale après
+    q34) ;
+  - `census_ms` : le reste du census, après la fusion ;
+  - `tower_index_ms` vaut 0 quand l'index vient du côté q2.
+- **Compteurs** (`CatalogueStats`) : `early_census_keys` (clés recensées
+  côté q2, égal à `balls_by_qmin[2]` sur une chaîne complète) et
+  `early_census_extra_shell_balls` (coquilles étendues parmi elles). Nuls
+  sans le levier.
+- **Mémoire** : les boules du côté q2 vivent de la fin de q2 au census,
+  soit 224 o par clé q2 : 102 Mo à 08/000000/K5, environ 580 Mo sur les
+  trames brutes à K10.
+- **Porte** `mhgp9_chain_q2_early_census_gate` (cible de test, points de
+  panne `MHGP9_TESTING`) :
+  - `--selftest` : six familles, dont `planted` (triangles aigus plantés
+    dont les clés q3 s'intercalent entre les clés q2), des sphères (coquilles
+    q2 étendues, cinq paires diamétrales par clé) et une coquille q2 de
+    14 sites (refus côté q2) ; K1, 2, 3, 5 et 10 ; W 1, 3 et 8. Chaque bras
+    est comparé octet pour octet à la référence sans levier à W1
+    (`tower_work` à W égal). Planchers : exactement 90 cas, dont
+    75 complets ; au moins 600 000 clés côté q2 (644 148 observées), au
+    moins 90 coquilles étendues côté q2, exactement 12 refus côté q2, au
+    moins 24 cas entrelacés ;
+  - `--priority` : onze scénarios de pannes, sur les deux bras, à W 1, 4 et
+    8 : la plus petite clé gagne (q2 contre q3/q4 dans les deux sens), et q2,
+    q34 puis la fusion passent avant le census. 66 exécutions, 18 pannes
+    vues côté q2 ;
+  - `--fallback` : voie de repli, par des points de panne du côté q2 (26
+    septembre 2026, après revue). Une panne hors du census clé par clé,
+    après l'index ou après le census de toutes les clés q2
+    (`std::bad_alloc`), sur `uniform`, `planted`, sphères et coquille de
+    14 sites, à K2 et K5, W 1 et 8 : même objet que sans le levier au même
+    W, `early_census_keys` nul, index reconstruit après la fusion
+    (`tower_index_ms` > 0). Avec une panne de census sur une clé q2 en plus :
+    même raison, rencontrée une seule fois côté q2. Un échec de q34 annule
+    le côté q2, retenu jusqu'à l'annulation : il ne recense alors aucune
+    clé. Planchers : exactement 60 exécutions, 36 replis et 3 annulations ;
+    au moins 90 000 clés recensées avant la panne (91 944 observées) ;
+  - `--frame` : 08/000000 à K5 (label `lidar`), condensés épinglés
+    reproduits sur les deux bras, même objet ;
+  - cinq mutants compilés tués (code 1) : statistiques du côté q2 perdues
+    (`cause=object.`), panne du côté q2 prioritaire sur une clé plus petite
+    (`cause=priority late_before_q2`), panne du côté q2 levée à la jointure
+    comme celle de q2 (`cause=priority merge_before_census`), échec du côté
+    q2 hors du census ignoré (`cause=fallback.early_keys`), annulation
+    jamais posée après un échec de q34 (`cause=fallback.cancel`).
+- **Mesures locales** (08/000000, W8, chemin par lots sur CPU, q2 pendant
+  les appels ; hôte partagé de 8 cœurs sous une charge de 35 à 81 :
+  indicatives seulement). Trois paires entrelacées, un processus par bras,
+  même binaire (`--frame … --lever=0|1`) ; condensés épinglés reproduits
+  sur tous les bras.
+  - **Clés déplacées** (compteur déterministe) : 456 919 sur 1 306 696 à
+    K5 (35 %), 881 908 sur 5 512 670 à K10 (16 %).
+  - **Côté q2** : 1,7 à 2,4 s en local, entièrement recouverts par q34 ;
+    `q2_census_wait` est nul partout.
+  - **Chemin après q34** (`q2_wait + q2_census_wait + merge + tower_index +
+    census`), sans → avec le levier :
+    - K5 : 4 410 / 4 663 / 4 344 → 4 392 / 3 673 / 3 440 ms. La fusion
+      passe de 460 / 567 / 636 à 391 / 373 / 386 ms (ardoises q2 déjà
+      triées) ; l'index, de 105 / 111 / 68 à 0 ms ; le census, de
+      3 844 / 3 985 / 3 641 à 4 002 / 3 300 / 3 054 ms (+4 %, −17 %,
+      −16 %) ;
+    - K10 : 9 685 / 10 587 / 12 653 → 8 831 / 9 675 / 11 338 ms. Le census
+      passe de 8 633 / 9 307 / 11 244 à 7 774 / 8 573 / 9 862 ms (−10 %,
+      −8 %, −12 %) ; la fusion ne bouge pas nettement (1 031 / 1 241 /
+      1 374 → 1 057 / 1 102 / 1 475 ms).
+  - **CPU du processus** : 181,4 à 181,8 → 180,9 à 182,2 s à K5 ; 548,0 à
+    549,8 → 550,3 à 554,4 s à K10.
+  - **Pic de RSS** : inchangé (1,01 Go à K5 ; 3,88 à 3,93 → 3,75 à 3,89 Go
+    à K10).
+  - **Limite** : en local, q34 tourne sur le CPU et le côté q2 lui prend des
+    cœurs ; le total de la chaîne ne baisse donc pas (q34 plus long de 4 à
+    10 s à K10). Le levier vise G4, où les appels de l'appareil laissent le
+    CPU libre (R21, 08/000000/K5 : q2 104 ms pour q34 509 ms).
+  - **Gain attendu sur G4** (à mesurer) : l'index (10 ms), la part q2 du
+    census et le tri des ardoises q2 sorti de la fusion (R21 : fusion
+    29 ms à K5). Les 99 ms (K5) et 490 ms (K10) de R21 sont le census de
+    **toutes** les clés (1 306 696 et 5 512 670) : les clés q2 n'en sont
+    que 35 % et 16 %, et coûtent moins que la moyenne. Le census local
+    baisse de 0 à 17 % à K5 et de 8 à 12 % à K10 : soit environ 0 à 17 ms
+    (35 ms au plus) à K5 et 40 à 60 ms (78 ms au plus) à K10 sur le census,
+    plus l'index et une part de la fusion.
+
 ### Étape 3 du plan des voies (24 septembre 2026, après R18)
 
 Plan du juge des voies, « Étape 3 — réduire le travail de masse », précédé

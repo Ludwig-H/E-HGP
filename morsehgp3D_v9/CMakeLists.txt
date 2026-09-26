@@ -453,6 +453,55 @@ mhgp9_gate(mhgp9_chain_batch_q3 0 mhgp9_chain_batch_q3_gate ARGS --n=1000
            EXPECT_PREFIX "chain_batch_q3_gate n=1000" LABELS "gate;chain;oracle" TIMEOUT 1200)
 mhgp9_gate(mhgp9_chain_batch_q3_bad_argument 2 mhgp9_chain_batch_q3_gate ARGS --n=abc
            LABELS "gate;chain" TIMEOUT 60)
+# v28 : recensement des cles q2 cote q2 (levier q2_early_census, pendant les
+# appels q34) : memes octets que le recensement apres la fusion (statut,
+# raison, condenses, catalogue boule par boule, statistiques et Euler,
+# tower_work, ordres) sur cinq familles (dont coquilles q2 etendues et refus
+# de coquille cote q2), K1..K10 et W 1, 3, 8 ; priorite des pannes par
+# points de panne de la cible de test (plus petite cle en echec, puis q2,
+# q34 et fusion avant le census) ; voie de repli du cote q2 (panne hors du
+# census cle par cle, annulation par un echec de q34) ; cinq mutants compiles
+# tues ; trame 08/000000 a K5 (label lidar) aux condenses epingles sur les
+# deux bras.
+foreach(variant IN ITEMS "" DROP_STATS EARLY_ERROR_FIRST ERROR_AT_JOIN IGNORE_FAILURE NO_CANCEL)
+  if(variant STREQUAL "")
+    set(target mhgp9_chain_q2_early_census_gate)
+  else()
+    string(TOLOWER ${variant} lower)
+    set(target mhgp9_chain_q2_early_census_${lower}_mutant_gate)
+  endif()
+  mhgp9_test_executable(${target} tests/chain/chain_q2_early_census_gate.cpp src/chain/tower_chain.cpp)
+  target_include_directories(${target} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/tests" "${CMAKE_CURRENT_SOURCE_DIR}/src/gen")
+  target_link_libraries(${target} PRIVATE mhgp9_gen mhgp9_gpu)
+  if(NOT variant STREQUAL "")
+    target_compile_definitions(${target} PRIVATE MHGP9_Q2_EARLY_CENSUS_MUTANT_${variant}=1)
+  endif()
+endforeach()
+mhgp9_gate(mhgp9_chain_q2_early_census 0 mhgp9_chain_q2_early_census_gate ARGS --selftest --n=1000
+           EXPECT_PREFIX "chain_q2_early_census_gate selftest n=1000" LABELS "gate;chain;oracle" TIMEOUT 3600)
+mhgp9_gate(mhgp9_chain_q2_early_census_priority 0 mhgp9_chain_q2_early_census_gate ARGS --priority
+           EXPECT_PREFIX "chain_q2_early_census_gate priority n=1000" LABELS "gate;chain" TIMEOUT 900)
+mhgp9_gate(mhgp9_chain_q2_early_census_fallback 0 mhgp9_chain_q2_early_census_gate ARGS --fallback
+           EXPECT_PREFIX "chain_q2_early_census_gate fallback n=1000" LABELS "gate;chain" TIMEOUT 900)
+mhgp9_gate(mhgp9_chain_q2_early_census_bad_argument 2 mhgp9_chain_q2_early_census_gate ARGS --n=abc
+           LABELS "gate;chain" TIMEOUT 60)
+mhgp9_gate(mhgp9_chain_q2_early_census_mutant_ignore_failure 1 mhgp9_chain_q2_early_census_ignore_failure_mutant_gate
+           ARGS --fallback EXPECT_PREFIX "cause=fallback.early_keys uniform/K2/W1/after_census"
+           LABELS "gate;chain;mutant" TIMEOUT 900)
+mhgp9_gate(mhgp9_chain_q2_early_census_mutant_no_cancel 1 mhgp9_chain_q2_early_census_no_cancel_mutant_gate
+           ARGS --fallback EXPECT_PREFIX "cause=fallback.cancel cancel/W1/on" LABELS "gate;chain;mutant" TIMEOUT 900)
+mhgp9_gate(mhgp9_chain_q2_early_census_mutant_drop_stats 1 mhgp9_chain_q2_early_census_drop_stats_mutant_gate
+           ARGS --selftest EXPECT_PREFIX "cause=object." LABELS "gate;chain;mutant" TIMEOUT 3600)
+mhgp9_gate(mhgp9_chain_q2_early_census_mutant_early_error_first 1
+           mhgp9_chain_q2_early_census_early_error_first_mutant_gate
+           ARGS --priority EXPECT_PREFIX "cause=priority late_before_q2/W1/on" LABELS "gate;chain;mutant" TIMEOUT 900)
+mhgp9_gate(mhgp9_chain_q2_early_census_mutant_error_at_join 1 mhgp9_chain_q2_early_census_error_at_join_mutant_gate
+           ARGS --priority EXPECT_PREFIX "cause=priority merge_before_census/W1/on" LABELS "gate;chain;mutant"
+           TIMEOUT 900)
+mhgp9_gate(mhgp9_chain_q2_early_census_lidar_k5 0 mhgp9_chain_q2_early_census_gate
+           ARGS --frame=${CMAKE_CURRENT_SOURCE_DIR}/../morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le
+                --k=5 --tower=67450c64611075b1 --catalogue=5ad1fe09354411ba --pairs=1
+           EXPECT_PREFIX "chain_q2_early_census_gate frame n=39885 K=5 pairs=1 arm=-1" LABELS "lidar;chain" TIMEOUT 3600)
 foreach(mutant IN ITEMS REGULAR_SHELLS_ONLY NO_SITE_TERM)
   string(TOLOWER ${mutant} lower)
   mhgp9_product_executable(mhgp9_chain_euler_${lower}_mutant_gate tests/chain/chain_euler_gate.cpp src/chain/tower_chain.cpp)

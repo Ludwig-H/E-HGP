@@ -179,6 +179,16 @@ struct ChainOptions {
   // complete_relative_to_cross_checked_catalogue_sealed_in_process_census.
   // Sans effet si run_tower est faux. Desactive par defaut.
   bool tower_sealed_catalogue = false;
+  // v28 : recensement des cles q2 cote q2 (leur representant est la
+  // presentation q2 de plus petit support, arite minimale) : une fois q2
+  // fini, sur son fil et pendant les appels de l'appareil, l'index de la tour
+  // (fonction des seuls sites) est construit, les ardoises q2 triees et
+  // chaque cle q2 distincte recensee ; apres la fusion, le recensement
+  // reprend ces resultats (une cle aussi presentee par q3/q4 garde son
+  // representant q2) et ne calcule que les autres cles. Memes octets
+  // (boules dans l'ordre des groupes, statistiques, refus, erreur de plus
+  // petite cle) ; exige q2_during_device ; desactive par defaut.
+  bool q2_early_census = false;
 };
 
 // Temps de mur en millisecondes, CPU du processus en secondes.
@@ -188,6 +198,15 @@ struct ChainTimes {
   // q2_wait_ms = 0.
   double prepare_ms = 0, gen_index_ms = 0, q2_ms = 0, q2_wait_ms = 0, q34_ms = 0;
   double merge_ms = 0, tower_index_ms = 0, census_ms = 0, tower_ms = 0, total_ms = 0;
+  // v28 : sous q2_early_census, q2_census_ms est le mur de la partie cote q2
+  // (index de la tour, tri des ardoises q2, recensement des cles q2), recouvert
+  // par q34 et hors de la somme des etapes ; q2_census_index_ms la part de
+  // l'index ; q2_census_wait_ms l'attente du fil principal au-dela de la fin
+  // de q2 (q2_wait_ms + q2_census_wait_ms = attente totale apres q34).
+  // census_ms reste le mur du recensement apres la fusion (le reste), et
+  // tower_index_ms vaut 0 quand l'index vient du cote q2. Sans le levier, les
+  // trois sont nuls.
+  double q2_census_ms = 0, q2_census_index_ms = 0, q2_census_wait_ms = 0;
   // Verification digest of the published tower, measured after total_ms
   // (not part of the chain's construction time).
   double digest_ms = 0;
@@ -206,6 +225,11 @@ struct CatalogueStats {
   std::uint64_t unique_keys = 0, balls = 0, extra_shell_balls = 0;
   std::uint64_t shell_over_cap = 0, max_shell = 0, max_interior = 0;
   std::uint64_t census_nodes = 0, census_leaf_tests = 0;
+  // v28 (q2_early_census) : cles recensees cote q2 (publie des la reprise
+  // apres la fusion) et, parmi elles, coquilles etendues (publie avec les
+  // autres statistiques) ; nuls sans le levier ou si la partie q2 a echoue
+  // hors recensement (repli sur le recensement complet apres la fusion).
+  std::uint64_t early_census_keys = 0, early_census_extra_shell_balls = 0;
   std::array<std::uint64_t, 5> balls_by_qmin{};
   std::array<std::uint64_t, 17> balls_by_shell{};  // index = taille de coquille (16 = 16 et plus)
   std::uint64_t bytes = 0;  // capacite du catalogue BallData
@@ -364,6 +388,36 @@ struct ChainResult {
   // Key ranges of the parallel presentation sort (1 below 4 096 presentations).
   std::size_t presentation_ranges = 0;
 };
+
+#if defined(MHGP9_TESTING)
+// Points de panne des cibles de test (jamais dans une cible produit) : le
+// recensement d'une cle listee leve Failure{invariant_violated,
+// "failpoint_census_<i>"} (i son rang dans la liste), sur les deux voies ; un
+// passage cote q2 (q2_early_census) est compte. failpoint_q2 fait echouer q2
+// a sa fin, failpoint_q34 l'appel du filtre CPU par lots (apres le front,
+// donc pendant q2), failpoint_merge la fusion.
+//
+// Cote q2 de q2_early_census (voie de repli) : `early_throw` fait lever le
+// cote q2 hors du census cle par cle, apres l'index (kEarlyAfterIndex) ou
+// apres le census de toutes ses cles (kEarlyAfterCensus, std::bad_alloc) ;
+// `early_hold` le fait attendre l'annulation (echec de q34) avant son census,
+// dix secondes au plus (depassement compte). Les compteurs disent combien de
+// passages cote q2 ont fini sans resultat (repli), dont par annulation.
+namespace chain_testing {
+void set_census_failpoints(std::vector<std::array<gen::i128, 5>> keys);
+std::uint64_t early_census_failpoint_hits();
+void set_stage_failpoints(bool q2, bool q34, bool merge);
+inline constexpr int kEarlyNoThrow = 0, kEarlyAfterIndex = 1, kEarlyAfterCensus = 2;
+struct EarlyFailpointCounts {
+  std::uint64_t fallbacks = 0;      // q2 side ended without results (ready unset)
+  std::uint64_t cancels = 0;        // among them, cancel seen (q34 failed)
+  std::uint64_t hold_timeouts = 0;  // early_hold ended without a cancel
+  std::uint64_t thrown_keys = 0;    // keys censused on the q2 side before a kEarlyAfterCensus throw
+};
+void set_early_failpoints(int early_throw, bool early_hold);  // also resets the counts
+EarlyFailpointCounts early_failpoint_counts();
+}  // namespace chain_testing
+#endif
 
 // points[i] a l'identite i (PointId = rang d'entree). Sites distincts requis.
 ChainResult run_tower_chain(std::span<const gen::Point3> points, const ChainOptions& options);
