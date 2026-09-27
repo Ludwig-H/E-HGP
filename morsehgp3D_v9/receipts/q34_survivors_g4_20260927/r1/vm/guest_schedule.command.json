@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "sudo",
+    "-n",
+    "cat",
+    "/run/systemd/shutdown/scheduled"
+  ],
+  "ended_epoch": 1790513751.0227408,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "guest_schedule",
+  "pid": 1815,
+  "started_epoch": 1790513751.0114014,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "9bcf2330a7e5632ce3040b553fdb50802c06d454f1eab208312138769779a77c",
+  "timeout_seconds": 449.99994759
+}

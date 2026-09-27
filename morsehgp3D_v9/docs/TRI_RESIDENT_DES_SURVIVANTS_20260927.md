@@ -93,4 +93,23 @@ suivante. Les chronos G4 et leur comparaison restent à produire.
 La sortie finale est encore un tableau hôte : le passage d'un propriétaire
 GPU directement à S3 reste à développer. Ce prototype ne remplace ni les
 autres étapes q3/q4 ni la construction FULL. Aucun gain G4 ou contrat
-100 ms nouveau n'est acquis ; GCP non utilisé pour cette qualification.
+100 ms nouveau n'est acquis ; GCP non utilisé pour cette qualification locale.
+
+## Premier essai G4 : échec du harnais, aucune mesure
+
+Le [protocole gardé](../audits/b_q34_survivors_session_20260927/README.md)
+a été publié à `5571957ca`, puis lancé depuis ce commit. Le
+[reçu R1](../receipts/q34_survivors_g4_20260927/r1/README.md) est **failed** :
+le pré-épinglage exigeait un fichier `.rsp`, présent dans le build local
+mais non produit par le CMake distant. Cet échec précède le build et les
+portes CUDA ; aucun gain ni défaut géométrique n'en découle.
+
+La capture et l'erreur sont conservées. Arrêt ciblé et état TERMINATED
+de la même génération vérifiés ; allocation observée155,926s, sans estimation
+de facture. Pas de relance automatique. L'exigence future doit porter sur
+la fermeture des options réellement utilisées, directes ou indirectes,
+pas sur la présence obligatoire d'une représentation particulière.
+
+Suite : [profilage de FULL avant nouveau chantier important](PROFILAGE_AVANT_REFONTE_20260927.md).
+Le candidat reste isolé ; son correctif de harnais et une éventuelle reprise
+nécessitent une capture distincte, sans réécrire le reçu d'échec.

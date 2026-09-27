@@ -1,0 +1,19 @@
+{
+  "mark": {
+    "date_utc": "2026-09-27T12:55:24Z",
+    "generation": "2026-09-27T05:54:28.609-07:00",
+    "guest_shutdown_minutes": "30",
+    "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "mark": "double_guard_verified",
+    "max_run_seconds": "3600",
+    "project": "devpod-gpu-exploration",
+    "schema": "e-hgp.guard-mark.v1",
+    "zone": "us-central1-b"
+  },
+  "schedule": {
+    "MODE": "poweroff",
+    "USEC": "1790515510605264",
+    "WALL_MESSAGE": "Coupe-circuit E-HGP",
+    "WARN_WALL": "1"
+  }
+}

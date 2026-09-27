@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "cmake",
+    "-S",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_a_real_20260927",
+    "-B",
+    "/workspaces/E-HGP/build/v9-a-real-20260927-r1_release",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+    "-DCMAKE_CXX_COMPILER=c++",
+    "-DMHGP9_A_REAL_SANITIZE=OFF"
+  ],
+  "name": "configure_release",
+  "started_epoch": 1790504088.1044831,
+  "timeout_seconds": null
+}

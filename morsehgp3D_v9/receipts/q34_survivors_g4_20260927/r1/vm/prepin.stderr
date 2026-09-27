@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/tmp/ehgp-full-v7-e45141c9445c3286.FRX6c5MUHK/source/morsehgp3D_v9/audits/b_q34_survivors_session_20260927/compile_contract.py", line 286, in <module>
+    result = prepin(args.source_root.resolve(), args.build.resolve(), c.read(args.manifest))
+  File "/tmp/ehgp-full-v7-e45141c9445c3286.FRX6c5MUHK/source/morsehgp3D_v9/audits/b_q34_survivors_session_20260927/compile_contract.py", line 164, in prepin
+    texts = generated(build)
+  File "/tmp/ehgp-full-v7-e45141c9445c3286.FRX6c5MUHK/source/morsehgp3D_v9/audits/b_q34_survivors_session_20260927/compile_contract.py", line 76, in generated
+    c.need(any(p.suffix == '.rsp' for p in paths), 'indirect CUDA flags expected')
+  File "/tmp/ehgp-full-v7-e45141c9445c3286.FRX6c5MUHK/source/morsehgp3D_v9/audits/b_q34_survivors_session_20260927/common.py", line 44, in need
+    raise ValueError(reason)
+ValueError: indirect CUDA flags expected

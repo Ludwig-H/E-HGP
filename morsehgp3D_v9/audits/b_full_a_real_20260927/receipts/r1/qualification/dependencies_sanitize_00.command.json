@@ -1,0 +1,33 @@
+{
+  "argv": [
+    "cmake",
+    "-E",
+    "chdir",
+    "/workspaces/E-HGP/build/v9-a-real-20260927-r1_sanitize",
+    "/usr/bin/clang++",
+    "-I/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/gen",
+    "-O3",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-O1",
+    "-g1",
+    "-fsanitize=address,undefined",
+    "-fno-omit-frame-pointer",
+    "-fno-sanitize-recover=all",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/gen/pipeline/local_credits.cpp",
+    "-M"
+  ],
+  "ended_epoch": 1790504092.416901,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "dependencies_sanitize_00",
+  "pid": 427324,
+  "started_epoch": 1790504092.341572,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "01d52ea704c91d03ffec799043df3fa3964ea50787030014ad6960f0f4bf27fa",
+  "timeout_seconds": null
+}

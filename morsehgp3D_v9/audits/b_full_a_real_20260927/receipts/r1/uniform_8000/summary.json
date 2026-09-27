@@ -1,0 +1,9 @@
+{
+  "FULL_executed_by_candidate": false,
+  "GCP_used": false,
+  "candidate_parallel": false,
+  "commands": 1,
+  "dependencies": 489,
+  "scope": "uniform_8000",
+  "status": "PASS"
+}

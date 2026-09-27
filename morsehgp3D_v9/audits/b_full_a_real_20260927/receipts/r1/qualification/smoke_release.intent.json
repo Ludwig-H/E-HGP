@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-a-real-20260927-r1_release/mhgp9_full_a_real",
+    "--synthetic",
+    "uniform",
+    "64"
+  ],
+  "name": "smoke_release",
+  "started_epoch": 1790504161.7308328,
+  "timeout_seconds": null
+}

@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "cmake",
+    "-E",
+    "chdir",
+    "/workspaces/E-HGP/build/v9-a-real-20260927-r1_release",
+    "/usr/bin/c++",
+    "-I/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/gen",
+    "-O3",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/gen/lanes/q34_witness_search.cpp",
+    "-M"
+  ],
+  "ended_epoch": 1790504091.1698306,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "dependencies_release_22",
+  "pid": 427266,
+  "started_epoch": 1790504091.095763,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "c6cd4246752f35536b84228d3535a169f02ebbc1163ba3c8a86016ea52f6029f",
+  "timeout_seconds": null
+}

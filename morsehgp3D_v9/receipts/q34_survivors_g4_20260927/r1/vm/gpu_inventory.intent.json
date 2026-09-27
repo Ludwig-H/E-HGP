@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "nvidia-smi"
+  ],
+  "name": "gpu_inventory",
+  "started_epoch": 1790513751.1403792,
+  "timeout_seconds": 449.870970437
+}

@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-a-real-20260927-r1_sanitize/mhgp9_full_a_real",
+    "--synthetic",
+    "uniform",
+    "64"
+  ],
+  "ended_epoch": 1790504260.948446,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "smoke_sanitize",
+  "pid": 432389,
+  "started_epoch": 1790504260.7596323,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "975677ab5ac4226ba0bc90678e6f3c2d36e569a459fdf6d93b14e4662c641fcc",
+  "timeout_seconds": null
+}

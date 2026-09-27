@@ -1,0 +1,169 @@
+{
+  "CUDA_installation_attempted": false,
+  "FULL_executed": false,
+  "commands": [
+    {
+      "argv": [
+        "sudo",
+        "-n",
+        "cat",
+        "/run/systemd/shutdown/scheduled"
+      ],
+      "ended_epoch": 1790513751.0227408,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "guest_schedule",
+      "pid": 1815,
+      "started_epoch": 1790513751.0114014,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "9bcf2330a7e5632ce3040b553fdb50802c06d454f1eab208312138769779a77c",
+      "timeout_seconds": 449.99994759
+    },
+    {
+      "argv": [
+        "g++",
+        "--version"
+      ],
+      "ended_epoch": 1790513751.0398028,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "compiler",
+      "pid": 1817,
+      "started_epoch": 1790513751.0284307,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "9eaf9b7f4b11c2e84e2478c2ceb0e4f48f4ba88565bcfc832b3bce49847dda6d",
+      "timeout_seconds": 449.982919832
+    },
+    {
+      "argv": [
+        "cmake",
+        "--version"
+      ],
+      "ended_epoch": 1790513751.122382,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "cmake",
+      "pid": 1818,
+      "started_epoch": 1790513751.0400295,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "6c08f840b67782da73a6fe113b64712615441722b15cd2723062dd4cc00a10d8",
+      "timeout_seconds": 449.971321485
+    },
+    {
+      "argv": [
+        "/usr/local/cuda/bin/nvcc",
+        "--version"
+      ],
+      "ended_epoch": 1790513751.1402407,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "nvcc",
+      "pid": 1819,
+      "started_epoch": 1790513751.1225362,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "28acf7c60a358550618607525561537e387a326bd4e453cb9cc6c261b96ec3b7",
+      "timeout_seconds": 449.88881395199996
+    },
+    {
+      "argv": [
+        "nvidia-smi"
+      ],
+      "ended_epoch": 1790513751.1946304,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "gpu_inventory",
+      "pid": 1820,
+      "started_epoch": 1790513751.1403792,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "cf2857942b216206c181426b82433b42bd2d67baad57f5462ecbb7fb2dbf79e9",
+      "timeout_seconds": 449.870970437
+    },
+    {
+      "argv": [
+        "lscpu"
+      ],
+      "ended_epoch": 1790513751.2024195,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "lscpu",
+      "pid": 1822,
+      "started_epoch": 1790513751.1948144,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "8bd86beaa9916b453878a8b50e97ebf4e6fc4a30c636e913cef212414b4b7586",
+      "timeout_seconds": 449.816535914
+    },
+    {
+      "argv": [
+        "cmake",
+        "-S",
+        "/tmp/ehgp-full-v7-e45141c9445c3286.FRX6c5MUHK/source/morsehgp3D_v9/audits/b_q34_survivors_compare_20260927",
+        "-B",
+        "/tmp/ehgp-full-v7-e45141c9445c3286.FRX6c5MUHK/survivors_build",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP9_COMPARE_ENABLE_CUDA=ON",
+        "-DMHGP9_GEN_LIBRARY=",
+        "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+        "-DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc",
+        "-DCMAKE_CUDA_ARCHITECTURES=120"
+      ],
+      "ended_epoch": 1790513753.271433,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "configure",
+      "pid": 1823,
+      "started_epoch": 1790513751.2025912,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "2d8fb1f30314d2dcac7fec16156621c70818701d8f7817fca0e7c880702aed22",
+      "timeout_seconds": 449.80875869199997
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "/tmp/ehgp-full-v7-e45141c9445c3286.FRX6c5MUHK/source/morsehgp3D_v9/audits/b_q34_survivors_session_20260927/compile_contract.py",
+        "--source-root",
+        "/tmp/ehgp-full-v7-e45141c9445c3286.FRX6c5MUHK/source",
+        "--build",
+        "/tmp/ehgp-full-v7-e45141c9445c3286.FRX6c5MUHK/survivors_build",
+        "--manifest",
+        "/tmp/ehgp-full-v7-e45141c9445c3286.FRX6c5MUHK/source_manifest.json",
+        "--output",
+        "/tmp/ehgp-full-v7-e45141c9445c3286.FRX6c5MUHK/output/compile_before.json"
+      ],
+      "ended_epoch": 1790513753.331546,
+      "exit_code": 1,
+      "group_closed": true,
+      "name": "prepin",
+      "pid": 1942,
+      "started_epoch": 1790513753.2716863,
+      "stderr_sha256": "30409fdd9d2450e2892ebc44159be1b96fbf70b771c54e8a4b6206853eb7803b",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timeout_seconds": 447.739665496
+    }
+  ],
+  "compilation_stable": false,
+  "contract_certified": false,
+  "error": "ValueError: command failed: prepin",
+  "generation": "2026-09-27T05:54:28.609-07:00",
+  "provenance": {
+    "commit": "5571957ca9231cf5771c053a283b11616d51b889",
+    "protocol_source": "commit",
+    "schema": "mhgp9_q34_survivors_session_v1",
+    "scope": "S2_only_no_FULL",
+    "tree": "ef5ee1ef7b7963644ef432489c29954067107bdd"
+  },
+  "public_status": "not_claimed",
+  "schema": "mhgp9_q34_survivors_session_v1",
+  "scope": "S2_only_no_FULL",
+  "source_manifest_sha256": "af70d59ff0d8481e46ebf05d5857435cfe8dfe2825a3f7b7fe10e3b426a5a4f2",
+  "sources_stable": true,
+  "status": "failed",
+  "target": {
+    "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-b"
+  },
+  "useful_budget_seconds": 450,
+  "useful_elapsed_seconds": 2.324875841000008,
+  "worker_sha256": "65923c1f3b72e1b986dec82394b7ff108574703de337b9ad931e825c13c37e4a"
+}

@@ -6788,3 +6788,22 @@ rejouent la capture historique :386–390ms hors S2,252–256ms de tour hors
 encodage. Prochain morceau FULL : manifeste de tous les blocs/cibles,
 pas seulement les drafts ; ancres, événements muets et contributions
 datées conservés. Pas de nouveaux gains GPU par ces seules analyses.
+
+### 27 septembre, 13 h UTC — vrais volumes A et priorité Nsight
+
+Le [harnais A réel](../morsehgp3D_v9/audits/b_full_a_real_20260927/RESULTATS.md)
+est clos : 69 commandes Release/sanitizers, ng00 et uniforme8k/16k/32k,
+120 comparaisons exactes ; dix lecteurs normal/−O et 188 valeurs des tableaux
+contre-vérifiés indépendamment. Gain min-label/event23,2 % sur ng00, pas
+gain sur A natif/FULL. Pas de nouveau port moteur sur cette seule base.
+
+Essai G4 du comparateur S2 publié `5571957ca` : **failed avant build**, prépin
+exigeant à tort un `.rsp` absent du CMake distant. [Capture conservée](../morsehgp3D_v9/receipts/q34_survivors_g4_20260927/r1/README.md),
+aucune porte CUDA/mesure exécutée, VM même génération arrêtée et relue,
+155,926s d'allocation. Pas de relance automatique ; fichiers gelés inchangés.
+
+Décision utilisateur : [Nsight sur FULL avant les grands chantiers](../morsehgp3D_v9/docs/PROFILAGE_AVANT_REFONTE_20260927.md).
+Aucune capture Nsight attestée dans les campagnes examinées. Profiler la
+vraie chaîne `mhgp9_tower_probe`, pas seulement S2 ni les copies du harnais A.
+Les futurs changements doivent viser un gain substantiel sur le mur complet ;
+le contrat100ms reste ouvert et ne justifie pas un acharnement sans mesure.

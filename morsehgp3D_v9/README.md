@@ -2,6 +2,14 @@
 
 Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 
+Priorité du 27 septembre : [profiler FULL avant toute nouvelle refonte](docs/PROFILAGE_AVANT_REFONTE_20260927.md).
+Aucune capture Nsight attestée à ce jour. Le contrat 100 ms reste ouvert ;
+les gains locaux ne suffisent pas à justifier de grands portages.
+Le [comparatif G4 S2](receipts/q34_survivors_g4_20260927/r1/README.md)
+a échoué avant compilation/tests : exigence erronée d'un fichier `.rsp`
+absent du CMake distant. Aucun nouveau chrono GPU ; VM arrêtée après
+155,926 s d'allocation observée. Pas de relance automatique.
+
 Nouveau prototype qualifié localement : [tri résident des survivants](docs/TRI_RESIDENT_DES_SURVIVANTS_20260927.md).
 Accumulation en O(S+Q), tri GPU sur 64 bits, sortie compacte de 12 octets.
 26 commandes locales passent et CUDA compile ; cette variante n'a pas
@@ -15,8 +23,10 @@ Le manifeste, le constructeur événementiel puis sa variante à identifiants
 stables sont qualifiés en Release/sanitizers : mêmes parents, ancres,
 contributions et niveaux natifs sur 376 rejeux ; cas à 32 parents inclus.
 La variante supprime plusieurs structures intermédiaires et passe aussi
-1,9 million de contrôles de coupes. Encore séquentielle, sans nouveau gain
-FULL revendiqué : prochaine mesure sur les vrais catalogues LiDAR.
+1,9 million de contrôles de coupes. Les [vrais catalogues sont désormais mesurés](audits/b_full_a_real_20260927/RESULTATS.md) :
+ng00 entière et uniforme8k/16k/32k, 120 comparaisons exactes. Min-label gagne
+23,2 % face au prototype événementiel sur ng00, pas face au moteur natif.
+Encore séquentiel, aucun gain FULL/GPU revendiqué.
 
 Nouveau raccord implémenté : [rectangles filtrés et index résident](docs/RACCORD_RESIDENT_Q34_20260927.md).
 50 commandes locales Release/sanitizers et le gate CUDA G4 passent.

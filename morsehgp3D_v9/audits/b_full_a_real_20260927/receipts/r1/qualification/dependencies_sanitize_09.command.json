@@ -1,0 +1,33 @@
+{
+  "argv": [
+    "cmake",
+    "-E",
+    "chdir",
+    "/workspaces/E-HGP/build/v9-a-real-20260927-r1_sanitize",
+    "/usr/bin/clang++",
+    "-I/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/gen",
+    "-O3",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-O1",
+    "-g1",
+    "-fsanitize=address,undefined",
+    "-fno-omit-frame-pointer",
+    "-fno-sanitize-recover=all",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/gen/lanes/edge_cover.cpp",
+    "-M"
+  ],
+  "ended_epoch": 1790504093.4892273,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "dependencies_sanitize_09",
+  "pid": 427355,
+  "started_epoch": 1790504093.4115283,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "7f06f58af3c8e336e9c47ee0400bdad1c7b84696ab929e38964fa7c4622f8d61",
+  "timeout_seconds": null
+}

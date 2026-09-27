@@ -1,0 +1,48 @@
+cmake_minimum_required(VERSION 3.20)
+project(mhgp9_full_a_real LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+option(MHGP9_A_REAL_SANITIZE "ASan UBSan LSan fresh objects" OFF)
+find_package(Threads REQUIRED)
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+get_filename_component(V9 "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
+function(pin name expected)
+  file(SHA256 "${name}" actual)
+  if(NOT actual STREQUAL expected)
+    message(FATAL_ERROR "Pinned source changed: ${name}")
+  endif()
+endfunction()
+pin("${V9}/src/chain/tower_chain.cpp" "7d1eeac6d08ebd1f92142dfae28447824c570f39ed4d18817f736da4117e5297")
+pin("${V9}/audits/b_full_a_events_20260927/events.hpp" "8c1280e9082d20e69cc1c47240160c336cb54f30d88594d34722db944d6de94f")
+pin("${V9}/audits/b_full_a_min_label_20260927/min_label.hpp" "6cd05606f03fe41da5ae1bfb8f53b810dcf53aa88e97607b7374219bc9519c09")
+execute_process(COMMAND "${Python3_EXECUTABLE}" "${V9}/audits/b_full_a_manifest_20260927/instrument.py" --check RESULT_VARIABLE INSTRUMENT_STATUS)
+if(NOT INSTRUMENT_STATUS EQUAL 0)
+  message(FATAL_ERROR "Native observation copy changed")
+endif()
+# Explicit fresh compilation of the native mhgp9_gen source inventory from
+# v9/CMakeLists.txt SHA 3c9eda7ebdb825e30f362354114827cb680691c1acb0c6d21f025ca2b7d6d39e.
+set(GEN_UNITS pipeline/local_credits.cpp pipeline/axis_q2.cpp pipeline/q2_census.cpp
+  pipeline/q2_census_parallel.cpp pipeline/prepared_cloud.cpp wspd/front.cpp lanes/q4_family.cpp
+  lanes/exact_ball.cpp lanes/q34_seed.cpp lanes/edge_cover.cpp lanes/q34_cover.cpp
+  lanes/family_certificate.cpp lanes/q34_pruning.cpp lanes/q34_collective.cpp lanes/q4_positive_domain.cpp
+  lanes/q4_center_map.cpp lanes/q4_local_partition.cpp lanes/q4_local.cpp lanes/q4_shallow_set.cpp lanes/q4_shallow.cpp
+  lanes/q4_window.cpp pipeline/wspd_q34.cpp lanes/q34_witness_search.cpp lanes/q3_ball_census.cpp lanes/q34_dead_lanes.cpp)
+set(GEN_SOURCES)
+foreach(unit IN LISTS GEN_UNITS)
+  list(APPEND GEN_SOURCES "${V9}/src/gen/${unit}")
+endforeach()
+add_library(mhgp9_a_real_gen STATIC ${GEN_SOURCES})
+target_include_directories(mhgp9_a_real_gen PUBLIC "${V9}/src/gen")
+target_link_libraries(mhgp9_a_real_gen PUBLIC Threads::Threads)
+add_executable(mhgp9_full_a_real probe.cpp)
+target_include_directories(mhgp9_full_a_real PRIVATE "${V9}/src" "${V9}/tests/gen")
+# chain.cpp and the GPU stub are included once in probe.cpp; no libchain.
+target_link_libraries(mhgp9_full_a_real PRIVATE mhgp9_a_real_gen Threads::Threads)
+foreach(target IN ITEMS mhgp9_a_real_gen mhgp9_full_a_real)
+  target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+  if(MHGP9_A_REAL_SANITIZE)
+    target_compile_options(${target} PRIVATE -O1 -g1 -fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all)
+    target_link_options(${target} PRIVATE -fsanitize=address,undefined)
+  endif()
+endforeach()

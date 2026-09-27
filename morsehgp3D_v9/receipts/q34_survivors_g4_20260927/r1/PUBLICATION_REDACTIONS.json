@@ -1,0 +1,66 @@
+{
+  "after_stop_source_sha256": "611ad9163a75e103102695559a232f9f31413fb89c6bb67ba95b3fee76073114",
+  "policy": "Allowlisted text only; no keys, archive, LiDAR payload, OS Login reply, unprojected GCE state, or controller stdout",
+  "redactions": [
+    {
+      "published_name": "host/guarded_start.redacted.stdout",
+      "published_sha256": "ead81a538b84a951ac19911ae043d1cae0f2708ee098d23506c8e488f2727292",
+      "source_path": "/workspaces/E-HGP/build/v9-g4-survivors-session-20260927-r1/full_host/guarded_start.stdout",
+      "source_sha256": "07a39cb429047e4155af88d355f377d0fe05a00b9d79040fc8a54e3c9a336885"
+    },
+    {
+      "published_name": "host/guarded_start.redacted.stderr",
+      "published_sha256": "3c26828d9560f85dceceec36b4b6e50aff7c0e120b4ff4446cabf3ba4c9a9187",
+      "source_path": "/workspaces/E-HGP/build/v9-g4-survivors-session-20260927-r1/full_host/guarded_start.stderr",
+      "source_sha256": "01dba9c4fb92106a230616d4db186a663bf47c068e1dac505876b9f5834ddd1f"
+    },
+    {
+      "published_name": "host/guarded_stop.redacted.stdout",
+      "published_sha256": "8237101459ad3fd3b178090dc01ee238c1558b1e6f7658c0954b25af6b58c3ee",
+      "source_path": "/workspaces/E-HGP/build/v9-g4-survivors-session-20260927-r1/full_host/guarded_stop.stdout",
+      "source_sha256": "8237101459ad3fd3b178090dc01ee238c1558b1e6f7658c0954b25af6b58c3ee"
+    },
+    {
+      "published_name": "host/guarded_stop.redacted.stderr",
+      "published_sha256": "616dbe8dca26439df528e1a17076f88507ba2c99dfdc8c9b2058366defaa0f31",
+      "source_path": "/workspaces/E-HGP/build/v9-g4-survivors-session-20260927-r1/full_host/guarded_stop.stderr",
+      "source_sha256": "616dbe8dca26439df528e1a17076f88507ba2c99dfdc8c9b2058366defaa0f31"
+    },
+    {
+      "published_name": "host/guest_schedule.redacted.stdout",
+      "published_sha256": "9bcf2330a7e5632ce3040b553fdb50802c06d454f1eab208312138769779a77c",
+      "source_path": "/workspaces/E-HGP/build/v9-g4-survivors-session-20260927-r1/full_host/guest_schedule.stdout",
+      "source_sha256": "9bcf2330a7e5632ce3040b553fdb50802c06d454f1eab208312138769779a77c"
+    },
+    {
+      "published_name": "host/guest_schedule.redacted.stderr",
+      "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_path": "/workspaces/E-HGP/build/v9-g4-survivors-session-20260927-r1/full_host/guest_schedule.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "published_name": "host/worker.redacted.stdout",
+      "published_sha256": "954905cc6ddefac25a26fa73edc29c12d840ff56f9d6f98ea2c6d68f0b02d2f5",
+      "source_path": "/workspaces/E-HGP/build/v9-g4-survivors-session-20260927-r1/full_host/worker.stdout",
+      "source_sha256": "954905cc6ddefac25a26fa73edc29c12d840ff56f9d6f98ea2c6d68f0b02d2f5"
+    },
+    {
+      "published_name": "host/worker.redacted.stderr",
+      "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_path": "/workspaces/E-HGP/build/v9-g4-survivors-session-20260927-r1/full_host/worker.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "published_name": "host/pack_capture.redacted.stdout",
+      "published_sha256": "6324e5895293945f353298ab376b85b20a68b605f3cbb637750fe9be1c1e7aed",
+      "source_path": "/workspaces/E-HGP/build/v9-g4-survivors-session-20260927-r1/full_host/pack_capture.stdout",
+      "source_sha256": "6324e5895293945f353298ab376b85b20a68b605f3cbb637750fe9be1c1e7aed"
+    },
+    {
+      "published_name": "host/pack_capture.redacted.stderr",
+      "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_path": "/workspaces/E-HGP/build/v9-g4-survivors-session-20260927-r1/full_host/pack_capture.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

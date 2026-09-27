@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "cmake",
+    "-S",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_a_real_20260927",
+    "-B",
+    "/workspaces/E-HGP/build/v9-a-real-20260927-r1_release",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+    "-DCMAKE_CXX_COMPILER=c++",
+    "-DMHGP9_A_REAL_SANITIZE=OFF"
+  ],
+  "ended_epoch": 1790504088.632296,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "configure_release",
+  "pid": 427006,
+  "started_epoch": 1790504088.1044831,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "465c3a345038a80ab47610ee91581d67d27451f348dfca36945213c8359ae100",
+  "timeout_seconds": null
+}

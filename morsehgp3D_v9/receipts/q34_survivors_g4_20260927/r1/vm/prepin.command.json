@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "python3",
+    "-B",
+    "/tmp/ehgp-full-v7-e45141c9445c3286.FRX6c5MUHK/source/morsehgp3D_v9/audits/b_q34_survivors_session_20260927/compile_contract.py",
+    "--source-root",
+    "/tmp/ehgp-full-v7-e45141c9445c3286.FRX6c5MUHK/source",
+    "--build",
+    "/tmp/ehgp-full-v7-e45141c9445c3286.FRX6c5MUHK/survivors_build",
+    "--manifest",
+    "/tmp/ehgp-full-v7-e45141c9445c3286.FRX6c5MUHK/source_manifest.json",
+    "--output",
+    "/tmp/ehgp-full-v7-e45141c9445c3286.FRX6c5MUHK/output/compile_before.json"
+  ],
+  "ended_epoch": 1790513753.331546,
+  "exit_code": 1,
+  "group_closed": true,
+  "name": "prepin",
+  "pid": 1942,
+  "started_epoch": 1790513753.2716863,
+  "stderr_sha256": "30409fdd9d2450e2892ebc44159be1b96fbf70b771c54e8a4b6206853eb7803b",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": 447.739665496
+}

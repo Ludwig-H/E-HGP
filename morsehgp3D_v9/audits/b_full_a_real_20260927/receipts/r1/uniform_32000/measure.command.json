@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-a-real-20260927-r1_release/mhgp9_full_a_real",
+    "--synthetic",
+    "uniform",
+    "32000"
+  ],
+  "ended_epoch": 1790513032.4398096,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "measure",
+  "pid": 80,
+  "started_epoch": 1790512931.5556693,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "5a54a796b3ed438bdf68645b4ee0152094c2e21b572c0778a2402f1803f85dd0",
+  "timeout_seconds": null
+}

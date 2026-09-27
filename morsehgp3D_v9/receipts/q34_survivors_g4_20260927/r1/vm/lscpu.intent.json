@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "lscpu"
+  ],
+  "name": "lscpu",
+  "started_epoch": 1790513751.1948144,
+  "timeout_seconds": 449.816535914
+}

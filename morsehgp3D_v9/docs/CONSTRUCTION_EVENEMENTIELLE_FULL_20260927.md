@@ -122,22 +122,27 @@ les occurrences E, les ancres du catalogue et la sortie explicite.
 La construction reste séquentielle. Aucune réduction du travail q3/q4
 ni nouvelle borne en nombre de points n'est acquise par cette variante.
 
-## Prochaine étape vers les 100 ms
+## Vrais catalogues mesurés, puis profilage FULL
 
-Ces constructeurs C++ sont encore séquentiels. Ils servent à fixer et
-vérifier l'objet avant de paralléliser la forêt, les requêtes, les préfixes
-et les écritures. La variante à identifiants stables a déjà supprimé
-l'enracinement et les renvois ; il faudra maintenant mesurer V/E/groupes/
-parents/contributions sur les vrais catalogues, ainsi que mémoire et
-temps de toutes ces étapes. Les parents d'événements, ceux du draft et
-les liens de la forêt finale sont comptés séparément.
+Les [mesures réelles](../audits/b_full_a_real_20260927/RESULTATS.md) sont
+closes : 69 commandes de qualification Release/sanitizers, puis ng00 sans
+sol entière et uniforme8k/16k/32k, 120 comparaisons exactes. Les parents
+d'événements, ceux du draft et les liens de la forêt finale sont distincts.
+Sur ng00, sommes des médianes K min-label/event : 3 148,510/4 099,105 ms ;
+capacités maximales observées210,372/290,674 Mo. Gain entre deux prototypes
+séquentiels sur le même manifeste, **pas gain face au constructeur natif**.
+
+Les volumes uniformes V/E croissent ici près du doublement ; les temps
+min-label font ×2,558 puis ×2,713. Ce n'est ni la croissance LiDAR ni une
+borne générale du générateur. Validation, préparation des manifestes,
+tables d'ancêtres et tris restent payés ; aucun port moteur n'est activé.
 
 Une [proposition distincte](../audits/b_full_a_min_label_review_20260927/NEXT_HEAVY_LIGHT.md)
 permettrait aussi de remplacer l'index O(V log V) par un index O(V),
 avec des requêtes logarithmiques. Elle n'est ni implémentée ni mesurée ;
-la mesure sur les vrais catalogues doit précéder un nouveau choix de port.
+les mesures présentes ne suffisent pas à justifier sa mise en chantier.
 
-Ensuite seulement, réutiliser cet historique pour les verticales et
-raccorder la sortie explicite. Les populations, la banque et l'encodage
-restent natifs pour l'instant. Aucun gain de tour ni contrat 100 ms
-nouvellement acquis ; la priorité est le parallélisme **dans** chaque K.
+Décision suivante : [profiler le vrai FULL avant une refonte importante](PROFILAGE_AVANT_REFONTE_20260927.md),
+puis choisir le levier ayant un potentiel substantiel sur le mur complet.
+Les populations, verticales, banque et encodage restent natifs. Aucun gain
+de tour ni contrat 100 ms nouvellement acquis.

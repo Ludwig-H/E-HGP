@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "cmake",
+    "--version"
+  ],
+  "ended_epoch": 1790513751.122382,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "cmake",
+  "pid": 1818,
+  "started_epoch": 1790513751.0400295,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "6c08f840b67782da73a6fe113b64712615441722b15cd2723062dd4cc00a10d8",
+  "timeout_seconds": 449.971321485
+}

@@ -1,0 +1,28 @@
+{
+  "FULL_executed": false,
+  "GCP_calls_by_reader": false,
+  "GPU_execution": "unqualified_or_unknown",
+  "capture_error": null,
+  "contract_certified": false,
+  "cost": {
+    "billed_cost_usd": null,
+    "generation": "2026-09-27T05:54:28.609-07:00",
+    "reason": "Elapsed allocation only; no billing export or verified hourly price",
+    "stopped": "2026-09-27T05:57:04.535-07:00",
+    "vm_elapsed_seconds": 155.926
+  },
+  "global_subquadratic_claim": false,
+  "host_error": null,
+  "manifest_sha256": "af70d59ff0d8481e46ebf05d5857435cfe8dfe2825a3f7b7fe10e3b426a5a4f2",
+  "original_host_status": "worker_failed",
+  "original_worker_status": "failed",
+  "public_status": "not_claimed",
+  "schema": "mhgp9_survivors_g4_publication_v1",
+  "scope": "S2_only_no_FULL",
+  "semantic_replay": false,
+  "snapshot_sha256": "24356b5180ad8b5fa88dcb5e02e6be7219aee217e58072bcb5c16f453b7547ba",
+  "source_commit": "5571957ca9231cf5771c053a283b11616d51b889",
+  "status": "failed",
+  "targeted_shutdown_certified": true,
+  "worker_error": "ValueError: command failed: prepin"
+}

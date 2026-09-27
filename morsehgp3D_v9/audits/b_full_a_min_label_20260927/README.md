@@ -106,13 +106,37 @@ des nuages LiDAR. Trois branches mutantes du **même binaire** sont tuées :
 dernier pas omis, perte de départ utilisée pour un saut, créateur non
 contributeur supprimé. Ce ne sont pas trois builds mutants indépendants.
 
-Le préflight mutable ne qualifie pas la version. La qualification fraîche
-Release/Clang ASan/UBSan/LSan et ses reçus seront gérés par le runner distinct
-après revue et gel. Binaire `mhgp9_full_a_min_label`, schéma
+La qualification fraîche R1 est close : **17 commandes**, 1 142 dépendances
+compilées épinglées, Release et Clang ASan/UBSan/LSan passent avec des
+compteurs identiques. Les lecteurs LIVE normal/−O et leurs 29 tests de
+corruption passent également, y compris en contrelecture indépendante.
+[Reçu R1](receipts/r1/summary.json) et
+[contre-audit](../b_full_a_min_label_review_20260927/README.md).
+Les builds `build/v9-a-min-label-20260927-r1_release` et
+`build/v9-a-min-label-20260927-r1_sanitize` sont épinglés, à ne pas réutiliser
+pour développer. Le préflight mutable ne remplace pas cette capture.
+Binaire `mhgp9_full_a_min_label`, schéma
 `mhgp9_full_a_min_label_v1`, option CMake `MHGP9_MIN_LABEL_SANITIZE`.
 CLI `--gate` ou `--preflight` ; les autres appels refusent `minimum.usage`.
 
+Relecture sans compiler ni relancer la géométrie, depuis la racine du dépôt :
+
+```sh
+python3 -B morsehgp3D_v9/audits/b_full_a_min_label_20260927/run.py --readback morsehgp3D_v9/audits/b_full_a_min_label_20260927/receipts/r1
+python3 -B -O morsehgp3D_v9/audits/b_full_a_min_label_20260927/run.py --readback morsehgp3D_v9/audits/b_full_a_min_label_20260927/receipts/r1
+```
+
+Les 376 rejeux géométriques conservent 3 368 historiques pour 3 784 groupes
+(416 entrées à un parent omises), 24 152 entrées `up` et 4 632 pertes.
+Les 227 graphes de coupes comprennent aussi les petits programmes abstraits ;
+ils totalisent 1 886 024 vérifications. Trois branches mutantes sont détectées.
+La capacité combinée maximale observée vaut 11 884 octets sur ce corpus et
+cette ABI, pas une borne portable ou une mesure sur LiDAR.
+
 Limites : DSU et tris encore séquentiels, index `O(V log V)`, tableaux E et
 sorties explicites conservés. Aucun partage de captures par K ajouté. Aucun
-gain mesuré sur de vrais manifestes, aucune parallélisation, aucun transfert
-de qualification FULL, GPU ou contrat 100 ms.
+gain sur de vrais manifestes déduit de cette seule qualification. Les
+[mesures séparées sur vrais catalogues](../b_full_a_real_20260927/RESULTATS.md)
+comparent maintenant min-label et événementiel, sans modifier ces sources
+figées. Aucune parallélisation, aucun transfert de qualification FULL, GPU
+ou contrat 100 ms.

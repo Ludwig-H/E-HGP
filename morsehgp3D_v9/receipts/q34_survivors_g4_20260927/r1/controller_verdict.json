@@ -1,0 +1,10 @@
+{
+  "FULL_executed": false,
+  "controller_exit": 1,
+  "error": "ValueError: controller did not complete",
+  "generation": "2026-09-27T05:54:28.609-07:00",
+  "schema": "mhgp9_q34_survivors_session_v1",
+  "scope": "S2_only_no_FULL",
+  "status": "failed",
+  "targeted_shutdown_certified": true
+}

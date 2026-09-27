@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "cmake",
+    "-E",
+    "chdir",
+    "/workspaces/E-HGP/build/v9-a-real-20260927-r1_release",
+    "/usr/bin/c++",
+    "-I/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/gen",
+    "-O3",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/gen/pipeline/axis_q2.cpp",
+    "-M"
+  ],
+  "ended_epoch": 1790504088.8458302,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "dependencies_release_01",
+  "pid": 427071,
+  "started_epoch": 1790504088.7753205,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "1aa6c0ae9e66eec0a8bce47d6eed90be4c5d73a7591f8dd05d82ecf6527225fc",
+  "timeout_seconds": null
+}

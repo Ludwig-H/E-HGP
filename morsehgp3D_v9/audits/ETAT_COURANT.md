@@ -1,5 +1,20 @@
 # État courant des audits v9
 
+**27 septembre — décision de priorité et clôture des mesures** :
+[profiler FULL avant une refonte](../docs/PROFILAGE_AVANT_REFONTE_20260927.md).
+Pas de trace Nsight attestée à ce jour ; ne pas investir dans un gros port
+sur la seule foi d'un gain de prototype. [A réel](b_full_a_real_20260927/RESULTATS.md) :
+69 commandes qualifiées, quatre entrées closes, 120 comparaisons exactes ;
+ng00 min-label/event 3 148,510/4 099,105 ms en somme des médianes K.
+Uniforme8k/16k/32k : V×2,073/2,048, E×2,080/2,053, temps M×2,558/2,713.
+Ni gain natif/FULL/G4 ni croissance LiDAR déduits ; contrelecture indépendante
+des dix lecteurs et des 188 valeurs de tableaux passée.
+
+[Essai G4 S2 R1](../receipts/q34_survivors_g4_20260927/r1/README.md) :
+échec du pré-épinglage avant build, `.rsp` exigé à tort sur le CMake distant.
+Aucune porte CUDA ni mesure exécutée. Reçu failed conservé, arrêt de la même
+génération certifié et relu,155,926s d'allocation ; pas de relance automatique.
+
 **27 septembre — comparateur S2 prêt pour les mesures G4** :
 [harnais](b_q34_survivors_compare_20260927/README.md),13commandes closes,
 six TU/1088dépendances, options indirectes/objets/archives/binaries fermés.

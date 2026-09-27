@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-a-real-20260927-r1_release/mhgp9_full_a_real",
+    "--synthetic",
+    "uniform",
+    "64"
+  ],
+  "ended_epoch": 1790504161.7672431,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "smoke_release",
+  "pid": 429030,
+  "started_epoch": 1790504161.7308328,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e4e8b4ff9657acfbfb401f86612c6ac9f34b56175438339a7e434051e2469240",
+  "timeout_seconds": null
+}

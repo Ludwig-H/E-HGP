@@ -1,5 +1,28 @@
 # Passation v9
 
+## Priorité au profilage FULL, pas à une nouvelle refonte — 27 septembre
+
+[Décision et protocole minimal](docs/PROFILAGE_AVANT_REFONTE_20260927.md).
+Aucune trace Nsight attestée dans les campagnes examinées. Profiler le vrai
+`mhgp9_tower_probe` avant un nouveau chantier important ; chronos sous
+profiler distincts du contrat, K déjà partiellement simultanés.
+
+[Mesures A closes](audits/b_full_a_real_20260927/RESULTATS.md) : qualification
+69 commandes, Release/sanitizers ; ng00 entière et uniforme8k/16k/32k,
+120 comparaisons exactes, lecteurs normal/−O contre-relus. Min-label/event
+sur ng00 : somme des médianes K 3 148,510/4 099,105 ms, capacités maximales
+210,372/290,674 Mo. Ce ne sont ni des murs FULL ni un gain sur A natif.
+Croissance uniforme des volumes proche du doublement ; temps M ×2,558/2,713.
+Une trame LiDAR seule ne démontre pas sa croissance.
+
+[Session G4 S2 R1](receipts/q34_survivors_g4_20260927/r1/README.md) close
+en échec, source `5571957ca` : `prepin` attend à tort un `.rsp` obligatoire,
+alors que le CMake distant ne l'émet pas. Build et portes CUDA non exécutés.
+Reçu conservé comme failed, VM même génération arrêtée, allocation155,926s.
+Pas de nouveau chrono ni de relance automatique. Protocole et sources figés ;
+un correctif futur devra autoriser les options directes tout en fermant tous
+les fichiers indirects effectivement référencés, dans une capture distincte.
+
 ## Comparateur S2 compilé avant G4 — 27 septembre
 
 [Harnais apparié](audits/b_q34_survivors_compare_20260927/README.md) clos :
@@ -8,7 +31,8 @@ compilés sans exécution GPU. Porte portable52lots/208opérateurs et trois
 refus CLI ; lecteurs normal/−O contre-relus. ABBA/BAAB distinguent premier
 contexte et premier appel de chaque implémentation, sorties détruites entre
 passages. Anciennes sources et moteur inchangés ; pas encore de chrono G4
-de ce comparateur ni de gain. Protocole cloud distinct en préparation.
+de ce comparateur ni de gain à cette porte locale. Le protocole cloud a
+depuis été publié ; son premier essai échoué est décrit ci-dessus.
 
 ## Tri des survivants avant téléchargement — 27 septembre
 

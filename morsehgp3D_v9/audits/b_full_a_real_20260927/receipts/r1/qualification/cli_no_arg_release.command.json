@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-a-real-20260927-r1_release/mhgp9_full_a_real"
+  ],
+  "ended_epoch": 1790504161.7710865,
+  "exit_code": 2,
+  "group_closed": true,
+  "name": "cli_no_arg_release",
+  "pid": 429083,
+  "started_epoch": 1790504161.768597,
+  "stderr_sha256": "721a83719e0931654cf9b4e3d7a28bf0ad543cea8d16b00bb18fd56b9bed2e9f",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": null
+}

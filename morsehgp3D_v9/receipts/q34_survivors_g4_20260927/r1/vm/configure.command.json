@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "cmake",
+    "-S",
+    "/tmp/ehgp-full-v7-e45141c9445c3286.FRX6c5MUHK/source/morsehgp3D_v9/audits/b_q34_survivors_compare_20260927",
+    "-B",
+    "/tmp/ehgp-full-v7-e45141c9445c3286.FRX6c5MUHK/survivors_build",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DMHGP9_COMPARE_ENABLE_CUDA=ON",
+    "-DMHGP9_GEN_LIBRARY=",
+    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+    "-DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc",
+    "-DCMAKE_CUDA_ARCHITECTURES=120"
+  ],
+  "ended_epoch": 1790513753.271433,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "configure",
+  "pid": 1823,
+  "started_epoch": 1790513751.2025912,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "2d8fb1f30314d2dcac7fec16156621c70818701d8f7817fca0e7c880702aed22",
+  "timeout_seconds": 449.80875869199997
+}

@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "cmake",
+    "-S",
+    "/tmp/ehgp-full-v7-e45141c9445c3286.FRX6c5MUHK/source/morsehgp3D_v9/audits/b_q34_survivors_compare_20260927",
+    "-B",
+    "/tmp/ehgp-full-v7-e45141c9445c3286.FRX6c5MUHK/survivors_build",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DMHGP9_COMPARE_ENABLE_CUDA=ON",
+    "-DMHGP9_GEN_LIBRARY=",
+    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+    "-DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc",
+    "-DCMAKE_CUDA_ARCHITECTURES=120"
+  ],
+  "name": "configure",
+  "started_epoch": 1790513751.2025912,
+  "timeout_seconds": 449.80875869199997
+}
