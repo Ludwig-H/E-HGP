@@ -8,8 +8,11 @@ Premier essai naïf réfuté :26composantes/1racineFULL, aucun score ; échec co
 Le raccord corrigé passe Release/ASan/UBSan,33fixtures et1 166coupes exactes ;
 partitions de facettes comparées à tout Čech, pas seulement couvertures.
 LSan exclu, anciens essais d'environnement archivés. Pilote gaussien corrigé
-en cours ; aucune domination statistique ni hiérarchie ponctuelle emboîtée
-encore qualifiée. Consommateur CPU distinct, moteur inchangé, zéroGCP.
+en cours ; aucune domination statistique. La
+[référence ponctuelle sparse](../experiments/weighted_clustering_20260927/POINT_ROUTING_REFERENCE.md)
+passe séparément133fixtures/2 160coupes/14refus, dont trois objets FULL
+qualifiés ; pas de score statistique ni chrono de production transféré.
+Consommateurs CPU distincts, moteur inchangé, zéroGCP.
 
 **27 septembre — correction de fidélité à la thèse/HGP-old** :
 [relecture complète des parties I–II](RELECTURE_THESE_ET_HGP_OLD_20260927.md).

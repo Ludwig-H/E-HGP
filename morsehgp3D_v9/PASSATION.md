@@ -16,8 +16,11 @@ Ancres sans contribution, plateaux, K10 et C vide à K=n contrôlés.
 LSan non qualifié ; échecs Clang-link/LSan historiques distingués.
 Pilote13scènes n1200/K5/10/m20/50/z1/2 en cours, comparateurs figés.
 Aucun nouveau score global, aucune croissance LiDAR/G4 déduite.
-Le [routage ponctuel emboîté](experiments/weighted_clustering_20260927/PLAN_PARTITIONS_POINTS.md)
-est encore un plan séparé : le vote plat n'en est pas une implémentation.
+Le [routage ponctuel emboîté](experiments/weighted_clustering_20260927/POINT_ROUTING_REFERENCE.md)
+possède maintenant une référence Fraction sparse séparée :133fixtures,
+2 160coupes,14refus, trois intégrations FULL en normal/−O. Pas de tableau
+n×V ; dates MEB, plateaux et singletons résiduels conservés. Aucun score
+statistique du pilote ne lui est transféré : celui-ci évalue le vote plat.
 
 ## Correction méthodologique après relecture intégrale I–II — 27 septembre
 

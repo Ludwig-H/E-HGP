@@ -91,6 +91,9 @@ poids réels. Le mode rationnel z2 sert aux petits contrôles.
   moteur compact implémenté.
 - [Comptages des dépôts](DEPOTS_MESURES.md) : captures distinctes K5/K10
   sur le premier cas clos, avec conservation des attaches et des dates.
+- [Routage ponctuel exact](POINT_ROUTING_REFERENCE.md) : référence sparse
+  séparée qui produit des partitions de points emboîtées ; elle n'est pas
+  la méthode de vote plat évaluée dans le pilote gaussien.
 
 ## Limites et coût
 
@@ -127,5 +130,25 @@ une expansion naïve O(K²C) ne serait pas une mesure honnête de son gain.
 Les dépôts doivent rester des **sorties de masse datées**, jamais de gros
 enfants susceptibles d'être sélectionnés par EOM. L'équivalence exacte
 n'hérite pas d'une égalité bit à bit des décisions binary64. Le
-[routage ponctuel emboîté](PLAN_PARTITIONS_POINTS.md) est un chantier
-distinct du vote plat, toujours à implémenter et à qualifier.
+[routage ponctuel emboîté](POINT_ROUTING_REFERENCE.md) possède désormais
+une référence distincte du vote plat, pas encore un benchmark de qualité.
+
+## Partitions de points emboîtées : référence maintenant implémentée
+
+`point_routing_reference.py` choisit un chemin unique par point, une fois
+pour K,z fixés. Les égalités s'arrêtent au parent ; les plateaux sont
+atomisés ; les points pas encore attachés restent des singletons distincts.
+Les dates de feuilles sont leurs vraies naissances MEB, pas les zéros
+virtuels de l'adaptateur EOM. Le score accepté est entier/Fraction positif.
+
+La référence utilise les incidences et de petits arbres virtuels par point,
+avec un index d'ancêtres commun. Pas de tableau n×V, ni de remontée de
+chaque incidence sur toute la profondeur. Son coût dépend de V et I=KF,
+pas d'une borne globale nouvellement acquise en n ; le coût binaire des
+grands rationnels reste à payer.
+
+Capture normal/−O close : **133 fixtures, 2 160 coupes, 14 refus**, dont
+trois intégrations aux objets FULL qualifiés (E5 K2, carré K2 et K1).
+Les deux lectures donnent les mêmes résultats, avec 668 pins inchangés.
+Le reçu et les commandes sont décrits dans la note dédiée. Ni EOM ni ARI,
+ni nouveau calcul natif/GPU n'ont été exécutés par cette qualification.

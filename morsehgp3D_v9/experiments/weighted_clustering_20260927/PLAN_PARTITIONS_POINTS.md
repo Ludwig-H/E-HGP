@@ -1,6 +1,9 @@
 # Étape suivante proposée : partitions de points emboîtées
 
-27 septembre 2026. **Plan, pas implémentation ni résultat de campagne.**
+27 septembre 2026. **Plan initial**, conservé comme spécification.
+Une [référence exacte sparse](POINT_ROUTING_REFERENCE.md) est maintenant
+implémentée et contrôlée sur petits arbres et trois objets FULL qualifiés.
+Cela ne transforme pas ce plan en benchmark de qualité ou de performance.
 Cadre expérimental v9, K fixé, z fixé, statut `not_claimed`. Aucun changement
 du moteur ou des captures gelées n'est requis par cette note. Les scores du
 pilote en cours ne serviront pas à choisir rétrospectivement le routage.
