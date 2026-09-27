@@ -1,0 +1,15 @@
+test_common_eom_identity_z_topology_and_input_immutable (__main__.CondensedTests.test_common_eom_identity_z_topology_and_input_immutable) ... ok
+test_condensed_corruptions_rejected (__main__.CondensedTests.test_condensed_corruptions_rejected) ... ok
+test_increasing_threshold_does_not_increase_cluster_tree_count (__main__.CondensedTests.test_increasing_threshold_does_not_increase_cluster_tree_count) ... ok
+test_one_large_child_continues_without_new_cluster (__main__.CondensedTests.test_one_large_child_continues_without_new_cluster) ... ok
+test_plateau_atomization_and_zero_radius_infinity (__main__.CondensedTests.test_plateau_atomization_and_zero_radius_infinity) ... ok
+test_raw_refusals_and_cut_refusals (__main__.CondensedTests.test_raw_refusals_and_cut_refusals) ... ok
+test_singleton_structural_root_and_csr_roundtrip (__main__.CondensedTests.test_singleton_structural_root_and_csr_roundtrip) ... ok
+test_thresholds_10_20_50_100_remove_clusters_not_points (__main__.CondensedTests.test_thresholds_10_20_50_100_remove_clusters_not_points) ... ok
+test_two_large_children_bifurcate_and_multifusion (__main__.CondensedTests.test_two_large_children_bifurcate_and_multifusion) ... ok
+test_zero_large_children_and_root_below_threshold (__main__.CondensedTests.test_zero_large_children_and_root_below_threshold) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.115s
+
+OK

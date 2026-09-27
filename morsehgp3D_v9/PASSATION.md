@@ -1,5 +1,40 @@
 # Passation v9
 
+## Correction méthodologique après relecture intégrale I–II — 27 septembre
+
+[Audit thèse/HGP-old](audits/RELECTURE_THESE_ET_HGP_OLD_20260927.md).
+Les expériences ci-dessous évaluent `first_coverage`, **pas** le §9.1 :
+elles projettent les points avant condensation, avec masses unitaires.
+Ancien clusterer : S_facettes/T_points, masses fractionnaires, condensation,
+EOM, puis vote. `expZ` modifie aussi les masses et votes historiques.
+Le seuil pondéré n'est pas une borne sur la cardinalité finale après vote.
+Retirer `C∩X` comme correction fidèle : définition 8 impose la couverture
+dilatée. La variante `whole_tree=True` suggère un routage descendant, mais
+son attribution globale entre racines reste à qualifier. FULL topologique
+seul ne donne pas les scores d'incidences ; fixer le catalogue contributif.
+Trois points exacts suffisent à montrer l'effacement des branches par LCA ;
+rejeu rationnel v7 des masses normal/−O passé, anciennes archives intactes.
+Priorité à une référence pondérée fidèle, puis à l'emboîtement ; ni nouveau
+grand chantier ni GCP. Tous les scores/capsules antérieurs sont conservés.
+
+## Gaussiennes 3D et condensation explicite — 27 septembre
+
+[Résultats](audits/b_gaussian_point_clustering_20260927/RESULTATS.md),
+[API de condensation](audits/b_gaussian_point_clustering_20260927/CONDENSATION.md).
+48 scènes n1200, G2/4/8/16, δ8/4/2, isotropes/allongées/déséquilibrées ;
+96 exports natifs,384 fitsHDB,1 920 scores, zéroéchec. K5/10, tailles10/20/50/100,
+expZ1/2 ; référenceK5/20/1 figée. `min_cluster_size` expose maintenant parents,
+masses, dates et n sorties de points, sans recalcul géométrique ni changementK.
+Condensation structurelle C≤max(1,2floor(n/m)−1), stockageO(n+C) ;
+ne pas transférer cette borne au générateur. Neufcommandes de gates passent.
+Sphériques δ4 : ARI0,5633 HGP/0,2228 HDBcommun, singleton-bruit0,5929/0,2735.
+À δ2, échec des deux ; allongéδ4, F1classes0,194/0,441 malgré arbre HGPprometteur.
+À G16, m100 interdit de récupérer exactement les classes75 ; garder ces cas.
+ExpZ2effetvariable ; aucune supériorité générale. HDBstandard conservé :
+exæquos atomisés changent217/384partitions, parfois sensiblement ; reproduction
+sansatomisation384/384. PrototypePythonbinary64, moteur et anciennes sources
+inchangés, CPUlocal uniquement, zéroGCP, aucune preuve nouvelle de croissance/G4.
+
 ## Clustering de points à ordre K fixé — 27 septembre
 
 [Résultats et suite mathématique](audits/b_point_hierarchy_k_20260927/RESULTATS.md),
@@ -15,9 +50,9 @@ pureté dendrogramme0,9977/0,9609 ; **évaluation3D ARI0,8647/0,9165**, donc
 pas de supériorité générale. Atom est séparable dans l'arbre mais EOM
 sur-segmente ; Spiral est déjà moins bien séparé dans l'arbre. ExpZ2 n'est
 pas un remède. Vote environ4,83×plus coûteux en prototype, sans gain convaincant.
-Garder première couverture comme baseline ; supplément canonique C∩X proposé
-mais NON implémenté : n requêtes KNN/facette→ancre à coupe fermée, pas lecture
-des seules couvertures dilatées. Ne pas changer la garde stricte du résolveur
+Garder première couverture comme baseline expérimentale. Le supplément C∩X
+alors proposé, non implémenté, est désormais retiré comme restitution fidèle
+de la thèse par la relecture ci-dessus. Ne pas changer la garde stricte du résolveur
 parents à l'aveugle. Moteur, registre et contratsG4 inchangés ; zéroGCP.
 Sources et captures épinglées, données privées, scripts/reçus/tableaux publiés.
 

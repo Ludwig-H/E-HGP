@@ -1,0 +1,322 @@
+{
+  "GCP_used": false,
+  "GPU_used": false,
+  "commands": [
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-point-hierarchy-k-native-20260927-r2/native_export",
+        "--gate"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927",
+      "name": "native_gate",
+      "pid": 94,
+      "returncode": 0,
+      "seconds": 0.008127593999233795,
+      "status": "passed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "3f0183c625e5f890552a0c546f2df69ff75f621f6f1e2ba3c81063f49564e3c0"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_gaussian_data.py"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927",
+      "name": "test_gaussian_data_normal",
+      "pid": 95,
+      "returncode": 0,
+      "seconds": 0.4668576859985478,
+      "status": "passed",
+      "stderr_sha256": "6c54b650fa7ef48c85cf14815fb7fb4e7330f836662adf957484ec9ed6c7254f",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_condensed.py"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927",
+      "name": "test_condensed_normal",
+      "pid": 103,
+      "returncode": 0,
+      "seconds": 0.21513402900018264,
+      "status": "passed",
+      "stderr_sha256": "c9e3f087282aee3efe81556e2fd17ac466e5882837abee4d6276d38892e666af",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_evaluation.py"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927",
+      "name": "test_evaluation_normal",
+      "pid": 104,
+      "returncode": 0,
+      "seconds": 0.9204418009976507,
+      "status": "passed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "c9ee2de7d4d6d8322d405a81eecd2b341a3a9bd7b58243f0323f52d655c5dc47"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_pipeline.py",
+        "--native",
+        "/workspaces/E-HGP/build/v9-point-hierarchy-k-native-20260927-r2/native_export"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927",
+      "name": "test_pipeline_normal",
+      "pid": 119,
+      "returncode": 0,
+      "seconds": 1.3719164989997807,
+      "status": "passed",
+      "stderr_sha256": "bd2607038f4c0f86e0ff53ef56802eed943c4d3cee10947ef9754c15f8ffc1c5",
+      "stdout_sha256": "bd8d29d6631744c85c34e1b739c806ed458509856fb74b828d04240e080dce62"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_gaussian_data.py"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927",
+      "name": "test_gaussian_data_optimized",
+      "pid": 136,
+      "returncode": 0,
+      "seconds": 0.5163195099994482,
+      "status": "passed",
+      "stderr_sha256": "54a60907dd418f7e8e00c3568758497795a7a0367fe5404f3ba6873ec114b80f",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_condensed.py"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927",
+      "name": "test_condensed_optimized",
+      "pid": 144,
+      "returncode": 0,
+      "seconds": 0.2151583449995087,
+      "status": "passed",
+      "stderr_sha256": "2b7422921a2f100f0030d4008622b9da8a530a21ea87129f3882d4e844e572ed",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_evaluation.py"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927",
+      "name": "test_evaluation_optimized",
+      "pid": 145,
+      "returncode": 0,
+      "seconds": 0.9206325939994713,
+      "status": "passed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "c9ee2de7d4d6d8322d405a81eecd2b341a3a9bd7b58243f0323f52d655c5dc47"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_pipeline.py",
+        "--native",
+        "/workspaces/E-HGP/build/v9-point-hierarchy-k-native-20260927-r2/native_export"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927",
+      "name": "test_pipeline_optimized",
+      "pid": 160,
+      "returncode": 0,
+      "seconds": 1.4678665850005927,
+      "status": "passed",
+      "stderr_sha256": "2ab7cc5d1dfe53744f0c191ae817791f5f9e381bd59b7c6f0dc72e77f7ded3c0",
+      "stdout_sha256": "bd8d29d6631744c85c34e1b739c806ed458509856fb74b828d04240e080dce62"
+    }
+  ],
+  "commands_expected": 9,
+  "differing_normal_optimized_stdout": [],
+  "engine_modified": false,
+  "excluded_nonruntime_formatter": "report.py",
+  "native_binary": "/workspaces/E-HGP/build/v9-point-hierarchy-k-native-20260927-r2/native_export",
+  "native_binary_sha256": "897a715a5b40b7fa298aaf66696def3a5cf636c98118db69da2684277cd11dd8",
+  "native_binary_sha256_after": "897a715a5b40b7fa298aaf66696def3a5cf636c98118db69da2684277cd11dd8",
+  "native_build_receipt": "/workspaces/E-HGP/build/v9-point-hierarchy-k-native-20260927-r2/receipt.json",
+  "native_build_receipt_sha256": "916a44b8072b9a8a5b4b72e9a6fc9b774fc8e38aee199861386e5e151c1cdcd1",
+  "native_build_receipt_sha256_after": "916a44b8072b9a8a5b4b72e9a6fc9b774fc8e38aee199861386e5e151c1cdcd1",
+  "old_dependencies_expected": {
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/benchmark.py": "8b5c80ddcf27896b7e25b5965caa50352a206de392318111a5623c37ce06736f",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/build_native.py": "073f7bc97bf93b0d6c690fdb4e1dcfc91af845c04a78432afd20e57c782e31fb",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/datasets.py": "7ff3d93677f51eabe9c1bea0f56a62bbcd53ce531c3a49bdfafeab29ab14f53c",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/eom.py": "c7121c857010fd89b6798ec634a0f55c4abd14c1c6bc6305c551c06e4625dead",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/native_export.cpp": "a5a62d458a628edbd4ca43cb633200344342c0287873aac15aacdf28d4fc6cf0",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/projection.py": "a6a88955e6ea94f2d002a825df58db94cb602376d096164eee55792bcf014242"
+  },
+  "planned_commands": [
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-point-hierarchy-k-native-20260927-r2/native_export",
+        "--gate"
+      ],
+      "name": "native_gate"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_gaussian_data.py"
+      ],
+      "name": "test_gaussian_data_normal"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_condensed.py"
+      ],
+      "name": "test_condensed_normal"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_evaluation.py"
+      ],
+      "name": "test_evaluation_normal"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_pipeline.py",
+        "--native",
+        "/workspaces/E-HGP/build/v9-point-hierarchy-k-native-20260927-r2/native_export"
+      ],
+      "name": "test_pipeline_normal"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_gaussian_data.py"
+      ],
+      "name": "test_gaussian_data_optimized"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_condensed.py"
+      ],
+      "name": "test_condensed_optimized"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_evaluation.py"
+      ],
+      "name": "test_evaluation_optimized"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_pipeline.py",
+        "--native",
+        "/workspaces/E-HGP/build/v9-point-hierarchy-k-native-20260927-r2/native_export"
+      ],
+      "name": "test_pipeline_optimized"
+    }
+  ],
+  "python": "3.12.1 (main, Mar 11 2026, 12:17:56) [GCC 13.3.0]",
+  "python_executable": "/home/codespace/.python/current/bin/python3",
+  "schema": "mhgp9_gaussian_qualification_v1",
+  "scope": "small_native_smoke_and_local_suites_not_48_scene_benchmark",
+  "sklearn_after": {
+    "backend": "sklearn",
+    "linkage_attribute": "_single_linkage_tree_",
+    "packages": {
+      "numpy": "2.5.3",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1"
+    },
+    "sha256": {
+      "/home/codespace/.python/current/lib/python3.12/site-packages/sklearn/cluster/_hdbscan/_linkage.cpython-312-x86_64-linux-gnu.so": "3664b9f4b0322ee99e31bc28386126d61937da28eceebff100b2922f3ac35a1a",
+      "/home/codespace/.python/current/lib/python3.12/site-packages/sklearn/cluster/_hdbscan/_reachability.cpython-312-x86_64-linux-gnu.so": "29784135c0db7c68feb4885a1f5ad88d5bbcb89d2ac88c7ec8fb93cbaa1a3ec7",
+      "/home/codespace/.python/current/lib/python3.12/site-packages/sklearn/cluster/_hdbscan/_tree.cpython-312-x86_64-linux-gnu.so": "37e882a5cb38cd6a51f9af6edd4dfea2c7914bd44d8afa3dc7732c87a135581d",
+      "/home/codespace/.python/current/lib/python3.12/site-packages/sklearn/cluster/_hdbscan/hdbscan.py": "6f030ac6b5bfbb88ce5a6125fd616fb0559b2a688ae225e03bb1d268065e601b"
+    }
+  },
+  "sklearn_before": {
+    "backend": "sklearn",
+    "linkage_attribute": "_single_linkage_tree_",
+    "packages": {
+      "numpy": "2.5.3",
+      "scikit-learn": "1.9.1",
+      "scipy": "1.18.1"
+    },
+    "sha256": {
+      "/home/codespace/.python/current/lib/python3.12/site-packages/sklearn/cluster/_hdbscan/_linkage.cpython-312-x86_64-linux-gnu.so": "3664b9f4b0322ee99e31bc28386126d61937da28eceebff100b2922f3ac35a1a",
+      "/home/codespace/.python/current/lib/python3.12/site-packages/sklearn/cluster/_hdbscan/_reachability.cpython-312-x86_64-linux-gnu.so": "29784135c0db7c68feb4885a1f5ad88d5bbcb89d2ac88c7ec8fb93cbaa1a3ec7",
+      "/home/codespace/.python/current/lib/python3.12/site-packages/sklearn/cluster/_hdbscan/_tree.cpython-312-x86_64-linux-gnu.so": "37e882a5cb38cd6a51f9af6edd4dfea2c7914bd44d8afa3dc7732c87a135581d",
+      "/home/codespace/.python/current/lib/python3.12/site-packages/sklearn/cluster/_hdbscan/hdbscan.py": "6f030ac6b5bfbb88ce5a6125fd616fb0559b2a688ae225e03bb1d268065e601b"
+    }
+  },
+  "sources_after": {
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/CONDENSATION.md": "f23a6271ce99bcf5b94deb92d5991d040e93d2e9cb80d085bb0c975b65f00299",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/DATASETS.md": "4821d78d8dc04f7e5823419d7bf88b31825c09be95028245d6860efc760f3855",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/README.md": "19d3790b6dd94a80c6c58a05aa045c7b3b860841727f8ec9b9d9e12dcc918b8a",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/condensed.py": "f4323c60696255a52ef53884ce94ec5701fdda21e66fa71f927f7dc833917c8e",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/evaluation.py": "d5a396c03a8d5eafc444e982e5bff3eb310d7ff7b4d1b0c7377797e23e7e0a9c",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/gaussian_data.py": "90181e26c31f60c6f89097a251df5511a3a9466829fa665c06e38578c663f858",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/qualification.py": "756d30709add218b84a49b328a62e1c816fcaf4ae0b37a51da4b7b4ecf121e1d",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/run.py": "ca0f2539f193e7a862e268c4f4a1246f8e9753df7d1a71622e92f435a9bff7a2",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_condensed.py": "5ce60aaaf6b5f616b161e2a8d9642ae599c360db5700b8de06975ad0c2d6bda7",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_evaluation.py": "28a6cdd6fe07d8ee30fc7a69e9b9ac64c8df2fc4acbea4501b5feb63cf79bb84",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_gaussian_data.py": "a1fb7501d1bc160dd45d136ce637cb663cb14c3a8b30a47fed3c4e158b4c9d2e",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_pipeline.py": "76f27403dc0a4d682bb3abcbca37643cfe98854b3c57c9dcf37a1626d8a0b5f5",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/benchmark.py": "8b5c80ddcf27896b7e25b5965caa50352a206de392318111a5623c37ce06736f",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/build_native.py": "073f7bc97bf93b0d6c690fdb4e1dcfc91af845c04a78432afd20e57c782e31fb",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/datasets.py": "7ff3d93677f51eabe9c1bea0f56a62bbcd53ce531c3a49bdfafeab29ab14f53c",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/eom.py": "c7121c857010fd89b6798ec634a0f55c4abd14c1c6bc6305c551c06e4625dead",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/native_export.cpp": "a5a62d458a628edbd4ca43cb633200344342c0287873aac15aacdf28d4fc6cf0",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/projection.py": "a6a88955e6ea94f2d002a825df58db94cb602376d096164eee55792bcf014242"
+  },
+  "sources_before": {
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/CONDENSATION.md": "f23a6271ce99bcf5b94deb92d5991d040e93d2e9cb80d085bb0c975b65f00299",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/DATASETS.md": "4821d78d8dc04f7e5823419d7bf88b31825c09be95028245d6860efc760f3855",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/README.md": "19d3790b6dd94a80c6c58a05aa045c7b3b860841727f8ec9b9d9e12dcc918b8a",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/condensed.py": "f4323c60696255a52ef53884ce94ec5701fdda21e66fa71f927f7dc833917c8e",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/evaluation.py": "d5a396c03a8d5eafc444e982e5bff3eb310d7ff7b4d1b0c7377797e23e7e0a9c",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/gaussian_data.py": "90181e26c31f60c6f89097a251df5511a3a9466829fa665c06e38578c663f858",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/qualification.py": "756d30709add218b84a49b328a62e1c816fcaf4ae0b37a51da4b7b4ecf121e1d",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/run.py": "ca0f2539f193e7a862e268c4f4a1246f8e9753df7d1a71622e92f435a9bff7a2",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_condensed.py": "5ce60aaaf6b5f616b161e2a8d9642ae599c360db5700b8de06975ad0c2d6bda7",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_evaluation.py": "28a6cdd6fe07d8ee30fc7a69e9b9ac64c8df2fc4acbea4501b5feb63cf79bb84",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_gaussian_data.py": "a1fb7501d1bc160dd45d136ce637cb663cb14c3a8b30a47fed3c4e158b4c9d2e",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/test_pipeline.py": "76f27403dc0a4d682bb3abcbca37643cfe98854b3c57c9dcf37a1626d8a0b5f5",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/benchmark.py": "8b5c80ddcf27896b7e25b5965caa50352a206de392318111a5623c37ce06736f",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/build_native.py": "073f7bc97bf93b0d6c690fdb4e1dcfc91af845c04a78432afd20e57c782e31fb",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/datasets.py": "7ff3d93677f51eabe9c1bea0f56a62bbcd53ce531c3a49bdfafeab29ab14f53c",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/eom.py": "c7121c857010fd89b6798ec634a0f55c4abd14c1c6bc6305c551c06e4625dead",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/native_export.cpp": "a5a62d458a628edbd4ca43cb633200344342c0287873aac15aacdf28d4fc6cf0",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/projection.py": "a6a88955e6ea94f2d002a825df58db94cb602376d096164eee55792bcf014242"
+  },
+  "status": "passed"
+}

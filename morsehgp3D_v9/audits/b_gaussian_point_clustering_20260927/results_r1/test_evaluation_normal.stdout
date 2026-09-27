@@ -1,0 +1,1 @@
+{"GCP_used": false, "GPU_used": false, "checks": 12, "condensed_tree_oracle_evaluations": 200, "exhaustive_matching_fixtures": 180, "raw_tree_oracle_evaluations": 400, "raw_tree_oracle_fixtures": 100, "status": "PASS"}

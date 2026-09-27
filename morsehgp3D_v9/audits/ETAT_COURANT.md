@@ -1,5 +1,29 @@
 # État courant des audits v9
 
+**27 septembre — correction de fidélité à la thèse/HGP-old** :
+[relecture complète des parties I–II](RELECTURE_THESE_ET_HGP_OLD_20260927.md).
+Les scores ci-dessous concernent la projection première couverture, pas
+le clusterer historique pondéré. Masses de facettes et vote après EOM
+manquent à cette reproduction ; `expZ` n'y a qu'un effet partiel.
+La proposition `C∩X` est retirée comme restitution fidèle. Le routage
+descendant de `whole_tree` est une piste, pas une hiérarchie globale déjà
+qualifiée. Rejeu des poids v7 normal/−O passé ; jouet natif exact à trois
+points confirme une perte par LCA, pas une victoire du vieux clusterer.
+Pas de nouveaux scores corrigés, moteur inchangé, zéroGCP. Capsules
+préservées ; avertissement ajouté au bilan gaussien, pas à ses sources figées.
+
+**27 septembre — gaussiennes et condensation explicite, campagne close** :
+[bilan](b_gaussian_point_clustering_20260927/RESULTATS.md),
+[tableaux](b_gaussian_point_clustering_20260927/results_r1/TABLES.md).
+48nuages complets de1 200points, G2/4/8/16, difficulté et tailles variables.
+96exports/384fitsHDB/1 920scores, zéroéchec ; neufcommandes de gates passent.
+`min_cluster_size`10/20/50/100 nettoie réellement les branches, tous les points
+restent identifiés. K5/10, expZ1/2, comparaisonEOMcommune et standard distinctes.
+HGPfavorablesphériqueδ4, mais faiblequalitéδ2 et échec de sélectionallongéδ4 ;
+seuil100incompatibleclasses75/60 explicitementmesuré. Aucune nouvelle géométrie,
+croissanceLiDAR ou qualification100ms ; localCPU, zéroGCP. Sources précédentes
+inchangées ; preuves et contre-audits dans le nouveau dossier.
+
 **27 septembre — point-clustering à K fixé, expérience close** :
 [rapport](b_point_hierarchy_k_20260927/RESULTATS.md),
 [reçu](b_point_hierarchy_k_20260927/results_r1/archive.json).
@@ -10,8 +34,8 @@ contrelecture indépendante labels/métriques/hashes concordante.
 Hiérarchies HGP prometteuses, mais avantage agrégé non robuste : évaluation3D
 K5/20/z1 ARI0,8647 contre0,9165 HDBcommun. ExpZ2 sur-segmente davantage.
 Pas de nouvelle mesure LiDAR/G4 ni borne globale, moteur inchangé, zéroGCP.
-La proposition canonique C∩X exige un supplément de localisation, reste non
-implémentée et ne reçoit aucun score de ce prototype. Anciennes captures ci-dessous.
+La proposition C∩X était non implémentée et sans score ; la relecture ci-dessus
+la retire comme restitution fidèle de l'objet de la thèse. Anciennes captures ci-dessous.
 
 **27 septembre — R2 FULL Nsight obtenue, G4 arrêtée** :
 [rapport](../docs/PROFIL_FULL_NSYS_20260927.md),

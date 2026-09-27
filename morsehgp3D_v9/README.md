@@ -2,6 +2,24 @@
 
 Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 
+Correction prioritaire du 27 septembre : [thèse relue et HGP-old audité](audits/RELECTURE_THESE_ET_HGP_OLD_20260927.md).
+Les deux campagnes de clustering ci-dessous testent une projection nouvelle,
+pas HGP-Clusterer historique : affectation exclusive avant EOM, au lieu de
+masses sur facettes puis vote. `expZ` n'y modifie pas ces masses manquantes.
+Conserver les scores comme baseline ; priorité à la restitution pondérée,
+puis à un routage de points réellement emboîté. La piste `C∩X` est retirée
+comme restitution fidèle de la thèse. Aucune domination universelle d'ARI
+ni nouveau résultat GPU revendiqué.
+
+Nouvelle campagne : [gaussiennes 3D et arbre condensé](audits/b_gaussian_point_clustering_20260927/RESULTATS.md).
+48 scènes de1 200 points,2/4/8/16 communautés, trois séparations,
+allongement/déséquilibre ; K5/10, seuils10/20/50/100, expZ1/2.
+1 920 résultats clos, aucun échec. L'API expose les branches condensées
+et toutes les sorties de points. HGP progresse sur les sphériques intermédiaires,
+mais le fort recouvrement et certaines sélections anisotropes restent difficiles.
+Comparaison EOM commune et HDBSCAN standard conservées ; CPU local, zéroGCP,
+aucune nouvelle qualification de vitesse ou croissance du moteur.
+
 Nouveau chantier distinct, le 27 septembre : [clustering de points depuis le seul T_K](audits/b_point_hierarchy_k_20260927/RESULTATS.md).
 Deux projections implémentées, même EOM que le comparateur HDBSCAN, expZ1/2 ;
 12 scènes complètes (10 vraies3D, deux SIPU planaires), 504 résultats clos.

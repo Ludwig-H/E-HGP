@@ -1,0 +1,440 @@
+{
+  "GCP_used": false,
+  "GPU_used": false,
+  "aggregate_rows": 720,
+  "checks": {
+    "comparisons": 97767,
+    "replayed_rows": 720
+  },
+  "elapsed_seconds": 680.8065109119998,
+  "errors": [],
+  "native_processes_launched": 0,
+  "qualification_binding": {
+    "benchmark_only": [
+      "report.py"
+    ],
+    "commands": 9,
+    "common_sources": 17,
+    "eom_sha256": "c7121c857010fd89b6798ec634a0f55c4abd14c1c6bc6305c551c06e4625dead",
+    "native_binary_sha256": "897a715a5b40b7fa298aaf66696def3a5cf636c98118db69da2684277cd11dd8",
+    "qualification_only": [
+      "build_native.py"
+    ],
+    "qualification_sha256": "c9c6a0b820456b430cc5ce9bc7a4cb0e6a93380a684ff3409cf2d04496fc696d"
+  },
+  "receipt_sha256": "8f9aba99396b6341f7a6872956e66f50a7776cc1535d9a3f9137907d2945157a",
+  "sample_artifact_index_sha256": "2b9879c6ecdb0f3abde7f74b03f75355cf7aa37cf4e9c2fc0fe7a79052d7d6d4",
+  "sample_artifacts": 720,
+  "sample_cases": [
+    "spherical_g2_d8_s1",
+    "spherical_g2_d4_s2",
+    "spherical_g2_d2_s3",
+    "spherical_g4_d8_s2",
+    "spherical_g4_d4_s3",
+    "spherical_g4_d2_s1",
+    "spherical_g8_d8_s3",
+    "spherical_g8_d4_s1",
+    "spherical_g8_d2_s2",
+    "spherical_g16_d8_s1",
+    "spherical_g16_d4_s2",
+    "spherical_g16_d2_s3",
+    "anisotropic_g8_d8_s1",
+    "anisotropic_g8_d4_s2",
+    "anisotropic_g8_d2_s1",
+    "unbalanced_g8_d8_s2",
+    "unbalanced_g8_d4_s1",
+    "unbalanced_g8_d2_s2"
+  ],
+  "schema": "mhgp9_gaussian_metric_audit_v1",
+  "source_sha256": "a89b3afaf84cc0bdd7fd228bb12aeccab8ef176fb1502cc335e6f8b2616dd644",
+  "status": "PASS",
+  "summaries": [
+    {
+      "hdbscan_common": {
+        "ari_all": 0.9989072911393782,
+        "ari_inliers_noise_singletons": 0.9989119206799119,
+        "clusters": 7.5,
+        "condensed_branch_f1": 0.9995101453698623,
+        "coverage": 0.9991666666666666,
+        "dendrogram_purity": 0.9989754473991254,
+        "exact_class_fraction": 0.9270833333333334,
+        "matched_macro_f1": 0.9995101453698623,
+        "raw_branch_f1": 0.999544751464251
+      },
+      "hdbscan_standard": {
+        "ari_all": 0.9988367311187741,
+        "ari_inliers_noise_singletons": 0.9988398384965722,
+        "clusters": 7.5,
+        "coverage": 0.999375,
+        "dendrogram_purity": 0.9989754473991254,
+        "exact_class_fraction": 0.9375,
+        "matched_macro_f1": 0.999475896295363
+      },
+      "hgp_first_coverage": {
+        "ari_all": 0.9996822735499709,
+        "ari_inliers_noise_singletons": 0.9996822735499709,
+        "clusters": 7.5,
+        "condensed_branch_f1": 0.9998611103394976,
+        "coverage": 1.0,
+        "dendrogram_purity": 0.99983819521863,
+        "exact_class_fraction": 0.96875,
+        "matched_macro_f1": 0.9998611103394976,
+        "raw_branch_f1": 0.9999303232998885
+      },
+      "paired_ari_singletons": {
+        "losses": 0,
+        "mean": 0.0007703528700589712,
+        "n": 12,
+        "sd": 0.0012809441247846206,
+        "ties": 8,
+        "wins": 4
+      },
+      "regime": "spherical",
+      "separation": 8
+    },
+    {
+      "hdbscan_common": {
+        "ari_all": 0.22278833761982936,
+        "ari_inliers_noise_singletons": 0.273484719494309,
+        "clusters": 4.166666666666667,
+        "condensed_branch_f1": 0.7130872343199333,
+        "coverage": 0.7333333333333333,
+        "dendrogram_purity": 0.5314497568251533,
+        "exact_class_fraction": 0.015625,
+        "matched_macro_f1": 0.47741176915988376,
+        "raw_branch_f1": 0.7145309286791149
+      },
+      "hdbscan_standard": {
+        "ari_all": 0.22007882730647374,
+        "ari_inliers_noise_singletons": 0.2696220240963782,
+        "clusters": 4.25,
+        "coverage": 0.7331944444444445,
+        "dendrogram_purity": 0.5314497568251533,
+        "exact_class_fraction": 0.015625,
+        "matched_macro_f1": 0.4745588987611284
+      },
+      "hgp_first_coverage": {
+        "ari_all": 0.5632738000630708,
+        "ari_inliers_noise_singletons": 0.5929449655599672,
+        "clusters": 7.083333333333333,
+        "condensed_branch_f1": 0.8443321351437194,
+        "coverage": 0.824375,
+        "dendrogram_purity": 0.7190289622607446,
+        "exact_class_fraction": 0.020833333333333332,
+        "matched_macro_f1": 0.7691575342260983,
+        "raw_branch_f1": 0.8459808913943409
+      },
+      "paired_ari_singletons": {
+        "losses": 1,
+        "mean": 0.3194602460656582,
+        "n": 12,
+        "sd": 0.23057749003366268,
+        "ties": 0,
+        "wins": 11
+      },
+      "regime": "spherical",
+      "separation": 4
+    },
+    {
+      "hdbscan_common": {
+        "ari_all": 0.013923343042588134,
+        "ari_inliers_noise_singletons": 0.013831338974714004,
+        "clusters": 2.5833333333333335,
+        "condensed_branch_f1": 0.24627773568586322,
+        "coverage": 0.40597222222222223,
+        "dendrogram_purity": 0.25140027767689693,
+        "exact_class_fraction": 0.0,
+        "matched_macro_f1": 0.11447524918481762,
+        "raw_branch_f1": 0.3952084301977259
+      },
+      "hdbscan_standard": {
+        "ari_all": 0.013959341393758047,
+        "ari_inliers_noise_singletons": 0.013854795768903215,
+        "clusters": 2.5833333333333335,
+        "coverage": 0.40708333333333335,
+        "dendrogram_purity": 0.25140027767689693,
+        "exact_class_fraction": 0.0,
+        "matched_macro_f1": 0.11500164739056982
+      },
+      "hgp_first_coverage": {
+        "ari_all": 0.017529221993227553,
+        "ari_inliers_noise_singletons": 0.016500016777644278,
+        "clusters": 2.8333333333333335,
+        "condensed_branch_f1": 0.38254580734348076,
+        "coverage": 0.6515972222222222,
+        "dendrogram_purity": 0.27644150357474667,
+        "exact_class_fraction": 0.0,
+        "matched_macro_f1": 0.16880560802907046,
+        "raw_branch_f1": 0.43194546733507977
+      },
+      "paired_ari_singletons": {
+        "losses": 6,
+        "mean": 0.0026686778029302734,
+        "n": 12,
+        "sd": 0.011650969987459112,
+        "ties": 0,
+        "wins": 6
+      },
+      "regime": "spherical",
+      "separation": 2
+    },
+    {
+      "hdbscan_common": {
+        "ari_all": 0.9809561135448235,
+        "ari_inliers_noise_singletons": 0.9818466290579777,
+        "clusters": 8,
+        "condensed_branch_f1": 0.9919501757024398,
+        "coverage": 0.985,
+        "dendrogram_purity": 0.9809631007171979,
+        "exact_class_fraction": 0.4375,
+        "matched_macro_f1": 0.9919501757024398,
+        "raw_branch_f1": 0.9919501757024398
+      },
+      "hdbscan_standard": {
+        "ari_all": 0.9797234525378757,
+        "ari_inliers_noise_singletons": 0.9804504803510787,
+        "clusters": 8,
+        "coverage": 0.9862500000000001,
+        "dendrogram_purity": 0.9809631007171979,
+        "exact_class_fraction": 0.375,
+        "matched_macro_f1": 0.9913274240050569
+      },
+      "hgp_first_coverage": {
+        "ari_all": 0.9933003146285884,
+        "ari_inliers_noise_singletons": 0.9933225791516889,
+        "clusters": 8,
+        "condensed_branch_f1": 0.9970763376988057,
+        "coverage": 0.9975,
+        "dendrogram_purity": 0.9942075970671588,
+        "exact_class_fraction": 0.375,
+        "matched_macro_f1": 0.9970763376988057,
+        "raw_branch_f1": 0.9976992520274834
+      },
+      "paired_ari_singletons": {
+        "losses": 0,
+        "mean": 0.011475950093711162,
+        "n": 2,
+        "sd": 0.012207204493945387,
+        "ties": 0,
+        "wins": 2
+      },
+      "regime": "anisotropic",
+      "separation": 8
+    },
+    {
+      "hdbscan_common": {
+        "ari_all": 0.1856470411104481,
+        "ari_inliers_noise_singletons": 0.2858610851055322,
+        "clusters": 5,
+        "condensed_branch_f1": 0.6750306453240551,
+        "coverage": 0.7025,
+        "dendrogram_purity": 0.4251193679677107,
+        "exact_class_fraction": 0.0,
+        "matched_macro_f1": 0.44102237574706377,
+        "raw_branch_f1": 0.6762503665679915
+      },
+      "hdbscan_standard": {
+        "ari_all": 0.0660472541225369,
+        "ari_inliers_noise_singletons": 0.06894484398241027,
+        "clusters": 2,
+        "coverage": 0.8233333333333334,
+        "dendrogram_purity": 0.4251193679677107,
+        "exact_class_fraction": 0.0,
+        "matched_macro_f1": 0.14376259933829616
+      },
+      "hgp_first_coverage": {
+        "ari_all": 0.19698873358671237,
+        "ari_inliers_noise_singletons": 0.19897386194835806,
+        "clusters": 2.5,
+        "condensed_branch_f1": 0.806867050149929,
+        "coverage": 0.9504166666666667,
+        "dendrogram_purity": 0.6311322976162355,
+        "exact_class_fraction": 0.0,
+        "matched_macro_f1": 0.19399405913209758,
+        "raw_branch_f1": 0.808051115401293
+      },
+      "paired_ari_singletons": {
+        "losses": 1,
+        "mean": -0.08688722315717415,
+        "n": 2,
+        "sd": 0.4787144468360979,
+        "ties": 0,
+        "wins": 1
+      },
+      "regime": "anisotropic",
+      "separation": 4
+    },
+    {
+      "hdbscan_common": {
+        "ari_all": 0.011102248862328818,
+        "ari_inliers_noise_singletons": 0.016301832103149103,
+        "clusters": 2.5,
+        "condensed_branch_f1": 0.25930113617040845,
+        "coverage": 0.4983333333333333,
+        "dendrogram_purity": 0.1478379361946236,
+        "exact_class_fraction": 0.0,
+        "matched_macro_f1": 0.09003856967487321,
+        "raw_branch_f1": 0.2696331612925717
+      },
+      "hdbscan_standard": {
+        "ari_all": 0.01115014761853696,
+        "ari_inliers_noise_singletons": 0.01632017523381305,
+        "clusters": 2.5,
+        "coverage": 0.49916666666666665,
+        "dendrogram_purity": 0.1478379361946236,
+        "exact_class_fraction": 0.0,
+        "matched_macro_f1": 0.08981399862658784
+      },
+      "hgp_first_coverage": {
+        "ari_all": 0.03365627670040153,
+        "ari_inliers_noise_singletons": 0.043111622466234685,
+        "clusters": 5,
+        "condensed_branch_f1": 0.29550550899639655,
+        "coverage": 0.5379166666666667,
+        "dendrogram_purity": 0.1726719470322166,
+        "exact_class_fraction": 0.0,
+        "matched_macro_f1": 0.18674246936036615,
+        "raw_branch_f1": 0.307399410847969
+      },
+      "paired_ari_singletons": {
+        "losses": 0,
+        "mean": 0.026809790363085582,
+        "n": 2,
+        "sd": 0.02823874314637489,
+        "ties": 0,
+        "wins": 2
+      },
+      "regime": "anisotropic",
+      "separation": 2
+    },
+    {
+      "hdbscan_common": {
+        "ari_all": 0.9983723100656896,
+        "ari_inliers_noise_singletons": 0.9983821866730498,
+        "clusters": 8,
+        "condensed_branch_f1": 0.9981545075480389,
+        "coverage": 0.9979166666666667,
+        "dendrogram_purity": 0.9987238181243733,
+        "exact_class_fraction": 0.75,
+        "matched_macro_f1": 0.9981545075480389,
+        "raw_branch_f1": 0.9981545075480389
+      },
+      "hdbscan_standard": {
+        "ari_all": 0.9982364405347107,
+        "ari_inliers_noise_singletons": 0.9982389027957304,
+        "clusters": 8,
+        "coverage": 0.9983333333333333,
+        "dendrogram_purity": 0.9987238181243733,
+        "exact_class_fraction": 0.75,
+        "matched_macro_f1": 0.9976381993298363
+      },
+      "hgp_first_coverage": {
+        "ari_all": 1.0,
+        "ari_inliers_noise_singletons": 1.0,
+        "clusters": 8,
+        "condensed_branch_f1": 1.0,
+        "coverage": 1.0,
+        "dendrogram_purity": 1.0,
+        "exact_class_fraction": 1.0,
+        "matched_macro_f1": 1.0,
+        "raw_branch_f1": 1.0
+      },
+      "paired_ari_singletons": {
+        "losses": 0,
+        "mean": 0.0016178133269502681,
+        "n": 2,
+        "sd": 0.0006163240076174176,
+        "ties": 0,
+        "wins": 2
+      },
+      "regime": "unbalanced",
+      "separation": 8
+    },
+    {
+      "hdbscan_common": {
+        "ari_all": 0.26863348139721954,
+        "ari_inliers_noise_singletons": 0.27615759823504726,
+        "clusters": 3.5,
+        "condensed_branch_f1": 0.6146206676489021,
+        "coverage": 0.8970833333333333,
+        "dendrogram_purity": 0.5418323320742273,
+        "exact_class_fraction": 0.0,
+        "matched_macro_f1": 0.3230742429530348,
+        "raw_branch_f1": 0.6243213070085677
+      },
+      "hdbscan_standard": {
+        "ari_all": 0.2685461221462595,
+        "ari_inliers_noise_singletons": 0.27597336619106827,
+        "clusters": 3.5,
+        "coverage": 0.8975,
+        "dendrogram_purity": 0.5418323320742273,
+        "exact_class_fraction": 0.0,
+        "matched_macro_f1": 0.32294531486358036
+      },
+      "hgp_first_coverage": {
+        "ari_all": 0.535887255061827,
+        "ari_inliers_noise_singletons": 0.5679602888558829,
+        "clusters": 7,
+        "condensed_branch_f1": 0.8034024177108565,
+        "coverage": 0.8604166666666667,
+        "dendrogram_purity": 0.7133089783818949,
+        "exact_class_fraction": 0.0,
+        "matched_macro_f1": 0.6965647818649858,
+        "raw_branch_f1": 0.8038550357361056
+      },
+      "paired_ari_singletons": {
+        "losses": 0,
+        "mean": 0.2918026906208357,
+        "n": 2,
+        "sd": 0.284720079876892,
+        "ties": 0,
+        "wins": 2
+      },
+      "regime": "unbalanced",
+      "separation": 4
+    },
+    {
+      "hdbscan_common": {
+        "ari_all": 0.02200835808543853,
+        "ari_inliers_noise_singletons": 0.06664001312957478,
+        "clusters": 2.5,
+        "condensed_branch_f1": 0.21298290670159148,
+        "coverage": 0.47333333333333333,
+        "dendrogram_purity": 0.23569180587284166,
+        "exact_class_fraction": 0.0,
+        "matched_macro_f1": 0.09659628308604966,
+        "raw_branch_f1": 0.2519031091064473
+      },
+      "hdbscan_standard": {
+        "ari_all": 0.02299901086469186,
+        "ari_inliers_noise_singletons": 0.06832995397070872,
+        "clusters": 2.5,
+        "coverage": 0.47625,
+        "dendrogram_purity": 0.23569180587284166,
+        "exact_class_fraction": 0.0,
+        "matched_macro_f1": 0.09778561290995727
+      },
+      "hgp_first_coverage": {
+        "ari_all": 0.06181740516247677,
+        "ari_inliers_noise_singletons": 0.09362392137045694,
+        "clusters": 2,
+        "condensed_branch_f1": 0.2578129002304382,
+        "coverage": 0.6270833333333333,
+        "dendrogram_purity": 0.2719779082476661,
+        "exact_class_fraction": 0.0,
+        "matched_macro_f1": 0.10375830330524591,
+        "raw_branch_f1": 0.3211047952765405
+      },
+      "paired_ari_singletons": {
+        "losses": 1,
+        "mean": 0.026983908240882166,
+        "n": 2,
+        "sd": 0.04324068824822141,
+        "ties": 0,
+        "wins": 1
+      },
+      "regime": "unbalanced",
+      "separation": 2
+    }
+  ]
+}
