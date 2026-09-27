@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-collective-r2-20260927_release/mhgp9_audit_q34_collective",
+    "--mutant",
+    "scatter"
+  ],
+  "ended_epoch": 1790491638.6977339,
+  "exit_code": 1,
+  "group_closed": true,
+  "name": "mutant_release_scatter",
+  "pid": 115011,
+  "started_epoch": 1790491638.6493437,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "ca0a4cf8ee62f27e1abab5006f53cd76523f6634513af472f6fea7db6d36a599",
+  "timeout_seconds": null
+}

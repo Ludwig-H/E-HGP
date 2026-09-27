@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-collective-r2-20260927_release/mhgp9_audit_q34_collective",
+    "--mutant",
+    "mask6"
+  ],
+  "ended_epoch": 1790491638.7012563,
+  "exit_code": 1,
+  "group_closed": true,
+  "name": "mutant_release_mask6",
+  "pid": 115888,
+  "started_epoch": 1790491638.6983595,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "ac0aa9a69e7f6488337fb3209a9c40deae616a6a936e88027e2ad7235fc2c410",
+  "timeout_seconds": null
+}

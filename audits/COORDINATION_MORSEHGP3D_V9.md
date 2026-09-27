@@ -1,5 +1,22 @@
 # Coordination Morse HGP 3D v9
 
+### 27 septembre — DEV : arène qualifiée, voie FULL linéaire mesurée
+
+[Bilan](../morsehgp3D_v9/docs/ARENE_COLLECTIVE_ET_FULL_LINEAIRE_20260927.md),
+base `b9fcc3d63`. Arène collective réellement implémentée, six buffers,
+géométrie préparée une fois, ancres partagées même dans un gros facteur.
+W1/W4 conservent les compteurs et sorties ; capacités finales LiDAR00
+29,328 Mo. Pas de raccord S2 ni GPU. Le défaut de couverture ordinal
+trouvé en contrelecture est traité par une porte complémentaire séparée.
+
+La voie first-parent est exacte sur absence de continuations vérifiée,
+avec repli général ; 19 294 comparaisons/build et quatre mutants. Vrais
+drafts LiDAR : 168,12/171,08 ms natif/prototype (sommes médianes K), pas
+gain scalaire. **Décision :** publier, conserver pour réduction/scatter
+parallèles, ne pas activer comme optimisation CPU. Poursuivre le raccord
+collectif complet et mesurer sur G4 seulement après ses portes. Aucun
+nouveau contrat, moteur inchangé, GCP non utilisé.
+
 ### 27 septembre — DEV : ordre direct, encodeur général négatif sur vrais drafts
 
 [Tranche](../morsehgp3D_v9/docs/ORDRE_ET_VRAIS_DRAFTS_20260927.md), base

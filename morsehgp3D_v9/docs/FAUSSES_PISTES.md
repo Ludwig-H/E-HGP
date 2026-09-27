@@ -144,6 +144,15 @@ autres sélections restent ouvertes, pas fermées par cet essai.
 
 ## Parallélisme, GPU, tour
 
+27 septembre, [première occurrence FULL](../receipts/full_first_real_drafts_20260927/README.md) :
+supprimer le tri ne garantit pas à lui seul un gain d'encodage CPU.
+La voie linéaire conserve les objets mais donne 168,12→171,08 ms sur
+LiDAR00 en sommes de médianes par ordre ; le port parallèle reste ouvert.
+De même, l'[arène collective](../receipts/q34_collective_arena_20260927/README.md)
+réduit le stockage mais ses lancements W4 régressent sur les tout petits
+lots Pool uniforme/terrain. Ne pas confondre tableaux parallélisables,
+accélération à toute taille et gain de tour GPU.
+
 27 septembre, [vrais drafts FULL](../receipts/full_real_drafts_20260927/README.md) :
 compatibilité structurelle ne signifie pas gain CPU. L'encodeur général
 à incidences triées régresse sur ng00 et uniforme8k/16k/32k. Ne pas le

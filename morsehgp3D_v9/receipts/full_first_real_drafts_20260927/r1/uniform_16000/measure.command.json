@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-full-first-real-drafts-20260927-r1/release/mhgp9_full_first_real_drafts",
+    "--synthetic",
+    "uniform",
+    "16000"
+  ],
+  "ended_epoch": 1790491723.0582485,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "measure",
+  "pid": 122002,
+  "started_epoch": 1790491708.5927086,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "ee65e19ae5302b4fe56c67bf679c4eb36013244e94a98898ec2d3259e299b4cc",
+  "timeout_seconds": 1800
+}

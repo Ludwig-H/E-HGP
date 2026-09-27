@@ -1,0 +1,16 @@
+{
+  "GCP_used": false,
+  "commands": 9,
+  "gate": {
+    "alias_checks": 18,
+    "exact_refusals": 78,
+    "nonidentity_original_ids": 763,
+    "permuted_sites": 622,
+    "positive_plans": 18,
+    "query_refusals": 18,
+    "schema": "mhgp9_collective_supplement_v1",
+    "status": "pass"
+  },
+  "scope": "supplementary_API_gate_only",
+  "status": "PASS"
+}

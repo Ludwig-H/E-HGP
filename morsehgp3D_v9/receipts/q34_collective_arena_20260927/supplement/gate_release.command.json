@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-collective-supplement-20260927_release/mhgp9_collective_supplement",
+    "--gate"
+  ],
+  "ended_epoch": 1790491843.6481981,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "gate_release",
+  "pid": 124455,
+  "started_epoch": 1790491843.6242635,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "b4b74a8ac52fd4b6254ff79cea45dc1b5e9fdd1a764d39dc7155b91969ff6c97",
+  "timeout_seconds": null
+}

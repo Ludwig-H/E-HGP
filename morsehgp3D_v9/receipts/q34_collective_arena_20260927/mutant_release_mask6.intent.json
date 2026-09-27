@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-collective-20260927_release/mhgp9_audit_q34_collective",
+    "--mutant",
+    "mask6"
+  ],
+  "name": "mutant_release_mask6",
+  "started_epoch": 1790491254.3898494,
+  "timeout_seconds": null
+}

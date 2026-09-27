@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-full-first-real-drafts-20260927-r1/sanitize/mhgp9_full_first_real_drafts",
+    "--gate"
+  ],
+  "name": "sanitize_gate",
+  "started_epoch": 1790491650.6873837,
+  "timeout_seconds": 600
+}

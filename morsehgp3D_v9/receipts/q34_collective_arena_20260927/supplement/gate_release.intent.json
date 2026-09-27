@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-collective-supplement-20260927_release/mhgp9_collective_supplement",
+    "--gate"
+  ],
+  "name": "gate_release",
+  "started_epoch": 1790491843.6242635,
+  "timeout_seconds": null
+}

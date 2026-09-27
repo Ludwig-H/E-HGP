@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-collective-20260927_sanitize/mhgp9_audit_q34_collective",
+    "--gate"
+  ],
+  "ended_epoch": 1790491269.0761237,
+  "exit_code": 1,
+  "group_closed": true,
+  "name": "gate_sanitize",
+  "pid": 4594,
+  "started_epoch": 1790491268.3332224,
+  "stderr_sha256": "924472a5b50480ad8fc93f9184b6259ee614dcba65022f921177d57735e20094",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": null
+}

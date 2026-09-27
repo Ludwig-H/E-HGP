@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-collective-r2-20260927_release/mhgp9_audit_q34_collective",
+    "--synthetic",
+    "uniform",
+    "32000",
+    "5",
+    "8"
+  ],
+  "name": "measure_uniform_32000",
+  "started_epoch": 1790491701.3639476,
+  "timeout_seconds": null
+}

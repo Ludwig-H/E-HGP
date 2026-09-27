@@ -1,5 +1,23 @@
 # Passation v9
 
+## Arène collective et FULL linéaire — 27 septembre, nouvelle clôture
+
+[Résultats et décisions](docs/ARENE_COLLECTIVE_ET_FULL_LINEAIRE_20260927.md).
+Les facteurs q34 sont préparés une seule fois dans six buffers collectifs.
+LiDAR00 : capacité finale 29,328 Mo, pic des tableaux d'un constructeur
+41,661 Mo, W1/W4 524,64/276,66 ms locaux partagés ; mêmes crédits et E.
+Dix mesures 8k/16k/32k et une trame, 23 commandes closes, Release/sanitizers.
+Petits lots plus lents en W4 ; résidu amas quasi quadratique inchangé.
+R1 ptrace conservé ; défaut de couverture du refus ordinal traité par un
+complément séparé, sans modifier les sources gelées.
+
+Le FULL sans continuation passe 19 294 comparaisons par build et quatre
+mutants. Voie linéaire, 16A octets temporaires ; sinon repli général.
+Sur vrais drafts LiDAR00, sommes médianes K natif/prototype 168,12/171,08 ms :
+ne pas l'activer comme gain CPU. Il prépare une réduction minimum et un
+scatter parallèles, mais aucun thread/GPU de cet encodeur n'est qualifié.
+Reçus et revues indépendantes liés au bilan. Moteur inchangé, GCP non utilisé.
+
 ## Lignes ordonnées et vraie charge FULL — 27 septembre, suite suivante
 
 [Synthèse et décisions](docs/ORDRE_ET_VRAIS_DRAFTS_20260927.md).

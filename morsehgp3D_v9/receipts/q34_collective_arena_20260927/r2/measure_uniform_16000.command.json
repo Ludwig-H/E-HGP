@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-collective-r2-20260927_release/mhgp9_audit_q34_collective",
+    "--synthetic",
+    "uniform",
+    "16000",
+    "5",
+    "8"
+  ],
+  "ended_epoch": 1790491701.3629136,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "measure_uniform_16000",
+  "pid": 121179,
+  "started_epoch": 1790491681.3222451,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "91dcee3ae63d0b1d7dab2b4283002307d507f9a8cfef68e3aa82da8a865946d2",
+  "timeout_seconds": null
+}

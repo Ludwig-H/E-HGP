@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "uname",
+    "-a"
+  ],
+  "name": "system",
+  "started_epoch": 1790491839.5475342,
+  "timeout_seconds": null
+}

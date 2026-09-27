@@ -1,5 +1,19 @@
 # État courant des audits v9
 
+**27 septembre — arène collective et FULL linéaire** :
+[synthèse](../docs/ARENE_COLLECTIVE_ET_FULL_LINEAIRE_20260927.md),
+[arène](b_q34_collective_arena_20260927/README.md),
+[FULL first-parent](b_full_first_parent_20260927/README.md),
+[vrais drafts](b_full_first_real_drafts_20260927/README.md).
+L'arène produit six buffers, 29,328 Mo finaux sur LiDAR00 contre 101,118 Mo
+pour les plans directs ; préparation partagée W1/W4 testée, E inchangé.
+Les amas restent quasi quadratiques en résidu. Les tests initiaux de refus
+ne distinguaient pas causalement le mauvais ordinal ; complément séparé.
+Le raccourci FULL conserve objets et refus, sans tri lorsque chaque action
+crée un nœud. Mesure CPU LiDAR négative/neutre : 168,12→171,08 ms en sommes
+des médianes par ordre, pas gain FULL. Bases pour port parallèle, pas
+activation moteur ; GCP non utilisé, 100 ms non acquis.
+
 **27 septembre — ordre natif et vrais drafts FULL** :
 [bilan](../docs/ORDRE_ET_VRAIS_DRAFTS_20260927.md),
 [lignes ordonnées](b_q34_ordered_rows_20260927/README.md),

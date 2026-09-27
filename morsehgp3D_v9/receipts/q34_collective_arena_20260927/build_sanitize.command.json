@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-audit-q34-collective-20260927_sanitize",
+    "--target",
+    "mhgp9_audit_q34_collective",
+    "-j",
+    "2"
+  ],
+  "ended_epoch": 1790491268.3326297,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "build_sanitize",
+  "pid": 4572,
+  "started_epoch": 1790491255.4964297,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "f8d476b1c8d05dc5c03a777e989ef6f4ee9ca432d6978eb42a48c69de2ff24f4",
+  "timeout_seconds": null
+}

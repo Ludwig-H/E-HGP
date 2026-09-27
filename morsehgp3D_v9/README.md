@@ -2,6 +2,12 @@
 
 Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 
+Suite actuelle du 27 septembre : [arène collective et FULL linéaire](docs/ARENE_COLLECTIVE_ET_FULL_LINEAIRE_20260927.md).
+Six buffers collectifs q34, mêmes crédits/résidu, capacité LiDAR00
+101,118→29,328 Mo ; dix mesures locales W1/W4. Le raccourci FULL sans
+continuations est qualifié et mesuré, mais ne gagne pas sur LiDAR en CPU
+scalaire. Priorité au raccord parallèle ; moteur/GPU encore inchangés.
+
 Suite du 27 septembre : [ordre natif et vrais drafts FULL](docs/ORDRE_ET_VRAIS_DRAFTS_20260927.md).
 Une nouvelle représentation partage des listes B ordonnées par classe A,
 pour éviter le tri final des survivants. 15 mesures et portes locales passent.
