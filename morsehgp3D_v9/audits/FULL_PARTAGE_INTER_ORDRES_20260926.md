@@ -183,6 +183,19 @@ premier thread fautif ; aucune lecture indirecte avant contrôle de domaine.
 La sortie est transactionnelle. Les doublons au même plateau, continuation
 après fusion et parent créé dans le même lot doivent être rejetés.
 
+Précision de reprise du 27 septembre : « la fusion est la dernière
+utilisation » caractérise les entrées acceptées, mais ne localise pas
+correctement la première erreur. Si une fusion est suivie d'un réemploi,
+la fusion reste valide : marquer le **premier réemploi après elle**.
+Pour deux incidences au même lot, marquer la seconde dans l'ordre canonique.
+Réduire ensuite selon lot, en-tête avant actions, numéro d'action et ordre
+des contrôles locaux. Sinon un traitement parallèle peut retourner une
+autre cause que le constructeur actuel, surtout sur plusieurs corruptions.
+La même valeur rationnelle doit conserver ses mots/son dénominateur à
+l'écriture ; normaliser les niveaux changerait la représentation publique.
+Le prototype non commis du worktree temporaire disparu n'est pas une
+qualification héritée : cette couture reste à implémenter et rejuger.
+
 Un premier sidecar peut appliquer ce nouvel encodeur **au draft du produit**,
 sans attendre un nouveau MSF. Comparer littéralement sa sortie et ses refus
 à `build_from()` isole le problème. Une fois qualifié, A pourra alimenter

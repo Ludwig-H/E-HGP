@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-bands-r2-20260927_release/mhgp9_audit_q34_bands",
+    "--frame",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le",
+    "5",
+    "8"
+  ],
+  "ended_epoch": 1790487978.5211723,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "measure_ng_00_full",
+  "pid": 38584,
+  "started_epoch": 1790487960.2232845,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "9aa215f06f39d957b0168d96877ebd5217754ae19a6839c0f406084977c264fc",
+  "timeout_seconds": null
+}

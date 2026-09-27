@@ -1,0 +1,10 @@
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/full_coverage_certificate.hpp:272:35: runtime error: shift exponent 32 is too large for 32-bit type 'u32' (aka 'unsigned int')
+    #0 0x5f3eb17f4ea7 in mhgp9::tower::full_coverage_detail::all_shell(mhgp9::tower::FullCoveragePopulation const&) /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/full_coverage_certificate.hpp:272:35
+    #1 0x5f3eb17f4ea7 in mhgp9::tower::FullCoverageBuildResult mhgp9::tower::full_coverage_detail::build_from<mhgp9::tower::full_coverage_detail::BatchVectorSource>(unsigned int, std::shared_ptr<mhgp9::tower::FullCoveragePopulations const>, mhgp9::tower::full_coverage_detail::BatchVectorSource const&) /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/full_coverage_certificate.hpp
+    #2 0x5f3eb17e970b in mhgp9::tower::build_full_coverage_certificate(unsigned int, std::shared_ptr<mhgp9::tower::FullCoveragePopulations const>, std::span<mhgp9::tower::FullCoverageBatch const, 18446744073709551615ul>) /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/full_coverage_certificate.hpp:402:10
+    #3 0x5f3eb17e7553 in main /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_population_alias_20260927/repro.cpp:53:28
+    #4 0x7474b7b611c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x7474b7b6128a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x5f3eb170a4f4 in _start (/workspaces/E-HGP/build/v9-audit-population-alias-20260927/sanitize+0x314f4) (BuildId: e5a9a91f02d89e6fdba6a1c875716665571fda06)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/full_coverage_certificate.hpp:272:35 

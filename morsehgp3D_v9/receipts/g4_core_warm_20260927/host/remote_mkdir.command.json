@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "/home/codespace/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "ssh",
+    "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-b",
+    "--quiet",
+    "--ssh-key-file=/workspaces/E-HGP/build/v9-g4-core-session-r2-20260927/id_ed25519",
+    "--ssh-key-expiration=2026-09-27T06:54:45.532459Z",
+    "--ssh-flag=-n",
+    "--ssh-flag=-o BatchMode=yes",
+    "--ssh-flag=-o ConnectTimeout=15",
+    "--command=umask 077; mktemp -d /tmp/ehgp-tower-v9-4e3fa578d9c95e0b.XXXXXXXXXX"
+  ],
+  "ended_epoch": 1790487978.6669014,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "remote_mkdir",
+  "pid": 38754,
+  "started_epoch": 1790487973.909137,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e0c663df57af15f5ab219a936784fd187f6aa36e7d72a51c14719dd1cd43974d",
+  "timeout_seconds": 90
+}

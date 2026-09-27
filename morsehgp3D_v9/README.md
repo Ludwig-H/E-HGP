@@ -2,6 +2,13 @@
 
 Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 
+Dernière reprise, 27 septembre : [bilan et décisions de développement](docs/REPRISE_DEV_20260927.md).
+Bandes q34 vérifiées (descripteurs LiDAR 34,810→4,913 Mo, pas encore de
+gain FULL) et nouvelle G4 SPOT close : le filtre diamétral économise
+environ 53 ms à chaud, chaîne K5 à 923 ms sur une trame sans sol.
+100 ms reste ouvert. Le défaut d'alias de la banque publique FULL est
+reproduit et documenté ; aucun changement moteur dans cette tranche.
+
 Dernière tranche du 26 septembre : [plans q3/q4 par facteurs](receipts/q34_factor_plan_20260926/README.md).
 Le prototype enlève 53–61 % des paires sur trois trames sans sol K5,
 avant leur développement, sans produire la tour. 24 mesures locales,

@@ -18,6 +18,15 @@ parents FULL (liste ciblée dans le [rapport 15](audit_v8/15_entrees_v8_non_lues
 
 ## Objet et mathématiques
 
+27 septembre : [mesure G4 core/chaud](../receipts/g4_core_warm_20260927/README.md).
+Supprimer le préfiltre diamétral n'allège pas la chaîne sur 00/K5/s8 :
+923,417→975,936 ms à chaud. La chauffe seule économise environ 20 ms,
+pas le facteur neuf vers 100 ms. Fermeture expérimentale limitée à ce cas.
+Les [bandes](../receipts/q34_bands_20260927/README.md) réduisent le stockage,
+mais ni E ni son exposant : ne pas les présenter comme un nouveau rejet.
+Enfin, déplacer un vecteur dans une banque constante n'en efface pas les
+alias ; [fixture publique FULL](../audits/b_population_alias_20260927/README.md).
+
 Compléments expérimentaux du 26 septembre, sans fermeture abusive des
 architectures voisines : voir [les quatre prototypes 100 ms](../audits/AUDIT_B_GAINS_STRUCTURELS_100MS_20260926.md).
 Un compte arbitraire accompagné d'IDs tous valides ne prouve pas la

@@ -1,0 +1,77 @@
+{
+  "GCP_used": false,
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_bands_20260927/run.py",
+        "--readback",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/q34_bands_20260927/r2"
+      ],
+      "exit_code": 0,
+      "name": "normal",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "7619fe16c00c24c96efe25e3f14a50e5ebe819d99118d7988ce55f1ddc3f0695"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_bands_20260927/run.py",
+        "--readback",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/q34_bands_20260927/r2"
+      ],
+      "exit_code": 0,
+      "name": "optimized",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "7619fe16c00c24c96efe25e3f14a50e5ebe819d99118d7988ce55f1ddc3f0695"
+    }
+  ],
+  "mutations": [
+    {
+      "cause": "full command inventory",
+      "name": "missing_command",
+      "rejected": true
+    },
+    {
+      "cause": "command recipe/closure",
+      "name": "wrong_argv",
+      "rejected": true
+    },
+    {
+      "cause": "command recipe/closure",
+      "name": "wrong_exit",
+      "rejected": true
+    },
+    {
+      "cause": "command recipe/closure",
+      "name": "open_group",
+      "rejected": true
+    },
+    {
+      "cause": "LIVE dependency closure",
+      "name": "wrong_source",
+      "rejected": true
+    },
+    {
+      "cause": "recipe and input mapping",
+      "name": "wrong_input",
+      "rejected": true
+    },
+    {
+      "cause": "closed local capture",
+      "name": "false_gpu",
+      "rejected": true
+    },
+    {
+      "cause": "closed local capture",
+      "name": "unclosed_capture",
+      "rejected": true
+    }
+  ],
+  "runner_sha256": "f4bf831a6027c0583ef1d9e920ed3937d6a171a7a83fbfe8cd386bb5413873d5",
+  "self_sha256": "2ad9af358281348d1004ea37c1b76998344ebd06d0f8b133d07da04d450f94fd",
+  "status": "PASS"
+}

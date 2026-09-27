@@ -1,5 +1,21 @@
 # Passation v9
 
+## Reprise et publication DEV — 27 septembre
+
+Lire [le bilan actuel](docs/REPRISE_DEV_20260927.md) avant les tranches
+ci-dessous. Bandes q34 reconstruites/qualifiées après perte du worktree
+temporaire : 23 commandes closes, dix mesures, normal/−O et mutants.
+Sur LiDAR00, −85,9 % de capacité des descripteurs mais +49,4 ms CPU
+de préparation dans le prototype différentiel ; pas de port aveugle.
+L'encodeur FULL non publié n'est plus accessible et reste à reconstruire.
+
+G4 core ON/OFF close : 18 passages FULL, trois digests identiques,
+923,417 contre 975,936 ms à chaud, une seule trame K5/s8/W48 sans sol.
+Conserver core ON. VM arrêtée après 248,353 s d'allocation. Le défaut
+public d'alias de banque FULL est reproduit, sans impact interne G4
+démontré. Moteur et protocole inchangés ; tous les nouveaux travaux et
+preuves sont dans les dossiers datés du 27, builds précédents préservés.
+
 ## Plans q34 éprouvés — 26 septembre, après la campagne q3
 
 Le [prototype par facteurs](audits/b_q34_factor_plan_20260926/README.md)

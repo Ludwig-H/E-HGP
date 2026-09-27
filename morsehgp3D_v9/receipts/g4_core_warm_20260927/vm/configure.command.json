@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "/usr/bin/cmake",
+    "-S",
+    "/tmp/ehgp-tower-v9-4e3fa578d9c95e0b.jLEtLeGGhi/source/morsehgp3D_v9",
+    "-B",
+    "/tmp/ehgp-tower-v9-4e3fa578d9c95e0b.jLEtLeGGhi/output/build",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DBOOST_ROOT=/usr",
+    "-DCMAKE_CXX_COMPILER=/usr/bin/g++",
+    "-DMHGP9_ENABLE_CUDA=ON",
+    "-DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc"
+  ],
+  "cwd": "/tmp/ehgp-tower-v9-4e3fa578d9c95e0b.jLEtLeGGhi/output",
+  "elapsed_seconds": 2.1670873440000094,
+  "ended_utc": "2026-09-27T05:46:40.277522+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 1817,
+  "session_work_deadline_epoch": 1790489497.3996205,
+  "started_utc": "2026-09-27T05:46:38.110408+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "c2cfbdb5557c68f2dedcd8a88a040f47192057facfc0884abc2030899e156f98"
+}

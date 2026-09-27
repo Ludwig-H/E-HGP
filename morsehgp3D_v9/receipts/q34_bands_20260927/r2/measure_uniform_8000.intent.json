@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-bands-r2-20260927_release/mhgp9_audit_q34_bands",
+    "--synthetic",
+    "uniform",
+    "8000",
+    "5",
+    "8"
+  ],
+  "name": "measure_uniform_8000",
+  "started_epoch": 1790487863.3533359,
+  "timeout_seconds": null
+}

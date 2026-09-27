@@ -1,5 +1,22 @@
 # État courant des audits v9
 
+**27 septembre — publication des prototypes et G4 close** :
+[bilan DEV](../docs/REPRISE_DEV_20260927.md),
+[bandes q34](b_q34_bands_20260927/README.md),
+[G4 core/résident](../receipts/g4_core_warm_20260927/README.md),
+[défaut d'alias public FULL](b_population_alias_20260927/README.md).
+Bandes : 18 928 cas, 4,46 M paires, Release/sanitizers/mutants, dix mesures ;
+capacité descripteurs LiDAR −85,9 %, résidu inchangé et +49,4 ms CPU dans
+le prototype conservant les anciens plans. Deux contrelectures sans défaut
+mathématique trouvé. Ni arène ni raccord GPU encore implémentés.
+G4 : ON 923,417 ms contre OFF 975,936 ms à chaud, même tour K5 explicite,
+18 passages jugés, une trame. Conserver le préfiltre diamétral. Arrêt exact
+certifié, allocation 248,353 s. Les 100 ms et sous-quadratique global
+restent ouverts. Alias : factory publique déplaçant les lignes mutable
+via anciens pointeurs ; correctif à porter, pas d'impact interne démontré.
+Les prototypes non publiés du worktree `/tmp` disparu ne sont pas promus ;
+les nouvelles preuves bandes/alias ont été reconstruites et datées du 27.
+
 **Plans par facteurs et FULL, 26 septembre après 21 h UTC** :
 [preuve et prototype](b_q34_factor_plan_20260926/README.md),
 [capture locale](../receipts/q34_factor_plan_20260926/README.md),

@@ -1,5 +1,29 @@
 # Coordination Morse HGP 3D v9
 
+### 27 septembre — DEV : bandes publiables, G4 core utile, cible libérée
+
+Base `ddf4776d7`, [bilan de reprise](../morsehgp3D_v9/docs/REPRISE_DEV_20260927.md).
+Utilisateur autorise de publier les prototypes vérifiés en développeur.
+Bandes disjointes q34 : correction/sanitizers/mutants validés, mémoire de
+descripteurs réduite sur LiDAR ; pas de gain FULL ni de port moteur implicite.
+Deux lectures indépendantes de `bands.hpp`/gate ne trouvent pas de défaut.
+**Suite acceptée :** arène collective directement depuis les facteurs,
+sans anciennes cellules, puis ordre/masques/GPU et mesure FULL appariée.
+Ne pas annoncer la correction du régime amas : son E reste inchangé.
+
+La G4 SPOT ciblée a exécuté six processus, 18 passages FULL K5 sur 00,
+core ON/OFF et témoins CPU ; objets identiques. ON gagne ~53 ms à chaud,
+923,417 contre 975,936 ms. Génération 05:45:14,960 UTC arrêtée à
+05:49:23,313 UTC, `TERMINATED` relu ; la cible est libérée.
+**Décision DEV :** conserver core ; le passage chaud n'apporte pas ×9.
+
+**Correctif public à porter :** la banque FULL déplacée conserve les alias
+mutables de l'appelant. Voir le reproducer daté du 27. Le constructeur
+interne privé ne montre pas cet alias ; ne pas invalider les G4 sans preuve.
+Préserver l'adoption rapide uniquement derrière une vraie frontière privée.
+Moteur/protocole inchangés ici. Le worktree temporaire précédent a disparu ;
+bandes et alias reconstruits, encodeur FULL non publié à reconstruire.
+
 ### 26 septembre, après 21 h UTC — reprise DEV : plan q34 mesuré, pas de port aveugle
 
 Base `92c709bc8`. [Capture](../morsehgp3D_v9/receipts/q34_factor_plan_20260926/README.md)

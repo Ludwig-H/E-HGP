@@ -1,0 +1,113 @@
+{
+  "status": "completed",
+  "pins_before": {
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_population_alias_20260927/repro.cpp": "5d3a7f830777b4b80407e6ada679191cfff8cbbc226de61bf7fd36ee6767246b",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_population_alias_20260927/run.py": "ade7531c76db550948bc433927d9c480306b4687234ad5937bd05e90fa8369b6",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/common/raw_vector.hpp": "f0923da448a945ac49ebd6ce787f52615a5df79782689536004fe0f97da5b4d7",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/core/device.hpp": "741377a5f8c0599754116a2426b71daf0a355eb89cae1403cdc08544ac0ae46e",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/core/intmath.hpp": "28a1fc6279e3b449c4bb6e47a1e6168a4dcf19a16210ab27f564723ba900e52e",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/core/mutants.hpp": "50c7c50e36f401ef323917df0ba1d0546f9ce09bb4138fb8051ca45ceadcab9a",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/core/types.hpp": "3ab5e0378b8b2bf5a24a3594ae64f37e7f5fa29a72abf335225b2c2ff4c97d6d",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/core/wide.hpp": "877ba8c4bd045c023f3cd64e8f7fc5edf0d074bfd0c5fac9510306e06f5f387e",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/full_certificate.hpp": "fd36213350637ce29ddf0b36f1a9fb36850185907245fd87a59bc1031a1a8342",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/full_coverage_certificate.hpp": "8259a3cb8110a9dd8333eaf48455def03bc886014d869f5fcf499898615a7a62",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/lanes/keys.hpp": "919f9713ba08a2f061a90b87f6b38228fb97575f3419793046fbe3c04ce933fa",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/lanes/level.hpp": "4acd8df236721d4158527421400c1a44a37687807be15b66e17d2bf689c5f980",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/parallel/pool.hpp": "058a94d90d58a1d612bfc1cd28409a260d723de937d7b982a94e912c25d45867",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/build_sanitize.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/build_release.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/dependencies_release.stdout": "78c8f84a0b9d9c136900a2cbe8dba665b133dd98644587329465709dec12a3c4",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/version_release.stdout": "88b7c4b67564a146863224148116065fee418539f0a408f3636a68f3bde51805",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/dependencies_sanitize.stdout": "76cf3236b67217ddcc028f94ec872676de59825ceb60db29caa869963aab56a6",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/version_sanitize.stdout": "3635b8631d4ebcd8ed7586f4e01e7a6b44407de9d38db6e01daca9c242ed7a53",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/reproduce_release.stdout": "1f0275d5ee1cd552d1d977280fdf367b2c534296bde6ba2c660bd1a0a51e5c02",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/reproduce_sanitize.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/reproduce_release.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/dependencies_release.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/build_sanitize.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/version_release.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/version_sanitize.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/dependencies_sanitize.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/reproduce_sanitize.stderr": "bd6824f617be740ba75c3b1bdeed7b80b06ffd72e891841963a7bf1c6d3303d6",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/build_release.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/manifest.json": "43c544ddb9a7e857711b36335e8e40364f32769f28b1b9b27ef36f4c068b0476",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_population_alias_20260927/replay.py": "b2125366bc674e817f3393fefdd29b4d706383e0b7d2102e5d9dba524a4ad623",
+    "/workspaces/E-HGP/build/v9-audit-population-alias-20260927/release": "9d0075289f76230dc8d9a316524f0890b5562c3bead37d27d6e590ebb419a39b",
+    "/workspaces/E-HGP/build/v9-audit-population-alias-20260927/sanitize": "8352dc362cfcdcae5762953fe572641d124830c122bce8f3c27a2d5beb01c0c6"
+  },
+  "commands": [
+    {
+      "name": "reproduce_release",
+      "argv": [
+        "/workspaces/E-HGP/build/v9-audit-population-alias-20260927/release"
+      ],
+      "expected_exit": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_s": 0.0025803490007092478,
+      "stdout_sha256": "1f0275d5ee1cd552d1d977280fdf367b2c534296bde6ba2c660bd1a0a51e5c02",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "reproduce_sanitize",
+      "argv": [
+        "/workspaces/E-HGP/build/v9-audit-population-alias-20260927/sanitize"
+      ],
+      "expected_exit": 0,
+      "status": "completed",
+      "exit_code": 0,
+      "wall_s": 0.012224170999616035,
+      "stdout_sha256": "1f0275d5ee1cd552d1d977280fdf367b2c534296bde6ba2c660bd1a0a51e5c02",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "expected_shift_stop",
+      "argv": [
+        "/workspaces/E-HGP/build/v9-audit-population-alias-20260927/sanitize",
+        "--shift"
+      ],
+      "expected_exit": 1,
+      "status": "completed",
+      "exit_code": 1,
+      "wall_s": 0.7657118510005603,
+      "stdout_sha256": "09bcfee21b08e098770f48137dfc0d24210b0c75e21a97c32f18edde7c49546e",
+      "stderr_sha256": "05dc8f594193f8cfb131f83836ba254a37077cb4e43784a2d1320a97dc06b195"
+    }
+  ],
+  "GCP_used": false,
+  "pins_after": {
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_population_alias_20260927/repro.cpp": "5d3a7f830777b4b80407e6ada679191cfff8cbbc226de61bf7fd36ee6767246b",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_population_alias_20260927/run.py": "ade7531c76db550948bc433927d9c480306b4687234ad5937bd05e90fa8369b6",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/common/raw_vector.hpp": "f0923da448a945ac49ebd6ce787f52615a5df79782689536004fe0f97da5b4d7",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/core/device.hpp": "741377a5f8c0599754116a2426b71daf0a355eb89cae1403cdc08544ac0ae46e",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/core/intmath.hpp": "28a1fc6279e3b449c4bb6e47a1e6168a4dcf19a16210ab27f564723ba900e52e",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/core/mutants.hpp": "50c7c50e36f401ef323917df0ba1d0546f9ce09bb4138fb8051ca45ceadcab9a",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/core/types.hpp": "3ab5e0378b8b2bf5a24a3594ae64f37e7f5fa29a72abf335225b2c2ff4c97d6d",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/core/wide.hpp": "877ba8c4bd045c023f3cd64e8f7fc5edf0d074bfd0c5fac9510306e06f5f387e",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/full_certificate.hpp": "fd36213350637ce29ddf0b36f1a9fb36850185907245fd87a59bc1031a1a8342",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/full_coverage_certificate.hpp": "8259a3cb8110a9dd8333eaf48455def03bc886014d869f5fcf499898615a7a62",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/lanes/keys.hpp": "919f9713ba08a2f061a90b87f6b38228fb97575f3419793046fbe3c04ce933fa",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/lanes/level.hpp": "4acd8df236721d4158527421400c1a44a37687807be15b66e17d2bf689c5f980",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/parallel/pool.hpp": "058a94d90d58a1d612bfc1cd28409a260d723de937d7b982a94e912c25d45867",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/build_sanitize.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/build_release.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/dependencies_release.stdout": "78c8f84a0b9d9c136900a2cbe8dba665b133dd98644587329465709dec12a3c4",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/version_release.stdout": "88b7c4b67564a146863224148116065fee418539f0a408f3636a68f3bde51805",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/dependencies_sanitize.stdout": "76cf3236b67217ddcc028f94ec872676de59825ceb60db29caa869963aab56a6",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/version_sanitize.stdout": "3635b8631d4ebcd8ed7586f4e01e7a6b44407de9d38db6e01daca9c242ed7a53",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/reproduce_release.stdout": "1f0275d5ee1cd552d1d977280fdf367b2c534296bde6ba2c660bd1a0a51e5c02",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/reproduce_sanitize.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/reproduce_release.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/dependencies_release.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/build_sanitize.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/version_release.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/version_sanitize.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/dependencies_sanitize.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/reproduce_sanitize.stderr": "bd6824f617be740ba75c3b1bdeed7b80b06ffd72e891841963a7bf1c6d3303d6",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/build_release.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/population_alias_20260927/manifest.json": "43c544ddb9a7e857711b36335e8e40364f32769f28b1b9b27ef36f4c068b0476",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_population_alias_20260927/replay.py": "b2125366bc674e817f3393fefdd29b4d706383e0b7d2102e5d9dba524a4ad623",
+    "/workspaces/E-HGP/build/v9-audit-population-alias-20260927/release": "9d0075289f76230dc8d9a316524f0890b5562c3bead37d27d6e590ebb419a39b",
+    "/workspaces/E-HGP/build/v9-audit-population-alias-20260927/sanitize": "8352dc362cfcdcae5762953fe572641d124830c122bce8f3c27a2d5beb01c0c6"
+  }
+}

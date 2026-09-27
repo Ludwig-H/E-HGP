@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-bands-20260927_release/mhgp9_audit_q34_bands",
+    "--mutant",
+    "mask6"
+  ],
+  "ended_epoch": 1790486572.8719587,
+  "exit_code": 1,
+  "group_closed": true,
+  "name": "mutant_release_mask6",
+  "pid": 155,
+  "started_epoch": 1790486572.869655,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "eacd1d1d0812e8dffb7e651613391bb8c3c54b573f70ee719e521df185d9932e",
+  "timeout_seconds": null
+}

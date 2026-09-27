@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-bands-r2-20260927_release/mhgp9_audit_q34_bands",
+    "--synthetic",
+    "terrain",
+    "16000",
+    "5",
+    "8"
+  ],
+  "ended_epoch": 1790487920.1242914,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "measure_terrain_16000",
+  "pid": 37664,
+  "started_epoch": 1790487918.282564,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "57e9108ee831c1559444bc325de30a6603db17cfae9feea576ccf02b4222e478",
+  "timeout_seconds": null
+}

@@ -1,0 +1,31 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/build/v9-resume-20260927/gcp-migration/tower_session_v9.py",
+    "--snapshot",
+    "/workspaces/E-HGP/build/v9-g4-core-snapshot-20260927/snapshot.tar.gz",
+    "--manifest",
+    "/workspaces/E-HGP/build/v9-g4-core-snapshot-20260927/source_manifest.json",
+    "--worker",
+    "/workspaces/E-HGP/build/v9-resume-20260927/gcp-migration/tower_worker_v9.py",
+    "--snapshot-sha256",
+    "2ccddb90e0e88bb072f7eef4f4b84ae25f3a148850d57bb03914f2c619221e8c",
+    "--manifest-sha256",
+    "71463c8b200d484437e758749899f6f5a2f5f1f560e8a5d48c63a01f4892c03d",
+    "--worker-sha256",
+    "49b096b3a7ef630f122b3577dda1878e69c3e9d2378a6a219c979a906cfb0f2b",
+    "--expected-controller-sha256",
+    "30291a6a99707c0d35ef4d23798af2a335425865e1f9fd1de9f98406adff4def",
+    "--session-dir",
+    "/workspaces/E-HGP/build/v9-g4-core-session-20260927",
+    "--ssh-key",
+    "/workspaces/E-HGP/build/v9-g4-core-session-20260927/id_ed25519",
+    "--gcloud",
+    "/home/codespace/google-cloud-sdk/bin/gcloud",
+    "--execute"
+  ],
+  "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+  "max_wait_before_interrupt_seconds": 600,
+  "wrapper_sha256": "28e3888fb94b71f492b8fa57770a80c496a8e7dd80af49a056a66dcfde0fde34"
+}

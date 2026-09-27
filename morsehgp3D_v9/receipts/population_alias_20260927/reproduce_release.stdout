@@ -1,0 +1,1 @@
+{"schema":"mhgp9_population_alias_audit_v2","status":"reproduced","copy_isolated":true,"move_row_alias_retained":true,"move_point_alias_retained":true,"revalidation_rejects":true,"certified_forest_changed":true,"rebuilt_forest_accepts":true,"before":[0,1],"after":[1,99],"GCP_used":false}
