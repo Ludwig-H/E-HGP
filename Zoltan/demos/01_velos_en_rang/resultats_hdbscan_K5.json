@@ -1,0 +1,163 @@
+{
+ "demo": "01_velos_en_rang",
+ "run": "hdbscan_K5",
+ "method": {
+  "method": "hdbscan",
+  "K": 5
+ },
+ "seq": "08",
+ "frame": "001176",
+ "velodyne_sha256": "2843601f1a174ca647ead5172b6be4a7f93a865c37185b54187c9cc75a03de00",
+ "labels_sha256": "f891e296d95506ab4ce0d7c6c285885c028d41516d002e3b9c3239e6b2b3a8df",
+ "ground": "patchwork_v8",
+ "n_raw": 126267,
+ "n_points_hierarchy": 67114,
+ "convention": "min_samples = K, point compté (scikit-learn) ; min_cluster_size = 1 (arbre non condensé)",
+ "iou": "IoU au sens de la qualité panoptique SemanticKITTI : points void (sem 0, 1, 52, 99) exclus ; arêtes de même poids fusionnées en bloc",
+ "void_points": 1787,
+ "rotation_deg": 105.75,
+ "objects": [
+  {
+   "key": "A",
+   "name": "vélo",
+   "select": {
+    "sem": 11,
+    "inst": 43
+   },
+   "points": 265,
+   "best_iou": 0.6711,
+   "best_level_m": 0.1505,
+   "seed_level_m": 0.0433,
+   "first_match_m": 0.1204,
+   "first_fusion_m": 0.2018,
+   "complete90_m": 0.171,
+   "matched_intervals_m": [
+    [
+     0.1204,
+     0.2018
+    ]
+   ]
+  },
+  {
+   "key": "B",
+   "name": "vélo",
+   "select": {
+    "sem": 11,
+    "inst": 57
+   },
+   "points": 194,
+   "best_iou": 0.4061,
+   "best_level_m": 0.1517,
+   "seed_level_m": 0.0451,
+   "first_match_m": null,
+   "first_fusion_m": 0.171,
+   "complete90_m": 0.171,
+   "matched_intervals_m": []
+  },
+  {
+   "key": "C",
+   "name": "vélo",
+   "select": {
+    "sem": 11,
+    "inst": 56
+   },
+   "points": 207,
+   "best_iou": 0.7536,
+   "best_level_m": 0.1473,
+   "seed_level_m": 0.0487,
+   "first_match_m": 0.1453,
+   "first_fusion_m": 0.2018,
+   "complete90_m": 0.2017,
+   "matched_intervals_m": [
+    [
+     0.1453,
+     0.2018
+    ]
+   ]
+  }
+ ],
+ "branch_merges_m": [
+  {
+   "level": 0.171,
+   "objects": [
+    "A",
+    "B"
+   ]
+  },
+  {
+   "level": 0.2018,
+   "objects": [
+    "A",
+    "B",
+    "C"
+   ]
+  }
+ ],
+ "best_common_cut": {
+  "matched_objects": 2,
+  "level": 0.1453,
+  "until": 0.2018
+ },
+ "sweep_best_iou": {
+  "hdbscan_K": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10
+  ],
+  "hdbscan": [
+   [
+    0.6585,
+    0.6585,
+    0.6483,
+    0.6411,
+    0.6711,
+    0.6578,
+    0.6433,
+    0.5762,
+    0.5774,
+    0.6211
+   ],
+   [
+    0.4116,
+    0.4116,
+    0.4113,
+    0.4163,
+    0.4061,
+    0.3991,
+    0.3955,
+    0.3965,
+    0.4,
+    0.4044
+   ],
+   [
+    0.6461,
+    0.6461,
+    0.6352,
+    0.6258,
+    0.7536,
+    0.7488,
+    0.7198,
+    0.6333,
+    0.6346,
+    0.6358
+   ]
+  ],
+  "alpine_bev": [
+   0.906,
+   0.8206,
+   0.8889
+  ]
+ },
+ "levels_shown_m": {
+  "min": 0.0347,
+  "max": 0.222
+ },
+ "crop_points": 2117
+}

@@ -1,0 +1,169 @@
+{
+ "demo": "03_pieton_contre_facade",
+ "run": "alpine_bev",
+ "method": {
+  "method": "alpine_bev",
+  "k": 32,
+  "video": false
+ },
+ "seq": "08",
+ "frame": "000048",
+ "velodyne_sha256": "6b3c08eb1b21a0256faeb9204c1b32090f0b7fd0f925e175cdbbe53ba0e9d2b2",
+ "labels_sha256": "82fceec502675dfcb47d918d351875f6fe785c5370ba93331c4c7bc66e437b18",
+ "ground": "patchwork_v8",
+ "n_raw": 119813,
+ "n_points_hierarchy": 44339,
+ "convention": "ALPINE sans sémantique : kNN 2D (union), arête si distance BEV < t ; arbre du lien simple en t",
+ "iou": "IoU au sens de la qualité panoptique SemanticKITTI : points void (sem 0, 1, 52, 99) exclus ; arêtes de même poids fusionnées en bloc",
+ "void_points": 8950,
+ "rotation_deg": 130.25,
+ "objects": [
+  {
+   "key": "A",
+   "name": "piéton près de la façade",
+   "select": {
+    "sem": 30,
+    "inst": 9
+   },
+   "points": 54,
+   "best_iou": 0.7083,
+   "best_level_m": 0.0689,
+   "seed_level_m": 0.0,
+   "first_match_m": 0.0661,
+   "first_fusion_m": 0.1326,
+   "complete90_m": 0.0689,
+   "matched_intervals_m": [
+    [
+     0.0661,
+     0.1326
+    ]
+   ]
+  },
+  {
+   "key": "B",
+   "name": "piéton isolé",
+   "select": {
+    "sem": 30,
+    "inst": 15
+   },
+   "points": 70,
+   "best_iou": 1.0,
+   "best_level_m": 0.143,
+   "seed_level_m": 0.0,
+   "first_match_m": 0.0378,
+   "first_fusion_m": 0.4156,
+   "complete90_m": 0.0604,
+   "matched_intervals_m": [
+    [
+     0.0378,
+     0.4156
+    ]
+   ]
+  },
+  {
+   "key": "C",
+   "name": "vélo",
+   "select": {
+    "sem": 11,
+    "inst": 24
+   },
+   "points": 50,
+   "best_iou": 0.9804,
+   "best_level_m": 0.3804,
+   "seed_level_m": 0.0,
+   "first_match_m": 0.1862,
+   "first_fusion_m": 0.9223,
+   "complete90_m": 0.3804,
+   "matched_intervals_m": [
+    [
+     0.1862,
+     0.9223
+    ]
+   ]
+  }
+ ],
+ "branch_merges_m": [
+  {
+   "level": 0.4156,
+   "objects": [
+    "A",
+    "B"
+   ]
+  },
+  {
+   "level": 0.9223,
+   "objects": [
+    "A",
+    "B",
+    "C"
+   ]
+  }
+ ],
+ "best_common_cut": {
+  "matched_objects": 2,
+  "level": 0.0661,
+  "until": 0.1326
+ },
+ "sweep_best_iou": {
+  "hdbscan_K": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10
+  ],
+  "hdbscan": [
+   [
+    0.4444,
+    0.4444,
+    0.4444,
+    0.4444,
+    0.4444,
+    0.4444,
+    0.4444,
+    0.4444,
+    0.4444,
+    0.4412
+   ],
+   [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   [
+    0.9804,
+    0.9804,
+    0.9804,
+    0.9804,
+    0.9804,
+    0.9804,
+    0.9804,
+    0.9804,
+    0.9804,
+    0.9804
+   ]
+  ],
+  "alpine_bev": [
+   0.7083,
+   1.0,
+   0.9804
+  ]
+ },
+ "levels_shown_m": {
+  "min": 0.01,
+  "max": 1.0146
+ },
+ "crop_points": 1357
+}

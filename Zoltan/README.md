@@ -21,6 +21,7 @@ public_status=not_claimed
 | --- | --- |
 | [`PolyhedralEncoding/`](PolyhedralEncoding/) | la présentation du 16 septembre 2026 (sources LaTeX et PDF), **conservée telle quelle** ; c'est le seul document antérieur qui survit au nettoyage |
 | [`FoundationModel/`](FoundationModel/) | l'architecture proposée, le contrat de la tour, le jeton, le protocole de test et les risques |
+| [`demos/`](demos/README.md) | vidéos pour les présentations, en thème sombre et clair comme Percolia.com : trames SemanticKITTI où la hiérarchie HDBSCAN (et ALPINE sans sémantique) ne sépare pas des objets voisins, plus un témoin ; aucun résultat Morse HGP 3D revendiqué |
 
 ## L'idée, en une phrase
 
@@ -59,10 +60,14 @@ Le dossier contient des falsificateurs exécutables des coupes et du guidage,
 avec leurs reçus. Il ne contient aucun résultat appris ni exporteur natif qualifié.
 Les chiffres de moteur proviennent des reçus `morsehgp3D_v9/receipts/` ;
 les fixtures abstraites de conception ont une portée distincte et explicite.
+Les démos de [`demos/`](demos/README.md) mesurent seulement des méthodes
+concurrentes (HDBSCAN, ALPINE sans sémantique) sur des trames identifiées.
 
 ## Licences
 
 Le code et la documentation de ce dossier sont sous MIT, comme la racine. Les
 poids pré-entraînés de la lignée Pointcept (Sonata, Concerto, Utonia) sont en
 **CC-BY-NC 4.0** : ils se comparent, ils ne s'importent jamais dans la ligne
-produit. Aucun octet SemanticKITTI n'est versionné ici.
+produit. Aucun octet SemanticKITTI n'est versionné ici. Les vidéos et images
+de `demos/` sont des œuvres dérivées de KITTI / SemanticKITTI (CC BY-NC-SA) ;
+leurs sources de points restent hors dépôt.

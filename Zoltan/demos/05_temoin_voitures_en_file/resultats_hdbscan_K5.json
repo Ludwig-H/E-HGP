@@ -1,0 +1,161 @@
+{
+ "demo": "05_temoin_voitures_en_file",
+ "run": "hdbscan_K5",
+ "method": {
+  "method": "hdbscan",
+  "K": 5,
+  "key": "match_all"
+ },
+ "seq": "08",
+ "frame": "002554",
+ "velodyne_sha256": "cfab4cbbca898c4e0899088d5c706f96d22a01de075ef49f53f2eeb5cef4792d",
+ "labels_sha256": "2d3cee423f63d1d8965debce156faaebb232a8706d7beb1aa116fc635f3d2b19",
+ "ground": "patchwork_v8",
+ "n_raw": 116809,
+ "n_points_hierarchy": 72426,
+ "convention": "min_samples = K, point compté (scikit-learn) ; min_cluster_size = 1 (arbre non condensé)",
+ "iou": "IoU au sens de la qualité panoptique SemanticKITTI : points void (sem 0, 1, 52, 99) exclus ; arêtes de même poids fusionnées en bloc",
+ "void_points": 5942,
+ "rotation_deg": 9.0,
+ "objects": [
+  {
+   "key": "A",
+   "name": "voiture",
+   "select": {
+    "sem": 10,
+    "inst": 169
+   },
+   "points": 1419,
+   "best_iou": 0.8637,
+   "best_level_m": 0.1697,
+   "seed_level_m": 0.0306,
+   "first_match_m": 0.0705,
+   "first_fusion_m": 0.2406,
+   "complete90_m": 0.1984,
+   "matched_intervals_m": [
+    [
+     0.0705,
+     0.2406
+    ]
+   ]
+  },
+  {
+   "key": "B",
+   "name": "voiture",
+   "select": {
+    "sem": 10,
+    "inst": 170
+   },
+   "points": 1199,
+   "best_iou": 0.9835,
+   "best_level_m": 0.3179,
+   "seed_level_m": 0.0334,
+   "first_match_m": 0.0846,
+   "first_fusion_m": 0.8933,
+   "complete90_m": 0.1122,
+   "matched_intervals_m": [
+    [
+     0.0846,
+     0.8933
+    ]
+   ]
+  },
+  {
+   "key": "C",
+   "name": "voiture",
+   "select": {
+    "sem": 10,
+    "inst": 171
+   },
+   "points": 896,
+   "best_iou": 0.9944,
+   "best_level_m": 0.2641,
+   "seed_level_m": 0.0393,
+   "first_match_m": 0.0867,
+   "first_fusion_m": 0.6579,
+   "complete90_m": 0.139,
+   "matched_intervals_m": [
+    [
+     0.0867,
+     0.6579
+    ]
+   ]
+  }
+ ],
+ "branch_merges_m": [
+  {
+   "level": 0.6579,
+   "objects": [
+    "B",
+    "C"
+   ]
+  }
+ ],
+ "best_common_cut": {
+  "matched_objects": 3,
+  "level": 0.0867,
+  "until": 0.2406
+ },
+ "sweep_best_iou": {
+  "hdbscan_K": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10
+  ],
+  "hdbscan": [
+   [
+    0.8735,
+    0.8735,
+    0.8721,
+    0.87,
+    0.8637,
+    0.8614,
+    0.8603,
+    0.8597,
+    0.8307,
+    0.8301
+   ],
+   [
+    0.9835,
+    0.9835,
+    0.9835,
+    0.9835,
+    0.9835,
+    0.9835,
+    0.9835,
+    0.9835,
+    0.9835,
+    0.9835
+   ],
+   [
+    0.9944,
+    0.9944,
+    0.9944,
+    0.9944,
+    0.9944,
+    0.9944,
+    0.9944,
+    0.9944,
+    0.9944,
+    0.9944
+   ]
+  ],
+  "alpine_bev": [
+   0.8809,
+   0.9909,
+   0.9665
+  ]
+ },
+ "levels_shown_m": {
+  "min": 0.0245,
+  "max": 0.9826
+ },
+ "crop_points": 10445
+}

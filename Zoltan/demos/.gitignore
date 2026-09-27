@@ -1,0 +1,6 @@
+# Octets KITTI / SemanticKITTI et coordonnées dérivées : jamais versionnés
+# (licence CC BY-NC-SA ; voir README.md, « Licences »). Tout se régénère
+# avec tools/build_scene.py.
+_cache/
+*/data/
+__pycache__/

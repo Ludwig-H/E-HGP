@@ -1,0 +1,153 @@
+{
+ "demo": "04_velos_en_rang_avec_sol",
+ "run": "hdbscan_K10",
+ "method": {
+  "method": "hdbscan",
+  "K": 10
+ },
+ "seq": "08",
+ "frame": "001176",
+ "velodyne_sha256": "2843601f1a174ca647ead5172b6be4a7f93a865c37185b54187c9cc75a03de00",
+ "labels_sha256": "f891e296d95506ab4ce0d7c6c285885c028d41516d002e3b9c3239e6b2b3a8df",
+ "ground": "none",
+ "n_raw": 126267,
+ "n_points_hierarchy": 126267,
+ "convention": "min_samples = K, point compté (scikit-learn) ; min_cluster_size = 1 (arbre non condensé)",
+ "iou": "IoU au sens de la qualité panoptique SemanticKITTI : points void (sem 0, 1, 52, 99) exclus ; arêtes de même poids fusionnées en bloc",
+ "void_points": 2004,
+ "rotation_deg": 105.75,
+ "objects": [
+  {
+   "key": "A",
+   "name": "vélo",
+   "select": {
+    "sem": 11,
+    "inst": 43
+   },
+   "points": 299,
+   "best_iou": 0.2289,
+   "best_level_m": 0.1209,
+   "seed_level_m": 0.0751,
+   "first_match_m": null,
+   "first_fusion_m": 0.1213,
+   "complete90_m": 0.1995,
+   "matched_intervals_m": []
+  },
+  {
+   "key": "B",
+   "name": "vélo",
+   "select": {
+    "sem": 11,
+    "inst": 57
+   },
+   "points": 218,
+   "best_iou": 0.2431,
+   "best_level_m": 0.163,
+   "seed_level_m": 0.0665,
+   "first_match_m": null,
+   "first_fusion_m": 0.1639,
+   "complete90_m": 0.2159,
+   "matched_intervals_m": []
+  },
+  {
+   "key": "C",
+   "name": "vélo",
+   "select": {
+    "sem": 11,
+    "inst": 56
+   },
+   "points": 223,
+   "best_iou": 0.3139,
+   "best_level_m": 0.1762,
+   "seed_level_m": 0.0785,
+   "first_match_m": null,
+   "first_fusion_m": 0.1772,
+   "complete90_m": 0.2324,
+   "matched_intervals_m": []
+  }
+ ],
+ "branch_merges_m": [
+  {
+   "level": 0.1772,
+   "objects": [
+    "A",
+    "C"
+   ]
+  },
+  {
+   "level": 0.1775,
+   "objects": [
+    "A",
+    "B",
+    "C"
+   ]
+  }
+ ],
+ "best_common_cut": {
+  "matched_objects": 0,
+  "level": null,
+  "until": null
+ },
+ "sweep_best_iou": {
+  "hdbscan_K": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10
+  ],
+  "hdbscan": [
+   [
+    0.3,
+    0.3,
+    0.29,
+    0.2841,
+    0.2207,
+    0.2207,
+    0.2207,
+    0.2007,
+    0.2166,
+    0.2289
+   ],
+   [
+    0.3073,
+    0.3073,
+    0.2982,
+    0.3108,
+    0.2941,
+    0.2798,
+    0.2615,
+    0.2477,
+    0.2511,
+    0.2431
+   ],
+   [
+    0.3612,
+    0.3612,
+    0.348,
+    0.3407,
+    0.3348,
+    0.3274,
+    0.296,
+    0.3318,
+    0.3184,
+    0.3139
+   ]
+  ],
+  "alpine_bev": [
+   0.355,
+   0.382,
+   0.5349
+  ]
+ },
+ "levels_shown_m": {
+  "min": 0.0532,
+  "max": 0.2556
+ },
+ "crop_points": 8624
+}

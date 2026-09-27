@@ -1,0 +1,63 @@
+{
+  "title": "Témoin : voitures garées en file, un même niveau HDBSCAN les sépare",
+  "title_alpine": "Témoin : voitures en file, ALPINE sans sémantique",
+  "catalogue": "trois voitures garées à 0,7–1,2 m l'une de l'autre",
+  "intro": "Vérité terrain : trois voitures garées en file, à 5–9 m du capteur, espacées de 1,2 et 0,7 m (A 1 419 points, B 1 199, C 896).",
+  "description": [
+    "Témoin, pour ne pas surinterpréter les démos précédentes : sur trame sans sol, la hiérarchie HDBSCAN contient les voitures (aucun échec sur les 2 188 voitures d'au moins 50 points du criblage). Ici, un même niveau apparie les trois voitures à la fois.",
+    "Le niveau est choisi avec la vérité terrain : la sélection automatique (EOM) n'est pas évaluée. La vidéo ALPINE montre qu'à son seuil voiture (t = 1,8 m), sans sémantique ni découpage par boîte, les voitures A et B sont déjà fusionnées."
+  ],
+  "seq": "08",
+  "frame": "002554",
+  "sha256": "cfab4cbbca898c4e0899088d5c706f96d22a01de075ef49f53f2eeb5cef4792d",
+  "labels_sha256": "2d3cee423f63d1d8965debce156faaebb232a8706d7beb1aa116fc635f3d2b19",
+  "ground": "patchwork_v8",
+  "runs": [
+    {
+      "method": "hdbscan",
+      "K": 5,
+      "key": "match_all"
+    },
+    {
+      "method": "alpine_bev",
+      "k": 32
+    }
+  ],
+  "objects": [
+    {
+      "key": "A",
+      "name": "voiture",
+      "select": {
+        "sem": 10,
+        "inst": 169
+      }
+    },
+    {
+      "key": "B",
+      "name": "voiture",
+      "select": {
+        "sem": 10,
+        "inst": 170
+      }
+    },
+    {
+      "key": "C",
+      "name": "voiture",
+      "select": {
+        "sem": 10,
+        "inst": 171
+      }
+    }
+  ],
+  "view": {
+    "azimuth": -8,
+    "elevation": 36,
+    "fill": 0.78,
+    "margin_x": 2.5,
+    "margin_y": 2.0,
+    "z_above": 1.0,
+    "point_size": 3.0,
+    "bev_point_size": 2.8,
+    "alpine_to_thresholds": true
+  }
+}

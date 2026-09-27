@@ -1,0 +1,67 @@
+{
+  "title": "Piéton près d'une façade : coupé en deux, puis absorbé",
+  "catalogue": "un piéton près d'une façade et d'un groupe, un piéton isolé, un vélo",
+  "intro": "Vérité terrain : A, un piéton près d'une façade (54 points) ; B, un piéton isolé (70) ; C, un vélo (50) ; à 17–20 m.",
+  "description": [
+    "Trois petits objets à la même distance du capteur. Le piéton A se tient près d'une façade, d'un mobilier (classe « autre objet ») et d'un groupe de piétons en mouvement. À K = 5, la hiérarchie le coupe en deux : à r = 0,305 m, 30 de ses 54 points sont dans un cluster de 762 points (463 « autre objet », 131 piétons en mouvement, 84 bâtiment, 52 trottoir), et les 24 autres forment un nœud pur, son meilleur nœud (IoU 0,44). Le piéton isolé B et le vélo C sont, eux, trouvés (IoU 1,00 et 0,98).",
+    "Le meilleur IoU de A vaut 0,44 pour tout K de 1 à 10. L'échec se répète dans les trames voisines (voir `recherche/`). L'arbre ALPINE en vue de dessus isole A (IoU 0,71) : pas de vidéo ALPINE pour cette scène.",
+    "Scène écartée au passage : en 08/000055, un autre piéton semblait échouer, mais sa boîte de vérité terrain contient un second piéton annoté sans identifiant d'instance, et le meilleur nœud de HDBSCAN recouvre presque exactement leur union. Le cas mêle un vrai rapprochement et une annotation incomplète ; nous l'avons écarté pour ne pas compter un défaut d'annotation comme un échec."
+  ],
+  "seq": "08",
+  "frame": "000048",
+  "sha256": "6b3c08eb1b21a0256faeb9204c1b32090f0b7fd0f925e175cdbbe53ba0e9d2b2",
+  "labels_sha256": "82fceec502675dfcb47d918d351875f6fe785c5370ba93331c4c7bc66e437b18",
+  "ground": "patchwork_v8",
+  "runs": [
+    {
+      "method": "hdbscan",
+      "K": 5
+    },
+    {
+      "method": "hdbscan",
+      "K": 10
+    },
+    {
+      "method": "alpine_bev",
+      "k": 32,
+      "video": false
+    }
+  ],
+  "objects": [
+    {
+      "key": "A",
+      "name": "piéton près de la façade",
+      "select": {
+        "sem": 30,
+        "inst": 9
+      }
+    },
+    {
+      "key": "B",
+      "name": "piéton isolé",
+      "select": {
+        "sem": 30,
+        "inst": 15
+      }
+    },
+    {
+      "key": "C",
+      "name": "vélo",
+      "select": {
+        "sem": 11,
+        "inst": 24
+      }
+    }
+  ],
+  "view": {
+    "azimuth": 20,
+    "elevation": 35,
+    "fill": 0.6,
+    "margin_x": 1.5,
+    "margin_y": 1.5,
+    "z_above": 1.0,
+    "point_size": 4.2,
+    "bev_point_size": 3.2
+  },
+  "key": "absorb"
+}

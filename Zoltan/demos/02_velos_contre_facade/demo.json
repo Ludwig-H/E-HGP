@@ -1,0 +1,65 @@
+{
+ "title": "Vélos contre une façade : HDBSCAN n'isole jamais A ni B",
+ "title_alpine": "Vélos contre une façade : ALPINE sans sémantique n'isole pas B",
+ "catalogue": "trois vélos contre un mur",
+ "intro": "Vérité terrain : trois vélos garés contre une façade, à 8–9 m du capteur (A 52 points, B 98, C 147).",
+ "description": [
+  "Trois vélos rangés contre un mur, peu de points par vélo. HDBSCAN n'isole les vélos A et B pour aucun K de 1 à 10 (au plus 0,36 et 0,24). Le vélo C, lui, est isolé (IoU 0,60 à K = 5, 0,52 à K = 10) : ce qu'il absorbe est surtout du mobilier « autre objet », que l'évaluation panoptique ignore.",
+  "ALPINE sans sémantique n'isole pas B (0,24) et n'isole A et C que de justesse (0,52). Ce qu'il faut regarder : A et B sont encore des fragments quand leurs branches absorbent la façade et se rejoignent."
+ ],
+ "seq": "08",
+ "frame": "000882",
+ "sha256": "67792442be545437694ef0fddbd7ad4fa21bf64430a2c6660f0192c8ba8d8148",
+ "labels_sha256": "1a8f3796062e990e5a0c982664e5974418e8f77fc585b7d51a295a52db988da8",
+ "ground": "patchwork_v8",
+ "runs": [
+  {
+   "method": "hdbscan",
+   "K": 5
+  },
+  {
+   "method": "hdbscan",
+   "K": 10
+  },
+  {
+   "method": "alpine_bev",
+   "k": 32
+  }
+ ],
+ "objects": [
+  {
+   "key": "A",
+   "name": "vélo",
+   "select": {
+    "sem": 11,
+    "inst": 38
+   }
+  },
+  {
+   "key": "B",
+   "name": "vélo",
+   "select": {
+    "sem": 11,
+    "inst": 58
+   }
+  },
+  {
+   "key": "C",
+   "name": "vélo",
+   "select": {
+    "sem": 11,
+    "inst": 59
+   }
+  }
+ ],
+ "view": {
+  "azimuth": 40,
+  "elevation": 50,
+  "fill": 0.6,
+  "margin_x": 1.5,
+  "margin_y": 1.5,
+  "z_above": 0.8,
+  "point_size": 4.2,
+  "bev_point_size": 3.2
+ }
+}

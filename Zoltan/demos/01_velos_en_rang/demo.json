@@ -1,0 +1,65 @@
+{
+ "title": "Vélos garés en rang : HDBSCAN n'isole pas le vélo B",
+ "catalogue": "quatre vélos garés en deux paires ; trois suivis",
+ "intro": "Vérité terrain : vélos garés en deux paires, à 7–9 m du capteur ; A (265 points) et B (194) côte à côte, C (207) derrière.",
+ "description": [
+  "Quatre vélos garés en deux paires sur un trottoir, devant un bâtiment : A et B côte à côte (leurs boîtes de vérité terrain se recouvrent en vue de dessus), C derrière, collé à un quatrième vélo non suivi (instance 55, qui échoue lui aussi).",
+  "Ce qu'il faut regarder : la branche de A absorbe B alors que B n'a jamais été isolé ; A reste apparié (la PQ le compte juste) mais B est perdu, et ce pour tout K de 1 à 10. L'arbre ALPINE en vue de dessus, lui, sépare les trois vélos suivis pour t ∈ [0,096 ; 0,102[ m, six fois sous son seuil vélo : pas de vidéo ALPINE pour cette scène."
+ ],
+ "seq": "08",
+ "frame": "001176",
+ "sha256": "2843601f1a174ca647ead5172b6be4a7f93a865c37185b54187c9cc75a03de00",
+ "labels_sha256": "f891e296d95506ab4ce0d7c6c285885c028d41516d002e3b9c3239e6b2b3a8df",
+ "ground": "patchwork_v8",
+ "runs": [
+  {
+   "method": "hdbscan",
+   "K": 5
+  },
+  {
+   "method": "hdbscan",
+   "K": 10
+  },
+  {
+   "method": "alpine_bev",
+   "k": 32,
+   "video": false
+  }
+ ],
+ "objects": [
+  {
+   "key": "A",
+   "name": "vélo",
+   "select": {
+    "sem": 11,
+    "inst": 43
+   }
+  },
+  {
+   "key": "B",
+   "name": "vélo",
+   "select": {
+    "sem": 11,
+    "inst": 57
+   }
+  },
+  {
+   "key": "C",
+   "name": "vélo",
+   "select": {
+    "sem": 11,
+    "inst": 56
+   }
+  }
+ ],
+ "view": {
+  "azimuth": -15,
+  "elevation": 55,
+  "fill": 0.65,
+  "margin_x": 1.2,
+  "margin_y": 1.2,
+  "z_above": 0.8,
+  "point_size": 4.2,
+  "bev_point_size": 3.2
+ }
+}

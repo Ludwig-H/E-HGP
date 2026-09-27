@@ -1,0 +1,160 @@
+{
+ "demo": "05_temoin_voitures_en_file",
+ "run": "alpine_bev",
+ "method": {
+  "method": "alpine_bev",
+  "k": 32
+ },
+ "seq": "08",
+ "frame": "002554",
+ "velodyne_sha256": "cfab4cbbca898c4e0899088d5c706f96d22a01de075ef49f53f2eeb5cef4792d",
+ "labels_sha256": "2d3cee423f63d1d8965debce156faaebb232a8706d7beb1aa116fc635f3d2b19",
+ "ground": "patchwork_v8",
+ "n_raw": 116809,
+ "n_points_hierarchy": 72426,
+ "convention": "ALPINE sans sémantique : kNN 2D (union), arête si distance BEV < t ; arbre du lien simple en t",
+ "iou": "IoU au sens de la qualité panoptique SemanticKITTI : points void (sem 0, 1, 52, 99) exclus ; arêtes de même poids fusionnées en bloc",
+ "void_points": 5942,
+ "rotation_deg": 9.0,
+ "objects": [
+  {
+   "key": "A",
+   "name": "voiture",
+   "select": {
+    "sem": 10,
+    "inst": 169
+   },
+   "points": 1419,
+   "best_iou": 0.8809,
+   "best_level_m": 0.125,
+   "seed_level_m": 0.0,
+   "first_match_m": 0.0215,
+   "first_fusion_m": 0.2282,
+   "complete90_m": 0.1056,
+   "matched_intervals_m": [
+    [
+     0.0215,
+     0.2282
+    ]
+   ]
+  },
+  {
+   "key": "B",
+   "name": "voiture",
+   "select": {
+    "sem": 10,
+    "inst": 170
+   },
+   "points": 1199,
+   "best_iou": 0.9909,
+   "best_level_m": 0.7044,
+   "seed_level_m": 0.0,
+   "first_match_m": 0.0239,
+   "first_fusion_m": 0.9846,
+   "complete90_m": 0.0583,
+   "matched_intervals_m": [
+    [
+     0.0239,
+     0.9846
+    ]
+   ]
+  },
+  {
+   "key": "C",
+   "name": "voiture",
+   "select": {
+    "sem": 10,
+    "inst": 171
+   },
+   "points": 896,
+   "best_iou": 0.9665,
+   "best_level_m": 0.1308,
+   "seed_level_m": 0.0,
+   "first_match_m": 0.0321,
+   "first_fusion_m": 0.413,
+   "complete90_m": 0.0827,
+   "matched_intervals_m": [
+    [
+     0.0321,
+     0.413
+    ]
+   ]
+  }
+ ],
+ "branch_merges_m": [
+  {
+   "level": 0.9846,
+   "objects": [
+    "A",
+    "B"
+   ]
+  }
+ ],
+ "best_common_cut": {
+  "matched_objects": 3,
+  "level": 0.0321,
+  "until": 0.2282
+ },
+ "sweep_best_iou": {
+  "hdbscan_K": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10
+  ],
+  "hdbscan": [
+   [
+    0.8735,
+    0.8735,
+    0.8721,
+    0.87,
+    0.8637,
+    0.8614,
+    0.8603,
+    0.8597,
+    0.8307,
+    0.8301
+   ],
+   [
+    0.9835,
+    0.9835,
+    0.9835,
+    0.9835,
+    0.9835,
+    0.9835,
+    0.9835,
+    0.9835,
+    0.9835,
+    0.9835
+   ],
+   [
+    0.9944,
+    0.9944,
+    0.9944,
+    0.9944,
+    0.9944,
+    0.9944,
+    0.9944,
+    0.9944,
+    0.9944,
+    0.9944
+   ]
+  ],
+  "alpine_bev": [
+   0.8809,
+   0.9909,
+   0.9665
+  ]
+ },
+ "levels_shown_m": {
+  "min": 0.0112,
+  "max": 2.0
+ },
+ "crop_points": 10445
+}

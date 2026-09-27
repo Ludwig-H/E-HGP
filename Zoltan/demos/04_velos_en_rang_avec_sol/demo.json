@@ -1,0 +1,61 @@
+{
+  "title": "Vélos en rang, sol conservé : HDBSCAN n'en isole aucun",
+  "catalogue": "les trois vélos de 01",
+  "intro": "Vérité terrain : les trois vélos de la démo 01, cette fois sans retirer le sol (126 267 points).",
+  "description": [
+    "La même trame que la démo 01, sol conservé. Chaque vélo touche le trottoir : sa branche absorbe le sol avant d'être complète. Aucun des trois n'est isolé, pour aucun K de 1 à 10, alors que sans sol A et C l'étaient.",
+    "ALPINE est omis : sa projection en vue de dessus suppose le sol retiré (la sémantique le retire dans l'article)."
+  ],
+  "seq": "08",
+  "frame": "001176",
+  "sha256": "2843601f1a174ca647ead5172b6be4a7f93a865c37185b54187c9cc75a03de00",
+  "labels_sha256": "f891e296d95506ab4ce0d7c6c285885c028d41516d002e3b9c3239e6b2b3a8df",
+  "ground": "none",
+  "runs": [
+    {
+      "method": "hdbscan",
+      "K": 5
+    },
+    {
+      "method": "hdbscan",
+      "K": 10
+    }
+  ],
+  "objects": [
+    {
+      "key": "A",
+      "name": "vélo",
+      "select": {
+        "sem": 11,
+        "inst": 43
+      }
+    },
+    {
+      "key": "B",
+      "name": "vélo",
+      "select": {
+        "sem": 11,
+        "inst": 57
+      }
+    },
+    {
+      "key": "C",
+      "name": "vélo",
+      "select": {
+        "sem": 11,
+        "inst": 56
+      }
+    }
+  ],
+  "view": {
+    "azimuth": -30,
+    "elevation": 55,
+    "fill": 0.65,
+    "margin_x": 1.5,
+    "margin_y": 1.5,
+    "z_above": 1.0,
+    "point_size": 3.4,
+    "bev_point_size": 2.4
+  },
+  "key": "absorb"
+}
