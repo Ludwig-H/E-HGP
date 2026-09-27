@@ -1,0 +1,20 @@
+{
+  "gcp-migration/full_probe_session_v7.py": "177b25a0d72150dc331661fdf8da1ccde77ea17fb694d9c6af5b0929755160d8",
+  "gcp-migration/selftest_full_probe_session_v7.py": "764bb9c322695ca3333cb954861a5677d76ab00dff708396216a29cce0e6c389",
+  "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf",
+  "morsehgp3D_v9/audits/b_q34_cuda_session_20260927/session.py": "20e1b9fc6a9aea435ac6876b1eef1723a76750d8f460367fa9ada50ad7fa01a0",
+  "morsehgp3D_v9/audits/b_q34_filtered_resident_20260927/device_cuda.cu": "1a1e8bdbe2976b5377ed5222e06d49484b570f399cb6f8af4a53c50764758737",
+  "morsehgp3D_v9/audits/b_q34_resident_survivors_20260927/device_cuda.cu": "af9259f6104cf0a0f12116af6be2860311b2cc32a989cf6fe70b78529bc86666",
+  "morsehgp3D_v9/audits/b_q34_survivors_compare_20260927/CMakeLists.txt": "0e14ac4d8a2650fa62b1d8e08b06faec010d0f480f704aa70df9dd28bfc3625a",
+  "morsehgp3D_v9/audits/b_q34_survivors_compare_20260927/probe.cpp": "49f49b87a6f6adf98c415fb763775314c02acb3c97fd6725969aba26479f88e8",
+  "morsehgp3D_v9/audits/b_q34_survivors_device_gate_20260927/device_gate.cu": "a944df2dcc8756ef8b1cccc201633318f0aefdc5cff85dc77cc8000b2f6d2bfe",
+  "morsehgp3D_v9/audits/b_q34_survivors_session_20260927/README.md": "f1f053fcdb9fb960ce76564c688a4a7bb7aa5f72d8342d3b12c29779f1ae502e",
+  "morsehgp3D_v9/audits/b_q34_survivors_session_20260927/common.py": "3880781ea4c4ace07806cf00cc7d83c0f500e226a2b20a3a0c9c8d6e5b7fbf55",
+  "morsehgp3D_v9/audits/b_q34_survivors_session_20260927/compile_contract.py": "68e334b2abcbd1e63284d8f9ed0681d36ec31fa50472e4c80d1168424b9d0f11",
+  "morsehgp3D_v9/audits/b_q34_survivors_session_20260927/package.py": "1f6d0522d0ead6d79d1140a62b87592384b8a80e3d6539f4164cf939367fac9e",
+  "morsehgp3D_v9/audits/b_q34_survivors_session_20260927/run_local.py": "59394db48b05510e7e48b925107aa09d8c0a32545d72efd3bd0076fd16a0dd5f",
+  "morsehgp3D_v9/audits/b_q34_survivors_session_20260927/selftest.py": "0a69db99701386df5ec3612914ca648ac32cd8a106d5be5662c7d69e55aafd12",
+  "morsehgp3D_v9/audits/b_q34_survivors_session_20260927/session.py": "55edc13c88fbe484da269f9308413c9b52ae329cb23aebf6cb40c5c29cc6e863",
+  "morsehgp3D_v9/audits/b_q34_survivors_session_20260927/worker.py": "65923c1f3b72e1b986dec82394b7ff108574703de337b9ad931e825c13c37e4a",
+  "morsehgp3D_v9/src/gpu/witness_filter.hpp": "0ab8b3e38205845b39db08cb7245e472042a3ab2aab663492383ce0729c98d1f"
+}

@@ -1,0 +1,85 @@
+{
+  "GCP_used": false,
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_survivors_session_20260927/selftest.py"
+      ],
+      "elapsed_seconds": 3.1569699379997473,
+      "exit_code": 0,
+      "name": "selftest_normal",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "497161141ab6ae11dd56e33c28e1d2cf6d92874960072e14fd58df98413ff482"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_survivors_session_20260927/selftest.py"
+      ],
+      "elapsed_seconds": 3.213562580999678,
+      "exit_code": 0,
+      "name": "selftest_optimized",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "497161141ab6ae11dd56e33c28e1d2cf6d92874960072e14fd58df98413ff482"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/gcp-migration/selftest_full_probe_session_v7.py"
+      ],
+      "elapsed_seconds": 0.11202183699970192,
+      "exit_code": 0,
+      "name": "legacy_normal",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "5843e549a9b5bcd2c81f09dc1131989de8a4b9b525678ebb4a6affe32c189a79"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-resume-20260927/gcp-migration/selftest_full_probe_session_v7.py"
+      ],
+      "elapsed_seconds": 0.11820543700014241,
+      "exit_code": 0,
+      "name": "legacy_optimized",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "5843e549a9b5bcd2c81f09dc1131989de8a4b9b525678ebb4a6affe32c189a79"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_survivors_session_20260927/session.py"
+      ],
+      "elapsed_seconds": 0.06946038899968698,
+      "exit_code": 0,
+      "name": "inert_normal",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a1281806f59c0dde1d9bc513200360d60aa310b31c959d9e2979c2d72afb2f85"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_survivors_session_20260927/session.py"
+      ],
+      "elapsed_seconds": 0.0686087320000297,
+      "exit_code": 0,
+      "name": "inert_optimized",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a1281806f59c0dde1d9bc513200360d60aa310b31c959d9e2979c2d72afb2f85"
+    }
+  ],
+  "measured_data": false,
+  "python_sha256": "0d9afd17e565411cbff3f942ccd0ba7cd2c0a9a623cf00448034b2e50f0220f9",
+  "schema": "mhgp9_q34_survivors_session_v1",
+  "scope": "offline_protocol_only",
+  "status": "passed"
+}

@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/build/v9-resume-20260927/gcp-migration/selftest_full_probe_session_v7.py"
+  ],
+  "elapsed_seconds": 0.11820543700014241,
+  "exit_code": 0,
+  "name": "legacy_optimized",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "5843e549a9b5bcd2c81f09dc1131989de8a4b9b525678ebb4a6affe32c189a79"
+}

@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_survivors_session_20260927/session.py"
+  ],
+  "elapsed_seconds": 0.0686087320000297,
+  "exit_code": 0,
+  "name": "inert_optimized",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "a1281806f59c0dde1d9bc513200360d60aa310b31c959d9e2979c2d72afb2f85"
+}
