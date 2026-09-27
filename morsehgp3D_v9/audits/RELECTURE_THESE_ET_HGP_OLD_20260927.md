@@ -20,6 +20,13 @@ puis une qualification séparée de l'emboîtement des partitions de points.
 Ni retoucher EOM pour gagner sur les exemples connus, ni changer de
 géométrie avant d'avoir isolé cet écart ne serait justifié par ces résultats.
 
+Complément de développement du même jour : la mesure est maintenant portée,
+mais la reconstruction brute par Gabriel s'est révélée fausse sur le pilote.
+E5, déjà archivée en v7, interdit cette lecture de la proposition6.
+Le [raccord corrigé](../experiments/weighted_clustering_20260927/ETAT_COURANT.md)
+conserve les attaches silencieuses vers FULL. La restitution de la mesure
+du chapitre9 ne signifie donc pas recopier une réduction topologique réfutée.
+
 ## 1. Ce que dit réellement le manuscrit
 
 Source : [manuscrit](../../docs/references/MANUSCRIT_THESE_HAUSEUX.pdf).
@@ -63,14 +70,9 @@ Fixons le catalogue contributif `C`, son univers de facettes `F = ∂C`,
 et `z = expZ`. Une facette τ contient K points, une coface σ en contient K+1.
 Pour des rayons strictement positifs :
 
-\[
-S_\tau=\sum_{\sigma\in C,\ \sigma\supset\tau}\rho_\sigma^{-z},\qquad
-T_x=\sum_{\tau\in F,\ x\in\tau}S_\tau,
-\]
-\[
-w_{x\tau}=S_\tau/T_x,\qquad
-m_\tau=\sum_{x\in\tau}w_{x\tau}.
-\]
+$$S_\tau=\sum_{\sigma\in C,\ \sigma\supset\tau}\rho_\sigma^{-z},\qquad T_x=\sum_{\tau\in F,\ x\in\tau}S_\tau.$$
+
+$$w_{x\tau}=S_\tau/T_x,\qquad m_\tau=\sum_{x\in\tau}w_{x\tau}.$$
 
 Tout point couvert distribue une masse totale de 1 entre ses facettes.
 La somme des masses de toutes les facettes vaut le nombre de points couverts.

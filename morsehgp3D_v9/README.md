@@ -2,6 +2,15 @@
 
 Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 
+Développement du 27 septembre : [clustering pondéré raccordé au FULL](experiments/weighted_clustering_20260927/ETAT_COURANT.md).
+Masses du chapitre9, attaches exactes des facettes, condensation et vote sont
+implémentés dans un consommateur distinct. Release/ASan/UBSan :33fixtures,
+1 166coupes exactes ; E5 et les ancres silencieuses du carré incluses.
+Le premier graphe Gabriel naïf a été réfuté et son essai échoué est conservé.
+Campagne gaussienne corrigée en cours, pas encore de scores consolidés.
+Partitions ponctuelles emboîtées et performances industrielles restent séparées.
+Moteur inchangé, GCP non utilisé.
+
 Correction prioritaire du 27 septembre : [thèse relue et HGP-old audité](audits/RELECTURE_THESE_ET_HGP_OLD_20260927.md).
 Les deux campagnes de clustering ci-dessous testent une projection nouvelle,
 pas HGP-Clusterer historique : affectation exclusive avant EOM, au lieu de

@@ -1,5 +1,16 @@
 # État courant des audits v9
 
+**27 septembre — passage développeur, référence pondérée corrigée** :
+[état actif](../experiments/weighted_clustering_20260927/ETAT_COURANT.md),
+[contrelecture des attaches silencieuses](../experiments/weighted_clustering_20260927/AUDIT_SILENT_ATTACHMENTS.md).
+Masses avant quotient, attaches datées FULL, condensation et vote implémentés.
+Premier essai naïf réfuté :26composantes/1racineFULL, aucun score ; échec conservé.
+Le raccord corrigé passe Release/ASan/UBSan,33fixtures et1 166coupes exactes ;
+partitions de facettes comparées à tout Čech, pas seulement couvertures.
+LSan exclu, anciens essais d'environnement archivés. Pilote gaussien corrigé
+en cours ; aucune domination statistique ni hiérarchie ponctuelle emboîtée
+encore qualifiée. Consommateur CPU distinct, moteur inchangé, zéroGCP.
+
 **27 septembre — correction de fidélité à la thèse/HGP-old** :
 [relecture complète des parties I–II](RELECTURE_THESE_ET_HGP_OLD_20260927.md).
 Les scores ci-dessous concernent la projection première couverture, pas

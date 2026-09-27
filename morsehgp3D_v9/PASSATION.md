@@ -1,5 +1,24 @@
 # Passation v9
 
+## Référence pondérée implémentée, attaches silencieuses corrigées — 27 septembre
+
+[État et fichiers actifs](experiments/weighted_clustering_20260927/ETAT_COURANT.md).
+Nouvel export du catalogue complet, masses de facettes avant réduction,
+attaches à la composante FULL fermée au rayon MEB, arbre augmenté, EOM
+pondéré puis vote. Géométrie rationnelle ; décisions statistiques binary64.
+Le premier essai a réintroduit le fold Gabriel réfuté par E5 :26racines
+au lieu d'une sur la première gaussienne. Zéro score produit par cet essai,
+sources et reçu failed conservés. Le nouveau chemin ignore ce graphe et
+réutilise seulement son calcul de masses/votes.
+Qualification corrigée Release et GCC ASan/UBSan :46commandes/capture,
+33fixtures,464facettes,1 166coupes exactes, lecteurs normal/−O passés.
+Ancres sans contribution, plateaux, K10 et C vide à K=n contrôlés.
+LSan non qualifié ; échecs Clang-link/LSan historiques distingués.
+Pilote13scènes n1200/K5/10/m20/50/z1/2 en cours, comparateurs figés.
+Aucun nouveau score global, aucune croissance LiDAR/G4 déduite.
+Le [routage ponctuel emboîté](experiments/weighted_clustering_20260927/PLAN_PARTITIONS_POINTS.md)
+est encore un plan séparé : le vote plat n'en est pas une implémentation.
+
 ## Correction méthodologique après relecture intégrale I–II — 27 septembre
 
 [Audit thèse/HGP-old](audits/RELECTURE_THESE_ET_HGP_OLD_20260927.md).

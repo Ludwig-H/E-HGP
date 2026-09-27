@@ -18,6 +18,14 @@ parents FULL (liste ciblée dans le [rapport 15](audit_v8/15_entrees_v8_non_lues
 
 ## Objet et mathématiques
 
+27 septembre, clustering pondéré : le premier port a réintroduit le graphe
+brut des cofaces Gabriel. Sur n1200/K5 il produit26racines contre1FULL ;
+E5 réfute exactement la réduction. Réparer les masses ne répare pas cette
+topologie : garder les attaches silencieuses des facettes à leur date MEB.
+Une racine artificielle ne corrige pas leurs dates. Les contributions de
+points ne suffisent pas davantage à retrouver les ancres : carréK2,
+fusion sans nouvelle contribution. Voir la [correction implémentée](../experiments/weighted_clustering_20260927/ETAT_COURANT.md).
+
 27 septembre : [mesure G4 core/chaud](../receipts/g4_core_warm_20260927/README.md).
 Supprimer le préfiltre diamétral n'allège pas la chaîne sur 00/K5/s8 :
 923,417→975,936 ms à chaud. La chauffe seule économise environ 20 ms,
