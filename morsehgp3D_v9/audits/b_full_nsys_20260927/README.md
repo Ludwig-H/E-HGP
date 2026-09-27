@@ -13,6 +13,12 @@ G4 arrêtée après157,524s d'allocation. [Reçu](../../receipts/full_nsys_20260
 [bilan et prochaine condition préalable](../../docs/PROFILAGE_AVANT_REFONTE_20260927.md).
 Pas de relance automatique ni de reconstruction implicite.
 
+Audit local complémentaire : l'archive FULL historique exclut explicitement
+`output/build` ; aucun des neuf binaires locaux du même nom n'a le hash
+attendu. Voir le bilan lié ci-dessus. Ne pas relancer R1 inchangé : une
+nouvelle capture doit posséder son artefact durable ou le reconstruire
+et le qualifier explicitement. Les preuves historiques restent intactes.
+
 Le lecteur de R1 est volontairement spécialisé sur cet échec préalable,
 pas sur un futur profilage réussi. Relectures LIVE normal/−O passées ;
 ses tests comptent 3 contrôles positifs et 17 refus ciblés. Les originaux

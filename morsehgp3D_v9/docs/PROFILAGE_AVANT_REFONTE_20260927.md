@@ -39,6 +39,34 @@ qualifiée, sans supposer la présence d'un ancien fichier `/tmp`.
 Cela ne justifie pas de relancer une refonte : la question du chemin
 critique demeure ouverte et le contrat 100 ms reste non atteint.
 
+## Récupération du binaire : audit local complémentaire
+
+Le 27 septembre, après clôture de R1, l'archive FULL historique est relue
+sans extraction ni exécution. SHA256 du `capture.tar.gz` de
+`build/v9-g4-core-session-r2-20260927/tower_v9_host/` :
+`309883ec105ef1d1924576839122f616d9d86c0d35f25cf3f2e8f1e0851f2e64`.
+Ses 135 membres ne contiennent pas le binaire. Ce n'est pas un oubli
+de recherche : la commande archivée et le
+[contrôleur FULL](../../gcp-migration/tower_session_v9.py) excluent
+explicitement `output/build`. Le reçu conserve le hash de l'exécutable,
+pas ses octets ; les snapshots conservent les sources et l'entrée.
+
+La recherche locale trouve neuf fichiers nommés `mhgp9_tower_probe`
+sous `/workspaces/E-HGP/build`, tous de SHA256 différent du binaire
+attendu `3a3798623cf3fa867a1da191580381394bdb48231098155f9c1f3610aee68ab4`.
+L'inspection des listes de 22 archives v9 voisines ne retrouve pas ce
+fichier non plus. Portée limitée à ces emplacements, pas preuve de son
+absence sur tout stockage possible. Un binaire différent ne peut pas
+être substitué silencieusement, même s'il porte le même nom.
+
+**Conséquence pratique :** une nouvelle capture doit apporter un
+exécutable identifié et ses dépendances, ou construire puis qualifier
+son propre artefact, avant de le profiler dans la même session. Ne pas
+reprendre le lanceur R1 inchangé en espérant retrouver l'ancien `/tmp`.
+Cette limite de récupération n'invalide pas les anciens chronos et
+objets jugés ; elle empêche leur réexécution immédiate à partir de
+l'archive seule. Aucun build, téléchargement ni GCP dans cet audit local.
+
 ## Ce qui manque toujours
 
 Les campagnes v9 examinées n'ont aucune capture **Nsight Systems** ou

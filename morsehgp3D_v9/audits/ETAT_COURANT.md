@@ -1,5 +1,16 @@
 # État courant des audits v9
 
+**27 septembre — reprise locale sans nouvelle G4** :
+l'[audit de récupération](../docs/PROFILAGE_AVANT_REFONTE_20260927.md)
+confirme que l'archive FULL exclut `output/build` et que les neuf exécutables
+locaux du même nom ont d'autres hashes. Ne pas relancer Nsight R1 inchangé.
+Les restes WIP Python v29 sont dépassés par le protocole publié ; les sept
+écarts C++ v6 ne sont pas des modifications du FULL v9 mesuré. Travaux
+d'autres acteurs préservés. R23-C demeure une capture historique non
+publiée à son chemin ; les questions séparateur E4 et s8/10/12 GPU sont
+déjà traitées, avec leurs limites, par [R24-B](../receipts/g4_tower_r24b_20260926/README.md).
+Aucun nouveau gain ni résultat de complexité ; moteur et builds inchangés.
+
 **27 septembre — essai Nsight G4 fermé avant profilage** :
 [reçu failed](../receipts/full_nsys_20260927/r1/README.md),
 [bilan](../docs/PROFILAGE_AVANT_REFONTE_20260927.md).

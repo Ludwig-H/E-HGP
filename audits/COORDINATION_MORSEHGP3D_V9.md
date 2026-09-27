@@ -1,5 +1,30 @@
 # Coordination Morse HGP 3D v9
 
+### 27 septembre — audit de reprise : artefacts et travaux résiduels
+
+Relevé sur main `4e25650dc`, sans nouvelle session GCP ni build.
+[Récupérabilité FULL](../morsehgp3D_v9/docs/PROFILAGE_AVANT_REFONTE_20260927.md) :
+l'archive exclut `output/build`, aucun des neuf binaires locaux nommés
+`mhgp9_tower_probe` n'a le hash attendu. Prochaine capture à préparer avec
+son propre exécutable identifié ; ne pas rejouer R1 inchangé.
+
+Les deux worktrees anciens ont été inspectés en lecture seule. Les deux
+WIP Python v29 sont fonctionnellement repris/dépassés dans main ; les sept
+écarts C++ v6 (route C6, permutation, piles census et ordonnanceur) ne
+figurent pas dans le snapshot du FULL v9 mesuré. Aucun de ces fichiers
+n'est effacé, intégré ou jugé qualifié ici. Les 418 fichiers R23-C restent
+dans le worktree de C, non publiés à ce chemin ; ne pas les confondre avec
+une nouvelle campagne. [R24-B](../morsehgp3D_v9/receipts/g4_tower_r24b_20260926/README.md)
+couvre déjà le séparateur E4 et s8/10/12 sur GPU. Une étendue de deux ou
+trois répétitions n'établit pas un seuil garanti de détection à 2 %.
+Le scénario hybride d'ordonnancement R23-C n'est ni un gain observé ni
+un plafond prouvé ; les entrées avec/sans sol viennent de la même trame.
+Les réserves sont consignées sans modifier les fichiers indépendants de C.
+
+Aucun compilateur/test visible aux relevés locaux ; ce constat borné ne
+prouve ni la présence ni l'arrêt d'un développeur sur un autre système.
+Pas de nouvelle qualification mathématique, GPU ou sous-quadratique.
+
 ### 27 septembre — DEV : diagnostic Nsight tenté, pas de refonte lancée
 
 [Protocole](../morsehgp3D_v9/audits/b_full_nsys_20260927/README.md)
