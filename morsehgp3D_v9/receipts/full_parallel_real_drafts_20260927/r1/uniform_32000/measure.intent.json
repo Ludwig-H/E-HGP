@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-full-parallel-real-drafts-20260927-r1/release/mhgp9_full_parallel_real_drafts",
+    "--synthetic",
+    "uniform",
+    "32000"
+  ],
+  "name": "measure",
+  "started_epoch": 1790493212.2478058,
+  "timeout_seconds": 1800
+}

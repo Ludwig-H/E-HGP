@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-arena-waves-20260927_release/mhgp9_q34_arena_waves",
+    "--mutant",
+    "fallback"
+  ],
+  "ended_epoch": 1790493328.7992172,
+  "exit_code": 1,
+  "group_closed": true,
+  "name": "mutant_release_fallback",
+  "pid": 195213,
+  "started_epoch": 1790493328.796378,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "7c6ac4c4af316f53dbbb660330caf9fa469e2b566791e86ae36c25be7470e10e",
+  "timeout_seconds": null
+}

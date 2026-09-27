@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-arena-waves-20260927_sanitize/mhgp9_q34_arena_waves",
+    "--mutant",
+    "fallback"
+  ],
+  "name": "mutant_sanitize_fallback",
+  "started_epoch": 1790493340.5594897,
+  "timeout_seconds": null
+}

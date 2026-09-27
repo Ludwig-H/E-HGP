@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-arena-waves-20260927_sanitize/mhgp9_q34_arena_waves",
+    "--gate"
+  ],
+  "ended_epoch": 1790493340.2135108,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "gate_sanitize",
+  "pid": 195339,
+  "started_epoch": 1790493338.506276,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "1ea024b5ec400adde8207c087cc7b9a27ed8b50d3a84284ad619efef0ddc2a5c",
+  "timeout_seconds": null
+}

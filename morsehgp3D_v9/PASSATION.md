@@ -1,5 +1,24 @@
 # Passation v9
 
+## Parents parallèles et vagues q34 — 27 septembre, suite qualifiée
+
+[Bilan et décisions de port](docs/PARENTS_PARALLELES_ET_VAGUES_Q34_20260927.md).
+Le first-parent est réellement parallèle : 372 entrées/2 232 comparaisons
+par build, Release/sanitizers et TSan passent. Sur vrais drafts LiDAR00,
+natifs/W1/W4 163,973/168,825/120,793 ms en sommes médianes K ; observation
+locale favorable, variable, pas un mur FULL/G4. Uniforme8k/16k/32k testé.
+Le lemme des blocs réguliers explique l'absence de continuations ; ABCZ
+prouve que les supprimer ailleurs perd une contribution malgré une
+topologie inchangée. Conserver détection et repli général.
+
+Consommateur q34 par vagues qualifié : 175 lots/1 050 consommations,
+ordre et masques S identiques au natif, aucune allocation globale P/E.
+Fallbacks entiers, Q non limitant la recherche, tri S toujours payé.
+15 commandes Release/sanitizers closes ; défauts S vide/pic mémoire
+corrigés avant gel. Préparation CPU et port GPU restent ouverts.
+Ne pas activer CPU Pool + GPU S2 comme un gain présumé ; S3/S4 et FULL
+reçoivent le même S. Aucun nouveau GCP ni contrat 100 ms, moteur inchangé.
+
 ## Arène collective et FULL linéaire — 27 septembre, nouvelle clôture
 
 [Résultats et décisions](docs/ARENE_COLLECTIVE_ET_FULL_LINEAIRE_20260927.md).

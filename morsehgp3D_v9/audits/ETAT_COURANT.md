@@ -1,5 +1,19 @@
 # État courant des audits v9
 
+**27 septembre — parents parallèles, continuations et vagues q34** :
+[synthèse](../docs/PARENTS_PARALLELES_ET_VAGUES_Q34_20260927.md),
+[contre-audit](b_parallel_and_waves_review_20260927/README.md),
+[origine des continuations](b_full_continuation_origin_20260927/README.md).
+FULL : vrai W4, refus canoniques et sorties explicites conservés,
+Release/sanitizers/TSan passent. Sommes médianes d'encodage LiDAR00
+natif/W4 163,973/120,793 ms, grande variabilité ; ni mur FULL ni G4.
+Vagues : 175 lots/1 050 consommations, S ordonné identique, scratch Q
+sans tableau global P/E ; les fallbacks ne perdent aucune paire.
+Les deux défauts de S vide et le pic de réallocation ont été corrigés
+avant gel. Les continuations restent nécessaires pour les contributions
+datées même sans changement de topologie. Croissance amas non corrigée,
+moteur inchangé, GCP non utilisé ; décisions de port explicites dans le bilan.
+
 **27 septembre — arène collective et FULL linéaire** :
 [synthèse](../docs/ARENE_COLLECTIVE_ET_FULL_LINEAIRE_20260927.md),
 [arène](b_q34_collective_arena_20260927/README.md),

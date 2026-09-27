@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-audit-full-parallel-real-drafts-20260927-r1/sanitize",
+    "--parallel",
+    "1"
+  ],
+  "ended_epoch": 1790493154.0746207,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "sanitize_build",
+  "pid": 188760,
+  "started_epoch": 1790493108.9693599,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "cfdcb33c3479092b39eee430dffe906677509e7ba80d1f9b85caa2ed0f550cb1",
+  "timeout_seconds": 600
+}

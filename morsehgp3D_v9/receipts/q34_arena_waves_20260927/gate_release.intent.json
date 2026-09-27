@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-arena-waves-20260927_release/mhgp9_q34_arena_waves",
+    "--gate"
+  ],
+  "name": "gate_release",
+  "started_epoch": 1790493328.4036717,
+  "timeout_seconds": null
+}

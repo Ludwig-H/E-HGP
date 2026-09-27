@@ -2,6 +2,14 @@
 
 Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 
+Nouvelle suite du 27 septembre : [parents parallèles et vagues q34](docs/PARENTS_PARALLELES_ET_VAGUES_Q34_20260927.md).
+Le raccourci FULL est maintenant testé en vrai multi-CPU, TSan compris ;
+sur les vrais drafts LiDAR00, encodage natif/W4 163,973/120,793 ms en
+sommes médianes K, pas un mur FULL. Le consommateur q34 épuise E avec
+un scratch de vague Q et retrouve exactement la sortie S native.
+Continuations préservées, reçus et contre-audit publiés ; moteur/GPU
+inchangés, croissance résiduelle et contrat 100 ms toujours ouverts.
+
 Suite actuelle du 27 septembre : [arène collective et FULL linéaire](docs/ARENE_COLLECTIVE_ET_FULL_LINEAIRE_20260927.md).
 Six buffers collectifs q34, mêmes crédits/résidu, capacité LiDAR00
 101,118→29,328 Mo ; dix mesures locales W1/W4. Le raccourci FULL sans

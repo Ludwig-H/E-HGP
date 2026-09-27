@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-full-parallel-real-drafts-20260927-r1/sanitize/mhgp9_full_parallel_real_drafts",
+    "--gate"
+  ],
+  "ended_epoch": 1790493154.150628,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "sanitize_gate",
+  "pid": 189498,
+  "started_epoch": 1790493154.0754864,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "79d26e9c29cf5a6f5ad79b0b6478fe6cafd01bc2bc14d0304ba14008a62d6df5",
+  "timeout_seconds": 600
+}

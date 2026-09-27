@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-continuation-origin-20260927-r2/release/mhgp9_continuation_origin",
+    "--drop-continuations"
+  ],
+  "name": "release_mutant",
+  "started_epoch": 1790492738.7188506,
+  "timeout_seconds": 600
+}

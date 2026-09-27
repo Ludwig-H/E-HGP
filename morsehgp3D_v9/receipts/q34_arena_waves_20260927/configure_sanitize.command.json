@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "cmake",
+    "-S",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_arena_waves_20260927",
+    "-B",
+    "/workspaces/E-HGP/build/v9-audit-q34-arena-waves-20260927_sanitize",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_CXX_COMPILER=clang++",
+    "-DCMAKE_CXX_FLAGS=-Wall -Wextra -Wpedantic -Werror -O1 -g1 -fsanitize=address,undefined -fno-omit-frame-pointer",
+    "-DMHGP9_SOURCE_ROOT=/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9",
+    "-DMHGP9_GEN_LIBRARY=/workspaces/E-HGP/build/v9-q3-payload-sanitize-20260926/libmhgp9_gen.a"
+  ],
+  "ended_epoch": 1790493329.9130301,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "configure_sanitize",
+  "pid": 195216,
+  "started_epoch": 1790493328.8817196,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "b9aa43ebbfc548977638bd49d8ff3031e30a215cf059c37fea31ec5c70ee34f2",
+  "timeout_seconds": null
+}

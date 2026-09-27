@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-arena-waves-20260927_sanitize/mhgp9_q34_arena_waves",
+    "--gate"
+  ],
+  "name": "gate_sanitize",
+  "started_epoch": 1790493338.506276,
+  "timeout_seconds": null
+}

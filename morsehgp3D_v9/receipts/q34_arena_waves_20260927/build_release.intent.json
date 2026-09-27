@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-audit-q34-arena-waves-20260927_release",
+    "--target",
+    "mhgp9_q34_arena_waves",
+    "-j",
+    "2"
+  ],
+  "name": "build_release",
+  "started_epoch": 1790493324.1022446,
+  "timeout_seconds": null
+}

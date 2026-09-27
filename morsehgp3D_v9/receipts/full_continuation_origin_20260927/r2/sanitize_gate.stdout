@@ -1,0 +1,1 @@
+{"schema":"mhgp9_continuation_origin_v1","status":"passed","chains":32,"orders":116,"regular_chains":16,"extended_chains":16,"extended_without_continuation":4,"continuation_actions":16,"fast_comparisons":208,"fallback_comparisons":24,"GCP_used":false}

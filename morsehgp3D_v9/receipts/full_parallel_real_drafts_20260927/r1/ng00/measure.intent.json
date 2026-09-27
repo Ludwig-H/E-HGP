@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-full-parallel-real-drafts-20260927-r1/release/mhgp9_full_parallel_real_drafts",
+    "--frame",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le"
+  ],
+  "name": "measure",
+  "started_epoch": 1790493163.8680801,
+  "timeout_seconds": 1800
+}

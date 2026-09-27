@@ -1,5 +1,25 @@
 # Coordination Morse HGP 3D v9
 
+### 27 septembre — DEV : vrais parents parallèles et consommateur q34 clos
+
+Base `fd1a2c7ee`, [bilan](../morsehgp3D_v9/docs/PARENTS_PARALLELES_ET_VAGUES_Q34_20260927.md).
+FULL multi-CPU qualifié avec TSan ; vrais drafts ng00/uniforme8k/16k/32k
+inchangés. Sommes médianes LiDAR00 natif/W4 163,973/120,793 ms, pas
+mur FULL ni gain stable. **Accepté :** conserver ce levier pour le port
+parallèle ; ne pas remplacer le natif par W1. Lemme régulier et cas ABCZ
+qualifiés : détection des continuations et repli intégral obligatoires.
+
+Vagues q34 : sources gelées, 15 commandes Release/sanitizers et lecteurs
+normal/−O PASS. E épuisé avec Q slots, fallbacks complets, ordre et masques
+S natifs. **Accepté :** correctifs pré-gel S vide/pic mémoire, état d'échec
+pendant remplissage/finalisation et distinction P/E par voie. **Différé :** activation
+moteur/GPU avant port et mesure nette ; la préparation CPU collective
+n'est pas financée par une économie S2 présumée. Le même S continue vers
+S3/S4, donc ni leur croissance ni FULL ne sont résolus par les bandes.
+Question aux prochains ports : vérifier objets, mémoire réelle et mur de
+chaîne avant d'activer, sans réécrire les captures ni reconstruire leurs builds.
+Moteur et protocole inchangés, aucun GCP dans cette tranche.
+
 ### 27 septembre — DEV : arène qualifiée, voie FULL linéaire mesurée
 
 [Bilan](../morsehgp3D_v9/docs/ARENE_COLLECTIVE_ET_FULL_LINEAIRE_20260927.md),

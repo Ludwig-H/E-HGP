@@ -1,0 +1,17 @@
+cmake_minimum_required(VERSION 3.20)
+project(mhgp9_full_parallel_real_drafts LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+find_package(Threads REQUIRED)
+add_executable(mhgp9_full_parallel_real_drafts probe.cpp)
+target_include_directories(mhgp9_full_parallel_real_drafts PRIVATE "${MHGP9_SOURCE_ROOT}/src"
+  "${MHGP9_SOURCE_ROOT}/src/gen" "${MHGP9_SOURCE_ROOT}/tests/gen")
+# No chain or GPU library: their sources are explicitly compiled once in probe.cpp.
+target_link_libraries(mhgp9_full_parallel_real_drafts PRIVATE "${MHGP9_GEN_LIBRARY}" Threads::Threads)
+target_compile_options(mhgp9_full_parallel_real_drafts PRIVATE -Wall -Wextra -Wpedantic -Werror)
+if(MHGP9_AUDIT_SANITIZE)
+  target_compile_options(mhgp9_full_parallel_real_drafts PRIVATE -O1 -g1 -fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=all)
+  target_link_options(mhgp9_full_parallel_real_drafts PRIVATE -fsanitize=address,undefined)
+endif()
+

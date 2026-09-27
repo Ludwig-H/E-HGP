@@ -1,0 +1,357 @@
+{
+  "GCP_used": false,
+  "binaries": {
+    "/workspaces/E-HGP/build/v9-audit-full-parallel-parent-20260927-r2/release": "8d46a94560aad8b4aec9f9d79cf33f1b8373c51d0636968054cdb8b1e8ce0780",
+    "/workspaces/E-HGP/build/v9-audit-full-parallel-parent-20260927-r2/sanitize": "605243a1b0e362319aba29c8f77ac9766037884728ddff22c8d3c60aad327fbd"
+  },
+  "build": "/workspaces/E-HGP/build/v9-audit-full-parallel-parent-20260927-r2",
+  "commands": [
+    {
+      "argv": [
+        "/usr/bin/g++",
+        "--version"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+      "elapsed_s": 0.002012549999562907,
+      "expected_returncode": 0,
+      "extra_env": {},
+      "name": "release_version",
+      "returncode": 0,
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "59d1cbef41d4ae78d5063d525b7aa13d18dc0493ea00537efc19b2ee398cb5a8"
+    },
+    {
+      "argv": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-I",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src",
+        "-MM",
+        "-MT",
+        "gate",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_parallel_parent_20260927/gate.cpp"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+      "elapsed_s": 0.0815180000008695,
+      "expected_returncode": 0,
+      "extra_env": {},
+      "name": "release_dependencies",
+      "returncode": 0,
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a4bf0604d58fdd7c95752b3a5ed06c0396421c1e088cddfc0c389af96b9d97de"
+    },
+    {
+      "argv": [
+        "/usr/bin/g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-I",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src",
+        "-O3",
+        "-DNDEBUG",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_parallel_parent_20260927/gate.cpp",
+        "-latomic",
+        "-o",
+        "/workspaces/E-HGP/build/v9-audit-full-parallel-parent-20260927-r2/release"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+      "elapsed_s": 6.995930467999642,
+      "expected_returncode": 0,
+      "extra_env": {},
+      "name": "release_compile",
+      "returncode": 0,
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-audit-full-parallel-parent-20260927-r2/release"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+      "elapsed_s": 0.5017436190009903,
+      "expected_returncode": 0,
+      "extra_env": {},
+      "name": "release_gate",
+      "returncode": 0,
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "68e0f0864af219ce2ca48b933b3e35c627e1c7c4f8efcac2be939d84b253d2e5"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-audit-full-parallel-parent-20260927-r2/release",
+        "--mutant",
+        "ignore-duplicate"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+      "elapsed_s": 0.002441440001348383,
+      "expected_returncode": 1,
+      "extra_env": {},
+      "name": "release_mutant_ignore-duplicate",
+      "returncode": 1,
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "c6c4405bb3bc3fc62dc4bea561b2eeb092f2a68b832ac279f2b8c536e0869982"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-audit-full-parallel-parent-20260927-r2/release",
+        "--mutant",
+        "first-visited"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+      "elapsed_s": 0.0022762420012441,
+      "expected_returncode": 1,
+      "extra_env": {},
+      "name": "release_mutant_first-visited",
+      "returncode": 1,
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a38a493e90631208a00bf85b9ff70b33e3acf6d346188892fd22987cd091cc8d"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-audit-full-parallel-parent-20260927-r2/release",
+        "--mutant",
+        "last-occurrence"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+      "elapsed_s": 0.0027018450000468874,
+      "expected_returncode": 1,
+      "extra_env": {},
+      "name": "release_mutant_last-occurrence",
+      "returncode": 1,
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "1dc89bc3ff8d5fc2c4fdd2be2841173667bed4ddc7397b6e806d41b03d1768d9"
+    },
+    {
+      "argv": [
+        "/usr/bin/clang++",
+        "--version"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+      "elapsed_s": 0.021399200000814744,
+      "expected_returncode": 0,
+      "extra_env": {},
+      "name": "sanitize_version",
+      "returncode": 0,
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "3635b8631d4ebcd8ed7586f4e01e7a6b44407de9d38db6e01daca9c242ed7a53"
+    },
+    {
+      "argv": [
+        "/usr/bin/clang++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-I",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src",
+        "-MM",
+        "-MT",
+        "gate",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_parallel_parent_20260927/gate.cpp"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+      "elapsed_s": 0.09409561000029498,
+      "expected_returncode": 0,
+      "extra_env": {},
+      "name": "sanitize_dependencies",
+      "returncode": 0,
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a0710a44b1e446fbd18872871b621ac026cc8678310b66a298b264a95bfbf67a"
+    },
+    {
+      "argv": [
+        "/usr/bin/clang++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-pthread",
+        "-I",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src",
+        "-O1",
+        "-g1",
+        "-fsanitize=address,undefined",
+        "-fno-omit-frame-pointer",
+        "-fno-sanitize-recover=all",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_parallel_parent_20260927/gate.cpp",
+        "-latomic",
+        "-o",
+        "/workspaces/E-HGP/build/v9-audit-full-parallel-parent-20260927-r2/sanitize"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+      "elapsed_s": 10.739809926999442,
+      "expected_returncode": 0,
+      "extra_env": {},
+      "name": "sanitize_compile",
+      "returncode": 0,
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-audit-full-parallel-parent-20260927-r2/sanitize"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+      "elapsed_s": 2.4171703529991646,
+      "expected_returncode": 0,
+      "extra_env": {
+        "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+        "LSAN_OPTIONS": "exitcode=23",
+        "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+      },
+      "name": "sanitize_gate",
+      "returncode": 0,
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "68e0f0864af219ce2ca48b933b3e35c627e1c7c4f8efcac2be939d84b253d2e5"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-audit-full-parallel-parent-20260927-r2/sanitize",
+        "--mutant",
+        "ignore-duplicate"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+      "elapsed_s": 0.01446661100089841,
+      "expected_returncode": 1,
+      "extra_env": {
+        "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+        "LSAN_OPTIONS": "exitcode=23",
+        "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+      },
+      "name": "sanitize_mutant_ignore-duplicate",
+      "returncode": 1,
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "c6c4405bb3bc3fc62dc4bea561b2eeb092f2a68b832ac279f2b8c536e0869982"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-audit-full-parallel-parent-20260927-r2/sanitize",
+        "--mutant",
+        "first-visited"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+      "elapsed_s": 0.013994750999700045,
+      "expected_returncode": 1,
+      "extra_env": {
+        "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+        "LSAN_OPTIONS": "exitcode=23",
+        "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+      },
+      "name": "sanitize_mutant_first-visited",
+      "returncode": 1,
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a38a493e90631208a00bf85b9ff70b33e3acf6d346188892fd22987cd091cc8d"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-audit-full-parallel-parent-20260927-r2/sanitize",
+        "--mutant",
+        "last-occurrence"
+      ],
+      "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+      "elapsed_s": 0.01686535099906905,
+      "expected_returncode": 1,
+      "extra_env": {
+        "ASAN_OPTIONS": "detect_leaks=1:halt_on_error=1",
+        "LSAN_OPTIONS": "exitcode=23",
+        "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+      },
+      "name": "sanitize_mutant_last-occurrence",
+      "returncode": 1,
+      "status": "completed",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "1dc89bc3ff8d5fc2c4fdd2be2841173667bed4ddc7397b6e806d41b03d1768d9"
+    }
+  ],
+  "schema": "mhgp9_full_parallel_parent_capture_v1",
+  "source_after": {
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_batch_encoder_20260927/encode.hpp": "21ba91771e72224db16a8bef99c644a7fd74308a813a5cb82bbf72bd6e82709c",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_batch_encoder_20260927/gate.cpp": "ba3de35b55d938270c5cb5263d031ef9ae109418ccc176c9844ecb71512a3f28",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_batch_encoder_20260927/run.py": "c43222841baa6a4adf804bc580ad084b38957317933dc1244d62a7cf88c945ce",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_first_parent_20260927/first.hpp": "5232e08f96330ab4c683c8fe2669478d500b705203ca4870bf146a3281652a9c",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_first_parent_20260927/fixture_helpers.hpp": "16ae4bc53145dd55b53d26ceea8276cafcd6b69d3bf77f56b16fbb74bc941c93",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_parallel_parent_20260927/gate.cpp": "91ca780972119af850e32eea7149ab0d18823bfcb4f897ae2dd35086a8d2f8b7",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_parallel_parent_20260927/parallel.hpp": "4f339ab84cb3ec8c24699688599940925c37527bcb130196a3e3e08a109c4128",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_parallel_parent_20260927/run.py": "cb64885b8412fc272263838924bec7806134355762ee95e491b5911e63fbceed",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/common/raw_vector.hpp": "f0923da448a945ac49ebd6ce787f52615a5df79782689536004fe0f97da5b4d7",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/core/device.hpp": "741377a5f8c0599754116a2426b71daf0a355eb89cae1403cdc08544ac0ae46e",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/core/intmath.hpp": "28a1fc6279e3b449c4bb6e47a1e6168a4dcf19a16210ab27f564723ba900e52e",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/core/morton.hpp": "8ad508002ac68264a9985bac21d5e5934d843066f5804119149995dae1b4652d",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/core/mutants.hpp": "50c7c50e36f401ef323917df0ba1d0546f9ce09bb4138fb8051ca45ceadcab9a",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/core/types.hpp": "3ab5e0378b8b2bf5a24a3594ae64f37e7f5fa29a72abf335225b2c2ff4c97d6d",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/core/wide.hpp": "877ba8c4bd045c023f3cd64e8f7fc5edf0d074bfd0c5fac9510306e06f5f387e",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/anchor_meb.hpp": "4c5f13c12a20f790cb2b1b33a2f27f2fc86c6b7251395261708562d28fbe5a70",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/ball_data.hpp": "cb53d281765a984096b775521db1e6b42893684840f7adca89bc69e52ca92b8a",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp": "124d3e9b52b1e6155e5a2ffd2a32cda7e5b403dda21155da2949b9ca8c90c0d0",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/full_certificate.hpp": "fd36213350637ce29ddf0b36f1a9fb36850185907245fd87a59bc1031a1a8342",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/full_coverage_certificate.hpp": "8259a3cb8110a9dd8333eaf48455def03bc886014d869f5fcf499898615a7a62",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/local_plateau.hpp": "bfbe4e09cdf4da4adaab5d1e0164f755461e149a6f909014ff4cd6bb0bf994f4",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/plateau.hpp": "c04ffdad4575d959d086f2739833661ad75e3de08e8f44c33125e63f54c562f2",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/lanes/keys.hpp": "919f9713ba08a2f061a90b87f6b38228fb97575f3419793046fbe3c04ce933fa",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/lanes/level.hpp": "4acd8df236721d4158527421400c1a44a37687807be15b66e17d2bf689c5f980",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/lanes/q2.hpp": "b6527c183cac2d093b5524c1510c46bb7899311ae7c613c7aafb488eb8517033",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/lanes/q3.hpp": "5b443889ddde4906a28bc921e3473d2dd9c4cd4f677a67b87903bc4b5b7ac588",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/lanes/q4.hpp": "467d8cbed7e364b88efdbd3cbbb6409594fb08530a2c11fb143e701c0ae8cdd9",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/parallel/pool.hpp": "058a94d90d58a1d612bfc1cd28409a260d723de937d7b982a94e912c25d45867",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/pipeline/census.hpp": "f35bdf0d87a2e667fb54743790a83f329428c5e3f7a12f61ca1f0012a361352c",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/tree/cloud_index.hpp": "2426a0cfa42689aed25b8a9c6630d92c54aa3cf4704273d58173ccad29275c5f"
+  },
+  "source_before": {
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_batch_encoder_20260927/encode.hpp": "21ba91771e72224db16a8bef99c644a7fd74308a813a5cb82bbf72bd6e82709c",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_batch_encoder_20260927/gate.cpp": "ba3de35b55d938270c5cb5263d031ef9ae109418ccc176c9844ecb71512a3f28",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_batch_encoder_20260927/run.py": "c43222841baa6a4adf804bc580ad084b38957317933dc1244d62a7cf88c945ce",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_first_parent_20260927/first.hpp": "5232e08f96330ab4c683c8fe2669478d500b705203ca4870bf146a3281652a9c",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_first_parent_20260927/fixture_helpers.hpp": "16ae4bc53145dd55b53d26ceea8276cafcd6b69d3bf77f56b16fbb74bc941c93",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_parallel_parent_20260927/gate.cpp": "91ca780972119af850e32eea7149ab0d18823bfcb4f897ae2dd35086a8d2f8b7",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_parallel_parent_20260927/parallel.hpp": "4f339ab84cb3ec8c24699688599940925c37527bcb130196a3e3e08a109c4128",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_parallel_parent_20260927/run.py": "cb64885b8412fc272263838924bec7806134355762ee95e491b5911e63fbceed",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/common/raw_vector.hpp": "f0923da448a945ac49ebd6ce787f52615a5df79782689536004fe0f97da5b4d7",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/core/device.hpp": "741377a5f8c0599754116a2426b71daf0a355eb89cae1403cdc08544ac0ae46e",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/core/intmath.hpp": "28a1fc6279e3b449c4bb6e47a1e6168a4dcf19a16210ab27f564723ba900e52e",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/core/morton.hpp": "8ad508002ac68264a9985bac21d5e5934d843066f5804119149995dae1b4652d",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/core/mutants.hpp": "50c7c50e36f401ef323917df0ba1d0546f9ce09bb4138fb8051ca45ceadcab9a",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/core/types.hpp": "3ab5e0378b8b2bf5a24a3594ae64f37e7f5fa29a72abf335225b2c2ff4c97d6d",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/core/wide.hpp": "877ba8c4bd045c023f3cd64e8f7fc5edf0d074bfd0c5fac9510306e06f5f387e",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/anchor_meb.hpp": "4c5f13c12a20f790cb2b1b33a2f27f2fc86c6b7251395261708562d28fbe5a70",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/ball_data.hpp": "cb53d281765a984096b775521db1e6b42893684840f7adca89bc69e52ca92b8a",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp": "124d3e9b52b1e6155e5a2ffd2a32cda7e5b403dda21155da2949b9ca8c90c0d0",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/full_certificate.hpp": "fd36213350637ce29ddf0b36f1a9fb36850185907245fd87a59bc1031a1a8342",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/full_coverage_certificate.hpp": "8259a3cb8110a9dd8333eaf48455def03bc886014d869f5fcf499898615a7a62",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/local_plateau.hpp": "bfbe4e09cdf4da4adaab5d1e0164f755461e149a6f909014ff4cd6bb0bf994f4",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/plateau.hpp": "c04ffdad4575d959d086f2739833661ad75e3de08e8f44c33125e63f54c562f2",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/lanes/keys.hpp": "919f9713ba08a2f061a90b87f6b38228fb97575f3419793046fbe3c04ce933fa",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/lanes/level.hpp": "4acd8df236721d4158527421400c1a44a37687807be15b66e17d2bf689c5f980",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/lanes/q2.hpp": "b6527c183cac2d093b5524c1510c46bb7899311ae7c613c7aafb488eb8517033",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/lanes/q3.hpp": "5b443889ddde4906a28bc921e3473d2dd9c4cd4f677a67b87903bc4b5b7ac588",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/lanes/q4.hpp": "467d8cbed7e364b88efdbd3cbbb6409594fb08530a2c11fb143e701c0ae8cdd9",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/parallel/pool.hpp": "058a94d90d58a1d612bfc1cd28409a260d723de937d7b982a94e912c25d45867",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/pipeline/census.hpp": "f35bdf0d87a2e667fb54743790a83f329428c5e3f7a12f61ca1f0012a361352c",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/tree/cloud_index.hpp": "2426a0cfa42689aed25b8a9c6630d92c54aa3cf4704273d58173ccad29275c5f"
+  },
+  "status": "completed"
+}

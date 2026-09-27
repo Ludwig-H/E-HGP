@@ -1,0 +1,77 @@
+{
+  "GCP_used": false,
+  "checker_sha256": "9fe2d7f64a872162fc25444384817da142cacd6a399cc478145c83d89242740d",
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_arena_waves_20260927/run.py",
+        "--readback",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/q34_arena_waves_20260927"
+      ],
+      "exit_code": 0,
+      "name": "normal",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "c7a9851916553dfc6198b7a8c994a7cbe48d564c2a4045e62fe6d3ce335354c0"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_arena_waves_20260927/run.py",
+        "--readback",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/q34_arena_waves_20260927"
+      ],
+      "exit_code": 0,
+      "name": "optimized",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "c7a9851916553dfc6198b7a8c994a7cbe48d564c2a4045e62fe6d3ce335354c0"
+    }
+  ],
+  "mutations": [
+    {
+      "cause": "complete command inventory",
+      "name": "missing_command",
+      "rejected": true
+    },
+    {
+      "cause": "command binding",
+      "name": "wrong_argv",
+      "rejected": true
+    },
+    {
+      "cause": "command binding",
+      "name": "wrong_exit",
+      "rejected": true
+    },
+    {
+      "cause": "command binding",
+      "name": "open_group",
+      "rejected": true
+    },
+    {
+      "cause": "LIVE source closure",
+      "name": "wrong_source",
+      "rejected": true
+    },
+    {
+      "cause": "gate scope only",
+      "name": "false_case",
+      "rejected": true
+    },
+    {
+      "cause": "closed local wave capture",
+      "name": "false_gpu",
+      "rejected": true
+    },
+    {
+      "cause": "closed local wave capture",
+      "name": "unclosed_capture",
+      "rejected": true
+    }
+  ],
+  "runner_sha256": "61640b164bec212b1b8dd8277687206dc45332861334c76bec17790594283b4d",
+  "status": "PASS"
+}

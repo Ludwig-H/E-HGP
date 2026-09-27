@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-continuation-origin-20260927-r2/sanitize/mhgp9_continuation_origin",
+    "--drop-continuations"
+  ],
+  "ended_epoch": 1790492783.1518254,
+  "exit_code": 1,
+  "group_closed": true,
+  "name": "sanitize_mutant",
+  "pid": 169898,
+  "started_epoch": 1790492783.1315958,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "2800a36c968c057be0ab8b22ca2d272144cf1443365aabc674cb5f06141d0281",
+  "timeout_seconds": 600
+}

@@ -1,0 +1,1 @@
+{"schema":"mhgp9_q34_arena_waves_v1","status":"pass","coverage":{"batches":175,"consumptions":1050,"pairs":355632,"survivors":195948,"pool_rejected":1878,"pool_lane_rejected":3622,"fallback_survivors":12778,"band_splits":78426,"rectangle_crossings":68616,"reordered":4104,"empty":216,"no_survivors":6,"closed":10712,"holes":7834,"retries":139,"refusals":20}}

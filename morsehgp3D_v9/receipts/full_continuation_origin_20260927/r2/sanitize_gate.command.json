@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-continuation-origin-20260927-r2/sanitize/mhgp9_continuation_origin"
+  ],
+  "ended_epoch": 1790492783.1306489,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "sanitize_gate",
+  "pid": 169338,
+  "started_epoch": 1790492782.959602,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "840d136edd25df9d2175d79fc707f672fa15880bdca708bff299d4984d089dc2",
+  "timeout_seconds": 600
+}

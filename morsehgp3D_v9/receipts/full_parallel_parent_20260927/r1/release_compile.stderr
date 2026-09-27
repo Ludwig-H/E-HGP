@@ -1,0 +1,8 @@
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_parallel_parent_20260927/gate.cpp: In function ‘size_t {anonymous}::scheduler_gate()’:
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_parallel_parent_20260927/gate.cpp:85:5: error: this ‘for’ clause does not guard... [-Werror=misleading-indentation]
+   85 |     for (auto x : hits) need(x == 1, "scheduler.grains"); ++checks;
+      |     ^~~
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_parallel_parent_20260927/gate.cpp:85:59: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘for’
+   85 |     for (auto x : hits) need(x == 1, "scheduler.grains"); ++checks;
+      |                                                           ^~
+cc1plus: all warnings being treated as errors
