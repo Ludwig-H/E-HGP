@@ -86,6 +86,11 @@ poids réels. Le mode rationnel z2 sert aux petits contrôles.
   contrôles indépendants, domaine petit explicitement borné.
 - `benchmark_full_weighted.py` : pilote corrigé ;
   `benchmark_weighted.py` : premier essai réfuté, historique uniquement.
+- [Dépôts datés](DEPOTS_DATES.md) : preuve de regroupement exact pour la
+  condensation et le vote plat, sous conditions ; ce n'est pas encore un
+  moteur compact implémenté.
+- [Comptages des dépôts](DEPOTS_MESURES.md) : captures distinctes K5/K10
+  sur le premier cas clos, avec conservation des attaches et des dates.
 
 ## Limites et coût
 
@@ -102,3 +107,25 @@ publié ici. Protocole inchangé : 13 scènes gaussiennes complètes n1200,
 K5/10, masses minimales20/50, expZ1/2, comparateurs précédents conservés
 par hash. Sous-ensemble diagnostique de régimes déjà vus, pas test statistique
 aveugle de supériorité universelle.
+
+## Piste suivante, sans gain de temps revendiqué
+
+En dimension trois, les facettes d'une coface ont au plus cinq événements
+distincts `(segment FULL fermé, naissance MEB)`. Après connaissance des
+attaches, les contributions peuvent ainsi être accumulées en O(K) opérations
+par coface sans développer tous les triplets coface–facette–point.
+Cela ne borne ni le nombre de cofaces ni le travail de recherche des attaches.
+
+Sur G2/δ8/graine1, le comptage donne 108 909 → 55 915 objets à K5 et
+689 531 → 174 331 à K10, en passant des facettes aux événements. Les incidences
+point–objet deviennent respectivement 309 138 et 1 828 667. Ce sont des
+comptages, pas une mesure de vitesse ni de mémoire totale. En particulier,
+le sous-total illustratif IDs/scores/masses augmente légèrement à K5.
+La référence calcule déjà les scores de façon factorisée : le comparer à
+une expansion naïve O(K²C) ne serait pas une mesure honnête de son gain.
+
+Les dépôts doivent rester des **sorties de masse datées**, jamais de gros
+enfants susceptibles d'être sélectionnés par EOM. L'équivalence exacte
+n'hérite pas d'une égalité bit à bit des décisions binary64. Le
+[routage ponctuel emboîté](PLAN_PARTITIONS_POINTS.md) est un chantier
+distinct du vote plat, toujours à implémenter et à qualifier.
