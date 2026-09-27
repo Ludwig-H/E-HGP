@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_resident_survivors_20260927/run.py",
+    "--prepin",
+    "/workspaces/E-HGP/build/v9-resident-survivors-20260927-r1_cuda",
+    "cuda"
+  ],
+  "ended_epoch": 1790501282.0287478,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "prepin_cuda",
+  "pid": 373513,
+  "started_epoch": 1790501279.5447006,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "a088b017f08e6cdc6d552737c6dcb84de8eec7bb34e07fc74a86f0b9e69aadd5",
+  "timeout_seconds": null
+}

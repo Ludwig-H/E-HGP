@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/cuda-12.9-local/bin/nvcc",
+    "--version"
+  ],
+  "name": "nvcc_version",
+  "started_epoch": 1790501251.1892853,
+  "timeout_seconds": null
+}

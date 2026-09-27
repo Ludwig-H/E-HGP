@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-resident-survivors-20260927-r1_release/mutant_payload"
+  ],
+  "ended_epoch": 1790501316.3729756,
+  "exit_code": 2,
+  "group_closed": true,
+  "name": "mutant_payload",
+  "pid": 374756,
+  "started_epoch": 1790501316.3706455,
+  "stderr_sha256": "0bc60cd664ded14e73503a6fe13f16763e90a54a5ba1b5606785bcad6e5fced4",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": null
+}

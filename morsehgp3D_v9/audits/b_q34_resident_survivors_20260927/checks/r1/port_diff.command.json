@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_resident_survivors_20260927/provenance.py",
+    "--diff"
+  ],
+  "ended_epoch": 1790501251.1886039,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "port_diff",
+  "pid": 372640,
+  "started_epoch": 1790501251.1488671,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "0d43ed47f75961215e02034db98994a89c3d483d52da746f99793feb41e375af",
+  "timeout_seconds": null
+}

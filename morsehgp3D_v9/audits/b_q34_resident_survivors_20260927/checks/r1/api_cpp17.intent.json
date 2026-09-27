@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "c++",
+    "-std=c++17",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-fsyntax-only",
+    "-I/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src",
+    "-include",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_resident_survivors_20260927/device.hpp",
+    "-x",
+    "c++",
+    "/dev/null"
+  ],
+  "name": "api_cpp17",
+  "started_epoch": 1790501295.7241752,
+  "timeout_seconds": null
+}

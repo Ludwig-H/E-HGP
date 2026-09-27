@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "cmake",
+    "-S",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_resident_survivors_20260927",
+    "-B",
+    "/workspaces/E-HGP/build/v9-resident-survivors-20260927-r1_release",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+    "-DCMAKE_CXX_COMPILER=c++",
+    "-DCMAKE_CXX_FLAGS=-Wall -Wextra -Wpedantic -Werror",
+    "-DMHGP9_GEN_LIBRARY=/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/libmhgp9_gen.a",
+    "-DMHGP9_SURVIVORS_ENABLE_CUDA=OFF"
+  ],
+  "ended_epoch": 1790501251.5512028,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "configure_release",
+  "pid": 372643,
+  "started_epoch": 1790501251.1954653,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "9becc1c05f5a8366cb9614dcf88384a43fe10dbd5ef6337eb4a72300f513eec7",
+  "timeout_seconds": null
+}

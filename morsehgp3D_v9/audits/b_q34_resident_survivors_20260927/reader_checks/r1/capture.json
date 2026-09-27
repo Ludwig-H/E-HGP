@@ -1,0 +1,52 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_resident_survivors_20260927/reader_checks/selftest.py",
+        "--exercise"
+      ],
+      "ended_epoch": 1790501539.3463297,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "normal",
+      "pid": 80,
+      "started_epoch": 1790501519.315439,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "5aa5e80e14f6bf98aa3f8ac5158ea87814474142bcddd736efa76afb46c72e9c",
+      "timeout_seconds": null
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-O",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_resident_survivors_20260927/reader_checks/selftest.py",
+        "--exercise"
+      ],
+      "ended_epoch": 1790501559.430513,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "optimized",
+      "pid": 81,
+      "started_epoch": 1790501539.3469665,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "5aa5e80e14f6bf98aa3f8ac5158ea87814474142bcddd736efa76afb46c72e9c",
+      "timeout_seconds": null
+    }
+  ],
+  "pins_after": {
+    "/workspaces/E-HGP/build/v9-resume-20260927/gcp-migration/full_probe_session_v7.py": "177b25a0d72150dc331661fdf8da1ccde77ea17fb694d9c6af5b0929755160d8",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_resident_survivors_20260927/checks/r1/capture.json": "d2c3c0813ac32bbbfd0b4e1c7d58e207395e7553090b33e40cbc016a39c23585",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_resident_survivors_20260927/reader_checks/selftest.py": "b1705dbdacb460eccbb628a7857aa5dce66fae8d2109cf6f233b448b73ee35ab",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_resident_survivors_20260927/run.py": "a9b75fca4c0598b22841b8dd57a91a120dc475f2fb84d558aad75b7d1abc8156"
+  },
+  "pins_before": {
+    "/workspaces/E-HGP/build/v9-resume-20260927/gcp-migration/full_probe_session_v7.py": "177b25a0d72150dc331661fdf8da1ccde77ea17fb694d9c6af5b0929755160d8",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_resident_survivors_20260927/checks/r1/capture.json": "d2c3c0813ac32bbbfd0b4e1c7d58e207395e7553090b33e40cbc016a39c23585",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_resident_survivors_20260927/reader_checks/selftest.py": "b1705dbdacb460eccbb628a7857aa5dce66fae8d2109cf6f233b448b73ee35ab",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_resident_survivors_20260927/run.py": "a9b75fca4c0598b22841b8dd57a91a120dc475f2fb84d558aad75b7d1abc8156"
+  },
+  "status": "completed"
+}

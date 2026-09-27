@@ -1,5 +1,14 @@
 # État courant des audits v9
 
+**27 septembre — accumulation et tri des survivants : porte locale close** :
+[bilan](../docs/TRI_RESIDENT_DES_SURVIVANTS_20260927.md),
+[prototype](b_q34_resident_survivors_20260927/README.md).
+26 commandes, 85 lots/1 360 appels appariés portables, deux mutants
+compilés détectés ; Release et sanitizers passent, CUDA compile.
+Pas de test GPU de cette variante ni de gain FULL revendiqué. O(S+Q)
+pour l'accumulation, sans tableau de toutes les candidates ; E inchangé.
+GCP non utilisé ; la comparaison G4 appariée reste à faire.
+
 **27 septembre — entrée FULL A et constructeur événementiel C++ clos** :
 [synthèse](../docs/CONSTRUCTION_EVENEMENTIELLE_FULL_20260927.md),
 [manifeste](b_full_a_manifest_20260927/README.md),

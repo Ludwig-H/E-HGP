@@ -1,0 +1,1 @@
+{"schema":"mhgp9_resident_survivors_v1","status":"passed","cuda_executed":false,"collector_cases":18,"refused":33,"cases":85,"calls":1360,"queries":101320,"S":39868,"reordered":376,"empty":72,"zero_output":4,"sparse_waves":4134,"high_keys":2076,"growths":52,"max_array_bytes":57204,"planned":63,"fallbacks":1411}

@@ -2,6 +2,11 @@
 
 Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 
+Nouveau prototype qualifié localement : [tri résident des survivants](docs/TRI_RESIDENT_DES_SURVIVANTS_20260927.md).
+Accumulation en O(S+Q), tri GPU sur 64 bits, sortie compacte de 12 octets.
+26 commandes locales passent et CUDA compile ; cette variante n'a pas
+encore exécuté ses tests sur GPU. Moteur et chronos FULL inchangés.
+
 Nouveau port FULL : [manifeste et constructeur événementiel C++](docs/CONSTRUCTION_EVENEMENTIELLE_FULL_20260927.md).
 Deux qualifications Release/sanitizers closes, mêmes parents, ancres,
 contributions et niveaux natifs sur376rejeux ; cas32parents inclus.

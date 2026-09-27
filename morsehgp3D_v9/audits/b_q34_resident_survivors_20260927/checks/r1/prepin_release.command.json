@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_resident_survivors_20260927/run.py",
+    "--prepin",
+    "/workspaces/E-HGP/build/v9-resident-survivors-20260927-r1_release",
+    "release"
+  ],
+  "ended_epoch": 1790501253.2436776,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "prepin_release",
+  "pid": 372696,
+  "started_epoch": 1790501251.5516388,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "9ca715ad25c8fc20cd9e861b89b3f05130b9622e6a7ce52e0ec4020e41aa80ed",
+  "timeout_seconds": null
+}

@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-resident-survivors-20260927-r1_release",
+    "--target",
+    "mhgp9_resident_survivors",
+    "-j2"
+  ],
+  "ended_epoch": 1790501260.070349,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "build_release",
+  "pid": 372823,
+  "started_epoch": 1790501253.2445436,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "77ad192312fb012e1df09498cd3552b408710eb819bf15f55bc28d0c8a4efcba",
+  "timeout_seconds": null
+}

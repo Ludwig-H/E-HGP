@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_resident_survivors_20260927/run.py",
+    "--prepin",
+    "/workspaces/E-HGP/build/v9-resident-survivors-20260927-r1_release",
+    "release"
+  ],
+  "name": "prepin_release",
+  "started_epoch": 1790501251.5516388,
+  "timeout_seconds": null
+}

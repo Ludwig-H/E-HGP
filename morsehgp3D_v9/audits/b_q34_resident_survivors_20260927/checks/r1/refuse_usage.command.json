@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-resident-survivors-20260927-r1_release/mhgp9_resident_survivors",
+    "--unknown"
+  ],
+  "ended_epoch": 1790501316.3753102,
+  "exit_code": 2,
+  "group_closed": true,
+  "name": "refuse_usage",
+  "pid": 374757,
+  "started_epoch": 1790501316.3734097,
+  "stderr_sha256": "ea381ca86972e367d1eecf82917af5a87b4fbcd252ee92ae64e290e4cbe2fb60",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": null
+}

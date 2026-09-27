@@ -1,0 +1,56 @@
+{
+  "CUDA_compiled": true,
+  "CUDA_executed": false,
+  "GCP_used": false,
+  "commands": 26,
+  "gate": {
+    "S": 39868,
+    "calls": 1360,
+    "cases": 85,
+    "collector_cases": 18,
+    "cuda_executed": false,
+    "empty": 72,
+    "fallbacks": 1411,
+    "growths": 52,
+    "high_keys": 2076,
+    "max_array_bytes": 57204,
+    "planned": 63,
+    "queries": 101320,
+    "refused": 33,
+    "reordered": 376,
+    "schema": "mhgp9_resident_survivors_v1",
+    "sparse_waves": 4134,
+    "status": "passed",
+    "zero_output": 4
+  },
+  "mutants": 2,
+  "scope": "output_only_portable_gate_and_CUDA_compile_no_GPU_no_FULL",
+  "source_port": {
+    "CUDA_executed": false,
+    "GCP_used": false,
+    "baseline_commit": "af369c44efa75236fa98e25e8f1bc4708b128fc4",
+    "new_source_sha256": {
+      "CMakeLists.txt": "e94f3c18220cfa9ea9eb648e74152181c95538cb0fd176baa4f71aab9ac393eb",
+      "device.hpp": "e042b21feec02075aa0f5eb2c3ee19f11339cc123efb166922c3d1def259e759",
+      "device_cpu.cpp": "f14e04e0e0c906867e068b162555e5fb96087e7737e20e449360a90b1e116f88",
+      "device_cuda.cu": "af9259f6104cf0a0f12116af6be2860311b2cc32a989cf6fe70b78529bc86666",
+      "device_stub.cpp": "f8dcae2b3888cdc2bc9f263d47ca58464d1676c40790c430d47eadfb2c7be8f3",
+      "host.hpp": "666ea61575dd4afe4c0ca9164c8af2f92d3455cbe286c10f45549be2437fbc30"
+    },
+    "old_source_sha256": {
+      "CMakeLists.txt": "04fb5d0c8a99674b00e7e810aa787c3568d4f615b42a140213d4c95e442acb79",
+      "device.hpp": "59747b0ff7289b0cda8532a5a6186626fd55aefa6711b3f207d2f5ed3c8edb9e",
+      "device_cpu.cpp": "b1bdace2429499df54202d517c1e85cdb54398d5805c16e3f7410e5d3b6b62d9",
+      "device_cuda.cu": "1a1e8bdbe2976b5377ed5222e06d49484b570f399cb6f8af4a53c50764758737",
+      "device_stub.cpp": "4b442c75b7818bf32b00f2d4cf81bd8f705edaab3a6075a3fbff0ef98c297c56",
+      "host.hpp": "7c3b20dd88d80b5b1722201c8755f576c6004e424a2e15373aeeb2831945f3f0"
+    },
+    "status": "passed",
+    "unchanged_kernel_sha256": {
+      "filter_kernel": "3ce90da014039a6825ea33d0958c45afee33395ecc2435d78b723d93bff4eea4",
+      "rectangles_kernel": "e3230c590331c590c18ae43ab971acfac69e38c02313861a93bf8bf1163cf47a",
+      "scatter_kernel": "c9ea3b18a30517ec6bb53b205d9d357796de05bc3c8ed17b072242794cbe3137"
+    }
+  },
+  "status": "PASS"
+}

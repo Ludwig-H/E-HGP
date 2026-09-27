@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-resident-survivors-20260927-r1_release/mhgp9_resident_survivors"
+  ],
+  "ended_epoch": 1790501260.3637168,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "gate_release",
+  "pid": 372924,
+  "started_epoch": 1790501260.0708442,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "1ee0693e6f79846eb17f11dfaceab874114302451a78b61e7083ba0bbed94588",
+  "timeout_seconds": null
+}

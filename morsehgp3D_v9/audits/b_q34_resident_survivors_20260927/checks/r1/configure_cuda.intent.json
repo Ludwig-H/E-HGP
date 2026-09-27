@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "cmake",
+    "-S",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_resident_survivors_20260927",
+    "-B",
+    "/workspaces/E-HGP/build/v9-resident-survivors-20260927-r1_cuda",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+    "-DCMAKE_CXX_COMPILER=c++",
+    "-DCMAKE_CXX_FLAGS=-Wall -Wextra -Wpedantic -Werror",
+    "-DMHGP9_GEN_LIBRARY=/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/libmhgp9_gen.a",
+    "-DMHGP9_SURVIVORS_ENABLE_CUDA=ON",
+    "-DCMAKE_CUDA_COMPILER=/workspaces/E-HGP/build/cuda-12.9-local/bin/nvcc",
+    "-DCMAKE_CUDA_ARCHITECTURES=120"
+  ],
+  "name": "configure_cuda",
+  "started_epoch": 1790501276.5952463,
+  "timeout_seconds": null
+}

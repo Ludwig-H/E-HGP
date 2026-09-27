@@ -1,5 +1,18 @@
 # Passation v9
 
+## Tri des survivants avant téléchargement — 27 septembre
+
+[Bilan](docs/TRI_RESIDENT_DES_SURVIVANTS_20260927.md).
+Prototype de sortie q34 uniquement : accumuler S sur le device, radix u64
+avec payload attaché, refus des doublons, télécharger 12 octets par sortie.
+Même filtrage et mêmes compteurs physiques ; pas de tableau global P/E.
+R1 ferme 26 commandes Release/Clang ASan/UBSan/LSan/compilation CUDA,
+85 lots et 1 360 appels appariés portables, deux mutants compilés détectés.
+Lecteurs LIVE normal/−O passent. Aucune exécution GPU de cette variante,
+aucun nouveau FULL/G4/croissance : prochaine porte device puis appariement
+sur trame entière. Clés hautes testées en portable, pas encore device.
+Sources/builds/reçu figés, moteur inchangé, GCP non utilisé dans ce lot.
+
 ## Manifeste FULL et constructeur événementiel C++ — 27 septembre
 
 [Bilan pédagogique](docs/CONSTRUCTION_EVENEMENTIELLE_FULL_20260927.md).

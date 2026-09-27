@@ -1,5 +1,17 @@
 # Coordination Morse HGP 3D v9
 
+### 27 septembre — DEV : tri des survivants qualifié localement
+
+[Bilan](../morsehgp3D_v9/docs/TRI_RESIDENT_DES_SURVIVANTS_20260927.md).
+R1 close 26 commandes, Release/ASan/UBSan/LSan et compilation CUDA ;
+lecteurs LIVE normal/−O passent, deux mutants compilés causalement réfutés.
+Le nouveau chemin garde S jusqu'au radix GPU, sans tableau global P/E,
+et produit un payload compact. Les noyaux géométriques restent identiques.
+Publication de prototype, pas activation moteur : aucune exécution GPU
+de cette variante ni nouveau gain FULL. Prochaine porte : clés hautes
+device et comparaison appariée G4 sur trame entière, coûts complets.
+GCP non utilisé dans ce lot. Sources/builds/reçu désormais figés.
+
 ### 27 septembre — DEV : manifeste natif et nouveau constructeur événementiel A
 
 [Synthèse](../morsehgp3D_v9/docs/CONSTRUCTION_EVENEMENTIELLE_FULL_20260927.md).

@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-resident-survivors-20260927-r1_sanitize",
+    "--target",
+    "mhgp9_resident_survivors",
+    "-j2"
+  ],
+  "ended_epoch": 1790501275.4462771,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "build_sanitize",
+  "pid": 372977,
+  "started_epoch": 1790501262.1634755,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "0a5e54839f5095379790ddb07336961bfdfbabdeba2344e38e6bb4c72460d4c5",
+  "timeout_seconds": null
+}

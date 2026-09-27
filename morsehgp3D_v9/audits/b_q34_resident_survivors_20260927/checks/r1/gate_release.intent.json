@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-resident-survivors-20260927-r1_release/mhgp9_resident_survivors"
+  ],
+  "name": "gate_release",
+  "started_epoch": 1790501260.0708442,
+  "timeout_seconds": null
+}

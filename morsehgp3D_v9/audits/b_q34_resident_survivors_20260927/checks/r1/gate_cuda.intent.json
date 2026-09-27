@@ -1,0 +1,8 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-resident-survivors-20260927-r1_cuda/mhgp9_resident_survivors"
+  ],
+  "name": "gate_cuda",
+  "started_epoch": 1790501295.4328148,
+  "timeout_seconds": null
+}

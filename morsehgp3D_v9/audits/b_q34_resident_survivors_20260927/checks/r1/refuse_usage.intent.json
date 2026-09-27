@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-resident-survivors-20260927-r1_release/mhgp9_resident_survivors",
+    "--unknown"
+  ],
+  "name": "refuse_usage",
+  "started_epoch": 1790501316.3734097,
+  "timeout_seconds": null
+}

@@ -1,0 +1,428 @@
+--- frozen_af369c44/device.hpp
++++ output_only_port/device.hpp
+@@ -1,9 +1,11 @@
++// Explicit narrow output-only port of b_q34_filtered_resident_20260927 at af369c44.
+ #pragma once
+ // Plain C++17 seam. Exact predicates/wire are reused unchanged from the
+ // qualified CUDA-waves source commit 33c1d28d7 (publication a7e80d7f9).
+ #include "../b_q34_cuda_waves_20260927/cuda_api.hpp"
+ #include <memory>
+-namespace mhgp9::audit::resident {
++#include "collector.hpp"
++namespace mhgp9::audit::resident_survivors {
+ namespace cw=cuda_waves;
+ using cw::u64;using cw::u32;using cw::u8;
+ struct RectQuery {u32 a,b;u8 mask;};
+@@ -13,7 +15,7 @@
+  public:
+   virtual ~Device()=default;
+   virtual RectPass rectangles(const RectQuery*,u32 count)=0;
+-  virtual cw::DeviceRun consume(cw::View,size_t q)=0;
++  virtual OrderedRun consume(cw::View,size_t q,bool debug_keys)=0;
+   virtual double close()=0; // Our buffers only, never cudaDeviceReset.
+ };
+ struct Opened {std::unique_ptr<Device> device;std::string name;bool cuda{};double init_ms{},upload_ms{};u64 resident_bytes{};};
+--- frozen_af369c44/device_cpu.cpp
++++ output_only_port/device_cpu.cpp
+@@ -1,8 +1,9 @@
++// Explicit narrow output-only port of b_q34_filtered_resident_20260927 at af369c44.
+ #include "device.hpp"
+ #include <algorithm>
+ #include <chrono>
+ #include <stdexcept>
+-namespace mhgp9::audit::resident {
++namespace mhgp9::audit::resident_survivors {
+ namespace {
+ using Clock=std::chrono::steady_clock;
+ double ms(Clock::time_point t) {return std::chrono::duration<double,std::milli>(Clock::now()-t).count();}
+@@ -24,12 +25,14 @@
+       need(out.masks[i]!=gpu::stack_failure,"resident.rectangle_stack_failure");out.visits=sum(out.visits,visits);}
+     out.kernel_ms=ms(start);return out;
+   }
+-  cw::DeviceRun consume(cw::View v,size_t q) override {
+-    need(!closed_ && q>0,"resident.closed_or_zero_q");cw::DeviceRun out;out.available=true;out.device="portable_exact_predicates";
++  OrderedRun consume(cw::View v,size_t q,bool debug) override {
++    need(!closed_ && !failed_ && q>0,"resident.closed_or_zero_q");OrderedRun out;out.available=true;out.device="portable_exact_predicates";
++    try {
+     v.nodes=index_.nodes;v.points=index_.points;v.nodes_count=index_.nodes_count;v.points_count=index_.points_count;v.k=index_.k;
+     const auto start=Clock::now();const auto capacity=std::min<u64>(q,0x7fffffffU);out.timing.q_actual=std::min(capacity,v.effective);
++    PortableCollector collector(std::max<u64>(out.timing.q_actual,1));std::vector<cw::Edge> compact;compact.reserve(count_size<cw::Edge>(out.timing.q_actual));
+     for(u64 base=0;base<v.effective;) {
+-      const auto count=std::min(capacity,v.effective-base);
++      const auto count=std::min(capacity,v.effective-base);compact.clear();
+       for(u64 j=0;j<count;++j) {cw::Edge e{};need(cw::decode(v,base+j,e),"resident.decode");
+         const auto input=e.mask;u64 visits=0;e.mask=cw::point_filter(v,e,visits);
+ #ifdef MHGP9_RESIDENT_FAULT_PAIR
+@@ -38,14 +41,20 @@
+         need(e.mask!=gpu::stack_failure,"resident.pair_stack_failure");
+         auto& c=out.counters;++c.queries;c.q3+=(input&2U)!=0;c.q4+=(input&4U)!=0;c.visits=sum(c.visits,visits);
+         c.rejected3+=(input&2U)!=0 && (e.mask&2U)==0;c.rejected4+=(input&4U)!=0 && (e.mask&4U)==0;
+-        if(e.mask) out.survivors.push_back(e);
++        if(e.mask) compact.push_back(e);
+       }
++      const auto append_start=Clock::now();collector.append(compact.data(),compact.size());out.output_times.append_ms+=ms(append_start);
+       base+=count;++out.counters.waves;
+     }
+-    out.timing.waves_ms=ms(start);out.timing.total_ms=out.timing.waves_ms;return out;
++    out.timing.waves_ms=ms(start);const auto order_start=Clock::now();collector.finish(out,debug);
++    out.output_times.sort_ms=ms(order_start);out.timing.order_ms=out.output_times.sort_ms;
++    out.memory.array_peak_bytes=plus(out.memory.array_peak_bytes,times(compact.capacity(),sizeof(cw::Edge)));
++    const auto release_start=Clock::now();std::vector<cw::Edge>().swap(compact);out.timing.release_ms=ms(release_start);
++    out.timing.total_ms=ms(start);return out;
++    } catch(...) {failed_=true;throw;}
+   }
+   double close() override {closed_=true;return 0;}
+- private:IndexInput index_;bool closed_{};
++ private:IndexInput index_;bool closed_{},failed_{};
+ };
+ }
+ Opened open_portable(IndexInput input) {Opened out;out.device=std::make_unique<Portable>(input);out.name="portable_exact_predicates";return out;}
+--- frozen_af369c44/device_cuda.cu
++++ output_only_port/device_cuda.cu
+@@ -1,3 +1,4 @@
++// Explicit narrow output-only port of b_q34_filtered_resident_20260927 at af369c44.
+ // Isolated audit runner. DeviceBuffer/check pattern explicitly adapted from
+ // src/gpu/filter_runner.cu at 70168cc3b; no old P/E allocation path is called.
+ #include "device.hpp"
+@@ -6,9 +7,10 @@
+ #include <stdexcept>
+ #include <cuda_runtime.h>
+ #include <cub/device/device_scan.cuh>
++#include <cub/device/device_radix_sort.cuh>
+ #include <chrono>
+ 
+-namespace mhgp9::audit::resident {
++namespace mhgp9::audit::resident_survivors {
+ using cw::Rectangle;using cw::Segment;using cw::Factor;using cw::Class;using cw::Band;
+ using cw::Edge;using cw::View;using cw::Counters;using cw::DeviceRun;using cw::add;
+ namespace {
+@@ -18,13 +20,20 @@
+ double elapsed(Clock::time_point t) {return std::chrono::duration<double,std::milli>(Clock::now()-t).count();}
+ void check(cudaError_t e,const char* why) {if (e!=cudaSuccess) throw std::runtime_error(std::string(why)+": "+cudaGetErrorString(e));}
+ #define CW_CUDA(x) check((x),#x)
++struct Ledger {u64 live{},peak{};explicit Ledger(u64 initial):live(initial),peak(initial) {}};
+ template<class T> struct DeviceBuffer {
+-  T* p=nullptr;size_t count=0;
+-  DeviceBuffer()=default;DeviceBuffer(const DeviceBuffer&)=delete;DeviceBuffer& operator=(const DeviceBuffer&)=delete;
+-  ~DeviceBuffer() {if (p) cudaFree(p);}
+-  void allocate(size_t n) {require(n<=std::numeric_limits<size_t>::max()/sizeof(T),"cuda_waves.device_size");count=n;if(n) CW_CUDA(cudaMalloc(reinterpret_cast<void**>(&p),n*sizeof(T)));}
++  T* p=nullptr;size_t count=0;Ledger* ledger=nullptr;
++  explicit DeviceBuffer(Ledger* l=nullptr):ledger(l) {}DeviceBuffer(const DeviceBuffer&)=delete;DeviceBuffer& operator=(const DeviceBuffer&)=delete;
++  ~DeviceBuffer() {if (p) {cudaFree(p);if(ledger) ledger->live-=bytes();}}
++  void allocate(size_t n) {
++    require(!p && count==0 && n<=std::numeric_limits<size_t>::max()/sizeof(T),"cuda_waves.device_size");
++    const auto next=ledger?plus(ledger->live,times(n,sizeof(T))):0;
++    if(n) CW_CUDA(cudaMalloc(reinterpret_cast<void**>(&p),n*sizeof(T)));count=n;
++    if(ledger) {ledger->live=next;ledger->peak=std::max(ledger->peak,next);}
++  }
+   void copy(const T* src,size_t n) {allocate(n);if(n) CW_CUDA(cudaMemcpy(p,src,n*sizeof(T),cudaMemcpyHostToDevice));}
+-  void release() {if(p) {CW_CUDA(cudaFree(p));p=nullptr;}count=0;}
++  void release() {if(p) {CW_CUDA(cudaFree(p));p=nullptr;}if(ledger) ledger->live-=bytes();count=0;}
++  void swap(DeviceBuffer& other) {require(ledger==other.ledger,"survivors.buffer_ledger");std::swap(p,other.p);std::swap(count,other.count);}
+   u64 bytes() const {return count*sizeof(T);}
+ };
+ // Totals are per wave: Q<=INT_MAX and node_count<2^32 bound visits below
+@@ -55,6 +64,72 @@
+ }
+ } // namespace
+ 
++namespace {
++__global__ void split_survivors(const Edge* edges,u64 count,u64* keys,Payload* values,unsigned long long* control) {
++  unsigned long long inversions=0;
++  for(u64 i=u64(blockIdx.x)*blockDim.x+threadIdx.x;i<count;i+=u64(blockDim.x)*gridDim.x) {
++    const auto e=edges[i];keys[i]=e.ordinal;values[i]={e.a,e.b,e.mask,{0,0,0}};
++    if(i) inversions+=edges[i-1].ordinal>=e.ordinal;
++    if(e.mask==0 || (e.mask&~6U)!=0) atomicExch(control+2,1ULL);
++  }
++  if(inversions) atomicAdd(control,inversions);
++}
++__global__ void validate_order(const u64* keys,u64 count,unsigned long long* control) {
++  for(u64 i=u64(blockIdx.x)*blockDim.x+threadIdx.x;i<count;i+=u64(blockDim.x)*gridDim.x)
++    if(i && keys[i-1]>=keys[i]) atomicExch(control+1,1ULL);
++}
++void append_survivors(DeviceBuffer<Edge>& stored,u64& size,const Edge* compact,u64 live,u64 quantum,
++                      OutputMemory& memory,OutputTimes& timing) {
++  const auto start=Clock::now();const auto needed=plus(size,live);const auto next=next_capacity(stored.count,needed,quantum);
++  if(next!=stored.count) {
++    DeviceBuffer<Edge> replacement(stored.ledger);replacement.allocate(count_size<Edge>(next));
++    memory.edge_peak_bytes=std::max(memory.edge_peak_bytes,times(plus(stored.count,next),sizeof(Edge)));
++    if(size) CW_CUDA(cudaMemcpy(replacement.p,stored.p,count_size<Edge>(size)*sizeof(Edge),cudaMemcpyDeviceToDevice));
++    memory.growth_copy_bytes=plus(memory.growth_copy_bytes,times(size,sizeof(Edge)));++memory.growths;
++    stored.swap(replacement);replacement.release();
++  }
++  if(live) CW_CUDA(cudaMemcpy(stored.p+size,compact,count_size<Edge>(live)*sizeof(Edge),cudaMemcpyDeviceToDevice));
++  size=needed;memory.size=size;memory.capacity=stored.count;
++  memory.append_copy_bytes=plus(memory.append_copy_bytes,times(live,sizeof(Edge)));timing.append_ms+=elapsed(start);
++}
++void finish_survivors(DeviceBuffer<Edge>& stored,u64 size,bool debug,cudaDeviceProp prop,OrderedRun& result) {
++  static_assert(sizeof(cub::detail::choose_offset_t<unsigned long long>)==8,"64-bit CUB offset required");
++  if(!size) {stored.release();return;}
++  auto* ledger=stored.ledger;
++  DeviceBuffer<u64> key_a(ledger),key_b(ledger);DeviceBuffer<Payload> value_a(ledger),value_b(ledger);
++  DeviceBuffer<unsigned long long> control(ledger);DeviceBuffer<unsigned char> scratch(ledger);
++  const auto split=Clock::now();key_a.allocate(count_size<u64>(size));key_b.allocate(count_size<u64>(size));
++  value_a.allocate(count_size<Payload>(size));value_b.allocate(count_size<Payload>(size));control.allocate(3);
++  CW_CUDA(cudaMemset(control.p,0,3*sizeof(unsigned long long)));
++  const unsigned blocks=static_cast<unsigned>(std::min<u64>((size+127)/128,u64(prop.multiProcessorCount)*64));
++  split_survivors<<<blocks,128>>>(stored.p,size,key_a.p,value_a.p,control.p);CW_CUDA(cudaGetLastError());
++  CW_CUDA(cudaDeviceSynchronize());stored.release();result.output_times.split_ms=elapsed(split);
++  cub::DoubleBuffer<u64> keys(key_a.p,key_b.p);cub::DoubleBuffer<Payload> values(value_a.p,value_b.p);
++  const auto sort=Clock::now();size_t bytes=0;
++  // Explicit NumItemsT=64 bits, verified against CUDA12.9/CUB2.8.2 headers.
++  // No conversion of global S to int; only the unchanged per-wave scan is int.
++  CW_CUDA((cub::DeviceRadixSort::SortPairs<u64,Payload,unsigned long long>(nullptr,bytes,keys,values,size,0,64)));
++  scratch.allocate(std::max<size_t>(bytes,1));result.memory.sort_scratch_bytes=scratch.bytes();
++  CW_CUDA((cub::DeviceRadixSort::SortPairs<u64,Payload,unsigned long long>(scratch.p,bytes,keys,values,size,0,64)));
++  CW_CUDA(cudaDeviceSynchronize());result.output_times.sort_ms=elapsed(sort);
++  const auto validation=Clock::now();validate_order<<<blocks,128>>>(keys.Current(),size,control.p);
++  CW_CUDA(cudaGetLastError());unsigned long long counters[3]{};
++  CW_CUDA(cudaMemcpy(counters,control.p,sizeof(counters),cudaMemcpyDeviceToHost));
++  require(counters[1]==0,"survivors.duplicate_or_unsorted");require(counters[2]==0,"survivors.invalid_payload");
++  result.counters.out_of_order=counters[0];result.output_times.validate_ms=elapsed(validation);
++  const auto download=Clock::now();result.survivors.resize(count_size<Payload>(size));
++  CW_CUDA(cudaMemcpy(result.survivors.data(),values.Current(),count_size<Payload>(size)*sizeof(Payload),cudaMemcpyDeviceToHost));
++  if(debug) {result.debug_keys.resize(count_size<u64>(size));
++    CW_CUDA(cudaMemcpy(result.debug_keys.data(),keys.Current(),count_size<u64>(size)*sizeof(u64),cudaMemcpyDeviceToHost));}
++  result.memory.host_payload_bytes=times(result.survivors.capacity(),sizeof(Payload));
++  result.memory.debug_key_bytes=times(result.debug_keys.capacity(),sizeof(u64));
++  result.timing.download_bytes=plus(result.timing.download_bytes,plus(sizeof(counters),plus(times(size,sizeof(Payload)),debug?times(size,sizeof(u64)):0)));
++  result.output_times.download_ms=elapsed(download);result.timing.download_ms+=result.output_times.download_ms;
++  result.timing.order_ms=result.output_times.split_ms+result.output_times.sort_ms+result.output_times.validate_ms;
++  const auto release=Clock::now();key_a.release();key_b.release();value_a.release();value_b.release();control.release();scratch.release();
++  result.output_times.release_ms=elapsed(release);result.timing.release_ms+=result.output_times.release_ms;
++}
++} // namespace
+ 
+ namespace {
+ __global__ void rectangles_kernel(const gpu::FlatNode* nodes,const RectQuery* queries,u32 count,unsigned k,u8* masks,unsigned long long* totals) {
+@@ -91,7 +166,7 @@
+     CW_CUDA(cudaMemcpy(out.masks.data(),masks.p,count,cudaMemcpyDeviceToHost));out.download_ms=elapsed(download);
+     const auto release=Clock::now();query.release();masks.release();totals.release();out.release_ms=elapsed(release);return out;
+   }
+-  DeviceRun consume(View,size_t) override;
++  OrderedRun consume(View,size_t,bool) override;
+   double close() override {
+     if(closed_) return 0;
+     const auto start=Clock::now();nodes_.release();points_.release();closed_=true;return elapsed(start);
+@@ -112,8 +187,8 @@
+   out.name=prop.name;out.cuda=true;out.device=std::move(context);return out;
+ }
+ 
+-DeviceRun ResidentCuda::consume(View host,size_t requested_q) {
+-  DeviceRun result;const auto total_start=Clock::now();
++OrderedRun ResidentCuda::consume(View host,size_t requested_q,bool debug_keys) {
++  OrderedRun result;const auto total_start=Clock::now();
+   try {
+     require(!closed_ && !failed_ && requested_q>0,"resident.closed_failed_or_zero_capacity");
+     result.available=true;result.device=name_;
+@@ -122,11 +197,11 @@
+     // All counts remain u64 globally. Only this wave's scan uses CUB int.
+     const auto q=static_cast<size_t>(std::min<u64>(host.effective,std::min<u64>(requested_q,0x7fffffffU)));
+     result.timing.q_actual=q;
+-    DeviceBuffer<Rectangle> rectangles;DeviceBuffer<Segment> segments;DeviceBuffer<Factor> factors;
+-    DeviceBuffer<Class> classes;DeviceBuffer<Band> bands;DeviceBuffer<u32> ranks;
+-    DeviceBuffer<u8> credits;
+-    DeviceBuffer<Edge> slots,compact;DeviceBuffer<u32> flags,positions;
+-    DeviceBuffer<unsigned long long> totals;DeviceBuffer<unsigned char> scratch;
++    Ledger ledger(resident_bytes());DeviceBuffer<Rectangle> rectangles(&ledger);DeviceBuffer<Segment> segments(&ledger);DeviceBuffer<Factor> factors(&ledger);
++    DeviceBuffer<Class> classes(&ledger);DeviceBuffer<Band> bands(&ledger);DeviceBuffer<u32> ranks(&ledger);
++    DeviceBuffer<u8> credits(&ledger);
++    DeviceBuffer<Edge> slots(&ledger),compact(&ledger);DeviceBuffer<u32> flags(&ledger),positions(&ledger);
++    DeviceBuffer<unsigned long long> totals(&ledger);DeviceBuffer<unsigned char> scratch(&ledger);
+     const auto upload_start=Clock::now();
+ #define COPY(field,count,buffer) buffer.copy(host.field,static_cast<size_t>(host.count));device.field=buffer.p;result.timing.upload_bytes=checked_sum(result.timing.upload_bytes,buffer.bytes())
+     COPY(rectangles,rectangle_count,rectangles);COPY(segments,segment_count,segments);
+@@ -141,7 +216,7 @@
+     result.timing.device_bytes=checked_sum(result.timing.upload_bytes,checked_sum(slots.bytes(),checked_sum(compact.bytes(),
+       checked_sum(flags.bytes(),checked_sum(positions.bytes(),checked_sum(totals.bytes(),scratch.bytes()))))));
+     result.timing.device_bytes=checked_sum(result.timing.device_bytes,checked_sum(nodes_.bytes(),points_.bytes()));
+-    Counters counts;std::vector<Edge> survivors;
++    Counters counts;DeviceBuffer<Edge> survivors(&ledger);u64 survivor_size=0;
+     for(u64 base=0;base<host.effective;) {
+       const auto count=static_cast<u32>(std::min<u64>(q,host.effective-base));
+       const auto wave_start=Clock::now();CW_CUDA(cudaMemset(totals.p,0,CountSize*sizeof(unsigned long long)));
+@@ -157,22 +232,21 @@
+       const u64 live=u64(tail[0])+tail[1];require(live<=count,"cuda_waves.compaction_count");
+       scatter_kernel<<<blocks,threads>>>(slots.p,flags.p,positions.p,count,compact.p);CW_CUDA(cudaGetLastError());
+       CW_CUDA(cudaDeviceSynchronize());result.timing.waves_ms+=elapsed(wave_start);
+-      const auto download_start=Clock::now();
+-      const auto old=survivors.size();require(live<=survivors.max_size()-old,"cuda_waves.output_size");
+-      survivors.resize(old+static_cast<size_t>(live));
+-      if(live) CW_CUDA(cudaMemcpy(survivors.data()+old,compact.p,static_cast<size_t>(live)*sizeof(Edge),cudaMemcpyDeviceToHost));
+-      result.timing.download_bytes=checked_sum(result.timing.download_bytes,checked_sum(live*sizeof(Edge),sizeof(wave_counts)+sizeof(tail)));
+-      result.timing.download_ms+=elapsed(download_start);accumulate(counts,wave_counts);base+=count;
++      append_survivors(survivors,survivor_size,compact.p,live,std::max<size_t>(q,1),result.memory,result.output_times);
++      result.timing.download_bytes=checked_sum(result.timing.download_bytes,sizeof(wave_counts)+sizeof(tail));
++      accumulate(counts,wave_counts);base+=count;
+     }
+     const auto release_start=Clock::now();
+     // Explicit release is inside total_ms; RAII still handles every failure.
+     rectangles.release();segments.release();factors.release();classes.release();bands.release();ranks.release();credits.release();
+     slots.release();compact.release();flags.release();positions.release();totals.release();scratch.release();
+     result.timing.release_ms=elapsed(release_start);
+-    result.counters=counts;result.survivors=std::move(survivors);
++    result.counters=counts;finish_survivors(survivors,survivor_size,debug_keys,prop_,result);
++    result.memory.array_peak_bytes=ledger.peak;result.timing.device_bytes=ledger.peak;
++    require(ledger.live==resident_bytes(),"survivors.unreleased_device_buffer");
+   } catch(const std::exception& e) {
+-    failed_=true;result.error=e.what();result.survivors.clear();result.counters={};
++    failed_=true;result.error=e.what();result.survivors.clear();result.debug_keys.clear();result.counters={};
+   }
+   result.timing.total_ms=elapsed(total_start);return result;
+ }
+-} // namespace mhgp9::audit::resident
++} // namespace mhgp9::audit::resident_survivors
+--- frozen_af369c44/device_stub.cpp
++++ output_only_port/device_stub.cpp
+@@ -1,5 +1,6 @@
++// Explicit narrow output-only port of b_q34_filtered_resident_20260927 at af369c44.
+ #include "device.hpp"
+ #include <stdexcept>
+-namespace mhgp9::audit::resident {
++namespace mhgp9::audit::resident_survivors {
+ Opened open_cuda(IndexInput) {throw std::runtime_error("resident.CUDA_not_compiled");}
+ }
+--- frozen_af369c44/host.hpp
++++ output_only_port/host.hpp
+@@ -1,3 +1,4 @@
++// Explicit narrow output-only port of b_q34_filtered_resident_20260927 at af369c44.
+ #pragma once
+ // Explicit port of waves::Prepared and cuda_waves::Snapshot/finish at
+ // 33c1d28d7. Crucial change: no CPU rectangle witness search in this path.
+@@ -6,7 +7,7 @@
+ #include "gpu/flat_index.hpp"
+ #include <chrono>
+ #include <type_traits>
+-namespace mhgp9::audit::resident {
++namespace mhgp9::audit::resident_survivors {
+ namespace wa=waves;namespace ca=collective;namespace fp=factor_plan;
+ using namespace mhgp9::gen;
+ using Clock=std::chrono::steady_clock;
+@@ -114,7 +115,7 @@
+   std::vector<cw::Class> classes_;std::vector<cw::Band> bands_;std::vector<u32> ranks_;std::vector<u8> credits_;
+   friend class Session;
+ };
+-struct Run {Q34FilterBatch output;cw::Counters counters;cw::Timing timing;};
++struct Run {Q34FilterBatch output;cw::Counters counters;cw::Timing timing;OutputMemory memory;OutputTimes output_times;std::vector<u64> debug_keys;};
+ class Session final {
+  public:
+   static std::unique_ptr<Session> open(Q2CensusIndexPtr index,std::span<const WspdRectangle> requests,
+@@ -127,29 +128,29 @@
+   const OpenWork& work() const {return work_;}
+   const std::string& device_name() const {return opened_.name;}
+   bool cuda() const {return opened_.cuda;}
+-  Run consume(const Prepared& p,size_t q) {
++  Run consume(const Prepared& p,size_t q,bool debug_keys=false) {
+ #ifdef MHGP9_RESIDENT_MUTANT_OWNER
+     need(opened_.device && q>0,"resident.session_identity_or_closed");
+ #else
+     need(opened_.device && decision_->origin_==p.decision_->origin_ && q>0,"resident.session_identity_or_closed");
+ #endif
+-    const auto start=Clock::now();auto device=opened_.device->consume(p.view(),q);
++    const auto start=Clock::now();auto device=opened_.device->consume(p.view(),q,debug_keys);
+     need(device.available && device.error.empty(),device.error.empty()?"resident.backend_unavailable":device.error.c_str());
+-    Run out;out.counters=device.counters;out.timing=device.timing;
++    Run out;out.counters=device.counters;out.timing=device.timing;out.memory=device.memory;out.output_times=device.output_times;out.debug_keys=std::move(device.debug_keys);
+     const auto& c=out.counters;const auto e=p.effective();
+     need(c.queries==e.all && c.q3==e.q3 && c.q4==e.q4,"resident.physical_counts");
+     const auto order_start=Clock::now();auto& edges=device.survivors;
+-    for(size_t i=1;i<edges.size();++i) out.counters.out_of_order+=edges[i-1].ordinal>=edges[i].ordinal;
+-    std::sort(edges.begin(),edges.end(),[](const auto& a,const auto& b){return a.ordinal<b.ordinal;});
+-    for(size_t i=1;i<edges.size();++i) need(edges[i-1].ordinal<edges[i].ordinal,"resident.duplicate_ordinal");
+-    out.output.backend=cuda()?"audit_resident_CUDA":"audit_resident_portable";
++    out.output.backend=cuda()?"audit_survivors_CUDA":"audit_survivors_portable";
+     out.output.rectangle_masks.assign(decision_->masks().begin(),decision_->masks().end());
+     out.output.survivors.reserve(edges.size());for(const auto& edge:edges) out.output.survivors.push_back({edge.a,edge.b,edge.mask});
+     out.output.expanded_pairs=decision_->logical().all;
+     out.output.pair_q3_rejected=wa::sum(decision_->logical().q3-e.q3,c.rejected3);
+     out.output.pair_q4_rejected=wa::sum(decision_->logical().q4-e.q4,c.rejected4);
+     out.output.rectangle_visits=decision_->visits();out.output.pair_visits=c.visits;
+-    out.timing.order_ms=milliseconds(order_start);const auto release_start=Clock::now();std::vector<cw::Edge>().swap(edges);
++    using NativeEdge=typename decltype(out.output.survivors)::value_type;
++    out.memory.host_conversion_peak_bytes=wa::sum(out.memory.host_payload_bytes,wa::sum(out.memory.debug_key_bytes,
++      wa::sum(wa::product(out.output.survivors.capacity(),sizeof(NativeEdge)),out.output.rectangle_masks.capacity())));
++    out.timing.order_ms+=milliseconds(order_start);const auto release_start=Clock::now();std::vector<Payload>().swap(edges);
+     out.timing.release_ms+=milliseconds(release_start);out.timing.total_ms=milliseconds(start);return out;
+   }
+   double close() {
+--- frozen_af369c44/CMakeLists.txt
++++ output_only_port/CMakeLists.txt
+@@ -1,61 +1,29 @@
+ cmake_minimum_required(VERSION 3.20)
+-project(mhgp9_q34_filtered_resident LANGUAGES CXX)
++project(mhgp9_resident_survivors LANGUAGES CXX)
+ set(CMAKE_CXX_STANDARD 20)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ set(CMAKE_CXX_EXTENSIONS OFF)
+-option(MHGP9_RESIDENT_ENABLE_CUDA "Compile isolated CUDA runner" OFF)
+-option(MHGP9_AUDIT_SANITIZE "ASan/UBSan host qualification" OFF)
+-get_filename_component(DEFAULT_SOURCE_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
+-set(MHGP9_SOURCE_ROOT "${DEFAULT_SOURCE_ROOT}" CACHE PATH "v9 source snapshot")
+-set(MHGP9_GEN_LIBRARY "" CACHE FILEPATH "Optional pinned local generator archive")
+-if(NOT EXISTS "${MHGP9_SOURCE_ROOT}/src/gen/wspd/front.hpp")
+-  message(FATAL_ERROR "v9 source snapshot required")
+-endif()
++option(MHGP9_SURVIVORS_ENABLE_CUDA "Compile both exact output backends, without running a GPU" OFF)
++set(MHGP9_RESIDENT_ENABLE_CUDA ${MHGP9_SURVIVORS_ENABLE_CUDA} CACHE BOOL "Shared baseline backend selection" FORCE)
++# Reuse the frozen source-list/build rules, not its executable or its receipts.
++add_subdirectory(../b_q34_filtered_resident_20260927 baseline EXCLUDE_FROM_ALL)
++get_filename_component(V9_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
++add_executable(mhgp9_resident_survivors probe.cpp device_cpu.cpp ../b_q34_filtered_resident_20260927/device_cpu.cpp)
++target_include_directories(mhgp9_resident_survivors PRIVATE "${V9_ROOT}/src" "${V9_ROOT}/src/gen" "${V9_ROOT}/tests/gen")
++target_compile_options(mhgp9_resident_survivors PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Wpedantic;-Werror>)
+ find_package(Threads REQUIRED)
+ if(MHGP9_GEN_LIBRARY)
+-  if(NOT EXISTS "${MHGP9_GEN_LIBRARY}")
+-    message(FATAL_ERROR "Requested generator archive missing")
+-  endif()
+-  set(GEN_TARGET "${MHGP9_GEN_LIBRARY}")
++  target_link_libraries(mhgp9_resident_survivors PRIVATE "${MHGP9_GEN_LIBRARY}" Threads::Threads)
+ else()
+-  # Explicit source-list port of the engine mhgp9_gen target at 70168cc3b.
+-  set(GEN_SOURCES
+-    pipeline/local_credits.cpp pipeline/axis_q2.cpp pipeline/q2_census.cpp
+-    pipeline/q2_census_parallel.cpp pipeline/prepared_cloud.cpp wspd/front.cpp
+-    lanes/q4_family.cpp lanes/exact_ball.cpp lanes/q34_seed.cpp lanes/edge_cover.cpp
+-    lanes/q34_cover.cpp lanes/family_certificate.cpp lanes/q34_pruning.cpp
+-    lanes/q34_collective.cpp lanes/q4_positive_domain.cpp lanes/q4_center_map.cpp
+-    lanes/q4_local_partition.cpp lanes/q4_local.cpp lanes/q4_shallow_set.cpp
+-    lanes/q4_shallow.cpp lanes/q4_window.cpp pipeline/wspd_q34.cpp
+-    lanes/q34_witness_search.cpp lanes/q3_ball_census.cpp lanes/q34_dead_lanes.cpp)
+-  list(TRANSFORM GEN_SOURCES PREPEND "${MHGP9_SOURCE_ROOT}/src/gen/")
+-  add_library(resident_gen STATIC ${GEN_SOURCES})
+-  target_include_directories(resident_gen PUBLIC "${MHGP9_SOURCE_ROOT}/src/gen")
+-  target_compile_options(resident_gen PRIVATE -Wall -Wextra -Wpedantic -Werror)
+-  target_link_libraries(resident_gen PUBLIC Threads::Threads)
+-  set(GEN_TARGET resident_gen)
++  target_link_libraries(mhgp9_resident_survivors PRIVATE resident_gen Threads::Threads)
+ endif()
+-add_executable(mhgp9_q34_filtered_resident probe.cpp device_cpu.cpp)
+-target_include_directories(mhgp9_q34_filtered_resident PRIVATE "${MHGP9_SOURCE_ROOT}/src" "${MHGP9_SOURCE_ROOT}/src/gen" "${MHGP9_SOURCE_ROOT}/tests/gen")
+-target_compile_options(mhgp9_q34_filtered_resident PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Wpedantic;-Werror>)
+-target_link_libraries(mhgp9_q34_filtered_resident PRIVATE ${GEN_TARGET} Threads::Threads)
+-if(MHGP9_RESIDENT_ENABLE_CUDA)
+-  if(MHGP9_AUDIT_SANITIZE)
+-    message(FATAL_ERROR "Host sanitizers and device qualification are separate")
+-  endif()
++if(MHGP9_SURVIVORS_ENABLE_CUDA)
+   enable_language(CUDA)
+   find_package(CUDAToolkit REQUIRED)
+-  target_sources(mhgp9_q34_filtered_resident PRIVATE device_cuda.cu)
+-  set_target_properties(mhgp9_q34_filtered_resident PROPERTIES CUDA_STANDARD 17 CUDA_STANDARD_REQUIRED ON CUDA_ARCHITECTURES 120)
+-  target_compile_options(mhgp9_q34_filtered_resident PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-Wall,-Wextra>)
+-  target_link_libraries(mhgp9_q34_filtered_resident PRIVATE CUDA::cudart_static)
++  target_sources(mhgp9_resident_survivors PRIVATE device_cuda.cu ../b_q34_filtered_resident_20260927/device_cuda.cu)
++  set_target_properties(mhgp9_resident_survivors PROPERTIES CUDA_STANDARD 17 CUDA_STANDARD_REQUIRED ON CUDA_ARCHITECTURES 120)
++  target_compile_options(mhgp9_resident_survivors PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-Wall,-Wextra>)
++  target_link_libraries(mhgp9_resident_survivors PRIVATE CUDA::cudart_static)
+ else()
+-  target_sources(mhgp9_q34_filtered_resident PRIVATE device_stub.cpp)
++  target_sources(mhgp9_resident_survivors PRIVATE device_stub.cpp ../b_q34_filtered_resident_20260927/device_stub.cpp)
+ endif()
+-if(MHGP9_AUDIT_SANITIZE)
+-  target_compile_options(mhgp9_q34_filtered_resident PRIVATE -O1 -g1 -fsanitize=address,undefined -fno-omit-frame-pointer)
+-  target_link_options(mhgp9_q34_filtered_resident PRIVATE -fsanitize=address,undefined)
+-  if(TARGET resident_gen)
+-    target_compile_options(resident_gen PRIVATE -O1 -g1 -fsanitize=address,undefined -fno-omit-frame-pointer)
+-  endif()
+-endif()
