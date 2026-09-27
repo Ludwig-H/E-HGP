@@ -1,0 +1,39 @@
+{
+  "FULL_executed_by_candidate": false,
+  "GCP_used": false,
+  "commands": 17,
+  "dependencies": 1141,
+  "gate": {
+    "FULL_executed_by_candidate": false,
+    "GCP_used": false,
+    "abstract_replays": 64,
+    "ancestor_queries": 10048,
+    "ancestor_steps": 54032,
+    "boundary_replays": 2,
+    "captures": 44,
+    "continuations": 32,
+    "edges": 5416,
+    "event_replays": 376,
+    "fixtures": 22,
+    "full_gate": true,
+    "groups": 3784,
+    "max_combined_capacity_observed_bytes": 13004,
+    "max_parents": 32,
+    "mutant_reasons": [
+      "event.predecessor_missing",
+      "replay.occurrence_roots",
+      "replay.occurrence_roots"
+    ],
+    "parallel": false,
+    "parent_draft_incidences": 3024,
+    "parent_event_incidences": 3408,
+    "parent_forest_incidences": 2992,
+    "schema": "mhgp9_full_a_events_v1",
+    "silent_groups": 384,
+    "status": "passed",
+    "vertices": 4632
+  },
+  "parallel": false,
+  "scope": "event_a_C++_serial",
+  "status": "PASS"
+}

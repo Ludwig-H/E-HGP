@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-a-events-20260927-r1_sanitize/mhgp9_full_a_events",
+    "--gate"
+  ],
+  "name": "gate_sanitize",
+  "started_epoch": 1790500611.3756983,
+  "timeout_seconds": null
+}

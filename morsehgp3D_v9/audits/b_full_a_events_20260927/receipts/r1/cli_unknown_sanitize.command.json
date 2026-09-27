@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-a-events-20260927-r1_sanitize/mhgp9_full_a_events",
+    "--unknown"
+  ],
+  "ended_epoch": 1790500611.931191,
+  "exit_code": 2,
+  "group_closed": true,
+  "name": "cli_unknown_sanitize",
+  "pid": 362464,
+  "started_epoch": 1790500611.9198048,
+  "stderr_sha256": "4ab37ad751bfb15578bf4c5d23884d91b6de94bf399bdb156a209cbd1c3ffaca",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": null
+}

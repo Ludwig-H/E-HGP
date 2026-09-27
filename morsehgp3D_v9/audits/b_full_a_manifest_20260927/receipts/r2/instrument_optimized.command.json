@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_a_manifest_20260927/instrument.py",
+    "--check"
+  ],
+  "ended_epoch": 1790500167.0911677,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "instrument_optimized",
+  "pid": 346464,
+  "started_epoch": 1790500167.0496533,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "c28577bb7f398860c78d9996e814f780a4e3d46a09d390053fc08a3c4da5fa41",
+  "timeout_seconds": null
+}

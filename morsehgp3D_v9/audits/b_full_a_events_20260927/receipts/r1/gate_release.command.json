@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-a-events-20260927-r1_release/mhgp9_full_a_events",
+    "--gate"
+  ],
+  "ended_epoch": 1790500573.8710313,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "gate_release",
+  "pid": 360236,
+  "started_epoch": 1790500573.7543411,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "5ce452fab58a967c57370a4e512815f1f80d64caed51500369599c466adefbce",
+  "timeout_seconds": null
+}

@@ -1,0 +1,35 @@
+--- native::Builder
++++ audit::AObservedBuilder
+@@ -1,6 +1,6 @@
+-class Builder {
++class AObservedBuilder {
+  public:
+-  Builder(const CloudIndex& index, std::span<const BallData> census, unsigned max_k, FullBallStats& stats,
++  AObservedBuilder(const CloudIndex& index, std::span<const BallData> census, unsigned max_k, FullBallStats& stats,
+       int static_threads = 0, FullBallBatchResolver batch = {}, bool meb_proposal = true,
+       FullBallTimes* phase_times = nullptr, const FullBallTowerOptions& options = {},
+       const SealedCatalogue* seal = nullptr)
+@@ -705,6 +705,7 @@
+       require(o.anchors[target] != kAbsent32, "full_ball_static_closed_anchor_missing");
+       block.roots.push_back(order_root(o, o.anchors[target], prior_count));
+     }
++    ::mhgp9::audit::a_manifest::capture_a_roots(o.k, position, id, block.roots);
+     block.contribution = o.lean_contribution[position];
+     block.interior = o.lean_interior[position] != 0;
+     std::sort(block.roots.begin(), block.roots.end());
+@@ -808,6 +809,7 @@
+     }
+     const auto& program = programs[o.k];
+     order_prepare_lean(o);
++    ::mhgp9::audit::a_manifest::capture_a_input(o, program, balls, level_run, domain, ix);
+     reserve_lean(o);
+     size_t k1_cursor = 0;
+     for (size_t begin = 0; begin < program.size();) {
+@@ -839,6 +841,7 @@
+     u64 live = 0;
+     for (u64 next : o.current.next) if (next == absent) ++live;
+     require(live == 1, "full_ball_final_component_count");
++    ::mhgp9::audit::a_manifest::capture_a_output(o);
+     failpoint_after_lots(o.k);
+   }
+ 

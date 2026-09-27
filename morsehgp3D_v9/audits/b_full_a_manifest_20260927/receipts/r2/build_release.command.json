@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-a-manifest-20260927-r2_release",
+    "--target",
+    "mhgp9_full_a_manifest",
+    "-j",
+    "2"
+  ],
+  "ended_epoch": 1790500203.172277,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "build_release",
+  "pid": 346532,
+  "started_epoch": 1790500168.6155512,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "8db88e1dc794f551f412cf402ee8bdcfe72db74d6092037fa5f6a6775e46179f",
+  "timeout_seconds": null
+}

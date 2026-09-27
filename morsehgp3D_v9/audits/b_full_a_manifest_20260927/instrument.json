@@ -1,0 +1,37 @@
+{
+  "extraction_markers": 2,
+  "generated_sha256": "e06121208f7c4a7d2b5e04c1ecdf32cd8dcb73456e1c21e6ac770583a54293e4",
+  "hooks": 3,
+  "original_class_sha256": "10712c8e761b20feb15bb7cd46bc6d9de640e3e7ba769412ca7b9c337808f200",
+  "patch_sha256": "cc847b0fb088e08c51e0cf92c4988d5e6a0a3d0a71ec3a8ce9f9c295c83a21de",
+  "renames": 2,
+  "source": "morsehgp3D_v9/src/tower/forest/full_ball_tower.hpp",
+  "source_sha256": "124d3e9b52b1e6155e5a2ffd2a32cda7e5b403dda21155da2949b9ca8c90c0d0",
+  "substitutions": [
+    {
+      "after": "class AObservedBuilder {",
+      "before": "class Builder {",
+      "count": 1
+    },
+    {
+      "after": "  AObservedBuilder(const CloudIndex& index,",
+      "before": "  Builder(const CloudIndex& index,",
+      "count": 1
+    },
+    {
+      "after": "    order_prepare_lean(o);\n    ::mhgp9::audit::a_manifest::capture_a_input(o, program, balls, level_run, domain, ix);\n    reserve_lean(o);",
+      "before": "    order_prepare_lean(o);\n    reserve_lean(o);",
+      "count": 1
+    },
+    {
+      "after": "    ::mhgp9::audit::a_manifest::capture_a_roots(o.k, position, id, block.roots);\n    block.contribution = o.lean_contribution[position];",
+      "before": "    block.contribution = o.lean_contribution[position];",
+      "count": 1
+    },
+    {
+      "after": "    require(live == 1, \"full_ball_final_component_count\");\n    ::mhgp9::audit::a_manifest::capture_a_output(o);\n    failpoint_after_lots(o.k);",
+      "before": "    require(live == 1, \"full_ball_final_component_count\");\n    failpoint_after_lots(o.k);",
+      "count": 1
+    }
+  ]
+}

@@ -1,5 +1,19 @@
 # État courant des audits v9
 
+**27 septembre — entrée FULL A et constructeur événementiel C++ clos** :
+[synthèse](../docs/CONSTRUCTION_EVENEMENTIELLE_FULL_20260927.md),
+[manifeste](b_full_a_manifest_20260927/README.md),
+[contre-audit du manifeste](b_full_a_manifest_review_20260927/README.md),
+[constructeur](b_full_a_events_20260927/README.md).
+Deux portes17commandes Release/sanitizers : manifesteR2 (R1nonqualifiée
+conservée) puis constructeurR1,376rejeux géométriques exacts chacun.
+Le second ajoute64rejeux abstraits/deuxcasK1 et trois branches mutantes.
+Lecteurs normal/−O et corruptions20/25 passent. Muets, contributions
+datées,32parents et niveaux représentés conservés. Aucune nouvelle
+géométrie, croissanceLiDAR ou accélération FULL ; constructeur encore
+sériel, avant son port parallèle interne à K. B/C et moteur inchangés,
+aucun GCP dans cette qualification. Sources/reçus/builds figés.
+
 **27 septembre — raccord résident, portable et première G4 clos** :
 [bilan](../docs/RACCORD_RESIDENT_Q34_20260927.md).
 50commandes Release/sanitizers,85cas×3configurations, mêmes sorties natives,
@@ -11,8 +25,8 @@ mono exclu, pas FULL, pas de nouvelle croissance ni comparaison GPU/GPU
 appariée. [Contrelecture](b_q34_filtered_contract_review_20260927/RESIDENT_G4.md)
 et reçu LIVE normal/−O passent. VM même génération arrêtée,191,901s
 d'allocation. Moteur inchangé, ne pas confondre progrès sur le prototype
-CPU9,9s et victoire sur S2GPU natif≈101ms historique. Manifest FULL A
-en cours d'implémentation, pas encore qualifié.
+CPU9,9s et victoire sur S2GPU natif≈101ms historique. Manifeste FULL A
+désormais qualifié dans la tranche ci-dessus.
 
 **27 septembre — prochains raccords et coûts extérieurs à S2** :
 [ledger q34](b_q34_outer_ledger_20260927/README.md),

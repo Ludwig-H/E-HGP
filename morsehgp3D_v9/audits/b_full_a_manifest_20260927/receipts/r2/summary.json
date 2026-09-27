@@ -1,0 +1,41 @@
+{
+  "GCP_used": false,
+  "commands": 17,
+  "dependencies": 1140,
+  "gate": {
+    "GCP_used": false,
+    "actions": 3400,
+    "blocks": 4176,
+    "capture_reuse_refused": 1,
+    "captures": 44,
+    "continuations": 32,
+    "contributions": 2456,
+    "duplicate_roots": 888,
+    "extra_blocks": 480,
+    "fixtures": 22,
+    "full_gate": true,
+    "global_run_gaps": 352,
+    "inert": 624,
+    "k1_nonidentity": 188,
+    "late_failure_refused": 1,
+    "max_parents": 32,
+    "mutants": [
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "order_replays": 376,
+    "parent_incidence": 3024,
+    "raw_roots": 5416,
+    "refusals": 708,
+    "reverse_slot_passes": 44,
+    "schema": "mhgp9_full_a_manifest_v1",
+    "shared_plateau_roots": 1120,
+    "status": "passed",
+    "targets": 5416
+  },
+  "scope": "native_A_manifest_and_scalar_replay_only",
+  "status": "PASS"
+}

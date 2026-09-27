@@ -1,0 +1,14 @@
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Found Python3: /home/codespace/.python/current/bin/python3 (found version "3.12.1") found components: Interpreter 
+{"status": "PASS", "renames": 2, "hooks": 3, "source_sha256": "124d3e9b52b1e6155e5a2ffd2a32cda7e5b403dda21155da2949b9ca8c90c0d0"}
+-- Configuring done (0.5s)
+-- Generating done (0.0s)
+-- Build files have been written to: /workspaces/E-HGP/build/v9-a-manifest-20260927-r1_release

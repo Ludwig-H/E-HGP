@@ -2,6 +2,12 @@
 
 Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 
+Nouveau port FULL : [manifeste et constructeur événementiel C++](docs/CONSTRUCTION_EVENEMENTIELLE_FULL_20260927.md).
+Deux qualifications Release/sanitizers closes, mêmes parents, ancres,
+contributions et niveaux natifs sur376rejeux ; cas32parents inclus.
+Le constructeur est encore séquentiel, sans nouvelle géométrie ni gain
+FULL revendiqué. Il prépare le parallélisme à l'intérieur de chaque K.
+
 Nouveau raccord implémenté : [rectangles filtrés et index résident](docs/RACCORD_RESIDENT_Q34_20260927.md).
 50 commandes locales Release/sanitizers et le gate CUDA G4 passent.
 Trame sans sol entière, mêmes survivants : adaptateur froid W4/W48

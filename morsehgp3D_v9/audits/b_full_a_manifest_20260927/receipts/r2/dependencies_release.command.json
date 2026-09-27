@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "c++",
+    "-std=c++20",
+    "-DMHGP9_TESTING",
+    "-O3",
+    "-DNDEBUG",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-I/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src",
+    "-isystem",
+    "/workspaces/E-HGP/build/v7_boost_gate/extracted/usr/include",
+    "-M",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_a_manifest_20260927/probe.cpp"
+  ],
+  "ended_epoch": 1790500167.4114892,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "dependencies_release",
+  "pid": 346466,
+  "started_epoch": 1790500167.0950267,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "6ff96934c65f08e98ee507fc4f0f2bb2db1ced4899374be894bfa26cfd9a5bfb",
+  "timeout_seconds": null
+}

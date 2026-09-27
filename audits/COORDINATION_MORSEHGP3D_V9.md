@@ -1,5 +1,20 @@
 # Coordination Morse HGP 3D v9
 
+### 27 septembre — DEV : manifeste natif et nouveau constructeur événementiel A
+
+[Synthèse](../morsehgp3D_v9/docs/CONSTRUCTION_EVENEMENTIELLE_FULL_20260927.md).
+ManifestR2 eteventR1 clos17commandes chacun, Release/ASan/UBSan/LSan,
+lecteurs normal/−O PASS.376rejeux natifs, événements muets/contributions
+datées/32parents et niveaux représentés vérifiés. Le port C++ événementiel
+ajoute64rejeux abstraits et deux frontièresK1 ; trois branches mutantes
+détectées. Son entrée garde les cibles géométriques natives, sans nouveau
+solveur. R1du manifeste reste nonqualifiée, causeincludes prépinnés
+incomplets du runner, entièrement conservée. Aucun défaut C++ masqué.
+**Décision :** publier ces prototypes qualifiés, pas les activer comme
+optimisations mesurées. Le constructeur est encore sériel ; mesurer les
+vrais V/E et coûts avant sa parallélisation. Croissance en NLiDAR et100ms
+FULL ouverts. Moteur/GCP inchangés dans ce lot ; tous builds clos épinglés.
+
 ### 27 septembre — DEV : raccord résident exécuté sur G4, publication sans activation moteur
 
 [Bilan](../morsehgp3D_v9/docs/RACCORD_RESIDENT_Q34_20260927.md),

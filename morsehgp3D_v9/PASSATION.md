@@ -1,5 +1,24 @@
 # Passation v9
 
+## Manifeste FULL et constructeur événementiel C++ — 27 septembre
+
+[Bilan pédagogique](docs/CONSTRUCTION_EVENEMENTIELLE_FULL_20260927.md).
+Le manifeste reprend toutes les entrées A natives, y compris muets et
+contributions datées ; R2 close17commandes/1140dépendances,44captures,
+376rejeux,20corruptions de lecteur. R1nonqualifiée conservée : inventaire
+préalable d'includes incomplet, harnais corrigé sans changer le C++.
+
+Le nouveau constructeur C++ de A utilise MSF, requêtes historiques et
+doublement des renvois ; aucune copie du solveur géométrique. R1close
+17commandes/1141dépendances,376comparaisons natives,64rejeux abstraits et
+deux frontièresK1 ; Release/ASan/UBSan/LSan, lecteurs normal/−O et
+25corruptions passent. Trois branches mutantes détectées,32parents réels
+dans le corpus géométrique. Encore séquentiel, pas TSan/GPU ni chronoLiDAR.
+La borne quasi linéaire-logarithmique porte sur V/E du manifeste, pas sur
+le nombre de points du générateur. Suite : vrais catalogues et profils
+V/E/G/parents/contributions, puis parallélisme interne ; B/C restent natifs.
+Moteur inchangé et GCP non utilisé dans ce lot. Sources/builds/reçus figés.
+
 ## Raccord résident qualifié en portable et sur G4 — 27 septembre
 
 [Bilan et prochaine mesure](docs/RACCORD_RESIDENT_Q34_20260927.md).
@@ -18,7 +37,7 @@ Ne pas promouvoir le moteur sur un gain contre l'ancien prototype CPU9,9s :
 battre le vrai filtre GPU et la chaîne complète reste à établir.
 Pas de nouveau FULL ni de croissance mesurée du raccord. Les deux prochains
 tickets S résident et manifeste FULL sont liés au bilan. Sources, builds
-et reçus r1 désormais figés ; nouveau manifest FULL en cours, non qualifié.
+et reçus r1 désormais figés ; manifeste FULL qualifié dans la tranche ci-dessus.
 
 ## Coûts hors S2 et premier raccord FULL — 27 septembre
 

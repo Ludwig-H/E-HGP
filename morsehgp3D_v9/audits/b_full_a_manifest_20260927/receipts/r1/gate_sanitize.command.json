@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-a-manifest-20260927-r1_sanitize/mhgp9_full_a_manifest",
+    "--gate"
+  ],
+  "ended_epoch": 1790500060.2888968,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "gate_sanitize",
+  "pid": 340965,
+  "started_epoch": 1790500059.3832572,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "2bf7e0ea592a5fb752867c656926a874dd5d2fab40f3df3ecf35556672090558",
+  "timeout_seconds": null
+}

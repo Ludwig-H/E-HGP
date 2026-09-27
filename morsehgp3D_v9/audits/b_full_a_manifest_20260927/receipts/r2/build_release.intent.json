@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-a-manifest-20260927-r2_release",
+    "--target",
+    "mhgp9_full_a_manifest",
+    "-j",
+    "2"
+  ],
+  "name": "build_release",
+  "started_epoch": 1790500168.6155512,
+  "timeout_seconds": null
+}

@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-a-manifest-20260927-r2_release/mhgp9_full_a_manifest",
+    "--unknown"
+  ],
+  "name": "cli_unknown_release",
+  "started_epoch": 1790500203.401547,
+  "timeout_seconds": null
+}

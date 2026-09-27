@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-a-manifest-20260927-r1_release/mhgp9_full_a_manifest",
+    "--gate"
+  ],
+  "name": "gate_release",
+  "started_epoch": 1790500009.4175215,
+  "timeout_seconds": null
+}

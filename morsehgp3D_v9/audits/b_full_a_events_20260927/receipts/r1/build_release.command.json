@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-a-events-20260927-r1_release",
+    "--target",
+    "mhgp9_full_a_events",
+    "-j",
+    "2"
+  ],
+  "ended_epoch": 1790500573.7538652,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "build_release",
+  "pid": 360051,
+  "started_epoch": 1790500548.2904062,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "9302ff20ef3c9a2c4b09679403e39f9bd51136e75bbab4192b50b0205538d4bc",
+  "timeout_seconds": null
+}

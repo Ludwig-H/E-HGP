@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-a-events-20260927-r1_release/mhgp9_full_a_events",
+    "--unknown"
+  ],
+  "name": "cli_unknown_release",
+  "started_epoch": 1790500573.8742108,
+  "timeout_seconds": null
+}
