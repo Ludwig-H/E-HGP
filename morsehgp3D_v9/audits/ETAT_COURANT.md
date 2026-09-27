@@ -1,5 +1,21 @@
 # État courant des audits v9
 
+**27 septembre — vrais S2 et correction du chemin critique** :
+[bilan](../docs/VAGUES_REELLES_ET_CHEMIN_CRITIQUE_20260927.md),
+[contrelecture](b_q34_waves_real_review_20260927/README.md).
+Qualification21commandes et dix mesures réelles : ng00 entier,
+uniforme8k/16k/32k, six coupes capteur. Tous les S ordonnés égaux ;
+LiDAR mono47,691→31,048s, uniforme régression7–8 %. Préparation
+rectangle sérielle14,133s, `Prepared`187,227Mo : ne pas brancher cette
+préparation CPU comme un gain GPU supposé. Croissance dominante favorable
+mesurée, mais tests de coins β=2,230 ; pas une preuve globale ni FULL.
+CUDA isolé publié33c1d28d7, portable qualifié31commandes puis vrai gate
+device/trame entière PASS.35ms de vagues mais préparationCPU9,898s :
+pas de gain net du raccord. VM arrêtée, allocation188,416s, reçu S2 distinct.
+Les K sont déjà parallèles dans FULL :
+37–48ms d'encodage mur, encore252–256ms de tour hors cette fenêtre dans
+les deux premiers passages historiques étudiés. Moteur inchangé.
+
 **27 septembre — parents parallèles, continuations et vagues q34** :
 [synthèse](../docs/PARENTS_PARALLELES_ET_VAGUES_Q34_20260927.md),
 [contre-audit](b_parallel_and_waves_review_20260927/README.md),

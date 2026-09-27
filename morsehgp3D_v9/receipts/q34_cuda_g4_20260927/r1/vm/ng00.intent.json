@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "/tmp/ehgp-full-v7-9b2978c01f933361.bWdFbWaoRq/cuda_waves_build/mhgp9_q34_cuda_waves",
+    "--frame",
+    "/tmp/ehgp-full-v7-9b2978c01f933361.bWdFbWaoRq/source/data/scene_00.u32le",
+    "--cuda",
+    "--q=262144",
+    "--k=5",
+    "--s=8"
+  ],
+  "name": "ng00",
+  "started_epoch": 1790495778.173785,
+  "timeout_seconds": 347.66303058299997
+}

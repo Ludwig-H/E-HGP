@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-waves-real-20260927_release/mhgp9_q34_waves_real",
+    "--synthetic",
+    "terrain",
+    "64",
+    "5",
+    "8",
+    "1"
+  ],
+  "name": "quick_release_terrain",
+  "started_epoch": 1790494998.858075,
+  "timeout_seconds": null
+}

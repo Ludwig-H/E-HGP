@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-waves-real-20260927_release/mhgp9_q34_waves_real",
+    "--synthetic",
+    "uniform",
+    "16000",
+    "5",
+    "8",
+    "4096"
+  ],
+  "ended_epoch": 1790495170.7430363,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "measure_uniform_16000",
+  "pid": 228244,
+  "started_epoch": 1790495144.4634964,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "2c8624f2950dbe9593dee4ee92a20aa14bde1d6fbd986ef3b1b5f2e38dc1af48",
+  "timeout_seconds": null
+}

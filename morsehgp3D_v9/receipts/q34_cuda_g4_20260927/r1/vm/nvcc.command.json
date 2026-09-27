@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/usr/local/cuda/bin/nvcc",
+    "--version"
+  ],
+  "ended_epoch": 1790495765.9617617,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "nvcc",
+  "pid": 1809,
+  "started_epoch": 1790495765.9397888,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "28acf7c60a358550618607525561537e387a326bd4e453cb9cc6c261b96ec3b7",
+  "timeout_seconds": 359.89702544399995
+}

@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-waves-real-20260927_sanitize/mhgp9_q34_waves_real",
+    "--synthetic",
+    "uniform",
+    "64",
+    "5",
+    "8",
+    "7"
+  ],
+  "name": "quick_sanitize_uniform",
+  "started_epoch": 1790495013.2954314,
+  "timeout_seconds": null
+}

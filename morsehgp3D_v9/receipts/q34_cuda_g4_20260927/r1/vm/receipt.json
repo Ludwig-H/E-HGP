@@ -1,0 +1,267 @@
+{
+  "CUDA_installation_attempted": false,
+  "FULL_executed": false,
+  "binary_sha256": "fc7632ff39ff38ffde20ad50715600ffbad5d88ba2e4c464d18455bc723072b1",
+  "binary_stable": true,
+  "commands": [
+    {
+      "argv": [
+        "sudo",
+        "-n",
+        "cat",
+        "/run/systemd/shutdown/scheduled"
+      ],
+      "ended_epoch": 1790495765.848576,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "guest_schedule",
+      "pid": 1805,
+      "started_epoch": 1790495765.836866,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "752a9ad0d09f81aa7d60d3b476d26ac7855599490f8cd0463809379adc000c8b",
+      "timeout_seconds": 359.99994845
+    },
+    {
+      "argv": [
+        "g++",
+        "--version"
+      ],
+      "ended_epoch": 1790495765.867084,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "compiler",
+      "pid": 1807,
+      "started_epoch": 1790495765.8537874,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "9eaf9b7f4b11c2e84e2478c2ceb0e4f48f4ba88565bcfc832b3bce49847dda6d",
+      "timeout_seconds": 359.983027762
+    },
+    {
+      "argv": [
+        "cmake",
+        "--version"
+      ],
+      "ended_epoch": 1790495765.9396577,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "cmake",
+      "pid": 1808,
+      "started_epoch": 1790495765.8672247,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "6c08f840b67782da73a6fe113b64712615441722b15cd2723062dd4cc00a10d8",
+      "timeout_seconds": 359.969589914
+    },
+    {
+      "argv": [
+        "/usr/local/cuda/bin/nvcc",
+        "--version"
+      ],
+      "ended_epoch": 1790495765.9617617,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "nvcc",
+      "pid": 1809,
+      "started_epoch": 1790495765.9397888,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "28acf7c60a358550618607525561537e387a326bd4e453cb9cc6c261b96ec3b7",
+      "timeout_seconds": 359.89702544399995
+    },
+    {
+      "argv": [
+        "nvidia-smi"
+      ],
+      "ended_epoch": 1790495766.0164664,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "gpu_inventory",
+      "pid": 1810,
+      "started_epoch": 1790495765.9619865,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "5754769354fc0ca9f739cae0b24027e59928ef97b664e7aec1cb22b5494928be",
+      "timeout_seconds": 359.874829487
+    },
+    {
+      "argv": [
+        "lscpu"
+      ],
+      "ended_epoch": 1790495766.0243542,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "lscpu",
+      "pid": 1812,
+      "started_epoch": 1790495766.0166104,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "8bd86beaa9916b453878a8b50e97ebf4e6fc4a30c636e913cef212414b4b7586",
+      "timeout_seconds": 359.82020430499995
+    },
+    {
+      "argv": [
+        "cmake",
+        "-S",
+        "/tmp/ehgp-full-v7-9b2978c01f933361.bWdFbWaoRq/source/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927",
+        "-B",
+        "/tmp/ehgp-full-v7-9b2978c01f933361.bWdFbWaoRq/cuda_waves_build",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DMHGP9_CUDA_WAVES_ENABLE_CUDA=ON",
+        "-DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc",
+        "-DCMAKE_CUDA_ARCHITECTURES=120"
+      ],
+      "ended_epoch": 1790495768.071743,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "configure",
+      "pid": 1813,
+      "started_epoch": 1790495766.0244968,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a196f0b7740358a502ecf796d73c736027944ba00c02d95614cd2c61d7d6f219",
+      "timeout_seconds": 359.81231824599996
+    },
+    {
+      "argv": [
+        "cmake",
+        "--build",
+        "/tmp/ehgp-full-v7-9b2978c01f933361.bWdFbWaoRq/cuda_waves_build",
+        "--target",
+        "mhgp9_q34_cuda_waves",
+        "-j8"
+      ],
+      "ended_epoch": 1790495776.7258463,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "build",
+      "pid": 1932,
+      "started_epoch": 1790495768.0719664,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "30faba96be17c6c52b4ca5e3f7e99030819d309be3aa74f03ba7e5b0cc46df05",
+      "timeout_seconds": 357.76484989999994
+    },
+    {
+      "argv": [
+        "/tmp/ehgp-full-v7-9b2978c01f933361.bWdFbWaoRq/cuda_waves_build/mhgp9_q34_cuda_waves",
+        "--gate",
+        "--cuda"
+      ],
+      "ended_epoch": 1790495778.1735013,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "device_gate",
+      "pid": 2123,
+      "started_epoch": 1790495777.1751091,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "4a1e0c943c5b09042c3ba30f36b7d9385fc3a166fbefdf9912a93fd48526ba34",
+      "timeout_seconds": 348.661707382
+    },
+    {
+      "argv": [
+        "/tmp/ehgp-full-v7-9b2978c01f933361.bWdFbWaoRq/cuda_waves_build/mhgp9_q34_cuda_waves",
+        "--frame",
+        "/tmp/ehgp-full-v7-9b2978c01f933361.bWdFbWaoRq/source/data/scene_00.u32le",
+        "--cuda",
+        "--q=262144",
+        "--k=5",
+        "--s=8"
+      ],
+      "ended_epoch": 1790495800.6965437,
+      "exit_code": 0,
+      "group_closed": true,
+      "name": "ng00",
+      "pid": 2129,
+      "started_epoch": 1790495778.173785,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "733acd553e4b3d86afd13d353dc0e1067c481c61cbdbf9ccd521ace6b966aef9",
+      "timeout_seconds": 347.66303058299997
+    }
+  ],
+  "compiled_dependencies_sha256": "804d409f26d789e0780dcb4538557e4a9bb4f8e29e7833e76ff1d617628599cb",
+  "compiled_dependencies_stable": true,
+  "contract_certified": false,
+  "gate": {
+    "cases": 85,
+    "cuda_executed": true,
+    "empty": 72,
+    "fallback_survivors": 1668,
+    "fallbacks": 1411,
+    "mixed_masks": 12465,
+    "mode": "gate",
+    "planned": 63,
+    "pool_lane_reduced": 312,
+    "pool_rejected": 179,
+    "queries": 101320,
+    "reordered": 376,
+    "runs": 340,
+    "schema": "mhgp9_q34_cuda_waves_v1",
+    "status": "passed",
+    "survivors": 39868,
+    "zero_output": 4
+  },
+  "generation": "2026-09-27T00:54:44.162-07:00",
+  "measure": {
+    "E": 9122704,
+    "E3": 6667094,
+    "E4": 8403884,
+    "P": 23686751,
+    "P3": 17732794,
+    "P4": 23446295,
+    "Q_actual": 262144,
+    "Q_requested": 262144,
+    "S": 2043612,
+    "cuda_executed": true,
+    "device": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+    "device_bytes": 203083870,
+    "digest_u64": 5324876275161635233,
+    "download_bytes": 49048928,
+    "input_hash_u64": 9245360528374966039,
+    "k": 5,
+    "mode": "frame",
+    "n": 39885,
+    "physical_queries": 9122704,
+    "preparation_workers": 4,
+    "prepared_retained_bytes": 187226739,
+    "reference_workers": 4,
+    "s": 8,
+    "schema": "mhgp9_q34_cuda_waves_v1",
+    "snapshot_array_bytes": 188402983,
+    "status": "passed",
+    "times_ms": {
+      "comparison": 1.223629,
+      "cuda_runner": 267.479866,
+      "destruction": 8.303474,
+      "front": 2097.075689,
+      "index": 12.404841,
+      "input": 0.649429,
+      "order_convert": 39.170853,
+      "preparation": 9898.347799,
+      "reference": 10080.259684,
+      "runner_release": 1.73209,
+      "snapshot": 49.732965,
+      "survivor_download_allocate": 22.568056,
+      "total": 22437.350192,
+      "upload_allocate": 8.195254,
+      "waves_including_count_download": 34.966614
+    },
+    "upload_bytes": 188402983,
+    "visits": 537798656,
+    "waves": 35
+  },
+  "provenance": {
+    "commit": "33c1d28d7f1d6a210061407d9282ca0ae125110c",
+    "protocol_source": "commit",
+    "schema": "mhgp9_cuda_waves_session_v1",
+    "scope": "S2_only_no_FULL",
+    "tree": "962dd228806cbdff25907ec6876a4f611b13b868"
+  },
+  "public_status": "not_claimed",
+  "schema": "mhgp9_cuda_waves_session_v1",
+  "scope": "S2_only_no_FULL",
+  "source_manifest_sha256": "5592580c15efd82f11e68b9184f6cae0d431686ff5237cfe5eea75adf3da41b4",
+  "sources_stable": true,
+  "status": "completed",
+  "target": {
+    "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-b"
+  },
+  "useful_budget_seconds": 360,
+  "useful_elapsed_seconds": 34.88151825400003,
+  "worker_sha256": "8e479b686942dcee3f8bbfe90ca4a1a0e0409050dde711eae3f4b1f9ddeb21b2"
+}

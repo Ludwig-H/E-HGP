@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "cmake",
+    "-S",
+    "/tmp/ehgp-full-v7-9b2978c01f933361.bWdFbWaoRq/source/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927",
+    "-B",
+    "/tmp/ehgp-full-v7-9b2978c01f933361.bWdFbWaoRq/cuda_waves_build",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DMHGP9_CUDA_WAVES_ENABLE_CUDA=ON",
+    "-DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc",
+    "-DCMAKE_CUDA_ARCHITECTURES=120"
+  ],
+  "ended_epoch": 1790495768.071743,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "configure",
+  "pid": 1813,
+  "started_epoch": 1790495766.0244968,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "a196f0b7740358a502ecf796d73c736027944ba00c02d95614cd2c61d7d6f219",
+  "timeout_seconds": 359.81231824599996
+}

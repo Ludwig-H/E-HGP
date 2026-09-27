@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-g4-cuda-waves-session-20260927-r1/full_host/start_and_verify.sh",
+    "--yes",
+    "--guest-shutdown-minutes",
+    "30",
+    "--handoff-file",
+    "/workspaces/E-HGP/build/v9-g4-cuda-waves-session-20260927-r1/full_host/handoff.json",
+    "--lifecycle-state-file",
+    "/workspaces/E-HGP/build/v9-g4-cuda-waves-session-20260927-r1/full_host/lifecycle.txt",
+    "--guard-mark-dir",
+    "/workspaces/E-HGP/build/v9-g4-cuda-waves-session-20260927-r1/full_host/guardmarks"
+  ],
+  "ended_epoch": 1790495737.07977,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "guarded_start",
+  "pid": 237281,
+  "started_epoch": 1790495656.1692777,
+  "stderr_sha256": "8e73c394e98d4bf305eb95382f2249405bc10488870b1a5b449c236c3cff259f",
+  "stdout_sha256": "47215152c344bfe6c334c8001b1f882b4764a28c8e7767b967c7d795a9c5ca6b",
+  "timeout_seconds": null
+}

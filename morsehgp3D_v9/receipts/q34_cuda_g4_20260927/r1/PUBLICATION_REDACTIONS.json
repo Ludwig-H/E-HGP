@@ -1,0 +1,66 @@
+{
+  "after_stop_source_sha256": "867840f725db9d774e041a14c72af22bf4384c31975fa39dc6177e1039c5e166",
+  "policy": "Allowlisted text only; no keys, archive, LiDAR payload, OS Login reply, unprojected GCE state, or controller stdout",
+  "redactions": [
+    {
+      "published_name": "host/guarded_start.redacted.stdout",
+      "published_sha256": "973cf409d7ffc354fd807c319878ba950b2027e92cade5c836d3f48a792b275b",
+      "source_path": "/workspaces/E-HGP/build/v9-g4-cuda-waves-session-20260927-r1/full_host/guarded_start.stdout",
+      "source_sha256": "47215152c344bfe6c334c8001b1f882b4764a28c8e7767b967c7d795a9c5ca6b"
+    },
+    {
+      "published_name": "host/guarded_start.redacted.stderr",
+      "published_sha256": "9695e22819ec6543603f2c4e9658ddf5ed5636bb587ee918466d5f9760548d47",
+      "source_path": "/workspaces/E-HGP/build/v9-g4-cuda-waves-session-20260927-r1/full_host/guarded_start.stderr",
+      "source_sha256": "8e73c394e98d4bf305eb95382f2249405bc10488870b1a5b449c236c3cff259f"
+    },
+    {
+      "published_name": "host/guarded_stop.redacted.stdout",
+      "published_sha256": "8237101459ad3fd3b178090dc01ee238c1558b1e6f7658c0954b25af6b58c3ee",
+      "source_path": "/workspaces/E-HGP/build/v9-g4-cuda-waves-session-20260927-r1/full_host/guarded_stop.stdout",
+      "source_sha256": "8237101459ad3fd3b178090dc01ee238c1558b1e6f7658c0954b25af6b58c3ee"
+    },
+    {
+      "published_name": "host/guarded_stop.redacted.stderr",
+      "published_sha256": "7ad50516ce0fd4f86e3d509737e920cfd3e93b10a6a55c47930781c057e3c42d",
+      "source_path": "/workspaces/E-HGP/build/v9-g4-cuda-waves-session-20260927-r1/full_host/guarded_stop.stderr",
+      "source_sha256": "7ad50516ce0fd4f86e3d509737e920cfd3e93b10a6a55c47930781c057e3c42d"
+    },
+    {
+      "published_name": "host/guest_schedule.redacted.stdout",
+      "published_sha256": "752a9ad0d09f81aa7d60d3b476d26ac7855599490f8cd0463809379adc000c8b",
+      "source_path": "/workspaces/E-HGP/build/v9-g4-cuda-waves-session-20260927-r1/full_host/guest_schedule.stdout",
+      "source_sha256": "752a9ad0d09f81aa7d60d3b476d26ac7855599490f8cd0463809379adc000c8b"
+    },
+    {
+      "published_name": "host/guest_schedule.redacted.stderr",
+      "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_path": "/workspaces/E-HGP/build/v9-g4-cuda-waves-session-20260927-r1/full_host/guest_schedule.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "published_name": "host/worker.redacted.stdout",
+      "published_sha256": "418be59af303ea809b498c6901e222f4b4ae2aac1f013291f451bcbaa2722724",
+      "source_path": "/workspaces/E-HGP/build/v9-g4-cuda-waves-session-20260927-r1/full_host/worker.stdout",
+      "source_sha256": "418be59af303ea809b498c6901e222f4b4ae2aac1f013291f451bcbaa2722724"
+    },
+    {
+      "published_name": "host/worker.redacted.stderr",
+      "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_path": "/workspaces/E-HGP/build/v9-g4-cuda-waves-session-20260927-r1/full_host/worker.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "published_name": "host/pack_capture.redacted.stdout",
+      "published_sha256": "329343c36d53d6bbdf4adc519e8352855f1635007e18cbd01f8f76de58a13858",
+      "source_path": "/workspaces/E-HGP/build/v9-g4-cuda-waves-session-20260927-r1/full_host/pack_capture.stdout",
+      "source_sha256": "329343c36d53d6bbdf4adc519e8352855f1635007e18cbd01f8f76de58a13858"
+    },
+    {
+      "published_name": "host/pack_capture.redacted.stderr",
+      "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_path": "/workspaces/E-HGP/build/v9-g4-cuda-waves-session-20260927-r1/full_host/pack_capture.stderr",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

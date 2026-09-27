@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/tmp/ehgp-full-v7-9b2978c01f933361.bWdFbWaoRq/cuda_waves_build",
+    "--target",
+    "mhgp9_q34_cuda_waves",
+    "-j8"
+  ],
+  "ended_epoch": 1790495776.7258463,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "build",
+  "pid": 1932,
+  "started_epoch": 1790495768.0719664,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "30faba96be17c6c52b4ca5e3f7e99030819d309be3aa74f03ba7e5b0cc46df05",
+  "timeout_seconds": 357.76484989999994
+}

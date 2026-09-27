@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-waves-real-20260927_release/mhgp9_q34_waves_real",
+    "--mutant",
+    "fallback"
+  ],
+  "name": "mutant_release_fallback",
+  "started_epoch": 1790494998.9296765,
+  "timeout_seconds": null
+}

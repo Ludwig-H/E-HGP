@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/tmp/ehgp-full-v7-9b2978c01f933361.bWdFbWaoRq/cuda_waves_build/mhgp9_q34_cuda_waves",
+    "--gate",
+    "--cuda"
+  ],
+  "ended_epoch": 1790495778.1735013,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "device_gate",
+  "pid": 2123,
+  "started_epoch": 1790495777.1751091,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "4a1e0c943c5b09042c3ba30f36b7d9385fc3a166fbefdf9912a93fd48526ba34",
+  "timeout_seconds": 348.661707382
+}

@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/home/codespace/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "scp",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-b",
+    "--quiet",
+    "--ssh-key-file=/workspaces/E-HGP/build/v9-g4-cuda-waves-session-20260927-r1/id_ed25519",
+    "--ssh-key-expiration=2026-09-27T09:04:15.225657Z",
+    "ehgp-v7-4fa0e0789a7d5bb06b787d35:/tmp/ehgp-full-v7-9b2978c01f933361.bWdFbWaoRq/capture.tar.gz",
+    "/workspaces/E-HGP/build/v9-g4-cuda-waves-session-20260927-r1/full_host/capture.tar.gz"
+  ],
+  "ended_epoch": 1790495812.7475011,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "download",
+  "pid": 240605,
+  "started_epoch": 1790495807.1259556,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": 180
+}

@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "/home/codespace/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "os-login",
+    "ssh-keys",
+    "add",
+    "--project=devpod-gpu-exploration",
+    "--key-file=/workspaces/E-HGP/build/v9-g4-cuda-waves-session-20260927-r1/id_ed25519.pub",
+    "--ttl=70m",
+    "--format=json",
+    "--quiet"
+  ],
+  "ended_epoch": 1790495656.1685925,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "oslogin_add",
+  "pid": 237263,
+  "started_epoch": 1790495654.7520165,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "d600753dad026f60ca33a62beed64556b0927f2c571b2e8e9ec1a98d29b4d03c",
+  "timeout_seconds": 90
+}

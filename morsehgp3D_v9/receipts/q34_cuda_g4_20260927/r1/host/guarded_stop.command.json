@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-g4-cuda-waves-session-20260927-r1/full_host/stop_and_verify.sh",
+    "--yes",
+    "--expected-last-start-timestamp",
+    "2026-09-27T00:54:44.162-07:00"
+  ],
+  "ended_epoch": 1790495879.2963653,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "guarded_stop",
+  "pid": 240647,
+  "started_epoch": 1790495812.76025,
+  "stderr_sha256": "7ad50516ce0fd4f86e3d509737e920cfd3e93b10a6a55c47930781c057e3c42d",
+  "stdout_sha256": "8237101459ad3fd3b178090dc01ee238c1558b1e6f7658c0954b25af6b58c3ee",
+  "timeout_seconds": null
+}

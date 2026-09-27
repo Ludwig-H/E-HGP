@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-waves-real-20260927_sanitize/mhgp9_q34_waves_real",
+    "--gate"
+  ],
+  "ended_epoch": 1790495013.2949405,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "gate_sanitize",
+  "pid": 225164,
+  "started_epoch": 1790495011.6184092,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "1ea024b5ec400adde8207c087cc7b9a27ed8b50d3a84284ad619efef0ddc2a5c",
+  "timeout_seconds": null
+}

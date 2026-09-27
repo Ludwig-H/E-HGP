@@ -2,10 +2,17 @@
 
 Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 
+Suite close du 27 septembre : [vrais S2, CUDA et chemin critique](docs/VAGUES_REELLES_ET_CHEMIN_CRITIQUE_20260927.md).
+Le consommateur par vagues passe maintenant aussi les tests CUDA sur G4.
+Trame sans sol entière : mêmes survivants,35ms de vagues, mais préparation
+CPU9,9s et aucun gain net du raccord complet. Ne pas l'activer tel quel.
+CPU8k/16k/32k et six coupes LiDAR sont publiés, avec régressions et compteur
+de croissance défavorable. VM arrêtée, allocation188,416s ;100ms FULL reste ouvert.
+
 Préparation G4 du 27 septembre : [consommateur q34 CUDA isolé](audits/b_q34_cuda_waves_20260927/README.md)
 et [protocole gardé](audits/b_q34_cuda_session_20260927/README.md).
-31 commandes de qualification portable passent ; CUDA reste à compiler et
-exécuter sur G4. Aucun nouveau gain GPU/FULL n'est annoncé par cette porte.
+31 commandes de qualification portable passent ; à cette porte préalable,
+CUDA restait à compiler et exécuter. Aucun gain GPU/FULL n'en était déduit.
 La [relecture des chronos G4](audits/b_critical_path_20260927/README.md)
 confirme que les K sont déjà encodés simultanément : il reste environ
 252–256 ms de construction de tour hors cette fenêtre, sur les deux

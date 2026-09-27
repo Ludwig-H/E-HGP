@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-audit-q34-waves-real-20260927_release",
+    "--target",
+    "mhgp9_q34_waves_real",
+    "-j",
+    "2"
+  ],
+  "name": "build_release",
+  "started_epoch": 1790494992.4399602,
+  "timeout_seconds": null
+}

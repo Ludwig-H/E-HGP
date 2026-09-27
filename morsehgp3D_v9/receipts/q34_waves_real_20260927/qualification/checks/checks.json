@@ -1,0 +1,78 @@
+{
+  "GCP_used": false,
+  "checker_sha256": "10f0c7e5b2b22732037a1d827847aa2097495ec1d05a58f1bfcb09b5a2f5a249",
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_waves_real_20260927/run.py",
+        "--readback",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/q34_waves_real_20260927/qualification"
+      ],
+      "exit_code": 0,
+      "name": "normal",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "fa98fd33057ae651cf4c9c8414e785876fdc052b0b01c22acf435dbcb56ef6fd"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_waves_real_20260927/run.py",
+        "--readback",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/q34_waves_real_20260927/qualification"
+      ],
+      "exit_code": 0,
+      "name": "optimized",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "fa98fd33057ae651cf4c9c8414e785876fdc052b0b01c22acf435dbcb56ef6fd"
+    }
+  ],
+  "kind": "qualification",
+  "mutations": [
+    {
+      "cause": "complete command inventory",
+      "name": "missing_command",
+      "rejected": true
+    },
+    {
+      "cause": "command binding",
+      "name": "wrong_argv",
+      "rejected": true
+    },
+    {
+      "cause": "command binding",
+      "name": "wrong_exit",
+      "rejected": true
+    },
+    {
+      "cause": "command binding",
+      "name": "open_group",
+      "rejected": true
+    },
+    {
+      "cause": "LIVE source closure",
+      "name": "wrong_source",
+      "rejected": true
+    },
+    {
+      "cause": "qualification only",
+      "name": "wrong_cases",
+      "rejected": true
+    },
+    {
+      "cause": "closed qualification",
+      "name": "false_gpu",
+      "rejected": true
+    },
+    {
+      "cause": "closed qualification",
+      "name": "unclosed_capture",
+      "rejected": true
+    }
+  ],
+  "reader_sha256": "2fd85bbc1a8a8df80b973716f50e4a8eb84a7f86a8de8e02b1a9b5e00e2f2bf6",
+  "status": "PASS"
+}

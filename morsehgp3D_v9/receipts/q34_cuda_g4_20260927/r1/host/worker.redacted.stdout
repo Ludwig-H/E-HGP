@@ -1,0 +1,11 @@
+guest_schedule: PID 1805
+compiler: PID 1807
+cmake: PID 1808
+nvcc: PID 1809
+gpu_inventory: PID 1810
+lscpu: PID 1812
+configure: PID 1813
+build: PID 1932
+device_gate: PID 2123
+ng00: PID 2129
+{"FULL_executed": false, "schema": "mhgp9_cuda_waves_session_v1", "status": "completed"}

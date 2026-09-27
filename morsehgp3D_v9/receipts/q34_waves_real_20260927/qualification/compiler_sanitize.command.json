@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "clang++",
+    "--version"
+  ],
+  "ended_epoch": 1790494999.0140498,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "compiler_sanitize",
+  "pid": 225024,
+  "started_epoch": 1790494998.991659,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "3635b8631d4ebcd8ed7586f4e01e7a6b44407de9d38db6e01daca9c242ed7a53",
+  "timeout_seconds": null
+}

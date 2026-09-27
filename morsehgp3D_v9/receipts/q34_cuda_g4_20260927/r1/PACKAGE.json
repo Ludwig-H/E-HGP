@@ -1,0 +1,17 @@
+{
+  "GCP_used": false,
+  "helper_sha256": "177b25a0d72150dc331661fdf8da1ccde77ea17fb694d9c6af5b0929755160d8",
+  "manifest_sha256": "5592580c15efd82f11e68b9184f6cae0d431686ff5237cfe5eea75adf3da41b4",
+  "provenance": {
+    "commit": "33c1d28d7f1d6a210061407d9282ca0ae125110c",
+    "protocol_source": "commit",
+    "schema": "mhgp9_cuda_waves_session_v1",
+    "scope": "S2_only_no_FULL",
+    "tree": "962dd228806cbdff25907ec6876a4f611b13b868"
+  },
+  "schema": "mhgp9_cuda_waves_session_v1",
+  "scope": "S2_only_no_FULL",
+  "snapshot_sha256": "9ae5186e54b7795b44d2957975e1d4626a44b92e1f15789e26a6c49f00b56073",
+  "status": "prepared_not_executed",
+  "worker_sha256": "8e479b686942dcee3f8bbfe90ca4a1a0e0409050dde711eae3f4b1f9ddeb21b2"
+}

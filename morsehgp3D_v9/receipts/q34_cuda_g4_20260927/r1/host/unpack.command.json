@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "/home/codespace/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "ssh",
+    "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-b",
+    "--quiet",
+    "--ssh-key-file=/workspaces/E-HGP/build/v9-g4-cuda-waves-session-20260927-r1/id_ed25519",
+    "--ssh-key-expiration=2026-09-27T09:04:15.225657Z",
+    "--ssh-flag=-n",
+    "--ssh-flag=-o BatchMode=yes",
+    "--ssh-flag=-o ConnectTimeout=15",
+    "--command=test \"$(sha256sum /tmp/ehgp-full-v7-9b2978c01f933361.bWdFbWaoRq/snapshot.tar.gz | cut -d \" \" -f 1)\" = 9ae5186e54b7795b44d2957975e1d4626a44b92e1f15789e26a6c49f00b56073 && test \"$(sha256sum /tmp/ehgp-full-v7-9b2978c01f933361.bWdFbWaoRq/source_manifest.json | cut -d \" \" -f 1)\" = 5592580c15efd82f11e68b9184f6cae0d431686ff5237cfe5eea75adf3da41b4 && test \"$(sha256sum /tmp/ehgp-full-v7-9b2978c01f933361.bWdFbWaoRq/worker.py | cut -d \" \" -f 1)\" = 8e479b686942dcee3f8bbfe90ca4a1a0e0409050dde711eae3f4b1f9ddeb21b2 && test \"$(sha256sum /tmp/ehgp-full-v7-9b2978c01f933361.bWdFbWaoRq/double_guard_verified | cut -d \" \" -f 1)\" = ae7f45f35ff8298db99d4951267d4960769b9e5e0c24d3d8b6c1900e1ebd3586 && mkdir -m 700 /tmp/ehgp-full-v7-9b2978c01f933361.bWdFbWaoRq/source && tar --no-same-owner --no-same-permissions -xzf /tmp/ehgp-full-v7-9b2978c01f933361.bWdFbWaoRq/snapshot.tar.gz -C /tmp/ehgp-full-v7-9b2978c01f933361.bWdFbWaoRq/source"
+  ],
+  "ended_epoch": 1790495760.0704424,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "unpack",
+  "pid": 239835,
+  "started_epoch": 1790495755.4731255,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": 90
+}

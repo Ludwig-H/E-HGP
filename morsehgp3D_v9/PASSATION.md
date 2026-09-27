@@ -1,5 +1,29 @@
 # Passation v9
 
+## Vagues réelles et chemin critique — 27 septembre, nouvelle qualification
+
+[Bilan actuel](docs/VAGUES_REELLES_ET_CHEMIN_CRITIQUE_20260927.md).
+S2 mono sur trame sans sol entière : 47,691→31,048 s, mêmes survivants,
+préparation comprise ; pas un mur FULL. Uniforme8k/16k/32k régresse de
+7–8 %, quoique les travaux principaux restent sous le quadruplement.
+Six coupes capteur closes : postes dominants sous β=2, exception de
+préparation β=2,230 conservée ; ni preuve générale ni plusieurs scènes.
+`Prepared` LiDAR conserve187,227Mo, pas seulement29,328Mo d'arène.
+
+Priorité de port : ne pas refaire le filtre rectangle GPU en CPU,
+compacter les descriptions utiles et conserver les ordinals originaux.
+Le consommateur CUDA isolé est publié en `33c1d28d7`, porte portable
+31 commandes et protocole gardé hors cloud qualifiés. La capture device
+suivante passe : vrais tests CUDA et trame entière exacte,35ms de vagues,
+mais préparationCPU9,898s ; aucun gain net du raccord. Allocation188,416s,
+VM même génération relueTERMINATED. Voir le bilan pour les périmètres et
+le reste non attribué du runner. Moteur inchangé.
+
+Correction d'interprétation FULL : les K sont déjà encodés simultanément.
+Sur deux premiers passages G4 historiques, fenêtre37–48ms et construction
+de tour hors encodage252–256ms. La somme des K ne se soustrait pas au mur.
+Il faut aussi traiter S3/S4, census et construction des événements FULL.
+
 ## Parents parallèles et vagues q34 — 27 septembre, suite qualifiée
 
 [Bilan et décisions de port](docs/PARENTS_PARALLELES_ET_VAGUES_Q34_20260927.md).

@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/usr/local/cuda/bin/nvcc",
+    "--version"
+  ],
+  "name": "nvcc",
+  "started_epoch": 1790495765.9397888,
+  "timeout_seconds": 359.89702544399995
+}

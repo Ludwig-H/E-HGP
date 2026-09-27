@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "/tmp/ehgp-full-v7-9b2978c01f933361.bWdFbWaoRq/cuda_waves_build/mhgp9_q34_cuda_waves",
+    "--frame",
+    "/tmp/ehgp-full-v7-9b2978c01f933361.bWdFbWaoRq/source/data/scene_00.u32le",
+    "--cuda",
+    "--q=262144",
+    "--k=5",
+    "--s=8"
+  ],
+  "ended_epoch": 1790495800.6965437,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "ng00",
+  "pid": 2129,
+  "started_epoch": 1790495778.173785,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "733acd553e4b3d86afd13d353dc0e1067c481c61cbdbf9ccd521ace6b966aef9",
+  "timeout_seconds": 347.66303058299997
+}

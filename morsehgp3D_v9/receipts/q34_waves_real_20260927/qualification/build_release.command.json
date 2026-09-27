@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-audit-q34-waves-real-20260927_release",
+    "--target",
+    "mhgp9_q34_waves_real",
+    "-j",
+    "2"
+  ],
+  "ended_epoch": 1790494998.5246482,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "build_release",
+  "pid": 224862,
+  "started_epoch": 1790494992.4399602,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "361a186ade257a836c0336a60c96ac50cf02b41e735ccf3105a87a7fcc77b574",
+  "timeout_seconds": null
+}

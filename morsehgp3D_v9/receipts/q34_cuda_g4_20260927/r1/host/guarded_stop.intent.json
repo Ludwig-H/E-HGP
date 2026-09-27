@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-g4-cuda-waves-session-20260927-r1/full_host/stop_and_verify.sh",
+    "--yes",
+    "--expected-last-start-timestamp",
+    "2026-09-27T00:54:44.162-07:00"
+  ],
+  "name": "guarded_stop",
+  "started_epoch": 1790495812.76025,
+  "timeout_seconds": null
+}

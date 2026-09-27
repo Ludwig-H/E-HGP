@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "sudo",
+    "-n",
+    "cat",
+    "/run/systemd/shutdown/scheduled"
+  ],
+  "name": "guest_schedule",
+  "started_epoch": 1790495765.836866,
+  "timeout_seconds": 359.99994845
+}

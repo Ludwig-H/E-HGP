@@ -1,5 +1,11 @@
 # Vagues q34 CUDA — prototype isolé, 27 septembre 2026
 
+Suite G4 close après cette qualification portable :
+[reçu device r1](../../receipts/q34_cuda_g4_20260927/r1/README.md).
+CUDA compilé/exécuté, sorties natives identiques ; aucun gain net du raccord
+à cause de sa préparation CPU. Les sections de qualification locale ci-dessous
+restent l'autorité de la porte portable, distincte de cette capture device.
+
 État : **porte portable locale passée ; CUDA non compilé et non exécuté ici**.
 Ni accélération GPU, ni gain net S2, ni contrat FULL ne sont acquis par ces
 reçus. Aucun moteur modifié, aucun GCP utilisé par cet auteur.

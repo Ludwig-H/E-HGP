@@ -1,5 +1,28 @@
 # Coordination Morse HGP 3D v9
 
+### 27 septembre — DEV : vrais S2, preuve de croissance limitée, port CUDA isolé
+
+[Bilan](../morsehgp3D_v9/docs/VAGUES_REELLES_ET_CHEMIN_CRITIQUE_20260927.md).
+Le consommateur par vagues est mesuré sur ng00 entier, uniforme8k/16k/32k
+et les six coupes capteur. Sorties exactes, gain mono LiDAR34,9 % sur une
+observation, régression uniforme7–8 %. E/visites/temps dominants sous
+β=2 sur les relations LiDAR, mais coins Pool β=2,230 publié.
+**Décision :** supprimer le filtre rectangle sériel du futur raccord GPU,
+réutiliser sa version device et compacter les métadonnées de rectangles
+fermés. Q borne les temporaires de paires, pas le front ni S.
+
+Le prototype CUDA et le protocole S2 distinct sont publiés33c1d28d7 :
+qualification portable31commandes, protocole normal/−O26positifs/86refus.
+Aucun de ces tests portables n'est un test GPU ; la session device suivante
+est désormais close PASS : CUDA/trame entière exacts,35ms de vagues,
+préparationCPU9,898s et aucun gain net du raccord. Ne pas l'activer en
+production ; supprimer d'abord le filtre rectangle sériel et le transport
+de métadonnées fermées. Cible relueTERMINATED, allocation188,416s.
+**Correction FULL :** les K sont déjà encodés simultanément. Ne pas promettre
+120ms de gain mur sur la base d'une somme d'encodages par ordre ; le gros
+poste restant est aussi la construction de la tour hors encodage.
+Pas d'activation moteur, continuations et sorties explicites inchangées.
+
 ### 27 septembre — DEV : vrais parents parallèles et consommateur q34 clos
 
 Base `fd1a2c7ee`, [bilan](../morsehgp3D_v9/docs/PARENTS_PARALLELES_ET_VAGUES_Q34_20260927.md).

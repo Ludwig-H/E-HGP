@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-waves-real-20260927_release/mhgp9_q34_waves_real",
+    "--frame",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/half_x_neg.u32le",
+    "5",
+    "8",
+    "4096"
+  ],
+  "ended_epoch": 1790495308.2154844,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "measure_ng00_half_x_neg",
+  "pid": 230083,
+  "started_epoch": 1790495253.3004913,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "7755a8b1ea30e739ed3573592922d29009d0c97a814ccde1acae82a31534ce90",
+  "timeout_seconds": null
+}
