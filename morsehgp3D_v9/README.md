@@ -2,6 +2,21 @@
 
 Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 
+Suite du 27 septembre : [dendrogramme explicite de points après FULL](experiments/point_dendrogram_20260927/README.md),
+[résultats K5](experiments/point_dendrogram_20260927/RESULTATS.md).
+Une feuille par point, dates rationnelles, partitions emboîtées, seuil de
+cardinalité puis EOM commun :181fixtures/3 124coupes et neuf gatesEOM passent.
+Pilote13scènes connu :52sélections nouvelles/182comparateurs conservés.
+À m20/z1, ARI moyen0,5061/0,2239 HDB commun sur G8sphériqueδ4,
+0,5406/0,2686 sur déséquilibré ; anisotropeF1reste0,1938/0,4410.
+Pas de domination universelle ni de vitesse industrielle : routage Python
+7,91–11,22s à n1200, sans nouveau calcul FULL/GPU/GCP.
+[Lecture HGP-old/Clusterer3D](audits/LECTURE_HGP_OLD_CLUSTERER3D_20260927.md) :
+leur catalogue contributif n'est pas Gabriel seul. Un
+[contre-exemple exact](audits/CATALOGUE_ET_POIDS_NON_GABRIEL_20260927.md)
+prouve que préserver la connexité ne préserve pas les poids. Priorité à
+l'ablation du catalogue, pas à une nouvelle modification EOM à l'aveugle.
+
 Développement du 27 septembre : [clustering pondéré raccordé au FULL](experiments/weighted_clustering_20260927/ETAT_COURANT.md).
 Masses du chapitre9, attaches exactes des facettes, condensation et vote sont
 implémentés dans un consommateur distinct. Release/ASan/UBSan :33fixtures,

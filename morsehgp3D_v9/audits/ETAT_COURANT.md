@@ -1,5 +1,17 @@
 # État courant des audits v9
 
+**27 septembre — dendrogramme de points et nouvelle lecture old/3D** :
+[implémentation et résultats](../experiments/point_dendrogram_20260927/RESULTATS.md),
+[lecture HGP-old/Clusterer3D](LECTURE_HGP_OLD_CLUSTERER3D_20260927.md),
+[contre-exemple de catalogue](CATALOGUE_ET_POIDS_NON_GABRIEL_20260927.md).
+Squelette ponctuel explicite, m en nombre de points, EOM commun ;181fixtures,
+3 124coupes, neuf gatesEOM, quatre commandes normal/−O closes avec729pins.
+PiloteK5n1200 :52sélections nouvelles/182comparateurs inchangés, résultats
+meilleurs sur plusieurs ARI moyens, mais anisotropez1F1inférieur àHDBSCAN.
+Catalogue nonGabriel des anciens estimateurs distinct ; preuveK2/4points
+sans ancienne géométrie exécutée. Ne pas transférer préservation de
+connexité aux poids. RéférencePython, pas moteur rapide ; zéroGCP.
+
 **27 septembre — passage développeur, référence pondérée corrigée** :
 [état actif](../experiments/weighted_clustering_20260927/ETAT_COURANT.md),
 [contrelecture des attaches silencieuses](../experiments/weighted_clustering_20260927/AUDIT_SILENT_ATTACHMENTS.md).

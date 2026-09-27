@@ -3,6 +3,15 @@
 27 septembre 2026. Cette entrée prévaut sur le README initial, conservé à
 l'identique parce qu'il fait partie des entrées hachées du premier essai.
 
+Suite dans un **nouveau dossier**, sans modification des sources/captures
+gelées de celui-ci : [dendrogramme explicite, condensation ponctuelle et
+pilote K5](../point_dendrogram_20260927/RESULTATS.md).
+Le routage désormais évalué n'est pas le vote plat mesuré ci-dessous.
+La [lecture complémentaire old/3D](../../audits/LECTURE_HGP_OLD_CLUSTERER3D_20260927.md)
+confirme aussi un écart de catalogue contributif : les formules S/T/m du
+chapitre9 ne rendent pas Gabriel et ordre-Voronoï interchangeables pour
+les poids. Les présentes mesures restent valides pour leur objet déclaré.
+
 Cadre : `exploration_v9_hors_registre / cpu_reference /
 quantized_u18_input_only / weighted_fixed_k_reference / not_claimed`.
 Aucun fichier du moteur, registre, ancien benchmark ou build épinglé n'est

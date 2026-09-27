@@ -1,5 +1,36 @@
 # Passation v9
 
+## Dendrogramme ponctuel explicite et audit des catalogues — 27 septembre
+
+[Entrée active](experiments/point_dendrogram_20260927/README.md),
+[bilan détaillé](experiments/point_dendrogram_20260927/RESULTATS.md).
+Le routage Fraction figé est maintenant matérialisé : n feuilles-points,
+parents et dates exactes, plateaux atomiques, extérieurs conservés, pas de
+racine artificielle. SqueletteO(n), provenanceO(V+n). Raccord distinct à
+la condensation/EOM unitaire commune, m cardinalité entière ; premier
+adaptateurEOMmono-racine, forêts représentables mais non encore sélectionnées.
+Quatre commandes normal/−O closes,729pins :181fixtures/3 124coupes/27refus/
+troisFULL existants, neuf gatesEOM dont oracle rationnel. Sources gelées
+antérieures et moteur inchangés, zéroGCP.
+
+Pilote préannoncé13scènes n1200/K5/m20,50/z1,2 clos :52nouvelles sélections,
+182comparateurs inchangés. Principal m20/z1 : ARI0,5061/0,2239 HDBcommun
+sur sphériqueG8δ4 ;0,5406/0,2686 déséquilibré. AnisotropeF10,1938/0,4410,
+donc pas victoire générale. ExpZ2améliore ce régime mais sur-segmente.
+Référence Python encore lente : routage7,91–11,22s, pas de borne de croissance
+ni qualificationproduction/G4. Ne pas confondre géométrie FULL antérieure
+et projection statistique mesurée ici ; scoresSτ sont dyadiques issus d'arrondis.
+
+La [lecture old/3D](audits/LECTURE_HGP_OLD_CLUSTERER3D_20260927.md) révèle
+catalogue d'ordre-Voronoï, masses avant MST, racines autorisées, perturbations
+et régularisations. Le [contre-exempleK2](audits/CATALOGUE_ET_POIDS_NON_GABRIEL_20260927.md)
+montre quatre cofaces admissibles contre deux Gabriel, six facettes contre
+cinq, et une MEB hors fenêtreFULLK2. Cela réfute une agrégation directe
+des anciens poids sur cette fenêtre, pas toute régénération depuis les points.
+Suite : petit oracle exact d'ablation catalogue×projection, puis protocole
+SIPU historiquement nommé et évaluation tenue à l'écart. Aucun port historique
+non commercial dans le moteur MIT, aucun changement des anciennes preuves.
+
 ## Référence pondérée implémentée, attaches silencieuses corrigées — 27 septembre
 
 [État et fichiers actifs](experiments/weighted_clustering_20260927/ETAT_COURANT.md).
