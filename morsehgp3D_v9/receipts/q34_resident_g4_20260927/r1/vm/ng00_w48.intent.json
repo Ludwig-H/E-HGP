@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "/tmp/ehgp-full-v7-f2f4597811a39e0d.3ThHKx80U2/resident_build/mhgp9_q34_filtered_resident",
+    "--frame",
+    "/tmp/ehgp-full-v7-f2f4597811a39e0d.3ThHKx80U2/source/data/scene_00.u32le",
+    "--cuda",
+    "--qr",
+    "262144",
+    "--q",
+    "262144",
+    "--workers",
+    "48",
+    "--k",
+    "5",
+    "--s",
+    "8"
+  ],
+  "name": "ng00_w48",
+  "started_epoch": 1790498530.2259128,
+  "timeout_seconds": 334.099785193
+}

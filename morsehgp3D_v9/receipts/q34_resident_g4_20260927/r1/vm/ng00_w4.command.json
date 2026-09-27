@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "/tmp/ehgp-full-v7-f2f4597811a39e0d.3ThHKx80U2/resident_build/mhgp9_q34_filtered_resident",
+    "--frame",
+    "/tmp/ehgp-full-v7-f2f4597811a39e0d.3ThHKx80U2/source/data/scene_00.u32le",
+    "--cuda",
+    "--qr",
+    "262144",
+    "--q",
+    "262144",
+    "--workers",
+    "4",
+    "--k",
+    "5",
+    "--s",
+    "8"
+  ],
+  "ended_epoch": 1790498530.2255197,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "ng00_w4",
+  "pid": 4080,
+  "started_epoch": 1790498517.2484255,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "b5ac550487abf276007b5da68b738a0b4ab614a7528d3b835195b2fd71b19100",
+  "timeout_seconds": 347.077272591
+}

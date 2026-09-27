@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/tmp/ehgp-full-v7-f2f4597811a39e0d.3ThHKx80U2/resident_build/mhgp9_q34_filtered_resident",
+    "--gate",
+    "--cuda"
+  ],
+  "ended_epoch": 1790498517.2481272,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "device_gate",
+  "pid": 2130,
+  "started_epoch": 1790498516.1619933,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "97092dd854019b7ba9e32c0aa9a96784971e6cf62aeb632f059d48559ca93718",
+  "timeout_seconds": 348.163704082
+}

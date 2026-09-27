@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "/home/codespace/google-cloud-sdk/bin/gcloud",
+    "compute",
+    "scp",
+    "--project=devpod-gpu-exploration",
+    "--zone=us-central1-b",
+    "--quiet",
+    "--ssh-key-file=/workspaces/E-HGP/build/v9-g4-resident-session-20260927-r1/id_ed25519",
+    "--ssh-key-expiration=2026-09-27T09:49:55.200327Z",
+    "/workspaces/E-HGP/build/v9-g4-resident-session-20260927-r1/full_host/snapshot.tar.gz",
+    "/workspaces/E-HGP/build/v9-g4-resident-session-20260927-r1/full_host/source_manifest.json",
+    "/workspaces/E-HGP/build/v9-g4-resident-session-20260927-r1/full_host/worker.py",
+    "/workspaces/E-HGP/build/v9-g4-resident-session-20260927-r1/full_host/guardmarks/double_guard_verified",
+    "ehgp-v7-4fa0e0789a7d5bb06b787d35:/tmp/ehgp-full-v7-f2f4597811a39e0d.3ThHKx80U2/"
+  ],
+  "name": "upload",
+  "started_epoch": 1790498487.6161964,
+  "timeout_seconds": 180
+}

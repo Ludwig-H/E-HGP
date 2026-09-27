@@ -1,9 +1,10 @@
 # Rectangles filtrés et index résident — 27 septembre 2026
 
 Le [prototype résident](../audits/b_q34_filtered_resident_20260927/README.md)
-est implémenté et sa qualification **portable CPU** est close. Il prépare
-le prochain essai GPU, sans changer le moteur ou ses défauts. Profil grille
-1 mm/u18, `not_claimed`. Aucun gain G4 ou contrat FULL nouveau à cette porte.
+est implémenté ; ses portes **portable CPU et CUDA sur G4** passent.
+Le premier essai réel retrouve les mêmes survivants, mais ne justifie pas
+encore son activation comme optimisation du moteur. Profil grille
+1 mm/u18, `not_claimed`. Aucun nouveau contrat FULL acquis.
 
 ## Le changement concret
 
@@ -53,27 +54,73 @@ Un compteur de couverture du gate sous-débordait pour certains masques
 mono-voie : il a été corrigé avant gel, en comptant les réductions réellement
 énumérées. Cette correction ne change pas les prédicats du prototype.
 La capture fraîche r1 a terminé sans échec. Pas de nouvelle gate TSan.
-L'unité CUDA est hachée mais **pas encore compilée par cette qualification**.
+Cette qualification locale ne compilait pas CUDA ; la session suivante
+le compile et l'exécute séparément.
 
-## Ce qui reste à mesurer
+## Premier essai réel G4, session fermée
 
 Le [nouveau protocole G4](../audits/b_q34_resident_session_20260927/README.md)
-est également qualifié hors cloud : quatre commandes, 46 contrôles positifs,
-117 refus, annulation/jointure testées, lecteurs normal/−O. Il prévoit une
-porte CUDA puis ng00 complète K5/s8 à quatre et 48 workers d'arène. Le front
-du harnais reste mono-thread, la référence CPU de correction utilise quatre
-workers. Les gardes et l'arrêt ciblé restent ceux du protocole épinglé.
+avait passé quatre commandes hors cloud, 46 contrôles positifs et
+117 refus. La [capture réelle r1](../receipts/q34_resident_g4_20260927/r1/README.md)
+est maintenant close : source `af369c44`, gate CUDA puis ng00 entière,
+39 885 sites, grille 1 mm, K5/s8, à quatre et 48 workers d'arène.
+Le front du harnais reste mono-thread et l'oracle CPU utilise quatre
+workers. Une observation par largeur, dans deux processus distincts.
 
-Le chrono `adapter` inclura initialisation CUDA, filtrages, préparation,
-transferts, tri/conversion et destruction des propriétaires temporaires.
-La sortie S+R reste possédée. Front/index amont, oracle et nettoyage final
-sont publiés séparément ; `total` du harnais n'est pas le temps candidat.
+Le gate couvre 85 cas : 255 appels portables et 194 appels CUDA du corpus,
+plus un appel valide de contrôle de propriété hors de ces compteurs.
+Les deux trames retrouvent exactement les mêmes masques, survivants
+ordonnés, masses et digest natifs : R=3 133 819 rectangles,
+P=23 686 751 paires logiques, E=9 122 704 requêtes physiques et
+S=2 043 612 survivants. Les replis restent complets.
+
+| Poste payé, ms | Arène W4 | Arène W48 |
+| --- | ---: | ---: |
+| Ouverture, filtre rectangle, compaction | 325,035 | 319,930 |
+| Dont initialisation CUDA | 161,392 | 155,936 |
+| Construction de l'arène CPU | 202,425 | 83,113 |
+| Paires GPU, retour et tri/conversion | 97,494 | 98,509 |
+| Fermeture des propriétaires temporaires | 2,544 | 2,772 |
+| **Adaptateur complet, froid** | **627,503** | **504,328** |
+| Front mono + adaptateur | 2 738,875 | 2 616,350 |
+
+Les sous-phases « dont » sont incluses, pas à additionner. L'adaptateur
+paie ses transferts et destructions ; les sorties S et masques R restent
+possédés, ainsi que l'amont du harnais. Il ne détruit pas le contexte CUDA
+global. Lecture, index, oracle et nettoyage final sont détaillés dans le
+reçu ; `total` du harnais inclut l'oracle et n'est pas le temps candidat.
+Pas de temps chaud obtenu par soustraction de l'initialisation, ni de gain
+stable W4/W48 établi par cette seule paire.
+
+Les capacités hôte retenues sont de 70,243 Mo pour les décisions et
+104,508 Mo pour `Prepared`, soit 174,751 Mo ensemble. Le champ device de
+consommation vaut 122,858 Mo, index résident inclus : ne pas le recompter.
+Ce sont des périmètres de tableaux, **pas des pics globaux RSS/VRAM** ;
+les entrées temporaires et le front amont existent aussi.
+
+Export et relectures LIVE normal/−O passent, avec
+[contrelecture indépendante](../audits/b_q34_filtered_contract_review_20260927/RESIDENT_G4.md).
+La G4 SPOT est certifiée **TERMINATED sur la même génération** après
+191,901 s d'allocation observée, sans estimation de facture.
+
+## Décision de port et prochaines mesures
 
 **Battre les 9,898 s du précédent prototype ne suffira pas.** Le filtre GPU
 du moteur était autour de 101 ms dans la capture historique, avec q2 en
 recouvrement. Une décision de port comme optimisation exige une comparaison
 GPU/GPU appariée, puis la vraie chaîne ; la référence CPU n'est qu'un oracle.
 La réduction de P à E peut être annulée par l'arène, le tri et les copies.
+Le prototype est publié et réutilisable, mais **n'est pas activé dans le
+moteur comme gain acquis**.
+
+Le travail ponctuel baisse réellement : 537,799 millions de visites contre
+1 110,658 millions dans la capture moteur historique. Les visites rectangles
+restent identiques. Leurs 81–82 ms nouveaux sont des chronos hôte par vagues,
+pas une comparaison appariée aux événements CUDA du moteur. Layout,
+réduction des compteurs et découpage en vagues diffèrent : isoler ces effets
+avant toute attribution causale, sans lancer une campagne de micro-variantes.
+L'arène CPU, les copies/compactions et le retour/tri de S restent des postes
+majeurs à supprimer ou paralléliser ; aucun d'eux ne ferme à lui seul FULL.
 
 Le raccord ajoute des scans linéaires en R et ne réintroduit pas le carré
 des facteurs. Cela ne borne pas globalement R, les visites, F, E ou S.

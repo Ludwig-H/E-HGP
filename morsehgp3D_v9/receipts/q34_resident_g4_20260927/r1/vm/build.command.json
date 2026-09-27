@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/tmp/ehgp-full-v7-f2f4597811a39e0d.3ThHKx80U2/resident_build",
+    "--target",
+    "mhgp9_q34_filtered_resident",
+    "-j8"
+  ],
+  "ended_epoch": 1790498515.7112036,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "build",
+  "pid": 1939,
+  "started_epoch": 1790498506.7783215,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "d9ab95ba6a3ddc860e79b27f00c5b1f8b43b9839d566305515a8baf1417a4d90",
+  "timeout_seconds": 357.547376299
+}

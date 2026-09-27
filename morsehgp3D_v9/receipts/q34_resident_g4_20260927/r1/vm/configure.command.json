@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "cmake",
+    "-S",
+    "/tmp/ehgp-full-v7-f2f4597811a39e0d.3ThHKx80U2/source/morsehgp3D_v9/audits/b_q34_filtered_resident_20260927",
+    "-B",
+    "/tmp/ehgp-full-v7-f2f4597811a39e0d.3ThHKx80U2/resident_build",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DMHGP9_RESIDENT_ENABLE_CUDA=ON",
+    "-DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc",
+    "-DCMAKE_CUDA_ARCHITECTURES=120"
+  ],
+  "ended_epoch": 1790498506.7780921,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "configure",
+  "pid": 1820,
+  "started_epoch": 1790498504.513812,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "415290925ca583e4fc1d83eef1dda70695273a8a6cc54baa4a7a4d00e5eb19ea",
+  "timeout_seconds": 359.811883633
+}

@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_resident_g4_readback_20260927/selftest.py"
+  ],
+  "elapsed_seconds": 3.3842759279996244,
+  "exit_code": 0,
+  "name": "normal",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "dbfae94a7fea15e1262565e6831ed1c3d05e6e6ba7cf7654037d8151fe8a710d"
+}

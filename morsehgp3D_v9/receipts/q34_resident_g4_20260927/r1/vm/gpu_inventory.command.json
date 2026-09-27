@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "nvidia-smi"
+  ],
+  "ended_epoch": 1790498504.50541,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "gpu_inventory",
+  "pid": 1817,
+  "started_epoch": 1790498504.4503589,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "84667f214684fd90e5aeaa03e7c3e33303ae70674890951b9858c4f83262d6ac",
+  "timeout_seconds": 359.875337435
+}

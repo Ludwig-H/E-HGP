@@ -1,5 +1,23 @@
 # Coordination Morse HGP 3D v9
 
+### 27 septembre — DEV : raccord résident exécuté sur G4, publication sans activation moteur
+
+[Bilan](../morsehgp3D_v9/docs/RACCORD_RESIDENT_Q34_20260927.md),
+[reçu réel](../morsehgp3D_v9/receipts/q34_resident_g4_20260927/r1/README.md).
+Source `af369c44`, gate CUDA85cas puis ng00 complète K5/s8 : mêmes
+masques, P/E/S, survivants ordonnés et digest natifs. Adaptateur froid
+W4/W48 627,503/504,328ms ; arène CPU202,425/83,113ms. Une observation
+par largeur, front W1 amont exclu, pas FULL ni gain GPU/GPU qualifié.
+Le raccord supprime bien le recalcul CPU des rectangles ; son coût
+d'arène, copies et ordre reste trop important pour l'activer comme gain.
+**Décision :** publier prototype, reçus et contrelecture, conserver le
+moteur natif tant que la comparaison appariée de chaîne ne justifie pas
+le port. Aucun temps chaud par soustraction de l'initialisation.
+VM même génération certifiée arrêtée,191,901s d'allocation ; toutes les
+sessions de commande fermées. Relectures LIVE normal/−O passent.
+En parallèle : manifeste FULL A en implémentation, petits tests seulement,
+qualification non close. Son dossier est exclu de ce commit de résultats.
+
 ### 27 septembre — DEV : vrais S2, preuve de croissance limitée, port CUDA isolé
 
 [Bilan](../morsehgp3D_v9/docs/VAGUES_REELLES_ET_CHEMIN_CRITIQUE_20260927.md).

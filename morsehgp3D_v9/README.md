@@ -3,9 +3,12 @@
 Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 
 Nouveau raccord implémenté : [rectangles filtrés et index résident](docs/RACCORD_RESIDENT_Q34_20260927.md).
-50 commandes locales Release/sanitizers passent ; protocole G4 W4/W48
-qualifié hors cloud. Le filtre rectangle ne sera plus recalculé en CPU
-après sa décision GPU. CUDA et gain réel restent à mesurer ; moteur inchangé.
+50 commandes locales Release/sanitizers et le gate CUDA G4 passent.
+Trame sans sol entière, mêmes survivants : adaptateur froid W4/W48
+627,503/504,328 ms, hors front amont et hors FULL. Le filtre rectangle
+n'est plus recalculé en CPU après sa décision GPU. Ce n'est pas encore
+un gain établi sur le filtre GPU du moteur ; pas d'activation aveugle.
+Reçu public et contre-audit publiés ; VM arrêtée après191,901s d'allocation.
 
 Audit complémentaire du 27 septembre : [q34 hors S2](audits/b_q34_outer_ledger_20260927/README.md),
 [construction FULL parallèle](audits/b_full_construction_parallel_20260927/README.md)

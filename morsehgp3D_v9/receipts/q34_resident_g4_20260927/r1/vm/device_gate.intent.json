@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/tmp/ehgp-full-v7-f2f4597811a39e0d.3ThHKx80U2/resident_build/mhgp9_q34_filtered_resident",
+    "--gate",
+    "--cuda"
+  ],
+  "name": "device_gate",
+  "started_epoch": 1790498516.1619933,
+  "timeout_seconds": 348.163704082
+}

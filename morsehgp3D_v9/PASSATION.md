@@ -1,18 +1,24 @@
 # Passation v9
 
-## Raccord résident qualifié en portable — 27 septembre
+## Raccord résident qualifié en portable et sur G4 — 27 septembre
 
 [Bilan et prochaine mesure](docs/RACCORD_RESIDENT_Q34_20260927.md).
 Le prototype filtre les rectangles avant l'arène, garde index/K et filiation,
 compacte les descriptions vivantes, puis consomme E par vagues sans tableau
 global P/E. La sortie ordonnée reste exactement native.50commandes closes,
 85cas×3configurations par build, Release/ClangASan/UBSan/LSan, trois mutants
-et quatre fautes portables ; lectures normal/−O passent. CUDA non compilé
-à cette porte, pas nouveau chrono G4/FULL ni mesure de croissance du raccord.
-Protocole gardé W4/W48 prêt et testé hors cloud. Ne pas promouvoir le moteur
-sur un gain contre l'ancien prototype CPU9,9s : battre le vrai filtre GPU
-et la chaîne complète reste à établir. Les deux prochains tickets S résident
-et manifeste FULL sont liés au bilan. Sources/builds/reçus r1 désormais figés.
+et quatre fautes portables ; lectures normal/−O passent. Puis vrai gate
+CUDA :85cas,255passages portables/194CUDA. Ng00 entière K5/s8 retrouve
+exactement P/E/S natifs ; adaptateur froid W4/W48 627,503/504,328ms,
+arène202,425/83,113ms. Front W1 conservé : front+adaptateur2,739/2,616s.
+Une mesure par largeur, pas de temps chaud ni de comparaison GPU/GPU
+qualifiée. Arrêt même génération certifié après191,901s d'allocation.
+Reçu LIVE normal/−O et contrelecture indépendante passent.
+Ne pas promouvoir le moteur sur un gain contre l'ancien prototype CPU9,9s :
+battre le vrai filtre GPU et la chaîne complète reste à établir.
+Pas de nouveau FULL ni de croissance mesurée du raccord. Les deux prochains
+tickets S résident et manifeste FULL sont liés au bilan. Sources, builds
+et reçus r1 désormais figés ; nouveau manifest FULL en cours, non qualifié.
 
 ## Coûts hors S2 et premier raccord FULL — 27 septembre
 

@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/tmp/ehgp-full-v7-f2f4597811a39e0d.3ThHKx80U2/resident_build",
+    "--target",
+    "mhgp9_q34_filtered_resident",
+    "-j8"
+  ],
+  "name": "build",
+  "started_epoch": 1790498506.7783215,
+  "timeout_seconds": 357.547376299
+}

@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "cmake",
+    "--version"
+  ],
+  "name": "cmake",
+  "started_epoch": 1790498504.3634257,
+  "timeout_seconds": 359.96227041099996
+}

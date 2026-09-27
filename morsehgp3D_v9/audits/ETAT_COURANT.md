@@ -1,13 +1,18 @@
 # État courant des audits v9
 
-**27 septembre — raccord résident, porte portable close** :
+**27 septembre — raccord résident, portable et première G4 clos** :
 [bilan](../docs/RACCORD_RESIDENT_Q34_20260927.md).
 50commandes Release/sanitizers,85cas×3configurations, mêmes sorties natives,
 trois mutants et quatre fautes portables. Le nouveau chemin garde l'index
 device entre les passes et ne refait pas le filtre rectangle en CPU.
-Unité CUDA encore non compilée, aucun chrono G4 ou FULL nouveau ; protocole
-de mesure W4/W48 testé hors cloud. Moteur inchangé, ne pas confondre progrès
-sur le prototype CPU9,9s et victoire sur S2GPU natif≈101ms historique.
+Vrai gate CUDA85cas passe ensuite ; ng00 entière K5/s8 : mêmes P/E/S
+et digest natifs, adaptateur froid W4/W48 627,503/504,328ms. Front amont
+mono exclu, pas FULL, pas de nouvelle croissance ni comparaison GPU/GPU
+appariée. [Contrelecture](b_q34_filtered_contract_review_20260927/RESIDENT_G4.md)
+et reçu LIVE normal/−O passent. VM même génération arrêtée,191,901s
+d'allocation. Moteur inchangé, ne pas confondre progrès sur le prototype
+CPU9,9s et victoire sur S2GPU natif≈101ms historique. Manifest FULL A
+en cours d'implémentation, pas encore qualifié.
 
 **27 septembre — prochains raccords et coûts extérieurs à S2** :
 [ledger q34](b_q34_outer_ledger_20260927/README.md),
