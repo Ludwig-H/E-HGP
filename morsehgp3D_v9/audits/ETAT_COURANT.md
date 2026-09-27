@@ -1,5 +1,17 @@
 # État courant des audits v9
 
+**27 septembre — campagne synthétique variable close** :
+[protocole et bilan](../experiments/synthetic_clustering_20260927/README.md),
+[contrelecture](../experiments/synthetic_clustering_20260927/POST_AUDIT.md).
+34scènes nouvelles,17scénarios, tailles/groupes/recouvrement/formes/bruit
+variables ;612sélections nouvelles,34exports natifs et68fitsHDBSCAN.
+Principal K5/m20/z1 : ARI0,5574/0,4198 etF10,6506/0,5415 HGP routé/HDBcommun.
+21gains,4égalités,9pertes : pas de victoire systématique. Comparaison commune
+et standard, vote massique et première couverture conservés. Lecteurs
+normal/−O bit-identiques,2 148pins ; moteur et anciennes sources inchangés.
+Diagnostics400/800/1600 seulement ; neuf entrées8k/16k/32k préparées non
+exécutées, aucune borne globale ou qualificationGPU nouvelle. ZéroGCP.
+
 **27 septembre — dendrogramme de points et nouvelle lecture old/3D** :
 [implémentation et résultats](../experiments/point_dendrogram_20260927/RESULTATS.md),
 [lecture HGP-old/Clusterer3D](LECTURE_HGP_OLD_CLUSTERER3D_20260927.md),

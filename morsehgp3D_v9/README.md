@@ -2,6 +2,16 @@
 
 Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 
+Nouvelle demande du 27 septembre : [campagne synthétique variable](experiments/synthetic_clustering_20260927/README.md),
+[tous les résultats](receipts/synthetic_clustering_20260927/r1/README.md).
+34scènes nouvelles, tailles400/800/1600,2à32groupes, recouvrement, formes,
+densités et bruit variables ;612sélections K5/m20,50/z1,2 entièrement recalculées.
+Principal m20/z1 : ARI moyen0,5574 HGP ponctuel/0,4198 HDB commun,
+F10,6506/0,5415 ;21gains,4égalités,9pertes pour chaque critère.
+Pas de domination générale. Contre-audits normal/−O identiques,2 148pins.
+Neuf entrées8k/16k/32k préparées mais non exécutées ; aucune nouvelle borne
+de croissance ni vitesseG4. Consommateurs et moteur inchangés, zéroGCP.
+
 Suite du 27 septembre : [dendrogramme explicite de points après FULL](experiments/point_dendrogram_20260927/README.md),
 [résultats K5](experiments/point_dendrogram_20260927/RESULTATS.md).
 Une feuille par point, dates rationnelles, partitions emboîtées, seuil de

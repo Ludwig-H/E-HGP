@@ -1,5 +1,30 @@
 # Passation v9
 
+## Campagne synthétique à paramètres variables — 27 septembre
+
+[Protocole et entrée](experiments/synthetic_clustering_20260927/README.md),
+[tables complètes](receipts/synthetic_clustering_20260927/r1/README.md).
+17scénarios ×deux nouvelles graines, n400/800/1600, G2/4/8/16/32,
+gaussiennes sphériques/allongées/déséquilibrées/hétéroscédastiques,
+anneaux épais et10%de bruit. Même grille par série de tailles, mêmes sites
+HGP/HDB ; aucun tri de cas après scores.34exports et68fits nouveaux,
+612sélections K5/m20,50/z1,2 closes sans échec,582,900s CPU partagé.
+Le catalogue Gabriel et les consommateurs antérieurs restent figés.
+
+Principal m20/z1 : ARI0,5574 HGP routé/0,4198 HDBcommun, F10,6506/0,5415.
+21gains/4égalités/9pertes pour chaque critère ; fortes différences entre
+graines et anneaux bruités défavorables conservés. Ce n'est pas une
+reproduction complète d'HGP-old ni une domination universelle.
+40gates préalables par mode ; six tests de lecteur et sept de publication
+supplémentaires. Contre-audits normal/−O identiques :612scores,68arbres,
+2 148pins LIVE. Les scores du vote massique ne garantissent pas m points.
+
+Diagnostics400/800/1600 disponibles, sans inventaire complet du travail
+géométrique. Les neuf nuages8k/16k/32k sont préparés, **pas exécutés** :
+ils restent la suite de croissance à mesurer. Autre chantier distinct :
+ablation du catalogue contributif, sans changer simultanément les méthodes
+sur ces graines désormais connues. Moteur, anciennes preuves et G4 inchangés.
+
 ## Dendrogramme ponctuel explicite et audit des catalogues — 27 septembre
 
 [Entrée active](experiments/point_dendrogram_20260927/README.md),
