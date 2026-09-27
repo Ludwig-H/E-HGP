@@ -5,6 +5,10 @@ Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 Priorité du 27 septembre : [profiler FULL avant toute nouvelle refonte](docs/PROFILAGE_AVANT_REFONTE_20260927.md).
 Aucune capture Nsight attestée à ce jour. Le contrat 100 ms reste ouvert ;
 les gains locaux ne suffisent pas à justifier de grands portages.
+Un [essai de profilage G4](receipts/full_nsys_20260927/r1/README.md) s'est
+arrêté avant calcul : ancien binaire FULL non disponible sous la forme attendue dans `/tmp`.
+Ni téléchargement ni lancement Nsight ; aucune relance automatique,
+moteur inchangé. Même génération arrêtée, allocation157,524s.
 Le [comparatif G4 S2](receipts/q34_survivors_g4_20260927/r1/README.md)
 a échoué avant compilation/tests : exigence erronée d'un fichier `.rsp`
 absent du CMake distant. Aucun nouveau chrono GPU ; VM arrêtée après

@@ -2,6 +2,15 @@
 
 ## Priorité au profilage FULL, pas à une nouvelle refonte — 27 septembre
 
+[Premier essai de profilage G4](receipts/full_nsys_20260927/r1/README.md)
+clos en échec avant calcul : contrôle de disponibilité du binaire FULL
+historique dans `/tmp` refusé. Aucun téléchargement/lancement Nsight ni
+nouvelle mesure GPU.
+Même génération arrêtée après157,524s, pas de relance automatique.
+Protocole local relu/testé et publié en `acb51d62e` ; moteur inchangé.
+Un futur essai devra disposer d'un binaire épinglé durable ou reconstruit
+et qualifié explicitement. Pas de grande refonte sans profil exploitable.
+
 [Décision et protocole minimal](docs/PROFILAGE_AVANT_REFONTE_20260927.md).
 Aucune trace Nsight attestée dans les campagnes examinées. Profiler le vrai
 `mhgp9_tower_probe` avant un nouveau chantier important ; chronos sous

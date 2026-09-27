@@ -1,0 +1,27 @@
+{
+  "CUDA_profile_executed": false,
+  "FULL_executed": false,
+  "GPU_execution": "not_executed",
+  "Nsight_downloaded": false,
+  "command_count": 0,
+  "contract_certified": false,
+  "cost": {
+    "billed_cost_usd": null,
+    "generation": "2026-09-27T06:21:02.905-07:00",
+    "stopped": "2026-09-27T06:23:40.429-07:00",
+    "vm_elapsed_seconds": 157.524
+  },
+  "diagnostic_commit": "acb51d62e1ed8ff5733276ebfd71e537b079aac2",
+  "engine_commit": "ddf4776d754a8db59a1333e11d56b39d8cb6f51a",
+  "failure_replay": true,
+  "host_status": "worker_failed",
+  "schema": "mhgp9_full_nsys_readback_v1",
+  "scope": "FULL_profile_diagnostic_not_contract",
+  "semantic_replay": false,
+  "sources_stable": true,
+  "status": "failed",
+  "trace_produced": false,
+  "worker_elapsed_seconds": 0.05034346200000073,
+  "worker_error": "ValueError: existing regular qualified artifact: /tmp/ehgp-tower-v9-4e3fa578d9c95e0b.jLEtLeGGhi/output/build/mhgp9_tower_probe",
+  "worker_status": "failed"
+}

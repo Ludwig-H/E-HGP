@@ -1,0 +1,10 @@
+{
+  "contract_certified": false,
+  "controller_exit": 1,
+  "generation": "2026-09-27T06:21:02.905-07:00",
+  "receipt_needs_semantic_readback": true,
+  "scope": "FULL_profile_diagnostic_not_contract",
+  "status": "worker_failed",
+  "targeted_shutdown_certified": true,
+  "vm_elapsed_seconds": 157.524
+}

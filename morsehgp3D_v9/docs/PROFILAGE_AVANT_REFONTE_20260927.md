@@ -5,13 +5,51 @@ important pour quelques pourcents ; demander d'abord des mesures montrant
 qu'il peut changer le résultat de la tour complète. Le contrat 100 ms
 reste ouvert. Aucun changement du moteur n'est décidé dans cette note.
 
-## Ce qui manque aujourd'hui
+## Essai du 27 septembre : pas encore de trace exploitable
+
+Le [protocole court](../audits/b_full_nsys_20260927/README.md), publié en
+`acb51d62e`, a été essayé une fois sur G4 SPOT. Il devait reprendre le
+binaire FULL historique inchangé, puis comparer quatre passages sans
+profiler et quatre sous Nsight Systems CLI 2025.3.1. Le lanceur et le
+worker passent respectivement 2/9 et 6/11 contrôles positifs/refus,
+en normal et sous `-O`, avec une contrelecture indépendante.
+
+**Échec avant le profilage** : le fichier historique
+`/tmp/ehgp-tower-v9-4e3fa578d9c95e0b.jLEtLeGGhi/output/build/mhgp9_tower_probe`
+n'a pas satisfait le contrôle de présence comme fichier ordinaire non
+symbolique. Le reçu ne distingue pas absence, accès impossible ou type
+inadmissible ; il n'établit pas pourquoi ce contrôle échoue.
+Le worker refuse avant toute commande de calcul ou
+de téléchargement : aucun FULL, aucun noyau GPU, aucun téléchargement
+ou lancement Nsight, aucun rapport. Ce n'est pas un échec de l'algorithme
+ni une incompatibilité démontrée de Nsight. Voir le
+[reçu conservé en échec](../receipts/full_nsys_20260927/r1/README.md).
+Son lecteur LIVE spécialisé rejoue le statut failed, l'identité du worker,
+les sources et l'arrêt de la même génération. Normal/−O passent ainsi
+que 3 contrôles positifs et 17 refus ; aucun succès de profilage n'en découle.
+
+La même génération G4 est certifiée `TERMINATED` :
+13:21:02,905 → 13:23:40,429 UTC, soit **157,524 s d'allocation** ; prix
+facturé non estimé. Aucune autre VM `project=e-hgp` active signalée par
+la fermeture. Aucun essai automatique supplémentaire ni changement moteur.
+
+Avant un prochain profilage, il faudra disposer d'un exécutable épinglé
+dans un stockage durable, ou préparer une reconstruction explicitement
+qualifiée, sans supposer la présence d'un ancien fichier `/tmp`.
+Cela ne justifie pas de relancer une refonte : la question du chemin
+critique demeure ouverte et le contrat 100 ms reste non atteint.
+
+## Ce qui manque toujours
 
 Les campagnes v9 examinées n'ont aucune capture **Nsight Systems** ou
-**Nsight Compute** attestée. La recherche dans les sources, commandes et
-reçus v9/v8/GCP ne trouve ni invocation `nsys`/`ncu`, ni rapport associé.
+**Nsight Compute** attestée. Avant cet essai, la recherche dans les sources,
+commandes et reçus v9/v8/GCP ne trouvait aucune exécution `nsys`/`ncu`
+attestée ni rapport associé. Le nouveau protocole contient désormais les
+commandes prévues, mais elles n'ont pas été exécutées sur G4.
 Une mention ancienne dans la roadmap est une intention, pas une preuve.
-L'installation actuelle de ces outils sur la VM reste à vérifier.
+Le paquet CLI officiel 2025.3.1 a depuis été vérifié et extrait localement,
+sans installation globale ; ses aides et sa version fonctionnent. Cela
+ne constitue ni une installation sur G4 ni une capture GPU.
 
 Nous avons des compteurs de travail, des chronos hôte et des synchronisations
 CUDA. Ils localisent certains coûts, mais n'expliquent pas à eux seuls les

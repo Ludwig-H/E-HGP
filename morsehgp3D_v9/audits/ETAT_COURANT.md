@@ -1,5 +1,15 @@
 # État courant des audits v9
 
+**27 septembre — essai Nsight G4 fermé avant profilage** :
+[reçu failed](../receipts/full_nsys_20260927/r1/README.md),
+[bilan](../docs/PROFILAGE_AVANT_REFONTE_20260927.md).
+Le contrôle de disponibilité du binaire FULL historique dans `/tmp` échoue ;
+raison précise non établie. Zéro commande worker, FULL/GPU faux,
+ni téléchargement ni lancement Nsight. Même génération G4 arrêtée,
+157,524s d'allocation ; contrelecture de l'échec et de l'arrêt passée.
+Pas de relance automatique, aucun changement moteur, toujours aucune
+trace Nsight exploitable. Contrat100ms et attribution des goulots ouverts.
+
 **27 septembre — décision de priorité et clôture des mesures** :
 [profiler FULL avant une refonte](../docs/PROFILAGE_AVANT_REFONTE_20260927.md).
 Pas de trace Nsight attestée à ce jour ; ne pas investir dans un gros port

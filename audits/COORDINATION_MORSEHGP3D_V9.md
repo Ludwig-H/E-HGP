@@ -1,5 +1,19 @@
 # Coordination Morse HGP 3D v9
 
+### 27 septembre — DEV : diagnostic Nsight tenté, pas de refonte lancée
+
+[Protocole](../morsehgp3D_v9/audits/b_full_nsys_20260927/README.md)
+publié `acb51d62e`, contrôles normal/−O et contrelecture passés.
+[Session](../morsehgp3D_v9/receipts/full_nsys_20260927/r1/README.md)
+failed avant toute commande worker : binaire FULL historique non disponible
+sous la forme attendue dans `/tmp`. Aucun FULL/GPU/Nsight exécuté ; aucune conclusion sur le
+goulot tirée de cet échec. VM même génération arrêtée après157,524s,
+aucune autre VM labellisée active signalée par la fermeture.
+Pas de relance automatique ; moteur inchangé. Avant nouvel essai, préparer
+un artefact exécutable durable épinglé, ou une reconstruction qualifiée.
+La décision utilisateur reste : pas de chantier important sans espérance
+étayée de gain substantiel sur FULL, pas d'acharnement pour100ms.
+
 ### 27 septembre — DEV : comparaison GPU appariée préparée localement
 
 [Comparateur](../morsehgp3D_v9/audits/b_q34_survivors_compare_20260927/README.md)
