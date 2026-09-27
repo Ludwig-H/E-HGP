@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-q34-ordered-rows-20260927-r1_sanitize/mhgp9_ordered_rows",
+    "--gate"
+  ],
+  "ended_epoch": 1790490600.7799578,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "sanitize_gate",
+  "pid": 87821,
+  "started_epoch": 1790490600.6404946,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "48ca02ed934bbc06ec0f2ed5aaaf581968bd196e4dc6a1045a58ad6bf22d8799",
+  "timeout_seconds": 90
+}

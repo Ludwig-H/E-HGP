@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "cmake",
+    "-S",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_real_drafts_20260927",
+    "-B",
+    "/workspaces/E-HGP/build/v9-audit-full-real-drafts-20260927-r3/sanitize",
+    "-DCMAKE_BUILD_TYPE=Debug",
+    "-DCMAKE_CXX_COMPILER=clang++",
+    "-DMHGP9_SOURCE_ROOT=/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9",
+    "-DMHGP9_GEN_LIBRARY=/workspaces/E-HGP/build/v9-q3-payload-sanitize-20260926/libmhgp9_gen.a",
+    "-DMHGP9_AUDIT_SANITIZE=ON"
+  ],
+  "ended_epoch": 1790490682.9961238,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "sanitize_configure",
+  "pid": 88929,
+  "started_epoch": 1790490682.4696808,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "8b3db40576c93ce3cacda11e3fb3552f6bf46785de36be1149274503b4a922ce",
+  "timeout_seconds": 600
+}

@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.20)
+project(mhgp9_ordered_rows LANGUAGES CXX)
+find_package(Threads REQUIRED)
+add_executable(mhgp9_ordered_rows probe.cpp)
+target_compile_features(mhgp9_ordered_rows PRIVATE cxx_std_20)
+target_compile_options(mhgp9_ordered_rows PRIVATE -Wall -Wextra -Wpedantic -Werror)
+target_include_directories(mhgp9_ordered_rows PRIVATE "${MHGP9_SOURCE_ROOT}/src" "${MHGP9_SOURCE_ROOT}/src/gen" "${MHGP9_SOURCE_ROOT}/tests/gen")
+target_link_libraries(mhgp9_ordered_rows PRIVATE "${MHGP9_GEN_LIBRARY}" Threads::Threads)

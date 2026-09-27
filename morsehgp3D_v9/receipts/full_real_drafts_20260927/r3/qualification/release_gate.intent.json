@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-full-real-drafts-20260927-r3/release/mhgp9_full_real_drafts",
+    "--gate"
+  ],
+  "name": "release_gate",
+  "started_epoch": 1790490682.4543762,
+  "timeout_seconds": 600
+}

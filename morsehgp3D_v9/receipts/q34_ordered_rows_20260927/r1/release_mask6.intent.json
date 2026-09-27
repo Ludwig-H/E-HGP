@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-q34-ordered-rows-20260927-r1_release/mhgp9_ordered_rows",
+    "--mutant",
+    "mask6"
+  ],
+  "name": "release_mask6",
+  "started_epoch": 1790490591.0485291,
+  "timeout_seconds": 90
+}

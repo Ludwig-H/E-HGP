@@ -95,6 +95,12 @@ GPU, mais ne donne pas de gain mono sur les cas testés.
 
 ## Voies q3/q4
 
+27 septembre, [listes ordonnées par classe A](../audits/b_q34_ordered_rows_20260927/README.md) :
+le tri final de S n'est pas obligatoire pour tout plan factorisé. Partager
+une liste B ordonnée par classe et garder A dans l'ordre original est une
+alternative exacte, avec W/T payés. Ce n'est pas une suppression de coût :
+dupliquer cette liste pour chaque ancre ferait reperdre le partage.
+
 27 septembre, [raccord des bandes](../audits/b_q34_batch_seam_20260927/README.md) :
 passer les survivants dans l'ordre des classes au batch natif est faux ;
 208 fixtures exigent le retour à l'ordre original avant S3. Remplacer
@@ -137,6 +143,13 @@ autres sélections restent ouvertes, pas fermées par cet essai.
 | Exposant par relation parent/enfant comme verdict de croissance | un compteur exactement linéaire reçoit 0,78 à 1,27 |
 
 ## Parallélisme, GPU, tour
+
+27 septembre, [vrais drafts FULL](../receipts/full_real_drafts_20260927/README.md) :
+compatibilité structurelle ne signifie pas gain CPU. L'encodeur général
+à incidences triées régresse sur ng00 et uniforme8k/16k/32k. Ne pas le
+brancher tel quel pour viser 100 ms. La voie linéaire sans continuations
+est une piste distincte sur condition vérifiée, pas une remise en cause
+de la nécessité de traiter les continuations lorsqu'elles existent.
 
 27 septembre, [encodeur par incidences](../audits/b_full_batch_encoder_20260927/README.md) :
 supprimer le contrôle des parents vivants n'est pas nécessaire pour une

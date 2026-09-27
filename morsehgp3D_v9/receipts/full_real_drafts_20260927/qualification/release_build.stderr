@@ -1,0 +1,7 @@
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_real_drafts_20260927/probe.cpp: In function ‘std::vector<mhgp9::gen::Point3> real_drafts::read_frame(const std::string&)’:
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_real_drafts_20260927/probe.cpp:184:52: error: lvalue required as left operand of assignment
+  184 |     need(value <= 262143, "frame.u18"); points[i][d] = value;
+      |                                         ~~~~~~~~~~~^
+gmake[2]: *** [CMakeFiles/mhgp9_full_real_drafts.dir/build.make:76: CMakeFiles/mhgp9_full_real_drafts.dir/probe.cpp.o] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:83: CMakeFiles/mhgp9_full_real_drafts.dir/all] Error 2
+gmake: *** [Makefile:91: all] Error 2

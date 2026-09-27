@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-q34-ordered-rows-20260927-r1_release/mhgp9_ordered_rows",
+    "--synthetic",
+    "uniform",
+    "32000",
+    "5",
+    "8"
+  ],
+  "ended_epoch": 1790490672.0471425,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "measure_uniform_32000",
+  "pid": 88345,
+  "started_epoch": 1790490640.6823485,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "f317277c02afb60d82100226c44c1dcbd007f2e09f5441a0dc08da33a7b08702",
+  "timeout_seconds": 90
+}

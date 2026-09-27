@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-q34-ordered-rows-20260927-r1_release/mhgp9_ordered_rows",
+    "--synthetic",
+    "terrain",
+    "32000",
+    "5",
+    "8"
+  ],
+  "ended_epoch": 1790490678.573089,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "measure_terrain_32000",
+  "pid": 88798,
+  "started_epoch": 1790490674.6558566,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "a6043a559175904d2fe701b7113ca74aa35059dcb34deea7744ee84f2c911beb",
+  "timeout_seconds": 90
+}

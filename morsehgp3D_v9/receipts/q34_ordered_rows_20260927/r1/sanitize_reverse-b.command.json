@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-q34-ordered-rows-20260927-r1_sanitize/mhgp9_ordered_rows",
+    "--mutant",
+    "reverse-b"
+  ],
+  "ended_epoch": 1790490600.842923,
+  "exit_code": 1,
+  "group_closed": true,
+  "name": "sanitize_reverse-b",
+  "pid": 87823,
+  "started_epoch": 1790490600.78202,
+  "stderr_sha256": "b2bc028fb203a7fb2fe7357ac5863760fb0ed28fa7ab6a8b2dc6b85d0478fe66",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": 90
+}

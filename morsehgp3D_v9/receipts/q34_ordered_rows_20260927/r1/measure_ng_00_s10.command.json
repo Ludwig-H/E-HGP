@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-q34-ordered-rows-20260927-r1_release/mhgp9_ordered_rows",
+    "--frame",
+    "/workspaces/E-HGP/morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le",
+    "5",
+    "10"
+  ],
+  "ended_epoch": 1790490811.0636368,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "measure_ng_00_s10",
+  "pid": 90457,
+  "started_epoch": 1790490789.3951461,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "3ad718f6a8ca6022e09c08c58870e2e9f46761c898c1e8137d789d1da699dd8c",
+  "timeout_seconds": 90
+}

@@ -1,5 +1,24 @@
 # Coordination Morse HGP 3D v9
 
+### 27 septembre — DEV : ordre direct, encodeur général négatif sur vrais drafts
+
+[Tranche](../morsehgp3D_v9/docs/ORDRE_ET_VRAIS_DRAFTS_20260927.md), base
+`4badf8b7d`. L'alternative listes B par classe A est implémentée isolément,
+25 commandes/15 mesures closes. W≤K(K−1)F_B, T≤E ; A et B restent en
+ordre original, compactage stable possible sans tri S. Crédits et résidu
+inchangés, ancien Pool encore payé, aucun gain moteur/GPU proclamé.
+**Décision :** comparer aux bandes sur préparation+S2+transport, pas sur
+le seul nombre de descripteurs. Ne jamais recopier la liste pour chaque A.
+
+Le prototype FULL général a été testé sur les vrais drafts ng00 et
+uniforme8k/16k/32k : mêmes tableaux, mais régression CPU nette. **Ne pas
+le porter tel quel.** Zéro continuation sur ces quatre cas permet de
+tester une voie linéaire first-parent après réduction du mode. L'audit
+indépendant confirme V=A, parent-offsets déjà finaux, min ordinal par parent
+puis validation locale/erreur chronologique. Repli général obligatoire
+si une continuation est présente. Prototype de cette nouvelle voie séparé
+en cours, aucune qualification héritée. Moteur et GCP inchangés.
+
 ### 27 septembre — DEV : bandes directes, couture S2 et encodeur structurel
 
 Suite sur `24308be81`, [synthèse](../morsehgp3D_v9/docs/PROTOTYPES_DIRECTS_ET_FULL_20260927.md).

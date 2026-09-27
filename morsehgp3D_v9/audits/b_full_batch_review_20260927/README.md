@@ -179,3 +179,88 @@ une archive autonome hors de ces sources/builds. Aucun test de course,
 d'injection de panne mémoire ou de performance n'est ajouté par cette
 contrelecture. La conclusion reste : **prototype structurel compatible
 sur le domaine testé, candidat au raccord parallèle, pas FULL GPU qualifié**.
+
+## Piste supplémentaire : voie linéaire sans continuations
+
+Contre-analyse demandée après la capture de vrais drafts FULL. Cette
+section est un argument de conception, pas une qualification d'un nouvel
+encodeur ni une mesure de gain. Les captures et sources r1 ci-dessus ne
+sont pas modifiées.
+
+La condition exacte est une réduction globale : **aucune action n'a
+exactement un parent**. Une action a donc zéro parent (naissance) ou au
+moins deux parents (fusion). Si une continuation existe, utiliser la voie
+générale ; sa présence n'est pas une erreur de draft et ne justifie pas
+un refus public.
+
+Dans ce domaine, chaque action crée exactement un nœud : `V=A`, son ID
+est son ordinal d'action global, et le nombre de nœuds pré-lot est
+`batch_begin[b]`. Les offsets de parents de la sortie sont directement
+ceux du draft : aucun parent de continuation n'est à retirer.
+
+Pour chaque parent `p<V`, construire
+`first[p] = min { j : draft.parent[j] == p }`, initialisé à un absent
+distinct de tous les ordinaux valides. Au slot global `j`, le contrôle
+des parents devient : ordre strict intra-action, `p<batch_begin[b]`, puis
+`j==first[p]`. L'évaluation de cette condition s'inscrit au même stade et
+au même slot dans la réduction d'erreur canonique déjà décrite. Les
+parents `p>=V` ne doivent jamais indexer la table ; leur erreur locale
+est tout de même enregistrée.
+
+Preuve : un premier usage accepté consomme définitivement son parent,
+car c'est nécessairement une fusion. Ce parent n'est donc vivant à un
+usage ultérieur ni dans le même lot ni dans un lot futur. Réciproquement,
+un parent pré-lot sans usage antérieur est vivant. Les deux contrôles
+produisent ainsi les mêmes décisions sur tout préfixe natif valide.
+Au premier refus natif, tous les événements antérieurs sont valides ;
+le contrôle local ou `first` reproduit ce refus. Les erreurs hypothétiques
+détectées après ce point ne changent pas le minimum chronologique.
+
+On peut inclure dans `first` une référence `p<V` pourtant interdite
+par le contrôle pré-lot : son refus local est antérieur à tout refus
+supplémentaire qu'elle induit. À l'inverse, **marquer le premier worker
+arrivé** au lieu du minimum d'ordinal n'est pas correct : cela peut
+déplacer l'erreur parent vers une action antérieure et lui faire dépasser
+une erreur de population native. `atomicMin` est une implémentation
+possible du minimum, pas une autorisation de changer l'ordre des motifs.
+
+Après admission seulement, les successeurs peuvent être écrits sans
+conflit, car chaque parent est utilisé au plus une fois. Les nœuds,
+parents et contributions ont des plages de sortie disjointes. Conserver
+exactement les niveaux et les références ; ne pas fusionner de naissances
+et ne pas réduire les niveaux rationnels.
+
+Travail abstrait : `O(B+A+P+C+V)` avec B lots, A actions, P références
+parents, C contributions et V nœuds, en comptant mode-check, validation,
+initialisation de la table et sortie. La table ajoute `V*sizeof(ordinal)`
+octets ; le tri et le tableau d'incidences disparaissent de cette voie.
+Cela ne mesure pas le coût des atomiques GPU : un draft invalide qui
+répète le même parent peut les sérialiser. Un draft accepté a au plus
+un usage par entrée. Les limites d'ordinal, les tailles d'allocation et
+la priorité des erreurs de forme/domaine restent à contrôler. Comme
+pour r1, l'équivalence sémantique ne garantit pas la même chronologie
+en présence d'épuisement mémoire.
+
+Fixtures prioritaires du futur gate :
+
+- naissances puis fusions indépendantes et fusion de leurs nouveaux
+  nœuds dans un lot ultérieur ; sorties champ à champ dans deux calendriers ;
+- fusion et réemploi dans le même lot puis dans un lot ultérieur ;
+  permutation des calendriers avec les mêmes motifs ;
+- population invalide sur la première fusion avant un réemploi futur :
+  la population doit gagner, ce qui tue un « premier worker » arbitraire ;
+- parent `p<V` créé dans le même lot, et parent créé dans un lot futur,
+  puis réemploi après sa création : le premier refus pré-lot doit gagner ;
+- parent `p>=V`, y compris l'absent maximal, sans accès à la table ;
+- parent localement non croissant et doublon intra-action ;
+- en-tête invalide du même lot contre erreur parent, puis erreur d'action
+  avant en-tête invalide d'un lot futur ;
+- une seule continuation insérée : sélection obligatoire de la voie
+  générale, avec continuation valide, vide et continuation après fusion ;
+- forme CSR invalide contre domaine invalide, et erreur de masque ref0
+  contre population invalide ref1, comme dans la qualification générale.
+
+Conclusion de la contre-analyse : **voie exacte et pertinente à prototyper**
+pour les drafts sans continuations, sans conclusion de performance avant
+capture appariée. Elle simplifie aussi les préfixes de sortie ; elle ne
+remplace pas l'encodeur général lorsque les continuations sont présentes.

@@ -1,0 +1,10 @@
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_real_drafts_20260927/probe.cpp: In function ‘std::vector<mhgp9::gen::Point3> real_drafts::read_frame(const std::string&)’:
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_real_drafts_20260927/probe.cpp:188:46: error: narrowing conversion of ‘xyz.std::array<unsigned int, 3>::operator[](0)’ from ‘std::array<unsigned int, 3>::value_type’ {aka ‘unsigned int’} to ‘mhgp9::gen::Coordinate’ {aka ‘int’} [-Werror=narrowing]
+  188 |     points[i] = Point3{xyz[0], xyz[1], xyz[2]};
+      |                                              ^
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_real_drafts_20260927/probe.cpp:188:46: error: narrowing conversion of ‘xyz.std::array<unsigned int, 3>::operator[](1)’ from ‘std::array<unsigned int, 3>::value_type’ {aka ‘unsigned int’} to ‘mhgp9::gen::Coordinate’ {aka ‘int’} [-Werror=narrowing]
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_real_drafts_20260927/probe.cpp:188:46: error: narrowing conversion of ‘xyz.std::array<unsigned int, 3>::operator[](2)’ from ‘std::array<unsigned int, 3>::value_type’ {aka ‘unsigned int’} to ‘mhgp9::gen::Coordinate’ {aka ‘int’} [-Werror=narrowing]
+cc1plus: all warnings being treated as errors
+gmake[2]: *** [CMakeFiles/mhgp9_full_real_drafts.dir/build.make:76: CMakeFiles/mhgp9_full_real_drafts.dir/probe.cpp.o] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:83: CMakeFiles/mhgp9_full_real_drafts.dir/all] Error 2
+gmake: *** [Makefile:91: all] Error 2

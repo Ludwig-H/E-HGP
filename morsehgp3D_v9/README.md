@@ -2,6 +2,13 @@
 
 Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 
+Suite du 27 septembre : [ordre natif et vrais drafts FULL](docs/ORDRE_ET_VRAIS_DRAFTS_20260927.md).
+Une nouvelle représentation partage des listes B ordonnées par classe A,
+pour éviter le tri final des survivants. 15 mesures et portes locales passent.
+Le test du premier encodeur sur de vrais drafts est négatif en temps CPU :
+ne pas le porter tel quel. Une voie linéaire sans continuations est proposée
+sur condition vérifiée ; moteur/GPU inchangés, aucun nouveau contrat acquis.
+
 Dernière tranche du 27 septembre : [bandes directes et encodeur FULL](docs/PROTOTYPES_DIRECTS_ET_FULL_20260927.md).
 La préparation des bandes ne construit plus les anciennes cellules ; les
 survivants ordonnés passent une porte de raccord native. L'encodeur

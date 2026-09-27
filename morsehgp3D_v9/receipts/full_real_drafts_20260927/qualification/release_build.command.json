@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-audit-full-real-drafts-20260927-r1/release",
+    "--parallel",
+    "1"
+  ],
+  "ended_epoch": 1790490523.856454,
+  "exit_code": 2,
+  "group_closed": true,
+  "name": "release_build",
+  "pid": 86551,
+  "started_epoch": 1790490518.4838712,
+  "stderr_sha256": "81a3cfdc3b5adf9a43ff1793ad495b49a44be3286fb1a956bf337a2ce2808acd",
+  "stdout_sha256": "91126f0b64f0740d5269eaaaf0fa48017e377023782eab524e34f77009655b44",
+  "timeout_seconds": 600
+}

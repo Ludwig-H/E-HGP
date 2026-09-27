@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-q34-ordered-rows-20260927-r1_release/mhgp9_ordered_rows",
+    "--synthetic",
+    "clusters",
+    "8000",
+    "5",
+    "8"
+  ],
+  "ended_epoch": 1790490682.1609383,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "measure_clusters_8000",
+  "pid": 88839,
+  "started_epoch": 1790490678.5749757,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "d5cd3ced7e8905e9cdc94ef744ff37735d2dcf5a13a96d60176f0f86a75f509b",
+  "timeout_seconds": 90
+}

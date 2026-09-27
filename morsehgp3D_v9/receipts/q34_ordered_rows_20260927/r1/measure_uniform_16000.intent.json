@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-q34-ordered-rows-20260927-r1_release/mhgp9_ordered_rows",
+    "--synthetic",
+    "uniform",
+    "16000",
+    "5",
+    "8"
+  ],
+  "name": "measure_uniform_16000",
+  "started_epoch": 1790490626.2168067,
+  "timeout_seconds": 90
+}

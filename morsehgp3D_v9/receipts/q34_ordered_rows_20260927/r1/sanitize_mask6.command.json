@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-q34-ordered-rows-20260927-r1_sanitize/mhgp9_ordered_rows",
+    "--mutant",
+    "mask6"
+  ],
+  "ended_epoch": 1790490600.8602037,
+  "exit_code": 1,
+  "group_closed": true,
+  "name": "sanitize_mask6",
+  "pid": 87825,
+  "started_epoch": 1790490600.8449798,
+  "stderr_sha256": "53dd12713f7eb46769d1a931cbef5f48d925539ac6d8edac348e9c0f85d0dcc6",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": 90
+}

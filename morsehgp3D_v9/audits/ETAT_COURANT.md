@@ -1,5 +1,22 @@
 # État courant des audits v9
 
+**27 septembre — ordre natif et vrais drafts FULL** :
+[bilan](../docs/ORDRE_ET_VRAIS_DRAFTS_20260927.md),
+[lignes ordonnées](b_q34_ordered_rows_20260927/README.md),
+[vrais drafts](b_full_real_drafts_20260927/README.md).
+Listes B partagées une fois par classe A, A en ordre original : pas de tri S
+nécessaire avec compactage stable. Portes Release/sanitizers/mutants,
+17 488 rectangles de gate et 15 mesures closes. W/T payés ; pas de nouveau
+rejet ni de correction de la croissance E amas. Aucun S2/GPU exécuté.
+
+Le premier encodeur FULL compatible est maintenant confronté à quatre vrais
+drafts : objets égaux, mais régression CPU (LiDAR sommes médianes K
+149,38→296,30 ms). Conserver ce résultat négatif. Les quatre drafts n'ont
+aucune continuation ; la [voie first-parent](b_full_batch_review_20260927/README.md)
+est une proposition linéaire contre-jugée, pas encore une qualification.
+Moteur inchangé, GCP non utilisé. La mémoire collective et le consommateur
+sans tableaux P restent des raccords ouverts, distincts du format seul.
+
 **27 septembre — suite : bandes directes, raccord et encodeur FULL** :
 [synthèse pour le développeur](../docs/PROTOTYPES_DIRECTS_ET_FULL_20260927.md).
 Le [plan direct](b_q34_direct_bands_20260927/README.md) supprime réellement

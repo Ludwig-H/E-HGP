@@ -1,5 +1,22 @@
 # Passation v9
 
+## Lignes ordonnées et vraie charge FULL — 27 septembre, suite suivante
+
+[Synthèse et décisions](docs/ORDRE_ET_VRAIS_DRAFTS_20260927.md).
+Les lignes B partagées par classe A évitent structurellement le tri final
+de S, sans scanner chaque paire du produit original : W≤K(K−1)F_B,
+T≤E. 25 commandes closes, 15 mesures, mêmes masses Pool. Sur LiDAR00
+K5 : W4,080M/T1,969M pour E9,123M, mais ancien Pool toujours payé.
+Les amas conservent le résidu quasi quadratique. Pas encore S2/GPU/FULL.
+
+Quatre vrais drafts FULL capturés sans changer le moteur : ng00 entier
+et uniforme8k/16k/32k. L'encodeur général donne les mêmes tableaux, mais
+coûte environ deux fois le natif en sommes de temps CPU par ordre.
+Le port scalaire est donc à différer. Aucun de ces drafts n'a de continuation :
+une voie first-parent linéaire est mathématiquement contre-jugée, à qualifier
+séparément. Le général reste nécessaire lorsqu'une continuation existe.
+Captures et échecs de compilation conservés, GCP non utilisé.
+
 ## Bandes directes et encodeur FULL reconstruits — 27 septembre, suite
 
 Lire [la nouvelle tranche](docs/PROTOTYPES_DIRECTS_ET_FULL_20260927.md)

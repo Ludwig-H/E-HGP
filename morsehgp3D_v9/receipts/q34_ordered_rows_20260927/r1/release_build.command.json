@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-q34-ordered-rows-20260927-r1_release",
+    "--parallel",
+    "2"
+  ],
+  "ended_epoch": 1790490591.0024855,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "release_build",
+  "pid": 87459,
+  "started_epoch": 1790490586.8185256,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "1bda93fe28e63dae88a6acd7f74b384e915a39351c326ef3b36d610fedac44ec",
+  "timeout_seconds": 90
+}
