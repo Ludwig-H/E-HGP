@@ -27,6 +27,14 @@ possède maintenant une référence Fraction sparse séparée :133fixtures,
 n×V ; dates MEB, plateaux et singletons résiduels conservés. Aucun score
 statistique du pilote ne lui est transféré : celui-ci évalue le vote plat.
 
+## Stockage local — 27 septembre
+
+[Nettoyage et restauration](docs/NETTOYAGE_STOCKAGE_20260927.md) : anciennes
+copies volumineuses de `build/` archivées sur le disque du projet et
+relocalisées vers `/tmp`. Les sources v2–v5 et les travaux non publiés sont
+conservés. Les lecteurs historiques sensibles à `Path.resolve()` peuvent
+nécessiter une restauration au chemin original ; voir les manifestes et ACL.
+
 ## Correction méthodologique après relecture intégrale I–II — 27 septembre
 
 [Audit thèse/HGP-old](audits/RELECTURE_THESE_ET_HGP_OLD_20260927.md).
