@@ -1,0 +1,3 @@
+[ 50%] Building CUDA object CMakeFiles/mhgp9_survivors_device_gate.dir/device_gate.cu.o
+[100%] Linking CUDA executable mhgp9_survivors_device_gate
+[100%] Built target mhgp9_survivors_device_gate

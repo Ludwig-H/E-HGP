@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_survivors_device_gate_20260927/reader_checks/selftest.py",
+    "--exercise"
+  ],
+  "ended_epoch": 1790502565.9640994,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "normal",
+  "pid": 80,
+  "started_epoch": 1790502559.4461005,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "cc2bce6967e592efda1cfbfc0e98b051a838c09129f6bcf0c1a5e6d0802d7e8c",
+  "timeout_seconds": null
+}

@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-survivors-device-gate-20260927-r1/mhgp9_survivors_device_gate",
+    "--unknown"
+  ],
+  "name": "refuse_unknown",
+  "started_epoch": 1790502454.3194783,
+  "timeout_seconds": null
+}

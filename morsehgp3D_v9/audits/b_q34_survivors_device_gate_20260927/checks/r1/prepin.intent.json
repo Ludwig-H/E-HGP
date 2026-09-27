@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_survivors_device_gate_20260927/run.py",
+    "--prepin",
+    "/workspaces/E-HGP/build/v9-survivors-device-gate-20260927-r1"
+  ],
+  "name": "prepin",
+  "started_epoch": 1790502443.9557953,
+  "timeout_seconds": null
+}

@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-survivors-device-gate-20260927-r1",
+    "--target",
+    "mhgp9_survivors_device_gate",
+    "-j2"
+  ],
+  "ended_epoch": 1790502454.3138206,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "build",
+  "pid": 212,
+  "started_epoch": 1790502445.0978632,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "ad8c0cd44e23002cb6142e8feccd4e18f53871f95b471902296b344e814131ab",
+  "timeout_seconds": null
+}

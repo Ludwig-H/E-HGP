@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_survivors_device_gate_20260927/reader_checks/selftest.py",
+    "--exercise"
+  ],
+  "name": "normal",
+  "started_epoch": 1790502559.4461005,
+  "timeout_seconds": null
+}

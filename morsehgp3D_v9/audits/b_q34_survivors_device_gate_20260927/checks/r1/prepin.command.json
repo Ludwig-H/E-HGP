@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_survivors_device_gate_20260927/run.py",
+    "--prepin",
+    "/workspaces/E-HGP/build/v9-survivors-device-gate-20260927-r1"
+  ],
+  "ended_epoch": 1790502445.0970397,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "prepin",
+  "pid": 202,
+  "started_epoch": 1790502443.9557953,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "5a3b2ff11c5a3466ed42fe46d1873a321ae8dc2974baec8dda204df00d1b5de5",
+  "timeout_seconds": null
+}

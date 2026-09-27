@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-survivors-device-gate-20260927-r1/mhgp9_survivors_device_gate",
+    "--host-gate"
+  ],
+  "ended_epoch": 1790502454.3165884,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "host_gate",
+  "pid": 256,
+  "started_epoch": 1790502454.3143446,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "211a120ab379fdabb47f5152957dfd857991d40e926bde53967f86ce68f05070",
+  "timeout_seconds": null
+}

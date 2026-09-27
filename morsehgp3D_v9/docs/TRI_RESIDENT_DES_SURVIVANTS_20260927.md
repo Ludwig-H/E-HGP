@@ -43,6 +43,14 @@ passent. Le [contre-audit](../audits/b_q34_resident_survivors_review_20260927/RE
 précise la couverture et les limites. Ce n'est pas un environnement
 entièrement hermétique ni une nouvelle qualification de concurrence.
 
+Précision de traçabilité après contre-audit : R1 n'épinglait pas le
+contenu du fichier de paramètres indirects des deux unités CUDA.
+Ses tests Release/San, qui n'utilisent pas ce fichier, restent établis ;
+la compilation CUDA est observée, mais sa preuve d'options exactes est
+partielle. Voir l'[addendum précis](../audits/b_q34_resident_survivors_review_20260927/RESPONSE_FILES.md).
+Les anciens reçus ne sont pas réécrits : le prochain comparatif G4 aura
+une nouvelle compilation avec ces fichiers fermés avant/après.
+
 ## Mémoire et complexité
 
 L'accumulation croît avec S survivants et Q emplacements de vague, en
@@ -58,6 +66,13 @@ devienne sous-quadratique en nombre de points. Aucune nouvelle campagne
 8k/16k/32k, coupes LiDAR ou multi-scènes n'est attribuée à cette tranche.
 
 ## Suite et décision d'intégration
+
+La [porte dédiée aux grandes clés](../audits/b_q34_survivors_device_gate_20260927/README.md)
+est maintenant compilée dans une capture autonome : dix commandes,
+24 cas hôte, lecteurs normal/−O et huit falsifications passent.
+Elle ferme aussi les fichiers de paramètres CUDA et de lien, sans réparer
+rétroactivement R1. Son mode `--cuda` reste à exécuter sur G4 : les tests
+hôte ne constituent pas cette exécution et ses compteurs device sont nuls.
 
 Faire une porte CUDA réelle, puis une comparaison appariée avec l'ancien
 raccord sur G4, sur la même trame entière, avec mêmes P/E/S et sorties.

@@ -5,6 +5,14 @@ dans cette tranche. [Qualification locale r1](checks/r1/summary.json) close
 PASS : 26 commandes, Release et ASan/UBSan/LSan, compilation CUDA 12.9 réussie,
 **aucune exécution GPU**. Les préflights ne constituent pas cette preuve.
 
+Précision de preuve ajoutée après clôture : les deux unités `.cu` utilisaient
+`includes_CUDA.rsp`, dont le contenu n'avait pas de pin propre avant/après.
+Le build CUDA est observé, mais sa fermeture des options indirectes est
+incomplète. Les unités C++ Release/San n'utilisaient pas de fichier réponse
+et ne sont pas affectées ; aucune reconstruction ni modification du reçu
+n'est faite. Voir l'[addendum ciblé](../b_q34_resident_survivors_review_20260927/RESPONSE_FILES.md).
+La prochaine compilation comparative G4 neuve fermera aussi ces options.
+
 ## Changement et limite
 
 Le résident publié dans [le reçu G4](../../receipts/q34_resident_g4_20260927/r1/README.md)

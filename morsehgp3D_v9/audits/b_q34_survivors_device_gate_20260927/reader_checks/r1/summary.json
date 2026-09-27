@@ -1,0 +1,12 @@
+{
+  "commands": 2,
+  "pins": {
+    "/workspaces/E-HGP/build/v9-resume-20260927/gcp-migration/full_probe_session_v7.py": "177b25a0d72150dc331661fdf8da1ccde77ea17fb694d9c6af5b0929755160d8",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_survivors_device_gate_20260927/checks/r1/capture.json": "fcb2afcb7b4627c2e6a9e55d1671111b508fe59273687d8ea56d6f560f05723c",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_survivors_device_gate_20260927/reader_checks/selftest.py": "53e20f27725d5754aa42a5e334256de9091ec0e59cee1277d8081153fa00b7a0",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_survivors_device_gate_20260927/run.py": "d81fd3c23892ee9a7ff22dc721787050b050e7563fc4c5fe2fdff9b015a958ce"
+  },
+  "positive_per_command": 1,
+  "refusals_per_command": 8,
+  "status": "PASS"
+}

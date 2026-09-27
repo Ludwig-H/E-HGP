@@ -1,5 +1,17 @@
 # Coordination Morse HGP 3D v9
 
+### 27 septembre — DEV : porte CUDA haut-u64 prête, portée R1 précisée
+
+[Porte](../morsehgp3D_v9/audits/b_q34_survivors_device_gate_20260927/README.md) :
+10 commandes, CUDA compilé/24 cas hôte, lecteurs normal/−O et huit
+falsifications passent. Pas de device/GCP exécuté dans cette capture.
+Fichiers de paramètres `.rsp`, archives liées et objet compilé sont fermés.
+[Addendum R1](../morsehgp3D_v9/audits/b_q34_resident_survivors_review_20260927/RESPONSE_FILES.md) :
+options indirectes des deux TU CUDA non épinglées dans l'ancien lot,
+Release/San et liens directs non concernés. Aucun échec géométrique déduit.
+Ne pas réparer les hashes historiques ; prochaine compilation du comparatif
+G4 avec fermeture propre. Aucun ancien code/reçu modifié.
+
 ### 27 septembre — DEV : variante FULL A à identifiants stables qualifiée
 
 [Bilan](../morsehgp3D_v9/docs/CONSTRUCTION_EVENEMENTIELLE_FULL_20260927.md).

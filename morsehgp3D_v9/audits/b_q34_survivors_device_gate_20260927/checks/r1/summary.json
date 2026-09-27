@@ -1,0 +1,32 @@
+{
+  "CUDA_compiled": true,
+  "CUDA_executed": false,
+  "GCP_used": false,
+  "commands": 10,
+  "compiled_pins": 989,
+  "gate": {
+    "boundary_inversions": 594,
+    "cases": 24,
+    "cuda_executed": false,
+    "download_bytes": 0,
+    "empty": 6,
+    "empty_waves": 1226,
+    "growth_copy_bytes": 0,
+    "growths": 0,
+    "high32": 624,
+    "high63": 606,
+    "inversions": 606,
+    "items": 642,
+    "mode": "host_fixture",
+    "peak_bytes": 0,
+    "refused": 0,
+    "schema": "mhgp9_survivors_device_gate_v1",
+    "single": 6,
+    "status": "passed",
+    "upload_bytes": 0
+  },
+  "headers_before": 978,
+  "scope": "CUDA_compile_and_host_fixtures_only_not_GPU_gate",
+  "source_pins": 1836,
+  "status": "PASS"
+}

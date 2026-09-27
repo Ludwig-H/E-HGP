@@ -13,6 +13,13 @@ aucun nouveau FULL/G4/croissance : prochaine porte device puis appariement
 sur trame entière. Clés hautes testées en portable, pas encore device.
 Sources/builds/reçu figés, moteur inchangé, GCP non utilisé dans ce lot.
 
+Porte dédiée haut-u64 compilée dans une nouvelle capture de dix commandes,
+24 cas hôte et huit falsifications du lecteur ; aucune exécution GPU.
+Elle ferme les fichiers de paramètres indirects, absents des pins CUDA de
+R1. L'[addendum](audits/b_q34_resident_survivors_review_20260927/RESPONSE_FILES.md)
+limite précisément l'ancienne preuve CUDA, sans annuler les tests portables.
+Le prochain comparatif G4 devra fermer ses propres options avant/après.
+
 ## Manifeste FULL et constructeur événementiel C++ — 27 septembre
 
 [Bilan pédagogique](docs/CONSTRUCTION_EVENEMENTIELLE_FULL_20260927.md).

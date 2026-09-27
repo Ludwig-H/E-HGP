@@ -9,6 +9,13 @@ Pas de test GPU de cette variante ni de gain FULL revendiqué. O(S+Q)
 pour l'accumulation, sans tableau de toutes les candidates ; E inchangé.
 GCP non utilisé ; la comparaison G4 appariée reste à faire.
 
+[Porte haut-u64](b_q34_survivors_device_gate_20260927/README.md) désormais
+compilée : dix commandes/24 cas hôte, aucun appel GPU ; lecteurs et huit
+falsifications passent. Voir l'[addendum de traçabilité CUDA R1](b_q34_resident_survivors_review_20260927/RESPONSE_FILES.md) :
+un fichier d'options indirectes n'était pas pré-épinglé. Pas de défaut
+géométrique observé ; Release/San non concernés, prochains builds CUDA
+tenus de fermer ces fichiers sans réécrire les anciens reçus.
+
 **27 septembre — entrée FULL A et constructeur événementiel C++ clos** :
 [synthèse](../docs/CONSTRUCTION_EVENEMENTIELLE_FULL_20260927.md),
 [manifeste](b_full_a_manifest_20260927/README.md),
