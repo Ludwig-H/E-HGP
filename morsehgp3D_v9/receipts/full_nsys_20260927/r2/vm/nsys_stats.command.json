@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "/tmp/ehgp-full-v7-5730576447fc18bd.ibGZ2DxHTJ/tools/nsys/opt/nvidia/nsight-systems-cli/2025.3.1/target-linux-x64/nsys",
+    "stats",
+    "--report",
+    "cuda_gpu_kern_sum,cuda_gpu_mem_time_sum,cuda_api_sum,osrt_sum",
+    "--format",
+    "csv",
+    "/tmp/ehgp-full-v7-5730576447fc18bd.ibGZ2DxHTJ/output/full_trace.sqlite"
+  ],
+  "cwd": "/tmp/ehgp-full-v7-5730576447fc18bd.ibGZ2DxHTJ/output",
+  "elapsed_seconds": 0.1137728839999852,
+  "ended_utc": "2026-09-27T14:00:59.193556+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 14083,
+  "session_work_deadline_epoch": 1790518188.2451453,
+  "started_utc": "2026-09-27T14:00:59.079712+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "174af53ba92d169eb98da7012a6170ed431890291526ddbbbee83ce0edcc3f21"
+}

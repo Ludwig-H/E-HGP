@@ -1,5 +1,16 @@
 # État courant des audits v9
 
+**27 septembre — R2 FULL Nsight obtenue, G4 arrêtée** :
+[rapport](../docs/PROFIL_FULL_NSYS_20260927.md),
+[reçu](../receipts/full_nsys_20260927/r2/README.md).
+Moteur inchangé, trois préflights puis4+4passages ; sorties contrôlées égales.
+ng00sans-sol entière1mm/K5 : baseline chaude912,219ms, un processus.
+Trace84noyaux,207,895ms/pass ; copies5,184ms ; tour CPU277–303ms.
+Compatibilité profiler réservée (piloteCUDA13.0, Nsight/CUPTI12.9), activité
+threads sans ordonnancement imprécise ; pas preuve d'exhaustivité/occupation.
+VM même génération arrêtée après220,439s.100ms reste ouvert ; aucune
+nouvelle refonte ni mesure de croissance. Les entrées suivantes sont historiques.
+
 **27 septembre — reprise locale sans nouvelle G4** :
 l'[audit de récupération](../docs/PROFILAGE_AVANT_REFONTE_20260927.md)
 confirme que l'archive FULL exclut `output/build` et que les neuf exécutables
@@ -19,11 +30,11 @@ raison précise non établie. Zéro commande worker, FULL/GPU faux,
 ni téléchargement ni lancement Nsight. Même génération G4 arrêtée,
 157,524s d'allocation ; contrelecture de l'échec et de l'arrêt passée.
 Pas de relance automatique, aucun changement moteur, toujours aucune
-trace Nsight exploitable. Contrat100ms et attribution des goulots ouverts.
+trace Nsight exploitable à la clôture de R1. Contrat100ms et attribution des goulots ouverts.
 
 **27 septembre — décision de priorité et clôture des mesures** :
 [profiler FULL avant une refonte](../docs/PROFILAGE_AVANT_REFONTE_20260927.md).
-Pas de trace Nsight attestée à ce jour ; ne pas investir dans un gros port
+Avant R2, pas de trace Nsight attestée ; ne pas investir dans un gros port
 sur la seule foi d'un gain de prototype. [A réel](b_full_a_real_20260927/RESULTATS.md) :
 69 commandes qualifiées, quatre entrées closes, 120 comparaisons exactes ;
 ng00 min-label/event 3 148,510/4 099,105 ms en somme des médianes K.

@@ -1,0 +1,56 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_nsys_r2_20260927/capture.py",
+    "--owned-controller",
+    "--commit",
+    "fe697742030c63b32ae68a8b9d4e364edca57432",
+    "--session-dir",
+    "/workspaces/E-HGP/build/v9-full-nsys-session-20260927-r2",
+    "--gcloud",
+    "/home/codespace/google-cloud-sdk/bin/gcloud"
+  ],
+  "diagnostic_commit": "fe697742030c63b32ae68a8b9d4e364edca57432",
+  "helper_sha256": "177b25a0d72150dc331661fdf8da1ccde77ea17fb694d9c6af5b0929755160d8",
+  "max_wait_before_interrupt_seconds": 900,
+  "native_package_provenance": {
+    "commit": "ddf4776d754a8db59a1333e11d56b39d8cb6f51a",
+    "helper": {
+      "path": "gcp-migration/full_probe_worker_v7.py",
+      "sha256": "da967163bdb7247bc6aad4df0c294cda1071076a0127cd5bd9f59bc0e4788439"
+    },
+    "inputs": {
+      "data/scene_00.u32le": {
+        "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le",
+        "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf"
+      },
+      "data/scene_01.u32le": {
+        "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_01_grid/full.u32le",
+        "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f"
+      },
+      "data/scene_02.u32le": {
+        "commit_path": "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_02_grid/full.u32le",
+        "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af"
+      },
+      "data/scene_b00.u32le": {
+        "commit_path": "morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_00_000000_grid/full.u32le",
+        "sha256": "233cc4ea8cac6e0b1155ea845af57b32e5236764bf2e119557aeab5bac76c172"
+      },
+      "data/scene_b01.u32le": {
+        "commit_path": "morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_01_000100_grid/full.u32le",
+        "sha256": "de45e8dcaf5610cd71a369b613f16914d5713e77cbe1532122ec2e823bc0b4ad"
+      },
+      "data/scene_b02.u32le": {
+        "commit_path": "morsehgp3D_v8/receipts/float32_precision_20260921/release_r2/precision_a1drpf9i/scene_02_000200_grid/full.u32le",
+        "sha256": "37a7be399fae909a1291cddfc3ca5b972d3effdfa8dc8cd87a41accd5fa0f5f7"
+      }
+    },
+    "protocol_source": "commit",
+    "schema": "mhgp9_tower_provenance_v1",
+    "tree": "fd45312b68290c45ecd64c9bb2f5c49e2ef79151"
+  },
+  "scope": "FULL_profile_diagnostic_not_contract",
+  "worker_sha256": "a5a39bd1f94af676cc84b1df035a418f5b56ed309d5765139408c7b745ac5245",
+  "wrapper_sha256": "ed388919d2776d5c8a48754d492c0ae4f31405e36f26d382e9c3aefe58c9f393"
+}

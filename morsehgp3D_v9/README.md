@@ -2,9 +2,15 @@
 
 Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 
-Priorité du 27 septembre : [profiler FULL avant toute nouvelle refonte](docs/PROFILAGE_AVANT_REFONTE_20260927.md).
-Aucune capture Nsight attestée à ce jour. Le contrat 100 ms reste ouvert ;
-les gains locaux ne suffisent pas à justifier de grands portages.
+Dernière mesure du 27 septembre : [profil FULL Nsight obtenu sur G4](docs/PROFIL_FULL_NSYS_20260927.md).
+Trame sans sol entière, K1..5 : médiane chaude sans profiler912,219ms
+(un processus), mêmes objets contrôlés dans les huit passages. Noyaux
+GPU207,895ms/pass, copies5,184ms ; tour CPU277–303ms.100ms reste ouvert.
+Réserve explicite : Nsight2025.3.1 signale le piloteCUDA13.0 non supporté
+et l'absence d'ordonnancement CPU. Diagnostic, pas occupation certifiée.
+VM arrêtée après220,439s ; moteur inchangé, pas de nouvelle grande refonte.
+La [décision de profiler avant refonte](docs/PROFILAGE_AVANT_REFONTE_20260927.md)
+et les échecs antérieurs restent conservés.
 Un [essai de profilage G4](receipts/full_nsys_20260927/r1/README.md) s'est
 arrêté avant calcul : ancien binaire FULL non disponible sous la forme attendue dans `/tmp`.
 Ni téléchargement ni lancement Nsight ; aucune relance automatique,

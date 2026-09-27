@@ -1,5 +1,20 @@
 # Coordination Morse HGP 3D v9
 
+### 27 septembre — DEV : vraie capture FULL Nsight R2, pas de refonte
+
+[Rapport](../morsehgp3D_v9/docs/PROFIL_FULL_NSYS_20260927.md),
+[reçu R2](../morsehgp3D_v9/receipts/full_nsys_20260927/r2/README.md).
+Protocolefe6977420, sourcesFULLddf4776d inchangées reconstruites sur G4.
+Trois préflights puis4+4passages, même objet contrôlé. ng00K5sanssol1mm :
+chaud912,219ms, un processus.84noyaux/207,895ms par passage ; copies5,184ms.
+Contrelecture indépendante des chiffres, sorties natives et avertissements :
+piloteCUDA13.0 non pris en charge par ce Nsight/CUPTI12.9, schedulingabsent.
+Donc diagnostic avec réserves, jamais occupation ou complétude certifiée.
+Arrêt même génération relu,220,439s ; aucun nouveaucloud après clôture.
+Tour CPU277–303ms et géométrie GPU déjà>100ms : pas de gros port justifié
+par quelques pourcents locaux. Prochaine décision après attribution CPU
+par phases si l'utilisateur poursuit. Ni contrat100ms ni croissance acquis.
+
 ### 27 septembre — audit de reprise : artefacts et travaux résiduels
 
 Relevé sur main `4e25650dc`, sans nouvelle session GCP ni build.

@@ -1,0 +1,72 @@
+Processing [/tmp/ehgp-full-v7-5730576447fc18bd.ibGZ2DxHTJ/output/full_trace.sqlite] with [/tmp/ehgp-full-v7-5730576447fc18bd.ibGZ2DxHTJ/tools/nsys/opt/nvidia/nsight-systems-cli/2025.3.1/target-linux-x64/reports/cuda_gpu_kern_sum.py]... 
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+43.4,360545100,4,90136275.0,90126923.0,90077403,90213851,59370.6,"mhgp9::gpu::<unnamed>::certificate_kernel(mhgp9::gpu::CertificateIndex, const unsigned int *, const unsigned int *, const unsigned char *, unsigned int, unsigned int, bool, unsigned int, unsigned int *, long long *, long long *, long long *, unsigned int *, unsigned long long *, unsigned char *, unsigned char *, mhgp9::gpu::CertificateWork *, unsigned int)"
+18.2,151681924,4,37920481.0,37911402.5,37893558,37965561,31291.9,"void mhgp9::gpu::<unnamed>::lanes_task_kernel<(bool)0>(mhgp9::gpu::LanesIndex, const unsigned int *, const unsigned int *, unsigned int, unsigned int, unsigned int, unsigned int, const mhgp9::gpu::LanesPlan *, int *, unsigned int *, unsigned int *, mhgp9::gpu::LanesTask *, unsigned long long, mhgp9::gpu::LaneRecord *, unsigned int *, mhgp9::gpu::LaneRecord *, unsigned long long, unsigned long long *, unsigned long long *, unsigned long long *, mhgp9::gpu::LanesTaskWork *, mhgp9::gpu::LanesTaskRecords *, unsigned long long *, bool, unsigned int, unsigned int *, unsigned int *, unsigned int)"
+16.3,135785174,4,33946293.5,33916709.0,33603160,34348596,384398.2,"mhgp9::gpu::<unnamed>::rectangle_kernel(const mhgp9::gpu::FlatNode *, const unsigned int *, const unsigned int *, const unsigned char *, unsigned long, unsigned int, unsigned char *, unsigned long long *, unsigned long long *, int *)"
+13.9,115443178,4,28860794.5,28859363.0,28831313,28893139,25977.1,"void mhgp9::gpu::<unnamed>::pair_kernel<(bool)0>(const mhgp9::gpu::FlatNode *, const int *, const unsigned int *, const unsigned int *, const unsigned char *, const unsigned long long *, unsigned long, unsigned long long, unsigned int, unsigned char *, unsigned long long *, unsigned long long *, int *, const unsigned long long *, const mhgp9::gpu::FixedWitnessTrace *, const unsigned char *, unsigned long long *)"
+7.3,61031754,4,15257938.5,15258347.5,15249354,15265705,6698.1,"mhgp9::gpu::<unnamed>::lanes_plan_kernel(mhgp9::gpu::LanesIndex, const unsigned int *, const unsigned int *, const unsigned char *, unsigned int, unsigned int, unsigned int, unsigned long long, unsigned int *, unsigned int *, int *, unsigned int *, unsigned int *, unsigned long long, unsigned long long *, unsigned long long *, mhgp9::gpu::LanesPlan *, mhgp9::gpu::EdgeQ3Work *, mhgp9::gpu::LanesTaskWork *, unsigned long long *, unsigned int)"
+0.3,2722465,4,680616.3,680704.5,680192,680864,303.1,"mhgp9::gpu::<unnamed>::lanes_answer_kernel(const mhgp9::gpu::LanesPlan *, const mhgp9::gpu::EdgeQ3Work *, const mhgp9::gpu::LanesTaskWork *, const unsigned char *, const unsigned long long *, const unsigned long long *, unsigned int, unsigned long long, const unsigned long long *, unsigned long long, unsigned char *, unsigned int *, unsigned int *, unsigned long long *, mhgp9::gpu::Q3Work *, mhgp9::gpu::Q4Work *, unsigned int)"
+0.2,1952961,4,488240.3,488208.5,485152,491392,3190.7,"mhgp9::gpu::<unnamed>::lanes_fill_kernel(const mhgp9::gpu::LanesPlan *, const unsigned long long *, unsigned int, unsigned long long, mhgp9::gpu::LanesTask *)"
+0.1,744673,4,186168.3,186000.0,185536,187137,696.8,"void mhgp9::gpu::<unnamed>::lanes_gather_kernel<(bool)0>(const mhgp9::gpu::LanesPlan *, const unsigned long long *, const mhgp9::gpu::LanesTask *, const mhgp9::gpu::LanesTaskRecords *, const unsigned char *, const unsigned long long *, const unsigned long long *, unsigned long long, unsigned long long, const unsigned long long *, unsigned long long, const mhgp9::gpu::LaneRecord *, mhgp9::gpu::LaneRecord *, const unsigned int *, unsigned int *, unsigned int)"
+0.1,600640,4,150160.0,150016.0,148864,151744,1258.9,"mhgp9::gpu::<unnamed>::scatter_kernel(const mhgp9::gpu::FlatNode *, const unsigned int *, const unsigned int *, const unsigned long long *, unsigned long, const unsigned char *, unsigned long long, const unsigned int *, unsigned int *, unsigned int *, unsigned char *)"
+0.0,335264,4,83816.0,83328.0,81888,86720,2088.7,"void cub::CUB_200802_SM_1200::DeviceScanKernel<cub::CUB_200802_SM_1200::detail::scan::policy_hub<unsigned int, unsigned int, unsigned int, unsigned int, cuda::std::__4::plus<void>>::Policy1000, unsigned int *, unsigned int *, cub::CUB_200802_SM_1200::ScanTileState<unsigned int, (bool)1>, cuda::std::__4::plus<void>, cub::CUB_200802_SM_1200::detail::InputValue<unsigned int, unsigned int *>, unsigned int, unsigned int, (bool)0>(T2, T3, T4, int, T5, T6, T7)"
+0.0,240960,4,60240.0,59936.0,59552,61536,892.4,"mhgp9::gpu::<unnamed>::flag_kernel(const unsigned char *, unsigned long long, unsigned int *)"
+0.0,194304,4,48576.0,48496.0,47840,49472,675.8,"void cub::CUB_200802_SM_1200::DeviceScanKernel<cub::CUB_200802_SM_1200::detail::scan::policy_hub<mhgp9::gpu::LanesTaskRecords, mhgp9::gpu::LanesTaskRecords, mhgp9::gpu::LanesTaskRecords, unsigned int, mhgp9::gpu::LanesRecordsSum>::Policy1000, mhgp9::gpu::LanesTaskRecords *, mhgp9::gpu::LanesTaskRecords *, cub::CUB_200802_SM_1200::ScanTileState<mhgp9::gpu::LanesTaskRecords, (bool)0>, mhgp9::gpu::LanesRecordsSum, cub::CUB_200802_SM_1200::NullType, unsigned int, mhgp9::gpu::LanesTaskRecords, (bool)0>(T2, T3, T4, int, T5, T6, T7)"
+0.0,174944,4,43736.0,43536.0,42656,45216,1126.9,"mhgp9::gpu::<unnamed>::lanes_replay_kernel(const mhgp9::gpu::LanesPlan *, const unsigned long long *, const mhgp9::gpu::LanesTask *, const mhgp9::gpu::LanesTaskRecords *, const mhgp9::gpu::LanesTaskWork *, unsigned int, unsigned int, unsigned char *, unsigned long long *)"
+0.0,56096,8,7012.0,6864.0,5312,8992,1802.5,"void cub::CUB_200802_SM_1200::DeviceScanKernel<cub::CUB_200802_SM_1200::detail::scan::policy_hub<unsigned long long, unsigned long long, unsigned long long, unsigned int, cuda::std::__4::plus<void>>::Policy1000, const unsigned long long *, unsigned long long *, cub::CUB_200802_SM_1200::ScanTileState<unsigned long long, (bool)1>, cuda::std::__4::plus<void>, cub::CUB_200802_SM_1200::detail::InputValue<unsigned long long, unsigned long long *>, unsigned int, unsigned long long, (bool)0>(T2, T3, T4, int, T5, T6, T7)"
+0.0,53057,4,13264.3,13280.0,13217,13280,31.5,"void cub::CUB_200802_SM_1200::DeviceScanKernel<cub::CUB_200802_SM_1200::detail::scan::policy_hub<unsigned long long, unsigned long long, unsigned long long, unsigned int, cuda::std::__4::plus<void>>::Policy1000, unsigned long long *, unsigned long long *, cub::CUB_200802_SM_1200::ScanTileState<unsigned long long, (bool)1>, cuda::std::__4::plus<void>, cub::CUB_200802_SM_1200::detail::InputValue<unsigned long long, unsigned long long *>, unsigned int, unsigned long long, (bool)0>(T2, T3, T4, int, T5, T6, T7)"
+0.0,11808,12,984.0,864.0,800,1312,220.1,"void cub::CUB_200802_SM_1200::DeviceScanInitKernel<cub::CUB_200802_SM_1200::ScanTileState<unsigned long long, (bool)1>>(T1, int)"
+0.0,3392,4,848.0,848.0,832,864,18.5,"void cub::CUB_200802_SM_1200::DeviceScanInitKernel<cub::CUB_200802_SM_1200::ScanTileState<mhgp9::gpu::LanesTaskRecords, (bool)0>>(T1, int)"
+0.0,3360,4,840.0,832.0,832,864,16.0,"void cub::CUB_200802_SM_1200::DeviceScanInitKernel<cub::CUB_200802_SM_1200::ScanTileState<unsigned int, (bool)1>>(T1, int)"
+
+Processing [/tmp/ehgp-full-v7-5730576447fc18bd.ibGZ2DxHTJ/output/full_trace.sqlite] with [/tmp/ehgp-full-v7-5730576447fc18bd.ibGZ2DxHTJ/tools/nsys/opt/nvidia/nsight-systems-cli/2025.3.1/target-linux-x64/reports/cuda_gpu_mem_time_sum.py]... 
+Time (%),Total Time (ns),Count,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Operation
+58.8,12205768,92,132671.4,23056.0,384,1923713,394138.5,[CUDA memcpy Device-to-Host]
+41.1,8531142,72,118488.1,65840.0,4032,504513,150331.3,[CUDA memcpy Host-to-Device]
+0.1,11040,20,552.0,352.0,320,1056,310.4,[CUDA memset]
+
+Processing [/tmp/ehgp-full-v7-5730576447fc18bd.ibGZ2DxHTJ/output/full_trace.sqlite] with [/tmp/ehgp-full-v7-5730576447fc18bd.ibGZ2DxHTJ/tools/nsys/opt/nvidia/nsight-systems-cli/2025.3.1/target-linux-x64/reports/cuda_api_sum.py]... 
+Time (%),Total Time (ns),Num Calls,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+82.1,817680958,164,4985859.5,106225.0,9020,90265018,16050144.7,cudaMemcpy
+11.1,110124748,150,734165.0,69225.0,1650,38383032,3193147.4,cudaFree
+3.9,38648992,1,38648992.0,38648992.0,38648992,38648992,0.0,cudaHostAlloc
+1.7,16633305,166,100200.6,52005.0,2850,1644719,207251.1,cudaMalloc
+1.0,10091305,9,1121256.1,1112810.0,915790,1316819,127322.4,cudaGetDeviceProperties_v2_v12000
+0.1,982610,84,11697.7,5340.0,2530,75720,13364.8,cudaLaunchKernel
+0.1,935290,18,51960.6,53250.0,5720,187820,38990.0,cudaMemGetInfo
+0.0,401120,72,5571.1,3550.0,1310,26730,6013.4,cudaEventRecord
+0.0,273710,20,13685.5,13040.0,2690,31860,8185.4,cudaMemset
+0.0,134300,72,1865.3,745.0,270,18500,2944.3,cudaEventCreate
+0.0,76420,12,6368.3,6505.0,5470,7230,591.5,cudaEventSynchronize
+0.0,48060,72,667.5,375.0,140,6210,887.8,cudaEventDestroy
+0.0,980,1,980.0,980.0,980,980,0.0,cuModuleGetLoadingMode
+
+Processing [/tmp/ehgp-full-v7-5730576447fc18bd.ibGZ2DxHTJ/output/full_trace.sqlite] with [/tmp/ehgp-full-v7-5730576447fc18bd.ibGZ2DxHTJ/tools/nsys/opt/nvidia/nsight-systems-cli/2025.3.1/target-linux-x64/reports/osrt_sum.py]... 
+Time (%),Total Time (ns),Num Calls,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+74.7,45362314602,12663,3582272.3,350490.0,1010,182061776,19871461.3,futex
+18.7,11343531413,576,19693630.9,10067235.5,1260,111261778,27887296.3,poll
+4.2,2558338211,5277,484809.2,14340.0,1180,100582543,4794112.4,pthread_join
+1.8,1074887370,61,17621104.4,14400124.0,69130,35463094,8931011.5,pthread_cond_wait
+0.4,223860505,5518,40569.1,16940.0,6470,6367277,193958.6,pthread_create
+0.3,194687713,1387,140366.1,11840.0,1010,37514943,1054370.2,ioctl
+0.0,637230,60,10620.5,3365.0,1030,229650,32412.1,mmap
+0.0,614220,26,23623.8,3505.0,2040,374550,72745.5,mmap64
+0.0,426800,98,4355.1,2470.0,1020,44720,5420.2,munmap
+0.0,282169,9,31352.1,17000.0,12170,147549,43809.6,sem_timedwait
+0.0,205259,29,7077.9,5180.0,1000,21800,5841.0,pthread_cond_broadcast
+0.0,91940,42,2189.0,1585.0,1000,8920,1523.1,open64
+0.0,76830,21,3658.6,2110.0,1040,19760,4423.3,fopen
+0.0,50390,39,1292.1,1080.0,1000,6030,859.7,read
+0.0,38650,1,38650.0,38650.0,38650,38650,0.0,fgets
+0.0,36380,10,3638.0,3295.0,2410,6010,1207.2,write
+0.0,24640,2,12320.0,12320.0,3540,21100,12416.8,fopen64
+0.0,16090,5,3218.0,3910.0,1200,4840,1518.7,open
+0.0,15880,2,7940.0,7940.0,3600,12280,6137.7,socket
+0.0,15590,7,2227.1,1260.0,1030,5470,1706.4,fclose
+0.0,13820,5,2764.0,1920.0,1120,6350,2088.6,close
+0.0,12130,1,12130.0,12130.0,12130,12130,0.0,connect
+0.0,10500,3,3500.0,3440.0,1550,5510,1980.7,pipe2
+0.0,8980,1,8980.0,8980.0,8980,8980,0.0,fflush
+0.0,3090,1,3090.0,3090.0,3090,3090,0.0,fwrite
+0.0,1980,1,1980.0,1980.0,1980,1980,0.0,bind
+

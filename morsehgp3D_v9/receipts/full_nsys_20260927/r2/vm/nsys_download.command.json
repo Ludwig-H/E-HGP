@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "curl",
+    "--fail",
+    "--location",
+    "--silent",
+    "--show-error",
+    "--proto",
+    "=https",
+    "--max-time",
+    "120",
+    "--max-filesize",
+    "175210028",
+    "--output",
+    "/tmp/ehgp-full-v7-5730576447fc18bd.ibGZ2DxHTJ/tools/nsight-systems-cli.deb",
+    "https://developer.download.nvidia.com/devtools/repos/ubuntu2204/amd64/NsightSystems-linux-cli-public-2025.3.1.90-3582212.deb"
+  ],
+  "cwd": "/tmp/ehgp-full-v7-5730576447fc18bd.ibGZ2DxHTJ/output",
+  "elapsed_seconds": 13.33250841600001,
+  "ended_utc": "2026-09-27T14:00:42.209440+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 2930,
+  "session_work_deadline_epoch": 1790518188.2451453,
+  "started_utc": "2026-09-27T14:00:28.876888+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

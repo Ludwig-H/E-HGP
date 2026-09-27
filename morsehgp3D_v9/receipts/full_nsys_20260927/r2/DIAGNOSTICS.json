@@ -1,0 +1,133 @@
+{
+  "events": [
+    {
+      "globalPid": -144115188075855872,
+      "severity": 1,
+      "source": 3,
+      "text": "Profiling has started.",
+      "timestamp": 0,
+      "timestampType": 1
+    },
+    {
+      "globalPid": 281617415274496,
+      "severity": 1,
+      "source": 2,
+      "text": "Process was launched by the profiler, see /tmp/ehgp-full-v7-5730576447fc18bd.ibGZ2DxHTJ/tools/tmp/nvidia/nsight_systems/quadd_session_108476/streams/pid_8490_stdout.log and stderr.log for program output",
+      "timestamp": 1848789,
+      "timestampType": 1
+    },
+    {
+      "globalPid": 281617415274496,
+      "severity": 1,
+      "source": 1,
+      "text": "Common injection library initialized successfully.",
+      "timestamp": 17947547,
+      "timestampType": 1
+    },
+    {
+      "globalPid": 281617415274496,
+      "severity": 1,
+      "source": 1,
+      "text": "OS runtime libraries injection initialized successfully.",
+      "timestamp": 22621795,
+      "timestampType": 1
+    },
+    {
+      "globalPid": 281617415274496,
+      "severity": 1,
+      "source": 1,
+      "text": "Buffers holding CUDA trace data will be flushed on CudaProfilerStop() call. See --flush-on-cudaprofilerstop to control this behavior.",
+      "timestamp": 24933774,
+      "timestampType": 1
+    },
+    {
+      "globalPid": 281617415274496,
+      "severity": 1,
+      "source": 1,
+      "text": "Loaded CUPTI library: /tmp/ehgp-full-v7-5730576447fc18bd.ibGZ2DxHTJ/tools/nsys/opt/nvidia/nsight-systems-cli/2025.3.1/target-linux-x64/libcupti.so.12.9",
+      "timestamp": 31759711,
+      "timestampType": 1
+    },
+    {
+      "globalPid": 281617415274496,
+      "severity": 2,
+      "source": 1,
+      "text": "Installed CUDA driver version (13.0) is not supported by this build of Nsight Systems. CUDA trace will be collected using libraries for driver version 12.9",
+      "timestamp": 31762411,
+      "timestampType": 1
+    },
+    {
+      "globalPid": 281617415274496,
+      "severity": 1,
+      "source": 1,
+      "text": "Enabling trace for device graph launch",
+      "timestamp": 123725038,
+      "timestampType": 1
+    },
+    {
+      "globalPid": 281617415274496,
+      "severity": 1,
+      "source": 1,
+      "text": "CUDA injection initialized successfully.",
+      "timestamp": 129153466,
+      "timestampType": 1
+    },
+    {
+      "globalPid": -144115188075855872,
+      "severity": 2,
+      "source": 3,
+      "text": "Scheduling information is absent. The thread activity is deduced based on OS runtime libraries traces. This is inaccurate and does not take into account asynchronous interrupts and exception faults.",
+      "timestamp": 289714786,
+      "timestampType": 2
+    },
+    {
+      "globalPid": 281617415274496,
+      "severity": 1,
+      "source": 3,
+      "text": "Number of CUDA events collected: \t1109.",
+      "timestamp": 290330525,
+      "timestampType": 2
+    },
+    {
+      "globalPid": 281617415274496,
+      "severity": 1,
+      "source": 3,
+      "text": "Number of OS runtime libraries events collected: \t25845.",
+      "timestamp": 290334285,
+      "timestampType": 2
+    },
+    {
+      "globalPid": 281617415274496,
+      "severity": 1,
+      "source": 1,
+      "text": "Number of CUPTI events produced: \t1196, CUPTI buffers: 50.",
+      "timestamp": 6315858601,
+      "timestampType": 1
+    },
+    {
+      "globalPid": -144115188075855872,
+      "severity": 1,
+      "source": 3,
+      "text": "Profiling has stopped.",
+      "timestamp": 6623716782,
+      "timestampType": 1
+    }
+  ],
+  "severity_labels": {
+    "0": "Unknown",
+    "1": "Info",
+    "2": "Warning",
+    "3": "Error",
+    "4": "Verbose"
+  },
+  "timestamp_sources": {
+    "0": "UnknownTimestamp",
+    "1": "TargetTimestamp",
+    "2": "HostTimestamp"
+  },
+  "trace_completeness_certified": false,
+  "warnings": [
+    "Installed CUDA driver version (13.0) is not supported by this build of Nsight Systems. CUDA trace will be collected using libraries for driver version 12.9",
+    "Scheduling information is absent. The thread activity is deduced based on OS runtime libraries traces. This is inaccurate and does not take into account asynchronous interrupts and exception faults."
+  ]
+}

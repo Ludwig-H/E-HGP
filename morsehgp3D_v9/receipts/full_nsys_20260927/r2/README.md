@@ -1,0 +1,5 @@
+# Nsight FULL R2 — diagnostic clos
+
+Statut du lecteur : completed. Voir SUMMARY.json pour validation native et éventuels échecs. Aucun contrat de temps acquis ; les durées sous profiler ne sont pas des mesures de performance contractuelles. La collecte n’est pas certifiée complète. Les diagnostics Nsight signalent le pilote CUDA 13.0 non pris en charge avec repli sur les bibliothèques 12.9, et l’absence d’informations d’ordonnancement : l’activité des threads inférée via OSRT est imprécise. Voir DIAGNOSTICS.json pour les messages bruts et leurs domaines d’horloge distincts. Ces réserves n’invalident pas les résultats exacts de la référence sans profiler. Arrêt certifié de la même génération ; allocation 220.439 s, sans estimation de prix.
+
+Lecture LIVE : `python3 -B morsehgp3D_v9/audits/b_full_nsys_r2_20260927/readback.py --readback DOSSIER`. Les preuves privées référencées doivent rester disponibles. Seuls les JSON/logs VM sélectionnés, le lancement, le verdict et la projection d’arrêt sont publiés ; aucune clé, donnée KITTI, réponse GCE/OS Login brute ou rapport binaire.

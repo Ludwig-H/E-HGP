@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/tmp/ehgp-full-v7-5730576447fc18bd.ibGZ2DxHTJ/tools/nsys/opt/nvidia/nsight-systems-cli/2025.3.1/target-linux-x64/nsys",
+    "--version"
+  ],
+  "cwd": "/tmp/ehgp-full-v7-5730576447fc18bd.ibGZ2DxHTJ/output",
+  "elapsed_seconds": 0.06377238000000318,
+  "ended_utc": "2026-09-27T14:00:44.133970+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 2936,
+  "session_work_deadline_epoch": 1790518188.2451453,
+  "started_utc": "2026-09-27T14:00:44.070140+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "dcac29a80c031ea82023b41eca2aa393682a9989a9111fad96d560847d3bd8eb"
+}

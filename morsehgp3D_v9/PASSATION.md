@@ -1,5 +1,21 @@
 # Passation v9
 
+## FULL profilé sur G4, avec réserves explicites — 27 septembre
+
+[Rapport pédagogique](docs/PROFIL_FULL_NSYS_20260927.md),
+[reçu R2](receipts/full_nsys_20260927/r2/README.md).
+Reconstruction du moteur inchangé puis trois préflights et quatre passages
+sans/quatre avec Nsight, mêmes objets contrôlés. Trame ng00 entière K1..5
+à1mm ; baseline chaude médiane912,219ms, un seul processus. Trace84noyaux,
+207,895ms/pass ; copies5,184ms/pass. Tour CPU277–303ms : ni les copies ni
+un noyau isolé ne permettent de promettre100ms. Pas de nouveau port moteur.
+Deux avertissements : piloteCUDA13.0 non supporté par Nsight2025.3.1
+(collecteCUPTI12.9), ordonnancement CPU absent. Ne pas certifier occupation,
+exhaustivité ou attribution des trous CPU. Même génération G4 arrêtée,
+220,439s d'allocation ; binaire et rapports récupérés en privé.
+Suite conditionnelle : attribution CPU par phases avec profiler compatible,
+pas nouvelle refonte spéculative. Anciennes captures ci-dessous historiques.
+
 ## Priorité au profilage FULL, pas à une nouvelle refonte — 27 septembre
 
 [Premier essai de profilage G4](receipts/full_nsys_20260927/r1/README.md)
@@ -12,7 +28,7 @@ Un futur essai devra disposer d'un binaire épinglé durable ou reconstruit
 et qualifié explicitement. Pas de grande refonte sans profil exploitable.
 
 [Décision et protocole minimal](docs/PROFILAGE_AVANT_REFONTE_20260927.md).
-Aucune trace Nsight attestée dans les campagnes examinées. Profiler le vrai
+Avant R2, aucune trace Nsight attestée dans les campagnes examinées. Profiler le vrai
 `mhgp9_tower_probe` avant un nouveau chantier important ; chronos sous
 profiler distincts du contrat, K déjà partiellement simultanés.
 

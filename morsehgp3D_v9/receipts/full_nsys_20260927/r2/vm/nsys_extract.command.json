@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "dpkg-deb",
+    "-x",
+    "/tmp/ehgp-full-v7-5730576447fc18bd.ibGZ2DxHTJ/tools/nsight-systems-cli.deb",
+    "/tmp/ehgp-full-v7-5730576447fc18bd.ibGZ2DxHTJ/tools/nsys"
+  ],
+  "cwd": "/tmp/ehgp-full-v7-5730576447fc18bd.ibGZ2DxHTJ/output",
+  "elapsed_seconds": 1.7171525930000087,
+  "ended_utc": "2026-09-27T14:00:44.026860+00:00",
+  "exit_code": 0,
+  "group_closed": true,
+  "per_command_watchdog": null,
+  "pid": 2932,
+  "session_work_deadline_epoch": 1790518188.2451453,
+  "started_utc": "2026-09-27T14:00:42.309647+00:00",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

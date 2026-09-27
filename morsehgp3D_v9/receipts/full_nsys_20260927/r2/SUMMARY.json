@@ -1,0 +1,64 @@
+{
+  "GPU_execution": "FULL_profile_trace_validated",
+  "activity": {
+    "kernel_tables": {
+      "CUPTI_ACTIVITY_KIND_KERNEL": 84
+    }
+  },
+  "binary_sha256": "32ea5df0e15fe7d92760dca3066e2f8900e85aab84d64e826213540d15768a54",
+  "chain_total_ms": {
+    "profile": [
+      1003.751,
+      1011.579,
+      978.008,
+      994.724
+    ],
+    "unprofiled": [
+      940.983,
+      907.267,
+      920.112,
+      912.219
+    ]
+  },
+  "command_count": 17,
+  "contract_certified": false,
+  "cost": {
+    "billed_cost_usd": null,
+    "generation": "2026-09-27T06:58:30.579-07:00",
+    "stopped": "2026-09-27T07:02:11.018-07:00",
+    "vm_elapsed_seconds": 220.439
+  },
+  "diagnostic_commit": "fe697742030c63b32ae68a8b9d4e364edca57432",
+  "engine_commit": "ddf4776d754a8db59a1333e11d56b39d8cb6f51a",
+  "host_status": "completed",
+  "profiler_warnings": [
+    "Installed CUDA driver version (13.0) is not supported by this build of Nsight Systems. CUDA trace will be collected using libraries for driver version 12.9",
+    "Scheduling information is absent. The thread activity is deduced based on OS runtime libraries traces. This is inaccurate and does not take into account asynchronous interrupts and exception faults."
+  ],
+  "reported_flags": {
+    "CUDA_profile_attempted": true,
+    "CUDA_profile_executed": true,
+    "FULL_attempted": true,
+    "FULL_executed": true,
+    "GPU_preflight_attempted": true,
+    "GPU_preflight_executed": true
+  },
+  "reports": {
+    "full_trace.nsys-rep": {
+      "bytes": 627533,
+      "sha256": "431546f9bc719b736671ef36f9d66559a0c4f8e0401fe0c9d73938575543378d"
+    },
+    "full_trace.sqlite": {
+      "bytes": 5632000,
+      "sha256": "cddc16be88718f46d77314af08f40603f736c1fdaff18e666fad4577319a62ba"
+    }
+  },
+  "schema": "mhgp9_full_nsys_readback_v2",
+  "scope": "FULL_profile_diagnostic_not_contract",
+  "semantic_replay": true,
+  "status": "completed",
+  "trace_completeness_certified": false,
+  "worker_elapsed_seconds": 71.67903618,
+  "worker_error": null,
+  "worker_status": "completed"
+}

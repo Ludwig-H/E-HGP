@@ -1,5 +1,10 @@
 # Profiler la chaîne entière avant une nouvelle refonte
 
+**Mise à jour après R2 :** une [capture FULL a maintenant été obtenue](PROFIL_FULL_NSYS_20260927.md).
+Elle remplace le constat d'absence de trace pour l'état courant, pas les
+faits de l'échec R1 conservés ci-dessous. Moteur inchangé, G4 arrêtée,
+diagnostic avec deux avertissements explicites de compatibilité/ordonnancement.
+
 27 septembre 2026. Décision utilisateur : ne pas poursuivre un chantier
 important pour quelques pourcents ; demander d'abord des mesures montrant
 qu'il peut changer le résultat de la tour complète. Le contrat 100 ms
@@ -67,9 +72,9 @@ Cette limite de récupération n'invalide pas les anciens chronos et
 objets jugés ; elle empêche leur réexécution immédiate à partir de
 l'archive seule. Aucun build, téléchargement ni GCP dans cet audit local.
 
-## Ce qui manque toujours
+## Ce qui manquait avant R2
 
-Les campagnes v9 examinées n'ont aucune capture **Nsight Systems** ou
+Avant R2, les campagnes v9 examinées n'avaient aucune capture **Nsight Systems** ou
 **Nsight Compute** attestée. Avant cet essai, la recherche dans les sources,
 commandes et reçus v9/v8/GCP ne trouvait aucune exécution `nsys`/`ncu`
 attestée ni rapport associé. Le nouveau protocole contient désormais les
