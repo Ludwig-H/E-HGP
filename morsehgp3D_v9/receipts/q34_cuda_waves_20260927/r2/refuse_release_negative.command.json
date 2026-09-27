@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-cuda-waves-20260927-r2_release/mhgp9_q34_cuda_waves",
+    "--gate",
+    "--q=-1"
+  ],
+  "ended_epoch": 1790494877.013069,
+  "exit_code": 2,
+  "group_closed": true,
+  "name": "refuse_release_negative",
+  "pid": 223224,
+  "started_epoch": 1790494877.0110295,
+  "stderr_sha256": "22c8f0b19b029a02d23a0b04f840da3cf446620896331854b0dfe8d56aec73ea",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": null
+}

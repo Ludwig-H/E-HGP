@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-audit-q34-cuda-waves-20260927-r1_release",
+    "--target",
+    "mhgp9_q34_cuda_waves",
+    "-j",
+    "2"
+  ],
+  "ended_epoch": 1790494840.269567,
+  "exit_code": 2,
+  "group_closed": true,
+  "name": "build_release",
+  "pid": 222431,
+  "started_epoch": 1790494837.917267,
+  "stderr_sha256": "0bffc926750ad83e21e5f67f4a44552c4859aa53d274fab29392d3a097eeb6f3",
+  "stdout_sha256": "27e5767f4a9a27d08292fe0f7aa4403060f641299de7fae60133485a3e8fdc8e",
+  "timeout_seconds": null
+}

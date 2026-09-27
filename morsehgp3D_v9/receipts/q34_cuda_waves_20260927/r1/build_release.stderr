@@ -1,0 +1,59 @@
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927/probe.cpp: In function ‘std::vector<mhgp9::gen::Point3> read_frame(const std::string&)’:
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927/probe.cpp:118:16: error: ‘u32’ was not declared in this scope
+  118 |     std::array<u32,3> xyz{};
+      |                ^~~
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927/probe.cpp:118:16: note: suggested alternatives:
+In file included from /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927/wire.hpp:4,
+                 from /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927/cuda_api.hpp:3,
+                 from /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927/snapshot.hpp:2,
+                 from /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927/runner.hpp:2,
+                 from /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927/probe.cpp:1:
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/gpu/witness_filter.hpp:32:7: note:   ‘mhgp9::gpu::u32’
+   32 | using u32 = std::uint32_t;
+      |       ^~~
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927/wire.hpp:7:31: note:   ‘mhgp9::audit::cuda_waves::u32’
+    7 | using u64=std::uint64_t;using u32=std::uint32_t;using u8=std::uint8_t;
+      |                               ^~~
+In file included from /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927/../b_q34_arena_waves_20260927/waves.hpp:5,
+                 from /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927/snapshot.hpp:3:
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927/../b_q34_arena_waves_20260927/../b_q34_collective_arena_20260927/arena.hpp:51:22: note:   ‘mhgp9::audit::collective::detail::u32’
+   51 | inline std::uint32_t u32(std::size_t value) {
+      |                      ^~~
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927/probe.cpp:118:21: error: template argument 1 is invalid
+  118 |     std::array<u32,3> xyz{};
+      |                     ^
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927/probe.cpp:119:57: error: invalid types ‘int[size_t {aka long unsigned int}]’ for array subscript
+  119 |     for(size_t d=0;d<3;++d) {for(size_t j=0;j<4;++j) xyz[d]|=u32(raw[12*i+4*d+j])<<(8*j);need(xyz[d]<=262143,"frame.u18");}
+      |                                                         ^
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927/probe.cpp:119:98: error: invalid types ‘int[size_t {aka long unsigned int}]’ for array subscript
+  119 |     for(size_t d=0;d<3;++d) {for(size_t j=0;j<4;++j) xyz[d]|=u32(raw[12*i+4*d+j])<<(8*j);need(xyz[d]<=262143,"frame.u18");}
+      |                                                                                                  ^
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927/probe.cpp:120:40: error: invalid types ‘int[int]’ for array subscript
+  120 |     out[i]={static_cast<Coordinate>(xyz[0]),static_cast<Coordinate>(xyz[1]),static_cast<Coordinate>(xyz[2])};
+      |                                        ^
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927/probe.cpp:120:72: error: invalid types ‘int[int]’ for array subscript
+  120 |     out[i]={static_cast<Coordinate>(xyz[0]),static_cast<Coordinate>(xyz[1]),static_cast<Coordinate>(xyz[2])};
+      |                                                                        ^
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927/probe.cpp:120:104: error: invalid types ‘int[int]’ for array subscript
+  120 |     out[i]={static_cast<Coordinate>(xyz[0]),static_cast<Coordinate>(xyz[1]),static_cast<Coordinate>(xyz[2])};
+      |                                                                                                        ^
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927/probe.cpp:120:108: error: no match for ‘operator=’ (operand types are ‘__gnu_cxx::__alloc_traits<std::allocator<mhgp9::gen::Point3>, mhgp9::gen::Point3>::value_type’ {aka ‘mhgp9::gen::Point3’} and ‘<brace-enclosed initializer list>’)
+  120 |     out[i]={static_cast<Coordinate>(xyz[0]),static_cast<Coordinate>(xyz[1]),static_cast<Coordinate>(xyz[2])};
+      |                                                                                                            ^
+In file included from /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/gen/pipeline/prepared_cloud.hpp:8,
+                 from /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/gen/pipeline/local_credits.hpp:11,
+                 from /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/gen/pipeline/axis_q2.hpp:3,
+                 from /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/gen/pipeline/q2_census.hpp:3,
+                 from /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927/../b_q34_arena_waves_20260927/../b_q34_collective_arena_20260927/../b_q34_factor_plan_20260926/plan.hpp:13,
+                 from /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927/../b_q34_arena_waves_20260927/../b_q34_collective_arena_20260927/arena.hpp:6:
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/gen/core/types.hpp:42:8: note: candidate: ‘constexpr mhgp9::gen::Point3& mhgp9::gen::Point3::operator=(const mhgp9::gen::Point3&)’
+   42 | struct Point3 {
+      |        ^~~~~~
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/gen/core/types.hpp:42:8: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘const mhgp9::gen::Point3&’
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/gen/core/types.hpp:42:8: note: candidate: ‘constexpr mhgp9::gen::Point3& mhgp9::gen::Point3::operator=(mhgp9::gen::Point3&&)’
+/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/gen/core/types.hpp:42:8: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘mhgp9::gen::Point3&&’
+gmake[3]: *** [CMakeFiles/mhgp9_q34_cuda_waves.dir/build.make:76: CMakeFiles/mhgp9_q34_cuda_waves.dir/probe.cpp.o] Error 1
+gmake[3]: *** Waiting for unfinished jobs....
+gmake[2]: *** [CMakeFiles/Makefile2:83: CMakeFiles/mhgp9_q34_cuda_waves.dir/all] Error 2
+gmake[1]: *** [CMakeFiles/Makefile2:90: CMakeFiles/mhgp9_q34_cuda_waves.dir/rule] Error 2
+gmake: *** [Makefile:124: mhgp9_q34_cuda_waves] Error 2

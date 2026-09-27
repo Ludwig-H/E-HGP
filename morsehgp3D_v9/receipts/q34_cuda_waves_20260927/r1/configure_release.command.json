@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "cmake",
+    "-S",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927",
+    "-B",
+    "/workspaces/E-HGP/build/v9-audit-q34-cuda-waves-20260927-r1_release",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_CXX_COMPILER=c++",
+    "-DCMAKE_CXX_FLAGS=-Wall -Wextra -Wpedantic -Werror",
+    "-DMHGP9_SOURCE_ROOT=/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9",
+    "-DMHGP9_GEN_LIBRARY=/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/libmhgp9_gen.a",
+    "-DMHGP9_CUDA_WAVES_ENABLE_CUDA=OFF"
+  ],
+  "ended_epoch": 1790494837.9168255,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "configure_release",
+  "pid": 222383,
+  "started_epoch": 1790494837.582695,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "f4e2b2bc7492a68315f2c039e5bf87dd0cf5276606b44b62a54ddb8365fffbbd",
+  "timeout_seconds": null
+}

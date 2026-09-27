@@ -1,0 +1,1 @@
+{"schema":"mhgp9_q34_cuda_waves_v1","status":"passed","mode":"gate","cuda_executed":false,"cases":85,"runs":340,"queries":101320,"survivors":39868,"planned":63,"fallbacks":1411,"empty":72,"zero_output":4,"reordered":376,"mixed_masks":12465,"pool_rejected":179,"pool_lane_reduced":312,"fallback_survivors":1668}

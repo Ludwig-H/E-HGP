@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-cuda-waves-20260927-r2_release/mhgp9_q34_cuda_waves",
+    "--gate",
+    "--s=4294967304"
+  ],
+  "name": "refuse_release_wide_s",
+  "started_epoch": 1790494877.0207067,
+  "timeout_seconds": null
+}

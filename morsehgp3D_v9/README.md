@@ -2,6 +2,15 @@
 
 Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 
+Préparation G4 du 27 septembre : [consommateur q34 CUDA isolé](audits/b_q34_cuda_waves_20260927/README.md)
+et [protocole gardé](audits/b_q34_cuda_session_20260927/README.md).
+31 commandes de qualification portable passent ; CUDA reste à compiler et
+exécuter sur G4. Aucun nouveau gain GPU/FULL n'est annoncé par cette porte.
+La [relecture des chronos G4](audits/b_critical_path_20260927/README.md)
+confirme que les K sont déjà encodés simultanément : il reste environ
+252–256 ms de construction de tour hors cette fenêtre, sur les deux
+premiers passages examinés. Une somme de gains par K n'est pas un gain mur.
+
 Nouvelle suite du 27 septembre : [parents parallèles et vagues q34](docs/PARENTS_PARALLELES_ET_VAGUES_Q34_20260927.md).
 Le raccourci FULL est maintenant testé en vrai multi-CPU, TSan compris ;
 sur les vrais drafts LiDAR00, encodage natif/W4 163,973/120,793 ms en

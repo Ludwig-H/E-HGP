@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "c++",
+    "-std=c++17",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-fsyntax-only",
+    "-I/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src",
+    "-include",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_cuda_waves_20260927/wire.hpp",
+    "-x",
+    "c++",
+    "/dev/null"
+  ],
+  "ended_epoch": 1790494876.9086993,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "wire_cpp17_release",
+  "pid": 223220,
+  "started_epoch": 1790494876.8845356,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": null
+}

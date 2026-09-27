@@ -1,0 +1,36 @@
+{
+  "CUDA_compiled": false,
+  "GCP_used": false,
+  "commands": 31,
+  "gate": {
+    "cases": 85,
+    "cuda_executed": false,
+    "empty": 72,
+    "fallback_survivors": 1668,
+    "fallbacks": 1411,
+    "mixed_masks": 12465,
+    "mode": "gate",
+    "planned": 63,
+    "pool_lane_reduced": 312,
+    "pool_rejected": 179,
+    "queries": 101320,
+    "reordered": 376,
+    "runs": 340,
+    "schema": "mhgp9_q34_cuda_waves_v1",
+    "status": "passed",
+    "survivors": 39868,
+    "zero_output": 4
+  },
+  "mutants": [
+    {
+      "cause": "cuda_waves.physical_counts",
+      "name": "mutant_mask6"
+    },
+    {
+      "cause": "cuda_gate.survivors_order_mask",
+      "name": "mutant_ordinal"
+    }
+  ],
+  "scope": "portable_wire_and_predicates_only_no_GPU_no_FULL",
+  "status": "PASS"
+}

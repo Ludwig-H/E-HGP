@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-cuda-waves-20260927-r2_release/mutant_ordinal",
+    "--gate"
+  ],
+  "ended_epoch": 1790494905.0440252,
+  "exit_code": 2,
+  "group_closed": true,
+  "name": "mutant_ordinal",
+  "pid": 223694,
+  "started_epoch": 1790494904.9636512,
+  "stderr_sha256": "85cd561bbc86b9c9aafcd7d2ce5a56ddd0007bc5badea5a79ed039c4ac38a3ff",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": null
+}

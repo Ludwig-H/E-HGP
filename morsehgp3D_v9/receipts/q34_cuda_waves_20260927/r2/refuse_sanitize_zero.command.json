@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-cuda-waves-20260927-r2_sanitize/mhgp9_q34_cuda_waves",
+    "--gate",
+    "--q=0"
+  ],
+  "ended_epoch": 1790494889.4954026,
+  "exit_code": 2,
+  "group_closed": true,
+  "name": "refuse_sanitize_zero",
+  "pid": 223460,
+  "started_epoch": 1790494889.484032,
+  "stderr_sha256": "5550b416e3f018e436c7f3b9e7b4ef16ffb67edf566263aa0121e80639ca4d4f",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": null
+}

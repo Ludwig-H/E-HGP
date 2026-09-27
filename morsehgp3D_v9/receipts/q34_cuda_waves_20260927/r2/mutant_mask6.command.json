@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-cuda-waves-20260927-r2_release/mutant_mask6",
+    "--gate"
+  ],
+  "ended_epoch": 1790494897.2637968,
+  "exit_code": 2,
+  "group_closed": true,
+  "name": "mutant_mask6",
+  "pid": 223549,
+  "started_epoch": 1790494897.2575905,
+  "stderr_sha256": "85709e8202313f994d4e6167700e0859152db5498a0ecf56f68a8c076180842c",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": null
+}

@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-cuda-waves-20260927-r2_sanitize/mhgp9_q34_cuda_waves",
+    "--gate",
+    "--s=4294967304"
+  ],
+  "name": "refuse_sanitize_wide_s",
+  "started_epoch": 1790494889.5421295,
+  "timeout_seconds": null
+}
