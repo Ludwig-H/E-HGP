@@ -1,0 +1,27 @@
+{
+  "GCP_used": false,
+  "GPU_used": false,
+  "build_receipt_sha256": "916a44b8072b9a8a5b4b72e9a6fc9b774fc8e38aee199861386e5e151c1cdcd1",
+  "cases": [
+    "fcps_atom",
+    "fcps_chainlink",
+    "fcps_hepta",
+    "fcps_tetra",
+    "sipu_flame",
+    "sipu_spiral",
+    "synthetic_bridge_noise_development",
+    "synthetic_bridge_noise_evaluation",
+    "synthetic_linked_rings_development",
+    "synthetic_linked_rings_evaluation",
+    "synthetic_varied_density_development",
+    "synthetic_varied_density_evaluation"
+  ],
+  "checks_receipt_sha256": "9b564416050b59e63ce7e2edb0e5d7b1a8b1f576069090cc5f70210a535bdf79",
+  "private_checks": "/workspaces/E-HGP/build/v9-point-clustering-checks-20260927-r1",
+  "private_run": "/workspaces/E-HGP/build/v9-point-clustering-benchmark-20260927-r1",
+  "rows": 504,
+  "run_receipt_sha256": "a299d72e8fd49e0e1bc243183a684c28fcff9c2d054f1794faeedc558adaebac",
+  "schema": "mhgp9_point_clustering_public_v1",
+  "source_scope": "fixed_K_point_projection_experiment_not_GPU_contract",
+  "status": "completed"
+}

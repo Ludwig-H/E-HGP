@@ -1,0 +1,153 @@
+{
+  "GCP_used": false,
+  "GPU_used": false,
+  "commands": [
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-point-hierarchy-k-native-20260927-r2/native_export",
+        "--gate"
+      ],
+      "name": "native",
+      "returncode": 0,
+      "seconds": 0.004689143001087359,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "3f0183c625e5f890552a0c546f2df69ff75f621f6f1e2ba3c81063f49564e3c0"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/test_datasets.py"
+      ],
+      "name": "test_datasets_normal",
+      "returncode": 0,
+      "seconds": 0.4698018909984967,
+      "stderr_sha256": "95ee8324b3b2fb83c45fdceb3dcd5e3728556347e7d12ffdfef7131cd1c104b2",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/test_eom.py"
+      ],
+      "name": "test_eom_normal",
+      "returncode": 0,
+      "seconds": 2.2361496279991115,
+      "stderr_sha256": "f31dcd79f7e439622ae8fe83f7f729383b56bf62228f6220baca0f43410304f7",
+      "stdout_sha256": "b4a0b0fd899c1dbf50e8dcf26b07b2db0f912f76eacc01b998dd4897b30f5147"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/test_projection.py",
+        "--native",
+        "/workspaces/E-HGP/build/v9-point-hierarchy-k-native-20260927-r2/native_export"
+      ],
+      "name": "test_projection_normal",
+      "returncode": 0,
+      "seconds": 0.23702819100071792,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "02be2888c275f90213329371e45e7ec4e4552acdccece080f62fb5d12caca443"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/test_benchmark.py"
+      ],
+      "name": "test_benchmark_normal",
+      "returncode": 0,
+      "seconds": 1.3714171939991502,
+      "stderr_sha256": "f7e87c170e72e100d657cceb06088c53f50437704434a187acc24bf09125bd54",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/test_datasets.py"
+      ],
+      "name": "test_datasets_optimized",
+      "returncode": 0,
+      "seconds": 0.4597742339992692,
+      "stderr_sha256": "a35a9111069d50a40afedf50d2385ab9584201ceeda7c459b7e1ca21961c9a44",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/test_eom.py"
+      ],
+      "name": "test_eom_optimized",
+      "returncode": 0,
+      "seconds": 2.1741898319996835,
+      "stderr_sha256": "411a76788f519a0f4dffea4b54674f345c732562593ea401d21b7ed08c3a437e",
+      "stdout_sha256": "b4a0b0fd899c1dbf50e8dcf26b07b2db0f912f76eacc01b998dd4897b30f5147"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/test_projection.py",
+        "--native",
+        "/workspaces/E-HGP/build/v9-point-hierarchy-k-native-20260927-r2/native_export"
+      ],
+      "name": "test_projection_optimized",
+      "returncode": 0,
+      "seconds": 0.24307999499978905,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "02be2888c275f90213329371e45e7ec4e4552acdccece080f62fb5d12caca443"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/test_benchmark.py"
+      ],
+      "name": "test_benchmark_optimized",
+      "returncode": 0,
+      "seconds": 1.347748894999313,
+      "stderr_sha256": "278d2b937c166af10839a598e27712c241cc2f510de8524ba088819ed1fd9b82",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "native_binary_sha256": "897a715a5b40b7fa298aaf66696def3a5cf636c98118db69da2684277cd11dd8",
+  "native_binary_sha256_after": "897a715a5b40b7fa298aaf66696def3a5cf636c98118db69da2684277cd11dd8",
+  "schema": "mhgp9_point_hierarchy_checks_v1",
+  "sources_after": {
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/benchmark.py": "8b5c80ddcf27896b7e25b5965caa50352a206de392318111a5623c37ce06736f",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/build_native.py": "073f7bc97bf93b0d6c690fdb4e1dcfc91af845c04a78432afd20e57c782e31fb",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/datasets.py": "7ff3d93677f51eabe9c1bea0f56a62bbcd53ce531c3a49bdfafeab29ab14f53c",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/eom.py": "c7121c857010fd89b6798ec634a0f55c4abd14c1c6bc6305c551c06e4625dead",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/native_export.cpp": "a5a62d458a628edbd4ca43cb633200344342c0287873aac15aacdf28d4fc6cf0",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/projection.py": "a6a88955e6ea94f2d002a825df58db94cb602376d096164eee55792bcf014242",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/run_checks.py": "00dce1891ff139c6c5c7640b240d4ab82927e28697b7850edcdc76f2bb0e6752",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/summarize.py": "4d6b09183448f5e74dde6fdc899333a7d23f2087f514c77cb0ede8c920e054e0",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/test_benchmark.py": "c01895021d0e4f2bd7ee57153896c14f99909af541d2f6fc4a0cc4e3e7f7cb5d",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/test_datasets.py": "dbe7cc3baa0db223b776db2f2789f5ea506c19384ce91e58a08b6ab6c812a348",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/test_eom.py": "d0bce3b021675f24caa92391515f33efe133a666337e1a948de4022f5812c123",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/test_projection.py": "484453dea37e3415b645418f272a8e8b098cb59d1f2b29fcaffabc617c997fdc"
+  },
+  "sources_before": {
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/benchmark.py": "8b5c80ddcf27896b7e25b5965caa50352a206de392318111a5623c37ce06736f",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/build_native.py": "073f7bc97bf93b0d6c690fdb4e1dcfc91af845c04a78432afd20e57c782e31fb",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/datasets.py": "7ff3d93677f51eabe9c1bea0f56a62bbcd53ce531c3a49bdfafeab29ab14f53c",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/eom.py": "c7121c857010fd89b6798ec634a0f55c4abd14c1c6bc6305c551c06e4625dead",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/native_export.cpp": "a5a62d458a628edbd4ca43cb633200344342c0287873aac15aacdf28d4fc6cf0",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/projection.py": "a6a88955e6ea94f2d002a825df58db94cb602376d096164eee55792bcf014242",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/run_checks.py": "00dce1891ff139c6c5c7640b240d4ab82927e28697b7850edcdc76f2bb0e6752",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/summarize.py": "4d6b09183448f5e74dde6fdc899333a7d23f2087f514c77cb0ede8c920e054e0",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/test_benchmark.py": "c01895021d0e4f2bd7ee57153896c14f99909af541d2f6fc4a0cc4e3e7f7cb5d",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/test_datasets.py": "dbe7cc3baa0db223b776db2f2789f5ea506c19384ce91e58a08b6ab6c812a348",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/test_eom.py": "d0bce3b021675f24caa92391515f33efe133a666337e1a948de4022f5812c123",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/test_projection.py": "484453dea37e3415b645418f272a8e8b098cb59d1f2b29fcaffabc617c997fdc"
+  },
+  "status": "passed"
+}

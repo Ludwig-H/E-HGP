@@ -1,0 +1,21 @@
+test_all_predicted_noise_and_all_true_noise (__main__.MetricTests.test_all_predicted_noise_and_all_true_noise) ... ok
+test_no_predicted_noise_and_small_classified_set (__main__.MetricTests.test_no_predicted_noise_and_small_classified_set) ... ok
+test_noise_precision_recall_and_distinct_ari_universes (__main__.MetricTests.test_noise_precision_recall_and_distinct_ari_universes) ... ok
+test_perfect_partition_and_label_permutation (__main__.MetricTests.test_perfect_partition_and_label_permutation) ... ok
+test_predicted_noise_is_one_block_not_a_free_accuracy_claim (__main__.MetricTests.test_predicted_noise_is_one_block_not_a_free_accuracy_claim) ... ok
+test_shape_refusals (__main__.MetricTests.test_shape_refusals) ... ok
+test_singleton_noise_score_ignores_true_noise_not_predicted_noise (__main__.MetricTests.test_singleton_noise_score_ignores_true_noise_not_predicted_noise) ... ok
+test_same_input_gate_without_files (__main__.PlumbingTests.test_same_input_gate_without_files) ... ok
+test_strict_json_infinity_encoding (__main__.PlumbingTests.test_strict_json_infinity_encoding) ... ok
+test_bad_truth_length (__main__.PurityTests.test_bad_truth_length) ... ok
+test_equal_height_atomization_removes_fake_purity (__main__.PurityTests.test_equal_height_atomization_removes_fake_purity) ... ok
+test_independent_pair_oracle_random_trees (__main__.PurityTests.test_independent_pair_oracle_random_trees) ... ok
+test_label_permutation_child_order_and_radius_scale (__main__.PurityTests.test_label_permutation_child_order_and_radius_scale) ... ok
+test_noise_excluded_also_from_lca_mass (__main__.PurityTests.test_noise_excluded_also_from_lca_mass) ... ok
+test_pure_and_crossed_tree (__main__.PurityTests.test_pure_and_crossed_tree) ... ok
+test_singleton_classes_and_no_pair_universe (__main__.PurityTests.test_singleton_classes_and_no_pair_universe) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.108s
+
+OK

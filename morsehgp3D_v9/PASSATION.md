@@ -1,5 +1,26 @@
 # Passation v9
 
+## Clustering de points à ordre K fixé — 27 septembre
+
+[Résultats et suite mathématique](audits/b_point_hierarchy_k_20260927/RESULTATS.md),
+[protocole](audits/b_point_hierarchy_k_20260927/README.md).
+Nouvelle demande utilisateur : partitions emboîtées depuis **T_K seulement**,
+comparées à HDBSCAN avec EOM commun et expZ1 puis2. Prototype export natif CPU,
+première couverture exacte + LCA daté, variante vote d'entrées exploratoire ;
+aucune masse facette/coface inventée, aucune verticale utilisée.
+12 scènes entières, 36 exports natifs, 72 fits HDBSCAN, 504 lignes, zéro échec.
+Neuf commandes de gates normal/−O passent ; contrelecture des504scores et hashes.
+PrincipalK5/taille20/z1, macro10scènes3D : ARI0,9168 HGP/0,9060 HDB commun,
+pureté dendrogramme0,9977/0,9609 ; **évaluation3D ARI0,8647/0,9165**, donc
+pas de supériorité générale. Atom est séparable dans l'arbre mais EOM
+sur-segmente ; Spiral est déjà moins bien séparé dans l'arbre. ExpZ2 n'est
+pas un remède. Vote environ4,83×plus coûteux en prototype, sans gain convaincant.
+Garder première couverture comme baseline ; supplément canonique C∩X proposé
+mais NON implémenté : n requêtes KNN/facette→ancre à coupe fermée, pas lecture
+des seules couvertures dilatées. Ne pas changer la garde stricte du résolveur
+parents à l'aveugle. Moteur, registre et contratsG4 inchangés ; zéroGCP.
+Sources et captures épinglées, données privées, scripts/reçus/tableaux publiés.
+
 ## FULL profilé sur G4, avec réserves explicites — 27 septembre
 
 [Rapport pédagogique](docs/PROFIL_FULL_NSYS_20260927.md),

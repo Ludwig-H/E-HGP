@@ -1,0 +1,15 @@
+test_analytic_z_ablation (__main__.EomTests.test_analytic_z_ablation) ... ok
+test_binary_plateau_diagnostic_is_not_hidden (__main__.EomTests.test_binary_plateau_diagnostic_is_not_hidden) ... ok
+test_duplicate_groups_infinite_stability (__main__.EomTests.test_duplicate_groups_infinite_stability) ... ok
+test_input_immutability_and_sequence_api (__main__.EomTests.test_input_immutability_and_sequence_api) ... ok
+test_multifurcation_permutation_and_scale_invariance (__main__.EomTests.test_multifurcation_permutation_and_scale_invariance) ... ok
+test_real_library_grid_and_replay (__main__.EomTests.test_real_library_grid_and_replay) ... ok
+test_refusals (__main__.EomTests.test_refusals) ... ok
+test_single_cluster_disallowed_and_small_domain (__main__.EomTests.test_single_cluster_disallowed_and_small_domain) ... ok
+test_small_branch_fallout (__main__.EomTests.test_small_branch_fallout) ... ok
+test_zero_plateau_never_inf_minus_inf (__main__.EomTests.test_zero_plateau_never_inf_minus_inf) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.885s
+
+OK

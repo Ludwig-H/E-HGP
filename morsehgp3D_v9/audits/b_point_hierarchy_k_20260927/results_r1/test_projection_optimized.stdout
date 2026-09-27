@@ -1,0 +1,1 @@
+{"GCP_used": false, "alpha_knn_squared_bound_checks": 67, "alpha_positive_lower_equalities": 25, "alpha_positive_upper_equalities": 1, "exact_cut_checks": 2696, "native_cases": 13, "native_exact_checks": 524, "native_lca_delayed_points": 5, "refusals": 37, "schema": "mhgp9_fixed_k_projection_selftest_v1", "status": "passed"}

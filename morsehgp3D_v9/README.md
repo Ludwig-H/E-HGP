@@ -2,6 +2,14 @@
 
 Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 
+Nouveau chantier distinct, le 27 septembre : [clustering de points depuis le seul T_K](audits/b_point_hierarchy_k_20260927/RESULTATS.md).
+Deux projections implémentées, même EOM que le comparateur HDBSCAN, expZ1/2 ;
+12 scènes complètes (10 vraies3D, deux SIPU planaires), 504 résultats clos.
+Première couverture : hiérarchie emboîtée et rattachements rationnels ;
+qualité prometteuse de l'arbre, mais HDBSCAN gagne sur le lot d'évaluation
+pour les clusters extraits. Pas de supériorité générale, pas de nouveau
+contrat GPU. Moteur inchangé, GCP non utilisé pour cette expérience.
+
 Dernière mesure du 27 septembre : [profil FULL Nsight obtenu sur G4](docs/PROFIL_FULL_NSYS_20260927.md).
 Trame sans sol entière, K1..5 : médiane chaude sans profiler912,219ms
 (un processus), mêmes objets contrôlés dans les huit passages. Noyaux

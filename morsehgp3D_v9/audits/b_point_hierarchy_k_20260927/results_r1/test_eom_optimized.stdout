@@ -1,0 +1,1 @@
+{"GPU_evidence": false, "atomic_z1_differences": [["continuous_uniform", 5, 2], ["continuous_uniform", 5, 5], ["continuous_uniform", 10, 2], ["integer_ties", 5, 2], ["integer_ties", 5, 5], ["integer_ties", 10, 2], ["integer_ties", 10, 5]], "cloud_calls": 0, "preserved_z1_agreement": 80, "synthetic_library_fits": 80}

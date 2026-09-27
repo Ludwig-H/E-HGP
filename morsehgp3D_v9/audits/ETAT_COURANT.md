@@ -1,5 +1,18 @@
 # État courant des audits v9
 
+**27 septembre — point-clustering à K fixé, expérience close** :
+[rapport](b_point_hierarchy_k_20260927/RESULTATS.md),
+[reçu](b_point_hierarchy_k_20260927/results_r1/archive.json).
+Première couverture + LCA exact et vote d'entrées, puis EOM commun avec
+HDBSCAN ; expZ1/2, K2/5/10, tailles20/50,12scènes entières dont10vraies3D.
+36exports,72fits,504scores, zéroéchec ; neufcommandes gates passent,
+contrelecture indépendante labels/métriques/hashes concordante.
+Hiérarchies HGP prometteuses, mais avantage agrégé non robuste : évaluation3D
+K5/20/z1 ARI0,8647 contre0,9165 HDBcommun. ExpZ2 sur-segmente davantage.
+Pas de nouvelle mesure LiDAR/G4 ni borne globale, moteur inchangé, zéroGCP.
+La proposition canonique C∩X exige un supplément de localisation, reste non
+implémentée et ne reçoit aucun score de ce prototype. Anciennes captures ci-dessous.
+
 **27 septembre — R2 FULL Nsight obtenue, G4 arrêtée** :
 [rapport](../docs/PROFIL_FULL_NSYS_20260927.md),
 [reçu](../receipts/full_nsys_20260927/r2/README.md).
