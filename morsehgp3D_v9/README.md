@@ -7,7 +7,10 @@ Masses du chapitre9, attaches exactes des facettes, condensation et vote sont
 implémentés dans un consommateur distinct. Release/ASan/UBSan :33fixtures,
 1 166coupes exactes ; E5 et les ancres silencieuses du carré incluses.
 Le premier graphe Gabriel naïf a été réfuté et son essai échoué est conservé.
-Campagne gaussienne corrigée en cours, pas encore de scores consolidés.
+[Campagne gaussienne corrigée close](receipts/weighted_full_gaussian_20260927/r2/TABLES.md) :
+13 scènes,104 sélections pondérées,260 comparateurs conservés ; contre-audits
+normal/−O identiques. Résultats contrastés selon le régime et expZ, pas de
+domination systématique sur HDBSCAN ou la première couverture.
 [Partitions ponctuelles emboîtées](experiments/weighted_clustering_20260927/POINT_ROUTING_REFERENCE.md) :
 référence Fraction sparse contrôlée,133fixtures et2 160coupes ; sa qualité
 statistique et ses performances industrielles restent à mesurer séparément.

@@ -1,0 +1,1794 @@
+{
+  "EOM_or_metrics_rerun": false,
+  "GCP_used": false,
+  "GPU_used": false,
+  "aggregate_count": 140,
+  "approximate_postprocessing": true,
+  "baseline_receipt": "/workspaces/E-HGP/build/v9-gaussian-clustering-benchmark-20260927-r1/receipt.json",
+  "baseline_receipt_sha256": "8f9aba99396b6341f7a6872956e66f50a7776cc1535d9a3f9137907d2945157a",
+  "command_count": 26,
+  "commands": [
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/spherical_g2_d8_s1/points.u32le",
+        "--k",
+        "5",
+        "--workers",
+        "1"
+      ],
+      "case": "spherical_g2_d8_s1",
+      "elapsed_seconds": 3.6374332470004447,
+      "k": 5,
+      "returncode": 0,
+      "reused_from": {
+        "directory": "/tmp/mhgp9-weighted-gaussian-20260927-uT1NCX/cases/spherical_g2_d8_s1_k5",
+        "receipt": "/workspaces/E-HGP/build/v9-weighted-full-gaussian-pilot-20260927-r1/receipt.json",
+        "receipt_sha256": "554f03778d565bbafd3cadb0a9e1c0d63c79606675a4f794c9cd8397d64acab4"
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "2f8b2eb7f8356e0aea9dbe49a3fa3d59968cdbcdc30a0ecb9c805f92a960142f"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/spherical_g2_d8_s1/points.u32le",
+        "--k",
+        "10",
+        "--workers",
+        "1"
+      ],
+      "case": "spherical_g2_d8_s1",
+      "elapsed_seconds": 26.05091381499733,
+      "k": 10,
+      "returncode": 0,
+      "reused_from": {
+        "directory": "/tmp/mhgp9-weighted-gaussian-20260927-uT1NCX/cases/spherical_g2_d8_s1_k10",
+        "receipt": "/workspaces/E-HGP/build/v9-weighted-full-gaussian-pilot-20260927-r1/receipt.json",
+        "receipt_sha256": "554f03778d565bbafd3cadb0a9e1c0d63c79606675a4f794c9cd8397d64acab4"
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "eaf9e205b7fdd1bb0fd6719f5388ca9be95a80a34f706d0c6447075f77c7b17b"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/spherical_g2_d8_s2/points.u32le",
+        "--k",
+        "5",
+        "--workers",
+        "1"
+      ],
+      "case": "spherical_g2_d8_s2",
+      "elapsed_seconds": 3.599647826002183,
+      "k": 5,
+      "returncode": 0,
+      "reused_from": {
+        "directory": "/tmp/mhgp9-weighted-gaussian-20260927-uT1NCX/cases/spherical_g2_d8_s2_k5",
+        "receipt": "/workspaces/E-HGP/build/v9-weighted-full-gaussian-pilot-20260927-r1/receipt.json",
+        "receipt_sha256": "554f03778d565bbafd3cadb0a9e1c0d63c79606675a4f794c9cd8397d64acab4"
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "fd3ace0d4eb4dd2351c28c579cca5f03905c38aec852af9cb41b2495c824efa3"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/spherical_g2_d8_s2/points.u32le",
+        "--k",
+        "10",
+        "--workers",
+        "1"
+      ],
+      "case": "spherical_g2_d8_s2",
+      "elapsed_seconds": 25.353909933997784,
+      "k": 10,
+      "returncode": 0,
+      "reused_from": {
+        "directory": "/tmp/mhgp9-weighted-gaussian-20260927-uT1NCX/cases/spherical_g2_d8_s2_k10",
+        "receipt": "/workspaces/E-HGP/build/v9-weighted-full-gaussian-pilot-20260927-r1/receipt.json",
+        "receipt_sha256": "554f03778d565bbafd3cadb0a9e1c0d63c79606675a4f794c9cd8397d64acab4"
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "646333dae4419b0d4d824737d7016b07e2eaa48f73bdce652ddbad77787a41f5"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/spherical_g2_d8_s3/points.u32le",
+        "--k",
+        "5",
+        "--workers",
+        "1"
+      ],
+      "case": "spherical_g2_d8_s3",
+      "elapsed_seconds": 3.80720150200068,
+      "k": 5,
+      "returncode": 0,
+      "reused_from": {
+        "directory": "/tmp/mhgp9-weighted-gaussian-20260927-uT1NCX/cases/spherical_g2_d8_s3_k5",
+        "receipt": "/workspaces/E-HGP/build/v9-weighted-full-gaussian-pilot-20260927-r1/receipt.json",
+        "receipt_sha256": "554f03778d565bbafd3cadb0a9e1c0d63c79606675a4f794c9cd8397d64acab4"
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "3176a2fabaffed14046a10f570d1e6abab57e16cb12709c796cd58bd2bc0ef8d"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/spherical_g2_d8_s3/points.u32le",
+        "--k",
+        "10",
+        "--workers",
+        "1"
+      ],
+      "case": "spherical_g2_d8_s3",
+      "elapsed_seconds": 26.360701417997916,
+      "k": 10,
+      "returncode": 0,
+      "reused_from": {
+        "directory": "/tmp/mhgp9-weighted-gaussian-20260927-uT1NCX/cases/spherical_g2_d8_s3_k10",
+        "receipt": "/workspaces/E-HGP/build/v9-weighted-full-gaussian-pilot-20260927-r1/receipt.json",
+        "receipt_sha256": "554f03778d565bbafd3cadb0a9e1c0d63c79606675a4f794c9cd8397d64acab4"
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "de8ba276a1521baff03404268d60579be35430c9668385cb4270aca28eeaa535"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/spherical_g8_d4_s1/points.u32le",
+        "--k",
+        "5",
+        "--workers",
+        "1"
+      ],
+      "case": "spherical_g8_d4_s1",
+      "elapsed_seconds": 3.5730456759993103,
+      "k": 5,
+      "returncode": 0,
+      "reused_from": {
+        "directory": "/tmp/mhgp9-weighted-gaussian-20260927-uT1NCX/cases/spherical_g8_d4_s1_k5",
+        "receipt": "/workspaces/E-HGP/build/v9-weighted-full-gaussian-pilot-20260927-r1/receipt.json",
+        "receipt_sha256": "554f03778d565bbafd3cadb0a9e1c0d63c79606675a4f794c9cd8397d64acab4"
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "bc607a199f0190a6814dd91dba91b3c88585f2880b9f31ca108615913bab33ea"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/spherical_g8_d4_s1/points.u32le",
+        "--k",
+        "10",
+        "--workers",
+        "1"
+      ],
+      "case": "spherical_g8_d4_s1",
+      "elapsed_seconds": 24.09584053800063,
+      "k": 10,
+      "returncode": 0,
+      "reused_from": {
+        "directory": "/workspaces/E-HGP/build/v9-weighted-full-gaussian-pilot-20260927-r1/spherical_g8_d4_s1_k10",
+        "receipt": "/workspaces/E-HGP/build/v9-weighted-full-gaussian-pilot-20260927-r1/receipt.json",
+        "receipt_sha256": "554f03778d565bbafd3cadb0a9e1c0d63c79606675a4f794c9cd8397d64acab4"
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "24f24feb197c558fa3497335ab60f2c39ef9cb9fe11c494ee2c89572011f3cea"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/spherical_g8_d4_s2/points.u32le",
+        "--k",
+        "5",
+        "--workers",
+        "1"
+      ],
+      "case": "spherical_g8_d4_s2",
+      "elapsed_seconds": 3.5748470519974944,
+      "k": 5,
+      "returncode": 0,
+      "reused_from": {
+        "directory": "/workspaces/E-HGP/build/v9-weighted-full-gaussian-pilot-20260927-r1/spherical_g8_d4_s2_k5",
+        "receipt": "/workspaces/E-HGP/build/v9-weighted-full-gaussian-pilot-20260927-r1/receipt.json",
+        "receipt_sha256": "554f03778d565bbafd3cadb0a9e1c0d63c79606675a4f794c9cd8397d64acab4"
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "231f974bc11a4b312969035901c59c5bc9ea37e291be7d83cfabbb25a8a0c2c9"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/spherical_g8_d4_s2/points.u32le",
+        "--k",
+        "10",
+        "--workers",
+        "1"
+      ],
+      "case": "spherical_g8_d4_s2",
+      "elapsed_seconds": 23.09949054200115,
+      "k": 10,
+      "returncode": 0,
+      "reused_from": {
+        "directory": "/workspaces/E-HGP/build/v9-weighted-full-gaussian-pilot-20260927-r1/spherical_g8_d4_s2_k10",
+        "receipt": "/workspaces/E-HGP/build/v9-weighted-full-gaussian-pilot-20260927-r1/receipt.json",
+        "receipt_sha256": "554f03778d565bbafd3cadb0a9e1c0d63c79606675a4f794c9cd8397d64acab4"
+      },
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "c65d9a4f63f6c5f9c305776b00d147a5cfb53df173aa2ed8da796c1d9e53655e"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/spherical_g8_d4_s3/points.u32le",
+        "--k",
+        "5",
+        "--workers",
+        "1"
+      ],
+      "case": "spherical_g8_d4_s3",
+      "elapsed_seconds": 3.287874104000366,
+      "k": 5,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "bedcdd3f214913c3fa3f144123e82ecd49c026161f7f9bd7b5be4b72970ec602"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/spherical_g8_d4_s3/points.u32le",
+        "--k",
+        "10",
+        "--workers",
+        "1"
+      ],
+      "case": "spherical_g8_d4_s3",
+      "elapsed_seconds": 22.44290715399984,
+      "k": 10,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "abde4b8bd729f33e9f596e2732ce60ec49030c3cc8344dced91bc06dad4f205e"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/spherical_g16_d2_s1/points.u32le",
+        "--k",
+        "5",
+        "--workers",
+        "1"
+      ],
+      "case": "spherical_g16_d2_s1",
+      "elapsed_seconds": 3.7833832730029826,
+      "k": 5,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "ec499ea6327c599d3817f87b7016a569139d353ae7767222bd12d71e1d26faab"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/spherical_g16_d2_s1/points.u32le",
+        "--k",
+        "10",
+        "--workers",
+        "1"
+      ],
+      "case": "spherical_g16_d2_s1",
+      "elapsed_seconds": 27.593780759001675,
+      "k": 10,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "488065459cf8254bfdeb2e7ad5c9cf3312835527d498b13a3d965bd7a41dfada"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/spherical_g16_d2_s2/points.u32le",
+        "--k",
+        "5",
+        "--workers",
+        "1"
+      ],
+      "case": "spherical_g16_d2_s2",
+      "elapsed_seconds": 3.7115971759994864,
+      "k": 5,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "1fc5d6803edaebc9ef39acfb3f2cec2ae410b2bab847bc801ffb5135c4f5ac34"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/spherical_g16_d2_s2/points.u32le",
+        "--k",
+        "10",
+        "--workers",
+        "1"
+      ],
+      "case": "spherical_g16_d2_s2",
+      "elapsed_seconds": 27.571416402999603,
+      "k": 10,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "90ea911b1e1091685816f89c8a42f5463ac83633823a55cb2546f9c8c04947e0"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/spherical_g16_d2_s3/points.u32le",
+        "--k",
+        "5",
+        "--workers",
+        "1"
+      ],
+      "case": "spherical_g16_d2_s3",
+      "elapsed_seconds": 3.8671572100029152,
+      "k": 5,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "0a58f4ad5249ee721770fdfb93965751fed144f523909731dbbc70130b669a0c"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/spherical_g16_d2_s3/points.u32le",
+        "--k",
+        "10",
+        "--workers",
+        "1"
+      ],
+      "case": "spherical_g16_d2_s3",
+      "elapsed_seconds": 27.773163960999227,
+      "k": 10,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "809a6dcc28ce3c451c196216e7a71015b4ca861b0db99bd8725960bea29472bd"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/anisotropic_g8_d4_s1/points.u32le",
+        "--k",
+        "5",
+        "--workers",
+        "1"
+      ],
+      "case": "anisotropic_g8_d4_s1",
+      "elapsed_seconds": 3.324042835,
+      "k": 5,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "07ced4a7c75a3d4df9ea697608cb6c7152969d49c25c227f2d1e608e95029496"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/anisotropic_g8_d4_s1/points.u32le",
+        "--k",
+        "10",
+        "--workers",
+        "1"
+      ],
+      "case": "anisotropic_g8_d4_s1",
+      "elapsed_seconds": 20.40338124399932,
+      "k": 10,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "4fdd0d8806562361dc956b599eee182727a2b075e369b0abd1c8e1a808fdbef2"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/anisotropic_g8_d4_s2/points.u32le",
+        "--k",
+        "5",
+        "--workers",
+        "1"
+      ],
+      "case": "anisotropic_g8_d4_s2",
+      "elapsed_seconds": 3.2372324479983945,
+      "k": 5,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a6e3c5824c7f328a74a0dcfe1a58369a6c32d41d1a9683cf34766d969ed56d7f"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/anisotropic_g8_d4_s2/points.u32le",
+        "--k",
+        "10",
+        "--workers",
+        "1"
+      ],
+      "case": "anisotropic_g8_d4_s2",
+      "elapsed_seconds": 19.89233058500031,
+      "k": 10,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "fc413898c3703ab7e5c4363be04746a6e705bf8a0553ac06bc2e9dd0da60de9b"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/unbalanced_g8_d4_s1/points.u32le",
+        "--k",
+        "5",
+        "--workers",
+        "1"
+      ],
+      "case": "unbalanced_g8_d4_s1",
+      "elapsed_seconds": 3.36307525400116,
+      "k": 5,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "94bcca8c433dc7fdd08e1ae33327ac6ceac9066d62965c08a1448e357b24aaa9"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/unbalanced_g8_d4_s1/points.u32le",
+        "--k",
+        "10",
+        "--workers",
+        "1"
+      ],
+      "case": "unbalanced_g8_d4_s1",
+      "elapsed_seconds": 23.056000112999754,
+      "k": 10,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "5f4e4aa583f83fe1a05f28f0396c9923aca70e954ea96d88abb673dc99ea9fa9"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/unbalanced_g8_d4_s2/points.u32le",
+        "--k",
+        "5",
+        "--workers",
+        "1"
+      ],
+      "case": "unbalanced_g8_d4_s2",
+      "elapsed_seconds": 3.241083310000249,
+      "k": 5,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "6e727ebb9bba64c909c8f84cb0b04811b8f38310c63708293747f2e88b43d39b"
+    },
+    {
+      "argv": [
+        "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+        "--input",
+        "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/prepared/unbalanced_g8_d4_s2/points.u32le",
+        "--k",
+        "10",
+        "--workers",
+        "1"
+      ],
+      "case": "unbalanced_g8_d4_s2",
+      "elapsed_seconds": 22.41856440600168,
+      "k": 10,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "0c784455a88d2bda7c567b955260297f5c9ab2fa8be40ee4f91e730d59adb306"
+    }
+  ],
+  "derivation": {
+    "aggregates_recomputed": false,
+    "arithmetic_audit_recomputed": false,
+    "live_before_and_after": true,
+    "live_pin_map_sha256": "a1c51b9e314b6e6ac47241dab26f185eed703b17c25ba8c1a48d579f92296428",
+    "live_pins_checked": 1093,
+    "normalization_source": "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/normalize_full_weighted_publication.py",
+    "normalization_source_sha256": "a185b986741fdcb844470def5db93af34018c35d71d1fd6c5a583b5a0a94021b",
+    "parent_files": {
+      "TABLES.md": "d9fca8c1933901ab36b5c1828c2a83303f8dedf89aa8a6069961e665d7e87f83",
+      "aggregates.csv": "87028a768cbcfcfd6f136f26452e9c0e1d486a8a0573df7faa34f0c32a9251e5",
+      "rows.csv": "67b8d6beb3c9c0162d9e95809a203463926aa45c2123f126eb0d88547422df25"
+    },
+    "parent_formatter_source_sha256": "0a0b2ecffd9a63da9ac3e07f5ac50127090acb0dbf9ce846d784400eec685185",
+    "parent_live_fields_preserved": true,
+    "parent_publication": "/workspaces/E-HGP/build/v9-weighted-publication-format-r1-20260927",
+    "parent_receipt_sha256": "4493c0de42163aa1692941f4b72037101656b52799170cde427f590b001c6017",
+    "parent_schema": "mhgp9_weighted_full_parallel_publication_v1",
+    "policy": "remove_only_ASCII_space_and_tab_before_LF_CRLF_or_EOF",
+    "proof": {
+      "changed_lines": 1,
+      "csv_byte_identical": {
+        "aggregates.csv": true,
+        "rows.csv": true
+      },
+      "idempotent": true,
+      "line_endings_preserved": true,
+      "markdown_exact_normalization": true,
+      "markdown_non_whitespace_sha256": "393c2648f372a228458692af95716f79207cd4025088073ae994337090b47c72",
+      "removed_bytes": 1
+    },
+    "scores_fits_EOM_or_geometry_rerun": false
+  },
+  "elapsed_seconds": 894.4054791510025,
+  "files": {
+    "TABLES.md": "48a19bce5f0a89c90db45dfd14cb4474899bf3eda47e0fe1581554a67628f87b",
+    "aggregates.csv": "87028a768cbcfcfd6f136f26452e9c0e1d486a8a0573df7faa34f0c32a9251e5",
+    "rows.csv": "67b8d6beb3c9c0162d9e95809a203463926aa45c2123f126eb0d88547422df25"
+  },
+  "fits_or_geometry_rerun": false,
+  "formatter_source_sha256": "b7bfba2b1364beb022a74698f6f468d6c3d4433abefb08467cdeaa5d9cbf8e9b",
+  "input_manifest": "/workspaces/E-HGP/build/v9-gaussian-clustering-data-20260927/manifest.json",
+  "input_manifest_sha256": "1cab6404055aebf0dfa31b76f16f8a4c84e4acf9678b2b910dabd9f367f46c67",
+  "live_before_and_after": true,
+  "live_pin_map_sha256": "5c1f0f17b842d8d3a0becfd284bc242ac7ce83d96f63bfd80c410338132c27b5",
+  "live_pins_checked": 1088,
+  "memory_bound_claimed": false,
+  "native_binary": "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+  "native_binary_sha256": "c7afdae542074ee90bb8c1ba5a7dfe679ef9851f91bf32bbcbc067b15853576e",
+  "note": "Same diagnostic grid; parallel and reused elapsed times are not a serial performance comparison",
+  "orchestration": {
+    "maximum_observed_workers": 2,
+    "native_commands": 26,
+    "newly_executed_units": 16,
+    "original_failure_preserved": true,
+    "original_source_closure_missing": true,
+    "owned_groups_closed": 16,
+    "resume_source_verification": "new LIVE verification, not retroactive closure",
+    "reused_units": 10,
+    "worker_commands": 16
+  },
+  "original_failure_promoted": false,
+  "plan": {
+    "cases": [
+      "spherical_g2_d8_s1",
+      "spherical_g2_d8_s2",
+      "spherical_g2_d8_s3",
+      "spherical_g8_d4_s1",
+      "spherical_g8_d4_s2",
+      "spherical_g8_d4_s3",
+      "spherical_g16_d2_s1",
+      "spherical_g16_d2_s2",
+      "spherical_g16_d2_s3",
+      "anisotropic_g8_d4_s1",
+      "anisotropic_g8_d4_s2",
+      "unbalanced_g8_d4_s1",
+      "unbalanced_g8_d4_s2"
+    ],
+    "exp_z": [
+      1,
+      2
+    ],
+    "k": [
+      5,
+      10
+    ],
+    "sizes": [
+      20,
+      50
+    ]
+  },
+  "post_audit": {
+    "GCP_used": false,
+    "Hungarian_solver": "scipy.optimize.linear_sum_assignment",
+    "Hungarian_solver_shared": true,
+    "NMI_recomputed": false,
+    "arithmetic_source_sha256": "95cece7c7b74d839495485d8bad018abffb246458f2d4a800e68c479387e6e1d",
+    "audit_source_sha256": "0a7ddbd1b93fd56e0a28523f6eb2ccc09b1b97b37e10019bacef7d89eb8055c5",
+    "comparator_rows": 260,
+    "facet_exits_checked": 39135752,
+    "geometry_or_EOM_rerun": false,
+    "limitations": [
+      "Post-capture addition; no qualification transferred by rewriting schema.",
+      "Exact ARI is independent; Hungarian optimization uses the shared SciPy solver.",
+      "Mass conservation concerns rounded input masses, not certified real weights.",
+      "Resumed units retain the interrupted receipt and its missing original source closure.",
+      "No serial speedup, statistical dominance, or nested point partition is inferred."
+    ],
+    "mass_max_absolute_error_from_covered_points": [
+      42229,
+      9223372036854775808
+    ],
+    "measures": 52,
+    "orchestration": {
+      "maximum_observed_workers": 2,
+      "native_commands": 26,
+      "newly_executed_units": 16,
+      "original_failure_preserved": true,
+      "original_source_closure_missing": true,
+      "owned_groups_closed": 16,
+      "resume_source_verification": "new LIVE verification, not retroactive closure",
+      "reused_units": 10,
+      "worker_commands": 16
+    },
+    "pins_checked": 1175,
+    "private_receipt": "/tmp/mhgp9-weighted-full-postchecks-20260927-o95pB0/normal/audit.json",
+    "receipt_sha256": "b048e8d34e8e3548e4e05340f333301c276ef04a0cacbbde4ad99814e010ee00",
+    "schema": "mhgp9_weighted_parallel_post_capture_score_audit_v1",
+    "scipy_version": "1.18.1",
+    "status": "passed",
+    "total_rows": 364,
+    "weighted_rows": 104
+  },
+  "private_capture": "/tmp/mhgp9-weighted-full-gaussian-parallel-20260927-b9SXyO/capture_r2",
+  "private_receipt": "/tmp/mhgp9-weighted-full-gaussian-parallel-20260927-b9SXyO/capture_r2/receipt.json",
+  "qualification": {
+    "build_receipt": "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/receipt.json",
+    "build_receipt_sha256": "75f71db0ee7d7806588072f883bba803e192472893d4720e132712107eee97f0",
+    "commands": [
+      {
+        "argv": [
+          "/home/codespace/.python/current/bin/python",
+          "-B",
+          "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/test_qualify_full_attachments.py"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.1143379349996394,
+        "name": "test_qualify_full_attachments_normal",
+        "returncode": 0,
+        "stderr_sha256": "ad61be9b74efb8a4b8ae7d0427622d79c722d44dc55c2f4aeb51140568dfc278",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/home/codespace/.python/current/bin/python",
+          "-B",
+          "-O",
+          "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/test_qualify_full_attachments.py"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.11420874299801653,
+        "name": "test_qualify_full_attachments_optimized",
+        "returncode": 0,
+        "stderr_sha256": "ad61be9b74efb8a4b8ae7d0427622d79c722d44dc55c2f4aeb51140568dfc278",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/home/codespace/.python/current/bin/python",
+          "-B",
+          "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/test_full_attachment_oracle.py"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.31456926800092333,
+        "name": "test_full_attachment_oracle_normal",
+        "returncode": 0,
+        "stderr_sha256": "498c87ff16e67f040548b425505a076d885bdd4cb4623718f239d12867a5564b",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/home/codespace/.python/current/bin/python",
+          "-B",
+          "-O",
+          "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/test_full_attachment_oracle.py"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.364648582002701,
+        "name": "test_full_attachment_oracle_optimized",
+        "returncode": 0,
+        "stderr_sha256": "f730a16a6969c0a58cf55846f9dbb8134f764f16d2c2972e468ee578519bad79",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/home/codespace/.python/current/bin/python",
+          "-B",
+          "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/test_full_weighted_tree.py"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.4650355839985423,
+        "name": "test_full_weighted_tree_normal",
+        "returncode": 0,
+        "stderr_sha256": "bf2a0d744651508aa3c6eecd0802a9a4cbbd7284fe91a99ec549ce2644d05ef7",
+        "stdout_sha256": "9ab57cbb5aefb97f27cf4b84c65ff9368de3c30e1a84788ee1adbb420a2403b5",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/home/codespace/.python/current/bin/python",
+          "-B",
+          "-O",
+          "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/test_full_weighted_tree.py"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.4649140770015947,
+        "name": "test_full_weighted_tree_optimized",
+        "returncode": 0,
+        "stderr_sha256": "2910b630346659c56bafe7b3e99334463c3ba62c1a9f36461b5b8a3f5f462a79",
+        "stdout_sha256": "9ab57cbb5aefb97f27cf4b84c65ff9368de3c30e1a84788ee1adbb420a2403b5",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/home/codespace/.python/current/bin/python",
+          "-B",
+          "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/test_weighted_model.py"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.1643496309989132,
+        "name": "test_weighted_model_normal",
+        "returncode": 0,
+        "stderr_sha256": "79df89c1275396d97b472c355017fe5c3369eacc7d16c42ed8963bcd5a4391c3",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/home/codespace/.python/current/bin/python",
+          "-B",
+          "-O",
+          "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/test_weighted_model.py"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.16429984800197417,
+        "name": "test_weighted_model_optimized",
+        "returncode": 0,
+        "stderr_sha256": "79df89c1275396d97b472c355017fe5c3369eacc7d16c42ed8963bcd5a4391c3",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/home/codespace/.python/current/bin/python",
+          "-B",
+          "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/test_weighted_eom.py"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.5151000000005297,
+        "name": "test_weighted_eom_normal",
+        "returncode": 0,
+        "stderr_sha256": "312ef0e524cef38bbd15e1ab418b652c039bee060e57c5d88ebaaf242a72f383",
+        "stdout_sha256": "2a902058a6fd5408a16967d35c16c87802517df8121cabe05d94a58c30078b69",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/home/codespace/.python/current/bin/python",
+          "-B",
+          "-O",
+          "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/test_weighted_eom.py"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.5150603359979868,
+        "name": "test_weighted_eom_optimized",
+        "returncode": 0,
+        "stderr_sha256": "971c0ab3d67dea8502f4f0e261e98143acf04a0faba76a1daff18780dfbd9a3e",
+        "stdout_sha256": "2a902058a6fd5408a16967d35c16c87802517df8121cabe05d94a58c30078b69",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/home/codespace/.python/current/bin/python",
+          "-B",
+          "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/test_attachment_export.py",
+          "--native",
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.11416336999900523,
+        "name": "test_attachment_export_normal",
+        "returncode": 0,
+        "stderr_sha256": "fa97c80fc3eb7334a7712f41052656d9ec705f0053004a58704211e91a7526ad",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/home/codespace/.python/current/bin/python",
+          "-B",
+          "-O",
+          "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/test_attachment_export.py",
+          "--native",
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.11415207699974417,
+        "name": "test_attachment_export_optimized",
+        "returncode": 0,
+        "stderr_sha256": "cafe0befc6204d742636f5a24376ea4683600e3bfa4dbf7d1f6d93fa609e5024",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--gate"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.007727997002803022,
+        "name": "native_gate",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "da540eef4b6c0303bca6535ef48832fcd0736384741eb3ba653fabda52c6941a",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/equilateral_k1.u32le",
+          "--k",
+          "1",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.0036506169999483973,
+        "name": "equilateral_k1",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "f32964b162b4f581eada9aadccba5c69f64c0fff4b5af9d637109e617900729b",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/equilateral_k2.u32le",
+          "--k",
+          "2",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.0035889910031983163,
+        "name": "equilateral_k2",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "10ace244d7079373a2c1e4f2cc395d8f26fbedc048d1e28f551cddf8be554ec9",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/obtuse_k1.u32le",
+          "--k",
+          "1",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.0035963549998996314,
+        "name": "obtuse_k1",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "fadcf1e6925a442958d150fd290a29252cd88ccd5bd1146fba37136e9f6e6294",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/obtuse_k2.u32le",
+          "--k",
+          "2",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.0035921870003221557,
+        "name": "obtuse_k2",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "663c421faefddc17b0354cef7c5d1aaec47583942ceef01f2499b6587bc22912",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/square_k1.u32le",
+          "--k",
+          "1",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.0035817390016745776,
+        "name": "square_k1",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "ffa79fc3eae2a0ab8f2f6bd16168bf3c488a1fca0a72de54d02989ecdde6e268",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/square_k2.u32le",
+          "--k",
+          "2",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.003645587999926647,
+        "name": "square_k2",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "2e64110bb7c7f6066b41b42bdacd56098a9d0f60dc0d7a487be375ab0fb44b8e",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/square_k3.u32le",
+          "--k",
+          "3",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.0036332950003270525,
+        "name": "square_k3",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "d572b3d5d59df7aa041e647bbfc9121d6168f46403649f1ecc544e95e2b8b460",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/octahedron_k1.u32le",
+          "--k",
+          "1",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.0035853250010404736,
+        "name": "octahedron_k1",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "2bf6be4e325bdf4fce1f83c0c06fed6c11d1930273bdab78120a1ce97d3f8208",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/octahedron_k2.u32le",
+          "--k",
+          "2",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.003668098997877678,
+        "name": "octahedron_k2",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "5530b81b25997e1c2c30eb099d458310dd64833377f4f0d67f6d251a3fa85f49",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/octahedron_k3.u32le",
+          "--k",
+          "3",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.007700787999056047,
+        "name": "octahedron_k3",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "444b546304622aadcd5a4415edaf3d7354addce9c96617af3b2b183a5f88c3b6",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/octahedron_k5.u32le",
+          "--k",
+          "5",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.0036361499987833668,
+        "name": "octahedron_k5",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "b529ef21e4ff2fcce05088a48ef6892c85b3c140cc1fcafc65ac673a6da45d1d",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/mandatory_interior_k1.u32le",
+          "--k",
+          "1",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.003585534999729134,
+        "name": "mandatory_interior_k1",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "8eb3d4a7dc45425c5fecd5b500ab9ef82e2b0e4c0e0a7b8e397746d9bc33b300",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/mandatory_interior_k2.u32le",
+          "--k",
+          "2",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.0036604449996957555,
+        "name": "mandatory_interior_k2",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "61a526e2ac141d0f1921bf9ae17d90787188753e9cd8adc0dc4f1193b0b7049f",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/mandatory_interior_k3.u32le",
+          "--k",
+          "3",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.007696671000303468,
+        "name": "mandatory_interior_k3",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "b3e4320247654f785d581a1be597bb57dd0e33e46215c33362c4594a3ede381e",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/mandatory_interior_k5.u32le",
+          "--k",
+          "5",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.007672656000067946,
+        "name": "mandatory_interior_k5",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "1c00ff4384071306469bbcb871d1794697a8f50489d4a5a35449ee0e85b5cbfe",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/random8_seed1_k1.u32le",
+          "--k",
+          "1",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.003604690999054583,
+        "name": "random8_seed1_k1",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "2b30d3920d6c06f5aaec173afc5e4eaa90eed68a582c4ca92ad20d6dea9d802b",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/random8_seed1_k2.u32le",
+          "--k",
+          "2",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.007747607000055723,
+        "name": "random8_seed1_k2",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "894a7ee7fbeea175f3bd9d5d55d3a428b0770954cc0e6cf65a8035a761a897f7",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/random8_seed1_k3.u32le",
+          "--k",
+          "3",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.0077911669977766,
+        "name": "random8_seed1_k3",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "59d716059d3996538aecccf2cb48de9de969dffda892ee4dac46bcf8a3b24938",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/random8_seed1_k5.u32le",
+          "--k",
+          "5",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.007768945000862004,
+        "name": "random8_seed1_k5",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "10050b1efc833829a4cd5761d1f13be449e109366d3ea85e5d2fdab3e80b4c61",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/random8_seed2_k1.u32le",
+          "--k",
+          "1",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.0036961709993192926,
+        "name": "random8_seed2_k1",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "8fbba5052f2ffaebc7e762e4a3c9eaacf52e690c89310bdfa5bbce5df757a3bc",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/random8_seed2_k2.u32le",
+          "--k",
+          "2",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.0037648789984814357,
+        "name": "random8_seed2_k2",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "a0a38ce972f3386a69883bf9a126e47e7c827b365c453c4bac1acff676ce4188",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/random8_seed2_k3.u32le",
+          "--k",
+          "3",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.00786907300062012,
+        "name": "random8_seed2_k3",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "3231163e5ca42716e0ad2b2d76c4c396db9017e2757835939f9b30a9fad9fe34",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/random8_seed2_k5.u32le",
+          "--k",
+          "5",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.0078023059977567755,
+        "name": "random8_seed2_k5",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "cf518029165d84a798ef7e955d789ce6500f902dc16f5a8f038e166036c11521",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/random8_seed3_k1.u32le",
+          "--k",
+          "1",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.00363971600017976,
+        "name": "random8_seed3_k1",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "cc3dd3db16bfe0f58b20568585eb087e919bf249197d457d657289adf3e7b150",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/random8_seed3_k2.u32le",
+          "--k",
+          "2",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.0077910470026836265,
+        "name": "random8_seed3_k2",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "09dc9a49e3d1ba7f87f55e2796bd425d61b0a8ab315b938d5f3f52711190c20c",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/random8_seed3_k3.u32le",
+          "--k",
+          "3",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.007846178999898257,
+        "name": "random8_seed3_k3",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "9c0b35601719426dfef92868b42bd8b617920e95922dc0ef8937793a2d06e0ac",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/random8_seed3_k5.u32le",
+          "--k",
+          "5",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.007810434999555582,
+        "name": "random8_seed3_k5",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "68fc9d4c8287213a61c769278d01981b610f11abf77ff8cd5d1a197ac65d23d5",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/eleven_k10_k10.u32le",
+          "--k",
+          "10",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.007688883000810165,
+        "name": "eleven_k10_k10",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "5fe642cf3bcd819675a0caabfedec7262553048259b951fa23b4c23dc97cf6f4",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/e5_silent_k1.u32le",
+          "--k",
+          "1",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.00366610600030981,
+        "name": "e5_silent_k1",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "c6390ae76aab76293813db907784940a637db8c6b7364de0b3ff1e183f7d652d",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/e5_silent_k2.u32le",
+          "--k",
+          "2",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.0036474700027611107,
+        "name": "e5_silent_k2",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "5db9f065acce15311e4ef890c161cc7bb86d93efa40206e54a2ecb2b5a44cd86",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/e5_silent_k3.u32le",
+          "--k",
+          "3",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.003689068998937728,
+        "name": "e5_silent_k3",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "bea0f90f35261d22bd2e828b48476c9bbfbd7be51e05a25037f3be0caeca6760",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/e5_silent_k4.u32le",
+          "--k",
+          "4",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.007698296001763083,
+        "name": "e5_silent_k4",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "1f12ec2e577079c047c87cef00afb886aa5a7a545e1f8be6ef9a020785c65365",
+        "timeout_seconds": 60
+      },
+      {
+        "argv": [
+          "/workspaces/E-HGP/build/v9-weighted-attachments-native-20260927-r1/native_weighted_export",
+          "--input",
+          "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/square_empty_weighted_k4.u32le",
+          "--k",
+          "4",
+          "--workers",
+          "1",
+          "--verify-coverage"
+        ],
+        "cwd": "/workspaces/E-HGP/build/v9-resume-20260927",
+        "elapsed_seconds": 0.003625680001277942,
+        "name": "square_empty_weighted_k4",
+        "returncode": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "408850015cd9f53f45a61de9c1b1173da47d5442674cc2e7a2574798a12a8946",
+        "timeout_seconds": 60
+      }
+    ],
+    "private_receipt": "/workspaces/E-HGP/build/v9-weighted-full-qualification-20260927-r1/receipt.json",
+    "publication_check": "LIVE hashes and command bindings; no new geometry/oracle execution",
+    "receipt_sha256": "35126c2a591a4d410b44d86a80967b50f4574bcdb9cadc5d94d9a982bafaba9c",
+    "schema": "mhgp9_weighted_full_attachment_qualification_v1",
+    "scope": "tiny_exact_FULL_facet_attachments_not_weighted_label_quality",
+    "source_count": 493,
+    "source_map_sha256": "9f99cdd0646a9de74e0e212ab526dfef66d7eddf0482ac0f83edde1dae8dc317",
+    "status": "passed",
+    "summary": {
+      "attached_facets": 464,
+      "attachment_cut_queries": 1166,
+      "cases": 33,
+      "catalogue_balls": 831,
+      "coface_subsets": 741,
+      "cut_queries": 1166,
+      "extra_balls": 70,
+      "gabriel_cofaces": 298,
+      "naive_disagreements": 2,
+      "rejected_center_masks": 70
+    }
+  },
+  "raw_clouds_or_native_arrays_published": false,
+  "receipt_sha256": "577930f26f4f97fd4f13fb99bb1e356e232a8479055c7f6e09a1bab87bbea720",
+  "reuse_verification": {
+    "missing_original_failure_source_closure": true,
+    "note": "New read-only verification after interruption; not an original successful source closure",
+    "receipt": "/workspaces/E-HGP/build/v9-weighted-full-gaussian-pilot-20260927-r1/receipt.json",
+    "receipt_sha256": "554f03778d565bbafd3cadb0a9e1c0d63c79606675a4f794c9cd8397d64acab4",
+    "resume_verification_currentpins": {
+      "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/condensed.py": "f4323c60696255a52ef53884ce94ec5701fdda21e66fa71f927f7dc833917c8e",
+      "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/evaluation.py": "d5a396c03a8d5eafc444e982e5bff3eb310d7ff7b4d1b0c7377797e23e7e0a9c",
+      "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/benchmark.py": "8b5c80ddcf27896b7e25b5965caa50352a206de392318111a5623c37ce06736f",
+      "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/datasets.py": "7ff3d93677f51eabe9c1bea0f56a62bbcd53ce531c3a49bdfafeab29ab14f53c",
+      "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/eom.py": "c7121c857010fd89b6798ec634a0f55c4abd14c1c6bc6305c551c06e4625dead",
+      "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/native_export.cpp": "a5a62d458a628edbd4ca43cb633200344342c0287873aac15aacdf28d4fc6cf0",
+      "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/projection.py": "a6a88955e6ea94f2d002a825df58db94cb602376d096164eee55792bcf014242",
+      "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/benchmark_full_weighted.py": "30bab0dc0d3009ac68eb8434e01888d56d8ce83cfcacf0bab636a8a422d18d9f",
+      "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/full_weighted_tree.py": "351c090e8bab4f1d43c867341b5196b2fa0a50eb2f980195751442b72c6e9635",
+      "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/qualify_full_attachments.py": "5fdfa3bc89043bec001cfacae6d7a179b3b3938ec82a39bb41a6e73e6ea17e9f",
+      "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/weighted_eom.py": "16181b12b2f99e2e5df55c548dde88476df157fcbcd88cc1b548bd1499c6bee9",
+      "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/weighted_model.py": "2ac34bf0f72fd809c26063774f1d5f42ced714565dbeff32ee59a0f52205b93e"
+    },
+    "units": 10
+  },
+  "root_policy": "excluded_for_both",
+  "row_count": 364,
+  "schema": "mhgp9_weighted_full_parallel_publication_normalized_v2",
+  "scope": "weighted_Gabriel_measure_FULL_connectivity_not_nested_point_decoder",
+  "selected_subset_after_previous_scores": true,
+  "serial_speedup_claimed": false,
+  "source_sha256": "a185b986741fdcb844470def5db93af34018c35d71d1fd6c5a583b5a0a94021b",
+  "sources": {
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/condensed.py": "f4323c60696255a52ef53884ce94ec5701fdda21e66fa71f927f7dc833917c8e",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_gaussian_point_clustering_20260927/evaluation.py": "d5a396c03a8d5eafc444e982e5bff3eb310d7ff7b4d1b0c7377797e23e7e0a9c",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/benchmark.py": "8b5c80ddcf27896b7e25b5965caa50352a206de392318111a5623c37ce06736f",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/datasets.py": "7ff3d93677f51eabe9c1bea0f56a62bbcd53ce531c3a49bdfafeab29ab14f53c",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/eom.py": "c7121c857010fd89b6798ec634a0f55c4abd14c1c6bc6305c551c06e4625dead",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/native_export.cpp": "a5a62d458a628edbd4ca43cb633200344342c0287873aac15aacdf28d4fc6cf0",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_point_hierarchy_k_20260927/projection.py": "a6a88955e6ea94f2d002a825df58db94cb602376d096164eee55792bcf014242",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/benchmark_full_weighted.py": "30bab0dc0d3009ac68eb8434e01888d56d8ce83cfcacf0bab636a8a422d18d9f",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/benchmark_full_weighted_parallel_r2.py": "58855796ea8c6c9110542719ca344e98923b48a706fb2a084bd5676c17fe03a4",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/full_weighted_tree.py": "351c090e8bab4f1d43c867341b5196b2fa0a50eb2f980195751442b72c6e9635",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/qualify_full_attachments.py": "5fdfa3bc89043bec001cfacae6d7a179b3b3938ec82a39bb41a6e73e6ea17e9f",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/weighted_eom.py": "16181b12b2f99e2e5df55c548dde88476df157fcbcd88cc1b548bd1499c6bee9",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/weighted_model.py": "2ac34bf0f72fd809c26063774f1d5f42ced714565dbeff32ee59a0f52205b93e"
+  },
+  "status": "completed",
+  "worker_commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/benchmark_full_weighted_parallel_r2.py",
+        "--worker-spec",
+        "/tmp/mhgp9-weighted-full-gaussian-parallel-20260927-b9SXyO/capture_r2/spherical_g8_d4_s3_k5.spec.json"
+      ],
+      "case": "spherical_g8_d4_s3",
+      "elapsed_seconds": 30.22180325500085,
+      "k": 5,
+      "pid": 343591,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "5e66da775e8f8d0cef51ce11d20eb423226a3211fed06c9712724719de95c157"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/benchmark_full_weighted_parallel_r2.py",
+        "--worker-spec",
+        "/tmp/mhgp9-weighted-full-gaussian-parallel-20260927-b9SXyO/capture_r2/spherical_g16_d2_s1_k5.spec.json"
+      ],
+      "case": "spherical_g16_d2_s1",
+      "elapsed_seconds": 36.225490824999724,
+      "k": 5,
+      "pid": 343975,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "29c8a65440445b032f960a09ae90754b137aafa3cd06b745518a5cab3987ef8c"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/benchmark_full_weighted_parallel_r2.py",
+        "--worker-spec",
+        "/tmp/mhgp9-weighted-full-gaussian-parallel-20260927-b9SXyO/capture_r2/spherical_g8_d4_s3_k10.spec.json"
+      ],
+      "case": "spherical_g8_d4_s3",
+      "elapsed_seconds": 165.93099206700208,
+      "k": 10,
+      "pid": 343592,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "1e9d5d22a6b7a93672cf14a92fc32ec528bd7c42069f28501f7d96add4de2518"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/benchmark_full_weighted_parallel_r2.py",
+        "--worker-spec",
+        "/tmp/mhgp9-weighted-full-gaussian-parallel-20260927-b9SXyO/capture_r2/spherical_g16_d2_s2_k5.spec.json"
+      ],
+      "case": "spherical_g16_d2_s2",
+      "elapsed_seconds": 35.624437701000716,
+      "k": 5,
+      "pid": 346289,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "60e6eae37ed6029735debf67f65aeaf1f89a2c40d60257584de3375ce2dc1b65"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/benchmark_full_weighted_parallel_r2.py",
+        "--worker-spec",
+        "/tmp/mhgp9-weighted-full-gaussian-parallel-20260927-b9SXyO/capture_r2/spherical_g16_d2_s1_k10.spec.json"
+      ],
+      "case": "spherical_g16_d2_s1",
+      "elapsed_seconds": 207.9573750540003,
+      "k": 10,
+      "pid": 344640,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "2391adcbcbaa0c6c4156b88b3336ee99db0e98d3c5faf598a9ff8e9cd7ebea3c"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/benchmark_full_weighted_parallel_r2.py",
+        "--worker-spec",
+        "/tmp/mhgp9-weighted-full-gaussian-parallel-20260927-b9SXyO/capture_r2/spherical_g16_d2_s3_k5.spec.json"
+      ],
+      "case": "spherical_g16_d2_s3",
+      "elapsed_seconds": 35.62745715300116,
+      "k": 5,
+      "pid": 347653,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e146f53b1b056adb429cffce4b5aecd3b1ff74b0921921afa4fa647238de57ba"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/benchmark_full_weighted_parallel_r2.py",
+        "--worker-spec",
+        "/tmp/mhgp9-weighted-full-gaussian-parallel-20260927-b9SXyO/capture_r2/spherical_g16_d2_s2_k10.spec.json"
+      ],
+      "case": "spherical_g16_d2_s2",
+      "elapsed_seconds": 205.95767218099718,
+      "k": 10,
+      "pid": 346824,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "16e979de5d79283dfdbc23e36a9ec57bd0407669d9c4c528e9c28377a4967bcb"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/benchmark_full_weighted_parallel_r2.py",
+        "--worker-spec",
+        "/tmp/mhgp9-weighted-full-gaussian-parallel-20260927-b9SXyO/capture_r2/anisotropic_g8_d4_s1_k5.spec.json"
+      ],
+      "case": "anisotropic_g8_d4_s1",
+      "elapsed_seconds": 28.42094573799841,
+      "k": 5,
+      "pid": 350225,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "97fc876fd7dbe752ee2ea70dc6bff564c02324aa71dbad4af062db8a14c89d3c"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/benchmark_full_weighted_parallel_r2.py",
+        "--worker-spec",
+        "/tmp/mhgp9-weighted-full-gaussian-parallel-20260927-b9SXyO/capture_r2/spherical_g16_d2_s3_k10.spec.json"
+      ],
+      "case": "spherical_g16_d2_s3",
+      "elapsed_seconds": 210.17631351100135,
+      "k": 10,
+      "pid": 348379,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "f4b2e01572f34d7b0e42420645a083a3d65fa77d872d5ac2ad1e8d436577f0b8"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/benchmark_full_weighted_parallel_r2.py",
+        "--worker-spec",
+        "/tmp/mhgp9-weighted-full-gaussian-parallel-20260927-b9SXyO/capture_r2/anisotropic_g8_d4_s2_k5.spec.json"
+      ],
+      "case": "anisotropic_g8_d4_s2",
+      "elapsed_seconds": 27.21718484899975,
+      "k": 5,
+      "pid": 353982,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "c63859d28eadaf5762766eed4cfc11de9f5e59631b46075556bcc54b6604ff92"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/benchmark_full_weighted_parallel_r2.py",
+        "--worker-spec",
+        "/tmp/mhgp9-weighted-full-gaussian-parallel-20260927-b9SXyO/capture_r2/anisotropic_g8_d4_s1_k10.spec.json"
+      ],
+      "case": "anisotropic_g8_d4_s1",
+      "elapsed_seconds": 139.90400122500068,
+      "k": 10,
+      "pid": 351402,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "20a5e1e05729afb7419ffb0fcc5ee6fd7d2aefb64c6441e581f4f7935de86c15"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/benchmark_full_weighted_parallel_r2.py",
+        "--worker-spec",
+        "/tmp/mhgp9-weighted-full-gaussian-parallel-20260927-b9SXyO/capture_r2/unbalanced_g8_d4_s1_k5.spec.json"
+      ],
+      "case": "unbalanced_g8_d4_s1",
+      "elapsed_seconds": 31.42129940200175,
+      "k": 5,
+      "pid": 355234,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a13e57737e209c6db2317765391735e86159c7623e9635d6e60793414d14f820"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/benchmark_full_weighted_parallel_r2.py",
+        "--worker-spec",
+        "/tmp/mhgp9-weighted-full-gaussian-parallel-20260927-b9SXyO/capture_r2/anisotropic_g8_d4_s2_k10.spec.json"
+      ],
+      "case": "anisotropic_g8_d4_s2",
+      "elapsed_seconds": 137.70240808900053,
+      "k": 10,
+      "pid": 354563,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "5632c4f1c5c13c15a2dd7ff11007c9019a0f2bb25db1e739daf44cccb8ec368e"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/benchmark_full_weighted_parallel_r2.py",
+        "--worker-spec",
+        "/tmp/mhgp9-weighted-full-gaussian-parallel-20260927-b9SXyO/capture_r2/unbalanced_g8_d4_s2_k5.spec.json"
+      ],
+      "case": "unbalanced_g8_d4_s2",
+      "elapsed_seconds": 30.621040270001686,
+      "k": 5,
+      "pid": 356929,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "c6b22807f1e245c0d105f380dcbad8f74523e1a2ffd2962cc8dff454afc91eb3"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/benchmark_full_weighted_parallel_r2.py",
+        "--worker-spec",
+        "/tmp/mhgp9-weighted-full-gaussian-parallel-20260927-b9SXyO/capture_r2/unbalanced_g8_d4_s1_k10.spec.json"
+      ],
+      "case": "unbalanced_g8_d4_s1",
+      "elapsed_seconds": 171.52535056800116,
+      "k": 10,
+      "pid": 355810,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "d0d69e243564d9ce43ecc7ee3a24956486deb1a84ee3a71175bb93f74c802227"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/experiments/weighted_clustering_20260927/benchmark_full_weighted_parallel_r2.py",
+        "--worker-spec",
+        "/tmp/mhgp9-weighted-full-gaussian-parallel-20260927-b9SXyO/capture_r2/unbalanced_g8_d4_s2_k10.spec.json"
+      ],
+      "case": "unbalanced_g8_d4_s2",
+      "elapsed_seconds": 168.11227844600216,
+      "k": 10,
+      "pid": 357166,
+      "returncode": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "9eb64a60114e7328e12a9cd5ba5812639e07b687a7a35489af0096196eac80ca"
+    }
+  ],
+  "worker_environment": {
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1"
+  }
+}

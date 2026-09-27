@@ -7,8 +7,11 @@ Masses avant quotient, attaches datées FULL, condensation et vote implémentés
 Premier essai naïf réfuté :26composantes/1racineFULL, aucun score ; échec conservé.
 Le raccord corrigé passe Release/ASan/UBSan,33fixtures et1 166coupes exactes ;
 partitions de facettes comparées à tout Čech, pas seulement couvertures.
-LSan exclu, anciens essais d'environnement archivés. Pilote gaussien corrigé
-en cours ; aucune domination statistique. La
+LSan exclu, anciens essais d'environnement archivés.
+[Pilote gaussien corrigé clos](../receipts/weighted_full_gaussian_20260927/r2/TABLES.md) :
+104 sélections pondérées/260 comparateurs ;52mesures et39 135 752sorties
+revérifiées,104ARI indépendants,1 175pins, normal/−O identiques. Les résultats
+sont contrastés, sans domination statistique. La
 [référence ponctuelle sparse](../experiments/weighted_clustering_20260927/POINT_ROUTING_REFERENCE.md)
 passe séparément133fixtures/2 160coupes/14refus, dont trois objets FULL
 qualifiés ; pas de score statistique ni chrono de production transféré.

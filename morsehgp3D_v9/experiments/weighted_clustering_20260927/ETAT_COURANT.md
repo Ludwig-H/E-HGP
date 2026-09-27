@@ -9,6 +9,11 @@ Aucun fichier du moteur, registre, ancien benchmark ou build épinglé n'est
 modifié. Aucune dépense GCP. Ce traitement de clustering est **après FULL** :
 ses temps ne remplacent pas les mesures de construction de la tour.
 
+La campagne de qualité corrigée et son contre-audit sont maintenant clos :
+**364 lignes, 140 agrégats, 104 sorties pondérées**. Le
+[bilan détaillé](RESULTATS.md) est mixte, sans dominance sur HDBSCAN ni sur
+la première couverture. La publication conserve tous les réglages prévus.
+
 ## Ce qui est implémenté
 
 1. Export du catalogue de boules complet et des cofaces Gabriel à K fixé,
@@ -84,8 +89,17 @@ poids réels. Le mode rationnel z2 sert aux petits contrôles.
 - `weighted_eom.py` : condensation et sélection avec masses pondérées.
 - `full_attachment_oracle.py`, `qualify_full_attachments.py` et leurs tests :
   contrôles indépendants, domaine petit explicitement borné.
-- `benchmark_full_weighted.py` : pilote corrigé ;
-  `benchmark_weighted.py` : premier essai réfuté, historique uniquement.
+- `benchmark_full_weighted_parallel_r2.py` : pilote clos, reprise explicite
+  de dix unités et seize nouveaux workers, avec fermeture de leurs groupes.
+  `benchmark_full_weighted.py` conserve l'essai séquentiel interrompu ;
+  `benchmark_full_weighted_parallel.py` la première version d'orchestration ;
+  `benchmark_weighted.py` le premier essai géométrique réfuté.
+- [Résultats](RESULTATS.md),
+  [publication close r2](../../receipts/weighted_full_gaussian_20260927/r2/TABLES.md),
+  `post_audit_parallel.py`, `report_full_weighted_parallel.py` et leurs tests :
+  lecteurs distincts, sans promotion du reçu interrompu. La r2 enlève
+  seulement un espace final Markdown ; la r1 scellée est conservée en privé,
+  les CSV restent identiques octet par octet et aucun score n'est recalculé.
 - [Dépôts datés](DEPOTS_DATES.md) : preuve de regroupement exact pour la
   condensation et le vote plat, sous conditions ; ce n'est pas encore un
   moteur compact implémenté.
@@ -105,11 +119,22 @@ voie industrielle, ni un chrono mono-thread (l'observateur utilise au moins
 deux workers, séparément déclarés). Il ne donne aucune nouvelle borne de
 croissance sur LiDAR ou de performance G4/100 ms.
 
-La campagne de qualité corrigée est en cours ; pas encore de score clos
-publié ici. Protocole inchangé : 13 scènes gaussiennes complètes n1200,
-K5/10, masses minimales20/50, expZ1/2, comparateurs précédents conservés
-par hash. Sous-ensemble diagnostique de régimes déjà vus, pas test statistique
-aveugle de supériorité universelle.
+La campagne de qualité corrigée est close : 13 scènes gaussiennes complètes
+n1200, K5/10, masses minimales20/50, expZ1/2, comparateurs précédents conservés
+par hash. Dix unités complètes ont été reprises après interruption ; seize
+ont été calculées par les nouveaux workers. L'ancien reçu reste en échec et
+sa clôture absente n'est pas reconstituée rétroactivement. Le contre-audit
+normal/−O identique recoupe 52 mesures, 39 135 752 sorties de facettes et
+1 175 pins, avec ARI exacts indépendants ; solveur Hungarian partagé,
+NMI non recalculé. Sous-ensemble diagnostique de régimes déjà vus, pas test
+statistique aveugle de supériorité universelle.
+
+Les [tableaux principaux](RESULTATS.md) montrent des résultats mixtes :
+le pondéré z2 progresse sur G8/δ4 sphérique, mais reste derrière HDBSCAN
+commun en anisotrope et déséquilibré z2. Les scores de première couverture
+restent aussi visibles. ExpZ change masses **et** λ chez HGP pondéré,
+contre λ seulement pour les comparateurs à masses ponctuelles unitaires.
+Ces résultats n'évaluent pas la nouvelle référence de routage emboîté.
 
 ## Piste suivante, sans gain de temps revendiqué
 

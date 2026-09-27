@@ -14,8 +14,13 @@ Qualification corrigée Release et GCC ASan/UBSan :46commandes/capture,
 33fixtures,464facettes,1 166coupes exactes, lecteurs normal/−O passés.
 Ancres sans contribution, plateaux, K10 et C vide à K=n contrôlés.
 LSan non qualifié ; échecs Clang-link/LSan historiques distingués.
-Pilote13scènes n1200/K5/10/m20/50/z1/2 en cours, comparateurs figés.
-Aucun nouveau score global, aucune croissance LiDAR/G4 déduite.
+[Pilote13scènes clos](receipts/weighted_full_gaussian_20260927/r2/TABLES.md),
+n1200/K5/10/m20/50/z1/2 :104 sélections pondérées et260 comparateurs figés.
+Les contre-audits normal/−O vérifient52mesures,39 135 752sorties de facettes,
+104ARI indépendants et1 175pins. Résultats mixtes : à K5/m20/z2, G8 sphérique
+δ4 donne0,5134 contre0,2239 pour HDBSCAN commun ; anisotrope0,1970 contre0,2523.
+Le fort recouvrement G16 reste difficile pour tous. Ni domination universelle,
+ni croissance LiDAR/G4 ou vitesse industrielle ne sont déduites de ce pilote.
 Le [routage ponctuel emboîté](experiments/weighted_clustering_20260927/POINT_ROUTING_REFERENCE.md)
 possède maintenant une référence Fraction sparse séparée :133fixtures,
 2 160coupes,14refus, trois intégrations FULL en normal/−O. Pas de tableau
