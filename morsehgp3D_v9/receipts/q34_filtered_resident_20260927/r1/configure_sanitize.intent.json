@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "cmake",
+    "-S",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_filtered_resident_20260927",
+    "-B",
+    "/workspaces/E-HGP/build/v9-audit-q34-resident-20260927-r1_sanitize",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_CXX_COMPILER=clang++",
+    "-DCMAKE_CXX_FLAGS=-Wall -Wextra -Wpedantic -Werror -O1 -g1 -fsanitize=address,undefined -fno-omit-frame-pointer",
+    "-DMHGP9_SOURCE_ROOT=/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9",
+    "-DMHGP9_GEN_LIBRARY=/workspaces/E-HGP/build/v9-q3-payload-sanitize-20260926/libmhgp9_gen.a",
+    "-DMHGP9_RESIDENT_ENABLE_CUDA=OFF"
+  ],
+  "name": "configure_sanitize",
+  "started_epoch": 1790498046.1793127,
+  "timeout_seconds": null
+}

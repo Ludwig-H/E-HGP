@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-resident-20260927-r1_release/mhgp9_q34_filtered_resident",
+    "--gate",
+    "--q",
+    "0"
+  ],
+  "name": "refuse_release_zero_q",
+  "started_epoch": 1790498030.3232093,
+  "timeout_seconds": null
+}

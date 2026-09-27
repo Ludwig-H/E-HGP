@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "c++",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-O2",
+    "-DMHGP9_RESIDENT_MUTANT_OWNER",
+    "-I/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src",
+    "-I/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/gen",
+    "-I/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/tests/gen",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_filtered_resident_20260927/probe.cpp",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_filtered_resident_20260927/device_cpu.cpp",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_filtered_resident_20260927/device_stub.cpp",
+    "/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/libmhgp9_gen.a",
+    "-pthread",
+    "-o",
+    "/workspaces/E-HGP/build/v9-audit-q34-resident-20260927-r1_release/mutant_owner"
+  ],
+  "name": "compile_release_mutant_owner",
+  "started_epoch": 1790498104.9832323,
+  "timeout_seconds": null
+}

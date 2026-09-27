@@ -1,5 +1,26 @@
 # État courant des audits v9
 
+**27 septembre — raccord résident, porte portable close** :
+[bilan](../docs/RACCORD_RESIDENT_Q34_20260927.md).
+50commandes Release/sanitizers,85cas×3configurations, mêmes sorties natives,
+trois mutants et quatre fautes portables. Le nouveau chemin garde l'index
+device entre les passes et ne refait pas le filtre rectangle en CPU.
+Unité CUDA encore non compilée, aucun chrono G4 ou FULL nouveau ; protocole
+de mesure W4/W48 testé hors cloud. Moteur inchangé, ne pas confondre progrès
+sur le prototype CPU9,9s et victoire sur S2GPU natif≈101ms historique.
+
+**27 septembre — prochains raccords et coûts extérieurs à S2** :
+[ledger q34](b_q34_outer_ledger_20260927/README.md),
+[contrat filtré](b_q34_filtered_contract_review_20260927/README.md),
+[construction FULL](b_full_construction_parallel_20260927/README.md).
+Relectures historiques normal/−O, pas nouveaux benchmarks :386–390ms
+q34 hors S2, dont83–84ms encore non attribuées. Priorité S2 : décision
+possédée issue du GPU, descriptions vivantes, même index résident.
+Priorité FULL : manifeste des vrais blocs/cibles/contributions, mêmes
+drafts/ancres avant remplacement chronologique. Ne pas supprimer les
+événements silencieux ni les contributions datées. Aucun gain ni port
+moteur de ces propositions encore qualifié, GCP non utilisé dans ce lot.
+
 **27 septembre — vrais S2 et correction du chemin critique** :
 [bilan](../docs/VAGUES_REELLES_ET_CHEMIN_CRITIQUE_20260927.md),
 [contrelecture](b_q34_waves_real_review_20260927/README.md).

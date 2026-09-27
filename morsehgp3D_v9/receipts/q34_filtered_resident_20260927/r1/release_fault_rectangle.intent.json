@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-resident-20260927-r1_release/fault_rectangle",
+    "--gate"
+  ],
+  "name": "release_fault_rectangle",
+  "started_epoch": 1790498038.2103908,
+  "timeout_seconds": null
+}

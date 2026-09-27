@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-audit-q34-resident-20260927-r1_release",
+    "--target",
+    "mhgp9_q34_filtered_resident",
+    "-j",
+    "2"
+  ],
+  "ended_epoch": 1790498029.917432,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "build_release",
+  "pid": 284485,
+  "started_epoch": 1790498023.390193,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "b5bf9e1e22743aaef3930bf30456f3f3e12d930cc0260e6637ee31aa66e3deed",
+  "timeout_seconds": null
+}

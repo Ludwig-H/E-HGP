@@ -1,0 +1,16 @@
+{
+  "gcp-migration/full_probe_session_v7.py": "177b25a0d72150dc331661fdf8da1ccde77ea17fb694d9c6af5b0929755160d8",
+  "gcp-migration/selftest_full_probe_session_v7.py": "764bb9c322695ca3333cb954861a5677d76ab00dff708396216a29cce0e6c389",
+  "morsehgp3D_v8/receipts/lidar_ground_20260921/release/ground_fq64xq_6/scene_00_grid/full.u32le": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf",
+  "morsehgp3D_v9/audits/b_q34_cuda_session_20260927/session.py": "20e1b9fc6a9aea435ac6876b1eef1723a76750d8f460367fa9ada50ad7fa01a0",
+  "morsehgp3D_v9/audits/b_q34_filtered_resident_20260927/CMakeLists.txt": "04fb5d0c8a99674b00e7e810aa787c3568d4f615b42a140213d4c95e442acb79",
+  "morsehgp3D_v9/audits/b_q34_filtered_resident_20260927/device_cuda.cu": "1a1e8bdbe2976b5377ed5222e06d49484b570f399cb6f8af4a53c50764758737",
+  "morsehgp3D_v9/audits/b_q34_filtered_resident_20260927/probe.cpp": "09cf90664bae59668cc2669463e0d8d982ab131eb9b9dd9a1be4b70f57ba548f",
+  "morsehgp3D_v9/audits/b_q34_resident_session_20260927/common.py": "ed8449188db32df53057734ffe3b39c4dd2397c3a8391aba50abd1444fd48184",
+  "morsehgp3D_v9/audits/b_q34_resident_session_20260927/package.py": "9dc57c622ff2a6f381ee2a83ec5da49e3b2073ef7f89f742757dbae7a242537d",
+  "morsehgp3D_v9/audits/b_q34_resident_session_20260927/run_local.py": "dfcd7885ca33d268cfe53132122361f0d0c179b68b5add622c0362e3ef8109b5",
+  "morsehgp3D_v9/audits/b_q34_resident_session_20260927/selftest.py": "3a0aa2e03703a0ac4d28fc8edbb7d72020d3a6a38d84dd55e3b7354471cc805c",
+  "morsehgp3D_v9/audits/b_q34_resident_session_20260927/session.py": "8bbbe05a85270bb91bdf3caadf0d5145cc131d01dfb66223090e39e6c0eaab54",
+  "morsehgp3D_v9/audits/b_q34_resident_session_20260927/worker.py": "2f3753380a907c2a0a699e9c2e46e45c31773b190d44614a711c35c5dbb1cfff",
+  "morsehgp3D_v9/src/gpu/witness_filter.hpp": "0ab8b3e38205845b39db08cb7245e472042a3ab2aab663492383ce0729c98d1f"
+}

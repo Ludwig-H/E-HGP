@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-resident-20260927-r1_release/mhgp9_q34_filtered_resident",
+    "--gate",
+    "--q",
+    "18446744073709551616"
+  ],
+  "ended_epoch": 1790498030.3371196,
+  "exit_code": 2,
+  "group_closed": true,
+  "name": "refuse_release_overflow",
+  "pid": 285589,
+  "started_epoch": 1790498030.3352292,
+  "stderr_sha256": "3bcba586cdb92de7df85f1b128bafd2eb224ae8132f09b60fbe07d173ec3fdd7",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": null
+}

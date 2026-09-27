@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "c++",
+    "-std=c++17",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-fsyntax-only",
+    "-I/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src",
+    "-include",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_filtered_resident_20260927/device.hpp",
+    "-x",
+    "c++",
+    "/dev/null"
+  ],
+  "ended_epoch": 1790498030.1659017,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "api_cpp17_release",
+  "pid": 284931,
+  "started_epoch": 1790498029.9180315,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": null
+}

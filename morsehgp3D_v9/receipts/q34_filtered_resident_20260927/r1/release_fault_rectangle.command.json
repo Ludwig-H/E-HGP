@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-resident-20260927-r1_release/fault_rectangle",
+    "--gate"
+  ],
+  "ended_epoch": 1790498038.2127914,
+  "exit_code": 2,
+  "group_closed": true,
+  "name": "release_fault_rectangle",
+  "pid": 285642,
+  "started_epoch": 1790498038.2103908,
+  "stderr_sha256": "8c874953bc0a807cef5fd171c2547657a8365cf5d91a1403fb341fa79a07edc6",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": null
+}

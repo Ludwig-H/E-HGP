@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-audit-q34-resident-20260927-r1_release",
+    "--target",
+    "mhgp9_q34_filtered_resident",
+    "-j",
+    "2"
+  ],
+  "name": "build_release",
+  "started_epoch": 1790498023.390193,
+  "timeout_seconds": null
+}

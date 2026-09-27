@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-audit-q34-resident-20260927-r1_sanitize",
+    "--target",
+    "mhgp9_q34_filtered_resident",
+    "-j",
+    "2"
+  ],
+  "ended_epoch": 1790498060.2024124,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "build_sanitize",
+  "pid": 286087,
+  "started_epoch": 1790498047.2031908,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "ff19079157ab516ffb3575eeb6f62e620ded946de4bef1a4ae2da75b0cff4fc4",
+  "timeout_seconds": null
+}

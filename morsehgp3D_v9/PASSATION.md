@@ -1,5 +1,38 @@
 # Passation v9
 
+## Raccord résident qualifié en portable — 27 septembre
+
+[Bilan et prochaine mesure](docs/RACCORD_RESIDENT_Q34_20260927.md).
+Le prototype filtre les rectangles avant l'arène, garde index/K et filiation,
+compacte les descriptions vivantes, puis consomme E par vagues sans tableau
+global P/E. La sortie ordonnée reste exactement native.50commandes closes,
+85cas×3configurations par build, Release/ClangASan/UBSan/LSan, trois mutants
+et quatre fautes portables ; lectures normal/−O passent. CUDA non compilé
+à cette porte, pas nouveau chrono G4/FULL ni mesure de croissance du raccord.
+Protocole gardé W4/W48 prêt et testé hors cloud. Ne pas promouvoir le moteur
+sur un gain contre l'ancien prototype CPU9,9s : battre le vrai filtre GPU
+et la chaîne complète reste à établir. Les deux prochains tickets S résident
+et manifeste FULL sont liés au bilan. Sources/builds/reçus r1 désormais figés.
+
+## Coûts hors S2 et premier raccord FULL — 27 septembre
+
+[Ledger q34](audits/b_q34_outer_ledger_20260927/README.md) et
+[plan d'implémentation FULL](audits/b_full_construction_parallel_20260927/README.md).
+Deux premiers passages historiques rejugés, pas une nouvelle campagne :
+q34 total487–491ms, S2≈101ms, S3≈119ms, attente S4≈80ms ;83–84ms
+restent non attribuées et ne sont pas un gain promis de validation.
+Ne pas additionner S4 et son attente, ni les phases q2 recouvertes.
+
+La prochaine couture S2 reçoit des décisions de rectangles scellées et
+prépare seulement les descriptions vivantes ; voir le
+[contrat](audits/b_q34_filtered_contract_review_20260927/README.md).
+P logique et E physique restent distincts. Aucun masque extérieur déclaré
+fiable, aucun recalcul géométrique CPU des rectangles déjà décidés sur GPU.
+Pour FULL, exporter les blocs actifs, cibles, contributions et ancres
+réelles puis comparer les mêmes drafts, avant le port du graphe temporel.
+Les seuls drafts finaux perdent des événements silencieux nécessaires.
+Moteur inchangé, aucune nouvelle dépense GCP pour ces audits.
+
 ## Vagues réelles et chemin critique — 27 septembre, nouvelle qualification
 
 [Bilan actuel](docs/VAGUES_REELLES_ET_CHEMIN_CRITIQUE_20260927.md).

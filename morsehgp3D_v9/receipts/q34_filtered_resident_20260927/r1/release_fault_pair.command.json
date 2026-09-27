@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-resident-20260927-r1_release/fault_pair",
+    "--gate"
+  ],
+  "ended_epoch": 1790498046.15676,
+  "exit_code": 2,
+  "group_closed": true,
+  "name": "release_fault_pair",
+  "pid": 286042,
+  "started_epoch": 1790498046.1542726,
+  "stderr_sha256": "3ce16ecce4a792f98fb97d55b9ebb41bc5003b5565a82e6bde56a2bd1304f2c5",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": null
+}

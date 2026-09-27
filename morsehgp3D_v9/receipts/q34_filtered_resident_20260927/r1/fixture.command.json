@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_filtered_resident_20260927/run.py",
+    "--fixture",
+    "/workspaces/E-HGP/build/v9-audit-q34-resident-20260927-r1_release/tiny_artificial.u32"
+  ],
+  "ended_epoch": 1790498030.3196783,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "fixture",
+  "pid": 285582,
+  "started_epoch": 1790498030.2705922,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": null
+}

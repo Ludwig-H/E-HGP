@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-resident-20260927-r1_sanitize/mhgp9_q34_filtered_resident",
+    "--gate",
+    "--cuda"
+  ],
+  "ended_epoch": 1790498061.1968725,
+  "exit_code": 2,
+  "group_closed": true,
+  "name": "refuse_sanitize_stub",
+  "pid": 287361,
+  "started_epoch": 1790498061.178729,
+  "stderr_sha256": "38239fd11ad7033956c516a8d8895ca443820e04bdf3410367b7fea2ab7ad99a",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": null
+}

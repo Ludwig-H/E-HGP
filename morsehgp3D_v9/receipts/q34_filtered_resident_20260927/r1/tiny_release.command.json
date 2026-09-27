@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-resident-20260927-r1_release/mhgp9_q34_filtered_resident",
+    "--frame",
+    "/workspaces/E-HGP/build/v9-audit-q34-resident-20260927-r1_release/tiny_artificial.u32",
+    "--qr",
+    "7",
+    "--q",
+    "7",
+    "--workers",
+    "4"
+  ],
+  "ended_epoch": 1790498030.3227284,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "tiny_release",
+  "pid": 285583,
+  "started_epoch": 1790498030.3201768,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "3561a41aabc6224df0dc933461ad0c1d37d0a2622be6113a50880cf350065cc6",
+  "timeout_seconds": null
+}

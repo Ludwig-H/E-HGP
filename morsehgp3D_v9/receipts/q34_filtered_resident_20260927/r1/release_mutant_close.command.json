@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-resident-20260927-r1_release/mutant_close",
+    "--gate"
+  ],
+  "ended_epoch": 1790498097.1191208,
+  "exit_code": 2,
+  "group_closed": true,
+  "name": "release_mutant_close",
+  "pid": 288268,
+  "started_epoch": 1790498097.1165583,
+  "stderr_sha256": "261eafaa17f609146d65ba8c73f2776e19634368b1dca6f57a585d2b67a698ef",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": null
+}

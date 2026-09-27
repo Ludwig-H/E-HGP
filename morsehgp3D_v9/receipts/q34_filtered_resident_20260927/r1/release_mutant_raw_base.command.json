@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-resident-20260927-r1_release/mutant_raw_base",
+    "--gate"
+  ],
+  "ended_epoch": 1790498104.9827125,
+  "exit_code": 2,
+  "group_closed": true,
+  "name": "release_mutant_raw_base",
+  "pid": 288340,
+  "started_epoch": 1790498104.9797823,
+  "stderr_sha256": "261f4ad691e95174304695e499f413a5db75bedeef2a6ad7120d98f1441acadb",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": null
+}

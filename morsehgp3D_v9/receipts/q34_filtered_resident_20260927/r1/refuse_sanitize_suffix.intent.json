@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-resident-20260927-r1_sanitize/mhgp9_q34_filtered_resident",
+    "--gate",
+    "--q",
+    "7tail"
+  ],
+  "name": "refuse_sanitize_suffix",
+  "started_epoch": 1790498061.105122,
+  "timeout_seconds": null
+}

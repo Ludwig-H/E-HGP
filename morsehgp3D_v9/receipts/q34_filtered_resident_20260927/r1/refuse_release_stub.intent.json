@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-resident-20260927-r1_release/mhgp9_q34_filtered_resident",
+    "--gate",
+    "--cuda"
+  ],
+  "name": "refuse_release_stub",
+  "started_epoch": 1790498030.3471572,
+  "timeout_seconds": null
+}

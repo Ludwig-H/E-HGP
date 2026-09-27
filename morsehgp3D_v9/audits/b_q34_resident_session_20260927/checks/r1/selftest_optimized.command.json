@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_resident_session_20260927/selftest.py"
+  ],
+  "elapsed_seconds": 2.1000642420003715,
+  "exit_code": 0,
+  "name": "selftest_optimized",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "d3bd339f4db60f796f72bfd7609a447d7f82afd0bc42207653ec788db4365bd1"
+}

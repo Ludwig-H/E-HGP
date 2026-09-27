@@ -1,0 +1,114 @@
+{
+  "CUDA_compiled": false,
+  "GCP_used": false,
+  "commands": 50,
+  "gate": {
+    "arena_gaps": 36,
+    "cases": 85,
+    "closed": 3573,
+    "cuda_executed": false,
+    "cuda_runs": 0,
+    "empty": 54,
+    "fallback_survivors": 4041,
+    "fallbacks": 4233,
+    "mode": "gate",
+    "pair_waves": 25536,
+    "planned": 189,
+    "pool_lane_reduced": 312,
+    "pool_rejected": 537,
+    "portable_runs": 255,
+    "queries": 75990,
+    "raw_holes": 1833,
+    "rectangle_waves": 3173,
+    "rejections": 276,
+    "reordered": 282,
+    "schema": "mhgp9_q34_filtered_resident_v1",
+    "source_gaps": 1833,
+    "status": "passed",
+    "survivors": 29901,
+    "zero_output": 3
+  },
+  "injected_portable_failures": [
+    {
+      "cause": "resident.rectangle_stack_failure",
+      "name": "release_fault_rectangle"
+    },
+    {
+      "cause": "resident.pair_stack_failure",
+      "name": "release_fault_pair"
+    },
+    {
+      "cause": "resident.rectangle_stack_failure",
+      "name": "sanitize_fault_rectangle"
+    },
+    {
+      "cause": "resident.pair_stack_failure",
+      "name": "sanitize_fault_pair"
+    }
+  ],
+  "mutants": [
+    {
+      "cause": "resident_gate.rectangle_masks",
+      "name": "release_mutant_close"
+    },
+    {
+      "cause": "resident_gate.compact_identity",
+      "name": "release_mutant_raw_base"
+    },
+    {
+      "cause": "resident_gate.refusal_missing",
+      "name": "release_mutant_owner"
+    }
+  ],
+  "scope": "portable_resident_seam_only_no_GPU_no_FULL",
+  "status": "PASS",
+  "tiny": {
+    "E": 63,
+    "E3": 63,
+    "E4": 59,
+    "P": 63,
+    "P3": 63,
+    "P4": 59,
+    "Q_actual": 7,
+    "Q_requested": 7,
+    "Qr_requested": 7,
+    "R": 65,
+    "R_live": 63,
+    "S": 63,
+    "arena_owned_peak_bound": 0,
+    "before_arena_release_bytes": 4584,
+    "cuda_executed": false,
+    "decision_retained_bytes": 2233,
+    "device": "portable_exact_predicates",
+    "digest_u64": 4611423470994764243,
+    "fallbacks": 63,
+    "input_hash_u64": 103698110648986415,
+    "k": 5,
+    "mode": "frame",
+    "n": 12,
+    "pair_device_bytes": 0,
+    "pair_download_bytes": 0,
+    "pair_upload_bytes": 0,
+    "physical_queries": 63,
+    "planned": 0,
+    "prepared_retained_bytes": 4584,
+    "raw_pairs": 65,
+    "raw_q3": 65,
+    "raw_q4": 64,
+    "rectangle_device_bytes": 0,
+    "rectangle_download_bytes": 0,
+    "rectangle_upload_bytes": 0,
+    "rectangle_visits": 904,
+    "rectangle_waves": 10,
+    "reference_workers": 4,
+    "resident_device_bytes": 0,
+    "s": 8,
+    "schema": "mhgp9_q34_filtered_resident_v1",
+    "status": "passed",
+    "temporary_input_bytes": 2172,
+    "visits": 869,
+    "waves": 9,
+    "workers_arena": 4,
+    "workers_front": 1
+  }
+}

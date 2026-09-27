@@ -2,6 +2,19 @@
 
 Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 
+Nouveau raccord implémenté : [rectangles filtrés et index résident](docs/RACCORD_RESIDENT_Q34_20260927.md).
+50 commandes locales Release/sanitizers passent ; protocole G4 W4/W48
+qualifié hors cloud. Le filtre rectangle ne sera plus recalculé en CPU
+après sa décision GPU. CUDA et gain réel restent à mesurer ; moteur inchangé.
+
+Audit complémentaire du 27 septembre : [q34 hors S2](audits/b_q34_outer_ledger_20260927/README.md),
+[construction FULL parallèle](audits/b_full_construction_parallel_20260927/README.md)
+et [contrat des rectangles filtrés](audits/b_q34_filtered_contract_review_20260927/README.md).
+La capture historique laisse386–390ms q34 hors S2 ; le port suivant doit
+éviter le recalcul CPU des rectangles, sans limiter le chantier à S2.
+Pour FULL, commencer par exporter les vrais blocs/cibles avant de remplacer
+leur construction chronologique. Propositions, pas nouveaux gains mesurés.
+
 Suite close du 27 septembre : [vrais S2, CUDA et chemin critique](docs/VAGUES_REELLES_ET_CHEMIN_CRITIQUE_20260927.md).
 Le consommateur par vagues passe maintenant aussi les tests CUDA sur G4.
 Trame sans sol entière : mêmes survivants,35ms de vagues, mais préparation

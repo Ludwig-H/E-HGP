@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-resident-20260927-r1_sanitize/fault_pair",
+    "--gate"
+  ],
+  "ended_epoch": 1790498089.3229537,
+  "exit_code": 2,
+  "group_closed": true,
+  "name": "sanitize_fault_pair",
+  "pid": 288201,
+  "started_epoch": 1790498089.2986114,
+  "stderr_sha256": "3ce16ecce4a792f98fb97d55b9ebb41bc5003b5565a82e6bde56a2bd1304f2c5",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": null
+}

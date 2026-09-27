@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-resident-20260927-r1_sanitize/mhgp9_q34_filtered_resident",
+    "--gate",
+    "--cuda"
+  ],
+  "name": "refuse_sanitize_stub",
+  "started_epoch": 1790498061.178729,
+  "timeout_seconds": null
+}

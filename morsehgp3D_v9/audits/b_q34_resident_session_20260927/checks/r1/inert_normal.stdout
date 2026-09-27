@@ -1,0 +1,1 @@
+{"schema": "mhgp9_q34_resident_session_v1", "status": "inert", "GCP_used": false, "FULL_executed": false, "target": {"project": "devpod-gpu-exploration", "zone": "us-central1-b", "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35"}, "useful_seconds": 360, "guest_minutes": 30}

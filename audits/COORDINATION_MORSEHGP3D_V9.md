@@ -6689,3 +6689,25 @@ expansion, puis front GPU compact et FULL événementiel tous ordres.
 Les notes d'audit q4 précisent le transport futur et son plafond de gain ;
 le [plan de reprise](../morsehgp3D_v9/docs/REPRISE_DEVELOPPEUR_IDS_Q3_20260926.md)
 fixe les invariants de témoins disjoints, F, travail résiduel et tests requis.
+
+### 27 septembre — couture résidente et FULL hors encodage
+
+Reprise dans le worktree persistant `build/v9-resume-20260927`, base
+`a7e80d7f9`, aucun WIP du worktree racine touché. Dernière session G4
+close : consommateur q34 exact,35ms de vagues mais préparationCPU9,9s,
+pas de gain net S2 ; VM arrêtée et même génération vérifiée.
+
+Le [contrat suivant](../morsehgp3D_v9/audits/b_q34_filtered_contract_review_20260927/README.md)
+interdit de refaire en CPU la géométrie des rectangles déjà filtrés.
+Décision opaque, compacts vivants, sidecar R et masses P/E séparées ;
+le prototype résident est maintenant qualifié en portable :50commandes,
+85cas×3configurations par build, Release/sanitizers et lecteurs normal/−O.
+Pas encore de compilation CUDA ou de mesure G4 de ce nouveau raccord.
+Root seul pilote la prochaine session gardée W4/W48, après publication.
+
+Les nouveaux audits [q34 extérieur](../morsehgp3D_v9/audits/b_q34_outer_ledger_20260927/README.md)
+et [FULL](../morsehgp3D_v9/audits/b_full_construction_parallel_20260927/README.md)
+rejouent la capture historique :386–390ms hors S2,252–256ms de tour hors
+encodage. Prochain morceau FULL : manifeste de tous les blocs/cibles,
+pas seulement les drafts ; ancres, événements muets et contributions
+datées conservés. Pas de nouveaux gains GPU par ces seules analyses.
