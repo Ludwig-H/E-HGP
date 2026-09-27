@@ -1,0 +1,79 @@
+{
+  "GCP_used": false,
+  "adapter_sha256": "f2c2fa26d47fc8425a2a4a4d313d63d16e104fb8ebcd6b3130a1c0aa80713300",
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_direct_bands_20260927/run.py",
+        "--readback",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/q34_direct_bands_20260927/r2"
+      ],
+      "exit_code": 0,
+      "name": "normal",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "3a219cf6cafa2c2634001a0f74b2db6ff6896a2a04312ae842739b5036a80263"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_direct_bands_20260927/run.py",
+        "--readback",
+        "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/receipts/q34_direct_bands_20260927/r2"
+      ],
+      "exit_code": 0,
+      "name": "optimized",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "3a219cf6cafa2c2634001a0f74b2db6ff6896a2a04312ae842739b5036a80263"
+    }
+  ],
+  "frozen_harness_sha256": "2ad9af358281348d1004ea37c1b76998344ebd06d0f8b133d07da04d450f94fd",
+  "mutations": [
+    {
+      "cause": "complete command inventory",
+      "name": "missing_command",
+      "rejected": true
+    },
+    {
+      "cause": "command recipe/closure",
+      "name": "wrong_argv",
+      "rejected": true
+    },
+    {
+      "cause": "command recipe/closure",
+      "name": "wrong_exit",
+      "rejected": true
+    },
+    {
+      "cause": "command recipe/closure",
+      "name": "open_group",
+      "rejected": true
+    },
+    {
+      "cause": "LIVE dependency closure",
+      "name": "wrong_source",
+      "rejected": true
+    },
+    {
+      "cause": "recipe/input mapping",
+      "name": "wrong_input",
+      "rejected": true
+    },
+    {
+      "cause": "closed local capture",
+      "name": "false_gpu",
+      "rejected": true
+    },
+    {
+      "cause": "closed local capture",
+      "name": "unclosed_capture",
+      "rejected": true
+    }
+  ],
+  "runner_sha256": "3165f540438340a23792b0c26217b20bc0eec07635c6f661a7acdffa8ff249e5",
+  "self_sha256": "2ad9af358281348d1004ea37c1b76998344ebd06d0f8b133d07da04d450f94fd",
+  "status": "PASS"
+}

@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-seam-20260927-r1/sanitize/mhgp9_q34_batch_seam"
+  ],
+  "ended_epoch": 1790489444.5523784,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "sanitize_gate",
+  "pid": 65897,
+  "started_epoch": 1790489426.182864,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "311c1f0edeac5023e0edbae791ef7f13c6cf0bce58d93a5384c2c2d1f92e2289",
+  "timeout_seconds": 90
+}

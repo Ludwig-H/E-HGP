@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-seam-20260927-r1/release/mhgp9_q34_batch_seam",
+    "lose-implicit"
+  ],
+  "ended_epoch": 1790489421.411358,
+  "exit_code": 1,
+  "group_closed": true,
+  "name": "release_lose-implicit",
+  "pid": 65745,
+  "started_epoch": 1790489421.2636137,
+  "stderr_sha256": "069edf7c521ce3fb32d76cc562b6655309fbe8caf9962904a41fca572ce1bb62",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": 90
+}

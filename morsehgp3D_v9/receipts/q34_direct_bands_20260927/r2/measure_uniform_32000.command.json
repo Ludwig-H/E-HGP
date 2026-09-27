@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-direct-bands-r2-20260927_release/mhgp9_audit_q34_direct_bands",
+    "--synthetic",
+    "uniform",
+    "32000",
+    "5",
+    "8"
+  ],
+  "ended_epoch": 1790489685.8379292,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "measure_uniform_32000",
+  "pid": 71314,
+  "started_epoch": 1790489652.762934,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "2ca54012f35e4890370cc81d765cff97079719caab08e97741e861582a5c0364",
+  "timeout_seconds": null
+}

@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-audit-q34-seam-20260927-r1/release",
+    "--parallel",
+    "2"
+  ],
+  "name": "release_build",
+  "started_epoch": 1790489415.0500138,
+  "timeout_seconds": 90
+}

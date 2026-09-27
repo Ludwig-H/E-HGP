@@ -1,5 +1,11 @@
 # Reprise du 27 septembre : publier les pistes vérifiées, conserver les limites
 
+Suite publiée : [bandes directement construites, raccord ordonné et
+encodeur structurel FULL](PROTOTYPES_DIRECTS_ET_FULL_20260927.md).
+Le dernier paragraphe ci-dessous décrit la perte constatée **avant** cette
+reconstruction ; l'encodeur est maintenant retesté avec de nouveaux reçus.
+Ce document conserve le périmètre du premier lot du 27 septembre.
+
 Base `ddf4776d7`, grille entière 1 mm, objectif tour **FULL K1..5 explicite
 en 100 ms sur G4**, sans sol prioritaire. Exploration hors registre,
 `public_status=not_claimed`. Cette tranche publie du code de prototype et

@@ -2,7 +2,14 @@
 
 Ouverture demandée le 22 septembre 2026, sur `main` uniquement.
 
-Dernière reprise, 27 septembre : [bilan et décisions de développement](docs/REPRISE_DEV_20260927.md).
+Dernière tranche du 27 septembre : [bandes directes et encodeur FULL](docs/PROTOTYPES_DIRECTS_ET_FULL_20260927.md).
+La préparation des bandes ne construit plus les anciennes cellules ; les
+survivants ordonnés passent une porte de raccord native. L'encodeur
+structurel par préfixes/incidences retrouve les tableaux et refus actuels.
+Prototypes CPU testés, pas encore intégrés au moteur : aucun nouveau chrono
+FULL/G4 ni contrat 100 ms. Les reçus et contre-audits sont publiés.
+
+Reprise précédente du même jour : [bilan et décisions de développement](docs/REPRISE_DEV_20260927.md).
 Bandes q34 vérifiées (descripteurs LiDAR 34,810→4,913 Mo, pas encore de
 gain FULL) et nouvelle G4 SPOT close : le filtre diamétral économise
 environ 53 ms à chaud, chaîne K5 à 923 ms sur une trame sans sol.

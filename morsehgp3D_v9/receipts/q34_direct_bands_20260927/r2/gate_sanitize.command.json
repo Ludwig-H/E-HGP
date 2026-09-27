@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-direct-bands-r2-20260927_sanitize/mhgp9_audit_q34_direct_bands",
+    "--gate"
+  ],
+  "ended_epoch": 1790489607.8331792,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "gate_sanitize",
+  "pid": 69177,
+  "started_epoch": 1790489607.0713208,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "6988bbd3028bd60e109e41ccec3d0b5560e8aad5b50dfbf1916fbe661bfa283f",
+  "timeout_seconds": null
+}

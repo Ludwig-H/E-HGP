@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-direct-bands-20260927_release/mhgp9_audit_q34_direct_bands",
+    "--mutant",
+    "overlap"
+  ],
+  "ended_epoch": 1790489324.3457224,
+  "exit_code": 1,
+  "group_closed": true,
+  "name": "mutant_release_overlap",
+  "pid": 154,
+  "started_epoch": 1790489324.3433204,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "f2ee0cd0f240f02191c6080724bf52f9bb9dda27ab610ca67e7abba208949a4d",
+  "timeout_seconds": null
+}

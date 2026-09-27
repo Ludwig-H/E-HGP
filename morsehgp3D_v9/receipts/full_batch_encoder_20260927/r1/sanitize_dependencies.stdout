@@ -1,0 +1,16 @@
+gate: \
+  /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_batch_encoder_20260927/gate.cpp \
+  /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_batch_encoder_20260927/encode.hpp \
+  /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/full_coverage_certificate.hpp \
+  /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/full_certificate.hpp \
+  /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/../lanes/keys.hpp \
+  /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/../lanes/../core/device.hpp \
+  /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/../lanes/../core/intmath.hpp \
+  /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/../lanes/../core/types.hpp \
+  /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/../lanes/level.hpp \
+  /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/../lanes/../core/wide.hpp \
+  /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/../lanes/../core/mutants.hpp \
+  /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/../parallel/pool.hpp \
+  /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/../parallel/../../common/raw_vector.hpp \
+  /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/../parallel/../core/mutants.hpp \
+  /workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/tower/forest/../parallel/../core/types.hpp

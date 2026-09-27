@@ -1,5 +1,27 @@
 # Passation v9
 
+## Bandes directes et encodeur FULL reconstruits — 27 septembre, suite
+
+Lire [la nouvelle tranche](docs/PROTOTYPES_DIRECTS_ET_FULL_20260927.md)
+avant les paragraphes historiques. Trois dossiers de prototypes qualifiés :
+`b_q34_direct_bands_20260927`, `b_q34_batch_seam_20260927` et
+`b_full_batch_encoder_20260927`, avec reçus et contrelecture FULL séparée.
+Le brouillon FULL perdu est désormais reconstruit et testé, sans hériter
+des anciens binaires. 6 838 entrées et deux calendriers par build,
+mêmes tableaux explicites et premier motif de refus, trois mutants.
+
+Le plan direct ne paie plus les anciennes cellules. Trois trames sans sol
+K5 : préparations CPU ancien/nouveau ≈975→638, 643→432, 1 122→740 ms ;
+pas un chrono moteur ni une attribution causale aux seules bandes.
+La porte de raccord conserve exactement l'ordre et les masques natifs sur
+576 configurations. Au port, restaurer l'ordre avant S3 et séparer P logique
+d'E effectivement testé. Allocations par rectangle et arène GPU restent
+à traiter. L'encodeur est scalaire, sans verticales ni génération du draft.
+
+Moteur inchangé dans ce lot, GCP non utilisé. Dernier chrono G4 FULL reste
+environ 923 ms K5 sur 00 sans sol ; 100 ms et sous-quadratique global
+non acquis. Ne pas écraser les nouvelles captures ni leurs builds clos.
+
 ## Reprise et publication DEV — 27 septembre
 
 Lire [le bilan actuel](docs/REPRISE_DEV_20260927.md) avant les tranches

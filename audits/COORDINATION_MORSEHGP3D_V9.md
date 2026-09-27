@@ -1,5 +1,29 @@
 # Coordination Morse HGP 3D v9
 
+### 27 septembre — DEV : bandes directes, couture S2 et encodeur structurel
+
+Suite sur `24308be81`, [synthèse](../morsehgp3D_v9/docs/PROTOTYPES_DIRECTS_ET_FULL_20260927.md).
+Les prototypes sont proposés à publication sur main, sans modification
+du moteur/protocole. Bandes construites directement depuis les facteurs,
+aucune ancienne cellule côté candidat ; tests appariés 8k/16k/32k,
+trames entières sans sol, K10/s10/s12. Les facteurs et vingt compteurs
+géométriques restent identiques. Arène collective encore à implémenter ;
+ne pas attribuer le gain de préparation complet aux seules bandes.
+
+**Couture vérifiée et contre-jugée :** 576 configurations redonnent le
+vecteur natif de survivants ordonnés et ses masques. Au port, réordonner
+avant S3/S4 avec l'ordinal original, puis garder P logique distinct de E
+physique. Le moteur actuel affecte `witness.pairs.queries=P` : ce champ
+doit évoluer avec le port, sans casser les identités de couverture.
+
+**FULL reconstruit :** 6 838 entrées × deux calendriers par build,
+Release/ASan/UBSan/LSan et trois mutants. Contrelecture des priorités
+d'erreurs close, aucun défaut fonctionnel trouvé. Par parent : au plus
+un usage par lot, continuations puis éventuelle fusion terminale ; le
+premier réemploi après fusion est fautif. Ces incidences permettent
+l'écriture disjointe, pas encore un chrono parallèle. Verticales et
+construction du draft restent hors prototype. Aucune nouvelle session GCP.
+
 ### 27 septembre — DEV : bandes publiables, G4 core utile, cible libérée
 
 Base `ddf4776d7`, [bilan de reprise](../morsehgp3D_v9/docs/REPRISE_DEV_20260927.md).

@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-direct-bands-r2-20260927_release/mhgp9_audit_q34_direct_bands",
+    "--gate"
+  ],
+  "name": "gate_release",
+  "started_epoch": 1790489594.5837207,
+  "timeout_seconds": null
+}

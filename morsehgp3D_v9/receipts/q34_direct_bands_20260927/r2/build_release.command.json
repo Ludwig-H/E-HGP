@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-audit-q34-direct-bands-r2-20260927_release",
+    "--target",
+    "mhgp9_audit_q34_direct_bands",
+    "-j",
+    "2"
+  ],
+  "ended_epoch": 1790489594.5831268,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "build_release",
+  "pid": 68522,
+  "started_epoch": 1790489589.3922496,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "92d046d1cde9b422f834584e9727639414696eee3a629e9d158c8b56cb4a6641",
+  "timeout_seconds": null
+}

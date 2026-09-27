@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-direct-bands-r2-20260927_release/mhgp9_audit_q34_direct_bands",
+    "--synthetic",
+    "clusters",
+    "32000",
+    "5",
+    "8"
+  ],
+  "ended_epoch": 1790489730.3196821,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "measure_clusters_32000",
+  "pid": 73595,
+  "started_epoch": 1790489706.7750545,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "29c30cb5a2e8d1330838c5f82deeca1a8c78d541a3dfb6901bfdb24c10d1254d",
+  "timeout_seconds": null
+}

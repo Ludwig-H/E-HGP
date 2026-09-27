@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-audit-q34-seam-20260927-r1/sanitize",
+    "--parallel",
+    "2"
+  ],
+  "ended_epoch": 1790489426.1819527,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "sanitize_build",
+  "pid": 65806,
+  "started_epoch": 1790489421.9826858,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "f02945ac5ef07490881e92f742885901233737e5e6d04a0871f2cd55eb965598",
+  "timeout_seconds": 90
+}

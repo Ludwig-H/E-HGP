@@ -1,0 +1,23 @@
+{
+  "argv": [
+    "cmake",
+    "-S",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_direct_bands_20260927",
+    "-B",
+    "/workspaces/E-HGP/build/v9-audit-q34-direct-bands-r2-20260927_release",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_CXX_COMPILER=c++",
+    "-DCMAKE_CXX_FLAGS=-Wall -Wextra -Wpedantic -Werror",
+    "-DMHGP9_SOURCE_ROOT=/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9",
+    "-DMHGP9_GEN_LIBRARY=/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/libmhgp9_gen.a"
+  ],
+  "ended_epoch": 1790489589.3917015,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "configure_release",
+  "pid": 68475,
+  "started_epoch": 1790489589.0076137,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "46330fe90763ece0d2c461f464cb900f791221d404df7247530230f1c5017d5a",
+  "timeout_seconds": null
+}

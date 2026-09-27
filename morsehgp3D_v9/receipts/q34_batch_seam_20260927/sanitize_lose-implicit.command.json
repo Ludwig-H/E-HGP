@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-seam-20260927-r1/sanitize/mhgp9_q34_batch_seam",
+    "lose-implicit"
+  ],
+  "ended_epoch": 1790489448.7589107,
+  "exit_code": 1,
+  "group_closed": true,
+  "name": "sanitize_lose-implicit",
+  "pid": 66494,
+  "started_epoch": 1790489446.8373978,
+  "stderr_sha256": "069edf7c521ce3fb32d76cc562b6655309fbe8caf9962904a41fca572ce1bb62",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": 90
+}

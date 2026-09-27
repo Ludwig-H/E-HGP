@@ -1,0 +1,13 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-direct-bands-r2-20260927_release/mhgp9_audit_q34_direct_bands",
+    "--synthetic",
+    "clusters",
+    "8000",
+    "5",
+    "8"
+  ],
+  "name": "measure_clusters_8000",
+  "started_epoch": 1790489692.8267093,
+  "timeout_seconds": null
+}

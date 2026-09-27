@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-audit-q34-direct-bands-r2-20260927_sanitize/mhgp9_audit_q34_direct_bands",
+    "--mutant",
+    "mask6"
+  ],
+  "name": "mutant_sanitize_mask6",
+  "started_epoch": 1790489607.8476214,
+  "timeout_seconds": null
+}

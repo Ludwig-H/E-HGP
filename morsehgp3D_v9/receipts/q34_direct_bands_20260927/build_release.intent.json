@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-audit-q34-direct-bands-20260927_release",
+    "--target",
+    "mhgp9_audit_q34_direct_bands",
+    "-j",
+    "2"
+  ],
+  "name": "build_release",
+  "started_epoch": 1790489318.9048157,
+  "timeout_seconds": null
+}

@@ -1,0 +1,1 @@
+{"schema":"mhgp9_full_batch_encoder_v1","status":"passed","scope":"structural_flat_only","cases":6838,"schedules":2,"comparisons":13676,"accepted":404,"rejected":6434,"nodes":13780,"parents":13131,"contributions":16500,"digest_u64":2613309417252955929,"seed":20260927,"GCP_used":false,"threads_executed":1}

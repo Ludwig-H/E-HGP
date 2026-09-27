@@ -1,5 +1,23 @@
 # État courant des audits v9
 
+**27 septembre — suite : bandes directes, raccord et encodeur FULL** :
+[synthèse pour le développeur](../docs/PROTOTYPES_DIRECTS_ET_FULL_20260927.md).
+Le [plan direct](b_q34_direct_bands_20260927/README.md) supprime réellement
+les anciennes cellules ; capacités complètes LiDAR00 125,200→101,118 Mo.
+Les préparations appariées sont plus rapides dans les prototypes CPU,
+sans attribution exclusive aux bandes ni gain FULL/GPU revendiqué.
+Le [raccord](b_q34_batch_seam_20260927/README.md) garde exactement les
+survivants ordonnés et leurs masques sur 576 cas : restaurer l'ordre avant
+S3, distinguer P logique et E ponctuel dans les compteurs du futur port.
+
+L'[encodeur FULL structurel](b_full_batch_encoder_20260927/README.md) et
+sa [contrelecture](b_full_batch_review_20260927/README.md) ferment 6 838
+entrées × deux calendriers par build, mêmes tableaux et premier refus,
+Release/sanitizers/trois mutants. Aucun contrôle live supprimé ; préfixes
+et incidences le remplacent. Prototype scalaire, ni threads/GPU, ni
+verticales/draft amont, ni tour complète. Moteur inchangé, GCP non utilisé.
+Les limites de croissance restent publiées ; E amas ×3,724/×3,942 inchangé.
+
 **27 septembre — publication des prototypes et G4 close** :
 [bilan DEV](../docs/REPRISE_DEV_20260927.md),
 [bandes q34](b_q34_bands_20260927/README.md),

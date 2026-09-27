@@ -95,6 +95,14 @@ GPU, mais ne donne pas de gain mono sur les cas testés.
 
 ## Voies q3/q4
 
+27 septembre, [raccord des bandes](../audits/b_q34_batch_seam_20260927/README.md) :
+passer les survivants dans l'ordre des classes au batch natif est faux ;
+208 fixtures exigent le retour à l'ordre original avant S3. Remplacer
+partout P par E casserait aussi les identités de couverture ; inversement,
+garder `queries=P` masquerait la baisse du travail ponctuel. Les bandes
+directes restent une piste utile, pas un nouveau rejet ni une réduction
+du nombre de survivants après S2.
+
 Contre-épreuve du 26 septembre : le [Pool par facteurs sur vrais rectangles](../receipts/q34_factor_plan_20260926/README.md)
 retire beaucoup de paires mais ne résout pas à lui seul le carré : sur
 amas 8k/16k/32k, E=2,09/7,79/30,70 M (dernier ×3,942). Sur LiDAR il reste
@@ -129,6 +137,13 @@ autres sélections restent ouvertes, pas fermées par cet essai.
 | Exposant par relation parent/enfant comme verdict de croissance | un compteur exactement linéaire reçoit 0,78 à 1,27 |
 
 ## Parallélisme, GPU, tour
+
+27 septembre, [encodeur par incidences](../audits/b_full_batch_encoder_20260927/README.md) :
+supprimer le contrôle des parents vivants n'est pas nécessaire pour une
+écriture parallèle. Le garder sous forme d'incidences/préfixes conserve
+les décisions ; rejeter rétroactivement une fusion parce qu'un réemploi
+ultérieur existe donnerait le mauvais premier refus. Le prototype éprouve
+cette règle mais ne fournit pas encore de gain temporel ni de GPU.
 
 | piste | fermée par |
 | --- | --- |
