@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-survivors-compare-20260927-r1_cuda",
+    "--target",
+    "mhgp9_survivors_compare",
+    "mhgp9_survivors_device_gate",
+    "-j2"
+  ],
+  "ended_epoch": 1790503791.0457401,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "build",
+  "pid": 231,
+  "started_epoch": 1790503765.8009164,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "c8a38b89db73c3c566607ab4e3fde056dfb2b21462ae5f255a9f63f8e5212b07",
+  "timeout_seconds": null
+}

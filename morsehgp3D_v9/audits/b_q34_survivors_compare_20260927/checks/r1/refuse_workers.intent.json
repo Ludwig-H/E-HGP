@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-survivors-compare-20260927-r1_cuda/mhgp9_survivors_compare",
+    "--frame",
+    "missing.u32",
+    "--workers",
+    "8",
+    "--first",
+    "baseline",
+    "--cuda"
+  ],
+  "name": "refuse_workers",
+  "started_epoch": 1790503791.1242447,
+  "timeout_seconds": null
+}

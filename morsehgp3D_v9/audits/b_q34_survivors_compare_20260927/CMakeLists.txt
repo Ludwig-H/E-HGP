@@ -1,0 +1,35 @@
+cmake_minimum_required(VERSION 3.20)
+project(mhgp9_survivors_compare LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+option(MHGP9_COMPARE_ENABLE_CUDA "Compile both frozen backends and the high-u64 device gate" OFF)
+set(MHGP9_RESIDENT_ENABLE_CUDA ${MHGP9_COMPARE_ENABLE_CUDA} CACHE BOOL "Frozen baseline CUDA selection" FORCE)
+add_subdirectory(../b_q34_filtered_resident_20260927 baseline EXCLUDE_FROM_ALL)
+get_filename_component(V9_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
+add_executable(mhgp9_survivors_compare probe.cpp
+  ../b_q34_filtered_resident_20260927/device_cpu.cpp
+  ../b_q34_resident_survivors_20260927/device_cpu.cpp)
+target_include_directories(mhgp9_survivors_compare PRIVATE "${V9_ROOT}/src" "${V9_ROOT}/src/gen" "${V9_ROOT}/tests/gen")
+target_compile_options(mhgp9_survivors_compare PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Wpedantic;-Werror>)
+find_package(Threads REQUIRED)
+if(MHGP9_GEN_LIBRARY)
+  target_link_libraries(mhgp9_survivors_compare PRIVATE "${MHGP9_GEN_LIBRARY}" Threads::Threads)
+else()
+  target_link_libraries(mhgp9_survivors_compare PRIVATE resident_gen Threads::Threads)
+endif()
+if(MHGP9_COMPARE_ENABLE_CUDA)
+  enable_language(CUDA)
+  find_package(CUDAToolkit REQUIRED)
+  target_sources(mhgp9_survivors_compare PRIVATE
+    ../b_q34_filtered_resident_20260927/device_cuda.cu
+    ../b_q34_resident_survivors_20260927/device_cuda.cu)
+  set_target_properties(mhgp9_survivors_compare PROPERTIES CUDA_STANDARD 17 CUDA_STANDARD_REQUIRED ON CUDA_ARCHITECTURES 120)
+  target_compile_options(mhgp9_survivors_compare PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-Wall,-Wextra>)
+  target_link_libraries(mhgp9_survivors_compare PRIVATE CUDA::cudart_static)
+  add_subdirectory(../b_q34_survivors_device_gate_20260927 device_gate EXCLUDE_FROM_ALL)
+else()
+  target_sources(mhgp9_survivors_compare PRIVATE
+    ../b_q34_filtered_resident_20260927/device_stub.cpp
+    ../b_q34_resident_survivors_20260927/device_stub.cpp)
+endif()

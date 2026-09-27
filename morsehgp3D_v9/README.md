@@ -6,6 +6,9 @@ Nouveau prototype qualifié localement : [tri résident des survivants](docs/TRI
 Accumulation en O(S+Q), tri GPU sur 64 bits, sortie compacte de 12 octets.
 26 commandes locales passent et CUDA compile ; cette variante n'a pas
 encore exécuté ses tests sur GPU. Moteur et chronos FULL inchangés.
+Le [comparateur apparié](audits/b_q34_survivors_compare_20260927/README.md)
+compile également : 52 lots/208 appels portables exacts, coûts complets et
+premiers appels CUDA distingués. Mesures G4 de cette comparaison à suivre.
 
 Nouveau port FULL : [manifeste et constructeur événementiel C++](docs/CONSTRUCTION_EVENEMENTIELLE_FULL_20260927.md).
 Le manifeste, le constructeur événementiel puis sa variante à identifiants

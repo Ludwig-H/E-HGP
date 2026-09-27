@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/cuda-12.9-local/bin/nvcc",
+    "-forward-unknown-to-host-compiler",
+    "--options-file",
+    "CMakeFiles/mhgp9_survivors_compare.dir/includes_CUDA.rsp",
+    "-O3",
+    "-DNDEBUG",
+    "-std=c++17",
+    "--generate-code=arch=compute_120,code=[compute_120,sm_120]",
+    "-Xcompiler=-Wall,-Wextra",
+    "-x",
+    "cu",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_filtered_resident_20260927/device_cuda.cu",
+    "-M"
+  ],
+  "name": "deps_3",
+  "started_epoch": 1790503762.5817668,
+  "timeout_seconds": null
+}

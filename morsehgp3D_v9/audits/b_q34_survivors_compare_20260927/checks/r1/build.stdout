@@ -1,0 +1,10 @@
+[ 33%] Building CXX object CMakeFiles/mhgp9_survivors_compare.dir/probe.cpp.o
+[ 33%] Building CXX object CMakeFiles/mhgp9_survivors_compare.dir/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_filtered_resident_20260927/device_cpu.cpp.o
+[ 50%] Building CXX object CMakeFiles/mhgp9_survivors_compare.dir/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_resident_survivors_20260927/device_cpu.cpp.o
+[ 66%] Building CUDA object CMakeFiles/mhgp9_survivors_compare.dir/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_filtered_resident_20260927/device_cuda.cu.o
+[ 83%] Building CUDA object CMakeFiles/mhgp9_survivors_compare.dir/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_resident_survivors_20260927/device_cuda.cu.o
+[100%] Linking CXX executable mhgp9_survivors_compare
+[100%] Built target mhgp9_survivors_compare
+[ 50%] Building CUDA object device_gate/CMakeFiles/mhgp9_survivors_device_gate.dir/device_gate.cu.o
+[100%] Linking CUDA executable mhgp9_survivors_device_gate
+[100%] Built target mhgp9_survivors_device_gate

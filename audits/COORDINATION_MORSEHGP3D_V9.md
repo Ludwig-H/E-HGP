@@ -1,5 +1,14 @@
 # Coordination Morse HGP 3D v9
 
+### 27 septembre — DEV : comparaison GPU appariée préparée localement
+
+[Comparateur](../morsehgp3D_v9/audits/b_q34_survivors_compare_20260927/README.md)
+figé après13commandes : CUDA compilé,52lots/208opérateurs portables égaux,
+1088dépendances/objets/options indirectes fermés, lecteurs normal/−O relus.
+Pas de GCP dans cette capture. ProtocoleG4 ABBA/BAAB en cours de préparation ;
+ne pas confondre propriétaire neuf et contexte neuf. Publication autorisée
+du prototype, moteur non activé ; prochains chronos comparatifs séparés.
+
 ### 27 septembre — DEV : porte CUDA haut-u64 prête, portée R1 précisée
 
 [Porte](../morsehgp3D_v9/audits/b_q34_survivors_device_gate_20260927/README.md) :

@@ -1,0 +1,9 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-survivors-compare-20260927-r1_cuda/mhgp9_survivors_compare",
+    "--gate"
+  ],
+  "name": "compare_gate",
+  "started_epoch": 1790503791.0462124,
+  "timeout_seconds": null
+}

@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-survivors-compare-20260927-r1_cuda/mhgp9_survivors_compare",
+    "--frame",
+    "missing.u32",
+    "--workers",
+    "4",
+    "--first",
+    "baseline"
+  ],
+  "ended_epoch": 1790503791.1238751,
+  "exit_code": 2,
+  "group_closed": true,
+  "name": "refuse_missing_cuda",
+  "pid": 1222,
+  "started_epoch": 1790503791.1216516,
+  "stderr_sha256": "009e322cc1fa916cd0c9840f1d4603a006c8151200e96a3279b8ef878b431cec",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": null
+}

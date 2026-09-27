@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-survivors-compare-20260927-r1_cuda",
+    "--target",
+    "mhgp9_survivors_compare",
+    "mhgp9_survivors_device_gate",
+    "-j2"
+  ],
+  "name": "build",
+  "started_epoch": 1790503765.8009164,
+  "timeout_seconds": null
+}

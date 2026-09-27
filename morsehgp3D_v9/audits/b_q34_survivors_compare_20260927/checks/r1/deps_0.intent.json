@@ -1,0 +1,22 @@
+{
+  "argv": [
+    "/usr/bin/c++",
+    "-I/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src",
+    "-I/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/src/gen",
+    "-I/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/tests/gen",
+    "-isystem",
+    "/workspaces/E-HGP/build/cuda-12.9-local/include",
+    "-O3",
+    "-DNDEBUG",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_survivors_compare_20260927/probe.cpp",
+    "-M"
+  ],
+  "name": "deps_0",
+  "started_epoch": 1790503762.2278829,
+  "timeout_seconds": null
+}

@@ -1,5 +1,15 @@
 # Passation v9
 
+## Comparateur S2 compilé avant G4 — 27 septembre
+
+[Harnais apparié](audits/b_q34_survivors_compare_20260927/README.md) clos :
+13 commandes, six TU, 1 088 dépendances pré-épinglées, deux binaires CUDA
+compilés sans exécution GPU. Porte portable52lots/208opérateurs et trois
+refus CLI ; lecteurs normal/−O contre-relus. ABBA/BAAB distinguent premier
+contexte et premier appel de chaque implémentation, sorties détruites entre
+passages. Anciennes sources et moteur inchangés ; pas encore de chrono G4
+de ce comparateur ni de gain. Protocole cloud distinct en préparation.
+
 ## Tri des survivants avant téléchargement — 27 septembre
 
 [Bilan](docs/TRI_RESIDENT_DES_SURVIVANTS_20260927.md).

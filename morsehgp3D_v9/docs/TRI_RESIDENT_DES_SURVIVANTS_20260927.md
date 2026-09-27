@@ -79,6 +79,17 @@ raccord sur G4, sur la même trame entière, avec mêmes P/E/S et sorties.
 Mesurer préparation, allocations, copies, tri, validation, conversion et
 destructions. Les champs de durée emboîtés ne se somment pas librement.
 
+Le [comparateur dédié](../audits/b_q34_survivors_compare_20260927/README.md)
+est maintenant compilé : 13 commandes closes, six unités de compilation,
+1 088 dépendances pré-épinglées, options indirectes/objets/archives fermés.
+Sa petite porte portable passe 52 lots et 208 opérateurs appariés ; lecteurs
+normal/−O contre-relus. Aucune exécution GPU à cette étape. Le protocole
+prévoit ABBA puis BAAB dans des processus distincts, pour W4 et W48, avec
+des propriétaires neufs à chaque passage. Seul le premier appel du processus
+paie un premier contexte CUDA ; le premier appel de chaque implémentation
+est aussi distingué. Chaque sortie est comparée puis détruite avant la
+suivante. Les chronos G4 et leur comparaison restent à produire.
+
 La sortie finale est encore un tableau hôte : le passage d'un propriétaire
 GPU directement à S3 reste à développer. Ce prototype ne remplace ni les
 autres étapes q3/q4 ni la construction FULL. Aucun gain G4 ou contrat

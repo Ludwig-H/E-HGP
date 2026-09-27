@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "cmake",
+    "-S",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_q34_survivors_compare_20260927",
+    "-B",
+    "/workspaces/E-HGP/build/v9-survivors-compare-20260927-r1_cuda",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
+    "-DMHGP9_COMPARE_ENABLE_CUDA=ON",
+    "-DMHGP9_GEN_LIBRARY=/workspaces/E-HGP/build/v9-q3-payload-integration-20260926/libmhgp9_gen.a",
+    "-DCMAKE_CUDA_COMPILER=/workspaces/E-HGP/build/cuda-12.9-local/bin/nvcc",
+    "-DCMAKE_CUDA_ARCHITECTURES=120"
+  ],
+  "ended_epoch": 1790503762.2022576,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "configure",
+  "pid": 80,
+  "started_epoch": 1790503758.8521347,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "016388d79bd2a43069ff6bc6c6be512b3709c0803f709c5a7726e9a271dcda0b",
+  "timeout_seconds": null
+}

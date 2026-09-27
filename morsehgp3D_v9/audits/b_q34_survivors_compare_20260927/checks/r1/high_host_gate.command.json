@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-survivors-compare-20260927-r1_cuda/device_gate/mhgp9_survivors_device_gate",
+    "--host-gate"
+  ],
+  "ended_epoch": 1790503791.1213114,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "high_host_gate",
+  "pid": 1221,
+  "started_epoch": 1790503791.1187656,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "211a120ab379fdabb47f5152957dfd857991d40e926bde53967f86ce68f05070",
+  "timeout_seconds": null
+}

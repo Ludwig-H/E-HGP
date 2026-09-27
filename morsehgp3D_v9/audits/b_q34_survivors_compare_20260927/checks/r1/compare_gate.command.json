@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-survivors-compare-20260927-r1_cuda/mhgp9_survivors_compare",
+    "--gate"
+  ],
+  "ended_epoch": 1790503791.1182992,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "compare_gate",
+  "pid": 356,
+  "started_epoch": 1790503791.0462124,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "3936bc85378525901948acd2b6ef17a37db35c3b51a813f9e533cd29d3929a4e",
+  "timeout_seconds": null
+}

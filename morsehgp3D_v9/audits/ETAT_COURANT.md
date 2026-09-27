@@ -1,5 +1,14 @@
 # État courant des audits v9
 
+**27 septembre — comparateur S2 prêt pour les mesures G4** :
+[harnais](b_q34_survivors_compare_20260927/README.md),13commandes closes,
+six TU/1088dépendances, options indirectes/objets/archives/binaries fermés.
+52lots/208opérateurs portables identiques, deux binaires CUDA compilés ;
+aucun GPU exécuté. Lecteurs normal/−O contre-relus. ABBA/BAAB par largeur,
+premiers appels contextuels et propres à chaque implémentation distingués,
+sorties détruites entre opérateurs. Prochaine sessionG4 distincte, pas encore
+de gain sur le témoin résident, encore moins sur le moteur FULL.
+
 **27 septembre — accumulation et tri des survivants : porte locale close** :
 [bilan](../docs/TRI_RESIDENT_DES_SURVIVANTS_20260927.md),
 [prototype](b_q34_resident_survivors_20260927/README.md).

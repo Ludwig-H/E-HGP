@@ -1,0 +1,1 @@
+{"schema":"mhgp9_survivors_device_gate_v1","status":"passed","mode":"host_fixture","cuda_executed":false,"cases":24,"refused":0,"items":642,"empty":6,"single":6,"empty_waves":1226,"high32":624,"high63":606,"boundary_inversions":594,"inversions":606,"growths":0,"growth_copy_bytes":0,"upload_bytes":0,"download_bytes":0,"peak_bytes":0}

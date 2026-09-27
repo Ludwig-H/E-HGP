@@ -1,0 +1,25 @@
+{
+  "CUDA_compiled": true,
+  "CUDA_executed": false,
+  "GCP_used": false,
+  "commands": 13,
+  "dependencies": 1088,
+  "gate": {
+    "S": 22408,
+    "cases": 52,
+    "cuda_executed": false,
+    "empty": 8,
+    "fallbacks": 11872,
+    "first_cuda_calls": 0,
+    "first_implementation_calls": 0,
+    "mode": "gate",
+    "operators": 208,
+    "planned": 440,
+    "queries": 26576,
+    "reordered": 224,
+    "schema": "mhgp9_survivors_compare_v1",
+    "status": "passed"
+  },
+  "status": "PASS",
+  "translation_units": 6
+}
