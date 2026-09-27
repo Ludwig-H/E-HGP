@@ -86,19 +86,56 @@ Elle ne prouve donc pas que tout le générateur LiDAR soit sous-quadratique.
 Aucune nouvelle mesure 8k/16k/32k, demi/quart de trame ou multi-scènes
 n'est revendiquée par ce lot. Les résidus q3/q4 difficiles restent ouverts.
 
+## Variante suivante qualifiée : identifiants stables, moins de structures
+
+La [variante min-label](../audits/b_full_a_min_label_20260927/README.md)
+implémente désormais la simplification proposée. Elle choisit comme
+identifiant d'une composante le plus ancien ordinal de ses sommets,
+pas un identifiant de point géométrique. Lorsqu'un contact ne fait que
+rejoindre une composante existante, cet identifiant reste le même.
+
+Cela permet de supprimer l'adjacence auxiliaire et son enracinement,
+la table des maxima de chemin et les chaînes de renvois. L'historique
+ne conserve que les naissances et fusions qui créent un nœud. Les
+contributions tardives restent explicitement datées ; une fusion sans
+contribution reste elle aussi conservée. Les blocs silencieux restent
+dans l'entrée et leurs ancres sont calculées : on ne les efface pas du
+problème mathématique.
+
+R1 ferme 17 commandes et 1 142 dépendances, Release et Clang
+ASan/UBSan/LSan. Les 376 rejeux natifs sont complétés par 74 rejeux
+abstraits et quatre rejeux de cas limites. Un parcours indépendant du
+graphe original vérifie 1 886 024 requêtes de coupe sur 227 graphes.
+Trois branches mutantes sont détectées. Les
+[contrôles indépendants](../audits/b_full_a_min_label_review_20260927/README.md)
+portent aussi sur les lecteurs normal/−O et leurs 29 corruptions ciblées.
+
+Sur le corpus géométrique, les 3 784 groupes ne demandent plus que
+3 368 entrées d'historique. Les 416 entrées omises correspondent à
+384 groupes entièrement silencieux et 32 continuations dont les
+contributions sont conservées. La capacité maximale observée des
+tableaux passe de 13 004 à 11 884 octets sur ce petit corpus et cette ABI.
+Ce n'est ni le pic RSS d'une trame, ni un gain chronométrique.
+
+La nouvelle représentation conserve un index d'ancêtres en O(V log V),
+les occurrences E, les ancres du catalogue et la sortie explicite.
+La construction reste séquentielle. Aucune réduction du travail q3/q4
+ni nouvelle borne en nombre de points n'est acquise par cette variante.
+
 ## Prochaine étape vers les 100 ms
 
-Ce premier constructeur C++ est encore séquentiel. Il sert à fixer et
-vérifier l'objet avant de paralléliser la forêt, l'enracinement, les
-requêtes, les préfixes et les écritures. Une
-[simplification mathématique séparée](../audits/b_full_a_events_review_20260927/NEXT_MIN_LABEL.md)
-propose de choisir le plus ancien ordinal de chaque composante : elle
-permettrait d'éviter le parcours d'enracinement, une table auxiliaire et
-les renvois intermédiaires. Ce n'est pas une capacité du prototype R1
-qualifié, ni un gain mesuré. Il faudra mesurer V/E/groupes/
+Ces constructeurs C++ sont encore séquentiels. Ils servent à fixer et
+vérifier l'objet avant de paralléliser la forêt, les requêtes, les préfixes
+et les écritures. La variante à identifiants stables a déjà supprimé
+l'enracinement et les renvois ; il faudra maintenant mesurer V/E/groupes/
 parents/contributions sur les vrais catalogues, ainsi que mémoire et
 temps de toutes ces étapes. Les parents d'événements, ceux du draft et
 les liens de la forêt finale sont comptés séparément.
+
+Une [proposition distincte](../audits/b_full_a_min_label_review_20260927/NEXT_HEAVY_LIGHT.md)
+permettrait aussi de remplacer l'index O(V log V) par un index O(V),
+avec des requêtes logarithmiques. Elle n'est ni implémentée ni mesurée ;
+la mesure sur les vrais catalogues doit précéder un nouveau choix de port.
 
 Ensuite seulement, réutiliser cet historique pour les verticales et
 raccorder la sortie explicite. Les populations, la banque et l'encodage

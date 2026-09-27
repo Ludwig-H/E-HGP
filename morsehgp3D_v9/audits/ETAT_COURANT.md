@@ -23,6 +23,14 @@ géométrie, croissanceLiDAR ou accélération FULL ; constructeur encore
 sériel, avant son port parallèle interne à K. B/C et moteur inchangés,
 aucun GCP dans cette qualification. Sources/reçus/builds figés.
 
+Suite min-label close : [prototype](b_full_a_min_label_20260927/README.md),
+[contre-audit](b_full_a_min_label_review_20260927/README.md).
+17commandes/1142dépendances Release/sanitizers ;376rejeux natifs et
+1886024requêtes de coupes sur227graphes. Historiques des seuls créateurs,
+CSR/DFS, tablemax et redirections supprimés, mêmes objets A complets.
+Pas de chronoLiDAR, de parallélisme nouveau ou de qualification FULL/G4.
+Mesurer les vrais catalogues avant le prochain choix d'index ou portGPU.
+
 **27 septembre — raccord résident, portable et première G4 clos** :
 [bilan](../docs/RACCORD_RESIDENT_Q34_20260927.md).
 50commandes Release/sanitizers,85cas×3configurations, mêmes sorties natives,

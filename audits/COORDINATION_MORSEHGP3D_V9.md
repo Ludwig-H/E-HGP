@@ -1,5 +1,16 @@
 # Coordination Morse HGP 3D v9
 
+### 27 septembre — DEV : variante FULL A à identifiants stables qualifiée
+
+[Bilan](../morsehgp3D_v9/docs/CONSTRUCTION_EVENEMENTIELLE_FULL_20260927.md).
+Forêt virtuelle de minima, pertes monotones et historiques des créateurs :
+suppression de CSR/DFS, tablemax et redirections. Les continuations gardent
+leurs contributions datées. R1 ferme17commandes/1142dépendances,
+376rejeux natifs et1886024requêtes de coupe indépendantes, Release/sanitizers.
+Mesure de petites capacités seulement, aucun chronoLiDAR/FULL ni GPU.
+GCP non utilisé. Sources/builds/reçu figés ; vrais V/E et coûts à mesurer
+avant substitution moteur. La piste d'index linéaire reste une proposition.
+
 ### 27 septembre — DEV : tri des survivants qualifié localement
 
 [Bilan](../morsehgp3D_v9/docs/TRI_RESIDENT_DES_SURVIVANTS_20260927.md).

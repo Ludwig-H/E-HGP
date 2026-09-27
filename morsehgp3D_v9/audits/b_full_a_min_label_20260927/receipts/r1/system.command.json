@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "uname",
+    "-a"
+  ],
+  "ended_epoch": 1790502168.2893646,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "system",
+  "pid": 391155,
+  "started_epoch": 1790502168.2869806,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "88f3550fba0ac84e8b5a3fd03552202247df72a629dff5219576ba6c2394f44d",
+  "timeout_seconds": null
+}

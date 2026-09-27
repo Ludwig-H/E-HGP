@@ -32,6 +32,17 @@ le nombre de points du générateur. Suite : vrais catalogues et profils
 V/E/G/parents/contributions, puis parallélisme interne ; B/C restent natifs.
 Moteur inchangé et GCP non utilisé dans ce lot. Sources/builds/reçus figés.
 
+Variante min-label désormais qualifiée séparément : R1 ferme 17 commandes,
+1 142 dépendances, 376 rejeux natifs, 74 abstraits/quatre frontières et
+1 886 024 requêtes de coupe indépendantes sur 227 graphes. Elle supprime
+CSR/DFS, table des maxima et redirections, sans perdre les continuations.
+Historiques : 3 368 pour 3 784 groupes ; capacités maximales observées
+11 884 octets contre 13 004 dans R1 événementiel sur le même petit corpus,
+pas pic RSS ou gain LiDAR. Table `up` O(V log V), DSU et tris sériels
+restent ; mesurer les vrais V/E avant port parallèle. Proposition d'index
+linéaire séparée, pas encore implémentée. Lecteurs normal/−O et leurs
+29 corruptions passent aussi en contrelecture indépendante.
+
 ## Raccord résident qualifié en portable et sur G4 — 27 septembre
 
 [Bilan et prochaine mesure](docs/RACCORD_RESIDENT_Q34_20260927.md).

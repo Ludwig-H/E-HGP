@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "python3",
+    "-B",
+    "-O",
+    "/workspaces/E-HGP/build/v9-resume-20260927/morsehgp3D_v9/audits/b_full_a_manifest_20260927/instrument.py",
+    "--check"
+  ],
+  "name": "instrument_optimized",
+  "started_epoch": 1790502168.331328,
+  "timeout_seconds": null
+}

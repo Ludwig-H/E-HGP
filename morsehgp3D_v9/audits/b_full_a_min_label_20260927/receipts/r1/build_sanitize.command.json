@@ -1,0 +1,20 @@
+{
+  "argv": [
+    "cmake",
+    "--build",
+    "/workspaces/E-HGP/build/v9-a-min-label-20260927-r1_sanitize",
+    "--target",
+    "mhgp9_full_a_min_label",
+    "-j",
+    "2"
+  ],
+  "ended_epoch": 1790502236.6952639,
+  "exit_code": 0,
+  "group_closed": true,
+  "name": "build_sanitize",
+  "pid": 392777,
+  "started_epoch": 1790502198.2808115,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "e2022bd57c1ba86054fb62e41541c8d71e8317e139f0d8bbfc2aff70c049e1d3",
+  "timeout_seconds": null
+}

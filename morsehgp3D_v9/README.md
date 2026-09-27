@@ -8,10 +8,12 @@ Accumulation en O(S+Q), tri GPU sur 64 bits, sortie compacte de 12 octets.
 encore exécuté ses tests sur GPU. Moteur et chronos FULL inchangés.
 
 Nouveau port FULL : [manifeste et constructeur événementiel C++](docs/CONSTRUCTION_EVENEMENTIELLE_FULL_20260927.md).
-Deux qualifications Release/sanitizers closes, mêmes parents, ancres,
-contributions et niveaux natifs sur376rejeux ; cas32parents inclus.
-Le constructeur est encore séquentiel, sans nouvelle géométrie ni gain
-FULL revendiqué. Il prépare le parallélisme à l'intérieur de chaque K.
+Le manifeste, le constructeur événementiel puis sa variante à identifiants
+stables sont qualifiés en Release/sanitizers : mêmes parents, ancres,
+contributions et niveaux natifs sur 376 rejeux ; cas à 32 parents inclus.
+La variante supprime plusieurs structures intermédiaires et passe aussi
+1,9 million de contrôles de coupes. Encore séquentielle, sans nouveau gain
+FULL revendiqué : prochaine mesure sur les vrais catalogues LiDAR.
 
 Nouveau raccord implémenté : [rectangles filtrés et index résident](docs/RACCORD_RESIDENT_Q34_20260927.md).
 50 commandes locales Release/sanitizers et le gate CUDA G4 passent.

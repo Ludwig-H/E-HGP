@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/workspaces/E-HGP/build/v9-a-min-label-20260927-r1_release/mhgp9_full_a_min_label",
+    "--unknown"
+  ],
+  "ended_epoch": 1790502197.5927215,
+  "exit_code": 2,
+  "group_closed": true,
+  "name": "cli_unknown_release",
+  "pid": 392725,
+  "started_epoch": 1790502197.5906904,
+  "stderr_sha256": "054d5b255aeab60376586fd20d664fea92f5d182141aee69c175b916f9ee047c",
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "timeout_seconds": null
+}
