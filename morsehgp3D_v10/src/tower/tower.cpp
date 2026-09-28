@@ -31,6 +31,21 @@ struct Facet {
   }
 };
 
+struct FacetHash {
+  size_t operator()(const std::array<u32, kMaxFacet>& a) const {
+    u64 h = 1469598103934665603ull;
+    for (u32 v : a) h = (h ^ v) * 1099511628211ull;
+    return static_cast<size_t>(h);
+  }
+};
+
+std::array<u32, kMaxFacet> facet_key(const Facet& f) {
+  std::array<u32, kMaxFacet> k;
+  k.fill(kNone);
+  for (u32 i = 0; i < f.n; ++i) k[i] = f.s[i];
+  return k;
+}
+
 struct SupHash {
   size_t operator()(const std::array<u32, 4>& a) const {
     u64 h = 1469598103934665603ull;
@@ -208,6 +223,7 @@ struct OrderCtx {
   int k;
   std::vector<u32> birth_node;              // par boule : noeud de naissance a cet ordre (kNone sinon)
   std::vector<std::atomic<u32>> cell_min;   // par boule : naissance de la cellule (b, k) (memo)
+  std::unordered_map<std::array<u32, kMaxFacet>, u32, FacetHash> seeds;  // sommet de naissance -> noeud
   std::atomic<u32> error{0};                // Reason + 1
   std::atomic<u64> steps{0}, memo_hits{0};
   explicit OrderCtx(const Geo& gg, int kk) : g(gg), k(kk), birth_node(gg.cat.balls(), kNone), cell_min(gg.cat.balls()) {
@@ -238,6 +254,10 @@ u32 resolve(OrderCtx& o, Facet F, Scratch& sc) {
     o.steps.fetch_add(1, std::memory_order_relaxed);
     if (k == 1) {
       node = F.s[0];
+      break;
+    }
+    if (const auto hit = o.seeds.find(facet_key(F)); hit != o.seeds.end()) {  // semis : sommet de naissance
+      node = hit->second;
       break;
     }
     const Sphere S = meb(g, F);
@@ -350,8 +370,20 @@ Outcome build_order(const Geo& g, int k, const TowerParams& params, sched::Pool&
     return x.rank != y.rank ? x.rank < y.rank : x.ref < y.ref;
   });
   const u32 nb = static_cast<u32>(births.size());
-  if (k > 1)
-    for (u32 i = 0; i < nb; ++i) o.birth_node[births[i].ref] = i;
+  if (k > 1) {
+    o.seeds.reserve(nb * 2);
+    for (u32 i = 0; i < nb; ++i) {
+      const u32 b = births[i].ref;
+      o.birth_node[b] = i;
+      if (!(cat.flags[b] & kExtendedShell) && cat.pop_off[b + 1] - cat.pop_off[b] == u64(k)) {
+        Facet f;  // sommet de naissance regulier : la boule fermee I u U, exactement k sites
+        for (u32 s2 : cat.interior(b)) f.s[f.n++] = s2;
+        for (u32 s2 : cat.shell(b)) f.s[f.n++] = s2;
+        f.sort();
+        o.seeds.emplace(facet_key(f), i);
+      }
+    }
+  }
   // resolution des representants (parallele, pure a memo pres)
   std::vector<Scratch> scratch(pool.size());
   pool.parallel_for(joins.size(), 64, [&](u64 b, u64 e, unsigned wk) {

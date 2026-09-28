@@ -64,7 +64,7 @@ double SiteTree::box_dist2(const Node& nd, const double q[3]) {
 }
 
 namespace {
-constexpr double kMargin = 0.02;  // erreur absolue des distances carrees approchees : < 1e-3 en u18
+constexpr double kMargin = 0.02;  // deux fois une borne large de l'erreur absolue des distances carrees approchees (< 1e-3 en u18)
 
 void approx_center(const geom::P3& a, const geom::Center& c, double q[3]) {
   const double D = static_cast<double>(c.D);
@@ -79,48 +79,80 @@ double approx_d2(const double q[3], i64 x, i64 y, i64 z) {
 }
 }  // namespace
 
+namespace {
+// Pile et tampons par fil : aucune allocation par requete en regime etabli.
+struct QueryScratch {
+  std::vector<std::pair<double, u32>> cand;  // (distance approchee, site)
+  std::vector<u32> stack;
+  double best[64];
+  int nbest = 0;
+};
+thread_local QueryScratch tls;
+
+// Insere d dans les `count` plus petites distances approchees (tableau trie croissant, count <= 64).
+inline void push_best(QueryScratch& q, double d, u32 count) {
+  int i;
+  if (q.nbest < static_cast<int>(count)) {
+    i = q.nbest++;
+  } else {
+    if (d >= q.best[count - 1]) return;
+    i = static_cast<int>(count) - 1;
+  }
+  while (i > 0 && q.best[i - 1] > d) {
+    q.best[i] = q.best[i - 1];
+    --i;
+  }
+  q.best[i] = d;
+}
+}  // namespace
+
 void SiteTree::nearest(const geom::P3& anchor, const geom::Center& c, u32 count,
                        std::vector<std::pair<i128, u32>>& out) const {
+  // Exactitude : l'erreur des distances carrees approchees est < kMargin / 2. Soit W la count-ieme plus
+  // petite distance approchee ; tout site parmi les count plus proches (ex aequo compris) a une distance
+  // approchee <= W + kMargin : on les collecte tous, puis on trie exactement (cle i128, puis indice).
   out.clear();
   if (root_ == kNone || count == 0) return;
-  double q[3];
-  approx_center(anchor, c, q);
-  struct Item {
-    i128 key;
-    u32 site;
-    double d2;
-    bool operator<(const Item& o) const { return key != o.key ? key < o.key : site < o.site; }
-  };
-  std::vector<Item> heap;  // max-tas sur (cle, site)
-  using QE = std::pair<double, u32>;
-  std::priority_queue<QE, std::vector<QE>, std::greater<QE>> open;
-  open.push({box_dist2(nodes_[root_], q), root_});
-  while (!open.empty()) {
-    const auto [bd, id] = open.top();
-    open.pop();
-    if (heap.size() == count && bd - kMargin > heap.front().d2 + kMargin) break;
+  if (count > 64) count = 64;
+  QueryScratch& q = tls;
+  q.cand.clear();
+  q.nbest = 0;
+  double cq[3];
+  approx_center(anchor, c, cq);
+  auto bound = [&]() { return q.nbest == static_cast<int>(count) ? q.best[count - 1] + kMargin : 1e300; };
+  q.stack.clear();
+  q.stack.push_back(root_);
+  while (!q.stack.empty()) {
+    const u32 id = q.stack.back();
+    q.stack.pop_back();
     const Node& nd = nodes_[id];
+    if (box_dist2(nd, cq) > bound()) continue;
     if (nd.left == kNone) {
       for (u32 s = nd.lo; s < nd.hi; ++s) {
-        const geom::P3 z{i64(cloud_.x[s]), i64(cloud_.y[s]), i64(cloud_.z[s])};
-        const Item it{geom::side_key(c, anchor, z), s, approx_d2(q, z.x, z.y, z.z)};
-        if (heap.size() < count) {
-          heap.push_back(it);
-          std::push_heap(heap.begin(), heap.end());
-        } else if (it < heap.front()) {
-          std::pop_heap(heap.begin(), heap.end());
-          heap.back() = it;
-          std::push_heap(heap.begin(), heap.end());
-        }
+        const double d = approx_d2(cq, cloud_.x[s], cloud_.y[s], cloud_.z[s]);
+        if (d > bound()) continue;
+        push_best(q, d, count);
+        q.cand.push_back({d, s});
       }
     } else {
-      open.push({box_dist2(nodes_[nd.left], q), nd.left});
-      open.push({box_dist2(nodes_[nd.right], q), nd.right});
+      const double dl = box_dist2(nodes_[nd.left], cq), dr = box_dist2(nodes_[nd.right], cq);
+      if (dl <= dr) {  // le plus proche en dernier : depile en premier
+        q.stack.push_back(nd.right);
+        q.stack.push_back(nd.left);
+      } else {
+        q.stack.push_back(nd.left);
+        q.stack.push_back(nd.right);
+      }
     }
   }
-  std::sort_heap(heap.begin(), heap.end());
-  out.reserve(heap.size());
-  for (const Item& it : heap) out.push_back({it.key, it.site});
+  const double W = bound();
+  for (const auto& [d, site] : q.cand) {
+    if (d > W) continue;
+    const geom::P3 z{i64(cloud_.x[site]), i64(cloud_.y[site]), i64(cloud_.z[site])};
+    out.push_back({geom::side_key(c, anchor, z), site});
+  }
+  std::sort(out.begin(), out.end());
+  if (out.size() > count) out.resize(count);
 }
 
 void SiteTree::closed_ball(const geom::P3& anchor, const geom::Center& c, std::vector<u32>& interior,
@@ -128,25 +160,28 @@ void SiteTree::closed_ball(const geom::P3& anchor, const geom::Center& c, std::v
   interior.clear();
   shell.clear();
   if (root_ == kNone) return;
-  double q[3];
-  approx_center(anchor, c, q);
-  const double r2 = approx_d2(q, anchor.x, anchor.y, anchor.z);
-  std::vector<u32> stack{root_};
-  while (!stack.empty()) {
-    const u32 id = stack.back();
-    stack.pop_back();
+  double cq[3];
+  approx_center(anchor, c, cq);
+  const double r2 = approx_d2(cq, anchor.x, anchor.y, anchor.z) + kMargin;
+  QueryScratch& q = tls;
+  q.stack.clear();
+  q.stack.push_back(root_);
+  while (!q.stack.empty()) {
+    const u32 id = q.stack.back();
+    q.stack.pop_back();
     const Node& nd = nodes_[id];
-    if (box_dist2(nd, q) - kMargin > r2 + kMargin) continue;
+    if (box_dist2(nd, cq) > r2) continue;
     if (nd.left == kNone) {
       for (u32 s = nd.lo; s < nd.hi; ++s) {
+        if (approx_d2(cq, cloud_.x[s], cloud_.y[s], cloud_.z[s]) > r2) continue;
         const geom::P3 z{i64(cloud_.x[s]), i64(cloud_.y[s]), i64(cloud_.z[s])};
         const i128 k = geom::side_key(c, anchor, z);
         if (k < 0) interior.push_back(s);
         else if (k == 0) shell.push_back(s);
       }
     } else {
-      stack.push_back(nd.right);
-      stack.push_back(nd.left);
+      q.stack.push_back(nd.right);
+      q.stack.push_back(nd.left);
     }
   }
   std::sort(interior.begin(), interior.end());
