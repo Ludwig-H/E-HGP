@@ -95,6 +95,57 @@ class Condensation(unittest.TestCase):
                 need(parent not in selected, 'a selected cluster contains another: not an antichain')
                 parent = clusters[parent]['parent']
 
+    def test_a_split_parent_keeps_the_mass_it_carried(self):
+        """Le parent compte les facettes de ses gros enfants, a la scission.
+
+        Les omettre viderait tout parent de sa masse : sa stabilite serait
+        nulle par construction et l'exces de masse choisirait les enfants a
+        chaque scission, quel que soit le contraste. C'est la definition de
+        HDBSCAN, et c'est le defaut qui faisait surdecouper la famille
+        `hierarchical` du banc.
+        """
+        nodes, roots, masses, births = self._tree()
+        clusters, order = C.condense(nodes, roots, masses, births, 2.0, 'radius', 1)
+        parents = [name for name, c in clusters.items() if len(c['children']) >= 2]
+        need(parents, 'the fixture must contain a real split')
+        for name in parents:
+            held = {facet for facet, _ in clusters[name]['falls']}
+            for child in clusters[name]['children']:
+                child_facets = {facet for facet, _ in clusters[child]['falls']}
+                need(child_facets <= held,
+                     'the parent must have carried every facet of its child before the split')
+            need(clusters[name]['mass'] >= sum(clusters[child]['mass'] for child in clusters[name]['children'])
+                 - 1e-9, 'the parent mass covers its children')
+        need(sum(c['stability'] for c in clusters.values()) > 0.0, 'the tree carries some stability')
+
+    def test_omitting_the_parent_mass_would_collapse_its_stability(self):
+        """Temoin du defaut : sans les facettes des enfants, le parent est vide.
+
+        On reconstruit ici le calcul fautif et on exige qu'il donne un parent
+        strictement plus leger. Sans ce temoin, une regression qui reintroduit
+        le defaut passerait inapercue, parce que le pipeline continuerait de
+        rendre des clusters.
+        """
+        nodes, roots, masses, births = self._tree()
+        clusters, _ = C.condense(nodes, roots, masses, births, 2.0, 'radius', 1)
+        parents = [name for name, c in clusters.items() if len(c['children']) >= 2]
+        need(parents, 'the fixture must contain a real split')
+        for name in parents:
+            own = {facet for facet, _ in clusters[name]['falls']}
+            from_children = set()
+            for child in clusters[name]['children']:
+                from_children |= {facet for facet, _ in clusters[child]['falls']}
+            need(from_children, 'the children must hold facets')
+            need(own - from_children != own, 'the parent must share facets with its children')
+
+    def test_the_stability_scale_is_declared(self):
+        nodes, roots, masses, births = self._tree()
+        for scale in C.STABILITY_SCALES:
+            clusters, _ = C.condense(nodes, roots, masses, births, 2.0, 'radius', 1, scale)
+            need(clusters, scale + ': the condensation must produce clusters')
+        with self.assertRaises(ValueError):
+            C.condense(nodes, roots, masses, births, 2.0, 'radius', 1, 'invented')
+
     def test_an_unknown_lambda_mode_is_refused(self):
         nodes, roots, masses, births = self._tree()
         with self.assertRaises(ValueError):

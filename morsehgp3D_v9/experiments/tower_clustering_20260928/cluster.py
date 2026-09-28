@@ -29,6 +29,7 @@ import collections
 import math
 
 LAMBDA_MODES = ('radius', 'psi')
+STABILITY_SCALES = ('lambda', 'log')
 
 
 def need(condition, reason):
@@ -129,7 +130,7 @@ def _lam(beta, mode, z):
     return 1.0 / radius if mode == 'radius' else radius ** (-z)
 
 
-def condense(nodes, roots, masses, births, min_cluster_mass, mode, z):
+def condense(nodes, roots, masses, births, min_cluster_mass, mode, z, scale='lambda', relative=0.0):
     """Condensation a la HDBSCAN, sur les masses et non sur des comptes.
 
     En descendant, un enfant dont la masse est sous le seuil ne devient pas un
@@ -137,6 +138,7 @@ def condense(nodes, roots, masses, births, min_cluster_mass, mode, z):
     dont au moins deux enfants survivent est une vraie scission.
     """
     need(mode in LAMBDA_MODES, 'lambda mode is one of ' + ', '.join(LAMBDA_MODES))
+    need(scale in STABILITY_SCALES, 'stability scale is one of ' + ', '.join(STABILITY_SCALES))
     # Masses cumulees, en post-ordre EXPLICITE : l'arbre de fusion d'un nuage de
     # quelques milliers de points depasse la profondeur de recursion de Python.
     mass = {}
@@ -164,7 +166,14 @@ def condense(nodes, roots, masses, births, min_cluster_mass, mode, z):
     order = []
 
     # Descente en largeur, sans recursion : une file de clusters a ouvrir.
-    queue = [(root, None, 0.0) for root in roots]
+    # Un cluster racine NAIT au niveau de sa propre fusion sommitale, pas a
+    # zero : en echelle logarithmique une naissance nulle rend sa stabilite
+    # indefinie, et en echelle lambda elle la gonfle artificiellement.
+    def root_birth(root):
+        level = nodes[root]['level'] if root in nodes else births[root]
+        return _lam(level, mode, z)
+
+    queue = [(root, None, root_birth(root)) for root in roots]
     while queue:
         item, parent, birth_lambda = queue.pop()
         name = 'c%d' % len(order)
@@ -179,17 +188,45 @@ def condense(nodes, roots, masses, births, min_cluster_mass, mode, z):
                 clusters[name]['falls'].append((current, _lam(births[current], mode, z)))
                 continue
             level = _lam(nodes[current]['level'], mode, z)
-            big = [child for child in nodes[current]['children'] if total(child) >= min_cluster_mass]
+            # Seuil ABSOLU, et facultativement RELATIF au parent. Un seuil
+            # absolu seul ne peut pas etre juste a toutes les echelles : il
+            # laisse passer une sous-structure dans un gros amas et refuse un
+            # vrai petit amas. Le seuil relatif demande a un enfant de porter
+            # une fraction de son parent, ce qui est sans echelle.
+            floor = min_cluster_mass
+            if relative > 0.0:
+                floor = max(floor, relative * total(current))
+            big = [child for child in nodes[current]['children'] if total(child) >= floor]
             for child in nodes[current]['children']:
                 if len(big) >= 2 and child in big:
+                    # Le parent a PORTE cet enfant depuis sa propre naissance
+                    # jusqu'a la scission : ses facettes quittent le parent ici.
+                    # Les omettre viderait le parent de toute sa masse et
+                    # ferait preferer les enfants a chaque scission, quel que
+                    # soit le contraste. C'est la definition de HDBSCAN.
+                    for facet in (nodes[child]['members'] if child in nodes else {child}):
+                        clusters[name]['falls'].append((facet, level))
                     queue.append((child, name, level))
                 elif child in big or not big:
                     stack.append(child)
                 else:
                     for facet in (nodes[child]['members'] if child in nodes else {child}):
                         clusters[name]['falls'].append((facet, level))
+    # Echelle de stabilite. En `lambda`, c'est la formule de HDBSCAN. En `log`,
+    # on integre en log-densite : la contribution d'une facette est le nombre de
+    # DOUBLEMENTS de densite qu'elle traverse dans le cluster, et non la
+    # difference brute. La difference brute favorise mecaniquement les enfants,
+    # parce qu'un sous-amas serre a des lambda enormes ; le logarithme ramene
+    # parent et enfants a la meme echelle et rend l'arbitrage sensible au
+    # CONTRASTE plutot qu'a l'amplitude. C'est ce qui decide la famille
+    # `hierarchical`, ou l'arbre est juste et seule la selection echoue.
     for name, cluster in clusters.items():
-        cluster['stability'] = sum(float(masses.get(facet, 0.0)) * max(0.0, lam - cluster['birth'])
+        birth = cluster['birth']
+        if scale == 'lambda':
+            span = lambda lam: max(0.0, lam - birth)
+        else:
+            span = lambda lam: (math.log(lam / birth) if birth > 0.0 and lam > birth else 0.0)
+        cluster['stability'] = sum(float(masses.get(facet, 0.0)) * span(lam)
                                    for facet, lam in cluster['falls'])
         cluster['mass'] = sum(float(masses.get(facet, 0.0)) for facet, lam in cluster['falls'])
     return clusters, order
