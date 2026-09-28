@@ -472,9 +472,16 @@ def validate_plan(plan, manifest):
     need(all(plan['cases'][0]['levers'][name] for name in LEVER_NAMES
              if any(c['levers'][name] for c in plan['cases'])),
          'the first case sets the preflight levers and must pin ON every lever the plan enables')
-    # Unchanged v29 developer fix: every real case needs its frame/K pin.
-    need(not PINNED_DIGESTS or all((case['scene'], case['k']) in PINNED_DIGESTS for case in plan['cases']),
-         'a plan case without a pinned digest')
+    # v29 developer fix, made non-vacuous on 28 September 2026. The per-case
+    # form could never refuse a plan: the checks above already force
+    # scene in INPUTS and k in (5, 10), and INPUTS x {5, 10} is exactly the
+    # key set of PINNED_DIGESTS, so the condition held by construction. The
+    # real risk it was meant to cover is a scene added to INPUTS without its
+    # pins, which no plan can express. So the check moves to the TABLES, where
+    # it can actually fail, and is stated on the admissible domain rather than
+    # on the cases at hand.
+    need(all((scene, k) in PINNED_DIGESTS for scene in INPUTS for k in (5, 10)),
+         'an admissible (scene, K) without a pinned digest')
     # v17: every (frame, K, s) run on the batch path has an engine-path twin,
     # so that the cross-case object comparison judges the batch/GPU tower.
     # v18: with the same certificate levers, so that its certificate work is
