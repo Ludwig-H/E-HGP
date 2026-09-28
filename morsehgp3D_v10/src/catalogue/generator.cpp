@@ -4,6 +4,7 @@
 // demi-ouvertes [lo, hi). En u18 : |X| < 2^24, tests de gardes, dominance et bissectrices en i64 ;
 // test droite des centres (lemme Z, zonogone) en i128 ; centres et recensement en i128 (geometry.hpp).
 #include <algorithm>
+#include <bit>
 #include <cmath>
 #include <memory>
 #include <mutex>
@@ -40,7 +41,11 @@ struct Local {
   // tampons reutilises
   std::vector<std::array<u32, 4>> memo;
   std::vector<u32> shell, interior;
-  std::vector<unsigned char> meets;
+  // feuille : copies locales (coordonnees, repere T, poids), masques de dominance, paires et triplets vivants
+  std::vector<P3> lp, lx;
+  std::vector<i64> lx2;
+  std::vector<u32> wl;
+  std::vector<u64> dom, live2, live3;
 };
 
 struct Ctx {
@@ -61,6 +66,7 @@ inline void merge_ledger(CatalogueLedger& a, const CatalogueLedger& b) {
   a.max_m = std::max(a.max_m, b.max_m);
   a.guard_tests += b.guard_tests;
   a.dominance_tests += b.dominance_tests;
+  a.leaf_dominance_tests += b.leaf_dominance_tests;
   a.pair_tests += b.pair_tests;
   a.triple_tests += b.triple_tests;
   a.line_hits += b.line_hits;
@@ -83,51 +89,45 @@ inline bool center_in_box(const P3& a, const geom::Center& c, const Box& Q) {
   return true;
 }
 
-// Plan bissecteur de (i, j) rencontre la boite fermee.
-inline bool bisector_meets(const Ctx& C, u32 i, u32 j, const Box& Q) {
-  const P3& a = C.X[i];
-  const P3& b = C.X[j];
-  const i64 d[3] = {a.x - b.x, a.y - b.y, a.z - b.z};
-  const i64 base = C.X2[i] - C.X2[j];
-  i64 smax = 0, smin = 0;
-  for (int k = 0; k < 3; ++k) {
-    smax += (d[k] > 0 ? Q.hi[k] : Q.lo[k]) * d[k];
-    smin += (d[k] > 0 ? Q.lo[k] : Q.hi[k]) * d[k];
-  }
-  return base - 2 * smax <= 0 && 0 <= base - 2 * smin;
+// Milieu de deux sites (repere T) dans la boite demi-ouverte : forme q2 de center_in_box (D = 2,
+// 2^T (a D + N) = X_a + X_b), exacte en i64.
+inline bool midpoint_in_box(const P3& A, const P3& B, const Box& Q) {
+  return 2 * Q.lo[0] <= A.x + B.x && A.x + B.x < 2 * Q.hi[0] && 2 * Q.lo[1] <= A.y + B.y && A.y + B.y < 2 * Q.hi[1] &&
+         2 * Q.lo[2] <= A.z + B.z && A.z + B.z < 2 * Q.hi[2];
 }
 
-// Lemme Z : la droite des centres equidistants de (a, b, d) (non alignes) rencontre la boite fermee.
-inline bool center_line_meets(const Ctx& C, u32 ia, u32 ib, u32 id, const Box& Q) {
-  const P3& A = C.X[ia];
-  const P3& B = C.X[ib];
-  const P3& Dp = C.X[id];
+// Lemme Z : la droite des centres equidistants de trois sites A, B, D (repere T) rencontre la boite fermee.
+// Avec u = A - B, v = A - D et F(C) = (f_AB(C), f_AD(C)), 2 F(Qbar) est le zonogone P + sum_k [-1, 1] g_k, ou
+// P = 2 F(centre de boite) = (2 (|A|^2 - |B|^2) - 2 (lo + hi) . u, idem avec D et v), g_k = -2 h_k (u_k, v_k)
+// et h_k = hi_k - lo_k > 0. Il contient 0 si et seulement si |n_k . P| <= sum_j |n_k . g_j| pour chaque g_k non
+// nul, n_k = g_k^perp = 2 h_k (v_k, -u_k) (les cotes d'un zonogone sont les g_k). Or n_k . g_j = 4 h_k h_j c_kj
+// avec c_kj = u_k v_j - v_k u_j (composantes de u x v au signe pres) ; la division par 2 h_k > 0 donne la forme
+// entiere exacte |v_k P_0 - u_k P_1| <= 2 sum_{j != k} h_j |c_kj|, meme decision que la forme developpee.
+// Bornes (u18, T = 6) : |X| < 2^24, |u|, |v| < 2^24, lo + hi < 2^26, h <= 2^24 : |P| < 2^54 et |c| < 2^49 en
+// i64 ; |v_k P_0 - u_k P_1| < 2^79 et 2 sum h_j |c_kj| < 2^76 en i128.
+// Rend -1 si A, B, D sont alignes (u x v = 0), 0 si la droite manque la boite, 1 si elle la rencontre.
+inline int center_line_meets(const P3& A, i64 a2, const P3& B, i64 b2, const P3& Dp, i64 d2, const Box& Q) {
   const i64 u[3] = {A.x - B.x, A.y - B.y, A.z - B.z};
   const i64 v[3] = {A.x - Dp.x, A.y - Dp.y, A.z - Dp.z};
-  // 2 F(centre de boite) = 2(|A|^2 - |B|^2) - 2 (lo + hi) . (A - B), idem pour D.
-  i128 f0 = 2 * i128(C.X2[ia] - C.X2[ib]), f1 = 2 * i128(C.X2[ia] - C.X2[id]);
-  i128 g[3][2];
+  const i64 c01 = u[0] * v[1] - v[0] * u[1], c02 = u[0] * v[2] - v[0] * u[2], c12 = u[1] * v[2] - v[1] * u[2];
+  if (c01 == 0 && c02 == 0 && c12 == 0) return -1;
+  i64 p0 = 2 * (a2 - b2), p1 = 2 * (a2 - d2), h[3];
   for (int k = 0; k < 3; ++k) {
-    const i128 s = Q.lo[k] + Q.hi[k];
-    f0 -= 2 * s * u[k];
-    f1 -= 2 * s * v[k];
-    const i128 h = Q.hi[k] - Q.lo[k];
-    g[k][0] = -2 * h * u[k];
-    g[k][1] = -2 * h * v[k];
+    const i64 s = Q.lo[k] + Q.hi[k];
+    p0 -= 2 * s * u[k];
+    p1 -= 2 * s * v[k];
+    h[k] = Q.hi[k] - Q.lo[k];
   }
+  const i64 a01 = c01 < 0 ? -c01 : c01, a02 = c02 < 0 ? -c02 : c02, a12 = c12 < 0 ? -c12 : c12;
+  const i128 r[3] = {2 * (i128(h[1]) * a01 + i128(h[2]) * a02), 2 * (i128(h[0]) * a01 + i128(h[2]) * a12),
+                     2 * (i128(h[0]) * a02 + i128(h[1]) * a12)};
   for (int k = 0; k < 3; ++k) {
-    if (g[k][0] == 0 && g[k][1] == 0) continue;
-    const i128 n0 = -g[k][1], n1 = g[k][0];
-    i128 lhs = n0 * f0 + n1 * f1;
-    if (lhs < 0) lhs = -lhs;
-    i128 rhs = 0;
-    for (int j = 0; j < 3; ++j) {
-      i128 t = n0 * g[j][0] + n1 * g[j][1];
-      rhs += t < 0 ? -t : t;
-    }
-    if (lhs > rhs) return false;
+    if (u[k] == 0 && v[k] == 0) continue;
+    i128 l = i128(v[k]) * p0 - i128(u[k]) * p1;
+    if (l < 0) l = -l;
+    if (l > r[k]) return 0;
   }
-  return true;
+  return 1;
 }
 
 // q_min et support canonique d'une coquille etendue (sites tries), centre (anchor + ctr).
@@ -171,22 +171,62 @@ void canonical_support(const Ctx& C, const std::vector<u32>& sh, const P3& ancho
   q = qgen;
 }
 
-// Juge une sphere candidate : recensement exact sur la liste de la feuille, admission, emission.
-void judge(const Ctx& C, Local& L, const std::vector<u32>& cand, u32 anchor_site, const geom::Center& ctr,
-           const std::array<u32, 4>& gen, u8 qgen) {
+// Niveau exact d'une boule emise, dans la representation (num, den) de la presentation qui l'emettait en
+// premier dans l'ordre d'enumeration de la feuille v1 (toutes les paires, puis chaque triplet (i, j, k) suivi
+// de ses quadruplets (i, j, k, l)). Le niveau exact ne depend pas de la presentation ; sa representation,
+// que la tour publie (cat.level), en depend, et la feuille v2 l'enumere dans un autre ordre : on la fixe ici.
+//   coquille reguliere : S* est la seule presentation ;
+//   coquille etendue, q_min = 2 : S* (paire antipodale lexicographiquement minimale ; paires d'abord) ;
+//   q_min = 4 : S* (seules presentations : tetraedres a centre strictement interieur, S* le premier) ;
+//   q_min = 3 : le premier tetraedre de coquille a centre strictement interieur dont le prefixe (i, j, k)
+//   precede S* (un tel prefixe n'est jamais S*, dont le plan contient le centre), sinon S*.
+geom::Level emitted_level(const Ctx& C, const std::vector<u32>& sh, const std::array<u32, 4>& sup, u8 q,
+                          const std::array<u32, 4>& gen, const geom::Center& ctr) {
+  if (q == 2) return geom::level2(C.P[sup[0]], C.P[sup[1]]);
+  if (q == 4) {
+    if (gen == sup) return geom::level4(ctr);
+    geom::Center c4;
+    geom::center4(C.P[sup[0]], C.P[sup[1]], C.P[sup[2]], C.P[sup[3]], c4);
+    return geom::level4(c4);
+  }
+  const u32 m = static_cast<u32>(sh.size());
+  const std::array<u32, 3> s3 = {sup[0], sup[1], sup[2]};
+  for (u32 i = 0; i < m; ++i)
+    for (u32 j = i + 1; j < m; ++j)
+      for (u32 k = j + 1; k < m; ++k) {
+        // coquille triee : les triplets defilent dans l'ordre lexicographique ; S* est atteint avant la fin
+        if (!(std::array<u32, 3>{sh[i], sh[j], sh[k]} < s3)) return geom::level3(C.P[s3[0]], C.P[s3[1]], C.P[s3[2]]);
+        for (u32 l = k + 1; l < m; ++l) {
+          const P3 &a = C.P[sh[i]], &b = C.P[sh[j]], &d = C.P[sh[k]], &e = C.P[sh[l]];
+          geom::Center c4;
+          if (!geom::center4(a, b, d, e, c4)) continue;
+          const P3* t[4] = {&a, &b, &d, &e};
+          if (geom::strictly_inside_tetra(t, a, c4)) return geom::level4(c4);
+        }
+      }
+  return geom::level3(C.P[sup[0]], C.P[sup[1]], C.P[sup[2]]);
+}
+
+// Juge une sphere candidate : recensement exact sur la liste de la feuille (copie locale L.lp, L.wl),
+// admission, emission. theta : seuil d'admission de la presentation (feuille v2). Le recensement s'arrete des
+// que le poids interieur le depasse : S* d'une boule admise ne s'arrete jamais (lemme S), une presentation
+// non canonique peut s'arreter puisque S* est enumere dans la meme feuille. theta = K - 1 : sortie p >= K.
+void judge(const Ctx& C, Local& L, const std::vector<u32>& cand, u32 anchor_local, const geom::Center& ctr,
+           const std::array<u32, 4>& gen, u8 qgen, i64 theta) {
   ++L.led.judged;
-  const P3& a = C.P[anchor_site];
+  const P3 a = L.lp[anchor_local];
+  const u32 m = static_cast<u32>(cand.size());
   u32 p = 0;
   L.shell.clear();
   L.interior.clear();
-  for (u32 z : cand) {
-    const int s = geom::side(ctr, a, C.P[z]);
+  for (u32 t = 0; t < m; ++t) {
+    const int s = geom::side(ctr, a, L.lp[t]);
     if (s < 0) {
-      p += C.w[z];
-      if (p >= static_cast<u32>(C.K)) return;  // toute admission exige p <= K - 1
-      L.interior.push_back(z);
+      p += L.wl[t];
+      if (static_cast<i64>(p) > theta) return;  // toute admission de cette presentation exige p <= theta
+      L.interior.push_back(cand[t]);
     } else if (s == 0) {
-      L.shell.push_back(z);
+      L.shell.push_back(cand[t]);
     }
   }
   std::array<u32, 4> sup;
@@ -197,8 +237,8 @@ void judge(const Ctx& C, Local& L, const std::vector<u32>& cand, u32 anchor_site
   } else {
     flags |= kExtendedShell;
     canonical_support(C, L.shell, a, ctr, gen, qgen, sup, q);
-    for (const auto& m : L.memo)
-      if (m == sup) return;
+    for (const auto& mm : L.memo)
+      if (mm == sup) return;
     L.memo.push_back(sup);
   }
   u32 u = 0;
@@ -219,9 +259,7 @@ void judge(const Ctx& C, Local& L, const std::vector<u32>& cand, u32 anchor_site
   r.pop_len = static_cast<u32>(L.interior.size() + L.shell.size());
   L.pop.insert(L.pop.end(), L.interior.begin(), L.interior.end());
   L.pop.insert(L.pop.end(), L.shell.begin(), L.shell.end());
-  if (qgen == 2) r.level = geom::level2(C.P[gen[0]], C.P[gen[1]]);
-  else if (qgen == 3) r.level = geom::level3(C.P[gen[0]], C.P[gen[1]], C.P[gen[2]]);
-  else r.level = geom::level4(ctr);
+  r.level = emitted_level(C, L.shell, sup, q, gen, ctr);
   L.recs.push_back(r);
   ++L.led.emitted;
   if (flags & kExtendedShell) ++L.led.extended;
@@ -229,54 +267,196 @@ void judge(const Ctx& C, Local& L, const std::vector<u32>& cand, u32 anchor_site
   L.led.max_shell = std::max<u64>(L.led.max_shell, L.shell.size());
 }
 
+// Bits d'indice global > b dans le mot t (t >= b / 64).
+inline u64 bits_above(u32 b, u32 t) { return t > (b >> 6) ? ~u64(0) : ~((u64(2) << (b & 63)) - 1); }
+
+// Population d'un mot (forme SWAR : le profil sans popcnt materiel appelait __popcountdi2).
+inline u64 popcount64(u64 x) {
+  x -= (x >> 1) & 0x5555555555555555ull;
+  x = (x & 0x3333333333333333ull) + ((x >> 2) & 0x3333333333333333ull);
+  x = (x + (x >> 4)) & 0x0F0F0F0F0F0F0F0Full;
+  return (x * 0x0101010101010101ull) >> 56;
+}
+
+// Feuille « v2 » (GEN_v1 § 2.6 et § 5.3) : on n'enumere que les presentations dont chaque partie peut
+// appartenir au support canonique S* d'une boule admise de centre dans la feuille.
+//
+//   Dom[i] = { j : max_{C dans Qbar} (|X_j - C|^2 - |X_i - C|^2) < 0 }   (forme du lemme D, i64, repere T) ;
+//   theta_q = K + 1 - q si toutes les positions de la liste pesent 1 (feuille serree), K - 1 sinon ;
+//   w(T) = poids de l'union des Dom[s], s dans T.
+// Une seule evaluation affine par paire non ordonnee (i, j) : g(C) = |X_j - C|^2 - |X_i - C|^2 a son maximum
+// et son minimum sur Qbar aux coins choisis par le signe de X_j - X_i ; max g < 0 met j dans Dom[i], min g > 0
+// met i dans Dom[j], et sinon min g <= 0 <= max g : c'est exactement le test de la bissectrice (qui coupe Qbar
+// si et seulement si ni i ni j ne domine l'autre).
+// Lemme M : si T est inclus dans la coquille d'une boule B de centre c dans Q (donc 2^T c dans Qbar), tout j
+// de Dom[s], s dans T, est strictement plus proche de c que s, donc interieur a B : w(T) <= p(B). Si B est
+// admise, sa coquille est dans la liste (theoreme C) et p(B) <= theta_{q_min} : coquille non ponderee,
+// p + q_min <= K + 1 ; ponderee (feuille non serree), p <= K - 1. theta_q decroit avec q.
+// Lemme S : S* d'une boule admise passe donc chacun des filtres suivants, et ses parties aussi :
+//   paire (i, j)      : bissectrice qui coupe Qbar, w <= theta_2 -> juge q2 si le milieu est dans Q ;
+//                       vivante (P2) si de plus w <= theta_3 (toute paire d'un S* de cardinal 3 ou 4) ;
+//   triplet (i, j, k) : trois paires vivantes, w <= theta_3, non alignes, droite des centres qui coupe Qbar
+//                       (lemme Z) -> juge q3 si aigu et centre dans Q ; vivant (H) si w <= theta_4 ;
+//   quadruplet        : quatre triplets vivants, w <= theta_4 -> juge q4 si centre dans Q, strictement
+//                       interieur au tetraedre ;
+//   recensement       : arret seulement si p > theta de la presentation (judge).
+// Une presentation non canonique peut etre ecartee sans perte : S* est enumere dans la meme feuille, et le
+// memo des coquilles etendues rend l'emission unique quel que soit l'ordre d'enumeration. Aucun flottant.
+// Masques sur NW mots de 64 bits ; NW = 0 : nombre de mots lu a l'execution (feuilles de plus de 256 sites).
+template <int NW>
+void enumerate_leaf_masks(const Ctx& C, Local& L, const std::vector<u32>& c, const Box& Q, u32 nw_rt) {
+  const u32 m = static_cast<u32>(c.size());
+  const u32 nw = NW > 0 ? static_cast<u32>(NW) : nw_rt;
+  L.memo.clear();
+  L.lp.resize(m);
+  L.lx.resize(m);
+  L.lx2.resize(m);
+  L.wl.resize(m);
+  bool tight = true;
+  for (u32 i = 0; i < m; ++i) {
+    L.lp[i] = C.P[c[i]];
+    L.lx[i] = C.X[c[i]];
+    L.lx2[i] = C.X2[c[i]];
+    L.wl[i] = C.w[c[i]];
+    tight = tight && L.wl[i] == 1;
+  }
+  const P3* const lp = L.lp.data();
+  const P3* const lx = L.lx.data();
+  const i64* const lx2 = L.lx2.data();
+  const u32* const wl = L.wl.data();
+  const i64 K = C.K;
+  const i64 th2 = K - 1, th3 = tight ? K - 2 : K - 1, th4 = tight ? K - 3 : K - 1;
+  L.dom.assign(size_t(m) * nw, 0);
+  L.live2.assign(size_t(m) * nw, 0);
+  // triplets vivants : ligne (a, b), a < b, au rang a m - a (a + 1) / 2 + b - a - 1 (triangle superieur)
+  L.live3.assign(size_t(m) * (m - 1) / 2 * nw, 0);
+  u64* const Dm = L.dom.data();
+  u64* const P2 = L.live2.data();
+  u64* const H = L.live3.data();
+  auto hrow = [&](u32 a, u32 b) { return H + (size_t(a) * m - size_t(a) * (a + 1) / 2 + (b - a - 1)) * nw; };
+  auto has = [&](const u64* row, u32 b) { return (row[b >> 6] >> (b & 63)) & 1; };
+  auto setbit = [&](u64* row, u32 b) { row[b >> 6] |= u64(1) << (b & 63); };
+  auto wword = [&](u64 x, u32 t) -> u64 {
+    if (tight) return popcount64(x);
+    u64 s = 0;
+    for (; x; x &= x - 1) s += wl[t * 64 + static_cast<u32>(std::countr_zero(x))];
+    return s;
+  };
+  // masques de dominance (et bissectrices)
+  for (u32 i = 0; i < m; ++i) {
+    const P3 Xi = lx[i];
+    const i64 xx = lx2[i];
+    for (u32 j = i + 1; j < m; ++j) {
+      const P3& Y = lx[j];
+      const i64 dx = Y.x - Xi.x, dy = Y.y - Xi.y, dz = Y.z - Xi.z;
+      const i64 base = lx2[j] - xx;
+      // C . (X_j - X_i) sur Qbar : minimum au coin (lo si d > 0, hi sinon), maximum au coin oppose
+      const i64 cmin =
+          (dx > 0 ? Q.lo[0] : Q.hi[0]) * dx + (dy > 0 ? Q.lo[1] : Q.hi[1]) * dy + (dz > 0 ? Q.lo[2] : Q.hi[2]) * dz;
+      const i64 cmax =
+          (dx > 0 ? Q.hi[0] : Q.lo[0]) * dx + (dy > 0 ? Q.hi[1] : Q.lo[1]) * dy + (dz > 0 ? Q.hi[2] : Q.lo[2]) * dz;
+      if (base - 2 * cmin < 0) setbit(Dm + size_t(i) * nw, j);
+      else if (base - 2 * cmax > 0) setbit(Dm + size_t(j) * nw, i);
+    }
+  }
+  L.led.leaf_dominance_tests += u64(m) * (m - 1) / 2;
+  geom::Center ctr;
+  // paires : q2 et paires vivantes
+  for (u32 i = 0; i < m; ++i) {
+    const u64* Di = Dm + size_t(i) * nw;
+    for (u32 j = i + 1; j < m; ++j) {
+      const u64* Dj = Dm + size_t(j) * nw;
+      if (has(Di, j) || has(Dj, i)) continue;  // bissectrice disjointe de Qbar
+      u64 d = 0;
+      for (u32 t = 0; t < nw; ++t) d += wword(Di[t] | Dj[t], t);
+      if (static_cast<i64>(d) > th2) continue;
+      if (static_cast<i64>(d) <= th3) {
+        setbit(P2 + size_t(i) * nw, j);
+        setbit(P2 + size_t(j) * nw, i);
+      }
+      ++L.led.pair_tests;
+      if (!midpoint_in_box(lx[i], lx[j], Q)) continue;
+      geom::center2(lp[i], lp[j], ctr);
+      judge(C, L, c, i, ctr, {c[i], c[j], kNone, kNone}, 2, th2);
+    }
+  }
+  if (th3 < 0) return;  // aucune paire vivante
+  // triplets : q3 et triplets vivants
+  for (u32 i = 0; i < m; ++i) {
+    const u64* Di = Dm + size_t(i) * nw;
+    const u64* Pi = P2 + size_t(i) * nw;
+    for (u32 tj = i >> 6; tj < nw; ++tj)
+      for (u64 js = Pi[tj] & bits_above(i, tj); js; js &= js - 1) {
+        const u32 j = tj * 64 + static_cast<u32>(std::countr_zero(js));
+        const u64* Dj = Dm + size_t(j) * nw;
+        const u64* Pj = P2 + size_t(j) * nw;
+        for (u32 tk = j >> 6; tk < nw; ++tk)
+          for (u64 ks = Pi[tk] & Pj[tk] & bits_above(j, tk); ks; ks &= ks - 1) {
+            const u32 k = tk * 64 + static_cast<u32>(std::countr_zero(ks));
+            const u64* Dk = Dm + size_t(k) * nw;
+            u64 d = 0;
+            for (u32 t = 0; t < nw; ++t) d += wword(Di[t] | Dj[t] | Dk[t], t);
+            if (static_cast<i64>(d) > th3) continue;
+            const int line = center_line_meets(lx[i], lx2[i], lx[j], lx2[j], lx[k], lx2[k], Q);
+            if (line < 0) continue;  // alignes
+            ++L.led.triple_tests;
+            if (line == 0) continue;
+            ++L.led.line_hits;
+            if (static_cast<i64>(d) <= th4) {
+              setbit(hrow(i, j), k);
+              setbit(hrow(i, k), j);
+              setbit(hrow(j, k), i);
+            }
+            const P3 &a = lp[i], &b = lp[j], &e = lp[k];
+            if (geom::acute(a, b, e)) {
+              geom::center3(a, b, e, ctr);
+              if (center_in_box(a, ctr, Q)) judge(C, L, c, i, ctr, {c[i], c[j], c[k], kNone}, 3, th3);
+            }
+          }
+      }
+  }
+  if (th4 < 0) return;  // aucun triplet vivant
+  // quadruplets : quatre triplets vivants (H[i, j] n'est non vide que si (i, j) est vivante)
+  for (u32 i = 0; i < m; ++i) {
+    const u64* Di = Dm + size_t(i) * nw;
+    const u64* Pi = P2 + size_t(i) * nw;
+    for (u32 tj = i >> 6; tj < nw; ++tj)
+      for (u64 js = Pi[tj] & bits_above(i, tj); js; js &= js - 1) {
+        const u32 j = tj * 64 + static_cast<u32>(std::countr_zero(js));
+        const u64* Hij = hrow(i, j);
+        const u64* Dj = Dm + size_t(j) * nw;
+        for (u32 tk = j >> 6; tk < nw; ++tk)
+          for (u64 ks = Hij[tk] & bits_above(j, tk); ks; ks &= ks - 1) {
+            const u32 k = tk * 64 + static_cast<u32>(std::countr_zero(ks));
+            const u64* Hik = hrow(i, k);
+            const u64* Hjk = hrow(j, k);
+            const u64* Dk = Dm + size_t(k) * nw;
+            for (u32 tl = k >> 6; tl < nw; ++tl)
+              for (u64 ls = Hij[tl] & Hik[tl] & Hjk[tl] & bits_above(k, tl); ls; ls &= ls - 1) {
+                const u32 l = tl * 64 + static_cast<u32>(std::countr_zero(ls));
+                const u64* Dl = Dm + size_t(l) * nw;
+                u64 d = 0;
+                for (u32 t = 0; t < nw; ++t) d += wword(Di[t] | Dj[t] | Dk[t] | Dl[t], t);
+                if (static_cast<i64>(d) > th4) continue;
+                ++L.led.quad_tests;
+                const P3 &a = lp[i], &b = lp[j], &e = lp[k], &f = lp[l];
+                if (!geom::center4(a, b, e, f, ctr)) continue;
+                if (!center_in_box(a, ctr, Q)) continue;
+                const P3* t4[4] = {&a, &b, &e, &f};
+                if (!geom::strictly_inside_tetra(t4, a, ctr)) continue;
+                judge(C, L, c, i, ctr, {c[i], c[j], c[k], c[l]}, 4, th4);
+              }
+          }
+      }
+  }
+}
+
 void enumerate_leaf(const Ctx& C, Local& L, const std::vector<u32>& c, const Box& Q) {
   const u32 m = static_cast<u32>(c.size());
-  L.memo.clear();
-  L.meets.assign(size_t(m) * m, 0);
-  for (u32 i = 0; i < m; ++i)
-    for (u32 j = i + 1; j < m; ++j) {
-      const unsigned char b = bisector_meets(C, c[i], c[j], Q) ? 1 : 0;
-      L.meets[size_t(i) * m + j] = L.meets[size_t(j) * m + i] = b;
-    }
-  auto M = [&](u32 i, u32 j) { return L.meets[size_t(i) * m + j] != 0; };
-  geom::Center ctr;
-  // q2
-  for (u32 i = 0; i < m; ++i)
-    for (u32 j = i + 1; j < m; ++j) {
-      if (!M(i, j)) continue;
-      ++L.led.pair_tests;
-      geom::center2(C.P[c[i]], C.P[c[j]], ctr);
-      if (!center_in_box(C.P[c[i]], ctr, Q)) continue;
-      judge(C, L, c, c[i], ctr, {c[i], c[j], kNone, kNone}, 2);
-    }
-  // q3 et q4
-  for (u32 i = 0; i < m; ++i)
-    for (u32 j = i + 1; j < m; ++j) {
-      if (!M(i, j)) continue;
-      for (u32 k = j + 1; k < m; ++k) {
-        if (!M(i, k) || !M(j, k)) continue;
-        const P3 &a = C.P[c[i]], &b = C.P[c[j]], &d = C.P[c[k]];
-        const P3 cr = geom::cross(geom::sub(b, a), geom::sub(d, a));
-        if (cr.x == 0 && cr.y == 0 && cr.z == 0) continue;
-        ++L.led.triple_tests;
-        if (!center_line_meets(C, c[i], c[j], c[k], Q)) continue;
-        ++L.led.line_hits;
-        if (geom::acute(a, b, d)) {
-          geom::center3(a, b, d, ctr);
-          if (center_in_box(a, ctr, Q)) judge(C, L, c, c[i], ctr, {c[i], c[j], c[k], kNone}, 3);
-        }
-        for (u32 l = k + 1; l < m; ++l) {
-          if (!M(i, l) || !M(j, l) || !M(k, l)) continue;
-          ++L.led.quad_tests;
-          const P3& e = C.P[c[l]];
-          if (!geom::center4(a, b, d, e, ctr)) continue;
-          if (!center_in_box(a, ctr, Q)) continue;
-          const P3* t[4] = {&a, &b, &d, &e};
-          if (!geom::strictly_inside_tetra(t, a, ctr)) continue;
-          judge(C, L, c, c[i], ctr, {c[i], c[j], c[k], c[l]}, 4);
-        }
-      }
-    }
+  if (m <= 64) enumerate_leaf_masks<1>(C, L, c, Q, 1);
+  else if (m <= 128) enumerate_leaf_masks<2>(C, L, c, Q, 2);
+  else if (m <= 256) enumerate_leaf_masks<4>(C, L, c, Q, 4);
+  else enumerate_leaf_masks<0>(C, L, c, Q, (m + 63) / 64);
 }
 
 struct Task {

@@ -23,7 +23,7 @@ namespace mhgp10 {
 
 struct CatalogueLedger {
   u64 nodes = 0, leaves = 0, skipped_bbox = 0, sum_m = 0, max_m = 0;
-  u64 guard_tests = 0, dominance_tests = 0;
+  u64 guard_tests = 0, dominance_tests = 0, leaf_dominance_tests = 0;
   u64 pair_tests = 0, triple_tests = 0, line_hits = 0, quad_tests = 0;
   u64 judged = 0, emitted = 0, extended = 0, weighted = 0, max_shell = 0, stalled_leaves = 0;
 };
