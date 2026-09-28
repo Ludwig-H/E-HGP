@@ -1,0 +1,7 @@
+{
+  "cpu_count": 8,
+  "numpy": "2.5.3",
+  "platform": "Linux-6.8.0-1064-azure-x86_64-with-glibc2.39",
+  "python": "3.12.1",
+  "scikit_learn": "1.9.1"
+}

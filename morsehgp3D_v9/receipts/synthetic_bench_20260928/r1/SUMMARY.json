@@ -1,0 +1,407 @@
+{
+  "bench_commit": "f4d74af7e8edaa73f8cc70164ae145c4150c2de1",
+  "bench_sources_sha256": "4d4e44362835257000258130469db5b62de8f7490ec7c20e14fda4f478e63e1c",
+  "by_family": {
+    "anisotropic": {
+      "hdbscan_default": {
+        "ari": 0.558,
+        "coverage": 0.8022
+      },
+      "hdbscan_oracle": {
+        "ari": 0.6232,
+        "coverage": 0.8625
+      },
+      "single_linkage": {
+        "ari": 0.1911,
+        "coverage": 1.0
+      }
+    },
+    "bridge": {
+      "hdbscan_default": {
+        "ari": 0.6,
+        "coverage": 0.8665
+      },
+      "hdbscan_oracle": {
+        "ari": 0.6702,
+        "coverage": 0.8942
+      },
+      "single_linkage": {
+        "ari": 0.1623,
+        "coverage": 1.0
+      }
+    },
+    "filaments": {
+      "hdbscan_default": {
+        "ari": 0.508,
+        "coverage": 0.8659
+      },
+      "hdbscan_oracle": {
+        "ari": 0.5915,
+        "coverage": 0.8862
+      },
+      "single_linkage": {
+        "ari": 0.4094,
+        "coverage": 1.0
+      }
+    },
+    "heteroscedastic": {
+      "hdbscan_default": {
+        "ari": 0.561,
+        "coverage": 0.6524
+      },
+      "hdbscan_oracle": {
+        "ari": 0.5949,
+        "coverage": 0.6966
+      },
+      "single_linkage": {
+        "ari": 0.2176,
+        "coverage": 1.0
+      }
+    },
+    "hierarchical": {
+      "hdbscan_default": {
+        "ari": 0.6664,
+        "coverage": 0.9864
+      },
+      "hdbscan_oracle": {
+        "ari": 0.9575,
+        "coverage": 0.9998
+      },
+      "single_linkage": {
+        "ari": 0.9709,
+        "coverage": 1.0
+      }
+    },
+    "shells": {
+      "hdbscan_default": {
+        "ari": 0.5888,
+        "coverage": 1.0
+      },
+      "hdbscan_oracle": {
+        "ari": 1.0,
+        "coverage": 1.0
+      },
+      "single_linkage": {
+        "ari": 1.0,
+        "coverage": 1.0
+      }
+    },
+    "spherical": {
+      "hdbscan_default": {
+        "ari": 0.4826,
+        "coverage": 0.8024
+      },
+      "hdbscan_oracle": {
+        "ari": 0.6465,
+        "coverage": 0.8268
+      },
+      "single_linkage": {
+        "ari": 0.0746,
+        "coverage": 1.0
+      }
+    },
+    "unbalanced": {
+      "hdbscan_default": {
+        "ari": 0.5257,
+        "coverage": 0.657
+      },
+      "hdbscan_oracle": {
+        "ari": 0.5846,
+        "coverage": 0.7114
+      },
+      "single_linkage": {
+        "ari": 0.0731,
+        "coverage": 1.0
+      }
+    }
+  },
+  "by_intrinsic_dimension": {
+    "1": {
+      "hdbscan_default": {
+        "ari": 0.508,
+        "coverage": 0.8659
+      },
+      "hdbscan_oracle": {
+        "ari": 0.5915,
+        "coverage": 0.8862
+      },
+      "single_linkage": {
+        "ari": 0.4094,
+        "coverage": 1.0
+      }
+    },
+    "2": {
+      "hdbscan_default": {
+        "ari": 0.5888,
+        "coverage": 1.0
+      },
+      "hdbscan_oracle": {
+        "ari": 1.0,
+        "coverage": 1.0
+      },
+      "single_linkage": {
+        "ari": 1.0,
+        "coverage": 1.0
+      }
+    },
+    "3": {
+      "hdbscan_default": {
+        "ari": 0.5289,
+        "coverage": 0.798
+      },
+      "hdbscan_oracle": {
+        "ari": 0.6649,
+        "coverage": 0.8296
+      },
+      "single_linkage": {
+        "ari": 0.1901,
+        "coverage": 1.0
+      }
+    }
+  },
+  "by_level": {
+    "easy": {
+      "hdbscan_default": {
+        "ari": 0.9698,
+        "coverage": 0.9748
+      },
+      "hdbscan_oracle": {
+        "ari": 0.9818,
+        "coverage": 0.985
+      },
+      "single_linkage": {
+        "ari": 0.7172,
+        "coverage": 1.0
+      }
+    },
+    "extreme": {
+      "hdbscan_default": {
+        "ari": 0.1986,
+        "coverage": 0.705
+      },
+      "hdbscan_oracle": {
+        "ari": 0.3874,
+        "coverage": 0.7454
+      },
+      "single_linkage": {
+        "ari": 0.2424,
+        "coverage": 1.0
+      }
+    },
+    "hard": {
+      "hdbscan_default": {
+        "ari": 0.3822,
+        "coverage": 0.7568
+      },
+      "hdbscan_oracle": {
+        "ari": 0.5759,
+        "coverage": 0.8053
+      },
+      "single_linkage": {
+        "ari": 0.1741,
+        "coverage": 1.0
+      }
+    },
+    "medium": {
+      "hdbscan_default": {
+        "ari": 0.5921,
+        "coverage": 0.8449
+      },
+      "hdbscan_oracle": {
+        "ari": 0.7591,
+        "coverage": 0.862
+      },
+      "single_linkage": {
+        "ari": 0.1761,
+        "coverage": 1.0
+      }
+    }
+  },
+  "centre_by_groups": {
+    "16": {
+      "hdbscan_default": {
+        "ari": 0.6359,
+        "coverage": 0.8255
+      },
+      "hdbscan_oracle": {
+        "ari": 0.7971,
+        "coverage": 0.8982
+      },
+      "single_linkage": {
+        "ari": 0.1482,
+        "coverage": 1.0
+      }
+    },
+    "2": {
+      "hdbscan_default": {
+        "ari": 0.6101,
+        "coverage": 0.7816
+      },
+      "hdbscan_oracle": {
+        "ari": 0.646,
+        "coverage": 0.8067
+      },
+      "single_linkage": {
+        "ari": 0.0,
+        "coverage": 1.0
+      }
+    },
+    "32": {
+      "hdbscan_default": {
+        "ari": 0.0316,
+        "coverage": 0.9867
+      },
+      "hdbscan_oracle": {
+        "ari": 0.4908,
+        "coverage": 0.8702
+      },
+      "single_linkage": {
+        "ari": 0.0585,
+        "coverage": 1.0
+      }
+    },
+    "4": {
+      "hdbscan_default": {
+        "ari": 0.7044,
+        "coverage": 0.8066
+      },
+      "hdbscan_oracle": {
+        "ari": 0.7361,
+        "coverage": 0.8268
+      },
+      "single_linkage": {
+        "ari": 0.0,
+        "coverage": 1.0
+      }
+    },
+    "8": {
+      "hdbscan_default": {
+        "ari": 0.5266,
+        "coverage": 0.7645
+      },
+      "hdbscan_oracle": {
+        "ari": 0.6828,
+        "coverage": 0.7655
+      },
+      "single_linkage": {
+        "ari": 0.0379,
+        "coverage": 1.0
+      }
+    }
+  },
+  "centre_by_noise": {
+    "0.0": {
+      "hdbscan_default": {
+        "ari": 0.3957,
+        "coverage": 0.9218
+      },
+      "hdbscan_oracle": {
+        "ari": 0.7683,
+        "coverage": 0.8525
+      },
+      "single_linkage": {
+        "ari": 0.117,
+        "coverage": 1.0
+      }
+    },
+    "0.1": {
+      "hdbscan_default": {
+        "ari": 0.6165,
+        "coverage": 0.7532
+      },
+      "hdbscan_oracle": {
+        "ari": 0.6855,
+        "coverage": 0.7989
+      },
+      "single_linkage": {
+        "ari": 0.0003,
+        "coverage": 1.0
+      }
+    },
+    "0.3": {
+      "hdbscan_default": {
+        "ari": 0.5675,
+        "coverage": 0.6184
+      },
+      "hdbscan_oracle": {
+        "ari": 0.5944,
+        "coverage": 0.645
+      },
+      "single_linkage": {
+        "ari": -0.0038,
+        "coverage": 1.0
+      }
+    }
+  },
+  "centre_by_size": {
+    "2000": {
+      "hdbscan_default": {
+        "ari": 0.5266,
+        "coverage": 0.7645
+      },
+      "hdbscan_oracle": {
+        "ari": 0.6828,
+        "coverage": 0.7655
+      },
+      "single_linkage": {
+        "ari": 0.0379,
+        "coverage": 1.0
+      }
+    },
+    "32000": {
+      "hdbscan_default": {
+        "ari": 0.7738,
+        "coverage": 0.8552
+      },
+      "hdbscan_oracle": {
+        "ari": 0.786,
+        "coverage": 0.8619
+      },
+      "single_linkage": {
+        "ari": 0.0,
+        "coverage": 1.0
+      }
+    },
+    "500": {
+      "hdbscan_default": {
+        "ari": 0.2681,
+        "coverage": 0.934
+      },
+      "hdbscan_oracle": {
+        "ari": 0.683,
+        "coverage": 0.8896
+      },
+      "single_linkage": {
+        "ari": 0.2023,
+        "coverage": 1.0
+      }
+    },
+    "8000": {
+      "hdbscan_default": {
+        "ari": 0.6217,
+        "coverage": 0.8639
+      },
+      "hdbscan_oracle": {
+        "ari": 0.7351,
+        "coverage": 0.8347
+      },
+      "single_linkage": {
+        "ari": 0.0153,
+        "coverage": 1.0
+      }
+    }
+  },
+  "commit": "f4d74af7e8edaa73f8cc70164ae145c4150c2de1",
+  "date": "2026-09-28",
+  "phase": "exploration_v9_hors_registre",
+  "points_total": 772500,
+  "public_status": "not_claimed",
+  "receipt": "synthetic_bench_20260928/r1",
+  "replay": {
+    "digest_mismatches": 0,
+    "digests_checked": 45,
+    "plan_identical": true
+  },
+  "runs_per_method": 255,
+  "scenes": 51
+}
