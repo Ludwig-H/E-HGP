@@ -87,6 +87,12 @@ inline void center2(const P3& a, const P3& b, Center& out) {
   out.D = 2;
 }
 
+// Cle de puissance exacte s(z) = D |z - a|^2 - 2 N.(z - a) = D (|z - c|^2 - r^2) ; |s| < 2^122 en u18.
+inline i128 side_key(const Center& c, const P3& a, const P3& z) {
+  const i128 dx = z.x - a.x, dy = z.y - a.y, dz = z.z - a.z;
+  return c.D * (dx * dx + dy * dy + dz * dz) - 2 * (c.N[0] * dx + c.N[1] * dy + c.N[2] * dz);
+}
+
 // Cote du site z par rapport a la sphere de centre a + N/D passant par a : -1 interieur, 0 coquille, 1 exterieur.
 inline int side(const Center& c, const P3& a, const P3& z) {
   const i128 dx = z.x - a.x, dy = z.y - a.y, dz = z.z - a.z;

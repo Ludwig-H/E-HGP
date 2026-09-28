@@ -6,6 +6,7 @@
 
 #include <vector>
 
+#include "arith/geometry.hpp"
 #include "cloud/cloud.hpp"
 
 namespace mhgp10 {
@@ -23,6 +24,16 @@ class SiteTree {
   // Sites (indices, ordre croissant) a distance carree <= r2 de q.
   void within(i64 qx, i64 qy, i64 qz, u64 r2, std::vector<u32>& out) const;
 
+  // Requetes a centre rationnel c = anchor + N/D (anchor sur la sphere de rayon r^2 = |N|^2 / D^2).
+  // Cle exacte s(z) = D |z - a|^2 - 2 N.(z - a) = D (|z - c|^2 - r^2) : meme ordre que la distance a c.
+  // L'elagage des boites se fait en double avec une marge prouvee large (erreur < 1e-3 en u18) ; toutes les
+  // decisions sur les sites sont exactes.
+  //
+  // `count` sites de plus petite cle (departage par indice), ordre croissant ; out = (cle, site).
+  void nearest(const geom::P3& anchor, const geom::Center& c, u32 count, std::vector<std::pair<i128, u32>>& out) const;
+  // Sites de cle < 0 (interieur strict) et = 0 (coquille), tries par indice.
+  void closed_ball(const geom::P3& anchor, const geom::Center& c, std::vector<u32>& interior, std::vector<u32>& shell) const;
+
   const Cloud& cloud() const { return cloud_; }
 
  private:
@@ -33,6 +44,7 @@ class SiteTree {
   };
   u32 build(u32 lo, u32 hi);
   static u64 box_dist2(const Node& nd, i64 qx, i64 qy, i64 qz);
+  static double box_dist2(const Node& nd, const double q[3]);
 
   const Cloud& cloud_;
   std::vector<Node> nodes_;
