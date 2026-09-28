@@ -1151,6 +1151,42 @@ if(Python3_Interpreter_FOUND AND EXISTS ${MHGP9_LIDAR_SCALING_CASE})
   endforeach()
 endif()
 
+# Fixture permanente de la contradiction « catalogue Gabriel de la fenetre de
+# rang contre catalogue contributif d'ordre-Voronoi » (registre des preuves,
+# paragraphe 2, ligne `false_in_general`). Elle existait depuis le
+# 27 septembre 2026 sans porte, donc sans rejeu possible depuis le depot :
+# l'audit du 28 l'a relevee. La porte recalcule en arithmetique exacte les
+# trois faits qui font la contradiction — une boule hors de la fenetre de rang
+# K=2, une facette qui n'existe que d'un cote, et des masses communes qui
+# different dans PLUSIEURS rapports distincts donc pas par renormalisation —
+# et tue trois mutants causaux. Sous python3 -O aussi.
+set(MHGP9_CATALOGUE_FIXTURE
+    ${CMAKE_CURRENT_SOURCE_DIR}/experiments/point_dendrogram_20260927/test_catalogue_counterexample.py)
+set(MHGP9_CATALOGUE_GATE ${CMAKE_CURRENT_SOURCE_DIR}/tests/math/catalogue_counterexample_gate.py)
+if(Python3_Interpreter_FOUND AND EXISTS ${MHGP9_CATALOGUE_FIXTURE})
+  foreach(mode IN ITEMS normal optimized)
+    if(mode STREQUAL "optimized")
+      set(py_flags "-B -O")
+    else()
+      set(py_flags "-B")
+    endif()
+    add_test(NAME mhgp9_catalogue_counterexample_${mode}
+             COMMAND ${CMAKE_COMMAND} -DEXPECTED=0 -DCMD=${Python3_EXECUTABLE}
+                     "-DARGS=${py_flags} ${MHGP9_CATALOGUE_GATE} ${MHGP9_CATALOGUE_FIXTURE}"
+                     "-DEXPECT_PREFIX=catalogue_counterexample mutants_killed=3/3 shared_facets=5 distinct_ratios=3"
+                     -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
+    set_tests_properties(mhgp9_catalogue_counterexample_${mode} PROPERTIES LABELS "gate;math" TIMEOUT 120)
+  endforeach()
+  foreach(mutant IN ITEMS equal_masses single_ratio no_missing_ball)
+    add_test(NAME mhgp9_catalogue_counterexample_mutant_${mutant}
+             COMMAND ${CMAKE_COMMAND} -DEXPECTED=4 -DCMD=${Python3_EXECUTABLE}
+                     "-DARGS=-B -O ${MHGP9_CATALOGUE_GATE} ${MHGP9_CATALOGUE_FIXTURE} --inject=${mutant}"
+                     "-DEXPECT_PREFIX=catalogue_counterexample mutant=${mutant} killed"
+                     -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/run_expect.cmake)
+    set_tests_properties(mhgp9_catalogue_counterexample_mutant_${mutant} PROPERTIES LABELS "gate;math;mutant" TIMEOUT 120)
+  endforeach()
+endif()
+
 # Mutant de compilation du noyau MEB (derniere paire maximale au lieu de la
 # premiere) : la porte doit le refuser (code 1, support canonique faux).
 # MEB propose (Welzl en double, verification exacte, canonisation au bord) :
