@@ -1,0 +1,156 @@
+{
+ "units": 256,
+ "tower": [
+  {
+   "score": 0.7444,
+   "cfg": {
+    "method": "tower",
+    "k": "1",
+    "mcs": "sqrt",
+    "z": "zhat",
+    "selection": "eom",
+    "alpha": "",
+    "fill": "full"
+   }
+  },
+  {
+   "score": 0.7413,
+   "cfg": {
+    "method": "tower",
+    "k": "1",
+    "mcs": "50",
+    "z": "zhat",
+    "selection": "eom",
+    "alpha": "",
+    "fill": "full"
+   }
+  },
+  {
+   "score": 0.7397,
+   "cfg": {
+    "method": "tower",
+    "k": "1",
+    "mcs": "sqrt",
+    "z": "zhat",
+    "selection": "eom",
+    "alpha": "",
+    "fill": "none"
+   }
+  },
+  {
+   "score": 0.7354,
+   "cfg": {
+    "method": "tower",
+    "k": "1",
+    "mcs": "50",
+    "z": "zhat",
+    "selection": "eom",
+    "alpha": "",
+    "fill": "none"
+   }
+  },
+  {
+   "score": 0.7295,
+   "cfg": {
+    "method": "tower",
+    "k": "2",
+    "mcs": "50",
+    "z": "zhat",
+    "selection": "eom",
+    "alpha": "",
+    "fill": "full"
+   }
+  }
+ ],
+ "tower_oracle": 0.8266,
+ "hdbscan": [
+  {
+   "score": 0.7444,
+   "cfg": {
+    "method": "hdbscan",
+    "k": "20",
+    "mcs": "sqrt",
+    "z": "",
+    "selection": "leaf",
+    "alpha": "1.0",
+    "fill": "full"
+   }
+  },
+  {
+   "score": 0.741,
+   "cfg": {
+    "method": "hdbscan",
+    "k": "12",
+    "mcs": "sqrt",
+    "z": "",
+    "selection": "leaf",
+    "alpha": "2.0",
+    "fill": "full"
+   }
+  },
+  {
+   "score": 0.7398,
+   "cfg": {
+    "method": "hdbscan",
+    "k": "8",
+    "mcs": "sqrt",
+    "z": "",
+    "selection": "leaf",
+    "alpha": "2.0",
+    "fill": "full"
+   }
+  },
+  {
+   "score": 0.7331,
+   "cfg": {
+    "method": "hdbscan",
+    "k": "12",
+    "mcs": "sqrt",
+    "z": "",
+    "selection": "leaf",
+    "alpha": "1.0",
+    "fill": "full"
+   }
+  },
+  {
+   "score": 0.7313,
+   "cfg": {
+    "method": "hdbscan",
+    "k": "5",
+    "mcs": "sqrt",
+    "z": "",
+    "selection": "leaf",
+    "alpha": "2.0",
+    "fill": "full"
+   }
+  }
+ ],
+ "hdbscan_oracle": 0.8592,
+ "hdbscan_default": [
+  {
+   "score": 0.5563,
+   "cfg": {
+    "method": "hdbscan_default",
+    "k": "",
+    "mcs": "5",
+    "z": "",
+    "selection": "eom",
+    "alpha": "1.0",
+    "fill": "none"
+   }
+  },
+  {
+   "score": 0.5472,
+   "cfg": {
+    "method": "hdbscan_default",
+    "k": "",
+    "mcs": "5",
+    "z": "",
+    "selection": "eom",
+    "alpha": "1.0",
+    "fill": "full"
+   }
+  }
+ ],
+ "hdbscan_default_oracle": 0.5692
+}
