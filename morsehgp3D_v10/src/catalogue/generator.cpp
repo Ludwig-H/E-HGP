@@ -367,8 +367,10 @@ void process(const Ctx& C, Local& L, const Box& Q, const std::vector<u32>& paren
       return;
     }
   }
-  const int stag = cand.size() == parent.size() ? parent_stag + 1 : 0;
+  // Stagnation (liste qui ne decroit plus) : comptee seulement sous l'echelle de la grille (cote <= 2^kT,
+  // un millimetre en u18), ou elle signale une sphere cospherique ; au-dessus, la decoupe continue toujours.
   const i64 side = Q.hi[0] - Q.lo[0];
+  const int stag = (side <= (i64(1) << kT) && cand.size() == parent.size()) ? parent_stag + 1 : 0;
   if (cand.size() > C.M && side > 1 && stag < kStagnationLimit) {
     const i64 mid[3] = {(Q.lo[0] + Q.hi[0]) / 2, (Q.lo[1] + Q.hi[1]) / 2, (Q.lo[2] + Q.hi[2]) / 2};
     auto shared = spill ? std::make_shared<const std::vector<u32>>(cand) : nullptr;
@@ -431,10 +433,21 @@ Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& par
     return cat;
   }
   // Phase sequentielle en largeur jusqu'a une frontiere assez large, puis taches paralleles.
+  // Racine : cube dyadique minimal contenant les sites (tout centre critique est dans conv(X)).
   Box root;
+  i64 lo[3] = {INT64_MAX, INT64_MAX, INT64_MAX}, ext = 0;
+  for (u32 s = 0; s < n; ++s) {
+    lo[0] = std::min(lo[0], C.X[s].x);
+    lo[1] = std::min(lo[1], C.X[s].y);
+    lo[2] = std::min(lo[2], C.X[s].z);
+  }
+  for (u32 s = 0; s < n; ++s)
+    ext = std::max({ext, C.X[s].x - lo[0], C.X[s].y - lo[1], C.X[s].z - lo[2]});
+  i64 side = 1;
+  while (side <= ext) side <<= 1;
   for (int ax = 0; ax < 3; ++ax) {
-    root.lo[ax] = 0;
-    root.hi[ax] = i64(1) << (kCoordinateBits + kT);
+    root.lo[ax] = lo[ax];
+    root.hi[ax] = lo[ax] + side;
   }
   auto all = std::make_shared<std::vector<u32>>(n);
   for (u32 s = 0; s < n; ++s) (*all)[s] = s;

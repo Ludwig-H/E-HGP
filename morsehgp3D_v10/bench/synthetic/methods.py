@@ -1,0 +1,55 @@
+"""Methodes du banc : la tete v10 sur la tour (CLI mhgp10_cluster) et sklearn.cluster.HDBSCAN appele tel quel."""
+import os
+import subprocess
+import tempfile
+import warnings
+
+import numpy as np
+from scipy.spatial import cKDTree
+
+warnings.filterwarnings('ignore')
+
+
+def tower_labels(build, grid, k, mcs, z=1.0, selection='eom', allow_single=False, threads=4):
+    exe = os.path.join(build, 'mhgp10_cluster')
+    with tempfile.TemporaryDirectory() as tmp:
+        src, out = os.path.join(tmp, 'in.u32le'), os.path.join(tmp, 'out.i32le')
+        np.ascontiguousarray(grid, dtype='<u4').tofile(src)
+        cmd = [exe, src, out, '--k=%d' % k, '--mcs=%d' % mcs, '--z=%r' % float(z), '--selection=' + selection,
+               '--threads=%d' % threads]
+        if allow_single:
+            cmd.append('--allow-single')
+        r = subprocess.run(cmd, capture_output=True, text=True)
+        if r.returncode != 0:
+            raise RuntimeError('mhgp10_cluster code %d : %s %s' % (r.returncode, r.stdout, r.stderr))
+        return np.fromfile(out, dtype='<i4').astype(np.int64)
+
+
+def hdbscan_labels(grid, min_samples, mcs, selection='eom', alpha=1.0, allow_single=False):
+    from sklearn.cluster import HDBSCAN
+    model = HDBSCAN(min_cluster_size=int(mcs), min_samples=int(min_samples), cluster_selection_method=selection,
+                    alpha=float(alpha), allow_single_cluster=bool(allow_single), algorithm='kd_tree', copy=True)
+    return model.fit(np.asarray(grid, dtype=np.float64)).labels_.astype(np.int64)
+
+
+def fill_noise(grid, labels):
+    """Remplissage complet : chaque point de bruit recoit l'etiquette du point classe le plus proche."""
+    labels = labels.copy()
+    noise = labels < 0
+    if noise.all() or not noise.any():
+        return labels
+    tree = cKDTree(np.asarray(grid[~noise], dtype=np.float64))
+    _, j = tree.query(np.asarray(grid[noise], dtype=np.float64))
+    labels[noise] = labels[~noise][j]
+    return labels
+
+
+def zhat(grid, k=10):
+    """Dimension intrinseque, MLE de Levina-Bickel moyennee (MacKay-Ghahramani), point exclu."""
+    X = np.asarray(grid, dtype=np.float64)
+    d, _ = cKDTree(X).query(X, k=k + 1)
+    d = d[:, 1:]
+    d = np.maximum(d, 1e-12)
+    inv = np.log(d[:, -1:] / d[:, :-1]).sum(axis=1) / (k - 1)
+    inv = inv[np.isfinite(inv) & (inv > 0)]
+    return float(1.0 / inv.mean()) if len(inv) else 3.0

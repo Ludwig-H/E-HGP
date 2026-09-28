@@ -43,6 +43,7 @@ struct Tower {
 struct TowerParams {
   int kmax = 5;
   bool points = true;  // attaches C n X
+  int only_order = 0;  // > 0 : ne construire que cet ordre (les ordres sont independants)
 };
 
 Result<Tower> build_tower(const Cloud& cloud, const SiteTree& tree, const Catalogue& cat, const TowerParams& params,

@@ -477,6 +477,7 @@ Result<Tower> build_tower(const Cloud& cloud, const SiteTree& tree, const Catalo
   t.orders.resize(t.kmax);
   Outcome worst;
   for (int k = 1; k <= t.kmax; ++k) {
+    if (params.only_order > 0 && k != params.only_order) continue;
     const Outcome o = build_order(g, k, params, pool, t.orders[k - 1]);
     if (!o.ok() && (worst.ok() || o.precedes(worst))) worst = o;
   }

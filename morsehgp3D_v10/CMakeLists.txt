@@ -55,6 +55,9 @@ target_link_libraries(mhgp10_catalogue PRIVATE mhgp10_core)
 add_executable(mhgp10_tower cli/mhgp10_tower.cpp)
 target_link_libraries(mhgp10_tower PRIVATE mhgp10_core)
 
+add_executable(mhgp10_cluster cli/mhgp10_cluster.cpp)
+target_link_libraries(mhgp10_cluster PRIVATE mhgp10_core)
+
 add_executable(mhgp10_unit tests/unit/unit_main.cpp)
 target_link_libraries(mhgp10_unit PRIVATE mhgp10_core)
 mhgp10_gate(NAME mhgp10_unit COMMAND mhgp10_unit CODE 0 LINE "unit_ok" LABELS gate fast)

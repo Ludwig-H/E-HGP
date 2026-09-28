@@ -81,6 +81,36 @@ def check(exe, P, K, tmp):
     return None
 
 
+def translation_check(exe, rnd, tmp):
+    """Regression du 28 sept. : un nuage compact loin de l'origine (racine bien plus grande que les donnees)
+    etait refuse (wide_leaf). Le catalogue doit etre le meme, a translation pres."""
+    pts = set()
+    while len(pts) < 3000:
+        pts.add(tuple(rnd.randint(0, 20000) for _ in range(3)))
+    P = sorted(pts)
+    dumps = []
+    for off in (0, 200000):
+        src = os.path.join(tmp, 'tr.u32le')
+        with open(src, 'wb') as f:
+            for p in P:
+                for v in p:
+                    f.write(int(v + off).to_bytes(4, 'little'))
+        dump = os.path.join(tmp, 'tr%d.txt' % off)
+        r = subprocess.run([exe, src, '--k=5', '--threads=2', '--dump=' + dump], capture_output=True, text=True)
+        if r.returncode != 0:
+            return 'translation off=%d refus %s' % (off, r.stdout.strip())
+        def shift(line, d):
+            head, rest = line.split('|', 1)
+            parts = []
+            for seg in rest.split('|'):
+                pts_ = sorted(tuple(int(c) - d for c in t.split(',')) for t in seg.split())
+                parts.append(' '.join(','.join(str(c) for c in t) for t in pts_))
+            return head + '|' + '|'.join(parts)
+        # l'indice de site est le rang de Morton, qui depend de la translation : forme canonique triee
+        dumps.append(sorted(shift(l.rstrip('\n'), off) for l in open(dump)))
+    return None if dumps[0] == dumps[1] and len(dumps[0]) > 1000 else 'translation : catalogues differents'
+
+
 def clouds(count, rnd):
     for t in range(count):
         n = rnd.randint(5, 22)
@@ -116,6 +146,11 @@ def main():
                         print('ECART K=%d n=%d : %s\n  %s' % (K, len(P), err, P))
                 else:
                     balls += sum(1 for b in R.catalogue(P, K) if b.qmin >= 2)
+        err = translation_check(exe, rnd, tmp)
+        checks += 1
+        if err:
+            fails += 1
+            print('ECART %s' % err)
     print('catalogue_oracle_checks %d fails %d balls %d' % (checks, fails, balls))
     if fails:
         return 1

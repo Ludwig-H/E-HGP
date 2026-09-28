@@ -27,6 +27,7 @@ int main(int argc, char** argv) {
     else if (a.rfind("--threads=", 0) == 0) threads = unsigned(std::stoul(a.substr(10)));
     else if (a.rfind("--leaf=", 0) == 0) params.leaf_size = u32(std::stoul(a.substr(7)));
     else if (a.rfind("--dump=", 0) == 0) dump = a.substr(7);
+    else if (a.rfind("--max-leaf=", 0) == 0) params.max_leaf = u32(std::stoul(a.substr(11)));
     else {
       std::fprintf(stderr, "option inconnue %s\n", a.c_str());
       return 2;
