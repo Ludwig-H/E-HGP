@@ -35,6 +35,8 @@ add_library(mhgp10_core STATIC
   src/sched/pool.cpp
   src/cloud/cloud.cpp
   src/cloud/site_tree.cpp
+  src/arith/geometry.cpp
+  src/catalogue/generator.cpp
   src/points/dendrogram.cpp
   src/head/head.cpp)
 target_include_directories(mhgp10_core PUBLIC ${PROJECT_SOURCE_DIR}/src)
@@ -45,6 +47,9 @@ endif()
 
 include(CTest)
 include(cmake/gates.cmake)
+
+add_executable(mhgp10_catalogue cli/mhgp10_catalogue.cpp)
+target_link_libraries(mhgp10_catalogue PRIVATE mhgp10_core)
 
 add_executable(mhgp10_unit tests/unit/unit_main.cpp)
 target_link_libraries(mhgp10_unit PRIVATE mhgp10_core)
@@ -59,6 +64,11 @@ target_link_libraries(mhgp10_mreach_cluster PRIVATE mhgp10_core)
 
 find_package(Python3 COMPONENTS Interpreter)
 if(Python3_FOUND)
+  add_test(NAME mhgp10_catalogue_oracle
+           COMMAND ${CMAKE_COMMAND} -DCMD=${Python3_EXECUTABLE}
+                   "-DARGS=${PROJECT_SOURCE_DIR}/tests/oracle/test_catalogue_oracle.py ${PROJECT_BINARY_DIR}"
+                   -DEXPECTED=0 -P ${PROJECT_SOURCE_DIR}/cmake/run_expect.cmake)
+  set_tests_properties(mhgp10_catalogue_oracle PROPERTIES LABELS "gate;oracle" TIMEOUT 1800)
   add_test(NAME mhgp10_head_condensation_vs_sklearn
            COMMAND ${CMAKE_COMMAND} -DCMD=${Python3_EXECUTABLE}
                    "-DARGS=${PROJECT_SOURCE_DIR}/tests/head/test_condensation_vs_sklearn.py ${PROJECT_BINARY_DIR}"
