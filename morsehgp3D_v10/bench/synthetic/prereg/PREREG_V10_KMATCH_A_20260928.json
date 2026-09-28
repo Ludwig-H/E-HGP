@@ -1,0 +1,236 @@
+{
+ "attribution_statement": "Attribution, écrite avant le test : à K = 1, la hiérarchie de la tour est exactement celle de sklearn à min_samples = 1 (liaison simple, à un facteur d'échelle près selon alpha) ; tout écart à K = 1 vient donc de la tête (échelle ẑ, sélection, politique de bruit), pas de la géométrie. À K ≥ 2, les deux hiérarchies diffèrent (multicouverture exacte contre atteignabilité mutuelle) et les têtes aussi ; l'écart mesure le couple hiérarchie + tête.",
+ "decision": {
+  "alpha": 0.05,
+  "bootstrap": 10000,
+  "delta_min": 0.02,
+  "pairs": [
+   {
+    "adversary": "hdb_ms1",
+    "method": "tw_K1",
+    "name": "K=1"
+   },
+   {
+    "adversary": "hdb_ms2",
+    "method": "tw_K2",
+    "name": "K=2"
+   },
+   {
+    "adversary": "hdb_ms3",
+    "method": "tw_K3",
+    "name": "K=3"
+   }
+  ],
+  "permutations": 100000,
+  "refusal_cap": 0.01,
+  "reported": [
+   {
+    "adversary": "hdb_lib",
+    "method": "tw_K1",
+    "name": "défaut sklearn"
+   },
+   {
+    "adversary": "hdb_these_K1",
+    "method": "tw_K1",
+    "name": "protocole de la thèse"
+   }
+  ]
+ },
+ "design": "Panneau apparie K = min_samples (directive utilisateur du 28 septembre 2026). Lot A : K = 1, 2, 3, teste maintenant en local. Lot B : K = 5, 8, 10, preenregistre separement apres l acceleration de la tour (cout actuel super-lineaire), avec la meme regle ; les deux lots sont publies quel que soit leur resultat. Aucun autre K n est teste sur l espace test pour ce panneau.",
+ "dev_basis": {
+  "choices": {
+   "K1": {
+    "dev_delta": 0.0611,
+    "hdb": {
+     "J": 0.715,
+     "candidates": 24,
+     "fill": "b1.5",
+     "head": "eom_a1",
+     "max": 0.715
+    },
+    "tower": {
+     "J": 0.7761,
+     "candidates": 18,
+     "fill": "b1.5",
+     "head": "eom_zzhat",
+     "max": 0.7764
+    }
+   },
+   "K2": {
+    "dev_delta": 0.0379,
+    "hdb": {
+     "J": 0.7261,
+     "candidates": 24,
+     "fill": "b2",
+     "head": "leaf_a2",
+     "max": 0.7261
+    },
+    "tower": {
+     "J": 0.764,
+     "candidates": 18,
+     "fill": "b2",
+     "head": "eom_zzhat",
+     "max": 0.764
+    }
+   },
+   "K3": {
+    "dev_delta": 0.0046,
+    "hdb": {
+     "J": 0.7479,
+     "candidates": 24,
+     "fill": "b2",
+     "head": "leaf_a2",
+     "max": 0.7479
+    },
+    "tower": {
+     "J": 0.7525,
+     "candidates": 18,
+     "fill": "b2",
+     "head": "eom_zzhat",
+     "max": 0.7525
+    }
+   }
+  },
+  "grids": {
+   "fills": "none, full, b1.5, b2, b2.5, b3 (coeur au max(K, 5)-ieme voisin)",
+   "mcs": "round(sqrt(n)) des deux cotes",
+   "sklearn": "EOM ou feuilles x alpha 1 ou 2",
+   "tower": "EOM z = 1, EOM z = zhat, feuilles"
+  },
+  "rule": "a chaque K, argmax de J (moyenne ponderee par cellule de l ARI_s) sur (tete, politique de bruit) ; egalite a 0,002 pres : echelle par defaut, puis politique la plus simple, puis EOM",
+  "source": "receipts/bench_dev_kmatch_20260928 (kmatch_dev_A.csv, 256 scenes dev, n = 2 000 et 8 000)"
+ },
+ "deviations_from_EVAL_v2": [
+  "8 familles du banc v9 (niveaux calibres par HDBSCAN(20, 20) en v9, biais connu) au lieu de 16 familles a niveaux geometriques ; pas de temoins nuls ni de suites publiques",
+  "comparaison appariee K = min_samples par lot, au lieu de l IUT sur six adversaires",
+  "garde AMI_nc au lieu de F1_H et AMI_s",
+  "mcs = round(sqrt(n)) fixe des deux cotes",
+  "egalites de plus proche voisin du remplissage : ordre de scipy cKDTree (identique pour toutes les methodes)",
+  "hdb_lib appelle HDBSCAN() tel quel (algorithm=\"auto\") ; les autres appels sklearn sont epingles a algorithm=\"kd_tree\""
+ ],
+ "engine": {
+  "build": "git archive 4a3d09d8a, CMake Release, g++ 13.3 (codespace)",
+  "commit": "4a3d09d8a",
+  "note": "sources C++ de morsehgp3D_v10 identiques entre 4a3d09d8a et le commit du preenregistrement ; binaire epingle par son sha256"
+ },
+ "id": "PREREG_V10_KMATCH_A_20260928",
+ "methods": [
+  {
+   "fill": "b1.5",
+   "k": 1,
+   "kind": "tower",
+   "mcs": "sqrt",
+   "name": "tw_K1",
+   "selection": "eom",
+   "z": "zhat"
+  },
+  {
+   "alpha": 1.0,
+   "fill": "b1.5",
+   "kind": "sklearn",
+   "mcs": "sqrt",
+   "min_samples": 1,
+   "name": "hdb_ms1",
+   "selection": "eom"
+  },
+  {
+   "fill": "b2",
+   "k": 2,
+   "kind": "tower",
+   "mcs": "sqrt",
+   "name": "tw_K2",
+   "selection": "eom",
+   "z": "zhat"
+  },
+  {
+   "alpha": 2.0,
+   "fill": "b2",
+   "kind": "sklearn",
+   "mcs": "sqrt",
+   "min_samples": 2,
+   "name": "hdb_ms2",
+   "selection": "leaf"
+  },
+  {
+   "fill": "b2",
+   "k": 3,
+   "kind": "tower",
+   "mcs": "sqrt",
+   "name": "tw_K3",
+   "selection": "eom",
+   "z": "zhat"
+  },
+  {
+   "alpha": 2.0,
+   "fill": "b2",
+   "kind": "sklearn",
+   "mcs": "sqrt",
+   "min_samples": 3,
+   "name": "hdb_ms3",
+   "selection": "leaf"
+  },
+  {
+   "fill": "none",
+   "kind": "sklearn_default",
+   "name": "hdb_lib"
+  },
+  {
+   "alpha": 1.0,
+   "fill": "none",
+   "kind": "sklearn",
+   "mcs": "sqrt",
+   "min_samples": 3,
+   "name": "hdb_these_K1",
+   "selection": "eom"
+  }
+ ],
+ "pins": {
+  "mhgp10_cluster_sha256": "b9d382711d541eb5c2f31a40c44cf94739592f9374f6e92a6883417d37b42815",
+  "python": "3.12.1",
+  "scripts_sha256": {
+   "decide.py": "f1859ec04b00469f95bb4ae70e5747b872c5ce8728164e8a11fbd591ade148ec",
+   "methods.py": "15e4cee580d114a95b6989b8527a48180b5fb91895fbdb7903b1e3470f456fe4",
+   "metrics.py": "76d6c92dcbcf7adca6b10284585b30cbb28114cefed3dafb46ad3ab60b75542a",
+   "run_campaign.py": "7e59000d948d4ff0e63226a84cc8ff6aeaaacd10212b4f54b16432b5a641fcc2",
+   "run_test.py": "f4d056113b9e389ba491ec9511b98af9754da9d1a357c3dbb6e9a56cfe0ea1b9",
+   "scenes.py": "61ea9abc511726c2a9ff1e066f7603d6bef195a7c5356a2d2048c28229608f00"
+  },
+  "versions": {
+   "numpy": "2.5.3",
+   "scipy": "1.18.1",
+   "sklearn": "1.9.1"
+  }
+ },
+ "plan": {
+  "families": [
+   "spherical",
+   "anisotropic",
+   "heteroscedastic",
+   "unbalanced",
+   "shells",
+   "bridge",
+   "hierarchical",
+   "filaments"
+  ],
+  "levels": [
+   "easy",
+   "medium",
+   "hard",
+   "extreme"
+  ],
+  "manifest_sha256": "c43a9f94b381f4901700f87ed583b2367a4187b80a7aa09a0ba6fed3f3edcb3e",
+  "noises": [
+   0.0,
+   0.1
+  ],
+  "replicates": 5,
+  "sizes": [
+   8000,
+   16000,
+   32000
+  ],
+  "split": "test"
+ },
+ "prediction": "Ecrite avant le test, d apres dev : ecarts dev tour - sklearn = +0.061 (K = 1), +0.038 (K = 2), +0.005 (K = 3) ; on attend une victoire de la tour la ou l ecart dev depasse 0,02 et la parite ailleurs.",
+ "status": "public_status=not_claimed ; mode=benchmark_only ; une seule execution sur l espace test (EVAL_v2 D11)"
+}

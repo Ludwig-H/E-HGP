@@ -44,6 +44,26 @@ def fill_noise(grid, labels):
     return labels
 
 
+def bounded_fill(grid, labels, k, rho):
+    """Remplissage borne b(rho) (EVAL_v2 § 2.6) : un point de bruit p recoit l'amas c du point classe le plus proche
+    si core(p) <= rho * Q95_c, ou core = distance au k-ieme voisin (point compris) et Q95_c le quantile 95 %
+    (type 7) de core sur les membres de c ; sinon p reste du bruit. Egalites de plus proche : ordre de cKDTree."""
+    labels = labels.copy()
+    noise = labels < 0
+    if noise.all() or not noise.any():
+        return labels
+    X = np.asarray(grid, dtype=np.float64)
+    core = cKDTree(X).query(X, k=int(k))[0]
+    core = core[:, -1] if core.ndim == 2 else core
+    q95 = {c: float(np.quantile(core[labels == c], 0.95)) for c in np.unique(labels[~noise])}
+    _, j = cKDTree(X[~noise]).query(X[noise])
+    cand = labels[~noise][j]
+    idx = np.flatnonzero(noise)
+    ok = core[idx] <= rho * np.array([q95[c] for c in cand])
+    labels[idx[ok]] = cand[ok]
+    return labels
+
+
 def zhat(grid, k=10):
     """Dimension intrinseque, MLE de Levina-Bickel moyennee (MacKay-Ghahramani), point exclu."""
     X = np.asarray(grid, dtype=np.float64)
