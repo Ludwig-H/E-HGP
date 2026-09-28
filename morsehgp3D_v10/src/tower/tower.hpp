@@ -30,6 +30,7 @@ struct OrderForest {
   std::vector<u32> child_off;  // CSR des enfants (fusions N-aires)
   std::vector<u32> child_val;
   std::vector<u32> birth;      // naissance : boule (ou site a K = 1) ; kNone pour une fusion
+  std::vector<u32> lower;      // image verticale dans l'ordre K - 1 (noeud vivant au niveau de creation) ; vide a K = 1
   std::vector<u32> point_node; // par site : composante qui le contient a son niveau d'entree D_K(x)
   std::vector<u64> point_level;// par site : D_K(x) (entier exact)
   u64 descents = 0, descent_steps = 0, memo_hits = 0, joins = 0, births = 0, merges = 0;
@@ -44,6 +45,7 @@ struct TowerParams {
   int kmax = 5;
   bool points = true;  // attaches C n X
   int only_order = 0;  // > 0 : ne construire que cet ordre (les ordres sont independants)
+  bool verticals = true;  // cartes K -> K - 1 (ignorees si only_order > 0)
 };
 
 Result<Tower> build_tower(const Cloud& cloud, const SiteTree& tree, const Catalogue& cat, const TowerParams& params,

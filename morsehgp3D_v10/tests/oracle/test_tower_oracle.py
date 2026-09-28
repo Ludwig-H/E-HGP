@@ -29,7 +29,7 @@ def parse(path):
             cur = dict(nodes=[], points=[])
             orders[int(t[1])] = cur
         elif t[0] == 'node':
-            cur['nodes'].append((int(t[2]), Fraction(int(t[3]), int(t[4]))))
+            cur['nodes'].append((int(t[2]), Fraction(int(t[3]), int(t[4])), int(t[5]) if len(t) > 5 else -1))
         else:
             cur['points'].append(((int(t[1]), int(t[2]), int(t[3])), int(t[4]), Fraction(int(t[5]))))
     return orders
@@ -87,6 +87,33 @@ def top(nodes, v, a, closed):
     return v
 
 
+def vertical_check(orders, k, P, levels):
+    """Carte verticale k -> k-1 : a chaque niveau critique (coupe fermee), l'image d'une composante vivante
+    d'ordre k contient ses points C n X (un point entre a l'ordre k l'est a l'ordre k-1)."""
+    up, down = orders[k], orders[k - 1]
+    idx = {p: i for i, p in enumerate(P)}
+    nodes_u, nodes_d = up['nodes'], down['nodes']
+    checked = 0
+    for a in levels:
+        ok = lambda l: l <= a  # noqa: E731
+        comp_d = {}
+        for pt, v, e in down['points']:
+            if ok(e):
+                comp_d[idx[pt]] = top(nodes_d, v, a, True)
+        for pt, v, e in up['points']:
+            if not ok(e):
+                continue
+            ru = top(nodes_u, v, a, True)
+            low = nodes_u[ru][2]
+            if low < 0:
+                return 'verticale absente k=%d' % k, checked
+            image = top(nodes_d, low, a, True)
+            if comp_d.get(idx[pt]) != image:
+                return 'verticale k=%d a=%s : point hors de l\'image' % (k, a), checked
+            checked += 1
+    return None, checked
+
+
 def check(exe, P, K, tmp):
     src = os.path.join(tmp, 'in.u32le')
     with open(src, 'wb') as f:
@@ -106,7 +133,7 @@ def check(exe, P, K, tmp):
         for a, op, cl in gamma_sweep(P, k):
             for is_closed, (want_n, want_part) in ((True, cl), (False, op)):
                 ok = (lambda l: l <= a) if is_closed else (lambda l: l < a)
-                alive = sum(1 for v, (par, lv) in enumerate(nodes)
+                alive = sum(1 for v, (par, lv, _low) in enumerate(nodes)
                             if ok(lv) and (par < 0 or not ok(nodes[par][1])))
                 if alive != want_n:
                     return 'k=%d a=%s ferme=%s composantes %d contre %d' % (k, a, is_closed, alive, want_n), cuts
@@ -118,6 +145,12 @@ def check(exe, P, K, tmp):
                 if mine != want_part:
                     return 'k=%d a=%s ferme=%s partition C n X' % (k, a, is_closed), cuts
                 cuts += 1
+    for k in range(2, min(K, len(P)) + 1):
+        levels = sorted({lv for _, lv, _ in orders[k]['nodes']} | {e for _, _, e in orders[k]['points']})
+        err, c = vertical_check(orders, k, P, levels)
+        if err:
+            return err, cuts
+        cuts += 0 * c
     return None, cuts
 
 

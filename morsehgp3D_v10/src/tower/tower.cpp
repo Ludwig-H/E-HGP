@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <memory>
 #include <unordered_map>
 
 #include "catalogue/support.hpp"
@@ -336,10 +337,12 @@ u32 rank_at_most(const Catalogue& cat, u64 e) {
   return lo;  // rang decale du dernier niveau <= e
 }
 
-Outcome build_order(const Geo& g, int k, const TowerParams& params, sched::Pool& pool, OrderForest& out) {
+Outcome build_order(const Geo& g, int k, const TowerParams& params, sched::Pool& pool, OrderForest& out,
+                    std::unique_ptr<OrderCtx>& keep) {
   const Catalogue& cat = g.cat;
   const Cloud& cloud = g.cloud;
-  OrderCtx o(g, k);
+  keep = std::make_unique<OrderCtx>(g, k);
+  OrderCtx& o = *keep;
   out.k = k;
   // naissances et jonctions
   struct Birth {
@@ -492,6 +495,61 @@ Outcome build_order(const Geo& g, int k, const TowerParams& params, sched::Pool&
   return Outcome{};
 }
 
+// Cartes verticales de l'ordre k (up) vers l'ordre k - 1 (down). Naissance de la boule b au niveau a : une
+// (k-1)-partie de sa boule fermee est realisee au centre, donc sa descente a l'ordre k - 1 donne une naissance
+// de la composante de L_{k-1}(a) qui contient la composante nee ; l'image est l'ancetre vivant au niveau a.
+// Fusion : image = ancetre au niveau de la fusion de l'image d'un enfant ; tous les enfants doivent s'accorder
+// (naturalite), sinon invariant_violated.
+Outcome build_verticals(const Geo& g, OrderForest& up, const OrderForest& down, OrderCtx& octx, sched::Pool& pool) {
+  const Catalogue& cat = g.cat;
+  const u32 nn = static_cast<u32>(up.rank.size());
+  up.lower.assign(nn, kNone);
+  auto ancestor = [&](u32 v, u32 r) {
+    while (down.parent[v] != kNone && down.rank[down.parent[v]] <= r) v = down.parent[v];
+    return v;
+  };
+  const u32 km1 = static_cast<u32>(octx.k);
+  std::vector<Scratch> scratch(pool.size());
+  std::atomic<u32> error{0};
+  // naissances (independantes)
+  pool.parallel_for(nn, 64, [&](u64 b0, u64 e0, unsigned wk) {
+    for (u64 v = b0; v < e0; ++v) {
+      const u32 ball = up.birth[v];
+      if (ball == kNone) continue;
+      Facet F;
+      if (up.k == 2) {  // naissance d'ordre 2 : une (k-1)-partie est un site de la boule fermee
+        F.n = 1;
+        F.s[0] = cat.support[ball][0];
+      } else {
+        for (u32 s2 : cat.interior(ball))
+          if (F.n < km1) F.s[F.n++] = s2;
+        for (u32 s2 : cat.shell(ball))
+          if (F.n < km1) F.s[F.n++] = s2;
+        F.sort();
+      }
+      const u32 m = resolve(octx, F, scratch[wk]);
+      if (m == kNone) {
+        error.store(1);
+        return;
+      }
+      up.lower[v] = ancestor(m, up.rank[v]);
+    }
+  });
+  if (error.load() || octx.error.load()) return fail(Reason::descent_no_terminal, u8(up.k));
+  // fusions : dans l'ordre de creation (enfants avant parents)
+  for (u32 v = 0; v < nn; ++v) {
+    if (up.birth[v] != kNone) continue;
+    u32 image = kNone;
+    for (u32 j = up.child_off[v]; j < up.child_off[v + 1]; ++j) {
+      const u32 c = ancestor(up.lower[up.child_val[j]], up.rank[v]);
+      if (image == kNone) image = c;
+      else if (image != c) return fail(Reason::vertical_naturality, u8(up.k));
+    }
+    up.lower[v] = image;
+  }
+  return Outcome{};
+}
+
 }  // namespace
 
 Result<Tower> build_tower(const Cloud& cloud, const SiteTree& tree, const Catalogue& cat, const TowerParams& params,
@@ -507,13 +565,19 @@ Result<Tower> build_tower(const Cloud& cloud, const SiteTree& tree, const Catalo
   Tower t;
   t.kmax = std::min<int>(params.kmax, static_cast<int>(cloud.sites()));
   t.orders.resize(t.kmax);
+  std::vector<std::unique_ptr<OrderCtx>> ctx(t.kmax + 1);
   Outcome worst;
   for (int k = 1; k <= t.kmax; ++k) {
     if (params.only_order > 0 && k != params.only_order) continue;
-    const Outcome o = build_order(g, k, params, pool, t.orders[k - 1]);
+    const Outcome o = build_order(g, k, params, pool, t.orders[k - 1], ctx[k]);
     if (!o.ok() && (worst.ok() || o.precedes(worst))) worst = o;
   }
   if (!worst.ok()) return worst;
+  if (params.verticals && params.only_order == 0)
+    for (int k = 2; k <= t.kmax; ++k) {
+      const Outcome o = build_verticals(g, t.orders[k - 1], t.orders[k - 2], *ctx[k - 1], pool);
+      if (!o.ok()) return o;
+    }
   return t;
 }
 

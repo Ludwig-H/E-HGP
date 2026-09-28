@@ -109,8 +109,9 @@ int main(int argc, char** argv) {
           num = arith::to_string(cat.level[ord.rank[v] - 1].num);
           den = arith::to_string(cat.level[ord.rank[v] - 1].den);
         }
-        std::fprintf(o, "node %u %lld %s %s\n", v, ord.parent[v] == kNone ? -1LL : (long long)ord.parent[v], num.c_str(),
-                     den.c_str());
+        const long long low = ord.lower.empty() ? -1LL : (long long)ord.lower[v];
+        std::fprintf(o, "node %u %lld %s %s %lld\n", v, ord.parent[v] == kNone ? -1LL : (long long)ord.parent[v], num.c_str(),
+                     den.c_str(), low);
       }
       for (u32 s = 0; s < cloud.sites(); ++s)
         std::fprintf(o, "point %u %u %u %u %llu\n", cloud.x[s], cloud.y[s], cloud.z[s], ord.point_node[s],
