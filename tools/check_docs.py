@@ -111,6 +111,13 @@ def active_markdown() -> list[Path]:
     paths.extend((v9 / "README.md", v9 / "PASSATION.md", v9 / "audits" / "ETAT_COURANT.md"))
     for directory in ("docs", "receipts", "bench"):
         paths.extend(sorted((v9 / directory).rglob("*.md")))
+    # V10 (ouverte le 28 septembre 2026) : entrees, documents, recus, et les deux documents de
+    # l'audit critique de la v9 ecrits par le developpeur (pas les preuves brutes rapatriees).
+    v10 = ROOT / "morsehgp3D_v10"
+    paths.extend(p for p in (v10 / "README.md", v10 / "PASSATION.md") if p.is_file())
+    for directory in ("docs", "receipts"):
+        paths.extend(sorted((v10 / directory).rglob("*.md")))
+    paths.extend(sorted((v10 / "audits" / "audit_v9_20260928").glob("*.md")))
     return list(dict.fromkeys(paths))
 
 

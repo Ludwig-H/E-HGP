@@ -1,0 +1,6 @@
+verif L14-F6 (hierarchical vs spherical level convention)
+- centres(3) pair distances (normalised): 1.0, 1.14, 1.643 -> medium sub-gaps 6.3 / 7.2 / 10.4 sigma_inner
+- medium: inner sigma 0.43, absolute sub-gap 2.71; group gap 8; empirical group std 1.24-1.26 (docstring says 1)
+- masses n=2000 g=8: sub-cluster 83, group 250
+- hdbscan_fixed_mcs.txt: a single fixed HDBSCAN setting (mcs=75, ms=5) gives spherical 0.80 AND hierarchical 0.79 (medium, 5 seeds);
+  mcs=100, ms=5 -> 0.68 / 0.97 ; mcs=30 (ms default) -> 0.38 / 0.93

@@ -1,0 +1,2 @@
+exp_spherical_2000_5.json conv=boundary K=5 facets=165449 components=62 largest=164969 pts_big=2000 small_inside_big_cover=61 sizes_head=[164969, 30, 21, 16, 16, 16]
+3.84 s 348176 KB

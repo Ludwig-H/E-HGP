@@ -1,0 +1,6 @@
+n=400 K=2 seed=3 vor_sets=7606 non_gabriel=5055 frac=0.665
+  LP open-cell check on sample: 60/60 feasible
+  facets vor=4855 gabriel=2618 only_vor=2237
+  S_vor/S_gab on common: min=1.000 med=1.882 max=14.555
+  m_vor/m_gab on common: min=0.286 med=0.871 max=5.781
+  sum m vor=400.000 gab=400.000

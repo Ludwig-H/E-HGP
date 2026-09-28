@@ -1,0 +1,37 @@
+/home/codespace/.python/current/lib/python3.12/site-packages/sklearn/cluster/_hdbscan/hdbscan.py:722: FutureWarning: The default value of `copy` will change from False to True in 1.10. Explicitly set a value for `copy` to silence this warning.
+  warn(
+{"seed": 0, "mcs": 10, "n": 1500, "hdb": [3, 0], "birth_min": 0.25, "n_births": 1500, "gab_singletons": 0, "mass_set": [1.0], "head": [3, 0, 1.0, "OK"], "prefix": [35, 933, 0.0658, "DIFF"], "patched": [3, 0, 1.0, "OK"], "wt": [3, 0, 1.0, "OK"], "wtpatched": [3, 0, 1.0, "OK"]}
+/home/codespace/.python/current/lib/python3.12/site-packages/sklearn/cluster/_hdbscan/hdbscan.py:722: FutureWarning: The default value of `copy` will change from False to True in 1.10. Explicitly set a value for `copy` to silence this warning.
+  warn(
+{"seed": 0, "mcs": 25, "n": 1500, "hdb": [3, 0], "head": [3, 0, 1.0, "OK"], "prefix": [4, 33, 0.9837, "DIFF"], "patched": [3, 0, 1.0, "OK"], "wt": [3, 0, 1.0, "OK"], "wtpatched": [3, 0, 1.0, "OK"]}
+/home/codespace/.python/current/lib/python3.12/site-packages/sklearn/cluster/_hdbscan/hdbscan.py:722: FutureWarning: The default value of `copy` will change from False to True in 1.10. Explicitly set a value for `copy` to silence this warning.
+  warn(
+{"seed": 1, "mcs": 10, "n": 1500, "hdb": [3, 0], "birth_min": 0.25, "n_births": 1500, "gab_singletons": 0, "mass_set": [1.0], "head": [3, 0, 1.0, "OK"], "prefix": [25, 835, 0.3365, "DIFF"], "patched": [3, 0, 1.0, "OK"], "wt": [3, 0, 1.0, "OK"], "wtpatched": [3, 0, 1.0, "OK"]}
+/home/codespace/.python/current/lib/python3.12/site-packages/sklearn/cluster/_hdbscan/hdbscan.py:722: FutureWarning: The default value of `copy` will change from False to True in 1.10. Explicitly set a value for `copy` to silence this warning.
+  warn(
+{"seed": 1, "mcs": 25, "n": 1500, "hdb": [3, 0], "head": [3, 0, 1.0, "OK"], "prefix": [8, 685, 0.658, "DIFF"], "patched": [3, 0, 1.0, "OK"], "wt": [3, 0, 1.0, "OK"], "wtpatched": [3, 0, 1.0, "OK"]}
+/home/codespace/.python/current/lib/python3.12/site-packages/sklearn/cluster/_hdbscan/hdbscan.py:722: FutureWarning: The default value of `copy` will change from False to True in 1.10. Explicitly set a value for `copy` to silence this warning.
+  warn(
+{"seed": 2, "mcs": 10, "n": 1500, "hdb": [5, 0], "birth_min": 9.0, "n_births": 1500, "gab_singletons": 0, "mass_set": [1.0], "head": [5, 0, 1.0, "OK"], "prefix": [21, 487, 0.5405, "DIFF"], "patched": [5, 0, 1.0, "OK"], "wt": [5, 0, 1.0, "OK"], "wtpatched": [5, 0, 1.0, "OK"]}
+/home/codespace/.python/current/lib/python3.12/site-packages/sklearn/cluster/_hdbscan/hdbscan.py:722: FutureWarning: The default value of `copy` will change from False to True in 1.10. Explicitly set a value for `copy` to silence this warning.
+  warn(
+{"seed": 2, "mcs": 25, "n": 1500, "hdb": [5, 0], "head": [5, 0, 1.0, "OK"], "prefix": [6, 70, 0.9817, "DIFF"], "patched": [5, 0, 1.0, "OK"], "wt": [5, 0, 1.0, "OK"], "wtpatched": [5, 0, 1.0, "OK"]}
+/home/codespace/.python/current/lib/python3.12/site-packages/sklearn/cluster/_hdbscan/hdbscan.py:722: FutureWarning: The default value of `copy` will change from False to True in 1.10. Explicitly set a value for `copy` to silence this warning.
+  warn(
+{"seed": 3, "mcs": 10, "n": 1500, "hdb": [6, 0], "birth_min": 0.25, "n_births": 1500, "gab_singletons": 0, "mass_set": [1.0], "head": [6, 0, 1.0, "OK"], "prefix": [33, 679, 0.2276, "DIFF"], "patched": [6, 0, 1.0, "OK"], "wt": [6, 0, 1.0, "OK"], "wtpatched": [6, 0, 1.0, "OK"]}
+/home/codespace/.python/current/lib/python3.12/site-packages/sklearn/cluster/_hdbscan/hdbscan.py:722: FutureWarning: The default value of `copy` will change from False to True in 1.10. Explicitly set a value for `copy` to silence this warning.
+  warn(
+{"seed": 3, "mcs": 25, "n": 1500, "hdb": [6, 0], "head": [6, 0, 1.0, "OK"], "prefix": [10, 241, 0.8269, "DIFF"], "patched": [6, 0, 1.0, "OK"], "wt": [6, 0, 1.0, "OK"], "wtpatched": [6, 0, 1.0, "OK"]}
+/home/codespace/.python/current/lib/python3.12/site-packages/sklearn/cluster/_hdbscan/hdbscan.py:722: FutureWarning: The default value of `copy` will change from False to True in 1.10. Explicitly set a value for `copy` to silence this warning.
+  warn(
+{"seed": 4, "mcs": 10, "n": 1500, "hdb": [3, 2], "birth_min": 2.0, "n_births": 1500, "gab_singletons": 0, "mass_set": [1.0], "head": [3, 2, 1.0, "OK"], "prefix": [31, 966, -0.0153, "DIFF"], "patched": [3, 2, 1.0, "OK"], "wt": [3, 2, 1.0, "OK"], "wtpatched": [3, 2, 1.0, "OK"]}
+/home/codespace/.python/current/lib/python3.12/site-packages/sklearn/cluster/_hdbscan/hdbscan.py:722: FutureWarning: The default value of `copy` will change from False to True in 1.10. Explicitly set a value for `copy` to silence this warning.
+  warn(
+{"seed": 4, "mcs": 25, "n": 1500, "hdb": [3, 2], "head": [3, 2, 1.0, "OK"], "prefix": [3, 2, 1.0, "OK"], "patched": [3, 2, 1.0, "OK"], "wt": [3, 2, 1.0, "OK"], "wtpatched": [3, 2, 1.0, "OK"]}
+/home/codespace/.python/current/lib/python3.12/site-packages/sklearn/cluster/_hdbscan/hdbscan.py:722: FutureWarning: The default value of `copy` will change from False to True in 1.10. Explicitly set a value for `copy` to silence this warning.
+  warn(
+{"seed": 5, "mcs": 10, "n": 1499, "hdb": [4, 0], "birth_min": 0.25, "n_births": 1499, "gab_singletons": 0, "mass_set": [1.0], "head": [15, 254, 0.8457, "DIFF"], "prefix": [31, 724, 0.2519, "DIFF"], "patched": [4, 0, 1.0, "OK"], "wt": [15, 254, 0.8457, "DIFF"], "wtpatched": [4, 0, 1.0, "OK"]}
+/home/codespace/.python/current/lib/python3.12/site-packages/sklearn/cluster/_hdbscan/hdbscan.py:722: FutureWarning: The default value of `copy` will change from False to True in 1.10. Explicitly set a value for `copy` to silence this warning.
+  warn(
+{"seed": 5, "mcs": 25, "n": 1499, "hdb": [4, 0], "head": [4, 0, 1.0, "OK"], "prefix": [7, 266, 0.7709, "DIFF"], "patched": [4, 0, 1.0, "OK"], "wt": [4, 0, 1.0, "OK"], "wtpatched": [4, 0, 1.0, "OK"]}
+exact matches over 12 {"head": 11, "prefix": 1, "patched": 12, "wt": 11, "wtpatched": 12}

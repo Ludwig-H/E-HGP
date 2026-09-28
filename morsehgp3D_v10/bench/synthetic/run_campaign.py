@@ -73,30 +73,29 @@ def run_scene(spec, build, threads):
             row = dict(common, method=method, k=k, mcs=m, z=z, selection=sel, alpha=alpha, fill=f, seconds=round(seconds, 4))
             row.update({key: round(v, 6) if isinstance(v, float) else v for key, v in metrics.scores(T, lab).items()})
             out.append(row)
-    # tour : une construction par K, toutes les tetes
+    # tour : un catalogue a Kmax, chaque ordre de TOWER_K, toutes les tetes sur chaque ordre
+    import subprocess
     import tempfile
     configs = [(m, z, sel) for m in MCS for z in ('1', 'zhat') for sel in SELECTIONS]
-    for k in TOWER_K:
-        with tempfile.TemporaryDirectory() as tmp:
-            src, dst, cfg = os.path.join(tmp, 'in'), os.path.join(tmp, 'out'), os.path.join(tmp, 'cfg')
-            np.ascontiguousarray(G, dtype='<u4').tofile(src)
-            with open(cfg, 'w') as f:
-                for m, z, sel in configs:
-                    f.write('%d %r %s 0\n' % (mcs_value(m, n), 1.0 if z == '1' else zh, sel))
-            t0 = time.time()
-            import subprocess
-            r = subprocess.run([os.path.join(build, 'mhgp10_cluster'), src, dst, '--k=%d' % k, '--mcs=5',
-                                '--threads=%d' % threads, '--configs=' + cfg], capture_output=True, text=True)
-            dt = time.time() - t0
-            if r.returncode != 0:  # refus compte comme defaite (ARI_s = 0), jamais omis
-                for m, z, sel in configs:
+    with tempfile.TemporaryDirectory() as tmp:
+        src, dst, cfg = os.path.join(tmp, 'in'), os.path.join(tmp, 'out'), os.path.join(tmp, 'cfg')
+        np.ascontiguousarray(G, dtype='<u4').tofile(src)
+        with open(cfg, 'w') as f:
+            for m, z, sel in configs:
+                f.write('%d %r %s 0\n' % (mcs_value(m, n), 1.0 if z == '1' else zh, sel))
+        t0 = time.time()
+        r = subprocess.run([os.path.join(build, 'mhgp10_cluster'), src, dst, '--k-list=' + ','.join(map(str, TOWER_K)),
+                            '--threads=%d' % threads, '--configs=' + cfg], capture_output=True, text=True)
+        dt = time.time() - t0
+        for k in TOWER_K:
+            for i, (m, z, sel) in enumerate(configs):
+                if r.returncode != 0:  # refus compte comme defaite (ARI_s = 0), jamais omis
                     for f in FILLS:
                         out.append(dict(common, method='tower', k=k, mcs=m, z=z, selection=sel, alpha='', fill=f,
                                         ari_s=0.0, ari_nc=0.0, ami_nc=0.0, coverage=0.0, clusters=0, seconds=dt))
-                continue
-            for i, (m, z, sel) in enumerate(configs):
-                lab = np.fromfile(dst + '.%d' % i, dtype='<i4').astype(np.int64)
-                emit('tower', k, m, z, sel, '', None, lab, dt / len(configs))
+                    continue
+                lab = np.fromfile(dst + '.k%d.%d' % (k, i), dtype='<i4').astype(np.int64)
+                emit('tower', k, m, z, sel, '', None, lab, dt / (len(configs) * len(TOWER_K)))
     # sklearn HDBSCAN : grille
     for ms in HDB_MS:
         for m in MCS:

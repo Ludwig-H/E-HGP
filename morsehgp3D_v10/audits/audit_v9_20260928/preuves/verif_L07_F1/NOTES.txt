@@ -1,0 +1,6 @@
+verif L07-F1 (28 sept. 2026) -- binaire build/v9-q3-payload-integration-20260926/mhgp9_tower_probe sha 3647d904, K2 W2 --static=2, nice 19
+entrees regenerees par experiments/synthetic_bench_20260928/bench_datasets.py (level=medium, groups=8, noise=0, seed=2026092800) ; sha shells 8k/32k identiques a L07.
+shells K2 : core_sites 142.9M / 1146.0M / 9131.5M (p 3.00/2.99) ; expanded 1.96M/7.98M/32.3M (p 2.03/2.02) ; balls 43266/86297/171812 (p 1.00/0.99) ; chain 9.7/51.7/297.7 s (p 2.41/2.53)
+spherical K2 : expanded p 1.04/1.03 ; core_sites p 1.07/1.04 ; chain 1.8/3.8/7.0 s
+spherical K5 : expanded p 1.06/1.01 ; core_sites p 1.09/1.03 ; chain 13.7/25.2/54.8 s
+filaments/hierarchical/bridge/heteroscedastic K2 : chain p 1.06-1.22 ; expanded p <= 1.27 ; core_sites p <= 1.06

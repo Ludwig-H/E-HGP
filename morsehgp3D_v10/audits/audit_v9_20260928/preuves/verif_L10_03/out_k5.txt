@@ -1,0 +1,4 @@
+exp_spherical_2000_5.json native k 5 computed_orders 5 native roots 1 [53482]
+  conv=gabriel K=5 facets=31943 merge_tree_roots=435 uf_components=435 largest=31272 pts_big=2000 pts_all=2000 small_inside_big_cover=434 sizes_head=[31272, 13, 11, 9, 9, 9]
+Command terminated by signal 15
+53.47 s 19050012 KB

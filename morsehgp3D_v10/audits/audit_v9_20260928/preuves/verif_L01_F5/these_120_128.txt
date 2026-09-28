@@ -1,0 +1,345 @@
+                                                          Chapitre                 9
+                             HGP-Clusterer en
+                                    pratique
+    Ce chapitre achève la deuxième partie consacrée à la généralisation du Single-Linkage
+dans l’espace euclidien, avec un certain nombre de considérations où la pratique diffère
+de la pure théorie.
+    Premier problème rencontré en pratique (§ 9.1) : il est parfois nécessaire d’avoir une
+partition stricte des données X (et non un recouvrement comme les K-polyèdres produits
+par HGP-Clusterer θHGP ).
+    Nous décrivons ensuite (§ 9.2) la mise en œuvre optimisée pour K = 2, qui ne nécessite
+que le calcul de la triangulation de Delaunay standard et nous a permis d’obtenir des
+résultats empiriques à la fois sur des données synthétiques 2D et des données réelles
+8D (les huiles d’olive italiennes) pour illustrer la supériorité de HGP-Clusterer face à
+HDBSCAN [65].
+    Il arrive aussi parfois que les données X soient de trop grande dimension pour pouvoir
+calculer la triangulation de Delaunay (phénomène dit du « fléau de la dimension », curse
+of dimensionality [95] en anglais), ou bien qu’elles ne proviennent tout simplement
+pas de l’espace euclidien (lorsque l’on dispose par exemple d’une matrice de distances
+représentant des données dans un espace métrique quelconque). Dans ce cas, nous
+pouvons recourir à un autre complexe que celui de Čech : le complexe de Vietoris–Rips
+(§ 9.3).
+    Pour terminer ce chapitre, nous revenons en § 9.4 sur l’objet mathématique au cœur
+de HGP-Clusterer, et qui contient toute l’information de la hiérarchie K-NN : la mosaïque
+de Delaunay d’ordre K. Nous l’avons utilisée à des fins de clustering, lors nous avons
+montré qu’il suffisait d’extraire un arbre minimum couvrant sur certaines de ses cellules.
+Mais l’on aurait également pu l’utiliser à d’autres fins de structuration automatique de
+données ! Nous esquissons une direction de travail encore ouverte : utiliser la mosaïque
+comme support d’une réduction de dimension de type UMAP, mais en recourant à des
+interactions d’ordre supérieur.
+
+
+
+
+                                           95
+96                                              Chapitre 9 — HGP-Clusterer en pratique
+
+
+9.1     Et lorsqu’on impose une partition stricte des don-
+        nées ?
+    Jusqu’ici, HGP-Clusterer a été présenté comme une hiérarchie exacte de K-polyèdres.
+Ce point est fondamental : pour K ≥ 2, l’objet naturel n’est pas une partition de X , mais
+un recouvrement de X (ou bien une partition des (K − 1)-simplexes).
+    Un point peut appartenir à plusieurs K-polyèdres, parce qu’il peut apparaître dans
+plusieurs (K − 1)-simplexes situés dans des composantes différentes du graphe ΓK (X )r ;
+c’est précisément l’information géométrique portée par les intersections d’ordre supérieur.
+    En revanche, la plupart des bibliothèques de clustering, des métriques usuelles, des
+tableaux de résultats et surtout des problèmes concrets posés à la fois par les mondes
+académique & industriel veulent une assignation unique d’un cluster à chaque point. Il va
+nous falloir “réparer” cela. Pour ce faire, nous proposons un post-traitement qui conserve
+telle quelle la première étape de la construction de la hiérarchie des K-polyèdres.
+    Soit FK l’ensemble des (K − 1)-simplexes effectivement construits par l’algorithme
+(ce sont les sommets du graphe dual utilisé par HGP-Clusterer ; dans la version standard
+de l’algorithme, FK correspond aux simplexes de Gabriel). Après traitement de cette
+hiérarchie (exempli gratia, condensation de l’arbre et sélection des clusters pertinents
+par excès de masse comme HDBSCAN [10] le fait), chaque face τ ∈ FK reçoit soit une
+étiquette de cluster
+                                 `(τ ) ∈ {0, . . . , qclust − 1},
+soit l’étiquette −1 si la face n’appartient à aucun cluster sélectionné (considérée comme
+du bruit).
+    L’implémentation associe à chaque face τ ∈ FK un score local positif. Dans la version
+par défaut, ce score est
+                                   X                           1
+                           Sτ ,          ψ ρ(σ) ,      ψ(t) = p ,
+                                   σ⊃τ                          t
+                               |σ|=K+1
+
+où ρ(σ) désigne le rayon de naissance du K-simplexe σ dans la filtration. Plus générale-
+ment, ψ peut être remplacée par toute fonction de poids décroissante. Le choix uniforme
+ψ ≡ 1 est possible, mais le choix 1/tp reflète plus exactement la densité locale, qui est au
+cœur du modèle mathématique derrière HGP-Clusterer.
+   Pour éviter qu’un point incident à beaucoup de faces soit artificiellement surpondéré,
+chaque point x ∈ X normalise la masse de ses faces incidentes par
+                                              X
+                                      Tx ,           Sτ .
+                                             τ ∈FK
+                                              x∈τ
+
+La masse d’une face dans l’arbre condensé est alors
+                                            X 1
+                                   mτ , S τ         ,
+                                            x∈τ Tx
+9.2 – 9.2 Optimisations pour K = 2 avec des résultats empiriques                            97
+
+
+avec la convention 1/Tx = 0 lorsque Tx = 0. Ainsi, lorsqu’un point appartient à au
+moins une face, il distribue une masse totale égale à 1 entre les faces qui le contiennent.
+C’est ce poids mτ , et non le simple comptage des faces, qui est utilisé par le seuil
+min_cluster_size dans l’arbre condensé (mêmes idées algorithmiques que HDBS-
+CAN).
+   La conversion en partition stricte se fait ensuite par vote pondéré. Pour tout point
+x ∈ X et tout cluster c, on définit
+                                                           X    Sτ
+                                           Vx (c) ,                .
+                                                          τ ∈FK Tx
+                                                           x∈τ
+                                                          `(τ )=c
+
+
+Le point reçoit alors l’étiquette
+
+                                         `(x)
+                                         b    ∈ argmax Vx (c)
+                                                          c
+
+
+ Proposition 7 : Partition stricte induite par le vote pondéré
+ Fixons une sélection de clusters sur les faces de FK et une règle déterministe de
+ départage des égalités. La procédure précédente définit une partition disjointe
+
+              X = Cb−1 ∪˙ Cb0 ∪˙ · · · ∪˙ Cbqclust −1 ,         Cbc , {x ∈ X | `(x)
+                                                                               b    = c},
+
+ où Cb−1 est l’ensemble des points non classés.
+
+     Pour K = 1, les faces sont les points eux-mêmes ; le vote est donc trivial et restitue
+exactement les étiquettes du Single-Linkage après sélection des composantes. Pour K ≥ 2,
+il joue un rôle réel : il remplace l’appartenance multiple aux K-polyèdres par une décision
+locale, pondérée par la densité de naissance des faces incidentes.
+
+
+9.2     Optimisations pour K = 2 avec des résultats empi-
+        riques
+9.2.1    Les propriétés géométriques du 2-graphe de Gabriel
+    Lorsque K = 2, les sommets du graphe dual sont les arêtes de la filtration, et les
+fusions sont portées par des triangles. Deux arêtes deviennent adjacentes lorsqu’elles
+sont facettes d’un même triangle de Čech.
+98                                                         Chapitre 9 — HGP-Clusterer en pratique
+
+
+  Proposition 8 : Le 2-graphe de Gabriel se lit dans la triangulation
+                  de Delaunay [65]
+  Les triangles aigus de Gabriel sont des triangles de Delaunay, puisque leur sphère
+  minimale est leur sphère circonscrite. Les triangles obtus de Gabriel ont pour boule
+  minimale le disque ayant pour diamètre leur plus long côté ; dans ce cas, les deux pe-
+  tites arêtes appartiennent à la triangulation de Delaunay, ce qui suffit pour énumérer
+  les triangles de Gabriel (aigus et obtus) sans parcourir tous les triplets de points.
+
+Preuve. Il suffit de jongler avec les notions de Gabriel et de Delaunay comme l’illustre
+la Fig. 9.1 ci-dessous. La boule ayant pour diamètre le plus grand côté ne contient qu’un
+seul point (le troisième sommet du triangle obtus). Il existe donc des boules contenant les
+plus petites arêtes et vides d’autres points du nuage X ; par conséquent ces arêtes sont
+de Delaunay.
+
+
+
+                                       Bσ
+                                                 x1
+                                         Dx3
+                                                               Dx2
+                                                      σ
+                                 x2                                      x3
+                                                      cσ
+
+                                                           r
+
+
+
+Figure 9.1 : Illustration de la preuve de Prop. 8. Si un triangle obtus σ = {x1 , x2 , x3 } est de Gabriel, sa
+boule minimale Bσ de diamètre [x2 , x3 ] est vide de tout “intrus”. L’on peut alors y inscrire deux disques
+Dx3 et Dx2 inclus dans Bσ (et donc également vides de tout point de X ). Ces disques vides attestent que
+[x1 , x2 ] et [x1 , x3 ] sont bien de Delaunay.
+
+
+
+9.2.2      Digression au cas K ≥ 2
+    Ces idées (Prop. 8 et la preuve) se généralisent très bien pour K ≥ 2.
+    La mosaïque de Delaunay DelK−1 (X ) d’ordre K − 1 a pour sommets les sous-
+ensembles Q ⊂ X de cardinal K − 1 associés à une cellule de Voronoï d’ordre K − 1
+non vide. Les arêtes élémentaires de cette mosaïque (reliant deux sommets Q, Q0 tels que
+|Q ∪ Q0 | = K,) portent donc un (K − 1)-simplexe τ = Q ∪ Q0 .
+    Autrement dit, les arêtes élémentaires de DelK−1 (X ) fournissent des candidats pour
+les sommets de ΓK (X ).
+    Regardons à présent les arêtes de ΓK (X ) : soit σ ⊆ X un K-simplexe de Gabriel,
+|σ| = K + 1. Notons comme à l’accoutumée Bσ = B(cσ , ρ(σ)) sa plus petite boule
+9.2 – 9.2.3   L’algorithme pour K = 2                                                                99
+
+
+englobante, et S = σ ∩ ∂Bσ son ensemble de support. Comme Bσ est minimale, on a
+|S| ≥ 2. Pour tout s ∈ S, on pose τs = σ \ {s}. Alors chaque facette active τs est portée
+par la mosaïque DelK−1 (X ) : par les arguments maintenant habituels (Fait 12), il existe
+deux sommets adjacents Q, Q0 de DelK−1 (X ) tels que Q ∪ Q0 = τs .
+    Comme |S| ≥ 2, en choisissant deux points distincts s, t ∈ S, on obtient deux facettes
+actives
+                            τs = σ \ {s},     τt = σ \ {t},
+et leur union redonne le simplexe entier :
+
+                                             τs ∪ τt = σ.
+
+Par conséquent, on obtient le résultat suivant généralisant Prop. 8 à K ≥ 2.
+
+  Théorème 7 : Le K-graphe de Gabriel se lit dans la mosaïque de De-
+               launay DelK−1 d’ordre K − 1
+  Tout K-simplexe de Gabriel peut être identifié à partir de deux (K − 1)-simplexes
+  portés par des arêtes élémentaires de DelK−1 (X ).
+
+   Ce Théorème 7 permet le résultat algorithmique suivant : pour retrouver la hiérarchie
+complète des niveaux K-NN, il suffit i) de construire la mosaïque DelK−1 (X ) d’ordre
+K − 1.
+
+9.2.3     L’algorithme pour K = 2
+   Prop. 8 permet d’obtenir Prop. 9 ainsi que l’Alg. 1 utilisé dans la suite de ce chapitre
+sur les données expérimentales.
+
+  Proposition 9 : Extraction planaire du 2-graphe de Gabriel [65]
+  Soit X ⊂ R2 un nuage fini en position générale. Tous les triangles de Gabriel de
+  X peuvent être extraits à partir de la triangulation de Delaunay ordinaire de X . En
+  particulier, le graphe dual des arêtes reliées par les triangles de Gabriel peut être
+  construit en temps O(n log n) dans le plan.
+
+
+Remarque En dimension plus grande, la mise en œuvre exacte devient rapidement
+limitée par la construction de la mosaïque de Delaunay d’ordre K. Des approximations
+de type Rips, une réduction préalable de dimension, un sous-échantillonnage suivi d’une
+propagation par k-plus proches voisins, ou encore une recherche restreinte à des listes
+   i). Il y a tout de même un coût supplémentaire non négligeable en grande dimension : trouver le
+rayon de filtration rσ des simplexes σ candidats, par exemple au moyen de l’algorithme de Welzl [92] (et
+éventuellement tester qu’ils sont bien de Gabriel).
+100                                             Chapitre 9 — HGP-Clusterer en pratique
+
+
+Algorithme 1 HGP-Clusterer pour K = 2 avec sortie en partition stricte
+Entrée : Nuage de points X ⊂ Rp , seuil min_cluster_size, choix de poids ψ
+Sortie : Clustering sur X
+ 1 : Construire la triangulation de Delaunay Del(X ).
+ 2 : Extraire les triangles de Gabriel : triangles aigus de Del(X ) satisfaisant le test de
+     vacuité, puis triangles obtus énumérés à partir des couples d’arêtes de Delaunay
+     incidentes (voir Prop. 8).
+ 3 : Construire le graphe dual G2 dont les sommets sont les arêtes τ = {xi , xj } apparais-
+     sant comme facettes d’au moins un triangle de Gabriel.
+ 4 : Pour chaque triangle σ = {xi , xj , xk }, relier (deux de) ses trois arêtes-facettes dans
+     G2 avec une fusion de poids ρ(σ).
+ 5 : Calculer les scores de faces Sτ = σ⊃τ ψ(ρ(σ)) et les masses mτ = Sτ x∈τ Tx−1 .
+                                        P                                         P
+
+ 6 : Extraire un arbre couvrant minimal T2 de G2 par Kruskal.
+ 7 : Condenser T2 avec le seuil min_cluster_size [10] et sélectionner les clusters par
+     excès de masse.
+ 8 : Propager les étiquettes des clusters aux points par le vote pondéré (voir la section
+     précédente).
+ 9 : Optionnellement, réaffecter les points non classés par 1-plus proche voisin parmi les
+     points déjà étiquetés.
+
+
+de voisins sont des options praticables. Elles doivent toutefois être distinguées de la
+construction géométrique exacte : dès qu’une approximation remplace la mosaïque exacte,
+les garanties d’équivalence avec les K-polyèdres exacts ne valent plus sans hypothèses
+supplémentaires.
+
+9.2.4    Résultats sur les huiles d’olive italiennes
+   Le jeu de données des huiles d’olive italiennes [96] contient 572 échantillons, chacun
+décrit par huit concentrations en acides gras. Ainsi le nuage X ⊂ R8 est représenté par
+une matrice de taille 572 × 8. Comme dans [25], nous avons centré puis normalisé (en
+norme `2 ) les colonnes de la matrice. Les données ont été mises à disposition publiquement
+par [97]. Les échantillons proviennent de neuf provinces italiennes, regroupées en trois
+macro-régions : Italie du Sud, Sardaigne, puis Centre-Nord.
+   HDBSCAN retrouve correctement les trois macro-régions, mais ne sépare pas les neuf
+provinces fines. La méthode Persistable de [25] est l’état-de-l’art pour l’identification
+des plus petites provinces : elle retrouve huit des neuf provinces (la Sicile n’est pas
+identifiée), mais ne classe directement que 279 points, soit environ 49% des données.
+Notre méthode [65] avec K = 2 retrouve également huit groupes interprétables (et c’est
+encore la Sicile qui échappe à l’identification, absorbée par les groupes de Calabre et de
+9.2 – 9.2.5   Résultats sur SIPU                                                       101
+
+
+Pouilles du Nord), mais elle classe directement 412 points, soit environ 72% des données,
+avec 396/412 ≈ 96.1% d’étiquettes correctes.
+   Dans les deux tableaux suivants (Tab. 9.1 & Tab. 9.2), chaque case contient le résultat
+de Persistable, puis celui de HGP-Clusterer. La colonne 4 correspond à la Sicile, non
+identifiée.
+
+Tableau 9.1 – Résultats partiels de Persistable et de HGP-Clusterer sur le jeu de données
+des huiles d’olive italiennes. La notation a/b indique Persistable/HGP-Clusterer.
+
+        Pers./HGP     1     2      3     4   5    6     7     8     9    Non classés
+        N. Apulia    12/24 0/0     0/0   – 0/0   0/0   0/0   0/0   0/0      13/1
+        Calabria      0/0 7/25     1/2   – 0/0   0/0   0/0   0/0   0/0     48/29
+        S. Apulia     0/0   0/0 100/145 – 0/0    0/0   0/0   0/0   0/0     106/61
+        Sicilia       3/6   0/2    0/1   – 0/0   0/0   0/0   0/0   0/0     33/27
+        Inl. Sard.    0/0   0/0    0/0   – 51/62 0/0   0/0   0/0   0/0      14/3
+        Coast S.      0/0   0/0    0/0   – 0/2 19/29 0/0     0/0   0/0      14/2
+        E. Ligur.     0/0   0/0    0/0   – 0/0   0/0 14/32 1/2     0/1     35/15
+        W. Ligur.     0/0   0/0    0/0   – 0/0   0/0   0/0 29/33 0/0       21/17
+        Umbria        0/0   0/0    0/0   – 0/0   0/0   0/0   0/0 42/46      9/5
+
+
+   L’extension exhaustive par 1-plus proche voisin des points non classés donne
+521/572 ≈ 91, 1% d’étiquettes correctes et un indice de Rand ajusté [98] (Adjusted
+Rand Index, ARI, en anglais) égal à 0, 890. La version exhaustive de Persistable atteint
+499/572 ≈ 87, 2% et un ARI égal à 0, 848.
+
+9.2.5     Résultats sur SIPU
+    Le benchmark public SIPU [99], utilisé ici via ClustBench [100], regroupe des jeux
+de données synthétiques de formes et de tailles très variées. Les jeux admettant une vérité
+terrain multiple – et donc sujets à ambiguïté –, comme compound, flame, pathbased et
+r15, n’ont pas été retenus ; worms_64 est également écarté à cause de sa dimension 64
+(du fait du fléau de la dimension, la triangulation de Delaunay n’est pas calculable).
+    La comparaison avec HDBSCAN [10] est rigoureusement√           faite : on garde le même
+seuil minimal de percolation, min_cluster_size= n, le même estimateur de densité
+ρb = 1/r, et le même critère d’excès de masse (ψ(t) = 1t ). Toutes choses égales par
+ailleurs, la seule différence est donc le type de connexité : connexité standard de graphe
+géométrique pour HDBSCAN, connexité par triangles de Čech pour HGP-Clusterer avec
+K = 2 [65].
+102                                                     Chapitre 9 — HGP-Clusterer en pratique
+
+
+
+Tableau 9.2 – Résultats exhaustifs de Persistable et de HGP-Clusterer sur le jeu de
+données des huiles d’olive italiennes, après propagation aux points non classés. La notation
+a/b indique Persistable/HGP-Clusterer.
+
+      Pers./HGP        1       2       3      4    5         6        7     8     9      Non classés
+      N. Apulia      21/24 2/1        0/0     – 0/0          0/0     0/0   0/0   0/0        2/0
+      Calabria        0/1 50/52       3/2     – 0/0          0/0     1/1   0/0   0/0        2/0
+      S. Apulia       0/2     1/0 196/204 – 0/0              0/0     0/0   0/0   0/0        9/0
+      Sicilia         6/10 20/16      7/10    – 0/0          0/0     0/0   0/0   0/0        3/0
+      Inl. Sard.      0/0     0/0     0/0     – 65/65 0/0            0/0   0/0   0/0         0/0
+      Coast S.        0/0     0/0     0/0     – 2/2 31/31 0/0              0/0   0/0         0/0
+      E. Ligur.       0/0     0/0     0/0     – 0/0          0/0 41/44 2/5       0/1        7/0
+      W. Ligur.       0/0     0/0     0/0     – 0/0          0/0     0/0 47/50 0/0          3/0
+      Umbria          0/0     0/0     0/0     – 0/0          0/0     2/0   0/0 48/51        1/0
+
+
+
+Tableau 9.3 – Résultats de HDBSCAN et de HGP-Clusterer sur les jeux de données SIPU.
+n désigne la taille du jeu de données, k le nombre de clusters, ARI l’indice de Rand ajusté,
+et “classés” la proportion de points affectés à un cluster.
+
+                  Vérité terrain                   HDBSCAN                  HGP-Clusterer
+        Jeu                     n     k       k        ARI       Classés    k     ARI      Classés
+        a1                   3 000    20      17   0.745          94.9%     17   0.778      97.7%
+        a2                   5 250    35      33   0.762          92.1%     32   0.834      96.2%
+        a3                   7 500    50      43   0.696          95.0%     45   0.831      97.1%
+        aggregation            788     7       5   0.809         100.0%      5   0.809     100.0%
+        birch1             100 000   100      98   0.215          79.7%    100   0.298      83.1%
+        birch2             100 000   100     100   0.996          99.7%     84   0.441      83.9%
+        d31                  3 100    31      27   0.659          90.0%     30   0.835      94.5%
+        jain                   373     2       3   0.935          98.4%      3   0.935      98.7%
+        s1                   5 000    15      15   0.961          97.6%     15   0.976      99.0%
+        s2                   5 000    15      15   0.783          88.9%     15   0.842      91.9%
+        s3                   5 000    15      15   0.251          65.9%     15   0.418      77.2%
+        s4                   5 000    15      15   0.258          67.4%     15   0.284      69.6%
+        spiral                 312     3       3   1.000         100.0%      3   1.000     100.0%
+        unbalance            6 500     8       8   1.000          99.9%      8   1.000     100.0%
+        worms_2            105 600    35      15   0.055          74.2%     33   0.076      66.4%
+

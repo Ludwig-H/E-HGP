@@ -1,0 +1,11 @@
+L12 architecture v9 @ ce8a649dd (worktree build/v9-open-worktree)
+- tracked: 15417 files, 86.3 MB; receipts 11869/29.4MB; audits 3205/50.7MB; src+tests+bench 3.5MB
+- src 33490 lines: gen 17534 (14817 identical v8), tower 6858 (3650 identical v7), gpu 6341, chain 2706
+- tests 37101 lines; audits code ~81k lines; python 63879 lines (323 files in audits)
+- ChainOptions 38 fields, 31 bool; 17 dependency checks tower_chain.cpp:1325-1363
+- R22 best GPU arm vs default: 12 levers differ (+device_session outside ChainOptions)
+- BallData 224 B/ball (292699904/1306696); RSS K5 1.21-1.56 GB, K10 4.47-6.36 GB @39885 pts
+- CI v9 red 40 runs since 2026-09-26T20:33 f9f273bb0: mhgp9_lidar_scaling_reader_{normal,optimized} cause=v13_baseline_refused
+- CI build 18.5 min (231 CU, 169 exe, tower_chain.cpp x35, wspd_q34.cpp x10), tests 24 min, 295 tests
+- probe schema bumped 30x (v1..v30) 22-26 sept
+- clustering 28 sept: native_weighted_export -> JSON catalogue+cofaces -> python Kruskal; FULL forests only validated

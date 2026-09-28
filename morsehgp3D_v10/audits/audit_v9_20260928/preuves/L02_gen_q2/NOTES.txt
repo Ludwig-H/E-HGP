@@ -1,0 +1,9 @@
+L02 generateur q2 - notes de travail (audit lecture seule, worktree ce8a649dd)
+Probe: q2_ledger_probe.cpp compile contre src/gen du worktree (chemin q2 inchange depuis f685461af),
+g++ -std=c++20 -O2, sources prepared_cloud/q2_census/front/local_credits/axis_q2. Sha256 dans probe.sha256.
+Campagne: run_campaign.sh (W2, nice 19, hote partage charge 2.6-5.6 : temps NON fiables, compteurs deterministes).
+Entrees LiDAR: build/v9-open-worktree/build/v9-scaling/work/s0{0,2}_k5_*_nested_{8000,16000,32000}.u32le,
+sha256 identiques aux points_sha256 du recu lidar_scaling_local_20260923 (verifie).
+Synthetiques: build/v9-q3-payload-scaling-inputs-20260926/{uniform,clusters,terrain}_{8000,16000,32000}.u32le.
+Controle: s00 8k K5 prod reproduit rect/cand/acc du recu (264668/2219322/104982); uniform 8k K5 reproduit v8 u16.
+Resultats: campaign.jsonl, knn.jsonl, ablation_summary.txt, analyze.py.

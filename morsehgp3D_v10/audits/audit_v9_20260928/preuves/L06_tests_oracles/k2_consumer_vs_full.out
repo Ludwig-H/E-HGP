@@ -1,0 +1,14 @@
+{"seed": 0, "n": 200, "k": 2, "box": 40, "levels": 768, "bad_levels": {"gabriel": 655, "boundary": 0}}
+{"seed": 0, "n": 200, "k": 2, "box": 5000, "levels": 1844, "bad_levels": {"gabriel": 1505, "boundary": 0}}
+{"seed": 1, "n": 200, "k": 2, "box": 40, "levels": 778, "bad_levels": {"gabriel": 393, "boundary": 0}}
+{"seed": 1, "n": 200, "k": 2, "box": 5000, "levels": 1821, "bad_levels": {"gabriel": 690, "boundary": 0}}
+{"seed": 2, "n": 200, "k": 2, "box": 40, "levels": 751, "bad_levels": {"gabriel": 437, "boundary": 0}}
+{"seed": 2, "n": 200, "k": 2, "box": 5000, "levels": 1747, "bad_levels": {"gabriel": 908, "boundary": 0}}
+{"seed": 0, "n": 200, "k": 3, "box": 40, "levels": 2027, "bad_levels": {"gabriel": 1822, "boundary": 256}}
+{"seed": 0, "n": 200, "k": 3, "box": 5000, "levels": 3053, "bad_levels": {"gabriel": 2599, "boundary": 291}}
+{"seed": 1, "n": 200, "k": 3, "box": 40, "levels": 2072, "bad_levels": {"gabriel": 2030, "boundary": 504}}
+{"seed": 1, "n": 200, "k": 3, "box": 5000, "levels": 3075, "bad_levels": {"gabriel": 2635, "boundary": 390}}
+{"seed": 2, "n": 200, "k": 3, "box": 40, "levels": 1937, "bad_levels": {"gabriel": 1713, "boundary": 102}}
+{"seed": 2, "n": 200, "k": 3, "box": 5000, "levels": 2941, "bad_levels": {"gabriel": 2700, "boundary": 107}}
+
+[exited with code 0]

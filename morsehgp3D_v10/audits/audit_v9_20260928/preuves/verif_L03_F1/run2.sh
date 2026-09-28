@@ -1,0 +1,4 @@
+#!/bin/bash
+while [ ! -f /tmp/claude-1000/-workspaces-E-HGP/497c67a8-5e59-434d-a8a7-2dc2144d8af4/scratchpad/audit_v9/verif_L03_F1/done.flag ]; do sleep 5; done
+/usr/bin/time -f "%e s %M KB" -o /tmp/claude-1000/-workspaces-E-HGP/497c67a8-5e59-434d-a8a7-2dc2144d8af4/scratchpad/audit_v9/verif_L03_F1/shells_16000_k5.err nice -n 19 /workspaces/E-HGP/build/v9-q3-payload-integration-20260926/mhgp9_tower_probe /tmp/claude-1000/-workspaces-E-HGP/497c67a8-5e59-434d-a8a7-2dc2144d8af4/scratchpad/audit_v9/L03_gen_q34/data/shells_16000.u32le 5 2 --no-tower > /tmp/claude-1000/-workspaces-E-HGP/497c67a8-5e59-434d-a8a7-2dc2144d8af4/scratchpad/audit_v9/verif_L03_F1/shells_16000_k5.json
+touch /tmp/claude-1000/-workspaces-E-HGP/497c67a8-5e59-434d-a8a7-2dc2144d8af4/scratchpad/audit_v9/verif_L03_F1/done2.flag

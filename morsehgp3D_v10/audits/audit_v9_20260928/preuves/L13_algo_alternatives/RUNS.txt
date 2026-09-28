@@ -1,0 +1,12 @@
+L13 prototype runs (audit v9, 28 sept. 2026), host partage 8 coeurs, nice -n 19, 2 fils.
+Source: cble.cpp (sha256 ci-dessous), g++ -O2 -march=native -std=c++20 -Wall -Wextra.
+Entrees: /workspaces/E-HGP/build/v9-q3-payload-scaling-inputs-20260926/{uniform,clusters,terrain}_{8000,16000,32000}.u32le
+         (exportees par mhgp9_front_fixture_export, recettes u16 graine 3, recu v9 q3_payload_local_20260926)
+         LiDAR 08/000200 sans sol: /workspaces/E-HGP/morsehgp3D_v9/audits/s4a_cpu_scene02_physical_panel_20260924/inputs/full_full.u32le
+         (45845 sites, sha256 a4bbc86d..., catalogue v9 K10 = 5483320, R22 K5 = 1407885)
+         planes_{8000,16000,32000}.u32le generes ici (deux plans rugueux z in [0,300) et [30000,30300), u16, graine 7)
+Oracle: --gen=40/60 --family=uniform|plane|grid --oracle (brut global) vs --M=8 (boites) : 36+12+12 cas identiques.
+Commande type: ./cble FILE --K=5 --dom=3 --M=16 --threads=2 ; K10: --dom=3 --M=24
+v9 de comparaison sur planes: /workspaces/E-HGP/build/v9-q3-payload-integration-20260926/mhgp9_tower_probe FILE 5 2 --s=8 --static=2 (+ leviers du manifeste q3_payload_local)
+Sorties JSON: out_*.json, v9_planes_*_K5.json/.err
+9dab902a4c85c1a8f0f9449206511347c6790f140154741dee36506c5544d9f9  cble.cpp

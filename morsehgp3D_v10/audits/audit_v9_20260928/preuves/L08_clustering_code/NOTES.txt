@@ -1,0 +1,12 @@
+Lentille L08 (code du clustering) -- notes de travail, 28 sept. 2026. Arbre lu : build/v9-open-worktree @ ce8a649dd + diff non commis.
+Binaire : build/v9-weighted-native-20260927-r1/native_weighted_export (2 fils, nice 19).
+Scripts (tous ici) :
+  cx_merge_tree.py / cx_min.py  -> merge_tree perd des facettes (3 triangles au meme niveau)
+  roots_fixture.py              -> fixture 64 pts : racine Gabriel isolee (16,30) m=0.515 selectionnee
+  probe.py + batchA.jsonl       -> 8 familles n=2000 medium graine 0 : as_is / fall_only / conform, gabriel / boundary
+  lone_triangle*.py             -> triangle de Gabriel (1070,1484,1944) isole dans G_2^Gab (bridge), verifie en exact
+  k1_oracle.py + k1_oracle.jsonl -> K=1 : chaine v9 vs sklearn HDBSCAN(min_samples=1) (as_is faux sur shells/filaments)
+  scale_probe.py + scale_count.jsonl + batchB.jsonl -> Sigma|members| 78M (8000 g), 447M (8000 b), 1,46G (32000 g), 8,67G (32000 b); RSS 3,9 Go a 8000 g
+  kroots.py (batchB)            -> racines Python 18/88/416 (gabriel K2/3/5) contre 1 racine native
+  hdb_ms1.py + hdb_ms1_all.csv  -> HDBSCAN(min_samples=1, mcs=ceil(sqrt n)) sur 250 runs : 0,737 contre oracle 0,683 (194-31)
+  oracle_ext.py + oracle_ext.csv -> oracle etendu (min_samples x selection) n<=2000

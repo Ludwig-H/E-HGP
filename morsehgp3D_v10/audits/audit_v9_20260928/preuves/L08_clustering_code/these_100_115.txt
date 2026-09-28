@@ -1,0 +1,655 @@
+74                Chapitre 7 — Le phénomène de percolation au cœur des performances
+
+
+Remarques
+  1. Lorsque K = 1, les trois familles coïncident : les 1-polyèdres sont les composantes
+     du graphe géométrique, les points cœurs du 1-Robust Single-Linkage sont tous les
+     points qui apparaissent dans le modèle booléen, et DBSCAN ne fait qu’ajouter une
+     frontière déjà présente. Les différences ne commencent donc qu’à partir de K ≥ 2.
+  2. Pour K = 2, le K-Robust Single-Linkage retire les feuilles des graphes géométriques
+     mais n’identifie pas pour autant de structures plus fines. Cet élagage non nécessaire
+     entraîne comme nous allons le voir des résultats pires que ceux pour K = 1.
+     DBSCAN réajoute ensuite ces points accessibles (qui correspondent exactement
+     aux feuilles élaguées) ; K = 2 donne donc les mêmes résultats pour DBSCAN que
+     K = 1.
+
+
+
+
+Figure 7.2 : Estimation de la fonction de probabilité λ 7→ Θ  b poly (λ) pour K ∈ {1, 2, 3, 4, 5} des K-
+                                                                K,2
+polyèdres en dimension 2. À noter que pour K = 1, le seuil critique en 2D est λc ≈ 1.44 [77, 78].
+
+
+Tableau 7.1 – Vitesse de percolation v en fonction de K pour les dimensions p = 2,
+p = 3 et p = 4. Les meilleurs résultats sont indiqués en gras.
+
+                 p=2                                   p=3                                 p=4
+K    HGP     Robust SL    DBSCAN           HGP     Robust SL   DBSCAN           HGP     Robust SL    DBSCAN
+1    0,735     0,735        0,735         0,563      0,563       0,563          0,362     0,362        0,362
+2    0,779     0,689        0,735         0,646      0,462       0,563          0,451     0,271        0,362
+3    0,800     0,632        0,753         0,690      0,412       0,582          0,497     0,247        0,378
+4    0,817     0,598        0,767         0,714      0,400       0,605          0,500     0,246        0,409
+5    0,826     0,584        0,779         0,732      0,399       0,625          0,534     0,236        0,415
+
+
+   Les résultats des estimations de Θ b cc (pour p = 2, K ∈ 1; 2; 3; 4; 5 ) sont montrés
+                                                             
+en Fig. 7.2 pour cc = poly, en Fig. 7.3 pour cc = core et en Fig. 7.4 pour cc = dbscan.
+7.4 – 7.4 Comparaison empirique entre K-polyèdres, K-Robust Single-Linkage et
+DBSCAN                                                                                             75
+
+
+
+
+Figure 7.3 : Estimation de la fonction de probabilité λ 7→ Θ
+                                                           b core (λ) pour K ∈ {1, 2, 3, 4, 5} des K-
+                                                             K,2
+composantes du Robust Single-Linkage en dimension 2.
+
+
+
+
+Figure 7.4 : Estimation de la fonction de probabilité λ 7→ Θ
+                                                           b dbscan (λ) pour K ∈ {1, 2, 3, 4, 5} des K-
+                                                             K,2
+composantes de DBSCAN en dimension 2.
+
+
+   Pour le calcul des vitesses de percolation vbcc (en dimension p = 2, p = 3 et p = 4), se
+reporter au Tab. 7.1.
+
+Remarque Ces simulations, quoique faisant intervenir n = 100 000 points, montrent
+des fonctions λ 7→ Θ(λ) “démarrant” au-dessus de 0 avec une pente nulle. Pourtant, au
+moins pour le Single-Linkage (K = 1), il a été montré que la pente au niveau du seuil λc
+est strictement positive [79-81] :
+
+                           ∃C > 0, ∀λ ≥ λc , Θ(λ) ≥ C (λ − λc ) .
+76               Chapitre 7 — Le phénomène de percolation au cœur des performances
+
+
+    Les K-polyèdres améliorent systématiquement la vitesse de percolation dès que K ≥ 2
+et surpassent les K-cœurs du Robust Single-Linkage et les K-composantes DBSCAN.
+    L’on s’attendait à ce que le K-Robust Single-Linkage soit moins bon que DBSCAN
+et que, pour K = 2, il donne de moins bons résultats que K = 1. En fait, c’est pis que
+cela : pour K ≥ 3, le Robust Single-Linkage continue de dégrader considérablement les
+résultats par rapport au Single-Linkage. La raison à cela se lit en Fig. 7.3 : l’algorithme
+peine à rassembler les derniers points ; sa probabilité de percolation Θcore converge trop
+lentement vers 1. L’erreur de ne pas prendre en compte les points à la frontière des amas
+est rédhibitoire.
+    DBSCAN répare partiellement cette erreur en réintégrant les points accessibles ; ses
+résultats sont donc meilleurs que ceux du Robust Single-Linkage (et progressent à partir
+de K ≥ 3), ils restent toutefois bien inférieurs à ceux des K-polyèdres ; la connectivité
+reste celle des cœurs, qui percolent bien trop vite (λ̂core
+                                                       c    < λ̂poly
+                                                                c    ) par rapport aux véritables
+niveaux LK .λ
+
+
+
+
+7.5      Et lorsque K → +∞ ?
+    À K et ε (rappel, ou recall en anglais) fixés, il y a peu d’espoir d’obtenir des ré-
+sultats  comparatifs entre les vitesses de percolation des différents algorithmes cc ∈
+  poly, dbscan, core autrement qu’avec des simulations sur de grands nuages de points.
+
+    Il en va autrement lorsque K → +∞.
+
+7.5.1     Le champ gaussien limite
+     Commençons par travailler en intensité normalisée
+                                µ , λ|B(0; 1/2)| = λ2−p ωp .
+Ainsi, pour x ∈ Rp , si l’on pose
+                             Nµ (x) , |Xµ/|B(0,1/2)| ∩ B(x, 1/2)|
+le nombre de voisins de x à intensité (normalisée) µ, alors Nµ (x) suit une loi de Poisson
+de paramètre µ, et notamment
+                             E[Nµ (x)] = µ,        V[Nµ (x)] = µ.
+     De plus, les vitesses étant des rapports d’intensités, passer de λ à µ ne change rien :
+                                         λc     µc
+                                             =      .
+                                        λ1−ε   µ1−ε
+     On introduit le champ de comptage (centré réduit)
+                                               Nµ (x) − µ
+                                    Zµ (x) ,       √      .
+                                                    µ
+7.5 – 7.5.1   Le champ gaussien limite                                                             77
+
+
+  Proposition 4 : Théorème central limite local du champ de comptage
+  Pour tous x1 , . . . , xm ∈ Rp , le vecteur
+
+                                          (Zµ (x1 ), . . . , Zµ (xm ))
+
+  converge en loi, lorsque µ → +∞, vers un vecteur gaussien centré
+
+                                          (Gp (x1 ), . . . , Gp (xm ))
+
+  de covariance
+                                                                   |B(xi , 1/2) ∩ B(xj , 1/2)|
+              E[Gp (xi )Gp (xj )] = ρp (xi − xj ) ,                                            .
+                                                                           |B(0, 1/2)|
+
+  Gp désigne le champ gaussien stationnaire centré de covariance ρp . En particulier,
+
+                                 ρp (z) = 0               dès que kzk ≥ 1.
+
+Preuve. Notons
+                             Bi , B(xi , 1/2),                    i ∈ {1, . . . , m}.
+On partitionne       i Bi en les atomes
+                 S
+
+                         Ç            å                   !
+                             \                [
+                 AJ ,            Bj       \          Bj       ,       ∅ 6= J ⊆ {1, . . . , m}.
+                           j∈J                j ∈J
+                                                /
+
+(Un point x ∈ i Bi apparaissant exactement dans les boules Bj pour j ∈ J ⊆ 1; . . . ; m
+              S                                                           
+sera placé dans l’ensemble AJ .) Les variables
+                                          YJ , Xµ/|B(0,1/2)| (AJ )
+sont des variables de Poisson indépendantes qui permettent d’écrire (en les combinant
+linéairement) le vecteur
+                                (Zµ (x1 ), . . . , Zµ (xm )) .
+L’approximation Poisson–Normale permet de conclure quant à la convergence. La cova-
+riance, elle, vaut :
+                                            1                       
+                     Cov Zµ (xi ), Zµ (xj ) = Cov Nµ (xi ), Nµ (xj )
+                                              µ
+                                              1                         
+                                            = V Xµ/|B(0,1/2)| (Bi ∩ Bj )
+                                              µ
+                                               |Bi ∩ Bj |
+                                            =             .
+                                              |B(0, 1/2)|
+78                Chapitre 7 — Le phénomène de percolation au cœur des performances
+
+
+    Les ensembles K-NN sont définis par Nµ (x)√≥ K. La transition se produit quand µ
+est proche de K, avec des fluctuations d’ordre K. La fenêtre d’intérêt pour µ est donc
+                                              √
+                                    µ = K + a K.
+
+Pour finir, en remarquant que
+                                              ®                      ´
+                                                            K −µ
+                        {x | Nµ (x) ≥ K} =        x Zµ (x) ≥ √           ,
+                                                               µ
+
+et avec la convergence K−µ
+                       √
+                         µ
+                            → −a, les amas de forte densité K-NN (pour le rayon r = 1/2
+fixé) peuvent se modéliser (à la limite) par l’ensemble d’excursion gaussien [82, 83]
+
+                                Ea , {x ∈ Rp | Gp (x) ≥ −a}.
+
+     L’évaluation de la vitesse de percolation se réduit dès lors à l’étude de ces excursions.
+
+7.5.2      Comportements sur le champ gaussien de HGP-Clusterer,
+           (H)DBSCAN et Robust Single-Linkage
+    À la limite, la différence de résultats entre les algorithmes s’explique formellement
+par la manière dont chacun interagit avec l’excursion Ea .
+    En s’appuyant sur le résultat (admis) ci-dessous, la récupération d’un point typique
+(l’origine 0) s’écrit asymptotiquement :
+     — Cœurs (Robust Single-Linkage). L’origine 0 doit appartenir à l’excursion Ea
+       (pour faire partie d’un cœur) et, une fois dilatés les cœurs de r = 1/2 (liaison par
+       arête), 0 doit se trouver dans une composante géante :
+
+                                Acore
+                                                                  
+                                  a   =   0 ∈ E a ∩ C ∞ δ1/2 (E a )  .
+
+     — DBSCAN. L’appartenance à l’excursion Ea stricte n’est plus exigée ; il suffit d’être
+       couvert par la composante géante dilatée :
+
+                              Adbscan
+                                                         
+                                a     = 0 ∈ C∞ δ1/2 (Ea ) .
+
+     — HGP-Clusterer. Il n’y a pas de dilatation préalable à l’identification d’une com-
+       posante géante de l’excursion Ea . C’est l’origine 0 qui est dilatée en une boule,
+       B(0; 1/2) = δ1/2 (0), et l’on regarde si cette boule intersecte C∞ (Ea ), cela revient à
+       observer l’événement :
+
+                                   Apoly
+                                           
+                                     a   = 0 ∈ δ1/2 (C∞ (Ea )) .
+7.5 – 7.5.2 Comportements sur le champ gaussien de acronymes]HGP@HGP –
+Hypergraphe-Percol’HGP-Clusterer, (H)acronymes]DBSCAN@DBSCAN –
+Density-Based Spatial Clustering of Applications with NoiseDBSCAN et Robust
+Single-Linkage                                                                           79
+    Soient p ≥ 2 et
+                              cc ∈ {poly, core, dbscan}.
+On pose
+                                     √                           µK (a)
+                      µK (a) := K + a K,           λK (a) ,                .
+                                                               |B(0; 1/2)|
+Soit                                               Ç          √ å
+                                                       K +a K
+                             FKcc (a) , Θcc
+                                         K,p,1/2                   .
+                                                       |B(0; 1/2)|
+On note Gp le champ gaussien stationnaire centré de covariance
+
+                                              |B(x; 1/2) ∩ B(y; 1/2)|
+                        E[Gp (x)Gp (y)] =                             ,
+                                                    |B(0; 1/2)|
+et
+                              Ea , {x ∈ Rp | Gp (x) ≥ −a}.
+Enfin, on définit
+                            Acore
+                             a    , {0 ∈ Ea ∩ C∞ (δ1/2 (Ea ))},
+                              Adbscan
+                               a      , {0 ∈ C∞ (δ1/2 (Ea ))},
+et
+                               Apoly
+                                a    , {0 ∈ δ1/2 (C∞ (Ea ))}.
+Alors, on admettra qu’en tout point de continuité de
+
+                                           a 7→ P(Acc
+                                                   a ),
+
+on a                                 Ç          √ å
+                                         K +a K
+                          Θcc
+                           K,p,1/2                   −−−−→ P(Acc
+                                                              a ).
+                                         |B(0; 1/2)| K→+∞
+
+   L’on voit avec cette formulation réapparaître les deux défauts du Robust Single-
+Linkage par rapport à HGP-Clusterer :
+     1. La dilatation δ1/2 est appliquée avant l’identification des composantes géantes C∞ ,
+        provoquant une percolation précoce (acorec   = adbscan
+                                                          c     ≤ apoly
+                                                                    c   ).
+     2. La condition d’être un point cœur, c’est-à-dire (en termes de champ gaussien)
+        d’appartenir à l’excursion Ea est beaucoup trop restrictive.
+   DBSCAN évite l’erreur du second point (en permettant à un point d’être seulement
+accessible), mais pas du premier : la percolation de ses composantes a lieu trop tôt
+(comparer Fig. 7.2 avec les Fig. 7.3 & 7.4).
+80                 Chapitre 7 — Le phénomène de percolation au cœur des performances
+
+
+7.5.3      Et à haut rappel ε → 0
+    Àrappel ε > 0 fixé, il est assez aisé de voir [84] que quel que soit l’algorithme
+cc ∈ poly; dbscan; core , la vitesse de percolation est asymptotiquement
+                                            Å      ã
+                                               1
+                                    1−O √            .
+                                                K
+    Cela vient de la nature du processus ponctuel choisi pour X , savoir : un processus
+de Poisson, dont les variations sont telles qu’il nous suffit de l’observer sur une fenêtre
+d’intensité (normalisée)                         √
+                                    µ = K + a K.
+    Dans le cas d’un rappel asymptotiquement
+                                   √             parfait ε → 0, c’est-à-dire que la fenêtre
+se déplace a → ∞ (et a = o( K)), on voit alors assez nettement quelles sont les
+obstructions aux événements Acore a   et Apoly
+                                          a    :
+   1. Cœurs (Robust Single-Linkage). Dans Acore  a , c’est l’événement 0 ∈ / Ea qui devient
+      prépondérant i) .
+   2. Polyèdres (HGP-Clusterer). L’obstruction est beaucoup plus coûteuse : il faut
+      que toute la boule B(0; 1/2) (et non simplement le point à l’origine) soit hors de
+      la composante infinie de l’excursion C∞ (Ea ). (L’on conjecture que le coût de la
+      réduction de l’excursion à sa composante infinie est négligeable devant celui de la
+      dilatation δ1/2 appliquée.)
+    Montrer rigoureusement ces résultats nous emmènerait trop loin ; le développement
+rigoureux des grandes déviations gaussiennes dépasserait le cadre de ce manuscrit.
+    Sous réserve toutefois que ces intuitions soient justes, les quantiles (asymptotiques)
+de rappel acc
+            1−ε (p) seraient alors donnés par
+                             »
+                 apoly
+                                                               p
+                  1−ε  (p) ∼   2Up log(1/ε) < acore 1−ε (p) ∼     2 log(1/ε)
+où Up < 1 est associé au coût lié à l’obstruction
+                                   ∀x ∈ B(0, 1/2),          Gp (x) < −1.
+   Ajoutez à cela que apoly
+                       c    ≥ acore
+                               c    et vous obtenez une meilleure vitesse de percolation
+asymptotique pour HGP-Clusterer.
+
+Remarque Ces résultats, qui ne sont qu’à l’ébauche d’intuitions, mériteraient pour être
+rigoureusement développés d’introduire l’espace de Cameron–Martin [87, 88], qui est
+l’espace de Hilbert à noyau reproduisant [89] (RKHS pour Reproducing Kernel Hilbert
+Space en anglais) adapté à l’étude des processus gaussiens. Pour ce qui est du coût de
+l’obstruction, c’est une conséquence du théorème de Schilder [90, 91].
+   i). Cette assertion – à elle seule !.. – mériterait d’être plus amplement justifiée ; c’est l’analogue continu
+des résultats de Penrose indiquant qu’en régime supercritique, lorsque λ → +∞, seules des composantes
+de taille plus en plus petites ne sont pas rattachées à la composante géante [6, 85, 86].
+7.5 – 7.5.3   Et à haut rappel ε → 0                                                       81
+
+
+Synthèse Ce chapitre permet de quantifier les défauts du Single-Linkage et de ses
+robustifications standards. En dimension p ≥ 2, le problème n’est pas seulement que les
+graphes chaînent ; c’est qu’ils percolent avant d’avoir bien récupéré tous les points des
+amas de forte densité.
+    La fonction de probabilité de percolation Θcc  K,p,r contient alors l’information qui nous
+intéresse : connaissant la densité f , on peut lire localement la fraction asymptotiquement
+récupérable à partir de l’intensité effective n(2rn )p f (x). Dans le cas élémentaire de deux
+niveaux de densité, la fraction récupérable avant fusion parasite vaut
+                                           Å                ã
+                                    cc        cc         ρ1
+                                 ΘK,p,1/2 λc (K, p)           .
+                                                         ρ0
+Formule qui nous a poussé à définir la vitesse de percolation
+
+                                        cc            λcc
+                                                       c
+                                       vcrit (ε) =        ,
+                                                     λcc
+                                                      1−ε
+
+un indice pratique pour mesurer la performance de l’algorithme : plus il est proche de 1,
+plus l’algorithme récupère vite un amas dense avant que le fond ne percole.
+    Les simulations en petites dimensions montrent que HGP-Clusterer (c’est-à-dire notre
+algorithme identifiant les K-polyèdres) possède une meilleure vitesse de percolation que
+le K-Robust Single-Linkage et K-DBSCAN. L’analyse lorsque K → +∞ explique ce
+phénomène : les niveaux K-NN convergent vers des excursions d’un champ gaussien, et
+l’échec des polyèdres exige un séparateur spatial autour d’une boule, là où l’échec des
+cœurs peut déjà venir d’une fluctuation ponctuelle. C’est la conséquence de notre idée de
+départ : il ne faut pas seulement demander aux points d’être denses ; il faut connecter
+correctement les régions où la densité K-NN est forte.
+                                                           Chapitre                  8
+                       À la recherche de la
+                         généralisation de
+                         l’arbre minimum
+                                  couvrant
+    Au cours du chapitre 6 précédent, nous avons montré que les K-polyèdres de Čech
+constituent la bonne généralisation du Single-Linkage : niveau par niveau, la hiérarchie
+qu’ils produisent coïncide avec les amas discrets de forte densité de l’estimateur K-NN
+(Théorème 2, p. 60). Cette réponse est satisfaisante mathématiquement, mais quelque peu
+brutale algorithmiquement. Construire le complexe   de Čech complet revient à manipuler
+                                                n
+tous les K-simplexes sur X , au nombre de K+1       .
+    Pour K = 1, cette explosion n’a pas lieu en pratique dans l’espace euclidien (de petite
+dimension) : on ne calcule pas toute la filtration des graphes géométriques, on extrait
+l’arbre minimum couvrant. Cet arbre est lui-même contenu dans le graphe de Gabriel,
+lui-même sous-graphe de la triangulation de Delaunay (Fait 1, p. 16).
+    L’objectif de ce chapitre est de reconstruire cette chaîne d’idées à l’ordre K :
+
+  Complexes de Čech       Simplexes responsables des fusions
+                 K-Graphe de Gabriel         Mosaïque de Delaunay d’ordre K
+
+Contributions Ce chapitre reprend et développe les optimisations géométriques intro-
+duites dans [65]. Nous commençons par montrer que l’on peut retrouver les K-polyèdres
+comme composantes connexes d’un graphe pondéré élémentaire sur les (K −1)-simplexes,
+c’est-à-dire en restreignant les arêtes aux K-simplexes. Cette reformulation permet de dé-
+finir précisément les simplexes K-séparants (Def. 27, p. 86) : les simplexes qui provoquent
+effectivement une fusion dans la hiérarchie. Le premier résultat central est le Théorème 4 :
+tout simplexe K-séparant est nécessairement de Gabriel. On en déduit que le graphe
+de Gabriel contient toutes les fusions utiles et qu’un arbre couvrant minimum construit
+sur ce graphe préserve, à chaque échelle, les K-polyèdres (Théorème 5, p. 91). Enfin, nous
+
+                                            83
+84      Chapitre 8 — À la recherche de la généralisation de l’arbre minimum couvrant
+
+
+expliquons comment construire en pratique la hiérarchie K-NN : la structure géométrique
+naturelle derrière cette construction est la mosaïque de Delaunay d’ordre K.
+
+
+8.1      L’approche persistante : les simplexes K-séparants
+     Fixons un nuage fini X ⊂ Rp et un entier
+
+                                    K ∈ [[1, |X | − 1]] .
+
+ Définition 25 : Rayon de naissance d’un simplexe
+ Pour tout sous-ensemble fini non vide σ ⊆ X , on note
+                                     ¶                     ©
+                           ρ(σ) , inf r ≥ 0 | σ ∈ Č(X , r) .
+
+ Autrement dit,
+                                ρ(σ) = infp maxky − xk.
+                                        y∈R   x∈σ
+
+ La boule fermée réalisant cet infimum sera notée
+
+                                    Bσ = B(cσ , ρ(σ)),
+
+ avec cσ son centre.
+
+Remarque En anglais, on appelle cette plus petite boule englobante la miniball de σ.
+La méthode standard pour calculer le rayon ρ(σ) ainsi que pour identifier le centre cσ de
+la boule Bσ est l’algorithme de Welzl [92].
+    Le rayon de naissance ρ(σ) est exactement le niveau d’apparition de σ dans la filtration
+de Čech. Pour K = 1, si σ = {x, x0 }, alors
+                                         1
+                                   ρ(σ) = kx − x0 k.
+                                         2
+   Dans toute la suite du chapitre, nous utiliserons l’hypothèse suivante à propos des
+données X .
+ Définition 26 : Position générale pour la filtration de Čech
+ On dit qu’un nuage X ⊂ Rp localement fini est en position générale pour la filtration
+ de Čech si, pour tout simplexe σ ⊆ X avec |σ| ≥ 2, aucun point de X \ σ n’appartient
+ à la frontière de sa plus petite boule englobante,
+
+                                  ∂Bσ ∩ (X \ σ) = ∅.
+8.1 – 8.1 L’approche persistante : les simplexes K-séparants                                                                    85
+
+
+  Autrement dit, aucun point du nuage extérieur à σ ne se trouve sur la frontière de la
+  plus petite boule englobante de σ.
+
+Remarques
+    1. Noter que notre définition d’un nuage en position générale est plus contraignante
+       que la Def. 4.2 de [37]
+    2. Sous cette hypothèse, les points de σ ∩ ∂Bσ forment exactement l’ensemble de
+       support de la boule minimale Bσ (voir Fait 12 ci-dessous). En particulier, ils sont
+       affinement indépendants et cσ appartient à l’intérieur (relatif) de conv(σ ∩ ∂Bσ ).
+
+   Fait (connu) 12 : Boule minimale et ensemble de support [37, 92]
+   Soit A ⊂ Rp fini non vide. Il existe une unique plus petite boule fermée contenant A.
+   Son centre appartient à l’enveloppe convexe d’un sous-ensemble
+
+                                                      S(A) ⊆ A ∩ ∂BA
+
+   de cardinal au plus p+1. Sous l’hypothèse de position générale (Def. 26), cet ensemble
+   de support est exactement l’ensemble des points de A situés sur la frontière de BA .
+   En particulier, si s ∈ S(A), alors
+
+                                                    ρ(A \ {s}) < ρ(A).
+
+
+
+                           x3 ∈ S
+                                                                                               x3 ∈
+                                                                                                  /S
+                    Bσ                                                                  Bσ
+                                 ρ(σ)
+                                                                                                   σ
+                               σ cσ                                    x1 ∈ S                                         x2 ∈ S
+                                                                                                  cσ
+    x1 ∈ S                                       x2 ∈ S                                           ρ(σ)
+
+
+(a) Triangle aigu. Le centre cσ se trouve à l’intérieur de l’enve-   (b) Triangle obtus : le centre cσ appartient à une arête. L’en-
+loppe convexe. Tous les sommets définissent la boule minimale,       semble de support est strictement inclus dans le simplexe :
+donc S = σ.                                                          S = {x1 , x2 } ( σ.
+
+Figure 8.1 : Illustration de la plus petite boule englobante Bσ , de son centre cσ , de son rayon de naissance
+ρ(σ) et de son ensemble de support à la frontière S = σ ∩ ∂Bσ pour un 2-simplexe σ = {x1 , x2 , x3 }.
+86      Chapitre 8 — À la recherche de la généralisation de l’arbre minimum couvrant
+
+
+8.1.1    Le graphe élémentaire des facettes
+    Il nous a été plus commode en Def. 21, p. 58 de définir les K-polyèdres comme
+les composantes connexes d’un graphe ΓK (X , r) dont les sommets sont les (K − 1)-
+simplexes de Č(X , r) et dont deux sommets sont adjacents lorsque leur union est encore
+un simplexe de Č(X , r), et ce sans restriction sur la taille de cette union. L’objet de Prop. 5
+est d’observer que l’on aurait pu se restreindre aux adjacences élémentaires, c’est-à-dire
+aux seuls K-simplexes pour créer des liaisons entre les sommets.
+
+  Proposition 5 : Les adjacences élémentaires suffisent
+  Pour tout r ≥ 0, retirer de ΓK (X , r) les liens entre deux sommets τ et τ 0 dès que
+  |τ ∪ τ 0 | > K + 1 laisse inchangées les composantes connexes. Elles correspondent
+  donc toujours aux K-polyèdres du complexe de Čech Č(X , r) définis en Def. 21.
+
+Preuve. Supposons que deux (K − 1)-simplexes τ et τ 0 soient adjacents dans ΓK (X , r),
+c’est-à-dire que τ ∪ τ 0 ∈ Č(X , r), soit
+                                        ρ(τ ∪ τ 0 ) ≤ r.
+Si |τ ∪ τ 0 | = K + 1, l’adjacence est déjà élémentaire. Si |τ ∪ τ 0 | > K + 1, alors on peut
+relier τ à τ 0 au moyen d’un chemin de K-sous-simplexes de τ ∪ τ 0 , différant à chaque
+fois d’un seul élément. Ces liaisons sont toutes présentes dans le graphe ΓK (X , r) élagué
+des simplexes de dimension > K.
+
+Notation À partir de maintenant, ΓK (X , r) désignera uniquement la version élaguée
+du graphe, réduit aux adjacences élémentaires. Nous noterons ce graphe indifféremment
+ΓK (X )≤r et ΓK (X ), sans indice, quand nous prenons r = +∞. Nous noterons aussi
+ΓK (X )<r le sous-graphe de ΓK (X )≤r privé de tous les simplexes σ (sommets et arêtes)
+ayant un rayon ρ(σ) exactement égal à r.
+
+  Définition 27 : Simplexe K-séparant
+  Soit σ ⊆ X un K-simplexe, et posons
+                                          rσ , ρ(σ).
+  On appelle facettes actives de σ les facettes déjà présentes strictement avant la nais-
+  sance de σ :
+                       F< (σ) , {τ ⊂ σ | |τ | = K et ρ(τ ) < rσ } .
+  On dit que σ est K-séparant s’il existe deux facettes actives
+                                        τ, τ 0 ∈ F< (σ)
+  qui appartiennent à deux composantes connexes distinctes de
+                                          ΓK (X )<rσ .
+8.2 – 8.2 Une condition nécessaire pour un simplexe séparant : être
+de Gabrielnoms]Gabriel@Gabriel                                                            87
+
+
+ Autrement dit, σ est K-séparant lorsqu’il provoque effectivement une fusion entre
+ deux K-polyèdres déjà présents.
+
+
+Remarque Sous l’hypothèse de position générale pour la filtration de Čech, un K-
+simplexe σ possède toujours au moins deux facettes actives. En effet, si
+
+                                      Sσ , σ ∩ ∂Bσ
+
+désigne l’ensemble de support de sa plus petite boule englobante, alors |Sσ | ≥ 2 et, pour
+tout s ∈ Sσ ,
+                                  ρ(σ \ {s}) < ρ(σ).
+Les facettes actives sont donc au moins les σ \ {s}, avec s ∈ Sσ . Les autres facettes,
+obtenues en retirant un sommet intérieur de Bσ , peuvent en revanche naître exactement
+au même niveau que σ.
+    Autrement dit, un simplexe K-séparant est un simplexe qui change réellement la
+connectivité persistante des K-polyèdres. Pour K = 1, les 1-simplexes séparants sont
+exactement les arêtes qui relient deux composantes distinctes du graphe géométrique au
+moment où elles apparaissent ; ce sont les arêtes de l’arbre minimum couvrant.
+    Le Fait 2 appliqué à ΓK (X ) dit que si l’on savait construire un arbre couvrant mini-
+mum de ΓK (X ), alors son élagage à l’échelle r redonnerait les K-polyèdres    de Č(X , r).
+Mais ce graphe contient encore tous les sommets induits par les Kn simplexes d’ordre
+                                                                       
+K − 1. Il faut donc identifier un sous-graphe beaucoup plus mince ; c’est l’objet de la
+section suivante.
+
+
+8.2     Une condition nécessaire pour un simplexe sépa-
+        rant : être de Gabriel
+    Le cas K = 1 fournit l’intuition géométrique décisive : une arête de l’arbre minimum
+couvrant euclidien est nécessairement une arête de Gabriel (Def. 3 & Fait 1, p. 16),
+c’est-à-dire que la plus petite boule englobante, celle ayant pour diamètre l’arête, est vide
+de tout autre point du nuage. La condition se généralise en remplaçant la boule diamétrale
+par la plus petite boule englobante du simplexe.
+
+ Définition 28 : Simplexe de Gabriel
+ Un K-simplexe σ ⊆ X est dit de Gabriel si l’intérieur de sa plus petite boule
+ englobante ne contient aucun point de X extérieur à σ :
+
+                                    B̊σ ∩ (X \ σ) = ∅.
+88         Chapitre 8 — À la recherche de la généralisation de l’arbre minimum couvrant
+
+
+Remarque Noter que notre généralisation de la notion de simplexe de Gabriel à l’aide
+de la miniball diffère de celle de [37], où l’on impose une condition de sphère circonscrite
+vide (la circumball). Pour K = 1, les deux notions coïncident avec l’arête de Gabriel
+classique.
+    Cette condition de vacuité est nécessaire pour qu’un K-simplexe provoque une fusion.
+
+  Théorème 4 : Condition nécessaire pour que σ soit K-séparant : σ doit
+               être de Gabriel
+   Supposons X en position générale pour la filtration de Čech. Tout simplexe K-
+   séparant est de Gabriel.
+
+Preuve du Théorème 4. Soit σ un K-simplexe, et posons
+
+                                                r = ρ(σ),             Bσ = B(c, r).
+
+Raisonnons par contraposée. Supposons que σ ne soit pas de Gabriel. Il existe donc un
+point
+                        z ∈X \σ        tel que    z ∈ B̊σ .
+Notons
+                                                          S , σ ∩ ∂Bσ
+l’ensemble des sommets de σ situés sur la frontière de la boule minimale. Par la Def. 26 et
+le Fait 12, S est l’ensemble de support de Bσ ; en particulier |S| ≥ 2, le centre c appartient
+à l’intérieur relatif de conv(S), et retirer n’importe quel point de S diminue strictement
+le rayon de naissance.
+
+
+                                                                                                  x3
+                     Bσ       x3 ∈
+                                 /S
+                                                                                       τ2                        τ1
+                                                                                                       z
+                                    σ                                       x1         σ1z            η1,2 σ2z          x2
+ x1 ∈ S                              c                     x2 ∈ S
+
+                                            r                                                     z
+                                z
+
+
+                                                                       (b) Les K-simplexes σ2z et σ1z ont des rayons < r. Le che-
+(a) Un triangle σ = {x1 , x2 , x3 }. Bσ a pour diamètre [x1 , x2 ].              σ1z        σ2z
+L’ensemble de support est S = {x1 , x2 }. σ n’est pas de Gabriel       min τ1 ←→r η1,2
+                                                                                   z
+                                                                                       ←→r τ2 connecte les facettes actives dans
+donc il existe un “intrus” z ∈ B̊σ .                                   ΓK (X )<r .
+
+Figure 8.2 : Illustration de la preuve du Théorème 4 (K = 2) pour un triangle σ = {x1 , x2 , x3 } obtus
+en x3 , c’est-à-dire que S = {x1 , x2 }. Si le simplexe n’est pas de Gabriel, Bσ (de rayon r) contient donc
+un “intrus” z. Les facettes τ1 et τ2 , actives pour une filtration < r, sont connectées au moyen de z (les
+2-simplexes σsz et σtz ).
+8.2 – 8.2 Une condition nécessaire pour un simplexe séparant : être
+de Gabrielnoms]Gabriel@Gabriel                                                              89
+
+
+    D’après la définition d’un simplexe K-séparant (Def. 27, p. 86) et la remarque associée,
+les facettes actives de σ (c’est-à-dire celles existant strictement avant r) sont exactement
+les facettes
+                                  τs , σ \ {s},        s ∈ S.
+   Montrons maintenant que toutes les facettes actives τs , s ∈ S, sont déjà dans la même
+composante de ΓK (X )<r . Soient s, t ∈ S, s 6= t. Considérons les deux K-simplexes
+
+                    σsz , (σ \ {s}) ∪ {z},           σtz , (σ \ {t}) ∪ {z}.
+
+Ils contiennent respectivement les facettes
+                                               z
+                        τs = σ \ {s},         ηs,t , (σ \ {s, t}) ∪ {z},
+
+et
+                                    z
+                                   ηs,t ,      τt = σ \ {t}.
+Il suffit donc de vérifier que
+
+                              ρ(σsz ) < r       et         ρ(σtz ) < r.
+
+(Voir la Fig. 8.2 pour une illustration.) Or σsz est contenu dans Bσ , et ses points situés sur
+la frontière de Bσ sont contenus dans S \ {s}. D’après le Fait 12, on a bien
+
+                                            ρ(σsz ) < r.
+
+Même raisonnement pour σtz .
+   Ainsi, pour tout couple s, t ∈ S, les facettes τs et τt sont reliées dans ΓK (X )<r par le
+chemin
+                                        σsz   z  σtz
+                                   τs ← →r ηs,t ← →r τ t
+Le simplexe σ n’a donc aucune influence sur les K-polyèdres (les (K − 1)-simplexes déjà
+existants étant de la même composante connexe ; ceux apparaissant ayant déjà tous leurs
+points dans cette même composante préexistante) ; il n’est pas K-séparant.
+
+  Définition 29 : K-graphe de Gabriel
+  Le K-graphe de Gabriel de X , noté
+                                             Gab
+                                            GK   (X ),
+  est le sous-graphe pondéré de ΓK (X ) défini ainsi.
+     — Ses sommets sont les (K − 1)-simplexes de X qui sont facettes d’au moins un
+         K-simplexe de Gabriel.
+     — Pour chaque K-simplexe de Gabriel σ, on relie entre elles toutes les facettes
+         de σ (formant une clique).
+

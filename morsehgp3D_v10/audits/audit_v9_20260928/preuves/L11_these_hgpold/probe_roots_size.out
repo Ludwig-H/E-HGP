@@ -1,0 +1,8 @@
+{"n": 300, "k": 3, "seed": 1, "conv": "boundary", "roots": 1, "root_masses_top": [300.0], "sqrt_n": 17.3}
+{"n": 300, "k": 3, "seed": 1, "conv": "gabriel", "roots": 16, "root_masses_top": [298.1, 0.3, 0.2, 0.2, 0.2, 0.1], "sqrt_n": 17.3}
+{"n": 300, "k": 3, "seed": 2, "conv": "boundary", "roots": 2, "root_masses_top": [299.9, 0.1], "sqrt_n": 17.3}
+{"n": 300, "k": 3, "seed": 2, "conv": "gabriel", "roots": 9, "root_masses_top": [299.2, 0.1, 0.1, 0.1, 0.1, 0.1], "sqrt_n": 17.3}
+{"n": 1000, "k": 2, "seed": 1, "conv": "boundary", "roots": 1, "root_masses_top": [1000.0], "sqrt_n": 31.6}
+{"n": 1000, "k": 2, "seed": 1, "conv": "gabriel", "roots": 3, "root_masses_top": [999.9, 0.1, 0.1], "sqrt_n": 31.6}
+{"n": 1000, "k": 3, "seed": 1, "conv": "boundary", "roots": 2, "root_masses_top": [999.9, 0.1], "sqrt_n": 31.6}
+{"n": 1000, "k": 3, "seed": 1, "conv": "gabriel", "roots": 33, "root_masses_top": [996.3, 0.5, 0.4, 0.4, 0.2, 0.1], "sqrt_n": 31.6}

@@ -1,0 +1,5 @@
+k1_emst_judge n=8000 merges=7999 mst_edges=7999 multiset_equal=True cuts=7 bad_cuts=0 export_s=0.42 prim_s=2.11
+tight8000 rc=0
+k1_emst_judge n=8000 merges=7999 mst_edges=7999 multiset_equal=True cuts=12 bad_cuts=0 export_s=0.33 prim_s=2.04
+wide8000 rc=0
+k1_emst_judge n=39885 merges=39884 mst_edges=39884 multiset_equal=True cuts=12 bad_cuts=0 export_s=1.23 prim_s=55.57

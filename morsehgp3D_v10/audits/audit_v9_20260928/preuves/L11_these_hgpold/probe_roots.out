@@ -1,0 +1,8 @@
+{"kind": "uniform", "n": 300, "k": 2, "seed": 1, "cofaces": 1948, "cofaces_<=1_gabriel_facet": 219, "roots_boundary": 1, "facets_boundary": 1982, "roots_gabriel": 1, "facets_gabriel": 990}
+{"kind": "uniform", "n": 300, "k": 2, "seed": 2, "cofaces": 1831, "cofaces_<=1_gabriel_facet": 223, "roots_boundary": 1, "facets_boundary": 1898, "roots_gabriel": 1, "facets_gabriel": 939}
+{"kind": "uniform", "n": 300, "k": 3, "seed": 1, "cofaces": 3034, "cofaces_<=1_gabriel_facet": 484, "roots_boundary": 1, "facets_boundary": 5711, "roots_gabriel": 5, "facets_gabriel": 1948}
+{"kind": "uniform", "n": 300, "k": 3, "seed": 2, "cofaces": 2946, "cofaces_<=1_gabriel_facet": 501, "roots_boundary": 1, "facets_boundary": 5610, "roots_gabriel": 1, "facets_gabriel": 1831}
+{"kind": "blobs", "n": 300, "k": 2, "seed": 1, "cofaces": 1611, "cofaces_<=1_gabriel_facet": 219, "roots_boundary": 1, "facets_boundary": 1782, "roots_gabriel": 3, "facets_gabriel": 870}
+{"kind": "blobs", "n": 300, "k": 2, "seed": 2, "cofaces": 1581, "cofaces_<=1_gabriel_facet": 190, "roots_boundary": 1, "facets_boundary": 1729, "roots_gabriel": 4, "facets_gabriel": 878}
+{"kind": "blobs", "n": 300, "k": 3, "seed": 1, "cofaces": 2436, "cofaces_<=1_gabriel_facet": 383, "roots_boundary": 1, "facets_boundary": 4836, "roots_gabriel": 16, "facets_gabriel": 1611}
+{"kind": "blobs", "n": 300, "k": 3, "seed": 2, "cofaces": 2391, "cofaces_<=1_gabriel_facet": 390, "roots_boundary": 2, "facets_boundary": 4764, "roots_gabriel": 9, "facets_gabriel": 1581}

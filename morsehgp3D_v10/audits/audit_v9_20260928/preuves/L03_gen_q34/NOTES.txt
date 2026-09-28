@@ -1,0 +1,7 @@
+L03 gen q3/q4 -- notes de travail (audit v9, ce8a649dd)
+Binaire: build/v9-q3-payload-integration-20260926/mhgp9_tower_probe sha256 3647d904... (src/gen, src/chain, tower_probe identiques 9751bae69..HEAD)
+Commande: nice -n 19 mhgp9_tower_probe <x.u32le> 5 2 --no-tower  (defauts chaine = moteur CPU Local28/GlobalBoxes, dead lanes+core+cache)
+Donnees: experiments/synthetic_bench_20260928 generate(family, n, groups=8, level=medium, noise=0, seed=11) + quantize(1mm,18 bits)
+Resultats: voir data/*_k5.json ; spherical lineaire ; shells super-quadratique (cover_sites x4.5/x5.7/x7.0).
+shells 32k: q34 1438.5 s / chain 1442.5 s (99.7 %), cover_sites 1.241e10 (x7.75), 4276 sites/cover, sorties q3+q4 375k (x1.99). Hote charge (load 8-11, autre agent sur shells_32000).
+spherical 32k: q34 60.8 s, expanded 1.94M (x2.04), 48 sites/cover.

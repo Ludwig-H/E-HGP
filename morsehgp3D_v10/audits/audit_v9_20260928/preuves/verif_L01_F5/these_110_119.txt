@@ -1,0 +1,433 @@
+84      Chapitre 8 — À la recherche de la généralisation de l’arbre minimum couvrant
+
+
+expliquons comment construire en pratique la hiérarchie K-NN : la structure géométrique
+naturelle derrière cette construction est la mosaïque de Delaunay d’ordre K.
+
+
+8.1      L’approche persistante : les simplexes K-séparants
+     Fixons un nuage fini X ⊂ Rp et un entier
+
+                                    K ∈ [[1, |X | − 1]] .
+
+ Définition 25 : Rayon de naissance d’un simplexe
+ Pour tout sous-ensemble fini non vide σ ⊆ X , on note
+                                     ¶                     ©
+                           ρ(σ) , inf r ≥ 0 | σ ∈ Č(X , r) .
+
+ Autrement dit,
+                                ρ(σ) = infp maxky − xk.
+                                        y∈R   x∈σ
+
+ La boule fermée réalisant cet infimum sera notée
+
+                                    Bσ = B(cσ , ρ(σ)),
+
+ avec cσ son centre.
+
+Remarque En anglais, on appelle cette plus petite boule englobante la miniball de σ.
+La méthode standard pour calculer le rayon ρ(σ) ainsi que pour identifier le centre cσ de
+la boule Bσ est l’algorithme de Welzl [92].
+    Le rayon de naissance ρ(σ) est exactement le niveau d’apparition de σ dans la filtration
+de Čech. Pour K = 1, si σ = {x, x0 }, alors
+                                         1
+                                   ρ(σ) = kx − x0 k.
+                                         2
+   Dans toute la suite du chapitre, nous utiliserons l’hypothèse suivante à propos des
+données X .
+ Définition 26 : Position générale pour la filtration de Čech
+ On dit qu’un nuage X ⊂ Rp localement fini est en position générale pour la filtration
+ de Čech si, pour tout simplexe σ ⊆ X avec |σ| ≥ 2, aucun point de X \ σ n’appartient
+ à la frontière de sa plus petite boule englobante,
+
+                                  ∂Bσ ∩ (X \ σ) = ∅.
+8.1 – 8.1 L’approche persistante : les simplexes K-séparants                                                                    85
+
+
+  Autrement dit, aucun point du nuage extérieur à σ ne se trouve sur la frontière de la
+  plus petite boule englobante de σ.
+
+Remarques
+    1. Noter que notre définition d’un nuage en position générale est plus contraignante
+       que la Def. 4.2 de [37]
+    2. Sous cette hypothèse, les points de σ ∩ ∂Bσ forment exactement l’ensemble de
+       support de la boule minimale Bσ (voir Fait 12 ci-dessous). En particulier, ils sont
+       affinement indépendants et cσ appartient à l’intérieur (relatif) de conv(σ ∩ ∂Bσ ).
+
+   Fait (connu) 12 : Boule minimale et ensemble de support [37, 92]
+   Soit A ⊂ Rp fini non vide. Il existe une unique plus petite boule fermée contenant A.
+   Son centre appartient à l’enveloppe convexe d’un sous-ensemble
+
+                                                      S(A) ⊆ A ∩ ∂BA
+
+   de cardinal au plus p+1. Sous l’hypothèse de position générale (Def. 26), cet ensemble
+   de support est exactement l’ensemble des points de A situés sur la frontière de BA .
+   En particulier, si s ∈ S(A), alors
+
+                                                    ρ(A \ {s}) < ρ(A).
+
+
+
+                           x3 ∈ S
+                                                                                               x3 ∈
+                                                                                                  /S
+                    Bσ                                                                  Bσ
+                                 ρ(σ)
+                                                                                                   σ
+                               σ cσ                                    x1 ∈ S                                         x2 ∈ S
+                                                                                                  cσ
+    x1 ∈ S                                       x2 ∈ S                                           ρ(σ)
+
+
+(a) Triangle aigu. Le centre cσ se trouve à l’intérieur de l’enve-   (b) Triangle obtus : le centre cσ appartient à une arête. L’en-
+loppe convexe. Tous les sommets définissent la boule minimale,       semble de support est strictement inclus dans le simplexe :
+donc S = σ.                                                          S = {x1 , x2 } ( σ.
+
+Figure 8.1 : Illustration de la plus petite boule englobante Bσ , de son centre cσ , de son rayon de naissance
+ρ(σ) et de son ensemble de support à la frontière S = σ ∩ ∂Bσ pour un 2-simplexe σ = {x1 , x2 , x3 }.
+86      Chapitre 8 — À la recherche de la généralisation de l’arbre minimum couvrant
+
+
+8.1.1    Le graphe élémentaire des facettes
+    Il nous a été plus commode en Def. 21, p. 58 de définir les K-polyèdres comme
+les composantes connexes d’un graphe ΓK (X , r) dont les sommets sont les (K − 1)-
+simplexes de Č(X , r) et dont deux sommets sont adjacents lorsque leur union est encore
+un simplexe de Č(X , r), et ce sans restriction sur la taille de cette union. L’objet de Prop. 5
+est d’observer que l’on aurait pu se restreindre aux adjacences élémentaires, c’est-à-dire
+aux seuls K-simplexes pour créer des liaisons entre les sommets.
+
+  Proposition 5 : Les adjacences élémentaires suffisent
+  Pour tout r ≥ 0, retirer de ΓK (X , r) les liens entre deux sommets τ et τ 0 dès que
+  |τ ∪ τ 0 | > K + 1 laisse inchangées les composantes connexes. Elles correspondent
+  donc toujours aux K-polyèdres du complexe de Čech Č(X , r) définis en Def. 21.
+
+Preuve. Supposons que deux (K − 1)-simplexes τ et τ 0 soient adjacents dans ΓK (X , r),
+c’est-à-dire que τ ∪ τ 0 ∈ Č(X , r), soit
+                                        ρ(τ ∪ τ 0 ) ≤ r.
+Si |τ ∪ τ 0 | = K + 1, l’adjacence est déjà élémentaire. Si |τ ∪ τ 0 | > K + 1, alors on peut
+relier τ à τ 0 au moyen d’un chemin de K-sous-simplexes de τ ∪ τ 0 , différant à chaque
+fois d’un seul élément. Ces liaisons sont toutes présentes dans le graphe ΓK (X , r) élagué
+des simplexes de dimension > K.
+
+Notation À partir de maintenant, ΓK (X , r) désignera uniquement la version élaguée
+du graphe, réduit aux adjacences élémentaires. Nous noterons ce graphe indifféremment
+ΓK (X )≤r et ΓK (X ), sans indice, quand nous prenons r = +∞. Nous noterons aussi
+ΓK (X )<r le sous-graphe de ΓK (X )≤r privé de tous les simplexes σ (sommets et arêtes)
+ayant un rayon ρ(σ) exactement égal à r.
+
+  Définition 27 : Simplexe K-séparant
+  Soit σ ⊆ X un K-simplexe, et posons
+                                          rσ , ρ(σ).
+  On appelle facettes actives de σ les facettes déjà présentes strictement avant la nais-
+  sance de σ :
+                       F< (σ) , {τ ⊂ σ | |τ | = K et ρ(τ ) < rσ } .
+  On dit que σ est K-séparant s’il existe deux facettes actives
+                                        τ, τ 0 ∈ F< (σ)
+  qui appartiennent à deux composantes connexes distinctes de
+                                          ΓK (X )<rσ .
+8.2 – 8.2 Une condition nécessaire pour un simplexe séparant : être
+de Gabrielnoms]Gabriel@Gabriel                                                            87
+
+
+ Autrement dit, σ est K-séparant lorsqu’il provoque effectivement une fusion entre
+ deux K-polyèdres déjà présents.
+
+
+Remarque Sous l’hypothèse de position générale pour la filtration de Čech, un K-
+simplexe σ possède toujours au moins deux facettes actives. En effet, si
+
+                                      Sσ , σ ∩ ∂Bσ
+
+désigne l’ensemble de support de sa plus petite boule englobante, alors |Sσ | ≥ 2 et, pour
+tout s ∈ Sσ ,
+                                  ρ(σ \ {s}) < ρ(σ).
+Les facettes actives sont donc au moins les σ \ {s}, avec s ∈ Sσ . Les autres facettes,
+obtenues en retirant un sommet intérieur de Bσ , peuvent en revanche naître exactement
+au même niveau que σ.
+    Autrement dit, un simplexe K-séparant est un simplexe qui change réellement la
+connectivité persistante des K-polyèdres. Pour K = 1, les 1-simplexes séparants sont
+exactement les arêtes qui relient deux composantes distinctes du graphe géométrique au
+moment où elles apparaissent ; ce sont les arêtes de l’arbre minimum couvrant.
+    Le Fait 2 appliqué à ΓK (X ) dit que si l’on savait construire un arbre couvrant mini-
+mum de ΓK (X ), alors son élagage à l’échelle r redonnerait les K-polyèdres    de Č(X , r).
+Mais ce graphe contient encore tous les sommets induits par les Kn simplexes d’ordre
+                                                                       
+K − 1. Il faut donc identifier un sous-graphe beaucoup plus mince ; c’est l’objet de la
+section suivante.
+
+
+8.2     Une condition nécessaire pour un simplexe sépa-
+        rant : être de Gabriel
+    Le cas K = 1 fournit l’intuition géométrique décisive : une arête de l’arbre minimum
+couvrant euclidien est nécessairement une arête de Gabriel (Def. 3 & Fait 1, p. 16),
+c’est-à-dire que la plus petite boule englobante, celle ayant pour diamètre l’arête, est vide
+de tout autre point du nuage. La condition se généralise en remplaçant la boule diamétrale
+par la plus petite boule englobante du simplexe.
+
+ Définition 28 : Simplexe de Gabriel
+ Un K-simplexe σ ⊆ X est dit de Gabriel si l’intérieur de sa plus petite boule
+ englobante ne contient aucun point de X extérieur à σ :
+
+                                    B̊σ ∩ (X \ σ) = ∅.
+88         Chapitre 8 — À la recherche de la généralisation de l’arbre minimum couvrant
+
+
+Remarque Noter que notre généralisation de la notion de simplexe de Gabriel à l’aide
+de la miniball diffère de celle de [37], où l’on impose une condition de sphère circonscrite
+vide (la circumball). Pour K = 1, les deux notions coïncident avec l’arête de Gabriel
+classique.
+    Cette condition de vacuité est nécessaire pour qu’un K-simplexe provoque une fusion.
+
+  Théorème 4 : Condition nécessaire pour que σ soit K-séparant : σ doit
+               être de Gabriel
+   Supposons X en position générale pour la filtration de Čech. Tout simplexe K-
+   séparant est de Gabriel.
+
+Preuve du Théorème 4. Soit σ un K-simplexe, et posons
+
+                                                r = ρ(σ),             Bσ = B(c, r).
+
+Raisonnons par contraposée. Supposons que σ ne soit pas de Gabriel. Il existe donc un
+point
+                        z ∈X \σ        tel que    z ∈ B̊σ .
+Notons
+                                                          S , σ ∩ ∂Bσ
+l’ensemble des sommets de σ situés sur la frontière de la boule minimale. Par la Def. 26 et
+le Fait 12, S est l’ensemble de support de Bσ ; en particulier |S| ≥ 2, le centre c appartient
+à l’intérieur relatif de conv(S), et retirer n’importe quel point de S diminue strictement
+le rayon de naissance.
+
+
+                                                                                                  x3
+                     Bσ       x3 ∈
+                                 /S
+                                                                                       τ2                        τ1
+                                                                                                       z
+                                    σ                                       x1         σ1z            η1,2 σ2z          x2
+ x1 ∈ S                              c                     x2 ∈ S
+
+                                            r                                                     z
+                                z
+
+
+                                                                       (b) Les K-simplexes σ2z et σ1z ont des rayons < r. Le che-
+(a) Un triangle σ = {x1 , x2 , x3 }. Bσ a pour diamètre [x1 , x2 ].              σ1z        σ2z
+L’ensemble de support est S = {x1 , x2 }. σ n’est pas de Gabriel       min τ1 ←→r η1,2
+                                                                                   z
+                                                                                       ←→r τ2 connecte les facettes actives dans
+donc il existe un “intrus” z ∈ B̊σ .                                   ΓK (X )<r .
+
+Figure 8.2 : Illustration de la preuve du Théorème 4 (K = 2) pour un triangle σ = {x1 , x2 , x3 } obtus
+en x3 , c’est-à-dire que S = {x1 , x2 }. Si le simplexe n’est pas de Gabriel, Bσ (de rayon r) contient donc
+un “intrus” z. Les facettes τ1 et τ2 , actives pour une filtration < r, sont connectées au moyen de z (les
+2-simplexes σsz et σtz ).
+8.2 – 8.2 Une condition nécessaire pour un simplexe séparant : être
+de Gabrielnoms]Gabriel@Gabriel                                                              89
+
+
+    D’après la définition d’un simplexe K-séparant (Def. 27, p. 86) et la remarque associée,
+les facettes actives de σ (c’est-à-dire celles existant strictement avant r) sont exactement
+les facettes
+                                  τs , σ \ {s},        s ∈ S.
+   Montrons maintenant que toutes les facettes actives τs , s ∈ S, sont déjà dans la même
+composante de ΓK (X )<r . Soient s, t ∈ S, s 6= t. Considérons les deux K-simplexes
+
+                    σsz , (σ \ {s}) ∪ {z},           σtz , (σ \ {t}) ∪ {z}.
+
+Ils contiennent respectivement les facettes
+                                               z
+                        τs = σ \ {s},         ηs,t , (σ \ {s, t}) ∪ {z},
+
+et
+                                    z
+                                   ηs,t ,      τt = σ \ {t}.
+Il suffit donc de vérifier que
+
+                              ρ(σsz ) < r       et         ρ(σtz ) < r.
+
+(Voir la Fig. 8.2 pour une illustration.) Or σsz est contenu dans Bσ , et ses points situés sur
+la frontière de Bσ sont contenus dans S \ {s}. D’après le Fait 12, on a bien
+
+                                            ρ(σsz ) < r.
+
+Même raisonnement pour σtz .
+   Ainsi, pour tout couple s, t ∈ S, les facettes τs et τt sont reliées dans ΓK (X )<r par le
+chemin
+                                        σsz   z  σtz
+                                   τs ← →r ηs,t ← →r τ t
+Le simplexe σ n’a donc aucune influence sur les K-polyèdres (les (K − 1)-simplexes déjà
+existants étant de la même composante connexe ; ceux apparaissant ayant déjà tous leurs
+points dans cette même composante préexistante) ; il n’est pas K-séparant.
+
+  Définition 29 : K-graphe de Gabriel
+  Le K-graphe de Gabriel de X , noté
+                                             Gab
+                                            GK   (X ),
+  est le sous-graphe pondéré de ΓK (X ) défini ainsi.
+     — Ses sommets sont les (K − 1)-simplexes de X qui sont facettes d’au moins un
+         K-simplexe de Gabriel.
+     — Pour chaque K-simplexe de Gabriel σ, on relie entre elles toutes les facettes
+         de σ (formant une clique).
+90      Chapitre 8 — À la recherche de la généralisation de l’arbre minimum couvrant
+
+
+     — Toutes les arêtes induites par σ reçoivent le poids ρ(σ).
+
+   Pour K = 1, ce graphe n’est autre que le graphe de Gabriel classique, pondéré par la
+moitié de la longueur des arêtes. Pour K ≥ 2, ce n’est plus un graphe sur les points, mais
+un graphe sur les (K − 1)-simplexes.
+
+ Proposition 6 : Le graphe de Gabriel contient toutes les fusions
+                 utiles
+ Pour tout r ≥ 0, les ensembles de points associés aux composantes connexes non
+ réduites à un sommet isolé de
+                                     Gab
+                                    GK   (X )≤r
+ coïncident avec les K-polyèdres de Č(X , r) non réduits à un (K − 1)-simplexe isolé.
+
+Preuve. Notons d’abord l’inclusion triviale
+                                  Gab
+                                 GK   (X )≤r ⊆ ΓK (X )≤r .
+Supposons (preuve par induction avec rayon r croissant) que jusqu’à un niveau critique r,
+les composantes non triviales (vues comme des ensembles de points) du graphe de Gabriel
+et du graphe de Čech des facettes définissent les mêmes ensembles de points. Ajoutons
+maintenant les K-simplexes de naissance r.
+     Si un simplexe σ ajouté à ce niveau est de Gabriel, il est ajouté dans les deux graphes.
+S’il ne l’est pas, la preuve du Théorème 4 montre que toutes ses facettes nées strictement
+avant r sont déjà reliées entre elles par des chemins de poids strictement plus petits que
+r. Les autres facettes de σ naissent au niveau r lui-même ; elles peuvent être ajoutées
+comme sommets, mais elles ne changent pas l’ensemble de points de la composante, car
+l’union des facettes actives
+                                {σ \ {s} | s ∈ σ ∩ ∂Bσ }
+contient déjà tous les sommets de σ. Ajouter σ ne crée donc aucune fusion nouvelle entre
+ensembles de points.
+   Par induction sur les valeurs critiques, les simplexes qui ne sont pas de Gabriel
+peuvent être supprimés sans modifier les K-polyèdres non triviaux.
+     Nous pouvons maintenant définir l’analogue de l’arbre minimum couvrant.
+
+ Définition 30 : K-arbre minimum couvrant
+ Un K-arbre minimum couvrant, noté K-MST, est un arbre minimum couvrant du
+ graphe pondéré GK
+                 Gab
+                     (X ). Pour r ≥ 0, on note
+
+                                        K-MST≤r
+8.3 – 8.3 La bonne structure à observer : la mosaïque
+de Delaunaynoms]Delaunay@Delaunay d’ordre K                                             91
+
+
+ le sous-graphe obtenu en supprimant les arêtes de poids strictement supérieur à r.
+
+ Théorème 5 : Complexe de Čech ≡ K-arbre minimum couvrant élagué
+ Supposons X ⊂ Rp en position générale pour la filtration de Čech. Pour tout r ≥ 0,
+ les ensembles de points associés aux composantes connexes de
+
+                                       K-MST≤r
+
+ qui ne sont pas réduites à un sommet isolé coïncident avec les K-polyèdres de Č(X , r)
+ qui ne sont pas réduits à un (K − 1)-simplexe isolé.
+
+Preuve du Théorème 5. On applique le Fait 2 au graphe pondéré
+                                        Gab
+                                       GK   (X ).
+
+Il donne, pour tout r ≥ 0, l’égalité des composantes connexes de
+
+                           K-MST≤r         et        Gab
+                                                    GK   (X )≤r .
+
+Le Prop. 6 identifie ensuite les composantes non triviales de ce dernier graphe avec les
+K-polyèdres non triviaux de Č(X , r).
+
+
+8.3     La bonne structure à observer : la mosaïque de De-
+        launay d’ordre K
+   Le Théorème 5 remplace le complexe de Čech complet par un arbre couvrant construit
+sur le K-graphe de Gabriel. Ilreste encore à savoir : comment trouver les simplexes
+                            n
+de Gabriel sans tester les K+1   candidats ?
+   Pour K = 1, la réponse dans l’espace euclidien Rp est la triangulation de Delaunay
+(Fait 1).
+   Pour K ≥ 2, la réponse est la mosaïque de Delaunay d’ordre K [62, 93]. (Pour la
+dimension p = 2, voir en particulier [94].)
+
+ Définition 31 : Cellules de Voronoï d’ordre supérieur et mosaïque
+                 de Delaunay duale [62, 93]
+ Soit X ⊆ Rp un ensemble fini, et soit k ∈ {1, . . . , |X | − 1}. Pour tout sous-ensemble
+ Q ⊂ X de cardinal k, on définit sa cellule de Voronoï d’ordre k par
+                          ß                                              ™
+                                   p
+              Vork (Q) , y ∈ R maxky − qk ≤ min ky − xk .
+                                        q∈Q               x∈X \Q
+92      Chapitre 8 — À la recherche de la généralisation de l’arbre minimum couvrant
+
+
+ Autrement dit, Vork (Q) est l’ensemble des points de l’espace pour lesquels les points
+ de Q sont les k plus proches voisins dans X .
+ La mosaïque de Delaunay d’ordre k, notée Delk (X ), est le complexe dual du diagramme
+ de Voronoï d’ordre k : ses sommets sont les k-uplets Q ⊂ X tels que Vork (Q) 6= ∅,
+ et plus généralement
+                                                         m
+                                                         \
+                {Q0 , . . . , Qm } ∈ Delk (X )   ⇐⇒            Vork (Qi ) 6= ∅.
+                                                         i=0
+
+ En particulier, deux sommets Q, Q0 de Delk (X ) sont adjacents dès qu’il existe un
+ point y ∈ Rp pour lequel Q et Q0 sont deux choix possibles de k plus proches voisins.
+ Nous dirons qu’un k-simplexe σ ⊂ X est porté par la mosaïque de Delaunay d’ordre
+ k s’il existe deux sommets adjacents Q, Q0 de Delk (X ) tels que
+
+                                        Q ∪ Q0 = σ.
+
+8.3.1    Un K-simplexe de Gabriel est nécessairement dans la mo-
+         saïque de Delaunay d’ordre K
+ Théorème 6 : Les K-simplexes de Gabriel sont portés par la mosaïque
+              de Delaunay d’ordre K
+ Soit X ⊂ Rp un nuage fini en position générale. Tout K-simplexe de Gabriel σ ⊆ X
+ est porté par la mosaïque de Delaunay d’ordre K, au sens de la Def. 31.
+
+Preuve du Théorème 6. Notons
+                                      Bσ = B(cσ , rσ )
+la plus petite boule fermée contenant σ. Comme σ est de Gabriel, aucun point de X \ σ
+n’appartient à l’intérieur de cette boule :
+                                    B̊σ ∩ (X \ σ) = ∅.
+En position générale, on peut de plus supposer qu’aucun point de X \ σ n’appartient à la
+sphère ∂Bσ . L’on décompose alors les sommets de σ en deux familles :
+                             I , σ ∩ B̊σ ,       S , σ ∩ ∂Bσ .
+Les points de I sont strictement plus proches du centre cσ que les points de S, tandis que
+tous les points de S sont à distance exactement rσ de cσ . La boule Bσ étant minimale,
+l’ensemble S contient au moins deux points. Choisissons donc deux sommets distincts
+s, t ∈ S. Considérons les deux K-uplets
+                            Qs , σ \ {s},         Qt , σ \ {t}.
+8.3 – 8.3.1 Un K-simplexe de Gabrielnoms]Gabriel@Gabriel est nécessairement dans
+la mosaïque de Delaunaynoms]Delaunay@Delaunay d’ordre K                       93
+
+
+Au point cσ , tous les points de I sont strictement plus proches que les points de S, et
+aucun point extérieur à σ n’est plus proche que les points de S. Ainsi, Qs et Qt sont deux
+choix possibles de K plus proches voisins de cσ . Autrement dit,
+
+                              cσ ∈ VorK (Qs ) ∩ VorK (Qt ).
+
+Par définition de la mosaïque de Delaunay d’ordre K, les deux sommets Qs et Qt sont
+donc adjacents dans DelK (X ). Enfin,
+
+                          Qs ∪ Qt = (σ \ {s}) ∪ (σ \ {t}) = σ,
+
+ce qui prouve que σ est porté par la mosaïque de Delaunay d’ordre K.
+    Nous avons à présent tous les résultats nécessaires pour aborder dès le chapitre suivant
+les aspects pratiques.
+
+Synthèse Le rôle de l’arbre minimum couvrant dans le Single-Linkage repose sur un
+principe plus général : dans une filtration, seules les cellules qui changent effectivement
+la connectivité doivent être conservées pour reconstruire les composantes à toutes les
+échelles.
+    Pour les K-polyèdres, ces cellules sont les simplexes K-séparants. Le Théorème 4
+montre qu’ils satisfont nécessairement une condition de vacuité : ils sont de Gabriel. On
+peut donc remplacer le graphe complet des facettes de Čech par le graphe beaucoup plus
+mince des simplexes de Gabriel, puis calculer un K-arbre minimum couvrant. L’élagage
+de cet arbre redonne exactement les mêmes K-polyèdres non triviaux que la hiérarchie
+complète sur le complexe de Čech (Théorème 5).
+    La structure géométrique qui organise ces simplexes est la mosaïque de Delaunay
+d’ordre K (Théorème 6).
+

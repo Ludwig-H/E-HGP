@@ -5,6 +5,8 @@
 //                  [--threads=W] [--tree=FILE] [--configs=FILE]
 // --configs : une configuration de tete par ligne « mcs z eom|leaf 0|1 » ; la i-eme ecrit OUT.i (i = 0, 1, ...),
 // toutes sur la meme construction de la tour.
+// --k-list=1,2,5 : un seul catalogue (a l'ordre maximal), puis chaque ordre de la liste ; les sorties deviennent
+// OUT.k<K>.<i> (les ordres sont independants a catalogue donne).
 // --tree : exporte la hierarchie de points (niveaux, parents, attaches) pour les tetes Python de developpement.
 // Codes : 0 conforme, 2 refus, 3 invariant viole.
 #include <chrono>
@@ -23,6 +25,7 @@ int main(int argc, char** argv) {
   unsigned threads = 0;
   ClusterParams cp;
   std::string tree_out, configs;
+  std::vector<int> klist;
   for (int i = 3; i < argc; ++i) {
     const std::string a = argv[i];
     if (a.rfind("--k=", 0) == 0) k = std::stoi(a.substr(4));
@@ -34,6 +37,16 @@ int main(int argc, char** argv) {
     else if (a.rfind("--threads=", 0) == 0) threads = unsigned(std::stoul(a.substr(10)));
     else if (a.rfind("--tree=", 0) == 0) tree_out = a.substr(7);
     else if (a.rfind("--configs=", 0) == 0) configs = a.substr(10);
+    else if (a.rfind("--k-list=", 0) == 0) {
+      std::string v = a.substr(9);
+      size_t pos = 0;
+      while (pos < v.size()) {
+        const size_t e = v.find(',', pos);
+        klist.push_back(std::stoi(v.substr(pos, e == std::string::npos ? std::string::npos : e - pos)));
+        if (e == std::string::npos) break;
+        pos = e + 1;
+      }
+    }
     else {
       std::fprintf(stderr, "option inconnue %s\n", a.c_str());
       return 2;
@@ -60,8 +73,11 @@ int main(int argc, char** argv) {
   const Cloud& cloud = prepared.value();
   sched::Pool pool(threads);
   SiteTree tree(cloud);
+  if (klist.empty()) klist.push_back(k);
+  int kmax = 0;
+  for (int kk : klist) kmax = std::max(kmax, kk);
   CatalogueParams catp;
-  catp.kmax = k;
+  catp.kmax = kmax;
   auto cat = build_catalogue(cloud, catp, pool);
   if (!cat.ok()) {
     std::printf("{\"status\":\"%s\",\"reason\":\"%s\"}\n", std::string(status_name(cat.outcome().status())).c_str(),
@@ -69,28 +85,10 @@ int main(int argc, char** argv) {
     return 2;
   }
   const auto t1 = clk::now();
-  TowerParams tp;
-  tp.kmax = k;
-  tp.only_order = k;
-  auto tw = build_tower(cloud, tree, cat.value(), tp, pool);
-  if (!tw.ok()) {
-    std::printf("{\"status\":\"%s\",\"reason\":\"%s\"}\n", std::string(status_name(tw.outcome().status())).c_str(),
-                std::string(reason_name(tw.outcome().reason)).c_str());
-    return tw.outcome().status() == Status::invariant_violated ? 3 : 2;
-  }
-  const auto t2 = clk::now();
-  const OrderForest& forest = tw.value().orders[k - 1];
-  const PointDendrogram d = point_dendrogram(cat.value(), forest, cloud);
-  const Outcome v = validate(d);
-  if (!v.ok()) {
-    std::printf("{\"status\":\"invariant_violated\",\"reason\":\"%s\"}\n", std::string(reason_name(v.reason)).c_str());
-    return 3;
-  }
+  // configurations de tete
   std::vector<ClusterParams> list;
-  std::vector<std::string> paths;
   if (configs.empty()) {
     list.push_back(cp);
-    paths.push_back(argv[2]);
   } else {
     FILE* c = std::fopen(configs.c_str(), "r");
     if (!c) return 2;
@@ -105,40 +103,64 @@ int main(int argc, char** argv) {
       q.selection = std::string(sel) == "leaf" ? Selection::leaf : Selection::eom;
       q.allow_single_cluster = single != 0;
       list.push_back(q);
-      paths.push_back(std::string(argv[2]) + "." + std::to_string(list.size() - 1));
     }
     std::fclose(c);
   }
+  const bool multi = klist.size() > 1 || !configs.empty();
+  double tower_s = 0, head_s = 0;
   size_t clusters = 0;
-  for (size_t i = 0; i < list.size(); ++i) {
-    const Clustering cl = cluster(d, list[i]);
-    clusters = cl.selected.size();
-    std::vector<i32> out(n, -1);
-    for (u32 s = 0; s < cloud.sites(); ++s)
-      for (PointId p : cloud.ids.row(s)) out[idx(p)] = cl.label[s];
-    FILE* o = std::fopen(paths[i].c_str(), "wb");
-    if (!o) return 2;
-    std::fwrite(out.data(), 4, n, o);
-    std::fclose(o);
-  }
-  const auto t3 = clk::now();
-  if (!tree_out.empty()) {
-    // format texte : levels L / l <valeur> ; nodes N / v <rang> <parent> ; points P / p <site> <noeud> <rang> <poids>
-    FILE* t = std::fopen(tree_out.c_str(), "w");
-    if (!t) return 2;
-    std::fprintf(t, "levels %zu\n", d.level.size());
-    for (double lv : d.level) std::fprintf(t, "%.17g\n", lv);
-    std::fprintf(t, "nodes %u\n", d.nodes());
-    for (u32 v2 = 0; v2 < d.nodes(); ++v2)
-      std::fprintf(t, "%u %lld\n", d.node_rank[v2], d.parent[v2] == kNone ? -1LL : (long long)d.parent[v2]);
-    std::fprintf(t, "points %u\n", n);
-    for (u32 s = 0; s < cloud.sites(); ++s)
-      for (PointId p : cloud.ids.row(s)) std::fprintf(t, "%u %u %u %u\n", idx(p), d.point_node[s], d.point_rank[s], 1u);
-    std::fclose(t);
+  for (int kk : klist) {
+    const auto a0 = clk::now();
+    TowerParams tp;
+    tp.kmax = kmax;
+    tp.only_order = kk;
+    auto tw = build_tower(cloud, tree, cat.value(), tp, pool);
+    if (!tw.ok()) {
+      std::printf("{\"status\":\"%s\",\"reason\":\"%s\",\"k\":%d}\n", std::string(status_name(tw.outcome().status())).c_str(),
+                  std::string(reason_name(tw.outcome().reason)).c_str(), kk);
+      return tw.outcome().status() == Status::invariant_violated ? 3 : 2;
+    }
+    const auto a1 = clk::now();
+    const OrderForest& forest = tw.value().orders[kk - 1];
+    const PointDendrogram d = point_dendrogram(cat.value(), forest, cloud);
+    const Outcome v = validate(d);
+    if (!v.ok()) {
+      std::printf("{\"status\":\"invariant_violated\",\"reason\":\"%s\"}\n", std::string(reason_name(v.reason)).c_str());
+      return 3;
+    }
+    for (size_t i = 0; i < list.size(); ++i) {
+      const Clustering cl = cluster(d, list[i]);
+      clusters = cl.selected.size();
+      std::vector<i32> out(n, -1);
+      for (u32 s = 0; s < cloud.sites(); ++s)
+        for (PointId p : cloud.ids.row(s)) out[idx(p)] = cl.label[s];
+      const std::string path = !multi ? std::string(argv[2])
+                                      : std::string(argv[2]) + ".k" + std::to_string(kk) + "." + std::to_string(i);
+      FILE* o = std::fopen(path.c_str(), "wb");
+      if (!o) return 2;
+      std::fwrite(out.data(), 4, n, o);
+      std::fclose(o);
+    }
+    if (!tree_out.empty()) {
+      FILE* t = std::fopen((tree_out + (multi ? ".k" + std::to_string(kk) : std::string())).c_str(), "w");
+      if (!t) return 2;
+      std::fprintf(t, "levels %zu\n", d.level.size());
+      for (double lv : d.level) std::fprintf(t, "%.17g\n", lv);
+      std::fprintf(t, "nodes %u\n", d.nodes());
+      for (u32 v2 = 0; v2 < d.nodes(); ++v2)
+        std::fprintf(t, "%u %lld\n", d.node_rank[v2], d.parent[v2] == kNone ? -1LL : (long long)d.parent[v2]);
+      std::fprintf(t, "points %u\n", n);
+      for (u32 s = 0; s < cloud.sites(); ++s)
+        for (PointId p : cloud.ids.row(s)) std::fprintf(t, "%u %u %u %u\n", idx(p), d.point_node[s], d.point_rank[s], 1u);
+      std::fclose(t);
+    }
+    const auto a2 = clk::now();
+    tower_s += std::chrono::duration<double>(a1 - a0).count();
+    head_s += std::chrono::duration<double>(a2 - a1).count();
   }
   auto sec = [](auto a, auto b) { return std::chrono::duration<double>(b - a).count(); };
-  std::printf("{\"status\":\"ok\",\"n\":%u,\"k\":%d,\"balls\":%u,\"clusters\":%zu,\"catalogue_s\":%.3f,\"tower_s\":%.3f,"
+  std::printf("{\"status\":\"ok\",\"n\":%u,\"kmax\":%d,\"balls\":%u,\"clusters\":%zu,\"catalogue_s\":%.3f,\"tower_s\":%.3f,"
               "\"head_s\":%.3f}\n",
-              n, k, cat.value().balls(), clusters, sec(t0, t1), sec(t1, t2), sec(t2, t3));
+              n, kmax, cat.value().balls(), clusters, sec(t0, t1), tower_s, head_s);
   return 0;
 }

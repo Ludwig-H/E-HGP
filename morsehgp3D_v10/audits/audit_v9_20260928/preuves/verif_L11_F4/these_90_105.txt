@@ -1,0 +1,788 @@
+64              Chapitre 7 — Le phénomène de percolation au cœur des performances
+
+
+lorsque K → +∞, la bonne fenêtre d’intensité normalisée est
+                                            √
+                                µ = K + a K.
+
+Dans cette fenêtre, les niveaux de forte densité K-NN sont remplacés par les excursions
+
+                               Ea = {x ∈ Rp | Gp (x) ≥ −a}
+
+d’un champ gaussien stationnaire. Cette formulation “à la limite” nous permet de refor-
+muler la différence entre ces méthodes.
+
+Contributions Ce chapitre reprend [41] et le généralise au cadre continu. Nous définis-
+sons la probabilité de percolation associée aux K-polyèdres, au K-Robust Single-Linkage
+et à (H)DBSCAN ; nous montrons comment cette fonction contrôle la fraction asympto-
+tiquement récupérable dans le modèle de Hartigan ; nous introduisons une vitesse de
+percolation que nous mesurons effectivement en petite dimension√pour quelques valeurs
+de K ; enfin, nous identifions la fenêtre gaussienne µ = K + a K lorsque K → +∞
+et nous réduisons le développement de la vitesse de percolation à des constantes de
+percolation d’excursions gaussiennes. Nous isolons ainsi le problème topologique du haut
+rappel : obstruction ponctuelle pour les cœurs, obstruction de rayon fini pour (H)DBSCAN,
+obstruction géométrique de connexion pour les K-polyèdres. Les résultats concordent :
+les polyèdres percolent plus vite dans les amas denses, et sont donc fractionnellement
+plus consistants.
+
+Remarque       Tout au long de ce chapitre, et sauf mention contraire, le rayon
+                                                  1
+                                            r=
+                                                  2
+est fixé à 1/2 ; l’analyse persistante pouvant se faire (au choix) au moyen du rayon ou de
+l’intensité λ, il nous a paru à la fois plus pertinent et plus standard de jouer sur l’intensité,
+à rayon fixé.
+
+
+7.1     Introduction à la percolation
+    Le terme latin percōlātĭō signifie une « filtration » (Gaffiot). De l’eau percole à travers
+une roche lorsqu’elle s’y infiltre et la traverse par un réseau géant formé de petits pores.
+Le modèle mathématique de la percolation fut introduit par Broadbent & Hammersley
+[70] en 1957 pour répondre à la question suivante : à quel moment l’eau peut-elle traverser
+de part en part une roche ? Duminil-Copin [71] a consacré à l’occasion des soixante ans
+de l’article de 1957 une longue revue à laquelle nous renvoyons le lecteur.
+    La percolation est un phénomène qui, sous des contraintes locales, s’observe de façon
+macroscopique. C’est le moment précis où une macro-structure apparaît. Souvent étudiée
+7.1 – 7.1.1   Le cadre mathématique                                                                  65
+
+
+de façon discrète sur Zp [72, 73], la situation qui nous intéresse ici est celle de la percolation
+continue [6, 18]. Point de départ : les graphes géométriques (au sens de Penrose [6, 74] ;
+modèle derrière le Single-Linkage) construits sur des processus ponctuels de Poisson i) .
+
+7.1.1     Le cadre mathématique
+   Soit Xλ un processus ponctuel de Poisson [75] homogène d’intensité λ > 0 sur Rp .
+On note
+                                  Xλ0 , Xλ ∪ {0}
+le processus de Palm ii) , c’est-à-dire le processus auquel on a ajouté un point en 0. Cette
+notation est commode pour mesurer la proportion asymptotique de points appartenant à
+une composante géante.
+
+  Définition 23 : Probabilité de percolation Θ
+  Soient K ∈ N? et
+                                  cc ∈ {poly, core, dbscan, . . .}
+  une famille de composantes croissante en une variable rayon r.
+     1. poly désigne les polyèdres.
+     2. core désigne les cœurs (au sens du Robust Single-Linkage).
+     3. dbscan désigne les composantes connexes de DBSCAN [49].
+
+  Remarque Les cœurs du Robust Single-Linkage ne sont pas les mêmes objets que
+  les cœurs au sens usuel de la théorie des graphes, définis comme les plus grands sous-
+  graphes induits pour que chaque sommet ait un degré ≥ K. Ces cœurs correspondent
+  à une procédure d’élagage récursif sur les nœuds ayant un degré strictement plus petit
+  que K, jusqu’à stabilisation ; au contraire, les cœurs au sens du Robust Single-Linkage
+  n’ont qu’un seul tour d’élagage.
+  On définit la probabilité de percolation par
+
+       K,p,r (λ) , P 0 ∈ une composante connexe infinie de cc construite sur Xλ .
+     Θcc                                                                            0
+                                                                                     
+
+  Lorsque la composante infinie existe et est unique, cette quantité est la probabilité
+  (de Palm) qu’un point typique appartienne à la composante géante.
+
+    i). Le choix poissonien pour le processus ponctuel vient directement du modèle statistique choisi, où
+l’on suppose les n données tirées i.i.d. selon f (et de l’approximation Poisson/Binomiale).
+   ii). Rappelons rapidement la théorie de Palm [75] : la loi d’un processus ponctuel de Poisson X condi-
+tionnée à 0 ∈ X est égale à la loi de X ∪ {0}. La formule de Campbell–Palm utilisée ci-dessous permet
+d’intégrer une fonction en utilisant cette loi conditionnelle.
+66              Chapitre 7 — Le phénomène de percolation au cœur des performances
+
+
+     Le changement d’échelle donne, pour tout r > 0,
+                                                          p
+                               Θcc           cc
+                                                            
+                                K,p,r (λ) = ΘK,p,1/2 λ(2r) .
+
+Nous travaillerons donc avec r = 1/2. Lorsque nous aurons besoin du nombre moyen de
+points dans une boule de rayon 1/2, nous utiliserons l’intensité normalisée
+
+                                        µ , λωp 2−p ,
+
+où ωp , |B(0, 1)| est le volume de la boule unité de Rp .
+
+Les K-polyèdres Rappelons (Def. 7, p. 19) que les ensembles de niveau de l’estimateur
+K-NN sont
+                  LλK , y ∈ Rp |B(y, 1/2) ∩ Xλ0 | ≥ K .
+                        
+
+Les K-polyèdres du complexe de Čech correspondent exactement aux composantes
+connexes de ces ensembles de niveau (Théorème 2, p. 60), puis aux points de Xλ0 situés à
+distance moins de 1/2 de ces composantes. Si C∞ désigne la composante non bornée de
+LλK , alors
+                           Θpoly
+                                                          
+                             K,p,1/2 (λ) = P 0 ∈ δ1/2 (C∞ ) ,
+
+avec la convention que l’événement est faux lorsqu’aucune composante non bornée
+n’existe. Le point important est celui-ci : le point 0 n’a pas besoin d’être lui-même dans
+LλK ; il suffit qu’il soit couvert par la composante de forte densité (au moyen de la dilatation
+δ1/2 ).
+
+Remarque Pour rappel, δr (A) , {x ∈ Rp | d(x, A) ≤ r} désigne la dilatation d’un
+ensemble A, et C∞ (·) la réunion de ses composantes connexes non bornées.
+
+Les cœurs du K-Robust Single-Linkage Les points cœurs sont
+
+             Xλcore , x ∈ Xλ0 |B(x, 1/2) ∩ Xλ0 | ≥ K = LλK ∩ Xλ0 .
+                     
+
+C’est ensuite sur Xλcore que le Robust Single-Linkage applique une dilatation δ1/2 et
+identifie les composantes connexes de
+
+                                         δ1/2 (Xλcore ),
+
+là où les polyèdres n’appliquent de dilatation qu’une fois les composantes de LλK correc-
+tement identifiées.
+    C’est l’asymétrie identifiée au chapitre précédent : le Robust Single-Linkage impose
+une contrainte de densité forte pour exister comme sommet, puis utilise une connectivité
+par arêtes ordinaires.
+7.1 – 7.1.1    Le cadre mathématique                                                        67
+
+
+DBSCAN (H)DBSCAN ajoute aux composantes de cœurs les points accessibles, c’est-
+à-dire les points situés à distance au plus 1/2 d’un cœur. Ainsi (H)DBSCAN et le K-
+Robust Single-Linkage ont la même structure de cœurs et donc le même seuil critique
+de percolation (voir le Prop. 2 ci-dessous), mais pas la même fonction de rappel au
+niveau 1 − ε : (H)DBSCAN réajoute une partie des points à la frontière que le K-Robust
+Single-Linkage avait jetés.
+
+  Proposition 1 : Existence d’un seuil critique (et absence de régime
+                  fantôme)
+  Pour tout p ≥ 2, K ∈ N∗ et
+
+                                cc ∈ {poly, core, dbscan},
+
+  la fonction
+                                     λ 7−→ Θcc
+                                            K,p,1/2 (λ)
+
+  est croissante. On définit le seuil critique par
+                                         n                        o
+                       λcc
+                        c (K, p) , inf
+                                                   cc
+                                          λ > 0 : ΘK,p,1/2 (λ) > 0 .
+
+ Alors
+                                   0 < λcc
+                                        c (K, p) < +∞,
+
+  et
+                            Θcc
+                             K,p,1/2 (λ) = 0   si λ < λcc
+                                                       c (K, p),
+
+  tandis que
+                            Θcc
+                             K,p,1/2 (λ) > 0   si λ > λcc
+                                                       c (K, p).
+
+  De plus, ce seuil coïncide avec le seuil d’existence d’une composante infinie. Soit
+                        n                                                    o
+       λcc                             une composante infinie de type
+                                                                        
+        ∃  (K, p) , inf  λ > 0 : P λ ∃                                cc  > 0  ,
+
+  alors
+                                  λcc          cc
+                                   ∃ (K, p) = λc (K, p).
+
+ (Il n’existe pas d’intervalle non vide d’intensités λ pour lesquelles il existerait presque-
+ sûrement une composante infinie qui soit de taille négligeable.)
+
+Preuve de Prop. 1. La croissance s’obtient par couplage de processus de Poisson. Si λ0 ≥ λ,
+on peut construire
+                                    Xλ0 = Xλ ∪ Xλ0 −λ ,
+où les deux processus du membre de droite sont indépendants. Ajouter des points ne sup-
+68               Chapitre 7 — Le phénomène de percolation au cœur des performances
+
+
+prime ni simplexe de Čech, ni point cœur, ni point accessible. Les composantes considérées
+ne peuvent donc que croître ou fusionner. Ainsi λ 7→ Θcc  K,p,1/2 (λ) est croissante.
+    Pour une configuration (localement finie) ξ, notons I∞ cc
+                                                              (ξ) l’ensemble des points de ξ
+rattachés à une composante infinie du modèle considéré. Plus précisément :
+     — pour core, ce sont les points appartenant à une composante infinie du graphe des
+       cœurs ;
+     — pour dbscan, ce sont les points appartenant à une composante DBSCAN infinie ;
+     — pour poly, un point x ∈ ξ est dans I∞
+                                           poly
+                                                (ξ) s’il existe une composante non bornée
+       C de
+                         LK (ξ) , y ∈ Rp |B(y, 1/2) ∩ ξ| ≥ K
+                                    
+
+       telle que d(x, C) ≤ 1/2.
+Avec cette notation,
+                                                               
+                          Θcc
+                           K,p,1/2 (λ) = P   0 ∈ I cc
+                                                   ∞  (Xλ ∪ {0})  .
+
+Pour le cube unité Q = [0, 1]p , posons
+                                   cc         cc
+                                  N∞  (Q) , |I∞  (Xλ ) ∩ Q|.
+
+La formule de Campbell–Palm donne
+                    cc
+                        (Q) = λ|Q| Θcc               cc
+                           
+                  E N∞              K,p,1/2 (λ) = λ ΘK,p,1/2 (λ).
+
+Si Θcc
+     K,p,1/2 (λ) = 0, alors N∞ (z +Q) = 0 presque sûrement pour tout z ∈ Z . Par réunion
+                             cc                                              p
+
+dénombrable, il n’existe donc presque-sûrement aucun point rattaché à une composante
+infinie, et donc pas de composante infinie.
+    Réciproquement, si une composante infinie existe avec probabilité strictement positive,
+alors elle fournit au moins un point de I∞ cc
+                                              (Xλ ) dans l’un des cubes z + Q, z ∈ Zp . Par
+stationnarité, et de nouveau par la formule de Campbell–Palm, on obtient
+
+                                      Θcc
+                                       K,p,1/2 (λ) > 0.
+
+Ainsi, pour tout λ > 0,
+
+         Pλ ∃ une composante infinie de type cc > 0                   Θcc
+                                               
+                                                            ⇐⇒         K,p,1/2 (λ) > 0.
+
+Comme l’événement d’existence d’une composante infinie est invariant par translation,
+il est de probabilité 0 ou 1 par ergodicité du processus de Poisson et
+
+                                   λcc          cc
+                                    ∃ (K, p) = λc (K, p).
+
+   Montrons à présent que ces seuils sont non dégénérés (dans ]0; +∞[). La stricte
+positivité vient de la comparaison avec le modèle booléen classique. En effet, dans les
+7.2 – 7.2 Percolation et non-consistance                                                69
+
+
+trois cas considérés, l’existence d’une composante infinie de type cc entraîne l’existence
+d’une composante infinie dans le modèle booléen. Par conséquent, pour p ≥ 2
+                                  λcc          bool
+                                   c (K, p) ≥ λc    (p),
+et l’on conclut grâce à l’inégalité stricte λbool
+                                             c    (p) > 0 (voir par exemple [6, 18]).
+     La finitude du seuil s’obtient par domination d’une percolation de sites [73] sur une
+grille discrète aZp . On pave Rp par des cubes de côté a suffisamment petit et l’on déclare
+un cube “ouvert” s’il est inclus dans LλK . En faisant tendre λ → +∞, la probabilité
+d’ouverture dépasse le seuil critique de percolation de sites sur Zp , les sites ouverts
+percolent, et donc LλK aussi.
+
+Remarque Dans le cas des K-polyèdres, cette transition est même abrupte (sharp
+en anglais) au sens de la percolation : il y a décroissance exponentielle des tailles de
+composantes en régime sous-critique (cf. [76], voir aussi [68]).
+
+  Proposition 2 : DBSCAN et K-Robust Single-Linkage ont le même seuil
+                  critique
+  Pour tout K ≥ 1 et p ≥ 2,
+
+                               λdbscan
+                                c      (K, p) = λcore
+                                                 c (K, p),
+
+
+  où les deux seuils sont ceux définis en Prop. 1. De plus, pour tout λ > 0,
+
+                               Θdbscan         core
+                                K,p,1/2 (λ) ≥ ΘK,p,1/2 (λ).
+
+
+Preuve. Une composante DBSCAN est obtenue à partir d’une composante de cœurs en
+lui ajoutant les points situés à moins de 1/2 d’un cœur. Si la composante de cœurs est
+finie, sa dilatation contient presque sûrement un nombre fini de points du processus
+de Poisson. Une composante DBSCAN est donc infinie si et seulement si la composante
+de cœurs dont elle provient est infinie. Les deux modèles ont donc le même seuil critique
+(rappelons qu’en Prop. 1, nous avons défini le seuil critique par la condition Θ > 0 et
+montré qu’il était le même que celui de l’existence d’une composante non bornée).
+    L’inégalité sur les fonctions de percolation est claire : tout point cœur appartenant à
+une composante K-Robust appartient aussi à la composante DBSCAN correspondante ;
+DBSCAN peut seulement ajouter des points accessibles.
+
+
+7.2     Percolation et non-consistance
+   Le lien entre percolation et clustering apparaît déjà chez Hartigan [1], puis de
+manière plus explicite dans les travaux de Penrose sur le Single-Linkage et la percolation
+continue [6, 74].
+70                      Chapitre 7 — Le phénomène de percolation au cœur des performances
+
+
+    Le mécanisme est simple (voir la Fig. 7.1 pour une illustration) : deux amas de forte
+densité vont nécessairement fusionner (du fait de la composante géante qui apparaît dans
+la vallée de faible densité les séparant) avant d’avoir pu “récupérer” tous les points des
+deux amas.
+
+
+
+
+(a) Arbre couvrant minimum élagué au rayon r1 . La percolation         (b) Arbre couvrant minimum élagué au rayon r2 > r1 , de sorte
+a eu lieu sur les deux carrés de forte densité mais pas sur le fond.   que la percolation a eu lieu partout.
+
+Figure 7.1 : Inconsistance du Single-Linkage en dimension p ≥ 2. Les deux amas de forte densité (carrés)
+sont fusionnés (droite, niveau r2 ) avant que tous les points en faisant partie soient récupérés par les deux
+composantes géantes (gauche, niveau r1 ).
+
+
+
+
+7.2.1         Lecture générale avec la densité f
+   Soit X un n-échantillon i.i.d. de densité f dans Rp , et soit rn → 0 une échelle locale.
+Par rapport à notre normalisation r = 1/2, autour d’un point x où f est régulière, le
+nuage vu à l’échelle rn ressemble à un processus de Poisson homogène d’intensité
+
+                                                    λn (x) ≃ n(2rn )p f (x),
+
+Autrement dit, la fonction
+                                                          Θcc
+                                                           K,p,1/2 (λn (x))
+
+donne la probabilité asymptotique qu’un point situé dans une région de densité f (x)
+appartienne à la composante géante observée à cette échelle.
+   Pour une densité générale, la séparation entre deux amas dépend alors de la géométrie
+des cols et des vallées de f . Soit C un amas de forte densité, c’est-à-dire une composante
+connexe de Hf (λ) et τ < λ une densité plus faible pour laquelle une vallée de plus faible
+densité, si elle devenait supercritique et percolait, ferait “disparaître” C par fusion. Juste
+avant cette fusion, la proportion récupérable de l’amas C est heuristiquement donnée
+par la moyenne pondérée
+                                       Å                  ã
+                           Z
+                                 cc       cc        f (x)
+                               ΘK,p,1/2 λc (K, p)           f (x) dx
+                            C                         τ
+                                         Z                           .                    (7.1)
+                                             f (x) dx
+                                                               C
+7.2 – 7.2.2   Le cas simple des niveaux de densité constants                               71
+
+
+   Le cas constant par morceaux ci-dessous est la version plus lisible de cette idée et qui
+permet de calculer un indice concret, la vitesse de percolation (Def. 24, p. 72).
+
+7.2.2    Le cas simple des niveaux de densité constants
+    Considérons deux domaines A, B ⊂ Rp compacts convexes de mesures de Lebesgue
+strictement positives, séparés par un domaine de fond F ⊃ A ∪ B contenant un corridor
+macroscopique (la dilatation d’un chemin lisse) reliant A à B. Par souci de simplicité
+du modèle, on supposera que les données sont tirées selon une densité constante par
+morceaux :
+                              f (x) = ρ1A∪B (x) + ρ0 1F (x),
+où ρ, ρ0 > 0. Posons
+                                        ρ1 , ρ + ρ0 .
+Les ensembles A et B ont donc densité ρ1 > ρ0 ; ce sont des amas de forte densité par
+rapport à la vallée de faible densité les reliant, à savoir F \ (A ∪ B). Voir la Fig. 7.1 pour
+une illustration : A et B sont les deux carrés inclus dans un long rectangle, le fond F .
+
+  Proposition 3 : Fusion asymptotique lorsque le fond devient super-
+                  critique
+  Soit cc une famille de composantes parmi celles considérées ci-dessus, et soit λcc
+                                                                                  c (K, p)
+  son seuil critique. Supposons que le rayon rn soit choisi de sorte que le fond soit
+  strictement supercritique :
+
+                                n(2rn )p ρ0 > λcc
+                                               c (K, p) + η
+
+  pour un η > 0 fixé. Alors, les deux composantes géantes présentes dans A et B
+  fusionnent avec probabilité tendant vers 1 lorsque n → +∞.
+
+Preuve. Après changement d’échelle par rn , le corridor contenu dans F devient une boîte
+dont les dimensions tendent vers l’infini. Dans cette boîte, le processus de points converge
+localement vers un processus de Poisson homogène d’intensité normalisée strictement
+supérieure au seuil critique. Les résultats standards de percolation continue supercritique
+donnent alors l’existence, avec probabilité tendant vers 1, d’une composante traversante
+reliant les deux faces opposées du corridor [6, 18].
+
+ Théorème 3 : Fraction récupérable avant fusion parasite
+  Soit cc une méthode de clustering persistant, de probabilité de percolation Θcc (qu’on
+  supposera continue) et de seuil critique λcc
+                                            c . Dans le modèle à deux densités ci-dessus,
+  la fraction asymptotiquement récupérable dans A et B juste avant la percolation du
+72              Chapitre 7 — Le phénomène de percolation au cœur des performances
+
+
+ fond est                                   Å             ã
+                                                       ρ1
+                                 Θcc
+                                  K,p,1/2
+                                              cc
+                                             λc (K, p)      .
+                                                       ρ0
+ En particulier, un rappel asymptotique d’au moins 1 − ε avant fusion parasite est
+ possible si et seulement si
+                                 ρ0    λcc (K, p)
+                                    ≤ ccc         ,
+                                 ρ1   λ1−ε (K, p)
+ où                                  ¶                            ©
+                    λcc                        cc
+                     1−ε (K, p) , inf λ > 0 : ΘK,p,1/2 (λ) ≥ 1 − ε .
+
+
+Preuve du Théorème 3. À la limite où le fond devient critique (lorsque son intensité
+normalisée tend vers λccc (K, p) par valeurs supérieures), l’intensité normalisée dans F
+vaut λc (K, p). À cette même échelle, l’intensité normalisée dans A et B vaut
+      cc
+
+
+                                                   ρ1
+                                       λcc
+                                        c (K, p)      .
+                                                   ρ0
+La proportion de points appartenant à la composante géante dans un domaine homogène
+de cette intensité converge vers la probabilité de Palm correspondante (en supposant la
+continuité en ce point de la fonction), c’est-à-dire vers
+                                          Å              ã
+                                  cc         cc       ρ1
+                                ΘK,p,1/2 λc (K, p)         .
+                                                      ρ0
+Pour que cette quantité soit au moins 1 − ε, il faut et il suffit que
+
+                                     ρ0   λcc (K, p)
+                                        ≤ ccc        ,
+                                     ρ1  λ1−ε (K, p)
+
+ce qui donne exactement l’inégalité annoncée.
+
+
+7.3      La vitesse de percolation
+     Le Théorème 3 précédent motive la définition suivante.
+
+ Définition 24 : Vitesse critique de percolation
+ Pour une famille cc, on définit le quantile de rappel au niveau α ∈ [0; 1]
+                                      ¶                         ©
+                    λcc                           cc
+                      α (K, p) , inf λ > 0 | ΘK,p,1/2 (λ) ≥ α .
+7.4 – 7.4 Comparaison empirique entre K-polyèdres, K-Robust Single-Linkage et
+DBSCAN                                                                                 73
+
+
+ La vitesse critique de percolation est le rapport
+
+                                   cc                λcc
+                                                      c (K, p)
+                                  vcrit,K,p (ε) ,    cc
+                                                                .
+                                                    λ1−ε (K, p)
+
+
+Remarque Plus cette quantité est proche de 1, plus la méthode récupère rapidement
+une grande fraction d’un amas dense avant que le fond ne percole. C’est donc un indice
+de performance directement lisible sur la courbe Θ.
+   Le seuil critique λc est en pratique difficile à estimer ; aussi l’avions-nous remplacé
+dans [41] par le quantile de niveau ε :
+
+                                                 λcc
+                                                  ε (K, p)
+                                    cc
+                                   vK,p (ε) ,    cc
+                                                            .                        (7.2)
+                                                λ1−ε (K, p)
+
+Remarque Si l’on préfère raisonner en rayons plutôt qu’en intensités, alors il suffit de
+remplacer dans la formule les quantiles des intensités par ceux des rayons
+
+                             λcc              rε (K, p) p
+                                           Å cc          ã
+                               ε (K, p)
+                                         =                 .
+                            λcc
+                              1−ε (K, p)
+                                              cc
+                                             r1−ε (K, p)
+
+7.4     Comparaison empirique entre K-polyèdres, K-
+        Robust Single-Linkage et DBSCAN
+   Les expériences de ce chapitre suivent le protocole suivant :
+  1. Fixer K_list une liste de K possibles, la dimension p ∈ N? , T ← 100 le nombre
+     de tests, n ← 100 000 le nombre de points (n ← 10 000 en dimension p = 4) et
+     ε ← 3%.
+  2. Pour t ∈ {1; . . . ; T } :
+      (a) L’on   génère  X contenant n points uniformément tirés dans l’hypercube
+                1/p p
+                      (approximation Poisson/binomiale).
+                  
+           0, n
+      (b) Pour cc ∈ {poly, core, dbscan}, générer de façon efficace (voir chapitre suivant
+          pour les K-polyèdres) la hiérarchie produite par cc sur X en repérant les
+          rayons de fusion et la proportion de points se trouvant alors dans la plus
+          grande composante connexe.
+  3. En déduire un estimateur Θ
+                              b cc de Θcc ainsi que de la vitesse de percolation
+
+                                                     b cc
+                                                     λ
+                                             vbcc , b ccε .
+                                                    λ1−ε
+74                Chapitre 7 — Le phénomène de percolation au cœur des performances
+
+
+Remarques
+  1. Lorsque K = 1, les trois familles coïncident : les 1-polyèdres sont les composantes
+     du graphe géométrique, les points cœurs du 1-Robust Single-Linkage sont tous les
+     points qui apparaissent dans le modèle booléen, et DBSCAN ne fait qu’ajouter une
+     frontière déjà présente. Les différences ne commencent donc qu’à partir de K ≥ 2.
+  2. Pour K = 2, le K-Robust Single-Linkage retire les feuilles des graphes géométriques
+     mais n’identifie pas pour autant de structures plus fines. Cet élagage non nécessaire
+     entraîne comme nous allons le voir des résultats pires que ceux pour K = 1.
+     DBSCAN réajoute ensuite ces points accessibles (qui correspondent exactement
+     aux feuilles élaguées) ; K = 2 donne donc les mêmes résultats pour DBSCAN que
+     K = 1.
+
+
+
+
+Figure 7.2 : Estimation de la fonction de probabilité λ 7→ Θ  b poly (λ) pour K ∈ {1, 2, 3, 4, 5} des K-
+                                                                K,2
+polyèdres en dimension 2. À noter que pour K = 1, le seuil critique en 2D est λc ≈ 1.44 [77, 78].
+
+
+Tableau 7.1 – Vitesse de percolation v en fonction de K pour les dimensions p = 2,
+p = 3 et p = 4. Les meilleurs résultats sont indiqués en gras.
+
+                 p=2                                   p=3                                 p=4
+K    HGP     Robust SL    DBSCAN           HGP     Robust SL   DBSCAN           HGP     Robust SL    DBSCAN
+1    0,735     0,735        0,735         0,563      0,563       0,563          0,362     0,362        0,362
+2    0,779     0,689        0,735         0,646      0,462       0,563          0,451     0,271        0,362
+3    0,800     0,632        0,753         0,690      0,412       0,582          0,497     0,247        0,378
+4    0,817     0,598        0,767         0,714      0,400       0,605          0,500     0,246        0,409
+5    0,826     0,584        0,779         0,732      0,399       0,625          0,534     0,236        0,415
+
+
+   Les résultats des estimations de Θ b cc (pour p = 2, K ∈ 1; 2; 3; 4; 5 ) sont montrés
+                                                             
+en Fig. 7.2 pour cc = poly, en Fig. 7.3 pour cc = core et en Fig. 7.4 pour cc = dbscan.
+7.4 – 7.4 Comparaison empirique entre K-polyèdres, K-Robust Single-Linkage et
+DBSCAN                                                                                             75
+
+
+
+
+Figure 7.3 : Estimation de la fonction de probabilité λ 7→ Θ
+                                                           b core (λ) pour K ∈ {1, 2, 3, 4, 5} des K-
+                                                             K,2
+composantes du Robust Single-Linkage en dimension 2.
+
+
+
+
+Figure 7.4 : Estimation de la fonction de probabilité λ 7→ Θ
+                                                           b dbscan (λ) pour K ∈ {1, 2, 3, 4, 5} des K-
+                                                             K,2
+composantes de DBSCAN en dimension 2.
+
+
+   Pour le calcul des vitesses de percolation vbcc (en dimension p = 2, p = 3 et p = 4), se
+reporter au Tab. 7.1.
+
+Remarque Ces simulations, quoique faisant intervenir n = 100 000 points, montrent
+des fonctions λ 7→ Θ(λ) “démarrant” au-dessus de 0 avec une pente nulle. Pourtant, au
+moins pour le Single-Linkage (K = 1), il a été montré que la pente au niveau du seuil λc
+est strictement positive [79-81] :
+
+                           ∃C > 0, ∀λ ≥ λc , Θ(λ) ≥ C (λ − λc ) .
+76               Chapitre 7 — Le phénomène de percolation au cœur des performances
+
+
+    Les K-polyèdres améliorent systématiquement la vitesse de percolation dès que K ≥ 2
+et surpassent les K-cœurs du Robust Single-Linkage et les K-composantes DBSCAN.
+    L’on s’attendait à ce que le K-Robust Single-Linkage soit moins bon que DBSCAN
+et que, pour K = 2, il donne de moins bons résultats que K = 1. En fait, c’est pis que
+cela : pour K ≥ 3, le Robust Single-Linkage continue de dégrader considérablement les
+résultats par rapport au Single-Linkage. La raison à cela se lit en Fig. 7.3 : l’algorithme
+peine à rassembler les derniers points ; sa probabilité de percolation Θcore converge trop
+lentement vers 1. L’erreur de ne pas prendre en compte les points à la frontière des amas
+est rédhibitoire.
+    DBSCAN répare partiellement cette erreur en réintégrant les points accessibles ; ses
+résultats sont donc meilleurs que ceux du Robust Single-Linkage (et progressent à partir
+de K ≥ 3), ils restent toutefois bien inférieurs à ceux des K-polyèdres ; la connectivité
+reste celle des cœurs, qui percolent bien trop vite (λ̂core
+                                                       c    < λ̂poly
+                                                                c    ) par rapport aux véritables
+niveaux LK .λ
+
+
+
+
+7.5      Et lorsque K → +∞ ?
+    À K et ε (rappel, ou recall en anglais) fixés, il y a peu d’espoir d’obtenir des ré-
+sultats  comparatifs entre les vitesses de percolation des différents algorithmes cc ∈
+  poly, dbscan, core autrement qu’avec des simulations sur de grands nuages de points.
+
+    Il en va autrement lorsque K → +∞.
+
+7.5.1     Le champ gaussien limite
+     Commençons par travailler en intensité normalisée
+                                µ , λ|B(0; 1/2)| = λ2−p ωp .
+Ainsi, pour x ∈ Rp , si l’on pose
+                             Nµ (x) , |Xµ/|B(0,1/2)| ∩ B(x, 1/2)|
+le nombre de voisins de x à intensité (normalisée) µ, alors Nµ (x) suit une loi de Poisson
+de paramètre µ, et notamment
+                             E[Nµ (x)] = µ,        V[Nµ (x)] = µ.
+     De plus, les vitesses étant des rapports d’intensités, passer de λ à µ ne change rien :
+                                         λc     µc
+                                             =      .
+                                        λ1−ε   µ1−ε
+     On introduit le champ de comptage (centré réduit)
+                                               Nµ (x) − µ
+                                    Zµ (x) ,       √      .
+                                                    µ
+7.5 – 7.5.1   Le champ gaussien limite                                                             77
+
+
+  Proposition 4 : Théorème central limite local du champ de comptage
+  Pour tous x1 , . . . , xm ∈ Rp , le vecteur
+
+                                          (Zµ (x1 ), . . . , Zµ (xm ))
+
+  converge en loi, lorsque µ → +∞, vers un vecteur gaussien centré
+
+                                          (Gp (x1 ), . . . , Gp (xm ))
+
+  de covariance
+                                                                   |B(xi , 1/2) ∩ B(xj , 1/2)|
+              E[Gp (xi )Gp (xj )] = ρp (xi − xj ) ,                                            .
+                                                                           |B(0, 1/2)|
+
+  Gp désigne le champ gaussien stationnaire centré de covariance ρp . En particulier,
+
+                                 ρp (z) = 0               dès que kzk ≥ 1.
+
+Preuve. Notons
+                             Bi , B(xi , 1/2),                    i ∈ {1, . . . , m}.
+On partitionne       i Bi en les atomes
+                 S
+
+                         Ç            å                   !
+                             \                [
+                 AJ ,            Bj       \          Bj       ,       ∅ 6= J ⊆ {1, . . . , m}.
+                           j∈J                j ∈J
+                                                /
+
+(Un point x ∈ i Bi apparaissant exactement dans les boules Bj pour j ∈ J ⊆ 1; . . . ; m
+              S                                                           
+sera placé dans l’ensemble AJ .) Les variables
+                                          YJ , Xµ/|B(0,1/2)| (AJ )
+sont des variables de Poisson indépendantes qui permettent d’écrire (en les combinant
+linéairement) le vecteur
+                                (Zµ (x1 ), . . . , Zµ (xm )) .
+L’approximation Poisson–Normale permet de conclure quant à la convergence. La cova-
+riance, elle, vaut :
+                                            1                       
+                     Cov Zµ (xi ), Zµ (xj ) = Cov Nµ (xi ), Nµ (xj )
+                                              µ
+                                              1                         
+                                            = V Xµ/|B(0,1/2)| (Bi ∩ Bj )
+                                              µ
+                                               |Bi ∩ Bj |
+                                            =             .
+                                              |B(0, 1/2)|
+78                Chapitre 7 — Le phénomène de percolation au cœur des performances
+
+
+    Les ensembles K-NN sont définis par Nµ (x)√≥ K. La transition se produit quand µ
+est proche de K, avec des fluctuations d’ordre K. La fenêtre d’intérêt pour µ est donc
+                                              √
+                                    µ = K + a K.
+
+Pour finir, en remarquant que
+                                              ®                      ´
+                                                            K −µ
+                        {x | Nµ (x) ≥ K} =        x Zµ (x) ≥ √           ,
+                                                               µ
+
+et avec la convergence K−µ
+                       √
+                         µ
+                            → −a, les amas de forte densité K-NN (pour le rayon r = 1/2
+fixé) peuvent se modéliser (à la limite) par l’ensemble d’excursion gaussien [82, 83]
+
+                                Ea , {x ∈ Rp | Gp (x) ≥ −a}.
+
+     L’évaluation de la vitesse de percolation se réduit dès lors à l’étude de ces excursions.
+
+7.5.2      Comportements sur le champ gaussien de HGP-Clusterer,
+           (H)DBSCAN et Robust Single-Linkage
+    À la limite, la différence de résultats entre les algorithmes s’explique formellement
+par la manière dont chacun interagit avec l’excursion Ea .
+    En s’appuyant sur le résultat (admis) ci-dessous, la récupération d’un point typique
+(l’origine 0) s’écrit asymptotiquement :
+     — Cœurs (Robust Single-Linkage). L’origine 0 doit appartenir à l’excursion Ea
+       (pour faire partie d’un cœur) et, une fois dilatés les cœurs de r = 1/2 (liaison par
+       arête), 0 doit se trouver dans une composante géante :
+
+                                Acore
+                                                                  
+                                  a   =   0 ∈ E a ∩ C ∞ δ1/2 (E a )  .
+
+     — DBSCAN. L’appartenance à l’excursion Ea stricte n’est plus exigée ; il suffit d’être
+       couvert par la composante géante dilatée :
+
+                              Adbscan
+                                                         
+                                a     = 0 ∈ C∞ δ1/2 (Ea ) .
+
+     — HGP-Clusterer. Il n’y a pas de dilatation préalable à l’identification d’une com-
+       posante géante de l’excursion Ea . C’est l’origine 0 qui est dilatée en une boule,
+       B(0; 1/2) = δ1/2 (0), et l’on regarde si cette boule intersecte C∞ (Ea ), cela revient à
+       observer l’événement :
+
+                                   Apoly
+                                           
+                                     a   = 0 ∈ δ1/2 (C∞ (Ea )) .
+7.5 – 7.5.2 Comportements sur le champ gaussien de acronymes]HGP@HGP –
+Hypergraphe-Percol’HGP-Clusterer, (H)acronymes]DBSCAN@DBSCAN –
+Density-Based Spatial Clustering of Applications with NoiseDBSCAN et Robust
+Single-Linkage                                                                           79
+    Soient p ≥ 2 et
+                              cc ∈ {poly, core, dbscan}.
+On pose
+                                     √                           µK (a)
+                      µK (a) := K + a K,           λK (a) ,                .
+                                                               |B(0; 1/2)|
+Soit                                               Ç          √ å
+                                                       K +a K
+                             FKcc (a) , Θcc
+                                         K,p,1/2                   .
+                                                       |B(0; 1/2)|
+On note Gp le champ gaussien stationnaire centré de covariance
+
+                                              |B(x; 1/2) ∩ B(y; 1/2)|
+                        E[Gp (x)Gp (y)] =                             ,
+                                                    |B(0; 1/2)|
+et
+                              Ea , {x ∈ Rp | Gp (x) ≥ −a}.
+Enfin, on définit
+                            Acore
+                             a    , {0 ∈ Ea ∩ C∞ (δ1/2 (Ea ))},
+                              Adbscan
+                               a      , {0 ∈ C∞ (δ1/2 (Ea ))},
+et
+                               Apoly
+                                a    , {0 ∈ δ1/2 (C∞ (Ea ))}.
+Alors, on admettra qu’en tout point de continuité de
+
+                                           a 7→ P(Acc
+                                                   a ),
+
+on a                                 Ç          √ å
+                                         K +a K
+                          Θcc
+                           K,p,1/2                   −−−−→ P(Acc
+                                                              a ).
+                                         |B(0; 1/2)| K→+∞
+
+   L’on voit avec cette formulation réapparaître les deux défauts du Robust Single-
+Linkage par rapport à HGP-Clusterer :
+     1. La dilatation δ1/2 est appliquée avant l’identification des composantes géantes C∞ ,
+        provoquant une percolation précoce (acorec   = adbscan
+                                                          c     ≤ apoly
+                                                                    c   ).
+     2. La condition d’être un point cœur, c’est-à-dire (en termes de champ gaussien)
+        d’appartenir à l’excursion Ea est beaucoup trop restrictive.
+   DBSCAN évite l’erreur du second point (en permettant à un point d’être seulement
+accessible), mais pas du premier : la percolation de ses composantes a lieu trop tôt
+(comparer Fig. 7.2 avec les Fig. 7.3 & 7.4).
+

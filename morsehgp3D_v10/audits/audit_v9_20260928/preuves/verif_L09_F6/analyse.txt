@@ -1,0 +1,64 @@
+scenes x seeds: 225
+hdbscan_default          gap ari-sing27 mean -0.0590 min -0.2984 max +0.0011  |gap|>0.05: 90/225
+hdbscan_oracle_ari       gap ari-sing27 mean -0.0543 min -0.2512 max +0.0010  |gap|>0.05: 83/225
+hdbscan_oracle_sing27    gap ari-sing27 mean -0.0558 min -0.2623 max +0.0010  |gap|>0.05: 85/225
+tower_lambda_eom         gap ari-sing27 mean -0.0358 min -0.3439 max +0.0218  |gap|>0.05: 54/225
+tower_lambda_leaf        gap ari-sing27 mean -0.0325 min -0.3439 max +0.3446  |gap|>0.05: 65/225
+tower_log_eom            gap ari-sing27 mean -0.0259 min -0.3439 max +0.0218  |gap|>0.05: 41/225
+tower_log_leaf           gap ari-sing27 mean -0.0325 min -0.3439 max +0.3446  |gap|>0.05: 65/225
+
+challenger             reference              ARI tous points (banc)       ARI singletons (27)         
+tower_lambda_eom       hdbscan_default        +0.2048 187- 34/225        +0.1816 187- 34/225
+tower_lambda_eom       hdbscan_oracle_ari     +0.0392 171- 54/225        +0.0207 165- 60/225
+tower_lambda_eom       hdbscan_oracle_sing27  +0.0400 171- 54/225        +0.0201 164- 61/225
+tower_lambda_leaf      hdbscan_default        +0.1682 169- 52/225        +0.1417 169- 52/225
+tower_lambda_leaf      hdbscan_oracle_ari     +0.0026 155- 70/225        -0.0192 151- 74/225
+tower_lambda_leaf      hdbscan_oracle_sing27  +0.0034 155- 70/225        -0.0199 151- 74/225
+tower_log_eom          hdbscan_default        +0.1898 187- 20/225        +0.1567 187- 20/225
+tower_log_eom          hdbscan_oracle_ari     +0.0242 155- 46/225        -0.0042 148- 53/225
+tower_log_eom          hdbscan_oracle_sing27  +0.0251 155- 46/225        -0.0049 148- 53/225
+tower_log_leaf         hdbscan_default        +0.1682 169- 52/225        +0.1417 169- 52/225
+tower_log_leaf         hdbscan_oracle_ari     +0.0026 155- 70/225        -0.0192 151- 74/225
+tower_log_leaf         hdbscan_oracle_sing27  +0.0034 155- 70/225        -0.0199 151- 74/225
+
+tower_lambda_eom vs hdbscan_oracle_ari (bank metric) / hdbscan_oracle_sing27 (sing27): sign flips 7 [('anisotropic_n2000_g8_medium_noise0', '2026092801', 0.014, -0.003), ('heteroscedastic_n2000_g8_extreme_noise0', '2026092800', 0.087, -0.008), ('heteroscedastic_n2000_g8_medium_noise0', '2026092801', 0.017, -0.007), ('spherical_n500_g16_hard_noise0', '2026092800', 0.171, -0.011), ('unbalanced_n2000_g8_easy_noise0', '2026092804', 0.001, -0.003), ('unbalanced_n2000_g8_hard_noise0', '2026092804', 0.079, -0.009)]
+tower_lambda_eom vs hdbscan_default (bank metric) / hdbscan_default (sing27): sign flips 2 [('filaments_n2000_g8_hard_noise0', '2026092803', -0.004, 0.052), ('unbalanced_n2000_g8_easy_noise0', '2026092804', 0.007, -0.002)]
+tower_lambda_leaf vs hdbscan_oracle_ari (bank metric) / hdbscan_oracle_sing27 (sing27): sign flips 6 [('anisotropic_n2000_g8_extreme_noise0', '2026092801', -0.008, 0.092), ('heteroscedastic_n2000_g8_extreme_noise0', '2026092800', 0.087, -0.008), ('heteroscedastic_n2000_g8_medium_noise0', '2026092801', 0.017, -0.007), ('spherical_n2000_g4_hard_noise0', '2026092802', 0.01, -0.025), ('spherical_n2000_g4_medium_noise0', '2026092802', 0.04, -0.009), ('spherical_n500_g16_hard_noise0', '2026092800', 0.171, -0.011)]
+tower_lambda_leaf vs hdbscan_default (bank metric) / hdbscan_default (sing27): sign flips 2 [('filaments_n2000_g8_hard_noise0', '2026092803', -0.004, 0.052), ('spherical_n2000_g4_medium_noise0', '2026092802', 0.046, -0.005)]
+tower_log_eom vs hdbscan_oracle_ari (bank metric) / hdbscan_oracle_sing27 (sing27): sign flips 7 [('heteroscedastic_n2000_g8_extreme_noise0', '2026092800', 0.087, -0.008), ('heteroscedastic_n2000_g8_medium_noise0', '2026092801', 0.017, -0.007), ('spherical_n2000_g8_extreme_noise0', '2026092802', 0.002, -0.004), ('spherical_n500_g16_hard_noise0', '2026092800', 0.171, -0.011), ('unbalanced_n2000_g8_easy_noise0', '2026092804', 0.001, -0.003), ('unbalanced_n2000_g8_hard_noise0', '2026092804', 0.079, -0.009)]
+tower_log_eom vs hdbscan_default (bank metric) / hdbscan_default (sing27): sign flips 2 [('bridge_n2000_g8_hard_noise0', '2026092804', -0.002, 0.001), ('unbalanced_n2000_g8_easy_noise0', '2026092804', 0.007, -0.002)]
+tower_log_leaf vs hdbscan_oracle_ari (bank metric) / hdbscan_oracle_sing27 (sing27): sign flips 6 [('anisotropic_n2000_g8_extreme_noise0', '2026092801', -0.008, 0.092), ('heteroscedastic_n2000_g8_extreme_noise0', '2026092800', 0.087, -0.008), ('heteroscedastic_n2000_g8_medium_noise0', '2026092801', 0.017, -0.007), ('spherical_n2000_g4_hard_noise0', '2026092802', 0.01, -0.025), ('spherical_n2000_g4_medium_noise0', '2026092802', 0.04, -0.009), ('spherical_n500_g16_hard_noise0', '2026092800', 0.171, -0.011)]
+tower_log_leaf vs hdbscan_default (bank metric) / hdbscan_default (sing27): sign flips 2 [('filaments_n2000_g8_hard_noise0', '2026092803', -0.004, 0.052), ('spherical_n2000_g4_medium_noise0', '2026092802', 0.046, -0.005)]
+
+tower_lambda_eom       anisotropic      bank +0.1325 (20-0/20)  sing27 +0.1331 (19-1/20)
+tower_lambda_eom       bridge           bank +0.1610 (20-0/20)  sing27 +0.1725 (20-0/20)
+tower_lambda_eom       filaments        bank +0.0111 (8-12/20)  sing27 +0.0221 (8-12/20)
+tower_lambda_eom       heteroscedastic  bank +0.0602 (20-0/20)  sing27 +0.0262 (18-2/20)
+tower_lambda_eom       hierarchical     bank -0.4877 (0-20/20)  sing27 -0.4832 (0-20/20)
+tower_lambda_eom       shells           bank -0.3980 (0-20/20)  sing27 -0.3754 (0-20/20)
+tower_lambda_eom       spherical        bank +0.2050 (85-0/85)  sing27 +0.1608 (84-1/85)
+tower_lambda_eom       unbalanced       bank +0.0908 (18-2/20)  sing27 +0.0467 (15-5/20)
+tower_lambda_leaf      anisotropic      bank +0.1152 (17-3/20)  sing27 +0.1232 (18-2/20)
+tower_lambda_leaf      bridge           bank +0.1610 (20-0/20)  sing27 +0.1725 (20-0/20)
+tower_lambda_leaf      filaments        bank -0.1090 (8-12/20)  sing27 -0.0714 (8-12/20)
+tower_lambda_leaf      heteroscedastic  bank +0.0602 (20-0/20)  sing27 +0.0262 (18-2/20)
+tower_lambda_leaf      hierarchical     bank -0.5120 (0-20/20)  sing27 -0.5058 (0-20/20)
+tower_lambda_leaf      shells           bank -0.4177 (0-20/20)  sing27 -0.3923 (0-20/20)
+tower_lambda_leaf      spherical        bank +0.1852 (81-4/85)  sing27 +0.1366 (78-7/85)
+tower_lambda_leaf      unbalanced       bank -0.0552 (9-11/20)  sing27 -0.1564 (9-11/20)
+tower_log_eom          anisotropic      bank +0.0106 (15-5/20)  sing27 -0.0113 (15-5/20)
+tower_log_eom          bridge           bank -0.0300 (15-5/20)  sing27 -0.0337 (15-5/20)
+tower_log_eom          filaments        bank -0.0334 (9-10/20)  sing27 -0.0352 (9-10/20)
+tower_log_eom          heteroscedastic  bank +0.0382 (19-1/20)  sing27 -0.0003 (17-3/20)
+tower_log_eom          hierarchical     bank -0.2760 (1-16/20)  sing27 -0.2760 (1-16/20)
+tower_log_eom          shells           bank +0.0000 (0-0/20)  sing27 +0.0000 (0-0/20)
+tower_log_eom          spherical        bank +0.1065 (77-8/85)  sing27 +0.0554 (75-10/85)
+tower_log_eom          unbalanced       bank +0.1103 (19-1/20)  sing27 +0.0666 (16-4/20)
+tower_log_leaf         anisotropic      bank +0.1152 (17-3/20)  sing27 +0.1232 (18-2/20)
+tower_log_leaf         bridge           bank +0.1610 (20-0/20)  sing27 +0.1725 (20-0/20)
+tower_log_leaf         filaments        bank -0.1090 (8-12/20)  sing27 -0.0714 (8-12/20)
+tower_log_leaf         heteroscedastic  bank +0.0602 (20-0/20)  sing27 +0.0262 (18-2/20)
+tower_log_leaf         hierarchical     bank -0.5120 (0-20/20)  sing27 -0.5058 (0-20/20)
+tower_log_leaf         shells           bank -0.4177 (0-20/20)  sing27 -0.3923 (0-20/20)
+tower_log_leaf         spherical        bank +0.1852 (81-4/85)  sing27 +0.1366 (78-7/85)
+tower_log_leaf         unbalanced       bank -0.0552 (9-11/20)  sing27 -0.1564 (9-11/20)

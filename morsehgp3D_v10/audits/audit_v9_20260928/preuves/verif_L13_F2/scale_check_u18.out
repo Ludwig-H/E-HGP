@@ -1,0 +1,26 @@
+run grid 1 3 65533 0.01s nodes 136 leaves 126 max_m 16
+run grid 1 3 40000 0.01s nodes 200 leaves 118 max_m 16
+run grid 1 5 65533 0.02s nodes 464 leaves 414 max_m 18
+run grid 1 5 40000 0.02s nodes 544 leaves 397 max_m 18
+run grid 1 8 65533 0.04s nodes 432 leaves 386 max_m 20
+run grid 1 8 40000 0.04s nodes 536 leaves 387 max_m 20
+run grid 2 3 65533 0.01s nodes 144 leaves 133 max_m 16
+run grid 2 3 40000 0.01s nodes 192 leaves 107 max_m 16
+run grid 2 5 65533 0.02s nodes 456 leaves 400 max_m 19
+run grid 2 5 40000 0.02s nodes 512 leaves 335 max_m 19
+run grid 2 8 65533 0.03s nodes 512 leaves 456 max_m 21
+run grid 2 8 40000 0.04s nodes 704 leaves 521 max_m 21
+run grid 3 3 65533 0.01s nodes 136 leaves 127 max_m 16
+run grid 3 3 40000 0.03s nodes 216 leaves 132 max_m 16
+run grid 3 5 65533 0.05s nodes 296 leaves 267 max_m 16
+run grid 3 5 40000 0.07s nodes 480 leaves 333 max_m 16
+run grid 3 8 65533 0.03s nodes 408 leaves 365 max_m 20
+run grid 3 8 40000 0.03s nodes 520 leaves 374 max_m 20
+run grid 4 3 65533 0.01s nodes 160 leaves 148 max_m 16
+run grid 4 3 40000 0.01s nodes 208 leaves 117 max_m 16
+run grid 4 5 65533 0.02s nodes 1240 leaves 1093 max_m 19
+run grid 4 5 40000 0.03s nodes 1232 leaves 1004 max_m 19
+run grid 4 8 65533 0.03s nodes 416 leaves 372 max_m 20
+run grid 4 8 40000 0.03s nodes 568 leaves 412 max_m 20
+total 24 fails 0
+EXIT 0
