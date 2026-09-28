@@ -21,7 +21,7 @@ GCP : non utilisé à ce jour
 
 | Acquis | Code | Porte |
 | --- | --- | --- |
-| Catalogue critique exact par boîtes de centres (lemmes G, D, C) | `src/catalogue/generator.cpp` | `mhgp10_catalogue_oracle` ; égalité à la v9 sur 08/000200 K5 et K10 |
+| Catalogue critique exact par boîtes de centres (lemmes G, D, C), feuille v2 à masques de dominance (lemmes M, S) | `src/catalogue/generator.cpp` | `mhgp10_catalogue_oracle` ; égalité à la v9 sur 08/000200 K5 et K10 ; dumps de la feuille v2 identiques à `93710d076` |
 | Tour FULL par morceaux locaux (Gordan) et descente | `src/tower/tower.cpp` | `mhgp10_tower_oracle` (7 600 coupes, E5) |
 | Hiérarchie de points C∩X | `src/tower/tower.cpp` (attaches) | `mhgp10_tower_oracle` (partitions de points) |
 | Condensation HDBSCAN exacte, EOM, feuilles | `src/head/head.cpp` | `mhgp10_head_condensation_vs_sklearn` |
@@ -38,12 +38,16 @@ GCP : non utilisé à ce jour
 
 ## Chantiers ouverts, par priorité
 
-1. **Clustering** : campagne de développement en cours (8 familles × 4 niveaux × bruit 0/0,1 × n = 2k, 8k).
-   À mi-parcours, la meilleure configuration unique de la tour égale le meilleur HDBSCAN réglé sur les mêmes graines
-   (parité, conforme à la prévision CLUSTER_v2). Expérience de choix par scène sans étiquettes en cours. Ensuite :
-   préenregistrement, puis campagne de test 8k/16k/32k (G4).
-2. **Performance LiDAR** (priorité de complexité) : accélération de la feuille du générateur en cours ; mesures
-   G4 à faire (protocole v10 en préparation, scripts gardés réutilisés).
+1. **Clustering** : campagne de développement terminée (reçu `receipts/bench_dev_20260928/`) : parité entre la
+   meilleure configuration unique de la tour et le meilleur HDBSCAN réglé sur les mêmes graines, large victoire sur
+   HDBSCAN par défaut. Sélection par scène par DBCV : gain symétrique pour les deux méthodes ; grille complète
+   (K ≤ 10, `min_samples` ≤ 20, α ∈ {1, 2}) en cours en local à n = 2 000. Ensuite : préenregistrement, puis
+   campagne de test 8k/16k/32k (G4).
+2. **Performance LiDAR** (priorité de complexité) : la feuille v2 a divisé le catalogue par ≈ 1,6 ; la tour est
+   désormais le goulot (mesure locale à 4 fils : K5 catalogue 3–4 s contre tour 4–6 s ; K10 11–15 s contre
+   32–56 s, RSS 2,4 Go), loin de l'estimation de conception (≈ 2 CPU·s à K5). Instrumentation par étage et
+   accélération de la tour en cours. Protocole G4 v10 (`gcp-migration/v10_*`) en correction après revue adverse,
+   non commité : aucune session G4 v10 à ce jour.
 3. **Multiplicités** dans la tour, Euler pondéré, juges d'échelle (K = 1 contre EMST, Euler à kmax + 2).
 4. Verticales publiées (calculables par descente, non exposées).
 
