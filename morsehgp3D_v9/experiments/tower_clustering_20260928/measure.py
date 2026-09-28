@@ -78,13 +78,36 @@ def read_export(report):
     need(cofaces, 'the export carries no coface')
     size = len(cofaces[0][0])
     need(all(len(v) == size for v, _ in cofaces), 'the cofaces do not share one cardinality')
-    gabriel = set()
+    gabriel = {}
     for entry in report.get('catalogue', ()):
         sites = tuple(sorted(int(s) for s in (entry.get('interior') or [])
                              + (entry.get('shell') or [])))
         if len(sites) == size - 1:
-            gabriel.add(sites)
+            gabriel[sites] = _rational(entry['beta'])
     return cofaces, gabriel, size - 1
+
+
+def facet_births(cofaces, gabriel_facets, convention):
+    """Niveau de naissance d'une facette dans la filtration.
+
+    Une facette de Gabriel a son propre rayon au catalogue, et c'est le bon
+    niveau : la boule minimale d'un sous-ensemble est plus petite que celle du
+    sur-ensemble, donc la facette existe avant toute coface qui la contient.
+    Sous la convention du bord, une facette n'est pas forcement de Gabriel et
+    n'a pas de rayon publie : elle entre alors dans la filtration au premier
+    niveau ou une coface la fait apparaitre.
+    """
+    births = {}
+    for vertices, beta in cofaces:
+        for facet in facets(vertices):
+            if convention == 'gabriel' and facet not in gabriel_facets:
+                continue
+            known = gabriel_facets.get(facet)
+            value = known if known is not None else beta
+            if facet not in births or value < births[facet]:
+                births[facet] = value
+    need(births, 'no facet has a birth level')
+    return births
 
 
 def facets(vertices):
