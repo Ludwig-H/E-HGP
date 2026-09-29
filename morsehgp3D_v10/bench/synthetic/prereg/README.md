@@ -109,3 +109,15 @@ décision principale :
 (`c764e121a`) et les scripts du banc.
 
 **Bases dev** : reçus `bench_dev_z_samehead_20260929` et `bench_dev_objet_20260929`.
+
+**Amendement du 29 septembre (avant toute lecture d'un résultat de test).** L'exécution passe sur la VM G4, à la
+demande de l'utilisateur. La VM (glibc 2.35, Python 3.10, sans pip) ne peut exécuter ni les binaires du codespace ni
+numpy 2.5.3. D'où trois changements, et aucun autre :
+- les binaires sont reconstruits depuis le même commit `c764e121a`, avec le même compilateur, mais liés
+  statiquement ; ils sont identiques aux binaires épinglés sur 152 contrôles dev, avec 0 écart ;
+- un Python 3.12.14 portable porte les mêmes numpy, scipy et scikit-learn ;
+- l'exécution passe par `bench/g4/lot_runner.py` en sessions, et la fusion par `bench/g4/merge_sessions.py`, qui
+  vérifie qu'aucune scène n'est calculée deux fois.
+
+Méthodes, plan, graines, décision et prédictions sont inchangés. L'exécution locale commencée à 10:10 UTC est
+interrompue et gardée à part pour un contrôle de concordance ; elle ne compte pas dans la décision.

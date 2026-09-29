@@ -1,4 +1,26 @@
 {
+ "amendements": [
+  {
+   "changements": [
+    "binaires : meme commit c764e121a, meme compilateur (g++ 13.3), edition de liens statique (-static) ; les epingles mhgp10_cluster_sha256 et mhgp10_mreach_cluster_sha256 designent ces binaires statiques",
+    "Python : CPython 3.12.14 portable (python-build-standalone 20260924) avec les MEMES numpy 2.5.3, scipy 1.18.1 et scikit-learn 1.9.1 que l environnement epingle (fichiers copies), plus leurs dependances",
+    "execution : sessions G4 par gcp-migration/v10_session.py et bench/g4/lot_runner.py (scenes restantes par taille decroissante, sous un budget de temps), fusion par bench/g4/merge_sessions.py (aucune scene calculee deux fois) ; methodes, plan, graines, regle de decision et predictions INCHANGES",
+    "l execution locale commencee le 29 septembre a 10:10 UTC sous ce preenregistrement est interrompue et conservee a part, pour un controle de concordance a la fin ; elle ne compte pas dans la decision"
+   ],
+   "date": "2026-09-29",
+   "epingles_initiales": {
+    "mhgp10_cluster_sha256": "c5aca0abb19da40ae72659efcc2f60739c563139ccb6a38f3cd16c562d87e607",
+    "mhgp10_mreach_cluster_sha256": "d4641950cf70a9c7343c19cc60bb538b2af4b455b9e10d8f667e3855036fb805",
+    "python": "3.12.1"
+   },
+   "motif": "Execution deplacee sur la VM G4 a la demande de l utilisateur (« Envoie le lot C ou tout calcul trop couteux/long sur G4 ; on n a pas toute la vie ! »). La VM (glibc 2.35, Python 3.10, sans pip ni numpy) ne peut executer ni les binaires epingles du codespace (GLIBC_2.38) ni numpy 2.5.3.",
+   "preenregistrement_initial_sha256": "5138add82aa27e9c28c57764cb773a166d5aeb7b13ba7ae9f92e1565a4e1638e",
+   "verifications": [
+    "binaires statiques = binaires dynamiques epingles : 152 controles (toutes les methodes de la tour et du temoin MR du lot C, 8 scenes dev difficiles, une par famille), 0 ecart",
+    "aucun resultat de test (lot C) n a ete lu avant cet amendement"
+   ]
+  }
+ ],
  "attribution_statement": "Attribution, écrite avant le test : à K = 1, les hiérarchies de la tour et de sklearn coïncident (liaison simple) ; l’écart y vient entièrement de la tête (z, politique de bruit). À K ≥ 2, la paire principale mesure ensemble la hiérarchie, l’entrée des points et la tête ; la famille « objet » isole la hiérarchie (même entrée, même tête, même remplissage) : une parité y signifierait que l’avantage sur HDBSCAN vient de l’entrée et de la tête, applicables aussi à la hiérarchie d’HDBSCAN.",
  "decision": {
   "alpha": 0.05,
@@ -728,9 +750,13 @@
   }
  ],
  "pins": {
-  "mhgp10_cluster_sha256": "c5aca0abb19da40ae72659efcc2f60739c563139ccb6a38f3cd16c562d87e607",
-  "mhgp10_mreach_cluster_sha256": "d4641950cf70a9c7343c19cc60bb538b2af4b455b9e10d8f667e3855036fb805",
-  "python": "3.12.1",
+  "execution_containers_sha256": {
+   "bins": "ab85e9f6644e644011a6502ea7ada6f12052b7710386a80e1ecb5547e370d40d",
+   "pyenv": "0c22a5d2a861eadc8aaae1dbd901bbf57933ff40d2cd0e454b2076323936b427"
+  },
+  "mhgp10_cluster_sha256": "6da02ee487da9c079575611c57e86d703ea5c593be31e799dcdceaab16803cff",
+  "mhgp10_mreach_cluster_sha256": "83c680b34cd1fbe19b21773af71bffb7513eb2dc70fa0db059e9abcd4c300f7f",
+  "python": "3.12.14 (python-build-standalone 20260924, portable)",
   "scripts_sha256": {
    "decide.py": "d360ed0ed150c738c48c15a270c9431da1c2127ca382ce6ed37d193faa81dc7f",
    "methods.py": "89fa4038362424cf161b82cd2029e32caaeb79fedfe2e6724bbdd62d8dd8b835",
