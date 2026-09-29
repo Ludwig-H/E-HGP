@@ -17,7 +17,7 @@ comme nœuds d'une même hiérarchie de partitions. Les verticales exactes ne l'
 pas : les paramètres `(K=1,r=10)` et `(K=2,r=15)` sont incomparables pour l'inclusion.
 
 Le petit exécutable compilé depuis le snapshot produit ces deux coupes, code 0 :
-[`crossing_report.json`](crossing_report.json), [`crossing.txt`](crossing.txt).
+[`crossing_report.json`](../../../receipts/audit_continu_20260929/pool_head/crossing_report.json), [`crossing.txt`](../../../receipts/audit_continu_20260929/pool_head/crossing.txt).
 Rejeu : `probe_multik.py TOWER_BINARY V10_SOURCE NEW_OUTPUT_DIRECTORY`.
 Cette contradiction concerne une fusion naïve des sorties, pas l'exactitude de FULL.
 

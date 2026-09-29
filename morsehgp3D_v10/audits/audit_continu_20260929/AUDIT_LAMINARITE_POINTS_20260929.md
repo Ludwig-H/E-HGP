@@ -89,7 +89,7 @@ d'appartenances. Elle ne restitue pas tous les amas discrets de la thèse.
 
 ### 2.1 Discontinuité confirmée dans le moteur
 
-Le test [catalogue/cover_discontinuity.json](catalogue/cover_discontinuity.json)
+Le test [catalogue/cover_discontinuity.json](../../receipts/audit_continu_20260929/catalogue/cover_discontinuity.json)
 compare les points 0,999,2000 et 0,1001,2000, k=2, modes core/cover :
 
 | Mode | Fusion gauche–milieu, premier nuage | Second nuage |
@@ -197,7 +197,7 @@ relancer le même chantier sous un autre nom sans nouvelle hypothèse utile.
 ### 4.2 Mélanger les ordres ne donne pas gratuitement un arbre
 
 Les blocs pris à des ordres et des rayons différents peuvent se croiser.
-Une [fixture native de cinq points](pool_head/crossing_report.json) le montre
+Une [fixture native de cinq points](../../receipts/audit_continu_20260929/pool_head/crossing_report.json) le montre
 déjà pour core : sur {0,20,22,50,52}, l'ordre 1 au rayon 10 contient le bloc
 {0,20,22}, et l'ordre 2 au rayon 15 contient {20,22,50,52}. Les paramètres
 sont incomparables et les deux blocs se croisent. Toute réduction de FULL

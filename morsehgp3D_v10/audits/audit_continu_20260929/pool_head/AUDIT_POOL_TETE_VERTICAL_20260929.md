@@ -23,7 +23,7 @@ Quatre résultats distincts appellent néanmoins une action :
 | P2 performance | La tête remonte séparément les ancêtres pour chaque cluster et point | Carré évitable sur un dendrogramme en peigne, pas un carré LiDAR démontré |
 
 Les commandes, codes, hashes de binaires et hashes des sources de compilation sont dans
-[`evidence.json`](evidence.json). Les sources des tests et leurs sorties sont conservées
+[`evidence.json`](../../../receipts/audit_continu_20260929/pool_head/evidence.json). Les sources des tests et leurs sorties sont conservées
 dans ce dossier. Les captures complètes avant/après sont également sous
 `/tmp/mhgp10-audit-pool-head.X45WLs` (complément temporaire, pas prérequis de lecture).
 
@@ -35,9 +35,9 @@ empruntés disparaissent alors que le second fil travaille encore. `run_chunks` 
 pas non plus le drapeau thread-local lors de cette sortie exceptionnelle. Une exception
 échappant au callback d'un ouvrier provoque de son côté `std::terminate`.
 
-[`pool_throw.cpp`](pool_throw.cpp) synchronise deux fils : l'ouvrier est dans le callback,
+[`pool_throw.cpp`](../../../receipts/audit_continu_20260929/pool_head/pool_throw.cpp) synchronise deux fils : l'ouvrier est dans le callback,
 l'appelant lève une exception, le `catch` appelant libère l'ouvrier. Résultat : code 1 et
-**ASan stack-use-after-scope**, [`pool.stderr`](pool.stderr). Aucun sabotage du moteur.
+**ASan stack-use-after-scope**, [`pool.stderr`](../../../receipts/audit_continu_20260929/pool_head/pool.stderr). Aucun sabotage du moteur.
 Le contrat du header n'interdit pas les exceptions ; les allocations de vecteurs du
 catalogue et de Kruskal dans les tâches peuvent notamment en lever.
 
@@ -72,7 +72,7 @@ singleton `{5}` est faux à ce niveau. Pourtant les premiers points concernés n
 en mode `core` qu'au niveau 4 ; entre-temps les trois points ont fusionné à l'ordre 1
 au niveau 9/4. Le juge accepte donc **original et mutant : 7 contrôles chacun**.
 
-[`tower.txt`](tower.txt) est la vraie sortie correcte. [`probe_vertical.py`](probe_vertical.py)
+[`tower.txt`](../../../receipts/audit_continu_20260929/pool_head/tower.txt) est la vraie sortie correcte. [`probe_vertical.py`](../../../receipts/audit_continu_20260929/pool_head/probe_vertical.py)
 ne change que le champ vertical du nœud d'ordre 2 né au niveau 1 et démontre le mutant
 survivant. Il ne change ni géométrie, ni forêt, ni attaches. Les autres contrôles de
 la porte ignorent ce champ. La tour réelle n'est pas réfutée.
@@ -85,12 +85,12 @@ promouvoir la seule inclusion des points en preuve complète des verticales.
 
 `src/head/head.cpp:135–141`, `155–160` et `162–167` remontent les chaînes d'ancêtres
 pour chaque objet. Sur un arbre en peigne valide, la seconde boucle seule traverse
-`(n−2)(n−1)/2` arêtes d'ancêtres internes. [`head_ladder.cpp`](head_ladder.cpp),
+`(n−2)(n−1)/2` arêtes d'ancêtres internes. [`head_ladder.cpp`](../../../receipts/audit_continu_20260929/pool_head/head_ladder.cpp),
 `selection=leaf`, `min_cluster_size=1`, confirme la validité du dendrogramme et les
 étiquettes ; la formule donne 1 997 001, 7 994 001 et 31 988 001 traversées pour
 2 000, 4 000 et 8 000 points.
 
-[`head_ladder.stdout`](head_ladder.stdout) conserve un passage de trois répétitions
+[`head_ladder.stdout`](../../../receipts/audit_continu_20260929/pool_head/head_ladder.stdout) conserve un passage de trois répétitions
 par taille : minima 8,744 / 32,298 / 64,553 ms. La machine partagée est variable ; un
 premier passage avait donné 5,107 / 31,290 / 233,373 ms. La conclusion quadratique
 vient du travail de boucle, pas de ces chronos. Cette fixture API n'établit pas que

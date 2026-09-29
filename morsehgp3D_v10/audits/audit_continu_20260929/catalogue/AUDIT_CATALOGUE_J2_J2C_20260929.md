@@ -20,7 +20,7 @@ Ces arguments supposent un `Cloud` préparé valide, immuable pendant l'appel, s
 
 ## 2. Expérience neuve, bornée et reproductible localement
 
-Sources de la sonde : `probe.cpp`, `check.py`, `check_r1_interrupted.py`. La sonde compile directement les sources courantes, sans mutation du moteur, avec GCC C++20, `-O2 -Wall -Wextra -Wpedantic -Werror -pthread`.
+Sources de la sonde dans [l'archive catalogue](../../../receipts/audit_continu_20260929/catalogue/) : `probe.cpp`, `check.py`, `check_r1_interrupted.py`. La sonde compile directement les sources courantes, sans mutation du moteur, avec GCC C++20, `-O2 -Wall -Wextra -Wpedantic -Werror -pthread`.
 
 - 24 nuages : extrêmes u18, cube, carré, triangle rectangle, octaèdre avec intrus pondéré, 18 petits tirages géométriques de graine `2026092905`.
 - K = 1, 2, 3, 5, 10, 12 ; feuilles par défaut, `max(8,K+1)`, 256 ; W1/W4.

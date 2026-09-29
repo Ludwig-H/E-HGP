@@ -50,11 +50,11 @@ Les opérations sont signées et ne sont pas une arithmétique modulaire défini
 par le code. On ne peut donc tirer une qualification de débit arithmétique exact
 de ces boucles optimisées.
 
-La [réplique hôte](cuda_loops_host_replica.cpp) reprend ces récurrences, sur
+La [réplique hôte](../../../receipts/audit_continu_20260929/timeout/cuda_loops_host_replica.cpp) reprend ces récurrences, sur
 quatre itérations et uniquement cette entrée. GCC 13.3 avec
 `-fsanitize=undefined -fno-sanitize-recover=undefined` signale le produit i64 à
 `t=0` et l'addition i128 à `t=2`, chacun avec code 1 attendu. Le
-[reçu](receipt_cuda_loops_host.json) conserve commandes, diagnostics et hashes.
+[reçu](../../../receipts/audit_continu_20260929/timeout/receipt_cuda_loops_host.json) conserve commandes, diagnostics et hashes.
 **Ce contrôle hôte ne prétend ni avoir instrumenté le device ni prouver quels
 codes machine NVCC a effectivement produits.** Il confirme le défaut de domaine
 des expressions recopiées ; la lecture de la source CUDA établit leur présence

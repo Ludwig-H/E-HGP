@@ -83,9 +83,9 @@ n'est pas mesuré ici et aucun résultat ancien ne se transfère à cette versio
   comparateur positif conservé ; boucles de débit avec débordements signés ;
   campagne grands K complète mais tour exécutée seulement à K10.
 
-- `pool_head/` : sources des petits tests et sorties fermées.
-- `timeout/` : processus enfant, recalcul de l'échelle, fichiers de preuve.
-- `catalogue/` : contre-oracle exact indépendant, entrées tronquées et feuilles.
+- `pool_head/`, `timeout/`, `catalogue/` : rapports et contre-vérifications.
+- [Captures archivées](../../receipts/audit_continu_20260929/README.md) :
+  sources des petits tests, sorties fermées et hashes, sans doublons ici.
 - [Projection laminaire](AUDIT_LAMINARITE_POINTS_20260929.md) : recommandations,
   preuves et limites ; [références statistiques](timeout/AUDIT_CIBLES_STATISTIQUES_20260929.md) :
   les diagnostics MAP/Morse ne sont pas des plafonds d'ARI.

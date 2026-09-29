@@ -82,7 +82,7 @@ marge. Aucune meilleure qualité statistique n'est déduite de ces inégalités.
 
 ## Petit oracle indépendant livré
 
-[probe_band.py](projection_band/probe_band.py) calcule exactement les
+[probe_band.py](../../receipts/audit_continu_20260929/projection_band/probe_band.py) calcule exactement les
 intersections des intervalles de multicouverture, sur trois sites colinéaires.
 La projection orthogonale sur leur axe diminue toutes les distances aux
 sites : ces calculs décrivent aussi les composantes pertinentes en 3D.
@@ -97,7 +97,7 @@ n'est pas un générateur sous-quadratique proposé pour le produit.
 
 Les 32 vues produites respectent l'ultramétricité et les dates d'activation.
 Les exécutions normales et `python -O` rendent le même JSON, code 0 ; le
-[reçu](projection_band/receipt.json) conserve le hash du script et les réponses.
+[reçu](../../receipts/audit_continu_20260929/projection_band/receipt.json) conserve le hash du script et les réponses.
 Ces exemples accompagnent la preuve ; ils ne la remplacent pas et ne sont
 pas des scènes de benchmark ni des mesures de performance.
 
@@ -118,3 +118,28 @@ Le prochain test utile est donc une comparaison des attaches et de leurs
 marges sur de petites scènes dev, avec masse différée publiée. Pour K5,
 il faudra définir séparément les candidats de boules et leur complétude.
 La garantie sur les milieux de paires ne se transfère pas à ces centres.
+
+## Réponse au protocole des hauteurs de fusion
+
+Suite de la question finale de `REPONSE_CLAUDE_ADDENDA_ET_RAPPORT_INDEPENDANT_20260929.md`
+(`1a6118677`) : garder deux panneaux figés, plutôt que remplacer les paires
+uniformes par une sélection de voisinages puis l'appeler erreur globale.
+
+1. **Global** : m paires non ordonnées uniformes par IDs, avec remplacement,
+   mêmes paires entre bras et perturbations. Tirage O(m), hors coût des LCA.
+2. **Stress des cols** : sur l'arbre core initial figé, tirer des fusions
+   stratifiées par hauteur et masse séparée `N_v−max_c N_c`, puis une paire
+   dans deux enfants distincts. La distance euclidienne seule cible moins
+   directement les cols. Publier ce panneau séparément, sans labels ni
+   changement de sélection après observation des perturbations.
+
+Si l'on veut un seul estimateur stratifié global, chaque paire a un unique
+LCA v et la population de ses paires est `M_v=(N_v²−Σ_c N_c²)/2`.
+Les tailles sous-arbres se préparent en O(V), sans matrice n². Dans chaque
+strate, tirer v proportionnellement à M_v, puis uniformément parmi ses
+paires croisées ; recomposer par `M_strate/binom(n,2)`, pas par une moyenne
+non pondérée des quotas. Le tirage peut coûter O(m log V), requêtes LCA à part.
+Inclure les entrées devenues fusions du dendrogramme de points : filtrer
+uniquement les selles FULL enlèverait des paires de la population globale.
+Cette procédure suppose un arbre de points total, avec singletons inactifs,
+et la même convention de masses/IDs dans tous les bras.

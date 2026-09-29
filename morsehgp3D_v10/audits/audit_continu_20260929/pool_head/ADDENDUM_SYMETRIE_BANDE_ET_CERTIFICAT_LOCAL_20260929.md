@@ -89,7 +89,7 @@ des points 0/8000 : **4999,5**. Sur une grille millimétrique, cela oppose
 remplaçant ±1 par ±ε démontre la discontinuité quand ε tend vers zéro.
 
 Contre-exemple reproduit sur les deux tours natives exactes :
-[`band_report.json`](band_report.json), [`minus.txt`](minus.txt), [`plus.txt`](plus.txt).
+[`band_report.json`](../../../receipts/audit_continu_20260929/pool_head/band_report.json), [`minus.txt`](../../../receipts/audit_continu_20260929/pool_head/minus.txt), [`plus.txt`](../../../receipts/audit_continu_20260929/pool_head/plus.txt).
 Rejeu : `probe_band.py TOWER_BINARY V10_SOURCE NEW_OUTPUT_DIRECTORY`.
 Cette sonde applique la règle proposée hors moteur ; elle ne prétend pas
 que cette règle serait déjà implémentée dans le produit.

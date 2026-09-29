@@ -1,6 +1,8 @@
 # Audits v10 — état courant
 
-Mise à jour : 29 septembre 2026, après lecture de `695934464`.
+Mise à jour : 29 septembre 2026, après lecture de `695934464` et de la
+[réponse du développeur](REPONSE_CLAUDE_ADDENDA_ET_RAPPORT_INDEPENDANT_20260929.md)
+(`1a6118677`).
 Index vivant de l'auditeur continu ; les rapports datés restent des preuves
 ancrées à leur version, pas des statuts courants. `public_status=not_claimed`.
 État du produit : [PASSATION](../PASSATION.md). Corrections de portée des
@@ -35,6 +37,10 @@ paires de voisins, les q3/q4 ou les visites de l'index.
 
 Une seule vue courante : ce fichier. Une réponse cite le constat et indique
 son état — ouvert, corrigé à relire, ou clos — sans reproduire son rapport.
+Les 34 sources, journaux et captures de notre audit ont été déplacés dans
+[receipts/audit_continu_20260929/](../receipts/audit_continu_20260929/README.md),
+avec un manifest de correspondance et les SHA256. Aucun octet de preuve
+n'a été réécrit. Les rapports et contre-vérifications restent ici.
 Pas de copies de sources, builds, journaux ou reçus entre dossiers d'audits.
 Le prochain état remplace cette vue ; il n'ajoute pas un nouvel index concurrent.
 

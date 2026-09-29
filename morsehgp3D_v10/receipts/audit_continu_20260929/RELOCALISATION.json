@@ -1,0 +1,178 @@
+{
+  "date": "2026-09-29",
+  "source_commit": "d7a47f9005518388f79eb8a348b6bc1664937ba3",
+  "scope": "only audit_continu_20260929 non-Markdown evidence",
+  "policy": "byte-identical relocation; historical argv, diagnostics and absolute paths preserved, not new qualification",
+  "files": [
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/RELECTURE_COORDINATION.json",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/RELECTURE_COORDINATION.json",
+      "sha256": "3c35596543c443b6e36e28eb725193671d9a9c0a8bb8d232acc32f69e721cae9"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/catalogue/check.py",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/catalogue/check.py",
+      "sha256": "423e8f756f862393b0f13a4af5068621fce2a34b39230edd0b36de13306bf1f0"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/catalogue/check_r1_interrupted.py",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/catalogue/check_r1_interrupted.py",
+      "sha256": "ca3c8f3e6af3c81f5f4fc9f899029a0becbedb12e6391cbc2cea5d8957f139de"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/catalogue/cover_discontinuity.json",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/catalogue/cover_discontinuity.json",
+      "sha256": "ddcffe66a5e9a25d72d385cfb5a7a656f41aa9c50508878bf2cc64603c3937b0"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/catalogue/cover_discontinuity.py",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/catalogue/cover_discontinuity.py",
+      "sha256": "3d76c5a98600e2cb9ca5d781c50ed6e94a36a158631ff4b9c5ef5e7734fb3a79"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/catalogue/leaf_stress.json",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/catalogue/leaf_stress.json",
+      "sha256": "103928ff521baec3b4c4409994da99f5f0e5eb5c6309f512b1b9a81948235fbc"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/catalogue/leaf_stress.py",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/catalogue/leaf_stress.py",
+      "sha256": "b3e78e8efbc4d20962bc4c54cfad3f480e5b6a247788401d311b0b49e6ea7cf3"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/catalogue/probe.cpp",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/catalogue/probe.cpp",
+      "sha256": "af7d5386d6e9727379e74bd5775787ac6793ba51e6b59e646121e6e7c0cc2a0a"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/catalogue/receipt.json",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/catalogue/receipt.json",
+      "sha256": "f4391a26faf70b34a4a53465a336bd403fb459f69ca55c8385bcee34faf024d3"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/catalogue/truncated_input.json",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/catalogue/truncated_input.json",
+      "sha256": "cadbae061321266d033343c46d0b1d37484fc6f1b01a08e2ca7a81934ad784ae"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/catalogue/truncated_input.py",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/catalogue/truncated_input.py",
+      "sha256": "89c22eaf192d377375276065c274fcaa4ad5c7759c1e56a51f891e48ef0000c0"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/pool_head/band_report.json",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/pool_head/band_report.json",
+      "sha256": "ab9c398e77e8d5ba6e4d2e6fa3376c94deb7b318d0fd90b279af2d05b2937456"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/pool_head/crossing.txt",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/pool_head/crossing.txt",
+      "sha256": "17608c16165905be5fea62991e95dcb1ada4713e181ff8a603fda2622ab7d929"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/pool_head/crossing_report.json",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/pool_head/crossing_report.json",
+      "sha256": "40cf1f4bc89ed3032806e165bff01353bac95bc911755e6ef3b63cddbe985e1a"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/pool_head/evidence.json",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/pool_head/evidence.json",
+      "sha256": "ed10d5cac2742864716067ae32d10eac6ebb9b98c33abd76b9430d1ab604e5a0"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/pool_head/head_ladder.cpp",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/pool_head/head_ladder.cpp",
+      "sha256": "0d0edc971218026185a08bf146b4649dd32835c915957638880e9d0ba05efde3"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/pool_head/head_ladder.stdout",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/pool_head/head_ladder.stdout",
+      "sha256": "461bd3648fb7b0e0dc4e066d28b8de091b3e7f96bc90c8160bf60bb13e729158"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/pool_head/minus.txt",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/pool_head/minus.txt",
+      "sha256": "774a19502e54950038d854757fa74d165e9b045efa01564b42afb6d894c5ab92"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/pool_head/plus.txt",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/pool_head/plus.txt",
+      "sha256": "9c74cea12c144e0929e34847695b76214688bdc68bdfb6e8539392ad2f848ce4"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/pool_head/pool.stderr",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/pool_head/pool.stderr",
+      "sha256": "1119b767a1c9f7a0e4b12a977c5119c1cb45b6371a6b6cf77bb961c99a1e5b35"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/pool_head/pool_throw.cpp",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/pool_head/pool_throw.cpp",
+      "sha256": "fae83d3e96cd39b6792ece84053665e0dc923bdd132bc6dfc6b83fc7588ed185"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/pool_head/probe_band.py",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/pool_head/probe_band.py",
+      "sha256": "0c1af926d8d6cd221c2123cc54b09aab731943d13f0c0e5cebd3480f61e8caa2"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/pool_head/probe_multik.py",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/pool_head/probe_multik.py",
+      "sha256": "8736a0e32702d6ea150fdfd680ece9a65cdfeef5c59270f652ec7e60d026fd37"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/pool_head/probe_vertical.py",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/pool_head/probe_vertical.py",
+      "sha256": "c89f1ad1df103ec0526af4a1cb6bd70823bb08ea46ae8732e4f51bcaeb659fee"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/pool_head/tower.txt",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/pool_head/tower.txt",
+      "sha256": "b9165d33b4d8a12794d9ad9b88e2b2856a17a7a0b93745fd186daac38f7f01a8"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/pool_head/unit.stdout",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/pool_head/unit.stdout",
+      "sha256": "48251aa4a769eaeda891770c58651a0672288eef9daeb436f0cf556ba9a064ec"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/projection_band/probe_band.py",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/projection_band/probe_band.py",
+      "sha256": "33ec5d798c2d8c5faa3eef0b47eac2e16541cfed58423c3976c4fd59a4eb8069"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/projection_band/receipt.json",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/projection_band/receipt.json",
+      "sha256": "9b7d10a522e9a316f1481d97e4e3144ee0089818319f4c67c2d7e4b7e0eff3df"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/timeout/cuda_loops_host_replica.cpp",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/timeout/cuda_loops_host_replica.cpp",
+      "sha256": "6786cfca67e4cda8d20764f3b56e159b044bb3c8fae42aaf207ff874099243e6"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/timeout/receipt_cuda_loops_host.json",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/timeout/receipt_cuda_loops_host.json",
+      "sha256": "db604359def46a69615f61ce0e0c8e6b70a00d0c053d87082b591515c74b5a07"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/timeout/receipt_initial_inconclusive.json",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/timeout/receipt_initial_inconclusive.json",
+      "sha256": "bdbf67621b14dcf4bcb8870d80bd4766216ddf0244635d4680db4224bf179cb6"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/timeout/receipt_normal.json",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/timeout/receipt_normal.json",
+      "sha256": "682f4de8b2b45b2baa4350f36fd5dde827269dd662304c0de4f2a9d484d7f416"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/timeout/receipt_optimized.json",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/timeout/receipt_optimized.json",
+      "sha256": "d48f313fad1eca2b310f9af3892abf137ca48a7903db4b193d5d30fd61ad0b3c"
+    },
+    {
+      "old_path": "morsehgp3D_v10/audits/audit_continu_20260929/timeout/reproduce.py",
+      "new_path": "morsehgp3D_v10/receipts/audit_continu_20260929/timeout/reproduce.py",
+      "sha256": "626954d0f0f21a056a3d185ef287b7947d0661db7de507bfc5f991ad7ca40868"
+    }
+  ]
+}
