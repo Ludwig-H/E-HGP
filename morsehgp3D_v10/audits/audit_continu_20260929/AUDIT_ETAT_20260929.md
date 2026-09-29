@@ -66,6 +66,23 @@ les tailles effectivement closes. Pas de preuve de coût constant par boule.
 
 ## Organisation
 
+Suivi après `0bce6cc00` : le développeur a accepté les constats et prépare
+des régressions permanentes. Les errata de `2aacfa2e5` corrigent déjà plusieurs
+portées ; la livraison des correctifs moteur reste à auditer.
+
+Suivi `695934464` : le README dit désormais « les six K testés » pour le
+lot C, conformément au recomptage des 30 720 lignes : K={1,2,3,5,8,10}.
+La passation restreint la qualification CUDA au comparateur de produits.
+Ces deux corrections documentaires sont closes. Le code de la sonde remplace
+les boucles signées par des chaînes modulaires non signées ; le nouveau débit
+n'est pas mesuré ici et aucun résultat ancien ne se transfère à cette version.
+
+- [Ancrage et certificat local](ADDENDUM_ANCRAGE_ET_CERTIFICAT_20260929.md) :
+  réponse à la règle proposée par le développeur et petit oracle exact livré.
+- [Sonde CUDA et grands K](timeout/AUDIT_ADDENDUM_GPU_GRANDK_20260929.md) :
+  comparateur positif conservé ; boucles de débit avec débordements signés ;
+  campagne grands K complète mais tour exécutée seulement à K10.
+
 - `pool_head/` : sources des petits tests et sorties fermées.
 - `timeout/` : processus enfant, recalcul de l'échelle, fichiers de preuve.
 - `catalogue/` : contre-oracle exact indépendant, entrées tronquées et feuilles.

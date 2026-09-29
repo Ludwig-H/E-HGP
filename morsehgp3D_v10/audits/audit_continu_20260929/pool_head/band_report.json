@@ -1,0 +1,88 @@
+{
+  "source_commit": "6206d1d11",
+  "binary_sha256": "a20776280ef4960d68f1b65ca7007b9e8a862809c57115b58486942856c22764",
+  "eta": "1/4",
+  "scale": 1000,
+  "max_point_displacement": 2,
+  "rows": [
+    {
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          8000,
+          0,
+          0
+        ],
+        [
+          17999,
+          0,
+          0
+        ]
+      ],
+      "argv": [
+        "/tmp/mhgp10-audit-pool-head.X45WLs/build/mhgp10_tower",
+        "/tmp/mhgp10-audit-pool-head.X45WLs/band/minus.u32le",
+        "--k=2",
+        "--threads=1",
+        "--dump=/tmp/mhgp10-audit-pool-head.X45WLs/band/minus.txt"
+      ],
+      "code": 0,
+      "birth_radii": [
+        "4000",
+        "9999/2"
+      ],
+      "cutoff_radius": "5000",
+      "candidates": [
+        0,
+        1
+      ],
+      "target": 2,
+      "target_radius": "17999/2",
+      "dump_sha256": "774a19502e54950038d854757fa74d165e9b045efa01564b42afb6d894c5ab92"
+    },
+    {
+      "points": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          8000,
+          0,
+          0
+        ],
+        [
+          18001,
+          0,
+          0
+        ]
+      ],
+      "argv": [
+        "/tmp/mhgp10-audit-pool-head.X45WLs/build/mhgp10_tower",
+        "/tmp/mhgp10-audit-pool-head.X45WLs/band/plus.u32le",
+        "--k=2",
+        "--threads=1",
+        "--dump=/tmp/mhgp10-audit-pool-head.X45WLs/band/plus.txt"
+      ],
+      "code": 0,
+      "birth_radii": [
+        "4000",
+        "10001/2"
+      ],
+      "cutoff_radius": "5000",
+      "candidates": [
+        0
+      ],
+      "target": 0,
+      "target_radius": "4000",
+      "dump_sha256": "9c74cea12c144e0929e34847695b76214688bdc68bdfb6e8539392ad2f848ce4"
+    }
+  ],
+  "attachment_radius_jump": "9999/2",
+  "conclusion": "two_unit_perturbation_causes_9999_over_2_attachment_jump"
+}

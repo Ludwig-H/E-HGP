@@ -1,0 +1,235 @@
+{
+  "schema": "mhgp10_audit_projection_band_receipt_v1",
+  "date": "2026-09-29",
+  "source_base": "0bce6cc00b199bdc585d9b8253192819cd2dde76",
+  "python": "Python 3.12.1",
+  "script_sha256": "33ec5d798c2d8c5faa3eef0b47eac2e16541cfed58423c3976c4fd59a4eb8069",
+  "commands": [
+    {
+      "argv": "python3 -B projection_band/probe_band.py",
+      "exit_code": 0
+    },
+    {
+      "argv": "python3 -B -O projection_band/probe_band.py",
+      "exit_code": 0
+    }
+  ],
+  "stdout_identical": true,
+  "result": {
+    "eta": "1/4",
+    "exact_arithmetic": "Fraction",
+    "local_certificate": {
+      "allowed_error": "1/5",
+      "epsilon": "1/10",
+      "maximum_error": "1/10",
+      "minimum_margin": "1/2",
+      "perturbations": 27,
+      "reference": {
+        "candidate_ids": [
+          [
+            [
+              0,
+              1
+            ]
+          ],
+          [
+            [
+              1,
+              0
+            ]
+          ],
+          [
+            [
+              2,
+              1
+            ]
+          ]
+        ],
+        "entries": [
+          "4",
+          "4",
+          "11/2"
+        ],
+        "pair_heights": {
+          "0,1": "4",
+          "0,2": "19/2",
+          "1,2": "19/2"
+        },
+        "points": [
+          "0",
+          "8",
+          "19"
+        ]
+      },
+      "required_margin": "9/40"
+    },
+    "refinement_witness": {
+      "eta0": {
+        "candidate_ids": [
+          [
+            [
+              0,
+              1
+            ]
+          ],
+          [
+            [
+              1,
+              0
+            ]
+          ],
+          [
+            [
+              2,
+              1
+            ]
+          ]
+        ],
+        "entries": [
+          "4",
+          "4",
+          "5"
+        ],
+        "pair_heights": {
+          "0,1": "4",
+          "0,2": "9",
+          "1,2": "9"
+        },
+        "points": [
+          "0",
+          "8",
+          "18"
+        ]
+      },
+      "eta_quarter": {
+        "candidate_ids": [
+          [
+            [
+              0,
+              1
+            ]
+          ],
+          [
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              2
+            ]
+          ],
+          [
+            [
+              2,
+              1
+            ]
+          ]
+        ],
+        "entries": [
+          "4",
+          "9",
+          "5"
+        ],
+        "pair_heights": {
+          "0,1": "9",
+          "0,2": "9",
+          "1,2": "9"
+        },
+        "points": [
+          "0",
+          "8",
+          "18"
+        ]
+      }
+    },
+    "schema": "mhgp10_k2_band_oracle_v1",
+    "scope": "three_site_1d_examples_embedded_in_3d_not_product",
+    "status": "pass",
+    "threshold_discontinuity": {
+      "above": {
+        "candidate_ids": [
+          [
+            [
+              0,
+              1
+            ]
+          ],
+          [
+            [
+              1,
+              0
+            ]
+          ],
+          [
+            [
+              2,
+              1
+            ]
+          ]
+        ],
+        "entries": [
+          "4000",
+          "4000",
+          "10001/2"
+        ],
+        "pair_heights": {
+          "0,1": "4000",
+          "0,2": "18001/2",
+          "1,2": "18001/2"
+        },
+        "points": [
+          "0",
+          "8000",
+          "18001"
+        ]
+      },
+      "below": {
+        "candidate_ids": [
+          [
+            [
+              0,
+              1
+            ]
+          ],
+          [
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              2
+            ]
+          ],
+          [
+            [
+              2,
+              1
+            ]
+          ]
+        ],
+        "entries": [
+          "4000",
+          "17999/2",
+          "9999/2"
+        ],
+        "pair_heights": {
+          "0,1": "17999/2",
+          "0,2": "17999/2",
+          "1,2": "17999/2"
+        },
+        "points": [
+          "0",
+          "8000",
+          "17999"
+        ]
+      },
+      "middle_entry_jump": "9999/2",
+      "point_displacement": "2"
+    },
+    "views_checked_ultrametric": 32
+  },
+  "engine_modified": false,
+  "gcp_used": false
+}

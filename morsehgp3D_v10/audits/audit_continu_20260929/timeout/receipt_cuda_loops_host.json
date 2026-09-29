@@ -1,0 +1,33 @@
+{
+  "schema": "mhgp10.cuda_loops_host_ubsan_audit.v1",
+  "source": "morsehgp3D_v10/audits/audit_continu_20260929/timeout/cuda_loops_host_replica.cpp",
+  "source_sha256": "6786cfca67e4cda8d20764f3b56e159b044bb3c8fae42aaf207ff874099243e6",
+  "cuda_source_sha256": "1a3f0100c6288d394368e16f8ce7f104c034d783c2c553a88451dda14a1552db",
+  "build_command": [
+    "g++",
+    "-O1",
+    "-std=c++17",
+    "-fsanitize=undefined",
+    "-fno-sanitize-recover=undefined",
+    "morsehgp3D_v10/audits/audit_continu_20260929/timeout/cuda_loops_host_replica.cpp",
+    "-o",
+    "/tmp/mhgp10-cuda-loops-host-replica-20260929"
+  ],
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "gpu_executed": false,
+  "engine_modified": false,
+  "commands": [
+    {
+      "argv": ["/tmp/mhgp10-cuda-loops-host-replica-20260929", "64"],
+      "returncode": 1,
+      "stdout": "",
+      "stderr": "loop64 iteration=0 x=-9223372036854775808\nmorsehgp3D_v10/audits/audit_continu_20260929/timeout/cuda_loops_host_replica.cpp:20:16: runtime error: signed integer overflow: -9223372036854775808 * -9223372036854775808 cannot be represented in type 'long int'\n"
+    },
+    {
+      "argv": ["/tmp/mhgp10-cuda-loops-host-replica-20260929", "128"],
+      "returncode": 1,
+      "stdout": "",
+      "stderr": "loop128 iteration=0 x=-9223372036854775808\nloop128 iteration=1 x=-9223372036854775808\nloop128 iteration=2 x=9151314442816847872\nmorsehgp3D_v10/audits/audit_continu_20260929/timeout/cuda_loops_host_replica.cpp:28:11: runtime error: signed integer overflow: 0x3f01000000000000fe00000000000000 + 0x7fffffffffffffff8000000000000000 cannot be represented in type '__int128'\n"
+    }
+  ]
+}
