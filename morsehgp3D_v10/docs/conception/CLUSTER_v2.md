@@ -164,6 +164,14 @@ $(\Pi_K(a))_{a\geq0}$ est la hiérarchie C∩X d'ordre K.
 **Divergence déclarée avec la thèse.** Les amas discrets de la Déf. 8 se recouvrent dès K ≥ 2 ; C∩X est une
 partition. Les amas discrets restent disponibles comme appartenance douce (§ 8.3), jamais comme hiérarchie.
 
+**Amendement du 29 septembre 2026** (audit de la hiérarchie K-NN, `audits/audit_hierarchie_knn_20260929/`). La tête
+v10-b du lot C se sert des amas discrets **comme entrée** d'une hiérarchie de points. L'entrée `cover` rattache
+chaque point à une seule composante, celle de sa première boule couvrante (rayon $\alpha_K(x)$). Chaque niveau reste
+donc une partition. Les amas discrets eux-mêmes, qui se recouvrent, ne sont toujours pas publiés comme hiérarchie :
+« jamais comme hiérarchie » ne vaut plus que pour eux, en tant qu'ensembles. En position générale, la première boule
+couvrante est une naissance d'ordre K. Une tête qui condense avec mcs > K ne lit donc pas $\alpha_K(x)$ : le point
+sort à la fusion qui absorbe cette naissance (`src/tower/tower.hpp`).
+
 ### 3.3 Énoncés (statut visé `proved_here`, § 14)
 
 - **(C1) Rattachement.** Pour $a\geq D_K(x)$, x est dans la composante de $L_K(a)$ qui contient la région témoin

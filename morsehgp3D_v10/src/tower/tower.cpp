@@ -1166,7 +1166,7 @@ Result<Tower> build_tower(const Cloud& cloud, const SiteTree& tree, const Catalo
   // deja un nuage plus large, la tour le refuse aussi (garde, meme raison).
   if (cloud.bits > kCoordinateBits) return fail(Reason::parameter_out_of_range);
   for (u32 s = 0; s < cloud.sites(); ++s)
-    if (cloud.w[s] != 1) return fail(Reason::shell_quotient_budget);  // multiplicites : semantique a venir
+    if (cloud.w[s] != 1) return fail(Reason::multiplicity_unsupported);  // multiplicites : semantique a venir
   Tower t;
   TowerStats& ts = t.stats;
   auto tstage = Clock::now();

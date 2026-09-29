@@ -1,0 +1,73 @@
+192 scenes gaussiennes
+
+== K=3
+famille          niveau      n   bayes morse20 morse40   tourC   tourA     skC
+anisotropic      easy       12  0.9936  0.9923  0.9919  0.9748  0.9768  0.9745
+anisotropic      extreme    12  0.8937  0.8538  0.8464  0.6869  0.6731  0.7357
+anisotropic      hard       12  0.9380  0.9139  0.9105  0.8494  0.8409  0.8482
+anisotropic      medium     12  0.9765  0.9679  0.9659  0.9419  0.9409  0.9293
+anisotropic      tous       48  0.9504  0.9320  0.9287  0.8632  0.8580  0.8719
+heteroscedastic  easy       12  0.9914  0.9914  0.9913  0.9655  0.9674  0.9816
+heteroscedastic  extreme    12  0.5168  0.2867  0.2792  0.3413  0.3772  0.3065
+heteroscedastic  hard       12  0.7784  0.7117  0.6992  0.6204  0.6519  0.6482
+heteroscedastic  medium     12  0.8982  0.8562  0.8312  0.8279  0.8281  0.8327
+heteroscedastic  tous       48  0.7962  0.7115  0.7002  0.6888  0.7061  0.6922
+spherical        easy       12  0.9834  0.9835  0.9835  0.9625  0.9653  0.9682
+spherical        extreme    12  0.8996  0.8984  0.8992  0.8649  0.8689  0.8548
+spherical        hard       12  0.9437  0.9429  0.9430  0.9174  0.9246  0.9136
+spherical        medium     12  0.9666  0.9660  0.9666  0.9462  0.9511  0.9457
+spherical        tous       48  0.9483  0.9477  0.9481  0.9228  0.9275  0.9206
+tous             tous      192  0.8950  0.8470  0.8427  0.8147  0.8275  0.7908
+unbalanced       easy       12  0.9843  0.9834  0.9829  0.9700  0.9710  0.8436
+unbalanced       extreme    12  0.7467  0.4631  0.4639  0.5636  0.6055  0.4470
+unbalanced       hard       12  0.8544  0.7939  0.7854  0.6819  0.7632  0.5832
+unbalanced       medium     12  0.9545  0.9473  0.9430  0.9207  0.9339  0.8407
+unbalanced       tous       48  0.8850  0.7969  0.7938  0.7841  0.8184  0.6786
+
+== K=5
+famille          niveau      n   bayes morse20 morse40   tourC   tourA     skC
+anisotropic      easy       12  0.9936  0.9923  0.9919  0.9714  0.9734  0.9860
+anisotropic      extreme    12  0.8937  0.8538  0.8464  0.7122  0.6913  0.7495
+anisotropic      hard       12  0.9380  0.9139  0.9105  0.8450  0.8349  0.8702
+anisotropic      medium     12  0.9765  0.9679  0.9659  0.9396  0.9361  0.9489
+anisotropic      tous       48  0.9504  0.9320  0.9287  0.8671  0.8589  0.8887
+heteroscedastic  easy       12  0.9914  0.9914  0.9913  0.9628  0.9638  0.9788
+heteroscedastic  extreme    12  0.5168  0.2867  0.2792  0.3461  0.3783  0.2875
+heteroscedastic  hard       12  0.7784  0.7117  0.6992  0.6278  0.6565  0.6171
+heteroscedastic  medium     12  0.8982  0.8562  0.8312  0.8276  0.8280  0.8274
+heteroscedastic  tous       48  0.7962  0.7115  0.7002  0.6911  0.7067  0.6777
+spherical        easy       12  0.9834  0.9835  0.9835  0.9589  0.9623  0.9635
+spherical        extreme    12  0.8996  0.8984  0.8992  0.8650  0.8697  0.8600
+spherical        hard       12  0.9437  0.9429  0.9430  0.9194  0.9256  0.9174
+spherical        medium     12  0.9666  0.9660  0.9666  0.9464  0.9512  0.9474
+spherical        tous       48  0.9483  0.9477  0.9481  0.9224  0.9272  0.9221
+tous             tous      192  0.8950  0.8470  0.8427  0.8167  0.8291  0.7989
+unbalanced       easy       12  0.9843  0.9834  0.9829  0.9719  0.9734  0.8930
+unbalanced       extreme    12  0.7467  0.4631  0.4639  0.5678  0.6127  0.4860
+unbalanced       hard       12  0.8544  0.7939  0.7854  0.6826  0.7722  0.5791
+unbalanced       medium     12  0.9545  0.9473  0.9430  0.9231  0.9355  0.8704
+unbalanced       tous       48  0.8850  0.7969  0.7938  0.7863  0.8234  0.7071
+
+== K=10
+famille          niveau      n   bayes morse20 morse40   tourC   tourA     skC
+anisotropic      easy       12  0.9936  0.9923  0.9919  0.9698  0.9704  0.9870
+anisotropic      extreme    12  0.8937  0.8538  0.8464  0.6859  0.6876  0.7640
+anisotropic      hard       12  0.9380  0.9139  0.9105  0.8270  0.8362  0.8680
+anisotropic      medium     12  0.9765  0.9679  0.9659  0.9324  0.9406  0.9495
+anisotropic      tous       48  0.9504  0.9320  0.9287  0.8538  0.8587  0.8921
+heteroscedastic  easy       12  0.9914  0.9914  0.9913  0.9643  0.9582  0.9825
+heteroscedastic  extreme    12  0.5168  0.2867  0.2792  0.3656  0.3808  0.2914
+heteroscedastic  hard       12  0.7784  0.7117  0.6992  0.6615  0.6588  0.6130
+heteroscedastic  medium     12  0.8982  0.8562  0.8312  0.8285  0.8284  0.8273
+heteroscedastic  tous       48  0.7962  0.7115  0.7002  0.7050  0.7066  0.6786
+spherical        easy       12  0.9834  0.9835  0.9835  0.9672  0.9626  0.9693
+spherical        extreme    12  0.8996  0.8984  0.8992  0.8479  0.8750  0.8658
+spherical        hard       12  0.9437  0.9429  0.9430  0.9134  0.9282  0.9229
+spherical        medium     12  0.9666  0.9660  0.9666  0.9496  0.9530  0.9521
+spherical        tous       48  0.9483  0.9477  0.9481  0.9195  0.9297  0.9275
+tous             tous      192  0.8950  0.8470  0.8427  0.8162  0.8296  0.8011
+unbalanced       easy       12  0.9843  0.9834  0.9829  0.9789  0.9762  0.9571
+unbalanced       extreme    12  0.7467  0.4631  0.4639  0.5706  0.6278  0.4918
+unbalanced       hard       12  0.8544  0.7939  0.7854  0.6812  0.7528  0.4919
+unbalanced       medium     12  0.9545  0.9473  0.9430  0.9160  0.9380  0.8846
+unbalanced       tous       48  0.8850  0.7969  0.7938  0.7867  0.8237  0.7063

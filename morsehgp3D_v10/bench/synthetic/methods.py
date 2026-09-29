@@ -72,10 +72,15 @@ def mreach_labels(build, grid, k, alpha, entry, configs, threads=1):
         return [np.fromfile('%s.%d' % (out, i), dtype='<i4').astype(np.int64) for i in range(len(configs))]
 
 
-def hdbscan_labels(grid, min_samples, mcs, selection='eom', alpha=1.0, allow_single=False):
+def hdbscan_labels(grid, min_samples, mcs, selection='eom', alpha=1.0, allow_single=False, algorithm='kd_tree'):
+    """sklearn.cluster.HDBSCAN tel quel. Dans scikit-learn 1.9.1, alpha n'agit que sous kd_tree et ball_tree : en brute
+    (et sur une matrice precalculee) il est ignore sans avertissement (mesure du 29 septembre 2026, audit IMP-04).
+    alpha != 1 est donc refuse hors de ces deux algorithmes, plutot que de publier un alpha sans effet."""
     from sklearn.cluster import HDBSCAN
+    if float(alpha) != 1.0 and algorithm not in ('kd_tree', 'ball_tree'):
+        raise ValueError('alpha=%r sans effet sous algorithm=%r (scikit-learn 1.9.1)' % (alpha, algorithm))
     model = HDBSCAN(min_cluster_size=int(mcs), min_samples=int(min_samples), cluster_selection_method=selection,
-                    alpha=float(alpha), allow_single_cluster=bool(allow_single), algorithm='kd_tree', copy=True)
+                    alpha=float(alpha), allow_single_cluster=bool(allow_single), algorithm=algorithm, copy=True)
     return model.fit(np.asarray(grid, dtype=np.float64)).labels_.astype(np.int64)
 
 

@@ -111,4 +111,9 @@ if(Python3_FOUND)
                    "-DARGS=${PROJECT_SOURCE_DIR}/tests/regression/test_mreach_border.py ${PROJECT_BINARY_DIR}"
                    -DEXPECTED=0 -P ${PROJECT_SOURCE_DIR}/cmake/run_expect.cmake)
   set_tests_properties(mhgp10_regression_mreach_border PROPERTIES LABELS "gate;regression" TIMEOUT 900)
+  add_test(NAME mhgp10_regression_multiplicity_refusal
+           COMMAND ${CMAKE_COMMAND} -DCMD=${Python3_EXECUTABLE}
+                   "-DARGS=${PROJECT_SOURCE_DIR}/tests/regression/test_multiplicity_refusal.py ${PROJECT_BINARY_DIR}"
+                   -DEXPECTED=0 -P ${PROJECT_SOURCE_DIR}/cmake/run_expect.cmake)
+  set_tests_properties(mhgp10_regression_multiplicity_refusal PROPERTIES LABELS "gate;regression;fast" TIMEOUT 300)
 endif()

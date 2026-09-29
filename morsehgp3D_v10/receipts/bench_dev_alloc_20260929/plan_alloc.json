@@ -1,0 +1,34 @@
+{
+ "schema": "ehgp.v10.session_plan.v1",
+ "build_timeout_seconds": 600,
+ "build_targets": [
+  "mhgp10_cluster"
+ ],
+ "results_cap_bytes": 134217728,
+ "commands": [
+  {
+   "name": "alloc_dev",
+   "timeout_seconds": 1300,
+   "argv": [
+    "python3",
+    "{src}/morsehgp3D_v10/bench/g4/pyenv_run.py",
+    "--env",
+    "{data}/pyenv.u32le",
+    "--work",
+    "{build}/pyenv_work",
+    "--",
+    "{src}/morsehgp3D_v10/bench/synthetic/alloc_dev.py",
+    "--build",
+    "{build}",
+    "--out",
+    "{out}/alloc_dev.csv",
+    "--sizes",
+    "8000,16000,32000",
+    "--replicates",
+    "2",
+    "--jobs",
+    "46"
+   ]
+  }
+ ]
+}

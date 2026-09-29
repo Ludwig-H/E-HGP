@@ -13,8 +13,11 @@ chaque K du lot C :
     l'amas, ou jusqu'a un maximum local non classe : il reste alors du bruit ;
   - asc*_b<rho> : la meme montee, puis le rejet de b(rho) (core(p) <= rho * Q95 de l'amas atteint).
 
+Un refus (code non nul du binaire, exception de sklearn ou de la generation) vaut ARI_s = 0 a chaque remplissage et
+est compte (colonne `refused`) : aucune scene ni aucune methode n'est omise (EVAL_v2 D8).
+
   python3 alloc_dev.py --build BUILD --out OUT.csv --sizes 8000,16000,32000 --replicates 2 --jobs 46
-Codes : 0 ; 1 si une scene echoue (les autres sont ecrites).
+Codes : 0 ; 1 si une ligne est un refus (toutes les lignes sont ecrites).
 """
 import argparse
 import csv
@@ -39,7 +42,14 @@ RHOS = (1.5, 2.0, 2.5)
 ASCENTS = ('asc', 'asc20')
 FILLS = (('none', 'full') + tuple('b%g' % r for r in RHOS)
          + tuple(a + s for a in ASCENTS for s in ('',) + tuple('_b%g' % r for r in RHOS)))
-COLS = ('family', 'level', 'noise', 'n', 'seed', 'method', 'k', 'fill', 'ari_s', 'ami_nc', 'coverage', 'clusters')
+COLS = ('family', 'level', 'noise', 'n', 'seed', 'method', 'k', 'fill', 'ari_s', 'ami_nc', 'coverage', 'clusters',
+        'refused')
+
+
+def refused_rows(spec, method, k):
+    return [dict(family=spec['family'], level=spec['level'], noise=spec['noise_fraction'], n=spec['n'],
+                 seed=spec['seed'], method=method, k=k, fill=fill, ari_s=0.0, ami_nc=0.0, coverage=0.0, clusters=0,
+                 refused=1) for fill in FILLS]
 
 
 def ascent_parents(core, nbr):
@@ -92,11 +102,21 @@ def run_unit(spec, build):
 
     ks = sorted(TOWER_Z)
     zs = sorted(set(TOWER_Z.values()))
-    batch = methods.tower_labels_batch(build, G, ks, ['cover'], [(mcs, z, 'eom', False) for z in zs], threads=1)
-    raw = [('tour', k, batch[('cover', k, zs.index(TOWER_Z[k]))]) for k in ks]
-    raw += [('sklearn', k, methods.hdbscan_labels(G, k, mcs, *SKLEARN[k])) for k in ks]
+    try:
+        batch = methods.tower_labels_batch(build, G, ks, ['cover'], [(mcs, z, 'eom', False) for z in zs], threads=1)
+        raw = [('tour', k, batch[('cover', k, zs.index(TOWER_Z[k]))]) for k in ks]
+    except Exception:  # refus de la tour (code non nul, binaire absent) : ARI_s = 0 (D8)
+        raw = [('tour', k, None) for k in ks]
+    for k in ks:
+        try:
+            raw.append(('sklearn', k, methods.hdbscan_labels(G, k, mcs, *SKLEARN[k])))
+        except Exception:  # refus de sklearn : ARI_s = 0 (D8)
+            raw.append(('sklearn', k, None))
     out = []
     for method, k, lab in raw:
+        if lab is None:
+            out += refused_rows(spec, method, k)
+            continue
         core = knn(max(k, 5))[0]
         for fill in FILLS:
             if fill == 'none':
@@ -113,7 +133,8 @@ def run_unit(spec, build):
             s = metrics.scores(T, pred)
             out.append(dict(family=spec['family'], level=spec['level'], noise=spec['noise_fraction'], n=n,
                             seed=spec['seed'], method=method, k=k, fill=fill, ari_s=round(s['ari_s'], 6),
-                            ami_nc=round(s['ami_nc'], 6), coverage=round(s['coverage'], 4), clusters=s['clusters']))
+                            ami_nc=round(s['ami_nc'], 6), coverage=round(s['coverage'], 4), clusters=s['clusters'],
+                            refused=0))
     return out
 
 
@@ -127,7 +148,7 @@ def main():
     a = ap.parse_args()
     specs = run_campaign.plan('dev', [int(s) for s in a.sizes.split(',')], a.replicates)
     specs.sort(key=lambda s: -s['n'])
-    failures = 0
+    refused = 0
     with open(a.out, 'w', newline='') as h:
         w = csv.DictWriter(h, fieldnames=COLS)
         w.writeheader()
@@ -136,15 +157,15 @@ def main():
             for i, fu in enumerate(as_completed(futs)):
                 try:
                     rows = fu.result()
-                except Exception as e:  # une scene en echec est comptee, jamais tue
-                    failures += 1
+                except Exception as e:  # generation ou ouvrier en echec : toutes ses lignes a ARI_s = 0 (D8)
                     print('ECHEC', futs[fu], repr(e)[:300], flush=True)
-                    continue
+                    rows = [r for m in ('tour', 'sklearn') for k in sorted(TOWER_Z) for r in refused_rows(futs[fu], m, k)]
+                refused += sum(r['refused'] for r in rows)
                 w.writerows(rows)
                 h.flush()
                 print('%d/%d' % (i + 1, len(specs)), flush=True)
-    print('SCENES %d ECHECS %d' % (len(specs), failures), flush=True)
-    return 1 if failures else 0
+    print('SCENES %d LIGNES_REFUSEES %d' % (len(specs), refused), flush=True)
+    return 1 if refused else 0
 
 
 if __name__ == '__main__':

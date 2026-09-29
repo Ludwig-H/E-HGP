@@ -597,7 +597,8 @@ Une fois la condensation corrigée et la racine exclue, le pipeline v9 (toujours
   - leaf : +0,003 devient −0,019.
 - **Portée** : à n = 2000 contre les têtes z = 1, la marge de la tour résiste à la correction de couverture. À n = 8000, elle disparaît : tour remplie contre HDBSCAN rempli, −0,021, 2-0-23.
 - **Sous 30 % de bruit**, le remplissage détruit l'ARI (0,624 → 0,441). La tour (0,642) égale seulement HDBSCAN non rempli.
-- **Réfuté** : « même biais dans le tableau 9.3 de la thèse ». La thèse ne dit pas comment l'ARI traite les non-classés, et le notebook de HGP-old calcule l'ARI hors bruit prédit. C'est affirmé, non démontré.
+- ~~**Réfuté** : « même biais dans le tableau 9.3 de la thèse ». La thèse ne dit pas comment l'ARI traite les non-classés, et le notebook de HGP-old calcule l'ARI hors bruit prédit. C'est affirmé, non démontré.~~
+- **Confirmé** (correction du 29 septembre 2026, `audits/audit_hierarchie_knn_20260929/annexes/LECTURE_HGP_OLD_THESE.md`) : « même biais dans le tableau 9.3 de la thèse ». Le tableau 9.3 est le tableau 4 d'ANS 2026 (référence [65] de la thèse), qui déclare l'ARI calculé « sur tous les points, bruit compris » (note 6, p. 18). Le notebook Colab, qui calcule l'ARI hors bruit, porte sur un autre banc et n'a aucune sortie sauvegardée.
 - **Pour la v10** : une politique de bruit préenregistrée ; ARI sur tous les points, ARI avec rejets en singletons, ARI sur points couverts, AMI, couverture et nombre de groupes.
 
 #### A9-68 — Calibration des niveaux sur l'échec d'un seul réglage

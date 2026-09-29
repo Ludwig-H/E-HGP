@@ -177,6 +177,7 @@ void test_status_and_buffer() {
   expect(status_of(Reason::none) == Status::ok, "statut none");
   expect(status_of(Reason::coordinate_out_of_domain) == Status::invalid_input, "statut entree");
   expect(status_of(Reason::shell_quotient_budget) == Status::unsupported_degeneracy, "statut degenerescence");
+  expect(status_of(Reason::multiplicity_unsupported) == Status::unsupported_degeneracy, "statut multiplicite");
   expect(fail(Reason::root_count, 2).precedes(fail(Reason::arith_guard, 3)), "priorite plus petit K");
   MemoryBudget budget(1000);
   Buffer<u64> a;

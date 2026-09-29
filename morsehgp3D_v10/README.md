@@ -29,7 +29,8 @@ public_status=not_claimed
 - Tour par **minima fixes, morceaux locaux (Gordan) et descente**, validée contre l'oracle Γ_k
   (dégénérescences comprises) par la référence exacte `reference/hgp10_ref.py`.
 - Doublons : le banc les retire (`quantize18`) ; la tour refuse encore explicitement une entrée pondérée
-  (multiplicités), sous une raison de refus à corriger (audit du 29 septembre, IMP-16).
+  (multiplicités), sous sa propre raison `multiplicity_unsupported` (statut `unsupported_degeneracy`, porte
+  `mhgp10_regression_multiplicity_refusal` ; corrigé le 29 septembre, IMP-16).
 - Un seul chemin par défaut, pas de levier sans ablation, pas de mutant dans le code produit.
 
 ## État

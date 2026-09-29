@@ -1,0 +1,5 @@
+2026-09-29T12:55:41Z worker demarre (pid 1928), echeance 1790688513, generation 2026-09-29T05:53:52.913-07:00
+2026-09-29T12:55:41Z python3 -m pip absent : aucune installation systeme n'est tentee
+2026-09-29T12:55:42Z etape build/configure : ok (code 0, 0.569 s)
+2026-09-29T12:55:46Z etape build/build : ok (code 0, 4.085 s)
+2026-09-29T13:04:30Z etape cmd/000_alloc_dev : ok (code 0, 524.222 s)

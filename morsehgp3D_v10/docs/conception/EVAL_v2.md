@@ -260,7 +260,8 @@ On note core_K(x) = d_K(x), la même quantité pour `tw`, `mr1`, `mr2` (sites po
   - Pour les sources de lignes (`sk1`, `sk2`), le départage se fait sur les coordonnées, puis sur le plus petit indice de ligne. Chez sklearn, deux lignes de même position peuvent recevoir des étiquettes différentes : sur un plateau binarisé, elles peuvent tomber dans deux enfants gros nés au même λ. Ces conflits aux doublons sont comptés et publiés ; les sources `sk` sont exclues d'EG14.
 - `b<ρ>` (remplissage borné, L14 `campaign3.py`) :
   - soit q le site classé le plus proche de p (départage ci-dessus) et c son groupe ;
-  - p reçoit c si core_K(p) ≤ ρ · Q95_c, où Q95_c est le quantile 95 % (type 7) de core_K sur les membres de c, pondéré par les multiplicités ;
+  - p reçoit c si core(p) ≤ ρ · Q95_c, où core est la distance au max(K, 5)-ième voisin, point compris, et Q95_c le quantile 95 % (type 7) de core sur les membres de c, pondéré par les multiplicités ;
+  - *correction du 29 septembre 2026* (audit de la hiérarchie K-NN) : ce paragraphe disait core_K, en contradiction avec CLUSTER_v2 § 8.1. Le banc (`bench/synthetic/methods.py`, `bounded_fill`) et les préenregistrements des lots A et C appliquent max(K, 5). Le banc départage aussi les égalités de plus proche dans l'ordre de cKDTree, et non dans l'ordre lexicographique ci-dessus : divergence déclarée, non mesurée ;
   - sinon, p reste du bruit.
 
 **Implémentation.** Une liste des 32 plus proches voisins est précalculée par scène. Le site classé est cherché d'abord dans cette liste ; à défaut, un repli exact interroge un kd-tree des sites classés. Coût : O(32 n) plus O(n_f log n), où n_f est le nombre de replis. Le taux de repli est publié : à ν = 0,3, il n'est pas négligeable.
