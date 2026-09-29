@@ -1,0 +1,3 @@
+/usr/local/cuda/bin/nvcc -O3 -std=c++17 -arch=sm_120 -o /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.3yxwvd2jk4/build/cuda_work/cuda_probe /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.3yxwvd2jk4/src/morsehgp3D_v10/bench/g4/cuda_probe.cu
+code 0
+

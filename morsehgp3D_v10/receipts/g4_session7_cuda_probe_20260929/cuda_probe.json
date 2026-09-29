@@ -1,0 +1,1 @@
+{"status":"ok","device":"NVIDIA RTX PRO 6000 Blackwell Server Edition","cc":"12.0","sms":188,"global_mem_gib":95.0,"cuda_error":"no error","i128_pairs":16777216,"i128_equal_cases":2011255,"i128_mismatches":0,"loop64_gops":2579.1,"loop128_gops":1111.2,"i128_over_i64":2.32,"h2d_gbps":56.8,"d2h_gbps":56.4,"launch_us":1.86}

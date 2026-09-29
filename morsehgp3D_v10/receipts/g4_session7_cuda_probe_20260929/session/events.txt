@@ -1,0 +1,5 @@
+2026-09-29T19:46:46Z worker demarre (pid 2017), echeance 1790713120, generation 2026-09-29T12:42:36.374-07:00
+2026-09-29T19:46:47Z python3 -m pip absent : aucune installation systeme n'est tentee
+2026-09-29T19:46:47Z etape build/configure : ok (code 0, 0.611 s)
+2026-09-29T19:46:52Z etape build/build : ok (code 0, 4.396 s)
+2026-09-29T19:46:56Z etape cmd/000_cuda_probe : ok (code 0, 4.176 s)

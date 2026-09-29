@@ -1,0 +1,10 @@
+{
+ "schema": "ehgp.v10.session_plan.v1",
+ "build_timeout_seconds": 600,
+ "build_targets": ["mhgp10_unit"],
+ "results_cap_bytes": 67108864,
+ "commands": [
+  {"name": "cuda_probe", "timeout_seconds": 900,
+   "argv": ["python3", "{src}/morsehgp3D_v10/bench/g4/cuda_probe.py", "--out", "{out}", "--work", "{build}/cuda_work", "--arch", "sm_120"]}
+ ]
+}
