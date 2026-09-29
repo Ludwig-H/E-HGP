@@ -127,8 +127,14 @@ GCP : session 1 le 29 septembre (CPU seul, arrêt certifié TERMINATED), reçu `
      feuille en en-tête commun CPU/GPU (J3a), puis les feuilles sur GPU, puis l'arbre entier sur GPU. Cibles :
      100 ms à K = 5, 1 s à K = 10.
    - La VM n'a ni pip ni numpy : Python portable et binaires statiques envoyés comme données (`bench/g4/`).
-3. **Multiplicités** dans la tour, Euler pondéré, juges d'échelle (K = 1 contre EMST, Euler à kmax + 2).
-4. Verticales publiées : calculées par la tour, non exposées à la tête.
+3. **Échelle au-delà du LiDAR** (reçu `receipts/g4_session5_scale_20260929`, jusqu'à 1 024 000 sites) : temps
+   linéaire en nombre de boules. Les boules par site sont bornées par la géométrie : ≈ 460 en 3D, 65 à 120 sur une
+   surface, à K = 10. **La mémoire est le mur** : ≈ 280 octets par boule au pic, soit 135 Go pour un million de sites
+   3D à K = 10. La tour coûte deux fois le catalogue à grande échelle. Au-delà d'environ 1,4 M sites LiDAR, il
+   faudra un catalogue qui ne réside pas tout entier. GPU de la VM : RTX PRO 6000 Blackwell (97 Go, sm_120),
+   CUDA 12.9 sous `/usr/local/cuda-12.9`.
+4. **Multiplicités** dans la tour, Euler pondéré, juges d'échelle (K = 1 contre EMST, Euler à kmax + 2).
+5. Verticales publiées : calculées par la tour, non exposées à la tête.
 
 ## Pièges
 

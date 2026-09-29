@@ -1,0 +1,7 @@
+2026-09-29T18:44:46Z worker demarre (pid 1955), echeance 1790709361, generation 2026-09-29T11:40:08.147-07:00
+2026-09-29T18:44:47Z python3 -m pip absent : aucune installation systeme n'est tentee
+2026-09-29T18:44:48Z etape build/configure : ok (code 0, 0.866 s)
+2026-09-29T18:44:55Z etape build/build : ok (code 0, 6.875 s)
+2026-09-29T18:44:55Z etape cmd/000_vm_facts : ok (code 0, 0.169 s)
+2026-09-29T18:44:56Z etape cmd/001_gates_cpp : ok (code 0, 1.099 s)
+2026-09-29T19:03:36Z etape cmd/002_scale_run : ok (code 0, 1120.011 s)

@@ -1,0 +1,220 @@
+== nvidia_smi_query
+name, driver_version, compute_cap, memory.total [MiB], clocks.max.sm [MHz], power.limit [W]
+NVIDIA RTX PRO 6000 Blackwell Server Edition, 580.173.02, 12.0, 97887 MiB, 2430 MHz, 600.00 W
+
+== nvidia_smi
+Tue Sep 29 18:44:55 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.173.02             Driver Version: 580.173.02     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA RTX PRO 6000 Blac...    On  |   00000000:05:00.0 Off |                    0 |
+| N/A   30C    P0             48W /  600W |       0MiB /  97887MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+
+== cuda_dirs
+[
+ "/usr/local/cuda",
+ "/usr/local/cuda-12.9"
+]
+== nvcc_in_path
+null
+== nvcc_versions
+[
+ {
+  "cmd": "/usr/local/cuda/bin/nvcc --version",
+  "code": 0,
+  "stdout": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Apr__9_19:24:57_PDT_2025\nCuda compilation tools, release 12.9, V12.9.41\nBuild cuda_12.9.r12.9/compiler.35813241_0\n",
+  "stderr": ""
+ },
+ {
+  "cmd": "/usr/local/cuda-12.9/bin/nvcc --version",
+  "code": 0,
+  "stdout": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2025 NVIDIA Corporation\nBuilt on Wed_Apr__9_19:24:57_PDT_2025\nCuda compilation tools, release 12.9, V12.9.41\nBuild cuda_12.9.r12.9/compiler.35813241_0\n",
+  "stderr": ""
+ }
+]
+== gxx
+g++ (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0
+Copyright (C) 2021 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+
+== clang
+FileNotFoundError(2, 'No such file or directory')
+== cmake
+cmake version 3.22.1
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+
+== docker
+FileNotFoundError(2, 'No such file or directory')
+== lscpu
+Architecture:                            x86_64
+CPU op-mode(s):                          32-bit, 64-bit
+Address sizes:                           52 bits physical, 57 bits virtual
+Byte Order:                              Little Endian
+CPU(s):                                  48
+On-line CPU(s) list:                     0-47
+Vendor ID:                               AuthenticAMD
+Model name:                              AMD EPYC 9B45
+CPU family:                              26
+Model:                                   2
+Thread(s) per core:                      2
+Core(s) per socket:                      24
+Socket(s):                               1
+Stepping:                                1
+BogoMIPS:                                5399.99
+Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl nonstop_tsc cpuid extd_apicid aperfmperf tsc_known_freq pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext mwaitx ssbd ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 clzero xsaveerptr wbnoinvd amd_ibpb_ret arat avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b avx512_vp2intersect flush_l1d srso_user_kernel_no
+Hypervisor vendor:                       KVM
+Virtualization type:                     full
+L1d cache:                               1.1 MiB (24 instances)
+L1i cache:                               768 KiB (24 instances)
+L2 cache:                                24 MiB (24 instances)
+L3 cache:                                96 MiB (3 instances)
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-47
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             Not affected
+Vulnerability L1tf:                      Not affected
+Vulnerability Mds:                       Not affected
+Vulnerability Meltdown:                  Not affected
+Vulnerability Mmio stale data:           Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Not affected
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; STIBP always-on; PBRSB-eIBRS Not affected; BHI Not affected
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Not affected
+Vulnerability Tsx async abort:           Not affected
+Vulnerability Vmscape:                   Not affected
+
+== avx512
+avx512f
+avx512dq
+avx512ifma
+avx512cd
+avx512bw
+avx512vl
+avx512_bf
+avx512vbmi
+avx512_vbmi
+avx512_vnni
+avx512_bitalg
+avx512_vpopcntdq
+avx512_vp
+
+== free
+               total        used        free      shared  buff/cache   available
+Mem:             176           1         174           0           0         173
+Swap:              0           0           0
+
+== df
+Filesystem       Size  Used Avail Use% Mounted on
+/dev/root         97G   19G   79G  20% /
+tmpfs             89G     0   89G   0% /dev/shm
+tmpfs             36G  1.2M   36G   1% /run
+tmpfs            5.0M     0  5.0M   0% /run/lock
+efivarfs         256K   29K  223K  12% /sys/firmware/efi/efivars
+/dev/nvme0n1p15  105M  6.1M   99M   6% /boot/efi
+tmpfs             18G  4.0K   18G   1% /run/user/1992881332
+
+== uname
+Linux ehgp-v7-4fa0e0789a7d5bb06b787d35 6.8.0-1066-gcp #74~22.04.1-Ubuntu SMP Fri Aug  7 21:51:15 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+
+== os_release
+PRETTY_NAME="Ubuntu 22.04.5 LTS"
+NAME="Ubuntu"
+VERSION_ID="22.04"
+VERSION="22.04.5 LTS (Jammy Jellyfish)"
+VERSION_CODENAME=jammy
+ID=ubuntu
+ID_LIKE=debian
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+UBUNTU_CODENAME=jammy
+
+== ldconfig_cuda
+	libnvtx3interop.so.1 (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnvtx3interop.so.1
+	libnvtx3interop.so (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnvtx3interop.so
+	libnvrtc.so.12 (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnvrtc.so.12
+	libnvrtc.so (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnvrtc.so
+	libnvrtc.alt.so.12 (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnvrtc.alt.so.12
+	libnvrtc.alt.so (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnvrtc.alt.so
+	libnvrtc-builtins.so.12.9 (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnvrtc-builtins.so.12.9
+	libnvrtc-builtins.so (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnvrtc-builtins.so
+	libnvrtc-builtins.alt.so.12.9 (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnvrtc-builtins.alt.so.12.9
+	libnvrtc-builtins.alt.so (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnvrtc-builtins.alt.so
+	libnvjpeg.so.12 (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnvjpeg.so.12
+	libnvjpeg.so (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnvjpeg.so
+	libnvfatbin.so.12 (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnvfatbin.so.12
+	libnvfatbin.so (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnvfatbin.so
+	libnvblas.so.12 (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnvblas.so.12
+	libnvblas.so (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnvblas.so
+	libnvJitLink.so.12 (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnvJitLink.so.12
+	libnvJitLink.so (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnvJitLink.so
+	libnpps.so.12 (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnpps.so.12
+	libnpps.so (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnpps.so
+	libnppitc.so.12 (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnppitc.so.12
+	libnppitc.so (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnppitc.so
+	libnppisu.so.12 (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnppisu.so.12
+	libnppisu.so (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnppisu.so
+	libnppist.so.12 (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnppist.so.12
+	libnppist.so (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnppist.so
+	libnppim.so.12 (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnppim.so.12
+	libnppim.so (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnppim.so
+	libnppig.so.12 (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnppig.so.12
+	libnppig.so (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnppig.so
+	libnppif.so.12 (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnppif.so.12
+	libnppif.so (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnppif.so
+	libnppidei.so.12 (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnppidei.so.12
+	libnppidei.so (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnppidei.so
+	libnppicc.so.12 (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnppicc.so.12
+	libnppicc.so (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnppicc.so
+	libnppial.so.12 (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnppial.so.12
+	libnppial.so (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnppial.so
+	libnppc.so.12 (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnppc.so.12
+	libnppc.so (libc6,x86-64) => /usr/local/cuda-12.9/targets/x86_64-linux/lib/libnppc.so
+
+== dpkg_cuda
+ii  cudnn                                               9.13.0-1                                         amd64        NVIDIA CUDA Deep Neural Network library (cuDNN)
+ii  cudnn9                                              9.13.0-1                                         amd64        NVIDIA CUDA Deep Neural Network library (cuDNN)
+ii  cudnn9-cuda-13                                      9.13.0.50-1                                      amd64        NVIDIA cuDNN for CUDA 13
+ii  cudnn9-cuda-13-0                                    9.13.0.50-1                                      amd64        NVIDIA cuDNN for CUDA 13.0
+ii  libcudnn9-cuda-13                                   9.13.0.50-1                                      amd64        cuDNN runtime libraries for CUDA 13.0
+ii  libcudnn9-dev-cuda-13                               9.13.0.50-1                                      amd64        cuDNN development libraries for CUDA 13.0
+ii  libcudnn9-headers-cuda-13                           9.13.0.50-1                                      amd64        cuDNN header files for CUDA 13.0
+ii  libcudnn9-static-cuda-13                            9.13.0.50-1                                      amd64        cuDNN static libraries for CUDA 13.0
+ii  libnvidia-cfg1-580-server:amd64                     580.173.02-0ubuntu0.22.04.1                      amd64        NVIDIA binary OpenGL/GLX configuration library
+ii  libnvidia-compute-580-server:amd64                  580.173.02-0ubuntu0.22.04.1                      amd64        NVIDIA libcompute package
+hi  libnvidia-container-tools                           1.19.1-1                                         amd64        NVIDIA container runtime library (command-line tools)
+hi  libnvidia-container1:amd64                          1.19.1-1                                         amd64        NVIDIA container runtime library
+ii  libnvidia-nscq-580                                  580.173.02-0ubuntu0.22.04.1                      amd64        NVSwitch Configuration and Query library
+ii  linux-modules-nvidia-580-server-open-6.8.0-1066-gcp 6.8.0-1066.74~22.04.1                            amd64        Linux kernel nvidia modules for version 6.8.0-1066
+ii  linux-modules-nvidia-580-server-open-gcp            6.8.0-1066.74~22.04.1                            amd64        Extra drivers for nvidia-580-server-open for the gcp flavour
+ii  nvidia-compute-utils-580-server                     580.173.02-0ubuntu0.22.04.1                      amd64        NVIDIA compute utilities
+hi  nvidia-container-toolkit                            1.19.1-1                                         amd64        NVIDIA Container toolkit
+hi  nvidia-container-toolkit-base                       1.19.1-1                                         amd64        NVIDIA Container Toolkit Base
+ii  nvidia-fabricmanager-580                            580.173.02-0ubuntu0.22.04.1                      amd64        Fabric Manager for NVSwitch based systems.
+ii  nvidia-firmware-580-server-580.173.02               580.173.02-0ubuntu0.22.04.1                      amd64        Firmware files used by the kernel module
+ii  nvidia-kernel-common-580-server                     580.173.02-0ubuntu0.22.04.1                      amd64        Shared files used with the kernel module
+ii  nvidia-utils-580-server                             580.173.02-0ubuntu0.22.04.1                      amd64        NVIDIA Server Driver support binaries
+
