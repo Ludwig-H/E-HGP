@@ -1,0 +1,7 @@
+entree K avant(t_boxes med [min-max]) apres(t_boxes med [min-max]) apres_v3(t_boxes med [min-max]) rapports
+lidar02_full 5 10.340 [10.321-10.518] | 6.313 [6.207-6.366] | 5.830 [5.814-5.953] | avant/apres x1.64 avant/apres_v3 x1.77
+lidar02_full 10 37.894 [37.731-38.435] | 25.472 [25.436-26.140] | 23.732 [23.726-24.323] | avant/apres x1.49 avant/apres_v3 x1.60
+lidar00_full 5 10.482 [10.451-10.671] | 6.468 [6.443-6.715] | 6.035 [6.000-6.103] | avant/apres x1.62 avant/apres_v3 x1.74
+lidar00_full 10 39.161 [39.156-39.526] | 26.973 [26.854-27.066] | 25.197 [25.113-25.468] | avant/apres x1.45 avant/apres_v3 x1.55
+lidar01_quarter_x_neg_y_neg 5 1.693 [1.688-1.711] | 0.980 [0.974-0.981] | 0.900 [0.898-0.913] | avant/apres x1.73 avant/apres_v3 x1.88
+lidar01_quarter_x_neg_y_neg 10 6.032 [6.006-6.093] | 3.911 [3.907-3.933] | 3.630 [3.601-3.637] | avant/apres x1.54 avant/apres_v3 x1.66

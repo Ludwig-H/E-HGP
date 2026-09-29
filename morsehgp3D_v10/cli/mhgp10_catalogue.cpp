@@ -84,14 +84,14 @@ int main(int argc, char** argv) {
     for (int p = 0; p < params.kmax; ++p) std::printf("%s%llu", p ? "," : "", static_cast<unsigned long long>(by[q][p]));
     std::printf("]");
   }
-  std::printf("},\"nodes\":%llu,\"leaves\":%llu,\"sum_m\":%llu,\"max_m\":%llu,\"guard_tests\":%llu,"
-              "\"dominance_tests\":%llu,\"leaf_dominance_tests\":%llu,\"pair_tests\":%llu,\"triple_tests\":%llu,"
-              "\"line_hits\":%llu,\"quad_tests\":%llu,\"judged\":%llu,\"extended\":%llu,\"weighted\":%llu,\"max_shell\":%llu,"
-              "\"stalled_leaves\":%llu}\n",
+  std::printf("},\"nodes\":%llu,\"leaves\":%llu,\"sum_m\":%llu,\"max_m\":%llu,\"skipped_bbox\":%llu,"
+              "\"preskipped_bbox\":%llu,\"filter_tests\":%llu,\"leaf_dominance_tests\":%llu,\"pair_tests\":%llu,"
+              "\"triple_tests\":%llu,\"line_hits\":%llu,\"quad_tests\":%llu,\"judged\":%llu,\"extended\":%llu,"
+              "\"weighted\":%llu,\"max_shell\":%llu,\"stalled_leaves\":%llu}\n",
               (unsigned long long)L.nodes, (unsigned long long)L.leaves, (unsigned long long)L.sum_m,
-              (unsigned long long)L.max_m, (unsigned long long)L.guard_tests, (unsigned long long)L.dominance_tests,
-              (unsigned long long)L.leaf_dominance_tests, (unsigned long long)L.pair_tests,
-              (unsigned long long)L.triple_tests, (unsigned long long)L.line_hits,
+              (unsigned long long)L.max_m, (unsigned long long)L.skipped_bbox, (unsigned long long)L.preskipped_bbox,
+              (unsigned long long)L.filter_tests, (unsigned long long)L.leaf_dominance_tests,
+              (unsigned long long)L.pair_tests, (unsigned long long)L.triple_tests, (unsigned long long)L.line_hits,
               (unsigned long long)L.quad_tests, (unsigned long long)L.judged, (unsigned long long)L.extended,
               (unsigned long long)L.weighted, (unsigned long long)L.max_shell, (unsigned long long)L.stalled_leaves);
   if (!dump.empty()) {

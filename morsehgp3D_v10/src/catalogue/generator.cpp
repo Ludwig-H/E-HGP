@@ -1,7 +1,7 @@
 // Generateur du catalogue par boites de centres. Voir catalogue.hpp pour l'objet et les references.
 //
 // Repere de l'arbre : sites mis a l'echelle X = x << kT (kT = 6 bits sous-unitaires), boites entieres
-// demi-ouvertes [lo, hi). En u18 : |X| < 2^24, tests de gardes, dominance et bissectrices en i64 ;
+// demi-ouvertes [lo, hi). En u18 : |X| < 2^24, tests de dominance (forme D-loc) et bissectrices en i64 ;
 // test droite des centres (lemme Z, zonogone) en i128 ; centres et recensement en i128 (geometry.hpp).
 #include <algorithm>
 #include <bit>
@@ -20,12 +20,28 @@ namespace {
 
 constexpr int kT = 6;
 constexpr int kStagnationLimit = 3;
+// Reservoir des dominateurs d'un noeud : au plus 3 K sites.
+constexpr u32 kPool = 3 * kMaxCatalogueOrder;
+// Filtre des noeuds en i64 : la plus grande quantite est la cle du reservoir, < 27 2^(2 (B + T)).
+static_assert(2 * (kCoordinateBits + kT) + 5 <= 63, "filtre des noeuds : bornes i64");
 
 using geom::P3;
 
 struct Box {
   i64 lo[3], hi[3];
 };
+
+// Enveloppe fermee d'une liste de sites (repere T).
+struct Env {
+  i64 lo[3], hi[3];
+};
+
+// Lemme K : l'enveloppe manque la boite demi-ouverte sur un axe, donc aucun centre possible dans la boite.
+inline bool misses(const Env& e, const Box& Q) {
+  for (int ax = 0; ax < 3; ++ax)
+    if (e.hi[ax] < Q.lo[ax] || e.lo[ax] >= Q.hi[ax]) return true;
+  return false;
+}
 
 struct Rec {
   std::array<u32, 4> sup;
@@ -65,10 +81,10 @@ inline void merge_ledger(CatalogueLedger& a, const CatalogueLedger& b) {
   a.nodes += b.nodes;
   a.leaves += b.leaves;
   a.skipped_bbox += b.skipped_bbox;
+  a.preskipped_bbox += b.preskipped_bbox;
   a.sum_m += b.sum_m;
   a.max_m = std::max(a.max_m, b.max_m);
-  a.guard_tests += b.guard_tests;
-  a.dominance_tests += b.dominance_tests;
+  a.filter_tests += b.filter_tests;
   a.leaf_dominance_tests += b.leaf_dominance_tests;
   a.pair_tests += b.pair_tests;
   a.triple_tests += b.triple_tests;
@@ -465,90 +481,115 @@ void enumerate_leaf(const Ctx& C, Local& L, const std::vector<u32>& c, const Box
 struct Task {
   Box box;
   std::shared_ptr<const std::vector<u32>> parent;
+  Env env;  // enveloppe de la liste parente (pre-ignorance)
   int parent_stag;
 };
 
-// Filtre d'un noeud : liste certifiee de la boite a partir de la liste parente.
-void filter_node(const Ctx& C, Local& L, const Box& Q, const std::vector<u32>& parent, std::vector<u32>& cand) {
-  ++L.led.nodes;
-  const i64 cq[3] = {Q.lo[0] + Q.hi[0], Q.lo[1] + Q.hi[1], Q.lo[2] + Q.hi[2]};
+// Filtre d'un noeud : liste certifiee de la boite a partir de la liste parente (lemme D). Reservoir : les
+// min(|parent|, 3K) sites les plus proches du centre de la boite, ordre (distance, site) ; Y : son plus petit
+// prefixe de poids >= 3K (ou tout le reservoir) ; x est exclu si et seulement si ses dominateurs dans Y pesent >= K.
+// Forme D-loc, repere local x' = X - lo, A = |x'|^2, boite cubique de cote h :
+//   max_{C dans Qbar} (|Y - C|^2 - |X - C|^2) = A(y) - A(x) + sum_i max(0, 2h x'_i - 2h y'_i),
+// donc y domine x si et seulement si A(x) - A(y) > sum_i max(0, 2h x'_i - 2h y'_i) : le meme entier que la forme par
+// coins, donc la meme decision. Bornes (u18, T = 6) : |x'_i| < 2^24, 2h <= 2^25, A < 3 2^48, |2h x'_i| < 2^49,
+// membre droit < 3 2^49 : i64.
+// Garde G omise (corollaire G inclus dans D) : S0, plus petit prefixe du reservoir de poids >= K, est inclus dans Y ;
+// un x que G exclut est domine par tout S0, donc par un poids >= K de Y, et D l'exclut aussi ; reservoir de poids
+// < K : ni G ni D n'excluent. Comptage sans branchement sur S0 puis sur Y \ S0 : le poids partiel ne fait que
+// croitre, donc s'arreter apres S0 des qu'il atteint K ne change pas la decision.
+// Les listes sont des sous-suites de (0, ..., n - 1) : le rang dans la liste departage comme l'indice de site.
+// Hors ligne : inline dans process (recursif), le noyau deborde ses registres sur la pile.
+[[gnu::noinline]] void filter_node(const Ctx& C, Local& L, const Box& Q, const std::vector<u32>& parent,
+                                   std::vector<u32>& cand) {
   const u32 np = static_cast<u32>(parent.size());
-  const u32 pool_n = std::min<u32>(np, 3u * static_cast<u32>(C.K));
-  std::vector<std::pair<i64, u32>> dd;
-  dd.reserve(np);
-  for (u32 s : parent) {
-    const i64 dx = 2 * C.X[s].x - cq[0], dy = 2 * C.X[s].y - cq[1], dz = 2 * C.X[s].z - cq[2];
-    dd.push_back({dx * dx + dy * dy + dz * dz, s});
-  }
-  if (pool_n < np) std::nth_element(dd.begin(), dd.begin() + pool_n, dd.end());
-  std::sort(dd.begin(), dd.begin() + pool_n);
-  // S0 : plus petit prefixe de poids >= K ; Y : prefixe de poids >= 3K (ou tout le reservoir).
-  u32 s0 = 0;
-  u64 acc = 0;
-  while (s0 < pool_n && acc < u64(C.K)) acc += C.w[dd[s0++].second];
-  if (acc < u64(C.K)) s0 = np;  // poids total < K : toutes les gardes (x se garde lui-meme)
-  u32 ny = 0;
-  acc = 0;
-  while (ny < pool_n && acc < 3 * u64(C.K)) acc += C.w[dd[ny++].second];
-  if (s0 == np) {
-    std::sort(dd.begin(), dd.end());
-  }
-  cand.clear();
-  for (u32 x : parent) {
-    const P3& Xx = C.X[x];
-    const i64 xx = C.X2[x];
-    // gardes (lemme G)
-    bool pass = false;
-    for (u32 t = 0; t < s0 && !pass; ++t) {
-      ++L.led.guard_tests;
-      const u32 y = dd[t].second;
-      const P3& Y = C.X[y];
-      const i64 dx = Xx.x - Y.x, dy = Xx.y - Y.y, dz = Xx.z - Y.z;
-      const i64 cx = dx > 0 ? Q.hi[0] : Q.lo[0], cy = dy > 0 ? Q.hi[1] : Q.lo[1], cz = dz > 0 ? Q.hi[2] : Q.lo[2];
-      pass = xx - C.X2[y] - 2 * (cx * dx + cy * dy + cz * dz) <= 0;
+  const i64 h = Q.hi[0] - Q.lo[0], h2 = 2 * h;
+  // reservoir par insertion, cle (dd, rang) avec dd = |2x' - h|^2 < 27 2^48 (distance au centre de la boite)
+  const u32 cap = std::min<u32>(np, 3u * static_cast<u32>(C.K));
+  i64 kd[kPool];
+  u32 kr[kPool], nb = 0;
+  for (u32 t = 0; t < np; ++t) {
+    const P3& X = C.X[parent[t]];
+    const i64 da = 2 * (X.x - Q.lo[0]) - h, db = 2 * (X.y - Q.lo[1]) - h, dc = 2 * (X.z - Q.lo[2]) - h;
+    const i64 dd = da * da + db * db + dc * dc;
+    if (nb == cap && dd >= kd[nb - 1]) continue;
+    u32 j = nb < cap ? nb++ : nb - 1;
+    for (; j > 0 && kd[j - 1] > dd; --j) {
+      kd[j] = kd[j - 1];
+      kr[j] = kr[j - 1];
     }
-    if (!pass) continue;
-    // dominateurs (lemme D)
-    u64 dom = 0;
-    bool dominated = false;
-    for (u32 t = 0; t < ny; ++t) {
-      ++L.led.dominance_tests;
-      const u32 y = dd[t].second;
-      const P3& Y = C.X[y];
-      const i64 dx = Y.x - Xx.x, dy = Y.y - Xx.y, dz = Y.z - Xx.z;
-      const i64 cx = dx > 0 ? Q.lo[0] : Q.hi[0], cy = dy > 0 ? Q.lo[1] : Q.hi[1], cz = dz > 0 ? Q.lo[2] : Q.hi[2];
-      if (C.X2[y] - xx - 2 * (cx * dx + cy * dy + cz * dz) < 0) {
-        dom += C.w[y];
-        if (dom >= u64(C.K)) {
-          dominated = true;
-          break;
-        }
+    kd[j] = dd;
+    kr[j] = t;
+  }
+  // Y en SoA (2h x', A, poids), S0 = ses s0 premiers
+  i64 yx[kPool], yy[kPool], yz[kPool], ya[kPool], yw[kPool];
+  u32 ny = 0, s0 = 0;
+  for (u64 acc = 0; ny < nb && acc < 3 * u64(C.K); ++ny) {
+    const u32 s = parent[kr[ny]];
+    const i64 a = C.X[s].x - Q.lo[0], b = C.X[s].y - Q.lo[1], c = C.X[s].z - Q.lo[2];
+    yx[ny] = a * h2;
+    yy[ny] = b * h2;
+    yz[ny] = c * h2;
+    ya[ny] = a * a + b * b + c * c;
+    yw[ny] = C.w[s];
+    acc += C.w[s];
+    if (s0 == 0 && acc >= u64(C.K)) s0 = ny + 1;
+  }
+  if (s0 == 0) s0 = ny;
+  // sortie sans branchement, dans l'ordre de la liste parente
+  cand.resize(np);
+  u32 m = 0;
+  u64 tests = 0;
+  for (u32 t = 0; t < np; ++t) {
+    const u32 s = parent[t];
+    const i64 a = C.X[s].x - Q.lo[0], b = C.X[s].y - Q.lo[1], c = C.X[s].z - Q.lo[2];
+    const i64 px = a * h2, py = b * h2, pz = c * h2, pa = a * a + b * b + c * c;
+    auto weight = [&](u32 r0, u32 r1) {  // poids des dominateurs de x parmi Y[r0, r1)
+      i64 w = 0;
+      for (u32 r = r0; r < r1; ++r) {
+        const i64 d = std::max<i64>(px - yx[r], 0) + std::max<i64>(py - yy[r], 0) + std::max<i64>(pz - yz[r], 0);
+        w += -i64(pa - ya[r] > d) & yw[r];  // masque : sans branchement
       }
+      return w;
+    };
+    i64 dom = weight(0, s0);
+    tests += s0;
+    if (dom < C.K) {
+      dom += weight(s0, ny);
+      tests += ny - s0;
     }
-    if (!dominated) cand.push_back(x);
+    cand[m] = s;
+    m += dom < C.K;
   }
+  cand.resize(m);
+  L.led.filter_tests += tests;
 }
 
-void process(const Ctx& C, Local& L, const Box& Q, const std::vector<u32>& parent, int parent_stag,
+void process(const Ctx& C, Local& L, const Box& Q, const std::vector<u32>& parent, const Env& penv, int parent_stag,
              std::vector<Task>* spill) {
+  ++L.led.nodes;
+  // Pre-ignorance : la liste de la boite est une sous-liste de la liste parente, donc son enveloppe est incluse dans
+  // penv ; si penv manque la boite, le lemme K l'ignorerait apres filtrage. Meme classement, sans filtrage.
+  if (misses(penv, Q)) {
+    ++L.led.skipped_bbox;
+    ++L.led.preskipped_bbox;
+    return;
+  }
   std::vector<u32> cand;
   filter_node(C, L, Q, parent, cand);
   // Lemme K (enveloppe, 3 directions) : aucun centre possible dans la boite.
-  if (cand.empty()) {
+  Env env = {{INT64_MAX, INT64_MAX, INT64_MAX}, {INT64_MIN, INT64_MIN, INT64_MIN}};
+  for (u32 s : cand) {
+    const P3& x = C.X[s];
+    env.lo[0] = std::min(env.lo[0], x.x);
+    env.lo[1] = std::min(env.lo[1], x.y);
+    env.lo[2] = std::min(env.lo[2], x.z);
+    env.hi[0] = std::max(env.hi[0], x.x);
+    env.hi[1] = std::max(env.hi[1], x.y);
+    env.hi[2] = std::max(env.hi[2], x.z);
+  }
+  if (cand.empty() || misses(env, Q)) {
     ++L.led.skipped_bbox;
     return;
-  }
-  for (int ax = 0; ax < 3; ++ax) {
-    i64 lo = INT64_MAX, hi = INT64_MIN;
-    for (u32 s : cand) {
-      const i64 v = ax == 0 ? C.X[s].x : (ax == 1 ? C.X[s].y : C.X[s].z);
-      lo = std::min(lo, v);
-      hi = std::max(hi, v);
-    }
-    if (hi < Q.lo[ax] || lo >= Q.hi[ax]) {
-      ++L.led.skipped_bbox;
-      return;
-    }
   }
   // Stagnation (liste qui ne decroit plus) : comptee seulement sous l'echelle de la grille (cote <= 2^kT,
   // un millimetre en u18), ou elle signale une sphere cospherique ; au-dessus, la decoupe continue toujours.
@@ -564,8 +605,8 @@ void process(const Ctx& C, Local& L, const Box& Q, const std::vector<u32>& paren
         ch.lo[ax] = up ? mid[ax] : Q.lo[ax];
         ch.hi[ax] = up ? Q.hi[ax] : mid[ax];
       }
-      if (spill) spill->push_back(Task{ch, shared, stag});
-      else process(C, L, ch, cand, stag, nullptr);
+      if (spill) spill->push_back(Task{ch, shared, env, stag});
+      else process(C, L, ch, cand, env, stag, nullptr);
     }
     return;
   }
@@ -637,7 +678,8 @@ Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& par
   auto t0 = Clock::now();
   auto all = std::make_shared<std::vector<u32>>(n);
   for (u32 s = 0; s < n; ++s) (*all)[s] = s;
-  std::vector<Task> frontier{Task{root, all, 0}};
+  const Env whole = {{INT64_MIN, INT64_MIN, INT64_MIN}, {INT64_MAX, INT64_MAX, INT64_MAX}};  // racine : sans parent
+  std::vector<Task> frontier{Task{root, all, whole, 0}};
   std::vector<Local> locals(pool.size());
   const size_t target = size_t(64) * pool.size();
   // Frontiere pilotee par la charge (GEN_v2 § 10.1) : le cout d'une tache suit le nombre de sites de sa boite, et la
@@ -677,7 +719,8 @@ Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& par
     std::vector<std::vector<Task>> spills(frontier.size());
     pool.parallel_for(frontier.size(), 1, [&](u64 b, u64 e, unsigned wk) {
       for (u64 i = b; i < e; ++i)
-        process(C, locals[wk], frontier[i].box, *frontier[i].parent, frontier[i].parent_stag, &spills[i]);
+        process(C, locals[wk], frontier[i].box, *frontier[i].parent, frontier[i].env, frontier[i].parent_stag,
+                &spills[i]);
     });
     std::vector<Task> next;
     for (auto& sp : spills)
@@ -699,7 +742,7 @@ Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& par
   pool.parallel_for(order.size(), 1, [&](u64 b, u64 e, unsigned wk) {
     for (u64 i = b; i < e; ++i) {
       const Task& t = kept[order[i]];
-      process(C, locals[wk], t.box, *t.parent, t.parent_stag, nullptr);
+      process(C, locals[wk], t.box, *t.parent, t.env, t.parent_stag, nullptr);
     }
   });
   kept.clear();

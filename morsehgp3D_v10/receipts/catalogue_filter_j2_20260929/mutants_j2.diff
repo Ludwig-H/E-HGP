@@ -1,0 +1,41 @@
+# mutant M1 (hors patch), relatif au code J2 final
+--- a/morsehgp3D_v10/src/catalogue/generator.cpp
++++ b/morsehgp3D_v10/src/catalogue/generator.cpp (M1)
+@@ -553,10 +553,7 @@
+     };
+     i64 dom = weight(0, s0);
+     tests += s0;
+-    if (dom < C.K) {
+-      dom += weight(s0, ny);
+-      tests += ny - s0;
+-    }
++    (void)ny;
+     cand[m] = s;
+     m += dom < C.K;
+   }
+# mutant M2 (hors patch), relatif au code J2 final
+--- a/morsehgp3D_v10/src/catalogue/generator.cpp
++++ b/morsehgp3D_v10/src/catalogue/generator.cpp (M2)
+@@ -502,7 +502,7 @@
+ [[gnu::noinline]] void filter_node(const Ctx& C, Local& L, const Box& Q, const std::vector<u32>& parent,
+                                    std::vector<u32>& cand) {
+   const u32 np = static_cast<u32>(parent.size());
+-  const i64 h = Q.hi[0] - Q.lo[0], h2 = 2 * h;
++  const i64 h = Q.hi[0] - Q.lo[0], h2 = h;
+   // reservoir par insertion, cle (dd, rang) avec dd = |2x' - h|^2 < 27 2^48 (distance au centre de la boite)
+   const u32 cap = std::min<u32>(np, 3u * static_cast<u32>(C.K));
+   i64 kd[kPool];
+# mutant M3 (hors patch), relatif au code J2 final
+--- a/morsehgp3D_v10/src/catalogue/generator.cpp
++++ b/morsehgp3D_v10/src/catalogue/generator.cpp (M3)
+@@ -569,7 +569,9 @@
+   ++L.led.nodes;
+   // Pre-ignorance : la liste de la boite est une sous-liste de la liste parente, donc son enveloppe est incluse dans
+   // penv ; si penv manque la boite, le lemme K l'ignorerait apres filtrage. Meme classement, sans filtrage.
+-  if (misses(penv, Q)) {
++  bool mut = false;
++  for (int ax = 0; ax < 3; ++ax) mut = mut || penv.hi[ax] <= Q.lo[ax] || penv.lo[ax] >= Q.hi[ax];
++  if (mut) {
+     ++L.led.skipped_bbox;
+     ++L.led.preskipped_bbox;
+     return;

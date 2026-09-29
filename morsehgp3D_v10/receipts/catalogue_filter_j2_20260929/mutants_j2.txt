@@ -1,0 +1,18 @@
+== mutant 1
+  lidar01_quarter_x_neg_y_neg K=5 ref=414aa4d47ffe1c55 mut=414aa4d47ffe1c55 dump_identique ; grand-livre DIFFERENT nodes:224977->1595953 leaves:118570->997313 sum_m:1359205->9948358 pair_tests:4330205->10866336 triple_tests:4949680->5567975 quad_tests:1342132->924656 judged:422636->348576
+  lidar01_quarter_x_neg_y_neg K=10 ref=7c46e50a72c08087 mut=7c46e50a72c08087 dump_identique ; grand-livre DIFFERENT nodes:301745->3138313 leaves:184136->2304495 sum_m:3395067->37172879 pair_tests:14057514->46950231 triple_tests:23632078->30812541 quad_tests:10599343->7966005 judged:1310062->1113692
+  syn_shells_density_x2 K=5 ref=fcd0425f8101b278 mut=fcd0425f8101b278 dump_identique ; grand-livre DIFFERENT nodes:387289->937313 leaves:187132->445123 sum_m:2160563->5005625 pair_tests:7644500->10833436 triple_tests:10293860->10154127 quad_tests:2886697->2014111 judged:827742->686877
+  syn_shells_density_x2 K=10 ref=8c145ca4ed47628a mut=8c145ca4ed47628a dump_identique ; grand-livre DIFFERENT nodes:490649->1370249 leaves:256969->699037 sum_m:4762313->12597653 pair_tests:22259194->34604780 triple_tests:44878213->47728660 quad_tests:20821494->15949354 judged:2220360->1949403
+  oracle T2 : code 0 ; catalogue_oracle_checks 161 fails 0 balls 14132
+== mutant 2
+  lidar01_quarter_x_neg_y_neg K=5 ref=414aa4d47ffe1c55 mut=9a9f85e913a445a7 DUMP_DIFFERENT ; grand-livre DIFFERENT balls:210424->6662 nodes:224977->2017 leaves:118570->747 sum_m:1359205->7827 pair_tests:4330205->32833 triple_tests:4949680->77970 quad_tests:1342132->57850 judged:422636->11946
+  lidar01_quarter_x_neg_y_neg K=10 ref=7c46e50a72c08087 mut=a38e038aafd5bc84 DUMP_DIFFERENT ; grand-livre DIFFERENT balls:767555->31902 nodes:301745->2289 leaves:184136->973 sum_m:3395067->17000 pair_tests:14057514->108857 triple_tests:23632078->398757 quad_tests:10599343->458054 judged:1310062->48439
+  syn_shells_density_x2 K=5 ref=fcd0425f8101b278 mut=520064ca4f6ee752 DUMP_DIFFERENT ; grand-livre DIFFERENT balls:405099->51706 nodes:387289->14113 leaves:187132->4929 sum_m:2160563->53842 pair_tests:7644500->244893 triple_tests:10293860->640617 quad_tests:2886697->468991 judged:827742->92741
+  syn_shells_density_x2 K=10 ref=8c145ca4ed47628a mut=85e44805182016e9 DUMP_DIFFERENT ; grand-livre DIFFERENT balls:1330933->187625 nodes:490649->17113 leaves:256969->6644 sum_m:4762313->118811 pair_tests:22259194->808109 triple_tests:44878213->3120081 quad_tests:20821494->3190218 judged:2220360->277281
+  oracle T2 : code 1 ; catalogue_oracle_checks 161 fails 110 balls 3165
+== mutant 3
+  lidar01_quarter_x_neg_y_neg K=5 ref=414aa4d47ffe1c55 mut=414aa4d47ffe1c55 dump_identique ; grand-livre DIFFERENT nodes:224977->224913 leaves:118570->118470 sum_m:1359205->1358034 pair_tests:4330205->4326471 triple_tests:4949680->4945792 quad_tests:1342132->1341039
+  lidar01_quarter_x_neg_y_neg K=10 ref=7c46e50a72c08087 mut=7c46e50a72c08087 dump_identique ; grand-livre DIFFERENT nodes:301745->301665 leaves:184136->183989 sum_m:3395067->3392420 pair_tests:14057514->14046517 triple_tests:23632078->23614127 quad_tests:10599343->10592999
+  syn_shells_density_x2 K=5 ref=fcd0425f8101b278 mut=fcd0425f8101b278 dump_identique ; grand-livre DIFFERENT leaves:187132->187110 sum_m:2160563->2160327 pair_tests:7644500->7643802 triple_tests:10293860->10293169 quad_tests:2886697->2886622
+  syn_shells_density_x2 K=10 ref=8c145ca4ed47628a mut=8c145ca4ed47628a dump_identique ; grand-livre DIFFERENT leaves:256969->256962 sum_m:4762313->4762190 pair_tests:22259194->22258729 triple_tests:44878213->44877555 quad_tests:20821494->20821270
+  oracle T2 : code 1 ; catalogue_oracle_checks 161 fails 45 balls 9771

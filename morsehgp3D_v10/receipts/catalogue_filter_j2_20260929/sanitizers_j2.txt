@@ -1,0 +1,4 @@
+lidar02_quarter_x_nonneg_y_nonneg K=5 ref=4939fead5753116e asan=4939fead5753116e code=0 stderr_lignes=0 IDENTIQUES
+lidar02_quarter_x_nonneg_y_nonneg K=10 ref=be5d19647049e109 asan=be5d19647049e109 code=0 stderr_lignes=0 IDENTIQUES
+syn_shells_density_x1 K=5 ref=6f903b08d471cad8 asan=6f903b08d471cad8 code=0 stderr_lignes=0 IDENTIQUES
+syn_shells_density_x1 K=10 ref=0bb0bc9c17a7f481 asan=0bb0bc9c17a7f481 code=0 stderr_lignes=0 IDENTIQUES
