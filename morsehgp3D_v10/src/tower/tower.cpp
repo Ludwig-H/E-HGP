@@ -1762,50 +1762,99 @@ Result<Tower> build_tower(const Cloud& cloud, const SiteTree& tree, const Catalo
 }
 
 PointDendrogram point_dendrogram(const Catalogue& cat, const OrderForest& f, const Cloud& cloud) {
-  // table de niveaux fusionnee : niveaux des noeuds (rangs du catalogue) et niveaux d'entree (entiers)
-  struct Key {
-    bool from_cat;
-    u32 rank;
-    u64 e;
+  // Table de niveaux fusionnee des noeuds et des points, dans l'ordre exact des niveaux.
+  //  - Cles du catalogue (noeuds ; points en entree cover) : rang r, de niveau 0 si r = 0 et cat.level[r - 1] sinon.
+  //    Les niveaux du catalogue croissent strictement avec le rang : le tri par denombrement des rangs est exact.
+  //  - Cles entieres (points en entree core) : D_K(x), triees comme entiers.
+  //  Les deux suites sont fusionnees par comparaison exacte, avec un raccourci double quand les approximations
+  //  s'ecartent de plus de 1e-9 en relatif, tres au-dessus de l'erreur d'arrondi de approx(). Les cles exactement
+  //  egales recoivent le meme rang : leur ordre relatif ne change pas la sortie.
+  const u32 nn = static_cast<u32>(f.rank.size());
+  const u32 n = cloud.sites();
+  const bool cover = !f.point_cat_rank.empty();
+  auto cat_level = [&](u32 r) -> geom::Level {
+    if (r == 0) return geom::Level{arith::I192{}, arith::I128w::from_u128(1)};
+    return cat.level[r - 1];
   };
-  auto level_of = [&](const Key& k) -> geom::Level {
-    if (k.from_cat) {
-      if (k.rank == 0) return geom::Level{arith::I192{}, arith::I128w::from_u128(1)};
-      return cat.level[k.rank - 1];
-    }
+  auto int_level = [](u64 e) {
     geom::Level L;
-    L.num = arith::I192::from_u128(k.e);
+    L.num = arith::I192::from_u128(e);
     L.den = arith::I128w::from_u128(1);
     return L;
   };
-  std::vector<Key> keys;
-  for (u32 r : f.rank) keys.push_back({true, r, 0});
-  if (!f.point_cat_rank.empty()) {
-    for (u32 r : f.point_cat_rank) keys.push_back({true, r, 0});  // entree cover : niveaux du catalogue
-  } else {
-    for (u64 e : f.point_level) keys.push_back({false, 0, e});
+  auto near = [](double x, double y) { return x == y || std::abs(x - y) <= 1e-9 * std::max(x, y); };
+  // A : cles du catalogue (0..nn-1 : noeuds ; nn.. : points en entree cover), par rang croissant
+  const u32 na = nn + (cover ? n : 0);
+  auto rank_of = [&](u32 i) { return i < nn ? f.rank[i] : f.point_cat_rank[i - nn]; };
+  u32 rmax = 0;
+  for (u32 i = 0; i < na; ++i) rmax = std::max(rmax, rank_of(i));
+  std::vector<u32> start(u64(rmax) + 2, 0), A(na);
+  for (u32 i = 0; i < na; ++i) ++start[u64(rank_of(i)) + 1];
+  for (u64 r = 0; r <= rmax; ++r) start[r + 1] += start[r];
+  for (u32 i = 0; i < na; ++i) A[start[rank_of(i)]++] = i;
+  // B : points en entree core, par D_K croissant
+  std::vector<u32> B;
+  if (!cover) {
+    B.resize(n);
+    for (u32 x = 0; x < n; ++x) B[x] = x;
+    std::sort(B.begin(), B.end(), [&](u32 a, u32 b) { return f.point_level[a] < f.point_level[b]; });
   }
-  std::vector<geom::Level> lv;
-  lv.reserve(keys.size());
-  for (const Key& k : keys) lv.push_back(level_of(k));
-  std::vector<u32> order(keys.size());
-  for (u32 i = 0; i < order.size(); ++i) order[i] = i;
-  std::sort(order.begin(), order.end(), [&](u32 a, u32 b) {
-    const double x = lv[a].approx(), y = lv[b].approx();
-    if (x != y && std::abs(x - y) > 1e-9 * std::max(x, y)) return x < y;
-    return geom::compare(lv[a], lv[b]) < 0;
-  });
-  std::vector<u32> merged(keys.size());
+  u32 cached = kNone;
+  double cached_x = 0;
+  auto x_rank = [&](u32 r) {  // approximation d'un niveau du catalogue, une fois par rang (A est trie par rang)
+    if (r != cached) {
+      cached = r;
+      cached_x = cat_level(r).approx();
+    }
+    return cached_x;
+  };
+  std::vector<u32> merged(u64(nn) + n);
   PointDendrogram d;
-  for (u32 i = 0; i < order.size(); ++i) {
+  u64 ia = 0, ib = 0;
+  bool first = true, prev_cat = false;
+  u32 prev_r = 0;
+  u64 prev_e = 0;
+  double prev_x = 0;
+  while (ia < A.size() || ib < B.size()) {
+    bool take_a = ib == B.size();
+    if (!take_a && ia < A.size()) {
+      const u32 r = rank_of(A[ia]);
+      const u64 e = f.point_level[B[ib]];
+      const double xa = x_rank(r), xb = int_level(e).approx();
+      take_a = !near(xa, xb) ? xa < xb : geom::compare(cat_level(r), int_level(e)) <= 0;
+    }
+    u32 slot, r = 0;
+    u64 e = 0;
+    double x;
+    if (take_a) {
+      slot = A[ia++];
+      r = rank_of(slot);
+      x = x_rank(r);
+    } else {
+      const u32 p = B[ib++];
+      slot = nn + p;
+      e = f.point_level[p];
+      x = int_level(e).approx();
+    }
     // niveaux publies en double, strictement croissants : deux niveaux exacts distincts dont les doubles coincident
     // (ou s'inversent d'un ulp) partagent un rang ; l'ordre exact des noeuds et des points est preserve
     // (regression tests/regression/test_level_collision.py)
-    const double x = lv[order[i]].approx();
-    if (i == 0 || (geom::compare(lv[order[i - 1]], lv[order[i]]) != 0 && x > d.level.back())) d.level.push_back(x);
-    merged[order[i]] = static_cast<u32>(d.level.size() - 1);
+    bool distinct = true;
+    if (!first) {
+      if (take_a && prev_cat) distinct = r != prev_r;
+      else if (!take_a && !prev_cat) distinct = e != prev_e;
+      else
+        distinct = !near(prev_x, x) || geom::compare(prev_cat ? cat_level(prev_r) : int_level(prev_e),
+                                                      take_a ? cat_level(r) : int_level(e)) != 0;
+    }
+    if (first || (distinct && x > d.level.back())) d.level.push_back(x);
+    merged[slot] = static_cast<u32>(d.level.size() - 1);
+    first = false;
+    prev_cat = take_a;
+    prev_r = r;
+    prev_e = e;
+    prev_x = x;
   }
-  const u32 nn = static_cast<u32>(f.rank.size());
   d.node_rank.resize(nn);
   for (u32 v = 0; v < nn; ++v) d.node_rank[v] = merged[v];
   d.parent = f.parent;
@@ -1819,7 +1868,6 @@ PointDendrogram point_dendrogram(const Catalogue& cat, const OrderForest& f, con
   std::vector<u32> fill(d.child_off.begin(), d.child_off.end() - 1);
   for (u32 v = 0; v < nn; ++v)
     if (f.parent[v] != kNone) d.child_val[fill[f.parent[v]]++] = v;
-  const u32 n = cloud.sites();
   d.point_node = f.point_node;
   d.point_rank.resize(n);
   d.point_weight.assign(n, 1);

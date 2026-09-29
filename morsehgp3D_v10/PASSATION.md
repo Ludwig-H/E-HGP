@@ -107,6 +107,16 @@ GCP : session 1 le 29 septembre (CPU seul, arrêt certifié TERMINATED), reçu `
      de 0,314 à 0,235 s à 48 fils. Trames entières à 48 fils : 0,23 à 0,29 s à K = 5, 1,02 à 1,29 s à K = 10. La
      chaîne complète jusqu'aux étiquettes prend 0,38 à 0,48 s, dont 0,15 à 0,18 s de tête. `MHGP10_MARCH` n'est
      permis sur G4 qu'après la porte ISA v4.
+   - **Assemblage** (`7eee86c53`) : tableaux du catalogue non initialisés, remplis par les boucles parallèles ;
+     identique octet pour octet en build normal et empoisonné ; ordre + assemblage −29 à −32 % à 4 fils.
+   - **Course du pool corrigée** (`8e3b76245`, reçu `receipts/pool_race_fix_20260929`) : un ouvrier en retard
+     pouvait exécuter une tranche du travail suivant deux fois ou avec la mauvaise fonction. Les tests préenregistrés
+     tournent à 1 fil et n'ont pas pu être touchés. Nouvelle porte de stress du pool dans `mhgp10_unit` ;
+     ThreadSanitizer propre (`-DMHGP10_TSAN=ON`, lancé par `setarch -R`).
+   - **Tête** (reçu `receipts/head_point_dendrogram_20260929`) : `point_dendrogram` trie par dénombrement des rangs du
+     catalogue au lieu d'un tri général à approximations recalculées : ×17 à K = 5 (0,272 → 0,016 s en local).
+   - **J2c en cours** (agent) : boîtes ajustées à l'enveloppe de leur liste, coupées au milieu du plus long côté
+     (audit de l'agent : −10 à −20 % sur l'étage des boîtes, catalogue identique).
    - Suite du plan ordonné du juge des conceptions GPU (hors dépôt, `v10-persist/gpu_design/juge/PLAN.md`) : la
      feuille en en-tête commun CPU/GPU (J3a), puis les feuilles sur GPU, puis l'arbre entier sur GPU. Cibles :
      100 ms à K = 5, 1 s à K = 10.
@@ -121,4 +131,7 @@ GCP : session 1 le 29 septembre (CPU seul, arrêt certifié TERMINATED), reçu `
 - Un redémarrage de la machine vide `/tmp` et le scratchpad, et tue les agents d'arrière-plan : garder sous
   `/workspaces` tout ce qui doit survivre.
 - `pkill -f` : toujours un motif à crochets (`'run_campa[i]gn'`), sinon le shell se tue lui-même.
+- Tout changement du code parallèle passe aussi sous ThreadSanitizer (`-DMHGP10_TSAN=ON`, dans `/tmp`). Sur ce
+  noyau, TSan exige `setarch $(uname -m) -R`, sinon « unexpected memory mapping ». Un échec d'oracle non
+  reproductible en isolé se stresse sous charge avant d'être attribué au dernier changement.
 - Aucun octet de nuage LiDAR n'est ajouté au dépôt ; les secteurs du v8 déjà suivis sont réutilisés en place.
