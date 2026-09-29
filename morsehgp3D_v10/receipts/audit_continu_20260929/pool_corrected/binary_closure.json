@@ -1,0 +1,9 @@
+{
+  "binary": "/tmp/mhgp10-pool-corrected.pICWsa/thread_create_failure",
+  "before_execution_source": "receipt.json:probe_binary_sha256",
+  "before_execution_sha256": "1edd53e1ca51c65b3b8af2f90db35f6497848544d1e2380a62281c357075e860",
+  "after_execution_check_utc": "2026-09-29 20:42:03 UTC",
+  "after_execution_method": "sha256sum /tmp/mhgp10-pool-corrected.pICWsa/thread_create_failure",
+  "after_execution_sha256": "1edd53e1ca51c65b3b8af2f90db35f6497848544d1e2380a62281c357075e860",
+  "identical": true
+}

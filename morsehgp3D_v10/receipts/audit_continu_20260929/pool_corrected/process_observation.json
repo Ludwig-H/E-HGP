@@ -1,0 +1,14 @@
+{
+  "observed_utc_window": "2026-09-29 20:38–20:40 UTC",
+  "method": "Host process list: ps -eo pid,ppid,etimes,time,pcpu,rss,comm,args; exact known PIDs plus pool-fix, v10-fixes/pool and TSan filters",
+  "previous_chain_no_longer_observed": [472189, 483572, 483573],
+  "current_chain": [
+    {"pid": 502711, "ppid": 2498, "elapsed_s": 32, "role": "shell workflow running new gates against old pool"},
+    {"pid": 505294, "ppid": 502717, "elapsed_s": 10, "command": "timeout 200 /tmp/pool-fix/gates-old/unit_old_asan pool_flag_restored"},
+    {"pid": 505296, "ppid": 505294, "elapsed_s": 10, "command": "/tmp/pool-fix/gates-old/unit_old_asan pool_flag_restored"}
+  ],
+  "scope": "old-pool mutant rejection, not corrected-pool TSan",
+  "corrected_pool_tsan_process_observed": false,
+  "qualification_from_process_presence": false,
+  "processes_modified_or_killed": false
+}

@@ -6,6 +6,14 @@ Moteur audité : `6206d1d11` ; instructions auditeurs : `ed7be3bc3`.
 `profile=quantized_u18_input_only`, `mode=audit_math_laminarite`,
 `public_status=not_claimed`. Aucun changement moteur, aucune session GCP.
 
+**Actualisation après relecture directe des parties I et II de la thèse :**
+la recommandation initiale de `core` comme référence « fidèle au modèle »
+était trop large. Core est une restriction exacte et stable de l'arbre
+continu, mais **pas la cible des amas discrets de la définition 8** : elle
+retarde ou perd leurs points frontière. La priorité scientifique est une
+projection qui préserve cette participation précoce, sans changer la
+connexité de FULL. Voir la section 7, qui précise et corrige cette priorité.
+
 ## Conclusion pratique
 
 Il faut **séparer l'arbre de densité, l'affectation des points, et la sélection
@@ -16,8 +24,10 @@ automatiquement de la robustesse de la multicouverture.
 
 Recommandation au développeur :
 
-1. Conserver une référence `core` fidèle au modèle, avec les dates d'entrée,
-   et ne pas supprimer la variante `cover` qui reste le témoin empirique.
+1. Conserver `core` comme référence de contrôle exacte et stable de la
+   restriction C∩X, **non comme remplacement des amas discrets couverts**.
+   Préserver les points frontière avec `cover` et une politique d'ancrage
+   cohérente ; comparer cette politique à la première couverture actuelle.
 2. Expérimenter une **affectation cohérente avec l'arbre et consciente de
    l'ambiguïté** : une décision par point, conservée dans tous ses ancêtres ;
    un point contesté est attaché à un ancêtre commun plutôt que forcé dans
@@ -50,8 +60,9 @@ points extérieurs à L_k(r) donne, pour chaque r, une partition **de tous les
 points**, et ces partitions sont emboîtées. Aucune affectation par vote n'est
 nécessaire pour obtenir cette complétude formelle.
 
-Un point x entre dans une composante au rayon d_k(x), point lui-même compris.
-Avant cela il est un singleton, pas un membre certifié d'un autre amas.
+Un point x entre dans la restriction core au rayon d_k(x), point lui-même
+compris. Avant cela il est un singleton dans **cette projection** ; il peut
+déjà être un membre couvert certifié d'un amas discret de la thèse.
 La hauteur de fusion entre deux points distincts est
 
 `u_k(x,y) = inf {r : x et y sont dans une même composante de L_k(r)}`.
@@ -306,3 +317,135 @@ contre-exemples de consensus ont été relus indépendamment dans
 Les deux contre-exemples géométriques sont également exercés dans le moteur,
 sur quelques points seulement. Ce rapport ne qualifie ni une nouvelle tête
 ni un gain de score ou de temps ; il propose la cible et les tests de la suite.
+
+## 7. Relecture des deux premières parties : la frontière est une cible, pas un détail
+
+Source directement relue : [manuscrit original](../../../docs/references/MANUSCRIT_THESE_HAUSEUX.pdf),
+SHA256 `579f83671ebca34cd810f350820074eb42672411713160f9c9c2a458ff4f4fef`.
+Lecture intégrale des pages PDF 35–76 puis 77–134 (parties I et II,
+chapitres 2 à 9), avec `pdftotext -raw`, en plages de 6 à 12 pages,
+et lecture du sommaire. La pagination imprimée est PDF−26 dans ces chapitres.
+Les annexes HGP-old ont aussi été relues, mais ne remplacent pas cette source.
+Le [reçu de lecture et du petit test de vote](../../receipts/audit_continu_20260929/thesis_boundary/receipt.json)
+fixe source, plages et périmètre ; il ne prétend pas certifier une interprétation
+mathématique par le seul hash d'un PDF.
+
+### 7.1 Ce que dit précisément le modèle
+
+La **définition 8**, p. imprimée 21 / PDF 47, définit l'amas discret par
+`X ∩ δ_r(C)`, C composante du niveau continu, **pas par C∩X**. Le point
+doit participer à un amas dense ; il n'a pas à être lui-même un centre
+dense. Le chapitre 6 établit cette correspondance par les intersections
+de K boules, sans imposer de partition exclusive à la famille des amas.
+
+Le manuscrit emploie « moins de r » dans cette définition. Les dates de
+contact ci-dessous sont les seuils de naissance, avec la convention **fermée**
+déclarée par v10 ; pour une convention ouverte, prendre les rayons juste
+au-dessus. Cette différence aux seules égalités ne change pas le problème
+de récupération de la frontière dans l'intervalle qui suit le contact.
+
+Pour deux sites à distance d et K2, l'amas les couvre dès d/2 ; ils ne
+deviennent core qu'à d. Exclure la frontière revient donc ici à retarder
+**tous** les points de l'amas, pas seulement quelques observations douteuses.
+Cette participation est géométriquement définie : ce n'est ni un remplissage
+1-NN après sélection ni un artifice de score ARI.
+
+Le chapitre 7 distingue aussi deux opérations qu'il ne faut pas confondre :
+
+- connecter une structure déjà épaissie peut provoquer une fusion parasite
+  précoce ; FULL doit conserver les composantes du niveau **avant** dilatation ;
+- demander que le point soit lui-même un cœur réduit le rappel avant cette
+  fusion ; la couverture récupère les points participants.
+
+Le « core » de la comparaison RSL du chapitre 7 n'est pas notre simple
+restriction `C∩X` d'un FULL exact : sa construction de connexité diffère
+aussi. On ne peut donc pas attribuer directement sa colonne de résultats
+à la projection core v10. Il faut tester séparément arbre et affectation.
+
+### 7.2 Le bon diagnostic statistique : récupérer avant la fusion parasite
+
+Les sections 7.2–7.4 étudient la percolation et la fraction récupérable des
+zones denses avant que leur séparation ne soit perdue. La table 7.1,
+p. 74 / PDF 100, donne en dimension 3 une vitesse de percolation empirique
+passant de 0,563 à 0,732 pour HGP lorsque K passe de 1 à 5, dans son
+protocole Poisson/binomial. Ce nombre est le **rapport des quantiles
+d'intensité λ_ε/λ_(1−ε)**, pas une fraction directement récupérée, une borne
+universelle d'ARI ou un résultat sur LiDAR.
+Le passage asymptotique de la section 7.5 comporte une limite admise et
+des intuitions : il ne qualifie pas notre tête actuelle.
+
+Conséquence pour l'ancrage : différer tous les points contestés jusqu'à un
+ancêtre commun donne bien un arbre, mais peut éliminer l'avantage recherché
+en les rendant disponibles seulement **après** la fusion de deux vrais amas.
+La marge de stabilité locale de notre bande ne suffit pas à éviter cela.
+Il faut publier le rappel frontière **avant fusion**, la masse réellement
+différée et sa date, pas seulement les hauteurs ou l'ARI de la meilleure coupe.
+
+### 7.3 Ce qu'apporte le chapitre 9, et ce qu'il ne démontre pas
+
+La section 9.1, pp. 96–97 / PDF 122–123, conserve l'arbre de faces, puis
+donne à chaque point incident avec `Tx>0` une masse totale unitaire
+distribuée entre ses faces incidentes : `Sτ / Tx`, où `Tx` est la somme
+de leurs scores `Sτ`. La convention du manuscrit est `1/Tx=0` lorsque
+`Tx=0` : un point sans face incidente ne reçoit pas cette masse. La masse de face est
+`mτ = Sτ ∑(1/Tx, x∈τ)`. Elle sert à la condensation ; ensuite un vote
+pondéré convertit **une sélection fixée** de clusters en partition stricte.
+La proposition 7 a cette portée précise. Elle ne démontre pas qu'un vote
+gagnant recalculé à toutes les coupes donne une hiérarchie de points emboîtée.
+
+Un [petit test exact indépendant](../../receipts/audit_continu_20260929/thesis_boundary/check_vote.py)
+montre le problème abstrait : dans les branches A/B/C, x porte les masses
+0,3/0,3/0,4 et y les masses 0,1/0,1/0,8. Ils sont tous deux affectés à C.
+Après la seule fusion A+B, x choisit AB et y reste dans C : un bloc de
+points vient de se scinder alors que les blocs de faces n'ont fait que
+fusionner. Les scores sont positifs et fixes, la masse totale est conservée,
+et aucun départage d'égalité n'intervient. Le test construit ces votes avec
+six faces à deux sommets et les normalisations du manuscrit ; il ne prétend
+pas produire un nuage euclidien réalisant ce même arbre de faces.
+
+Ce qui reste utile de HGP-old est donc **la conservation de masse et le
+traitement de la frontière**, pas une garantie inexistante d'emboîtement
+du vote à toutes les coupes. Une affectation fixée une fois puis suivie par
+les ancêtres passe le même test de laminarité. Ses scores de choix et ses
+dates doivent encore être justifiés et testés.
+
+La comparaison SIPU de la section 9.2.5 prend une même condensation et
+un même estimateur 1/r. Le manuscrit rapporte lui-même une exception
+birch2 où HDBSCAN fait mieux avec cet exposant, puis une amélioration HGP
+avec 1/r². Préserver la frontière est donc une piste fondée, pas une
+garantie de domination pour chaque jeu, ni un prétexte pour changer z
+uniquement chez l'un des concurrents. Les mesures avec remplissage 1-NN
+doivent rester séparées des affectations natives.
+
+### 7.4 Consigne au développeur : préserver sans percoler ni surconstruire
+
+1. Conserver FULL comme arbre spatial de référence. Ne pas fusionner ses
+   branches parce qu'elles couvrent un même point frontière.
+2. Exploiter le [lemme de couverture par catalogue](catalogue/ADDENDUM_COUVERTURE_CATALOGUE_20260929.md)
+   pour conserver **toutes les composantes couvrantes**, avec la coquille
+   complète et les intérieurs, pas seulement le support ou `first[x]`.
+   Sa condition renforcée concerne les témoins de couverture, jamais la
+   suppression des événements de fusion de FULL.
+3. Dédupliquer les candidats par composante à la coupe considérée : plusieurs
+   boules dans une même branche ne rendent pas le point ambigu entre clusters.
+   Garder l'attache précoce quand la concurrence est seulement apparente ;
+   traiter séparément les véritables conflits entre branches.
+4. Décider un propriétaire et une date cohérents, puis suivre ses ancêtres.
+   Comparer une attache dure précoce, l'ancrage différé et un diagnostic de
+   masse fractionnaire inspiré de la thèse. Ce dernier est un diagnostic,
+   pas encore une sortie dure laminaire ni un nouvel EOM qualifié.
+5. Garder `core` comme contrôle de stabilité et de coût, non comme cible
+   statistique prioritaire. Ajouter de petits nuages 3D à zones denses,
+   périphéries et couloir peu dense ; mesurer ce qui est récupéré avant
+   connexion parasite, puis jitter apparié et EOM z1/z2 équitablement.
+6. Ne pas reconstruire toutes les faces/cofaces de HGP-old pour obtenir ces
+   poids. Une clé de boule n'est pas un simplexe ; ses incidences n'ont pas
+   automatiquement le score Sτ du chapitre 9. Exiger la bonne unité de masse
+   et mesurer incidences, attaches, condensation et sortie explicite.
+
+Le bénéfice théorique est maintenant mieux ciblé ; aucun nouveau score de
+clustering, chrono FULL/G4, ni port GPU ne découle de cette relecture.
+Les arguments de réduction Gabriel des chapitres 8 et 9 ne deviennent pas
+des oracles par cette relecture : les contre-exemples archivés qui motivent
+FULL restent applicables. Le nouveau lemme de couverture suppose un
+catalogue critique complet, pas le seul graphe de Gabriel d'une ancienne version.

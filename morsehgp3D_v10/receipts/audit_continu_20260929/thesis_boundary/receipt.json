@@ -1,0 +1,174 @@
+{
+  "status": "pass",
+  "date_utc": "2026-09-29",
+  "scope": "source_reread_and_abstract_vote_only_not_native_FULL_or_GPU",
+  "thesis": {
+    "path": "docs/references/MANUSCRIT_THESE_HAUSEUX.pdf",
+    "sha256": "579f83671ebca34cd810f350820074eb42672411713160f9c9c2a458ff4f4fef",
+    "pdf_pages_total": 248,
+    "selected_part_I_pdf_pages": [
+      35,
+      76
+    ],
+    "selected_part_II_pdf_pages": [
+      77,
+      134
+    ],
+    "root_read_chunks": [
+      [
+        35,
+        46
+      ],
+      [
+        47,
+        56
+      ],
+      [
+        57,
+        66
+      ],
+      [
+        67,
+        78
+      ],
+      [
+        79,
+        88
+      ],
+      [
+        89,
+        98
+      ],
+      [
+        99,
+        108
+      ],
+      [
+        109,
+        120
+      ],
+      [
+        121,
+        130
+      ],
+      [
+        131,
+        136
+      ]
+    ],
+    "method": "Main agent read complete raw pdftotext output for each listed chunk, not only an annex or a delegated summary.",
+    "printed_page_to_pdf_offset": 26
+  },
+  "script_sha256": "33b4ebf0f6aac573db3ec4f9535cabff21150bd34000610ec60f0e031fd07a0f",
+  "commands": [
+    "/home/codespace/.python/current/bin/python3 morsehgp3D_v10/receipts/audit_continu_20260929/thesis_boundary/check_vote.py",
+    "/home/codespace/.python/current/bin/python3 -O morsehgp3D_v10/receipts/audit_continu_20260929/thesis_boundary/check_vote.py"
+  ],
+  "exit_codes": [
+    0,
+    0
+  ],
+  "normal_and_optimized_stdout_equal": true,
+  "output": {
+    "early_labels": {
+      "a": "A",
+      "b": "B",
+      "c": "C",
+      "d": "A",
+      "e": "B",
+      "f": "C",
+      "x": "C",
+      "y": "C"
+    },
+    "early_votes": {
+      "a": {
+        "A": "1"
+      },
+      "b": {
+        "B": "1"
+      },
+      "c": {
+        "C": "1"
+      },
+      "d": {
+        "A": "1"
+      },
+      "e": {
+        "B": "1"
+      },
+      "f": {
+        "C": "1"
+      },
+      "x": {
+        "A": "3/10",
+        "B": "3/10",
+        "C": "2/5"
+      },
+      "y": {
+        "A": "1/10",
+        "B": "1/10",
+        "C": "4/5"
+      }
+    },
+    "face_count": 6,
+    "fixed_anchors_nested": true,
+    "late_labels": {
+      "a": "AB",
+      "b": "AB",
+      "c": "C",
+      "d": "AB",
+      "e": "AB",
+      "f": "C",
+      "x": "AB",
+      "y": "C"
+    },
+    "late_votes": {
+      "a": {
+        "AB": "1"
+      },
+      "b": {
+        "AB": "1"
+      },
+      "c": {
+        "C": "1"
+      },
+      "d": {
+        "AB": "1"
+      },
+      "e": {
+        "AB": "1"
+      },
+      "f": {
+        "C": "1"
+      },
+      "x": {
+        "AB": "3/5",
+        "C": "2/5"
+      },
+      "y": {
+        "AB": "1/5",
+        "C": "4/5"
+      }
+    },
+    "nesting_violation_recomputed_vote": {
+      "early": [
+        "C",
+        "C"
+      ],
+      "late": [
+        "AB",
+        "C"
+      ],
+      "pair": [
+        "x",
+        "y"
+      ]
+    },
+    "point_count": 8,
+    "scope": "abstract_positive_face_weights_not_a_geometric_FULL_receipt",
+    "status": "pass",
+    "total_face_mass": "8"
+  },
+  "engine_modified": false,
+  "gcp_used": false
+}

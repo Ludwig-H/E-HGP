@@ -1,0 +1,52 @@
+{
+  "status": "PASS",
+  "scope": "exact rational collinear component-coverage oracle, not product qualification",
+  "source_sha256": "11fb43b964689b44aabeff5863e2856c599caaf99ede91d9630ee13eebfc20db",
+  "counts": {
+    "scenes": 273,
+    "cuts": 7822,
+    "point_queries": 30102,
+    "multi_component_queries": 1298,
+    "strict_radius_witnesses": 23385
+  },
+  "orders": [
+    1,
+    2,
+    3
+  ],
+  "minimum_only_counterexample": {
+    "points": [
+      -2,
+      0,
+      4
+    ],
+    "K": 2,
+    "R": 2,
+    "x": 0,
+    "expected_components": [
+      0,
+      1
+    ],
+    "minimum_only_components": [
+      0
+    ]
+  },
+  "weighted_zero_counterexample": {
+    "points": [
+      0,
+      10
+    ],
+    "weights": [
+      2,
+      1
+    ],
+    "K": 2,
+    "R": 1,
+    "expected_components": [
+      0
+    ],
+    "positive_only_components": []
+  },
+  "engine_imports": false,
+  "GCP_used": false
+}
