@@ -1,0 +1,9 @@
+pid=708851 state=S ppid=1 starttime_ticks=1586308
+python3 harness/fuzz.py 505 120 fuzz/g505_clang.tsv 
+2026-09-29 21:41:37.7443883790 0 /workspaces/E-HGP/build/v10-perf/feuille-verif/fuzz/g505_clang.log
+2026-09-29 21:47:13.5193753870 2862 /workspaces/E-HGP/build/v10-perf/feuille-verif/fuzz/g505_clang.tsv
+505	68	fam_clusters	74	ok		1	IDENTIQUE	0
+505	69	fam_clusters	239	ok		1	IDENTIQUE	0
+505	70	fam_clusters	188	ok		3	IDENTIQUE	0
+505	71	fam_extent	234	ok		1	IDENTIQUE	0
+505	72	fam_grid	111	ok		1	IDENTIQUE	0

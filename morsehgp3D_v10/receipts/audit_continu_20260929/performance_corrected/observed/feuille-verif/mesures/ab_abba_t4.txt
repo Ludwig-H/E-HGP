@@ -1,0 +1,2 @@
+lidar02_full                 K=5  fils=4  avant 7.588 [7.554-7.608] n=4  apres 5.571 [5.517-5.600] n=4  x1.362  apparies x1.354-x1.372  charge 31.3-36.9
+lidar02_full                 K=10 fils=4  avant 32.785 [32.626-32.943] n=2  apres 21.026 [20.936-21.116] n=2  x1.559  apparies x1.559-x1.559  charge 37.5-44.0

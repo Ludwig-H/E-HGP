@@ -1,0 +1,50 @@
+{
+  "attribution_statement": "Fixture d'audit, aucun score de nuage.",
+  "decision": {
+    "alpha": 0.05,
+    "bootstrap": 8,
+    "delta_min": 0.02,
+    "pairs": [
+      {
+        "adversary": "hdb",
+        "method": "tour",
+        "name": "tour_hdb"
+      }
+    ],
+    "permutations": 8,
+    "refusal_cap": 0.01
+  },
+  "id": "AUDIT_DEV_METADATA_ONLY",
+  "methods": [
+    {
+      "name": "tour"
+    },
+    {
+      "name": "hdb"
+    },
+    {
+      "name": "temoin"
+    }
+  ],
+  "plan": {
+    "families": [
+      "shells",
+      "spherical"
+    ],
+    "levels": [
+      "hard",
+      "easy"
+    ],
+    "manifest_sha256": "2f3cdc32e72c84e8621373647285e4c4761cea34e9617f7534e5c926f1430b65",
+    "noises": [
+      0.0,
+      0.1
+    ],
+    "replicates": 2,
+    "sizes": [
+      8000,
+      16000
+    ],
+    "split": "dev"
+  }
+}

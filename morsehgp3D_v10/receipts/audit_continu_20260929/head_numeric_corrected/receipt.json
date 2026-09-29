@@ -1,0 +1,74 @@
+{
+  "timestamp_utc": "2026-09-29T21:45:37Z",
+  "phase": "exploration_v10_hors_registre",
+  "backend": "cpu_reference",
+  "profile": "public_PointDendrogram_API_joint_numeric_domain",
+  "mode": "independent_readonly_numeric_audit",
+  "public_status": "not_claimed",
+  "original_snapshot": "/workspaces/E-HGP/build/v10-fixes/tete/src/morsehgp3D_v10",
+  "snapshot_base_declared_by_developer": "0bce6cc00",
+  "integrated_checkout_observed": "12aa92110; integrated head sources retain earlier hashes",
+  "archive": "source_snapshot contains the seven literal native files required by the two-unit head harness; no product source was edited",
+  "archive_matches_original_snapshot": true,
+  "source_sha256_before": {
+    "joint_head_probe.cpp": "9a830470b13a667d8daaf0459a8fd5fc72783d15f28201bff5f818862d93f894",
+    "source_snapshot/src/head/head.cpp": "dc34aed57e9248a58858515f731654540d38d9ed919877d81f7ca68476bc6dd5",
+    "source_snapshot/src/head/head.hpp": "8d9e29b1992d8d27cb9c542dadca4bd08631b8de128a8bd62a6fb46f8cad474b",
+    "source_snapshot/src/points/dendrogram.cpp": "2eadd747ff6804003e971bd2cb0d492beb7ee5fbd697d3975fb9822f966ba71f",
+    "source_snapshot/src/points/dendrogram.hpp": "cf42951edbfa01b6cfa93cfa88a498042548aa5df51c8872b68557f992412a00",
+    "source_snapshot/src/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "source_snapshot/src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "source_snapshot/src/core/reasons.def": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b"
+  },
+  "source_sha256_after": {
+    "joint_head_probe.cpp": "9a830470b13a667d8daaf0459a8fd5fc72783d15f28201bff5f818862d93f894",
+    "source_snapshot/src/head/head.cpp": "dc34aed57e9248a58858515f731654540d38d9ed919877d81f7ca68476bc6dd5",
+    "source_snapshot/src/head/head.hpp": "8d9e29b1992d8d27cb9c542dadca4bd08631b8de128a8bd62a6fb46f8cad474b",
+    "source_snapshot/src/points/dendrogram.cpp": "2eadd747ff6804003e971bd2cb0d492beb7ee5fbd697d3975fb9822f966ba71f",
+    "source_snapshot/src/points/dendrogram.hpp": "cf42951edbfa01b6cfa93cfa88a498042548aa5df51c8872b68557f992412a00",
+    "source_snapshot/src/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "source_snapshot/src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "source_snapshot/src/core/reasons.def": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b"
+  },
+  "source_hashes_equal_before_after": true,
+  "compile_cwd": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/head_numeric_corrected/",
+  "compile_argv": [
+    "g++",
+    "-std=c++20",
+    "-O2",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-Isource_snapshot/src",
+    "joint_head_probe.cpp",
+    "source_snapshot/src/points/dendrogram.cpp",
+    "source_snapshot/src/head/head.cpp",
+    "-o",
+    "/tmp/mhgp10-head-joint-audit-8u4znc8o/joint_head_probe_exact"
+  ],
+  "compiler": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "compile_exit_code": 0,
+  "compile_stdout": "",
+  "execute_argv": [
+    "/tmp/mhgp10-head-joint-audit-8u4znc8o/joint_head_probe_exact"
+  ],
+  "execute_exit_code": 0,
+  "stdout": "long_double_max_exponent=16384\ncase=u18_range_z1 z=1.00000000000000000e+00 per_point_weight=4294967295 total_integer_mass=8589934590 validate_d=ok/none validate_p=ok/none nonfinite_lambda=0 nonfinite_birth=0 nonfinite_stability=0 nan_stability=0 selected=0, labels=0,0, oracle_root_stability=9.9188020957155552469193935e+09 oracle_children_sum=7.2610670842844447526149452e+09 expected_selected=0, analytical_agreement=1\ncase=u18_range_z2 z=2.0000000000000000000000000e+00 per_point_weight=4294967295 total_integer_mass=8589934590 validate_d=ok/none validate_p=ok/none nonfinite_lambda=0 nonfinite_birth=0 nonfinite_stability=0 nan_stability=0 selected=1,2, labels=0,1, oracle_root_stability=1.1453246120000000000000000e+10 oracle_children_sum=2.2906492239999999998137355e+10 expected_selected=1,2, analytical_agreement=1\ncase=finite_lambda_unweighted_z2 z=2.0000000000000000000000000e+00 per_point_weight=1 total_integer_mass=2 validate_d=ok/none validate_p=ok/none nonfinite_lambda=0 nonfinite_birth=0 nonfinite_stability=0 nan_stability=0 selected=1,2, labels=0,1, oracle_root_stability=2.2222222222222222074785393e+299 oracle_children_sum=1.7777777777777777290978417e+300 expected_selected=1,2, analytical_agreement=1\ncase=finite_lambda_weighted_z2 z=2.0000000000000000000000000e+00 per_point_weight=4294967295 total_integer_mass=8589934590 validate_d=ok/none validate_p=ok/none nonfinite_lambda=0 nonfinite_birth=0 nonfinite_stability=3 nan_stability=0 selected=0, labels=0,0, oracle_root_stability=9.5443717666666666030931046e+308 oracle_children_sum=7.6354974133333331240546591e+309 expected_selected=1,2, analytical_agreement=0\ncase=zero_merge_z1 z=1.0000000000000000000000000e+00 per_point_weight=2 total_integer_mass=4 validate_d=ok/none validate_p=ok/none nonfinite_lambda=2 nonfinite_birth=2 nonfinite_stability=3 nan_stability=2 selected=0, labels=0,0,\ncontrols_pass=1 weighted_overflow_and_EOM_mismatch_reproduced=1 zero_merge_NaN_reproduced=1\n",
+  "binary_sha256": "38d88d982da5ea53541a6c144f7499d3d8fbcaebf8958c1a768500c4d17bba67",
+  "oracle": "Independent closed-form two-leaf condensation. For equal positive weights, children win iff merge_level > 4*leaf_level for z=1 and >2*leaf_level for z=2. Power-of-two scaling is exact on the chosen positive binary64 values; no computed product tree is reused. Long double values are approximate diagnostics, not a generic exact-arithmetic oracle; local max_exponent=16384.",
+  "observed_developer_tests": {
+    "path": "/workspaces/E-HGP/build/v10-fixes/tete/apres/ctest_gate.txt",
+    "completed": true,
+    "count": 11,
+    "failed": 0,
+    "wall_seconds": 2136.3,
+    "independently_reexecuted": false
+  },
+  "incomplete_separate_verification": {
+    "path": "/workspaces/E-HGP/build/v10-fixes/tete-verif/apres/ctest_gate.txt",
+    "observed": "unit and head_gate passed, catalogue oracle started",
+    "claim_of_completed_suite": false
+  },
+  "scope": "Five two-point manual cases only; no scene, seed, catalogue, tower, engine rebuild, sanitizer campaign or GCP. The range controls use u18-compatible levels but are not executions or qualifications of its producer.",
+  "preliminary_collector_failure_preserved": "launch_before_compile_completion.json records the attempted invocation before the yielded compilation had completed; this is not a geometric failure."
+}

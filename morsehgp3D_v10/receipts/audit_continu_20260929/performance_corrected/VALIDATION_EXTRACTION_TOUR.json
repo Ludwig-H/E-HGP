@@ -1,0 +1,145 @@
+{
+  "observations": 280,
+  "groups": [
+    {
+      "group": "replay",
+      "series": "chaine_k10",
+      "variant": "instr-c",
+      "threads": 1,
+      "count": 8
+    },
+    {
+      "group": "replay",
+      "series": "chaine_k10",
+      "variant": "instr-c",
+      "threads": 8,
+      "count": 8
+    },
+    {
+      "group": "replay",
+      "series": "chaine_k10",
+      "variant": "p1c-c",
+      "threads": 1,
+      "count": 8
+    },
+    {
+      "group": "replay",
+      "series": "chaine_k10",
+      "variant": "p1c-c",
+      "threads": 8,
+      "count": 8
+    },
+    {
+      "group": "replay",
+      "series": "chaine_k5",
+      "variant": "instr-c",
+      "threads": 1,
+      "count": 18
+    },
+    {
+      "group": "replay",
+      "series": "chaine_k5",
+      "variant": "instr-c",
+      "threads": 8,
+      "count": 18
+    },
+    {
+      "group": "replay",
+      "series": "chaine_k5",
+      "variant": "p1c-c",
+      "threads": 1,
+      "count": 18
+    },
+    {
+      "group": "replay",
+      "series": "chaine_k5",
+      "variant": "p1c-c",
+      "threads": 8,
+      "count": 18
+    },
+    {
+      "group": "replay_tour",
+      "series": "tour_k5",
+      "variant": "instr-c",
+      "threads": 1,
+      "count": 8
+    },
+    {
+      "group": "replay_tour",
+      "series": "tour_k5",
+      "variant": "instr-c",
+      "threads": 8,
+      "count": 8
+    },
+    {
+      "group": "replay_tour",
+      "series": "tour_k5",
+      "variant": "p1c-c",
+      "threads": 1,
+      "count": 8
+    },
+    {
+      "group": "replay_tour",
+      "series": "tour_k5",
+      "variant": "p1c-c",
+      "threads": 8,
+      "count": 8
+    },
+    {
+      "group": "wall_ab",
+      "series": "chaine_k5",
+      "variant": "base",
+      "threads": 4,
+      "count": 24
+    },
+    {
+      "group": "wall_ab",
+      "series": "chaine_k5",
+      "variant": "base",
+      "threads": 8,
+      "count": 24
+    },
+    {
+      "group": "wall_ab",
+      "series": "chaine_k5",
+      "variant": "p1c",
+      "threads": 4,
+      "count": 24
+    },
+    {
+      "group": "wall_ab",
+      "series": "chaine_k5",
+      "variant": "p1c",
+      "threads": 8,
+      "count": 24
+    },
+    {
+      "group": "wall_ab",
+      "series": "chaine_k5",
+      "variant": "p2c",
+      "threads": 4,
+      "count": 24
+    },
+    {
+      "group": "wall_ab",
+      "series": "chaine_k5",
+      "variant": "p2c",
+      "threads": 8,
+      "count": 24
+    }
+  ],
+  "unique_digest_by_series": {
+    "replay/chaine_k5": [
+      "8c830550f15e8721500909111b926055"
+    ],
+    "replay/chaine_k10": [
+      "03093d3052c8db4ba3ce41216d1b6d32"
+    ],
+    "replay_tour/tour_k5": [
+      "9a8070afa52433dbfd0f9393165ad11b"
+    ],
+    "wall_ab/chaine_k5": [
+      "8c830550f15e8721500909111b926055"
+    ]
+  }
+}

@@ -1,0 +1,869 @@
+diff --git a/morsehgp3D_v10/src/catalogue/catalogue.hpp b/morsehgp3D_v10/src/catalogue/catalogue.hpp
+index 2b1f28f..63aa344 100644
+--- a/morsehgp3D_v10/src/catalogue/catalogue.hpp
++++ b/morsehgp3D_v10/src/catalogue/catalogue.hpp
+@@ -77,7 +77,8 @@ struct Catalogue {
+   UninitVector<u32> n_interior;              // |I| en positions
+   UninitVector<geom::Level> level;           // niveau exact par rang
+   CatalogueLedger ledger;
+-  // temps muraux (s) : frontiere en largeur, taches paralleles des boites, ordre canonique, assemblage
++  // temps muraux (s) : frontiere (coupe de l'arbre en taches, tete et corps), taches paralleles des boites, ordre
++  // canonique, assemblage
+   double t_frontier = 0, t_boxes = 0, t_order = 0, t_assemble = 0;
+   double t_collect = 0, t_sort = 0, t_bands = 0, t_compare = 0, t_ranks = 0, t_copy = 0;  // detail des deux derniers
+   u64 bands = 0, band_members = 0;  // bandes flottantes reparees en exact, et leurs boules
+diff --git a/morsehgp3D_v10/src/catalogue/generator.cpp b/morsehgp3D_v10/src/catalogue/generator.cpp
+index f5c0042..30ebc0c 100644
+--- a/morsehgp3D_v10/src/catalogue/generator.cpp
++++ b/morsehgp3D_v10/src/catalogue/generator.cpp
+@@ -5,12 +5,16 @@
+ // sa liste, puis la coupe au milieu de son plus long cote. En u18 : |X| < 2^24, tests de dominance (forme D-loc) et
+ // bissectrices en i64 ; test droite des centres (lemme Z, zonogone) en i128 ; centres et recensement en i128.
+ #include <algorithm>
++#include <atomic>
+ #include <bit>
+ #include <chrono>
+ #include <cmath>
++#include <condition_variable>
+ #include <memory>
+ #include <mutex>
+ #include <numeric>
++#include <span>
++#include <thread>
+ 
+ #include "catalogue/catalogue.hpp"
+ #include "sched/sort.hpp"
+@@ -29,6 +33,13 @@ constexpr int kT = 6;
+ constexpr int kStagnationLimit = 9;
+ // Reservoir des dominateurs d'un noeud : au plus 3 K sites.
+ constexpr u32 kPool = 3 * kMaxCatalogueOrder;
++// Tete de la frontiere : un noeud a developper dont la liste parente a au moins max(kHeadList, n / P) sites est filtre
++// par tranches de kHeadGrain sites reparties sur le pool.
++constexpr u64 kHeadList = 4096;
++constexpr u32 kHeadGrain = 1024;
++// Frontiere : essais d'un ouvrier sans travail avant de dormir, et duree maximale d'un sommeil (microsecondes).
++constexpr u32 kIdleSpins = 64;
++constexpr int kIdleSleepUs = 200;
+ // Filtre des noeuds en i64 : la plus grande quantite est la cle du reservoir, < 27 2^(2 (B + T)).
+ static_assert(2 * (kCoordinateBits + kT) + 5 <= 63, "filtre des noeuds : bornes i64");
+ 
+@@ -224,7 +235,7 @@ geom::Level emitted_level(const Ctx& C, const std::vector<u32>& sh, const std::a
+ // admission, emission. theta : seuil d'admission de la presentation (feuille v2). Le recensement s'arrete des
+ // que le poids interieur le depasse : S* d'une boule admise ne s'arrete jamais (lemme S), une presentation
+ // non canonique peut s'arreter puisque S* est enumere dans la meme feuille. theta = K - 1 : sortie p >= K.
+-void judge(const Ctx& C, Local& L, const std::vector<u32>& cand, u32 anchor_local, const geom::Center& ctr,
++void judge(const Ctx& C, Local& L, std::span<const u32> cand, u32 anchor_local, const geom::Center& ctr,
+            const std::array<u32, 4>& gen, u8 qgen, i64 theta) {
+   ++L.led.judged;
+   const P3 a = L.lp[anchor_local];
+@@ -317,7 +328,7 @@ inline u64 popcount64(u64 x) {
+ // memo des coquilles etendues rend l'emission unique quel que soit l'ordre d'enumeration. Aucun flottant.
+ // Masques sur NW mots de 64 bits ; NW = 0 : nombre de mots lu a l'execution (feuilles de plus de 256 sites).
+ template <int NW>
+-void enumerate_leaf_masks(const Ctx& C, Local& L, const std::vector<u32>& c, const Box& Q, u32 nw_rt) {
++void enumerate_leaf_masks(const Ctx& C, Local& L, std::span<const u32> c, const Box& Q, u32 nw_rt) {
+   const u32 m = static_cast<u32>(c.size());
+   const u32 nw = NW > 0 ? static_cast<u32>(NW) : nw_rt;
+   L.memo.clear();
+@@ -464,7 +475,7 @@ void enumerate_leaf_masks(const Ctx& C, Local& L, const std::vector<u32>& c, con
+   }
+ }
+ 
+-void enumerate_leaf(const Ctx& C, Local& L, const std::vector<u32>& c, const Box& Q) {
++void enumerate_leaf(const Ctx& C, Local& L, std::span<const u32> c, const Box& Q) {
+   const u32 m = static_cast<u32>(c.size());
+   if (m <= 64) enumerate_leaf_masks<1>(C, L, c, Q, 1);
+   else if (m <= 128) enumerate_leaf_masks<2>(C, L, c, Q, 2);
+@@ -472,11 +483,9 @@ void enumerate_leaf(const Ctx& C, Local& L, const std::vector<u32>& c, const Box
+   else enumerate_leaf_masks<0>(C, L, c, Q, (m + 63) / 64);
+ }
+ 
+-struct Task {
+-  Box box;
+-  std::shared_ptr<const std::vector<u32>> parent;
+-  int parent_stag;
+-};
++// Listes de sites (sous-suites croissantes de 0, ..., n - 1) : tableaux sans initialisation par valeur, chaque case
++// est ecrite par le filtre ou par la copie compacte de la tete avant d'etre lue.
++using List = UninitVector<u32>;
+ 
+ // Filtre d'un noeud : liste certifiee de la boite a partir de la liste parente (lemme D). Reservoir : les
+ // min(|parent|, 3K) sites les plus proches du centre de la boite, ordre (distance, site) ; Y : son plus petit
+@@ -492,20 +501,20 @@ struct Task {
+ // < K : ni G ni D n'excluent. Comptage sans branchement sur S0 puis sur Y \ S0 : le poids partiel ne fait que
+ // croitre, donc s'arreter apres S0 des qu'il atteint K ne change pas la decision.
+ // Les listes sont des sous-suites de (0, ..., n - 1) : le rang dans la liste departage comme l'indice de site.
+-// Hors ligne : inline dans process (recursif), le noyau deborde ses registres sur la pile.
+-[[gnu::noinline]] void filter_node(const Ctx& C, Local& L, const Box& Q, const std::vector<u32>& parent,
+-                                   std::vector<u32>& cand) {
+-  const u32 np = static_cast<u32>(parent.size());
+-  const i64 hx = Q.hi[0] - Q.lo[0], hy = Q.hi[1] - Q.lo[1], hz = Q.hi[2] - Q.lo[2];
+-  // reservoir par insertion, cle (dd, rang)
+-  const u32 cap = std::min<u32>(np, 3u * static_cast<u32>(C.K));
++// Le filtre est ecrit en trois morceaux (reservoir, dominateurs, tri des sites) : filter_node les enchaine sur toute la
++// liste, la tete de la frontiere les applique a des tranches de la liste parente reparties sur le pool.
++
++// Reservoir : les cap plus petites cles (dd, rang) inserees, triees. Une cle inseree a un rang plus grand que les cles
++// presentes de meme dd (insertion dans l'ordre de la liste, ou fusion de reservoirs de tranches dans l'ordre des
++// tranches) : elle passe apres elles, et l'ordre (dd, rang) est lexicographique. Le reservoir d'une liste est donc la
++// fusion, dans l'ordre des tranches, des reservoirs de ses tranches : les cap plus petites cles de la liste sont parmi
++// les cap plus petites de leur tranche.
++struct Reservoir {
+   i64 kd[kPool];
+-  u32 kr[kPool], nb = 0;
+-  for (u32 t = 0; t < np; ++t) {
+-    const P3& X = C.X[parent[t]];
+-    const i64 da = 2 * (X.x - Q.lo[0]) - hx, db = 2 * (X.y - Q.lo[1]) - hy, dc = 2 * (X.z - Q.lo[2]) - hz;
+-    const i64 dd = da * da + db * db + dc * dc;
+-    if (nb == cap && dd >= kd[nb - 1]) continue;
++  u32 kr[kPool];
++  u32 nb = 0;
++  void insert(u32 cap, i64 dd, u32 t) {
++    if (nb == cap && dd >= kd[nb - 1]) return;
+     u32 j = nb < cap ? nb++ : nb - 1;
+     for (; j > 0 && kd[j - 1] > dd; --j) {
+       kd[j] = kd[j - 1];
+@@ -514,34 +523,67 @@ struct Task {
+     kd[j] = dd;
+     kr[j] = t;
+   }
+-  // Y en SoA (2h_i x'_i, A, poids), S0 = ses s0 premiers
+-  i64 yx[kPool], yy[kPool], yz[kPool], ya[kPool], yw[kPool];
++};
++
++// Y en SoA (2h_i x'_i, A, poids) et S0 = ses s0 premiers.
++struct Dominators {
++  i64 x[kPool], y[kPool], z[kPool], a[kPool], w[kPool];
++  u32 ny = 0, s0 = 0;
++};
++
++inline u32 pool_cap(const Ctx& C, u32 np) { return std::min<u32>(np, 3u * static_cast<u32>(C.K)); }
++
++// Cles des sites s[0, k) inseres dans R, s[j] au rang rank0 + j de la liste.
++inline void reserve(const Ctx& C, const Box& Q, const u32* s, u32 k, u32 rank0, u32 cap, Reservoir& R) {
++  const i64 hx = Q.hi[0] - Q.lo[0], hy = Q.hi[1] - Q.lo[1], hz = Q.hi[2] - Q.lo[2];
++  for (u32 j = 0; j < k; ++j) {
++    const P3& X = C.X[s[j]];
++    const i64 da = 2 * (X.x - Q.lo[0]) - hx, db = 2 * (X.y - Q.lo[1]) - hy, dc = 2 * (X.z - Q.lo[2]) - hz;
++    R.insert(cap, da * da + db * db + dc * dc, rank0 + j);
++  }
++}
++
++// Fusion de reservoirs de tranches, dans l'ordre des tranches.
++inline void merge_into(Reservoir& R, const Reservoir& part, u32 cap) {
++  for (u32 j = 0; j < part.nb; ++j) R.insert(cap, part.kd[j], part.kr[j]);
++}
++
++inline void dominators(const Ctx& C, const Box& Q, const u32* parent, const Reservoir& R, Dominators& Y) {
++  const i64 hx = Q.hi[0] - Q.lo[0], hy = Q.hi[1] - Q.lo[1], hz = Q.hi[2] - Q.lo[2];
+   u32 ny = 0, s0 = 0;
+-  for (u64 acc = 0; ny < nb && acc < 3 * u64(C.K); ++ny) {
+-    const u32 s = parent[kr[ny]];
++  for (u64 acc = 0; ny < R.nb && acc < 3 * u64(C.K); ++ny) {
++    const u32 s = parent[R.kr[ny]];
+     const i64 a = C.X[s].x - Q.lo[0], b = C.X[s].y - Q.lo[1], c = C.X[s].z - Q.lo[2];
+-    yx[ny] = 2 * hx * a;
+-    yy[ny] = 2 * hy * b;
+-    yz[ny] = 2 * hz * c;
+-    ya[ny] = a * a + b * b + c * c;
+-    yw[ny] = C.w[s];
++    Y.x[ny] = 2 * hx * a;
++    Y.y[ny] = 2 * hy * b;
++    Y.z[ny] = 2 * hz * c;
++    Y.a[ny] = a * a + b * b + c * c;
++    Y.w[ny] = C.w[s];
+     acc += C.w[s];
+     if (s0 == 0 && acc >= u64(C.K)) s0 = ny + 1;
+   }
+-  if (s0 == 0) s0 = ny;
+-  // sortie sans branchement, dans l'ordre de la liste parente
+-  cand.resize(np);
++  Y.ny = ny;
++  Y.s0 = s0 == 0 ? ny : s0;
++}
++
++// Sites de parent[t0, t1) que Y ne domine pas d'un poids >= K, ecrits a partir de out dans l'ordre de la liste, sans
++// branchement (out a t1 - t0 cases) ; rend leur nombre. Hors ligne : inline dans process (recursif), le noyau deborde
++// ses registres sur la pile.
++[[gnu::noinline]] u32 keep(const Ctx& C, const Box& Q, const u32* parent, u32 t0, u32 t1, const Dominators& Y,
++                           u32* out, u64& tests_out) {
++  const i64 hx = Q.hi[0] - Q.lo[0], hy = Q.hi[1] - Q.lo[1], hz = Q.hi[2] - Q.lo[2];
++  const u32 ny = Y.ny, s0 = Y.s0;
+   u32 m = 0;
+   u64 tests = 0;
+-  for (u32 t = 0; t < np; ++t) {
++  for (u32 t = t0; t < t1; ++t) {
+     const u32 s = parent[t];
+     const i64 a = C.X[s].x - Q.lo[0], b = C.X[s].y - Q.lo[1], c = C.X[s].z - Q.lo[2];
+     const i64 px = 2 * hx * a, py = 2 * hy * b, pz = 2 * hz * c, pa = a * a + b * b + c * c;
+     auto weight = [&](u32 r0, u32 r1) {  // poids des dominateurs de x parmi Y[r0, r1)
+       i64 w = 0;
+       for (u32 r = r0; r < r1; ++r) {
+-        const i64 d = std::max<i64>(px - yx[r], 0) + std::max<i64>(py - yy[r], 0) + std::max<i64>(pz - yz[r], 0);
+-        w += -i64(pa - ya[r] > d) & yw[r];  // masque : sans branchement
++        const i64 d = std::max<i64>(px - Y.x[r], 0) + std::max<i64>(py - Y.y[r], 0) + std::max<i64>(pz - Y.z[r], 0);
++        w += -i64(pa - Y.a[r] > d) & Y.w[r];  // masque : sans branchement
+       }
+       return w;
+     };
+@@ -551,74 +593,482 @@ struct Task {
+       dom += weight(s0, ny);
+       tests += ny - s0;
+     }
+-    cand[m] = s;
++    out[m] = s;
+     m += dom < C.K;
+   }
+-  cand.resize(m);
+-  L.led.filter_tests += tests;
++  tests_out += tests;
++  return m;
+ }
+ 
+-// Noeud : liste certifiee de Q, puis boite ajustee S = Q inter [env.lo, env.hi + 1), env enveloppe fermee de la liste
+-// (coordonnees entieres). S contient tout centre admis de Q : une boule admise a son support dans sa coquille, donc
+-// dans la liste (theoreme C), et son centre dans l'interieur relatif de conv(support), inclus dans l'enveloppe fermee.
+-// S vide est le lemme K (aucun centre possible). S est coupee en deux au milieu de son plus long cote : les deux
+-// moities pavent S, chaque centre admis reste dans une seule feuille. Une boite fille est incluse dans S, donc dans
+-// l'enveloppe de sa liste parente : la pre-ignorance par cette enveloppe (J2) ne se declencherait jamais.
+-void process(const Ctx& C, Local& L, const Box& Q, const std::vector<u32>& parent, int parent_stag,
+-             std::vector<Task>* spill) {
+-  ++L.led.nodes;
+-  std::vector<u32> cand;
+-  filter_node(C, L, Q, parent, cand);
+-  // Lemme K : liste vide, ou boite ajustee vide sur un axe (l'enveloppe manque Q) : aucun centre possible dans Q.
+-  if (cand.empty()) {
+-    ++L.led.skipped_bbox;
+-    return;
++void filter_node(const Ctx& C, Local& L, const Box& Q, std::span<const u32> parent, List& cand) {
++  const u32 np = static_cast<u32>(parent.size());
++  Reservoir R;
++  reserve(C, Q, parent.data(), np, 0, pool_cap(C, np), R);
++  Dominators Y;
++  dominators(C, Q, parent.data(), R, Y);
++  cand.resize(np);
++  cand.resize(keep(C, Q, parent.data(), 0, np, Y, cand.data(), L.led.filter_tests));
++}
++
++// Enveloppe fermee des sites c[0, m), m > 0 (repere T).
++inline Box envelope(const Ctx& C, const u32* c, u32 m) {
++  Box E = {{INT64_MAX, INT64_MAX, INT64_MAX}, {INT64_MIN, INT64_MIN, INT64_MIN}};
++  for (u32 t = 0; t < m; ++t) {
++    const P3& x = C.X[c[t]];
++    E.lo[0] = std::min(E.lo[0], x.x);
++    E.lo[1] = std::min(E.lo[1], x.y);
++    E.lo[2] = std::min(E.lo[2], x.z);
++    E.hi[0] = std::max(E.hi[0], x.x);
++    E.hi[1] = std::max(E.hi[1], x.y);
++    E.hi[2] = std::max(E.hi[2], x.z);
++  }
++  return E;
++}
++
++inline void envelope_merge(Box& E, const Box& F) {
++  for (int a = 0; a < 3; ++a) {
++    E.lo[a] = std::min(E.lo[a], F.lo[a]);
++    E.hi[a] = std::max(E.hi[a], F.hi[a]);
+   }
+-  Box S = {{INT64_MAX, INT64_MAX, INT64_MAX}, {INT64_MIN, INT64_MIN, INT64_MIN}};  // enveloppe, puis boite ajustee
+-  for (u32 s : cand) {
+-    const P3& x = C.X[s];
+-    S.lo[0] = std::min(S.lo[0], x.x);
+-    S.lo[1] = std::min(S.lo[1], x.y);
+-    S.lo[2] = std::min(S.lo[2], x.z);
+-    S.hi[0] = std::max(S.hi[0], x.x);
+-    S.hi[1] = std::max(S.hi[1], x.y);
+-    S.hi[2] = std::max(S.hi[2], x.z);
+-  }
+-  int ax = 0;  // axe du plus long cote de S (le premier en cas d'egalite)
++}
++
++// Decision d'un noeud de liste non vide (m sites, liste parente de np sites), d'enveloppe fermee E.
++struct Fit {
++  Box S;       // boite ajustee
++  int ax;      // axe du plus long cote de S (le premier en cas d'egalite)
++  i64 mid;     // milieu de la coupe
++  int stag;    // niveaux sans decroissance sous l'echelle de la grille
++  bool split;  // deux filles, sinon feuille
++};
++
++// Boite ajustee S = Q inter [E.lo, E.hi + 1), E enveloppe fermee de la liste (coordonnees entieres). S contient tout
++// centre admis de Q : une boule admise a son support dans sa coquille, donc dans la liste (theoreme C), et son centre
++// dans l'interieur relatif de conv(support), inclus dans l'enveloppe fermee. S vide est le lemme K (aucun centre
++// possible) : rend faux. S est coupee en deux au milieu de son plus long cote : les deux moities pavent S, chaque
++// centre admis reste dans une seule feuille. Une boite fille est incluse dans S, donc dans l'enveloppe de sa liste
++// parente : la pre-ignorance par cette enveloppe (J2) ne se declencherait jamais.
++inline bool decide(const Ctx& C, Local& L, const Box& Q, const Box& E, u64 m, u64 np, int parent_stag, Fit& f) {
++  Box S = E;
++  int ax = 0;
+   for (int a = 0; a < 3; ++a) {
+     S.lo[a] = std::max(S.lo[a], Q.lo[a]);
+     S.hi[a] = std::min(S.hi[a] + 1, Q.hi[a]);
+     if (S.lo[a] >= S.hi[a]) {
+       ++L.led.skipped_bbox;
+-      return;
++      return false;
+     }
+     if (S.hi[a] - S.lo[a] > S.hi[ax] - S.lo[ax]) ax = a;
+   }
+   const i64 side = S.hi[ax] - S.lo[ax];
+-  const int stag = (side <= (i64(1) << kT) && cand.size() == parent.size()) ? parent_stag + 1 : 0;
+-  if (cand.size() > C.M && side > 1 && stag < kStagnationLimit) {
+-    const i64 mid = (S.lo[ax] + S.hi[ax]) / 2;
+-    auto shared = spill ? std::make_shared<const std::vector<u32>>(cand) : nullptr;
+-    for (int o = 0; o < 2; ++o) {
+-      Box ch = S;
+-      (o ? ch.lo[ax] : ch.hi[ax]) = mid;
+-      if (spill) spill->push_back(Task{ch, shared, stag});
+-      else process(C, L, ch, cand, stag, nullptr);
+-    }
+-    return;
+-  }
++  f.S = S;
++  f.ax = ax;
++  f.mid = (S.lo[ax] + S.hi[ax]) / 2;
++  f.stag = (side <= (i64(1) << kT) && m == np) ? parent_stag + 1 : 0;
++  f.split = m > C.M && side > 1 && f.stag < kStagnationLimit;
++  return true;
++}
++
++inline Box child_box(const Fit& f, int o) {
++  Box ch = f.S;
++  (o ? ch.lo[f.ax] : ch.hi[f.ax]) = f.mid;
++  return ch;
++}
++
++// Feuille : grand livre, refus transactionnel d'une liste trop large, enumeration.
++void leaf(const Ctx& C, Local& L, std::span<const u32> cand, const Fit& f) {
+   ++L.led.leaves;
+-  if (stag >= kStagnationLimit) ++L.led.stalled_leaves;
++  if (f.stag >= kStagnationLimit) ++L.led.stalled_leaves;
+   L.led.sum_m += cand.size();
+   L.led.max_m = std::max<u64>(L.led.max_m, cand.size());
+   if (cand.size() > C.max_leaf) {
+-    const Outcome f = fail(Reason::wide_leaf);
+-    if (L.fail.ok()) L.fail = f;
++    const Outcome fl = fail(Reason::wide_leaf);
++    if (L.fail.ok()) L.fail = fl;
++    return;
++  }
++  enumerate_leaf(C, L, cand, f.S);
++}
++
++// Noeud : liste certifiee de Q, boite ajustee, puis deux filles (recursion en profondeur) ou feuille.
++void process(const Ctx& C, Local& L, const Box& Q, std::span<const u32> parent, int parent_stag) {
++  ++L.led.nodes;
++  List cand;
++  filter_node(C, L, Q, parent, cand);
++  // Lemme K : liste vide, ou boite ajustee vide sur un axe (l'enveloppe manque Q) : aucun centre possible dans Q.
++  if (cand.empty()) {
++    ++L.led.skipped_bbox;
++    return;
++  }
++  const u32 m = static_cast<u32>(cand.size());
++  Fit f;
++  if (!decide(C, L, Q, envelope(C, cand.data(), m), m, parent.size(), parent_stag, f)) return;
++  if (f.split) {
++    for (int o = 0; o < 2; ++o) process(C, L, child_box(f, o), cand, f.stag);
++    return;
++  }
++  leaf(C, L, cand, f);
++}
++
++// ---------------------------------------------------------------------------------------------------------------
++// Frontiere (coupe de l'arbre en taches paralleles). L'arbre (boites, listes, feuilles) est une fonction de l'entree
++// seule ; la frontiere n'en est qu'une coupe, et le catalogue n'en depend pas (ordre canonique).
++//
++// Charge d'une tache : sites de sa liste parente dans sa boite (demi-ouverte), comme la frontiere J1 ; cap = n / (64 P).
++// Regle locale : une tache est developpee dans la frontiere (filtre, ajustement, puis feuille ou deux filles) si sa
++// charge est > cap ou si sa liste parente a au moins theta sites ; sinon elle est gardee pour l'etage des boites. La
++// decision ne depend que de la tache : l'ensemble des taches gardees est une fonction de l'entree, de cap et de theta,
++// jamais de l'ordre de traitement. Une tache gardee a donc au plus cap sites dans sa boite et moins de theta sites dans
++// sa liste parente (a plusieurs fils ; la frontiere J1 pouvait garder une petite boite a tres grande liste). Les
++// taches gardees partent par charge decroissante, puis par coin bas de la boite (unique : les boites gardees sont
++// deux a deux disjointes et non vides) : ordre total, le meme quels que soient le nombre de fils et l'ordonnancement.
++//
++// Execution : une seule region du pool (Frontier), sans barriere entre niveaux. Les taches a developper de liste
++// parente >= theta (tete : les premiers niveaux n'ont que 1, 2, 4 taches, et leurs listes portent presque tout le
++// nuage : 45 845, 45 845, 45 346, 44 466 sites sur la trame 02) ont leur filtre decoupe en tranches ; les autres (corps)
++// sont developpees d'un bloc. Tranches et taches de corps sont des elements de travail des memes piles, pris par vol de
++// taches : la tete et le corps se recouvrent.
++struct Task {
++  Box box{};
++  std::shared_ptr<const List> parent;
++  int parent_stag = 0;
++  u64 load = 0;
++};
++
++// Charges des deux filles de f (sites de c[0, m) dans chacune) : c dans la fille basse si et seulement si c est dans
++// S et sa coordonnee sur l'axe de coupe est < mid.
++inline void child_loads(const Ctx& C, const Fit& f, const u32* c, u32 m, u64 l[2]) {
++  const Box& S = f.S;
++  const int ax = f.ax;
++  u64 a = 0, b = 0;
++  for (u32 t = 0; t < m; ++t) {
++    const P3& x = C.X[c[t]];
++    const bool in = x.x >= S.lo[0] && x.x < S.hi[0] && x.y >= S.lo[1] && x.y < S.hi[1] && x.z >= S.lo[2] &&
++                    x.z < S.hi[2];
++    const i64 v = ax == 0 ? x.x : (ax == 1 ? x.y : x.z);
++    a += in && v < f.mid;
++    b += in && v >= f.mid;
++  }
++  l[0] += a;
++  l[1] += b;
++}
++
++// Developpe une tache sur un ouvrier : filtre, ajustement, puis feuille (enumeree ici) ou deux filles ; une fille de
++// charge > cap est a developper (dev), les autres sont gardees (kept).
++void expand(const Ctx& C, Local& L, const Task& t, u64 cap, std::vector<Task>& dev, std::vector<Task>& kept) {
++  ++L.led.nodes;
++  List cand;
++  filter_node(C, L, t.box, *t.parent, cand);
++  if (cand.empty()) {
++    ++L.led.skipped_bbox;
++    return;
++  }
++  const u32 m = static_cast<u32>(cand.size());
++  Fit f;
++  if (!decide(C, L, t.box, envelope(C, cand.data(), m), m, t.parent->size(), t.parent_stag, f)) return;
++  if (!f.split) {
++    leaf(C, L, cand, f);
+     return;
+   }
+-  enumerate_leaf(C, L, cand, S);
++  u64 l[2] = {0, 0};
++  child_loads(C, f, cand.data(), m, l);
++  auto shared = std::make_shared<const List>(std::move(cand));
++  for (int o = 0; o < 2; ++o) (l[o] > cap ? dev : kept).push_back(Task{child_box(f, o), shared, f.stag, l[o]});
+ }
+ 
++// Tete. Une tache de tete (a developper, liste parente d'au moins theta sites) est developpee avec son filtre decoupe
++// en tranches de grain sites de sa liste parente ; les tranches sont des elements de travail comme les autres (voir
++// frontier). Phases d'une tache de tete :
++//   0. (racine seulement) reservoir de chaque tranche ; fusion dans l'ordre des tranches = reservoir serie (Reservoir) ;
++//   1. tri des sites de chaque tranche (dans une copie de travail, a la place de la tranche), enveloppe des gardes ;
++//      etape serie : decision (O(tranches)) ;
++//   2. copie compacte (tranches concatenees dans leur ordre : meme liste qu'en serie), charges des filles et, si les
++//      filles restent en tete, leurs reservoirs sur les gardes de la tranche (rang = place dans la liste compacte) ;
++//      etape serie : classement des filles, feuille eventuelle (rare : une grande liste reduite a M sites au plus).
++// L'etape serie d'une phase est faite par l'ouvrier qui termine la derniere tranche (compteur atomique : chaque
++// tranche ecrit ses resultats avant de decrementer, en liberation ; le dernier lit en acquisition).
++struct Piece {
++  u32 t0, t1;
++  u32 kept = 0, at = 0;  // sites gardes, et place du premier dans la liste compacte
++  u64 tests = 0, l[2] = {0, 0};
++  Box env;
++  Reservoir R[2];  // phase 0 : R[0] reservoir de la tranche ; phase 2 : reservoirs des filles
++};
++
++struct Big {
++  Task t;
++  Reservoir R;  // reservoir de la liste parente
++  Dominators Y;
++  List scratch;
++  std::vector<Piece> pc;
++  std::vector<u32> todo;  // tranches de la phase en cours
++  std::atomic<u32> remaining{0};
++  int phase = 0;
++  Fit fit;
++  u8 state = 0;  // 1 : feuille, 2 : deux filles
++  std::shared_ptr<List> list;
++};
++
++// Element de travail : tache de noeud (big nul) ou tranche d'une tache de tete.
++struct Work {
++  Task t;
++  Big* big = nullptr;
++  u32 piece = 0;
++};
++
++// Pile d'un ouvrier : le proprietaire prend au bout (profondeur d'abord), un voleur prend l'element le plus ancien.
++struct alignas(64) Stack {
++  std::mutex m;
++  std::vector<Work> q;
++  size_t head = 0;             // q[head, size) : elements presents
++  std::atomic<u64> count{0};  // q.size() - head, lu sans verrou par les voleurs
++};
++
++struct Frontier {
++  const Ctx& C;
++  std::vector<Local>& locals;
++  u64 cap, theta;
++  u32 grain;
++  std::vector<Stack> st;
++  std::vector<std::vector<Task>> kept_w;
++  std::atomic<u64> pending{0};  // elements publies non termines (en pile ou en cours)
++  // Ouvrier sans travail : kIdleSpins essais (yield), puis sommeil borne sur idle_cv (compteur d'evenements epoch) :
++  // chaque publication et la fin (pending == 0) incrementent epoch puis lisent sleepers ; le dormeur lit epoch, s'inscrit
++  // dans sleepers, reteste le travail, puis attend que epoch change. Operations seq_cst des deux cotes : soit le dormeur
++  // voit le travail (ou le nouvel epoch), soit le publieur le voit inscrit et le reveille ; aucun reveil perdu. Le sommeil
++  // reste borne a kIdleSleepUs. Sur une machine dediee, les attentes courtes (transitions de phase) restent actives.
++  std::mutex idle_m;
++  std::condition_variable idle_cv;
++  std::atomic<u32> sleepers{0};
++  std::atomic<u64> epoch{0};
++
++  Frontier(const Ctx& c, std::vector<Local>& l, unsigned P, u64 cp, u64 th, u32 g)
++      : C(c), locals(l), cap(cp), theta(th), grain(g), st(P), kept_w(P) {}
++
++  void wake() {
++    epoch.fetch_add(1, std::memory_order_seq_cst);
++    if (sleepers.load(std::memory_order_seq_cst) == 0) return;
++    std::lock_guard<std::mutex> lk(idle_m);
++    idle_cv.notify_all();
++  }
++
++  bool has_work() const {
++    for (const Stack& s : st)
++      if (s.count.load(std::memory_order_relaxed) > 0) return true;
++    return false;
++  }
++
++  void sleep() {
++    const u64 e = epoch.load(std::memory_order_seq_cst);
++    sleepers.fetch_add(1, std::memory_order_seq_cst);
++    if (pending.load(std::memory_order_seq_cst) != 0 && !has_work()) {
++      std::unique_lock<std::mutex> lk(idle_m);
++      idle_cv.wait_for(lk, std::chrono::microseconds(kIdleSleepUs),
++                       [&] { return epoch.load(std::memory_order_seq_cst) != e; });
++    }
++    sleepers.fetch_sub(1, std::memory_order_relaxed);
++  }
++
++  // Publie des elements sur la pile de wk : comptes avant d'etre visibles, donc avant que leur createur ne se retire.
++  void push(unsigned wk, std::vector<Work>& items) {
++    if (items.empty()) return;
++    pending.fetch_add(items.size(), std::memory_order_relaxed);
++    {
++      Stack& s = st[wk];
++      std::lock_guard<std::mutex> lk(s.m);
++      for (Work& w : items) s.q.push_back(std::move(w));
++      s.count.store(s.q.size() - s.head, std::memory_order_relaxed);
++    }
++    items.clear();
++    wake();
++  }
++
++  bool pop(unsigned wk, Work& w) {
++    Stack& own = st[wk];
++    if (own.count.load(std::memory_order_relaxed) > 0) {
++      std::lock_guard<std::mutex> lk(own.m);
++      if (own.q.size() > own.head) {
++        w = std::move(own.q.back());
++        own.q.pop_back();
++        if (own.q.size() == own.head) {
++          own.q.clear();
++          own.head = 0;
++        }
++        own.count.store(own.q.size() - own.head, std::memory_order_relaxed);
++        return true;
++      }
++    }
++    const unsigned P = static_cast<unsigned>(st.size());
++    for (unsigned j = 1; j < P; ++j) {
++      Stack& v = st[(wk + j) % P];
++      if (v.count.load(std::memory_order_relaxed) == 0) continue;
++      std::lock_guard<std::mutex> lk(v.m);
++      if (v.q.size() > v.head) {
++        w = std::move(v.q[v.head++]);
++        if (v.q.size() == v.head) {
++          v.q.clear();
++          v.head = 0;
++        }
++        v.count.store(v.q.size() - v.head, std::memory_order_relaxed);
++        return true;
++      }
++    }
++    return false;
++  }
++
++  // Nouvelle tache de tete (reservoir R de sa liste deja calcule, sauf phase 0) : tranches de la phase publiees.
++  Big* make_big(Task&& t) {
++    Big* b = new Big;
++    b->t = std::move(t);
++    const u32 np = static_cast<u32>(b->t.parent->size());
++    const u32 nch = std::max<u32>(1, (np + grain - 1) / grain);
++    b->pc.resize(nch);
++    for (u32 c = 0; c < nch; ++c) {
++      b->pc[c].t0 = static_cast<u32>(u64(np) * c / nch);
++      b->pc[c].t1 = static_cast<u32>(u64(np) * (c + 1) / nch);
++    }
++    return b;
++  }
++
++  void publish_phase(Big* b, int phase, unsigned wk, std::vector<Work>& out) {
++    b->phase = phase;
++    b->todo.clear();
++    for (u32 c = 0; c < b->pc.size(); ++c)
++      if (phase != 2 || b->pc[c].kept > 0) b->todo.push_back(c);
++    b->remaining.store(static_cast<u32>(b->todo.size()), std::memory_order_relaxed);
++    for (u32 c : b->todo) {
++      Work w;
++      w.big = b;
++      w.piece = c;
++      out.push_back(std::move(w));
++    }
++    push(wk, out);
++  }
++
++  void start_keep(Big* b, unsigned wk, std::vector<Work>& out) {
++    dominators(C, b->t.box, b->t.parent->data(), b->R, b->Y);
++    b->scratch.resize(b->t.parent->size());
++    publish_phase(b, 1, wk, out);
++  }
++
++  void run_piece(Big* b, u32 c) {
++    Piece& p = b->pc[c];
++    const Task& t = b->t;
++    if (b->phase == 0) {
++      reserve(C, t.box, t.parent->data() + p.t0, p.t1 - p.t0, p.t0, pool_cap(C, static_cast<u32>(t.parent->size())),
++              p.R[0]);
++    } else if (b->phase == 1) {
++      u32* out = b->scratch.data() + p.t0;
++      p.kept = keep(C, t.box, t.parent->data(), p.t0, p.t1, b->Y, out, p.tests);
++      if (p.kept > 0) p.env = envelope(C, out, p.kept);
++    } else {
++      const u32* src = b->scratch.data() + p.t0;
++      std::copy(src, src + p.kept, b->list->data() + p.at);
++      if (b->state != 2) return;
++      child_loads(C, b->fit, src, p.kept, p.l);
++      const u32 m = static_cast<u32>(b->list->size());
++      if (m < theta) return;
++      for (int o = 0; o < 2; ++o) reserve(C, child_box(b->fit, o), src, p.kept, p.at, pool_cap(C, m), p.R[o]);
++    }
++  }
++
++  // Etape serie apres la derniere tranche d'une phase ; rend vrai si b est termine (a liberer).
++  bool finish_phase(Big* b, unsigned wk, std::vector<Work>& out) {
++    Local& L = locals[wk];
++    const Task& t = b->t;
++    if (b->phase == 0) {
++      const u32 cp = pool_cap(C, static_cast<u32>(t.parent->size()));
++      for (const Piece& p : b->pc) merge_into(b->R, p.R[0], cp);
++      for (Piece& p : b->pc) p.R[0].nb = 0;
++      start_keep(b, wk, out);
++      return false;
++    }
++    if (b->phase == 1) {
++      ++L.led.nodes;
++      u64 m = 0;
++      Box E = {{INT64_MAX, INT64_MAX, INT64_MAX}, {INT64_MIN, INT64_MIN, INT64_MIN}};
++      for (Piece& p : b->pc) {
++        p.at = static_cast<u32>(m);
++        m += p.kept;
++        L.led.filter_tests += p.tests;
++        if (p.kept > 0) envelope_merge(E, p.env);
++      }
++      if (m == 0) {
++        ++L.led.skipped_bbox;
++        return true;
++      }
++      if (!decide(C, L, t.box, E, m, t.parent->size(), t.parent_stag, b->fit)) return true;
++      b->state = b->fit.split ? 2 : 1;
++      b->list = std::make_shared<List>();
++      b->list->resize(m);
++      publish_phase(b, 2, wk, out);
++      return false;
++    }
++    b->scratch = List();
++    if (b->state == 1) {
++      leaf(C, L, *b->list, b->fit);
++      return true;
++    }
++    u64 l[2] = {0, 0};
++    for (const Piece& p : b->pc) {
++      l[0] += p.l[0];
++      l[1] += p.l[1];
++    }
++    const u32 m = static_cast<u32>(b->list->size());
++    std::shared_ptr<const List> shared = std::move(b->list);
++    for (int o = 0; o < 2; ++o) {
++      Task ch{child_box(b->fit, o), shared, b->fit.stag, l[o]};
++      if (m >= theta) {
++        Big* nb = make_big(std::move(ch));
++        for (const Piece& p : b->pc) merge_into(nb->R, p.R[o], pool_cap(C, m));
++        start_keep(nb, wk, out);
++      } else if (l[o] > cap) {
++        Work w;
++        w.t = std::move(ch);
++        out.push_back(std::move(w));
++      } else {
++        kept_w[wk].push_back(std::move(ch));
++      }
++    }
++    push(wk, out);
++    return true;
++  }
++
++  void worker(unsigned wk) {
++    std::vector<Task> dev;
++    std::vector<Work> out;
++    u32 misses = 0;
++    for (;;) {
++      Work w;
++      if (!pop(wk, w)) {
++        if (pending.load(std::memory_order_acquire) == 0) return;
++        if (++misses < kIdleSpins) {
++          std::this_thread::yield();
++        } else {
++          sleep();
++          misses = 0;
++        }
++        continue;
++      }
++      misses = 0;
++      if (w.big == nullptr) {
++        dev.clear();
++        expand(C, locals[wk], w.t, cap, dev, kept_w[wk]);
++        w.t.parent.reset();
++        for (Task& d : dev) {
++          Work x;
++          x.t = std::move(d);
++          out.push_back(std::move(x));
++        }
++        push(wk, out);
++      } else {
++        Big* b = w.big;
++        run_piece(b, w.piece);
++        if (b->remaining.fetch_sub(1, std::memory_order_acq_rel) == 1 && finish_phase(b, wk, out)) delete b;
++      }
++      if (pending.fetch_sub(1, std::memory_order_acq_rel) == 1) wake();
++    }
++  }
++};
++
+ }  // namespace
+ 
+ geom::Center ball_center(const Cloud& cloud, const Catalogue& cat, u32 b) {
+@@ -655,7 +1105,6 @@ Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& par
+     cat.pop_off.push_back(0);
+     return cat;
+   }
+-  // Phase sequentielle en largeur jusqu'a une frontiere assez large, puis taches paralleles.
+   // Racine : cube dyadique minimal contenant les sites (tout centre critique est dans conv(X)).
+   Box root;
+   i64 lo[3] = {INT64_MAX, INT64_MAX, INT64_MAX}, ext = 0;
+@@ -675,71 +1124,65 @@ Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& par
+   using Clock = std::chrono::steady_clock;
+   auto since = [](Clock::time_point t) { return std::chrono::duration<double>(Clock::now() - t).count(); };
+   auto t0 = Clock::now();
+-  auto all = std::make_shared<std::vector<u32>>(n);
+-  for (u32 s = 0; s < n; ++s) (*all)[s] = s;
+-  std::vector<Task> frontier{Task{root, all, 0}};
+-  std::vector<Local> locals(pool.size());
+-  const size_t target = size_t(64) * pool.size();
+-  // Frontiere pilotee par la charge (GEN_v2 § 10.1) : le cout d'une tache suit le nombre de sites de sa boite, et la
+-  // densite LiDAR est tres concentree (une cellule de 2 m porte 6 % des sites de la trame 02). Apres la cible en
+-  // nombre, on ne developpe plus que les taches de plus de n / (64 P) sites ; les taches finales partent par charge
+-  // decroissante. L'arbre et la sortie (ordre canonique) ne dependent pas de cette coupe.
+-  const u64 cap = std::max<u64>(1, u64(n) / target);
+-  auto inside = [&](const Task& t) {
+-    u64 c = 0;
+-    for (u32 s : *t.parent) {
+-      const P3& x = C.X[s];
+-      c += x.x >= t.box.lo[0] && x.x < t.box.hi[0] && x.y >= t.box.lo[1] && x.y < t.box.hi[1] &&
+-           x.z >= t.box.lo[2] && x.z < t.box.hi[2];
+-    }
+-    return c;
+-  };
++  // Frontiere (voir Task) : cap = n / (64 P), comme la frontiere pilotee par la charge J1 (GEN_v2 § 10.1 : le cout
++  // d'une tache suit le nombre de sites de sa boite, et la densite LiDAR est tres concentree, une cellule de 2 m porte
++  // 6 % des sites de la trame 02). Tete : noeuds de liste parente >= theta = max(kHeadList, n / P), filtres par
++  // tranches de kHeadGrain sites ; a un fil, aucune tete. Ni cap ni theta ne changent l'arbre.
++  const unsigned P = pool.size();
++  const u64 cap = std::max<u64>(1, u64(n) / (u64(64) * P));
++  u64 theta = P > 1 ? std::max<u64>(kHeadList, u64(n) / P) : UINT64_MAX;
++  u32 grain = kHeadGrain;
++  auto all = std::make_shared<List>();
++  all->resize(n);
++  std::iota(all->begin(), all->end(), 0u);
++  std::vector<Local> locals(P);
+   std::vector<Task> kept;
+-  std::vector<u64> kept_load;
+-  while (!frontier.empty()) {
+-    if (frontier.size() >= target) {
+-      std::vector<u64> load(frontier.size());
+-      pool.parallel_for(frontier.size(), 64, [&](u64 b, u64 e, unsigned) {
+-        for (u64 i = b; i < e; ++i) load[i] = inside(frontier[i]);
+-      });
+-      std::vector<Task> heavy;
+-      for (size_t i = 0; i < frontier.size(); ++i) {
+-        if (load[i] > cap) {
+-          heavy.push_back(std::move(frontier[i]));
+-        } else {
+-          kept.push_back(std::move(frontier[i]));
+-          kept_load.push_back(load[i]);
+-        }
+-      }
+-      frontier.swap(heavy);
+-      if (frontier.empty()) break;
++  {
++    Frontier F(C, locals, P, cap, theta, grain);
++    std::vector<Work> init;
++    Task r{root, std::move(all), 0, n};
++    if (n >= theta) {
++      F.publish_phase(F.make_big(std::move(r)), 0, 0, init);
++    } else if (r.load > cap) {
++      Work w;
++      w.t = std::move(r);
++      init.push_back(std::move(w));
++      F.push(0, init);
++    } else {
++      kept.push_back(std::move(r));
+     }
+-    std::vector<std::vector<Task>> spills(frontier.size());
+-    pool.parallel_for(frontier.size(), 1, [&](u64 b, u64 e, unsigned wk) {
+-      for (u64 i = b; i < e; ++i)
+-        process(C, locals[wk], frontier[i].box, *frontier[i].parent, frontier[i].parent_stag, &spills[i]);
+-    });
+-    std::vector<Task> next;
+-    for (auto& sp : spills)
+-      for (auto& t : sp) next.push_back(std::move(t));
+-    frontier.swap(next);
+-  }
+-  for (Task& t : frontier) {  // frontiere epuisee avant la cible (petits nuages)
+-    kept_load.push_back(inside(t));
+-    kept.push_back(std::move(t));
+-  }
+-  frontier.clear();
+-  std::vector<u32> order(kept.size());
+-  std::iota(order.begin(), order.end(), 0u);
+-  std::stable_sort(order.begin(), order.end(), [&](u32 a, u32 b) { return kept_load[a] > kept_load[b]; });
++    if (F.pending.load(std::memory_order_relaxed) > 0)
++      pool.parallel_for(P, 1, [&](u64 b0, u64 e0, unsigned wk) {
++        for (u64 i = b0; i < e0; ++i) F.worker(wk);
++      });
++    for (auto& kw : F.kept_w)
++      for (Task& t : kw) kept.push_back(std::move(t));
++  }
++  // Taches gardees par charge decroissante, puis coin bas de la boite : ordre total (boites disjointes et non vides),
++  // donc le meme quel que soit l'ordre de production.
++  struct Key {
++    u64 load;
++    i64 lo0, lo1, lo2;
++    u32 idx;
++  };
++  std::vector<Key> order(kept.size());
++  for (size_t i = 0; i < kept.size(); ++i)
++    order[i] = Key{kept[i].load, kept[i].box.lo[0], kept[i].box.lo[1], kept[i].box.lo[2], static_cast<u32>(i)};
++  sched::parallel_sort(pool, order, [](const Key& a, const Key& b) {
++    if (a.load != b.load) return a.load > b.load;
++    if (a.lo0 != b.lo0) return a.lo0 < b.lo0;
++    if (a.lo1 != b.lo1) return a.lo1 < b.lo1;
++    if (a.lo2 != b.lo2) return a.lo2 < b.lo2;
++    return a.idx < b.idx;
++  });
+   cat.tasks = kept.size();
+-  cat.max_task_sites = kept_load.empty() ? 0 : kept_load[order[0]];
++  cat.max_task_sites = order.empty() ? 0 : order[0].load;
+   cat.t_frontier = since(t0);
+   t0 = Clock::now();
+   pool.parallel_for(order.size(), 1, [&](u64 b, u64 e, unsigned wk) {
+     for (u64 i = b; i < e; ++i) {
+-      const Task& t = kept[order[i]];
+-      process(C, locals[wk], t.box, *t.parent, t.parent_stag, nullptr);
++      const Task& t = kept[order[i].idx];
++      process(C, locals[wk], t.box, *t.parent, t.parent_stag);
+     }
+   });
+   kept.clear();

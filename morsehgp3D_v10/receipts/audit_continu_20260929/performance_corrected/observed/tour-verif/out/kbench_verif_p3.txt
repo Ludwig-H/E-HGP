@@ -1,0 +1,121 @@
+== /tmp/verif_tour_dump/deg_blocks8.k1.bin
+/tmp/verif_tour_dump/deg_blocks8.k1.bin : naissances 8000, jonctions 21614, representants 43228, fusions 15
+  P3 mediane : travail 129656 representants traites (x3.00 des 43228 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/verif_tour_dump/deg_blocks8.k2.bin
+/tmp/verif_tour_dump/deg_blocks8.k2.bin : naissances 21614, jonctions 19478, representants 77846, fusions 22
+  P3 mediane : travail 233452 representants traites (x3.00 des 77846 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/verif_tour_dump/deg_blocks8.k3.bin
+/tmp/verif_tour_dump/deg_blocks8.k3.bin : naissances 19478, jonctions 46731, representants 140154, fusions 39
+  P3 mediane : travail 420276 representants traites (x3.00 des 140154 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/verif_tour_dump/deg_blocks8.k4.bin
+/tmp/verif_tour_dump/deg_blocks8.k4.bin : naissances 66171, jonctions 13890, representants 128562, fusions 64
+  P3 mediane : travail 432278 representants traites (x3.36 des 128562 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/verif_tour_dump/deg_blocks8.k5.bin
+/tmp/verif_tour_dump/deg_blocks8.k5.bin : naissances 13890, jonctions 62403, representants 187161, fusions 104
+  P3 mediane : travail 560946 representants traites (x3.00 des 187161 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/verif_tour_dump/deg_box20.k1.bin
+/tmp/verif_tour_dump/deg_box20.k1.bin : naissances 4000, jonctions 8818, representants 17636, fusions 16
+  P3 mediane : travail 58204 representants traites (x3.30 des 17636 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/verif_tour_dump/deg_box20.k2.bin
+/tmp/verif_tour_dump/deg_box20.k2.bin : naissances 8818, jonctions 15925, representants 41797, fusions 40
+  P3 mediane : travail 210382 representants traites (x5.03 des 41797 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/verif_tour_dump/deg_box20.k3.bin
+/tmp/verif_tour_dump/deg_box20.k3.bin : naissances 15916, jonctions 27280, representants 79304, fusions 527
+  P3 mediane : travail 531219 representants traites (x6.70 des 79304 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/verif_tour_dump/deg_box20.k4.bin
+/tmp/verif_tour_dump/deg_box20.k4.bin : naissances 27196, jonctions 47675, representants 144828, fusions 861
+  P3 mediane : travail 1033997 representants traites (x7.14 des 144828 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/verif_tour_dump/deg_box20.k5.bin
+/tmp/verif_tour_dump/deg_box20.k5.bin : naissances 45425, jonctions 72383, representants 224714, fusions 1187
+  P3 mediane : travail 1727175 representants traites (x7.69 des 224714 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/verif_tour_dump/deg_cube14.k1.bin
+/tmp/verif_tour_dump/deg_cube14.k1.bin : naissances 2744, jonctions 7644, representants 15288, fusions 1
+  P3 mediane : travail 15288 representants traites (x1.00 des 15288 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/verif_tour_dump/deg_cube14.k2.bin
+/tmp/verif_tour_dump/deg_cube14.k2.bin : naissances 7644, jonctions 7098, representants 28392, fusions 1
+  P3 mediane : travail 28392 representants traites (x1.00 des 28392 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/verif_tour_dump/deg_cube14.k3.bin
+/tmp/verif_tour_dump/deg_cube14.k3.bin : naissances 7098, jonctions 17576, representants 52728, fusions 1
+  P3 mediane : travail 52728 representants traites (x1.00 des 52728 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/verif_tour_dump/deg_cube14.k4.bin
+/tmp/verif_tour_dump/deg_cube14.k4.bin : naissances 24674, jonctions 4933, representants 48326, fusions 1
+  P3 mediane : travail 127410 representants traites (x2.64 des 48326 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/verif_tour_dump/deg_cube14.k5.bin
+/tmp/verif_tour_dump/deg_cube14.k5.bin : naissances 4933, jonctions 24336, representants 73008, fusions 1
+  P3 mediane : travail 73008 representants traites (x1.00 des 73008 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/verif_tour_dump/deg_jitter16.k1.bin
+/tmp/verif_tour_dump/deg_jitter16.k1.bin : naissances 4096, jonctions 18233, representants 36466, fusions 2377
+  P3 mediane : travail 280212 representants traites (x7.68 des 36466 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/verif_tour_dump/deg_jitter16.k2.bin
+/tmp/verif_tour_dump/deg_jitter16.k2.bin : naissances 18233, jonctions 36304, representants 94844, fusions 5552
+  P3 mediane : travail 889577 representants traites (x9.38 des 94844 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/verif_tour_dump/deg_jitter16.k3.bin
+/tmp/verif_tour_dump/deg_jitter16.k3.bin : naissances 36250, jonctions 70477, representants 205662, fusions 17797
+  P3 mediane : travail 2134262 representants traites (x10.38 des 205662 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/verif_tour_dump/deg_jitter16.k4.bin
+/tmp/verif_tour_dump/deg_jitter16.k4.bin : naissances 70305, jonctions 83232, representants 269182, fusions 29523
+  P3 mediane : travail 3122032 representants traites (x11.60 des 269182 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/verif_tour_dump/deg_jitter16.k5.bin
+/tmp/verif_tour_dump/deg_jitter16.k5.bin : naissances 82880, jonctions 134742, representants 424215, fusions 38646
+  P3 mediane : travail 4758841 representants traites (x11.22 des 424215 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/tour_dump/lidar02_k10.k1.bin
+/tmp/tour_dump/lidar02_k10.k1.bin : naissances 45845, jonctions 118797, representants 237594, fusions 45563
+  P3 mediane : travail 1294682 representants traites (x5.45 des 237594 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/tour_dump/lidar02_k10.k2.bin
+/tmp/tour_dump/lidar02_k10.k2.bin : naissances 118797, jonctions 182823, representants 454248, fusions 89087
+  P3 mediane : travail 2912332 representants traites (x6.41 des 454248 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/tour_dump/lidar02_k10.k3.bin
+/tmp/tour_dump/lidar02_k10.k3.bin : naissances 182823, jonctions 273879, representants 728016, fusions 132038
+  P3 mediane : travail 5341985 representants traites (x7.34 des 728016 representants)
+SORTIES IDENTIQUES
+exit=0
+== /tmp/tour_dump/lidar02_k10.k7.bin
+/tmp/tour_dump/lidar02_k10.k7.bin : naissances 574604, jonctions 693466, representants 2177951, fusions 381144
+  P3 mediane : travail 17667853 representants traites (x8.11 des 2177951 representants)
+SORTIES IDENTIQUES
+exit=0
+FIN

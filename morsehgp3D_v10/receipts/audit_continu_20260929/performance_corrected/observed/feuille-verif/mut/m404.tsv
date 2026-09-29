@@ -1,0 +1,10 @@
+M3_bas_strict	TUE	cas 0	fam_sphere	K=5	par compteurs
+B4_A_large	TUE	cas 0	fam_sphere	K=5	par catalogue
+B4_somme_large	TUE	cas 0	fam_sphere	K=5	par catalogue
+Small_seuil_2p22	TUE	cas 1	fam_clusters	K=3	par compteurs
+D_large	TUE	cas 0	fam_sphere	K=5	par catalogue
+aigu_large	TUE	cas 0	fam_sphere	K=5	par catalogue
+Small_sites_2p22	TUE	cas 100	fam_clusters	K=10	par compteurs
+Z_i64_partout	TUE	cas 1	fam_clusters	K=3	par compteurs
+B4_i64_partout	TUE	cas 12	fam_plane	K=3	par compteurs
+M3_haut_strict	SURVIT	200 cas

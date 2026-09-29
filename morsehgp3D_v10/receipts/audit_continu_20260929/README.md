@@ -44,6 +44,19 @@ Une nouvelle exécution doit produire un reçu distinct, avec sa propre version.
   implémentée dans le produit ; aucune qualification statistique.
 - `timeout/cuda_corrected/` : contrôle arithmétique hôte UBSan de la sonde
   unsigned ; aucun chrono ou reçu GPU nouveau.
+- `oracles_corrected/` : mutants de dumps, dont une multifusion ternaire
+  binarisée encore acceptée ; juges figés et rejeu autonome normal/−O.
+  Les 24/24 gates du développeur sont observées, non relancées ici.
+- `head_numeric_corrected/` : petite sonde API, λ finis mais stabilité
+  pondérée infinie et EOM faussé ; fusion zéro → NaN. Notes de bornes
+  positives distinctes du domaine API général et des résultats du producteur.
+- `bench_corrected/` : scripts figés, 18 commandes courtes, vrais processus
+  arrêtés au délai/signal, complétude refusée ; ARI impossible encore accepté.
+  CSV volontairement corrompus de fixture, jamais scores de clustering.
+- `performance_corrected/` : journaux CPU et sources observés, gains J3,
+  frontière et tour séparés ; mutant équivalent par parité. Une source
+  temporaire a disparu après copie, échec de fermeture conservé. Aucun
+  nouveau résultat d'exécution G4/GPU.
 
 Ces nouveaux fichiers ne font pas partie des 34 déplacements historiques
 du manifeste. Les comptes, sources et limites sont dans leurs reçus propres

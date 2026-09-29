@@ -1,0 +1,4 @@
+deg_box20 A base=14a5fd5d7f095bc1d46fa8ccc5d81c9e p1c=14a5fd5d7f095bc1d46fa8ccc5d81c9e p2c=14a5fd5d7f095bc1d46fa8ccc5d81c9e OK
+deg_box20 B base=8042a2f8fe269a6d8db220b620333d32 p1c=8042a2f8fe269a6d8db220b620333d32 p2c=8042a2f8fe269a6d8db220b620333d32 OK
+deg_box20 C base=e95b2d73304cc2fd67c3e96507c46c0e p1c=e95b2d73304cc2fd67c3e96507c46c0e p2c=e95b2d73304cc2fd67c3e96507c46c0e OK
+ARRETE apres deg_box20 C (charge 35-46) : deg_box20 D-J et deg_blocks8 non joues

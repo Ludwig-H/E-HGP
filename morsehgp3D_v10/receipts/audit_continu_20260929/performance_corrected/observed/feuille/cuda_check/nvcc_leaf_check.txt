@@ -1,0 +1,7 @@
+ptxas info    : 0 bytes gmem
+ptxas info    : Compiling entry function '_Z10leaf_checkPKN6mhgp104leaf5SitesEPKNS0_3BoxEiiPyPm' for 'sm_120'
+ptxas info    : Function properties for _Z10leaf_checkPKN6mhgp104leaf5SitesEPKNS0_3BoxEiiPyPm
+    5632 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 126 registers, used 0 barriers, 5632 bytes cumulative stack size
+ptxas info    : Compile time = 1078.227 ms
+rc=0

@@ -1,0 +1,4 @@
+catalogue_oracle_checks 357 fails 0 balls 18140
+record_checks levels 18140 dense_ranks 18140 canonical 18140 canonical_with_choice 619 weighted 2937 extended 4212 weighted_calls 52
+mutants 571 killed 571 drapeau0=106/106 drapeau1=106/106 niveau=106/106 poids_u=106/106 rangs+1=6/6 retrait=106/106 support=16/16 trou=19/19
+code 0

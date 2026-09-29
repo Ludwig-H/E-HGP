@@ -1,0 +1,10 @@
+run 1 code=0 scale_run_timeout_ok charge=37.35
+run 2 code=0 scale_run_timeout_ok charge=37.17
+run 3 code=0 scale_run_timeout_ok charge=35.61
+run 4 code=0 scale_run_timeout_ok charge=35.54
+run 5 code=0 scale_run_timeout_ok charge=34.97
+run 6 code=0 scale_run_timeout_ok charge=35.93
+run 7 code=0 scale_run_timeout_ok charge=35.09
+run 8 code=0 scale_run_timeout_ok charge=34.07
+run 9 code=0 scale_run_timeout_ok charge=33.74
+run 10 code=0 scale_run_timeout_ok charge=33.41

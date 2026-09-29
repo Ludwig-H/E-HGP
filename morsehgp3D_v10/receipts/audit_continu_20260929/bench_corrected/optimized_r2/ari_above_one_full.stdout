@@ -1,0 +1,3 @@
+Banc v10 préenregistré AUDIT_DEV_METADATA_ONLY, 32 scènes de test, comparaison appariée K = min_samples. Aucune revendication de supériorité : pas de différence significative au sens préenregistré.
+- tour_hdb (tour contre hdb) : pas de différence significative ; Δ = +0,694 [+0,647 ; +0,723], p_Holm = 0,11, 32 victoires / 0 défaites / 0 égalités ; non-infériorité de la tour à la marge 0,02 établie.
+Fixture d'audit, aucun score de nuage.

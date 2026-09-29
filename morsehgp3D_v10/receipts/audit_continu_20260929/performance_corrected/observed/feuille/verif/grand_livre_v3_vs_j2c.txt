@@ -1,0 +1,11 @@
+lidar02_full                 K=5  identique (13 compteurs)
+lidar02_full                 K=10 identique (13 compteurs)
+lidar00_full                 K=5  identique (13 compteurs)
+lidar00_full                 K=10 identique (13 compteurs)
+lidar01_quarter_x_neg_y_neg  K=5  identique (13 compteurs)
+lidar01_quarter_x_neg_y_neg  K=10 identique (13 compteurs)
+syn_shells_density_x2        K=5  identique (13 compteurs)
+syn_shells_density_x2        K=10 identique (13 compteurs)
+syn_filaments_space_x4       K=5  identique (13 compteurs)
+syn_filaments_space_x4       K=10 identique (13 compteurs)
+grand livre de l arbre et de la feuille, v3d (1 fil) contre J2c (ledger_j2c.jsonl) : 10 / 10 identiques

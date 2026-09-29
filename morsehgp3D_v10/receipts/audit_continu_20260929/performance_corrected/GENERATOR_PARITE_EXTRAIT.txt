@@ -1,0 +1,26 @@
+   546	  leaf::Sites& S = L.sites;
+   547	  S.m = m;
+   548	  bool tight = true;
+   549	  for (u32 i = 0; i < m; ++i) {
+   550	    const u32 s = c[i];
+   551	    S.p[0][i] = C.P[s].x;
+   552	    S.p[1][i] = C.P[s].y;
+   553	    S.p[2][i] = C.P[s].z;
+   554	    S.x[0][i] = C.X[s].x;
+   555	    S.x[1][i] = C.X[s].y;
+   556	    S.x[2][i] = C.X[s].z;
+   557	    S.x2[i] = C.X2[s];
+   558	    S.w[i] = C.w[s];
+   754	  Ctx C{cloud, {}, {}, {}, {}, params.kmax, params.leaf_size, params.max_leaf};
+   755	  // M(K) : taille de feuille, table fixe calibree sur t_boxes de l'arbre binaire (trames 00 et 02, quart 01,
+   756	  // synthetique ; K = 3, 5, 10, 12) ; le catalogue n'en depend pas.
+   757	  if (C.M == 0) C.M = params.kmax <= 3 ? 12 : (params.kmax <= 6 ? 16 : (params.kmax <= 10 ? 24 : 28));
+   758	  C.P.resize(n);
+   759	  C.X.resize(n);
+   760	  C.X2.resize(n);
+   761	  C.w.resize(n);
+   762	  for (u32 s = 0; s < n; ++s) {
+   763	    C.P[s] = P3{i64(cloud.x[s]), i64(cloud.y[s]), i64(cloud.z[s])};
+   764	    C.X[s] = P3{C.P[s].x << kT, C.P[s].y << kT, C.P[s].z << kT};
+   765	    C.X2[s] = geom::dot(C.X[s], C.X[s]);
+   766	    C.w[s] = cloud.w[s];

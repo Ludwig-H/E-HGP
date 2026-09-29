@@ -1,0 +1,107 @@
+{
+ "mean_ari_s": {
+  "hdb": 0.5561244375000001,
+  "temoin": 0.39585465625000005,
+  "tour": 1.25
+ },
+ "pairs": {
+  "tour_hdb": {
+   "adversary": "hdb",
+   "by_family": {
+    "shells": {
+     "ci": [
+      0.539370153125,
+      0.6612135343750001
+     ],
+     "delta": 0.5999871875,
+     "losses": 0,
+     "p": 0.1111111111111111,
+     "p_holm": 0.2222222222222222,
+     "scenes": 16,
+     "ties": 0,
+     "wins": 16
+    },
+    "spherical": {
+     "ci": [
+      0.6545759687499999,
+      0.8470686250000001
+     ],
+     "delta": 0.7877639375,
+     "losses": 0,
+     "p": 0.1111111111111111,
+     "p_holm": 0.2222222222222222,
+     "scenes": 16,
+     "ties": 0,
+     "wins": 16
+    }
+   },
+   "by_size": {
+    "16000": {
+     "ci": [
+      0.7444642218749999,
+      0.91596664375
+     ],
+     "delta": 0.81797325,
+     "losses": 0,
+     "p": 0.1111111111111111,
+     "scenes": 16,
+     "ties": 0,
+     "wins": 16
+    },
+    "8000": {
+     "ci": [
+      0.439512859375,
+      0.57371545625
+     ],
+     "delta": 0.569777875,
+     "losses": 0,
+     "p": 0.1111111111111111,
+     "scenes": 16,
+     "ties": 0,
+     "wins": 16
+    }
+   },
+   "ci": [
+    0.6472775093750001,
+    0.722913096875
+   ],
+   "delta": 0.6938755624999999,
+   "guard_ami": {
+    "ci": [
+     -0.048165314062500006,
+     0.21925266250000003
+    ],
+    "delta": 0.095718125,
+    "losses": 14,
+    "p": 0.2222222222222222,
+    "scenes": 32,
+    "ties": 0,
+    "wins": 18
+   },
+   "losses": 0,
+   "method": "tour",
+   "name": "tour_hdb",
+   "p": 0.1111111111111111,
+   "p_holm": 0.1111111111111111,
+   "scenes": 32,
+   "ties": 0,
+   "verdict": "pas de différence significative",
+   "wins": 32
+  }
+ },
+ "prereg": "PREREG_DEV.json",
+ "prereg_sha256": "01f53b721a6e59ab7c3819768fcc61dce29fffc712eda1c4eb57b508b965563d",
+ "refusals": {
+  "hdb": 0,
+  "temoin": 1,
+  "tour": 0
+ },
+ "reported": {},
+ "scenes": 32,
+ "secondary": {},
+ "statement": [
+  "Banc v10 préenregistré AUDIT_DEV_METADATA_ONLY, 32 scènes de test, comparaison appariée K = min_samples. Aucune revendication de supériorité : pas de différence significative au sens préenregistré.",
+  "- tour_hdb (tour contre hdb) : pas de différence significative ; Δ = +0,694 [+0,647 ; +0,723], p_Holm = 0,11, 32 victoires / 0 défaites / 0 égalités ; non-infériorité de la tour à la marge 0,02 établie.",
+  "Fixture d'audit, aucun score de nuage."
+ ]
+}

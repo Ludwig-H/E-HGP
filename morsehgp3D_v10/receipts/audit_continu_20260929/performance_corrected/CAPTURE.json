@@ -1,0 +1,51 @@
+{
+  "schema": "ehgp.audit.prototype_cpu_capture.v1",
+  "public_status": "not_claimed",
+  "backend": "cpu_reference",
+  "profile": "quantized_u18_input_only",
+  "capture_open_utc": "2026-09-29T21:44:15Z",
+  "capture_close_utc": "2026-09-29T21:52:29Z",
+  "originals": {
+    "expected": 82,
+    "unchanged": 81,
+    "missing": [
+      "/tmp/j3verif_mut/M3_haut_strict/src/catalogue/leaf.hpp"
+    ],
+    "changed": [],
+    "binaries_unchanged": true
+  },
+  "closure_sha256sum_exit_code": 1,
+  "closure_missing_source_snapshot_preserved_sha256": "4e75dffc0c066db51749a7befffec0b0389c7cf5e2d77d7938c1db4b357c9631",
+  "binary_count": 9,
+  "engine_campaigns_launched_by_this_audit": 0,
+  "gcp_commands_launched_by_this_audit": 0,
+  "tour_csv_observations": 280,
+  "j3_fuzz_complete_cases": 940,
+  "j3_fuzz_timeout_cases": 10,
+  "j3_g505_addendum": {
+    "observed_close_utc": "2026-09-29T21:53:46Z",
+    "conclusive_cases": 120,
+    "timeout_cases": 0,
+    "disagreements": 0,
+    "pid_708851_absent": true,
+    "two_logs_and_binary_hashes_equal_before_after": true,
+    "compiler_and_J3_BIN_provenance_complete": false
+  },
+  "source_manifest_checks": [
+    {
+      "cwd": "/workspaces/E-HGP/build/v10-perf/feuille",
+      "command": "sha256sum -c SHA256SUMS --quiet",
+      "exit_code": 0
+    },
+    {
+      "cwd": "/workspaces/E-HGP/build/v10-perf/frontiere",
+      "command": "sha256sum -c SHA256SUMS --quiet",
+      "exit_code": 0
+    },
+    {
+      "cwd": "/workspaces/E-HGP/build/v10-perf/tour-verif",
+      "command": "sha256sum -c out/sources.sha256 --quiet",
+      "exit_code": 0
+    }
+  ]
+}

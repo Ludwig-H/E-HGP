@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "date_utc": "2026-09-29",
+  "scope": "benchmark_metadata_and_process_cleanup_only",
+  "normal_receipt_sha256": "b83ee069c1f4d6a26aba5005969483f914cddece8b1878406f8c051f36bb5149",
+  "optimized_receipt_sha256": "4291d0cfdcdf66e5b237709cc787c67e0916603140f27667707a02b50e712b52",
+  "runner_sha256": "222798e025ec93d1d33007d6a8c90a8f99f4a5da3caaa42ea9dba85ca6a8ec2b",
+  "commands_total": 18,
+  "normal_optimized_semantic_results_same": true,
+  "timeout_gate_scenarios_per_mode": 8,
+  "dev_metadata_scenes": 32,
+  "clouds_generated": 0,
+  "impossible_ARI_accepted_in_check_and_full_decision": true,
+  "impossible_ARI_full_mean": 1.25,
+  "first_fixture_failure_preserved": true,
+  "engine_modified": false,
+  "GCP_used": false
+}

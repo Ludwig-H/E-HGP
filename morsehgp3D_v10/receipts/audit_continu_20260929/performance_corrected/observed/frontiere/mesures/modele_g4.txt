@@ -1,0 +1,17 @@
+K=5 : c = 18.97 ns par site filtre ; feuille moyenne = 9.22 us (G4, 1 fil)
+  avant P=12 : mesure G4 16.6 ms ; borne par tours 11.5 ms ; reste (barrieres, series, desequilibre) 5.1 ms ; 24 tours + 5 coupes, 4661 taches deplacees, 4661 noeuds, 46 feuilles dans la frontiere
+  avant P=24 : mesure G4 21.6 ms ; borne par tours 9.8 ms ; reste (barrieres, series, desequilibre) 11.8 ms ; 27 tours + 5 coupes, 11316 taches deplacees, 11316 noeuds, 404 feuilles dans la frontiere
+  avant P=48 : mesure G4 26.6 ms ; borne par tours 8.8 ms ; reste (barrieres, series, desequilibre) 17.8 ms ; 28 tours + 5 coupes, 22441 taches deplacees, 22441 noeuds, 1267 feuilles dans la frontiere
+  apres P=48 (v2, 15 tours de tete, 32 appels au pool) : t_frontier estime 4.1 ms pour B = 22 us
+  apres P=48 (v2, 15 tours de tete, 32 appels au pool) : t_frontier estime 5.0 ms pour B = 50 us
+  apres P=48 (v2, 15 tours de tete, 32 appels au pool) : t_frontier estime 6.6 ms pour B = 100 us
+  apres P=48 (v3) : frontiere 6018 noeuds, 5721759 sites filtres (avant 7805259), chaine 1.08 ms, feuilles 0 (avant 1267)
+    t_frontier estime 2.6 a 4.8 ms (mesure avant : 26.6 ms) ; travail deplace 51.2 ms CPU -> t_boxes +1.5 ms (efficacite des boites 0.71) ; gain net 20.3 a 22.5 ms sur le catalogue (0.171 s) : x1.134 a x1.152
+K=10 : c = 32.38 ns par site filtre ; feuille moyenne = 27.32 us (G4, 1 fil)
+  avant P=24 : mesure G4 31.2 ms ; borne par tours 16.8 ms ; reste (barrieres, series, desequilibre) 14.4 ms ; 27 tours + 5 coupes, 11364 taches deplacees, 11364 noeuds, 396 feuilles dans la frontiere
+  avant P=48 : mesure G4 39.6 ms ; borne par tours 15.1 ms ; reste (barrieres, series, desequilibre) 24.5 ms ; 28 tours + 5 coupes, 22686 taches deplacees, 22686 noeuds, 1235 feuilles dans la frontiere
+  apres P=48 (v2, 15 tours de tete, 32 appels au pool) : t_frontier estime 6.2 ms pour B = 22 us
+  apres P=48 (v2, 15 tours de tete, 32 appels au pool) : t_frontier estime 7.1 ms pour B = 50 us
+  apres P=48 (v2, 15 tours de tete, 32 appels au pool) : t_frontier estime 8.7 ms pour B = 100 us
+  apres P=48 (v3) : frontiere 6027 noeuds, 5738150 sites filtres (avant 8014854), chaine 1.84 ms, feuilles 10 (avant 1235)
+    t_frontier estime 4.2 a 8.1 ms (mesure avant : 39.6 ms) ; travail deplace 107.2 ms CPU -> t_boxes +3.2 ms (efficacite des boites 0.70) ; gain net 28.3 a 32.2 ms sur le catalogue (0.628 s) : x1.047 a x1.054

@@ -1,7 +1,8 @@
 # Audits v10 — état courant
 
-Mise à jour : 29 septembre 2026, après lecture de `12aa92110`, relecture
-intégrale des parties I et II de la thèse et contre-audits des copies corrigées.
+Mise à jour : 29 septembre 2026, après publication `55d1f1904`, relecture
+des copies corrigées et des campagnes réellement terminées. Les parties I
+et II de la thèse ont été relues intégralement dans la tranche précédente.
 Index vivant de l'auditeur continu ; les rapports datés restent des preuves
 ancrées à leur version, pas des statuts courants. `public_status=not_claimed`.
 État du produit : [PASSATION](../PASSATION.md). Corrections de portée des
@@ -14,7 +15,11 @@ mesures : [ERRATA](../receipts/ERRATA.md). Ne pas réécrire les reçus clos.
 | FULL → partitions de points | Frontière à préserver, cible de la définition 8 ; core n'est qu'un contrôle. Le vote plat ne garantit pas toutes les coupes. Nouvelle piste : majorité de masses fixes, preuve d'emboîtement et 180 cas abstraits. Témoins propres à K pour éviter un biais Kmax démontré sur six sites. Ni tête native ni qualité statistique acquises. | [Relecture et piste, sections 7–8](audit_continu_20260929/AUDIT_LAMINARITE_POINTS_20260929.md), [certificat local](audit_continu_20260929/ADDENDUM_ANCRAGE_ET_CERTIFICAT_20260929.md) |
 | Retrouver toutes les couvertures | Lemme par composante : témoin p+q_min≤K, coquilles et intérieurs complets. 30 102 requêtes autonomes, puis 64 appels natifs K1–K4, huit géométries, nerf rationnel indépendant et listes complètes. Ne pas supprimer les fusions FULL p+q_min=K+1. Qualification native bornée, pas globale. | [Preuve, oracle et complément R2](audit_continu_20260929/catalogue/ADDENDUM_COUVERTURE_CATALOGUE_20260929.md) |
 | Sécurité du pool | Copie corrigée : exceptions/TLS par l'autre auditeur ; création partielle 0/1/2 fils joints ici ; consommateurs contre-vérifiés, 124+84 injections. Logs terminés ASan/TSan du développeur maintenant observés et figés. Intégration encore distincte. | [Contre-audit courant](audit_continu_20260929/pool_head/CONTRE_AUDIT_POOL_CORRIGE_20260929.md) |
-| Interfaces et tête numérique | Pipe corrigé complet sur neuf commandes courtes. Nouveau défaut : suffixes numériques et dépassements u32 acceptés silencieusement. H3 tête reste distinct, reproduit par l'autre auditeur. | [Interfaces corrigées et nouveau défaut](audit_continu_20260929/catalogue/CONTRE_AUDIT_INTERFACES_CORRIGEES_20260929.md), [état historique détaillé](audit_continu_20260929/AUDIT_ETAT_20260929.md) |
+| Interfaces | Pipe corrigé complet sur neuf commandes courtes. Suffixes numériques et dépassements u32 acceptés silencieusement : ouverts sur copie. | [Interfaces corrigées et nouveau défaut](audit_continu_20260929/catalogue/CONTRE_AUDIT_INTERFACES_CORRIGEES_20260929.md) |
+| Tête numérique | H3 API générale : nouvelle preuve, λ finis mais poids faisant déborder les stabilités et fausser EOM ; fusion zéro → NaN. Domaine producteur positif entier borné : preuve de finitude conditionnelle, pas ordre EOM exact ni gestion générale des zéros. | [Contre-audit numérique et bornes](audit_continu_20260929/pool_head/CONTRE_AUDIT_TETE_NUMERIQUE_20260929.md) |
+| Juges catalogue/FULL | Sur copie, S* canonique et verticale sans point sont maintenant jugés. Doublons I/U, ordre exporté et fusion ternaire binarisée au même plateau encore acceptés. Ces mutants révèlent des angles morts du juge, pas un défaut géométrique du moteur. | [Contre-audit des juges corrigés](audit_continu_20260929/catalogue/CONTRE_AUDIT_JUGES_CORRIGES_20260929.md) |
+| Bancs et arrêt des calculs | Copie corrigée contre-vérifiée : arrêt/récolte au délai et signal, complétude refusée, 18 commandes courtes normal/−O. ARI impossible de 1,25 encore accepté jusque dans la décision de fixture. | [Contre-audit des bancs](audit_continu_20260929/timeout/CONTRE_AUDIT_BANCS_CORRIGES_20260929.md) |
+| Prototypes CPU | J3 réduit le CPU de t_boxes ×1,37–1,55, mêmes comptes ; mutant survivant équivalent par parité. 1 060 cas conclusifs et dix délais observés, TSan frontière v3b terminé. Gain p1c CPU total FULL K5 seulement 2,5 % sur le lot local ; variantes non combinées sur G4. | [Contre-audit CPU, périmètres et preuves](audit_continu_20260929/performance/CONTRE_AUDIT_PROTO_CPU_20260929.md) |
 | CUDA | Correction unsigned acceptée ; 96 récurrences et 4096 comparateurs hôtes exacts, UBSan propre. Débits historiques signés toujours invalides ; aucun nouveau reçu GPU de la sonde corrigée, aucun port exact FULL GPU acquis. | [Sonde corrigée](audit_continu_20260929/timeout/CONTRE_AUDIT_SONDE_CORRIGEE.md), [audit historique](audit_continu_20260929/timeout/AUDIT_ADDENDUM_GPU_GRANDK_20260929.md), [errata](../receipts/ERRATA.md) |
 | G4 et passage à l'échelle | FULL K5 sans attaches mesuré à 204–254 ms sur trois trames sans sol d'une seule séquence ; CPU, non GPU. Ni 100 ms ni plusieurs séquences qualifiés. | [Recalcul des mesures](audit_continu_20260929/timeout/AUDIT_ECHELLE.md) |
 
@@ -50,7 +55,7 @@ Le prochain état remplace cette vue ; il n'ajoute pas un nouvel index concurren
 Le point d'entrée `audits/README.md` a été actualisé par son propriétaire
 et son auditeur coordonné dans le worktree ; je ne le modifie pas. Leur
 `SUIVI_AUDIT_INDEPENDANT.md` et leurs nouvelles notes sont encore à publier
-au HEAD distant `12139ed6f` observé avant cette publication : je n'embarque aucun
+au HEAD distant `55d1f1904` observé avant cette publication : je n'embarque aucun
 fichier d'un autre acteur. Nos captures brutes sont
 dans `receipts/audit_continu_20260929/`, avec relocalisation à hashes identiques
 publiée dans `c5015a570`. Les nouveaux petits tests y restent aussi. Les

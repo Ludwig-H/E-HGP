@@ -1,0 +1,64 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v10-fixes/oracles/build
+Test project /workspaces/E-HGP/build/v10-fixes/oracles/build
+      Start  1: mhgp10_unit
+ 1/24 Test  #1: mhgp10_unit ............................................   Passed    2.27 sec
+      Start  2: mhgp10_catalogue_oracle
+ 2/24 Test  #2: mhgp10_catalogue_oracle ................................   Passed  276.72 sec
+      Start  3: mhgp10_tower_oracle
+ 3/24 Test  #3: mhgp10_tower_oracle ....................................   Passed   65.54 sec
+      Start  4: mhgp10_tower_oracle_mutant_vertical_audit
+ 4/24 Test  #4: mhgp10_tower_oracle_mutant_vertical_audit ..............   Passed    0.53 sec
+      Start  5: mhgp10_tower_oracle_mutant_vertical_descendant
+ 5/24 Test  #5: mhgp10_tower_oracle_mutant_vertical_descendant .........   Passed    0.44 sec
+      Start  6: mhgp10_tower_oracle_mutant_vertical_later
+ 6/24 Test  #6: mhgp10_tower_oracle_mutant_vertical_later ..............   Passed    0.40 sec
+      Start  7: mhgp10_tower_oracle_mutant_vertical_fusion
+ 7/24 Test  #7: mhgp10_tower_oracle_mutant_vertical_fusion .............   Passed    0.51 sec
+      Start  8: mhgp10_tower_oracle_mutant_vertical_missing
+ 8/24 Test  #8: mhgp10_tower_oracle_mutant_vertical_missing ............   Passed    0.48 sec
+      Start  9: mhgp10_tower_oracle_mutant_witness_level
+ 9/24 Test  #9: mhgp10_tower_oracle_mutant_witness_level ...............   Passed    0.50 sec
+      Start 10: mhgp10_tower_oracle_mutant_witness_swap
+10/24 Test #10: mhgp10_tower_oracle_mutant_witness_swap ................   Passed    0.56 sec
+      Start 11: mhgp10_catalogue_oracle_mutant_support_not_canonical
+11/24 Test #11: mhgp10_catalogue_oracle_mutant_support_not_canonical ...   Passed    0.61 sec
+      Start 12: mhgp10_catalogue_oracle_mutant_level_value
+12/24 Test #12: mhgp10_catalogue_oracle_mutant_level_value .............   Passed    0.48 sec
+      Start 13: mhgp10_catalogue_oracle_mutant_rank_offset
+13/24 Test #13: mhgp10_catalogue_oracle_mutant_rank_offset .............   Passed    0.46 sec
+      Start 14: mhgp10_catalogue_oracle_mutant_rank_gap
+14/24 Test #14: mhgp10_catalogue_oracle_mutant_rank_gap ................   Passed    0.50 sec
+      Start 15: mhgp10_catalogue_oracle_mutant_flag_extended
+15/24 Test #15: mhgp10_catalogue_oracle_mutant_flag_extended ...........   Passed    0.28 sec
+      Start 16: mhgp10_catalogue_oracle_mutant_flag_weighted
+16/24 Test #16: mhgp10_catalogue_oracle_mutant_flag_weighted ...........   Passed    0.47 sec
+      Start 17: mhgp10_catalogue_oracle_mutant_weight_shell
+17/24 Test #17: mhgp10_catalogue_oracle_mutant_weight_shell ............   Passed    0.49 sec
+      Start 18: mhgp10_catalogue_oracle_mutant_weighted_admission
+18/24 Test #18: mhgp10_catalogue_oracle_mutant_weighted_admission ......   Passed    0.62 sec
+      Start 19: mhgp10_head_condensation_vs_sklearn
+19/24 Test #19: mhgp10_head_condensation_vs_sklearn ....................   Passed   53.81 sec
+      Start 20: mhgp10_regression_level_collision
+20/24 Test #20: mhgp10_regression_level_collision ......................   Passed   67.41 sec
+      Start 21: mhgp10_points_cover
+21/24 Test #21: mhgp10_points_cover ....................................   Passed  101.12 sec
+      Start 22: mhgp10_regression_batch_equivalence
+22/24 Test #22: mhgp10_regression_batch_equivalence ....................   Passed  201.38 sec
+      Start 23: mhgp10_regression_mreach_border
+23/24 Test #23: mhgp10_regression_mreach_border ........................   Passed    9.68 sec
+      Start 24: mhgp10_regression_multiplicity_refusal
+24/24 Test #24: mhgp10_regression_multiplicity_refusal .................   Passed    0.37 sec
+
+100% tests passed, 0 tests failed out of 24
+
+Label Time Summary:
+fast          =   9.95 sec*proc (17 tests)
+gate          = 785.63 sec*proc (24 tests)
+head          =  53.81 sec*proc (1 test)
+oracle        = 349.57 sec*proc (17 tests)
+points        = 101.12 sec*proc (1 test)
+regression    = 278.85 sec*proc (4 tests)
+
+Total Test time (real) = 785.73 sec
+785.79 s wall
+code=0

@@ -1,0 +1,4 @@
+Première tentative de fermeture : sha256sum code 1, chemin temporaire du mutant absent.
+Cette première erreur a été constatée pendant la capture ; aucun fichier temporaire n'a été recréé.
+La relecture de fermeture à 2026-09-29T21:52:29Z garde le même refus, avec 81 autres originaux inchangés.
+sha256sum: /tmp/j3verif_mut/M3_haut_strict/src/catalogue/leaf.hpp: No such file or directory

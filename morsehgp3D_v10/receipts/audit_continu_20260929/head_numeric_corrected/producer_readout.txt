@@ -1,0 +1,121 @@
+  }
+  // appelle f(k, i_local) pour chaque item de [b, e)
+  template <class Fn>
+  void each(u64 b, u64 e, Fn f) const {
+    size_t idx = std::upper_bound(off.begin(), off.end(), b) - off.begin() - 1;
+    for (u64 x = b; x < e; ++x) {
+      while (x >= off[idx + 1]) ++idx;
+      if (!f(ks[idx], x - off[idx])) return;
+    }
+  }
+};
+
+}  // namespace
+
+Result<Tower> build_tower(const Cloud& cloud, const SiteTree& tree, const Catalogue& cat, const TowerParams& params,
+                          sched::Pool& pool) {
+  if (params.kmax < 1 || params.kmax > cat.kmax) return fail(Reason::kmax_out_of_range);
+  // Les filtres flottants (marge kApproxMargin, SiteTree) sont prouves pour des coordonnees u18 ; le catalogue refuse
+  // deja un nuage plus large, la tour le refuse aussi (garde, meme raison).
+  if (cloud.bits > kCoordinateBits) return fail(Reason::parameter_out_of_range);
+  for (u32 s = 0; s < cloud.sites(); ++s)
+    if (cloud.w[s] != 1) return fail(Reason::multiplicity_unsupported);  // multiplicites : semantique a venir
+  Tower t;
+  TowerStats& ts = t.stats;
+  auto tstage = Clock::now();
+  const u32 n = cloud.sites();
+  const u32 nballs = cat.balls();
+  Geo g{cloud, tree, cat, {}, {}};
+  g.P.resize(n);
+  for (u32 s = 0; s < n; ++s) g.P[s] = P3{i64(cloud.x[s]), i64(cloud.y[s]), i64(cloud.z[s])};
+  if (!g.lookup.init(nballs)) return fail(Reason::memory_budget);
+  pool.parallel_for((g.lookup.capacity() + 65535) / 65536, 1, [&](u64 b0, u64 e0, unsigned) {
+    for (u64 blk = b0; blk < e0; ++blk) g.lookup.zero(blk * 65536, std::min(g.lookup.capacity(), (blk + 1) * 65536));
+  });
+  pool.parallel_for(nballs, 4096, [&](u64 b0, u64 e0, unsigned) {
+    for (u64 b = b0; b < e0; ++b) {
+    if (cover && int(pk.empty() ? 0 : pk.back() + extra) > cat.kmax) return fail(Reason::kmax_out_of_range);
+    std::vector<u32> pk_core;
+    for (u32 k : pk)
+      if (!cover || (k == 1 && extra == 0)) pk_core.push_back(k);
+    if (cover) {
+      for (u32 k : pk) {
+        if (k == 1 && extra == 0) continue;
+        OrderRun& o = *runs[k];
+        OrderForest& out = t.orders[k - 1];
+        out.point_cat_rank.assign(n, 0);
+        // boule couvrante : poids >= k + extra (poids > positions : multiplicites, refusees en amont) ; son centre
+        // est dans L_k a son niveau, et toute k-partie de la boule fermee le contient dans sa region temoin
+        const u32 kc = k + extra;
+        auto covering = [&](u64 b) { return cat.p[b] + cat.u[b] >= kc && cat.pop_off[b + 1] - cat.pop_off[b] >= kc; };
+        // composante de L_k(niveau de b) qui contient le centre de b : une k-partie quelconque de la boule fermee
+        auto cover_node = [&](u32 b, Scratch& sc, Facet& F) -> u32 {
+          const auto I = cat.interior(b);
+          const auto U = cat.shell(b);
+          size_t i = 0, j = 0;
+          F.n = k;
+          for (u32 m = 0; m < k; ++m) F.s[m] = (j >= U.size() || (i < I.size() && I[i] < U[j])) ? I[i++] : U[j++];
+          const u32 v = resolve(X, o, o.error, F, sc, sc.c[1][k]);
+          return v == kNone ? kNone : ancestor(out, o.jumps, v, cat.rank[b] + 1, sc.walk[k]);  // kNone : erreur
+        };                                                                                      // deja enregistree
+        // premiere boule couvrante de chaque site : plus petit indice (ordre canonique, donc par niveau croissant)
+        std::vector<u32> first(n, kNone);
+        pool.parallel_for(cat.balls(), 4096, [&](u64 b0, u64 e0, unsigned) {
+          for (u64 b = b0; b < e0; ++b) {
+            if (!covering(b)) continue;
+            for (u64 q = cat.pop_off[b]; q < cat.pop_off[b + 1]; ++q) {
+          pool.parallel_for(cat.balls(), 256, [&](u64 b0, u64 e0, unsigned wk) {
+            Facet F;
+            for (u64 b = b0; b < e0; ++b)
+              if (covering(b)) out.ball_node[b] = cover_node(u32(b), scratch[wk], F);
+          });
+          for (u32 x = 0; x < n; ++x) out.point_node[x] = out.ball_node[first[x]];
+        } else {  // seules les premieres boules couvrantes : au plus n resolutions
+          std::vector<u32> need(first);
+          std::sort(need.begin(), need.end());
+          need.erase(std::unique(need.begin(), need.end()), need.end());
+          std::vector<u32> node(need.size(), kNone);
+          pool.parallel_for(need.size(), 64, [&](u64 i0, u64 e0, unsigned wk) {
+            Facet F;
+            for (u64 i = i0; i < e0; ++i) node[i] = cover_node(need[i], scratch[wk], F);
+          });
+          for (u32 x = 0; x < n; ++x)
+            out.point_node[x] = node[std::lower_bound(need.begin(), need.end(), first[x]) - need.begin()];
+        }
+        for (u32 x = 0; x < n; ++x) out.point_cat_rank[x] = cat.rank[first[x]] + 1;
+      }
+    }
+    // Entree core : une requete par site ; les k plus proches (cle exacte = distance carree, puis indice) sont le
+    // prefixe des kq plus proches pour tout k <= kq ; D_k(x) est la cle du k-ieme.
+    pk.swap(pk_core);
+    const u32 kq = pk.empty() ? 0 : pk.back();
+    if (kq > 0)
+      pool.parallel_for(n, 64, [&](u64 b0, u64 e0, unsigned wk) {
+        Scratch& sc = scratch[wk];
+        Facet F;
+        for (u64 x = b0; x < e0; ++x) {
+          const P3& px = g.P[x];
+          g.tree.nearest(px, geom::Center{{0, 0, 0}, 1}, kq, sc.knn);
+          ++sc.c[1][kq].knn_queries;
+          for (u32 k : pk) {
+            OrderRun& o = *runs[k];
+            OrderForest& out = t.orders[k - 1];
+            F.n = k;
+            for (u32 i = 0; i < k; ++i) F.s[i] = sc.knn[i].second;
+            F.sort();
+            const u64 lev = static_cast<u64>(sc.knn[k - 1].first);
+            u32 v = resolve(X, o, o.error, F, sc, sc.c[1][k]);
+            if (v == kNone) continue;  // erreur deja enregistree pour l'ordre
+            const u32 r = ranks.at_most(cat, lev);
+            v = ancestor(out, o.jumps, v, r, sc.walk[k]);
+            out.point_node[x] = v;
+            out.point_level[x] = lev;
+          }
+        }
+      });
+    for (u32 k = atlas.kfirst; k <= atlas.klast; ++k) {
+      OrderRun& o = *runs[k];
+      if (o.outcome.ok() && o.error.load()) o.outcome = fail(static_cast<Reason>(o.error.load() - 1), u8(k));
+0c5b44ae7993e850c5c6cdb63d0c9829847eb70364f40894a3df964f708b88e9  /workspaces/E-HGP/build/v10-fixes/tete/src/morsehgp3D_v10/src/tower/tower.cpp
+8c5502606c08543ac0704bef9bc17279ab11ff487ae9ffd519384470a5a92a34  /workspaces/E-HGP/build/v10-fixes/tete/apres/ctest_gate.txt
+7f1c51170df39344e1bd6ff1698bc450f751b3a6f7cf2dc4526a0a7ae3e82de4  /workspaces/E-HGP/build/v10-fixes/tete/RECU_tete.md

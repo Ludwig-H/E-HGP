@@ -1,0 +1,8 @@
+{
+ "complete": true,
+ "computed": 32,
+ "plan_sha256": "2f3cdc32e72c84e8621373647285e4c4761cea34e9617f7534e5c926f1430b65",
+ "prereg": "PREREG_DEV.json",
+ "prereg_sha256": "01f53b721a6e59ab7c3819768fcc61dce29fffc712eda1c4eb57b508b965563d",
+ "scenes": 32
+}

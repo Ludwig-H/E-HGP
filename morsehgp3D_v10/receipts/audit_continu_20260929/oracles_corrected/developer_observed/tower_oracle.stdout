@@ -1,0 +1,4 @@
+tower_oracle_checks 73 fails 0 cuts 23444
+witness_checks bijections 12574 points 2252 witnesses 3271 verticals 3978 verticals_empty 2905 verticals_points 14292
+mutants 218 killed 218 blind_to_old_judge 200
+code 0

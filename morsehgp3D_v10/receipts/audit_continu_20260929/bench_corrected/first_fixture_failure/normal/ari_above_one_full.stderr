@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/bench_corrected/source/morsehgp3D_v10/bench/synthetic/decide.py", line 386, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/bench_corrected/source/morsehgp3D_v10/bench/synthetic/decide.py", line 358, in main
+    lines.append(prereg['attribution_statement'])
+                 ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'attribution_statement'

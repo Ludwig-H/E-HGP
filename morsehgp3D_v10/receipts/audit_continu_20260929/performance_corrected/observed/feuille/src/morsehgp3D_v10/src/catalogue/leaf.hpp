@@ -1,0 +1,412 @@
+// Feuille v3 du catalogue (J3) : noyaux a source unique CPU/GPU pour les feuilles de m <= 64 sites.
+//
+// Meme objet et memes decisions que la feuille v2 (enumerate_leaf_masks de generator.cpp) : memes presentations
+// jugees, dans le meme ordre, memes compteurs (pair_tests, triple_tests, line_hits, quad_tests). Ne changent que la
+// disposition (SoA locale, masques d'un mot), la forme des predicats et l'ordre des tests a l'interieur d'une
+// presentation :
+//   D  dominance sans branchement ; masques de lignes dom[i] (sites qui dominent i) et de colonnes domby[i] (sites
+//      que i domine) ;
+//   Z  droite des centres (lemme Z) sans branchement, termes de paire (u_ij, P_ij) calcules une fois par paire ;
+//   M  centre q3 precede de l'enveloppe du triangle median (lemme M3) ;
+//   B  quadruplets : enveloppe du tetraedre (lemme E4), puis interieur strict par coordonnees barycentriques entieres
+//      sans le centre (lemme B4), puis centre et boite seulement pour les interieurs ;
+//   R  recensement limite aux sites que les masques ne decident pas (lemme R) ; cote q2 en i64.
+// Aucun flottant ; bornes (coordonnees u18, repere T = 6) en tete de chaque predicat.
+//
+// Source unique : fonctions MHGP10_HD, tableaux de taille fixe, aucun conteneur ni exception. Le CPU parcourt les
+// indices en serie ; un noyau GPU (un warp par feuille) repartirait les indices d'une phase sur les voies, les
+// mises a jour de masques etant des OU commutatifs (voir la voie partielle, leaf_fast.cuh). Le puits (sink) recoit
+// les presentations dont le centre est dans la boite : le CPU y recense et emet (memo, support canonique).
+#pragma once
+
+#include <cstddef>
+#include <type_traits>
+
+#include "arith/geometry.hpp"
+#include "core/types.hpp"
+
+#if defined(__CUDACC__)
+#define MHGP10_HD __host__ __device__ inline
+#else
+#define MHGP10_HD inline
+#endif
+
+namespace mhgp10::leaf {
+
+constexpr int kT = 6;
+constexpr u32 kMaxSites = 64;
+
+struct Box {
+  i64 lo[3], hi[3];
+};
+
+// Sites d'une feuille, en SoA : coordonnees entieres p, repere T x = p << kT, |x|^2, poids.
+struct Sites {
+  i64 p[3][kMaxSites];
+  i64 x[3][kMaxSites];
+  i64 x2[kMaxSites];
+  u32 w[kMaxSites];
+  u32 m = 0;
+  bool tight = true;
+  bool small = false;  // etendue locale E' < 2^18 (voie etroite en i64, voir small_extent)
+};
+
+// Masques d'une feuille. dom[i] : j tel que max_{C dans Qbar} (|X_j - C|^2 - |X_i - C|^2) < 0 (j domine i) ;
+// domby[i] : j tel que i domine j ; p2[i] : paires vivantes.
+struct Masks {
+  u64 dom[kMaxSites];
+  u64 domby[kMaxSites];
+  u64 p2[kMaxSites];
+};
+
+struct Counters {
+  u64 pair_tests = 0, triple_tests = 0, line_hits = 0, quad_tests = 0;
+};
+
+MHGP10_HD u64 popc(u64 x) {
+#if defined(__CUDA_ARCH__)
+  return static_cast<u64>(__popcll(x));
+#elif defined(__POPCNT__)  // build a -march (MHGP10_MARCH) : instruction popcnt
+  return static_cast<u64>(__builtin_popcountll(x));
+#else  // SWAR : sans popcnt materiel, __builtin_popcountll appelle __popcountdi2
+  x -= (x >> 1) & 0x5555555555555555ull;
+  x = (x & 0x3333333333333333ull) + ((x >> 2) & 0x3333333333333333ull);
+  x = (x + (x >> 4)) & 0x0F0F0F0F0F0F0F0Full;
+  return (x * 0x0101010101010101ull) >> 56;
+#endif
+}
+MHGP10_HD u32 ctz(u64 x) {
+#if defined(__CUDA_ARCH__)
+  return static_cast<u32>(__ffsll(static_cast<long long>(x)) - 1);
+#else
+  return static_cast<u32>(__builtin_ctzll(x));
+#endif
+}
+MHGP10_HD u64 above(u32 b) { return (~u64(0) << b) << 1; }  // bits > b (b < 64), sans branchement
+MHGP10_HD u64 all_bits(u32 m) { return m >= 64 ? ~u64(0) : (u64(1) << m) - 1; }
+MHGP10_HD i64 mn(i64 a, i64 b) { return a < b ? a : b; }
+MHGP10_HD i64 mx(i64 a, i64 b) { return a < b ? b : a; }
+MHGP10_HD i128 abs128(i128 v) { return v < 0 ? -v : v; }
+MHGP10_HD i64 abs64(i64 v) { return v < 0 ? -v : v; }
+// Ligne (a, b), a < b, des triplets vivants : triangle superieur, m (m - 1) / 2 mots.
+MHGP10_HD std::size_t hrow(u32 a, u32 b, u32 m) {
+  return std::size_t(a) * m - std::size_t(a) * (a + 1) / 2 + (b - a - 1);
+}
+MHGP10_HD u64 wsum(const Sites& S, u64 x) {
+  if (S.tight) return popc(x);
+  u64 s = 0;
+  for (; x; x &= x - 1) s += S.w[ctz(x)];
+  return s;
+}
+
+// ------------------------------------------------------------------------------------------------ phase D
+// Dominance, une evaluation affine par paire non ordonnee (meme decision que la feuille v2) : avec d = X_j - X_i,
+// min et max de C.d sur Qbar valent sum_k min / max (lo_k d_k, hi_k d_k) (lo_k < hi_k) ; j domine i si
+// |X_j|^2 - |X_i|^2 - 2 min < 0, i domine j si |X_j|^2 - |X_i|^2 - 2 max > 0 (exclusifs : min <= max).
+// Bornes : |lo|, |hi| < 2^25, |d| < 2^24 : produits < 2^49, sommes < 2^51 en i64.
+MHGP10_HD void dominance(const Sites& S, const Box& Q, Masks& M) {
+  const u32 m = S.m;
+  for (u32 i = 0; i < m; ++i) {
+    M.dom[i] = 0;
+    M.domby[i] = 0;
+    M.p2[i] = 0;
+  }
+  for (u32 i = 0; i < m; ++i) {
+    const i64 xi = S.x[0][i], yi = S.x[1][i], zi = S.x[2][i], qi = S.x2[i];
+    u64 row = 0, by = 0;
+    for (u32 j = i + 1; j < m; ++j) {
+      const i64 dx = S.x[0][j] - xi, dy = S.x[1][j] - yi, dz = S.x[2][j] - zi;
+      const i64 base = S.x2[j] - qi;
+      const i64 l0 = Q.lo[0] * dx, h0 = Q.hi[0] * dx, l1 = Q.lo[1] * dy, h1 = Q.hi[1] * dy, l2 = Q.lo[2] * dz,
+                h2 = Q.hi[2] * dz;
+      const i64 cmin = mn(l0, h0) + mn(l1, h1) + mn(l2, h2);
+      const i64 cmax = mx(l0, h0) + mx(l1, h1) + mx(l2, h2);
+      const u64 jd = static_cast<u64>(base - 2 * cmin < 0);  // j domine i
+      const u64 id = static_cast<u64>(base - 2 * cmax > 0);  // i domine j
+      row |= jd << j;
+      by |= id << j;
+      M.dom[j] |= id << i;
+      M.domby[j] |= jd << i;
+    }
+    M.dom[i] |= row;
+    M.domby[i] |= by;
+  }
+}
+
+// ------------------------------------------------------------------------------------------------ recensement
+// Lemme R. Soit c dans Qbar le centre d'une presentation de sites generateurs G (tous sur la sphere, exactement).
+// Pour s dans G : j dans dom[s] est strictement plus proche de c que s, donc interieur ; t dans domby[s] est
+// strictement plus loin, donc exterieur ; s est sur la coquille. Seuls les autres sites sont testes. Le resultat
+// (poids interieur, masques interieur et coquille) est celui du recensement complet ; l'arret des que le poids
+// depasse theta rend la meme decision (aucune emission). side(t) : -1 interieur, 0 coquille, 1 exterieur.
+template <class Side>
+MHGP10_HD bool census(const Sites& S, const Masks& M, u64 gm, i64 theta, Side&& side, u32& p, u64& inner, u64& shell) {
+  u64 kin = 0, kout = 0;
+  for (u64 g = gm; g; g &= g - 1) {
+    const u32 s = ctz(g);
+    kin |= M.dom[s];
+    kout |= M.domby[s];
+  }
+  kin &= ~gm;
+  u64 unk = all_bits(S.m) & ~(kin | kout | gm);
+  u64 pw = wsum(S, kin);
+  if (static_cast<i64>(pw) > theta) return false;
+  u64 in2 = 0, sh2 = 0;
+  for (; unk; unk &= unk - 1) {
+    const u32 t = ctz(unk);
+    const int sd = side(t);
+    if (sd < 0) {
+      pw += S.w[t];
+      if (static_cast<i64>(pw) > theta) return false;
+      in2 |= u64(1) << t;
+    } else if (sd == 0) {
+      sh2 |= u64(1) << t;
+    }
+  }
+  p = static_cast<u32>(pw);
+  inner = kin | in2;
+  shell = gm | sh2;
+  return true;
+}
+
+// Cote q2 (centre (a + b) / 2, D = 2, N = b - a) : signe de 2 |z - a|^2 - 2 (b - a).(z - a), soit celui de
+// |z - a|^2 - (b - a).(z - a). Bornes u18 : chaque terme < 3 2^36, difference < 2^39 en i64.
+MHGP10_HD int side2(const Sites& S, u32 a, u32 b, u32 z) {
+  const i64 dx = S.p[0][z] - S.p[0][a], dy = S.p[1][z] - S.p[1][a], dz = S.p[2][z] - S.p[2][a];
+  const i64 nx = S.p[0][b] - S.p[0][a], ny = S.p[1][b] - S.p[1][a], nz = S.p[2][b] - S.p[2][a];
+  const i64 v = dx * dx + dy * dy + dz * dz - (nx * dx + ny * dy + nz * dz);
+  return v < 0 ? -1 : (v == 0 ? 0 : 1);
+}
+
+MHGP10_HD geom::P3 pt(const Sites& S, u32 i) { return geom::P3{S.p[0][i], S.p[1][i], S.p[2][i]}; }
+
+// Centre rationnel (a + N / D) dans la boite demi-ouverte (repere T) : lo D <= 2^T (a D + N) < hi D.
+MHGP10_HD bool center_in_box(const geom::P3& a, const geom::Center& c, const Box& Q) {
+  const i64 av[3] = {a.x, a.y, a.z};
+  for (int i = 0; i < 3; ++i) {
+    const i128 v = (i128(av[i]) * c.D + c.N[i]) * (i128(1) << kT);
+    if (v < i128(Q.lo[i]) * c.D || v >= i128(Q.hi[i]) * c.D) return false;
+  }
+  return true;
+}
+
+// ------------------------------------------------------------------------------------------------ phase P
+// Paires : bissectrice qui coupe Qbar (ni i ni j ne domine l'autre), poids, paires vivantes, q2 si le milieu est
+// dans Q. Ordre (i, j) lexicographique, comme la feuille v2.
+template <class Sink>
+MHGP10_HD void pairs(const Sites& S, const Box& Q, Masks& M, i64 th2, i64 th3, Sink&& sink, Counters& cn) {
+  const u32 m = S.m;
+  const u64 all = all_bits(m);
+  for (u32 i = 0; i < m; ++i) {
+    u64 row = 0;
+    for (u64 js = ~(M.dom[i] | M.domby[i]) & above(i) & all; js; js &= js - 1) {
+      const u32 j = ctz(js);
+      const u64 d = wsum(S, M.dom[i] | M.dom[j]);
+      if (static_cast<i64>(d) > th2) continue;
+      const u64 live = static_cast<u64>(static_cast<i64>(d) <= th3);
+      row |= live << j;
+      M.p2[j] |= live << i;
+      ++cn.pair_tests;
+      const i64 sx = S.x[0][i] + S.x[0][j], sy = S.x[1][i] + S.x[1][j], sz = S.x[2][i] + S.x[2][j];
+      if (sx < 2 * Q.lo[0] || sx >= 2 * Q.hi[0] || sy < 2 * Q.lo[1] || sy >= 2 * Q.hi[1] || sz < 2 * Q.lo[2] ||
+          sz >= 2 * Q.hi[2])
+        continue;
+      sink.q2(i, j);
+    }
+    M.p2[i] |= row;
+  }
+}
+
+// ------------------------------------------------------------------------------------------------ phase Z + M
+// Triplets (i, j, k) de paires vivantes, i < j < k, dans le repere local y = X - lo (T), h = hi - lo. Termes de paire,
+// une fois par (i, k) : u_ik = X_i - X_k, P_ik = 2 u_ik.(y_i + y_k - h), n_ik = |u_ik|^2. P_ik est exactement le
+// 2 (|X_i|^2 - |X_k|^2) - 2 (lo + hi).u_ik du lemme Z (|X_i|^2 - |X_k|^2 = u_ik.(X_i + X_k), 2 lo + h = lo + hi).
+// Lemme Z sans branchement : la forme de center_line_meets, ou la branche « u_k = v_k = 0 » est absorbee (l = 0 <= r)
+// et l'alignement (u x v = 0) est un booleen. Aigu : 0 < u_ij.u_ik < min(n_ij, n_ik) (les trois produits scalaires
+// de geom::acute, a l'echelle 2^(2T) pres). Lemme M3 : le centre circonscrit d'un triangle aigu est l'orthocentre de
+// son triangle median, strictement interieur ; si l'enveloppe du triangle median (sommets doubles y_a + y_b, bornes
+// S - max et S - min, S = y_i + y_j + y_k) manque [0, 2 h), le centre manque Q. Le centre q3 n'est calcule que si
+// la droite touche, le triangle est aigu et l'enveloppe mediane rencontre la boite : le juge est appele exactement
+// quand la feuille v2 l'appelait (centre dans Q => droite qui touche et enveloppe qui rencontre).
+// Triplets vivants : seul le bit k de la ligne (i, j) est pose (i < j < k). La phase B ne lit une ligne (a, b) qu'au-
+// dessus de b (k dans H[i, j] au-dessus de j ; l dans H[i, j], H[i, k], H[j, k] au-dessus de k) : les bits j de
+// (i, k) et i de (j, k) que posait la feuille v2 ne sont jamais lus. Chaque face (a, b, c), a < b < c, d'un
+// quadruplet est lue par le bit c de la ligne (a, b), pose quand (i, j, k) = (a, b, c).
+// Voie etroite (Small : E' = max(|y|_inf, h) < 2^18) : |u| < 2^19, |P| < 18 2^37 < 2^41.2, |u x v| < 2^39,
+// r < 2^59, |v_k P_0 - u_k P_1| < 2^61.2 : tout en i64. Voie large (bornes de la feuille v2) : |u| < 2^24,
+// |y| < 2^25, |P| < 2^53, |u x v| < 2^49 en i64 ; r < 2^75 et |l| < 2^79 en i128.
+template <bool Small>
+MHGP10_HD bool line_hit(i64 u0, i64 u1, i64 u2, i64 v0, i64 v1, i64 v2, i64 p0, i64 p1, i64 h0, i64 h1, i64 h2,
+                        bool& nal) {
+  using W = typename std::conditional<Small, i64, i128>::type;
+  const i64 c01 = u0 * v1 - v0 * u1, c02 = u0 * v2 - v0 * u2, c12 = u1 * v2 - v1 * u2;
+  nal = (c01 | c02 | c12) != 0;
+  const W a01 = abs64(c01), a02 = abs64(c02), a12 = abs64(c12);
+  const W r0 = 2 * (W(h1) * a01 + W(h2) * a02), r1 = 2 * (W(h0) * a01 + W(h2) * a12),
+          r2 = 2 * (W(h0) * a02 + W(h1) * a12);
+  const W l0 = W(v0) * p0 - W(u0) * p1, l1 = W(v1) * p0 - W(u1) * p1, l2 = W(v2) * p0 - W(u2) * p1;
+  return nal & (l0 <= r0) & (-l0 <= r0) & (l1 <= r1) & (-l1 <= r1) & (l2 <= r2) & (-l2 <= r2);
+}
+
+template <bool Small, class Sink>
+MHGP10_HD void triples_impl(const Sites& S, const Box& Q, const Masks& M, u64* H, i64 th3, i64 th4, Sink&& sink,
+                            Counters& cn) {
+  const u32 m = S.m;
+  const i64 h0 = Q.hi[0] - Q.lo[0], h1 = Q.hi[1] - Q.lo[1], h2 = Q.hi[2] - Q.lo[2];
+  const i64 H0 = 2 * h0, H1 = 2 * h1, H2 = 2 * h2;
+  i64 Y0[kMaxSites], Y1[kMaxSites], Y2[kMaxSites];
+  for (u32 t = 0; t < m; ++t) {
+    Y0[t] = S.x[0][t] - Q.lo[0];
+    Y1[t] = S.x[1][t] - Q.lo[1];
+    Y2[t] = S.x[2][t] - Q.lo[2];
+  }
+  i64 U0[kMaxSites], U1[kMaxSites], U2[kMaxSites], PP[kMaxSites], NN[kMaxSites];
+  u64 tt = 0, lh = 0;
+  for (u32 i = 0; i < m; ++i) {
+    const u64 rows = M.p2[i] & above(i);
+    if (!rows) continue;
+    const i64 yi0 = Y0[i], yi1 = Y1[i], yi2 = Y2[i];
+    for (u64 ks = rows; ks; ks &= ks - 1) {
+      const u32 k = ctz(ks);
+      const i64 a = yi0 - Y0[k], b = yi1 - Y1[k], c = yi2 - Y2[k];
+      U0[k] = a;
+      U1[k] = b;
+      U2[k] = c;
+      PP[k] = 2 * (a * (yi0 + Y0[k] - h0) + b * (yi1 + Y1[k] - h1) + c * (yi2 + Y2[k] - h2));
+      NN[k] = a * a + b * b + c * c;
+    }
+    const u64 Di = M.dom[i];
+    const i64 hbi = static_cast<i64>(i) * m - static_cast<i64>(i) * (i + 1) / 2 - i - 1;  // hrow(i, b) = hbi + b
+    for (u64 js = rows; js; js &= js - 1) {
+      const u32 j = ctz(js);
+      const u64 ks0 = rows & M.p2[j] & above(j);
+      if (!ks0) continue;
+      const u64 Dij = Di | M.dom[j];
+      const i64 u0 = U0[j], u1 = U1[j], u2 = U2[j], p0 = PP[j], nj = NN[j];
+      const i64 yj0 = Y0[j], yj1 = Y1[j], yj2 = Y2[j];
+      const i64 s0 = yi0 + yj0, s1 = yi1 + yj1, s2 = yi2 + yj2;
+      const i64 n0 = mn(yi0, yj0), x0 = mx(yi0, yj0), n1 = mn(yi1, yj1), x1 = mx(yi1, yj1), n2 = mn(yi2, yj2),
+                x2 = mx(yi2, yj2);
+      u64 hij = 0;
+      for (u64 ks = ks0; ks; ks &= ks - 1) {
+        const u32 k = ctz(ks);
+        const i64 d = static_cast<i64>(wsum(S, Dij | M.dom[k]));
+        if (d > th3) continue;
+        const i64 v0 = U0[k], v1 = U1[k], v2 = U2[k];
+        bool nal;
+        const bool hit = line_hit<Small>(u0, u1, u2, v0, v1, v2, p0, PP[k], h0, h1, h2, nal);
+        tt += nal;
+        lh += hit;
+        hij |= static_cast<u64>(hit & (d <= th4)) << k;
+        const i64 g = u0 * v0 + u1 * v1 + u2 * v2;
+        const bool acute = (g > 0) & (g < nj) & (g < NN[k]);
+        if (hit & acute) {
+          const i64 yk0 = Y0[k], yk1 = Y1[k], yk2 = Y2[k];
+          const i64 t0 = s0 + yk0, t1 = s1 + yk1, t2 = s2 + yk2;
+          const bool med = (t0 - mn(n0, yk0) >= 0) & (t0 - mx(x0, yk0) < H0) & (t1 - mn(n1, yk1) >= 0) &
+                           (t1 - mx(x1, yk1) < H1) & (t2 - mn(n2, yk2) >= 0) & (t2 - mx(x2, yk2) < H2);
+          if (med) sink.q3(i, j, k, th3);
+        }
+      }
+      H[hbi + j] |= hij;
+    }
+  }
+  cn.triple_tests += tt;
+  cn.line_hits += lh;
+}
+
+template <class Sink>
+MHGP10_HD void triples(const Sites& S, const Box& Q, const Masks& M, u64* H, i64 th3, i64 th4, Sink&& sink,
+                       Counters& cn) {
+  if (S.small) triples_impl<true>(S, Q, M, H, th3, th4, sink, cn);
+  else triples_impl<false>(S, Q, M, H, th3, th4, sink, cn);
+}
+
+// ------------------------------------------------------------------------------------------------ phase B
+// Lemme B4 (interieur strict sans le centre). Avec u = p_j - p_i, v = p_k - p_i, s = p_l - p_i, det = s.(u x v)
+// et G la matrice de Gram de (u, v, s), le centre circonscrit c verifie 2 (c - p_i).u = |u|^2 (idem v, s), donc
+// c - p_i = alpha u + beta v + gamma s avec (alpha, beta, gamma) = adj(G) (|u|^2, |v|^2, |s|^2) / (2 det^2)
+// (det G = det^2). Les coordonnees barycentriques de c sont (1 - alpha - beta - gamma, alpha, beta, gamma) ; c est
+// strictement interieur au tetraedre si et seulement si A, B, Gm > 0 et A + B + Gm < 2 det^2 (numerateurs entiers).
+// C'est la meme decision que strictly_inside_tetra (quatre orientations du centre contre celles des sommets :
+// signes des coordonnees barycentriques), sans calculer le centre. adj(G) : mineurs de Gram (Binet-Cauchy).
+// Si det = 0, D2 = 0 et la derniere inegalite echoue avec A, B, Gm > 0 : le test « det != 0 » est redondant, garde.
+// Voie large, bornes u18 : |composantes| < 2^18, produits scalaires < 2^37.6, u x v < 2^37 et det < 2^56.6 en i64 ;
+// mineurs < 2^76.2, numerateurs < 2^115.4, A + B + Gm < 2^117, 2 det^2 < 2^114.2 en i128.
+// Voie etroite (E' < 2^18 en repere T, donc |p_a - p_b| < 2^13) : produits scalaires < 2^27.6, u x v < 2^27,
+// det < 2^41.6, mineurs < 2^56.2 en i64 ; numerateurs < 2^85.4 et 2 det^2 < 2^84.2 en i128 (produits i64 x i64).
+// Lemme E4 : un centre strictement interieur est dans l'enveloppe du tetraedre ; si elle manque Q, rejet.
+template <bool Small, class Sink>
+MHGP10_HD void quads_impl(const Sites& S, const Box& Q, const Masks& M, const u64* H, i64 th4, Sink&& sink,
+                          Counters& cn) {
+  using G = typename std::conditional<Small, i64, i128>::type;
+  const u32 m = S.m;
+  u64 qt = 0;
+  for (u32 i = 0; i < m; ++i) {
+    const i64 pix = S.p[0][i], piy = S.p[1][i], piz = S.p[2][i];
+    const u64 Di = M.dom[i];
+    for (u64 js = M.p2[i] & above(i); js; js &= js - 1) {
+      const u32 j = ctz(js);
+      const u64 Hij = H[hrow(i, j, m)];
+      const i64 ux = S.p[0][j] - pix, uy = S.p[1][j] - piy, uz = S.p[2][j] - piz;
+      const i64 uu = ux * ux + uy * uy + uz * uz;
+      const u64 Dij = Di | M.dom[j];
+      for (u64 ks = Hij & above(j); ks; ks &= ks - 1) {
+        const u32 k = ctz(ks);
+        const u64 ls0 = Hij & H[hrow(i, k, m)] & H[hrow(j, k, m)] & above(k);
+        if (!ls0) continue;
+        const i64 vx = S.p[0][k] - pix, vy = S.p[1][k] - piy, vz = S.p[2][k] - piz;
+        const i64 vv = vx * vx + vy * vy + vz * vz, uv = ux * vx + uy * vy + uz * vz;
+        const i64 cx = uy * vz - uz * vy, cy = uz * vx - ux * vz, cz = ux * vy - uy * vx;  // u x v
+        const G g33 = G(uu) * vv - G(uv) * uv;
+        const i64 mn0 = mn(mn(pix, S.p[0][j]), S.p[0][k]), mx0 = mx(mx(pix, S.p[0][j]), S.p[0][k]);
+        const i64 mn1 = mn(mn(piy, S.p[1][j]), S.p[1][k]), mx1 = mx(mx(piy, S.p[1][j]), S.p[1][k]);
+        const i64 mn2 = mn(mn(piz, S.p[2][j]), S.p[2][k]), mx2 = mx(mx(piz, S.p[2][j]), S.p[2][k]);
+        const u64 Dijk = Dij | M.dom[k];
+        for (u64 ls = ls0; ls; ls &= ls - 1) {
+          const u32 l = ctz(ls);
+          const i64 d = static_cast<i64>(wsum(S, Dijk | M.dom[l]));
+          if (d > th4) continue;
+          ++qt;
+          const i64 plx = S.p[0][l], ply = S.p[1][l], plz = S.p[2][l];
+          const bool env = ((mx(mx0, plx) << kT) >= Q.lo[0]) & ((mn(mn0, plx) << kT) < Q.hi[0]) &
+                           ((mx(mx1, ply) << kT) >= Q.lo[1]) & ((mn(mn1, ply) << kT) < Q.hi[1]) &
+                           ((mx(mx2, plz) << kT) >= Q.lo[2]) & ((mn(mn2, plz) << kT) < Q.hi[2]);
+          const i64 sx = plx - pix, sy = ply - piy, sz = plz - piz;
+          const i64 ss = sx * sx + sy * sy + sz * sz, us = ux * sx + uy * sy + uz * sz, vs = vx * sx + vy * sy + vz * sz;
+          const i64 det = sx * cx + sy * cy + sz * cz;
+          const G g11 = G(vv) * ss - G(vs) * vs, g22 = G(uu) * ss - G(us) * us;
+          const G g12 = G(vs) * us - G(uv) * ss, g13 = G(uv) * vs - G(vv) * us;
+          const G g23 = G(us) * uv - G(uu) * vs;
+          const i128 A = i128(g11) * uu + i128(g12) * vv + i128(g13) * ss,
+                     B = i128(g12) * uu + i128(g22) * vv + i128(g23) * ss,
+                     Gm = i128(g13) * uu + i128(g23) * vv + i128(g33) * ss;
+          const i128 D2 = 2 * (i128(det) * det);
+          const bool inside = (det != 0) & (A > 0) & (B > 0) & (Gm > 0) & (A + B + Gm < D2);
+          if (inside & env) sink.q4(i, j, k, l, th4);
+        }
+      }
+    }
+  }
+  cn.quad_tests += qt;
+}
+
+template <class Sink>
+MHGP10_HD void quads(const Sites& S, const Box& Q, const Masks& M, const u64* H, i64 th4, Sink&& sink, Counters& cn) {
+  if (S.small) quads_impl<true>(S, Q, M, H, th4, sink, cn);
+  else quads_impl<false>(S, Q, M, H, th4, sink, cn);
+}
+
+// Etendue locale de la feuille (voie etroite) : E' = max(|X - lo|_inf, h) < 2^18 (repere T).
+MHGP10_HD bool small_extent(const Sites& S, const Box& Q) {
+  constexpr i64 kLim = i64(1) << 18;
+  bool ok = Q.hi[0] - Q.lo[0] < kLim && Q.hi[1] - Q.lo[1] < kLim && Q.hi[2] - Q.lo[2] < kLim;
+  for (u32 t = 0; t < S.m; ++t)
+    for (int a = 0; a < 3; ++a) {
+      const i64 y = S.x[a][t] - Q.lo[a];
+      ok = ok && y < kLim && -y < kLim;
+    }
+  return ok;
+}
+
+}  // namespace mhgp10::leaf

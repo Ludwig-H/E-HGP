@@ -1,0 +1,9 @@
+delai_enfant_et_petit_enfant       ok  code=-9 retour=3.03s pids=[721574, 721579] survivants=[] fichiers_temps=[]
+signal_pendant_le_lancement        ok  exception=Terminated(<Signals.SIGTERM: 15>) groupe_ferme=True survivants=[]
+appel_normal_json_natif            ok  code=0 balls=7 stdout_natif=True mesures=True
+run_ligne_ok_appels_natifs         ok  code=0 statut=ok appels=['catalogue', 'tower'] 
+run_compteurs_de_boules_egaux      ok  code=3 statut=balls_mismatch appels=2 
+run_delai_tour_tuee                ok  code=0 statut=tower_timeout pids=[721768] survivants=[] duree=3.36s 
+run_sigterm_appel_tue              ok  code=143 pids=[721865] survivants=[] INTERROMPU par le signal 15 : appel en cours tue et recolte
+run_sigint_appel_tue               ok  code=130 pids=[721937] survivants=[] INTERROMPU par le signal 2 : appel en cours tue et recolte
+scale_run_timeout_ok

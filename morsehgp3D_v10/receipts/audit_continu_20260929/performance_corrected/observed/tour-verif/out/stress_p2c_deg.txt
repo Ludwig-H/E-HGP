@@ -1,0 +1,11 @@
+deg_jitter16 [--k=5 --only-order=5 --entry=cover] base=f14a62d146663ca53587ba79e225fb9f p2c(2,5,7 x3)=f14a62d146663ca53587ba79e225fb9f IDENTIQUES
+deg_jitter16 [--k=6 --no-points] base=f887551ee2097d0c462468024f8d12bf p2c(2,5,7 x3)=f887551ee2097d0c462468024f8d12bf IDENTIQUES
+deg_jitter16 [--k=7 --only-order=7 --entry=cover] base=865bae856644c9aa6e61e9b7017a72f0 p2c(2,5,7 x3)=865bae856644c9aa6e61e9b7017a72f0 IDENTIQUES
+deg_cube14 [--k=5 --only-order=5 --entry=cover] base=70cb4bd99446b2eb8308648d42674519 p2c(2,5,7 x3)=70cb4bd99446b2eb8308648d42674519 IDENTIQUES
+deg_cube14 [--k=6 --no-points] base=d56a63d7c7b40ac1c2412e0cd80ba0b0 p2c(2,5,7 x3)=d56a63d7c7b40ac1c2412e0cd80ba0b0 IDENTIQUES
+deg_cube14 [--k=7 --only-order=7 --entry=cover] base=e09c2b4aa43dac09aa5fd2223b279651 p2c(2,5,7 x3)=e09c2b4aa43dac09aa5fd2223b279651 IDENTIQUES
+deg_box20 [--k=5 --only-order=5 --entry=cover] base=8042a2f8fe269a6d8db220b620333d32 p2c(2,5,7 x3)=8042a2f8fe269a6d8db220b620333d32 IDENTIQUES
+deg_box20 [--k=6 --no-points] base=30da987599e8d9b4b4a65b3307341c9b p2c(2,5,7 x3)=30da987599e8d9b4b4a65b3307341c9b IDENTIQUES
+Exception ignored in: <_io.TextIOWrapper name='<stdout>' mode='w' encoding='utf-8'>
+BrokenPipeError: [Errno 32] Broken pipe
+deg_box20 [--k=7 --only-order=7 --entry=cover] ARRETE (charge 35-46, temps)

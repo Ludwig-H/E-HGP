@@ -1,0 +1,7 @@
+callgrind --branch-sim=yes, quart 01 (lidar01_quarter_x_neg_y_neg), 1 fil ; base a10605a06 contre v3d
+(instructions Ir, branchements conditionnels Bc, mauvaises predictions simulees Bcm ; feuille = cout inclusif
+ de enumerate_leaf_masks<1> (base) ou enumerate_leaf_v3 (v3d))
+K=5 programme Ir 6.939 G -> 5.601 G (x1.24)
+K=5 feuille   Ir 4.230 G -> 2.894 G (x1.46) ; Bc 216.8 M -> 102.3 M (x2.12) ; Bcm 30.6 M -> 14.2 M (x2.16)
+K=10 programme Ir 30.126 G -> 21.194 G (x1.42)
+K=10 feuille   Ir 22.201 G -> 13.281 G (x1.67) ; Bc 964.9 M -> 408.8 M (x2.36) ; Bcm 124.1 M -> 52.3 M (x2.37)
