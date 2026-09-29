@@ -5,6 +5,9 @@ génération d'une scène de l'espace `test`. Le JSON fait foi ; ce texte le ré
 
 ## PREREG_V10_KMATCH_A_20260928 : panneau apparié K = min_samples, lot A (K = 1, 2, 3)
 
+**Exécuté le 29 septembre 2026** : la tour bat HDBSCAN à K = 1, 2 et 3 (Δ = +0,053, +0,092, +0,049 ; reçu
+`receipts/test_kmatch_A_20260929`).
+
 **Question.** À ordre égal, la tour v10 à l'ordre K, avec sa meilleure tête choisie sur `dev`, fait-elle mieux que
 sklearn HDBSCAN à `min_samples` = K, avec sa meilleure tête choisie sur les mêmes scènes par la même règle ? La
 comparaison se fait sur les tailles d'intérêt n = 8 000, 16 000 et 32 000. K = `min_samples` suit la directive de

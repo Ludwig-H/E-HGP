@@ -1,0 +1,18 @@
+{
+ "cpus": 8,
+ "environment": {
+  "numpy": "2.5.3",
+  "python": "3.12.1",
+  "scipy": "1.18.1",
+  "sklearn": "1.9.1"
+ },
+ "finished_utc": "2026-09-29T09:20:13Z",
+ "host": "codespaces-0bcb78",
+ "jobs": 4,
+ "plan_sha256": "c43a9f94b381f4901700f87ed583b2367a4187b80a7aa09a0ba6fed3f3edcb3e",
+ "prereg": "PREREG_V10_KMATCH_A_20260928.json",
+ "prereg_sha256": "2e4e62733872191a5a0a0d7b378f6e92c7eb4fa4b8041fecbfd1a1a808f6929c",
+ "scenes": 960,
+ "started_utc": "2026-09-29T06:34:07Z",
+ "worker_failures": 0
+}

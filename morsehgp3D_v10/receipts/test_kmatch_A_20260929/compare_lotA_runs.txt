@@ -1,0 +1,1 @@
+lignes du run interrompu : 1280 ; identiques 1280 ; differentes 0 ; absentes de la relance 0

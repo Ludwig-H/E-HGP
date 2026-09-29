@@ -52,8 +52,10 @@ GCP : session 1 le 29 septembre (CPU seul, arrêt certifié TERMINATED), reçu `
    - Il reste deux faiblesses : `filaments` et `anisotropic` aux niveaux difficiles, où EOM fusionne des groupes
      proches, et la décroissance de l'avantage quand K grandit. Piste : juger une scission par sa persistance à
      travers K, grâce aux verticales.
-   - Campagne de test du lot A (tête C∩X, préenregistrée `e8dd36a91`) : relancée en entier après un redémarrage de
-     la machine. Le run interrompu (160/960 scènes) est conservé et doit concorder avec la relance.
+   - **Test préenregistré du lot A (tête C∩X du 28 septembre, `e8dd36a91`) : la tour bat HDBSCAN à K = 1, 2 et 3**
+     sur 960 scènes de test de 8 000 à 32 000 points : Δ = +0,053, +0,092 et +0,049, p_Holm = 3e-5. Reçu
+     `receipts/test_kmatch_A_20260929`. À K = 1, l'écart vient de la seule tête (les hiérarchies coïncident). Le
+     run interrompu (160 scènes) concorde ligne pour ligne avec la relance.
    - La tête v10-b exigera un nouveau préenregistrement, sur un nouvel espace de graines. Le banc est prêt :
      l'appel groupé partage le catalogue entre tous les K, et `run_test.py --resume` reprend une exécution
      interrompue sans recalculer une scène.
