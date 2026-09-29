@@ -1,0 +1,14 @@
+K = 5
+  lidar02_full                 M=12 6.580  M=16 5.197  M=20 5.343  M=24 5.883  M=28 6.739 | meilleur M=16
+  lidar00_full                 M=12 7.096  M=16 5.593  M=20 5.650  M=24 6.232  M=28 7.097 | meilleur M=16
+  lidar01_quarter_x_neg_y_neg  M=12 1.030  M=16 0.785  M=20 0.808  M=24 0.862  M=28 0.993 | meilleur M=16
+  syn_shells_density_x2        M=12 1.818  M=16 1.585  M=20 1.628  M=24 1.812  M=28 2.119 | meilleur M=16
+  somme des medianes : M=12 16.52  M=16 13.16  M=20 13.43  M=24 14.79  M=28 16.95
+  pire ecart au meilleur par entree : M=12 +31.2%  M=16 +0.0%  M=20 +3.0%  M=24 +14.4%  M=28 +33.7%
+K = 10
+  lidar02_full                 M=16 41.578  M=20 24.849  M=24 22.311  M=28 22.665  M=32 24.435  M=40 29.732 | meilleur M=24
+  lidar00_full                 M=16 45.695  M=20 27.209  M=24 24.003  M=28 24.355  M=32 26.158  M=40 31.915 | meilleur M=24
+  lidar01_quarter_x_neg_y_neg  M=16 7.302  M=20 3.945  M=24 3.258  M=28 3.261  M=32 3.444  M=40 4.172 | meilleur M=24
+  syn_shells_density_x2        M=16 9.440  M=20 6.204  M=24 5.819  M=28 6.029  M=32 6.502  M=40 8.079 | meilleur M=24
+  somme des medianes : M=16 104.01  M=20 62.21  M=24 55.39  M=28 56.31  M=32 60.54  M=40 73.90
+  pire ecart au meilleur par entree : M=16 +124.1%  M=20 +21.1%  M=24 +0.0%  M=28 +3.6%  M=32 +11.7%  M=40 +38.8%

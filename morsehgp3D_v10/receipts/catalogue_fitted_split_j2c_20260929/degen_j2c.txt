@@ -1,0 +1,11 @@
+grid10 K=5 ref=fdf54258a4c869e9 j2c=fdf54258a4c869e9 IDENTIQUES ; boules 24995 ref: noeuds 41065 feuilles 35216 bloquees 0 m_max 16 | j2c: noeuds 10275 feuilles 5138 bloquees 0 m_max 16 identite True
+grid10 K=10 ref=fee42eca567de8ab j2c=fee42eca567de8ab IDENTIQUES ; boules 121462 ref: noeuds 176073 feuilles 153012 bloquees 5096 m_max 32 | j2c: noeuds 34665 feuilles 17333 bloquees 1157 m_max 32 identite True
+grid10s7 K=5 ref=5b039b8990111243 j2c=5b039b8990111243 IDENTIQUES ; boules 24995 ref: noeuds 14089 feuilles 12328 bloquees 0 m_max 16 | j2c: noeuds 10275 feuilles 5138 bloquees 0 m_max 16 identite True
+grid10s7 K=10 ref=89e2eb0e761fe3e7 j2c=89e2eb0e761fe3e7 IDENTIQUES ; boules 121462 ref: noeuds 77097 feuilles 67460 bloquees 5096 m_max 32 | j2c: noeuds 46737 feuilles 23369 bloquees 1075 m_max 32 identite True
+grid16 K=5 ref=b844ccc00d3c64e8 j2c=b844ccc00d3c64e8 IDENTIQUES ; boules 115373 ref: noeuds 211353 feuilles 182906 bloquees 0 m_max 16 | j2c: noeuds 53727 feuilles 26864 bloquees 0 m_max 16 identite True
+grid16 K=10 ref=db6687d078af1e09 j2c=db6687d078af1e09 IDENTIQUES ; boules 593926 ref: noeuds 866489 feuilles 755526 bloquees 25688 m_max 32 | j2c: noeuds 174095 feuilles 87048 bloquees 6431 m_max 32 identite True
+sphere101 K=5 ref=1b72bcaa33e95c1f j2c=1b72bcaa33e95c1f IDENTIQUES ; boules 2757 ref: noeuds 5001 feuilles 2034 bloquees 8 m_max 168 | j2c: noeuds 3403 feuilles 902 bloquees 8 m_max 168 identite True
+sphere101 K=10 ref=efbf6296b70b18bd j2c=efbf6296b70b18bd IDENTIQUES ; boules 7805 ref: noeuds 4961 feuilles 2146 bloquees 8 m_max 168 | j2c: noeuds 4085 feuilles 1103 bloquees 8 m_max 168 identite True
+sphere314 K=5 ref=[code 2 {"status":"resource_exhausted","reason":"wide_leaf"}] j2c=[code 2 {"status":"resource_exhausted","reason":"wide_leaf"}] MEME_REFUS
+sphere314 K=10 ref=[code 2 {"status":"resource_exhausted","reason":"wide_leaf"}] j2c=[code 2 {"status":"resource_exhausted","reason":"wide_leaf"}] MEME_REFUS
+FIN echec=0

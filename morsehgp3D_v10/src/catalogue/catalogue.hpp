@@ -6,7 +6,8 @@
 // Generation par BOITES DE CENTRES (lentille L13 de l'audit v9, conception GEN_v1) : chaque boule est
 // enumeree dans l'unique feuille demi-ouverte qui contient son centre ; la liste de la feuille contient
 // la boule K-NN fermee de tout point de la feuille (lemmes des gardes et des dominateurs), donc le
-// recensement local est exact (theoreme C). Aucun flottant dans les decisions.
+// recensement local est exact (theoreme C). Arbre binaire de boites ajustees a l'enveloppe de leur liste, coupees
+// au milieu du plus long cote. Aucun flottant dans les decisions.
 //
 // Ordre canonique publie : (niveau exact, S*) ; rang = rang dense des niveaux exacts distincts.
 #pragma once
@@ -54,10 +55,9 @@ template <class T>
 using UninitVector = std::vector<T, UninitAlloc<T>>;
 
 // filter_tests : tests de dominance du filtre des noeuds (S0 pour chaque site de la liste parente, puis Y \ S0 pour
-// ceux que S0 n'exclut pas) ; preskipped_bbox : noeuds ignores par l'enveloppe de la liste parente, sans filtrage
-// (compris dans skipped_bbox).
+// ceux que S0 n'exclut pas).
 struct CatalogueLedger {
-  u64 nodes = 0, leaves = 0, skipped_bbox = 0, preskipped_bbox = 0, sum_m = 0, max_m = 0;
+  u64 nodes = 0, leaves = 0, skipped_bbox = 0, sum_m = 0, max_m = 0;
   u64 filter_tests = 0, leaf_dominance_tests = 0;
   u64 pair_tests = 0, triple_tests = 0, line_hits = 0, quad_tests = 0;
   u64 judged = 0, emitted = 0, extended = 0, weighted = 0, max_shell = 0, stalled_leaves = 0;

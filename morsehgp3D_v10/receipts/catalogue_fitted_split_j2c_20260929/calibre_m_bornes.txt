@@ -1,0 +1,8 @@
+K=3 lidar01_quarter_x_neg_y_neg  M=8 0.484  M=12 0.304  M=16 0.312 | meilleur M=12
+K=3 syn_shells_density_x2        M=8 0.896  M=12 0.665  M=16 0.694 | meilleur M=12
+K=12 lidar01_quarter_x_neg_y_neg  M=24 5.479  M=28 4.883  M=32 4.903  M=40 5.676 | meilleur M=28
+K=12 syn_shells_density_x2        M=24 8.631  M=28 8.425  M=32 8.822  M=40 10.466 | meilleur M=28
+K=12 lidar02_full                 M=24 34.777  M=28 32.840  M=32 33.812 | meilleur M=28
+K=12 lidar00_full                 M=24 38.057  M=28 35.728  M=32 36.929 | meilleur M=28
+K=12 lidar01_quarter_x_neg_y_neg  M=24 5.479  M=28 4.883  M=32 4.903  M=40 5.676 | meilleur M=28
+K=12 syn_shells_density_x2        M=24 8.631  M=28 8.425  M=32 8.822  M=40 10.466 | meilleur M=28

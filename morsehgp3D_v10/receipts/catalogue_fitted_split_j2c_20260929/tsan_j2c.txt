@@ -1,0 +1,3 @@
+quart01 K=5 4 fils ref=414aa4d47ffe1c55 tsan=414aa4d47ffe1c55 code=0 avertissements_tsan=0 IDENTIQUES
+quart01 K=10 4 fils ref=7c46e50a72c08087 tsan=7c46e50a72c08087 code=0 avertissements_tsan=0 IDENTIQUES
+oracle T2 sous TSan (12 nuages, 2 fils par appel) : code 0 ; catalogue_oracle_checks 49 fails 0 balls 3691

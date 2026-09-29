@@ -1,0 +1,8 @@
+lidar02_quarter_x_nonneg_y_nonneg K=5 ref=4939fead5753116e asan=4939fead5753116e code=0 stderr_lignes=0 IDENTIQUES
+lidar02_quarter_x_nonneg_y_nonneg K=10 ref=be5d19647049e109 asan=be5d19647049e109 code=0 stderr_lignes=0 IDENTIQUES
+syn_shells_density_x1 K=5 ref=6f903b08d471cad8 asan=6f903b08d471cad8 code=0 stderr_lignes=0 IDENTIQUES
+syn_shells_density_x1 K=10 ref=0bb0bc9c17a7f481 asan=0bb0bc9c17a7f481 code=0 stderr_lignes=0 IDENTIQUES
+sphere101 K=5 ref=1b72bcaa33e95c1f asan=1b72bcaa33e95c1f code=0 stderr_lignes=0 IDENTIQUES
+sphere101 K=10 ref=efbf6296b70b18bd asan=efbf6296b70b18bd code=0 stderr_lignes=0 IDENTIQUES
+grid10 K=5 ref=fdf54258a4c869e9 asan=fdf54258a4c869e9 code=0 stderr_lignes=0 IDENTIQUES
+grid10 K=10 ref=fee42eca567de8ab asan=fee42eca567de8ab code=0 stderr_lignes=0 IDENTIQUES

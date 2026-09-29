@@ -115,8 +115,10 @@ GCP : session 1 le 29 septembre (CPU seul, arrêt certifié TERMINATED), reçu `
      ThreadSanitizer propre (`-DMHGP10_TSAN=ON`, lancé par `setarch -R`).
    - **Tête** (reçu `receipts/head_point_dendrogram_20260929`) : `point_dendrogram` trie par dénombrement des rangs du
      catalogue au lieu d'un tri général à approximations recalculées : ×17 à K = 5 (0,272 → 0,016 s en local).
-   - **J2c en cours** (agent) : boîtes ajustées à l'enveloppe de leur liste, coupées au milieu du plus long côté
-     (audit de l'agent : −10 à −20 % sur l'étage des boîtes, catalogue identique).
+   - **J2c** (reçu `receipts/catalogue_fitted_split_j2c_20260929`) : boîtes ajustées à l'enveloppe de leur liste,
+     coupées au milieu du plus long côté (arbre binaire). Catalogue identique ; étage des boîtes ×1,12 à ×1,30 en
+     local ; `t_frontier` +60 à 100 %, à surveiller sur G4. Les conceptions GPU « arbre » supposaient un octree : à
+     revoir.
    - Suite du plan ordonné du juge des conceptions GPU (hors dépôt, `v10-persist/gpu_design/juge/PLAN.md`) : la
      feuille en en-tête commun CPU/GPU (J3a), puis les feuilles sur GPU, puis l'arbre entier sur GPU. Cibles :
      100 ms à K = 5, 1 s à K = 10.

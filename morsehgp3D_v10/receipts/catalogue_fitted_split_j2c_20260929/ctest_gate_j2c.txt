@@ -1,0 +1,34 @@
+Internal ctest changing into directory: /workspaces/E-HGP/build/v10-j2/j2c/build
+Test project /workspaces/E-HGP/build/v10-j2/j2c/build
+    Start 1: mhgp10_unit
+1/9 Test #1: mhgp10_unit ..............................   Passed    2.35 sec
+    Start 2: mhgp10_catalogue_oracle
+2/9 Test #2: mhgp10_catalogue_oracle ..................   Passed  146.50 sec
+    Start 3: mhgp10_tower_oracle
+3/9 Test #3: mhgp10_tower_oracle ......................   Passed  167.62 sec
+    Start 4: mhgp10_head_condensation_vs_sklearn
+4/9 Test #4: mhgp10_head_condensation_vs_sklearn ......   Passed    8.20 sec
+    Start 5: mhgp10_regression_level_collision
+5/9 Test #5: mhgp10_regression_level_collision ........   Passed    8.39 sec
+    Start 6: mhgp10_points_cover
+6/9 Test #6: mhgp10_points_cover ......................   Passed   13.40 sec
+    Start 7: mhgp10_regression_batch_equivalence
+7/9 Test #7: mhgp10_regression_batch_equivalence ......   Passed   38.58 sec
+    Start 8: mhgp10_regression_mreach_border
+8/9 Test #8: mhgp10_regression_mreach_border ..........   Passed    2.06 sec
+    Start 9: mhgp10_regression_multiplicity_refusal
+9/9 Test #9: mhgp10_regression_multiplicity_refusal ...   Passed    0.07 sec
+
+100% tests passed, 0 tests failed out of 9
+
+Label Time Summary:
+fast          =   2.42 sec*proc (2 tests)
+gate          = 387.16 sec*proc (9 tests)
+head          =   8.20 sec*proc (1 test)
+oracle        = 314.12 sec*proc (2 tests)
+points        =  13.40 sec*proc (1 test)
+regression    =  49.10 sec*proc (4 tests)
+
+Total Test time (real) = 387.17 sec
+catalogue_oracle_checks 161 fails 0 balls 14132
+tower_oracle_checks 73 fails 0 cuts 23444
