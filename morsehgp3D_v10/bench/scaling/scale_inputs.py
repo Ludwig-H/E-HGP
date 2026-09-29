@@ -13,7 +13,10 @@ par le capteur (signes des coordonnees float32 d'origine) : 4 quarts, 2 moitiees
 sur la grille commune de 1 mm. Quart -> moitie -> trame est le doublement et le quadruplement spatial reel.
 
   python3 scale_inputs.py --out <dossier>        # ecrit les .u32le et MANIFEST.json (sha256, n, h, regime)
-Aucune etiquette : ces entrees ne servent qu'au cout.
+  python3 scale_inputs.py --out <dossier> --factors 1,2,4,8,16,32,64,128   # grands facteurs (G4)
+Aucune etiquette : ces entrees ne servent qu'au cout. Avec --factors, les combinaisons qui sortent du domaine 18 bits
+(regime `space` : l'etendue grandit avec n a pas h fixe) sont ecartees et notees dans le manifeste (`skipped`) ; sans
+--factors, les sorties sont celles de toujours (facteurs 1, 2, 4).
 """
 import argparse
 import hashlib
@@ -105,18 +108,24 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--out', required=True)
     ap.add_argument('--repo', default=os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
+    ap.add_argument('--factors', default=','.join(str(f) for f in FACTORS))
     args = ap.parse_args()
+    factors = [int(x) for x in args.factors.split(',')]
     os.makedirs(args.out, exist_ok=True)
-    manifest = dict(schema='mhgp10.scale_inputs.v1', n0=N0, factors=list(FACTORS), seed=SEED, entries=[])
+    manifest = dict(schema='mhgp10.scale_inputs.v1', n0=N0, factors=factors, seed=SEED, entries=[], skipped=[])
     for family in FAMILIES:
         for regime in ('space', 'density'):
             base = scene(family, regime, 1)
             lo, hi = base.min(axis=0), base.max(axis=0)
             h = float((hi - lo).max()) / float(1 << 16)
-            clouds = {f: scene(family, regime, f) for f in FACTORS}
+            clouds = {f: scene(family, regime, f) for f in factors}
             origin = np.min([c.min(axis=0) for c in clouds.values()], axis=0)
-            for f in FACTORS:
-                grid, dups = quantize(clouds[f], h, origin)
+            for f in factors:
+                try:
+                    grid, dups = quantize(clouds[f], h, origin)
+                except ValueError:  # hors du domaine 18 bits a pas h fixe
+                    manifest['skipped'].append(dict(family=family, regime=regime, factor=f, reason='domaine 18 bits'))
+                    continue
                 name = 'syn_%s_%s_x%d.u32le' % (family, regime, f)
                 data = np.ascontiguousarray(grid, dtype='<u4').tobytes()
                 with open(os.path.join(args.out, name), 'wb') as fh:

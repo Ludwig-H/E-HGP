@@ -5,7 +5,10 @@ Pour chaque (entree, K) : compteurs deterministes du catalogue (mhgp10_catalogue
 chaque doublement, log2(x(2n) / x(n)), par regime (synthetique `space` / `density` ; LiDAR quart -> moitie -> trame,
 avec les effectifs reels des secteurs : exposant = log(x_parent / x_enfant) / log(n_parent / n_enfant)).
 
-  python3 scale_run.py run --build <build> --data <dossier scale_inputs> --out mesures.csv --k 5,10 --threads 4
+  python3 scale_run.py run --build <build> --data <dossier scale_inputs> --out mesures.csv --k 5,10 --threads 4 \
+      [--timeout 300] [--budget 1300]
+Entrees traitees par taille croissante. --timeout : delai de chaque appel de binaire (statut `timeout`) ; --budget :
+au-dela de ce temps total, les entrees restantes ne sont pas lancees (statut `skipped_budget`, ecrit).
   python3 scale_run.py report --csv mesures.csv
 Les compteurs sont deterministes (independants de la charge) ; les temps ne valent que sur un hote calme (G4).
 """
@@ -24,12 +27,21 @@ COLS = ('file', 'kind', 'family', 'regime', 'factor', 'frame', 'sector', 'sites'
         'wall_s', 'cpu_s', 'max_rss_kb')
 
 
+TIMEOUT = None  # delai par appel de binaire (s), fixe par --timeout
+
+
 def run_json(cmd):
-    """Execute cmd sous /usr/bin/time (RSS maximale propre a la commande) et rend (code, json, mur, cpu, rss)."""
+    """Execute cmd sous /usr/bin/time (RSS maximale propre a la commande) et rend (code, json, mur, cpu, rss).
+    Code -9 si le delai TIMEOUT est depasse."""
     timing = cmd[0] + '.time.%d' % os.getpid()
     full = ['/usr/bin/time', '-f', '%e %U %S %M', '-o', timing] + cmd if os.path.exists('/usr/bin/time') else cmd
     t0 = time.time()
-    r = subprocess.run(full, capture_output=True, text=True)
+    try:
+        r = subprocess.run(full, capture_output=True, text=True, timeout=TIMEOUT)
+    except subprocess.TimeoutExpired:
+        if os.path.exists(timing):
+            os.remove(timing)
+        return -9, None, time.time() - t0, None, None
     wall, cpu, rss = time.time() - t0, None, None
     if full is not cmd and os.path.exists(timing):
         with open(timing) as fh:
@@ -49,6 +61,9 @@ def measure(build, path, k, threads):
     row = dict(k=k, threads=threads)
     code, cat, _, _, _ = run_json([os.path.join(build, 'mhgp10_catalogue'), path, '--k=%d' % k,
                                    '--threads=%d' % threads])
+    if code == -9:
+        row['status'] = 'catalogue_timeout'
+        return row
     if code != 0 or cat is None:
         row['status'] = 'catalogue_refused_%d' % code
         return row
@@ -57,6 +72,9 @@ def measure(build, path, k, threads):
                cat_triple_tests=cat.get('triple_tests'))
     code, tw, wall, cpu, rss = run_json([os.path.join(build, 'mhgp10_tower'), path, '--k=%d' % k,
                                          '--threads=%d' % threads, '--no-points'])
+    if code == -9:
+        row['status'] = 'tower_timeout'
+        return row
     if code != 0 or tw is None:
         row['status'] = 'tower_refused_%d' % code
         return row
@@ -91,15 +109,21 @@ def cmd_run(args):
     path = os.path.join(args.data, 'MANIFEST.json')
     manifest = json.load(open(path)) if os.path.exists(path) else infer_manifest(args.data)
     ks = [int(x) for x in args.k.split(',')]
-    entries = manifest['entries']
+    entries = sorted(manifest['entries'], key=lambda e: (e['sites'], e['file']))
     if args.only:
         entries = [e for e in entries if any(tok in e['file'] for tok in args.only.split(','))]
+    global TIMEOUT
+    TIMEOUT = args.timeout
+    t_start = time.time()
     with open(args.out, 'w', newline='') as h:
         w = csv.DictWriter(h, fieldnames=COLS)
         w.writeheader()
         for e in entries:
             for k in ks:
-                row = measure(args.build, os.path.join(args.data, e['file']), k, args.threads)
+                if args.budget and time.time() - t_start > args.budget:
+                    row = dict(k=k, threads=args.threads, status='skipped_budget')
+                else:
+                    row = measure(args.build, os.path.join(args.data, e['file']), k, args.threads)
                 row.update(file=e['file'], kind=e['kind'], family=e.get('family', ''), regime=e.get('regime', ''),
                            factor=e.get('factor', ''), frame=e.get('frame', ''), sector=e.get('sector', ''),
                            sites=e['sites'])
@@ -138,7 +162,8 @@ def cmd_report(args):
         fams = sorted({(r['family'], r['regime']) for r in rows if r['kind'] == 'synthetic'})
         for fam, reg in fams:
             line = []
-            for f1, f2 in ((1, 2), (2, 4)):
+            facs = sorted({int(r['factor']) for r in rows if r['family'] == fam and r['regime'] == reg and r['k'] == k})
+            for f1, f2 in zip(facs, facs[1:]):
                 a = by.get(('syn_%s_%s_x%d.u32le' % (fam, reg, f1), k))
                 b = by.get(('syn_%s_%s_x%d.u32le' % (fam, reg, f2), k))
                 if not a or not b:
@@ -181,6 +206,8 @@ def main():
     r.add_argument('--k', default='5,10')
     r.add_argument('--threads', type=int, default=4)
     r.add_argument('--only', default='')
+    r.add_argument('--timeout', type=float, default=None)
+    r.add_argument('--budget', type=float, default=None)
     p = sub.add_parser('report')
     p.add_argument('--csv', required=True)
     p.add_argument('--json', default='')
