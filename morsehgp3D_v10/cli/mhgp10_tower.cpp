@@ -116,7 +116,12 @@ int main(int argc, char** argv) {
               n, kmax, pool.size(), cat.balls(), sec(t0, t1), cat_s.back(), tow_s.back(), points ? "true" : "false", rss_cat,
               hwm_cat, rss_tow, hwm_tow);
   for (size_t i = 0; i < cat_s.size(); ++i) std::printf("%s%.4f", i ? "," : "", cat_s[i]);
-  std::printf("],\"passes_tower_s\":[");
+  std::printf("],\"catalogue_stages\":{\"t_frontier\":%.4f,\"t_boxes\":%.4f,\"t_order\":%.4f,\"t_assemble\":%.4f,"
+              "\"t_collect\":%.4f,\"t_sort\":%.4f,\"t_bands\":%.4f,\"t_compare\":%.4f,\"t_ranks\":%.4f,\"t_copy\":%.4f,"
+              "\"bands\":%llu,\"band_members\":%llu}",
+              cat.t_frontier, cat.t_boxes, cat.t_order, cat.t_assemble, cat.t_collect, cat.t_sort, cat.t_bands,
+              cat.t_compare, cat.t_ranks, cat.t_copy, (unsigned long long)cat.bands, (unsigned long long)cat.band_members);
+  std::printf(",\"passes_tower_s\":[");
   for (size_t i = 0; i < tow_s.size(); ++i) std::printf("%s%.4f", i ? "," : "", tow_s[i]);
   std::printf("],\"orders\":[");
   auto counters = [](const char* name, const ResolveCounters& c) {

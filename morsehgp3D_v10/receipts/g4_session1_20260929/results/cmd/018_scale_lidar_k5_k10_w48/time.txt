@@ -1,0 +1,23 @@
+	Command being timed: "timeout --foreground --kill-after=10s 1200s python3 /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.crpgio9glA/src/morsehgp3D_v10/bench/scaling/scale_run.py run --build /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.crpgio9glA/build --data /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.crpgio9glA/data --out /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.crpgio9glA/results/cmd/018_scale_lidar_k5_k10_w48/files/scale_lidar.csv --k 5,10 --threads 48 --only lidar"
+	User time (seconds): 899.52
+	System time (seconds): 17.16
+	Percent of CPU this job got: 1108%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 1:22.70
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 2061808
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 16405472
+	Voluntary context switches: 75197
+	Involuntary context switches: 31284
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 736
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

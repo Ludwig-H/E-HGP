@@ -1,0 +1,15 @@
+status=ok
+exit_code=0
+requested_timeout_seconds=600
+effective_timeout_seconds=600
+started_epoch=1790666983.294101531
+ended_epoch=1790666987.723654153
+group_closed_epoch=1790666987.724495352
+wall_seconds=4.430
+max_rss_kb=327504
+time_txt=present
+group_closed=1
+residual_group_killed=0
+streams_truncated=0
+loadavg_before=0.11 0.03 0.01 1/626 2092
+loadavg_after=0.11 0.03 0.01 1/630 2303

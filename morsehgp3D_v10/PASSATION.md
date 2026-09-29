@@ -7,7 +7,7 @@ phase=exploration_v10_hors_registre
 backend=cpu_reference
 profile=quantized_u18_input_only
 public_status=not_claimed
-GCP : non utilisé à ce jour ; protocole v10 commité (`11d7ad25f`), première session en préparation
+GCP : session 1 le 29 septembre (CPU seul, arrêt certifié TERMINATED), reçu `receipts/g4_session1_20260929`
 ```
 
 ## Lire d'abord
@@ -63,10 +63,20 @@ GCP : non utilisé à ce jour ; protocole v10 commité (`11d7ad25f`), première 
    - Le catalogue domine désormais la chaîne : K5 de 2,7 à 3,8 s, K10 de 10 à 14 s à 4 fils.
    - En entrée `cover`, l'attache ne résout plus que les premières boules couvrantes : la tour est 2 à 3,5 fois
      plus rapide dans ce mode, avec des dumps identiques.
-   - Aucune mesure G4 à ce jour. Le protocole `gcp-migration/v10_*` est commité : trois revues adverses, 47
-     scénarios, 8 mutants tués. Session 1 prête : calibration, trames LiDAR entières (tour seule, entrée
-     `cover`, chaîne complète jusqu'aux étiquettes), mise à l'échelle LiDAR par secteurs, synthétique en régime
-     spatial et en régime de densité.
+   - Session G4 1, CPU seul (le GPU n'a pas servi, la v10 n'a pas de voie CUDA), 48 fils :
+     - K = 5 : de 0,58 à 1,19 s par trame (catalogue et tour) ; chaîne complète jusqu'aux étiquettes en entrée
+       `cover`, de 0,75 à 1,39 s ;
+     - K = 10 : de 2,5 à 4,6 s ;
+     - compteurs linéaires en croissance spatiale (exposant 1,00 à 1,05), de 1,03 à 1,31 en croissance de
+       densité, proches de 1 sur les secteurs LiDAR coupés au capteur.
+   - Le catalogue fait 85 à 93 % du temps et ne passe pas l'échelle : ×7,7 de 1 à 48 fils. Son assemblage final
+     était séquentiel ; il est désormais parallèle, avec un catalogue identique octet pour octet (reçu
+     `receipts/catalogue_parallel_assembly_20260929`).
+   - Prochain levier : l'énumération des boîtes. Le filtrage des nœuds internes compte 592 M tests de gardes et de
+     dominance, contre 133 M dans les feuilles. Deux voies : réduire ce travail sur CPU, ou porter l'arbre de boîtes
+     sur GPU.
+   - La VM n'a ni `pip` ni `numpy` : les portes Python ne tournent qu'en local, et une campagne sklearn ne peut pas
+     y tourner en l'état.
 3. **Multiplicités** dans la tour, Euler pondéré, juges d'échelle (K = 1 contre EMST, Euler à kmax + 2).
 4. Verticales publiées : calculées par la tour, non exposées à la tête.
 

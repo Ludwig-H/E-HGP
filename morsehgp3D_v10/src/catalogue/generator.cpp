@@ -5,11 +5,13 @@
 // test droite des centres (lemme Z, zonogone) en i128 ; centres et recensement en i128 (geometry.hpp).
 #include <algorithm>
 #include <bit>
+#include <chrono>
 #include <cmath>
 #include <memory>
 #include <mutex>
 
 #include "catalogue/catalogue.hpp"
+#include "sched/sort.hpp"
 
 namespace mhgp10 {
 
@@ -629,6 +631,9 @@ Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& par
     root.lo[ax] = lo[ax];
     root.hi[ax] = lo[ax] + side;
   }
+  using Clock = std::chrono::steady_clock;
+  auto since = [](Clock::time_point t) { return std::chrono::duration<double>(Clock::now() - t).count(); };
+  auto t0 = Clock::now();
   auto all = std::make_shared<std::vector<u32>>(n);
   for (u32 s = 0; s < n; ++s) (*all)[s] = s;
   std::vector<Task> frontier{Task{root, all, 0}};
@@ -645,41 +650,77 @@ Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& par
       for (auto& t : sp) next.push_back(std::move(t));
     frontier.swap(next);
   }
+  cat.t_frontier = since(t0);
+  t0 = Clock::now();
   pool.parallel_for(frontier.size(), 1, [&](u64 b, u64 e, unsigned wk) {
     for (u64 i = b; i < e; ++i) process(C, locals[wk], frontier[i].box, *frontier[i].parent, frontier[i].parent_stag, nullptr);
   });
   frontier.clear();
+  cat.t_boxes = since(t0);
+  t0 = Clock::now();
   // Echec eventuel (feuille trop large) : refus transactionnel.
   for (const Local& L : locals)
     if (!L.fail.ok()) return L.fail;
-  // Rassemblement et ordre canonique (niveau exact, S*).
+  // Rassemblement et ordre canonique (niveau exact, S*), en parallele : collecte a des positions fixees par des
+  // prefixes, tri parallele sur la cle (approximation du niveau, S*) qui est un ordre total hors boule emise deux
+  // fois (refusee plus bas), donc resultat identique au tri sequentiel ; puis reparation exacte des bandes.
   struct Ref {
-    u32 local, rec;
     double approx;
+    std::array<u32, 4> sup;
+    u32 local, rec;
   };
-  std::vector<Ref> refs;
+  std::vector<u64> first(locals.size() + 1, 0);
   for (u32 li = 0; li < locals.size(); ++li) {
     merge_ledger(cat.ledger, locals[li].led);
-    for (u32 r = 0; r < locals[li].recs.size(); ++r) refs.push_back({li, r, locals[li].recs[r].level.approx()});
+    first[li + 1] = first[li] + locals[li].recs.size();
   }
-  auto rec = [&](const Ref& x) -> const Rec& { return locals[x.local].recs[x.rec]; };
-  std::sort(refs.begin(), refs.end(), [&](const Ref& x, const Ref& y) {
-    if (x.approx != y.approx) return x.approx < y.approx;
-    return rec(x).sup < rec(y).sup;
+  std::vector<Ref> refs(first.back());
+  pool.parallel_for(locals.size(), 1, [&](u64 b, u64 e, unsigned) {
+    for (u64 li = b; li < e; ++li)
+      for (u32 r = 0; r < locals[li].recs.size(); ++r)
+        refs[first[li] + r] = Ref{locals[li].recs[r].level.approx(), locals[li].recs[r].sup, u32(li), r};
   });
-  // reparation exacte des bandes flottantes (erreur relative de approx < 2^-50)
+  auto rec = [&](const Ref& x) -> const Rec& { return locals[x.local].recs[x.rec]; };
+  cat.t_collect = since(t0);
+  auto t1 = Clock::now();
+  sched::parallel_sort(pool, refs, [](const Ref& x, const Ref& y) {
+    if (x.approx != y.approx) return x.approx < y.approx;
+    return x.sup < y.sup;
+  });
+  cat.t_sort = since(t1);
+  t1 = Clock::now();
+  // reparation exacte des bandes flottantes (erreur relative de approx < 2^-50) : bandes reperees en serie,
+  // triees en parallele (chacune ne touche que ses positions)
+  std::vector<std::pair<u64, u64>> bands;
   for (size_t i = 0; i < refs.size();) {
     size_t j = i + 1;
     while (j < refs.size() && refs[j].approx - refs[j - 1].approx <= refs[j].approx * 0x1p-40) ++j;
-    if (j - i > 1)
-      std::sort(refs.begin() + i, refs.begin() + j, [&](const Ref& x, const Ref& y) {
-        const int c = geom::compare(rec(x).level, rec(y).level);
-        if (c != 0) return c < 0;
-        return rec(x).sup < rec(y).sup;
-      });
+    if (j - i > 1) {
+      bands.push_back({i, j});
+      cat.band_members += j - i;
+    }
     i = j;
   }
+  cat.bands = bands.size();
+  pool.parallel_for(bands.size(), 16, [&](u64 b0, u64 e0, unsigned) {
+    for (u64 q = b0; q < e0; ++q)
+      std::sort(refs.begin() + bands[q].first, refs.begin() + bands[q].second, [&](const Ref& x, const Ref& y) {
+        const int c = geom::compare(rec(x).level, rec(y).level);
+        if (c != 0) return c < 0;
+        return x.sup < y.sup;
+      });
+  });
+  cat.t_bands = since(t1);
+  cat.t_order = since(t0);
+  t0 = Clock::now();
   const u32 nb = static_cast<u32>(refs.size());
+  // comparaisons exactes des voisins en parallele ; le premier defaut, dans l'ordre, decide du refus
+  std::vector<signed char> cmp(nb, -1);
+  t1 = Clock::now();
+  pool.parallel_for(nb, 4096, [&](u64 b0, u64 e0, unsigned) {
+    for (u64 b = std::max<u64>(b0, 1); b < e0; ++b)
+      cmp[b] = static_cast<signed char>(geom::compare(rec(refs[b - 1]).level, rec(refs[b]).level));
+  });
   cat.rank.resize(nb);
   cat.support.resize(nb);
   cat.qmin.resize(nb);
@@ -689,31 +730,58 @@ Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& par
   cat.n_interior.resize(nb);
   cat.pop_off.resize(u64(nb) + 1);
   cat.pop_off[0] = 0;
-  u64 total = 0;
-  for (const Ref& x : refs) total += rec(x).pop_len;
-  cat.pop.resize(total);
-  u32 rank = 0;
-  for (u32 b = 0; b < nb; ++b) {
-    const Rec& r = rec(refs[b]);
-    if (b > 0) {
-      const Rec& prev = rec(refs[b - 1]);
-      const int c = geom::compare(prev.level, r.level);
-      if (c > 0) return fail(Reason::rank_order);
-      if (c == 0 && prev.sup == r.sup) return fail(Reason::census_mismatch);  // boule emise deux fois
-      if (c < 0) ++rank;
-    }
-    if (b == 0 || rank == cat.level.size()) cat.level.push_back(r.level);
-    cat.rank[b] = rank;
-    cat.support[b] = r.sup;
-    cat.qmin[b] = r.q;
-    cat.p[b] = r.p;
-    cat.u[b] = r.u;
-    cat.flags[b] = r.flags;
-    cat.n_interior[b] = r.n_i;
-    const std::vector<u32>& src = locals[refs[b].local].pop;
-    std::copy(src.begin() + r.pop_begin, src.begin() + r.pop_begin + r.pop_len, cat.pop.begin() + cat.pop_off[b]);
-    cat.pop_off[b + 1] = cat.pop_off[b] + r.pop_len;
+  cat.t_compare = since(t1);
+  t1 = Clock::now();
+  // premier defaut dans l'ordre (refus deterministe), rangs et decalages par sommes prefixes paralleles
+  const u64 chunks = std::min<u64>(u64(pool.size()) * 8, std::max<u64>(1, nb / 4096));
+  auto chunk_lo = [&](u64 c) { return u64(nb) * c / chunks; };
+  std::vector<u64> bad(chunks, u64(nb)), inc(chunks + 1, 0), pops(chunks + 1, 0);
+  pool.parallel_for(chunks, 1, [&](u64 c0, u64 c1, unsigned) {
+    for (u64 c = c0; c < c1; ++c)
+      for (u64 b = chunk_lo(c); b < chunk_lo(c + 1); ++b) {
+        if (b > 0 && bad[c] == u64(nb) && (cmp[b] > 0 || (cmp[b] == 0 && refs[b - 1].sup == refs[b].sup))) bad[c] = b;
+        if (b > 0 && cmp[b] < 0) ++inc[c + 1];
+        pops[c + 1] += rec(refs[b]).pop_len;
+      }
+  });
+  for (u64 c = 0; c < chunks; ++c) {
+    if (bad[c] < nb) return fail(cmp[bad[c]] > 0 ? Reason::rank_order : Reason::census_mismatch);  // boule emise 2 fois
+    inc[c + 1] += inc[c];
+    pops[c + 1] += pops[c];
   }
+  cat.level.resize(nb ? inc[chunks] + 1 : 0);
+  pool.parallel_for(chunks, 1, [&](u64 c0, u64 c1, unsigned) {
+    for (u64 c = c0; c < c1; ++c) {
+      u32 rank = u32(inc[c]);
+      u64 off = pops[c];
+      for (u64 b = chunk_lo(c); b < chunk_lo(c + 1); ++b) {
+        if (b > 0 && cmp[b] < 0) ++rank;
+        if (b == 0 || cmp[b] < 0) cat.level[rank] = rec(refs[b]).level;
+        cat.rank[b] = rank;
+        cat.pop_off[b] = off;
+        off += rec(refs[b]).pop_len;
+      }
+    }
+  });
+  cat.pop_off[nb] = pops[chunks];
+  cat.pop.resize(cat.pop_off[nb]);
+  cat.t_ranks = since(t1);
+  t1 = Clock::now();
+  pool.parallel_for(nb, 4096, [&](u64 b0, u64 e0, unsigned) {
+    for (u64 b = b0; b < e0; ++b) {
+      const Rec& r = rec(refs[b]);
+      cat.support[b] = r.sup;
+      cat.qmin[b] = r.q;
+      cat.p[b] = r.p;
+      cat.u[b] = r.u;
+      cat.flags[b] = r.flags;
+      cat.n_interior[b] = r.n_i;
+      const std::vector<u32>& src = locals[refs[b].local].pop;
+      std::copy(src.begin() + r.pop_begin, src.begin() + r.pop_begin + r.pop_len, cat.pop.begin() + cat.pop_off[b]);
+    }
+  });
+  cat.t_copy = since(t1);
+  cat.t_assemble = since(t0);
   return cat;
 }
 

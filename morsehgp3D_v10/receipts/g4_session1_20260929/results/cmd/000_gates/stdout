@@ -1,0 +1,73 @@
+Test project /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.crpgio9glA/build
+    Start 1: mhgp10_unit
+    Start 2: mhgp10_catalogue_oracle
+    Start 3: mhgp10_tower_oracle
+    Start 4: mhgp10_head_condensation_vs_sklearn
+    Start 5: mhgp10_regression_level_collision
+    Start 6: mhgp10_points_cover
+    Start 7: mhgp10_regression_batch_equivalence
+1/7 Test #4: mhgp10_head_condensation_vs_sklearn ...***Failed    0.05 sec
+Traceback (most recent call last):
+  File "/home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.crpgio9glA/src/morsehgp3D_v10/tests/head/test_condensation_vs_sklearn.py", line 16, in <module>
+    import numpy as np
+ModuleNotFoundError: No module named 'numpy'
+
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.crpgio9glA/src/morsehgp3D_v10/cmake/run_expect.cmake:18 (message):
+  code de sortie 1, attendu 0
+
+
+
+2/7 Test #5: mhgp10_regression_level_collision .....***Failed    0.05 sec
+Traceback (most recent call last):
+  File "/home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.crpgio9glA/src/morsehgp3D_v10/tests/regression/test_level_collision.py", line 14, in <module>
+    import numpy as np
+ModuleNotFoundError: No module named 'numpy'
+
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.crpgio9glA/src/morsehgp3D_v10/cmake/run_expect.cmake:18 (message):
+  code de sortie 1, attendu 0
+
+
+
+3/7 Test #7: mhgp10_regression_batch_equivalence ...***Failed    0.05 sec
+Traceback (most recent call last):
+  File "/home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.crpgio9glA/src/morsehgp3D_v10/tests/regression/test_batch_equivalence.py", line 18, in <module>
+    import numpy as np
+ModuleNotFoundError: No module named 'numpy'
+
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.crpgio9glA/src/morsehgp3D_v10/cmake/run_expect.cmake:18 (message):
+  code de sortie 1, attendu 0
+
+
+
+4/7 Test #6: mhgp10_points_cover ...................***Failed    0.06 sec
+Traceback (most recent call last):
+  File "/home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.crpgio9glA/src/morsehgp3D_v10/tests/points/test_cover_entry.py", line 20, in <module>
+    import numpy as np
+ModuleNotFoundError: No module named 'numpy'
+
+CMake Error at /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.crpgio9glA/src/morsehgp3D_v10/cmake/run_expect.cmake:18 (message):
+  code de sortie 1, attendu 0
+
+
+
+5/7 Test #1: mhgp10_unit ...........................   Passed    0.22 sec
+6/7 Test #2: mhgp10_catalogue_oracle ...............   Passed  111.02 sec
+7/7 Test #3: mhgp10_tower_oracle ...................   Passed  123.99 sec
+
+43% tests passed, 4 tests failed out of 7
+
+Label Time Summary:
+fast          =   0.22 sec*proc (1 test)
+gate          = 235.43 sec*proc (7 tests)
+head          =   0.05 sec*proc (1 test)
+oracle        = 235.01 sec*proc (2 tests)
+points        =   0.06 sec*proc (1 test)
+regression    =   0.10 sec*proc (2 tests)
+
+Total Test time (real) = 124.00 sec
+
+The following tests FAILED:
+	  4 - mhgp10_head_condensation_vs_sklearn (Failed)
+	  5 - mhgp10_regression_level_collision (Failed)
+	  6 - mhgp10_points_cover (Failed)
+	  7 - mhgp10_regression_batch_equivalence (Failed)

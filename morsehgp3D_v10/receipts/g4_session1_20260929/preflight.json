@@ -1,0 +1,604 @@
+{
+  "backend": "reference_cpu",
+  "budget": {
+    "build_and_setup_seconds": 1320,
+    "closing_reserve_seconds": 660,
+    "command_timeouts_sum_seconds": 8340,
+    "guest_seconds": 2700,
+    "oversubscribed": true,
+    "ssh_cutoff_before_guest_seconds": 360,
+    "upload_estimate_seconds": 182,
+    "worker_window_seconds": 1738
+  },
+  "commit": "8b8d66f6e92ae99dfd8d0da58c74d352b7155614",
+  "data_bytes": 11086116,
+  "data_dir": "/workspaces/E-HGP/build/v10-g4-data-s1",
+  "data_files": [
+    {
+      "name": "lidar00_full.u32le",
+      "sha256": "0baa4de14c95838ef7bd18d5a98551ca513ed830ec1eeee84f649fa97c95abaf",
+      "size": 478620
+    },
+    {
+      "name": "lidar00_half_x_neg.u32le",
+      "sha256": "d232d3b8b0c7989ae27ee3d28e166d1abb9343531095af9d002c382847dad8cd",
+      "size": 295092
+    },
+    {
+      "name": "lidar00_half_x_nonneg.u32le",
+      "sha256": "54b546a3a585e60e7d316cb9d36d1fb16175373491a4c76e2e009bcd6f401f3a",
+      "size": 183528
+    },
+    {
+      "name": "lidar00_quarter_x_neg_y_neg.u32le",
+      "sha256": "cc89a00a944dd5dea17b303a4a508e0dd424bda6848f38b82de32a919952f1bc",
+      "size": 138432
+    },
+    {
+      "name": "lidar00_quarter_x_neg_y_nonneg.u32le",
+      "sha256": "6020856e9c6f6d6ad596afd945ae970ed4062ffd4670a73486bc2a57cb2bf3d6",
+      "size": 156660
+    },
+    {
+      "name": "lidar00_quarter_x_nonneg_y_neg.u32le",
+      "sha256": "e9c5ba569ef8b8293025c848786d9d50ba33c68b5ab5d3f06ff8670de799584a",
+      "size": 98700
+    },
+    {
+      "name": "lidar00_quarter_x_nonneg_y_nonneg.u32le",
+      "sha256": "4b72d7b2f96b6dd3b57252e4576a4c6466c1219d3c5ac06e0c7d20874d128208",
+      "size": 84828
+    },
+    {
+      "name": "lidar01_full.u32le",
+      "sha256": "ba15adc6907d58e50bf28bca92305210c1efdde6efdf46c782aa1eec2318036f",
+      "size": 426612
+    },
+    {
+      "name": "lidar01_half_x_neg.u32le",
+      "sha256": "f7d3a05701253c4107f903587de7c1837fc85fed10e2f23e7b0299a74e0e2aac",
+      "size": 228228
+    },
+    {
+      "name": "lidar01_half_x_nonneg.u32le",
+      "sha256": "8b6deaac04aa596568afa768a3e59f08361fbd64f34c629bfa6eac752fbc6187",
+      "size": 198384
+    },
+    {
+      "name": "lidar01_quarter_x_neg_y_neg.u32le",
+      "sha256": "e115280415b11e080ec32ecef3f3cad6a1bb2b66799688083c29a02a9f36c15c",
+      "size": 96888
+    },
+    {
+      "name": "lidar01_quarter_x_neg_y_nonneg.u32le",
+      "sha256": "1f39f4c37d5fb74e9005b4058ba27f1cca911cdb6088454024a0d2f42b8b1541",
+      "size": 131340
+    },
+    {
+      "name": "lidar01_quarter_x_nonneg_y_neg.u32le",
+      "sha256": "bf96e897a3117cb62336b08649ef66fe3c8b06072cfed2540b414e6a1af1b044",
+      "size": 110652
+    },
+    {
+      "name": "lidar01_quarter_x_nonneg_y_nonneg.u32le",
+      "sha256": "417c85244a8fd964c6a84c7a10b63194fa3d1ec5bdb866479c31874b703185bf",
+      "size": 87732
+    },
+    {
+      "name": "lidar02_full.u32le",
+      "sha256": "a4bbc86d00f92627b869fdc34aa260353bf1b821eff7c992ad93beb2a13308af",
+      "size": 550140
+    },
+    {
+      "name": "lidar02_half_x_neg.u32le",
+      "sha256": "a207f00aef22d469f970d35dae47d716833aed23a5a8b51e866969e2c22845a0",
+      "size": 308760
+    },
+    {
+      "name": "lidar02_half_x_nonneg.u32le",
+      "sha256": "e1900f7766f41d51f2104461006d8b5abd89dc2c26e46d380b87827afb30dcba",
+      "size": 241380
+    },
+    {
+      "name": "lidar02_quarter_x_neg_y_neg.u32le",
+      "sha256": "7033e374544c316ae28ce1df87b948452e3164a03163e2491e08291a0093b868",
+      "size": 195144
+    },
+    {
+      "name": "lidar02_quarter_x_neg_y_nonneg.u32le",
+      "sha256": "23f76c730b4c540d2ab1be2a6dce3015bac78575f61d1d98499b331527a99821",
+      "size": 113616
+    },
+    {
+      "name": "lidar02_quarter_x_nonneg_y_neg.u32le",
+      "sha256": "6924df0523a457925a2398585fd170eeb02d6efacf9e673739d2c40b14fd1f68",
+      "size": 177948
+    },
+    {
+      "name": "lidar02_quarter_x_nonneg_y_nonneg.u32le",
+      "sha256": "47f05b7845a8e9ecf1dfbd005eb9242ac41a8e8d6421b27d9c2b481992d2f9f7",
+      "size": 63432
+    },
+    {
+      "name": "syn_clusters_density_x1.u32le",
+      "sha256": "da2f5d08e1e2af5919718ecb2ca828556d3076345958010c2c93a906be04d9b7",
+      "size": 96000
+    },
+    {
+      "name": "syn_clusters_density_x2.u32le",
+      "sha256": "03d8e8861076ce91033cb3afeb738a0cc6e93f0b50867b47172e633dd6eab834",
+      "size": 192000
+    },
+    {
+      "name": "syn_clusters_density_x4.u32le",
+      "sha256": "b709a69153bfb9b5865d69acbc65464633dcf4a977377206db7e1a3bea2aeda5",
+      "size": 384000
+    },
+    {
+      "name": "syn_clusters_space_x1.u32le",
+      "sha256": "e72f797e4d8622b3899be4925934e2784dac263c1da7d304094b413b09fa6f4e",
+      "size": 96000
+    },
+    {
+      "name": "syn_clusters_space_x2.u32le",
+      "sha256": "100b160c0baeabd86a35287ac3b1528cddf9bfcb0e3e0c5fc8e14ed6100cd82e",
+      "size": 192000
+    },
+    {
+      "name": "syn_clusters_space_x4.u32le",
+      "sha256": "c0fc46cce9646d31d6d1a410a042eaa865f080d9d4c24c162ac114ee21b7f5c8",
+      "size": 384000
+    },
+    {
+      "name": "syn_filaments_density_x1.u32le",
+      "sha256": "13cc07539d87a6aa6184ce209200f2d025c6ca6272c2fc261def27a5c03aa154",
+      "size": 96000
+    },
+    {
+      "name": "syn_filaments_density_x2.u32le",
+      "sha256": "c179db1a19a070c29b4c64659c83425c8c2080d8b7430f931162aaf2975a99b8",
+      "size": 192000
+    },
+    {
+      "name": "syn_filaments_density_x4.u32le",
+      "sha256": "f6460b36f7771fd8e58d81e3098ef3e806306ef846d21c68fa13aef35934a88e",
+      "size": 384000
+    },
+    {
+      "name": "syn_filaments_space_x1.u32le",
+      "sha256": "17109b7b77b05620f5ec9ec479d3049e28152f82aeb433a55ae5bd55dafa3c46",
+      "size": 96000
+    },
+    {
+      "name": "syn_filaments_space_x2.u32le",
+      "sha256": "13da2622b2d48af52197a7590dd15c4896f9c7aa97d19502e88f90e1198ea9eb",
+      "size": 192000
+    },
+    {
+      "name": "syn_filaments_space_x4.u32le",
+      "sha256": "b65496e2d7ddf4b75bf6d4f538f1c3be252e1d4505dbbca8a12731a87f23e34f",
+      "size": 384000
+    },
+    {
+      "name": "syn_shells_density_x1.u32le",
+      "sha256": "35443956baf711924640480784aa4eab45d51677b36d78918cebb547b4a5e405",
+      "size": 96000
+    },
+    {
+      "name": "syn_shells_density_x2.u32le",
+      "sha256": "6fd320a9b5a541756adbe39da514783aed07c0ec09e92441f15e05e13dee8f6b",
+      "size": 192000
+    },
+    {
+      "name": "syn_shells_density_x4.u32le",
+      "sha256": "51577d4945843464cffada7c43327e8ce400f15dfa21ee527e2ab4cfbf43ebc3",
+      "size": 384000
+    },
+    {
+      "name": "syn_shells_space_x1.u32le",
+      "sha256": "b953270eb15345e5c8b9ed344768717df49e481a5d8c65763b718794a6f48f56",
+      "size": 96000
+    },
+    {
+      "name": "syn_shells_space_x2.u32le",
+      "sha256": "c17e60f78d7813df3d3dba3a8c702611d1bb2cb55ba381cf9192ff422b205dad",
+      "size": 192000
+    },
+    {
+      "name": "syn_shells_space_x4.u32le",
+      "sha256": "801471497f87e2ff9c6f1ed9f7e02446f4cbeb1c780fcf6f6d5f01de932aa344",
+      "size": 384000
+    },
+    {
+      "name": "syn_terrain_density_x1.u32le",
+      "sha256": "633b090bafe0f5cfcd7a839a1915f30a5ca05c6ac1700d9877422fc38fc2dc1f",
+      "size": 96000
+    },
+    {
+      "name": "syn_terrain_density_x2.u32le",
+      "sha256": "487e618f89a9644749ba541c6dd78cc960a4de302c84e645b25820797a96f6b9",
+      "size": 192000
+    },
+    {
+      "name": "syn_terrain_density_x4.u32le",
+      "sha256": "360d6fc142094060a360240b4b2cd5c49aa90a2910fa391a2c65fa6c59c80242",
+      "size": 384000
+    },
+    {
+      "name": "syn_terrain_space_x1.u32le",
+      "sha256": "cc505929e2ce666056b7380ff7cc656a9500fa0976e3937fdb07391edaaf3925",
+      "size": 96000
+    },
+    {
+      "name": "syn_terrain_space_x2.u32le",
+      "sha256": "03955d2a01b40dbefa9975ada04d27bd661fc28d2f25538e17d55f18d65875af",
+      "size": 192000
+    },
+    {
+      "name": "syn_terrain_space_x4.u32le",
+      "sha256": "ec7b8c040c66b6d791904db9581a69ffbff30780acaf920f3dc23c640395d5eb",
+      "size": 384000
+    },
+    {
+      "name": "syn_uniform_density_x1.u32le",
+      "sha256": "6aef4ab64e8f73bd26fdb7d0919b796245cb76ff922d68b47d7de79f219bc0f3",
+      "size": 96000
+    },
+    {
+      "name": "syn_uniform_density_x2.u32le",
+      "sha256": "0a40ecf7e80a7de7d82b5b2d23e5f83cb78e3e75f3f71a153d5eea618e5b3e46",
+      "size": 192000
+    },
+    {
+      "name": "syn_uniform_density_x4.u32le",
+      "sha256": "84e5755bf196761a4fb1e4147f01b455d77e0dca5c57319dddfa4b9544926eee",
+      "size": 384000
+    },
+    {
+      "name": "syn_uniform_space_x1.u32le",
+      "sha256": "974210d5f435f0a236950a054f1fbde884928acc4ee0c31ebe5131bc0e159ac9",
+      "size": 96000
+    },
+    {
+      "name": "syn_uniform_space_x2.u32le",
+      "sha256": "46d164c44dde4dbc326f6d5e833a9160cce6c9d8e1bb382659bf2043e7392bd9",
+      "size": 192000
+    },
+    {
+      "name": "syn_uniform_space_x4.u32le",
+      "sha256": "8f77b89812c2cdf3e417b9bc79b29ed847274281e85f834ae3971f62dcb1e5a3",
+      "size": 384000
+    }
+  ],
+  "data_manifest_sha256": "096c5d33095af171b7409d11534fc28a48386981095e356b502bc15032eda57a",
+  "gcloud_account": "<compte>",
+  "gcp_mutations": "none",
+  "gcp_reads": [
+    [
+      "config",
+      "get-value",
+      "project"
+    ],
+    [
+      "config",
+      "get-value",
+      "account"
+    ],
+    [
+      "compute",
+      "instances",
+      "describe"
+    ]
+  ],
+  "guest_shutdown_minutes": 45,
+  "local_free_bytes": 5101117440,
+  "max_run_seconds": 3600,
+  "mode": "execute",
+  "os_login_ttl_minutes": 65,
+  "package_bytes": 3712451,
+  "package_sha256": "5978e16d517e40ed87d80f1b7bbd6cb0714ced73e554874ab24054a5b8cc26c1",
+  "plan": {
+    "build_targets": [],
+    "build_timeout_seconds": 600,
+    "commands": [
+      {
+        "argv": [
+          "ctest",
+          "--no-tests=error",
+          "-L",
+          "gate",
+          "-j",
+          "16",
+          "--output-on-failure"
+        ],
+        "name": "gates",
+        "timeout_seconds": 900
+      },
+      {
+        "argv": [
+          "./mhgp10_tower",
+          "{data}/lidar00_full.u32le",
+          "--k=5",
+          "--threads=48",
+          "--no-points",
+          "--repeat=3"
+        ],
+        "name": "c0_lidar00_k5_w48",
+        "timeout_seconds": 240
+      },
+      {
+        "argv": [
+          "./mhgp10_tower",
+          "{data}/lidar01_full.u32le",
+          "--k=5",
+          "--threads=48",
+          "--no-points",
+          "--repeat=3"
+        ],
+        "name": "c0_lidar01_k5_w48",
+        "timeout_seconds": 240
+      },
+      {
+        "argv": [
+          "./mhgp10_tower",
+          "{data}/lidar02_full.u32le",
+          "--k=5",
+          "--threads=48",
+          "--no-points",
+          "--repeat=3"
+        ],
+        "name": "c0_lidar02_k5_w48",
+        "timeout_seconds": 240
+      },
+      {
+        "argv": [
+          "./mhgp10_tower",
+          "{data}/lidar00_full.u32le",
+          "--k=10",
+          "--threads=48",
+          "--no-points",
+          "--repeat=2"
+        ],
+        "name": "c0_lidar00_k10_w48",
+        "timeout_seconds": 420
+      },
+      {
+        "argv": [
+          "./mhgp10_tower",
+          "{data}/lidar01_full.u32le",
+          "--k=10",
+          "--threads=48",
+          "--no-points",
+          "--repeat=2"
+        ],
+        "name": "c0_lidar01_k10_w48",
+        "timeout_seconds": 420
+      },
+      {
+        "argv": [
+          "./mhgp10_tower",
+          "{data}/lidar02_full.u32le",
+          "--k=10",
+          "--threads=48",
+          "--no-points",
+          "--repeat=2"
+        ],
+        "name": "c0_lidar02_k10_w48",
+        "timeout_seconds": 420
+      },
+      {
+        "argv": [
+          "./mhgp10_tower",
+          "{data}/lidar02_full.u32le",
+          "--k=5",
+          "--threads=24",
+          "--no-points",
+          "--repeat=3"
+        ],
+        "name": "c0_lidar02_k5_w24",
+        "timeout_seconds": 240
+      },
+      {
+        "argv": [
+          "./mhgp10_tower",
+          "{data}/lidar02_full.u32le",
+          "--k=5",
+          "--threads=1",
+          "--no-points",
+          "--repeat=1"
+        ],
+        "name": "c0_lidar02_k5_w1",
+        "timeout_seconds": 420
+      },
+      {
+        "argv": [
+          "./mhgp10_tower",
+          "{data}/lidar00_full.u32le",
+          "--k=5",
+          "--threads=48",
+          "--entry=cover",
+          "--repeat=2"
+        ],
+        "name": "c1_lidar00_k5_cover_w48",
+        "timeout_seconds": 240
+      },
+      {
+        "argv": [
+          "./mhgp10_tower",
+          "{data}/lidar00_full.u32le",
+          "--k=10",
+          "--threads=48",
+          "--entry=cover",
+          "--repeat=2"
+        ],
+        "name": "c1_lidar00_k10_cover_w48",
+        "timeout_seconds": 420
+      },
+      {
+        "argv": [
+          "./mhgp10_tower",
+          "{data}/lidar01_full.u32le",
+          "--k=5",
+          "--threads=48",
+          "--entry=cover",
+          "--repeat=2"
+        ],
+        "name": "c1_lidar01_k5_cover_w48",
+        "timeout_seconds": 240
+      },
+      {
+        "argv": [
+          "./mhgp10_tower",
+          "{data}/lidar01_full.u32le",
+          "--k=10",
+          "--threads=48",
+          "--entry=cover",
+          "--repeat=2"
+        ],
+        "name": "c1_lidar01_k10_cover_w48",
+        "timeout_seconds": 420
+      },
+      {
+        "argv": [
+          "./mhgp10_tower",
+          "{data}/lidar02_full.u32le",
+          "--k=5",
+          "--threads=48",
+          "--entry=cover",
+          "--repeat=2"
+        ],
+        "name": "c1_lidar02_k5_cover_w48",
+        "timeout_seconds": 240
+      },
+      {
+        "argv": [
+          "./mhgp10_tower",
+          "{data}/lidar02_full.u32le",
+          "--k=10",
+          "--threads=48",
+          "--entry=cover",
+          "--repeat=2"
+        ],
+        "name": "c1_lidar02_k10_cover_w48",
+        "timeout_seconds": 420
+      },
+      {
+        "argv": [
+          "./mhgp10_cluster",
+          "{data}/lidar00_full.u32le",
+          "{out}/labels.i32le",
+          "--k=5",
+          "--mcs=200",
+          "--z=2",
+          "--selection=eom",
+          "--entry=cover",
+          "--threads=48"
+        ],
+        "name": "c2_lidar00_cluster_k5_cover_w48",
+        "timeout_seconds": 240
+      },
+      {
+        "argv": [
+          "./mhgp10_cluster",
+          "{data}/lidar01_full.u32le",
+          "{out}/labels.i32le",
+          "--k=5",
+          "--mcs=200",
+          "--z=2",
+          "--selection=eom",
+          "--entry=cover",
+          "--threads=48"
+        ],
+        "name": "c2_lidar01_cluster_k5_cover_w48",
+        "timeout_seconds": 240
+      },
+      {
+        "argv": [
+          "./mhgp10_cluster",
+          "{data}/lidar02_full.u32le",
+          "{out}/labels.i32le",
+          "--k=5",
+          "--mcs=200",
+          "--z=2",
+          "--selection=eom",
+          "--entry=cover",
+          "--threads=48"
+        ],
+        "name": "c2_lidar02_cluster_k5_cover_w48",
+        "timeout_seconds": 240
+      },
+      {
+        "argv": [
+          "python3",
+          "{src}/morsehgp3D_v10/bench/scaling/scale_run.py",
+          "run",
+          "--build",
+          "{build}",
+          "--data",
+          "{data}",
+          "--out",
+          "{out}/scale_lidar.csv",
+          "--k",
+          "5,10",
+          "--threads",
+          "48",
+          "--only",
+          "lidar"
+        ],
+        "name": "scale_lidar_k5_k10_w48",
+        "timeout_seconds": 1200
+      },
+      {
+        "argv": [
+          "python3",
+          "{src}/morsehgp3D_v10/bench/scaling/scale_run.py",
+          "run",
+          "--build",
+          "{build}",
+          "--data",
+          "{data}",
+          "--out",
+          "{out}/scale_syn_k5.csv",
+          "--k",
+          "5",
+          "--threads",
+          "48",
+          "--only",
+          "syn_"
+        ],
+        "name": "scale_syn_k5_w48",
+        "timeout_seconds": 900
+      }
+    ],
+    "needs_python": true,
+    "needs_python_deduced": true,
+    "results_cap_bytes": 1073741824
+  },
+  "plan_sha256": "14a085e35f4e040457507d16b8c1bc6438c9c8044e69e65ad7f4564d17a5c772",
+  "pre_start_generation": "2026-09-27T06:58:30.579-07:00",
+  "protocol_sha256": {
+    "gcp-migration/start_and_verify.sh": "73d76c674c71d997a803587a0b20186f668e7aa44f62d4c8b516e22e13469bc0",
+    "gcp-migration/stop_and_verify.sh": "ddcad77aa995ebb334fd3f341f7bb81ac94f749593fec98f885fb1c4b7956f3c",
+    "gcp-migration/v10_session.py": "60423f8015555ee36c75886f840c2b4a605d84a88cf69bb1dabc984ae634ab1a",
+    "gcp-migration/v10_worker.sh": "a81e81183e84d8df9f705085a1ed803d8d0df8c15e246474bb4ff80ee5cfb1a6"
+  },
+  "public_status": "not_claimed",
+  "python_pins": {
+    "hdbscan": "0.8.44",
+    "numpy": "2.2.6",
+    "scikit-learn": "1.7.2",
+    "scipy": "1.15.3"
+  },
+  "run_dir": "/tmp/ehgp-v10-runs/v10.20260929a-42ad4bc524c0",
+  "run_dir_same_filesystem": false,
+  "schema": "ehgp.v10.session_preflight.v3",
+  "target": {
+    "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-b"
+  },
+  "warnings": [
+    "somme des delais > fenetre utile : les dernieres commandes seront coupees ou sautees a l'echeance"
+  ],
+  "worker_plan_sha256": "b70ceecfee3068d2e8ca405273614de09987127960f5a0338d336ff49a18571a"
+}

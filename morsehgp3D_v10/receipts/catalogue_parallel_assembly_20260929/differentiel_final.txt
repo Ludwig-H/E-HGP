@@ -1,0 +1,11 @@
+lidar02_full K=5 ancien=8a850649ff103c1c nouveau8=8a850649ff103c1c nouveau3=8a850649ff103c1c IDENTIQUES
+lidar02_full K=10 ancien=d6abe0dba4d9be33 nouveau8=d6abe0dba4d9be33 nouveau3=d6abe0dba4d9be33 IDENTIQUES
+lidar00_full K=5 ancien=3982c3ab79c4a542 nouveau8=3982c3ab79c4a542 nouveau3=3982c3ab79c4a542 IDENTIQUES
+lidar00_full K=10 ancien=7b2d4055f4cc7004 nouveau8=7b2d4055f4cc7004 nouveau3=7b2d4055f4cc7004 IDENTIQUES
+lidar01_quarter_x_neg_y_neg K=5 ancien=414aa4d47ffe1c55 nouveau8=414aa4d47ffe1c55 nouveau3=414aa4d47ffe1c55 IDENTIQUES
+lidar01_quarter_x_neg_y_neg K=10 ancien=7c46e50a72c08087 nouveau8=7c46e50a72c08087 nouveau3=7c46e50a72c08087 IDENTIQUES
+syn_shells_density_x2 K=5 ancien=fcd0425f8101b278 nouveau8=fcd0425f8101b278 nouveau3=fcd0425f8101b278 IDENTIQUES
+syn_shells_density_x2 K=10 ancien=8c145ca4ed47628a nouveau8=8c145ca4ed47628a nouveau3=8c145ca4ed47628a IDENTIQUES
+syn_filaments_space_x4 K=5 ancien=e9408470b9317629 nouveau8=e9408470b9317629 nouveau3=e9408470b9317629 IDENTIQUES
+syn_filaments_space_x4 K=10 ancien=b9719e2166bb7c92 nouveau8=b9719e2166bb7c92 nouveau3=b9719e2166bb7c92 IDENTIQUES
+FIN

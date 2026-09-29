@@ -1,0 +1,27 @@
+[  9%] Building CXX object CMakeFiles/mhgp10_core.dir/src/sched/pool.cpp.o
+[  9%] Building CXX object CMakeFiles/mhgp10_core.dir/src/core/buffer.cpp.o
+[ 14%] Building CXX object CMakeFiles/mhgp10_core.dir/src/cloud/site_tree.cpp.o
+[ 28%] Building CXX object CMakeFiles/mhgp10_core.dir/src/cloud/cloud.cpp.o
+[ 23%] Building CXX object CMakeFiles/mhgp10_core.dir/src/arith/geometry.cpp.o
+[ 28%] Building CXX object CMakeFiles/mhgp10_core.dir/src/head/head.cpp.o
+[ 42%] Building CXX object CMakeFiles/mhgp10_core.dir/src/tower/tower.cpp.o
+[ 42%] Building CXX object CMakeFiles/mhgp10_core.dir/src/points/dendrogram.cpp.o
+[ 42%] Building CXX object CMakeFiles/mhgp10_core.dir/src/catalogue/generator.cpp.o
+[ 47%] Linking CXX static library libmhgp10_core.a
+[ 47%] Built target mhgp10_core
+[ 52%] Building CXX object CMakeFiles/mhgp10_catalogue.dir/cli/mhgp10_catalogue.cpp.o
+[ 57%] Building CXX object CMakeFiles/mhgp10_tower.dir/cli/mhgp10_tower.cpp.o
+[ 61%] Building CXX object CMakeFiles/mhgp10_cluster.dir/cli/mhgp10_cluster.cpp.o
+[ 66%] Building CXX object CMakeFiles/mhgp10_unit.dir/tests/unit/unit_main.cpp.o
+[ 71%] Building CXX object CMakeFiles/mhgp10_mreach_cluster.dir/tests/head/mreach_cluster.cpp.o
+[ 76%] Building CXX object CMakeFiles/mhgp10_mreach_cluster.dir/tests/head/mreach.cpp.o
+[ 80%] Linking CXX executable mhgp10_catalogue
+[ 80%] Built target mhgp10_catalogue
+[ 85%] Linking CXX executable mhgp10_tower
+[ 85%] Built target mhgp10_tower
+[ 90%] Linking CXX executable mhgp10_cluster
+[ 95%] Linking CXX executable mhgp10_mreach_cluster
+[ 95%] Built target mhgp10_cluster
+[ 95%] Built target mhgp10_mreach_cluster
+[100%] Linking CXX executable mhgp10_unit
+[100%] Built target mhgp10_unit

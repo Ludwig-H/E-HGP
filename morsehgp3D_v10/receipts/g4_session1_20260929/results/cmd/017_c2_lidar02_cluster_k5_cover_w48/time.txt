@@ -1,0 +1,23 @@
+	Command being timed: "timeout --foreground --kill-after=10s 240s ./mhgp10_cluster /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.crpgio9glA/data/lidar02_full.u32le /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.crpgio9glA/results/cmd/017_c2_lidar02_cluster_k5_cover_w48/files/labels.i32le --k=5 --mcs=200 --z=2 --selection=eom --entry=cover --threads=48"
+	User time (seconds): 11.18
+	System time (seconds): 0.17
+	Percent of CPU this job got: 811%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:01.40
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 487268
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 200895
+	Voluntary context switches: 1207
+	Involuntary context switches: 448
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 368
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
