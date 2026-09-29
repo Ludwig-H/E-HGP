@@ -75,3 +75,37 @@ son épingle. Une réexécution sur les mêmes graines n'est permise que pour un
 
 Un premier projet, jamais commité ni exécuté, opposait la tour à K = 1 à un sklearn réglé librement
 (`min_samples` = 12). Il a été retiré avant tout gel, sur la directive K = `min_samples`.
+
+## PREREG_V10_COVER_C_20260929 : tête v10-b (première couverture), lot C ; lot B ; famille « objet »
+
+**Question.** À K = `min_samples` (1, 2, 3, 5, 8, 10), la tour avec la tête v10-b fait-elle mieux que sklearn HDBSCAN,
+chaque méthode avec sa meilleure tête choisie sur dev par la même règle ? La tête v10-b fait entrer les points par
+première couverture (amas discrets du théorème 2) et sélectionne par EOM avec λ = r^(−z).
+
+**Méthodes figées.** Le choix se fait sur les 128 scènes dev de 8 000 points : l'optimum de z croît avec n (audit du 29
+septembre), et les tailles de test commencent à 8 000.
+
+| K | Tour | sklearn à `min_samples` = K | Écart dev |
+| ---: | --- | --- | ---: |
+| 1 | cover, EOM z = 6, b(2) | EOM α = 1, b(1,5) | +0,070 |
+| 2 | cover, EOM z = 4, b(2) | EOM α = 1, b(1,5) | +0,067 |
+| 3 | cover, EOM z = 5, b(2) | feuilles α = 2, b(2) | +0,060 |
+| 5 | cover, EOM z = 6, b(2) | feuilles α = 2, b(2,5) | +0,046 |
+| 8 | cover, EOM z = 6, b(1,5) | feuilles α = 2, b(2,5) | +0,022 |
+| 10 | cover, EOM z = 6, b(1,5) | feuilles α = 2, b(2,5) | +0,013 |
+
+**Familles secondaires**, avec la même règle de décision et un Holm dans chaque famille ; elles ne changent pas la
+décision principale :
+- **Lot B**, promis par le préenregistrement du lot A : tête C∩X du 28 septembre à K = 5, 8 et 10, contre sklearn.
+  Écarts dev : −0,007, −0,020 et −0,030.
+- **Objet** : la tour contre la hiérarchie d'atteignabilité mutuelle d'HDBSCAN (α = 2), munie de la même entrée
+  (règle des points-bord) et de la même tête. On mesure ainsi ce que l'objet exact apporte au-delà de l'entrée et de
+  la tête. Écarts dev de +0,001 à +0,008 : on attend la parité.
+
+**Paires descriptives sans remplissage** (audit IMP-11). Écarts dev de +0,035 à +0,112.
+
+**Plan.** 960 scènes de l'espace neuf `test_v10b` : 8 familles × 4 niveaux × bruit {0 ; 0,1} × n {8 000 ; 16 000 ;
+32 000} × 5 graines. Le manifeste des spécifications est épinglé par son sha256, ainsi que les deux binaires
+(`c764e121a`) et les scripts du banc.
+
+**Bases dev** : reçus `bench_dev_z_samehead_20260929` et `bench_dev_objet_20260929`.

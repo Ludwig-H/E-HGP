@@ -1,0 +1,780 @@
+{
+ "attribution_statement": "Attribution, écrite avant le test : à K = 1, les hiérarchies de la tour et de sklearn coïncident (liaison simple) ; l’écart y vient entièrement de la tête (z, politique de bruit). À K ≥ 2, la paire principale mesure ensemble la hiérarchie, l’entrée des points et la tête ; la famille « objet » isole la hiérarchie (même entrée, même tête, même remplissage) : une parité y signifierait que l’avantage sur HDBSCAN vient de l’entrée et de la tête, applicables aussi à la hiérarchie d’HDBSCAN.",
+ "decision": {
+  "alpha": 0.05,
+  "bootstrap": 10000,
+  "delta_min": 0.02,
+  "pairs": [
+   {
+    "adversary": "hdb_ms1",
+    "method": "tw_K1",
+    "name": "K=1"
+   },
+   {
+    "adversary": "hdb_ms2",
+    "method": "tw_K2",
+    "name": "K=2"
+   },
+   {
+    "adversary": "hdb_ms3",
+    "method": "tw_K3",
+    "name": "K=3"
+   },
+   {
+    "adversary": "hdb_ms5",
+    "method": "tw_K5",
+    "name": "K=5"
+   },
+   {
+    "adversary": "hdb_ms8",
+    "method": "tw_K8",
+    "name": "K=8"
+   },
+   {
+    "adversary": "hdb_ms10",
+    "method": "tw_K10",
+    "name": "K=10"
+   }
+  ],
+  "permutations": 100000,
+  "refusal_cap": 0.01,
+  "reported": [
+   {
+    "adversary": "hdb_ms1_nf",
+    "method": "tw_K1_nf",
+    "name": "K=1 sans remplissage"
+   },
+   {
+    "adversary": "hdb_ms2_nf",
+    "method": "tw_K2_nf",
+    "name": "K=2 sans remplissage"
+   },
+   {
+    "adversary": "hdb_ms3_nf",
+    "method": "tw_K3_nf",
+    "name": "K=3 sans remplissage"
+   },
+   {
+    "adversary": "hdb_ms5_nf",
+    "method": "tw_K5_nf",
+    "name": "K=5 sans remplissage"
+   },
+   {
+    "adversary": "hdb_ms8_nf",
+    "method": "tw_K8_nf",
+    "name": "K=8 sans remplissage"
+   },
+   {
+    "adversary": "hdb_ms10_nf",
+    "method": "tw_K10_nf",
+    "name": "K=10 sans remplissage"
+   }
+  ],
+  "secondary": [
+   {
+    "adversary_label": "HDBSCAN",
+    "method_label": "la tour (C∩X)",
+    "name": "lot B, tête C∩X du 28 septembre",
+    "pairs": [
+     {
+      "adversary": "hdb_ms5",
+      "method": "cap_K5",
+      "name": "lot B, K=5"
+     },
+     {
+      "adversary": "hdb_ms8",
+      "method": "cap_K8",
+      "name": "lot B, K=8"
+     },
+     {
+      "adversary": "hdb_ms10",
+      "method": "cap_K10",
+      "name": "lot B, K=10"
+     }
+    ]
+   },
+   {
+    "adversary_label": "MR2-bord",
+    "method_label": "la tour",
+    "name": "objet exact contre hiérarchie d’HDBSCAN, même entrée et même tête",
+    "pairs": [
+     {
+      "adversary": "mrb_K2",
+      "method": "tw_K2",
+      "name": "objet, K=2"
+     },
+     {
+      "adversary": "mrb_K3",
+      "method": "tw_K3",
+      "name": "objet, K=3"
+     },
+     {
+      "adversary": "mrb_K5",
+      "method": "tw_K5",
+      "name": "objet, K=5"
+     },
+     {
+      "adversary": "mrb_K8",
+      "method": "tw_K8",
+      "name": "objet, K=8"
+     },
+     {
+      "adversary": "mrb_K10",
+      "method": "tw_K10",
+      "name": "objet, K=10"
+     }
+    ]
+   }
+  ]
+ },
+ "design": "Lot C : tete v10-b (entree des points par premiere couverture, amas discrets du theoreme 2 ; EOM avec lambda = r^(-z), z choisi sur dev) contre sklearn HDBSCAN a min_samples = K (directive du 28 septembre 2026), K = 1, 2, 3, 5, 8, 10. Famille secondaire lot B (promis par le preenregistrement du lot A) : tete C n X du 28 septembre a K = 5, 8, 10, meme grille que le lot A. Famille secondaire « objet » (audit du 29 septembre, OBJ-01) : la tour contre la hierarchie d atteignabilite mutuelle d HDBSCAN (alpha = 2) munie de la MEME entree (regle des points-bord, analogue de la couverture) et de la MEME tete ; elle mesure ce que l objet exact apporte au-dela de l entree et de la tete. Paires descriptives sans remplissage (audit IMP-11 : le remplissage borne fait l essentiel du score de sklearn en feuilles a alpha = 2). Espace de graines neuf test_v10b, puisque la tete a change.",
+ "dev_basis": {
+  "cap_sklearn_files": [
+   "kmatch_dev_A.csv",
+   "kcover_dev_k5cap.csv",
+   "kcover_dev_k8cap.csv",
+   "kcover_dev_k8cap_missing.csv",
+   "kcover_dev_k10cap.csv"
+  ],
+  "choices": {
+   "B_K10": {
+    "cap": {
+     "J": 0.7508,
+     "candidates": 18,
+     "fill": "b2",
+     "head": "leaf_z1",
+     "max": 0.7519
+    },
+    "dev_delta": -0.0302
+   },
+   "B_K5": {
+    "cap": {
+     "J": 0.7435,
+     "candidates": 18,
+     "fill": "b2",
+     "head": "eom_zzhat",
+     "max": 0.7435
+    },
+    "dev_delta": -0.0069
+   },
+   "B_K8": {
+    "cap": {
+     "J": 0.7527,
+     "candidates": 18,
+     "fill": "b2.5",
+     "head": "leaf_z1",
+     "max": 0.7527
+    },
+    "dev_delta": -0.0204
+   },
+   "K1": {
+    "dev_delta": 0.0701,
+    "hdb": {
+     "J": 0.7209,
+     "candidates": 24,
+     "fill": "b1.5",
+     "head": "eom_a1",
+     "max": 0.7209
+    },
+    "tower": {
+     "J": 0.791,
+     "candidates": 48,
+     "entry": "cover",
+     "fill": "b2",
+     "head": "eom_z6",
+     "max": 0.791
+    }
+   },
+   "K10": {
+    "dev_delta": 0.0133,
+    "hdb": {
+     "J": 0.781,
+     "candidates": 24,
+     "fill": "b2.5",
+     "head": "leaf_a2",
+     "max": 0.781
+    },
+    "tower": {
+     "J": 0.7943,
+     "candidates": 48,
+     "entry": "cover",
+     "fill": "b1.5",
+     "head": "eom_z6",
+     "max": 0.795
+    }
+   },
+   "K2": {
+    "dev_delta": 0.0665,
+    "hdb": {
+     "J": 0.7209,
+     "candidates": 24,
+     "fill": "b1.5",
+     "head": "eom_a1",
+     "max": 0.7209
+    },
+    "tower": {
+     "J": 0.7874,
+     "candidates": 48,
+     "entry": "cover",
+     "fill": "b2",
+     "head": "eom_z4",
+     "max": 0.7893
+    }
+   },
+   "K3": {
+    "dev_delta": 0.0597,
+    "hdb": {
+     "J": 0.7291,
+     "candidates": 24,
+     "fill": "b2",
+     "head": "leaf_a2",
+     "max": 0.7307
+    },
+    "tower": {
+     "J": 0.7888,
+     "candidates": 48,
+     "entry": "cover",
+     "fill": "b2",
+     "head": "eom_z5",
+     "max": 0.7903
+    }
+   },
+   "K5": {
+    "dev_delta": 0.0461,
+    "hdb": {
+     "J": 0.7504,
+     "candidates": 24,
+     "fill": "b2.5",
+     "head": "leaf_a2",
+     "max": 0.7504
+    },
+    "tower": {
+     "J": 0.7965,
+     "candidates": 48,
+     "entry": "cover",
+     "fill": "b2",
+     "head": "eom_z6",
+     "max": 0.7965
+    }
+   },
+   "K8": {
+    "dev_delta": 0.0224,
+    "hdb": {
+     "J": 0.7731,
+     "candidates": 24,
+     "fill": "b2.5",
+     "head": "leaf_a2",
+     "max": 0.7731
+    },
+    "tower": {
+     "J": 0.7955,
+     "candidates": 48,
+     "entry": "cover",
+     "fill": "b1.5",
+     "head": "eom_z6",
+     "max": 0.7968
+    }
+   },
+   "OBJ_K10": {
+    "dev_delta": 0.0077,
+    "mrb": {
+     "J": 0.7866,
+     "fill": "b1.5",
+     "head": "eom_z6"
+    }
+   },
+   "OBJ_K2": {
+    "dev_delta": 0.0015,
+    "mrb": {
+     "J": 0.7859,
+     "fill": "b2",
+     "head": "eom_z4"
+    }
+   },
+   "OBJ_K3": {
+    "dev_delta": 0.0013,
+    "mrb": {
+     "J": 0.7875,
+     "fill": "b2",
+     "head": "eom_z5"
+    }
+   },
+   "OBJ_K5": {
+    "dev_delta": 0.0059,
+    "mrb": {
+     "J": 0.7906,
+     "fill": "b2",
+     "head": "eom_z6"
+    }
+   },
+   "OBJ_K8": {
+    "dev_delta": 0.0082,
+    "mrb": {
+     "J": 0.7873,
+     "fill": "b1.5",
+     "head": "eom_z6"
+    }
+   }
+  },
+  "cover_files": [
+   "kcover_dev_zgrid.csv",
+   "kcover_dev_zgrid2.csv",
+   "kcover_dev_extra1.csv"
+  ],
+  "nofill": {
+   "K1": {
+    "dev_delta": 0.0349,
+    "hdb": {
+     "J": 0.6989,
+     "head": "eom_a1"
+    },
+    "tower": {
+     "J": 0.7338,
+     "entry": "cover",
+     "head": "eom_z3"
+    }
+   },
+   "K10": {
+    "dev_delta": 0.112,
+    "hdb": {
+     "J": 0.6534,
+     "head": "eom_a1"
+    },
+    "tower": {
+     "J": 0.7654,
+     "entry": "cover",
+     "head": "eom_z5"
+    }
+   },
+   "K2": {
+    "dev_delta": 0.0413,
+    "hdb": {
+     "J": 0.6989,
+     "head": "eom_a1"
+    },
+    "tower": {
+     "J": 0.7402,
+     "entry": "cover",
+     "head": "eom_z4"
+    }
+   },
+   "K3": {
+    "dev_delta": 0.058,
+    "hdb": {
+     "J": 0.6871,
+     "head": "eom_a1"
+    },
+    "tower": {
+     "J": 0.745,
+     "entry": "cover",
+     "head": "eom_z3"
+    }
+   },
+   "K5": {
+    "dev_delta": 0.0813,
+    "hdb": {
+     "J": 0.674,
+     "head": "eom_a1"
+    },
+    "tower": {
+     "J": 0.7553,
+     "entry": "cover",
+     "head": "eom_z5"
+    }
+   },
+   "K8": {
+    "dev_delta": 0.1032,
+    "hdb": {
+     "J": 0.6599,
+     "head": "eom_a1"
+    },
+    "tower": {
+     "J": 0.7631,
+     "entry": "cover",
+     "head": "eom_z5"
+    }
+   }
+  }
+ },
+ "dev_rule": "a chaque K, argmax de J (moyenne ponderee par cellule de l ARI_s, sur les 128 scenes dev de 8 000 points : l optimum de z croit avec n et les tailles de test commencent a 8 000) sur les candidats declares ; egalite a 0,002 pres : tour cover : z = 3 d abord puis |z - 3| croissant, puis politique la plus simple ; tour C n X et sklearn : regle du lot A (echelle par defaut, politique, EOM). Candidats tour cover : EOM a z dans {1, zhat, 2, 3, 4, 5, 6, 8} x 6 politiques ; entree cover1 (alpha_{K+1}) mesuree neutre des z >= 3 et exclue.",
+ "deviations_from_EVAL_v2": [
+  "8 familles du banc v9 au lieu de 16 familles a niveaux geometriques ; pas de temoins nuls",
+  "comparaison appariee K = min_samples, au lieu de l IUT sur six adversaires",
+  "garde AMI_nc au lieu de F1_H et AMI_s",
+  "mcs = round(sqrt(n)) fixe des deux cotes",
+  "remplissage borne a k = max(K, 5) au lieu de core_K (ecart deja declare au lot A)",
+  "famille « objet » : hierarchie d HDBSCAN par le temoin mhgp10_mreach_cluster (egal a sklearn aux egalites de plateau pres), entree bord et tete v10 ; ce n est pas sklearn tel quel",
+  "egalites de plus proche voisin du remplissage : ordre de scipy cKDTree"
+ ],
+ "engine": {
+  "build": "git archive c764e121a, CMake Release, g++ 13.3 (codespace)",
+  "commit": "c764e121a",
+  "note": "binaires mhgp10_cluster et mhgp10_mreach_cluster epingles par leur sha256 ; scripts du banc identiques entre c764e121a et le commit du preenregistrement"
+ },
+ "id": "PREREG_V10_COVER_C_20260929",
+ "methods": [
+  {
+   "entry": "cover",
+   "fill": "b2",
+   "k": 1,
+   "kind": "tower",
+   "mcs": "sqrt",
+   "name": "tw_K1",
+   "selection": "eom",
+   "z": "6"
+  },
+  {
+   "alpha": 1.0,
+   "fill": "b1.5",
+   "kind": "sklearn",
+   "mcs": "sqrt",
+   "min_samples": 1,
+   "name": "hdb_ms1",
+   "selection": "eom"
+  },
+  {
+   "entry": "cover",
+   "fill": "none",
+   "k": 1,
+   "kind": "tower",
+   "mcs": "sqrt",
+   "name": "tw_K1_nf",
+   "selection": "eom",
+   "z": "3"
+  },
+  {
+   "alpha": 1.0,
+   "fill": "none",
+   "kind": "sklearn",
+   "mcs": "sqrt",
+   "min_samples": 1,
+   "name": "hdb_ms1_nf",
+   "selection": "eom"
+  },
+  {
+   "entry": "cover",
+   "fill": "b2",
+   "k": 2,
+   "kind": "tower",
+   "mcs": "sqrt",
+   "name": "tw_K2",
+   "selection": "eom",
+   "z": "4"
+  },
+  {
+   "alpha": 1.0,
+   "fill": "b1.5",
+   "kind": "sklearn",
+   "mcs": "sqrt",
+   "min_samples": 2,
+   "name": "hdb_ms2",
+   "selection": "eom"
+  },
+  {
+   "entry": "cover",
+   "fill": "none",
+   "k": 2,
+   "kind": "tower",
+   "mcs": "sqrt",
+   "name": "tw_K2_nf",
+   "selection": "eom",
+   "z": "4"
+  },
+  {
+   "alpha": 1.0,
+   "fill": "none",
+   "kind": "sklearn",
+   "mcs": "sqrt",
+   "min_samples": 2,
+   "name": "hdb_ms2_nf",
+   "selection": "eom"
+  },
+  {
+   "entry": "cover",
+   "fill": "b2",
+   "k": 3,
+   "kind": "tower",
+   "mcs": "sqrt",
+   "name": "tw_K3",
+   "selection": "eom",
+   "z": "5"
+  },
+  {
+   "alpha": 2.0,
+   "fill": "b2",
+   "kind": "sklearn",
+   "mcs": "sqrt",
+   "min_samples": 3,
+   "name": "hdb_ms3",
+   "selection": "leaf"
+  },
+  {
+   "entry": "cover",
+   "fill": "none",
+   "k": 3,
+   "kind": "tower",
+   "mcs": "sqrt",
+   "name": "tw_K3_nf",
+   "selection": "eom",
+   "z": "3"
+  },
+  {
+   "alpha": 1.0,
+   "fill": "none",
+   "kind": "sklearn",
+   "mcs": "sqrt",
+   "min_samples": 3,
+   "name": "hdb_ms3_nf",
+   "selection": "eom"
+  },
+  {
+   "entry": "cover",
+   "fill": "b2",
+   "k": 5,
+   "kind": "tower",
+   "mcs": "sqrt",
+   "name": "tw_K5",
+   "selection": "eom",
+   "z": "6"
+  },
+  {
+   "alpha": 2.0,
+   "fill": "b2.5",
+   "kind": "sklearn",
+   "mcs": "sqrt",
+   "min_samples": 5,
+   "name": "hdb_ms5",
+   "selection": "leaf"
+  },
+  {
+   "entry": "cover",
+   "fill": "none",
+   "k": 5,
+   "kind": "tower",
+   "mcs": "sqrt",
+   "name": "tw_K5_nf",
+   "selection": "eom",
+   "z": "5"
+  },
+  {
+   "alpha": 1.0,
+   "fill": "none",
+   "kind": "sklearn",
+   "mcs": "sqrt",
+   "min_samples": 5,
+   "name": "hdb_ms5_nf",
+   "selection": "eom"
+  },
+  {
+   "entry": "cover",
+   "fill": "b1.5",
+   "k": 8,
+   "kind": "tower",
+   "mcs": "sqrt",
+   "name": "tw_K8",
+   "selection": "eom",
+   "z": "6"
+  },
+  {
+   "alpha": 2.0,
+   "fill": "b2.5",
+   "kind": "sklearn",
+   "mcs": "sqrt",
+   "min_samples": 8,
+   "name": "hdb_ms8",
+   "selection": "leaf"
+  },
+  {
+   "entry": "cover",
+   "fill": "none",
+   "k": 8,
+   "kind": "tower",
+   "mcs": "sqrt",
+   "name": "tw_K8_nf",
+   "selection": "eom",
+   "z": "5"
+  },
+  {
+   "alpha": 1.0,
+   "fill": "none",
+   "kind": "sklearn",
+   "mcs": "sqrt",
+   "min_samples": 8,
+   "name": "hdb_ms8_nf",
+   "selection": "eom"
+  },
+  {
+   "entry": "cover",
+   "fill": "b1.5",
+   "k": 10,
+   "kind": "tower",
+   "mcs": "sqrt",
+   "name": "tw_K10",
+   "selection": "eom",
+   "z": "6"
+  },
+  {
+   "alpha": 2.0,
+   "fill": "b2.5",
+   "kind": "sklearn",
+   "mcs": "sqrt",
+   "min_samples": 10,
+   "name": "hdb_ms10",
+   "selection": "leaf"
+  },
+  {
+   "entry": "cover",
+   "fill": "none",
+   "k": 10,
+   "kind": "tower",
+   "mcs": "sqrt",
+   "name": "tw_K10_nf",
+   "selection": "eom",
+   "z": "5"
+  },
+  {
+   "alpha": 1.0,
+   "fill": "none",
+   "kind": "sklearn",
+   "mcs": "sqrt",
+   "min_samples": 10,
+   "name": "hdb_ms10_nf",
+   "selection": "eom"
+  },
+  {
+   "alpha": 2,
+   "entry": "border",
+   "fill": "b2",
+   "k": 2,
+   "kind": "mreach",
+   "mcs": "sqrt",
+   "name": "mrb_K2",
+   "selection": "eom",
+   "z": "4"
+  },
+  {
+   "alpha": 2,
+   "entry": "border",
+   "fill": "b2",
+   "k": 3,
+   "kind": "mreach",
+   "mcs": "sqrt",
+   "name": "mrb_K3",
+   "selection": "eom",
+   "z": "5"
+  },
+  {
+   "alpha": 2,
+   "entry": "border",
+   "fill": "b2",
+   "k": 5,
+   "kind": "mreach",
+   "mcs": "sqrt",
+   "name": "mrb_K5",
+   "selection": "eom",
+   "z": "6"
+  },
+  {
+   "alpha": 2,
+   "entry": "border",
+   "fill": "b1.5",
+   "k": 8,
+   "kind": "mreach",
+   "mcs": "sqrt",
+   "name": "mrb_K8",
+   "selection": "eom",
+   "z": "6"
+  },
+  {
+   "alpha": 2,
+   "entry": "border",
+   "fill": "b1.5",
+   "k": 10,
+   "kind": "mreach",
+   "mcs": "sqrt",
+   "name": "mrb_K10",
+   "selection": "eom",
+   "z": "6"
+  },
+  {
+   "entry": "core",
+   "fill": "b2",
+   "k": 5,
+   "kind": "tower",
+   "mcs": "sqrt",
+   "name": "cap_K5",
+   "selection": "eom",
+   "z": "zhat"
+  },
+  {
+   "entry": "core",
+   "fill": "b2.5",
+   "k": 8,
+   "kind": "tower",
+   "mcs": "sqrt",
+   "name": "cap_K8",
+   "selection": "leaf",
+   "z": "1"
+  },
+  {
+   "entry": "core",
+   "fill": "b2",
+   "k": 10,
+   "kind": "tower",
+   "mcs": "sqrt",
+   "name": "cap_K10",
+   "selection": "leaf",
+   "z": "1"
+  }
+ ],
+ "pins": {
+  "mhgp10_cluster_sha256": "c5aca0abb19da40ae72659efcc2f60739c563139ccb6a38f3cd16c562d87e607",
+  "mhgp10_mreach_cluster_sha256": "d4641950cf70a9c7343c19cc60bb538b2af4b455b9e10d8f667e3855036fb805",
+  "python": "3.12.1",
+  "scripts_sha256": {
+   "decide.py": "d360ed0ed150c738c48c15a270c9431da1c2127ca382ce6ed37d193faa81dc7f",
+   "methods.py": "89fa4038362424cf161b82cd2029e32caaeb79fedfe2e6724bbdd62d8dd8b835",
+   "metrics.py": "76d6c92dcbcf7adca6b10284585b30cbb28114cefed3dafb46ad3ab60b75542a",
+   "run_campaign.py": "7e59000d948d4ff0e63226a84cc8ff6aeaaacd10212b4f54b16432b5a641fcc2",
+   "run_test.py": "87ba7917482dea2036bb079cd3a242123e7d691ca4ed556714efc3c315a889f3",
+   "scenes.py": "61ea9abc511726c2a9ff1e066f7603d6bef195a7c5356a2d2048c28229608f00"
+  },
+  "versions": {
+   "numpy": "2.5.3",
+   "scipy": "1.18.1",
+   "sklearn": "1.9.1"
+  }
+ },
+ "plan": {
+  "families": [
+   "spherical",
+   "anisotropic",
+   "heteroscedastic",
+   "unbalanced",
+   "shells",
+   "bridge",
+   "hierarchical",
+   "filaments"
+  ],
+  "levels": [
+   "easy",
+   "medium",
+   "hard",
+   "extreme"
+  ],
+  "manifest_sha256": "f3b015333df0fae3dcf930a1bab6fe68d15d8a60b415ba39fac256f74d630575",
+  "noises": [
+   0.0,
+   0.1
+  ],
+  "replicates": 5,
+  "sizes": [
+   8000,
+   16000,
+   32000
+  ],
+  "split": "test_v10b"
+ },
+ "prediction": "Ecrite avant le test, d apres les 128 scenes dev de 8 000 points : ecarts tour - sklearn = +0.070 (K = 1), +0.067 (K = 2), +0.060 (K = 3), +0.046 (K = 5), +0.022 (K = 8), +0.013 (K = 10) ; sans remplissage : +0.035, +0.041, +0.058, +0.081, +0.103, +0.112 ; tour - MR2-bord a meme entree et meme tete : +0.002 (K = 2), +0.001 (K = 3), +0.006 (K = 5), +0.008 (K = 8), +0.008 (K = 10). On attend : victoire de la tour sur sklearn la ou l ecart dev depasse 0,02 (et probablement au-dela, l ecart du lot A ayant cru avec n) ; parite de la tour et de MR2-bord (audit OBJ-01) ; lot B perdant ou a parite.",
+ "status": "public_status=not_claimed ; mode=benchmark_only ; une seule execution sur l espace test_v10b (EVAL_v2 D11)"
+}
