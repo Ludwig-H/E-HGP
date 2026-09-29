@@ -90,10 +90,12 @@ GCP : session 1 le 29 septembre (CPU seul, arrêt certifié TERMINATED), reçu `
      leurs cœurs ne répare rien. La tour en feuilles égale sklearn sur `anisotropic` (0,887 contre 0,883), mais
      s'effondre sur `shells` (0,60 contre 0,94). Chaque famille veut sa sélection, et aucune règle fixe essayée
      (z, feuilles, prominence à la ToMATo, antichaîne mêlée) ne gagne 0,02 en moyenne.
-   - **Ordres K plus grands** (dev sur G4, reçu `receipts/bench_dev_bigk_20260929`, témoin MR₂-bord, K = 10 à 48) :
-     ils n'aident pas. `shells` s'effondre dès K = 16 (les coquilles voisines fusionnent), et les gains ailleurs
-     restent sous 0,03. La tour à K = 10 reste la meilleure (0,800). Pas d'extension du moteur au-delà de K = 10
-     pour le clustering.
+   - **Ordres K plus grands** (dev sur G4, reçu `receipts/bench_dev_bigk_20260929`) : c'est le témoin MR₂-bord qui a
+     été mesuré à K = 10 à 48, la tour exacte seulement à K = 10.
+     - Avec la tête z = 6, le recul moyen vient presque entièrement de `shells`, qui s'effondre dès K = 16.
+     - D'autres réglages progressent : MR₂ à z = 3 sans remplissage gagne +0,046 sur `anisotropic` à K = 48.
+     - Cette grille ne justifie pas à elle seule un chantier immédiat du moteur au-delà de K = 10. Elle ne démontre
+       pas que de grands K ne peuvent pas aider (addendum GPU et grands K de l'audit continu).
    - **Prochaine recherche** (dev) : un critère de sélection par scène (conception en cours), un a priori de taille
      autre que √n.
    - **Corrections de l'audit livrées** : raison de refus propre aux multiplicités (IMP-16, porte
@@ -151,8 +153,10 @@ GCP : session 1 le 29 septembre (CPU seul, arrêt certifié TERMINATED), reçu `
      points demanderont un catalogue qui ne réside pas tout entier ;
    - le rapport tour/catalogue varie de 1,1 (`terrain`) à 2 (`clusters`, `uniform` denses).
 
-   GPU de la VM : RTX PRO 6000 Blackwell (97 Go, sm_120), CUDA 12.9 sous `/usr/local/cuda-12.9`, `__int128` exact
-   sur le device (`receipts/g4_session7_cuda_probe_20260929`).
+   GPU de la VM : RTX PRO 6000 Blackwell (97 Go, sm_120), CUDA 12.9 sous `/usr/local/cuda-12.9`. La sonde
+   (`receipts/g4_session7_cuda_probe_20260929`) qualifie seulement un comparateur de produits i64 × i64 en `__int128`,
+   exact sur 16,8 M paires. Ni les prédicats complets ni l'arithmétique I192 du moteur ne sont qualifiés. Le rapport
+   de débit ×2,3 entre 128 et 64 bits n'est pas fiable : les boucles de débit débordaient en entiers signés.
 4. **Multiplicités** dans la tour, Euler pondéré, juges d'échelle (K = 1 contre EMST, Euler à kmax + 2).
 5. Verticales publiées : calculées par la tour, non exposées à la tête.
 

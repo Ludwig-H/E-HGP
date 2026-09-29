@@ -49,8 +49,8 @@ public_status=not_claimed
 
 - **Clustering, tests préenregistrés** : à K = `min_samples`, la tour bat sklearn HDBSCAN.
   - Lot A, tête C∩X, 960 scènes de 8 000 à 32 000 points : K = 1, 2, 3 (reçu `receipts/test_kmatch_A_20260929`).
-  - Lot C, tête v10-b (entrée par première couverture, EOM avec λ = r^(−z)) : **tous les K de 1 à 10**, Δ de +0,031
-    à +0,091, et de +0,034 à +0,105 sans remplissage (reçu `receipts/test_cover_C_20260929`).
+  - Lot C, tête v10-b (entrée par première couverture, EOM avec λ = r^(−z)) : **aux six K testés** (1, 2, 3, 5, 8 et
+    10), Δ de +0,031 à +0,091, et de +0,034 à +0,105 sans remplissage (reçu `receipts/test_cover_C_20260929`).
 - **Audit** (`audits/audit_hierarchie_knn_20260929`) : la tour est l'arbre plug-in exact de l'estimateur K-NN.
   - À même entrée et même tête, la hiérarchie d'HDBSCAN fait jeu égal ; le lot C le confirme (famille « objet »).
   - L'avantage vient donc de l'entrée des amas discrets et de la tête. L'axe K de la tour reste inexploité.
