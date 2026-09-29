@@ -73,15 +73,19 @@ GCP : session 1 le 29 septembre (CPU seul, arrêt certifié TERMINATED), reçu `
      fusion `bench/g4/merge_sessions.py`).
    - **Têtes multi-K** (`audits/tete_multik_20260929`, dev seulement) : tranche oblique, persistance à travers K,
      antichaîne à ordres mêlés. Aucune ne bat v10-b de 0,02 ; seule l'antichaîne se reproduit hors échantillon
-     (+0,0046). Sur 416 composantes gaussiennes séparables, v10-b en retient 91 % (99 % sous un col à 30 % du pic) :
-     l'écart restant au plafond de Bayes est l'affectation de la masse sous le col.
+     (+0,0046). Sur 416 composantes gaussiennes séparables, v10-b en retient 91 % (99 % sous un col à 30 % du pic) ;
+     l'écart restant à la référence MAP supervisée porte sur l'affectation de la masse sous le col.
    - **Affectation sous le col** (dev sur G4, reçu `receipts/bench_dev_alloc_20260929`) : la montée de densité
      lissée et bornée (`asc20_b2`) est le meilleur remplissage de la tour à chaque K, de +0,003 à +0,009 (sous la
      marge de 0,02). Elle nuit à sklearn en feuilles : le levier est propre à la tête EOM. Sur les 192 scènes
      gaussiennes à K = 10 :
-     - Bayes 0,895, bassins de la vraie densité (Morse) 0,847, tour 0,816 puis 0,830 avec `asc20_b2` ;
-     - le prix du modèle (0,048) est hors de portée de toute méthode de densité ;
-     - il reste 0,017 à la tour, surtout sur `anisotropic`, où sklearn en feuilles fait mieux (0,892 contre 0,859).
+     - scores de référence (diagnostics supervisés, pas des plafonds d'ARI, audit continu du 29 septembre) : MAP à
+       paramètres estimés sur les labels 0,895 ; montée discrète (k = 20) sur la densité ajustée avec les labels
+       0,847 ; tour 0,816, puis 0,830 avec `asc20_b2` ;
+     - l'écart entre les deux références n'est pas une impossibilité démontrée pour les méthodes de densité : il
+       compare deux procédures ;
+     - la tour reste à 0,017 de la seconde, surtout sur `anisotropic`, où sklearn en feuilles fait mieux (0,892
+       contre 0,859).
    - **Sélection sur `anisotropic`** (dev local, reçu `receipts/bench_dev_shrink_20260929`) : rétrécir les amas EOM à
      leurs cœurs ne répare rien. La tour en feuilles égale sklearn sur `anisotropic` (0,887 contre 0,883), mais
      s'effondre sur `shells` (0,60 contre 0,94). Chaque famille veut sa sélection, et aucune règle fixe essayée
@@ -123,20 +127,32 @@ GCP : session 1 le 29 septembre (CPU seul, arrêt certifié TERMINATED), reçu `
      coupées au milieu du plus long côté (arbre binaire). Catalogue identique ; étage des boîtes ×1,12 à ×1,30 en
      local ; `t_frontier` +60 à 100 %, à surveiller sur G4. Les conceptions GPU « arbre » supposaient un octree : à
      revoir.
-   - **Session G4 4** (reçu `receipts/g4_session4_j2c_20260929`, CPU seul, 48 fils) : chaîne complète jusqu'aux
-     étiquettes à K = 5 en 0,22 à 0,26 s (0,46 à 0,56 s le matin), dont 0,02 s de tête. Catalogue et tour : 0,20 à
-     0,25 s à K = 5, 0,86 à 1,13 s à K = 10. Restent pour 100 ms : boîtes (0,10 s), tour (0,05 s), frontière
-     (0,027 s), ordre et assemblage.
+   - **Session G4 4** (reçu `receipts/g4_session4_j2c_20260929`, CPU seul, 24 cœurs et 48 fils, trois trames sans sol
+     d'une seule séquence, 08) :
+     - catalogue + tour **FULL** 1..K sans attaches : 0,204 à 0,254 s à K = 5, 0,86 à 1,12 s à K = 10, hors
+       préparation ;
+     - `mhgp10_cluster` (catalogue + **un seul ordre** K = 5 + tête, pas FULL) : 0,218 à 0,263 s, dont 0,02 s de
+       tête ;
+     - ni 100 ms ni plusieurs séquences ne sont qualifiés. Pour un budget FULL, la tour FULL seule prend 67 à 89 ms
+       à K = 5.
    - Suite du plan ordonné du juge des conceptions GPU (hors dépôt, `v10-persist/gpu_design/juge/PLAN.md`) : la
      feuille en en-tête commun CPU/GPU (J3a), puis les feuilles sur GPU, puis l'arbre entier sur GPU. Cibles :
      100 ms à K = 5, 1 s à K = 10.
    - La VM n'a ni pip ni numpy : Python portable et binaires statiques envoyés comme données (`bench/g4/`).
-3. **Échelle au-delà du LiDAR** (reçu `receipts/g4_session5_scale_20260929`, jusqu'à 1 024 000 sites) : temps
-   linéaire en nombre de boules. Les boules par site sont bornées par la géométrie : ≈ 460 en 3D, 65 à 120 sur une
-   surface, à K = 10. **La mémoire est le mur** : ≈ 280 octets par boule au pic, soit 135 Go pour un million de sites
-   3D à K = 10. La tour coûte deux fois le catalogue à grande échelle. Au-delà d'environ 1,4 M sites LiDAR, il
-   faudra un catalogue qui ne réside pas tout entier. GPU de la VM : RTX PRO 6000 Blackwell (97 Go, sm_120),
-   CUDA 12.9 sous `/usr/local/cuda-12.9`.
+3. **Échelle au-delà du LiDAR** (reçu `receipts/g4_session5_scale_20260929`, jusqu'à 1 024 000 sites, corrigé par
+   l'audit continu, voir `receipts/ERRATA.md`) :
+   - croissance empirique sous-quadratique. Ce n'est pas un coût constant par boule : sur `clusters` K = 10, la tour
+     passe de 86 à 174 ns par boule de 8 000 à 1 024 000 sites ;
+   - le nombre de boules par site (≈ 460 en 3D, 65 à 120 sur une surface, à K = 10) est un ordre de grandeur
+     empirique, pas une borne ;
+   - **la mémoire est le mur** : 303,6 à 314,9 octets par boule au pic ; un million de sites 3D à K = 10 prend
+     135,28 Gio, soit 145,26 Go ;
+   - aucune capacité LiDAR n'est qualifiée (le seuil « 1,4 M sites » était faux). Les dizaines de millions de
+     points demanderont un catalogue qui ne réside pas tout entier ;
+   - le rapport tour/catalogue varie de 1,1 (`terrain`) à 2 (`clusters`, `uniform` denses).
+
+   GPU de la VM : RTX PRO 6000 Blackwell (97 Go, sm_120), CUDA 12.9 sous `/usr/local/cuda-12.9`, `__int128` exact
+   sur le device (`receipts/g4_session7_cuda_probe_20260929`).
 4. **Multiplicités** dans la tour, Euler pondéré, juges d'échelle (K = 1 contre EMST, Euler à kmax + 2).
 5. Verticales publiées : calculées par la tour, non exposées à la tête.
 
