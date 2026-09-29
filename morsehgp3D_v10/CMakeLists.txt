@@ -86,4 +86,9 @@ if(Python3_FOUND)
                    "-DARGS=${PROJECT_SOURCE_DIR}/tests/head/test_condensation_vs_sklearn.py ${PROJECT_BINARY_DIR}"
                    -DEXPECTED=0 -P ${PROJECT_SOURCE_DIR}/cmake/run_expect.cmake)
   set_tests_properties(mhgp10_head_condensation_vs_sklearn PROPERTIES LABELS "gate;head" TIMEOUT 900)
+  add_test(NAME mhgp10_regression_level_collision
+           COMMAND ${CMAKE_COMMAND} -DCMD=${Python3_EXECUTABLE}
+                   "-DARGS=${PROJECT_SOURCE_DIR}/tests/regression/test_level_collision.py ${PROJECT_BINARY_DIR}"
+                   -DEXPECTED=0 -P ${PROJECT_SOURCE_DIR}/cmake/run_expect.cmake)
+  set_tests_properties(mhgp10_regression_level_collision PROPERTIES LABELS "gate;regression" TIMEOUT 900)
 endif()

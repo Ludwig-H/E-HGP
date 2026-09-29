@@ -1724,7 +1724,11 @@ PointDendrogram point_dendrogram(const Catalogue& cat, const OrderForest& f, con
   std::vector<u32> merged(keys.size());
   PointDendrogram d;
   for (u32 i = 0; i < order.size(); ++i) {
-    if (i == 0 || geom::compare(lv[order[i - 1]], lv[order[i]]) != 0) d.level.push_back(lv[order[i]].approx());
+    // niveaux publies en double, strictement croissants : deux niveaux exacts distincts dont les doubles coincident
+    // (ou s'inversent d'un ulp) partagent un rang ; l'ordre exact des noeuds et des points est preserve
+    // (regression tests/regression/test_level_collision.py)
+    const double x = lv[order[i]].approx();
+    if (i == 0 || (geom::compare(lv[order[i - 1]], lv[order[i]]) != 0 && x > d.level.back())) d.level.push_back(x);
     merged[order[i]] = static_cast<u32>(d.level.size() - 1);
   }
   const u32 nn = static_cast<u32>(f.rank.size());
