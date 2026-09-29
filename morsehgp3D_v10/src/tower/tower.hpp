@@ -128,6 +128,8 @@ struct Tower {
 //   cover : x entre a alpha_K(x)^2, alpha_K(x) = rayon de la plus petite boule fermee contenant x et au moins K - 1
 //           autres sites, dans la composante de cette boule (amas discrets, theoreme 2 de la these :
 //           d(x, C) <= r). d_K(x) / 2 <= alpha_K(x) <= d_K(x). A K = 1, alpha = 0 : les deux coincident.
+//           En position generale la premiere boule couvrante est une naissance d'ordre K (masse <= K) : une tete
+//           qui condense avec mcs > K ne lit pas alpha_K(x), le point sort a la fusion qui absorbe sa naissance.
 enum class PointEntry : u8 { core, cover };
 
 struct TowerParams {

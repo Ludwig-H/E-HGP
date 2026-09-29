@@ -45,20 +45,29 @@ GCP : session 1 le 29 septembre (CPU seul, arrêt certifié TERMINATED), reçu `
 ## Chantiers ouverts, par priorité
 
 1. **Clustering (tête v10-b).**
-   - Sur dev, l'entrée par première couverture corrige le défaut de rappel de la tête du 28 septembre (sémantique
-     des cœurs). À K apparié avec `min_samples`, la tour bat sklearn à K = 1, 2, 3 et 5 (+0,061, +0,050, +0,035,
-     +0,013) et fait jeu égal à K = 8. Son meilleur réglage est K = 3, ẑ-EOM, b(1,5) : 0,7831 (reçu
-     `receipts/bench_dev_cover_20260929`).
-   - Il reste deux faiblesses : `filaments` et `anisotropic` aux niveaux difficiles, où EOM fusionne des groupes
-     proches, et la décroissance de l'avantage quand K grandit. Piste : juger une scission par sa persistance à
-     travers K, grâce aux verticales.
-   - **Test préenregistré du lot A (tête C∩X du 28 septembre, `e8dd36a91`) : la tour bat HDBSCAN à K = 1, 2 et 3**
-     sur 960 scènes de test de 8 000 à 32 000 points : Δ = +0,053, +0,092 et +0,049, p_Holm = 3e-5. Reçu
-     `receipts/test_kmatch_A_20260929`. À K = 1, l'écart vient de la seule tête (les hiérarchies coïncident). Le
-     run interrompu (160 scènes) concorde ligne pour ligne avec la relance.
-   - La tête v10-b exigera un nouveau préenregistrement, sur un nouvel espace de graines. Le banc est prêt :
-     l'appel groupé partage le catalogue entre tous les K, et `run_test.py --resume` reprend une exécution
-     interrompue sans recalculer une scène.
+   - **Audit du 29 septembre** (`audits/audit_hierarchie_knn_20260929`) : 3 lectures, 4 audits, 4
+     contre-vérifications, 52 constats, dont aucun réfuté.
+     - La tour est exactement l'arbre plug-in de l'estimateur K-NN, et elle identifie les modes des mélanges
+       séparables : aux niveaux faciles, sa meilleure coupe atteint le plafond de Bayes.
+     - À même entrée et même tête, elle égale la hiérarchie d'HDBSCAN (MR-bord, à 0,01 près sur dev). L'avantage
+       sur HDBSCAN vient de l'entrée des amas discrets et de la tête (z). À entrée cœur, MR₁ bat la tour : c'est la
+       loi de la demi-lacune.
+     - L'axe K (verticales) reste inexploité : c'est la voie d'un avantage structurel.
+   - **Tête v10-b** : entrée `cover`, EOM avec λ = r^(−z), remplissage borné.
+     - ẑ est abandonné : il fait s'effondrer `shells` à K = 10.
+     - L'optimum de z dépend de n (≈ 3–4 à 2 000 points, ≈ 6 à 8 000).
+     - Sans remplissage, la tour domine sklearn de +0,04 à +0,115 sur dev ; avec, de +0,013 à +0,070 (scènes de
+       8 000 points).
+   - **Lot A** (tête C∩X du 28 septembre, test préenregistré) : la tour bat HDBSCAN à K = 1, 2 et 3, avec
+     Δ = +0,053, +0,092 et +0,049, p_Holm = 3e-5 (reçu `receipts/test_kmatch_A_20260929`). À K = 1, c'est un effet
+     de tête.
+   - **Lot C** (préenregistrement `bc413ff56`, exécution en cours, espace `test_v10b`) :
+     - tête v10-b contre sklearn à K = 1, 2, 3, 5, 8 et 10 ;
+     - lot B (tête C∩X à K = 5, 8, 10) ;
+     - famille « objet » : la tour contre MR₂-bord à même entrée et même tête ;
+     - paires sans remplissage.
+   - **Prochaine recherche** (dev) : une tête multi-K sur les verticales (tranche oblique à la Rolle–Scoccola) ; une
+     sélection qui ne dépende pas de la taille.
 2. **Performance LiDAR** (priorité de complexité).
    - La tour est 8 à 14 fois plus rapide. Mesures à 4 fils : K5 de 0,40 à 0,54 s, K10 de 2,8 à 3,9 s, RSS K10 de
      1,8 Go.

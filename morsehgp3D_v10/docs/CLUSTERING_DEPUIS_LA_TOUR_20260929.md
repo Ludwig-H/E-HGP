@@ -35,8 +35,11 @@ simple robuste, faite de cœurs puis d'arêtes.
 - Les masses et le vote du § 9.1 sont des heuristiques : aucun théorème ne relie m_τ à une masse de probabilité, et la
   proposition 7 ne garantit qu'une partition. Mesure : le vote de couverture ne fait pas mieux que l'étiquette de
   l'arbre suivie d'un remplissage borné.
-- Le poids ψ(t) = t^(−p), avec p la dimension ambiante, est moins bon que l'échelle à la dimension intrinsèque ẑ
-  (mesuré).
+- ~~Le poids ψ(t) = t^(−p), avec p la dimension ambiante, est moins bon que l'échelle à la dimension intrinsèque ẑ
+  (mesuré).~~ Contredit par la grille z du 29 septembre (reçu `bench_dev_z_samehead_20260929`) : z = 3 égale ẑ jusqu'à
+  K = 5 et le dépasse à K = 8 et 10, où ẑ ≈ 2,1 fait s'effondrer `shells`. L'optimum de z dépend de n (≈ 3–4 à 2 000
+  points, ≈ 6 à 8 000). z est un cadran de granularité de l'EOM, pas une dimension : voir
+  [l'audit du 29 septembre](../audits/audit_hierarchie_knn_20260929/AUDIT_HIERARCHIE_KNN_20260929.md).
 - Le tableau 9.3 (SIPU) n'établit pas la supériorité sur HDBSCAN : une exécution par jeu, `min_samples` non déclaré,
   traitement du bruit dans l'ARI non déclaré. D'où notre protocole apparié à K = `min_samples`.
 - Le paradoxe du choix de K (§ 4.4.5) est attribué à la connexité de HDBSCAN. Or notre tête v10 du 28 septembre, sur
@@ -57,7 +60,9 @@ coïncident. Le remplissage borné, qui apportait +0,03 à +0,04 aux deux métho
 
 1. **Entrée par première couverture.** x entre au niveau α_K(x)², le carré du plus petit rayon d'une boule fermée
    contenant x et au moins K − 1 autres points, avec d_K(x)/2 ≤ α_K(x) ≤ d_K(x). Il entre dans la composante de cette
-   boule. Calcul exact :
+   boule. Précision de l'audit du 29 septembre : en position générale, cette boule est une naissance d'ordre K, sous
+   mcs ; la condensation ne lit donc pas α_K(x), et le point sort au λ de la fusion qui absorbe sa naissance. Le gain
+   de cette entrée vient de la profondeur à laquelle la masse entre dans l'arbre. Calcul exact :
    - la première boule couvrante est la première boule du catalogue, par niveau, qui contient x et au moins K sites ;
    - toutes les K-parties d'une boule fermée contiennent son centre dans leur région témoin, donc une seule
      résolution par boule suffit.
@@ -66,7 +71,8 @@ coïncident. Le remplissage borné, qui apportait +0,03 à +0,04 aux deux métho
 3. **Étiquettes** : la lignée dans l'arbre, puis un remplissage borné b(1,5). Le vote de couverture, prévu comme
    variante, donne le même score à 0,002 près.
 
-Mesure dev (reçu `receipts/bench_dev_cover_20260929`), meilleure configuration de chaque méthode :
+Mesure dev (reçu `receipts/bench_dev_cover_20260929`), meilleure configuration de chaque méthode. À K = 1, les
+hiérarchies de la tour et de sklearn coïncident (liaison simple) : l'écart y est entièrement un effet de tête.
 
 | K | Tour, première couverture | sklearn à `min_samples` = K |
 | ---: | ---: | ---: |
