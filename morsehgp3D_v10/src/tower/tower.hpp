@@ -134,6 +134,8 @@ struct TowerParams {
   int kmax = 5;
   bool points = true;  // attaches des points
   PointEntry entry = PointEntry::core;
+  int cover_extra = 0;      // entree cover : boule couvrante de poids >= K + cover_extra (1 : entree a
+                            // alpha_{K+1}(x), semantique de HGP-old) ; le catalogue doit servir K + cover_extra
   bool ball_nodes = false;  // entree cover : publier aussi ball_node pour toutes les boules (une resolution par
                             // boule de poids >= K) ; sinon seules les premieres boules couvrantes sont resolues
   int only_order = 0;  // > 0 : ne construire que cet ordre (les ordres sont independants)

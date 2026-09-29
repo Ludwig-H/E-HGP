@@ -2,6 +2,7 @@
 
 Le banc de test calcule toutes les methodes de la tour d'une scene en un seul appel de mhgp10_cluster : un catalogue a
 l'ordre maximal de la liste, puis chaque (entree, K) et chaque tete (`--k-list`, `--entry=core,cover`, `--configs`).
+Entrees : core, cover (premiere boule de poids >= K) et cover1 (poids >= K + 1, entree a alpha_{K+1}).
 Cette porte exige, sur deux scenes dev de 2 000 points :
   - les memes etiquettes que des appels separes (un catalogue a l'ordre K seulement, une seule tete) ;
   - les memes etiquettes avec `--label=vote`, qui resout toutes les boules couvrantes, que sans (seules les premieres
@@ -25,7 +26,7 @@ import scenes  # noqa: E402
 SPECS = ({'family': 'filaments', 'n': 2000, 'groups': 8, 'level': 'hard', 'noise_fraction': 0.1, 'seed': 29092026},
          {'family': 'anisotropic', 'n': 2000, 'groups': 8, 'level': 'medium', 'noise_fraction': 0.0, 'seed': 2909})
 KS = (1, 2, 3, 5, 8)
-ENTRIES = ('core', 'cover')
+ENTRIES = ('core', 'cover', 'cover1')
 
 
 def vote_call(build, G, k, cfg, threads):

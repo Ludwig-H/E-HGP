@@ -1544,17 +1544,21 @@ Result<Tower> build_tower(const Cloud& cloud, const SiteTree& tree, const Catalo
     // boule fermee contiennent son centre dans leur region temoin, donc une seule resolution par boule donne la
     // composante qui couvre chacun de ses points au niveau de la boule.
     const bool cover = params.entry == PointEntry::cover;
+    const u32 extra = cover ? u32(std::max(0, params.cover_extra)) : 0;
+    if (cover && int(pk.empty() ? 0 : pk.back() + extra) > cat.kmax) return fail(Reason::kmax_out_of_range);
     std::vector<u32> pk_core;
     for (u32 k : pk)
-      if (!cover || k == 1) pk_core.push_back(k);
+      if (!cover || (k == 1 && extra == 0)) pk_core.push_back(k);
     if (cover) {
       for (u32 k : pk) {
-        if (k == 1) continue;
+        if (k == 1 && extra == 0) continue;
         OrderRun& o = *runs[k];
         OrderForest& out = t.orders[k - 1];
         out.point_cat_rank.assign(n, 0);
-        // boule couvrante : poids >= k (poids > positions : multiplicites, refusees en amont)
-        auto covering = [&](u64 b) { return cat.p[b] + cat.u[b] >= k && cat.pop_off[b + 1] - cat.pop_off[b] >= k; };
+        // boule couvrante : poids >= k + extra (poids > positions : multiplicites, refusees en amont) ; son centre
+        // est dans L_k a son niveau, et toute k-partie de la boule fermee le contient dans sa region temoin
+        const u32 kc = k + extra;
+        auto covering = [&](u64 b) { return cat.p[b] + cat.u[b] >= kc && cat.pop_off[b + 1] - cat.pop_off[b] >= kc; };
         // composante de L_k(niveau de b) qui contient le centre de b : une k-partie quelconque de la boule fermee
         auto cover_node = [&](u32 b, Scratch& sc, Facet& F) -> u32 {
           const auto I = cat.interior(b);

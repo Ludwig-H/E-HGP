@@ -74,10 +74,11 @@ u32 find(std::vector<u32>& p, u32 x) {
 
 }  // namespace
 
-PointDendrogram mreach_dendrogram(const SiteTree& tree, u64 k, sched::Pool& pool) {
+PointDendrogram mreach_dendrogram(const SiteTree& tree, u64 k, sched::Pool& pool, u64 alpha) {
   const Cloud& c = tree.cloud();
   const u32 n = c.sites();
-  const std::vector<u64> core = core_distances2(tree, k, pool);
+  std::vector<u64> core = core_distances2(tree, k, pool);
+  for (u64& v : core) v *= alpha * alpha;
   std::vector<Edge> mst = prim_mst(c, core, pool);
   std::sort(mst.begin(), mst.end(), [](const Edge& x, const Edge& y) {
     if (x.w != y.w) return x.w < y.w;

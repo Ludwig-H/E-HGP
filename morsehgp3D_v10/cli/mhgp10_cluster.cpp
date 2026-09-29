@@ -9,11 +9,14 @@
 // OUT.k<K>.<i> (les ordres sont independants a catalogue donne).
 // --tree : exporte la hierarchie de points (niveaux, parents, attaches) pour les tetes Python de developpement.
 // --entry=core|cover : entree des points par leur propre rayon K-NN (coeurs, C n X, defaut) ou par premiere
-// couverture (amas discrets), voir TowerParams. --entry=core,cover : les deux entrees sur le meme catalogue ; les
-// sorties deviennent OUT.<entree>.k<K>.<i> (et l'arbre TREE.<entree>.k<K>). --label=vote (entree cover) : ecrit en
+// couverture (amas discrets), voir TowerParams ; coverE (E = 1..9) : boule couvrante de poids >= K + E (cover1 :
+// entree a alpha_{K+1}, comme HGP-old). --entry=core,cover,cover1 : plusieurs entrees sur le meme catalogue (ordre
+// max(K) + max(E)) ; les sorties deviennent OUT.<entree>.k<K>.<i> (et l'arbre TREE.<entree>.k<K>). --label=vote (entree cover) : ecrit en
 // plus OUT[...].vote, ou chaque point recoit l'amas retenu qui le couvre par sa boule de plus bas niveau (-1 si
-// aucun).
+// aucun). --cover-extra=E (entree cover) : boule couvrante de poids >= K + E (E = 1 : entree a alpha_{K+1}, comme
+// HGP-old) ; le catalogue est construit a l'ordre max(K) + E.
 // Codes : 0 conforme, 2 refus, 3 invariant viole.
+#include <cctype>
 #include <chrono>
 #include <cstdio>
 #include <string>
@@ -30,8 +33,14 @@ int main(int argc, char** argv) {
   unsigned threads = 0;
   ClusterParams cp;
   std::string tree_out, configs;
-  std::vector<PointEntry> entries;
+  struct EntrySpec {
+    PointEntry entry;
+    int extra;        // entree cover : boule couvrante de poids >= K + extra
+    std::string tag;  // suffixe des sorties quand plusieurs entrees sont demandees
+  };
+  std::vector<EntrySpec> entries;
   bool vote = false;
+  int cover_extra = -1;  // --cover-extra : applique aux jetons « cover » sans suffixe
   std::vector<int> klist;
   for (int i = 3; i < argc; ++i) {
     const std::string a = argv[i];
@@ -44,10 +53,26 @@ int main(int argc, char** argv) {
     else if (a.rfind("--threads=", 0) == 0) threads = unsigned(std::stoul(a.substr(10)));
     else if (a.rfind("--tree=", 0) == 0) tree_out = a.substr(7);
     else if (a.rfind("--configs=", 0) == 0) configs = a.substr(10);
-    else if (a == "--entry=core") entries = {PointEntry::core};
-    else if (a == "--entry=cover") entries = {PointEntry::cover};
-    else if (a == "--entry=core,cover") entries = {PointEntry::core, PointEntry::cover};
+    else if (a.rfind("--entry=", 0) == 0) {
+      entries.clear();
+      std::string v = a.substr(8);
+      size_t pos = 0;
+      while (pos <= v.size()) {
+        const size_t e = v.find(',', pos);
+        const std::string tok = v.substr(pos, e == std::string::npos ? std::string::npos : e - pos);
+        if (tok == "core") entries.push_back({PointEntry::core, 0, tok});
+        else if (tok.rfind("cover", 0) == 0 && tok.size() <= 6 && (tok.size() == 5 || std::isdigit(tok[5])))
+          entries.push_back({PointEntry::cover, tok.size() == 5 ? 0 : tok[5] - '0', tok});
+        else {
+          std::fprintf(stderr, "entree inconnue %s\n", tok.c_str());
+          return 2;
+        }
+        if (e == std::string::npos) break;
+        pos = e + 1;
+      }
+    }
     else if (a == "--label=vote") vote = true;
+    else if (a.rfind("--cover-extra=", 0) == 0) cover_extra = std::stoi(a.substr(14));
     else if (a == "--label=tree") vote = false;
     else if (a.rfind("--k-list=", 0) == 0) {
       std::string v = a.substr(9);
@@ -86,11 +111,16 @@ int main(int argc, char** argv) {
   sched::Pool pool(threads);
   SiteTree tree(cloud);
   if (klist.empty()) klist.push_back(k);
-  if (entries.empty()) entries.push_back(PointEntry::core);
+  if (entries.empty()) entries.push_back({PointEntry::core, 0, "core"});
+  if (cover_extra >= 0)
+    for (EntrySpec& es : entries)
+      if (es.entry == PointEntry::cover && es.tag == "cover") es.extra = cover_extra;
+  int max_extra = 0;
+  for (const EntrySpec& es : entries) max_extra = std::max(max_extra, es.extra);
   int kmax = 0;
   for (int kk : klist) kmax = std::max(kmax, kk);
   CatalogueParams catp;
-  catp.kmax = kmax;
+  catp.kmax = kmax + max_extra;  // l'entree cover a K + extra lit des boules de poids K + extra
   auto cat = build_catalogue(cloud, catp, pool);
   if (!cat.ok()) {
     std::printf("{\"status\":\"%s\",\"reason\":\"%s\"}\n", std::string(status_name(cat.outcome().status())).c_str(),
@@ -123,13 +153,15 @@ int main(int argc, char** argv) {
   double tower_s = 0, head_s = 0;
   size_t clusters = 0;
   for (int kk : klist)
-  for (PointEntry entry : entries) {
-    const std::string tag = entries.size() > 1 ? (entry == PointEntry::cover ? ".cover" : ".core") : "";
+  for (const EntrySpec& es : entries) {
+    const PointEntry entry = es.entry;
+    const std::string tag = entries.size() > 1 ? "." + es.tag : "";
     const auto a0 = clk::now();
     TowerParams tp;
     tp.kmax = kmax;
     tp.only_order = kk;
     tp.entry = entry;
+    tp.cover_extra = es.extra;
     tp.ball_nodes = vote && entry == PointEntry::cover;  // la relation de couverture complete ne sert qu'au vote
     auto tw = build_tower(cloud, tree, cat.value(), tp, pool);
     if (!tw.ok()) {
