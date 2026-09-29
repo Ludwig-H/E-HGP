@@ -8,6 +8,9 @@
 // --k-list=1,2,5 : un seul catalogue (a l'ordre maximal), puis chaque ordre de la liste ; les sorties deviennent
 // OUT.k<K>.<i> (les ordres sont independants a catalogue donne).
 // --tree : exporte la hierarchie de points (niveaux, parents, attaches) pour les tetes Python de developpement.
+// --entry=core|cover : entree des points par leur propre rayon K-NN (coeurs, C n X, defaut) ou par premiere
+// couverture (amas discrets), voir TowerParams. --label=vote (avec --entry=cover) : ecrit en plus OUT[...].vote,
+// ou chaque point recoit l'amas retenu qui le couvre par sa boule de plus bas niveau (-1 si aucun).
 // Codes : 0 conforme, 2 refus, 3 invariant viole.
 #include <chrono>
 #include <cstdio>
@@ -25,6 +28,8 @@ int main(int argc, char** argv) {
   unsigned threads = 0;
   ClusterParams cp;
   std::string tree_out, configs;
+  PointEntry entry = PointEntry::core;
+  bool vote = false;
   std::vector<int> klist;
   for (int i = 3; i < argc; ++i) {
     const std::string a = argv[i];
@@ -37,6 +42,10 @@ int main(int argc, char** argv) {
     else if (a.rfind("--threads=", 0) == 0) threads = unsigned(std::stoul(a.substr(10)));
     else if (a.rfind("--tree=", 0) == 0) tree_out = a.substr(7);
     else if (a.rfind("--configs=", 0) == 0) configs = a.substr(10);
+    else if (a == "--entry=core") entry = PointEntry::core;
+    else if (a == "--entry=cover") entry = PointEntry::cover;
+    else if (a == "--label=vote") vote = true;
+    else if (a == "--label=tree") vote = false;
     else if (a.rfind("--k-list=", 0) == 0) {
       std::string v = a.substr(9);
       size_t pos = 0;
@@ -114,6 +123,7 @@ int main(int argc, char** argv) {
     TowerParams tp;
     tp.kmax = kmax;
     tp.only_order = kk;
+    tp.entry = entry;
     auto tw = build_tower(cloud, tree, cat.value(), tp, pool);
     if (!tw.ok()) {
       std::printf("{\"status\":\"%s\",\"reason\":\"%s\",\"k\":%d}\n", std::string(status_name(tw.outcome().status())).c_str(),
@@ -128,18 +138,46 @@ int main(int argc, char** argv) {
       std::printf("{\"status\":\"invariant_violated\",\"reason\":\"%s\"}\n", std::string(reason_name(v.reason)).c_str());
       return 3;
     }
+    // vote de couverture : boules couvrantes de chaque site, par niveau croissant (ordre canonique du catalogue)
+    std::vector<u64> cov_off;
+    std::vector<u32> cov_ball;
+    if (vote && !forest.ball_node.empty()) {
+      const Catalogue& C = cat.value();
+      cov_off.assign(u64(cloud.sites()) + 1, 0);
+      for (u32 b = 0; b < C.balls(); ++b)
+        if (forest.ball_node[b] != kNone)
+          for (u64 q = C.pop_off[b]; q < C.pop_off[b + 1]; ++q) ++cov_off[C.pop[q] + 1];
+      for (u32 s = 0; s < cloud.sites(); ++s) cov_off[s + 1] += cov_off[s];
+      cov_ball.resize(cov_off[cloud.sites()]);
+      std::vector<u64> fillc(cov_off.begin(), cov_off.end() - 1);
+      for (u32 b = 0; b < C.balls(); ++b)
+        if (forest.ball_node[b] != kNone)
+          for (u64 q = C.pop_off[b]; q < C.pop_off[b + 1]; ++q) cov_ball[fillc[C.pop[q]]++] = b;
+    }
     for (size_t i = 0; i < list.size(); ++i) {
       const Clustering cl = cluster(d, list[i]);
       clusters = cl.selected.size();
-      std::vector<i32> out(n, -1);
-      for (u32 s = 0; s < cloud.sites(); ++s)
-        for (PointId p : cloud.ids.row(s)) out[idx(p)] = cl.label[s];
+      std::vector<i32> lab_vote;
+      if (!cov_off.empty()) {
+        lab_vote.assign(cloud.sites(), -1);
+        for (u32 s = 0; s < cloud.sites(); ++s)
+          for (u64 q = cov_off[s]; q < cov_off[s + 1] && lab_vote[s] < 0; ++q) {
+            const u32 c = cl.tree.node_cluster[forest.ball_node[cov_ball[q]]];
+            if (c != kNone) lab_vote[s] = cl.cluster_label[c];
+          }
+      }
       const std::string path = !multi ? std::string(argv[2])
                                       : std::string(argv[2]) + ".k" + std::to_string(kk) + "." + std::to_string(i);
-      FILE* o = std::fopen(path.c_str(), "wb");
-      if (!o) return 2;
-      std::fwrite(out.data(), 4, n, o);
-      std::fclose(o);
+      for (int variant = 0; variant < (lab_vote.empty() ? 1 : 2); ++variant) {
+        const std::vector<i32>& lab = variant == 0 ? cl.label : lab_vote;
+        std::vector<i32> out(n, -1);
+        for (u32 s = 0; s < cloud.sites(); ++s)
+          for (PointId p : cloud.ids.row(s)) out[idx(p)] = lab[s];
+        FILE* o = std::fopen((path + (variant == 0 ? "" : ".vote")).c_str(), "wb");
+        if (!o) return 2;
+        std::fwrite(out.data(), 4, n, o);
+        std::fclose(o);
+      }
     }
     if (!tree_out.empty()) {
       FILE* t = std::fopen((tree_out + (multi ? ".k" + std::to_string(kk) : std::string())).c_str(), "w");

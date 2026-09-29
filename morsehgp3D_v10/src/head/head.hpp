@@ -31,11 +31,13 @@ struct CondensedTree {
   std::vector<u64> mass;           // masse a la naissance
   std::vector<u32> point_cluster;  // point -> cluster d'ou il sort
   std::vector<double> point_lambda;
+  std::vector<u32> node_cluster;   // noeud du dendrogramme -> cluster condense qui le contient (vote de couverture)
 };
 
 struct Clustering {
   std::vector<i32> label;          // par point du dendrogramme ; -1 = bruit
   std::vector<u32> selected;       // clusters retenus
+  std::vector<i32> cluster_label;  // cluster condense -> etiquette de son premier ancetre retenu (lui compris), -1 sinon
   CondensedTree tree;
 };
 

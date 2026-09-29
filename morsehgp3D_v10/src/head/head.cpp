@@ -36,6 +36,7 @@ CondensedTree condense(const PointDendrogram& d, const ClusterParams& p) {
 
   CondensedTree t;
   t.point_cluster.assign(d.points(), kNone);
+  t.node_cluster.assign(n, kNone);
   t.point_lambda.assign(d.points(), 0.0);
   auto new_cluster = [&](u32 parent, double birth, u64 m) {
     t.parent.push_back(parent);
@@ -51,6 +52,7 @@ CondensedTree condense(const PointDendrogram& d, const ClusterParams& p) {
     while (!stack.empty()) {
       const u32 u = stack.back();
       stack.pop_back();
+      t.node_cluster[u] = c;
       for (u32 j = att_off[u]; j < att_off[u + 1]; ++j) {
         const u32 x = att[j];
         t.point_cluster[x] = c;
@@ -67,6 +69,7 @@ CondensedTree condense(const PointDendrogram& d, const ClusterParams& p) {
   while (!work.empty()) {
     auto [v, c] = work.back();
     work.pop_back();
+    t.node_cluster[v] = c;
     // points attaches directement : sortent a leur niveau d'entree
     for (u32 j = att_off[v]; j < att_off[v + 1]; ++j) {
       const u32 x = att[j];
@@ -148,6 +151,13 @@ Clustering cluster(const PointDendrogram& d, const ClusterParams& p) {
       id[c] = static_cast<i32>(out.selected.size());
       out.selected.push_back(c);
     }
+  out.cluster_label.assign(m, -1);
+  for (u32 c = 0; c < m; ++c)
+    for (u32 a = c; a != kNone; a = t.parent[a])
+      if (chosen[a]) {
+        out.cluster_label[c] = id[a];
+        break;
+      }
   out.label.assign(d.points(), -1);
   for (u32 x = 0; x < d.points(); ++x) {
     for (u32 c = t.point_cluster[x]; c != kNone; c = t.parent[c])

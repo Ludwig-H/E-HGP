@@ -106,8 +106,11 @@ struct OrderForest {
   std::vector<u32> child_val;
   std::vector<u32> birth;      // naissance : boule (ou site a K = 1) ; kNone pour une fusion
   std::vector<u32> lower;      // image verticale dans l'ordre K - 1 (noeud vivant au niveau de creation) ; vide a K = 1
-  std::vector<u32> point_node; // par site : composante qui le contient a son niveau d'entree D_K(x)
-  std::vector<u64> point_level;// par site : D_K(x) (entier exact)
+  std::vector<u32> point_node; // par site : composante d'entree (voir PointEntry)
+  std::vector<u64> point_level;// entree core : D_K(x) (entier exact)
+  std::vector<u32> point_cat_rank;  // entree cover : rang de noeud (rang du catalogue + 1) du niveau alpha_K(x)^2
+  std::vector<u32> ball_node;       // entree cover : composante de L_K(niveau de b) qui contient le centre de la
+                                    // boule b (kNone si le poids de b est < K) ; relation de couverture des points
   u64 descents = 0, descent_steps = 0, memo_hits = 0, joins = 0, births = 0, merges = 0;
   OrderStats stats;
 };
@@ -118,9 +121,18 @@ struct Tower {
   TowerStats stats;
 };
 
+// Entree des points dans la hierarchie d'ordre K (docs/CLUSTERING_DEPUIS_LA_TOUR_20260929.md) :
+//   core  : x entre a D_K(x) = d_K(x)^2 (x compris) dans la composante de L_K qui le contient (semantique des
+//           coeurs, C n X) ;
+//   cover : x entre a alpha_K(x)^2, alpha_K(x) = rayon de la plus petite boule fermee contenant x et au moins K - 1
+//           autres sites, dans la composante de cette boule (amas discrets, theoreme 2 de la these :
+//           d(x, C) <= r). d_K(x) / 2 <= alpha_K(x) <= d_K(x). A K = 1, alpha = 0 : les deux coincident.
+enum class PointEntry : u8 { core, cover };
+
 struct TowerParams {
   int kmax = 5;
-  bool points = true;  // attaches C n X
+  bool points = true;  // attaches des points
+  PointEntry entry = PointEntry::core;
   int only_order = 0;  // > 0 : ne construire que cet ordre (les ordres sont independants)
   bool verticals = true;  // cartes K -> K - 1 (ignorees si only_order > 0)
 };

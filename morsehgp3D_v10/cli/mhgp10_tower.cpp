@@ -1,6 +1,6 @@
 // Sonde de la tour : nuage u32le -> catalogue -> tour FULL 1..K -> attaches C n X.
 //
-//   mhgp10_tower IN.u32le --k=K [--threads=W] [--dump=FILE] [--no-points] [--repeat=R]
+//   mhgp10_tower IN.u32le --k=K [--threads=W] [--dump=FILE] [--no-points] [--repeat=R] [--entry=core|cover]
 // --no-points : tour FULL seule (contrat LiDAR), sans attaches C n X. --repeat : R passes chaudes dans le meme
 // processus (catalogue + tour), temps publies par passe.
 // Sortie standard : une ligne JSON (temps par etage, noeuds, fusions, descentes).
@@ -39,12 +39,15 @@ int main(int argc, char** argv) {
   std::string dump;
   bool points = true;
   int repeat = 1;
+  PointEntry entry = PointEntry::core;
   for (int i = 2; i < argc; ++i) {
     const std::string a = argv[i];
     if (a.rfind("--k=", 0) == 0) kmax = std::stoi(a.substr(4));
     else if (a.rfind("--threads=", 0) == 0) threads = unsigned(std::stoul(a.substr(10)));
     else if (a.rfind("--dump=", 0) == 0) dump = a.substr(7);
     else if (a == "--no-points") points = false;
+    else if (a == "--entry=core") entry = PointEntry::core;
+    else if (a == "--entry=cover") entry = PointEntry::cover;
     else if (a.rfind("--repeat=", 0) == 0) repeat = std::stoi(a.substr(9));
     else return 2;
   }
@@ -75,6 +78,7 @@ int main(int argc, char** argv) {
   TowerParams tp;
   tp.kmax = kmax;
   tp.points = points;
+  tp.entry = entry;
   std::vector<double> cat_s, tow_s;
   Result<Catalogue> built = fail(Reason::none);
   Result<Tower> tw = fail(Reason::none);
@@ -173,8 +177,12 @@ int main(int argc, char** argv) {
                      den.c_str(), low);
       }
       for (u32 s = 0; s < cloud.sites(); ++s)
-        std::fprintf(o, "point %u %u %u %u %llu\n", cloud.x[s], cloud.y[s], cloud.z[s], ord.point_node[s],
-                     (unsigned long long)ord.point_level[s]);
+        if (!ord.point_cat_rank.empty())  // entree cover : niveau = rang de noeud (rang du catalogue + 1)
+          std::fprintf(o, "point %u %u %u %u r%u\n", cloud.x[s], cloud.y[s], cloud.z[s], ord.point_node[s],
+                       ord.point_cat_rank[s]);
+        else
+          std::fprintf(o, "point %u %u %u %u %llu\n", cloud.x[s], cloud.y[s], cloud.z[s], ord.point_node[s],
+                       (unsigned long long)ord.point_level[s]);
     }
     std::fclose(o);
   }

@@ -1539,8 +1539,55 @@ Result<Tower> build_tower(const Cloud& cloud, const SiteTree& tree, const Catalo
         t.orders[k - 1].point_level.assign(n, 0);
         pk.push_back(k);
       }
-    // Une requete par site : les k plus proches (cle exacte = distance carree, puis indice) sont le prefixe des
-    // kq plus proches pour tout k <= kq ; D_k(x) est la cle du k-ieme.
+    // Entree cover (k >= 2) : la premiere boule du catalogue, dans l'ordre canonique donc par niveau croissant,
+    // dont la boule fermee contient x et au moins k sites, a pour rayon alpha_k(x) ; toutes les k-parties d'une
+    // boule fermee contiennent son centre dans leur region temoin, donc une seule resolution par boule donne la
+    // composante qui couvre chacun de ses points au niveau de la boule.
+    const bool cover = params.entry == PointEntry::cover;
+    std::vector<u32> pk_core;
+    for (u32 k : pk)
+      if (!cover || k == 1) pk_core.push_back(k);
+    if (cover) {
+      for (u32 k : pk) {
+        if (k == 1) continue;
+        OrderRun& o = *runs[k];
+        OrderForest& out = t.orders[k - 1];
+        out.ball_node.assign(cat.balls(), kNone);
+        out.point_cat_rank.assign(n, 0);
+        pool.parallel_for(cat.balls(), 256, [&](u64 b0, u64 e0, unsigned wk) {
+          Scratch& sc = scratch[wk];
+          Facet F;
+          for (u64 b = b0; b < e0; ++b) {
+            if (cat.p[b] + cat.u[b] < k) continue;
+            const auto I = cat.interior(u32(b));
+            const auto U = cat.shell(u32(b));
+            if (I.size() + U.size() < k) continue;  // poids > positions : multiplicites, refusees en amont
+            size_t i = 0, j = 0;
+            F.n = k;
+            for (u32 m = 0; m < k; ++m) F.s[m] = (j >= U.size() || (i < I.size() && I[i] < U[j])) ? I[i++] : U[j++];
+            u32 v = resolve(X, o, o.error, F, sc, sc.c[1][k]);
+            if (v == kNone) continue;  // erreur deja enregistree pour l'ordre
+            out.ball_node[b] = ancestor(out, o.jumps, v, cat.rank[b] + 1, sc.walk[k]);
+          }
+        });
+        std::vector<u32> first(n, kNone);
+        for (u32 b = 0; b < cat.balls(); ++b)
+          if (out.ball_node[b] != kNone)
+            for (u64 q = cat.pop_off[b]; q < cat.pop_off[b + 1]; ++q)
+              if (first[cat.pop[q]] == kNone) first[cat.pop[q]] = b;
+        for (u32 x = 0; x < n; ++x) {
+          if (first[x] == kNone) {
+            if (!o.error.load()) o.error.store(u32(Reason::census_mismatch) + 1);
+            break;
+          }
+          out.point_node[x] = out.ball_node[first[x]];
+          out.point_cat_rank[x] = cat.rank[first[x]] + 1;
+        }
+      }
+    }
+    // Entree core : une requete par site ; les k plus proches (cle exacte = distance carree, puis indice) sont le
+    // prefixe des kq plus proches pour tout k <= kq ; D_k(x) est la cle du k-ieme.
+    pk.swap(pk_core);
     const u32 kq = pk.empty() ? 0 : pk.back();
     if (kq > 0)
       pool.parallel_for(n, 64, [&](u64 b0, u64 e0, unsigned wk) {
@@ -1710,7 +1757,11 @@ PointDendrogram point_dendrogram(const Catalogue& cat, const OrderForest& f, con
   };
   std::vector<Key> keys;
   for (u32 r : f.rank) keys.push_back({true, r, 0});
-  for (u64 e : f.point_level) keys.push_back({false, 0, e});
+  if (!f.point_cat_rank.empty()) {
+    for (u32 r : f.point_cat_rank) keys.push_back({true, r, 0});  // entree cover : niveaux du catalogue
+  } else {
+    for (u64 e : f.point_level) keys.push_back({false, 0, e});
+  }
   std::vector<geom::Level> lv;
   lv.reserve(keys.size());
   for (const Key& k : keys) lv.push_back(level_of(k));
