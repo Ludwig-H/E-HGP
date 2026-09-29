@@ -1,0 +1,5 @@
+2026-09-29T10:43:31Z worker demarre (pid 1930), echeance 1790680576, generation 2026-09-29T03:41:17.986-07:00
+2026-09-29T10:43:32Z python3 -m pip absent : aucune installation systeme n'est tentee
+2026-09-29T10:43:32Z etape build/configure : ok (code 0, 0.561 s)
+2026-09-29T10:43:37Z etape build/build : ok (code 0, 4.425 s)
+2026-09-29T11:04:09Z etape cmd/000_lot_c : ok (code 0, 1231.804 s)

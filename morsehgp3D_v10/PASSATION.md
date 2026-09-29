@@ -61,11 +61,16 @@ GCP : session 1 le 29 septembre (CPU seul, arrêt certifié TERMINATED), reçu `
    - **Lot A** (tête C∩X du 28 septembre, test préenregistré) : la tour bat HDBSCAN à K = 1, 2 et 3, avec
      Δ = +0,053, +0,092 et +0,049, p_Holm = 3e-5 (reçu `receipts/test_kmatch_A_20260929`). À K = 1, c'est un effet
      de tête.
-   - **Lot C** (préenregistrement `bc413ff56`, exécution en cours, espace `test_v10b`) :
-     - tête v10-b contre sklearn à K = 1, 2, 3, 5, 8 et 10 ;
-     - lot B (tête C∩X à K = 5, 8, 10) ;
-     - famille « objet » : la tour contre MR₂-bord à même entrée et même tête ;
-     - paires sans remplissage.
+   - **Lot C** (préenregistrement `bc413ff56`, amendé `65ea6b222`, exécuté sur G4 en deux sessions, reçu
+     `receipts/test_cover_C_20260929`) : **la tête v10-b bat HDBSCAN à tous les K** :
+     - Δ = +0,075, +0,073, +0,091, +0,064, +0,040 et +0,031 à K = 1, 2, 3, 5, 8 et 10 ; sans remplissage, de
+       +0,034 à +0,105 ;
+     - lot B (tête C∩X) : parité à K = 5, défaite à K = 8 et 10 ;
+     - famille « objet » : parité de la tour et de MR₂-bord à même entrée et même tête à K = 2, 3, 5 et 8, et
+       +0,010 pour la tour à K = 10 (sous la marge). L'avantage vient de l'entrée et de la tête.
+   - **Tout calcul long passe sur G4** (directive du 29 septembre). La VM n'a ni pip ni numpy : un Python portable
+     et des binaires statiques y sont envoyés comme données (`bench/g4/lot_runner.py`, `bench/g4/pyenv_run.py`,
+     fusion `bench/g4/merge_sessions.py`).
    - **Prochaine recherche** (dev) : une tête multi-K sur les verticales (tranche oblique à la Rolle–Scoccola) ; une
      sélection qui ne dépende pas de la taille.
 2. **Performance LiDAR** (priorité de complexité).

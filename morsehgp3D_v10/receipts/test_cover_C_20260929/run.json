@@ -1,0 +1,56 @@
+{
+ "complete": true,
+ "computed": 960,
+ "plan_sha256": "f3b015333df0fae3dcf930a1bab6fe68d15d8a60b415ba39fac256f74d630575",
+ "prereg": "PREREG_V10_COVER_C_20260929.json",
+ "prereg_sha256": "7233093ef3616eca2013bfde99b29597519386a3396b2073a2037515eb7abbd6",
+ "scenes": 960,
+ "segments": [
+  {
+   "already_done": 0,
+   "budget_seconds": 1140.0,
+   "computed": 338,
+   "cpus": 48,
+   "environment": {
+    "numpy": "2.5.3",
+    "python": "3.12.14",
+    "scipy": "1.18.1",
+    "sklearn": "1.9.1"
+   },
+   "finished_utc": "2026-09-29T11:04:08Z",
+   "host": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+   "jobs": 46,
+   "plan_sha256": "f3b015333df0fae3dcf930a1bab6fe68d15d8a60b415ba39fac256f74d630575",
+   "prereg": "PREREG_V10_COVER_C_20260929.json",
+   "prereg_sha256": "7233093ef3616eca2013bfde99b29597519386a3396b2073a2037515eb7abbd6",
+   "remaining": 622,
+   "scenes": 960,
+   "started_utc": "2026-09-29T10:43:41Z",
+   "todo": 960,
+   "worker_failures": 0
+  },
+  {
+   "already_done": 338,
+   "budget_seconds": 1140.0,
+   "computed": 622,
+   "cpus": 48,
+   "environment": {
+    "numpy": "2.5.3",
+    "python": "3.12.14",
+    "scipy": "1.18.1",
+    "sklearn": "1.9.1"
+   },
+   "finished_utc": "2026-09-29T11:20:32Z",
+   "host": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+   "jobs": 46,
+   "plan_sha256": "f3b015333df0fae3dcf930a1bab6fe68d15d8a60b415ba39fac256f74d630575",
+   "prereg": "PREREG_V10_COVER_C_20260929.json",
+   "prereg_sha256": "7233093ef3616eca2013bfde99b29597519386a3396b2073a2037515eb7abbd6",
+   "remaining": 0,
+   "scenes": 960,
+   "started_utc": "2026-09-29T11:09:57Z",
+   "todo": 622,
+   "worker_failures": 0
+  }
+ ]
+}

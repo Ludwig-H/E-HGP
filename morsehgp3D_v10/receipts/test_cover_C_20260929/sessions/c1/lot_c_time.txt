@@ -1,0 +1,23 @@
+	Command being timed: "timeout --foreground --kill-after=10s 1560s python3 /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.SeqrHgdXQg/src/morsehgp3D_v10/bench/g4/lot_runner.py --prereg /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.SeqrHgdXQg/src/morsehgp3D_v10/bench/synthetic/prereg/PREREG_V10_COVER_C_20260929.json --env /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.SeqrHgdXQg/data/pyenv.u32le --bins /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.SeqrHgdXQg/data/bins.u32le --done /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.SeqrHgdXQg/data/done.u32le --out /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.SeqrHgdXQg/results/cmd/000_lot_c/files --work /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.SeqrHgdXQg/build/lot_work --jobs 46 --budget 1140"
+	User time (seconds): 53638.86
+	System time (seconds): 1274.59
+	Percent of CPU this job got: 4457%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 20:31.80
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 4249948
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 2
+	Minor (reclaiming a frame) page faults: 1073700636
+	Voluntary context switches: 9897
+	Involuntary context switches: 160170
+	Swaps: 0
+	File system inputs: 176
+	File system outputs: 8916464
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

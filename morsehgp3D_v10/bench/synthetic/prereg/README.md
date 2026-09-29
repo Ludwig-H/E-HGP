@@ -78,6 +78,9 @@ Un premier projet, jamais commité ni exécuté, opposait la tour à K = 1 à un
 
 ## PREREG_V10_COVER_C_20260929 : tête v10-b (première couverture), lot C ; lot B ; famille « objet »
 
+**Exécuté le 29 septembre 2026 sur G4** : la tour bat HDBSCAN à K = 1, 2, 3, 5, 8 et 10 (Δ de +0,031 à +0,091) ; lot B
+perdant à K = 8 et 10 ; famille « objet » à parité, sauf +0,010 à K = 10 (reçu `receipts/test_cover_C_20260929`).
+
 **Question.** À K = `min_samples` (1, 2, 3, 5, 8, 10), la tour avec la tête v10-b fait-elle mieux que sklearn HDBSCAN,
 chaque méthode avec sa meilleure tête choisie sur dev par la même règle ? La tête v10-b fait entrer les points par
 première couverture (amas discrets du théorème 2) et sélectionne par EOM avec λ = r^(−z).
