@@ -764,7 +764,7 @@ Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& par
     merge_ledger(cat.ledger, locals[li].led);
     first[li + 1] = first[li] + locals[li].recs.size();
   }
-  std::vector<Ref> refs(first.back());
+  UninitVector<Ref> refs(first.back());
   pool.parallel_for(locals.size(), 1, [&](u64 b, u64 e, unsigned) {
     for (u64 li = b; li < e; ++li)
       for (u32 r = 0; r < locals[li].recs.size(); ++r)
@@ -804,8 +804,9 @@ Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& par
   cat.t_order = since(t0);
   t0 = Clock::now();
   const u32 nb = static_cast<u32>(refs.size());
-  // comparaisons exactes des voisins en parallele ; le premier defaut, dans l'ordre, decide du refus
-  std::vector<signed char> cmp(nb, -1);
+  // comparaisons exactes des voisins en parallele (cmp[0] n'est jamais lu) ; le premier defaut, dans l'ordre, decide
+  // du refus
+  UninitVector<signed char> cmp(nb);
   t1 = Clock::now();
   pool.parallel_for(nb, 4096, [&](u64 b0, u64 e0, unsigned) {
     for (u64 b = std::max<u64>(b0, 1); b < e0; ++b)

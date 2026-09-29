@@ -12,6 +12,10 @@
 #pragma once
 
 #include <array>
+#include <cstring>
+#include <memory>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 #include "arith/geometry.hpp"
@@ -20,6 +24,34 @@
 #include "sched/pool.hpp"
 
 namespace mhgp10 {
+
+// Allocateur des grands tableaux du catalogue : aucune initialisation par valeur (types triviaux). Chaque case est
+// ecrite par la boucle parallele qui remplit le tableau : le premier contact des pages se repartit sur les fils au
+// lieu d'un remplissage en serie. En build de test (MHGP10_POISON), les octets sont empoisonnes 0xA5.
+template <class T>
+struct UninitAlloc : std::allocator<T> {
+  static_assert(std::is_trivially_copyable_v<T> && std::is_trivially_destructible_v<T>, "types triviaux seulement");
+  template <class U>
+  struct rebind {
+    using other = UninitAlloc<U>;
+  };
+  UninitAlloc() = default;
+  template <class U>
+  UninitAlloc(const UninitAlloc<U>&) noexcept {}
+  T* allocate(std::size_t n) {
+    T* p = std::allocator<T>::allocate(n);
+#ifdef MHGP10_POISON
+    std::memset(static_cast<void*>(p), 0xA5, n * sizeof(T));
+#endif
+    return p;
+  }
+  template <class U, class... A>
+  void construct(U* p, A&&... a) {
+    if constexpr (sizeof...(A) > 0) ::new (static_cast<void*>(p)) U(std::forward<A>(a)...);
+  }
+};
+template <class T>
+using UninitVector = std::vector<T, UninitAlloc<T>>;
 
 // filter_tests : tests de dominance du filtre des noeuds (S0 pour chaque site de la liste parente, puis Y \ S0 pour
 // ceux que S0 n'exclut pas) ; preskipped_bbox : noeuds ignores par l'enveloppe de la liste parente, sans filtrage
@@ -34,16 +66,16 @@ struct CatalogueLedger {
 struct Catalogue {
   int kmax = 0;
   // par boule, ordre canonique
-  std::vector<u32> rank;                    // rang du niveau
-  std::vector<std::array<u32, 4>> support;  // S* trie (kNone au-dela de q_min)
-  std::vector<u8> qmin;                     // 2..4
-  std::vector<u32> p;                       // poids interieur
-  std::vector<u32> u;                       // poids de la coquille
-  std::vector<u8> flags;                    // bit0 coquille etendue, bit1 coquille ponderee
-  std::vector<u64> pop_off;                 // CSR : I trie puis U trie (indices de sites)
-  std::vector<u32> pop;
-  std::vector<u32> n_interior;              // |I| en positions
-  std::vector<geom::Level> level;           // niveau exact par rang
+  UninitVector<u32> rank;                    // rang du niveau
+  UninitVector<std::array<u32, 4>> support;  // S* trie (kNone au-dela de q_min)
+  UninitVector<u8> qmin;                     // 2..4
+  UninitVector<u32> p;                       // poids interieur
+  UninitVector<u32> u;                       // poids de la coquille
+  UninitVector<u8> flags;                    // bit0 coquille etendue, bit1 coquille ponderee
+  UninitVector<u64> pop_off;                 // CSR : I trie puis U trie (indices de sites)
+  UninitVector<u32> pop;
+  UninitVector<u32> n_interior;              // |I| en positions
+  UninitVector<geom::Level> level;           // niveau exact par rang
   CatalogueLedger ledger;
   // temps muraux (s) : frontiere en largeur, taches paralleles des boites, ordre canonique, assemblage
   double t_frontier = 0, t_boxes = 0, t_order = 0, t_assemble = 0;

@@ -13,8 +13,8 @@
 
 namespace mhgp10::sched {
 
-template <class T, class Less>
-void parallel_sort(Pool& pool, std::vector<T>& v, Less less) {
+template <class T, class A, class Less>
+void parallel_sort(Pool& pool, std::vector<T, A>& v, Less less) {
   const u64 n = v.size();
   const u64 P = pool.size();
   if (P <= 1 || n < 8192 || in_parallel_region()) {
@@ -50,7 +50,7 @@ void parallel_sort(Pool& pool, std::vector<T>& v, Less less) {
     for (u64 i = 0; i < P; ++i) size += cut[i * (P + 1) + j + 1] - cut[i * (P + 1) + j];
     off[j + 1] = off[j] + size;
   }
-  std::vector<T> out(n);
+  std::vector<T, A> out(n);  // allocateur de v : sans initialisation par valeur si v n'en a pas
   pool.parallel_for(P, 1, [&](u64 b, u64 e, unsigned) {
     for (u64 j = b; j < e; ++j) {
       u64 at = off[j];
