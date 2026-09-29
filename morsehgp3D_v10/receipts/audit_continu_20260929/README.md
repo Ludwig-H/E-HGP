@@ -23,3 +23,18 @@ de capture adaptés. Ne jamais lancer un script écrivain sur cette archive.
 La profondeur relative au dossier v10 est inchangée ; les imports locaux
 restent groupés. `timeout/reproduce.py` retrouve donc encore le même moteur.
 Une nouvelle exécution doit produire un reçu distinct, avec sa propre version.
+
+## Captures ajoutées après la relocalisation
+
+- `math_catalogue_cover/` : oracle exact autonome de toutes les composantes
+  couvrantes, K1/K2/K3, normal et `-O` ; ni générateur ni tour native.
+- `thesis_boundary/` : provenance de la relecture des parties I et II et
+  petit contre-exemple abstrait du vote recalculé à chaque coupe.
+- `pool_corrected/` : refus réel de création partielle de fils sur copie
+  corrigée ; ne qualifie pas les consommateurs ou l'intégration.
+- `timeout/cuda_corrected/` : contrôle arithmétique hôte UBSan de la sonde
+  unsigned ; aucun chrono ou reçu GPU nouveau.
+
+Ces nouveaux fichiers ne font pas partie des 34 déplacements historiques
+du manifeste. Les comptes, sources et limites sont dans leurs reçus propres
+et dans les rapports pointés par l'état courant. GCP non utilisé.
