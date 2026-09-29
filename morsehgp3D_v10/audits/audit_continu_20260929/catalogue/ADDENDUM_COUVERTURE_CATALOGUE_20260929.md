@@ -231,3 +231,84 @@ ne teste pas numériquement q3/q4, les résolutions natives, ni un coût GPU.
 Le nombre d'incidences point→boules, la résolution des composantes et leur
 déduplication restent à mesurer ; aucune borne sous-quadratique ni garantie
 statistique ne découle de ce lemme.
+
+## Complément R2 : résolutions natives et listes complètes à la coupe
+
+Cette tranche distincte confronte les routines natives au lemme, sans
+reconstruire le moteur. Une
+[sonde d'export](../../../receipts/audit_continu_20260929/math_catalogue_cover/native_r2/probe.cpp)
+est liée à l'archive existante
+`/tmp/mhgp10-audit-pool-head.X45WLs/build/libmhgp10_core.a`, capture de
+`6206d1d11`. Les en-têtes viennent de son snapshot figé ; `tower.cpp` et
+`tower.hpp` y sont identiques au worktree lu. La
+[commande de compilation](../../../receipts/audit_continu_20260929/math_catalogue_cover/native_r2/build.json)
+et les empreintes sont conservées. Ce n'est pas une nouvelle qualification
+de la totalité du moteur ni un test de sa dernière variante éventuelle.
+
+Le [juge autonome](../../../receipts/audit_continu_20260929/math_catalogue_cover/native_r2/check_native.py)
+ne charge ni le catalogue Python de référence ni son oracle Gamma. Pour
+chaque K-partie F, il calcule exactement sa plus petite boule par supports
+de taille au plus quatre, avec élimination de Gauss rationnelle. À la coupe
+de rayon carré β, il forme les ensembles convexes
+`Q_F = intersection des B(x,sqrt(β)), x∈F`. Un sommet est présent si
+`MEB(F)²≤β` ; deux sommets sont joints si `MEB(F∪G)²≤β`. Le nerf ainsi
+construit a exactement les composantes de leur union `L_K(sqrt(β))`.
+Il teste toutes les unions, pas seulement l'adjacence optimisée de Gamma.
+Cette construction exhaustive est uniquement un juge borné ; elle n'est
+pas une proposition d'architecture pour le produit.
+
+L'identité géométrique des composantes natives est fixée par les **centres
+de leurs naissances**, indépendamment de `ball_node`. Pour chaque coupe :
+
+- la remontée des naissances doit donner une bijection avec les composantes
+  géométriques, sans fausse fusion ni composante perdue ;
+- chaque `ball_node` de population au moins K doit être actif au propre
+  rayon de sa boule, puis remonter vers la composante contenant son centre
+  à la nouvelle coupe ;
+- la liste obtenue par toutes les incidences `I∪U` doit être exactement la
+  liste des composantes géométriques couvrant le point. Côté oracle,
+  une composante couvre x ssi elle contient une lentille d'une K-partie
+  incluant x, ce qui est l'expression géométrique de `dist(x,C)≤R` ;
+- les sorties à deux workers doivent être identiques à celles d'un worker.
+  Désactiver `ball_nodes` doit seulement enlever cette table : forêt,
+  attaches à la première boule et dates doivent rester identiques.
+
+Les reçus [normal](../../../receipts/audit_continu_20260929/math_catalogue_cover/native_r2/normal/receipt.json)
+et [−O](../../../receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/receipt.json)
+passent et conservent les mêmes comptes et empreintes de fermeture : huit
+fixtures, 32 appels natifs par exécution Python, soit 64 appels au total.
+Chaque exécution vérifie 242 coupes, 1 046 listes point→composantes dont
+88 multivoques, et 538 résolutions de boules. Parmi ces dernières, 434
+se font à une coupe strictement postérieure au rayon propre, 34 concernent
+`p≥K`, et 60 une boule q3/q4 contenant des points strictement intérieurs.
+Les coupes comprennent les égalités exactes, des intervalles entre niveaux
+et une coupe au-delà du dernier événement.
+
+Les huit scènes sont : deux sites ; les lignes {0,2,6}, {0,2,4} et
+{0,1,2,3,4,5} ; le triangle avec intérieur de la preuve ; un carré ; un
+tétraèdre ; le même tétraèdre avec son centre. Tous les ordres K1 à
+`min(4,n)` sont testés. En particulier :
+
+- **{0,2,6}, K2, R=2, x=2** : `ball_nodes` et ses incidences retrouvent
+  les deux composantes. `first[x]` n'en retrouve qu'une. Ce n'est plus
+  seulement un contre-exemple de l'oracle collinéaire : les deux sorties
+  comparées sont issues de la même forêt native ;
+- **triangle avec intérieur, K4** : la boule q3 de rayon carré `169/36`,
+  `p=1`, résout correctement le point intérieur `(2,1,0)` à sa naissance ;
+- **tétraèdre avec intérieur, K4** : sommets `(0,0,0), (4,4,0), (4,0,4),
+  (0,4,4)` et point `(2,2,2)`. La boule q4 de rayon carré 12 et `p=1`
+  résout la composante fusionnée ; les quatre boules q3 de rayon carré
+  `32/3` résolvent auparavant quatre composantes. Le point intérieur
+  participe ainsi à plusieurs couvertures sans justifier leur fusion
+  anticipée ;
+- **K1** : `ball_node` est vide même avec l'option activée, car la voie
+  native conserve la préparation des attaches par sites. Le juge utilise
+  donc ces sites et `point_node` comme témoins de rayon nul. Un futur
+  adaptateur ne doit pas supposer l'existence d'une table de boules K1.
+
+Aucun désaccord n'a été observé sur ces fixtures. Cela valide localement
+la résolution à K et la remontée à R, et pas seulement les populations ou
+la première boule. Le domaine reste non pondéré, très petit, avec
+`cover_extra=0`. Ce complément ne qualifie ni toutes les dégénérescences,
+ni une nouvelle règle d'affectation exclusive, ni le coût des incidences
+sur LiDAR. Moteur et Git inchangés ; GCP non utilisé.

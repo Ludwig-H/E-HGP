@@ -1,0 +1,2 @@
+/usr/bin/ar qc libmhgp10_core.a CMakeFiles/mhgp10_core.dir/src/core/buffer.cpp.o CMakeFiles/mhgp10_core.dir/src/sched/pool.cpp.o CMakeFiles/mhgp10_core.dir/src/cloud/cloud.cpp.o CMakeFiles/mhgp10_core.dir/src/cloud/site_tree.cpp.o CMakeFiles/mhgp10_core.dir/src/arith/geometry.cpp.o CMakeFiles/mhgp10_core.dir/src/catalogue/generator.cpp.o CMakeFiles/mhgp10_core.dir/src/tower/tower.cpp.o CMakeFiles/mhgp10_core.dir/src/points/dendrogram.cpp.o CMakeFiles/mhgp10_core.dir/src/head/head.cpp.o
+/usr/bin/ranlib libmhgp10_core.a

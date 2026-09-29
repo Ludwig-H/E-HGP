@@ -1,0 +1,4 @@
+pool_construction allocations 4 echecs_injectes 4
+fault_catalogue allocations 6325 essais 124 injections 124 (hors appelant 67) refus_memory_budget 124 absorbees 0
+fault_tower allocations 338 essais 85 injections 85 (hors appelant 29) refus_memory_budget 85 absorbees 0
+fault_ok

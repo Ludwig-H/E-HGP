@@ -1,0 +1,3 @@
+fault_catalogue allocations 6336 essais 124 injections 124 (hors appelant 49) refus_memory_budget 124 absorbees 0
+fault_tower allocations 311 essais 84 injections 84 (hors appelant 28) refus_memory_budget 84 absorbees 0
+fault_ok

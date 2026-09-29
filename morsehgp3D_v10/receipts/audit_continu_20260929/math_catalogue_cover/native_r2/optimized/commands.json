@@ -1,0 +1,354 @@
+[
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/pair.txt",
+      "2",
+      "1",
+      "1"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "becf4fadb67a02f484f0f4bb411960901f3fa6b235602de990311a62c9878dbb"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/pair.txt",
+      "2",
+      "2",
+      "1"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "becf4fadb67a02f484f0f4bb411960901f3fa6b235602de990311a62c9878dbb"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/pair.txt",
+      "2",
+      "1",
+      "0"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "f6e2a645d72e7e9e7648eb244d13d5c4c48848ce8538fb9136c82fbc08570deb"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/pair.txt",
+      "2",
+      "2",
+      "0"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "f6e2a645d72e7e9e7648eb244d13d5c4c48848ce8538fb9136c82fbc08570deb"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/line_asym.txt",
+      "3",
+      "1",
+      "1"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "9ea22445bea46a8ca1208d2d5b34069aa45db8e8a25c73b724efd4e2e38c61be"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/line_asym.txt",
+      "3",
+      "2",
+      "1"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "9ea22445bea46a8ca1208d2d5b34069aa45db8e8a25c73b724efd4e2e38c61be"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/line_asym.txt",
+      "3",
+      "1",
+      "0"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "09ecffa06f32c901d10886a6a125a5e4b5b4470ec16913532ccd14315bd53fcb"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/line_asym.txt",
+      "3",
+      "2",
+      "0"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "09ecffa06f32c901d10886a6a125a5e4b5b4470ec16913532ccd14315bd53fcb"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/line_tie.txt",
+      "3",
+      "1",
+      "1"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "162daafec86107c79cb42b07c0ff4980a7af0d34dfc97a62e51910d9d3549e71"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/line_tie.txt",
+      "3",
+      "2",
+      "1"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "162daafec86107c79cb42b07c0ff4980a7af0d34dfc97a62e51910d9d3549e71"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/line_tie.txt",
+      "3",
+      "1",
+      "0"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "3c78c805987ba22b8431a53a514bfe0f0cbae6f4e92aca2a19e360e95ae7d882"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/line_tie.txt",
+      "3",
+      "2",
+      "0"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "3c78c805987ba22b8431a53a514bfe0f0cbae6f4e92aca2a19e360e95ae7d882"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/line_deep.txt",
+      "4",
+      "1",
+      "1"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "38dc6001acfa7b79baa123a447c295b6baf45fd8a3aea32bc09708e3e9f2139a"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/line_deep.txt",
+      "4",
+      "2",
+      "1"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "38dc6001acfa7b79baa123a447c295b6baf45fd8a3aea32bc09708e3e9f2139a"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/line_deep.txt",
+      "4",
+      "1",
+      "0"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "d4afdef3a1e33a63b585b5e8339ab33ae87e90cc871b2a6c9ca8a5ca12492060"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/line_deep.txt",
+      "4",
+      "2",
+      "0"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "d4afdef3a1e33a63b585b5e8339ab33ae87e90cc871b2a6c9ca8a5ca12492060"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/triangle_interior.txt",
+      "4",
+      "1",
+      "1"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "f531d9021e68db363ba05b78e4666c1ef157873a41bcd860f37b4193380fb125"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/triangle_interior.txt",
+      "4",
+      "2",
+      "1"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "f531d9021e68db363ba05b78e4666c1ef157873a41bcd860f37b4193380fb125"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/triangle_interior.txt",
+      "4",
+      "1",
+      "0"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "01c50d0c45d7d87782faf56cfe33e4e5a087e16803cb4b8064ed15bee9152a6d"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/triangle_interior.txt",
+      "4",
+      "2",
+      "0"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "01c50d0c45d7d87782faf56cfe33e4e5a087e16803cb4b8064ed15bee9152a6d"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/square.txt",
+      "4",
+      "1",
+      "1"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "c0393e0610385d284ba29b769b24325b8ac539794b3eb50e01cff9008476beb4"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/square.txt",
+      "4",
+      "2",
+      "1"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "c0393e0610385d284ba29b769b24325b8ac539794b3eb50e01cff9008476beb4"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/square.txt",
+      "4",
+      "1",
+      "0"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "9927aca55cab0ae81e98147bf92cd2956749e4925c4ae373bf6e2493a6310694"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/square.txt",
+      "4",
+      "2",
+      "0"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "9927aca55cab0ae81e98147bf92cd2956749e4925c4ae373bf6e2493a6310694"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/tetra.txt",
+      "4",
+      "1",
+      "1"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "2670dc37880aa1843cf3dd493627ae70e68a4db69474425c9d60efc488892579"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/tetra.txt",
+      "4",
+      "2",
+      "1"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "2670dc37880aa1843cf3dd493627ae70e68a4db69474425c9d60efc488892579"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/tetra.txt",
+      "4",
+      "1",
+      "0"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "488d6e7dd8ca3fa73cbaf7eb49b3efb7b468dc1e121694ebbc7d026c4e616aea"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/tetra.txt",
+      "4",
+      "2",
+      "0"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "488d6e7dd8ca3fa73cbaf7eb49b3efb7b468dc1e121694ebbc7d026c4e616aea"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/tetra_interior.txt",
+      "4",
+      "1",
+      "1"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "7b34888b830ef3bdf31d976d2719cbe67a2d60607bb302394f0f9c174568d0b9"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/tetra_interior.txt",
+      "4",
+      "2",
+      "1"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "7b34888b830ef3bdf31d976d2719cbe67a2d60607bb302394f0f9c174568d0b9"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/tetra_interior.txt",
+      "4",
+      "1",
+      "0"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "3670fb8564db1df76b553431d88134fa128f34d7115018c68e21167ad249fd18"
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe",
+      "morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/optimized/tetra_interior.txt",
+      "4",
+      "2",
+      "0"
+    ],
+    "returncode": 0,
+    "stdout_sha256": "3670fb8564db1df76b553431d88134fa128f34d7115018c68e21167ad249fd18"
+  }
+]

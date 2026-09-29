@@ -1,0 +1,934 @@
+diff --git a/morsehgp3D_v10/CMakeLists.txt b/morsehgp3D_v10/CMakeLists.txt
+index 56e7396..6f398b1 100644
+--- a/morsehgp3D_v10/CMakeLists.txt
++++ b/morsehgp3D_v10/CMakeLists.txt
+@@ -116,4 +116,11 @@ if(Python3_FOUND)
+                    "-DARGS=${PROJECT_SOURCE_DIR}/tests/regression/test_multiplicity_refusal.py ${PROJECT_BINARY_DIR}"
+                    -DEXPECTED=0 -P ${PROJECT_SOURCE_DIR}/cmake/run_expect.cmake)
+   set_tests_properties(mhgp10_regression_multiplicity_refusal PROPERTIES LABELS "gate;regression;fast" TIMEOUT 300)
++  # Frontieres d'entree des sondes : fins u32le incompletes (quatre sondes), export sans attaches, --repeat, feuille
++  # M < K + 3, options illisibles ; code exact, signal refuse (audits continu et independant du 29 septembre 2026).
++  add_test(NAME mhgp10_regression_cli_input_frontiers
++           COMMAND ${CMAKE_COMMAND} -DCMD=${Python3_EXECUTABLE}
++                   "-DARGS=${PROJECT_SOURCE_DIR}/tests/regression/test_cli_input_frontiers.py ${PROJECT_BINARY_DIR}"
++                   -DEXPECTED=0 -P ${PROJECT_SOURCE_DIR}/cmake/run_expect.cmake)
++  set_tests_properties(mhgp10_regression_cli_input_frontiers PROPERTIES LABELS "gate;regression;fast" TIMEOUT 600)
+ endif()
+diff --git a/morsehgp3D_v10/cli/mhgp10_catalogue.cpp b/morsehgp3D_v10/cli/mhgp10_catalogue.cpp
+index b75ff37..63fffc5 100644
+--- a/morsehgp3D_v10/cli/mhgp10_catalogue.cpp
++++ b/morsehgp3D_v10/cli/mhgp10_catalogue.cpp
+@@ -3,16 +3,30 @@
+ //   mhgp10_catalogue IN.u32le --k=K [--threads=W] [--leaf=M] [--dump=FILE]
+ // Sortie standard : une ligne JSON (comptes par (q_min, p), grand-livre, temps mural).
+ // --dump : une ligne par boule, ordre canonique : rang q p u flags | S* (coordonnees) | I | U.
++// --leaf : M = 0 (table M(K) par defaut) ou M >= K + 3, sinon refus parameter_out_of_range (build_catalogue).
++// Entree lue en entier ou refusee avant calcul (cloud/u32le_input.hpp) ; un refus ecrit une ligne JSON (statut,
++// raison), une valeur d'option illisible est refusee (parameter_out_of_range).
+ // Codes : 0 conforme, 2 refus.
+ #include <chrono>
+ #include <cstdio>
++#include <stdexcept>
+ #include <string>
+ #include <vector>
+ 
+ #include "catalogue/catalogue.hpp"
++#include "cloud/u32le_input.hpp"
+ 
+ using namespace mhgp10;
+ 
++namespace {
++// Refus avant calcul : une ligne JSON (statut, raison), code 2.
++int refuse(const Outcome& o) {
++  std::printf("{\"status\":\"%s\",\"reason\":\"%s\"}\n", std::string(status_name(o.status())).c_str(),
++              std::string(reason_name(o.reason)).c_str());
++  return 2;
++}
++}  // namespace
++
+ int main(int argc, char** argv) {
+   if (argc < 2) {
+     std::fprintf(stderr, "usage: mhgp10_catalogue IN.u32le --k=K [--threads=W] [--leaf=M] [--dump=FILE]\n");
+@@ -21,34 +35,28 @@ int main(int argc, char** argv) {
+   CatalogueParams params;
+   unsigned threads = 0;
+   std::string dump;
+-  for (int i = 2; i < argc; ++i) {
+-    const std::string a = argv[i];
+-    if (a.rfind("--k=", 0) == 0) params.kmax = std::stoi(a.substr(4));
+-    else if (a.rfind("--threads=", 0) == 0) threads = unsigned(std::stoul(a.substr(10)));
+-    else if (a.rfind("--leaf=", 0) == 0) params.leaf_size = u32(std::stoul(a.substr(7)));
+-    else if (a.rfind("--dump=", 0) == 0) dump = a.substr(7);
+-    else if (a.rfind("--max-leaf=", 0) == 0) params.max_leaf = u32(std::stoul(a.substr(11)));
+-    else {
+-      std::fprintf(stderr, "option inconnue %s\n", a.c_str());
+-      return 2;
++  try {
++    for (int i = 2; i < argc; ++i) {
++      const std::string a = argv[i];
++      if (a.rfind("--k=", 0) == 0) params.kmax = std::stoi(a.substr(4));
++      else if (a.rfind("--threads=", 0) == 0) threads = unsigned(std::stoul(a.substr(10)));
++      else if (a.rfind("--leaf=", 0) == 0) params.leaf_size = u32(std::stoul(a.substr(7)));
++      else if (a.rfind("--dump=", 0) == 0) dump = a.substr(7);
++      else if (a.rfind("--max-leaf=", 0) == 0) params.max_leaf = u32(std::stoul(a.substr(11)));
++      else {
++        std::fprintf(stderr, "option inconnue %s\n", a.c_str());
++        return 2;
++      }
+     }
++  } catch (const std::logic_error&) {  // std::stoi / std::stoul : valeur illisible ou hors de son type
++    return refuse(fail(Reason::parameter_out_of_range));
+   }
+-  FILE* f = std::fopen(argv[1], "rb");
+-  if (!f) return 2;
+-  std::vector<u32> raw;
+-  u32 buf[3];
+-  while (std::fread(buf, 4, 3, f) == 3) raw.insert(raw.end(), buf, buf + 3);
+-  std::fclose(f);
+-  const u32 n = static_cast<u32>(raw.size() / 3);
+-  std::vector<u32> x(n), y(n), z(n), pid(n);
+-  for (u32 i = 0; i < n; ++i) {
+-    x[i] = raw[3 * i];
+-    y[i] = raw[3 * i + 1];
+-    z[i] = raw[3 * i + 2];
+-    pid[i] = i;
+-  }
++  auto input = read_u32le_cloud(argv[1]);
++  if (!input.ok()) return refuse(input.outcome());
++  const U32leCloud& in = input.value();
++  const u32 n = static_cast<u32>(in.x.size());  // < kNone : garde du lecteur
+   const auto t0 = std::chrono::steady_clock::now();
+-  auto prepared = prepare_cloud(x, y, z, pid, kCoordinateBits);
++  auto prepared = prepare_cloud(in.x, in.y, in.z, in.pid, kCoordinateBits);
+   if (!prepared.ok()) {
+     std::printf("{\"status\":\"%s\",\"reason\":\"%s\"}\n", std::string(status_name(prepared.outcome().status())).c_str(),
+                 std::string(reason_name(prepared.outcome().reason)).c_str());
+diff --git a/morsehgp3D_v10/cli/mhgp10_cluster.cpp b/morsehgp3D_v10/cli/mhgp10_cluster.cpp
+index 1be1009..6dcfbf7 100644
+--- a/morsehgp3D_v10/cli/mhgp10_cluster.cpp
++++ b/morsehgp3D_v10/cli/mhgp10_cluster.cpp
+@@ -15,18 +15,31 @@
+ // plus OUT[...].vote, ou chaque point recoit l'amas retenu qui le couvre par sa boule de plus bas niveau (-1 si
+ // aucun). --cover-extra=E (entree cover) : boule couvrante de poids >= K + E (E = 1 : entree a alpha_{K+1}, comme
+ // HGP-old) ; le catalogue est construit a l'ordre max(K) + E.
++// Entree lue en entier ou refusee avant calcul (cloud/u32le_input.hpp) ; un refus ecrit une ligne JSON (statut,
++// raison), une valeur d'option illisible est refusee (parameter_out_of_range).
+ // Codes : 0 conforme, 2 refus, 3 invariant viole.
+ #include <cctype>
+ #include <chrono>
+ #include <cstdio>
++#include <stdexcept>
+ #include <string>
+ #include <vector>
+ 
++#include "cloud/u32le_input.hpp"
+ #include "head/head.hpp"
+ #include "tower/tower.hpp"
+ 
+ using namespace mhgp10;
+ 
++namespace {
++// Refus avant calcul : une ligne JSON (statut, raison), code 2.
++int refuse(const Outcome& o) {
++  std::printf("{\"status\":\"%s\",\"reason\":\"%s\"}\n", std::string(status_name(o.status())).c_str(),
++              std::string(reason_name(o.reason)).c_str());
++  return 2;
++}
++}  // namespace
++
+ int main(int argc, char** argv) {
+   if (argc < 3) return 2;
+   int k = 2;
+@@ -42,71 +55,65 @@ int main(int argc, char** argv) {
+   bool vote = false;
+   int cover_extra = -1;  // --cover-extra : applique aux jetons « cover » sans suffixe
+   std::vector<int> klist;
+-  for (int i = 3; i < argc; ++i) {
+-    const std::string a = argv[i];
+-    if (a.rfind("--k=", 0) == 0) k = std::stoi(a.substr(4));
+-    else if (a.rfind("--mcs=", 0) == 0) cp.min_cluster_size = std::stoull(a.substr(6));
+-    else if (a.rfind("--z=", 0) == 0) cp.z = std::stod(a.substr(4));
+-    else if (a == "--selection=leaf") cp.selection = Selection::leaf;
+-    else if (a == "--selection=eom") cp.selection = Selection::eom;
+-    else if (a == "--allow-single") cp.allow_single_cluster = true;
+-    else if (a.rfind("--threads=", 0) == 0) threads = unsigned(std::stoul(a.substr(10)));
+-    else if (a.rfind("--tree=", 0) == 0) tree_out = a.substr(7);
+-    else if (a.rfind("--configs=", 0) == 0) configs = a.substr(10);
+-    else if (a.rfind("--entry=", 0) == 0) {
+-      entries.clear();
+-      std::string v = a.substr(8);
+-      size_t pos = 0;
+-      while (pos <= v.size()) {
+-        const size_t e = v.find(',', pos);
+-        const std::string tok = v.substr(pos, e == std::string::npos ? std::string::npos : e - pos);
+-        if (tok == "core") entries.push_back({PointEntry::core, 0, tok});
+-        else if (tok.rfind("cover", 0) == 0 && tok.size() <= 6 && (tok.size() == 5 || std::isdigit(tok[5])))
+-          entries.push_back({PointEntry::cover, tok.size() == 5 ? 0 : tok[5] - '0', tok});
+-        else {
+-          std::fprintf(stderr, "entree inconnue %s\n", tok.c_str());
+-          return 2;
++  try {
++    for (int i = 3; i < argc; ++i) {
++      const std::string a = argv[i];
++      if (a.rfind("--k=", 0) == 0) k = std::stoi(a.substr(4));
++      else if (a.rfind("--mcs=", 0) == 0) cp.min_cluster_size = std::stoull(a.substr(6));
++      else if (a.rfind("--z=", 0) == 0) cp.z = std::stod(a.substr(4));
++      else if (a == "--selection=leaf") cp.selection = Selection::leaf;
++      else if (a == "--selection=eom") cp.selection = Selection::eom;
++      else if (a == "--allow-single") cp.allow_single_cluster = true;
++      else if (a.rfind("--threads=", 0) == 0) threads = unsigned(std::stoul(a.substr(10)));
++      else if (a.rfind("--tree=", 0) == 0) tree_out = a.substr(7);
++      else if (a.rfind("--configs=", 0) == 0) configs = a.substr(10);
++      else if (a.rfind("--entry=", 0) == 0) {
++        entries.clear();
++        std::string v = a.substr(8);
++        size_t pos = 0;
++        while (pos <= v.size()) {
++          const size_t e = v.find(',', pos);
++          const std::string tok = v.substr(pos, e == std::string::npos ? std::string::npos : e - pos);
++          if (tok == "core") entries.push_back({PointEntry::core, 0, tok});
++          else if (tok.rfind("cover", 0) == 0 && tok.size() <= 6 && (tok.size() == 5 || std::isdigit(tok[5])))
++            entries.push_back({PointEntry::cover, tok.size() == 5 ? 0 : tok[5] - '0', tok});
++          else {
++            std::fprintf(stderr, "entree inconnue %s\n", tok.c_str());
++            return 2;
++          }
++          if (e == std::string::npos) break;
++          pos = e + 1;
+         }
+-        if (e == std::string::npos) break;
+-        pos = e + 1;
+       }
+-    }
+-    else if (a == "--label=vote") vote = true;
+-    else if (a.rfind("--cover-extra=", 0) == 0) cover_extra = std::stoi(a.substr(14));
+-    else if (a == "--label=tree") vote = false;
+-    else if (a.rfind("--k-list=", 0) == 0) {
+-      std::string v = a.substr(9);
+-      size_t pos = 0;
+-      while (pos < v.size()) {
+-        const size_t e = v.find(',', pos);
+-        klist.push_back(std::stoi(v.substr(pos, e == std::string::npos ? std::string::npos : e - pos)));
+-        if (e == std::string::npos) break;
+-        pos = e + 1;
++      else if (a == "--label=vote") vote = true;
++      else if (a.rfind("--cover-extra=", 0) == 0) cover_extra = std::stoi(a.substr(14));
++      else if (a == "--label=tree") vote = false;
++      else if (a.rfind("--k-list=", 0) == 0) {
++        std::string v = a.substr(9);
++        size_t pos = 0;
++        while (pos < v.size()) {
++          const size_t e = v.find(',', pos);
++          klist.push_back(std::stoi(v.substr(pos, e == std::string::npos ? std::string::npos : e - pos)));
++          if (e == std::string::npos) break;
++          pos = e + 1;
++        }
++      }
++      else {
++        std::fprintf(stderr, "option inconnue %s\n", a.c_str());
++        return 2;
+       }
+     }
+-    else {
+-      std::fprintf(stderr, "option inconnue %s\n", a.c_str());
+-      return 2;
+-    }
+-  }
+-  FILE* f = std::fopen(argv[1], "rb");
+-  if (!f) return 2;
+-  std::vector<u32> raw;
+-  u32 buf[3];
+-  while (std::fread(buf, 4, 3, f) == 3) raw.insert(raw.end(), buf, buf + 3);
+-  std::fclose(f);
+-  const u32 n = static_cast<u32>(raw.size() / 3);
+-  std::vector<u32> x(n), y(n), z(n), pid(n);
+-  for (u32 i = 0; i < n; ++i) {
+-    x[i] = raw[3 * i];
+-    y[i] = raw[3 * i + 1];
+-    z[i] = raw[3 * i + 2];
+-    pid[i] = i;
++  } catch (const std::logic_error&) {  // std::stoi / std::stoull / std::stod : valeur illisible ou hors de son type
++    return refuse(fail(Reason::parameter_out_of_range));
+   }
++  auto input = read_u32le_cloud(argv[1]);
++  if (!input.ok()) return refuse(input.outcome());
++  const U32leCloud& in = input.value();
++  const u32 n = static_cast<u32>(in.x.size());  // < kNone : garde du lecteur
+   using clk = std::chrono::steady_clock;
+   const auto t0 = clk::now();
+-  auto prepared = prepare_cloud(x, y, z, pid, kCoordinateBits);
+-  if (!prepared.ok()) return 2;
++  auto prepared = prepare_cloud(in.x, in.y, in.z, in.pid, kCoordinateBits);
++  if (!prepared.ok()) return refuse(prepared.outcome());
+   const Cloud& cloud = prepared.value();
+   sched::Pool pool(threads);
+   SiteTree tree(cloud);
+diff --git a/morsehgp3D_v10/cli/mhgp10_tower.cpp b/morsehgp3D_v10/cli/mhgp10_tower.cpp
+index b1937a5..43f4f20 100644
+--- a/morsehgp3D_v10/cli/mhgp10_tower.cpp
++++ b/morsehgp3D_v10/cli/mhgp10_tower.cpp
+@@ -5,20 +5,32 @@
+ // processus (catalogue + tour), temps publies par passe.
+ // Sortie standard : une ligne JSON (temps par etage, noeuds, fusions, descentes).
+ // --dump : par ordre, les noeuds (parent, niveau exact num/den, image verticale dans l'ordre K - 1) et les attaches
+-// des points (entree cover : rang, puis niveau exact num/den).
++// des points (entree cover : rang, puis niveau exact num/den) ; avec --no-points, les noeuds seuls (aucune ligne point).
++// --repeat : R >= 1, sinon refus parameter_out_of_range avant calcul.
++// Entree lue en entier ou refusee avant calcul (cloud/u32le_input.hpp) ; un refus ecrit une ligne JSON (statut,
++// raison), une valeur d'option illisible est refusee (parameter_out_of_range).
+ // Codes : 0 conforme, 2 refus, 3 invariant viole.
+ #include <chrono>
+ #include <cstdio>
+ #include <cstdlib>
+ #include <cstring>
++#include <stdexcept>
+ #include <string>
+ #include <vector>
+ 
++#include "cloud/u32le_input.hpp"
+ #include "tower/tower.hpp"
+ 
+ using namespace mhgp10;
+ 
+ namespace {
++// Refus avant calcul : une ligne JSON (statut, raison), code 2.
++int refuse(const Outcome& o) {
++  std::printf("{\"status\":\"%s\",\"reason\":\"%s\"}\n", std::string(status_name(o.status())).c_str(),
++              std::string(reason_name(o.reason)).c_str());
++  return 2;
++}
++
+ // Memoire residente du processus (Linux, /proc/self/status) : VmRSS et VmHWM en kio ; 0 si indisponible.
+ void resident_kib(unsigned long long& rss, unsigned long long& hwm) {
+   rss = hwm = 0;
+@@ -41,35 +53,31 @@ int main(int argc, char** argv) {
+   bool points = true;
+   int repeat = 1;
+   PointEntry entry = PointEntry::core;
+-  for (int i = 2; i < argc; ++i) {
+-    const std::string a = argv[i];
+-    if (a.rfind("--k=", 0) == 0) kmax = std::stoi(a.substr(4));
+-    else if (a.rfind("--threads=", 0) == 0) threads = unsigned(std::stoul(a.substr(10)));
+-    else if (a.rfind("--dump=", 0) == 0) dump = a.substr(7);
+-    else if (a == "--no-points") points = false;
+-    else if (a == "--entry=core") entry = PointEntry::core;
+-    else if (a == "--entry=cover") entry = PointEntry::cover;
+-    else if (a.rfind("--repeat=", 0) == 0) repeat = std::stoi(a.substr(9));
+-    else return 2;
+-  }
+-  FILE* f = std::fopen(argv[1], "rb");
+-  if (!f) return 2;
+-  std::vector<u32> raw;
+-  u32 buf[3];
+-  while (std::fread(buf, 4, 3, f) == 3) raw.insert(raw.end(), buf, buf + 3);
+-  std::fclose(f);
+-  const u32 n = static_cast<u32>(raw.size() / 3);
+-  std::vector<u32> x(n), y(n), z(n), pid(n);
+-  for (u32 i = 0; i < n; ++i) {
+-    x[i] = raw[3 * i];
+-    y[i] = raw[3 * i + 1];
+-    z[i] = raw[3 * i + 2];
+-    pid[i] = i;
++  try {
++    for (int i = 2; i < argc; ++i) {
++      const std::string a = argv[i];
++      if (a.rfind("--k=", 0) == 0) kmax = std::stoi(a.substr(4));
++      else if (a.rfind("--threads=", 0) == 0) threads = unsigned(std::stoul(a.substr(10)));
++      else if (a.rfind("--dump=", 0) == 0) dump = a.substr(7);
++      else if (a == "--no-points") points = false;
++      else if (a == "--entry=core") entry = PointEntry::core;
++      else if (a == "--entry=cover") entry = PointEntry::cover;
++      else if (a.rfind("--repeat=", 0) == 0) repeat = std::stoi(a.substr(9));
++      else return 2;
++    }
++  } catch (const std::logic_error&) {  // std::stoi / std::stoul : valeur illisible ou hors de son type
++    return refuse(fail(Reason::parameter_out_of_range));
+   }
++  // au moins une passe : la sortie publie la derniere (catalogue, tour, temps) ; R = 0 lisait des resultats absents
++  if (repeat < 1) return refuse(fail(Reason::parameter_out_of_range));
++  auto input = read_u32le_cloud(argv[1]);
++  if (!input.ok()) return refuse(input.outcome());
++  const U32leCloud& in = input.value();
++  const u32 n = static_cast<u32>(in.x.size());  // < kNone : garde du lecteur
+   using clk = std::chrono::steady_clock;
+   const auto t0 = clk::now();
+-  auto prepared = prepare_cloud(x, y, z, pid, kCoordinateBits);
+-  if (!prepared.ok()) return 2;
++  auto prepared = prepare_cloud(in.x, in.y, in.z, in.pid, kCoordinateBits);
++  if (!prepared.ok()) return refuse(prepared.outcome());
+   const Cloud& cloud = prepared.value();
+   sched::Pool pool(threads);
+   SiteTree tree(cloud);
+@@ -183,6 +191,7 @@ int main(int argc, char** argv) {
+         std::fprintf(o, "node %u %lld %s %s %lld\n", v, ord.parent[v] == kNone ? -1LL : (long long)ord.parent[v], num.c_str(),
+                      den.c_str(), low);
+       }
++      if (ord.point_node.empty()) continue;  // --no-points : aucune attache calculee, les noeuds seuls sont exportes
+       for (u32 s = 0; s < cloud.sites(); ++s)
+         if (!ord.point_cat_rank.empty()) {  // entree cover : rang de noeud (rang du catalogue + 1), puis niveau exact
+           const geom::Level& lv = cat.level[ord.point_cat_rank[s] - 1];
+diff --git a/morsehgp3D_v10/src/catalogue/catalogue.hpp b/morsehgp3D_v10/src/catalogue/catalogue.hpp
+index 2b1f28f..7ce0d04 100644
+--- a/morsehgp3D_v10/src/catalogue/catalogue.hpp
++++ b/morsehgp3D_v10/src/catalogue/catalogue.hpp
+@@ -94,10 +94,19 @@ enum : u8 { kExtendedShell = 1, kWeightedShell = 2 };
+ 
+ struct CatalogueParams {
+   int kmax = 5;           // ordre maximal servi (catalogue interne jusqu'a kMaxCatalogueOrder)
+-  u32 leaf_size = 0;      // 0 : M(K) par defaut
++  u32 leaf_size = 0;      // 0 : M(K) par defaut ; sinon M >= kmax + 3 (kLeafMargin), refus parameter_out_of_range
+   u32 max_leaf = 256;     // au-dela : refus resource_exhausted
+ };
+ 
++// Taille de feuille minimale au-dessus de K (voir build_catalogue) : en position generale, la liste d'une boite reduite
++// a un point tend vers sa boule K-NN fermee, de K + 3 sites au plus (sommet du diagramme d'ordre K en dimension 3).
++inline constexpr u32 kLeafMargin = 3;
++
++// Garde des indices de boules (audit J2/J2c, P1 differe) : les boules, leurs rangs et Catalogue::balls() sont des u32
++// et kNone est reserve ; un total >= kNone est refuse (index_overflow_u32, resource_exhausted) AVANT l'assemblage. Le
++// total borne chaque compte par fil. Fonction pure, jugee a des cardinaux artificiels (tests/unit).
++Outcome check_ball_count(u64 balls);
++
+ Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& params, sched::Pool& pool);
+ 
+ // Centre exact d'une boule du catalogue, relatif a son premier site de support.
+diff --git a/morsehgp3D_v10/src/catalogue/generator.cpp b/morsehgp3D_v10/src/catalogue/generator.cpp
+index f5c0042..15d2edf 100644
+--- a/morsehgp3D_v10/src/catalogue/generator.cpp
++++ b/morsehgp3D_v10/src/catalogue/generator.cpp
+@@ -631,9 +631,21 @@ geom::Center ball_center(const Cloud& cloud, const Catalogue& cat, u32 b) {
+   return c;
+ }
+ 
++Outcome check_ball_count(u64 balls) { return balls >= kNone ? fail(Reason::index_overflow_u32) : Outcome{}; }
++
+ Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& params, sched::Pool& pool) {
+   if (params.kmax < 1 || params.kmax > kMaxCatalogueOrder) return fail(Reason::kmax_out_of_range);
+   if (cloud.bits > kCoordinateBits) return fail(Reason::parameter_out_of_range);
++  // Taille de feuille (audit J2/J2c, leaf_stress). La liste certifiee d'une boite contient la boule K-NN fermee de
++  // chacun de ses points (theoreme C) ; quand la boite se reduit a un point c, elle tend vers la boule K-NN fermee de
++  // c : en position generale K sites hors du diagramme de Voronoi d'ordre K, K + 1 sur ses faces, K + 2 sur ses
++  // aretes, K + 3 en ses sommets (au plus quatre sites cospheriques, au plus K - 1 strictement interieurs). Avec
++  // M < K + 3, pres de toute une strate de ce diagramme (volume, faces, aretes, sommets pour M < K, = K, K + 1, K + 2)
++  // aucune boite ne s'arrete par la taille : la subdivision y descend jusqu'a la stagnation sous la grille et le nombre
++  // de noeuds croit avec l'etendue du nuage (en cube, carre, lineaire, logarithme). Avec M >= K + 3, toute boite assez
++  // petite s'arrete en position generale ; la table par defaut (12 / 16 / 24 / 28) garde cette marge et plus.
++  if (params.leaf_size != 0 && params.leaf_size < u32(params.kmax) + kLeafMargin)
++    return fail(Reason::parameter_out_of_range);
+   const u32 n = cloud.sites();
+   Ctx C{cloud, {}, {}, {}, {}, params.kmax, params.leaf_size, params.max_leaf};
+   // M(K) : taille de feuille, table fixe calibree sur t_boxes de l'arbre binaire (trames 00 et 02, quart 01,
+@@ -761,6 +773,9 @@ Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& par
+     merge_ledger(cat.ledger, locals[li].led);
+     first[li + 1] = first[li] + locals[li].recs.size();
+   }
++  // indices de boules u32 (Ref::rec, nb, rangs, Catalogue::balls) : refus avant toute allocation de l'assemblage ; le
++  // total borne chaque compte par fil, la boucle locale ci-dessous ne peut donc pas reboucler
++  if (const Outcome guard = check_ball_count(first.back()); !guard.ok()) return guard;
+   UninitVector<Ref> refs(first.back());
+   pool.parallel_for(locals.size(), 1, [&](u64 b, u64 e, unsigned) {
+     for (u64 li = b; li < e; ++li)
+diff --git a/morsehgp3D_v10/src/cloud/u32le_input.hpp b/morsehgp3D_v10/src/cloud/u32le_input.hpp
+new file mode 100644
+index 0000000..6a65a4d
+--- /dev/null
++++ b/morsehgp3D_v10/src/cloud/u32le_input.hpp
+@@ -0,0 +1,91 @@
++// Lecture commune des nuages u32le des sondes (cli/ et temoin tests/head/mreach_cluster) : mots de 32 bits
++// petit-boutistes, un point = trois mots x y z, PointId = rang d'entree.
++//
++// Frontiere d'entree (audits du 29 septembre 2026, fins de fichier incompletes acceptees) : le fichier est lu EN ENTIER
++// ou refuse AVANT tout calcul, jamais tronque en silence.
++//   - fichier illisible, erreur de lecture, lecture incomplete : input_unreadable (invalid_input) ;
++//   - taille non multiple de 12 octets (point incomplet, mot surnumeraire) : size_mismatch (invalid_input : les
++//     tableaux x, y, z n'auraient pas la meme longueur) ;
++//   - au moins kNone points : index_overflow_u32 (indices de points u32, kNone reserve), avant toute lecture quand la
++//     taille est connue ;
++//   - memoire insuffisante pour la lecture : memory_budget.
++// Le fichier vide (empty_input) et le domaine des coordonnees (coordinate_out_of_domain) restent juges par
++// prepare_cloud, sur TOUS les mots du fichier. check_u32le_size est pure : testee sans fichier (tests/unit).
++#pragma once
++
++#include <bit>
++#include <cstdio>
++#include <cstring>
++#include <filesystem>
++#include <new>
++#include <vector>
++
++#include "core/status.hpp"
++
++namespace mhgp10 {
++
++static_assert(std::endian::native == std::endian::little, "lecture u32le : hote petit-boutiste suppose");
++
++struct U32leCloud {
++  std::vector<u32> x, y, z, pid;
++};
++
++// Nombre de points d'un fichier u32le de `bytes` octets, ou refus (size_mismatch, index_overflow_u32).
++inline Result<u64> check_u32le_size(u64 bytes) {
++  if (bytes % 12 != 0) return fail(Reason::size_mismatch);
++  if (bytes / 12 >= kNone) return fail(Reason::index_overflow_u32);
++  return bytes / 12;
++}
++
++inline Result<U32leCloud> read_u32le_cloud(const char* path) {
++  // taille annoncee d'un fichier regulier : refus avant lecture ; un tube ou un peripherique se lit en flux et se
++  // juge a la fin, sur les octets effectivement lus
++  std::error_code ec;
++  const bool regular = std::filesystem::is_regular_file(path, ec);
++  u64 announced = 0;
++  if (regular) {
++    announced = std::filesystem::file_size(path, ec);
++    if (ec) return fail(Reason::input_unreadable);
++    const Result<u64> points = check_u32le_size(announced);
++    if (!points.ok()) return points.outcome();
++  }
++  std::FILE* f = std::fopen(path, "rb");
++  if (!f) return fail(Reason::input_unreadable);
++  std::vector<unsigned char> bytes;
++  bool io_error = false;
++  try {
++    if (regular) bytes.reserve(announced);
++    std::vector<unsigned char> chunk(1u << 16);
++    size_t got;
++    while ((got = std::fread(chunk.data(), 1, chunk.size(), f)) > 0)
++      bytes.insert(bytes.end(), chunk.data(), chunk.data() + got);
++    io_error = std::ferror(f) != 0 || !std::feof(f);  // la boucle ne s'arrete proprement qu'en fin de fichier
++  } catch (const std::bad_alloc&) {
++    std::fclose(f);
++    return fail(Reason::memory_budget);
++  }
++  std::fclose(f);
++  // erreur de lecture, ou fichier regulier dont la taille a change pendant la lecture : lecture incomplete
++  if (io_error || (regular && bytes.size() != announced)) return fail(Reason::input_unreadable);
++  const Result<u64> points = check_u32le_size(bytes.size());
++  if (!points.ok()) return points.outcome();
++  const u64 n = points.value();
++  U32leCloud c;
++  try {
++    c.x.resize(n);
++    c.y.resize(n);
++    c.z.resize(n);
++    c.pid.resize(n);
++  } catch (const std::bad_alloc&) {
++    return fail(Reason::memory_budget);
++  }
++  for (u64 i = 0; i < n; ++i) {
++    std::memcpy(&c.x[i], bytes.data() + 12 * i, 4);
++    std::memcpy(&c.y[i], bytes.data() + 12 * i + 4, 4);
++    std::memcpy(&c.z[i], bytes.data() + 12 * i + 8, 4);
++    c.pid[i] = static_cast<u32>(i);
++  }
++  return c;
++}
++
++}  // namespace mhgp10
+diff --git a/morsehgp3D_v10/src/core/reasons.def b/morsehgp3D_v10/src/core/reasons.def
+index 01ef698..9fb2ae8 100644
+--- a/morsehgp3D_v10/src/core/reasons.def
++++ b/morsehgp3D_v10/src/core/reasons.def
+@@ -25,3 +25,6 @@ MHGP10_REASON(vertical_naturality, invariant_violated)
+ MHGP10_REASON(census_mismatch, invariant_violated)
+ MHGP10_REASON(nested_parallelism, invariant_violated)
+ MHGP10_REASON(leaf_unsplittable, invariant_violated)
++// fichier d'entree illisible (ouverture, erreur ou lecture incomplete) : cloud/u32le_input.hpp ; en fin de table pour
++// ne renumeroter aucune raison existante
++MHGP10_REASON(input_unreadable, invalid_input)
+diff --git a/morsehgp3D_v10/tests/head/mreach_cluster.cpp b/morsehgp3D_v10/tests/head/mreach_cluster.cpp
+index c8bb9f2..205b06e 100644
+--- a/morsehgp3D_v10/tests/head/mreach_cluster.cpp
++++ b/morsehgp3D_v10/tests/head/mreach_cluster.cpp
+@@ -7,18 +7,30 @@
+ // --alpha : parametre alpha de scikit-learn (mreach = max(coeurs, distance / alpha)). --configs : une tete par ligne
+ // « mcs z eom|leaf 0|1 », la i-eme ecrite dans OUT.i, toutes sur la meme hierarchie (diagnostic dev : meme tete sur
+ // la tour et sur l'atteignabilite mutuelle).
++// Entree lue en entier ou refusee avant calcul (cloud/u32le_input.hpp) ; un refus ecrit « refus <raison> » sur la
++// sortie d'erreur, une valeur d'option illisible est refusee (parameter_out_of_range).
+ // Codes : 0 conforme, 2 refus avant calcul.
+ #include <cstdio>
+ #include <cstring>
++#include <stdexcept>
+ #include <string>
+ #include <vector>
+ 
+ #include "cloud/site_tree.hpp"
++#include "cloud/u32le_input.hpp"
+ #include "head/head.hpp"
+ #include "mreach.hpp"
+ 
+ using namespace mhgp10;
+ 
++namespace {
++// Refus avant calcul : « refus <raison> » sur la sortie d'erreur, code 2.
++int refuse(const Outcome& o) {
++  std::fprintf(stderr, "refus %s\n", std::string(reason_name(o.reason)).c_str());
++  return 2;
++}
++}  // namespace
++
+ int main(int argc, char** argv) {
+   if (argc < 3) {
+     std::fprintf(stderr, "usage: mhgp10_cluster IN.u32le OUT.i32le [options]\n");
+@@ -31,44 +43,35 @@ int main(int argc, char** argv) {
+   u64 alpha = 1;
+   bool border = false;
+   std::string configs;
+-  for (int i = 3; i < argc; ++i) {
+-    const std::string a = argv[i];
+-    if (a.rfind("--source=", 0) == 0) source = a.substr(9);
+-    else if (a.rfind("--k=", 0) == 0) k = std::stoull(a.substr(4));
+-    else if (a.rfind("--mcs=", 0) == 0) params.min_cluster_size = std::stoull(a.substr(6));
+-    else if (a.rfind("--z=", 0) == 0) params.z = std::stod(a.substr(4));
+-    else if (a == "--selection=leaf") params.selection = Selection::leaf;
+-    else if (a == "--selection=eom") params.selection = Selection::eom;
+-    else if (a == "--allow-single") params.allow_single_cluster = true;
+-    else if (a.rfind("--threads=", 0) == 0) threads = unsigned(std::stoul(a.substr(10)));
+-    else if (a.rfind("--alpha=", 0) == 0) alpha = std::stoull(a.substr(8));
+-    else if (a == "--entry=border") border = true;
+-    else if (a == "--entry=core") border = false;
+-    else if (a.rfind("--configs=", 0) == 0) configs = a.substr(10);
+-    else {
+-      std::fprintf(stderr, "option inconnue %s\n", a.c_str());
+-      return 2;
++  try {
++    for (int i = 3; i < argc; ++i) {
++      const std::string a = argv[i];
++      if (a.rfind("--source=", 0) == 0) source = a.substr(9);
++      else if (a.rfind("--k=", 0) == 0) k = std::stoull(a.substr(4));
++      else if (a.rfind("--mcs=", 0) == 0) params.min_cluster_size = std::stoull(a.substr(6));
++      else if (a.rfind("--z=", 0) == 0) params.z = std::stod(a.substr(4));
++      else if (a == "--selection=leaf") params.selection = Selection::leaf;
++      else if (a == "--selection=eom") params.selection = Selection::eom;
++      else if (a == "--allow-single") params.allow_single_cluster = true;
++      else if (a.rfind("--threads=", 0) == 0) threads = unsigned(std::stoul(a.substr(10)));
++      else if (a.rfind("--alpha=", 0) == 0) alpha = std::stoull(a.substr(8));
++      else if (a == "--entry=border") border = true;
++      else if (a == "--entry=core") border = false;
++      else if (a.rfind("--configs=", 0) == 0) configs = a.substr(10);
++      else {
++        std::fprintf(stderr, "option inconnue %s\n", a.c_str());
++        return 2;
++      }
+     }
++  } catch (const std::logic_error&) {  // std::stoull / std::stoul / std::stod : valeur illisible ou hors de son type
++    return refuse(fail(Reason::parameter_out_of_range));
+   }
+-  FILE* f = std::fopen(argv[1], "rb");
+-  if (!f) return 2;
+-  std::vector<u32> raw;
+-  u32 buf[3];
+-  while (std::fread(buf, 4, 3, f) == 3) raw.insert(raw.end(), buf, buf + 3);
+-  std::fclose(f);
+-  const u32 n = static_cast<u32>(raw.size() / 3);
+-  std::vector<u32> x(n), y(n), z(n), pid(n);
+-  for (u32 i = 0; i < n; ++i) {
+-    x[i] = raw[3 * i];
+-    y[i] = raw[3 * i + 1];
+-    z[i] = raw[3 * i + 2];
+-    pid[i] = i;
+-  }
+-  auto prepared = prepare_cloud(x, y, z, pid, 21);
+-  if (!prepared.ok()) {
+-    std::fprintf(stderr, "refus %s\n", std::string(reason_name(prepared.outcome().reason)).c_str());
+-    return 2;
+-  }
++  auto input = read_u32le_cloud(argv[1]);
++  if (!input.ok()) return refuse(input.outcome());
++  const U32leCloud& in = input.value();
++  const u32 n = static_cast<u32>(in.x.size());  // < kNone : garde du lecteur
++  auto prepared = prepare_cloud(in.x, in.y, in.z, in.pid, 21);
++  if (!prepared.ok()) return refuse(prepared.outcome());
+   const Cloud& cloud = prepared.value();
+   SiteTree tree(cloud);
+   sched::Pool pool(threads);
+diff --git a/morsehgp3D_v10/tests/regression/test_cli_input_frontiers.py b/morsehgp3D_v10/tests/regression/test_cli_input_frontiers.py
+new file mode 100644
+index 0000000..e6c7fa1
+--- /dev/null
++++ b/morsehgp3D_v10/tests/regression/test_cli_input_frontiers.py
+@@ -0,0 +1,195 @@
++"""Regression (29 septembre 2026, audits continu et independant du 29 septembre : frontieres d'entree des sondes). Chaque
++cas est une fixture minimale gravee aux coordonnees exactes ; le code de sortie est EXACT et un signal n'est jamais un
++succes (delai depasse : processus tue et recolte, echec).
++
++  (a) Fin de fichier u32le incomplete : quatre points valides suivis de r = 1..11 octets (prefixe du point hors u18
++      262144 1 2) -> refus size_mismatch (invalid_input), code 2, sans sortie ecrite, sur les quatre sondes
++      (mhgp10_catalogue, mhgp10_tower, mhgp10_cluster, mhgp10_mreach_cluster). Temoins contre le vert par vacuite :
++      r = 0 lu en entier (code 0, n = 4) ; r = 12 (point complet) lu puis juge par prepare_cloud : hors u18 refuse
++      (coordinate_out_of_domain), admis par le temoin mreach en 21 bits (n = 5). Fichier absent, dossier :
++      input_unreadable.
++  (b) mhgp10_tower --no-points --dump sur trois points alignes : code 0, et le dump est exactement le dump complet
++      prive de ses lignes point (noeuds, parents, niveaux exacts, verticales).
++  (c) mhgp10_tower --repeat=0, -1, illisible : refus parameter_out_of_range ; temoin --repeat=2 (deux passes publiees).
++  (d) mhgp10_catalogue --leaf=M avec M < K + 3 sur les huit coins du cube u18, K = 5 : refus parameter_out_of_range
++      avant calcul (l'ancien binaire subdivise sans fin : delai depasse) ; temoins M = K + 3 et defaut (27 boules,
++      dumps identiques).
++  (e) Valeur d'option illisible (--k=abc) : refus parameter_out_of_range, jamais SIGABRT, sur les quatre sondes.
++
++Python nu (ni numpy ni scipy) : la porte tourne aussi sur la VM G4 (label fast). Aucune dependance a assert.
++
++  python3 test_cli_input_frontiers.py <dossier de build>   -> 0 conforme, 1 desaccord, 3 plancher non atteint
++"""
++import json
++import os
++import resource
++import struct
++import subprocess
++import sys
++import tempfile
++
++TIMEOUT_S = 60
++FOUR = [(0, 0, 0), (8, 0, 0), (0, 8, 0), (0, 0, 8)]  # audit independant, run_frontier_checks.py
++OUTSIDE = struct.pack('<3I', 262144, 1, 2)            # premier mot hors u18 (audit independant, one_word / two_words)
++LINE3 = [(0, 0, 0), (2, 0, 0), (5, 0, 0)]              # audit continu, pool_head (export sans attaches)
++CUBE = [(x, y, z) for x in (0, 262143) for y in (0, 262143) for z in (0, 262143)]  # audit continu, leaf_stress
++CHECKS_EXPECTED = 15 * 4 + 4 + 4 + 8 + 4
++
++
++def pack(points):
++    return b''.join(struct.pack('<3I', *p) for p in points)
++
++
++def no_core():
++    resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
++
++
++class Gate:
++    def __init__(self, build, tmp):
++        self.build, self.tmp = build, tmp
++        self.checks = self.failures = 0
++
++    def run(self, argv):
++        """(code, derniere ligne JSON de stdout, stderr) ; code None si le delai est depasse (processus tue)."""
++        try:
++            r = subprocess.run(argv, capture_output=True, text=True, timeout=TIMEOUT_S, preexec_fn=no_core)
++        except subprocess.TimeoutExpired:
++            return None, {}, 'delai depasse'
++        js = {}
++        for line in r.stdout.splitlines():
++            if line.startswith('{'):
++                try:
++                    js = json.loads(line)
++                except ValueError:
++                    js = {}
++        return r.returncode, js, r.stderr
++
++    def record(self, name, ok, detail):
++        self.checks += 1
++        self.failures += not ok
++        print('%-58s %s %s' % (name, 'ok' if ok else 'ECHEC', detail), flush=True)
++
++    def write(self, name, data):
++        path = os.path.join(self.tmp, name)
++        with open(path, 'wb') as f:
++            f.write(data)
++        return path
++
++    def probe(self, tool, src, extra):
++        """Sonde sur src : (code, json, stderr, taille de la sortie i32 ou None)."""
++        exe = os.path.join(self.build, 'mhgp10_' + tool)
++        out = os.path.join(self.tmp, 'labels_' + tool + '.i32le')
++        if os.path.exists(out):
++            os.remove(out)
++        argv = [exe, src] + ([out] if tool in ('cluster', 'mreach_cluster') else []) + extra
++        code, js, err = self.run(argv)
++        size = os.path.getsize(out) if os.path.exists(out) else None
++        return code, js, err, size
++
++    def refused(self, tool, code, js, err, size, reason):
++        """Refus attendu avant calcul : code 2, raison publiee (ligne JSON de statut invalid_input, ou « refus <raison> »
++        sur la sortie d'erreur du temoin mreach), aucune sortie ecrite."""
++        if tool == 'mreach_cluster':
++            said = ('refus %s' % reason) in err.splitlines()
++        else:
++            said = js.get('reason') == reason and js.get('status') == 'invalid_input'
++        return code == 2 and said and size is None
++
++    def truncated_tails(self):
++        for tool in ('catalogue', 'tower', 'cluster', 'mreach_cluster'):
++            extra = ['--k=2', '--threads=1'] + (['--mcs=2'] if tool in ('cluster', 'mreach_cluster') else [])
++            for r in range(0, 13):
++                src = self.write('tail%d.u32le' % r, pack(FOUR) + OUTSIDE[:r])
++                code, js, err, size = self.probe(tool, src, extra)
++                if r == 0:
++                    ok = code == 0 and (size == 16 if tool == 'mreach_cluster' else js.get('n') == 4 and
++                                        js.get('status') == 'ok')
++                elif r == 12 and tool == 'mreach_cluster':
++                    ok = code == 0 and size == 20  # 21 bits : le cinquieme point est lu et admis
++                elif r == 12:
++                    ok = self.refused(tool, code, js, err, size, 'coordinate_out_of_domain')
++                else:
++                    ok = self.refused(tool, code, js, err, size, 'size_mismatch')
++                self.record('%s reste %d octets' % (tool, r), ok, 'code=%s raison=%s' % (code, js.get('reason', '-')))
++            for label, src in (('fichier absent', os.path.join(self.tmp, 'absent.u32le')), ('dossier', self.tmp)):
++                code, js, err, size = self.probe(tool, src, extra)
++                self.record('%s %s' % (tool, label), self.refused(tool, code, js, err, size, 'input_unreadable'),
++                            'code=%s raison=%s' % (code, js.get('reason', '-')))
++
++    def no_points_dump(self):
++        exe = os.path.join(self.build, 'mhgp10_tower')
++        src = self.write('line3.u32le', pack(LINE3))
++        full, bare = os.path.join(self.tmp, 'full.dump'), os.path.join(self.tmp, 'bare.dump')
++        code_f, js_f, _ = self.run([exe, src, '--k=2', '--threads=1', '--dump=' + full])
++        code_b, js_b, _ = self.run([exe, src, '--k=2', '--threads=1', '--no-points', '--dump=' + bare])
++        self.record('tower dump complet (temoin)', code_f == 0 and js_f.get('points') is True, 'code=%s' % code_f)
++        self.record('tower --no-points --dump', code_b == 0 and js_b.get('points') is False, 'code=%s' % code_b)
++        lf = open(full).read().splitlines() if code_f == 0 and os.path.exists(full) else []
++        lb = open(bare).read().splitlines() if code_b == 0 and os.path.exists(bare) else []
++        kept = [x for x in lf if not x.startswith('point ')]
++        # K = 2 sur trois points alignes : ordre 1, cinq noeuds ; ordre 2, trois noeuds ; trois attaches par ordre
++        self.record('dump complet : 2 ordres, 8 noeuds, 6 attaches',
++                    sum(x.startswith('order ') for x in lf) == 2 and sum(x.startswith('node ') for x in lf) == 8 and
++                    sum(x.startswith('point ') for x in lf) == 6, 'lignes=%d' % len(lf))
++        self.record('dump sans attaches == dump complet sans lignes point', bool(lb) and lb == kept,
++                    'lignes=%d/%d' % (len(lb), len(kept)))
++
++    def repeat(self):
++        exe = os.path.join(self.build, 'mhgp10_tower')
++        src = self.write('four.u32le', pack(FOUR))
++        for value in ('0', '-1', 'x'):
++            code, js, _ = self.run([exe, src, '--k=2', '--threads=1', '--repeat=' + value])
++            self.record('tower --repeat=%s' % value, code == 2 and js.get('reason') == 'parameter_out_of_range',
++                        'code=%s raison=%s' % (code, js.get('reason', '-')))
++        code, js, _ = self.run([exe, src, '--k=2', '--threads=1', '--repeat=2'])
++        self.record('tower --repeat=2 (temoin)', code == 0 and len(js.get('passes_catalogue_s', [])) == 2 and
++                    len(js.get('passes_tower_s', [])) == 2, 'code=%s' % code)
++
++    def leaf(self):
++        exe = os.path.join(self.build, 'mhgp10_catalogue')
++        src = self.write('cube.u32le', pack(CUBE))
++        for leaf in ('2', '4', '5', '7', 'abc'):  # 2 : leaf_stress de l'audit ; K - 1, K, K + 2 ; illisible
++            code, js, _ = self.run([exe, src, '--k=5', '--threads=1', '--leaf=' + leaf])
++            self.record('catalogue K=5 --leaf=%s' % leaf, code == 2 and js.get('reason') == 'parameter_out_of_range' and
++                        js.get('status') == 'invalid_input', 'code=%s raison=%s' % (code, js.get('reason', '-')))
++        dumps = []
++        for extra in (['--leaf=8'], []):
++            dump = os.path.join(self.tmp, 'cube%d.dump' % len(dumps))
++            code, js, _ = self.run([exe, src, '--k=5', '--threads=1', '--dump=' + dump] + extra)
++            dumps.append(open(dump).read() if code == 0 and os.path.exists(dump) else None)
++            self.record('catalogue K=5 %s (temoin)' % (extra[0] if extra else 'feuille par defaut'),
++                        code == 0 and js.get('balls') == 27, 'code=%s boules=%s' % (code, js.get('balls', '-')))
++        # le catalogue ne depend pas de M ; sur un arbre non trivial, l'egalite est jugee en C++ (mhgp10_unit)
++        self.record('catalogue K=5 : dump --leaf=8 == dump par defaut', dumps[0] is not None and dumps[0] == dumps[1],
++                    'octets=%s' % (len(dumps[0]) if dumps[0] else '-'))
++
++    def unreadable_options(self):
++        src = self.write('four.u32le', pack(FOUR))
++        for tool in ('catalogue', 'tower', 'cluster', 'mreach_cluster'):
++            code, js, err, size = self.probe(tool, src, ['--k=abc', '--mcs=2'] if tool in ('cluster', 'mreach_cluster')
++                                             else ['--k=abc'])
++            self.record('%s --k=abc' % tool, self.refused(tool, code, js, err, size, 'parameter_out_of_range'),
++                        'code=%s' % code)
++
++
++def main():
++    build = sys.argv[1]
++    with tempfile.TemporaryDirectory() as tmp:
++        gate = Gate(build, tmp)
++        gate.truncated_tails()
++        gate.no_points_dump()
++        gate.repeat()
++        gate.leaf()
++        gate.unreadable_options()
++    if gate.checks != CHECKS_EXPECTED:
++        print('PLANCHER : %d controles au lieu de %d' % (gate.checks, CHECKS_EXPECTED))
++        return 3
++    if gate.failures:
++        print('ECHECS %d sur %d' % (gate.failures, gate.checks))
++        return 1
++    print('cli_input_frontiers_ok %d' % gate.checks)
++    return 0
++
++
++if __name__ == '__main__':
++    sys.exit(main())
+diff --git a/morsehgp3D_v10/tests/unit/unit_main.cpp b/morsehgp3D_v10/tests/unit/unit_main.cpp
+index e1a237c..fb96e29 100644
+--- a/morsehgp3D_v10/tests/unit/unit_main.cpp
++++ b/morsehgp3D_v10/tests/unit/unit_main.cpp
+@@ -10,8 +10,10 @@
+ #include <vector>
+ 
+ #include "arith/wide.hpp"
++#include "catalogue/catalogue.hpp"
+ #include "cloud/cloud.hpp"
+ #include "cloud/site_tree.hpp"
++#include "cloud/u32le_input.hpp"
+ #include "core/buffer.hpp"
+ #include "core/status.hpp"
+ #include "sched/pool.hpp"
+@@ -223,6 +225,64 @@ void test_status_and_buffer() {
+   expect(c.well_formed() && c.row(1).size() == 1, "csr");
+ }
+ 
++// Frontieres d'entree (audits du 29 septembre 2026) : garde des indices de boules jugee a des cardinaux artificiels
++// (aucune boule allouee), taille d'un fichier u32le, feuille M < K + 3 refusee avant calcul par build_catalogue, et
++// catalogue identique a M = K + 3 et a la taille par defaut (le catalogue ne depend pas de M).
++void test_input_frontiers() {
++  for (u64 b : {u64(0), u64(1), u64(kNone) - 1}) expect(check_ball_count(b).ok(), "garde boules : cardinal admis");
++  for (u64 b : {u64(kNone), u64(1) << 32, u64(1) << 40, ~u64(0)}) {
++    const Outcome o = check_ball_count(b);
++    expect(o.reason == Reason::index_overflow_u32 && o.status() == Status::resource_exhausted,
++           "garde boules : refus index_overflow_u32");
++  }
++  for (u64 r = 1; r < 12; ++r)
++    expect(check_u32le_size(48 + r).outcome().reason == Reason::size_mismatch, "u32le : fin incomplete refusee");
++  expect(check_u32le_size(48).ok() && check_u32le_size(48).value() == 4, "u32le : quatre points");
++  expect(check_u32le_size(0).ok() && check_u32le_size(0).value() == 0, "u32le : vide (juge par prepare_cloud)");
++  expect(check_u32le_size(12 * (u64(kNone) - 1)).ok(), "u32le : kNone - 1 points admis");
++  expect(check_u32le_size(12 * u64(kNone)).outcome().reason == Reason::index_overflow_u32, "u32le : kNone points");
++  std::mt19937_64 g(20260929);
++  const u32 n = 40;
++  std::vector<u32> x(n), y(n), z(n), pid(n);
++  for (u32 i = 0; i < n; ++i) {
++    x[i] = u32(g() % 256) * 1024;  // etendue u18 : l'explosion d'une feuille trop petite croit avec elle
++    y[i] = u32(g() % 256) * 1024;
++    z[i] = u32(g() % 256) * 1024;
++    pid[i] = i;
++  }
++  auto cloud = prepare_cloud(x, y, z, pid, 18);
++  expect(cloud.ok(), "frontieres : nuage");
++  if (!cloud.ok()) return;
++  sched::Pool pool(1);
++  const int K = 5;
++  for (u32 leaf : {1u, 2u, u32(K) - 1, u32(K), u32(K) + kLeafMargin - 1}) {
++    CatalogueParams p;
++    p.kmax = K;
++    p.leaf_size = leaf;
++    const auto r = build_catalogue(cloud.value(), p, pool);
++    expect(!r.ok() && r.outcome().reason == Reason::parameter_out_of_range, "feuille M < K + 3 refusee");
++  }
++  CatalogueParams small, dflt;
++  small.kmax = dflt.kmax = K;
++  small.leaf_size = u32(K) + kLeafMargin;
++  const auto a = build_catalogue(cloud.value(), small, pool), b = build_catalogue(cloud.value(), dflt, pool);
++  expect(a.ok() && b.ok(), "feuille M = K + 3 et defaut admises");
++  if (!a.ok() || !b.ok()) return;
++  const Catalogue &A = a.value(), &B = b.value();
++  bool same = A.balls() == B.balls() && A.balls() > 0 && A.level.size() == B.level.size() &&
++              A.ledger.nodes > B.ledger.nodes;  // l'arbre differe vraiment
++  for (u32 i = 0; same && i < A.balls(); ++i) {
++    same = A.rank[i] == B.rank[i] && A.support[i] == B.support[i] && A.qmin[i] == B.qmin[i] && A.p[i] == B.p[i] &&
++           A.u[i] == B.u[i] && A.flags[i] == B.flags[i] && A.n_interior[i] == B.n_interior[i] &&
++           A.pop_off[i + 1] == B.pop_off[i + 1];
++    for (u64 q = A.pop_off[i]; same && q < A.pop_off[i + 1]; ++q) same = A.pop[q] == B.pop[q];
++  }
++  for (size_t r = 0; same && r < A.level.size(); ++r) same = geom::compare(A.level[r], B.level[r]) == 0;
++  std::printf("frontieres balls %u levels %zu nodes %llu/%llu\n", A.balls(), A.level.size(),
++              (unsigned long long)A.ledger.nodes, (unsigned long long)B.ledger.nodes);
++  expect(same, "feuille M = K + 3 : meme catalogue que la taille par defaut");
++}
++
+ void test_cloud() {
+   std::mt19937_64 g(7);
+   const u32 n = 5000;
+@@ -389,6 +449,7 @@ void test_site_tree_rational() {
+ }  // namespace
+ 
+ int main() {
++  test_input_frontiers();
+   test_site_tree();
+   test_site_tree_rational();
+   test_cloud();

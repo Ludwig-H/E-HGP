@@ -27,11 +27,21 @@ Une nouvelle exécution doit produire un reçu distinct, avec sa propre version.
 ## Captures ajoutées après la relocalisation
 
 - `math_catalogue_cover/` : oracle exact autonome de toutes les composantes
-  couvrantes, K1/K2/K3, normal et `-O` ; ni générateur ni tour native.
+  couvrantes, K1/K2/K3, normal et `-O` ; `native_r2/` ajoute 64 appels sur
+  huit petites géométries K1–K4 face à un nerf rationnel indépendant,
+  sans nouvelle construction du moteur ni qualification globale.
 - `thesis_boundary/` : provenance de la relecture des parties I et II et
   petit contre-exemple abstrait du vote recalculé à chaque coupe.
 - `pool_corrected/` : refus réel de création partielle de fils sur copie
-  corrigée ; ne qualifie pas les consommateurs ou l'intégration.
+  corrigée ; `consumer_r2/` ajoute un rejeu indépendant des pannes catalogue
+  et tour, ainsi que des logs terminés ASan/TSan observés du développeur.
+  Les copies ne qualifient pas leur intégration.
+- `interfaces_corrected/` : neuf appels courts, entrée par pipe complète,
+  et trois options numériques silencieusement acceptées à tort sur copie.
+- `majority_lamination/` : preuve et oracle abstrait de majorité fixe,
+  180 cas ; `native_kmax_r2/` montre sur exports natifs le biais Kmax et
+  son élimination par les témoins propres à K. La nouvelle tête n'est pas
+  implémentée dans le produit ; aucune qualification statistique.
 - `timeout/cuda_corrected/` : contrôle arithmétique hôte UBSan de la sonde
   unsigned ; aucun chrono ou reçu GPU nouveau.
 

@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "date_utc": "2026-09-29",
+  "scope": "native_FULL_K2_export_with_audit_only_unit_mass_head",
+  "normal_receipt_sha256": "4ab53b31627771e869725668366caf294e72015cbdd371413ddee1acf53562ba",
+  "optimized_receipt_sha256": "cb1235e2afdf00c3121f04cfa8ee05a1613da1c3d1f7d850817e615f2d4a698f",
+  "source_sha256": "fee05c377bb439c235e1c387915d305a878e690424aee210f02e1942b90fb540",
+  "native_calls_total": 8,
+  "normal_optimized_results_same": true,
+  "nesting_checks_total": 720,
+  "pinned_probe_build": "../../math_catalogue_cover/native_r2/build.json",
+  "engine_modified": false,
+  "native_head_implemented": false,
+  "statistical_or_GPU_qualification": false,
+  "GCP_used": false
+}

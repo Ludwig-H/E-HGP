@@ -1,0 +1,55 @@
+{
+  "status": "PASS",
+  "date_utc": "2026-09-29",
+  "scope": "abstract_exact_weighted_witness_trees_not_native_HGP_or_statistical_benchmark",
+  "source_sha256": "347a878f3354162518cd7092ef9f503c15a82bf1b38ec825d8636196bebe16c5",
+  "commands": [
+    "python3 morsehgp3D_v10/receipts/audit_continu_20260929/majority_lamination/check_majority.py",
+    "python3 -O morsehgp3D_v10/receipts/audit_continu_20260929/majority_lamination/check_majority.py"
+  ],
+  "exit_codes": [
+    0,
+    0
+  ],
+  "normal_optimized_same": true,
+  "output": {
+    "GCP_used": false,
+    "active_denominator_mutant_rejected": true,
+    "below_half_has_two_owners": true,
+    "cases": 180,
+    "engine_imports": false,
+    "invalid_theta_rejections": 3,
+    "majority_example_early": {
+      "x": [
+        "singleton",
+        "x"
+      ],
+      "y": [
+        "node",
+        2
+      ]
+    },
+    "majority_example_late": {
+      "x": [
+        "node",
+        3
+      ],
+      "y": [
+        "node",
+        2
+      ]
+    },
+    "pair_checks": 106350,
+    "scope": "abstract_exact_weighted_witness_trees_only",
+    "status": "PASS",
+    "theta_values": [
+      "1/2",
+      "3/5",
+      "9/10"
+    ],
+    "transitions": 4254,
+    "two_site_abstract_boundary_model_pass": true
+  },
+  "engine_modified": false,
+  "GCP_used": false
+}

@@ -449,3 +449,176 @@ Les arguments de réduction Gabriel des chapitres 8 et 9 ne deviennent pas
 des oracles par cette relecture : les contre-exemples archivés qui motivent
 FULL restent applicables. Le nouveau lemme de couverture suppose un
 catalogue critique complet, pas le seul graphe de Gabriel d'une ancienne version.
+
+## 8. Une laminarisation par majorité de masse fixe — piste mathématique, pas nouveau moteur
+
+Le vote du chapitre 9 suggère une alternative plus structurée au seul LCA
+de candidats proches : **ne rattacher un point que lorsqu'une branche porte
+strictement plus de la moitié de sa masse de témoins**. Contrairement à
+l'argmax indépendant, cette règle possède une preuve directe d'emboîtement.
+Il faut garder les dates des témoins et un dénominateur fixé une fois.
+
+### Construction et preuve
+
+Pour chaque point x, fixer des témoins de poids positifs et finis `w_i`, attachés
+chacun à une branche `v_i` de l'arbre continu et une date `t_i` où x est
+effectivement couvert par elle. Après cette date, le témoin suit uniquement
+les ancêtres. Poser `W_x = Σ_i w_i > 0`, **sur tous les témoins fixés**,
+y compris ceux dont la date n'est pas encore atteinte. Les témoins inactifs
+ne votent pas ; ils restent présents dans le dénominateur. Tous suivent un
+**même arbre à fusions seulement**, à K fixé ou sur une tranche monotone
+explicitement déclarée ; mélanger des K incomparables invalide ce cadre.
+
+À une coupe r, `M_x(C,r)` est la somme des poids des témoins actifs de x
+dont la branche appartient à C à cette coupe. Avec `1/2 ≤ θ < 1`, inclure
+x dans C seulement si `M_x(C,r) > θ W_x`. Sinon, x reste son propre
+singleton de complétion, pas membre d'un bloc collectif nommé « bruit ».
+
+1. **Exclusivité.** Deux composantes distinctes ne peuvent satisfaire cette
+   inégalité : leurs masses sont disjointes et leur somme est au plus W_x,
+   tandis que deux majorités strictes dépasseraient W_x.
+2. **Ascendance.** Si C devient C′ à un rayon supérieur, ses témoins actifs
+   restent actifs et vont tous dans C′. De nouveaux témoins peuvent s'ajouter ;
+   `M_x(C′,r′) ≥ M_x(C,r)`. Une majorité acquise ne se perd donc jamais au
+   profit d'une branche concurrente.
+3. **Partitions emboîtées.** Deux points déjà réunis dans C restent réunis
+   dans C′. Les points encore seuls peuvent rejoindre une composante, mais
+   aucun bloc existant ne se scinde. Un propriétaire unique et sa première
+   date suffisent ensuite à exporter l'arbre de points par ascendance.
+4. **Fidélité géométrique conditionnelle.** Un propriétaire a au moins un
+   témoin actif qui couvre x ; l'ascendance et la croissance du rayon
+   préservent cette couverture. Aucun test demandant que x soit core
+   n'apparaît. Sur deux sites à K2, un témoin unique les réunit dès d/2.
+
+Au seuil θ=1/2, une égalité exacte ne donne pas de majorité ; θ<1/2 permet
+deux propriétaires simultanés, θ≥1 peut empêcher toute entrée. Si chaque
+point a au moins un témoin et tous leurs ancrages rejoignent une racine
+finie, la masse de celle-ci atteint W_x : tous les points finissent réunis.
+Les contacts sont traités par la convention fermée et les plateaux exacts
+de FULL, pas par un ordre arbitraire entre événements simultanés.
+
+**Stabilité conditionnelle.** Si deux arbres possèdent des transports
+cohérents de composantes, dans les deux sens avec décalage δ, et si ces
+transports préservent chaque témoin actif, son ID de point et son poids,
+alors une majorité dans C est aussi une majorité dans son image. L'unicité
+impose le même propriétaire transporté. Les relations d'équivalence des
+partitions s'incluent ainsi à décalage δ dans les deux sens : les hauteurs
+de fusion des points diffèrent d'au plus δ. Cette preuve ne demande pas
+une marge supplémentaire lorsque poids et univers sont **identiques**.
+Elle ne se transfère pas automatiquement aux témoins sélectionnés et aux
+poids ψ(r) recalculés après perturbation : ces hypothèses difficiles ne
+découlent pas de la seule exactitude ou stabilité de FULL.
+
+### Ce qui différencie cette piste de la thèse et de la bande actuelle
+
+- Les `Sτ/Tx` de la thèse sont des masses fixes sur des faces. Leur somme
+  vers les ancêtres est l'ingrédient réutilisable ; un argmax à chaque coupe
+  n'est pas remplacé silencieusement par cette nouvelle règle majoritaire.
+- Si les atomes sont des boules du catalogue, une boule couvrante apporte
+  un seul témoin par incidence point→boule, avec sa composante à K et sa
+  date. Ce ne sont **pas** les faces/cofaces du chapitre 9 : il faut nommer
+  ce nouveau choix de poids et ne pas prétendre reproduire ses scores Sτ.
+- L'univers et les poids doivent être définis **à K fixé**, indépendamment
+  de la profondeur Kmax demandée au générateur. Sinon, une tête K2 peut
+  changer quand on demande aussi K3 et K4, sans changement de son arbre FULL.
+  Le paragraphe ci-dessous donne un contre-exemple natif et une correction.
+- Plusieurs témoins d'une même composante se renforcent au lieu de créer
+  une ambiguïté artificielle. La concurrence porte sur les branches, pas
+  sur le nombre de supports canoniques.
+- La règle ne force pas tous les points à attendre d_k(x), mais peut tout
+  de même retarder beaucoup de frontière si sa masse se disperse. Le rappel
+  avant fusion parasite, le nombre de singletons et leurs dates restent
+  les diagnostics décisifs. Rien ne prouve encore qu'elle batte `cover`
+  ou l'ancrage par bande sur les nuages demandés.
+
+Un dénominateur recalculé sur les seuls témoins actifs casse la preuve :
+une masse peut tomber sous le seuil quand de nouveaux témoins apparaissent.
+Le [petit oracle Fraction](../../receipts/audit_continu_20260929/majority_lamination/check_majority.py)
+rejette ce mutant. Sur l'exemple A/B/C de la section 7, x attend A+B,
+tandis que y entre tôt dans C ; ils ne sont pas d'abord réunis pour se
+séparer ensuite. C'est une propriété de construction, pas une vérité terrain.
+
+### Coût et réserves avant toute implémentation
+
+Le script est volontairement exhaustif sur de petits arbres : ses scans
+ne sont **pas** une architecture à porter. Noter D le nombre d'incidences
+témoins-point effectivement retenues et H le nombre de nœuds de FULL.
+W_x se prépare en O(D), puis les événements peuvent agréger des cartes
+par composante et point. Une fusion de petites cartes vers de grandes
+évite le scan de tous les n points à chaque nœud. Pour une borne simple,
+choisir le sens de fusion par le **nombre d'atomes activés représentés**,
+pas par la somme de leurs poids. Chaque transfert de clé se charge à un
+atome qu'elle représente ; son nombre d'atomes de composante double quand
+il migre. Il y a donc O(D log D) opérations de carte attendues avec une
+table de hachage, plus traitement des H événements, tri éventuel des dates,
+calcul des poids et sortie. Une carte ordonnée ajoute un facteur logarithmique.
+Cette analyse compte des opérations, pas des nanosecondes ou des bits
+d'arithmétique exacte. Les suppressions éventuelles ne doivent pas réduire
+le compteur logique qui justifie le doublement.
+
+Les seules entrées dont la masse change doivent être réévaluées ; un
+propriétaire déjà acquis suit son ancêtre sans rescanner tous ses points.
+Cette architecture reste à implémenter et mesurer. D peut être quadratique
+si l'on recrée toutes les paires ou toutes les faces. Aucun O(n log n),
+gain mémoire, port massivement parallèle ou chrono n'est acquis ici.
+
+Les poids réels, le seuil et les additions ont aussi un contrat numérique
+propre. ψ=1/r peut exiger des comparaisons de sommes irrationnelles ; un
+double non certifié ne prouve pas une majorité stricte. Un choix rationnel
+ou une décision par intervalles conservateurs est envisageable, mais doit
+être déclaré et testé, y compris aux égalités. La validité de FULL ne
+certifie pas automatiquement cette nouvelle tête. Les témoins de rayon
+nul, notamment K1, exigent une masse finie spéciale, pas ψ(0)=∞.
+
+La [capture abstraite](../../receipts/audit_continu_20260929/majority_lamination/receipt.json)
+exerce 180 cas, 4 254 transitions de coupes et 106 350 vérifications de
+paires, aux seuils 1/2, 3/5 et 9/10, en normal et `−O`. Poids tardifs,
+atomes aux nœuds internes, arbres en peigne et plateaux sont inclus. Elle
+ne qualifie aucun score statistique, algorithme natif ou chrono G4. À
+explorer seulement par un petit bras dev mesurant frontière et coût,
+sans vaste chantier avant un signal utile.
+
+### Ne pas faire dépendre la tête K de Kmax
+
+Le lemme de couverture permet un univers de témoins propre à K : pour les
+boules positives, retenir `population ≥ K` et `p+q_min ≤ K`, avec toutes
+leurs incidences intérieur/coquille. Ajouter les témoins sites de rayon nul
+lorsqu'ils sont nécessaires. Pour un catalogue critique **complet et canonique**,
+cet univers est le même pour chaque Kmax≥K et retrouve encore toutes les
+composantes couvrantes. Fixer également une fonction de poids indépendante
+de Kmax et des rangs/indices natifs, qui peuvent changer lorsque le catalogue
+s'élargit. Le filtre moins fort `p+q_min≤K+1`, fixé à K et non à Kmax,
+supprime aussi cette dépendance. Le filtre renforcé propose moins d'atomes
+avec la même complétude de couverture ; le lemme ne démontre pas qu'il soit
+statistiquement meilleur. La majorité est ensuite calculée sur le FULL K intégral ; **les
+événements `p+q_min=K+1` restent indispensables à sa construction**.
+
+Le [petit test sur export natif](../../receipts/audit_continu_20260929/majority_lamination/native_kmax_r2/check_kmax.py)
+reprend six sites collinéaires 0,…,5, K2, θ=1/2 et des masses unitaires.
+L'arbre FULL K2 a dans les deux cas cinq naissances à β=1/4 puis leur
+multifusion à β=1 ; sa signature géométrique est identique, sans comparaison
+naïve des indices ou des rangs de tableaux. β désigne ici le **rayon carré**.
+
+| Univers de témoins | Kmax | W(x0), W(x2) | Première fusion des points x0/x2 |
+| --- | ---: | ---: | ---: |
+| Toutes les boules couvrantes du catalogue | 2 | 2, 5 | β=1 |
+| Toutes les boules couvrantes du catalogue | 4 | 4, 10 | β=9/4 |
+| Témoins propres à K2, `p+q_min≤2` | 2 | 1, 2 | β=1 |
+| Témoins propres à K2, `p+q_min≤2` | 4 | 1, 2 | β=1 |
+
+Les boules ajoutées avec Kmax4 retardent artificiellement la majorité :
+à β=1, le point x2 ne porte que 5/10 de sa masse dans la racine, au lieu
+de 5/5. Cette dépendance est évitable ; le test compare aussi l'identité
+complète des témoins filtrés. Huit appels natifs, W1/W2, normal/`−O`, et
+720 contrôles d'emboîtement passent, dans la
+[capture close distincte](../../receipts/audit_continu_20260929/majority_lamination/native_kmax_r2/closure.json).
+La sonde et son archive sont celles du [raccord natif R2](../../receipts/audit_continu_20260929/math_catalogue_cover/native_r2/build.json).
+La tête majoritaire reste un calcul d'audit Python sur ces exports, **pas
+une tête implémentée dans le moteur**, ni une qualification de performance.
+
+La conservation de masse de la thèse doit aussi rester visible dans les
+benchmarks : condenser après une projection dure peut supprimer ou retarder
+des contributions frontière que la condensation fractionnaire conservait.
+Comparer ces deux unités de masse, déclarer le traitement des singletons et
+mesurer le rappel frontière avant fusion parasite. Ni la preuve d'emboîtement
+ni l'indépendance de Kmax ne démontrent une optimalité statistique.

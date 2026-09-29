@@ -1,0 +1,558 @@
+{
+  "kind": "preintegration_interfaces_counter_audit",
+  "binary_original": "/workspaces/E-HGP/build/v10-fixes/entrees_cli/build-final/mhgp10_catalogue",
+  "binary_sha256_before": "8ec42a51b2ecee2904c4cf594caa67b12a86f5666a28a8ade7d49b7f030c6e27",
+  "runner_sha256": "71a3c280cb791dd2c4a937bcb3caf7ad624577831e280ecfc824cfcb68bbc40d",
+  "sources": [
+    {
+      "path": "/workspaces/E-HGP/build/v10-fixes/entrees_cli/src/morsehgp3D_v10/src/cloud/u32le_input.hpp",
+      "snapshot": "sources/00_u32le_input.hpp",
+      "sha256_before": "c937f225ba6db15d943c259920af0dbc69378aa9bdef7a640ff28b3f363d6a7a",
+      "snapshot_sha256": "c937f225ba6db15d943c259920af0dbc69378aa9bdef7a640ff28b3f363d6a7a",
+      "sha256_after": "c937f225ba6db15d943c259920af0dbc69378aa9bdef7a640ff28b3f363d6a7a"
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-fixes/entrees_cli/src/morsehgp3D_v10/cli/mhgp10_catalogue.cpp",
+      "snapshot": "sources/01_mhgp10_catalogue.cpp",
+      "sha256_before": "849c8d24b77bff5514b0434e6db8ec3ba6c5342e3d5f7e429f9a4cf62657cc1c",
+      "snapshot_sha256": "849c8d24b77bff5514b0434e6db8ec3ba6c5342e3d5f7e429f9a4cf62657cc1c",
+      "sha256_after": "849c8d24b77bff5514b0434e6db8ec3ba6c5342e3d5f7e429f9a4cf62657cc1c"
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-fixes/entrees_cli/src/morsehgp3D_v10/cli/mhgp10_tower.cpp",
+      "snapshot": "sources/02_mhgp10_tower.cpp",
+      "sha256_before": "d1ad636ecfd4e462d8f3c1b8783ff017820dd50a67df6972b1c7246b5519dde2",
+      "snapshot_sha256": "d1ad636ecfd4e462d8f3c1b8783ff017820dd50a67df6972b1c7246b5519dde2",
+      "sha256_after": "d1ad636ecfd4e462d8f3c1b8783ff017820dd50a67df6972b1c7246b5519dde2"
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-fixes/entrees_cli/src/morsehgp3D_v10/src/catalogue/generator.cpp",
+      "snapshot": "sources/03_generator.cpp",
+      "sha256_before": "967a32f67fac841c31479940a0722ad1a2d7f026bfefe8d36588551922cef836",
+      "snapshot_sha256": "967a32f67fac841c31479940a0722ad1a2d7f026bfefe8d36588551922cef836",
+      "sha256_after": "967a32f67fac841c31479940a0722ad1a2d7f026bfefe8d36588551922cef836"
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-fixes/entrees_cli/src/morsehgp3D_v10/src/catalogue/catalogue.hpp",
+      "snapshot": "sources/04_catalogue.hpp",
+      "sha256_before": "78e72fa5951ade8ecf80adf541705d4528fa7aef79905b6565d12936b3625d28",
+      "snapshot_sha256": "78e72fa5951ade8ecf80adf541705d4528fa7aef79905b6565d12936b3625d28",
+      "sha256_after": "78e72fa5951ade8ecf80adf541705d4528fa7aef79905b6565d12936b3625d28"
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-fixes/entrees_cli/src/morsehgp3D_v10/tests/regression/test_cli_input_frontiers.py",
+      "snapshot": "sources/05_test_cli_input_frontiers.py",
+      "sha256_before": "fe33924f1d96e0e1d4310ff2e7511cc15d49a9461e23435cb1fc2e355ff68540",
+      "snapshot_sha256": "fe33924f1d96e0e1d4310ff2e7511cc15d49a9461e23435cb1fc2e355ff68540",
+      "sha256_after": "fe33924f1d96e0e1d4310ff2e7511cc15d49a9461e23435cb1fc2e355ff68540"
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-fixes/entrees_cli/RECU_entrees_cli.md",
+      "snapshot": "sources/06_RECU_entrees_cli.md",
+      "sha256_before": "24f0b0ba508f5f8dcd89f433695bc813b6a3a4e8691db73cac2da706ad3fb4fb",
+      "snapshot_sha256": "24f0b0ba508f5f8dcd89f433695bc813b6a3a4e8691db73cac2da706ad3fb4fb",
+      "sha256_after": "24f0b0ba508f5f8dcd89f433695bc813b6a3a4e8691db73cac2da706ad3fb4fb"
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-fixes/entrees_cli/entrees_cli.patch",
+      "snapshot": "sources/07_entrees_cli.patch",
+      "sha256_before": "1d3c978c8425eab1ab0940c3e08f9db4a1fc1824f7352121b76973c2d8f2743b",
+      "snapshot_sha256": "1d3c978c8425eab1ab0940c3e08f9db4a1fc1824f7352121b76973c2d8f2743b",
+      "sha256_after": "1d3c978c8425eab1ab0940c3e08f9db4a1fc1824f7352121b76973c2d8f2743b"
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-fixes/entrees_cli/build-final/CMakeFiles/mhgp10_catalogue.dir/flags.make",
+      "snapshot": "sources/08_flags.make",
+      "sha256_before": "09bc4d5cf6ca590d4bf9991e2a9ee1252a6c7b589d4a6e705d17bc86134f3010",
+      "snapshot_sha256": "09bc4d5cf6ca590d4bf9991e2a9ee1252a6c7b589d4a6e705d17bc86134f3010",
+      "sha256_after": "09bc4d5cf6ca590d4bf9991e2a9ee1252a6c7b589d4a6e705d17bc86134f3010"
+    }
+  ],
+  "product_has_common_reader": false,
+  "commands": [
+    {
+      "case": "baseline",
+      "argv": [
+        "/tmp/mhgp10-interface-gates-5i6vclik/mhgp10_catalogue",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/interfaces_corrected/capture/four_points.u32le",
+        "--k=2",
+        "--threads=1",
+        "--leaf=8",
+        "--dump=/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/interfaces_corrected/capture/baseline.dump"
+      ],
+      "input_kind": "regular",
+      "payload_sha256": "455b3bd290193d883e0ee65dc6fa05b1e289fa35999a24fd9828277b789ce3b7",
+      "payload_size": 48,
+      "returncode": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":4,\"sites\":4,\"K\":2,\"threads\":1,\"balls\":6,\"levels\":2,\"prepare_s\":0.0000,\"catalogue_s\":0.0000,\"catalogue_stages\":{\"t_frontier\":0.0000,\"t_boxes\":0.0000,\"t_order\":0.0000,\"t_assemble\":0.0000,\"t_collect\":0.0000,\"t_sort\":0.0000,\"t_bands\":0.0000,\"t_compare\":0.0000,\"t_ranks\":0.0000,\"t_copy\":0.0000,\"bands\":2,\"band_members\":6,\"tasks\":0,\"max_task_sites\":0},\"by_q_p\":{\"q2\":[6,0],\"q3\":[0,0],\"q4\":[0,0]},\"nodes\":1,\"leaves\":1,\"sum_m\":4,\"max_m\":4,\"skipped_bbox\":0,\"filter_tests\":16,\"leaf_dominance_tests\":6,\"pair_tests\":6,\"triple_tests\":4,\"line_hits\":4,\"quad_tests\":0,\"judged\":7,\"extended\":3,\"weighted\":0,\"max_shell\":3,\"stalled_leaves\":0}\n",
+      "stderr": "",
+      "wall_s": 0.018914257998403627,
+      "json": {
+        "status": "ok",
+        "n": 4,
+        "sites": 4,
+        "K": 2,
+        "threads": 1,
+        "balls": 6,
+        "levels": 2,
+        "prepare_s": 0.0,
+        "catalogue_s": 0.0,
+        "catalogue_stages": {
+          "t_frontier": 0.0,
+          "t_boxes": 0.0,
+          "t_order": 0.0,
+          "t_assemble": 0.0,
+          "t_collect": 0.0,
+          "t_sort": 0.0,
+          "t_bands": 0.0,
+          "t_compare": 0.0,
+          "t_ranks": 0.0,
+          "t_copy": 0.0,
+          "bands": 2,
+          "band_members": 6,
+          "tasks": 0,
+          "max_task_sites": 0
+        },
+        "by_q_p": {
+          "q2": [
+            6,
+            0
+          ],
+          "q3": [
+            0,
+            0
+          ],
+          "q4": [
+            0,
+            0
+          ]
+        },
+        "nodes": 1,
+        "leaves": 1,
+        "sum_m": 4,
+        "max_m": 4,
+        "skipped_bbox": 0,
+        "filter_tests": 16,
+        "leaf_dominance_tests": 6,
+        "pair_tests": 6,
+        "triple_tests": 4,
+        "line_hits": 4,
+        "quad_tests": 0,
+        "judged": 7,
+        "extended": 3,
+        "weighted": 0,
+        "max_shell": 3,
+        "stalled_leaves": 0
+      },
+      "dump_sha256": "263379914af2129d3f60b8e11b0ac9604f78b36371a8b9698f49e1d57ffc5b56"
+    },
+    {
+      "case": "k_suffix",
+      "argv": [
+        "/tmp/mhgp10-interface-gates-5i6vclik/mhgp10_catalogue",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/interfaces_corrected/capture/four_points.u32le",
+        "--k=2not_an_integer",
+        "--threads=1",
+        "--leaf=8",
+        "--dump=/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/interfaces_corrected/capture/k_suffix.dump"
+      ],
+      "input_kind": "regular",
+      "payload_sha256": "455b3bd290193d883e0ee65dc6fa05b1e289fa35999a24fd9828277b789ce3b7",
+      "payload_size": 48,
+      "returncode": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":4,\"sites\":4,\"K\":2,\"threads\":1,\"balls\":6,\"levels\":2,\"prepare_s\":0.0000,\"catalogue_s\":0.0001,\"catalogue_stages\":{\"t_frontier\":0.0000,\"t_boxes\":0.0000,\"t_order\":0.0000,\"t_assemble\":0.0000,\"t_collect\":0.0000,\"t_sort\":0.0000,\"t_bands\":0.0000,\"t_compare\":0.0000,\"t_ranks\":0.0000,\"t_copy\":0.0000,\"bands\":2,\"band_members\":6,\"tasks\":0,\"max_task_sites\":0},\"by_q_p\":{\"q2\":[6,0],\"q3\":[0,0],\"q4\":[0,0]},\"nodes\":1,\"leaves\":1,\"sum_m\":4,\"max_m\":4,\"skipped_bbox\":0,\"filter_tests\":16,\"leaf_dominance_tests\":6,\"pair_tests\":6,\"triple_tests\":4,\"line_hits\":4,\"quad_tests\":0,\"judged\":7,\"extended\":3,\"weighted\":0,\"max_shell\":3,\"stalled_leaves\":0}\n",
+      "stderr": "",
+      "wall_s": 0.010531177000302705,
+      "json": {
+        "status": "ok",
+        "n": 4,
+        "sites": 4,
+        "K": 2,
+        "threads": 1,
+        "balls": 6,
+        "levels": 2,
+        "prepare_s": 0.0,
+        "catalogue_s": 0.0001,
+        "catalogue_stages": {
+          "t_frontier": 0.0,
+          "t_boxes": 0.0,
+          "t_order": 0.0,
+          "t_assemble": 0.0,
+          "t_collect": 0.0,
+          "t_sort": 0.0,
+          "t_bands": 0.0,
+          "t_compare": 0.0,
+          "t_ranks": 0.0,
+          "t_copy": 0.0,
+          "bands": 2,
+          "band_members": 6,
+          "tasks": 0,
+          "max_task_sites": 0
+        },
+        "by_q_p": {
+          "q2": [
+            6,
+            0
+          ],
+          "q3": [
+            0,
+            0
+          ],
+          "q4": [
+            0,
+            0
+          ]
+        },
+        "nodes": 1,
+        "leaves": 1,
+        "sum_m": 4,
+        "max_m": 4,
+        "skipped_bbox": 0,
+        "filter_tests": 16,
+        "leaf_dominance_tests": 6,
+        "pair_tests": 6,
+        "triple_tests": 4,
+        "line_hits": 4,
+        "quad_tests": 0,
+        "judged": 7,
+        "extended": 3,
+        "weighted": 0,
+        "max_shell": 3,
+        "stalled_leaves": 0
+      },
+      "dump_sha256": "263379914af2129d3f60b8e11b0ac9604f78b36371a8b9698f49e1d57ffc5b56"
+    },
+    {
+      "case": "leaf_wrap",
+      "argv": [
+        "/tmp/mhgp10-interface-gates-5i6vclik/mhgp10_catalogue",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/interfaces_corrected/capture/four_points.u32le",
+        "--k=2",
+        "--threads=1",
+        "--leaf=4294967304",
+        "--dump=/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/interfaces_corrected/capture/leaf_wrap.dump"
+      ],
+      "input_kind": "regular",
+      "payload_sha256": "455b3bd290193d883e0ee65dc6fa05b1e289fa35999a24fd9828277b789ce3b7",
+      "payload_size": 48,
+      "returncode": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":4,\"sites\":4,\"K\":2,\"threads\":1,\"balls\":6,\"levels\":2,\"prepare_s\":0.0000,\"catalogue_s\":0.0000,\"catalogue_stages\":{\"t_frontier\":0.0000,\"t_boxes\":0.0000,\"t_order\":0.0000,\"t_assemble\":0.0000,\"t_collect\":0.0000,\"t_sort\":0.0000,\"t_bands\":0.0000,\"t_compare\":0.0000,\"t_ranks\":0.0000,\"t_copy\":0.0000,\"bands\":2,\"band_members\":6,\"tasks\":0,\"max_task_sites\":0},\"by_q_p\":{\"q2\":[6,0],\"q3\":[0,0],\"q4\":[0,0]},\"nodes\":1,\"leaves\":1,\"sum_m\":4,\"max_m\":4,\"skipped_bbox\":0,\"filter_tests\":16,\"leaf_dominance_tests\":6,\"pair_tests\":6,\"triple_tests\":4,\"line_hits\":4,\"quad_tests\":0,\"judged\":7,\"extended\":3,\"weighted\":0,\"max_shell\":3,\"stalled_leaves\":0}\n",
+      "stderr": "",
+      "wall_s": 0.011560408000150346,
+      "json": {
+        "status": "ok",
+        "n": 4,
+        "sites": 4,
+        "K": 2,
+        "threads": 1,
+        "balls": 6,
+        "levels": 2,
+        "prepare_s": 0.0,
+        "catalogue_s": 0.0,
+        "catalogue_stages": {
+          "t_frontier": 0.0,
+          "t_boxes": 0.0,
+          "t_order": 0.0,
+          "t_assemble": 0.0,
+          "t_collect": 0.0,
+          "t_sort": 0.0,
+          "t_bands": 0.0,
+          "t_compare": 0.0,
+          "t_ranks": 0.0,
+          "t_copy": 0.0,
+          "bands": 2,
+          "band_members": 6,
+          "tasks": 0,
+          "max_task_sites": 0
+        },
+        "by_q_p": {
+          "q2": [
+            6,
+            0
+          ],
+          "q3": [
+            0,
+            0
+          ],
+          "q4": [
+            0,
+            0
+          ]
+        },
+        "nodes": 1,
+        "leaves": 1,
+        "sum_m": 4,
+        "max_m": 4,
+        "skipped_bbox": 0,
+        "filter_tests": 16,
+        "leaf_dominance_tests": 6,
+        "pair_tests": 6,
+        "triple_tests": 4,
+        "line_hits": 4,
+        "quad_tests": 0,
+        "judged": 7,
+        "extended": 3,
+        "weighted": 0,
+        "max_shell": 3,
+        "stalled_leaves": 0
+      },
+      "dump_sha256": "263379914af2129d3f60b8e11b0ac9604f78b36371a8b9698f49e1d57ffc5b56"
+    },
+    {
+      "case": "threads_wrap",
+      "argv": [
+        "/tmp/mhgp10-interface-gates-5i6vclik/mhgp10_catalogue",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/interfaces_corrected/capture/four_points.u32le",
+        "--k=2",
+        "--threads=4294967297",
+        "--leaf=8",
+        "--dump=/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/interfaces_corrected/capture/threads_wrap.dump"
+      ],
+      "input_kind": "regular",
+      "payload_sha256": "455b3bd290193d883e0ee65dc6fa05b1e289fa35999a24fd9828277b789ce3b7",
+      "payload_size": 48,
+      "returncode": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":4,\"sites\":4,\"K\":2,\"threads\":1,\"balls\":6,\"levels\":2,\"prepare_s\":0.0000,\"catalogue_s\":0.0000,\"catalogue_stages\":{\"t_frontier\":0.0000,\"t_boxes\":0.0000,\"t_order\":0.0000,\"t_assemble\":0.0000,\"t_collect\":0.0000,\"t_sort\":0.0000,\"t_bands\":0.0000,\"t_compare\":0.0000,\"t_ranks\":0.0000,\"t_copy\":0.0000,\"bands\":2,\"band_members\":6,\"tasks\":0,\"max_task_sites\":0},\"by_q_p\":{\"q2\":[6,0],\"q3\":[0,0],\"q4\":[0,0]},\"nodes\":1,\"leaves\":1,\"sum_m\":4,\"max_m\":4,\"skipped_bbox\":0,\"filter_tests\":16,\"leaf_dominance_tests\":6,\"pair_tests\":6,\"triple_tests\":4,\"line_hits\":4,\"quad_tests\":0,\"judged\":7,\"extended\":3,\"weighted\":0,\"max_shell\":3,\"stalled_leaves\":0}\n",
+      "stderr": "",
+      "wall_s": 0.013272743000925402,
+      "json": {
+        "status": "ok",
+        "n": 4,
+        "sites": 4,
+        "K": 2,
+        "threads": 1,
+        "balls": 6,
+        "levels": 2,
+        "prepare_s": 0.0,
+        "catalogue_s": 0.0,
+        "catalogue_stages": {
+          "t_frontier": 0.0,
+          "t_boxes": 0.0,
+          "t_order": 0.0,
+          "t_assemble": 0.0,
+          "t_collect": 0.0,
+          "t_sort": 0.0,
+          "t_bands": 0.0,
+          "t_compare": 0.0,
+          "t_ranks": 0.0,
+          "t_copy": 0.0,
+          "bands": 2,
+          "band_members": 6,
+          "tasks": 0,
+          "max_task_sites": 0
+        },
+        "by_q_p": {
+          "q2": [
+            6,
+            0
+          ],
+          "q3": [
+            0,
+            0
+          ],
+          "q4": [
+            0,
+            0
+          ]
+        },
+        "nodes": 1,
+        "leaves": 1,
+        "sum_m": 4,
+        "max_m": 4,
+        "skipped_bbox": 0,
+        "filter_tests": 16,
+        "leaf_dominance_tests": 6,
+        "pair_tests": 6,
+        "triple_tests": 4,
+        "line_hits": 4,
+        "quad_tests": 0,
+        "judged": 7,
+        "extended": 3,
+        "weighted": 0,
+        "max_shell": 3,
+        "stalled_leaves": 0
+      },
+      "dump_sha256": "263379914af2129d3f60b8e11b0ac9604f78b36371a8b9698f49e1d57ffc5b56"
+    },
+    {
+      "case": "nonnumeric_control",
+      "argv": [
+        "/tmp/mhgp10-interface-gates-5i6vclik/mhgp10_catalogue",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/interfaces_corrected/capture/four_points.u32le",
+        "--k=not_an_integer",
+        "--threads=1",
+        "--leaf=8",
+        "--dump=/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/interfaces_corrected/capture/nonnumeric_control.dump"
+      ],
+      "input_kind": "regular",
+      "payload_sha256": "455b3bd290193d883e0ee65dc6fa05b1e289fa35999a24fd9828277b789ce3b7",
+      "payload_size": 48,
+      "returncode": 2,
+      "stdout": "{\"status\":\"invalid_input\",\"reason\":\"parameter_out_of_range\"}\n",
+      "stderr": "",
+      "wall_s": 0.00982205500076816,
+      "json": {
+        "status": "invalid_input",
+        "reason": "parameter_out_of_range"
+      },
+      "dump_sha256": null
+    },
+    {
+      "case": "pipe_complete",
+      "argv": [
+        "/tmp/mhgp10-interface-gates-5i6vclik/mhgp10_catalogue",
+        "/proc/self/fd/3",
+        "--k=2",
+        "--threads=1",
+        "--leaf=8",
+        "--dump=/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/interfaces_corrected/capture/pipe_complete.dump"
+      ],
+      "input_kind": "pipe",
+      "payload_sha256": "455b3bd290193d883e0ee65dc6fa05b1e289fa35999a24fd9828277b789ce3b7",
+      "payload_size": 48,
+      "pipe_verified_by_fstat": true,
+      "returncode": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":4,\"sites\":4,\"K\":2,\"threads\":1,\"balls\":6,\"levels\":2,\"prepare_s\":0.0000,\"catalogue_s\":0.0000,\"catalogue_stages\":{\"t_frontier\":0.0000,\"t_boxes\":0.0000,\"t_order\":0.0000,\"t_assemble\":0.0000,\"t_collect\":0.0000,\"t_sort\":0.0000,\"t_bands\":0.0000,\"t_compare\":0.0000,\"t_ranks\":0.0000,\"t_copy\":0.0000,\"bands\":2,\"band_members\":6,\"tasks\":0,\"max_task_sites\":0},\"by_q_p\":{\"q2\":[6,0],\"q3\":[0,0],\"q4\":[0,0]},\"nodes\":1,\"leaves\":1,\"sum_m\":4,\"max_m\":4,\"skipped_bbox\":0,\"filter_tests\":16,\"leaf_dominance_tests\":6,\"pair_tests\":6,\"triple_tests\":4,\"line_hits\":4,\"quad_tests\":0,\"judged\":7,\"extended\":3,\"weighted\":0,\"max_shell\":3,\"stalled_leaves\":0}\n",
+      "stderr": "",
+      "wall_s": 0.010377773998698103,
+      "json": {
+        "status": "ok",
+        "n": 4,
+        "sites": 4,
+        "K": 2,
+        "threads": 1,
+        "balls": 6,
+        "levels": 2,
+        "prepare_s": 0.0,
+        "catalogue_s": 0.0,
+        "catalogue_stages": {
+          "t_frontier": 0.0,
+          "t_boxes": 0.0,
+          "t_order": 0.0,
+          "t_assemble": 0.0,
+          "t_collect": 0.0,
+          "t_sort": 0.0,
+          "t_bands": 0.0,
+          "t_compare": 0.0,
+          "t_ranks": 0.0,
+          "t_copy": 0.0,
+          "bands": 2,
+          "band_members": 6,
+          "tasks": 0,
+          "max_task_sites": 0
+        },
+        "by_q_p": {
+          "q2": [
+            6,
+            0
+          ],
+          "q3": [
+            0,
+            0
+          ],
+          "q4": [
+            0,
+            0
+          ]
+        },
+        "nodes": 1,
+        "leaves": 1,
+        "sum_m": 4,
+        "max_m": 4,
+        "skipped_bbox": 0,
+        "filter_tests": 16,
+        "leaf_dominance_tests": 6,
+        "pair_tests": 6,
+        "triple_tests": 4,
+        "line_hits": 4,
+        "quad_tests": 0,
+        "judged": 7,
+        "extended": 3,
+        "weighted": 0,
+        "max_shell": 3,
+        "stalled_leaves": 0
+      },
+      "dump_sha256": "263379914af2129d3f60b8e11b0ac9604f78b36371a8b9698f49e1d57ffc5b56"
+    },
+    {
+      "case": "pipe_suffix_1",
+      "argv": [
+        "/tmp/mhgp10-interface-gates-5i6vclik/mhgp10_catalogue",
+        "/proc/self/fd/3",
+        "--k=2",
+        "--threads=1",
+        "--leaf=8",
+        "--dump=/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/interfaces_corrected/capture/pipe_suffix_1.dump"
+      ],
+      "input_kind": "pipe",
+      "payload_sha256": "042eb5b68d9873a4d3b867d0682164ca7b13f22658c8c954dae8c823e351bad4",
+      "payload_size": 49,
+      "pipe_verified_by_fstat": true,
+      "returncode": 2,
+      "stdout": "{\"status\":\"invalid_input\",\"reason\":\"size_mismatch\"}\n",
+      "stderr": "",
+      "wall_s": 0.007456060000549769,
+      "json": {
+        "status": "invalid_input",
+        "reason": "size_mismatch"
+      },
+      "dump_sha256": null
+    },
+    {
+      "case": "pipe_suffix_11",
+      "argv": [
+        "/tmp/mhgp10-interface-gates-5i6vclik/mhgp10_catalogue",
+        "/proc/self/fd/3",
+        "--k=2",
+        "--threads=1",
+        "--leaf=8",
+        "--dump=/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/interfaces_corrected/capture/pipe_suffix_11.dump"
+      ],
+      "input_kind": "pipe",
+      "payload_sha256": "fbc7b2b58fbb2ba44ab65fb8aa7dcdd5d034d72a8bf5eaeb4a2c484bfae3615a",
+      "payload_size": 59,
+      "pipe_verified_by_fstat": true,
+      "returncode": 2,
+      "stdout": "{\"status\":\"invalid_input\",\"reason\":\"size_mismatch\"}\n",
+      "stderr": "",
+      "wall_s": 0.0022830990001239115,
+      "json": {
+        "status": "invalid_input",
+        "reason": "size_mismatch"
+      },
+      "dump_sha256": null
+    },
+    {
+      "case": "pipe_complete_outside_u18",
+      "argv": [
+        "/tmp/mhgp10-interface-gates-5i6vclik/mhgp10_catalogue",
+        "/proc/self/fd/3",
+        "--k=2",
+        "--threads=1",
+        "--leaf=8",
+        "--dump=/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/interfaces_corrected/capture/pipe_complete_outside_u18.dump"
+      ],
+      "input_kind": "pipe",
+      "payload_sha256": "b1a6fb520527d5d3cc8b8e15da534ee3b1fcbb54f20fe6469f397e14d6b4abf0",
+      "payload_size": 60,
+      "pipe_verified_by_fstat": true,
+      "returncode": 2,
+      "stdout": "{\"status\":\"invalid_input\",\"reason\":\"coordinate_out_of_domain\"}\n",
+      "stderr": "",
+      "wall_s": 0.007569442001113202,
+      "json": {
+        "status": "invalid_input",
+        "reason": "coordinate_out_of_domain"
+      },
+      "dump_sha256": null
+    }
+  ],
+  "binary_frozen_sha256_before": "8ec42a51b2ecee2904c4cf594caa67b12a86f5666a28a8ade7d49b7f030c6e27",
+  "binary_frozen_sha256_after": "8ec42a51b2ecee2904c4cf594caa67b12a86f5666a28a8ade7d49b7f030c6e27",
+  "binary_sha256_after": "8ec42a51b2ecee2904c4cf594caa67b12a86f5666a28a8ade7d49b7f030c6e27",
+  "capture_status": "closed",
+  "failures": [],
+  "numeric_gate": "finding_reproduced",
+  "stream_gate": "pass",
+  "scope": "catalogue Release only; neither integrated product nor sanitizer qualification"
+}

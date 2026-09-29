@@ -1,0 +1,109 @@
+{
+  "status": "PASS",
+  "scope": "bounded native ball_node resolution and closed-cut coverage lists",
+  "source_commit_of_pinned_archive": "6206d1d11",
+  "engine_rebuilt": false,
+  "GCP_used": false,
+  "counts": {
+    "scenes": 8,
+    "k1_site_table_orders": 8,
+    "cuts_checked": 242,
+    "point_component_lists": 1046,
+    "multi_component_lists": 88,
+    "ball_resolution_checks": 538,
+    "resolution_after_own_radius": 434,
+    "deep_balls_p_ge_k": 34,
+    "interior_q3_q4_checks": 60,
+    "first_point_checks": 83
+  },
+  "native_calls": 32,
+  "counterexamples": [
+    {
+      "case": "line_asym",
+      "K": 2,
+      "radius_squared": "4",
+      "point": [
+        2,
+        0,
+        0
+      ],
+      "all_components": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          2
+        ]
+      ],
+      "first_only": [
+        [
+          0,
+          1
+        ]
+      ]
+    }
+  ],
+  "hashes_before": {
+    "/tmp/mhgp10-audit-pool-head.X45WLs/build/libmhgp10_core.a": "1aaacd63dcb76413b61fc6eb983c52bdaa9a32f9a059a906af2254061beac5da",
+    "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe": "1c2ce0d73c5871783f2fc3e04a3940a53250af7a0d60a1689ec8a4c3a9787a85",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/check_native.py": "8e64fc679183b4b3626903352703e501fcd9efb6d82e85f7993f5bf5bc917783",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/probe.cpp": "4156c87f6a6fad646274cd447d7c4641cd6388eda939d276992763a8da7d5d32",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/arith/geometry.cpp": "0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/arith/geometry.hpp": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/arith/wide.hpp": "9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/catalogue/catalogue.hpp": "2f47beb9dfc1e59e3ee4c3f412de76de2f4872940d7dccdfb327ba5f6ce35229",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/catalogue/generator.cpp": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/catalogue/support.hpp": "7cc62930f623e99b598954c6b9f2f5e73e4ee4f0438426c55d18041d56d1a11d",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/cloud/cloud.cpp": "9cfe9f5b7c86eef3430d9d3d4835ebab5c70add30bf57480edbad1e830f44679",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/cloud/cloud.hpp": "b462545a6aaa86329a0122f05bd1b4fdd2a0cbd7e294218087ba472a8539ef2f",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/cloud/site_tree.cpp": "32296818941943102cf7afbaef6665ffc80f5ca5564a274ad00ae25e8c096eec",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/cloud/site_tree.hpp": "3cb0a70d7a05a6665e0c59676eccbe1b3ac16097ed336fc0007a97ad6bbb8f35",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/core/buffer.cpp": "d4d67d329a0fadc59ab0870c094f380a1a501b369a0da4915cc8a5e66dfe5d81",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/core/buffer.hpp": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/core/reasons.def": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/head/head.cpp": "f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/head/head.hpp": "f2710f309a201bc1094dcb49af7acc418ca33b1887f8373d8934f965d072c5e9",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/points/dendrogram.cpp": "44711c93473cc31b675b5da29c07645d7c8a7cf686b540681a3da7e7b7c673d4",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/points/dendrogram.hpp": "3162508b979572a6a4da0b3f0c445b09baa5e2fd77ba826a8d57b25711c42d16",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/sched/pool.cpp": "7eecd6757c03fa8184fbcee7a55b26ef312c1df16acac4241e6917328975d72a",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/sched/pool.hpp": "e9eba470b8234eaa7f16626e172f3099ed6a635606639c3734755a6fe92283e5",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/sched/sort.hpp": "a75edebefd74c820615027bd90af578cbbdfdc997589638fc02bb0cb57a5a1db",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/tower/tower.cpp": "0c5b44ae7993e850c5c6cdb63d0c9829847eb70364f40894a3df964f708b88e9",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/tower/tower.hpp": "96c945dc4b1bd21dc0e51817b0d38e41cc0fbddc7b22cd34ae9e6d7244ce228a"
+  },
+  "hashes_after": {
+    "/tmp/mhgp10-audit-pool-head.X45WLs/build/libmhgp10_core.a": "1aaacd63dcb76413b61fc6eb983c52bdaa9a32f9a059a906af2254061beac5da",
+    "/tmp/mhgp10-cover-native-r2.XfedhHF8/probe": "1c2ce0d73c5871783f2fc3e04a3940a53250af7a0d60a1689ec8a4c3a9787a85",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/check_native.py": "8e64fc679183b4b3626903352703e501fcd9efb6d82e85f7993f5bf5bc917783",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/math_catalogue_cover/native_r2/probe.cpp": "4156c87f6a6fad646274cd447d7c4641cd6388eda939d276992763a8da7d5d32",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/arith/geometry.cpp": "0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/arith/geometry.hpp": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/arith/wide.hpp": "9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/catalogue/catalogue.hpp": "2f47beb9dfc1e59e3ee4c3f412de76de2f4872940d7dccdfb327ba5f6ce35229",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/catalogue/generator.cpp": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/catalogue/support.hpp": "7cc62930f623e99b598954c6b9f2f5e73e4ee4f0438426c55d18041d56d1a11d",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/cloud/cloud.cpp": "9cfe9f5b7c86eef3430d9d3d4835ebab5c70add30bf57480edbad1e830f44679",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/cloud/cloud.hpp": "b462545a6aaa86329a0122f05bd1b4fdd2a0cbd7e294218087ba472a8539ef2f",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/cloud/site_tree.cpp": "32296818941943102cf7afbaef6665ffc80f5ca5564a274ad00ae25e8c096eec",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/cloud/site_tree.hpp": "3cb0a70d7a05a6665e0c59676eccbe1b3ac16097ed336fc0007a97ad6bbb8f35",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/core/buffer.cpp": "d4d67d329a0fadc59ab0870c094f380a1a501b369a0da4915cc8a5e66dfe5d81",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/core/buffer.hpp": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/core/reasons.def": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/head/head.cpp": "f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/head/head.hpp": "f2710f309a201bc1094dcb49af7acc418ca33b1887f8373d8934f965d072c5e9",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/points/dendrogram.cpp": "44711c93473cc31b675b5da29c07645d7c8a7cf686b540681a3da7e7b7c673d4",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/points/dendrogram.hpp": "3162508b979572a6a4da0b3f0c445b09baa5e2fd77ba826a8d57b25711c42d16",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/sched/pool.cpp": "7eecd6757c03fa8184fbcee7a55b26ef312c1df16acac4241e6917328975d72a",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/sched/pool.hpp": "e9eba470b8234eaa7f16626e172f3099ed6a635606639c3734755a6fe92283e5",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/sched/sort.hpp": "a75edebefd74c820615027bd90af578cbbdfdc997589638fc02bb0cb57a5a1db",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/tower/tower.cpp": "0c5b44ae7993e850c5c6cdb63d0c9829847eb70364f40894a3df964f708b88e9",
+    "/tmp/mhgp10-audit-pool-head.X45WLs/snapshot/morsehgp3D_v10/src/tower/tower.hpp": "96c945dc4b1bd21dc0e51817b0d38e41cc0fbddc7b22cd34ae9e6d7244ce228a"
+  },
+  "source_closure": true
+}
