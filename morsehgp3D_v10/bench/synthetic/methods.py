@@ -10,19 +10,45 @@ from scipy.spatial import cKDTree
 warnings.filterwarnings('ignore')
 
 
-def tower_labels(build, grid, k, mcs, z=1.0, selection='eom', allow_single=False, threads=4):
+def tower_labels(build, grid, k, mcs, z=1.0, selection='eom', allow_single=False, threads=4, entry='core'):
     exe = os.path.join(build, 'mhgp10_cluster')
     with tempfile.TemporaryDirectory() as tmp:
         src, out = os.path.join(tmp, 'in.u32le'), os.path.join(tmp, 'out.i32le')
         np.ascontiguousarray(grid, dtype='<u4').tofile(src)
         cmd = [exe, src, out, '--k=%d' % k, '--mcs=%d' % mcs, '--z=%r' % float(z), '--selection=' + selection,
-               '--threads=%d' % threads]
+               '--threads=%d' % threads, '--entry=' + entry]
         if allow_single:
             cmd.append('--allow-single')
         r = subprocess.run(cmd, capture_output=True, text=True)
         if r.returncode != 0:
             raise RuntimeError('mhgp10_cluster code %d : %s %s' % (r.returncode, r.stdout, r.stderr))
         return np.fromfile(out, dtype='<i4').astype(np.int64)
+
+
+def tower_labels_batch(build, grid, ks, entries, configs, threads=1):
+    """Un seul appel de mhgp10_cluster : un catalogue a l'ordre max(ks), puis chaque (entree, K) de la tour et chaque
+    configuration de tete (mcs, z, selection, allow_single). Rend {(entree, K, i): etiquettes}. Leve RuntimeError si
+    le binaire refuse (code non nul) : l'appelant retombe alors sur des appels separes."""
+    exe = os.path.join(build, 'mhgp10_cluster')
+    ks, entries = sorted(set(int(k) for k in ks)), list(entries)
+    with tempfile.TemporaryDirectory() as tmp:
+        src, out, cfg = os.path.join(tmp, 'in.u32le'), os.path.join(tmp, 'out.i32le'), os.path.join(tmp, 'cfg')
+        np.ascontiguousarray(grid, dtype='<u4').tofile(src)
+        with open(cfg, 'w') as f:
+            for mcs, z, selection, single in configs:
+                f.write('%d %r %s %d\n' % (int(mcs), float(z), selection, 1 if single else 0))
+        cmd = [exe, src, out, '--k-list=' + ','.join(str(k) for k in ks), '--configs=' + cfg,
+               '--entry=' + ','.join(entries), '--threads=%d' % threads]
+        r = subprocess.run(cmd, capture_output=True, text=True)
+        if r.returncode != 0:
+            raise RuntimeError('mhgp10_cluster code %d : %s %s' % (r.returncode, r.stdout, r.stderr))
+        labels = {}
+        for e in entries:
+            for k in ks:
+                for i in range(len(configs)):
+                    tag = ('.' + e) if len(entries) > 1 else ''
+                    labels[(e, k, i)] = np.fromfile('%s%s.k%d.%d' % (out, tag, k, i), dtype='<i4').astype(np.int64)
+        return labels
 
 
 def hdbscan_labels(grid, min_samples, mcs, selection='eom', alpha=1.0, allow_single=False):

@@ -96,4 +96,9 @@ if(Python3_FOUND)
                    "-DARGS=${PROJECT_SOURCE_DIR}/tests/points/test_cover_entry.py ${PROJECT_BINARY_DIR}"
                    -DEXPECTED=0 -P ${PROJECT_SOURCE_DIR}/cmake/run_expect.cmake)
   set_tests_properties(mhgp10_points_cover PROPERTIES LABELS "gate;points" TIMEOUT 900)
+  add_test(NAME mhgp10_regression_batch_equivalence
+           COMMAND ${CMAKE_COMMAND} -DCMD=${Python3_EXECUTABLE}
+                   "-DARGS=${PROJECT_SOURCE_DIR}/tests/regression/test_batch_equivalence.py ${PROJECT_BINARY_DIR}"
+                   -DEXPECTED=0 -P ${PROJECT_SOURCE_DIR}/cmake/run_expect.cmake)
+  set_tests_properties(mhgp10_regression_batch_equivalence PROPERTIES LABELS "gate;regression" TIMEOUT 900)
 endif()

@@ -9,8 +9,10 @@
 // OUT.k<K>.<i> (les ordres sont independants a catalogue donne).
 // --tree : exporte la hierarchie de points (niveaux, parents, attaches) pour les tetes Python de developpement.
 // --entry=core|cover : entree des points par leur propre rayon K-NN (coeurs, C n X, defaut) ou par premiere
-// couverture (amas discrets), voir TowerParams. --label=vote (avec --entry=cover) : ecrit en plus OUT[...].vote,
-// ou chaque point recoit l'amas retenu qui le couvre par sa boule de plus bas niveau (-1 si aucun).
+// couverture (amas discrets), voir TowerParams. --entry=core,cover : les deux entrees sur le meme catalogue ; les
+// sorties deviennent OUT.<entree>.k<K>.<i> (et l'arbre TREE.<entree>.k<K>). --label=vote (entree cover) : ecrit en
+// plus OUT[...].vote, ou chaque point recoit l'amas retenu qui le couvre par sa boule de plus bas niveau (-1 si
+// aucun).
 // Codes : 0 conforme, 2 refus, 3 invariant viole.
 #include <chrono>
 #include <cstdio>
@@ -28,7 +30,7 @@ int main(int argc, char** argv) {
   unsigned threads = 0;
   ClusterParams cp;
   std::string tree_out, configs;
-  PointEntry entry = PointEntry::core;
+  std::vector<PointEntry> entries;
   bool vote = false;
   std::vector<int> klist;
   for (int i = 3; i < argc; ++i) {
@@ -42,8 +44,9 @@ int main(int argc, char** argv) {
     else if (a.rfind("--threads=", 0) == 0) threads = unsigned(std::stoul(a.substr(10)));
     else if (a.rfind("--tree=", 0) == 0) tree_out = a.substr(7);
     else if (a.rfind("--configs=", 0) == 0) configs = a.substr(10);
-    else if (a == "--entry=core") entry = PointEntry::core;
-    else if (a == "--entry=cover") entry = PointEntry::cover;
+    else if (a == "--entry=core") entries = {PointEntry::core};
+    else if (a == "--entry=cover") entries = {PointEntry::cover};
+    else if (a == "--entry=core,cover") entries = {PointEntry::core, PointEntry::cover};
     else if (a == "--label=vote") vote = true;
     else if (a == "--label=tree") vote = false;
     else if (a.rfind("--k-list=", 0) == 0) {
@@ -83,6 +86,7 @@ int main(int argc, char** argv) {
   sched::Pool pool(threads);
   SiteTree tree(cloud);
   if (klist.empty()) klist.push_back(k);
+  if (entries.empty()) entries.push_back(PointEntry::core);
   int kmax = 0;
   for (int kk : klist) kmax = std::max(kmax, kk);
   CatalogueParams catp;
@@ -115,15 +119,18 @@ int main(int argc, char** argv) {
     }
     std::fclose(c);
   }
-  const bool multi = klist.size() > 1 || !configs.empty();
+  const bool multi = klist.size() > 1 || !configs.empty() || entries.size() > 1;
   double tower_s = 0, head_s = 0;
   size_t clusters = 0;
-  for (int kk : klist) {
+  for (int kk : klist)
+  for (PointEntry entry : entries) {
+    const std::string tag = entries.size() > 1 ? (entry == PointEntry::cover ? ".cover" : ".core") : "";
     const auto a0 = clk::now();
     TowerParams tp;
     tp.kmax = kmax;
     tp.only_order = kk;
     tp.entry = entry;
+    tp.ball_nodes = vote && entry == PointEntry::cover;  // la relation de couverture complete ne sert qu'au vote
     auto tw = build_tower(cloud, tree, cat.value(), tp, pool);
     if (!tw.ok()) {
       std::printf("{\"status\":\"%s\",\"reason\":\"%s\",\"k\":%d}\n", std::string(status_name(tw.outcome().status())).c_str(),
@@ -167,7 +174,7 @@ int main(int argc, char** argv) {
           }
       }
       const std::string path = !multi ? std::string(argv[2])
-                                      : std::string(argv[2]) + ".k" + std::to_string(kk) + "." + std::to_string(i);
+                                      : std::string(argv[2]) + tag + ".k" + std::to_string(kk) + "." + std::to_string(i);
       for (int variant = 0; variant < (lab_vote.empty() ? 1 : 2); ++variant) {
         const std::vector<i32>& lab = variant == 0 ? cl.label : lab_vote;
         std::vector<i32> out(n, -1);
@@ -180,7 +187,7 @@ int main(int argc, char** argv) {
       }
     }
     if (!tree_out.empty()) {
-      FILE* t = std::fopen((tree_out + (multi ? ".k" + std::to_string(kk) : std::string())).c_str(), "w");
+      FILE* t = std::fopen((tree_out + (multi ? tag + ".k" + std::to_string(kk) : std::string())).c_str(), "w");
       if (!t) return 2;
       std::fprintf(t, "levels %zu\n", d.level.size());
       for (double lv : d.level) std::fprintf(t, "%.17g\n", lv);

@@ -1552,37 +1552,56 @@ Result<Tower> build_tower(const Cloud& cloud, const SiteTree& tree, const Catalo
         if (k == 1) continue;
         OrderRun& o = *runs[k];
         OrderForest& out = t.orders[k - 1];
-        out.ball_node.assign(cat.balls(), kNone);
         out.point_cat_rank.assign(n, 0);
-        pool.parallel_for(cat.balls(), 256, [&](u64 b0, u64 e0, unsigned wk) {
-          Scratch& sc = scratch[wk];
-          Facet F;
+        // boule couvrante : poids >= k (poids > positions : multiplicites, refusees en amont)
+        auto covering = [&](u64 b) { return cat.p[b] + cat.u[b] >= k && cat.pop_off[b + 1] - cat.pop_off[b] >= k; };
+        // composante de L_k(niveau de b) qui contient le centre de b : une k-partie quelconque de la boule fermee
+        auto cover_node = [&](u32 b, Scratch& sc, Facet& F) -> u32 {
+          const auto I = cat.interior(b);
+          const auto U = cat.shell(b);
+          size_t i = 0, j = 0;
+          F.n = k;
+          for (u32 m = 0; m < k; ++m) F.s[m] = (j >= U.size() || (i < I.size() && I[i] < U[j])) ? I[i++] : U[j++];
+          const u32 v = resolve(X, o, o.error, F, sc, sc.c[1][k]);
+          return v == kNone ? kNone : ancestor(out, o.jumps, v, cat.rank[b] + 1, sc.walk[k]);  // kNone : erreur
+        };                                                                                      // deja enregistree
+        // premiere boule couvrante de chaque site : plus petit indice (ordre canonique, donc par niveau croissant)
+        std::vector<u32> first(n, kNone);
+        pool.parallel_for(cat.balls(), 4096, [&](u64 b0, u64 e0, unsigned) {
           for (u64 b = b0; b < e0; ++b) {
-            if (cat.p[b] + cat.u[b] < k) continue;
-            const auto I = cat.interior(u32(b));
-            const auto U = cat.shell(u32(b));
-            if (I.size() + U.size() < k) continue;  // poids > positions : multiplicites, refusees en amont
-            size_t i = 0, j = 0;
-            F.n = k;
-            for (u32 m = 0; m < k; ++m) F.s[m] = (j >= U.size() || (i < I.size() && I[i] < U[j])) ? I[i++] : U[j++];
-            u32 v = resolve(X, o, o.error, F, sc, sc.c[1][k]);
-            if (v == kNone) continue;  // erreur deja enregistree pour l'ordre
-            out.ball_node[b] = ancestor(out, o.jumps, v, cat.rank[b] + 1, sc.walk[k]);
+            if (!covering(b)) continue;
+            for (u64 q = cat.pop_off[b]; q < cat.pop_off[b + 1]; ++q) {
+              std::atomic_ref<u32> f(first[cat.pop[q]]);
+              u32 cur = f.load(std::memory_order_relaxed);
+              while (b < cur && !f.compare_exchange_weak(cur, u32(b), std::memory_order_relaxed)) {}
+            }
           }
         });
-        std::vector<u32> first(n, kNone);
-        for (u32 b = 0; b < cat.balls(); ++b)
-          if (out.ball_node[b] != kNone)
-            for (u64 q = cat.pop_off[b]; q < cat.pop_off[b + 1]; ++q)
-              if (first[cat.pop[q]] == kNone) first[cat.pop[q]] = b;
-        for (u32 x = 0; x < n; ++x) {
-          if (first[x] == kNone) {
-            if (!o.error.load()) o.error.store(u32(Reason::census_mismatch) + 1);
-            break;
-          }
-          out.point_node[x] = out.ball_node[first[x]];
-          out.point_cat_rank[x] = cat.rank[first[x]] + 1;
+        if (std::find(first.begin(), first.end(), kNone) != first.end()) {
+          if (!o.error.load()) o.error.store(u32(Reason::census_mismatch) + 1);
+          continue;
         }
+        if (params.ball_nodes) {  // relation de couverture complete (vote) : une resolution par boule couvrante
+          out.ball_node.assign(cat.balls(), kNone);
+          pool.parallel_for(cat.balls(), 256, [&](u64 b0, u64 e0, unsigned wk) {
+            Facet F;
+            for (u64 b = b0; b < e0; ++b)
+              if (covering(b)) out.ball_node[b] = cover_node(u32(b), scratch[wk], F);
+          });
+          for (u32 x = 0; x < n; ++x) out.point_node[x] = out.ball_node[first[x]];
+        } else {  // seules les premieres boules couvrantes : au plus n resolutions
+          std::vector<u32> need(first);
+          std::sort(need.begin(), need.end());
+          need.erase(std::unique(need.begin(), need.end()), need.end());
+          std::vector<u32> node(need.size(), kNone);
+          pool.parallel_for(need.size(), 64, [&](u64 i0, u64 e0, unsigned wk) {
+            Facet F;
+            for (u64 i = i0; i < e0; ++i) node[i] = cover_node(need[i], scratch[wk], F);
+          });
+          for (u32 x = 0; x < n; ++x)
+            out.point_node[x] = node[std::lower_bound(need.begin(), need.end(), first[x]) - need.begin()];
+        }
+        for (u32 x = 0; x < n; ++x) out.point_cat_rank[x] = cat.rank[first[x]] + 1;
       }
     }
     // Entree core : une requete par site ; les k plus proches (cle exacte = distance carree, puis indice) sont le

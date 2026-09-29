@@ -1,0 +1,31 @@
+syn_filaments_space_x1 K=5 rc=0/0 IDENTIQUE 269ab0b0f36accbd
+   old {'prepare_s': 0.0022, 'catalogue_s': 1.8928, 'tower_s': 0.76, 'passes_catalogue_s': [1.8928], 'passes_tower_s': [0.76]}
+   new {'prepare_s': 0.0021, 'catalogue_s': 1.933, 'tower_s': 0.3823, 'passes_catalogue_s': [1.933], 'passes_tower_s': [0.3823]}
+syn_filaments_space_x1 K=10 rc=0/0 IDENTIQUE ed430da44d8169e1
+   old {'prepare_s': 0.0021, 'catalogue_s': 7.6212, 'tower_s': 10.104, 'passes_catalogue_s': [7.6212], 'passes_tower_s': [10.104]}
+   new {'prepare_s': 0.0022, 'catalogue_s': 7.1418, 'tower_s': 3.1898, 'passes_catalogue_s': [7.1418], 'passes_tower_s': [3.1898]}
+syn_clusters_density_x2 K=5 rc=0/0 IDENTIQUE 9414fcd658ac298d
+   old {'prepare_s': 0.0044, 'catalogue_s': 4.6198, 'tower_s': 2.6704, 'passes_catalogue_s': [4.6198], 'passes_tower_s': [2.6704]}
+   new {'prepare_s': 0.011, 'catalogue_s': 4.72, 'tower_s': 1.198, 'passes_catalogue_s': [4.72], 'passes_tower_s': [1.198]}
+syn_clusters_density_x2 K=10 rc=0/0 IDENTIQUE f3d6ec983d6d6733
+   old {'prepare_s': 0.0048, 'catalogue_s': 20.7251, 'tower_s': 40.7493, 'passes_catalogue_s': [20.7251], 'passes_tower_s': [40.7493]}
+   new {'prepare_s': 0.0051, 'catalogue_s': 21.1723, 'tower_s': 13.2842, 'passes_catalogue_s': [21.1723], 'passes_tower_s': [13.2842]}
+syn_shells_space_x1 K=5 rc=0/0 IDENTIQUE d66411cfc14cd4dc
+   old {'prepare_s': 0.0023, 'catalogue_s': 1.2107, 'tower_s': 0.2544, 'passes_catalogue_s': [1.2107], 'passes_tower_s': [0.2544]}
+   new {'prepare_s': 0.0023, 'catalogue_s': 1.2634, 'tower_s': 0.1343, 'passes_catalogue_s': [1.2634], 'passes_tower_s': [0.1343]}
+syn_shells_space_x1 K=10 rc=0/0 IDENTIQUE d5c9f6720bee4829
+   old {'prepare_s': 0.0024, 'catalogue_s': 4.0681, 'tower_s': 2.5282, 'passes_catalogue_s': [4.0681], 'passes_tower_s': [2.5282]}
+   new {'prepare_s': 0.0023, 'catalogue_s': 4.0065, 'tower_s': 0.7138, 'passes_catalogue_s': [4.0065], 'passes_tower_s': [0.7138]}
+lidar02_quarter_x_nonneg_y_nonneg K=5 rc=0/0 IDENTIQUE 693741fa416cfcb8
+   old {'prepare_s': 0.0014, 'catalogue_s': 0.8253, 'tower_s': 0.2299, 'passes_catalogue_s': [0.8253], 'passes_tower_s': [0.2299]}
+   new {'prepare_s': 0.0024, 'catalogue_s': 0.919, 'tower_s': 0.1193, 'passes_catalogue_s': [0.919], 'passes_tower_s': [0.1193]}
+lidar02_quarter_x_nonneg_y_nonneg K=10 rc=0/0 IDENTIQUE ee9f81fbfc68794a
+   old {'prepare_s': 0.0015, 'catalogue_s': 2.8688, 'tower_s': 2.4993, 'passes_catalogue_s': [2.8688], 'passes_tower_s': [2.4993]}
+   new {'prepare_s': 0.003, 'catalogue_s': 2.9584, 'tower_s': 0.7936, 'passes_catalogue_s': [2.9584], 'passes_tower_s': [0.7936]}
+lidar01_quarter_x_neg_y_neg K=5 rc=0/0 IDENTIQUE b1ca06dce5ff09ad
+   old {'prepare_s': 0.0022, 'catalogue_s': 1.5476, 'tower_s': 0.4003, 'passes_catalogue_s': [1.5476], 'passes_tower_s': [0.4003]}
+   new {'prepare_s': 0.0019, 'catalogue_s': 1.4789, 'tower_s': 0.1694, 'passes_catalogue_s': [1.4789], 'passes_tower_s': [0.1694]}
+lidar01_quarter_x_neg_y_neg K=10 rc=0/0 IDENTIQUE 5de425e22a71db0a
+   old {'prepare_s': 0.0021, 'catalogue_s': 5.3584, 'tower_s': 3.1227, 'passes_catalogue_s': [5.3584], 'passes_tower_s': [3.1227]}
+   new {'prepare_s': 0.0021, 'catalogue_s': 5.2623, 'tower_s': 1.0448, 'passes_catalogue_s': [5.2623], 'passes_tower_s': [1.0448]}
+FIN

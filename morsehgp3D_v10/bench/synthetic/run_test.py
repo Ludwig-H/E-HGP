@@ -8,6 +8,11 @@ Lit le preenregistrement (JSON), verifie tout ce qu'il epingle AVANT de generer 
 Puis execute chaque methode figee sur chaque scene. Un refus (exception, code non nul, delai) vaut ARI_s = 0 et
 est compte (colonne `refused`) : aucune scene ni aucune methode n'est jamais omise (EVAL_v2 D8).
 
+Les methodes de la tour d'une scene partagent un seul appel du binaire (un catalogue a l'ordre maximal, puis chaque
+(entree, K) et chaque tete) ; si cet appel est refuse, chaque methode retombe sur son appel separe, et un refus y est
+compte comme ailleurs. `--resume` reprend une execution interrompue : les scenes deja completes dans results.csv sont
+gardees telles quelles, les autres sont calculees (une scene n'est jamais calculee deux fois).
+
   python3 run_test.py --prereg prereg/PREREG_V10_CLUSTER_<date>.json --build <build> --out <dossier> --jobs 4
 Codes : 0 campagne complete ; 2 refus avant calcul (epingle violee) ; 3 campagne incomplete.
 """
@@ -36,7 +41,7 @@ import scenes  # noqa: E402
 
 SCRIPTS = ('scenes.py', 'methods.py', 'metrics.py', 'run_campaign.py', 'run_test.py', 'decide.py')
 COLUMNS = ('unit', 'family', 'level', 'noise', 'n', 'seed', 'points', 'duplicates', 'zhat', 'method', 'ari_s',
-           'ari_nc', 'ami_nc', 'coverage', 'clusters', 'refused', 'reason', 'seconds')
+           'ari_nc', 'ami_nc', 'coverage', 'clusters', 'refused', 'reason', 'seconds', 'shared_seconds')
 
 
 def sha256_file(path):
@@ -95,14 +100,36 @@ def apply_fill(G, labels, fill, k):
     raise ValueError('politique de bruit inconnue ' + fill)
 
 
+def tower_key(m, n, zh):
+    z = zh if m['z'] == 'zhat' else float(m['z'])
+    return ('tower', m.get('entry', 'core'), int(m['k']), mcs_of(m['mcs'], n), z, m['selection'])
+
+
+def tower_batch(prereg_methods, G, n, zh, build, cache):
+    """Toutes les methodes de la tour d'une scene en un seul appel ; rend sa duree. Si le binaire refuse, rien n'est
+    mis en cache et chaque methode retombe sur son appel separe dans run_method."""
+    keys = [tower_key(m, n, zh) for m in prereg_methods if m['kind'] == 'tower']
+    if len(keys) < 2:
+        return 0.0
+    configs = sorted({(k[3], k[4], k[5], False) for k in keys})
+    t0 = time.time()
+    try:
+        labels = methods.tower_labels_batch(build, G, [k[2] for k in keys], sorted({k[1] for k in keys}), configs,
+                                            threads=1)
+    except Exception:
+        return round(time.time() - t0, 3)
+    for k in keys:
+        cache[k] = labels[(k[1], k[2], configs.index((k[3], k[4], k[5], False)))]
+    return round(time.time() - t0, 3)
+
+
 def run_method(m, G, n, zh, build, cache):
     """Etiquettes brutes d'une methode (avant remplissage), avec cache par construction partagee."""
     mcs = mcs_of(m['mcs'], n) if 'mcs' in m else None
     if m['kind'] == 'tower':
-        z = zh if m['z'] == 'zhat' else float(m['z'])
-        key = ('tower', m['k'], mcs, z, m['selection'])
+        key = tower_key(m, n, zh)
         if key not in cache:
-            cache[key] = methods.tower_labels(build, G, int(m['k']), mcs, z, m['selection'], threads=1)
+            cache[key] = methods.tower_labels(build, G, key[2], key[3], key[4], key[5], threads=1, entry=key[1])
         return cache[key]
     if m['kind'] == 'sklearn':
         key = ('sk', m['min_samples'], mcs, m['selection'], m['alpha'])
@@ -117,8 +144,12 @@ def run_method(m, G, n, zh, build, cache):
     raise ValueError('methode inconnue ' + m['kind'])
 
 
+def unit_name(spec):
+    return '%s_n%d_%s_nu%g_s%d' % (spec['family'], spec['n'], spec['level'], spec['noise_fraction'], spec['seed'])
+
+
 def run_unit(spec, prereg, build):
-    unit = '%s_n%d_%s_nu%g_s%d' % (spec['family'], spec['n'], spec['level'], spec['noise_fraction'], spec['seed'])
+    unit = unit_name(spec)
     base = dict(unit=unit, family=spec['family'], level=spec['level'], noise=spec['noise_fraction'], n=spec['n'],
                 seed=spec['seed'])
     out = []
@@ -135,6 +166,8 @@ def run_unit(spec, prereg, build):
         return out
     base.update(points=n, duplicates=dups, zhat=round(zh, 4))
     cache = {}
+    shared = tower_batch(prereg['methods'], G, n, zh, build, cache)
+    base.update(shared_seconds=shared)
     for m in prereg['methods']:
         t0 = time.time()
         try:
@@ -158,6 +191,7 @@ def main():
     ap.add_argument('--build', required=True)
     ap.add_argument('--out', required=True)
     ap.add_argument('--jobs', type=int, default=4)
+    ap.add_argument('--resume', action='store_true')
     args = ap.parse_args()
     with open(args.prereg) as f:
         prereg = json.load(f)
@@ -167,17 +201,43 @@ def main():
             print('REFUS', e, flush=True)
         return 2
     specs, digest = plan_manifest(prereg)
-    os.makedirs(args.out, exist_ok=False)
-    info = dict(prereg=os.path.basename(args.prereg), prereg_sha256=sha256_file(args.prereg), plan_sha256=digest,
-                scenes=len(specs), environment=environment(), host=platform.node(), cpus=os.cpu_count(),
-                started_utc=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), jobs=args.jobs)
     path = os.path.join(args.out, 'results.csv')
-    done, failed = 0, 0
-    with open(path, 'w', newline='') as h:
+    segment = dict(started_utc=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), jobs=args.jobs,
+                   host=platform.node(), cpus=os.cpu_count(), environment=environment())
+    kept = set()
+    if args.resume and os.path.isfile(path):
+        info = json.load(open(os.path.join(args.out, 'run.json')))
+        if info['prereg_sha256'] != sha256_file(args.prereg) or info['plan_sha256'] != digest:
+            print('REFUS reprise : preenregistrement ou plan different', flush=True)
+            return 2
+        rows = list(csv.DictReader(open(path)))
+        names = {m['name'] for m in prereg['methods']}
+        by_unit = {}
+        for r in rows:
+            by_unit.setdefault(r['unit'], set()).add(r['method'])
+        kept = {u for u, ms in by_unit.items() if ms == names}
+        with open(path, 'w', newline='') as h:  # scenes incompletes retirees, recalculees ci-dessous
+            w = csv.DictWriter(h, fieldnames=COLUMNS)
+            w.writeheader()
+            for r in rows:
+                if r['unit'] in kept:
+                    w.writerow({c: r.get(c, '') for c in COLUMNS})
+        segment.update(kept_scenes=len(kept))
+        info.setdefault('segments', []).append(segment)
+    else:
+        os.makedirs(args.out, exist_ok=False)
+        info = dict(prereg=os.path.basename(args.prereg), prereg_sha256=sha256_file(args.prereg), plan_sha256=digest,
+                    scenes=len(specs), segments=[segment])
+        with open(path, 'w', newline='') as h:
+            csv.DictWriter(h, fieldnames=COLUMNS).writeheader()
+    with open(os.path.join(args.out, 'run.json'), 'w') as f:
+        json.dump(info, f, indent=1, sort_keys=True)
+    todo = [s for s in specs if unit_name(s) not in kept]
+    done, failed = len(specs) - len(todo), 0
+    with open(path, 'a', newline='') as h:
         w = csv.DictWriter(h, fieldnames=COLUMNS)
-        w.writeheader()
         with ProcessPoolExecutor(max_workers=args.jobs) as pool:
-            futs = {pool.submit(run_unit, s, prereg, args.build): s for s in specs}
+            futs = {pool.submit(run_unit, s, prereg, args.build): s for s in todo}
             for fu in as_completed(futs):
                 done += 1
                 try:
@@ -185,17 +245,16 @@ def main():
                 except Exception:
                     failed += 1
                     s = futs[fu]
-                    rows = [dict(unit='%s_n%d_%s_nu%g_s%d' % (s['family'], s['n'], s['level'], s['noise_fraction'],
-                                                              s['seed']),
-                                 family=s['family'], level=s['level'], noise=s['noise_fraction'], n=s['n'],
-                                 seed=s['seed'], method=m['name'], ari_s=0.0, ari_nc=0.0, ami_nc=0.0, coverage=0.0,
+                    rows = [dict(unit=unit_name(s), family=s['family'], level=s['level'], noise=s['noise_fraction'],
+                                 n=s['n'], seed=s['seed'], method=m['name'], ari_s=0.0, ari_nc=0.0, ami_nc=0.0, coverage=0.0,
                                  clusters=0, refused=1, reason='worker: ' + traceback.format_exc(limit=1)[-200:],
                                  seconds=0.0) for m in prereg['methods']]
                 for r in rows:
                     w.writerow({c: r.get(c, '') for c in COLUMNS})
                 h.flush()
                 print('%d/%d' % (done, len(specs)), flush=True)
-    info.update(finished_utc=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), worker_failures=failed)
+    segment.update(finished_utc=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), worker_failures=failed,
+                   computed_scenes=len(todo))
     with open(os.path.join(args.out, 'run.json'), 'w') as f:
         json.dump(info, f, indent=1, sort_keys=True)
     return 0 if done == len(specs) else 3

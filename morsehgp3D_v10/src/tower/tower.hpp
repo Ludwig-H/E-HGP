@@ -109,8 +109,9 @@ struct OrderForest {
   std::vector<u32> point_node; // par site : composante d'entree (voir PointEntry)
   std::vector<u64> point_level;// entree core : D_K(x) (entier exact)
   std::vector<u32> point_cat_rank;  // entree cover : rang de noeud (rang du catalogue + 1) du niveau alpha_K(x)^2
-  std::vector<u32> ball_node;       // entree cover : composante de L_K(niveau de b) qui contient le centre de la
-                                    // boule b (kNone si le poids de b est < K) ; relation de couverture des points
+  std::vector<u32> ball_node;       // entree cover, sur demande (TowerParams::ball_nodes) : composante de
+                                    // L_K(niveau de b) qui contient le centre de la boule b (kNone si le poids de b
+                                    // est < K) ; relation de couverture des points
   u64 descents = 0, descent_steps = 0, memo_hits = 0, joins = 0, births = 0, merges = 0;
   OrderStats stats;
 };
@@ -133,6 +134,8 @@ struct TowerParams {
   int kmax = 5;
   bool points = true;  // attaches des points
   PointEntry entry = PointEntry::core;
+  bool ball_nodes = false;  // entree cover : publier aussi ball_node pour toutes les boules (une resolution par
+                            // boule de poids >= K) ; sinon seules les premieres boules couvrantes sont resolues
   int only_order = 0;  // > 0 : ne construire que cet ordre (les ordres sont independants)
   bool verticals = true;  // cartes K -> K - 1 (ignorees si only_order > 0)
 };

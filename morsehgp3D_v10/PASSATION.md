@@ -7,7 +7,7 @@ phase=exploration_v10_hors_registre
 backend=cpu_reference
 profile=quantized_u18_input_only
 public_status=not_claimed
-GCP : non utilisé à ce jour (protocole v10 en troisième tour de corrections, voir plus bas)
+GCP : non utilisé à ce jour ; protocole v10 commité (`11d7ad25f`), première session en préparation
 ```
 
 ## Lire d'abord
@@ -25,7 +25,8 @@ GCP : non utilisé à ce jour (protocole v10 en troisième tour de corrections, 
 | --- | --- | --- |
 | Catalogue critique exact par boîtes de centres (lemmes G, D, C), feuille v2 à masques de dominance (lemmes M, S) | `src/catalogue/generator.cpp` | `mhgp10_catalogue_oracle` ; égalité à la v9 sur 08/000200 K5 et K10 |
 | Tour FULL par morceaux locaux (Gordan) et descente, construite tous ordres ensemble par étages, verticales à pointeurs de saut | `src/tower/tower.cpp` | `mhgp10_tower_oracle` ; dumps identiques au binaire figé `4a3d09d8a` sur 8 entrées ; 1 fil = 4 fils |
-| Hiérarchie de points, entrée `core` (C∩X) ou `cover` (première couverture, amas discrets du théorème 2) | `src/tower/tower.cpp` (attaches) | `mhgp10_tower_oracle`, `mhgp10_points_cover`, `mhgp10_regression_level_collision` |
+| Hiérarchie de points, entrée `core` (C∩X) ou `cover` (première couverture, amas discrets du théorème 2) ; en `cover`, seules les premières boules couvrantes sont résolues (au plus n par ordre) | `src/tower/tower.cpp` (attaches) | `mhgp10_tower_oracle`, `mhgp10_points_cover`, `mhgp10_regression_level_collision`, `mhgp10_regression_batch_equivalence` ; reçu `receipts/cover_attach_first_balls_20260929` |
+| Appel groupé du banc : un catalogue par scène pour tous les K, les deux entrées et toutes les têtes | `cli/mhgp10_cluster.cpp` (`--k-list`, `--entry=core,cover`, `--configs`), `bench/synthetic/run_test.py` | `mhgp10_regression_batch_equivalence` (groupé = séparé, vote = arbre, 1 fil = 4 fils) |
 | Condensation HDBSCAN exacte, EOM, feuilles ; vote de couverture | `src/head/head.cpp`, `cli/mhgp10_cluster.cpp` | `mhgp10_head_condensation_vs_sklearn` |
 | Référence exacte Python | `reference/hgp10_ref.py` | `reference/test_ref.py` |
 
@@ -53,14 +54,19 @@ GCP : non utilisé à ce jour (protocole v10 en troisième tour de corrections, 
      travers K, grâce aux verticales.
    - Campagne de test du lot A (tête C∩X, préenregistrée `e8dd36a91`) : relancée en entier après un redémarrage de
      la machine. Le run interrompu (160/960 scènes) est conservé et doit concorder avec la relance.
-   - La tête v10-b exigera un nouveau préenregistrement, sur un nouvel espace de graines.
+   - La tête v10-b exigera un nouveau préenregistrement, sur un nouvel espace de graines. Le banc est prêt :
+     l'appel groupé partage le catalogue entre tous les K, et `run_test.py --resume` reprend une exécution
+     interrompue sans recalculer une scène.
 2. **Performance LiDAR** (priorité de complexité).
    - La tour est 8 à 14 fois plus rapide. Mesures à 4 fils : K5 de 0,40 à 0,54 s, K10 de 2,8 à 3,9 s, RSS K10 de
      1,8 Go.
    - Le catalogue domine désormais la chaîne : K5 de 2,7 à 3,8 s, K10 de 10 à 14 s à 4 fils.
-   - Aucune mesure G4 à ce jour. Session 1 prête : calibration, mise à l'échelle LiDAR par secteurs, synthétique
-     en régime spatial et en régime de densité. Elle attend que le protocole `gcp-migration/v10_*` soit commité :
-     trois revues adverses, aucun bloquant au troisième tour, cinq majeurs en correction.
+   - En entrée `cover`, l'attache ne résout plus que les premières boules couvrantes : la tour est 2 à 3,5 fois
+     plus rapide dans ce mode, avec des dumps identiques.
+   - Aucune mesure G4 à ce jour. Le protocole `gcp-migration/v10_*` est commité : trois revues adverses, 47
+     scénarios, 8 mutants tués. Session 1 prête : calibration, trames LiDAR entières (tour seule, entrée
+     `cover`, chaîne complète jusqu'aux étiquettes), mise à l'échelle LiDAR par secteurs, synthétique en régime
+     spatial et en régime de densité.
 3. **Multiplicités** dans la tour, Euler pondéré, juges d'échelle (K = 1 contre EMST, Euler à kmax + 2).
 4. Verticales publiées : calculées par la tour, non exposées à la tête.
 
