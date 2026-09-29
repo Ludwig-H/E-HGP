@@ -6,11 +6,14 @@
 //   3. bande passante hote <-> device en memoire epinglee (transfert seul) ;
 //   4. latence d'un lancement de noyau vide suivi de sa synchronisation, et debit de lancements asynchrones.
 // Chaque appel CUDA est verifie ; la premiere erreur arrete la sonde (code 3).
-// Sortie : une ligne JSON sur stdout. Code 0 si l'exactitude tient, 1 sinon, 2 si CUDA est indisponible, 3 si un appel
-// CUDA echoue.
+// Sortie : une seule ligne JSON sur stdout, dont le champ status correspond au code de sortie :
+//   0 ok, 1 i128_mismatch (ecart d'exactitude), 2 no_cuda (aucun peripherique), 3 cuda_error (appel CUDA en echec, y
+//   compris la lecture des proprietes d'un peripherique present), 5 timing_invalid (duree mesuree nulle, negative ou
+//   non finie : aucun debit n'est publie).
 #include <cuda_runtime.h>
 
 #include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <cstdio>
 #include <random>
@@ -68,11 +71,12 @@ static double secs(clk::time_point a, clk::time_point b) { return std::chrono::d
 
 int main() {
   int dev = 0;
-  cudaDeviceProp p;
-  if (cudaGetDeviceCount(&dev) != cudaSuccess || dev == 0 || cudaGetDeviceProperties(&p, 0) != cudaSuccess) {
+  if (cudaGetDeviceCount(&dev) != cudaSuccess || dev == 0) {
     std::printf("{\"status\":\"no_cuda\"}\n");
     return 2;
   }
+  cudaDeviceProp p;
+  CK(cudaGetDeviceProperties(&p, 0));  // peripherique present mais illisible : cuda_error, code 3
   // 1. exactitude i128 sur 16 M paires aleatoires, bornes pleines i64 comprises
   const size_t n = size_t(1) << 24;
   std::mt19937_64 rng(20260929);
@@ -155,15 +159,24 @@ int main() {
   CK(cudaDeviceSynchronize());
   auto t5 = clk::now();
   const cudaError_t err = cudaGetLastError();
+  // Durees : toutes strictement positives et finies, sinon aucun debit n'est publie (status timing_invalid, code 5).
+  const double w_h2d = secs(t0, t1), w_d2h = secs(t1, t2), w_sync = secs(t3, t4), w_async = secs(t4, t5);
+  const bool timing_ok = ms64 > 0 && ms128 > 0 && std::isfinite(ms64) && std::isfinite(ms128) && w_h2d > 0 &&
+                         w_d2h > 0 && w_sync > 0 && w_async > 0 && std::isfinite(w_h2d) && std::isfinite(w_d2h) &&
+                         std::isfinite(w_sync) && std::isfinite(w_async);
+  const int code = bad != 0 ? 1 : (err != cudaSuccess ? 3 : (timing_ok ? 0 : 5));
+  const char* status = code == 1 ? "i128_mismatch" : (code == 3 ? "cuda_error" : (code == 5 ? "timing_invalid" : "ok"));
   const double ops = double(m) * iters;
+  const double z = 0.0;  // debits non publies (0) si une duree est invalide
   std::printf("{\"status\":\"%s\",\"device\":\"%s\",\"cc\":\"%d.%d\",\"sms\":%d,\"global_mem_gib\":%.1f,"
               "\"cuda_error\":\"%s\",\"i128_pairs\":%zu,\"i128_equal_cases\":%zu,\"i128_mismatches\":%zu,"
-              "\"loop64_gops\":%.1f,\"loop128_gops\":%.1f,\"i128_over_i64\":%.2f,\"h2d_gbps\":%.1f,\"d2h_gbps\":%.1f,"
-              "\"launch_sync_us\":%.2f,\"launch_async_us\":%.2f,\"loops\":\"modular_unsigned\"}\n",
-              bad == 0 ? "ok" : "i128_mismatch", p.name, p.major, p.minor, p.multiProcessorCount,
-              double(p.totalGlobalMem) / double(1ull << 30), cudaGetErrorString(err), n, equal, bad,
-              ops / (ms64 * 1e-3) * 1e-9, ops / (ms128 * 1e-3) * 1e-9, double(ms128) / double(ms64),
-              4.0 * bytes / secs(t0, t1) * 1e-9, 4.0 * bytes / secs(t1, t2) * 1e-9, secs(t3, t4) * 1e6 / 1000.0,
-              secs(t4, t5) * 1e6 / 1000.0);
-  return bad == 0 && err == cudaSuccess ? 0 : 1;
+              "\"timing_ok\":%s,\"loop64_gops\":%.1f,\"loop128_gops\":%.1f,\"i128_over_i64\":%.2f,\"h2d_gbps\":%.1f,"
+              "\"d2h_gbps\":%.1f,\"launch_sync_us\":%.2f,\"launch_async_us\":%.2f,\"loops\":\"modular_unsigned\"}\n",
+              status, p.name, p.major, p.minor, p.multiProcessorCount, double(p.totalGlobalMem) / double(1ull << 30),
+              cudaGetErrorString(err), n, equal, bad, timing_ok ? "true" : "false",
+              timing_ok ? ops / (ms64 * 1e-3) * 1e-9 : z, timing_ok ? ops / (ms128 * 1e-3) * 1e-9 : z,
+              timing_ok ? double(ms128) / double(ms64) : z, timing_ok ? 4.0 * bytes / w_h2d * 1e-9 : z,
+              timing_ok ? 4.0 * bytes / w_d2h * 1e-9 : z, timing_ok ? w_sync * 1e6 / 1000.0 : z,
+              timing_ok ? w_async * 1e6 / 1000.0 : z);
+  return code;
 }
