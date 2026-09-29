@@ -1,0 +1,14 @@
+Test project /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.w1AfkDqMWU/build
+    Start 1: mhgp10_unit
+1/2 Test #1: mhgp10_unit ..............................   Passed    1.06 sec
+    Start 9: mhgp10_regression_multiplicity_refusal
+2/2 Test #9: mhgp10_regression_multiplicity_refusal ...   Passed    0.04 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Label Time Summary:
+fast          =   1.09 sec*proc (2 tests)
+gate          =   1.09 sec*proc (2 tests)
+regression    =   0.04 sec*proc (1 test)
+
+Total Test time (real) =   1.10 sec

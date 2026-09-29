@@ -1,0 +1,3 @@
+lidar00_full.u32le: OK
+lidar01_full.u32le: OK
+lidar02_full.u32le: OK

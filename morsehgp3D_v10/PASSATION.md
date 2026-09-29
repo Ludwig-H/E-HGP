@@ -119,6 +119,10 @@ GCP : session 1 le 29 septembre (CPU seul, arrêt certifié TERMINATED), reçu `
      coupées au milieu du plus long côté (arbre binaire). Catalogue identique ; étage des boîtes ×1,12 à ×1,30 en
      local ; `t_frontier` +60 à 100 %, à surveiller sur G4. Les conceptions GPU « arbre » supposaient un octree : à
      revoir.
+   - **Session G4 4** (reçu `receipts/g4_session4_j2c_20260929`, CPU seul, 48 fils) : chaîne complète jusqu'aux
+     étiquettes à K = 5 en 0,22 à 0,26 s (0,46 à 0,56 s le matin), dont 0,02 s de tête. Catalogue et tour : 0,20 à
+     0,25 s à K = 5, 0,86 à 1,13 s à K = 10. Restent pour 100 ms : boîtes (0,10 s), tour (0,05 s), frontière
+     (0,027 s), ordre et assemblage.
    - Suite du plan ordonné du juge des conceptions GPU (hors dépôt, `v10-persist/gpu_design/juge/PLAN.md`) : la
      feuille en en-tête commun CPU/GPU (J3a), puis les feuilles sur GPU, puis l'arbre entier sur GPU. Cibles :
      100 ms à K = 5, 1 s à K = 10.
