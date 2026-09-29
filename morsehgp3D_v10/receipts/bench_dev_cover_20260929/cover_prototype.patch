@@ -1,0 +1,242 @@
+diff -ru -x build /tmp/claude-1000/-workspaces-E-HGP/497c67a8-5e59-434d-a8a7-2dc2144d8af4/scratchpad/morsehgp3D_v10/cli/mhgp10_cluster.cpp morsehgp3D_v10/cli/mhgp10_cluster.cpp
+--- /tmp/claude-1000/-workspaces-E-HGP/497c67a8-5e59-434d-a8a7-2dc2144d8af4/scratchpad/morsehgp3D_v10/cli/mhgp10_cluster.cpp	2026-09-28 20:18:37.000000000 +0000
++++ morsehgp3D_v10/cli/mhgp10_cluster.cpp	2026-09-28 20:38:46.567975107 +0000
+@@ -25,6 +25,8 @@
+   unsigned threads = 0;
+   ClusterParams cp;
+   std::string tree_out, configs;
++  bool cover = false;  // PROTOTYPE : entree des points par premiere couverture
++  bool vote = false;   // PROTOTYPE : etiquette = amas retenu qui couvre le point par sa boule la plus basse
+   std::vector<int> klist;
+   for (int i = 3; i < argc; ++i) {
+     const std::string a = argv[i];
+@@ -37,6 +39,10 @@
+     else if (a.rfind("--threads=", 0) == 0) threads = unsigned(std::stoul(a.substr(10)));
+     else if (a.rfind("--tree=", 0) == 0) tree_out = a.substr(7);
+     else if (a.rfind("--configs=", 0) == 0) configs = a.substr(10);
++    else if (a == "--entry=cover") cover = true;
++    else if (a == "--entry=cap") cover = false;
++    else if (a == "--label=vote") vote = true;
++    else if (a == "--label=tree") vote = false;
+     else if (a.rfind("--k-list=", 0) == 0) {
+       std::string v = a.substr(9);
+       size_t pos = 0;
+@@ -114,6 +120,7 @@
+     TowerParams tp;
+     tp.kmax = kmax;
+     tp.only_order = kk;
++    tp.cover = cover;
+     auto tw = build_tower(cloud, tree, cat.value(), tp, pool);
+     if (!tw.ok()) {
+       std::printf("{\"status\":\"%s\",\"reason\":\"%s\",\"k\":%d}\n", std::string(status_name(tw.outcome().status())).c_str(),
+@@ -128,18 +135,49 @@
+       std::printf("{\"status\":\"invariant_violated\",\"reason\":\"%s\"}\n", std::string(reason_name(v.reason)).c_str());
+       return 3;
+     }
++    // PROTOTYPE vote de couverture : boules couvrantes de chaque site, par niveau croissant (ordre canonique)
++    std::vector<u64> cov_off;
++    std::vector<u32> cov_ball;
++    if (vote && !forest.ball_node.empty()) {
++      const Catalogue& C = cat.value();
++      cov_off.assign(cloud.sites() + 1, 0);
++      for (u32 b = 0; b < C.balls(); ++b)
++        if (forest.ball_node[b] != kNone)
++          for (u64 t = C.pop_off[b]; t < C.pop_off[b + 1]; ++t) ++cov_off[C.pop[t] + 1];
++      for (u32 s = 0; s < cloud.sites(); ++s) cov_off[s + 1] += cov_off[s];
++      cov_ball.resize(cov_off[cloud.sites()]);
++      std::vector<u64> fillc(cov_off.begin(), cov_off.end() - 1);
++      for (u32 b = 0; b < C.balls(); ++b)
++        if (forest.ball_node[b] != kNone)
++          for (u64 t = C.pop_off[b]; t < C.pop_off[b + 1]; ++t) cov_ball[fillc[C.pop[t]]++] = b;
++    }
+     for (size_t i = 0; i < list.size(); ++i) {
+       const Clustering cl = cluster(d, list[i]);
+       clusters = cl.selected.size();
+-      std::vector<i32> out(n, -1);
+-      for (u32 s = 0; s < cloud.sites(); ++s)
+-        for (PointId p : cloud.ids.row(s)) out[idx(p)] = cl.label[s];
++      std::vector<i32> lab_vote;
++      if (!cov_off.empty()) {
++        lab_vote.assign(cloud.sites(), -1);
++        for (u32 s = 0; s < cloud.sites(); ++s) {
++          i32 best = -1;
++          for (u64 t = cov_off[s]; t < cov_off[s + 1] && best < 0; ++t) {
++            const u32 c = cl.tree.node_cluster[forest.ball_node[cov_ball[t]]];
++            if (c != kNone) best = cl.cluster_label[c];
++          }
++          lab_vote[s] = best;
++        }
++      }
+       const std::string path = !multi ? std::string(argv[2])
+                                       : std::string(argv[2]) + ".k" + std::to_string(kk) + "." + std::to_string(i);
+-      FILE* o = std::fopen(path.c_str(), "wb");
+-      if (!o) return 2;
+-      std::fwrite(out.data(), 4, n, o);
+-      std::fclose(o);
++      for (int variant = 0; variant < (lab_vote.empty() ? 1 : 2); ++variant) {
++        const std::vector<i32>& lab = variant == 0 ? cl.label : lab_vote;
++        std::vector<i32> out(n, -1);
++        for (u32 s = 0; s < cloud.sites(); ++s)
++          for (PointId p : cloud.ids.row(s)) out[idx(p)] = lab[s];
++        FILE* o = std::fopen((path + (variant == 0 ? "" : ".vote")).c_str(), "wb");
++        if (!o) return 2;
++        std::fwrite(out.data(), 4, n, o);
++        std::fclose(o);
++      }
+     }
+     if (!tree_out.empty()) {
+       FILE* t = std::fopen((tree_out + (multi ? ".k" + std::to_string(kk) : std::string())).c_str(), "w");
+diff -ru -x build /tmp/claude-1000/-workspaces-E-HGP/497c67a8-5e59-434d-a8a7-2dc2144d8af4/scratchpad/morsehgp3D_v10/src/head/head.cpp morsehgp3D_v10/src/head/head.cpp
+--- /tmp/claude-1000/-workspaces-E-HGP/497c67a8-5e59-434d-a8a7-2dc2144d8af4/scratchpad/morsehgp3D_v10/src/head/head.cpp	2026-09-28 20:18:37.000000000 +0000
++++ morsehgp3D_v10/src/head/head.cpp	2026-09-28 20:37:15.214973096 +0000
+@@ -36,6 +36,7 @@
+ 
+   CondensedTree t;
+   t.point_cluster.assign(d.points(), kNone);
++  t.node_cluster.assign(n, kNone);
+   t.point_lambda.assign(d.points(), 0.0);
+   auto new_cluster = [&](u32 parent, double birth, u64 m) {
+     t.parent.push_back(parent);
+@@ -51,6 +52,7 @@
+     while (!stack.empty()) {
+       const u32 u = stack.back();
+       stack.pop_back();
++      t.node_cluster[u] = c;
+       for (u32 j = att_off[u]; j < att_off[u + 1]; ++j) {
+         const u32 x = att[j];
+         t.point_cluster[x] = c;
+@@ -67,6 +69,7 @@
+   while (!work.empty()) {
+     auto [v, c] = work.back();
+     work.pop_back();
++    t.node_cluster[v] = c;
+     // points attaches directement : sortent a leur niveau d'entree
+     for (u32 j = att_off[v]; j < att_off[v + 1]; ++j) {
+       const u32 x = att[j];
+@@ -148,6 +151,13 @@
+       id[c] = static_cast<i32>(out.selected.size());
+       out.selected.push_back(c);
+     }
++  out.cluster_label.assign(m, -1);
++  for (u32 c = 0; c < m; ++c)
++    for (u32 a = c; a != kNone; a = t.parent[a])
++      if (chosen[a]) {
++        out.cluster_label[c] = id[a];
++        break;
++      }
+   out.label.assign(d.points(), -1);
+   for (u32 x = 0; x < d.points(); ++x) {
+     for (u32 c = t.point_cluster[x]; c != kNone; c = t.parent[c])
+diff -ru -x build /tmp/claude-1000/-workspaces-E-HGP/497c67a8-5e59-434d-a8a7-2dc2144d8af4/scratchpad/morsehgp3D_v10/src/head/head.hpp morsehgp3D_v10/src/head/head.hpp
+--- /tmp/claude-1000/-workspaces-E-HGP/497c67a8-5e59-434d-a8a7-2dc2144d8af4/scratchpad/morsehgp3D_v10/src/head/head.hpp	2026-09-28 20:18:37.000000000 +0000
++++ morsehgp3D_v10/src/head/head.hpp	2026-09-28 20:37:15.214973096 +0000
+@@ -31,11 +31,13 @@
+   std::vector<u64> mass;           // masse a la naissance
+   std::vector<u32> point_cluster;  // point -> cluster d'ou il sort
+   std::vector<double> point_lambda;
++  std::vector<u32> node_cluster;   // PROTOTYPE : noeud du dendrogramme -> cluster condense qui le contient
+ };
+ 
+ struct Clustering {
+   std::vector<i32> label;          // par point du dendrogramme ; -1 = bruit
+   std::vector<u32> selected;       // clusters retenus
++  std::vector<i32> cluster_label;  // PROTOTYPE : cluster condense -> etiquette de son premier ancetre retenu, -1 sinon
+   CondensedTree tree;
+ };
+ 
+diff -ru -x build /tmp/claude-1000/-workspaces-E-HGP/497c67a8-5e59-434d-a8a7-2dc2144d8af4/scratchpad/morsehgp3D_v10/src/tower/tower.cpp morsehgp3D_v10/src/tower/tower.cpp
+--- /tmp/claude-1000/-workspaces-E-HGP/497c67a8-5e59-434d-a8a7-2dc2144d8af4/scratchpad/morsehgp3D_v10/src/tower/tower.cpp	2026-09-28 20:18:37.000000000 +0000
++++ morsehgp3D_v10/src/tower/tower.cpp	2026-09-28 20:37:15.218973096 +0000
+@@ -470,9 +470,59 @@
+     const u32 n = cloud.sites();
+     out.point_node.assign(n, kNone);
+     out.point_level.assign(n, 0);
++    // PROTOTYPE couverture : premiere boule du catalogue (ordre canonique = niveau croissant) dont la boule
++    // fermee contient x et au moins K sites (poids compris) ; son rayon est alpha_K(x), le premier rayon auquel
++    // x est couvert par une composante de L_K (amas discret, theoreme 2 de la these).
++    std::vector<u32> fc;
++    const bool cover = params.cover && k > 1;  // K = 1 : alpha = 0, identique a C n X
++    if (cover) {
++      fc.assign(n, kNone);
++      for (u32 bb = 0; bb < cat.balls(); ++bb) {
++        if (cat.p[bb] + cat.u[bb] < u32(k)) continue;
++        for (u64 t = cat.pop_off[bb]; t < cat.pop_off[bb + 1]; ++t)
++          if (fc[cat.pop[t]] == kNone) fc[cat.pop[t]] = bb;
++      }
++      out.point_cat_rank.assign(n, 0);
++      // toutes les K-parties de la boule fermee b contiennent son centre dans leur region temoin : une seule
++      // resolution par boule donne la composante qui couvre chacun de ses points au niveau de b
++      out.ball_node.assign(cat.balls(), kNone);
++      pool.parallel_for(cat.balls(), 256, [&](u64 b0, u64 e0, unsigned wk) {
++        Scratch& sc = scratch[wk];
++        for (u64 bb = b0; bb < e0; ++bb) {
++          if (cat.p[bb] + cat.u[bb] < u32(k)) continue;
++          Facet F;
++          F.n = u32(k);
++          u32 m = 0;
++          for (u64 t = cat.pop_off[bb]; t < cat.pop_off[bb + 1] && m < u32(k); ++t) F.s[m++] = cat.pop[t];
++          if (m < u32(k)) continue;  // poids > positions : cas pondere, hors prototype
++          F.sort();
++          u32 v = resolve(o, F, sc);
++          if (v == kNone) return;
++          const u32 r = cat.rank[bb] + 1;
++          while (out.parent[v] != kNone && out.rank[out.parent[v]] <= r) v = out.parent[v];
++          out.ball_node[bb] = v;
++        }
++      });
++    }
+     pool.parallel_for(n, 64, [&](u64 b, u64 e, unsigned wk) {
+       Scratch& sc = scratch[wk];
+       for (u64 x = b; x < e; ++x) {
++        if (cover) {
++          const u32 bb = fc[x];
++          if (bb == kNone) {
++            o.error.store(u32(Reason::census_mismatch) + 1);
++            return;
++          }
++          const u32 r = cat.rank[bb] + 1;
++          const u32 v = out.ball_node[bb];
++          if (v == kNone) {
++            o.error.store(u32(Reason::census_mismatch) + 1);
++            return;
++          }
++          out.point_node[x] = v;
++          out.point_cat_rank[x] = r;
++          continue;
++        }
+         const P3& px = g.P[x];
+         g.tree.nearest(px, geom::Center{{0, 0, 0}, 1}, u32(k), sc.near);
+         Facet F;
+@@ -600,7 +650,11 @@
+   };
+   std::vector<Key> keys;
+   for (u32 r : f.rank) keys.push_back({true, r, 0});
+-  for (u64 e : f.point_level) keys.push_back({false, 0, e});
++  if (!f.point_cat_rank.empty()) {
++    for (u32 r : f.point_cat_rank) keys.push_back({true, r, 0});
++  } else {
++    for (u64 e : f.point_level) keys.push_back({false, 0, e});
++  }
+   std::vector<geom::Level> lv;
+   lv.reserve(keys.size());
+   for (const Key& k : keys) lv.push_back(level_of(k));
+diff -ru -x build /tmp/claude-1000/-workspaces-E-HGP/497c67a8-5e59-434d-a8a7-2dc2144d8af4/scratchpad/morsehgp3D_v10/src/tower/tower.hpp morsehgp3D_v10/src/tower/tower.hpp
+--- /tmp/claude-1000/-workspaces-E-HGP/497c67a8-5e59-434d-a8a7-2dc2144d8af4/scratchpad/morsehgp3D_v10/src/tower/tower.hpp	2026-09-28 20:18:37.000000000 +0000
++++ morsehgp3D_v10/src/tower/tower.hpp	2026-09-28 20:37:15.218973096 +0000
+@@ -33,6 +33,8 @@
+   std::vector<u32> lower;      // image verticale dans l'ordre K - 1 (noeud vivant au niveau de creation) ; vide a K = 1
+   std::vector<u32> point_node; // par site : composante qui le contient a son niveau d'entree D_K(x)
+   std::vector<u64> point_level;// par site : D_K(x) (entier exact)
++  std::vector<u32> point_cat_rank;  // mode couverture : rang de noeud du niveau de premiere couverture alpha_K(x)^2
++  std::vector<u32> ball_node;       // mode couverture : composante de L_K(niveau b) contenant le centre de b (kNone si p + u < K)
+   u64 descents = 0, descent_steps = 0, memo_hits = 0, joins = 0, births = 0, merges = 0;
+ };
+ 
+@@ -46,6 +48,7 @@
+   bool points = true;  // attaches C n X
+   int only_order = 0;  // > 0 : ne construire que cet ordre (les ordres sont independants)
+   bool verticals = true;  // cartes K -> K - 1 (ignorees si only_order > 0)
++  bool cover = false;     // PROTOTYPE : entree des points par premiere couverture (amas discrets, theoreme 2)
+ };
+ 
+ Result<Tower> build_tower(const Cloud& cloud, const SiteTree& tree, const Catalogue& cat, const TowerParams& params,

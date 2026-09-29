@@ -1,0 +1,35 @@
+K   methode    tete           bruit       J  anisot bridge filame hetero hierar shells spheri unbala
+1   cap        eom_zzhat      b2     0.7764   0.821  0.886  0.673  0.683  0.517  0.965  0.906  0.759   n: 2000=0.775 8000=0.778
+1   sklearn    eom_a2         b1.5   0.7150   0.664  0.756  0.593  0.692  0.590  0.968  0.694  0.763   n: 2000=0.709 8000=0.721
+
+2   cap        eom_zzhat      b2     0.7640   0.815  0.838  0.686  0.676  0.548  0.974  0.848  0.729   n: 2000=0.762 8000=0.766
+2   cover      eom_zzhat      b1.5   0.7763   0.826  0.874  0.691  0.694  0.504  0.968  0.894  0.760   n: 2000=0.783 8000=0.770
+2   coverVote  eom_zzhat      b1.5   0.7754   0.826  0.874  0.691  0.691  0.504  0.964  0.894  0.759   n: 2000=0.781 8000=0.770
+2   sklearn    leaf_a2        b2     0.7261   0.852  0.902  0.699  0.669  0.481  0.647  0.918  0.641   n: 2000=0.751 8000=0.702
+
+3   cap        eom_zzhat      b2     0.7525   0.819  0.844  0.645  0.676  0.566  0.976  0.771  0.723   n: 2000=0.750 8000=0.755
+3   cover      eom_zzhat      b1.5   0.7831   0.838  0.899  0.698  0.687  0.494  0.966  0.911  0.773   n: 2000=0.786 8000=0.780
+3   coverVote  eom_zzhat      b1.5   0.7816   0.838  0.898  0.697  0.682  0.494  0.962  0.909  0.773   n: 2000=0.784 8000=0.779
+3   sklearn    leaf_a2        b2     0.7479   0.870  0.903  0.741  0.684  0.498  0.707  0.918  0.662   n: 2000=0.767 8000=0.729
+
+5   cap        leaf_z1        b2.5   0.7591   0.883  0.902  0.801  0.671  0.491  0.703  0.919  0.702   n: 2000=0.778 8000=0.740
+5   cover      eom_zzhat      b1.5   0.7782   0.833  0.880  0.705  0.695  0.485  0.962  0.893  0.772   n: 2000=0.787 8000=0.769
+5   coverVote  eom_zzhat      b1.5   0.7760   0.831  0.877  0.704  0.690  0.485  0.958  0.890  0.772   n: 2000=0.785 8000=0.768
+5   sklearn    leaf_a2        b2.5   0.7651   0.883  0.901  0.790  0.664  0.515  0.775  0.917  0.676   n: 2000=0.780 8000=0.750
+
+Ecart couverture - C n X a tete et politique egales (meilleures 5 par K)
+  K=2 eom_zzhat      none  cover=0.7450  delta=+0.0544
+  K=2 eom_z1         none  cover=0.7045  delta=+0.0526
+  K=2 eom_z1         full  cover=0.6859  delta=+0.0296
+  K=2 eom_z1         b1.5  cover=0.7196  delta=+0.0256
+  K=2 eom_z1         b3    cover=0.7033  delta=+0.0246
+  K=3 eom_zzhat      none  cover=0.7535  delta=+0.0770
+  K=3 eom_z1         none  cover=0.7120  delta=+0.0681
+  K=3 eom_z1         full  cover=0.6891  delta=+0.0396
+  K=3 eom_zzhat      full  cover=0.7516  delta=+0.0377
+  K=3 eom_zzhat      b1.5  cover=0.7831  delta=+0.0359
+  K=5 eom_z1         none  cover=0.7115  delta=+0.0985
+  K=5 eom_zzhat      none  cover=0.7582  delta=+0.0818
+  K=5 eom_z1         full  cover=0.6861  delta=+0.0720
+  K=5 eom_z1         b1.5  cover=0.7184  delta=+0.0674
+  K=5 eom_z1         b3    cover=0.7013  delta=+0.0608
