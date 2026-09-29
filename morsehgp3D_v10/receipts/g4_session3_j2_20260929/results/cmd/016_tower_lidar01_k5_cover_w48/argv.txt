@@ -1,0 +1,1 @@
+./mhgp10_tower /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.1AabpmGzaf/data/lidar01_full.u32le --k=5 --threads=48 --entry=cover --repeat=3 

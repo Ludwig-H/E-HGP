@@ -82,8 +82,12 @@ GCP : session 1 le 29 septembre (CPU seul, arrêt certifié TERMINATED), reçu `
      - Bayes 0,895, bassins de la vraie densité (Morse) 0,847, tour 0,816 puis 0,830 avec `asc20_b2` ;
      - le prix du modèle (0,048) est hors de portée de toute méthode de densité ;
      - il reste 0,017 à la tour, surtout sur `anisotropic`, où sklearn en feuilles fait mieux (0,892 contre 0,859).
-   - **Prochaine recherche** (dev) : la sélection sur `anisotropic` ; un a priori de taille autre que √n ; des ordres
-     K plus grands, hors du moteur exact actuel (`kMaxOrder = 10`), à évaluer d'abord sur le témoin MR₂-bord.
+   - **Sélection sur `anisotropic`** (dev local, reçu `receipts/bench_dev_shrink_20260929`) : rétrécir les amas EOM à
+     leurs cœurs ne répare rien. La tour en feuilles égale sklearn sur `anisotropic` (0,887 contre 0,883), mais
+     s'effondre sur `shells` (0,60 contre 0,94). Chaque famille veut sa sélection, et aucune règle fixe essayée
+     (z, feuilles, prominence à la ToMATo, antichaîne mêlée) ne gagne 0,02 en moyenne.
+   - **Prochaine recherche** (dev) : un critère de sélection par scène ; un a priori de taille autre que √n ; des
+     ordres K plus grands, hors du moteur exact actuel (`kMaxOrder = 10`), à évaluer d'abord sur le témoin MR₂-bord.
    - **Corrections de l'audit livrées** : raison de refus propre aux multiplicités (IMP-16, porte
      `mhgp10_regression_multiplicity_refusal`) ; α ≠ 1 refusé hors de `kd_tree`/`ball_tree` dans
      `methods.hdbscan_labels` (IMP-04, α est ignoré en brute dans sklearn 1.9.1) ; refus dev écrits à ARI_s = 0
@@ -98,8 +102,11 @@ GCP : session 1 le 29 septembre (CPU seul, arrêt certifié TERMINATED), reçu `
    - le catalogue passe maintenant de 8,5 s à 1 fil à 0,31 s à 48 fils (×27, contre ×7,7).
    - **J2 livré** (`5565f94fb`, reçu `receipts/catalogue_filter_j2_20260929`) : filtre des nœuds en forme D-loc
      exacte, garde incluse dans la dominance, pré-ignorance par l'enveloppe parente. Le catalogue est identique octet
-     pour octet (10 entrées, 1 et 4 fils), les 9 portes sont vertes. En local à 1 fil : filtre ×3,4 à ×3,8, étage
-     des boîtes ×1,5 à ×1,7. Mesure G4 à faire ; `MHGP10_MARCH` n'est permis sur G4 qu'après la porte ISA v4.
+     pour octet (10 entrées, 1 et 4 fils), les 9 portes sont vertes. Sur G4 (reçu
+     `receipts/g4_session3_j2_20260929`), le catalogue de la trame 02 à K = 5 passe de 8,51 à 4,82 s à 1 fil, et
+     de 0,314 à 0,235 s à 48 fils. Trames entières à 48 fils : 0,23 à 0,29 s à K = 5, 1,02 à 1,29 s à K = 10. La
+     chaîne complète jusqu'aux étiquettes prend 0,38 à 0,48 s, dont 0,15 à 0,18 s de tête. `MHGP10_MARCH` n'est
+     permis sur G4 qu'après la porte ISA v4.
    - Suite du plan ordonné du juge des conceptions GPU (hors dépôt, `v10-persist/gpu_design/juge/PLAN.md`) : la
      feuille en en-tête commun CPU/GPU (J3a), puis les feuilles sur GPU, puis l'arbre entier sur GPU. Cibles :
      100 ms à K = 5, 1 s à K = 10.
