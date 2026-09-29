@@ -2,7 +2,9 @@
 // ordonnanceur (couverture exacte, determinisme, imbrication serialisee), statuts et tampons.
 // Codes : 0 conforme, 1 desaccord d'un juge, 3 plancher non atteint.
 #include <algorithm>
+#include <atomic>
 #include <cstdio>
+#include <functional>
 #include <random>
 #include <string>
 #include <vector>
@@ -170,6 +172,33 @@ void test_pool() {
       for (u32 i = 0; i < 1000; ++i) ok3 &= v[i] == i;
       expect(ok3, "pool reutilisation");
     }
+  }
+}
+
+// Travaux courts enchaines (regression du 29 septembre 2026) : un ouvrier en retard ne doit jamais executer une
+// tranche d'un travail avec la fonction d'un autre, ni lire les champs d'un travail sans synchronisation. Chaque
+// travail a sa propre fonction, gardee en vie, et ses propres compteurs : chaque indice doit etre execute exactement
+// une fois, par la fonction de son travail.
+void test_pool_short_jobs() {
+  // un travail d'un indice suivi d'un travail de 64 : le compteur perime d'un ouvrier en retard (>= 1) tombe alors
+  // dans la plage du travail suivant, qui serait execute deux fois ou par la mauvaise fonction
+  for (unsigned threads : {4u, 8u}) {
+    sched::Pool pool(threads);
+    const u32 jobs = 50000, width = 64;
+    std::vector<std::atomic<u32>> hits(u64(jobs) * width);
+    std::vector<std::function<void(u64, u64, unsigned)>> fns;
+    fns.reserve(jobs);
+    for (u32 j = 0; j < jobs; ++j)
+      fns.emplace_back([&hits, j](u64 b, u64 e, unsigned) {
+        for (u64 i = b; i < e; ++i) hits[u64(j) * width + i].fetch_add(1, std::memory_order_relaxed);
+      });
+    auto size_of = [&](u32 j) -> u32 { return j % 2 ? width : 1 + j % 3; };
+    for (u32 j = 0; j < jobs; ++j) pool.parallel_for(size_of(j), 1, fns[j]);
+    u64 bad = 0;
+    for (u32 j = 0; j < jobs; ++j)
+      for (u32 i = 0; i < width; ++i) bad += hits[u64(j) * width + i].load() != (i < size_of(j) ? 1u : 0u);
+    if (bad) std::printf("pool travaux courts : %llu cases fausses a %u fils\n", (unsigned long long)bad, threads);
+    expect(bad == 0, "pool travaux courts enchaines");
   }
 }
 
@@ -365,6 +394,7 @@ int main() {
   test_cloud();
   test_wide();
   test_pool();
+  test_pool_short_jobs();
   test_status_and_buffer();
   if (failures) {
     std::printf("unit_failures %d\n", failures);

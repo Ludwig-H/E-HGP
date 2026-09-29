@@ -1,0 +1,16 @@
+Porte unitaire « pool travaux courts enchaines » (tests/unit/unit_main.cpp) contre l'ancien pool, 6 executions puis 3
+executions detaillees, le 29 septembre 2026 :
+
+ECHEC pool travaux courts enchaines unit_failures 2
+ECHEC pool travaux courts enchaines unit_failures 1
+ECHEC pool travaux courts enchaines unit_failures 2
+ECHEC pool travaux courts enchaines unit_failures 1
+ECHEC pool travaux courts enchaines unit_failures 1
+ECHEC pool travaux courts enchaines unit_failures 2
+pool travaux courts : 2 cases fausses a 8 fils
+pool travaux courts : 2 cases fausses a 4 fils
+pool travaux courts : 6 cases fausses a 8 fils
+pool travaux courts : 2 cases fausses a 8 fils
+
+Avec le pool corrige : 6 executions sur 6 « unit_ok ». Sous ThreadSanitizer (setarch -R), porte unitaire verte et
+aucun avertissement.

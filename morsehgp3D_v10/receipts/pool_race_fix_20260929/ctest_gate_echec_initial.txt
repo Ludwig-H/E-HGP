@@ -1,0 +1,45 @@
+Test project /workspaces/E-HGP/build/v10-wt
+    Start 1: mhgp10_unit
+1/9 Test #1: mhgp10_unit ..............................   Passed    0.34 sec
+    Start 2: mhgp10_catalogue_oracle
+2/9 Test #2: mhgp10_catalogue_oracle ..................***Failed  147.79 sec
+ECART K=1 n=18 : refus {"status":"invariant_violated","reason":"census_mismatch"}
+  [(6, 4, 0), (4, 4, 0), (4, 2, 0), (3, 5, 0), (3, 0, 0), (5, 5, 0), (0, 6, 0), (2, 2, 0), (2, 6, 0), (6, 0, 0), (5, 4, 0), (1, 6, 0), (3, 6, 0), (3, 3, 0), (4, 1, 0), (2, 4, 0), (4, 5, 0), (6, 2, 0)]
+catalogue_oracle_checks 161 fails 1 balls 14095
+
+CMake Error at /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/cmake/run_expect.cmake:18 (message):
+  code de sortie 1, attendu 0
+
+
+
+    Start 3: mhgp10_tower_oracle
+3/9 Test #3: mhgp10_tower_oracle ......................   Passed  169.01 sec
+    Start 4: mhgp10_head_condensation_vs_sklearn
+4/9 Test #4: mhgp10_head_condensation_vs_sklearn ......   Passed    8.19 sec
+    Start 5: mhgp10_regression_level_collision
+5/9 Test #5: mhgp10_regression_level_collision ........   Passed    8.33 sec
+    Start 6: mhgp10_points_cover
+6/9 Test #6: mhgp10_points_cover ......................   Passed   13.74 sec
+    Start 7: mhgp10_regression_batch_equivalence
+7/9 Test #7: mhgp10_regression_batch_equivalence ......   Passed   40.00 sec
+    Start 8: mhgp10_regression_mreach_border
+8/9 Test #8: mhgp10_regression_mreach_border ..........   Passed    2.22 sec
+    Start 9: mhgp10_regression_multiplicity_refusal
+9/9 Test #9: mhgp10_regression_multiplicity_refusal ...   Passed    0.08 sec
+
+89% tests passed, 1 tests failed out of 9
+
+Label Time Summary:
+fast          =   0.42 sec*proc (2 tests)
+gate          = 389.71 sec*proc (9 tests)
+head          =   8.19 sec*proc (1 test)
+oracle        = 316.80 sec*proc (2 tests)
+points        =  13.74 sec*proc (1 test)
+regression    =  50.63 sec*proc (4 tests)
+
+Total Test time (real) = 389.73 sec
+
+The following tests FAILED:
+	  2 - mhgp10_catalogue_oracle (Failed)
+Errors while running CTest
+CTEST_EXIT 8

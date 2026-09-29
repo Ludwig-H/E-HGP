@@ -25,14 +25,13 @@ Pool::~Pool() {
   for (auto& t : workers_) t.join();
 }
 
-void Pool::run_chunks(unsigned id) {
+void Pool::run_chunks(Job& job, unsigned id) {
   const bool was = tls_in_region;
   tls_in_region = true;
   for (;;) {
-    const u64 begin = next_.fetch_add(grain_, std::memory_order_relaxed);
-    if (begin >= n_) break;
-    const u64 end = std::min(n_, begin + grain_);
-    (*job_)(begin, end, id);
+    const u64 begin = job.next.fetch_add(job.grain, std::memory_order_relaxed);
+    if (begin >= job.n) break;
+    (*job.body)(begin, std::min(job.n, begin + job.grain), id);
   }
   tls_in_region = was;
 }
@@ -40,17 +39,19 @@ void Pool::run_chunks(unsigned id) {
 void Pool::worker_loop(unsigned id) {
   u64 seen = 0;
   for (;;) {
+    Job* job;
     {
       std::unique_lock<std::mutex> lock(mutex_);
-      wake_.wait(lock, [&] { return stop_ || generation_ != seen; });
+      wake_.wait(lock, [&] { return stop_ || (current_ != nullptr && generation_ != seen); });
       if (stop_) return;
       seen = generation_;
-      ++active_;
+      job = current_;
+      ++job->users;
     }
-    run_chunks(id);
+    run_chunks(*job, id);
     {
       std::lock_guard<std::mutex> lock(mutex_);
-      if (--active_ == 0) done_.notify_all();
+      if (--job->users == 0) done_.notify_all();
     }
   }
 }
@@ -63,19 +64,23 @@ void Pool::parallel_for(u64 n, u64 grain, const std::function<void(u64, u64, uns
     for (u64 b = 0; b < n; b += grain) body(b, std::min(n, b + grain), 0);
     return;
   }
+  // Un ouvrier en retard ne voit jamais les champs d'un autre travail : il capture le descripteur sous le verrou, et
+  // l'appelant ferme la capture avant d'attendre ceux qui l'ont pris (regression du 29 septembre 2026 : un ouvrier
+  // inscrit apres la fin d'un travail lisait le compteur du suivant et en executait des tranches deux fois).
+  Job job;
+  job.body = &body;
+  job.n = n;
+  job.grain = grain;
   {
     std::lock_guard<std::mutex> lock(mutex_);
-    job_ = &body;
-    n_ = n;
-    grain_ = grain;
-    next_.store(0, std::memory_order_relaxed);
+    current_ = &job;
     ++generation_;
   }
   wake_.notify_all();
-  run_chunks(0);
+  run_chunks(job, 0);
   std::unique_lock<std::mutex> lock(mutex_);
-  done_.wait(lock, [&] { return active_ == 0; });
-  job_ = nullptr;
+  current_ = nullptr;
+  done_.wait(lock, [&] { return job.users == 0; });
 }
 
 }  // namespace mhgp10::sched

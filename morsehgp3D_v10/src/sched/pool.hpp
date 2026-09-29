@@ -34,17 +34,22 @@ class Pool {
   u64 nested_calls() const { return nested_.load(std::memory_order_relaxed); }
 
  private:
+  // Descripteur d'un travail, propre a un appel de parallel_for. Un ouvrier ne le lit qu'apres l'avoir capture sous
+  // mutex_ ; l'appelant ferme la capture (current_ = nullptr) avant d'attendre que users retombe a 0.
+  struct Job {
+    const std::function<void(u64, u64, unsigned)>* body = nullptr;
+    u64 n = 0, grain = 1;
+    std::atomic<u64> next{0};
+    unsigned users = 0;  // ouvriers qui l'ont capture et ne l'ont pas rendu (sous mutex_)
+  };
   void worker_loop(unsigned id);
-  void run_chunks(unsigned id);
+  static void run_chunks(Job& job, unsigned id);
 
   std::vector<std::thread> workers_;
   std::mutex mutex_;
   std::condition_variable wake_;
   std::condition_variable done_;
-  const std::function<void(u64, u64, unsigned)>* job_ = nullptr;
-  u64 n_ = 0, grain_ = 1;
-  std::atomic<u64> next_{0};
-  unsigned active_ = 0;
+  Job* current_ = nullptr;  // travail ouvert a la capture (sous mutex_)
   u64 generation_ = 0;
   bool stop_ = false;
   std::atomic<u64> nested_{0};

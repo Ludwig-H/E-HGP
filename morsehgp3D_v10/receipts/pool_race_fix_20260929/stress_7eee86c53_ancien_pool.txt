@@ -1,0 +1,8 @@
+threads=2 runs=400 refus=0
+{"status":"invariant_violated","reason":"census_mismatch"}
+
+threads=2 runs=400 refus=1
+threads=2 runs=400 refus=0
+threads=2 runs=400 refus=0
+threads=2 runs=400 refus=0
+threads=2 runs=400 refus=0

@@ -1,0 +1,18 @@
+Extrait du rapport ThreadSanitizer tel qu'imprime le 29 septembre 2026 (binaire mhgp10_catalogue du worktree a
+7eee86c53, build RelWithDebInfo -DMHGP10_TSAN=ON dans /tmp/v10-tsan, lance par
+TSAN_OPTIONS="halt_on_error=1 exitcode=66" setarch x86_64 -R mhgp10_catalogue cas18_coplanaire_k1.u32le --k=1 --threads=4,
+deuxieme execution) :
+
+WARNING: ThreadSanitizer: data race (pid=752862)
+  Read of size 8 at 0x7fffffffca88 by thread T2:
+    #0 mhgp10::sched::Pool::run_chunks(unsigned int) src/sched/pool.cpp:33
+    #1 mhgp10::sched::Pool::worker_loop(unsigned int) src/sched/pool.cpp:50
+  Previous write of size 8 at 0x7fffffffca88 by main thread (mutexes: write M0):
+    #0 mhgp10::sched::Pool::parallel_for(...) src/sched/pool.cpp:69
+    #1 mhgp10::build_catalogue(...) src/catalogue/generator.cpp:844
+    #2 main cli/mhgp10_catalogue.cpp:60
+  Location is stack of main thread.
+SUMMARY: ThreadSanitizer: data race src/sched/pool.cpp:33 in mhgp10::sched::Pool::run_chunks(unsigned int)
+
+pool.cpp:33 = « if (begin >= n_) break; » (lecture de n_ sans verrou) ; pool.cpp:69 = « n_ = n; » (ecriture sous
+le verrou par le parallel_for suivant).
