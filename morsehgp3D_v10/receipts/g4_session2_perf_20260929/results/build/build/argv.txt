@@ -1,0 +1,1 @@
+cmake --build /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.4Vi1guIaW1/build -j 48 --target mhgp10_catalogue mhgp10_tower mhgp10_cluster mhgp10_unit 

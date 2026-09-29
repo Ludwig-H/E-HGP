@@ -1,0 +1,11 @@
+Test project /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.4Vi1guIaW1/build
+    Start 1: mhgp10_unit
+1/1 Test #1: mhgp10_unit ......................   Passed    0.22 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Label Time Summary:
+fast    =   0.22 sec*proc (1 test)
+gate    =   0.22 sec*proc (1 test)
+
+Total Test time (real) =   0.22 sec

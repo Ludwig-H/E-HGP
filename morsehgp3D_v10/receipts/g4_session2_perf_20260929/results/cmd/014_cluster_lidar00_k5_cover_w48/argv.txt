@@ -1,0 +1,1 @@
+./mhgp10_cluster /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.4Vi1guIaW1/data/lidar00_full.u32le /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.4Vi1guIaW1/results/cmd/014_cluster_lidar00_k5_cover_w48/files/labels.i32le --k=5 --mcs=200 --z=3 --selection=eom --entry=cover --threads=48 

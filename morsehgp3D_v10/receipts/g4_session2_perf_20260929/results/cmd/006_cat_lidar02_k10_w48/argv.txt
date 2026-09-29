@@ -1,0 +1,1 @@
+./mhgp10_catalogue /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.4Vi1guIaW1/data/lidar02_full.u32le --k=10 --threads=48 

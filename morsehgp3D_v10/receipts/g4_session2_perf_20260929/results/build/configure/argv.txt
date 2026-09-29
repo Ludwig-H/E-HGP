@@ -1,0 +1,1 @@
+cmake -S /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.4Vi1guIaW1/src/morsehgp3D_v10 -B /home/louis_hauseux_gmail_com/ehgp-v10/ehgp-v10.4Vi1guIaW1/build -DCMAKE_BUILD_TYPE=Release 

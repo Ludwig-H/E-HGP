@@ -1,0 +1,248 @@
+{
+ "schema": "ehgp.v10.session_plan.v1",
+ "build_timeout_seconds": 600,
+ "build_targets": [
+  "mhgp10_catalogue",
+  "mhgp10_tower",
+  "mhgp10_cluster",
+  "mhgp10_unit"
+ ],
+ "commands": [
+  {
+   "name": "gates_cpp",
+   "timeout_seconds": 300,
+   "argv": [
+    "ctest",
+    "--no-tests=error",
+    "-L",
+    "fast",
+    "--output-on-failure"
+   ]
+  },
+  {
+   "name": "cat_lidar02_k5_w1",
+   "timeout_seconds": 420,
+   "argv": [
+    "./mhgp10_catalogue",
+    "{data}/lidar02_full.u32le",
+    "--k=5",
+    "--threads=1"
+   ]
+  },
+  {
+   "name": "cat_lidar02_k5_w12",
+   "timeout_seconds": 240,
+   "argv": [
+    "./mhgp10_catalogue",
+    "{data}/lidar02_full.u32le",
+    "--k=5",
+    "--threads=12"
+   ]
+  },
+  {
+   "name": "cat_lidar02_k5_w24",
+   "timeout_seconds": 240,
+   "argv": [
+    "./mhgp10_catalogue",
+    "{data}/lidar02_full.u32le",
+    "--k=5",
+    "--threads=24"
+   ]
+  },
+  {
+   "name": "cat_lidar02_k5_w48",
+   "timeout_seconds": 240,
+   "argv": [
+    "./mhgp10_catalogue",
+    "{data}/lidar02_full.u32le",
+    "--k=5",
+    "--threads=48"
+   ]
+  },
+  {
+   "name": "cat_lidar02_k10_w24",
+   "timeout_seconds": 300,
+   "argv": [
+    "./mhgp10_catalogue",
+    "{data}/lidar02_full.u32le",
+    "--k=10",
+    "--threads=24"
+   ]
+  },
+  {
+   "name": "cat_lidar02_k10_w48",
+   "timeout_seconds": 300,
+   "argv": [
+    "./mhgp10_catalogue",
+    "{data}/lidar02_full.u32le",
+    "--k=10",
+    "--threads=48"
+   ]
+  },
+  {
+   "name": "tower_lidar00_k5_w48",
+   "timeout_seconds": 300,
+   "argv": [
+    "./mhgp10_tower",
+    "{data}/lidar00_full.u32le",
+    "--k=5",
+    "--threads=48",
+    "--no-points",
+    "--repeat=3"
+   ]
+  },
+  {
+   "name": "tower_lidar00_k10_w48",
+   "timeout_seconds": 300,
+   "argv": [
+    "./mhgp10_tower",
+    "{data}/lidar00_full.u32le",
+    "--k=10",
+    "--threads=48",
+    "--no-points",
+    "--repeat=3"
+   ]
+  },
+  {
+   "name": "tower_lidar01_k5_w48",
+   "timeout_seconds": 300,
+   "argv": [
+    "./mhgp10_tower",
+    "{data}/lidar01_full.u32le",
+    "--k=5",
+    "--threads=48",
+    "--no-points",
+    "--repeat=3"
+   ]
+  },
+  {
+   "name": "tower_lidar01_k10_w48",
+   "timeout_seconds": 300,
+   "argv": [
+    "./mhgp10_tower",
+    "{data}/lidar01_full.u32le",
+    "--k=10",
+    "--threads=48",
+    "--no-points",
+    "--repeat=3"
+   ]
+  },
+  {
+   "name": "tower_lidar02_k5_w48",
+   "timeout_seconds": 300,
+   "argv": [
+    "./mhgp10_tower",
+    "{data}/lidar02_full.u32le",
+    "--k=5",
+    "--threads=48",
+    "--no-points",
+    "--repeat=3"
+   ]
+  },
+  {
+   "name": "tower_lidar02_k10_w48",
+   "timeout_seconds": 300,
+   "argv": [
+    "./mhgp10_tower",
+    "{data}/lidar02_full.u32le",
+    "--k=10",
+    "--threads=48",
+    "--no-points",
+    "--repeat=3"
+   ]
+  },
+  {
+   "name": "tower_lidar00_k5_cover_w48",
+   "timeout_seconds": 240,
+   "argv": [
+    "./mhgp10_tower",
+    "{data}/lidar00_full.u32le",
+    "--k=5",
+    "--threads=48",
+    "--entry=cover",
+    "--repeat=3"
+   ]
+  },
+  {
+   "name": "cluster_lidar00_k5_cover_w48",
+   "timeout_seconds": 240,
+   "argv": [
+    "./mhgp10_cluster",
+    "{data}/lidar00_full.u32le",
+    "{out}/labels.i32le",
+    "--k=5",
+    "--mcs=200",
+    "--z=3",
+    "--selection=eom",
+    "--entry=cover",
+    "--threads=48"
+   ]
+  },
+  {
+   "name": "tower_lidar01_k5_cover_w48",
+   "timeout_seconds": 240,
+   "argv": [
+    "./mhgp10_tower",
+    "{data}/lidar01_full.u32le",
+    "--k=5",
+    "--threads=48",
+    "--entry=cover",
+    "--repeat=3"
+   ]
+  },
+  {
+   "name": "cluster_lidar01_k5_cover_w48",
+   "timeout_seconds": 240,
+   "argv": [
+    "./mhgp10_cluster",
+    "{data}/lidar01_full.u32le",
+    "{out}/labels.i32le",
+    "--k=5",
+    "--mcs=200",
+    "--z=3",
+    "--selection=eom",
+    "--entry=cover",
+    "--threads=48"
+   ]
+  },
+  {
+   "name": "tower_lidar02_k5_cover_w48",
+   "timeout_seconds": 240,
+   "argv": [
+    "./mhgp10_tower",
+    "{data}/lidar02_full.u32le",
+    "--k=5",
+    "--threads=48",
+    "--entry=cover",
+    "--repeat=3"
+   ]
+  },
+  {
+   "name": "cluster_lidar02_k5_cover_w48",
+   "timeout_seconds": 240,
+   "argv": [
+    "./mhgp10_cluster",
+    "{data}/lidar02_full.u32le",
+    "{out}/labels.i32le",
+    "--k=5",
+    "--mcs=200",
+    "--z=3",
+    "--selection=eom",
+    "--entry=cover",
+    "--threads=48"
+   ]
+  },
+  {
+   "name": "tower_lidar02_k5_w24",
+   "timeout_seconds": 240,
+   "argv": [
+    "./mhgp10_tower",
+    "{data}/lidar02_full.u32le",
+    "--k=5",
+    "--threads=24",
+    "--no-points",
+    "--repeat=3"
+   ]
+  }
+ ]
+}

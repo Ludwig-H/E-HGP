@@ -73,26 +73,16 @@ GCP : session 1 le 29 septembre (CPU seul, arrêt certifié TERMINATED), reçu `
      fusion `bench/g4/merge_sessions.py`).
    - **Prochaine recherche** (dev) : une tête multi-K sur les verticales (tranche oblique à la Rolle–Scoccola) ; une
      sélection qui ne dépende pas de la taille.
-2. **Performance LiDAR** (priorité de complexité).
-   - La tour est 8 à 14 fois plus rapide. Mesures à 4 fils : K5 de 0,40 à 0,54 s, K10 de 2,8 à 3,9 s, RSS K10 de
-     1,8 Go.
-   - Le catalogue domine désormais la chaîne : K5 de 2,7 à 3,8 s, K10 de 10 à 14 s à 4 fils.
-   - En entrée `cover`, l'attache ne résout plus que les premières boules couvrantes : la tour est 2 à 3,5 fois
-     plus rapide dans ce mode, avec des dumps identiques.
-   - Session G4 1, CPU seul (le GPU n'a pas servi, la v10 n'a pas de voie CUDA), 48 fils :
-     - K = 5 : de 0,58 à 1,19 s par trame (catalogue et tour) ; chaîne complète jusqu'aux étiquettes en entrée
-       `cover`, de 0,75 à 1,39 s ;
-     - K = 10 : de 2,5 à 4,6 s ;
-     - compteurs linéaires en croissance spatiale (exposant 1,00 à 1,05), de 1,03 à 1,31 en croissance de
-       densité, proches de 1 sur les secteurs LiDAR coupés au capteur.
-   - Le catalogue fait 85 à 93 % du temps et ne passe pas l'échelle : ×7,7 de 1 à 48 fils. Son assemblage final
-     était séquentiel ; il est désormais parallèle, avec un catalogue identique octet pour octet (reçu
-     `receipts/catalogue_parallel_assembly_20260929`).
-   - Prochain levier : l'énumération des boîtes. Le filtrage des nœuds internes compte 592 M tests de gardes et de
-     dominance, contre 133 M dans les feuilles. Deux voies : réduire ce travail sur CPU, ou porter l'arbre de boîtes
-     sur GPU.
-   - La VM n'a ni `pip` ni `numpy` : les portes Python ne tournent qu'en local, et une campagne sklearn ne peut pas
-     y tourner en l'état.
+2. **Performance LiDAR** (priorité de complexité). Mesures G4 en CPU seul, 48 fils (reçus
+   `receipts/g4_session1_20260929` puis `receipts/g4_session2_perf_20260929`) :
+   - après l'assemblage parallèle et la frontière pilotée par la charge (J1), catalogue et tour à K = 5 en **0,31 à
+     0,37 s** par trame (0,58 à 1,19 s avant) et en 1,2 à 1,5 s à K = 10 (2,5 à 4,6 s) ;
+   - chaîne complète jusqu'aux étiquettes à K = 5 : 0,46 à 0,56 s ;
+   - le catalogue passe maintenant de 8,5 s à 1 fil à 0,31 s à 48 fils (×27, contre ×7,7).
+   - Plan ordonné du juge des conceptions GPU (hors dépôt, `v10-persist/gpu_design/juge/PLAN.md`) : J2, le coût par
+     test du filtre de l'arbre (environ 33 cycles contre 2,4 possibles), puis la feuille en en-tête commun CPU/GPU,
+     puis les feuilles sur GPU, puis l'arbre entier sur GPU. Cibles : 100 ms à K = 5, 1 s à K = 10.
+   - La VM n'a ni pip ni numpy : Python portable et binaires statiques envoyés comme données (`bench/g4/`).
 3. **Multiplicités** dans la tour, Euler pondéré, juges d'échelle (K = 1 contre EMST, Euler à kmax + 2).
 4. Verticales publiées : calculées par la tour, non exposées à la tête.
 
