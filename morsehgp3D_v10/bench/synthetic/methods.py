@@ -51,6 +51,27 @@ def tower_labels_batch(build, grid, ks, entries, configs, threads=1):
         return labels
 
 
+def mreach_labels(build, grid, k, alpha, entry, configs, threads=1):
+    """Hierarchie d'atteignabilite mutuelle d'HDBSCAN (temoin mhgp10_mreach_cluster, egal a sklearn aux egalites de
+    plateau pres), parametre alpha de sklearn, entree 'core' (coeurs) ou 'border' (regle des points-bord, analogue
+    de l'entree cover de la tour), puis la MEME tete v10 que la tour pour chaque configuration (mcs, z, selection,
+    allow_single). Diagnostic « meme tete, meme entree » : isole l'apport de l'objet exact. Rend une liste
+    d'etiquettes, une par configuration."""
+    exe = os.path.join(build, 'mhgp10_mreach_cluster')
+    with tempfile.TemporaryDirectory() as tmp:
+        src, out, cfg = os.path.join(tmp, 'in.u32le'), os.path.join(tmp, 'out.i32le'), os.path.join(tmp, 'cfg')
+        np.ascontiguousarray(grid, dtype='<u4').tofile(src)
+        with open(cfg, 'w') as f:
+            for mcs, z, selection, single in configs:
+                f.write('%d %r %s %d\n' % (int(mcs), float(z), selection, 1 if single else 0))
+        cmd = [exe, src, out, '--source=mreach', '--k=%d' % int(k), '--alpha=%d' % int(alpha), '--entry=' + entry,
+               '--configs=' + cfg, '--threads=%d' % threads]
+        r = subprocess.run(cmd, capture_output=True, text=True)
+        if r.returncode != 0:
+            raise RuntimeError('mhgp10_mreach_cluster code %d : %s %s' % (r.returncode, r.stdout, r.stderr))
+        return [np.fromfile('%s.%d' % (out, i), dtype='<i4').astype(np.int64) for i in range(len(configs))]
+
+
 def hdbscan_labels(grid, min_samples, mcs, selection='eom', alpha=1.0, allow_single=False):
     from sklearn.cluster import HDBSCAN
     model = HDBSCAN(min_cluster_size=int(mcs), min_samples=int(min_samples), cluster_selection_method=selection,

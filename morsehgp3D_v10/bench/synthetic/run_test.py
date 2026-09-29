@@ -72,6 +72,10 @@ def check_pins(prereg, build):
     exe = os.path.join(build, 'mhgp10_cluster')
     if not os.path.isfile(exe) or sha256_file(exe) != prereg['pins']['mhgp10_cluster_sha256']:
         errors.append('binaire mhgp10_cluster different de l epingle')
+    if any(m['kind'] == 'mreach' for m in prereg['methods']):
+        exe = os.path.join(build, 'mhgp10_mreach_cluster')
+        if not os.path.isfile(exe) or sha256_file(exe) != prereg['pins'].get('mhgp10_mreach_cluster_sha256'):
+            errors.append('binaire mhgp10_mreach_cluster different de l epingle')
     for name in SCRIPTS:
         want = prereg['pins']['scripts_sha256'].get(name)
         if want is None or sha256_file(os.path.join(HERE, name)) != want:
@@ -123,6 +127,29 @@ def tower_batch(prereg_methods, G, n, zh, build, cache):
     return round(time.time() - t0, 3)
 
 
+def mreach_key(m, n, zh):
+    z = zh if m['z'] == 'zhat' else float(m['z'])
+    return ('mreach', int(m['k']), int(m['alpha']), m['entry'], mcs_of(m['mcs'], n), z, m['selection'])
+
+
+def mreach_batch(prereg_methods, G, n, zh, build, cache):
+    """Methodes « meme tete » sur la hierarchie d'HDBSCAN : un appel par (K, alpha, entree), toutes les tetes a la
+    fois ; si l'appel est refuse, rien n'est mis en cache et chaque methode retombe sur son appel separe."""
+    groups = {}
+    for m in prereg_methods:
+        if m['kind'] == 'mreach':
+            key = mreach_key(m, n, zh)
+            groups.setdefault(key[1:4], set()).add((key[4], key[5], key[6], False))
+    for (k, alpha, entry), cfgs in groups.items():
+        cfgs = sorted(cfgs)
+        try:
+            labels = methods.mreach_labels(build, G, k, alpha, entry, cfgs, threads=1)
+        except Exception:
+            continue
+        for (mcs, z, sel, _), lab in zip(cfgs, labels):
+            cache[('mreach', k, alpha, entry, mcs, z, sel)] = lab
+
+
 def run_method(m, G, n, zh, build, cache):
     """Etiquettes brutes d'une methode (avant remplissage), avec cache par construction partagee."""
     mcs = mcs_of(m['mcs'], n) if 'mcs' in m else None
@@ -130,6 +157,12 @@ def run_method(m, G, n, zh, build, cache):
         key = tower_key(m, n, zh)
         if key not in cache:
             cache[key] = methods.tower_labels(build, G, key[2], key[3], key[4], key[5], threads=1, entry=key[1])
+        return cache[key]
+    if m['kind'] == 'mreach':
+        key = mreach_key(m, n, zh)
+        if key not in cache:
+            cache[key] = methods.mreach_labels(build, G, key[1], key[2], key[3], [(key[4], key[5], key[6], False)],
+                                               threads=1)[0]
         return cache[key]
     if m['kind'] == 'sklearn':
         key = ('sk', m['min_samples'], mcs, m['selection'], m['alpha'])
@@ -167,7 +200,9 @@ def run_unit(spec, prereg, build):
     base.update(points=n, duplicates=dups, zhat=round(zh, 4))
     cache = {}
     shared = tower_batch(prereg['methods'], G, n, zh, build, cache)
-    base.update(shared_seconds=shared)
+    t_mr = time.time()
+    mreach_batch(prereg['methods'], G, n, zh, build, cache)
+    base.update(shared_seconds=round(shared + time.time() - t_mr, 3))
     for m in prereg['methods']:
         t0 = time.time()
         try:

@@ -74,7 +74,7 @@ u32 find(std::vector<u32>& p, u32 x) {
 
 }  // namespace
 
-PointDendrogram mreach_dendrogram(const SiteTree& tree, u64 k, sched::Pool& pool, u64 alpha) {
+PointDendrogram mreach_dendrogram(const SiteTree& tree, u64 k, sched::Pool& pool, u64 alpha, bool border) {
   const Cloud& c = tree.cloud();
   const u32 n = c.sites();
   std::vector<u64> core = core_distances2(tree, k, pool);
@@ -85,9 +85,33 @@ PointDendrogram mreach_dendrogram(const SiteTree& tree, u64 k, sched::Pool& pool
     if (x.a != y.a) return x.a < y.a;
     return x.b < y.b;
   });
+  // Entree « bord » : meilleur site porteur y de chaque point x (departage par indice), calcule avant la table des
+  // niveaux, qui doit contenir les niveaux d'entree e(x).
+  std::vector<u64> entry(core);
+  std::vector<u32> carrier(n);
+  std::iota(carrier.begin(), carrier.end(), 0u);
+  if (border)
+    pool.parallel_for(n, 256, [&](u64 b0, u64 e0, unsigned) {
+      std::vector<u32> near;
+      for (u64 x = b0; x < e0; ++x) {
+        if (core[x] == 0) continue;
+        tree.within(c.x[x], c.y[x], c.z[x], core[x] - 1, near);
+        for (u32 y : near) {
+          if (y == x) continue;
+          const i64 dx = i64(c.x[x]) - i64(c.x[y]), dy = i64(c.y[x]) - i64(c.y[y]), dz = i64(c.z[x]) - i64(c.z[y]);
+          const u64 e = std::max(core[y], static_cast<u64>(dx * dx + dy * dy + dz * dz));
+          // strictement meilleur que l'entree propre ; entre porteurs de meme niveau, le plus petit indice
+          if (e < entry[x] || (e == entry[x] && carrier[x] != x && y < carrier[x])) {
+            entry[x] = e;
+            carrier[x] = y;
+          }
+        }
+      }
+    });
   // Table des niveaux : valeurs entieres exactes distinctes.
   std::vector<u64> vals(core.begin(), core.end());
   for (const Edge& e : mst) vals.push_back(e.w);
+  if (border) vals.insert(vals.end(), entry.begin(), entry.end());
   std::sort(vals.begin(), vals.end());
   vals.erase(std::unique(vals.begin(), vals.end()), vals.end());
   auto rank_of = [&](u64 v) { return static_cast<u32>(std::lower_bound(vals.begin(), vals.end(), v) - vals.begin()); };
@@ -150,6 +174,26 @@ PointDendrogram mreach_dendrogram(const SiteTree& tree, u64 k, sched::Pool& pool
       a = b;
     }
     i = j;
+  }
+  if (border) {
+    // attache de x : plus haut ancetre de la feuille du porteur de niveau <= e(x) (sauts binaires ; les niveaux
+    // croissent vers la racine, donc le parent de l'ancetre retenu est de niveau > e(x))
+    const u32 nn = d.nodes();
+    std::vector<std::vector<u32>> up(1, d.parent);
+    for (u32 j = 1; (1u << j) < nn; ++j) {
+      std::vector<u32> nxt(nn, kNone);
+      for (u32 v = 0; v < nn; ++v) nxt[v] = up[j - 1][v] == kNone ? kNone : up[j - 1][up[j - 1][v]];
+      up.push_back(std::move(nxt));
+    }
+    for (u32 x = 0; x < n; ++x) {
+      if (carrier[x] == x) continue;
+      const u32 re = rank_of(entry[x]);
+      u32 v = carrier[x];  // feuille du site porteur (noeud d'indice le site)
+      for (int j = int(up.size()) - 1; j >= 0; --j)
+        if (up[j][v] != kNone && d.node_rank[up[j][v]] <= re) v = up[j][v];
+      d.point_node[x] = v;
+      d.point_rank[x] = re;
+    }
   }
   return d;
 }

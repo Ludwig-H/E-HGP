@@ -10,6 +10,8 @@ pese autant. Pour une paire (M, A) : Delta_s = ARI_s(M) - ARI_s(A), Delta = sum_
 « M bat A » : p_Holm < alpha, Delta >= delta_min, borne basse de l'IC > 0, Delta > 0 a chaque taille, aucune perte
 significative d'AMI, refus de M <= refusal_cap. « A bat M » : p_Holm < alpha et Delta < 0. Sinon : pas de
 difference significative, avec la non-inferiorite a la marge delta_min si la borne basse de l'IC >= -delta_min.
+Familles secondaires (`decision.secondary`, facultatives) : meme regle, Holm dans chaque famille, libelles propres
+(`method_label`, `adversary_label`) ; elles ne changent pas la decision principale.
 
   python3 decide.py --prereg prereg/PREREG_<id>.json --run <dossier de run_test>
 Ecrit <dossier>/DECISION.json et <dossier>/DECISION.md. Codes : 0, 2 (preenregistrement ou run incoherent).
@@ -155,33 +157,49 @@ def main():
     for i, p in enumerate(dec.get('reported', [])):
         out['reported'][p['name']] = dict(p, **compare(units, keys, seed + 7919 + 17 * i, dec, p['method'],
                                                        p['adversary']))
-    lines = []
-    verdicts = {}
-    for pname, s in out['pairs'].items():
-        g = s['guard_ami']
-        guard_loss = g['p'] < alpha and g['delta'] < 0
-        beats = (s['p_holm'] < alpha and s['delta'] > 0 and s['delta'] >= dmin and s['ci'][0] > 0 and
-                 all(v['delta'] > 0 for v in s['by_size'].values()) and not guard_loss and
-                 refusals[s['method']] <= dec['refusal_cap'] * len(keys))
-        if beats:
-            verdict = 'la tour bat HDBSCAN'
-        elif s['p_holm'] < alpha and s['delta'] < 0:
-            verdict = 'HDBSCAN bat la tour'
-        elif s['p_holm'] < alpha and s['delta'] > 0:
-            verdict = 'avantage significatif à la tour, sous la marge ou non uniforme en taille'
-        else:
-            verdict = 'pas de différence significative'
-        verdicts[pname] = verdict
-        margin = ('%.2f' % dmin).replace('.', ',')
-        ni = ('non-infériorité de la tour à la marge %s établie' % margin if s['ci'][0] >= -dmin
-              else 'non-infériorité de la tour non établie')
-        s['verdict'] = verdict
-        lines.append('- %s (%s contre %s) : %s ; Δ = %s [%s ; %s], p_Holm = %s, %d victoires / %d défaites / '
-                     '%d égalités ; %s.' % (pname, s['method'], s['adversary'], verdict, fr(s['delta']),
-                                           fr(s['ci'][0]), fr(s['ci'][1]), fp(s['p_holm']), s['wins'], s['losses'],
-                                           s['ties'], ni))
-    won = [p for p, v in verdicts.items() if v == 'la tour bat HDBSCAN']
-    lost = [p for p, v in verdicts.items() if v == 'HDBSCAN bat la tour']
+    def judge_pairs(pairs, mlab, alab):
+        res, text = {}, []
+        for pname, s in pairs.items():
+            g = s['guard_ami']
+            guard_loss = g['p'] < alpha and g['delta'] < 0
+            beats = (s['p_holm'] < alpha and s['delta'] > 0 and s['delta'] >= dmin and s['ci'][0] > 0 and
+                     all(v['delta'] > 0 for v in s['by_size'].values()) and not guard_loss and
+                     refusals[s['method']] <= dec['refusal_cap'] * len(keys))
+            if beats:
+                verdict = '%s bat %s' % (mlab, alab)
+            elif s['p_holm'] < alpha and s['delta'] < 0:
+                verdict = '%s bat %s' % (alab[0].upper() + alab[1:], mlab)
+            elif s['p_holm'] < alpha and s['delta'] > 0:
+                verdict = 'avantage significatif à %s, sous la marge ou non uniforme en taille' % mlab
+            else:
+                verdict = 'pas de différence significative'
+            res[pname] = 'gagne' if beats else ('perd' if s['p_holm'] < alpha and s['delta'] < 0 else 'autre')
+            margin = ('%.2f' % dmin).replace('.', ',')
+            ni = ('non-infériorité de %s à la marge %s établie' % (mlab, margin) if s['ci'][0] >= -dmin
+                  else 'non-infériorité de %s non établie' % mlab)
+            s['verdict'] = verdict
+            text.append('- %s (%s contre %s) : %s ; Δ = %s [%s ; %s], p_Holm = %s, %d victoires / %d défaites / '
+                        '%d égalités ; %s.' % (pname, s['method'], s['adversary'], verdict, fr(s['delta']),
+                                              fr(s['ci'][0]), fr(s['ci'][1]), fp(s['p_holm']), s['wins'], s['losses'],
+                                              s['ties'], ni))
+        return res, text
+
+    verdicts, lines = judge_pairs(out['pairs'], 'la tour', 'HDBSCAN')
+    out['secondary'] = {}
+    sec_lines = []
+    for fi, fam in enumerate(dec.get('secondary', [])):
+        fp_ = {}
+        for i, p in enumerate(fam['pairs']):
+            fp_[p['name']] = dict(p, **compare(units, keys, seed + 104729 * (fi + 1) + 17 * i, dec, p['method'],
+                                               p['adversary']))
+        for pname, pa in zip(fp_, holm([v['p'] for v in fp_.values()])):
+            fp_[pname]['p_holm'] = pa
+        _, text = judge_pairs(fp_, fam.get('method_label', 'la tour'), fam.get('adversary_label', 'HDBSCAN'))
+        out['secondary'][fam['name']] = fp_
+        sec_lines += ['', 'Famille secondaire « %s » (Holm dans la famille ; sans effet sur la décision principale) :'
+                      % fam['name']] + text
+    won = [p for p, v in verdicts.items() if v == 'gagne']
+    lost = [p for p, v in verdicts.items() if v == 'perd']
     head = ('Banc v10 préenregistré %s, %d scènes de test, comparaison appariée K = min_samples. '
             % (prereg['id'], len(keys)))
     if won and not lost:
@@ -193,6 +211,7 @@ def main():
     else:
         head += 'Aucune revendication de supériorité : pas de différence significative au sens préenregistré.'
     lines.insert(0, head)
+    lines += sec_lines
     lines.append(prereg['attribution_statement'])
     out['statement'] = lines
     with open(os.path.join(args.run, 'DECISION.json'), 'w') as f:
@@ -201,8 +220,10 @@ def main():
           'main.', ''] + lines
     md += ['', '## ARI_s moyen pondéré par cellule', '', '| Méthode | ARI_s | Refus |', '| --- | ---: | ---: |']
     md += ['| %s | %s | %d |' % (m, ('%.4f' % out['mean_ari_s'][m]).replace('.', ','), refusals[m]) for m in names]
-    for group in ('pairs', 'reported'):
-        for pname, s in out[group].items():
+    groups = [('pairs', out['pairs'])] + [('secondary', v) for v in out['secondary'].values()]
+    groups.append(('reported', out['reported']))
+    for group, items in groups:
+        for pname, s in items.items():
             md += ['', '## %s : %s contre %s%s' % (pname, s['method'], s['adversary'],
                                                    '' if group == 'pairs' else ' (descriptif)'), '',
                    '| Strate | Δ | IC 95 % | p |', '| --- | ---: | --- | ---: |',

@@ -3,6 +3,7 @@
 //
 //   mhgp10_cluster IN.u32le OUT.i32le --source=mreach --k=5 --mcs=20 [--z=1] [--selection=eom|leaf]
 //                  [--allow-single] [--threads=0] [--alpha=1|2] [--configs=FILE]
+// --entry=border : entree des points par la regle des points-bord (analogue MR de l'entree cover de la tour).
 // --alpha : parametre alpha de scikit-learn (mreach = max(coeurs, distance / alpha)). --configs : une tete par ligne
 // « mcs z eom|leaf 0|1 », la i-eme ecrite dans OUT.i, toutes sur la meme hierarchie (diagnostic dev : meme tete sur
 // la tour et sur l'atteignabilite mutuelle).
@@ -28,6 +29,7 @@ int main(int argc, char** argv) {
   ClusterParams params;
   unsigned threads = 0;
   u64 alpha = 1;
+  bool border = false;
   std::string configs;
   for (int i = 3; i < argc; ++i) {
     const std::string a = argv[i];
@@ -40,6 +42,8 @@ int main(int argc, char** argv) {
     else if (a == "--allow-single") params.allow_single_cluster = true;
     else if (a.rfind("--threads=", 0) == 0) threads = unsigned(std::stoul(a.substr(10)));
     else if (a.rfind("--alpha=", 0) == 0) alpha = std::stoull(a.substr(8));
+    else if (a == "--entry=border") border = true;
+    else if (a == "--entry=core") border = false;
     else if (a.rfind("--configs=", 0) == 0) configs = a.substr(10);
     else {
       std::fprintf(stderr, "option inconnue %s\n", a.c_str());
@@ -73,7 +77,7 @@ int main(int argc, char** argv) {
     return 2;
   }
   if (alpha < 1 || alpha > 2) return 2;
-  PointDendrogram d = mreach_dendrogram(tree, k, pool, alpha);
+  PointDendrogram d = mreach_dendrogram(tree, k, pool, alpha, border);
   const Outcome v = validate(d);
   if (!v.ok()) {
     std::fprintf(stderr, "dendrogramme invalide %s\n", std::string(reason_name(v.reason)).c_str());
