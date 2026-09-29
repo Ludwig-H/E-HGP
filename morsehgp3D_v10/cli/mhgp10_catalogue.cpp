@@ -75,9 +75,10 @@ int main(int argc, char** argv) {
               std::chrono::duration<double>(t2 - t1).count());
   std::printf("\"catalogue_stages\":{\"t_frontier\":%.4f,\"t_boxes\":%.4f,\"t_order\":%.4f,\"t_assemble\":%.4f,"
               "\"t_collect\":%.4f,\"t_sort\":%.4f,\"t_bands\":%.4f,\"t_compare\":%.4f,\"t_ranks\":%.4f,\"t_copy\":%.4f,"
-              "\"bands\":%llu,\"band_members\":%llu},\"by_q_p\":{",
+              "\"bands\":%llu,\"band_members\":%llu,\"tasks\":%llu,\"max_task_sites\":%llu},\"by_q_p\":{",
               cat.t_frontier, cat.t_boxes, cat.t_order, cat.t_assemble, cat.t_collect, cat.t_sort, cat.t_bands,
-              cat.t_compare, cat.t_ranks, cat.t_copy, (unsigned long long)cat.bands, (unsigned long long)cat.band_members);
+              cat.t_compare, cat.t_ranks, cat.t_copy, (unsigned long long)cat.bands, (unsigned long long)cat.band_members,
+              (unsigned long long)cat.tasks, (unsigned long long)cat.max_task_sites);
   for (int q = 2; q <= 4; ++q) {
     std::printf("%s\"q%d\":[", q > 2 ? "," : "", q);
     for (int p = 0; p < params.kmax; ++p) std::printf("%s%llu", p ? "," : "", static_cast<unsigned long long>(by[q][p]));

@@ -1,0 +1,11 @@
+lidar02_full K=5 ancien=8a850649ff103c1c lpt3=8a850649ff103c1c lpt1=8a850649ff103c1c IDENTIQUES ; grand-livre identique taches 3515 max_sites 238
+lidar02_full K=10 ancien=d6abe0dba4d9be33 lpt3=d6abe0dba4d9be33 lpt1=d6abe0dba4d9be33 IDENTIQUES ; grand-livre identique taches 3555 max_sites 238
+lidar00_full K=5 ancien=3982c3ab79c4a542 lpt3=3982c3ab79c4a542 lpt1=3982c3ab79c4a542 IDENTIQUES ; grand-livre identique taches 1729 max_sites 207
+lidar00_full K=10 ancien=7b2d4055f4cc7004 lpt3=7b2d4055f4cc7004 lpt1=7b2d4055f4cc7004 IDENTIQUES ; grand-livre identique taches 1729 max_sites 207
+lidar01_quarter_x_neg_y_neg K=5 ancien=414aa4d47ffe1c55 lpt3=414aa4d47ffe1c55 lpt1=414aa4d47ffe1c55 IDENTIQUES ; grand-livre identique taches 1812 max_sites 42
+lidar01_quarter_x_neg_y_neg K=10 ancien=7c46e50a72c08087 lpt3=7c46e50a72c08087 lpt1=7c46e50a72c08087 IDENTIQUES ; grand-livre identique taches 1804 max_sites 42
+syn_shells_density_x2 K=5 ancien=fcd0425f8101b278 lpt3=fcd0425f8101b278 lpt1=fcd0425f8101b278 IDENTIQUES ; grand-livre identique taches 1537 max_sites 83
+syn_shells_density_x2 K=10 ancien=8c145ca4ed47628a lpt3=8c145ca4ed47628a lpt1=8c145ca4ed47628a IDENTIQUES ; grand-livre identique taches 1537 max_sites 83
+syn_filaments_space_x4 K=5 ancien=e9408470b9317629 lpt3=e9408470b9317629 lpt1=e9408470b9317629 IDENTIQUES ; grand-livre identique taches 1958 max_sites 166
+syn_filaments_space_x4 K=10 ancien=b9719e2166bb7c92 lpt3=b9719e2166bb7c92 lpt1=219de84c79652b4b DIFFERENTS ; grand-livre identique taches 1966 max_sites 166
+FIN

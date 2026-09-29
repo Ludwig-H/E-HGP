@@ -46,6 +46,7 @@ struct Catalogue {
   double t_frontier = 0, t_boxes = 0, t_order = 0, t_assemble = 0;
   double t_collect = 0, t_sort = 0, t_bands = 0, t_compare = 0, t_ranks = 0, t_copy = 0;  // detail des deux derniers
   u64 bands = 0, band_members = 0;  // bandes flottantes reparees en exact, et leurs boules
+  u64 tasks = 0, max_task_sites = 0;  // taches paralleles de l'arbre, et sites de la plus chargee
 
   u32 balls() const { return static_cast<u32>(rank.size()); }
   std::span<const u32> interior(u32 b) const { return {pop.data() + pop_off[b], n_interior[b]}; }

@@ -9,6 +9,7 @@
 #include <cmath>
 #include <memory>
 #include <mutex>
+#include <numeric>
 
 #include "catalogue/catalogue.hpp"
 #include "sched/sort.hpp"
@@ -35,7 +36,7 @@ struct Rec {
   geom::Level level;
 };
 
-struct Local {
+struct alignas(64) Local {  // une par fil : pas de faux partage entre compteurs voisins
   std::vector<Rec> recs;
   std::vector<u32> pop;
   CatalogueLedger led;
@@ -639,7 +640,40 @@ Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& par
   std::vector<Task> frontier{Task{root, all, 0}};
   std::vector<Local> locals(pool.size());
   const size_t target = size_t(64) * pool.size();
-  while (!frontier.empty() && frontier.size() < target) {
+  // Frontiere pilotee par la charge (GEN_v2 § 10.1) : le cout d'une tache suit le nombre de sites de sa boite, et la
+  // densite LiDAR est tres concentree (une cellule de 2 m porte 6 % des sites de la trame 02). Apres la cible en
+  // nombre, on ne developpe plus que les taches de plus de n / (64 P) sites ; les taches finales partent par charge
+  // decroissante. L'arbre et la sortie (ordre canonique) ne dependent pas de cette coupe.
+  const u64 cap = std::max<u64>(1, u64(n) / target);
+  auto inside = [&](const Task& t) {
+    u64 c = 0;
+    for (u32 s : *t.parent) {
+      const P3& x = C.X[s];
+      c += x.x >= t.box.lo[0] && x.x < t.box.hi[0] && x.y >= t.box.lo[1] && x.y < t.box.hi[1] &&
+           x.z >= t.box.lo[2] && x.z < t.box.hi[2];
+    }
+    return c;
+  };
+  std::vector<Task> kept;
+  std::vector<u64> kept_load;
+  while (!frontier.empty()) {
+    if (frontier.size() >= target) {
+      std::vector<u64> load(frontier.size());
+      pool.parallel_for(frontier.size(), 64, [&](u64 b, u64 e, unsigned) {
+        for (u64 i = b; i < e; ++i) load[i] = inside(frontier[i]);
+      });
+      std::vector<Task> heavy;
+      for (size_t i = 0; i < frontier.size(); ++i) {
+        if (load[i] > cap) {
+          heavy.push_back(std::move(frontier[i]));
+        } else {
+          kept.push_back(std::move(frontier[i]));
+          kept_load.push_back(load[i]);
+        }
+      }
+      frontier.swap(heavy);
+      if (frontier.empty()) break;
+    }
     std::vector<std::vector<Task>> spills(frontier.size());
     pool.parallel_for(frontier.size(), 1, [&](u64 b, u64 e, unsigned wk) {
       for (u64 i = b; i < e; ++i)
@@ -650,12 +684,25 @@ Result<Catalogue> build_catalogue(const Cloud& cloud, const CatalogueParams& par
       for (auto& t : sp) next.push_back(std::move(t));
     frontier.swap(next);
   }
+  for (Task& t : frontier) {  // frontiere epuisee avant la cible (petits nuages)
+    kept_load.push_back(inside(t));
+    kept.push_back(std::move(t));
+  }
+  frontier.clear();
+  std::vector<u32> order(kept.size());
+  std::iota(order.begin(), order.end(), 0u);
+  std::stable_sort(order.begin(), order.end(), [&](u32 a, u32 b) { return kept_load[a] > kept_load[b]; });
+  cat.tasks = kept.size();
+  cat.max_task_sites = kept_load.empty() ? 0 : kept_load[order[0]];
   cat.t_frontier = since(t0);
   t0 = Clock::now();
-  pool.parallel_for(frontier.size(), 1, [&](u64 b, u64 e, unsigned wk) {
-    for (u64 i = b; i < e; ++i) process(C, locals[wk], frontier[i].box, *frontier[i].parent, frontier[i].parent_stag, nullptr);
+  pool.parallel_for(order.size(), 1, [&](u64 b, u64 e, unsigned wk) {
+    for (u64 i = b; i < e; ++i) {
+      const Task& t = kept[order[i]];
+      process(C, locals[wk], t.box, *t.parent, t.parent_stag, nullptr);
+    }
   });
-  frontier.clear();
+  kept.clear();
   cat.t_boxes = since(t0);
   t0 = Clock::now();
   // Echec eventuel (feuille trop large) : refus transactionnel.

@@ -4,7 +4,8 @@
 // --no-points : tour FULL seule (contrat LiDAR), sans attaches C n X. --repeat : R passes chaudes dans le meme
 // processus (catalogue + tour), temps publies par passe.
 // Sortie standard : une ligne JSON (temps par etage, noeuds, fusions, descentes).
-// --dump : par ordre, les noeuds (parent, niveau exact num/den) et les attaches des points.
+// --dump : par ordre, les noeuds (parent, niveau exact num/den, image verticale dans l'ordre K - 1) et les attaches
+// des points (entree cover : rang, puis niveau exact num/den).
 // Codes : 0 conforme, 2 refus, 3 invariant viole.
 #include <chrono>
 #include <cstdio>
@@ -118,9 +119,10 @@ int main(int argc, char** argv) {
   for (size_t i = 0; i < cat_s.size(); ++i) std::printf("%s%.4f", i ? "," : "", cat_s[i]);
   std::printf("],\"catalogue_stages\":{\"t_frontier\":%.4f,\"t_boxes\":%.4f,\"t_order\":%.4f,\"t_assemble\":%.4f,"
               "\"t_collect\":%.4f,\"t_sort\":%.4f,\"t_bands\":%.4f,\"t_compare\":%.4f,\"t_ranks\":%.4f,\"t_copy\":%.4f,"
-              "\"bands\":%llu,\"band_members\":%llu}",
+              "\"bands\":%llu,\"band_members\":%llu,\"tasks\":%llu,\"max_task_sites\":%llu}",
               cat.t_frontier, cat.t_boxes, cat.t_order, cat.t_assemble, cat.t_collect, cat.t_sort, cat.t_bands,
-              cat.t_compare, cat.t_ranks, cat.t_copy, (unsigned long long)cat.bands, (unsigned long long)cat.band_members);
+              cat.t_compare, cat.t_ranks, cat.t_copy, (unsigned long long)cat.bands, (unsigned long long)cat.band_members,
+              (unsigned long long)cat.tasks, (unsigned long long)cat.max_task_sites);
   std::printf(",\"passes_tower_s\":[");
   for (size_t i = 0; i < tow_s.size(); ++i) std::printf("%s%.4f", i ? "," : "", tow_s[i]);
   std::printf("],\"orders\":[");
@@ -182,9 +184,11 @@ int main(int argc, char** argv) {
                      den.c_str(), low);
       }
       for (u32 s = 0; s < cloud.sites(); ++s)
-        if (!ord.point_cat_rank.empty())  // entree cover : niveau = rang de noeud (rang du catalogue + 1)
-          std::fprintf(o, "point %u %u %u %u r%u\n", cloud.x[s], cloud.y[s], cloud.z[s], ord.point_node[s],
-                       ord.point_cat_rank[s]);
+        if (!ord.point_cat_rank.empty()) {  // entree cover : rang de noeud (rang du catalogue + 1), puis niveau exact
+          const geom::Level& lv = cat.level[ord.point_cat_rank[s] - 1];
+          std::fprintf(o, "point %u %u %u %u r%u %s %s\n", cloud.x[s], cloud.y[s], cloud.z[s], ord.point_node[s],
+                       ord.point_cat_rank[s], arith::to_string(lv.num).c_str(), arith::to_string(lv.den).c_str());
+        }
         else
           std::fprintf(o, "point %u %u %u %u %llu\n", cloud.x[s], cloud.y[s], cloud.z[s], ord.point_node[s],
                        (unsigned long long)ord.point_level[s]);
