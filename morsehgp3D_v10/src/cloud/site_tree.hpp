@@ -1,7 +1,11 @@
-// Index unique des sites : arbre binaire implicite sur l'ordre de Morton du Cloud, boites entieres.
+// Index unique des sites : arbre k-d a coupe mediane sur l'axe le plus etendu, boites entieres serrees.
 //
 // Requetes exactes en entiers (coordonnees <= 21 bits : distances carrees < 2^45, i64 suffit) :
 // K-ieme distance ponderee D_K(q) (multiplicites comprises) et voisins dans une boule fermee.
+//
+// Les sorties ne dependent pas de la forme de l'arbre : chaque requete rend un ensemble defini par les seules
+// coordonnees (les `count` plus petites cles exactes departagees par indice, les sites d'une boule fermee
+// tries par indice, D_K(q)). L'arbre ne decide que de l'elagage.
 #pragma once
 
 #include <vector>
@@ -38,16 +42,16 @@ class SiteTree {
 
  private:
   struct Node {
-    u32 lo, hi;       // intervalle de sites [lo, hi)
-    u32 left, right;  // enfants (kNone pour une feuille)
-    i64 bmin[3], bmax[3];
+    double bmin[3], bmax[3];  // boite entiere exacte (entiers < 2^21 representes exactement)
+    u32 lo, hi;               // intervalle [lo, hi) de l'ordre de l'arbre
+    u32 left, right;          // enfants (kNone pour une feuille)
   };
   u32 build(u32 lo, u32 hi);
-  static u64 box_dist2(const Node& nd, i64 qx, i64 qy, i64 qz);
-  static double box_dist2(const Node& nd, const double q[3]);
 
   const Cloud& cloud_;
   std::vector<Node> nodes_;
+  std::vector<u32> site_;               // ordre de l'arbre -> site
+  std::vector<double> px_, py_, pz_;    // coordonnees dans l'ordre de l'arbre
   u32 root_ = kNone;
 };
 

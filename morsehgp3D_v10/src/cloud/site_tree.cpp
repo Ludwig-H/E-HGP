@@ -1,66 +1,63 @@
 #include "cloud/site_tree.hpp"
 
 #include <algorithm>
+#include <numeric>
 #include <queue>
 
 namespace mhgp10 {
 
 SiteTree::SiteTree(const Cloud& cloud) : cloud_(cloud) {
   const u32 n = cloud.sites();
-  nodes_.reserve(2 * (n / kLeaf + 1) + 4);
+  site_.resize(n);
+  std::iota(site_.begin(), site_.end(), 0u);
+  nodes_.reserve(4 * (n / kLeaf + 1) + 4);
   if (n > 0) root_ = build(0, n);
+  px_.resize(n);
+  py_.resize(n);
+  pz_.resize(n);
+  for (u32 t = 0; t < n; ++t) {
+    px_[t] = double(cloud.x[site_[t]]);
+    py_[t] = double(cloud.y[site_[t]]);
+    pz_[t] = double(cloud.z[site_[t]]);
+  }
 }
 
+// Coupe mediane sur l'axe le plus etendu (departage : coordonnee puis indice de site, donc arbre deterministe).
 u32 SiteTree::build(u32 lo, u32 hi) {
+  const Buffer<u32>* c[3] = {&cloud_.x, &cloud_.y, &cloud_.z};
+  u32 mn[3], mx[3];
+  for (int a = 0; a < 3; ++a) mn[a] = mx[a] = (*c[a])[site_[lo]];
+  for (u32 t = lo + 1; t < hi; ++t)
+    for (int a = 0; a < 3; ++a) {
+      const u32 v = (*c[a])[site_[t]];
+      mn[a] = std::min(mn[a], v);
+      mx[a] = std::max(mx[a], v);
+    }
   const u32 id = static_cast<u32>(nodes_.size());
-  nodes_.push_back(Node{lo, hi, kNone, kNone, {0, 0, 0}, {0, 0, 0}});
+  Node nd{};
+  for (int a = 0; a < 3; ++a) {
+    nd.bmin[a] = double(mn[a]);
+    nd.bmax[a] = double(mx[a]);
+  }
+  nd.lo = lo;
+  nd.hi = hi;
+  nd.left = nd.right = kNone;
+  nodes_.push_back(nd);
   if (hi - lo > kLeaf) {
+    int axis = 0;
+    for (int a = 1; a < 3; ++a)
+      if (mx[a] - mn[a] > mx[axis] - mn[axis]) axis = a;
     const u32 mid = lo + (hi - lo) / 2;
+    const Buffer<u32>& ca = *c[axis];
+    std::nth_element(site_.begin() + lo, site_.begin() + mid, site_.begin() + hi, [&](u32 p, u32 q) {
+      return ca[p] != ca[q] ? ca[p] < ca[q] : p < q;
+    });
     const u32 l = build(lo, mid);
     const u32 r = build(mid, hi);
-    Node& nd = nodes_[id];
-    nd.left = l;
-    nd.right = r;
-    for (int a = 0; a < 3; ++a) {
-      nd.bmin[a] = std::min(nodes_[l].bmin[a], nodes_[r].bmin[a]);
-      nd.bmax[a] = std::max(nodes_[l].bmax[a], nodes_[r].bmax[a]);
-    }
-  } else {
-    Node& nd = nodes_[id];
-    const Buffer<u32>* c[3] = {&cloud_.x, &cloud_.y, &cloud_.z};
-    for (int a = 0; a < 3; ++a) {
-      nd.bmin[a] = (*c[a])[lo];
-      nd.bmax[a] = (*c[a])[lo];
-      for (u32 s = lo + 1; s < hi; ++s) {
-        nd.bmin[a] = std::min<i64>(nd.bmin[a], (*c[a])[s]);
-        nd.bmax[a] = std::max<i64>(nd.bmax[a], (*c[a])[s]);
-      }
-    }
+    nodes_[id].left = l;
+    nodes_[id].right = r;
   }
   return id;
-}
-
-u64 SiteTree::box_dist2(const Node& nd, i64 qx, i64 qy, i64 qz) {
-  const i64 q[3] = {qx, qy, qz};
-  u64 d = 0;
-  for (int a = 0; a < 3; ++a) {
-    i64 t = 0;
-    if (q[a] < nd.bmin[a]) t = nd.bmin[a] - q[a];
-    else if (q[a] > nd.bmax[a]) t = q[a] - nd.bmax[a];
-    d += static_cast<u64>(t * t);
-  }
-  return d;
-}
-
-double SiteTree::box_dist2(const Node& nd, const double q[3]) {
-  double d = 0;
-  for (int a = 0; a < 3; ++a) {
-    double t = 0;
-    if (q[a] < double(nd.bmin[a])) t = double(nd.bmin[a]) - q[a];
-    else if (q[a] > double(nd.bmax[a])) t = q[a] - double(nd.bmax[a]);
-    d += t * t;
-  }
-  return d;
 }
 
 namespace {
@@ -73,17 +70,41 @@ void approx_center(const geom::P3& a, const geom::Center& c, double q[3]) {
   q[2] = double(a.z) + static_cast<double>(c.N[2]) / D;
 }
 
-double approx_d2(const double q[3], i64 x, i64 y, i64 z) {
-  const double dx = double(x) - q[0], dy = double(y) - q[1], dz = double(z) - q[2];
+inline double approx_d2(const double q[3], double x, double y, double z) {
+  const double dx = x - q[0], dy = y - q[1], dz = z - q[2];
   return dx * dx + dy * dy + dz * dz;
 }
-}  // namespace
 
-namespace {
+// Distance carree approchee d'un point a une boite. Pour un site de la boite, elle est <= sa distance approchee
+// (arrondi IEEE monotone, memes operandes q) : l'elagage ne perd aucun site de distance approchee <= la borne.
+inline double box_d2(const double bmin[3], const double bmax[3], const double q[3]) {
+  double d = 0;
+  for (int a = 0; a < 3; ++a) {
+    double t = 0;
+    if (q[a] < bmin[a]) t = bmin[a] - q[a];
+    else if (q[a] > bmax[a]) t = q[a] - bmax[a];
+    d += t * t;
+  }
+  return d;
+}
+
+inline u64 box_d2_exact(const double bmin[3], const double bmax[3], i64 qx, i64 qy, i64 qz) {
+  const i64 q[3] = {qx, qy, qz};
+  u64 d = 0;
+  for (int a = 0; a < 3; ++a) {
+    const i64 lo = static_cast<i64>(bmin[a]), hi = static_cast<i64>(bmax[a]);
+    i64 t = 0;
+    if (q[a] < lo) t = lo - q[a];
+    else if (q[a] > hi) t = q[a] - hi;
+    d += static_cast<u64>(t * t);
+  }
+  return d;
+}
+
 // Pile et tampons par fil : aucune allocation par requete en regime etabli.
 struct QueryScratch {
-  std::vector<std::pair<double, u32>> cand;  // (distance approchee, site)
-  std::vector<u32> stack;
+  std::vector<std::pair<double, u32>> cand;  // (distance approchee, position dans l'ordre de l'arbre)
+  std::vector<std::pair<double, u32>> stack;  // (distance approchee de la boite, noeud)
   double best[64];
   int nbest = 0;
 };
@@ -109,8 +130,9 @@ inline void push_best(QueryScratch& q, double d, u32 count) {
 void SiteTree::nearest(const geom::P3& anchor, const geom::Center& c, u32 count,
                        std::vector<std::pair<i128, u32>>& out) const {
   // Exactitude : l'erreur des distances carrees approchees est < kMargin / 2. Soit W la count-ieme plus
-  // petite distance approchee ; tout site parmi les count plus proches (ex aequo compris) a une distance
-  // approchee <= W + kMargin : on les collecte tous, puis on trie exactement (cle i128, puis indice).
+  // petite distance approchee (sur tous les sites) ; tout site parmi les count plus proches (ex aequo compris)
+  // a une distance approchee <= W + kMargin. La borne d'elagage ne descend jamais sous W + kMargin, donc tous
+  // ces sites sont examines ; on les collecte, puis on trie exactement (cle i128, puis indice).
   out.clear();
   if (root_ == kNone || count == 0) return;
   if (count > 64) count = 64;
@@ -119,35 +141,38 @@ void SiteTree::nearest(const geom::P3& anchor, const geom::Center& c, u32 count,
   q.nbest = 0;
   double cq[3];
   approx_center(anchor, c, cq);
-  auto bound = [&]() { return q.nbest == static_cast<int>(count) ? q.best[count - 1] + kMargin : 1e300; };
+  double bound = 1e300;
   q.stack.clear();
-  q.stack.push_back(root_);
+  q.stack.push_back({box_d2(nodes_[root_].bmin, nodes_[root_].bmax, cq), root_});
   while (!q.stack.empty()) {
-    const u32 id = q.stack.back();
+    const auto [bd, id] = q.stack.back();
     q.stack.pop_back();
+    if (bd > bound) continue;
     const Node& nd = nodes_[id];
-    if (box_dist2(nd, cq) > bound()) continue;
     if (nd.left == kNone) {
-      for (u32 s = nd.lo; s < nd.hi; ++s) {
-        const double d = approx_d2(cq, cloud_.x[s], cloud_.y[s], cloud_.z[s]);
-        if (d > bound()) continue;
+      for (u32 t = nd.lo; t < nd.hi; ++t) {
+        const double d = approx_d2(cq, px_[t], py_[t], pz_[t]);
+        if (d > bound) continue;
         push_best(q, d, count);
-        q.cand.push_back({d, s});
+        q.cand.push_back({d, t});
+        if (q.nbest == static_cast<int>(count)) bound = q.best[count - 1] + kMargin;
       }
     } else {
-      const double dl = box_dist2(nodes_[nd.left], cq), dr = box_dist2(nodes_[nd.right], cq);
+      const Node& l = nodes_[nd.left];
+      const Node& r = nodes_[nd.right];
+      const double dl = box_d2(l.bmin, l.bmax, cq), dr = box_d2(r.bmin, r.bmax, cq);
       if (dl <= dr) {  // le plus proche en dernier : depile en premier
-        q.stack.push_back(nd.right);
-        q.stack.push_back(nd.left);
+        if (dr <= bound) q.stack.push_back({dr, nd.right});
+        if (dl <= bound) q.stack.push_back({dl, nd.left});
       } else {
-        q.stack.push_back(nd.left);
-        q.stack.push_back(nd.right);
+        if (dl <= bound) q.stack.push_back({dl, nd.left});
+        if (dr <= bound) q.stack.push_back({dr, nd.right});
       }
     }
   }
-  const double W = bound();
-  for (const auto& [d, site] : q.cand) {
-    if (d > W) continue;
+  for (const auto& [d, t] : q.cand) {
+    if (d > bound) continue;
+    const u32 site = site_[t];
     const geom::P3 z{i64(cloud_.x[site]), i64(cloud_.y[site]), i64(cloud_.z[site])};
     out.push_back({geom::side_key(c, anchor, z), site});
   }
@@ -162,26 +187,39 @@ void SiteTree::closed_ball(const geom::P3& anchor, const geom::Center& c, std::v
   if (root_ == kNone) return;
   double cq[3];
   approx_center(anchor, c, cq);
-  const double r2 = approx_d2(cq, anchor.x, anchor.y, anchor.z) + kMargin;
+  // Erreur absolue de chaque distance carree approchee (site ou ancre) < kMargin / 2 : un site de distance
+  // approchee > r2a + kMargin est exterieur, < r2a - kMargin strictement interieur ; seule la bande entre les deux
+  // est decidee par la cle exacte.
+  const double r2a = approx_d2(cq, double(anchor.x), double(anchor.y), double(anchor.z));
+  const double r2 = r2a + kMargin, inner = r2a - kMargin;
   QueryScratch& q = tls;
   q.stack.clear();
-  q.stack.push_back(root_);
+  q.stack.push_back({box_d2(nodes_[root_].bmin, nodes_[root_].bmax, cq), root_});
   while (!q.stack.empty()) {
-    const u32 id = q.stack.back();
+    const auto [bd, id] = q.stack.back();
     q.stack.pop_back();
+    if (bd > r2) continue;
     const Node& nd = nodes_[id];
-    if (box_dist2(nd, cq) > r2) continue;
     if (nd.left == kNone) {
-      for (u32 s = nd.lo; s < nd.hi; ++s) {
-        if (approx_d2(cq, cloud_.x[s], cloud_.y[s], cloud_.z[s]) > r2) continue;
+      for (u32 t = nd.lo; t < nd.hi; ++t) {
+        const double d = approx_d2(cq, px_[t], py_[t], pz_[t]);
+        if (d > r2) continue;
+        const u32 s = site_[t];
+        if (d < inner) {  // |z - c|^2 - r^2 < d - r2a + 2 * erreur < 0 : strictement interieur, sans calcul exact
+          interior.push_back(s);
+          continue;
+        }
         const geom::P3 z{i64(cloud_.x[s]), i64(cloud_.y[s]), i64(cloud_.z[s])};
         const i128 k = geom::side_key(c, anchor, z);
         if (k < 0) interior.push_back(s);
         else if (k == 0) shell.push_back(s);
       }
     } else {
-      q.stack.push_back(nd.right);
-      q.stack.push_back(nd.left);
+      const Node& l = nodes_[nd.left];
+      const Node& r = nodes_[nd.right];
+      const double dl = box_d2(l.bmin, l.bmax, cq), dr = box_d2(r.bmin, r.bmax, cq);
+      if (dr <= r2) q.stack.push_back({dr, nd.right});
+      if (dl <= r2) q.stack.push_back({dl, nd.left});
     }
   }
   std::sort(interior.begin(), interior.end());
@@ -201,14 +239,15 @@ u64 SiteTree::kth_distance(i64 qx, i64 qy, i64 qz, u64 k) const {
   auto bound = [&]() -> u64 { return held >= k ? best.top().d2 : ~u64{0}; };
   using QE = std::pair<u64, u32>;
   std::priority_queue<QE, std::vector<QE>, std::greater<QE>> open;
-  open.push({box_dist2(nodes_[root_], qx, qy, qz), root_});
+  open.push({box_d2_exact(nodes_[root_].bmin, nodes_[root_].bmax, qx, qy, qz), root_});
   while (!open.empty()) {
     const auto [bd, id] = open.top();
     open.pop();
     if (bd > bound()) break;
     const Node& nd = nodes_[id];
     if (nd.left == kNone) {
-      for (u32 s = nd.lo; s < nd.hi; ++s) {
+      for (u32 t = nd.lo; t < nd.hi; ++t) {
+        const u32 s = site_[t];
         const i64 dx = i64(cloud_.x[s]) - qx, dy = i64(cloud_.y[s]) - qy, dz = i64(cloud_.z[s]) - qz;
         const u64 d2 = static_cast<u64>(dx * dx + dy * dy + dz * dz);
         if (held >= k && d2 >= best.top().d2) continue;
@@ -221,8 +260,8 @@ u64 SiteTree::kth_distance(i64 qx, i64 qy, i64 qz, u64 k) const {
         }
       }
     } else {
-      open.push({box_dist2(nodes_[nd.left], qx, qy, qz), nd.left});
-      open.push({box_dist2(nodes_[nd.right], qx, qy, qz), nd.right});
+      open.push({box_d2_exact(nodes_[nd.left].bmin, nodes_[nd.left].bmax, qx, qy, qz), nd.left});
+      open.push({box_d2_exact(nodes_[nd.right].bmin, nodes_[nd.right].bmax, qx, qy, qz), nd.right});
     }
   }
   return held >= k ? best.top().d2 : ~u64{0};
@@ -236,9 +275,10 @@ void SiteTree::within(i64 qx, i64 qy, i64 qz, u64 r2, std::vector<u32>& out) con
     const u32 id = stack.back();
     stack.pop_back();
     const Node& nd = nodes_[id];
-    if (box_dist2(nd, qx, qy, qz) > r2) continue;
+    if (box_d2_exact(nd.bmin, nd.bmax, qx, qy, qz) > r2) continue;
     if (nd.left == kNone) {
-      for (u32 s = nd.lo; s < nd.hi; ++s) {
+      for (u32 t = nd.lo; t < nd.hi; ++t) {
+        const u32 s = site_[t];
         const i64 dx = i64(cloud_.x[s]) - qx, dy = i64(cloud_.y[s]) - qy, dz = i64(cloud_.z[s]) - qz;
         if (static_cast<u64>(dx * dx + dy * dy + dz * dz) <= r2) out.push_back(s);
       }

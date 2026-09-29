@@ -288,10 +288,79 @@ void test_site_tree() {
   if (checks < 5000) failures += 1000;
 }
 
+
+// Requetes a centre rationnel de SiteTree (nearest, closed_ball) contre la force brute exacte : centres de spheres
+// passant par 1 a 4 sites (centre entier, formes q2, q3, q4 ; ancre sur la sphere), sur grilles grossieres
+// (cospherite, ex aequo), moyennes et u18. La cle exacte decide ; l'arbre (elagage flottant a marge, bande exacte
+// de la boule fermee) ne doit rien perdre ni rien ajouter.
+void test_site_tree_rational() {
+  std::mt19937_64 g(23);
+  u64 checks = 0, shells = 0;
+  for (int t = 0; t < 24; ++t) {
+    const u32 n = 40 + u32(g() % 1200);
+    const u32 span = (t % 3 == 0) ? 12 : ((t % 3 == 1) ? 400 : 250000);
+    std::vector<u32> x(n), y(n), z(n), pid(n);
+    for (u32 i = 0; i < n; ++i) {
+      x[i] = u32(g() % span);
+      y[i] = u32(g() % span);
+      z[i] = u32(g() % span);
+      pid[i] = i;
+    }
+    auto r = prepare_cloud(x, y, z, pid, 18);
+    if (!r.ok()) {
+      expect(false, "tree cloud");
+      continue;
+    }
+    const Cloud& c = r.value();
+    SiteTree tree(c);
+    auto P = [&](u32 s) { return geom::P3{i64(c.x[s]), i64(c.y[s]), i64(c.z[s])}; };
+    std::vector<std::pair<i128, u32>> got, want;
+    std::vector<u32> gi, gu, wi, wu;
+    for (int q = 0; q < 60; ++q) {
+      const int arity = 1 + int(g() % 4);
+      u32 s[4];
+      for (int a = 0; a < 4; ++a) s[a] = u32(g() % c.sites());
+      const geom::P3 anchor = P(s[0]);
+      geom::Center ctr{{0, 0, 0}, 1};
+      bool ok = true;
+      if (arity == 2) geom::center2(P(s[0]), P(s[1]), ctr);
+      else if (arity == 3) ok = geom::center3(P(s[0]), P(s[1]), P(s[2]), ctr);
+      else if (arity == 4) ok = geom::center4(P(s[0]), P(s[1]), P(s[2]), P(s[3]), ctr);
+      if (!ok) continue;
+      want.clear();
+      wi.clear();
+      wu.clear();
+      for (u32 zz = 0; zz < c.sites(); ++zz) {
+        const i128 key = geom::side_key(ctr, anchor, P(zz));
+        want.push_back({key, zz});
+        if (key < 0) wi.push_back(zz);
+        else if (key == 0) wu.push_back(zz);
+      }
+      std::sort(want.begin(), want.end());
+      for (u32 count : {1u, 3u, 7u, 12u}) {
+        tree.nearest(anchor, ctr, count, got);
+        const size_t m = std::min<size_t>(count, want.size());
+        bool same = got.size() == m;
+        for (size_t i = 0; same && i < m; ++i) same = got[i] == want[i];
+        expect(same, "nearest rationnel");
+        ++checks;
+      }
+      tree.closed_ball(anchor, ctr, gi, gu);
+      expect(gi == wi && gu == wu, "closed_ball rationnel");
+      shells += wu.size() > 1;
+      ++checks;
+    }
+  }
+  std::printf("site_tree_rational_checks %llu shells %llu\n", static_cast<unsigned long long>(checks),
+              static_cast<unsigned long long>(shells));
+  if (checks < 4000 || shells < 300) failures += 1000;
+}
+
 }  // namespace
 
 int main() {
   test_site_tree();
+  test_site_tree_rational();
   test_cloud();
   test_wide();
   test_pool();
