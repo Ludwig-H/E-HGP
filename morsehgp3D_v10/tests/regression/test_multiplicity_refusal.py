@@ -1,17 +1,17 @@
 """Regression (29 septembre 2026, audit IMP-16) : une entree a positions dupliquees (multiplicites) est refusee par la
 tour sous sa propre raison, multiplicity_unsupported (statut unsupported_degeneracy), et non plus sous
 shell_quotient_budget. Temoin positif : le meme nuage sans le doublon passe (code 0), la porte n'est donc pas verte
-par vacuite.
+par vacuite. Python nu (ni numpy ni scipy) : la porte tourne aussi sur la VM G4 (label fast).
 
   python3 test_multiplicity_refusal.py <dossier de build>   -> code 0 si conforme, 1 sinon
 """
 import json
 import os
+import random
+import struct
 import subprocess
 import sys
 import tempfile
-
-import numpy as np
 
 
 def run(build, exe, src, extra):
@@ -26,15 +26,20 @@ def run(build, exe, src, extra):
 
 def main():
     build = sys.argv[1]
-    rng = np.random.default_rng(20260929)
-    distinct = rng.integers(0, 1000, size=(40, 3)).astype('<u4')
-    doubled = distinct.copy()
+    rng = random.Random(20260929)
+    distinct = []
+    while len(distinct) < 40:
+        p = (rng.randrange(1000), rng.randrange(1000), rng.randrange(1000))
+        if p not in distinct:
+            distinct.append(p)
+    doubled = list(distinct)
     doubled[7] = doubled[3]  # un doublon de position : un site de multiplicite 2
     failures = 0
     with tempfile.TemporaryDirectory() as tmp:
         for name, cloud, want in (('distinct', distinct, None), ('doublon', doubled, 'multiplicity_unsupported')):
             src = os.path.join(tmp, name)
-            cloud.tofile(src)
+            with open(src, 'wb') as f:
+                f.write(b''.join(struct.pack('<3I', *p) for p in cloud))
             for exe, extra in (('mhgp10_tower', ['--k=5']),
                                ('mhgp10_cluster', [os.path.join(tmp, 'out'), '--k=5', '--mcs=5'])):
                 code, js = run(build, exe, src, extra)
