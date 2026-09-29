@@ -1,0 +1,113 @@
+{
+  "backend": "reference_cpu",
+  "budget": {
+    "build_and_setup_seconds": 1320,
+    "closing_reserve_seconds": 660,
+    "command_timeouts_sum_seconds": 1500,
+    "guest_seconds": 2700,
+    "oversubscribed": true,
+    "ssh_cutoff_before_guest_seconds": 360,
+    "upload_estimate_seconds": 194,
+    "worker_window_seconds": 1726
+  },
+  "commit": "97a0b50ac31478898610b44c1d9ada8741d8ab7c",
+  "data_bytes": 136056776,
+  "data_dir": "/workspaces/E-HGP/build/v10-g4-data-alloc",
+  "data_files": [
+    {
+      "name": "pyenv.u32le",
+      "sha256": "0c22a5d2a861eadc8aaae1dbd901bbf57933ff40d2cd0e454b2076323936b427",
+      "size": 136056776
+    }
+  ],
+  "data_manifest_sha256": "94463926effc51bd5a6ba27380116ab772013f1decfac128a02be5d474884ed6",
+  "gcloud_account": "<compte>",
+  "gcp_mutations": "none",
+  "gcp_reads": [
+    [
+      "config",
+      "get-value",
+      "project"
+    ],
+    [
+      "config",
+      "get-value",
+      "account"
+    ],
+    [
+      "compute",
+      "instances",
+      "describe"
+    ]
+  ],
+  "guest_shutdown_minutes": 45,
+  "local_free_bytes": 2638974976,
+  "max_run_seconds": 3600,
+  "mode": "execute",
+  "os_login_ttl_minutes": 65,
+  "package_bytes": 7274727,
+  "package_sha256": "4fe1fd931ba5808a29f44af3b3ae7ccae656a5fff460a92b40b0342350968089",
+  "plan": {
+    "build_targets": [
+      "mhgp10_cluster",
+      "mhgp10_mreach_cluster"
+    ],
+    "build_timeout_seconds": 600,
+    "commands": [
+      {
+        "argv": [
+          "python3",
+          "{src}/morsehgp3D_v10/bench/g4/pyenv_run.py",
+          "--env",
+          "{data}/pyenv.u32le",
+          "--work",
+          "{build}/pyenv_work",
+          "--",
+          "{src}/morsehgp3D_v10/bench/synthetic/bigk_dev.py",
+          "--build",
+          "{build}",
+          "--out",
+          "{out}/bigk_dev.csv",
+          "--sizes",
+          "32000",
+          "--replicates",
+          "2",
+          "--jobs",
+          "46"
+        ],
+        "name": "bigk_dev",
+        "timeout_seconds": 1500
+      }
+    ],
+    "needs_python": true,
+    "needs_python_deduced": true,
+    "results_cap_bytes": 134217728
+  },
+  "plan_sha256": "99ff054f0334b2378bdaafe2dcb9562f7b54bcd7dd62c503ff846d533161dd3f",
+  "pre_start_generation": "2026-09-29T11:40:08.147-07:00",
+  "protocol_sha256": {
+    "gcp-migration/start_and_verify.sh": "73d76c674c71d997a803587a0b20186f668e7aa44f62d4c8b516e22e13469bc0",
+    "gcp-migration/stop_and_verify.sh": "ddcad77aa995ebb334fd3f341f7bb81ac94f749593fec98f885fb1c4b7956f3c",
+    "gcp-migration/v10_session.py": "60423f8015555ee36c75886f840c2b4a605d84a88cf69bb1dabc984ae634ab1a",
+    "gcp-migration/v10_worker.sh": "a81e81183e84d8df9f705085a1ed803d8d0df8c15e246474bb4ff80ee5cfb1a6"
+  },
+  "public_status": "not_claimed",
+  "python_pins": {
+    "hdbscan": "0.8.44",
+    "numpy": "2.2.6",
+    "scikit-learn": "1.7.2",
+    "scipy": "1.15.3"
+  },
+  "run_dir": "/tmp/ehgp-v10-runs/v10.20260929s6a-8a5b08870d9d",
+  "run_dir_same_filesystem": false,
+  "schema": "ehgp.v10.session_preflight.v3",
+  "target": {
+    "instance": "ehgp-v7-4fa0e0789a7d5bb06b787d35",
+    "project": "devpod-gpu-exploration",
+    "zone": "us-central1-b"
+  },
+  "warnings": [
+    "somme des delais > fenetre utile : les dernieres commandes seront coupees ou sautees a l'echeance"
+  ],
+  "worker_plan_sha256": "9438a579120a46736a054ee61a3a9bb7fd46f510a8dea16dc0b6a12e2c645a8f"
+}

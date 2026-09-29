@@ -1,0 +1,5 @@
+2026-09-29T19:13:39Z worker demarre (pid 2013), echeance 1790711113, generation 2026-09-29T12:08:57.758-07:00
+2026-09-29T19:13:40Z python3 -m pip absent : aucune installation systeme n'est tentee
+2026-09-29T19:13:40Z etape build/configure : ok (code 0, 0.602 s)
+2026-09-29T19:13:45Z etape build/build : ok (code 0, 5.094 s)
+2026-09-29T19:18:29Z etape cmd/000_bigk_dev : ok (code 0, 283.418 s)

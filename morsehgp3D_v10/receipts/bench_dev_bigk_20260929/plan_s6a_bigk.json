@@ -1,0 +1,12 @@
+{
+ "schema": "ehgp.v10.session_plan.v1",
+ "build_timeout_seconds": 600,
+ "build_targets": ["mhgp10_cluster", "mhgp10_mreach_cluster"],
+ "results_cap_bytes": 134217728,
+ "commands": [
+  {"name": "bigk_dev", "timeout_seconds": 1500,
+   "argv": ["python3", "{src}/morsehgp3D_v10/bench/g4/pyenv_run.py", "--env", "{data}/pyenv.u32le", "--work", "{build}/pyenv_work", "--",
+            "{src}/morsehgp3D_v10/bench/synthetic/bigk_dev.py", "--build", "{build}", "--out", "{out}/bigk_dev.csv",
+            "--sizes", "32000", "--replicates", "2", "--jobs", "46"]}
+ ]
+}

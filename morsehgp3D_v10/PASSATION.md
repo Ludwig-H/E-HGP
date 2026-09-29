@@ -86,8 +86,12 @@ GCP : session 1 le 29 septembre (CPU seul, arrêt certifié TERMINATED), reçu `
      leurs cœurs ne répare rien. La tour en feuilles égale sklearn sur `anisotropic` (0,887 contre 0,883), mais
      s'effondre sur `shells` (0,60 contre 0,94). Chaque famille veut sa sélection, et aucune règle fixe essayée
      (z, feuilles, prominence à la ToMATo, antichaîne mêlée) ne gagne 0,02 en moyenne.
-   - **Prochaine recherche** (dev) : un critère de sélection par scène ; un a priori de taille autre que √n ; des
-     ordres K plus grands, hors du moteur exact actuel (`kMaxOrder = 10`), à évaluer d'abord sur le témoin MR₂-bord.
+   - **Ordres K plus grands** (dev sur G4, reçu `receipts/bench_dev_bigk_20260929`, témoin MR₂-bord, K = 10 à 48) :
+     ils n'aident pas. `shells` s'effondre dès K = 16 (les coquilles voisines fusionnent), et les gains ailleurs
+     restent sous 0,03. La tour à K = 10 reste la meilleure (0,800). Pas d'extension du moteur au-delà de K = 10
+     pour le clustering.
+   - **Prochaine recherche** (dev) : un critère de sélection par scène (conception en cours), un a priori de taille
+     autre que √n.
    - **Corrections de l'audit livrées** : raison de refus propre aux multiplicités (IMP-16, porte
      `mhgp10_regression_multiplicity_refusal`) ; α ≠ 1 refusé hors de `kd_tree`/`ball_tree` dans
      `methods.hdbscan_labels` (IMP-04, α est ignoré en brute dans sklearn 1.9.1) ; refus dev écrits à ARI_s = 0
