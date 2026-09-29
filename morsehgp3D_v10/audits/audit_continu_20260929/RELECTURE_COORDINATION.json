@@ -1,0 +1,30 @@
+{
+  "date": "2026-09-29",
+  "scope": "small_multik_witness_only_no_benchmark_seeds",
+  "source_base": "6206d1d118794c9e1cabb6faeaec2aaa77d37e5b",
+  "replay_checkout": "3b3ea7241cf770906e5fa6d632c6f68d803ff2cb",
+  "source_diff_src_cli_oracle": "empty",
+  "binary_sha256": "a20776280ef4960d68f1b65ca7007b9e8a862809c57115b58486942856c22764",
+  "first_attempt": {
+    "python": "python3 -B -O",
+    "output_directory": "/tmp/mhgp10-root-multik-20260929-r1",
+    "source_argument": "/tmp/mhgp10-audit-pool-head.X45WLs/source/morsehgp3D_v10",
+    "exit_code": 1,
+    "failure": "FileNotFoundError importing tests/oracle/test_tower_oracle.py: wrong snapshot path",
+    "native_process_started": false
+  },
+  "second_attempt": {
+    "python": "python3 -B -O",
+    "script": "pool_head/probe_multik.py",
+    "binary": "/workspaces/E-HGP/build/v10-j2/j2c/build/mhgp10_tower",
+    "source_argument": "/tmp/mhgp10-audit-publish-20260929.wOJjqwTx/morsehgp3D_v10",
+    "output_directory": "/tmp/mhgp10-root-multik-20260929-r2",
+    "exit_code": 0,
+    "core_k1_r10": [[0,20,22],[50,52]],
+    "core_k2_r15": [[20,22,50,52]],
+    "conclusion": "native_crossing_confirmed"
+  },
+  "markdown_check": {"documents": 8, "errors": 0},
+  "gcp_used": false,
+  "engine_modified": false
+}

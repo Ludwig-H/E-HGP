@@ -1,0 +1,114 @@
+{
+  "pool": {
+    "source_commit": "6206d1d11",
+    "argv": [
+      "/tmp/mhgp10-audit-pool-head.X45WLs/pool_throw"
+    ],
+    "code": 1,
+    "binary_sha256": "052f7cd5399dcb6e2e4594865f6a531c8c149e270d25752234425e99af2ef2aa",
+    "source_closure": true,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "1119b767a1c9f7a0e4b12a977c5119c1cb45b6371a6b6cf77bb961c99a1e5b35"
+  },
+  "no_points": {
+    "source_commit": "6206d1d11",
+    "argv": [
+      "/tmp/mhgp10-audit-pool-head.X45WLs/build/mhgp10_tower",
+      "/tmp/mhgp10-audit-pool-head.X45WLs/points.u32le",
+      "--k=2",
+      "--threads=1",
+      "--no-points",
+      "--dump=/tmp/mhgp10-audit-pool-head.X45WLs/no_points_dump.txt"
+    ],
+    "code": -11,
+    "binary_sha256": "a20776280ef4960d68f1b65ca7007b9e8a862809c57115b58486942856c22764",
+    "source_closure": true,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "head_ladder": {
+    "source_commit": "6206d1d11",
+    "argv": [
+      "/tmp/mhgp10-audit-pool-head.X45WLs/head_ladder"
+    ],
+    "code": 0,
+    "binary_sha256": "2e9085cd5943fb096ee83dcc8793e43f1ed3643bfd6727a04967a1d8086d8b2d",
+    "source_closure": true,
+    "stdout_sha256": "461bd3648fb7b0e0dc4e066d28b8de091b3e7f96bc90c8160bf60bb13e729158",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "unit": {
+    "source_commit": "6206d1d11",
+    "argv": [
+      "/tmp/mhgp10-audit-pool-head.X45WLs/build/mhgp10_unit"
+    ],
+    "code": 0,
+    "binary_sha256": "311f49996912bfeb7bf7d8fb24b8e7c66fae5625e5f9c77f7987f42a7b152eed",
+    "source_closure": true,
+    "stdout_sha256": "48251aa4a769eaeda891770c58651a0672288eef9daeb436f0cf556ba9a064ec",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "vertical": {
+    "argv": [
+      "/tmp/mhgp10-audit-pool-head.X45WLs/build/mhgp10_tower",
+      "/tmp/mhgp10-audit-pool-head.X45WLs/points.u32le",
+      "--k=2",
+      "--threads=1",
+      "--dump=/tmp/mhgp10-audit-pool-head.X45WLs/tower.txt"
+    ],
+    "binary_sha256": "a20776280ef4960d68f1b65ca7007b9e8a862809c57115b58486942856c22764",
+    "gate_sha256": "4dd097f9bdb861ade442af9f1f882093383c0d326fd17fd003bcb850787b7e48",
+    "baseline_gate": [
+      null,
+      7
+    ],
+    "mutated_gate": [
+      null,
+      7
+    ],
+    "mutated_order": 2,
+    "mutated_node": 0,
+    "wrong_lower": 2,
+    "original_lower": 3,
+    "birth_level": "1",
+    "right_component": 3,
+    "wrong_component": 2,
+    "outcome": "wrong_vertical_survives_published_gate"
+  },
+  "source_hashes": {
+    "CMakeLists.txt": "8f94edde344a86ed8306ed9796557530c1ccf3eabfab0ab7ede8bcac836027dd",
+    "cli/mhgp10_catalogue.cpp": "e345022a524223a950925d6140fc68e4df54beccfcc0de846606d2084a6cc12f",
+    "cli/mhgp10_cluster.cpp": "ddb1a9326e641f0917746c858cf3d6a275813974c5a1f3d0aff6554439eefec2",
+    "cli/mhgp10_tower.cpp": "f13e60f158ff99bbe3ae5ee6aeefd0062e95071c2009ff74f16d80f0dd6aa8f7",
+    "cmake/gates.cmake": "a304bee130b92d68d49d362ce8d629ef0ed072483a1f4402ce3daf906ca48efc",
+    "cmake/run_expect.cmake": "dfb1b6456913276d1bd24e1f0a0bac523c548111a7efef5ad563899d03de40d1",
+    "src/arith/geometry.cpp": "0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2",
+    "src/arith/geometry.hpp": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673",
+    "src/arith/wide.hpp": "9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800",
+    "src/catalogue/catalogue.hpp": "2f47beb9dfc1e59e3ee4c3f412de76de2f4872940d7dccdfb327ba5f6ce35229",
+    "src/catalogue/generator.cpp": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662",
+    "src/catalogue/support.hpp": "7cc62930f623e99b598954c6b9f2f5e73e4ee4f0438426c55d18041d56d1a11d",
+    "src/cloud/cloud.cpp": "9cfe9f5b7c86eef3430d9d3d4835ebab5c70add30bf57480edbad1e830f44679",
+    "src/cloud/cloud.hpp": "b462545a6aaa86329a0122f05bd1b4fdd2a0cbd7e294218087ba472a8539ef2f",
+    "src/cloud/site_tree.cpp": "32296818941943102cf7afbaef6665ffc80f5ca5564a274ad00ae25e8c096eec",
+    "src/cloud/site_tree.hpp": "3cb0a70d7a05a6665e0c59676eccbe1b3ac16097ed336fc0007a97ad6bbb8f35",
+    "src/core/buffer.cpp": "d4d67d329a0fadc59ab0870c094f380a1a501b369a0da4915cc8a5e66dfe5d81",
+    "src/core/buffer.hpp": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60",
+    "src/core/reasons.def": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b",
+    "src/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "src/head/head.cpp": "f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578",
+    "src/head/head.hpp": "f2710f309a201bc1094dcb49af7acc418ca33b1887f8373d8934f965d072c5e9",
+    "src/points/dendrogram.cpp": "44711c93473cc31b675b5da29c07645d7c8a7cf686b540681a3da7e7b7c673d4",
+    "src/points/dendrogram.hpp": "3162508b979572a6a4da0b3f0c445b09baa5e2fd77ba826a8d57b25711c42d16",
+    "src/sched/pool.cpp": "7eecd6757c03fa8184fbcee7a55b26ef312c1df16acac4241e6917328975d72a",
+    "src/sched/pool.hpp": "e9eba470b8234eaa7f16626e172f3099ed6a635606639c3734755a6fe92283e5",
+    "src/sched/sort.hpp": "a75edebefd74c820615027bd90af578cbbdfdc997589638fc02bb0cb57a5a1db",
+    "src/tower/tower.cpp": "0c5b44ae7993e850c5c6cdb63d0c9829847eb70364f40894a3df964f708b88e9",
+    "src/tower/tower.hpp": "96c945dc4b1bd21dc0e51817b0d38e41cc0fbddc7b22cd34ae9e6d7244ce228a",
+    "tests/oracle/test_tower_oracle.py": "4dd097f9bdb861ade442af9f1f882093383c0d326fd17fd003bcb850787b7e48",
+    "tests/unit/unit_main.cpp": "abd83cb717fcc4d2337a22250111d4735b3b553c95642fceca98e1d12f26511a"
+  },
+  "status": "independent_audit_not_engine_qualification",
+  "GCP_used": false
+}

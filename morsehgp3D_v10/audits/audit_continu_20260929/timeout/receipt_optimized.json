@@ -1,0 +1,29 @@
+{
+  "schema": "mhgp10.audit_timeout_descendant.v1",
+  "source": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/bench/scaling/scale_run.py",
+  "source_sha256": "03c2c9d12e05ab14e51ca036dbb0351df1d335b8404cdede9eea96109e36b120",
+  "reproducer_sha256": "626954d0f0f21a056a3d185ef287b7947d0661db7de507bfc5f991ad7ca40868",
+  "worker_pid": 81,
+  "configured_timeout_seconds": 1.0,
+  "historical_session5_timeouts": 0,
+  "engine_modified": false,
+  "gcp_used": false,
+  "worker_returncode": 0,
+  "worker_stdout": "{\"result\": [-9, null, 1.008364200592041, null, null], \"elapsed_seconds\": 1.0084060249992035}\n",
+  "worker_stderr": "",
+  "child": {
+    "pid": 83,
+    "pgid": 81
+  },
+  "child_alive_after_timeout_return": true,
+  "child_proc_state_after_timeout": "S",
+  "regression_reproduced": true,
+  "owned_group_sigterm": true,
+  "reaped_owned_descendants": [
+    {
+      "pid": 83,
+      "status": 15
+    }
+  ],
+  "child_absent_after_cleanup": true
+}

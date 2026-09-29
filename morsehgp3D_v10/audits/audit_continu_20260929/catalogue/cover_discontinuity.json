@@ -1,0 +1,108 @@
+{
+  "schema": "mhgp10_cover_discontinuity_witness_v1",
+  "binary_sha256": "a20776280ef4960d68f1b65ca7007b9e8a862809c57115b58486942856c22764",
+  "rows": [
+    {
+      "middle": 999,
+      "entry": "cover",
+      "argv": [
+        "/workspaces/E-HGP/build/v10-j2/j2c/build/mhgp10_tower",
+        "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/cover_999.u32le",
+        "--k=2",
+        "--threads=1",
+        "--entry=cover",
+        "--dump=/tmp/mhgp10-catalogue-audit-20260929.35hiJi/cover_999_cover.txt"
+      ],
+      "code": 0,
+      "beta_left_middle": "998001/4",
+      "beta_middle_right": "1000000",
+      "dump_sha256": "7147aff12360d2ee7f62207f711c4752f995046020ad042db1aa5d4516759499",
+      "dump": "order 1 5 3\nnode 0 3 0 1 -1\nnode 1 3 0 1 -1\nnode 2 4 0 1 -1\nnode 3 4 998001 4 -1\nnode 4 -1 1002001 4 -1\npoint 0 0 0 0 0\npoint 999 0 0 1 0\npoint 2000 0 0 2 0\norder 2 3 3\nnode 0 2 998001 4 3\nnode 1 2 1002001 4 4\nnode 2 -1 4000000 4 4\npoint 0 0 0 0 r1 998001 4\npoint 999 0 0 0 r1 998001 4\npoint 2000 0 0 1 r2 1002001 4\n"
+    },
+    {
+      "middle": 999,
+      "entry": "core",
+      "argv": [
+        "/workspaces/E-HGP/build/v10-j2/j2c/build/mhgp10_tower",
+        "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/cover_999.u32le",
+        "--k=2",
+        "--threads=1",
+        "--entry=core",
+        "--dump=/tmp/mhgp10-catalogue-audit-20260929.35hiJi/cover_999_core.txt"
+      ],
+      "code": 0,
+      "beta_left_middle": "998001",
+      "beta_middle_right": "1002001",
+      "dump_sha256": "579d19a2d420435ec148e39c25fe3120c0da24b8c66c7e6c50248c5f40312158",
+      "dump": "order 1 5 3\nnode 0 3 0 1 -1\nnode 1 3 0 1 -1\nnode 2 4 0 1 -1\nnode 3 4 998001 4 -1\nnode 4 -1 1002001 4 -1\npoint 0 0 0 0 0\npoint 999 0 0 1 0\npoint 2000 0 0 2 0\norder 2 3 3\nnode 0 2 998001 4 3\nnode 1 2 1002001 4 4\nnode 2 -1 4000000 4 4\npoint 0 0 0 0 998001\npoint 999 0 0 0 998001\npoint 2000 0 0 2 1002001\n"
+    },
+    {
+      "middle": 1000,
+      "entry": "cover",
+      "argv": [
+        "/workspaces/E-HGP/build/v10-j2/j2c/build/mhgp10_tower",
+        "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/cover_1000.u32le",
+        "--k=2",
+        "--threads=1",
+        "--entry=cover",
+        "--dump=/tmp/mhgp10-catalogue-audit-20260929.35hiJi/cover_1000_cover.txt"
+      ],
+      "code": 0,
+      "beta_left_middle": "250000",
+      "beta_middle_right": "1000000",
+      "dump_sha256": "792a9bb8272cac5548a9f824622d987879ee76cf9c7d5fa23d7dbee2237814eb",
+      "dump": "order 1 4 3\nnode 0 3 0 1 -1\nnode 1 3 0 1 -1\nnode 2 3 0 1 -1\nnode 3 -1 1000000 4 -1\npoint 0 0 0 0 0\npoint 1000 0 0 1 0\npoint 2000 0 0 2 0\norder 2 3 3\nnode 0 2 1000000 4 3\nnode 1 2 1000000 4 3\nnode 2 -1 4000000 4 3\npoint 0 0 0 0 r1 1000000 4\npoint 1000 0 0 0 r1 1000000 4\npoint 2000 0 0 1 r1 1000000 4\n"
+    },
+    {
+      "middle": 1000,
+      "entry": "core",
+      "argv": [
+        "/workspaces/E-HGP/build/v10-j2/j2c/build/mhgp10_tower",
+        "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/cover_1000.u32le",
+        "--k=2",
+        "--threads=1",
+        "--entry=core",
+        "--dump=/tmp/mhgp10-catalogue-audit-20260929.35hiJi/cover_1000_core.txt"
+      ],
+      "code": 0,
+      "beta_left_middle": "1000000",
+      "beta_middle_right": "1000000",
+      "dump_sha256": "9e5f74438370db0f78b789fa266364d0f22335228910962e18894babfe7fabd1",
+      "dump": "order 1 4 3\nnode 0 3 0 1 -1\nnode 1 3 0 1 -1\nnode 2 3 0 1 -1\nnode 3 -1 1000000 4 -1\npoint 0 0 0 0 0\npoint 1000 0 0 1 0\npoint 2000 0 0 2 0\norder 2 3 3\nnode 0 2 1000000 4 3\nnode 1 2 1000000 4 3\nnode 2 -1 4000000 4 3\npoint 0 0 0 2 1000000\npoint 1000 0 0 2 1000000\npoint 2000 0 0 2 1000000\n"
+    },
+    {
+      "middle": 1001,
+      "entry": "cover",
+      "argv": [
+        "/workspaces/E-HGP/build/v10-j2/j2c/build/mhgp10_tower",
+        "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/cover_1001.u32le",
+        "--k=2",
+        "--threads=1",
+        "--entry=cover",
+        "--dump=/tmp/mhgp10-catalogue-audit-20260929.35hiJi/cover_1001_cover.txt"
+      ],
+      "code": 0,
+      "beta_left_middle": "1000000",
+      "beta_middle_right": "998001/4",
+      "dump_sha256": "ecc69047c2e6009db8feb691c709b9f3e1ac759d2a44ebcb1914c55413aa1b90",
+      "dump": "order 1 5 3\nnode 0 4 0 1 -1\nnode 1 3 0 1 -1\nnode 2 3 0 1 -1\nnode 3 4 998001 4 -1\nnode 4 -1 1002001 4 -1\npoint 0 0 0 0 0\npoint 1001 0 0 1 0\npoint 2000 0 0 2 0\norder 2 3 3\nnode 0 2 998001 4 3\nnode 1 2 1002001 4 4\nnode 2 -1 4000000 4 4\npoint 0 0 0 1 r2 1002001 4\npoint 1001 0 0 0 r1 998001 4\npoint 2000 0 0 0 r1 998001 4\n"
+    },
+    {
+      "middle": 1001,
+      "entry": "core",
+      "argv": [
+        "/workspaces/E-HGP/build/v10-j2/j2c/build/mhgp10_tower",
+        "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/cover_1001.u32le",
+        "--k=2",
+        "--threads=1",
+        "--entry=core",
+        "--dump=/tmp/mhgp10-catalogue-audit-20260929.35hiJi/cover_1001_core.txt"
+      ],
+      "code": 0,
+      "beta_left_middle": "1002001",
+      "beta_middle_right": "998001",
+      "dump_sha256": "5820352455e9e60307d1f5c6ce7b3fc05e8475e1070f4e506851cf5a4116eb78",
+      "dump": "order 1 5 3\nnode 0 4 0 1 -1\nnode 1 3 0 1 -1\nnode 2 3 0 1 -1\nnode 3 4 998001 4 -1\nnode 4 -1 1002001 4 -1\npoint 0 0 0 0 0\npoint 1001 0 0 1 0\npoint 2000 0 0 2 0\norder 2 3 3\nnode 0 2 998001 4 3\nnode 1 2 1002001 4 4\nnode 2 -1 4000000 4 4\npoint 0 0 0 2 1002001\npoint 1001 0 0 0 998001\npoint 2000 0 0 0 998001\n"
+    }
+  ]
+}

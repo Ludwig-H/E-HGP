@@ -1,0 +1,15 @@
+{
+  "schema": "mhgp10.audit_timeout_descendant.v1",
+  "source": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/bench/scaling/scale_run.py",
+  "source_sha256": "03c2c9d12e05ab14e51ca036dbb0351df1d335b8404cdede9eea96109e36b120",
+  "reproducer_sha256": "54de277001f0546284bfbce219ba84def741785695af805248e1528fef1cde23",
+  "worker_pid": 80,
+  "configured_timeout_seconds": 0.2,
+  "historical_session5_timeouts": 0,
+  "engine_modified": false,
+  "gcp_used": false,
+  "worker_returncode": 0,
+  "worker_stdout": "{\"result\": [-9, null, 0.20553231239318848, null, null], \"elapsed_seconds\": 0.20557066800029133}\n",
+  "worker_stderr": "",
+  "owned_group_sigterm": true
+}

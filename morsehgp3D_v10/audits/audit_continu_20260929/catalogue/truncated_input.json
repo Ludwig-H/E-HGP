@@ -1,0 +1,66 @@
+{
+  "schema": "mhgp10_truncated_input_audit_v1",
+  "binary_sha256": "a3bbad50b81b901c57cea7193bc48d58cce68126e44ae0a225ad678baa3af0cb",
+  "rows": [
+    {
+      "extra_bytes": 0,
+      "argv": [
+        "/workspaces/E-HGP/build/v10-j2/j2c/build/mhgp10_catalogue",
+        "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/trailing_0.u32le",
+        "--k=1",
+        "--threads=1"
+      ],
+      "code": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":2,\"sites\":2,\"K\":1,\"threads\":1,\"balls\":1,\"levels\":1,\"prepare_s\":0.0000,\"catalogue_s\":0.0000,\"catalogue_stages\":{\"t_frontier\":0.0000,\"t_boxes\":0.0000,\"t_order\":0.0000,\"t_assemble\":0.0000,\"t_collect\":0.0000,\"t_sort\":0.0000,\"t_bands\":0.0000,\"t_compare\":0.0000,\"t_ranks\":0.0000,\"t_copy\":0.0000,\"bands\":0,\"band_members\":0,\"tasks\":0,\"max_task_sites\":0},\"by_q_p\":{\"q2\":[1],\"q3\":[0],\"q4\":[0]},\"nodes\":1,\"leaves\":1,\"sum_m\":2,\"max_m\":2,\"skipped_bbox\":0,\"filter_tests\":4,\"leaf_dominance_tests\":1,\"pair_tests\":1,\"triple_tests\":0,\"line_hits\":0,\"quad_tests\":0,\"judged\":1,\"extended\":0,\"weighted\":0,\"max_shell\":2,\"stalled_leaves\":0}\n",
+      "stderr": ""
+    },
+    {
+      "extra_bytes": 1,
+      "argv": [
+        "/workspaces/E-HGP/build/v10-j2/j2c/build/mhgp10_catalogue",
+        "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/trailing_1.u32le",
+        "--k=1",
+        "--threads=1"
+      ],
+      "code": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":2,\"sites\":2,\"K\":1,\"threads\":1,\"balls\":1,\"levels\":1,\"prepare_s\":0.0000,\"catalogue_s\":0.0000,\"catalogue_stages\":{\"t_frontier\":0.0000,\"t_boxes\":0.0000,\"t_order\":0.0000,\"t_assemble\":0.0000,\"t_collect\":0.0000,\"t_sort\":0.0000,\"t_bands\":0.0000,\"t_compare\":0.0000,\"t_ranks\":0.0000,\"t_copy\":0.0000,\"bands\":0,\"band_members\":0,\"tasks\":0,\"max_task_sites\":0},\"by_q_p\":{\"q2\":[1],\"q3\":[0],\"q4\":[0]},\"nodes\":1,\"leaves\":1,\"sum_m\":2,\"max_m\":2,\"skipped_bbox\":0,\"filter_tests\":4,\"leaf_dominance_tests\":1,\"pair_tests\":1,\"triple_tests\":0,\"line_hits\":0,\"quad_tests\":0,\"judged\":1,\"extended\":0,\"weighted\":0,\"max_shell\":2,\"stalled_leaves\":0}\n",
+      "stderr": ""
+    },
+    {
+      "extra_bytes": 4,
+      "argv": [
+        "/workspaces/E-HGP/build/v10-j2/j2c/build/mhgp10_catalogue",
+        "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/trailing_4.u32le",
+        "--k=1",
+        "--threads=1"
+      ],
+      "code": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":2,\"sites\":2,\"K\":1,\"threads\":1,\"balls\":1,\"levels\":1,\"prepare_s\":0.0000,\"catalogue_s\":0.0000,\"catalogue_stages\":{\"t_frontier\":0.0000,\"t_boxes\":0.0000,\"t_order\":0.0000,\"t_assemble\":0.0000,\"t_collect\":0.0000,\"t_sort\":0.0000,\"t_bands\":0.0000,\"t_compare\":0.0000,\"t_ranks\":0.0000,\"t_copy\":0.0000,\"bands\":0,\"band_members\":0,\"tasks\":0,\"max_task_sites\":0},\"by_q_p\":{\"q2\":[1],\"q3\":[0],\"q4\":[0]},\"nodes\":1,\"leaves\":1,\"sum_m\":2,\"max_m\":2,\"skipped_bbox\":0,\"filter_tests\":4,\"leaf_dominance_tests\":1,\"pair_tests\":1,\"triple_tests\":0,\"line_hits\":0,\"quad_tests\":0,\"judged\":1,\"extended\":0,\"weighted\":0,\"max_shell\":2,\"stalled_leaves\":0}\n",
+      "stderr": ""
+    },
+    {
+      "extra_bytes": 8,
+      "argv": [
+        "/workspaces/E-HGP/build/v10-j2/j2c/build/mhgp10_catalogue",
+        "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/trailing_8.u32le",
+        "--k=1",
+        "--threads=1"
+      ],
+      "code": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":2,\"sites\":2,\"K\":1,\"threads\":1,\"balls\":1,\"levels\":1,\"prepare_s\":0.0000,\"catalogue_s\":0.0000,\"catalogue_stages\":{\"t_frontier\":0.0000,\"t_boxes\":0.0000,\"t_order\":0.0000,\"t_assemble\":0.0000,\"t_collect\":0.0000,\"t_sort\":0.0000,\"t_bands\":0.0000,\"t_compare\":0.0000,\"t_ranks\":0.0000,\"t_copy\":0.0000,\"bands\":0,\"band_members\":0,\"tasks\":0,\"max_task_sites\":0},\"by_q_p\":{\"q2\":[1],\"q3\":[0],\"q4\":[0]},\"nodes\":1,\"leaves\":1,\"sum_m\":2,\"max_m\":2,\"skipped_bbox\":0,\"filter_tests\":4,\"leaf_dominance_tests\":1,\"pair_tests\":1,\"triple_tests\":0,\"line_hits\":0,\"quad_tests\":0,\"judged\":1,\"extended\":0,\"weighted\":0,\"max_shell\":2,\"stalled_leaves\":0}\n",
+      "stderr": ""
+    },
+    {
+      "extra_bytes": 11,
+      "argv": [
+        "/workspaces/E-HGP/build/v10-j2/j2c/build/mhgp10_catalogue",
+        "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/trailing_11.u32le",
+        "--k=1",
+        "--threads=1"
+      ],
+      "code": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":2,\"sites\":2,\"K\":1,\"threads\":1,\"balls\":1,\"levels\":1,\"prepare_s\":0.0000,\"catalogue_s\":0.0000,\"catalogue_stages\":{\"t_frontier\":0.0000,\"t_boxes\":0.0000,\"t_order\":0.0000,\"t_assemble\":0.0000,\"t_collect\":0.0000,\"t_sort\":0.0000,\"t_bands\":0.0000,\"t_compare\":0.0000,\"t_ranks\":0.0000,\"t_copy\":0.0000,\"bands\":0,\"band_members\":0,\"tasks\":0,\"max_task_sites\":0},\"by_q_p\":{\"q2\":[1],\"q3\":[0],\"q4\":[0]},\"nodes\":1,\"leaves\":1,\"sum_m\":2,\"max_m\":2,\"skipped_bbox\":0,\"filter_tests\":4,\"leaf_dominance_tests\":1,\"pair_tests\":1,\"triple_tests\":0,\"line_hits\":0,\"quad_tests\":0,\"judged\":1,\"extended\":0,\"weighted\":0,\"max_shell\":2,\"stalled_leaves\":0}\n",
+      "stderr": ""
+    }
+  ]
+}

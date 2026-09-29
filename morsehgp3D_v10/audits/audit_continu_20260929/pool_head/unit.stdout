@@ -1,0 +1,4 @@
+site_tree_checks 6000
+site_tree_rational_checks 7155 shells 1099
+wide_checks 100000
+unit_ok

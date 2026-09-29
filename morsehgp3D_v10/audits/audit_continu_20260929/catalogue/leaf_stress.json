@@ -1,0 +1,53 @@
+[
+  {
+    "argv": [
+      "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/probe",
+      "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/cube_max.txt",
+      "1",
+      "0",
+      "1"
+    ],
+    "status": "completed",
+    "returncode": 0,
+    "balls": 19,
+    "wall_s": 0.00275896799939801
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/probe",
+      "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/cube_max.txt",
+      "1",
+      "2",
+      "1"
+    ],
+    "status": "completed",
+    "returncode": 0,
+    "balls": 19,
+    "wall_s": 0.01672138599860773
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/probe",
+      "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/cube_max.txt",
+      "5",
+      "0",
+      "1"
+    ],
+    "status": "completed",
+    "returncode": 0,
+    "balls": 27,
+    "wall_s": 0.007540997999967658
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/probe",
+      "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/cube_max.txt",
+      "5",
+      "2",
+      "1"
+    ],
+    "status": "timeout_killed_and_joined",
+    "seconds_limit": 2,
+    "wall_s": 2.0083470240006136
+  }
+]

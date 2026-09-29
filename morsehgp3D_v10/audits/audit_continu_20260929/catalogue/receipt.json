@@ -1,0 +1,31 @@
+{
+  "schema": "mhgp10_catalogue_targeted_audit_v1",
+  "status": "completed",
+  "cases": 24,
+  "calls": 432,
+  "ball_records_checked": 15195,
+  "weighted_records_checked": 6309,
+  "extended_records_checked": 2031,
+  "checks": [
+    "exact numerical level against Fraction",
+    "Morton-minimal canonical support",
+    "full I/U/weighted counts",
+    "dense exact ranks",
+    "extended/weighted flags",
+    "leaf-size 0/max(8,K+1)/256; workers 1/4"
+  ],
+  "hashes": {
+    "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/probe": "92e16c573011c585fc6d5d36a2fcd192dca6fc50959a87f49f765fcdcc8219ba",
+    "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/probe.cpp": "af7d5386d6e9727379e74bd5775787ac6793ba51e6b59e646121e6e7c0cc2a0a",
+    "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/check.py": "423e8f756f862393b0f13a4af5068621fce2a34b39230edd0b36de13306bf1f0",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/catalogue/catalogue.hpp": "2f47beb9dfc1e59e3ee4c3f412de76de2f4872940d7dccdfb327ba5f6ce35229",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/catalogue/support.hpp": "7cc62930f623e99b598954c6b9f2f5e73e4ee4f0438426c55d18041d56d1a11d",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/catalogue/generator.cpp": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/arith/geometry.hpp": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/arith/geometry.cpp": "0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/arith/wide.hpp": "9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800",
+    "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/check_r1_interrupted.py": "ca3c8f3e6af3c81f5f4fc9f899029a0becbedb12e6391cbc2cea5d8957f139de",
+    "/tmp/mhgp10-catalogue-audit-20260929.35hiJi/commands_r2.json": "d947d6b502573bde3b089944f09e81e6195189fb6057d531c45811ec086a7577"
+  },
+  "first_attempt": "Interrupted (130) during cube_max in leaf_size=2 stress; kept in check_r1_interrupted.py"
+}

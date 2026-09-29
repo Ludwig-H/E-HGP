@@ -1,0 +1,27 @@
+order 1 9 5
+node 0 7 0 1 -1
+node 1 5 0 1 -1
+node 2 5 0 1 -1
+node 3 6 0 1 -1
+node 4 6 0 1 -1
+node 5 7 4 4 -1
+node 6 8 4 4 -1
+node 7 8 400 4 -1
+node 8 -1 784 4 -1
+point 0 0 0 0 0
+point 20 0 0 1 0
+point 22 0 0 2 0
+point 50 0 0 3 0
+point 52 0 0 4 0
+order 2 6 5
+node 0 4 4 4 5
+node 1 5 4 4 6
+node 2 4 400 4 7
+node 3 5 784 4 8
+node 4 5 484 4 7
+node 5 -1 900 4 8
+point 0 0 0 5 400
+point 20 0 0 0 4
+point 22 0 0 0 4
+point 50 0 0 1 4
+point 52 0 0 1 4
