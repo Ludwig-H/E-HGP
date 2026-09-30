@@ -1,6 +1,6 @@
 # Frontière, laminarité et précision — décisions mathématiques
 
-30 septembre 2026. Produit 4b7d70422 ; preuves jusqu'à d192637a7. Nouveau contrôle de bande et croisement inter-K, aucun moteur changé/GCP. public_status=not_claimed. [Version longue conservée exactement](../../receipts/audit_independant_20260930/notes_avant_synthese/README.md).
+30 septembre 2026. Moteur u18 publié inchangé depuis 4b7d70422 ; preuves jusqu'à 33fcb53a0 et recherches privées relues. Aucun moteur changé/GCP. public_status=not_claimed. [Version longue conservée exactement](../../receipts/audit_independant_20260930/notes_avant_synthese/README.md).
 
 ## Cible de la thèse
 
@@ -18,7 +18,9 @@ Le bras 4b7 considère tous les témoins forts jusqu'à (1+η)α_K(x), puis fixe
 
 **Variante éprouvée à K fixé :** supprimer les ancêtres redondants parmi les nœuds sélectionnés, puis LCA. Les témoins de première couverture restent minimaux ; les nouveaux témoins plus tardifs ne peuvent en être descendants. Couverture, laminarité et monotonie avec η sont conservées, entrée jamais plus tardive. [Preuve et prototype exact](../../receipts/audit_independant_20260930/fixed_k_antichain/README.md) : 2 892 bandes abstraites, six exports/507 coupes, incidences internes K3/K5 gardées, normal/−O identiques. Aucun bras développeur modifié.
 
-Triangle K2 (0,0),(8,0),(0,3), η=1/8 : x=(8,0) entre à β=16 au lieu de 73/4, l’ancêtre tardif n’ajoutant pas de lignée concurrente. La masse devient disponible plus tôt ; ici la partition de points peut rester identique, aucun gain de coassociation/qualité acquis. Le prototype garde les antichaînes pour audit ; tri par point et mémoire supplémentaires à mesurer. Bande complète à fermer jusqu’à (1+η)²α² avant décision, malgré la date d’entrée avancée.
+Triangle K2 (0,0),(8,0),(0,3), η=1/8 : x=(8,0) entre à β=16 au lieu de 73/4 ; partition éventuellement identique. Nouveau vrai cas K2 (0,0),(10,0),(8,4),(4,8) : à la coupe β=200/9, l'antichaîne donne {0,3}|{1,2}, au lieu de {0}|{1,2}|{3}. [Contre-audit Γ complet](../../receipts/audit_continu_20260929/antichain_counterreview_20260930/README.md). Effet sur une partition acquis, aucun gain de qualité/EOM.
+
+**Port natif possible sans tri par point :** garder le minimum `(tout↑,tin↓)` et le maximum tin ; leur LCA est celle des minima incomparables. [Helper C++ isolé](../../receipts/audit_independant_20260930/developer_rebound/streaming_euler/README.md) : 588 sélections, 7 056 comparaisons Release/UBSan, mutant du départage tué numériquement. Comparaisons u32, vide explicite, tout=kNone accepté comme fin exclusive, identifiant kNone refusé. Balayage O(D), puis une LCA/point ; O(P) résumés parallèles supplémentaires, index LCA distinct. Bande complète à fermer jusqu'à (1+η)²α² avant décision, malgré l'entrée avancée.
 
 ## Toutes les incidences, y compris internes
 
@@ -58,7 +60,13 @@ Même arbre changé d'unité : β_phys=h²β_grille, λ_phys=h^(−z)λ_grille ;
 
 ## Condensation : correction préalable
 
-Le [défaut désormais reproduit](../../receipts/audit_independant_20260930/point_condensation_followup/README.md) porte sur les départs directement attachés : quand la masse restante passe sous min_cluster_size, la branche doit finir à cette cohorte, même sans division géométrique. Dans le vrai cas interne K3/mcs6, sortie 6→5 à β25 : stabilité z1 correcte 6/5 au lieu de 88/65 ; étiquettes inchangées ici. Les arbres API montrent séparément des inversions EOM, racine exclue. Relectures d’archives normal/−O passent ; aucun moteur/sklearn relancé. Corriger les dates exactes simultanées avant d’interpréter l’effet de l’antichaîne sur EOM.
+Le [défaut reproduit](../../receipts/audit_independant_20260930/point_condensation_followup/README.md) porte sur les départs directement attachés : quand la masse restante passe sous min_cluster_size, la branche doit finir à cette cohorte, même sans division géométrique. Vrai K3/mcs6 : sortie 6→5 à β25, stabilité z1 correcte 6/5 au lieu de 88/65 ; étiquettes inchangées ici. Les arbres API montrent séparément des inversions EOM.
+
+[Référence de réparation](../../receipts/audit_independant_20260930/developer_rebound/condensation_reference/README.md) : contracter rangs géométriques égaux, introduire cohortes datées, aplatir cohortes au plateau parent. 536 condensations exactes et 1 092 coupes conservées ; sondes natives privées Release/UBSan concordent. Deux branches artificielles apparaissent si le plateau n'est pas aplati. Représentation ≤V+n ; temps du prototype et transport node_cluster pour le vote distincts. Aucun FULL changé ou nouveau générateur exécuté.
+
+**Recherche fractionnaire actuelle :** la masse de fin d'un enfant est bien celle du split inverse, sans anticipation. Préciser mcs aux splits seuls ou à toute densité. Six sites collinéaires K3 montrent un franchissement progressif intérieur à λ*=4099903/12533447 ; l'intégrale jusqu'à la fin géométrique ajoute une durée sous le seuil. [Preuve autonome](../../receipts/audit_independant_20260930/developer_rebound/fractional_review/README.md). Les deux conventions peuvent être définies ; elles n'ont pas les mêmes dates de fin. Ce point ne réfute ni l'antichaîne ni le vote, et ne constitue pas un verdict statistique sur Pκ/A7/majorité.
+
+[Pκ chronologique](../../receipts/audit_continu_20260929/persistent_anchor_stream_20260930/README.md) : preuve abstraite conditionnelle relue, propriétaire issu de la première cohorte complète, pas du LCA final. Dates généralement algébriques en rayon, pas nécessairement niveaux FULL existants. [Qκ quadratique](../../receipts/audit_continu_20260929/quadratic_anchor_rule_20260930/README.md) évite ces sommes de racines mais diffère de Pκ et exige d'autres capacités de comparaison. Notre référence rationnelle de condensation ne qualifie ni leur ordre exact ni leurs garanties géométriques/statistiques.
 
 ## Prochaine comparaison utile
 

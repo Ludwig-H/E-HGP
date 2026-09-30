@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "source_commit": "33fcb53a0b749c7d7f16909ce8a3f0ef9160a37a",
+  "source_hashes_stable": true,
+  "native_scalar_invocations": 2,
+  "normal_ubsan_identical": true,
+  "python_judgments": 4,
+  "native_checks": 392,
+  "no_arena_allocation": true,
+  "geometric_catalogue_realized": false,
+  "product_tower_executed": false,
+  "performance": false,
+  "GCP": false,
+  "build_directory": "/tmp/mhgp10-ext-span-audit-syvduesg",
+  "binary_hashes": {
+    "normal": "2f13273fd8579e079fd4af14fc415e95f64206450c36c442487792a65e09bdc2",
+    "ubsan": "1b025362b8c46a0b9b296197393ce9273299fec98a252479ece92c882f49b91c"
+  }
+}

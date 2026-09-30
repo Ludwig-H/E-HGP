@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/streaming_euler/record.py", line 109, in <module>
+    main()
+  File "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/streaming_euler/record.py", line 69, in main
+    need(deps(dep.read_text()) <= paths,'compiled dependency escaped initial closure')
+  File "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/streaming_euler/record.py", line 16, in need
+    raise RuntimeError(text)
+RuntimeError: compiled dependency escaped initial closure

@@ -1,0 +1,318 @@
+{
+  "captured_utc": "2026-09-30T12:21:11.092323+00:00",
+  "audit_scope": "lecture et extraction de rapports, verdicts adverses, dernières tâches ; aucun rejeu produit",
+  "shared_head": "408d1ffe4d90a7ee6393716c6ddc8319b2b77daa",
+  "observed_origin_main": "33fcb53a0b749c7d7f16909ce8a3f0ef9160a37a",
+  "product_diff_shared_to_origin": {
+    "paths": [
+      "morsehgp3D_v10/src",
+      "morsehgp3D_v10/cli",
+      "morsehgp3D_v10/tests",
+      "morsehgp3D_v10/bench",
+      "morsehgp3D_v10/reference",
+      "morsehgp3D_v10/cmake",
+      "morsehgp3D_v10/CMakeLists.txt"
+    ],
+    "changed_files": [],
+    "interpretation": "aucun nouveau port produit entre ces deux commits sur les chemins vérifiés"
+  },
+  "sources": [
+    {
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/moteur_livre/RAPPORT.md",
+      "bytes": 19003,
+      "sha256": "81f5dc62b1767eb55a6b11a3df50d6a7293d1c8db31a3521974e9b34f7566ed2",
+      "mtime_utc": "2026-09-30T11:45:59.185487+00:00",
+      "reading_scope": "lecture ciblée",
+      "excerpt_ranges": [
+        [
+          16,
+          35
+        ],
+        [
+          193,
+          231
+        ],
+        [
+          298,
+          318
+        ]
+      ]
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/moteur_livre/engine_mutant_strict_results.json",
+      "bytes": 883,
+      "sha256": "c0cd2d2f34b31d4c474f626d8c308257c8aa3eeaa89252fadc77edd1c707f5a9",
+      "mtime_utc": "2026-09-30T11:29:39.258553+00:00",
+      "reading_scope": "lecture intégrale",
+      "excerpt_ranges": null
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/frontiere/RAPPORT_FRONTIERE_20260930.md",
+      "bytes": 24522,
+      "sha256": "95488bc1312b04c57a9b9723e9374596454ebeee2e1434dfa4de019f05a2664b",
+      "mtime_utc": "2026-09-30T11:03:08.625660+00:00",
+      "reading_scope": "lecture ciblée",
+      "excerpt_ranges": [
+        [
+          309,
+          320
+        ]
+      ]
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/verif_frontiere/RAPPORT_VERIF_FRONTIERE_20260930.md",
+      "bytes": 12320,
+      "sha256": "47e99708096bc4917f458bece7b41cdb2e83fe3e21d79cd6997cdb660328c041",
+      "mtime_utc": "2026-09-30T11:44:30.983493+00:00",
+      "reading_scope": "lecture ciblée des verdicts",
+      "excerpt_ranges": [
+        [
+          18,
+          26
+        ],
+        [
+          49,
+          75
+        ]
+      ]
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/precision/PLAN_PRECISION.md",
+      "bytes": 21909,
+      "sha256": "4df21157d8d188b06011d3c9dd5edf8b8ed4948b188dff77943717648283f81e",
+      "mtime_utc": "2026-09-30T10:50:51.560709+00:00",
+      "reading_scope": "lecture ciblée",
+      "excerpt_ranges": [
+        [
+          17,
+          27
+        ]
+      ]
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/verif_precision/VERDICTS.txt",
+      "bytes": 7032,
+      "sha256": "0fc4294982133ccf0018f41e1f76d7384c3ee1609ca8ca8db69b7ec160ff3562",
+      "mtime_utc": "2026-09-30T11:31:00.660547+00:00",
+      "reading_scope": "lecture intégrale",
+      "excerpt_ranges": [
+        [
+          18,
+          38
+        ],
+        [
+          68,
+          73
+        ]
+      ]
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/raccord_r2/PLAN_INTEGRATION_R2.md",
+      "bytes": 10226,
+      "sha256": "189c98f6d8fd027b6722aef1c8d277ca8ada1724b6d8dba51941970cdcce1563",
+      "mtime_utc": "2026-09-30T10:55:06.445692+00:00",
+      "reading_scope": "lecture intégrale",
+      "excerpt_ranges": null
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/raccord_r2/RAPPORT_RACCORD_R2.md",
+      "bytes": 22948,
+      "sha256": "54b22a64aefbf71d7bcf9c378e8b0bf73e4fb09fdbd2ed9d463555c5b0fc807a",
+      "mtime_utc": "2026-09-30T10:56:34.131686+00:00",
+      "reading_scope": "lecture ciblée",
+      "excerpt_ranges": null
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/verif_raccord_r2/VERIF_RACCORD_R2.md",
+      "bytes": 6611,
+      "sha256": "2ce4eae7bee6ccf121f43d81ce5a2ac9d585b0ab324b9b2d68725cba76d4797a",
+      "mtime_utc": "2026-09-30T11:30:32.657549+00:00",
+      "reading_scope": "lecture intégrale",
+      "excerpt_ranges": [
+        [
+          18,
+          33
+        ],
+        [
+          59,
+          97
+        ]
+      ]
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/cardinalites/RAPPORT_CARDINALITES.md",
+      "bytes": 17474,
+      "sha256": "bf19942eff1bb98f27a82b5b48a71d01649a4a02a352a92c61c2c97131545a2d",
+      "mtime_utc": "2026-09-30T11:01:32.909666+00:00",
+      "reading_scope": "lecture ciblée",
+      "excerpt_ranges": null
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/verif_cardinalites/INDEX_PREUVES.txt",
+      "bytes": 3843,
+      "sha256": "f52459f66a189999238c14168c6c1d1de109308cb097f34708eb80b7b50d9e74",
+      "mtime_utc": "2026-09-30T11:29:47.103552+00:00",
+      "reading_scope": "lecture intégrale",
+      "excerpt_ranges": [
+        [
+          20,
+          49
+        ]
+      ]
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/constats/TRACKER.md",
+      "bytes": 38363,
+      "sha256": "65fdfdcf63d64c63f3b5c0c7fd72f91811020da50cf86fa232b8b75a0561c873",
+      "mtime_utc": "2026-09-30T10:23:11.593820+00:00",
+      "reading_scope": "lecture ciblée",
+      "excerpt_ranges": null
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/verif_constats/INDEX_PREUVES.txt",
+      "bytes": 2378,
+      "sha256": "d858ed79172c6999b93a371d52b75f6991372bdd70c147ae0a33948b534b6418",
+      "mtime_utc": "2026-09-30T11:12:38.266621+00:00",
+      "reading_scope": "lecture intégrale",
+      "excerpt_ranges": null
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/sante/RAPPORT_SANTE.md",
+      "bytes": 24611,
+      "sha256": "74cb2a48e90d3fe5e5204cdc726e8b45e1902847becc9ec06e12dad2c4f7ef82",
+      "mtime_utc": "2026-09-30T10:45:30.754730+00:00",
+      "reading_scope": "lecture ciblée",
+      "excerpt_ranges": [
+        [
+          21,
+          37
+        ],
+        [
+          279,
+          293
+        ]
+      ]
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/verif_sante/preuves/journal_verifications.txt",
+      "bytes": 1357,
+      "sha256": "6fe6ced98b6831a0705e6fc9d90f2b9d20846695b15999e7b62c620788252a52",
+      "mtime_utc": "2026-09-30T11:32:18.489542+00:00",
+      "reading_scope": "lecture intégrale",
+      "excerpt_ranges": null
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-verrou-points/ancrage_marges/MEMO_ANCRAGE_MARGES_20260930.md",
+      "bytes": 80732,
+      "sha256": "bcf0b4008acf37c1ea7e139fbb00e7718d9c1e2aa8c7fefa97fa4491a62624b9",
+      "mtime_utc": "2026-09-30T11:40:39.254509+00:00",
+      "reading_scope": "index et passages ciblés ; preuve non contre-vérifiée",
+      "excerpt_ranges": [
+        [
+          21,
+          53
+        ],
+        [
+          724,
+          741
+        ],
+        [
+          851,
+          866
+        ]
+      ]
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-verrou-points/masses_selection/MEMO_MASSES_SELECTION_20260930.md",
+      "bytes": 56270,
+      "sha256": "3fd53faa94d2b1775a7e38f2832b3eb118ecf8b71b7e072263998e9111d0d001",
+      "mtime_utc": "2026-09-30T11:42:12.443502+00:00",
+      "reading_scope": "index et passages ciblés ; preuve non contre-vérifiée",
+      "excerpt_ranges": [
+        [
+          29,
+          43
+        ],
+        [
+          388,
+          424
+        ]
+      ]
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-verrou-points/axe_K/MEMO_AXE_K_TOUR_COMPLETE_20260930.md",
+      "bytes": 52811,
+      "sha256": "84a3c6e12463c12f734469b861686cc186392daf62beeeaf53f95282b8ef1ca9",
+      "mtime_utc": "2026-09-30T11:36:55.472524+00:00",
+      "reading_scope": "index et réponse courte ; preuve non contre-vérifiée",
+      "excerpt_ranges": [
+        [
+          21,
+          79
+        ]
+      ]
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-integration-r2/logs/head_ctest_gate.txt",
+      "bytes": 1987,
+      "sha256": "012175428944d3fd475c4ecc2b6ca3f4c617857383423e23eef9514633adeeb4",
+      "mtime_utc": "2026-09-30T12:04:09.201414+00:00",
+      "reading_scope": "lecture intégrale",
+      "excerpt_ranges": null
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-integration-r2/logs/faits_math_apply.txt",
+      "bytes": 687,
+      "sha256": "b3199f11a7ce7cda9190687b062f68c9576a57c0b357a51083943634b94c6ee3",
+      "mtime_utc": "2026-09-30T12:08:21.207397+00:00",
+      "reading_scope": "lecture intégrale",
+      "excerpt_ranges": null
+    },
+    {
+      "path": "/home/codespace/.claude/projects/-workspaces-E-HGP/497c67a8-5e59-434d-a8a7-2dc2144d8af4/workflows/scripts/audit-geant-v10-wf_5ddd24f5-867.js",
+      "bytes": 23261,
+      "sha256": "5f1f1de8d49a8e642f7347e9479d9f37ac140c875573e1c060be6c32d1400cc0",
+      "reading_scope": "index des tâches, chemins, étapes et conditions ; pas exécution"
+    },
+    {
+      "path": "/home/codespace/.claude/projects/-workspaces-E-HGP-build-v9-open-worktree/497c67a8-5e59-434d-a8a7-2dc2144d8af4/workflows/scripts/verrou-full-points-wf_097f86be-4df.js",
+      "bytes": 21916,
+      "sha256": "12e9a745c648ddc47654dfa59308fd071aded197971df97370925561b5c474a3",
+      "reading_scope": "index des tâches, chemins, étapes et conditions ; pas exécution"
+    },
+    {
+      "path": "/home/codespace/.claude/projects/-workspaces-E-HGP-build-v9-open-worktree/497c67a8-5e59-434d-a8a7-2dc2144d8af4/workflows/scripts/integration-r2-v10-wf_8d9c436e-5da.js",
+      "bytes": 21644,
+      "sha256": "b9849153fa714988052d6ee23178105343e12c2ad49b734b3bb7a7f2bc05da5b",
+      "reading_scope": "index des tâches, chemins, étapes et conditions ; pas exécution"
+    },
+    {
+      "git_commit": "408d1ffe4d90a7ee6393716c6ddc8319b2b77daa",
+      "path": "morsehgp3D_v10/audits/NOTE_CLAUDE_REPRISE_ET_PRECISION_20260930.md",
+      "sha256": "e3349c95309742b1ae279e1d6535176a7b9ec96bd799f49c3fe718447c2acdb9",
+      "reading_scope": "lecture intégrale git show ; newline terminal conservée"
+    }
+  ],
+  "statuses": [
+    {
+      "workstream": "audit géant",
+      "status": "synthèse non déposée au moment de la lecture ; dernier statut assistant 13 agents sur 14 terminés, vérificateur moteur encore actif",
+      "accepted_scope": "verdicts adverses par lentille, non synthèse finale"
+    },
+    {
+      "workstream": "recherche FULL vers points",
+      "status": "cinq mémos présents ; vérification adverse et juge annoncés en cours",
+      "accepted_scope": "candidats et théorèmes allégués dans les mémos ; pas de qualification ni sélection finale"
+    },
+    {
+      "workstream": "intégration R2",
+      "status": "13/13 portes du HEAD de départ ; application faits_math code 0 ; aucune qualification commune finale",
+      "accepted_scope": "préflight de départ et application partielle, pas intégration sept groupes"
+    }
+  ],
+  "no_replays": true,
+  "no_gcp": true,
+  "no_gpu": true,
+  "no_heldout_seeds": true,
+  "prior_r2_backup_receipt": "receipts/audit_independant_20260930/evidence_followup_20260930/provenance_408d1ffe4/ ; 726 payloads non relus ici"
+}

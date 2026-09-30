@@ -1,0 +1,53 @@
+Private R2 exact geometry and REAL-BOX scope audit, frozen before execution.
+No native generator, engine edits, shared archives/docs, timing bench or GCP.
+Generator source examined: catalogue/generator.cpp SHA256
+d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662.
+Implementation facts: root is dyadic cube containing all sites (lines663+);
+process filters, intersects with bbox(cand)+1 in T6 BEFORE longest-axis
+split (lines558-616). K5 default M16 (lines639-641). Crop means there is
+NO general aspect<=2 guarantee. Two distinct vertical sites n2 produce
+a root leaf of widths (1,1,64*D+1), even though its incoming root is a cube.
+The script mirrors these elementary integer root/crop rules, not the engine.
+
+Important conditional-domain limitation: if a belongs to CLOSED Q, evaluating
+at c=a gives sum_z w_z*power(z)>=0. No actual group can have sigma<0.
+Thus this certificate is useful only for anchors outside Q, or a separately
+proved smaller REALISABLE-centre domain. At the first root all sites are
+inside Q. None can be dominated there, since at c=x another site's squared
+distance is positive. Consequently n<=M means all sites survive and the
+first leaf is bbox(all)+1. Every anchor is inside that leaf, so the moments
+certificate cannot reject anything there. In particular the old14-site/M16
+examples and the new16-site/M16 example do NOT realise their fine test Q.
+
+Isotropic counterexample, raw coordinates before a common +5000 translation:
+a=(-4226,0,0), b=(4224,130,0), d=(4224,-78,104), e=(4224,-78,-104).
+Z has12 distinct sites (0,sy*y,sz*z) for independent signs sy,sz in{-1,+1}
+and (y,z) in {(1690,1690),(1689,1691),(1691,1689)}.
+Q=[-820,820]^3; after translation every site and box endpoint is u18 integer.
+Centre=(5000,5000,5000), radius2=4226^2. All four support barycentric
+weights are positive: 2112/4225,6339/33800,2113/13520,2113/13520.
+The shell is exactly a,b,d,e and I=Z (p12). None of the four supports
+has an individual universal dominator on CLOSED Q. For the moments
+certificate all four anchors have credit3, and sigma+2R2<0 rejects K5 q4.
+This is a real isotropic GEOMETRIC query-domain witness. It is NOT a
+claim that the default generator reaches Q on this16-site input.
+
+The oracle uses Fraction powers computed directly by norms, compares with
+the moment identity at all corners and fractional centres, recoups sigma,
+convex radius maximum, strict I/U, positive barycentric centre and nonzero
+tetrahedron determinant. It also verifies the actual initial boxes and
+no root dominance on the tiny input profiles; point-coordinate proof uses
+the direct norm oracle. Sampled centres are not a proof of universality:
+the affine-moment and convex-radius lemmas provide that proof separately.
+
+Architecture recommendation, not implemented:
+Prepare <=7 fixed groups once per REAL leaf; test only eligible anchors
+outside its closed S before Dom/support loops. Do not delete them from the
+census or add anonymous credits to Dom. Record real S/cand, anchor-in-S
+fraction, certificates, candidate counts and TOTAL group preparation/test
+work. Crop anisotropy does not prove that prior boxes are reached. A q4
+family may instead use centres equidistant to its triple (line intersectS),
+but that costs per triple; it is not an already-qualified per-leaf free gain.
+
+Execute only python3 -B check.py and python3 -B -O check.py. Preserve stdout,
+stderr, return codes and source/protocol hashes before/after, then close.

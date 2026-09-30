@@ -1,0 +1,245 @@
+{
+  "exact_condensations": 536,
+  "exact_cut_checks": 1092,
+  "exact_selection_checks": 2144,
+  "named": [
+    {
+      "case": "staggered_API",
+      "exact_eom_without_root": [
+        [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            3,
+            4
+          ]
+        ],
+        []
+      ],
+      "exact_point_lambda": [
+        "1/2",
+        "1/2",
+        "1/3",
+        "1/4",
+        "1/4"
+      ],
+      "exact_stabilities": [
+        "1",
+        "11/15",
+        "1/10"
+      ],
+      "mcs": 2,
+      "old_differs": true,
+      "z": 1
+    },
+    {
+      "case": "staggered_API",
+      "exact_eom_without_root": [
+        [
+          [
+            0,
+            1,
+            2
+          ],
+          [
+            3,
+            4
+          ]
+        ],
+        []
+      ],
+      "exact_point_lambda": [
+        "1/4",
+        "1/4",
+        "1/9",
+        "1/16",
+        "1/16"
+      ],
+      "exact_stabilities": [
+        "1/5",
+        "221/450",
+        "9/200"
+      ],
+      "mcs": 2,
+      "old_differs": true,
+      "z": 2
+    },
+    {
+      "case": "equal_geometry_plateau_API",
+      "exact_eom_without_root": [
+        [],
+        [
+          0,
+          1,
+          2,
+          3
+        ]
+      ],
+      "exact_point_lambda": [
+        "1/5",
+        "1/5",
+        "1/5",
+        "1/5"
+      ],
+      "exact_stabilities": [
+        "4/5"
+      ],
+      "mcs": 2,
+      "old_differs": true,
+      "z": 1
+    },
+    {
+      "case": "equal_geometry_plateau_API",
+      "exact_eom_without_root": [
+        [],
+        [
+          0,
+          1,
+          2,
+          3
+        ]
+      ],
+      "exact_point_lambda": [
+        "1/25",
+        "1/25",
+        "1/25",
+        "1/25"
+      ],
+      "exact_stabilities": [
+        "4/25"
+      ],
+      "mcs": 2,
+      "old_differs": true,
+      "z": 2
+    },
+    {
+      "case": "cohort_at_geometric_split_API",
+      "exact_eom_without_root": [
+        [],
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      ],
+      "exact_point_lambda": [
+        "1/5",
+        "1/5",
+        "1/5",
+        "1/5",
+        "1/5",
+        "1/5"
+      ],
+      "exact_stabilities": [
+        "6/5"
+      ],
+      "mcs": 2,
+      "old_differs": true,
+      "z": 1
+    },
+    {
+      "case": "cohort_at_geometric_split_API",
+      "exact_eom_without_root": [
+        [],
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      ],
+      "exact_point_lambda": [
+        "1/25",
+        "1/25",
+        "1/25",
+        "1/25",
+        "1/25",
+        "1/25"
+      ],
+      "exact_stabilities": [
+        "6/25"
+      ],
+      "mcs": 2,
+      "old_differs": true,
+      "z": 2
+    },
+    {
+      "case": "historical_K3_cover",
+      "exact_eom_without_root": [
+        [],
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      ],
+      "exact_point_lambda": [
+        "2/33",
+        "2/13",
+        "2/13",
+        "2/13",
+        "1/25",
+        "2/33"
+      ],
+      "exact_stabilities": [
+        "6679/10725"
+      ],
+      "mcs": 2,
+      "old_differs": false,
+      "z": 2
+    },
+    {
+      "case": "historical_K3_cover",
+      "exact_eom_without_root": [
+        [],
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      ],
+      "exact_point_lambda": [
+        "1/25",
+        "1/25",
+        "1/25",
+        "1/25",
+        "1/25",
+        "1/25"
+      ],
+      "exact_stabilities": [
+        "6/25"
+      ],
+      "mcs": 6,
+      "old_differs": true,
+      "z": 2
+    }
+  ],
+  "native": {
+    "release": {
+      "rows": 1120,
+      "targeted_selection_rows": 64
+    },
+    "ubsan": {
+      "rows": 1120,
+      "targeted_selection_rows": 64
+    }
+  },
+  "original_static_differences": 389,
+  "plateau_wrong_value_exit_code": 0,
+  "scope": "fixed API trees and one archived K3 geometric cover; no new native generator, vote or statistics",
+  "status": "COHORT_REFERENCE_PASS"
+}

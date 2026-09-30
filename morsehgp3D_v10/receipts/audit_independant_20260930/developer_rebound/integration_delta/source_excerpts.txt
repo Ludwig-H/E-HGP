@@ -1,0 +1,211 @@
+
+SOURCE notes/faits_math.md
+SHA256 6338496aeb41dd6102b83776ebbd89e20fba884c600cd32ea64a22656afbc6d3
+
+1: # Étape 1 : mise en place et groupe `faits_math` (30 septembre 2026)
+2: 
+3: ```text
+4: phase=exploration_v10_hors_registre
+5: backend=cpu_reference
+6: profile=quantized_u18_input_only
+7: mode=raccord_r2
+8: public_status=not_claimed
+9: GCP non utilisé
+10: ```
+11: 
+12: Worktree partagé lu seulement (`git archive`, `git show`, `git log`). Aucune commande GCP.
+13: 
+14: ## 1. Dépôt jetable
+15: 
+16: | commit | contenu |
+17: | --- | --- |
+18: | `6e29d65` | `base 56020cab6` : `morsehgp3D_v10` sans `audits/` ni `receipts/`, `docs/math`, `tools` (147 fichiers) |
+19: | `5a06844` | `head a8252527e` : mêmes chemins, plus `receipts/test_kmatch_A_20260929`, `test_cover_C_20260929`, `head_point_dendrogram_20260929` (243 fichiers) |
+20: | `85c2c1d` | `v10 raccord r2 faits_math: …` : patch, correctifs, reçu |
+
+48: ## 3. Résultats
+49: 
+50: | contrôle | résultat |
+51: | --- | --- |
+52: | état tête, `ctest -L gate -j2` | 13/13, code 0, 386 s |
+53: | `git apply --3way` du patch (`65a86d2b…`) | 0 conflit, 9 fusionnés, 2 nouveaux ; registre racine identique à la base et à la tête |
+54: | build intégré, build neuf | 0 avertissement ; 8 artefacts identiques à la tête (sha256) |
+55: | `ctest -L gate -j2`, état final | 15/15, code 0, 387 s (oracles 306 s et 349 s) |
+56: | `ctest --no-tests=error -L fast` | 5/5, code 0 |
+57: | deux portes, `python3`, `-O`, `-W error` | code 0, sorties identiques ; faits 210 contrôles, 14/14, 2/2 ; registre 65, 14/14, 2/2 |
+58: | refus (usage, build absent, racine vide, titre V10 renommé, registre de base, § 14 renommé) | code 2, normal et `-O` |
+59: | sondes du vérificateur interrompu | V1 à V12 conformes ; P5, P9, P10 refusées ; P1, P3, P4, P11 acceptées (limites) |
+60: | mutants de la copie (`mutants_du_correctif.py`) | 13 tués, 3 équivalents acceptés |
+61: | mutants du raccord (`mutants_du_raccord.py`) | 10/10 conformes : chaque contrôle ajouté est porteur |
+62: | `check_docs`, `check_passation`, `check_scope`, `check_implementation_status`, `check_contracts`, `check_references` | sorties identiques tête et intégré ; 0 nouveau constat |
+63: 
+64: Deux passages `ctest -L gate` intermédiaires ont été arrêtés par moi (code 143, groupe de processus tué par PID) pour
+65: changer les portes en cours de route : pas des échecs.
+66: 
+67: ## 4. Correctifs ajoutés
+68: 
+69: | correctif | détail |
+70: | --- | --- |
+71: | niveaux `--tree` (V1, V2) | `off_levels` : tout niveau de l'arbre de la tête est un niveau exact de la tour (F1 à F4) ; coupe ouverte de l'arbre aux rayons d'égalité de F3 ; mutants `arbre_contact_juste_dessous`, `arbre_lien_juste_dessous`, `arbre_racine_decalee`, `arbre_lien_avance` |
+72: | convention gardée (P5, P9, et P10) | déclaration fermée mot pour mot, pas de déclaration ouverte, convention au § 3.2 de CLUSTER_v2 et dans `tower.hpp`, survies de V10-P3 et V10-P6 mot pour mot ; six mutants |
+73: | `StopIteration` | section V10 ou § 14 introuvable : refus code 2 ; mutant inapplicable : échec nommé (deux portes) |
+74: | enregistrement CMake | lignes attendues 14/14 ; porte des faits : ARGS commençant par le script, `-O` par `PYTHONOPTIMIZE=1` |
+75: | documents | registre V10 (« Quatorze mutants », niveaux exacts, convention gardée) ; § 3.2 de CLUSTER_v2 |
+76: 
+77: ## 5. Constat nouveau (hors plan) et suites
+78: 
+79: - **faits_math × `mhgp10_fast_targets` (entrees_cli)** : le juge exige un script en tête des ARGS d'une porte `fast`
+80:   Python. La porte des faits (`-O script build`) y était une « FORME INCONNUE » (code 3). Levé ici. Juge extrait du
+81:   patch et joué seul : `/tmp/mhgp10-integ-r2/scratch/test_fast_targets_entrees_cli_r2.py`. Il rend encore 3 pour
+82:   les deux portes `fast` de la tête : P4, à faire à l'étape 5 ou après l'étape 7 selon le plan.
+83: - Étape 7 (`tete`) : l'en-tête de `cli/mhgp10_cluster.cpp` porte l'erratum « une laminarisation des amas discrets » ;
+84:   la famille B refuse le retour de « premiere couverture (amas discrets) ». Garder le commentaire corrigé, rejouer
+85:   `mhgp10_regression_projection_registry`.
+86: - Limites laissées : P1, P3, P4, P11 (famille B liste explicite, famille C existence sur disque) ; JSON épinglé
+87:   `PREREG_V10_COVER_C_20260929.json` inchangé (propriétaire du préenregistrement).
+88: - Sanitizers non rejoués : aucun code compilé ne change, binaires identiques.
+89: 
+90: ## 6. Reçu publié dans l'arbre
+91: 
+92: `morsehgp3D_v10/receipts/raccord_r2_20260930/faits_math/` : `README.md`, `copie_r2/` (sauvegarde `recu/` copiée
+93: sans modification : reçus des tours 1 et 2, scripts, sorties), `preuves/` (texte seulement), `SHA256SUMS`
+94: (113 fichiers, 293 Ko).
+
+SOURCE logs/faits_math_ctest_gate.txt
+SHA256 1112705f9108774fe6fade3650ee445cdf9a734b06835d7e4f237ec7d06b122a
+Test project /tmp/mhgp10-integ-r2/build
+      Start  7: mhgp10_tower_oracle
+      Start  6: mhgp10_catalogue_oracle
+ 1/15 Test  #6: mhgp10_catalogue_oracle ..................   Passed  306.34 sec
+      Start 13: mhgp10_regression_batch_equivalence
+ 2/15 Test  #7: mhgp10_tower_oracle ......................   Passed  348.55 sec
+      Start 10: mhgp10_points_cover
+ 3/15 Test #13: mhgp10_regression_batch_equivalence ......   Passed   60.25 sec
+      Start  8: mhgp10_head_condensation_vs_sklearn
+ 4/15 Test #10: mhgp10_points_cover ......................   Passed   23.27 sec
+      Start  9: mhgp10_regression_level_collision
+ 5/15 Test  #8: mhgp10_head_condensation_vs_sklearn ......   Passed   14.24 sec
+      Start 14: mhgp10_regression_mreach_border
+ 6/15 Test #14: mhgp10_regression_mreach_border ..........   Passed    4.68 sec
+      Start  1: mhgp10_unit
+ 7/15 Test  #9: mhgp10_regression_level_collision ........   Passed   13.91 sec
+      Start 12: mhgp10_regression_projection_registry
+ 8/15 Test  #1: mhgp10_unit ..............................   Passed    0.65 sec
+      Start  5: mhgp10_dev_quotas
+ 9/15 Test #12: mhgp10_regression_projection_registry ....   Passed    0.70 sec
+      Start  3: mhgp10_grid32_primitives
+10/15 Test  #5: mhgp10_dev_quotas ........................   Passed    0.26 sec
+      Start 11: mhgp10_regression_projection_facts
+11/15 Test  #3: mhgp10_grid32_primitives .................   Passed    0.20 sec
+      Start  4: mhgp10_cover_band_structural
+12/15 Test  #4: mhgp10_cover_band_structural .............   Passed    0.12 sec
+      Start 15: mhgp10_regression_multiplicity_refusal
+13/15 Test #11: mhgp10_regression_projection_facts .......   Passed    0.31 sec
+      Start  2: mhgp10_rank_search
+14/15 Test  #2: mhgp10_rank_search .......................   Passed    0.02 sec
+15/15 Test #15: mhgp10_regression_multiplicity_refusal ...   Passed    0.14 sec
+
+100% tests passed, 0 tests failed out of 15
+
+Label Time Summary:
+fast          =   1.48 sec*proc (5 tests)
+gate          = 773.66 sec*proc (15 tests)
+head          =  14.24 sec*proc (1 test)
+oracle        = 654.89 sec*proc (2 tests)
+points        =  23.65 sec*proc (3 tests)
+regression    =  80.22 sec*proc (8 tests)
+
+Total Test time (real) = 386.90 sec
+
+SOURCE logs/faits_math_ctest_gate.code
+SHA256 b0cc3323458438a56cc60354af9131656fe28bad115726b7dc6948f354913ffe
+code=0 duree=387s
+
+SOURCE logs/faits_math_ctest_fast.txt
+SHA256 c6d4a2750e1f4c416542ac66d721ac3f5c67ce10cfc4b0d299c1ce8ef90aa5c6
+Test project /tmp/mhgp10-integ-r2/build
+    Start  1: mhgp10_unit
+1/5 Test  #1: mhgp10_unit ..............................   Passed    1.49 sec
+    Start  4: mhgp10_cover_band_structural
+2/5 Test  #4: mhgp10_cover_band_structural .............   Passed    0.08 sec
+    Start  5: mhgp10_dev_quotas
+3/5 Test  #5: mhgp10_dev_quotas ........................   Passed    0.16 sec
+    Start 11: mhgp10_regression_projection_facts
+4/5 Test #11: mhgp10_regression_projection_facts .......   Passed    0.24 sec
+    Start 15: mhgp10_regression_multiplicity_refusal
+5/5 Test #15: mhgp10_regression_multiplicity_refusal ...   Passed    0.11 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Label Time Summary:
+fast          =   2.06 sec*proc (5 tests)
+gate          =   2.06 sec*proc (5 tests)
+points        =   0.23 sec*proc (2 tests)
+regression    =   0.34 sec*proc (2 tests)
+
+Total Test time (real) =   2.07 sec
+
+SOURCE logs/faits_math_ctest_fast.code
+SHA256 5e1ad2a542c5a018c9eacc2a4ab9214e0e48e1a487b0eab237192dfa8d70f791
+code=0
+
+SOURCE logs/faits_math_binaires.txt
+SHA256 19390edb4a92256cc97ab2c478a31a13e6a59de063b425bb39d3ecb003df0816
+mhgp10_catalogue tete=a3bbad50b81b901c57cea7193bc48d58cce68126e44ae0a225ad678baa3af0cb integre=a3bbad50b81b901c57cea7193bc48d58cce68126e44ae0a225ad678baa3af0cb integre_neuf=a3bbad50b81b901c57cea7193bc48d58cce68126e44ae0a225ad678baa3af0cb IDENTIQUES
+mhgp10_tower tete=3d55b8699b30abce635b27dea797468f229f95bfdb332468f42191ad9c0c9360 integre=3d55b8699b30abce635b27dea797468f229f95bfdb332468f42191ad9c0c9360 integre_neuf=3d55b8699b30abce635b27dea797468f229f95bfdb332468f42191ad9c0c9360 IDENTIQUES
+mhgp10_cluster tete=5df023bd685087a70c4015922f38177ea2480399136ace8f4e80f6536f72713d integre=5df023bd685087a70c4015922f38177ea2480399136ace8f4e80f6536f72713d integre_neuf=5df023bd685087a70c4015922f38177ea2480399136ace8f4e80f6536f72713d IDENTIQUES
+mhgp10_mreach_cluster tete=1dab9a4f9cd8ec3b3f51cd42d1f073f92ae3608d869792e8cb20a33ed5dfefac integre=1dab9a4f9cd8ec3b3f51cd42d1f073f92ae3608d869792e8cb20a33ed5dfefac integre_neuf=1dab9a4f9cd8ec3b3f51cd42d1f073f92ae3608d869792e8cb20a33ed5dfefac IDENTIQUES
+mhgp10_unit tete=311f49996912bfeb7bf7d8fb24b8e7c66fae5625e5f9c77f7987f42a7b152eed integre=311f49996912bfeb7bf7d8fb24b8e7c66fae5625e5f9c77f7987f42a7b152eed integre_neuf=311f49996912bfeb7bf7d8fb24b8e7c66fae5625e5f9c77f7987f42a7b152eed IDENTIQUES
+mhgp10_rank_search tete=0361f51d909529b70e340ebcb6e9b121865e6fe613ca9cba64cc469141ef6472 integre=0361f51d909529b70e340ebcb6e9b121865e6fe613ca9cba64cc469141ef6472 integre_neuf=0361f51d909529b70e340ebcb6e9b121865e6fe613ca9cba64cc469141ef6472 IDENTIQUES
+mhgp10_grid32_primitives tete=8a2e823c224bc04f7b8c109f953e9aafdc163bdc5a0efc2d8fd4685bc18509ec integre=8a2e823c224bc04f7b8c109f953e9aafdc163bdc5a0efc2d8fd4685bc18509ec integre_neuf=8a2e823c224bc04f7b8c109f953e9aafdc163bdc5a0efc2d8fd4685bc18509ec IDENTIQUES
+libmhgp10_core.a tete=d53abf19f8f9b3eac7b4d11e4d10ffeeb95029107acee9464ea0ae9e66b8bf5a integre=d53abf19f8f9b3eac7b4d11e4d10ffeeb95029107acee9464ea0ae9e66b8bf5a integre_neuf=d53abf19f8f9b3eac7b4d11e4d10ffeeb95029107acee9464ea0ae9e66b8bf5a IDENTIQUES
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+cmake version 3.28.3
+
+SOURCE src/morsehgp3D_v10/receipts/raccord_r2_20260930/faits_math/README.md
+SHA256 74c0c2eb77b4283b68f152970e455acffc1b1fe4b3c1887f7d6279eb103af062
+
+32: ## 1. Ce qui est intégré
+33: 
+34: `git apply --3way --whitespace=error-all faits_math_r2.patch` : code 0, **aucun conflit**, 9 fichiers fusionnés et
+35: 2 nouveaux ([journal](preuves/application_3way.txt)).
+36: 
+37: | fichier | contenu |
+38: | --- | --- |
+39: | `docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md` | section V10, lignes V10-P1 à V10-P8, convention fermée |
+40: | `morsehgp3D_v10/docs/conception/CLUSTER_v2.md` | second amendement du § 3.2, obligations OP16 à OP20 |
+41: | `CMakeLists.txt` | portes `mhgp10_regression_projection_facts` et `mhgp10_regression_projection_registry` |
+42: | `tests/regression/test_projection_facts.py`, `test_projection_registry.py` | les deux portes (nouvelles) |
+43: | `PASSATION.md`, `README.md`, `bench/synthetic/prereg/README.md`, `docs/CLUSTERING_DEPUIS_LA_TOUR_20260929.md` | errata « cover = amas discrets » |
+44: | `src/tower/tower.hpp`, `cli/mhgp10_cluster.cpp` | mêmes errata, commentaires seulement |
+45: 
+46: Registre racine : le fichier est identique à `56020cab6` et à `a8252527e` (aucun commit ne le touche entre les deux,
+47: ni jusqu'à `origin/main` `33fcb53a0`). La fusion à trois voies est donc exacte. La section V10 est insérée après la
+48: dernière ligne V9 (voies sans atlas) et avant le § 10, comme dans la copie.
+49: 
+50: ## 2. Conflits et résolution
+51: 
+52: Aucun conflit textuel. Un conflit latent, absent du plan, a été trouvé et levé ici :
+53: 
+54: | conflit | constat | résolution |
+55: | --- | --- | --- |
+56: | `faits_math` × porte `mhgp10_fast_targets` d'`entrees_cli` | la porte des faits est `fast` et ses ARGS commencent par `-O` ; le juge des portes `fast` d'`entrees_cli` exige un script en tête d'ARGS : « FORME INCONNUE », code 3 ([avant](preuves/fast_targets_entrees_cli_sur_integre_avant.txt)) | ARGS commençant par le script (forme P4 du plan) ; `-O` passe par l'environnement du test, `PYTHONOPTIMIZE=1` et `PYTHONDONTWRITEBYTECODE=1` ([CTest -V](preuves/ctest_V_projection_facts.txt)). Rejouée dans le dossier restreint aux cibles des plans G4 : code 0 ([après](preuves/fast_targets_entrees_cli_sur_integre_apres.txt)) |
+57: 
+58: Le juge `test_fast_targets.py` est celui du patch `entrees_cli_r2.patch` (`b1c0b530…`), extrait et joué seul sur le
+59: build intégré ; il n'est pas dans l'arbre avant l'étape 5. Il rend encore 3 à cause des deux portes `fast` de la tête
+60: (`cover_band_structural`, `dev_quotas`) : c'est le préalable P4, hors de cette étape.
+
+167: ## 7. Limites et points ouverts
+168: 
+169: - Sondes P1, P3, P4, P11 acceptées. La famille B est une liste explicite : elle bloque le retour des neuf énoncés, pas
+170:   une formulation nouvelle. La famille C juge l'existence sur le disque, pas le suivi par git. Limites déjà écrites
+171:   dans le reçu du tour 2 ; le plan ne les demande pas.
+172: - `PREREG_V10_COVER_C_20260929.json` (épinglé) dit toujours « amas discrets du théorème 2 ». Au propriétaire du
+173:   préenregistrement.
+174: - Hors périmètre, comme dans la copie : §§ 8 à 11 d'`AUDIT_LAMINARITE_POINTS` (têtes majoritaires, contacts
+175:   coquille/intérieur, contre-exemple frontière). Ils relèvent de la porte de conception frontière.
+176: - Pour l'étape 5 (`entrees_cli`) : la porte des faits a déjà la forme attendue par `mhgp10_fast_targets` ; P4 reste à
+177:   faire pour les deux portes `fast` de la tête.
+178: - Pour l'étape 7 (`tete`) : l'en-tête de `cli/mhgp10_cluster.cpp` porte un erratum gardé par la famille B ; garder le
+179:   commentaire corrigé, puis rejouer `mhgp10_regression_projection_registry`.
+180: - Oracle `Line` exact pour des sites alignés seulement ; F5 est un arbre abstrait.

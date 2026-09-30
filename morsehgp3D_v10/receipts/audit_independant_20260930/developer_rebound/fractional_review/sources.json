@@ -1,0 +1,36 @@
+{
+  "captured_utc": "2026-09-30T12:31:43.537244+00:00",
+  "scope": "prop11 ; miniature exacte z2 K3 ; règle nouvelle privée, pas défaut HEAD",
+  "sources": [
+    {
+      "path": "/workspaces/E-HGP/build/v10-verrou-points/masses_selection/MEMO_MASSES_SELECTION_20260930.md",
+      "sha256": "3fd53faa94d2b1775a7e38f2832b3eb118ecf8b71b7e072263998e9111d0d001",
+      "bytes": 56270
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-verrou-points/masses_selection/lib/selection.py",
+      "sha256": "509acaa1170c1bcf3a3cfb97eb6220db3a908b0b7669c75efad78183e84bc80e",
+      "bytes": 10596
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-verrou-points/masses_selection/lib/fullk.py",
+      "sha256": "a09a6c85687971f80e0df030effaf4cc112b9641176badf8460296898625a44e",
+      "bytes": 10501
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-verrou-points/masses_selection/lib/participation.py",
+      "sha256": "47acfd0c482455f9b14fbfaa9e90a9f5ff02627dd15453c3dc99a8651b696549",
+      "bytes": 12767
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-verrou-points/masses_selection/lib/scale.py",
+      "sha256": "7445aec285ce649b32e6b31c62dca96448f4f5b19b0b305b455d545462b2f294",
+      "bytes": 4078
+    }
+  ],
+  "verifier_report_available": "aucun fichier de vérification masses présent dans build/v10-verrou-points au relevé ; verif_axiomes seulement",
+  "no_statistics": true,
+  "no_heldout_seeds": true,
+  "no_product_changes": true,
+  "no_gcp": true
+}

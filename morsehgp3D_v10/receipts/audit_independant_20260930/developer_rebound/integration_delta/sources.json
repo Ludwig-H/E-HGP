@@ -1,0 +1,117 @@
+{
+  "captured_utc": "2026-09-30T12:39:35.898321+00:00",
+  "scope": "delta faits_math dans copie commune ; lecture seulement, aucun test ni relecture de sauvegarde726",
+  "private_integration_commit": "85c2c1d61797c426abdffef28c797f63361b6f22",
+  "private_parent_commit": "5a0684430b3b52809dd5f8b43c12ff64d68793dd",
+  "source_shared_commit": "a8252527e6f42a87eb38326798af91898fdeaf0c",
+  "changed_relevant_files": [
+    "morsehgp3D_v10/CMakeLists.txt",
+    "morsehgp3D_v10/cli/mhgp10_cluster.cpp",
+    "morsehgp3D_v10/src/tower/tower.hpp",
+    "morsehgp3D_v10/tests/regression/test_projection_facts.py",
+    "morsehgp3D_v10/tests/regression/test_projection_registry.py"
+  ],
+  "sources": [
+    {
+      "path": "/workspaces/E-HGP/build/v10-integration-r2/notes/faits_math.md",
+      "bytes": 6252,
+      "sha256": "6338496aeb41dd6102b83776ebbd89e20fba884c600cd32ea64a22656afbc6d3",
+      "mtime_utc": "2026-09-30T12:29:59.399310+00:00",
+      "excerpt_ranges": [
+        [
+          1,
+          20
+        ],
+        [
+          48,
+          94
+        ]
+      ]
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-integration-r2/logs/faits_math_ctest_gate.txt",
+      "bytes": 2252,
+      "sha256": "1112705f9108774fe6fade3650ee445cdf9a734b06835d7e4f237ec7d06b122a",
+      "mtime_utc": "2026-09-30T12:29:18.126313+00:00",
+      "excerpt_ranges": null
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-integration-r2/logs/faits_math_ctest_gate.code",
+      "bytes": 18,
+      "sha256": "b0cc3323458438a56cc60354af9131656fe28bad115726b7dc6948f354913ffe",
+      "mtime_utc": "2026-09-30T12:29:18.128313+00:00",
+      "excerpt_ranges": null
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-integration-r2/logs/faits_math_ctest_fast.txt",
+      "bytes": 903,
+      "sha256": "c6d4a2750e1f4c416542ac66d721ac3f5c67ce10cfc4b0d299c1ce8ef90aa5c6",
+      "mtime_utc": "2026-09-30T12:29:18.131313+00:00",
+      "excerpt_ranges": null
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-integration-r2/logs/faits_math_ctest_fast.code",
+      "bytes": 7,
+      "sha256": "5e1ad2a542c5a018c9eacc2a4ab9214e0e48e1a487b0eab237192dfa8d70f791",
+      "mtime_utc": "2026-09-30T12:29:18.133313+00:00",
+      "excerpt_ranges": null
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-integration-r2/logs/faits_math_binaires.txt",
+      "bytes": 2061,
+      "sha256": "19390edb4a92256cc97ab2c478a31a13e6a59de063b425bb39d3ecb003df0816",
+      "mtime_utc": "2026-09-30T12:29:18.136313+00:00",
+      "excerpt_ranges": null
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/receipts/raccord_r2_20260930/faits_math/README.md",
+      "bytes": 16998,
+      "sha256": "74c0c2eb77b4283b68f152970e455acffc1b1fe4b3c1887f7d6279eb103af062",
+      "mtime_utc": "2026-09-30T12:29:05.861314+00:00",
+      "excerpt_ranges": [
+        [
+          32,
+          60
+        ],
+        [
+          167,
+          180
+        ]
+      ]
+    }
+  ],
+  "reported_binary_hashes_parsed": {
+    "mhgp10_catalogue": "a3bbad50b81b901c57cea7193bc48d58cce68126e44ae0a225ad678baa3af0cb",
+    "mhgp10_tower": "3d55b8699b30abce635b27dea797468f229f95bfdb332468f42191ad9c0c9360",
+    "mhgp10_cluster": "5df023bd685087a70c4015922f38177ea2480399136ace8f4e80f6536f72713d",
+    "mhgp10_mreach_cluster": "1dab9a4f9cd8ec3b3f51cd42d1f073f92ae3608d869792e8cb20a33ed5dfefac",
+    "mhgp10_unit": "311f49996912bfeb7bf7d8fb24b8e7c66fae5625e5f9c77f7987f42a7b152eed",
+    "mhgp10_rank_search": "0361f51d909529b70e340ebcb6e9b121865e6fe613ca9cba64cc469141ef6472",
+    "mhgp10_grid32_primitives": "8a2e823c224bc04f7b8c109f953e9aafdc163bdc5a0efc2d8fd4685bc18509ec",
+    "libmhgp10_core.a": "d53abf19f8f9b3eac7b4d11e4d10ffeeb95029107acee9464ea0ae9e66b8bf5a"
+  },
+  "parsed_result": {
+    "gate": {
+      "passed": 15,
+      "total": 15,
+      "code": 0,
+      "wall_seconds": 386.9
+    },
+    "fast": {
+      "passed": 5,
+      "total": 5,
+      "code": 0,
+      "wall_seconds": 2.07
+    },
+    "eight_artifacts_equal_as_logged": true
+  },
+  "qualification_limit": "faits_math et deux juges intégrés ; aucun patch moteur/head/CLI strict/oracles R2 qualifié par ces logs ; pas intégration publique",
+  "remaining": {
+    "P4_fast_targets": "ancienne forme directe de cover_band_structural et dev_quotas toujours à adapter",
+    "oracles_R2_x_CLI": "options dump/births et leaf K+3 prévus étape6, non résolus par faits_math",
+    "next_planned_group": "SiteTree avec réparation ; puis bancs, pool, entrees_cli, oracles, tete"
+  },
+  "no_product_replays": true,
+  "no_gcp": true,
+  "previous_receipts_unchanged": true
+}

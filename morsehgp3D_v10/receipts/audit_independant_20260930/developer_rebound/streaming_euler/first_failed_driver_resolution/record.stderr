@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/streaming_euler/record.py", line 107, in <module>
+    main()
+  File "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/streaming_euler/record.py", line 66, in main
+    command([compiler,*flags,*extra,'-MD','-MF',dep,ROOT/'probe.cpp','-o',binary],'compile_'+name)
+  File "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/streaming_euler/record.py", line 30, in command
+    need(result.returncode == expected,'command failed: '+name)
+  File "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/streaming_euler/record.py", line 16, in need
+    raise RuntimeError(text)
+RuntimeError: command failed: compile_release

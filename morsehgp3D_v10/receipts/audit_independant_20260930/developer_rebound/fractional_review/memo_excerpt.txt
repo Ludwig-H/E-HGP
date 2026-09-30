@@ -1,0 +1,112 @@
+47: ## 1. Objets et notations
+48: 
+49: X ⊂ R³ est un nuage de n sites distincts. K ≥ 2 est fixé. À K = 1, les amas discrets forment déjà une partition
+50: (remarque 3 de la définition 8) : il n'y a rien à projeter. β = r² désigne un **rayon carré** exact.
+51: 
+52: L'arbre FULL_K est l'arbre de fusion des composantes de `L_K(β) = {y : |X ∩ B̄(y, √β)| ≥ K}`. Un nœud v a une
+53: naissance b_v et une mort d_v = b_parent(v), avec d = +∞ pour la racine. Coupe fermée : v est vivant à β si
+54: b_v ≤ β < d_v. Un plateau exact est un seul événement. `anc(v, β)` est l'ancêtre de v vivant à β.
+55: 
+56: **Définition 1 (couverture).** La branche v couvre x à β ∈ [b_v, d_v) si dist(x, C_v(β)) ≤ √β, où C_v(β) est la
+57: composante représentée par v. On note c_x(v) le premier tel β, V_x l'ensemble des v pour lesquels il existe, et
+58: T_x = {(v, β) : v ∈ V_x, c_x(v) ≤ β < d_v} l'**arbre de couverture** de x. À la coupe β, la famille des v
+59: vivants de V_x avec c_x(v) ≤ β est exactement l'ensemble des amas discrets X ∩ δ_r(C) qui contiennent x.
+60: 
+61: **Lemme 1.** V_x est clos vers le haut et c_x(parent(v)) = b_parent(v) pour v ∈ V_x.
+62: 
+63: *Preuve.* Si v couvre x à β < d_v, la composante du parent à b_parent contient C_v(β), donc
+64: dist(x, C_parent) ≤ √β ≤ √b_parent. ∎
+65: 
+66: **Lemme 2 (calcul sans énumération).** Soit W_x l'ensemble des témoins forts de x : boules critiques de
+67: population fermée ≥ K, de p + q_min ≤ K, contenant x (intérieur ou coquille). Le nœud d'un témoin w est la
+68: composante de son centre à son propre niveau ℓ(w) (le `ball_node` natif). Alors, pour tout nœud v,
+69: `c_x(v) = max(b_v, min{ℓ(w) : w ∈ W_x, nœud(w) ⪯ v})` dès que cet ensemble est non vide, et v ∉ V_x sinon.
+70: 
+71: *Preuve.* Le lemme de couverture du catalogue (addendum de l'auditeur continu, preuve complète) dit, à chaque
+72: coupe β : x est couvert par la composante C ssi un témoin fort de niveau ≤ β a son centre dans C. Le centre
+73: d'un témoin w est dans `anc(nœud(w), β)` pour β ≥ ℓ(w). Donc v couvre x à β ∈ [b_v, d_v) ssi un témoin
+74: vérifie ℓ(w) ≤ β et nœud(w) ⪯ v. Le plus petit tel β est la formule annoncée. Un témoin placé sous un enfant a
+75: un niveau < b_v : le maximum rend alors b_v, ce qui est la continuation du lemme 1. ∎
+81: ## 2. L'unité de masse : la persistance couverte d'une branche
+82: 
+83: **Définition 2.** Soit φ(β) = β^(−z/2) = r^(−z), l'échelle λ de la tête EOM, avec φ(+∞) = 0. L'**unité de
+84: participation** de x dans la branche v ∈ V_x est `w_x(v) = φ(c_x(v)) − φ(d_v) > 0`. La masse totale
+85: `W_x = Σ_{v ∈ V_x} w_x(v)` est la longueur, en unités λ, de l'arbre de couverture T_x.
+86: 
+87: Lecture : x participe à l'amas discret porté par v du rayon √c_x(v) au rayon √d_v. L'unité w_x(v) est la durée
+88: de cette participation en unités de densité : c'est exactement le terme λ_max − λ_min de la stabilité de
+89: Campello et al. La masse unité de x se répartit au prorata de ses participations, passées et futures. C'est la
+90: généralisation, à toutes les branches et avec leurs continuations, du contrôle « durée couverte des feuilles » de
+91: l'audit (sections 10 et 11) ; la majorité à dénominateur fixe de l'audit (section 8) en est le cas des atomes
+92: activés par marches.
+93: 
+94: **Proposition 3 (télescopage des continuations).**
+95: (a) Le long d'une chaîne de nœuds de V_x où chacun a exactement un enfant couvert, la somme des unités vaut
+96: φ(c) − φ(d_haut) : elle ne dépend pas du découpage.
+97: (b) Insérer une continuation dans une branche v, par fusion à γ avec une branche g qui ne couvre pas x, ne change
+98: ni W_x ni aucune masse accumulée du § 3. Si g couvre x, W_x augmente de w_x(g) ≤ φ(b_g) − φ(d_g), la persistance
+99: de g en λ, qui tend vers zéro avec la persistance du fantôme.
+100: (c) Exclure un ancêtre retire φ(b) − φ(d) à W_x ; compter chaque continuation comme une unité nouvelle double
+101: sa masse. Ce sont les deux défauts relevés à la section 11 de l'audit ; l'unité de branche n'a ni l'un ni l'autre.
+102: 
+103: *Preuve.* (a) φ(c) − φ(d_1) + φ(d_1) − φ(d_2) + … = φ(c) − φ(d_haut). (b) Le découpage de v en v′ = [b_v, γ) et
+104: v″ = [γ, d_v) remplace w_x(v) par w_x(v′) + w_x(v″) = w_x(v) si c_x(v) < γ, et par w_x(v″) = w_x(v) sinon ; la
+105: masse accumulée d'un nœud vivant (définition 3) est une somme télescopique de ces termes. Le second énoncé est
+106: la définition de w_x(g). (c) Immédiat. ∎
+107: 
+108: **Proposition 4 (indépendance du catalogue et de Kmax).** V_x, c_x et w_x ne dépendent que de FULL_K et de la
+109: relation géométrique de couverture. Deux univers de témoins qui certifient les mêmes couvertures donnent les
+110: mêmes unités. L'univers fort ne dépend pas de Kmax.
+111: 
+112: *Preuve.* Définition 1 et lemme 2 ; l'admission p + q_min ≤ K ne fait pas intervenir Kmax. ∎
+113: 
+114: Conséquences vérifiées : dans le contact coquille/intérieur, le nuage de base a 15 incidences de témoins forts et
+115: le nuage déplacé 6, mais les unités de branche changent seulement par la variation continue des niveaux. Sur six
+116: sites alignés, Kmax = 2 et Kmax = 4 donnent des catalogues de 9 et 14 boules, mais les mêmes 10 incidences fortes,
+117: les mêmes unités et les mêmes attaches (fixture KM, § 8).
+118: 
+119: ## 3. Deux activations d'une même masse, et la majorité
+120: 
+121: **Définition 3 (activations).** Pour v vivant à β, notons base_x(v) la somme des unités des descendants stricts
+122: de v dans V_x.
+123: 
+124: - **Progressive** : `A_x(v, β) = base_x(v) + (φ(c_x(v)) − φ(β))_+`. La masse entre au fil de la couverture.
+125: - **Par marches** : `S_x(v, β) = Σ w_x(u)` sur les u ⪯ v de V_x avec c_x(u) ≤ β. Chaque unité entre entière à
+126:   sa première couverture ; c'est le mode des atomes de l'audit (majorités A3/A4, durée de feuille).
+127: 
+128: La **réserve** `ρ_x(β) = 1 − Σ_{v vivant} A_x(v, β)/W_x` est la part future de la participation. Pour toute
+129: coupe, la masse active des nœuds plus les réserves vaut n : la masse totale est conservée.
+130: 
+131: **Définition 4 (attache majoritaire).** Progressive : `t(x) = min{β : ∃ v vivant, A_x(v, β) ≥ W_x/2}` et o(x)
+132: est cette branche. Par marches : même définition avec S_x(v, β) > W_x/2. À β ≥ t(x), le bloc de x est
+133: anc(o(x), β) ; avant t(x), x est un singleton de complétion, jamais un bloc collectif « bruit ».
+134: 
+135: Forme close. Sur une chaîne de continuations issue d'un nœud a avec base_x(a) < W_x/2, le franchissement a lieu à
+136: `φ(t) = base_x(a) + φ(c_x(a)) − W_x/2`, s'il est avant la fin de la chaîne ; sinon la majorité est acquise par
+137: saut à une fusion. Pour un point couvert par une seule lignée, t = 2^(2/z) c_x : le retard de confiance vaut
+138: 2^(1/z) en rayon (1,41 à z = 2, 1,26 à z = 3, 1,19 à z = 4), contre au plus 2 pour core.
+386: ## 8. La sélection sans hiérarchie de points
+387: 
+388: **Proposition 11 (condensation fractionnaire).** Masse d'un nœud : m_v(β) = Σ_x A_x(v, β)/W_x (progressive) ou
+389: Σ_x S_x(v, β)/W_x (marches). Elle croît pendant la vie de v. À sa mort, les deux coïncident :
+390: m_v(d_v⁻) = Σ_x (base_x(v) + w_x(v))/W_x, car toutes les unités du sous-arbre sont acquises. La condensation
+391: N-aire (enfants gros si m ≥ mcs, mcs réel), puis l'EOM avec `S(C) = ∫ m_C dλ` sur la vie condensée de C
+392: (égalité → parent, racine exclue), sont bien définies et rendent une antichaîne de nœuds de FULL.
+393: 
+394: *Preuve.* Pour des masses unités entières entrant à des dates fixes, ∫ m_C dλ = Σ_p (λ_max,C(p) − λ_min,C(p)),
+395: la stabilité σ(C) de Campello et al. telle que l'écrivent McInnes et Healy. La définition est linéaire en la
+396: masse : elle s'étend telle quelle aux masses fractionnaires. La condensation ne lit que les masses de fin de vie
+397: des enfants, identiques dans les deux activations. L'EOM ascendante choisit une antichaîne par construction. ∎
+398: 
+399: **Proposition 12 (vote à l'antichaîne).** Pour l'antichaîne choisie, de sommets top(c), posons
+400: `V_x(c) = Σ_{u ∈ V_x, u ⪯ top(c)} w_x(u)/W_x`. Les sous-arbres sont disjoints, donc Σ_c V_x(c) ≤ 1. L'étiquette
+401: est l'argmax unique s'il est positif ; sinon x est bruit (abstention aux égalités, sans départage par
+402: identifiant). Le résultat est une partition : c'est la proposition 7 du manuscrit, avec des unités de branche au
+403: lieu des faces.
+404: 
+405: **Proposition 13 (cohérence hiérarchie / vote).** Si le propriétaire majoritaire progressif de x vérifie
+406: o(x) ⪯ top(c) pour un cluster choisi c, alors V_x(c) > 1/2 et le vote donne c.
+407: 
+408: *Preuve.* top(c) est o(x) ou l'un de ses ancêtres, donc d_top(c) ≥ d_o(x) > t(x). V_x(c) majore la masse accumulée
+409: dans le sous-arbre de top(c) à tout β < d_top(c). Juste après t(x), cette masse dépasse strictement W_x/2 : o(x)
+410: couvre x, sa masse croît strictement (théorème 7, étape 1). ∎

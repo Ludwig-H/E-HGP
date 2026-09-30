@@ -1,0 +1,516 @@
+Lecture indépendante bornée des travaux en cours — 30 septembre 2026.
+Ces extraits sont figés ; les sources externes peuvent évoluer. Aucun résultat n’a été rejoué par cet auditeur.
+
+SOURCE /workspaces/E-HGP/build/v10-giant-audit/moteur_livre/RAPPORT.md
+SHA256 81f5dc62b1767eb55a6b11a3df50d6a7293d1c8db31a3521974e9b34f7566ed2
+
+16: ## Verdict en une ligne
+17: 
+18: Le code livré est **exact et sans effet sur les sorties** : modèle,
+19: sanitizers, mutants et différentiel pré/HEAD sont verts. Le point faible
+20: est la **couverture** : un raccord `RankIndex` faux à l'égalité survit à
+21: toutes les portes, alors qu'il change 389 attaches sur une trame LiDAR et
+22: les étiquettes d'une fixture de 5 points.
+23: 
+24: ## 0. Périmètre et provenance
+25: 
+26: - HEAD `8bb4618e5`. Ses sources moteur sont celles de `4b7d70422`, seul
+27:   commit de développement : `git diff 4b7d70422 8bb4618e5` est vide sur
+28:   `src`, `cli`, `tests`, `bench`, `reference`, `cmake`, `CMakeLists.txt`.
+29: - Pré-tranche : `bdc0b8f08` (`git archive`, build Release privé).
+30: - Diff moteur `bdc0b8f08..8bb4618e5` : 9 fichiers, +827/−16.
+31: - Pendant l'audit, `main` est passé à `408d1ffe4` (reprise développeur ;
+32:   décision : grille fixe u32 portée par paliers, u24 puis u32 complet).
+33:   `git diff 8bb4618e5 408d1ffe4` est vide sur les mêmes chemins : les
+34:   résultats ci-dessous valent aussi pour `408d1ffe4`. Cette décision met
+35:   ML-1 et ML-6 sur le chemin critique du port.
+
+193: ### 2.4 Le raccord est-il gardé par une porte ?
+194: 
+195: Quatre mutants du raccord, build privé complet, puis `ctest -L gate`
+196: (sans `mhgp10_catalogue_oracle`, qui n'exécute que le catalogue).
+197: 
+198: | Mutant du raccord | Dumps changés | Portes rouges | `tower_oracle` |
+199: | --- | --- | --- | --- |
+200: | rang −1 | clusters_x1 K5, lidar02 K5 | 4 (via `validate`, `rank_order`) | **vert** |
+201: | rang +1 | idem | 5 | rouge |
+202: | échantillon lu dans `level[i]` | idem | 5 | rouge |
+203: | `level_at_most` strict (`<` au lieu de `<=`) | lidar02 K5 | **0 : survit aux 12 portes** | **vert** |
+204: 
+205: Le mutant strict n'est **pas** équivalent :
+206: 
+207: | Mesure | Résultat |
+208: | --- | --- |
+209: | lidar02_full, K = 5, core | **389 attaches sur 229 225** changent (k=2 : 174, k=3 : 74, k=4 : 74, k=5 : 67) ; 0 nœud |
+210: | fixture 3 points `(0,0,0) (2,0,0) (4,0,0)`, K = 2 | les 3 attaches d'ordre 2 descendent du nœud de fusion (niveau 4) vers ses enfants (niveau 1) |
+211: | fixture 5 points (`fixture_egalite_attache_min5.txt`), K=2, mcs=2, z=3 | étiquettes HEAD `[-1,-1,-1,-1,-1]`, mutant `[-1,0,0,1,1]` |
+212: | 400 petits nuages entiers (graine dev) | 273 arbres exportés et 34 jeux d'étiquettes différents |
+213: 
+214: Cause : l'oracle T2 remonte avec `top()` (`test_tower_oracle.py:83–86`,
+215: groupement l. 143). Une attache posée sur un **descendant** du bon nœud
+216: donne donc les mêmes partitions à toute coupe. `validate()`
+217: (`dendrogram.cpp:28`) accepte `point_rank == node_rank[parent]`, cas
+218: prévu pour les plateaux de durée nulle. Le contrat écrit
+219: (`dendrogram.hpp:5–8`) exige pourtant « la composante qui le contient à
+220: son niveau d'entrée », donc le nœud de fusion.
+221: 
+222: HEAD respecte ce contrat. Invariant linéaire exact
+223: `niveau(v) ≤ e < niveau(parent(v))` (`scripts/attach_invariant.py`) :
+224: 0 violation sur 847 675 attaches core — 80 000 (clusters_x1 K10),
+225: 80 000 (uniform_x2 K5), 229 225 (lidar02 K5), 458 450 (lidar02 K10).
+226: Le mutant strict en viole 389 sur lidar02 K5, exactement les attaches
+227: changées ; il viole aussi les deux fixtures.
+228: 
+229: C'est le point d'entrée du futur port de précision : `level_at_most` doit
+230: être réécrit (`Wide1(e)` à abandonner, `precision_math/AUDIT.md` § 3).
+231: Une régression à l'égalité y passerait toutes les portes actuelles.
+
+298: ## 6. Constats
+299: 
+300: | Id | Sévérité | Où | Constat |
+301: | --- | --- | --- | --- |
+302: | ML-1 | majeur | `tests/oracle/test_tower_oracle.py:83–86,143` ; `src/points/dendrogram.cpp:28` ; `src/tower/tower.cpp:996–999` | Couverture : raccord strict à l'égalité non détecté (§ 2.4) |
+303: | ML-2 | mineur | `tests/unit/rank_search.cpp:54–65` | Section 3 sans plafond ni `try` : délai 300 s ou SIGABRT |
+304: | ML-3 | mineur | `src/catalogue/generator.cpp:803`, `catalogue.hpp:86` | Garde de cardinalité du catalogue absente (domaine futur) |
+305: | ML-4 | mineur | `CMakeLists.txt:70–78, 89–94` | Portes Python hors `mhgp10_gate`, sans `-O` ; portes C++ sans `fast` |
+306: | ML-5 | mineur | `tests/points/test_cover_band_native.py` | Test natif non enregistré, dépend de copies de reçus |
+307: | ML-6 | info | `tower.cpp:1011,1618` ; `tower.hpp:110` | Chemin K-NN u64, sans `static_assert` (domaine futur) |
+308: | ML-7 | info | `rank_search.hpp` | Exact ; ordonnancement inchangé ; 11 mutants tués, 6 équivalents |
+309: | ML-8 | info | `tower.cpp:1004–1017` | Sorties identiques pré/HEAD ; déterminisme 1/4 fils |
+310: | ML-9 | info | `grid32_primitives.hpp` | Exact contre oracle non borné ; 13/13 mutants tués ; non raccordé |
+311: 
+312: Actions proposées : graver les fixtures 3 et 5 points dans une porte ;
+313: ajouter l'invariant `niveau(v) ≤ e < niveau(parent(v))` au juge T2 et à
+314: une porte d'échelle (linéaire) ; borner la section 3 de la porte de rang ;
+315: refuser `refs.size() >= kNone` en `index_overflow_u32` ; ajouter une
+316: `static_assert` sur `3·(2^kCoordinateBits−1)^2 < 2^63` près de
+317: `tower.cpp:1618` ; passer les portes Python par `run_expect` avec leur
+318: variante `-O`.
+
+SOURCE /workspaces/E-HGP/build/v10-giant-audit/frontiere/RAPPORT_FRONTIERE_20260930.md
+SHA256 95488bc1312b04c57a9b9723e9374596454ebeee2e1434dfa4de019f05a2664b
+
+309: - Quel η préenregistrer ? Cette sonde ne donne qu'une distribution de `ρ`, pas un choix.
+310: - La cible est-elle une hiérarchie à K fixé ou multi-K ? Le second cas exige une politique
+311:   déclarée (raffinement ou regroupement commun), car les projections par K se croisent.
+312: - R4 utilise D5 absolu à δ=4 : avec 22 à 35 % de points à risque à δ=1 et 36 à 55 % à δ=4
+313:   (K5 LiDAR), il favorisera presque toujours A0 contre les bras de couverture. Faut-il un D5
+314:   à l'échelle des amas comme critère principal ?
+315: - Le jitter δ=1 à 4 mm est-il le bon ε physique pour le LiDAR visé ?
+316: - Pendant l'audit, des reçus non commités sont apparus dans le worktree
+317:   (`audit_independant_20260930/fixed_k_antichain/`, `point_condensation*`,
+318:   `audit_continu_20260929/point_condensation*`, `group_moments_20260930/`). Ils ne sont pas
+319:   lus ici : cet audit est ancré à `8bb4618e5`. L'antichaîne y est peut-être déjà traitée.
+320: 
+
+SOURCE /workspaces/E-HGP/build/v10-giant-audit/verif_frontiere/RAPPORT_VERIF_FRONTIERE_20260930.md
+SHA256 47e99708096bc4917f458bece7b41cdb2e83fe3e21d79cd6997cdb660328c041
+
+18: 
+19: 1. **Aucun défaut produit HEAD.** La lentille le dit aussi. Tous ses chiffres rejoués sont identiques.
+20: 2. **Mathématique confirmée.** Le bord de bande est reproduit par un juge maison sans `frontier_core`
+21:    (MEB de `hgp10_ref.py`, Γ3 maison) : saut de 1,1635·S (η=1/32) et 1,5350·S (η=1/8), > 2ε exact.
+22: 3. **Sévérités surévaluées.** Six constats « majeur » portent sur une bande expérimentale que HEAD
+23:    ne dit pas stable, sur des bras privés ou sur une campagne jamais lancée. Aucun ne reste majeur.
+24: 4. **Deux corrections de fait.** Les fondations du test natif sont versionnées à HEAD, dans les reçus (F9).
+25:    L'export complet à 32 000 points K5 se charge : 532,6 Mo, 57 s, pic 5,6 Go (F5).
+26: 5. **Un point manqué utile.** B_η (HEAD) dépend du filtre d'univers des témoins ; l'antichaîne non.
+
+49: | Id | Verdict | Sévérité lentille → corrigée | Preuve propre et correction |
+50: | --- | --- | --- | --- |
+51: | F1 | confirmé (mathématique) | majeur → mineur | Bord de bande reproduit par l'exporteur HEAD et par un juge maison sans `frontier_core` : 9281395600/233 → 26214400 (1,1635·S) et 17419776256/389 → 26214400 (1,5350·S). Mais HEAD ne revendique aucune stabilité : README l.35-38 (« le seuil et le catalogue peuvent changer sous perturbation », garantie K2 non transférée à q3/q4), doc l.38-40. Le phénomène était déjà dans l'amendement 01 (G6, A2 η=1/4 « DEPASSE », rejoué). Reste : phrase à préciser et fixture à ajouter. « À peine moins » à K5 minimise −18 % (η=1/4, ε²=3). Le risque mesuré porte sur l'antichaîne, pas sur B_η HEAD (identiques à 8 000), et sur un seul nuage de 8 000 points : « à l'échelle » est trop fort. |
+52: | F2 | confirmé | majeur → info | A5 = A1 hors conflit exact découle de la définition (`arms.py` l.571-575). L'instabilité est déjà écrite dans HEAD (doc l.28-31) et dans la porte du développeur (G4 F2 : A5/A6 « DEPASSE », rejoué à HEAD). Conflits LiDAR 1 (K2) et 5 (K5) rejoués. Bras privés. |
+53: | F3 | confirmé | majeur → mineur | A3 était préenregistré comme témoin négatif « attendu en échec ». G2 (x0 à 2/3) et G6 (1025 → 1523/4, « DEPASSE ») sont des contre-exemples d'auditeur déjà dans la porte (rejouée, PASS). Chiffres LiDAR rejoués à l'identique : K2, A3 7 953 différés dont 5 190 après D_K, A4 3 668 dont 515 ; K5, A3 7 998 dont 4 653, A4 7 926 dont 2 112. Aucun code HEAD en cause. |
+54: | F4 | confirmé | majeur → mineur | Comptes LiDAR rejoués à l'identique (ρ−1 médian 0,052 à K5 ; différés 2 915/6 080/7 205 ; après D_K 160/476/939). Aucune affirmation HEAD contredite (README l.38, reçus « ne qualifient pas »). « Presque tout » ne vaut que pour η ≥ 1/8 ; « moins de 5 % » vaut 5,2 % sur le crop LiDAR. Le défaut η=1/8 de `cover_band.py` diffère 76 à 88 % à K5. |
+55: | F5 | réfuté (conclusion) | majeur → info | La taille est confirmée : 532,6 Mo à 32 000 K5. Mais l'export est mesuré, pas extrapolé : natif 10,5 s, chargement Python 56,9 s, univers fort 19,6 s, pic 5,62 Go, sur une machine de 31 Go. La campagne à 32 000 K5 « tient » donc ; elle coûte environ 1,5 min et 5,6 Go par chargement. Un export allégé reste une optimisation, pas une précondition. Les 94 s à 16 000 de la lentille venaient de la charge : 27,7 s ici. |
+56: | F6 | confirmé | majeur → info | Aucun `diagnostics.py`, `run_frontier.py`, `campaign/`, `recu/`. Pins `e9eab2754`/`a2077628` ; core 36/36 identique avec le binaire HEAD. La bande est née après le scellement (04:13Z contre commit 07:01Z) : son absence n'est pas une incohérence. Seule divergence réelle : η de A2 entre la tâche {0,1/8,1/4,1/2} et le préenregistrement {0,1/4,1}, qui fait foi. Aucun document HEAD n'annonce de résultat de campagne. |
+57: | F7 | confirmé | mineur → info | `BandAttachments` (l.27-34) sans marge. Mais une « fraction certifiable » exige un théorème de marge que HEAD exclut pour q3/q4 (README l.37-38) : publier la marge comme diagnostic, pas comme certificat. Plage « 16 à 71 % » fausse : 3,8 % (amas K2) à 70,6 % (quart LiDAR K5). |
+58: | F8 | confirmé | mineur | Exemple rejoué : B_1 = 121/40, antichaîne = 5/2, α²=1 ; Γ de référence : racine à 121/40, nœud 5/2. Déjà écrit par l'auditeur indépendant (ANCRAGE_AMBIGUITES, commité). Nouveau : B_η dépend du filtre d'univers, l'antichaîne non (M1). |
+59: | F9 | confirmé partiellement | mineur → info | Pas de variante `-O` en CTest : vrai pour toutes les portes Python v10, pas seulement la frontière. Test natif hors CTest : vrai. « Fondations non versionnées » : faux, elles sont commitées dans `receipts/development_frontier_precision_20260930/foundations/` (SHA identiques aux copies durables). |
+60: | F10 | confirmé | mineur | Mutants rejoués : natif PASS 815 avec seuil non carré et égalité de bord exclue ; structurel les tue (2 et 1 échecs). La suite HEAD tue donc les quatre. Manque réel : aucune fixture de bord de bande. |
+61: | F11 | confirmé | mineur → info | 1 680 et 8 958 sites, 0 doublon, fond jamais généré. Déjà documenté dans HEAD (README l.49-52, doc l.44-47). Copie privée. |
+62: | F12 | confirmé | info | stdout identiques octet pour octet, 800 contrôles, normal et `-O`. |
+63: | F13 | confirmé | info | Quatre paquets rejoués, sorties identiques hors chemins, empreintes et durées. Partie native de `duration_branch_reserves` non rejouée ici. |
+64: | F14 | confirmé | info | `perturb.json` : ε²=3 et 48 en unités de grille. Garde de domaine futur, pas un défaut u18. |
+65: 
+66: ## 4. Points manqués par la lentille
+67: 
+68: | Id | Sévérité | Nature | Constat manqué | Preuve |
+69: | --- | --- | --- | --- | --- |
+70: | M1 | mineur | conception, produit HEAD expérimental | B_η (HEAD) n'est pas une fonction des seules composantes couvrantes : ses dates changent avec le filtre d'univers (fort `p+q_min≤K` contre toutes les boules de population ≥ K du même export). L'antichaîne B_η^min, elle, est invariante, comme le prédit le lemme de couverture. C'est un argument plus fort que la rareté du retard par témoin ancêtre (F8). | `universe_invariance.py`, 54 petits nuages × K2/K3/K4 (1 134 points-K par η) : B_η change 0/0/5/34/258/375 fois pour η = 1/64, 1/32, 1/8, 1/4, 1, 3, toujours plus tard ; antichaîne 0. Normal = `-O`. LiDAR 8 000 (`universe_fast.py`) : B_η change 23/127/309/1 995 points à K2 et 36/228/534/4 125 à K5 pour η = 1/32, 1/8, 1/4, 1 ; antichaîne 0. Avec l'univers fort, antichaîne = B_η pour 8 000 points, sauf 2 à K5, η=1. |
+71: | M2 | mineur | outillage privé, provenance | Les fondations écrivent un libellé moteur constant `e9eab2754` même quand on les lance avec le binaire HEAD (`panels.py` l.66, `valide_fondations_a.py` l.1117, défaut de `CMakeLists.txt`). Le reçu « fondations_a_head » de la lentille porte lui-même `engine_commit: e9eab2754`. Un amendement 02 « épinglé à HEAD » publierait donc une provenance fausse. | `grep e9eab2754` ; rejeu `panels.py core-ref` avec `mhgp10_tower` HEAD : manifeste `binary.sha256=3d55b869…`, `engine_commit=e9eab2754`. |
+72: | M3 | info | produit HEAD expérimental, robustesse | `cover_band_lca` ne valide un témoin que s'il est dans la bande (l.74-80). Un nœud invalide (−7) ou non vivant à son niveau, au-delà du seuil, est accepté sans erreur, alors que la docstring promet un refus explicite des entrées invalides. | Sonde : témoins `(1, 100, -7)` et `(1, 100, 0)` acceptés, date 4. |
+73: | M4 | info | déjà dans la porte privée | La porte de conception du développeur montre déjà l'instabilité de A5/A6 (G4 F2 : « DEPASSE ») et la discontinuité de bord de bande pour A2 (G6, η=1/4). La nouveauté de F1/F2 se limite à la fixture q3/q4 de la bande HEAD. | Porte rejouée à HEAD, lignes G4 et G6, normal = `-O`. |
+74: | M5 | info | intégrité du préenregistrement | Réponse partielle à la question ouverte de la lentille. Les exécutions antérieures au scellement (`quick1-3`, 04:05–04:12) utilisent une scène propre aux fondations A (famille `spherical`, 600 points, graine `mhgp10-frontiere-fondations-a-dev-20260930`), pas une scène préenregistrée. Les références core datent de 04:13:58, après le scellement (04:13:52). La porte ne lit que les scènes `gate_*`. Aucun fichier n'indique un bras sur une scène dev. | `stat` des fichiers ; `dev_scenes` des reçus `quick*` ; `design_gate.py` l.385-666. |
+75: | M6 | info | proposition de campagne | La campagne proposée reprend D1 pour les scènes de 8 000 à 32 000 points. Or D1 est préenregistré « exhaustif, jamais estimé par panel », et la règle d'échelle impose invariants globaux et juge d'échantillon : D1 doit être redéfini par amendement (coupes échantillonnées, comme `arms_probe`). Le test scellé « par engagement » ne dit pas qui garde le texte secret : sur une machine partagée par des agents, le dériver d'une valeur publique future (un commit postérieur au gel) est plus sûr. | Rapport de la lentille §10 ; `PREREG_FRONTIERE.json` (`D1_emboitement.exhaustive`) ; `CLAUDE.md`. |
+
+SOURCE /workspaces/E-HGP/build/v10-giant-audit/precision/PLAN_PRECISION.md
+SHA256 4df21157d8d188b06011d3c9dd5edf8b8ed4948b188dff77943717648283f81e
+
+17: ## 0. Décision proposée
+18: 
+19: 1. **Voie C** : grille exacte d'abord, par paliers **B21 → B24 → B32**.
+20:    Le float32 sans perte vient ensuite, comme palier dyadique du même moteur,
+21:    si l'utilisateur maintient cette préférence après les mesures.
+22: 2. **Tranche 1 = palier B21 complet** : FULL et tête à 0,1 mm sur une trame KITTI.
+23:    Qualification par similitude exacte ×8, différentiels de modes, oracle T2,
+24:    mutants, et identité bit à bit du profil u18.
+25: 3. Les fondations u32 (Morton96, K-NN u128, filtre relatif, rang exact) ne servent
+26:    pas à B21. Elles se qualifient mieux avec le palier qui les exige (T2, T3).
+27: 
+
+SOURCE /workspaces/E-HGP/build/v10-giant-audit/verif_precision/VERDICTS.txt
+SHA256 0fc4294982133ccf0018f41e1f76d7384c3ee1609ca8ca8db69b7ec160ff3562
+
+18: | Id | Verdict | Sévérité corrigée | Note courte |
+19: |---|---|---|---|
+20: | PREC-01 | confirmé | mineur | Reproduit sur HEAD (3 supports + fixture G1). Pas nouveau : G1 du 29 sept., corrigé dans R2 sitetree non intégré. |
+21: | PREC-02 | confirmé | mineur (était majeur) | B21 den = 16M^6 mod 2^128, B22 den = 0, B24 num = 0, aucun diagnostic. Garde future. |
+22: | PREC-03 | confirmé | mineur (était majeur) | B21 side = -1, vérité +1, UBSan hpp:99/100. Sûr à B20 par bornes euclidiennes. |
+23: | PREC-04 | confirmé | mineur (était majeur) | UB à B21, signe juste. Nouveau : décision inversée dès B22 (native). |
+24: | PREC-05 | confirmé | mineur (était majeur) | Borne 39u 2^(2B) rederivée. 38 003 = contacts, pas sphères. Marge suppose FE_TONEAREST. |
+25: | PREC-06 | confirmé | info (était majeur) | Branche morte en HEAD ; piège d'un port naïf seulement ; déjà demandé par l'auditeur. |
+26: | PREC-07 | confirmé | info | Collision reproduite ; prepare_cloud refuse bits > 21. |
+27: | PREC-08 | confirmé | info | Valeur fausse à 2^32-1 = vraie mod 2^64 ; B31-B32 seulement. |
+28: | PREC-09 | confirmé | mineur | Quatre retours ignorés, sûrs en u18 par bornes. |
+29: | PREC-10 | confirmé | info | Comportement voulu, documenté et testé. |
+30: | PREC-11 | confirmé | mineur | Reproduit sur les binaires HEAD. Pas nouveau : 29 sept., corrigé dans R2 entrees_cli. |
+31: | PREC-12 | confirmé | info | Aucune voie HEAD ne construit un Cloud hors prepare_cloud. |
+32: | PREC-13 | confirmé | info | Majorants de l'auditeur valides. « 28 comparaisons » : le grand livre en fait 60. |
+33: | PREC-14 | confirmé | info | 29 seuils recalculés, tous égaux. Marge réelle probable : 2 bits (B20). |
+34: | PREC-15 | confirmé | info | Domaines KITTI recalculés : B18/B21/B24/B28, 0 fusion. |
+35: | PREC-16 | confirmé | info | Compteurs HEAD identiques. Parts extrapolées, pas mesurées à 0,1 mm. |
+36: | PREC-17 | confirmé | info | Trois commentaires inexacts vérifiés. |
+37: | PREC-18 | incertain | majeur (plan) | Faits justes, mais T1 = B21 contredit la décision utilisateur de 408d1ffe4 (u24 puis u32). |
+38: 
+
+68: Manques de la lentille (détail dans la réponse structurée)
+69: 
+70: - Décision utilisateur consignée au HEAD 408d1ffe4 ignorée : u24 puis u32 complet, float32 natif non développé.
+71: - Corrections R2 non intégrées ignorées (sitetree, entrees_cli, pool, oracles, tete) : mêmes fichiers que la tranche.
+72: - Marge proposée valable seulement sous FE_TONEAREST ; HEAD ne vérifie pas le mode d'arrondi.
+73: - orient_center : décision fausse dès B22, non montrée par la lentille.
+
+SOURCE /workspaces/E-HGP/build/v10-giant-audit/verif_raccord_r2/VERIF_RACCORD_R2.md
+SHA256 2ce4eae7bee6ccf121f43d81ce5a2ac9d585b0ab324b9b2d68725cba76d4797a
+
+18: ## 1. Ce qui a été rejoué
+19: 
+20: | Contrôle | Résultat |
+21: | --- | --- |
+22: | Extraction HEAD 8bb4618e5 et base 56020cab6, dépôt jetable neuf | 158 et 147 fichiers, comme la lentille |
+23: | `git apply --check` sur HEAD | pool, entrees_cli, tete refusés aux mêmes lignes ; les 4 autres passent |
+24: | `--3way` seul, puis 42 paires ordonnées | 7/7 sans conflit ; 12 paires en conflit, comptes identiques |
+25: | Ordre du plan, résolution mécanique | 0, 0, 0, 1, 6, 5, 12 zones : 24 |
+26: | Filiation r1 → r2 | 7/7 ; chaque `<g>_r2.patch` = base..HEAD jetable |
+27: | Copie durable de la réparation SiteTree | = base..82b49a9, au `--full-index` près |
+28: | Build neuf de 82b49a9, porte, 28 mutants de la lentille + 6 miens | 0 avertissement ; témoin vert ; **34/34 tués** |
+29: | Sondes CLI (HEAD, copies) | `preuves/sondes_verif.sh`, sortie jointe |
+30: | Fixtures bancs de l'auditeur, decide.py R2 et HEAD | identiques au tableau de la lentille |
+31: | `decide_completeness` sans reçus | code 1, `FileNotFoundError` |
+32: 
+33: Non rejoués : sanitizers, callgrind, différentiels tour/tête/catalogue.
+
+59: ### 3.1 Conflit sémantique oracles × entrees_cli (majeur)
+60: 
+61: La boucle des fixtures du juge catalogue r2 (`oracles_r2.patch:760-761`)
+62: utilise `--leaf=max(8, K+1)` pour K = 1, 2, 3, 5, 10, 12. La règle produit
+63: d'entrees_cli exige M ≥ K + 3 (`generator.cpp:665`, `kLeafMargin = 3`).
+64: 
+65: | Appel, 40 points | HEAD | oracles | entrees_cli |
+66: | --- | --- | --- | --- |
+67: | `--k=10 --leaf=11` | 0 | 0 | **2**, `parameter_out_of_range` |
+68: | `--k=12 --leaf=13` | 0 | 0 | **2** |
+69: | `--k=10 --leaf=11 --allow-small-leaf --max-nodes=10^6` | – | – | 2, `node_budget` |
+70: | idem, `--max-nodes=10^8` | – | – | 0 (1,85 s sur HEAD) |
+71: 
+72: Neuf fixtures × deux K : 18 contrôles refusés. `mhgp10_catalogue_oracle`
+73: échouera sur l'arbre intégré, même après le report de `--dump-levels`.
+74: Ni l'essai A (sans entrees_cli) ni l'essai D (sans oracles) ne pouvaient
+75: le voir. L'étape 6 du plan ne le mentionne pas. Trancher : feuille
+76: `max(8, K+3)` dans le juge, ou mode diagnostic avec budget large.
+77: 
+78: ### 3.2 Frontière de tête de HEAD (mineur)
+79: 
+80: HEAD rend `status ok`, code 0, pour `--z=nan`, `--z=-1`, `--z=0`, `--z=17`,
+81: `--mcs=0`, et K=1 mcs=1. La lentille ne compare que les copies. Seul tete
+82: corrige ce défaut produit. Les lots A et C n'y touchent pas : zhat dans
+83: [2,09 ; 3,12], MCS ≥ 10.
+84: 
+85: ### 3.3 Gardes flottantes de la tour en u18 (mineur)
+86: 
+87: - `cmake -DCMAKE_CXX_FLAGS=-Ofast` et `CMAKE_CXX_FLAGS_RELEASE=-ffast-math` :
+88:   configure code 0 à HEAD.
+89: - Aucun `#error`, `fegetround` ni `fp_environment` dans `src/` ; ARCH_v2
+90:   § 17.6 les annonce.
+91: - `tower.cpp` sous `-march=x86-64-v3` hors `MHGP10_MARCH` : 260 FMA ; 0 avec
+92:   `-ffp-contract=off`. La borne de `kApproxMargin` reprend l'hypothèse
+93:   « sans contraction » de SiteTree.
+94: 
+95: Latent : le build par défaut et les CLI sont sûrs. Après la réparation,
+96: le `#error` de `site_tree.cpp` bloque un `-Ofast` global, pas la
+97: contraction ni le mode d'arrondi de la tour.
+
+SOURCE /workspaces/E-HGP/build/v10-giant-audit/verif_cardinalites/INDEX_PREUVES.txt
+SHA256 f52459f66a189999238c14168c6c1d1de109308cb097f34708eb80b7b50d9e74
+
+20: 
+21: ## Verdicts
+22: 
+23: | Id | Verdict | Severite | Point cle |
+24: | --- | --- | --- | --- |
+25: | CARD-01 | confirme | majeur | Temoin 16 bits : catalogue « ok » tronque 3/3 ; la tour et la tete refusent ensuite en root_count (code 3). Premier mur u32 du chemin mhgp10_cluster a K = 10. Masque par la RAM sur 176 Gio. |
+26: | CARD-02 | confirme | majeur | 11 echecs sur 22 limites, tous SIGABRT, 0 memory_budget. Erreur de libelle : MemoryBudget::limit() existe (buffer.hpp:34). |
+27: | CARD-03 | confirme | mineur | Vrai pour la tour complete seulement. A un ordre (mhgp10_cluster), les gardes tombent apres le mur des boules a K = 10. |
+28: | CARD-04 | confirme | info | Mesures justes. L'audit massif declarait deja « hors capacites/socle/tour ». Le pic du processus reste au catalogue. |
+29: | CARD-05 | confirme | info | N >= 2^32 : domaine futur (fichiers >= 48 Gio). La fin de fichier partielle est deja CLI-02. |
+30: | CARD-06 | confirme | mineur | --leaf=8000 --max-leaf=8000 : SIGABRT. --max-leaf seul : sans effet. --max-leaf=2^32 devient 0 (wide_leaf). |
+31: | CARD-07 | confirme | info | Copie privee. La garde R2 evite l'assemblage (refs, tri, cmp), pas l'enumeration. |
+32: | CARD-08 | refute (K = 1) | info | K >= 2 juste. A K = 1, la garde des representants (tower.cpp:1324) borne E_1 <= nr_1 < kNone, donc N_1 <= kNone. Garde proposee redondante. |
+33: | CARD-09 | confirme | info | Mecanisme juste ; raisonnement a corriger a K = 1 ((N_1 + n)/B_1 = 1,15-1,18 en LiDAR). La garde des representants protege en pratique. |
+34: | CARD-10 | confirme | info | Gardes futures lues (tower.cpp:1177, 1288-1296, site_tree.cpp:138). |
+35: | CARD-11 | confirme | info | La copie R2 tete refuse deja mcs < 1 (contrairement au § 4) ; le cast i32 reste. |
+36: | CARD-12 | confirme | info | Plus fort : L <= nb deja u32, donc tower.cpp:1013 ne peut pas tronquer dans HEAD. |
+37: | CARD-13 | confirme | info | Estimation plausible (tailles recompilees), non mesuree. |
+38: 
+39: ## Manques de la lentille
+40: 
+41: 1. Murs par chemin : a un ordre (only_order = K), la garde de l'atlas ne compte que C_K et nr_K. A K = 10, elle tombe a
+42:    B = 5,3-6,7 e9 (representants) ou 10-12 e9 (cellules), apres le mur des boules non garde (4,29 e9).
+43: 2. La garde des representants par ordre manque au tableau des murs. Pour l'ordre 1 seul (kmax = 1 ou
+44:    only_order = 1), c'est le premier mur u32 (n = 0,56-0,99 e9). Elle borne la foret K = 1 sur tout chemin
+45:    valide (foret connexe) : N_1 = E_1 + 1 <= nr_1 + 1 <= kNone.
+46: 3. Effet aval de la troncature : refus root_count (invariant_violated), pas index_overflow_u32.
+47: 4. Conversions des options CLI (u32(std::stoul), unsigned(std::stoul)) absentes de l'inventaire (deja CLI-06).
+48: 5. --repeat >= 2 : pic 311,8 -> 505,1 o/boule (+62 %) ; toute mesure memoire en --repeat surestime le pic.
+49: 6. Masques u32 de local_structure (1u << idx) : kMaxShellEnum <= 32 implicite ; MAS-09 prevoit de le relever.
+
+SOURCE /workspaces/E-HGP/build/v10-giant-audit/sante/RAPPORT_SANTE.md
+SHA256 74cb2a48e90d3fe5e5204cdc726e8b45e1902847becc9ec06e12dad2c4f7ef82
+
+21: ## 1. Synthèse
+22: 
+23: | Volet | Résultat | Verdict |
+24: | --- | --- | --- |
+25: | ASan + UBSan (GCC 13.3) | 13/13 portes : 6 en options par défaut ; 11 non-oracle en options strictes, puis avec `log_path` ; 2 oracles avec `log_path` ; 0 message | propre |
+26: | TSan (GCC 13.3) | `mhgp10_unit` ×3 sous `setarch -R`, et trois CLI à 4 fils : codes 0, 0 alerte, stderr vide | propre |
+27: | Clang 18.1.3 `-Werror` | build sans avertissement ; 6/6 portes rapides | propre |
+28: | Clang `-fsanitize=integer,undefined` | 20 sites (36 rapports), tous arithmétique modulaire voulue ; 0 UB ; 0 troncature implicite | propre |
+29: | Mémoire non initialisée | build `MHGP10_POISON` et valgrind memcheck : sorties identiques, 0 erreur | propre |
+30: | Déterminisme | catalogue, tour, étiquettes, arbre identiques octet pour octet sur six configurations (Release GCC, Clang entiers, ASan, TSan, empoisonné ; Release sous valgrind pour étiquettes et arbre) | propre |
+31: | Contrôles Python racine | 5/6 verts ; `check_docs` rouge : 154 liens morts, tous dans des copies d'auditeurs sous `receipts/` | **rouge** |
+32: | CI `main` | rouge sans interruption depuis le 19 juillet ; 2 441 exécutions ; aucune cause v10 | **rouge, aveugle** |
+33: | Reçus v10 | 30 preuves hachées (50 entrées, 7 manifestes) exclues par `.gitignore` | défaut mineur |
+34: 
+35: Le produit v10 est sain sous tous les sanitizers essayés. Les défauts sont autour : contrôle
+36: documentaire rouge et masqué, CI sans signal depuis dix semaines, preuves de reçus hors dépôt,
+37: hygiène des portes.
+
+279: | ID | Sév. | Classe | Constat | Preuve | Action |
+280: | --- | --- | --- | --- | --- | --- |
+281: | S1 | majeur | contrôle du dépôt, reçus d'auditeurs | `check_docs` rouge à HEAD : 154 liens morts, 100 % dans 5 copies `.md` déposées par les auditeurs ; 165 dans l'état vivant | § 3.1 ; `preuves/checks/check_docs.stderr` ; bissection | Décider du périmètre : exclure `receipts/audit_continu_*` et `receipts/audit_independant_*`, comme `audits/` des v4–v9, ou ranger les copies hors `.md`. Ne pas réécrire les copies |
+282: | S2 | majeur | CI, hors v10 | `main` rouge depuis `00cc9ef74` (19/07) ; 2 441 échecs ; causes produit et `tests/gcp` figées depuis `95dd8036a` ; 12 étapes sautées ; derrière elles, le premier échec rejoué est `check_docs` (S1) | § 4 ; `preuves/ci/extraits_echecs_ci.txt` | Signaler aux propriétaires ; au minimum isoler les contrôles Python dans un job indépendant |
+283: | S3 | mineur | reçus (preuves) | 30 fichiers hachés (7 manifestes) exclus par `.gitignore` ; une copie fraîche échoue `sha256sum -c` ; touche aussi des reçus développeur | § 3.2 | `git add -f` de ces 30 fichiers (16 Kio) ou règle de négation sous `morsehgp3D_v10/receipts/` |
+284: | S4 | mineur | CI v10, garde manquante | aucun workflow v10 ; `ARCH_v2.md` § 13 prévoit `morsehgp3d-v10.yml`, `check_v10.py`, labels `sanitize`/`mutant` : rien n'existe | § 4 ; `CMakeLists.txt` | Job minimal (build + portes rapides) ou mention « non livré » dans § 13 |
+285: | S5 | mineur | portes, produit | 8 portes Python via `run_expect.cmake` sans `-B` (`CMakeLists.txt:95-134`), contre `-B` pour les 2 directes (l. 89-94) ; plusieurs importent `hgp10_ref`, `test_catalogue_oracle`, `scenes`, `methods` : ctest écrit du bytecode dans l'arbre source | `__pycache__` du worktree datés 28–29/09 (`reference/`, `tests/oracle/`, `bench/synthetic/`) | Ajouter `-B` |
+286: | S6 | mineur | portes, labels | `mhgp10_rank_search` et `mhgp10_grid32_primitives` (0,01–0,2 s) hors label `fast` : `ctest -L fast` les saute | `CMakeLists.txt:72-78` | Ajouter `fast` |
+287: | S7 | mineur | portes, garde latente | `test_level_collision.py:38-39` saute une variante sur « option inconnue » sans plancher : vert par vacuité possible | lecture ; aujourd'hui les 2 variantes tournent | Exiger la variante `core` |
+288: | S8 | info | sanitizers | produit propre sous ASan/UBSan, TSan, Clang `-Werror`, Clang entiers, empoisonnement, valgrind ; sorties identiques sur six builds ; juge vérifié par défauts plantés | § 2 | Garder ces passes avant chaque intégration parallèle |
+289: | S9 | info | sanitizers, garde future | code de sortie sanitizer 1 = code « désaccord d'un juge » | § 2.5 | Si une porte attend 1 : `exitcode` distinct dans les options sanitizer |
+290: | S10 | info | contrôles racine | `check_passation` ne lit que la v4 ; le seul contrôle racine qui lit la v10 est `check_docs` | `tools/check_passation.py:33` | — |
+291: | S11 | info | reçus | 29 manifestes visent des chemins absolus machine (`/tmp`, `/workspaces/E-HGP/build`), dont 8 déjà disparus ; 1 manifeste d'auditeur périmé (`sitetree_corrected/SHA256SUMS`) | § 3.2 ; `preuves/checks/manifestes_classes.txt` | Ne pas présenter ces manifestes comme rejouables |
+292: | S12 | info | outillage sanitizer | `log_path` ne capte pas UBSan dans le runtime combiné GCC 13 : un reçu qui prouverait « 0 alerte UBSan » par fichiers vides serait vide par construction | témoin § 2.6 | Prouver UBSan par le code de sortie (mode sans récupération) ou par stderr conservé |
+293: | S13 | info | documentation v10, état vivant | éditions non committées de `PASSATION.md:16` et `docs/DEVELOPPEMENT_FRONTIERE_ET_PRECISION_20260930.md:15` pointent vers `receipts/audit_continu_20260929/point_condensation_cover_r2_20260930/README.md`, absent à 10:42 | `check_docs` sur le worktree vivant : 165 erreurs | Vérifier le lien avant commit |
+
+SOURCE /workspaces/E-HGP/build/v10-verrou-points/ancrage_marges/MEMO_ANCRAGE_MARGES_20260930.md
+SHA256 bcf0b4008acf37c1ea7e139fbb00e7718d9c1e2aa8c7fefa97fa4491a62624b9
+
+21: 1. **Toute la famille « propriétaire, date, puis ascendance » est laminaire.** Si le propriétaire couvre le point
+22:    à sa date, elle est aussi **sans percolation** : un bloc reste dans un amas discret de la définition 8, et deux
+23:    blocs ne fusionnent qu'à la fusion FULL de leurs composantes (théorèmes T1, T2).
+24: 2. **La structure couvrante d'un point se réduit à une antichaîne de feuilles datées** (nœuds témoins minimaux)
+25:    et à son code-barres H0 par la règle de l'aîné. Toutes les règles étudiées sont des fonctions de ce code-barres
+26:    (section 2). Les entrées internes K3/K5 et les continuations y sont incluses sans cas particulier.
+27: 3. **Nouvelle règle : l'ancrage persistant `P_κ`.** Date `t(x) = max(α, max_j (m_j − κ(c_j − α)))`, où
+28:    `(c_j, m_j)` sont les barres finies du code-barres couvrant de x ; propriétaire = lignée de première
+29:    couverture. Pour `κ ≥ 1` : laminaire, couvrante, **stable sans aucune condition de marge**, avec
+30:    `|Δt| ≤ (1+2κ)ε` et une distance de fusion `|Δu| ≤ (1+4κ)ε` (théorème T5) ; retard `t − α ≤ d_K(x)/2` ;
+31:    attache immédiate dès que chaque branche concurrente vérifie `m_j − α ≤ κ(c_j − α)`.
+32:    `P_1` a une lecture directe : le retard est la plus grande persistance d'une branche concurrente.
+33: 4. **Prix de la précocité, borne inférieure (théorème T6).** Toute projection laminaire, couvrante et
+34:    équivariante qui attache immédiatement tout point dont les branches concurrentes vérifient
+35:    `m_j − α ≤ κ(c_j − α)` (κ-précocité) a une constante de Lipschitz au moins κ/2.
+36:    Attacher immédiatement à une couverture unique (première couverture A1, bras A5, κ = ∞) est donc discontinu
+37:    dans le modèle réel. `P_κ` atteint exactement κ/2 sur la famille F2 : l'ordre Θ(κ) est optimal.
+38: 5. **Bandes.** La bande **non saturée** actuelle (`cover_band_lca`, date `max(α, niveau(J))`) est instable
+39:    même loin de son bord : une branche courte parasite née dans la bande repousse la date jusqu'à sa fusion
+40:    (théorème T7a). Deux contre-exemples exacts nouveaux : Thalès à quatre points (saut de hauteur 395 pour un
+41:    déplacement d'une unité, point certifié par la marge de bord) et l'entrée interne K3 agrandie (saut 170,7,
+42:    points certifiés). La bande **saturée** `max(B, niveau(J))` est stable sous marge de bord, en `(L_B+2)ε`
+43:    (théorème T7b), mais retarde **tous** les points d'un facteur `1+η`. Plus généralement, une règle de lignée
+44:    `t = max(α, max_j (m_j − g(c_j − α)))` est stable si g est lipschitzien, nul en 0 et `g(s) − s` non
+45:    décroissant, et instable dès que g est discontinu ou passe sous la diagonale (remarque du § 5, prop. 7.1).
+46: 6. **Scènes dev (diagnostic, pas une revendication).** Voir la section 11 : sur les six scènes dev, K2 et K5,
+47:    et sur une scène de 8 000 sites à K2,
+48:    `P_2`–`P_8` gardent presque tout le rappel avant la première fusion parasite de la première couverture,
+49:    restent dans leurs bornes prouvées sous jitter apparié, tandis que les bandes non saturées sortent de
+50:    toute borne sur des points certifiés.
+51: 7. **Recommandation.** Prendre `P_2` (ou `P_4`) comme projection frontière exacte à K fixé ; garder `core` comme
+52:    témoin stable ; ne pas porter les bandes non saturées ; mesurer ensuite condensation et EOM équitables.
+53: 
+
+724: - **Rappel avant fusion parasite.** `P_2` à `P_8` restent à moins de 0,01 de A1 à K2 et l'égalent presque à K5
+725:   (1,000 sur `bhc_n600_base` et `bhc_n1200_base`) ; les bandes perdent jusqu'à 0,13 (`bench_bridge` K5,
+726:   `bande_f[1/2]` : 0,839 contre 0,966) et `core` de 0,02 à 0,20. Sur les halos bhc, `P_8` retrouve 96 à 100 % du
+727:   rappel de A1, `core` 16 à 54 %. La frontière récupérée par la première couverture est donc conservée par `P_κ`
+728:   pour l'essentiel ; ce qui est perdu correspond aux quasi-égalités réelles.
+729: - **Stabilité.** `P_κ` reste dans ses bornes partout (hauteurs : `P_2 ≤ 2,70 ε`, `P_8 ≤ 8,57 ε` ; dates :
+730:   `P_8 ≤ 12,21 ε`). A1/A5 montent à 25,2 ε (`bhc_n1200_base` K5) sur de rares quasi-égalités (≤ 0,9 % des paires
+731:   au-delà de 2ε). Les bandes non saturées montent à 47,4 ε en hauteur et 90,7 ε en date ; sur des points
+732:   **certifiés** par la marge de bord, `bande_f[1/2]` sort de sa borne dans 9 couples sur 12 (T7a observé sur
+733:   données dev). La bande saturée reste dans `(L_B+2)ε` sur tous les points certifiés (T7b).
+734: - **Retards.** `P_2` retarde 45 à 85 % des points, mais de 0 à 9 % de α en médiane ; `P_8` retarde 11 à 27 % des
+735:   points, 90e centile ≤ 13 % de α. La bande saturée retarde tous les points d'au moins 25 % (η = 1/4) ; `core`
+736:   vaut exactement `2α` à K2.
+737: - **Ambiguïté.** L'indice `κ*(x)` a pour médiane 1,8 à 2,2 à K2 et 3,4 à 4,0 à K5 ; aucune scène n'a d'ex æquo
+738:   exact à la première couverture. `P_κ` attache immédiatement la fraction `P(κ* ≤ κ)` des points.
+739: - **Comptes.** À K2, 5 à 7 incidences fortes par point, 5 à 7 feuilles médianes ; à K5, 54 à 80 incidences par
+740:   point et 51 à 82 feuilles médianes (jusqu'à 179). L'élagage `4α²` exact garde 56 à 66 % des incidences à K2 et
+741:   65 à 88 % à K5 : le coût est dominé par l'univers fort lui-même, pas par la règle.
+
+851: ## 13. Limites, questions ouvertes, statuts proposés
+852: 
+853: **Limites.** (1) Les théorèmes portent sur des perturbations bijectives à K fixé ; ajouts, retraits, changement
+854: de K, EOM et vérité statistique sont hors champ. (2) Les dates `P_κ` sont algébriques (sommes de racines) : un
+855: port natif demande des comparaisons exactes de telles sommes, bornées mais nouvelles dans le moteur. (3) Les
+856: constantes `1+2κ` et `1+4κ` ne sont pas démontrées optimales ; la borne inférieure est κ/2. (4) Les scènes dev
+857: (600 à 1 500 sites) et la scène de 8 000 sites ne qualifient ni coût ni gain statistique ; aucun chronomètre
+858: n'est revendiqué. (5) Le croisement multi-K (0,1,2,6,9 de l'auditeur indépendant) n'est pas traité : `P_κ` donne
+859: une hiérarchie laminaire **par ordre** ; une politique inter-K reste à déclarer.
+860: 
+861: **Questions ouvertes.** (a) Constante optimale entre κ/2 et `1+4κ` ; **conjecture** : `κ + O(1)` en hauteur
+862: (observé au plus `κ + 0,34` sur les fixtures et `κ + 0,7` sur les scènes dev ; atteint `κ` sur F1×100). (b) Une règle hybride `min(t_{P_κ}, d_K)`
+863: avec propriétaire core quand `d_K` est plus tôt : sa continuité à la bascule n'est pas acquise.
+864: (c) Choix de κ sur des critères statistiques (rappel frontière avant fusion parasite, condensation, EOM z1/z2),
+865: sur dev puis préenregistrement. (d) Masse fractionnaire compatible : le code-barres couvrant fournit un indice
+866: d'ambiguïté `κ*(x) = max_j (m_j − α)/(c_j − α)` (∞ aux ex æquo) ; `P_κ` attache x immédiatement si et seulement
+
+SOURCE /workspaces/E-HGP/build/v10-verrou-points/masses_selection/MEMO_MASSES_SELECTION_20260930.md
+SHA256 3fd53faa94d2b1775a7e38f2832b3eb118ecf8b71b7e072263998e9111d0d001
+
+29:    par marches passait toutes les fixtures connues : le théorème fournit sa fixture d'échec, {0, 937 / 938, 2 000}.
+30: 3. **Le prix de la stabilité est un théorème.** Théorème 9 : sur la famille à trois sites de F2, une règle fidèle
+31:    aux amas discrets, équivariante et L-lipschitzienne ne peut pas réunir le point du milieu à sa première
+32:    couverture tant que son avance relative sur la branche concurrente est inférieure à 1/(2L−1). La règle
+33:    progressive paie ce prix continûment ; z règle le compromis.
+34: 4. **Toutes les fixtures connues passent pour z\* ≈ 1,845 ≤ z ≤ 6.** Le bas de la fenêtre vient des cinq sites.
+35:    Le haut vient de F2 999/1001 avec la tolérance 2ε de core : à z = 7 et 8, ρ(0, m) change de 46,5 et 110 pour
+36:    un déplacement de 2, continûment mais avec amplification. F1, F2, les huit paires, le contact
+37:    coquille/intérieur, les entrées internes K3/K5, le fantôme K5 et la quasi-égalité K3 des bras A5/A6 passent
+38:    pour z = 2, 3, 4. La règle ne dépend ni du catalogue, ni de Kmax.
+39: 5. **La sélection n'a pas besoin d'une hiérarchie de points.** Condensation et EOM se font sur FULL avec les masses
+40:    fractionnaires ; un vote à l'antichaîne choisie donne la partition (proposition 7 transposée). Projeter d'abord
+41:    change la sélection, dans les deux sens (fixtures S1, S2). La hiérarchie majoritaire est cohérente avec le vote.
+42: 6. **Les masses du § 9.1 ne sont pas la bonne unité** pour une hiérarchie : biais de degré (les paires précoces
+43:    échouent), perte des entrées internes en convention Gabriel (T_x = 0), activation par marches.
+
+388: **Proposition 11 (condensation fractionnaire).** Masse d'un nœud : m_v(β) = Σ_x A_x(v, β)/W_x (progressive) ou
+389: Σ_x S_x(v, β)/W_x (marches). Elle croît pendant la vie de v. À sa mort, les deux coïncident :
+390: m_v(d_v⁻) = Σ_x (base_x(v) + w_x(v))/W_x, car toutes les unités du sous-arbre sont acquises. La condensation
+391: N-aire (enfants gros si m ≥ mcs, mcs réel), puis l'EOM avec `S(C) = ∫ m_C dλ` sur la vie condensée de C
+392: (égalité → parent, racine exclue), sont bien définies et rendent une antichaîne de nœuds de FULL.
+393: 
+394: *Preuve.* Pour des masses unités entières entrant à des dates fixes, ∫ m_C dλ = Σ_p (λ_max,C(p) − λ_min,C(p)),
+395: la stabilité σ(C) de Campello et al. telle que l'écrivent McInnes et Healy. La définition est linéaire en la
+396: masse : elle s'étend telle quelle aux masses fractionnaires. La condensation ne lit que les masses de fin de vie
+397: des enfants, identiques dans les deux activations. L'EOM ascendante choisit une antichaîne par construction. ∎
+398: 
+399: **Proposition 12 (vote à l'antichaîne).** Pour l'antichaîne choisie, de sommets top(c), posons
+400: `V_x(c) = Σ_{u ∈ V_x, u ⪯ top(c)} w_x(u)/W_x`. Les sous-arbres sont disjoints, donc Σ_c V_x(c) ≤ 1. L'étiquette
+401: est l'argmax unique s'il est positif ; sinon x est bruit (abstention aux égalités, sans départage par
+402: identifiant). Le résultat est une partition : c'est la proposition 7 du manuscrit, avec des unités de branche au
+403: lieu des faces.
+404: 
+405: **Proposition 13 (cohérence hiérarchie / vote).** Si le propriétaire majoritaire progressif de x vérifie
+406: o(x) ⪯ top(c) pour un cluster choisi c, alors V_x(c) > 1/2 et le vote donne c.
+407: 
+408: *Preuve.* top(c) est o(x) ou l'un de ses ancêtres, donc d_top(c) ≥ d_o(x) > t(x). V_x(c) majore la masse accumulée
+409: dans le sous-arbre de top(c) à tout β < d_top(c). Juste après t(x), cette masse dépasse strictement W_x/2 : o(x)
+410: couvre x, sa masse croît strictement (théorème 7, étape 1). ∎
+411: 
+412: Contrôle : zéro violation sur 194 cas de fixtures (mcs ∈ {1, 2, 3}, z ∈ {2, 4}, deux activations) et sur les
+413: scènes dev (§ 9).
+414: 
+415: **Proposition 14 (hiérarchie tirée en arrière).** Étant donnés l'antichaîne et le vote, attacher chaque point
+416: étiqueté c au début de la vie condensée de c, ou à sa première couverture par la chaîne de c si elle est
+417: postérieure, puis suivre les ancêtres, donne une hiérarchie laminaire et fidèle. Entre l'entrée du dernier point
+418: étiqueté et la première mort d'un cluster choisi, ses blocs sont exactement les classes du vote. Elle ne voit
+419: rien sous la sélection et hérite des discontinuités de l'EOM (égalités S(C) = Σ R) et du vote. Elle est
+420: canonique **relativement à la sélection**, pas davantage. (La chaîne de c couvre x avant d_c : V_x(c) > 0 donne un
+421: nœud couvrant sous top(c), et le lemme 1 fait couvrir top(c).)
+422: 
+423: *Preuve.* Dispositif d'ancrage (théorème 5, (iv)) ; fidélité : la chaîne condensée de c couvre x à sa date
+424: d'attache par construction, puis lemme 1. ∎
+
+SOURCE /workspaces/E-HGP/build/v10-verrou-points/axe_K/MEMO_AXE_K_TOUR_COMPLETE_20260930.md
+SHA256 84a3c6e12463c12f734469b861686cc186392daf62beeeaf53f95282b8ef1ca9
+
+21: ## 0. Réponse courte
+22: 
+23: 1. **Aucune laminarisation multi-K ne contourne le trilemme sans renoncer à la fidélité à l'ordre K.** On veut
+24:    trois choses d'une projection laminaire :
+25:    - la fidélité à l'ordre K (N_K) : ne réunir que des points couverts par une même composante de L_K(r) ;
+26:    - la précocité E_c : réunir au rayon c·r deux points que couvre une seule et même composante au rayon r ;
+27:    - la continuité en les positions.
+28: 
+29:    Le théorème T (§ 3) montre que les trois sont incompatibles dès que c < 2. La constante 2 est exacte :
+30:    core vérifie E_2, et sa borne 2ε l'établit. Les règles qui gardent un squelette d'ordre K fixe et y rangent
+31:    les points grâce aux autres ordres y restent soumises. Elles sont alors tardives ou discontinues, fixtures
+32:    exactes à l'appui :
+33:    - témoin le plus dense (DW_j, alias `cover_extra`) ;
+34:    - relèvement vertical depuis un ordre bas.
+35: 
+36:    La greffe lexicographique sacrifie N_K ; elle reste discontinue (fixture G).
+37: 2. **Ce que l'axe K apporte de démontré : la robustesse au retrait et à l'ajout de points.**
+38:    - Le théorème A (§ 2.3) transporte à la multicouverture exacte le théorème 38 de Rolle–Scoccola.
+39:    - La classification core à deux paramètres est (ε + ε′, p)-entrelacée.
+40:    - Toute tranche droite de pente finie hérite d'une borne max(2ε, p r₀/K₀) (corollaire B).
+41:    - Aucune tranche à K fixe n'a de borne dès qu'un seul point est retiré (fixture S).
+42:    - Le prix : les fusions se font aux ordres bas le long de la tranche, donc la percolation est déclarée.
+43:    - La proposition R le quantifie : avant sa première fusion parasite, une tranche ne récupère jamais plus
+44:      de points de frontière que l'ordre fixe actif juste avant cette fusion.
+45: 3. **Les consensus canoniques sont laminaires mais retirent exactement ce qui est contesté.**
+46:    - Le consensus strict et le consensus majoritaire entre ordres (Margush–McMorris) perdent les deux blocs
+47:      qui se croisent, sur F3 comme sur la fixture P.
+48:    - Le consensus strict est de plus discontinu (F3 déplacé).
+49:    - Le raffinement commun (meet) est stable et fidèle à tous les ordres, mais tardif (fixture M).
+50:    - Le regroupement commun (join) percole par les bas ordres, comme le graphe multi-ordres de la
+51:      bibliothèque produit (`HIERARCHIE_DE_POINTS_MULTI_ORDRES.md` § 4). Fixture J : ce graphe réunit deux
+52:      branches d'ordre 2 au niveau λ = 1/27 de l'ordre 1, contre λ = 1/108 pour l'ordre 2 seul.
+53: 4. **Les branches parallèles ne se font que par un choix déclaré.** La fixture P exhibe une famille
+54:    laminaire cible, « petit objet A | (Q | Q′) », qui demande des paramètres anti-monotones. Aucun ordre fixe,
+55:    aucune tranche et aucun consensus ne la produisent. La greffe (4, 2) la produit, mais elle a une course
+56:    d'absorption discontinue (fixture G) et absorbe en bloc les couloirs.
+57: 5. **Sur huit scènes dev (ordres 1 à 5), aucune construction multi-K ne bat cover au plus grand ordre en rappel
+58:    de frontière.**
+59:    - Rappel moyen avant la première fusion parasite : cover_5 0,902 ; DW_1 au squelette 4 0,890 ;
+60:      tranche cover c = 6 0,885 ; core_5 0,826 ; meet 0,812 ; tranche core 0,749 à 0,805.
+61:    - Rappel du halo sur les scènes à halo : 0,863 pour cover_5, 0,450 pour core_5, au plus 0,35 pour les
+62:      tranches core.
+63:    - Stabilité : zéro dépassement des bornes démontrées.
+64:    - Cover, tranches cover et DW dépassent 2ε sous un jitter d'une unité : jusqu'à 0,34 s, contre 0,03 s pour
+65:      core et les tranches core.
+66:    - Addenda préenregistrés : la greffe sur cover G(5; 3) a exactement le rappel de cover_5 sur les 8 scènes et
+67:      garde un petit objet épars de 4 points comme branche, que cover_5, core_5, DW_1 et meet perdent. Mais
+68:      sous le même jitter, elle amplifie la distorsion jusqu'à 0,69 s, soit 14 fois celle de cover_5.
+69: 6. **Recommandation (§ 7).** Aucune construction multi-K n'est un meilleur candidat que le squelette à K
+70:    fixé. Pour la hiérarchie de points, le levier utile de l'axe K est le choix de l'ordre du squelette : le
+71:    plus grand ordre compatible avec les objets, parce qu'il repousse les fusions parasites. L'axe K ne doit
+72:    pas servir à une nouvelle laminarisation par défaut.
+73:    - Garder le squelette FULL à K fixé, seul fidèle aux amas discrets de la définition 8.
+74:    - Garder une entrée précoce déclarée (cover) ou à marge. La proposition T′ donne le délai minimal de toute
+75:      règle lipschitzienne : M − 2Λδ.
+76:    - Publier à côté la tranche core de Rolle–Scoccola, objet certifié stable aux points aberrants.
+77:    - Réserver les verticales à l'annotation (persistance, prominence verticale) et au diagnostic des points
+78:      contestés.
+79:    - Si l'application exige les petits objets de moins de K points, une greffe d'ordre bas est une option à

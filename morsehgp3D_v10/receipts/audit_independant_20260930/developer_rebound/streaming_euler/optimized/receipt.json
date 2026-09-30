@@ -1,0 +1,46 @@
+{
+  "GCP_used": false,
+  "correct_global": [
+    1,
+    0,
+    0
+  ],
+  "correct_implied_lca": 0,
+  "counts": {
+    "cases": 588,
+    "different_root_cases": 21,
+    "summary_comparisons": 7056,
+    "virtual_cases": 24
+  },
+  "mutant_implied_lca": 2,
+  "mutant_native_global": [
+    1,
+    2,
+    0
+  ],
+  "mutant_returncode": 0,
+  "optimize_flag": 1,
+  "refusals": 8,
+  "scope": "isolated native associative u32 reducer only; no LCA-index, FULL, statistics or performance qualification",
+  "sources_after": {
+    "/usr/local/python/3.12.1/bin/python3.12": "0d9afd17e565411cbff3f942ccd0ba7cd2c0a9a623cf00448034b2e50f0220f9",
+    "/workspaces/E-HGP/build/v10-audit-streaming-euler-20260930.bgx8cts7/mutant": "4f434bb757cb3e7c273e2c3fd2e91ff5b4c1aa4aff70e62204b803c4c0f9ec1e",
+    "/workspaces/E-HGP/build/v10-audit-streaming-euler-20260930.bgx8cts7/release": "4bd16c9b917fe73d5a00a591fc7ce4a2b11bcb77d8303f6f6c35e34db4056d33",
+    "/workspaces/E-HGP/build/v10-audit-streaming-euler-20260930.bgx8cts7/ubsan": "48df95be6f10ae59bf505aac7ea89081eab1eab3e0bf4fce6ebf65264b0d7604",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/streaming_euler/build_receipt.json": "723e4f844cd9a8f928caa348806b1edfd0ab42279b5d948d7117e4fc6c0132ad",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/streaming_euler/check.py": "a214fb551ce0f02c7bc3f3fb61d873504aabe20dca27d238a3af714947699396",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/streaming_euler/extrema.hpp": "e023ae294cb81c03eaaa6f31a17ada7da42a4a3f2da8ff556cc46448e153d09d",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/streaming_euler/probe.cpp": "1c8c1c4173bda4f1e782982ee4da14447b1a5efbb0aa658adfcdae6919e63bba"
+  },
+  "sources_before": {
+    "/usr/local/python/3.12.1/bin/python3.12": "0d9afd17e565411cbff3f942ccd0ba7cd2c0a9a623cf00448034b2e50f0220f9",
+    "/workspaces/E-HGP/build/v10-audit-streaming-euler-20260930.bgx8cts7/mutant": "4f434bb757cb3e7c273e2c3fd2e91ff5b4c1aa4aff70e62204b803c4c0f9ec1e",
+    "/workspaces/E-HGP/build/v10-audit-streaming-euler-20260930.bgx8cts7/release": "4bd16c9b917fe73d5a00a591fc7ce4a2b11bcb77d8303f6f6c35e34db4056d33",
+    "/workspaces/E-HGP/build/v10-audit-streaming-euler-20260930.bgx8cts7/ubsan": "48df95be6f10ae59bf505aac7ea89081eab1eab3e0bf4fce6ebf65264b0d7604",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/streaming_euler/build_receipt.json": "723e4f844cd9a8f928caa348806b1edfd0ab42279b5d948d7117e4fc6c0132ad",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/streaming_euler/check.py": "a214fb551ce0f02c7bc3f3fb61d873504aabe20dca27d238a3af714947699396",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/streaming_euler/extrema.hpp": "e023ae294cb81c03eaaa6f31a17ada7da42a4a3f2da8ff556cc46448e153d09d",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/streaming_euler/probe.cpp": "1c8c1c4173bda4f1e782982ee4da14447b1a5efbb0aa658adfcdae6919e63bba"
+  },
+  "status": "PASS"
+}

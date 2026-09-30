@@ -1,0 +1,1 @@
+{"closed_compilation_dependencies": 254, "counts": {"cases": 588, "different_root_cases": 21, "summary_comparisons": 7056, "virtual_cases": 24}, "mutant_wrong_native_value": true, "normal_optimized_equal": true, "refusals": 8, "status": "PASS"}

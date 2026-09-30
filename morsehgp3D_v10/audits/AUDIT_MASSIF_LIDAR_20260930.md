@@ -1,6 +1,6 @@
 # LiDAR massif et précision — contrat proposé au développeur
 
-30 septembre 2026. Demandes utilisateur : dizaines de millions et précision paramétrable. Produit 4b7d70422 ; preuves jusqu'à d192637a7. RankIndex intégré, primitives larges et filtre relatif de portée distincte. public_status=not_claimed. Aucun GCP, allocation massive ou moteur modifié par cet audit. [Massif](../receipts/audit_independant_20260930/massif/README.md), [précision](../receipts/audit_independant_20260930/precision_grille/representation/README.md).
+30 septembre 2026. Demandes utilisateur : dizaines de millions et précision paramétrable. Moteur publié inchangé depuis 4b7d70422 ; preuves jusqu'à 33fcb53a0, raccord privé R2 commencé. Primitives larges/filtre isolés. public_status=not_claimed. Aucun GCP, allocation massive ou moteur modifié par cet audit. [Massif](../receipts/audit_independant_20260930/massif/README.md), [précision](../receipts/audit_independant_20260930/precision_grille/representation/README.md).
 
 **Décision utilisateur confirmée : grille u32 par paliers u24 puis u32 complet ; float32 natif hors chantier courant.** Exposer le pas physique h, publier le domaine exact certifié et conserver un repère commun. Pour le massif : segments depuis les boîtes de centres certifiées, fusion externe exacte. Cela traite la capacité du catalogue ; atlas, verticales, incidences et reprise restent à concevoir.
 
@@ -52,6 +52,7 @@ Commandes sans points : tous ordres/verticales, aucune attache, tête ou export 
 | Boules / forêt | B→u32 sans garde au catalogue ; garde proposée en copie R2. Atlas/représentants protègent déjà la [forêt/CSR](../receipts/audit_independant_20260930/forest_cardinality/README.md) valide actuelle. Promouvoir les réserves ; conserver ces invariants globaux dans le futur port segmenté. |
 | RankIndex | Milieu sûr et produit élargi intégrés dans 4b7d70422 ; [helper réel, 36 220 cas normal/UBSan](../receipts/audit_independant_20260930/rank_search_preintegration/README.md) passent. Raccord observé dans le binaire u18 ; cardinalité avant cast de level.size() distincte. |
 | Atlas | Refus cellules/représentants≥kNone présent, après catalogue résident ; B représentable ne garantit pas l'atlas. |
+| Arène ExtCell | rep_first et son addition restent u32 sur l'arène commune à tous K. Les gardes par K donnent Σsr[k], compatible u64 ; garde globale append/span recommandée. [392 contrôles scalaires normal/UBSan](../receipts/audit_independant_20260930/developer_rebound/catalogue/README.md), sans corruption de catalogue géométrique exécutée revendiquée. |
 | Mémoire | Budget Buffer partiel, grands vecteurs et budget par défaut illimité. Réserver états simultanés/disque et fermer workers sur refus. |
 | Retours | Cloud conserve poids/IDs, mais FULL refuse les multiplicités. Déduplication des scans exige modèle déclaré et correspondance complète. |
 
@@ -64,6 +65,8 @@ Linéaire en B n'est pas linéaire en n. [Famille rationnelle v7](../../morsehgp
 [GEN §§3.1–3.5](../docs/conception/GEN_v2.md#L110) : N_Kmax(c) inclus dans L(Q), voisins ex æquo compris, émission unique par feuille demi-ouverte. Kmax suffit : p+q_min≤Kmax+1 implique p≤Kmax−1. Conserver I/U complets.
 
 Kmax témoins S donnent R_Q²=max des ||s−v||² sur sommets v de Q. Un bloc global Z avec dist(Q,Z)²>R_Q² peut être rejeté ; égalité conservée. [Piste Q×Z](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md), sans gain ni borne globale acquis ; listes parfois larges.
+
+[Protocole de moments sur vraies feuilles](../receipts/audit_independant_20260930/developer_rebound/catalogue/MOMENTS_PROTOCOL.md) : capturer S/candidats du générateur, boîtes potentiellement très allongées, ancres hors Q fermé. Groupes fixes préparés une fois, credits recouvrants pris par maximum ; mesurer taux éligible, préparation, Dom et coût aval. Petit témoin cubique ne prouve ni feuille atteignable ni gain natif. La réduction Euler des attaches ajoute aussi O(P) résumés de workers ; éviter une table dense n×W supposée gratuite.
 
 Chaîne : index global → boîtes certifiées → segments triés (niveau exact,S*) → fusion externe → plateaux globaux → atlas/verticales → incidences/points → tête/retours. IDs globaux, rangs exacts uniques, accès disque unions/descentes et réservations par phase à définir. [Tri externe](https://www.ittc.ku.edu/~jsv/Papers/AgV88.IO.pdf), [graphes externes](https://www.ittc.ku.edu/~jsv/Papers/CGG95.external_graph.pdf) : références d'E/S, aucune borne HGP complète.
 

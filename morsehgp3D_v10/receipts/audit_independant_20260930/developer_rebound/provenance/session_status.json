@@ -1,0 +1,14 @@
+{
+  "private_source_path": "/home/codespace/.claude/projects/-workspaces-E-HGP/497c67a8-5e59-434d-a8a7-2dc2144d8af4.jsonl",
+  "read_scope": "derniers 262144 octets seulement ; aucun dump du journal ni bloc outil",
+  "window_offset": 51671476,
+  "window_bytes": 262144,
+  "window_sha256": "06578e0e11799ac9db7bffed7046bf490a03058b2b4de085187ad8f1aeebd315",
+  "selected_assistant_texts": [
+    {
+      "timestamp": "2026-09-30T11:51:14.659Z",
+      "text": "Trois workflows tournent :\n\n| Workflow | Où il en est |\n| --- | --- |\n| Audit géant | 13 agents sur 14 ont fini ; il reste le vérificateur du code livré, puis la synthèse. |\n| Recherche sur le verrou FULL → points | Les cinq vérificateurs adverses tournent ; le juge suivra. |\n| Intégration R2 | Première étape (faits mathématiques) en cours, sur la base `a8252527e`. |\n\nLes cinq approches de recherche se rejoignent sur plusieurs points :\n\n- **L'arbre** reste FULL à K fixé. Aucune construction multi-K ne fait mieux, et un K plus grand améliore le rappel frontière.\n- **L'attache** se fixe une fois pour toutes, le long de la lignée de première couverture ; seule la date d'entrée varie d'une règle à l'autre.\n- **Un compromis démontré** : aucune règle ne peut être à la fois la plus précoce, fidèle à la première couverture unique et stable. Core et cover occupent les deux extrêmes.\n- **Trois candidats stables au milieu :**\n  - l'ancrage persistant P_κ : stabilité démontrée sans marge, et presque tout le rappel frontière de cover, à 0,01 près sur les scènes dev ;\n  - la bande douce A7 : instabilité divisée par dix environ, en gardant le rappel de cover ;\n  - la majorité progressive sur des masses de branche, qui avance au fil de la couverture au lieu d'entrer par paliers.\n- **Pour la sélection seule**, pas besoin de hiérarchie sur les points : on condense et on applique l'EOM sur FULL avec des masses fractionnaires, puis on vote une seule fois.\n\nLe juge tranchera entre ces candidats après les vérificateurs. Je reprends quand un workflow se termine.",
+      "event_line_sha256": "8713da9774edcbb50c2fa5f31fb9e3a205eb62cab63c23995b95b8172c74853e"
+    }
+  ]
+}

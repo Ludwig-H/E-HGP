@@ -1,0 +1,11 @@
+# Delta : faits_math dans la copie d’intégration commune
+
+Lecture du 30 septembre 2026, après clôture de l’étape à 12:29 UTC. Source commune privée : `85c2c1d61797c426abdffef28c797f63361b6f22`, parent `5a0684430b3b52809dd5f8b43c12ff64d68793dd` (extraction de `a8252527e`). Sources hachées dans [sources.json](sources.json), note et logs ciblés dans [source_excerpts.txt](source_excerpts.txt). Aucun test ni relecture de la sauvegarde R2 de 726 payloads.
+
+**Acquis sur cette copie :** faits_math est appliqué sans conflit textuel ; deux juges de faits/projections et du registre sont ajoutés, avec niveaux exacts de l’arbre, convention fermée gardée et refus nommé pour section absente. Le log final donne 15/15 portes, code 0, 386,90 s mur ; `fast` donne 5/5, code 0, 2,07 s. Les huit artefacts HEAD/intégré/build-neuf ont les mêmes SHA dans le relevé, dont les quatre CLI et `libmhgp10_core.a`. Ces nombres sont ceux des logs du développeur, lus et parsés, sans rejeu de l’auditeur.
+
+Les sources compilées ne changent que par commentaires ; cette tranche intègre des documents et des juges. Elle ne corrige encore ni pool, ni tête, ni SiteTree, ni parseur strict. Les 15 portes ne constituent pas une qualification commune des sept groupes R2. Elles n’acquièrent aucun nouveau contrat float32/u24/u32, FULL massif ou GPU.
+
+**Conflits restants :** le conflit faits_math × futur `fast_targets` est levé pour la nouvelle porte (script au début des ARGS, `-O` par environnement). Le juge futur rend encore 3 pour les deux portes directes de HEAD, `cover_band_structural` et `dev_quotas` : P4 reste à l’étape CLI. Les oracles HEAD passent ici ; le patch oracles R2 et la CLI stricte ne sont pas encore réunis. Leur conflit `leaf=max(8,K+1)` contre `leaf≥K+3`, ainsi que `--dump-levels` et `--dump-births`, restent l’étape 6 prévue. Le commentaire corrigé de projection dans `mhgp10_cluster.cpp` doit être préservé à l’étape tête, puis le juge du registre rejoué.
+
+**Suite planifiée :** SiteTree avec sa réparation vérifiée, puis bancs, pool, entrées CLI, oracles et tête ; enfin la qualification globale sur un seul arbre et ses binaires. Le présent reçu couvre uniquement le commit privé faits_math, sans verdict sur une étape ultérieure en cours et sans intégration publique acquise. Les reçus de rebond précédents restent inchangés.

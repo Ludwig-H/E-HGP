@@ -1,0 +1,145 @@
+{
+  "K": 3,
+  "extra_score_from_below_mcs_tail": "8433544/12533447",
+  "gamma_supports_at_cuts": {
+    "1": [
+      [
+        0,
+        1,
+        2
+      ],
+      [
+        3,
+        4,
+        5
+      ]
+    ],
+    "25": [
+      [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    ],
+    "81/4": [
+      [
+        0,
+        1,
+        2
+      ],
+      [
+        1,
+        2,
+        3
+      ],
+      [
+        2,
+        3,
+        4
+      ],
+      [
+        3,
+        4,
+        5
+      ]
+    ]
+  },
+  "invariants": {
+    "antichain_property_not_refuted": true,
+    "at_split_mass_not_anticipatory": true,
+    "end_masses_do_not_determine_chronological_terminal_dates": true,
+    "label_change_not_claimed": true,
+    "parent_birth_equals_sum_child_ends_progressive": true
+  },
+  "leaf_coefficient": "12533447/4216772",
+  "leaf_end_mass_at_split": "75200682/26354825",
+  "leaf_mass_at_geometric_birth": "0",
+  "leaf_mass_at_lambda_1_2": "12533447/8433544",
+  "leaf_mass_function": "a*(1-lambda), lambda in [1/25,1]",
+  "mcs": "2",
+  "points_xyz": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0
+    ],
+    [
+      2,
+      0,
+      0
+    ],
+    [
+      10,
+      0,
+      0
+    ],
+    [
+      11,
+      0,
+      0
+    ],
+    [
+      12,
+      0,
+      0
+    ]
+  ],
+  "prototype_chosen_tops": [
+    0,
+    1
+  ],
+  "prototype_condensed_clusters": [
+    {
+      "chain": [
+        4
+      ],
+      "children": [
+        1,
+        2
+      ],
+      "parent": null,
+      "top": 4
+    },
+    {
+      "chain": [
+        0
+      ],
+      "children": [],
+      "parent": 0,
+      "top": 0
+    },
+    {
+      "chain": [
+        1
+      ],
+      "children": [],
+      "parent": 0,
+      "top": 1
+    }
+  ],
+  "prototype_leaf_score": "902408184/658870625",
+  "recorded_selection_source_sha256": "509acaa1170c1bcf3a3cfb97eb6220db3a908b0b7669c75efad78183e84bc80e",
+  "root_progressive_mass_at_birth": "303724453/52709650",
+  "scope": "private proposal11 semantics; no HEAD defect and no statistical result",
+  "score_if_end_at_first_mass_lt_mcs": "5753670740285248/8257920058294375",
+  "site_total_weights": [
+    "1",
+    "2044/2025",
+    "2063/2025",
+    "2063/2025",
+    "2044/2025",
+    "1"
+  ],
+  "step_leaf_mass": "constant leaf_end_mass until geometric birth; no same interior stop",
+  "sum_child_end_mass": "303724453/52709650",
+  "threshold_lambda": "4099903/12533447",
+  "z": 2
+}

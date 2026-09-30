@@ -1,0 +1,1 @@
+{"counts": {"cases": 588, "different_root_cases": 21, "summary_comparisons": 7056, "virtual_cases": 24}, "mutant_killed_by_wrong_native_value": true, "refusals": 8, "status": "PASS"}

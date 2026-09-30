@@ -1,0 +1,130 @@
+[
+  {
+    "name": "compiler",
+    "argv": [
+      "g++",
+      "--version"
+    ],
+    "shell_display": "g++ --version",
+    "cwd": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue",
+    "exit_code": 0,
+    "env_overrides": {}
+  },
+  {
+    "name": "compile_normal",
+    "argv": [
+      "g++",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wconversion",
+      "-Wshadow",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue/span_check.cpp",
+      "-O2",
+      "-o",
+      "/tmp/mhgp10-ext-span-audit-syvduesg/normal"
+    ],
+    "shell_display": "g++ -std=c++20 -Wall -Wextra -Wconversion -Wshadow /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue/span_check.cpp -O2 -o /tmp/mhgp10-ext-span-audit-syvduesg/normal",
+    "cwd": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue",
+    "exit_code": 0,
+    "env_overrides": {}
+  },
+  {
+    "name": "compile_ubsan",
+    "argv": [
+      "g++",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wconversion",
+      "-Wshadow",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue/span_check.cpp",
+      "-O1",
+      "-g",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-o",
+      "/tmp/mhgp10-ext-span-audit-syvduesg/ubsan"
+    ],
+    "shell_display": "g++ -std=c++20 -Wall -Wextra -Wconversion -Wshadow /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue/span_check.cpp -O1 -g -fsanitize=undefined -fno-sanitize-recover=undefined -o /tmp/mhgp10-ext-span-audit-syvduesg/ubsan",
+    "cwd": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue",
+    "exit_code": 0,
+    "env_overrides": {}
+  },
+  {
+    "name": "normal",
+    "argv": [
+      "/tmp/mhgp10-ext-span-audit-syvduesg/normal"
+    ],
+    "shell_display": "/tmp/mhgp10-ext-span-audit-syvduesg/normal",
+    "cwd": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue",
+    "exit_code": 0,
+    "env_overrides": {}
+  },
+  {
+    "name": "ubsan",
+    "argv": [
+      "/tmp/mhgp10-ext-span-audit-syvduesg/ubsan"
+    ],
+    "shell_display": "/tmp/mhgp10-ext-span-audit-syvduesg/ubsan",
+    "cwd": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue",
+    "exit_code": 0,
+    "env_overrides": {
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    }
+  },
+  {
+    "name": "judge_normal",
+    "argv": [
+      "python3",
+      "-B",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue/judge.py",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue/normal.stdout"
+    ],
+    "shell_display": "python3 -B /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue/judge.py /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue/normal.stdout",
+    "cwd": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue",
+    "exit_code": 0,
+    "env_overrides": {}
+  },
+  {
+    "name": "judge_normal_O",
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue/judge.py",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue/normal.stdout"
+    ],
+    "shell_display": "python3 -B -O /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue/judge.py /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue/normal.stdout",
+    "cwd": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue",
+    "exit_code": 0,
+    "env_overrides": {}
+  },
+  {
+    "name": "judge_ubsan",
+    "argv": [
+      "python3",
+      "-B",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue/judge.py",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue/ubsan.stdout"
+    ],
+    "shell_display": "python3 -B /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue/judge.py /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue/ubsan.stdout",
+    "cwd": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue",
+    "exit_code": 0,
+    "env_overrides": {}
+  },
+  {
+    "name": "judge_ubsan_O",
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue/judge.py",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue/ubsan.stdout"
+    ],
+    "shell_display": "python3 -B -O /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue/judge.py /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue/ubsan.stdout",
+    "cwd": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/developer_rebound/catalogue",
+    "exit_code": 0,
+    "env_overrides": {}
+  }
+]
