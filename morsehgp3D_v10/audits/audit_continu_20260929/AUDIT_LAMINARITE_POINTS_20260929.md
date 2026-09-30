@@ -752,7 +752,9 @@ paires de la section 9 sont récupérés dès leur naissance, pour les deux
 φ, normal/−O. Ce sont huit contrôles de conception, pas une solution.
 
 L'univers limité aux feuilles peut manquer des points couverts seulement
-par une branche interne. Une branche fantôme peut aussi couper une branche
+par une branche interne à K3/K5 ; la section 11 corrige cette réserve pour
+K2 et donne les contre-exemples exacts aux ordres supérieurs.
+Une branche fantôme peut aussi couper une branche
 longue : ignorer tous les ancêtres ferait perdre sa continuation. Ajouter
 tous les ancêtres au dénominateur peut au contraire retarder à nouveau la
 frontière. Il faut définir une unité de branche et une mesure conservée,
@@ -767,3 +769,98 @@ ce contact coquille/intérieur aux perturbations des bras annoncés, avec
 rappel frontière et masse différée. Ni les quatre petits succès ni la
 preuve d'emboîtement ne justifient un grand port, une promesse ARI/EOM ou
 le contrat 100 ms.
+
+## 11. Ne pas perdre la frontière portée par les branches internes
+
+La relecture de la définition 8 impose une appartenance par couverture,
+pas par densité propre du point. Cette exigence concerne **toutes les
+branches de FULL**, pas seulement ses feuilles. Nous avons contre-vérifié
+notre réserve de la section 10 au lieu de la laisser comme intuition.
+Les [preuves et traces](../../receipts/audit_continu_20260929/duration_branch_reserves_20260930/README.md)
+séparent l'argument général K2, les contre-exemples K3/K5 et le diagnostic
+de continuation sous perturbation.
+
+### K2 : chaque point possède une véritable incidence de feuille
+
+Pour des sites distincts, choisir un plus proche voisin a de x, à distance
+d>0. Si z appartient à la boule fermée de diamètre xa, alors
+`|z−x|² ≤ (a−x)·(z−x) ≤ d|z−x|`. Tout z autre que x et a y serait donc
+strictement plus proche de x que a ; l'égalité à distance d impose z=a.
+La boule est vide d'autres sites, y compris sur sa coquille.
+
+Le sommet `{x,a}` de Γ2 naît à β=d²/4. Toute 3-partie le contenant a un
+rayon MEB strictement supérieur : la seule boule de rayon d/2 contenant
+x et a est celle de leur diamètre. Ce sommet naît donc isolé et crée une
+feuille de durée positive couvrant x. **Aucun point n'est donc dépourvu
+d'incidence de feuille à K2.** Ce lemme garantit un univers non vide par
+point, pas la récupération de toutes ses futures composantes couvrantes
+internes, ni la robustesse statistique des poids ou de la majorité.
+
+### K3 et K5 : des entrées frontière strictement internes
+
+À K3, prendre les six sites, dans cet ordre :
+
+`x=(15,4,0), a=(5,4,0), b=(7,8,0), c=(7,0,0), e=(1,4,0), f=(0,4,1)`.
+
+Ils ont une dimension affine trois. Les quatre feuilles naissent à
+β=13/2,13,13,16 ; toutes meurent au plus tard à β=169/9. Pourtant,
+x n'est couvert qu'à **β=25**, sur une branche interne déjà née.
+L'unique boule critique forte couvrant x a p=0, q_min=2 et la coquille
+`{x,a,b,c}`. À K3, c'est un `join`, pas une naissance.
+
+À K5, prendre les sept sites :
+
+`x=(325,325,650), (520,325,65), (200,325,25), (325,416,13),`
+`(325,130,65), (442,481,65), (250,225,25)`.
+
+Ils sont tous sur la sphère de centre (325,325,325), rayon 325, et de
+dimension affine trois. Trois feuilles sur les six sites inférieurs
+fusionnent à β=116715625/3409. **x n'entre qu'à β=105625**, dans cette
+branche interne. Aucune feuille ne couvre x durant sa vie, même si on
+autorise une feuille à acquérir des points après sa naissance. L'unique
+boule critique forte couvrant x est la sphère commune, p=0, q_min=3,
+coquille de sept sites ; son rôle à K5 est encore un `join`.
+
+Les traces Γ exhaustives traitent toutes les K-parties et K+1-parties,
+et chaque plateau en un seul événement. Elles examinent les couvertures
+durant toute la vie des feuilles, pas seulement à leur naissance.
+Le filtrage fort sert aux témoins de couverture, **jamais à supprimer
+les fusions de FULL**. Les deux petits exports natifs et leur comparaison
+indépendante sur 414 coupes sont séparés des calculs Fraction dans le reçu.
+Ils utilisent l'archive historique `6206d1d11`, pas le moteur R2 courant.
+Le seul wrapper d'audit est recompilé, avec ses dépendances réelles et
+reproduction bit à bit ; aucun moteur reconstruit ni transfert de qualification.
+
+### La persistance doit conserver les continuations
+
+Dans le second exemple, multiplier les coordonnées non translatées par
+N=64,128,256, translater de (325N,325N,325N), puis déplacer seulement x
+d'une unité vers le bas. Tout reste dans u18. De petits arcs apparaissent
+près de la sphère commune et segmentent l'ancienne branche interne longue.
+Leur persistance totale en φ=1/β tend vers zéro dans le modèle réel
+normalisé, mais la continuation ancestrale de l'ancien arc porte une masse
+qui tend vers **1/105625**, donc non nulle.
+
+Ignorer cette continuation ferait perdre une masse finie pour une
+perturbation qui tend vers zéro. À l'inverse, sommer correctement les
+segments d'une même continuation télescope leurs persistances : **cela
+ne réfute pas toute pondération par durée**. Le diagnostic vise l'exclusion
+des ancêtres et le double comptage des arcs, pas une tête complète déjà
+implémentée. Les trois tailles u18 sont des mesures d'amplification ; la
+limite continue relève du modèle réel, pas de la grille finie.
+
+### Conséquence pour la conception
+
+Conserver les entrées frontière sur les branches internes et une mesure
+cohérente lors de leur continuation. Ne pas prendre « une feuille = une
+unité de masse » comme réduction générale K5. Ne pas remplacer non plus
+chaque continuation par une nouvelle masse indépendante à chaque fusion.
+Le contrôle simple reste une attache précoce à la composante réellement
+unique, suivie par ascendance ; les conflits doivent être traités à part.
+
+Avant un port coûteux, la porte frontière doit réunir ces K3/K5, le contact
+coquille/intérieur de la section 10, les deux paires précoces de la section 9
+et les métriques de récupération avant connexion parasite. Elle devra
+ensuite mesurer condensation et EOM équitables z1/z2 sur les bras dev.
+Ces preuves de structure ne qualifient aucun ARI, EOM, coût sous-quadratique
+global ni contrat FULL/G4 de 100 ms. Aucun moteur modifié, GCP0.

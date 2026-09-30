@@ -1,0 +1,106 @@
+{
+  "status": "STREAM_SCOPE_COUNTEREXAMPLES_REPRODUCED",
+  "scope": "tiny_archived_core_dump_K2_comparison_not_new_producer",
+  "optimized": 0,
+  "rows": {
+    "baseline": {
+      "stream_error": null,
+      "strict_error": null,
+      "stream_counts": {
+        "births": 5,
+        "plateau_births": 0,
+        "fusions": 3,
+        "fusion_links": 1,
+        "attaches": 6,
+        "attaches_parent_a_l_entree": 0,
+        "orders": 2,
+        "verticals": 3,
+        "verticals_same_level": 2
+      }
+    },
+    "complete_order_prefix": {
+      "stream_error": null,
+      "strict_error": "ordres du dump [1], attendus 1..2",
+      "stream_counts": {
+        "births": 3,
+        "plateau_births": 0,
+        "fusions": 2,
+        "fusion_links": 1,
+        "attaches": 3,
+        "attaches_parent_a_l_entree": 0,
+        "orders": 1
+      }
+    },
+    "foreign_point_ids": {
+      "stream_error": null,
+      "strict_error": "k=1 : attache d'un point inconnu ou double (1000, 0, 0)",
+      "stream_counts": {
+        "births": 5,
+        "plateau_births": 0,
+        "fusions": 3,
+        "fusion_links": 1,
+        "attaches": 6,
+        "attaches_parent_a_l_entree": 0,
+        "orders": 2,
+        "verticals": 3,
+        "verticals_same_level": 2
+      }
+    },
+    "false_header_counts": {
+      "stream_error": null,
+      "strict_error": null,
+      "stream_counts": {
+        "births": 5,
+        "plateau_births": 0,
+        "fusions": 3,
+        "fusion_links": 1,
+        "attaches": 6,
+        "attaches_parent_a_l_entree": 0,
+        "orders": 2,
+        "verticals": 3,
+        "verticals_same_level": 2
+      }
+    },
+    "missing_point_control": {
+      "stream_error": "k=2 : bloc d'attaches de 2 lignes pour 3 sites",
+      "strict_error": "k=2 : 2 attaches pour 3 points (bloc d'attaches incomplet ou absent)",
+      "stream_counts": {
+        "births": 5,
+        "plateau_births": 0,
+        "fusions": 3,
+        "fusion_links": 1,
+        "attaches": 3,
+        "attaches_parent_a_l_entree": 0,
+        "orders": 1
+      }
+    }
+  },
+  "hashes_before": {
+    "check_stream.py": "9a86b1fa8ae8461761119d9c83ac3cf4eac882060c914a2d0afb84b8b5e4fbe2",
+    "sources/invariants_echelle.py": "6cddeb73fdaaf2485f63d9579a9698fd20f03f73032902469f5e8aa5c8779c02",
+    "sources/reference/hgp10_ref.py": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104",
+    "sources/tests/oracle/test_catalogue_oracle.py": "cdecc5e69e5e87cd49c89dd9b5f81e1e7a40ba7419c7aecf2d6a7ec2dbc1543d",
+    "sources/tests/oracle/test_tower_oracle.py": "faf12244e19ee58747f0eb4d15061cf6d08280a8f09695f68456f2bc409eaddc",
+    "fixtures/baseline.txt": "992cf6eb6571c3dbec89f191321391ea628668974d514ffd6114788a20d27c76",
+    "fixtures/complete_order_prefix.txt": "01a5f322108d1d77d671118f8a9e1f6d54e215b5b5b347d0be95bd83e72fc707",
+    "fixtures/false_header_counts.txt": "3f951ae4212788035864b42df44f5ee36dff1dcd94823c51a241ba841951a447",
+    "fixtures/foreign_point_ids.txt": "8c7da5664b4bd74380f91869e242a54419689ac032679906b4a30fe71698003b",
+    "fixtures/missing_point_control.txt": "dc923255c1431d1a171deb93e030b1c0cea181548c5d04223c74d8ff124b364f"
+  },
+  "hashes_after": {
+    "check_stream.py": "9a86b1fa8ae8461761119d9c83ac3cf4eac882060c914a2d0afb84b8b5e4fbe2",
+    "sources/invariants_echelle.py": "6cddeb73fdaaf2485f63d9579a9698fd20f03f73032902469f5e8aa5c8779c02",
+    "sources/reference/hgp10_ref.py": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104",
+    "sources/tests/oracle/test_catalogue_oracle.py": "cdecc5e69e5e87cd49c89dd9b5f81e1e7a40ba7419c7aecf2d6a7ec2dbc1543d",
+    "sources/tests/oracle/test_tower_oracle.py": "faf12244e19ee58747f0eb4d15061cf6d08280a8f09695f68456f2bc409eaddc",
+    "fixtures/baseline.txt": "992cf6eb6571c3dbec89f191321391ea628668974d514ffd6114788a20d27c76",
+    "fixtures/complete_order_prefix.txt": "01a5f322108d1d77d671118f8a9e1f6d54e215b5b5b347d0be95bd83e72fc707",
+    "fixtures/false_header_counts.txt": "3f951ae4212788035864b42df44f5ee36dff1dcd94823c51a241ba841951a447",
+    "fixtures/foreign_point_ids.txt": "8c7da5664b4bd74380f91869e242a54419689ac032679906b4a30fe71698003b",
+    "fixtures/missing_point_control.txt": "dc923255c1431d1a171deb93e030b1c0cea181548c5d04223c74d8ff124b364f"
+  },
+  "engine_calls": 0,
+  "engine_modified": false,
+  "GCP_used": false,
+  "wall_seconds": 0.05863623799996276
+}

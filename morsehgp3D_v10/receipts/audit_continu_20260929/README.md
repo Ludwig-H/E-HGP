@@ -86,6 +86,13 @@ Une nouvelle exécution doit produire un reçu distinct, avec sa propre version.
   porte native de tête R2 et sources/logs Pool observés. Corrections de
   portée des premières observations conservées ; copies privées distinctes,
   aucune qualification du raccord commun.
+- `duration_branch_reserves_20260930/` : preuve générale K2, entrées frontière
+  internes K3/K5, petits exports natifs et diagnostic de continuation après
+  apparition d'arcs fantômes. Pas de score statistique ni nouveau moteur.
+- `r2_rounding_bench_stream_20260930/` : SiteTree quatre modes code0,
+  validation des paramètres/en-têtes des bancs et invariants des grands
+  dumps. Sources figées, tests courts ; pas de nouveau banc de clustering,
+  producteur LiDAR ou qualification globale.
 
 Ces nouveaux fichiers ne font pas partie des 34 déplacements historiques
 du manifeste. Les comptes, sources et limites sont dans leurs reçus propres
@@ -112,3 +119,16 @@ espaces historiques dans trois logs CMake et deux patches de mutants.
 Ils restent octet pour octet : aucun reformatage d'une preuve close.
 Le contrôle documentaire global antérieurement en échec n'est pas annoncé
 vert ni relancé comme qualification de cette tranche.
+
+Le complément frontière interne/R2 contrôle treize Markdown ciblés, sans
+erreur, et les deux nouveaux manifestes globaux : 43 et 202 entrées.
+Les cinq manifestes propres des sous-paquets sont aussi vérifiés. Les
+manifestes développeur copiés avec un sous-ensemble de leurs preuves
+gardent leur rôle de provenance, pas de manifeste autonome de ce sous-ensemble.
+Le rejeu principal des exports archivés confirme 414 coupes, sans nouvel
+appel natif. Les 254 chemins publiés sont comparés à la liste explicite
+des rapports et des preuves ; aucune modification d'un autre acteur
+ou du moteur n'est incluse. Le contrôle documentaire global reste distinct.
+Le contrôle des espaces est propre sur les sept rapports rédigés ; sur
+les données, il signale des espaces de logs, des CRLF de CSV et la fin
+du CMakeCache. Ces fichiers clos restent octet pour octet.

@@ -68,3 +68,52 @@ les mutants des juges et la borne CSR de l'autre prototype après raccord.
 Ces gains de fiabilité ne qualifient ni une nouvelle projection frontière,
 ni un score ARI/EOM, ni FULL/GPU en 100 ms. Les campagnes encore actives et
 les résultats historiques ne sont pas promus.
+
+## Complément : SiteTree, bancs et juge des grands dumps
+
+La [capture suivante](../../receipts/audit_continu_20260929/r2_rounding_bench_stream_20260930/README.md)
+ne remplace pas le paquet R2 précédent ; ses hashes restent fermés.
+
+**SiteTree : réserve d'arrondi close à son périmètre.** Rejeu direct de
+la porte existante, code 0, 0,989 s : 5 969 requêtes par mode. Le filtre
+est désormais limité par `fegetround()` au mode nearest du thread appelant ;
+les trois modes dirigés passent au repli exact. G1, bornes et lectures
+entre threads sont exercés. Ni FTZ/DAZ ni les autres filtres de FULL ne
+sont qualifiés par ce test. Le [rapport SiteTree](catalogue/CONTRE_AUDIT_SITETREE_CORRIGE_20260929.md)
+sépare ce résultat de notre ancien harnais code 1.
+
+**Bancs : ARI hors domaine corrigé, schéma encore incomplet.** Nos
+44 appels courts normal/−O confirment les refus R2 puis reproduisent
+alpha=2/NaN accepté, paramètres absents ou méthode inconnue passant le
+contrôle avant `KeyError`, et colonne `ari_s` dupliquée acceptée.
+Alpha=2 peut produire « la tour bat HDBSCAN » sur scores fabriqués,
+p corrigé=1/3. Cela ne réfute aucune décision A/C historique : leurs
+préenregistrements actuels sont valides. Le [rapport des bancs](timeout/CONTRE_AUDIT_BANCS_CORRIGES_20260929.md)
+précise schéma, simulations et vrais signaux locaux.
+
+**Grands dumps : deux contrôles linéaires manquants.** Le lecteur R2
+`invariants_echelle.py` se limite explicitement à la structure, pas à
+la bijection géométrique de Γ. Sur un petit dump natif K1..2 archivé :
+
+- Retirer tout l'ordre 2 laisse un préfixe K1 cohérent, accepté par le
+  lecteur en flux ; le juge exact R2 refuse les ordres manquants.
+- Translater de +1000 toutes les coordonnées x des attaches conserve
+  leur nombre/unicité ; le lecteur accepte, le juge exact refuse les
+  sites inconnus.
+- Des tailles annoncées 999/999 passent les deux parseurs : réserve de
+  schéma, pas défaut géométrique propre au lecteur en flux.
+- Retirer une seule attache est correctement refusé par les deux.
+
+Le [rejeu normal/−O](../../receipts/audit_continu_20260929/r2_rounding_bench_stream_20260930/stream/README.md)
+termine code 0 avec résultats identiques. Aucun producteur LiDAR réel n'est
+observé émettant un préfixe ou de faux sites. L'interface du lecteur ne
+reçoit que n, pas K ni les sites attendus. Passer K effectif et l'ensemble
+exact des sites, vérifier les ordres et les tailles annoncées : travail
+linéaire en la sortie, sans nouvel oracle combinatoire. Ces gardes ne
+qualifieront toujours pas la complétude géométrique des grands dumps.
+
+La [section 11 frontière](AUDIT_LAMINARITE_POINTS_20260929.md) ajoute en
+parallèle un résultat positif K2 et de vraies entrées internes K3/K5.
+Conserver leurs incidences et continuations est une condition de conception,
+pas une autorisation de relancer une grosse optimisation de tête.
+Aucun moteur modifié, aucun GCP ni contrat 100 ms nouvellement acquis.

@@ -1,0 +1,68 @@
+{
+  "date_utc": "2026-09-30",
+  "status": "COUNTER_REVIEW_PASS_WITH_SCOPE_LIMITS",
+  "purpose": "Independent audit of K2 coverage lemma, K3/K5 leaf incompleteness and arc-segmentation warning",
+  "original_packet": "/tmp/mhgp10-duration-reserves-0930.F3wiP72t",
+  "original_manifest_copy": "original_packet_SHA256SUMS",
+  "K2": {
+    "general_lemma_valid": true,
+    "premise": "finite distinct sites; n>=2",
+    "argument": "A nearest-neighbour diameter ball contains no third site, including in distance ties. Its Gamma2 vertex is isolated at birth; all incident three-point cofaces have strictly larger MEB radius, hence a positive-life leaf covering that point.",
+    "exact_point_controls": 18,
+    "strong_birth_property": "p=0,q_min=2,shell={x,nearest}; alive and strong at K2",
+    "limitation": "This ensures at least one leaf incidence per point, not a statistically optimal mass choice."
+  },
+  "K3_K5": {
+    "native_exports": 2,
+    "catalogue_complete_against_separate_Fraction_critical_balls": true,
+    "all_strong_ball_ancestor_walks": 19,
+    "leaves_cover_x_over_any_positive_lifetime": 0,
+    "K3": {
+      "points": 6,
+      "x_morton_index": 4,
+      "entry_beta": "25",
+      "native_internal_ball_node": 5,
+      "node_birth": "169/9",
+      "leaves": 4,
+      "strong_balls": 5
+    },
+    "K5": {
+      "points": 7,
+      "x_morton_index": 6,
+      "entry_beta": "105625",
+      "native_internal_ball_node": 3,
+      "node_birth": "116715625/3409",
+      "leaves": 3,
+      "strong_balls": 4
+    },
+    "implication": "A leaf-only projection is not a complete projection onto points for K>=3; internal-branch coverage must be handled.",
+    "native_ID_policy": "Map points by exact coordinates and compare geometric components, never raw Gamma/native node IDs.",
+    "geometric_cuts_checked": 414
+  },
+  "ghost": {
+    "scales": [
+      64,
+      128,
+      256
+    ],
+    "exact_checks_reproduced": true,
+    "interpretation": "Small new leaf persistences do not account for a non-negligible continuation of a pre-existing internal arc if ancestors are discarded.",
+    "not_claimed": "This does not refute all persistence weighting; correctly telescoping continuation segments avoids this specific double-count/loss. The three u18 scales are finite controls, not an infinite-grid limit or a whole-head stability theorem."
+  },
+  "provenance": {
+    "wrapper_source_sha256": "4156c87f6a6fad646274cd447d7c4641cd6388eda939d276992763a8da7d5d32",
+    "archive_sha256": "1aaacd63dcb76413b61fc6eb983c52bdaa9a32f9a059a906af2254061beac5da",
+    "reproduced_wrapper_sha256": "1c2ce0d73c5871783f2fc3e04a3940a53250af7a0d60a1689ec8a4c3a9787a85",
+    "archive_historical_source_commit": "6206d1d11",
+    "include_root": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src",
+    "header_snapshot_complete_for_MMD_project_dependencies": true,
+    "first_capture_gap": "core/reasons.def was not in the initial .hpp-only pin.",
+    "gap_resolution": "A second wrapper-only compile pins all actual project dependencies before/after and reproduces the binary used by the two saved exports bit-for-bit. No claim that the omitted initial pin existed, and no third native call."
+  },
+  "limits": [
+    "Raw-output geometric replay is autonomous in this packet; native rebuild needs the separately pinned historical library, not included.",
+    "Independent Fraction algorithms share Python Fraction, so no claim of independent arithmetic implementation.",
+    "No current R2 engine/tower/head qualification, EOM benchmark or performance/scaling qualification transferred.",
+    "No engine mutation, no GCP, only two tiny native exports."
+  ]
+}

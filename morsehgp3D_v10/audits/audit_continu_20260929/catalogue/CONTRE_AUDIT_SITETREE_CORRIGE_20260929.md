@@ -1,5 +1,12 @@
 # Contre-audit de SiteTree corrigé — 29 septembre 2026
 
+**État au 30 septembre, R2 : le verrou d'arrondi ci-dessous est clos pour
+SiteTree.** Le filtre vérifie désormais FE_TONEAREST dans le thread
+appelant ; les trois modes dirigés passent au repli exact. La nouvelle
+porte quatre modes a été rejouée ici, code 0. Le complément final en donne
+les comptes et les limites. Le rapport du 29 et son terminal code 1 restent
+conservés comme historique, sans qualification rétroactive.
+
 Le correctif cible correctement G1 : le filtre est borné au cube u18 par une garde rationnelle sans débordement ; les centres lointains utilisent les deux replis exacts. Aucun nouveau désaccord géométrique n'a été trouvé dans cette passe. Le verrou restant utile est **le contrat d'arrondi et sa gate** : la preuve publiée suppose FE_TONEAREST, tandis que la frontière publique ne vérifie pas ce mode ; le plancher de la gate existante dépend lui-même de l'arrondi.
 
 `phase=exploration_v10_hors_registre`, `backend=cpu_reference`, `profile=quantized_u18_input_only`, `mode=independent_sitetree_numeric_counteraudit`, `public_status=not_claimed`. Copie `build/v10-fixes/sitetree/src/morsehgp3D_v10`, base déclarée `0bce6cc00`. Aucun moteur, index, source d'un autre acteur ou Git modifié. GCP non utilisé.
@@ -58,3 +65,41 @@ L'argument produit est géométriquement correct : une MEB a son centre dans l'e
 Le repli O(n) n'implique aucune borne sous-linéaire pour les requêtes filtrées ou globale pour la tour. `nearest` peut garder puis trier Θ(n) candidats, et `closed_ball` trie ses sorties : O(n log n) demeure possible sur le chemin filtré. Le nombre de requêtes et de candidats n'est pas borné par cette correction de domaine.
 
 **Verrou proposé :** soit publier et contrôler FE_TONEAREST à la frontière commune, soit compléter la preuve pour les quatre modes (conversion incluse) et définir avant exécution les planchers adverses par mode, avec un plancher géométrique positif distinct. Les préconditions de représentation et d'immuabilité restent explicites ; un `filtered=false` ne doit jamais être présenté comme un refus sûr d'une requête forgée. Aucun défaut sur les chemins produits ou contrat de tour/performance n'est inféré de ces angles morts.
+
+## Complément R2 — 30 septembre : garde par thread et porte réellement verte
+
+La copie `/tmp/mhgp10-r2/sitetree` choisit la première solution :
+`fegetround()` est lu à chaque décision de filtre, dans le thread appelant.
+Le mode n'est pas forcé. FE_TONEAREST peut utiliser le filtre ; les trois
+modes dirigés utilisent la comparaison entière exacte. Le header exclut
+explicitement les changements MXCSR seuls, hors contrat `cfenv`.
+
+Le [reçu indépendant](../../../receipts/audit_continu_20260929/r2_rounding_bench_stream_20260930/sitetree/receipt.json)
+porte le rejeu du binaire existant : code 0, 0,989 s, neuf empreintes ciblées
+identiques avant/après. **Aucune compilation de moteur** ni longue campagne
+relancée. Chaque mode exerce 5 969 requêtes :
+
+| Mode | Filtre | Repli exact | Dont repli dû à l'arrondi |
+| --- | ---: | ---: | ---: |
+| FE_TONEAREST | 3 998 | 1 971 | 0 |
+| Chacun des trois modes dirigés | 0 | 5 969 | 3 998 |
+
+G1 conserve ses quatre sites de coquille. La porte ajoute trente contrôles
+de bornes extrêmes sur `filtered` seul, quarante requêtes après construction
+sous arrondi dirigé et vingt cas entre threads d'arrondis différents.
+Les anciens comptes adverses restent des diagnostics ; les planchers
+géométriques sont maintenant distingués et réellement atteints.
+Le journal développeur 11/11, code 0, 1 201,03 s est observé, non rejoué.
+
+La garde vérifie D≤2^82, |N|≤2^100 et ancre u18 avant ses produits,
+qui restent sous 2^101. `__FAST_MATH__` est refusé à la compilation.
+Ces constats ne transforment pas `filtered=false` en refus d'une requête
+forgée : représentation de `side_key`, durée de vie et immuabilité de
+Cloud restent des préconditions. La complexité des replis et des requêtes
+filtrées reste celle décrite plus haut.
+
+Aucune porte FTZ/DAZ n'est trouvée ou rejouée ici. Les autres filtres de
+FULL ne sont pas qualifiés sous modes dirigés par ce seul test SiteTree.
+Ni GPU/G4, ni coût global sous-quadratique, ni intégration de toutes les
+copies corrigées ne sont acquis. GCP0 ; les anciennes captures code 1
+restent inchangées.

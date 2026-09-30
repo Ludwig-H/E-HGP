@@ -1,0 +1,4 @@
+RESULTAT {"chemin": "pendant_appel", "exception": "Terminated(<Signals.SIGTERM: 15>)", "pids": [336874, 336877], "survivants": [], "second_signal_simule": 1}
+RESULTAT {"chemin": "delai", "exception": "Terminated(<Signals.SIGTERM: 15>)", "pids": [336879, 336880], "survivants": [], "second_signal_simule": 1}
+SURVIVANTS pendant_appel=0 delai=0
+code=0

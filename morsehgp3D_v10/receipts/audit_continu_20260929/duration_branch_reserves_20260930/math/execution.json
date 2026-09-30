@@ -1,0 +1,14 @@
+{
+  "normal": {
+    "exit_code": 0,
+    "wall_seconds": 2.230393475
+  },
+  "optimized": {
+    "exit_code": 0,
+    "wall_seconds": 2.657925886
+  },
+  "semantic_equal": true,
+  "native_calls": 0,
+  "GCP_used": false,
+  "engine_modified": false
+}

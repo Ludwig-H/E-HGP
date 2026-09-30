@@ -62,3 +62,31 @@ La durée effectivement couverte récupère ces petits cas, mais feuilles
 seules/ancêtres/branches fantômes restent ouverts ; ne pas lancer un vaste
 port sur ce seul signal. L'attache à une composante réellement unique,
 avec marge et ascendance figée, reste un contrôle peu coûteux utile.
+
+## Complément : entrées internes et trois gardes peu coûteuses
+
+Notre [section 11](AUDIT_LAMINARITE_POINTS_20260929.md) corrige une réserve :
+à K2, chaque site distinct possède bien une incidence de feuille, par
+l'argument du diamètre vers un plus proche voisin. À K3 et K5, les nuages
+3D à six et sept sites prouvent en revanche une entrée frontière uniquement
+interne. Ajouter ces deux cas à la porte de conception ; conserver leurs
+incidences et la continuation des branches. La pondération par durée
+n'est pas réfutée, mais un univers limité aux feuilles serait incomplet K5.
+
+Le [complément R2](CONTRE_AUDIT_R2_20260930.md) ferme la réserve SiteTree
+pour sa nouvelle porte quatre arrondis et transmet trois actions simples :
+
+1. Au juge des grands dumps, passer K et les sites attendus ; refuser
+   les ordres manquants et points étrangers, même lorsque leurs nombres
+   et la structure interne sont cohérents. Vérifier les tailles annoncées.
+2. Au juge statistique, valider le schéma complet du préenregistrement,
+   notamment alpha fini dans son domaine, paramètres requis et méthodes
+   référencées ; ne pas laisser `--check-only` annoncer une config valide
+   qui finira ensuite en `KeyError`.
+3. Refuser les colonnes CSV dupliquées avant lecture. ARI1,25 sous un
+   en-tête unique est bien corrigé R2 ; la nouvelle faille vient d'un
+   schéma ambigu, pas d'une absence de garde sur le score lu.
+
+Ces défauts sont reproduits par fixtures courtes, pas par erreurs observées
+sur LiDAR ou par résultats A/C invalidés. Leur correction ne demande ni
+GCP ni grand chantier. Les reçus précédents restent clos et inchangés.

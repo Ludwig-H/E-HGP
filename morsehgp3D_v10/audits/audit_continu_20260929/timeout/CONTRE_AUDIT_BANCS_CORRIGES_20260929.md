@@ -1,5 +1,11 @@
 # Contre-audit courant des bancs corrigés
 
+**Mise à jour R2, 30 septembre : ARI 1,25 est maintenant refusé.** Les
+réserves actuelles concernent le schéma du préenregistrement et l'unicité
+des colonnes CSV ; elles sont détaillées dans le complément final.
+La reproduction ancienne ci-dessous reste vraie sur sa copie figée,
+pas sur la nouvelle source R2.
+
 29 septembre 2026, `cpu_reference`, hors registre, `public_status=not_claimed`.
 Les deux causes initiales sont traitées sur la copie : groupe de processus
 fermé au délai/signal, et décision refusée sur un plan incomplet. Un angle
@@ -96,3 +102,48 @@ Le checkout produit observé garde les scripts anciens ; intégration,
 épingle du prochain préenregistrement et régression du binaire combiné
 restent sous la responsabilité du développeur. Nos empreintes qualifient
 cette copie, pas un mélange des différentes copies corrigées.
+
+## Complément R2 — paramètres de décision et schéma CSV
+
+Le [nouveau paquet](../../../receipts/audit_continu_20260929/r2_rounding_bench_stream_20260930/bancs/README.md)
+fige trente fichiers source, leurs dates et hashes, puis exécute 44 appels
+courts : vingt-deux normal et vingt-deux `−O`, résultats sémantiques
+identiques. Quatre unités seulement, scores fabriqués ; aucun moteur,
+nuage, expérience de signal ou GCP lancé par ces appels.
+
+ARI 1,25 sous en-tête unique, NaN non refusé et mauvaise métadonnée de bruit
+sont maintenant refusés code 2. NaN sous `refused=1` reste intentionnellement
+substitué par zéro. Les champs que la décision n'utilise pas ne sont pas
+promus en nouvelles métriques validées. La fusion d'un lot corrompu peut
+écrire son enveloppe, mais le juge appliqué ensuite le refuse : pas de
+contournement observé du juge complet par cette fusion.
+
+Les nouveaux défauts sont précis et peu coûteux à corriger :
+
+- **Alpha hors domaine.** Avec les mêmes scores fabriqués, alpha=2 passe
+  `--check-only`, puis produit code 0 et « la tour bat HDBSCAN » avec
+  p corrigé=1/3. Alpha=NaN est également accepté. Le changement de SHA du
+  préenregistrement change la graine : les p-valeurs des deux appels ne
+  sont pas annoncées identiques. Le défaut est le seuil invalide accepté.
+- **Configuration incomplète.** Une paire visant une méthode non enregistrée
+  ou `bootstrap` absent passe le contrôle puis finit en `KeyError`, code 1,
+  plutôt qu'en refus propre. Des définitions de méthodes dupliquées passent
+  le contrôle du lot ; leur décision complète n'est pas testée ici.
+- **En-tête ambigu.** Deux colonnes `ari_s`, première à 1,25 et dernière
+  à 0,8, sont acceptées. `DictReader` garde la dernière et publie 0,8.
+  La garde de domaine fonctionne sur ce qu'elle lit ; c'est le schéma
+  ambigu qui doit être refusé avant lecture des lignes.
+
+Valider finitude/domaines, paramètres requis, nombres de tirages, unicité
+des noms et références de paires avant tout calcul statistique, y compris
+les familles secondaires. Refuser aussi les colonnes dupliquées. Les
+préenregistrements A/C actuels ont alpha=0,05 et des noms/paramètres
+cohérents : ces fixtures ne réfutent aucune de leurs décisions historiques.
+
+Les preuves de complétude observées distinguent le mutant N02 équivalent
+des cas isolants M09/M10/N03/N04 réellement tués. Les 120 essais POSIX locaux
+observés utilisent de vrais signaux et des binaires factices ; aucune tour
+ne reste vivante lors de leur contrôle. Les injections du second signal
+sont, elles, des simulations, bien que leurs enfants soient réellement
+lancés. Aucun de ces relevés n'est une nouvelle exécution G4 ou une
+comparaison de qualité HGP/HDBSCAN. Les preuves longues ne sont pas rejouées.

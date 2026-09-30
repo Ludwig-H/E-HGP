@@ -1,0 +1,52 @@
+{
+  "status": "CLOSED_SMALL_COUNTER_REVIEW",
+  "verifier_commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "/tmp/mhgp10-audit-duration-native-0930.uMzY5yHH/verify.py"
+      ],
+      "returncode": 0,
+      "stdout_file": "normal.json",
+      "stderr": "",
+      "wall_seconds": 8.326112684
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-audit-duration-native-0930.uMzY5yHH/verify.py"
+      ],
+      "returncode": 0,
+      "stdout_file": "optimized.json",
+      "stderr": "",
+      "wall_seconds": 8.592906709
+    }
+  ],
+  "normal_optimized_semantics_equal": true,
+  "native_executions": 2,
+  "native_execution_receipt": "native_calls.json",
+  "wrapper_compilations": 2,
+  "first_wrapper_compile_returncode": 0,
+  "first_wrapper_compile_stdout": "",
+  "first_wrapper_compile_stderr": "",
+  "first_wrapper_compile_wall_seconds": 2.074037155,
+  "closed_wrapper_compile_receipt": "closed_build.json",
+  "reproduced_binary_identical": true,
+  "engine_rebuilt": false,
+  "engine_modified": false,
+  "GCP_used": false,
+  "system_library_provenance": "historical archive pinned by SHA256; no current source qualification transferred",
+  "exact_judge_replay": "python3 -B verify.py ; python3 -B -O verify.py",
+  "published_verifier_never_executes_native_binary": true,
+  "included_header_snapshot_count": 12,
+  "native_stderr_authority": "native_calls.json stores actual stderr=\"\"; stray one-newline convenience files intentionally not published",
+  "publication_exclusions": [
+    "probe",
+    "probe_closed",
+    "k3.stderr.txt",
+    "k5.stderr.txt"
+  ]
+}

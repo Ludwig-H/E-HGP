@@ -1,0 +1,80 @@
+{
+ "mean_ari_s": {
+  "hdb": 0.1,
+  "tour": 0.8
+ },
+ "pairs": {
+  "tour_contre_hdb": {
+   "adversary": "hdb",
+   "by_family": {
+    "spherical": {
+     "ci": [
+      0.7000000000000001,
+      0.7000000000000001
+     ],
+     "delta": 0.7000000000000001,
+     "losses": 0,
+     "p": 0.3333333333333333,
+     "p_holm": 0.3333333333333333,
+     "scenes": 4,
+     "ties": 0,
+     "wins": 4
+    }
+   },
+   "by_size": {
+    "8000": {
+     "ci": [
+      0.7000000000000001,
+      0.7000000000000001
+     ],
+     "delta": 0.7000000000000001,
+     "losses": 0,
+     "p": 0.1111111111111111,
+     "scenes": 4,
+     "ties": 0,
+     "wins": 4
+    }
+   },
+   "ci": [
+    0.7000000000000001,
+    0.7000000000000001
+   ],
+   "delta": 0.7000000000000001,
+   "guard_ami": {
+    "ci": [
+     0.0,
+     0.0
+    ],
+    "delta": 0.0,
+    "losses": 0,
+    "p": 1.0,
+    "scenes": 4,
+    "ties": 4,
+    "wins": 0
+   },
+   "losses": 0,
+   "method": "tour",
+   "name": "tour_contre_hdb",
+   "p": 0.3333333333333333,
+   "p_holm": 0.3333333333333333,
+   "scenes": 4,
+   "ties": 0,
+   "verdict": "la tour bat HDBSCAN",
+   "wins": 4
+  }
+ },
+ "prereg": "prereg.json",
+ "prereg_sha256": "e170feebdd052205730d7cb496aebf1cb5ba1777ac239e0cf7ae779d2633dfed",
+ "refusals": {
+  "hdb": 0,
+  "tour": 0
+ },
+ "reported": {},
+ "scenes": 4,
+ "secondary": {},
+ "statement": [
+  "Banc v10 préenregistré AUDIT_BANCS_R2_ALPHA_AND_SCHEMA, 4 scènes de test, comparaison appariée K = min_samples. La tour bat HDBSCAN pour tour_contre_hdb, sans perte significative ailleurs.",
+  "- tour_contre_hdb (tour contre hdb) : la tour bat HDBSCAN ; Δ = +0,700 [+0,700 ; +0,700], p_Holm = 0,33, 4 victoires / 0 défaites / 0 égalités ; non-infériorité de la tour à la marge 0,02 établie.",
+  "Audit-only fabricated score fixture; no clustering or ground-truth benchmark was run."
+ ]
+}

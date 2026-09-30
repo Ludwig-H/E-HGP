@@ -1,0 +1,8 @@
+{
+  "exit_code": 0,
+  "wall_time_seconds": 3.539669463,
+  "source": "short_adverses.py",
+  "calls": 22,
+  "engine_calls": 0,
+  "GCP_used": false
+}

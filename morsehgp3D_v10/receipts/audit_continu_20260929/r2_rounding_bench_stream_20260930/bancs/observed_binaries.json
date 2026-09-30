@@ -1,0 +1,78 @@
+{
+  "observed_utc": "2026-09-30T04:29:59.273552+00:00",
+  "binaries": [
+    {
+      "origin": "/tmp/mhgp10-r2/bancs/build/libmhgp10_core.a",
+      "sha256": "1aaacd63dcb76413b61fc6eb983c52bdaa9a32f9a059a906af2254061beac5da",
+      "size": 503080,
+      "mtime_ns": "1790737953330552591",
+      "mtime_utc": "2026-09-30T03:12:33.330553+00:00",
+      "copied": false,
+      "used_by_our_short_probe": false
+    },
+    {
+      "origin": "/tmp/mhgp10-r2/bancs/build/mhgp10_catalogue",
+      "sha256": "a3bbad50b81b901c57cea7193bc48d58cce68126e44ae0a225ad678baa3af0cb",
+      "size": 214768,
+      "mtime_ns": "1790737955053552475",
+      "mtime_utc": "2026-09-30T03:12:35.053552+00:00",
+      "copied": false,
+      "used_by_our_short_probe": false
+    },
+    {
+      "origin": "/tmp/mhgp10-r2/bancs/build/mhgp10_tower",
+      "sha256": "a20776280ef4960d68f1b65ca7007b9e8a862809c57115b58486942856c22764",
+      "size": 421752,
+      "mtime_ns": "1790737955288552460",
+      "mtime_utc": "2026-09-30T03:12:35.288553+00:00",
+      "copied": false,
+      "used_by_our_short_probe": false
+    },
+    {
+      "origin": "/tmp/mhgp10-r2/bancs/build/mhgp10_cluster",
+      "sha256": "e00e2431f8c9daf7e90a429cb905f9c559d5a4699a376497aaf2e766f70def70",
+      "size": 449336,
+      "mtime_ns": "1790737955804552425",
+      "mtime_utc": "2026-09-30T03:12:35.804552+00:00",
+      "copied": false,
+      "used_by_our_short_probe": false
+    },
+    {
+      "origin": "/tmp/mhgp10-r2/bancs/build-r1/libmhgp10_core.a",
+      "sha256": "1aaacd63dcb76413b61fc6eb983c52bdaa9a32f9a059a906af2254061beac5da",
+      "size": 503080,
+      "mtime_ns": "1790737966410551714",
+      "mtime_utc": "2026-09-30T03:12:46.410552+00:00",
+      "copied": false,
+      "used_by_our_short_probe": false
+    },
+    {
+      "origin": "/tmp/mhgp10-r2/bancs/build-r1/mhgp10_catalogue",
+      "sha256": "a3bbad50b81b901c57cea7193bc48d58cce68126e44ae0a225ad678baa3af0cb",
+      "size": 214768,
+      "mtime_ns": "1790737968093551601",
+      "mtime_utc": "2026-09-30T03:12:48.093552+00:00",
+      "copied": false,
+      "used_by_our_short_probe": false
+    },
+    {
+      "origin": "/tmp/mhgp10-r2/bancs/build-r1/mhgp10_tower",
+      "sha256": "a20776280ef4960d68f1b65ca7007b9e8a862809c57115b58486942856c22764",
+      "size": 421752,
+      "mtime_ns": "1790737968377551582",
+      "mtime_utc": "2026-09-30T03:12:48.377552+00:00",
+      "copied": false,
+      "used_by_our_short_probe": false
+    },
+    {
+      "origin": "/tmp/mhgp10-r2/bancs/build-r1/mhgp10_cluster",
+      "sha256": "e00e2431f8c9daf7e90a429cb905f9c559d5a4699a376497aaf2e766f70def70",
+      "size": 449336,
+      "mtime_ns": "1790737968870551549",
+      "mtime_utc": "2026-09-30T03:12:48.870552+00:00",
+      "copied": false,
+      "used_by_our_short_probe": false
+    }
+  ],
+  "used_by_own_probe": false
+}

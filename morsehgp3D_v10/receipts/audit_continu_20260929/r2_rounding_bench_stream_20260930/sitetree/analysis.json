@@ -1,0 +1,44 @@
+{
+  "observation": "2026-09-30; read-only review of SiteTree R2 only",
+  "finding": "The previous rounding-floor reservation is closed for the present SiteTree gate and contract, not for whole FULL pipeline FENV.",
+  "gate_scope": {
+    "per_mode_queries": 5969,
+    "rounding_modes": [
+      "FE_TONEAREST",
+      "FE_UPWARD",
+      "FE_DOWNWARD",
+      "FE_TOWARDZERO"
+    ],
+    "nearest_filtered": 3998,
+    "nearest_exact_fallback": 1971,
+    "directed_filtered": 0,
+    "directed_exact_fallback": 5969,
+    "directed_in_domain_rounding_fallback": 3998,
+    "bounds_filter_only": 30,
+    "built_upward_queries": 40,
+    "different_thread_rounding_cases": 20,
+    "G1_shell_size": 4
+  },
+  "proof_review": [
+    "fegetround is read at each filtered call in the calling thread; no forced rounding mode",
+    "Geometric/adverse floors differentiated before new gate; adverses 505/259/271/265 retained as historical diagnostics",
+    "30 extreme D/N/anchor cases call filtered only; fabricated nonrepresentable requests are not passed to side_key",
+    "Legitimate q2/q3/q4 and representable fabricated anchors are tested by exact wide-integer brute force",
+    "D <= 2^82, anchor u18, |N| <= 2^100 precede products; |D*a+N| < 2^101 so no i128 guard overflow",
+    "The source gate hash changed from 03c6e3b7 to 5b6629dd only by comment reflow (git diff edbdfaa e18d644 inspected)",
+    "Existing complete CTest log read: 11/11, ctest_rc=0, real1201.03s; not rerun by reviewer"
+  ],
+  "remaining_scope_limits": [
+    "filtered=false is an exact-fallback decision, not a public request refusal",
+    "caller must ensure side_key representations fit i128 and borrowed Cloud stays alive/immutable",
+    "exact fallback nearest costs O(n*count), count<=64; closed_ball fallback O(n)",
+    "filtered nearest may collect Theta(n) candidates and sort O(n log n); filtered closed_ball sorts output",
+    "No subquadratic bound for total query generation, census or whole pipeline follows",
+    "No FTZ/DAZ gate found or replayed here",
+    "MXCSR-only rounding change outside cfenv is explicitly excluded by header contract",
+    "Other tower floating filters are not qualified under directed modes by this gate",
+    "No G4 or GPU qualification; GCP0",
+    "Auditor replay is existing binary only; no engine compilation"
+  ],
+  "packet_role": "Closed archive of observations and source snapshots. Live replay still requires the pinned binary/library outside this packet."
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "argv": [
+      "/tmp/mhgp10-audit-duration-native-0930.uMzY5yHH/probe",
+      "/tmp/mhgp10-audit-duration-native-0930.uMzY5yHH/k3.txt",
+      "3",
+      "1",
+      "1"
+    ],
+    "returncode": 0,
+    "stderr": "",
+    "wall_seconds": 0.005294445999425079
+  },
+  {
+    "argv": [
+      "/tmp/mhgp10-audit-duration-native-0930.uMzY5yHH/probe",
+      "/tmp/mhgp10-audit-duration-native-0930.uMzY5yHH/k5.txt",
+      "5",
+      "1",
+      "1"
+    ],
+    "returncode": 0,
+    "stderr": "",
+    "wall_seconds": 0.003924921000361792
+  }
+]

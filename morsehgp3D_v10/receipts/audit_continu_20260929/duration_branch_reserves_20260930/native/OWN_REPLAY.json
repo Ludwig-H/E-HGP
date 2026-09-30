@@ -1,0 +1,232 @@
+{
+  "date": "2026-09-30",
+  "argv": [
+    "python3",
+    "-B",
+    "verify.py"
+  ],
+  "cwd_historical": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/duration_branch_reserves_20260930/native",
+  "exit_code": 0,
+  "additional_native_calls": 0,
+  "result": {
+    "status": "DURATION_NATIVE_COUNTER_REVIEW_PASS",
+    "optimized": 0,
+    "native_calls_in_this_verifier": 0,
+    "native_exports_consumed": 2,
+    "GCP_used": false,
+    "engine_modified": false,
+    "counts": {
+      "scenes": 2,
+      "k1_site_table_orders": 2,
+      "cuts_checked": 414,
+      "point_component_lists": 2814,
+      "multi_component_lists": 360,
+      "ball_resolution_checks": 2790,
+      "resolution_after_own_radius": 2682,
+      "deep_balls_p_ge_k": 292,
+      "interior_q3_q4_checks": 676,
+      "first_point_checks": 40
+    },
+    "details": [
+      {
+        "case": "k3",
+        "k": 3,
+        "sites": 6,
+        "x_coordinate": [
+          15,
+          4,
+          0
+        ],
+        "x_native_morton_index": 4,
+        "strong_balls": 5,
+        "strong_catalogue_complete_against_Fraction": true,
+        "strong_ball_ancestor_tests": 12,
+        "strong_covering_ball": {
+          "index": 13,
+          "beta": "25",
+          "q_min": 2,
+          "p": 0,
+          "shell_points": [
+            [
+              7,
+              0,
+              0
+            ],
+            [
+              5,
+              4,
+              0
+            ],
+            [
+              15,
+              4,
+              0
+            ],
+            [
+              7,
+              8,
+              0
+            ]
+          ],
+          "internal_ball_node": 5,
+          "internal_node_birth": "169/9"
+        },
+        "leaf_lifetimes": [
+          {
+            "node": 0,
+            "birth": "13/2",
+            "death": "33/2",
+            "ever_covers_x": false
+          },
+          {
+            "node": 1,
+            "birth": "13",
+            "death": "33/2",
+            "ever_covers_x": false
+          },
+          {
+            "node": 2,
+            "birth": "13",
+            "death": "33/2",
+            "ever_covers_x": false
+          },
+          {
+            "node": 3,
+            "birth": "16",
+            "death": "169/9",
+            "ever_covers_x": false
+          }
+        ],
+        "all_strong_balls_times_ancestors_leaf_x_count": 0
+      },
+      {
+        "case": "k5",
+        "k": 5,
+        "sites": 7,
+        "x_coordinate": [
+          325,
+          325,
+          650
+        ],
+        "x_native_morton_index": 6,
+        "strong_balls": 4,
+        "strong_catalogue_complete_against_Fraction": true,
+        "strong_ball_ancestor_tests": 7,
+        "strong_covering_ball": {
+          "index": 38,
+          "beta": "105625",
+          "q_min": 3,
+          "p": 0,
+          "shell_points": [
+            [
+              250,
+              225,
+              25
+            ],
+            [
+              325,
+              130,
+              65
+            ],
+            [
+              200,
+              325,
+              25
+            ],
+            [
+              325,
+              416,
+              13
+            ],
+            [
+              442,
+              481,
+              65
+            ],
+            [
+              520,
+              325,
+              65
+            ],
+            [
+              325,
+              325,
+              650
+            ]
+          ],
+          "internal_ball_node": 3,
+          "internal_node_birth": "116715625/3409"
+        },
+        "leaf_lifetimes": [
+          {
+            "node": 0,
+            "birth": "6865625/261",
+            "death": "116715625/3409",
+            "ever_covers_x": false
+          },
+          {
+            "node": 1,
+            "birth": "1795625/66",
+            "death": "116715625/3409",
+            "ever_covers_x": false
+          },
+          {
+            "node": 2,
+            "birth": "68445/2",
+            "death": "116715625/3409",
+            "ever_covers_x": false
+          }
+        ],
+        "all_strong_balls_times_ancestors_leaf_x_count": 0
+      }
+    ],
+    "source_hashes_before": {
+      "verify.py": "2188f0523241b6e724e11d82d3b50ecff78ecff1c6c0f3655d2c34047c2f0dc5",
+      "check_reserves.py": "df1569e5d625f41f0ebadf438e2279971af320b20a21121532d6be1b464e3f29",
+      "frozen_reference.py": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104",
+      "check_native_geometry.py": "8e64fc679183b4b3626903352703e501fcd9efb6d82e85f7993f5bf5bc917783",
+      "k3.txt": "5cec62e030966c101d8dd17d34989d4040fd45fb93c1c8719be837418fd1bd24",
+      "k5.txt": "8483dded291bf98a0b4b12055a31c9b2586e8f03e10a4b3143c44f26d8f46a26",
+      "k3.stdout.json": "145aea6b17af04e6c0e893d8ead5e2578fefbf88020a212de016a5297ba3dff1",
+      "k5.stdout.json": "b02b6a204b6bfb1dc86f977384d8d928d3bc66bb2a73d70850b387dbde929dc4"
+    },
+    "source_hashes_after": {
+      "verify.py": "2188f0523241b6e724e11d82d3b50ecff78ecff1c6c0f3655d2c34047c2f0dc5",
+      "check_reserves.py": "df1569e5d625f41f0ebadf438e2279971af320b20a21121532d6be1b464e3f29",
+      "frozen_reference.py": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104",
+      "check_native_geometry.py": "8e64fc679183b4b3626903352703e501fcd9efb6d82e85f7993f5bf5bc917783",
+      "k3.txt": "5cec62e030966c101d8dd17d34989d4040fd45fb93c1c8719be837418fd1bd24",
+      "k5.txt": "8483dded291bf98a0b4b12055a31c9b2586e8f03e10a4b3143c44f26d8f46a26",
+      "k3.stdout.json": "145aea6b17af04e6c0e893d8ead5e2578fefbf88020a212de016a5297ba3dff1",
+      "k5.stdout.json": "b02b6a204b6bfb1dc86f977384d8d928d3bc66bb2a73d70850b387dbde929dc4"
+    },
+    "fraction_replay": {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/duration_branch_reserves_20260930/native/check_reserves.py",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/duration_branch_reserves_20260930/native/frozen_reference.py"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "status": "DURATIONLEAF_RESERVES_GEOMETRICALLY_RESOLVED",
+      "semantic_sha256": "dfdf70c06712b43050c371e3349a643181eb72dea51cef6cdec5373c67f43b74",
+      "semantic_matches_original": true,
+      "nearest_K2_point_controls": 18,
+      "ghost_scales": [
+        64,
+        128,
+        256
+      ],
+      "hashes_before": {
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/duration_branch_reserves_20260930/native/check_reserves.py": "df1569e5d625f41f0ebadf438e2279971af320b20a21121532d6be1b464e3f29",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/duration_branch_reserves_20260930/native/frozen_reference.py": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104"
+      },
+      "hashes_after": {
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/duration_branch_reserves_20260930/native/check_reserves.py": "df1569e5d625f41f0ebadf438e2279971af320b20a21121532d6be1b464e3f29",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/duration_branch_reserves_20260930/native/frozen_reference.py": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104"
+      }
+    },
+    "wall_seconds": 7.167359963999843
+  }
+}

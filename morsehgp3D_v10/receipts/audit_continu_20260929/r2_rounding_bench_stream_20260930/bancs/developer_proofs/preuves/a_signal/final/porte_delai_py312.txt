@@ -1,0 +1,17 @@
+delai_enfant_et_petit_enfant       ok  code=-9 retour=3.04s pids=[240189, 240197] survivants=[] fichiers_temps=[]
+signal_hors_appel_apres_delai      ok  exception=Terminated(<Signals.SIGTERM: 15>) (un signal differe ici serait perdu si aucun appel ne suit)
+signal_pendant_le_lancement        ok  exception=Terminated(<Signals.SIGTERM: 15>) groupe_ferme=True survivants=[]
+appel_normal_json_natif            ok  code=0 balls=7 stdout_natif=True mesures=True
+second_signal_pendant_appel        ok  exception=Terminated(<Signals.SIGTERM: 15>) attendue=Terminated injection=1 pids=[240784, 240845] survivants=[] fichiers_temps=[] report_leve=True
+second_signal_apres_delai          ok  exception=Terminated(<Signals.SIGTERM: 15>) attendue=Terminated injection=1 pids=[240849, 240854] survivants=[] fichiers_temps=[] report_leve=True
+second_signal_apres_exception      ok  exception=OSError('echec simule de communicate') attendue=OSError injection=1 pids=[240867, 240869] survivants=[] fichiers_temps=[] report_leve=True
+balayage_lignes_delai              ok  temoin=True lignes=27 clauses_except_couvertes=[(166, 168)] echecs=0 
+balayage_lignes_signal             ok  temoin=True lignes=24 clauses_except_couvertes=[(169, 177), (166, 168)] echecs=0 
+close_group_vrai_signal_differe    ok  exception=Terminated(15) injection=1 pids=[243103, 243104] survivants=[] groupe_ferme=True
+run_ligne_ok_appels_natifs         ok  code=0 statut=ok appels=['catalogue', 'tower'] 
+run_compteurs_de_boules_egaux      ok  code=3 statut=balls_mismatch appels=2 
+run_delai_tour_tuee                ok  code=0 statut=tower_timeout pids=[243141] survivants=[] duree=3.44s 
+run_sigterm_appel_tue              ok  code=143 pids=[243748] survivants=[] INTERROMPU par le signal 15 : appel en cours tue et recolte
+run_sigint_appel_tue               ok  code=130 pids=[243761] survivants=[] INTERROMPU par le signal 2 : appel en cours tue et recolte
+scale_run_timeout_ok
+code=0 duree=25s

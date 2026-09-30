@@ -1,0 +1,80 @@
+{
+ "mean_ari_s": {
+  "hdb": 0.1,
+  "tour": 0.0
+ },
+ "pairs": {
+  "tour_contre_hdb": {
+   "adversary": "hdb",
+   "by_family": {
+    "spherical": {
+     "ci": [
+      -0.10000000000000002,
+      -0.10000000000000002
+     ],
+     "delta": -0.1,
+     "losses": 4,
+     "p": 0.1111111111111111,
+     "p_holm": 0.1111111111111111,
+     "scenes": 4,
+     "ties": 0,
+     "wins": 0
+    }
+   },
+   "by_size": {
+    "8000": {
+     "ci": [
+      -0.10000000000000002,
+      -0.10000000000000002
+     ],
+     "delta": -0.1,
+     "losses": 4,
+     "p": 0.1111111111111111,
+     "scenes": 4,
+     "ties": 0,
+     "wins": 0
+    }
+   },
+   "ci": [
+    -0.10000000000000002,
+    -0.10000000000000002
+   ],
+   "delta": -0.1,
+   "guard_ami": {
+    "ci": [
+     -0.5,
+     -0.5
+    ],
+    "delta": -0.5,
+    "losses": 4,
+    "p": 0.1111111111111111,
+    "scenes": 4,
+    "ties": 0,
+    "wins": 0
+   },
+   "losses": 4,
+   "method": "tour",
+   "name": "tour_contre_hdb",
+   "p": 0.1111111111111111,
+   "p_holm": 0.1111111111111111,
+   "scenes": 4,
+   "ties": 0,
+   "verdict": "pas de différence significative",
+   "wins": 0
+  }
+ },
+ "prereg": "prereg.json",
+ "prereg_sha256": "8ab76a2a6397bbd45fa98ec19fdf2f6d4ad5cc20757b470de3dafbbe8d264bc1",
+ "refusals": {
+  "hdb": 0,
+  "tour": 4
+ },
+ "reported": {},
+ "scenes": 4,
+ "secondary": {},
+ "statement": [
+  "Banc v10 préenregistré AUDIT_BANCS_R2_ALPHA_AND_SCHEMA, 4 scènes de test, comparaison appariée K = min_samples. Aucune revendication de supériorité : pas de différence significative au sens préenregistré.",
+  "- tour_contre_hdb (tour contre hdb) : pas de différence significative ; Δ = -0,100 [-0,100 ; -0,100], p_Holm = 0,11, 0 victoires / 4 défaites / 0 égalités ; non-infériorité de la tour non établie.",
+  "Audit-only fabricated score fixture; no clustering or ground-truth benchmark was run."
+ ]
+}

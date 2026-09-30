@@ -1,0 +1,172 @@
+{
+  "date": "2026-09-30",
+  "status": "SHORT_COUNTERAUDIT_R2_DECISION_SCHEMA",
+  "public_status": "not_claimed",
+  "origin": "/tmp/mhgp10-r2/bancs",
+  "capture_directory_historical": "/tmp/mhgp10-audit-bancs-r2-20260930.q7virKbe",
+  "own_calls_normal": 22,
+  "own_calls_optimized": 22,
+  "total_own_calls": 44,
+  "normal_collector_exit_code": 0,
+  "optimized_collector_exit_code": 0,
+  "normal_seconds": 3.642327554,
+  "optimized_seconds": 3.539669463,
+  "semantic_modes_equal": true,
+  "scores_are_fabricated": true,
+  "units": 4,
+  "fixture_plan": {
+    "source": "plan_specs in frozen decide.py",
+    "independent_plan_oracle_claimed": false,
+    "sites_field": 8000,
+    "families": [
+      "spherical"
+    ],
+    "levels": [
+      "easy"
+    ],
+    "noise": 0,
+    "replicates": 4
+  },
+  "native_engine_calls": 0,
+  "scene_generator_calls": 0,
+  "new_signal_experiments": 0,
+  "processes_stopped": 0,
+  "GCP_used": false,
+  "GPU_used": false,
+  "developer_manifest_check": {
+    "argv": [
+      "sha256sum",
+      "--check",
+      "--quiet",
+      "SHA256SUMS"
+    ],
+    "cwd": "/tmp/mhgp10-r2/bancs",
+    "exit_code": 0,
+    "output": ""
+  },
+  "sources_copied_match_origins": true,
+  "source_hashes_before_after_unchanged": true,
+  "new_findings": [
+    {
+      "name": "decision_alpha_domain",
+      "case": "alpha_two",
+      "check_only_code": 0,
+      "full_code": 0,
+      "alpha": 2,
+      "p_holm": 0.3333333333333333,
+      "published_verdict": "la tour bat HDBSCAN",
+      "scope": "malformed preregistration; not existing A/C registration",
+      "seed_changes_with_prereg_sha": true
+    },
+    {
+      "name": "nonfinite_decision_alpha",
+      "case": "alpha_nan",
+      "check_only_code": 0,
+      "full_code": 0,
+      "published_verdict": "pas de différence significative",
+      "scope": "NaN decision parameter, not score row"
+    },
+    {
+      "name": "missing_or_unknown_decision_configuration",
+      "cases": [
+        "missing_pair_method",
+        "missing_bootstrap"
+      ],
+      "check_only_codes": [
+        0,
+        0
+      ],
+      "full_codes": [
+        1,
+        1
+      ],
+      "exceptions": [
+        "KeyError not_registered",
+        "KeyError bootstrap"
+      ],
+      "decision_written": false
+    },
+    {
+      "name": "duplicate_method_definitions",
+      "case": "duplicate_method_definition",
+      "check_only_code": 0,
+      "full_decision_not_tested": true
+    },
+    {
+      "name": "duplicate_CSV_score_column",
+      "case": "duplicate_ari_header",
+      "check_only_code": 0,
+      "full_code": 0,
+      "first_ari_s": 1.25,
+      "last_ari_s": 0.8,
+      "published_mean_ari_s": 0.8,
+      "scope": "ambiguous schema accepted; parser keeps last value"
+    }
+  ],
+  "corrected_controls": {
+    "ari_125_nonrefused": 2,
+    "nan_nonrefused": 2,
+    "wrong_noise_metadata": 2
+  },
+  "intentional_behavior": {
+    "refused_nan": {
+      "check_only_code": 0,
+      "full_code": 0,
+      "substitution": 0,
+      "finite_decision": true
+    },
+    "unused_metrics_invalid": {
+      "check_only_code": 0,
+      "full_code": 0,
+      "fields": [
+        "ari_nc",
+        "coverage",
+        "clusters"
+      ],
+      "ignored_by_current_decision_contract": true
+    },
+    "fusion_poison": {
+      "merge_code": 0,
+      "structural_complete": true,
+      "downstream_check_code": 2,
+      "numerical_qualification": false
+    }
+  },
+  "developer_signal_subset": [
+    {
+      "file": "developer_proofs/preuves/g_vrais_signaux/python3.10_final_groupe.jsonl",
+      "trials": 60,
+      "tower_marker_present": 60,
+      "tower_survived": 0,
+      "exit_codes": [
+        -15
+      ],
+      "real_posix_signal": true,
+      "fake_native_binaries": true
+    },
+    {
+      "file": "developer_proofs/preuves/g_vrais_signaux/python3_final_groupe.jsonl",
+      "trials": 60,
+      "tower_marker_present": 60,
+      "tower_survived": 0,
+      "exit_codes": [
+        -15
+      ],
+      "real_posix_signal": true,
+      "fake_native_binaries": true
+    }
+  ],
+  "developer_signal_simulation": {
+    "second_signal_simulated": true,
+    "real_children_launched": true,
+    "not_a_new_POSIX_signal_measurement": true
+  },
+  "limitations": [
+    "No complete re-execution of developer mutant or signal campaigns.",
+    "No native binary or actual clustering benchmark ran in our probes.",
+    "Scores are fabricated; these are judge robustness tests, not quality measures against ground truth.",
+    "SHA pins the preregistration but does not validate its parameter schema.",
+    "The two published A/C preregistrations have valid finite parameters and unique registered names; their conclusions are not invalidated by these malformed-fixture cases.",
+    "Alpha changes the preregistration SHA and hence the random seed; the raw p-values differ across those cases."
+  ]
+}

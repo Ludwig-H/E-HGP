@@ -1,0 +1,17 @@
+{
+ "complete": true,
+ "computed": 4,
+ "plan_sha256": "cdaf9f82e8a45e8cb70d08c576a7bbbe3cc83137a92e9c307aeb91f71b0858be",
+ "prereg": "prereg.json",
+ "prereg_sha256": "8ab76a2a6397bbd45fa98ec19fdf2f6d4ad5cc20757b470de3dafbbe8d264bc1",
+ "scenes": 4,
+ "segments": [
+  {
+   "complete": true,
+   "computed": 4,
+   "plan_sha256": "cdaf9f82e8a45e8cb70d08c576a7bbbe3cc83137a92e9c307aeb91f71b0858be",
+   "prereg_sha256": "8ab76a2a6397bbd45fa98ec19fdf2f6d4ad5cc20757b470de3dafbbe8d264bc1",
+   "scenes": 4
+  }
+ ]
+}

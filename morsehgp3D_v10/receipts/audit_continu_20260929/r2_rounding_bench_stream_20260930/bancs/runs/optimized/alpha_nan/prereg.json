@@ -1,0 +1,43 @@
+{
+  "id": "AUDIT_BANCS_R2_ALPHA_AND_SCHEMA",
+  "attribution_statement": "Audit-only fabricated score fixture; no clustering or ground-truth benchmark was run.",
+  "plan": {
+    "split": "dev",
+    "families": [
+      "spherical"
+    ],
+    "levels": [
+      "easy"
+    ],
+    "sizes": [
+      8000
+    ],
+    "noises": [
+      0.0
+    ],
+    "replicates": 4,
+    "manifest_sha256": "cdaf9f82e8a45e8cb70d08c576a7bbbe3cc83137a92e9c307aeb91f71b0858be"
+  },
+  "methods": [
+    {
+      "name": "tour"
+    },
+    {
+      "name": "hdb"
+    }
+  ],
+  "decision": {
+    "alpha": NaN,
+    "delta_min": 0.02,
+    "permutations": 8,
+    "bootstrap": 8,
+    "refusal_cap": 0.01,
+    "pairs": [
+      {
+        "name": "tour_contre_hdb",
+        "method": "tour",
+        "adversary": "hdb"
+      }
+    ]
+  }
+}
