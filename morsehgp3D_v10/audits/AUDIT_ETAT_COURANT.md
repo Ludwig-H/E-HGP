@@ -1,7 +1,7 @@
 # Audits v10 — état courant
 
-Mise à jour : 30 septembre 2026, 20 h UTC : bancs intégrés, relecture
-des erreurs workers, palier B21 privé et domaine des paramètres MMt.
+Mise à jour : 30 septembre 2026, 20 h 40 UTC : réponses au développeur,
+couvertures complètes, bord de bande dure et portée des conclusions statistiques.
 Les sources publiées du moteur restent inchangées
 dans cette tranche ; le développeur travaille désormais dans une copie
 isolée d'intégration, distincte du worktree partagé. Les parties I
@@ -10,6 +10,38 @@ Index vivant de l'auditeur continu ; les rapports datés restent des preuves
 ancrées à leur version, pas des statuts courants. `public_status=not_claimed`.
 État du produit : [PASSATION](../PASSATION.md). Corrections de portée des
 mesures : [ERRATA](../receipts/ERRATA.md). Ne pas réécrire les reçus clos.
+
+**Nouveau verrou confirmé pour la tête :** une bande dure reste discontinue
+même sur l'univers des paires, sans disparition de vote du catalogue.
+Le [témoin à cinq sites](../receipts/audit_continu_20260929/hard_band_border_20260930/README.md)
+à K2/η1/4 fait sauter une hauteur de réunion de55 à105 lorsqu'un
+seul site franchit infinitésimalement le bord de bande. Version
+entière u18 : déplacement de deux unités, réunion56320→107520.
+Fonction réelle extraite AST, deux constructions géométriques exactes indépendantes,
+24 cas et1274 comparaisons normal/−O ; deux mutants causaux rejetés.
+Lecteur avec SHA externe, inventaire fermé et intégrité après rejeu.
+Pas de résolveur natif, MMt, EOM ou G4 dans ce lot. Garder la bande
+dure comme contrôle statistique ; ne pas lui attribuer la continuité
+des variantes à poids souples et marge continue.
+
+**Voie constructive pour MMt :** le
+[raccord des couvertures](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#construire-les-couvertures-sans-développer-γ)
+utilise le lemme catalogue complet déjà éprouvé, puis propriétaires
+vivants, déduplication par point/nœud et antichaîne des seeds. Pour les
+boules fortes, D≤(K−2)M+Σ|U| ; D=KM si coquille=support minimal.
+Le CSR existe déjà ; un chemin comptage/préfixes/radix peut être linéaire
+dans ce payload, après sélection, index Euler et calcul des propriétaires.
+Preuve mathématique recoupée, pas port ni nouveau benchmark natif.
+Ne pas confondre cette réduction avec les votes des K-parties : leurs
+comptes ne sont pas conservés. Les coquilles étendues et M restent payés.
+
+**Statistiques :** erreur inconditionnelle, précision des seuls points
+affectés et rappel avant fusion ne s'impliquent pas. Attendre la racine
+est admissible mais a un rappel pré-fusion nul. La
+[contre-relecture](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#ce-que-les-résultats-statistiques-autorisent)
+précise aussi les régimes K fixé/K croissant, les sites/retours pondérés,
+la portée des88 nuages et des coupes gaussiennes. Aucun score MMt/EOM
+ni avantage HDBSCAN n'est acquis par ces nouveaux contrôles.
 
 **À corriger dans les bancs désormais committés privés :** la garde des dossiers de
 fusion ne protège pas les fichiers liés aux entrées. Le
@@ -116,7 +148,11 @@ l'annulation saturante, de la durée de vie des callbacks et de la relance
 après sortie des workers. Petite sonde pool-only : compilation stricte et
 trois répétitions correctes, sans nouveau test HGP ni sanitizer. Les pins
 de l'index et du worktree sont séparés : `make_pool` et sa traduction
-`session_overhead`, encore en évolution, ne sont pas qualifiés par ce lot.
+`session_overhead` ont maintenant une relecture favorable distincte :
+deux exceptions prévues converties, quatre points d'entrée avant ouverture
+de sortie ; pas avant la préparation de l'index mreach. Le test RLIMIT
+suppose Linux/glibc et piles8Mio, limite virtuelle1Gio, non RSS. Aucun
+nouveau test natif de ces voies par cet audit.
 Réserve secondaire préexistante : Pool(1) ne marque pas sa région ; aucun
 sous-Pool du moteur observé. Ni union des sept groupes ni condensation
 corrigée acquises. Aucun test GCP lancé par cet audit.
@@ -129,7 +165,11 @@ aveugle. Notre [relecture rationnelle figée](../receipts/audit_continu_20260929
 recoupe les majorants et précise une dette documentaire : seuil flottant
 arrondi omis dans la preuve grossière ; borne conjointe au même centre et
 borne du rayon d'une MEB ferment la preuve plus fine. Deux rejeux Python
-normal/−O, aucun appel natif. Ne pas transformer les journaux privés
+normal/−O, aucun appel natif. Le nouveau ledger privé
+`10d8f386…` explicite la borne conjointe ; préciser encore r2a≥m dans
+l'affirmation d'exactitude du seuil dyadique (contre-exemple2^-100+m).
+Le snapshot publié reste immutable et le moteur5dd83b5c reste distinct
+de R2. Ne pas transformer les journaux privés
 20/20 gates et 27/27 mutations en qualification CLI, u24/u32 ou G4.
 
 **Plateaux de tête :** les événements de même rang doivent être traités

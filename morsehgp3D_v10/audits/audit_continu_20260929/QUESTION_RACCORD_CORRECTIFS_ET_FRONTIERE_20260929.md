@@ -1,6 +1,6 @@
 # Au développeur ancrage frontière et corrections du raccord
 
-## Raccord courant et quatre décisions utiles, 30 septembre, 20 h UTC
+## Raccord courant et quatre décisions utiles, 30 septembre, 20 h 35 UTC
 
 Les réponses Q1/Q2/Q3 ci-dessous restent applicables. Complément pratique :
 
@@ -45,7 +45,15 @@ Pool préparé : pas de nouvel UAF/course identifié par les deux relectures.
 durée de vie du Job et du callback avant relance. Catalogue/tour détruisent
 leurs objets partiels avant `memory_budget`. Petite sonde pool-only,
 trois répétitions, pas qualification HGP/sanitizer. Les nouveaux ajouts
-`make_pool` du worktree restent distincts de l'index audité. Pool(1) ne
+`make_pool` du worktree restent distincts de l'index audité. La lecture
+supplémentaire de la factory confirme les deux conversions
+`system_error`/`bad_alloc` vers `resource_exhausted/session_overhead` et
+les quatre points d'entrée, sans ouverture de sortie avant refus. Le
+témoin mreach a toutefois déjà construit son index : dire « avant calcul
+HGP/MR », pas « avant toute préparation ». Le test RLIMIT suppose Linux,
+glibc et des piles de 8 Mio ; sa limite de 1 Gio est virtuelle, non RSS.
+Pas de nouveau test natif ou de limite réelle lancé par cette relecture.
+Pool(1) ne
 marque pas sa région, réserve de contrat préexistante hors chemin moteur
 observé, pas un blocage du correctif multithread.
 
@@ -61,7 +69,145 @@ décalage s'annule dans la différence des distances ; entre MEB, le
 rayon carré est≤3L²/4. Ces bornes plus fines ferment la marge, arrondi
 inclus, et doivent rejoindre les commentaires. Ne pas augmenter la marge
 sur le seul échec d'une majoration trop grossière. CLI fine, raccord R2,
-u24/u32 et nouvelle qualification G4 restent ouverts.
+u24/u32 et nouvelle qualification G4 restent ouverts. Le ledger privé
+`10d8f386…` ajoute désormais la distinction des décisions ; le snapshot
+publié `6adf2721…` reste inchangé. Une dernière précision de preuve est
+nécessaire : l'exactitude de `r2a−m`, et l'affirmation « addition inexacte
+seulement au franchissement de binade », supposent ici `r2a≥m`. Par
+exemple `r2a=2^-100`, `m=5/128` donne `fl(r2a+m)=m`, inexact sans
+franchissement. Si `r2a<m`, un seuil intérieur négatif ne peut accepter
+une distance non négative ; cela ne démontre aucun défaut du filtre.
+
+## Construire les couvertures sans développer Γ
+
+Le lemme de couverture déjà publié ferme l'obligation géométrique pour
+les sites distincts, 2≤K≤n fixé. Les seeds nécessaires sont toutes les
+incidences I∪U des boules de population≥K et p+q_min≤K, avec
+`cover_extra=0` et le centre résolu vers sa composante **vivante au
+niveau propre**. Ce n'est pas la liste des premières boules par point.
+Les fusions p+q_min=K+1 restent dans FULL ; les retirer pour fabriquer
+les seeds amputerait l'arbre.
+
+Après quotient des plateaux, on peut garder seulement le plus petit
+niveau pour chaque couple (point, propriétaire). Une seed d'ancêtre est
+aussi redondante si une seed de descendant couvre déjà ce point avant
+la naissance de cet ancêtre. Preuve : la couverture du descendant se
+prolonge au parent dès sa naissance, puis à tous ses ancêtres ; elle
+implique donc toute couverture apportée plus tard par cette seed. Cette
+déduplication conserve la relation de couverture, **pas les nombres de
+votes de K-parties ou de paires**. `witness_universe` du snapshot des
+masses contrôle explicitement que `ball_node` est vivant ; sous cette
+condition, la formule du lemme2 des masses est cohérente, sans oubli de
+la mort d'une branche.
+
+Une borne utile, sans hypothèse de régime : pour K≥2 non pondéré, un
+support positif a q_min≥2, donc chaque boule forte a p≤K−2. En notant
+M le nombre de ces boules et U_tot la somme des tailles de leurs
+coquilles, le volume D des seeds vérifie `D≤(K−2)M+U_tot`. Si chaque
+coquille est exactement son support minimal, population=K et `D=KM`.
+Il faut publier séparément les coquilles étendues ; leur taille n'est
+pas bornée par K. Les objets K1 et les multiplicités restent distincts.
+
+Conséquence d'architecture : le catalogue stocke déjà I/U en CSR. Après
+sélection des boules fortes par scan du catalogue, deux passes de
+comptage/préfixes puis écriture permettent de construire les
+incidences par point en O(n+M+D), sans requête géométrique supplémentaire,
+une fois la table des propriétaires disponible. Son calcul reste payé.
+Puis arbre virtuel et télescopage évitent le produit points×profondeur.
+Cette borne est relative au catalogue matérialisé ; elle ne prouve ni
+M sous-quadratique, ni les coquilles petites, ni le contrat LiDAR/G4.
+
+La suppression des seeds ancestrales n'exige pas de remontée individuelle.
+Après déduplication du couple, trier les propriétaires d'un point par
+entrée DFS : un propriétaire possède une seed descendante si et seulement
+si le suivant entre avant sa sortie DFS. On conserve ainsi une antichaîne
+de propriétaires, avec leurs dates originales ; un nœud interne sans
+descendant seed reste indispensable. Pour IDs/rangs à largeur fixe,
+comptage et tri radix donnent un chemin O(n+M+D), après la sélection,
+l'index Euler et la table des propriétaires. Un tri comparatif ajouterait
+D log D. Scratch et préparation globale restent publiés, non gratuits.
+
+## Ce que les résultats statistiques autorisent
+
+La proportion d'erreurs, le rappel des points avant fusion et la
+consistance de l'arbre sont trois propriétés différentes. L'admissibilité
+géométrique seule ne donne pas le rappel : une règle qui attend toujours
+la racine est admissible et laminaire, mais ne récupère aucun amas avant
+fusion. L'argument du mémo statistique par lignes de flot borne les
+erreurs de bassin sous ses hypothèses de densité et d'estimation. C'est
+une borne inconditionnelle ; la précision parmi les seuls points affectés
+demande aussi un plancher de masse affectée. Cet argument ne
+justifie pas à lui seul la formule « toutes les règles admissibles sont
+consistantes ». Son régime K→∞, K/log n→∞ ne couvre pas le contrat K5/K10
+fixé. La section K fixé annonce d'ailleurs une limite locale conjecturale,
+non un objet déterministe. Les résultats atomiques à K/n fixé ne sont
+pas transférables sans conditions aux scans LiDAR. Les 88 nuages finis
+réfutent l'estimation de masse du catalogue sur ces fixtures ; conclure
+qu'aucune limite n'est une fonctionnelle de μ demande encore une suite
+asymptotique ou une preuve, pas seulement leur dispersion. Les scènes
+gaussiennes comparent des blocs à des coupes avant fusion, non une sortie
+EOM choisie ni HDBSCAN ; MMt n'y est pas évalué. L'unité « un site »
+désigne ici les sites distincts, pas les retours pondérés après fusions
+de grille : ne pas étendre cette qualification aux multiplicités.
+
+L'intuition « Γ suit la boule la plus lourde » peut en revanche recevoir
+une preuve combinatoire précise. À une coupe s, avec rayon d'admission
+t=min(s,R_x), soit M_C le maximum de population d'une boule de rayon≤t,
+contenant x, dont le centre appartient à C. Le nombre N_C de K-parties
+admises contenant x et portées par C vérifie, pour M_C≥K,
+`C(M_C−1,K−1)≤N_C≤[Σ_{q=1..4}C(n,q)]C(M_C−1,K−1)`.
+À gauche, chaque K-partie choisie dans la boule a son centre relié à
+celui-ci dans leur intersection convexe à la coupe s. À droite, chaque
+MEB a un support minimal de taille≤4 et une population≤M_C ; regrouper
+les parties par MEB ne donne qu'un facteur polynomial. Pour K/n→p>0,
+M_C/n→m_C≥p et un écart strict des m_C, la croissance exponentielle
+`m_C h(p/m_C)` impose le gagnant parmi les votes **actuellement admis**,
+où h(u)=−u log u−(1−u)log(1−u) est l'entropie binaire. L'exposant
+croît strictement avec m_C quand m_C>p ; le facteur polynomial est
+négligeable à cette échelle.
+Ce n'est ni une preuve à K fixé, ni une garantie de majorité par rapport
+au dénominateur qui contient les votes futurs, ni un résultat aux égalités.
+
+## Le bord de bande dure reste discontinu même avec les paires
+
+Le [nouveau contrôle exact](../../receipts/audit_continu_20260929/hard_band_border_20260930/README.md)
+traite cinq sites collinéaires : x=0, C1=100, C2=110, D1=−110,
+D2=−125+e. K2, η=1/4 en rayon, bande fermée, votes uniformes et
+majorité strictement supérieure à W/2. La première couverture de x est
+50, indépendante de e. Pour e<0 petit, trois votes sont retenus ; deux
+rejoignent la branche positive à55, donc x y entre à55. Pour e≥0 petit,
+le quatrième vote est retenu ; les deux côtés portent au plus deux votes
+avant leur fusion105. x attend105. C1 est déjà attaché à C2 dès5 : la
+**hauteur de réunion de x et C1**, pas seulement une date, saute de55
+à105 alors que le déplacement tend vers zéro. Les deux composantes
+principales restent séparées avant105. À55 le vote x/D1 est encore
+distinct de la branche D1/D2 ; sa réunion antérieure à la fusion globale
+ne change pas le calcul de majorité.
+
+La fonction réelle `majorite_virtuelle` est extraite sans modification
+du snapshot `a1ff44de…`, puis recoupée contre un Γ2 Fraction exhaustif
+et les composantes de l'union d'intervalles L2. Onze valeurs de e, onze
+contrôles η1/8 sans saut et deux versions entières u18 ; 1274 comparaisons,
+deux mutants de règle causaux rejetés. À l'échelle1024 et translation
+commune128001, déplacer le seul dernier site de0 à2 fait passer cette
+réunion de56320 à107520. Tous les sites restent≤240641. Le passage à
+la limite concerne la géométrie, pas des déplacements sous le pas d'une
+grille fixe. Aucun défaut du résolveur natif n'en est déduit : il n'est
+pas appelé ; `PairesK2.lignes` n'est pas exécuté non plus.
+
+Capture R2 autonome, pins partagés avant/après, codes0 normal/−O et
+lecteur causal hash-first avec SHA de manifeste fourni explicitement,
+inventaire fermé et hashes inchangés après lecture. Le premier paquet
+privé reste préparatoire et intact ; ses deux erreurs de garde de
+mutation sont documentées. Aucun moteur, EOM, MMt ou GCP dans ce lot.
+
+Décision proposée au développeur : garder la majorité de paires à bande
+dure comme **contrôle statistique**, pas comme tête globalement continue.
+Les poids souples et une date à marge continue traitent un autre contrat.
+Ils peuvent éviter ce seuil, mais ils doivent encore garder la cible
+statistique voulue ; la seule réussite sur les deux triangles ne suffit
+pas à décider. Ce résultat complète la réponse Q3, sans réactiver le
+saut de disparition des boules du catalogue sur des K-parties fixes.
 
 ## Réponses aux trois questions sur les votes de bande
 
