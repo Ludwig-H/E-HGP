@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "/home/codespace/.python/current/bin/python3",
+    "-I",
+    "-B",
+    "-O",
+    "/tmp/mhgp10-selection-semantics-audit-20260930.hXM2t9C1/check.py",
+    "--archive",
+    "/tmp/mhgp10-selection-semantics-audit-20260930.hXM2t9C1"
+  ],
+  "end_utc": "2026-09-30T21:06:40.586545+00:00",
+  "exit_code": 0,
+  "source_after": {
+    "MEMO_MASSES_SELECTION_20260930.md": "3fd53faa94d2b1775a7e38f2832b3eb118ecf8b71b7e072263998e9111d0d001",
+    "dev_scenes.py": "626b0dc9ca27c9aae4a5a184188e012d394ff05d52b4480f3729cebee0fad03c",
+    "lib/participation.py": "47acfd0c482455f9b14fbfaa9e90a9f5ff02627dd15453c3dc99a8651b696549",
+    "lib/scale.py": "7445aec285ce649b32e6b31c62dca96448f4f5b19b0b305b455d545462b2f294",
+    "lib/selection.py": "509acaa1170c1bcf3a3cfb97eb6220db3a908b0b7669c75efad78183e84bc80e"
+  },
+  "source_before": {
+    "MEMO_MASSES_SELECTION_20260930.md": "3fd53faa94d2b1775a7e38f2832b3eb118ecf8b71b7e072263998e9111d0d001",
+    "dev_scenes.py": "626b0dc9ca27c9aae4a5a184188e012d394ff05d52b4480f3729cebee0fad03c",
+    "lib/participation.py": "47acfd0c482455f9b14fbfaa9e90a9f5ff02627dd15453c3dc99a8651b696549",
+    "lib/scale.py": "7445aec285ce649b32e6b31c62dca96448f4f5b19b0b305b455d545462b2f294",
+    "lib/selection.py": "509acaa1170c1bcf3a3cfb97eb6220db3a908b0b7669c75efad78183e84bc80e"
+  },
+  "start_utc": "2026-09-30T21:06:40.483545+00:00",
+  "stderr": "",
+  "stdout": "{\"API21\":{\"A_cut_lambda\":\"1/2\",\"A_departures\":[{\"after\":6,\"area\":\"6/5\",\"before\":9,\"lambda\":\"1/3\"},{\"after\":3,\"area\":\"1\",\"before\":6,\"lambda\":\"1/2\"}],\"A_overcount\":\"3/2\",\"B_cut_lambda\":\"1/4\",\"B_departures\":[{\"after\":0,\"area\":\"3/10\",\"before\":6,\"lambda\":\"1/4\"}],\"attachments\":[[\"1\",0],[\"4\",0],[\"9\",0],[\"16\",1],[\"16\",1],[\"100\",3],[\"100\",3],[\"1\",0],[\"4\",0],[\"9\",0],[\"16\",1],[\"16\",1],[\"100\",3],[\"100\",3],[\"1\",0],[\"4\",0],[\"9\",0],[\"16\",1],[\"16\",1],[\"100\",3],[\"100\",3]],\"birth\":[\"1\",\"16\",\"25\",\"100\",\"1600\"],\"chosen_tops_traversal\":[3,0,1],\"clusters\":[{\"chain\":[4],\"children\":[1,2],\"parent\":null,\"top\":4},{\"chain\":[2],\"children\":[3,4],\"parent\":0,\"top\":2},{\"chain\":[3],\"children\":[],\"parent\":0,\"top\":3},{\"chain\":[0],\"children\":[],\"parent\":1,\"top\":0},{\"chain\":[1],\"children\":[],\"parent\":1,\"top\":1}],\"end_mass\":[\"9\",\"6\",\"15\",\"6\",\"21\"],\"mcs\":5,\"n\":21,\"parent\":[2,2,4,4,-1],\"standard_chosen_tops\":[2,3],\"standard_scores\":{\"A\":\"11/5\",\"B\":\"3/10\",\"C\":\"9/20\",\"R\":\"21/8\"},\"wholelife_stab\":[\"37/10\",\"3/10\",\"21/8\",\"9/20\",\"21/40\"],\"z\":1},\"guards\":{\"executed\":[\"NodeStats\",\"ancestor_selected\",\"condense\",\"depth_of\",\"eom\",\"hard_stats\",\"unselect\"],\"phi_orig_ignored\":true,\"selection_block_AST_checked_only\":true,\"structural_final_mass_declared\":true},\"pins\":{\"MEMO_MASSES_SELECTION_20260930.md\":\"3fd53faa94d2b1775a7e38f2832b3eb118ecf8b71b7e072263998e9111d0d001\",\"dev_scenes.py\":\"626b0dc9ca27c9aae4a5a184188e012d394ff05d52b4480f3729cebee0fad03c\",\"participation.py\":\"47acfd0c482455f9b14fbfaa9e90a9f5ff02627dd15453c3dc99a8651b696549\",\"scale.py\":\"7445aec285ce649b32e6b31c62dca96448f4f5b19b0b305b455d545462b2f294\",\"selection.py\":\"509acaa1170c1bcf3a3cfb97eb6220db3a908b0b7669c75efad78183e84bc80e\"},\"scale_cases\":[{\"beta\":\"4\",\"converted_input_control\":\"117/1000\",\"correct\":\"117/1000\",\"death\":\"25\",\"observed\":\"121/500\",\"z_attach\":2,\"z_eom\":3},{\"beta\":\"9\",\"converted_input_control\":\"16/225\",\"correct\":\"16/225\",\"death\":\"25\",\"observed\":\"-2/675\",\"z_attach\":3,\"z_eom\":2},{\"beta\":\"9\",\"converted_input_control\":\"2/15\",\"correct\":\"2/15\",\"death\":\"25\",\"observed\":\"2/15\",\"z_attach\":1,\"z_eom\":1},{\"beta\":\"4\",\"converted_input_control\":\"21/100\",\"correct\":\"21/100\",\"death\":\"25\",\"observed\":\"21/100\",\"z_attach\":2,\"z_eom\":2},{\"beta\":\"9\",\"converted_input_control\":\"98/3375\",\"correct\":\"98/3375\",\"death\":\"25\",\"observed\":\"98/3375\",\"z_attach\":3,\"z_eom\":3},{\"beta\":\"9\",\"converted_input_control\":\"544/50625\",\"correct\":\"544/50625\",\"death\":\"25\",\"observed\":\"544/50625\",\"z_attach\":4,\"z_eom\":4}],\"scope\":{\"Decimal_runtime_qualified\":false,\"Fraction_exact\":true,\"GCP\":false,\"HDBSCAN_run\":false,\"abstract_tree_API\":true,\"fractional_final_mass_semantics_refuted\":false,\"native\":false}}\n"
+}

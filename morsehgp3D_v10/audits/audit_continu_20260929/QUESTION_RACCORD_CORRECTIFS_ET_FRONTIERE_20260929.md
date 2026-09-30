@@ -1,6 +1,6 @@
 # Au développeur ancrage frontière et corrections du raccord
 
-## Raccord courant et quatre décisions utiles, 30 septembre, 20 h 35 UTC
+## Raccord courant et six décisions utiles, 30 septembre, 21 h 24 UTC
 
 Les réponses Q1/Q2/Q3 ci-dessous restent applicables. Complément pratique :
 
@@ -31,6 +31,30 @@ Les réponses Q1/Q2/Q3 ci-dessous restent applicables. Complément pratique :
    double ; quotient des plateaux puis cohortes de points. Ces deux
    verrous déjà reproduits restent ouverts, même si le raccord des bancs
    ne change aucune ancienne étiquette.
+5. **Exposant EOM des contrôles durs.** Dans `dev_scenes.selection_block`,
+   `(atts, _phi)` ignore l'échelle qui a produit les attaches. `hard_stats`
+   prend directement `a.phi_date`, puis soustrait une mort dans la nouvelle
+   échelle. Cela mélange des quantités différentes. Pour β4, mort β25,
+   z_att2→z_EOM3 :121/500 au lieu de117/1000. Pour β9, mort β25,
+   z_att3→z_EOM2 :−2/675 alors que la date est admissible. Réexprimer
+   les dates en φ_EOM, avec β exact quand disponible ; sinon conserver
+   et convertir leur expression certifiée et leur exposant d'origine,
+   jamais une inversion flottante. Le
+   [reçu autonome](../../receipts/audit_continu_20260929/selection_semantics_20260930/README.md)
+   ferme six cas exacts et les gardes du vrai appel, cinq sources
+   complètes, lecteurs normal/−O et manifeste externe. Les diagnostics rappel/jitter ont
+   leur échelle propre ; ne pas les invalider par transfert automatique.
+6. **Sémantique de `min_cluster_size`.** Le contrôle dur Python répète
+   la condensation par seule masse finale du C++ : la fixture API21 à
+   mcs5 donne {A,B,C}, contre {R,C} en intégrant les départs et la fin
+   lorsque la masse restante devient trop petite. Question au développeur :
+   pour les masses progressives, mcs vise-t-il la masse instantanée ou
+   la masse finale admissible ? La seconde définit une condensation
+   structurale possible, mais elle n'est pas la condensation standard
+   des points. Garder celle-ci comme contrôle séparé et ne pas revendiquer
+   l'équivalence Campello/HDBSCAN. Le même reçu confirme37/10 contre11/5
+   pour A et la bascule EOM sur l'API21 ; aucune nouvelle réalisation
+   géométrique, invocation C++ ou HDBSCAN dans cette tranche.
 
 Le commit bancaire privé `d2640c8f89e5078f53a4fd4b2f925c44d16bfb77`
 est maintenant clos : 92/92 hashes recoupés, 26/26 gates et 7/7 fast
@@ -57,6 +81,16 @@ Pool(1) ne
 marque pas sa région, réserve de contrat préexistante hors chemin moteur
 observé, pas un blocage du correctif multithread.
 
+Suivi21 h14 du lot courant : terminal Release39/39, code0,2242,69s,
+copie `preuves/ctest_gate.txt` SHA
+`6dd8377b46c4e5cdaf82095e1d10de7748b7df1747a6ccfd068a2d15c6dca7a4`.
+Le README pool se termine encore par `@@SUITE@@` et n'a pas de manifeste
+final. Journal mutants `/tmp/mhgp10-integ-r2/mut-pool/campagne.jsonl`,
+SHA `faaf0e16…`,23 lignes conformes mais aucune synthèse finale ni code
+de campagne : les anciens PIDs disparus ne prouvent pas sa réussite.
+MV3 participation y donne1,0,1 ; distinguer l'ancien reçu3/3 du nouveau
+lot2/3. Aucune nouvelle campagne lancée par cet audit.
+
 Palier privé B21, HEAD `5dd83b5c68919d87ada067204d19ee4edb166859` :
 relecture des voies étroites/larges et des niveaux I192/I192 cohérente.
 Le [snapshot de bornes](../../receipts/audit_continu_20260929/b21_bound_counterreview_20260930/README.md)
@@ -77,6 +111,31 @@ seulement au franchissement de binade », supposent ici `r2a≥m`. Par
 exemple `r2a=2^-100`, `m=5/128` donne `fl(r2a+m)=m`, inexact sans
 franchissement. Si `r2a<m`, un seuil intérieur négatif ne peut accepter
 une distance non négative ; cela ne démontre aucun défaut du filtre.
+
+Le rapport adverse privé B21 `notes/verif-mutants/RAPPORT.md` rédigé à
+21 h02, SHA `d60167da9f31421ef2ef1286215dfef2bcad9af6fe3efa06b27dbb59b3e286ca`,
+rend FAIL sur les **portes**, sans sortie HEAD erronée découverte.
+M1 : prendre la portée du saut sur I[0] seulement survit aux portes,
+mais coins graine49 donne un débordement i128 sous UBSan dans le mutant.
+M2 : une marge0,02 aux sites d'usage reste invisible si seuls les
+getters sont jugés ; SiteTree dispose d'une fixture6 contre4 décisions
+exactes, la certification MEB manque encore d'observable. Axes de feuille,
+bord exact du domaine et ordre du saut ont aussi des trous. Rapport et
+sondes relus, aucun rejeu natif de notre part ; HEAD reste5dd83b5c.
+
+Un résultat positif ferme toutefois l'équivalence `jump_key_wide_2limbs`
+sur ce tri. Pour trois points du cube[0,L]³, chaque axe donne une somme
+des trois différences carrées≤2L² : si δ partage leur étendue w≤L,
+la somme vaut δ²+(w−δ)²+w²≤2L². Donc les côtés vérifient
+a²+b²+c²≤6L², puis AM-GM donne a²b²c²≤8L⁶. Le vrai code q3 a
+`D=2|u×v|²`, `r²=a²b²c²/(4|u×v|²)` ; la clé d'un intérieur est
+`s=D(|z−centre|²−r²)`, donc |s|≤Dr²≤4L⁶<2^128 à B≤21.
+q2 donne≤3L²/2 ; q4 a le majorant général144L⁵<2^113. Le mutant
+conserve signe et deux mots : ses mots supérieurs sont donc exactement
+nuls. Preuve analytique recoupée sur les quatre sources du5dd83b5c,
+pas maximum numérique ni nouvel essai. Elle ne rend pas sûre une
+évaluation i128 intermédiaire ; l'invariance globale des sorties après
+changement de sélection du saut reste une autre obligation de preuve.
 
 ## Construire les couvertures sans développer Γ
 
@@ -126,6 +185,117 @@ descendant seed reste indispensable. Pour IDs/rangs à largeur fixe,
 comptage et tri radix donnent un chemin O(n+M+D), après la sélection,
 l'index Euler et la table des propriétaires. Un tri comparatif ajouterait
 D log D. Scratch et préparation globale restent publiés, non gratuits.
+
+Le [prototype structurel clos](../../receipts/audit_continu_20260929/seed_cover_antichain_20260930/README.md)
+recoupe désormais cette réduction sur512 cas :68 699 coupes exactes
+critiques et intermédiaires,16 839 incidences→6327 seeds. Les six exports
+natifs sont copiés de captures closes, pas nouvellement générés ;88
+incidences incluent des points à seeds uniquement internes K3/K5. Sont
+aussi éprouvés7 828 propriétaires normalisés à leur mort,1549 nœuds de
+plateaux contractés, une chaîne20 000 sans récursion et une forêt laissée
+comme telle. Cinq mutations causales changent les couvertures ; remplacer
+les rangs exacts par doubles viole séparément l'invariant de naissance.
+Capture et lecteurs normal/−O autonomes, manifeste externe
+`dfb3e67339d98558873aeb07524e9249f072e9451561857db4de29ba61b50cd4`.
+Le prototype trie comparativement et normalise des owners bruts en
+remontant : O(D log D) et possiblement O(DH), pas une implémentation
+linéaire ni une nouvelle mesure native. La borne proposée suppose la
+table de propriétaires déjà calculée ; son coût reste à fermer.
+
+## Paires locales : borne globale utile, recherche encore ouverte
+
+Pour n sites distincts,2≤K≤n, K incluant le site interrogé, poser
+r_x=d_K(x), ρ=min_{x≠y}|xy|, D=max_{x,y}|xy| et Δ=D/ρ. Pour c≥1
+fixé, le nombre total de paires **orientées** telles que |xy|≤c r_x
+est O((K−1)c³ n(1+log Δ)). La constante est géométrique, pas un chrono.
+
+Preuve recoupée : regrouper les ancres par r_x∈[R,2R), R=2^jρ.
+Dans une cellule demi-ouverte de côté R/√3, toute distance entre deux
+points est strictement<R. Elle contient donc au plus K−1 ancres de
+ce groupe : K ancres forceraient leur K-ième distance sous R, même si
+la coquille à R est exacte. Pour une cible y fixée, ses ancres incidentes
+du groupe sont dans B(y,2cR), qui rencontre O(c³) cellules. Compter les
+ancres entrantes par y puis sommer les groupes ferme la borne. Ce n'est
+pas une borne par voisinage sortant : un seul point peut garder Θ(n)
+voisins. Sur une grille B bits, Δ≤√3(2^B−1), donc le majorant est
+O((K−1)c³n(B+1)), sans hypothèse LiDAR. B reste un paramètre, pas une
+qualification du moteur large.
+
+Pour les paires K2 à bande en rayon η, ℓ=|xy|/2 et α_x=d_2(x)/2 :
+c=1+η. Pour une paire d'ordre K≥3 avec
+ℓ=max(|xy|/2,d_K((x+y)/2)) et ℓ≤(1+η)α_x, la seule relation
+α_x≤d_K(x) donne c=2(1+η). Le prototype souple MMp utilise une autre
+normalisation A=min_y ℓ², non α² ; ses constantes ne se transfèrent
+pas implicitement. Les K-parties et leurs classes restent distinctes :
+le cap K3 de Q1 garde son nombre quadratique de classes pour un point.
+
+Cette preuve ouvre un budget de **sortie de paires** raisonnable, pas
+une preuve de travail total. Le `SiteGrid.candidates` actuel peut rendre
+tous les sites d'une grosse cellule avant filtrage exact ; le résolveur
+K2 matérialise également des listes d'intérieurs. Mesurer ces candidats
+et les tests de census, puis utiliser un index adaptatif ou un parcours
+conjoint avec refus certifié des blocs. Ne pas confondre la bonne taille
+des votes retenus avec une recherche sous-quadratique déjà obtenue.
+
+Le [paquet clos SiteGrid/packing](../../receipts/audit_continu_20260929/pair_grid_packing_20260930/README.md)
+recoupe66 petits cas exacts et la classe réelle extraite AST du snapshot
+frontière `86ba984f…`. À n exact8000/16000/32000, m=n−2 sites denses
+appariés à distance1 plus deux extrêmes u18 donnent exactement3m votes
+dirigés. Le pas global32768/16384/16384 met les m sites dans une case :
+toute requête locale de vote renvoie m IDs ; au total m², soit
+63 968 004/255 936 004/1 023 872 004. Trois requêtes de vote et trois
+census de partenaires par taille recoupent le comportement réel ; les
+totaux sont dérivés analytiquement sans exécuter le carré. Le census
+des partenaires vides paierait aussi m−2 tests malgré une coquille de
+deux sites. Sans les extrêmes, le même code a un pas4 et≤16 candidats
+locaux : il ne faut pas une taille de case imposée par tout le volume.
+Ce témoin n'est ni un scan LiDAR ni une nouvelle croissance FULL mesurée.
+Manifeste externe `92f5d1d9333a96e7c97349da8313f06b9b73a641fbe78a2472b755eea6dd3514`,
+lecteurs autonomes normal/−O avec SHA avant replay et intégrité après.
+
+Le census garde un deuxième carré indépendant de cet index. Lire le
+`PairResolverK2.third_sites` réel du snapshot `86ba984f…` : il construit
+toute la liste, puis `resolve` choisit le site de distance minimale à
+l'**ancre conservée**, départage par ID. Prendre a=0 et m sites
+b_j=128000+j sur un axe,0≤j<m≤32000. À K2/η1/4, les m votes de a
+sont dans sa bande. La boule diamétrale de(a,b_j) contient exactement
+les j autres b_i, i<j. Chaque état initial distinct matérialise j
+témoins, puis choisit b_0 ; mémoïser(a,b_0) ne retire pas cette première
+collecte. Total m(m−1)/2 intérieurs, alors que tous les votes du nuage
+sont O(m). Preuve par le code et les intervalles, pas nouvelle exécution
+quadratique ni famille SemanticKITTI. Chercher un témoin optimal avec
+certificat, sans liste exhaustive ; une meilleure grille seule ne suffit pas.
+
+Résultat positif séparé : toute sous-paire de la descente keep0 reste
+dans la bande de la même ancre, car pour un troisième site distinct z
+dans la boule diamétrale, |a−z|²+|b−z|²≤|a−b|² et |a−z|<|a−b|.
+Les distances diminuent strictement et tous les états sont mémoïsés
+après retour. Le nombre d'états/census frais du chemin de votes est
+donc au plus le nombre D de paires orientées de bande, auquel les300
+autocontrôles arbitraires et300 keep1 sans mémo ajoutent O(600n).
+Le carré caché est ici le **coût de chaque census**, pas nécessairement
+le nombre de descentes. La borne ne paye pas encore les recherches
+ni les remontées d'ancêtres de la forêt.
+
+## Dettes ciblées du prototype de sélection
+
+La relecture statique du vrai `selection.py` confirme que l'EOM actuel
+n'est pas linéaire : `depth_of` remonte les parents pour chaque cluster.
+Un peigne de h fusions et h+1 feuilles, chaque feuille de masse mcs,
+conserve les2h+1 clusters à la condensation ; la somme des profondeurs
+vaut h(h+1). Les parcours `unselect` et `ancestor_selected` peuvent
+ajouter le même défaut. Une passe postordre pour les scores puis une
+passe descendante pour les décisions suffit conceptuellement ; ne pas
+porter ces remontées individuelles dans la tête industrielle. C'est
+une preuve de coût du prototype, pas une mesure native ni un défaut
+de la récurrence mathématique EOM.
+
+Réserve de diagnostic séparée : `dev_scenes.selection_block` indexe
+la liste des marges non-None avec `len(lab)//2`. Avec r marges pour n
+points,1≤r≤floor(n/2) provoque un IndexError ; sinon ce n'est pas
+la médiane de cette liste. Le test `any()` ne traite que r=0. Utiliser
+la taille des marges retenues et préciser la convention de médiane.
+Lecture seule, aucun score historique corrigé ni nouveau banc lancé.
 
 ## Ce que les résultats statistiques autorisent
 
@@ -265,6 +435,38 @@ borné par K qui conserve **exactement** les masses des K-parties.
 Cela n'exclut pas un comptage par blocs, une CDF implicite ou des
 requêtes multi-centres exploitant tout le nuage.
 
+**Complément P0, totalité des paires K3/K5.** La bande des K-parties ne
+se transfère pas telle quelle aux paires d'ordre K. Le
+[nouveau reçu](../../receipts/audit_continu_20260929/pair_band_totality_20260930/README.md)
+donne deux familles minimales exactes :
+
+- FX-A9 :0,2,7,10,13, K3, x=10. Première couverture α=3 par{7,10,13} ;
+  les quatre ℓ vers0/2/7/13 valent respectivement5,4,9/2,9/2.
+  Bord1,25α=15/4<4 : aucun vote. À η1/3, la paire vers2 entre sur la
+  coquille ; η1/2 ajoute7 et13. Dans le MMp réel, A=min ℓ²=16, pas α²=9.
+- K5 : x=0 et quatre sommets(1,1,1),(1,−1,−1),(−1,1,−1),(−1,−1,1).
+  Pour tout centre c, leur distance carrée moyenne vaut3+|c|² ; donc
+  MEB unique centrée en0, α²=3. Au milieu d'une paire x/y, trois
+  distances carrées valent19/4, d'où les quatre ℓ²=19/4. Bordη1/4 :
+  75/16<76/16, aucun vote. Translation+(1,1,1) : cinq sites u18 à
+  coordonnées0/1/2, même résultat. Contrôles K2 non vides et seuil
+  carré19/12 inclus exacts.
+
+Les quatre votes de chaque cas sont exhaustifs Fraction ; les fonctions
+réelles `votes_paires/poids_bande` sont rejouées sur un contexte MEB
+analytique, avec IDs factices : niveaux/échelles/poids seulement, pas
+propriétaires FULL. Trois cas vides,20 bornes α²≤A≤4α², deux mutations
+causales et lecteur sémantique normal/−O. Manifeste externe
+`b19df04fa430d84848d21d5627d020cd21906b7e5d96abb7eef5d126a5f2b21d`.
+Ce n'est pas un bug du K2 déjà implémenté ni du MMp actuel : celui-ci
+normalise par min ℓ et évite ce zéro, en changeant de modèle. Définir
+explicitement l'échelle et le fallback avant un port K5. Le jouet
+`mmc.votes_paires` trie n distances pour chacun des n milieux de chacun
+des n sites : O(n³ log n), avant même Γ exhaustif ; ne pas copier ce
+chemin comme implémentation locale. Le diagnostic FX-A9 mélange aussi
+unité de vote, normalisation et règle d'admission : isoler ces facteurs
+dans les comparaisons statistiques.
+
 Le [contre-exemple CDF clos](../../receipts/audit_continu_20260929/component_ballot_cdf_20260930/README.md)
 précise une information à conserver : à couverture et composante
 identiques, la masse de x passe de 2 à 3 à K2, et de 5 à 15 à K5,
@@ -296,9 +498,12 @@ ne disparaît pas lorsqu'un autre site entre dans sa boule ; r_F et α_x
 restent continus. Sur les boules fortes du catalogue, le même poids ne
 répare pas la disparition du vote. Le rejeu du développeur le confirme.
 
-Pour K≥2, sites distincts et n≥K, α_x>0 et W≥1 : un vote qui minimise
+Dans cet univers de K-parties, pour K≥2, sites distincts et n≥K,
+α_x>0 et W≥1 : un vote qui minimise
 r_F a poids 1. Le dénominateur ne peut donc pas s'annuler. K1/α=0
-demande un cas séparé. Avec λ=√(1+η′), le poids tronqué est
+demande un cas séparé. Les paires d'ordre K≥3 ne minimisent pas
+nécessairement à α : ne pas leur transférer ce plancher sans changer
+explicitement la normalisation en `min ℓ`. Avec λ=√(1+η′), le poids tronqué est
 2λ/η′-lipschitzien en r_F/α. On peut écrire directement la borne finie
 `Δ≤N_union·[2λ(1+λ)/η′]·dε/α_min`, sans terme asymptotique,
 où N_union compte les votes positifs dans au moins un des deux nuages,

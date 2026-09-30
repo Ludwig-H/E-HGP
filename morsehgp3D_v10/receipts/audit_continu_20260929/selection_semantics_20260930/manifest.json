@@ -1,0 +1,73 @@
+{
+  "files": {
+    "PROTOCOL.md": {
+      "bytes": 2830,
+      "sha256": "5d9bffb003b0f4c1b1d5819df8b53b4a0ee1c96fc666589862d9509a5747e01e"
+    },
+    "README.md": {
+      "bytes": 1964,
+      "sha256": "4174805afbc9b0efa45d9097ba35b31cdf4dbb6d6174a87a506cd01702a4ab99"
+    },
+    "capture.py": {
+      "bytes": 2557,
+      "sha256": "cd6d2e2f2b033e274443545aee5cea46a0b256eb80cd4f1943f2de222bcddfbd"
+    },
+    "captures/normal.json": {
+      "bytes": 4421,
+      "sha256": "3b2e5f9e2bfaa351bd0e9bde1db5dae1723a11cbcd548c75214925e1be6a61b1"
+    },
+    "captures/optimized.json": {
+      "bytes": 4431,
+      "sha256": "a2eae8b83f07f82b0abbb9bc7af7b45689fa3cc35e0fb8efc33677246dc8f839"
+    },
+    "check.py": {
+      "bytes": 9322,
+      "sha256": "4823d30925f22437a19da3a1b4eecf068971b2f08c3e4304b31090289385527e"
+    },
+    "preflight_ast_guard.json": {
+      "bytes": 2235,
+      "sha256": "5b87fe332f27b46f2dc33bad8ace8868a168d1e9c3e30f8e17174e2e40c10788"
+    },
+    "preflight_first_order.json": {
+      "bytes": 1162,
+      "sha256": "4616778cfdea05ea01b309044cf62e0f0e822c7595a7b232dd31d4fc848af809"
+    },
+    "preflight_guard_check.py": {
+      "bytes": 9074,
+      "sha256": "054578719214565fe2849c645c2e25d15cd7596cc3376630603c71ea5c02cc83"
+    },
+    "snapshots/MEMO_MASSES_SELECTION_20260930.md": {
+      "bytes": 56270,
+      "sha256": "3fd53faa94d2b1775a7e38f2832b3eb118ecf8b71b7e072263998e9111d0d001"
+    },
+    "snapshots/dev_scenes.py": {
+      "bytes": 13013,
+      "sha256": "626b0dc9ca27c9aae4a5a184188e012d394ff05d52b4480f3729cebee0fad03c"
+    },
+    "snapshots/participation.py": {
+      "bytes": 12767,
+      "sha256": "47acfd0c482455f9b14fbfaa9e90a9f5ff02627dd15453c3dc99a8651b696549"
+    },
+    "snapshots/scale.py": {
+      "bytes": 4078,
+      "sha256": "7445aec285ce649b32e6b31c62dca96448f4f5b19b0b305b455d545462b2f294"
+    },
+    "snapshots/selection.py": {
+      "bytes": 10596,
+      "sha256": "509acaa1170c1bcf3a3cfb97eb6220db3a908b0b7669c75efad78183e84bc80e"
+    },
+    "verify.py": {
+      "bytes": 4935,
+      "sha256": "c88df37c74fdea4318ade6a1444213dc33323854281e3edb34371fa66c83c053"
+    }
+  },
+  "schema": 1,
+  "scope": "bounded_exact_selection_audit_no_native",
+  "source_pins": {
+    "MEMO_MASSES_SELECTION_20260930.md": "3fd53faa94d2b1775a7e38f2832b3eb118ecf8b71b7e072263998e9111d0d001",
+    "dev_scenes.py": "626b0dc9ca27c9aae4a5a184188e012d394ff05d52b4480f3729cebee0fad03c",
+    "participation.py": "47acfd0c482455f9b14fbfaa9e90a9f5ff02627dd15453c3dc99a8651b696549",
+    "scale.py": "7445aec285ce649b32e6b31c62dca96448f4f5b19b0b305b455d545462b2f294",
+    "selection.py": "509acaa1170c1bcf3a3cfb97eb6220db3a908b0b7669c75efad78183e84bc80e"
+  }
+}

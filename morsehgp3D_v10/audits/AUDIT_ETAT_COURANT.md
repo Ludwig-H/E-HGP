@@ -1,7 +1,7 @@
 # Audits v10 — état courant
 
-Mise à jour : 30 septembre 2026, 20 h 40 UTC : réponses au développeur,
-couvertures complètes, bord de bande dure et portée des conclusions statistiques.
+Mise à jour : 30 septembre 2026, 21 h 24 UTC : réponses au développeur,
+seeds recoupées, budget des paires et correctifs des comparaisons EOM.
 Les sources publiées du moteur restent inchangées
 dans cette tranche ; le développeur travaille désormais dans une copie
 isolée d'intégration, distincte du worktree partagé. Les parties I
@@ -11,7 +11,48 @@ ancrées à leur version, pas des statuts courants. `public_status=not_claimed`.
 État du produit : [PASSATION](../PASSATION.md). Corrections de portée des
 mesures : [ERRATA](../receipts/ERRATA.md). Ne pas réécrire les reçus clos.
 
-**Nouveau verrou confirmé pour la tête :** une bande dure reste discontinue
+**À corriger avant les comparaisons EOM :** le banc privé
+`masses_selection/dev_scenes.py` réutilise `phi_date` dans une nouvelle
+échelle z sans conversion. Pour une attache β4, mort β25, z2→z3,
+`hard_stats` donne121/500 au lieu de117/1000. En sens inverse,
+β9, mort β25, z3→z2 donne−2/675 malgré une attache valide.
+Le [contre-audit clos](../receipts/audit_continu_20260929/selection_semantics_20260930/README.md)
+épingle cinq sources complètes, vérifie le vrai appel par AST et recoupe
+six cas exacts, quatre à exposants identiques positifs. Lecteurs autonomes
+normal/−O,15 payloads, SHA externe et intégrité avant/après ; les deux
+échecs de préflight du harnais restent documentés. Seules les comparaisons EOM à exposants différents
+sont atteintes par ce constat, pas les diagnostics de rappel/jitter qui
+réutilisent leur propre échelle. Le contrôle de condensation dur reste
+aussi non équivalent à la condensation standard des départs de points.
+
+**Réponse Q2 renforcée :** la bande α des paires d'ordre K peut être
+vide, même K5. Au centre d'un tétraèdre régulier entier, α²=3 et
+les quatre votes ont ℓ²=19/4 ; η1/4 donne le bord75/16<76/16.
+La normalisation du prototype MMp par `min ℓ` évite le zéro mais change
+l'échelle. Décider cette sémantique avant le port K5 ; la seule
+localisation des centres ne suffit pas. Le
+[reçu K3/K5 autonome](../receipts/audit_continu_20260929/pair_band_totality_20260930/README.md)
+recoupe les quatre votes exhaustifs, la translation u18, les contrôles
+K2 et aux seuils,20 bornes d'échelle, fonctions réelles sur contexte
+analytique. Pas de propriétaire natif ni de défaut du K2 implémenté.
+
+**Complexité des paires :** le
+[packing global recoupé](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#paires-locales--borne-globale-utile-recherche-encore-ouverte)
+borne la cardinalité par O((K−1)c³n(1+log Δ)), soit O(n(B+1)) à
+K/c fixés sur une grille B bits. Ce n'est pas une borne Γ ni de recherche.
+Le [contre-exemple du vrai SiteGrid](../receipts/audit_continu_20260929/pair_grid_packing_20260930/README.md)
+à n exact8k/16k/32k a23994/47994/95994 votes, mais le filtrage peut
+recevoir63 968 004/255 936 004/1 023 872 004 IDs de candidats denses.
+Comptes déduits, neuf requêtes de vote AST recoupées, pas boucle quadratique
+exécutée ni régime LiDAR/G4. Les extrêmes contrôlent le pas d'une grille
+uniforme et font tomber tous les points denses dans la même cellule.
+Instrumenter candidats et census ; ne pas porter cet index comme garantie
+sous-quadratique. Le census matérialisant tous les intérieurs garde un
+second carré possible même avec un meilleur index ; sa preuve collinéaire
+et la borne positive sur les états mémoïsés sont dans la note au développeur.
+EOM Python a aussi des remontées quadratiques évitables.
+
+**Verrou confirmé pour la tête :** une bande dure reste discontinue
 même sur l'univers des paires, sans disparition de vote du catalogue.
 Le [témoin à cinq sites](../receipts/audit_continu_20260929/hard_band_border_20260930/README.md)
 à K2/η1/4 fait sauter une hauteur de réunion de55 à105 lorsqu'un
@@ -31,7 +72,14 @@ vivants, déduplication par point/nœud et antichaîne des seeds. Pour les
 boules fortes, D≤(K−2)M+Σ|U| ; D=KM si coquille=support minimal.
 Le CSR existe déjà ; un chemin comptage/préfixes/radix peut être linéaire
 dans ce payload, après sélection, index Euler et calcul des propriétaires.
-Preuve mathématique recoupée, pas port ni nouveau benchmark natif.
+Le [prototype structurel clos](../receipts/audit_continu_20260929/seed_cover_antichain_20260930/README.md)
+recoupe désormais512 cas et68 699 coupes :16 839 incidences→6327 seeds,
+six exports natifs clos copiés, internes seuls K3/K5, plateaux,
+activation=mort et chaîne20k. Cinq mutations changent la couverture ;
+une sixième, quotient par doubles, viole le propriétaire vivant.
+Lecteurs autonomes normal/−O, SHA externe et intégrité avant/après.
+Tri Python O(D log D), normalisation brute pouvant coûter O(DH) : pas
+encore de radix industriel, port moteur ou nouveau benchmark natif.
 Ne pas confondre cette réduction avec les votes des K-parties : leurs
 comptes ne sont pas conservés. Les coquilles étendues et M restent payés.
 
@@ -73,7 +121,8 @@ mesuré. Les seuls K voisins ne déterminent pas les votes exacts. Le
 montre aussi des admissions sans nouvelle fusion, à couverture identique.
 Comptage implicite ouvert ; ne pas reconstruire toutes les parties/classes.
 Les poids souples échappent au saut de contact sur des K-parties fixes,
-pas sur des votes de catalogue. W≥1 pour K≥2/n≥K/sites distincts.
+pas sur des votes de catalogue. W≥1 pour les K-parties à K≥2/n≥K/sites
+distincts ; ne pas transférer cela aux paires normalisées par α à K≥3.
 La [preuve S est cohérente à la contre-relecture](../receipts/audit_continu_20260929/majority_SN_counterreview_20260930/README.md) ;
 un témoin exact à quatre sites réfute l'appartenance utilisée pour la
 constante précise de N, à g=1. L'erreur angulaire doit être contrôlée ;
@@ -157,6 +206,13 @@ Réserve secondaire préexistante : Pool(1) ne marque pas sa région ; aucun
 sous-Pool du moteur observé. Ni union des sept groupes ni condensation
 corrigée acquises. Aucun test GCP lancé par cet audit.
 
+Nouveau terminal du développeur :39/39 gates Release, code0,2242,69s.
+Le reçu pool conserve encore `@@SUITE@@` et n'a pas de manifeste final :
+raccord en cours. Le journal mutants disponible se termine sans synthèse
+ni code de campagne ; les PIDs disparus ne closent pas les preuves.
+Dans ce lot, MV3 participation donne1,0,1 ; l'ancien3/3 reste une
+observation distincte, pas une garantie de répétabilité.
+
 **Précision supérieure à u18 :** le chantier privé `build/v10-b21/src`,
 HEAD `5dd83b5c68919d87ada067204d19ee4edb166859`, comporte dix-huit commits
 de moteur B21 ; CLI fine et raccord R2 restent à faire. Les voies larges
@@ -171,6 +227,14 @@ l'affirmation d'exactitude du seuil dyadique (contre-exemple2^-100+m).
 Le snapshot publié reste immutable et le moteur5dd83b5c reste distinct
 de R2. Ne pas transformer les journaux privés
 20/20 gates et 27/27 mutations en qualification CLI, u24/u32 ou G4.
+Le nouveau rapport adverse privé `notes/verif-mutants/RAPPORT.md`,
+SHA `d60167da…`, rend FAIL pour les portes, pas pour une sortie HEAD
+fausse. Priorités : portée du saut sur tous les intérieurs (mutant UB
+sur coins graine49), marge effective aux sites d'usage, pas seulement
+getters. Sondes relues, non réexécutées par cet audit. En revanche,
+l'équivalence du mutant comparaison2limbs est maintenant prouvée par
+la borne cubique4L⁶<2^128 ; ne pas la fonder sur un maximum numérique.
+Cette petite borne ne sécurise pas les produits intermédiaires i128.
 
 **Plateaux de tête :** les événements de même rang doivent être traités
 ensemble, avant le test des masses. La

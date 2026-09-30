@@ -1,0 +1,32 @@
+{
+  "copied_existing_exports_only": true,
+  "inputs": {
+    "fixtures/internal_k3.json": {
+      "sha256": "a2af5e645bba1eb775a5ed6d659ccc14d1ddd17246ce4f0973f7170a10a47499",
+      "upstream_path": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/fixed_k_antichain/fixtures/internal_k3.json"
+    },
+    "fixtures/internal_k5.json": {
+      "sha256": "2f0d5beb4938bec80b7ea71240d880171e5f1e88d209d542912aa8128039ffa1",
+      "upstream_path": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/fixed_k_antichain/fixtures/internal_k5.json"
+    },
+    "fixtures/near_tie_1024_0.json": {
+      "sha256": "308fa2a5b1a836f68e9a9f6f161dab55630dc441e045d6b0c444a433604b35a4",
+      "upstream_path": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/fixed_k_antichain/fixtures/near_tie_1024_0.json"
+    },
+    "fixtures/near_tie_1024_1.json": {
+      "sha256": "31b74712010425ac66011ad186e9a7b6f68c8770eab63f77c0c59e1491795849",
+      "upstream_path": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/fixed_k_antichain/fixtures/near_tie_1024_1.json"
+    },
+    "fixtures/triangle.json": {
+      "sha256": "17945c9aa55f2521b7407aba23341c75a3404084d2c0654eaee60000b388618c",
+      "upstream_path": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/fixed_k_antichain/fixtures/triangle.json"
+    },
+    "fixtures/triangle_default.json": {
+      "sha256": "c62d0f0834e5b25d4d96260aba38d2225dcfdcc068e3942870725b3de66cb0ec",
+      "upstream_path": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/fixed_k_antichain/fixtures/triangle_default.json"
+    }
+  },
+  "native_invocations": 0,
+  "upstream_manifest_path": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/fixed_k_antichain/SHA256SUMS",
+  "upstream_manifest_sha256": "9ab1e991f360331a9bcfe91a84920bb1708d8370c44ac6a603fd90d161f1806e"
+}
