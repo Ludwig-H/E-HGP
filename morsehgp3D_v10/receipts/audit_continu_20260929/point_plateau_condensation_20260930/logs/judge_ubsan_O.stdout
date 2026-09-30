@@ -1,0 +1,107 @@
+{
+  "GCP_used": false,
+  "equal_cut_checks": 20,
+  "new_native_calls": 0,
+  "pair_checks": 576,
+  "reports": [
+    {
+      "factored_exact_stabilities": [
+        "12/5",
+        "0",
+        "24/5"
+      ],
+      "factored_partition": {
+        "clusters": [
+          [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          [
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ]
+        ],
+        "noise": []
+      },
+      "flat_partition": {
+        "clusters": [],
+        "noise": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ]
+      },
+      "native_zero_stability_leaf_selected": true,
+      "oracle_flat_root_stability": "36/5",
+      "z": 1
+    },
+    {
+      "factored_exact_stabilities": [
+        "12/25",
+        "0",
+        "144/25"
+      ],
+      "factored_partition": {
+        "clusters": [
+          [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          [
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ]
+        ],
+        "noise": []
+      },
+      "flat_partition": {
+        "clusters": [],
+        "noise": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ]
+      },
+      "native_zero_stability_leaf_selected": true,
+      "oracle_flat_root_stability": "156/25",
+      "z": 2
+    }
+  ],
+  "rows": 4,
+  "scope": "two equivalent API ultrametrics, no 3D/Gamma/sklearn realization",
+  "status": "EXPECTED_PLATEAU_API_NONINVARIANCE"
+}

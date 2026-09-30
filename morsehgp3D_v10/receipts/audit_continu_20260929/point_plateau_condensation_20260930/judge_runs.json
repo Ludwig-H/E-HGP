@@ -1,0 +1,85 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-point-plateau-condensation-20260930.6a2Rhm5t/judge.py",
+        "/tmp/mhgp10-point-plateau-condensation-20260930.6a2Rhm5t/logs/native_normal.stdout"
+      ],
+      "code": 0,
+      "end_ns": 37314866288345,
+      "end_utc": "2026-09-30T13:03:45.829023+00:00",
+      "name": "judge_normal",
+      "start_ns": 37314833107405,
+      "start_utc": "2026-09-30T13:03:45.795842+00:00",
+      "stderr": "",
+      "stdout": "{\n  \"GCP_used\": false,\n  \"equal_cut_checks\": 20,\n  \"new_native_calls\": 0,\n  \"pair_checks\": 576,\n  \"reports\": [\n    {\n      \"factored_exact_stabilities\": [\n        \"12/5\",\n        \"0\",\n        \"24/5\"\n      ],\n      \"factored_partition\": {\n        \"clusters\": [\n          [\n            0,\n            1,\n            2,\n            3,\n            4,\n            5\n          ],\n          [\n            6,\n            7,\n            8,\n            9,\n            10,\n            11\n          ]\n        ],\n        \"noise\": []\n      },\n      \"flat_partition\": {\n        \"clusters\": [],\n        \"noise\": [\n          0,\n          1,\n          2,\n          3,\n          4,\n          5,\n          6,\n          7,\n          8,\n          9,\n          10,\n          11\n        ]\n      },\n      \"native_zero_stability_leaf_selected\": true,\n      \"oracle_flat_root_stability\": \"36/5\",\n      \"z\": 1\n    },\n    {\n      \"factored_exact_stabilities\": [\n        \"12/25\",\n        \"0\",\n        \"144/25\"\n      ],\n      \"factored_partition\": {\n        \"clusters\": [\n          [\n            0,\n            1,\n            2,\n            3,\n            4,\n            5\n          ],\n          [\n            6,\n            7,\n            8,\n            9,\n            10,\n            11\n          ]\n        ],\n        \"noise\": []\n      },\n      \"flat_partition\": {\n        \"clusters\": [],\n        \"noise\": [\n          0,\n          1,\n          2,\n          3,\n          4,\n          5,\n          6,\n          7,\n          8,\n          9,\n          10,\n          11\n        ]\n      },\n      \"native_zero_stability_leaf_selected\": true,\n      \"oracle_flat_root_stability\": \"156/25\",\n      \"z\": 2\n    }\n  ],\n  \"rows\": 4,\n  \"scope\": \"two equivalent API ultrametrics, no 3D/Gamma/sklearn realization\",\n  \"status\": \"EXPECTED_PLATEAU_API_NONINVARIANCE\"\n}\n"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-point-plateau-condensation-20260930.6a2Rhm5t/judge.py",
+        "/tmp/mhgp10-point-plateau-condensation-20260930.6a2Rhm5t/logs/native_normal.stdout"
+      ],
+      "code": 0,
+      "end_ns": 37314901599579,
+      "end_utc": "2026-09-30T13:03:45.864329+00:00",
+      "name": "judge_normal_O",
+      "start_ns": 37314866340272,
+      "start_utc": "2026-09-30T13:03:45.829081+00:00",
+      "stderr": "",
+      "stdout": "{\n  \"GCP_used\": false,\n  \"equal_cut_checks\": 20,\n  \"new_native_calls\": 0,\n  \"pair_checks\": 576,\n  \"reports\": [\n    {\n      \"factored_exact_stabilities\": [\n        \"12/5\",\n        \"0\",\n        \"24/5\"\n      ],\n      \"factored_partition\": {\n        \"clusters\": [\n          [\n            0,\n            1,\n            2,\n            3,\n            4,\n            5\n          ],\n          [\n            6,\n            7,\n            8,\n            9,\n            10,\n            11\n          ]\n        ],\n        \"noise\": []\n      },\n      \"flat_partition\": {\n        \"clusters\": [],\n        \"noise\": [\n          0,\n          1,\n          2,\n          3,\n          4,\n          5,\n          6,\n          7,\n          8,\n          9,\n          10,\n          11\n        ]\n      },\n      \"native_zero_stability_leaf_selected\": true,\n      \"oracle_flat_root_stability\": \"36/5\",\n      \"z\": 1\n    },\n    {\n      \"factored_exact_stabilities\": [\n        \"12/25\",\n        \"0\",\n        \"144/25\"\n      ],\n      \"factored_partition\": {\n        \"clusters\": [\n          [\n            0,\n            1,\n            2,\n            3,\n            4,\n            5\n          ],\n          [\n            6,\n            7,\n            8,\n            9,\n            10,\n            11\n          ]\n        ],\n        \"noise\": []\n      },\n      \"flat_partition\": {\n        \"clusters\": [],\n        \"noise\": [\n          0,\n          1,\n          2,\n          3,\n          4,\n          5,\n          6,\n          7,\n          8,\n          9,\n          10,\n          11\n        ]\n      },\n      \"native_zero_stability_leaf_selected\": true,\n      \"oracle_flat_root_stability\": \"156/25\",\n      \"z\": 2\n    }\n  ],\n  \"rows\": 4,\n  \"scope\": \"two equivalent API ultrametrics, no 3D/Gamma/sklearn realization\",\n  \"status\": \"EXPECTED_PLATEAU_API_NONINVARIANCE\"\n}\n"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-point-plateau-condensation-20260930.6a2Rhm5t/judge.py",
+        "/tmp/mhgp10-point-plateau-condensation-20260930.6a2Rhm5t/logs/native_ubsan.stdout"
+      ],
+      "code": 0,
+      "end_ns": 37314939781758,
+      "end_utc": "2026-09-30T13:03:45.902515+00:00",
+      "name": "judge_ubsan",
+      "start_ns": 37314901682273,
+      "start_utc": "2026-09-30T13:03:45.864422+00:00",
+      "stderr": "",
+      "stdout": "{\n  \"GCP_used\": false,\n  \"equal_cut_checks\": 20,\n  \"new_native_calls\": 0,\n  \"pair_checks\": 576,\n  \"reports\": [\n    {\n      \"factored_exact_stabilities\": [\n        \"12/5\",\n        \"0\",\n        \"24/5\"\n      ],\n      \"factored_partition\": {\n        \"clusters\": [\n          [\n            0,\n            1,\n            2,\n            3,\n            4,\n            5\n          ],\n          [\n            6,\n            7,\n            8,\n            9,\n            10,\n            11\n          ]\n        ],\n        \"noise\": []\n      },\n      \"flat_partition\": {\n        \"clusters\": [],\n        \"noise\": [\n          0,\n          1,\n          2,\n          3,\n          4,\n          5,\n          6,\n          7,\n          8,\n          9,\n          10,\n          11\n        ]\n      },\n      \"native_zero_stability_leaf_selected\": true,\n      \"oracle_flat_root_stability\": \"36/5\",\n      \"z\": 1\n    },\n    {\n      \"factored_exact_stabilities\": [\n        \"12/25\",\n        \"0\",\n        \"144/25\"\n      ],\n      \"factored_partition\": {\n        \"clusters\": [\n          [\n            0,\n            1,\n            2,\n            3,\n            4,\n            5\n          ],\n          [\n            6,\n            7,\n            8,\n            9,\n            10,\n            11\n          ]\n        ],\n        \"noise\": []\n      },\n      \"flat_partition\": {\n        \"clusters\": [],\n        \"noise\": [\n          0,\n          1,\n          2,\n          3,\n          4,\n          5,\n          6,\n          7,\n          8,\n          9,\n          10,\n          11\n        ]\n      },\n      \"native_zero_stability_leaf_selected\": true,\n      \"oracle_flat_root_stability\": \"156/25\",\n      \"z\": 2\n    }\n  ],\n  \"rows\": 4,\n  \"scope\": \"two equivalent API ultrametrics, no 3D/Gamma/sklearn realization\",\n  \"status\": \"EXPECTED_PLATEAU_API_NONINVARIANCE\"\n}\n"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-point-plateau-condensation-20260930.6a2Rhm5t/judge.py",
+        "/tmp/mhgp10-point-plateau-condensation-20260930.6a2Rhm5t/logs/native_ubsan.stdout"
+      ],
+      "code": 0,
+      "end_ns": 37314974637081,
+      "end_utc": "2026-09-30T13:03:45.937369+00:00",
+      "name": "judge_ubsan_O",
+      "start_ns": 37314939843994,
+      "start_utc": "2026-09-30T13:03:45.902586+00:00",
+      "stderr": "",
+      "stdout": "{\n  \"GCP_used\": false,\n  \"equal_cut_checks\": 20,\n  \"new_native_calls\": 0,\n  \"pair_checks\": 576,\n  \"reports\": [\n    {\n      \"factored_exact_stabilities\": [\n        \"12/5\",\n        \"0\",\n        \"24/5\"\n      ],\n      \"factored_partition\": {\n        \"clusters\": [\n          [\n            0,\n            1,\n            2,\n            3,\n            4,\n            5\n          ],\n          [\n            6,\n            7,\n            8,\n            9,\n            10,\n            11\n          ]\n        ],\n        \"noise\": []\n      },\n      \"flat_partition\": {\n        \"clusters\": [],\n        \"noise\": [\n          0,\n          1,\n          2,\n          3,\n          4,\n          5,\n          6,\n          7,\n          8,\n          9,\n          10,\n          11\n        ]\n      },\n      \"native_zero_stability_leaf_selected\": true,\n      \"oracle_flat_root_stability\": \"36/5\",\n      \"z\": 1\n    },\n    {\n      \"factored_exact_stabilities\": [\n        \"12/25\",\n        \"0\",\n        \"144/25\"\n      ],\n      \"factored_partition\": {\n        \"clusters\": [\n          [\n            0,\n            1,\n            2,\n            3,\n            4,\n            5\n          ],\n          [\n            6,\n            7,\n            8,\n            9,\n            10,\n            11\n          ]\n        ],\n        \"noise\": []\n      },\n      \"flat_partition\": {\n        \"clusters\": [],\n        \"noise\": [\n          0,\n          1,\n          2,\n          3,\n          4,\n          5,\n          6,\n          7,\n          8,\n          9,\n          10,\n          11\n        ]\n      },\n      \"native_zero_stability_leaf_selected\": true,\n      \"oracle_flat_root_stability\": \"156/25\",\n      \"z\": 2\n    }\n  ],\n  \"rows\": 4,\n  \"scope\": \"two equivalent API ultrametrics, no 3D/Gamma/sklearn realization\",\n  \"status\": \"EXPECTED_PLATEAU_API_NONINVARIANCE\"\n}\n"
+    }
+  ],
+  "new_native_calls": 0,
+  "schema": "mhgp10.point_plateau.judges.v1",
+  "sources_after": {
+    "judge.py": "c5f446befd1e9cd79d9da6bd035e2b92a728500f004330198ab4ad7a2e3f8430",
+    "logs/native_normal.stdout": "eae5107a87802c2f31d33044d4c1adef833d5ae08f153b8dd6ffe9d04bfec1de",
+    "logs/native_ubsan.stdout": "eae5107a87802c2f31d33044d4c1adef833d5ae08f153b8dd6ffe9d04bfec1de",
+    "run_judges.py": "f6d65c3c18540923b48002eafd61370a94561c21cc40b8ae5ef8e84ea6a57080"
+  },
+  "sources_before": {
+    "judge.py": "c5f446befd1e9cd79d9da6bd035e2b92a728500f004330198ab4ad7a2e3f8430",
+    "logs/native_normal.stdout": "eae5107a87802c2f31d33044d4c1adef833d5ae08f153b8dd6ffe9d04bfec1de",
+    "logs/native_ubsan.stdout": "eae5107a87802c2f31d33044d4c1adef833d5ae08f153b8dd6ffe9d04bfec1de",
+    "run_judges.py": "f6d65c3c18540923b48002eafd61370a94561c21cc40b8ae5ef8e84ea6a57080"
+  },
+  "status": "CAPTURED"
+}

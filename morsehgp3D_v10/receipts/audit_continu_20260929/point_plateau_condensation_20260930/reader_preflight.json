@@ -1,0 +1,12 @@
+{
+  "argv": [
+    "python3",
+    "-B",
+    "verify.py"
+  ],
+  "chunk_id": "5b5dc1",
+  "wall_time_seconds": 0.12013646,
+  "exit_code": 1,
+  "original_token_count": 187,
+  "output": "Traceback (most recent call last):\n  File \"/tmp/mhgp10-point-plateau-condensation-20260930.6a2Rhm5t/verify.py\", line 139, in <module>\n    if __name__=='__main__': main()\n                             ^^^^^^\n  File \"/tmp/mhgp10-point-plateau-condensation-20260930.6a2Rhm5t/verify.py\", line 108, in main\n    native_receipt(load('receipt.json'))\n  File \"/tmp/mhgp10-point-plateau-condensation-20260930.6a2Rhm5t/verify.py\", line 87, in native_receipt\n    require((ROOT/(prefix+'logs/'+c['name']+'.'+s)).read_text()==c[s],'linked native log')\n  File \"/tmp/mhgp10-point-plateau-condensation-20260930.6a2Rhm5t/verify.py\", line 33, in require\n    if not ok: raise ValueError(message)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^\nValueError: linked native log\n"
+}

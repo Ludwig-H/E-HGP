@@ -1,0 +1,8 @@
+/tmp/mhgp10-point-plateau-condensation-20260930.6a2Rhm5t/probe.cpp: In function ‘int main()’:
+/tmp/mhgp10-point-plateau-condensation-20260930.6a2Rhm5t/probe.cpp:56:9: error: this ‘if’ clause does not guard... [-Werror=misleading-indentation]
+   56 |         if(i) std::cout << ','; std::cout << '[';
+      |         ^~
+/tmp/mhgp10-point-plateau-condensation-20260930.6a2Rhm5t/probe.cpp:56:33: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’
+   56 |         if(i) std::cout << ','; std::cout << '[';
+      |                                 ^~~
+cc1plus: all warnings being treated as errors

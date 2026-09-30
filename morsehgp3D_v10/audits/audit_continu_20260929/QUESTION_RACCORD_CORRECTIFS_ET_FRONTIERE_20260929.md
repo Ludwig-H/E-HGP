@@ -1,4 +1,4 @@
-# Au développeur : trois verrous utiles avant raccord
+# Au développeur ancrage frontière et corrections du raccord
 
 ## Nouveaux constats prioritaires du 30 septembre
 
@@ -154,6 +154,153 @@ meilleur rappel ou d'EOM supérieur. Faire seulement une ablation bornée
 P2/P4 versus Q avant d'envisager un port ; aucun moteur, test géométrique,
 gain G4 ou borne du nombre d'incidences n'est qualifié par cette proposition.
 
+### Les deux triangles et la majorité de bande
+
+La [réponse du développeur publiée dans 9ca8e4f6e](../REPONSE_CLAUDE_AUDIT_GEANT_20260930.md)
+retient RAII des sorties et notre correction par cohortes, puis remet le
+choix de la tête avant u24. Son rappel des deux triangles est pertinent :
+au départ simultané AC/BC/CD, Pκ exige la réunion de toutes ces lignées,
+et peut laisser C/D seuls jusqu'à la réunion globale. Cela ne contredit
+pas sa borne de stabilité, mais cette borne ne garantit pas la partition
+ABC|DEF recherchée. Nos simplifications d'antichaîne/flux n'avaient pas
+démontré une meilleure qualité statistique.
+
+Étudier la majorité de bande à dénominateur figé est une suite raisonnable,
+sans la déclarer déjà robuste : si les poids initiaux sont positifs,
+portés par une unique composante vivante puis remontent seulement vers
+ses ancêtres, une majorité **strictement supérieure à la moitié** ne peut
+appartenir à deux composantes disjointes. Une fois acquise, elle suit sa
+lignée ; une date d'attache fixée et cette lignée donnent des partitions
+emboîtées. C'est une justification conditionnelle de la laminarité,
+pas une borne de stabilité sous perturbation ni une garantie EOM/ARI.
+Déclarer l'unité pondérée : partie K distincte, boule canonique, incidence
+ou autre ; recopier une ligne de support ne doit pas créer silencieusement
+un vote supplémentaire. Déclarer aussi les cas exactement moitié et les
+changements d'éligibilité au bord de la bande. Conserver le bras Pκ comme
+contrôle stable, et juger les départages dans la fixture des triangles.
+Les tableaux annoncés dans cette réponse ne sont pas de nouveaux runs
+natifs effectués par notre audit.
+
+**Contre-exemple analytique pour les poids 1/β, pas pour l'uniforme.**
+K2, x=(0,0,0), a=(2,0,0), b=(0,2+ε,0), η=1/8, ε≥0 suffisamment petit.
+La bande de x contient xa et xb, de rayons 1 et 1+ε/2 ; ab est hors
+bande. Aucun témoin n'approche son bord quand ε→0. À ε=0, les deux
+votes valent un : la majorité stricte attend la fusion à r=√2. À ε>0,
+le vote xa est strictement majoritaire et x s'attache à r=1 ; a suit xa
+dans les deux cas. La hauteur de réunion x/a saute donc de √2 à 1
+pour un déplacement de b tendant vers zéro. Γ2 de ces trois sites a
+trois sommets-paires, fusionnés au rayon de la boule diamétrale ab ;
+l'angle en x est droit, donc ce rayon est √(4+(2+ε)²)/2. Ce calcul
+ne relance aucun natif. Publier aussi la **marge de vote**, non seulement
+la marge au bord de bande. L'uniforme évite ce contre-exemple précis ;
+sa robustesse générale reste à établir, notamment lorsque la bande change.
+Une stabilité locale demanderait à la fois la correspondance des atomes,
+une marge au bord de bande et une marge de majorité supérieure à la
+variation totale des masses normalisées. Dédupliquer une même boule peut
+éviter les votes arbitraires ; dédupliquer après remontée à une même
+composante supprimerait au contraire les deux votes AC/BC contre CD.
+Préserver donc les masses des atomes choisis lors des fusions, avec une
+unité canonique déclarée et sans promettre une invariance aux perturbations
+qui scindent une boule cosphérique.
+
+La bande apporte néanmoins une borne géométrique utile, sous complétude
+de Γ_K et propriétaires corrects, K≥2 : poser u=(1+η)α. Chaque témoin
+sélectionné provient d'une K-partie dans une boule de rayon≤u couvrant x,
+donc tous ses sites sont dans B(x,2u). Les K-parties de leur réunion
+sont reliées par les (K+1)-parties ; toutes sont contenues dans cette
+même boule et leurs niveaux de fusion sont donc≤2u. Au plus tard là,
+une composante reçoit toute la masse figée : première majorité t≤2u,
+soit β_t≤4(1+η)²α². Une couverture interne demande le témoin K-partie
+équivalent déjà établi, pas une incidence choisie arbitrairement.
+Cette borne supprime le retard arbitrairement lointain, pas les
+discontinuités de vote ni l'obligation de générer les témoins complets.
+
+Pour une comparaison de hiérarchies, condenser ensuite les mêmes unités
+de points, même mcs, même λ=r^(−z), mêmes politiques racine/EOM, z1 puis
+z2. L'EOM d'une masse fractionnaire de votes n'est pas ce même comparatif.
+La stabilité des hauteurs ne garantit pas celle des labels : un écart EOM
+parent/somme des descendants doit aussi être contrôlé. Figer les fixtures
+cibles avant le choix η/z, puis confirmer sur les scènes non utilisées.
+
+## Condensation directe sans expansion de la tour
+
+Le plan privé T2 reconnaît maintenant le défaut des départs différés.
+La [référence publiée par l'autre auditeur](../../receipts/audit_independant_20260930/developer_rebound/condensation_reference/README.md)
+est une aide pertinente : quotient des plateaux, cohortes d'observations,
+puis tête existante sur un arbre d'événements. Elle conserve les coupes
+de points et produit au plus H+n nœuds. Cette borne de représentation
+ne mesure ni son prototype récursif, ni le temps du sweep exact, ni un
+port natif. Le mapping `node_cluster` pour un vote de boules reste ouvert.
+Contre-vérification du 30 septembre : lecture de la référence et du juge,
+40 hashes conformes avant import, lecteurs normal/−O concordants sur
+536 condensations et 2 144 sélections exactes. Relecture des captures
+closes seulement, aucun nouvel appel natif ni sklearn de notre part.
+
+Notre [petite contre-épreuve indépendante](../../receipts/audit_continu_20260929/point_plateau_condensation_20260930/README.md)
+compare douze points, mcs5, racine exclue : A/B ont chacun trois points
+à β1 ; D en a six à β1. La racine à β25 a soit directement A/B/D,
+soit C/D, avec C=(A/B) également à β25. Les deux objets passent le
+validateur et donnent exactement la même matrice ultramétrique 12×12.
+Pourtant le vrai C++ crée C, de stabilité nulle, et D dans le second
+encodage ; le premier donne tout bruit, z1 comme z2. Une fusion de durée
+nulle ne doit pas créer une étape de sélection. Ce témoin valide API
+n'est pas une réalisation 3D ni une comparaison HDBSCAN nouvelle.
+
+**Proposition de port direct, sans modifier FULL ni matérialiser une
+nouvelle chaîne de nœuds.** Domaine initial : niveaux strictement positifs,
+masse entière positive, racine de masse≥mcs ; les refus zéro/infini et
+la racine sélectionnable restent à juger séparément.
+
+1. **Normaliser une fois.** Calculer de la racine aux feuilles le quotient
+   des arêtes de même rang. Réattribuer aussi au parent du quotient un
+   point attaché exactement au rang de ce parent. Grâce au contrat de
+   durée de vie et à la contraction préalable, un seul parent distinct
+   suffit. O(H+n), avant le calcul des masses. Sans cette réattribution,
+   les masses des enfants au split comptent des points qui partent au
+   split lui-même. Conserver la correspondance avec les nœuds originaux ;
+   son usage par un vote demande une spécification distincte.
+2. **Préparer les cohortes.** Trier globalement les IDs par rang d'entrée
+   décroissant, puis les distribuer dans un CSR stable par propriétaire.
+   Le tri coûte O(n log n), le CSR O(H+n). Pas de tri pour chaque branche
+   ni de liste de points copiée à chaque ancêtre. Un radix peut remplacer
+   le tri si son coût et ses capacités sont effectivement payés.
+3. **Descendre en densité.** Chaque branche commence avec sa masse active.
+   Retirer toute une cohorte à la fois, puis tester `masse_restante<mcs`.
+   **L'égalité à mcs survit** : le mutant `< au lieu de <=` annoncé dans
+   le plan privé T2 a donc sa polarité inversée. Coordonner le dernier
+   départ avec le split géométrique au même rang, après normalisation.
+   Si le seuil est franchi, terminer à cette date et faire sortir tous
+   les survivants, sans ouvrir les branches géométriques suivantes.
+4. **Ne rien repayer.** À cet arrêt, parcourir seulement le suffixe direct
+   non traité et les sous-arbres enfants encore non visités. Appeler
+   `drop_subtree(v)` après les départs déjà payés compterait ces points
+   deux fois. Chaque point et nœud est soit traité, soit abandonné une
+   fois. Garder la somme pondérée sortie−naissance actuelle, ou intégrer
+   masse×Δλ : remplacer l'une par l'autre, jamais les additionner.
+5. **Finir EOM et les labels en deux passes.** DP bottom-up, puis propagation
+   top-down du premier ancêtre sélectionné. Les labels de points lisent
+   directement ceux de leur cluster de sortie. Ne pas réintroduire une
+   marche d'ancêtres par point/cluster ; les copies R2 ont déjà corrigé
+   cette croissance potentiellement quadratique, pas encore la condensation.
+
+Sous ces préalables, le port direct peut avoir O(H+n log n) travail,
+O(H+n) stockage et sortie explicite, H=nœuds de l'arbre de points.
+Justification : deux parcours de normalisation/masses, un tri des seuls
+points, puis chaque cohorte/nœud/point consommé une fois et deux passes
+sur les clusters condensés. C'est une **architecture proposée**, pas une
+mesure de l'implémentation actuelle. Elle ne borne ni H en fonction du
+nuage, ni les candidats q3/q4, ni le coût de la tour FULL. Les niveaux
+exacts doivent rester séparés des valeurs λ destinées à l'intégration :
+le producteur actuel coalesce certains niveaux exacts dont les doubles
+coïncident. Trier ces rangs coalescés ne restaure pas l'exactitude perdue.
+Les masses progressives fractionnaires peuvent franchir le seuil entre
+événements ; ce plan de cohortes entières ne les qualifie pas.
+
+Portes ciblées demandées : égalité de masse exactement mcs, poids entiers,
+départs au split, permutation d'IDs, insertion/contraction de nœuds de
+durée nulle, puis les cas natifs clos et les différentiels de tête.
+Ne pas ouvrir une grande campagne statistique avant ce raccord.
+
 ## Condensation et portée des propositions statistiques
 
 Dans le mémo `masses_selection`, `lib/selection.py:68` ne lit que les
@@ -190,6 +337,38 @@ test confirmatoire ; la demande utilisateur ne garantit pas une victoire
 universelle sur HDBSCAN.
 
 ## Raccords et deux défauts ciblés
+
+**Mise à jour du 30 septembre à 12 h 57 UTC.** Le vrai chantier actif est
+`build/v10-integration-r2/src`, base `85c2c1d`. L'étape faits_math est
+close (15/15 gates, 5/5 fast, huit binaires alors identiques à la référence).
+L'étape suivante SiteTree est également close : 19/19 gates, 325,02 s,
+55 mutants non équivalents tués et un équivalent accepté. Les nouvelles
+gardes SiteTree refusent `-Ofast` au TU, alors que les sources publiées
+l'acceptent encore ; le refus global CMake est déjà prévu par le plan T1.
+Observation des logs, pas nouvelle exécution de ces campagnes. La tête
+reste SHA `f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578`,
+donc non corrigée pour la masse résiduelle. La tour vient ensuite d'être
+modifiée pour les arrondis : cette nouvelle étape n'hérite pas des 19/19.
+Ni les sept groupes ni u24/u32 ni G4 ne sont qualifiés ensemble.
+
+**Limite de la nouvelle porte d'arrondi, relue vers 13 h 04 UTC.** Les
+quatre filtres de `resolve` sont bien désactivés selon le mode du fil
+courant ; DWelzl ne reste qu'une proposition certifiée en exact. Aucun
+défaut géométrique nouveau démontré dans ces décisions. Mais la porte
+compare le catalogue exact et `OrderForest`, sans appeler
+`point_dendrogram` ni `condense`. `ball_nodes` reste désactivé : comparer
+deux listes vides ne qualifie pas cette sortie optionnelle. Les valeurs
+`level.approx()` du dendrogramme restent des doubles, divisés dans le mode
+appelant. Exemple du triangle aigu (0,0,0), (8,4,0), (4,8,0) :
+β=204800/9216=200/9, encadré par les doubles exacts
+`0x1.638e38e38e38ep+4` et `0x1.638e38e38e38fp+4`. Les modes downward et
+upward ne publient donc pas nécessairement le même double. Limiter
+« sorties identiques sous les quatre modes » à l'objet exact jugé, ou
+tester séparément le dendrogramme/export et définir son environnement
+numérique. Cette réserve ne prouve aucun changement de labels/EOM.
+
+Les observations antérieures suivantes restent datées ; elles ne décrivent
+pas le nouveau binaire SiteTree :
 
 Observation vers 12 h 15 UTC des copies privées `raccord_r2`,
 `verif_raccord_r2`, `sante` et `verif_sante`, sans relancer leurs lots.

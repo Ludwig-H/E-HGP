@@ -1,0 +1,19 @@
+PLATEAU CONTRACTION / POINT-CONDENSATION API COUNTERTEST
+Prepared before compiler/native executions, 2026-09-30.
+Seven exact source Git blobs from 8bb4618e5c6c7c2bc8a5d7a1c2e189a4249d0047.
+No shared engine/source/build/docs modification, no cloud/Gamma/catalogue/GPU/GCP.
+Two valid PointDendrogram representations, same12unitpoints and ultrametric:
+ A:3points, B:3points, D:6points, births beta1, joins beta25.
+ Factored: C25 joins A/B, root25 joins C/D (zero-length C).
+ Flat: root25 joins A/B/D in one N-ary plateau.
+EOM, mcs5, global root excluded. z1 and z2, no leaf-selection API test.
+Expected strict-cut oracle: one big D continues root; root excluded =>allnoise.
+Expected actual frozen head: factored creates C and D; current EOM leaf rule
+also selects zero-stability C. Do not silently change this policy or claim
+an independent HDBSCAN invocation. Native output must be judged as observed.
+Two compilations(normal/UBSan), two native invocations, 4rows per invocation.
+UBSan halt_on_error, diagnostics retained, hashes source/compiler/binary before/after.
+Independent Fraction strict-cut oracle compares all12x12pairlevels, exact
+closed/open partitions and native labels/EOM stabilities. Normal and -O judges.
+Float tolerance only for diagnostic native stability/lambda, never cut decisions.
+Code0 denotes expected API non-invariance, not engine qualification.

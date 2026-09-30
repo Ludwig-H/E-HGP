@@ -1,0 +1,87 @@
+{
+  "GCP_used": false,
+  "binary_hashes": {},
+  "closed_utc": "2026-09-30T12:57:20.936557+00:00",
+  "commands": [
+    {
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "--version"
+      ],
+      "code": 0,
+      "end_ns": 36927819957868,
+      "end_utc": "2026-09-30T12:57:18.782694+00:00",
+      "name": "compiler",
+      "start_ns": 36927818212061,
+      "start_utc": "2026-09-30T12:57:18.780944+00:00",
+      "stderr": "",
+      "stdout": "x86_64-linux-gnu-g++-13 (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"
+    },
+    {
+      "argv": [
+        "/usr/bin/x86_64-linux-gnu-g++-13",
+        "-std=c++20",
+        "-O2",
+        "-Wall",
+        "-Wextra",
+        "-Wpedantic",
+        "-Werror",
+        "-I/tmp/mhgp10-point-plateau-condensation-20260930.6a2Rhm5t/source",
+        "/tmp/mhgp10-point-plateau-condensation-20260930.6a2Rhm5t/probe.cpp",
+        "/tmp/mhgp10-point-plateau-condensation-20260930.6a2Rhm5t/source/head/head.cpp",
+        "/tmp/mhgp10-point-plateau-condensation-20260930.6a2Rhm5t/source/points/dendrogram.cpp",
+        "-o",
+        "/tmp/mhgp10-point-plateau-binaries-20260930.vQNNp8mf/plateau_normal"
+      ],
+      "code": 1,
+      "end_ns": 36929972080045,
+      "end_utc": "2026-09-30T12:57:20.934812+00:00",
+      "name": "compile_normal",
+      "start_ns": 36927820076268,
+      "start_utc": "2026-09-30T12:57:18.782816+00:00",
+      "stderr": "/tmp/mhgp10-point-plateau-condensation-20260930.6a2Rhm5t/probe.cpp: In function ‘int main()’:\n/tmp/mhgp10-point-plateau-condensation-20260930.6a2Rhm5t/probe.cpp:56:9: error: this ‘if’ clause does not guard... [-Werror=misleading-indentation]\n   56 |         if(i) std::cout << ','; std::cout << '[';\n      |         ^~\n/tmp/mhgp10-point-plateau-condensation-20260930.6a2Rhm5t/probe.cpp:56:33: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the ‘if’\n   56 |         if(i) std::cout << ','; std::cout << '[';\n      |                                 ^~~\ncc1plus: all warnings being treated as errors\n",
+      "stdout": ""
+    }
+  ],
+  "compiler": "/usr/bin/x86_64-linux-gnu-g++-13",
+  "compiler_after": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+  "compiler_before": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
+  "errors": [
+    {
+      "error": "command failed: compile_normal",
+      "type": "ValueError"
+    }
+  ],
+  "native_invocations": 0,
+  "schema": "mhgp10.point_plateau.native.v1",
+  "shared_sources_modified": false,
+  "source_commit": "8bb4618e5c6c7c2bc8a5d7a1c2e189a4249d0047",
+  "source_frozen_utc": "2026-09-30T12:57:18.751245+00:00",
+  "sources_after": {
+    "PROTOCOL.txt": "049e57a4751fe833df83fe602bd5173d6feec019fb822efb9b5349edae991346",
+    "judge.py": "c5f446befd1e9cd79d9da6bd035e2b92a728500f004330198ab4ad7a2e3f8430",
+    "probe.cpp": "8d9965659c5af15722440879c36666d46e00947b3e8aa45a45beb6a7b515fdbb",
+    "record.py": "0cbda3cedd5b4895f0a1aee292473bb858eec0e0dc41a2a0cf2120942dc0abe6",
+    "source/core/reasons.def": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b",
+    "source/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "source/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "source/head/head.cpp": "f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578",
+    "source/head/head.hpp": "f2710f309a201bc1094dcb49af7acc418ca33b1887f8373d8934f965d072c5e9",
+    "source/points/dendrogram.cpp": "44711c93473cc31b675b5da29c07645d7c8a7cf686b540681a3da7e7b7c673d4",
+    "source/points/dendrogram.hpp": "3162508b979572a6a4da0b3f0c445b09baa5e2fd77ba826a8d57b25711c42d16"
+  },
+  "sources_before": {
+    "PROTOCOL.txt": "049e57a4751fe833df83fe602bd5173d6feec019fb822efb9b5349edae991346",
+    "judge.py": "c5f446befd1e9cd79d9da6bd035e2b92a728500f004330198ab4ad7a2e3f8430",
+    "probe.cpp": "8d9965659c5af15722440879c36666d46e00947b3e8aa45a45beb6a7b515fdbb",
+    "record.py": "0cbda3cedd5b4895f0a1aee292473bb858eec0e0dc41a2a0cf2120942dc0abe6",
+    "source/core/reasons.def": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b",
+    "source/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "source/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "source/head/head.cpp": "f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578",
+    "source/head/head.hpp": "f2710f309a201bc1094dcb49af7acc418ca33b1887f8373d8934f965d072c5e9",
+    "source/points/dendrogram.cpp": "44711c93473cc31b675b5da29c07645d7c8a7cf686b540681a3da7e7b7c673d4",
+    "source/points/dendrogram.hpp": "3162508b979572a6a4da0b3f0c445b09baa5e2fd77ba826a8d57b25711c42d16"
+  },
+  "status": "FAIL"
+}
