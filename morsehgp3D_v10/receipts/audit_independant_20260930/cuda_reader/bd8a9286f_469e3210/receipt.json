@@ -1,0 +1,57 @@
+{
+  "timestamp_utc": "2026-09-30T03:45:28.646561+00:00",
+  "reader_commit": "bd8a9286f1488e181fcbadbe12acfc0774b9ac18",
+  "checkout_observed": "bdc0b8f08ee37ee351996b29c5974f78415bc036",
+  "reader_before_commit": "bd8a9286f^",
+  "source_before_after_matches": true,
+  "closure_hashes": {
+    "cuda_probe.py": "469e3210c3001123b65d4e0f54d631f8dbc1d393f8839fbdabd8a123160462a5",
+    "cuda_probe.cu": "929cc77fe70a6e5893060c2d53a8e0e11210944b170a6ba90ecd359a13af09e2"
+  },
+  "files_sha256": {
+    "cuda_probe.py": "469e3210c3001123b65d4e0f54d631f8dbc1d393f8839fbdabd8a123160462a5",
+    "cuda_probe.cu": "929cc77fe70a6e5893060c2d53a8e0e11210944b170a6ba90ecd359a13af09e2",
+    "cuda_probe_before.py": "10a57047bf31841283ce6d33f710d865c6983b1f90522408f53cb5f68f546026",
+    "record_reader.py": "0a0becbba86164d5f5486a2cfa6805d79faae9753360ddbf4a30db11ee1e6b38",
+    "normal.json": "f41b88d88ec8aa32e9edc86123c5563d3c0ae598465bc6b9fd807f1f2d37e4f0",
+    "optimized.json": "6be969503a5112c05b3f2fba556f007fd78466d355715db23c8780fa980ad428",
+    "snapshot.json": "36d35978cfbfe2c007638b87fe0192d7f611c67e798a69e2e92f41a78a16ba9d"
+  },
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-S",
+        "-B",
+        "/tmp/mhgp10-cuda-reader-audit-20260930-wnzwuarc/record_reader.py"
+      ],
+      "exit_code": 0,
+      "output": "normal.json"
+    },
+    {
+      "argv": [
+        "python3",
+        "-O",
+        "-S",
+        "-B",
+        "/tmp/mhgp10-cuda-reader-audit-20260930-wnzwuarc/record_reader.py"
+      ],
+      "exit_code": 0,
+      "output": "optimized.json"
+    }
+  ],
+  "meaning_of_zero": "Capture script completed; failures are explicitly recorded in its JSON. Not a conforming audit gate.",
+  "pure_manual_cases_per_mode": 12,
+  "independent_spawn_error_simulations_per_mode": 2,
+  "developer_self_test_observed_per_mode": {
+    "judge_cases": 33,
+    "simulations": 7,
+    "code": 0
+  },
+  "findings": [
+    "Oversized standard JSON integers cause uncaught OverflowError in math.isfinite instead of verdict8.",
+    "Simulated OSError at compiler/probe spawn leaves no attempt.json in fresh writable output directory."
+  ],
+  "scope": "Manual JSON records and subprocess.run mocks only. No real nvcc, GPU, GCP, clustering, source mutation or held-out seed.",
+  "new_real_cuda_processes": 0
+}

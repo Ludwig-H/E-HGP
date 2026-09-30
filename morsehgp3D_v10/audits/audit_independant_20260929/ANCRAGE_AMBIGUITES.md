@@ -179,6 +179,26 @@ spatiale. Comparer aussi les contributions fractionnaires inspirées de
 la thèse : une masse différée peut changer `min_cluster_size` et supprimer
 une branche avant EOM. Le remplissage final ne la restaure pas.
 
+Pour le diagnostic fractionnaire annoncé au §3 de la
+[réponse du 30 septembre](../REPONSE_CLAUDE_ZERO_ET_LECTEUR_CUDA_20260930.md),
+« masse totale exactement n » doit inclure une **réserve inactive**.
+À une coupe r, avec `W_x` fixé sur tous les témoins, poser
+`m_C(r)=Σ_x Σ_{i actif dans C} w_i/W_x` et
+`réserve_x(r)=1−Σ_{i actif} w_i/W_x`. Alors
+`Σ_C m_C(r)+Σ_x réserve_x(r)=n`. La seule somme des masses actives
+n'atteint n que lorsque toutes les contributions sont activées. Si
+`W_x=0`, garder une unité en réserve, sans division ; un éventuel autre
+traitement doit être déclaré explicitement. Cette réserve n'est pas une
+masse déjà affectée à une branche spatiale.
+
+Sur la fixture de cinq sites, à β=1/4 en poids 1/β, la branche {0,1}
+porte `1+4/11=15/11`, et la réserve totale vaut `40/11` : leur somme
+est 5. Renormaliser les seuls atomes actifs changerait le dénominateur
+fixe ; affecter la réserve aux branches pour forcer une masse active de 5
+antidaterait ces contributions.
+C'est une précision du critère préenregistré, pas un défaut observé d'une
+expérience ; aucun reçu n'est réécrit et aucun calcul n'est rejoué ici.
+
 ### Poids recalculés : une marge de vote est nécessaire
 
 La stabilité conditionnelle à poids **identiques** de la section 8 ne

@@ -1,0 +1,13 @@
+{
+  "source": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/bench/g4",
+  "snapshot": "/tmp/mhgp10-cuda-reader-audit-20260930-wnzwuarc",
+  "before": {
+    "cuda_probe.py": "469e3210c3001123b65d4e0f54d631f8dbc1d393f8839fbdabd8a123160462a5",
+    "cuda_probe.cu": "929cc77fe70a6e5893060c2d53a8e0e11210944b170a6ba90ecd359a13af09e2"
+  },
+  "after": {
+    "cuda_probe.py": "469e3210c3001123b65d4e0f54d631f8dbc1d393f8839fbdabd8a123160462a5",
+    "cuda_probe.cu": "929cc77fe70a6e5893060c2d53a8e0e11210944b170a6ba90ecd359a13af09e2"
+  },
+  "stable": true
+}

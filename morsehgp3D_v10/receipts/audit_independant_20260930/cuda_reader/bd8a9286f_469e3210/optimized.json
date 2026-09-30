@@ -1,0 +1,170 @@
+{
+  "optimized": true,
+  "cases": [
+    {
+      "name": "manual_complete",
+      "code": 0,
+      "raw": "{\"status\": \"ok\", \"device\": \"manual GPU fixture\", \"cc\": \"12.0\", \"sms\": 188, \"global_mem_gib\": 94.9, \"cuda_error\": \"no error\", \"i128_pairs\": 16777216, \"i128_equal_cases\": 2011255, \"i128_mismatches\": 0, \"timing_ok\": true, \"loop64_gops\": 100.0, \"loop128_gops\": 50.0, \"i128_over_i64\": 2.0, \"h2d_gbps\": 20.0, \"d2h_gbps\": 20.0, \"launch_sync_us\": 5.0, \"launch_async_us\": 2.0, \"loops\": \"modular_unsigned\"}",
+      "expected": 0,
+      "got": 0,
+      "reasons": [],
+      "old_reader_code": 0,
+      "conforms": true
+    },
+    {
+      "name": "status_only",
+      "code": 0,
+      "raw": "{\"status\":\"ok\"}",
+      "expected": 8,
+      "got": 8,
+      "reasons": [
+        "champs manquants : cc, cuda_error, d2h_gbps, device, global_mem_gib, h2d_gbps, i128_equal_cases, i128_mismatches, i128_over_i64, i128_pairs, launch_async_us, launch_sync_us, loop128_gops, loop64_gops, loops, sms, timing_ok"
+      ],
+      "old_reader_code": 0,
+      "conforms": true
+    },
+    {
+      "name": "duplicate_status",
+      "code": 0,
+      "raw": "{\"status\": \"ok\", \"device\": \"manual GPU fixture\", \"cc\": \"12.0\", \"sms\": 188, \"global_mem_gib\": 94.9, \"cuda_error\": \"no error\", \"i128_pairs\": 16777216, \"i128_equal_cases\": 2011255, \"i128_mismatches\": 0, \"timing_ok\": true, \"loop64_gops\": 100.0, \"loop128_gops\": 50.0, \"i128_over_i64\": 2.0, \"h2d_gbps\": 20.0, \"d2h_gbps\": 20.0, \"launch_sync_us\": 5.0, \"launch_async_us\": 2.0, \"loops\": \"modular_unsigned\",\"status\":\"ok\"}",
+      "expected": 8,
+      "got": 8,
+      "reasons": [
+        "cle JSON dupliquee"
+      ],
+      "old_reader_code": 0,
+      "conforms": true
+    },
+    {
+      "name": "mismatch",
+      "code": 0,
+      "raw": "{\"status\": \"ok\", \"device\": \"manual GPU fixture\", \"cc\": \"12.0\", \"sms\": 188, \"global_mem_gib\": 94.9, \"cuda_error\": \"no error\", \"i128_pairs\": 16777216, \"i128_equal_cases\": 2011255, \"i128_mismatches\": 1, \"timing_ok\": true, \"loop64_gops\": 100.0, \"loop128_gops\": 50.0, \"i128_over_i64\": 2.0, \"h2d_gbps\": 20.0, \"d2h_gbps\": 20.0, \"launch_sync_us\": 5.0, \"launch_async_us\": 2.0, \"loops\": \"modular_unsigned\"}",
+      "expected": 8,
+      "got": 8,
+      "reasons": [
+        "ok avec 1 desaccords i128"
+      ],
+      "old_reader_code": 0,
+      "conforms": true
+    },
+    {
+      "name": "wrong_type",
+      "code": 0,
+      "raw": "{\"status\": \"ok\", \"device\": \"manual GPU fixture\", \"cc\": \"12.0\", \"sms\": true, \"global_mem_gib\": 94.9, \"cuda_error\": \"no error\", \"i128_pairs\": 16777216, \"i128_equal_cases\": 2011255, \"i128_mismatches\": 0, \"timing_ok\": true, \"loop64_gops\": 100.0, \"loop128_gops\": 50.0, \"i128_over_i64\": 2.0, \"h2d_gbps\": 20.0, \"d2h_gbps\": 20.0, \"launch_sync_us\": 5.0, \"launch_async_us\": 2.0, \"loops\": \"modular_unsigned\"}",
+      "expected": 8,
+      "got": 8,
+      "reasons": [
+        "type de sms : True"
+      ],
+      "old_reader_code": 0,
+      "conforms": true
+    },
+    {
+      "name": "missing_equal",
+      "code": 0,
+      "raw": "{\"status\": \"ok\", \"device\": \"manual GPU fixture\", \"cc\": \"12.0\", \"sms\": 188, \"global_mem_gib\": 94.9, \"cuda_error\": \"no error\", \"i128_pairs\": 16777216, \"i128_equal_cases\": 0, \"i128_mismatches\": 0, \"timing_ok\": true, \"loop64_gops\": 100.0, \"loop128_gops\": 50.0, \"i128_over_i64\": 2.0, \"h2d_gbps\": 20.0, \"d2h_gbps\": 20.0, \"launch_sync_us\": 5.0, \"launch_async_us\": 2.0, \"loops\": \"modular_unsigned\"}",
+      "expected": 8,
+      "got": 8,
+      "reasons": [
+        "egalites forcees absentes ou hors bornes : 0"
+      ],
+      "old_reader_code": 0,
+      "conforms": true
+    },
+    {
+      "name": "negative_rate",
+      "code": 0,
+      "raw": "{\"status\": \"ok\", \"device\": \"manual GPU fixture\", \"cc\": \"12.0\", \"sms\": 188, \"global_mem_gib\": 94.9, \"cuda_error\": \"no error\", \"i128_pairs\": 16777216, \"i128_equal_cases\": 2011255, \"i128_mismatches\": 0, \"timing_ok\": true, \"loop64_gops\": -1, \"loop128_gops\": 50.0, \"i128_over_i64\": 2.0, \"h2d_gbps\": 20.0, \"d2h_gbps\": 20.0, \"launch_sync_us\": 5.0, \"launch_async_us\": 2.0, \"loops\": \"modular_unsigned\"}",
+      "expected": 8,
+      "got": 8,
+      "reasons": [
+        "ok avec loop64_gops <= 0"
+      ],
+      "old_reader_code": 0,
+      "conforms": true
+    },
+    {
+      "name": "enormous_integer_rate",
+      "code": 0,
+      "raw": "{\"status\": \"ok\", \"device\": \"manual GPU fixture\", \"cc\": \"12.0\", \"sms\": 188, \"global_mem_gib\": 94.9, \"cuda_error\": \"no error\", \"i128_pairs\": 16777216, \"i128_equal_cases\": 2011255, \"i128_mismatches\": 0, \"timing_ok\": true, \"loop64_gops\": 10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000, \"loop128_gops\": 50.0, \"i128_over_i64\": 2.0, \"h2d_gbps\": 20.0, \"d2h_gbps\": 20.0, \"launch_sync_us\": 5.0, \"launch_async_us\": 2.0, \"loops\": \"modular_unsigned\"}",
+      "expected": 8,
+      "exception": "OverflowError",
+      "detail": "int too large to convert to float",
+      "old_reader_code": 0,
+      "conforms": false
+    },
+    {
+      "name": "enormous_integer_memory",
+      "code": 0,
+      "raw": "{\"status\": \"ok\", \"device\": \"manual GPU fixture\", \"cc\": \"12.0\", \"sms\": 188, \"global_mem_gib\": 10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000, \"cuda_error\": \"no error\", \"i128_pairs\": 16777216, \"i128_equal_cases\": 2011255, \"i128_mismatches\": 0, \"timing_ok\": true, \"loop64_gops\": 100.0, \"loop128_gops\": 50.0, \"i128_over_i64\": 2.0, \"h2d_gbps\": 20.0, \"d2h_gbps\": 20.0, \"launch_sync_us\": 5.0, \"launch_async_us\": 2.0, \"loops\": \"modular_unsigned\"}",
+      "expected": 8,
+      "exception": "OverflowError",
+      "detail": "int too large to convert to float",
+      "old_reader_code": 0,
+      "conforms": false
+    },
+    {
+      "name": "overflow_float_lexeme",
+      "code": 0,
+      "raw": "{\"status\": \"ok\", \"device\": \"manual GPU fixture\", \"cc\": \"12.0\", \"sms\": 188, \"global_mem_gib\": 94.9, \"cuda_error\": \"no error\", \"i128_pairs\": 16777216, \"i128_equal_cases\": 2011255, \"i128_mismatches\": 0, \"timing_ok\": true, \"loop64_gops\": 1e400, \"loop128_gops\": 50.0, \"i128_over_i64\": 2.0, \"h2d_gbps\": 20.0, \"d2h_gbps\": 20.0, \"launch_sync_us\": 5.0, \"launch_async_us\": 2.0, \"loops\": \"modular_unsigned\"}",
+      "expected": 8,
+      "got": 8,
+      "reasons": [
+        "loop64_gops non fini"
+      ],
+      "old_reader_code": 0,
+      "conforms": true
+    },
+    {
+      "name": "nonstandard_nan",
+      "code": 0,
+      "raw": "{\"status\": \"ok\", \"device\": \"manual GPU fixture\", \"cc\": \"12.0\", \"sms\": 188, \"global_mem_gib\": 94.9, \"cuda_error\": \"no error\", \"i128_pairs\": 16777216, \"i128_equal_cases\": 2011255, \"i128_mismatches\": 0, \"timing_ok\": true, \"loop64_gops\": NaN, \"loop128_gops\": 50.0, \"i128_over_i64\": 2.0, \"h2d_gbps\": 20.0, \"d2h_gbps\": 20.0, \"launch_sync_us\": 5.0, \"launch_async_us\": 2.0, \"loops\": \"modular_unsigned\"}",
+      "expected": 8,
+      "got": 8,
+      "reasons": [
+        "constante JSON non standard : NaN"
+      ],
+      "old_reader_code": 0,
+      "conforms": true
+    },
+    {
+      "name": "no_cuda",
+      "code": 2,
+      "raw": "{\"status\":\"no_cuda\"}",
+      "expected": 2,
+      "got": 2,
+      "reasons": [],
+      "old_reader_code": 2,
+      "conforms": true
+    }
+  ],
+  "simulated_paths": [
+    {
+      "exception": "PermissionError",
+      "detail": "[Errno 13] manual simulated spawn failure",
+      "name": "compile_spawn_oserror",
+      "subprocess_calls": 1,
+      "expected_attempt": true,
+      "attempt_exists": false,
+      "output_files": [],
+      "stdout": ""
+    },
+    {
+      "exception": "PermissionError",
+      "detail": "[Errno 13] manual simulated spawn failure",
+      "name": "probe_spawn_oserror",
+      "subprocess_calls": 2,
+      "expected_attempt": true,
+      "attempt_exists": false,
+      "output_files": [
+        "compile.txt"
+      ],
+      "stdout": ""
+    }
+  ],
+  "developer_self_test": {
+    "code": 0,
+    "stdout": "{\"self_test\": \"ok\", \"cas_juge\": 33, \"simulations\": 7, \"echecs\": []}\n"
+  },
+  "real_cuda_processes": 0
+}

@@ -1,16 +1,20 @@
 # Contre-audit courant : correctifs de la tête et du banc
 
-Mise à jour du 30 septembre 2026, checkout `e9eab2754`. `public_status=not_claimed`. Référence :
+Mise à jour du 30 septembre 2026 : tête/bancs relus à `e9eab2754`, lecteur CUDA de `bd8a9286f` relu à `bdc0b8f08`.
+`public_status=not_claimed`. Référence :
 [TETE_BANCS_PREUVES.md](TETE_BANCS_PREUVES.md) et
-[réponse de raccord du développeur](../REPONSE_CLAUDE_CONTRE_AUDITS_ET_RACCORD_20260929.md), §1–3.
+[réponse de raccord du développeur](../REPONSE_CLAUDE_CONTRE_AUDITS_ET_RACCORD_20260929.md), §1–3 ;
+[réponse zéro et lecteur CUDA](../REPONSE_CLAUDE_ZERO_ET_LECTEUR_CUDA_20260930.md).
 
-**État : second tour en chantier, H3 et domaine des métriques encore ouverts dans les copies disponibles ;
-qualification commune en attente.** Les extractions `/tmp/mhgp10-r2/tete/src/morsehgp3D_v10` et
-`/tmp/mhgp10-r2/bancs/src/morsehgp3D_v10` contiennent encore les unités du premier tour. Leurs
+**Dernière lecture tête/bancs : second tour en chantier à `e9eab2754`, H3 et domaine des métriques encore ouverts
+dans les copies alors disponibles ; qualification commune en attente.** Les extractions
+`/tmp/mhgp10-r2/tete/src/morsehgp3D_v10` et `/tmp/mhgp10-r2/bancs/src/morsehgp3D_v10` contenaient les unités du premier tour. Leurs
 [empreintes de lecture](../../receipts/audit_independant_20260930/head_bench/sources_read_20260930.json)
-sont stables avant/après ; les sources intégrées restent antérieures. Aucun snapshot commun recevant tous les
+sont stables avant/après ; les sources intégrées observées restaient antérieures. Aucun snapshot commun recevant tous les
 correctifs et qualifié n'a été identifié à cette lecture. La garde H3 conjointe et le domaine des métriques sont
 annoncés, mais pas encore présents dans ces unités. Les défauts déjà capturés ne sont pas rejoués sur du code identique.
+Le lecteur CUDA intégré est contre-vérifié séparément ci-dessous : les anciennes enveloppes sont refusées, mais deux
+chemins échappent encore au protocole de refus ou au journal de tentative. Cette vérification ne qualifie pas un GPU.
 
 | Fichier de la copie | SHA-256 |
 | --- | --- |
@@ -78,7 +82,8 @@ doivent être explicites avant le calcul, et le contrat API doit exiger cette va
 
 La condition « nœud né à zéro de masse ≥ mcs refusé » ne couvre pas à elle seule le dernier cas. La protection
 vient du λ effectivement consommé : une petite feuille abandonnée à une fusion positive et une racine singleton
-légère ont des parcours différents. Les unités courantes ne portent encore aucune garde conjointe.
+légère ont des parcours différents. La réponse du 30 septembre accepte ce refus, racine comprise ; les unités
+hachées à `e9eab2754` ne portaient encore aucune garde conjointe. Le correctif et son intégration restent à qualifier.
 
 Pour H4, le peigne doit passer avec les mêmes labels, puis une véritable remontée quadratique doit échouer sur
 une observable externe. La porte disponible lit encore `ancestor_steps` calculé par le code sous test ; sa borne
@@ -90,6 +95,42 @@ ligne manquante, doublon, scène ou méthode hors plan, métadonnées ou épingl
 sur une ligne non refusée. Conserver le témoin `refused=1` avec NaN (score substitué par zéro) et les scores négatifs
 valides. Une fusion partielle peut préparer la suite, pas produire la décision confirmatoire. Le rejeu normal/−O et
 la simulation déterministe de la course de lancement doivent ensuite porter sur les empreintes finales communes.
+
+## Lecteur CUDA intégré — schéma corrigé, deux chemins de refus à compléter
+
+Source `bench/g4/cuda_probe.py` du commit `bd8a9286f`, SHA-256
+`469e3210c3001123b65d4e0f54d631f8dbc1d393f8839fbdabd8a123160462a5` ; sonde native inchangée
+`929cc77fe70a6e5893060c2d53a8e0e11210944b170a6ba90ecd359a13af09e2`. Le snapshot et ses empreintes ont été
+fermés avant/après dans le [reçu neuf](../../receipts/audit_independant_20260930/cuda_reader/bd8a9286f_469e3210/receipt.json).
+Douze petits JSON manuels et deux erreurs de lancement simulées sont exécutés en Python nu normal et −O. Aucun
+processus nvcc/CUDA, GPU ou GCP réel n'est lancé ; les captures antérieures restent intactes.
+
+Le contrôle complet manuel et `no_cuda` sont acceptés. Statut seul, clé dupliquée, mauvais type, désaccord i128,
+égalités absentes, débit négatif, NaN et exposant numérique débordant sont refusés. Pour ces mutations, l'ancien
+lecteur rendait 0. Le correctif est donc pertinent et causal sur ces enveloppes. L'auto-test du développeur est aussi
+rejoué : 33 cas du juge et sept chemins simulés passent dans les deux modes.
+
+**CUD1 — P2, valeur JSON faisant sortir du juge.** Un JSON complet où `loop64_gops`, puis `global_mem_gib`, vaut
+l'entier `10**400` lève `OverflowError: int too large to convert to float`, au lieu du verdict 8.
+`_is_type()` à `cuda_probe.py:83–84` accepte cet entier comme nombre, puis `math.isfinite()` à la ligne 113 le
+convertit sans garde. Le nombre est du JSON standard ; aucune constante NaN/Infinity ou récursion profonde n'est
+nécessaire. Le même enregistrement sous la forme flottante `1e400` est correctement refusé. La capture
+[normal](../../receipts/audit_independant_20260930/cuda_reader/bd8a9286f_469e3210/normal.json) et celle
+[−O](../../receipts/audit_independant_20260930/cuda_reader/bd8a9286f_469e3210/optimized.json) concordent.
+Une conversion bornée ou un test de finitude qui traite `OverflowError` comme une valeur hors domaine suffit ;
+la fixture doit rendre 8 sans exception dans la fonction pure, puis conserver `attempt.json` via le lanceur.
+
+**CUD2 — P2, tentative non journalisée si le lancement échoue.** Dans un dossier neuf créé et accessible, un
+`PermissionError` simulé de `subprocess.run()` au lancement de nvcc (`cuda_probe.py:210`) sort de `main()` et ne
+laisse aucun fichier. La même erreur au lancement de la sonde (ligne 218) laisse seulement `compile.txt` ; aucun
+`attempt.json` dans les deux cas. Les appels sont remplacés par mocks, donc aucun compilateur ni sonde n'est
+exécuté. La promesse « attempt.json toujours écrit » du §2 de la réponse ne couvre pas encore ces chemins.
+Journaliser le début de tentative, puis capturer les erreurs système de lancement avec un code et une étape
+déclarés ferme cette cause ; cela ne requiert aucune campagne GPU.
+
+Le script de capture rend 0 parce qu'il a enregistré ces résultats, y compris les exceptions attendues par l'audit ;
+ce code n'est pas une porte de conformité verte. Ces deux constats ne réfutent aucun débit archivé et ne rouvrent pas
+les scénarios de délai/signal déjà réussis par l'auto-test. Ils bornent la fermeture du lecteur et de sa traçabilité.
 
 ## Ce qui doit fermer les constats
 

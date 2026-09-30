@@ -43,8 +43,8 @@ n'exécute aucun test et refuse d'écraser une capture. Les 40 entrées sont sta
 | Domaine produit de feuille | Garde `M=0` ou `M≥K+3` présente dans `entrees_cli`, lignes 637–648 ; K et bits sont vérifiés auparavant. | Témoin aux bords M=K+2/K+3, défaut M=0 conservé, conversion numérique stricte avant u32. Cette restriction ne prouve aucune borne générale sur les dégénérescences. |
 | Diagnostic petite feuille | `--allow-small-leaf`, `--max-nodes` et champs associés encore absents. | Opt-in explicite M≥K avec budget positif obligatoire ; M<K refusé. Un budget épuisé rend resource_exhausted sans dump ni catalogue réussi sur un préfixe, quel que soit le nombre de fils. |
 
-La lecture SiteTree indépendante, lue dans le worktree mais encore non publiée à cette capture
-(`audit_continu_20260929/catalogue/CONTRE_AUDIT_SITETREE_CORRIGE_20260929.md`),
+La [lecture SiteTree indépendante](../audit_continu_20260929/catalogue/CONTRE_AUDIT_SITETREE_CORRIGE_20260929.md),
+non publiée à la capture de 03 h 12 puis publiée en `96f42370a`,
 prouve déjà la correction G1 sur cette même unité et décrit les trois planchers d'arrondi échoués ; elle n'est
 pas rejouée ici. `filtered=false` sélectionne un chemin, sans valider un Center forgé : la précondition de
 représentation de `side_key` reste nécessaire. Le nuage 21 bits de la gate ne qualifie que des centres de site ou
