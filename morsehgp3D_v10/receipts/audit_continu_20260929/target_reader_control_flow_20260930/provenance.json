@@ -1,0 +1,30 @@
+{
+  "schema": "mhgp10.target_reader.provenance.v1",
+  "origin": "/workspaces/E-HGP/build/v10-verrou-points/fixtures_cibles/lib",
+  "observations": [
+    {
+      "observed_utc": "2026-09-30T14:08:18Z",
+      "hashes": {
+        "run_target.py": "41e92016a967180812549e5c3851b79baf510110404e5b333f600973193d50cf",
+        "valide_lib.py": "94a96b1f0fcdd5032e13323aa065e44bb16f5e27abd397f5c1e16fcbebd2e6ad",
+        "regles.py": "517957e4e48d0f5b8f6e129955c2fc63b0d23613fa472a990d788b7e8d18bfd6"
+      }
+    },
+    {
+      "observed_utc": "2026-09-30T14:14:35Z",
+      "hashes": {
+        "run_target.py": "41e92016a967180812549e5c3851b79baf510110404e5b333f600973193d50cf",
+        "valide_lib.py": "94a96b1f0fcdd5032e13323aa065e44bb16f5e27abd397f5c1e16fcbebd2e6ad",
+        "regles.py": "517957e4e48d0f5b8f6e129955c2fc63b0d23613fa472a990d788b7e8d18bfd6"
+      }
+    }
+  ],
+  "copied_files": [
+    "run_target.py",
+    "valide_lib.py"
+  ],
+  "regles_not_executed": true,
+  "shared_sources_modified": false,
+  "native_invocations": 0,
+  "GCP_used": false
+}

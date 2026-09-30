@@ -1,0 +1,35 @@
+{
+  "schema": "mhgp10.target_reader.preflight2.v1",
+  "scope": "private harness stub-points accepted dict only; no engine defect",
+  "commands": [
+    {
+      "name": "normal",
+      "argv": [
+        "python3",
+        "-B",
+        "/tmp/mhgp10-target-reader-audit-20260930.9ZbrpwSQ/micro.py"
+      ],
+      "code": 1,
+      "start_utc": "2026-09-30T14:12:21.664Z",
+      "end_utc": "2026-09-30T14:12:21.883Z",
+      "tool_wall_seconds": 0.024730328,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/tmp/mhgp10-target-reader-audit-20260930.9ZbrpwSQ/micro.py\", line 222, in <module>\n    main()\n  File \"/tmp/mhgp10-target-reader-audit-20260930.9ZbrpwSQ/micro.py\", line 211, in main\n    \"empty_variant\": empty_target_cases(),\n                     ^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/mhgp10-target-reader-audit-20260930.9ZbrpwSQ/micro.py\", line 177, in empty_target_cases\n    normalized = namespace[\"normaliser\"](raw, \"in_memory_fixture\")\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"source/run_target.py\", line 183, in normaliser\n  File \"/tmp/mhgp10-target-reader-audit-20260930.9ZbrpwSQ/micro.py\", line 121, in stub_points\n    return [(name, tuple(xyz)) for name, xyz in points.items()]\n                                                ^^^^^^^^^^^^\nAttributeError: 'list' object has no attribute 'items'\n"
+    },
+    {
+      "name": "optimized",
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-target-reader-audit-20260930.9ZbrpwSQ/micro.py"
+      ],
+      "code": 1,
+      "start_utc": "2026-09-30T14:12:21.884Z",
+      "end_utc": "2026-09-30T14:12:22.136Z",
+      "tool_wall_seconds": 0.069432178,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/tmp/mhgp10-target-reader-audit-20260930.9ZbrpwSQ/micro.py\", line 222, in <module>\n    main()\n  File \"/tmp/mhgp10-target-reader-audit-20260930.9ZbrpwSQ/micro.py\", line 211, in main\n    \"empty_variant\": empty_target_cases(),\n                     ^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/mhgp10-target-reader-audit-20260930.9ZbrpwSQ/micro.py\", line 177, in empty_target_cases\n    normalized = namespace[\"normaliser\"](raw, \"in_memory_fixture\")\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"source/run_target.py\", line 183, in normaliser\n  File \"/tmp/mhgp10-target-reader-audit-20260930.9ZbrpwSQ/micro.py\", line 121, in stub_points\n    return [(name, tuple(xyz)) for name, xyz in points.items()]\n                                                ^^^^^^^^^^^^\nAttributeError: 'list' object has no attribute 'items'\n"
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+{"argv": ["NOT_EXECUTED"], "call": "catalogue", "code": 0, "cpu_s": 0.01, "file": "fixture.u32le", "k": 5, "max_rss_kb": 1, "stderr": "", "stdout": "{\"status\": \"ok\", \"balls\": 7, \"fixture\": \"catalogue\"}\n", "threads": 1, "timed_out": false, "wall_s": 0.01}
+{"argv": ["NOT_EXECUTED"], "call": "tower", "code": 0, "cpu_s": 0.01, "file": "fixture.u32le", "k": 5, "max_rss_kb": 1, "stderr": "", "stdout": "{\"status\": \"ok\", \"balls\": 7, \"fixture\": \"tower\"}\n", "threads": 1, "timed_out": false, "wall_s": 0.01}

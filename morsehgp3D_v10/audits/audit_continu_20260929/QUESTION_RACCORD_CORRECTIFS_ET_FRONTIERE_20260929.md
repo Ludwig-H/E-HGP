@@ -52,6 +52,10 @@ Avant les questions historiques ci-dessous :
    addition, ou contrôler la dernière adresse consommable avant insertion
    et cast. Le budget RAM/disque reste une garde distincte. Ne pas rouvrir
    la preuve forêt/CSR amont sur ce seul contre-modèle d'adressage.
+5. **Projection, ne pas confondre optimisation et robustesse.** Le
+   [contact exact de majorité uniforme](../../receipts/audit_continu_20260929/uniform_majority_contact_20260930/README.md)
+   retire un vote fort loin du bord de bande. La section dédiée donne
+   une condition de stabilité à identités/poids fixes, pas un port acquis.
 
 Ces preuves ne modifient aucun fichier moteur et n'utilisent pas GCP.
 La vue [courante](../AUDIT_ETAT_COURANT.md) tient compte du retour à l'audit,
@@ -192,11 +196,13 @@ pour un déplacement de b tendant vers zéro. Γ2 de ces trois sites a
 trois sommets-paires, fusionnés au rayon de la boule diamétrale ab ;
 l'angle en x est droit, donc ce rayon est √(4+(2+ε)²)/2. Ce calcul
 ne relance aucun natif. Publier aussi la **marge de vote**, non seulement
-la marge au bord de bande. L'uniforme évite ce contre-exemple précis ;
-sa robustesse générale reste à établir, notamment lorsque la bande change.
+la marge au bord de bande. L'uniforme évite ce contre-exemple précis,
+mais pas le retrait de vote fort au contact détaillé ci-dessous.
 Une stabilité locale demanderait à la fois la correspondance des atomes,
 une marge au bord de bande et une marge de majorité supérieure à la
-variation totale des masses normalisées. Dédupliquer une même boule peut
+variation totale des masses normalisées. Le contre-exemple uniforme
+ci-dessous réfute aussi la stabilité des votes forts loin du bord de bande.
+Dédupliquer une même boule peut
 éviter les votes arbitraires ; dédupliquer après remontée à une même
 composante supprimerait au contraire les deux votes AC/BC contre CD.
 Préserver donc les masses des atomes choisis lors des fusions, avec une
@@ -221,6 +227,62 @@ z2. L'EOM d'une masse fractionnaire de votes n'est pas ce même comparatif.
 La stabilité des hauteurs ne garantit pas celle des labels : un écart EOM
 parent/somme des descendants doit aussi être contrôlé. Figer les fixtures
 cibles avant le choix η/z, puis confirmer sur les scènes non utilisées.
+
+### Majorité uniforme : un contact suffit, même loin du bord de bande
+
+La [preuve géométrique close](../../receipts/audit_continu_20260929/uniform_majority_contact_20260930/README.md)
+utilise quatre sites affine-3D, K2, η1/8 :
+`a=(0,0,0), b=(10,0,0), z=(9−ε,3,0), y=(0,0,9)`.
+Γ2 est construit entièrement : six sommets-paires et quatre événements
+triples, recoupés par un second calcul MEB à supports positifs Fraction.
+À ε=0, α_a²=81/4 ; seuil de bande 6561/256. **Dans cette bande**,
+a possède les trois votes forts uniformes AY, AZ et AB ; AB/AZ rejoignent
+la même composante à β25, donc a la choisit avec 2/3 des votes. b a
+seulement BZ dans sa bande. Leur hauteur de réunion est β25.
+
+Pour ε>0 petit, la puissance de z dans AB vaut `−8ε+ε²<0` : AB passe
+de p0 à p1, q_min2. Son masque fort `p+q_min≤K` disparaît, mais la
+boule et l'événement faible ABZ à β25 **restent dans FULL/Γ2**. a n'a
+plus que AY/AZ : une voix sur deux à β25 n'est pas une majorité stricte.
+Il attend la réunion AYZ à `F=(171−18ε+ε²)/4`. Sa hauteur avec b tend
+donc vers 171/4, au lieu de 25 ; en rayon, 5 devient √171/2 alors que
+le déplacement tend vers zéro. Aucun bord de bande n'est franchi,
+aux quatre points. Ce n'est ni une scission de boule ni une erreur du
+générateur exact : c'est une discontinuité de la règle statistique.
+Le dénominateur est figé pendant chaque remontée, pas entre les deux
+nuages. Une telle règle reste laminaire mais n'est pas stable.
+
+Onze cas exacts normal/−O, dont l'homothétie u18 à S1024 avec un jitter
+d'une unité, et deux mutations de mauvaise valeur. Deux relectures
+indépendantes concordent. Aucun appel natif, EOM/ARI, benchmark ou GCP.
+Réduire η ne résout pas généralement ce mécanisme : pour T=M²+1,
+`b=(2T,0,0), z=(2M²−ε,2M,0), y=(0,0,2T)`, choisir
+`1+1/M² < (1+η)² < 2+1/M²`. Cela permet η>0 arbitrairement petit,
+notamment tout η<√2−1 avec M assez grand. Les deux inégalités sont
+nécessaires au schéma ; aucune assertion pour tous les η très grands.
+
+**Une condition de stabilité réellement utile.** Fixer les identités
+des points et des atomes votants, leurs univers et leurs poids positifs.
+Si deux filtrations Γ s'entrelacent à ε par **deux** maps compatibles,
+transportant ces admissions/atomes, toute masse >W_x/2 se retrouve dans
+une composante image à r+ε. La majorité y est unique ; tous les points
+du même bloc suivent cette même image. Les partitions complétées par
+des singletons s'entrelacent donc à ε, et les hauteurs de paire changent
+d'au plus ε **en rayon**. Une seule map ne donne qu'un raffinement dans
+un sens. Cette preuve ne couvre pas EOM/labels, poids 1/β variables,
+fusion d'IDs ou ajout/retrait de points.
+
+Référence bornée : votes uniformes de toutes les K-parties F contenant x,
+dont le MEB est dans la bande. Les IDs de ces parties restent fixes et
+chaque rayon MEB est 1-Lipschitz sous déplacement maximal ε. α_x aussi.
+Une marge `|r_F−(1+η)α_x|>(2+η)ε` conserve leur sélection ; Γ complet
+se transporte par les K- et (K+1)-parties. Dans le contre-exemple, AB
+reste alors un vote et la hauteur reste β25 ; une marge conservatrice
+de 1/16 en rayon donne ε<1/34. Ce contrôle **change l'unité de vote**.
+Ne pas le présenter comme une réparation déjà portée des boules fortes.
+L'énumération C(n,K) est hors voie industrielle : trouver une compression
+ou un comptage conservant ces identités/masses est le problème ouvert.
+L'optimisation suivante calcule une majorité donnée, pas ses atomes gratis.
 
 ### Majorité : deux sélections au lieu de toutes les lignées
 
@@ -270,7 +332,8 @@ Si admissions et naissances ne sont pas déjà ordonnées ensemble, payer
 leur union exacte ; jamais un max entre deux tables de rangs indépendantes,
 ni entre doubles qui ont coalescé des niveaux distincts.
 
-**Port pertinent : uniforme d'abord.** La sélection devient la médiane
+**Calcul à prototyper : uniforme d'abord, sans qualification statistique.**
+La sélection devient la médiane
 haute d'indice d//2, y compris pour d pair. CSR par point, sélection
 segmentée de tin, D requêtes LCA indépendantes, sélection segmentée de h,
 puis n requêtes ancêtre : les grandes opérations sont parallélisables.
@@ -408,10 +471,31 @@ reste SHA `f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578`,
 donc non corrigée pour la masse résiduelle. La tour vient ensuite d'être
 modifiée pour les arrondis : cette nouvelle étape n'hérite pas des 19/19.
 À 13 h 43 UTC, son journal B est désormais clos : **22/22 en 483,51 s**,
-porte d'arrondi et porte CMake comprises ; code pilote 0. Le clone est
-maintenant HEAD `62c8e07ef`, SiteTree intégré et modifications B non committées.
+porte d'arrondi et porte CMake comprises ; code pilote 0. À la reprise
+suivante, B est committée dans HEAD `d303c88f5`, copie toujours isolée.
 Observation seulement, aucun nouveau lancement de notre part.
 Ni les sept groupes ni u24/u32 ni G4 ne sont qualifiés ensemble.
+
+**Reçu A/B relu ensuite.** Ses 100 hashes concordent ; le patch B est
+exactement le diff `62c8e07→d303c88`. Les binaires du build courant et
+du build-B-neuf ont aujourd'hui les identités publiées. Cela ne remplace
+pas des empreintes source/dépendances/compilateur/binaires avant et après
+les campagnes : celles-ci ne sont pas fournies pour chaque invocation.
+Les 80 mutants tués sont 55 A + 17 tour + 8 CMake ; la contre-porte de
+34 mutants recouvre A et n'est pas à additionner. Le complément −O
+rejoue six mutants sélectionnés, pas les 81. Les trois nouveaux juges GCC
+et les deux configurations Clang sont distincts du lot CTest complet.
+
+Les dix dumps de tour ont des hashes réellement non vides et concordants
+dans le journal, sans défaut observé. Leur script peut pourtant afficher
+`IDENTIQUES` si les trois exports manquent avec code0 : le pipeline
+`sha256sum | cut` ne vérifie ni existence ni succès et trois chaînes
+vides sont égales. Exiger fichiers et hashes valides, conserver les trois
+digests ; les dumps sont supprimés par ce script, pas par notre audit.
+Les dix-huit différentiels de tête (mcs8/9, z1/2/3) jugent non-régression
+des sorties, pas le nouvel oracle de condensation. Leurs logs utilisent
+`<final>`/`<travail>` au lieu des argv exacts. Réserve de preuve, pas
+annonce que ces campagnes ont produit des données fausses.
 
 **Option Clang citée : garde de configuration contournée.** Le
 [reçu portable](../../receipts/audit_continu_20260929/quoted_build_flags_20260930/README.md)
@@ -424,6 +508,26 @@ objet moteur ni FULL exécuté. La porte B ne contient pas cette fixture.
 Tokeniser tous les ensembles de flags avec le mode de plateforme approprié,
 tester les tokens interdits puis ajouter cette régression. Un motif sur
 la chaîne brute laisse passer les guillemets interprétés par le compilateur.
+Ce constat concerne B/d303c88, pas automatiquement le chantier suivant.
+À 17 h 23 UTC, le développeur a ajouté `cmake/fp_flags.cmake`
+(SHA `22036c6616828272f8c8254837c5d884a817629877c3736fe424858270f7618d`) :
+`separate_arguments(NATIVE_COMMAND)` puis comparaison de tokens, contrôle
+différé après création des cibles, limites explicitement documentées
+pour fichiers de réponse et générateurs qui fabriquent un token.
+Les journaux GCC/Clang terminés `fpgate_g++.txt` et `fpgate_clang++.txt`
+refusent bien `cite_auditeur` avec code1 et finissent à 285 unitaires,
+24 refus, quatre témoins. Hashes `4047cc313fcaa00c753a7293992f808f88e2745b05ae54b0ecccc5a6e1a6aa6d`
+et `a0836110199363d1008f8934221edb9a0f21ccd2891cc1c879b8d41481881b04`,
+durées 25,819/34,046 s de ces portes seulement. Sources non committées,
+pas d'inventaire avant/après ni code pilote archivé : observation de
+progrès, pas qualification close. Le log des mutants n'a pas encore de
+conclusion ; aucun handle de processus live vérifié par notre audit.
+
+Le groupe bancs partiel a été sauvegardé dans `wip/bancs_partiel*.patch`
+et `wip/fichiers_bancs_partiels`, puis retiré du clone vers 16 h 59 UTC ;
+HEAD reste d303c88. Son journal tête supplémentaire est clos 13/13,
+385,95 s, code pilote0. Ne pas y voir la correction par cohortes ni
+additionner cette observation aux anciennes campagnes comme preuve d'union.
 
 **Limite de la nouvelle porte d'arrondi, relue vers 13 h 04 UTC.** Les
 quatre filtres de `resolve` sont bien désactivés selon le mode du fil
@@ -439,7 +543,31 @@ appelant. Exemple du triangle aigu (0,0,0), (8,4,0), (4,8,0) :
 upward ne publient donc pas nécessairement le même double. Limiter
 « sorties identiques sous les quatre modes » à l'objet exact jugé, ou
 tester séparément le dendrogramme/export et définir son environnement
-numérique. Cette réserve ne prouve aucun changement de labels/EOM.
+numérique. Le README du reçu B reconnaît désormais explicitement cette
+limite dans sa section 11, ainsi que la coalescence possible de niveaux
+dans les doubles de points. Cette réserve ne prouve aucun changement
+de labels/EOM. FTZ/DAZ et MXCSR hors contrat cfenv ne sont pas qualifiés
+par la porte actuelle ; aucun nouveau défaut géométrique déduit ici.
+
+### Deux contrôles peu coûteux dans les nouveaux juges de fixtures
+
+La [preuve portable close](../../receipts/audit_continu_20260929/target_reader_control_flow_20260930/README.md)
+fige les sources privées `fixtures_cibles/lib` et extrait par AST leurs
+fonctions réelles. Deux défauts reproduits normal/−O : `valide_lib.main`
+rend code0 malgré `sources_stables=False` quand ses neuf groupes de tests
+stubés passent ; une variante `target=[]` acceptée par `normaliser` produit
+zéro verdict puis `passe=True` par `all([])` dans `juger_fixture`.
+Contrôles positifs/négatifs conservés. Aucune source réellement mutée sur
+disque, aucun import du module original, aucun Γ ou binaire natif exécuté.
+
+Refuser les empreintes divergentes (code3 comme run_target), exiger une
+liste de cibles non vide dans les variantes et dans l'API du jugement,
+puis publier l'inventaire réellement jugé. Le code0 de run_target signifie
+que le juge a tourné, pas qu'un candidat gagne : le défaut est ici le
+champ `passe=True` sans test. La validation privée close de 389 contrôles,
+zéro échec et sources stables, ainsi que ses captures normal/−O, ne sont
+pas invalidées par ces preuves de contrôle. Elles ne qualifient pas à
+elles seules les nouvelles familles cibles K3..K10 ni un profil G4.
 
 Les observations antérieures suivantes restent datées ; elles ne décrivent
 pas le nouveau binaire SiteTree :
@@ -486,6 +614,29 @@ Deux actions petites et causales, sans nouvelle campagne G4 :
    propriétaire RAII du `FILE*` avant toute opération susceptible
    de lever. Aucun callback actuel n'est prouvé fautif ; ni défaut
    FULL ni fuite sur les fichiers utilisateur constatés par ce test.
+
+### Banc de croissance : ne pas mélanger CSV et journal d'appels
+
+Le [nouveau contre-exemple clos](../../receipts/audit_continu_20260929/banc_output_alias_20260930/capture/README.md)
+appelle le vrai `cmd_run` de `scale_run.py`, avec `measure` simulé.
+Destinations distinctes : CSV et deux lignes JSONL valides. Destinations
+`--calls==--out` : code0 et message `ok`, mais les deux formats sont
+corrompus. Deux ouvertures en `w` sur le même fichier gardent des offsets
+indépendants. Normal/−O concordent, source inchangée avant/après ; aucun
+processus HGP, aucun chrono, aucun GCP. La capture ne fournit pas d'heure
+UTC d'acquisition : ne pas en inventer, ni confondre son entrée factice
+« 8000 sites » avec un nuage mesuré. Refuser l'identité des destinations
+avant toute troncature et ajouter le contrôle à la porte des bancs.
+Le nom exact est reproduit ; liens durs/symboliques sont des cas proposés
+à tester, pas déjà exercés. À la reprise de 17 h 23 UTC, le groupe bancs
+partiel est sauvegardé puis retiré du clone actif : la preuve reste celle
+de ses sources 14f3915d, pas de la version courante réinitialisée.
+Les correctifs de schéma et leurs campagnes futures restent distincts.
+Le [lecteur séparé](../../receipts/audit_continu_20260929/banc_output_alias_20260930/reader/README.md)
+vérifie les douze hashes originaux avant parse, puis rejoue `cmd_run`
+extrait par AST dans un répertoire temporaire privé, normal/−O. Les trois
+exports sont reproduits octet pour octet, CRLF compris ; aucun import
+LIVE ni subprocess. Ses dates UTC sont celles des lectures seulement.
 
 ## Demandes antérieures et leur suivi
 

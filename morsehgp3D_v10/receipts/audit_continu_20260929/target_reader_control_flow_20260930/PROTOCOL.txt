@@ -1,0 +1,14 @@
+Scope: two control-flow paths in new private fixtures_cibles library, not geometry or clustering quality.
+Read two original Python sources at pinned hashes; copy exact bytes before AST compilation.
+Extract only valide_lib.Juge/main and run_target._cles/normaliser/juger_fixture.
+Execute with explicit unit stubs, never importing original modules.
+All v1..v9 tests are stub positive checks except one negative test control.
+empreintes returns two synthetic maps: stable or changed; no on-disk source mutation occurs.
+Point parser, Scene, FULL compatibility, mathematical rule and judgment are stubs.
+Canonical fixture keys only; ALIAS is the empty stub mapping, not an alias-parser test.
+Test target=[] on a displaced variant using actual normaliser/juger_fixture control flow.
+Require nonempty positive and negative controls plus refusal of empty base target.
+Final commands: Python normal and optimized, no asserts, no writes by micro.py.
+Archive portable reader hashes exact inventory before receipt reads or subprocess replay.
+Keep the two private-harness preflights and original diagnostics; do not classify them as engine faults.
+No Gamma/native/sklearn/GCP/build/timing/ARI/statistical qualification.

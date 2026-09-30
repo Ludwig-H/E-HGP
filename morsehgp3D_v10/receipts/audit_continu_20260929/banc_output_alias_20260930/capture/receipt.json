@@ -1,0 +1,17 @@
+{
+  "status": "OUTPUT_ALIAS_COUNTEREXAMPLE",
+  "source": "/workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/bench/scaling/scale_run.py",
+  "source_before": "14f3915daef73088360cf5d90be1a76aab81666ddb22764dc2ea003822714dea",
+  "source_after": "14f3915daef73088360cf5d90be1a76aab81666ddb22764dc2ea003822714dea",
+  "commands": [
+    {"argv": ["python3", "-B", "probe.py"], "returncode": 0, "stdout": "normal.stdout", "stderr": "normal.stderr"},
+    {"argv": ["python3", "-B", "-O", "probe.py"], "returncode": 0, "stdout": "optimized.stdout", "stderr": "optimized.stderr"}
+  ],
+  "cmd_run_invocations": 4,
+  "native_executions": 0,
+  "real_measurements": 0,
+  "GCP_used": false,
+  "control": {"returncode": 0, "csv_valid": true, "journal_valid": true},
+  "exact_alias": {"returncode": 0, "csv_valid": false, "journal_valid": false},
+  "scope": "actual cmd_run, simulated measure, exact output-name collision only"
+}

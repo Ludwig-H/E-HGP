@@ -1,0 +1,53 @@
+{
+  "GCP_used": false,
+  "Gamma_invocations": 0,
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-target-reader-audit-20260930.9ZbrpwSQ/micro.py"
+      ],
+      "code": 0,
+      "end_ns": 41562868838849,
+      "end_utc": "2026-09-30T14:14:33.831589+00:00",
+      "name": "normal",
+      "start_ns": 41562702757630,
+      "start_utc": "2026-09-30T14:14:33.665488+00:00",
+      "stderr": "",
+      "stdout": "{\n  \"Gamma_calls\": 0,\n  \"empty_variant\": {\n    \"base_empty_refused\": true,\n    \"reports\": [\n      {\n        \"case\": \"positive_nonempty\",\n        \"judgments_including_base\": 2,\n        \"normalized_variant_targets\": 1,\n        \"overall_passed\": true,\n        \"variant_passed\": true,\n        \"variant_targets\": 1,\n        \"variant_verdicts\": [\n          {\n            \"observes\": [],\n            \"passe\": true,\n            \"scope\": \"stub, no partition evaluated\",\n            \"viol\": null\n          }\n        ]\n      },\n      {\n        \"case\": \"negative_nonempty\",\n        \"judgments_including_base\": 2,\n        \"normalized_variant_targets\": 1,\n        \"overall_passed\": false,\n        \"variant_passed\": false,\n        \"variant_targets\": 1,\n        \"variant_verdicts\": [\n          {\n            \"observes\": [],\n            \"passe\": false,\n            \"scope\": \"stub, no partition evaluated\",\n            \"viol\": {\n              \"reason\": \"stub rejects\"\n            }\n          }\n        ]\n      },\n      {\n        \"case\": \"empty_target\",\n        \"judgments_including_base\": 1,\n        \"normalized_variant_targets\": 0,\n        \"overall_passed\": true,\n        \"variant_passed\": true,\n        \"variant_targets\": 0,\n        \"variant_verdicts\": []\n      }\n    ],\n    \"stub_calls\": {\n      \"Scene_stubs\": 6,\n      \"compat_stubs\": 5,\n      \"judge_stubs\": 5\n    }\n  },\n  \"filesystem_outputs\": 0,\n  \"native_calls\": 0,\n  \"scope\": \"AST-selected pinned functions and explicit unit stubs, not validation of geometric results\",\n  \"shared_source_mutations\": 0,\n  \"sklearn_calls\": 0,\n  \"source_change\": [\n    {\n      \"after\": {\n        \"frozen_unit\": \"0000000000000000000000000000000000000000000000000000000000000000\"\n      },\n      \"before\": {\n        \"frozen_unit\": \"0000000000000000000000000000000000000000000000000000000000000000\"\n      },\n      \"controls\": 9,\n      \"failures\": 0,\n      \"mode\": \"stable\",\n      \"receipt_code\": 0,\n      \"returned_code\": 0,\n      \"scope\": \"real AST main; nine stub test groups; synthetic fingerprint sampler; no source mutated\",\n      \"snapshot_calls\": 2,\n      \"sources_stables\": true\n    },\n    {\n      \"after\": {\n        \"frozen_unit\": \"1111111111111111111111111111111111111111111111111111111111111111\"\n      },\n      \"before\": {\n        \"frozen_unit\": \"0000000000000000000000000000000000000000000000000000000000000000\"\n      },\n      \"controls\": 9,\n      \"failures\": 0,\n      \"mode\": \"changed\",\n      \"receipt_code\": 0,\n      \"returned_code\": 0,\n      \"scope\": \"real AST main; nine stub test groups; synthetic fingerprint sampler; no source mutated\",\n      \"snapshot_calls\": 2,\n      \"sources_stables\": false\n    },\n    {\n      \"after\": {\n        \"frozen_unit\": \"0000000000000000000000000000000000000000000000000000000000000000\"\n      },\n      \"before\": {\n        \"frozen_unit\": \"0000000000000000000000000000000000000000000000000000000000000000\"\n      },\n      \"controls\": 9,\n      \"failures\": 1,\n      \"mode\": \"test_failure\",\n      \"receipt_code\": 1,\n      \"returned_code\": 1,\n      \"scope\": \"real AST main; nine stub test groups; synthetic fingerprint sampler; no source mutated\",\n      \"snapshot_calls\": 2,\n      \"sources_stables\": true\n    }\n  ],\n  \"source_pins\": {\n    \"source/run_target.py\": \"41e92016a967180812549e5c3851b79baf510110404e5b333f600973193d50cf\",\n    \"source/valide_lib.py\": \"94a96b1f0fcdd5032e13323aa065e44bb16f5e27abd397f5c1e16fcbebd2e6ad\"\n  },\n  \"status\": \"OBSERVED_CONTROL_FLOW_GAPS\"\n}\n"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-target-reader-audit-20260930.9ZbrpwSQ/micro.py"
+      ],
+      "code": 0,
+      "end_ns": 41563118391424,
+      "end_utc": "2026-09-30T14:14:34.081141+00:00",
+      "name": "optimized",
+      "start_ns": 41562868932794,
+      "start_utc": "2026-09-30T14:14:33.831671+00:00",
+      "stderr": "",
+      "stdout": "{\n  \"Gamma_calls\": 0,\n  \"empty_variant\": {\n    \"base_empty_refused\": true,\n    \"reports\": [\n      {\n        \"case\": \"positive_nonempty\",\n        \"judgments_including_base\": 2,\n        \"normalized_variant_targets\": 1,\n        \"overall_passed\": true,\n        \"variant_passed\": true,\n        \"variant_targets\": 1,\n        \"variant_verdicts\": [\n          {\n            \"observes\": [],\n            \"passe\": true,\n            \"scope\": \"stub, no partition evaluated\",\n            \"viol\": null\n          }\n        ]\n      },\n      {\n        \"case\": \"negative_nonempty\",\n        \"judgments_including_base\": 2,\n        \"normalized_variant_targets\": 1,\n        \"overall_passed\": false,\n        \"variant_passed\": false,\n        \"variant_targets\": 1,\n        \"variant_verdicts\": [\n          {\n            \"observes\": [],\n            \"passe\": false,\n            \"scope\": \"stub, no partition evaluated\",\n            \"viol\": {\n              \"reason\": \"stub rejects\"\n            }\n          }\n        ]\n      },\n      {\n        \"case\": \"empty_target\",\n        \"judgments_including_base\": 1,\n        \"normalized_variant_targets\": 0,\n        \"overall_passed\": true,\n        \"variant_passed\": true,\n        \"variant_targets\": 0,\n        \"variant_verdicts\": []\n      }\n    ],\n    \"stub_calls\": {\n      \"Scene_stubs\": 6,\n      \"compat_stubs\": 5,\n      \"judge_stubs\": 5\n    }\n  },\n  \"filesystem_outputs\": 0,\n  \"native_calls\": 0,\n  \"scope\": \"AST-selected pinned functions and explicit unit stubs, not validation of geometric results\",\n  \"shared_source_mutations\": 0,\n  \"sklearn_calls\": 0,\n  \"source_change\": [\n    {\n      \"after\": {\n        \"frozen_unit\": \"0000000000000000000000000000000000000000000000000000000000000000\"\n      },\n      \"before\": {\n        \"frozen_unit\": \"0000000000000000000000000000000000000000000000000000000000000000\"\n      },\n      \"controls\": 9,\n      \"failures\": 0,\n      \"mode\": \"stable\",\n      \"receipt_code\": 0,\n      \"returned_code\": 0,\n      \"scope\": \"real AST main; nine stub test groups; synthetic fingerprint sampler; no source mutated\",\n      \"snapshot_calls\": 2,\n      \"sources_stables\": true\n    },\n    {\n      \"after\": {\n        \"frozen_unit\": \"1111111111111111111111111111111111111111111111111111111111111111\"\n      },\n      \"before\": {\n        \"frozen_unit\": \"0000000000000000000000000000000000000000000000000000000000000000\"\n      },\n      \"controls\": 9,\n      \"failures\": 0,\n      \"mode\": \"changed\",\n      \"receipt_code\": 0,\n      \"returned_code\": 0,\n      \"scope\": \"real AST main; nine stub test groups; synthetic fingerprint sampler; no source mutated\",\n      \"snapshot_calls\": 2,\n      \"sources_stables\": false\n    },\n    {\n      \"after\": {\n        \"frozen_unit\": \"0000000000000000000000000000000000000000000000000000000000000000\"\n      },\n      \"before\": {\n        \"frozen_unit\": \"0000000000000000000000000000000000000000000000000000000000000000\"\n      },\n      \"controls\": 9,\n      \"failures\": 1,\n      \"mode\": \"test_failure\",\n      \"receipt_code\": 1,\n      \"returned_code\": 1,\n      \"scope\": \"real AST main; nine stub test groups; synthetic fingerprint sampler; no source mutated\",\n      \"snapshot_calls\": 2,\n      \"sources_stables\": true\n    }\n  ],\n  \"source_pins\": {\n    \"source/run_target.py\": \"41e92016a967180812549e5c3851b79baf510110404e5b333f600973193d50cf\",\n    \"source/valide_lib.py\": \"94a96b1f0fcdd5032e13323aa065e44bb16f5e27abd397f5c1e16fcbebd2e6ad\"\n  },\n  \"status\": \"OBSERVED_CONTROL_FLOW_GAPS\"\n}\n"
+    }
+  ],
+  "native_invocations": 0,
+  "schema": "mhgp10.target_reader_control_flow.v1",
+  "scope": "AST-selected copied Python functions with explicit unit stubs, not native/geometry/statistics",
+  "sources_after": {
+    "micro.py": "e3ec9ac9bb883e172e0d23abda724dc7150a9fe2c849d8ddca8cd3a307440b2d",
+    "record.py": "da4b05bb2eabb26b26e93a31f3337f114b1957dddbe2cd3a94a83160d9a0da4c",
+    "source/run_target.py": "41e92016a967180812549e5c3851b79baf510110404e5b333f600973193d50cf",
+    "source/valide_lib.py": "94a96b1f0fcdd5032e13323aa065e44bb16f5e27abd397f5c1e16fcbebd2e6ad"
+  },
+  "sources_before": {
+    "micro.py": "e3ec9ac9bb883e172e0d23abda724dc7150a9fe2c849d8ddca8cd3a307440b2d",
+    "record.py": "da4b05bb2eabb26b26e93a31f3337f114b1957dddbe2cd3a94a83160d9a0da4c",
+    "source/run_target.py": "41e92016a967180812549e5c3851b79baf510110404e5b333f600973193d50cf",
+    "source/valide_lib.py": "94a96b1f0fcdd5032e13323aa065e44bb16f5e27abd397f5c1e16fcbebd2e6ad"
+  },
+  "status": "CAPTURED"
+}

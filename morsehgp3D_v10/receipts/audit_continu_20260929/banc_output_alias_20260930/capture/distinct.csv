@@ -1,0 +1,2 @@
+file,kind,family,regime,factor,frame,sector,sites,k,threads,status,balls,cat_nodes,cat_leaves,cat_sum_m,cat_judged,cat_quad_tests,cat_triple_tests,tower_nodes_kmax,tower_steps_kmax,tower_nodes_all,tower_steps_all,catalogue_s,tower_s,wall_s,cpu_s,max_rss_kb
+fixture.u32le,synthetic,uniform,space,1,,,8000,5,1,ok,7,,,,,,,,,,,,0.01,,,

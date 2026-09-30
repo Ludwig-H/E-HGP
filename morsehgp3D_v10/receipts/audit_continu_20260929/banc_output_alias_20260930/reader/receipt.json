@@ -1,0 +1,32 @@
+{
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-banc-alias-reader-20260930.eogoTXmm/verify.py"
+      ],
+      "reader_end_utc": "2026-09-30T14:52:15.507418+00:00",
+      "reader_start_utc": "2026-09-30T14:52:15.408991+00:00",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"AST_cmd_run_calls\": 2, \"GCP_used\": false, \"native_calls\": 0, \"original_acquisition_utc\": \"not recorded; not inferred\", \"original_files\": 12, \"original_manifest_sha256\": \"3f23f6d3980296230a225e1425b5f44ad25bd3e66c6b8a917a4afa7bdb225cc0\", \"scope\": \"archived cmd_run exact-name output collision; no performance or general inode proof\", \"simulated_measure_calls\": 2, \"source_sha256\": \"14f3915daef73088360cf5d90be1a76aab81666ddb22764dc2ea003822714dea\", \"status\": \"ARCHIVE_ALIAS_AST_PASS\", \"subprocess_calls\": 0}\n"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-banc-alias-reader-20260930.eogoTXmm/verify.py"
+      ],
+      "reader_end_utc": "2026-09-30T14:52:15.616780+00:00",
+      "reader_start_utc": "2026-09-30T14:52:15.507446+00:00",
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\"AST_cmd_run_calls\": 2, \"GCP_used\": false, \"native_calls\": 0, \"original_acquisition_utc\": \"not recorded; not inferred\", \"original_files\": 12, \"original_manifest_sha256\": \"3f23f6d3980296230a225e1425b5f44ad25bd3e66c6b8a917a4afa7bdb225cc0\", \"scope\": \"archived cmd_run exact-name output collision; no performance or general inode proof\", \"simulated_measure_calls\": 2, \"source_sha256\": \"14f3915daef73088360cf5d90be1a76aab81666ddb22764dc2ea003822714dea\", \"status\": \"ARCHIVE_ALIAS_AST_PASS\", \"subprocess_calls\": 0}\n"
+    }
+  ],
+  "native_invocations": 0,
+  "schema": "mhgp10.banc_alias.reader_capture.v1",
+  "scope": "reader invocations only; original acquisition UTC not recorded"
+}

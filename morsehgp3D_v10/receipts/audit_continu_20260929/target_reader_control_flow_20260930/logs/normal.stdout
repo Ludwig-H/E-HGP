@@ -1,0 +1,116 @@
+{
+  "Gamma_calls": 0,
+  "empty_variant": {
+    "base_empty_refused": true,
+    "reports": [
+      {
+        "case": "positive_nonempty",
+        "judgments_including_base": 2,
+        "normalized_variant_targets": 1,
+        "overall_passed": true,
+        "variant_passed": true,
+        "variant_targets": 1,
+        "variant_verdicts": [
+          {
+            "observes": [],
+            "passe": true,
+            "scope": "stub, no partition evaluated",
+            "viol": null
+          }
+        ]
+      },
+      {
+        "case": "negative_nonempty",
+        "judgments_including_base": 2,
+        "normalized_variant_targets": 1,
+        "overall_passed": false,
+        "variant_passed": false,
+        "variant_targets": 1,
+        "variant_verdicts": [
+          {
+            "observes": [],
+            "passe": false,
+            "scope": "stub, no partition evaluated",
+            "viol": {
+              "reason": "stub rejects"
+            }
+          }
+        ]
+      },
+      {
+        "case": "empty_target",
+        "judgments_including_base": 1,
+        "normalized_variant_targets": 0,
+        "overall_passed": true,
+        "variant_passed": true,
+        "variant_targets": 0,
+        "variant_verdicts": []
+      }
+    ],
+    "stub_calls": {
+      "Scene_stubs": 6,
+      "compat_stubs": 5,
+      "judge_stubs": 5
+    }
+  },
+  "filesystem_outputs": 0,
+  "native_calls": 0,
+  "scope": "AST-selected pinned functions and explicit unit stubs, not validation of geometric results",
+  "shared_source_mutations": 0,
+  "sklearn_calls": 0,
+  "source_change": [
+    {
+      "after": {
+        "frozen_unit": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "before": {
+        "frozen_unit": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "controls": 9,
+      "failures": 0,
+      "mode": "stable",
+      "receipt_code": 0,
+      "returned_code": 0,
+      "scope": "real AST main; nine stub test groups; synthetic fingerprint sampler; no source mutated",
+      "snapshot_calls": 2,
+      "sources_stables": true
+    },
+    {
+      "after": {
+        "frozen_unit": "1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      "before": {
+        "frozen_unit": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "controls": 9,
+      "failures": 0,
+      "mode": "changed",
+      "receipt_code": 0,
+      "returned_code": 0,
+      "scope": "real AST main; nine stub test groups; synthetic fingerprint sampler; no source mutated",
+      "snapshot_calls": 2,
+      "sources_stables": false
+    },
+    {
+      "after": {
+        "frozen_unit": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "before": {
+        "frozen_unit": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "controls": 9,
+      "failures": 1,
+      "mode": "test_failure",
+      "receipt_code": 1,
+      "returned_code": 1,
+      "scope": "real AST main; nine stub test groups; synthetic fingerprint sampler; no source mutated",
+      "snapshot_calls": 2,
+      "sources_stables": true
+    }
+  ],
+  "source_pins": {
+    "source/run_target.py": "41e92016a967180812549e5c3851b79baf510110404e5b333f600973193d50cf",
+    "source/valide_lib.py": "94a96b1f0fcdd5032e13323aa065e44bb16f5e27abd397f5c1e16fcbebd2e6ad"
+  },
+  "status": "OBSERVED_CONTROL_FLOW_GAPS"
+}

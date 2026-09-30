@@ -1,7 +1,8 @@
 # Audits v10 — état courant
 
-Mise à jour : 30 septembre 2026, majorité exacte par deux sélections,
-condensation par cohortes et suivi du raccord actif. Les sources publiées du moteur restent inchangées
+Mise à jour : 30 septembre 2026, contact instable de la majorité uniforme,
+condition de votes fixes, juges de fixtures et suivi du raccord actif.
+Les sources publiées du moteur restent inchangées
 dans cette tranche ; le développeur travaille désormais dans une copie
 isolée d'intégration, distincte du worktree partagé. Les parties I
 et II de la thèse ont été relues intégralement dans la tranche précédente.
@@ -41,16 +42,24 @@ témoin géométrique de score avec le renversement EOM des arbres API.
 
 **Développeur actif :** la [note Claude](NOTE_CLAUDE_REPRISE_ET_PRECISION_20260930.md)
 confirme la grille u32 par paliers, u24 puis u32 ; float32 natif différé.
-La copie `build/v10-integration-r2/src`, HEAD `62c8e07ef` avec modifications
-B non committées, a fermé
+La copie `build/v10-integration-r2/src`, HEAD `d303c88f5`, a intégré
 l'étape A faits_math/SiteTree : 19/19 CTests en 325,02 s, 55 mutants
 non équivalents tués et un équivalent accepté. À 13 h 43 UTC, lecture
 du journal B clos : 22/22 en 483,51 s, avec nouvelle porte d'arrondi
-de la tour et porte d'options CMake. Observation des journaux, sans
-relancer ces lots : ni union des sept groupes R2 ni tête corrigée.
-Les identités binaires de faits_math seules ne qualifient pas les étapes
-suivantes. La tête conserve son défaut de masse résiduelle dans cet état
-observé. Aucun port FULL u24/u32 ni résultat G4 nouveau.
+de la tour et porte d'options CMake ; B est désormais committée séparément.
+Les 100 hashes du reçu SiteTree concordent et son patch B correspond au
+commit. Les dix différentiels tour et dix-huit tête sont des observations
+de non-régression, pas des oracles de condensation. Le reçu ne fournit pas
+les pins source/dépendances/binaires avant et après chacune de ces campagnes.
+Les 80 mutants non équivalents tués regroupent A et B ; ne pas y ajouter
+les 34 contre-mutants déjà recouvrants, ni annoncer 81 rejeux sous −O :
+ce complément en rejoue six. Aucun nouveau lancement de notre part.
+Ni union des sept groupes R2 ni tête corrigée : son SHA reste inchangé.
+À 17 h 23 UTC, le groupe bancs partiel est sauvegardé dans `wip/` puis
+retiré du clone ; aucune nouvelle qualification de ce groupe. Le chantier
+courant reprend la garde CMake. Un journal tête supplémentaire est clos,
+13/13 en 385,95 s, sans réparation du défaut de condensation constatée.
+Aucun port FULL u24/u32 ni résultat G4 nouveau.
 
 **Plateaux de tête :** les événements de même rang doivent être traités
 ensemble, avant le test des masses. La
@@ -123,6 +132,27 @@ globale ni de supériorité statistique. Pκ reste un contrôle robuste à
 comparer, pas une règle produit validée. Le développeur annonce désormais
 condensation et choix de la tête avant le palier u24 ; ce palier reste ouvert.
 
+**Majorité uniforme : robustesse réfutée pour les boules fortes de bande.**
+La [preuve exacte](../receipts/audit_continu_20260929/uniform_majority_contact_20260930/README.md)
+donne quatre sites affine-3D, K2/η1/8 : un contact devenu intérieur retire
+un vote fort et fait sauter la hauteur de réunion de β25 vers 171/4,
+pour un déplacement tendant vers zéro. Γ2 complet conserve la fusion
+faible ; aucune limite de bande n'est franchie. Deux contre-relectures
+concordent. Onze cas Fraction et deux mutants causaux, normal/−O ;
+ni erreur FULL, ni appel natif, ni résultat EOM/ARI démontré. Réduire η
+ne répare pas généralement ce mécanisme : une famille permet η>0
+arbitrairement petit, avec les restrictions géométriques publiées.
+
+**Condition utile, pas nouvelle règle industrielle.** Si identités,
+univers et poids des votes sont fixes et transportés par les deux maps
+compatibles de Γ, les partitions de majorité s'entrelacent avec le même
+ε en rayon. Les K-parties contenant chaque point donnent une référence
+qui satisfait cette condition, avec une marge de bande explicite ; dans
+ce témoin leur hauteur reste β25. Ce n'est pas le vote par boule forte.
+Leur comptage efficace/compression sans perte reste ouvert : ne pas
+énumérer les K-parties dans le produit, ni reconstruire Γ explicitement.
+Pas de garantie de labels/EOM ou d'ajout/retrait de sites.
+
 **Majorité, optimisation exacte validée abstraitement :** deux sélections
 pondérées et une LCA par atome remplacent le parcours de toutes les
 lignées. Choisir un médian pondéré m dans l'ordre Euler des propriétaires,
@@ -162,7 +192,32 @@ La [contre-porte des options citées](../receipts/audit_continu_20260929/quoted_
 montre aussi que Clang accepte réellement `"-freciprocal-math"` malgré
 la garde CMake et sans macros de refus au préprocesseur. Deux configurations,
 deux prétraitements ; ni objet moteur compilé ni résultat géométrique faux
-démontré. Tokeniser les flags et intégrer ce cas ; les 22/22 ne le couvrent pas.
+démontré. Les 22/22 de B ne couvrent pas ce cas. À 17 h 23 UTC, la
+nouvelle source privée `cmake/fp_flags.cmake` tokenise effectivement les
+flags ; les journaux GCC et Clang terminés refusent `cite_auditeur`,
+avec 285 contrôles unitaires, 24 refus et quatre témoins chacun. Progrès
+observé, pas reçu clos à empreintes avant/après ni nouveau commit :
+sources et porte de mutants encore en chantier. L'archive d303c88 reste
+la version fautive éprouvée ; ne pas attribuer ce défaut à la source
+nouvelle sans rejeu.
+
+**Juges des fixtures, deux trous fermés comme preuves, pas corrigés.**
+Le [contrôle causal portable](../receipts/audit_continu_20260929/target_reader_control_flow_20260930/README.md)
+montre `valide_lib` code0 malgré `sources_stables=False`, et une variante
+`target=[]` déclarée `passe=True` sans aucun jugement. Fonctions réelles
+extraites par AST, tests/mathématiques stubés ; normal/−O concordants.
+La validation privée close de 389 contrôles a, elle, des sources stables
+et zéro échec : elle n'est pas invalidée. Refuser les hashes divergents
+et les cibles vides, publier le nombre réellement jugé. Ce ne sont ni
+deux défauts géométriques ni une qualification des nouvelles règles.
+
+**Banc de croissance, collision à refuser.** Le
+[contre-exemple](../receipts/audit_continu_20260929/banc_output_alias_20260930/capture/README.md)
+montre `--calls==--out` : code0/`ok`, CSV et JSONL corrompus par deux
+descripteurs sur le même fichier. Vrai `cmd_run`, `measure` simulé,
+normal/−O, contrôle distinct valide ; aucun calcul HGP ou mesure 8k.
+Refuser avant troncature. La copie fautive éprouvée est désormais dans
+le groupe bancs partiel sauvegardé, pas dans le clone courant réinitialisé.
 Le [suivi au développeur](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md)
 distingue aussi condensation terminale/progressive et hypothèses statistiques.
 
@@ -224,17 +279,18 @@ le bras et n'a pas de qualité statistique démontrée.
 
 | Sujet | État actuel | Référence |
 | --- | --- | --- |
-| FULL → partitions de points | Pκ : stabilité et flux, pas qualité frontière démontrée. Majorité de bande : calcul exact par deux sélections validé abstraitement, pas port natif. Corriger cohortes/plateaux avant EOM ; aucun choix produit ni victoire ARI acquis. | [Deux sélections](../receipts/audit_continu_20260929/weighted_majority_select_20260930/README.md), [calcul en flux](../receipts/audit_continu_20260929/persistent_anchor_stream_20260930/README.md), [suivi](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md) |
+| FULL → partitions de points | Pκ : stabilité et flux, pas qualité frontière démontrée. Vote uniforme par boule forte : instable au contact, même loin du bord de bande. Votes d'identités/poids fixes : stabilité conditionnelle ; comptage industriel ouvert. Deux sélections restent exactes. Corriger cohortes/plateaux avant EOM ; aucun choix produit ni victoire ARI acquis. | [Contact et contrôle fixe](../receipts/audit_continu_20260929/uniform_majority_contact_20260930/README.md), [deux sélections](../receipts/audit_continu_20260929/weighted_majority_select_20260930/README.md), [suivi](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md) |
 | Fixtures de projection | F1–F4 cohérentes. Notre Γ exact confirme 75 couples nuage/K ; campagnes développeur 10/10 closes, distinctes de notre test autonome. Aucun vote ni nouveau traitement frontière qualifié. | [Contre-audit des fixtures](audit_continu_20260929/CONTRE_AUDIT_FIXTURES_PROJECTION_20260929.md) |
 | Retrouver toutes les couvertures | Lemme par composante : témoin p+q_min≤K, coquilles et intérieurs complets. 30 102 requêtes autonomes, puis 64 appels natifs K1–K4, huit géométries, nerf rationnel indépendant et listes complètes. Ne pas supprimer les fusions FULL p+q_min=K+1. Qualification native bornée, pas globale. | [Preuve, oracle et complément R2](audit_continu_20260929/catalogue/ADDENDUM_COUVERTURE_CATALOGUE_20260929.md) |
 | Sécurité du pool | R2 : CAS saturant et série sans overflow. Deux différentiels clos 24/24, oracles 2/2 ; comparateurs limités à des préfixes SHA96/64bits. Timeout d'une sonde à barrière distinct d'un deadlock démontré. Copies non intégrées. | [Complément R2](audit_continu_20260929/CONTRE_AUDIT_R2_20260930.md), [premiers correctifs](audit_continu_20260929/pool_head/CONTRE_AUDIT_POOL_CORRIGE_20260929.md) |
 | Interfaces | Parseur strict sur copie R2. Nouvelle CLI tête : refus numériques propagés, mais mêmes destinations étiquettes/arbre → texte écrasant les labels, code0. Quatre sondes closes, raccord avec écritures vérifiées encore en chantier. | [Collision et raccord R2](audit_continu_20260929/CONTRE_AUDIT_R2_20260930.md), [premiers correctifs](audit_continu_20260929/catalogue/CONTRE_AUDIT_INTERFACES_CORRIGEES_20260929.md) |
-| SiteTree et centres rationnels | Filtre limité à FE_TONEAREST. Après les huit mutants survivants historiques, nouvelle contre-porte privée : chemins réellement observés, 34 mutants tués, ASan/TSan passent isolément. Aucun transfert à un binaire commun, FENV global ou FULL. | [Complément SiteTree R2](audit_continu_20260929/catalogue/CONTRE_AUDIT_SITETREE_CORRIGE_20260929.md), [suivi du raccord](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md) |
+| SiteTree et centres rationnels | Filtre limité à FE_TONEAREST. Raccord isolé d303c88 : 22/22, guards tour sous quatre arrondis ; objets exacts jugés, pas dendrogramme/condensation. Contre-porte 34 mutants recouvrante, ASan/TSan isolés. Pas d'union FULL qualifiée. | [Complément SiteTree R2](audit_continu_20260929/catalogue/CONTRE_AUDIT_SITETREE_CORRIGE_20260929.md), [suivi du raccord](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md) |
 | Tête numérique | R2 protège racine zéro et M·λ_max ; notre porte native antérieure passe. Quatre nouvelles sondes confirment Outcome dans la CLI tête et un refus tardif avant écriture dans la même hiérarchie. Ancienne tête dans la copie CLI stricte ; union non qualifiée. | [Contrôle R2](audit_continu_20260929/CONTRE_AUDIT_R2_20260930.md), [défauts et borne d'origine](audit_continu_20260929/pool_head/CONTRE_AUDIT_TETE_NUMERIQUE_20260929.md) |
 | Condensation des points | Seuil des départs différés et plateaux atomiques à réparer. Deux encodages de la même ultramétrique changent les clusters ; référence indépendante par cohortes. Une tête directe O(H+n log n) est possible sous les préalables publiés ; aucun port ni gain natif mesuré. | [API et référence](../receipts/audit_continu_20260929/point_condensation_20260930/README.md), [témoin géométrique](../receipts/audit_continu_20260929/point_condensation_cover_r2_20260930/README.md), [plateaux](../receipts/audit_continu_20260929/point_plateau_condensation_20260930/README.md), [plan direct](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#condensation-directe-sans-expansion-de-la-tour) |
 | Rejets q3/q4 par groupe | Somme affine de puissances → plusieurs intérieurs certifiés ; dominance individuelle vide sur deux fixtures 3D. Test division-free strict, contacts gardés, groupes recouvrants non additifs. Sélection/coût total/croissance encore à mesurer. | [Preuve et essai borné proposé](../receipts/audit_continu_20260929/group_moments_20260930/README.md) |
 | Juges catalogue/FULL | Petits juges R2 renforcés contre-vérifiés. Nouveau lecteur structurel des grands dumps : ordre K entier manquant ou coordonnées d'attaches inconnues acceptés sur fixtures ; contrôles linéaires à ajouter. Aucun dump LiDAR réellement fautif observé. | [Compléments R2](audit_continu_20260929/CONTRE_AUDIT_R2_20260930.md), [angles morts d'origine](audit_continu_20260929/catalogue/CONTRE_AUDIT_JUGES_CORRIGES_20260929.md) |
-| Bancs et arrêt des calculs | R2 refuse maintenant ARI1,25. 44 nouveaux appels courts : alpha=2/NaN et en-tête ari_s dupliqué admis ; config absente/inconnue finit en KeyError. Schéma à valider, A/C historiques non réfutés. 120 vrais signaux POSIX locaux observés distingués des simulations. | [Complément des bancs R2](audit_continu_20260929/timeout/CONTRE_AUDIT_BANCS_CORRIGES_20260929.md) |
+| Juges des cibles de clustering | Deux défauts causaux : sources divergentes n'imposent pas l'échec ; variante vide déclarée gagnante. Contrôles AST avec stubs, pas géométrie. Les 389 contrôles privés source-stables ne sont pas réfutés. | [Preuve portable](../receipts/audit_continu_20260929/target_reader_control_flow_20260930/README.md) |
+| Bancs et arrêt des calculs | Groupe partiel sauvegardé/retiré du clone, portes finales non closes. Collision CSV/JSONL reproduite dans sa copie 14f3915d, `measure` simulé, code0 malgré corruption. 120 vrais signaux POSIX antérieurs distingués des simulations. A/C non réfutés. | [Collision](../receipts/audit_continu_20260929/banc_output_alias_20260930/capture/README.md), [complément R2](audit_continu_20260929/timeout/CONTRE_AUDIT_BANCS_CORRIGES_20260929.md) |
 | Prototypes CPU | J3 réduit le CPU de t_boxes ×1,37–1,55, mêmes comptes ; mutant survivant équivalent par parité. 1 060 cas conclusifs et dix délais observés, TSan frontière v3b terminé. Gain p1c CPU total FULL K5 seulement 2,5 % sur le lot local ; variantes non combinées sur G4. | [Contre-audit CPU, périmètres et preuves](audit_continu_20260929/performance/CONTRE_AUDIT_PROTO_CPU_20260929.md) |
 | Aval ordre/tête | Contre-audit nouvelle copie : validation parallèle CSR hors bornes sur objet public forgé, alors que série refuse. Temps mur local ordre+assemblage réduits, sans preuve GPU/FULL 100 ms. Gate nouvelle copie 9/9 réellement close, défaut CSR toujours reproductible ; refus et interruptions séparés des cas conclusifs. | [Contre-audit ordre/tête](audit_continu_20260929/performance/CONTRE_AUDIT_ORDRE_TETE_CORRIGE_20260929.md) |
 | CUDA | Unsigned accepté ; contrôle hôte UBSan propre. Statuts et durées corrigés dans 779dd38a9, mais lecteur d'enveloppe seulement : vingt entrées et huit simulations en précisent les limites. Débits historiques signés invalides, aucun nouveau reçu GPU ni port FULL GPU qualifié. | [Sonde corrigée](audit_continu_20260929/timeout/CONTRE_AUDIT_SONDE_CORRIGEE.md), [statuts et échecs](audit_continu_20260929/ADDENDUM_ZERO_ET_STATUTS_20260930.md), [errata](../receipts/ERRATA.md) |

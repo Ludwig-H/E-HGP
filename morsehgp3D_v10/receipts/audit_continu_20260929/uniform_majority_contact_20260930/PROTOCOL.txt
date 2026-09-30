@@ -1,0 +1,20 @@
+FOUR-SITE AFFINE-3D UNIFORM FIXED-BAND CONTACT COUNTERPROOF
+K2, eta1/8. All pair vertices and all triple hyperedges of Gamma2 retained.
+Canonical geometric balls deduplicated by exact center/radius2; positive
+supports enumerate q1..q4, strict interiors/shells by Fraction.
+Strong vote requires p+qmin<=K AND K<=population; alive requires p<K<=population.
+At epsilon0 AB has shell A/B/Z. Inward Z turns one contact into strict
+interior; AB remains geometric/live and a FULL merge event but ceases strong.
+No crossing of a band threshold: every covering pair ball has positive
+gap; same geometric within-band pair labels at all four queries.
+Complete Gamma cuts open/closed at every birth/event recorded; MEB pair
+and triple values recouped by independent positive-support enumeration.
+First hard majority uses constant denominator, strict 2mass>W.
+Control uses all K-parts containing each query within the same band, not
+an implicit production enumeration. Declared candidate and control differ.
+Eleven tiny cases: epsilon0 and four rational inward steps; u18 homothety
+S1024 plus jitter1; analytic-family M3/eta1/8 and M32/eta1/1000, epsilon0
+and 1/65536. Two wrong-value mathematical mutations (not binaries):
+omit the weak ABZ FULL event; deduplicate two ballots in same component.
+Sources/protocol/recorder frozen before two normal/-O proof executions.
+No native compilation, engine writes, 3D cloud benchmark, GPU or GCP.

@@ -1,0 +1,14 @@
+{
+  "schema": "mhgp10.target_reader.preflight1.v1",
+  "argv": [
+    "python3",
+    "-B",
+    "/tmp/mhgp10-target-reader-audit-20260930.9ZbrpwSQ/micro.py"
+  ],
+  "code": 1,
+  "stdout": "",
+  "stderr_path": "stderr",
+  "exact_utc_not_recorded": true,
+  "tool_wall_seconds": 0.049953671,
+  "scope": "private harness omitted ALIAS global; no engine defect"
+}

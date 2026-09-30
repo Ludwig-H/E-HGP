@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/tmp/mhgp10-target-reader-audit-20260930.9ZbrpwSQ/micro.py", line 221, in <module>
+    main()
+  File "/tmp/mhgp10-target-reader-audit-20260930.9ZbrpwSQ/micro.py", line 210, in main
+    "empty_variant": empty_target_cases(),
+                     ^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/mhgp10-target-reader-audit-20260930.9ZbrpwSQ/micro.py", line 176, in empty_target_cases
+    normalized = namespace["normaliser"](raw, "in_memory_fixture")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "source/run_target.py", line 150, in normaliser
+  File "source/run_target.py", line 46, in _cles
+NameError: name 'ALIAS' is not defined

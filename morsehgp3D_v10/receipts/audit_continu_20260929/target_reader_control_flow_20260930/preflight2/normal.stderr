@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/tmp/mhgp10-target-reader-audit-20260930.9ZbrpwSQ/micro.py", line 222, in <module>
+    main()
+  File "/tmp/mhgp10-target-reader-audit-20260930.9ZbrpwSQ/micro.py", line 211, in main
+    "empty_variant": empty_target_cases(),
+                     ^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/mhgp10-target-reader-audit-20260930.9ZbrpwSQ/micro.py", line 177, in empty_target_cases
+    normalized = namespace["normaliser"](raw, "in_memory_fixture")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "source/run_target.py", line 183, in normaliser
+  File "/tmp/mhgp10-target-reader-audit-20260930.9ZbrpwSQ/micro.py", line 121, in stub_points
+    return [(name, tuple(xyz)) for name, xyz in points.items()]
+                                                ^^^^^^^^^^^^
+AttributeError: 'list' object has no attribute 'items'
