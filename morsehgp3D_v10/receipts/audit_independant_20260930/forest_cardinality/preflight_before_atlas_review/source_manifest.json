@@ -1,0 +1,11 @@
+{
+  "commit": "408d1ffe4d90a7ee6393716c6ddc8319b2b77daa",
+  "path": "morsehgp3D_v10/src/tower/tower.cpp",
+  "sha256": "d919bee049838ca9744218565afeb62b69e04c1a1437f42869a9f7d1fb2e39ae",
+  "expressions_verified": [
+    "const u32 nb = o.nbirths();",
+    "out.rank.reserve(nb + nj);",
+    "const u32 node = static_cast<u32>(out.rank.size());",
+    "out.child_off.push_back(static_cast<u32>(out.child_val.size()));"
+  ]
+}

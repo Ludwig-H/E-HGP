@@ -1,0 +1,741 @@
+{
+  "GCP_used": false,
+  "GPU_used": false,
+  "R2_patch_base": "56020cab64c7c853c90ee766d6d5fa87ad0236d3",
+  "backup_groups": [
+    {
+      "additional_preserved_files_not_in_original_ledger": [
+        {
+          "path": "RECU_bancs_r2.src.md",
+          "sha256": "08af5ba89325c6bad8538644ac1f4891d26a924c77adc7dda58e18afc089d73d"
+        },
+        {
+          "path": "bancs_r1.patch",
+          "sha256": "39a669b937e074e330322f2255ef1e0e5da8c4e7613c504132c969cd207b438f"
+        }
+      ],
+      "backup_path": "/workspaces/E-HGP/build/v10-r2-backup-20260930/bancs",
+      "bad_hashes": [],
+      "declared_payloads": 211,
+      "group": "bancs",
+      "ledger_sha256": "484231475f0b1b201ae2184f64e1fb72a513db025b1f97e8de1b7860ba85fce7",
+      "missing": [],
+      "original_differences": [],
+      "patch_path": "/workspaces/E-HGP/build/v10-r2-backup-20260930/bancs/bancs_r2.patch",
+      "patch_sha256": "e47ab9231a47b05290e84de00eecf7d0c37fd6988dd62c3b8d1a1079edd16584",
+      "touched": [
+        "morsehgp3D_v10/CMakeLists.txt",
+        "morsehgp3D_v10/bench/g4/merge_sessions.py",
+        "morsehgp3D_v10/bench/scaling/scale_run.py",
+        "morsehgp3D_v10/bench/synthetic/decide.py",
+        "morsehgp3D_v10/tests/regression/test_decide_completeness.py",
+        "morsehgp3D_v10/tests/regression/test_scale_run_timeout.py"
+      ]
+    },
+    {
+      "additional_preserved_files_not_in_original_ledger": [
+        {
+          "path": "RECU_entrees_cli.md",
+          "sha256": "8c804665ea447e019e111ee7c6cb3c77d665b0de1b0e337352541f8e15fea05c"
+        },
+        {
+          "path": "entrees_cli_r1.patch",
+          "sha256": "cfd7daaea88648d00dcf7334e053cefb09d7005f903557c024abc56cbec62490"
+        }
+      ],
+      "backup_path": "/workspaces/E-HGP/build/v10-r2-backup-20260930/entrees_cli",
+      "bad_hashes": [],
+      "declared_payloads": 104,
+      "group": "entrees_cli",
+      "ledger_sha256": "22b611f998aae013f0becf16fafc1a03cbcca462b78049ad3e566d86993ce95d",
+      "missing": [],
+      "original_differences": [],
+      "patch_path": "/workspaces/E-HGP/build/v10-r2-backup-20260930/entrees_cli/entrees_cli_r2.patch",
+      "patch_sha256": "b1c0b5302f3502aea1defa8c1c1a81bc42c6aca9ed2876d64a00e82e0a9c6293",
+      "touched": [
+        "morsehgp3D_v10/CMakeLists.txt",
+        "morsehgp3D_v10/cli/mhgp10_catalogue.cpp",
+        "morsehgp3D_v10/cli/mhgp10_cluster.cpp",
+        "morsehgp3D_v10/cli/mhgp10_tower.cpp",
+        "morsehgp3D_v10/docs/conception/ARCH_v2.md",
+        "morsehgp3D_v10/docs/conception/CONCEPTION_V10.md",
+        "morsehgp3D_v10/src/catalogue/catalogue.hpp",
+        "morsehgp3D_v10/src/catalogue/generator.cpp",
+        "morsehgp3D_v10/src/cloud/u32le_input.hpp",
+        "morsehgp3D_v10/src/core/cli_options.hpp",
+        "morsehgp3D_v10/src/core/cli_output.hpp",
+        "morsehgp3D_v10/src/core/reasons.def",
+        "morsehgp3D_v10/tests/head/mreach_cluster.cpp",
+        "morsehgp3D_v10/tests/regression/test_cli_input_frontiers.py",
+        "morsehgp3D_v10/tests/regression/test_fast_targets.py",
+        "morsehgp3D_v10/tests/unit/unit_main.cpp"
+      ]
+    },
+    {
+      "additional_preserved_files_not_in_original_ledger": [],
+      "backup_path": "/workspaces/E-HGP/build/v10-r2-backup-20260930/faits_math",
+      "bad_hashes": [],
+      "declared_payloads": 82,
+      "group": "faits_math",
+      "ledger_sha256": "a62fc84484878f022dbc4350decc004483e76a2715298a4ce8c5da0c1c993eff",
+      "missing": [],
+      "original_differences": [],
+      "patch_path": "/workspaces/E-HGP/build/v10-r2-backup-20260930/faits_math/faits_math_r2.patch",
+      "patch_sha256": "65a86d2b4677c59dd158018b8fd4c775db93eb4201a9d9da81a2f5e5b8eb02e5",
+      "touched": [
+        "docs/math/STATUT_PREUVES_ET_HEURISTIQUES.md",
+        "morsehgp3D_v10/CMakeLists.txt",
+        "morsehgp3D_v10/PASSATION.md",
+        "morsehgp3D_v10/README.md",
+        "morsehgp3D_v10/bench/synthetic/prereg/README.md",
+        "morsehgp3D_v10/cli/mhgp10_cluster.cpp",
+        "morsehgp3D_v10/docs/CLUSTERING_DEPUIS_LA_TOUR_20260929.md",
+        "morsehgp3D_v10/docs/conception/CLUSTER_v2.md",
+        "morsehgp3D_v10/src/tower/tower.hpp",
+        "morsehgp3D_v10/tests/regression/test_projection_facts.py",
+        "morsehgp3D_v10/tests/regression/test_projection_registry.py"
+      ]
+    },
+    {
+      "additional_preserved_files_not_in_original_ledger": [],
+      "backup_path": "/workspaces/E-HGP/build/v10-r2-backup-20260930/oracles",
+      "bad_hashes": [],
+      "declared_payloads": 81,
+      "group": "oracles",
+      "ledger_sha256": "9b057e66e08fbc366f2d14eec3da9e61f770363a30b8e221c4fcdafd18a00f95",
+      "missing": [],
+      "original_differences": [],
+      "patch_path": "/workspaces/E-HGP/build/v10-r2-backup-20260930/oracles/oracles_r2.patch",
+      "patch_sha256": "ea79324ee49fb53b9674f97853881c61d535915d05380abe1306fdc22378762d",
+      "touched": [
+        "morsehgp3D_v10/CMakeLists.txt",
+        "morsehgp3D_v10/cli/mhgp10_catalogue.cpp",
+        "morsehgp3D_v10/cli/mhgp10_tower.cpp",
+        "morsehgp3D_v10/docs/SPEC_V10.md",
+        "morsehgp3D_v10/tests/oracle/test_catalogue_oracle.py",
+        "morsehgp3D_v10/tests/oracle/test_tower_oracle.py"
+      ]
+    },
+    {
+      "additional_preserved_files_not_in_original_ledger": [],
+      "backup_path": "/workspaces/E-HGP/build/v10-r2-backup-20260930/pool",
+      "bad_hashes": [],
+      "declared_payloads": 128,
+      "group": "pool",
+      "ledger_sha256": "00fb1dea9450d950b12c4ecf59c98b3b6459c57bbd04cd89e540d9352bb50d97",
+      "missing": [],
+      "original_differences": [],
+      "patch_path": "/workspaces/E-HGP/build/v10-r2-backup-20260930/pool/pool_r2.patch",
+      "patch_sha256": "db5e04e49128e5d95e5bd1ef1b32dcc291f32bbd84590f1f71600f43ecb8bf94",
+      "touched": [
+        "morsehgp3D_v10/CMakeLists.txt",
+        "morsehgp3D_v10/src/catalogue/generator.cpp",
+        "morsehgp3D_v10/src/sched/pool.cpp",
+        "morsehgp3D_v10/src/sched/pool.hpp",
+        "morsehgp3D_v10/src/tower/tower.cpp",
+        "morsehgp3D_v10/tests/head/mreach_cluster.cpp",
+        "morsehgp3D_v10/tests/regression/test_worker_bad_alloc.py",
+        "morsehgp3D_v10/tests/unit/fault_main.cpp",
+        "morsehgp3D_v10/tests/unit/fault_preload.cpp",
+        "morsehgp3D_v10/tests/unit/unit_main.cpp"
+      ]
+    },
+    {
+      "additional_preserved_files_not_in_original_ledger": [],
+      "backup_path": "/workspaces/E-HGP/build/v10-r2-backup-20260930/sitetree",
+      "bad_hashes": [],
+      "declared_payloads": 63,
+      "group": "sitetree",
+      "ledger_sha256": "0bb8c4205e065cee900866109cb5561a0b50090dea294943c3170d6a2ba29cf5",
+      "missing": [],
+      "original_differences": [],
+      "patch_path": "/workspaces/E-HGP/build/v10-r2-backup-20260930/sitetree/sitetree_r2.patch",
+      "patch_sha256": "1f6038d66a1bee98f98b1df9c304c8069f74bd1b62d0e247297ab5c9e0fa00aa",
+      "touched": [
+        "morsehgp3D_v10/CMakeLists.txt",
+        "morsehgp3D_v10/src/cloud/site_tree.cpp",
+        "morsehgp3D_v10/src/cloud/site_tree.hpp",
+        "morsehgp3D_v10/tests/regression/site_tree_far_center.cpp",
+        "morsehgp3D_v10/tests/regression/site_tree_fast_math.cmake",
+        "morsehgp3D_v10/tests/unit/unit_main.cpp"
+      ]
+    },
+    {
+      "additional_preserved_files_not_in_original_ledger": [],
+      "backup_path": "/workspaces/E-HGP/build/v10-r2-backup-20260930/tete",
+      "bad_hashes": [],
+      "declared_payloads": 57,
+      "group": "tete",
+      "ledger_sha256": "2f2c1c1e060e6351afe3614555b778126906ceb37f98c75298a3990a95cc8328",
+      "missing": [],
+      "original_differences": [],
+      "patch_path": "/workspaces/E-HGP/build/v10-r2-backup-20260930/tete/tete_r2.patch",
+      "patch_sha256": "af48faf8f3d9c99112c23b84cace2002cb646cd03d003c6cd6ad6fb131cea7e2",
+      "touched": [
+        "morsehgp3D_v10/CMakeLists.txt",
+        "morsehgp3D_v10/cli/mhgp10_cluster.cpp",
+        "morsehgp3D_v10/src/core/reasons.def",
+        "morsehgp3D_v10/src/head/head.cpp",
+        "morsehgp3D_v10/src/head/head.hpp",
+        "morsehgp3D_v10/src/points/dendrogram.cpp",
+        "morsehgp3D_v10/src/points/dendrogram.hpp",
+        "morsehgp3D_v10/tests/head/head_complexity.cpp",
+        "morsehgp3D_v10/tests/head/head_gate.cpp",
+        "morsehgp3D_v10/tests/head/mreach_cluster.cpp",
+        "morsehgp3D_v10/tests/head/test_head_frontier.py"
+      ]
+    }
+  ],
+  "backup_journal": {
+    "events": [
+      {
+        "label": null,
+        "line": 1,
+        "result_group": null,
+        "type": "launched",
+        "verdict": null
+      },
+      {
+        "label": "reprise:pool",
+        "line": 2,
+        "result_group": null,
+        "type": "started",
+        "verdict": null
+      },
+      {
+        "label": "reprise:sitetree",
+        "line": 3,
+        "result_group": null,
+        "type": "started",
+        "verdict": null
+      },
+      {
+        "label": "reprise:entrees_cli",
+        "line": 4,
+        "result_group": null,
+        "type": "started",
+        "verdict": null
+      },
+      {
+        "label": "reprise:oracles",
+        "line": 5,
+        "result_group": null,
+        "type": "started",
+        "verdict": null
+      },
+      {
+        "label": "reprise:tete",
+        "line": 6,
+        "result_group": null,
+        "type": "started",
+        "verdict": null
+      },
+      {
+        "label": "reprise:bancs",
+        "line": 7,
+        "result_group": null,
+        "type": "started",
+        "verdict": null
+      },
+      {
+        "label": "reprise:bancs",
+        "line": 8,
+        "result_group": "bancs",
+        "type": "result",
+        "verdict": null
+      },
+      {
+        "label": "reprise:faits_math",
+        "line": 9,
+        "result_group": null,
+        "type": "started",
+        "verdict": null
+      },
+      {
+        "label": "reprise:sitetree",
+        "line": 10,
+        "result_group": "sitetree",
+        "type": "result",
+        "verdict": null
+      },
+      {
+        "label": "verif:bancs",
+        "line": 11,
+        "result_group": null,
+        "type": "started",
+        "verdict": null
+      },
+      {
+        "label": "reprise:oracles",
+        "line": 12,
+        "result_group": "oracles",
+        "type": "result",
+        "verdict": null
+      },
+      {
+        "label": "verif:sitetree",
+        "line": 13,
+        "result_group": null,
+        "type": "started",
+        "verdict": null
+      },
+      {
+        "label": "reprise:pool",
+        "line": 14,
+        "result_group": "pool",
+        "type": "result",
+        "verdict": null
+      },
+      {
+        "label": "verif:oracles",
+        "line": 15,
+        "result_group": null,
+        "type": "started",
+        "verdict": null
+      },
+      {
+        "label": "reprise:entrees_cli",
+        "line": 16,
+        "result_group": "entrees_cli",
+        "type": "result",
+        "verdict": null
+      },
+      {
+        "label": "verif:pool",
+        "line": 17,
+        "result_group": null,
+        "type": "started",
+        "verdict": null
+      },
+      {
+        "label": "reprise:tete",
+        "line": 18,
+        "result_group": "tete",
+        "type": "result",
+        "verdict": null
+      },
+      {
+        "label": "verif:entrees_cli",
+        "line": 19,
+        "result_group": null,
+        "type": "started",
+        "verdict": null
+      },
+      {
+        "label": "verif:bancs",
+        "line": 20,
+        "result_group": "bancs",
+        "type": "result",
+        "verdict": "accepte_avec_reserves"
+      },
+      {
+        "label": "verif:tete",
+        "line": 21,
+        "result_group": null,
+        "type": "started",
+        "verdict": null
+      },
+      {
+        "label": "verif:sitetree",
+        "line": 22,
+        "result_group": "sitetree",
+        "type": "result",
+        "verdict": "refuse"
+      },
+      {
+        "label": "reparation:sitetree",
+        "line": 23,
+        "result_group": null,
+        "type": "started",
+        "verdict": null
+      },
+      {
+        "label": "verif:oracles",
+        "line": 24,
+        "result_group": "oracles",
+        "type": "result",
+        "verdict": "accepte_avec_reserves"
+      },
+      {
+        "label": "reprise:faits_math",
+        "line": 25,
+        "result_group": "faits_math",
+        "type": "result",
+        "verdict": null
+      },
+      {
+        "label": "verif:faits_math",
+        "line": 26,
+        "result_group": null,
+        "type": "started",
+        "verdict": null
+      },
+      {
+        "label": "verif:pool",
+        "line": 27,
+        "result_group": "pool",
+        "type": "result",
+        "verdict": "accepte_avec_reserves"
+      },
+      {
+        "label": "verif:faits_math",
+        "line": 28,
+        "result_group": null,
+        "type": "failed",
+        "verdict": null
+      },
+      {
+        "label": "verif:tete",
+        "line": 29,
+        "result_group": null,
+        "type": "failed",
+        "verdict": null
+      },
+      {
+        "label": "verif:entrees_cli",
+        "line": 30,
+        "result_group": null,
+        "type": "failed",
+        "verdict": null
+      },
+      {
+        "label": "reparation:sitetree",
+        "line": 31,
+        "result_group": null,
+        "type": "failed",
+        "verdict": null
+      },
+      {
+        "label": "integration",
+        "line": 32,
+        "result_group": null,
+        "type": "started",
+        "verdict": null
+      },
+      {
+        "label": "integration",
+        "line": 33,
+        "result_group": null,
+        "type": "failed",
+        "verdict": null
+      }
+    ],
+    "failure_cause_quota": "not recorded in failed rows; quota attribution comes only from the developer note",
+    "path": "/workspaces/E-HGP/build/v10-r2-backup-20260930/journal_wf_5f9c9288-e03.jsonl",
+    "sha256": "6c64dff755f9fba75c8dcb1966105174eb56d622e789cbc13e29f074a987b21f",
+    "verdicts": [
+      {
+        "blocking": [],
+        "group": "bancs",
+        "line": 20,
+        "minor_count": 5,
+        "verdict": "accepte_avec_reserves"
+      },
+      {
+        "blocking": [
+          "S-b : la porte ne vérifie pas le repli réellement pris, alors que le plancher des modes dirigés l'exige. Le plancher « replis d'arrondi >= 2000 (requêtes du domaine du contrat servies par le repli exact) » est compté par `ms.rounding_fallbacks += domain && !r.filtered` dans check_query (tests/regression/site_tree_far_center.cpp). Il compte donc la valeur rendue par le prédicat public filtered(), jamais le chemin exécuté dans nearest et closed_ball. Contre-exemple : un mutant naturel et non équivalent, `in_domain`, où filtered() = fegetround()==FE_TONEAREST && in_domain() et où nearest et closed_ball appellent in_domain(). Hors FE_TONEAREST, c'est le chemin r1, donc le défaut S-b réintroduit sur le chemin (patchs : /tmp/mhgp10-r2/sitetree-verif/preuves/mutant_naturel_in_domain.{cpp,hpp}.patch). Résultat : porte r2 code 0, site_tree_far_center_ok, replis_arrondi=3998 dans chacun des trois modes dirigés. Même résultat pour chemin_nearest_sans_arrondi, chemin_closed_ball_sans_arrondi et chemin_deux_sans_arrondi : porte r2 code 0, porte r1 code 0. Compteurs de chemin instrumentés (preuves/site_tree_mutant_chemin_instr.cpp) : sous chemin_deux_sans_arrondi, le journal de porte est identique, et le filtre flottant sert 84 028 appels de requêtes du domaine en mode dirigé (3998 x 7 x 3, plus 70 dans le fil D2), avec 0 repli du domaine. Sur le r2 réel : 0 appel filtré et 125 434 replis en mode dirigé ; le moteur est donc correct. Ce mutant ne donne les mêmes sorties que si la marge vaut aussi dans les modes dirigés, extension non prouvée (borne de conversion i128->double) que la doctrine v4 refuse d'utiliser. Le § 3 du reçu (table des planchers) et l'en-tête de la porte présentent ce compte comme des requêtes « servies par le repli exact » : la porte ne l'établit pas. Correction attendue : rendre le chemin observable (par exemple un compteur par fil des replis exacts de SiteTree), juger chaque requête sur la règle « repli pris si et seulement si non (FE_TONEAREST et domaine) », faire porter le plancher des modes dirigés sur les replis réellement pris, et ajouter in_domain et les trois mutants chemin_* aux mutants à tuer."
+        ],
+        "group": "sitetree",
+        "line": 22,
+        "minor_count": 4,
+        "verdict": "refuse"
+      },
+      {
+        "blocking": [],
+        "group": "oracles",
+        "line": 24,
+        "minor_count": 4,
+        "verdict": "accepte_avec_reserves"
+      },
+      {
+        "blocking": [],
+        "group": "pool",
+        "line": 27,
+        "minor_count": 5,
+        "verdict": "accepte_avec_reserves"
+      }
+    ]
+  },
+  "build_executed": false,
+  "current_build_binaries": [
+    {
+      "bytes": 494124,
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/build/libmhgp10_core.a",
+      "sha256_observed": "d53abf19f8f9b3eac7b4d11e4d10ffeeb95029107acee9464ea0ae9e66b8bf5a"
+    },
+    {
+      "bytes": 214768,
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/build/mhgp10_catalogue",
+      "sha256_observed": "a3bbad50b81b901c57cea7193bc48d58cce68126e44ae0a225ad678baa3af0cb"
+    },
+    {
+      "bytes": 416704,
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/build/mhgp10_tower",
+      "sha256_observed": "3d55b8699b30abce635b27dea797468f229f95bfdb332468f42191ad9c0c9360"
+    },
+    {
+      "bytes": 444288,
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/build/mhgp10_cluster",
+      "sha256_observed": "5df023bd685087a70c4015922f38177ea2480399136ace8f4e80f6536f72713d"
+    },
+    {
+      "bytes": 135352,
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/build/mhgp10_unit",
+      "sha256_observed": "311f49996912bfeb7bf7d8fb24b8e7c66fae5625e5f9c77f7987f42a7b152eed"
+    },
+    {
+      "bytes": 132824,
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/build/mhgp10_mreach_cluster",
+      "sha256_observed": "1dab9a4f9cd8ec3b3f51cd42d1f073f92ae3608d869792e8cb20a33ed5dfefac"
+    },
+    {
+      "bytes": 17656,
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/build/mhgp10_rank_search",
+      "sha256_observed": "0361f51d909529b70e340ebcb6e9b121865e6fe613ca9cba64cc469141ef6472"
+    },
+    {
+      "bytes": 39616,
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/build/mhgp10_grid32_primitives",
+      "sha256_observed": "8a2e823c224bc04f7b8c109f953e9aafdc163bdc5a0efc2d8fd4685bc18509ec"
+    }
+  ],
+  "current_product_sources": [
+    {
+      "local_matches_pinned_commit": true,
+      "path": "morsehgp3D_v10/CMakeLists.txt",
+      "sha256": "246f57a8cda19cf5623d238850074321ea635bcc6a05ddd7c0a00b3a6638437b",
+      "unchanged_from_777406b82": false
+    },
+    {
+      "local_matches_pinned_commit": true,
+      "path": "morsehgp3D_v10/src/sched/pool.cpp",
+      "sha256": "7eecd6757c03fa8184fbcee7a55b26ef312c1df16acac4241e6917328975d72a",
+      "unchanged_from_777406b82": true
+    },
+    {
+      "local_matches_pinned_commit": true,
+      "path": "morsehgp3D_v10/src/head/head.cpp",
+      "sha256": "f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578",
+      "unchanged_from_777406b82": true
+    },
+    {
+      "local_matches_pinned_commit": true,
+      "path": "morsehgp3D_v10/src/cloud/site_tree.cpp",
+      "sha256": "32296818941943102cf7afbaef6665ffc80f5ca5564a274ad00ae25e8c096eec",
+      "unchanged_from_777406b82": true
+    },
+    {
+      "local_matches_pinned_commit": true,
+      "path": "morsehgp3D_v10/src/catalogue/generator.cpp",
+      "sha256": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662",
+      "unchanged_from_777406b82": true
+    },
+    {
+      "local_matches_pinned_commit": true,
+      "path": "morsehgp3D_v10/src/tower/tower.cpp",
+      "sha256": "d919bee049838ca9744218565afeb62b69e04c1a1437f42869a9f7d1fb2e39ae",
+      "unchanged_from_777406b82": false
+    },
+    {
+      "local_matches_pinned_commit": true,
+      "path": "morsehgp3D_v10/cli/mhgp10_catalogue.cpp",
+      "sha256": "e345022a524223a950925d6140fc68e4df54beccfcc0de846606d2084a6cc12f",
+      "unchanged_from_777406b82": true
+    },
+    {
+      "local_matches_pinned_commit": true,
+      "path": "morsehgp3D_v10/cli/mhgp10_tower.cpp",
+      "sha256": "f13e60f158ff99bbe3ae5ee6aeefd0062e95071c2009ff74f16d80f0dd6aa8f7",
+      "unchanged_from_777406b82": true
+    },
+    {
+      "local_matches_pinned_commit": true,
+      "path": "morsehgp3D_v10/cli/mhgp10_cluster.cpp",
+      "sha256": "ddb1a9326e641f0917746c858cf3d6a275813974c5a1f3d0aff6554439eefec2",
+      "unchanged_from_777406b82": true
+    }
+  ],
+  "declared_build_commit": "8bb4618e5c6c7c2bc8a5d7a1c2e189a4249d0047",
+  "limitations": [
+    "Build sources are the shared checkout, not a private archived source snapshot. Hashes observed now do not retrospectively prove pre-build source or binary closure.",
+    "The 13 named passing gates cover the existing u18 engine and two standalone helpers; they do not contain the unintegrated R2 regression gates.",
+    "No R2 patch corrects the kruskal node/CSR size casts or the nb+nj u32 reserve; CLI R2 guards catalogue count separately.",
+    "SiteTree refusal is a gate/path coverage problem recorded by its verifier, not a new numerical counterexample demonstrated here.",
+    "No successful common R2 integration verdict exists in the saved journal."
+  ],
+  "note_commit": "408d1ffe4d90a7ee6393716c6ddc8319b2b77daa",
+  "observed_build_logs": {
+    "build.log": {
+      "captured_path": "observed/build.log",
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/build.log",
+      "sha256": "ae201ef4e8dbc9c6589e73e7ed348e8e6668f0246a37ba24456a568a01196e64"
+    },
+    "build/CMakeCache.txt": {
+      "captured_path": "observed/build/CMakeCache.txt",
+      "important_lines": [
+        "CMAKE_BUILD_TYPE:STRING=Release",
+        "CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++",
+        "MHGP10_MARCH:STRING=",
+        "MHGP10_POISON:BOOL=OFF",
+        "MHGP10_SANITIZE:BOOL=OFF",
+        "MHGP10_TSAN:BOOL=OFF",
+        "CMAKE_HOME_DIRECTORY:INTERNAL=/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10"
+      ],
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/build/CMakeCache.txt",
+      "sha256": "c82abbe1a6f8201e0f619b0e29b62f1dbfcb0b80bdfa1686d239e1fdb438ef65"
+    },
+    "build/CTestTestfile.cmake": {
+      "captured_path": "observed/build/CTestTestfile.cmake",
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/build/CTestTestfile.cmake",
+      "sha256": "78431cc4a895ed5cc622da4947c1a28e59e60bf70dca28b4ea1e7617d4cceda3"
+    },
+    "build/ctest_fast.log": {
+      "captured_path": "observed/build/ctest_fast.log",
+      "no_failed_tests_marker": true,
+      "passed_tests": [
+        {
+          "elapsed_s": 0.01,
+          "name": "mhgp10_rank_search"
+        },
+        {
+          "elapsed_s": 0.07,
+          "name": "mhgp10_cover_band_structural"
+        },
+        {
+          "elapsed_s": 0.11,
+          "name": "mhgp10_grid32_primitives"
+        },
+        {
+          "elapsed_s": 0.17,
+          "name": "mhgp10_dev_quotas"
+        },
+        {
+          "elapsed_s": 1.02,
+          "name": "mhgp10_unit"
+        },
+        {
+          "elapsed_s": 11.3,
+          "name": "mhgp10_regression_level_collision"
+        },
+        {
+          "elapsed_s": 12.16,
+          "name": "mhgp10_head_condensation_vs_sklearn"
+        },
+        {
+          "elapsed_s": 0.09,
+          "name": "mhgp10_regression_multiplicity_refusal"
+        },
+        {
+          "elapsed_s": 2.6,
+          "name": "mhgp10_regression_mreach_border"
+        },
+        {
+          "elapsed_s": 18.14,
+          "name": "mhgp10_points_cover"
+        },
+        {
+          "elapsed_s": 43.26,
+          "name": "mhgp10_regression_batch_equivalence"
+        }
+      ],
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/build/ctest_fast.log",
+      "sha256": "3a5ee1255c085ed502c3196111778b6291451114d5ab23db09229d4544f4014f"
+    },
+    "build/ctest_oracle.log": {
+      "captured_path": "observed/build/ctest_oracle.log",
+      "no_failed_tests_marker": true,
+      "passed_tests": [
+        {
+          "elapsed_s": 162.96,
+          "name": "mhgp10_catalogue_oracle"
+        },
+        {
+          "elapsed_s": 182.81,
+          "name": "mhgp10_tower_oracle"
+        }
+      ],
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/build/ctest_oracle.log",
+      "sha256": "d38955997fefa991b81e88ed290a876fa73645204d4378f02be605938e36d25c"
+    },
+    "configure.log": {
+      "captured_path": "observed/configure.log",
+      "path": "/workspaces/E-HGP/build/v10-giant-audit/configure.log",
+      "sha256": "3ccb0d8b26ce541cb413e11012f958727672bf5cd1839c4fe76a850581f38f74"
+    }
+  },
+  "observed_utc": "2026-09-30T10:23:30.087863+00:00",
+  "overlapping_patch_files": {
+    "morsehgp3D_v10/CMakeLists.txt": [
+      "bancs",
+      "entrees_cli",
+      "faits_math",
+      "oracles",
+      "pool",
+      "sitetree",
+      "tete"
+    ],
+    "morsehgp3D_v10/cli/mhgp10_catalogue.cpp": [
+      "entrees_cli",
+      "oracles"
+    ],
+    "morsehgp3D_v10/cli/mhgp10_cluster.cpp": [
+      "entrees_cli",
+      "faits_math",
+      "tete"
+    ],
+    "morsehgp3D_v10/cli/mhgp10_tower.cpp": [
+      "entrees_cli",
+      "oracles"
+    ],
+    "morsehgp3D_v10/src/catalogue/generator.cpp": [
+      "entrees_cli",
+      "pool"
+    ],
+    "morsehgp3D_v10/src/core/reasons.def": [
+      "entrees_cli",
+      "tete"
+    ],
+    "morsehgp3D_v10/tests/head/mreach_cluster.cpp": [
+      "entrees_cli",
+      "pool",
+      "tete"
+    ],
+    "morsehgp3D_v10/tests/unit/unit_main.cpp": [
+      "entrees_cli",
+      "pool",
+      "sitetree"
+    ]
+  },
+  "passed_gate_names": [
+    "mhgp10_rank_search",
+    "mhgp10_cover_band_structural",
+    "mhgp10_grid32_primitives",
+    "mhgp10_dev_quotas",
+    "mhgp10_unit",
+    "mhgp10_regression_level_collision",
+    "mhgp10_head_condensation_vs_sklearn",
+    "mhgp10_regression_multiplicity_refusal",
+    "mhgp10_regression_mreach_border",
+    "mhgp10_points_cover",
+    "mhgp10_regression_batch_equivalence",
+    "mhgp10_catalogue_oracle",
+    "mhgp10_tower_oracle"
+  ],
+  "pinned_sources_sha256": {
+    "morsehgp3D_v10/CMakeLists.txt": "246f57a8cda19cf5623d238850074321ea635bcc6a05ddd7c0a00b3a6638437b",
+    "morsehgp3D_v10/audits/NOTE_CLAUDE_REPRISE_ET_PRECISION_20260930.md": "e3349c95309742b1ae279e1d6535176a7b9ec96bd799f49c3fe718447c2acdb9",
+    "morsehgp3D_v10/cli/mhgp10_catalogue.cpp": "e345022a524223a950925d6140fc68e4df54beccfcc0de846606d2084a6cc12f",
+    "morsehgp3D_v10/cli/mhgp10_cluster.cpp": "ddb1a9326e641f0917746c858cf3d6a275813974c5a1f3d0aff6554439eefec2",
+    "morsehgp3D_v10/cli/mhgp10_tower.cpp": "f13e60f158ff99bbe3ae5ee6aeefd0062e95071c2009ff74f16d80f0dd6aa8f7",
+    "morsehgp3D_v10/src/catalogue/generator.cpp": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662",
+    "morsehgp3D_v10/src/cloud/site_tree.cpp": "32296818941943102cf7afbaef6665ffc80f5ca5564a274ad00ae25e8c096eec",
+    "morsehgp3D_v10/src/head/head.cpp": "f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578",
+    "morsehgp3D_v10/src/sched/pool.cpp": "7eecd6757c03fa8184fbcee7a55b26ef312c1df16acac4241e6917328975d72a",
+    "morsehgp3D_v10/src/tower/tower.cpp": "d919bee049838ca9744218565afeb62b69e04c1a1437f42869a9f7d1fb2e39ae"
+  },
+  "read_source_count": 1487,
+  "read_sources_stable_before_after": true,
+  "scope": "Read-only backup/source/log checks; no product test, build, Git mutation, GPU or GCP executed",
+  "status": "PASS",
+  "tests_executed": false
+}

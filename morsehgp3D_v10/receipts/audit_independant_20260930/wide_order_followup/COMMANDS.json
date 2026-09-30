@@ -1,0 +1,159 @@
+[
+  {
+    "name": "compiler",
+    "argv": [
+      "g++",
+      "--version"
+    ],
+    "shell_display": "g++ --version",
+    "cwd": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup",
+    "env_overrides": {},
+    "exit_code": 0
+  },
+  {
+    "name": "compile_normal",
+    "argv": [
+      "g++",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wconversion",
+      "-Wshadow",
+      "-I",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/source/src",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/check.cpp",
+      "-O2",
+      "-o",
+      "/tmp/mhgp10-wide-order-followup-01bng3o2/normal"
+    ],
+    "shell_display": "g++ -std=c++20 -Wall -Wextra -Wconversion -Wshadow -I /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/source/src /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/check.cpp -O2 -o /tmp/mhgp10-wide-order-followup-01bng3o2/normal",
+    "cwd": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup",
+    "env_overrides": {},
+    "exit_code": 0
+  },
+  {
+    "name": "compile_ubsan",
+    "argv": [
+      "g++",
+      "-std=c++20",
+      "-Wall",
+      "-Wextra",
+      "-Wconversion",
+      "-Wshadow",
+      "-I",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/source/src",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/check.cpp",
+      "-O1",
+      "-g",
+      "-fsanitize=undefined",
+      "-fno-sanitize-recover=undefined",
+      "-o",
+      "/tmp/mhgp10-wide-order-followup-01bng3o2/ubsan"
+    ],
+    "shell_display": "g++ -std=c++20 -Wall -Wextra -Wconversion -Wshadow -I /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/source/src /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/check.cpp -O1 -g -fsanitize=undefined -fno-sanitize-recover=undefined -o /tmp/mhgp10-wide-order-followup-01bng3o2/ubsan",
+    "cwd": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup",
+    "env_overrides": {},
+    "exit_code": 0
+  },
+  {
+    "name": "normal",
+    "argv": [
+      "/tmp/mhgp10-wide-order-followup-01bng3o2/normal"
+    ],
+    "shell_display": "/tmp/mhgp10-wide-order-followup-01bng3o2/normal",
+    "cwd": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup",
+    "env_overrides": {},
+    "exit_code": 0
+  },
+  {
+    "name": "ubsan",
+    "argv": [
+      "/tmp/mhgp10-wide-order-followup-01bng3o2/ubsan"
+    ],
+    "shell_display": "/tmp/mhgp10-wide-order-followup-01bng3o2/ubsan",
+    "cwd": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup",
+    "env_overrides": {
+      "UBSAN_OPTIONS": "halt_on_error=1:print_stacktrace=1"
+    },
+    "exit_code": 0
+  },
+  {
+    "name": "judge_normal",
+    "argv": [
+      "python3",
+      "-B",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/judge.py",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/normal.stdout"
+    ],
+    "shell_display": "python3 -B /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/judge.py /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/normal.stdout",
+    "cwd": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup",
+    "env_overrides": {},
+    "exit_code": 0
+  },
+  {
+    "name": "judge_normal_O",
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/judge.py",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/normal.stdout"
+    ],
+    "shell_display": "python3 -B -O /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/judge.py /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/normal.stdout",
+    "cwd": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup",
+    "env_overrides": {},
+    "exit_code": 0
+  },
+  {
+    "name": "judge_ubsan",
+    "argv": [
+      "python3",
+      "-B",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/judge.py",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/ubsan.stdout"
+    ],
+    "shell_display": "python3 -B /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/judge.py /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/ubsan.stdout",
+    "cwd": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup",
+    "env_overrides": {},
+    "exit_code": 0
+  },
+  {
+    "name": "judge_ubsan_O",
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/judge.py",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/ubsan.stdout"
+    ],
+    "shell_display": "python3 -B -O /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/judge.py /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/ubsan.stdout",
+    "cwd": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup",
+    "env_overrides": {},
+    "exit_code": 0
+  },
+  {
+    "name": "geometry_contract",
+    "argv": [
+      "python3",
+      "-B",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/geometry_contract.py"
+    ],
+    "shell_display": "python3 -B /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/geometry_contract.py",
+    "cwd": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup",
+    "env_overrides": {},
+    "exit_code": 0
+  },
+  {
+    "name": "geometry_contract_O",
+    "argv": [
+      "python3",
+      "-B",
+      "-O",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/geometry_contract.py"
+    ],
+    "shell_display": "python3 -B -O /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup/geometry_contract.py",
+    "cwd": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/wide_order_followup",
+    "env_overrides": {},
+    "exit_code": 0
+  }
+]

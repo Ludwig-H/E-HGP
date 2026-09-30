@@ -1,0 +1,1 @@
+First closed interpretation omitted the atlas.cells and representative-prefix guards. Its abstract arithmetic and hashes remain correct, but it does not demonstrate a reachable native FULL overflow. Current README records the corrected upstream-invariant proof.

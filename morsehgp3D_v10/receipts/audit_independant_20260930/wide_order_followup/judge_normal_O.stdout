@@ -1,0 +1,1 @@
+{"geometric_pairs": 2, "native_stdout_sha256": "ae0d424519475bfd60417d359ca11d7f549bad1472005aa19faf4a5c1a4ed881", "refusal_cycle_confirmed": true, "scope": "q2/66-bit threshold and future-adapter contracts only; no native wide constructors, FULL, timing or campaign", "status": "PASS", "threshold_bridges": 1}

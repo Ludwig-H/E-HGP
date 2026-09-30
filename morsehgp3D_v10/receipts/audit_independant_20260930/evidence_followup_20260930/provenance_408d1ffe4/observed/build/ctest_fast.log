@@ -1,0 +1,34 @@
+Test project /workspaces/E-HGP/build/v10-giant-audit/build
+      Start  1: mhgp10_unit
+      Start  2: mhgp10_rank_search
+      Start  3: mhgp10_grid32_primitives
+      Start  4: mhgp10_cover_band_structural
+ 1/11 Test  #2: mhgp10_rank_search .......................   Passed    0.01 sec
+      Start  5: mhgp10_dev_quotas
+ 2/11 Test  #4: mhgp10_cover_band_structural .............   Passed    0.07 sec
+      Start  6: mhgp10_head_condensation_vs_sklearn
+ 3/11 Test  #3: mhgp10_grid32_primitives .................   Passed    0.11 sec
+      Start  7: mhgp10_regression_level_collision
+ 4/11 Test  #5: mhgp10_dev_quotas ........................   Passed    0.17 sec
+      Start  8: mhgp10_points_cover
+ 5/11 Test  #1: mhgp10_unit ..............................   Passed    1.02 sec
+      Start  9: mhgp10_regression_batch_equivalence
+ 6/11 Test  #7: mhgp10_regression_level_collision ........   Passed   11.30 sec
+      Start 10: mhgp10_regression_mreach_border
+ 7/11 Test  #6: mhgp10_head_condensation_vs_sklearn ......   Passed   12.16 sec
+      Start 11: mhgp10_regression_multiplicity_refusal
+ 8/11 Test #11: mhgp10_regression_multiplicity_refusal ...   Passed    0.09 sec
+ 9/11 Test #10: mhgp10_regression_mreach_border ..........   Passed    2.60 sec
+10/11 Test  #8: mhgp10_points_cover ......................   Passed   18.14 sec
+11/11 Test  #9: mhgp10_regression_batch_equivalence ......   Passed   43.26 sec
+
+100% tests passed, 0 tests failed out of 11
+
+Label Time Summary:
+fast          =   1.36 sec*proc (4 tests)
+gate          =  88.96 sec*proc (11 tests)
+head          =  12.16 sec*proc (1 test)
+points        =  18.39 sec*proc (3 tests)
+regression    =  57.38 sec*proc (6 tests)
+
+Total Test time (real) =  44.29 sec

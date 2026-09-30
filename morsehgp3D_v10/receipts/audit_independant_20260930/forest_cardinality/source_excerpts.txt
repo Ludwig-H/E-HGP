@@ -1,0 +1,75 @@
+1041: Outcome kruskal(const Catalogue& cat, OrderRun& o, OrderForest& out, Scratch& sc) {
+1042:   const u32 k = static_cast<u32>(o.k);
+1043:   const u32 nb = o.nbirths();
+1044:   const u32 nj = static_cast<u32>(o.join_ball.size());
+1045:   out.rank.clear();
+1046:   out.birth.clear();
+1047:   out.rank.reserve(nb + nj);
+1048:   out.birth.reserve(nb + nj);
+1049:   for (u32 i = 0; i < o.site_births; ++i) {
+1050:     out.rank.push_back(0);
+1051:     out.birth.push_back(i);
+1052:   }
+1053:   for (u32 b : o.birth_ball) {
+1054:     out.rank.push_back(cat.rank[b] + 1);
+1055:     out.birth.push_back(b);
+1056:   }
+1057:   out.parent.assign(nb, kNone);
+1058:   out.parent.reserve(nb + nj);
+1059:   out.child_off.assign(nb + 1, 0);
+1060:   out.child_off.reserve(nb + nj + 1);
+1061:   out.child_val.clear();
+1062:   std::vector<u32> dsu(nb), top(nb);
+1063:   for (u32 i = 0; i < nb; ++i) dsu[i] = top[i] = i;
+1064:   auto find = [&](u32 x) {
+1065:     while (dsu[x] != x) x = dsu[x] = dsu[dsu[x]];
+1066:     return x;
+1067:   };
+1068:   std::vector<u32>& pre = sc.buf;
+1069:   auto& members = sc.pairs;
+1070:   std::vector<u32> kids;
+1071:   for (u32 i = 0; i < nj;) {
+1072:     const u32 rk = cat.rank[o.join_ball[i]] + 1;
+1073:     u32 j = i;
+1074:     while (j < nj && cat.rank[o.join_ball[j]] + 1 == rk) ++j;
+1075:     // racines pre-lot de chaque representant, puis unions du lot
+1076:     pre.clear();
+1077:     for (u32 r = o.join_off[i]; r < o.join_off[j]; ++r) pre.push_back(find(o.rep_node[r]));
+1078:     for (u32 t = i; t < j; ++t) {
+1079:       const u32 r0 = o.join_off[t] - o.join_off[i];
+1080:       for (u32 r = r0 + 1; r < o.join_off[t + 1] - o.join_off[i]; ++r) {
+1081:         const u32 x = find(pre[r0]), y = find(pre[r]);
+1082:         if (x != y) dsu[std::max(x, y)] = std::min(x, y);
+1083:       }
+1084:     }
+1085:     members.clear();
+1086:     for (u32 r : pre) members.push_back({find(r), r});
+1087:     std::sort(members.begin(), members.end());
+1088:     members.erase(std::unique(members.begin(), members.end()), members.end());
+1089:     for (size_t a = 0; a < members.size();) {
+1090:       size_t b = a;
+1091:       while (b < members.size() && members[b].first == members[a].first) ++b;
+1092:       if (b - a >= 2) {
+1093:         const u32 node = static_cast<u32>(out.rank.size());
+1094:         out.rank.push_back(rk);
+1095:         out.birth.push_back(kNone);
+1096:         out.parent.push_back(kNone);
+1097:         kids.clear();
+1098:         for (size_t t = a; t < b; ++t) kids.push_back(top[members[t].second]);
+1099:         std::sort(kids.begin(), kids.end());
+1100:         for (u32 kid : kids) {
+1101:           out.child_val.push_back(kid);
+1102:           out.parent[kid] = node;
+1103:         }
+1104:         out.child_off.push_back(static_cast<u32>(out.child_val.size()));
+1105:         top[members[a].first] = node;
+1106:         ++out.merges;
+1107:       }
+1108:       a = b;
+1109:     }
+1110:     i = j;
+1111:   }
+1112:   u32 roots = 0;
+1113:   for (u32 v = 0; v < out.rank.size(); ++v) roots += out.parent[v] == kNone;
+1114:   if (roots != 1) return fail(Reason::root_count, u8(k));
+1115:   return Outcome{};

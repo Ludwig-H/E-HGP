@@ -1,8 +1,8 @@
 # LiDAR massif et précision — contrat proposé au développeur
 
-30 septembre 2026. Demandes utilisateur : dizaines de millions et précision paramétrable. Produit 4b7d70422 ; preuves jusqu'à bbc21eef7. RankIndex intégré, primitives larges et filtre relatif de portée distincte. public_status=not_claimed. Aucun GCP, allocation massive ou moteur modifié par cet audit. [Massif](../receipts/audit_independant_20260930/massif/README.md), [précision](../receipts/audit_independant_20260930/precision_grille/representation/README.md).
+30 septembre 2026. Demandes utilisateur : dizaines de millions et précision paramétrable. Produit 4b7d70422 ; preuves jusqu'à 408d1ffe4. RankIndex intégré, primitives larges et filtre relatif de portée distincte. public_status=not_claimed. Aucun GCP, allocation massive ou moteur modifié par cet audit. [Massif](../receipts/audit_independant_20260930/massif/README.md), [précision](../receipts/audit_independant_20260930/precision_grille/representation/README.md).
 
-**Décision utile.** Exposer le pas physique h, publier le profil exact certifié et conserver un repère commun. Pour le massif : segments depuis les boîtes de centres certifiées, fusion externe exacte. Cela traite la capacité du catalogue ; atlas, verticales, incidences et reprise restent à concevoir.
+**Décision utilisateur confirmée : grille u32 par paliers u24 puis u32 complet ; float32 natif hors chantier courant.** Exposer le pas physique h, publier le domaine exact certifié et conserver un repère commun. Pour le massif : segments depuis les boîtes de centres certifiées, fusion externe exacte. Cela traite la capacité du catalogue ; atlas, verticales, incidences et reprise restent à concevoir.
 
 ## Précision : pas et largeur distincts
 
@@ -24,7 +24,9 @@ Contrat minimal proposé :
 3. Manifest versionné lié au hash des coordonnées : h rationnel, origine/traduction, repère, profil, unités, IDs, correspondance retours→sites et fusions. Le u32le nu/CLI ne portent pas h/origine et recréent les IDs par ligne.
 4. Voie large qualifiée ensemble : Morton/identité, centres, prédicats, niveaux et filtres. Un pas fin ne récupère pas une précision déjà perdue par le capteur.
 
-Niveaux exacts en cellules² : β_phys=h²β_grille, r_phys=h·r_grille, λ_phys=h^(−z)λ_grille. EOM idéal invariant pour le même arbre, masses/z et conventions de zéro. **Requantifier change le nuage.** Garder unité interne et dates exactes. Le [filtre relatif certifié](../receipts/audit_continu_20260929/relative_filter_20260930/README.md) conserve les contacts en prototype ; READY ne certifie pas la positivité du support. Signe exact : borne q3 de 201 bits, protocole générique sur 192 bits jusqu'à 258 bits. Repli, nearest natif et port commun restent à faire ; aucun FULL large ou gain acquis.
+Niveaux exacts en cellules² : β_phys=h²β_grille, r_phys=h·r_grille, λ_phys=h^(−z)λ_grille. EOM idéal invariant pour le même arbre, masses/z et conventions de zéro. **Requantifier change le nuage.** Garder unité interne et dates exactes. Le [filtre relatif certifié](../receipts/audit_continu_20260929/relative_filter_20260930/README.md) conserve les contacts en prototype ; READY ne certifie pas la positivité du support. Signe exact : borne q3 de 201 bits, protocole générique sur 192 bits jusqu'à 258 bits. Repli, nearest natif et port commun restent à faire ; aucun FULL large ou gain acquis. [Complément ordre/KNN](../receipts/audit_independant_20260930/wide_order_followup/README.md) : deux boules q2 K3 de niveaux E et E+1/4 coïncident en double u32, même physiquement ; coupe exacte au seuil E distincte. Prévalider les niveaux avant tri, jamais traiter un refus comme une égalité. Distances/q2 u24 exacts en double ne couvrent pas q3/q4.
+
+Borne utile au dispatch : MEB certifiée dans une boîte de largeurs Δ donne 4β≤ΣΔ² ; ainsi β u32<2^64, même si les K-NN demandent 66 bits. Le raccourci fermé 4e≥ΣΔ² exige ce certificat et le même profil ; équidistance ou READY ne suffisent pas. [Preuve, neuf MEB exactes et contre-cas obtus](../receipts/audit_independant_20260930/wide_order_followup_bound/dispatch_meb_bound.md), normal/−O. Une valeur β bornée ne dispense pas des numérateur/dénominateur larges ; aucun constructeur ou gain de débit acquis.
 
 ## Mesures et dimensionnement
 
@@ -47,7 +49,7 @@ Commandes sans points : tous ordres/verticales, aucune attache, tête ou export 
 
 | Verrou | Correction |
 | --- | --- |
-| Boules | [Cast refs.size()→u32](../src/catalogue/generator.cpp#L803) sans garde ; collecteurs locaux et Catalogue::balls à auditer. Refus avant dépassement/conversion ou IDs globaux plus larges. |
+| Boules / forêt | B→u32 sans garde au catalogue ; garde proposée en copie R2. Atlas/représentants protègent déjà la [forêt/CSR](../receipts/audit_independant_20260930/forest_cardinality/README.md) valide actuelle. Promouvoir les réserves ; conserver ces invariants globaux dans le futur port segmenté. |
 | RankIndex | Milieu sûr et produit élargi intégrés dans 4b7d70422 ; [helper réel, 36 220 cas normal/UBSan](../receipts/audit_independant_20260930/rank_search_preintegration/README.md) passent. Raccord observé dans le binaire u18 ; cardinalité avant cast de level.size() distincte. |
 | Atlas | Refus cellules/représentants≥kNone présent, après catalogue résident ; B représentable ne garantit pas l'atlas. |
 | Mémoire | Budget Buffer partiel, grands vecteurs et budget par défaut illimité. Réserver états simultanés/disque et fermer workers sur refus. |
@@ -67,4 +69,4 @@ Chaîne : index global → boîtes certifiées → segments triés (niveau exact
 
 Point partagé/halo fixe ne suffisent pas : K2 {0,1,2} couvre 1 deux fois à β=1/4, fusionne à β=1 ; {0,1,10,11} naît dans le vide à 81/4, fusionne à 25 avec trois parents. [Calculs exacts](../receipts/audit_independant_20260930/massif/semantique/receipt.json).
 
-**Prochaine décision développeur :** h/profil et manifest, repli/port larges, gardes de cardinalité ; résidence RAM/disque. Puis différentiel résident/segments : plateaux transverses, verticales fermées, incidences internes, segments vides et reprise. Sceller segments et publier seulement les plateaux validés. La [bande par K](../receipts/audit_independant_20260930/cover_band_followup/README.md) ne rend pas ses partitions communes laminaires : fixer aussi le contrat de hiérarchie de points.
+**Prochaine livraison développeur :** pas/manifeste et port u24 complet, gardes de cardinalité ; résidence RAM/disque. Puis différentiel résident/segments : plateaux transverses, verticales fermées, incidences internes, segments vides et reprise. Sceller segments et publier seulement les plateaux validés. Hiérarchie de points : un K fixé conformément au choix courant ; le [croisement inter-K](../receipts/audit_independant_20260930/cover_band_followup/README.md) ne bloque pas cette cible.

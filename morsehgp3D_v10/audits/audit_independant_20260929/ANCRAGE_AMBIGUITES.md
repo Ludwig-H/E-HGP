@@ -1,6 +1,6 @@
 # Frontière, laminarité et précision — décisions mathématiques
 
-30 septembre 2026. Produit 4b7d70422 et développement jusqu'à bbc21eef7. Nouveau contrôle de bande et croisement inter-K, aucun moteur changé/GCP. public_status=not_claimed. [Version longue conservée exactement](../../receipts/audit_independant_20260930/notes_avant_synthese/README.md).
+30 septembre 2026. Produit 4b7d70422 ; preuves jusqu'à 408d1ffe4. Nouveau contrôle de bande et croisement inter-K, aucun moteur changé/GCP. public_status=not_claimed. [Version longue conservée exactement](../../receipts/audit_independant_20260930/notes_avant_synthese/README.md).
 
 ## Cible de la thèse
 
@@ -10,19 +10,21 @@ Parties I/II relues : pages imprimées 1–50 et 53–107, [trace](../../receipt
 
 Core à K fixé est un arbre ; couvertures recouvrantes et coupes multi-K peuvent se croiser. FULL/verticales ne déterminent pas seuls une projection laminaire exclusive. [Obstructions](../../receipts/audit_independant_20260929/historique/base_6206d1d11/TOUR_ET_POINTS.md).
 
-## Nouveau bras par bande : contrat inter-K à fixer
+## Bande à K fixé : cible courante et limite inter-K
 
 Le bras 4b7 considère tous les témoins forts jusqu'à (1+η)α_K(x), puis fixe leur LCA aux dates propres. Couverture à l'entrée, laminarité à K fixé et raffinement avec η sont corrects. Cinq sites (0,1,2,6,9) sur une droite, η=1/8, r=3 donnent **K2 : {0,1,2}|{6,9} ; K3 : {0,1,2,6}|{9}**. Les blocs se croisent. La composante K3 descend à gauche K2 ; x=6 est ancré à droite K2, sans ex æquo de première couverture. [Γ et export natif, normal/−O](../../receipts/audit_independant_20260930/cover_band_followup/README.md). Les verticales FULL sont correctes ; les propriétaires ne commutent pas avec elles.
 
-Une hiérarchie commune exige une politique déclarée : K fixé, chaîne monotone avec transport, ou combinaison. Le raffinement commun est laminaire mais laisse ici 6 et 9 singletons ; le regroupement commun fusionne tout dès β=9, avant la fusion géométrique K2 à 49/4. Inclure K1 dans ce regroupement redonne K1 : tout bloc couvert raffine une composante L1. [Preuve et 800 contrôles](../../receipts/audit_independant_20260930/cover_band_followup/intrinsic_cross_k/README.md). Comparer rappel, masse différée et condensation avant de choisir.
+**La cible utilisateur est désormais un seul K fixé.** Le croisement ne la bloque pas. Une combinaison future de plusieurs K exigerait une politique de transport ou de combinaison déclarée. Le raffinement commun est laminaire mais laisse ici 6 et 9 singletons ; le regroupement commun fusionne tout dès β=9, avant la fusion géométrique K2 à 49/4. Inclure K1 dans ce regroupement redonne K1 : tout bloc couvert raffine une composante L1. [Preuve et 800 contrôles](../../receipts/audit_independant_20260930/cover_band_followup/intrinsic_cross_k/README.md). Comparer rappel, masse différée et condensation pour le bras à K fixé.
 
-Autre retard prévu par le bras : un témoin ancêtre tardif peut repousser l'entrée sans lignée concurrente. Comparer l'antichaîne des nœuds sélectionnés minimaux, puis leur LCA ; sous le protocole de témoins vivants aux dates propres, elle garde couverture et monotonie avec η. Variante à tester, aucune robustesse ou compatibilité inter-K acquise.
+**Variante éprouvée à K fixé :** supprimer les ancêtres redondants parmi les nœuds sélectionnés, puis LCA. Les témoins de première couverture restent minimaux ; les nouveaux témoins plus tardifs ne peuvent en être descendants. Couverture, laminarité et monotonie avec η sont conservées, entrée jamais plus tardive. [Preuve et prototype exact](../../receipts/audit_independant_20260930/fixed_k_antichain/README.md) : 2 892 bandes abstraites, six exports/507 coupes, incidences internes K3/K5 gardées, normal/−O identiques. Aucun bras développeur modifié.
+
+Triangle K2 (0,0),(8,0),(0,3), η=1/8 : x=(8,0) entre à β=16 au lieu de 73/4, l’ancêtre tardif n’ajoutant pas de lignée concurrente. La masse devient disponible plus tôt ; ici la partition de points peut rester identique, aucun gain de coassociation/qualité acquis. Le prototype garde les antichaînes pour audit ; tri par point et mémoire supplémentaires à mesurer. Bande complète à fermer jusqu’à (1+η)²α² avant décision, malgré la date d’entrée avancée.
 
 ## Toutes les incidences, y compris internes
 
 Pour dist(x,C)≤r, témoin critique contenant x, rayon≤r, centre dans C, avec population≥K et p+q_min≤K. [Preuve et contrôles](../audit_continu_20260929/catalogue/ADDENDUM_COUVERTURE_CATALOGUE_20260929.md). Résoudre le centre à K puis son ancêtre vivant ; population≥K n'assure pas une cellule active à K. Garder I/U complets.
 
-Transporter (x,K,niveau(b),composante_K(centre(b))), résoudre chaque (b,K) une fois, puis dédupliquer par point/coupe. K1 : ajouter les n sites au niveau zéro. Volume≤n+Kmax·Σ_b|I_b∪U_b| pour ce raccord non pondéré, b désignant les boules positives. Borne relative au catalogue. **Conserver les fusions FULL p+q_min=K+1.**
+Transporter (x,K,niveau(b),composante_K(centre(b))), résoudre chaque (b,K) une fois, puis dédupliquer par point/coupe. K1 : ajouter les n sites au niveau zéro (p=0, q_min=m=1 ; formule 1D p=K−2 limitée à K≥2). Volume≤n+Kmax·Σ_b|I_b∪U_b| pour ce raccord non pondéré, b désignant les boules positives. Borne relative au catalogue. **Conserver les fusions FULL p+q_min=K+1.**
 
 [Sections 10–11](../audit_continu_20260929/AUDIT_LAMINARITE_POINTS_20260929.md#L694) : contact coquille/intérieur modifiant les atomes ; entrée frontière strictement interne K3/K5. Chaque point a une feuille couvrante à K2, pas toutes ses couvertures futures. « Une feuille=une unité » n'est pas une réduction générale.
 

@@ -1,0 +1,13 @@
+Test project /workspaces/E-HGP/build/v10-giant-audit/build
+    Start 6: mhgp10_catalogue_oracle
+    Start 7: mhgp10_tower_oracle
+1/2 Test #6: mhgp10_catalogue_oracle ..........   Passed  162.96 sec
+2/2 Test #7: mhgp10_tower_oracle ..............   Passed  182.81 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Label Time Summary:
+gate      = 345.77 sec*proc (2 tests)
+oracle    = 345.77 sec*proc (2 tests)
+
+Total Test time (real) = 182.82 sec

@@ -1,0 +1,138 @@
+{
+  "steps": [
+    {
+      "argv": [
+        "g++",
+        "--version"
+      ],
+      "returncode": 0,
+      "wall_seconds": 0.00920717900226009,
+      "stdout": "compiler.stdout",
+      "stderr": "compiler.stderr"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/forest_cardinality/check.py",
+        "--inputs"
+      ],
+      "returncode": 0,
+      "wall_seconds": 0.06474337400140939,
+      "stdout": "inputs.stdout",
+      "stderr": "inputs.stderr"
+    },
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-O2",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/forest_cardinality/arithmetic.cpp",
+        "-o",
+        "/tmp/mhgp10-forest-cardinality-20260930/normal_r2"
+      ],
+      "returncode": 0,
+      "wall_seconds": 0.7372718989972782,
+      "stdout": "compile_normal.stdout",
+      "stderr": "compile_normal.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-forest-cardinality-20260930/normal_r2"
+      ],
+      "returncode": 0,
+      "wall_seconds": 0.004435113001818536,
+      "stdout": "normal.stdout",
+      "stderr": "normal.stderr"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/forest_cardinality/check.py",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/forest_cardinality/normal.stdout"
+      ],
+      "returncode": 0,
+      "wall_seconds": 0.08771541999885812,
+      "stdout": "judge_normal_normal.stdout",
+      "stderr": "judge_normal_normal.stderr"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/forest_cardinality/check.py",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/forest_cardinality/normal.stdout"
+      ],
+      "returncode": 0,
+      "wall_seconds": 0.07568493100188789,
+      "stdout": "judge_normal_optimized.stdout",
+      "stderr": "judge_normal_optimized.stderr"
+    },
+    {
+      "argv": [
+        "g++",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-O1",
+        "-g",
+        "-fsanitize=undefined",
+        "-fno-sanitize-recover=undefined",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/forest_cardinality/arithmetic.cpp",
+        "-o",
+        "/tmp/mhgp10-forest-cardinality-20260930/ubsan_r2"
+      ],
+      "returncode": 0,
+      "wall_seconds": 0.8953495540008589,
+      "stdout": "compile_ubsan.stdout",
+      "stderr": "compile_ubsan.stderr"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-forest-cardinality-20260930/ubsan_r2"
+      ],
+      "returncode": 0,
+      "wall_seconds": 0.0046143370018398855,
+      "stdout": "ubsan.stdout",
+      "stderr": "ubsan.stderr"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/forest_cardinality/check.py",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/forest_cardinality/ubsan.stdout"
+      ],
+      "returncode": 0,
+      "wall_seconds": 0.08608901700063143,
+      "stdout": "judge_ubsan_normal.stdout",
+      "stderr": "judge_ubsan_normal.stderr"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/forest_cardinality/check.py",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/forest_cardinality/ubsan.stdout"
+      ],
+      "returncode": 0,
+      "wall_seconds": 0.0696652919978078,
+      "stdout": "judge_ubsan_optimized.stdout",
+      "stderr": "judge_ubsan_optimized.stderr"
+    }
+  ],
+  "external_binaries": {
+    "/tmp/mhgp10-forest-cardinality-20260930/normal_r2": "a87d0eafe5c92bb5780e39e5005dbff3585bdbebd155ca0deacb68cb4e9715f2",
+    "/tmp/mhgp10-forest-cardinality-20260930/ubsan_r2": "bab6371c7547d5ad231217572de5849ab15a25dd8e46f5b36cf4def09c7957e4"
+  },
+  "production_code_changed": false,
+  "massive_allocation": false,
+  "first_capture": "preflight_reporting_error/"
+}

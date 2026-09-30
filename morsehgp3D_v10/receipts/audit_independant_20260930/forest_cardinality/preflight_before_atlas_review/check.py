@@ -1,0 +1,80 @@
+"""Virtual arithmetic and abstract forest bounds, not native FULL capacity."""
+import json
+from pathlib import Path
+import random
+import sys
+
+HERE = Path(__file__).resolve().parent
+U32 = (1 << 32) - 1
+
+
+def queries():
+    values = [0, 1, 2, (1 << 31) - 1, 1 << 31, (1 << 31) + 1,
+              U32 - 1, U32, U32 + 1, U32 + 2]
+    return [(b, j, max(b, j), b + j) for b in values for j in values]
+
+
+def run():
+    checks = 0
+    forests = 0
+    rng = random.Random(9302026)
+    for births in range(1, 81):
+        for policy in range(18):
+            roots = births
+            nodes = births
+            edges = 0
+            merges = 0
+            joins = 0
+            while roots > 1:
+                arity = 2 if policy == 0 else roots if policy == 1 else rng.randint(2, roots)
+                joins += 1 + (rng.randrange(5) if policy > 1 else 0)
+                roots -= arity - 1
+                nodes += 1
+                edges += arity
+                merges += 1
+                if edges != nodes - roots:
+                    raise RuntimeError('forest CSR identity')
+                if merges > min(joins, births - roots):
+                    raise RuntimeError('component decrease bound')
+                if nodes > births + min(joins, births - 1):
+                    raise RuntimeError('preflight bound')
+                checks += 3
+            forests += 1
+            if nodes > 2 * births - 1:
+                raise RuntimeError('binary upper bound')
+            checks += 1
+
+    # A connected comb saturates the bound. No nodes are allocated.
+    b = (1 << 31) + 1
+    j = b - 1
+    node_count, edge_count = 2 * b - 1, 2 * b - 2
+    if not (b < U32 and j < U32 and node_count > U32 and edge_count > U32):
+        raise RuntimeError('individually representable counts are insufficient')
+    # A star remains representable even above 2^31 births: avoid a fixed birth cap.
+    if not (b + min(1, b - 1) < U32):
+        raise RuntimeError('star must fit conservative preflight')
+    checks += 2
+    comb = {'births': b, 'joins': j, 'nodes': node_count, 'edges': edge_count}
+    native_cases = len(queries())
+    if len(sys.argv) == 2:
+        lines = Path(sys.argv[1]).read_text().splitlines()
+        if len(lines) != native_cases:
+            raise RuntimeError('native row count')
+        for case, line in zip(queries(), lines):
+            b, j, n, e = case
+            expected = [((b & U32) + (j & U32)) & U32, n & U32, e & U32]
+            got = [int(x) for x in line.split()]
+            if got != expected:
+                raise RuntimeError((case, expected, got))
+            checks += 3
+    return {'abstract_forests': forests, 'checks': checks,
+            'virtual_native_cases': native_cases,
+            'connected_comb': comb,
+            'scope': 'integer expressions and forest identities only; no geometry or capacity claim'}
+
+
+if __name__ == '__main__':
+    if sys.argv[1:] == ['--inputs']:
+        print('\n'.join(' '.join(map(str, row)) for row in queries()))
+    else:
+        print(json.dumps(run(), sort_keys=True))

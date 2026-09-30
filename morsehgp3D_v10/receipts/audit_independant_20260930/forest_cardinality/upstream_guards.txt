@@ -1,0 +1,59 @@
+1310:         }
+1311:       }
+1312:   // prefixes par morceau (sommes en u64 ; tout index publie en u32, sinon refus index_overflow_u32)
+1313:   {
+1314:     u64 cells = 0;
+1315:     std::array<u64, kOrders> sb{}, sj{}, sr{};
+1316:     for (u64 ch = 0; ch <= nchunks; ++ch) {
+1317:       const u64 c = ch < nchunks ? ch_cells[ch] : 0;
+1318:       const auto nbirth = ch < nchunks ? ch_births[ch] : std::array<u32, kOrders>{};
+1319:       const auto njoin = ch < nchunks ? ch_joins[ch] : std::array<u32, kOrders>{};
+1320:       const auto nrep = ch < nchunks ? ch_reps[ch] : std::array<u32, kOrders>{};
+1321:       if (cells >= kNone) return fail(Reason::index_overflow_u32);
+1322:       ch_cells[ch] = cells;
+1323:       for (u32 k = 0; k < kOrders; ++k) {
+1324:         if (sb[k] >= kNone || sj[k] >= kNone || sr[k] >= kNone) return fail(Reason::index_overflow_u32);
+1325:         ch_births[ch][k] = static_cast<u32>(sb[k]);
+1326:         ch_joins[ch][k] = static_cast<u32>(sj[k]);
+1327:         ch_reps[ch][k] = static_cast<u32>(sr[k]);
+1328:       }
+1329:       cells += c;
+1330:       for (u32 k = 0; k < kOrders; ++k) {
+1331:         sb[k] += nbirth[k];
+1332:         sj[k] += njoin[k];
+1333:         sr[k] += nrep[k];
+1334:       }
+1335:     }
+1336:     if (cells >= kNone) return fail(Reason::index_overflow_u32);
+1337:     atlas.cells = cells;
+1338:   }
+1358:     for (u64 b = b0; b < e0; ++b) {
+1359:       ball_vnode[b] = kNone;
+1360:       const u32 lo = atlas.info[b].lo, hi = atlas.info[b].hi;
+1361:       if (lo > hi) continue;
+1362:       atlas.info[b].base = static_cast<u32>(cell);
+1363:       const bool extended = cat.flags[b] & kExtendedShell;
+1364:       const u32 p = cat.p[b];
+1365:       const u32 m = static_cast<u32>(cat.shell(static_cast<u32>(b)).size());
+1366:       for (u32 k = lo; k <= hi; ++k, ++cell) {
+1367:         OrderRun& o = *runs[k];
+1368:         Local kind;
+1369:         u32 e = kNone;
+1370:         if (extended) {
+1371:           e = ext_first[x] + (k - lo);
+1372:           kind = ext[e].kind;
+1373:         } else {
+1374:           kind = (k == p + m) ? Local::birth : (k + 1 == p + m ? Local::join : Local::inert);
+1375:         }
+1376:         atlas.kind[cell] = static_cast<u8>(kind);
+1377:         u32 v = kNone;
+1378:         if (kind == Local::birth) {
+1379:           v = o.site_births + nb[k];
+1380:           o.birth_ball[nb[k]++] = static_cast<u32>(b);
+1381:         } else if (kind == Local::join) {
+1382:           const u32 j = nj[k]++;
+1383:           o.join_ball[j] = static_cast<u32>(b);
+1384:           o.join_ext[j] = e;
+1385:           o.join_off[j] = nr[k];
+1386:           nr[k] += extended ? ext[e].nreps : m;
+1387:         }

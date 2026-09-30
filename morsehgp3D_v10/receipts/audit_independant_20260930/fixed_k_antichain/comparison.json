@@ -1,0 +1,14 @@
+{
+  "abstract_contexts": 482,
+  "abstract_eta_cases": 2892,
+  "native_cut_checks": 507,
+  "native_exports": 6,
+  "optimize_flags": [
+    0,
+    1
+  ],
+  "receipts_equal_except_optimize_flag": true,
+  "status": "PASS",
+  "stdout_equal": true,
+  "strong_incidences": 88
+}

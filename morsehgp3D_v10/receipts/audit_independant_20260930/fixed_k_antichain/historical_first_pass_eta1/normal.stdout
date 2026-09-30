@@ -1,0 +1,1 @@
+{"abstract_contexts": 482, "abstract_eta_cases": 2892, "native_cut_checks": 462, "native_exports": 5, "status": "PASS", "triangle_original": ["13/4", "13/4", "13/4"], "triangle_reduced": ["13/4", "1", "9/4"]}

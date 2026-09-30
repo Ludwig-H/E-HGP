@@ -1,0 +1,30 @@
+{
+  "commit": "408d1ffe4d90a7ee6393716c6ddc8319b2b77daa",
+  "method": "immutable git show snapshot; product not modified",
+  "sources": [
+    {
+      "git_path": "morsehgp3D_v10/src/cloud/grid32_primitives.hpp",
+      "receipt_path": "source/src/cloud/grid32_primitives.hpp",
+      "sha256": "72ed100ce866443ef90435b75d924d8454c5b5b19e9bbf00cb1a5b474b342a0d",
+      "bytes": 2266
+    },
+    {
+      "git_path": "morsehgp3D_v10/src/arith/geometry.cpp",
+      "receipt_path": "source/src/arith/geometry.cpp",
+      "sha256": "0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2",
+      "bytes": 3058
+    },
+    {
+      "git_path": "morsehgp3D_v10/src/arith/geometry.hpp",
+      "receipt_path": "source/src/arith/geometry.hpp",
+      "sha256": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673",
+      "bytes": 6644
+    },
+    {
+      "git_path": "morsehgp3D_v10/receipts/audit_continu_20260929/level_order_20260930/prototype/level_comparator.cpp",
+      "receipt_path": "source/receipts/audit_continu_20260929/level_order_20260930/prototype/level_comparator.cpp",
+      "sha256": "70e838ba42fb8c179a4b619819d01853d9a3a85fd7d5cfbedf6a72188b6fd586",
+      "bytes": 5606
+    }
+  ]
+}

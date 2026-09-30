@@ -1,0 +1,33 @@
+[ 12%] Building CXX object CMakeFiles/mhgp10_core.dir/src/core/buffer.cpp.o
+[ 12%] Building CXX object CMakeFiles/mhgp10_core.dir/src/sched/pool.cpp.o
+[ 16%] Building CXX object CMakeFiles/mhgp10_grid32_primitives.dir/tests/unit/grid32_primitives.cpp.o
+[ 16%] Building CXX object CMakeFiles/mhgp10_rank_search.dir/tests/unit/rank_search.cpp.o
+[ 20%] Building CXX object CMakeFiles/mhgp10_core.dir/src/cloud/cloud.cpp.o
+[ 24%] Linking CXX executable mhgp10_rank_search
+[ 24%] Built target mhgp10_rank_search
+[ 28%] Building CXX object CMakeFiles/mhgp10_core.dir/src/cloud/site_tree.cpp.o
+[ 32%] Building CXX object CMakeFiles/mhgp10_core.dir/src/arith/geometry.cpp.o
+[ 36%] Linking CXX executable mhgp10_grid32_primitives
+[ 36%] Built target mhgp10_grid32_primitives
+[ 40%] Building CXX object CMakeFiles/mhgp10_core.dir/src/catalogue/generator.cpp.o
+[ 44%] Building CXX object CMakeFiles/mhgp10_core.dir/src/tower/tower.cpp.o
+[ 48%] Building CXX object CMakeFiles/mhgp10_core.dir/src/points/dendrogram.cpp.o
+[ 52%] Building CXX object CMakeFiles/mhgp10_core.dir/src/head/head.cpp.o
+[ 56%] Linking CXX static library libmhgp10_core.a
+[ 56%] Built target mhgp10_core
+[ 68%] Building CXX object CMakeFiles/mhgp10_cluster.dir/cli/mhgp10_cluster.cpp.o
+[ 68%] Building CXX object CMakeFiles/mhgp10_catalogue.dir/cli/mhgp10_catalogue.cpp.o
+[ 68%] Building CXX object CMakeFiles/mhgp10_tower.dir/cli/mhgp10_tower.cpp.o
+[ 72%] Building CXX object CMakeFiles/mhgp10_unit.dir/tests/unit/unit_main.cpp.o
+[ 76%] Linking CXX executable mhgp10_catalogue
+[ 76%] Built target mhgp10_catalogue
+[ 80%] Building CXX object CMakeFiles/mhgp10_mreach_cluster.dir/tests/head/mreach_cluster.cpp.o
+[ 84%] Linking CXX executable mhgp10_tower
+[ 84%] Built target mhgp10_tower
+[ 88%] Building CXX object CMakeFiles/mhgp10_mreach_cluster.dir/tests/head/mreach.cpp.o
+[ 92%] Linking CXX executable mhgp10_cluster
+[ 92%] Built target mhgp10_cluster
+[ 96%] Linking CXX executable mhgp10_unit
+[ 96%] Built target mhgp10_unit
+[100%] Linking CXX executable mhgp10_mreach_cluster
+[100%] Built target mhgp10_mreach_cluster

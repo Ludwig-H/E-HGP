@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "source_commit": "408d1ffe4d90a7ee6393716c6ddc8319b2b77daa",
+  "source_hashes_stable": true,
+  "build_directory": "/tmp/mhgp10-wide-order-followup-01bng3o2",
+  "native_invocations": 2,
+  "geometric_pairs_per_run": 2,
+  "threshold_bridges_per_run": 1,
+  "normal_ubsan_identical": true,
+  "python_judgments": 4,
+  "full_build": false,
+  "native_wide_level_constructors": false,
+  "FULL": false,
+  "GCP": false,
+  "binary_hashes": {
+    "normal": "0b826d4019e1263e9dcc448bae5dd4eebfa21301476a2a896cc099d52455fea3",
+    "ubsan": "70be7befec758001d1652c25e055a5a793e34691e40e5fe1fda1b53d5a2e2ada"
+  },
+  "fraction_incidence_judgments": 2,
+  "fraction_incidence_fixtures_per_judgment": 3,
+  "geometry_incidence_source": "geometry_contract.py, same-cloud positive q2 admissibility at K3"
+}

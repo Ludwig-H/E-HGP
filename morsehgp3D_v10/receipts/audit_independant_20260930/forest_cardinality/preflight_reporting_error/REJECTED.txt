@@ -1,0 +1,1 @@
+First capture: arithmetic results correct, but connected_comb JSON labels overwritten by native-loop variables. Not authoritative for the reported comb. Sources/outputs retained unchanged; final judge checks exact metadata.
