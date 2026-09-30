@@ -1,7 +1,7 @@
 # Audits v10 — état courant
 
-Mise à jour : 30 septembre 2026, 21 h 50 UTC : réponses au développeur,
-saut intérieur simplifié, census recoupé et raccord Pool clos privé.
+Mise à jour : 30 septembre 2026, 22 h 45 UTC : réponses Q1/Q2/Q3 mises
+en évidence, contraction par orthants, nouveaux filtres B21 et P2 relus.
 Les sources publiées du moteur restent inchangées
 dans cette tranche ; le développeur travaille désormais dans une copie
 isolée d'intégration, distincte du worktree partagé. Les parties I
@@ -23,6 +23,36 @@ précisent cette portée : aucune extension à p<K ou à la coquille,
 aucune borne sur les pas ni aucun gain mesuré. Un census limité à K
 intérieurs certifiés devient donc une piste exacte ; un simple retrait
 du tri laisserait le coût de collecte exhaustive intact.
+
+**Proposition neuve pour accélérer ce saut :** un flux unique d'intérieurs
+stricts, réparti en huit orthants du centre exact, s'arrête au certificat
+ou à EOF après au plus8(K−1)+1 reports, soit33 àK5 et73 àK10.
+Un orthant saturé fournit G avec `β(G)<2β(F)/3`. Sinon, à EOF,
+tous les intérieurs sont connus et p≤8(K−1) ; p peut encore être≥K.
+La [preuve et ses limites](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#choix-par-orthants-avec-contraction-certifiée)
+bornent les sauts saturés par O(B) sur grille entière, pas les autres
+pas ni les visites d'index. Pas de port moteur, test natif ou chrono.
+Une famille de couches K3/K5 force aussi m−1 sauts de secours par
+résolution ; la mémo peut les amortir. Ne pas en déduire un carré LiDAR.
+Ne pas appliquer ce raccourci au census complet du catalogue ni au
+K2 à ancre fixe en lui transférant sa borne d'états.
+
+**Questions du développeur immédiatement accessibles :** la
+[réponse courte Q1/Q2/Q3](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#réponse-directe-aux-questions-q1-q2-q3)
+précède désormais les détails. Les seuls K voisins ne déterminent pas
+les classes de bande ; les K-parties fixes restent l'univers exact ;
+leurs poids souples évitent le saut de disparition du catalogue, sous
+les conditions de stabilité publiées. MMt change de modèle de masses.
+
+**Raccord vivant22 h35 :** HEAD privé `6d2d3bc5` pour P4 ; P2 est encore
+dans l'index/travail suivant. La nouvelle `OutputSet` réserve des
+temporaires, protège les alias et ferme les flux par RAII ; les quatre
+CLI contrôlent son commit. Relecture statique seulement. Un deuxième
+rename en échec laisse toutefois la première destination remplacée :
+pas de transaction globale ni de conservation des deux sentinelles sur
+ce refus tardif. Le [suivi précis](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#raccord-courant-et-six-décisions-utiles-30-septembre-22-h-35-utc)
+distingue ces corrections des anciennes pertes de fichiers. Le contenant
+u32le de ce raccord utilise encore le moteur u18, pas le palier B21.
 
 **À corriger avant les comparaisons EOM :** le banc privé
 `masses_selection/dev_scenes.py` réutilise `phi_date` dans une nouvelle
@@ -249,9 +279,9 @@ mais n'en imprime encore que les préfixes et un argv `<travail>`.
 Préciser cette limite de provenance ; pas de défaut de sortie déduit.
 Groupe privé clos, pas union complète R2 ni contrat G4 acquis.
 
-**Précision supérieure à u18 :** le chantier privé `build/v10-b21/src`,
-HEAD `5dd83b5c68919d87ada067204d19ee4edb166859`, comporte dix-huit commits
-de moteur B21 ; CLI fine et raccord R2 restent à faire. Les voies larges
+**Précision supérieure à u18 :** le chantier privé `build/v10-b21/src`
+a avancé après notre lecture épinglée à `5dd83b5c68919d87ada067204d19ee4edb166859`.
+CLI fine et raccord R2 restent non qualifiés. Les voies larges
 et I192/I192 répondent aux débordements identifiés, pas un élargissement
 aveugle. Notre [relecture rationnelle figée](../receipts/audit_continu_20260929/b21_bound_counterreview_20260930/README.md)
 recoupe les majorants et précise une dette documentaire : seuil flottant
@@ -260,8 +290,8 @@ borne du rayon d'une MEB ferment la preuve plus fine. Deux rejeux Python
 normal/−O, aucun appel natif. Le nouveau ledger privé
 `10d8f386…` explicite la borne conjointe ; préciser encore r2a≥m dans
 l'affirmation d'exactitude du seuil dyadique (contre-exemple2^-100+m).
-Le snapshot publié reste immutable et le moteur5dd83b5c reste distinct
-de R2. Ne pas transformer les journaux privés
+Le snapshot publié reste immutable et cette lecture de5dd83b5c reste
+distincte des corrections suivantes et de R2. Ne pas transformer les journaux privés
 20/20 gates et 27/27 mutations en qualification CLI, u24/u32 ou G4.
 Le nouveau rapport adverse privé `notes/verif-mutants/RAPPORT.md`,
 SHA `d60167da…`, rend FAIL pour les portes, pas pour une sortie HEAD
@@ -271,6 +301,18 @@ getters. Sondes relues, non réexécutées par cet audit. En revanche,
 l'équivalence du mutant comparaison2limbs est maintenant prouvée par
 la borne cubique4L⁶<2^128 ; ne pas la fonder sur un maximum numérique.
 Cette petite borne ne sécurise pas les produits intermédiaires i128.
+
+Suivi22 h45 épinglé à `7af07c53` : compare-gap/marge représentable relu,
+preuve par monotonie cohérente sans troisième erreur de soustraction.
+L'ancien seuil arrondi avec comparaison stricte était également sûr
+par monotonie : ne pas transformer la borne grossière en ancienne
+erreur géométrique. Les nouvelles portes adressent les trous de portée,
+marges, axes, domaine et départage ; ajout de code de test, pas campagne
+de mutants déjà rejouée/clôturée. Le différentiel des chemins vaut pour
+une même politique de sélection ; deux sauts valides différents doivent
+être jugés aussi par propriétaires aux coupes, pas seulement compteurs.
+La [réponse actualisée](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#raccord-courant-et-six-décisions-utiles-30-septembre-22-h-35-utc)
+sépare ce nouveau code des anciens reçus. Aucun nouveau chrono G4.
 
 **Plateaux de tête :** les événements de même rang doivent être traités
 ensemble, avant le test des masses. La

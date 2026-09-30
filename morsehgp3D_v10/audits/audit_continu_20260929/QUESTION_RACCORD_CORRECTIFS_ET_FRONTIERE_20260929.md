@@ -1,6 +1,33 @@
 # Au développeur ancrage frontière et corrections du raccord
 
-## Raccord courant et six décisions utiles, 30 septembre, 21 h 50 UTC
+## Réponse directe aux questions Q1 Q2 Q3
+
+Les [trois questions du développeur](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions)
+ont été relues le30 septembre à22 h35 UTC. Les réponses détaillées et leurs
+contre-exemples sont [plus bas](#réponses-aux-trois-questions-sur-les-votes-de-bande).
+
+1. **Q1, classes locales.** Oui, tous les sites nécessaires sont dans
+   B(x,2R). Non, les seuls K voisins ne suffisent pas. L'occupation m de
+   cette région borne les classes, mais K seul ne borne pas m : une
+   famille K3 a déjà C(m,2) classes dans la bande. Préférer un comptage
+   implicite ; ne pas matérialiser ces classes pour garantir le coût.
+2. **Q2, univers exact à K≥3.** Les K-parties identifiées restent l'univers
+   fidèle et continu. Des requêtes de rayon, ou KNN adaptatives jusqu'au
+   rayon utile, retrouvent leurs sites ; leur coût n'est pas borné par K.
+   Les paires d'ordre K et MMt sont des alternatives de modèle, pas des
+   compressions équivalentes de ces votes. Choisir cette sémantique
+   explicitement avant le port, en gardant un petit oracle K-parties.
+3. **Q3, poids.** Oui, le poids souple dépendant du rayon évite le mécanisme
+   de disparition étudié si les votes sont les K-parties fixes. Non, il
+   ne le répare pas sur les boules fortes du catalogue. La stabilité
+   obtenue reste conditionnée par l'univers apparié, son effectif et
+   une échelle α positive ; ce n'est pas une garantie uniforme d'ARI/EOM.
+
+Complément neuf pour le moteur : le [saut par orthants](#choix-par-orthants-avec-contraction-certifiée)
+ci-dessous borne les reports à33 pour K5 et73 pour K10, avec contraction
+certifiée du niveau. Cette déduction n'est ni un port ni un chrono G4.
+
+## Raccord courant et six décisions utiles, 30 septembre, 22 h 35 UTC
 
 Les réponses Q1/Q2/Q3 ci-dessous restent applicables. Complément pratique :
 
@@ -106,17 +133,41 @@ Ces différentiels sont une non-régression : ni condensation corrigée,
 ni croissance à K constant, ni chrono G4. Les trois noms LiDAR00/01/02
 de cette suite ne prouvent pas plusieurs séquences SemanticKITTI.
 
-Palier privé B21, HEAD `5dd83b5c68919d87ada067204d19ee4edb166859` :
+Suivi22 h35 : l'intégration est au HEAD privé
+`6d2d3bc5d1c34deca95f3ba6cc7929179517680c` pour P4. Le nouveau P2
+est dans le travail/index suivant, pas dans ce HEAD. `cli_output.hpp`,
+SHA `754a6ff111962b2d35b9931aa18cde54203079800ee3a5814414c984009aaaf0`,
+remplace bien la réservation destructive : déclarations/alias avant
+création, temporaires, RAII et commit contrôlé par les quatre CLI,
+y compris sorties `.vote` et entrée configs. Relecture statique, pas
+campagne rejouée. Ne plus attribuer les anciennes troncatures à cette
+réécriture. Un verrou reste : si le deuxième rename échoue, le premier
+est déjà publié et son ancien contenu n'est pas restauré. Le header
+reconnaît cette limite mais promet aussi « tout ou rien ». Exiger un cas
+de faute au deuxième rename avec deux sentinelles préexistantes, puis
+une politique cohérente de restauration/publication ; le contrôle du
+code d'erreur seul n'établit pas la transaction globale. Les réserves
+sur les bancs committés restent distinctes de ce correctif en cours.
+
+Le lecteur `u32le_input.hpp` désigne un contenant32bits, pas une nouvelle
+précision géométrique : les CLI de ce raccord utilisent encore le domaine
+u18. Le palier B21 reste séparé. Les IDs sont les rangs de ce fichier,
+donc garder la correspondance des retours capteur sans sol. Le lecteur
+conserve12n octets bruts puis16n octets XYZ/IDs simultanément, au moins
+28n hors budget moteur ; ne pas oublier cette entrée dans le contrat massif.
+
+Palier privé B21, lecture précédente épinglée à
+`5dd83b5c68919d87ada067204d19ee4edb166859` :
 relecture des voies étroites/larges et des niveaux I192/I192 cohérente.
 Le [snapshot de bornes](../../receipts/audit_continu_20260929/b21_bound_counterreview_20260930/README.md)
-ne compile ni n'appelle le moteur. Trois constats documentaires subsistent :
+ne compile ni n'appelle le moteur. À ce pin, trois constats documentaires :
 delta annoncée fausse ; arrondi du seuil omis dans la chaîne grossière ;
 hypothèse MEB nécessaire dans la preuve fine d'I3. À B21, le majorant
 grossier avec demi-ulp donne0,03917965>m=0,0390625 ; ce n'est pas une
 erreur géométrique démontrée. Au même centre, le terme quadratique de
 décalage s'annule dans la différence des distances ; entre MEB, le
 rayon carré est≤3L²/4. Ces bornes plus fines ferment la marge, arrondi
-inclus, et doivent rejoindre les commentaires. Ne pas augmenter la marge
+inclus. Ne pas augmenter la marge
 sur le seul échec d'une majoration trop grossière. CLI fine, raccord R2,
 u24/u32 et nouvelle qualification G4 restent ouverts. Le ledger privé
 `10d8f386…` ajoute désormais la distinction des décisions ; le snapshot
@@ -136,7 +187,8 @@ M2 : une marge0,02 aux sites d'usage reste invisible si seuls les
 getters sont jugés ; SiteTree dispose d'une fixture6 contre4 décisions
 exactes, la certification MEB manque encore d'observable. Axes de feuille,
 bord exact du domaine et ordre du saut ont aussi des trous. Rapport et
-sondes relus, aucun rejeu natif de notre part ; HEAD reste5dd83b5c.
+sondes relus, aucun rejeu natif de notre part ; ce rapport épingle5dd83b5c,
+pas les corrections suivantes.
 
 Un résultat positif ferme toutefois l'équivalence `jump_key_wide_2limbs`
 sur ce tri. Pour trois points du cube[0,L]³, chaque axe donne une somme
@@ -152,6 +204,34 @@ pas maximum numérique ni nouvel essai. Elle ne rend pas sûre une
 évaluation i128 intermédiaire. L'invariance topologique après changement
 de sélection du saut p≥K est maintenant prouvée ci-dessous ; elle
 ne promet pas l'égalité des témoins internes bruts ou de leurs compteurs.
+
+Suivi22 h45, lecture figée à `7af07c53e0a48480593f3d228c6f4c981275d076` :
+les comparaisons portent désormais sur l'écart flottant et la marge
+représentable. Pour m double, `fl(t)>m ⇒ t>m`, par monotonie puisque
+`t≤m ⇒ fl(t)≤fl(m)=m`. Les deux erreurs des distances, majorées par
+2ε≤m, suffisent ; pas de troisième marge de soustraction à ajouter.
+Le raisonnement couvre les usages relus dans SiteTree et la tour.
+Pour nearest, si τ est la K-ième distance exacte, le seuil approché
+courant w vérifie w≥τ−ε ; tout vrai voisin retenable a d≤τ+ε≤w+2ε.
+Ce résultat reste limité au domaine B≤21, arrondi au plus proche et
+compilation flottante stricte, avec les replis exacts hors domaine.
+
+Précision au développeur : l'ancienne comparaison **stricte** avec seuil
+arrondi était aussi sûre par monotonie de l'arrondi. Pour d représentable,
+`d>fl(r2a+m) ⇒ d>r2a+m`, et symétriquement pour le seuil intérieur.
+La majoration grossière de l'arrondi ne démontrait donc pas une ancienne
+erreur géométrique. Le nouveau code rend la preuve plus directe ; ses
+replis peuvent différer, sans que ce soit un changement de l'objet exact.
+
+Les nouvelles sources de portes adressent portée complète du saut,
+marges aux sites d'usage, trois axes de feuilles, bord du domaine et
+ordre/départage des clés. Aucun nouveau reçu de campagne n'est clos par
+cette relecture : ajout d'une porte ne signifie pas mutant tué. En
+particulier, les compteurs de tour de FX-BANDE exigent hi>lo, pas une
+valeur exacte gravée. MODES compare les chemins sous une **même politique
+de sélection** ; ce n'est pas un invariant de Γ pour deux choix différents
+de G. Garder FX-SAUT comme contrat du sélecteur exact privé, et juger un
+futur saut par orthants aussi par les propriétaires aux coupes utiles.
 
 ## Saut intérieur sans tri des plus proches
 
@@ -199,6 +279,75 @@ avant `resolve` : le lemme n'autorise aucun remplacement de cette
 densité par une K-partie arbitraire. Pour l'essai, comparer les coupes
 ouvertes/fermées de Γ, les propriétaires et les verticales ; ne pas
 juger seulement les feuilles terminales ou les compteurs de descente.
+
+### Choix par orthants avec contraction certifiée
+
+Déduction mathématique contre-relue, pas prototype produit. Pour la même
+branche de résolution p≥K, parcourir UN flux des sites strictement
+intérieurs, sans doublons. Affecter chaque site à l'un des huit orthants
+de centre c selon les signes **exacts** de ses trois coordonnées moins
+c ; attribuer l'égalité au côté positif. Conserver au plus K−1 IDs par
+orthant. Dès qu'un orthant reçoit son K-ième site, prendre ces K sites
+pour G et arrêter le parcours.
+
+Le flux s'arrête au certificat ou à EOF. S'il fournit
+`Q=8(K−1)+1` reports, un orthant a nécessairement K sites : Q vaut9 àK2,
+33 àK5 et73 àK10. Le stockage et le regroupement des IDs sont O(K).
+Ce seuil est un certificat géométrique d'arrêt, ni un plafond de recherche
+ni une troncature d'un census requis. Les signes doivent utiliser le centre
+exact, pas un centre double arrondi ; aucun rayon irrationnel à calculer.
+
+La contraction est même meilleure que celle du cube de côté r. Après
+réflexion des coordonnées, poser u=z−c≥0 et t=|u|<r. La boule auxiliaire
+de centre a=(r/3,r/3,r/3) vérifie
+`|u−a|²=t²−(2r/3)Σu_i+r²/3≤t²−(2r/3)t+r²/3<2r²/3`,
+car `t²−(2r/3)t−r²/3=(t−r)(t+r/3)<0`. Elle contient G,
+donc `β(G)<2β(F)/3`. Ce centre auxiliaire n'intervient que dans la preuve.
+L'échange dans Γ décrit ci-dessus conserve le propriétaire à la coupe
+d'usage, pas nécessairement la feuille terminale ni la composante au
+nouveau niveau β(G).
+
+Si EOF arrive sans orthant saturé, tous les intérieurs ont été rapportés
+et `p≤8(K−1)`. Cela **n'implique pas p<K**. Pour K≤p≤8(K−1), choisir
+K de ces sites donne encore une descente stricte, sans contraction
+uniforme. Pour p<K, conserver toute la branche locale existante,
+coquille comprise : ce petit p ne borne pas |U|. À K2 sur0,1,L−1,L,
+F={0,L} a deux intérieurs dans deux orthants ; le seul G={1,L−1}
+donne `β(G)/β(F)=((L−2)/L)²`, arbitrairement proche de1.
+
+Il existe même une chaîne de sauts de secours forcés à K3 et K5. Pour
+m≥2, poser T=10m, R=3m²+1, r_i=R−i et c_i=(iT,0,0), 0≤i<m.
+La couche F_i a les directions YZ(5,0),(−3,4),(−3,−4), et ajoute
+(3,4),(3,−4) à K5, multipliées par r_i. Leur cercle de rayon5r_i
+est leur MEB : les trois premières directions entourent son centre.
+Avec V=T²+25, la puissance d'un site de couche i+h vaut
+`|z_{i+h}−c_i|²−25r_i²=h(hV−50r_i)`.
+On a V<50r_i<2V pour toutes les couches. Seule F_{i+1} est donc
+strictement intérieure, p=K, et aucun orthant ne contient K sites.
+Le saut sur I est forcé : m−1 étapes, quel que soit le sélecteur parmi I.
+Après translation Y+3R,Z+4R, le cube a côté24m²+8 : famille à B variable,
+pas asymptotique illimitée en u18. Deux petits contrôles privés Fraction
+normal/−O recoupent aussi le témoin T1000/R30001 à16 couches K3/K5,
+quinze étapes forcées ; pas de reçu natif autonome. Une mémo des couches
+peut amortir ces étapes : ce n'est pas un carré global prouvé ni un
+régime LiDAR testé. La couche i+2 est hors de B_i ; ne pas hériter au
+résolveur sans ancre la localisation initiale du schéma K2 à ancre fixe.
+
+Si les autres étapes restent descendantes, le nombre de sauts à orthant
+saturé dans une résolution est O(log(β_initial/β_min)), même entrecoupés
+de sauts de secours. Sur le cube entier B bits, sites distincts et K≥2,
+`β_min≥1/4` et `β_initial≤3(2^B−1)²/4`, donc O(B) **de ces sauts**.
+Ni tous les pas de résolution ni les visites d'index ne sont ainsi bornés.
+EOF, tests ambigus et blocs rejetés restent payés ; en parallèle, compter
+aussi les reports déjà engagés au-delà du préfixe logique Q.
+
+Essai pertinent : comparer propriétaires aux coupes exactes, pas IDs des
+feuilles ; publier visites, reports, sauts saturés/secours et coût total.
+Ne pas transférer cette règle au résolveur K2 `keep0` à ancre fixe : prendre
+K intérieurs peut perdre son ancre et la borne d'états mémoïsés déjà
+prouvée pour ce schéma. Ne pas remplacer non plus le census I/U complet
+du catalogue, la vraie densité k-NN des points ou la règle d'attache MMt.
+Multiplicités et nouveaux domaines numériques exigent leur preuve propre.
 
 ## Construire les couvertures sans développer Γ
 
