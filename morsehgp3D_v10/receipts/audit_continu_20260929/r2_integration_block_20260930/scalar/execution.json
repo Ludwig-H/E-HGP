@@ -1,0 +1,35 @@
+{
+  "scope": "scalar exact checks only; no native engine or GCP",
+  "initial_diagnostic_executions": [
+    {
+      "command": "python3 -B check_block_rank.py",
+      "returncode": 0,
+      "tool_wall_seconds": 0.631188803
+    },
+    {
+      "command": "python3 -B -O check_block_rank.py",
+      "returncode": 0,
+      "tool_wall_seconds": 0.762967147
+    }
+  ],
+  "recorded_executions": [
+    {
+      "mode": "normal",
+      "command": "python3 -B check_block_rank.py",
+      "returncode": 0,
+      "tool_wall_seconds": 0.804331431,
+      "output_file": "normal.json"
+    },
+    {
+      "mode": "optimized",
+      "command": "python3 -B -O check_block_rank.py",
+      "returncode": 0,
+      "tool_wall_seconds": 0.743341046,
+      "output_file": "optimized.json"
+    }
+  ],
+  "total_scalar_executions": 4,
+  "normal_optimized_equal": true,
+  "native_executions": 0,
+  "GCP_used": false
+}

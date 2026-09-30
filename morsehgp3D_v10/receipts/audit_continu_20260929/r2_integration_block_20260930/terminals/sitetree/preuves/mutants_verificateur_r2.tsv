@@ -1,0 +1,23 @@
+mutant	famille	verdict	porte_r2	porte_r1	detail
+temoin	-	TEMOIN_OK	0	0	
+chemin_nearest_sans_arrondi	S-b chemin	SURVIT	0	0	
+chemin_closed_ball_sans_arrondi	S-b chemin	SURVIT	0	0	
+chemin_deux_sans_arrondi	S-b chemin	SURVIT	0	0	
+arrondi_cache_thread_local	S-b	TUE	1	0	porte_r2: ECHEC filtered == domaine du contrat, mode d'arrondi compris (161)
+arrondi_upward_seul	S-b	TUE	1	0	porte_r2: ECHEC filtered == domaine du contrat, mode d'arrondi compris (162)
+arrondi_sans_towardzero	S-b	TUE	1	0	porte_r2: ECHEC filtered == domaine du contrat, mode d'arrondi compris (163)
+arrondi_dans_nearest_seul	S-b	TUE	1	0	porte_r2: ECHEC filtered == domaine du contrat, mode d'arrondi compris (161)
+drapeau_axe_x_seul	S-a drapeau	SURVIT	0	0	
+drapeau_sans_axe_z	S-a drapeau	SURVIT	0	0	
+drapeau_seuil_L_plus_1	S-a drapeau	SURVIT	0	0	
+drapeau_seuil_19_bits	S-a drapeau	SURVIT	0	0	
+drapeau_seuil_20_bits	S-a drapeau	SURVIT	0	0	
+drapeau_bmin	S-a drapeau	TUE	1	0	porte_r2: ECHEC nuage de 21 bits, ancre et centre dans le cube : hors du domaine (5561)
+drapeau_strict	S-a drapeau	TUE	1	1	porte_r2: ECHEC bord du cube : domaine grave (2)
+ancre_sans_borne_basse	S-a ancre	TUE	1	0	porte_r2: ECHEC ancre hors du cube : hors du domaine du filtre (0)
+ancre_sans_borne_haute	S-a ancre	TUE	1	0	porte_r2: ECHEC ancre hors du cube : hors du domaine du filtre (3)
+ancre_axe_x_seul	S-a ancre	TUE	1	0	porte_r2: ECHEC ancre hors du cube : hors du domaine du filtre (1)
+ancre_bord_plus_un	S-a ancre	TUE	1	0	porte_r2: ECHEC ancre hors du cube : hors du domaine du filtre (3)
+ancre_bord_moins_un	S-a ancre	TUE	1	0	porte_r2: ECHEC ancre hors du cube : hors du domaine du filtre (0)
+borne_D_stricte	S-c	TUE	1	0	porte_r2: ECHEC D = 2^82 (30)
+borne_D_zero_admis	S-c	TUE	1	0	porte_r2: ECHEC D = 0 (10)

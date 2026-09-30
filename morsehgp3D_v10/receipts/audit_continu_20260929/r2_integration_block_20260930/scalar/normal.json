@@ -1,0 +1,202 @@
+{
+  "GCP_used": false,
+  "block_checks": {
+    "block_tests": 504,
+    "center_checks": 1272,
+    "configs": 120,
+    "rejected_blocks": 126,
+    "retained_tie_neighbors": 2250
+  },
+  "closed_equality": {
+    "gap_squared": "1",
+    "radius_squared": "1",
+    "strict_reject": false,
+    "unsafe_ge_reject": true
+  },
+  "engine_calls": 0,
+  "rank_cases": [
+    {
+      "fixed": {
+        "initial_upper": 1,
+        "result": 1,
+        "steps": 0,
+        "terminated": true
+      },
+      "length": 1,
+      "old": {
+        "initial_upper": 1,
+        "result": 1,
+        "steps": 0,
+        "terminated": true
+      }
+    },
+    {
+      "fixed": {
+        "initial_upper": 63,
+        "result": 63,
+        "steps": 5,
+        "terminated": true
+      },
+      "length": 63,
+      "old": {
+        "initial_upper": 63,
+        "result": 63,
+        "steps": 5,
+        "terminated": true
+      }
+    },
+    {
+      "fixed": {
+        "initial_upper": 64,
+        "result": 64,
+        "steps": 6,
+        "terminated": true
+      },
+      "length": 64,
+      "old": {
+        "initial_upper": 64,
+        "result": 64,
+        "steps": 6,
+        "terminated": true
+      }
+    },
+    {
+      "fixed": {
+        "initial_upper": 65,
+        "result": 65,
+        "steps": 0,
+        "terminated": true
+      },
+      "length": 65,
+      "old": {
+        "initial_upper": 65,
+        "result": 65,
+        "steps": 0,
+        "terminated": true
+      }
+    },
+    {
+      "fixed": {
+        "initial_upper": 127,
+        "result": 127,
+        "steps": 5,
+        "terminated": true
+      },
+      "length": 127,
+      "old": {
+        "initial_upper": 127,
+        "result": 127,
+        "steps": 5,
+        "terminated": true
+      }
+    },
+    {
+      "fixed": {
+        "initial_upper": 128,
+        "result": 128,
+        "steps": 6,
+        "terminated": true
+      },
+      "length": 128,
+      "old": {
+        "initial_upper": 128,
+        "result": 128,
+        "steps": 6,
+        "terminated": true
+      }
+    },
+    {
+      "fixed": {
+        "initial_upper": 2147483584,
+        "result": 2147483584,
+        "steps": 6,
+        "terminated": true
+      },
+      "length": 2147483584,
+      "old": {
+        "initial_upper": 2147483584,
+        "result": 2147483584,
+        "steps": 6,
+        "terminated": true
+      }
+    },
+    {
+      "fixed": {
+        "initial_upper": 2147483648,
+        "result": 2147483648,
+        "steps": 6,
+        "terminated": true
+      },
+      "length": 2147483648,
+      "old": {
+        "initial_upper": 2147483648,
+        "result": 2147483648,
+        "steps": 6,
+        "terminated": true
+      }
+    },
+    {
+      "fixed": {
+        "initial_upper": 2147483712,
+        "result": 2147483712,
+        "steps": 6,
+        "terminated": true
+      },
+      "length": 2147483712,
+      "old": {
+        "initial_upper": 2147483712,
+        "result": 2147483585,
+        "steps": 200,
+        "terminated": false
+      }
+    },
+    {
+      "fixed": {
+        "initial_upper": 4294967231,
+        "result": 4294967231,
+        "steps": 5,
+        "terminated": true
+      },
+      "length": 4294967231,
+      "old": {
+        "initial_upper": 4294967231,
+        "result": 8129,
+        "steps": 200,
+        "terminated": false
+      }
+    },
+    {
+      "fixed": {
+        "initial_upper": 4294967232,
+        "result": 4294967232,
+        "steps": 6,
+        "terminated": true
+      },
+      "length": 4294967232,
+      "old": {
+        "initial_upper": 4294967232,
+        "result": 16322,
+        "steps": 200,
+        "terminated": false
+      }
+    },
+    {
+      "fixed": {
+        "initial_upper": 4294967294,
+        "result": 4294967294,
+        "steps": 5,
+        "terminated": true
+      },
+      "length": 4294967294,
+      "old": {
+        "initial_upper": 0,
+        "result": 4294967233,
+        "steps": 0,
+        "terminated": true
+      }
+    }
+  ],
+  "scope": "exact scalar proof checks only, not producer scaling",
+  "source_sha256": "d25b72873699f31eb6b8d52964b9125f96cbe4c9c419c8c80b36bcc8df26f4ae",
+  "status": "PASS"
+}

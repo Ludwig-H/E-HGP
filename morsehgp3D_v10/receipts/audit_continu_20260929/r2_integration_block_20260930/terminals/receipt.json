@@ -1,0 +1,139 @@
+{
+  "schema": "mhgp10_readonly_terminal_capture_v1",
+  "created_utc": "2026-09-30",
+  "public_status": "not_claimed",
+  "source_roots": [
+    "/tmp/mhgp10-r2/pool-verif",
+    "/tmp/mhgp10-r2/sitetree-verif"
+  ],
+  "copy_count": 43,
+  "source_copy_hashes_equal": true,
+  "source_copy_mtime_ns_equal": true,
+  "executions_by_this_audit": {
+    "new_tests": 0,
+    "engine_runs": 0,
+    "compilations": 0,
+    "gcp_calls": 0,
+    "external_kills": 0,
+    "repository_edits": 0
+  },
+  "closed_evidence": [
+    {
+      "group": "pool",
+      "path": "pool/diff/results.txt",
+      "kind": "tower_and_catalogue_differential",
+      "terminal": "DONE",
+      "configurations": 24,
+      "matching_rows": 24,
+      "divergent_rows": 0,
+      "commands_in_comparator": 96,
+      "logged_native_codes": "all zero",
+      "dump_hash_hex_chars": 24,
+      "comparison_scope": "96-bit prefixes of SHA256; original per-run dumps deleted by comparator; no reconstructed full hashes",
+      "closed_mtime_utc": "2026-09-30 05:02:54.185108707 UTC"
+    },
+    {
+      "group": "pool",
+      "path": "pool/diff/results_head.txt",
+      "kind": "cluster_and_mreach_differential",
+      "terminal": "DONE",
+      "configurations": 24,
+      "matching_rows": 24,
+      "divergent_rows": 0,
+      "commands_in_comparator": 96,
+      "logged_native_codes": "all zero",
+      "dump_hash_hex_chars": 16,
+      "comparison_scope": "64-bit prefixes of labels and tree for cluster; labels and raw stdout for mreach; not full byte-for-byte comparison",
+      "closed_mtime_utc": "2026-09-30 05:07:58.705088291 UTC"
+    },
+    {
+      "group": "pool",
+      "path": "pool/logs/ctest_pool11.txt",
+      "kind": "ctest_pool",
+      "tests": 11,
+      "passed": 11,
+      "failed": 0,
+      "explicit_exit_code": null,
+      "note": "CTest completion summary, no explicit wrapper exit-code line retained in this file",
+      "closed_mtime_utc": "2026-09-30 04:42:41.216190028 UTC"
+    },
+    {
+      "group": "pool",
+      "path": "pool/logs/ctest_oracle.txt",
+      "kind": "ctest_oracle",
+      "tests": 2,
+      "passed": 2,
+      "failed": 0,
+      "explicit_exit_code": 0,
+      "closed_mtime_utc": "2026-09-30 05:12:15.761071057 UTC"
+    },
+    {
+      "group": "sitetree",
+      "path": "sitetree/runs/diff_tour.txt",
+      "kind": "tower_differential",
+      "configurations": 7,
+      "matching_rows": 7,
+      "divergent_rows": 0,
+      "explicit_exit_code": 0,
+      "note": "Source uses full SHA256 while running but log prints prefix; one-thread counts and zero fallback instrument counters are also compared, three-thread dumps compared; per-run dumps removed",
+      "closed_mtime_utc": "2026-09-30 04:55:29.337138531 UTC"
+    },
+    {
+      "group": "sitetree",
+      "path": "sitetree/runs/head_diff_instr.txt",
+      "kind": "head_differential",
+      "configurations": 18,
+      "matching_rows": 18,
+      "divergent_rows": 0,
+      "explicit_exit_code": 0,
+      "note": "Captured terminal and instrumentation only; script generating this head differential was not located in this source root",
+      "closed_mtime_utc": "2026-09-30 04:51:39.413153946 UTC"
+    },
+    {
+      "group": "sitetree",
+      "path": "sitetree/runs/ctest_gate_r2.txt",
+      "kind": "ctest_gate",
+      "tests": 11,
+      "passed": 11,
+      "failed": 0,
+      "explicit_exit_code": 0,
+      "closed_mtime_utc": "2026-09-30 05:01:10.776115640 UTC"
+    }
+  ],
+  "source_pins": {
+    "pool_final_cpp": "555951df52187dc7cd0adfae00c3e88bd75c807e766bb32809f889dc25dfffff",
+    "pool_r1_and_hybrid_cpp": "db59f6c763dff698e92537340e8bed1cbb18344f343ac763c97a6189900698cf",
+    "sitetree_r2_cpp": "dfa69e3a78cc9e7aad3dd01fc08f895cae54a3b670bbdb055250ad9db87f45b1",
+    "sitetree_r2_hpp": "2ef95eec936621f26d64ee7c683af867aff2f81bf4d925fb87f41d1c693f1ae2",
+    "notes": [
+      "Read-only diff -qr: Pool final/src equals /tmp/mhgp10-r2/pool/src/morsehgp3D_v10/src; SiteTree r2/src equals /tmp/mhgp10-r2/sitetree/src/morsehgp3D_v10/src at observation.",
+      "These are post-build observed source and binary pins, not proof of a frozen full dependency closure before compilation."
+    ]
+  },
+  "coverage_limits": {
+    "rounding_path_mutant": {
+      "product": {
+        "repli_dirige": 125434,
+        "repli_nearest": 13802,
+        "filtre_dirige": 0,
+        "filtre_nearest": 28056
+      },
+      "mutant": {
+        "repli_dirige": 41406,
+        "repli_nearest": 13802,
+        "filtre_dirige": 84028,
+        "filtre_nearest": 28056
+      },
+      "gate_passes_for_both": true,
+      "note": "The current product calls filtered in nearest and closed_ball; the gate still permits a path-bypassing mutant. This is a regression-test coverage weakness, not a current engine defect."
+    },
+    "barrier_probe": {
+      "asan_code": 124,
+      "tsan_code": 0,
+      "diagnostic_kind": "read-only source analysis, no new replay",
+      "note": "The repeatedly reused four-party barrier may strand three callbacks if the thrower is delayed after first barrier phase. Source of a bounded delayed diagnostic is copied, but no output of that diagnostic was found or executed here."
+    },
+    "no_performance_or_growth_claim": true,
+    "no_full_256_bit_recovery_for_pool_24_runs": true
+  }
+}

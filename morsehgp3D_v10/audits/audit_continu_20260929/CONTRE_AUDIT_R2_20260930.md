@@ -117,3 +117,65 @@ parallèle un résultat positif K2 et de vraies entrées internes K3/K5.
 Conserver leurs incidences et continuations est une condition de conception,
 pas une autorisation de relancer une grosse optimisation de tête.
 Aucun moteur modifié, aucun GCP ni contrat 100 ms nouvellement acquis.
+
+## Clôtures observées et raccord numérique dans la CLI
+
+Observation du 30 septembre, vers 05:03 UTC, distincte des captures
+précédentes : le différentiel Pool est terminé, **24/24 comparaisons
+identiques**, codes 0, `DONE`. Il inclut catalogue et tour LiDAR00 FULL
+K10, référence à quatre fils contre correction à 1/3/8 fils. Son script
+compare les 24 premiers hexadécimaux des SHA, soit 96 bits ; il n'impose
+pas lui-même un code non nul en cas d'écart. Ici, codes, hashes et marqueur
+terminal sont présents : résultat différentiel réel, pas comparaison
+octet par octet ni mesure de performance. Le complément SiteTree est clos :
+tour 7/7, têtes instrumentées 18/18 et CTest 11/11, codes 0. Ce sont des
+campagnes du développeur observées, non relancées par cet audit.
+
+Le lot tête Pool s'est ensuite terminé 24/24, `DONE`, à 05:07:58 UTC,
+et ses deux oracles à 05:12:15, code 0. Le premier compare des préfixes
+SHA de 64 bits. Les sorties temporaires ont été supprimées par leurs
+comparateurs ; aucun digest complet ne peut être reconstruit depuis ces
+logs. Notre audit n'a rien effacé ni rejoué.
+
+Deux réserves de juge restent séparées du produit. Le délai ASan de
+`contre_pool` est compatible avec sa barrière réutilisée à quatre callbacks
+après le départ de l'un d'eux par exception ; il ne prouve pas un deadlock
+du Pool. Le juge SiteTree laisse survivre huit mutants, dont le contournement
+du mode d'arrondi : la variante instrumentée filtre 84 028 fois en mode
+dirigé sans être refusée, contre zéro pour le correctif actuel. Ajouter
+une condition explicite sur le chemin exercé ; aucune nouvelle réponse
+géométrique fautive du produit n'est démontrée ici.
+
+Notre [nouvelle petite capture](../../receipts/audit_continu_20260929/r2_integration_block_20260930/README.md)
+exécute quatre appels sur le binaire tête `50902942…` : K1/mcs1 est refusé
+`numeric_domain`, code 2, sans sortie ; une deuxième configuration invalide
+est aussi refusée avant toute sortie **dans la même hiérarchie**. Le contrôle
+K2/mcs2 produit ses 20 octets. La collision étiquettes/arbre demeure :
+code 0, texte de 126 octets remplaçant les étiquettes. Les hashes sont
+stables. La copie `entrees_cli-verif` garde l'ancienne tête ; la copie tête
+garde les écritures non vérifiées. Ces succès ne qualifient pas leur union.
+À 05:19 UTC, la CLI d'intégration inspectée contient encore cinq zones de
+conflit de fusion. C'est un état de travail observé, pas une source compilable
+ou un nouveau défaut du moteur publié.
+
+## Complément au diagnostic massif
+
+Le [nouvel audit massif indépendant](../AUDIT_MASSIF_LIDAR_20260930.md)
+pose correctement la différence entre capacité mémoire et coût de calcul.
+Sa certification par K témoins conserve les coquilles admises : p≤K−1
+suffit, aucun halo K+1 n'est nécessaire. Le complément scalaire de notre
+capture retrouve **un deuxième débordement** de `RankIndex::at_most` :
+`lo*64` est calculé en u32 avant le minimum. Pour L=2³²−2, sa borne devient
+zéro et la fonction scalaire rend L−61, sans lire de tableau. Élargir le
+produit avant le minimum, puis convertir ; corriger aussi le milieu.
+Douze valeurs de L passent avec ces formules sûres, normal/−O identiques.
+Ce contrôle n'alloue pas des milliards de niveaux et ne qualifie pas une
+nouvelle tour.
+
+La [question au développeur](QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md)
+précise une piste pour réduire les scans : boîte de centres × bloc du
+SiteTree global, rayon supérieur certifié par K témoins et rejet strict
+du bloc entier. Les 120 petites configurations rationnelles contrôlent
+la formule ; ni un producteur, ni une borne de croissance, ni un gain
+LiDAR ne sont mesurés. Les égalités restent présentes, pour FULL et pour
+les points frontière. Aucun code du moteur, GCP ou statut public modifié.

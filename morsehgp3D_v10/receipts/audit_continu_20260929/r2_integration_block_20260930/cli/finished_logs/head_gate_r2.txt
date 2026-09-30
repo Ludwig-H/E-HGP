@@ -1,0 +1,18 @@
+validate : 24/24 fixtures refusees avec leur raison
+parametres : 15/15 cas conformes
+parse_z : 27/27 jetons conformes
+echelle de l'audit continu eom : m = 3999 clusters, pas vers le parent (diagnostic) 9994
+echelle de l'audit continu eom allow_single : m = 3999 clusters, pas vers le parent (diagnostic) 9994
+echelle de l'audit continu feuilles : m = 3999 clusters, pas vers le parent (diagnostic) 5996
+echelle de l'audit continu feuilles allow_single : m = 3999 clusters, pas vers le parent (diagnostic) 5996
+peigne de l'audit independant eom : m = 2049 clusters, pas vers le parent (diagnostic) 5119
+peigne de l'audit independant eom allow_single : m = 2049 clusters, pas vers le parent (diagnostic) 5119
+peigne de l'audit independant feuilles : m = 2049 clusters, pas vers le parent (diagnostic) 3071
+peigne de l'audit independant feuilles allow_single : m = 2049 clusters, pas vers le parent (diagnostic) 3071
+juge aleatoire : 24195 cas acceptes, 7315 a >= 5 clusters, 3240 desactivations EOM, regle de la racine 8112 (bruit 3740, racine avec enfants 971) ; refus du domaine (2) 3805
+allow_single_cluster : 9/9 fixtures egales a sklearn 1.9.1, 1/1 divergences gravees tenues
+domaine numerique : 30/30 fixtures gravees conformes (19 refus, 11 acceptations au juge analytique)
+domaine aleatoire : 14601 cas acceptes (dont 874 a lambda_max > 1e200), refus (1) 260, (2) 2473, (3) 6123, (4) 543
+auto-protection : 25/25 appels invalides refuses sans sortie
+head_gate_ok
+rc=0

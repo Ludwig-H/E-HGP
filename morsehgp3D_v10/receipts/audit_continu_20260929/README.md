@@ -93,6 +93,10 @@ Une nouvelle exécution doit produire un reçu distinct, avec sa propre version.
   validation des paramètres/en-têtes des bancs et invariants des grands
   dumps. Sources figées, tests courts ; pas de nouveau banc de clustering,
   producteur LiDAR ou qualification globale.
+- `r2_integration_block_20260930/` : quatre sondes CLI de raccord,
+  clôtures Pool/SiteTree observées, réserves des juges et certificat
+  rationnel de rejet par blocs. Refus numériques remontés, collision de
+  sorties persistante ; aucune intégration ni optimisation produit qualifiée.
 
 Ces nouveaux fichiers ne font pas partie des 34 déplacements historiques
 du manifeste. Les comptes, sources et limites sont dans leurs reçus propres
@@ -132,3 +136,17 @@ ou du moteur n'est incluse. Le contrôle documentaire global reste distinct.
 Le contrôle des espaces est propre sur les sept rapports rédigés ; sur
 les données, il signale des espaces de logs, des CRLF de CSV et la fin
 du CMakeCache. Ces fichiers clos restent octet pour octet.
+
+La tranche raccord/blocs contrôle six Markdown ciblés et quatre
+manifestes propres, en normal/−O : 79 entrées globales, puis 19/6/49.
+Elle ne relance aucune campagne tierce. Les scripts comparateurs et
+leurs limites de digest sont conservés, les sources et logs de provenance
+restent octet pour octet. Les quatre rapports et les 80 fichiers du nouveau
+paquet constituent la liste explicite de publication ; moteur et travaux
+des autres acteurs restent exclus. Le contrôle documentaire global
+antérieurement en échec n'est pas promu.
+
+Le contrôle des espaces est propre sur les rapports rédigés de cette
+tranche ; sur les preuves brutes, il signale les fins de deux CMakeCache,
+des cellules TSV vides et un journal développeur. Ces octets clos sont
+conservés, pas reformattés pour rendre le contrôle global vert.

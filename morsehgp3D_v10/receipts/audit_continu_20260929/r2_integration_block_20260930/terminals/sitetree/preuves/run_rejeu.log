@@ -1,0 +1,7 @@
+temoin                             -            r2=0    r1=0    TEMOIN_OK    
+R_garde_sans_nuage_u18             rejeu S-a    r2=1    r1=0    TUE          porte_r2: ECHEC nuage de 21 bits, ancre et centre dans le cube : hors du domaine (5561)
+R_garde_sans_ancre                 rejeu S-a    r2=1    r1=0    TUE          porte_r2: ECHEC ancre hors du cube : hors du domaine du filtre (0)
+R_arrondi_absent                   rejeu S-b    r2=1    r1=0    TUE          porte_r2: ECHEC filtered == domaine du contrat, mode d'arrondi compris (161)
+R_arrondi_force_nearest            rejeu S-b    r2=1    r1=0    TUE          porte_r2: ECHEC fixture : mode d'arrondi conserve (1)
+R_arrondi_cache_statique           rejeu S-b    r2=1    r1=0    TUE          porte_r2: ECHEC filtered == domaine du contrat, mode d'arrondi compris (161)
+R_arrondi_seulement_closed_ball    rejeu S-b    r2=1    r1=0    TUE          porte_r2: ECHEC filtered == domaine du contrat, mode d'arrondi compris (161)

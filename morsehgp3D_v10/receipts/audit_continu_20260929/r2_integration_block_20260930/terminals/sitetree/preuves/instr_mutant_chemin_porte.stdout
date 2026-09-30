@@ -1,0 +1,34 @@
+fixture_g1 mode=nearest interieur=0 coquille=4 0 1 2 3
+fixture_g1 mode=nearest nearest(1) = (0,0)
+fixture_g1 mode=nearest nearest(2) = (0,0) (0,1)
+fixture_g1 mode=nearest nearest(3) = (0,0) (0,1) (0,2)
+fixture_g1 mode=nearest nearest(4) = (0,0) (0,1) (0,2) (0,3)
+fixture_g1 mode=upward interieur=0 coquille=4 0 1 2 3
+fixture_g1 mode=upward nearest(1) = (0,0)
+fixture_g1 mode=upward nearest(2) = (0,0) (0,1)
+fixture_g1 mode=upward nearest(3) = (0,0) (0,1) (0,2)
+fixture_g1 mode=upward nearest(4) = (0,0) (0,1) (0,2) (0,3)
+fixture_g1 mode=downward interieur=0 coquille=4 0 1 2 3
+fixture_g1 mode=downward nearest(1) = (0,0)
+fixture_g1 mode=downward nearest(2) = (0,0) (0,1)
+fixture_g1 mode=downward nearest(3) = (0,0) (0,1) (0,2)
+fixture_g1 mode=downward nearest(4) = (0,0) (0,1) (0,2) (0,3)
+fixture_g1 mode=towardzero interieur=0 coquille=4 0 1 2 3
+fixture_g1 mode=towardzero nearest(1) = (0,0)
+fixture_g1 mode=towardzero nearest(2) = (0,0) (0,1)
+fixture_g1 mode=towardzero nearest(3) = (0,0) (0,1) (0,2)
+fixture_g1 mode=towardzero nearest(4) = (0,0) (0,1) (0,2) (0,3)
+balayage requetes=2531 hors_cube=1359 adverses=505 nearest=60744
+balayage type=obtus hors_cube=256 adverses=113
+balayage type=plat hors_cube=256 adverses=160
+balayage type=plat_min hors_cube=256 adverses=152
+balayage type=variante_g1 hors_cube=256 adverses=79
+balayage type=quelconque hors_cube=335 adverses=1
+balayage adverses_par_mode nearest=505 upward=259 downward=271 towardzero=265
+domaine bords=7 sites=960 milieux=960 aigus=444 tetra_internes=419 nuage21=240 nuage21_ancre_centre_u18=240 ancres_fabriquees=128 bornes_gravees=30
+arrondi arbre_construit_upward=40 fils=20
+mode=nearest requetes=5969 filtre=3998 repli=1971 replis_arrondi=0 adverses=505
+mode=upward requetes=5969 filtre=0 repli=5969 replis_arrondi=3998 adverses=259
+mode=downward requetes=5969 filtre=0 repli=5969 replis_arrondi=3998 adverses=271
+mode=towardzero requetes=5969 filtre=0 repli=5969 replis_arrondi=3998 adverses=265
+site_tree_far_center_ok

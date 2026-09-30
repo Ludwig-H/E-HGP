@@ -1,0 +1,31 @@
+adv_pool g1 asan code=0 reports=0 last=adv_ok
+adv_pool g2 asan code=0 reports=0 last=adv_ok
+adv_pool g3 asan code=0 reports=0 last=adv_ok
+adv_pool g4 asan code=0 reports=0 last=adv_ok
+adv_pool g5 asan code=0 reports=0 last=adv_ok
+adv_pool g6 asan code=0 reports=0 last=adv_ok
+adv_pool g7 asan code=0 reports=0 last=adv_ok
+adv_pool g8 asan code=0 reports=0 last=adv_ok
+wrap_grain asan code=0 reports=0 last=wrap_grain executions ou la tranche 0 passe deux fois ou plus : 0 / 300
+contre_pool asan code=124 reports=0 last=
+pool_failure_probe asan code=0 reports=0 last=allocation_failure_propagated_after_join
+pool_throw_borne asan code=0 reports=0 last=caller_resumed_after_worker_left
+thread_create_failure 1 asan code=0 reports=0 last=PASS fail_at=1 first_created=0 first_joined=0 total_created=2 total_joined=2 hits=1000
+thread_create_failure 2 asan code=0 reports=0 last=PASS fail_at=2 first_created=1 first_joined=1 total_created=3 total_joined=3 hits=1000
+thread_create_failure 3 asan code=0 reports=0 last=PASS fail_at=3 first_created=2 first_joined=2 total_created=4 total_joined=4 hits=1000
+adv_pool g1 tsan code=0 reports=0 last=adv_ok
+adv_pool g2 tsan code=0 reports=0 last=adv_ok
+adv_pool g3 tsan code=0 reports=0 last=adv_ok
+adv_pool g4 tsan code=0 reports=0 last=adv_ok
+adv_pool g5 tsan code=0 reports=0 last=adv_ok
+adv_pool g6 tsan code=0 reports=0 last=adv_ok
+adv_pool g7 tsan code=0 reports=0 last=adv_ok
+adv_pool g8 tsan code=0 reports=0 last=adv_ok
+wrap_grain tsan code=0 reports=0 last=wrap_grain executions ou la tranche 0 passe deux fois ou plus : 0 / 300
+contre_pool tsan code=0 reports=0 last=PASS 4 exceptions appelant/ouvrier, directes/imbriquees; quiescence, TLS, reutilisation
+pool_failure_probe tsan code=0 reports=0 last=allocation_failure_propagated_after_join
+pool_throw_borne tsan code=0 reports=0 last=caller_resumed_after_worker_left
+thread_create_failure 1 tsan code=0 reports=0 last=PASS fail_at=1 first_created=0 first_joined=0 total_created=2 total_joined=2 hits=1000
+thread_create_failure 2 tsan code=0 reports=0 last=PASS fail_at=2 first_created=1 first_joined=1 total_created=3 total_joined=3 hits=1000
+thread_create_failure 3 tsan code=0 reports=0 last=PASS fail_at=3 first_created=2 first_joined=2 total_created=4 total_joined=4 hits=1000
+pool_throw_borne release code=0 reports=0 last=caller_resumed_after_worker_left

@@ -1,0 +1,10 @@
+{
+  "command": "ps -eo pid,ppid,etimes,time,pcpu,rss,comm,args",
+  "returncode": 0,
+  "relevant_rows": [
+    " 601746  592776      12 00:00:00  0.0 16480 cmake           /usr/bin/cmake -DCMD=/home/codespace/.python/current/bin/python3 -DARGS=/tmp/mhgp10-r2/tete-verif/src/morsehgp3D_v10/tests/points/test_cover_entry.py /tmp/mhgp10-r2/tete-verif/build -DEXPECTED=0 -P /tmp/mhgp10-r2/tete-verif/src/morsehgp3D_v10/cmake/run_expect.cmake",
+    " 601747  601746      12 00:00:11 91.3 37204 python3         /home/codespace/.python/current/bin/python3 /tmp/mhgp10-r2/tete-verif/src/morsehgp3D_v10/tests/points/test_cover_entry.py /tmp/mhgp10-r2/tete-verif/build"
+  ],
+  "notes": "Unchanged-state observation only; no signalling performed.",
+  "utc": "2026-09-30 05:05:07 UTC"
+}

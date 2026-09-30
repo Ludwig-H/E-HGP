@@ -1,0 +1,13 @@
+syn_clusters_density_x1          n=8000   K=10 cover codes=[0, 0, 0, 0, 0] dump=9f3a5610b6a7baaf dumps(1f,3f)=identiques compteurs=identiques instr(repli_dir,repli_near,filtre_dir,filtre_near)=(0, 0, 0, 707795) IDENTIQUES
+syn_shells_space_x2              n=16000  K=5  cover codes=[0, 0, 0, 0, 0] dump=c280b8fae9d7891d dumps(1f,3f)=identiques compteurs=identiques instr(repli_dir,repli_near,filtre_dir,filtre_near)=(0, 0, 0, 48588) IDENTIQUES
+syn_uniform_density_x4           n=32000  K=10 core  codes=[0, 0, 0, 0, 0] dump=06bd452ba5ef8b5a dumps(1f,3f)=identiques compteurs=identiques instr(repli_dir,repli_near,filtre_dir,filtre_near)=(0, 0, 0, 2586534) IDENTIQUES
+syn_terrain_density_x2           n=16000  K=10 cover codes=[0, 0, 0, 0, 0] dump=538d7aa0d3aeaf95 dumps(1f,3f)=identiques compteurs=identiques instr(repli_dir,repli_near,filtre_dir,filtre_near)=(0, 0, 0, 92264) IDENTIQUES
+syn_filaments_density_x4         n=32000  K=5  cover codes=[0, 0, 0, 0, 0] dump=ed3441fc02c1e929 dumps(1f,3f)=identiques compteurs=identiques instr(repli_dir,repli_near,filtre_dir,filtre_near)=(0, 0, 0, 395558) IDENTIQUES
+lidar02_quarter_x_nonneg_y_neg   n=14829  K=5  cover codes=[0, 0, 0, 0, 0] dump=ec21d973f2fc0168 dumps(1f,3f)=identiques compteurs=identiques instr(repli_dir,repli_near,filtre_dir,filtre_near)=(0, 0, 0, 71538) IDENTIQUES
+lidar01_half_x_nonneg            n=16532  K=10 core  codes=[0, 0, 0, 0, 0] dump=7a2c84db69d91d5d dumps(1f,3f)=identiques compteurs=identiques instr(repli_dir,repli_near,filtre_dir,filtre_near)=(0, 0, 0, 603475) IDENTIQUES
+ECARTS 0 sur 7
+
+real	24m34.566s
+user	17m57.014s
+sys	1m19.716s
+rc=0

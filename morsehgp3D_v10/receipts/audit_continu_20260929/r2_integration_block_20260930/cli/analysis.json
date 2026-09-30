@@ -1,0 +1,35 @@
+{
+  "date_utc": "2026-09-30",
+  "new_state": "Numeric head Outcome is propagated in tete-verif, not yet joined to entrees_cli safeguards.",
+  "locations": {
+    "entrees_cli": "/tmp/mhgp10-r2/entrees_cli",
+    "tete_verif": "/tmp/mhgp10-r2/tete-verif",
+    "published_collision_commit": "72df96768"
+  },
+  "observed_good": [
+    "tete-verif cluster reads Clustering.outcome before using labels or tree.",
+    "K1/mcs1 returns unsupported_degeneracy/numeric_domain with code2 and no output.",
+    "A later bad configuration also refuses before any configuration output on that hierarchy.",
+    "K2/mcs2 control still produces the expected20 label bytes."
+  ],
+  "unresolved": [
+    "The exact same labels/--tree path succeeds but replaces20-byte labels with126-byte text on tete-verif.",
+    "entrees_cli binary/source/output header hashes are unchanged from the published collision proof.",
+    "entrees_cli still has the old head structs with no Outcome; its cluster caller therefore cannot propagate the new numeric result.",
+    "tete-verif still uses plain fopen/fwrite/fclose; it has not inherited entrees_cli OutputSet checks/cleanup.",
+    "No combined build proving both head refusal and safe CLI outputs is present in these two copies."
+  ],
+  "causal_collision": "Both outputs write the same path sequentially. entrees_cli OutputSet suppresses only duplicate bookkeeping, after fopen(...,wb) has already truncated the path.",
+  "recommended_minimal_raccord": [
+    "Merge the new head API and explicit Outcome checks into the strict-output CLI source, compiling consumers and head against the same headers.",
+    "Reserve distinct output destinations by logical role before opening/truncating any of them; reject labels/tree and expanded configs/vote path collisions.",
+    "Requalify one combined binary with tiny distinct-output control, exact-name collision refusal, direct numeric refusal, and later-config refusal."
+  ],
+  "limits": [
+    "Only exact same-name collision was exercised; no symlink/hardlink/path-normalization qualification.",
+    "Four calls are correctness probes, not performance tests.",
+    "Finished-log snapshots are observed developer receipts, not campaigns run by this counter-auditor.",
+    "No claim of full-tree global atomicity over multiple orders/entries; tested late configuration is within one hierarchy.",
+    "No current FULL, G4, scaling, or statistical quality qualification."
+  ]
+}

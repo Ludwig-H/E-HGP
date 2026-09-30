@@ -1,0 +1,23 @@
+{
+  "scope": "Read-only source observation, not a new test or qualification",
+  "observed_utc": "2026-09-30 05:24:19 UTC",
+  "frontier_root": "/workspaces/E-HGP/build/v10-frontiere/work/bench/frontier",
+  "source_hashes_at_read": {
+    "design_gate.py": "57c971cdc91b1685b875908927edbe57fe213c27d9c034a14be0ae22dc60d473",
+    "arms.py": "f1a2d385f83f84eb1b2be93c0b16c8269fda0ce43f66cb28f4c464862ed71855",
+    "juge_bras_ref.py": "64d03f73e0fb929336f3f3f3810364d75670acf4faa748abeed42edf622a7c9a",
+    "frontier_core.py": "86ba984ff7986bdd44a5d53e9b2c7d3f2c0eb847764938cd28259d18439850b7"
+  },
+  "observations": [
+    "G7 includes exact K3/K5 internal-frontier-entry fixtures from section11 of the published audit.",
+    "G8 distinguishes two covering balls from one covering spatial component.",
+    "The current arms do not implement duration weights; the ghost continuation case remains a design obligation if that weight is introduced.",
+    "A --sans-mutants invocation can print PASS; it is not the full mutant gate.",
+    "CLI integration source had five unresolved merge-conflict regions at the prior05:19 read. This is a work-in-progress state, not a released engine failure."
+  ],
+  "limits": [
+    "Sources changed during the subagent inspection, not frozen before imports.",
+    "No frontier gate, engine, compilation, statistical benchmark, GCP or GPU call performed for this observation.",
+    "The source hashes identify the files read, not a frozen full dependency closure or a receipt of a completed run."
+  ]
+}

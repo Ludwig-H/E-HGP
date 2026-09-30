@@ -90,3 +90,73 @@ pour sa nouvelle porte quatre arrondis et transmet trois actions simples :
 Ces défauts sont reproduits par fixtures courtes, pas par erreurs observées
 sur LiDAR ou par résultats A/C invalidés. Leur correction ne demande ni
 GCP ni grand chantier. Les reçus précédents restent clos et inchangés.
+
+## Raccord observé et une proposition de rejet par blocs
+
+Le [dernier complément R2](CONTRE_AUDIT_R2_20260930.md) confirme quatre
+appels minuscules : la nouvelle CLI tête propage maintenant `Outcome` et
+refuse une configuration tardive invalide avant écriture dans la hiérarchie
+testée. Elle accepte encore la collision étiquettes/arbre. Le différentiel
+Pool est clos 24/24, celui de SiteTree et ses 11 CTests aussi ; ces copies
+ne constituent toujours pas un binaire commun qualifié. Le chantier de
+fusion est observé en cours, sans relancer ses tests.
+
+Pour le massif, je confirme l'invariant de [l'audit indépendant](../AUDIT_MASSIF_LIDAR_20260930.md).
+J'ajoute à sa garde M2 le cas scalaire L=2³²−2 : `lo*64` déborde avant
+le minimum et rend L−61. Faire le produit en u64 **avant** clamp/conversion,
+pas après ; le milieu sûr seul ne suffit pas.
+
+**Proposition à mesurer, pas optimisation acquise.** Au lieu de rescanner
+et matérialiser toute la liste parente pour chaque boîte de centres Q,
+transmettre une couverture de blocs du SiteTree global. Pour n≥K, choisir
+K sites distincts S, puis calculer, dans une unité commune exacte,
+`R_Q² = max_{s∈S,v sommet de Q} ||s−v||²`. Pour tout c∈Q,
+`d_K(c)² ≤ R_Q²`. Une boule admise par FULL a p≤K−1, donc son rayon est
+au plus d_K(c) ; tous ses intérieurs et sa coquille restent dans ce rayon.
+Rejeter un bloc Z seulement si `dist_min(Z,Q)² > R_Q²` : tout son contenu
+est alors inutile à cette boîte. **L'égalité n'est jamais un rejet.**
+Lorsque n<K, il n'y a pas ces K témoins : conserver la liste complète
+ou une autre certification explicite, sans quota caché.
+
+La preuve est générale pour les sites distincts non pondérés ; le
+[contrôle Fraction](../../receipts/audit_continu_20260929/r2_integration_block_20260930/scalar/normal.json)
+exerce 120 petites configurations, 504 blocs dont 126 rejetés, et 1 272
+centres rationnels. Une fixture d'égalité montre causalement pourquoi
+`≥` serait faux. Ces contrôles ne prouvent pas le gain ni la complexité.
+L'index reste immuable partagé, états et files possédés par tâche ; étendre
+les IDs seulement aux feuilles où l'énumération l'exige.
+
+Pour que cette piste gagne réellement, ne pas construire d'abord S par
+un nouveau scan de toute la liste. Comparer une requête sur l'index et
+la réutilisation de témoins parentaux certifiés, puis le filtre D actuel
+sur les blocs résiduels. Avec les mêmes témoins, ce rejet est déjà impliqué
+par leurs dominances ponctuelles : l'intérêt visé est de **payer un test
+pour un bloc**, pas d'annoncer une nouvelle élimination géométrique.
+Mesurer visites de couples Q/Z, sélection des témoins, IDs développés,
+listes matérialisées, candidats, sorties et coût aval, en 8k/16k/32k et
+sur les coupes capteur. Un tri externe n'en réduit pas le travail.
+
+Enfin relever max_shell et le nombre de coquilles de plus de 24 sites
+avant tout palier massif : la tour actuelle les refuse et utilise encore
+une énumération combinatoire. Le quotient rapide de TOWER_v2 est un plan,
+pas le produit. Un tel chantier n'est prioritaire pour 100 ms que si ces
+coquilles coûtent réellement dans les régimes LiDAR concernés.
+
+## Reprise de nos cas frontière dans la porte de conception
+
+Lecture seule à 05:24 UTC dans le chantier `build/v10-frontiere` : G7
+reprend exactement les entrées internes K3/K5 de notre section 11 et
+G8 dédoublonne deux boules couvrantes d'une même composante. Les témoins
+gardent I∪U, le filtre propre à K et les coupes fermées ; les attaches
+suivent ensuite l'ascendance. C'est cohérent avec le besoin frontière
+relue dans la thèse. Les deux nouvelles fixtures sont explicitement hors
+préenregistrement, pas de nouveaux scores du test statistique.
+
+Cette lecture n'est pas un rejeu : sources en évolution, aucune porte
+complète nouvelle déclarée acquise par notre audit. Distinguer le PASS
+sans mutants du PASS complet. Les bras actuels n'implémentent pas la
+durée : l'absence du cas ghost n'est pas leur défaut d'implémentation,
+mais devient une garde indispensable **si** ce poids est exploré. G6
+doit continuer à exposer le saut inverseβ sous contact de coquille ;
+passer ce contre-test signifie comprendre le comportement, pas prouver
+sa robustesse statistique.

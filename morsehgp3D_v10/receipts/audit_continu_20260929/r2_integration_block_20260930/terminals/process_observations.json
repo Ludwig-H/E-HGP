@@ -1,0 +1,52 @@
+{
+  "scope": "only process rows naming pool-verif or sitetree-verif",
+  "observations": [
+    {
+      "observed_utc_approximate": "2026-09-30 05:00:50 UTC",
+      "matching_rows": [
+        " 465194    2874    1862 00:00:00  0.0  7360 bash            /bin/bash -c source /home/codespace/.claude/shell-snapshots/snapshot-bash-1790737119606-kg6cad.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \\builtin unalias -- 'unsetenv'; \\builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval '/tmp/mhgp10-r2/pool-verif/diff/run_diff.sh > /tmp/mhgp10-r2/pool-verif/diff/run_diff.log 2>&1' < /dev/null && pwd -P >| /tmp/claude-6d19-cwd",
+        " 465222  465194    1862 00:00:00  0.0  3604 run_diff.sh     /bin/bash /tmp/mhgp10-r2/pool-verif/diff/run_diff.sh",
+        " 533158    2874     733 00:00:00  0.0  7316 bash            /bin/bash -c source /home/codespace/.claude/shell-snapshots/snapshot-bash-1790737119606-kg6cad.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \\builtin unalias -- 'unsetenv'; \\builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'cd /tmp/mhgp10-r2/sitetree-verif && ( time nice -n 5 ctest --test-dir build-r2 -L gate --output-on-failure ) > runs/ctest_gate_r2.txt 2>&1; echo \"ctest_rc=$?\" >> runs/ctest_gate_r2.txt; tail -25 runs/ctest_gate_r2.txt' < /dev/null && pwd -P >| /tmp/claude-7da3-cwd",
+        " 533189  533158     733 00:00:00  0.0  5900 bash            /bin/bash -c source /home/codespace/.claude/shell-snapshots/snapshot-bash-1790737119606-kg6cad.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \\builtin unalias -- 'unsetenv'; \\builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'cd /tmp/mhgp10-r2/sitetree-verif && ( time nice -n 5 ctest --test-dir build-r2 -L gate --output-on-failure ) > runs/ctest_gate_r2.txt 2>&1; echo \"ctest_rc=$?\" >> runs/ctest_gate_r2.txt; tail -25 runs/ctest_gate_r2.txt' < /dev/null && pwd -P >| /tmp/claude-7da3-cwd",
+        " 539219    2874     545 00:00:00  0.0  7392 bash            /bin/bash -c source /home/codespace/.claude/shell-snapshots/snapshot-bash-1790737119606-kg6cad.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \\builtin unalias -- 'unsetenv'; \\builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'f1=/tmp/mhgp10-r2/sitetree-verif/runs/diff_tour.txt; f2=/tmp/mhgp10-r2/sitetree-verif/runs/head_diff_instr.txt; f3=/tmp/mhgp10-r2/sitetree-verif/runs/ctest_gate_r2.txt; s1=0; s2=0; s3=0; n1=$(grep -c '\"'\"'IDENTIQUES\\|ECART'\"'\"' $f1 2>/dev/null); while true; do c=$(grep -c '\"'\"'IDENTIQUES\\|ECART'\"'\"' $f1 2>/dev/null); if [ \"$c\" != \"$n1\" ]; then tail -1 $f1 | cut -c1-110; n1=$c; fi; if [ $s1 = 0 ] && grep -q '\"'\"'^rc='\"'\"' $f1 2>/dev/null; then echo \"TOUR_FINI: $(grep -E '\"'\"'^ECARTS|^rc='\"'\"' $f1 | tr '\"'\"'\\n'\"'\"' '\"'\"' '\"'\"')\"; s1=1; fi; if [ $s2 = 0 ] && grep -q '\"'\"'HEADDIFF_INSTR_EXIT'\"'\"' $f2 2>/dev/null; then echo \"TETE_INSTR_FINIE: $(grep -E '\"'\"'^ECARTS|HEADDIFF_INSTR_EXIT'\"'\"' $f2 | tr '\"'\"'\\n'\"'\"' '\"'\"' '\"'\"')\"; s2=1; fi; if [ $s3 = 0 ] && grep -q '\"'\"'ctest_rc='\"'\"' $f3 2>/dev/null; then echo \"CTEST_FINI: $(grep -E '\"'\"'tests passed|ctest_rc='\"'\"' $f3 | tr '\"'\"'\\n'\"'\"' '\"'\"' '\"'\"')\"; s3=1; fi; if [ $s1 = 1 ] && [ $s2 = 1 ] && [ $s3 = 1 ]; then break; fi; sleep 5; done' < /dev/null && pwd -P >| /tmp/claude-baf4-cwd",
+        " 541843    2874     489 00:00:00  0.0  7348 bash            /bin/bash -c source /home/codespace/.claude/shell-snapshots/snapshot-bash-1790737119606-kg6cad.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \\builtin unalias -- 'unsetenv'; \\builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'until grep -q '\"'\"'ctest_rc='\"'\"' /tmp/mhgp10-r2/sitetree-verif/runs/ctest_gate_r2.txt 2>/dev/null; do sleep 10; done; tail -22 /tmp/mhgp10-r2/sitetree-verif/runs/ctest_gate_r2.txt' < /dev/null && pwd -P >| /tmp/claude-5511-cwd",
+        " 552841    2874     307 00:00:00  0.0  7368 bash            /bin/bash -c source /home/codespace/.claude/shell-snapshots/snapshot-bash-1790737119606-kg6cad.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \\builtin unalias -- 'unsetenv'; \\builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'until grep -q '\"'\"'ctest_rc='\"'\"' /tmp/mhgp10-r2/sitetree-verif/runs/ctest_gate_r2.txt 2>/dev/null; do sleep 5; done; grep -E '\"'\"'Test +#|tests passed|ctest_rc|^real'\"'\"' /tmp/mhgp10-r2/sitetree-verif/runs/ctest_gate_r2.txt' < /dev/null && pwd -P >| /tmp/claude-b751-cwd",
+        " 568299  533190      47 00:00:00  0.0 16416 cmake           /usr/bin/cmake -DCMD=/home/codespace/.python/current/bin/python3 -DARGS=/tmp/mhgp10-r2/sitetree-verif/r2/morsehgp3D_v10/tests/regression/test_batch_equivalence.py /tmp/mhgp10-r2/sitetree-verif/build-r2 -DEXPECTED=0 -P /tmp/mhgp10-r2/sitetree-verif/r2/morsehgp3D_v10/cmake/run_expect.cmake",
+        " 568302  568299      47 00:00:01  2.9 68492 python3         /home/codespace/.python/current/bin/python3 /tmp/mhgp10-r2/sitetree-verif/r2/morsehgp3D_v10/tests/regression/test_batch_equivalence.py /tmp/mhgp10-r2/sitetree-verif/build-r2",
+        " 575597  465222      16 00:00:00  0.0  2128 run_diff.sh     /bin/bash /tmp/mhgp10-r2/pool-verif/diff/run_diff.sh",
+        " 575599  575597      16 00:01:01  370 1373728 mhgp10_tower  /tmp/mhgp10-r2/pool-verif/build-final/mhgp10_tower /workspaces/E-HGP/build/v10-scale-inputs/lidar00_full.u32le --k=10 --threads=8 --dump=/tmp/mhgp10-r2/pool-verif/diff/work/d",
+        " 576390  568302       0 00:00:00  150  5992 mhgp10_cluster  /tmp/mhgp10-r2/sitetree-verif/build-r2/mhgp10_cluster /tmp/tmp5k9o256n/in.u32le /tmp/tmp5k9o256n/out --k=2 --mcs=45 --z=1.0 --selection=leaf --threads=2 --entry=cover --label=vote"
+      ],
+      "note": "Process snapshot only. A missing PID here is not an exit-code receipt; terminal logs carry outcomes."
+    },
+    {
+      "observed_utc_approximate": "2026-09-30 05:02:38 UTC",
+      "matching_rows": [
+        " 465194    2874    1970 00:00:00  0.0  7360 bash            /bin/bash -c source /home/codespace/.claude/shell-snapshots/snapshot-bash-1790737119606-kg6cad.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \\builtin unalias -- 'unsetenv'; \\builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval '/tmp/mhgp10-r2/pool-verif/diff/run_diff.sh > /tmp/mhgp10-r2/pool-verif/diff/run_diff.log 2>&1' < /dev/null && pwd -P >| /tmp/claude-6d19-cwd",
+        " 465222  465194    1970 00:00:00  0.0  3604 run_diff.sh     /bin/bash /tmp/mhgp10-r2/pool-verif/diff/run_diff.sh",
+        " 580146    2874      68 00:00:00  0.0  7376 bash            /bin/bash -c source /home/codespace/.claude/shell-snapshots/snapshot-bash-1790737119606-kg6cad.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \\builtin unalias -- 'unsetenv'; \\builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'until grep -q '\"'\"'^DONE'\"'\"' /tmp/mhgp10-r2/pool-verif/diff/results.txt; do sleep 5; done; awk '\"'\"'{print $1, $2, $3, $NF}'\"'\"' /tmp/mhgp10-r2/pool-verif/diff/results.txt' < /dev/null && pwd -P >| /tmp/claude-04f9-cwd",
+        " 584668  465222       4 00:00:00  0.0  2128 run_diff.sh     /bin/bash /tmp/mhgp10-r2/pool-verif/diff/run_diff.sh",
+        " 584670  584668       4 00:00:26  594 836592 mhgp10_catalogu /tmp/mhgp10-r2/pool-verif/build-final/mhgp10_catalogue /workspaces/E-HGP/build/v10-scale-inputs/lidar00_full.u32le --k=10 --threads=8 --dump=/tmp/mhgp10-r2/pool-verif/diff/work/d"
+      ],
+      "note": "Process snapshot only. A missing PID here is not an exit-code receipt; terminal logs carry outcomes."
+    },
+    {
+      "observed_utc_approximate": "2026-09-30 05:05:00 UTC",
+      "matching_rows": [
+        " 586946    2874     113 00:00:00  0.0  7284 bash            /bin/bash -c source /home/codespace/.claude/shell-snapshots/snapshot-bash-1790737119606-kg6cad.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \\builtin unalias -- 'unsetenv'; \\builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval '/tmp/mhgp10-r2/pool-verif/diff/run_diff_head.sh > /tmp/mhgp10-r2/pool-verif/diff/run_diff_head.log 2>&1' < /dev/null && pwd -P >| /tmp/claude-1b71-cwd",
+        " 586973  586946     113 00:00:00  0.0  3612 run_diff_head.s /bin/bash /tmp/mhgp10-r2/pool-verif/diff/run_diff_head.sh",
+        " 592610    2874      35 00:00:00  0.1  7348 bash            /bin/bash -c source /home/codespace/.claude/shell-snapshots/snapshot-bash-1790737119606-kg6cad.sh 2>/dev/null || true && shopt -u extglob 2>/dev/null || true && { \\builtin unalias -- 'unsetenv'; \\builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'V=/tmp/mhgp10-r2/pool-verif; cd $V; /usr/bin/time -f \"%e s\" timeout 5400 nice -n 5 ctest --test-dir build-final --output-on-failure -L oracle -j1 > logs/ctest_oracle.txt 2>&1; echo \"ctest oracle code=$?\" >> logs/ctest_oracle.txt; tail -12 logs/ctest_oracle.txt' < /dev/null && pwd -P >| /tmp/claude-f56a-cwd",
+        " 592641  592639      35 00:00:00  0.0 16464 cmake           /usr/bin/cmake -DCMD=/home/codespace/.python/current/bin/python3 -DARGS=/tmp/mhgp10-r2/pool-verif/final/morsehgp3D_v10/tests/oracle/test_catalogue_oracle.py /tmp/mhgp10-r2/pool-verif/build-final -DEXPECTED=0 -P /tmp/mhgp10-r2/pool-verif/final/morsehgp3D_v10/cmake/run_expect.cmake",
+        " 592642  592641      35 00:00:34 95.9 20216 python3         /home/codespace/.python/current/bin/python3 /tmp/mhgp10-r2/pool-verif/final/morsehgp3D_v10/tests/oracle/test_catalogue_oracle.py /tmp/mhgp10-r2/pool-verif/build-final",
+        " 601133  586973      14 00:00:00  0.0  2164 run_diff_head.s /bin/bash /tmp/mhgp10-r2/pool-verif/diff/run_diff_head.sh",
+        " 601135  601133      14 00:00:36  259 977776 mhgp10_cluster /tmp/mhgp10-r2/pool-verif/build-final/mhgp10_cluster /workspaces/E-HGP/build/v10-scale-inputs/syn_clusters_density_x2.u32le /tmp/mhgp10-r2/pool-verif/diff/work_head/l --k=10 --mcs=20 --threads=3 --tree=/tmp/mhgp10-r2/pool-verif/diff/work_head/t"
+      ],
+      "note": "Process snapshot only. A missing PID here is not an exit-code receipt; terminal logs carry outcomes."
+    },
+    {
+      "observed_utc_approximate": "2026-09-30 05:13:06 UTC",
+      "matching_rows": [],
+      "note": "Process snapshot only. A missing PID here is not an exit-code receipt; terminal logs carry outcomes."
+    }
+  ]
+}

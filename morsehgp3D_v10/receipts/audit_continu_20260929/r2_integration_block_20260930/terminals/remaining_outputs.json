@@ -1,0 +1,26 @@
+{
+  "observed_utc": "2026-09-30T05:16:06.090999+00:00",
+  "scope": "selected dump and label/tree paths only; not whole developer workspace",
+  "hash_limit_bytes": 16777216,
+  "files": [],
+  "initial_inventory_observation": {
+    "observed_utc_approximate": "2026-09-30 05:11:37 UTC",
+    "files": [
+      {
+        "path": "/tmp/mhgp10-r2/pool-verif/diff/c.dump",
+        "bytes": 385473907,
+        "mtime_utc": "2026-09-30 04:29:22.834243554 UTC",
+        "sha256": null,
+        "hashed": false
+      },
+      {
+        "path": "/tmp/mhgp10-r2/pool-verif/diff/t.dump",
+        "bytes": 143597433,
+        "mtime_utc": "2026-09-30 04:29:16.419243985 UTC",
+        "sha256": null,
+        "hashed": false
+      }
+    ],
+    "note": "Only metadata read then. These large historical outputs were not rescanned or copied. By the later inventory they no longer existed; this audit did not delete them. They do not recover the 24 per-run dumps removed by run_diff.sh."
+  }
+}

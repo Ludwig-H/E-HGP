@@ -1,0 +1,103 @@
+{
+  "observed_utc": "2026-09-30T05:16:05.880138+00:00",
+  "binaries": [
+    {
+      "path": "/tmp/mhgp10-r2/pool-verif/build-final/libmhgp10_core.a",
+      "bytes": 500312,
+      "mtime_ns": "1790742248279264643",
+      "sha256": "e2dd1b9a37c3e630bd3b1089ad90eda6163a827547d154fcd5ccdd5482f109e7",
+      "stable_during_hash": true
+    },
+    {
+      "path": "/tmp/mhgp10-r2/pool-verif/build-final/mhgp10_tower",
+      "bytes": 419392,
+      "mtime_ns": "1790742251007264460",
+      "sha256": "ff7fdb410519cbd681f43833232ccfdd32dc9b7ffbafdf65ec011e53743bf41c",
+      "stable_during_hash": true
+    },
+    {
+      "path": "/tmp/mhgp10-r2/pool-verif/build-final/mhgp10_catalogue",
+      "bytes": 216480,
+      "mtime_ns": "1790742250357264504",
+      "sha256": "441a92540eec940393116312f103ec5cefd6aa8960ab7fc498acb6ce8f976cda",
+      "stable_during_hash": true
+    },
+    {
+      "path": "/tmp/mhgp10-r2/pool-verif/build-final/mhgp10_cluster",
+      "bytes": 446976,
+      "mtime_ns": "1790742251791264408",
+      "sha256": "58d588e30892e22c1208dd8d8fa9a5de8dc976f09fceda6f0cf97f5f3b37e4e3",
+      "stable_during_hash": true
+    },
+    {
+      "path": "/tmp/mhgp10-r2/pool-verif/build-final/mhgp10_mreach_cluster",
+      "bytes": 133464,
+      "mtime_ns": "1790742256884264066",
+      "sha256": "d92642b23ec4b5f8dacb58f5c5ecc19ed95240d5358a1ba21591e2ce8a2268b7",
+      "stable_during_hash": true
+    },
+    {
+      "path": "/tmp/mhgp10-r2/pool-verif/build-base/mhgp10_tower",
+      "bytes": 421752,
+      "mtime_ns": "1790742507980247232",
+      "sha256": "a20776280ef4960d68f1b65ca7007b9e8a862809c57115b58486942856c22764",
+      "stable_during_hash": true
+    },
+    {
+      "path": "/tmp/mhgp10-r2/pool-verif/build-base/mhgp10_catalogue",
+      "bytes": 214768,
+      "mtime_ns": "1790742505664247387",
+      "sha256": "a3bbad50b81b901c57cea7193bc48d58cce68126e44ae0a225ad678baa3af0cb",
+      "stable_during_hash": true
+    },
+    {
+      "path": "/tmp/mhgp10-r2/sitetree-verif/build-r2/libmhgp10_core.a",
+      "bytes": 506696,
+      "mtime_ns": "1790742154965270899",
+      "sha256": "701be311bf2a1a61a0a88926ec868f6edc43a12ec1ac58104374b3fb6ba33f5c",
+      "stable_during_hash": true
+    },
+    {
+      "path": "/tmp/mhgp10-r2/sitetree-verif/build-r2/mhgp10_tower",
+      "bytes": 425976,
+      "mtime_ns": "1790742157979270697",
+      "sha256": "9671ccdcb0fa7b504c6e832aad0830fa106fbf23c4765773f1bcc5007e94bc1e",
+      "stable_during_hash": true
+    },
+    {
+      "path": "/tmp/mhgp10-r2/sitetree-verif/build-base/mhgp10_tower",
+      "bytes": 421752,
+      "mtime_ns": "1790742179450269258",
+      "sha256": "a20776280ef4960d68f1b65ca7007b9e8a862809c57115b58486942856c22764",
+      "stable_during_hash": true
+    },
+    {
+      "path": "/tmp/mhgp10-r2/sitetree-verif/instr/r2_instr/mhgp10_tower",
+      "bytes": 426456,
+      "mtime_ns": "1790742633373238825",
+      "sha256": "051e99cc9341de291396a469bea10b5ccafa5a413a50d95ca65f7c8a86add167",
+      "stable_during_hash": true
+    },
+    {
+      "path": "/tmp/mhgp10-r2/sitetree-verif/instr/r2_instr/gate",
+      "bytes": 148904,
+      "mtime_ns": "1790742575192242726",
+      "sha256": "5eed669b53b70dbdd48fd70b614447ae31778b94d833c8ca35c71e53214e7c01",
+      "stable_during_hash": true
+    },
+    {
+      "path": "/tmp/mhgp10-r2/sitetree-verif/instr/mutant_chemin_instr/gate",
+      "bytes": 148968,
+      "mtime_ns": "1790742578738242488",
+      "sha256": "1532d2698cea883180b9022fde6f2d139f94a4ea2fc46f7f1849f19b8dcb76d5",
+      "stable_during_hash": true
+    },
+    {
+      "path": "/tmp/mhgp10-r2/sitetree-verif/mut/naturel/gate",
+      "bytes": 148480,
+      "mtime_ns": "1790743847860157402",
+      "sha256": "a7f5792a78c7bc95f5aea9581769ba52d7aad2880370d68fc940c75a5cd1f882",
+      "stable_during_hash": true
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+--- r2/morsehgp3D_v10/src/cloud/site_tree.cpp	2026-09-30 04:17:35.051291007 +0000
++++ mut/naturel/inc/cloud/site_tree.cpp	2026-09-30 04:50:33.329158376 +0000
+@@ -159,9 +159,10 @@
+ }  // namespace
+ 
+ bool SiteTree::filtered(const geom::P3& a, const geom::Center& c) const {
+-  // Hypothese d'arrondi de la preuve de kMargin : hors FE_TONEAREST (mode du fil qui execute la requete), le filtre
+-  // est coupe et la requete passe par le repli exact. La correction ne depend pas du filtre, seul le debit change.
+-  if (std::fegetround() != FE_TONEAREST) return false;
++  return std::fegetround() == FE_TONEAREST && in_domain(a, c);
++}
++
++bool SiteTree::in_domain(const geom::P3& a, const geom::Center& c) const {
+   // Bornes de representation d'abord (formes q2/q3/q4 sur des points u18 : D < 2^82, |N_i| < 2^100) : les produits
+   // suivants restent sous 2^101, sans debordement. Puis le centre dans le cube : 0 <= D c_i = D a_i + N_i <= L D.
+   constexpr i128 kMaxD = i128{1} << 82, kMaxN = i128{1} << 100;
+@@ -184,7 +185,7 @@
+   out.clear();
+   if (root_ == kNone || count == 0) return;
+   if (count > 64) count = 64;
+-  if (!filtered(anchor, c)) {  // repli exact : les count plus petites (cle, site), tableau trie par insertion
++  if (!in_domain(anchor, c)) {  // repli exact : les count plus petites (cle, site), tableau trie par insertion
+     for (u32 s = 0; s < cloud_.sites(); ++s) {
+       const std::pair<i128, u32> e{geom::side_key(c, anchor, site_point(cloud_, s)), s};
+       if (out.size() == count) {
+@@ -244,7 +245,7 @@
+   interior.clear();
+   shell.clear();
+   if (root_ == kNone) return;
+-  if (!filtered(anchor, c)) {  // repli exact : cle de chaque site, dans l'ordre des indices
++  if (!in_domain(anchor, c)) {  // repli exact : cle de chaque site, dans l'ordre des indices
+     for (u32 s = 0; s < cloud_.sites(); ++s) {
+       const i128 k = geom::side_key(c, anchor, site_point(cloud_, s));
+       if (k < 0) interior.push_back(s);

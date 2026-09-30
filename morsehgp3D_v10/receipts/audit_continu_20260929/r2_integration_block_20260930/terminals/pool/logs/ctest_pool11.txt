@@ -1,0 +1,33 @@
+Internal ctest changing into directory: /tmp/mhgp10-r2/pool-verif/build-final
+Test project /tmp/mhgp10-r2/pool-verif/build-final
+      Start  1: mhgp10_unit
+ 1/11 Test  #1: mhgp10_unit ..........................   Passed    2.25 sec
+      Start  2: mhgp10_pool_caller_exception
+ 2/11 Test  #2: mhgp10_pool_caller_exception .........   Passed    0.39 sec
+      Start  3: mhgp10_pool_worker_exception
+ 3/11 Test  #3: mhgp10_pool_worker_exception .........   Passed    0.08 sec
+      Start  4: mhgp10_pool_flag_restored
+ 4/11 Test  #4: mhgp10_pool_flag_restored ............   Passed    0.15 sec
+      Start  5: mhgp10_pool_cancel_and_reuse
+ 5/11 Test  #5: mhgp10_pool_cancel_and_reuse .........   Passed    0.10 sec
+      Start  6: mhgp10_pool_claim_wrap
+ 6/11 Test  #6: mhgp10_pool_claim_wrap ...............   Passed    0.42 sec
+      Start  7: mhgp10_pool_short_jobs
+ 7/11 Test  #7: mhgp10_pool_short_jobs ...............   Passed    0.19 sec
+      Start  8: mhgp10_fault_pool_construction
+ 8/11 Test  #8: mhgp10_fault_pool_construction .......   Passed    0.10 sec
+      Start  9: mhgp10_fault_entry_points
+ 9/11 Test  #9: mhgp10_fault_entry_points ............   Passed    0.81 sec
+      Start 10: mhgp10_fault_aligned_forms
+10/11 Test #10: mhgp10_fault_aligned_forms ...........   Passed    0.40 sec
+      Start 19: mhgp10_regression_worker_bad_alloc
+11/11 Test #19: mhgp10_regression_worker_bad_alloc ...   Passed    9.09 sec
+
+100% tests passed, 0 tests failed out of 11
+
+Label Time Summary:
+fast          =   3.57 sec*proc (7 tests)
+gate          =  13.98 sec*proc (11 tests)
+regression    =  11.73 sec*proc (10 tests)
+
+Total Test time (real) =  13.98 sec

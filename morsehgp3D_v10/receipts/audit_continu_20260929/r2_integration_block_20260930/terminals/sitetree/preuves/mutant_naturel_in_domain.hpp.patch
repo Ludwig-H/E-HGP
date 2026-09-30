@@ -1,0 +1,10 @@
+--- r2/morsehgp3D_v10/src/cloud/site_tree.hpp	2026-09-30 04:17:35.051291007 +0000
++++ mut/naturel/inc/cloud/site_tree.hpp	2026-09-30 04:50:33.329158376 +0000
+@@ -69,6 +69,7 @@
+   // exact, qui evalue geom::side_key sur tous les sites. Les preconditions de representation et d'immuabilite restent
+   // celles de l'appelant ; hors de celles-ci, aucune sortie n'est garantie (debordement i128 possible).
+   bool filtered(const geom::P3& anchor, const geom::Center& c) const;
++  bool in_domain(const geom::P3& anchor, const geom::Center& c) const;  // mutant : conditions (2) a (6)
+ 
+   const Cloud& cloud() const { return cloud_; }
+ 

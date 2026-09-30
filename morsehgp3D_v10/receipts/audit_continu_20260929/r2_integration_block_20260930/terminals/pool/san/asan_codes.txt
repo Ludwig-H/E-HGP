@@ -1,0 +1,10 @@
+asan mhgp10_unit all code=0 reports=0 last=unit_ok
+asan mhgp10_unit pool_caller_exception code=0 reports=0 last=unit_ok
+asan mhgp10_unit pool_worker_exception code=0 reports=0 last=unit_ok
+asan mhgp10_unit pool_flag_restored code=0 reports=0 last=unit_ok
+asan mhgp10_unit pool_cancel_and_reuse code=0 reports=0 last=unit_ok
+asan mhgp10_unit pool_claim_wrap code=0 reports=0 last=unit_ok
+asan mhgp10_unit pool_short_jobs code=0 reports=0 last=unit_ok
+asan mhgp10_fault pool_construction code=0 reports=0 last=fault_ok
+asan mhgp10_fault entry_points code=0 reports=0 last=fault_ok
+asan mhgp10_fault aligned_forms code=0 reports=0 last=fault_ok

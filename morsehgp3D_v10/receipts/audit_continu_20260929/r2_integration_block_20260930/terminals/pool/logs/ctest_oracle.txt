@@ -1,0 +1,16 @@
+Internal ctest changing into directory: /tmp/mhgp10-r2/pool-verif/build-final
+Test project /tmp/mhgp10-r2/pool-verif/build-final
+    Start 11: mhgp10_catalogue_oracle
+1/2 Test #11: mhgp10_catalogue_oracle ..........   Passed  240.90 sec
+    Start 12: mhgp10_tower_oracle
+2/2 Test #12: mhgp10_tower_oracle ..............   Passed  230.61 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Label Time Summary:
+gate      = 471.51 sec*proc (2 tests)
+oracle    = 471.51 sec*proc (2 tests)
+
+Total Test time (real) = 471.51 sec
+471.52 s
+ctest oracle code=0
