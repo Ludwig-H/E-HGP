@@ -1,0 +1,48 @@
+Relative sphere CPU audit prototype, version 1 (not production or FULL)
+
+Source: relative_filter.cpp, C++20, <=300 lines. No dynamic allocation in
+relative_filter operations; the CLI may allocate. Mag stores three little-endian
+u64 limbs internally. Text always supplies HIGH MID LOW decimal limbs.
+Signed integer: SIGN HIGH MID LOW; SIGN is -1/0/1, canonical zero requires SIGN0.
+D: HIGH MID LOW, unsigned nonzero. Coordinates: decimal u32, including endpoints.
+Lines on stdin (one JSON response per nonempty line):
+C SIGN HIGH MID LOW
+S AX AY AZ X Y Z NX_SIGN NX_HIGH NX_MID NX_LOW NY_SIGN NY_HIGH NY_MID NY_LOW NZ_SIGN NZ_HIGH NZ_MID NZ_LOW D_HIGH D_MID D_LOW
+B AX AY AZ LOX LOY LOZ HIX HIY HIZ NX_SIGN NX_HIGH NX_MID NX_LOW NY_SIGN NY_HIGH NY_MID NY_LOW NZ_SIGN NZ_HIGH NZ_MID NZ_LOW D_HIGH D_MID D_LOW
+
+C converts signed magnitude to a certified interval. S/B prepare rho=N/D and
+R^2=sum(rho_j^2), relative to anchor A. The anchor is on the sphere by definition.
+No support positivity, native ball construction, centre/radius ordering, k-NN
+generator, exact fallback or FULL computation is implemented by this prototype.
+
+JSON interval [L,H] uses decimal u64 bit patterns of IEEE754 binary64, not a
+native byte dump. Convert by struct.pack/unpack little or big endian consistently.
+C READY returns value. S/B successful prepare returns rho[3], radius, distance.
+For S, distance bounds ||(X-A)-rho||^2. EXTERIOR iff distance.lo>radius.hi;
+INTERIOR iff distance.hi<radius.lo; otherwise AMBIGU, requiring future exact work.
+For B, distance bounds the squared minimum distance to the CLOSED box relative
+to A. Only EXTERIOR or AMBIGU is issued, never box-wide interior from a minimum.
+Malformed tokens print INVALID_INPUT. D0, noncanonical signs, reversed boxes
+print REFUSED_DEN/SIGN/BOX. Distance is meaningful only for non-refusal answers.
+
+All public floating computations check current FE_TONEAREST and on SSE2 also
+MXCSR RN, FTZ/DAZ off, all SSE exceptions masked. Non-SSE2 builds refuse ENV.
+Standard nontrapping x87 environment is a precondition. No filter function sets
+rounding, restores FENV or changes MXCSR. Sticky exception flags may naturally
+be raised by arithmetic/nextafter; preservation of flags is NOT promised.
+CLI flags --round=nearest/up/down/zero, --ftz, --daz deliberately change modes
+ONLY in main for refusal probes. Bounds do not qualify other modes or GPU.
+
+Integer conversion extracts <=53 top bits, ldexp scales exactly, and tests ALL
+discarded bits. Positive upper advances one ULP iff remainder nonzero; negative
+interval reverses endpoints. Divisions and interval operations are outward by
+nextafter; squared lower and sums clamp to zero. u32-relative differences use
+i64, then exact double conversion. Finite magnitudes are bounded by 192 bits;
+squared sums stay far below double overflow. Prepared sphere storage is private,
+and per-query environment is checked again after preparation.
+
+Audit mutations: -DMUTANT_DROP_REST drops conversion remainder; C detects it.
+-DMUTANT_FIXED_MARGIN substitutes approximate relative distance plus fixed .02
+classification for S only. Mutant bounds remain printed for independent judging.
+No correctness qualification until an independent Fraction oracle rejects unsafe
+statuses and confirms all reported bounds; near-boundary AMBIGU is intentional.

@@ -1,0 +1,100 @@
+[
+  {
+    "mode": "normal",
+    "command": "timeout 45s g++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Werror -fno-fast-math relative_filter.cpp -o normal",
+    "chunk_id": "6960da",
+    "wall_time_seconds": 0.853721249,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "mode": "ubsan",
+    "command": "timeout 45s g++ -std=c++20 -O1 -g -Wall -Wextra -Wpedantic -Werror -fno-fast-math -fsanitize=undefined -fno-sanitize-recover=all relative_filter.cpp -o ubsan",
+    "chunk_id": "32ce52",
+    "wall_time_seconds": 1.001084522,
+    "session_id": 55102,
+    "original_token_count": 0,
+    "output": "",
+    "completion": {
+      "exit_code": 0,
+      "output": "",
+      "note": "Session 55102 completion from previous tool receipt 41364b"
+    }
+  },
+  {
+    "mode": "smoke",
+    "command": "timeout 45s g++ -std=c++20 -O1 -g -Wall -Wextra -Wpedantic -Werror -fno-fast-math -fsanitize=undefined -fno-sanitize-recover=all smoke.cpp -o smoke_ubsan",
+    "chunk_id": "54cc56",
+    "wall_time_seconds": 1.001309725,
+    "session_id": 5212,
+    "original_token_count": 0,
+    "output": "",
+    "completion": {
+      "chunk_id": "ea5b87",
+      "wall_time_seconds": 0.000011,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": ""
+    }
+  },
+  {
+    "mode": "normal_v2",
+    "command": "timeout 45s g++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Werror -fno-fast-math relative_filter.cpp -o normal_v2",
+    "chunk_id": "2ccdd0",
+    "wall_time_seconds": 0.877570316,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "mode": "ubsan_v2",
+    "command": "timeout 45s g++ -std=c++20 -O1 -g -Wall -Wextra -Wpedantic -Werror -fno-fast-math -fsanitize=undefined -fno-sanitize-recover=all relative_filter.cpp -o ubsan_v2",
+    "chunk_id": "056938",
+    "wall_time_seconds": 1.00145252,
+    "session_id": 73663,
+    "original_token_count": 0,
+    "output": "",
+    "completion": {
+      "chunk_id": "924934",
+      "wall_time_seconds": 0.000008866,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": ""
+    }
+  },
+  {
+    "mode": "drop_rest",
+    "command": "timeout 45s g++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Werror -fno-fast-math -DMUTANT_DROP_REST relative_filter.cpp -o drop_rest",
+    "chunk_id": "2a94f0",
+    "wall_time_seconds": 0.905672581,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "mode": "fixed_margin",
+    "command": "timeout 45s g++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Werror -fno-fast-math -DMUTANT_FIXED_MARGIN relative_filter.cpp -o fixed_margin",
+    "chunk_id": "53815a",
+    "wall_time_seconds": 0.91895752,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "mode": "smoke_v2",
+    "command": "timeout 45s g++ -std=c++20 -O1 -g -Wall -Wextra -Wpedantic -Werror -fno-fast-math -fsanitize=undefined -fno-sanitize-recover=all smoke.cpp -o smoke_v2_ubsan",
+    "chunk_id": "6693f3",
+    "wall_time_seconds": 1.000679328,
+    "session_id": 41526,
+    "original_token_count": 0,
+    "output": "",
+    "completion": {
+      "chunk_id": "9f2839",
+      "wall_time_seconds": 0.000009618,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": ""
+    }
+  }
+]

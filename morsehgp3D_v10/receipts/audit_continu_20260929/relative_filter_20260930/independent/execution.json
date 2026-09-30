@@ -1,0 +1,164 @@
+{
+  "GCP_used": false,
+  "after": {
+    "/tmp/mhgp10-relative-sphere-filter-0930.gBKSarn2/drop_rest": "4ae567fcba229d4c9f17517b98d41130ab025b55f64f9c9b2771a647225022de",
+    "/tmp/mhgp10-relative-sphere-filter-0930.gBKSarn2/fixed_margin": "5a8dce6e28030f13536a27fdf87178d7f97d0d5fe4f8a84b39e81c5e753e9fc9",
+    "/tmp/mhgp10-relative-sphere-filter-0930.gBKSarn2/normal_v2": "dcce11f7af28babb42a782adef29bc18485de5e86ba68ceba655c42ecd6450b1",
+    "/tmp/mhgp10-relative-sphere-filter-0930.gBKSarn2/relative_filter.cpp": "2c8b7cc7e89e344dd2733ee7f1ff5de3c03c66c42ed2ea82a5b76e1fb92636aa",
+    "/tmp/mhgp10-relative-sphere-filter-0930.gBKSarn2/ubsan_v2": "ab6b448e0eb78083f137d0541b15b0486996e6cf013f280c0dd10f50bee335c3",
+    "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/inputs.py": "4f0910c69ad09fc08ff0fd0b77a3bea32a8929ca6acfde229a0ef238bc5d2f3f",
+    "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/inputs_v1.py": "39733dc53ace9068a4657b383c5be1c4abda8078eec4f167342a91f54e3cc145",
+    "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/judge.py": "11b45a27025040e345a8d297813e56c50fdbea813bcbd4041fba1ecae9cc49cb",
+    "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/record.py": "ec3ac8d270d99e0e9e8cf7fb56f9b6373953942981404ee8c82bb52b37a3409c"
+  },
+  "before": {
+    "/tmp/mhgp10-relative-sphere-filter-0930.gBKSarn2/drop_rest": "4ae567fcba229d4c9f17517b98d41130ab025b55f64f9c9b2771a647225022de",
+    "/tmp/mhgp10-relative-sphere-filter-0930.gBKSarn2/fixed_margin": "5a8dce6e28030f13536a27fdf87178d7f97d0d5fe4f8a84b39e81c5e753e9fc9",
+    "/tmp/mhgp10-relative-sphere-filter-0930.gBKSarn2/normal_v2": "dcce11f7af28babb42a782adef29bc18485de5e86ba68ceba655c42ecd6450b1",
+    "/tmp/mhgp10-relative-sphere-filter-0930.gBKSarn2/relative_filter.cpp": "2c8b7cc7e89e344dd2733ee7f1ff5de3c03c66c42ed2ea82a5b76e1fb92636aa",
+    "/tmp/mhgp10-relative-sphere-filter-0930.gBKSarn2/ubsan_v2": "ab6b448e0eb78083f137d0541b15b0486996e6cf013f280c0dd10f50bee335c3",
+    "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/inputs.py": "4f0910c69ad09fc08ff0fd0b77a3bea32a8929ca6acfde229a0ef238bc5d2f3f",
+    "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/inputs_v1.py": "39733dc53ace9068a4657b383c5be1c4abda8078eec4f167342a91f54e3cc145",
+    "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/judge.py": "11b45a27025040e345a8d297813e56c50fdbea813bcbd4041fba1ecae9cc49cb",
+    "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/record.py": "ec3ac8d270d99e0e9e8cf7fb56f9b6373953942981404ee8c82bb52b37a3409c"
+  },
+  "commands": [
+    {
+      "argv": [
+        "/tmp/mhgp10-relative-sphere-filter-0930.gBKSarn2/normal_v2"
+      ],
+      "exit_code": 0,
+      "name": "normal"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/judge.py",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/requests.json",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/normal.stdout"
+      ],
+      "exit_code": 0,
+      "name": "judge_normal_normal"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/judge.py",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/requests.json",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/normal.stdout"
+      ],
+      "exit_code": 0,
+      "name": "judge_normal_optimized"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-relative-sphere-filter-0930.gBKSarn2/ubsan_v2"
+      ],
+      "exit_code": 0,
+      "name": "ubsan"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/judge.py",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/requests.json",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/ubsan.stdout"
+      ],
+      "exit_code": 0,
+      "name": "judge_ubsan_normal"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/judge.py",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/requests.json",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/ubsan.stdout"
+      ],
+      "exit_code": 0,
+      "name": "judge_ubsan_optimized"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-relative-sphere-filter-0930.gBKSarn2/drop_rest"
+      ],
+      "exit_code": 0,
+      "name": "drop_rest"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/judge.py",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/requests.json",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/drop_rest.stdout"
+      ],
+      "exit_code": 1,
+      "name": "judge_drop_rest_normal"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/judge.py",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/requests.json",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/drop_rest.stdout"
+      ],
+      "exit_code": 1,
+      "name": "judge_drop_rest_optimized"
+    },
+    {
+      "argv": [
+        "/tmp/mhgp10-relative-sphere-filter-0930.gBKSarn2/fixed_margin"
+      ],
+      "exit_code": 0,
+      "name": "fixed_margin"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/judge.py",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/requests.json",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/fixed_margin.stdout"
+      ],
+      "exit_code": 1,
+      "name": "judge_fixed_margin_normal"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/judge.py",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/requests.json",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/fixed_margin.stdout"
+      ],
+      "exit_code": 1,
+      "name": "judge_fixed_margin_optimized"
+    }
+  ],
+  "expected_exit_codes": {
+    "drop_rest": 0,
+    "fixed_margin": 0,
+    "judge_drop_rest_normal": 1,
+    "judge_drop_rest_optimized": 1,
+    "judge_fixed_margin_normal": 1,
+    "judge_fixed_margin_optimized": 1,
+    "judge_normal_normal": 0,
+    "judge_normal_optimized": 0,
+    "judge_ubsan_normal": 0,
+    "judge_ubsan_optimized": 0,
+    "normal": 0,
+    "ubsan": 0
+  },
+  "requests": 3600,
+  "scope": "isolated numerical filter; errors of two mutants expected",
+  "status": "PASS"
+}

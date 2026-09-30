@@ -1,0 +1,156 @@
+{
+  "GCP_used": false,
+  "after": {
+    "drop_rest.stdout": "1f2437ad8cd11cb35c78aece0c57d55ab0167125a987f4332b3e66f505e21ed9",
+    "fixed_margin.stdout": "d60b1f6f1ce2d279936f4476984bb9698d3dc0b4505f51857ce6a0952e45de28",
+    "judge.py": "b3f5a782811b651043ad3fc2570918354c5c8f7b13f324f50b3f2d00668fcc69",
+    "judge_v1.py": "11b45a27025040e345a8d297813e56c50fdbea813bcbd4041fba1ecae9cc49cb",
+    "normal.stdout": "6aa46b6400aa5fc74613a2496aad8a96fc5603dbe4a9a6ef1081d62498ef77d1",
+    "record_judge_r2.py": "8687d5b4234b6173e5eb4ca034f758e01fd42dd2bad0824ee540e3b6bd17f913",
+    "requests.json": "0e21bdd1fa4eb1d6e0670bb571253f33a0e569db00e98ec80a65f805be608cd5",
+    "ubsan.stdout": "6aa46b6400aa5fc74613a2496aad8a96fc5603dbe4a9a6ef1081d62498ef77d1"
+  },
+  "before": {
+    "drop_rest.stdout": "1f2437ad8cd11cb35c78aece0c57d55ab0167125a987f4332b3e66f505e21ed9",
+    "fixed_margin.stdout": "d60b1f6f1ce2d279936f4476984bb9698d3dc0b4505f51857ce6a0952e45de28",
+    "judge.py": "b3f5a782811b651043ad3fc2570918354c5c8f7b13f324f50b3f2d00668fcc69",
+    "judge_v1.py": "11b45a27025040e345a8d297813e56c50fdbea813bcbd4041fba1ecae9cc49cb",
+    "normal.stdout": "6aa46b6400aa5fc74613a2496aad8a96fc5603dbe4a9a6ef1081d62498ef77d1",
+    "record_judge_r2.py": "8687d5b4234b6173e5eb4ca034f758e01fd42dd2bad0824ee540e3b6bd17f913",
+    "requests.json": "0e21bdd1fa4eb1d6e0670bb571253f33a0e569db00e98ec80a65f805be608cd5",
+    "ubsan.stdout": "6aa46b6400aa5fc74613a2496aad8a96fc5603dbe4a9a6ef1081d62498ef77d1"
+  },
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/judge.py",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/requests.json",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/normal.stdout"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "judge_r2_normal_normal"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/judge.py",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/requests.json",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/normal.stdout"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "judge_r2_normal_optimized"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/judge.py",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/requests.json",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/ubsan.stdout"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "judge_r2_ubsan_normal"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/judge.py",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/requests.json",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/ubsan.stdout"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0,
+      "name": "judge_r2_ubsan_optimized"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/judge.py",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/requests.json",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/drop_rest.stdout"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "name": "judge_r2_drop_rest_normal"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/judge.py",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/requests.json",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/drop_rest.stdout"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "name": "judge_r2_drop_rest_optimized"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/judge.py",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/requests.json",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/fixed_margin.stdout"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "name": "judge_r2_fixed_margin_normal"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/judge.py",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/requests.json",
+        "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q/fixed_margin.stdout"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "name": "judge_r2_fixed_margin_optimized"
+    }
+  ],
+  "native_executions": 0,
+  "probes": [
+    {
+      "case": "NaN",
+      "error": "nonfinite JSON constant: NaN",
+      "refused": true
+    },
+    {
+      "case": "Infinity",
+      "error": "nonfinite JSON constant: Infinity",
+      "refused": true
+    },
+    {
+      "case": "-Infinity",
+      "error": "nonfinite JSON constant: -Infinity",
+      "refused": true
+    },
+    {
+      "case": "boolean_request_id",
+      "error": "paired identity",
+      "refused": true
+    },
+    {
+      "case": "duplicate_key",
+      "error": "duplicate JSON key",
+      "refused": true
+    }
+  ],
+  "schema": "mhgp10_relative_filter_judge_r2_v1",
+  "status": "PASS",
+  "trusted_panel": "Frozen requests must also be hashed and regenerated by archive reader; optional exact_contact is not standalone input validation."
+}

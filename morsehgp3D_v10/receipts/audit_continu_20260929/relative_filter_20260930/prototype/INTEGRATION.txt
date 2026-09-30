@@ -1,0 +1,31 @@
+Integration limits and next steps (audit prototype only)
+
+Capabilities: fixed-size signed192 coefficients and positive192 denominator,
+u32 coordinates, relative sphere preparation once, site intervals, relative
+closed-box minimum-distance intervals, binary64 RN with explicit CPU guards.
+Sphere holds private state; prepared results must not be forged or mutated.
+
+For a future SiteTree port:
+1. Prepare this relative descriptor once per query; no per-site integer192
+   conversion and no absolute-coordinate centre in the double path.
+2. An EXTERIOR site has a rigorous exclusion certificate; an INTERIOR site has
+   a rigorous strict-interior certificate. AMBIGU must invoke the exact side
+   predicate of the declared coordinate domain. This prototype has no such
+   predicate, so AMBIGU is deliberately not a geometric answer.
+3. A box is rejected only when its certified lower distance exceeds the
+   certified upper radius. This prototype does NOT certify that every point
+   of a box lies strictly inside; its box output is a MINIMUM distance.
+4. Environment refusals require explicit propagation, not reinterpretation
+   as interior, exterior, zero candidates or successful empty output.
+5. A different preparation object is needed for arbitrary radius inputs,
+   radius ordering, positivity of supports or ownership of q3/q4 events.
+   Here R^2=||N/D||^2 relative to the anchor by construction.
+6. A local extent fitting u18 does not justify old absolute floating shortcuts
+   when global u32 offsets are large. Relative differences must precede floating
+   conversion, and exact fallback still needs its own certified wider arithmetic.
+
+No LiDAR/G4 benchmark, performance contract, nearest-neighbour index, census,
+ball catalogue, tower or hierarchical clustering is acquired by these tests.
+No claim that signed192 can encode the complete float32 geometric domain.
+No transfer of CPU MXCSR qualification to GPU. CLI allocations are out of scope;
+only the fixed-size filter operations avoid dynamic allocation.

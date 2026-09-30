@@ -1,0 +1,577 @@
+{
+  "GCP_used": false,
+  "baseline": {
+    "counts": {
+      "AMBIGU": 322,
+      "B": 250,
+      "C": 2299,
+      "EXTERIOR": 624,
+      "INTERIOR": 355,
+      "S": 1051,
+      "contacts": 196,
+      "translations": 40
+    },
+    "exact_rank_checks": 147,
+    "requests": 3600,
+    "scope": "bounded converter/site/box filter; no native nearest, index, fallback or FULL",
+    "status": "PASS"
+  },
+  "cases": 56,
+  "duplicate_json_key_refused": true,
+  "expected_rejections": 53,
+  "explicitly_scoped_acceptances": [
+    "request_boolean_zero_id",
+    "removed_one_contact_marker",
+    "unused_extra_nonfinite_field"
+  ],
+  "failures": [],
+  "native_executions": 0,
+  "observed_rejections": 53,
+  "optimize_flag": 0,
+  "origin": "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q",
+  "original_source_and_outputs_unchanged": true,
+  "results": [
+    {
+      "error": "panel completeness",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "missing_first_conversion_line",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "panel completeness",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "missing_last_site_line",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "panel completeness",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "missing_all_conversion_lines",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "panel completeness",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "extra_duplicate_line",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "conversion excludes true integer at 1",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "swapped_signed_conversion_lines",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "'op'",
+      "error_type": "KeyError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "missing_op",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "paired identity",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "wrong_op",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "'status'",
+      "error_type": "KeyError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "missing_conversion_status",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "conversion refusal",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "misleading_conversion_status",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "'value'",
+      "error_type": "KeyError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "missing_conversion_value",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "conversion excludes true integer at 1",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "ready_but_wrong_conversion",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "interval bits",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "conversion_interval_wrong_shape",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "finite ordered interval",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "conversion_interval_reversed",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "interval bits",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "conversion_boolean_endpoint",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "interval bits",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "conversion_nan_endpoint",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "finite ordered interval",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "conversion_nan_bits",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "finite ordered interval",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "conversion_inf_bits",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "'rho'",
+      "error_type": "KeyError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "missing_site_rho",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "'rho'",
+      "error_type": "KeyError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "missing_box_rho",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "'radius'",
+      "error_type": "KeyError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "missing_site_radius",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "'radius'",
+      "error_type": "KeyError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "missing_box_radius",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "'distance'",
+      "error_type": "KeyError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "missing_site_distance",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "'distance'",
+      "error_type": "KeyError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "missing_box_distance",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "'status'",
+      "error_type": "KeyError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "missing_site_status",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "'status'",
+      "error_type": "KeyError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "missing_box_status",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "rho missing",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "rho_wrong_shape",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "finite ordered interval",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "rho_nan_bits",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "finite ordered interval",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "rho_inf_bits",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "finite ordered interval",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "radius_nan_bits",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "finite ordered interval",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "radius_inf_bits",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "finite ordered interval",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "distance_nan_bits",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "finite ordered interval",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "distance_inf_bits",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "finite ordered interval",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "radius_interval_reversed",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "finite ordered interval",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "distance_interval_reversed",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "finite ordered interval",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "rho_interval_reversed",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "radius enclosure",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "radius_negative_lower",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "radius enclosure",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "distance_negative_lower",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "unsafe exterior at 2300",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "false_exterior_on_interior",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "unsafe interior at 2301",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "false_interior_on_exterior",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "minimum box used as all-inside certificate",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "box_all_inside_certificate",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "unsafe interior at 2299",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "contact_interior",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "unsafe exterior at 2299",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "contact_exterior",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "unexpected query refusal",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "query_ready_status",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "unexpected query refusal",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "query_status_nan",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "unexpected query refusal",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "query_status_inf",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "unnecessary ambiguous state",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "all_queries_ambiguous_unchanged_intervals",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "non-vacuity floors",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "all_queries_ambiguous_valid_broad_enclosures_floor",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "translation changes native bits",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "translation_bit_change_still_enclosing",
+      "rejected": true,
+      "scope": "answer"
+    },
+    {
+      "error": "'id'",
+      "error_type": "KeyError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "request_missing_id",
+      "rejected": true,
+      "scope": "trusted_request_mutation"
+    },
+    {
+      "error": "paired identity",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "request_wrong_id",
+      "rejected": true,
+      "scope": "trusted_request_mutation"
+    },
+    {
+      "counts": {
+        "AMBIGU": 322,
+        "B": 250,
+        "C": 2299,
+        "EXTERIOR": 624,
+        "INTERIOR": 355,
+        "S": 1051,
+        "contacts": 196,
+        "translations": 40
+      },
+      "exact_rank_checks": 147,
+      "expectation_met": true,
+      "expected_rejection": false,
+      "name": "request_boolean_zero_id",
+      "rejected": false,
+      "returned_status": "PASS",
+      "scope": "trusted_request_typing_outside_output_contract"
+    },
+    {
+      "error": "non-vacuity floors",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "removed_one_translation_marker",
+      "rejected": true,
+      "scope": "trusted_request_mutation"
+    },
+    {
+      "error": "non-vacuity floors",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "removed_all_contact_markers",
+      "rejected": true,
+      "scope": "trusted_request_mutation"
+    },
+    {
+      "error": "lost contact at 2300",
+      "error_type": "ValueError",
+      "expectation_met": true,
+      "expected_rejection": true,
+      "name": "spoofed_contact_marker",
+      "rejected": true,
+      "scope": "trusted_request_mutation"
+    },
+    {
+      "counts": {
+        "AMBIGU": 322,
+        "B": 250,
+        "C": 2299,
+        "EXTERIOR": 624,
+        "INTERIOR": 355,
+        "S": 1051,
+        "contacts": 195,
+        "translations": 40
+      },
+      "exact_rank_checks": 147,
+      "expectation_met": true,
+      "expected_rejection": false,
+      "name": "removed_one_contact_marker",
+      "rejected": false,
+      "returned_status": "PASS",
+      "scope": "trusted_request_marker_outside_output_contract"
+    },
+    {
+      "counts": {
+        "AMBIGU": 322,
+        "B": 250,
+        "C": 2299,
+        "EXTERIOR": 624,
+        "INTERIOR": 355,
+        "S": 1051,
+        "contacts": 196,
+        "translations": 40
+      },
+      "exact_rank_checks": 147,
+      "expectation_met": true,
+      "expected_rejection": false,
+      "name": "unused_extra_nonfinite_field",
+      "rejected": false,
+      "returned_status": "PASS",
+      "scope": "ignored_unknown_field_not_a_numeric_certificate"
+    }
+  ],
+  "scope": "bounded in-memory output judge audit, not a general request/schema validator",
+  "source_hashes": {
+    "judge.py": "11b45a27025040e345a8d297813e56c50fdbea813bcbd4041fba1ecae9cc49cb",
+    "normal.stdout": "6aa46b6400aa5fc74613a2496aad8a96fc5603dbe4a9a6ef1081d62498ef77d1",
+    "requests.json": "0e21bdd1fa4eb1d6e0670bb571253f33a0e569db00e98ec80a65f805be608cd5",
+    "ubsan.stdout": "6aa46b6400aa5fc74613a2496aad8a96fc5603dbe4a9a6ef1081d62498ef77d1"
+  },
+  "status": "PASS"
+}

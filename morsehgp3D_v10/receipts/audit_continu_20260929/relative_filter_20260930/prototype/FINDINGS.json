@@ -1,0 +1,24 @@
+{
+  "schema": "mhgp10_relative_filter_prototype_findings_v1",
+  "status": "AUDIT_PROTOTYPE_READY",
+  "source_sha256": "2c8b7cc7e89e344dd2733ee7f1ff5de3c03c66c42ed2ea82a5b76e1fb92636aa",
+  "own_normal_ubsan_pair": {
+    "rows": 27,
+    "exit_codes": [
+      0,
+      0
+    ],
+    "stdout_identical": true,
+    "stderr_empty": true,
+    "causal_contacts_all_ambiguous": 9
+  },
+  "own_smoke": {
+    "checks": 50,
+    "failures": 0,
+    "post_prepare_fenv_refusals": true
+  },
+  "production_changes": 0,
+  "gcp_sessions": 0,
+  "recommended_integration": "Replace absolute-centre fixed-margin shortcuts by relative descriptor preparation, certified bounds and mandatory domain-qualified exact fallback on AMBIGU. Propagate refusals explicitly; do not claim full-box interior from minimum-distance bounds.",
+  "independent_packet": "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q"
+}

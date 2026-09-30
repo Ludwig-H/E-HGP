@@ -1,0 +1,1 @@
+{"counts": {"AMBIGU": 322, "B": 250, "C": 2299, "EXTERIOR": 624, "INTERIOR": 355, "S": 1051, "contacts": 196, "translations": 40}, "exact_rank_checks": 147, "requests": 3600, "scope": "bounded converter/site/box filter; no native nearest, index, fallback or FULL", "status": "PASS"}

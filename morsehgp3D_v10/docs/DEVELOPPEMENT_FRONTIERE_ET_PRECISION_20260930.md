@@ -163,6 +163,47 @@ les coupes capteur à univers d'IDs différent ne sont pas appariées par ce lem
 Aucun test de croissance ou FULL large ne découle
 de cet oracle borné. GCP non utilisé dans ces contre-épreuves.
 
+### Filtre relatif : première réparation isolée
+
+Le [prototype d'audit](../receipts/audit_continu_20260929/relative_filter_20260930/README.md)
+prépare maintenant N/D et le rayon dans le repère de l'ancre, puis encadre
+les distances de sites u32 et de boîtes fermées. Les coefficients ont une
+magnitude de 192 bits ; les contacts restent `AMBIGU`, à transmettre au
+futur repli exact. Les boîtes ne certifient que le rejet extérieur, pas
+l'intériorité de tous leurs points.
+
+Le panel Fraction indépendant comprend 3 600 requêtes : 2 299 conversions,
+1 051 sites et 250 boîtes. Normal/UBSan donnent les mêmes sorties ; 196
+contacts et 40 translations identiques bit à bit passent. Deux mutants
+code0 sont tués mathématiquement : reste de conversion perdu et marge
+fixe réintroduite. Les 147 contrôles du lemme de rang restent sur listes
+statiques Python, pas un nouveau nearest natif.
+
+Le prototype vérifie les modes courants FE_TONEAREST/SSE2 et refuse
+FTZ/DAZ ; environnement x87 non piégeant requis. Son descripteur const
+semble partageable en lecture, mais aucun test concurrent, TSan ou GPU
+n'est acquis. L'ancien smoke au gel incomplet reste historique ; la porte
+v2 figée exécutée passe ses 50 contrôles. La contre-vérification adversariale
+du juge conserve ses trois versions et leurs limites, sans effacer les
+tolérances initiales ni relancer les captures natives.
+
+Le repli exact doit être qualifié selon son domaine : la valeur P du
+protocole générique peut nécessiter 258 bits, contre les bornes suffisantes
+201/168 bits des supports q3/q4 u32 réellement certifiés. Un calcul sur
+256 bits sans garde ne couvre donc pas toutes les entrées du prototype.
+Un dispatch de domaine, ou un certificat de dépassement pour le signe
+seul, reste à implémenter et à éprouver. Le filtre isolé n'est pas encore
+un port du propriétaire, du SiteTree, des niveaux ou de la tour.
+Il ne lève pas le refus u18 et ne transfère aucun chrono historique.
+
+Le [lecteur renforcé R2](../receipts/audit_continu_20260929/relative_filter_reader_r2_20260930/README.md)
+vérifie les fichiers avant de charger le juge et exige toutes les empreintes,
+avec zéro exécution native aux rejugements. Cinq altérations structurelles
+sont refusées. La première clôture est conservée à octets identiques.
+Les quatre documents et ce nouveau complément passent le contrôle ciblé ;
+le contrôle global des espaces signale seulement une ligne vide finale
+dans le script adversarial R1 clos, conservée pour la traçabilité.
+
 ## Ordre des travaux suivants
 
 1. Préparer le profil large : identité sans collision, conversion exacte

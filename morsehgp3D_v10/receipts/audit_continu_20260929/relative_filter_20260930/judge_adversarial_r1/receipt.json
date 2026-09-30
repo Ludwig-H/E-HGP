@@ -1,0 +1,100 @@
+{
+  "schema": "mhgp10_relative_judge_adversarial_v1",
+  "origin": "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q",
+  "observed_start_utc": "2026-09-30 08:22:39 UTC",
+  "observed_end_utc": "2026-09-30 08:29:47 UTC",
+  "original_source_and_outputs_sha256": {
+    "judge.py": "11b45a27025040e345a8d297813e56c50fdbea813bcbd4041fba1ecae9cc49cb",
+    "normal.stdout": "6aa46b6400aa5fc74613a2496aad8a96fc5603dbe4a9a6ef1081d62498ef77d1",
+    "requests.json": "0e21bdd1fa4eb1d6e0670bb571253f33a0e569db00e98ec80a65f805be608cd5",
+    "ubsan.stdout": "6aa46b6400aa5fc74613a2496aad8a96fc5603dbe4a9a6ef1081d62498ef77d1"
+  },
+  "source_snapshot": {
+    "file": "judge_observed.py",
+    "sha256": "11b45a27025040e345a8d297813e56c50fdbea813bcbd4041fba1ecae9cc49cb",
+    "role": "Read-only observed source copy; tests import the original file and verify hashes before/after."
+  },
+  "harness": {
+    "file": "check_adversarial.py",
+    "sha256": "9eefafebf9085c5a546efeb1cfdb7caad4c98bc767da578fa0579d6dde0e1458"
+  },
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "check_adversarial.py"
+      ],
+      "cwd": "/tmp/mhgp10-relative-judge-adversarial-20260930.s0huDoJ1",
+      "rc": 0,
+      "output": "normal.output"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "check_adversarial.py"
+      ],
+      "cwd": "/tmp/mhgp10-relative-judge-adversarial-20260930.s0huDoJ1",
+      "rc": 0,
+      "output": "optimized.output"
+    }
+  ],
+  "capture_note": "Tool combined output parsed as complete JSON. Separate calls judge the baseline once and apply56 mutations plus one duplicate JSON-key probe per Python mode. No per-case CLI process was launched.",
+  "baseline": {
+    "requests": 3600,
+    "exact_rank_checks": 147,
+    "counts": {
+      "AMBIGU": 322,
+      "B": 250,
+      "C": 2299,
+      "EXTERIOR": 624,
+      "INTERIOR": 355,
+      "S": 1051,
+      "contacts": 196,
+      "translations": 40
+    }
+  },
+  "scope_groups": {
+    "answer": {
+      "total": 48,
+      "rejected": 48,
+      "accepted": 0
+    },
+    "trusted_request_mutation": {
+      "total": 5,
+      "rejected": 5,
+      "accepted": 0
+    },
+    "trusted_request_typing_outside_output_contract": {
+      "total": 1,
+      "rejected": 0,
+      "accepted": 1
+    },
+    "trusted_request_marker_outside_output_contract": {
+      "total": 1,
+      "rejected": 0,
+      "accepted": 1
+    },
+    "ignored_unknown_field_not_a_numeric_certificate": {
+      "total": 1,
+      "rejected": 0,
+      "accepted": 1
+    }
+  },
+  "mutations_per_pass": 56,
+  "duplicate_key_probe_per_pass": 1,
+  "semantic_comparison": {
+    "equal_except_optimize_flag": true,
+    "normal": 0,
+    "optimized": 1
+  },
+  "original_sources_edited": false,
+  "original_captures_edited": false,
+  "native_programs_executed": 0,
+  "repository_files_edited": false,
+  "GCP_used": false,
+  "findings": "findings.json",
+  "reproduction": "The small packet records its original fixture hashes and origin paths rather than embedding the 1.1MB request/answer fixture pair. It is not a standalone archive."
+}

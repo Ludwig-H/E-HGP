@@ -1,0 +1,55 @@
+{
+  "status": "BOUNDED_OUTPUT_MUTATIONS_REFUSED_WITH_EXPLICIT_SCOPE_LIMITS",
+  "output_mutations": {
+    "tested": 48,
+    "rejected": 48,
+    "unexpected_acceptances": 0
+  },
+  "other_mutations": {
+    "trusted_request_expected_rejections": 5,
+    "explicit_scope_acceptances": 3
+  },
+  "parser_controls": {
+    "duplicate_key_rejected": true,
+    "scope": "One duplicate-key probe; not a general strict JSON validator"
+  },
+  "identity": {
+    "contract": "3600 frozen requests from captured path/hash; answers are positionally paired and do not carry an id field. Length, request.id and op are compared; exact Fraction values/enclosures are computed per request.",
+    "omitted_or_wrong_op_rejected": true,
+    "missing_or_extra_lines_rejected": true,
+    "swapped_signed_conversion_lines_rejected": true,
+    "limit": "No claim that the answer protocol has an independently echoed request ID or that valid numerically identical rows are distinguishable."
+  },
+  "statuses_and_intervals": {
+    "missing_C_value_status_and_op_rejected": true,
+    "missing_site_or_box_rho_radius_distance_status_rejected": true,
+    "reversed_or_nonfinite_interval_bits_rejected": true,
+    "misleading_interior_exterior_or_ready_status_rejected": true,
+    "contact_as_interior_or_exterior_rejected": true
+  },
+  "targeted_causes": {
+    "all_ambiguous_unchanged_intervals": "Rejected before floors as an unnecessary ambiguous state.",
+    "all_ambiguous_broad_valid_enclosures": "Rejected exactly by non-vacuity floors, not a containment failure; all queries used finite broad enclosures and no useful classifications.",
+    "bitwise_translation_mutation": "A widened but still containing rho interval on a translated image is rejected exactly by translation changes native bits."
+  },
+  "allowed_scope_probes": [
+    {
+      "name": "request_boolean_zero_id",
+      "observed": "Accepted: Python False==0 at request0.",
+      "scope": "Malformed trusted request typing, not a forged output certificate; requests are separately hash-pinned."
+    },
+    {
+      "name": "removed_one_contact_marker",
+      "observed": "Accepted: contact count196 becomes195, still above100.",
+      "scope": "The marker belongs to the frozen request panel. Even without it, exact-distance and strict status tests still forbid an interior/exterior classification of a true contact. Not an exact manifest/fixture validator."
+    },
+    {
+      "name": "unused_extra_nonfinite_field",
+      "observed": "Accepted: an in-memory NaN in an unknown unused answer field is ignored.",
+      "scope": "All numeric certificate fields remain checked finite through interval bits. Do not describe this judge as rejecting every nonfinite JSON value or every unknown field."
+    }
+  ],
+  "scope": "Imported original judge and altered data only in memory; no native execution, engine validation, GPU/GCP, global nearest/index/FULL qualification or statistical robustness.",
+  "normal_optimized": "Same complete results after removing only optimize_flag (0 versus1).",
+  "source_unchanged": true
+}

@@ -24,6 +24,18 @@ les niveaux, les prédicats et les filtres de contacts. Préserver le repère
 relatif, les unités et tous les IDs, puis porter les opérations sous bornes
 certifiées. Ces tests sont hors contrat u18, pas des régressions de ce profil.
 
+Première réparation isolée : le
+[filtre relatif certifié](receipts/audit_continu_20260929/relative_filter_20260930/README.md)
+encadre les requêtes de sites/boîtes u32 avec coefficients 192 bits.
+3 600 requêtes Fraction passent en normal/UBSan, dont 196 contacts et 40
+translations identiques ; deux mutants sont rejetés numériquement.
+Le repli exact, le nearest natif et le raccord à toute la tour restent
+à faire. Ni parallélisation, croissance globale ni performance G4 de ce
+nouveau profil ne sont qualifiées. Les juges R1/R2/R3 et leurs limites
+sont conservés séparément ; une seule vue courante demeure dans `audits/`.
+Utiliser le [lecteur renforcé](receipts/audit_continu_20260929/relative_filter_reader_r2_20260930/README.md),
+qui contrôle les hashes avant chargement et refuse les tables d'empreintes vides.
+
 ```text
 phase=exploration_v10_hors_registre
 backend=cpu_reference

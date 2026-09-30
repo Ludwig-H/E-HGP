@@ -1,0 +1,28 @@
+{
+  "GCP_used": false,
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/relative_filter_reader_r2_20260930/verify.py",
+        "--inner-only"
+      ],
+      "exit_code": 0,
+      "mode": "normal"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/relative_filter_reader_r2_20260930/verify.py",
+        "--inner-only"
+      ],
+      "exit_code": 0,
+      "mode": "optimized"
+    }
+  ],
+  "native_executions": 0,
+  "status": "PASS"
+}

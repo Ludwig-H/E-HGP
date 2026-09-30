@@ -1,0 +1,175 @@
+{
+  "schema": "mhgp10_relative_filter_prototype_receipt_v1",
+  "packet": "/tmp/mhgp10-relative-sphere-filter-0930.gBKSarn2",
+  "backend": "cpu_audit_prototype",
+  "profile": "signed192_coefficients_u32_relative_coordinates",
+  "public_status": "not_claimed",
+  "started_utc": "2026-09-30 08:12:36 UTC",
+  "closed_observation_utc": "2026-09-30 08:22:56 UTC",
+  "repository_edited": false,
+  "gcp_used": false,
+  "full": false,
+  "production_exact_fallback": false,
+  "performance_contract_measured": false,
+  "versions": [
+    {
+      "version": "v1",
+      "source": "relative_filter_v1.cpp",
+      "sha256": "80299e604be52c8204d804fd2af0917e3826baeb79651081b83a1552a3be5335",
+      "bins": [
+        "normal",
+        "ubsan"
+      ],
+      "native_cli_executed_by_this_task": false
+    },
+    {
+      "version": "v2",
+      "source": "relative_filter.cpp",
+      "sha256": "2c8b7cc7e89e344dd2733ee7f1ff5de3c03c66c42ed2ea82a5b76e1fb92636aa",
+      "difference": "Only explicit binary64 radix2/digits53/max_exponent1024 static_assert added.",
+      "bins": [
+        "normal_v2",
+        "ubsan_v2",
+        "drop_rest",
+        "fixed_margin",
+        "smoke_v2_ubsan"
+      ]
+    },
+    {
+      "version": "unqualified_first_smoke_build",
+      "bin": "smoke_ubsan",
+      "native_executed": false,
+      "qualification": "not_authoritative",
+      "reason": "Build was launched on v1, but v2 static_assert edit happened before its completion was observed. Preserve this build/log; do not infer a closed source-build pin. A separate v2 smoke build was run under stable hashes."
+    }
+  ],
+  "logical_source_lines": {
+    "filter": 230,
+    "smoke": 60,
+    "total": 290
+  },
+  "capabilities": [
+    "Signed magnitude192 to rigorous binary64 intervals by top53+remainder.",
+    "Positive192 denominator; relative rho=N/D and R²=||rho||² prepared once.",
+    "u32 site/anchor relative differences computed in i64 before double conversion.",
+    "Rigorous strict site interior/exterior or AMBIGU requiring future exact fallback.",
+    "Rigorous relative minimum distance to closed axis-aligned u32 box; EXTERIOR or AMBIGU only.",
+    "No dynamic allocation in filter operations; CLI may allocate."
+  ],
+  "preconditions": [
+    "binary64 radix2/digits53/max_exponent1024 with IEC559.",
+    "Current FE_TONEAREST; current SSE2 MXCSR RN, FTZ/DAZ off, SSE exception masks set.",
+    "Standard nontrapping x87 environment.",
+    "Canonical signed-zero encoding; D nonzero; ordered box corners."
+  ],
+  "fenv": "Public floating computations recheck current environment, including after preparation. Filter functions do not change control modes/MXCSR; naturally raised sticky exception flags are not preserved.",
+  "provenance": {
+    "compile_v1_before": {
+      "relative_filter.cpp": "80299e604be52c8204d804fd2af0917e3826baeb79651081b83a1552a3be5335",
+      "PROTOCOL.txt": "f1103596490d6a457c72033270a7fe558fd736a0c70fe0742e2d5c19da944c6f"
+    },
+    "v2_observed_before": {
+      "relative_filter.cpp": "2c8b7cc7e89e344dd2733ee7f1ff5de3c03c66c42ed2ea82a5b76e1fb92636aa",
+      "relative_filter_v1.cpp": "80299e604be52c8204d804fd2af0917e3826baeb79651081b83a1552a3be5335",
+      "smoke.cpp": "082971126bab2568786753d6944b9bc62acc57becf3cc4f1a0734496c898f4cd",
+      "PROTOCOL.txt": "f1103596490d6a457c72033270a7fe558fd736a0c70fe0742e2d5c19da944c6f",
+      "normal": "dcce11f7af28babb42a782adef29bc18485de5e86ba68ceba655c42ecd6450b1",
+      "ubsan": "08ce336599bd51257c908275eb007358d66499f379497d18d9d4594ebe5946b7",
+      "smoke_ubsan": "b2b4dd0e09144e001763103e768e27d7f7f98a09511e798090f0b3aedbc6828b"
+    },
+    "small_run_before": {
+      "normal_v2": "dcce11f7af28babb42a782adef29bc18485de5e86ba68ceba655c42ecd6450b1",
+      "ubsan_v2": "ab6b448e0eb78083f137d0541b15b0486996e6cf013f280c0dd10f50bee335c3",
+      "drop_rest": "4ae567fcba229d4c9f17517b98d41130ab025b55f64f9c9b2771a647225022de",
+      "fixed_margin": "5a8dce6e28030f13536a27fdf87178d7f97d0d5fe4f8a84b39e81c5e753e9fc9",
+      "smoke_v2_ubsan": "ad9e68a19ff9ba03dfd97336b07c1599a1f61c54acee04b30d1b127e86830dc7",
+      "relative_filter.cpp": "2c8b7cc7e89e344dd2733ee7f1ff5de3c03c66c42ed2ea82a5b76e1fb92636aa",
+      "smoke.cpp": "082971126bab2568786753d6944b9bc62acc57becf3cc4f1a0734496c898f4cd",
+      "small_batch.txt": "d934c16c3511bfa3c894672e27cf715f4c91cd1cbcf28c0dab4a920b0bf0fe22"
+    },
+    "small_run_after": {
+      "normal_v2": "dcce11f7af28babb42a782adef29bc18485de5e86ba68ceba655c42ecd6450b1",
+      "ubsan_v2": "ab6b448e0eb78083f137d0541b15b0486996e6cf013f280c0dd10f50bee335c3",
+      "drop_rest": "4ae567fcba229d4c9f17517b98d41130ab025b55f64f9c9b2771a647225022de",
+      "fixed_margin": "5a8dce6e28030f13536a27fdf87178d7f97d0d5fe4f8a84b39e81c5e753e9fc9",
+      "smoke_v2_ubsan": "ad9e68a19ff9ba03dfd97336b07c1599a1f61c54acee04b30d1b127e86830dc7",
+      "relative_filter.cpp": "2c8b7cc7e89e344dd2733ee7f1ff5de3c03c66c42ed2ea82a5b76e1fb92636aa",
+      "smoke.cpp": "082971126bab2568786753d6944b9bc62acc57becf3cc4f1a0734496c898f4cd",
+      "small_batch.txt": "d934c16c3511bfa3c894672e27cf715f4c91cd1cbcf28c0dab4a920b0bf0fe22"
+    },
+    "all_files_before_bin_relocation": {
+      "relative_filter.cpp": "2c8b7cc7e89e344dd2733ee7f1ff5de3c03c66c42ed2ea82a5b76e1fb92636aa",
+      "relative_filter_v1.cpp": "80299e604be52c8204d804fd2af0917e3826baeb79651081b83a1552a3be5335",
+      "smoke.cpp": "082971126bab2568786753d6944b9bc62acc57becf3cc4f1a0734496c898f4cd",
+      "PROTOCOL.txt": "f1103596490d6a457c72033270a7fe558fd736a0c70fe0742e2d5c19da944c6f",
+      "small_batch.txt": "d934c16c3511bfa3c894672e27cf715f4c91cd1cbcf28c0dab4a920b0bf0fe22",
+      "normal": "dcce11f7af28babb42a782adef29bc18485de5e86ba68ceba655c42ecd6450b1",
+      "ubsan": "08ce336599bd51257c908275eb007358d66499f379497d18d9d4594ebe5946b7",
+      "smoke_ubsan": "b2b4dd0e09144e001763103e768e27d7f7f98a09511e798090f0b3aedbc6828b",
+      "normal_v2": "dcce11f7af28babb42a782adef29bc18485de5e86ba68ceba655c42ecd6450b1",
+      "ubsan_v2": "ab6b448e0eb78083f137d0541b15b0486996e6cf013f280c0dd10f50bee335c3",
+      "drop_rest": "4ae567fcba229d4c9f17517b98d41130ab025b55f64f9c9b2771a647225022de",
+      "fixed_margin": "5a8dce6e28030f13536a27fdf87178d7f97d0d5fe4f8a84b39e81c5e753e9fc9",
+      "smoke_v2_ubsan": "ad9e68a19ff9ba03dfd97336b07c1599a1f61c54acee04b30d1b127e86830dc7"
+    },
+    "sources_after_relocation": {
+      "relative_filter.cpp": "2c8b7cc7e89e344dd2733ee7f1ff5de3c03c66c42ed2ea82a5b76e1fb92636aa",
+      "relative_filter_v1.cpp": "80299e604be52c8204d804fd2af0917e3826baeb79651081b83a1552a3be5335",
+      "smoke.cpp": "082971126bab2568786753d6944b9bc62acc57becf3cc4f1a0734496c898f4cd",
+      "PROTOCOL.txt": "f1103596490d6a457c72033270a7fe558fd736a0c70fe0742e2d5c19da944c6f",
+      "small_batch.txt": "d934c16c3511bfa3c894672e27cf715f4c91cd1cbcf28c0dab4a920b0bf0fe22"
+    },
+    "external_binary_dir": "/tmp/mhgp10-relative-sphere-binaries-0930.eHrR9Bc0",
+    "binary_hashes_after_relocation": {
+      "/tmp/mhgp10-relative-sphere-binaries-0930.eHrR9Bc0/normal": "dcce11f7af28babb42a782adef29bc18485de5e86ba68ceba655c42ecd6450b1",
+      "/tmp/mhgp10-relative-sphere-binaries-0930.eHrR9Bc0/ubsan": "08ce336599bd51257c908275eb007358d66499f379497d18d9d4594ebe5946b7",
+      "/tmp/mhgp10-relative-sphere-binaries-0930.eHrR9Bc0/smoke_ubsan": "b2b4dd0e09144e001763103e768e27d7f7f98a09511e798090f0b3aedbc6828b",
+      "/tmp/mhgp10-relative-sphere-binaries-0930.eHrR9Bc0/normal_v2": "dcce11f7af28babb42a782adef29bc18485de5e86ba68ceba655c42ecd6450b1",
+      "/tmp/mhgp10-relative-sphere-binaries-0930.eHrR9Bc0/ubsan_v2": "ab6b448e0eb78083f137d0541b15b0486996e6cf013f280c0dd10f50bee335c3",
+      "/tmp/mhgp10-relative-sphere-binaries-0930.eHrR9Bc0/drop_rest": "4ae567fcba229d4c9f17517b98d41130ab025b55f64f9c9b2771a647225022de",
+      "/tmp/mhgp10-relative-sphere-binaries-0930.eHrR9Bc0/fixed_margin": "5a8dce6e28030f13536a27fdf87178d7f97d0d5fe4f8a84b39e81c5e753e9fc9",
+      "/tmp/mhgp10-relative-sphere-binaries-0930.eHrR9Bc0/smoke_v2_ubsan": "ad9e68a19ff9ba03dfd97336b07c1599a1f61c54acee04b30d1b127e86830dc7"
+    },
+    "compiler": "compiler.txt",
+    "system_headers_and_libraries_bundled": false
+  },
+  "execution": {
+    "compilations": "compilations.json",
+    "small_runs": "small_runs.json",
+    "own_native_calls": 3,
+    "own_cli_rows_per_backend": 27,
+    "own_native_smoke_checks": 50,
+    "own_native_smoke_failures": 0,
+    "normal_equals_ubsan": true,
+    "native_stderr_empty": true,
+    "mini_gate_interpretation": "Nonvacuity and environment smoke checks only, NOT an independent exact correctness qualification."
+  },
+  "independent_validation_reference": {
+    "packet": "/workspaces/E-HGP/build/v10-relative-filter-audit-20260930.n81Su40Q",
+    "reported_by": "/root",
+    "copied_into_this_packet": false,
+    "replayed_by_this_task": false,
+    "reported_rows": {
+      "total": 3600,
+      "C": 2299,
+      "S": 1051,
+      "B": 250
+    },
+    "reported_judges": 4,
+    "reported_contacts": 196,
+    "reported_bit_identical_translations": 40,
+    "reported_rank_lemma_controls": 147,
+    "reported_mutants": {
+      "DROP_REST": "rc0 then rejected mathematically: integer excluded at request315",
+      "FIXED_MARGIN": "rc0 then rejected mathematically: false interior at request2687"
+    },
+    "qualification_limit": "No native nearest-neighbour/index or production engine qualification; external receipt is the authority for these independent checks."
+  },
+  "limits": [
+    "No exact side predicate or support positivity is implemented.",
+    "Box minimum-distance bounds cannot certify that all sites are strictly inside.",
+    "No catalogue/FULL/G4/GPU/performance/growth contract acquired.",
+    "No float32 engine or grid precision policy is changed.",
+    "No inherited u18 production qualification is expanded."
+  ]
+}
