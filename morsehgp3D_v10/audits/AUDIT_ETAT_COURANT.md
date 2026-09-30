@@ -1,7 +1,7 @@
 # Audits v10 — état courant
 
-Mise à jour : 30 septembre 2026, 21 h 24 UTC : réponses au développeur,
-seeds recoupées, budget des paires et correctifs des comparaisons EOM.
+Mise à jour : 30 septembre 2026, 21 h 50 UTC : réponses au développeur,
+saut intérieur simplifié, census recoupé et raccord Pool clos privé.
 Les sources publiées du moteur restent inchangées
 dans cette tranche ; le développeur travaille désormais dans une copie
 isolée d'intégration, distincte du worktree partagé. Les parties I
@@ -10,6 +10,19 @@ Index vivant de l'auditeur continu ; les rapports datés restent des preuves
 ancrées à leur version, pas des statuts courants. `public_status=not_claimed`.
 État du produit : [PASSATION](../PASSATION.md). Corrections de portée des
 mesures : [ERRATA](../receipts/ERRATA.md). Ne pas réécrire les reçus clos.
+
+**Simplification mathématique utile pour FULL :** dans la branche p≥K,
+le saut peut prendre **n'importe quels K sites strictement intérieurs**,
+pas nécessairement les K plus proches du centre. Leur MEB a un niveau
+strictement inférieur ; une chaîne d'échanges de K-parties, contenue
+dans l'ancienne boule, conserve la composante au niveau utile. Pour un
+représentant de lot λ, son niveau β<λ conserve aussi la composante
+pré-lot. Les feuilles terminales brutes peuvent changer, pas leur ancêtre
+requis. La [preuve et les sites d'usage](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#saut-intérieur-sans-tri-des-plus-proches)
+précisent cette portée : aucune extension à p<K ou à la coquille,
+aucune borne sur les pas ni aucun gain mesuré. Un census limité à K
+intérieurs certifiés devient donc une piste exacte ; un simple retrait
+du tri laisserait le coût de collecte exhaustive intact.
 
 **À corriger avant les comparaisons EOM :** le banc privé
 `masses_selection/dev_scenes.py` réutilise `phi_date` dans une nouvelle
@@ -50,7 +63,22 @@ Instrumenter candidats et census ; ne pas porter cet index comme garantie
 sous-quadratique. Le census matérialisant tous les intérieurs garde un
 second carré possible même avec un meilleur index ; sa preuve collinéaire
 et la borne positive sur les états mémoïsés sont dans la note au développeur.
+Le [nouveau reçu autonome](../receipts/audit_continu_20260929/pair_census_square_20260930/README.md)
+recoupe ce second carré avec un index **idéal** donnant seulement les
+vrais intérieurs :20 petites configurations,368 propriétaires comparés
+aux composantes L2 exactes, mémo et argmin réel par AST. Chaque collecte
+et argmin paie m(m−1)/2 pour3m−2 votes ; un argmin en flux réduit
+la mémoire, pas ce temps. Lecteurs normal/−O, deux mutations causales
+et une du lecteur, sept fichiers clos ; grandes tailles analytiques
+seulement, m distinct de n=m+1. Pas d'index ni de forêt natifs appelés.
 EOM Python a aussi des remontées quadratiques évitables.
+Un [générateur par cellules d'ancres et échelles](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#générateur-de-paires-avec-budget-de-recherche)
+a maintenant un budget complet proposé : O(nJ+An+C), hash attendu,
+ou radix/jointure déterministe avec coût de clés publié. J≤B+1 ;
+C≤(K−1)AnJ borne aussi les faux candidats et les cases vides coûtent
+au plus An. Mais A=1331 déjà à K2/η1/4 : constantes, k-NN initiaux,
+census et propriétaires restent payés. Preuve d'architecture seulement,
+pas prototype mesuré ni contrat100ms.
 
 **Verrou confirmé pour la tête :** une bande dure reste discontinue
 même sur l'univers des paires, sans disparition de vote du catalogue.
@@ -180,8 +208,8 @@ de tête normal/UBSan, aucun nouvel appel générateur : ne pas confondre ce
 témoin géométrique de score avec le renversement EOM des arbres API.
 
 **Développeur actif :** la copie `build/v10-integration-r2/src` a maintenant
-HEAD `d2640c8f89e5078f53a4fd4b2f925c44d16bfb77` : bancs après faits_math,
-SiteTree et son addendum. Le reçu bancaire possède 92 pièces hachées,
+HEAD `7edb91123be00796563f333feaca77d70e201163` : Pool après bancs,
+faits_math, SiteTree et son addendum. Le reçu bancaire précédent possède 92 pièces hachées,
 toutes recoupées ; manifeste `2b48788a872a0fee6dc55bec9f5c4337179c34bbbf615e4c48e5a6c41c627354`.
 Terminaux archivés : 26/26 gates, 1391,68 s ; 7/7 fast, 37,11 s, codes0.
 Le bilan bancaire 91 mutants tués/4 équivalents est une union de campagnes
@@ -192,7 +220,7 @@ en tête. L'addendum antérieur SiteTree/tour/CMake conserve sa campagne
 94/94 mutants non équivalents tués et un équivalent : autre groupe,
 ne pas additionner ces comptes comme qualification d'une union R2.
 
-Le chantier suivant prépare Pool/catalogue/tour : relecture favorable de
+Le nouveau groupe Pool/catalogue/tour possède une relecture favorable de
 l'annulation saturante, de la durée de vie des callbacks et de la relance
 après sortie des workers. Petite sonde pool-only : compilation stricte et
 trois répétitions correctes, sans nouveau test HGP ni sanitizer. Les pins
@@ -206,12 +234,20 @@ Réserve secondaire préexistante : Pool(1) ne marque pas sa région ; aucun
 sous-Pool du moteur observé. Ni union des sept groupes ni condensation
 corrigée acquises. Aucun test GCP lancé par cet audit.
 
-Nouveau terminal du développeur :39/39 gates Release, code0,2242,69s.
-Le reçu pool conserve encore `@@SUITE@@` et n'a pas de manifeste final :
-raccord en cours. Le journal mutants disponible se termine sans synthèse
-ni code de campagne ; les PIDs disparus ne closent pas les preuves.
-Dans ce lot, MV3 participation donne1,0,1 ; l'ancien3/3 reste une
-observation distincte, pas une garantie de répétabilité.
+Nouveau terminal du développeur :39/39 gates Release, code0,936,50s,
+SHA `fcab734f…`. Le passage antérieur2242,69s est conservé séparément.
+Le journal mutants archivé `eb699ff…` contient47 enregistrements,
+une synthèse42/42 tués,4/4 survivants attendus et témoin vert.
+Le nouveau MV3 est tué3/3 grâce aux rafales ; le premier passage1,0,1
+reste archivé comme interrompu. Ces journaux ont été relus, pas rejoués
+par cet audit. Le développeur a maintenant fermé le reçu et amendé
+son commit :156/156 pièces et inventaire recoupés normal/−O, manifeste
+`e1e9bb08ddb3fb98f28ab161771bc7049d1d82935206ba5cfa9ce1beb2f77537`.
+Les différentiels archivés tour10/10 et catalogue10/10 conservent les
+trois SHA complets ; tête18/18 compare les SHA complets en mémoire,
+mais n'en imprime encore que les préfixes et un argv `<travail>`.
+Préciser cette limite de provenance ; pas de défaut de sortie déduit.
+Groupe privé clos, pas union complète R2 ni contrat G4 acquis.
 
 **Précision supérieure à u18 :** le chantier privé `build/v10-b21/src`,
 HEAD `5dd83b5c68919d87ada067204d19ee4edb166859`, comporte dix-huit commits

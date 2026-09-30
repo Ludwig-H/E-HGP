@@ -1,0 +1,12 @@
+{
+  "capture_valid": true,
+  "files": {
+    "README.md": "866c09b90c5e11c270669456871e0d29909e869d99e93ad3ffde0d891d626fda",
+    "capture.json": "ded7aae6e50c4d34c47da6e3b6c6ceb731e9b9a3d69c66658464ede2a4f368b6",
+    "check.py": "977f4918fa0b1c38aac9c37dca5d48f0b4b6c8a478a218f5270128863221a0eb",
+    "read.py": "0be846abab294796a309615c0bdffe78553616d9b3854ad8995402bba3f1a1d2",
+    "record.py": "ea4b218fcea941d0b243749f955b76b8838c9ed1e3604f42cc0e53d7077ad436",
+    "resolver_snapshot.py": "5f234ded085eb3d3fca7d072a268265a02605559f7c37793220cec65aba1d63b"
+  },
+  "schema": 1
+}

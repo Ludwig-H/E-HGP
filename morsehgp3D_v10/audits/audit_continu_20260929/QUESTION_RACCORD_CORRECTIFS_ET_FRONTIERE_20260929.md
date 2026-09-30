@@ -1,6 +1,6 @@
 # Au développeur ancrage frontière et corrections du raccord
 
-## Raccord courant et six décisions utiles, 30 septembre, 21 h 24 UTC
+## Raccord courant et six décisions utiles, 30 septembre, 21 h 50 UTC
 
 Les réponses Q1/Q2/Q3 ci-dessous restent applicables. Complément pratique :
 
@@ -81,15 +81,30 @@ Pool(1) ne
 marque pas sa région, réserve de contrat préexistante hors chemin moteur
 observé, pas un blocage du correctif multithread.
 
-Suivi21 h14 du lot courant : terminal Release39/39, code0,2242,69s,
-copie `preuves/ctest_gate.txt` SHA
-`6dd8377b46c4e5cdaf82095e1d10de7748b7df1747a6ccfd068a2d15c6dca7a4`.
-Le README pool se termine encore par `@@SUITE@@` et n'a pas de manifeste
-final. Journal mutants `/tmp/mhgp10-integ-r2/mut-pool/campagne.jsonl`,
-SHA `faaf0e16…`,23 lignes conformes mais aucune synthèse finale ni code
-de campagne : les anciens PIDs disparus ne prouvent pas sa réussite.
-MV3 participation y donne1,0,1 ; distinguer l'ancien reçu3/3 du nouveau
-lot2/3. Aucune nouvelle campagne lancée par cet audit.
+Suivi21 h50 : le groupe Pool est clos et committé privé
+`7edb91123be00796563f333feaca77d70e201163`. Le nouveau terminal Release
+est39/39, code0,936,50s, copie `preuves/ctest_gate.txt` SHA
+`fcab734f03a8838de31abd18da454af8742c260254f95072ec12af9ce05eef80`.
+Le passage2242,69s reste dans `ctest_gate_avant_rafales.txt`.
+`preuves/mutants/campagne.jsonl.txt`, SHA
+`eb699ff4555dbdb925036a946c3408fc1ce5cfa77e1b766600476847a0a23a3a`,
+ferme47 enregistrements et la synthèse42/42 tueurs tués,4/4 survivants
+attendus, témoin vert. MV3 donne maintenant1,1,1 ; le premier passage
+interrompu1,0,1 reste conservé, pas effacé. Le reçu possède maintenant
+son inventaire156 pièces et SHA256SUMS externe
+`e1e9bb08ddb3fb98f28ab161771bc7049d1d82935206ba5cfa9ce1beb2f77537` :
+empreintes avant/après, inventaire fermé sans liens,47 enregistrements
+et synthèse recoupés normal/−O par cet audit. Les placeholders observés
+à21h41 ont été retirés ; seuls sept fichiers de reçus diffèrent du
+commit intermédiaire455fd76, pas le code. Aucun nouveau test natif.
+
+Les traces tour10/10 et catalogue10/10 impriment ref/int1/int4 en SHA256
+complets et FIN echec0 ; tête18/18 compare les SHA complets en mémoire,
+mais sa trace conserve encore seulement16 caractères et `<travail>`.
+Ne pas dire que **toutes** les empreintes complètes et argv sont publiés.
+Ces différentiels sont une non-régression : ni condensation corrigée,
+ni croissance à K constant, ni chrono G4. Les trois noms LiDAR00/01/02
+de cette suite ne prouvent pas plusieurs séquences SemanticKITTI.
 
 Palier privé B21, HEAD `5dd83b5c68919d87ada067204d19ee4edb166859` :
 relecture des voies étroites/larges et des niveaux I192/I192 cohérente.
@@ -134,8 +149,56 @@ q2 donne≤3L²/2 ; q4 a le majorant général144L⁵<2^113. Le mutant
 conserve signe et deux mots : ses mots supérieurs sont donc exactement
 nuls. Preuve analytique recoupée sur les quatre sources du5dd83b5c,
 pas maximum numérique ni nouvel essai. Elle ne rend pas sûre une
-évaluation i128 intermédiaire ; l'invariance globale des sorties après
-changement de sélection du saut reste une autre obligation de preuve.
+évaluation i128 intermédiaire. L'invariance topologique après changement
+de sélection du saut p≥K est maintenant prouvée ci-dessous ; elle
+ne promet pas l'égalité des témoins internes bruts ou de leurs compteurs.
+
+## Saut intérieur sans tri des plus proches
+
+Résultat mathématique recoupé sur le modèle Γ_K, pour sites distincts
+et poids1,2≤K≤n. Soit F une K-partie, B sa MEB, de centre c et
+niveau carré β. Si l'intérieur strict I de B contient au moins K
+sites, choisir une K-partie **quelconque** G⊂I donne
+`β(G)≤max_{g∈G}|g−c|²<β`. Le tri par distance au centre n'est donc
+pas nécessaire à la décroissance stricte.
+
+F et G sont liés dans Γ_K(β) fermé : une chaîne d'échanges unitaires
+dans F∪G transforme F en G ; chaque coface de K+1 sites est contenue
+dans B, donc sa MEB a niveau≤β. Les descentes suivantes restent liées
+à F sans dépasser ce niveau. Pour un représentant de lot λ, PO-T2
+donne β(F)<λ : tout choix reste ainsi dans la **même composante
+pré-lot λ⁻**. Pour une attache ou une verticale à coupe fermée
+λ≥β(F), la conclusion est également la même.
+
+Attention : la feuille terminale n'est pas canonique. À K2, F={0,10},
+I={1,2,8,9}, les choix {1,2} et {8,9} donnent deux naissances
+différentes, déjà réunies au niveau25 de F. Comparer les ancêtres
+au niveau utile, pas ces IDs. `Min(c)` dans TOWER_v2§6.3 est un point
+fixe du pointeur de descente, pas l'argmin de toutes les naissances.
+Le modèle Γ_K est explicite au§3.2 ; PO-T1/2/4 ferment la preuve.
+
+Raccord source relu dans B21 `5dd83b5c` : `tower.cpp` branche p≥k,
+vers976–1030, choisit aujourd'hui les plus proches ; mémo vers1064/1089
+stocke une naissance témoin. Kruskal1169–1196 normalise les racines
+pré-lot puis impose séparément le minimum DSU ; `cover_node`1651–1652
+appelle ensuite `ancestor` au niveau propre. Les attaches core et les
+verticales font aussi cette normalisation. Pas de modification moteur,
+test natif ni mesure nouvelle dans cette preuve.
+
+Proposition de petit essai : un parcours d'index qui rapporte au plus K
+**intérieurs certifiés**, puis saute immédiatement. Si ces K sites
+n'existent pas, poursuivre le census exact complet nécessaire à la
+structure locale ; réutiliser la continuation plutôt que recommencer.
+Un simple retrait du tri économise la sélection, mais pas la collecte
+actuelle de tout I/U. Ne pas appliquer cette preuve à p<K, à K points
+de coquille, aux multiplicités sans leur preuve distincte, ni à une
+nouvelle règle de clustering. L'arbitraire peut rallonger les descentes :
+le gain et les histogrammes doivent être mesurés avant le port massif.
+Conserver aussi la **vraie requête k-NN des points**, qui calcule D_K(x)
+avant `resolve` : le lemme n'autorise aucun remplacement de cette
+densité par une K-partie arbitraire. Pour l'essai, comparer les coupes
+ouvertes/fermées de Γ, les propriétaires et les verticales ; ne pas
+juger seulement les feuilles terminales ou les compteurs de descente.
 
 ## Construire les couvertures sans développer Γ
 
@@ -262,9 +325,33 @@ sont dans sa bande. La boule diamétrale de(a,b_j) contient exactement
 les j autres b_i, i<j. Chaque état initial distinct matérialise j
 témoins, puis choisit b_0 ; mémoïser(a,b_0) ne retire pas cette première
 collecte. Total m(m−1)/2 intérieurs, alors que tous les votes du nuage
-sont O(m). Preuve par le code et les intervalles, pas nouvelle exécution
-quadratique ni famille SemanticKITTI. Chercher un témoin optimal avec
-certificat, sans liste exhaustive ; une meilleure grille seule ne suffit pas.
+sont O(m). Le
+[reçu clos de collecte](../../receipts/audit_continu_20260929/pair_census_square_20260930/README.md)
+rejoue les méthodes réelles avec un index **idéal** qui ne renvoie que
+les vrais intérieurs, et une forêt analytique collinéaire, pas le natif.
+Vingt configurations m2/3/5/8/16, deux ordres de requêtes et candidats,
+recoupent368 propriétaires vivants au niveau propre contre L2 exact.
+La projection orthogonale des points collinéaires sur leur axe conserve
+L2 : les composantes sont celles des intervalles testés indépendamment.
+L'argmin réel porte sur l'ancre cur[0], pas le milieu ; le mutant de
+milieu change la sélection mais garde ici un propriétaire correct.
+Le mutant mémo ignoré est tué par son travail répété, pas ses labels.
+
+Un argmin en flux conserve le choix avec mémoireO(1), mais paie encore
+les mêmes j visites. Grand m8000/16000/32000 et n=m+1 dans le reçu :
+**formules uniquement**, aucune exécution quadratique ni mesure LiDAR.
+Pour n exact8000/16000/32000, remplacer m par n−1 donne respectivement
+31 988 001/127 976 001/511 952 001 tests de census, et autant d'argmin.
+Deux lecteurs normal/−O et mutant du lecteur ; manifeste externe
+`514362ac6b6047a1239b7bff8c583cfca4a12a83f7190cbf7c38996ece7c69cd`,
+sept fichiers réguliers avec empreintes avant/après. Une recherche de
+témoin certifiée **sans liste exhaustive** est nécessaire : préserver
+l'argmin si ce témoin brut est requis, ou adopter le choix quelconque
+justifié pour FULL. À K2 seulement, même un troisième site de coquille
+distinct des deux bouts donne |a−z|<|a−b| et une coface contenue dans
+l'ancienne boule ; cette variante garde donc le propriétaire utile.
+Elle n'autorise pas K sites quelconques de coquille à K≥3. Une meilleure
+grille seule ne suffit pas à retirer le carré du traitement actuel.
 
 Résultat positif séparé : toute sous-paire de la descente keep0 reste
 dans la bande de la même ancre, car pour un troisième site distinct z
@@ -276,6 +363,56 @@ autocontrôles arbitraires et300 keep1 sans mémo ajoutent O(600n).
 Le carré caché est ici le **coût de chaque census**, pas nécessairement
 le nombre de descentes. La borne ne paye pas encore les recherches
 ni les remontées d'ancêtres de la forêt.
+
+## Générateur de paires avec budget de recherche
+
+Proposition exacte recoupée, pas code porté ni mesure. Sur la grille
+entière[0,2^B−1]³, sites distincts et K incluant l'ancre, supposer les
+distances `s[x]=d_K(x)²` **déjà disponibles**. Pour un facteur de rayon
+c≥1, écrire c²=N/D exactement et prendre Q=ceil(4c), A=(2Q+1)³.
+L'ancre x appartient au seul bucket `j=(bit_length(s[x])−1)//2`.
+Sa cellule à cette échelle a les coordonnées `(2*x_i)>>j`, donc
+côté R/2 avec R=2^j. Cela traite j0 sans arrondi flottant.
+
+Grouper les **ancres** par(bucket,cellule). Dans chaque bucket non vide,
+grouper aussi toutes les **cibles** par cellule de la même échelle.
+Puis, pour chaque cellule d'ancres occupée, consulter ses A cellules
+cibles voisines. Tester exactement chaque paire du produit, en excluant
+x=y et en exigeant `D*|xy|²≤N*s[x]`. La cellule cible peut être dense ;
+seule l'occupation de la cellule d'ancres est bornée par K−1.
+
+Preuve de complétude : r_x∈[R,2R), donc |xy|≤c r_x<2cR=4c(R/2).
+Chaque différence d'indice de cellule est≤Q. Chaque paire orientée
+est rencontrée une seule fois. Pour une cible y et un bucket, A
+cellules d'ancres contiennent au plus (K−1)A ancres : même les faux
+candidats du stencil sont donc bornés par `C≤(K−1)AnJ`, J≤B+1.
+La somme des cellules d'ancres occupées est≤n, donc les consultations
+**cases vides comprises** sont≤An, pas AnJ. Les index de cibles
+coûtent O(nJ). Le hash donne O(nJ+An+C+P) seulement **en espérance**,
+P étant la sortie ; mémoire O(n+P) par bucket, hors sortie streamée.
+
+Version déterministe : trier une fois Morton(2x), puis obtenir les
+plages cibles d'échelle j par son préfixe `Morton(2x)>>3j`, déjà contigu.
+Par bucket, produire les≤A*m_j requêtes de cellules voisines, les
+trier radix puis joindre aux plages cibles. À B≤32, Morton(2x) a≤99
+bits ; avec bucket,≤105 bits, soit≤14 passes radix8. Budget
+O(pn+nJ+pAn+C+P), p≤14, J≤33 ; scratch O(n+A max_j m_j+P).
+Ne pas découper les requêtes en lots arbitraires en rescannant n cibles
+gratuitement à chaque lot. Une mémoire plus petite doit payer les
+recherches binaires ou la fusion externe. Les distances carrées B32
+ont besoin de66 bits ; u128 suffit, pas u64. Les produits avec N/D,
+offsets et compteurs ont leur propre garde. Pour B variable, publier
+aussi coût des clés, passes radix et arithmétique multiprécision.
+
+Réserve pratique pour100ms : à η1/4, c=5/4 en K2 donne A=1331,
+c=5/2 pour la bande α à K≥3 donne A=9261. À n40k, ce second stencil
+autorise370,44 millions de consultations ; K5/J22 borne C par32,60
+milliards. Ce sont des plafonds pessimistes, **pas des chronos**.
+Réduire par distance de boîtes et rayon maximal des ancres est sûr ;
+mesurer les vraies cellules, C/P, requêtes vides et volumes radix avant
+de choisir GPU. Le calcul d_K, les qNN aux milieux, census et owners
+restent hors de cette borne. MMp normalisé par minℓ, avec α≤minℓ≤2α,
+exige c²=16(1+η′), pas le facteur K2 transféré aveuglément.
 
 ## Dettes ciblées du prototype de sélection
 
