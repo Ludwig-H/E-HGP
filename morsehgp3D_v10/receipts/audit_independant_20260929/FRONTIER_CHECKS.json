@@ -1,0 +1,175 @@
+{
+  "commit": "6206d1d118794c9e1cabb6faeaec2aaa77d37e5b",
+  "source": "/workspaces/E-HGP/build/v10-audit-independent-20260929/source/morsehgp3D_v10",
+  "cases": [
+    {
+      "name": "frontier_catalogue_one_byte",
+      "command": [
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/release/mhgp10_catalogue",
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/one_byte.u32le",
+        "--k=2",
+        "--threads=1"
+      ],
+      "returncode": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":4,\"sites\":4,\"K\":2,\"threads\":1,\"balls\":6,\"levels\":2,\"prepare_s\":0.0037,\"catalogue_s\":0.0022,\"catalogue_stages\":{\"t_frontier\":0.0005,\"t_boxes\":0.0000,\"t_order\":0.0000,\"t_assemble\":0.0000,\"t_collect\":0.0000,\"t_sort\":0.0000,\"t_bands\":0.0000,\"t_compare\":0.0000,\"t_ranks\":0.0000,\"t_copy\":0.0000,\"bands\":2,\"band_members\":6,\"tasks\":0,\"max_task_sites\":0},\"by_q_p\":{\"q2\":[6,0],\"q3\":[0,0],\"q4\":[0,0]},\"nodes\":1,\"leaves\":1,\"sum_m\":4,\"max_m\":4,\"skipped_bbox\":0,\"filter_tests\":16,\"leaf_dominance_tests\":6,\"pair_tests\":6,\"triple_tests\":4,\"line_hits\":4,\"quad_tests\":0,\"judged\":7,\"extended\":3,\"weighted\":0,\"max_shell\":3,\"stalled_leaves\":0}\n",
+      "stderr": "",
+      "elapsed_s": 0.01709682999899087
+    },
+    {
+      "name": "frontier_tower_one_byte",
+      "command": [
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/release/mhgp10_tower",
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/one_byte.u32le",
+        "--k=2",
+        "--threads=1"
+      ],
+      "returncode": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":4,\"K\":2,\"threads\":1,\"balls\":6,\"prepare_s\":0.0095,\"catalogue_s\":0.0004,\"tower_s\":0.0002,\"points\":true,\"rss_kib\":{\"after_catalogue\":3676,\"peak_after_catalogue\":3676,\"after_tower\":3800,\"peak_after_tower\":3800},\"passes_catalogue_s\":[0.0004],\"catalogue_stages\":{\"t_frontier\":0.0002,\"t_boxes\":0.0000,\"t_order\":0.0000,\"t_assemble\":0.0000,\"t_collect\":0.0000,\"t_sort\":0.0000,\"t_bands\":0.0000,\"t_compare\":0.0000,\"t_ranks\":0.0000,\"t_copy\":0.0000,\"bands\":2,\"band_members\":6,\"tasks\":0,\"max_task_sites\":0},\"passes_tower_s\":[0.0002],\"orders\":[{\"k\":1,\"nodes\":5,\"births\":4,\"merges\":1,\"joins\":3,\"steps\":10,\"memo\":0,\"t_kruskal\":0.0000,\"t_vertical\":0.0000,\"local_cells\":6,\"walk_steps\":0,\"join\":{\"resolves\":6,\"steps\":6,\"seed_hits\":0,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":0,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":0,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0},\"point\":{\"resolves\":4,\"steps\":4,\"seed_hits\":0,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":0,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":0,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0},\"vertical\":{\"resolves\":0,\"steps\":0,\"seed_hits\":0,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":0,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":0,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0}},{\"k\":2,\"nodes\":4,\"births\":3,\"merges\":1,\"joins\":3,\"steps\":10,\"memo\":0,\"t_kruskal\":0.0000,\"t_vertical\":0.0000,\"local_cells\":6,\"walk_steps\":7,\"join\":{\"resolves\":6,\"steps\":6,\"seed_hits\":6,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":0,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":0,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0},\"point\":{\"resolves\":4,\"steps\":4,\"seed_hits\":4,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":4,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":0,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0},\"vertical\":{\"resolves\":0,\"steps\":0,\"seed_hits\":0,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":0,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":3,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0}}],\"stages\":{\"t_prepare\":0.0000,\"t_local\":0.0000,\"t_seeds\":0.0000,\"t_resolve\":0.0000,\"t_kruskal\":0.0000,\"t_points\":0.0000,\"t_vertical\":0.0000,\"sum_order_kruskal\":0.0000,\"sum_order_vertical\":0.0000,\"local_cells\":12,\"walk_steps\":7,\"meb_fallbacks\":0,\"join\":{\"resolves\":12,\"steps\":12,\"seed_hits\":6,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":0,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":0,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0},\"point\":{\"resolves\":8,\"steps\":8,\"seed_hits\":4,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":4,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":0,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0},\"vertical\":{\"resolves\":0,\"steps\":0,\"seed_hits\":0,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":0,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":3,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0}}}\n",
+      "stderr": "",
+      "elapsed_s": 0.057258325001384947
+    },
+    {
+      "name": "frontier_cluster_one_byte",
+      "command": [
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/release/mhgp10_cluster",
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/one_byte.u32le",
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/clusterone_byte.i32le",
+        "--mcs=2",
+        "--k=2",
+        "--threads=1"
+      ],
+      "returncode": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":4,\"kmax\":2,\"balls\":6,\"clusters\":0,\"catalogue_s\":0.001,\"tower_s\":0.000,\"head_s\":0.000}\n",
+      "stderr": "",
+      "elapsed_s": 0.058530388998406124
+    },
+    {
+      "name": "frontier_catalogue_one_word",
+      "command": [
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/release/mhgp10_catalogue",
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/one_word.u32le",
+        "--k=2",
+        "--threads=1"
+      ],
+      "returncode": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":4,\"sites\":4,\"K\":2,\"threads\":1,\"balls\":6,\"levels\":2,\"prepare_s\":0.0000,\"catalogue_s\":0.0000,\"catalogue_stages\":{\"t_frontier\":0.0000,\"t_boxes\":0.0000,\"t_order\":0.0000,\"t_assemble\":0.0000,\"t_collect\":0.0000,\"t_sort\":0.0000,\"t_bands\":0.0000,\"t_compare\":0.0000,\"t_ranks\":0.0000,\"t_copy\":0.0000,\"bands\":2,\"band_members\":6,\"tasks\":0,\"max_task_sites\":0},\"by_q_p\":{\"q2\":[6,0],\"q3\":[0,0],\"q4\":[0,0]},\"nodes\":1,\"leaves\":1,\"sum_m\":4,\"max_m\":4,\"skipped_bbox\":0,\"filter_tests\":16,\"leaf_dominance_tests\":6,\"pair_tests\":6,\"triple_tests\":4,\"line_hits\":4,\"quad_tests\":0,\"judged\":7,\"extended\":3,\"weighted\":0,\"max_shell\":3,\"stalled_leaves\":0}\n",
+      "stderr": "",
+      "elapsed_s": 0.008958295000411454
+    },
+    {
+      "name": "frontier_tower_one_word",
+      "command": [
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/release/mhgp10_tower",
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/one_word.u32le",
+        "--k=2",
+        "--threads=1"
+      ],
+      "returncode": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":4,\"K\":2,\"threads\":1,\"balls\":6,\"prepare_s\":0.0000,\"catalogue_s\":0.0000,\"tower_s\":0.0024,\"points\":true,\"rss_kib\":{\"after_catalogue\":3752,\"peak_after_catalogue\":3752,\"after_tower\":3828,\"peak_after_tower\":3828},\"passes_catalogue_s\":[0.0000],\"catalogue_stages\":{\"t_frontier\":0.0000,\"t_boxes\":0.0000,\"t_order\":0.0000,\"t_assemble\":0.0000,\"t_collect\":0.0000,\"t_sort\":0.0000,\"t_bands\":0.0000,\"t_compare\":0.0000,\"t_ranks\":0.0000,\"t_copy\":0.0000,\"bands\":2,\"band_members\":6,\"tasks\":0,\"max_task_sites\":0},\"passes_tower_s\":[0.0024],\"orders\":[{\"k\":1,\"nodes\":5,\"births\":4,\"merges\":1,\"joins\":3,\"steps\":10,\"memo\":0,\"t_kruskal\":0.0000,\"t_vertical\":0.0000,\"local_cells\":6,\"walk_steps\":0,\"join\":{\"resolves\":6,\"steps\":6,\"seed_hits\":0,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":0,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":0,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0},\"point\":{\"resolves\":4,\"steps\":4,\"seed_hits\":0,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":0,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":0,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0},\"vertical\":{\"resolves\":0,\"steps\":0,\"seed_hits\":0,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":0,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":0,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0}},{\"k\":2,\"nodes\":4,\"births\":3,\"merges\":1,\"joins\":3,\"steps\":10,\"memo\":0,\"t_kruskal\":0.0000,\"t_vertical\":0.0000,\"local_cells\":6,\"walk_steps\":7,\"join\":{\"resolves\":6,\"steps\":6,\"seed_hits\":6,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":0,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":0,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0},\"point\":{\"resolves\":4,\"steps\":4,\"seed_hits\":4,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":4,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":0,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0},\"vertical\":{\"resolves\":0,\"steps\":0,\"seed_hits\":0,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":0,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":3,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0}}],\"stages\":{\"t_prepare\":0.0000,\"t_local\":0.0000,\"t_seeds\":0.0023,\"t_resolve\":0.0000,\"t_kruskal\":0.0000,\"t_points\":0.0000,\"t_vertical\":0.0000,\"sum_order_kruskal\":0.0000,\"sum_order_vertical\":0.0000,\"local_cells\":12,\"walk_steps\":7,\"meb_fallbacks\":0,\"join\":{\"resolves\":12,\"steps\":12,\"seed_hits\":6,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":0,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":0,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0},\"point\":{\"resolves\":8,\"steps\":8,\"seed_hits\":4,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":4,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":0,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0},\"vertical\":{\"resolves\":0,\"steps\":0,\"seed_hits\":0,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":0,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":3,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0}}}\n",
+      "stderr": "",
+      "elapsed_s": 0.011700348999511334
+    },
+    {
+      "name": "frontier_cluster_one_word",
+      "command": [
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/release/mhgp10_cluster",
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/one_word.u32le",
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/clusterone_word.i32le",
+        "--mcs=2",
+        "--k=2",
+        "--threads=1"
+      ],
+      "returncode": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":4,\"kmax\":2,\"balls\":6,\"clusters\":0,\"catalogue_s\":0.000,\"tower_s\":0.000,\"head_s\":0.000}\n",
+      "stderr": "",
+      "elapsed_s": 0.02227777899861394
+    },
+    {
+      "name": "frontier_catalogue_two_words",
+      "command": [
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/release/mhgp10_catalogue",
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/two_words.u32le",
+        "--k=2",
+        "--threads=1"
+      ],
+      "returncode": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":4,\"sites\":4,\"K\":2,\"threads\":1,\"balls\":6,\"levels\":2,\"prepare_s\":0.0000,\"catalogue_s\":0.0000,\"catalogue_stages\":{\"t_frontier\":0.0000,\"t_boxes\":0.0000,\"t_order\":0.0000,\"t_assemble\":0.0000,\"t_collect\":0.0000,\"t_sort\":0.0000,\"t_bands\":0.0000,\"t_compare\":0.0000,\"t_ranks\":0.0000,\"t_copy\":0.0000,\"bands\":2,\"band_members\":6,\"tasks\":0,\"max_task_sites\":0},\"by_q_p\":{\"q2\":[6,0],\"q3\":[0,0],\"q4\":[0,0]},\"nodes\":1,\"leaves\":1,\"sum_m\":4,\"max_m\":4,\"skipped_bbox\":0,\"filter_tests\":16,\"leaf_dominance_tests\":6,\"pair_tests\":6,\"triple_tests\":4,\"line_hits\":4,\"quad_tests\":0,\"judged\":7,\"extended\":3,\"weighted\":0,\"max_shell\":3,\"stalled_leaves\":0}\n",
+      "stderr": "",
+      "elapsed_s": 0.012835588999223546
+    },
+    {
+      "name": "frontier_tower_two_words",
+      "command": [
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/release/mhgp10_tower",
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/two_words.u32le",
+        "--k=2",
+        "--threads=1"
+      ],
+      "returncode": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":4,\"K\":2,\"threads\":1,\"balls\":6,\"prepare_s\":0.0000,\"catalogue_s\":0.0000,\"tower_s\":0.0002,\"points\":true,\"rss_kib\":{\"after_catalogue\":3824,\"peak_after_catalogue\":3824,\"after_tower\":3900,\"peak_after_tower\":3900},\"passes_catalogue_s\":[0.0000],\"catalogue_stages\":{\"t_frontier\":0.0000,\"t_boxes\":0.0000,\"t_order\":0.0000,\"t_assemble\":0.0000,\"t_collect\":0.0000,\"t_sort\":0.0000,\"t_bands\":0.0000,\"t_compare\":0.0000,\"t_ranks\":0.0000,\"t_copy\":0.0000,\"bands\":2,\"band_members\":6,\"tasks\":0,\"max_task_sites\":0},\"passes_tower_s\":[0.0002],\"orders\":[{\"k\":1,\"nodes\":5,\"births\":4,\"merges\":1,\"joins\":3,\"steps\":10,\"memo\":0,\"t_kruskal\":0.0000,\"t_vertical\":0.0000,\"local_cells\":6,\"walk_steps\":0,\"join\":{\"resolves\":6,\"steps\":6,\"seed_hits\":0,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":0,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":0,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0},\"point\":{\"resolves\":4,\"steps\":4,\"seed_hits\":0,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":0,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":0,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0},\"vertical\":{\"resolves\":0,\"steps\":0,\"seed_hits\":0,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":0,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":0,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0}},{\"k\":2,\"nodes\":4,\"births\":3,\"merges\":1,\"joins\":3,\"steps\":10,\"memo\":0,\"t_kruskal\":0.0000,\"t_vertical\":0.0000,\"local_cells\":6,\"walk_steps\":7,\"join\":{\"resolves\":6,\"steps\":6,\"seed_hits\":6,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":0,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":0,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0},\"point\":{\"resolves\":4,\"steps\":4,\"seed_hits\":4,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":4,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":0,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0},\"vertical\":{\"resolves\":0,\"steps\":0,\"seed_hits\":0,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":0,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":3,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0}}],\"stages\":{\"t_prepare\":0.0000,\"t_local\":0.0000,\"t_seeds\":0.0000,\"t_resolve\":0.0000,\"t_kruskal\":0.0000,\"t_points\":0.0000,\"t_vertical\":0.0000,\"sum_order_kruskal\":0.0000,\"sum_order_vertical\":0.0000,\"local_cells\":12,\"walk_steps\":7,\"meb_fallbacks\":0,\"join\":{\"resolves\":12,\"steps\":12,\"seed_hits\":6,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":0,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":0,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0},\"point\":{\"resolves\":8,\"steps\":8,\"seed_hits\":4,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":4,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":0,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0},\"vertical\":{\"resolves\":0,\"steps\":0,\"seed_hits\":0,\"birth_hits\":0,\"memo_hits\":0,\"meb\":0,\"knn_queries\":0,\"knn_jumps\":0,\"closed_balls\":0,\"lookups\":0,\"local_calls\":0,\"reused\":3,\"census_cat\":0,\"level_exact\":0,\"jump_exact\":0}}}\n",
+      "stderr": "",
+      "elapsed_s": 0.02522605400008615
+    },
+    {
+      "name": "frontier_cluster_two_words",
+      "command": [
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/release/mhgp10_cluster",
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/two_words.u32le",
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/clustertwo_words.i32le",
+        "--mcs=2",
+        "--k=2",
+        "--threads=1"
+      ],
+      "returncode": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":4,\"kmax\":2,\"balls\":6,\"clusters\":0,\"catalogue_s\":0.000,\"tower_s\":0.000,\"head_s\":0.012}\n",
+      "stderr": "",
+      "elapsed_s": 0.027593879000050947
+    },
+    {
+      "name": "frontier_tower_repeat0",
+      "command": [
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/release/mhgp10_tower",
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/valid.u32le",
+        "--k=2",
+        "--threads=1",
+        "--repeat=0"
+      ],
+      "returncode": -11,
+      "stdout": "",
+      "stderr": "",
+      "elapsed_s": 0.17789151800025138
+    },
+    {
+      "name": "frontier_tower_no_points_dump",
+      "command": [
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/release/mhgp10_tower",
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/valid.u32le",
+        "--k=2",
+        "--threads=1",
+        "--no-points",
+        "--dump=/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/no_points.dump"
+      ],
+      "returncode": -11,
+      "stdout": "",
+      "stderr": "",
+      "elapsed_s": 0.1546201340006519
+    },
+    {
+      "name": "pool_failure_worker",
+      "command": [
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/pool_failure_probe"
+      ],
+      "returncode": -6,
+      "stdout": "",
+      "stderr": "terminate called after throwing an instance of 'std::bad_alloc'\n  what():  std::bad_alloc\n",
+      "elapsed_s": 0.15828516900000977
+    }
+  ],
+  "binary_sha256": {
+    "mhgp10_unit": "311f49996912bfeb7bf7d8fb24b8e7c66fae5625e5f9c77f7987f42a7b152eed",
+    "mhgp10_catalogue": "a3bbad50b81b901c57cea7193bc48d58cce68126e44ae0a225ad678baa3af0cb",
+    "mhgp10_mreach_cluster": "1dab9a4f9cd8ec3b3f51cd42d1f073f92ae3608d869792e8cb20a33ed5dfefac",
+    "mhgp10_tower": "a20776280ef4960d68f1b65ca7007b9e8a862809c57115b58486942856c22764",
+    "mhgp10_cluster": "e00e2431f8c9daf7e90a429cb905f9c559d5a4699a376497aaf2e766f70def70"
+  }
+}

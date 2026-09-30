@@ -1,0 +1,16 @@
+spherical        hard     GMM-known 0.953 (min 0.948) published_level 0.32
+spherical        extreme  GMM-known 0.907 (min 0.896) published_level 0.16
+anisotropic      hard     GMM-known 0.950 (min 0.921) published_level 0.43
+anisotropic      extreme  GMM-known 0.894 (min 0.868) published_level 0.23
+heteroscedastic  hard     GMM-known 0.768 (min 0.759) published_level 0.42
+heteroscedastic  extreme  GMM-known 0.480 (min 0.439) published_level 0.18
+unbalanced       hard     GMM-known 0.845 (min 0.810) published_level 0.40
+unbalanced       extreme  GMM-known 0.714 (min 0.676) published_level 0.16
+shells           hard     GMM-known 1.000 (min 1.000) published_level 0.34
+shells           extreme  GMM-known 1.000 (min 1.000) published_level 0.18
+bridge           hard     GMM-known 0.980 (min 0.974) published_level 0.46
+bridge           extreme  GMM-known 0.907 (min 0.898) published_level 0.15
+hierarchical     hard     GMM-known 0.984 (min 0.921) published_level 0.51
+hierarchical     extreme  GMM-known 0.952 (min 0.921) published_level 0.46
+filaments        hard     GMM-known 0.940 (min 0.916) published_level 0.34
+filaments        extreme  GMM-known 0.795 (min 0.696) published_level 0.14

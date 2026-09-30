@@ -1,0 +1,2 @@
+validate_d=ok/none validate_p=ok/none
+result_has_status=false clusters=3 nonfinite_birth=2 nan_stability=2 inf_stability=1 nonfinite_exit=4 labels=0,0,0,0,

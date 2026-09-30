@@ -1,0 +1,41 @@
+{
+  "date": "2026-09-29",
+  "revision": "6206d1d118794c9e1cabb6faeaec2aaa77d37e5b",
+  "source": "/workspaces/E-HGP/build/v10-audit-independent-20260929/source/morsehgp3D_v10",
+  "gcp": "not_used",
+  "product_mutations": false,
+  "hashes": {
+    "release/libmhgp10_core.a": "1aaacd63dcb76413b61fc6eb983c52bdaa9a32f9a059a906af2254061beac5da",
+    "tower_probe": "1a96f1755414f391857de7ae9f3e7c6531588ca23094616631825a32cfdbac52",
+    "tower_meb_probe": "60d66b4a28cf0f7f28ad30bf37c9799277213f932e3772700513be1c706f9c91",
+    "tower_probe.cpp": "c805460322c7c00c7f1fb9efb7fa863e4ace8e4e5a696cba3da8e2bff904c2d9",
+    "tower_full_check.py": "bda0ae627440a18dce45d55b8e808d5a2678b7070bf7a371222c1e461ece6d12",
+    "tower_point_crossing.py": "c63862f775cad1fe616d1f2027e34e895139caf3bb000a737458d0261589ee6e",
+    "tower_meb_probe.cpp": "bc2b1c7b920fb3c6c864cf0692a916363128d965506cdae2b4148d947007ea00",
+    "tower_meb_check.py": "f9d1e2b8d0ca8927c91a03e2b28a884bf43d900249d0007845e79eab6605a7cb"
+  },
+  "first_full_check": {
+    "command_suffix": "tower_full_check.py tower_probe SOURCE 4",
+    "scope": "initial probe, K <= 5, two threads, before broadening the audit harness",
+    "exit_code": 0,
+    "stdout": {"alpha_exact": 266, "births_no_attached_point_at_birth_core": 172, "births_no_attached_point_at_birth_cover": 63, "clouds": 9, "covering_k_parts": 1747, "cuts_births": 776, "status": "ok", "vertical_nodes": 506}
+  },
+  "full_check": {
+    "command_suffix": "tower_full_check.py tower_probe SOURCE 16",
+    "scope": "six explicit fixtures plus sixteen fixed-seed clouds, all K <= n <= 8, binary dumps equal at one and four threads",
+    "exit_code": 0,
+    "stdout": {"alpha_exact": 911, "births_no_attached_point_at_birth_core": 623, "births_no_attached_point_at_birth_cover": 292, "clouds": 22, "covering_k_parts": 9518, "cuts_births": 3264, "status": "ok", "vertical_nodes": 1846}
+  },
+  "meb_check": {
+    "command_suffix": "tower_meb_check.py tower_meb_probe SOURCE",
+    "scope": "direct exact Welzl routine and certified MEB, brute Fraction judge; no production MEB fallback occurred",
+    "exit_code": 0,
+    "stdout": {"bases": 20, "exact_spheres": 120, "meb_fallbacks": 0, "permuted_cases": 60, "status": "ok"},
+    "harness_compile_failure_preserved": "First compilation of tower_meb_probe.cpp failed: arith::to_string has no i128 overload. The audit harness was corrected to convert i128 to I128w; no product or mathematical defect inferred."
+  },
+  "point_crossing": {
+    "command_suffix": "tower_point_crossing.py tower_probe SOURCE",
+    "exit_code": 0,
+    "stdout": {"crossing": {"first": [0, 1], "second": [1, 2]}, "cuts": [{"a": "1/4", "groups": [[0, 1], [2], [3]], "k": 1}, {"a": "36", "groups": [[1, 2]], "k": 4}], "positions": [[0, 0, 0], [1, 0, 0], [4, 0, 0], [7, 0, 0]], "status": "ok"}
+  }
+}

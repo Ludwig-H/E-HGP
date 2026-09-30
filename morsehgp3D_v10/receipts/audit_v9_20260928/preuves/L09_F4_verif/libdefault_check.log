@@ -1,0 +1,14 @@
+runs 250
+all              mcs5=0.589 mcs20=0.527 (n=250)
+anisotropic      mcs5=0.571 mcs20=0.558 (n=20)
+bridge           mcs5=0.609 mcs20=0.600 (n=20)
+filaments        mcs5=0.547 mcs20=0.508 (n=20)
+heteroscedastic  mcs5=0.563 mcs20=0.561 (n=20)
+hierarchical     mcs5=0.601 mcs20=0.666 (n=20)
+shells           mcs5=1.000 mcs20=0.589 (n=20)
+spherical        mcs5=0.537 mcs20=0.469 (n=110)
+unbalanced       mcs5=0.515 mcs20=0.526 (n=20)
+level easy     (famille x niveau, n2000 g8) mcs5=0.978 mcs20=0.970
+level medium   (famille x niveau, n2000 g8) mcs5=0.701 mcs20=0.670
+level hard     (famille x niveau, n2000 g8) mcs5=0.462 mcs20=0.383
+level extreme  (famille x niveau, n2000 g8) mcs5=0.289 mcs20=0.199

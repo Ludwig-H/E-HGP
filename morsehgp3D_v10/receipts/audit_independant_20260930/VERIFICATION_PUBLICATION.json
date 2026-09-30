@@ -1,0 +1,54 @@
+{
+  "base_head": "e9eab2754f3d9f2a9e16d8c542b908c19b725c9a",
+  "scope": "isolated publication of independent audit and archival relocation; no product edit",
+  "archive_files_verified": 425,
+  "archive_sha256_mismatches": [],
+  "tracked_archive_files_relocated": 385,
+  "own_documents_checked": 9,
+  "own_document_errors": {},
+  "docs_command": [
+    "python3",
+    "tools/check_docs.py"
+  ],
+  "baseline": {
+    "returncode": 1,
+    "stdout": "",
+    "stderr": "Documentation validation failed:\n- morsehgp3D_v10/receipts/audit_continu_20260929/performance_corrected/observed/G4_SESSION4_HISTORIQUE.md:15: missing local link 'plan_s4_j2c.json'\n- morsehgp3D_v10/receipts/audit_continu_20260929/performance_corrected/observed/G4_SESSION4_HISTORIQUE.md:22: missing local link 'compare_sessions.py'\n- morsehgp3D_v10/receipts/audit_continu_20260929/performance_corrected/observed/G4_SESSION4_HISTORIQUE.md:23: missing local link 'comparaison_s2_s3_s4.txt'\n"
+  },
+  "after_relocation": {
+    "returncode": 1,
+    "stdout": "",
+    "stderr": "Documentation validation failed:\n- morsehgp3D_v10/PASSATION.md:20: missing local link 'audits/audit_v9_20260928/AUDIT_V9_CRITIQUE_20260928.md'\n- morsehgp3D_v10/receipts/audit_continu_20260929/performance_corrected/observed/G4_SESSION4_HISTORIQUE.md:15: missing local link 'plan_s4_j2c.json'\n- morsehgp3D_v10/receipts/audit_continu_20260929/performance_corrected/observed/G4_SESSION4_HISTORIQUE.md:22: missing local link 'compare_sessions.py'\n- morsehgp3D_v10/receipts/audit_continu_20260929/performance_corrected/observed/G4_SESSION4_HISTORIQUE.md:23: missing local link 'comparaison_s2_s3_s4.txt'\n"
+  },
+  "navigation_handoff": {
+    "files_excluded": [
+      "morsehgp3D_v10/PASSATION.md",
+      "morsehgp3D_v10/audits/README.md"
+    ],
+    "owner": "developer",
+    "reference": "audits/REPONSE_CLAUDE_CONTRE_AUDITS_ET_RACCORD_20260929.md section 4",
+    "reason": "developer explicitly commits prepared navigation edits after relocation owner commit",
+    "publication_link_temporarily_missing": "morsehgp3D_v10/PASSATION.md:20 -> audits/audit_v9_20260928/AUDIT_V9_CRITIQUE_20260928.md",
+    "prepared_workspace_target": "morsehgp3D_v10/receipts/audit_v9_20260928/AUDIT_V9_CRITIQUE_20260928.md"
+  },
+  "git_scope": {
+    "expected_paths": 897,
+    "staged_paths": 897,
+    "unplanned": [],
+    "product_edits": [],
+    "other_authors_navigation_excluded": true
+  },
+  "diff_check": {
+    "all_staged": {
+      "returncode": 2,
+      "stdout": "morsehgp3D_v10/receipts/audit_independant_20260929/evidence_head_validate_results.json:71: new blank line at EOF.\nmorsehgp3D_v10/receipts/audit_v9_20260928/preuves/verif_L06_F5/cfg.log:9: trailing whitespace.\n+-- Found Threads: TRUE  \nmorsehgp3D_v10/receipts/audit_v9_20260928/preuves/verif_L06_F5/cfg.log:10: trailing whitespace.\n+-- Found Python3: /home/codespace/.python/current/bin/python3 (found version \"3.12.1\") found components: Interpreter \n",
+      "stderr": ""
+    },
+    "own_active_notes_and_new_scripts": {
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "raw_evidence_policy": "Preserve original logs and JSON bytes; whitespace in immutable captured output is not reformatted."
+  }
+}

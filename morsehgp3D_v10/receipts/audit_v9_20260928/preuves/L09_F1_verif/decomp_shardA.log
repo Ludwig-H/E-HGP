@@ -1,0 +1,189 @@
+ 27/250 bridge_n2000_g8_extreme_noise0 seed=2026092801 cda_eom=0.532 head_eom=0.000 splitonly_eom=0.000 rootonly_eom=0.532 head_eom_noroot=0.532 head_leaf=0.532 cda_eom_noroot=0.532 3.1s
+ 28/250 bridge_n2000_g8_extreme_noise0 seed=2026092802 cda_eom=0.571 head_eom=0.571 splitonly_eom=0.000 rootonly_eom=0.571 head_eom_noroot=0.571 head_leaf=0.571 cda_eom_noroot=0.571 3.0s
+ 29/250 bridge_n2000_g8_extreme_noise0 seed=2026092803 cda_eom=0.522 head_eom=0.522 splitonly_eom=0.000 rootonly_eom=0.522 head_eom_noroot=0.522 head_leaf=0.522 cda_eom_noroot=0.522 3.3s
+ 30/250 bridge_n2000_g8_extreme_noise0 seed=2026092804 cda_eom=0.532 head_eom=0.532 splitonly_eom=0.000 rootonly_eom=0.532 head_eom_noroot=0.532 head_leaf=0.532 cda_eom_noroot=0.532 2.8s
+ 31/250 bridge_n2000_g8_hard_noise0 seed=2026092800 cda_eom=0.894 head_eom=0.894 splitonly_eom=0.894 rootonly_eom=0.894 head_eom_noroot=0.894 head_leaf=0.894 cda_eom_noroot=0.894 2.3s
+ 32/250 bridge_n2000_g8_hard_noise0 seed=2026092801 cda_eom=0.871 head_eom=0.871 splitonly_eom=0.871 rootonly_eom=0.871 head_eom_noroot=0.871 head_leaf=0.871 cda_eom_noroot=0.871 3.0s
+ 33/250 bridge_n2000_g8_hard_noise0 seed=2026092802 cda_eom=0.896 head_eom=0.896 splitonly_eom=0.896 rootonly_eom=0.896 head_eom_noroot=0.896 head_leaf=0.896 cda_eom_noroot=0.896 2.9s
+ 34/250 bridge_n2000_g8_hard_noise0 seed=2026092803 cda_eom=0.879 head_eom=0.879 splitonly_eom=0.879 rootonly_eom=0.879 head_eom_noroot=0.879 head_leaf=0.879 cda_eom_noroot=0.879 3.9s
+ 35/250 bridge_n2000_g8_hard_noise0 seed=2026092804 cda_eom=0.901 head_eom=0.901 splitonly_eom=0.901 rootonly_eom=0.901 head_eom_noroot=0.901 head_leaf=0.901 cda_eom_noroot=0.901 3.6s
+ 36/250 bridge_n2000_g8_medium_noise0 seed=2026092800 cda_eom=0.926 head_eom=0.926 splitonly_eom=0.926 rootonly_eom=0.926 head_eom_noroot=0.926 head_leaf=0.926 cda_eom_noroot=0.926 2.8s
+ 37/250 bridge_n2000_g8_medium_noise0 seed=2026092801 cda_eom=0.917 head_eom=0.917 splitonly_eom=0.917 rootonly_eom=0.917 head_eom_noroot=0.917 head_leaf=0.917 cda_eom_noroot=0.917 2.6s
+ 38/250 bridge_n2000_g8_medium_noise0 seed=2026092802 cda_eom=0.938 head_eom=0.938 splitonly_eom=0.938 rootonly_eom=0.938 head_eom_noroot=0.938 head_leaf=0.938 cda_eom_noroot=0.938 3.0s
+ 39/250 bridge_n2000_g8_medium_noise0 seed=2026092803 cda_eom=0.903 head_eom=0.903 splitonly_eom=0.903 rootonly_eom=0.903 head_eom_noroot=0.903 head_leaf=0.903 cda_eom_noroot=0.903 3.4s
+ 40/250 bridge_n2000_g8_medium_noise0 seed=2026092804 cda_eom=0.915 head_eom=0.915 splitonly_eom=0.915 rootonly_eom=0.915 head_eom_noroot=0.915 head_leaf=0.915 cda_eom_noroot=0.915 2.9s
+ 41/250 filaments_n2000_g8_easy_noise0 seed=2026092800 cda_eom=0.597 head_eom=0.827 splitonly_eom=0.827 rootonly_eom=0.597 head_eom_noroot=0.827 head_leaf=0.597 cda_eom_noroot=0.597 3.9s
+ 42/250 filaments_n2000_g8_easy_noise0 seed=2026092801 cda_eom=0.583 head_eom=0.960 splitonly_eom=0.960 rootonly_eom=0.583 head_eom_noroot=0.960 head_leaf=0.583 cda_eom_noroot=0.583 2.6s
+ 43/250 filaments_n2000_g8_easy_noise0 seed=2026092802 cda_eom=0.578 head_eom=0.899 splitonly_eom=0.899 rootonly_eom=0.578 head_eom_noroot=0.899 head_leaf=0.578 cda_eom_noroot=0.578 2.6s
+ 44/250 filaments_n2000_g8_easy_noise0 seed=2026092803 cda_eom=0.471 head_eom=0.999 splitonly_eom=0.999 rootonly_eom=0.471 head_eom_noroot=0.999 head_leaf=0.471 cda_eom_noroot=0.471 2.7s
+ 45/250 filaments_n2000_g8_easy_noise0 seed=2026092804 cda_eom=0.709 head_eom=0.999 splitonly_eom=0.999 rootonly_eom=0.709 head_eom_noroot=0.999 head_leaf=0.709 cda_eom_noroot=0.709 3.0s
+ 46/250 filaments_n2000_g8_extreme_noise0 seed=2026092800 cda_eom=0.247 head_eom=0.000 splitonly_eom=0.000 rootonly_eom=0.247 head_eom_noroot=0.247 head_leaf=0.247 cda_eom_noroot=0.247 3.4s
+ 47/250 filaments_n2000_g8_extreme_noise0 seed=2026092801 cda_eom=0.324 head_eom=0.000 splitonly_eom=0.000 rootonly_eom=0.324 head_eom_noroot=0.324 head_leaf=0.324 cda_eom_noroot=0.324 3.0s
+ 48/250 filaments_n2000_g8_extreme_noise0 seed=2026092802 cda_eom=0.382 head_eom=0.382 splitonly_eom=0.000 rootonly_eom=0.382 head_eom_noroot=0.382 head_leaf=0.382 cda_eom_noroot=0.382 2.9s
+ 49/250 filaments_n2000_g8_extreme_noise0 seed=2026092803 cda_eom=0.278 head_eom=0.000 splitonly_eom=0.000 rootonly_eom=0.278 head_eom_noroot=0.278 head_leaf=0.278 cda_eom_noroot=0.278 3.1s
+ 50/250 filaments_n2000_g8_extreme_noise0 seed=2026092804 cda_eom=0.349 head_eom=0.000 splitonly_eom=0.000 rootonly_eom=0.349 head_eom_noroot=0.349 head_leaf=0.349 cda_eom_noroot=0.349 3.4s
+ 51/250 filaments_n2000_g8_hard_noise0 seed=2026092800 cda_eom=0.550 head_eom=0.550 splitonly_eom=0.000 rootonly_eom=0.550 head_eom_noroot=0.550 head_leaf=0.550 cda_eom_noroot=0.550 3.2s
+ 52/250 filaments_n2000_g8_hard_noise0 seed=2026092801 cda_eom=0.314 head_eom=0.077 splitonly_eom=0.077 rootonly_eom=0.314 head_eom_noroot=0.077 head_leaf=0.314 cda_eom_noroot=0.314 2.7s
+ 53/250 filaments_n2000_g8_hard_noise0 seed=2026092802 cda_eom=0.516 head_eom=0.516 splitonly_eom=0.516 rootonly_eom=0.516 head_eom_noroot=0.516 head_leaf=0.516 cda_eom_noroot=0.516 2.6s
+ 54/250 filaments_n2000_g8_hard_noise0 seed=2026092803 cda_eom=0.416 head_eom=0.416 splitonly_eom=0.416 rootonly_eom=0.416 head_eom_noroot=0.416 head_leaf=0.416 cda_eom_noroot=0.416 1.8s
+ 55/250 filaments_n2000_g8_hard_noise0 seed=2026092804 cda_eom=0.438 head_eom=0.568 splitonly_eom=0.568 rootonly_eom=0.438 head_eom_noroot=0.568 head_leaf=0.438 cda_eom_noroot=0.438 1.7s
+ 56/250 filaments_n2000_g8_medium_noise0 seed=2026092800 cda_eom=0.568 head_eom=0.713 splitonly_eom=0.713 rootonly_eom=0.568 head_eom_noroot=0.713 head_leaf=0.568 cda_eom_noroot=0.568 2.1s
+ 57/250 filaments_n2000_g8_medium_noise0 seed=2026092801 cda_eom=0.564 head_eom=0.658 splitonly_eom=0.658 rootonly_eom=0.564 head_eom_noroot=0.658 head_leaf=0.564 cda_eom_noroot=0.564 2.1s
+ 58/250 filaments_n2000_g8_medium_noise0 seed=2026092802 cda_eom=0.586 head_eom=0.675 splitonly_eom=0.675 rootonly_eom=0.586 head_eom_noroot=0.675 head_leaf=0.586 cda_eom_noroot=0.586 1.7s
+ 59/250 filaments_n2000_g8_medium_noise0 seed=2026092803 cda_eom=0.474 head_eom=0.663 splitonly_eom=0.663 rootonly_eom=0.474 head_eom_noroot=0.663 head_leaf=0.474 cda_eom_noroot=0.474 1.7s
+ 60/250 filaments_n2000_g8_medium_noise0 seed=2026092804 cda_eom=0.706 head_eom=0.949 splitonly_eom=0.949 rootonly_eom=0.706 head_eom_noroot=0.949 head_leaf=0.706 cda_eom_noroot=0.706 2.1s
+ 61/250 heteroscedastic_n2000_g8_easy_noise0 seed=2026092800 cda_eom=0.998 head_eom=0.998 splitonly_eom=0.998 rootonly_eom=0.998 head_eom_noroot=0.998 head_leaf=0.998 cda_eom_noroot=0.998 2.8s
+ 62/250 heteroscedastic_n2000_g8_easy_noise0 seed=2026092801 cda_eom=0.993 head_eom=0.993 splitonly_eom=0.993 rootonly_eom=0.993 head_eom_noroot=0.993 head_leaf=0.993 cda_eom_noroot=0.993 2.3s
+ 63/250 heteroscedastic_n2000_g8_easy_noise0 seed=2026092802 cda_eom=0.999 head_eom=0.999 splitonly_eom=0.999 rootonly_eom=0.999 head_eom_noroot=0.999 head_leaf=0.999 cda_eom_noroot=0.999 2.4s
+ 64/250 heteroscedastic_n2000_g8_easy_noise0 seed=2026092803 cda_eom=0.995 head_eom=0.995 splitonly_eom=0.995 rootonly_eom=0.995 head_eom_noroot=0.995 head_leaf=0.995 cda_eom_noroot=0.995 1.8s
+ 65/250 heteroscedastic_n2000_g8_easy_noise0 seed=2026092804 cda_eom=1.000 head_eom=1.000 splitonly_eom=1.000 rootonly_eom=1.000 head_eom_noroot=1.000 head_leaf=1.000 cda_eom_noroot=1.000 2.1s
+ 66/250 heteroscedastic_n2000_g8_extreme_noise0 seed=2026092800 cda_eom=0.309 head_eom=0.000 splitonly_eom=0.000 rootonly_eom=0.309 head_eom_noroot=0.309 head_leaf=0.309 cda_eom_noroot=0.309 5.5s
+ 67/250 heteroscedastic_n2000_g8_extreme_noise0 seed=2026092801 cda_eom=0.285 head_eom=0.000 splitonly_eom=0.000 rootonly_eom=0.285 head_eom_noroot=0.285 head_leaf=0.285 cda_eom_noroot=0.285 6.1s
+ 68/250 heteroscedastic_n2000_g8_extreme_noise0 seed=2026092802 cda_eom=0.278 head_eom=0.000 splitonly_eom=0.000 rootonly_eom=0.278 head_eom_noroot=0.278 head_leaf=0.278 cda_eom_noroot=0.278 4.5s
+ 69/250 heteroscedastic_n2000_g8_extreme_noise0 seed=2026092803 cda_eom=0.284 head_eom=0.000 splitonly_eom=0.000 rootonly_eom=0.284 head_eom_noroot=0.284 head_leaf=0.284 cda_eom_noroot=0.284 4.9s
+ 70/250 heteroscedastic_n2000_g8_extreme_noise0 seed=2026092804 cda_eom=0.282 head_eom=0.000 splitonly_eom=0.000 rootonly_eom=0.282 head_eom_noroot=0.282 head_leaf=0.282 cda_eom_noroot=0.282 5.0s
+ 71/250 heteroscedastic_n2000_g8_hard_noise0 seed=2026092800 cda_eom=0.499 head_eom=0.499 splitonly_eom=0.499 rootonly_eom=0.499 head_eom_noroot=0.499 head_leaf=0.499 cda_eom_noroot=0.499 4.1s
+ 72/250 heteroscedastic_n2000_g8_hard_noise0 seed=2026092801 cda_eom=0.570 head_eom=0.570 splitonly_eom=0.570 rootonly_eom=0.570 head_eom_noroot=0.570 head_leaf=0.570 cda_eom_noroot=0.570 4.4s
+ 73/250 heteroscedastic_n2000_g8_hard_noise0 seed=2026092802 cda_eom=0.495 head_eom=0.495 splitonly_eom=0.495 rootonly_eom=0.495 head_eom_noroot=0.495 head_leaf=0.495 cda_eom_noroot=0.495 4.1s
+ 74/250 heteroscedastic_n2000_g8_hard_noise0 seed=2026092803 cda_eom=0.553 head_eom=0.553 splitonly_eom=0.553 rootonly_eom=0.553 head_eom_noroot=0.553 head_leaf=0.553 cda_eom_noroot=0.553 3.8s
+ 75/250 heteroscedastic_n2000_g8_hard_noise0 seed=2026092804 cda_eom=0.540 head_eom=0.540 splitonly_eom=0.540 rootonly_eom=0.540 head_eom_noroot=0.540 head_leaf=0.540 cda_eom_noroot=0.540 3.7s
+ 76/250 heteroscedastic_n2000_g8_medium_noise0 seed=2026092800 cda_eom=0.815 head_eom=0.815 splitonly_eom=0.815 rootonly_eom=0.815 head_eom_noroot=0.815 head_leaf=0.815 cda_eom_noroot=0.815 2.7s
+ 77/250 heteroscedastic_n2000_g8_medium_noise0 seed=2026092801 cda_eom=0.758 head_eom=0.758 splitonly_eom=0.758 rootonly_eom=0.758 head_eom_noroot=0.758 head_leaf=0.758 cda_eom_noroot=0.758 2.5s
+ 78/250 heteroscedastic_n2000_g8_medium_noise0 seed=2026092802 cda_eom=0.818 head_eom=0.818 splitonly_eom=0.818 rootonly_eom=0.818 head_eom_noroot=0.818 head_leaf=0.818 cda_eom_noroot=0.818 3.0s
+ 79/250 heteroscedastic_n2000_g8_medium_noise0 seed=2026092803 cda_eom=0.811 head_eom=0.811 splitonly_eom=0.811 rootonly_eom=0.811 head_eom_noroot=0.811 head_leaf=0.811 cda_eom_noroot=0.811 2.5s
+ 80/250 heteroscedastic_n2000_g8_medium_noise0 seed=2026092804 cda_eom=0.818 head_eom=0.818 splitonly_eom=0.818 rootonly_eom=0.818 head_eom_noroot=0.818 head_leaf=0.818 cda_eom_noroot=0.818 3.1s
+ 81/250 hierarchical_n2000_g8_easy_noise0 seed=2026092800 cda_eom=0.388 head_eom=0.504 splitonly_eom=0.504 rootonly_eom=0.388 head_eom_noroot=0.504 head_leaf=0.388 cda_eom_noroot=0.388 2.7s
+ 82/250 hierarchical_n2000_g8_easy_noise0 seed=2026092801 cda_eom=0.356 head_eom=0.535 splitonly_eom=0.535 rootonly_eom=0.356 head_eom_noroot=0.535 head_leaf=0.356 cda_eom_noroot=0.356 2.7s
+ 83/250 hierarchical_n2000_g8_easy_noise0 seed=2026092802 cda_eom=0.365 head_eom=0.471 splitonly_eom=0.471 rootonly_eom=0.365 head_eom_noroot=0.471 head_leaf=0.365 cda_eom_noroot=0.365 2.5s
+ 84/250 hierarchical_n2000_g8_easy_noise0 seed=2026092803 cda_eom=0.454 head_eom=0.540 splitonly_eom=0.540 rootonly_eom=0.454 head_eom_noroot=0.540 head_leaf=0.454 cda_eom_noroot=0.454 1.7s
+ 85/250 hierarchical_n2000_g8_easy_noise0 seed=2026092804 cda_eom=0.395 head_eom=0.395 splitonly_eom=0.395 rootonly_eom=0.395 head_eom_noroot=0.395 head_leaf=0.395 cda_eom_noroot=0.395 1.8s
+ 86/250 hierarchical_n2000_g8_extreme_noise0 seed=2026092800 cda_eom=0.464 head_eom=0.464 splitonly_eom=0.464 rootonly_eom=0.464 head_eom_noroot=0.464 head_leaf=0.464 cda_eom_noroot=0.464 1.7s
+ 87/250 hierarchical_n2000_g8_extreme_noise0 seed=2026092801 cda_eom=0.464 head_eom=0.464 splitonly_eom=0.464 rootonly_eom=0.464 head_eom_noroot=0.464 head_leaf=0.464 cda_eom_noroot=0.464 2.0s
+ 88/250 hierarchical_n2000_g8_extreme_noise0 seed=2026092802 cda_eom=0.464 head_eom=0.464 splitonly_eom=0.464 rootonly_eom=0.464 head_eom_noroot=0.464 head_leaf=0.464 cda_eom_noroot=0.464 1.8s
+ 89/250 hierarchical_n2000_g8_extreme_noise0 seed=2026092803 cda_eom=0.464 head_eom=0.464 splitonly_eom=0.464 rootonly_eom=0.464 head_eom_noroot=0.464 head_leaf=0.464 cda_eom_noroot=0.464 1.6s
+ 90/250 hierarchical_n2000_g8_extreme_noise0 seed=2026092804 cda_eom=0.464 head_eom=0.464 splitonly_eom=0.464 rootonly_eom=0.464 head_eom_noroot=0.464 head_leaf=0.464 cda_eom_noroot=0.464 1.7s
+ 91/250 hierarchical_n2000_g8_hard_noise0 seed=2026092800 cda_eom=0.464 head_eom=0.464 splitonly_eom=0.464 rootonly_eom=0.464 head_eom_noroot=0.464 head_leaf=0.464 cda_eom_noroot=0.464 2.0s
+ 92/250 hierarchical_n2000_g8_hard_noise0 seed=2026092801 cda_eom=0.464 head_eom=0.464 splitonly_eom=0.464 rootonly_eom=0.464 head_eom_noroot=0.464 head_leaf=0.464 cda_eom_noroot=0.464 2.1s
+ 93/250 hierarchical_n2000_g8_hard_noise0 seed=2026092802 cda_eom=0.463 head_eom=0.463 splitonly_eom=0.463 rootonly_eom=0.463 head_eom_noroot=0.463 head_leaf=0.463 cda_eom_noroot=0.463 2.4s
+ 94/250 hierarchical_n2000_g8_hard_noise0 seed=2026092803 cda_eom=0.463 head_eom=0.463 splitonly_eom=0.463 rootonly_eom=0.463 head_eom_noroot=0.463 head_leaf=0.463 cda_eom_noroot=0.463 2.0s
+ 95/250 hierarchical_n2000_g8_hard_noise0 seed=2026092804 cda_eom=0.464 head_eom=0.464 splitonly_eom=0.464 rootonly_eom=0.464 head_eom_noroot=0.464 head_leaf=0.464 cda_eom_noroot=0.464 1.6s
+ 96/250 hierarchical_n2000_g8_medium_noise0 seed=2026092800 cda_eom=0.463 head_eom=0.463 splitonly_eom=0.463 rootonly_eom=0.463 head_eom_noroot=0.463 head_leaf=0.463 cda_eom_noroot=0.463 2.0s
+ 97/250 hierarchical_n2000_g8_medium_noise0 seed=2026092801 cda_eom=0.463 head_eom=0.463 splitonly_eom=0.463 rootonly_eom=0.463 head_eom_noroot=0.463 head_leaf=0.463 cda_eom_noroot=0.463 2.0s
+ 98/250 hierarchical_n2000_g8_medium_noise0 seed=2026092802 cda_eom=0.463 head_eom=0.463 splitonly_eom=0.463 rootonly_eom=0.463 head_eom_noroot=0.463 head_leaf=0.463 cda_eom_noroot=0.463 1.8s
+ 99/250 hierarchical_n2000_g8_medium_noise0 seed=2026092803 cda_eom=0.463 head_eom=0.463 splitonly_eom=0.463 rootonly_eom=0.463 head_eom_noroot=0.463 head_leaf=0.463 cda_eom_noroot=0.463 1.7s
+100/250 hierarchical_n2000_g8_medium_noise0 seed=2026092804 cda_eom=0.463 head_eom=0.463 splitonly_eom=0.463 rootonly_eom=0.463 head_eom_noroot=0.463 head_leaf=0.463 cda_eom_noroot=0.463 1.9s
+101/250 shells_n2000_g8_easy_noise0 seed=2026092800 cda_eom=0.410 head_eom=0.410 splitonly_eom=0.410 rootonly_eom=0.410 head_eom_noroot=0.410 head_leaf=0.410 cda_eom_noroot=0.410 2.0s
+102/250 shells_n2000_g8_easy_noise0 seed=2026092801 cda_eom=0.603 head_eom=0.603 splitonly_eom=0.603 rootonly_eom=0.603 head_eom_noroot=0.603 head_leaf=0.603 cda_eom_noroot=0.603 1.9s
+103/250 shells_n2000_g8_easy_noise0 seed=2026092802 cda_eom=0.670 head_eom=0.670 splitonly_eom=0.670 rootonly_eom=0.670 head_eom_noroot=0.670 head_leaf=0.670 cda_eom_noroot=0.670 2.6s
+104/250 shells_n2000_g8_easy_noise0 seed=2026092803 cda_eom=0.641 head_eom=0.737 splitonly_eom=0.737 rootonly_eom=0.641 head_eom_noroot=0.737 head_leaf=0.641 cda_eom_noroot=0.641 2.6s
+105/250 shells_n2000_g8_easy_noise0 seed=2026092804 cda_eom=0.605 head_eom=0.605 splitonly_eom=0.605 rootonly_eom=0.605 head_eom_noroot=0.605 head_leaf=0.605 cda_eom_noroot=0.605 2.3s
+106/250 shells_n2000_g8_extreme_noise0 seed=2026092800 cda_eom=0.412 head_eom=0.412 splitonly_eom=0.412 rootonly_eom=0.412 head_eom_noroot=0.412 head_leaf=0.412 cda_eom_noroot=0.412 1.8s
+107/250 shells_n2000_g8_extreme_noise0 seed=2026092801 cda_eom=0.603 head_eom=0.603 splitonly_eom=0.603 rootonly_eom=0.603 head_eom_noroot=0.603 head_leaf=0.603 cda_eom_noroot=0.603 1.7s
+108/250 shells_n2000_g8_extreme_noise0 seed=2026092802 cda_eom=0.671 head_eom=0.671 splitonly_eom=0.671 rootonly_eom=0.671 head_eom_noroot=0.671 head_leaf=0.671 cda_eom_noroot=0.671 2.0s
+109/250 shells_n2000_g8_extreme_noise0 seed=2026092803 cda_eom=0.641 head_eom=0.737 splitonly_eom=0.737 rootonly_eom=0.641 head_eom_noroot=0.737 head_leaf=0.641 cda_eom_noroot=0.641 2.3s
+110/250 shells_n2000_g8_extreme_noise0 seed=2026092804 cda_eom=0.605 head_eom=0.605 splitonly_eom=0.605 rootonly_eom=0.605 head_eom_noroot=0.605 head_leaf=0.605 cda_eom_noroot=0.605 2.6s
+111/250 shells_n2000_g8_hard_noise0 seed=2026092800 cda_eom=0.410 head_eom=0.410 splitonly_eom=0.410 rootonly_eom=0.410 head_eom_noroot=0.410 head_leaf=0.410 cda_eom_noroot=0.410 2.6s
+112/250 shells_n2000_g8_hard_noise0 seed=2026092801 cda_eom=0.603 head_eom=0.603 splitonly_eom=0.603 rootonly_eom=0.603 head_eom_noroot=0.603 head_leaf=0.603 cda_eom_noroot=0.603 1.8s
+113/250 shells_n2000_g8_hard_noise0 seed=2026092802 cda_eom=0.671 head_eom=0.671 splitonly_eom=0.671 rootonly_eom=0.671 head_eom_noroot=0.671 head_leaf=0.671 cda_eom_noroot=0.671 2.7s
+114/250 shells_n2000_g8_hard_noise0 seed=2026092803 cda_eom=0.596 head_eom=0.697 splitonly_eom=0.697 rootonly_eom=0.596 head_eom_noroot=0.697 head_leaf=0.596 cda_eom_noroot=0.596 2.6s
+115/250 shells_n2000_g8_hard_noise0 seed=2026092804 cda_eom=0.623 head_eom=0.623 splitonly_eom=0.623 rootonly_eom=0.623 head_eom_noroot=0.623 head_leaf=0.623 cda_eom_noroot=0.623 1.8s
+116/250 shells_n2000_g8_medium_noise0 seed=2026092800 cda_eom=0.412 head_eom=0.412 splitonly_eom=0.412 rootonly_eom=0.412 head_eom_noroot=0.412 head_leaf=0.412 cda_eom_noroot=0.412 2.4s
+117/250 shells_n2000_g8_medium_noise0 seed=2026092801 cda_eom=0.603 head_eom=0.603 splitonly_eom=0.603 rootonly_eom=0.603 head_eom_noroot=0.603 head_leaf=0.603 cda_eom_noroot=0.603 2.4s
+118/250 shells_n2000_g8_medium_noise0 seed=2026092802 cda_eom=0.671 head_eom=0.671 splitonly_eom=0.671 rootonly_eom=0.671 head_eom_noroot=0.671 head_leaf=0.671 cda_eom_noroot=0.671 2.3s
+119/250 shells_n2000_g8_medium_noise0 seed=2026092803 cda_eom=0.595 head_eom=0.697 splitonly_eom=0.697 rootonly_eom=0.595 head_eom_noroot=0.697 head_leaf=0.595 cda_eom_noroot=0.595 1.8s
+120/250 shells_n2000_g8_medium_noise0 seed=2026092804 cda_eom=0.598 head_eom=0.598 splitonly_eom=0.598 rootonly_eom=0.598 head_eom_noroot=0.598 head_leaf=0.598 cda_eom_noroot=0.598 2.3s
+121/250 spherical_n2000_g16_hard_noise0 seed=2026092800 cda_eom=0.849 head_eom=0.849 splitonly_eom=0.849 rootonly_eom=0.849 head_eom_noroot=0.849 head_leaf=0.849 cda_eom_noroot=0.849 2.0s
+122/250 spherical_n2000_g16_hard_noise0 seed=2026092801 cda_eom=0.840 head_eom=0.840 splitonly_eom=0.840 rootonly_eom=0.840 head_eom_noroot=0.840 head_leaf=0.840 cda_eom_noroot=0.840 2.0s
+123/250 spherical_n2000_g16_hard_noise0 seed=2026092802 cda_eom=0.828 head_eom=0.828 splitonly_eom=0.828 rootonly_eom=0.828 head_eom_noroot=0.828 head_leaf=0.828 cda_eom_noroot=0.828 2.1s
+124/250 spherical_n2000_g16_hard_noise0 seed=2026092803 cda_eom=0.884 head_eom=0.884 splitonly_eom=0.884 rootonly_eom=0.884 head_eom_noroot=0.884 head_leaf=0.884 cda_eom_noroot=0.884 2.0s
+125/250 spherical_n2000_g16_hard_noise0 seed=2026092804 cda_eom=0.764 head_eom=0.764 splitonly_eom=0.764 rootonly_eom=0.764 head_eom_noroot=0.764 head_leaf=0.764 cda_eom_noroot=0.764 2.5s
+126/250 spherical_n2000_g16_medium_noise0 seed=2026092800 cda_eom=0.944 head_eom=0.944 splitonly_eom=0.944 rootonly_eom=0.944 head_eom_noroot=0.944 head_leaf=0.944 cda_eom_noroot=0.944 1.8s
+127/250 spherical_n2000_g16_medium_noise0 seed=2026092801 cda_eom=0.942 head_eom=0.942 splitonly_eom=0.942 rootonly_eom=0.942 head_eom_noroot=0.942 head_leaf=0.942 cda_eom_noroot=0.942 1.9s
+128/250 spherical_n2000_g16_medium_noise0 seed=2026092802 cda_eom=0.948 head_eom=0.948 splitonly_eom=0.948 rootonly_eom=0.948 head_eom_noroot=0.948 head_leaf=0.948 cda_eom_noroot=0.948 1.8s
+129/250 spherical_n2000_g16_medium_noise0 seed=2026092803 cda_eom=0.953 head_eom=0.953 splitonly_eom=0.953 rootonly_eom=0.953 head_eom_noroot=0.953 head_leaf=0.953 cda_eom_noroot=0.953 1.9s
+130/250 spherical_n2000_g16_medium_noise0 seed=2026092804 cda_eom=0.940 head_eom=0.940 splitonly_eom=0.940 rootonly_eom=0.940 head_eom_noroot=0.940 head_leaf=0.940 cda_eom_noroot=0.940 1.8s
+131/250 spherical_n2000_g2_medium_noise0 seed=2026092800 cda_eom=0.738 head_eom=0.000 splitonly_eom=0.000 rootonly_eom=0.738 head_eom_noroot=0.738 head_leaf=0.567 cda_eom_noroot=0.738 3.9s
+132/250 spherical_n2000_g2_medium_noise0 seed=2026092801 cda_eom=0.771 head_eom=0.000 splitonly_eom=0.000 rootonly_eom=0.771 head_eom_noroot=0.771 head_leaf=0.771 cda_eom_noroot=0.771 3.4s
+133/250 spherical_n2000_g2_medium_noise0 seed=2026092802 cda_eom=0.508 head_eom=0.000 splitonly_eom=0.000 rootonly_eom=0.508 head_eom_noroot=0.736 head_leaf=0.508 cda_eom_noroot=0.508 3.1s
+134/250 spherical_n2000_g2_medium_noise0 seed=2026092803 cda_eom=0.500 head_eom=0.000 splitonly_eom=0.000 rootonly_eom=0.500 head_eom_noroot=0.708 head_leaf=0.500 cda_eom_noroot=0.500 2.9s
+135/250 spherical_n2000_g2_medium_noise0 seed=2026092804 cda_eom=0.810 head_eom=0.000 splitonly_eom=0.000 rootonly_eom=0.810 head_eom_noroot=0.810 head_leaf=0.037 cda_eom_noroot=0.810 3.2s
+136/250 spherical_n2000_g32_medium_noise0 seed=2026092800 cda_eom=0.897 head_eom=0.897 splitonly_eom=0.897 rootonly_eom=0.897 head_eom_noroot=0.897 head_leaf=0.897 cda_eom_noroot=0.897 3.0s
+137/250 spherical_n2000_g32_medium_noise0 seed=2026092801 cda_eom=0.883 head_eom=0.883 splitonly_eom=0.883 rootonly_eom=0.883 head_eom_noroot=0.883 head_leaf=0.883 cda_eom_noroot=0.883 2.5s
+138/250 spherical_n2000_g32_medium_noise0 seed=2026092802 cda_eom=0.901 head_eom=0.901 splitonly_eom=0.901 rootonly_eom=0.901 head_eom_noroot=0.901 head_leaf=0.901 cda_eom_noroot=0.901 2.5s
+139/250 spherical_n2000_g32_medium_noise0 seed=2026092803 cda_eom=0.856 head_eom=0.856 splitonly_eom=0.856 rootonly_eom=0.856 head_eom_noroot=0.856 head_leaf=0.856 cda_eom_noroot=0.856 2.6s
+140/250 spherical_n2000_g32_medium_noise0 seed=2026092804 cda_eom=0.917 head_eom=0.917 splitonly_eom=0.917 rootonly_eom=0.917 head_eom_noroot=0.917 head_leaf=0.917 cda_eom_noroot=0.917 2.8s
+141/250 spherical_n2000_g4_hard_noise0 seed=2026092800 cda_eom=0.813 head_eom=0.000 splitonly_eom=0.000 rootonly_eom=0.813 head_eom_noroot=0.813 head_leaf=0.813 cda_eom_noroot=0.813 3.6s
+142/250 spherical_n2000_g4_hard_noise0 seed=2026092801 cda_eom=0.748 head_eom=0.000 splitonly_eom=0.000 rootonly_eom=0.748 head_eom_noroot=0.748 head_leaf=0.748 cda_eom_noroot=0.748 3.9s
+143/250 spherical_n2000_g4_hard_noise0 seed=2026092802 cda_eom=0.603 head_eom=0.000 splitonly_eom=0.000 rootonly_eom=0.603 head_eom_noroot=0.772 head_leaf=0.603 cda_eom_noroot=0.603 4.6s
+144/250 spherical_n2000_g4_hard_noise0 seed=2026092803 cda_eom=0.731 head_eom=0.000 splitonly_eom=0.000 rootonly_eom=0.731 head_eom_noroot=0.731 head_leaf=0.731 cda_eom_noroot=0.731 4.5s
+145/250 spherical_n2000_g4_hard_noise0 seed=2026092804 cda_eom=0.767 head_eom=0.767 splitonly_eom=0.000 rootonly_eom=0.767 head_eom_noroot=0.767 head_leaf=0.767 cda_eom_noroot=0.767 5.0s
+146/250 spherical_n2000_g4_medium_noise0 seed=2026092800 cda_eom=0.906 head_eom=0.906 splitonly_eom=0.906 rootonly_eom=0.906 head_eom_noroot=0.906 head_leaf=0.906 cda_eom_noroot=0.906 3.5s
+147/250 spherical_n2000_g4_medium_noise0 seed=2026092801 cda_eom=0.875 head_eom=0.875 splitonly_eom=0.875 rootonly_eom=0.875 head_eom_noroot=0.875 head_leaf=0.875 cda_eom_noroot=0.875 3.6s
+148/250 spherical_n2000_g4_medium_noise0 seed=2026092802 cda_eom=0.791 head_eom=0.926 splitonly_eom=0.926 rootonly_eom=0.791 head_eom_noroot=0.926 head_leaf=0.791 cda_eom_noroot=0.791 3.5s
+149/250 spherical_n2000_g4_medium_noise0 seed=2026092803 cda_eom=0.867 head_eom=0.000 splitonly_eom=0.000 rootonly_eom=0.867 head_eom_noroot=0.867 head_leaf=0.867 cda_eom_noroot=0.867 3.7s
+150/250 spherical_n2000_g4_medium_noise0 seed=2026092804 cda_eom=0.898 head_eom=0.898 splitonly_eom=0.898 rootonly_eom=0.898 head_eom_noroot=0.898 head_leaf=0.898 cda_eom_noroot=0.898 3.3s
+151/250 spherical_n2000_g8_easy_noise0 seed=2026092800 cda_eom=0.996 head_eom=0.996 splitonly_eom=0.996 rootonly_eom=0.996 head_eom_noroot=0.996 head_leaf=0.996 cda_eom_noroot=0.996 3.9s
+152/250 spherical_n2000_g8_easy_noise0 seed=2026092801 cda_eom=0.995 head_eom=0.995 splitonly_eom=0.995 rootonly_eom=0.995 head_eom_noroot=0.995 head_leaf=0.995 cda_eom_noroot=0.995 4.0s
+153/250 spherical_n2000_g8_easy_noise0 seed=2026092802 cda_eom=0.997 head_eom=0.997 splitonly_eom=0.997 rootonly_eom=0.997 head_eom_noroot=0.997 head_leaf=0.997 cda_eom_noroot=0.997 3.5s
+154/250 spherical_n2000_g8_easy_noise0 seed=2026092803 cda_eom=0.995 head_eom=0.995 splitonly_eom=0.995 rootonly_eom=0.995 head_eom_noroot=0.995 head_leaf=0.995 cda_eom_noroot=0.995 3.8s
+155/250 spherical_n2000_g8_easy_noise0 seed=2026092804 cda_eom=0.997 head_eom=0.997 splitonly_eom=0.997 rootonly_eom=0.997 head_eom_noroot=0.997 head_leaf=0.997 cda_eom_noroot=0.997 3.3s
+156/250 spherical_n2000_g8_extreme_noise0 seed=2026092800 cda_eom=0.636 head_eom=0.000 splitonly_eom=0.000 rootonly_eom=0.636 head_eom_noroot=0.636 head_leaf=0.636 cda_eom_noroot=0.636 5.0s
+157/250 spherical_n2000_g8_extreme_noise0 seed=2026092801 cda_eom=0.640 head_eom=0.640 splitonly_eom=0.000 rootonly_eom=0.640 head_eom_noroot=0.640 head_leaf=0.640 cda_eom_noroot=0.640 5.8s
+158/250 spherical_n2000_g8_extreme_noise0 seed=2026092802 cda_eom=0.629 head_eom=0.629 splitonly_eom=0.000 rootonly_eom=0.629 head_eom_noroot=0.629 head_leaf=0.629 cda_eom_noroot=0.629 5.3s
+159/250 spherical_n2000_g8_extreme_noise0 seed=2026092803 cda_eom=0.494 head_eom=0.000 splitonly_eom=0.000 rootonly_eom=0.494 head_eom_noroot=0.494 head_leaf=0.494 cda_eom_noroot=0.494 5.0s
+160/250 spherical_n2000_g8_extreme_noise0 seed=2026092804 cda_eom=0.649 head_eom=0.649 splitonly_eom=0.000 rootonly_eom=0.649 head_eom_noroot=0.649 head_leaf=0.649 cda_eom_noroot=0.649 5.4s
+161/250 spherical_n2000_g8_hard_noise0 seed=2026092800 cda_eom=0.831 head_eom=0.831 splitonly_eom=0.831 rootonly_eom=0.831 head_eom_noroot=0.831 head_leaf=0.831 cda_eom_noroot=0.831 5.0s
+162/250 spherical_n2000_g8_hard_noise0 seed=2026092801 cda_eom=0.802 head_eom=0.802 splitonly_eom=0.802 rootonly_eom=0.802 head_eom_noroot=0.802 head_leaf=0.802 cda_eom_noroot=0.802 4.2s
+163/250 spherical_n2000_g8_hard_noise0 seed=2026092802 cda_eom=0.810 head_eom=0.810 splitonly_eom=0.810 rootonly_eom=0.810 head_eom_noroot=0.810 head_leaf=0.810 cda_eom_noroot=0.810 4.7s
+164/250 spherical_n2000_g8_hard_noise0 seed=2026092803 cda_eom=0.782 head_eom=0.782 splitonly_eom=0.782 rootonly_eom=0.782 head_eom_noroot=0.782 head_leaf=0.782 cda_eom_noroot=0.782 4.2s
+165/250 spherical_n2000_g8_hard_noise0 seed=2026092804 cda_eom=0.776 head_eom=0.776 splitonly_eom=0.776 rootonly_eom=0.776 head_eom_noroot=0.776 head_leaf=0.776 cda_eom_noroot=0.776 2.7s
+166/250 spherical_n2000_g8_medium_noise0 seed=2026092800 cda_eom=0.937 head_eom=0.937 splitonly_eom=0.937 rootonly_eom=0.937 head_eom_noroot=0.937 head_leaf=0.937 cda_eom_noroot=0.937 3.6s
+167/250 spherical_n2000_g8_medium_noise0 seed=2026092801 cda_eom=0.906 head_eom=0.906 splitonly_eom=0.906 rootonly_eom=0.906 head_eom_noroot=0.906 head_leaf=0.906 cda_eom_noroot=0.906 3.3s
+168/250 spherical_n2000_g8_medium_noise0 seed=2026092802 cda_eom=0.922 head_eom=0.922 splitonly_eom=0.922 rootonly_eom=0.922 head_eom_noroot=0.922 head_leaf=0.922 cda_eom_noroot=0.922 3.7s
+169/250 spherical_n2000_g8_medium_noise0 seed=2026092803 cda_eom=0.915 head_eom=0.915 splitonly_eom=0.915 rootonly_eom=0.915 head_eom_noroot=0.915 head_leaf=0.915 cda_eom_noroot=0.915 3.4s
+170/250 spherical_n2000_g8_medium_noise0 seed=2026092804 cda_eom=0.919 head_eom=0.919 splitonly_eom=0.919 rootonly_eom=0.919 head_eom_noroot=0.919 head_leaf=0.919 cda_eom_noroot=0.919 3.7s
+171/250 spherical_n2000_g8_medium_noise0p1 seed=2026092800 cda_eom=0.844 head_eom=0.844 splitonly_eom=0.844 rootonly_eom=0.844 head_eom_noroot=0.844 head_leaf=0.844 cda_eom_noroot=0.844 4.1s
+172/250 spherical_n2000_g8_medium_noise0p1 seed=2026092801 cda_eom=0.799 head_eom=0.799 splitonly_eom=0.799 rootonly_eom=0.799 head_eom_noroot=0.799 head_leaf=0.799 cda_eom_noroot=0.799 4.1s
+173/250 spherical_n2000_g8_medium_noise0p1 seed=2026092802 cda_eom=0.843 head_eom=0.843 splitonly_eom=0.843 rootonly_eom=0.843 head_eom_noroot=0.843 head_leaf=0.843 cda_eom_noroot=0.843 3.6s
+174/250 spherical_n2000_g8_medium_noise0p1 seed=2026092803 cda_eom=0.812 head_eom=0.812 splitonly_eom=0.812 rootonly_eom=0.812 head_eom_noroot=0.812 head_leaf=0.812 cda_eom_noroot=0.812 3.6s
+175/250 spherical_n2000_g8_medium_noise0p1 seed=2026092804 cda_eom=0.844 head_eom=0.844 splitonly_eom=0.844 rootonly_eom=0.844 head_eom_noroot=0.844 head_leaf=0.844 cda_eom_noroot=0.844 3.9s
+176/250 spherical_n2000_g8_medium_noise0p3 seed=2026092800 cda_eom=0.654 head_eom=0.654 splitonly_eom=0.654 rootonly_eom=0.654 head_eom_noroot=0.654 head_leaf=0.654 cda_eom_noroot=0.654 4.1s
+177/250 spherical_n2000_g8_medium_noise0p3 seed=2026092801 cda_eom=0.609 head_eom=0.609 splitonly_eom=0.609 rootonly_eom=0.609 head_eom_noroot=0.609 head_leaf=0.609 cda_eom_noroot=0.609 4.3s
+178/250 spherical_n2000_g8_medium_noise0p3 seed=2026092802 cda_eom=0.662 head_eom=0.662 splitonly_eom=0.662 rootonly_eom=0.662 head_eom_noroot=0.662 head_leaf=0.662 cda_eom_noroot=0.662 4.0s
+179/250 spherical_n2000_g8_medium_noise0p3 seed=2026092803 cda_eom=0.683 head_eom=0.683 splitonly_eom=0.683 rootonly_eom=0.683 head_eom_noroot=0.683 head_leaf=0.683 cda_eom_noroot=0.683 4.1s
+180/250 spherical_n2000_g8_medium_noise0p3 seed=2026092804 cda_eom=0.601 head_eom=0.601 splitonly_eom=0.601 rootonly_eom=0.601 head_eom_noroot=0.601 head_leaf=0.601 cda_eom_noroot=0.601 4.3s
+181/250 spherical_n500_g16_hard_noise0 seed=2026092800 cda_eom=0.743 head_eom=0.743 splitonly_eom=0.743 rootonly_eom=0.743 head_eom_noroot=0.743 head_leaf=0.743 cda_eom_noroot=0.743 1.1s
+182/250 spherical_n500_g16_hard_noise0 seed=2026092801 cda_eom=0.929 head_eom=0.929 splitonly_eom=0.929 rootonly_eom=0.929 head_eom_noroot=0.929 head_leaf=0.929 cda_eom_noroot=0.929 0.6s
+183/250 spherical_n500_g16_hard_noise0 seed=2026092802 cda_eom=0.859 head_eom=0.859 splitonly_eom=0.859 rootonly_eom=0.859 head_eom_noroot=0.859 head_leaf=0.859 cda_eom_noroot=0.859 0.5s
+184/250 spherical_n500_g16_hard_noise0 seed=2026092803 cda_eom=0.770 head_eom=0.770 splitonly_eom=0.770 rootonly_eom=0.770 head_eom_noroot=0.770 head_leaf=0.770 cda_eom_noroot=0.770 0.5s
+185/250 spherical_n500_g16_hard_noise0 seed=2026092804 cda_eom=0.942 head_eom=0.942 splitonly_eom=0.942 rootonly_eom=0.942 head_eom_noroot=0.942 head_leaf=0.942 cda_eom_noroot=0.942 0.4s
+186/250 spherical_n500_g16_medium_noise0 seed=2026092800 cda_eom=0.964 head_eom=0.964 splitonly_eom=0.964 rootonly_eom=0.964 head_eom_noroot=0.964 head_leaf=0.964 cda_eom_noroot=0.964 0.4s
+187/250 spherical_n500_g16_medium_noise0 seed=2026092801 cda_eom=0.963 head_eom=0.963 splitonly_eom=0.963 rootonly_eom=0.963 head_eom_noroot=0.963 head_leaf=0.963 cda_eom_noroot=0.963 0.5s
+188/250 spherical_n500_g16_medium_noise0 seed=2026092802 cda_eom=0.951 head_eom=0.951 splitonly_eom=0.951 rootonly_eom=0.951 head_eom_noroot=0.951 head_leaf=0.951 cda_eom_noroot=0.951 0.5s
+189/250 spherical_n500_g16_medium_noise0 seed=2026092803 cda_eom=0.932 head_eom=0.932 splitonly_eom=0.932 rootonly_eom=0.932 head_eom_noroot=0.932 head_leaf=0.932 cda_eom_noroot=0.932 0.4s
+190/250 spherical_n500_g16_medium_noise0 seed=2026092804 cda_eom=0.972 head_eom=0.972 splitonly_eom=0.972 rootonly_eom=0.972 head_eom_noroot=0.972 head_leaf=0.972 cda_eom_noroot=0.972 0.6s
+191/250 spherical_n500_g4_hard_noise0 seed=2026092800 cda_eom=0.809 head_eom=0.809 splitonly_eom=0.000 rootonly_eom=0.809 head_eom_noroot=0.809 head_leaf=0.809 cda_eom_noroot=0.809 0.7s
+192/250 spherical_n500_g4_hard_noise0 seed=2026092801 cda_eom=0.606 head_eom=0.606 splitonly_eom=0.000 rootonly_eom=0.606 head_eom_noroot=0.606 head_leaf=0.606 cda_eom_noroot=0.606 0.7s
+193/250 spherical_n500_g4_hard_noise0 seed=2026092802 cda_eom=0.776 head_eom=0.776 splitonly_eom=0.000 rootonly_eom=0.776 head_eom_noroot=0.776 head_leaf=0.776 cda_eom_noroot=0.776 0.8s
+194/250 spherical_n500_g4_hard_noise0 seed=2026092803 cda_eom=0.863 head_eom=0.863 splitonly_eom=0.000 rootonly_eom=0.863 head_eom_noroot=0.863 head_leaf=0.863 cda_eom_noroot=0.863 0.8s
+195/250 spherical_n500_g4_hard_noise0 seed=2026092804 cda_eom=0.730 head_eom=0.730 splitonly_eom=0.730 rootonly_eom=0.730 head_eom_noroot=0.730 head_leaf=0.730 cda_eom_noroot=0.730 0.5s
+196/250 spherical_n500_g4_medium_noise0 seed=2026092800 cda_eom=0.944 head_eom=0.944 splitonly_eom=0.944 rootonly_eom=0.944 head_eom_noroot=0.944 head_leaf=0.944 cda_eom_noroot=0.944 0.5s
+197/250 spherical_n500_g4_medium_noise0 seed=2026092801 cda_eom=0.798 head_eom=0.798 splitonly_eom=0.000 rootonly_eom=0.798 head_eom_noroot=0.798 head_leaf=0.798 cda_eom_noroot=0.798 0.5s
+198/250 spherical_n500_g4_medium_noise0 seed=2026092802 cda_eom=0.933 head_eom=0.933 splitonly_eom=0.933 rootonly_eom=0.933 head_eom_noroot=0.933 head_leaf=0.933 cda_eom_noroot=0.933 0.7s
+199/250 spherical_n500_g4_medium_noise0 seed=2026092803 cda_eom=0.949 head_eom=0.949 splitonly_eom=0.949 rootonly_eom=0.949 head_eom_noroot=0.949 head_leaf=0.949 cda_eom_noroot=0.949 1.3s
+200/250 spherical_n500_g4_medium_noise0 seed=2026092804 cda_eom=0.854 head_eom=0.854 splitonly_eom=0.854 rootonly_eom=0.854 head_eom_noroot=0.854 head_leaf=0.854 cda_eom_noroot=0.854 0.7s
+201/250 spherical_n500_g8_medium_noise0 seed=2026092800 cda_eom=0.933 head_eom=0.933 splitonly_eom=0.933 rootonly_eom=0.933 head_eom_noroot=0.933 head_leaf=0.933 cda_eom_noroot=0.933 1.2s
+202/250 spherical_n500_g8_medium_noise0 seed=2026092801 cda_eom=0.861 head_eom=0.861 splitonly_eom=0.861 rootonly_eom=0.861 head_eom_noroot=0.861 head_leaf=0.861 cda_eom_noroot=0.861 0.5s
+203/250 spherical_n500_g8_medium_noise0 seed=2026092802 cda_eom=0.956 head_eom=0.956 splitonly_eom=0.956 rootonly_eom=0.956 head_eom_noroot=0.956 head_leaf=0.956 cda_eom_noroot=0.956 0.6s
+204/250 spherical_n500_g8_medium_noise0 seed=2026092803 cda_eom=0.967 head_eom=0.967 splitonly_eom=0.967 rootonly_eom=0.967 head_eom_noroot=0.967 head_leaf=0.967 cda_eom_noroot=0.967 0.5s
+205/250 spherical_n500_g8_medium_noise0 seed=2026092804 cda_eom=0.932 head_eom=0.932 splitonly_eom=0.932 rootonly_eom=0.932 head_eom_noroot=0.932 head_leaf=0.932 cda_eom_noroot=0.932 0.7s
+206/250 spherical_n8000_g16_hard_noise0 seed=2026092800 cda_eom=0.783 head_eom=0.783 splitonly_eom=0.783 rootonly_eom=0.783 head_eom_noroot=0.783 head_leaf=0.783 cda_eom_noroot=0.783 35.0s
+207/250 spherical_n8000_g16_hard_noise0 seed=2026092801 cda_eom=0.810 head_eom=0.810 splitonly_eom=0.810 rootonly_eom=0.810 head_eom_noroot=0.810 head_leaf=0.810 cda_eom_noroot=0.810 49.4s
+208/250 spherical_n8000_g16_hard_noise0 seed=2026092802 cda_eom=0.801 head_eom=0.801 splitonly_eom=0.801 rootonly_eom=0.801 head_eom_noroot=0.801 head_leaf=0.801 cda_eom_noroot=0.801 39.1s
+209/250 spherical_n8000_g16_hard_noise0 seed=2026092803 cda_eom=0.787 head_eom=0.787 splitonly_eom=0.787 rootonly_eom=0.787 head_eom_noroot=0.787 head_leaf=0.787 cda_eom_noroot=0.787 24.6s
+210/250 spherical_n8000_g16_hard_noise0 seed=2026092804 cda_eom=0.755 head_eom=0.755 splitonly_eom=0.755 rootonly_eom=0.755 head_eom_noroot=0.755 head_leaf=0.755 cda_eom_noroot=0.755 20.6s
+211/250 spherical_n8000_g16_medium_noise0 seed=2026092800 cda_eom=0.928 head_eom=0.928 splitonly_eom=0.928 rootonly_eom=0.928 head_eom_noroot=0.928 head_leaf=0.928 cda_eom_noroot=0.928 19.5s
+212/250 spherical_n8000_g16_medium_noise0 seed=2026092801 cda_eom=0.936 head_eom=0.936 splitonly_eom=0.936 rootonly_eom=0.936 head_eom_noroot=0.936 head_leaf=0.936 cda_eom_noroot=0.936 19.6s
+213/250 spherical_n8000_g16_medium_noise0 seed=2026092802 cda_eom=0.927 head_eom=0.927 splitonly_eom=0.927 rootonly_eom=0.927 head_eom_noroot=0.927 head_leaf=0.927 cda_eom_noroot=0.927 18.1s
+214/250 spherical_n8000_g16_medium_noise0 seed=2026092803 cda_eom=0.920 head_eom=0.920 splitonly_eom=0.920 rootonly_eom=0.920 head_eom_noroot=0.920 head_leaf=0.920 cda_eom_noroot=0.920 15.3s
+215/250 spherical_n8000_g16_medium_noise0 seed=2026092804 cda_eom=0.933 head_eom=0.933 splitonly_eom=0.933 rootonly_eom=0.933 head_eom_noroot=0.933 head_leaf=0.933 cda_eom_noroot=0.933 15.1s

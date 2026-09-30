@@ -1,0 +1,116 @@
+{
+  "timestamp_utc": "2026-09-30T03:21:08.294602+00:00",
+  "checkout_head": "e9eab2754f3d9f2a9e16d8c542b908c19b725c9a",
+  "stage": "group_copy_preintegration",
+  "requested_pool_path": "src/pool.cpp",
+  "actual_pool_path": "src/sched/pool.cpp",
+  "first_copy_pool_sha256": "db59f6c763dff698e92537340e8bed1cbb18344f343ac763c97a6189900698cf",
+  "copy_sources": {
+    "build": "/tmp/mhgp10-pool-short-audit-20260930-pqc4lu4h",
+    "new_source": "/tmp/mhgp10-r2/pool/src/morsehgp3D_v10",
+    "old_source": "/workspaces/E-HGP/build/v10-fixes/pool/src/morsehgp3D_v10",
+    "first": {
+      "src/sched/pool.cpp": "555951df52187dc7cd0adfae00c3e88bd75c807e766bb32809f889dc25dfffff",
+      "src/sched/pool.hpp": "9bc7cc6a9ce9c4c1eb1593ebab6c3fba2eb0b9b0fba8ebe3cc524711125ecca0",
+      "src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+      "src/catalogue/generator.cpp": "cf0c5a6ee7a04ebafce11b178f22ee63de9905490fdb0195ad8a72ef06318339",
+      "src/catalogue/catalogue.hpp": "2f47beb9dfc1e59e3ee4c3f412de76de2f4872940d7dccdfb327ba5f6ce35229",
+      "src/tower/tower.cpp": "e96bf081283a242c1dfa58c0abb130a2dc13681a0af19ed5d650e013dbf370d2",
+      "src/tower/tower.hpp": "96c945dc4b1bd21dc0e51817b0d38e41cc0fbddc7b22cd34ae9e6d7244ce228a",
+      "src/core/buffer.cpp": "d4d67d329a0fadc59ab0870c094f380a1a501b369a0da4915cc8a5e66dfe5d81",
+      "src/core/buffer.hpp": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60",
+      "src/core/reasons.def": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b"
+    },
+    "last": {
+      "src/sched/pool.cpp": "555951df52187dc7cd0adfae00c3e88bd75c807e766bb32809f889dc25dfffff",
+      "src/sched/pool.hpp": "9bc7cc6a9ce9c4c1eb1593ebab6c3fba2eb0b9b0fba8ebe3cc524711125ecca0",
+      "src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+      "src/catalogue/generator.cpp": "cf0c5a6ee7a04ebafce11b178f22ee63de9905490fdb0195ad8a72ef06318339",
+      "src/catalogue/catalogue.hpp": "2f47beb9dfc1e59e3ee4c3f412de76de2f4872940d7dccdfb327ba5f6ce35229",
+      "src/tower/tower.cpp": "e96bf081283a242c1dfa58c0abb130a2dc13681a0af19ed5d650e013dbf370d2",
+      "src/tower/tower.hpp": "96c945dc4b1bd21dc0e51817b0d38e41cc0fbddc7b22cd34ae9e6d7244ce228a",
+      "src/core/buffer.cpp": "d4d67d329a0fadc59ab0870c094f380a1a501b369a0da4915cc8a5e66dfe5d81",
+      "src/core/buffer.hpp": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60",
+      "src/core/reasons.def": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b"
+    },
+    "old_hashes": {
+      "src/sched/pool.cpp": "db59f6c763dff698e92537340e8bed1cbb18344f343ac763c97a6189900698cf",
+      "src/sched/pool.hpp": "7f8bd3136720e0ec0ce04c4a8d7d016519005c3d4e9e4ca92398885228b0a2ff",
+      "src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+      "src/catalogue/generator.cpp": "cf0c5a6ee7a04ebafce11b178f22ee63de9905490fdb0195ad8a72ef06318339",
+      "src/catalogue/catalogue.hpp": "2f47beb9dfc1e59e3ee4c3f412de76de2f4872940d7dccdfb327ba5f6ce35229",
+      "src/tower/tower.cpp": "e96bf081283a242c1dfa58c0abb130a2dc13681a0af19ed5d650e013dbf370d2",
+      "src/tower/tower.hpp": "96c945dc4b1bd21dc0e51817b0d38e41cc0fbddc7b22cd34ae9e6d7244ce228a",
+      "src/core/buffer.cpp": "d4d67d329a0fadc59ab0870c094f380a1a501b369a0da4915cc8a5e66dfe5d81",
+      "src/core/buffer.hpp": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60",
+      "src/core/reasons.def": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b"
+    },
+    "stable": true
+  },
+  "source_hashes_after_execution": {
+    "src/sched/pool.cpp": "555951df52187dc7cd0adfae00c3e88bd75c807e766bb32809f889dc25dfffff",
+    "src/sched/pool.hpp": "9bc7cc6a9ce9c4c1eb1593ebab6c3fba2eb0b9b0fba8ebe3cc524711125ecca0",
+    "src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "src/catalogue/generator.cpp": "cf0c5a6ee7a04ebafce11b178f22ee63de9905490fdb0195ad8a72ef06318339",
+    "src/catalogue/catalogue.hpp": "2f47beb9dfc1e59e3ee4c3f412de76de2f4872940d7dccdfb327ba5f6ce35229",
+    "src/tower/tower.cpp": "e96bf081283a242c1dfa58c0abb130a2dc13681a0af19ed5d650e013dbf370d2",
+    "src/tower/tower.hpp": "96c945dc4b1bd21dc0e51817b0d38e41cc0fbddc7b22cd34ae9e6d7244ce228a",
+    "src/core/buffer.cpp": "d4d67d329a0fadc59ab0870c094f380a1a501b369a0da4915cc8a5e66dfe5d81",
+    "src/core/buffer.hpp": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60",
+    "src/core/reasons.def": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b"
+  },
+  "stable": true,
+  "change": "Saturating compare_exchange claims and subtraction-bounded serial chunks; no n + P*grain precondition remains. TLS RAII, users quiescence and partial constructor cleanup are unchanged. Consumer wrappers and Buffer/reasons are bit-identical to first corrected copy.",
+  "compile": {
+    "argv": [
+      "g++",
+      "-std=c++20",
+      "-O2",
+      "-pthread",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-I/tmp/mhgp10-pool-short-audit-20260930-pqc4lu4h/src",
+      "/tmp/mhgp10-pool-short-audit-20260930-pqc4lu4h/range_probe.cpp",
+      "/tmp/mhgp10-pool-short-audit-20260930-pqc4lu4h/src/sched/pool.cpp",
+      "-o",
+      "/tmp/mhgp10-pool-short-audit-20260930-pqc4lu4h/range_probe"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "execution": {
+    "argv": [
+      "/tmp/mhgp10-pool-short-audit-20260930-pqc4lu4h/range_probe"
+    ],
+    "exit_code": 0,
+    "stdout": "small_n_huge_grain threads=1 chunks=1 ok=1\nmax_n_one_chunk threads=1 chunks=1 ok=1\nmax_n_remainder_one threads=1 chunks=2 ok=1\nmax_n_half_chunks threads=1 chunks=2 ok=1\nsmall_n_huge_grain threads=4 chunks=1 ok=1\nmax_n_one_chunk threads=4 chunks=1 ok=1\nmax_n_remainder_one threads=4 chunks=2 ok=1\nmax_n_half_chunks threads=4 chunks=2 ok=1\nnested_max_n_half_chunks chunks=2 ok=1\n",
+    "stderr": "",
+    "scenarios": 9,
+    "expanded_points": 0
+  },
+  "probe_source": "#include <algorithm>\n#include <chrono>\n#include <iostream>\n#include <limits>\n#include <mutex>\n#include <stdexcept>\n#include <thread>\n#include <utility>\n#include <vector>\n#include \"sched/pool.hpp\"\n\nusing mhgp10::u64;\nusing Interval = std::pair<u64, u64>;\nstruct Case { const char* name; u64 n, grain; std::vector<Interval> expected; };\n\nint main() {\n  const u64 top = std::numeric_limits<u64>::max();\n  const u64 half = u64(1) << 63;\n  const Case cases[] = {\n      {\"small_n_huge_grain\", 17, half, {{0, 17}}},\n      {\"max_n_one_chunk\", top, top, {{0, top}}},\n      {\"max_n_remainder_one\", top, top - 1, {{0, top - 1}, {top - 1, top}}},\n      {\"max_n_half_chunks\", top, half, {{0, half}, {half, top}}},\n  };\n  bool all = true;\n  for (unsigned threads : {1u, 4u}) {\n    mhgp10::sched::Pool pool(threads);\n    for (const auto& c : cases) {\n      std::mutex mutex;\n      std::vector<Interval> actual;\n      pool.parallel_for(c.n, c.grain, [&](u64 begin, u64 end, unsigned) {\n        {\n          std::lock_guard<std::mutex> lock(mutex);\n          actual.emplace_back(begin, end);\n          if (actual.size() > 4 || !(begin < end && end <= c.n)) throw std::runtime_error(\"bad interval\");\n        }\n        std::this_thread::sleep_for(std::chrono::milliseconds(2));\n      });\n      std::sort(actual.begin(), actual.end());\n      const bool ok = actual == c.expected && !mhgp10::sched::in_parallel_region();\n      all = all && ok;\n      std::cout << c.name << \" threads=\" << threads << \" chunks=\" << actual.size() << \" ok=\" << ok << '\\n';\n    }\n  }\n  {\n    mhgp10::sched::Pool pool(4);\n    std::vector<Interval> actual;\n    pool.parallel_for(1, 1, [&](u64, u64, unsigned) {\n      pool.parallel_for(top, half, [&](u64 begin, u64 end, unsigned) { actual.emplace_back(begin, end); });\n    });\n    const bool ok = actual == cases[3].expected && pool.nested_calls() == 1 && !mhgp10::sched::in_parallel_region();\n    all = all && ok;\n    std::cout << \"nested_max_n_half_chunks chunks=\" << actual.size() << \" ok=\" << ok << '\\n';\n  }\n  return all ? 0 : 1;\n}\n",
+  "probe_sha256": "cffdb15fba561818a0cfcc81169166eab8c63ce7e908c047feb053527dc63d44",
+  "binary_sha256": "3464b6ded3a12ed5090fae35ffc1d73718d38a7873c74aafa071da4e7b9474a4",
+  "snapshot_contents": {
+    "src/sched/pool.cpp": "#include \"sched/pool.hpp\"\n\n#include <algorithm>\n\nnamespace mhgp10::sched {\n\nnamespace {\nthread_local bool tls_in_region = false;\n\n// Leve le drapeau pour la duree d'un run_chunks et le restaure en toute sortie, normale ou exceptionnelle (audit du\n// 29 septembre 2026 : un fil appelant quitte par une exception gardait le drapeau, et tous ses parallel_for suivants\n// passaient en serie, comptes comme imbriques).\nclass RegionFlag {\n public:\n  RegionFlag() : was_(tls_in_region) { tls_in_region = true; }\n  ~RegionFlag() { tls_in_region = was_; }\n  RegionFlag(const RegionFlag&) = delete;\n  RegionFlag& operator=(const RegionFlag&) = delete;\n\n private:\n  bool was_;\n};\n}  // namespace\n\nbool in_parallel_region() { return tls_in_region; }\n\nPool::Pool(unsigned threads) {\n  if (threads == 0) threads = std::max(1u, std::thread::hardware_concurrency());\n  workers_.reserve(threads - 1);\n  try {\n    for (unsigned i = 1; i < threads; ++i) workers_.emplace_back([this, i] { worker_loop(i); });\n  } catch (...) {\n    shutdown();  // les fils deja crees : un std::thread joignable detruit appellerait std::terminate\n    throw;\n  }\n}\n\nPool::~Pool() { shutdown(); }\n\nvoid Pool::shutdown() noexcept {\n  {\n    std::lock_guard<std::mutex> lock(mutex_);\n    stop_ = true;\n  }\n  wake_.notify_all();\n  for (auto& t : workers_) t.join();\n}\n\n// Reclamation saturante : si le compteur vaut begin < n, la tranche [begin, begin + min(grain, n - begin)) est prise\n// par un seul echange compare. Le compteur ne prend que des valeurs de [0, n] et ne decroit jamais, quels que soient\n// n et grain : aucune arithmetique ne deborde, et chaque tranche est reclamee au plus une fois (verificateur du tour 1,\n// 29 septembre 2026 : fetch_add portait le compteur jusqu'a n + P * grain, qui repassait par 0 au-dela de 2^64, et une\n// tranche etait executee deux fois).\n// Aucune exception ne sort : la premiere levee par body est conservee dans le travail, et le compteur de tranches\n// est porte a n, si bien que toute tranche reclamee apres la capture est refusee (le compteur reste a n) ; seules\n// les tranches deja reclamees, au plus une par fil, se terminent.\nvoid Pool::run_chunks(Job& job, unsigned id) noexcept {\n  const RegionFlag region;\n  try {\n    u64 begin = job.next.load(std::memory_order_relaxed);\n    while (begin < job.n) {\n      const u64 end = begin + std::min(job.grain, job.n - begin);\n      if (!job.next.compare_exchange_weak(begin, end, std::memory_order_relaxed)) continue;  // begin relu\n      (*job.body)(begin, end, id);\n      begin = job.next.load(std::memory_order_relaxed);\n    }\n  } catch (...) {\n    job.next.store(job.n, std::memory_order_relaxed);\n    if (!job.failed.exchange(true, std::memory_order_relaxed)) job.error = std::current_exception();\n  }\n}\n\nvoid Pool::worker_loop(unsigned id) {\n  u64 seen = 0;\n  for (;;) {\n    Job* job;\n    {\n      std::unique_lock<std::mutex> lock(mutex_);\n      wake_.wait(lock, [&] { return stop_ || (current_ != nullptr && generation_ != seen); });\n      if (stop_) return;\n      seen = generation_;\n      job = current_;\n      ++job->users;\n    }\n    run_chunks(*job, id);\n    {\n      std::lock_guard<std::mutex> lock(mutex_);\n      if (--job->users == 0) done_.notify_all();\n    }\n  }\n}\n\nvoid Pool::parallel_for(u64 n, u64 grain, const std::function<void(u64, u64, unsigned)>& body) {\n  if (n == 0) return;\n  if (grain == 0) grain = 1;\n  if (tls_in_region || workers_.empty()) {\n    if (tls_in_region) nested_.fetch_add(1, std::memory_order_relaxed);\n    for (u64 b = 0; b < n;) {  // memes tranches, sans b + grain qui deborderait pres de 2^64\n      const u64 e = b + std::min(grain, n - b);\n      body(b, e, 0);\n      b = e;\n    }\n    return;\n  }\n  // Un ouvrier en retard ne voit jamais les champs d'un autre travail : il capture le descripteur sous le verrou, et\n  // l'appelant ferme la capture avant d'attendre ceux qui l'ont pris (regression du 29 septembre 2026 : un ouvrier\n  // inscrit apres la fin d'un travail lisait le compteur du suivant et en executait des tranches deux fois).\n  // Exceptions (audit du 29 septembre 2026) : run_chunks les capture dans le travail, y compris dans l'appelant ;\n  // la fermeture de la capture et l'attente des utilisateurs precedent donc toujours la sortie de parallel_for, et\n  // body comme le descripteur restent vivants tant qu'un ouvrier les lit. La relance vient apres.\n  Job job;\n  job.body = &body;\n  job.n = n;\n  job.grain = grain;\n  {\n    std::lock_guard<std::mutex> lock(mutex_);\n    current_ = &job;\n    ++generation_;\n  }\n  wake_.notify_all();\n  run_chunks(job, 0);\n  {\n    std::unique_lock<std::mutex> lock(mutex_);\n    current_ = nullptr;\n    done_.wait(lock, [&] { return job.users == 0; });\n  }\n  if (job.error) std::rethrow_exception(job.error);\n}\n\n}  // namespace mhgp10::sched\n",
+    "src/sched/pool.hpp": "// Ordonnanceur unique de la v10 : un Pool par Session, aucun fil ailleurs.\n//\n// Regles de determinisme : chaque tache ecrit a des positions fixees par son ordinal (jamais par\n// l'ordre d'arrivee) ; les concatenations passent par des prefixes ; pas de parallelisme imbrique\n// (un parallel_for appele depuis un ouvrier s'execute en serie et le signale).\n#pragma once\n\n#include <atomic>\n#include <condition_variable>\n#include <exception>\n#include <functional>\n#include <mutex>\n#include <thread>\n#include <vector>\n\n#include \"core/types.hpp\"\n\nnamespace mhgp10::sched {\n\nclass Pool {\n public:\n  // threads = 0 : std::thread::hardware_concurrency(). Si la creation d'un fil echoue, les fils deja crees sont\n  // arretes et joints avant que l'exception ne sorte du constructeur (jamais de std::thread joignable detruit).\n  explicit Pool(unsigned threads = 0);\n  ~Pool();\n  Pool(const Pool&) = delete;\n  Pool& operator=(const Pool&) = delete;\n\n  unsigned size() const { return static_cast<unsigned>(workers_.size()) + 1; }\n\n  // Execute body(begin, end, worker) sur [0, n) par tranches de `grain` ; le fil appelant participe.\n  // Les tranches sont distribuees dynamiquement, mais body ne doit ecrire qu'en fonction de [begin, end).\n  // Tranches : [k * grain, min(n, (k + 1) * grain)) pour k < ceil(n / grain) (grain = 0 vaut 1), chacune reclamee au\n  // plus une fois, en parallele comme en serie. Aucune borne sur n ni sur grain : la reclamation sature a n, le\n  // compteur reste dans [0, n] et aucune arithmetique ne deborde (fetch_add, avant, exigeait n + P * grain < 2^64).\n  // Exceptions : la premiere exception levee par body, dans l'appelant ou dans un ouvrier, est capturee ; aucune\n  // tranche reclamee apres sa capture n'est executee ; parallel_for ne rend la main qu'apres la sortie de tous les\n  // fils entres dans le travail, puis relance cette exception dans l'appelant (les suivantes sont abandonnees). Le\n  // pool reste utilisable. En serie (imbrication, pool a un fil), l'exception sort directement de la tranche.\n  void parallel_for(u64 n, u64 grain, const std::function<void(u64, u64, unsigned)>& body);\n\n  // Nombre d'appels imbriques executes en serie depuis la creation (0 attendu).\n  u64 nested_calls() const { return nested_.load(std::memory_order_relaxed); }\n\n private:\n  // Descripteur d'un travail, propre a un appel de parallel_for. Un ouvrier ne le lit qu'apres l'avoir capture sous\n  // mutex_ ; l'appelant ferme la capture (current_ = nullptr) avant d'attendre que users retombe a 0, en sortie\n  // normale comme apres une exception.\n  struct Job {\n    const std::function<void(u64, u64, unsigned)>* body = nullptr;\n    u64 n = 0, grain = 1;\n    std::atomic<u64> next{0};         // debut de la prochaine tranche, dans [0, n], croissant\n    std::atomic<bool> failed{false};  // une exception a ete capturee ; elit l'unique ecrivain de error\n    std::exception_ptr error;         // premiere exception ; lue par l'appelant apres users == 0 (sous mutex_)\n    unsigned users = 0;  // ouvriers qui l'ont capture et ne l'ont pas rendu (sous mutex_)\n  };\n  void worker_loop(unsigned id);\n  void shutdown() noexcept;\n  static void run_chunks(Job& job, unsigned id) noexcept;\n\n  std::vector<std::thread> workers_;\n  std::mutex mutex_;\n  std::condition_variable wake_;\n  std::condition_variable done_;\n  Job* current_ = nullptr;  // travail ouvert a la capture (sous mutex_)\n  u64 generation_ = 0;\n  bool stop_ = false;\n  std::atomic<u64> nested_{0};\n};\n\n// Vrai dans un fil ouvrier du Pool (ou dans l'appelant pendant un parallel_for).\nbool in_parallel_region();\n\n}  // namespace mhgp10::sched\n",
+    "src/core/types.hpp": "// Types fondamentaux de la v10 : entiers, identifiants forts, ordre.\n//\n// Les identifiants sont des enum class sur u32 : un rang et un identifiant n'ont jamais le meme type\n// (la v9 a du graver un mutant parce qu'ils en partageaient un).\n#pragma once\n\n#include <cstddef>\n#include <cstdint>\n\nnamespace mhgp10 {\n\nusing u8 = std::uint8_t;\nusing u16 = std::uint16_t;\nusing u32 = std::uint32_t;\nusing u64 = std::uint64_t;\nusing i32 = std::int32_t;\nusing i64 = std::int64_t;\n__extension__ typedef __int128 i128;\n__extension__ typedef unsigned __int128 u128;\n\nenum class PointId : u32 {};    // identite externe d'un point d'entree (arbitraire, unique)\nenum class SiteIdx : u32 {};    // rang dense d'une position distincte (ordre de Morton)\nenum class BallIdx : u32 {};    // rang d'une boule dans l'ordre moteur du catalogue\nenum class LevelRank : u32 {};  // rang dense d'un niveau exact distinct (0 = niveau nul)\nenum class NodeIdx : u32 {};    // noeud d'une foret d'ordre K\n\nusing Order = u8;               // K dans [1, kmax]\n\ninline constexpr u32 kNone = 0xFFFFFFFFu;\ninline constexpr int kCoordinateBits = 18;\ninline constexpr i64 kCoordinateLimit = (i64{1} << kCoordinateBits) - 1;  // 262 143\ninline constexpr int kMaxOrder = 10;         // kmax public\ninline constexpr int kMaxCatalogueOrder = 12;  // catalogue interne (juge d'Euler a kmax + 2)\n\ntemplate <class Id>\nconstexpr u32 idx(Id x) {\n  return static_cast<u32>(x);\n}\ntemplate <class Id>\nconstexpr Id make_id(u32 v) {\n  return static_cast<Id>(v);\n}\n\n}  // namespace mhgp10\n"
+  },
+  "remaining_contracts": {
+    "TLS_and_quiescence": "First-copy mechanisms unchanged. Nine new range cases restore caller TLS; callback lifetime and exception scenarios are not replayed here. Requalification on final common binary still required.",
+    "thread_creation_failure": "Constructor shuts down and joins already-created threads, then rethrows unchanged, including system_error. No Outcome-returning factory or conversion of arbitrary system_error is promised. Earlier fault qualification is distinct.",
+    "budget_and_bad_alloc": "Buffer budget refusal returns false; build_catalogue and build_tower convert std::bad_alloc after pool quiescence to resource_exhausted/memory_budget and destroy partial results. Other exceptions propagate unchanged. This is not an assertion that every std::vector allocation is charged to MemoryBudget."
+  },
+  "not_executed": [
+    "old pool range reproduction",
+    "catalogue/tower injections",
+    "thread creation fault injection",
+    "ASan/UBSan",
+    "TSan",
+    "long gates",
+    "GCP"
+  ],
+  "integrated_closed": false
+}

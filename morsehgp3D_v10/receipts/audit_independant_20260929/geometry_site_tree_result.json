@@ -1,0 +1,9 @@
+{
+  "source": "6206d1d118794c9e1cabb6faeaec2aaa77d37e5b",
+  "command": [
+    "/workspaces/E-HGP/build/v10-audit-independent-20260929/geometry_site_tree"
+  ],
+  "returncode": 1,
+  "stdout": "center=(225072.5,-25328815117.5,154615790175.5) strictly_inside=0 expected_shell=4 got_shell=3 got_interior=0\nsite=0 point=(0,0,0) exact_side=0 approx_delta=0 in_shell=1 in_interior=0\nsite=1 point=(152369,7,1) exact_side=0 approx_delta=4194304 in_shell=0 in_interior=0\nsite=2 point=(225068,1,0) exact_side=0 approx_delta=0 in_shell=1 in_interior=0\nsite=3 point=(225077,1,0) exact_side=0 approx_delta=0 in_shell=1 in_interior=0\nnearest_count=1 got=1 exact=1\nnearest_count=3 got=3 exact=0\nnearest_count=4 got=4 exact=1\n",
+  "stderr": ""
+}

@@ -1,0 +1,48 @@
+{
+  "time_utc": "2026-09-30T03:09:20.680408+00:00",
+  "checkout_head": "e9eab2754f3d9f2a9e16d8c542b908c19b725c9a",
+  "mode": "readonly_sources_and_entry_criteria",
+  "new_execution": false,
+  "common_qualified_snapshot_available": false,
+  "hashes_before": {
+    "/tmp/mhgp10-r2/tete/src/morsehgp3D_v10/src/head/head.cpp": "dc34aed57e9248a58858515f731654540d38d9ed919877d81f7ca68476bc6dd5",
+    "/tmp/mhgp10-r2/tete/src/morsehgp3D_v10/src/head/head.hpp": "8d9e29b1992d8d27cb9c542dadca4bd08631b8de128a8bd62a6fb46f8cad474b",
+    "/tmp/mhgp10-r2/tete/src/morsehgp3D_v10/src/points/dendrogram.cpp": "2eadd747ff6804003e971bd2cb0d492beb7ee5fbd697d3975fb9822f966ba71f",
+    "/tmp/mhgp10-r2/tete/src/morsehgp3D_v10/tests/head/head_gate.cpp": "3abdce52689f988f9d1ec9e574b1f266d80d01d09862244c6cea8721572bdc8e",
+    "/tmp/mhgp10-r2/bancs/src/morsehgp3D_v10/bench/synthetic/decide.py": "bab58df89c398479cb2a59791a7d23370937cfc51f5064037a76a160d5da7dd3",
+    "/tmp/mhgp10-r2/bancs/src/morsehgp3D_v10/bench/g4/merge_sessions.py": "2526cc3d2f4dee8347e052698dbfeccba050aee30e92934ff7dd5a7ec7ae7ca5",
+    "/tmp/mhgp10-r2/bancs/src/morsehgp3D_v10/bench/scaling/scale_run.py": "f8d5e891a06b0549dd1de19aaad76e32cbe32e19f69b8dab3bd34cfd4ff5f6e2",
+    "/tmp/mhgp10-r2/bancs/src/morsehgp3D_v10/tests/regression/test_decide_completeness.py": "fec257927926202d4dc166f0bab1fdd59eab3422ba9f5982c0ef97454d90f2e2",
+    "/tmp/mhgp10-r2/bancs/src/morsehgp3D_v10/tests/regression/test_scale_run_timeout.py": "7bbb23fc7a85c4a8b8d639ccd68a4ad7d99a78ebb424d348ebb778fa1c81636c",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/head/head.cpp": "f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/points/dendrogram.cpp": "44711c93473cc31b675b5da29c07645d7c8a7cf686b540681a3da7e7b7c673d4",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/bench/synthetic/decide.py": "d360ed0ed150c738c48c15a270c9431da1c2127ca382ce6ed37d193faa81dc7f",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/bench/g4/merge_sessions.py": "291ba17d38b376b41209a063f2682a627412a83435b5923a879b705fe176722e",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/bench/scaling/scale_run.py": "03c2c9d12e05ab14e51ca036dbb0351df1d335b8404cdede9eea96109e36b120",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/audits/REPONSE_CLAUDE_CONTRE_AUDITS_ET_RACCORD_20260929.md": "775132c378a089b99f8987df12997b0fbe4ff2a7a0a8e759b3a4795b0ef90186"
+  },
+  "hashes_after": {
+    "/tmp/mhgp10-r2/tete/src/morsehgp3D_v10/src/head/head.cpp": "dc34aed57e9248a58858515f731654540d38d9ed919877d81f7ca68476bc6dd5",
+    "/tmp/mhgp10-r2/tete/src/morsehgp3D_v10/src/head/head.hpp": "8d9e29b1992d8d27cb9c542dadca4bd08631b8de128a8bd62a6fb46f8cad474b",
+    "/tmp/mhgp10-r2/tete/src/morsehgp3D_v10/src/points/dendrogram.cpp": "2eadd747ff6804003e971bd2cb0d492beb7ee5fbd697d3975fb9822f966ba71f",
+    "/tmp/mhgp10-r2/tete/src/morsehgp3D_v10/tests/head/head_gate.cpp": "3abdce52689f988f9d1ec9e574b1f266d80d01d09862244c6cea8721572bdc8e",
+    "/tmp/mhgp10-r2/bancs/src/morsehgp3D_v10/bench/synthetic/decide.py": "bab58df89c398479cb2a59791a7d23370937cfc51f5064037a76a160d5da7dd3",
+    "/tmp/mhgp10-r2/bancs/src/morsehgp3D_v10/bench/g4/merge_sessions.py": "2526cc3d2f4dee8347e052698dbfeccba050aee30e92934ff7dd5a7ec7ae7ca5",
+    "/tmp/mhgp10-r2/bancs/src/morsehgp3D_v10/bench/scaling/scale_run.py": "f8d5e891a06b0549dd1de19aaad76e32cbe32e19f69b8dab3bd34cfd4ff5f6e2",
+    "/tmp/mhgp10-r2/bancs/src/morsehgp3D_v10/tests/regression/test_decide_completeness.py": "fec257927926202d4dc166f0bab1fdd59eab3422ba9f5982c0ef97454d90f2e2",
+    "/tmp/mhgp10-r2/bancs/src/morsehgp3D_v10/tests/regression/test_scale_run_timeout.py": "7bbb23fc7a85c4a8b8d639ccd68a4ad7d99a78ebb424d348ebb778fa1c81636c",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/head/head.cpp": "f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/points/dendrogram.cpp": "44711c93473cc31b675b5da29c07645d7c8a7cf686b540681a3da7e7b7c673d4",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/bench/synthetic/decide.py": "d360ed0ed150c738c48c15a270c9431da1c2127ca382ce6ed37d193faa81dc7f",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/bench/g4/merge_sessions.py": "291ba17d38b376b41209a063f2682a627412a83435b5923a879b705fe176722e",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/bench/scaling/scale_run.py": "03c2c9d12e05ab14e51ca036dbb0351df1d335b8404cdede9eea96109e36b120",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/audits/REPONSE_CLAUDE_CONTRE_AUDITS_ET_RACCORD_20260929.md": "775132c378a089b99f8987df12997b0fbe4ff2a7a0a8e759b3a4795b0ef90186"
+  },
+  "stable": true,
+  "observations": {
+    "head_joint_domain_implemented": false,
+    "head_old_h3_hash": true,
+    "bench_old_unbounded_metrics_hash": true
+  },
+  "scope": "R2 group copies still contain the already audited implementation. No build, test seed, clustering, GCP or known-defect replay was executed."
+}

@@ -1,0 +1,16 @@
+shells       n=500    default 1.000 [1.0, 1.0, 1.0, 1.0, 1.0]  oracle 1.000  matched(sqrt n, ms=3) 1.000
+shells       n=2000   default 0.836 [1.0, 1.0, 1.0, 0.18, 1.0]  oracle 1.000  matched(sqrt n, ms=3) 1.000
+shells       n=8000   default 0.178 [0.18, 0.18, 0.18, 0.18, 0.18]  oracle 1.000  matched(sqrt n, ms=3) 1.000
+shells       n=32000  default 0.178 [0.18, 0.18, 0.18, 0.18, 0.18]  oracle -  matched(sqrt n, ms=3) 1.000
+hierarchical n=500    default 0.974 [1.0, 1.0, 0.87, 1.0, 1.0]  oracle 0.974  matched(sqrt n, ms=3) 0.974
+hierarchical n=2000   default 0.692 [0.61, 0.69, 0.83, 0.64, 0.69]  oracle 0.948  matched(sqrt n, ms=3) 0.477
+hierarchical n=8000   default 0.451 [0.43, 0.43, 0.53, 0.44, 0.43]  oracle 0.989  matched(sqrt n, ms=3) 0.455
+hierarchical n=32000  default 0.435 [0.44, 0.43, 0.43, 0.44, 0.44]  oracle -  matched(sqrt n, ms=3) 0.451
+spherical    n=500    default 0.268 [0.64, 0.17, 0.18, 0.18, 0.18]  oracle 0.683  matched(sqrt n, ms=3) 0.874
+spherical    n=2000   default 0.396 [0.73, 0.72, 0.18, 0.17, 0.18]  oracle 0.768  matched(sqrt n, ms=3) 0.853
+spherical    n=8000   default 0.622 [0.75, 0.7, 0.18, 0.73, 0.75]  oracle 0.735  matched(sqrt n, ms=3) 0.833
+spherical    n=32000  default 0.774 [0.77, 0.77, 0.77, 0.78, 0.78]  oracle -  matched(sqrt n, ms=3) 0.849
+filaments    n=500    default 0.632 [0.43, 0.66, 0.65, 0.84, 0.57]  oracle 0.831  matched(sqrt n, ms=3) 0.853
+filaments    n=2000   default 0.599 [0.77, 0.08, 0.64, 0.75, 0.76]  oracle 0.856  matched(sqrt n, ms=3) 0.812
+filaments    n=8000   default 0.806 [0.93, 0.67, 0.68, 0.76, 0.98]  oracle 0.814  matched(sqrt n, ms=3) 0.818
+filaments    n=32000  default 0.765 [0.82, 0.73, 0.85, 0.66, 0.76]  oracle -  matched(sqrt n, ms=3) 0.763

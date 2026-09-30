@@ -1,0 +1,15 @@
+{
+  "name": "frontier_cluster_two_words",
+  "command": [
+    "/workspaces/E-HGP/build/v10-audit-independent-20260929/release/mhgp10_cluster",
+    "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/two_words.u32le",
+    "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/clustertwo_words.i32le",
+    "--mcs=2",
+    "--k=2",
+    "--threads=1"
+  ],
+  "returncode": 0,
+  "stdout": "{\"status\":\"ok\",\"n\":4,\"kmax\":2,\"balls\":6,\"clusters\":0,\"catalogue_s\":0.000,\"tower_s\":0.000,\"head_s\":0.012}\n",
+  "stderr": "",
+  "elapsed_s": 0.027593879000050947
+}

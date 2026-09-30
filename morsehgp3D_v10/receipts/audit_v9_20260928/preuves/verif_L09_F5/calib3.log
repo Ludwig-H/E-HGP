@@ -1,0 +1,4 @@
+seeds11-13 shells       500/2000/8000 default 1.0000 / 1.0000 / 0.1780
+seeds11-13 hierarchical 500/2000/8000 default 1.0000 / 0.6264 / 0.4301
+seeds11-13 spherical    500/2000/8000 default 0.3286 / 0.7352 / 0.7814
+seeds11-13 filaments    500/2000/8000 default 0.5073 / 0.7136 / 0.9387

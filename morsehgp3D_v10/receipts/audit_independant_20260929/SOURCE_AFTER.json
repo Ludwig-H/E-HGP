@@ -1,0 +1,62 @@
+{
+  "time": "2026-09-29T20:08:56.509650+00:00",
+  "base": "6206d1d118794c9e1cabb6faeaec2aaa77d37e5b",
+  "current_head": "2aacfa2e550e78c22ce970095c4e26adf1d36311",
+  "changed_since_start": [
+    "PASSATION.md",
+    "receipts/ERRATA.md"
+  ],
+  "missing_since_start": [],
+  "product_changed_since_start": [],
+  "audit_validation_errors": [],
+  "sanitize_options": "ASan+UBSan, leak detection disabled under sandbox ptrace; positive failure cases are expected",
+  "sanitize_cases": [
+    {
+      "name": "sanitize_unit",
+      "command": [
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/sanitize/mhgp10_unit"
+      ],
+      "returncode": 0,
+      "stdout": "site_tree_checks 6000\nsite_tree_rational_checks 7155 shells 1099\nwide_checks 100000\nunit_ok\n",
+      "stderr": "",
+      "elapsed_s": 5.559000340001148
+    },
+    {
+      "name": "sanitize_no_points_dump",
+      "command": [
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/sanitize/mhgp10_tower",
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/valid.u32le",
+        "--k=2",
+        "--threads=1",
+        "--no-points",
+        "--dump=/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/no_points_san.dump"
+      ],
+      "returncode": 1,
+      "stdout": "",
+      "stderr": "/usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/stl_vector.h:1148:9: runtime error: reference binding to null pointer of type 'const value_type' (aka 'const unsigned int')\nSUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/stl_vector.h:1148:9 \n",
+      "elapsed_s": 3.1788923269996303
+    },
+    {
+      "name": "sanitize_repeat0",
+      "command": [
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/sanitize/mhgp10_tower",
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/valid.u32le",
+        "--k=2",
+        "--threads=1",
+        "--repeat=0"
+      ],
+      "returncode": 1,
+      "stdout": "",
+      "stderr": "/usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/stl_iterator.h:1158:45: runtime error: applying non-zero offset 18446744073709551608 to null pointer\nSUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/stl_iterator.h:1158:45 \n",
+      "elapsed_s": 0.024177090999728534
+    }
+  ],
+  "source_archive_sha256": "857f43cc1b9eacef3f44f706c6b8fca61c16cc2d3faf324d48917d482cda222c",
+  "release_binary_sha256": {
+    "mhgp10_unit": "311f49996912bfeb7bf7d8fb24b8e7c66fae5625e5f9c77f7987f42a7b152eed",
+    "mhgp10_catalogue": "a3bbad50b81b901c57cea7193bc48d58cce68126e44ae0a225ad678baa3af0cb",
+    "mhgp10_mreach_cluster": "1dab9a4f9cd8ec3b3f51cd42d1f073f92ae3608d869792e8cb20a33ed5dfefac",
+    "mhgp10_tower": "a20776280ef4960d68f1b65ca7007b9e8a862809c57115b58486942856c22764",
+    "mhgp10_cluster": "e00e2431f8c9daf7e90a429cb905f9c559d5a4699a376497aaf2e766f70def70"
+  }
+}

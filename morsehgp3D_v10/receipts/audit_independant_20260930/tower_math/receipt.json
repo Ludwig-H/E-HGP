@@ -1,0 +1,139 @@
+{
+  "base_head": "e9eab2754f3d9f2a9e16d8c542b908c19b725c9a",
+  "kind": "bounded_exact_Fraction_geometry_and_majority_probe",
+  "native_build": false,
+  "test_seeds": false,
+  "gcp": false,
+  "beta_unit": "squared_radius",
+  "threshold": "M>W/2",
+  "positive_universe": "population>=2 and p+q_min<=2; exact canonical sphere, full closed incidences",
+  "source_before": {
+    "receipts/audit_independant_20260930/tower_math/check_majority_five_sites.py": "a4e4b624985d5bc24149d124e11ccea5129431ac8b539f8b630ec120705b3df5",
+    "reference/hgp10_ref.py": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104"
+  },
+  "source_after": {
+    "receipts/audit_independant_20260930/tower_math/check_majority_five_sites.py": "a4e4b624985d5bc24149d124e11ccea5129431ac8b539f8b630ec120705b3df5",
+    "reference/hgp10_ref.py": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104"
+  },
+  "runs": [
+    {
+      "name": "normal",
+      "argv": [
+        "python3",
+        "-B",
+        "receipts/audit_independant_20260930/tower_math/check_majority_five_sites.py"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 0.06851989599999797,
+      "stdout_sha256": "236983e13666ced73fba2edf1ffca33c310c8299e0e7850df1479c82ed673afc",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "optimized",
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "receipts/audit_independant_20260930/tower_math/check_majority_five_sites.py"
+      ],
+      "exit_code": 0,
+      "wall_seconds": 0.09502894200022638,
+      "stdout_sha256": "236983e13666ced73fba2edf1ffca33c310c8299e0e7850df1479c82ed673afc",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "normal_optimized_equal": true,
+  "status": "ok",
+  "native_capture": {
+    "base_head": "6206d1d118794c9e1cabb6faeaec2aaa77d37e5b",
+    "frozen_source_root": "/workspaces/E-HGP/build/v10-audit-independent-20260929/source/morsehgp3D_v10",
+    "single_native_call": true,
+    "native_argv": [
+      "/workspaces/E-HGP/build/v10-audit-independent-20260929/tower_probe",
+      "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/tower_math/five_sites.u32le",
+      "2",
+      "1"
+    ],
+    "native_exit_code": 0,
+    "check_argv": [
+      "python3",
+      "-B",
+      "receipts/audit_independant_20260930/tower_math/check_native_five_sites.py",
+      "receipts/audit_independant_20260930/tower_math/native.stdout"
+    ],
+    "check_exit_code": 0,
+    "wall_seconds": 0.054036722000091686,
+    "before": {
+      "frozen_binary": "1a96f1755414f391857de7ae9f3e7c6531588ca23094616631825a32cfdbac52",
+      "frozen_library": "1aaacd63dcb76413b61fc6eb983c52bdaa9a32f9a059a906af2254061beac5da",
+      "audit_probe_source": "c805460322c7c00c7f1fb9efb7fa863e4ace8e4e5a696cba3da8e2bff904c2d9",
+      "native_checker": "7bf7f83e2909b229e6271baab9fdc24a3393baa748ed601865a154a4c5b88b22",
+      "reference_source": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104",
+      "input": "06217738ccd54311abb752f14f6a7c01c5a29863721df2c8f9f9a0fa3d2266f5",
+      "frozen/src/arith/geometry.cpp": "0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2",
+      "frozen/src/arith/geometry.hpp": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673",
+      "frozen/src/arith/wide.hpp": "9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800",
+      "frozen/src/catalogue/catalogue.hpp": "2f47beb9dfc1e59e3ee4c3f412de76de2f4872940d7dccdfb327ba5f6ce35229",
+      "frozen/src/catalogue/generator.cpp": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662",
+      "frozen/src/catalogue/support.hpp": "7cc62930f623e99b598954c6b9f2f5e73e4ee4f0438426c55d18041d56d1a11d",
+      "frozen/src/cloud/cloud.cpp": "9cfe9f5b7c86eef3430d9d3d4835ebab5c70add30bf57480edbad1e830f44679",
+      "frozen/src/cloud/cloud.hpp": "b462545a6aaa86329a0122f05bd1b4fdd2a0cbd7e294218087ba472a8539ef2f",
+      "frozen/src/cloud/site_tree.cpp": "32296818941943102cf7afbaef6665ffc80f5ca5564a274ad00ae25e8c096eec",
+      "frozen/src/cloud/site_tree.hpp": "3cb0a70d7a05a6665e0c59676eccbe1b3ac16097ed336fc0007a97ad6bbb8f35",
+      "frozen/src/core/buffer.cpp": "d4d67d329a0fadc59ab0870c094f380a1a501b369a0da4915cc8a5e66dfe5d81",
+      "frozen/src/core/buffer.hpp": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60",
+      "frozen/src/core/reasons.def": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b",
+      "frozen/src/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+      "frozen/src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+      "frozen/src/head/head.cpp": "f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578",
+      "frozen/src/head/head.hpp": "f2710f309a201bc1094dcb49af7acc418ca33b1887f8373d8934f965d072c5e9",
+      "frozen/src/points/dendrogram.cpp": "44711c93473cc31b675b5da29c07645d7c8a7cf686b540681a3da7e7b7c673d4",
+      "frozen/src/points/dendrogram.hpp": "3162508b979572a6a4da0b3f0c445b09baa5e2fd77ba826a8d57b25711c42d16",
+      "frozen/src/sched/pool.cpp": "7eecd6757c03fa8184fbcee7a55b26ef312c1df16acac4241e6917328975d72a",
+      "frozen/src/sched/pool.hpp": "e9eba470b8234eaa7f16626e172f3099ed6a635606639c3734755a6fe92283e5",
+      "frozen/src/sched/sort.hpp": "a75edebefd74c820615027bd90af578cbbdfdc997589638fc02bb0cb57a5a1db",
+      "frozen/src/tower/tower.cpp": "0c5b44ae7993e850c5c6cdb63d0c9829847eb70364f40894a3df964f708b88e9",
+      "frozen/src/tower/tower.hpp": "96c945dc4b1bd21dc0e51817b0d38e41cc0fbddc7b22cd34ae9e6d7244ce228a"
+    },
+    "after": {
+      "frozen_binary": "1a96f1755414f391857de7ae9f3e7c6531588ca23094616631825a32cfdbac52",
+      "frozen_library": "1aaacd63dcb76413b61fc6eb983c52bdaa9a32f9a059a906af2254061beac5da",
+      "audit_probe_source": "c805460322c7c00c7f1fb9efb7fa863e4ace8e4e5a696cba3da8e2bff904c2d9",
+      "native_checker": "7bf7f83e2909b229e6271baab9fdc24a3393baa748ed601865a154a4c5b88b22",
+      "reference_source": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104",
+      "input": "06217738ccd54311abb752f14f6a7c01c5a29863721df2c8f9f9a0fa3d2266f5",
+      "frozen/src/arith/geometry.cpp": "0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2",
+      "frozen/src/arith/geometry.hpp": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673",
+      "frozen/src/arith/wide.hpp": "9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800",
+      "frozen/src/catalogue/catalogue.hpp": "2f47beb9dfc1e59e3ee4c3f412de76de2f4872940d7dccdfb327ba5f6ce35229",
+      "frozen/src/catalogue/generator.cpp": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662",
+      "frozen/src/catalogue/support.hpp": "7cc62930f623e99b598954c6b9f2f5e73e4ee4f0438426c55d18041d56d1a11d",
+      "frozen/src/cloud/cloud.cpp": "9cfe9f5b7c86eef3430d9d3d4835ebab5c70add30bf57480edbad1e830f44679",
+      "frozen/src/cloud/cloud.hpp": "b462545a6aaa86329a0122f05bd1b4fdd2a0cbd7e294218087ba472a8539ef2f",
+      "frozen/src/cloud/site_tree.cpp": "32296818941943102cf7afbaef6665ffc80f5ca5564a274ad00ae25e8c096eec",
+      "frozen/src/cloud/site_tree.hpp": "3cb0a70d7a05a6665e0c59676eccbe1b3ac16097ed336fc0007a97ad6bbb8f35",
+      "frozen/src/core/buffer.cpp": "d4d67d329a0fadc59ab0870c094f380a1a501b369a0da4915cc8a5e66dfe5d81",
+      "frozen/src/core/buffer.hpp": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60",
+      "frozen/src/core/reasons.def": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b",
+      "frozen/src/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+      "frozen/src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+      "frozen/src/head/head.cpp": "f583da400d00571a547989a46b1690f2bb093e9e068a01897078363a92674578",
+      "frozen/src/head/head.hpp": "f2710f309a201bc1094dcb49af7acc418ca33b1887f8373d8934f965d072c5e9",
+      "frozen/src/points/dendrogram.cpp": "44711c93473cc31b675b5da29c07645d7c8a7cf686b540681a3da7e7b7c673d4",
+      "frozen/src/points/dendrogram.hpp": "3162508b979572a6a4da0b3f0c445b09baa5e2fd77ba826a8d57b25711c42d16",
+      "frozen/src/sched/pool.cpp": "7eecd6757c03fa8184fbcee7a55b26ef312c1df16acac4241e6917328975d72a",
+      "frozen/src/sched/pool.hpp": "e9eba470b8234eaa7f16626e172f3099ed6a635606639c3734755a6fe92283e5",
+      "frozen/src/sched/sort.hpp": "a75edebefd74c820615027bd90af578cbbdfdc997589638fc02bb0cb57a5a1db",
+      "frozen/src/tower/tower.cpp": "0c5b44ae7993e850c5c6cdb63d0c9829847eb70364f40894a3df964f708b88e9",
+      "frozen/src/tower/tower.hpp": "96c945dc4b1bd21dc0e51817b0d38e41cc0fbddc7b22cd34ae9e6d7244ce228a"
+    },
+    "sources_unchanged": true,
+    "output_sha256": {
+      "native.stdout": "1352108a2862463230a738e30d9ebd76b66ea5e2831d98856a07b101e5f0b9c7",
+      "native.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_check.stdout": "044402d52da207d2f88ef15012049fdbbe728fd7be45603b40ed9f524f7ccc5c",
+      "native_check.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "majority_native": false
+  }
+}

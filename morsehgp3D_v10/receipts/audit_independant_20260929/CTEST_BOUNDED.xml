@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Linux-c++"
+	tests="7"
+	failures="0"
+	disabled="0"
+	skipped="0"
+	hostname="codespaces-0bcb78"
+	time="400"
+	timestamp="2026-09-29T19:35:10"
+	>
+	<testcase name="mhgp10_unit" classname="mhgp10_unit" time="2.06521" status="run">
+		<properties>
+			<property name="cmake_labels" value="fast;gate"/>
+		</properties>
+		<system-out>site_tree_checks 6000
+site_tree_rational_checks 7155 shells 1099
+wide_checks 100000
+unit_ok
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp10_head_condensation_vs_sklearn" classname="mhgp10_head_condensation_vs_sklearn" time="41.1103" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;head"/>
+		</properties>
+		<system-out>hdbscan_checks 360 mismatches 0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp10_regression_level_collision" classname="mhgp10_regression_level_collision" time="53.1879" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;regression"/>
+		</properties>
+		<system-out>core : 509710 niveaux publies, statut ok
+['--entry=cover'] : 502080 niveaux publies, statut ok
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp10_points_cover" classname="mhgp10_points_cover" time="98.4263" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;points"/>
+		</properties>
+		<system-out>controles 4584 ecarts 0
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp10_regression_batch_equivalence" classname="mhgp10_regression_batch_equivalence" time="196.829" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;regression"/>
+		</properties>
+		<system-out>filaments : 2000 points, 4 amas (couverture, K = 3, tete 0)
+anisotropic : 2000 points, 8 amas (couverture, K = 3, tete 0)
+136 controles, 0 ecarts
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp10_regression_mreach_border" classname="mhgp10_regression_mreach_border" time="8.65541" status="run">
+		<properties>
+			<property name="cmake_labels" value="gate;regression"/>
+		</properties>
+		<system-out>spherical : 2000 points
+filaments : 2000 points
+44 controles, 0 ecarts ; couverture bord &gt;= coeur dans 98 % des cas
+
+</system-out>
+	</testcase>
+	<testcase name="mhgp10_regression_multiplicity_refusal" classname="mhgp10_regression_multiplicity_refusal" time="0.329494" status="run">
+		<properties>
+			<property name="cmake_labels" value="fast;gate;regression"/>
+		</properties>
+		<system-out>mhgp10_tower distinct code=0 raison=- ok
+mhgp10_cluster distinct code=0 raison=- ok
+mhgp10_tower doublon code=2 raison=multiplicity_unsupported ok
+mhgp10_cluster doublon code=2 raison=multiplicity_unsupported ok
+multiplicity_refusal_ok
+
+</system-out>
+	</testcase>
+</testsuite>

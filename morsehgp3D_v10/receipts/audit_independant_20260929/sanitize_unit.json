@@ -1,0 +1,10 @@
+{
+  "name": "sanitize_unit",
+  "command": [
+    "/workspaces/E-HGP/build/v10-audit-independent-20260929/sanitize/mhgp10_unit"
+  ],
+  "returncode": 0,
+  "stdout": "site_tree_checks 6000\nsite_tree_rational_checks 7155 shells 1099\nwide_checks 100000\nunit_ok\n",
+  "stderr": "",
+  "elapsed_s": 5.559000340001148
+}

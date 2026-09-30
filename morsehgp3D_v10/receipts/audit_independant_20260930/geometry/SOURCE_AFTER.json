@@ -1,0 +1,111 @@
+{
+  "utc": "2026-09-30T03:12:15.993211+00:00",
+  "scope": "lecture de copies par groupe ; aucune extraction commune ni qualification de build",
+  "roots": {
+    "produit": {
+      "root": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10",
+      "files": {
+        "src/cloud/site_tree.cpp": "32296818941943102cf7afbaef6665ffc80f5ca5564a274ad00ae25e8c096eec",
+        "src/cloud/site_tree.hpp": "3cb0a70d7a05a6665e0c59676eccbe1b3ac16097ed336fc0007a97ad6bbb8f35",
+        "tests/regression/site_tree_far_center.cpp": null,
+        "src/catalogue/generator.cpp": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662",
+        "src/catalogue/catalogue.hpp": "2f47beb9dfc1e59e3ee4c3f412de76de2f4872940d7dccdfb327ba5f6ce35229",
+        "cli/mhgp10_catalogue.cpp": "e345022a524223a950925d6140fc68e4df54beccfcc0de846606d2084a6cc12f",
+        "tests/oracle/test_catalogue_oracle.py": "f581b1ce6ee207589aaac9c275081d56b3d0cb22982e7fd894a0a1cf366fe853",
+        "CMakeLists.txt": "8f94edde344a86ed8306ed9796557530c1ccf3eabfab0ab7ede8bcac836027dd"
+      },
+      "textual_observations_not_tests": {
+        "sitetree_mentions_fegetround": false,
+        "oracle_uses_frozenset": true,
+        "oracle_sorts_got_by_rank": true,
+        "catalogue_cli_mentions_allow_small_leaf": false,
+        "catalogue_cli_mentions_max_nodes": false,
+        "generator_has_k_plus_margin_guard": false
+      }
+    },
+    "sitetree_r2": {
+      "root": "/tmp/mhgp10-r2/sitetree/src/morsehgp3D_v10",
+      "files": {
+        "src/cloud/site_tree.cpp": "d83e999bf626c4e8233517e9fe36ccdfef50ec2c319b3610b0814f9d2fa09e24",
+        "src/cloud/site_tree.hpp": "362bf31d94a743fb18f578d4ddbba05fe2e2287e00cc636d85565fbfe75a9d5d",
+        "tests/regression/site_tree_far_center.cpp": "38157638361c662ca38e8b871dea90ff1706ddb7e70d1b8f30a198fe134121bf",
+        "src/catalogue/generator.cpp": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662",
+        "src/catalogue/catalogue.hpp": "2f47beb9dfc1e59e3ee4c3f412de76de2f4872940d7dccdfb327ba5f6ce35229",
+        "cli/mhgp10_catalogue.cpp": "e345022a524223a950925d6140fc68e4df54beccfcc0de846606d2084a6cc12f",
+        "tests/oracle/test_catalogue_oracle.py": "f581b1ce6ee207589aaac9c275081d56b3d0cb22982e7fd894a0a1cf366fe853",
+        "CMakeLists.txt": "7e9fed3bf00a8f74212d051898f9eac3024ca6cba82326cb98de153bd10ad967"
+      },
+      "textual_observations_not_tests": {
+        "sitetree_mentions_fegetround": false,
+        "oracle_uses_frozenset": true,
+        "oracle_sorts_got_by_rank": true,
+        "catalogue_cli_mentions_allow_small_leaf": false,
+        "catalogue_cli_mentions_max_nodes": false,
+        "generator_has_k_plus_margin_guard": false
+      }
+    },
+    "oracles_r2": {
+      "root": "/tmp/mhgp10-r2/oracles/src/morsehgp3D_v10",
+      "files": {
+        "src/cloud/site_tree.cpp": "32296818941943102cf7afbaef6665ffc80f5ca5564a274ad00ae25e8c096eec",
+        "src/cloud/site_tree.hpp": "3cb0a70d7a05a6665e0c59676eccbe1b3ac16097ed336fc0007a97ad6bbb8f35",
+        "tests/regression/site_tree_far_center.cpp": null,
+        "src/catalogue/generator.cpp": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662",
+        "src/catalogue/catalogue.hpp": "2f47beb9dfc1e59e3ee4c3f412de76de2f4872940d7dccdfb327ba5f6ce35229",
+        "cli/mhgp10_catalogue.cpp": "26dfa55086efd398c5a9cd6a4f29953cafe6013cb67885d2166ac9c37d141c7a",
+        "tests/oracle/test_catalogue_oracle.py": "b814428d4c63133441b8e21f921f23fd28bcd7b4d35421ea6050e9e37a9689a3",
+        "CMakeLists.txt": "c4caf7d28cd38f366d95066257a212c6aa385f054405f88a792074c20d92ac88"
+      },
+      "textual_observations_not_tests": {
+        "sitetree_mentions_fegetround": false,
+        "oracle_uses_frozenset": true,
+        "oracle_sorts_got_by_rank": true,
+        "catalogue_cli_mentions_allow_small_leaf": false,
+        "catalogue_cli_mentions_max_nodes": false,
+        "generator_has_k_plus_margin_guard": false
+      }
+    },
+    "oracles_snapshot_r1": {
+      "root": "/tmp/mhgp10-r2/oracles/src-r1/morsehgp3D_v10",
+      "files": {
+        "src/cloud/site_tree.cpp": "32296818941943102cf7afbaef6665ffc80f5ca5564a274ad00ae25e8c096eec",
+        "src/cloud/site_tree.hpp": "3cb0a70d7a05a6665e0c59676eccbe1b3ac16097ed336fc0007a97ad6bbb8f35",
+        "tests/regression/site_tree_far_center.cpp": null,
+        "src/catalogue/generator.cpp": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662",
+        "src/catalogue/catalogue.hpp": "2f47beb9dfc1e59e3ee4c3f412de76de2f4872940d7dccdfb327ba5f6ce35229",
+        "cli/mhgp10_catalogue.cpp": "26dfa55086efd398c5a9cd6a4f29953cafe6013cb67885d2166ac9c37d141c7a",
+        "tests/oracle/test_catalogue_oracle.py": "b814428d4c63133441b8e21f921f23fd28bcd7b4d35421ea6050e9e37a9689a3",
+        "CMakeLists.txt": "c4caf7d28cd38f366d95066257a212c6aa385f054405f88a792074c20d92ac88"
+      },
+      "textual_observations_not_tests": {
+        "sitetree_mentions_fegetround": false,
+        "oracle_uses_frozenset": true,
+        "oracle_sorts_got_by_rank": true,
+        "catalogue_cli_mentions_allow_small_leaf": false,
+        "catalogue_cli_mentions_max_nodes": false,
+        "generator_has_k_plus_margin_guard": false
+      }
+    },
+    "entrees_r2": {
+      "root": "/tmp/mhgp10-r2/entrees_cli/src/morsehgp3D_v10",
+      "files": {
+        "src/cloud/site_tree.cpp": "32296818941943102cf7afbaef6665ffc80f5ca5564a274ad00ae25e8c096eec",
+        "src/cloud/site_tree.hpp": "3cb0a70d7a05a6665e0c59676eccbe1b3ac16097ed336fc0007a97ad6bbb8f35",
+        "tests/regression/site_tree_far_center.cpp": null,
+        "src/catalogue/generator.cpp": "967a32f67fac841c31479940a0722ad1a2d7f026bfefe8d36588551922cef836",
+        "src/catalogue/catalogue.hpp": "78e72fa5951ade8ecf80adf541705d4528fa7aef79905b6565d12936b3625d28",
+        "cli/mhgp10_catalogue.cpp": "849c8d24b77bff5514b0434e6db8ec3ba6c5342e3d5f7e429f9a4cf62657cc1c",
+        "tests/oracle/test_catalogue_oracle.py": "f581b1ce6ee207589aaac9c275081d56b3d0cb22982e7fd894a0a1cf366fe853",
+        "CMakeLists.txt": "44f95407ad741a94967e6c38761a0cdc3c404b6c2cbe599b8948b8bf684cc382"
+      },
+      "textual_observations_not_tests": {
+        "sitetree_mentions_fegetround": false,
+        "oracle_uses_frozenset": true,
+        "oracle_sorts_got_by_rank": true,
+        "catalogue_cli_mentions_allow_small_leaf": false,
+        "catalogue_cli_mentions_max_nodes": false,
+        "generator_has_k_plus_margin_guard": true
+      }
+    }
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "base": "6206d1d118794c9e1cabb6faeaec2aaa77d37e5b",
+  "sanitizers": "ASan+UBSan; LSan disabled because sandbox ptrace",
+  "runs": {
+    "rank": {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "3c70c1",
+        "wall_time_seconds": 1.096132047,
+        "exit_code": 1,
+        "original_token_count": 1165,
+        "output": "mode=rank validate=ok\n=================================================================\n==2==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000000018 at pc 0x58199c08cf33 bp 0x7ffebffda0f0 sp 0x7ffebffda0e0\nREAD of size 8 at 0x502000000018 thread T0\n    #0 0x58199c08cf32 in mhgp10::condense(mhgp10::PointDendrogram const&, mhgp10::ClusterParams const&) /workspaces/E-HGP/build/v10-audit-independent-20260929/source/morsehgp3D_v10/src/head/head.cpp:76\n    #1 0x58199c090860 in mhgp10::cluster(mhgp10::PointDendrogram const&, mhgp10::ClusterParams const&) /workspaces/E-HGP/build/v10-audit-independent-20260929/source/morsehgp3D_v10/src/head/head.cpp:109\n    #2 0x58199c07c2df in main morsehgp3D_v10/audits/audit_independant_20260929/evidence_head_validate.cpp:49\n    #3 0x7e2e7c25c1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58\n    #4 0x7e2e7c25c28a in __libc_start_main_impl ../csu/libc-start.c:360\n    #5 0x58199c07a5e4 in _start (/workspaces/E-HGP/build/v10-audit-independent-20260929/head_probes/head_validate+0x695e4) (BuildId: cf8ca89d0c8ecdd2adc204224ee440d960794994)\n\n0x502000000018 is located 0 bytes after 8-byte region [0x502000000010,0x502000000018)\nallocated by thread T0 here:\n    #0 0x7e2e7ceef548 in operator new(unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:95\n    #1 0x58199c07e723 in std::__new_allocator<double>::allocate(unsigned long, void const*) /usr/include/c++/13/bits/new_allocator.h:151\n    #2 0x58199c07e723 in std::allocator<double>::allocate(unsigned long) /usr/include/c++/13/bits/allocator.h:198\n    #3 0x58199c07e723 in std::allocator_traits<std::allocator<double> >::allocate(std::allocator<double>&, unsigned long) /usr/include/c++/13/bits/alloc_traits.h:482\n    #4 0x58199c07e723 in std::_Vector_base<double, std::allocator<double> >::_M_allocate(unsigned long) /usr/include/c++/13/bits/stl_vector.h:381\n    #5 0x58199c07e723 in double* std::vector<double, std::allocator<double> >::_M_allocate_and_copy<double const*>(unsigned long, double const*, double const*) /usr/include/c++/13/bits/stl_vector.h:1619\n    #6 0x58199c07e723 in void std::vector<double, std::allocator<double> >::_M_assign_aux<double const*>(double const*, double const*, std::forward_iterator_tag) /usr/include/c++/13/bits/vector.tcc:324\n    #7 0x58199c07a8cf in std::vector<double, std::allocator<double> >::operator=(std::initializer_list<double>) /usr/include/c++/13/bits/stl_vector.h:790\n    #8 0x58199c07a8cf in single() morsehgp3D_v10/audits/audit_independant_20260929/evidence_head_validate.cpp:12\n    #9 0x58199c07b76c in main morsehgp3D_v10/audits/audit_independant_20260929/evidence_head_validate.cpp:25\n    #10 0x7e2e7c25c1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58\n    #11 0x7e2e7c25c28a in __libc_start_main_impl ../csu/libc-start.c:360\n    #12 0x58199c07a5e4 in _start (/workspaces/E-HGP/build/v10-audit-independent-20260929/head_probes/head_validate+0x695e4) (BuildId: cf8ca89d0c8ecdd2adc204224ee440d960794994)\n\nSUMMARY: AddressSanitizer: heap-buffer-overflow /workspaces/E-HGP/build/v10-audit-independent-20260929/source/morsehgp3D_v10/src/head/head.cpp:76 in mhgp10::condense(mhgp10::PointDendrogram const&, mhgp10::ClusterParams const&)\nShadow bytes around the buggy address:\n  0x501ffffffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n  0x501ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n  0x501ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n  0x501fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n  0x501fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n=>0x502000000000: fa fa 00[fa]fa fa 04 fa fa fa 00 fa fa fa 04 fa\n  0x502000000080: fa fa 04 fa fa fa 04 fa fa fa 04 fa fa fa 00 fa\n  0x502000000100: fa fa 00 fa fa fa 04 fa fa fa fd fa fa fa 04 fa\n  0x502000000180: fa fa 04 fa fa fa 00 fa fa fa 04 fa fa fa 00 fa\n  0x502000000200: fa fa 00 fa fa fa 00 fa fa fa 00 fa fa fa fa fa\n  0x502000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa\nShadow byte legend (one shadow byte represents 8 application bytes):\n  Addressable:           00\n  Partially addressable: 01 02 03 04 05 06 07 \n  Heap left redzone:       fa\n  Freed heap region:       fd\n  Stack left redzone:      f1\n  Stack mid redzone:       f2\n  Stack right redzone:     f3\n  Stack after return:      f5\n  Stack use after scope:   f8\n  Global redzone:          f9\n  Global init order:       f6\n  Poisoned by user:        f7\n  Container overflow:      fc\n  Array cookie:            ac\n  Intra object redzone:    bb\n  ASan internal:           fe\n  Left alloca redzone:     ca\n  Right alloca redzone:    cb\n==2==ABORTING\n"
+      }
+    },
+    "missing-edge": {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "8cba14",
+        "wall_time_seconds": 0.163735219,
+        "exit_code": 0,
+        "original_token_count": 15,
+        "output": "mode=missing-edge validate=ok\nlabel=-1 stability=0 finite=1\n"
+      }
+    },
+    "nan-level": {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "a358a9",
+        "wall_time_seconds": 0.179039642,
+        "exit_code": 0,
+        "original_token_count": 15,
+        "output": "mode=nan-level validate=ok\nlabel=0 stability=nan finite=0\n"
+      }
+    },
+    "nan-z": {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "23828a",
+        "wall_time_seconds": 0.212069513,
+        "exit_code": 0,
+        "original_token_count": 13,
+        "output": "mode=nan-z validate=ok\nlabel=0 stability=1 finite=1\n"
+      }
+    },
+    "negative-z": {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "2f9fef",
+        "wall_time_seconds": 0.190854553,
+        "exit_code": 0,
+        "original_token_count": 15,
+        "output": "mode=negative-z validate=ok\nlabel=0 stability=1 finite=1\n"
+      }
+    },
+    "nan-z-v2": {
+      "chunk_id": "9684a8",
+      "wall_time_seconds": 0.116051257,
+      "exit_code": 0,
+      "original_token_count": 14,
+      "output": "mode=nan-z validate=ok\nlabel=0 stability=nan finite=0\n"
+    },
+    "negative-z-v2": {
+      "chunk_id": "90a0d6",
+      "wall_time_seconds": 0.185917853,
+      "exit_code": 0,
+      "original_token_count": 15,
+      "output": "mode=negative-z validate=ok\nlabel=0 stability=2 finite=1\n"
+    }
+  }
+}
+

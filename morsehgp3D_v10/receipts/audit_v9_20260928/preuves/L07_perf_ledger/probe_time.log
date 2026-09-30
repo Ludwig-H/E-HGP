@@ -1,0 +1,4 @@
+shells_8000 probe wall=11.73 user=22.91 maxrss=35172
+spherical_8000 probe wall=1.82 user=3.44 maxrss=67400
+shells_32000 probe wall=297.71 user=576.56 maxrss=121008
+exit=0

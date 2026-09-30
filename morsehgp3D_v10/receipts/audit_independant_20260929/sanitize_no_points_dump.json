@@ -1,0 +1,15 @@
+{
+  "name": "sanitize_no_points_dump",
+  "command": [
+    "/workspaces/E-HGP/build/v10-audit-independent-20260929/sanitize/mhgp10_tower",
+    "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/valid.u32le",
+    "--k=2",
+    "--threads=1",
+    "--no-points",
+    "--dump=/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/no_points_san.dump"
+  ],
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "/usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/stl_vector.h:1148:9: runtime error: reference binding to null pointer of type 'const value_type' (aka 'const unsigned int')\nSUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/stl_vector.h:1148:9 \n",
+  "elapsed_s": 3.1788923269996303
+}

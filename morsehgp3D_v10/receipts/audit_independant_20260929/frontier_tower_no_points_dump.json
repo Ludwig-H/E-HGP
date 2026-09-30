@@ -1,0 +1,15 @@
+{
+  "name": "frontier_tower_no_points_dump",
+  "command": [
+    "/workspaces/E-HGP/build/v10-audit-independent-20260929/release/mhgp10_tower",
+    "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/valid.u32le",
+    "--k=2",
+    "--threads=1",
+    "--no-points",
+    "--dump=/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/no_points.dump"
+  ],
+  "returncode": -11,
+  "stdout": "",
+  "stderr": "",
+  "elapsed_s": 0.1546201340006519
+}

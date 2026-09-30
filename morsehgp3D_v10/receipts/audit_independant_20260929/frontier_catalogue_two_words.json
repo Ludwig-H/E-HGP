@@ -1,0 +1,13 @@
+{
+  "name": "frontier_catalogue_two_words",
+  "command": [
+    "/workspaces/E-HGP/build/v10-audit-independent-20260929/release/mhgp10_catalogue",
+    "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/two_words.u32le",
+    "--k=2",
+    "--threads=1"
+  ],
+  "returncode": 0,
+  "stdout": "{\"status\":\"ok\",\"n\":4,\"sites\":4,\"K\":2,\"threads\":1,\"balls\":6,\"levels\":2,\"prepare_s\":0.0000,\"catalogue_s\":0.0000,\"catalogue_stages\":{\"t_frontier\":0.0000,\"t_boxes\":0.0000,\"t_order\":0.0000,\"t_assemble\":0.0000,\"t_collect\":0.0000,\"t_sort\":0.0000,\"t_bands\":0.0000,\"t_compare\":0.0000,\"t_ranks\":0.0000,\"t_copy\":0.0000,\"bands\":2,\"band_members\":6,\"tasks\":0,\"max_task_sites\":0},\"by_q_p\":{\"q2\":[6,0],\"q3\":[0,0],\"q4\":[0,0]},\"nodes\":1,\"leaves\":1,\"sum_m\":4,\"max_m\":4,\"skipped_bbox\":0,\"filter_tests\":16,\"leaf_dominance_tests\":6,\"pair_tests\":6,\"triple_tests\":4,\"line_hits\":4,\"quad_tests\":0,\"judged\":7,\"extended\":3,\"weighted\":0,\"max_shell\":3,\"stalled_leaves\":0}\n",
+  "stderr": "",
+  "elapsed_s": 0.012835588999223546
+}

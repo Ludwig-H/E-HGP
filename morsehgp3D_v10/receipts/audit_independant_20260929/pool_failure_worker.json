@@ -1,0 +1,10 @@
+{
+  "name": "pool_failure_worker",
+  "command": [
+    "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/pool_failure_probe"
+  ],
+  "returncode": -6,
+  "stdout": "",
+  "stderr": "terminate called after throwing an instance of 'std::bad_alloc'\n  what():  std::bad_alloc\n",
+  "elapsed_s": 0.15828516900000977
+}

@@ -1,0 +1,1002 @@
+{
+  "source": "6206d1d118794c9e1cabb6faeaec2aaa77d37e5b",
+  "checks": 128,
+  "scenes": 32,
+  "balls": 2783,
+  "weighted_checks": 64,
+  "stricter_gen_v2_surplus": 111,
+  "failures": [
+    {
+      "scene": 5,
+      "weighted": false,
+      "K": 5,
+      "leaf": 3,
+      "workers": 1,
+      "raw": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          2
+        ],
+        [
+          0,
+          2,
+          0
+        ],
+        [
+          0,
+          2,
+          2
+        ],
+        [
+          2,
+          0,
+          0
+        ],
+        [
+          2,
+          0,
+          2
+        ],
+        [
+          2,
+          2,
+          0
+        ],
+        [
+          2,
+          2,
+          2
+        ]
+      ],
+      "error": "timeout_2s",
+      "stdout": "None",
+      "stderr": "None"
+    },
+    {
+      "scene": 6,
+      "weighted": false,
+      "K": 5,
+      "leaf": 3,
+      "workers": 1,
+      "raw": [
+        [
+          0,
+          1,
+          1
+        ],
+        [
+          2,
+          1,
+          1
+        ],
+        [
+          1,
+          0,
+          1
+        ],
+        [
+          1,
+          2,
+          1
+        ],
+        [
+          1,
+          1,
+          0
+        ],
+        [
+          1,
+          1,
+          2
+        ]
+      ],
+      "error": "timeout_2s",
+      "stdout": "None",
+      "stderr": "None"
+    }
+  ],
+  "configurations": [
+    {
+      "scene": 0,
+      "weighted": false,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 0,
+      "weighted": false,
+      "K": 2,
+      "leaf": 2,
+      "workers": 4
+    },
+    {
+      "scene": 0,
+      "weighted": false,
+      "K": 5,
+      "leaf": 3,
+      "workers": 1
+    },
+    {
+      "scene": 0,
+      "weighted": false,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 0,
+      "weighted": true,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 0,
+      "weighted": true,
+      "K": 2,
+      "leaf": 2,
+      "workers": 4
+    },
+    {
+      "scene": 0,
+      "weighted": true,
+      "K": 5,
+      "leaf": 3,
+      "workers": 1
+    },
+    {
+      "scene": 0,
+      "weighted": true,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 1,
+      "weighted": false,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 1,
+      "weighted": false,
+      "K": 2,
+      "leaf": 2,
+      "workers": 4
+    },
+    {
+      "scene": 1,
+      "weighted": false,
+      "K": 5,
+      "leaf": 3,
+      "workers": 1
+    },
+    {
+      "scene": 1,
+      "weighted": false,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 1,
+      "weighted": true,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 1,
+      "weighted": true,
+      "K": 2,
+      "leaf": 2,
+      "workers": 4
+    },
+    {
+      "scene": 1,
+      "weighted": true,
+      "K": 5,
+      "leaf": 3,
+      "workers": 1
+    },
+    {
+      "scene": 1,
+      "weighted": true,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 2,
+      "weighted": false,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 2,
+      "weighted": false,
+      "K": 2,
+      "leaf": 2,
+      "workers": 4
+    },
+    {
+      "scene": 2,
+      "weighted": false,
+      "K": 5,
+      "leaf": 3,
+      "workers": 1
+    },
+    {
+      "scene": 2,
+      "weighted": false,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 2,
+      "weighted": true,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 2,
+      "weighted": true,
+      "K": 2,
+      "leaf": 2,
+      "workers": 4
+    },
+    {
+      "scene": 2,
+      "weighted": true,
+      "K": 5,
+      "leaf": 3,
+      "workers": 1
+    },
+    {
+      "scene": 2,
+      "weighted": true,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 3,
+      "weighted": false,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 3,
+      "weighted": false,
+      "K": 2,
+      "leaf": 12,
+      "workers": 4
+    },
+    {
+      "scene": 3,
+      "weighted": false,
+      "K": 5,
+      "leaf": 12,
+      "workers": 1
+    },
+    {
+      "scene": 3,
+      "weighted": false,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 3,
+      "weighted": true,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 3,
+      "weighted": true,
+      "K": 2,
+      "leaf": 12,
+      "workers": 4
+    },
+    {
+      "scene": 3,
+      "weighted": true,
+      "K": 5,
+      "leaf": 12,
+      "workers": 1
+    },
+    {
+      "scene": 3,
+      "weighted": true,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 4,
+      "weighted": false,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 4,
+      "weighted": false,
+      "K": 2,
+      "leaf": 12,
+      "workers": 4
+    },
+    {
+      "scene": 4,
+      "weighted": false,
+      "K": 5,
+      "leaf": 12,
+      "workers": 1
+    },
+    {
+      "scene": 4,
+      "weighted": false,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 4,
+      "weighted": true,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 4,
+      "weighted": true,
+      "K": 2,
+      "leaf": 12,
+      "workers": 4
+    },
+    {
+      "scene": 4,
+      "weighted": true,
+      "K": 5,
+      "leaf": 12,
+      "workers": 1
+    },
+    {
+      "scene": 4,
+      "weighted": true,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 5,
+      "weighted": false,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 5,
+      "weighted": false,
+      "K": 2,
+      "leaf": 2,
+      "workers": 4
+    },
+    {
+      "scene": 5,
+      "weighted": false,
+      "K": 5,
+      "leaf": 3,
+      "workers": 1
+    },
+    {
+      "scene": 5,
+      "weighted": false,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 5,
+      "weighted": true,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 5,
+      "weighted": true,
+      "K": 2,
+      "leaf": 2,
+      "workers": 4
+    },
+    {
+      "scene": 5,
+      "weighted": true,
+      "K": 5,
+      "leaf": 3,
+      "workers": 1
+    },
+    {
+      "scene": 5,
+      "weighted": true,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 6,
+      "weighted": false,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 6,
+      "weighted": false,
+      "K": 2,
+      "leaf": 2,
+      "workers": 4
+    },
+    {
+      "scene": 6,
+      "weighted": false,
+      "K": 5,
+      "leaf": 3,
+      "workers": 1
+    },
+    {
+      "scene": 6,
+      "weighted": false,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 6,
+      "weighted": true,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 6,
+      "weighted": true,
+      "K": 2,
+      "leaf": 2,
+      "workers": 4
+    },
+    {
+      "scene": 6,
+      "weighted": true,
+      "K": 5,
+      "leaf": 3,
+      "workers": 1
+    },
+    {
+      "scene": 6,
+      "weighted": true,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 7,
+      "weighted": false,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 7,
+      "weighted": false,
+      "K": 2,
+      "leaf": 12,
+      "workers": 4
+    },
+    {
+      "scene": 7,
+      "weighted": false,
+      "K": 5,
+      "leaf": 12,
+      "workers": 1
+    },
+    {
+      "scene": 7,
+      "weighted": false,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 7,
+      "weighted": true,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 7,
+      "weighted": true,
+      "K": 2,
+      "leaf": 12,
+      "workers": 4
+    },
+    {
+      "scene": 7,
+      "weighted": true,
+      "K": 5,
+      "leaf": 12,
+      "workers": 1
+    },
+    {
+      "scene": 7,
+      "weighted": true,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 8,
+      "weighted": false,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 8,
+      "weighted": false,
+      "K": 2,
+      "leaf": 12,
+      "workers": 4
+    },
+    {
+      "scene": 8,
+      "weighted": false,
+      "K": 5,
+      "leaf": 12,
+      "workers": 1
+    },
+    {
+      "scene": 8,
+      "weighted": false,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 8,
+      "weighted": true,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 8,
+      "weighted": true,
+      "K": 2,
+      "leaf": 12,
+      "workers": 4
+    },
+    {
+      "scene": 8,
+      "weighted": true,
+      "K": 5,
+      "leaf": 12,
+      "workers": 1
+    },
+    {
+      "scene": 8,
+      "weighted": true,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 9,
+      "weighted": false,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 9,
+      "weighted": false,
+      "K": 2,
+      "leaf": 12,
+      "workers": 4
+    },
+    {
+      "scene": 9,
+      "weighted": false,
+      "K": 5,
+      "leaf": 12,
+      "workers": 1
+    },
+    {
+      "scene": 9,
+      "weighted": false,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 9,
+      "weighted": true,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 9,
+      "weighted": true,
+      "K": 2,
+      "leaf": 12,
+      "workers": 4
+    },
+    {
+      "scene": 9,
+      "weighted": true,
+      "K": 5,
+      "leaf": 12,
+      "workers": 1
+    },
+    {
+      "scene": 9,
+      "weighted": true,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 10,
+      "weighted": false,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 10,
+      "weighted": false,
+      "K": 2,
+      "leaf": 12,
+      "workers": 4
+    },
+    {
+      "scene": 10,
+      "weighted": false,
+      "K": 5,
+      "leaf": 12,
+      "workers": 1
+    },
+    {
+      "scene": 10,
+      "weighted": false,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 10,
+      "weighted": true,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 10,
+      "weighted": true,
+      "K": 2,
+      "leaf": 12,
+      "workers": 4
+    },
+    {
+      "scene": 10,
+      "weighted": true,
+      "K": 5,
+      "leaf": 12,
+      "workers": 1
+    },
+    {
+      "scene": 10,
+      "weighted": true,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 11,
+      "weighted": false,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 11,
+      "weighted": false,
+      "K": 2,
+      "leaf": 12,
+      "workers": 4
+    },
+    {
+      "scene": 11,
+      "weighted": false,
+      "K": 5,
+      "leaf": 12,
+      "workers": 1
+    },
+    {
+      "scene": 11,
+      "weighted": false,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 11,
+      "weighted": true,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 11,
+      "weighted": true,
+      "K": 2,
+      "leaf": 12,
+      "workers": 4
+    },
+    {
+      "scene": 11,
+      "weighted": true,
+      "K": 5,
+      "leaf": 12,
+      "workers": 1
+    },
+    {
+      "scene": 11,
+      "weighted": true,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 12,
+      "weighted": false,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 12,
+      "weighted": false,
+      "K": 2,
+      "leaf": 12,
+      "workers": 4
+    },
+    {
+      "scene": 12,
+      "weighted": false,
+      "K": 5,
+      "leaf": 12,
+      "workers": 1
+    },
+    {
+      "scene": 12,
+      "weighted": false,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 12,
+      "weighted": true,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 12,
+      "weighted": true,
+      "K": 2,
+      "leaf": 12,
+      "workers": 4
+    },
+    {
+      "scene": 12,
+      "weighted": true,
+      "K": 5,
+      "leaf": 12,
+      "workers": 1
+    },
+    {
+      "scene": 12,
+      "weighted": true,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 13,
+      "weighted": false,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 13,
+      "weighted": false,
+      "K": 2,
+      "leaf": 12,
+      "workers": 4
+    },
+    {
+      "scene": 13,
+      "weighted": false,
+      "K": 5,
+      "leaf": 12,
+      "workers": 1
+    },
+    {
+      "scene": 13,
+      "weighted": false,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 13,
+      "weighted": true,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 13,
+      "weighted": true,
+      "K": 2,
+      "leaf": 12,
+      "workers": 4
+    },
+    {
+      "scene": 13,
+      "weighted": true,
+      "K": 5,
+      "leaf": 12,
+      "workers": 1
+    },
+    {
+      "scene": 13,
+      "weighted": true,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 14,
+      "weighted": false,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 14,
+      "weighted": false,
+      "K": 2,
+      "leaf": 12,
+      "workers": 4
+    },
+    {
+      "scene": 14,
+      "weighted": false,
+      "K": 5,
+      "leaf": 12,
+      "workers": 1
+    },
+    {
+      "scene": 14,
+      "weighted": false,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 14,
+      "weighted": true,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 14,
+      "weighted": true,
+      "K": 2,
+      "leaf": 12,
+      "workers": 4
+    },
+    {
+      "scene": 14,
+      "weighted": true,
+      "K": 5,
+      "leaf": 12,
+      "workers": 1
+    },
+    {
+      "scene": 14,
+      "weighted": true,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 15,
+      "weighted": false,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 15,
+      "weighted": false,
+      "K": 2,
+      "leaf": 12,
+      "workers": 4
+    },
+    {
+      "scene": 15,
+      "weighted": false,
+      "K": 5,
+      "leaf": 12,
+      "workers": 1
+    },
+    {
+      "scene": 15,
+      "weighted": false,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    },
+    {
+      "scene": 15,
+      "weighted": true,
+      "K": 1,
+      "leaf": 64,
+      "workers": 1
+    },
+    {
+      "scene": 15,
+      "weighted": true,
+      "K": 2,
+      "leaf": 12,
+      "workers": 4
+    },
+    {
+      "scene": 15,
+      "weighted": true,
+      "K": 5,
+      "leaf": 12,
+      "workers": 1
+    },
+    {
+      "scene": 15,
+      "weighted": true,
+      "K": 10,
+      "leaf": 64,
+      "workers": 4
+    }
+  ]
+}

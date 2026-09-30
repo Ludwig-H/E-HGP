@@ -1,0 +1,18 @@
+{
+  "date_utc": "2026-09-29 20:32",
+  "old_independent_files_moved": 43,
+  "historical_v9_files_moved": 425,
+  "hashes_preserved": true,
+  "local_links_checked": 87,
+  "broken_links": [],
+  "audit_notes_current": [
+    "ANCRAGE_AMBIGUITES.md",
+    "CONTRE_AUDIT_GEOMETRIE.md",
+    "CONTRE_AUDIT_TETE_BANCS.md",
+    "GEOMETRIE_CATALOGUE.md",
+    "TETE_BANCS_PREUVES.md",
+    "TOUR_ET_POINTS.md",
+    "tower_statistical_sources.md"
+  ],
+  "scope": "Rangement et navigation ; captures historiques conserv\u00e9es. Aucun source produit ni index Git modifi\u00e9 par cette op\u00e9ration."
+}

@@ -1,0 +1,2 @@
+2000 default {'ari': 1.0, 'clusters': 8, 'noise': 0, 'coverage': 1.0} oracle {'ari': 1.0, 'clusters': 8, 'noise': 0, 'parameter': 5}
+8000 default {'ari': 0.1779540829959098, 'clusters': 3, 'noise': 0, 'coverage': 1.0} oracle {'ari': 1.0, 'clusters': 8, 'noise': 0, 'parameter': 5}

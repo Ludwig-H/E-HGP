@@ -1,0 +1,112 @@
+{
+  "date": "2026-09-29",
+  "primary_source": "/workspaces/E-HGP/build/v9-open-worktree/docs/references/MANUSCRIT_THESE_HAUSEUX.pdf",
+  "sha256": "579f83671ebca34cd810f350820074eb42672411713160f9c9c2a458ff4f4fef",
+  "extraction": [
+    "pdftotext",
+    "-layout",
+    "/workspaces/E-HGP/build/v9-open-worktree/docs/references/MANUSCRIT_THESE_HAUSEUX.pdf",
+    "/tmp/mhgp10-these-20260929.txt"
+  ],
+  "scope": [
+    {
+      "reader": "auditeur Partie I",
+      "pdf_pages": [
+        27,
+        76
+      ],
+      "printed_pages": [
+        1,
+        50
+      ],
+      "chapters": [
+        1,
+        5
+      ],
+      "coverage": "intégrale, introduction comprise"
+    },
+    {
+      "reader": "auditeur Partie II",
+      "pdf_pages": [
+        79,
+        133
+      ],
+      "printed_pages": [
+        53,
+        107
+      ],
+      "chapters": [
+        6,
+        9
+      ],
+      "coverage": "intégrale, titre PDF77 et passages supplémentaires relus"
+    },
+    {
+      "reader": "auditeur géométrie",
+      "sections": [
+        "2.4.4",
+        "6.3",
+        "7.4",
+        "7.5",
+        "9"
+      ],
+      "coverage": "ciblée, chapitre9 entier"
+    },
+    {
+      "reader": "auditeur principal",
+      "coverage": "Contrôle ciblé des définitions, preuves et recommandations ; passages clés relus directement et formules du vote inspectées en images",
+      "pdf_pages_read": [
+        45,
+        46,
+        47,
+        62,
+        63,
+        64,
+        65,
+        80,
+        81,
+        82,
+        85,
+        86,
+        87,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        103,
+        104,
+        105,
+        106,
+        107,
+        122,
+        123,
+        125,
+        126,
+        129,
+        130,
+        131,
+        132,
+        133
+      ],
+      "pdf_images": [
+        122,
+        123
+      ]
+    }
+  ],
+  "current_note": "audits/audit_independant_20260929/ANCRAGE_AMBIGUITES.md",
+  "conclusions": [
+    "cible discrète X∩δ_r(C), avec frontières partagées",
+    "masses normalisées par observation avant condensation ; vote après sélection",
+    "mesurer récupération avant fusion et perte de masse due à projection",
+    "core reste comparateur stable ; projection de points distincte de relation complète",
+    "convergence percolation gaussienne admise et haut rappel conjectural dans le manuscrit"
+  ],
+  "limits": [
+    "aucune campagne",
+    "aucun source produit modifié",
+    "pas de qualification de score de faces par la seule compression du catalogue"
+  ]
+}

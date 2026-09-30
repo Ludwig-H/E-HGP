@@ -1,0 +1,14 @@
+{
+  "name": "sanitize_repeat0",
+  "command": [
+    "/workspaces/E-HGP/build/v10-audit-independent-20260929/sanitize/mhgp10_tower",
+    "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/valid.u32le",
+    "--k=2",
+    "--threads=1",
+    "--repeat=0"
+  ],
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "/usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/stl_iterator.h:1158:45: runtime error: applying non-zero offset 18446744073709551608 to null pointer\nSUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/stl_iterator.h:1158:45 \n",
+  "elapsed_s": 0.024177090999728534
+}

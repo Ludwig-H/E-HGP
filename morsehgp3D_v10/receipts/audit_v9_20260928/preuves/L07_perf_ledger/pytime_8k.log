@@ -1,0 +1,7 @@
+spherical_8000 json_load 1.17
+ read_export 0.86
+ births 0.41
+ facet_levels 1.41
+ merge_tree 10.49 nodes 23304 roots 17
+ measure 2.37
+ condense 0.90 total 17.60

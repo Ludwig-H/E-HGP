@@ -1,0 +1,50 @@
+{
+  "prior_attempt": "geometry_catalogue_probe.py terminated with unhandled TimeoutExpired 20s at --k=2 --leaf=2 --threads=4; no per-case snapshot had yet been saved; first-case hypothesis retested below",
+  "P": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      4,
+      0,
+      0
+    ],
+    [
+      2,
+      3,
+      0
+    ]
+  ],
+  "retests": [
+    {
+      "command": [
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/release/mhgp10_catalogue",
+        "morsehgp3D_v10/audits/audit_independant_20260929/geometry_first_timeout.u32le",
+        "--k=2",
+        "--leaf=2",
+        "--threads=1"
+      ],
+      "status": "completed",
+      "returncode": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":3,\"sites\":3,\"K\":2,\"threads\":1,\"balls\":4,\"levels\":3,\"prepare_s\":0.0000,\"catalogue_s\":0.0004,\"catalogue_stages\":{\"t_frontier\":0.0001,\"t_boxes\":0.0002,\"t_order\":0.0000,\"t_assemble\":0.0000,\"t_collect\":0.0000,\"t_sort\":0.0000,\"t_bands\":0.0000,\"t_compare\":0.0000,\"t_ranks\":0.0000,\"t_copy\":0.0000,\"bands\":1,\"band_members\":2,\"tasks\":84,\"max_task_sites\":1},\"by_q_p\":{\"q2\":[3,0],\"q3\":[1,0],\"q4\":[0,0]},\"nodes\":759,\"leaves\":340,\"sum_m\":856,\"max_m\":3,\"skipped_bbox\":40,\"filter_tests\":6627,\"leaf_dominance_tests\":692,\"pair_tests\":204,\"triple_tests\":2,\"line_hits\":2,\"quad_tests\":0,\"judged\":4,\"extended\":0,\"weighted\":0,\"max_shell\":3,\"stalled_leaves\":176}\n",
+      "stderr": "",
+      "seconds": 0.006629278001128114
+    },
+    {
+      "command": [
+        "/workspaces/E-HGP/build/v10-audit-independent-20260929/release/mhgp10_catalogue",
+        "morsehgp3D_v10/audits/audit_independant_20260929/geometry_first_timeout.u32le",
+        "--k=2",
+        "--leaf=2",
+        "--threads=4"
+      ],
+      "status": "completed",
+      "returncode": 0,
+      "stdout": "{\"status\":\"ok\",\"n\":3,\"sites\":3,\"K\":2,\"threads\":4,\"balls\":4,\"levels\":3,\"prepare_s\":0.0002,\"catalogue_s\":0.0005,\"catalogue_stages\":{\"t_frontier\":0.0005,\"t_boxes\":0.0000,\"t_order\":0.0000,\"t_assemble\":0.0000,\"t_collect\":0.0000,\"t_sort\":0.0000,\"t_bands\":0.0000,\"t_compare\":0.0000,\"t_ranks\":0.0000,\"t_copy\":0.0000,\"bands\":1,\"band_members\":2,\"tasks\":0,\"max_task_sites\":0},\"by_q_p\":{\"q2\":[3,0],\"q3\":[1,0],\"q4\":[0,0]},\"nodes\":759,\"leaves\":340,\"sum_m\":856,\"max_m\":3,\"skipped_bbox\":40,\"filter_tests\":6627,\"leaf_dominance_tests\":692,\"pair_tests\":204,\"triple_tests\":2,\"line_hits\":2,\"quad_tests\":0,\"judged\":4,\"extended\":0,\"weighted\":0,\"max_shell\":3,\"stalled_leaves\":176}\n",
+      "stderr": "",
+      "seconds": 0.021383665000030305
+    }
+  ]
+}

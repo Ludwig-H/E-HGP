@@ -1,0 +1,26 @@
+   1/25 spherical_n500_g16_hard_noise0         seed=2026092800 ARI=0.743 couv=0.97 clusters=13 0.3s
+   2/25 spherical_n500_g16_hard_noise0         seed=2026092801 ARI=0.929 couv=0.97 clusters=16 0.3s
+   3/25 spherical_n500_g16_hard_noise0         seed=2026092802 ARI=0.859 couv=0.92 clusters=15 0.4s
+   4/25 spherical_n500_g16_hard_noise0         seed=2026092803 ARI=0.770 couv=0.95 clusters=14 0.4s
+   5/25 spherical_n500_g16_hard_noise0         seed=2026092804 ARI=0.942 couv=0.97 clusters=16 0.4s
+   6/25 spherical_n500_g16_medium_noise0       seed=2026092800 ARI=0.964 couv=0.99 clusters=16 0.4s
+   7/25 spherical_n500_g16_medium_noise0       seed=2026092801 ARI=0.963 couv=0.99 clusters=16 0.4s
+   8/25 spherical_n500_g16_medium_noise0       seed=2026092802 ARI=0.951 couv=0.99 clusters=16 0.4s
+   9/25 spherical_n500_g16_medium_noise0       seed=2026092803 ARI=0.932 couv=0.98 clusters=16 0.3s
+  10/25 spherical_n500_g16_medium_noise0       seed=2026092804 ARI=0.972 couv=0.99 clusters=16 0.3s
+  11/25 spherical_n500_g4_hard_noise0          seed=2026092800 ARI=0.809 couv=0.90 clusters=7 0.4s
+  12/25 spherical_n500_g4_hard_noise0          seed=2026092801 ARI=0.606 couv=0.83 clusters=7 0.4s
+  13/25 spherical_n500_g4_hard_noise0          seed=2026092802 ARI=0.776 couv=0.87 clusters=5 0.5s
+  14/25 spherical_n500_g4_hard_noise0          seed=2026092803 ARI=0.863 couv=0.92 clusters=6 0.3s
+  15/25 spherical_n500_g4_hard_noise0          seed=2026092804 ARI=0.730 couv=0.86 clusters=5 0.4s
+  16/25 spherical_n500_g4_medium_noise0        seed=2026092800 ARI=0.944 couv=0.98 clusters=5 0.5s
+  17/25 spherical_n500_g4_medium_noise0        seed=2026092801 ARI=0.798 couv=0.90 clusters=8 0.5s
+  18/25 spherical_n500_g4_medium_noise0        seed=2026092802 ARI=0.933 couv=0.97 clusters=4 0.5s
+  19/25 spherical_n500_g4_medium_noise0        seed=2026092803 ARI=0.949 couv=0.98 clusters=6 0.3s
+  20/25 spherical_n500_g4_medium_noise0        seed=2026092804 ARI=0.854 couv=0.94 clusters=7 0.3s
+  21/25 spherical_n500_g8_medium_noise0        seed=2026092800 ARI=0.933 couv=0.97 clusters=9 0.3s
+  22/25 spherical_n500_g8_medium_noise0        seed=2026092801 ARI=0.861 couv=0.92 clusters=9 0.3s
+  23/25 spherical_n500_g8_medium_noise0        seed=2026092802 ARI=0.956 couv=0.98 clusters=8 0.3s
+  24/25 spherical_n500_g8_medium_noise0        seed=2026092803 ARI=0.967 couv=0.99 clusters=9 0.4s
+  25/25 spherical_n500_g8_medium_noise0        seed=2026092804 ARI=0.932 couv=0.98 clusters=8 0.3s
+{"runs": 25, "refused": 0, "k": 2, "z": 1, "convention": "gabriel", "lambda_mode": "radius", "min_cluster_mass": "sqrt(n)"}

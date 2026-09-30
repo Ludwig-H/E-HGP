@@ -1,0 +1,110 @@
+[
+  {
+    "scene": 5,
+    "raw": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        2
+      ],
+      [
+        0,
+        2,
+        0
+      ],
+      [
+        0,
+        2,
+        2
+      ],
+      [
+        2,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        2
+      ],
+      [
+        2,
+        2,
+        0
+      ],
+      [
+        2,
+        2,
+        2
+      ]
+    ],
+    "command": [
+      "/workspaces/E-HGP/build/v10-audit-independent-20260929/release/mhgp10_catalogue",
+      "/tmp/tmpf7khxc5b/input.u32le",
+      "--k=5",
+      "--leaf=12",
+      "--threads=1",
+      "--dump=/tmp/tmpf7khxc5b/dump.txt"
+    ],
+    "returncode": 0,
+    "seconds": 0.25641189199996006,
+    "stdout": "{\"status\":\"ok\",\"n\":8,\"sites\":8,\"K\":5,\"threads\":1,\"balls\":27,\"levels\":4,\"prepare_s\":0.0000,\"catalogue_s\":0.0001,\"catalogue_stages\":{\"t_frontier\":0.0000,\"t_boxes\":0.0000,\"t_order\":0.0000,\"t_assemble\":0.0000,\"t_collect\":0.0000,\"t_sort\":0.0000,\"t_bands\":0.0000,\"t_compare\":0.0000,\"t_ranks\":0.0000,\"t_copy\":0.0000,\"bands\":3,\"band_members\":26,\"tasks\":0,\"max_task_sites\":0},\"by_q_p\":{\"q2\":[19,0,0,0,0],\"q3\":[0,8,0,0,0],\"q4\":[0,0,0,0,0]},\"nodes\":1,\"leaves\":1,\"sum_m\":8,\"max_m\":8,\"skipped_bbox\":0,\"filter_tests\":64,\"leaf_dominance_tests\":28,\"pair_tests\":28,\"triple_tests\":56,\"line_hits\":56,\"quad_tests\":70,\"judged\":38,\"extended\":7,\"weighted\":0,\"max_shell\":8,\"stalled_leaves\":0}\n",
+    "stderr": "",
+    "oracle_equal": true,
+    "balls": 27
+  },
+  {
+    "scene": 6,
+    "raw": [
+      [
+        0,
+        1,
+        1
+      ],
+      [
+        2,
+        1,
+        1
+      ],
+      [
+        1,
+        0,
+        1
+      ],
+      [
+        1,
+        2,
+        1
+      ],
+      [
+        1,
+        1,
+        0
+      ],
+      [
+        1,
+        1,
+        2
+      ]
+    ],
+    "command": [
+      "/workspaces/E-HGP/build/v10-audit-independent-20260929/release/mhgp10_catalogue",
+      "/tmp/tmpf7khxc5b/input.u32le",
+      "--k=5",
+      "--leaf=12",
+      "--threads=1",
+      "--dump=/tmp/tmpf7khxc5b/dump.txt"
+    ],
+    "returncode": 0,
+    "seconds": 0.12865228299961018,
+    "stdout": "{\"status\":\"ok\",\"n\":6,\"sites\":6,\"K\":5,\"threads\":1,\"balls\":21,\"levels\":3,\"prepare_s\":0.0000,\"catalogue_s\":0.0001,\"catalogue_stages\":{\"t_frontier\":0.0000,\"t_boxes\":0.0000,\"t_order\":0.0000,\"t_assemble\":0.0000,\"t_collect\":0.0000,\"t_sort\":0.0000,\"t_bands\":0.0000,\"t_compare\":0.0000,\"t_ranks\":0.0000,\"t_copy\":0.0000,\"bands\":2,\"band_members\":20,\"tasks\":0,\"max_task_sites\":0},\"by_q_p\":{\"q2\":[13,0,0,0,0],\"q3\":[8,0,0,0,0],\"q4\":[0,0,0,0,0]},\"nodes\":1,\"leaves\":1,\"sum_m\":6,\"max_m\":6,\"skipped_bbox\":0,\"filter_tests\":36,\"leaf_dominance_tests\":15,\"pair_tests\":15,\"triple_tests\":20,\"line_hits\":20,\"quad_tests\":15,\"judged\":23,\"extended\":1,\"weighted\":0,\"max_shell\":6,\"stalled_leaves\":0}\n",
+    "stderr": "",
+    "oracle_equal": true,
+    "balls": 21
+  }
+]

@@ -1,0 +1,22 @@
+repro vs auditor matched_eom: pairs 250 maxdiff 0
+repro m20_ms20 vs receipt hdbscan_default: pairs 250 maxdiff 0
+== PRE (tour_z1) n= 250 mean tower 0.7071838628667576
+  vs B_hdbscan_default +0.1800 197-49-4 refmean=0.527 inv=False | aniso:+0.180 bridg:+0.231 filam:-0.025 heter:+0.094 hiera:-0.221 shell:-0.006 spher:+0.358 unbal:+0.029
+  vs B_hdbscan_oracle +0.0238 183-67-0 refmean=0.683 inv=False | aniso:+0.115 bridg:+0.161 filam:-0.109 heter:+0.060 hiera:-0.512 shell:-0.418 spher:+0.187 unbal:-0.030
+  vs B_single_linkage +0.4309 195-54-1 refmean=0.276 inv=False | aniso:+0.547 bridg:+0.669 filam:+0.073 heter:+0.437 hiera:-0.525 shell:-0.418 spher:+0.749 unbal:+0.482
+  vs m20_ms20         +0.1800 197-49-4 refmean=0.527 inv=False | aniso:+0.180 bridg:+0.231 filam:-0.025 heter:+0.094 hiera:-0.221 shell:-0.006 spher:+0.358 unbal:+0.029
+  vs m20_ms3          +0.0218 182-63-5 refmean=0.685 inv=True | aniso:+0.120 bridg:+0.126 filam:-0.082 heter:+0.028 hiera:-0.149 shell:-0.418 spher:+0.126 unbal:-0.047
+  vs m_sqrt_ms2       -0.0306 149-96-5 refmean=0.738 inv=True | aniso:+0.049 bridg:+0.097 filam:-0.123 heter:+0.009 hiera:-0.150 shell:-0.418 spher:+0.046 unbal:-0.098
+  vs m_sqrt_ms3       +0.0073 182-63-5 refmean=0.700 inv=True | aniso:+0.070 bridg:+0.124 filam:-0.111 heter:+0.028 hiera:-0.153 shell:-0.418 spher:+0.112 unbal:-0.063
+  vs oracle_ms2       -0.0708 128-121-1 refmean=0.778 inv=False | aniso:+0.045 bridg:+0.068 filam:-0.140 heter:+0.002 hiera:-0.529 shell:-0.418 spher:+0.035 unbal:-0.109
+  vs oracle_ms3       -0.0352 166-83-1 refmean=0.742 inv=True | aniso:+0.069 bridg:+0.114 filam:-0.125 heter:+0.024 hiera:-0.528 shell:-0.418 spher:+0.091 unbal:-0.077
+== POST (tour_z1b) n= 250 mean tower 0.6440648965369569
+  vs B_hdbscan_default +0.1169 170-76-4 refmean=0.527 inv=False | aniso:+0.084 bridg:+0.205 filam:+0.035 heter:+0.022 hiera:-0.197 shell:+0.013 spher:+0.248 unbal:-0.065
+  vs B_hdbscan_oracle -0.0394 154-96-0 refmean=0.683 inv=False | aniso:+0.018 bridg:+0.134 filam:-0.049 heter:-0.012 hiera:-0.488 shell:-0.398 spher:+0.077 unbal:-0.124
+  vs B_single_linkage +0.3678 169-75-6 refmean=0.276 inv=False | aniso:+0.451 bridg:+0.642 filam:+0.133 heter:+0.366 hiera:-0.501 shell:-0.398 spher:+0.640 unbal:+0.387
+  vs m20_ms20         +0.1169 170-76-4 refmean=0.527 inv=False | aniso:+0.084 bridg:+0.205 filam:+0.035 heter:+0.022 hiera:-0.197 shell:+0.013 spher:+0.248 unbal:-0.065
+  vs m20_ms3          -0.0413 156-89-5 refmean=0.685 inv=True | aniso:+0.024 bridg:+0.099 filam:-0.022 heter:-0.044 hiera:-0.124 shell:-0.398 spher:+0.017 unbal:-0.142
+  vs m_sqrt_ms2       -0.0937 133-112-5 refmean=0.738 inv=False | aniso:-0.048 bridg:+0.070 filam:-0.063 heter:-0.062 hiera:-0.125 shell:-0.398 spher:-0.064 unbal:-0.193
+  vs m_sqrt_ms3       -0.0558 156-89-5 refmean=0.700 inv=True | aniso:-0.026 bridg:+0.097 filam:-0.051 heter:-0.044 hiera:-0.129 shell:-0.398 spher:+0.002 unbal:-0.157
+  vs oracle_ms2       -0.1340 115-134-1 refmean=0.778 inv=False | aniso:-0.051 bridg:+0.041 filam:-0.080 heter:-0.070 hiera:-0.504 shell:-0.398 spher:-0.074 unbal:-0.204
+  vs oracle_ms3       -0.0983 142-107-1 refmean=0.742 inv=False | aniso:-0.028 bridg:+0.087 filam:-0.065 heter:-0.048 hiera:-0.504 shell:-0.398 spher:-0.019 unbal:-0.171

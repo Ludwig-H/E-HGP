@@ -1,0 +1,9 @@
+spherical_2000 wall=0.57 s user=0.86 sys=0.02 maxrss=23136 KB
+spherical_8000 wall=2.52 s user=4.36 sys=0.12 maxrss=81104 KB
+shells_8000 wall=14.24 s user=27.20 sys=0.08 maxrss=46808 KB
+shells_2000 wall=1.00 s user=1.74 sys=0.02 maxrss=16696 KB
+spherical_8000(gen) wall=3.09 s user=4.34 maxrss=84548 KB
+spherical_32000(gen) wall=18.18 s user=21.60 maxrss=357568 KB
+shells_8000(gen) wall=15.53 s user=28.32 maxrss=47908 KB
+shells_32000(gen) wall=366.99 s user=671.45 maxrss=171112 KB
+exit=0

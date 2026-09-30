@@ -1,0 +1,14 @@
+{
+  "name": "frontier_tower_repeat0",
+  "command": [
+    "/workspaces/E-HGP/build/v10-audit-independent-20260929/release/mhgp10_tower",
+    "/workspaces/E-HGP/build/v10-audit-independent-20260929/frontier/valid.u32le",
+    "--k=2",
+    "--threads=1",
+    "--repeat=0"
+  ],
+  "returncode": -11,
+  "stdout": "",
+  "stderr": "",
+  "elapsed_s": 0.17789151800025138
+}
