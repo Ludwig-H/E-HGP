@@ -17,7 +17,7 @@ GCP : session 1 le 29 septembre (CPU seul, arrêt certifié TERMINATED), reçu `
 3. [Clustering depuis la tour](docs/CLUSTERING_DEPUIS_LA_TOUR_20260929.md) : lecture critique des parties I et II de
    la thèse, diagnostic de la tête du 28 septembre, tête v10-b.
 4. [Conception intégrée](docs/conception/CONCEPTION_V10.md), et
-   [audit critique de la v9](audits/audit_v9_20260928/AUDIT_V9_CRITIQUE_20260928.md).
+   [audit critique de la v9](receipts/audit_v9_20260928/AUDIT_V9_CRITIQUE_20260928.md).
 
 ## Acquis (théorème ou oracle → code → porte)
 

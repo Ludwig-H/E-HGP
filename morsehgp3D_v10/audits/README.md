@@ -4,13 +4,14 @@
 
 ## Où lire
 
-- État courant : [`../PASSATION.md`](../PASSATION.md) (fait foi), puis [`../README.md`](../README.md).
+- Produit : [`../PASSATION.md`](../PASSATION.md) (fait foi), puis [`../README.md`](../README.md).
+- Audits actifs : [état courant de l'audit continu](AUDIT_ETAT_COURANT.md) et [suivi des constats de l'audit indépendant](SUIVI_AUDIT_INDEPENDANT.md). Ces vues sont mises à jour en place ; les rapports de base ne ferment pas les correctifs ultérieurs.
 - Conception : [`../docs/SPEC_V10.md`](../docs/SPEC_V10.md), [`../docs/conception/`](../docs/conception/),
   [`../docs/CLUSTERING_DEPUIS_LA_TOUR_20260929.md`](../docs/CLUSTERING_DEPUIS_LA_TOUR_20260929.md).
 - Preuves de mesure : [`../receipts/`](../receipts/), un dossier par livraison, immuable. Les corrections après coup
   sont dans [`../receipts/ERRATA.md`](../receipts/ERRATA.md).
 - Audits déjà présents :
-  - [`audit_v9_20260928/`](audit_v9_20260928/) : audit critique de la v9, qui a fondé la v10 ;
+  - [archive de l'audit v9](../receipts/audit_v9_20260928/) : audit critique historique qui a fondé la v10 ; conclusions et preuves conservées dans `receipts/` ;
   - [`audit_hierarchie_knn_20260929/`](audit_hierarchie_knn_20260929/) : pertinence de la hiérarchie de la tour pour
     les niveaux de densité K-NN, comparaison avec HGP-old ;
   - [`tete_multik_20260929/`](tete_multik_20260929/) : trois têtes multi-K et leur juge.
@@ -23,7 +24,7 @@
 - Personne ne modifie le fichier d'un autre ; on répond par un nouveau fichier qui cite le précédent.
 - Toute correction produit un reçu dans `../receipts/`. Une contradiction mathématique devient une fixture
   permanente.
-- Je relis ce dossier à chaque poussée : une veille me signale tout nouveau fichier ici. Je réponds par
+- Je relis ce dossier (`git fetch`) à chaque étape de mon travail et avant chaque poussée. Je réponds par
   `REPONSE_CLAUDE_*` et j'exécute ce qui doit l'être avant toute nouvelle dépense.
 
 ## Règles partagées
@@ -38,24 +39,10 @@
 - HGP-old est une source critique, jamais un oracle ni une base de code, et sous licence en lecture seule. La thèse
   est une source, pas une autorité.
 
-## Ce qui mérite le plus un regard critique (29 septembre 2026)
+## Priorités courantes
 
-1. **Exactitude des changements de performance du jour.** Chacun est annoncé identique octet pour octet :
-   - J2, filtre D-loc (`5565f94fb`) ;
-   - assemblage non initialisé (`7eee86c53`) ;
-   - course du pool (`8e3b76245`) ;
-   - tête par dénombrement (`b662673b2`) ;
-   - J2c, boîtes ajustées (`777406b82`).
+1. **FULL → points** : conserver la couverture et les masses des points frontière avant condensation ; utiliser core comme comparateur de stabilité. [La note courante](audit_independant_20260929/ANCRAGE_AMBIGUITES.md) relit les parties I et II de la thèse, précise le bras K2 et répond au choix du panel de paires.
+2. **Correctifs et juges** : fermer les défauts reproduits d'entrée, pool, tête et banc par contre-vérification, puis vérifier leur intégration. [La réponse du développeur sur le raccord](REPONSE_CLAUDE_CONTRE_AUDITS_ET_RACCORD_20260929.md) fixe l'extraction commune et les décisions par constat ; les suivis actifs ci-dessus portent leur statut.
+3. **Contrats et portée des preuves** : utiliser [la passation](../PASSATION.md) et [les errata](../receipts/ERRATA.md). Les ratios mémoire et temps mesurés ne sont pas des bornes générales ; aucun contrat FULL GPU ou capacité LiDAR générale n'est acquis.
 
-   Les lemmes et contrôles sont dans les reçus correspondants. Une faille de preuve, un cas que les différentiels ne
-   couvrent pas ou un mutant non tué est ce qui compte le plus.
-2. **Le banc et ses conclusions** :
-   - lot C préenregistré (`../receipts/test_cover_C_20260929/`) ;
-   - affectation sous le col et décomposition Bayes/Morse (`../receipts/bench_dev_alloc_20260929/`) ;
-   - sélection (`../receipts/bench_dev_shrink_20260929/`) ;
-   - ordres K plus grands (`../bench/synthetic/bigk_dev.py`, reçu à venir).
-3. **L'échelle** (`../receipts/g4_session5_scale_20260929/`) : temps linéaire en boules, mur mémoire d'environ 280
-   octets par boule. La conclusion, un catalogue qui ne réside pas tout entier au-delà d'environ 1,4 M sites LiDAR,
-   est-elle la bonne ?
-4. **En cours** : conception de six leviers de performance (frontière, feuilles, tour, ordre et tête, GPU,
-   sélection par scène), avec vérificateurs adverses. Le plan ordonné sera versé ici quand il sera prêt.
+Les archives, captures, scripts de reproduction et notes intermédiaires remplacées vont dans `../receipts/`, avec leurs empreintes et leurs liens. L'audit v9 y a été déplacé intégralement ; ses conclusions restent accessibles par le lien historique ci-dessus. Les fichiers encore utilisés par un autre auditeur ne sont pas réorganisés pendant ses travaux.
