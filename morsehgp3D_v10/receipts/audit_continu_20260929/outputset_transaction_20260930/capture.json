@@ -1,0 +1,49 @@
+{
+  "scope": "header-only causal test; no engine, CLI, GPU, GCP or full benchmark",
+  "utc_before": "2026-09-30 22:56:39 UTC",
+  "utc_after": "2026-09-30 22:56:39 UTC",
+  "compile": {
+    "argv": [
+      "timeout",
+      "10s",
+      "g++",
+      "-std=c++20",
+      "-O0",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-Isnapshot",
+      "probe.cpp",
+      "-Wl,--wrap=rename",
+      "-o",
+      "probe"
+    ],
+    "exit_code": 0,
+    "output": ""
+  },
+  "run": {
+    "argv": [
+      "./probe",
+      "/tmp/mhgp10-outputset-transaction-audit-20260930.NJyipG60"
+    ],
+    "exit_code": 0,
+    "output": "{\"case\":\"success\",\"status\":\"ok\",\"reason\":\"none\",\"a\":\"NEW_A\",\"b\":\"NEW_B\",\"rename_calls\":2,\"temp_count\":0,\"fds_before\":5,\"fds_after\":5,\"did_commit\":true,\"second_commit_ok\":false,\"escaped\":false,\"contract_all_or_nothing\":true,\"observation_matches_expected\":true}\n{\"case\":\"no_commit\",\"status\":\"ok\",\"reason\":\"none\",\"a\":\"OLD_A\",\"b\":\"OLD_B\",\"rename_calls\":0,\"temp_count\":0,\"fds_before\":5,\"fds_after\":5,\"did_commit\":false,\"second_commit_ok\":false,\"escaped\":false,\"contract_all_or_nothing\":true,\"observation_matches_expected\":true}\n{\"case\":\"writer_bad_alloc\",\"status\":\"resource_exhausted\",\"reason\":\"memory_budget\",\"a\":\"OLD_A\",\"b\":\"OLD_B\",\"rename_calls\":0,\"temp_count\":0,\"fds_before\":5,\"fds_after\":5,\"did_commit\":false,\"second_commit_ok\":false,\"escaped\":false,\"contract_all_or_nothing\":true,\"observation_matches_expected\":true}\n{\"case\":\"rename2_eio\",\"status\":\"resource_exhausted\",\"reason\":\"output_unwritable\",\"a\":\"NEW_A\",\"b\":\"OLD_B\",\"rename_calls\":2,\"temp_count\":0,\"fds_before\":5,\"fds_after\":5,\"did_commit\":true,\"second_commit_ok\":false,\"escaped\":false,\"contract_all_or_nothing\":false,\"observation_matches_expected\":true}\n{\"case\":\"idempotent\",\"status\":\"ok\",\"reason\":\"none\",\"a\":\"NEW_A\",\"b\":\"NEW_B\",\"rename_calls\":2,\"temp_count\":0,\"fds_before\":5,\"fds_after\":5,\"did_commit\":true,\"second_commit_ok\":true,\"escaped\":false,\"contract_all_or_nothing\":true,\"observation_matches_expected\":true}\n"
+  },
+  "interpretation": "native code 0 confirms expected observations, including a demonstrated violation of the advertised all-or-nothing contract in rename2_eio; it is not a pass of that contract",
+  "archive_metadata": {
+    "artifact_scope": "text-only archive of code and a historical five-case native capture; not a native replay",
+    "native_reexecuted_by_reader": false,
+    "omitted_binary_sha256": "e859cfe91830ee2f300dba5ec229a8b8deaf5a3612ec8bc975460d12b684fc03",
+    "original_manifest_sha256": "ee24d8178f5f0620b8f8a7d47137e12be45a762cec4aa14e7ebf8ca879f28462",
+    "compiler_identification": {
+      "argv": [
+        "g++",
+        "--version"
+      ],
+      "output": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0\nCopyright (C) 2023 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n",
+      "exit_code": 0,
+      "observed_utc": "2026-09-30 23:11:16 UTC",
+      "scope": "GNU compiler identified after the original capture; compiler executable was not hashed before the original build"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "working_head": "6d2d3bc5d1c34deca95f3ba6cc7929179517680c",
+  "source_root": "/workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/src/core",
+  "scope": "working files; cli_output and cli_options differ from staged index; not files of HEAD",
+  "sha256_before": {
+    "cli_output.hpp": "763e2ee3bb74ab4b40042eb0efcdc7f47f62e7dd53a6dcda610076925792e20e",
+    "cli_options.hpp": "f3cb844d4104a9a82080d98cb7e9812fdfedc861d10c948660293681b293dd53",
+    "status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "reasons.def": "bf30b339ed2b26cd97e07c06c644683e80f641ec9c1eeb77c8135e668afb3409"
+  },
+  "sha256_after": {
+    "cli_output.hpp": "763e2ee3bb74ab4b40042eb0efcdc7f47f62e7dd53a6dcda610076925792e20e",
+    "cli_options.hpp": "f3cb844d4104a9a82080d98cb7e9812fdfedc861d10c948660293681b293dd53",
+    "status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "reasons.def": "bf30b339ed2b26cd97e07c06c644683e80f641ec9c1eeb77c8135e668afb3409"
+  }
+}

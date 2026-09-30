@@ -1,7 +1,7 @@
 # Audits v10 — état courant
 
-Mise à jour : 30 septembre 2026, 22 h 45 UTC : réponses Q1/Q2/Q3 mises
-en évidence, contraction par orthants, nouveaux filtres B21 et P2 relus.
+Mise à jour : 30 septembre 2026, 23 h 25 UTC : questions Q1/Q2/Q3 relues,
+cache des descentes audité, refus tardif de publication reproduit.
 Les sources publiées du moteur restent inchangées
 dans cette tranche ; le développeur travaille désormais dans une copie
 isolée d'intégration, distincte du worktree partagé. Les parties I
@@ -42,7 +42,27 @@ K2 à ancre fixe en lui transférant sa borne d'états.
 précède désormais les détails. Les seuls K voisins ne déterminent pas
 les classes de bande ; les K-parties fixes restent l'univers exact ;
 leurs poids souples évitent le saut de disparition du catalogue, sous
-les conditions de stabilité publiées. MMt change de modèle de masses.
+les conditions de stabilité publiées, notamment la date à marge avec
+κ≥√(1+η′). MMt change de modèle de masses. Une occupation locale m borne
+les supports en3D par O(m⁴), pas par K ; K3 possède déjà quadratiquement
+beaucoup de classes. Les regrouper n'autorise pas à remplacer leur compte
+exact par un vote. Les quatre préférences proposées à l'utilisateur
+dans le mémo privé restent des choix de modèle, pas des théorèmes à trancher
+par cet audit.
+
+La contre-relecture de S reste cohérente. Le passage de la proposition N
+au délai exact g=1 garde toutefois la perte angulaire déjà signalée dans
+le mémo privé ; corriger par une limite à g<1, sans transformer ce détail
+en réfutation de la stabilité locale. Voir la réponse Q3 détaillée.
+
+**Mesure utile avant une nouvelle optimisation FULL :** l'Atlas ne
+mémoïse pas les états profonds p≥K, ni tous les p<K ; même un HIT arrive
+après MEB et census. Le
+[cache distinct proposé](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#cache-des-descentes-profondes-et-mesure-utile-avant-le-port)
+doit garder clés exactes, K, propriétaire du nuage et naissance témoin,
+puis remonter à la bonne coupe. Mesurer les répétitions sur LiDAR avant
+de porter une table concurrente ; `FlatIndex` actuel ne devient pas sûr
+par simple ajout d'insertions. Constats de code, aucun gain100ms mesuré.
 
 **Raccord vivant22 h35 :** HEAD privé `6d2d3bc5` pour P4 ; P2 est encore
 dans l'index/travail suivant. La nouvelle `OutputSet` réserve des
@@ -53,6 +73,24 @@ pas de transaction globale ni de conservation des deux sentinelles sur
 ce refus tardif. Le [suivi précis](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#raccord-courant-et-six-décisions-utiles-30-septembre-22-h-35-utc)
 distingue ces corrections des anciennes pertes de fichiers. Le contenant
 u32le de ce raccord utilise encore le moteur u18, pas le palier B21.
+
+Le [reçu nouveau](../receipts/audit_continu_20260929/outputset_transaction_20260930/protocol.md)
+reproduit désormais le refus au deuxième rename sur les headers complets
+`763e2ee3…`, avec deux sentinelles : NEW_A/OLD_B, refus correct mais pas
+restauration. Cinq cas, compilation native isolée et recompilation
+indépendante, zéro fuite de temporaire/FD ; ni moteur ni CLI HGP lancés.
+Archive textuelle close dix payloads, lecteurs normal/−O hash-first
+recoupés, binaire omis et non relancé par eux. Son code0 constate ce
+défaut ; il ne qualifie pas la transaction. L'idempotence est corrigée.
+
+**B21 relevé23 h20 :** logs terminaux16 comparaisons tour/tête et4
+catalogue,6/6 fast au30c66d8,1/1 sanitizer au9f54c5b ; ombre réelle
+positive et zéro violation dans ses logs. La campagne mutants reste
+partielle et les scopes ne sont pas réunis dans une clôture finale.
+Les gardes de collecteurs sont encore à fermer : dump absent peut
+donner une égalité de hashes vides, `--only` inconnu une campagne vide
+verte, signal sanitizer un « tué » sans juge causal. Sources relues,
+pas nouvelles campagnes exécutées ; aucun chrono G4/FULL acquis.
 
 **À corriger avant les comparaisons EOM :** le banc privé
 `masses_selection/dev_scenes.py` réutilise `phi_date` dans une nouvelle

@@ -3,13 +3,13 @@
 ## Réponse directe aux questions Q1 Q2 Q3
 
 Les [trois questions du développeur](../REPONSE_CLAUDE_CONTACT_COMPTAGE_ET_JUGES_20260930.md#7-questions)
-ont été relues le30 septembre à22 h35 UTC. Les réponses détaillées et leurs
+ont été relues le30 septembre à23 h25 UTC. Les réponses détaillées et leurs
 contre-exemples sont [plus bas](#réponses-aux-trois-questions-sur-les-votes-de-bande).
 
 1. **Q1, classes locales.** Oui, tous les sites nécessaires sont dans
    B(x,2R). Non, les seuls K voisins ne suffisent pas. L'occupation m de
    cette région borne les classes, mais K seul ne borne pas m : une
-   famille K3 a déjà C(m,2) classes dans la bande. Préférer un comptage
+   famille K3 a déjà C(m−1,2) classes dans la bande. Préférer un comptage
    implicite ; ne pas matérialiser ces classes pour garantir le coût.
 2. **Q2, univers exact à K≥3.** Les K-parties identifiées restent l'univers
    fidèle et continu. Des requêtes de rayon, ou KNN adaptatives jusqu'au
@@ -20,8 +20,25 @@ contre-exemples sont [plus bas](#réponses-aux-trois-questions-sur-les-votes-de-
 3. **Q3, poids.** Oui, le poids souple dépendant du rayon évite le mécanisme
    de disparition étudié si les votes sont les K-parties fixes. Non, il
    ne le répare pas sur les boules fortes du catalogue. La stabilité
-   obtenue reste conditionnée par l'univers apparié, son effectif et
-   une échelle α positive ; ce n'est pas une garantie uniforme d'ARI/EOM.
+   obtenue reste conditionnée par l'univers apparié, son effectif,
+   une échelle α positive et le domaine κ≥√(1+η′) de la règle à marge ;
+   ce n'est pas une garantie uniforme d'ARI/EOM. Sans la marge de date,
+   une majorité stricte peut encore changer brutalement de propriétaire.
+
+**Conséquence pour le prochain port :** distinguer les votes exacts de
+l'oracle MMg et les temps de couverture MMt. MMt est calculable à partir
+de FULL et des incidences complètes, mais ne conserve pas les comptes de
+K-parties. Une liste KNN adaptative jusqu'au rayon utile est admissible
+pour Q1/Q2 ; une liste figée de K voisins ne l'est pas. Le rayon demandé
+en Q1 est bien2√(1+η′)α, et non2(1+η)α sans convention reliant η etη′.
+Une boule minimale de rayon≤R contenant x est entièrement dans B(x,2R),
+donc cette requête retrouve aussi les sites intérieurs/coquille de ses
+classes. Si cette occupation vaut m, les supports minimaux ont au plus
+quatre sites en3D, donc au plusΣ_{q=1..4}C(m,q) classes distinctes.
+Cette borne en occupation ne rend pas leur matérialisation sous-quadratique :
+le contre-exemple K3 publié possède déjà C(m−1,2) classes autour de x.
+Les regroupements par boule doivent conserver leur compte exact h_B et
+leur propriétaire aux coupes utiles, pas un seul vote par classe.
 
 Complément neuf pour le moteur : le [saut par orthants](#choix-par-orthants-avec-contraction-certifiée)
 ci-dessous borne les reports à33 pour K5 et73 pour K10, avec contraction
@@ -149,6 +166,36 @@ une politique cohérente de restauration/publication ; le contrôle du
 code d'erreur seul n'établit pas la transaction globale. Les réserves
 sur les bancs committés restent distinctes de ce correctif en cours.
 
+Suivi23 h17 : le
+[contre-audit natif borné](../../receipts/audit_continu_20260929/outputset_transaction_20260930/protocol.md)
+confirme désormais cette limite au snapshot `cli_output.hpp`
+`763e2ee3bb74ab4b40042eb0efcdc7f47f62e7dd53a6dcda610076925792e20e`.
+Cinq cas compilés avec les cinq headers complets : succès, abandon avant
+commit, `bad_alloc` du writer, EIO au deuxième rename, double commit.
+Le quatrième retourne correctement `output_unwritable`, mais laisse
+NEW_A/OLD_B au lieu des deux sentinelles originales. Zéro temporaire
+résiduel, aucun FD perdu ; l'idempotence est maintenant corrigée.
+Le code0 de la sonde confirme les observations attendues, **y compris
+le défaut**, pas le contrat « tout ou rien ». Recompilation indépendante
+de cet audit : même SHA brut du binaire
+`e859cfe91830ee2f300dba5ec229a8b8deaf5a3612ec8bc975460d12b684fc03`,
+mêmes cinq observations ; FD4→4 contre5→5 dans la capture initiale.
+Aucun moteur ou CLI HGP compilé, sanitizer ou GCP lancé.
+Archive textuelle close, dix payloads plus manifeste, SHA externe
+`00d12d5faf46fbee2d3d7a2201032c33215b0ba8bf4cc9db861f990a4b9d33cc`.
+Lecteurs normal/−O recoupés ; ils vérifient code/capture, ne relancent
+pas le binaire omis. Le compilateur a été identifié après capture,
+pas rétrospectivement épinglé avant elle. Préserver les anciens reçus.
+
+Correction proposée au développeur : sauvegarde des originaux jusqu'à
+publication complète, restauration éprouvée à l'échec tardif et état
+de récupération explicite si elle échoue. Des renames successifs sur
+plusieurs chemins ne garantissent pas à eux seuls une publication
+atomique globale ; ne pas la promettre aux lecteurs concurrents ni
+après crash. Une génération de sorties publiée par un unique pointeur
+ou manifeste atomique est une autre interface possible, à décider
+explicitement plutôt qu'à introduire dans ce raccord en silence.
+
 Le lecteur `u32le_input.hpp` désigne un contenant32bits, pas une nouvelle
 précision géométrique : les CLI de ce raccord utilisent encore le domaine
 u18. Le palier B21 reste séparé. Les IDs sont les rangs de ce fichier,
@@ -232,6 +279,81 @@ valeur exacte gravée. MODES compare les chemins sous une **même politique
 de sélection** ; ce n'est pas un invariant de Γ pour deux choix différents
 de G. Garder FX-SAUT comme contrat du sélecteur exact privé, et juger un
 futur saut par orthants aussi par les propriétaires aux coupes utiles.
+
+Suivi23 h20 du palier B21 : HEAD privé
+`30c66d82eb4f6019684168896baa9b80c4067c14`. Les nouveaux logs donnent
+16 différentiels tour/tête et4 catalogue avec FIN ecarts0,6/6 fast
+au30c66d8,1/1 sanitizer au9f54c5b, ombre réelle positive/violations0
+et FIN echecs0. Ce sont des scopes différents, pas une capture finale
+unique de FULL ni une précision LiDAR qualifiée. La campagne mutants
+9f54c5b reste partielle au relevé ; l'essai1113223 interrompu reste conservé.
+Aucun de ces appels relancé par cet audit.
+
+Avant clôture, deux gardes de collecteur restent nécessaires. Lecture
+du script `identite_reparation.sh`, SHA
+`aaebf4f510064d7837c054f26ce480e20bb7a43a5571f3267820136775c8e335` :
+un moteur code0 avec dump absent donne un hash vide accepté par le
+pipeline `sha256sum | cut`, sans `pipefail`. Exiger existence/lecture,
+succès de hachage et SHA complet ; le problème ne démontre pas que les
+digests non vides observés soient faux. Lecture du collector mutants,
+SHA `5cddff2f3f96dfcf3872637ddf7ecc98872b4b41c65b168c8635c1bcb5b9e621` :
+`--only` inconnu sélectionne zéro mutant et peut finir total0/code0 ;
+un code sanitizer entier non nul, même un signal sans diagnostic causal,
+devient `TUE_SANITIZE`. Refuser les sélections vides/inconnues,
+distinguer mutation jugée, diagnostic sanitizer et échec d'infrastructure,
+garder les sorties/argv/binaires complets et fermer l'inventaire.
+Constats de code, pas une nouvelle campagne de mutations exécutée.
+
+## Cache des descentes profondes et mesure utile avant le port
+
+Relecture du code B21 `1113223c9052ce429a677d4063700dc3d3ab8bfb` :
+`tower.cpp`, SHA
+`e346a03222a4427dad96dfe359a80060c6a830f63b30fe40affe09f1dd6560f9`.
+Ce constat est structurel, pas un nouveau profil LiDAR. L'index `seeds`
+ne contient que les naissances régulières préparées avant résolution.
+Les branches p=K et p>K font `continue` sans ticket `pend` ni mémo
+Atlas. Une cellule Atlas n'existe que pour K≥p+q_min−1 ; à rayon positif,
+q_min≥2, donc un état p≥K n'en a aucune. Certains états p<K n'en ont
+pas non plus : q_min=3 avec p=K−1, q_min=4 avec p=K−2 ouK−1.
+Déplacer le lookup Atlas
+avant le census ne corrigerait donc pas cette absence.
+
+Même pour un état éligible, le HIT Atlas actuel arrive **après** MEB,
+recherche du catalogue et census. Le census hors catalogue matérialise
+et trie I/U ; p>K parcourt ensuite I pour la sélection. Le contrôle
+exact de catalogue d'une boule sur32 est aussi répété à chaque passage
+sur cette même boule, sans bit indiquant sa validation antérieure.
+Un mémo peut économiser la descente suivante sans économiser ce préfixe.
+
+Proposition distincte, non implémentée : cache par K-partie complète
+triée, K et propriétaire immuable du nuage, consulté avant MEB. Un cache
+par identité géométrique exacte de boule pourrait regrouper davantage
+d'états, mais exige déjà sa MEB ; rayon seul ou hash seul sont insuffisants.
+Stocker une naissance témoin, puis remonter à la coupe demandée, pas un
+propriétaire final valable à toute hauteur. Deux K-parties contenues
+dans la même boule B sont liées par échanges dans Γ_K(β(B)) : chaque
+coface reste dans B. Leurs descentes exactes donnent donc la même
+composante à coupe fermée λ≥β(B), et pré-lot λ>β(B), pas à β(B)⁻.
+Cette preuve autorise un témoin non canonique avec la bonne remontée.
+
+Ne pas muter `FlatIndex` tel quel pendant ces recherches : `find` lit
+des slots non atomiques après la barrière de construction, et son test
+de clé utilise la population du seed terminal. Ce n'est ni une table
+des états profonds ni un cache dynamique sûr. Les loads/stores atomiques
+du mémo existant publient des résultats, mais ne réservent pas un calcul :
+plusieurs workers peuvent lire le même miss et refaire la descente.
+Séparer cache READY et déduplication des calculs simultanés ; si celle-ci
+est nécessaire, traiter publication, exceptions et évictions, sans
+attente active GPU d'un producteur qui n'est pas encore ordonnancé.
+
+Avant un chantier massif, mesurer sur les trames sans sol : états
+distincts et visites répétées, p=K, K<p≤8(K−1), grands p, p<K sans cellule,
+MEB/census, visites d'index, volumes I/U, cache froid/chaud, un/quatre
+workers et mémoire réelle. Sur la famille forcée publiée m16/K3 ouK5,
+la prévision analytique est15 sauts pour chaque F0 répété et120 pour
+toutes les couches sans cache profond, contre15 états profonds distincts.
+Ce petit diagnostic n'a pas été lancé nativement. Il motive un test,
+ne prouve ni un carré LiDAR actuel ni un gain vers100ms.
 
 ## Saut intérieur sans tri des plus proches
 
@@ -816,7 +938,12 @@ strictement après `√(12101/2525)−1`, délai demandé. Six paires et
 quatre cofaces Γ2 Fraction recoupées normal/−O ; aucun appel natif.
 Une perte strictement inférieure à 1 et une erreur angulaire contrôlée
 peuvent réparer l'argument de croissance ; ne pas confondre cette piste
-avec la constante exacte déjà démontrée.
+avec la constante exacte déjà démontrée. Relecture23 h20 : le mémo privé
+`MEMO.md`, SHA `7ec56b4d07dc7728756662471efc9997cca3337e45db318b9132e5edcad03f02`,
+conserve encore le passage sans perte au bord g=1. Ce correctif de preuve
+déjà publié reste à intégrer ; il ne réfute pas le théorème S ni ne
+supprime la croissance limite avec N. Le résultat est limité à D(γ,g),
+pas à toute règle qui manipule des masses.
 
 ### MMt et le prochain port
 

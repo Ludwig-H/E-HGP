@@ -1,0 +1,15 @@
+{
+  "schema": "outputset_transaction_text_v2",
+  "sha256": {
+    "capture.json": "7d982657634749f7cb73da568c79f94855302de2c0dffdbe935fe01e8634498e",
+    "source_pins.json": "89e337079adb71a1b7f109a3f995435b829eb5a54f497f435204512ca8395cab",
+    "protocol.md": "7b903b41165911c8a8ce252fcfe6273d2413c99c2d698561349c5fafd1f6c78d",
+    "probe.cpp": "77c25fee92dd8ccce5644c1cac063c09d0e8900b9533a01117b8911fe915682f",
+    "reader.py": "9a035094615c04eef99abc0415820a1d0541858742a32e8e8e9504f1739c7c0e",
+    "snapshot/core/cli_output.hpp": "763e2ee3bb74ab4b40042eb0efcdc7f47f62e7dd53a6dcda610076925792e20e",
+    "snapshot/core/cli_options.hpp": "f3cb844d4104a9a82080d98cb7e9812fdfedc861d10c948660293681b293dd53",
+    "snapshot/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "snapshot/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+    "snapshot/core/reasons.def": "bf30b339ed2b26cd97e07c06c644683e80f641ec9c1eeb77c8135e668afb3409"
+  }
+}
