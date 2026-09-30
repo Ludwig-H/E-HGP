@@ -1,0 +1,63 @@
+{
+  "reference_commit": "d192637a7",
+  "mode": "archived receipt readers only",
+  "native_executions": 0,
+  "sklearn_executions": 0,
+  "GCP": false,
+  "reports": [
+    {
+      "folder": "point_condensation_20260930",
+      "argv": [
+        "python3",
+        "-B",
+        "verify.py"
+      ],
+      "returncode": 0,
+      "wall_seconds": 0.1426443729978928,
+      "stdout": "{\"GCP_used\": false, \"api_configs_per_native_mode\": 24, \"equivalent_ultrametric_configs\": 16, \"hashed_files\": 86, \"native_EOM_flips_per_mode\": 4, \"native_differences_per_mode\": 8, \"native_invocations_now\": 0, \"sklearn_fit_calls_now\": 0, \"status\": \"ARCHIVE_PASS\"}\n",
+      "stderr": "",
+      "manifest_sha256": "b0deb2c6a44de1614431b2075a91fa531fda29b9317c12cdc3b984f3adb41794"
+    },
+    {
+      "folder": "point_condensation_20260930",
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "verify.py"
+      ],
+      "returncode": 0,
+      "wall_seconds": 0.1470901379980205,
+      "stdout": "{\"GCP_used\": false, \"api_configs_per_native_mode\": 24, \"equivalent_ultrametric_configs\": 16, \"hashed_files\": 86, \"native_EOM_flips_per_mode\": 4, \"native_differences_per_mode\": 8, \"native_invocations_now\": 0, \"sklearn_fit_calls_now\": 0, \"status\": \"ARCHIVE_PASS\"}\n",
+      "stderr": "",
+      "manifest_sha256": "b0deb2c6a44de1614431b2075a91fa531fda29b9317c12cdc3b984f3adb41794"
+    },
+    {
+      "folder": "point_condensation_cover_r2_20260930",
+      "argv": [
+        "python3",
+        "-B",
+        "verify.py"
+      ],
+      "returncode": 0,
+      "wall_seconds": 0.27304883399847313,
+      "stdout": "{\"EOM_flips_per_mode\": 0, \"GCP_used\": false, \"archived_judge_invocations\": 4, \"archived_native_invocations\": 2, \"captured_commands\": 11, \"differing_rows_per_mode\": 4, \"manifest_entries\": 44, \"native_generator_invocations\": 0, \"native_rows_per_mode\": 12, \"positive_controls_per_mode\": 8, \"scope\": \"archived executions rejudged; no native, generator, compiler, or LIVE replay\", \"source_pins\": 17, \"status\": \"ARCHIVE_PASS\"}\n",
+      "stderr": "",
+      "manifest_sha256": "9fbd2f223e507495fdcf95bc58da3a917d55acc0cd34b3a260ab186e35bb3aa1"
+    },
+    {
+      "folder": "point_condensation_cover_r2_20260930",
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "verify.py"
+      ],
+      "returncode": 0,
+      "wall_seconds": 0.20365788799972506,
+      "stdout": "{\"EOM_flips_per_mode\": 0, \"GCP_used\": false, \"archived_judge_invocations\": 4, \"archived_native_invocations\": 2, \"captured_commands\": 11, \"differing_rows_per_mode\": 4, \"manifest_entries\": 44, \"native_generator_invocations\": 0, \"native_rows_per_mode\": 12, \"positive_controls_per_mode\": 8, \"scope\": \"archived executions rejudged; no native, generator, compiler, or LIVE replay\", \"source_pins\": 17, \"status\": \"ARCHIVE_PASS\"}\n",
+      "stderr": "",
+      "manifest_sha256": "9fbd2f223e507495fdcf95bc58da3a917d55acc0cd34b3a260ab186e35bb3aa1"
+    }
+  ]
+}

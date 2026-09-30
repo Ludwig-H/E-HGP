@@ -1,6 +1,6 @@
 # Frontière, laminarité et précision — décisions mathématiques
 
-30 septembre 2026. Produit 4b7d70422 ; preuves jusqu'à 408d1ffe4. Nouveau contrôle de bande et croisement inter-K, aucun moteur changé/GCP. public_status=not_claimed. [Version longue conservée exactement](../../receipts/audit_independant_20260930/notes_avant_synthese/README.md).
+30 septembre 2026. Produit 4b7d70422 ; preuves jusqu'à d192637a7. Nouveau contrôle de bande et croisement inter-K, aucun moteur changé/GCP. public_status=not_claimed. [Version longue conservée exactement](../../receipts/audit_independant_20260930/notes_avant_synthese/README.md).
 
 ## Cible de la thèse
 
@@ -55,6 +55,10 @@ Arrondi au plus proche : déplacement≤ε=√3·h/2 par rapport aux coordonnée
 Core : |u_X(i,j)−u_Y(i,j)|≤2ε, soit √3·h pour cette quantification. Pour Γ/FULL, le décalage en rayon carré est (√β+ε)² ; pour core, (√β+2ε)². Aucune constante globale h². Déduplication sans copies/poids change l'univers. Pas de garantie EOM ou d'étiquettes physiques.
 
 Même arbre changé d'unité : β_phys=h²β_grille, λ_phys=h^(−z)λ_grille ; stabilités multipliées par h^(−z). Les poids 1/β prennent h^(−2), les poids 1/r prennent h^(−1), les uniformes restent identiques : chaque facteur global s'annule à la normalisation. EOM idéal invariant avec mêmes masses, z, conventions de zéro et scores définis. Requantifier peut changer les décisions. [Contrat h/profil](../AUDIT_MASSIF_LIDAR_20260930.md), [preuve et contrôles bornés](../../receipts/audit_independant_20260930/precision_grille/semantique/README.md).
+
+## Condensation : correction préalable
+
+Le [défaut désormais reproduit](../../receipts/audit_independant_20260930/point_condensation_followup/README.md) porte sur les départs directement attachés : quand la masse restante passe sous min_cluster_size, la branche doit finir à cette cohorte, même sans division géométrique. Dans le vrai cas interne K3/mcs6, sortie 6→5 à β25 : stabilité z1 correcte 6/5 au lieu de 88/65 ; étiquettes inchangées ici. Les arbres API montrent séparément des inversions EOM, racine exclue. Relectures d’archives normal/−O passent ; aucun moteur/sklearn relancé. Corriger les dates exactes simultanées avant d’interpréter l’effet de l’antichaîne sur EOM.
 
 ## Prochaine comparaison utile
 

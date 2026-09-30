@@ -1,6 +1,6 @@
 # Géométrie, interfaces et juges — état du raccord
 
-30 septembre 2026, produit 4b7d70422, preuves jusqu'à 408d1ffe4. RankIndex intégré, primitives u32/bande isolées ; autres copies R2 distinctes. public_status=not_claimed. Aucun GCP.
+30 septembre 2026, produit 4b7d70422, preuves jusqu'à d192637a7. RankIndex intégré, primitives u32/bande isolées ; autres copies R2 distinctes. public_status=not_claimed. Aucun GCP.
 
 | Point | État actuel |
 | --- | --- |

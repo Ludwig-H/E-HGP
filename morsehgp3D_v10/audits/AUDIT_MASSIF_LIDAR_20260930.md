@@ -1,6 +1,6 @@
 # LiDAR massif et précision — contrat proposé au développeur
 
-30 septembre 2026. Demandes utilisateur : dizaines de millions et précision paramétrable. Produit 4b7d70422 ; preuves jusqu'à 408d1ffe4. RankIndex intégré, primitives larges et filtre relatif de portée distincte. public_status=not_claimed. Aucun GCP, allocation massive ou moteur modifié par cet audit. [Massif](../receipts/audit_independant_20260930/massif/README.md), [précision](../receipts/audit_independant_20260930/precision_grille/representation/README.md).
+30 septembre 2026. Demandes utilisateur : dizaines de millions et précision paramétrable. Produit 4b7d70422 ; preuves jusqu'à d192637a7. RankIndex intégré, primitives larges et filtre relatif de portée distincte. public_status=not_claimed. Aucun GCP, allocation massive ou moteur modifié par cet audit. [Massif](../receipts/audit_independant_20260930/massif/README.md), [précision](../receipts/audit_independant_20260930/precision_grille/representation/README.md).
 
 **Décision utilisateur confirmée : grille u32 par paliers u24 puis u32 complet ; float32 natif hors chantier courant.** Exposer le pas physique h, publier le domaine exact certifié et conserver un repère commun. Pour le massif : segments depuis les boîtes de centres certifiées, fusion externe exacte. Cela traite la capacité du catalogue ; atlas, verticales, incidences et reprise restent à concevoir.
 

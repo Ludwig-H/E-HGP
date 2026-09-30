@@ -1,0 +1,9 @@
+# Condensation : lecture indépendante du nouveau verrou
+
+30 septembre 2026. Audit publié par l’autre auteur au commit d192637a7, découvert pendant la clôture de notre tranche df0890977. Notre complément lit ses deux paquets clos, sans compiler, exécuter HGP/sklearn ni modifier ses fichiers.
+
+Le mécanisme est cohérent avec la condensation d’une hiérarchie sur les points : les points directement attachés sortent par cohortes, aussi lorsqu’aucun enfant spatial ne se divise. Dès que la masse résiduelle devient inférieure à min_cluster_size, la branche et ses observations restantes terminent à la même date. Les départs antérieurs ne sont pas repayés. Traiter ensemble divisions géométriques et départs à rang exact égal ; préserver FULL et les continuations.
+
+Le [témoin géométrique K3](../../audit_continu_20260929/point_condensation_cover_r2_20260930/README.md) utilise les six points de l’export interne déjà conservé dans nos tests de bande. À mcs6, la première sortie à β25 fait passer 6→5 : stabilité z1 correcte 6/5, contre 88/65 calculée ; z2 : 6/25 contre 1294/4225. Aucune inversion EOM sur ce nuage. Le [paquet API distinct](../../audit_continu_20260929/point_condensation_20260930/README.md) montre séparément des inversions EOM, même racine exclue/mcs5 ; il ne prouve pas la réalisation 3D de ces arbres précis.
+
+Quatre lectures verify.py normal/−O donnent ARCHIVE_PASS, vérifient les manifestes puis rejugent les sorties scellées. Les compteurs et SHA sont dans [recheck.json](recheck.json) ; zéro nouvelle invocation native ou sklearn. Il s’agit de la contre-vérification de preuves de l’autre auteur, pas d’une nouvelle campagne indépendante. Aucun effet ARI ni fréquence du défaut déduits. Ces observations sont prioritaires avant notre comparaison de l’antichaîne en condensation/EOM.
