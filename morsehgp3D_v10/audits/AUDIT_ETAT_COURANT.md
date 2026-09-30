@@ -1,7 +1,8 @@
 # Audits v10 — état courant
 
-Mise à jour : 30 septembre 2026, retour explicite à l'audit, défaut de
-condensation confirmé et suivi du développeur `408d1ffe4`. Les parties I
+Mise à jour : 30 septembre 2026, contre-relecture de `df0890977`/`a8252527e`,
+calcul frontière sans tri et portée des boîtes q3/q4. Le développeur reste
+sur `408d1ffe4`, moteur inchangé dans cette tranche. Les parties I
 et II de la thèse ont été relues intégralement dans la tranche précédente.
 Index vivant de l'auditeur continu ; les rapports datés restent des preuves
 ancrées à leur version, pas des statuts courants. `public_status=not_claimed`.
@@ -50,6 +51,33 @@ des seuils tight K5. 5 793 contrôles Fraction normal/−O et deux erreurs
 logiques causales ; pas de port natif ni de gain LiDAR acquis. Tester un
 petit nombre de groupes préparés une fois, masques q3/q4 de supports
 seulement : ne pas retirer ces sites du census ni déplacer le carré.
+
+Le [complément boîtes réelles](../receipts/audit_continu_20260929/group_moments_box_r2_20260930/README.md)
+ajoute un témoin cubique, quatre crédits q4 de trois sans dominance
+individuelle. Mais les petites entrées 14/16 sites s'arrêtent dès la
+première feuille M16 : ce n'est pas la boîte des témoins. Si l'ancre est
+dans la boîte fermée, σ≥0 et le certificat ne peut rien rejeter ; sauter
+ce calcul. Le recadrage interdit aussi de supposer les feuilles toujours
+presque cubiques. 503 contrôles Fraction normal/−O, aucun appel générateur.
+Prochain essai : vraies listes S/candidats, ancres hors S et coût total.
+
+**Frontière, piste plus légère :** le [contre-audit des témoins redondants](../receipts/audit_continu_20260929/antichain_counterreview_20260930/README.md)
+confirme un vrai changement de partition à K2/η1/8 sur quatre points,
+réunion 0/3 avancée de β25 à 200/9 ; Γ2 et univers fort complets Fraction.
+Les six exports antérieurs n'avançaient aucune des 434 hauteurs contrôlées.
+Surtout, l'antichaîne n'a pas besoin d'être triée ou stockée : deux extrêmes
+Euler donnent exactement son LCA, un balayage des incidences puis au plus
+une LCA par point. 2 892 bandes et 6 227 sélections supplémentaires,
+normal/−O concordants. Réductions parallélisables ; ni port natif, gain
+LiDAR/EOM/ARI, borne du nombre d'incidences ou chrono G4 acquis.
+
+**Massif, garde globale distincte :** `ExtCell::rep_first` indexe une seule
+arène `ext_reps` pour tous les K, mais son cast et l'addition à l'accès
+restent u32 (`tower.cpp:1290/1024`). Les gardes par ordre `sr[k]` et sur
+le nombre de cellules ne bornent pas cette somme globale. Élargir décalage
+et addition, ou refuser avant insertion/conversion. Réserve d'adressage
+pour le futur massif, pas contre-exemple géométrique exécuté ; la preuve
+indépendante protégeant forêt/CSR actuelle reste correcte.
 
 **Port précis, contre-épreuves du même jour :** relever seulement le refus
 u18 serait incorrect. Les corps géométriques donnent déjà un rayon q4

@@ -1,0 +1,33 @@
+{
+  "closed_utc": "2026-09-30 11:18:10 UTC",
+  "scope": "Private exact Fraction geometry + mirror of integer root/crop rules; no native generator, engine edit, shared archive/doc edit, benchmark or GCP",
+  "source_and_protocol_frozen_before_execution": {
+    "PROTOCOL.txt": "63a742a212f8d5eb79bbaf4fa8251df14ca921c36fc396519707721248cb8396",
+    "check.py": "3b71937e9727bff38554cb000b4557fd49700ff9f9755f0788ca09265dcc15cf"
+  },
+  "sources_unchanged_after_execution": true,
+  "generator_sha256_before_and_after": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662",
+  "runs": [
+    {"command": ["python3", "-B", "check.py"], "return_code": 0, "stdout": "normal.stdout.json", "stderr": "normal.stderr", "checks": 503},
+    {"command": ["python3", "-B", "-O", "check.py"], "return_code": 0, "stdout": "optimized.stdout.json", "stderr": "optimized.stderr", "checks": 503}
+  ],
+  "stdout_identical_sha256": "e79a57b7b9278c471c2ec6f667c1f029846290482d4bc632c0c19720ddbfa91d",
+  "stderr_empty": true,
+  "observations": {
+    "isotropic_fixture_sites": 16,
+    "common_translation_each_axis": 5000,
+    "point_profile": "distinct integer u18 sites, unit multiplicities",
+    "Q_side_each_axis": 1640,
+    "strictly_positive_tetrahedron_support": true,
+    "strict_interior_count": 12,
+    "shell_indices": [0, 1, 2, 3],
+    "old_Dom_of_four_supports": [[], [], [], []],
+    "quantitative_credits_of_four_supports": [3, 3, 3, 3],
+    "K5_q4_threshold2_strict_slacks": [-8980984, -6042104, -4848184, -4848184],
+    "default_first_leaf_credits_of_same_four_supports": [0, 0, 0, 0],
+    "old14_default_initial_widths_T6": [1537, 1217, 1857],
+    "vertical_two_site_initial_widths_T6": [1, 1, 16777153]
+  },
+  "proof_scope": "No general aspect<=2 invariant survives bbox cropping. The isotropic witness demonstrates strict strength over point dominance on a legal geometric query box, NOT reachability of that box as a default generator leaf. For n<=M root retains all sites and every anchor lies in the actual first-leaf box, forcing sigma>=0 for all true groups. Finite centre samples supplement, not replace, the affine/convex mathematical proof.",
+  "qualification_transfers": {"new_generator_execution": false, "real_leaf_gain": false, "LiDAR_gain": false, "FULL": false, "subquadratic_global": false, "GPU_G4": false}
+}

@@ -23,8 +23,37 @@ Avant les questions historiques ci-dessous :
    pas un choix par tuple. Masques d'éligibilité q3/q4 seulement, census
    complet conservé. Publier aussi sélection/préparation et coût résiduel ;
    ni gain LiDAR ni passage sous-quadratique encore démontrés.
+   Le [complément boîtes](../../receipts/audit_continu_20260929/group_moments_box_r2_20260930/README.md)
+   donne un vrai témoin cubique, mais aucune petite boîte atteinte par
+   défaut. Si a∈S fermé, σ≥0 : sauter cette ancre. Relever d'abord les
+   vraies listes S/candidats et la fraction d'ancres hors S, puis mesurer
+   préparation, rejets nouveaux et aval. Aucune hypothèse d'aspect≤2
+   ne survit au recadrage par l'enveloppe de la liste.
+3. **Frontière, même réduction sans tri par point.** Le
+   [contre-audit exact](../../receipts/audit_continu_20260929/antichain_counterreview_20260930/README.md)
+   donne un changement réel au η par défaut : quatre points K2,
+   hauteur 0/3 de 25 à 200/9, sans modifier FULL. Aucun gain statistique
+   revendiqué. Pour calculer le LCA des témoins minimaux : scanner les
+   sélectionnés, garder `argmin(tout,-tin)` et `argmax(tin)`, puis leur
+   LCA. Plus de tri ni stockage de l'antichaîne ; au plus une requête
+   LCA par point, hors préparation de l'index. Les réductions se combinent
+   par tâches, avec comparaison unsigned sûre et rangs/plateaux exacts.
+   Préserver les premières couvertures et les incidences internes K3/K5 ;
+   racines différentes refusées. Corriger la condensation avant EOM.
+4. **Massif, un index global à protéger séparément.** Les décalages de
+   `ext_reps` sont communs aux K ; `rep_first=u32(ext_reps.size())`, puis
+   `rep_first+r` en u32, ne sont pas protégés par les refus `sr[k]` par
+   ordre ni par `atlas.cells`. Modèle cardinal abstrait : 20 M jonctions
+   par ordre K8/K9/K10 avec 58/74/92 représentants donnent respectivement
+   1,16/1,48/1,84 milliards, chacun représentable, mais 4,48 milliards
+   dans l'arène globale. Les compteurs de morceaux restent sûrs ; même
+   dix cellules par boule resteraient sous la garde de l'atlas. Aucun
+   nuage 3D réalisant ces chiffres n'est attesté. Élargir décalage **et**
+   addition, ou contrôler la dernière adresse consommable avant insertion
+   et cast. Le budget RAM/disque reste une garde distincte. Ne pas rouvrir
+   la preuve forêt/CSR amont sur ce seul contre-modèle d'adressage.
 
-Ces deux paquets ne modifient aucun fichier moteur et n'utilisent pas GCP.
+Ces preuves ne modifient aucun fichier moteur et n'utilisent pas GCP.
 La vue [courante](../AUDIT_ETAT_COURANT.md) tient compte du retour à l'audit,
 du développeur actif et de sa décision de grille u32 par paliers.
 
