@@ -1,0 +1,99 @@
+{
+  "schema": "mhgp10_input_raccord_readonly_audit_v1",
+  "observed_utc": "2026-09-30 07:14:33 UTC",
+  "scope": "Read-only interfaces/provenance audit; no native execution, compilation, engine edits or GCP. Source/binary hashes observed around final targeted queries, not a new engine qualification.",
+  "local_head": "bdc0b8f08ee37ee351996b29c5974f78415bc036",
+  "origin_main_observed": "4b7d7042226e4299e57e1257f4034d45d82c8b77",
+  "source_hash_count": 28,
+  "hashes_stable": true,
+  "live_process_scope": {
+    "command": "ps -eo pid,ppid,etimes,time,pcpu,rss,comm,args",
+    "exit_code": 0,
+    "output_truncation_reported": false,
+    "rows_under_target_prefixes_excluding_audit_wrappers": [],
+    "limitation": "Instantaneous process observation, not a claim that all external actors or campaigns are idle."
+  },
+  "existing_executables": [
+    {
+      "path": "/tmp/mhgp10-r2/entrees_cli-verif/build/mhgp10_cluster",
+      "sha256": "a776427321ae27d3ccde41dffbf03fa8601144926a99ac727bb78a205bb04781",
+      "source": "/tmp/mhgp10-r2/entrees_cli-verif/src/morsehgp3D_v10",
+      "scope": "Existing private CLI build; not the common integ tree, no new numerical profile."
+    },
+    {
+      "path": "/workspaces/E-HGP/build/v10-frontiere/frontier-build/export_frontier",
+      "sha256": "b2dc98243c4230761ff6384660978f5972e21d9db62f30621eb8de2be78d6616",
+      "library_sha256": "1aaacd63dcb76413b61fc6eb983c52bdaa9a32f9a059a906af2254061beac5da",
+      "scope": "Frozen u18 frontier instrument; existing normal receipt has 1961564 checks/113 categories, not a new run."
+    }
+  ],
+  "integ_block": {
+    "path": "/tmp/mhgp10-r2/entrees_cli-verif/integ",
+    "unmerged_cli_files": [
+      "morsehgp3D_v10/cli/mhgp10_catalogue.cpp",
+      "morsehgp3D_v10/cli/mhgp10_tower.cpp"
+    ],
+    "conflict_blocks": 5,
+    "source_state": "Old head interface remains without numeric_domain outcome; OutputSet still opens wb before duplicate-path lookup. Already proved historically; not re-run.",
+    "cache_provenance": "Queried candidate builds point to src/morsehgp3D_v10, not integ; no common executable established in the requested tree.",
+    "classification": "Integration absence plus known source defects, not a newly discovered geometric failure."
+  },
+  "matrix": [
+    {
+      "interface": "Exact preparation",
+      "present": "v8/bench/prepare_lidar_precision.py already supports parameters('grid','0.1'), rational decimal rounding, global translation and all return maps.",
+      "missing": "A v10 consumer of this manifest and its typed profile, not a new converter.",
+      "classification": "Available preparator; missing raccord."
+    },
+    {
+      "interface": "Format/domain",
+      "present": "Raw triplets u32le; R2 complete-file reader; v10 CLI always passes B18; Cloud factory B<=21.",
+      "missing": "Validated bound/dispatch for declared u24/u32 profile before catalogue/tower. Do not lift only kMaxCoordinateBits.",
+      "classification": "Wide profile unsupported, not a defect under current u18 contract."
+    },
+    {
+      "interface": "Physical step",
+      "present": "v8 quantization.step_metres as exact numerator/denominator; precision_mm_text preserved.",
+      "missing": "Read/echo exact step alongside numerical domain and convert beta_phys=h^2*beta_grid only explicitly.",
+      "classification": "No new physical precision established."
+    },
+    {
+      "interface": "Origin and spatial cuts",
+      "present": "v8 common integer translation, encoded_sensor_origin and boundary counters; grid uses represented-sign cuts, float32 raw-sign cuts.",
+      "missing": "Preserve rule/masks rather than re-derive cuts locally. Origin metadata can lie outside u32 storage; do not force it into u32.",
+      "classification": "Declared preparator conventions; no claim of identical raw/grid partition."
+    },
+    {
+      "interface": "IDs/returns",
+      "present": "v8 raw_to_full.u32le plus each *.site_ids.u32le; Cloud accepts unique arbitrary PointIds. CLI rebuilds local pid=i.",
+      "missing": "Bind local row, full-site ID, raw-return ID via checked maps/hashes; keep local dense array indices separate from global IDs; scatter final labels explicitly.",
+      "classification": "Local-ID contract is valid now but insufficient for declared full-return identity."
+    },
+    {
+      "interface": "Fusions/statistical population",
+      "present": "Preparatory fusion counts and raw map; Cloud keeps multiplicities but current FULL refuses them.",
+      "missing": "Declare whether estimator counts distinct represented sites or raw returns. Expanding labels by raw map does not restore weighted KNN density.",
+      "classification": "Known statistical-scope requirement, not solved by more bits."
+    },
+    {
+      "interface": "Frontier foundations",
+      "present": "Private work uses u18 exports, local IDs and LiDAR crop1500->source8000 map; exact level tables in grid units.",
+      "missing": "Consumer/profile of complete raw scenes plus masks/manifest needed before precision/full-frame claims.",
+      "classification": "Useful frozen u18 instrumentation, no new wide/G4 qualification."
+    }
+  ],
+  "recommended_isolated_task": {
+    "name": "v10 validated precision-manifest adapter (read/refusal first)",
+    "reuse": "Reuse v8 exact preparator; do not copy its historic qualifications or recompute from old 1mm integers.",
+    "proposed_location": "morsehgp3D_v10/bench/precision/ (new isolated directory); avoid other developer's R2 copies.",
+    "checks": [
+      "strict duplicate/type validation and profile-format match",
+      "exact step>0 and translation metadata preserved",
+      "payload/map sizes and hashes bound to selected dataset",
+      "strictly increasing local-to-full IDs, raw-map ranges/surjectivity on full",
+      "publish fusions and masks, keep sensor-origin cut convention",
+      "explicitly refuse unsupported numeric domain before any engine run"
+    ],
+    "important_limit": "An adapter accepting 0.1mm input still cannot qualify FULL until the arithmetic/index/catalogue/tower profile is ported."
+  }
+}

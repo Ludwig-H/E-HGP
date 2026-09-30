@@ -1,0 +1,31 @@
+{
+  "status": "NO_PROOF_DEFECT_FOUND_WITH_STATED_SCOPE",
+  "scope": "Independent bounded mathematical review and two Python reruns only; not native engine, FULL, clustering, scaling or G4 qualification",
+  "labelled_universe": {
+    "assumptions": "Fixed finite index set I; p_i and p'_i in R^3; max_i norm(p_i-p'_i)<=epsilon; coincident positions allowed but labels retained.",
+    "proof": "For each nonempty S subset I, use a minimum enclosing ball of p_S with centre c and radius R. Triangle inequality gives norm(p'_i-c)<=R+epsilon for i in S, hence R'(S)<=R(S)+epsilon. Exchange P,P' to obtain absolute radius difference<=epsilon.",
+    "grid_bound": "Exact coordinatewise nearest grid rounding of isotropic positive step h gives epsilon<=sqrt(3)*h/2.",
+    "graph_proof": "For K>=1, Gamma_K(r) has labelled K-subsets F with R(F)<=r and edges whose union is a labelled K+1-subset with MEB radius<=r. Identity on labels embeds vertices and edges into Gamma'_K(r+epsilon), and conversely. Component maps compose to the filtration map at r+2epsilon. No equality of cuts is asserted.",
+    "parameter_warning": "The additive shift epsilon is in radius. For a=R^2, the corresponding bound is a' <= (sqrt(a)+epsilon)^2, not a+epsilon or a+epsilon^2.",
+    "tested_or_proved": "183 exact subset-radius pairs were tested. Graph inclusions are a mathematical consequence of the radius lemma and graph definition, not a new runtime graph comparison."
+  },
+  "oracle_review": {
+    "method": "Fraction Gram system and support enumeration up to size 4 in R^3; nonnegative barycentric coefficients; all queried points enclosed.",
+    "rationale": "A MEB centre is in the convex hull of its active boundary points; an affinely independent support of at most 4 can be chosen. Repeated positions are handled by smaller supports including singletons.",
+    "exact_radical_check": "For a,b,e>=0, abs(sqrt(a)-sqrt(b))<=sqrt(e) iff a+b-e<=0 or (a+b-e)^2<=4ab. Positive-side squaring is exact; no float root approximation is used.",
+    "scope": "Only the mathematical MEB helper is reviewed here. Other oracle tower/descent functions are not tested or requalified."
+  },
+  "limitations": {
+    "deduplication": "After unweighted deduplication the fixed K-subset label universe is lost. Labels mapped to one site can change cardinality of a K-subset. Expanding the multiplicities into labelled positions restores the lemma conceptually, but proves neither the implementation nor the correctness of a weighted native FULL quotient.",
+    "illustrative_counterexample_not_executed": "For K=2 take labelled points (-delta,0,0),(delta,0,0),(L,0,0), grid h=4*delta with L a large grid multiple. First two round to 0 and each moves delta. Their labelled pair has radius delta before and 0 after. Unweighted dedup leaves sites 0,L, whose sole pair is born at L/2: no corresponding additive-delta comparison at small radius. This is a mathematical example, not an additional executed fixture.",
+    "sensor_cuts": "If halves/quadrants are recomputed after rounding, raw IDs can cross a cut. The theorem does not compare such unequal universes automatically; fix the label universe/mask or explicitly account for changed membership. Two such changed profiles are already reported by the original panel.",
+    "clustering": "Component interleaving does not certify identical covers, hard point attachments, EOM choices or ARI; reciprocal-density transforms can amplify small radius changes near zero.",
+    "exclusions": [
+      "native FULL weighted equivalence",
+      "GPU/G4",
+      "subquadratic scaling",
+      "EOM/ARI robustness",
+      "semantic ground truth clustering quality"
+    ]
+  }
+}

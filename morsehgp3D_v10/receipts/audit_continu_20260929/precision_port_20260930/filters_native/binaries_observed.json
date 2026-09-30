@@ -1,0 +1,108 @@
+{
+  "original_source_root": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10",
+  "dependencies": [
+    {
+      "path": "src/cloud/site_tree.cpp",
+      "sha256_before": "32296818941943102cf7afbaef6665ffc80f5ca5564a274ad00ae25e8c096eec",
+      "sha256_after": "32296818941943102cf7afbaef6665ffc80f5ca5564a274ad00ae25e8c096eec",
+      "copied_sha256": "32296818941943102cf7afbaef6665ffc80f5ca5564a274ad00ae25e8c096eec"
+    },
+    {
+      "path": "src/cloud/site_tree.hpp",
+      "sha256_before": "3cb0a70d7a05a6665e0c59676eccbe1b3ac16097ed336fc0007a97ad6bbb8f35",
+      "sha256_after": "3cb0a70d7a05a6665e0c59676eccbe1b3ac16097ed336fc0007a97ad6bbb8f35",
+      "copied_sha256": "3cb0a70d7a05a6665e0c59676eccbe1b3ac16097ed336fc0007a97ad6bbb8f35"
+    },
+    {
+      "path": "src/cloud/cloud.hpp",
+      "sha256_before": "b462545a6aaa86329a0122f05bd1b4fdd2a0cbd7e294218087ba472a8539ef2f",
+      "sha256_after": "b462545a6aaa86329a0122f05bd1b4fdd2a0cbd7e294218087ba472a8539ef2f",
+      "copied_sha256": "b462545a6aaa86329a0122f05bd1b4fdd2a0cbd7e294218087ba472a8539ef2f"
+    },
+    {
+      "path": "src/arith/geometry.hpp",
+      "sha256_before": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673",
+      "sha256_after": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673",
+      "copied_sha256": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673"
+    },
+    {
+      "path": "src/arith/wide.hpp",
+      "sha256_before": "9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800",
+      "sha256_after": "9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800",
+      "copied_sha256": "9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800"
+    },
+    {
+      "path": "src/core/buffer.cpp",
+      "sha256_before": "d4d67d329a0fadc59ab0870c094f380a1a501b369a0da4915cc8a5e66dfe5d81",
+      "sha256_after": "d4d67d329a0fadc59ab0870c094f380a1a501b369a0da4915cc8a5e66dfe5d81",
+      "copied_sha256": "d4d67d329a0fadc59ab0870c094f380a1a501b369a0da4915cc8a5e66dfe5d81"
+    },
+    {
+      "path": "src/core/buffer.hpp",
+      "sha256_before": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60",
+      "sha256_after": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60",
+      "copied_sha256": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60"
+    },
+    {
+      "path": "src/core/status.hpp",
+      "sha256_before": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+      "sha256_after": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+      "copied_sha256": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038"
+    },
+    {
+      "path": "src/core/reasons.def",
+      "sha256_before": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b",
+      "sha256_after": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b",
+      "copied_sha256": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b"
+    },
+    {
+      "path": "src/core/types.hpp",
+      "sha256_before": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+      "sha256_after": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+      "copied_sha256": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c"
+    }
+  ],
+  "private_sources_before": {
+    "probe.cpp": "bc48c3f1668b7036d67baf6e40427b71a6f9136c4ce06700c38770c5ac5c8e6a",
+    "judge.py": "270a0486539b75571e1fe69a85bd720a20d3b20323b2178d7b497b417d560217",
+    "source/src/cloud/site_tree.cpp": "32296818941943102cf7afbaef6665ffc80f5ca5564a274ad00ae25e8c096eec",
+    "source/src/cloud/site_tree.hpp": "3cb0a70d7a05a6665e0c59676eccbe1b3ac16097ed336fc0007a97ad6bbb8f35",
+    "source/src/cloud/cloud.hpp": "b462545a6aaa86329a0122f05bd1b4fdd2a0cbd7e294218087ba472a8539ef2f",
+    "source/src/arith/geometry.hpp": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673",
+    "source/src/arith/wide.hpp": "9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800",
+    "source/src/core/buffer.cpp": "d4d67d329a0fadc59ab0870c094f380a1a501b369a0da4915cc8a5e66dfe5d81",
+    "source/src/core/buffer.hpp": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60",
+    "source/src/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "source/src/core/reasons.def": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b",
+    "source/src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c"
+  },
+  "private_sources_after": {
+    "probe.cpp": "bc48c3f1668b7036d67baf6e40427b71a6f9136c4ce06700c38770c5ac5c8e6a",
+    "judge.py": "270a0486539b75571e1fe69a85bd720a20d3b20323b2178d7b497b417d560217",
+    "source/src/cloud/site_tree.cpp": "32296818941943102cf7afbaef6665ffc80f5ca5564a274ad00ae25e8c096eec",
+    "source/src/cloud/site_tree.hpp": "3cb0a70d7a05a6665e0c59676eccbe1b3ac16097ed336fc0007a97ad6bbb8f35",
+    "source/src/cloud/cloud.hpp": "b462545a6aaa86329a0122f05bd1b4fdd2a0cbd7e294218087ba472a8539ef2f",
+    "source/src/arith/geometry.hpp": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673",
+    "source/src/arith/wide.hpp": "9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800",
+    "source/src/core/buffer.cpp": "d4d67d329a0fadc59ab0870c094f380a1a501b369a0da4915cc8a5e66dfe5d81",
+    "source/src/core/buffer.hpp": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60",
+    "source/src/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+    "source/src/core/reasons.def": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b",
+    "source/src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c"
+  },
+  "binaries_first_observed_after_initial_normal_run": {
+    "normal": "53836e65e0d39b3a46358b073ebaafd5895d12e8d36a19d3965a3c163ed0b7aa",
+    "ubsan": "fe1e821b5f06496daad861ca7abc460de8fa300ce674eeab9c619b6a7a2521c5"
+  },
+  "binaries_after_captured_ubsan_and_normal_repeat": {
+    "normal": "53836e65e0d39b3a46358b073ebaafd5895d12e8d36a19d3965a3c163ed0b7aa",
+    "ubsan": "fe1e821b5f06496daad861ca7abc460de8fa300ce674eeab9c619b6a7a2521c5"
+  },
+  "external_binaries_after_relocation": {
+    "/tmp/mhgp10-site-filter-binaries-0930.9fkfIcL9/normal": "53836e65e0d39b3a46358b073ebaafd5895d12e8d36a19d3965a3c163ed0b7aa",
+    "/tmp/mhgp10-site-filter-binaries-0930.9fkfIcL9/ubsan": "fe1e821b5f06496daad861ca7abc460de8fa300ce674eeab9c619b6a7a2521c5"
+  },
+  "binary_location_note": "Binaries are intentionally outside this source/log packet; hashes were stable before/after the final captured pair and after relocation. No pre-first-normal-run binary hash is claimed.",
+  "compiler_output": "compiler.txt",
+  "system_headers_or_linked_system_libraries_pinned": false
+}

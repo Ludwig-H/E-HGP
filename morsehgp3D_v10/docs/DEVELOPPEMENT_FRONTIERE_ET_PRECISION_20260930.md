@@ -101,8 +101,67 @@ Pour préserver le débit, la piste pertinente est un dispatch **certifié par
 opération** : conserver la voie courte lorsque les valeurs effectivement
 impliquées sont dans sa borne, replier vers les mots larges sinon. Une petite
 étendue du support seule ne justifie pas le test contre un témoin très loin.
-Les marges flottantes 0,02 héritées de u18 doivent être redémontrées ; les
+Les marges flottantes 0,02 héritées de u18 ne sont pas transportables ; les
 recopies de boîtes ne sont pas des filtres numériques qualifiés.
+
+### Contre-épreuves du port précis
+
+Le [nouveau reçu](../receipts/audit_continu_20260929/precision_port_20260930/README.md)
+est distinct des fondations déjà closes. Il exerce les corps actuels sur des
+entrées volontairement hors contrat, sans supprimer le refus du moteur.
+
+- 24 appels géométriques C++ normal/UBSan, 20 sorties jugées en paires
+  Fraction normal/−O : huit désaccords numériques et quatre arrêts UBSan.
+  Le rayon q4 d'un tétraèdre régulier u24 devient zéro au lieu de
+  `844424829468675/4`, sans alerte UBSan. Déjà u21 tronque son dénominateur.
+- Trois contacts à centres réduits isolent les erreurs du filtre flottant :
+  coquille perdue ou faux intérieur, y compris après translation d'une
+  géométrie de diamètre local u18 près de 4e9. Les côtés exacts du cas restent
+  dans i128. Le paquet scalaire compte 614 contrôles par passage ; son
+  préflight à attente erronée reste rejeté et conservé.
+  Le complément C++ copie le vrai SiteTree et confirme les trois erreurs
+  sans diagnostic UBSan : neuf requêtes au total, dont six dans la paire
+  finale normal/UBSan ; quatre lectures Fraction à 72 contrôles chacune.
+  Les nuages sont construits directement hors factory u18, sans changer
+  le contrat de production. Code0 signifie ici « erreurs attendues confirmées ».
+- La réduction par PGCD peut accélérer certains supports, mais deux
+  tétraèdres stricts u24 gardent après réduction des niveaux 194/146 bits.
+  Elle ne dispense pas des largeurs sûres ni du contrôle de `resize(false)`.
+
+La correction recommandée prépare le centre **relatif à l'ancre**, traduit
+exactement les écarts avant conversion, puis encadre distances et rayons
+par intervalles extérieurs. Un contact ambigu passe au prédicat exact.
+Nearest retient les candidats dont la borne inférieure ne dépasse pas la
+borne supérieure du rang recherché, égalités comprises. Toutes les voies
+`0.02` de SiteTree **et** de la tour doivent suivre le même contrat.
+Le contre-cas nearest prouve un mauvais départage à distance égale, pas
+une mauvaise valeur du rayon K-NN.
+
+Pour le catalogue, recadrer les polynômes **avant** leur multiplication peut
+conserver une voie courte sans entier large partout. Si L, exprimé en T6,
+borne la largeur de Q et les écarts de tous les sites parentaux à Q.lo,
+L≤2^29 suffit aux intermédiaires D-loc en i64 ; la droite des centres u32/T6
+reste dans i128 avec L≤2^38. Ces bornes sont mathématiques et conditionnelles
+au recadrage et aux promotions avant calcul, pas des ports exécutés ni des
+gains mesurés. La petite largeur de Q seule ne borne pas les sites parentaux.
+
+Le préparateur exact v8 accepte déjà un pas décimal paramétrable : ne pas
+réécrire une conversion flottante ni affiner une ancienne grille entière.
+Il manque un consommateur v10 contrôlant le manifeste, les hashes et les
+correspondances retour/site avant de lancer un profil déclaré supporté.
+L'origine signée peut sortir de u32 sans que les coordonnées locales stockées
+le fassent ; elle doit rester une métadonnée exacte, distincte des indices.
+
+Un petit contrôle mathématique complémentaire vérifie 117 arrondis et
+183 couples de rayons MEB sur trois nuages 3D, aux pas 1/0,1/0,01 mm.
+À univers de retours étiquetés fixé, l'erreur des rayons est au plus √3·h/2.
+Ce lemme donne un entrelacement des composantes Γ_K en rayon, pas la
+stabilité des attaches, de l'EOM ou de l'ARI. Fusionner des retours sans
+leurs multiplicités change l'estimateur ; diffuser leurs étiquettes ensuite
+ne rétablit pas sa densité. Le décalage est en rayon, non en rayon carré ;
+les coupes capteur à univers d'IDs différent ne sont pas appariées par ce lemme.
+Aucun test de croissance ou FULL large ne découle
+de cet oracle borné. GCP non utilisé dans ces contre-épreuves.
 
 ## Ordre des travaux suivants
 
@@ -133,3 +192,9 @@ documents de preuve passent le contrôle ciblé. Le contrôle global du dépôt
 reste en échec sur des liens relatifs de captures historiques déjà présentes ;
 ces archives closes n'ont pas été réécrites pour faire passer le contrôle.
 Le registre formel, inchangé, passe ses 20 phases.
+
+La publication des contre-épreuves de précision vérifie six documents ciblés
+et 159 empreintes du nouveau reçu, puis ses six manifestes internes, lecteurs
+normal/−O. Le contrôle des espaces est propre sur les documents et scripts
+rédigés ; celui de toutes les données signale une ligne vide finale dans
+le `compiler.txt` natif clos. Ces octets de preuve restent inchangés.

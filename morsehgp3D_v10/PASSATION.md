@@ -18,6 +18,12 @@ Premières primitives u32 isolées livrées : distance u128 et Morton96,
 212 684 contrôles. Le domaine du moteur complet et son refus au-delà de u18
 sont inchangés.
 
+L'[audit du port précis](receipts/audit_continu_20260929/precision_port_20260930/README.md)
+ajoute les contre-épreuves natives : élargir uniquement l'entrée casserait
+les niveaux, les prédicats et les filtres de contacts. Préserver le repère
+relatif, les unités et tous les IDs, puis porter les opérations sous bornes
+certifiées. Ces tests sont hors contrat u18, pas des régressions de ce profil.
+
 ```text
 phase=exploration_v10_hors_registre
 backend=cpu_reference

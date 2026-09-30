@@ -1,0 +1,7 @@
+source/src/arith/geometry.hpp:21:55: runtime error: signed integer overflow: 4294967295 * 4294967295 cannot be represented in type 'long int'
+    #0 0x62ee8549621a in mhgp10::geom::dot(mhgp10::geom::P3 const&, mhgp10::geom::P3 const&) source/src/arith/geometry.hpp:21
+    #1 0x62ee8549621a in mhgp10::geom::level2(mhgp10::geom::P3 const&, mhgp10::geom::P3 const&) source/src/arith/geometry.cpp:55
+    #2 0x62ee8548e0a9 in main /tmp/mhgp10-geometry-domain-micro-20260930.5Glxm6x4/probe.cpp:51
+    #3 0x7c7388c941c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7c7388c9428a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x62ee8548d444 in _start (/tmp/mhgp10-geometry-domain-binaries-20260930.k5QKkBRi/ubsan+0xa444) (BuildId: c351744fbc6e5f0e4b612c1ccad39e955787b9db)

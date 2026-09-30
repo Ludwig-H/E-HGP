@@ -1,0 +1,10 @@
+README.md: OK
+check.py: OK
+execution.json: OK
+normal.stderr: OK
+normal.stdout: OK
+optimized.stderr: OK
+optimized.stdout: OK
+record.py: OK
+source/hgp10_ref.py: OK
+source/prepare_lidar_precision.py: OK

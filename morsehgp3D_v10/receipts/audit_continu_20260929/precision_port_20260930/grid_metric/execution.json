@@ -1,0 +1,36 @@
+{
+  "GCP_used": false,
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-grid-metric-audit-20260930.RfeQKaHO/check.py"
+      ],
+      "name": "normal",
+      "returncode": 0
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-grid-metric-audit-20260930.RfeQKaHO/check.py"
+      ],
+      "name": "optimized",
+      "returncode": 0
+    }
+  ],
+  "paired_results_equal_except_optimize": true,
+  "source_after": {
+    "check.py": "0979ee3337d6767bfe1c9fb3522ed567308277c828888afc5dd634366a33d0c8",
+    "source/hgp10_ref.py": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104",
+    "source/prepare_lidar_precision.py": "d22a7b90f3f2214f14c44a4980d2cca7fb33fac8cbd23a977be958fa5d25fb84"
+  },
+  "source_before": {
+    "check.py": "0979ee3337d6767bfe1c9fb3522ed567308277c828888afc5dd634366a33d0c8",
+    "source/hgp10_ref.py": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104",
+    "source/prepare_lidar_precision.py": "d22a7b90f3f2214f14c44a4980d2cca7fb33fac8cbd23a977be958fa5d25fb84"
+  },
+  "status": "PASS"
+}

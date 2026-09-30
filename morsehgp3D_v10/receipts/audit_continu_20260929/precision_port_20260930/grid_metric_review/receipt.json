@@ -1,0 +1,67 @@
+{
+  "schema": "mhgp10_independent_grid_metric_review_v1",
+  "original_packet": "/tmp/mhgp10-grid-metric-audit-20260930.RfeQKaHO",
+  "original_sha256": {
+    "README.md": "905c8b93db0b065b3d73b556d36498ec7073c0621680009209e7866d9104fd16",
+    "check.py": "0979ee3337d6767bfe1c9fb3522ed567308277c828888afc5dd634366a33d0c8",
+    "source/hgp10_ref.py": "2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104",
+    "source/prepare_lidar_precision.py": "d22a7b90f3f2214f14c44a4980d2cca7fb33fac8cbd23a977be958fa5d25fb84",
+    "SHA256SUMS": "099ed8547145c141db5c41e6c58d417798fad50cdfde142a6f4cd4c65f3081ba"
+  },
+  "observation_start_utc": "2026-09-30 07:39:56 UTC",
+  "observation_end_utc": "2026-09-30 07:48:54 UTC",
+  "times_note": "These clock readings bracket inspection, not per-command execution timestamps. Tool wall time is a diagnostic, not a HGP benchmark.",
+  "commands": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "check.py"
+      ],
+      "cwd": "/tmp/mhgp10-grid-metric-audit-20260930.RfeQKaHO",
+      "rc": 0,
+      "tool_wall_time_seconds": 0.24544954,
+      "output_file": "normal.output",
+      "output_capture": "Tool combined output; full JSON parsed successfully"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "check.py"
+      ],
+      "cwd": "/tmp/mhgp10-grid-metric-audit-20260930.RfeQKaHO",
+      "rc": 0,
+      "tool_wall_time_seconds": 0.235656461,
+      "output_file": "optimized.output",
+      "output_capture": "Tool combined output; full JSON parsed successfully"
+    }
+  ],
+  "semantic_comparison": {
+    "equal_except_declared_optimize_flag": true,
+    "normal_optimize_flag": 0,
+    "optimized_optimize_flag": 1,
+    "counts": {
+      "coordinate_roundings": 117,
+      "fused_profiles": 2,
+      "origin_outside_u32_profiles": 6,
+      "radius_pairs": 183,
+      "raw_mapping_entries": 39,
+      "shifted_cut_profiles": 2
+    }
+  },
+  "integrity": {
+    "original_manifest_before_rc": 0,
+    "original_manifest_after_rc": 0,
+    "original_manifest_entries": 10,
+    "original_file_inventory_same": true,
+    "new_pycache_in_original": false
+  },
+  "original_packet_modified": false,
+  "repository_modified": false,
+  "GCP_used": false,
+  "native_engine_executed": false,
+  "findings_file": "findings.json",
+  "evidence_role": "Separate observation capture, not a source snapshot or standalone reproduction package."
+}

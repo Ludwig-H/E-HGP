@@ -1,0 +1,5 @@
+e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673  src/arith/geometry.hpp
+0e98cf5050c64e880386736de9aa47779fae377db0c9fe7acc64dfcf6c039de2  src/arith/geometry.cpp
+9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800  src/arith/wide.hpp
+716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c  src/core/types.hpp
+d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662  src/catalogue/generator.cpp

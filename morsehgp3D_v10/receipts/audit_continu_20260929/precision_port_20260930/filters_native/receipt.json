@@ -1,0 +1,296 @@
+{
+  "schema": "mhgp10_site_filter_native_receipt_v1",
+  "packet": "/tmp/mhgp10-site-filter-native-0930.r9F94iFV",
+  "started_utc": "2026-09-30 07:36:03 UTC",
+  "observation_closed_utc": "2026-09-30 07:49:12 UTC",
+  "scope": "unchanged_u18_bodies_outside_contract",
+  "gcp_used": false,
+  "repository_files_changed": false,
+  "meaning_of_success": "The native gate exits zero only when all three expected classification failures are reproduced; this is NOT production correctness qualification.",
+  "construction": {
+    "cloud_sites": 3,
+    "private_manual_cloud": true,
+    "bit_tags": [
+      24,
+      24,
+      32
+    ],
+    "prepare_cloud_called": false,
+    "u18_guard_unchanged": true,
+    "site_order": "Morton96 canonical",
+    "point_ids": "original fixture IDs; native lists use SiteIds",
+    "support": "strictly acute triangles checked independently",
+    "centres": "hand supplied reduced rationals relative to anchor; centre3 not called",
+    "rounding": "FE_TONEAREST",
+    "tree_leaf_limit": 16
+  },
+  "provenance": {
+    "original_source_root": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10",
+    "dependencies": [
+      {
+        "path": "src/cloud/site_tree.cpp",
+        "sha256_before": "32296818941943102cf7afbaef6665ffc80f5ca5564a274ad00ae25e8c096eec",
+        "sha256_after": "32296818941943102cf7afbaef6665ffc80f5ca5564a274ad00ae25e8c096eec",
+        "copied_sha256": "32296818941943102cf7afbaef6665ffc80f5ca5564a274ad00ae25e8c096eec"
+      },
+      {
+        "path": "src/cloud/site_tree.hpp",
+        "sha256_before": "3cb0a70d7a05a6665e0c59676eccbe1b3ac16097ed336fc0007a97ad6bbb8f35",
+        "sha256_after": "3cb0a70d7a05a6665e0c59676eccbe1b3ac16097ed336fc0007a97ad6bbb8f35",
+        "copied_sha256": "3cb0a70d7a05a6665e0c59676eccbe1b3ac16097ed336fc0007a97ad6bbb8f35"
+      },
+      {
+        "path": "src/cloud/cloud.hpp",
+        "sha256_before": "b462545a6aaa86329a0122f05bd1b4fdd2a0cbd7e294218087ba472a8539ef2f",
+        "sha256_after": "b462545a6aaa86329a0122f05bd1b4fdd2a0cbd7e294218087ba472a8539ef2f",
+        "copied_sha256": "b462545a6aaa86329a0122f05bd1b4fdd2a0cbd7e294218087ba472a8539ef2f"
+      },
+      {
+        "path": "src/arith/geometry.hpp",
+        "sha256_before": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673",
+        "sha256_after": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673",
+        "copied_sha256": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673"
+      },
+      {
+        "path": "src/arith/wide.hpp",
+        "sha256_before": "9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800",
+        "sha256_after": "9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800",
+        "copied_sha256": "9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800"
+      },
+      {
+        "path": "src/core/buffer.cpp",
+        "sha256_before": "d4d67d329a0fadc59ab0870c094f380a1a501b369a0da4915cc8a5e66dfe5d81",
+        "sha256_after": "d4d67d329a0fadc59ab0870c094f380a1a501b369a0da4915cc8a5e66dfe5d81",
+        "copied_sha256": "d4d67d329a0fadc59ab0870c094f380a1a501b369a0da4915cc8a5e66dfe5d81"
+      },
+      {
+        "path": "src/core/buffer.hpp",
+        "sha256_before": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60",
+        "sha256_after": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60",
+        "copied_sha256": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60"
+      },
+      {
+        "path": "src/core/status.hpp",
+        "sha256_before": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+        "sha256_after": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+        "copied_sha256": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038"
+      },
+      {
+        "path": "src/core/reasons.def",
+        "sha256_before": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b",
+        "sha256_after": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b",
+        "copied_sha256": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b"
+      },
+      {
+        "path": "src/core/types.hpp",
+        "sha256_before": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+        "sha256_after": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c",
+        "copied_sha256": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c"
+      }
+    ],
+    "private_sources_before": {
+      "probe.cpp": "bc48c3f1668b7036d67baf6e40427b71a6f9136c4ce06700c38770c5ac5c8e6a",
+      "judge.py": "270a0486539b75571e1fe69a85bd720a20d3b20323b2178d7b497b417d560217",
+      "source/src/cloud/site_tree.cpp": "32296818941943102cf7afbaef6665ffc80f5ca5564a274ad00ae25e8c096eec",
+      "source/src/cloud/site_tree.hpp": "3cb0a70d7a05a6665e0c59676eccbe1b3ac16097ed336fc0007a97ad6bbb8f35",
+      "source/src/cloud/cloud.hpp": "b462545a6aaa86329a0122f05bd1b4fdd2a0cbd7e294218087ba472a8539ef2f",
+      "source/src/arith/geometry.hpp": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673",
+      "source/src/arith/wide.hpp": "9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800",
+      "source/src/core/buffer.cpp": "d4d67d329a0fadc59ab0870c094f380a1a501b369a0da4915cc8a5e66dfe5d81",
+      "source/src/core/buffer.hpp": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60",
+      "source/src/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+      "source/src/core/reasons.def": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b",
+      "source/src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c"
+    },
+    "private_sources_after": {
+      "probe.cpp": "bc48c3f1668b7036d67baf6e40427b71a6f9136c4ce06700c38770c5ac5c8e6a",
+      "judge.py": "270a0486539b75571e1fe69a85bd720a20d3b20323b2178d7b497b417d560217",
+      "source/src/cloud/site_tree.cpp": "32296818941943102cf7afbaef6665ffc80f5ca5564a274ad00ae25e8c096eec",
+      "source/src/cloud/site_tree.hpp": "3cb0a70d7a05a6665e0c59676eccbe1b3ac16097ed336fc0007a97ad6bbb8f35",
+      "source/src/cloud/cloud.hpp": "b462545a6aaa86329a0122f05bd1b4fdd2a0cbd7e294218087ba472a8539ef2f",
+      "source/src/arith/geometry.hpp": "e5954da39ab6c216bfb05535158cf862eca9a4ba78a81f7dd0c33b6be1fed673",
+      "source/src/arith/wide.hpp": "9cd1a34563501fa1c26d9ec79d510f755f49e6fc0a452e432dfc271a209f4800",
+      "source/src/core/buffer.cpp": "d4d67d329a0fadc59ab0870c094f380a1a501b369a0da4915cc8a5e66dfe5d81",
+      "source/src/core/buffer.hpp": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60",
+      "source/src/core/status.hpp": "f6983f95f60195eb5b5f73f73d9cc97b48d694d0877efd226072d6240cf84038",
+      "source/src/core/reasons.def": "0679dd4d0b4df946aa79568fd42cab744cea2c6c39bf9a3bd92a7698921a797b",
+      "source/src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c"
+    },
+    "binaries_first_observed_after_initial_normal_run": {
+      "normal": "53836e65e0d39b3a46358b073ebaafd5895d12e8d36a19d3965a3c163ed0b7aa",
+      "ubsan": "fe1e821b5f06496daad861ca7abc460de8fa300ce674eeab9c619b6a7a2521c5"
+    },
+    "binaries_after_captured_ubsan_and_normal_repeat": {
+      "normal": "53836e65e0d39b3a46358b073ebaafd5895d12e8d36a19d3965a3c163ed0b7aa",
+      "ubsan": "fe1e821b5f06496daad861ca7abc460de8fa300ce674eeab9c619b6a7a2521c5"
+    },
+    "external_binaries_after_relocation": {
+      "/tmp/mhgp10-site-filter-binaries-0930.9fkfIcL9/normal": "53836e65e0d39b3a46358b073ebaafd5895d12e8d36a19d3965a3c163ed0b7aa",
+      "/tmp/mhgp10-site-filter-binaries-0930.9fkfIcL9/ubsan": "fe1e821b5f06496daad861ca7abc460de8fa300ce674eeab9c619b6a7a2521c5"
+    },
+    "binary_location_note": "Binaries are intentionally outside this source/log packet; hashes were stable before/after the final captured pair and after relocation. No pre-first-normal-run binary hash is claimed.",
+    "compiler_output": "compiler.txt",
+    "system_headers_or_linked_system_libraries_pinned": false
+  },
+  "execution": {
+    "working_directory": "/tmp/mhgp10-site-filter-native-0930.r9F94iFV",
+    "native_program_invocations": 3,
+    "actual_closed_ball_queries": 9,
+    "compile_normal": {
+      "command": "timeout 45s g++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -Werror -Isource/src probe.cpp source/src/cloud/site_tree.cpp source/src/core/buffer.cpp -o normal",
+      "chunk_id": "c7705f",
+      "wall_time_seconds": 1.00041208,
+      "session_id": 14162,
+      "original_token_count": 0,
+      "output": "",
+      "completion": {
+        "chunk_id": "54047f",
+        "wall_time_seconds": 0.000009147,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    "compile_ubsan": {
+      "command": "timeout 45s g++ -std=c++20 -O1 -g -Wall -Wextra -Wpedantic -Werror -fsanitize=undefined -fno-sanitize-recover=all -Isource/src probe.cpp source/src/cloud/site_tree.cpp source/src/core/buffer.cpp -o ubsan",
+      "chunk_id": "d7efa2",
+      "wall_time_seconds": 1.000998407,
+      "session_id": 86250,
+      "original_token_count": 0,
+      "output": "",
+      "completion": {
+        "chunk_id": "495d59",
+        "wall_time_seconds": 0.000009538,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    "initial_normal_combined_stream": {
+      "command": "timeout 5s ./normal",
+      "chunk_id": "7005a3",
+      "wall_time_seconds": 0.038506874,
+      "exit_code": 0,
+      "original_token_count": 377,
+      "output": "{\"schema\":\"mhgp10_site_filter_native_failure_probe_v1\",\"scope\":\"unchanged_u18_bodies_outside_contract\",\"cases\":[{\"name\":\"u24_reduced_false_interior\",\"bits_tag\":24,\"cloud_construction\":\"direct_private_outside_u18_factory\",\"points_fixture_order\":[[0,0,0],[15000005,15000005,0],[15000005,0,15000005]],\"site_original_fixture_ids\":[0,1,2],\"target_site\":2,\"N\":[\"30000010\",\"15000005\",\"15000005\"],\"D\":\"3\",\"exact_side_keys\":[\"0\",\"0\",\"0\"],\"interior\":[1,2],\"shell\":[0],\"expected_target_failure\":\"false_interior\",\"failure_reproduced\":true},{\"name\":\"u24_reduced_lost\",\"bits_tag\":24,\"cloud_construction\":\"direct_private_outside_u18_factory\",\"points_fixture_order\":[[15000010,0,15000010],[15000010,15000010,0],[0,0,0]],\"site_original_fixture_ids\":[2,1,0],\"target_site\":0,\"N\":[\"-15000010\",\"15000010\",\"-30000020\"],\"D\":\"3\",\"exact_side_keys\":[\"0\",\"0\",\"0\"],\"interior\":[],\"shell\":[2],\"expected_target_failure\":\"lost_shell\",\"failure_reproduced\":true},{\"name\":\"u32_translated_reduced_lost\",\"bits_tag\":32,\"cloud_construction\":\"direct_private_outside_u18_factory\",\"points_fixture_order\":[[4000000000,4000000000,4000000000],[4000200005,4000000000,4000000000],[4000040001,4000200005,4000000000]],\"site_original_fixture_ids\":[0,1,2],\"target_site\":2,\"N\":[\"1000025\",\"840021\",\"0\"],\"D\":\"10\",\"exact_side_keys\":[\"0\",\"0\",\"0\"],\"interior\":[],\"shell\":[0,1],\"expected_target_failure\":\"lost_shell\",\"failure_reproduced\":true}],\"checks\":59,\"key_controls\":9,\"expected_failures_confirmed\":3,\"gate_failures\":0,\"status\":\"EXPECTED_FAILURES_CONFIRMED\"}\n"
+    },
+    "wrapper_preparation_failure": {
+      "command": "python3 -B -c 'import subprocess,json,time; t=time.monotonic(); p=subprocess.run(['timeout','5s','./ubsan'],capture_output=True,text=True,env={**__import__('os').environ,'UBSAN_OPTIONS':'print_stacktrace=1:halt_on_error=1'}); print(json.dumps({'argv':['timeout','5s','./ubsan'],'exit_code':p.returncode,'stdout':p.stdout,'stderr':p.stderr,'wall_time_seconds':time.monotonic()-t}))'",
+      "chunk_id": "c28761",
+      "wall_time_seconds": 0.042858915,
+      "exit_code": 1,
+      "original_token_count": 122,
+      "output": "  File \"<string>\", line 1\n    import subprocess,json,time; t=time.monotonic(); p=subprocess.run([timeout,5s,./ubsan],capture_output=True,text=True,env={**__import__(os).environ,UBSAN_OPTIONS:print_stacktrace=1:halt_on_error=1}); print(json.dumps({argv:[timeout,5s,./ubsan],exit_code:p.returncode,stdout:p.stdout,stderr:p.stderr,wall_time_seconds:time.monotonic()-t}))\n                                                                               ^\nSyntaxError: invalid decimal literal\n",
+      "native_executed": false,
+      "interpretation": "Shell quoting error caused Python SyntaxError before subprocess invocation; retained, not a geometric or native defect."
+    },
+    "captured_ubsan": {
+      "argv": [
+        "timeout",
+        "5s",
+        "./ubsan"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"schema\":\"mhgp10_site_filter_native_failure_probe_v1\",\"scope\":\"unchanged_u18_bodies_outside_contract\",\"cases\":[{\"name\":\"u24_reduced_false_interior\",\"bits_tag\":24,\"cloud_construction\":\"direct_private_outside_u18_factory\",\"points_fixture_order\":[[0,0,0],[15000005,15000005,0],[15000005,0,15000005]],\"site_original_fixture_ids\":[0,1,2],\"target_site\":2,\"N\":[\"30000010\",\"15000005\",\"15000005\"],\"D\":\"3\",\"exact_side_keys\":[\"0\",\"0\",\"0\"],\"interior\":[1,2],\"shell\":[0],\"expected_target_failure\":\"false_interior\",\"failure_reproduced\":true},{\"name\":\"u24_reduced_lost\",\"bits_tag\":24,\"cloud_construction\":\"direct_private_outside_u18_factory\",\"points_fixture_order\":[[15000010,0,15000010],[15000010,15000010,0],[0,0,0]],\"site_original_fixture_ids\":[2,1,0],\"target_site\":0,\"N\":[\"-15000010\",\"15000010\",\"-30000020\"],\"D\":\"3\",\"exact_side_keys\":[\"0\",\"0\",\"0\"],\"interior\":[],\"shell\":[2],\"expected_target_failure\":\"lost_shell\",\"failure_reproduced\":true},{\"name\":\"u32_translated_reduced_lost\",\"bits_tag\":32,\"cloud_construction\":\"direct_private_outside_u18_factory\",\"points_fixture_order\":[[4000000000,4000000000,4000000000],[4000200005,4000000000,4000000000],[4000040001,4000200005,4000000000]],\"site_original_fixture_ids\":[0,1,2],\"target_site\":2,\"N\":[\"1000025\",\"840021\",\"0\"],\"D\":\"10\",\"exact_side_keys\":[\"0\",\"0\",\"0\"],\"interior\":[],\"shell\":[0,1],\"expected_target_failure\":\"lost_shell\",\"failure_reproduced\":true}],\"checks\":59,\"key_controls\":9,\"expected_failures_confirmed\":3,\"gate_failures\":0,\"status\":\"EXPECTED_FAILURES_CONFIRMED\"}\n",
+      "stderr": "",
+      "wall_time_seconds": 0.004104386000108207,
+      "environment_extra": {
+        "UBSAN_OPTIONS": "print_stacktrace=1:halt_on_error=1"
+      },
+      "tool_capture": {
+        "command": "python3 -B -c 'import subprocess,json,time,os; t=time.monotonic(); p=subprocess.run(['\\''timeout'\\'','\\''5s'\\'','\\''./ubsan'\\''],capture_output=True,text=True,env={**os.environ,'\\''UBSAN_OPTIONS'\\'':'\\''print_stacktrace=1:halt_on_error=1'\\''}); print(json.dumps({'\\''argv'\\'':['\\''timeout'\\'','\\''5s'\\'','\\''./ubsan'\\''],'\\''exit_code'\\'':p.returncode,'\\''stdout'\\'':p.stdout,'\\''stderr'\\'':p.stderr,'\\''wall_time_seconds'\\'':time.monotonic()-t}))'",
+        "chunk_id": "d9559f",
+        "wall_time_seconds": 0.064963777,
+        "exit_code": 0,
+        "original_token_count": 448,
+        "output": "{\"argv\": [\"timeout\", \"5s\", \"./ubsan\"], \"exit_code\": 0, \"stdout\": \"{\\\"schema\\\":\\\"mhgp10_site_filter_native_failure_probe_v1\\\",\\\"scope\\\":\\\"unchanged_u18_bodies_outside_contract\\\",\\\"cases\\\":[{\\\"name\\\":\\\"u24_reduced_false_interior\\\",\\\"bits_tag\\\":24,\\\"cloud_construction\\\":\\\"direct_private_outside_u18_factory\\\",\\\"points_fixture_order\\\":[[0,0,0],[15000005,15000005,0],[15000005,0,15000005]],\\\"site_original_fixture_ids\\\":[0,1,2],\\\"target_site\\\":2,\\\"N\\\":[\\\"30000010\\\",\\\"15000005\\\",\\\"15000005\\\"],\\\"D\\\":\\\"3\\\",\\\"exact_side_keys\\\":[\\\"0\\\",\\\"0\\\",\\\"0\\\"],\\\"interior\\\":[1,2],\\\"shell\\\":[0],\\\"expected_target_failure\\\":\\\"false_interior\\\",\\\"failure_reproduced\\\":true},{\\\"name\\\":\\\"u24_reduced_lost\\\",\\\"bits_tag\\\":24,\\\"cloud_construction\\\":\\\"direct_private_outside_u18_factory\\\",\\\"points_fixture_order\\\":[[15000010,0,15000010],[15000010,15000010,0],[0,0,0]],\\\"site_original_fixture_ids\\\":[2,1,0],\\\"target_site\\\":0,\\\"N\\\":[\\\"-15000010\\\",\\\"15000010\\\",\\\"-30000020\\\"],\\\"D\\\":\\\"3\\\",\\\"exact_side_keys\\\":[\\\"0\\\",\\\"0\\\",\\\"0\\\"],\\\"interior\\\":[],\\\"shell\\\":[2],\\\"expected_target_failure\\\":\\\"lost_shell\\\",\\\"failure_reproduced\\\":true},{\\\"name\\\":\\\"u32_translated_reduced_lost\\\",\\\"bits_tag\\\":32,\\\"cloud_construction\\\":\\\"direct_private_outside_u18_factory\\\",\\\"points_fixture_order\\\":[[4000000000,4000000000,4000000000],[4000200005,4000000000,4000000000],[4000040001,4000200005,4000000000]],\\\"site_original_fixture_ids\\\":[0,1,2],\\\"target_site\\\":2,\\\"N\\\":[\\\"1000025\\\",\\\"840021\\\",\\\"0\\\"],\\\"D\\\":\\\"10\\\",\\\"exact_side_keys\\\":[\\\"0\\\",\\\"0\\\",\\\"0\\\"],\\\"interior\\\":[],\\\"shell\\\":[0,1],\\\"expected_target_failure\\\":\\\"lost_shell\\\",\\\"failure_reproduced\\\":true}],\\\"checks\\\":59,\\\"key_controls\\\":9,\\\"expected_failures_confirmed\\\":3,\\\"gate_failures\\\":0,\\\"status\\\":\\\"EXPECTED_FAILURES_CONFIRMED\\\"}\\n\", \"stderr\": \"\", \"wall_time_seconds\": 0.004104386000108207}\n"
+      }
+    },
+    "captured_normal_repeat": {
+      "argv": [
+        "timeout",
+        "5s",
+        "./normal"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"schema\":\"mhgp10_site_filter_native_failure_probe_v1\",\"scope\":\"unchanged_u18_bodies_outside_contract\",\"cases\":[{\"name\":\"u24_reduced_false_interior\",\"bits_tag\":24,\"cloud_construction\":\"direct_private_outside_u18_factory\",\"points_fixture_order\":[[0,0,0],[15000005,15000005,0],[15000005,0,15000005]],\"site_original_fixture_ids\":[0,1,2],\"target_site\":2,\"N\":[\"30000010\",\"15000005\",\"15000005\"],\"D\":\"3\",\"exact_side_keys\":[\"0\",\"0\",\"0\"],\"interior\":[1,2],\"shell\":[0],\"expected_target_failure\":\"false_interior\",\"failure_reproduced\":true},{\"name\":\"u24_reduced_lost\",\"bits_tag\":24,\"cloud_construction\":\"direct_private_outside_u18_factory\",\"points_fixture_order\":[[15000010,0,15000010],[15000010,15000010,0],[0,0,0]],\"site_original_fixture_ids\":[2,1,0],\"target_site\":0,\"N\":[\"-15000010\",\"15000010\",\"-30000020\"],\"D\":\"3\",\"exact_side_keys\":[\"0\",\"0\",\"0\"],\"interior\":[],\"shell\":[2],\"expected_target_failure\":\"lost_shell\",\"failure_reproduced\":true},{\"name\":\"u32_translated_reduced_lost\",\"bits_tag\":32,\"cloud_construction\":\"direct_private_outside_u18_factory\",\"points_fixture_order\":[[4000000000,4000000000,4000000000],[4000200005,4000000000,4000000000],[4000040001,4000200005,4000000000]],\"site_original_fixture_ids\":[0,1,2],\"target_site\":2,\"N\":[\"1000025\",\"840021\",\"0\"],\"D\":\"10\",\"exact_side_keys\":[\"0\",\"0\",\"0\"],\"interior\":[],\"shell\":[0,1],\"expected_target_failure\":\"lost_shell\",\"failure_reproduced\":true}],\"checks\":59,\"key_controls\":9,\"expected_failures_confirmed\":3,\"gate_failures\":0,\"status\":\"EXPECTED_FAILURES_CONFIRMED\"}\n",
+      "stderr": "",
+      "wall_time_seconds": 0.0035513940019882284,
+      "tool_capture": {
+        "command": "python3 -B -c 'import subprocess,json,time; t=time.monotonic(); p=subprocess.run(['\\''timeout'\\'','\\''5s'\\'','\\''./normal'\\''],capture_output=True,text=True); print(json.dumps({'\\''argv'\\'':['\\''timeout'\\'','\\''5s'\\'','\\''./normal'\\''],'\\''exit_code'\\'':p.returncode,'\\''stdout'\\'':p.stdout,'\\''stderr'\\'':p.stderr,'\\''wall_time_seconds'\\'':time.monotonic()-t}))'",
+        "chunk_id": "998ba3",
+        "wall_time_seconds": 0.066971638,
+        "exit_code": 0,
+        "original_token_count": 449,
+        "output": "{\"argv\": [\"timeout\", \"5s\", \"./normal\"], \"exit_code\": 0, \"stdout\": \"{\\\"schema\\\":\\\"mhgp10_site_filter_native_failure_probe_v1\\\",\\\"scope\\\":\\\"unchanged_u18_bodies_outside_contract\\\",\\\"cases\\\":[{\\\"name\\\":\\\"u24_reduced_false_interior\\\",\\\"bits_tag\\\":24,\\\"cloud_construction\\\":\\\"direct_private_outside_u18_factory\\\",\\\"points_fixture_order\\\":[[0,0,0],[15000005,15000005,0],[15000005,0,15000005]],\\\"site_original_fixture_ids\\\":[0,1,2],\\\"target_site\\\":2,\\\"N\\\":[\\\"30000010\\\",\\\"15000005\\\",\\\"15000005\\\"],\\\"D\\\":\\\"3\\\",\\\"exact_side_keys\\\":[\\\"0\\\",\\\"0\\\",\\\"0\\\"],\\\"interior\\\":[1,2],\\\"shell\\\":[0],\\\"expected_target_failure\\\":\\\"false_interior\\\",\\\"failure_reproduced\\\":true},{\\\"name\\\":\\\"u24_reduced_lost\\\",\\\"bits_tag\\\":24,\\\"cloud_construction\\\":\\\"direct_private_outside_u18_factory\\\",\\\"points_fixture_order\\\":[[15000010,0,15000010],[15000010,15000010,0],[0,0,0]],\\\"site_original_fixture_ids\\\":[2,1,0],\\\"target_site\\\":0,\\\"N\\\":[\\\"-15000010\\\",\\\"15000010\\\",\\\"-30000020\\\"],\\\"D\\\":\\\"3\\\",\\\"exact_side_keys\\\":[\\\"0\\\",\\\"0\\\",\\\"0\\\"],\\\"interior\\\":[],\\\"shell\\\":[2],\\\"expected_target_failure\\\":\\\"lost_shell\\\",\\\"failure_reproduced\\\":true},{\\\"name\\\":\\\"u32_translated_reduced_lost\\\",\\\"bits_tag\\\":32,\\\"cloud_construction\\\":\\\"direct_private_outside_u18_factory\\\",\\\"points_fixture_order\\\":[[4000000000,4000000000,4000000000],[4000200005,4000000000,4000000000],[4000040001,4000200005,4000000000]],\\\"site_original_fixture_ids\\\":[0,1,2],\\\"target_site\\\":2,\\\"N\\\":[\\\"1000025\\\",\\\"840021\\\",\\\"0\\\"],\\\"D\\\":\\\"10\\\",\\\"exact_side_keys\\\":[\\\"0\\\",\\\"0\\\",\\\"0\\\"],\\\"interior\\\":[],\\\"shell\\\":[0,1],\\\"expected_target_failure\\\":\\\"lost_shell\\\",\\\"failure_reproduced\\\":true}],\\\"checks\\\":59,\\\"key_controls\\\":9,\\\"expected_failures_confirmed\\\":3,\\\"gate_failures\\\":0,\\\"status\\\":\\\"EXPECTED_FAILURES_CONFIRMED\\\"}\\n\", \"stderr\": \"\", \"wall_time_seconds\": 0.0035513940019882284}\n"
+      }
+    },
+    "judges": [
+      {
+        "mode": "normal",
+        "optimized": false,
+        "command": "python3 -B judge.py '{\"schema\":\"mhgp10_site_filter_native_failure_probe_v1\",\"scope\":\"unchanged_u18_bodies_outside_contract\",\"cases\":[{\"name\":\"u24_reduced_false_interior\",\"bits_tag\":24,\"cloud_construction\":\"direct_private_outside_u18_factory\",\"points_fixture_order\":[[0,0,0],[15000005,15000005,0],[15000005,0,15000005]],\"site_original_fixture_ids\":[0,1,2],\"target_site\":2,\"N\":[\"30000010\",\"15000005\",\"15000005\"],\"D\":\"3\",\"exact_side_keys\":[\"0\",\"0\",\"0\"],\"interior\":[1,2],\"shell\":[0],\"expected_target_failure\":\"false_interior\",\"failure_reproduced\":true},{\"name\":\"u24_reduced_lost\",\"bits_tag\":24,\"cloud_construction\":\"direct_private_outside_u18_factory\",\"points_fixture_order\":[[15000010,0,15000010],[15000010,15000010,0],[0,0,0]],\"site_original_fixture_ids\":[2,1,0],\"target_site\":0,\"N\":[\"-15000010\",\"15000010\",\"-30000020\"],\"D\":\"3\",\"exact_side_keys\":[\"0\",\"0\",\"0\"],\"interior\":[],\"shell\":[2],\"expected_target_failure\":\"lost_shell\",\"failure_reproduced\":true},{\"name\":\"u32_translated_reduced_lost\",\"bits_tag\":32,\"cloud_construction\":\"direct_private_outside_u18_factory\",\"points_fixture_order\":[[4000000000,4000000000,4000000000],[4000200005,4000000000,4000000000],[4000040001,4000200005,4000000000]],\"site_original_fixture_ids\":[0,1,2],\"target_site\":2,\"N\":[\"1000025\",\"840021\",\"0\"],\"D\":\"10\",\"exact_side_keys\":[\"0\",\"0\",\"0\"],\"interior\":[],\"shell\":[0,1],\"expected_target_failure\":\"lost_shell\",\"failure_reproduced\":true}],\"checks\":59,\"key_controls\":9,\"expected_failures_confirmed\":3,\"gate_failures\":0,\"status\":\"EXPECTED_FAILURES_CONFIRMED\"}'",
+        "chunk_id": "089d90",
+        "wall_time_seconds": 0.061002563,
+        "exit_code": 0,
+        "original_token_count": 231,
+        "output": "{\"cases\": [{\"barycentric\": [\"1/3\", \"1/3\", \"1/3\"], \"expected_interior\": [], \"expected_shell\": [0, 1, 2], \"name\": \"u24_reduced_false_interior\", \"native_interior\": [1, 2], \"native_shell\": [0], \"radius_squared\": \"450000300000050/3\", \"safe_side_intermediate_bits\": 51, \"target_failure\": \"false_interior\"}, {\"barycentric\": [\"1/3\", \"1/3\", \"1/3\"], \"expected_interior\": [], \"expected_shell\": [0, 1, 2], \"name\": \"u24_reduced_lost\", \"native_interior\": [], \"native_shell\": [2], \"radius_squared\": \"450000600000200/3\", \"safe_side_intermediate_bits\": 51, \"target_failure\": \"lost_shell\"}, {\"barycentric\": [\"41/250\", \"52/125\", \"21/50\"], \"expected_interior\": [], \"expected_shell\": [0, 1, 2], \"name\": \"u32_translated_reduced_lost\", \"native_interior\": [], \"native_shell\": [0, 1], \"radius_squared\": \"852842640533/50\", \"safe_side_intermediate_bits\": 39, \"target_failure\": \"lost_shell\"}], \"checks\": 72, \"status\": \"EXPECTED_FAILURES_CONFIRMED\"}\n"
+      },
+      {
+        "mode": "normal",
+        "optimized": true,
+        "command": "python3 -B -O judge.py '{\"schema\":\"mhgp10_site_filter_native_failure_probe_v1\",\"scope\":\"unchanged_u18_bodies_outside_contract\",\"cases\":[{\"name\":\"u24_reduced_false_interior\",\"bits_tag\":24,\"cloud_construction\":\"direct_private_outside_u18_factory\",\"points_fixture_order\":[[0,0,0],[15000005,15000005,0],[15000005,0,15000005]],\"site_original_fixture_ids\":[0,1,2],\"target_site\":2,\"N\":[\"30000010\",\"15000005\",\"15000005\"],\"D\":\"3\",\"exact_side_keys\":[\"0\",\"0\",\"0\"],\"interior\":[1,2],\"shell\":[0],\"expected_target_failure\":\"false_interior\",\"failure_reproduced\":true},{\"name\":\"u24_reduced_lost\",\"bits_tag\":24,\"cloud_construction\":\"direct_private_outside_u18_factory\",\"points_fixture_order\":[[15000010,0,15000010],[15000010,15000010,0],[0,0,0]],\"site_original_fixture_ids\":[2,1,0],\"target_site\":0,\"N\":[\"-15000010\",\"15000010\",\"-30000020\"],\"D\":\"3\",\"exact_side_keys\":[\"0\",\"0\",\"0\"],\"interior\":[],\"shell\":[2],\"expected_target_failure\":\"lost_shell\",\"failure_reproduced\":true},{\"name\":\"u32_translated_reduced_lost\",\"bits_tag\":32,\"cloud_construction\":\"direct_private_outside_u18_factory\",\"points_fixture_order\":[[4000000000,4000000000,4000000000],[4000200005,4000000000,4000000000],[4000040001,4000200005,4000000000]],\"site_original_fixture_ids\":[0,1,2],\"target_site\":2,\"N\":[\"1000025\",\"840021\",\"0\"],\"D\":\"10\",\"exact_side_keys\":[\"0\",\"0\",\"0\"],\"interior\":[],\"shell\":[0,1],\"expected_target_failure\":\"lost_shell\",\"failure_reproduced\":true}],\"checks\":59,\"key_controls\":9,\"expected_failures_confirmed\":3,\"gate_failures\":0,\"status\":\"EXPECTED_FAILURES_CONFIRMED\"}'",
+        "chunk_id": "5c7c2d",
+        "wall_time_seconds": 0.063900705,
+        "exit_code": 0,
+        "original_token_count": 231,
+        "output": "{\"cases\": [{\"barycentric\": [\"1/3\", \"1/3\", \"1/3\"], \"expected_interior\": [], \"expected_shell\": [0, 1, 2], \"name\": \"u24_reduced_false_interior\", \"native_interior\": [1, 2], \"native_shell\": [0], \"radius_squared\": \"450000300000050/3\", \"safe_side_intermediate_bits\": 51, \"target_failure\": \"false_interior\"}, {\"barycentric\": [\"1/3\", \"1/3\", \"1/3\"], \"expected_interior\": [], \"expected_shell\": [0, 1, 2], \"name\": \"u24_reduced_lost\", \"native_interior\": [], \"native_shell\": [2], \"radius_squared\": \"450000600000200/3\", \"safe_side_intermediate_bits\": 51, \"target_failure\": \"lost_shell\"}, {\"barycentric\": [\"41/250\", \"52/125\", \"21/50\"], \"expected_interior\": [], \"expected_shell\": [0, 1, 2], \"name\": \"u32_translated_reduced_lost\", \"native_interior\": [], \"native_shell\": [0, 1], \"radius_squared\": \"852842640533/50\", \"safe_side_intermediate_bits\": 39, \"target_failure\": \"lost_shell\"}], \"checks\": 72, \"status\": \"EXPECTED_FAILURES_CONFIRMED\"}\n"
+      },
+      {
+        "mode": "ubsan",
+        "optimized": false,
+        "command": "python3 -B judge.py '{\"schema\":\"mhgp10_site_filter_native_failure_probe_v1\",\"scope\":\"unchanged_u18_bodies_outside_contract\",\"cases\":[{\"name\":\"u24_reduced_false_interior\",\"bits_tag\":24,\"cloud_construction\":\"direct_private_outside_u18_factory\",\"points_fixture_order\":[[0,0,0],[15000005,15000005,0],[15000005,0,15000005]],\"site_original_fixture_ids\":[0,1,2],\"target_site\":2,\"N\":[\"30000010\",\"15000005\",\"15000005\"],\"D\":\"3\",\"exact_side_keys\":[\"0\",\"0\",\"0\"],\"interior\":[1,2],\"shell\":[0],\"expected_target_failure\":\"false_interior\",\"failure_reproduced\":true},{\"name\":\"u24_reduced_lost\",\"bits_tag\":24,\"cloud_construction\":\"direct_private_outside_u18_factory\",\"points_fixture_order\":[[15000010,0,15000010],[15000010,15000010,0],[0,0,0]],\"site_original_fixture_ids\":[2,1,0],\"target_site\":0,\"N\":[\"-15000010\",\"15000010\",\"-30000020\"],\"D\":\"3\",\"exact_side_keys\":[\"0\",\"0\",\"0\"],\"interior\":[],\"shell\":[2],\"expected_target_failure\":\"lost_shell\",\"failure_reproduced\":true},{\"name\":\"u32_translated_reduced_lost\",\"bits_tag\":32,\"cloud_construction\":\"direct_private_outside_u18_factory\",\"points_fixture_order\":[[4000000000,4000000000,4000000000],[4000200005,4000000000,4000000000],[4000040001,4000200005,4000000000]],\"site_original_fixture_ids\":[0,1,2],\"target_site\":2,\"N\":[\"1000025\",\"840021\",\"0\"],\"D\":\"10\",\"exact_side_keys\":[\"0\",\"0\",\"0\"],\"interior\":[],\"shell\":[0,1],\"expected_target_failure\":\"lost_shell\",\"failure_reproduced\":true}],\"checks\":59,\"key_controls\":9,\"expected_failures_confirmed\":3,\"gate_failures\":0,\"status\":\"EXPECTED_FAILURES_CONFIRMED\"}'",
+        "chunk_id": "bc1621",
+        "wall_time_seconds": 0.066146253,
+        "exit_code": 0,
+        "original_token_count": 231,
+        "output": "{\"cases\": [{\"barycentric\": [\"1/3\", \"1/3\", \"1/3\"], \"expected_interior\": [], \"expected_shell\": [0, 1, 2], \"name\": \"u24_reduced_false_interior\", \"native_interior\": [1, 2], \"native_shell\": [0], \"radius_squared\": \"450000300000050/3\", \"safe_side_intermediate_bits\": 51, \"target_failure\": \"false_interior\"}, {\"barycentric\": [\"1/3\", \"1/3\", \"1/3\"], \"expected_interior\": [], \"expected_shell\": [0, 1, 2], \"name\": \"u24_reduced_lost\", \"native_interior\": [], \"native_shell\": [2], \"radius_squared\": \"450000600000200/3\", \"safe_side_intermediate_bits\": 51, \"target_failure\": \"lost_shell\"}, {\"barycentric\": [\"41/250\", \"52/125\", \"21/50\"], \"expected_interior\": [], \"expected_shell\": [0, 1, 2], \"name\": \"u32_translated_reduced_lost\", \"native_interior\": [], \"native_shell\": [0, 1], \"radius_squared\": \"852842640533/50\", \"safe_side_intermediate_bits\": 39, \"target_failure\": \"lost_shell\"}], \"checks\": 72, \"status\": \"EXPECTED_FAILURES_CONFIRMED\"}\n"
+      },
+      {
+        "mode": "ubsan",
+        "optimized": true,
+        "command": "python3 -B -O judge.py '{\"schema\":\"mhgp10_site_filter_native_failure_probe_v1\",\"scope\":\"unchanged_u18_bodies_outside_contract\",\"cases\":[{\"name\":\"u24_reduced_false_interior\",\"bits_tag\":24,\"cloud_construction\":\"direct_private_outside_u18_factory\",\"points_fixture_order\":[[0,0,0],[15000005,15000005,0],[15000005,0,15000005]],\"site_original_fixture_ids\":[0,1,2],\"target_site\":2,\"N\":[\"30000010\",\"15000005\",\"15000005\"],\"D\":\"3\",\"exact_side_keys\":[\"0\",\"0\",\"0\"],\"interior\":[1,2],\"shell\":[0],\"expected_target_failure\":\"false_interior\",\"failure_reproduced\":true},{\"name\":\"u24_reduced_lost\",\"bits_tag\":24,\"cloud_construction\":\"direct_private_outside_u18_factory\",\"points_fixture_order\":[[15000010,0,15000010],[15000010,15000010,0],[0,0,0]],\"site_original_fixture_ids\":[2,1,0],\"target_site\":0,\"N\":[\"-15000010\",\"15000010\",\"-30000020\"],\"D\":\"3\",\"exact_side_keys\":[\"0\",\"0\",\"0\"],\"interior\":[],\"shell\":[2],\"expected_target_failure\":\"lost_shell\",\"failure_reproduced\":true},{\"name\":\"u32_translated_reduced_lost\",\"bits_tag\":32,\"cloud_construction\":\"direct_private_outside_u18_factory\",\"points_fixture_order\":[[4000000000,4000000000,4000000000],[4000200005,4000000000,4000000000],[4000040001,4000200005,4000000000]],\"site_original_fixture_ids\":[0,1,2],\"target_site\":2,\"N\":[\"1000025\",\"840021\",\"0\"],\"D\":\"10\",\"exact_side_keys\":[\"0\",\"0\",\"0\"],\"interior\":[],\"shell\":[0,1],\"expected_target_failure\":\"lost_shell\",\"failure_reproduced\":true}],\"checks\":59,\"key_controls\":9,\"expected_failures_confirmed\":3,\"gate_failures\":0,\"status\":\"EXPECTED_FAILURES_CONFIRMED\"}'",
+        "chunk_id": "b247be",
+        "wall_time_seconds": 0.066299275,
+        "exit_code": 0,
+        "original_token_count": 231,
+        "output": "{\"cases\": [{\"barycentric\": [\"1/3\", \"1/3\", \"1/3\"], \"expected_interior\": [], \"expected_shell\": [0, 1, 2], \"name\": \"u24_reduced_false_interior\", \"native_interior\": [1, 2], \"native_shell\": [0], \"radius_squared\": \"450000300000050/3\", \"safe_side_intermediate_bits\": 51, \"target_failure\": \"false_interior\"}, {\"barycentric\": [\"1/3\", \"1/3\", \"1/3\"], \"expected_interior\": [], \"expected_shell\": [0, 1, 2], \"name\": \"u24_reduced_lost\", \"native_interior\": [], \"native_shell\": [2], \"radius_squared\": \"450000600000200/3\", \"safe_side_intermediate_bits\": 51, \"target_failure\": \"lost_shell\"}, {\"barycentric\": [\"41/250\", \"52/125\", \"21/50\"], \"expected_interior\": [], \"expected_shell\": [0, 1, 2], \"name\": \"u32_translated_reduced_lost\", \"native_interior\": [], \"native_shell\": [0, 1], \"radius_squared\": \"852842640533/50\", \"safe_side_intermediate_bits\": 39, \"target_failure\": \"lost_shell\"}], \"checks\": 72, \"status\": \"EXPECTED_FAILURES_CONFIRMED\"}\n"
+      }
+    ],
+    "judge_algorithm": "Independent Fraction squared distances plus 2x2 Gram solve; no native floating-filter formulas.",
+    "count_per_native_run": {
+      "checks": 59,
+      "exact_side_controls": 9,
+      "expected_failures": 3,
+      "gate_failures": 0
+    },
+    "count_per_judge_run": {
+      "checks": 72,
+      "expected_failures": 3
+    },
+    "historical_scalar_files": {
+      "files": [
+        "check.py",
+        "normal.json"
+      ],
+      "source": "/tmp/mhgp10-site-filter-audit-0930.1Rvq2yg8",
+      "replayed_in_this_task": false
+    }
+  },
+  "limitations": [
+    "Outside factory-supported u18 input domain: no counterexample to currently supported u18 engine is claimed.",
+    "Only three supports and closed_ball queries, no FULL, catalogue, q4 centre generation, performance contract, broad FTZ/DAZ or four-rounding qualification.",
+    "UBSan passing alone is not proof of arithmetic correctness; the independent Fraction judge and exact nine side keys establish these fixtures.",
+    "Copied bodies and transitive local headers are pinned; compiler system headers/libraries are not bundled."
+  ]
+}

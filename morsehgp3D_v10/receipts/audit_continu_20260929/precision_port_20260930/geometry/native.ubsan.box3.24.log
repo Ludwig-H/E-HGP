@@ -1,0 +1,6 @@
+source/snippets/center_in_box.hpp:10:16: runtime error: signed integer overflow: 0x03ffffec000027ffffd8000013fffffc * 64 cannot be represented in type '__int128'
+    #0 0x56222a8abf99 in mhgp10::micro_owner::center_in_box(mhgp10::geom::P3 const&, mhgp10::geom::Center const&, mhgp10::micro_owner::Box const&) source/snippets/center_in_box.hpp:10
+    #1 0x56222a8a7180 in main /tmp/mhgp10-geometry-domain-micro-20260930.5Glxm6x4/probe.cpp:63
+    #2 0x7f5b806401c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #3 0x7f5b8064028a in __libc_start_main_impl ../csu/libc-start.c:360
+    #4 0x56222a8a6444 in _start (/tmp/mhgp10-geometry-domain-binaries-20260930.k5QKkBRi/ubsan+0xa444) (BuildId: c351744fbc6e5f0e4b612c1ccad39e955787b9db)

@@ -19,6 +19,14 @@ Deux relectures indépendantes valident la première brique u32 isolée
 (distance u128, Morton96, 212 684 contrôles). Elle ne qualifie pas les
 supports q3/q4, le catalogue, la tour ou le GPU à ce nouveau domaine.
 
+**Port précis, contre-épreuves du même jour :** relever seulement le refus
+u18 serait incorrect. Les corps géométriques donnent déjà un rayon q4
+tronqué à u21 ; à u24, un rayon devient zéro sans diagnostic UBSan.
+Les filtres de contacts doivent aussi changer, pas seulement leurs entiers.
+Les [preuves séparées](../receipts/audit_continu_20260929/precision_port_20260930/README.md)
+conservent les erreurs attendues, les contrôles positifs et un préflight
+scalaire rejeté. Elles ne démontrent aucun défaut du profil u18 protégé.
+
 ## À lire maintenant
 
 | Sujet | État actuel | Référence |
@@ -37,6 +45,7 @@ supports q3/q4, le catalogue, la tour ou le GPU à ce nouveau domaine.
 | CUDA | Unsigned accepté ; contrôle hôte UBSan propre. Statuts et durées corrigés dans 779dd38a9, mais lecteur d'enveloppe seulement : vingt entrées et huit simulations en précisent les limites. Débits historiques signés invalides, aucun nouveau reçu GPU ni port FULL GPU qualifié. | [Sonde corrigée](audit_continu_20260929/timeout/CONTRE_AUDIT_SONDE_CORRIGEE.md), [statuts et échecs](audit_continu_20260929/ADDENDUM_ZERO_ET_STATUTS_20260930.md), [errata](../receipts/ERRATA.md) |
 | G4 et passage à l'échelle | FULL K5 sans attaches mesuré à 204–254 ms sur trois trames sans sol d'une seule séquence ; CPU, non GPU. Ni 100 ms ni plusieurs séquences qualifiés. | [Recalcul des mesures](audit_continu_20260929/timeout/AUDIT_ECHELLE.md) |
 | Plusieurs dizaines de millions | RankIndex corrigé dans le produit : milieu par différence et `lo*64` élargi avant clamp, 36 047 contrôles virtuels et deux mutants tués. Cela ne qualifie pas la capacité massive, les autres conversions ou la nouvelle précision. Certificat Q×Z encore à implémenter. | [Développement et portée](../docs/DEVELOPPEMENT_FRONTIERE_ET_PRECISION_20260930.md), [audit massif indépendant](AUDIT_MASSIF_LIDAR_20260930.md) |
+| Précision au-delà de u18 | Morton96/distance u128 isolés acquis ; q3/q4/niveaux/propriétaire et filtres encore à porter. Contre-exemples natifs et scalaires clos hors domaine actuel. Préparateur décimal exact disponible ; consommateur v10 des pas, origines et IDs manquant. | [Audit du port précis](../receipts/audit_continu_20260929/precision_port_20260930/README.md), [ordre de développement](../docs/DEVELOPPEMENT_FRONTIERE_ET_PRECISION_20260930.md) |
 
 La borne locale K2 demande une marge stricte autour du seuil d'ambiguïté.
 Elle garantit des dates sous perturbations appariées, pas l'ARI, l'EOM ni

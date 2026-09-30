@@ -1,0 +1,4 @@
+  File "<string>", line 1
+    import subprocess,json,time; t=time.monotonic(); p=subprocess.run([timeout,5s,./ubsan],capture_output=True,text=True,env={**__import__(os).environ,UBSAN_OPTIONS:print_stacktrace=1:halt_on_error=1}); print(json.dumps({argv:[timeout,5s,./ubsan],exit_code:p.returncode,stdout:p.stdout,stderr:p.stderr,wall_time_seconds:time.monotonic()-t}))
+                                                                               ^
+SyntaxError: invalid decimal literal

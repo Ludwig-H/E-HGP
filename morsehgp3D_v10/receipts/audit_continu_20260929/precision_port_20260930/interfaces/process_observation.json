@@ -1,0 +1,13 @@
+{
+  "command": "ps -eo pid,ppid,etimes,time,pcpu,rss,comm,args",
+  "utc": "2026-09-30 07:14:33 UTC",
+  "exit_code": 0,
+  "original_token_count": 1913,
+  "scope_prefixes": [
+    "/tmp/mhgp10-r2",
+    "/workspaces/E-HGP/build/v10-frontiere",
+    "/tmp/mhgp10-frontiere"
+  ],
+  "rows": [],
+  "filter_exclusions": "codex sandbox wrappers, bwrap and read-only audit commands"
+}

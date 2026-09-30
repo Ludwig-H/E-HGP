@@ -1,0 +1,152 @@
+{
+  "GCP_used": false,
+  "commands": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/precision_port_20260930/verify.py",
+        "--inner-only"
+      ],
+      "exit_code": 0,
+      "name": "normal"
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_continu_20260929/precision_port_20260930/verify.py",
+        "--inner-only"
+      ],
+      "exit_code": 0,
+      "name": "optimized"
+    }
+  ],
+  "manifests_after": {
+    "filters_native": "6d71df75c02740e9c7d8146d6a162e643602c8b407516dc6e68b71d9773783df",
+    "filters_scalar": "e757d58f95d1c262b642c64b03403ea4c49f844dd01efe30ac6e88eed3f8ba06",
+    "geometry": "aa1f33873abbc05f9f7a35237dc68bb1893ad2fa69af33604539a8a026505595",
+    "grid_metric": "099ed8547145c141db5c41e6c58d417798fad50cdfde142a6f4cd4c65f3081ba",
+    "grid_metric_review": "687b369bc38c47d3a13c513fc567ecc690b75a84eee2eee92eba40f857e97650",
+    "interfaces": "d994aceb0b27408c91d72ec9da0634cc00f194ef960f68deb3d2a5132804eeea"
+  },
+  "manifests_before": {
+    "filters_native": "6d71df75c02740e9c7d8146d6a162e643602c8b407516dc6e68b71d9773783df",
+    "filters_scalar": "e757d58f95d1c262b642c64b03403ea4c49f844dd01efe30ac6e88eed3f8ba06",
+    "geometry": "aa1f33873abbc05f9f7a35237dc68bb1893ad2fa69af33604539a8a026505595",
+    "grid_metric": "099ed8547145c141db5c41e6c58d417798fad50cdfde142a6f4cd4c65f3081ba",
+    "grid_metric_review": "687b369bc38c47d3a13c513fc567ecc690b75a84eee2eee92eba40f857e97650",
+    "interfaces": "d994aceb0b27408c91d72ec9da0634cc00f194ef960f68deb3d2a5132804eeea"
+  },
+  "reader_results": [
+    {
+      "GCP_used": false,
+      "geometry": {
+        "archived_judgments": 40,
+        "fraction_matching": 12,
+        "fraction_mismatching": 8,
+        "native_calls": 24,
+        "schema_omission_refusals": 3,
+        "successful_outputs": 20,
+        "ubsan_stops": 4
+      },
+      "grid_metric": {
+        "coordinate_roundings": 117,
+        "fused_profiles": 2,
+        "origin_outside_u32_profiles": 6,
+        "radius_pairs": 183,
+        "raw_mapping_entries": 39,
+        "shifted_cut_profiles": 2
+      },
+      "inner_manifest_entries": {
+        "filters_native": 32,
+        "filters_scalar": 7,
+        "geometry": 84,
+        "grid_metric": 10,
+        "grid_metric_review": 7,
+        "interfaces": 5
+      },
+      "interfaces": {
+        "engine_executions": 0,
+        "source_hashes_observed": 28
+      },
+      "metric_review": {
+        "independent_python_reruns": 2,
+        "native_engine_executions": 0,
+        "same_bounded_panel": true
+      },
+      "native_filters": {
+        "archived_judge_passes": 4,
+        "closed_ball_queries": 9,
+        "conclusion": "expected errors confirmed outside u18",
+        "fixtures": 3,
+        "judge_checks_per_pass": 72,
+        "native_checks_per_invocation": 59,
+        "native_program_invocations": 3
+      },
+      "scalar_filters": {
+        "checks_per_pass": 614,
+        "native_compilation": false,
+        "rejected_preflight_preserved": true
+      },
+      "scope": "closed audit reader; not an engine qualification",
+      "status": "PASS"
+    },
+    {
+      "GCP_used": false,
+      "geometry": {
+        "archived_judgments": 40,
+        "fraction_matching": 12,
+        "fraction_mismatching": 8,
+        "native_calls": 24,
+        "schema_omission_refusals": 3,
+        "successful_outputs": 20,
+        "ubsan_stops": 4
+      },
+      "grid_metric": {
+        "coordinate_roundings": 117,
+        "fused_profiles": 2,
+        "origin_outside_u32_profiles": 6,
+        "radius_pairs": 183,
+        "raw_mapping_entries": 39,
+        "shifted_cut_profiles": 2
+      },
+      "inner_manifest_entries": {
+        "filters_native": 32,
+        "filters_scalar": 7,
+        "geometry": 84,
+        "grid_metric": 10,
+        "grid_metric_review": 7,
+        "interfaces": 5
+      },
+      "interfaces": {
+        "engine_executions": 0,
+        "source_hashes_observed": 28
+      },
+      "metric_review": {
+        "independent_python_reruns": 2,
+        "native_engine_executions": 0,
+        "same_bounded_panel": true
+      },
+      "native_filters": {
+        "archived_judge_passes": 4,
+        "closed_ball_queries": 9,
+        "conclusion": "expected errors confirmed outside u18",
+        "fixtures": 3,
+        "judge_checks_per_pass": 72,
+        "native_checks_per_invocation": 59,
+        "native_program_invocations": 3
+      },
+      "scalar_filters": {
+        "checks_per_pass": 614,
+        "native_compilation": false,
+        "rejected_preflight_preserved": true
+      },
+      "scope": "closed audit reader; not an engine qualification",
+      "status": "PASS"
+    }
+  ],
+  "scope": "archive read/rejudgment; no new native engine run",
+  "status": "PASS"
+}

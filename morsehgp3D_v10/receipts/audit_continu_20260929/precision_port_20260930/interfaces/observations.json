@@ -1,0 +1,82 @@
+{
+  "cache_sources": {
+    "command": "rg -n '^CMAKE_HOME_DIRECTORY' /tmp/mhgp10-r2/entrees_cli-verif/build/CMakeCache.txt /tmp/mhgp10-r2/entrees_cli-verif/build-plan-r2/CMakeCache.txt /workspaces/E-HGP/build/v10-frontiere/frontier-build/CMakeCache.txt /workspaces/E-HGP/build/v10-frontiere/engine-build/CMakeCache.txt",
+    "chunk_id": "18c473",
+    "wall_time_seconds": 0.000011912,
+    "exit_code": 0,
+    "original_token_count": 152,
+    "output": "/workspaces/E-HGP/build/v10-frontiere/engine-build/CMakeCache.txt:318:CMAKE_HOME_DIRECTORY:INTERNAL=/workspaces/E-HGP/build/v10-frontiere/engine/morsehgp3D_v10\n/tmp/mhgp10-r2/entrees_cli-verif/build/CMakeCache.txt:318:CMAKE_HOME_DIRECTORY:INTERNAL=/tmp/mhgp10-r2/entrees_cli-verif/src/morsehgp3D_v10\n/workspaces/E-HGP/build/v10-frontiere/frontier-build/CMakeCache.txt:281:CMAKE_HOME_DIRECTORY:INTERNAL=/workspaces/E-HGP/build/v10-frontiere/work/bench/frontier\n/tmp/mhgp10-r2/entrees_cli-verif/build-plan-r2/CMakeCache.txt:318:CMAKE_HOME_DIRECTORY:INTERNAL=/tmp/mhgp10-r2/entrees_cli-verif/src/morsehgp3D_v10\n"
+  },
+  "integ_conflicts": {
+    "command": "rg -n '^<<<<<<<|^=======|^>>>>>>>' /tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli",
+    "chunk_id": "fd3c45",
+    "wall_time_seconds": 0.000012103,
+    "exit_code": 0,
+    "original_token_count": 350,
+    "output": "/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli/mhgp10_tower.cpp:65:<<<<<<< HEAD\n/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli/mhgp10_tower.cpp:95:=======\n/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli/mhgp10_tower.cpp:120:>>>>>>> oracles\n/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli/mhgp10_tower.cpp:256:<<<<<<< HEAD\n/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli/mhgp10_tower.cpp:258:=======\n/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli/mhgp10_tower.cpp:301:>>>>>>> oracles\n/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli/mhgp10_catalogue.cpp:36:<<<<<<< HEAD\n/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli/mhgp10_catalogue.cpp:40:=======\n/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli/mhgp10_catalogue.cpp:44:>>>>>>> oracles\n/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli/mhgp10_catalogue.cpp:51:<<<<<<< HEAD\n/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli/mhgp10_catalogue.cpp:82:=======\n/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli/mhgp10_catalogue.cpp:93:>>>>>>> oracles\n/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli/mhgp10_catalogue.cpp:162:<<<<<<< HEAD\n/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli/mhgp10_catalogue.cpp:164:=======\n/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli/mhgp10_catalogue.cpp:191:>>>>>>> oracles\n"
+  },
+  "integ_status": {
+    "command": "git -C /tmp/mhgp10-r2/entrees_cli-verif/integ status --short",
+    "chunk_id": "d7be3b",
+    "wall_time_seconds": 0.000012263,
+    "exit_code": 0,
+    "original_token_count": 65,
+    "output": "M  morsehgp3D_v10/CMakeLists.txt\nUU morsehgp3D_v10/cli/mhgp10_catalogue.cpp\nUU morsehgp3D_v10/cli/mhgp10_tower.cpp\nM  morsehgp3D_v10/docs/SPEC_V10.md\nM  morsehgp3D_v10/tests/oracle/test_catalogue_oracle.py\nM  morsehgp3D_v10/tests/oracle/test_tower_oracle.py\n"
+  },
+  "current_local_refs": {
+    "command": "git -C /workspaces/E-HGP/build/v9-open-worktree rev-parse HEAD origin/main",
+    "chunk_id": "51bf59",
+    "wall_time_seconds": 0.000011201,
+    "exit_code": 0,
+    "original_token_count": 21,
+    "output": "bdc0b8f08ee37ee351996b29c5974f78415bc036\n4b7d7042226e4299e57e1257f4034d45d82c8b77\n"
+  },
+  "new_source_mtimes": {
+    "command": "find /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/cli /tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/src /tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli /workspaces/E-HGP/build/v10-frontiere/work/bench/frontier -maxdepth 2 -type f -newermt '2026-09-30 07:02:00 UTC' -printf '%TY-%Tm-%Td %TH:%TM:%TS %p\\n'",
+    "chunk_id": "195e08",
+    "wall_time_seconds": 0.000014487,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  "frontier_receipt": {
+    "command": "jq '{status,checks_total:(.counts|values|add),categories:(.counts|keys|length),failures:.failures,hashes_before,hashes_after}' /workspaces/E-HGP/build/v10-frontiere/work/bench/frontier/receipts/fondations_a_20260930/normal/receipt.json",
+    "chunk_id": "d227b1",
+    "wall_time_seconds": 0.000020017,
+    "exit_code": 0,
+    "original_token_count": 349,
+    "output": "{\n  \"status\": \"PASS\",\n  \"checks_total\": 1961564,\n  \"categories\": 113,\n  \"failures\": [],\n  \"hashes_before\": {\n    \"CMakeLists.txt\": \"4169b5de7d100ece32a559af5476f0b50c5988e033dab07b3421d876829ec7ca\",\n    \"export_frontier.cpp\": \"1e5e1cca9d0142d1900d2ad588603e58646809aeafddb0f58499c30510676121\",\n    \"exporter\": \"b2dc98243c4230761ff6384660978f5972e21d9db62f30621eb8de2be78d6616\",\n    \"frontier_core.py\": \"86ba984ff7986bdd44a5d53e9b2c7d3f2c0eb847764938cd28259d18439850b7\",\n    \"reference\": \"2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104\",\n    \"scenes.py\": \"61ea9abc511726c2a9ff1e066f7603d6bef195a7c5356a2d2048c28229608f00\",\n    \"valide_fondations_a.py\": \"e501d9fd7dcde2536de5c8059338002a5312e7b1cebfb7381e96be22a5c690c1\"\n  },\n  \"hashes_after\": {\n    \"CMakeLists.txt\": \"4169b5de7d100ece32a559af5476f0b50c5988e033dab07b3421d876829ec7ca\",\n    \"export_frontier.cpp\": \"1e5e1cca9d0142d1900d2ad588603e58646809aeafddb0f58499c30510676121\",\n    \"exporter\": \"b2dc98243c4230761ff6384660978f5972e21d9db62f30621eb8de2be78d6616\",\n    \"frontier_core.py\": \"86ba984ff7986bdd44a5d53e9b2c7d3f2c0eb847764938cd28259d18439850b7\",\n    \"reference\": \"2cb84ad549b1f8982e71f7757794d97b5eadab323fd22d17461da18b76914104\",\n    \"scenes.py\": \"61ea9abc511726c2a9ff1e066f7603d6bef195a7c5356a2d2048c28229608f00\",\n    \"valide_fondations_a.py\": \"e501d9fd7dcde2536de5c8059338002a5312e7b1cebfb7381e96be22a5c690c1\"\n  }\n}\n"
+  },
+  "frontier_crop_ids": {
+    "command": "jq '{id,n,point_id,coordinates,source_grid:.params.grid,source_points:.params.source_points,source_index_count:(.params.source_indices|length),source_hash:.params.source_sha256}' /workspaces/E-HGP/build/v10-frontiere/work/bench/frontier/scenes/lidar02_crop1500/scene.json",
+    "chunk_id": "dd54cc",
+    "wall_time_seconds": 0.000011461,
+    "exit_code": 0,
+    "original_token_count": 95,
+    "output": "{\n  \"id\": \"lidar02_crop1500\",\n  \"n\": 1500,\n  \"point_id\": \"rang dans points.u32le (0..n-1), identique au PointId des CLI natives\",\n  \"coordinates\": \"grille entiere u18, 0 <= c <= 262143\",\n  \"source_grid\": \"1 mm (trame lidar02 de la v10)\",\n  \"source_points\": 8000,\n  \"source_index_count\": 1500,\n  \"source_hash\": \"a82bcef7f17f6ef2a3ad10bb4086b1ab198d9ec0eb7f2578027a7d61f7e5895d\"\n}\n"
+  },
+  "precision_not_consumed": {
+    "command": "rg -n 'grid_step|--precision-mm|--profile|site_ids|raw_to_full|step_metres|little_endian_float32' /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/cli /tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/src /tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli",
+    "chunk_id": "48a4e8",
+    "wall_time_seconds": 0.000014367,
+    "exit_code": 1,
+    "original_token_count": 0,
+    "output": ""
+  },
+  "R_cli_and_cloud_refs": {
+    "command": "rg -n 'pid\\[i\\] = i|kCoordinateBits|kMaxCoordinateBits|bits == 32|morton3|key\\[p\\] ==' /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/cli /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/cloud/cloud.cpp /workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/cloud/cloud.hpp",
+    "chunk_id": "c64678",
+    "wall_time_seconds": 0.000040466,
+    "exit_code": 0,
+    "original_token_count": 512,
+    "output": "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/cloud/cloud.hpp:16:inline constexpr int kMaxCoordinateBits = 21;  // cle de Morton sur 63 bits\n/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/cloud/cloud.hpp:19:  int bits = kCoordinateBits;\n/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/cloud/cloud.hpp:27:u64 morton3(u32 x, u32 y, u32 z);\n/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/cloud/cloud.hpp:32:                            std::span<const u32> point_ids, int bits = kCoordinateBits,\n/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/cloud/cloud.cpp:21:u64 morton3(u32 x, u32 y, u32 z) { return spread21(x) | (spread21(y) << 1) | (spread21(z) << 2); }\n/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/cloud/cloud.cpp:28:  if (bits < 1 || bits > kMaxCoordinateBits) return fail(Reason::parameter_out_of_range);\n/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/cloud/cloud.cpp:30:  const u32 limit = (bits == 32) ? ~u32{0} : ((u32{1} << bits) - 1);\n/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/cloud/cloud.cpp:40:  for (u64 i = 0; i < n; ++i) key[i] = morton3(x[i], y[i], z[i]);\n/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src/cloud/cloud.cpp:59:    if (i > 0 && key[p] == key[order[i - 1]]) {\n/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/cli/mhgp10_cluster.cpp:104:    pid[i] = i;\n/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/cli/mhgp10_cluster.cpp:108:  auto prepared = prepare_cloud(x, y, z, pid, kCoordinateBits);\n/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/cli/mhgp10_tower.cpp:67:    pid[i] = i;\n/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/cli/mhgp10_tower.cpp:71:  auto prepared = prepare_cloud(x, y, z, pid, kCoordinateBits);\n/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/cli/mhgp10_catalogue.cpp:48:    pid[i] = i;\n/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/cli/mhgp10_catalogue.cpp:51:  auto prepared = prepare_cloud(x, y, z, pid, kCoordinateBits);\n"
+  },
+  "integ_outcome_refs": {
+    "command": "rg -n 'Outcome|numeric_domain|c\\.outcome|auto c = cluster|Clustering c = cluster|Clustering cluster|Outcome outcome' /tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli/mhgp10_cluster.cpp /tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/src/head/head.hpp /tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/src/head/head.cpp",
+    "chunk_id": "9c8e43",
+    "wall_time_seconds": 0.000044793,
+    "exit_code": 0,
+    "original_token_count": 301,
+    "output": "/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/src/head/head.cpp:107:Clustering cluster(const PointDendrogram& d, const ClusterParams& p) {\n/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/src/head/head.hpp:45:Clustering cluster(const PointDendrogram& d, const ClusterParams& p);\n/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli/mhgp10_cluster.cpp:71:    Outcome bad;\n/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli/mhgp10_cluster.cpp:196:        if (const Outcome o = outputs.reserve(label_path(kk, tag, i)); !o.ok()) return print_refusal(o);\n/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli/mhgp10_cluster.cpp:198:        if (const Outcome o = outputs.reserve(tree_path(kk, tag)); !o.ok()) return print_refusal(o);\n/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli/mhgp10_cluster.cpp:229:    const Outcome v = validate(d);\n/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli/mhgp10_cluster.cpp:268:        const Outcome written = outputs.write(path + (variant == 0 ? \"\" : \".vote\"),\n/tmp/mhgp10-r2/entrees_cli-verif/integ/morsehgp3D_v10/cli/mhgp10_cluster.cpp:274:      const Outcome written = outputs.write(tree_path(kk, tag), [&](std::FILE* t) {\n"
+  }
+}
