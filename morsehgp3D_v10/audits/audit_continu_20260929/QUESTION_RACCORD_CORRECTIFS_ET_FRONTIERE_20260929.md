@@ -284,6 +284,52 @@ L'énumération C(n,K) est hors voie industrielle : trouver une compression
 ou un comptage conservant ces identités/masses est le problème ouvert.
 L'optimisation suivante calcule une majorité donnée, pas ses atomes gratis.
 
+### Compter les K parties par boule minimale sans les énumérer
+
+La [preuve de comptage close](../../receipts/audit_continu_20260929/parts_meb_class_counts_20260930/README.md)
+donne une identité exacte pour une boule B=(c,r), I intérieur strict,
+p=|I|, U coquille. Poser h_B(j)=nombre de S⊂U, |S|=j, avec c∈conv(S),
+et h_B,x(j) le même nombre exigeant x∈S. Le nombre de K-parties F
+contenant x et dont la boule minimale est **exactement B** vaut :
+
+- x∈I : `Σ_j h_B(j)·C(p−1,K−j−1)` ;
+- x∈U : `Σ_j h_B,x(j)·C(p,K−j)` ;
+- x hors B : zéro, avec binômes hors domaine définis à zéro.
+
+F∩I et F∩U donnent une décomposition unique ; le critère MEB=B est
+`c∈conv(F∩U)`. Chaque F a une seule boule minimale : pas de somme des
+binômes de simples contenances qui double-compterait les mêmes parties.
+Pour U affinement indépendant, c strictement intérieur, seul S=U
+contribue. En revanche, sur un carré cosphérique, h(2)=2,h(3)=4,h(4)=1 :
+compter seulement les supports minimaux perd des votes. Le petit oracle
+compare 113 comptes point/K sur segment, triangle, tétraèdre et carré,
+contre une énumération MEB indépendante, normal/−O. Cette énumération
+est un oracle petit, pas une proposition pour le produit.
+
+**Le catalogue courant ne donne pas toutes ces classes.** À K=Kmax=2,
+sites colinéaires 0,19/10,39/20,2 et point x=0, les trois paires contenant
+x sont dans la bande η1/8. La classe diamétrale {0,2}, rayon1, a p2,
+q_min2 ; elle est omise par `p+q_min≤Kmax+1` et n'est pas vivante à K2.
+Elle porte pourtant un vote de la référence. La masse passe de trois
+à deux si on ne compte que les classes du catalogue. C'est une perte
+de masse/identité, **pas** une erreur FULL ni un flip de hauteur attesté.
+
+Prolongement **analytique**, distinct des 113 contrôles : M=Kmax≥K≥2,
+point0 et M+1 sites distincts dans [19/10,2], dont l'extrémité2. Toute
+K-partie contenant0 a un rayon entre19/20 et1 ; toutes restent strictement
+dans la bande η1/8. La classe de diamètre {0,2} a p=M et q_min2,
+donc est omise, mais porte C(M,K−2) votes parmi C(M+1,K−1), fraction
+`(K−1)/(M+1)`. Pour M10, cela vaut4/11 à K5 et9/11 à K10. Contre-relecture
+indépendante concordante, aucun nouveau test ni hauteur projetée calculée.
+
+Il reste à retrouver et payer ces classes, leurs propriétaires et leurs
+incidences, ou un comptage différent directement sur FULL et le nuage.
+Cette obstruction locale ne prouve pas l'impossibilité de cette seconde
+voie. Coquilles non régulières et tailles des compteurs exacts restent
+payées ; aucun accumulateur u64 implicite. Ni élargissement aveugle du
+catalogue ni reconstruction explicite de Γ ne sont recommandés, et aucune
+croissance sous-quadratique ou performance G4 n'est acquise ici.
+
 ### Majorité : deux sélections au lieu de toutes les lignées
 
 La bibliothèque privée `fixtures_cibles/lib/regles.py`, relue à 13 h 59 UTC

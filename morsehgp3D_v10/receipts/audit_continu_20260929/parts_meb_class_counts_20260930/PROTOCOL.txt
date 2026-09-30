@@ -1,0 +1,11 @@
+Scope: four tiny exact MEB classes, 113 point/K count equalities.
+Direct MEB oracle enumerates positive critical supports of size at most four.
+Class formula separately reconstructs convex hull membership of complete T intersection U.
+Fixture dimensions: segment1D, triangle/square2D, tetrahedron3D.
+Case K2/Kmax2 collinear points0,19/10,39/20,2: reference band has3votes;
+p+qmin<=Kmax+1 retains2. Loss of identity/mass, no majority-height flip asserted.
+This does NOT imply reconstruction impossible from the original cloud plus FULL.
+No proposed production enumeration, wide catalogue port, HGP runtime or GCP call.
+Final subprocess captures two small proofs, normal/optimized with exact argv,
+source hash before/after, UTC and monotonic timestamps, stdout/stderr separate.
+Reader checks manifest/inventory before receipt parsing, then two relocatable proofs.

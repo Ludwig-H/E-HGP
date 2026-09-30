@@ -153,6 +153,19 @@ Leur comptage efficace/compression sans perte reste ouvert : ne pas
 énumérer les K-parties dans le produit, ni reconstruire Γ explicitement.
 Pas de garantie de labels/EOM ou d'ajout/retrait de sites.
 
+**Comptage des votes : une compression exacte, un manque de classes.**
+Le [complément mathématique](../receipts/audit_continu_20260929/parts_meb_class_counts_20260930/README.md)
+regroupe les K-parties par leur boule minimale exacte, sans double compte.
+Coquille régulière : un binôme suffit par point intérieur/de coquille ;
+coquille dégénérée : compter aussi les sous-ensembles non minimaux qui
+contiennent le centre dans leur enveloppe convexe. 113 contrôles Fraction,
+quatre classes, normal/−O. Mais des classes ayant p≥Kmax sont absentes
+du catalogue FULL et portent néanmoins des votes de cette référence.
+Perte de masse démontrée, pas défaut de connectivité ni flip de hauteur.
+L'extension analytique concerne aussi K5/K10 ; détail dans le suivi.
+Ni génération sous-quadratique des classes ni port/comptage GPU acquis :
+ne pas élargir aveuglément le catalogue ni énumérer C(n,K) en production.
+
 **Majorité, optimisation exacte validée abstraitement :** deux sélections
 pondérées et une LCA par atome remplacent le parcours de toutes les
 lignées. Choisir un médian pondéré m dans l'ordre Euler des propriétaires,

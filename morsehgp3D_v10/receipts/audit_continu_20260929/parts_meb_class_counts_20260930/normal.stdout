@@ -1,0 +1,907 @@
+{
+  "GCP_used": false,
+  "class_fixtures": [
+    {
+      "beta": "1",
+      "checks": [
+        {
+          "K": 1,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 0
+        },
+        {
+          "K": 1,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 1
+        },
+        {
+          "K": 1,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 2
+        },
+        {
+          "K": 1,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 3
+        },
+        {
+          "K": 2,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 0
+        },
+        {
+          "K": 2,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 1
+        },
+        {
+          "K": 2,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 2
+        },
+        {
+          "K": 2,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 3
+        },
+        {
+          "K": 3,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 0
+        },
+        {
+          "K": 3,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 1
+        },
+        {
+          "K": 3,
+          "enumerated": 2,
+          "formula": 2,
+          "x": 2
+        },
+        {
+          "K": 3,
+          "enumerated": 2,
+          "formula": 2,
+          "x": 3
+        },
+        {
+          "K": 4,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 0
+        },
+        {
+          "K": 4,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 1
+        },
+        {
+          "K": 4,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 2
+        },
+        {
+          "K": 4,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 3
+        }
+      ],
+      "h": {
+        "0": 0,
+        "1": 0,
+        "2": 1
+      },
+      "hx": {
+        "0": {
+          "0": 0,
+          "1": 0,
+          "2": 1
+        },
+        "1": {
+          "0": 0,
+          "1": 0,
+          "2": 1
+        }
+      },
+      "name": "segment_regular",
+      "p": 2,
+      "q": 2
+    },
+    {
+      "beta": "1",
+      "checks": [
+        {
+          "K": 1,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 0
+        },
+        {
+          "K": 1,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 1
+        },
+        {
+          "K": 1,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 2
+        },
+        {
+          "K": 1,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 3
+        },
+        {
+          "K": 1,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 4
+        },
+        {
+          "K": 2,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 0
+        },
+        {
+          "K": 2,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 1
+        },
+        {
+          "K": 2,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 2
+        },
+        {
+          "K": 2,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 3
+        },
+        {
+          "K": 2,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 4
+        },
+        {
+          "K": 3,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 0
+        },
+        {
+          "K": 3,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 1
+        },
+        {
+          "K": 3,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 2
+        },
+        {
+          "K": 3,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 3
+        },
+        {
+          "K": 3,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 4
+        },
+        {
+          "K": 4,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 0
+        },
+        {
+          "K": 4,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 1
+        },
+        {
+          "K": 4,
+          "enumerated": 2,
+          "formula": 2,
+          "x": 2
+        },
+        {
+          "K": 4,
+          "enumerated": 2,
+          "formula": 2,
+          "x": 3
+        },
+        {
+          "K": 4,
+          "enumerated": 2,
+          "formula": 2,
+          "x": 4
+        },
+        {
+          "K": 5,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 0
+        },
+        {
+          "K": 5,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 1
+        },
+        {
+          "K": 5,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 2
+        },
+        {
+          "K": 5,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 3
+        },
+        {
+          "K": 5,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 4
+        }
+      ],
+      "h": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 1
+      },
+      "hx": {
+        "0": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 1
+        },
+        "1": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 1
+        },
+        "2": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 1
+        }
+      },
+      "name": "triangle_regular",
+      "p": 2,
+      "q": 3
+    },
+    {
+      "beta": "1",
+      "checks": [
+        {
+          "K": 1,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 0
+        },
+        {
+          "K": 1,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 1
+        },
+        {
+          "K": 1,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 2
+        },
+        {
+          "K": 1,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 3
+        },
+        {
+          "K": 1,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 4
+        },
+        {
+          "K": 1,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 5
+        },
+        {
+          "K": 2,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 0
+        },
+        {
+          "K": 2,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 1
+        },
+        {
+          "K": 2,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 2
+        },
+        {
+          "K": 2,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 3
+        },
+        {
+          "K": 2,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 4
+        },
+        {
+          "K": 2,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 5
+        },
+        {
+          "K": 3,
+          "enumerated": 2,
+          "formula": 2,
+          "x": 0
+        },
+        {
+          "K": 3,
+          "enumerated": 2,
+          "formula": 2,
+          "x": 1
+        },
+        {
+          "K": 3,
+          "enumerated": 5,
+          "formula": 5,
+          "x": 2
+        },
+        {
+          "K": 3,
+          "enumerated": 5,
+          "formula": 5,
+          "x": 3
+        },
+        {
+          "K": 3,
+          "enumerated": 5,
+          "formula": 5,
+          "x": 4
+        },
+        {
+          "K": 3,
+          "enumerated": 5,
+          "formula": 5,
+          "x": 5
+        },
+        {
+          "K": 4,
+          "enumerated": 6,
+          "formula": 6,
+          "x": 0
+        },
+        {
+          "K": 4,
+          "enumerated": 6,
+          "formula": 6,
+          "x": 1
+        },
+        {
+          "K": 4,
+          "enumerated": 8,
+          "formula": 8,
+          "x": 2
+        },
+        {
+          "K": 4,
+          "enumerated": 8,
+          "formula": 8,
+          "x": 3
+        },
+        {
+          "K": 4,
+          "enumerated": 8,
+          "formula": 8,
+          "x": 4
+        },
+        {
+          "K": 4,
+          "enumerated": 8,
+          "formula": 8,
+          "x": 5
+        },
+        {
+          "K": 5,
+          "enumerated": 5,
+          "formula": 5,
+          "x": 0
+        },
+        {
+          "K": 5,
+          "enumerated": 5,
+          "formula": 5,
+          "x": 1
+        },
+        {
+          "K": 5,
+          "enumerated": 5,
+          "formula": 5,
+          "x": 2
+        },
+        {
+          "K": 5,
+          "enumerated": 5,
+          "formula": 5,
+          "x": 3
+        },
+        {
+          "K": 5,
+          "enumerated": 5,
+          "formula": 5,
+          "x": 4
+        },
+        {
+          "K": 5,
+          "enumerated": 5,
+          "formula": 5,
+          "x": 5
+        },
+        {
+          "K": 6,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 0
+        },
+        {
+          "K": 6,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 1
+        },
+        {
+          "K": 6,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 2
+        },
+        {
+          "K": 6,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 3
+        },
+        {
+          "K": 6,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 4
+        },
+        {
+          "K": 6,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 5
+        }
+      ],
+      "h": {
+        "0": 0,
+        "1": 0,
+        "2": 2,
+        "3": 4,
+        "4": 1
+      },
+      "hx": {
+        "0": {
+          "0": 0,
+          "1": 0,
+          "2": 1,
+          "3": 3,
+          "4": 1
+        },
+        "1": {
+          "0": 0,
+          "1": 0,
+          "2": 1,
+          "3": 3,
+          "4": 1
+        },
+        "2": {
+          "0": 0,
+          "1": 0,
+          "2": 1,
+          "3": 3,
+          "4": 1
+        },
+        "3": {
+          "0": 0,
+          "1": 0,
+          "2": 1,
+          "3": 3,
+          "4": 1
+        }
+      },
+      "name": "square_contact",
+      "p": 2,
+      "q": 4
+    },
+    {
+      "beta": "3",
+      "checks": [
+        {
+          "K": 1,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 0
+        },
+        {
+          "K": 1,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 1
+        },
+        {
+          "K": 1,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 2
+        },
+        {
+          "K": 1,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 3
+        },
+        {
+          "K": 1,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 4
+        },
+        {
+          "K": 1,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 5
+        },
+        {
+          "K": 2,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 0
+        },
+        {
+          "K": 2,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 1
+        },
+        {
+          "K": 2,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 2
+        },
+        {
+          "K": 2,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 3
+        },
+        {
+          "K": 2,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 4
+        },
+        {
+          "K": 2,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 5
+        },
+        {
+          "K": 3,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 0
+        },
+        {
+          "K": 3,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 1
+        },
+        {
+          "K": 3,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 2
+        },
+        {
+          "K": 3,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 3
+        },
+        {
+          "K": 3,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 4
+        },
+        {
+          "K": 3,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 5
+        },
+        {
+          "K": 4,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 0
+        },
+        {
+          "K": 4,
+          "enumerated": 0,
+          "formula": 0,
+          "x": 1
+        },
+        {
+          "K": 4,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 2
+        },
+        {
+          "K": 4,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 3
+        },
+        {
+          "K": 4,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 4
+        },
+        {
+          "K": 4,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 5
+        },
+        {
+          "K": 5,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 0
+        },
+        {
+          "K": 5,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 1
+        },
+        {
+          "K": 5,
+          "enumerated": 2,
+          "formula": 2,
+          "x": 2
+        },
+        {
+          "K": 5,
+          "enumerated": 2,
+          "formula": 2,
+          "x": 3
+        },
+        {
+          "K": 5,
+          "enumerated": 2,
+          "formula": 2,
+          "x": 4
+        },
+        {
+          "K": 5,
+          "enumerated": 2,
+          "formula": 2,
+          "x": 5
+        },
+        {
+          "K": 6,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 0
+        },
+        {
+          "K": 6,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 1
+        },
+        {
+          "K": 6,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 2
+        },
+        {
+          "K": 6,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 3
+        },
+        {
+          "K": 6,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 4
+        },
+        {
+          "K": 6,
+          "enumerated": 1,
+          "formula": 1,
+          "x": 5
+        }
+      ],
+      "h": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 1
+      },
+      "hx": {
+        "0": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "4": 1
+        },
+        "1": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "4": 1
+        },
+        "2": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "4": 1
+        },
+        "3": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "4": 1
+        }
+      },
+      "name": "tetrahedron_regular",
+      "p": 2,
+      "q": 4
+    }
+  ],
+  "formula_checks": 113,
+  "missing_vote": {
+    "I": [
+      1,
+      2
+    ],
+    "K": 2,
+    "Kmax": 2,
+    "U": [
+      0,
+      3
+    ],
+    "alpha2": "361/400",
+    "beta": "1",
+    "eta": "1/8",
+    "mass_from_bounded_catalogue": 2,
+    "mass_full": 3,
+    "missing_part": [
+      0,
+      3
+    ],
+    "p": 2,
+    "points": [
+      [
+        "0",
+        "0",
+        "0"
+      ],
+      [
+        "19/10",
+        "0",
+        "0"
+      ],
+      [
+        "39/20",
+        "0",
+        "0"
+      ],
+      [
+        "2",
+        "0",
+        "0"
+      ]
+    ],
+    "qmin": 2,
+    "retained_parts": [
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        2
+      ]
+    ],
+    "scope": "loss of reference vote identity and mass; no changed majority height claimed",
+    "selected_parts": [
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        0,
+        3
+      ]
+    ],
+    "threshold2": "29241/25600"
+  },
+  "native_calls": 0,
+  "scope": "tiny Fraction combinatorial oracle; no industrial enumeration proposed",
+  "status": "MEB_CLASS_FORMULAS_AND_FULL_VOTE_GAP_PROVED"
+}
