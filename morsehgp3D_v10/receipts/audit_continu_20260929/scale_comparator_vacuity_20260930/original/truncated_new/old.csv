@@ -1,0 +1,3 @@
+file,k,status,balls,cat_judged,tower_nodes_all,tower_steps_all,tower_s
+a.u32le,5,ok,7,True,3,4,0.05
+b.u32le,5,ok,7,True,3,4,0.05

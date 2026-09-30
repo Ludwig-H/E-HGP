@@ -1,0 +1,16 @@
+1. Read current decide.py and merge_sessions.py, inspect regression scope.
+2. Copy decide/merge/scenes to private source tree using apply_patch; require
+   copied bytes SHA equal originals. Native/scenes module never imported.
+3. Build two complementary valid session payloads for a pinned minimal plan.
+4. For each seven modes, prepare a new private TemporaryDirectory and record all
+   four source payloads before invocation. Stable aliases exist before the call.
+5. Invoke only copied merge CLI (-B -S, plus -O in optimized mode), record code,
+   stdout/stderr; compare source bytes and unchanged prereg sentinel.
+6. On successful merge, invoke copied decide --check-only; no statistical decision.
+7. Record raw source before/after bytes base64 and SHA; serialize normalized paths
+   and CLI -O display only, not execution. Actual outer calls in receipt.json.
+8. Capture final harness normal/-O with real UTC and original source pins before/
+   after; no failed test hidden. Freeze whitelist+SHA manifest after documentation.
+9. Reader hash-first validates whole archive, receipt and exact causal mutations,
+   then repeats the seven small cases normal/-O in isolated fresh tmp directories.
+10. No shared writes, engine, GCP, race simulation, or transferred qualification.

@@ -1,0 +1,22 @@
+{
+  "controls": [
+    {
+      "code": 1,
+      "name": "manifest_empty",
+      "semantic_guard": "manifest SHA"
+    },
+    {
+      "code": 1,
+      "name": "case_omitted",
+      "semantic_guard": "cases inventory length"
+    },
+    {
+      "code": 1,
+      "name": "false_code",
+      "semantic_guard": "code exact"
+    }
+  ],
+  "original_evidence_path": "/tmp/mhgp10-compare-scale-reader-strict-20260930.CYOlL0Cy/MUTATIONS.json",
+  "original_evidence_sha": "f17d551e0dc03f32d65d39905bd064c32c0b75f13e301c7b4503b50191d97c7c",
+  "scope": "archived controls from CYOl; no new mutation replay"
+}

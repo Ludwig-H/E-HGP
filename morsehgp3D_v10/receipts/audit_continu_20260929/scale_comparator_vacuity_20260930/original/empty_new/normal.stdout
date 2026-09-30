@@ -1,0 +1,9 @@
+{
+ "lignes_ancien": 1,
+ "lignes_nouveau": 0,
+ "entetes_egaux": true,
+ "colonnes_deterministes": 7,
+ "ecarts": [],
+ "lignes_coherentes_avec_json_natifs": [],
+ "appels": 0
+}

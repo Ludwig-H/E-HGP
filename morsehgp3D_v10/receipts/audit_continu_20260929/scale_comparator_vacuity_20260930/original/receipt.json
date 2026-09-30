@@ -1,0 +1,138 @@
+{
+  "gcp_used": false,
+  "native_calls": 0,
+  "redecide_scope": "static codeflow only: unconditional return 0 at line 118; not executed",
+  "redecide_source_copy": "0d4d3a9f4fa042403257b666554479b14ade8b1e3035ad03d478a2e074ddc07e",
+  "schema": "causal_compare_scale_static_source_v1",
+  "scope": "reader accepts missing or extra rows; fabricated bounded CSV/JSON, no engine result falsified",
+  "source_after": "6b5364272a3f412afb3a5ffbf46e4912ec4dbf99e8caeecace744f0c2c3aac63",
+  "source_before": "6b5364272a3f412afb3a5ffbf46e4912ec4dbf99e8caeecace744f0c2c3aac63",
+  "source_copy": "6b5364272a3f412afb3a5ffbf46e4912ec4dbf99e8caeecace744f0c2c3aac63",
+  "source_path": "/workspaces/E-HGP/build/v10-integration-r2/src/morsehgp3D_v10/receipts/raccord_r2_20260930/bancs/outils/compare_scale.py",
+  "tests": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/compare_scale.py",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/positive/old.csv",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/positive/new.csv"
+      ],
+      "case": "positive",
+      "code": 0,
+      "expected_valid": true,
+      "mode": "normal",
+      "new_count": 1,
+      "old_count": 1
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/compare_scale.py",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/positive/old.csv",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/positive/new.csv"
+      ],
+      "case": "positive",
+      "code": 0,
+      "expected_valid": true,
+      "mode": "optimized",
+      "new_count": 1,
+      "old_count": 1
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/compare_scale.py",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/empty_new/old.csv",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/empty_new/new.csv"
+      ],
+      "case": "empty_new",
+      "code": 0,
+      "expected_valid": false,
+      "mode": "normal",
+      "new_count": 0,
+      "old_count": 1
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/compare_scale.py",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/empty_new/old.csv",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/empty_new/new.csv"
+      ],
+      "case": "empty_new",
+      "code": 0,
+      "expected_valid": false,
+      "mode": "optimized",
+      "new_count": 0,
+      "old_count": 1
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/compare_scale.py",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/truncated_new/old.csv",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/truncated_new/new.csv"
+      ],
+      "case": "truncated_new",
+      "code": 0,
+      "expected_valid": false,
+      "mode": "normal",
+      "new_count": 1,
+      "old_count": 2
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/compare_scale.py",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/truncated_new/old.csv",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/truncated_new/new.csv"
+      ],
+      "case": "truncated_new",
+      "code": 0,
+      "expected_valid": false,
+      "mode": "optimized",
+      "new_count": 1,
+      "old_count": 2
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/compare_scale.py",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/extra_new/old.csv",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/extra_new/new.csv"
+      ],
+      "case": "extra_new",
+      "code": 0,
+      "expected_valid": false,
+      "mode": "normal",
+      "new_count": 2,
+      "old_count": 1
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/compare_scale.py",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/extra_new/old.csv",
+        "/tmp/mhgp10-compare-scale-causal-20260930.I620fdij/extra_new/new.csv"
+      ],
+      "case": "extra_new",
+      "code": 0,
+      "expected_valid": false,
+      "mode": "optimized",
+      "new_count": 2,
+      "old_count": 1
+    }
+  ]
+}

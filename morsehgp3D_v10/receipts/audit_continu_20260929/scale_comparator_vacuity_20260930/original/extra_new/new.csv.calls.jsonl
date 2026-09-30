@@ -1,0 +1,4 @@
+{"file": "a.u32le", "k": 5, "call": "catalogue", "code": 0, "stdout": "{\"balls\": 7, \"judged\": true}", "stderr": ""}
+{"file": "a.u32le", "k": 5, "call": "tower", "code": 0, "stdout": "{\"balls\": 7, \"orders\": [{\"nodes\": 3, \"steps\": 4}], \"tower_s\": 0.05}", "stderr": ""}
+{"file": "b.u32le", "k": 5, "call": "catalogue", "code": 0, "stdout": "{\"balls\": 7, \"judged\": true}", "stderr": ""}
+{"file": "b.u32le", "k": 5, "call": "tower", "code": 0, "stdout": "{\"balls\": 7, \"orders\": [{\"nodes\": 3, \"steps\": 4}], \"tower_s\": 0.05}", "stderr": ""}

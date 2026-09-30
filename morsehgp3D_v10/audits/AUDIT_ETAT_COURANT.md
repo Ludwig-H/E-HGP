@@ -1,7 +1,7 @@
 # Audits v10 — état courant
 
-Mise à jour : 30 septembre 2026, réponses aux trois questions du développeur,
-balayage médian MMt, précision rationnelle et suivi du raccord à 18 h 46 UTC.
+Mise à jour : 30 septembre 2026, préparation compacte MMt et contre-audit
+des sorties et lecteurs du raccord bancaire, en complément du balayage médian.
 Les sources publiées du moteur restent inchangées
 dans cette tranche ; le développeur travaille désormais dans une copie
 isolée d'intégration, distincte du worktree partagé. Les parties I
@@ -10,6 +10,23 @@ Index vivant de l'auditeur continu ; les rapports datés restent des preuves
 ancrées à leur version, pas des statuts courants. `public_status=not_claimed`.
 État du produit : [PASSATION](../PASSATION.md). Corrections de portée des
 mesures : [ERRATA](../receipts/ERRATA.md). Ne pas réécrire les reçus clos.
+
+**À corriger dans les bancs privés courants :** la garde des dossiers de
+fusion ne protège pas les fichiers liés aux entrées. Le
+[contre-exemple isolé](../receipts/audit_continu_20260929/merge_output_file_alias_20260930/README.md)
+reproduit cinq alias stables : fusion code0, session source modifiée,
+sortie encore acceptée par `--check-only`. Sept cas normal/−O, aucun
+fichier partagé touché. Protéger les trois sorties contre toutes les
+entrées et entre elles avant écriture ; ne pas se limiter au dossier.
+Le [comparateur CSV privé](../receipts/audit_continu_20260929/scale_comparator_vacuity_20260930/README.md)
+accepte aussi une sortie vide, tronquée ou supplémentaire : contrôler
+effectifs/inventaires, pas seulement `zip`. Lecteur final sans écriture,
+inventaire fermé et huit rejeux sur snapshot épinglé, normal/−O.
+Les différentiels archivés observés restent non vides ; ce défaut de
+lecteur ne démontre pas qu'ils soient faux. Leur portée reste le runner,
+pas la condensation ni une performance FULL/G4 nouvelle. À 19 h 25 UTC,
+sources privées de fusion et de tête encore inchangées ; aucun correctif
+de ces nouveaux alias ni de condensation constaté dans cette capture.
 
 **Questions du développeur traitées en priorité :** la
 [réponse Q1/Q2/Q3](audit_continu_20260929/QUESTION_RACCORD_CORRECTIFS_ET_FRONTIERE_20260929.md#réponses-aux-trois-questions-sur-les-votes-de-bande)
@@ -32,6 +49,11 @@ et mérite un petit prototype, pas un grand port déjà justifié. La
 valide une réduction exacte à la lignée médiane : au plus deux événements
 par atome, cinq arbres Fraction/AST concordants, dates et propriétaires
 compris. L'extraction des atomes reste payée ; aucun gain industriel acquis.
+La [compression préalable](../receipts/audit_continu_20260929/mmt_cover_compression_20260930/README.md)
+est désormais recoupée sur 108 arbres rationnels, 15 360 comparaisons et
+quatre mutations : au plus 2S nœuds virtuels, durées télescopées sans
+changer les masses par composante originale, sans remontée par seed.
+Ni complétude des seeds natifs ni date QS complète rejouée dans ce lot.
 Lemme T et propriétaires S_t demandent les précisions de seuil/intégration
 publiées ; la majoration finie simplifiée oublie un rapport d'échelles.
 99 contre 35 pour cette majoration, pas un échec de stabilité de MMt.

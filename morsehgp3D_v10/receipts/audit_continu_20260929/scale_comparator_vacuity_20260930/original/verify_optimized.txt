@@ -1,0 +1,2 @@
+PASS ARCHIVE_READER_FALSE_ACCEPTANCE_OBSERVED files=37 valid=2 invalid_accepted=6 source_locked=true native=0 GCP=false
+code=0

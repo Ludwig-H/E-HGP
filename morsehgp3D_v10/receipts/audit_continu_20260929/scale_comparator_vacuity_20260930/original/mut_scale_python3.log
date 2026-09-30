@@ -1,0 +1,30 @@
+temoin                                   temoin      survit         conforme 
+m1_sans_drapeau_clause_exterieure        tue         tue            conforme second_signal_apres_exception
+m2_sans_drapeau_clause_delai             tue         tue            conforme second_signal_apres_delai balayage_lignes_delai
+m3_stop_sans_drapeau                     tue         tue            conforme balayage_lignes_signal
+m4_signal_differe_perdu_apres_delai      tue         tue            conforme second_signal_apres_delai balayage_lignes_delai
+m5_drapeau_non_remis_apres_delai         tue         tue            conforme signal_hors_appel_apres_delai balayage_lignes_delai
+m5b_drapeau_non_remis_apres_exception    tue         tue            conforme second_signal_pendant_appel second_signal_apres_exception
+m6_sans_masque_close_group               tue         tue            conforme second_signal_pendant_appel second_signal_apres_delai second_signal_apres_exception close_group_vrai_signal_differe
+m7_clause_delai_plate                    tue         tue            conforme balayage_lignes_delai
+r1_sans_report_des_signaux               tue         tue            conforme signal_pendant_le_lancement second_signal_pendant_appel second_signal_apres_delai second_signal_apres_exception
+r1_sans_recolte_du_groupe                tue         tue            conforme delai_enfant_et_petit_enfant signal_pendant_le_lancement second_signal_pendant_appel second_signal_apres_delai
+r1_sans_killpg                           tue         tue            conforme case_delay signal_pendant_le_lancement second_signal_pendant_appel second_signal_apres_delai
+r1_sans_nouvelle_session                 tue         tue            conforme case_delay signal_pendant_le_lancement second_signal_pendant_appel second_signal_apres_delai
+r1_sans_controle_des_boules              tue         tue            conforme run_compteurs_de_boules_egaux
+r1_sans_appels_natifs                    tue         tue            conforme run_ligne_ok_appels_natifs run_compteurs_de_boules_egaux run_delai_tour_tuee destinations_distinctes_temoin
+r1_sans_gestionnaire_sigterm             tue         tue            conforme run_sigterm_appel_tue run_sigint_appel_tue
+v_sans_subreaper                         equivalent  survit         conforme 
+v_delai_proc_kill                        tue         tue            conforme delai_enfant_et_petit_enfant second_signal_apres_delai balayage_lignes_delai run_delai_tour_tuee
+S1_drapeau_baisse_apres_le_report        tue         tue            conforme balayage_lignes_production
+S2_report_du_lancement_jamais_leve       tue         tue            conforme signal_pendant_le_lancement second_signal_pendant_appel balayage_lignes_signal balayage_lignes_production
+S9_masque_sigterm_seul                   equivalent  survit         conforme 
+Z1_destinations_non_jugees               tue         tue            conforme destinations_meme_chemin destinations_chemin_equivalent destinations_lien_symbolique destinations_lien_dur
+Z2_chemin_resolu_seul                    tue         tue            conforme destinations_lien_dur
+Z3_chaine_egale_seule                    tue         tue            conforme destinations_chemin_equivalent_fichier_absent destinations_lien_symbolique_fichier_absent
+bilan mutants=23 tues=21/21 equivalents=2/2 temoin=survit motifs_absents=0
+
+real	9m56.969s
+user	1m40.931s
+sys	0m25.547s
+code=0

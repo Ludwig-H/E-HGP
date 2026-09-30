@@ -1,0 +1,14 @@
+[
+  {
+    "copy": "mut_scale_python3.log",
+    "scope": "23 scale mutations, 21 killed and 2 equivalents; not full 95-mutant campaign",
+    "sha256": "b9addd5498779c0b8647d27515e6ee4b229f56f8704abe20df449108750a04c1",
+    "source": "/tmp/mhgp10-integ-r2/scratch/mut_scale_python3.log"
+  },
+  {
+    "copy": "mut_scale_python3.10.log",
+    "scope": "23 scale mutations, 21 killed and 2 equivalents; not full 95-mutant campaign",
+    "sha256": "c13d5a41d257c3d5a64fce9d76b1a2aa1b5899b39de83c3bc1d35e24f2aa2352",
+    "source": "/tmp/mhgp10-integ-r2/scratch/mut_scale_python3.10.log"
+  }
+]

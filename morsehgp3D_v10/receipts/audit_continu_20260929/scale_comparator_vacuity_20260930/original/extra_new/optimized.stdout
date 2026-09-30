@@ -1,0 +1,22 @@
+{
+ "lignes_ancien": 1,
+ "lignes_nouveau": 2,
+ "entetes_egaux": true,
+ "colonnes_deterministes": 7,
+ "ecarts": [],
+ "lignes_coherentes_avec_json_natifs": [
+  [
+   "a.u32le",
+   "5",
+   "ok",
+   true
+  ],
+  [
+   "b.u32le",
+   "5",
+   "ok",
+   true
+  ]
+ ],
+ "appels": 4
+}

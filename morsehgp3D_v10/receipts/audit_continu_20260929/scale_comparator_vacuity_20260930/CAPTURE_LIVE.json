@@ -1,0 +1,235 @@
+{
+  "ended_utc": "2026-09-30T19:21:25.581134+00:00",
+  "gcp_used": false,
+  "native_calls": 0,
+  "runs": [
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/compare_scale.py",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/positive/old.csv",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/positive/new.csv"
+      ],
+      "case": "positive",
+      "code": 0,
+      "mode": "normal",
+      "stdout": {
+        "appels": 2,
+        "colonnes_deterministes": 7,
+        "ecarts": [],
+        "entetes_egaux": true,
+        "lignes_ancien": 1,
+        "lignes_coherentes_avec_json_natifs": [
+          [
+            "a.u32le",
+            "5",
+            "ok",
+            true
+          ]
+        ],
+        "lignes_nouveau": 1
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/compare_scale.py",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/positive/old.csv",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/positive/new.csv"
+      ],
+      "case": "positive",
+      "code": 0,
+      "mode": "optimized",
+      "stdout": {
+        "appels": 2,
+        "colonnes_deterministes": 7,
+        "ecarts": [],
+        "entetes_egaux": true,
+        "lignes_ancien": 1,
+        "lignes_coherentes_avec_json_natifs": [
+          [
+            "a.u32le",
+            "5",
+            "ok",
+            true
+          ]
+        ],
+        "lignes_nouveau": 1
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/compare_scale.py",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/empty_new/old.csv",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/empty_new/new.csv"
+      ],
+      "case": "empty_new",
+      "code": 0,
+      "mode": "normal",
+      "stdout": {
+        "appels": 0,
+        "colonnes_deterministes": 7,
+        "ecarts": [],
+        "entetes_egaux": true,
+        "lignes_ancien": 1,
+        "lignes_coherentes_avec_json_natifs": [],
+        "lignes_nouveau": 0
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/compare_scale.py",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/empty_new/old.csv",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/empty_new/new.csv"
+      ],
+      "case": "empty_new",
+      "code": 0,
+      "mode": "optimized",
+      "stdout": {
+        "appels": 0,
+        "colonnes_deterministes": 7,
+        "ecarts": [],
+        "entetes_egaux": true,
+        "lignes_ancien": 1,
+        "lignes_coherentes_avec_json_natifs": [],
+        "lignes_nouveau": 0
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/compare_scale.py",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/truncated_new/old.csv",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/truncated_new/new.csv"
+      ],
+      "case": "truncated_new",
+      "code": 0,
+      "mode": "normal",
+      "stdout": {
+        "appels": 2,
+        "colonnes_deterministes": 7,
+        "ecarts": [],
+        "entetes_egaux": true,
+        "lignes_ancien": 2,
+        "lignes_coherentes_avec_json_natifs": [
+          [
+            "a.u32le",
+            "5",
+            "ok",
+            true
+          ]
+        ],
+        "lignes_nouveau": 1
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/compare_scale.py",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/truncated_new/old.csv",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/truncated_new/new.csv"
+      ],
+      "case": "truncated_new",
+      "code": 0,
+      "mode": "optimized",
+      "stdout": {
+        "appels": 2,
+        "colonnes_deterministes": 7,
+        "ecarts": [],
+        "entetes_egaux": true,
+        "lignes_ancien": 2,
+        "lignes_coherentes_avec_json_natifs": [
+          [
+            "a.u32le",
+            "5",
+            "ok",
+            true
+          ]
+        ],
+        "lignes_nouveau": 1
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/compare_scale.py",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/extra_new/old.csv",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/extra_new/new.csv"
+      ],
+      "case": "extra_new",
+      "code": 0,
+      "mode": "normal",
+      "stdout": {
+        "appels": 4,
+        "colonnes_deterministes": 7,
+        "ecarts": [],
+        "entetes_egaux": true,
+        "lignes_ancien": 1,
+        "lignes_coherentes_avec_json_natifs": [
+          [
+            "a.u32le",
+            "5",
+            "ok",
+            true
+          ],
+          [
+            "b.u32le",
+            "5",
+            "ok",
+            true
+          ]
+        ],
+        "lignes_nouveau": 2
+      }
+    },
+    {
+      "argv": [
+        "/home/codespace/.python/current/bin/python3",
+        "-B",
+        "-O",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/compare_scale.py",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/extra_new/old.csv",
+        "/tmp/mhgp10-compare-scale-final-minimal-20260930.U5WLWkhd/original/extra_new/new.csv"
+      ],
+      "case": "extra_new",
+      "code": 0,
+      "mode": "optimized",
+      "stdout": {
+        "appels": 4,
+        "colonnes_deterministes": 7,
+        "ecarts": [],
+        "entetes_egaux": true,
+        "lignes_ancien": 1,
+        "lignes_coherentes_avec_json_natifs": [
+          [
+            "a.u32le",
+            "5",
+            "ok",
+            true
+          ],
+          [
+            "b.u32le",
+            "5",
+            "ok",
+            true
+          ]
+        ],
+        "lignes_nouveau": 2
+      }
+    }
+  ],
+  "started_utc": "2026-09-30T19:21:25.203425+00:00",
+  "timeout_each_s": 10
+}

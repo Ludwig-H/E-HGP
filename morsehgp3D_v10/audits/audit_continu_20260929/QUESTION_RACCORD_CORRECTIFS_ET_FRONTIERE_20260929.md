@@ -125,6 +125,7 @@ temps de couverture des branches, pas les K-parties. C'est un changement
 de modèle de masses, pas une compression des votes précédents. Le mémo
 privé relu est épinglé à `7ec56b4d…`, `mmt.py` à `93f6acd0…` ; aucun
 port natif ni nouveau chrono G4 n'est fait dans cette réponse.
+Le domaine étudié ici est K≥2, n≥K et A>0 ; K1/A=0 demande un cas séparé.
 
 #### Réduction exacte à une seule lignée
 
@@ -152,25 +153,42 @@ Une pente >1 signale une couverture/compression comptée plusieurs fois.
 
 Après index DFS/LCA global et extraction des vrais atomes :
 O(D log D + D·coût_LCA), mémoire O(D), puis balayage linéaire et recherche
-d'ancêtre finale sur FULL original. Les cinq arbres abstraits Fraction/AST
+d'ancêtre finale sur FULL original. Il s'agit d'un nombre d'opérations
+arithmétiques ; leur coût dépend aussi de la largeur des rationnels.
+Les cinq arbres abstraits Fraction/AST
 recoupent masses, W, T_half, T1, date et propriétaire, normal/−O.
 Le plateau exactement à moitié attend sa fin : `inf{G>W/2}` n'est pas
 le premier niveau G≥W/2. Le cas critique atteint bien t=49/40 à s*=25/16.
 Ni ces fixtures ni la preuve ne bornent ΣD sur les trames LiDAR.
 
-**Préparation sans remontées cachées, proposition à tester.** Partir des S
+**Préparation sans remontées cachées, éprouvée abstraitement.** Partir des
 incidences natives couvrantes complètes `(ball_node,activation)` de I∪U,
-dédupliquer par propriétaire/activation minimale. Un arbre virtuel des
+avec propriétaire vivant à l'activation ; dédupliquer en S propriétaires
+et activation minimale. Un arbre virtuel des
 nœuds seeds et de leurs LCA consécutives en DFS a au plus 2S−1 nœuds,
 avec éventuellement la racine originale ajoutée. Sur une continuation
 sans nouvelle activation ni réunion de lignées couvrantes, les durées
 des vies successives se télescopent : conserver un intervalle, pas tous
 les ancêtres. Garder les activations et les réunions couvertes ; retrouver
 le propriétaire vivant dans FULL original à la date exacte. Cette
-compression est mathématiquement justifiée sous couverture héréditaire
-complète, mais **non rejouée par les cinq toys**, qui utilisent les atomes
-déjà fournis. Mesurer aussi l'extraction et ΣS ; aucune borne globale
-sous-quadratique ou performance GPU n'en découle.
+compression est justifiée sous couverture héréditaire complète. Le
+[nouveau contrôle séparé](../../receipts/audit_continu_20260929/mmt_cover_compression_20260930/README.md)
+la recoupe désormais sur 108 petits arbres rationnels : 15 360 comparaisons
+par composante **originale**, W, quotient de plateaux, lignée médiane et
+majorité ; quatre mutations causales, normal/−O. Activations tardives,
+seeds internes/redondants, fusions multiples et chaîne de 31 nœuds à deux
+nœuds virtuels sont exercés. Ce lot ne calcule pas les dates QS complètes
+et ne reprend pas la qualification des cinq autres toys de dates.
+
+Le prototype partage un index binaire global : préparation/mémoire
+O(M log M), puis compression O(I+S log S+S log M), si les I seeds d'entrée
+ont déjà un propriétaire vivant. Sinon, payer aussi leur normalisation par
+requêtes d'ancêtre exactes, pas une remontée entière par incidence. Aucun
+parcours de chemin original par seed dans ce compresseur. L'oracle, lui,
+développe les chemins uniquement pour ces petits contrôles. Mesurer
+l'extraction, ΣI/ΣS et la mémoire de l'index partagé ; aucune preuve de
+complétude des incidences du catalogue, borne globale sous-quadratique
+ou performance GPU n'en découle.
 
 #### Précision nécessaire, y compris sur u18
 
@@ -217,11 +235,86 @@ au premier ordre, pas cette majoration finie. X={−1,1}, Y={−2,2}, ε=1,
 η=3, κ=λ=2 : B_t exact vaut 99, simplifié annoncé 35. L'écart réel
 des dates n'est que √(5/2) : **aucun échec de stabilité démontré**.
 
+**Ne pas supposer n_max borné par K/dimension.** Le §9.7 propose un packing
+de branches K2. La famille rationnelle du [cap Q1](../../receipts/audit_continu_20260929/band_classes_locality_20260930/README.md)
+en donne un corollaire analytique contraire : à β=1/4, les m paires
+{0,u_i} sont m sommets Γ2 isolés, tous couvrants pour 0. Toute coface
+qui pourrait les joindre contient un triangle {0,u_i,u_j}, strictement
+aigu et de niveau >1/4. Pour m fini, ces m branches persistent sur un
+intervalle positif avant la première coface. Le nombre peut être
+arbitrairement grand en géométrie réelle générale, à K2 fixé en 3D.
+Leurs durées peuvent se raccourcir quand m croît : aucune réfutation
+de stabilité ou obstruction LiDAR n'est déduite. Mesurer ce compteur
+dans les régimes visés, sans prendre le packing pour une borne acquise.
+
 Priorité pratique : conserver les rangs exacts, corriger la condensation
 par cohortes, puis un prototype borné de ce noyau MMt. Publier extraction,
 ΣS/ΣD, événements, égalités et coût des replis sur les fixtures K3/K5,
 puis les tailles 8k/16k/32k et trames déclarées. Le prototype ne vaut pas
 une qualification statistique ni une promesse du contrat 100 ms.
+
+## Contre audit bancaire et intégrité des fichiers
+
+Source privée courante `merge_sessions.py`, SHA `059cc7ea…`, clone 2d0a0c41c :
+la nouvelle garde `same_directory(out,session)` fonctionne dans son périmètre,
+mais ne protège pas un **fichier** de sortie partageant une entrée par lien
+symbolique ou lien physique. Le [paquet causal](../../receipts/audit_continu_20260929/merge_output_file_alias_20260930/README.md)
+conserve deux sessions complémentaires d'un plan valide, deux scènes/deux
+méthodes, et sept cas normal/−O. Dossiers distincts : cinq alias de fichiers
+laissent la fusion rendre code0 et modifient les sources. Deux aliases CSV,
+deux JSON, puis alias croisé `out/results.csv→session/run.json` : dans ce
+dernier cas, le JSON source devient littéralement un CSV. La sortie fusionnée
+reste conforme et passe `decide --check-only` ; ce n'est pas un faux score
+statistique, mais une perte d'intégrité des entrées.
+
+Contrôles positifs : destinations distinctes, sources intactes, code0 ;
+dossier de session identique, refus code2 et sources intactes. Les liens
+existent avant l'appel, sans course ni acteur concurrent. Sources complètes
+épinglées avant/après, fichiers avant/après base64 et SHA conservés, lecteurs
+hash-first et replays normal/−O. Aucun moteur, NumPy, GCP ou fichier partagé
+touché. Le contre-exemple n'annule pas la correction des dossiers identiques.
+
+Correction nécessaire avant ouverture destructive : les trois destinations
+`results.csv`, `run.json`, `done.u32le` contre **tous** les fichiers d'entrée
+(préenregistrement et run/results de chaque session), y compris aliases croisés,
+puis destinations entre elles. Résolution de liens et identité d'inode,
+sentinelles intactes avant refus. Des temporaires frais suivis de remplacement
+évitent aussi de tronquer un inode partagé ; définir la politique de sorties
+et tester ces cas, sans prétendre à une transaction globale non implémentée.
+
+**Comparateur différentiel incomplet.** Le [paquet minimal et son lecteur](../../receipts/audit_continu_20260929/scale_comparator_vacuity_20260930/README.md)
+conservent `compare_scale.py`, SHA `6b536427…`. Ce script compare
+`zip(old,new)` sans égalité des nombres de lignes. Une sortie vide
+et un journal d'appels vide passent par `all([])` ; une sortie tronquée ou
+avec une ligne supplémentaire passe aussi. Huit petites commandes sur CSV/JSON
+fabriqués : deux témoins conformes, six acceptations invalides, normal/−O ;
+aucun appel moteur. Contrôler la totalité des inventaires/effectifs et un
+plancher non nul, puis la correspondance unique des clés/commandes ; ne pas
+prendre code0 seul pour une égalité. Les différentiels privés observés sont
+non vides et leurs colonnes ont été relues : ce défaut du comparateur ne
+démontre pas que leurs valeurs soient fausses. L'annexe finale ferme tous
+ses fichiers par manifest épinglé explicitement, puis rejoue les huit appels
+sans écrire dans l'archive. Les trois refus de garde sont archivés séparément,
+pas nouvellement rejoués par son lecteur. L'ancien collecteur `strictread.py
+--replay` reste une source historique, **pas** le point d'entrée à utiliser.
+La première copie de publication avait normalisé les CSV CRLF : refus de hash
+avant tout rejeu, puis octets rétablis et lecteurs normal/−O validés. Aucun
+échec géométrique n'est déduit de cet incident de copie.
+
+`redecide_refusion.py`, SHA `0d4d3a9…`, est un collecteur : son `return 0`
+est inconditionnel, sans juger les codes des sous-appels ou flags d'égalité.
+Conclusion de **lecture de code seulement**, pas une nouvelle exécution :
+lire les codes/valeurs archivés, ou séparer collecteur et juge causal.
+
+**État de campagne :** le journal global des 95 mutations des bancs termine
+code1, 90/92 tués, trois équivalents. Deux survivants : P6 non-fini, désormais
+reclassé équivalent parce que tous ses usages imposent déjà des bornes finies ;
+Z3 comparaison brute des chemins, désormais tué par les sorties inexistantes
+ajoutées. Les nouvelles sous-campagnes scale Python3 et Python3.10 terminent
+chacune code0, 21/21 tués et deux équivalents ; ce ne sont pas des replays
+clos de toute la campagne de 95. La campagne SiteTree précédente 94/94
+reste distincte. Ne pas fusionner des campagnes de sources/gates différentes
+ou confondre index ancien et fichiers courants encore `MM`/`AM`.
 
 ## Nouveaux constats prioritaires du 30 septembre
 
