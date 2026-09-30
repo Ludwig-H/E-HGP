@@ -6,6 +6,8 @@ sans modifier ses copies de travail, ses builds ou les sources produit. Elle com
 
 ## État vérifié
 
+**Actualisation après publication `a6b380e9c`.** Le [nouveau contre-audit R2 de l'autre auditeur](../audit_continu_20260929/CONTRE_AUDIT_R2_20260930.md) a rejoué les cinq corruptions de listes/ordre et les deux corruptions FULL, désormais refusées. Les résultats ci-dessous sont la capture de 03 h 12 de notre copie, conservée à ses hashes ; ils ne décrivent pas les juges plus récents. L'[état courant](../SUIVI_AUDIT_INDEPENDANT.md) distingue cette fermeture dans la copie R2 du raccord commun encore attendu. Aucun de ces rejeux n'est revendiqué comme notre nouvelle exécution.
+
 La [réponse du développeur](../REPONSE_CLAUDE_CONTRE_AUDITS_ET_RACCORD_20260929.md) annonce une seconde réparation,
 puis une extraction commune. Les nouvelles copies sont dans `/tmp/mhgp10-r2/{sitetree,oracles,entrees_cli}/src/morsehgp3D_v10`.
 Ce sont encore **trois copies par groupe**, avec des correctifs différents ; elles ne constituent pas une extraction

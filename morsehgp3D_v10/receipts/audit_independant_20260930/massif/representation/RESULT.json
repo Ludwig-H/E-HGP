@@ -1,0 +1,31 @@
+{
+  "sizeof_bytes": {
+    "Level": 56,
+    "Rec": 104,
+    "Ref": 32,
+    "BallInfo": 12,
+    "SiteTreeNode": 64,
+    "P3": 24
+  },
+  "rank_index_unsafe": {
+    "levels": 2147483712,
+    "initial_a": 2147483649,
+    "initial_b": 2147483712,
+    "first_mid": 32,
+    "out_of_interval": 8,
+    "iterations": 200,
+    "terminated": 0
+  },
+  "rank_index_safe": {
+    "iterations": 6,
+    "returned": 2147483712,
+    "expected": 2147483712
+  },
+  "private_layouts_are_copies": true,
+  "massive_allocation": false,
+  "product_build_or_test_suite": false,
+  "bounded_iterations": 200,
+  "source_stable": true,
+  "proved_failure": "Avec b=2^31+64 et prédicat toujours vrai, le milieu u32 (a+b)/2 est toujours <=2^31-1. Donc a=mid+1 reste <=2^31<b : terminaison impossible. Premier milieu 32 hors intervalle.",
+  "scope": "Preuve de domaine scalaire de RankIndex::at_most, pas exécution de FULL sur un nuage réalisant plus de deux milliards de niveaux."
+}

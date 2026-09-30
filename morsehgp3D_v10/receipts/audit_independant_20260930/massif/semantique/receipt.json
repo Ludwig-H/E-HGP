@@ -1,0 +1,62 @@
+{
+  "base_git_head": "bdc0b8f08ee37ee351996b29c5974f78415bc036",
+  "computational_dependency": "morsehgp3D_v10/receipts/audit_independant_20260930/massif/semantique/check.py",
+  "limits": [
+    "Tiny exact arithmetic only, no native or reference HGP execution.",
+    "Both Gamma2 fixtures are complete collinear calculations; no seed campaign.",
+    "Box bound is proved for every center by convexity; 27 queries including ties are illustrations.",
+    "No massive-data/GPU/GCP/cost/robustness qualification.",
+    "No product or audit Markdown edit."
+  ],
+  "normal_optimized_stdout_identical": true,
+  "runs": [
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "morsehgp3D_v10/receipts/audit_independant_20260930/massif/semantique/check.py"
+      ],
+      "mode": "normal",
+      "probe_wall_seconds": 0.047655309999754536,
+      "returncode": 0,
+      "stderr": "normal.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "normal.stdout",
+      "stdout_sha256": "939b50b96dfe58da2330c734bfa4ba5403272bdcf98841449be934c003c5bb4a"
+    },
+    {
+      "argv": [
+        "python3",
+        "-B",
+        "-O",
+        "morsehgp3D_v10/receipts/audit_independant_20260930/massif/semantique/check.py"
+      ],
+      "mode": "optimized",
+      "probe_wall_seconds": 0.04464137699960702,
+      "returncode": 0,
+      "stderr": "optimized.stderr",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout": "optimized.stdout",
+      "stdout_sha256": "939b50b96dfe58da2330c734bfa4ba5403272bdcf98841449be934c003c5bb4a"
+    }
+  ],
+  "schema": "mhgp10-independent-massif-semantique-v1",
+  "source_references_not_imported": {
+    "morsehgp3D_v10/docs/conception/GEN_v2.md": "sections3.1-3.5 and3.9; closed K-certified lists, global census, center ownership",
+    "morsehgp3D_v10/docs/conception/TOWER_v2.md": "sections3.2-3.7 and6.2-6.4; Gamma, simultaneous events, resolver, parents, verticals",
+    "morsehgp3D_v7/docs/CROISSANCE_ET_BORNE_DE_SORTIE.md": "rational fixedK2 quadratic FULL-birth lower bound; not a native/u18 execution"
+  },
+  "source_sha256_after": {
+    "morsehgp3D_v10/docs/conception/GEN_v2.md": "71edbd8507b7ba071c91d1409a911a4c4fce3e19184fe6ce0e878e70a3e9b59b",
+    "morsehgp3D_v10/docs/conception/TOWER_v2.md": "2a0935d8d857b57aa805354b479488125762cee51284b69169a4dc0041a122c0",
+    "morsehgp3D_v10/receipts/audit_independant_20260930/massif/semantique/check.py": "4002537c3a8ad2c68b4320387d4f566c07ca629c31ba1865b858b6fc4cd179a5",
+    "morsehgp3D_v7/docs/CROISSANCE_ET_BORNE_DE_SORTIE.md": "53b61eb22fb47cbab0497f5d5e184562c31b9e90fe55773651dbfe0f85552f3b"
+  },
+  "source_sha256_before": {
+    "morsehgp3D_v10/docs/conception/GEN_v2.md": "71edbd8507b7ba071c91d1409a911a4c4fce3e19184fe6ce0e878e70a3e9b59b",
+    "morsehgp3D_v10/docs/conception/TOWER_v2.md": "2a0935d8d857b57aa805354b479488125762cee51284b69169a4dc0041a122c0",
+    "morsehgp3D_v10/receipts/audit_independant_20260930/massif/semantique/check.py": "4002537c3a8ad2c68b4320387d4f566c07ca629c31ba1865b858b6fc4cd179a5",
+    "morsehgp3D_v7/docs/CROISSANCE_ET_BORNE_DE_SORTIE.md": "53b61eb22fb47cbab0497f5d5e184562c31b9e90fe55773651dbfe0f85552f3b"
+  },
+  "status": "ok"
+}

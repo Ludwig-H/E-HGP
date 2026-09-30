@@ -1,0 +1,448 @@
+{
+  "schema": "mhgp10.audit.massif.dimensionnement.v1",
+  "date_utc": "2026-09-30",
+  "mode": "read_only_extraction_and_decimal_arithmetic",
+  "public_status": "not_claimed",
+  "gcp_used_by_this_audit": false,
+  "gpu_used_by_this_audit": false,
+  "large_compute_used_by_this_audit": false,
+  "checkout_head_observed": "bdc0b8f08ee37ee351996b29c5974f78415bc036",
+  "sources": [
+    {
+      "path": "morsehgp3D_v10/receipts/g4_session5_scale_20260929/scale.csv",
+      "size_bytes": 34371,
+      "sha256": "970cb7707f3b9854fdb0b18f40ff0e1fc6875089c883ab340e2c25f3c341ab78"
+    },
+    {
+      "path": "morsehgp3D_v10/receipts/g4_session5_scale_20260929/MANIFEST_entrees.json",
+      "size_bytes": 30413,
+      "sha256": "acd5db1dd2825a82afe2cd4f1904e36940f258536c8ec323d4128b78499176ce"
+    },
+    {
+      "path": "morsehgp3D_v10/receipts/g4_session5_scale_20260929/vm_facts.json",
+      "size_bytes": 16513,
+      "sha256": "c188ab60d3b6e11a235908a78c0d45e916b01dd790c7c150606a140fc8f1e942"
+    },
+    {
+      "path": "morsehgp3D_v10/receipts/g4_session5_scale_20260929/plan_s5_scale.json",
+      "size_bytes": 764,
+      "sha256": "579e3e6fcd19f73b2caebf98673caeccbaecd4257f787d319c6b0e8588933670"
+    },
+    {
+      "path": "morsehgp3D_v10/receipts/g4_session5_scale_20260929/session/receipt.json",
+      "size_bytes": 45311,
+      "sha256": "9d0ce63819011da792dee599a357486bde1f3ec81475ced17572ed8e67938229"
+    },
+    {
+      "path": "morsehgp3D_v10/receipts/g4_session5_scale_20260929/SHA256SUMS",
+      "size_bytes": 1391,
+      "sha256": "8022b4ff93f7930c40794087018de6b50cfe0a21c70c28201497957b7355107d"
+    },
+    {
+      "path": "morsehgp3D_v10/receipts/ERRATA.md",
+      "size_bytes": 7060,
+      "sha256": "9c10073bd6acfe225ca8abd2f2da5a5fb6e6b102e3f278408ee225dbe8a99402"
+    },
+    {
+      "path": "morsehgp3D_v10/PASSATION.md",
+      "size_bytes": 14697,
+      "sha256": "08a4731b190cd5cdeed8659f3db7d97a31e95734eb1fa6ef8d8b0a08c777e5d0"
+    },
+    {
+      "path": "morsehgp3D_v10/docs/SPEC_V10.md",
+      "size_bytes": 6236,
+      "sha256": "ca5f5785b9a6f572e807bf7e2ec9c7c08e4d78a00f2ce146d9ef994f8713e08a"
+    },
+    {
+      "path": "morsehgp3D_v10/docs/conception/EVAL_v2.md",
+      "size_bytes": 114411,
+      "sha256": "c7dd30af8ab18b4eb6874837122f7d2bccaeff2bd0f9e3d2c91e41e31e08422c"
+    },
+    {
+      "path": "morsehgp3D_v10/docs/conception/ARCH_v2.md",
+      "size_bytes": 134159,
+      "sha256": "55dc9989610ffbe4c5a2ba9bbcdc9ca598f78d06b1b32427efa7bb84576a8510"
+    },
+    {
+      "path": "morsehgp3D_v10/bench/scaling/scale_run.py",
+      "size_bytes": 10695,
+      "sha256": "03c2c9d12e05ab14e51ca036dbb0351df1d335b8404cdede9eea96109e36b120"
+    },
+    {
+      "path": "morsehgp3D_v10/src/catalogue/generator.cpp",
+      "size_bytes": 39374,
+      "sha256": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662"
+    },
+    {
+      "path": "morsehgp3D_v10/src/catalogue/catalogue.hpp",
+      "size_bytes": 4972,
+      "sha256": "2f47beb9dfc1e59e3ee4c3f412de76de2f4872940d7dccdfb327ba5f6ce35229"
+    },
+    {
+      "path": "morsehgp3D_v10/src/tower/tower.cpp",
+      "size_bytes": 76065,
+      "sha256": "0c5b44ae7993e850c5c6cdb63d0c9829847eb70364f40894a3df964f708b88e9"
+    },
+    {
+      "path": "morsehgp3D_v10/src/core/buffer.hpp",
+      "size_bytes": 4461,
+      "sha256": "2b5f66fc39e4cb550a6a13585efa5b116e3fc34cdeface94271a15c9fe8f7c60"
+    },
+    {
+      "path": "docs/PERFORMANCE_MORSEHGP3D.md",
+      "size_bytes": 44074,
+      "sha256": "95738725a8c7044cefd7c7078d9b5232db99538aeafe098c7c5c32eeb81d0040"
+    },
+    {
+      "path": "docs/SPECIFICATION_MORSEHGP3D.md",
+      "size_bytes": 373222,
+      "sha256": "90c6c261531e7accf6ef27886987e553edb5206d5812d599ca8f3b41ee741cb4"
+    },
+    {
+      "path": "morsehgp3D_v7/docs/CONTRAT_PERFORMANCE.md",
+      "size_bytes": 7870,
+      "sha256": "1bec7fddd7e5be4bc46abc2d8ef5f0b6bff45e1cccbf7853acb3971c178061ca"
+    },
+    {
+      "path": "morsehgp3D_v10/audits/REPONSE_CLAUDE_ZERO_ET_LECTEUR_CUDA_20260930.md",
+      "size_bytes": 4111,
+      "sha256": "69b10af771ed569b53f5b16acadeb04764b67d4e331c81b56c97d77a8c212dd9"
+    },
+    {
+      "path": "morsehgp3D_v10/audits/REPONSE_CLAUDE_CINQ_SITES_ET_R2_20260930.md",
+      "size_bytes": 2134,
+      "sha256": "3f57cf43a41c1f8a458f6cf005bc6bf22fd346397710972af3d1582f58e247c0"
+    },
+    {
+      "path": "morsehgp3D_v10/receipts/g4_session7_cuda_probe_20260929/cuda_probe.json",
+      "size_bytes": 322,
+      "sha256": "87e862380d18d5ac67de1e098d59b2ce7bf48eaa5cf0ddbe024f1d6ae89da9a5"
+    },
+    {
+      "path": "morsehgp3D_v10/receipts/g4_session7_cuda_probe_20260929/SHA256SUMS",
+      "size_bytes": 962,
+      "sha256": "dffccbd9292a07e09078f464e2c6018562ce877a70305bc56d6fb7650a127914"
+    }
+  ],
+  "scope": {
+    "measured_backend": "cpu_reference_on_g4",
+    "threads": 48,
+    "physical_cores": 24,
+    "measured_object": "catalogue_then_FULL_tower_1_to_Kmax_with_no_points",
+    "excluded_from_catalogue_plus_tower_timing": [
+      "input_file_read",
+      "cloud_preparation",
+      "ground_mask",
+      "quantization_deduplication",
+      "point_attachment",
+      "head",
+      "projection_to_original_returns",
+      "canonical_export_and_durability"
+    ],
+    "process_wall_includes": [
+      "input_file_read",
+      "cloud_preparation",
+      "catalogue",
+      "tower",
+      "summary_output",
+      "process_lifecycle"
+    ],
+    "csv_ball_count_source": "separate_catalogue_process_before_tower_process",
+    "csv_timing_rss_source": "tower_process_regenerating_catalogue",
+    "historical_runner_does_not_compare_the_two_catalogue_counts": true,
+    "large_output_archived": "summary_only_not_full_canonical_tower_export",
+    "one_seed_one_execution_per_configuration": true
+  },
+  "s5_campaign": {
+    "rows": 176,
+    "statuses": {
+      "ok": 169,
+      "skipped_budget": 7
+    },
+    "unique_inputs": 88,
+    "manifest_input_kinds": {
+      "synthetic": 67,
+      "lidar": 21
+    },
+    "synthetic_seed": 3,
+    "lidar_sequence": "08",
+    "lidar_frames": [
+      "000000",
+      "000100",
+      "000200"
+    ],
+    "lidar_regime": "ground_removed_grid_1mm",
+    "largest_input": {
+      "duplicates_removed": 0,
+      "factor": 128,
+      "family": "clusters",
+      "file": "syn_clusters_density_x128.u32le",
+      "kind": "synthetic",
+      "points": 1024000,
+      "regime": "density",
+      "sha256": "01490d04ddf1373108722bbf26d792305a288d6b6e9a4fdcde349acc9c7d65f5",
+      "sites": 1024000,
+      "step": 0.00023127352981474182
+    },
+    "worker_commit": "882b13286177657c9b56287f2b1bf20b17858528",
+    "session_status": "failed_remote",
+    "session_status_note": "failed_remote from pip, no failed scientific command according to preserved receipt",
+    "generation": "2026-09-29T11:40:08.147-07:00",
+    "targeted_shutdown_certified": true
+  },
+  "s5_csv_rows_exact_strings": [
+    {
+      "file": "syn_clusters_density_x128.u32le",
+      "kind": "synthetic",
+      "family": "clusters",
+      "regime": "density",
+      "factor": "128",
+      "frame": "",
+      "sector": "",
+      "sites": "1024000",
+      "k": "5",
+      "threads": "48",
+      "status": "ok",
+      "balls": "87574708",
+      "cat_nodes": "24191231",
+      "cat_leaves": "12091852",
+      "cat_sum_m": "170846096",
+      "cat_judged": "247797368",
+      "cat_quad_tests": "509398045",
+      "cat_triple_tests": "1310321073",
+      "tower_nodes_kmax": "40356203",
+      "tower_steps_kmax": "136760522",
+      "tower_nodes_all": "91295769",
+      "tower_steps_all": "312618869",
+      "catalogue_s": "7.8414",
+      "tower_s": "13.0047",
+      "wall_s": "21.51",
+      "cpu_s": "544.25",
+      "max_rss_kb": "24542164"
+    },
+    {
+      "file": "syn_clusters_density_x128.u32le",
+      "kind": "synthetic",
+      "family": "clusters",
+      "regime": "density",
+      "factor": "128",
+      "frame": "",
+      "sector": "",
+      "sites": "1024000",
+      "k": "10",
+      "threads": "48",
+      "status": "ok",
+      "balls": "478482791",
+      "cat_nodes": "34121521",
+      "cat_leaves": "17057430",
+      "cat_sum_m": "371955080",
+      "cat_judged": "1129403071",
+      "cat_quad_tests": "4225653499",
+      "cat_triple_tests": "5913532755",
+      "tower_nodes_kmax": "154652771",
+      "tower_steps_kmax": "519668603",
+      "tower_nodes_all": "606575494",
+      "tower_steps_all": "2046759159",
+      "catalogue_s": "41.3419",
+      "tower_s": "83.0214",
+      "wall_s": "126.82",
+      "cpu_s": "3756.05",
+      "max_rss_kb": "141855788"
+    }
+  ],
+  "measured_row_arithmetic": [
+    {
+      "k": 5,
+      "rss_bytes": 25131175936,
+      "rss_gib": "23.405231475830078125",
+      "rss_gb_decimal": "25.131175936",
+      "rss_bytes_per_ball": "286.9684239883506091735983864",
+      "catalogue_plus_tower_seconds": "20.8461"
+    },
+    {
+      "k": 10,
+      "rss_bytes": 145260326912,
+      "rss_gib": "135.284221649169921875",
+      "rss_gb_decimal": "145.260326912",
+      "rss_bytes_per_ball": "303.5852691972781942747027656",
+      "catalogue_plus_tower_seconds": "124.3633"
+    }
+  ],
+  "machine_facts_exact": {
+    "free": {
+      "cmd": "free -g",
+      "code": 0,
+      "stdout": "               total        used        free      shared  buff/cache   available\nMem:             176           1         174           0           0         173\nSwap:              0           0           0\n",
+      "stderr": ""
+    },
+    "df": {
+      "cmd": "df -h",
+      "code": 0,
+      "stdout": "Filesystem       Size  Used Avail Use% Mounted on\n/dev/root         97G   19G   79G  20% /\ntmpfs             89G     0   89G   0% /dev/shm\ntmpfs             36G  1.2M   36G   1% /run\ntmpfs            5.0M     0  5.0M   0% /run/lock\nefivarfs         256K   29K  223K  12% /sys/firmware/efi/efivars\n/dev/nvme0n1p15  105M  6.1M   99M   6% /boot/efi\ntmpfs             18G  4.0K   18G   1% /run/user/1992881332\n",
+      "stderr": ""
+    },
+    "lscpu": {
+      "cmd": "lscpu",
+      "code": 0,
+      "stdout": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           52 bits physical, 57 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  48\nOn-line CPU(s) list:                     0-47\nVendor ID:                               AuthenticAMD\nModel name:                              AMD EPYC 9B45\nCPU family:                              26\nModel:                                   2\nThread(s) per core:                      2\nCore(s) per socket:                      24\nSocket(s):                               1\nStepping:                                1\nBogoMIPS:                                5399.99\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl nonstop_tsc cpuid extd_apicid aperfmperf tsc_known_freq pni pclmulqdq monitor ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext mwaitx ssbd ibrs ibpb stibp ibrs_enhanced vmmcall fsgsbase tsc_adjust bmi1 avx2 smep bmi2 invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 clzero xsaveerptr wbnoinvd amd_ibpb_ret arat avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid movdiri movdir64b avx512_vp2intersect flush_l1d srso_user_kernel_no\nHypervisor vendor:                       KVM\nVirtualization type:                     full\nL1d cache:                               1.1 MiB (24 instances)\nL1i cache:                               768 KiB (24 instances)\nL2 cache:                                24 MiB (24 instances)\nL3 cache:                                96 MiB (3 instances)\nNUMA node(s):                            1\nNUMA node0 CPU(s):                       0-47\nVulnerability Gather data sampling:      Not affected\nVulnerability Indirect target selection: Not affected\nVulnerability Itlb multihit:             Not affected\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Not affected\nVulnerability Spec rstack overflow:      Not affected\nVulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; STIBP always-on; PBRSB-eIBRS Not affected; BHI Not affected\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Not affected\nVulnerability Tsx async abort:           Not affected\nVulnerability Vmscape:                   Not affected\n",
+      "stderr": ""
+    },
+    "nvidia_smi_query": {
+      "cmd": "nvidia-smi --query-gpu=name,driver_version,compute_cap,memory.total,clocks.max.sm,power.limit --format=csv",
+      "code": 0,
+      "stdout": "name, driver_version, compute_cap, memory.total [MiB], clocks.max.sm [MHz], power.limit [W]\nNVIDIA RTX PRO 6000 Blackwell Server Edition, 580.173.02, 12.0, 97887 MiB, 2430 MHz, 600.00 W\n",
+      "stderr": ""
+    }
+  },
+  "machine_fact_interpretation": {
+    "host_total_free_g_gib_integer": 176,
+    "host_available_gib_integer": 173,
+    "root_df_h_size": "97G",
+    "root_df_h_available": "79G",
+    "gpu_memory_total_mib": 97887,
+    "scope": "captured_S5_preflight_not_current_infrastructure"
+  },
+  "scenario_rules": {
+    "interpretation": "scenario_only_not_prediction_not_bound_not_qualification",
+    "formula": "sites_assumed * balls_per_site_assumed * rss_bytes_per_ball_assumed",
+    "assumption_warning": "Neither constant balls per site nor constant RSS per ball is established for LiDAR or larger inputs. Values 303.6 to 314.9 refer to corrected large measured K10 cases, not every case.",
+    "excluded_resources": [
+      "extra_point_frontier_model_cost",
+      "raw_returns_and_masks",
+      "mapping_and_pose_buffers",
+      "serialized_outputs",
+      "external_sort_spool",
+      "checkpoint_copies",
+      "OS_and_runtime_margin"
+    ],
+    "reserved_u32_none": 4294967295,
+    "representation_warning": "Catalogue has unchecked casts to u32; tower checks additional cell and representative limits. Scenario ball count alone is not a capacity verdict."
+  },
+  "scenarios": [
+    {
+      "interpretation": "scenario_only_not_prediction_not_bound_not_qualification",
+      "sites_assumed": 10000000,
+      "balls_per_site_assumed": 120,
+      "balls_scenario": 1200000000,
+      "rss_bytes_per_ball_assumed_min": "303.6",
+      "rss_bytes_per_ball_assumed_max": "314.9",
+      "rss_bytes_scenario_min": "364320000000.0",
+      "rss_bytes_scenario_max": "377880000000.0",
+      "rss_gb_decimal_scenario_min": "364.32",
+      "rss_gb_decimal_scenario_max": "377.88",
+      "rss_gib_scenario_min": "339.2994403839111328125",
+      "rss_gib_scenario_max": "351.928174495697021484375",
+      "balls_scenario_reaches_reserved_u32_none": false
+    },
+    {
+      "interpretation": "scenario_only_not_prediction_not_bound_not_qualification",
+      "sites_assumed": 10000000,
+      "balls_per_site_assumed": 460,
+      "balls_scenario": 4600000000,
+      "rss_bytes_per_ball_assumed_min": "303.6",
+      "rss_bytes_per_ball_assumed_max": "314.9",
+      "rss_bytes_scenario_min": "1396560000000.0",
+      "rss_bytes_scenario_max": "1448540000000.0",
+      "rss_gb_decimal_scenario_min": "1396.56",
+      "rss_gb_decimal_scenario_max": "1448.54",
+      "rss_gib_scenario_min": "1300.64785480499267578125",
+      "rss_gib_scenario_max": "1349.0580022335052490234375",
+      "balls_scenario_reaches_reserved_u32_none": true
+    },
+    {
+      "interpretation": "scenario_only_not_prediction_not_bound_not_qualification",
+      "sites_assumed": 30000000,
+      "balls_per_site_assumed": 120,
+      "balls_scenario": 3600000000,
+      "rss_bytes_per_ball_assumed_min": "303.6",
+      "rss_bytes_per_ball_assumed_max": "314.9",
+      "rss_bytes_scenario_min": "1092960000000.0",
+      "rss_bytes_scenario_max": "1133640000000.0",
+      "rss_gb_decimal_scenario_min": "1092.96",
+      "rss_gb_decimal_scenario_max": "1133.64",
+      "rss_gib_scenario_min": "1017.8983211517333984375",
+      "rss_gib_scenario_max": "1055.784523487091064453125",
+      "balls_scenario_reaches_reserved_u32_none": false
+    },
+    {
+      "interpretation": "scenario_only_not_prediction_not_bound_not_qualification",
+      "sites_assumed": 30000000,
+      "balls_per_site_assumed": 460,
+      "balls_scenario": 13800000000,
+      "rss_bytes_per_ball_assumed_min": "303.6",
+      "rss_bytes_per_ball_assumed_max": "314.9",
+      "rss_bytes_scenario_min": "4189680000000.0",
+      "rss_bytes_scenario_max": "4345620000000.0",
+      "rss_gb_decimal_scenario_min": "4189.68",
+      "rss_gb_decimal_scenario_max": "4345.62",
+      "rss_gib_scenario_min": "3901.94356441497802734375",
+      "rss_gib_scenario_max": "4047.1740067005157470703125",
+      "balls_scenario_reaches_reserved_u32_none": true
+    },
+    {
+      "interpretation": "scenario_only_not_prediction_not_bound_not_qualification",
+      "sites_assumed": 50000000,
+      "balls_per_site_assumed": 120,
+      "balls_scenario": 6000000000,
+      "rss_bytes_per_ball_assumed_min": "303.6",
+      "rss_bytes_per_ball_assumed_max": "314.9",
+      "rss_bytes_scenario_min": "1821600000000.0",
+      "rss_bytes_scenario_max": "1889400000000.0",
+      "rss_gb_decimal_scenario_min": "1821.6",
+      "rss_gb_decimal_scenario_max": "1889.4",
+      "rss_gib_scenario_min": "1696.4972019195556640625",
+      "rss_gib_scenario_max": "1759.640872478485107421875",
+      "balls_scenario_reaches_reserved_u32_none": true
+    },
+    {
+      "interpretation": "scenario_only_not_prediction_not_bound_not_qualification",
+      "sites_assumed": 50000000,
+      "balls_per_site_assumed": 460,
+      "balls_scenario": 23000000000,
+      "rss_bytes_per_ball_assumed_min": "303.6",
+      "rss_bytes_per_ball_assumed_max": "314.9",
+      "rss_bytes_scenario_min": "6982800000000.0",
+      "rss_bytes_scenario_max": "7242700000000.0",
+      "rss_gb_decimal_scenario_min": "6982.8",
+      "rss_gb_decimal_scenario_max": "7242.7",
+      "rss_gib_scenario_min": "6503.23927402496337890625",
+      "rss_gib_scenario_max": "6745.2900111675262451171875",
+      "balls_scenario_reaches_reserved_u32_none": true
+    }
+  ],
+  "slo_status": {
+    "v10_massive_slo_found": false,
+    "v10_current_perf_scope": "EVAL_v2 section 12: full LiDAR frames and cumulative 1/2/4/8-frame diagnostic, not 10/30/50M",
+    "historical_phase15_v4_wall_caps_seconds": {
+      "1000000": 600,
+      "10000001": 3600,
+      "30000000": 7200
+    },
+    "historical_caps_explicitly_not_migrated_to_v10": true,
+    "historical_caps_are_not_current_v10_latency_targets": true,
+    "historical_60s_600s_targets_not_in_current_SPEC_section15": true,
+    "no_implicit_100ms_massive_target": true
+  },
+  "claude_response_status": {
+    "cuda_strict_reader_does_not_qualify_full_gpu_engine": true,
+    "old_signed_S7_receipt_intentionally_rejected_by_new_reader": true,
+    "copies_r2_not_qualified_before_common_integration_capture": true
+  },
+  "integrity": {
+    "s5": {
+      "checked_payloads": 16,
+      "failures": [],
+      "scope": "integrity_only_not_scientific_qualification"
+    },
+    "s7": {
+      "checked_payloads": 11,
+      "failures": [],
+      "scope": "integrity_only_not_scientific_qualification"
+    }
+  },
+  "validation": {
+    "source_hashes_rechecked_before_write": true,
+    "two_csv_rows_exact": true,
+    "decimal_arithmetic_no_large_execution": true
+  }
+}

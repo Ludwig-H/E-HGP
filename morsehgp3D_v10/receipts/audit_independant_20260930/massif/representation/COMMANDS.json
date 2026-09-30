@@ -1,0 +1,26 @@
+{
+  "cwd": "/workspaces/E-HGP/build/v9-open-worktree",
+  "compile_argv": [
+    "g++",
+    "-O2",
+    "-std=c++20",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Werror",
+    "-I",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/src",
+    "/workspaces/E-HGP/build/v9-open-worktree/morsehgp3D_v10/receipts/audit_independant_20260930/massif/representation/probe.cpp",
+    "-o",
+    "/tmp/mhgp10_massive_scalar_probe_capture_20260930"
+  ],
+  "run_argv": [
+    "/tmp/mhgp10_massive_scalar_probe_capture_20260930"
+  ],
+  "compile_exit": 0,
+  "run_exit": 0,
+  "compile_seconds": 0.44544977999976254,
+  "run_seconds": 0.001323160000538337,
+  "binary_sha256": "a63935ab1a7c8611ce85ecbfe5f2c2835516196ef0c28fdd325cbefae6fff343",
+  "compiler_version": "g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0"
+}

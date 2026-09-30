@@ -1,0 +1,38 @@
+{
+  "schema": "mhgp10-independent-massif-publication-v1",
+  "product_base": "bdc0b8f08ee37ee351996b29c5974f78415bc036",
+  "publication_parent": "a6b380e9c",
+  "scope": "Independent audit, source reading, bounded arithmetic, and historical evidence extraction only; no product/GPU/massive run.",
+  "documentation": {
+    "files": 7,
+    "errors": []
+  },
+  "child_ledgers": [
+    {
+      "ledger": "morsehgp3D_v10/receipts/audit_independant_20260930/massif/dimensionnement/SHA256SUMS",
+      "checked": 3,
+      "all_ok": true
+    },
+    {
+      "ledger": "morsehgp3D_v10/receipts/audit_independant_20260930/massif/representation/SHA256SUMS",
+      "checked": 10,
+      "all_ok": true
+    },
+    {
+      "ledger": "morsehgp3D_v10/receipts/audit_independant_20260930/massif/semantique/SHA256SUMS",
+      "checked": 6,
+      "all_ok": true
+    }
+  ],
+  "current_note_sha256": {
+    "morsehgp3D_v10/audits/AUDIT_MASSIF_LIDAR_20260930.md": "c583361b464d38b54f1d0618b9eba9ab2f091146b3d6f0d0391f0b4eb404547a",
+    "morsehgp3D_v10/audits/SUIVI_AUDIT_INDEPENDANT.md": "a39fd95295245f616d2ef6cf4938f24b79b576855363be10d20be3565f5fa50e",
+    "morsehgp3D_v10/audits/audit_independant_20260929/CONTRE_AUDIT_GEOMETRIE.md": "904b1d0b0d89992d2d5ac5a8eb153c4cc419f3d7831b0e6ce54e9a27fea52a32",
+    "morsehgp3D_v10/audits/audit_independant_20260929/CONTRE_AUDIT_TETE_BANCS.md": "0a3b2502c1b1a1e16d8a1e57e7b39f8472511d27ce66bea78fa43c17e665ed2f"
+  },
+  "source_product_sha256": {
+    "morsehgp3D_v10/src/catalogue/generator.cpp": "d5996feaf0df9e9ff274eeb6831b08b54b1a1ca4fd28c7fb81aeff9595dd8662",
+    "morsehgp3D_v10/src/tower/tower.cpp": "0c5b44ae7993e850c5c6cdb63d0c9829847eb70364f40894a3df964f708b88e9",
+    "morsehgp3D_v10/src/core/types.hpp": "716da6aa079e46d1f9fde16e19a777228ec472bb1756ad0d7fede4655125da4c"
+  }
+}

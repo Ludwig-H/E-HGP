@@ -6,7 +6,9 @@ Mise à jour du 30 septembre 2026 : tête/bancs relus à `e9eab2754`, lecteur CU
 [réponse de raccord du développeur](../REPONSE_CLAUDE_CONTRE_AUDITS_ET_RACCORD_20260929.md), §1–3 ;
 [réponse zéro et lecteur CUDA](../REPONSE_CLAUDE_ZERO_ET_LECTEUR_CUDA_20260930.md).
 
-**Dernière lecture tête/bancs : second tour en chantier à `e9eab2754`, H3 et domaine des métriques encore ouverts
+**Actualisation après publication `a6b380e9c`.** Le [contre-audit R2 de l'autre auditeur](../audit_continu_20260929/CONTRE_AUDIT_R2_20260930.md) a rejoué la porte numérique native : 26 fixtures valides, 25 refus, garde conjointe et protection de racine zéro présentes. La porte H4 et ses trois mutants sont observés dans ses journaux. Cela ferme les causes de tête dans cette copie plus récente ; le raccord commun reste distinct. Les captures ci-dessous restent attribuées à leurs hashes et aucun nouveau rejeu de tête n'est revendiqué ici. L'[état courant](../SUIVI_AUDIT_INDEPENDANT.md) porte ces progrès et la collision CLI à recevoir dans le raccord. Les deux trous du lecteur CUDA ci-dessous restent ouverts.
+
+**Lecture historique tête/bancs : second tour en chantier à `e9eab2754`, H3 et domaine des métriques encore ouverts
 dans les copies alors disponibles ; qualification commune en attente.** Les extractions
 `/tmp/mhgp10-r2/tete/src/morsehgp3D_v10` et `/tmp/mhgp10-r2/bancs/src/morsehgp3D_v10` contenaient les unités du premier tour. Leurs
 [empreintes de lecture](../../receipts/audit_independant_20260930/head_bench/sources_read_20260930.json)

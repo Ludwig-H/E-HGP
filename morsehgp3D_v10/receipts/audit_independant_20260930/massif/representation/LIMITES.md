@@ -1,0 +1,11 @@
+# Représentation massive : reçu scalaire du 30 septembre 2026
+
+`public_status=not_claimed`. Sources analysées en lecture seule ; empreintes avant/après dans `SOURCE_MANIFEST.json`. Aucun fichier `audits/`, source produit, build existant ou ressource GCP modifié. Une seule sonde C++ de dispositions et de calculs u32, compilation locale bornée ; pas de réservation massive, pas de nuage massif ni campagne FULL.
+
+La sonde inclut réellement `geom::Level` et `geom::P3`. Rec, Ref, BallInfo et SiteTreeNode sont des copies textuelles des dispositions privées lues, pas un accès aux types privés du produit. Leur taille est celle de ce compilateur et de cette ABI ; ce n’est pas une garantie de portabilité. Les formules donnent des charges logiques, hors capacités de vecteurs, allocateur, listes de facteurs, temporaires locaux, cache et pages. Elles n’établissent pas une borne RSS supérieure.
+
+Pour `tower.cpp:1020-1024`, le cas scalaire L=2^31+64 est dans le domaine de comptage u32. Le premier milieu 32 sort de [2147483649,2147483712). Avec le prédicat toujours vrai, tout milieu u32 est au plus 2^31-1, donc a reste au plus 2^31 et la boucle ne peut atteindre b. La sonde s’arrête volontairement après 200 itérations. Le milieu `a+(b-a)/2` rejoint b en six itérations. Cela prouve le défaut de calcul dans ce domaine ; nous n’avons pas prouvé qu’un nuage u18 réalisant L niveaux et un appel produit correspondant ont déjà été exécutés.
+
+Ne pas confondre les CSR : le catalogue utilise `pop_off` **u64** (`catalogue.hpp:75`) ; les retours bruts du Cloud utilisent `Csr<PointId>::off` **u32** (`buffer.hpp:124-126`), protégés par N<kNone (`cloud.cpp:29`). Le document ARCH_v2 encore entièrement u32 n’est donc pas l’autorité de ces tailles courantes. La garde de nombre de boules proposée dans des copies de correction n’est pas testée par ce reçu et ne doit pas être appelée intégrée.
+
+Les chiffres conditionnels à 10/30/50/100 millions dans `FORMULES.json` sont des multiplications d’hypothèses empiriques, pas des extrapolations qualifiées ni des bornes mathématiques. Le reçu S5 est antérieur à ce contrôle et ne teste pas les attaches des points (`--no-points`), ni la tête. Ni ce reçu ni une réduction d’octets par boule ne qualifie le contrat massif RAM/VRAM, reprise et résidence.
